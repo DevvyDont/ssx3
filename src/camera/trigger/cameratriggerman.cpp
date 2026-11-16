@@ -321,7 +321,7 @@ extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream)
 }
 #endif
 
-extern void* D_004C5830[];
+extern void* gCamTriggerMan[];
 extern "C" void* func_0016CEF0(void*, void*, int);
 
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -341,7 +341,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEC8__FPvi);
 void func_0016CEF0_CEC8(void*, void*, int) __asm__("func_0016CEF0");
 void func_0016CEC8(void* self, int a1)
 {
-    func_0016CEF0_CEC8((void*)D_004C5830, self, a1);
+    func_0016CEF0_CEC8((void*)gCamTriggerMan, self, a1);
 }
 #endif
 
@@ -368,7 +368,7 @@ void func_0016CF40_2(void* mgr, void* self) __asm__("func_0016CF40__FPv");
 
 extern "C" void func_0016CF18(void* self)
 {
-    func_0016CF40_2((void*)D_004C5830, self);
+    func_0016CF40_2((void*)gCamTriggerMan, self);
 }
 #endif
 
@@ -966,9 +966,9 @@ struct sCtmM_E560 {
 } __attribute__((aligned(16)));
 
 extern sCtmM_E560 D_004FF1A0_E560 __asm__("t4mat_Identity");
-extern sCtmV_E560 D_004FF140_E560 __asm__("D_004FF140");
+extern sCtmV_E560 D_004FF140_E560 __asm__("t4vect_XAxis");
 extern sCtmV_E560 D_004FF150_E560 __asm__("t4vect_YAxis");
-extern sCtmV_E560 D_004FF160_E560 __asm__("D_004FF160");
+extern sCtmV_E560 D_004FF160_E560 __asm__("t4vect_ZAxis");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
@@ -1175,9 +1175,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016F068);
 #include "bx/math3d.h"
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
 
-extern t4Vector D_004FF140_F068 __asm__("D_004FF140");
+extern t4Vector D_004FF140_F068 __asm__("t4vect_XAxis");
 extern t4Vector D_004FF150_F068 __asm__("t4vect_YAxis");
-extern t4Vector D_004FF160_F068 __asm__("D_004FF160");
+extern t4Vector D_004FF160_F068 __asm__("t4vect_ZAxis");
 extern t4Matrix D_004FF1A0_F068 __asm__("t4mat_Identity");
 
 struct sVec3_F068 {
@@ -1534,9 +1534,9 @@ struct sCtmM_FBB8 {
 } __attribute__((aligned(16)));
 
 extern sCtmM_FBB8 D_004FF1A0_FBB8 __asm__("t4mat_Identity");
-extern sCtmV_FBB8 D_004FF140_FBB8 __asm__("D_004FF140");
+extern sCtmV_FBB8 D_004FF140_FBB8 __asm__("t4vect_XAxis");
 extern sCtmV_FBB8 D_004FF150_FBB8 __asm__("t4vect_YAxis");
-extern sCtmV_FBB8 D_004FF160_FBB8 __asm__("D_004FF160");
+extern sCtmV_FBB8 D_004FF160_FBB8 __asm__("t4vect_ZAxis");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
@@ -1826,9 +1826,9 @@ struct sCtmM {
 } __attribute__((aligned(16)));
 
 extern sCtmM t4mat_Identity;
-extern sCtmV D_004FF140;
+extern sCtmV t4vect_XAxis;
 extern sCtmV t4vect_YAxis;
-extern sCtmV D_004FF160;
+extern sCtmV t4vect_ZAxis;
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
@@ -1983,9 +1983,9 @@ extern "C" sCtmV func_00170240(char* src)
     sCtmM m(t4mat_Identity);
     float one = 1.0f;
     ctmTransMtx(&m, sCtmV(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis(&m, D_004FF140, *(float*)(src + 0x10));
+    ctmRotAxis(&m, t4vect_XAxis, *(float*)(src + 0x10));
     ctmRotAxis(&m, t4vect_YAxis, *(float*)(src + 0x14));
-    ctmRotAxis(&m, D_004FF160, *(float*)(src + 0xC));
+    ctmRotAxis(&m, t4vect_ZAxis, *(float*)(src + 0xC));
     m = ctmScaleMtx(&m, sCtmV(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
     return ctmApplyMtx(&m, sCtmV(*(float*)(src + 0x2C), *(float*)(src + 0x30), *(float*)(src + 0x34), one));
 }
@@ -1995,9 +1995,9 @@ extern "C" sCtmV func_00170240(char* src)
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_001707B0);
 #ifdef SKIP_ASM
 extern sCtmM t4mat_Identity;
-extern sCtmV D_004FF140;
+extern sCtmV t4vect_XAxis;
 extern sCtmV t4vect_YAxis;
-extern sCtmV D_004FF160;
+extern sCtmV t4vect_ZAxis;
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
@@ -2010,9 +2010,9 @@ extern "C" sCtmV func_001707B0(char* src)
     sCtmM m(t4mat_Identity);
     float one = 1.0f;
     ctmTransMtx(&m, sCtmV(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis(&m, D_004FF140, *(float*)(src + 0x10));
+    ctmRotAxis(&m, t4vect_XAxis, *(float*)(src + 0x10));
     ctmRotAxis(&m, t4vect_YAxis, *(float*)(src + 0x14));
-    ctmRotAxis(&m, D_004FF160, *(float*)(src + 0xC));
+    ctmRotAxis(&m, t4vect_ZAxis, *(float*)(src + 0xC));
     m = ctmScaleMtx(&m, sCtmV(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
     return ctmApplyMtx(&m, sCtmV(*(float*)(src + 0x38), *(float*)(src + 0x3C), *(float*)(src + 0x40), one));
 }
@@ -2075,9 +2075,9 @@ struct sCtmM_0D20 {
 } __attribute__((aligned(16)));
 
 extern sCtmM_0D20 D_004FF1A0_0D20 __asm__("t4mat_Identity");
-extern sCtmV_0D20 D_004FF140_0D20 __asm__("D_004FF140");
+extern sCtmV_0D20 D_004FF140_0D20 __asm__("t4vect_XAxis");
 extern sCtmV_0D20 D_004FF150_0D20 __asm__("t4vect_YAxis");
-extern sCtmV_0D20 D_004FF160_0D20 __asm__("D_004FF160");
+extern sCtmV_0D20 D_004FF160_0D20 __asm__("t4vect_ZAxis");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).

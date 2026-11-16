@@ -513,7 +513,7 @@ struct sColor_3A3F48 {
 
 void* func_0039E288(void* self);
 extern void* D_0046DD60[];
-extern void* D_004A5A58;
+extern void* gUISoundNull;
 
 struct sV2_3A3F48 {
     float x, y;
@@ -641,10 +641,10 @@ extern "C" void func_003A3F48_impl(int initialize, int priority)
         new (&D_00508720) sColor_3A3F48(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
         new (&D_00508730) sColor_3A3F48(1.0f, 0.0f, 1.0f, 0.0f);
         new (&D_00508740) sColor_3A3F48(1.0f, 1.0f, 0.0f, 0.0f);
-            func_0039E288(&D_004A5A58);
+            func_0039E288(&gUISoundNull);
             new (&D_004A5A60) sV2_3A3F48(2.0f, 2.0f);
         } else {
-            D_004A5A58 = D_0046DD60;
+            gUISoundNull = D_0046DD60;
         }
     }
 }

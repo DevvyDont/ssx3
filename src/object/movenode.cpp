@@ -330,7 +330,7 @@ extern "C" void cMoveNode_postUpdateModifierBlock(cMoveNode* self)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_onCollide);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern "C" int func_002D1B30(int);
 void func_0034FE00(void*, int, int, int);
 
@@ -361,7 +361,7 @@ struct cMN_355770_VEnt {
  * the
  * debounce has run out it is re-armed to half a second and func_0034FE00 forwards the collision (probably to
  * the
- * script system, D_004A3DD8).
+ * script system, cWScriptMan_TheWScriptMan).
  *
  * @param tc  collision info (On Tour const tCollideInfo*, passed as int)
  * @param ti  intersection info (On Tour const tIntersectInfo*, passed as int)
@@ -382,7 +382,7 @@ extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
         }
     }
     if (self->Debounce <= 0) {
-        self->Debounce = *(int*)(D_004A5B64 + 0x10) / 2;
+        self->Debounce = *(int*)(cAppMan_TheAppMan + 0x10) / 2;
         func_0034FE00(self, tc, ti, pBeing);
     }
 }
@@ -391,7 +391,7 @@ extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_setDebounce);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 /**
  * Sets the node's collision debounce, in seconds, as a count of app timer ticks.
@@ -400,7 +400,7 @@ extern char* D_004A5B64;
  */
 extern "C" void cMoveNode_setDebounce(cMoveNode* self, float secs)
 {
-    self->Debounce = (int)((float)*(int*)(D_004A5B64 + 0x10) * secs);
+    self->Debounce = (int)((float)*(int*)(cAppMan_TheAppMan + 0x10) * secs);
 }
 #endif
 
@@ -510,14 +510,14 @@ extern "C" void cMoveNode_addMagnet(cMoveNode* self, void* mat, float radius, fl
 //100%
 INCLUDE_ASM("object/movenode", func_00355A78);
 #ifdef SKIP_ASM
-extern int D_004A3AC4;
+extern int cAvalanche_m_badCookie;
 extern char str_AvaSplineModifier[];
 extern "C" void* func_00357750(cAvaSplineModifier* self, void* src);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_00355A78(cMoveNode* self)
 {
-    if (D_004A3AC4 == 0) {
+    if (cAvalanche_m_badCookie == 0) {
         cMoveNode_addTransformModifier(self, func_00357750((cAvaSplineModifier*)cMemMan_alloc(0x90, str_AvaSplineModifier, 0x20000000, 0), self->Instance));
     }
 }
@@ -2751,12 +2751,12 @@ void* cParticleNode_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("object/movenode", func_003579C8);
 #ifdef SKIP_ASM
-extern void* D_004A4028;
+extern void* cMultiParticleMan_TheMultiParticleMan;
 
 extern "C" void* func_003579C8(cMultiParticleMan* self)
 {
     int i;
-    D_004A4028 = ((void*)self);
+    cMultiParticleMan_TheMultiParticleMan = ((void*)self);
     for (i = 0; i < 4; i++) {
         ((void**)self)[i] = 0;
     }
@@ -2767,13 +2767,13 @@ extern "C" void* func_003579C8(cMultiParticleMan* self)
 //100%
 INCLUDE_ASM("object/movenode", cMultiParticleMan__cMultiParticleMan);
 #ifdef SKIP_ASM
-extern void* D_004A4028;
+extern void* cMultiParticleMan_TheMultiParticleMan;
 extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* p, int flags);
 void operator_delete(int* ptr);
 
 /**
  * Destroys the multi-particle manager: deletes each of its up to 4 cMultiParticle (destructor flags 3) and clears the
- * global D_004A4028 that points at the manager.
+ * global cMultiParticleMan_TheMultiParticleMan that points at the manager.
  *
  * @param flags  destructor flags; bit 0 frees the manager itself with operator_delete
  */
@@ -2786,7 +2786,7 @@ extern "C" void cMultiParticleMan__cMultiParticleMan(cMultiParticleMan* self, in
             cMultiParticle__cMultiParticle((cMultiParticle*)p, 3);
         }
     }
-    D_004A4028 = 0;
+    cMultiParticleMan_TheMultiParticleMan = 0;
     if (flags & 1) {
         operator_delete((int*)self);
     }

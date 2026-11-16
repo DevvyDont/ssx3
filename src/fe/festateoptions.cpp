@@ -101,7 +101,7 @@ extern int D_004A14D4;
 extern int D_004A14D8;
 extern int D_004A14DC;
 extern int D_004A14E0;
-extern char D_004A5A58;
+extern char gUISoundNull;
 
 struct sVE_188980p {
     short delta;
@@ -144,7 +144,7 @@ static inline int Is_00188980(int id, char* s) { return id == GetHashValue32(s);
  *
  * Event 6 (back) does the same save check or transition-out. Event 13 (the keyboard popup is done) checks the
  * typed text with func_00187D38 (unknown) and calls slot 2 of the engine's listener at +0x14 (default
- * D_004A5A58) with 6 on a result of 1, else 4, then forgets the popup.
+ * gUISoundNull) with 6 on a result of 1, else 4, then forgets the popup.
  *
  * @param widget  the widget the event is for
  * @param event  UI event code (5, 6 or 13 are handled)
@@ -200,7 +200,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, u
     }
     case 13: {
         int r = func_00187D38((char*)self->popup + 0x74);
-        char* obj = &D_004A5A58;
+        char* obj = &gUISoundNull;
         char* sound = *(char**)(self->engine + 0x14);
         if (sound != 0)
             obj = sound;
@@ -446,8 +446,8 @@ struct sGameCfg_188F28 {
     signed char f6;                 // 0x6
     char pad7[0x288 - 7];
 };
-// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
-extern sGameCfg_188F28 D_00535610_188F28 __asm__("D_00535610");
+// PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
+extern sGameCfg_188F28 D_00535610_188F28 __asm__("cBEOptionInterface_mOption");
 
 struct sOptionIface_188F28 {
     sGameCfg_188F28 getOptions() { return D_00535610_188F28; }
@@ -613,8 +613,8 @@ struct sGameCfg_189610 {
     signed char f6;         // 0x6
     char pad7[0x288 - 7];
 };
-// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
-extern sGameCfg_189610 D_00535610_189610 __asm__("D_00535610");
+// PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
+extern sGameCfg_189610 D_00535610_189610 __asm__("cBEOptionInterface_mOption");
 
 struct sVE_189610a {
     short delta;
@@ -745,8 +745,8 @@ struct sGameCfg_189980 {
     unsigned int pad25 : 7;
     char rest[0x288 - 4];
 };
-// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
-extern sGameCfg_189980 D_00535610_189980 __asm__("D_00535610");
+// PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
+extern sGameCfg_189980 D_00535610_189980 __asm__("cBEOptionInterface_mOption");
 
 struct sVE_189980a {
     short delta;
@@ -795,7 +795,7 @@ static inline void Refresh_189980(sOptGame_189980* self)
  * custom interface (engine + 0x0) virtual slot 5, probably getPrevState.
  *
  * Event 9 (a list changed) stores the language, speed-unit or widescreen choice into the options block
- * D_00535610 (the language also goes to the locale), re-applies the options and sets the changed flag
+ * cBEOptionInterface_mOption (the language also goes to the locale), re-applies the options and sets the changed flag
  * D_004A14D0. A null widget is ignored.
  *
  * @param widget  the widget the event is for (null: nothing happens)
@@ -900,8 +900,8 @@ struct sGameCfg_189D60 {
     signed char f6;                 // 0x6
     char pad7[0x288 - 7];
 };
-// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
-extern sGameCfg_189D60 D_00535610_189D60 __asm__("D_00535610");
+// PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
+extern sGameCfg_189D60 D_00535610_189D60 __asm__("cBEOptionInterface_mOption");
 
 struct sOptionIface_189D60 {
     sGameCfg_189D60 getOptions() { return D_00535610_189D60; }
@@ -1078,8 +1078,8 @@ struct sSndCfg_18A3D8 {
     int pad18 : 14;
     char rest[0x288 - 4];
 };
-// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
-extern sSndCfg_18A3D8 D_00535610_18A3D8 __asm__("D_00535610");
+// PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
+extern sSndCfg_18A3D8 D_00535610_18A3D8 __asm__("cBEOptionInterface_mOption");
 
 struct sVE_18A3D8 {
     short delta;
@@ -1209,8 +1209,8 @@ struct sSndCfg_18A8D0 {
     int pad19 : 13;
     char rest[0x288 - 4];
 };
-// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
-extern sSndCfg_18A8D0 D_00535610_18A8D0 __asm__("D_00535610");
+// PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
+extern sSndCfg_18A8D0 D_00535610_18A8D0 __asm__("cBEOptionInterface_mOption");
 
 struct sVE_18A8D0a {
     short delta;
@@ -1355,8 +1355,8 @@ struct sSndCfg_18B380 {
     int pad19 : 13;
     char rest[0x288 - 4];
 };
-// PORT: D_00535610 is viewed with different types across the unit; view bound by asm label
-extern sSndCfg_18B380 D_00535610_18B380 __asm__("D_00535610");
+// PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
+extern sSndCfg_18B380 D_00535610_18B380 __asm__("cBEOptionInterface_mOption");
 
 // The options interface's view of the same settings word (unsigned flags).
 struct sSndOpts_18B380 {
@@ -1676,7 +1676,7 @@ struct sOptions_C2A0 {
     unsigned int mode : 2;
     int data[(0x288 - 4) / 4];
 };
-extern sOptions_C2A0 D_00535610_C2A0 __asm__("D_00535610");
+extern sOptions_C2A0 D_00535610_C2A0 __asm__("cBEOptionInterface_mOption");
 
 struct sVE_18C2A0 {
     short delta;
@@ -1761,7 +1761,7 @@ struct sOptions_C478 {
     unsigned int mode : 2;
     int data[(0x288 - 4) / 4];
 };
-extern sOptions_C478 D_00535610_C478 __asm__("D_00535610");
+extern sOptions_C478 D_00535610_C478 __asm__("cBEOptionInterface_mOption");
 
 static inline int optMode_C478(sOptions_C478 o)
 {

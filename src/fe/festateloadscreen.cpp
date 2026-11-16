@@ -19,7 +19,7 @@ extern "C" void cUIEngine_loadFile(void* engine, const char* name);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" void func_00233640(void* self, int type);
 extern "C" void cUIStateStack_push(void* list, void* screen);
-extern int D_004A19C4;
+extern int cRealFE_mStartState;
 extern signed char D_00535C11[];
 extern char str_UIEngine_b[];
 extern char str_data_ui_fl[];
@@ -87,7 +87,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
  * Loads the loading screen's UI and pushes the right loading state.
  *
  * Calls the graphics manager's slot 44 with 0x100, creates a UI engine loaded from "data/ui/fl" with the
- * app's fonts and locale and a cFEInput, then pushes cFELoadStateInLodge when D_004A19C4 is 0x27 (going to
+ * app's fonts and locale and a cFEInput, then pushes cFELoadStateInLodge when cRealFE_mStartState is 0x27 (going to
  * the lodge), cFELoadHintState when results are not locked or the game path is 0, else cFELoadState; the last
  * two get this screen as parent and a texture (func_00233640 with 1 or 2). SplashTexID (+0x18) becomes -1.
  */
@@ -116,7 +116,7 @@ extern "C" void cFELoadScreen_load(void* self)
     char* gm = (char*)SSXApp->GameModeMan;
     cBE_getInterface_3438(cBE_getBE(), 0);
     char* screen;
-    if (D_004A19C4 == 0x27) {
+    if (cRealFE_mStartState == 0x27) {
         screen = newScreenA_233438(self);
     } else if (*(int*)(gm + 0x9C) == 0 || D_00535C11[0] == 0) {
         screen = newScreenB_233438(self);
@@ -211,7 +211,7 @@ extern "C" void func_00233640(void* self, int type)
 //100%
 INCLUDE_ASM("fe/festateloadscreen", func_002338C8);
 #ifdef SKIP_ASM
-extern int D_004A4324;
+extern int cDepthFog_m_Enable;
 extern "C" void cGraphicsMan_UploadTextures(void* g);
 extern "C" void cSSXApp_startFELoad(void* app);
 extern "C" void* func_0028B180();
@@ -233,7 +233,7 @@ extern "C" void func_002338C8(void)
     cGraphicsMan_UploadTextures(GrMan);
     cSSXApp_startFELoad(SSXApp);
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
-    int* p = &D_004A4324;
+    int* p = &cDepthFog_m_Enable;
     *p = 0;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_38C8* vt = (sVE_38C8*)ps2GraphicsMan->mVtbl;
@@ -1102,7 +1102,7 @@ extern "C" void cWScriptMan_setupMissions(void* a);
 extern "C" void func_00129160(void* p);
 extern "C" void func_00155E58(void* p);
 extern void* cGameState_mpGame;
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 
 struct sRaceMan_234750 {
@@ -1159,8 +1159,8 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
         cAI_setRaceRankType(*(void**)((char*)cGameState_mpGame + 0xC), 1);
     else if (mode != 4)
         cAI_setRaceRankType(*(void**)((char*)cGameState_mpGame + 0xC), 2);
-    func_00308F38(D_004A3DD8);
-    cWScriptMan_setupMissions(D_004A3DD8);
+    func_00308F38(cWScriptMan_TheWScriptMan);
+    cWScriptMan_setupMissions(cWScriptMan_TheWScriptMan);
     (*(sRaceMan_234750**)((char*)cGameState_mpGame + 0xC))->f8C = 0;
     cAI_setAIState(*(void**)((char*)cGameState_mpGame + 0xC), 3);
     cBE_setState(1);

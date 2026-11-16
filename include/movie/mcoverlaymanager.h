@@ -3,14 +3,14 @@
 
 // cMCOverlayManager: the memory-card save/load/delete state machine behind the front end's and the overlays'
 // memory-card screens. One instance, made on demand by cMCOverlayManager_getManager__Fv
-// (cMemMan_alloc(0x74C, "MCManager"), pointer in D_004A2C74; cSSXApp_getMCManager returns it). Its methods live in
+// (cMemMan_alloc(0x74C, "MCManager"), pointer in cMCOverlayManager_instance; cSSXApp_getMCManager returns it). Its methods live in
 // src/movie/movieplayer.cpp (the unit mixes them with movie-player code; some local views there call the card
 // object a "decoder"). The front end (cFEMemCard, fe/festatetrophyroom.cpp func_001D5488) plugs its handlers into
 // the 45 callback slots at 0x000-0x0B0.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. The class has no base; g++ 2.95 puts its vptr
 // after the data, at 0x748 (On Tour: after mFileListCache, at 0x4CC of 0x4D0).
-// Statics (not in the object): cMCOverlayManager_mSaveInProgress (gp-relative int), the instance D_004A2C74.
+// Statics (not in the object): cMCOverlayManager_mSaveInProgress (gp-relative int), the instance cMCOverlayManager_instance.
 // Evidence tags:
 //   [R] retail's constructor cMCOverlayManager_cMCOverlayManager (word stores, the default callback stubs,
 //       MEM_fill sizes), init func_0023D5A8, SetAction, the vtable cMCOverlayManager_vtbl and getManager's alloc;

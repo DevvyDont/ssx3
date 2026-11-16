@@ -3356,10 +3356,10 @@ extern "C" int func_0030D2D0(void *arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2D8);
 #ifdef SKIP_ASM
-extern int D_004A3DD8;
+extern int cWScriptMan_TheWScriptMan;
 
 extern "C" int func_0030D2D8(void) {
-    return D_004A3DD8;
+    return cWScriptMan_TheWScriptMan;
 }
 #endif
 //100%

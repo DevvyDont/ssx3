@@ -582,7 +582,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char* GrMan_boardwakefx __asm__("GrMan");
-extern int D_004A4528;
+extern int cRenderToggles_m_DisableBoardWake;
 
 struct sGs_DAB8 {
     unsigned int f0_0 : 2;
@@ -606,7 +606,7 @@ struct sGs_DAB8 {
     void SetF22(int v) { f4_22 = v; }
 };
 
-extern sGs_DAB8 D_00501420_DAB8 __asm__("D_00501420");
+extern sGs_DAB8 D_00501420_DAB8 __asm__("sDrawState_s_defaultDrawState");
 
 struct sWakeVtx_DAB8 {
     char pad0[0x64];
@@ -729,12 +729,12 @@ public:
 /**
  * Draws a board wake as a strip, fading its alpha from the newest point's age along the strip.
  *
- * Skipped when D_004A4528 is set or there are no segments; at most max - 2 segments are drawn.
+ * Skipped when cRenderToggles_m_DisableBoardWake is set or there are no segments; at most max - 2 segments are drawn.
  */
 // Board wake: draws the wake strip with alpha fading by the age of the newest point.
 extern "C" void cBoardWakeFX_render(sWake_DAB8* self)
 {
-    if (D_004A4528 != 0 || self->count == 0)
+    if (cRenderToggles_m_DisableBoardWake != 0 || self->count == 0)
         return;
     ((cGfx_DAB8*)GrMan_boardwakefx)->PushState();
     *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = D_00501420_DAB8;
@@ -955,8 +955,8 @@ struct sWake_E058 {
     int cap;                    // 0xB8
 };
 
-// D_004FA370: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sEnt_E058 views a row from its +0x28 field
-extern char D_004FA370[];
+// cRenderStateMan_m_state: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sEnt_E058 views a row from its +0x28 field
+extern char cRenderStateMan_m_state[];
 
 // PORT: g++ minimum operator (<?).
 static inline float wakeClampE058(float v, float lo, float hi)
@@ -982,7 +982,7 @@ extern "C" void func_002DE058(sWake_E058* self)
     self->head = (self->head + self->cap - 1) % self->cap;
     char* sub = self->obj + 0x6C0;
     sWakeVt_E058* vt = *(sWakeVt_E058**)sub;
-    sCol_E058 col = ((sEnt_E058*)(D_004FA370 + 0x28))[vt[7].fn(sub + vt[7].delta)].col;
+    sCol_E058 col = ((sEnt_E058*)(cRenderStateMan_m_state + 0x28))[vt[7].fn(sub + vt[7].delta)].col;
     col.a *= 2.0f;
     col.r *= 2.0f;
     col.g *= 2.0f;
@@ -2214,7 +2214,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     char* sub2 = self->obj + 0x6C0;
     sWakeVtIF920* vt2 = *(sWakeVtIF920**)sub2;
     int idx = vt2[7].fn(sub2 + vt2[7].delta);
-    sEnt_E058* e = &((sEnt_E058*)(D_004FA370 + 0x28))[idx];
+    sEnt_E058* e = &((sEnt_E058*)(cRenderStateMan_m_state + 0x28))[idx];
     sWakeVecE398 c;
     c.x = e->col.r;
     c.y = e->col.g;
@@ -2548,7 +2548,7 @@ struct sMat1120 {
     }
 } __attribute__((aligned(16)));
 
-extern sRow1120 D_004FF130_1120 __asm__("D_004FF130");
+extern sRow1120 D_004FF130_1120 __asm__("t4vect_Origin");
 
 struct sWakeFx1120 {
     char* obj;                  // 0x00
@@ -3888,7 +3888,7 @@ struct sWakeMgr2E18 {
 
 extern void* cLensFxMan_vtbl[];
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
-extern int D_004A3B18;
+extern int cLensFxMan_mbDrawSun;
 void* func_002E2860(void* self);
 void func_002E3110(void* self);
 extern "C" void func_002F4380(void* self);
@@ -3899,7 +3899,7 @@ extern "C" void func_002F4380(void* self);
  *
  * It builds 2 x 256 elements of 0x30 bytes at +0x68 (func_002E2860) and two 0x210-byte objects at +0x6070
  * (func_002F4380), sets +0x6494 to 1 and clears the pair at +0x60. It then passes func_002E3110 and itself to
- * graphics manager slot 117 and sets D_004A3B18. The PS2 version's constructor (func_002EC418) calls this.
+ * graphics manager slot 117 and sets cLensFxMan_mbDrawSun. The PS2 version's constructor (func_002EC418) calls this.
  *
  * @return self
  */
@@ -3951,7 +3951,7 @@ extern "C" void* cLensFxMan_cLensFxMan(void* self)
         sBWVEntry2E18* setPhase2Slot = &(*(sBWVEntry2E18**)(obj + 0x10D8))[117];
         setPhase2Slot->fn(obj + setPhase2Slot->delta, (void*)func_002E3110, self);
     }
-    D_004A3B18 = 1;
+    cLensFxMan_mbDrawSun = 1;
     return self;
 }
 #endif
@@ -4019,12 +4019,12 @@ struct sBWVEntry2 {
 
 extern void* cLensFxMan_vtbl[];
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
-extern int D_004A3B18;
+extern int cLensFxMan_mbDrawSun;
 void operator_delete(int* p);
 
 /**
  * Destroys the lens effects manager: unregisters its graphics-manager callback (GrMan slot 117 with 0, 0), clears
- * D_004A3B18 and frees the object when bit 0 of @p flags is set.
+ * cLensFxMan_mbDrawSun and frees the object when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -4034,7 +4034,7 @@ extern "C" void cLensFxMan__cLensFxMan(void* self, int flags)
     *(void***)((char*)self + 0x649C) = cLensFxMan_vtbl;
     sBWVEntry2* setPhase2Slot = &(*(sBWVEntry2**)(obj + 0x10D8))[117];
     setPhase2Slot->fn(obj + setPhase2Slot->delta, 0, 0);
-    D_004A3B18 = 0;
+    cLensFxMan_mbDrawSun = 0;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -4125,7 +4125,7 @@ extern "C" void func_002E3130(void* selfp)
     if (self->f6494 == 0) {
         // Double-buffered state with a bank dimension of one: bank 0 is current, the previous bank is !bufferId.
         int bufferId = 0;
-        if (D_004A3B18 != 0) {
+        if (cLensFxMan_mbDrawSun != 0) {
             for (int v = 0; v < self->viewCount; v++) {
                 int prev = !bufferId;
                 if (self->suns[bufferId][v].active != 0) {
@@ -4256,7 +4256,7 @@ struct sBW3478Fx : sBW3478Data {
     virtual void vf18();
 };
 
-extern int D_004A3B18;
+extern int cLensFxMan_mbDrawSun;
 extern "C" void func_002F4A08(void* dst, void* src, int i);
 
 extern "C" void func_002E3478(void* selfv, int i)
@@ -4265,7 +4265,7 @@ extern "C" void func_002E3478(void* selfv, int i)
     // The wake arrays have a leading bank dimension of one, indexed through a variable:
     // func_002E3130 keeps it as a zeroed register multiplied by 0x6000 at run time.
     int bank = 0;
-    if (D_004A3B18 != 0) {
+    if (cLensFxMan_mbDrawSun != 0) {
         func_002F4A08(&self->blk[bank][i], self, i);
     }
     self->vf10();
@@ -4302,7 +4302,7 @@ struct sWakeRCtx {
 };
 
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
-extern sWakeRState D_00501420;
+extern sWakeRState sDrawState_s_defaultDrawState;
 
 static inline void setA22_3578(sWakeRCtx* c, int v) { c->top->a22 = v; }
 static inline void setA0_3578(sWakeRCtx* c, int v) { c->top->a0 = v; }
@@ -4315,7 +4315,7 @@ extern "C" void func_002E3578(void)
     sWakeRCtx* ctx = (sWakeRCtx*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
-    *ctx->top = D_00501420;
+    *ctx->top = sDrawState_s_defaultDrawState;
     setA22_3578(ctx, 1);
     setA0_3578(ctx, 2);
     setB10_3578(ctx, 0);
@@ -4534,7 +4534,7 @@ struct sWake_3AF8 {
     sWkColor_3AF8 color;        // 0x28
 };
 
-extern sRsState_2868 D_00501420_3AF8 __asm__("D_00501420");
+extern sRsState_2868 D_00501420_3AF8 __asm__("sDrawState_s_defaultDrawState");
 
 // Render context (GrMan): state stack at 0xE84, vtable at 0x10D8.
 struct sRCtx_3AF8 {
@@ -5126,7 +5126,7 @@ extern "C" float func_002E4678(void* self)
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_update);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 struct sWkVtA46C8 { short delta; short index; int (*fn)(void*); };
 struct sWkVtB46C8 { short delta; short index; void (*fn)(void*, void*); };
@@ -5156,7 +5156,7 @@ extern "C" void cTransitionMan_update(char* self)
     } else if (*(float**)(self + 0x70) != 0) {
         *(float*)(self + 0x48) = **(float**)(self + 0x70) * (*(float*)(self + 0x54) + *(float*)(self + 0x58) + *(float*)(self + 0x5C));
     } else {
-        *(float*)(self + 0x48) += 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+        *(float*)(self + 0x48) += 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     }
     if (*(float*)(self + 0x54) + *(float*)(self + 0x58) + *(float*)(self + 0x5C) <= *(float*)(self + 0x48)) {
         func_002E4578(self);
@@ -5626,7 +5626,7 @@ struct t4Vec_4F50 : sWakeVecE398 {
     t4Vec_4F50(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
-extern sWakeVecE398 D_004FF160_4F50 __asm__("D_004FF160");     // t4vect::ZAxis
+extern sWakeVecE398 D_004FF160_4F50 __asm__("t4vect_ZAxis");     // t4vect::ZAxis
 extern float D_00504FB8[];                                      // cSinCosTable::gSinCosTable
 
 static inline float FXRand_4F50(float lo, float hi)
@@ -5697,7 +5697,7 @@ extern "C" void func_002E4F50_4F50(cSnowBox_4F50* self, const tWorldPainterSnowf
         self->windScale = params->f[3] * 250.0f;
         break;
     }
-    const float kTimeDiff = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+    const float kTimeDiff = 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     float windBlend;
     float x;
     float y;
@@ -5877,9 +5877,9 @@ struct sVt55D8 {
 
 // PORT: 128-bit TImode quadword (the PC port needs a 16-byte struct).
 typedef int cQuad55D8 __attribute__((mode(TI)));
-extern cQuad55D8 D_004FF140;
+extern cQuad55D8 t4vect_XAxis;
 extern cQuad55D8 t4vect_YAxis;
-extern cQuad55D8 D_004FF160;
+extern cQuad55D8 t4vect_ZAxis;
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * matrix).
 static inline sMat55D8 wakeMulMat55D8(const sMat55D8& a, const sMat55D8& b)
@@ -6013,10 +6013,10 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
     v.w = a;
     info.col = v;
     if (info.pos.x < x + -0.5f) {
-        wakeAddEq55D8(info.pos, D_004FF140);
+        wakeAddEq55D8(info.pos, t4vect_XAxis);
     }
     if (x1 + 0.5f < info.pos.x) {
-        wakeSubEq55D8(info.pos, D_004FF140);
+        wakeSubEq55D8(info.pos, t4vect_XAxis);
     }
     if (info.pos.y < y + -0.5f) {
         wakeAddEq55D8(info.pos, t4vect_YAxis);
@@ -6025,10 +6025,10 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
         wakeSubEq55D8(info.pos, t4vect_YAxis);
     }
     if (info.pos.z < z + -0.5f) {
-        wakeAddEq55D8(info.pos, D_004FF160);
+        wakeAddEq55D8(info.pos, t4vect_ZAxis);
     }
     if (z1 + 0.5f < info.pos.z) {
-        wakeSubEq55D8(info.pos, D_004FF160);
+        wakeSubEq55D8(info.pos, t4vect_ZAxis);
     }
     v.x = 1.5f;
     v.y = 1.5f;
@@ -6307,11 +6307,11 @@ struct sWakeFx_6008 {
     sWakeVec5430 last[4];       // 0x40
 };
 
-extern int D_004A4524;
+extern int cRenderToggles_m_DisableSnowFall;
 extern int cSnowfallToggles_m_TestAdditive[1];
 extern sRsCtx_6008* D_004A5B80_6008 __asm__("cGraphicsMan_TheGraphicsMan");
-extern sRsState_6008 D_00501420_6008[] __asm__("D_00501420");
-extern sV4_6008 D_004FF130;
+extern sRsState_6008 D_00501420_6008[] __asm__("sDrawState_s_defaultDrawState");
+extern sV4_6008 t4vect_Origin;
 extern "C" void func_002E55D8(int* p, sMat_6008* m, float r, float g, float b);
 
 static inline sRiders_6008* riders_6008()
@@ -6353,12 +6353,12 @@ static inline void rsSetB_6008(sRsCtx_6008* ctx, int mask, int shift, int v)
  * Draws the falling snow for the current view, moving its boxes with the camera.
  *
  * The boxes of the current view move by that view's position change since the last frame (+0x20). The colour
- * comes from the view's +0x80 colour (times 0.6, minus 0.5). Skipped when D_004A4524 is set;
+ * comes from the view's +0x80 colour (times 0.6, minus 0.5). Skipped when cRenderToggles_m_DisableSnowFall is set;
  * cSnowfallToggles_m_TestAdditive selects additive blending.
  */
 extern "C" void cSnowFall_render(sWakeFx_6008* self)
 {
-    if (D_004A4524 != 0) {
+    if (cRenderToggles_m_DisableSnowFall != 0) {
         return;
     }
     sRiders_6008* rs = riders_6008();
@@ -6382,7 +6382,7 @@ extern "C" void cSnowFall_render(sWakeFx_6008* self)
     ctx->top->tex = rsTexF70_6008(ctx);
     sMat_6008 snowMatrix;
     snowMatrix = *ctx->vtable[35].fn((char*)ctx + ctx->vtable[35].delta);
-    snowMatrix.v[3] = D_004FF130;
+    snowMatrix.v[3] = t4vect_Origin;
     sRiders_6008* rs2 = riders_6008();
     sWakeVec5430 camDir = *(sWakeVec5430*)(rs2->riders[rs2->cur] + 0x80);
     float boxMinX = camDir.x * 0.6f + -0.5f;

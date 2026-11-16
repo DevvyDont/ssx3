@@ -4,7 +4,7 @@
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BENewRaceInt[];
 extern void* D_0045AE58[16];
-extern void* D_004A11B4;
+extern void* cBENewRaceInterface_instance;
 
 struct cBENewRaceInterface {
     char pad_0x00[8];
@@ -34,7 +34,7 @@ struct sRaceEntry {
     char pad_0x5c[4];
     int field_0x60;
 };
-extern sRaceEntry D_0043D950[];
+extern sRaceEntry cBELibrary_locationDB[];
 
 extern sPad16 D_0043E254;
 
@@ -53,19 +53,19 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getThis__Fv);
  * Returns the new-race interface singleton, creating it on first use.
  *
  * The first call allocates 0x10 bytes tagged "BENewRaceInt", clears the word at 0x8, stores the vtable
- * D_0045AE58 and keeps the object in D_004A11B4.
+ * D_0045AE58 and keeps the object in cBENewRaceInterface_instance.
  *
  * @return the new-race interface
  */
 void* cBENewRaceInterface_getThis()
 {
-    if (D_004A11B4 == 0) {
+    if (cBENewRaceInterface_instance == 0) {
         cBENewRaceInterface* mem = (cBENewRaceInterface*)cMemMan_alloc(0x10, str_BENewRaceInt, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045AE58;
-        D_004A11B4 = mem;
+        cBENewRaceInterface_instance = mem;
     }
-    return D_004A11B4;
+    return cBENewRaceInterface_instance;
 }
 #endif
 
@@ -77,22 +77,22 @@ struct sRaceSettings_00144928
     int data[0x4C / 4];
 };
 
-extern sRaceSettings_00144928 D_005305B0;
+extern sRaceSettings_00144928 cBELibrary_raceDB;
 
 extern "C" void func_00144928(void)
 {
-    D_005305B0 = *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace.playerID[0];
+    cBELibrary_raceDB = *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace.playerID[0];
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", func_001449E8);
 #ifdef SKIP_ASM
-extern sRaceSettings_00144928 D_005305B0;
+extern sRaceSettings_00144928 cBELibrary_raceDB;
 
 extern "C" void func_001449E8(void)
 {
-    *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace.playerID[0] = D_005305B0;
+    *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace.playerID[0] = cBELibrary_raceDB;
 }
 #endif
 
@@ -163,11 +163,11 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocation);
 /**
  * Returns the location table entry (0x64 bytes) of the race's location, newRace.iLocationIdx.
  *
- * @return the entry in D_0043D950
+ * @return the entry in cBELibrary_locationDB
  */
 extern "C" void* cBENewRaceInterface_getLocation()
 {
-    return (char*)&D_0043D950[0] + D_00535C08.value * 0x64;
+    return (char*)&cBELibrary_locationDB[0] + D_00535C08.value * 0x64;
 }
 #endif
 
@@ -253,7 +253,7 @@ INCLUDE_ASM("be/beintnewrace", func_00144C78);
 #ifdef SKIP_ASM
 extern "C" int func_00144C78(void* self, int a1)
 {
-    return D_0043D950[a1].field_0x54;
+    return cBELibrary_locationDB[a1].field_0x54;
 }
 #endif
 
@@ -262,7 +262,7 @@ INCLUDE_ASM("be/beintnewrace", func_00144C98);
 #ifdef SKIP_ASM
 extern "C" int func_00144C98()
 {
-    return D_0043D950[D_00535C08.value].field_0x54;
+    return cBELibrary_locationDB[D_00535C08.value].field_0x54;
 }
 #endif
 
@@ -271,7 +271,7 @@ INCLUDE_ASM("be/beintnewrace", func_00144CC0);
 #ifdef SKIP_ASM
 extern "C" int func_00144CC0(void* self, int a1)
 {
-    return D_0043D950[a1].field_0x58;
+    return cBELibrary_locationDB[a1].field_0x58;
 }
 #endif
 
@@ -287,7 +287,7 @@ struct sRaceEntryFull_00144CE0 {
 
 extern "C" int func_00144CE0(void* self, int a1)
 {
-    sRaceEntryFull_00144CE0* t = (sRaceEntryFull_00144CE0*)D_0043D950;
+    sRaceEntryFull_00144CE0* t = (sRaceEntryFull_00144CE0*)cBELibrary_locationDB;
     for (int i = 0; i < 23; i++) {
         if (t[i].field_0x5C == a1) {
             return t[i].field_0x0;
@@ -302,7 +302,7 @@ INCLUDE_ASM("be/beintnewrace", func_00144D18);
 #ifdef SKIP_ASM
 extern "C" int func_00144D18(void* self, int a1)
 {
-    return D_0043D950[a1].field_0x60;
+    return cBELibrary_locationDB[a1].field_0x60;
 }
 #endif
 
@@ -503,7 +503,7 @@ struct sGameEvent_001451E8
     int kind;
     char rest[0x50];
 };
-extern sGameEvent_001451E8 D_0043E978[];
+extern sGameEvent_001451E8 cBELibrary_gameEventDB[];
 
 static inline char* Race_1451E8()
 {
@@ -514,11 +514,11 @@ static inline char* Race_1451E8()
  * Sets the race's game event; events 4 and 5 also set one AI rider (none on game path 2).
  *
  * @param event  the game event
- * @return whether the event's mode (D_0043E978) matches the current game mode
+ * @return whether the event's mode (cBELibrary_gameEventDB) matches the current game mode
  */
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event)
 {
-    sGameEvent_001451E8 eventRec = D_0043E978[event];
+    sGameEvent_001451E8 eventRec = cBELibrary_gameEventDB[event];
     *((signed char*)Race_1451E8() + 0x4A) = event;
     if (event < 6)
     {
@@ -630,7 +630,7 @@ extern "C" int func_001453D0(void* self, int kind, int place, int mode)
 INCLUDE_ASM("be/beintnewrace", func_001454F8);
 #ifdef SKIP_ASM
 extern "C" int func_00145600(void* self, int a1, int a2);
-extern int D_004A11BC;
+extern int cBENewRaceInterface_mNextLocation;
 
 struct sRaceLookup_00440B38
 {
@@ -663,7 +663,7 @@ extern "C" int func_001454F8(void* self, int kind)
     }
     for (int i = 0; i < 30; i++)
     {
-        if (D_00440B38[i].key == D_004A11BC && D_00440B38[i].kind == kind)
+        if (D_00440B38[i].key == cBENewRaceInterface_mNextLocation && D_00440B38[i].kind == kind)
         {
             return D_00440B38[i].value;
         }

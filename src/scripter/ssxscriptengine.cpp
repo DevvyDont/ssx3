@@ -2909,7 +2909,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_FillOrientationFromStar
 #ifdef SKIP_ASM
 extern "C" float func_0031C228(float x);
 extern "C" void* func_0026B5E0(void*, int, int);
-extern char D_004D33A0[];
+extern char gPaths[];
 
 struct sVec4_27B750
 {
@@ -2982,7 +2982,7 @@ extern "C" void cSSXScriptEngine_FillOrientationFromStartPointInfo(cSSXScriptEng
 {
     char* sub = obj + 0x6C0;
     sVEntry_27B750* vtEntry = &(*(sVEntry_27B750**)sub)[7];
-    sNode_27B750* startPoint = (sNode_27B750*)func_0026B5E0(D_004D33A0, 1, vtEntry->fn(sub + vtEntry->delta));
+    sNode_27B750* startPoint = (sNode_27B750*)func_0026B5E0(gPaths, 1, vtEntry->fn(sub + vtEntry->delta));
     *pos = sVec4_27B750(startPoint->px, startPoint->py, startPoint->pz, 1.0f);
     *yaw = Atan2_27B750(startPoint->dy, startPoint->dx);
     float z = startPoint->dz;
@@ -4788,9 +4788,9 @@ char* func_0027C2A8_D970(void* self) __asm__("func_0027C2A8__FPv");
 char* func_0027C4B8_D970(void* self) __asm__("func_0027C4B8__FPv");
 char* func_0027C6A0_D970(void* self) __asm__("func_0027C6A0__FPv");
 extern char t4mat_Identity[];
-extern float D_004FF140_D970[] __asm__("D_004FF140");
+extern float D_004FF140_D970[] __asm__("t4vect_XAxis");
 extern float D_004FF150_D970[] __asm__("t4vect_YAxis");
-extern float D_004FF160_D970[] __asm__("D_004FF160");
+extern float D_004FF160_D970[] __asm__("t4vect_ZAxis");
 extern "C" void func_0027A0D8_f(void* self, int type, void* a2, sVec4_SE* out, float* roll, float* pitch, float* yaw) __asm__("func_0027A0D8");
 
 // One camera case: offset + euler angles from the record, then the player's frame on top.
@@ -4916,9 +4916,9 @@ void* func_00279EF8_2(void* engine, int id) __asm__("func_00279EF8__FPv");
 extern "C" void func_0027A0D8(void* engine, int id, void* obj, void* pos, float* a, float* b, float* c);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern char t4mat_Identity[];
-extern float D_004FF140[4];
+extern float t4vect_XAxis[4];
 extern float t4vect_YAxis[4];
-extern float D_004FF160[4];
+extern float t4vect_ZAxis[4];
 
 struct sMat_F9F8 {
     float m[4][4];
@@ -5126,16 +5126,16 @@ extern "C" void func_0027F9F8(char* self)
     sMat_F9F8 m;
     LoadIdentity_F9F8(&m);
     Translate_F9F8(&m, v);
-    ROTATE_F9F8(&m, D_004FF160, -*(float*)(self + 0x78));
+    ROTATE_F9F8(&m, t4vect_ZAxis, -*(float*)(self + 0x78));
     ROTATE_F9F8(&m, t4vect_YAxis, *(float*)(self + 0x74));
-    ROTATE_F9F8(&m, D_004FF140, *(float*)(self + 0x70));
+    ROTATE_F9F8(&m, t4vect_XAxis, *(float*)(self + 0x70));
     sVec_F9F8 pos;
     float rx, ry, rz;
     func_0027A0D8(ScriptEngine, *(signed char*)(info + 1), *(void**)((char*)obj + 0x8), &pos, &rx, &ry, &rz);
     Translate_F9F8(mat, pos);
-    ROTATE2_F9F8(mat, D_004FF160, -rz);
+    ROTATE2_F9F8(mat, t4vect_ZAxis, -rz);
     ROTATE2_F9F8(mat, t4vect_YAxis, ry);
-    ROTATE2_F9F8(mat, D_004FF140, rx);
+    ROTATE2_F9F8(mat, t4vect_XAxis, rx);
     MulMat_F9F8(mat, mat, &m);
     *(float*)(self + 0x70) += rx;
     *(float*)(self + 0x74) += ry;
@@ -5382,7 +5382,7 @@ void func_002A1BD0(void* p);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 extern "C" void func_00309E50(void* mgr, int a, int b);
 extern "C" void func_0027CC28(void* self, void* out);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 extern int D_004A3B60;
 
 struct sSePair07B0 {
@@ -5419,7 +5419,7 @@ extern "C" void func_002807B0(sSeEngine07B0* self)
     sSeInfo07B0 info;
     func_00283440((char*)self + 0xC);
     for (int i = 0; i < self->pairCount; i++) {
-        func_00309E50(D_004A3DD8, self->pairs[i].b, self->pairs[i].a);
+        func_00309E50(cWScriptMan_TheWScriptMan, self->pairs[i].b, self->pairs[i].a);
     }
     if (self->field_0xF0 != 0) {
         func_002A1BD0(func_0028B180());
@@ -5475,7 +5475,7 @@ void func_00281000(void* self, int a1, void* a2, void* a3);
 extern "C" int func_00287968(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 extern int D_004A3B60;
 // The "no link" hash: a const global with a dynamic initializer (set by the scripter's static init).
 extern const int D_004A525C; // const with a dynamic initializer: set once by __sti__all_in_one_scripter_cpp (= GetHashValue32(str_NoScript))
@@ -5606,7 +5606,7 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float
     int i;
     for (i = 0; i < info.nLinks; i++) {
         sSeLink_08E8* l = &info.links[i];
-        func_00309E50(D_004A3DD8, owner, l->a);
+        func_00309E50(cWScriptMan_TheWScriptMan, owner, l->a);
         int id = *l->b;
         if (id != D_004A525C) {
             int found = 0;

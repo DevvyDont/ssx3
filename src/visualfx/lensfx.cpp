@@ -341,13 +341,13 @@ struct sLensVE_CFA0 {
     void (*fn)(void*, int);
 };
 
-// The unit declares D_004FA370 later as sLensFxSlot[]; bind a row view to the same symbol.
-extern sLensRow_CFA0 D_lensRows_CFA0[] __asm__("D_004FA370");
-extern int D_004A3B54;
+// The unit declares cRenderStateMan_m_state later as sLensFxSlot[]; bind a row view to the same symbol.
+extern sLensRow_CFA0 D_lensRows_CFA0[] __asm__("cRenderStateMan_m_state");
+extern int cRenderStateMan_m_initialized;
 
 extern "C" void func_002ECFA0(void)
 {
-    if (D_004A3B54 != 0) {
+    if (cRenderStateMan_m_initialized != 0) {
         int i;
         for (i = 0; i < 8; i++) {
             int j;
@@ -360,7 +360,7 @@ extern "C" void func_002ECFA0(void)
             }
         }
     }
-    D_004A3B54 = 0;
+    cRenderStateMan_m_initialized = 0;
 }
 #endif
 
@@ -384,9 +384,9 @@ struct sLensRow_ED048 {
     char pad48[0xF0 - 0x48];
 };
 
-// The unit declares D_004FA370 later as sLensFxSlot[]; bind views to the labels.
-extern sLensRow_ED048 D_lensRows_ED048[] __asm__("D_004FA370");
-extern int D_004A3B54;
+// The unit declares cRenderStateMan_m_state later as sLensFxSlot[]; bind views to the labels.
+extern sLensRow_ED048 D_lensRows_ED048[] __asm__("cRenderStateMan_m_state");
+extern int cRenderStateMan_m_initialized;
 extern cWorldPainterManArg D_004A5560;
 extern cWorldPainterManArg D_004A5568;
 extern cWorldPainterManArg D_004A5570;
@@ -433,7 +433,7 @@ extern "C" void func_002ED048(void)
         lensVecOneED048(&D_lensRows_ED048[i].v28);
         lensVecOneED048(&D_lensRows_ED048[i].v38);
     }
-    D_004A3B54 = 1;
+    cRenderStateMan_m_initialized = 1;
 }
 #endif
 
@@ -654,8 +654,8 @@ extern "C" float func_002EDF00(void* self)
 }
 #endif
 
-// the lens table D_004FA370 (8 rows of 0xF0 bytes, config size 0x780); the unit types it as sLensFxSlot[] further down
-extern char D_lensTable_DFB8[] __asm__("D_004FA370");
+// the lens table cRenderStateMan_m_state (8 rows of 0xF0 bytes, config size 0x780); the unit types it as sLensFxSlot[] further down
+extern char D_lensTable_DFB8[] __asm__("cRenderStateMan_m_state");
 
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EDFB8);
@@ -724,11 +724,11 @@ struct sLensFxSlot {
     char pad24[0xF0 - 0x24];
 };
 
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE070(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p14;
     return *obj->vt[27].fn((char*)obj + obj->vt[27].delta);
 }
@@ -737,11 +737,11 @@ extern "C" float func_002EE070(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE0B8);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE0B8(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p14;
     return *obj->vt[28].fn((char*)obj + obj->vt[28].delta);
 }
@@ -750,11 +750,11 @@ extern "C" float func_002EE0B8(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE100);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE100(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p14;
     return *obj->vt[29].fn((char*)obj + obj->vt[29].delta);
 }
@@ -763,11 +763,11 @@ extern "C" float func_002EE100(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE148);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE148(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p14;
     return *obj->vt[30].fn((char*)obj + obj->vt[30].delta);
 }
@@ -776,11 +776,11 @@ extern "C" float func_002EE148(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE190);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE190(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p14;
     return *obj->vt[31].fn((char*)obj + obj->vt[31].delta);
 }
@@ -789,11 +789,11 @@ extern "C" float func_002EE190(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE1D8);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE1D8(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p14;
     return *obj->vt[32].fn((char*)obj + obj->vt[32].delta);
 }
@@ -802,11 +802,11 @@ extern "C" float func_002EE1D8(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE220);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" int func_002EE220(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p14;
     return *(int*)obj->vt[33].fn((char*)obj + obj->vt[33].delta);
 }
@@ -815,11 +815,11 @@ extern "C" int func_002EE220(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE268);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE268(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p14;
     return *obj->vt[34].fn((char*)obj + obj->vt[34].delta);
 }
@@ -828,11 +828,11 @@ extern "C" float func_002EE268(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE2B0);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE2B0(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p14;
     return *obj->vt[35].fn((char*)obj + obj->vt[35].delta);
 }
@@ -902,11 +902,11 @@ extern "C" void func_002EE390(void)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE3B8);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE3B8(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p0;
     return *obj->vt[6].fn((char*)obj + obj->vt[6].delta);
 }
@@ -915,11 +915,11 @@ extern "C" float func_002EE3B8(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE400);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE400(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p10;
     return *obj->vt[26].fn((char*)obj + obj->vt[26].delta);
 }
@@ -933,7 +933,7 @@ extern int D_004A3B60;
 extern "C" float func_002EE448(int i)
 {
     if (D_004A3B60 == 0) {
-        sLensFxSlot* s = &D_004FA370[i];
+        sLensFxSlot* s = &cRenderStateMan_m_state[i];
         sLensFxObj* obj = *s->p20;
         return *obj->vt[43].fn((char*)obj + obj->vt[43].delta) * (1.0f - *(float*)((char*)s + 0x24));
     }
@@ -944,11 +944,11 @@ extern "C" float func_002EE448(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE4C0);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE4C0(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p20;
     return *obj->vt[44].fn((char*)obj + obj->vt[44].delta);
 }
@@ -957,11 +957,11 @@ extern "C" float func_002EE4C0(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE508);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE508(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p20;
     return *obj->vt[45].fn((char*)obj + obj->vt[45].delta) * (1.0f - *(float*)((char*)s + 0x24));
 }
@@ -970,11 +970,11 @@ extern "C" float func_002EE508(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE570);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE570(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p20;
     return *obj->vt[46].fn((char*)obj + obj->vt[46].delta);
 }
@@ -983,11 +983,11 @@ extern "C" float func_002EE570(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE5B8);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE5B8(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p20;
     return *obj->vt[49].fn((char*)obj + obj->vt[49].delta);
 }
@@ -1001,7 +1001,7 @@ extern int D_004A3B60;
 extern "C" float func_002EE600(int i)
 {
     if (D_004A3B60 == 0) {
-        sLensFxSlot* s = &D_004FA370[i];
+        sLensFxSlot* s = &cRenderStateMan_m_state[i];
         sLensFxObj* obj = *s->p20;
         return *obj->vt[51].fn((char*)obj + obj->vt[51].delta);
     }
@@ -1012,11 +1012,11 @@ extern "C" float func_002EE600(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE660);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE660(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p20;
     return *obj->vt[52].fn((char*)obj + obj->vt[52].delta);
 }
@@ -1025,11 +1025,11 @@ extern "C" float func_002EE660(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE6A8);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE6A8(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p20;
     return *obj->vt[50].fn((char*)obj + obj->vt[50].delta);
 }
@@ -1038,11 +1038,11 @@ extern "C" float func_002EE6A8(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE6F0);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE6F0(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p20;
     return *obj->vt[48].fn((char*)obj + obj->vt[48].delta);
 }
@@ -1051,11 +1051,11 @@ extern "C" float func_002EE6F0(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE738);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE738(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p20;
     return *obj->vt[53].fn((char*)obj + obj->vt[53].delta);
 }
@@ -1064,11 +1064,11 @@ extern "C" float func_002EE738(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EE780);
 #ifdef SKIP_ASM
-extern sLensFxSlot D_004FA370[];
+extern sLensFxSlot cRenderStateMan_m_state[];
 
 extern "C" float func_002EE780(int i)
 {
-    sLensFxSlot* s = &D_004FA370[i];
+    sLensFxSlot* s = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *s->p20;
     return *obj->vt[54].fn((char*)obj + obj->vt[54].delta);
 }

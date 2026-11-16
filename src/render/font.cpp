@@ -793,7 +793,7 @@ extern "C" void func_00392980(cFont* self, const unsigned short* str, float x, f
 //100%
 INCLUDE_ASM("render/font", cFont_vcentertextf);
 #ifdef SKIP_ASM
-extern void* D_004A3E90;
+extern void* cBXString_EmptyString;
 extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
 extern "C" void cBXString__cBXString(void* self, int flags);
 
@@ -812,7 +812,7 @@ struct sBXStr_29F8 {
 extern "C" void cFont_vcentertextf(cFont* self, const char* fmt, void* ap, float x, float y)
 {
     sBXStr_29F8 txt;
-    txt.p = (char*)D_004A3E90;
+    txt.p = (char*)cBXString_EmptyString;
     func_003191C0(&txt, fmt, ap);
     func_00392908(self, x, y, txt.p);
     cBXString__cBXString(&txt, 2);
@@ -844,7 +844,7 @@ extern "C" void func_00392AD0(cFont* self, const unsigned short* str, float x, f
 //100%
 INCLUDE_ASM("render/font", cFont_vrighttextf);
 #ifdef SKIP_ASM
-extern void* D_004A3E90;
+extern void* cBXString_EmptyString;
 extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
 extern "C" void cBXString__cBXString(void* self, int flags);
 
@@ -863,7 +863,7 @@ struct sBXStr_2B40 {
 extern "C" void cFont_vrighttextf(cFont* self, const char* fmt, void* ap, float x, float y)
 {
     sBXStr_2B40 txt;
-    txt.p = (char*)D_004A3E90;
+    txt.p = (char*)cBXString_EmptyString;
     func_003191C0(&txt, fmt, ap);
     func_00392A60(self, txt.p, x, y);
     cBXString__cBXString(&txt, 2);
@@ -1541,15 +1541,15 @@ void func_003942E0(void* self)
 INCLUDE_ASM("render/font", cGraphicsMan_SetDefaultDrawState);
 #ifdef SKIP_ASM
 
-extern sDrawState D_00501420;
+extern sDrawState sDrawState_s_defaultDrawState;
 
 /**
- * Resets the current draw state (*m_pCurrentDrawState) to the default draw state D_00501420 built by the cGraphicsMan
+ * Resets the current draw state (*m_pCurrentDrawState) to the default draw state sDrawState_s_defaultDrawState built by the cGraphicsMan
  * constructor.
  */
 extern "C" void cGraphicsMan_SetDefaultDrawState(cPS2GraphicsMan* self)
 {
-    *(self->m_pCurrentDrawState) = D_00501420;
+    *(self->m_pCurrentDrawState) = sDrawState_s_defaultDrawState;
 }
 #endif
 //100%
@@ -3302,9 +3302,9 @@ INCLUDE_ASM("render/font", func_00395750);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern char t4mat_Identity[];
-extern float D_004FF140[4];
+extern float t4vect_XAxis[4];
 extern float t4vect_YAxis[4];
-extern float D_004FF160[4];
+extern float t4vect_ZAxis[4];
 
 struct sMat_5750 {
     float m[4][4];
@@ -3451,8 +3451,8 @@ extern "C" void func_00395750(cPS2GraphicsMan* self, sVec_5750* pos, float rx, f
     ((float*)self->mCurrentView)[9] = 1.0f;
     ((float*)self->mCurrentView)[6] = 1.0f;
     ((float*)self->mCurrentView)[10] = 0.0f;
-    Rotate_5750(self, D_004FF140, -rx);
-    Rotate_5750(self, D_004FF160, -ry);
+    Rotate_5750(self, t4vect_XAxis, -rx);
+    Rotate_5750(self, t4vect_ZAxis, -ry);
     Rotate_5750(self, t4vect_YAxis, -rz);
     sVec_5750 v = Scale_5750(*pos, -1.0f);
     v.w = -v.w;
@@ -4148,73 +4148,73 @@ extern "C" int *func_00396358(void) {
 //100%
 INCLUDE_ASM("render/font", func_00396368);
 #ifdef SKIP_ASM
-extern int D_004A4524;
+extern int cRenderToggles_m_DisableSnowFall;
 
 extern "C" int *func_00396368(void) {
-    return &D_004A4524;
+    return &cRenderToggles_m_DisableSnowFall;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396378);
 #ifdef SKIP_ASM
-extern int D_004A4528;
+extern int cRenderToggles_m_DisableBoardWake;
 
 extern "C" int *func_00396378(void) {
-    return &D_004A4528;
+    return &cRenderToggles_m_DisableBoardWake;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396388);
 #ifdef SKIP_ASM
-extern int D_004A452C;
+extern int cRenderToggles_m_DisableSkyBox;
 
 extern "C" int *func_00396388(void) {
-    return &D_004A452C;
+    return &cRenderToggles_m_DisableSkyBox;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396398);
 #ifdef SKIP_ASM
-extern int D_004A4530;
+extern int cRenderToggles_m_DisableCharacterSpecular;
 
 extern "C" int *func_00396398(void) {
-    return &D_004A4530;
+    return &cRenderToggles_m_DisableCharacterSpecular;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_003963A8);
 #ifdef SKIP_ASM
-extern int D_004A4534;
+extern int cRenderToggles_m_DisableAIVisualFX;
 
 extern "C" int *func_003963A8(void) {
-    return &D_004A4534;
+    return &cRenderToggles_m_DisableAIVisualFX;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_003963B8);
 #ifdef SKIP_ASM
-extern int D_004A4538;
+extern int cRenderToggles_m_DisableBoundingBoxes;
 
 extern "C" int *func_003963B8(void) {
-    return &D_004A4538;
+    return &cRenderToggles_m_DisableBoundingBoxes;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_003963C8);
 #ifdef SKIP_ASM
-extern int D_004A453C;
+extern int cRenderToggles_m_UseReflectionVector;
 
 extern "C" int *func_003963C8(void) {
-    return &D_004A453C;
+    return &cRenderToggles_m_UseReflectionVector;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_003963D8);
 #ifdef SKIP_ASM
-extern int D_004A4540;
+extern int cRenderToggles_m_DisableHUD;
 
 extern "C" int *func_003963D8(void) {
-    return &D_004A4540;
+    return &cRenderToggles_m_DisableHUD;
 }
 #endif
 //100%
@@ -4363,10 +4363,10 @@ extern "C" void func_003964C8(int* self, int flags)
 //100%
 INCLUDE_ASM("render/font", func_003964F8);
 #ifdef SKIP_ASM
-extern int D_004A4444;
+extern int cPlants_m_Enable;
 
 extern "C" int *func_003964F8(void) {
-    return &D_004A4444;
+    return &cPlants_m_Enable;
 }
 #endif
 //100%
@@ -5051,19 +5051,19 @@ extern "C" int *func_00396B10(void) {
 //100%
 INCLUDE_ASM("render/font", func_00396B20);
 #ifdef SKIP_ASM
-extern int D_004A44B4;
+extern int cVisualEffectsTest_m_Enable;
 
 extern "C" int *func_00396B20(void) {
-    return &D_004A44B4;
+    return &cVisualEffectsTest_m_Enable;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_00396B30);
 #ifdef SKIP_ASM
-extern int D_004A44B8;
+extern int cVisualEffectsTest_m_LayerId;
 
 extern "C" int *func_00396B30(void) {
-    return &D_004A44B8;
+    return &cVisualEffectsTest_m_LayerId;
 }
 #endif
 
@@ -5300,10 +5300,10 @@ extern "C" int *func_00396E20(void) {
 //100%
 INCLUDE_ASM("render/font", func_00396E30);
 #ifdef SKIP_ASM
-extern int D_004A460C;
+extern int cScreenTint_m_LightningEnable;
 
 extern "C" int *func_00396E30(void) {
-    return &D_004A460C;
+    return &cScreenTint_m_LightningEnable;
 }
 #endif
 //100%
@@ -5318,10 +5318,10 @@ extern "C" int *func_00396E40(void) {
 //100%
 INCLUDE_ASM("render/font", func_00396E50);
 #ifdef SKIP_ASM
-extern int D_004A4614;
+extern int cScreenTint_m_LightningChance;
 
 extern "C" int *func_00396E50(void) {
-    return &D_004A4614;
+    return &cScreenTint_m_LightningChance;
 }
 #endif
 //100%

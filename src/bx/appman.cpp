@@ -4,10 +4,10 @@
 INCLUDE_ASM("bx/appman", cAppMan_cAppMan);
 #ifdef SKIP_ASM
 extern void* cAppMan_vtbl[16];
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 
 /**
- * Constructs the application manager with its defaults and makes it the global instance (D_004A5B64, On Tour
+ * Constructs the application manager with its defaults and makes it the global instance (cAppMan_TheAppMan, On Tour
  * TheAppMan).
  *
  * Up to 12 update steps per frame, game rate 1.0, frame-rate damping 0.9, no 30 fps lock, no modules.
@@ -28,13 +28,13 @@ extern "C" void* cAppMan_cAppMan(void* self)
     *(int*)((char*)self + 0x28) = 0;
     *(int*)((char*)self + 0x2C) = 0;
     *(int*)((char*)self + 0xC) = 0;
-    D_004A5B64 = self;
+    cAppMan_TheAppMan = self;
     return self;
 }
 #endif
 
 extern void* cAppMan_vtbl[16];
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 void operator_delete(int* ptr);
 
 //99.92%
@@ -49,7 +49,7 @@ INCLUDE_ASM("bx/appman", cAppMan__cAppMan__FPvi);
 void cAppMan__cAppMan(void* self, int flags)
 {
     *(void**)((char*)self + 0x5C) = cAppMan_vtbl;
-    D_004A5B64 = 0;
+    cAppMan_TheAppMan = 0;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -467,7 +467,7 @@ INCLUDE_ASM("bx/appman", func_00317500__Fv);
 #ifdef SKIP_ASM
 int func_00317500(void)
 {
-    return func_00317348(D_004A5B64);
+    return func_00317348(cAppMan_TheAppMan);
 }
 #endif
 
@@ -476,7 +476,7 @@ INCLUDE_ASM("bx/appman", func_00317520__Fv);
 #ifdef SKIP_ASM
 int func_00317520(void)
 {
-    return *(int*)((char*)D_004A5B64 + 0x8);
+    return *(int*)((char*)cAppMan_TheAppMan + 0x8);
 }
 #endif
 
@@ -505,7 +505,7 @@ void func_00317550(void* self, float arg)
     float diff = arg - old8;
     float x0 = *(float*)((char*)self + 0x0);
     float rate = raw * diff;
-    int v1 = *(int*)((char*)D_004A5B64 + 0x1C);
+    int v1 = *(int*)((char*)cAppMan_TheAppMan + 0x1C);
     x0 = x0 - arg;
     rate = rate * 0.01f;
     *(float*)((char*)self + 0x4) = old8;
@@ -525,8 +525,8 @@ INCLUDE_ASM("bx/appman", func_003175A0__FPv);
 #ifdef SKIP_ASM
 void func_003175A0(void* self)
 {
-    int delta = *(int*)((char*)D_004A5B64 + 0x1C) - *(int*)((char*)self + 0x10);
-    float ret = func_0040D758((float)delta * *(float*)((char*)D_004A5B64 + 0x14) * *(float*)((char*)self + 0x1C));
+    int delta = *(int*)((char*)cAppMan_TheAppMan + 0x1C) - *(int*)((char*)self + 0x10);
+    float ret = func_0040D758((float)delta * *(float*)((char*)cAppMan_TheAppMan + 0x14) * *(float*)((char*)self + 0x1C));
     *(float*)((char*)self + 0x0) = *(float*)((char*)self + 0x14) + *(float*)((char*)self + 0x18) * ret;
 }
 #endif

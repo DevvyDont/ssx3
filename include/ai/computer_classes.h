@@ -46,7 +46,7 @@ public:
     virtual ~cRiderVb_cmp();
 };
 
-extern t4Vector D_004FF160;
+extern t4Vector t4vect_ZAxis;
 
 struct cCompHead00_cmp { char pad[0x18]; };
 
@@ -93,7 +93,7 @@ public:
     {
         h = cCompHandle_cmp();
         f18 = 0;
-        v = D_004FF160;
+        v = t4vect_ZAxis;
     }
 };
 

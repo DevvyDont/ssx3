@@ -104,7 +104,7 @@ cExecutionMan* cExecutionMan_halt(cExecutionMan* self);
 extern "C" void func_0040FC90(void); // __main
 extern "C" void systemInit(void);
 extern "C" int cAppMan_run(void* self, cExecutionMan* exec, int argc, char** argv);
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 extern const char str_PS2ExecutionMan[];
 extern void* D_0048DB68[];
 
@@ -117,7 +117,7 @@ int main_impl(int argc, char** argv) __asm__("main");
  *
  * Calls __main (func_0040FC90) and systemInit(), allocates the 0x142C0-byte "PS2ExecutionMan", initialises it
  * with cExecutionMan_halt() and gives it the PS2 vtable (D_0048DB68), then hands it to cAppMan_run() on the
- * application object (D_004A5B64).
+ * application object (cAppMan_TheAppMan).
  *
  * @param argc  the argument count, passed to cAppMan_run()
  * @param argv  the argument strings, passed to cAppMan_run()
@@ -130,7 +130,7 @@ int main_impl(int argc, char** argv)
     cExecutionManMainK* exec = (cExecutionManMainK*)cMemMan_alloc(0x142C0, str_PS2ExecutionMan, 0, 0);
     cExecutionMan_halt((cExecutionMan*)exec);
     exec->field_0x8 = D_0048DB68;
-    return cAppMan_run(D_004A5B64, (cExecutionMan*)exec, argc, argv);
+    return cAppMan_run(cAppMan_TheAppMan, (cExecutionMan*)exec, argc, argv);
 }
 #endif
 
@@ -144,8 +144,8 @@ public:
     virtual void v01();
     virtual void v02();
 };
-// Typed view of D_004A5B64 (main() in this unit declares it as void*).
-extern cAppManB008* D_004A5B64_B008 __asm__("D_004A5B64");
+// Typed view of cAppMan_TheAppMan (main() in this unit declares it as void*).
+extern cAppManB008* D_004A5B64_B008 __asm__("cAppMan_TheAppMan");
 extern "C" void func_00402450(int);
 extern "C" void func_00401718(int);
 extern "C" void func_00425FB8(void);

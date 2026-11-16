@@ -236,8 +236,8 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_00169418);
 extern void* D_0045BDE0[];
 extern void* D_0045C8B8[];
 struct sVec4K9418 { float x, y, z, w; } __attribute__((aligned(16)));
-// Same object as the unit's later `extern func_001694B8_sVec4 D_004FF130;` (that type is defined below this point).
-extern sVec4K9418 D_004FF130_K9418 __asm__("D_004FF130");
+// Same object as the unit's later `extern func_001694B8_sVec4 t4vect_Origin;` (that type is defined below this point).
+extern sVec4K9418 D_004FF130_K9418 __asm__("t4vect_Origin");
 extern "C" float cCameraAlgorithm_getDefaultView(void* self);
 
 struct sCamCtlK9418 {
@@ -296,7 +296,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_001694B8);
 struct func_001694B8_sVec4 { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern void* D_0045C850[];
-extern func_001694B8_sVec4 D_004FF130;
+extern func_001694B8_sVec4 t4vect_Origin;
 extern "C" void* func_00169418(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
@@ -305,7 +305,7 @@ extern "C" void* func_001694B8(void* self)
     func_00169418(self);
     *(void***)((char*)self + 0x10) = D_0045C850;
     cCameraJitterer_cCameraJitterer((char*)self + 0x74);
-    *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
+    *(func_001694B8_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 0x56;
     *(int*)((char*)self + 0x44) = 0;
     *(int*)((char*)self + 0x48) = 0;
@@ -501,9 +501,9 @@ struct sPair_9828 {
 };
 
 extern sM_9828 D_004FF1A0_9828 __asm__("t4mat_Identity");
-extern sV_9828 D_004FF140_9828 __asm__("D_004FF140");
+extern sV_9828 D_004FF140_9828 __asm__("t4vect_XAxis");
 extern sV_9828 D_004FF150_9828 __asm__("t4vect_YAxis");
-extern sV_9828 D_004FF160_9828 __asm__("D_004FF160");
+extern sV_9828 D_004FF160_9828 __asm__("t4vect_ZAxis");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_9828 func_0031B748_9828(sM_9828* m) __asm__("func_0031B748");
 extern "C" sV_9828 func_00160228_9828(char* p, float a, float b) __asm__("func_00160228");
@@ -660,7 +660,7 @@ extern "C" sPair_9828 func_00169828(char* p)
 INCLUDE_ASM("camera/script/scriptcontroller", func_00169CF8);
 #ifdef SKIP_ASM
 extern void* D_0045C7E8[];
-extern func_001694B8_sVec4 D_004FF130;
+extern func_001694B8_sVec4 t4vect_Origin;
 extern "C" void* func_00169418(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
@@ -669,7 +669,7 @@ extern "C" void* func_00169CF8(void* self)
     func_00169418(self);
     *(void***)((char*)self + 0x10) = D_0045C7E8;
     cCameraJitterer_cCameraJitterer((char*)self + 0x74);
-    *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
+    *(func_001694B8_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 0x57;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x44) = 0;
@@ -829,9 +829,9 @@ struct sPair_9F88 {
 };
 
 extern sM_9F88 D_004FF1A0_9F88 __asm__("t4mat_Identity");
-extern sV_9F88 D_004FF140_9F88 __asm__("D_004FF140");
+extern sV_9F88 D_004FF140_9F88 __asm__("t4vect_XAxis");
 extern sV_9F88 D_004FF150_9F88 __asm__("t4vect_YAxis");
-extern sV_9F88 D_004FF160_9F88 __asm__("D_004FF160");
+extern sV_9F88 D_004FF160_9F88 __asm__("t4vect_ZAxis");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_9F88 func_0031B748_9F88(sM_9F88* m) __asm__("func_0031B748");
 extern "C" sV_9F88 func_00160228_9F88(char* p, float a, float b) __asm__("func_00160228");
@@ -988,7 +988,7 @@ extern "C" sPair_9F88 func_00169F88(char* p)
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016A458);
 #ifdef SKIP_ASM
 extern void* D_0045C780[];
-extern func_001694B8_sVec4 D_004FF130;
+extern func_001694B8_sVec4 t4vect_Origin;
 extern "C" void* func_00169418(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
@@ -997,7 +997,7 @@ extern "C" void* func_0016A458(void* self)
     func_00169418(self);
     *(void***)((char*)self + 0x10) = D_0045C780;
     cCameraJitterer_cCameraJitterer((char*)self + 0x70);
-    *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
+    *(func_001694B8_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 0x58;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x44) = 0;
@@ -1222,9 +1222,9 @@ struct sPair_A868 {
 };
 
 extern sM_A868 D_004FF1A0_A868 __asm__("t4mat_Identity");
-extern sV_A868 D_004FF140_A868 __asm__("D_004FF140");
+extern sV_A868 D_004FF140_A868 __asm__("t4vect_XAxis");
 extern sV_A868 D_004FF150_A868 __asm__("t4vect_YAxis");
-extern sV_A868 D_004FF160_A868 __asm__("D_004FF160");
+extern sV_A868 D_004FF160_A868 __asm__("t4vect_ZAxis");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_A868 func_0031B748_A868(sM_A868* m) __asm__("func_0031B748");
 extern "C" sV_A868 func_00160228_A868(char* p, float a, float b) __asm__("func_00160228");
@@ -1381,7 +1381,7 @@ extern "C" sPair_A868 func_0016A868(char* p)
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016AD38);
 #ifdef SKIP_ASM
 extern void* D_0045C718[];
-extern func_001694B8_sVec4 D_004FF130;
+extern func_001694B8_sVec4 t4vect_Origin;
 extern "C" void* func_00169418(void* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
@@ -1390,7 +1390,7 @@ extern "C" void* func_0016AD38(void* self)
     func_00169418(self);
     *(void***)((char*)self + 0x10) = D_0045C718;
     cCameraJitterer_cCameraJitterer((char*)self + 0x70);
-    *(func_001694B8_sVec4*)((char*)self + 0x30) = D_004FF130;
+    *(func_001694B8_sVec4*)((char*)self + 0x30) = t4vect_Origin;
     *(int*)((char*)self + 0xC) = 0x59;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x44) = 0;
@@ -1870,9 +1870,9 @@ struct sPair_B7B8 {
 };
 
 extern sM_B7B8 D_004FF1A0_B7B8 __asm__("t4mat_Identity");
-extern sV_B7B8 D_004FF140_B7B8 __asm__("D_004FF140");
+extern sV_B7B8 D_004FF140_B7B8 __asm__("t4vect_XAxis");
 extern sV_B7B8 D_004FF150_B7B8 __asm__("t4vect_YAxis");
-extern sV_B7B8 D_004FF160_B7B8 __asm__("D_004FF160");
+extern sV_B7B8 D_004FF160_B7B8 __asm__("t4vect_ZAxis");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_B7B8 func_0031B748_B7B8(sM_B7B8* m) __asm__("func_0031B748");
 extern "C" sV_B7B8 func_00160228_B7B8(char* p, float a, float b) __asm__("func_00160228");

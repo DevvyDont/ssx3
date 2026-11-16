@@ -9,7 +9,7 @@ INCLUDE_ASM("seg/seg_1FBE38", checkActiveNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cMemMan_alloc(int, void*, int, int);
-extern char *D_004A3DD8_AE38 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_AE38 __asm__("cWScriptMan_TheWScriptMan");
 extern char D_00489618_AE38[] __asm__("D_00489618");
 extern char D_00489628_AE38[] __asm__("D_00489628");
 extern char D_00489638_AE38[] __asm__("D_00489638");
@@ -69,7 +69,7 @@ extern "C" int checkActiveNode(void *node, int type, void *buf) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FB060);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_B060 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_B060 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_B060(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_B060(unsigned i) { if (i == 0) return 0; return refToPtr_B060(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -77,7 +77,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_00359228_B060(void*, int, void*, void*) __asm__("func_00359228");
 extern char D_00489658_B060[] __asm__("D_00489658");
 struct V3_B060 { float x, y, z; };
-extern V3_B060 D_004C9098_B060 __asm__("D_004C9098");
+extern V3_B060 D_004C9098_B060 __asm__("luno_gLunoNil");
 struct Tag_B060 { char c; Tag_B060() {} Tag_B060(const Tag_B060 &o) : c(o.c) {} };
 extern unsigned D_B060[] __asm__("D_004FB390");
 extern int D_004A55C0;
@@ -145,7 +145,7 @@ extern "C" V3_B060 func_002FB060(int n, Ent_B060 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FB270);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_B270 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_B270 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_B270(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_B270(unsigned i) { if (i == 0) return 0; return refToPtr_B270(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -153,7 +153,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_00358C80_B270(void*, int, void*, void*) __asm__("func_00358C80");
 extern char D_00489668_B270[] __asm__("D_00489668");
 struct V3_B270 { float x, y, z; };
-extern V3_B270 D_004C9098_B270 __asm__("D_004C9098");
+extern V3_B270 D_004C9098_B270 __asm__("luno_gLunoNil");
 struct Tag_B270 { char c; Tag_B270() {} Tag_B270(const Tag_B270 &o) : c(o.c) {} };
 extern unsigned D_B270[] __asm__("D_004FB3C0");
 extern int D_004A55C4;
@@ -225,7 +225,7 @@ extern "C" V3_B270 func_002FB270(int n, Ent_B270 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FB498);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_B498 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_B498 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_B498(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_B498(unsigned i) { if (i == 0) return 0; return refToPtr_B498(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -233,7 +233,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_003421A0_B498(void*, int, void*, void*) __asm__("func_003421A0");
 extern char D_00489678_B498[] __asm__("D_00489678");
 struct V3_B498 { float x, y, z; };
-extern V3_B498 D_004C9098_B498 __asm__("D_004C9098");
+extern V3_B498 D_004C9098_B498 __asm__("luno_gLunoNil");
 struct Tag_B498 { char c; Tag_B498() {} Tag_B498(const Tag_B498 &o) : c(o.c) {} };
 extern unsigned D_B498[] __asm__("D_004FB400");
 extern int D_004A55C8;
@@ -301,7 +301,7 @@ extern "C" V3_B498 func_002FB498(int n, Ent_B498 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FB6B8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_B6B8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_B6B8 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_B6B8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_B6B8(unsigned i) { if (i == 0) return 0; return refToPtr_B6B8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -309,7 +309,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_00343010_B6B8(void*, int, void*, void*) __asm__("func_00343010");
 extern char D_00489688_B6B8[] __asm__("D_00489688");
 struct V3_B6B8 { float x, y, z; };
-extern V3_B6B8 D_004C9098_B6B8 __asm__("D_004C9098");
+extern V3_B6B8 D_004C9098_B6B8 __asm__("luno_gLunoNil");
 struct Tag_B6B8 { char c; Tag_B6B8() {} Tag_B6B8(const Tag_B6B8 &o) : c(o.c) {} };
 extern unsigned D_B6B8[] __asm__("D_004FB430");
 extern int D_004A55CC;
@@ -380,7 +380,7 @@ extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FB8D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_B8D0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_B8D0 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_B8D0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_B8D0(unsigned i) { if (i == 0) return 0; return refToPtr_B8D0(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -388,7 +388,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_00343768_B8D0(void*, int, void*, void*) __asm__("func_00343768");
 extern char D_004A3BE8_B8D0[] __asm__("D_004A3BE8");
 struct V3_B8D0 { float x, y, z; };
-extern V3_B8D0 D_004C9098_B8D0 __asm__("D_004C9098");
+extern V3_B8D0 D_004C9098_B8D0 __asm__("luno_gLunoNil");
 struct Tag_B8D0 { char c; Tag_B8D0() {} Tag_B8D0(const Tag_B8D0 &o) : c(o.c) {} };
 extern unsigned D_B8D0[] __asm__("D_004FB468");
 extern int D_004A55D0;
@@ -448,7 +448,7 @@ extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FBAB0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_BAB0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_BAB0 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_BAB0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_BAB0(unsigned i) { if (i == 0) return 0; return refToPtr_BAB0(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -456,7 +456,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_0034EC58_BAB0(void*, int, void*, void*) __asm__("func_0034EC58");
 extern char D_00489698_BAB0[] __asm__("D_00489698");
 struct V3_BAB0 { float x, y, z; };
-extern V3_BAB0 D_004C9098_BAB0 __asm__("D_004C9098");
+extern V3_BAB0 D_004C9098_BAB0 __asm__("luno_gLunoNil");
 struct Tag_BAB0 { char c; Tag_BAB0() {} Tag_BAB0(const Tag_BAB0 &o) : c(o.c) {} };
 extern unsigned D_BAB0[] __asm__("D_004FB478");
 extern int D_004A55D4;
@@ -521,7 +521,7 @@ extern "C" V3_BAB0 func_002FBAB0(int n, Ent_BAB0 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FBCB8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_BCB8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_BCB8 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_BCB8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_BCB8(unsigned i) { if (i == 0) return 0; return refToPtr_BCB8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -529,7 +529,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_00341AA0_BCB8(void*, int, int, void*, void*) __asm__("func_00341AA0");
 extern char D_004896A8_BCB8[] __asm__("D_004896A8");
 struct V3_BCB8 { float x, y, z; };
-extern V3_BCB8 D_004C9098_BCB8 __asm__("D_004C9098");
+extern V3_BCB8 D_004C9098_BCB8 __asm__("luno_gLunoNil");
 struct Tag_BCB8 { char c; Tag_BCB8() {} Tag_BCB8(const Tag_BCB8 &o) : c(o.c) {} };
 extern unsigned D_BCB8[] __asm__("D_004FB498");
 extern int D_004A55D8;
@@ -597,7 +597,7 @@ extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FBEC8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_BEC8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_BEC8 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_BEC8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_BEC8(unsigned i) { if (i == 0) return 0; return refToPtr_BEC8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -605,7 +605,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_00341388_BEC8(void*, int, int, void*, void*) __asm__("func_00341388");
 extern char D_004A3BF0_BEC8[] __asm__("D_004A3BF0");
 struct V3_BEC8 { float x, y, z; };
-extern V3_BEC8 D_004C9098_BEC8 __asm__("D_004C9098");
+extern V3_BEC8 D_004C9098_BEC8 __asm__("luno_gLunoNil");
 struct Tag_BEC8 { char c; Tag_BEC8() {} Tag_BEC8(const Tag_BEC8 &o) : c(o.c) {} };
 extern unsigned D_BEC8[] __asm__("D_004FB4C8");
 extern int D_004A55DC;
@@ -672,7 +672,7 @@ extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FC0D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_C0D0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_C0D0 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_C0D0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C0D0(unsigned i) { if (i == 0) return 0; return refToPtr_C0D0(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -680,7 +680,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_00356DB0_C0D0(void*, int, void*, int, bool) __asm__("func_00356DB0");
 extern char D_004A3BF8_C0D0[] __asm__("D_004A3BF8");
 struct V3_C0D0 { float x, y, z; };
-extern V3_C0D0 D_004C9098_C0D0 __asm__("D_004C9098");
+extern V3_C0D0 D_004C9098_C0D0 __asm__("luno_gLunoNil");
 struct Tag_C0D0 { char c; Tag_C0D0() {} Tag_C0D0(const Tag_C0D0 &o) : c(o.c) {} };
 extern unsigned D_C0D0[] __asm__("D_004FB4F0");
 extern int D_004A55E0;
@@ -796,14 +796,14 @@ extern "C" void func_002FC2C0(char* self, char* ev) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FC420);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_C420 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_C420 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_C420 __asm__("SSXApp");
 static inline char *refToPtr_C420(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C420(unsigned i) { if (i == 0) return 0; return refToPtr_C420(i); }
 extern "C" int checkActiveNode(void*, int, void*);
 extern "C" void func_002FC2C0_C420(void*, void*) __asm__("func_002FC2C0");
 struct V3_C420 { float x, y, z; };
-extern V3_C420 D_004C9098_C420 __asm__("D_004C9098");
+extern V3_C420 D_004C9098_C420 __asm__("luno_gLunoNil");
 struct Tag_C420 { char c; Tag_C420() {} Tag_C420(const Tag_C420 &o) : c(o.c) {} };
 extern unsigned D_C420[] __asm__("D_004FB500");
 extern int D_004A55E4;
@@ -861,7 +861,7 @@ extern "C" V3_C420 func_002FC420(int n, Ent_C420 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", MakeDeadFadeFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_C5D8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_C5D8 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_C5D8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C5D8(unsigned i) { if (i == 0) return 0; return refToPtr_C5D8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -869,7 +869,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cDeadFadeNode_cDeadFadeNode_C5D8(void*, int, void*, void*, int) __asm__("cDeadFadeNode_cDeadFadeNode");
 extern char D_004896D8_C5D8[] __asm__("D_004896D8");
 struct V3_C5D8 { float x, y, z; };
-extern V3_C5D8 D_004C9098_C5D8 __asm__("D_004C9098");
+extern V3_C5D8 D_004C9098_C5D8 __asm__("luno_gLunoNil");
 struct Tag_C5D8 { char c; Tag_C5D8() {} Tag_C5D8(const Tag_C5D8 &o) : c(o.c) {} };
 extern unsigned D_C5D8[] __asm__("D_004FB510");
 extern int D_004A55E8;
@@ -943,7 +943,7 @@ extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FC7D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_C7D0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_C7D0 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_C7D0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C7D0(unsigned i) { if (i == 0) return 0; return refToPtr_C7D0(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -951,7 +951,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_00342C08_C7D0(void*, int, void*, void*, int) __asm__("func_00342C08");
 extern char D_004896E8_C7D0[] __asm__("D_004896E8");
 struct V3_C7D0 { float x, y, z; };
-extern V3_C7D0 D_004C9098_C7D0 __asm__("D_004C9098");
+extern V3_C7D0 D_004C9098_C7D0 __asm__("luno_gLunoNil");
 struct Tag_C7D0 { char c; Tag_C7D0() {} Tag_C7D0(const Tag_C7D0 &o) : c(o.c) {} };
 extern unsigned D_C7D0[] __asm__("D_004FB528");
 extern int D_004A55EC;
@@ -1013,7 +1013,7 @@ extern "C" V3_C7D0 func_002FC7D0(int n, Ent_C7D0 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FC9C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_C9C8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_C9C8 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_C9C8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C9C8(unsigned i) { if (i == 0) return 0; return refToPtr_C9C8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -1021,7 +1021,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_0034ADD8_C9C8(void*, int, void*, void*) __asm__("func_0034ADD8");
 extern char D_004A3C08_C9C8[] __asm__("D_004A3C08");
 struct V3_C9C8 { float x, y, z; };
-extern V3_C9C8 D_004C9098_C9C8 __asm__("D_004C9098");
+extern V3_C9C8 D_004C9098_C9C8 __asm__("luno_gLunoNil");
 struct Tag_C9C8 { char c; Tag_C9C8() {} Tag_C9C8(const Tag_C9C8 &o) : c(o.c) {} };
 extern unsigned D_C9C8[] __asm__("D_004FB540");
 extern int D_004A55F0;
@@ -1106,9 +1106,9 @@ extern "C" V3_C9C8 func_002FC9C8(int n, Ent_C9C8 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FCC20);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_CC20 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_CC20 __asm__("cWScriptMan_TheWScriptMan");
 struct V3_CC20 { float x, y, z; };
-extern V3_CC20 D_004C9098_CC20 __asm__("D_004C9098");
+extern V3_CC20 D_004C9098_CC20 __asm__("luno_gLunoNil");
 struct Tag_CC20 { char c; Tag_CC20() {} Tag_CC20(const Tag_CC20 &o) : c(o.c) {} };
 extern unsigned D_CC20[] __asm__("D_004FB5B0");
 extern int D_004A55F4;
@@ -1171,7 +1171,7 @@ extern "C" V3_CC20* func_002FCC20(V3_CC20* ret, int n, Ent_CC20 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", MakeFlexBridgeFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_CDC8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_CDC8 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_CDC8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_CDC8(unsigned i) { if (i == 0) return 0; return refToPtr_CDC8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -1179,7 +1179,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cFlexBridgeNode_cFlexBridgeNode_CDC8(void*, int, void*, void*) __asm__("cFlexBridgeNode_cFlexBridgeNode");
 extern char D_004896F8_CDC8[] __asm__("D_004896F8");
 struct V3_CDC8 { float x, y, z; };
-extern V3_CDC8 D_004C9098_CDC8 __asm__("D_004C9098");
+extern V3_CDC8 D_004C9098_CDC8 __asm__("luno_gLunoNil");
 struct Tag_CDC8 { char c; Tag_CDC8() {} Tag_CDC8(const Tag_CDC8 &o) : c(o.c) {} };
 extern unsigned D_CDC8[] __asm__("D_004FB5C0");
 extern int D_004A55F8;
@@ -1258,7 +1258,7 @@ extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FCFF0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_CFF0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_CFF0 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_CFF0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_CFF0(unsigned i) { if (i == 0) return 0; return refToPtr_CFF0(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -1266,7 +1266,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_00351B40_CFF0(void*, int, void*, void*, int, int) __asm__("func_00351B40");
 extern char D_00489708_CFF0[] __asm__("D_00489708");
 struct V3_CFF0 { float x, y, z; };
-extern V3_CFF0 D_004C9098_CFF0 __asm__("D_004C9098");
+extern V3_CFF0 D_004C9098_CFF0 __asm__("luno_gLunoNil");
 struct Tag_CFF0 { char c; Tag_CFF0() {} Tag_CFF0(const Tag_CFF0 &o) : c(o.c) {} };
 extern unsigned D_CFF0[] __asm__("D_004FB5E8");
 extern int D_004A55FC;
@@ -1341,12 +1341,12 @@ extern "C" V3_CFF0 func_002FCFF0(int n, Ent_CFF0 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", AddRollerFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_D250 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_D250 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_D250 __asm__("SSXApp");
 extern "C" void cMoveNode_addRoller_D250(void*, void*, int, int) __asm__("cMoveNode_addRoller");
 struct O_D250 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_D250 { float x, y, z; };
-extern V3_D250 D_004C9098_D250 __asm__("D_004C9098");
+extern V3_D250 D_004C9098_D250 __asm__("luno_gLunoNil");
 struct Tag_D250 { char c; Tag_D250() {} Tag_D250(const Tag_D250 &o) : c(o.c) {} };
 extern unsigned D_D250[] __asm__("D_004FB628");
 extern int D_004A5600;
@@ -1413,7 +1413,7 @@ extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FD420);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_D420 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_D420 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_D420(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_D420(unsigned i) { if (i == 0) return 0; return refToPtr_D420(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -1423,7 +1423,7 @@ void operator_delete(int*);
 extern char D_00489718_D420[] __asm__("D_00489718");
 extern char D_00489730_D420[] __asm__("D_00489730");
 struct V3_D420 { float x, y, z; };
-extern V3_D420 D_004C9098_D420 __asm__("D_004C9098");
+extern V3_D420 D_004C9098_D420 __asm__("luno_gLunoNil");
 struct Tag_D420 { char c; Tag_D420() {} Tag_D420(const Tag_D420 &o) : c(o.c) {} };
 extern unsigned D_D420[] __asm__("D_004FB640");
 extern int D_004A5604;
@@ -1546,7 +1546,7 @@ extern "C" V3_D420 func_002FD420(int n, Ent_D420 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FD758);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_D758 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_D758 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_D758 __asm__("SSXApp");
 struct V4_D758 { float x, y, z, w; V4_D758() {} V4_D758(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} } __attribute__((aligned(16)));
 struct M4_D758 { V4_D758 r[4]; };
@@ -1596,7 +1596,7 @@ static inline void vAddTo_D758(V4_D758 &a, const V4_D758 &b) {
 }
 struct O_D758 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_D758 { float x, y, z; };
-extern V3_D758 D_004C9098_D758 __asm__("D_004C9098");
+extern V3_D758 D_004C9098_D758 __asm__("luno_gLunoNil");
 struct Tag_D758 { char c; Tag_D758() {} Tag_D758(const Tag_D758 &o) : c(o.c) {} };
 extern unsigned D_D758[] __asm__("D_004FB720");
 extern int D_004A5608;
@@ -1661,7 +1661,7 @@ extern "C" V3_D758 func_002FD758(int n, Ent_D758 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FD9F8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_D9F8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_D9F8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_D9F8 __asm__("SSXApp");
 struct V4_D9F8 { float x, y, z, w; V4_D9F8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
 extern "C" void cMoveNode_addParent_D9F8(void*, int, int, V4_D9F8*) __asm__("cMoveNode_addParent");
@@ -1669,7 +1669,7 @@ struct O_D9F8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual 
 static inline char *refToPtr_D9F8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_D9F8(unsigned i) { if (i == 0) return 0; return refToPtr_D9F8(i); }
 struct V3_D9F8 { float x, y, z; };
-extern V3_D9F8 D_004C9098_D9F8 __asm__("D_004C9098");
+extern V3_D9F8 D_004C9098_D9F8 __asm__("luno_gLunoNil");
 struct Tag_D9F8 { char c; Tag_D9F8() {} Tag_D9F8(const Tag_D9F8 &o) : c(o.c) {} };
 extern unsigned D_D9F8[] __asm__("D_004FB738");
 extern int D_004A560C;
@@ -1748,7 +1748,7 @@ extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FDC60);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_DC60 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_DC60 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_DC60 __asm__("SSXApp");
 struct V4_DC60 { float x, y, z, w; V4_DC60(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {} };
 extern "C" void cMoveNode_addParent_DC60(void*, int, int, V4_DC60*) __asm__("cMoveNode_addParent");
@@ -1756,7 +1756,7 @@ struct O_DC60 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual 
 static inline char *refToPtr_DC60(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_DC60(unsigned i) { if (i == 0) return 0; return refToPtr_DC60(i); }
 struct V3_DC60 { float x, y, z; };
-extern V3_DC60 D_004C9098_DC60 __asm__("D_004C9098");
+extern V3_DC60 D_004C9098_DC60 __asm__("luno_gLunoNil");
 struct Tag_DC60 { char c; Tag_DC60() {} Tag_DC60(const Tag_DC60 &o) : c(o.c) {} };
 extern unsigned D_DC60[] __asm__("D_004FB758");
 extern int D_004A5610;
@@ -1835,14 +1835,14 @@ extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", AddSplineFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_DED0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_DED0 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_DED0 __asm__("SSXApp");
 extern "C" void cMoveNode_addSpline1_DED0(void*, void*) __asm__("cMoveNode_addSpline1");
 struct O_DED0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_DED0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_DED0(unsigned i) { if (i == 0) return 0; return refToPtr_DED0(i); }
 struct V3_DED0 { float x, y, z; };
-extern V3_DED0 D_004C9098_DED0 __asm__("D_004C9098");
+extern V3_DED0 D_004C9098_DED0 __asm__("luno_gLunoNil");
 struct Tag_DED0 { char c; Tag_DED0() {} Tag_DED0(const Tag_DED0 &o) : c(o.c) {} };
 extern unsigned D_DED0[] __asm__("D_004FB778");
 extern int D_004A5614;
@@ -1925,14 +1925,14 @@ extern "C" V3_DED0 AddSplineFunc(int n, Ent_DED0 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", AddMultiSplineFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_E0C0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_E0C0 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_E0C0 __asm__("SSXApp");
 extern "C" void cMoveNode_addSpline_E0C0(void*, void*) __asm__("cMoveNode_addSpline");
 struct O_E0C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 static inline char *refToPtr_E0C0(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_E0C0(unsigned i) { if (i == 0) return 0; return refToPtr_E0C0(i); }
 struct V3_E0C0 { float x, y, z; };
-extern V3_E0C0 D_004C9098_E0C0 __asm__("D_004C9098");
+extern V3_E0C0 D_004C9098_E0C0 __asm__("luno_gLunoNil");
 struct Tag_E0C0 { char c; Tag_E0C0() {} Tag_E0C0(const Tag_E0C0 &o) : c(o.c) {} };
 extern unsigned D_E0C0[] __asm__("D_004FB7A8");
 extern int D_004A5618;
@@ -2016,12 +2016,12 @@ extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FE2C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_E2C0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_E2C0 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_E2C0 __asm__("SSXApp");
 extern "C" void cMoveNode_addUVScroll_E2C0(void*, void*) __asm__("cMoveNode_addUVScroll");
 struct O_E2C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_E2C0 { float x, y, z; };
-extern V3_E2C0 D_004C9098_E2C0 __asm__("D_004C9098");
+extern V3_E2C0 D_004C9098_E2C0 __asm__("luno_gLunoNil");
 struct Tag_E2C0 { char c; Tag_E2C0() {} Tag_E2C0(const Tag_E2C0 &o) : c(o.c) {} };
 extern unsigned D_E2C0[] __asm__("D_004FB7E0");
 extern int D_004A561C;
@@ -2086,12 +2086,12 @@ extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FE4A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_E4A8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_E4A8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_E4A8 __asm__("SSXApp");
 extern "C" void cMoveNode_addTexFlip_E4A8(void*, void*) __asm__("cMoveNode_addTexFlip");
 struct O_E4A8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_E4A8 { float x, y, z; };
-extern V3_E4A8 D_004C9098_E4A8 __asm__("D_004C9098");
+extern V3_E4A8 D_004C9098_E4A8 __asm__("luno_gLunoNil");
 struct Tag_E4A8 { char c; Tag_E4A8() {} Tag_E4A8(const Tag_E4A8 &o) : c(o.c) {} };
 extern unsigned D_E4A8[] __asm__("D_004FB818");
 extern int D_004A5620;
@@ -2147,12 +2147,12 @@ extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FE668);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_E668 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_E668 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_E668 __asm__("SSXApp");
 extern "C" void cMoveNode_addBoost_E668(void*, void*) __asm__("cMoveNode_addBoost");
 struct O_E668 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_E668 { float x, y, z; };
-extern V3_E668 D_004C9098_E668 __asm__("D_004C9098");
+extern V3_E668 D_004C9098_E668 __asm__("luno_gLunoNil");
 struct Tag_E668 { char c; Tag_E668() {} Tag_E668(const Tag_E668 &o) : c(o.c) {} };
 extern unsigned D_E668[] __asm__("D_004FB830");
 extern int D_004A5624;
@@ -2213,7 +2213,7 @@ extern "C" V3_E668 func_002FE668(int n, Ent_E668 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", cViewer_addParticle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_E840 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_E840 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_E840(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_E840(unsigned i) { if (i == 0) return 0; return refToPtr_E840(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -2281,7 +2281,7 @@ static inline int nearViewer_E840(const V4_E840 &pos) {
     return 0;
 }
 struct V3_E840 { float x, y, z; };
-extern V3_E840 D_004C9098_E840 __asm__("D_004C9098");
+extern V3_E840 D_004C9098_E840 __asm__("luno_gLunoNil");
 struct Tag_E840 { char c; Tag_E840() {} Tag_E840(const Tag_E840 &o) : c(o.c) {} };
 extern unsigned D_E840[] __asm__("D_004FB858");
 extern int D_004A5628;
@@ -2420,7 +2420,7 @@ extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FEE98);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_EE98 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_EE98 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_EE98(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_EE98(unsigned i) { if (i == 0) return 0; return refToPtr_EE98(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -2431,7 +2431,7 @@ extern "C" void cMoveNode_addDynamicParticle_EE98(void*, void*, int, V4_EE98*) _
 void operator_delete(int*);
 extern char D_00489750_EE98[] __asm__("D_00489750");
 struct V3_EE98 { float x, y, z; };
-extern V3_EE98 D_004C9098_EE98 __asm__("D_004C9098");
+extern V3_EE98 D_004C9098_EE98 __asm__("luno_gLunoNil");
 struct Tag_EE98 { char c; Tag_EE98() {} Tag_EE98(const Tag_EE98 &o) : c(o.c) {} };
 extern unsigned D_EE98[] __asm__("D_004FB938");
 extern int D_004A562C;
@@ -2547,12 +2547,12 @@ extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", AddRailFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_F1C8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_F1C8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_F1C8 __asm__("SSXApp");
 extern "C" void cMoveNode_addRail_F1C8(void*, void*) __asm__("cMoveNode_addRail");
 struct O_F1C8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_F1C8 { float x, y, z; };
-extern V3_F1C8 D_004C9098_F1C8 __asm__("D_004C9098");
+extern V3_F1C8 D_004C9098_F1C8 __asm__("luno_gLunoNil");
 struct Tag_F1C8 { char c; Tag_F1C8() {} Tag_F1C8(const Tag_F1C8 &o) : c(o.c) {} };
 extern unsigned D_F1C8[] __asm__("D_004FBA28");
 extern int D_004A5630;
@@ -2622,7 +2622,7 @@ extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *params) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FF390);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_F390 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_F390 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_F390(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_F390(unsigned i) { if (i == 0) return 0; return refToPtr_F390(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -2630,7 +2630,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_00348D98_F390(void*, void*, void*) __asm__("func_00348D98");
 extern char D_00489768_F390[] __asm__("D_00489768");
 struct V3_F390 { float x, y, z; };
-extern V3_F390 D_004C9098_F390 __asm__("D_004C9098");
+extern V3_F390 D_004C9098_F390 __asm__("luno_gLunoNil");
 struct Tag_F390 { char c; Tag_F390() {} Tag_F390(const Tag_F390 &o) : c(o.c) {} };
 extern unsigned D_F390[] __asm__("D_004FBA38");
 extern int D_004A5634;
@@ -2717,7 +2717,7 @@ extern "C" V3_F390 func_002FF390(int n, Ent_F390 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FF5E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_F5E8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_F5E8 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_F5E8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_F5E8(unsigned i) { if (i == 0) return 0; return refToPtr_F5E8(i); }
 extern "C" int checkActiveNode(void*, int, void*);
@@ -2725,7 +2725,7 @@ extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void func_00349B48_F5E8(void*, void*, void*) __asm__("func_00349B48");
 extern char D_00489778_F5E8[] __asm__("D_00489778");
 struct V3_F5E8 { float x, y, z; };
-extern V3_F5E8 D_004C9098_F5E8 __asm__("D_004C9098");
+extern V3_F5E8 D_004C9098_F5E8 __asm__("luno_gLunoNil");
 struct Tag_F5E8 { char c; Tag_F5E8() {} Tag_F5E8(const Tag_F5E8 &o) : c(o.c) {} };
 extern unsigned D_F5E8[] __asm__("D_004FBA90");
 extern int D_004A5638;
@@ -2818,11 +2818,11 @@ int* func_00226610(void*);
 struct Flag_F850 { char c; Flag_F850() {} Flag_F850(const Flag_F850& o) : c(o.c) {} };
 struct Ent_F850 { int idx; int val; int pad; int kind; };
 struct R12_F850 { int a; int b; int c; };
-extern R12_F850 D_004C9098_F850 __asm__("D_004C9098");
+extern R12_F850 D_004C9098_F850 __asm__("luno_gLunoNil");
 
 extern int D_00446530_F850[] __asm__("D_00446530");
 extern "C" void func_0010F1C0(int, int, float);
-extern int* D_004A3DD8_F850 __asm__("D_004A3DD8");
+extern int* D_004A3DD8_F850 __asm__("cWScriptMan_TheWScriptMan");
 extern char* D_004A28A8_F850 __asm__("SSXApp");
 extern int D_004A563C_F850 __asm__("D_004A563C");
 struct T12_F850 { int a; int b; int e; Flag_F850 f; };
@@ -2861,7 +2861,7 @@ extern "C" R12_F850 func_002FF850(int n, Ent_F850* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FF9A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_F9A8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_F9A8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_F9A8 __asm__("SSXApp");
 static inline char *look_F9A8(unsigned id) {
     if (~id == 0)
@@ -2875,7 +2875,7 @@ static inline char *look_F9A8(unsigned id) {
 
 struct O_F9A8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35(); virtual void v36(int, float); };
 struct V3_F9A8 { float x, y, z; };
-extern V3_F9A8 D_004C9098_F9A8 __asm__("D_004C9098");
+extern V3_F9A8 D_004C9098_F9A8 __asm__("luno_gLunoNil");
 struct Tag_F9A8 { char c; Tag_F9A8() {} Tag_F9A8(const Tag_F9A8 &o) : c(o.c) {} };
 extern unsigned D_F9A8[] __asm__("D_004FBAF8");
 extern int D_004A5640;
@@ -2921,7 +2921,7 @@ extern unsigned D_004A5648_FB50 __asm__("D_004A5648");
 extern Flag_FB50 D_004A564C_FB50 __asm__("D_004A564C");
 extern int D_004A5650_FB50 __asm__("D_004A5650");
 extern int D_004A3C10_FB50[2] __asm__("D_004A3C10");
-extern char *D_004A3DD8_FB50 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_FB50 __asm__("cWScriptMan_TheWScriptMan");
 static inline char *refToPtr_FB50(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_FB50(unsigned i) { if (i == 0) return 0; return refToPtr_FB50(i); }
 extern "C" void* cMemMan_alloc(int, void*, int, int);
@@ -2929,7 +2929,7 @@ extern "C" void func_00350E90_FB50(void*, void*) __asm__("func_00350E90");
 extern char D_004A3C18_FB50[] __asm__("D_004A3C18");
 struct O_FB50 { int p0, p1, p2; virtual void v01(int); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); };
 struct V3_FB50 { float x, y, z; };
-extern V3_FB50 D_004C9098_FB50 __asm__("D_004C9098");
+extern V3_FB50 D_004C9098_FB50 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_FB50(void*, void*, int) __asm__("MEM_copy");
 struct Ent_FB50 { int idx; int val; int pad; int type; };
 extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *e) {
@@ -2987,7 +2987,7 @@ extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FFD58);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_FD58 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_FD58 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_FD58 __asm__("SSXApp");
 static inline char *look_FD58(unsigned id) {
     if (~id == 0)
@@ -3001,7 +3001,7 @@ static inline char *look_FD58(unsigned id) {
 
 struct O_FD58 { int p0, p1, p2; virtual void v01(int); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual int v10(int); };
 struct V3_FD58 { float x, y, z; };
-extern V3_FD58 D_004C9098_FD58 __asm__("D_004C9098");
+extern V3_FD58 D_004C9098_FD58 __asm__("luno_gLunoNil");
 struct Tag_FD58 { char c; Tag_FD58() {} Tag_FD58(const Tag_FD58 &o) : c(o.c) {} };
 extern unsigned D_FD58 __asm__("D_004A5658");
 extern Tag_FD58 D_004A565C;
@@ -3045,14 +3045,14 @@ extern "C" V3_FD58 func_002FFD58(int n, Ent_FD58 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_002FFF00);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_FF00 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_FF00 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_FF00 __asm__("SSXApp");
 static inline char *refToPtr_FF00(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_FF00(unsigned i) { if (i == 0) return 0; return refToPtr_FF00(i); }
 extern "C" void *func_0028B180_FF00(void) __asm__("func_0028B180");
 extern "C" void cSSXAudio_WorldSound_FF00(void*, void*, int) __asm__("cSSXAudio_WorldSound");
 struct V3_FF00 { float x, y, z; };
-extern V3_FF00 D_004C9098_FF00 __asm__("D_004C9098");
+extern V3_FF00 D_004C9098_FF00 __asm__("luno_gLunoNil");
 struct Tag_FF00 { char c; Tag_FF00() {} Tag_FF00(const Tag_FF00 &o) : c(o.c) {} };
 extern unsigned D_FF00[] __asm__("D_004FBB08");
 extern int D_004A5664;
@@ -3109,14 +3109,14 @@ extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_003000A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_00A8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_00A8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_00A8 __asm__("SSXApp");
 static inline char *refToPtr_00A8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_00A8(unsigned i) { if (i == 0) return 0; return refToPtr_00A8(i); }
 extern "C" void *func_0028B180_00A8(void) __asm__("func_0028B180");
 extern "C" void cSSXAudio_AttachSound_00A8(void*, void*, int, int) __asm__("cSSXAudio_AttachSound");
 struct V3_00A8 { float x, y, z; };
-extern V3_00A8 D_004C9098_00A8 __asm__("D_004C9098");
+extern V3_00A8 D_004C9098_00A8 __asm__("luno_gLunoNil");
 struct Tag_00A8 { char c; Tag_00A8() {} Tag_00A8(const Tag_00A8 &o) : c(o.c) {} };
 extern unsigned D_00A8[] __asm__("D_004FBB18");
 extern int D_004A5668;
@@ -3175,14 +3175,14 @@ extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00300260);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_0260 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_0260 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_0260 __asm__("SSXApp");
 static inline char *refToPtr_0260(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0260(unsigned i) { if (i == 0) return 0; return refToPtr_0260(i); }
 extern "C" void *func_0028B180_0260(void) __asm__("func_0028B180");
 extern "C" void cSSXAudio_DetachSound_0260(void*, void*, int, int) __asm__("cSSXAudio_DetachSound");
 struct V3_0260 { float x, y, z; };
-extern V3_0260 D_004C9098_0260 __asm__("D_004C9098");
+extern V3_0260 D_004C9098_0260 __asm__("luno_gLunoNil");
 struct Tag_0260 { char c; Tag_0260() {} Tag_0260(const Tag_0260 &o) : c(o.c) {} };
 extern unsigned D_0260[] __asm__("D_004FBB28");
 extern int D_004A566C;
@@ -3241,11 +3241,11 @@ extern "C" V3_0260 func_00300260(int n, Ent_0260 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00300418);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_0418 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_0418 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_0418 __asm__("SSXApp");
 struct O_0418 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(int); };
 struct V3_0418 { float x, y, z; };
-extern V3_0418 D_004C9098_0418 __asm__("D_004C9098");
+extern V3_0418 D_004C9098_0418 __asm__("luno_gLunoNil");
 struct Tag_0418 { char c; Tag_0418() {} Tag_0418(const Tag_0418 &o) : c(o.c) {} };
 extern unsigned D_0418[] __asm__("D_004FBB38");
 extern int D_004A5670;
@@ -3301,10 +3301,10 @@ extern "C" V3_0418 func_00300418(int n, Ent_0418 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_003005E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A3DD8_05E8 __asm__("D_004A3DD8");
+extern int D_004A3DD8_05E8 __asm__("cWScriptMan_TheWScriptMan");
 struct O_05E8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35(); };
 struct V3_05E8 { float x, y, z; };
-extern V3_05E8 D_004C9098_05E8 __asm__("D_004C9098");
+extern V3_05E8 D_004C9098_05E8 __asm__("luno_gLunoNil");
 struct Tag_05E8 { char c; Tag_05E8() {} Tag_05E8(const Tag_05E8 &o) : c(o.c) {} };
 extern unsigned D_05E8 __asm__("D_004A5678");
 extern Tag_05E8 D_004A567C;
@@ -3361,7 +3361,7 @@ extern unsigned D_004A5688_0770 __asm__("D_004A5688");
 extern Flag_0770 D_004A568C_0770 __asm__("D_004A568C");
 extern int D_004A5690_0770 __asm__("D_004A5690");
 extern int D_004A3C40_0770[2] __asm__("D_004A3C40");
-extern int *D_004A3DD8_0770 __asm__("D_004A3DD8");
+extern int *D_004A3DD8_0770 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_0770 __asm__("SSXApp");
 struct O_0770 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct Sh_0770 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(void*); };
@@ -3369,7 +3369,7 @@ struct Lvl_0770 { char pad[0x28]; char *sh[1]; };
 static inline char *refToPtr_0770(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0770(unsigned i) { if (i == 0) return 0; return refToPtr_0770(i); }
 struct V3_0770 { float x, y, z; };
-extern V3_0770 D_004C9098_0770 __asm__("D_004C9098");
+extern V3_0770 D_004C9098_0770 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_0770(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0770 { int idx; int val; int pad; int type; };
 extern "C" V3_0770 func_00300770(int n, Ent_0770 *e) {
@@ -3432,7 +3432,7 @@ extern unsigned D_004A5698_0948 __asm__("D_004A5698");
 extern Flag_0948 D_004A569C_0948 __asm__("D_004A569C");
 extern int D_004A56A0_0948 __asm__("D_004A56A0");
 extern int D_004A3C48_0948[2] __asm__("D_004A3C48");
-extern int *D_004A3DD8_0948 __asm__("D_004A3DD8");
+extern int *D_004A3DD8_0948 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_0948 __asm__("SSXApp");
 struct O_0948 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct Sh_0948 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(void*); };
@@ -3440,7 +3440,7 @@ struct Lvl_0948 { char pad[0x28]; char *sh[1]; };
 static inline char *refToPtr_0948(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0948(unsigned i) { if (i == 0) return 0; return refToPtr_0948(i); }
 struct V3_0948 { float x, y, z; };
-extern V3_0948 D_004C9098_0948 __asm__("D_004C9098");
+extern V3_0948 D_004C9098_0948 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_0948(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0948 { int idx; int val; int pad; int type; };
 extern "C" V3_0948 func_00300948(int n, Ent_0948 *e) {
@@ -3503,7 +3503,7 @@ int* func_00226610(void*);
 struct Flag_0B20 { char c; Flag_0B20() {} Flag_0B20(const Flag_0B20& o) : c(o.c) {} };
 struct Ent_0B20 { int idx; int val; int pad; int kind; };
 struct R12_0B20 { int a; int b; int c; };
-extern R12_0B20 D_004C9098_0B20 __asm__("D_004C9098");
+extern R12_0B20 D_004C9098_0B20 __asm__("luno_gLunoNil");
 
 extern int D_004A3C50_0B20[2] __asm__("D_004A3C50");
 extern "C" void func_00358B28(unsigned, int);
@@ -3551,7 +3551,7 @@ extern "C" void cSSXScriptEngine_AddToNISListByScriptHashID_0C78(int, int, int, 
 extern "C" void cSSXScriptEngine_ReadyNISList_0C78(int, int) __asm__("cSSXScriptEngine_ReadyNISList");
 extern "C" void cSSXScriptEngine_PlayNISList_0C78(int, int, int, int) __asm__("cSSXScriptEngine_PlayNISList");
 struct V3_0C78 { float x, y, z; };
-extern V3_0C78 D_004C9098_0C78 __asm__("D_004C9098");
+extern V3_0C78 D_004C9098_0C78 __asm__("luno_gLunoNil");
 struct Tag_0C78 { char c; Tag_0C78() {} Tag_0C78(const Tag_0C78 &o) : c(o.c) {} };
 extern unsigned D_0C78[] __asm__("D_004FBB58");
 extern int D_004A56A8;
@@ -3603,12 +3603,12 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00300E28);
 extern "C" void MEM_copy(void*, void*, int);
 struct Ent_0E28 { int idx; int val; int pad; int kind; };
 struct R12_0E28 { int a; int b; int c; };
-extern R12_0E28 D_004C9098_0E28 __asm__("D_004C9098");
+extern R12_0E28 D_004C9098_0E28 __asm__("luno_gLunoNil");
 struct Flag_0E28 { char c; Flag_0E28() {} Flag_0E28(const Flag_0E28& o) : c(o.c) {} };
 
 extern int D_004A3C60_0E28[2] __asm__("D_004A3C60");
 extern "C" void func_0030B928(int, unsigned, int);
-extern int D_004A3DD8_0E28 __asm__("D_004A3DD8");
+extern int D_004A3DD8_0E28 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A56AC_0E28 __asm__("D_004A56AC");
 struct T12u_0E28 { unsigned a; int b; Flag_0E28 f; };
 extern T12u_0E28 D_004FBB68_0E28 __asm__("D_004FBB68");
@@ -3643,9 +3643,9 @@ extern "C" R12_0E28 func_00300E28(int n, Ent_0E28* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00300F50);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_0F50 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_0F50 __asm__("cWScriptMan_TheWScriptMan");
 struct V3_0F50 { float x, y, z; };
-extern V3_0F50 D_004C9098_0F50 __asm__("D_004C9098");
+extern V3_0F50 D_004C9098_0F50 __asm__("luno_gLunoNil");
 struct Tag_0F50 { char c; Tag_0F50() {} Tag_0F50(const Tag_0F50 &o) : c(o.c) {} };
 extern unsigned D_0F50[] __asm__("D_004FBB78");
 extern int D_56B0_0F50 __asm__("D_004A56B0");
@@ -3729,7 +3729,7 @@ struct Flag_1120 { char c; Flag_1120() {} Flag_1120(const Flag_1120& o) : c(o.c)
 struct Ent_1120 { int idx; int val; int pad; int kind; };
 extern int D_004A3C68_1120[2] __asm__("D_004A3C68");
 extern "C" int cWScriptMan_collect_1120(char*, int, unsigned, unsigned) __asm__("cWScriptMan_collect");
-extern char *D_004A3DD8_1120 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_1120 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_1120 __asm__("SSXApp");
 extern int D_004A56B4_1120 __asm__("D_004A56B4");
 struct T12_1120 { unsigned a; unsigned b; Flag_1120 f; };
@@ -3797,11 +3797,11 @@ int* func_00226610(void*);
 struct Flag_12F0 { char c; Flag_12F0() {} Flag_12F0(const Flag_12F0& o) : c(o.c) {} };
 struct Ent_12F0 { int idx; int val; int pad; int kind; };
 struct R12_12F0 { int a; int b; int c; };
-extern R12_12F0 D_004C9098_12F0 __asm__("D_004C9098");
+extern R12_12F0 D_004C9098_12F0 __asm__("luno_gLunoNil");
 
 extern int D_004A3C70_12F0[2] __asm__("D_004A3C70");
 extern "C" int cWScriptMan_doMissionCmd_12F0(int, unsigned, int, int) __asm__("cWScriptMan_doMissionCmd");
-extern int D_004A3DD8_12F0 __asm__("D_004A3DD8");
+extern int D_004A3DD8_12F0 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A56B8_12F0 __asm__("D_004A56B8");
 struct T12_12F0 { unsigned a; int b; Flag_12F0 f; };
 extern T12_12F0 D_004FBBE0_12F0 __asm__("D_004FBBE0");
@@ -3847,7 +3847,7 @@ struct cLunoValue_1440 {
     int word1;
     int type;
 };
-extern cLunoValue_1440 D_004C9098_1440 __asm__("D_004C9098");
+extern cLunoValue_1440 D_004C9098_1440 __asm__("luno_gLunoNil");
 // Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
 // and the slot; refs[slot] >> 8 is the object address >> 2.
 struct sRefSet_1440 {
@@ -3868,7 +3868,7 @@ struct cWScriptMan_1440 {
     char pad_0x29C[0x8];
     char* f2A4;             // 0x2A4
 };
-extern cWScriptMan_1440* D_004A3DD8_1440 __asm__("D_004A3DD8");
+extern cWScriptMan_1440* D_004A3DD8_1440 __asm__("cWScriptMan_TheWScriptMan");
 struct sBindArg_1FBE38_1440 { int idx; int val; int pad; int type; };
 struct sBindEnd_1FBE38_1440 {};  // empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
@@ -3927,11 +3927,11 @@ int* func_00226610(void*);
 struct Flag_1560 { char c; Flag_1560() {} Flag_1560(const Flag_1560& o) : c(o.c) {} };
 struct Ent_1560 { int idx; int val; int pad; int kind; };
 struct R12_1560 { int a; int b; int c; };
-extern R12_1560 D_004C9098_1560 __asm__("D_004C9098");
+extern R12_1560 D_004C9098_1560 __asm__("luno_gLunoNil");
 
 extern int D_004A3C80_1560[2] __asm__("D_004A3C80");
 extern "C" int func_0030BA80(int, unsigned);
-extern int D_004A3DD8_1560 __asm__("D_004A3DD8");
+extern int D_004A3DD8_1560 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A56C8_1560 __asm__("D_004A56C8");
 extern unsigned D_004A56C0_1560 __asm__("D_004A56C0");
 extern Flag_1560 D_004A56C4_1560 __asm__("D_004A56C4");
@@ -3971,7 +3971,7 @@ extern "C" void* func_00301560(void* self, int n, Ent_1560* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00301680);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_1680 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_1680 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_1680 __asm__("SSXApp");
 static inline char *look_1680(unsigned id) {
     if (~id == 0)
@@ -4036,7 +4036,7 @@ extern "C" V3_1680* func_00301680(V3_1680 *ret, int n, Ent_1680 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00301830);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_1830 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_1830 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_1830 __asm__("SSXApp");
 static inline char *look_1830(unsigned id) {
     if (~id == 0)
@@ -4113,7 +4113,7 @@ extern "C" V3_1830* func_00301830(V3_1830 *ret, int n, Ent_1830 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_003019C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_19C8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_19C8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_19C8 __asm__("SSXApp");
 int *func_00226610(void*);
 struct O_19C8 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31(); virtual int v32(float); };
@@ -4184,7 +4184,7 @@ extern unsigned D_004A56F0_1B88 __asm__("D_004A56F0");
 extern Flag_1B88 D_004A56F4_1B88 __asm__("D_004A56F4");
 extern int D_004A56F8_1B88 __asm__("D_004A56F8");
 extern int D_004A3CA0_1B88[2] __asm__("D_004A3CA0");
-extern int D_004A3DD8_1B88 __asm__("D_004A3DD8");
+extern int D_004A3DD8_1B88 __asm__("cWScriptMan_TheWScriptMan");
 extern "C" void MEM_copy(void*, void*, int);
 extern "C" void func_0030A6D8(int, int);
 int* func_00226610(void*);
@@ -4226,7 +4226,7 @@ extern unsigned D_004A5700_1C80 __asm__("D_004A5700");
 extern Flag_1C80 D_004A5704_1C80 __asm__("D_004A5704");
 extern int D_004A5708_1C80 __asm__("D_004A5708");
 extern int D_004A3CA8_1C80[2] __asm__("D_004A3CA8");
-extern int D_004A3DD8_1C80 __asm__("D_004A3DD8");
+extern int D_004A3DD8_1C80 __asm__("cWScriptMan_TheWScriptMan");
 extern "C" void MEM_copy(void*, void*, int);
 extern "C" void func_0030A700(int, int);
 int* func_00226610(void*);
@@ -4268,7 +4268,7 @@ extern unsigned D_004A5710_1D78 __asm__("D_004A5710");
 extern Flag_1D78 D_004A5714_1D78 __asm__("D_004A5714");
 extern int D_004A5718_1D78 __asm__("D_004A5718");
 extern int D_004A3CB0_1D78[2] __asm__("D_004A3CB0");
-extern int *D_004A3DD8_1D78 __asm__("D_004A3DD8");
+extern int *D_004A3DD8_1D78 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_1D78 __asm__("SSXApp");
 struct O_1D78 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct Sh_1D78 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(void*); };
@@ -4276,7 +4276,7 @@ struct Lvl_1D78 { char pad[0x28]; char *sh[1]; };
 static inline char *refToPtr_1D78(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_1D78(unsigned i) { if (i == 0) return 0; return refToPtr_1D78(i); }
 struct V3_1D78 { float x, y, z; };
-extern V3_1D78 D_004C9098_1D78 __asm__("D_004C9098");
+extern V3_1D78 D_004C9098_1D78 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_1D78(void*, void*, int) __asm__("MEM_copy");
 struct Chk_1D78 { virtual void v01(); virtual void v02(); virtual int v03(char*); };
 int* func_00226610_1D78(void*) __asm__("func_00226610__FPv");
@@ -4353,7 +4353,7 @@ extern "C" void func_00303D88_1F48(int) __asm__("func_00303D88");
 
 struct Ent_1F48 { int idx; int val; int pad; int kind; };
 struct R12_1F48 { int a; int b; int c; };
-extern R12_1F48 D_004C9098_1F48 __asm__("D_004C9098");
+extern R12_1F48 D_004C9098_1F48 __asm__("luno_gLunoNil");
 
 extern "C" R12_1F48 func_00301F48(int n, Ent_1F48* e) {
     if (D_004A5728_1F48 == 0) {
@@ -4383,14 +4383,14 @@ extern "C" R12_1F48 func_00301F48(int n, Ent_1F48* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00302048);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int *D_004A3DD8_2048 __asm__("D_004A3DD8");
+extern int *D_004A3DD8_2048 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_2048 __asm__("SSXApp");
 extern int D_00445E40_2048[] __asm__("D_00445E40");
 extern "C" void func_0030B7F8_2048(int*, int) __asm__("func_0030B7F8");
 extern "C" void cSectionMan_eventbegin_2048(int, int) __asm__("cSectionMan_eventbegin");
 struct Sh_2048 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual int v09(); };
 struct V3_2048 { float x, y, z; };
-extern V3_2048 D_004C9098_2048 __asm__("D_004C9098");
+extern V3_2048 D_004C9098_2048 __asm__("luno_gLunoNil");
 struct Tag_2048 { char c; Tag_2048() {} Tag_2048(const Tag_2048 &o) : c(o.c) {} };
 extern unsigned D_2048[] __asm__("D_004FBC10");
 extern int D_004A572C;
@@ -4459,10 +4459,10 @@ extern Defaults_2210 D_004FBC20_2210 __asm__("D_004FBC20");
 extern int D_004A5730_2210 __asm__("D_004A5730");
 extern const int D_004465C8_2210[] __asm__("D_004465C8");
 extern char* const D_00445E40_2210[] __asm__("D_00445E40");
-extern int* D_004A3DD8_2210 __asm__("D_004A3DD8");
+extern int* D_004A3DD8_2210 __asm__("cWScriptMan_TheWScriptMan");
 extern char* D_004A28A8_2210 __asm__("SSXApp");
 struct V3_2210 { float x, y, z; };
-extern V3_2210 D_004C9098_2210 __asm__("D_004C9098");
+extern V3_2210 D_004C9098_2210 __asm__("luno_gLunoNil");
 extern "C" void* cBE_getBE_2210() __asm__("cBE_getBE");
 extern "C" void* cBE_getInterface_2210(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00144CE0_2210(void* iface, int id) __asm__("func_00144CE0");
@@ -4554,10 +4554,10 @@ extern "C" V3_2210 func_00302210(int n, Ent_2210* e)
 INCLUDE_ASM("seg/seg_1FBE38", func_00302490);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_2490 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_2490 __asm__("cWScriptMan_TheWScriptMan");
 struct O_2490 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_2490 { float x, y, z; };
-extern V3_2490 D_004C9098_2490 __asm__("D_004C9098");
+extern V3_2490 D_004C9098_2490 __asm__("luno_gLunoNil");
 struct Tag_2490 { char c; Tag_2490() {} Tag_2490(const Tag_2490 &o) : c(o.c) {} };
 struct T12_2490 { unsigned a; int b; Tag_2490 f; };
 extern T12_2490 D_4FBC30_2490 __asm__("D_004FBC30");
@@ -4639,7 +4639,7 @@ struct cLunoValue {
     int word1;
     int type;
 };
-extern cLunoValue D_004C9098;
+extern cLunoValue luno_gLunoNil;
 struct sBindArg_1FBE38 { int idx; int val; int pad; int type; };
 struct sBindEnd_1FBE38 {};  // empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
@@ -4689,7 +4689,7 @@ extern "C" cLunoValue* func_00302680(cLunoValue* ret, int n, sBindArg_1FBE38* e)
 INCLUDE_ASM("seg/seg_1FBE38", func_00302778);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern cLunoValue D_004C9098;
+extern cLunoValue luno_gLunoNil;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
@@ -4738,7 +4738,7 @@ extern "C" cLunoValue* func_00302778(cLunoValue* ret, int n, sBindArg_1FBE38* e)
 INCLUDE_ASM("seg/seg_1FBE38", func_00302870);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern cLunoValue D_004C9098;
+extern cLunoValue luno_gLunoNil;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
@@ -4792,10 +4792,10 @@ int* func_00226610(void*);
 struct Flag_2968 { char c; Flag_2968() {} Flag_2968(const Flag_2968& o) : c(o.c) {} };
 struct Ent_2968 { int idx; int val; int pad; int kind; };
 struct R12_2968 { int a; int b; int c; };
-extern R12_2968 D_004C9098_2968 __asm__("D_004C9098");
+extern R12_2968 D_004C9098_2968 __asm__("luno_gLunoNil");
 
 extern int D_004A3CE8_2968[2] __asm__("D_004A3CE8");
-extern char* D_004A3DD8_2968 __asm__("D_004A3DD8");
+extern char* D_004A3DD8_2968 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A5770_2968 __asm__("D_004A5770");
 extern unsigned D_004A5768_2968 __asm__("D_004A5768");
 extern Flag_2968 D_004A576C_2968 __asm__("D_004A576C");
@@ -4843,11 +4843,11 @@ int* func_00226610(void*);
 struct Flag_2AC0 { char c; Flag_2AC0() {} Flag_2AC0(const Flag_2AC0& o) : c(o.c) {} };
 struct Ent_2AC0 { int idx; int val; int pad; int kind; };
 struct R12_2AC0 { int a; int b; int c; };
-extern R12_2AC0 D_004C9098_2AC0 __asm__("D_004C9098");
+extern R12_2AC0 D_004C9098_2AC0 __asm__("luno_gLunoNil");
 
 extern int D_004A3CF0_2AC0[2] __asm__("D_004A3CF0");
 extern "C" void func_0030A728(int, int, int);
-extern int D_004A3DD8_2AC0 __asm__("D_004A3DD8");
+extern int D_004A3DD8_2AC0 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A5774_2AC0 __asm__("D_004A5774");
 struct T12_2AC0 { unsigned a; int b; Flag_2AC0 f; };
 extern T12_2AC0 D_004FBC40_2AC0 __asm__("D_004FBC40");
@@ -4885,11 +4885,11 @@ int* func_00226610(void*);
 struct Flag_2BD8 { char c; Flag_2BD8() {} Flag_2BD8(const Flag_2BD8& o) : c(o.c) {} };
 struct Ent_2BD8 { int idx; int val; int pad; int kind; };
 struct R12_2BD8 { int a; int b; int c; };
-extern R12_2BD8 D_004C9098_2BD8 __asm__("D_004C9098");
+extern R12_2BD8 D_004C9098_2BD8 __asm__("luno_gLunoNil");
 
 extern int D_004A3CF8_2BD8[2] __asm__("D_004A3CF8");
 extern "C" void cWScriptMan_doMissionCmd(int, int, int, int);
-extern int D_004A3DD8_2BD8 __asm__("D_004A3DD8");
+extern int D_004A3DD8_2BD8 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A5780_2BD8 __asm__("D_004A5780");
 extern unsigned D_004A5778_2BD8 __asm__("D_004A5778");
 extern Flag_2BD8 D_004A577C_2BD8 __asm__("D_004A577C");
@@ -4926,11 +4926,11 @@ int* func_00226610(void*);
 struct Flag_2CE8 { char c; Flag_2CE8() {} Flag_2CE8(const Flag_2CE8& o) : c(o.c) {} };
 struct Ent_2CE8 { int idx; int val; int pad; int kind; };
 struct R12_2CE8 { int a; int b; int c; };
-extern R12_2CE8 D_004C9098_2CE8 __asm__("D_004C9098");
+extern R12_2CE8 D_004C9098_2CE8 __asm__("luno_gLunoNil");
 
 extern int D_004A3D00_2CE8[2] __asm__("D_004A3D00");
 extern "C" void func_0030A728(int, int, int);
-extern int D_004A3DD8_2CE8 __asm__("D_004A3DD8");
+extern int D_004A3DD8_2CE8 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A5790_2CE8 __asm__("D_004A5790");
 extern unsigned D_004A5788_2CE8 __asm__("D_004A5788");
 extern Flag_2CE8 D_004A578C_2CE8 __asm__("D_004A578C");
@@ -4967,11 +4967,11 @@ int* func_00226610(void*);
 struct Flag_2DF0 { char c; Flag_2DF0() {} Flag_2DF0(const Flag_2DF0& o) : c(o.c) {} };
 struct Ent_2DF0 { int idx; int val; int pad; int kind; };
 struct R12_2DF0 { int a; int b; int c; };
-extern R12_2DF0 D_004C9098_2DF0 __asm__("D_004C9098");
+extern R12_2DF0 D_004C9098_2DF0 __asm__("luno_gLunoNil");
 
 extern int D_004A3D08_2DF0[2] __asm__("D_004A3D08");
 extern "C" void func_0030A728(int, int, int);
-extern int D_004A3DD8_2DF0 __asm__("D_004A3DD8");
+extern int D_004A3DD8_2DF0 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A57A0_2DF0 __asm__("D_004A57A0");
 extern unsigned D_004A5798_2DF0 __asm__("D_004A5798");
 extern Flag_2DF0 D_004A579C_2DF0 __asm__("D_004A579C");
@@ -5009,7 +5009,7 @@ int* func_00226610(void*);
 struct Flag_2EF8 { char c; Flag_2EF8() {} Flag_2EF8(const Flag_2EF8& o) : c(o.c) {} };
 struct Ent_2EF8 { int idx; int val; int pad; int kind; };
 extern int D_004A3D10_2EF8[2] __asm__("D_004A3D10");
-extern char *D_004A3DD8_2EF8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_2EF8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_2EF8 __asm__("SSXApp");
 extern int D_004A57B0_2EF8 __asm__("D_004A57B0");
 extern int D_004A57A8_2EF8 __asm__("D_004A57A8");
@@ -5075,7 +5075,7 @@ extern "C" void* func_00302EF8(void* self, int n, Ent_2EF8* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00303130);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_3130 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_3130 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_3130 __asm__("SSXApp");
 static inline char *look_3130(unsigned id) {
     if (~id == 0)
@@ -5133,7 +5133,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003032C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (vector length).
 void* func_00226618(void*);
-extern char *D_004A3DD8_32C0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_32C0 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_32C0 __asm__("SSXApp");
 struct Vec_32C0 { float x, y, z, w; } __attribute__((aligned(16)));
 struct A_32C0 { char pad[0x6C0]; };
@@ -5175,7 +5175,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00303380);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (vector length).
 void* func_00226618(void*);
-extern char *D_004A3DD8_3380 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_3380 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_3380 __asm__("SSXApp");
 struct Vec_3380 { float x, y, z, w; } __attribute__((aligned(16)));
 struct A_3380 { char pad[0x6C0]; };
@@ -5224,7 +5224,7 @@ struct cWScriptMan {
     char pad_0x29C[0x8];
     char* f2A4;             // 0x2A4
 };
-extern cWScriptMan* D_004A3DD8;
+extern cWScriptMan* cWScriptMan_TheWScriptMan;
 // A being: the script/AI-facing interface of a rider. Slot order of the prototype's vtable _vt$6cBeing; parameter
 // types from its mangled names (applyBoost__6cBeingRC8t4Vector, transport__6cBeingRC8t4Matrix, ...).
 extern "C" void* func_003578A8(void*, int, void*, void*, void*);
@@ -5234,7 +5234,7 @@ static inline void setInt_3430(cLunoValue* r, const unsigned& v) {
     *func_00226610(r) = v;
 }
 extern "C" cLunoValue* func_00303430(cLunoValue* ret) {
-    char *p = D_004A3DD8->f290;
+    char *p = cWScriptMan_TheWScriptMan->f290;
     unsigned v;
     if (p)
         v = *(unsigned*)(p + 0x78);
@@ -5250,7 +5250,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00303490);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int* func_00226620_3490(void*) __asm__("func_00226620__FPv");
-extern char *D_004A3DD8_3490 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_3490 __asm__("cWScriptMan_TheWScriptMan");
 extern "C" unsigned func_003079D8_3490(char*) __asm__("func_003079D8");
 extern "C" void* func_00303490(void* self) {
     char *p = *(char**)(D_004A3DD8_3490 + 0x2A4);
@@ -5270,7 +5270,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003034F8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int* func_00226610(void*);
-extern char *D_004A3DD8_34F8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_34F8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_34F8 __asm__("SSXApp");
 struct A_34F8 { char pad[0x6C0]; };
 struct B_34F8 { virtual void v01(); };
@@ -5301,7 +5301,7 @@ int* func_00226610(void*);
 struct Flag_3598 { char c; Flag_3598() {} Flag_3598(const Flag_3598& o) : c(o.c) {} };
 struct Ent_3598 { int idx; int val; int pad; int kind; };
 struct R12_3598 { int a; int b; int c; };
-extern R12_3598 D_004C9098_3598 __asm__("D_004C9098");
+extern R12_3598 D_004C9098_3598 __asm__("luno_gLunoNil");
 
 extern int D_004A3D20_3598[2] __asm__("D_004A3D20");
 float AIrandf(float, float);
@@ -5347,7 +5347,7 @@ extern int D_004A57C8_36B0 __asm__("D_004A57C8");
 extern int D_004A3D28_36B0[2] __asm__("D_004A3D28");
 extern "C" void MEM_copy(void*, void*, int);
 extern "C" int func_0030AF08(int*, int, int);
-extern int* D_004A3DD8_36B0 __asm__("D_004A3DD8");
+extern int* D_004A3DD8_36B0 __asm__("cWScriptMan_TheWScriptMan");
 int* func_00226610(void*);
 
 struct Ent_36B0 { int idx; int val; int pad; int kind; };
@@ -5390,7 +5390,7 @@ extern int D_004A57D0_37B0 __asm__("D_004A57D0");
 extern Flag_37B0 D_004A57D4_37B0 __asm__("D_004A57D4");
 extern int D_004A57D8_37B0 __asm__("D_004A57D8");
 extern int D_004A3D30_37B0[2] __asm__("D_004A3D30");
-extern int* D_004A3DD8_37B0 __asm__("D_004A3DD8");
+extern int* D_004A3DD8_37B0 __asm__("cWScriptMan_TheWScriptMan");
 extern char* D_004A28A8_37B0 __asm__("SSXApp");
 extern "C" int func_00122EE8_37B0(char* rider, int which) __asm__("func_00122EE8");
 
@@ -5453,13 +5453,13 @@ extern "C" void* func_003037B0(void* self, int n, Ent_37B0* e)
 INCLUDE_ASM("seg/seg_1FBE38", func_003039F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_39F0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_39F0 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_39F0 __asm__("SSXApp");
 extern int D_004A3FF0_39F0 __asm__("D_004A3FF0");
 extern "C" void func_00343C60_39F0(int, int) __asm__("func_00343C60");
 extern "C" void func_00343F38_39F0(int, int) __asm__("func_00343F38");
 struct V3_39F0 { float x, y, z; };
-extern V3_39F0 D_004C9098_39F0 __asm__("D_004C9098");
+extern V3_39F0 D_004C9098_39F0 __asm__("luno_gLunoNil");
 struct Tag_39F0 { char c; Tag_39F0() {} Tag_39F0(const Tag_39F0 &o) : c(o.c) {} };
 extern unsigned D_39F0[] __asm__("D_004FBC70");
 extern int D_004A57DC;
@@ -5515,10 +5515,10 @@ extern "C" V3_39F0 func_003039F0(int n, Ent_39F0 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00303BA0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_3BA0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_3BA0 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A2A00_3BA0 __asm__("D_004A2A00");
 struct V3_3BA0 { float x, y, z; };
-extern V3_3BA0 D_004C9098_3BA0 __asm__("D_004C9098");
+extern V3_3BA0 D_004C9098_3BA0 __asm__("luno_gLunoNil");
 struct Tag_3BA0 { char c; Tag_3BA0() {} Tag_3BA0(const Tag_3BA0 &o) : c(o.c) {} };
 struct T20_3BA0 { unsigned a; int b; int c; int d; Tag_3BA0 f; };
 extern T20_3BA0 D_4FBC80_3BA0 __asm__("D_004FBC80");
@@ -5641,7 +5641,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00303EC8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int* func_00226610(void*);
-extern char *D_004A3DD8_3EC8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_3EC8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_3EC8 __asm__("SSXApp");
 struct A_3EC8 { char pad[0x6C0]; };
 struct B_3EC8 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual bool v09(); };
@@ -5672,10 +5672,10 @@ extern "C" void* func_00303EC8(void* self) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00303F80);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_3F80 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_3F80 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_3F80 __asm__("SSXApp");
 struct V3_3F80 { float x, y, z; };
-extern V3_3F80 D_004C9098_3F80 __asm__("D_004C9098");
+extern V3_3F80 D_004C9098_3F80 __asm__("luno_gLunoNil");
 struct A_3F80 { char pad[0x6C0]; };
 struct B_3F80 { virtual void v01(); };
 struct D_3F80 : A_3F80, B_3F80 { };
@@ -5701,11 +5701,11 @@ int* func_00226610(void*);
 struct Flag_3FF0 { char c; Flag_3FF0() {} Flag_3FF0(const Flag_3FF0& o) : c(o.c) {} };
 struct Ent_3FF0 { int idx; int val; int pad; int kind; };
 struct R12_3FF0 { int a; int b; int c; };
-extern R12_3FF0 D_004C9098_3FF0 __asm__("D_004C9098");
+extern R12_3FF0 D_004C9098_3FF0 __asm__("luno_gLunoNil");
 
 extern int D_004A3D40_3FF0[2] __asm__("D_004A3D40");
 void func_0030B4C0(void*, int, int);
-extern void* D_004A3DD8_3FF0 __asm__("D_004A3DD8");
+extern void* D_004A3DD8_3FF0 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A57E4_3FF0 __asm__("D_004A57E4");
 struct T12_3FF0 { int a; int b; Flag_3FF0 f; };
 extern T12_3FF0 D_004FBC98_3FF0 __asm__("D_004FBC98");
@@ -5743,11 +5743,11 @@ int* func_00226610(void*);
 struct Flag_4100 { char c; Flag_4100() {} Flag_4100(const Flag_4100& o) : c(o.c) {} };
 struct Ent_4100 { int idx; int val; int pad; int kind; };
 struct R12_4100 { int a; int b; int c; };
-extern R12_4100 D_004C9098_4100 __asm__("D_004C9098");
+extern R12_4100 D_004C9098_4100 __asm__("luno_gLunoNil");
 
 extern int D_004A3D48_4100[2] __asm__("D_004A3D48");
 void func_0030B4D8(void*, int, int);
-extern void* D_004A3DD8_4100 __asm__("D_004A3DD8");
+extern void* D_004A3DD8_4100 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A57E8_4100 __asm__("D_004A57E8");
 struct T12_4100 { int a; int b; Flag_4100 f; };
 extern T12_4100 D_004FBCA8_4100 __asm__("D_004FBCA8");
@@ -5785,11 +5785,11 @@ int* func_00226610(void*);
 struct Flag_4210 { char c; Flag_4210() {} Flag_4210(const Flag_4210& o) : c(o.c) {} };
 struct Ent_4210 { int idx; int val; int pad; int kind; };
 struct R12_4210 { int a; int b; int c; };
-extern R12_4210 D_004C9098_4210 __asm__("D_004C9098");
+extern R12_4210 D_004C9098_4210 __asm__("luno_gLunoNil");
 
 extern int D_004A3D50_4210[2] __asm__("D_004A3D50");
 void func_0030B4F0(void*, int, int);
-extern void* D_004A3DD8_4210 __asm__("D_004A3DD8");
+extern void* D_004A3DD8_4210 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A57EC_4210 __asm__("D_004A57EC");
 struct T12_4210 { int a; int b; Flag_4210 f; };
 extern T12_4210 D_004FBCB8_4210 __asm__("D_004FBCB8");
@@ -5822,7 +5822,7 @@ extern "C" R12_4210 func_00304210(int n, Ent_4210* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00304320);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern cLunoValue D_004C9098;
+extern cLunoValue luno_gLunoNil;
 // Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
 // and the slot; refs[slot] >> 8 is the object address >> 2.
 struct sRefSet {
@@ -5833,8 +5833,8 @@ struct sRefWorld {
     char pad_0x0[0x8];
     sRefSet** sets;         // 0x8
 };
-// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
-extern cWScriptMan* D_004A3DD8;
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at the instance.
+extern cWScriptMan* cWScriptMan_TheWScriptMan;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
@@ -5866,7 +5866,7 @@ extern int D_004A57F8_4320 __asm__("D_004A57F8");
 extern int D_004A3D58_4320[2] __asm__("D_004A3D58");
 // Inline accessor of the current script process (wscript/wscriptman func_0030D2D8 is its out-of-line copy). Calling it
 // at each use gives the shared copy of the pointer the target keeps (lw; move) instead of one cached local.
-static inline cWScriptMan *curProcess_4320() { return D_004A3DD8; }
+static inline cWScriptMan *curProcess_4320() { return cWScriptMan_TheWScriptMan; }
 void func_0030B508(void*, int, void*);
 extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* e) {
     if (D_004A57F8_4320 == 0) {
@@ -5909,7 +5909,7 @@ extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* e) {
     }
     if (obj)
         func_0030B508(curProcess_4320(), gv, obj);
-    return D_004C9098;
+    return luno_gLunoNil;
 }
 #endif
 
@@ -5922,11 +5922,11 @@ int* func_00226610(void*);
 struct Flag_44A8 { char c; Flag_44A8() {} Flag_44A8(const Flag_44A8& o) : c(o.c) {} };
 struct Ent_44A8 { int idx; int val; int pad; int kind; };
 struct R12_44A8 { int a; int b; int c; };
-extern R12_44A8 D_004C9098_44A8 __asm__("D_004C9098");
+extern R12_44A8 D_004C9098_44A8 __asm__("luno_gLunoNil");
 
 extern int D_004A3D60_44A8[2] __asm__("D_004A3D60");
 extern "C" void cGameModeMan_riderGateHit(int, int, int);
-extern int* D_004A3DD8_44A8 __asm__("D_004A3DD8");
+extern int* D_004A3DD8_44A8 __asm__("cWScriptMan_TheWScriptMan");
 extern char* D_004A28A8_44A8 __asm__("SSXApp");
 extern int D_004A5808_44A8 __asm__("D_004A5808");
 extern int D_004A5800_44A8 __asm__("D_004A5800");
@@ -5960,9 +5960,9 @@ extern "C" R12_44A8 func_003044A8(int n, Ent_44A8* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_003045B8);
 #ifdef SKIP_ASM
 // PORT: 64-bit bitfield container (unsigned long is 8 bytes on the EE).
-extern char *D_004A3DD8_45B8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_45B8 __asm__("cWScriptMan_TheWScriptMan");
 struct V3_45B8 { float x, y, z; };
-extern V3_45B8 D_004C9098_45B8 __asm__("D_004C9098");
+extern V3_45B8 D_004C9098_45B8 __asm__("luno_gLunoNil");
 struct Tag_45B8 { char c; Tag_45B8() {} Tag_45B8(const Tag_45B8 &o) : c(o.c) {} };
 struct Rec_45B8 {
     unsigned a0; int a1; int a2; int a3;
@@ -6046,12 +6046,12 @@ extern "C" V3_45B8 func_003045B8(int n, Ent_45B8 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00304980);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_4980 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_4980 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_4980 __asm__("SSXApp");
 void func_00355878(void*, void*);
 struct O_4980 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_4980 { float x, y, z; };
-extern V3_4980 D_004C9098_4980 __asm__("D_004C9098");
+extern V3_4980 D_004C9098_4980 __asm__("luno_gLunoNil");
 struct Tag_4980 { char c; Tag_4980() {} Tag_4980(const Tag_4980 &o) : c(o.c) {} };
 extern unsigned D_4980[] __asm__("D_004FBD10");
 extern int D_004A5810;
@@ -6109,11 +6109,11 @@ int* func_00226610(void*);
 struct Flag_4B38 { char c; Flag_4B38() {} Flag_4B38(const Flag_4B38& o) : c(o.c) {} };
 struct Ent_4B38 { int idx; int val; int pad; int kind; };
 struct R12_4B38 { int a; int b; int c; };
-extern R12_4B38 D_004C9098_4B38 __asm__("D_004C9098");
+extern R12_4B38 D_004C9098_4B38 __asm__("luno_gLunoNil");
 
 extern int D_004A3D70_4B38[2] __asm__("D_004A3D70");
 extern "C" void cReplay_eventWScript(int, int, int);
-extern int* D_004A3DD8_4B38 __asm__("D_004A3DD8");
+extern int* D_004A3DD8_4B38 __asm__("cWScriptMan_TheWScriptMan");
 extern char* D_004A28A8_4B38 __asm__("SSXApp");
 extern int D_004A5820_4B38 __asm__("D_004A5820");
 extern int D_004A5818_4B38 __asm__("D_004A5818");
@@ -6150,7 +6150,7 @@ void* func_00226618(void*);
 extern "C" void MEM_copy(void*, void*, int);
 struct Tag_4C50 { char c; Tag_4C50() {} Tag_4C50(const Tag_4C50 &o) : c(o.c) {} };
 struct Ent_4C50 { int idx; int val; int pad; int type; };
-extern char *D_004A3DD8_4C50 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_4C50 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_4C50 __asm__("SSXApp");
 extern unsigned D_5828_4C50 __asm__("D_004A5828");
 extern Tag_4C50 D_582C_4C50 __asm__("D_004A582C");
@@ -6223,12 +6223,12 @@ extern "C" void* func_00304C50(void* self, int n, Ent_4C50 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00304E38);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_4E38 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_4E38 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_4E38 __asm__("SSXApp");
 extern "C" void cMoveNode_addDebounce_4E38(void*, void*) __asm__("cMoveNode_addDebounce");
 struct O_4E38 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_4E38 { float x, y, z; };
-extern V3_4E38 D_004C9098_4E38 __asm__("D_004C9098");
+extern V3_4E38 D_004C9098_4E38 __asm__("luno_gLunoNil");
 struct Tag_4E38 { char c; Tag_4E38() {} Tag_4E38(const Tag_4E38 &o) : c(o.c) {} };
 extern unsigned D_4E38[] __asm__("D_004FBD20");
 extern int D_004A5834;
@@ -6290,7 +6290,7 @@ struct Ent_4FF0 { int idx; int val; int pad; int kind; };
 struct R12_4FF0 { int a; int b; int c; };
 struct T12_4FF0 { int a; int b; Flag_4FF0 f; };
 extern T12_4FF0 D_004FBD30_4FF0 __asm__("D_004FBD30");
-extern R12_4FF0 D_004C9098_4FF0 __asm__("D_004C9098");
+extern R12_4FF0 D_004C9098_4FF0 __asm__("luno_gLunoNil");
 
 extern "C" R12_4FF0 func_00304FF0(int n, Ent_4FF0* e) {
     if (D_004A5838_4FF0 == 0) {
@@ -6321,11 +6321,11 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003050F0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
-extern cLunoValue D_004C9098;
+extern cLunoValue luno_gLunoNil;
 // Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
 // and the slot; refs[slot] >> 8 is the object address >> 2.
-// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
-extern cWScriptMan* D_004A3DD8;
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at the instance.
+extern cWScriptMan* cWScriptMan_TheWScriptMan;
 struct tInstanceRecord;
 class cBeing {
 public:
@@ -6440,7 +6440,7 @@ struct sGame {
     sCameras* cameras;          // 0x84
 };
 // The game singleton (SSXApp).
-extern void* D_004A4028;
+extern void* cMultiParticleMan_TheMultiParticleMan;
 // One script argument as the VM passes it to a binding: the slot index in the defaults record, then the value
 // (cLunoValue layout: value word, second word, type).
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
@@ -6535,7 +6535,7 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
     if (buf->useObj) {
         unsigned id = buf->id;
         if (~id == 0) {
-            obj = D_004A3DD8->f290;
+            obj = cWScriptMan_TheWScriptMan->f290;
         } else {
             sRefSet *s = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
             char *r;
@@ -6546,7 +6546,7 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
             obj = r;
         }
     }
-    int being = D_004A3DD8->being;
+    int being = cWScriptMan_TheWScriptMan->being;
     float scale = buf->scale;
     int keyword = buf->keyword;
     if (keyword == 0) {
@@ -6576,7 +6576,7 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
             }
         }
     }
-    return D_004C9098;
+    return luno_gLunoNil;
 }
 #endif
 
@@ -6584,10 +6584,10 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00305478);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_5478 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_5478 __asm__("cWScriptMan_TheWScriptMan");
 struct O_5478 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct V3_5478 { float x, y, z; };
-extern V3_5478 D_004C9098_5478 __asm__("D_004C9098");
+extern V3_5478 D_004C9098_5478 __asm__("luno_gLunoNil");
 struct Tag_5478 { char c; Tag_5478() {} Tag_5478(const Tag_5478 &o) : c(o.c) {} };
 struct Rec_5478 { unsigned id; float a; float b; Tag_5478 f; };
 extern Rec_5478 D_4FBD58_5478 __asm__("D_004FBD58");
@@ -6646,12 +6646,12 @@ extern "C" V3_5478 func_00305478(int n, Ent_5478 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00305660);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int *D_004A3DD8_5660 __asm__("D_004A3DD8");
+extern int *D_004A3DD8_5660 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_5660 __asm__("SSXApp");
 struct Sh_5660 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual int v08(); };
 extern "C" void func_00390EC8_5660(float) __asm__("func_00390EC8");
 struct V3_5660 { float x, y, z; };
-extern V3_5660 D_004C9098_5660 __asm__("D_004C9098");
+extern V3_5660 D_004C9098_5660 __asm__("luno_gLunoNil");
 struct Tag_5660 { char c; Tag_5660() {} Tag_5660(const Tag_5660 &o) : c(o.c) {} };
 extern unsigned D_5660 __asm__("D_004A5848");
 extern Tag_5660 D_004A584C;
@@ -6696,10 +6696,10 @@ extern "C" V3_5660 func_00305660(int n, Ent_5660 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_003057C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_57C0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_57C0 __asm__("cWScriptMan_TheWScriptMan");
 struct O_57C0 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void *v24(); };
 struct V3_57C0 { float x, y, z; };
-extern V3_57C0 D_004C9098_57C0 __asm__("D_004C9098");
+extern V3_57C0 D_004C9098_57C0 __asm__("luno_gLunoNil");
 struct Tag_57C0 { char c; Tag_57C0() {} Tag_57C0(const Tag_57C0 &o) : c(o.c) {} };
 struct Rec_57C0 { unsigned id; int a; int b; float c; float d; float e; float g; float h; int k; Tag_57C0 f; };
 extern Rec_57C0 D_4FBD68_57C0 __asm__("D_004FBD68");
@@ -6765,11 +6765,11 @@ INCLUDE_ASM("seg/seg_1FBE38", func_003059A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern cLunoValue D_004C9098;
+extern cLunoValue luno_gLunoNil;
 // Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
 // and the slot; refs[slot] >> 8 is the object address >> 2.
-// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
-extern cWScriptMan* D_004A3DD8;
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at the instance.
+extern cWScriptMan* cWScriptMan_TheWScriptMan;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
@@ -6845,7 +6845,7 @@ extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* e) {
         }
         cp++; f3++; f2++; f1++; f0++;
     }
-    return D_004C9098;
+    return luno_gLunoNil;
 }
 #endif
 
@@ -6858,11 +6858,11 @@ int* func_00226610(void*);
 struct Flag_5C88 { char c; Flag_5C88() {} Flag_5C88(const Flag_5C88& o) : c(o.c) {} };
 struct Ent_5C88 { int idx; int val; int pad; int kind; };
 struct R12_5C88 { int a; int b; int c; };
-extern R12_5C88 D_004C9098_5C88 __asm__("D_004C9098");
+extern R12_5C88 D_004C9098_5C88 __asm__("luno_gLunoNil");
 
 extern int D_004A3D98_5C88[2] __asm__("D_004A3D98");
 extern "C" int cAvalanche_triggerAvalanche(int);
-extern int D_004A3AC4_5C88 __asm__("D_004A3AC4");
+extern int D_004A3AC4_5C88 __asm__("cAvalanche_m_badCookie");
 extern int D_004A5868_5C88 __asm__("D_004A5868");
 extern int D_004A5860_5C88 __asm__("D_004A5860");
 extern Flag_5C88 D_004A5864_5C88 __asm__("D_004A5864");
@@ -6896,14 +6896,14 @@ extern "C" R12_5C88 func_00305C88(int n, Ent_5C88* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00305D90);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_5D90 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_5D90 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_5D90 __asm__("SSXApp");
 static inline char *refToPtr_5D90(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_5D90(unsigned i) { if (i == 0) return 0; return refToPtr_5D90(i); }
 extern "C" void func_00355A78_5D90(void*, void*) __asm__("func_00355A78");
 struct O_5D90 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); };
 struct V3_5D90 { float x, y, z; };
-extern V3_5D90 D_004C9098_5D90 __asm__("D_004C9098");
+extern V3_5D90 D_004C9098_5D90 __asm__("luno_gLunoNil");
 struct Tag_5D90 { char c; Tag_5D90() {} Tag_5D90(const Tag_5D90 &o) : c(o.c) {} };
 extern unsigned D_5D90 __asm__("D_004A5870");
 extern Tag_5D90 D_004A5874;
@@ -6964,7 +6964,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00305F40);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct V3_5F40 { float x, y, z; };
-extern V3_5F40 D_004C9098_5F40 __asm__("D_004C9098");
+extern V3_5F40 D_004C9098_5F40 __asm__("luno_gLunoNil");
 struct Tag_5F40 { char c; Tag_5F40() {} Tag_5F40(const Tag_5F40 &o) : c(o.c) {} };
 struct Rec_5F40 {
     int a; int b; float c; float d; float e;
@@ -7077,11 +7077,11 @@ extern "C" V3_5F40 func_00305F40(int n, Ent_5F40 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_003061B0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern cLunoValue D_004C9098;
+extern cLunoValue luno_gLunoNil;
 // Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
 // and the slot; refs[slot] >> 8 is the object address >> 2.
-// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); D_004A3DD8 points at the instance.
-extern cWScriptMan* D_004A3DD8;
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at the instance.
+extern cWScriptMan* cWScriptMan_TheWScriptMan;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
 int* func_00226610(void*);
@@ -7162,7 +7162,7 @@ int* func_00226610(void*);
 struct Flag_6300 { char c; Flag_6300() {} Flag_6300(const Flag_6300& o) : c(o.c) {} };
 struct Ent_6300 { int idx; int val; int pad; int kind; };
 struct R12_6300 { int a; int b; int c; };
-extern R12_6300 D_004C9098_6300 __asm__("D_004C9098");
+extern R12_6300 D_004C9098_6300 __asm__("luno_gLunoNil");
 
 extern int D_004A3DB0_6300[2] __asm__("D_004A3DB0");
 extern "C" void func_001E3510(int, int);
@@ -7204,11 +7204,11 @@ extern "C" R12_6300 func_00306300(int n, Ent_6300* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00306438);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_6438 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_6438 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_6438 __asm__("SSXApp");
 extern "C" void func_00101728_6438(void*, void*, float, float) __asm__("func_00101728");
 struct V3_6438 { float x, y, z; };
-extern V3_6438 D_004C9098_6438 __asm__("D_004C9098");
+extern V3_6438 D_004C9098_6438 __asm__("luno_gLunoNil");
 struct Tag_6438 { char c; Tag_6438() {} Tag_6438(const Tag_6438 &o) : c(o.c) {} };
 extern unsigned D_6438[] __asm__("D_004FBF48");
 extern int D_004A5890;
@@ -7264,7 +7264,7 @@ extern "C" V3_6438 func_00306438(int n, Ent_6438 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_003065E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_65E8 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_65E8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_65E8 __asm__("SSXApp");
 static inline char *look_65E8(unsigned id) {
     if (~id == 0)
@@ -7278,7 +7278,7 @@ static inline char *look_65E8(unsigned id) {
 
 extern "C" void func_00101888_65E8(void*, void*) __asm__("func_00101888");
 struct V3_65E8 { float x, y, z; };
-extern V3_65E8 D_004C9098_65E8 __asm__("D_004C9098");
+extern V3_65E8 D_004C9098_65E8 __asm__("luno_gLunoNil");
 struct Tag_65E8 { char c; Tag_65E8() {} Tag_65E8(const Tag_65E8 &o) : c(o.c) {} };
 extern unsigned D_65E8 __asm__("D_004A5898");
 extern Tag_65E8 D_004A589C;
@@ -7319,7 +7319,7 @@ extern "C" V3_65E8 func_003065E8(int n, Ent_65E8 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00306770);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_6770 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_6770 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_6770 __asm__("SSXApp");
 static inline char *look_6770(unsigned id) {
     if (~id == 0)
@@ -7333,7 +7333,7 @@ static inline char *look_6770(unsigned id) {
 
 extern "C" void func_00101900_6770(void*, void*, int) __asm__("func_00101900");
 struct V3_6770 { float x, y, z; };
-extern V3_6770 D_004C9098_6770 __asm__("D_004C9098");
+extern V3_6770 D_004C9098_6770 __asm__("luno_gLunoNil");
 struct Tag_6770 { char c; Tag_6770() {} Tag_6770(const Tag_6770 &o) : c(o.c) {} };
 extern unsigned D_6770[] __asm__("D_004FBF58");
 extern int D_004A58A4;
@@ -7388,11 +7388,11 @@ extern "C" V3_6770 func_00306770(int n, Ent_6770 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00306908);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_6908 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_6908 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_6908 __asm__("SSXApp");
 extern "C" void func_00101970_6908(void*, void*) __asm__("func_00101970");
 struct V3_6908 { float x, y, z; };
-extern V3_6908 D_004C9098_6908 __asm__("D_004C9098");
+extern V3_6908 D_004C9098_6908 __asm__("luno_gLunoNil");
 struct Tag_6908 { char c; Tag_6908() {} Tag_6908(const Tag_6908 &o) : c(o.c) {} };
 extern unsigned D_6908 __asm__("D_004A58A8");
 extern Tag_6908 D_004A58AC;
@@ -7445,7 +7445,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306A90);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct V3_6A90 { float x, y, z; };
-extern V3_6A90 D_004C9098_6A90 __asm__("D_004C9098");
+extern V3_6A90 D_004C9098_6A90 __asm__("luno_gLunoNil");
 struct Tag_6A90 { char c; Tag_6A90() {} Tag_6A90(const Tag_6A90 &o) : c(o.c) {} };
 struct Rec_6A90 {
     int a; int b; float c; float d; float e;
@@ -7458,7 +7458,7 @@ extern Rec_6A90 D_4FBF68_6A90 __asm__("D_004FBF68");
 extern int D_58B4_6A90 __asm__("D_004A58B4");
 extern const int D_00446890_6A90[] __asm__("D_00446890");
 extern "C" void* MEM_copy_6A90(void*, void*, int) __asm__("MEM_copy");
-extern int D_004A4028_6A90 __asm__("D_004A4028");
+extern int D_004A4028_6A90 __asm__("cMultiParticleMan_TheMultiParticleMan");
 extern "C" void cMultiParticleMan_addParticle_6A90(int, int, Rec_6A90*, int) __asm__("cMultiParticleMan_addParticle");
 struct Ent_6A90 { int idx; int val; int pad; int type; };
 extern "C" V3_6A90 func_00306A90(int n, Ent_6A90 *e) {
@@ -7548,13 +7548,13 @@ extern "C" V3_6A90 func_00306A90(int n, Ent_6A90 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00306CB0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_004A3DD8_6CB0 __asm__("D_004A3DD8");
+extern char *D_004A3DD8_6CB0 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_6CB0 __asm__("SSXApp");
-extern void *D_004A4028_6CB0 __asm__("D_004A4028");
+extern void *D_004A4028_6CB0 __asm__("cMultiParticleMan_TheMultiParticleMan");
 void func_00357AE8(void*, int, int);
 void func_00357B10(void*, int, int);
 struct V3_6CB0 { float x, y, z; };
-extern V3_6CB0 D_004C9098_6CB0 __asm__("D_004C9098");
+extern V3_6CB0 D_004C9098_6CB0 __asm__("luno_gLunoNil");
 struct Tag_6CB0 { char c; Tag_6CB0() {} Tag_6CB0(const Tag_6CB0 &o) : c(o.c) {} };
 extern unsigned D_6CB0[] __asm__("D_004FC050");
 extern int D_004A58B8;
@@ -7611,7 +7611,7 @@ extern "C" V3_6CB0 func_00306CB0(int n, Ent_6CB0 *e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00306E68);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A3DD8_6E68 __asm__("D_004A3DD8");
+extern int D_004A3DD8_6E68 __asm__("cWScriptMan_TheWScriptMan");
 extern "C" int func_0030BFC0_6E68(int, int, int, int) __asm__("func_0030BFC0");
 extern "C" void *func_0028B180_6E68() __asm__("func_0028B180");
 extern "C" void cSSXAudio_WorldSound_6E68(void*, void*, int) __asm__("cSSXAudio_WorldSound");
@@ -7681,7 +7681,7 @@ int* func_00226610(void*);
 struct Flag_7020 { char c; Flag_7020() {} Flag_7020(const Flag_7020& o) : c(o.c) {} };
 struct Ent_7020 { int idx; int val; int pad; int kind; };
 struct R12_7020 { int a; int b; int c; };
-extern R12_7020 D_004C9098_7020 __asm__("D_004C9098");
+extern R12_7020 D_004C9098_7020 __asm__("luno_gLunoNil");
 
 extern int D_004A3DD0_7020[2] __asm__("D_004A3DD0");
 extern "C" int func_001E3570(int, int);

@@ -80,7 +80,7 @@ static inline int tex_1D10(sRCtx_1D10* c, int i)
     return c->texs[i];
 }
 
-extern sDrawState D_00501420;
+extern sDrawState sDrawState_s_defaultDrawState;
 
 extern "C" void func_002D1D10(void* obj, float* src, int kind, float size, float angle)
 {
@@ -96,7 +96,7 @@ extern "C" void func_002D1D10(void* obj, float* src, int kind, float size, float
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     (ctx->m_pCurrentDrawState)[1] = (ctx->m_pCurrentDrawState)[0];
     (*(sDrawState**)&ctx->m_pCurrentDrawState)++;
-    *(ctx->m_pCurrentDrawState) = D_00501420;
+    *(ctx->m_pCurrentDrawState) = sDrawState_s_defaultDrawState;
     setA_1D10((ctx->m_pCurrentDrawState), 1, 1, 22);
     setA_1D10((ctx->m_pCurrentDrawState), 0, 3, 0);
     setB_1D10((ctx->m_pCurrentDrawState), 0, 0x7FFFF, 10);

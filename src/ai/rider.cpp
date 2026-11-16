@@ -781,8 +781,8 @@ extern "C" void func_002105B0(int);
 
 // The unit declares these later with their own vector types; bind them by asm label.
 extern const t4Vector D_004FF120_D660 __asm__("t4vect_Zero");
-extern const t4Vector D_004FF130_D660 __asm__("D_004FF130");
-extern const t4Vector D_004FF160_D660 __asm__("D_004FF160");
+extern const t4Vector D_004FF130_D660 __asm__("t4vect_Origin");
+extern const t4Vector D_004FF160_D660 __asm__("t4vect_ZAxis");
 
 struct sRay_D660 {
     char data[0xB0];
@@ -1177,7 +1177,7 @@ extern "C" void func_0011D660_impl(cRider* self, const t4Vector* pos, const floa
 INCLUDE_ASM("ai/rider", cRider_putAtDropOffBC);
 #ifdef SKIP_ASM
 extern "C" void* func_0026B5E0(void*, int, int);
-extern char D_004D33A0[];
+extern char gPaths[];
 extern "C" float func_00115B08(void* self);
 
 struct sVec4_0011DD98
@@ -1228,7 +1228,7 @@ static inline void vu0AddEq_11DD98(sVec4_0011DD98& dst, sVec4_0011DD98 b)
  */
 extern "C" void cRider_putAtDropOffBC(cRider* self)
 {
-    float* startPoint = (float*)func_0026B5E0(D_004D33A0, 2, self->mAIIndex);
+    float* startPoint = (float*)func_0026B5E0(gPaths, 2, self->mAIIndex);
     sVec4_0011DD98 dir;
     sVec4_0011DD98 pos;
     dir.x = startPoint[5];
@@ -1248,7 +1248,7 @@ extern "C" void cRider_putAtDropOffBC(cRider* self)
 INCLUDE_ASM("ai/rider", cRider_putAtStartpoint);
 #ifdef SKIP_ASM
 extern "C" void* func_0026B5E0(void*, int, int);
-extern char D_004D33A0[];
+extern char gPaths[];
 extern "C" void func_00119368(void* metrix, int flag);
 // PORT: prototype mismatch. The unit defines func_0011FEC8/cRider_setMotionState with one
 // param, but their bodies forward $5 to cRiderHandler__setControlState/cRiderHandler__setMotionState (int arg).
@@ -1265,7 +1265,7 @@ extern "C" void func_0011D660(void* self, sVec4_0011DE60* a, sVec4_0011DE60* b, 
 /**
  * Puts the rider on the ground at a path start point, facing the point's direction.
  *
- * Looks the point up in the start-point list D_004D33A0 (func_0026B5E0 falls back to the list's first entry
+ * Looks the point up in the start-point list gPaths (func_0026B5E0 falls back to the list's first entry
  * when nothing matches), ends the current trick and combo in mMetrix (func_00119368), sets control state
  * CS_Cruise and motion state MS_Ground, then places the rider with func_0011D660 (anim 5, height 0, so it is
  * dropped onto the ground).
@@ -1275,7 +1275,7 @@ extern "C" void func_0011D660(void* self, sVec4_0011DE60* a, sVec4_0011DE60* b, 
  */
 extern "C" void cRider_putAtStartpoint(cRider* self, int StartpointID, int StartpointType)
 {
-    float* startPoint = (float*)func_0026B5E0(D_004D33A0, StartpointType, StartpointID);
+    float* startPoint = (float*)func_0026B5E0(gPaths, StartpointType, StartpointID);
     sVec4_0011DE60 pos;
     sVec4_0011DE60 dir;
     float px = startPoint[2];
@@ -1305,7 +1305,7 @@ INCLUDE_ASM("ai/rider", cRider_cleanupAfterPutAt);
 extern "C" char* func_00311B20(void*, int);
 extern "C" void cRiderHandler_resetRiderFX(void* self);
 extern "C" void func_003099F8(void* self);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 struct sVec4_0011DF18
 {
@@ -1358,7 +1358,7 @@ extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify)
         char* objB = obj + vtB[3].delta;
         vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
     }
-    func_003099F8(D_004A3DD8);
+    func_003099F8(cWScriptMan_TheWScriptMan);
 }
 #endif
 
@@ -1651,8 +1651,8 @@ struct sVec4W : t4Vector {
         z = az;
     }
 } __attribute__((aligned(16)));
-extern t4Vector D_004FF130;
-extern t4Vector D_004FF160;
+extern t4Vector t4vect_Origin;
+extern t4Vector t4vect_ZAxis;
 extern t4Vector D_004FF220;
 extern "C" void func_00134DD0(void* self, void* xf);
 extern "C" void cRider_doLeanPoseAdjust(void* self, void* xf);
@@ -1952,7 +1952,7 @@ static inline sXf_EB98 Combine_EB98(const sXf_EB98& a, const sXf_EB98& b)
 {
     sXf_EB98 r;
     r.rot = QuatMul_EB98(a.rot, b.rot);
-    r.pos = Add_EB98(Rot_EB98(a.rot, Sub_EB98(b.pos, D_004FF130)), a.pos);
+    r.pos = Add_EB98(Rot_EB98(a.rot, Sub_EB98(b.pos, t4vect_Origin)), a.pos);
     return r;
 }
 
@@ -1970,14 +1970,14 @@ extern "C" void func_0011EB98_impl(cRider* self)
     ab[0] = xf;
     if (func_0011FEE8(self) != 13 && self->mSlewed[18].cur != 0.0f)
     {
-        sVec4W s = Scale_EB98(D_004FF160, self->mSlewed[18].cur);
+        sVec4W s = Scale_EB98(t4vect_ZAxis, self->mSlewed[18].cur);
         ab[0].pos += Rot_EB98(ab[0].rot, s);
     }
     if (self->mUseRootPoseOverride != 0)
     {
-        self->mAnimModel->localPos[self->mBoneBoardRoot] = D_004FF130;
+        self->mAnimModel->localPos[self->mBoneBoardRoot] = t4vect_Origin;
         self->mAnimModel->localRot[self->mBoneBoardRoot] = D_004FF220;
-        self->mAnimModel->localPos[self->mBoneBoardChild] = D_004FF130;
+        self->mAnimModel->localPos[self->mBoneBoardChild] = t4vect_Origin;
         self->mAnimModel->localRot[self->mBoneBoardChild] = D_004FF220;
         ab[1].pos = *(sVec4W*)&self->mRootPoseOverridePos;
         ab[1].rot = *(sVec4W*)&self->unk_140[0];
@@ -2072,7 +2072,7 @@ static inline float Clamp_F3D8(float v, float lo, float hi)
 // Point v of transform x's local space, in x's parent space.
 static inline sVec4W XformPoint_F3D8(const sXf_EB98& x, const sVec4& v)
 {
-    return Add_EB98(Rot_EB98(x.rot, Sub_EB98(*(const sVec4W*)&v, D_004FF130)), x.pos);
+    return Add_EB98(Rot_EB98(x.rot, Sub_EB98(*(const sVec4W*)&v, t4vect_Origin)), x.pos);
 }
 
 extern "C" void func_0011F3D8_impl(cRider* self, int* chain, sXf_EB98* target, float blend) __asm__("func_0011F3D8");
@@ -2098,7 +2098,7 @@ extern "C" void func_0011F3D8_impl(cRider* self, int* chain, sXf_EB98* target, f
     sXf_EB98 local;
     // x-first sVec4 here (the store order shows it); local.pos itself is an sVec4W.
     (t4Vector&)local.pos = sVec4(a, 0.0f, 0.0f, 1.0f);
-    local.rot = AxisAngle_EB98(*(sVec4W*)&D_004FF160, ang - 1.5707963705062866f);
+    local.rot = AxisAngle_EB98(*(sVec4W*)&t4vect_ZAxis, ang - 1.5707963705062866f);
     sXf_EB98 t1 = Combine_EB98(*root, local);
     sVec4W dir = Sub_EB98(XformPoint_F3D8(t1, sVec4(b, 0.0f, 0.0f, 1.0f)), root->pos);
     sVec4W axis = Cross_EB98(Normalize_F3D8(dir), Normalize_F3D8(d));
@@ -2123,8 +2123,8 @@ struct sVec4XW : t4Vector {
     sVec4XW() {}
     sVec4XW(float ax, float ay, float az, float aw) { x = ax; w = aw; y = ay; z = az; }
 } __attribute__((aligned(16)));
-extern t4Vector D_004FF130;
-extern t4Vector D_004FF140;
+extern t4Vector t4vect_Origin;
+extern t4Vector t4vect_XAxis;
 extern t4Vector t4vect_YAxis;
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
 
@@ -2295,11 +2295,11 @@ static inline void LeanAbout_LP(char* self, sXf_LP* xf, float a, float b, float 
     sVec4XW* n = (sVec4XW*)((*(int*)(self + 0x8A0) << 4) + *(int*)(trk + 0x24));
     sVec4XW d = SubO_LP(sVec4XW(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
                             n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C)),
-                      D_004FF130);
+                      t4vect_Origin);
     {
         sVec4XW v = Rot_LP(xf->rot, d);
         AddToL_LP(xf->pos, v);
-        xf->rot *= AxisAngle_LP(D_004FF140, a * ka);
+        xf->rot *= AxisAngle_LP(t4vect_XAxis, a * ka);
     }
     QuatMulTo_LP(xf->rot, AxisAngle_LP(t4vect_YAxis, b * kb));
     sVec4XW w = Scale_LP(d, -1.0f);
@@ -2326,7 +2326,7 @@ extern "C" void cRider_doLeanPoseAdjust_x(char* self, sXf_LP* xf)
         LeanAbout_LP(self, xf, leanAboutX, leanAboutY, 0.523598849773407f, 0.7853982448577881f);
     float k = *(float*)(self + 0x250);
     if (k != 0.0f) {
-        QuatMulTo_LP(xf->rot, AxisAngle_LP(D_004FF140, k * 0.7853982448577881f));
+        QuatMulTo_LP(xf->rot, AxisAngle_LP(t4vect_XAxis, k * 0.7853982448577881f));
     }
     sVec4XW sideShift = Scale_LP(*(sVec4XW*)(self + 0x3B0), *(float*)(*(char**)(self + 0x780) + 0x140) * (*(float*)(self + 0x1F0) * 45.0f));
     AddTo_LP(xf->pos, sideShift);
@@ -3267,7 +3267,7 @@ void* func_001217F8(void* vself)
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateSplit10);
 #ifdef SKIP_ASM
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 extern "C" void func_0030A060(void* mgr, void* a, void* b, void* c);
 void func_00125AD0(void* self);
 extern "C" void func_00112338(void* self);
@@ -3298,7 +3298,7 @@ extern "C" void cRider_updateSplit10(cRider* self)
         }
         else
         {
-            func_0030A060(D_004A3DD8, self->unk_A60, self->unk_9E0, (char*)&self->mVtbl);
+            func_0030A060(cWScriptMan_TheWScriptMan, self->unk_A60, self->unk_9E0, (char*)&self->mVtbl);
         }
     }
     func_00125AD0(self);
@@ -3435,7 +3435,7 @@ INCLUDE_ASM("ai/rider", cRider_alignRiderAxis);
 // sVec4 stores x, y, z, w.
 // sVec4W stores w first, then x, y, z.
 extern t4Vector D_004FF120_1AA0 __asm__("t4vect_Zero");
-extern t4Vector D_004FF140;
+extern t4Vector t4vect_XAxis;
 extern "C" void func_0031BB30(void* q, const void* a, const void* b);
 extern "C" float func_0031C128(float x);
 extern "C" float func_0031BF60(float x);
@@ -3603,7 +3603,7 @@ extern "C" void cRider_alignRiderAxis(cRider* self, const sVec4* up, const sVec4
             goto have_axis;
         }
     }
-    axis = D_004FF140;
+    axis = t4vect_XAxis;
 have_axis:
     angle = (maxRate <? angle * rate) * 0.01666666753590107f;
     deltaRot = AxisAngle_1AA0(axis, angle);
@@ -4144,9 +4144,9 @@ struct sV2_2680 {
     sV2_2680(const float& ax, const float& ay) : x(ax), y(ay) {}
 };
 
-extern sGsState_2680 D_00501420;
+extern sGsState_2680 sDrawState_s_defaultDrawState;
 extern char t4mat_Identity[];
-extern int D_004A4540;
+extern int cRenderToggles_m_DisableHUD;
 // Release build: the assert compiles to nothing (gcc still emits its loop notes).
 #define ASSERT_2680(cond) do { } while (0)
 
@@ -4167,7 +4167,7 @@ struct sOverlay_2680 {
 extern "C" void func_00122680(void)
 {
     ASSERT_2680(SSXApp != 0);
-    if (D_004A4540 == 0) {
+    if (cRenderToggles_m_DisableHUD == 0) {
         sOverlay_2680* o = (sOverlay_2680*)SSXApp->Game->DebugFont;
         o->f38 = o->f30;
         ((cGraphicsMan_2680*)GrMan)->BeginScene();
@@ -4175,7 +4175,7 @@ extern "C" void func_00122680(void)
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop[1] = ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop[0];
         ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop++;
-        *((cGraphicsMan_2680*)GrMan)->stateTop = D_00501420;
+        *((cGraphicsMan_2680*)GrMan)->stateTop = sDrawState_s_defaultDrawState;
         *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
         ((cGraphicsMan_2680*)GrMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
         ((cGraphicsMan_2680*)GrMan)->SetTexture(t4mat_Identity);
@@ -4393,11 +4393,11 @@ extern "C" void cRider_RenderShadow(cRider* self)
 INCLUDE_ASM("ai/rider", func_00122C28);
 #ifdef SKIP_ASM
 extern "C" void* func_0026B5E0(void*, int, int);
-extern char D_004D33A0[];
+extern char gPaths[];
 
 extern "C" float* func_00122C28(float* out, cRider* rider)
 {
-    float* p = (float*)func_0026B5E0(D_004D33A0, 1, rider->mAIIndex);
+    float* p = (float*)func_0026B5E0(gPaths, 1, rider->mAIIndex);
     out[0] = p[2];
     out[1] = p[3];
     out[2] = p[4];
@@ -4674,7 +4674,7 @@ INCLUDE_ASM("ai/rider", cRider_transport);
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
-extern t4Vector D_004FF140;
+extern t4Vector t4vect_XAxis;
 
 // 16-byte vectors with inline constructors (non-POD siblings of t4Vector). The classes differ only in the order
 // their 4-float constructor stores the components; that order decides the float-register allocation of every
@@ -4804,7 +4804,7 @@ extern "C" void cRider_transport_v(cRider* self, char* mat)
     }
     off = Scale_3210(MatMulV_3210(mat, off), 100.0f);
     AddEq_3210(pos, off);
-    sVec4 dir = MatMulV_3210(mat, D_004FF140);
+    sVec4 dir = MatMulV_3210(mat, t4vect_XAxis);
     func_00119368(self->mMetrix, 1);
     cRider_setMotionState_impl(self, 0);
     func_0011FEC8_impl(self, 0);
@@ -4830,7 +4830,7 @@ INCLUDE_ASM("ai/rider", cRider_initForMission);
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type;
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
-extern t4Vector D_004FF140;
+extern t4Vector t4vect_XAxis;
 extern "C" void cReplay_eventReset(int a, int b);
 extern "C" void cRider_cancelRiderTransitions(cRider* self);
 extern "C" void func_002F1A00(void* a);
@@ -4876,7 +4876,7 @@ extern "C" void cRider_initForMission(cRider* self, char* mat)
     t4Vector dir;
     cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
     pos = *(t4Vector*)(mat + 0x30);
-    dir = MatMulV_34D0(mat, D_004FF140);
+    dir = MatMulV_34D0(mat, t4vect_XAxis);
     func_00119368(self->mMetrix, 1);
     cRider_setMotionState_impl(self, 3);
     func_0011FEC8_impl(self, 0xD);
@@ -4949,7 +4949,7 @@ struct sV_3640
 } __attribute__((aligned(16)));
 
 extern sV_3640 D_004FF120_3640 __asm__("t4vect_Zero");
-extern sV_3640 D_004FF160_3640 __asm__("D_004FF160");
+extern sV_3640 D_004FF160_3640 __asm__("t4vect_ZAxis");
 
 static inline sV_3640 AxisAngle_3640(const sV_3640& axis, float angle)
 {
@@ -5393,14 +5393,14 @@ extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float currFrame, fl
 INCLUDE_ASM("ai/rider", cRider_GetNISEndPosition);
 #ifdef SKIP_ASM
 extern "C" void* func_0026B5E0(void*, int, int);
-extern char D_004D33A0[];
+extern char gPaths[];
 int func_0027C958(void* self);
 
 struct sV_3F38 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern sV_3F38 D_004FF160_3F38 __asm__("D_004FF160");
+extern sV_3F38 D_004FF160_3F38 __asm__("t4vect_ZAxis");
 
 struct sRay_3F38 {
     char data[0xB0];
@@ -5483,7 +5483,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
         break;
     case 1:
         {
-            float* startPoint = (float*)func_0026B5E0(D_004D33A0, 1, self->mAIIndex);
+            float* startPoint = (float*)func_0026B5E0(gPaths, 1, self->mAIIndex);
             sV_3F38 startPos;
             startPos.x = startPoint[2];
             startPos.y = startPoint[3];
@@ -5494,7 +5494,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
         break;
     case 2:
         {
-            float* startPoint = (float*)func_0026B5E0(D_004D33A0, 2, 0);
+            float* startPoint = (float*)func_0026B5E0(gPaths, 2, 0);
             sV_3F38 startPos;
             startPos.x = startPoint[2];
             startPos.y = startPoint[3];
@@ -5511,7 +5511,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
         case 20:
         case 21:
             {
-                float* startPoint = (float*)func_0026B5E0(D_004D33A0, 2, 0);
+                float* startPoint = (float*)func_0026B5E0(gPaths, 2, 0);
                 sV_3F38 startPos;
                 startPos.x = startPoint[2];
                 startPos.y = startPoint[3];
@@ -5524,7 +5524,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
         case 15:
         case 16:
             {
-                float* startPoint = (float*)func_0026B5E0(D_004D33A0, 2, self->mAIIndex);
+                float* startPoint = (float*)func_0026B5E0(gPaths, 2, self->mAIIndex);
                 sV_3F38 startPos;
                 startPos.x = startPoint[2];
                 startPos.y = startPoint[3];
@@ -5535,7 +5535,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
             break;
         default:
             {
-                float* startPoint = (float*)func_0026B5E0(D_004D33A0, 2, 1);
+                float* startPoint = (float*)func_0026B5E0(gPaths, 2, 1);
                 sV_3F38 startPos;
                 startPos.x = startPoint[2];
                 startPos.y = startPoint[3];
@@ -5548,7 +5548,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
         break;
     case 4:
         {
-            float* startPoint = (float*)func_0026B5E0(D_004D33A0, 2, self->mAIIndex);
+            float* startPoint = (float*)func_0026B5E0(gPaths, 2, self->mAIIndex);
             sV_3F38 startPos;
             startPos.x = startPoint[2];
             startPos.y = startPoint[3];
@@ -5617,7 +5617,7 @@ struct sV_42B0 {
 } __attribute__((aligned(16)));
 
 extern sV_42B0 D_004FF120_42B0 __asm__("t4vect_Zero");
-extern sV_42B0 D_004FF160_42B0 __asm__("D_004FF160");
+extern sV_42B0 D_004FF160_42B0 __asm__("t4vect_ZAxis");
 
 struct sRay_42B0 {
     char data[0xB0];
@@ -5898,7 +5898,7 @@ struct sQ_124788
     sQ_124788(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sQ_124788 D_004FF130_124788 __asm__("D_004FF130");
+extern sQ_124788 D_004FF130_124788 __asm__("t4vect_Origin");
 
 struct sXf_124788
 {
@@ -6393,7 +6393,7 @@ struct sVEntry001253D0 {
     int (*fn)(void*);
 };
 
-extern int D_005366D0[];
+extern int cGameModeMan_bGiveUp[];
 
 static inline bool riderHasFinished001253D0(cRider* rider)
 {
@@ -6403,7 +6403,7 @@ static inline bool riderHasFinished001253D0(cRider* rider)
 /**
  * Marks a rider who quits before finishing as did-not-finish.
  *
- * Sets mDidNotFinish and the rider's entry in the per-rider table D_005366D0, which the front-end popups
+ * Sets mDidNotFinish and the rider's entry in the per-rider table cGameModeMan_bGiveUp, which the front-end popups
  * read.
  */
 extern "C" void cRider_quitEvent(cRider* self)
@@ -6414,7 +6414,7 @@ extern "C" void cRider_quitEvent(cRider* self)
         self->mDidNotFinish = 1;
         char* sub = (char*)&self->mVtbl;
         sVEntry001253D0* vt = *(sVEntry001253D0**)sub;
-        D_005366D0[vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta)] = 1;
+        cGameModeMan_bGiveUp[vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta)] = 1;
     }
 }
 #endif

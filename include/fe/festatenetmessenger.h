@@ -72,7 +72,7 @@ struct cFEStateNetMessenger {
     unsigned int mMessageHintFrame; // 0x050 [R] 0; [U] func_001AAB68 stores the frame when the session's count
                                     //       (func_00262938) becomes > 0 and 0 when it drops; func_001AA9B0 (slot 27)
                                     //       blinks widgets "IconMessageHint"/"TextMessageCount" while
-                                    //       (frame - it) % 60 > 30 (frame counter D_004A5B64 + 0x18)
+                                    //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
@@ -116,7 +116,7 @@ struct cFEStateNetMessenger {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateNetMessenger
-    char* mszFoundName;             // 0x6D0 [R] cBXString: func_001A3DC8 stores the empty-string rep D_004A3E90, the dtor
+    char* mszFoundName;             // 0x6D0 [R] cBXString: func_001A3DC8 stores the empty-string rep cBXString_EmptyString, the dtor
                                     //       destroys it; [U] func_001A4CE8 copies a find result's name (result + 0x8) into
                                     //       it and shows "kT_POPUP279UserFound" with it as option 0; func_001A4928 (that
                                     //       XX
@@ -125,7 +125,7 @@ struct cFEStateNetMessenger {
                                     //       func_0025E6D0); func_001A4E28 prints it into "kT_POPUP279InvalidName"
     int unk_6D8;                    // 0x6D8 [U] func_001A4CE8 copies the find result's word at + 0x10; no read seen
     int mLastRefreshFrame;          // 0x6DC [R] 0; [U] onUpdate override func_001A3FE0: when 1..59 frames have not
-                                    //       passed since it (frame counter D_004A5B64 + 0x18) it only updates, else it
+                                    //       passed since it (frame counter cAppMan_TheAppMan + 0x18) it only updates, else it
                                     //       stores the frame and rebuilds the list (func_001A6978)
     char* unk_6E0;                  // 0x6E0 [R] cBXString (as above); no other access seen
     tFEStringPtrVector mNames;      // 0x6E4 [R] zeroed by func_001A3DC8, freed by func_001A3EA0 after func_001A5450

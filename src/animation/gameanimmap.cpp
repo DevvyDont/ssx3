@@ -81,13 +81,13 @@ extern float D_004FE760[4];
 extern float D_004FE770[4];
 extern float D_004FE780[4];
 extern float D_004FE790[4];
-extern int D_004A5950;
+extern int kAnimIDInvalid;
 void sti_003150F8(int init, int prio) __asm__("func_003150F8");
 void sti_003150F8(int init, int prio)
 {
     if (prio == 0xFFFF && init) {
-        *(char*)&D_004A5950 = -1;
-        D_004A5950 = (D_004A5950 & 0xFF) | 0xFFFFFF00u;
+        *(char*)&kAnimIDInvalid = -1;
+        kAnimIDInvalid = (kAnimIDInvalid & 0xFF) | 0xFFFFFF00u;
         D_004FE420[0] = 1.0f;
         D_004FE420[1] = 1.0f;
         D_004FE420[2] = 1.0f;
@@ -367,16 +367,16 @@ INCLUDE_ASM("animation/gameanimmap", func_003158E8);
 #ifdef SKIP_ASM
 #include "bx/math3d.h"
 extern "C" void func_0031BE50(float *, float *, float);
-extern t4Vector D_004FF130;
-extern t4Vector D_004FF160;
+extern t4Vector t4vect_Origin;
+extern t4Vector t4vect_ZAxis;
 
 extern "C" void func_003158E8(void *self, float angle) {
     t4Vector q;
     float s;
     float c;
-    const t4Vector* axis = &D_004FF160;
+    const t4Vector* axis = &t4vect_ZAxis;
 
-    *(t4Vector *)((char*)self + 0x30) = D_004FF130;
+    *(t4Vector *)((char*)self + 0x30) = t4vect_Origin;
     func_0031BE50(&s, &c, -angle * 0.5f);
     q.w = c;
     q.x = s * axis->x;

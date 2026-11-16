@@ -18,7 +18,7 @@
 // in the worldpainter splits): see methods.txt.
 //
 // Statics (not declared here: the .cpp files declare these D_ symbols with differing types):
-//   cWorldPainterMan::m_iCurrSection = D_004A3860 (unsigned int; [O] static member; [U] read by queryPosition
+//   cWorldPainterMan::m_iCurrSection = cWorldPainterMan_m_iCurrSection (unsigned int; [O] static member; [U] read by queryPosition
 //   cWorldPainterQuery_queryPosition and render func_002BB6E0; func_002ED490 reads it too).
 //
 // A FLAT layout, like main/game.h. Evidence tags:

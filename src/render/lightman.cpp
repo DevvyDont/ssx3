@@ -627,7 +627,7 @@ struct sLmCtx_EE78 {
 
 extern sLmMat_EE78 D_00504D80_EE78[] __asm__("D_00504D80");
 extern sLmMat_EE78 t4mat_Identity;
-extern float D_004FF160[3];
+extern float t4vect_ZAxis[3];
 extern int D_004A445C;
 extern float D_004A4448;
 extern float D_004A444C;
@@ -758,9 +758,9 @@ extern "C" void func_0038EE78(void)
         lmCopy_EE78(&m0, &t4mat_Identity);
         func_0031BE50(&s, &c, angle);
         float tc = 1.0f - c;
-        float x = D_004FF160[0];
-        float y = D_004FF160[1];
-        float z = D_004FF160[2];
+        float x = t4vect_ZAxis[0];
+        float y = t4vect_ZAxis[1];
+        float z = t4vect_ZAxis[2];
         float tx = tc * x;
         float ty = tc * y;
         float tz = tc * z;
@@ -1555,12 +1555,12 @@ extern "C" void func_00390C20()
 //100%
 INCLUDE_ASM("render/lightman", func_00390C60);
 #ifdef SKIP_ASM
-extern int D_004A460C;
+extern int cScreenTint_m_LightningEnable;
 extern int D_004A46B4;
 extern int D_004A4698;
 extern int D_004A469C;
 extern int D_004A4610;
-extern float D_004A4614;
+extern float cScreenTint_m_LightningChance;
 extern int D_004A4618;
 extern int D_004A461C;
 extern int D_004A4620;
@@ -1605,7 +1605,7 @@ static inline float RandRange_0C60(float lo, float hi)
 // PORT: D_004A469C holds a float (declared int elsewhere in the unit).
 extern "C" void func_00390C60()
 {
-    if (D_004A460C == 0) {
+    if (cScreenTint_m_LightningEnable == 0) {
         return;
     }
     if (D_004A46B4 > 0) {
@@ -1614,7 +1614,7 @@ extern "C" void func_00390C60()
     int t = D_004A4698;
     int trig = D_004A4610;
     if (t < 0) {
-        if (RandF_0C60() < D_004A4614 * D_004A4614) {
+        if (RandF_0C60() < cScreenTint_m_LightningChance * cScreenTint_m_LightningChance) {
             func_00390EC8(RandRange_0C60(0.019999999552965164f, 2.0f) * 100000.0f);
         }
         return;
@@ -1664,7 +1664,7 @@ extern "C" void func_00390C60()
 //100%
 INCLUDE_ASM("render/lightman", func_00390EC8);
 #ifdef SKIP_ASM
-extern int D_004A460C;
+extern int cScreenTint_m_LightningEnable;
 extern int D_004A4698;
 extern int D_004A469C;
 extern float D_004A46B0;
@@ -1672,7 +1672,7 @@ extern int D_004A46B4;
 
 extern "C" void func_00390EC8(float t)
 {
-    if (D_004A460C != 0) {
+    if (cScreenTint_m_LightningEnable != 0) {
         D_004A4698 = 0;
         D_004A469C = 0;
         D_004A46B0 = t;
@@ -1684,12 +1684,12 @@ extern "C" void func_00390EC8(float t)
 //100%
 INCLUDE_ASM("render/lightman", func_00390EF8);
 #ifdef SKIP_ASM
-extern int D_004A460C;
+extern int cScreenTint_m_LightningEnable;
 extern int D_004A46B4;
 
 extern "C" int func_00390EF8()
 {
-    if (D_004A460C != 0 && D_004A46B4 == 0) {
+    if (cScreenTint_m_LightningEnable != 0 && D_004A46B4 == 0) {
         D_004A46B4 = -1;
         return 1;
     }
@@ -1734,8 +1734,8 @@ struct sHudVert_0F20 {
     sHudVert_0F20() {}
 };
 
-extern sGs_0F20 D_00501420_0F20 __asm__("D_00501420");
-extern int D_004A460C_i __asm__("D_004A460C");
+extern sGs_0F20 D_00501420_0F20 __asm__("sDrawState_s_defaultDrawState");
+extern int D_004A460C_i __asm__("cScreenTint_m_LightningEnable");
 extern float D_004A469C_f __asm__("D_004A469C");
 extern float D_004A46A0_f __asm__("D_004A46A0");
 extern float D_004A46A4_f __asm__("D_004A46A4");

@@ -88,7 +88,7 @@ struct cFEStateReadMessagePopup {
     unsigned int mMessageHintFrame; // 0x050 [R] 0; [U] func_001AAB68 stores the frame when the session's count
                                     //       (func_00262938) becomes > 0 and 0 when it drops; func_001AA9B0 (slot 27)
                                     //       blinks widgets "IconMessageHint"/"TextMessageCount" while
-                                    //       (frame - it) % 60 > 30 (frame counter D_004A5B64 + 0x18)
+                                    //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
@@ -133,7 +133,7 @@ struct cFEStateReadMessagePopup {
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateReadMessagePopup
     char* mszSender;                // 0x6D0 [R] cBXString built from the ctor's 4th argument (cBXString_cBXString2),
-                                    //       the empty rep D_004A3E90 in the default ctor, destroyed by cFEStateReadMessagePopup__cFEStateReadMessagePopup;
+                                    //       the empty rep cBXString_EmptyString in the default ctor, destroyed by cFEStateReadMessagePopup__cFEStateReadMessagePopup;
                                     //       [U] cFEStateReadMessagePopup_onWidgetEvent sends the typed reply to it (func_00262690) and titles
                                     //       the keyboard with it; func_001A7F78 moves BuddyMan's messages from it
                                     //       into mMessages; func_001A81F0 shows it ("kT_POPUP242PlayerID")

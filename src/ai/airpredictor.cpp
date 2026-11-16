@@ -13,7 +13,7 @@ struct sPair8 {
     int x[2];
 };
 
-extern sQuadR D_004FF160;
+extern sQuadR t4vect_ZAxis;
 extern sQuadR t4vect_Zero;
 extern sPair8 D_004A5960[];
 
@@ -28,7 +28,7 @@ extern "C" void cAirPredictor_reset(char* self)
     *(int*)(self + 0x98) = 0;
     *(int*)(self + 0x9C) = 0;
     *(int*)(self + 0xA4) = 0;
-    *(sQuadR*)(self + 0x20) = D_004FF160;
+    *(sQuadR*)(self + 0x20) = t4vect_ZAxis;
     *(sQuadR*)(self + 0x10) = t4vect_Zero;
     *(int*)(self + 0x90) = -1;
     *(unsigned int*)(self + 0x30) = 0xFFFFFFFF;
@@ -85,7 +85,7 @@ struct sAirP_3200 {
     int state;               // 0xAC
 };
 
-extern sQuadR D_004FF160;
+extern sQuadR t4vect_ZAxis;
 // func_001139A0 is defined later in the unit (with its own vector type).
 float func_001139A0_3200(void* self, sVec4_3200* pos, sVec4_3200* vel, sVec4_3200* outPos, sVec4_3200* outVel) __asm__("func_001139A0");
 // func_0032E100 (intersect/riderspheretree) builds the capsule and returns it.
@@ -263,7 +263,7 @@ extern "C" void func_00113200(char* vself)
         self->f10 = vu0Add_3200(vu0Scale_3200(prevVel, param), vu0Scale_3200(self->vel, 1.0f - param));
         if (self->state == 2) {
             self->state = 3;
-            *(sQuadR*)&self->f20 = D_004FF160;
+            *(sQuadR*)&self->f20 = t4vect_ZAxis;
             self->f90 = 0xD;
         } else if (self) { // FAKEMATCH: identical arms, see header
             self->state = 1;
@@ -340,9 +340,9 @@ void cAirPredictor_initLaunch(char* self, sQuad* launchPos, sQuad* launchVel)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/airpredictor", func_00113648);
 #ifdef SKIP_ASM
-extern sQuadR D_004FF130;
-extern sQuadR D_004FF140;
-extern sQuadR D_004FF160;
+extern sQuadR t4vect_Origin;
+extern sQuadR t4vect_XAxis;
+extern sQuadR t4vect_ZAxis;
 extern "C" void func_00113200(char* self);
 
 struct sVec4_3648
@@ -390,9 +390,9 @@ extern "C" void func_00113648(char* self, sQuad* a, sQuad* b, float dt)
     if (*(float*)(self + 0x98) > 60.0f) {
         if (*(int*)(self + 0xAC) == 2) {
             *(int*)(self + 0xAC) = 3;
-            *(sQuadR*)(self + 0x0) = D_004FF130;
-            *(sQuadR*)(self + 0x10) = D_004FF140;
-            *(sQuadR*)(self + 0x20) = D_004FF160;
+            *(sQuadR*)(self + 0x0) = t4vect_Origin;
+            *(sQuadR*)(self + 0x10) = t4vect_XAxis;
+            *(sQuadR*)(self + 0x20) = t4vect_ZAxis;
             *(int*)(self + 0x90) = 0xD;
         } else {
             cAirPredictor_initLaunch(self, a, b);

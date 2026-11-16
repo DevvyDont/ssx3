@@ -13,22 +13,22 @@ extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cPopupInfo_cPopupInfo(void* self);
 extern "C" void func_00416210(void* dst, int c, int n);
 extern void* cScreenPopup_vtbl[];
-extern int D_004A3E90;
+extern int cBXString_EmptyString;
 struct sVec3_58E8 {
     float x, y, z;
     sVec3_58E8(float a, float b, float c) : x(a), y(b), z(c) {}
 };
 struct sQuad_58E8 { int v[4]; };
-extern sQuad_58E8 D_004C6788;
-extern sQuad_58E8 D_004C6798;
+extern sQuad_58E8 gPopupWhite;
+extern sQuad_58E8 gPopupBlack;
 
 /**
  * Constructs a message/confirmation popup state with empty widgets and default layout settings.
  *
  * Runs the cUIState constructor (func_0039E318), stores cScreenPopup_vtbl, constructs the embedded cPopupInfo
- * (cPopupInfo_cPopupInfo at +0xBC) and points mszInputText and mszStaticText at the empty string D_004A3E90. Every
+ * (cPopupInfo_cPopupInfo at +0xBC) and points mszInputText and mszStaticText at the empty string cBXString_EmptyString. Every
  * widget pointer, mpKeyboard, the five options and the five confirmations are cleared; miDefaultOption is -1,
- * mbReceivePrev 1, mvCurrentScale (1, 1, 1), the highlight colours come from D_004C6788 / D_004C6798 and
+ * mbReceivePrev 1, mvCurrentScale (1, 1, 1), the highlight colours come from gPopupWhite / gPopupBlack and
  * miMaxChars is 0x3F.
  *
  * @param engine  the UI engine that owns the state
@@ -40,7 +40,7 @@ extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, void* engine, voi
     func_0039E318(self, engine, owner);
     self->mVtbl = cScreenPopup_vtbl;
     cPopupInfo_cPopupInfo((char*)self + 0xBC);
-    int defaultStr = D_004A3E90;
+    int defaultStr = cBXString_EmptyString;
     self->mszInputText = (char*)defaultStr;
     self->mszStaticText = (char*)defaultStr;
     self->miDefaultOption = -1;
@@ -77,8 +77,8 @@ extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, void* engine, voi
     *(sVec3_58E8*)&self->mvCurrentScale[0] = sVec3_58E8(1.0f, 1.0f, 1.0f);
     self->mbCenterOptions = 0;
     self->mbCenterText = 0;
-    *(sQuad_58E8*)&self->mtHighlightedColor[0] = D_004C6788;
-    *(sQuad_58E8*)&self->mtUnhighlightColor[0] = D_004C6798;
+    *(sQuad_58E8*)&self->mtHighlightedColor[0] = gPopupWhite;
+    *(sQuad_58E8*)&self->mtUnhighlightColor[0] = gPopupBlack;
     self->miMaxChars = 0x3F;
     return ((void*)self);
 }
@@ -572,32 +572,32 @@ extern "C" void func_001C66E8_impl(char* self)
             char* o = *(char**)(self + 0x74);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6798);
+                vt[11].fn(o + vt[11].delta, &gPopupBlack);
             }
         }
         {
             char* o = *(char**)(self + 0x78);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6798);
+                vt[11].fn(o + vt[11].delta, &gPopupBlack);
             }
         }
         {
             char* o = *(char**)(self + 0x7C);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6798);
+                vt[11].fn(o + vt[11].delta, &gPopupBlack);
             }
         }
         {
             char* o = *(char**)(self + 0x80);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6798);
+                vt[11].fn(o + vt[11].delta, &gPopupBlack);
             }
         }
-        *(sQuad_58E8*)(self + 0x32C) = D_004C6788;
-        *(sQuad_58E8*)(self + 0x33C) = D_004C6798;
+        *(sQuad_58E8*)(self + 0x32C) = gPopupWhite;
+        *(sQuad_58E8*)(self + 0x33C) = gPopupBlack;
         break;
     case 1:
         func_001CA4C0(self, *(void**)(self + 0x64));
@@ -613,32 +613,32 @@ extern "C" void func_001C66E8_impl(char* self)
             char* o = *(char**)(self + 0x74);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6798);
+                vt[11].fn(o + vt[11].delta, &gPopupBlack);
             }
         }
         {
             char* o = *(char**)(self + 0x78);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6798);
+                vt[11].fn(o + vt[11].delta, &gPopupBlack);
             }
         }
         {
             char* o = *(char**)(self + 0x7C);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6798);
+                vt[11].fn(o + vt[11].delta, &gPopupBlack);
             }
         }
         {
             char* o = *(char**)(self + 0x80);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6798);
+                vt[11].fn(o + vt[11].delta, &gPopupBlack);
             }
         }
-        *(sQuad_58E8*)(self + 0x32C) = D_004C6788;
-        *(sQuad_58E8*)(self + 0x33C) = D_004C6798;
+        *(sQuad_58E8*)(self + 0x32C) = gPopupWhite;
+        *(sQuad_58E8*)(self + 0x33C) = gPopupBlack;
         break;
     case 2:
         func_001CA488(self, *(void**)(self + 0x48));
@@ -654,32 +654,32 @@ extern "C" void func_001C66E8_impl(char* self)
             char* o = *(char**)(self + 0x74);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6788);
+                vt[11].fn(o + vt[11].delta, &gPopupWhite);
             }
         }
         {
             char* o = *(char**)(self + 0x78);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6788);
+                vt[11].fn(o + vt[11].delta, &gPopupWhite);
             }
         }
         {
             char* o = *(char**)(self + 0x7C);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6788);
+                vt[11].fn(o + vt[11].delta, &gPopupWhite);
             }
         }
         {
             char* o = *(char**)(self + 0x80);
             if (o != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &D_004C6788);
+                vt[11].fn(o + vt[11].delta, &gPopupWhite);
             }
         }
         *(sQuad_58E8*)(self + 0x32C) = D_004C67A8;
-        *(sQuad_58E8*)(self + 0x33C) = D_004C6788;
+        *(sQuad_58E8*)(self + 0x33C) = gPopupWhite;
         break;
     }
 }
@@ -3522,7 +3522,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_cKeyboardPopup);
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cBXString_Reset(void* self);
 extern "C" void cKeyboardPopup_fillSelectableKeys(cKeyboardPopup* self);
-extern int D_004A3E90;
+extern int cBXString_EmptyString;
 extern void* D_004A33F0;
 extern void* cKeyboardPopup_vtbl[];
 
@@ -3544,7 +3544,7 @@ extern void* cKeyboardPopup_vtbl[];
 extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, void* engine, void* owner, int Password, unsigned char CtrlBits)
 {
     func_0039E318(self, engine, owner);
-    int defaultStr = D_004A3E90;
+    int defaultStr = cBXString_EmptyString;
     self->mCtrlBits = CtrlBits;
     self->mbPassword = Password;
     self->mbSetInputText = 0;
@@ -5782,7 +5782,7 @@ public:
 struct sSndK1CDB98 {
     sVEntryK1CDB98* vt;
 };
-extern sSndK1CDB98 D_004A5A58;
+extern sSndK1CDB98 gUISoundNull;
 
 typedef int (*FnIK1CDB98)(void*);
 
@@ -5954,7 +5954,7 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
         }
         sSndK1CDB98* snd = *(sSndK1CDB98**)((char*)self->mpEngine + 0x14);
         if (snd == 0)
-            snd = &D_004A5A58;
+            snd = &gUISoundNull;
         if (changed && snd != 0)
             ((void (*)(void*, int))snd->vt[2].fn)((char*)snd + snd->vt[2].delta, sound);
     }

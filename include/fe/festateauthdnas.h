@@ -80,7 +80,7 @@ struct cFEStateAuthDNAS {
     unsigned int mMessageHintFrame; // 0x050 [R] 0; [U] func_001AAB68 stores the frame when the session's count
                                     //       (func_00262938) becomes > 0 and 0 when it drops; func_001AA9B0 (slot 27)
                                     //       blinks widgets "IconMessageHint"/"TextMessageCount" while
-                                    //       (frame - it) % 60 > 30 (frame counter D_004A5B64 + 0x18)
+                                    //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
@@ -127,7 +127,7 @@ struct cFEStateAuthDNAS {
     void* mpAuth;                   // 0x6D0 [R] 0; [U] onCreateScreen cFEStateAuthDNAS_onCreateScreen stores
                                     //       func_002561B8(cMemMan_alloc(0xA50, "cFEStateAuthDNASCreate")) (the DNAS
                                     //       authentication object, class not named) and starts it in the mode of the
-                                    //       profile bits D_00535610; onUpdate cFEStateAuthDNAS_onUpdate polls it (its first word:
+                                    //       profile bits cBEOptionInterface_mOption; onUpdate cFEStateAuthDNAS_onUpdate polls it (its first word:
                                     //       >= 3 ready, 5 done; + 0x1C error; error texts at + 0x450/0x650/0x850),
                                     //       cFEStateAuthDNAS_onInputBegin cancels it (+ 0x14 = 1); the destructor shuts it down
                                     //       (func_002563A8) and deletes it
@@ -230,7 +230,7 @@ struct cFEStateAuthDNASError {
     unsigned int mMessageHintFrame; // 0x050 [R] 0; [U] func_001AAB68 stores the frame when the session's count
                                     //       (func_00262938) becomes > 0 and 0 when it drops; func_001AA9B0 (slot 27)
                                     //       blinks widgets "IconMessageHint"/"TextMessageCount" while
-                                    //       (frame - it) % 60 > 30 (frame counter D_004A5B64 + 0x18)
+                                    //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;

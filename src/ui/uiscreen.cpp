@@ -1423,7 +1423,7 @@ struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void* func_0039FF50(void* self);
-extern char D_004A5A58;
+extern char gUISoundNull;
 
 struct cUISlider_onInput_sVEntryI {
     short delta;
@@ -1446,7 +1446,7 @@ struct cUISlider_onInput_sVEntryS {
  *
  * Left lowers mValue while above 0 (keyframer event 8), right raises it while below mNumValues - 1 (event 9); a
  * change is reported to the screen's state as widget event 9 (onWidgetEvent) and to slot 2 of the engine's +0x14
- * listener (D_004A5A58 when none) with 1.
+ * listener (gUISoundNull when none) with 1.
  *
  * @param input  the input (On Tour const cUIInput* pInput)
  * @return 1 for left or right (even at the end of the range), else 0 (On Tour returns bool)
@@ -1454,7 +1454,7 @@ struct cUISlider_onInput_sVEntryS {
 extern "C" int cUISlider_onInput(cUISlider* self, char* input)
 {
     char* customSnd = *(char**)((char*)func_0039FF50(((char*)self)) + 0x14);
-    char* snd = &D_004A5A58;
+    char* snd = &gUISoundNull;
     if (customSnd) snd = customSnd;
     cUISlider_onInput_sVEntryI* vi = *(cUISlider_onInput_sVEntryI**)(input + 8);
     if (vi[19].fn(input + vi[19].delta)) {

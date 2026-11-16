@@ -103,7 +103,7 @@ extern "C" int cOVState_ENTERLODGE_onWidgetMenu(void* self, int pMenu, unsigned 
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onWidgetEvent);
 #ifdef SKIP_ASM
-extern int D_004A19C4;
+extern int cRealFE_mStartState;
 extern "C" void cGame_exit(void* game, int a);
 extern "C" void func_0039F190(void*, int);
 struct sFlag001F72E0 {
@@ -126,7 +126,7 @@ struct sSelf001F72E0 {
  * Handles the Enter Lodge prompt: Yes leaves the race for the lodge, No or Triangle closes the prompt.
  *
  * Cross and Triangle first set word +0x8 of Game->mCurrentState (flag->active here) to 1. Yes (choice 0) sets
- * the front-end start state D_004A19C4 to 0x27, which cRealFE_loadStartState turns into the lodge state, and
+ * the front-end start state cRealFE_mStartState to 0x27, which cRealFE_loadStartState turns into the lodge state, and
  * exits the game (cGame_exit). No (1) and Triangle set mRemovePDA (+0x54, called done here) and close the
  * state.
  *
@@ -143,7 +143,7 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(sSelf001F72E0* self, void* wid
             case 0:
                 {
                     void* game = SSXApp->Game;
-                    D_004A19C4 = 0x27;
+                    cRealFE_mStartState = 0x27;
                     cGame_exit(game, 0);
                 }
                 break;
@@ -257,16 +257,16 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetCreate(void* self, void* ite
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7548);
 #ifdef SKIP_ASM
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 extern "C" int* func_0030C820(void* list);
 
 extern "C" void func_001F7548(void* self)
 {
-    int* p = func_0030C820((char*)D_004A3DD8 + 0x1C4);
+    int* p = func_0030C820((char*)cWScriptMan_TheWScriptMan + 0x1C4);
     if (p != 0) {
         *(int*)((char*)self + 0x9C) = *p;
     } else {
-        *(int*)((char*)self + 0x9C) = *(int*)((char*)D_004A3DD8 + 0x2A0);
+        *(int*)((char*)self + 0x9C) = *(int*)((char*)cWScriptMan_TheWScriptMan + 0x2A0);
     }
 }
 #endif
@@ -296,10 +296,10 @@ extern "C" void func_0030B540(void* self);
 extern "C" void func_0030B658(void* self);
 extern "C" void func_0030B6F8(void* self);
 extern "C" int func_0030B8C0(void* self);
-extern void* D_004A3DD8;
-extern int D_004A26FC;
+extern void* cWScriptMan_TheWScriptMan;
+extern int cOVStateManager_mStatus;
 extern int D_004A2A54;
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
 
@@ -313,11 +313,11 @@ struct sMgr_75A0 {
  * closes.
  *
  * Yes (Cross on choice 0) queues WScriptMan operation 2 (func_0030B6F8, probably a restart) when a challenge
- * already runs (func_0030B8C0), else stores the offer's mission id (+0x9C) in D_004A3DD8 +0x2A0 and queues
+ * already runs (func_0030B8C0), else stores the offer's mission id (+0x9C) in cWScriptMan_TheWScriptMan +0x2A0 and queues
  * operation 1 (start, func_0030B540); it also sets the audio's mBigChallengeStarting (func_0029D6D0). No
  * falls through to Triangle: store the id, queue operation 3 (decline, func_0030B658).
- * Both set the pending overlay action D_004A26FC to 3 (close) and pop the pause-mode stack D_005366E8,
- * restoring the pause mask D_004A2A50.
+ * Both set the pending overlay action cOVStateManager_mStatus to 3 (close) and pop the pause-mode stack D_005366E8,
+ * restoring the pause mask cPauseState_Flags.
  *
  * @param item  the selected item; ignored when null
  * @param msg  the widget event: 5 Cross, 6 Triangle
@@ -330,22 +330,22 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item
     switch (msg) {
     case 5:
         if (*(int*)((char*)item + 0x18) == 0) {
-            if (func_0030B8C0(D_004A3DD8) != 0) {
-                func_0030B6F8(D_004A3DD8);
+            if (func_0030B8C0(cWScriptMan_TheWScriptMan) != 0) {
+                func_0030B6F8(cWScriptMan_TheWScriptMan);
             } else {
-                ((sMgr_75A0*)D_004A3DD8)->f2A0 = *(int*)((char*)self + 0x9C);
-                func_0030B540(D_004A3DD8);
+                ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
+                func_0030B540(cWScriptMan_TheWScriptMan);
             }
-            D_004A26FC = 3;
-            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            cOVStateManager_mStatus = 3;
+            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             func_0029D6D0(func_0028B180());
             break;
         }
     case 6:
-        ((sMgr_75A0*)D_004A3DD8)->f2A0 = *(int*)((char*)self + 0x9C);
-        func_0030B658(D_004A3DD8);
-        D_004A26FC = 3;
-        D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+        ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
+        func_0030B658(cWScriptMan_TheWScriptMan);
+        cOVStateManager_mStatus = 3;
+        cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
         break;
     }
 }
@@ -378,12 +378,12 @@ extern "C" void func_001F76B8(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F7738);
 #ifdef SKIP_ASM
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 extern "C" int* func_0030C820(void* list);
 
 extern "C" void func_001F7738(void* self)
 {
-    *(int*)((char*)self + 0x9C) = *func_0030C820((char*)D_004A3DD8 + 0x1C4);
+    *(int*)((char*)self + 0x9C) = *func_0030C820((char*)cWScriptMan_TheWScriptMan + 0x1C4);
 }
 #endif
 
@@ -442,10 +442,10 @@ extern "C" void func_001F7800(void* self, void* item, int msg)
     case 5: {
         int v = *(int*)((char*)item + 0x18);
         if (v == 0) {
-            ((sMgr_75A0*)D_004A3DD8)->f2A0 = *(int*)((char*)self + 0x9C);
-            func_0030B6F8(D_004A3DD8);
+            ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
+            func_0030B6F8(cWScriptMan_TheWScriptMan);
             func_0039F190_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
-            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             func_0029D6D0(func_0028B180());
             return;
         }
@@ -465,9 +465,9 @@ extern "C" void func_001F7800(void* self, void* item, int msg)
     default:
         return;
     }
-    func_0030B658(D_004A3DD8);
+    func_0030B658(cWScriptMan_TheWScriptMan);
     func_0039F190_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
-    D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 #endif
 
@@ -501,7 +501,7 @@ extern "C" void func_002C2540(void* str, const char* s);
 extern "C" void sprintf1_1F7958(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void cUIText_setUnicodeString(void* text, void* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern int D_004A2700;
+extern int cOVStateManager_mMiscData;
 extern char str_61toptimes[];
 extern char str_OV_darkblue[];
 extern char str_pct_S_Jam[];
@@ -543,7 +543,7 @@ static inline int Loc1F7958(char* name)
  *
  * "track_xxx" names the event as the rewards overlay does. Race modes (cGameMode 0 / 5) show time, top5record
  * and helptext01, other modes points, top5scores and helptext02; ngca, xba and ps2x are shown, and both help
- * texts hidden while D_004A2700 is set. Rows 1-5 get name0N / with0N / time0N from the score interface (8),
+ * texts hidden while cOVStateManager_mMiscData is set. Rows 1-5 get name0N / with0N / time0N from the score interface (8),
  * the time formatted by func_0020A1A8 or the points as "%d". Plays UI event 0xE.
  * func_001FD190() is declared without parameters here; retail relies on $a0 still holding the event kind.
  */
@@ -625,7 +625,7 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
     cUIState_showObjSafe(self, str_ngca_b);
     cUIState_showObjSafe(self, str_xba_b);
     cUIState_showObjSafe(self, str_ps2x_b);
-    if (D_004A2700 != 0) {
+    if (cOVStateManager_mMiscData != 0) {
         cUIState_hideObjSafe(self, str_helptext01);
         cUIState_hideObjSafe(self, str_helptext02);
     }
@@ -659,7 +659,7 @@ extern char str_continue[];
 extern char str_kT_CMNContinue_b[];
 extern char str_kT_OVRCMNReturn[];
 extern char str_saverecords[];
-extern int D_004A2700;
+extern int cOVStateManager_mMiscData;
 
 static inline int isHashTOPTIMES(int id, char* s)
 {
@@ -669,7 +669,7 @@ static inline int isHashTOPTIMES(int id, char* s)
 /**
  * Sets up the top-times buttons: Continue (choice 0) or Return, and Save Records (choice 1).
  *
- * "continue" reads kT_CMNContinue, or kT_OVRCMNReturn while D_004A2700 is set; "saverecords" gets miscData 1.
+ * "continue" reads kT_CMNContinue, or kT_OVRCMNReturn while cOVStateManager_mMiscData is set; "saverecords" gets miscData 1.
  *
  * @param w  the widget being created
  */
@@ -677,7 +677,7 @@ extern "C" void cOVState_TOPTIMES_onWidgetCreate(void* self, cUIText* w)
 {
     int id = *(int*)((char*)w + 0x38);
     if (isHashTOPTIMES(id, str_continue)) {
-        if (D_004A2700 == 0) {
+        if (cOVStateManager_mMiscData == 0) {
             cUIText_setUnicodeStringByID(w, GetHashValue32(str_kT_CMNContinue_b));
         } else {
             cUIText_setUnicodeStringByID(w, GetHashValue32(str_kT_OVRCMNReturn));
@@ -794,7 +794,7 @@ extern "C" void cOVState_TOPTIMES_onWidgetEvent(void* self, void* pWidget, int E
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F8118);
 #ifdef SKIP_ASM
-extern int D_004A26FC;
+extern int cOVStateManager_mStatus;
 extern "C" void cOVStateManager_triggerOverlay(int id);
 
 extern "C" void func_001F8118(void* self, void* a1)
@@ -804,7 +804,7 @@ extern "C" void func_001F8118(void* self, void* a1)
         switch (v) {
         case 0:
             *(int*)((char*)self + 0xA0) = 1;
-            D_004A26FC = 1;
+            cOVStateManager_mStatus = 1;
             break;
         case 1:
             *(int*)((char*)self + 0xA0) = v;

@@ -1272,7 +1272,7 @@ struct sKey8_691F8 {
     int a, b;
 };
 
-extern sRS_691F8 D_00501420;
+extern sRS_691F8 sDrawState_s_defaultDrawState;
 extern sTexPair_691F8 D_004A5A10[];
 extern sKey8_691F8 D_004A5960[];
 
@@ -1304,7 +1304,7 @@ static inline void gfxSetTex_691F8(sRS_691F8* r, const sTexPair_691F8& t)
 /**
  * Constructs the base graphics manager and publishes it in cGraphicsMan_TheGraphicsMan.
  *
- * Stores cGraphicsMan_vtbl at +0x10D8, builds the default draw state D_00501420 (depth, alpha, blend and texture
+ * Stores cGraphicsMan_vtbl at +0x10D8, builds the default draw state sDrawState_s_defaultDrawState (depth, alpha, blend and texture
  * fields; texture ids -1), copies it into all 4 draw-state stack entries (+0xE88) and makes the first current, fills
  * the 86-entry effect texture map (+0xF50) with -1 and sets mNumViews (+0x270) to 1.
  *
@@ -1317,28 +1317,28 @@ extern "C" void* cGraphicsMan_cGraphicsMan(char* self)
     *(int*)(self + 0xF44) = 0;
     cGraphicsMan_TheGraphicsMan = (cPS2GraphicsMan*)(self);
     for (unsigned int i = 0; i < 2; i++) D_004A5A10[0].s[i] = -1;
-    func_00416210(&D_00501420, 0, 0x10);
-    gfxSetA_691F8(&D_00501420, 1, 3, 23);
-    gfxSetA_691F8(&D_00501420, 0, 1, 22);
-    gfxSetA_691F8(&D_00501420, 3, 3, 20);
-    gfxSetA_691F8(&D_00501420, 0, 0xFF, 12);
-    gfxSetA_691F8(&D_00501420, 0, 3, 0);
-    gfxSetB_691F8(&D_00501420, 4, 0x1F, 5);
-    gfxSetB_691F8(&D_00501420, 0, 0x1F, 0);
-    gfxSet0_691F8(&D_00501420, 0, 3, 0);
-    gfxSet0_691F8(&D_00501420, 0, 3, 10);
-    gfxSet0_691F8(&D_00501420, 0, 0xF, 6);
-    gfxSetC_691F8(&D_00501420, 0, 0x3FFFFFFF, 0);
+    func_00416210(&sDrawState_s_defaultDrawState, 0, 0x10);
+    gfxSetA_691F8(&sDrawState_s_defaultDrawState, 1, 3, 23);
+    gfxSetA_691F8(&sDrawState_s_defaultDrawState, 0, 1, 22);
+    gfxSetA_691F8(&sDrawState_s_defaultDrawState, 3, 3, 20);
+    gfxSetA_691F8(&sDrawState_s_defaultDrawState, 0, 0xFF, 12);
+    gfxSetA_691F8(&sDrawState_s_defaultDrawState, 0, 3, 0);
+    gfxSetB_691F8(&sDrawState_s_defaultDrawState, 4, 0x1F, 5);
+    gfxSetB_691F8(&sDrawState_s_defaultDrawState, 0, 0x1F, 0);
+    gfxSet0_691F8(&sDrawState_s_defaultDrawState, 0, 3, 0);
+    gfxSet0_691F8(&sDrawState_s_defaultDrawState, 0, 3, 10);
+    gfxSet0_691F8(&sDrawState_s_defaultDrawState, 0, 0xF, 6);
+    gfxSetC_691F8(&sDrawState_s_defaultDrawState, 0, 0x3FFFFFFF, 0);
     for (unsigned int k = 0; k < 2; k++) {
-        gfxSetA_691F8(&D_00501420, 5, 0x1F, 2 + k * 5);
-        gfxSet0_691F8(&D_00501420, 0, 0xFF, 12 + k * 8);
+        gfxSetA_691F8(&sDrawState_s_defaultDrawState, 5, 0x1F, 2 + k * 5);
+        gfxSet0_691F8(&sDrawState_s_defaultDrawState, 0, 0xFF, 12 + k * 8);
     }
     for (unsigned int k = 0; k < 2; k++) {
-        gfxSet0_691F8(&D_00501420, 0, 3, 2 + k * 2);
+        gfxSet0_691F8(&sDrawState_s_defaultDrawState, 0, 3, 2 + k * 2);
     }
-    gfxSetTex_691F8(&D_00501420, D_004A5A10[0]);
+    gfxSetTex_691F8(&sDrawState_s_defaultDrawState, D_004A5A10[0]);
     for (int k = 0; k < 4; k++) {
-        ((sRS_691F8*)(self + 0xE88))[k] = D_00501420;
+        ((sRS_691F8*)(self + 0xE88))[k] = sDrawState_s_defaultDrawState;
     }
     *(sRS_691F8**)(self + 0xE84) = (sRS_691F8*)(self + 0xE88);
     *(sKey8_691F8*)self = D_004A5960[0];

@@ -267,7 +267,7 @@ struct sViews_2D5048 {
 };
 
 extern char* GrMan_angerfx __asm__("GrMan");
-extern sRState_2D5048 D_00501420_2D5048 __asm__("D_00501420");
+extern sRState_2D5048 D_00501420_2D5048 __asm__("sDrawState_s_defaultDrawState");
 
 static inline sViews_2D5048* views_2D5048()
 {

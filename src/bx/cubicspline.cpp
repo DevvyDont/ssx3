@@ -2299,23 +2299,23 @@ struct sXf_0550 {
 };
 
 extern char D_004FF000[];
-extern char D_004FF018[];
-extern char D_004FF030[];
+extern char BXrandom[];
+extern char AIrandom[];
 extern char D_004FF048[], D_004FF058[], D_004FF068[], D_004FF078[], D_004FF088[], D_004FF098[], D_004FF0A8[], D_004FF0B8[], D_004FF0C8[];
 extern char D_004A5958;
 extern void* D_004A3E94;
 extern char D_004A5960[], D_004A5968[], D_004A5970[];
 extern char t3vect_Zero[], D_004FF0E8[], D_004FF0F8[], D_004FF108[];
-extern char t4vect_Zero[], D_004FF130[], D_004FF140[], t4vect_YAxis[], D_004FF160[];
-extern char D_004FF170[], t4mat_Identity[], D_004FF1E0[], D_004FF220[], D_004FF230[], TheDynamicMemMan[];
+extern char t4vect_Zero[], t4vect_Origin[], t4vect_XAxis[], t4vect_YAxis[], t4vect_ZAxis[];
+extern char t3mat_Identity[], t4mat_Identity[], D_004FF1E0[], D_004FF220[], tPose_Identity[], TheDynamicMemMan[];
 
 extern "C" void func_00320550(int init, int prio)
 {
     if (prio == 0xFFFF) {
         if (init != 0) {
             func_00316A00(D_004FF000);
-            func_00317930(D_004FF018);
-            func_00317930(D_004FF030);
+            func_00317930(BXrandom);
+            func_00317930(AIrandom);
             new (D_004FF048) sV3_0550(1.0f, 0.0f, 0.0f);
             new (D_004FF058) sV3_0550(0.0f, 0.0f, 1.0f);
             new (D_004FF068) sV3_0550(1.0f, 1.0f, 0.0f);
@@ -2334,15 +2334,15 @@ extern "C" void func_00320550(int init, int prio)
             new (D_004FF0F8) sV3_0550(0.0f, 1.0f, 0.0f);
             new (D_004FF108) sV3_0550(0.0f, 0.0f, 1.0f);
             new (t4vect_Zero) sV4_0550(0.0f, 0.0f, 0.0f, 0.0f);
-            new (D_004FF130) sV4_0550(0.0f, 0.0f, 0.0f, 1.0f);
-            new (D_004FF140) sV4_0550(1.0f, 0.0f, 0.0f, 0.0f);
+            new (t4vect_Origin) sV4_0550(0.0f, 0.0f, 0.0f, 1.0f);
+            new (t4vect_XAxis) sV4_0550(1.0f, 0.0f, 0.0f, 0.0f);
             new (t4vect_YAxis) sV4_0550(0.0f, 1.0f, 0.0f, 0.0f);
-            new (D_004FF160) sV4_0550(0.0f, 0.0f, 1.0f, 0.0f);
-            new (D_004FF170) sM33_0550();
+            new (t4vect_ZAxis) sV4_0550(0.0f, 0.0f, 1.0f, 0.0f);
+            new (t3mat_Identity) sM33_0550();
             new (t4mat_Identity) sM44_0550(1.0f);
             new (D_004FF1E0) sM44_0550(0.0f);
             new (D_004FF220) sQ_0550(0.0f, 0.0f, 0.0f, 1.0f);
-            new (D_004FF230) sXf_0550(*(sV4_0550*)D_004FF130, *(sQ_0550*)D_004FF220);
+            new (tPose_Identity) sXf_0550(*(sV4_0550*)t4vect_Origin, *(sQ_0550*)D_004FF220);
             func_0031FF20(TheDynamicMemMan);
         } else {
             func_0031FF38(TheDynamicMemMan, 2);

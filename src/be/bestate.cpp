@@ -10,7 +10,7 @@ struct sStateSingleton {
 
 extern const char str_BERace[];
 extern void* cBERaceState_vtbl[16];
-extern void* D_004A122C;
+extern void* cBERaceState_instance;
 
 //99.86%
 INCLUDE_ASM("be/bestate", cBERaceState_getState__FPv);
@@ -19,19 +19,19 @@ INCLUDE_ASM("be/bestate", cBERaceState_getState__FPv);
  * Returns the cBERaceState singleton, creating it on first use.
  *
  * The first call allocates 8 bytes tagged "BERace", stores @p self in the first word and the cBERaceState vtable
- * in the second, and keeps the object in D_004A122C. cBE_getBE() passes the state index (1) as @p self.
+ * in the second, and keeps the object in cBERaceState_instance. cBE_getBE() passes the state index (1) as @p self.
  *
  * @return the cBERaceState object
  */
 void* cBERaceState_getState(void* self)
 {
-    if (D_004A122C == 0) {
+    if (cBERaceState_instance == 0) {
         sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, str_BERace, 0, 0);
         mem->field_0x0 = self;
         mem->vtable = cBERaceState_vtbl;
-        D_004A122C = mem;
+        cBERaceState_instance = mem;
     }
-    return D_004A122C;
+    return cBERaceState_instance;
 }
 #endif
 
@@ -109,15 +109,15 @@ struct sStateObj153200 {
     int f4;
     int f8;
 };
-extern sStateObj153200* D_004A11B4;
-extern sStateObj153200* D_004A11C0;
+extern sStateObj153200* cBENewRaceInterface_instance;
+extern sStateObj153200* cBENewPlayerInterface_instance;
 extern sStateObj153200* D_004A11C8;
-extern sStateObj153200* D_004A120C;
-extern sStateObj153200* D_004A1214;
-extern sStateObj153200* D_004A121C;
-extern sStateObj153200* D_004A1238;
-extern sStateObj153200* D_004A1248;
-extern sStateObj153200* D_004A124C;
+extern sStateObj153200* cBEOptionInterface_instance;
+extern sStateObj153200* cBEEconInterface_instance;
+extern sStateObj153200* cBESaveInterface_instance;
+extern sStateObj153200* cBEMissionInterface_instance;
+extern sStateObj153200* cBEScoreInterface_instance;
+extern sStateObj153200* cBEAggressionInterface_instance;
 
 /**
  * Leaves the race back-end state: marks its interfaces inactive.
@@ -127,16 +127,16 @@ extern sStateObj153200* D_004A124C;
  * cBERaceState_onEnter never sets them.
  */
 extern "C" void cBERaceState_onExit(void) {
-    D_004A120C->f8 = 0;
-    D_004A1248->f8 = 0;
+    cBEOptionInterface_instance->f8 = 0;
+    cBEScoreInterface_instance->f8 = 0;
     D_004A11C8->f8 = 0;
-    D_004A11C0->f8 = 0;
-    D_004A11B4->f8 = 0;
-    D_004A1238->f8 = 0;
-    D_004A1214->f8 = 0;
-    D_004A124C->f8 = 0;
+    cBENewPlayerInterface_instance->f8 = 0;
+    cBENewRaceInterface_instance->f8 = 0;
+    cBEMissionInterface_instance->f8 = 0;
+    cBEEconInterface_instance->f8 = 0;
+    cBEAggressionInterface_instance->f8 = 0;
     cBERewardInterface_instance->bIsActive = 0;
-    D_004A121C->f8 = 0;
+    cBESaveInterface_instance->f8 = 0;
 }
 #endif
 
@@ -144,12 +144,12 @@ extern "C" void cBERaceState_onExit(void) {
 INCLUDE_ASM("be/bestate", cBERaceState_onEnter);
 #ifdef SKIP_ASM
 extern sStateObj153200* D_004A11C8;
-extern sStateObj153200* D_004A120C;
-extern sStateObj153200* D_004A1214;
-extern sStateObj153200* D_004A121C;
-extern sStateObj153200* D_004A1238;
-extern sStateObj153200* D_004A1248;
-extern sStateObj153200* D_004A124C;
+extern sStateObj153200* cBEOptionInterface_instance;
+extern sStateObj153200* cBEEconInterface_instance;
+extern sStateObj153200* cBESaveInterface_instance;
+extern sStateObj153200* cBEMissionInterface_instance;
+extern sStateObj153200* cBEScoreInterface_instance;
+extern sStateObj153200* cBEAggressionInterface_instance;
 
 /**
  * Enters the race back-end state: marks its interfaces active.
@@ -158,14 +158,14 @@ extern sStateObj153200* D_004A124C;
  * aggression, reward and save interfaces; the network, player and character interfaces stay as they were.
  */
 extern "C" void cBERaceState_onEnter(void) {
-    D_004A120C->f8 = 1;
-    D_004A1248->f8 = 1;
+    cBEOptionInterface_instance->f8 = 1;
+    cBEScoreInterface_instance->f8 = 1;
     D_004A11C8->f8 = 1;
-    D_004A1238->f8 = 1;
-    D_004A1214->f8 = 1;
-    D_004A124C->f8 = 1;
+    cBEMissionInterface_instance->f8 = 1;
+    cBEEconInterface_instance->f8 = 1;
+    cBEAggressionInterface_instance->f8 = 1;
     cBERewardInterface_instance->bIsActive = 1;
-    D_004A121C->f8 = 1;
+    cBESaveInterface_instance->f8 = 1;
 }
 #endif
 

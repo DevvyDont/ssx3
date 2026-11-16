@@ -263,10 +263,10 @@ struct sVEntry_002382D8 {
 };
 
 extern void* D_00536668[];
-extern int D_005366D0[];
+extern int cGameModeMan_bGiveUp[];
 
 /**
- * Restarts the current heat: calls the current handler's virtual slot 2 and clears the six riders' D_005366D0
+ * Restarts the current heat: calls the current handler's virtual slot 2 and clears the six riders' cGameModeMan_bGiveUp
  * values.
  */
 extern "C" void cGameModeMan_restartHeat(cGameModeMan* self)
@@ -276,7 +276,7 @@ extern "C" void cGameModeMan_restartHeat(cGameModeMan* self)
     sVEntry_002382D8* vt = *(sVEntry_002382D8**)obj;
     vt[2].fn((char*)obj + vt[2].delta);
     for (i = 5; i >= 0; i--) {
-        D_005366D0[i] = 0;
+        cGameModeMan_bGiveUp[i] = 0;
     }
 }
 #endif
@@ -659,7 +659,7 @@ extern int D_00536730[];
 extern int D_00536708[];
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
-extern int D_005366D0[];
+extern int cGameModeMan_bGiveUp[];
 
 extern "C" void func_00238D30(void)
 {
@@ -667,7 +667,7 @@ extern "C" void func_00238D30(void)
     func_00416210(D_00536708, 0, 0x28);
     func_00416210(D_00536640, 0, 0x28);
     func_00416210(D_005366A8, 0, 0x28);
-    func_00416210(D_005366D0, 0, 0x18);
+    func_00416210(cGameModeMan_bGiveUp, 0, 0x18);
 }
 #endif
 
@@ -679,7 +679,7 @@ extern int D_00536730[];
 extern int D_00536708[];
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
-extern int D_005366D0[];
+extern int cGameModeMan_bGiveUp[];
 
 extern "C" void func_00238DA8(void)
 {
@@ -687,7 +687,7 @@ extern "C" void func_00238DA8(void)
     func_00416210(D_00536708, 0, 0x28);
     func_00416210(D_00536640, 9, 0x28);
     func_00416210(D_005366A8, 0, 0x28);
-    func_00416210(D_005366D0, 0, 0x18);
+    func_00416210(cGameModeMan_bGiveUp, 0, 0x18);
 }
 #endif
 

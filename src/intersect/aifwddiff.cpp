@@ -1072,9 +1072,9 @@ struct sVec4_29590 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern sVec4_29590 D_004FF140;
+extern sVec4_29590 t4vect_XAxis;
 extern sVec4_29590 t4vect_YAxis;
-extern sVec4_29590 D_004FF160;
+extern sVec4_29590 t4vect_ZAxis;
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sVec4_29590 vu0Scale_29590(const sVec4_29590& v, float s)
@@ -1103,14 +1103,14 @@ extern "C" int func_00329590(float m, sVec4_29590* mn, sVec4_29590* mx, sVec4_29
                 *hp = *p;
                 hp->x = mn->x;
                 *t = d1;
-                sVec4_29590 n = vu0Scale_29590(D_004FF140, -1.0f);
+                sVec4_29590 n = vu0Scale_29590(t4vect_XAxis, -1.0f);
                 *nrm = n;
             }
             if (d2 < *t) {
                 *hp = *p;
                 hp->x = mx->x;
                 *t = d2;
-                *nrm = D_004FF140;
+                *nrm = t4vect_XAxis;
             }
         }
     }
@@ -1141,14 +1141,14 @@ extern "C" int func_00329590(float m, sVec4_29590* mn, sVec4_29590* mx, sVec4_29
                 *hp = *p;
                 hp->z = mn->z;
                 *t = d1;
-                sVec4_29590 n = vu0Scale_29590(D_004FF160, -1.0f);
+                sVec4_29590 n = vu0Scale_29590(t4vect_ZAxis, -1.0f);
                 *nrm = n;
             }
             if (d2 < *t) {
                 *hp = *p;
                 hp->z = mx->z;
                 *t = d2;
-                *nrm = D_004FF160;
+                *nrm = t4vect_ZAxis;
             }
         }
     }

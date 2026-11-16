@@ -590,9 +590,9 @@ extern float D_004A434C;
 extern float D_004A4350;
 extern float D_004A4354;
 extern float D_004A4440;
-extern float D_004FF140[4];
+extern float t4vect_XAxis[4];
 extern float t4vect_YAxis[4];
-extern float D_004FF160[4];
+extern float t4vect_ZAxis[4];
 extern sM4_B370 D_004FF1A0_B370 __asm__("t4mat_Identity");
 extern sM4_B370 D_005049C0;
 extern char* str_at_HP[];
@@ -692,9 +692,9 @@ static inline void Render_B370(sBezMan_B370* self)
     self->fx = D_004FF1A0_B370;
     {
         sM4_B370 r;
-        ROTATE_B370(&self->fx, r, D_004FF140, ry)
+        ROTATE_B370(&self->fx, r, t4vect_XAxis, ry)
         ROTATE_B370(&self->fx, r, t4vect_YAxis, rx)
-        ROTATE_B370(&self->fx, r, D_004FF160, rz)
+        ROTATE_B370(&self->fx, r, t4vect_ZAxis, rz)
     }
 
     sV4_B370 col;

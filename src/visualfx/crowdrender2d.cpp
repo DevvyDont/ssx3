@@ -167,7 +167,7 @@ struct sCrowdAnim2D {
 // D_00445D38 is one 0xD8-byte crowd anim def (sCrowdAnimDef_BAC0 below); its frames[] start at +0x98.
 struct sCrowdAnimDefFrames_ctor { char pad_0x0[0x98]; int frames[16]; };
 extern sCrowdAnimDefFrames_ctor D_00445D38_ctor __asm__("D_00445D38");
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 /**
  * Constructs a 2D crowd animation: type and animation 0 at frame 0, advancing every 3 ticks from now.
@@ -185,7 +185,7 @@ void* cCrowdAnim2D_cCrowdAnim2D(void* memory, void* param_1)
     anim->fC = 0;
     anim->f10 = D_00445D38_ctor.frames[0];
     anim->f0 = 0;
-    anim->f18 = *(int*)(D_004A5B64 + 0x1C);
+    anim->f18 = *(int*)(cAppMan_TheAppMan + 0x1C);
     anim->f14 = 3;
     return anim;
 }
@@ -298,7 +298,7 @@ struct sCrowdAnim2D_BAC0 {
  */
 extern "C" void cCrowdAnim2D_update(sCrowdAnim2D_BAC0* self)
 {
-    int now = *(int*)(D_004A5B64 + 0x1C);
+    int now = *(int*)(cAppMan_TheAppMan + 0x1C);
     if (now - self->last < self->delay) {
         return;
     }

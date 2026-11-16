@@ -126,8 +126,8 @@ void cTypeObjNode__cTypeObjNode_impl(void* self, int flags)
 //100%
 INCLUDE_ASM("object/objnode", func_00354850);
 #ifdef SKIP_ASM
-extern int D_004A5B78;
-extern int D_004A5B7C;
+extern int cSortObjNode_ObjNodeSortIndex;
+extern int cSortObjNode_ObjNodeNoSortIndex;
 extern void* cSortObjNode_vtbl[];
 
 static inline int objNextId_4850(int* c)
@@ -141,9 +141,9 @@ extern "C" void* func_00354850(void* self, void* a1, int type)
     func_00354720(self, a1, type);
     *(void***)((char*)self + 0xC) = cSortObjNode_vtbl;
     if (type == 6) {
-        id = objNextId_4850(&D_004A5B7C);
+        id = objNextId_4850(&cSortObjNode_ObjNodeNoSortIndex);
     } else {
-        id = objNextId_4850(&D_004A5B78);
+        id = objNextId_4850(&cSortObjNode_ObjNodeSortIndex);
     }
     *(int*)((char*)self + 0x14) = id;
     return self;

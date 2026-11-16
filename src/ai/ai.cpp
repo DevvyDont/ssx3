@@ -325,7 +325,7 @@ extern "C" void cAI_reinitMissionRiders(cAI* self)
 INCLUDE_ASM("ai/ai", cAI_update);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 // PORT: func_0012BB20 is defined below with its own self type; bound by asm label.
 extern "C" void func_0012BB20_AF0(void* self) __asm__("func_0012BB20");
 extern "C" void cAI_AIStateUpdate(void* self);
@@ -373,7 +373,7 @@ static inline char* Rider_AF0(char* obj)
  * riders: with a mission rider loaded, player 0 and, unless PlaybackMan's mode (+0x70) is 0, the mission
  * rider; otherwise the players, the computers (if ComputerRidersActive) and the actors (if
  * ComputerActorsActive). Each pass (cRider_updateSplit1..12, then the rider handler's FX parts) runs over all
- * of them before the next; while bit 0 of D_004A2A50 (pause flags) is set only cRider_updateSplitPaused runs.
+ * of them before the next; while bit 0 of cPauseState_Flags (pause flags) is set only cRider_updateSplitPaused runs.
  * Ends with the FocusMan (func_00101B60) and DangerMan (func_001013A8) updates and AITick++.
  */
 // Updates every active rider: players, computers and others, in fixed passes.
@@ -415,7 +415,7 @@ extern "C" void cAI_update(cAI* self)
                 riders[n - 1] = Rider_AF0(((char**)&self->Actors[0])[i]);
             }
     }
-    if (D_004A2A50 & 1) {
+    if (cPauseState_Flags & 1) {
         for (i = 0; i < n; i++) cRider_updateSplitPaused(riders[i]);
     } else {
         for (i = 0; i < n; i++) handlers[i] = *(char**)(riders[i] + 0x77C);
@@ -1254,20 +1254,20 @@ INCLUDE_ASM("ai/ai", cAI_swaploadPathFile);
 extern "C" void func_00112180(void* rider, int v);
 extern "C" void func_0026AF00(void* self);
 extern "C" void func_0026ADA8(void*, int);
-extern char D_004D33A0[];
+extern char gPaths[];
 /**
  * Swaps in a different AI path file: purges the loaded paths, loads the new file and re-initialises every rider's
  * path.
  *
- * Calls func_0026AF00 (On Tour cPathSys::purgePaths) and func_0026ADA8 on PathSys (D_004D33A0) with the file, then
+ * Calls func_0026AF00 (On Tour cPathSys::purgePaths) and func_0026ADA8 on PathSys (gPaths) with the file, then
  * func_00112180 (cRider::initPath(false)) on each of the NumberOfRidersAllocated riders (+0x28 table).
  *
  * @param filename  the path file name, passed as an int (On Tour const char* filename)
  */
 extern "C" void cAI_swaploadPathFile(cAI* self, int filename) {
     int i;
-    func_0026AF00(D_004D33A0);
-    func_0026ADA8(D_004D33A0, filename);
+    func_0026AF00(gPaths);
+    func_0026ADA8(gPaths, filename);
     for (i = 0; i < self->NumberOfRidersAllocated; i++) {
         func_00112180(*(void**)((char*)self + 0x28 + (i << 2)), 0);
     }
@@ -1280,7 +1280,7 @@ INCLUDE_ASM("ai/ai", cAI_swaploadInjectedPathFile);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self);
-extern char D_004D33A0[];
+extern char gPaths[];
 extern "C" void func_0026AF00(void* self);
 extern "C" int func_0026AD70(void* self, int v);
 extern "C" void func_00112180(void* rider, int v);
@@ -1298,7 +1298,7 @@ struct sAiObj12A340
  *
  * In BE sections 0x11-0x15, game mode 5 or game event 0xB takes only UID 1 and game mode 6 only UID 2; every
  * other case refuses UIDs 1 and 2, and sections 0x16 and up refuse all files. On acceptance frees the old
- * data of the path object D_004D33A0, loads the file into it and re-attaches each rider's path state
+ * data of the path object gPaths, loads the file into it and re-attaches each rider's path state
  * (func_00112180) if there is an AI.
  *
  * @param uiSectionID  the section ID (On Tour uiSectionID); not read, the section comes from Game->SectionMan
@@ -1331,8 +1331,8 @@ extern "C" int cAI_swaploadInjectedPathFile(cAI* self, int uiSectionID, int mode
 ok:
     if (lvl < 0x16)
     {
-        func_0026AF00(D_004D33A0);
-        func_0026AD70(D_004D33A0, data);
+        func_0026AF00(gPaths);
+        func_0026AD70(gPaths, data);
         if ((void*)SSXApp->Game->AI == 0)
             return 1;
         for (int i = 0; i < self->NumberOfRidersAllocated; i++)
@@ -1350,13 +1350,13 @@ INCLUDE_ASM("ai/ai", func_0012A490);
 #ifdef SKIP_ASM
 extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self);
 void func_0026ADA0(void* self);
-extern char D_004D33A0[];
+extern char gPaths[];
 
 extern "C" void func_0012A490(void)
 {
     if (cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan) < 0x16)
     {
-        func_0026ADA0(D_004D33A0);
+        func_0026ADA0(gPaths);
     }
 }
 #endif
@@ -1367,7 +1367,7 @@ INCLUDE_ASM("ai/ai", func_0012A4D0);
 extern "C" void func_0026ADE8(int *);
 
 extern "C" void func_0012A4D0(void) {
-    func_0026ADE8(&(*(int*)&D_004D33A0));
+    func_0026ADE8(&(*(int*)&gPaths));
 }
 #endif
 //100%
@@ -1462,9 +1462,9 @@ static inline t4Vector Front_A560(cRider* rider)
 // Puts the riders (all, or only rider `which`) back on the first path node that has a distance, facing along the path.
 extern "C" void func_0012A560(sAiObj12A340* self, int which)
 {
-    int n = NodeCount_A560(D_004D33A0);
+    int n = NodeCount_A560(gPaths);
     for (int i = 0; i < n; i++) {
-        void* node = func_0026AF70(D_004D33A0, i);
+        void* node = func_0026AF70(gPaths, i);
         float d = func_0026A138(node);
         if (d != -1.0f) {
             float back = d - 1000.0f;
@@ -1568,9 +1568,9 @@ static inline t4Vector Front_A768(cRider* rider)
 // each with a penalty of 3600 ticks per place.
 extern "C" void func_0012A768(sAiObj12A340* self, int n)
 {
-    int count = NodeCount_A768(D_004D33A0);
+    int count = NodeCount_A768(gPaths);
     for (int i = 0; i < count; i++) {
-        void* node = func_0026AF70(D_004D33A0, i);
+        void* node = func_0026AF70(gPaths, i);
         float d = func_0026A138(node);
         if (d != -1.0f) {
             for (int j = 0; j < self->mCount; j++) {
@@ -2096,8 +2096,8 @@ extern "C" void cAI_resetRidersStatTotals(sAiObj128A48* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_purgeAnims);
 #ifdef SKIP_ASM
-extern void** D_004A3DF8;
-extern void* D_004A3E7C;
+extern void** cAnimDataBase_TheAnimDataBase;
+extern void* cGameAnimMap_TheGameAnimMap;
 extern "C" void func_00314FE8(void*, void*);
 extern "C" void func_00311110(void*);
 extern "C" void func_003112C8(void*, int);
@@ -2105,7 +2105,7 @@ extern "C" void func_003112C8(void*, int);
 /**
  * Unloads the character animation file that cAI_loadAnims() loaded.
  *
- * For the one entry of the anim table D_004A3DF8: removes its animations from the game anim map D_004A3E7C,
+ * For the one entry of the anim table cAnimDataBase_TheAnimDataBase: removes its animations from the game anim map cGameAnimMap_TheGameAnimMap,
  * clears the entry, frees the animation banks (func_00311110) and deletes the data source (func_003112C8,
  * flags 3).
  */
@@ -2114,11 +2114,11 @@ extern "C" void cAI_purgeAnims(cAI* self)
     int i;
     for (i = 0; i < 1; i++)
     {
-        void* bank = *(void**)((char*)D_004A3DF8 + ((unsigned char)i << 2));
+        void* bank = *(void**)((char*)cAnimDataBase_TheAnimDataBase + ((unsigned char)i << 2));
         if (bank != 0)
         {
-            func_00314FE8(D_004A3E7C, bank);
-            void** animTable = D_004A3DF8;
+            func_00314FE8(cGameAnimMap_TheGameAnimMap, bank);
+            void** animTable = cAnimDataBase_TheAnimDataBase;
             *(void**)((char*)animTable + ((unsigned char)i << 2)) = 0;
             func_00311110(animTable);
             func_003112C8(bank, 3);
@@ -2140,13 +2140,13 @@ void cGameAnimMap_testResolve_impl(void* map) __asm__("cGameAnimMap_testResolve_
 struct sAnimTable { void* anims[1]; };
 extern char str_data_char_anm_big[];
 extern char str_AdfDataSource[];
-extern char* D_004A1100[1];
+extern char* kAnimBankName[1];
 
 /**
  * Loads the riders' basic animation file and registers its animations in the game anim map.
  *
  * Opens "data/char/anm.big" (func_003DED50), reads "data/char/anm.big|data/char/basic.afl" into a new
- * "AdfDataSource" kept in the anim table D_004A3DF8, adds its animations to the map D_004A3E7C as kind 0,
+ * "AdfDataSource" kept in the anim table cAnimDataBase_TheAnimDataBase, adds its animations to the map cGameAnimMap_TheGameAnimMap as kind 0,
  * resolves the map (cGameAnimMap_testResolve) and releases the archive handle (func_003DEDC0).
  */
 extern "C" void cAI_loadAnims(void)
@@ -2156,11 +2156,11 @@ extern "C" void cAI_loadAnims(void)
     func_003DED50(str_data_char_anm_big, 0, 0x64, &handle);
     for (i = 0; i < 1; i++)
     {
-        void* bank = func_00311250(cMemMan_alloc(0x18, str_AdfDataSource, 0, 0), D_004A1100[i]);
-        ((sAnimTable*)D_004A3DF8)->anims[(unsigned char)i] = bank;
-        func_00314F30(D_004A3E7C, i, bank);
+        void* bank = func_00311250(cMemMan_alloc(0x18, str_AdfDataSource, 0, 0), kAnimBankName[i]);
+        ((sAnimTable*)cAnimDataBase_TheAnimDataBase)->anims[(unsigned char)i] = bank;
+        func_00314F30(cGameAnimMap_TheGameAnimMap, i, bank);
     }
-    cGameAnimMap_testResolve_impl(D_004A3E7C);
+    cGameAnimMap_testResolve_impl(cGameAnimMap_TheGameAnimMap);
     func_003DEDC0(handle, 0x64);
 }
 #endif
@@ -2636,8 +2636,8 @@ struct sQuat_12BE20
     sQuat_12BE20(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sQuat_12BE20 D_004FF130_12BE20 __asm__("D_004FF130");
-extern sQuat_12BE20 D_004FF160_12BE20 __asm__("D_004FF160");
+extern sQuat_12BE20 D_004FF130_12BE20 __asm__("t4vect_Origin");
+extern sQuat_12BE20 D_004FF160_12BE20 __asm__("t4vect_ZAxis");
 
 static inline sQuat_12BE20 AxisAngle_12BE20(const sQuat_12BE20& axis, float angle)
 {
@@ -3055,7 +3055,7 @@ extern "C" void cGateControl_readFromReplayFrame(cGateControl* self, void* obj)
 INCLUDE_ASM("ai/ai", cFinishLineControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" float func_00119368(void* self, int a1);
-extern float D_004A4C8C;
+extern float nFinishLineControl_kFinishStopThreshCPS;
 
 struct sAiVec4_12C5C8 {
     float x, y, z, w;
@@ -3092,14 +3092,14 @@ struct sAiObj12C5C8
  * Enters the finish-line control: closes the rider's trick scoring and picks the first finish state.
  *
  * Ends the current trick and combo (func_00119368(metrix, 1)). FinishState is 0 (Brake) when the rider moves
- * faster than D_004A4C8C (277.78, set by a static initializer), is spinning (mSpinRate) or stands on a slope
+ * faster than nFinishLineControl_kFinishStopThreshCPS (277.78, set by a static initializer), is spinning (mSpinRate) or stands on a slope
  * (mGroundNormal.z < 0.8); otherwise 1 (IntoStance).
  */
 extern "C" void cFinishLineControl_gainFocus(cFinishLineControl* self)
 {
     func_00119368(*(void**)((char*)self->mRider + 0x790), 1);
     char* rider = (char*)self->mRider;
-    if (D_004A4C8C < aiLength_12C5C8(*(sAiVec4_12C5C8*)(rider + 0x1E0)))
+    if (nFinishLineControl_kFinishStopThreshCPS < aiLength_12C5C8(*(sAiVec4_12C5C8*)(rider + 0x1E0)))
     {
         self->FinishState = 0;
         return;
@@ -3131,7 +3131,7 @@ extern "C" void func_00115B58(void*);
 int func_0011FE98(void* self);
 extern "C" int func_00311AE8(void*, int);
 int func_00312AA0(void* self, int i);
-extern float D_004A4C8C;
+extern float nFinishLineControl_kFinishStopThreshCPS;
 extern char t4vect_Zero[];
 
 struct sVec4_12C678
@@ -3233,7 +3233,7 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self)
             {
                 vu0ScaleEq_12C678(*(sVec4_12C678*)((char*)self->mRider + 0x1E0), 0.9700000286102295f);
                 if (aiAbs_12C678(*(float*)((char*)self->mRider + 0x214)) == 1.0f ||
-                    aiLength_12C678(*(sVec4_12C678*)((char*)self->mRider + 0x1E0)) < D_004A4C8C)
+                    aiLength_12C678(*(sVec4_12C678*)((char*)self->mRider + 0x1E0)) < nFinishLineControl_kFinishStopThreshCPS)
                 {
                     self->FinishState = 1;
                 }
@@ -3332,7 +3332,7 @@ extern "C" void func_0029E578(void* self, void* a1);
 extern "C" int func_00311AE8(void*, int);
 extern "C" void cReplay_eventWipeout(void* self, int key, int id);
 extern "C" void func_00309990(void* self);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 extern char t4vect_Zero[];
 
 struct sVec4_12CA30
@@ -3398,7 +3398,7 @@ extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
         *(int*)((char*)self->mRider + 0x318) = 0;
     }
     cReplay_eventWipeout(SSXApp->Game->Replay, *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0x790) + 0xFC);
-    func_00309990(D_004A3DD8);
+    func_00309990(cWScriptMan_TheWScriptMan);
 }
 #endif
 
@@ -5878,8 +5878,8 @@ struct sQuat_12FEC8
     sQuat_12FEC8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sQuat_12FEC8 D_004FF130;
-extern sQuat_12FEC8 D_004FF160;
+extern sQuat_12FEC8 t4vect_Origin;
+extern sQuat_12FEC8 t4vect_ZAxis;
 
 static inline sQuat_12FEC8 AxisAngle_12FEC8(const sQuat_12FEC8& axis, float angle)
 {
@@ -5892,7 +5892,7 @@ static inline sQuat_12FEC8 AxisAngle_12FEC8(const sQuat_12FEC8& axis, float angl
  * Flips the rider's stance for a board pivot: toggles switch stance and swaps the nose and tail sides.
  *
  * Toggles the switch flag (rider + 0x320), sets the animation orientation offset to a turn of 0 or pi about Z
- * (D_004FF130, D_004FF160) and copies the flag to the animator's IsFlipped; swaps rail styles 1 and 2 and
+ * (t4vect_Origin, t4vect_ZAxis) and copies the flag to the animator's IsFlipped; swaps rail styles 1 and 2 and
  * negates the pivot value and target (rider + 0x280, + 0x288).
  */
 extern "C" void cBoardPressControl_changeFakieBoardPress(cBoardPressControl* self)
@@ -5902,8 +5902,8 @@ extern "C" void cBoardPressControl_changeFakieBoardPress(cBoardPressControl* sel
     float fakieAngle = 0.0f;
     if (*(int*)(rider + 0x320) != 0) fakieAngle = 3.1415927410125732f;
     char* anim = *(char**)(rider + 0x784);
-    *(sQuat_12FEC8*)(anim + 0x30) = D_004FF130;
-    *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(D_004FF160, -fakieAngle);
+    *(sQuat_12FEC8*)(anim + 0x30) = t4vect_Origin;
+    *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(t4vect_ZAxis, -fakieAngle);
     char* rider2 = (char*)self->mRider;
     *(int*)(*(char**)(rider2 + 0x784) + 0x18) = *(int*)(rider2 + 0x320);
     char* rider3 = (char*)self->mRider;
@@ -6693,12 +6693,12 @@ extern "C" int cBoardPressControl_checkForWipeout(cBoardPressControl* self, void
         char* rider4 = (char*)self->mRider;
         float speed = aiLength_12C5C8(*(sAiVec4_12C5C8*)(rider4 + 0x1E0));
         info.pos = *(sQuat_12FEC8*)(rider4 + 0x110);
-        info.up = Scale_130DD0(D_004FF160, -1.0f);
+        info.up = Scale_130DD0(t4vect_ZAxis, -1.0f);
         info.speed = speed;
         if (speed > 0.0010000000474974513f)
             info.dir = Div_130DD0(*(sQuat_12FEC8*)((char*)self->mRider + 0x1E0), speed);
         else
-            info.dir = D_004FF160;
+            info.dir = t4vect_ZAxis;
         char* rider5 = (char*)self->mRider;
         if (*(int*)(rider5 + 0x330) == 2)
             func_0010EB30(rider5, 0x167, 0, *(int*)(rider5 + 0x438), &info);
@@ -7438,8 +7438,8 @@ struct sQuat_2060
     sQuat_2060(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sQuat_2060 D_004FF130_2060 __asm__("D_004FF130");
-extern sQuat_2060 D_004FF160_2060 __asm__("D_004FF160");
+extern sQuat_2060 D_004FF130_2060 __asm__("t4vect_Origin");
+extern sQuat_2060 D_004FF160_2060 __asm__("t4vect_ZAxis");
 
 static inline sQuat_2060 AxisAngle_2060(const sQuat_2060& axis, float angle)
 {
@@ -8988,10 +8988,10 @@ struct sXf
     sVec4 pos;
     sVec4 rot;
 };
-extern t4Vector D_004FF130_4DD0 __asm__("D_004FF130");
-extern t4Vector D_004FF140;
+extern t4Vector D_004FF130_4DD0 __asm__("t4vect_Origin");
+extern t4Vector t4vect_XAxis;
 extern t4Vector t4vect_YAxis;
-extern t4Vector D_004FF160_4DD0 __asm__("D_004FF160");
+extern t4Vector D_004FF160_4DD0 __asm__("t4vect_ZAxis");
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sVec4 QuatMul_12E010_4DD0(const sVec4& a, const sVec4& b)
 {
@@ -9250,7 +9250,7 @@ extern "C" void func_00134DD0_x(void* self, sXf* xf)
         nv = cur;
     *(float*)((char*)self + 0x40) = nv;
     sVec4 ax = Norm_134DD0(Sub_12E010_4DD0(ScaleO_134DD0(t4vect_YAxis, nv),
-                                             ScaleO_134DD0(D_004FF140, 1.0f - *(float*)((char*)self + 0x40))));
+                                             ScaleO_134DD0(t4vect_XAxis, 1.0f - *(float*)((char*)self + 0x40))));
     {
         sVec4 q3;
         q3 = AxisAngleB_134DD0(ax, a2);
@@ -9888,8 +9888,8 @@ extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
     int railStyle = *(int*)(rider + 0x328);
     if (railStyle == 4) {
         char* anim = *(char**)(rider + 0x784);
-        *(sQuat_12FEC8*)(anim + 0x30) = D_004FF130;
-        *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(D_004FF160, 1.5707963705062866f);
+        *(sQuat_12FEC8*)(anim + 0x30) = t4vect_Origin;
+        *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
         cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), grind->anims[0], 0, -1.0f);
     } else if (railStyle == 3) {
         cRiderAnimBase_play(*(void**)(rider + 0x784), grind->anims[1], 0, -1.0f);
@@ -9897,13 +9897,13 @@ extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
         *(int*)(rider + 0x320) = 0;
         *(int*)(*(char**)((char*)self->mRider + 0x784) + 0x18) = 0;
         char* anim = *(char**)((char*)self->mRider + 0x784);
-        *(sQuat_12FEC8*)(anim + 0x30) = D_004FF130;
-        *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(D_004FF160, 1.5707963705062866f);
+        *(sQuat_12FEC8*)(anim + 0x30) = t4vect_Origin;
+        *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
         cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), grind->anims[2], 0, -1.0f);
     } else {
         char* anim = *(char**)(rider + 0x784);
-        *(sQuat_12FEC8*)(anim + 0x30) = D_004FF130;
-        *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(D_004FF160, 1.5707963705062866f);
+        *(sQuat_12FEC8*)(anim + 0x30) = t4vect_Origin;
+        *(sQuat_12FEC8*)(anim + 0x40) = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
         cRiderAnimBase_play(*(void**)((char*)self->mRider + 0x784), grind->anims[3], 0, -1.0f);
     }
     float k = 0.33000001311302185f;

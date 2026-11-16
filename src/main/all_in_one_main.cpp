@@ -660,8 +660,8 @@ extern float D_004C6748[4];
 extern float D_004C6758[4];
 extern float D_004C6768[4];
 extern float D_004C6778[4];
-extern float D_004C6788[4];
-extern float D_004C6798[4];
+extern float gPopupWhite[4];
+extern float gPopupBlack[4];
 extern float D_004C67A8[4];
 extern float D_004C67B8[4];
 extern float D_004C67C8[4];
@@ -976,14 +976,14 @@ void sti_001DBC98(int init, int prio)
             D_004C6778[1] = D_004C6338[3];
             D_004C6778[2] = 0.100000001f;
             D_004C6778[3] = 0.899999976f;
-            D_004C6788[0] = 1.0f;
-            D_004C6788[1] = 1.0f;
-            D_004C6788[2] = 1.0f;
-            D_004C6788[3] = 1.0f;
-            D_004C6798[0] = 1.0f;
-            D_004C6798[1] = D_004C6338[3];
-            D_004C6798[2] = D_004C6338[3];
-            D_004C6798[3] = D_004C6338[3];
+            gPopupWhite[0] = 1.0f;
+            gPopupWhite[1] = 1.0f;
+            gPopupWhite[2] = 1.0f;
+            gPopupWhite[3] = 1.0f;
+            gPopupBlack[0] = 1.0f;
+            gPopupBlack[1] = D_004C6338[3];
+            gPopupBlack[2] = D_004C6338[3];
+            gPopupBlack[3] = D_004C6338[3];
             D_004C67A8[0] = 1.0f;
             D_004C67A8[1] = 0.400000006f;
             D_004C67A8[2] = 0.720000029f;
@@ -1373,30 +1373,30 @@ extern "C" void func_001DCCB0(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCCB8);
 #ifdef SKIP_ASM
-extern int D_004A19C4;
+extern int cRealFE_mStartState;
 
 extern "C" void func_001DCCB8(int arg0) {
-    D_004A19C4 = arg0;
+    cRealFE_mStartState = arg0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCCC0);
 #ifdef SKIP_ASM
-extern int D_004A19C4;
+extern int cRealFE_mStartState;
 
 extern "C" int func_001DCCC0(void) {
-    return D_004A19C4;
+    return cRealFE_mStartState;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DCCC8);
 #ifdef SKIP_ASM
-extern int D_004A19CC;
+extern int cRealFE_mMovieList;
 
 extern "C" void func_001DCCC8(void) {
-    D_004A19CC |= 4;
+    cRealFE_mMovieList |= 4;
 }
 #endif
 
@@ -2551,7 +2551,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDBD0);
 extern "C" void *func_0039E318_DBD0(void *, int, int) __asm__("func_0039E318");
 extern "C" void cPopupInfo_cPopupInfo_DBD0(void *) __asm__("cPopupInfo_cPopupInfo");
 extern int cScreenPopup_vtbl[];
-extern int D_004A3E90;
+extern int cBXString_EmptyString;
 
 struct S_DBD0 {
     int pad0[2];
@@ -2564,8 +2564,8 @@ extern "C" S_DBD0 *func_001DDBD0(S_DBD0 *self) {
     func_0039E318_DBD0(self, 0, 0);
     self->vt = cScreenPopup_vtbl;
     cPopupInfo_cPopupInfo_DBD0((char *)self + 0xBC);
-    self->v2B0 = D_004A3E90;
-    self->v2B4 = D_004A3E90;
+    self->v2B0 = cBXString_EmptyString;
+    self->v2B4 = cBXString_EmptyString;
     return self;
 }
 #endif
@@ -2695,43 +2695,43 @@ extern "C" void func_001DDD08(int arg0) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDD28);
 #ifdef SKIP_ASM
-extern void *D_004A2028;
+extern void *cFEMemCard_mInstance;
 
 extern "C" int func_001DDD28(void) {
-    return (*(int *)((char*)(D_004A2028) + (0x1DC)));
+    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1DC)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDD38);
 #ifdef SKIP_ASM
-extern void *D_004A2028;
+extern void *cFEMemCard_mInstance;
 
 extern "C" int func_001DDD38(void) {
-    return (*(int *)((char*)(D_004A2028) + (0x1F4)));
+    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1F4)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDD48);
 #ifdef SKIP_ASM
-extern void *D_004A2028;
+extern void *cFEMemCard_mInstance;
 
 extern "C" int func_001DDD48(void) {
-    return (*(int *)((char*)(D_004A2028) + (0x1E0)));
+    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1E0)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDD58);
 #ifdef SKIP_ASM
-extern void *D_004A2028;
+extern void *cFEMemCard_mInstance;
 
 extern "C" int func_001DDD58(void) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(D_004A2028) + (0x1E4)));
-    (*(int *)((char*)(D_004A2028) + (0x1E4))) = 0;
+    temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1E4)));
+    (*(int *)((char*)(cFEMemCard_mInstance) + (0x1E4))) = 0;
     return temp_2;
 }
 #endif
@@ -2739,33 +2739,33 @@ extern "C" int func_001DDD58(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDD68);
 #ifdef SKIP_ASM
-extern void *D_004A2028;
+extern void *cFEMemCard_mInstance;
 
 extern "C" int func_001DDD68(void) {
-    return (*(int *)((char*)(D_004A2028) + (0x1F0)));
+    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1F0)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDD78);
 #ifdef SKIP_ASM
-extern void *D_004A2028;
+extern void *cFEMemCard_mInstance;
 
 extern "C" int func_001DDD78(void) {
-    return (*(int *)((char*)(D_004A2028) + (0x1A8)));
+    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1A8)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDD88);
 #ifdef SKIP_ASM
-extern void *D_004A2028;
+extern void *cFEMemCard_mInstance;
 
 extern "C" int func_001DDD88(void) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(D_004A2028) + (0x1F8)));
-    (*(int *)((char*)(D_004A2028) + (0x1F8))) = 0;
+    temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1F8)));
+    (*(int *)((char*)(cFEMemCard_mInstance) + (0x1F8))) = 0;
     return temp_2;
 }
 #endif
@@ -2773,13 +2773,13 @@ extern "C" int func_001DDD88(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDD98);
 #ifdef SKIP_ASM
-extern void *D_004A2028;
+extern void *cFEMemCard_mInstance;
 
 extern "C" int func_001DDD98(void) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(D_004A2028) + (0x1FC)));
-    (*(int *)((char*)(D_004A2028) + (0x1FC))) = 0;
+    temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1FC)));
+    (*(int *)((char*)(cFEMemCard_mInstance) + (0x1FC))) = 0;
     return temp_2;
 }
 #endif
@@ -2787,23 +2787,23 @@ extern "C" int func_001DDD98(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDDA8);
 #ifdef SKIP_ASM
-extern void *D_004A2028;
+extern void *cFEMemCard_mInstance;
 
 extern "C" int func_001DDDA8(void) {
-    return (*(int *)((char*)(D_004A2028) + (0x1E8)));
+    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1E8)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDDB8);
 #ifdef SKIP_ASM
-extern void *D_004A2028;
+extern void *cFEMemCard_mInstance;
 
 extern "C" int func_001DDDB8(void) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(D_004A2028) + (0x1EC)));
-    (*(int *)((char*)(D_004A2028) + (0x1EC))) = 0;
+    temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1EC)));
+    (*(int *)((char*)(cFEMemCard_mInstance) + (0x1EC))) = 0;
     return temp_2;
 }
 #endif
@@ -2812,7 +2812,7 @@ extern "C" int func_001DDDB8(void) {
 INCLUDE_ASM("main/all_in_one_main", func_001DDDC8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A2028_DDC8 __asm__("D_004A2028");
+extern int D_004A2028_DDC8 __asm__("cFEMemCard_mInstance");
 
 extern "C" int func_001DDDC8(void) {
     return D_004A2028_DDC8 != 0;
@@ -2902,10 +2902,10 @@ extern "C" void cFEPopupConfirm__cFEPopupConfirm(void *self) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDEE0);
 #ifdef SKIP_ASM
-extern int D_004A203C;
+extern int cFEPopupConfirm_mUsePreFE;
 
 extern "C" void func_001DDEE0(int arg0) {
-    D_004A203C = arg0;
+    cFEPopupConfirm_mUsePreFE = arg0;
 }
 #endif
 
@@ -3129,7 +3129,7 @@ extern void* cFEStateOptionsDeviceSelect_vtbl[];
 /**
  * Destroys the options device-select state: stores its vtable at +0x8, then runs the base destructor.
  *
- * The base, func_001D5428(), clears the global D_004A2028 and runs the cUIState destructor (func_0039E390). The
+ * The base, func_001D5428(), clears the global cFEMemCard_mInstance and runs the cUIState destructor (func_0039E390). The
  * g++ delete flags in the second argument register pass through untouched.
  *
  * @return no meaningful value (func_001D5428 returns nothing)
@@ -3200,7 +3200,7 @@ extern void* cFEStateProfileLoad_vtbl[];
 /**
  * Destroys the profile-load state: stores its vtable at +0x8, then runs the base destructor.
  *
- * The base, func_001D5428(), clears the global D_004A2028 and runs the cUIState destructor (func_0039E390). The
+ * The base, func_001D5428(), clears the global cFEMemCard_mInstance and runs the cUIState destructor (func_0039E390). The
  * g++ delete flags in the second argument register pass through untouched.
  *
  * @return no meaningful value (func_001D5428 returns nothing)
@@ -3239,7 +3239,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE288);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E318_E288(void *, int, int) __asm__("func_0039E318");
 extern int cKeyboardPopup_vtbl[];
-extern int D_004A3E90;
+extern int cBXString_EmptyString;
 
 struct S_E288 {
     int pad0[2];
@@ -3253,7 +3253,7 @@ extern "C" S_E288 *func_001DE288(S_E288 *self) {
     func_0039E318_E288(self, 0, 0);
     self->vt = cKeyboardPopup_vtbl;
     self->v60 = 0x3F;
-    self->v424 = D_004A3E90;
+    self->v424 = cBXString_EmptyString;
     return self;
 }
 #endif

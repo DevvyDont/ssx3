@@ -1597,7 +1597,7 @@ extern "C" void* func_0032C508(void* self)
 INCLUDE_ASM("intersect/riderspheretree", func_0032C540);
 #ifdef SKIP_ASM
 extern sSphereVec4 D_004FF640[8];
-extern sSphereVec4 D_004FF130;
+extern sSphereVec4 t4vect_Origin;
 
 extern "C" void func_0032C540(void* self)
 {
@@ -1605,7 +1605,7 @@ extern "C" void func_0032C540(void* self)
     for (int i = 0; i < 8; i++) {
         dst[i] = D_004FF640[i];
     }
-    *(sSphereVec4*)((char*)self + 0x80) = D_004FF130;
+    *(sSphereVec4*)((char*)self + 0x80) = t4vect_Origin;
     *(float*)((char*)self + 0x90) = 1.0f;
 }
 #endif
@@ -2715,15 +2715,15 @@ INCLUDE_ASM("intersect/riderspheretree", SphereTree_initCache);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label as a placement operator new[].
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_SphereTreeCache[];
-extern void** D_004A3FC8;
-extern void* D_004A3FCC;
-extern int D_004A3FD0;
-extern int D_004A3FD4;
-extern void** D_004A3FD8;
-extern void* D_004A3FDC;
-extern int D_004A3FE0;
-extern int D_004A3FE4;
-extern int D_004A3FE8;
+extern void** SphereTree_buffers;
+extern void* SphereTree_bufID;
+extern int SphereTree_bufNum;
+extern int SphereTree_bufPtr;
+extern void** SphereTree_bigBuffers;
+extern void* SphereTree_bigBufID;
+extern int SphereTree_bigBufNum;
+extern int SphereTree_bigBufPtr;
+extern int SphereTree_bigBufDepth;
 
 /**
  * Allocates the sphere-tree decompression caches: small and big buffers, each holding a full octree of its
@@ -2734,7 +2734,7 @@ extern int D_004A3FE8;
  * @param nSmall  number of small buffers (On Tour numBufs)
  * @param smallDepth  octree depth of a small buffer (On Tour bufDepth)
  * @param nBig  number of big buffers (On Tour numBigBufs)
- * @param threshold  octree depth of a big buffer, also kept in D_004A3FE8 (On Tour bigDepth)
+ * @param threshold  octree depth of a big buffer, also kept in SphereTree_bigBufDepth (On Tour bigDepth)
  */
 // Allocates the two decompression caches; each buffer holds a full octree of the given depth
 // (1 + 8 + 64 + ... nodes).
@@ -2744,41 +2744,41 @@ extern "C" void SphereTree_initCache(int nSmall, int smallDepth, int nBig, int t
     int bigSize = 0;
     int i;
     int k;
-    D_004A3FE8 = threshold;
+    SphereTree_bigBufDepth = threshold;
     k = 1;
     for (i = 0; i <= smallDepth; i++) {
         smallSize += k;
         k <<= 3;
     }
     k = 1;
-    for (i = 0; i <= D_004A3FE8; i++) {
+    for (i = 0; i <= SphereTree_bigBufDepth; i++) {
         bigSize += k;
         k <<= 3;
     }
-    D_004A3FC8 = 0;
-    D_004A3FCC = 0;
-    D_004A3FD8 = 0;
-    D_004A3FDC = 0;
+    SphereTree_buffers = 0;
+    SphereTree_bufID = 0;
+    SphereTree_bigBuffers = 0;
+    SphereTree_bigBufID = 0;
     if (nSmall != 0) {
-        D_004A3FC8 = new (str_SphereTreeCache, 0, 0) void*[nSmall];
-        D_004A3FCC = new (str_SphereTreeCache, 0, 0) int[nSmall];
+        SphereTree_buffers = new (str_SphereTreeCache, 0, 0) void*[nSmall];
+        SphereTree_bufID = new (str_SphereTreeCache, 0, 0) int[nSmall];
     }
     if (nBig != 0) {
-        D_004A3FD8 = new (str_SphereTreeCache, 0, 0) void*[nBig];
-        D_004A3FDC = new (str_SphereTreeCache, 0, 0) int[nBig];
+        SphereTree_bigBuffers = new (str_SphereTreeCache, 0, 0) void*[nBig];
+        SphereTree_bigBufID = new (str_SphereTreeCache, 0, 0) int[nBig];
     }
     for (i = 0; i < nSmall; i++) {
-        D_004A3FC8[i] = new (str_SphereTreeCache, 0, 0) char[smallSize];
-        ((int*)D_004A3FCC)[i] = -1;
+        SphereTree_buffers[i] = new (str_SphereTreeCache, 0, 0) char[smallSize];
+        ((int*)SphereTree_bufID)[i] = -1;
     }
     for (i = 0; i < nBig; i++) {
-        D_004A3FD8[i] = new (str_SphereTreeCache, 0, 0) char[bigSize];
-        ((int*)D_004A3FDC)[i] = -1;
+        SphereTree_bigBuffers[i] = new (str_SphereTreeCache, 0, 0) char[bigSize];
+        ((int*)SphereTree_bigBufID)[i] = -1;
     }
-    D_004A3FD0 = nSmall;
-    D_004A3FE0 = nBig;
-    D_004A3FD4 = 0;
-    D_004A3FE4 = 0;
+    SphereTree_bufNum = nSmall;
+    SphereTree_bigBufNum = nBig;
+    SphereTree_bufPtr = 0;
+    SphereTree_bigBufPtr = 0;
 }
 #endif
 
@@ -2786,44 +2786,44 @@ extern "C" void SphereTree_initCache(int nSmall, int smallDepth, int nBig, int t
 INCLUDE_ASM("intersect/riderspheretree", func_0032DE20);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
-extern void** D_004A3FC8;
-extern void* D_004A3FCC;
-extern int D_004A3FD0;
-extern void** D_004A3FD8;
-extern void* D_004A3FDC;
-extern int D_004A3FE0;
+extern void** SphereTree_buffers;
+extern void* SphereTree_bufID;
+extern int SphereTree_bufNum;
+extern void** SphereTree_bigBuffers;
+extern void* SphereTree_bigBufID;
+extern int SphereTree_bigBufNum;
 
 extern "C" void func_0032DE20(void)
 {
-    if (D_004A3FC8 != 0) {
-        for (int i = 0; i < D_004A3FD0; i++) {
-            if (D_004A3FC8[i] != 0) {
-                cMemMan_free(D_004A3FC8[i]);
+    if (SphereTree_buffers != 0) {
+        for (int i = 0; i < SphereTree_bufNum; i++) {
+            if (SphereTree_buffers[i] != 0) {
+                cMemMan_free(SphereTree_buffers[i]);
             }
         }
-        if (D_004A3FC8 != 0) {
-            cMemMan_free(D_004A3FC8);
+        if (SphereTree_buffers != 0) {
+            cMemMan_free(SphereTree_buffers);
         }
-        D_004A3FC8 = 0;
+        SphereTree_buffers = 0;
     }
-    if (D_004A3FCC != 0) {
-        cMemMan_free(D_004A3FCC);
-        D_004A3FCC = 0;
+    if (SphereTree_bufID != 0) {
+        cMemMan_free(SphereTree_bufID);
+        SphereTree_bufID = 0;
     }
-    if (D_004A3FD8 != 0) {
-        for (int i = 0; i < D_004A3FE0; i++) {
-            if (D_004A3FD8[i] != 0) {
-                cMemMan_free(D_004A3FD8[i]);
+    if (SphereTree_bigBuffers != 0) {
+        for (int i = 0; i < SphereTree_bigBufNum; i++) {
+            if (SphereTree_bigBuffers[i] != 0) {
+                cMemMan_free(SphereTree_bigBuffers[i]);
             }
         }
-        if (D_004A3FD8 != 0) {
-            cMemMan_free(D_004A3FD8);
+        if (SphereTree_bigBuffers != 0) {
+            cMemMan_free(SphereTree_bigBuffers);
         }
-        D_004A3FD8 = 0;
+        SphereTree_bigBuffers = 0;
     }
-    if (D_004A3FDC != 0) {
-        cMemMan_free(D_004A3FDC);
-        D_004A3FDC = 0;
+    if (SphereTree_bigBufID != 0) {
+        cMemMan_free(SphereTree_bigBufID);
+        SphereTree_bigBufID = 0;
     }
 }
 #endif
@@ -2831,15 +2831,15 @@ extern "C" void func_0032DE20(void)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", func_0032DF28);
 #ifdef SKIP_ASM
-extern void** D_004A3FC8;
-extern void* D_004A3FCC;
-extern int D_004A3FD0;
-extern int D_004A3FD4;
-extern void** D_004A3FD8;
-extern void* D_004A3FDC;
-extern int D_004A3FE0;
-extern int D_004A3FE4;
-extern int D_004A3FE8;
+extern void** SphereTree_buffers;
+extern void* SphereTree_bufID;
+extern int SphereTree_bufNum;
+extern int SphereTree_bufPtr;
+extern void** SphereTree_bigBuffers;
+extern void* SphereTree_bigBufID;
+extern int SphereTree_bigBufNum;
+extern int SphereTree_bigBufPtr;
+extern int SphereTree_bigBufDepth;
 extern "C" void* func_0032B620(void* dst, void* src);
 
 struct sSphereData_DF28 {
@@ -2857,38 +2857,38 @@ extern "C" int func_0032DF28(void* selfp)
     sSphereData_DF28* self = (sSphereData_DF28*)selfp;
     int key = self->key;
     int* pslot = &self->slot;
-    if (self->size < D_004A3FE8) {
-        if (((int*)D_004A3FCC)[*pslot] == key) {
-            return (int)D_004A3FC8[*pslot];
+    if (self->size < SphereTree_bigBufDepth) {
+        if (((int*)SphereTree_bufID)[*pslot] == key) {
+            return (int)SphereTree_buffers[*pslot];
         }
-        for (int i = 0; i < D_004A3FD0; i++) {
-            if (((int*)D_004A3FCC)[i] == key) {
+        for (int i = 0; i < SphereTree_bufNum; i++) {
+            if (((int*)SphereTree_bufID)[i] == key) {
                 *pslot = i;
-                return (int)D_004A3FC8[i];
+                return (int)SphereTree_buffers[i];
             }
         }
-        func_0032B620(D_004A3FC8[D_004A3FD4], self->packed);
-        ((int*)D_004A3FCC)[D_004A3FD4] = key;
-        *pslot = D_004A3FD4;
-        D_004A3FD4++;
-        D_004A3FD4 %= D_004A3FD0;
-        return (int)D_004A3FC8[*pslot];
+        func_0032B620(SphereTree_buffers[SphereTree_bufPtr], self->packed);
+        ((int*)SphereTree_bufID)[SphereTree_bufPtr] = key;
+        *pslot = SphereTree_bufPtr;
+        SphereTree_bufPtr++;
+        SphereTree_bufPtr %= SphereTree_bufNum;
+        return (int)SphereTree_buffers[*pslot];
     } else {
-        if (((int*)D_004A3FDC)[*pslot] == key) {
-            return (int)D_004A3FD8[*pslot];
+        if (((int*)SphereTree_bigBufID)[*pslot] == key) {
+            return (int)SphereTree_bigBuffers[*pslot];
         }
-        for (int i = 0; i < D_004A3FE0; i++) {
-            if (((int*)D_004A3FDC)[i] == key) {
+        for (int i = 0; i < SphereTree_bigBufNum; i++) {
+            if (((int*)SphereTree_bigBufID)[i] == key) {
                 *pslot = i;
-                return (int)D_004A3FD8[i];
+                return (int)SphereTree_bigBuffers[i];
             }
         }
-        func_0032B620(D_004A3FD8[D_004A3FE4], self->packed);
-        ((int*)D_004A3FDC)[D_004A3FE4] = key;
-        *pslot = D_004A3FE4;
-        D_004A3FE4++;
-        D_004A3FE4 %= D_004A3FE0;
-        return (int)D_004A3FD8[*pslot];
+        func_0032B620(SphereTree_bigBuffers[SphereTree_bigBufPtr], self->packed);
+        ((int*)SphereTree_bigBufID)[SphereTree_bigBufPtr] = key;
+        *pslot = SphereTree_bigBufPtr;
+        SphereTree_bigBufPtr++;
+        SphereTree_bigBufPtr %= SphereTree_bigBufNum;
+        return (int)SphereTree_bigBuffers[*pslot];
     }
 }
 #endif

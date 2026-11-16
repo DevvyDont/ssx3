@@ -597,7 +597,7 @@ struct sGs_1510 {
     void SetF22(int v) { f4_22 = v; }
 };
 
-extern sGs_1510 D_00501420_1510 __asm__("D_00501420");
+extern sGs_1510 D_00501420_1510 __asm__("sDrawState_s_defaultDrawState");
 
 class cGfx_1510 {
 public:
@@ -634,7 +634,7 @@ public:
 /**
  * Draws the punch effect's four sprites when it is active.
  *
- * Pushes a copy of the default draw state (D_00501420) with the effect texture (GrMan _EffectTexMap[24],
+ * Pushes a copy of the default draw state (sDrawState_s_defaultDrawState) with the effect texture (GrMan _EffectTexMap[24],
  * +0xFB0) and its blend settings, draws each sprite at pos[i] with its size and colour over the whole
  * texture, then pops the state.
  */
@@ -2418,7 +2418,7 @@ struct sGsState_3E28 {
     unsigned int w10;
 };
 
-extern sGsState_3E28 D_00501420;
+extern sGsState_3E28 sDrawState_s_defaultDrawState;
 
 static inline void SetF22_3E28(sGsState_3E28* s, int v)
 {
@@ -2476,7 +2476,7 @@ extern void func_002F3418_3E28(void*, sV2_3E28*) __asm__("func_002F3418");
  *
  * Needs SplashToggles "Enable" and "Render" and this view being the one rendered. When D_004A3B60 (a
  * script-controlled flag that also gates other lens effects) is set, it resets the splashes instead. Draws in
- * its own 2D scene with a pushed copy of the default draw state (D_00501420) and the current screen size.
+ * its own 2D scene with a pushed copy of the default draw state (sDrawState_s_defaultDrawState) and the current screen size.
  */
 extern "C" void cSplashManager_render(sEmitter_3E28* self)
 {
@@ -2500,7 +2500,7 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
     ((cGfx_3E28*)ps2GraphicsMan)->SetTexture(t4mat_Identity);
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop[1] = ((cGfx_3E28*)ps2GraphicsMan)->stateTop[0];
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop++;
-    *((cGfx_3E28*)ps2GraphicsMan)->stateTop = D_00501420;
+    *((cGfx_3E28*)ps2GraphicsMan)->stateTop = sDrawState_s_defaultDrawState;
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f8_5 = 8;
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f4_23 = 2;
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f4_20 = 0;
@@ -2926,7 +2926,7 @@ struct sGsState_4A08 {
     void SetF22(int v) { f4_22 = v; }
 };
 
-extern sGsState_4A08 D_00501420_4A08 __asm__("D_00501420");
+extern sGsState_4A08 D_00501420_4A08 __asm__("sDrawState_s_defaultDrawState");
 
 class cGfx_4A08 {
 public:

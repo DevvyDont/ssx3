@@ -2027,15 +2027,15 @@ extern "C" void func_002723A8(cScriptHeap* scriptHeap, void* p)
 INCLUDE_ASM("replay/replaycache", func_00272488);
 #ifdef SKIP_ASM
 extern "C" void* func_00272308(void* heap, int size);
-extern int D_004A3488;
+extern int kScriptHeapPointerSize;
 
 // PORT: real arity is (size, heap); the unit declares func_00272488(void*) for its callers.
 extern "C" void* func_00272488_impl(int size, void* heap) __asm__("func_00272488");
 extern "C" void* func_00272488_impl(int size, void* heap)
 {
-    void** p = (void**)func_00272308(heap, size + D_004A3488);
+    void** p = (void**)func_00272308(heap, size + kScriptHeapPointerSize);
     *p = heap;
-    return (char*)p + D_004A3488;
+    return (char*)p + kScriptHeapPointerSize;
 }
 #endif
 
@@ -2053,13 +2053,13 @@ void* func_002724C8(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002724E8);
 #ifdef SKIP_ASM
-extern int D_004A3488;
+extern int kScriptHeapPointerSize;
 
 // PORT: returns void; the unit declares func_002724E8 as returning void*.
 extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
 extern "C" void func_002724E8_impl(void* p)
 {
-    char* h = (char*)p - D_004A3488;
+    char* h = (char*)p - kScriptHeapPointerSize;
     func_002723A8((cScriptHeap*)(*(sRcHeap**)h), h);
 }
 #endif

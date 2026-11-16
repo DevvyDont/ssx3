@@ -1064,7 +1064,7 @@ extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, fl
 void func_00111AA0_137D18(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 extern "C" int cRider_checkForReset(void* rider, int a, int b);
 extern "C" void cRider_updateOrientationImplicit(void*);
-extern t4Vector D_004FF160;
+extern t4Vector t4vect_ZAxis;
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float vu0Length_137D18(const t4Vector& v)
@@ -1307,7 +1307,7 @@ extern "C" void func_00137D18(void* vself)
     fric *= clamp_137D18(RIDER->mGroundNormal.z + 0.30000001192092896f, 0.0f, 1.0f);
     if (1.0f / dt < fric)
         fric = 1.0f / dt;
-    t4Vector grav = vu0Scale_137D18(D_004FF160, -1800.0f);
+    t4Vector grav = vu0Scale_137D18(t4vect_ZAxis, -1800.0f);
     t4Vector drag = vu0Scale_137D18(tang, -fric);
     t4Vector acc = vu0Add_137D18(grav, drag);
     vu0AddEq_137D18(RIDER->mPosition, vu0Scale_137D18(RIDER->mVelocity, dt));

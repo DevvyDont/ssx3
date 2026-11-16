@@ -401,7 +401,7 @@ struct sV4_F600 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern sV4_F600 D_004FF140_F600[] __asm__("D_004FF140");
+extern sV4_F600 D_004FF140_F600[] __asm__("t4vect_XAxis");
 extern sV4_F600 D_004FF150_F600[] __asm__("t4vect_YAxis");
 
 // PORT: PS2-only VU0 inline asm (a - b).
@@ -532,7 +532,7 @@ struct sV4_F790 {
     sV4_F790(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-extern sV4_F790 D_004FF140_F790[] __asm__("D_004FF140");
+extern sV4_F790 D_004FF140_F790[] __asm__("t4vect_XAxis");
 extern sV4_F790 D_004FF150_F790[] __asm__("t4vect_YAxis");
 extern "C" void cMoveNode_updateIntersectInfo(void* self, void* a);
 
@@ -681,7 +681,7 @@ extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790*
 //100%
 INCLUDE_ASM("object/floatingnode", cFloatingNode_updateNode);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 // The tilt clamp reads the angles through a view of the spring block at +0x2C.
 struct sFloatTilt_34F930 {
@@ -728,7 +728,7 @@ struct sFloatingNode_34F930 {
 // Steps the float spring (bob height plus two tilt axes) by one frame.
 extern "C" int cFloatingNode_updateNode(cFloatingNode* self)
 {
-    float dt = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+    float dt = 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     float accelZ = -self->ZSpring * (self->Z - self->Zo) + self->ForceScale * self->Force + -self->ZDamp * self->Vel;
     float accelX = -self->ASpring * self->OX + self->TorqueScale * self->TX + -self->ADamp * self->WX;
     float accelY = -self->ASpring * self->OY + self->TorqueScale * self->TY + -self->ADamp * self->WY;

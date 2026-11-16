@@ -705,9 +705,9 @@ extern "C" void func_00232B28(void* self)
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00232C98);
 #ifdef SKIP_ASM
-extern int D_004A4324;
+extern int cDepthFog_m_Enable;
 extern int cScreenTint_m_Enable;
-extern int D_004A43C8;
+extern int cLightGlow_m_Enable;
 extern "C" void cGraphicsMan_UploadTextures(void* g);
 
 struct sVec3i_2C98 {
@@ -731,9 +731,9 @@ extern "C" void func_00232C98(void* self)
 {
     cGraphicsMan_UploadTextures(GrMan);
     *(int*)((char*)self + 0x14) = 0;
-    clear_2C98(&D_004A4324);
+    clear_2C98(&cDepthFog_m_Enable);
     clear_2C98(&cScreenTint_m_Enable);
-    clear_2C98(&D_004A43C8);
+    clear_2C98(&cLightGlow_m_Enable);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_2C98* vt = (sVE_2C98*)ps2GraphicsMan->mVtbl;
     vt[15].fn((char*)ps2GraphicsMan + vt[15].delta, sVec3i_2C98(0, 0, 0));
@@ -1078,7 +1078,7 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", func_00233260);
 #ifdef SKIP_ASM
-extern int D_004A4324;
+extern int cDepthFog_m_Enable;
 extern "C" void cGraphicsMan_UploadTextures(void* g);
 extern "C" void cSSXApp_startGameLoad(void* self);
 extern "C" void* func_0028B180();
@@ -1100,7 +1100,7 @@ extern "C" void func_00233260(void)
     cGraphicsMan_UploadTextures(GrMan);
     cSSXApp_startGameLoad(SSXApp);
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
-    int* p = &D_004A4324;
+    int* p = &cDepthFog_m_Enable;
     *p = 0;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_3260* vt = (sVE_3260*)ps2GraphicsMan->mVtbl;

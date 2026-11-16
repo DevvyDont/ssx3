@@ -27,20 +27,20 @@ struct sRSMEntry {
     char pad24[0xF0 - 0x24];
 };
 
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 /**
  * Returns the red component of the snowflake colour for one row of the render-state table.
  *
- * Row @p i of D_004FA370 (0xF0 bytes per row) holds at +0x20 a pointer to an object whose virtual slot 55
+ * Row @p i of cRenderStateMan_m_state (0xF0 bytes per row) holds at +0x20 a pointer to an object whose virtual slot 55
  * returns a pointer to the value.
  *
- * @param i  row of D_004FA370 (the avalanche effect passes 0)
+ * @param i  row of cRenderStateMan_m_state (the avalanche effect passes 0)
  * @return the red component
  */
 extern "C" float cRenderStateMan_SnowFlakeColourR(int i)
 {
-    sRSMEntry* entry = &D_004FA370[i];
+    sRSMEntry* entry = &cRenderStateMan_m_state[i];
     sRSMObj* stateObj = *entry->p20;
     sRSMVEntry* vt = stateObj->vt;
     return *vt[55].fn((char*)stateObj + vt[55].delta);
@@ -50,20 +50,20 @@ extern "C" float cRenderStateMan_SnowFlakeColourR(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourG);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 /**
  * Returns the green component of the snowflake colour for one row of the render-state table.
  *
- * Row @p i of D_004FA370 (0xF0 bytes per row) holds at +0x20 a pointer to an object whose virtual slot 56
+ * Row @p i of cRenderStateMan_m_state (0xF0 bytes per row) holds at +0x20 a pointer to an object whose virtual slot 56
  * returns a pointer to the value.
  *
- * @param i  row of D_004FA370 (the avalanche effect passes 0)
+ * @param i  row of cRenderStateMan_m_state (the avalanche effect passes 0)
  * @return the green component
  */
 extern "C" float cRenderStateMan_SnowFlakeColourG(int i)
 {
-    sRSMEntry* entry = &D_004FA370[i];
+    sRSMEntry* entry = &cRenderStateMan_m_state[i];
     sRSMObj* stateObj = *entry->p20;
     sRSMVEntry* vt = stateObj->vt;
     return *vt[56].fn((char*)stateObj + vt[56].delta);
@@ -73,20 +73,20 @@ extern "C" float cRenderStateMan_SnowFlakeColourG(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourB);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 /**
  * Returns the blue component of the snowflake colour for one row of the render-state table.
  *
- * Row @p i of D_004FA370 (0xF0 bytes per row) holds at +0x20 a pointer to an object whose virtual slot 57
+ * Row @p i of cRenderStateMan_m_state (0xF0 bytes per row) holds at +0x20 a pointer to an object whose virtual slot 57
  * returns a pointer to the value.
  *
- * @param i  row of D_004FA370 (the avalanche effect passes 0)
+ * @param i  row of cRenderStateMan_m_state (the avalanche effect passes 0)
  * @return the blue component
  */
 extern "C" float cRenderStateMan_SnowFlakeColourB(int i)
 {
-    sRSMEntry* entry = &D_004FA370[i];
+    sRSMEntry* entry = &cRenderStateMan_m_state[i];
     sRSMObj* stateObj = *entry->p20;
     sRSMVEntry* vt = stateObj->vt;
     return *vt[57].fn((char*)stateObj + vt[57].delta);
@@ -96,11 +96,11 @@ extern "C" float cRenderStateMan_SnowFlakeColourB(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EE8A0);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EE8A0(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p20;
     sRSMVEntry* vt = o->vt;
     return *vt[58].fn((char*)o + vt[58].delta);
@@ -110,11 +110,11 @@ extern "C" float func_002EE8A0(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EE8E8);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EE8E8(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p20;
     sRSMVEntry* vt = o->vt;
     return *vt[59].fn((char*)o + vt[59].delta);
@@ -124,11 +124,11 @@ extern "C" float func_002EE8E8(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EE930);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EE930(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p20;
     sRSMVEntry* vt = o->vt;
     return *vt[60].fn((char*)o + vt[60].delta);
@@ -138,11 +138,11 @@ extern "C" float func_002EE930(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EE978);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EE978(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p20;
     sRSMVEntry* vt = o->vt;
     return *vt[61].fn((char*)o + vt[61].delta);
@@ -152,11 +152,11 @@ extern "C" float func_002EE978(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EE9C0);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EE9C0(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p04;
     sRSMVEntry* vt = o->vt;
     return *vt[7].fn((char*)o + vt[7].delta);
@@ -166,11 +166,11 @@ extern "C" float func_002EE9C0(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEA08);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEA08(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p04;
     sRSMVEntry* vt = o->vt;
     return *vt[8].fn((char*)o + vt[8].delta);
@@ -180,11 +180,11 @@ extern "C" float func_002EEA08(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEA50);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEA50(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p04;
     sRSMVEntry* vt = o->vt;
     return *vt[9].fn((char*)o + vt[9].delta);
@@ -194,11 +194,11 @@ extern "C" float func_002EEA50(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEA98);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEA98(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p04;
     sRSMVEntry* vt = o->vt;
     return *vt[10].fn((char*)o + vt[10].delta);
@@ -208,11 +208,11 @@ extern "C" float func_002EEA98(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEAE0);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEAE0(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p04;
     sRSMVEntry* vt = o->vt;
     return *vt[11].fn((char*)o + vt[11].delta);
@@ -222,11 +222,11 @@ extern "C" float func_002EEAE0(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEB28);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEB28(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p04;
     sRSMVEntry* vt = o->vt;
     return *vt[12].fn((char*)o + vt[12].delta);
@@ -241,7 +241,7 @@ extern int D_004A3B60;
 extern "C" float func_002EEB70(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &D_004FA370[i];
+        sRSMEntry* e = &cRenderStateMan_m_state[i];
         sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
         sRSMVEntry* vt = o->vt;
         return *vt[20].fn((char*)o + vt[20].delta);
@@ -258,7 +258,7 @@ extern int D_004A3B60;
 extern "C" float func_002EEBD0(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &D_004FA370[i];
+        sRSMEntry* e = &cRenderStateMan_m_state[i];
         sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
         sRSMVEntry* vt = o->vt;
         return *vt[21].fn((char*)o + vt[21].delta);
@@ -275,7 +275,7 @@ extern int D_004A3B60;
 extern "C" float func_002EEC30(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &D_004FA370[i];
+        sRSMEntry* e = &cRenderStateMan_m_state[i];
         sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
         sRSMVEntry* vt = o->vt;
         return *vt[22].fn((char*)o + vt[22].delta);
@@ -292,7 +292,7 @@ extern int D_004A3B60;
 extern "C" float func_002EEC90(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &D_004FA370[i];
+        sRSMEntry* e = &cRenderStateMan_m_state[i];
         sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
         sRSMVEntry* vt = o->vt;
         return *vt[23].fn((char*)o + vt[23].delta);
@@ -309,7 +309,7 @@ extern int D_004A3B60;
 extern "C" float func_002EECF0(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &D_004FA370[i];
+        sRSMEntry* e = &cRenderStateMan_m_state[i];
         sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
         sRSMVEntry* vt = o->vt;
         return *vt[24].fn((char*)o + vt[24].delta);
@@ -326,7 +326,7 @@ extern int D_004A3B60;
 extern "C" float func_002EED50(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &D_004FA370[i];
+        sRSMEntry* e = &cRenderStateMan_m_state[i];
         sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
         sRSMVEntry* vt = o->vt;
         return *vt[25].fn((char*)o + vt[25].delta);
@@ -338,11 +338,11 @@ extern "C" float func_002EED50(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEDB0);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEDB0(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p08;
     sRSMVEntry* vt = o->vt;
     return *vt[13].fn((char*)o + vt[13].delta);
@@ -352,11 +352,11 @@ extern "C" float func_002EEDB0(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEDF8);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEDF8(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p08;
     sRSMVEntry* vt = o->vt;
     return *vt[14].fn((char*)o + vt[14].delta);
@@ -366,11 +366,11 @@ extern "C" float func_002EEDF8(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEE40);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEE40(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p08;
     sRSMVEntry* vt = o->vt;
     return *vt[15].fn((char*)o + vt[15].delta);
@@ -380,11 +380,11 @@ extern "C" float func_002EEE40(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEE88);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEE88(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p08;
     sRSMVEntry* vt = o->vt;
     return *vt[16].fn((char*)o + vt[16].delta);
@@ -394,11 +394,11 @@ extern "C" float func_002EEE88(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEED0);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEED0(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p08;
     sRSMVEntry* vt = o->vt;
     return *vt[17].fn((char*)o + vt[17].delta);
@@ -408,11 +408,11 @@ extern "C" float func_002EEED0(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEF18);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEF18(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p08;
     sRSMVEntry* vt = o->vt;
     return *vt[18].fn((char*)o + vt[18].delta);
@@ -422,11 +422,11 @@ extern "C" float func_002EEF18(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEF60);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEF60(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p08;
     sRSMVEntry* vt = o->vt;
     return *vt[19].fn((char*)o + vt[19].delta);
@@ -436,11 +436,11 @@ extern "C" float func_002EEF60(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEFA8);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEFA8(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p1C;
     sRSMVEntry* vt = o->vt;
     return *vt[42].fn((char*)o + vt[42].delta);
@@ -450,11 +450,11 @@ extern "C" float func_002EEFA8(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EEFF0);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EEFF0(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p1C;
     sRSMVEntry* vt = o->vt;
     return *vt[41].fn((char*)o + vt[41].delta);
@@ -464,11 +464,11 @@ extern "C" float func_002EEFF0(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF038);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EF038(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = **(sRSMObj***)((char*)e + 0x18);
     sRSMVEntry* vt = o->vt;
     return *vt[36].fn((char*)o + vt[36].delta) * (1.0f - *(float*)((char*)e + 0x24));
@@ -478,11 +478,11 @@ extern "C" float func_002EF038(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF0A0);
 #ifdef SKIP_ASM
-extern sRSMEntry D_004FA370[];
+extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EF0A0(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
+    sRSMEntry* e = &cRenderStateMan_m_state[i];
     sRSMObj* o = *e->p20;
     sRSMVEntry* vt = o->vt;
     return *vt[47].fn((char*)o + vt[47].delta);
@@ -501,7 +501,7 @@ extern "C" void* func_002EF0E8(int i)
         return &D_004A55B0;
     }
     {
-        sRSMEntry* e = &D_004FA370[i];
+        sRSMEntry* e = &cRenderStateMan_m_state[i];
         sRSMObj* o = *e->p1C;
         sRSMVEntry* vt = o->vt;
         return vt[37].fn((char*)o + vt[37].delta);
@@ -521,7 +521,7 @@ extern "C" void* func_002EF140(int i)
         return &D_004A55B0;
     }
     {
-        sRSMEntry* e = &D_004FA370[i];
+        sRSMEntry* e = &cRenderStateMan_m_state[i];
         sRSMObj* o = *e->p1C;
         sRSMVEntry* vt = o->vt;
         return vt[38].fn((char*)o + vt[38].delta);
@@ -541,7 +541,7 @@ extern "C" void* func_002EF198(int i)
         return &D_004A55B0;
     }
     {
-        sRSMEntry* e = &D_004FA370[i];
+        sRSMEntry* e = &cRenderStateMan_m_state[i];
         sRSMObj* o = *e->p1C;
         sRSMVEntry* vt = o->vt;
         return vt[39].fn((char*)o + vt[39].delta);
@@ -561,7 +561,7 @@ extern "C" void* func_002EF1F0(int i)
         return &D_004A55B0;
     }
     {
-        sRSMEntry* e = &D_004FA370[i];
+        sRSMEntry* e = &cRenderStateMan_m_state[i];
         sRSMObj* o = *e->p1C;
         sRSMVEntry* vt = o->vt;
         return vt[40].fn((char*)o + vt[40].delta);
@@ -646,7 +646,7 @@ extern "C" void func_002EF248(void* frame)
 {
     int i;
     for (i = 0; i < 6; i++) {
-        sRSMEntry* e = &D_004FA370[i];
+        sRSMEntry* e = &cRenderStateMan_m_state[i];
         ((cRSMObjWF*)*e->p20)->v64(frame);
         ((cRSMObjWF*)*e->p20)->v64(frame);
     }
@@ -730,7 +730,7 @@ public:
 /**
  * Restores the render states from a replay frame.
  *
- * For each of the 6 render state entries (D_004FA370, 0xF0 bytes each), calls virtual slot 65 of the object at
+ * For each of the 6 render state entries (cRenderStateMan_m_state, 0xF0 bytes each), calls virtual slot 65 of the object at
  * *p20 (+0x20) twice with the frame.
  *
  * @param frame  the replay frame stream to read from
@@ -739,7 +739,7 @@ extern "C" void cRenderStateMan_readFromReplayFrame(void* frame)
 {
     int i;
     for (i = 0; i < 6; i++) {
-        sRSMEntry* entry = &D_004FA370[i];
+        sRSMEntry* entry = &cRenderStateMan_m_state[i];
         ((cRSMObjRF*)*entry->p20)->v65(frame);
         ((cRSMObjRF*)*entry->p20)->v65(frame);
     }
@@ -749,13 +749,13 @@ extern "C" void cRenderStateMan_readFromReplayFrame(void* frame)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002EF368);
 #ifdef SKIP_ASM
-extern void* D_004A3B5C;
-extern int D_004A4444;
+extern void* cRenderStateMan_m_inNIS;
+extern int cPlants_m_Enable;
 
 extern "C" void func_002EF368(void* p)
 {
-    D_004A3B5C = p;
-    D_004A4444 = p != 0;
+    cRenderStateMan_m_inNIS = p;
+    cPlants_m_Enable = p != 0;
 }
 #endif
 
@@ -1054,7 +1054,7 @@ struct sTrail_EF950 {
 };
 
 extern sRsCtx_EF950* GrMan_renderstateman __asm__("GrMan");
-extern sRsState_EF950 D_00501420[];
+extern sRsState_EF950 sDrawState_s_defaultDrawState[];
 extern int cPowerUpFXToggles_m_TestTrickBoost;
 extern float D_004A3B74;
 
@@ -1167,7 +1167,7 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
         return;
     }
     rsPush_EF950(GrMan_renderstateman);
-    *GrMan_renderstateman->top = D_00501420[0];
+    *GrMan_renderstateman->top = sDrawState_s_defaultDrawState[0];
     int glow = 0;
     float alpha = 0.3f;
     float start = 0.0f;
@@ -1363,8 +1363,8 @@ extern "C" float func_002EEF18(int i);
 extern "C" float func_002EEF60(int i);
 extern "C" float func_002EF038(int i);
 extern "C" int func_002F7BE0(void* p);
-extern void* D_004A3B5C;
-extern int D_004A4328;
+extern void* cRenderStateMan_m_inNIS;
+extern int cDepthFog_m_OverrideWP;
 extern int cDepthFog_m_Exponent;
 extern float cDepthFog_m_Density;
 extern float cDepthFog_m_NearPlane;
@@ -1376,22 +1376,22 @@ extern float cScreenTint_m_ColourB;
 extern float cScreenTint_m_FillR;
 extern float cScreenTint_m_FillG;
 extern float cScreenTint_m_FillB;
-extern float D_004A4614;
-extern int D_004A460C;
-extern int D_004A43CC;
-extern float D_004A43D4;
-extern float D_004A43D8;
-extern float D_004A43DC;
-extern float D_004A43E0;
-extern float D_004A43E4;
-extern float D_004A43F0;
-extern float D_004A43F4;
+extern float cScreenTint_m_LightningChance;
+extern int cScreenTint_m_LightningEnable;
+extern int cLightGlow_m_OverrideWP;
+extern float cLightGlow_m_PS2MinIntensity;
+extern float cLightGlow_m_PS2ModIntensity;
+extern float cLightGlow_m_PS2CopyIntensity;
+extern float cLightGlow_m_PS2FrameSrcScale;
+extern float cLightGlow_m_PS2FrameDstScale;
+extern float cLightGlow_m_PS2IntensityTex2;
+extern float cLightGlow_m_PS2IntensityTex3;
 
 struct sRsCol_F00A0 {
     float r, g, b, a;
     sRsCol_F00A0(const float& x, const float& y, const float& z, const float& w) : r(x), g(y), b(z), a(w) {}
 };
-extern sRsCol_F00A0 D_00504720;
+extern sRsCol_F00A0 cDepthFog_m_Colour;
 
 struct sRsCtx_F00A0 {
     char pad0[0x8C];
@@ -1416,8 +1416,8 @@ extern sRsCtx_F00A0* D_ctx_F00A0 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_002F00A0(void* self, int i)
 {
     sRsCtx_F00A0* ctx = D_ctx_F00A0;
-    if (D_004A4328 == 0) {
-        sRsCol_F00A0* dst = &D_00504720;
+    if (cDepthFog_m_OverrideWP == 0) {
+        sRsCol_F00A0* dst = &cDepthFog_m_Colour;
         cDepthFog_m_Density = func_002EE9C0(i);
         cDepthFog_m_Exponent = 1;
         cDepthFog_m_NearPlane = func_002EEA08(i);
@@ -1434,23 +1434,23 @@ extern "C" void func_002F00A0(void* self, int i)
         cScreenTint_m_FillR = func_002EEC90(i);
         cScreenTint_m_FillG = func_002EECF0(i);
         cScreenTint_m_FillB = func_002EED50(i);
-        D_004A4614 = func_002EE738(i);
+        cScreenTint_m_LightningChance = func_002EE738(i);
         int on = 0;
         int* st = *(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
         if (*st == 1 || func_002F7BE0(st))
             on = 1;
-        D_004A460C = on;
+        cScreenTint_m_LightningEnable = on;
     }
-    if (D_004A43CC == 0) {
-        D_004A43D4 = func_002EEDB0(i);
-        D_004A43D8 = func_002EEDF8(i);
-        D_004A43DC = func_002EEE40(i);
-        D_004A43E0 = func_002EEE88(i);
-        D_004A43E4 = func_002EEED0(i);
-        D_004A43F0 = func_002EEF18(i);
-        D_004A43F4 = func_002EEF60(i);
+    if (cLightGlow_m_OverrideWP == 0) {
+        cLightGlow_m_PS2MinIntensity = func_002EEDB0(i);
+        cLightGlow_m_PS2ModIntensity = func_002EEDF8(i);
+        cLightGlow_m_PS2CopyIntensity = func_002EEE40(i);
+        cLightGlow_m_PS2FrameSrcScale = func_002EEE88(i);
+        cLightGlow_m_PS2FrameDstScale = func_002EEED0(i);
+        cLightGlow_m_PS2IntensityTex2 = func_002EEF18(i);
+        cLightGlow_m_PS2IntensityTex3 = func_002EEF60(i);
     }
-    ctx->a8C[i] = D_004A3B5C;
+    ctx->a8C[i] = cRenderStateMan_m_inNIS;
     ctx->aAC[i] = func_002EF038(i);
     ctx->aCC[i] = func_002EE3B8(i);
     ctx->aEC[i] = func_002EE9C0(i);

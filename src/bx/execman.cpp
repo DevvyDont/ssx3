@@ -192,10 +192,10 @@ extern "C" int func_00320AC0(int arg0) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320AC8);
 #ifdef SKIP_ASM
-extern int D_004A5B64;
+extern int cAppMan_TheAppMan;
 
 extern "C" int func_00320AC8(void) {
-    return D_004A5B64;
+    return cAppMan_TheAppMan;
 }
 #endif
 //100%

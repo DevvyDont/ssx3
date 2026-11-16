@@ -216,7 +216,7 @@ struct sVEr_4A90 {
 struct sDefObj_4A90 {
     sVE_4A90* vt;
 };
-extern sDefObj_4A90 D_004A5A58;
+extern sDefObj_4A90 gUISoundNull;
 
 /**
  * Handles accept and back on the buy-attributes screen: opens the buy popup, closes the prompt, or leaves.
@@ -245,7 +245,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(char* self, char* obj, int msg)
         } else {
             sDefObj_4A90* sound = *(sDefObj_4A90**)(*(char**)(self + 0x10) + 0x14);
             if (sound == 0)
-                sound = &D_004A5A58;
+                sound = &gUISoundNull;
             if (sound != 0)
                 sound->vt[2].fn((char*)sound + sound->vt[2].delta, 4);
         }
@@ -309,7 +309,7 @@ static inline void defaultMsg_4C30(sBuyAttrib_4C30* s, int msg)
 {
     sDefObj_4A90* p = *(sDefObj_4A90**)(s->owner + 0x14);
     if (p == 0)
-        p = &D_004A5A58;
+        p = &gUISoundNull;
     if (p != 0)
         p->vt[2].fn((char*)p + p->vt[2].delta, msg);
 }
@@ -1005,7 +1005,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(sCareer_56C8* self, char* w)
     }
     sDefObj_4A90* sound = *(sDefObj_4A90**)(self->owner + 0x14);
     if (sound == 0)
-        sound = &D_004A5A58;
+        sound = &gUISoundNull;
     if (sound != 0)
         sound->vt[2].fn((char*)sound + sound->vt[2].delta, msg);
     return handled;

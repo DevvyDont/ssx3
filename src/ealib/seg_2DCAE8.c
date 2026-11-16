@@ -734,7 +734,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_init);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003DCC88_CBD8(int, int, int, int) __asm__("func_003DCC88");
 extern int func_003DCD98_CBD8(int, int, int) __asm__("func_003DCD98");
-extern int (*D_00450C10_CBD8[])(char *, int, int) __asm__("D_00450C10");
+extern int (*D_00450C10_CBD8[])(char *, int, int) __asm__("gFileSysOpts");
 extern char D_00495D28_CBD8[] __asm__("D_00495D28");
 extern int D_00519AB0_CBD8[] __asm__("D_00519AB0");
 extern int D_00519AE8_CBD8[] __asm__("D_00519AE8");
@@ -823,7 +823,7 @@ extern void func_003E44B0_CDE0(void) __asm__("func_003E44B0");
 extern void func_003DECA0_CDE0(int, int) __asm__("func_003DECA0");
 extern void func_003E56E0_CDE0(char *) __asm__("func_003E56E0");
 extern void func_003E6220_CDE0(char *, int) __asm__("func_003E6220");
-extern void (*D_00450C10_CDE0[])(int) __asm__("D_00450C10");
+extern void (*D_00450C10_CDE0[])(int) __asm__("gFileSysOpts");
 extern void (*D_00450C18_CDE0[])(int) __asm__("D_00450C18");
 extern char D_00519AC4_CDE0[] __asm__("D_00519AC4");
 extern int *D_00519AE4_CDE0[] __asm__("D_00519AE4");
@@ -1367,7 +1367,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD8E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00450C10: the file system's settings (0x24 bytes: func_003DE928 hands out a copy, func_003DE9B8 takes one).
+/* gFileSysOpts: the file system's settings (0x24 bytes: func_003DE928 hands out a copy, func_003DE9B8 takes one).
    Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
 struct sC10File { char *name; int a; int b; char *path; };   /* built-in file table entry (f20) */
 struct sC10 {
@@ -1381,9 +1381,9 @@ struct sC10 {
     char *f1C;                      /* also D_00450C50 */
     struct sC10File *f20;
 };
-extern struct sC10 D_00450C10;
-extern void *(*D_00450C14)(char *, int, int);   /* D_00450C10.f04 */
-extern int (*D_00450C18)(void *);               /* D_00450C10.f08 */
+extern struct sC10 gFileSysOpts;
+extern void *(*D_00450C14)(char *, int, int);   /* gFileSysOpts.f04 */
+extern int (*D_00450C18)(void *);               /* gFileSysOpts.f08 */
 /* D_00519AB0: the file system's command manager (func_003DCC88 sets it up). Layout from every use in this unit;
    field names are their offsets. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
@@ -1412,7 +1412,7 @@ void func_003DD8E8(int a0, int a1, struct sFsNode *s) {
     }
     n = BIG_sizeofheader_D8E8(s->f00);
     if (s->f04 < n) {
-        fs = &D_00450C10;
+        fs = &gFileSysOpts;
         fs->f08((void *)s->f00);
         s->f04 = n;
         s->f00 = (int)fs->f04(D_00495D68_D8E8, n, s->f08);
@@ -1464,7 +1464,7 @@ extern C_DAC0 *func_003DE670_DAC0(void) __asm__("func_003DE670");
 extern void iFILESYS_ExecCommand_DAC0(C_DAC0 *) __asm__("iFILESYS_ExecCommand");
 extern Q_DAC0 *D_00519AE4_DAC0 __asm__("D_00519AE4");
 extern int func_00416B18_DAC0(char *, char *, int) __asm__("func_00416B18");
-extern void *(*D_00450C10_DAC0[])(char *, int, int) __asm__("D_00450C10");
+extern void *(*D_00450C10_DAC0[])(char *, int, int) __asm__("gFileSysOpts");
 extern char D_00495D68_DAC0[] __asm__("D_00495D68");
 extern int func_003DD4E8_DAC0(char *, int, int, R_DAC0 *) __asm__("func_003DD4E8");
 extern void fCF70_DAC0(int, void *) __asm__("func_003DCF70");
@@ -1519,7 +1519,7 @@ extern int func_003DD5A0_DC30(char *, int, R_DC30 *) __asm__("func_003DD5A0");
 extern void func_003DCF70_DC30(int, void *) __asm__("func_003DCF70");
 extern void func_003DDC00_DC30(int, int, int) __asm__("func_003DDC00");
 extern G_DC30 D_00519AB0_DC30 __asm__("D_00519AB0");
-extern int (*D_00450C10_DC30[])(void *) __asm__("D_00450C10");
+extern int (*D_00450C10_DC30[])(void *) __asm__("gFileSysOpts");
 
 int func_003DDC30(char *a0, int a1, int a2) {
     N_DC30 *prev;
@@ -2047,7 +2047,7 @@ void func_003DE8C0(int a0) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DE910);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450C10_E910[4] __asm__("D_00450C10");
+extern int D_00450C10_E910[4] __asm__("gFileSysOpts");
 
 void func_003DE910(int arg0, int arg1) {
     D_00450C10_E910[1] = arg0;
@@ -2061,7 +2061,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DE928);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct A_E928 { int p0, p4, p8, pC, f10, f14, f18, f1C; };
 struct B_E928 { int f0, f4, f8, fC; };
-extern struct A_E928 D_00450C10_E928 __asm__("D_00450C10");
+extern struct A_E928 D_00450C10_E928 __asm__("gFileSysOpts");
 extern struct B_E928 D_00450C58_E928 __asm__("D_00450C58");
 extern int D_00450C50_E928[] __asm__("D_00450C50");
 extern void func_003E6220_E928(int, int) __asm__("func_003E6220");
@@ -2087,7 +2087,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DE9B8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct A_E9B8 { int p0, p4, p8, pC, f10, f14, f18, f1C; };
 struct B_E9B8 { int f0, f4, f8, fC; };
-extern struct A_E9B8 D_00450C10_E9B8 __asm__("D_00450C10");
+extern struct A_E9B8 D_00450C10_E9B8 __asm__("gFileSysOpts");
 extern struct B_E9B8 D_00450C58_E9B8 __asm__("D_00450C58");
 extern int D_00450C50_E9B8[] __asm__("D_00450C50");
 extern void func_003E6220_E9B8(void *, int) __asm__("func_003E6220");
@@ -2339,7 +2339,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", queueadd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MUTEX_unlock_qa(void *) __asm__("MUTEX_unlock");
-extern char D_00519C08_9C08[] __asm__("D_00519C08");
+extern char D_00519C08_9C08[] __asm__("hlafile_mutex");
 
 /**
  * Appends an async-file request to the end of a request queue (head, tail), under the async-file mutex.
@@ -2365,7 +2365,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DEED8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MUTEX_unlock_EED8(void *) __asm__("MUTEX_unlock");
-extern char D_00519C08_9C08[] __asm__("D_00519C08");
+extern char D_00519C08_9C08[] __asm__("hlafile_mutex");
 
 void *func_003DEED8(void **arg0) {
     void *temp_2;
@@ -2387,7 +2387,7 @@ void *func_003DEED8(void **arg0) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DEF40);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00519C00_EF40[] __asm__("D_00519C00");
+extern int D_00519C00_EF40[] __asm__("hlafile_requestidcounter");
 
 void func_003DEF40(unsigned char *arg0) {
     int temp_2;
@@ -2405,8 +2405,8 @@ void func_003DEF40(unsigned char *arg0) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DEF70);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450C34_0C34[] __asm__("D_00450C34");
-extern int D_00519BF0_9BF0[] __asm__("D_00519BF0");
+extern int D_00450C34_0C34[] __asm__("hlafile_request");
+extern int D_00519BF0_9BF0[] __asm__("numrequests");
 
 int *func_003DEF70(int arg0) {
     int *temp_2;
@@ -2427,7 +2427,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", releaserequest);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void queueadd_rr(char *, char *) __asm__("queueadd");
 extern void (*D_00450C18_0C18[])(unsigned int) __asm__("D_00450C18");
-extern char D_00519BF8_9BF8[] __asm__("D_00519BF8");
+extern char D_00519BF8_9BF8[] __asm__("freequeue");
 
 /**
  * Returns an async-file request to the free queue, freeing its buffer through the free hook when it owns one.
@@ -2455,7 +2455,7 @@ void releaserequest(char *request) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF028);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char D_00519C08_F028[] __asm__("D_00519C08");
+extern char D_00519C08_F028[] __asm__("hlafile_mutex");
 extern void MUTEX_lock_F028(void *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_F028(void *) __asm__("MUTEX_unlock");
 extern void releaserequest_F028(void *) __asm__("releaserequest");
@@ -2483,7 +2483,7 @@ void func_003DF028(void *arg0) {
 
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sReq {                       /* 0x30, a file request (D_00450C34[], D_00519BF0 of them) */
+struct sReq {                       /* 0x30, a file request (hlafile_request[], numrequests of them) */
     int f00;                        /* id: sequence << 8 | index */
     struct sReq *f04;               /* next free */
     int f08;
@@ -2497,10 +2497,10 @@ struct sReq {                       /* 0x30, a file request (D_00450C34[], D_005
     int f28;
     int f2C;
 };
-extern struct sReq *D_00450C34;
+extern struct sReq *hlafile_request;
 struct sReqQueue { struct sReq *f00; struct sReq *f04; };  /* head, tail */
-extern struct sReqQueue D_00519BF8;             /* free requests */
-extern char D_00519C08[];                       /* request list mutex */
+extern struct sReqQueue freequeue;             /* free requests */
+extern char hlafile_mutex[];                       /* request list mutex */
 #endif
 
 //100%
@@ -2664,11 +2664,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", ASYNCFILE_init);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 typedef struct E_F488 { int id; struct E_F488 *next; int pad[5]; volatile int f1C; int pad2[4]; } E_F488;
-extern E_F488 *D_00450C34_F488 __asm__("D_00450C34");
+extern E_F488 *D_00450C34_F488 __asm__("hlafile_request");
 extern E_F488 *(*D_00450C14_F488)(char *, int, int) __asm__("D_00450C14");
-extern int D_00519BF0_F488 __asm__("D_00519BF0");
-extern E_F488 *D_00519BF8_F488[2] __asm__("D_00519BF8");
-extern char D_00519C08_F488[] __asm__("D_00519C08");
+extern int D_00519BF0_F488 __asm__("numrequests");
+extern E_F488 *D_00519BF8_F488[2] __asm__("freequeue");
+extern char D_00519C08_F488[] __asm__("hlafile_mutex");
 extern char D_00495DB8_F488[] __asm__("D_00495DB8");
 extern void MUTEX_create_F488(void *) __asm__("MUTEX_create");
 
@@ -2705,7 +2705,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF570);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00519BF0;
+extern int numrequests;
 extern int ASYNCFILE_cancel(int);
 extern int func_003E5440(char *);
 extern void func_003E5398(int);
@@ -2713,23 +2713,23 @@ extern int SYNCTASK_run(int);
 extern void func_003E56E0_F570(char *) __asm__("func_003E56E0");
 
 void func_003DF570(void) {
-    if (D_00450C34 != 0) {
+    if (hlafile_request != 0) {
         int i;
-        for (i = 0; i < D_00519BF0; i++) {
-            ASYNCFILE_cancel(D_00450C34[i].f00);
+        for (i = 0; i < numrequests; i++) {
+            ASYNCFILE_cancel(hlafile_request[i].f00);
         }
         for (;;) {
             int busy = 0;
-            for (i = 0; i < D_00519BF0; i++) {
-                if (D_00450C34[i].f1C != 0) busy = 1;
+            for (i = 0; i < numrequests; i++) {
+                if (hlafile_request[i].f1C != 0) busy = 1;
             }
             if (!busy) break;
             if (func_003E5440(0) != 0) SYNCTASK_run(0);
             func_003E5398(0);
         }
-        D_00450C10.f08(D_00450C34);
-        func_003E56E0_F570(D_00519C08);
-        D_00450C34 = 0;
+        gFileSysOpts.f08(hlafile_request);
+        func_003E56E0_F570(hlafile_mutex);
+        hlafile_request = 0;
     }
 }
 #endif
@@ -2738,7 +2738,7 @@ void func_003DF570(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF690);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char D_00519BF8_F690[] __asm__("D_00519BF8");
+extern char D_00519BF8_F690[] __asm__("freequeue");
 extern int *f_EED8_F690(char *) __asm__("func_003DEED8");
 extern void f_EF40_F690(void *) __asm__("func_003DEF40");
 extern int f_D4E8_F690(int, int, int, void *) __asm__("func_003DD4E8");
@@ -2774,7 +2774,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF748);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003DF2C0_F748(void) __asm__("func_003DF2C0");
-extern int D_00519BF8_F748[] __asm__("D_00519BF8");
+extern int D_00519BF8_F748[] __asm__("freequeue");
 struct Q_F748 { int w0; int p1[1]; int f8; int fc; int f10; int f14; int f18; volatile int h; int p2[1]; int f24; int f28; int f2c; };
 
 int func_003DF748(int a, int b, int c) {
@@ -2804,7 +2804,7 @@ extern void fCF70_F808(int, char *) __asm__("func_003DCF70");
 extern int fD648_F808(int, int, int, int, int, void *) __asm__("func_003DD648");
 extern char *fEED8_F808(char *) __asm__("func_003DEED8");
 extern void fEF40_F808(char *) __asm__("func_003DEF40");
-extern char D_9BF8_F808[] __asm__("D_00519BF8");
+extern char D_9BF8_F808[] __asm__("freequeue");
 extern char fF3C0_F808[] __asm__("func_003DF3C0");
 
 int func_003DF808(int a0, int a1, int a2, int a3) {
@@ -2836,7 +2836,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF8E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MUTEX_unlock_F8E8(void *) __asm__("MUTEX_unlock");
-extern char D_00519C08_9C08[] __asm__("D_00519C08");
+extern char D_00519C08_9C08[] __asm__("hlafile_mutex");
 extern char *func_003DEF70_F8E8(int) __asm__("func_003DEF70");
 
 void func_003DF8E8_impl(int h, void (*fn)(int)) __asm__("func_003DF8E8");
@@ -2875,10 +2875,10 @@ extern void munlock_F980(char *) __asm__("MUTEX_unlock");
 int ASYNCFILE_getstatus(int handle) {
     struct sReq *req;
     int status;
-    mlock_F980(D_00519C08);
+    mlock_F980(hlafile_mutex);
     req = func_003DEF70(handle);
     status = req ? req->f1C == 0 : -1;
-    munlock_F980(D_00519C08);
+    munlock_F980(hlafile_mutex);
     return status;
 }
 #endif
@@ -2907,7 +2907,7 @@ int ASYNCFILE_release(int h, int *a, int *b);
 int ASYNCFILE_release(int handle, int *address, int *size) {
     struct sReq *req;
     int busy = 0;
-    MUTEX_lock(D_00519C08);
+    MUTEX_lock(hlafile_mutex);
     req = func_003DEF70(handle);
     if (req != 0) {
         busy = req->f10;
@@ -2915,7 +2915,7 @@ int ASYNCFILE_release(int handle, int *address, int *size) {
             req->f0C = 1;
         }
     }
-    MUTEX_unlock_AR(D_00519C08);
+    MUTEX_unlock_AR(hlafile_mutex);
     if (req == 0 || busy != 0) {
         return -1;
     }
@@ -2944,7 +2944,7 @@ extern void munlock_FAF0(char *) __asm__("MUTEX_unlock");
 extern void fD148_FAF0(int) __asm__("func_003DD148");
 extern char *fEF70_FAF0(int) __asm__("func_003DEF70");
 extern void rel_FAF0(char *) __asm__("releaserequest");
-extern char D_9C08_FAF0[] __asm__("D_00519C08");
+extern char D_9C08_FAF0[] __asm__("hlafile_mutex");
 
 /**
  * Cancels an async file request: stops its in-flight operation, or releases it when it has not started.
@@ -3053,7 +3053,7 @@ void func_003DFC48(char *arg0, int arg1) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DFCD8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00519C18_FCD8[] __asm__("D_00519C18");
+extern int D_00519C18_FCD8[] __asm__("stream_requestidcounter");
 extern void *func_003DFCD8_impl(char *arg0) __asm__("func_003DFCD8");
 
 void *func_003DFCD8_impl(char *arg0) {
@@ -4625,10 +4625,10 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1D68);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00450C10: the file system's settings (0x24 bytes: func_003DE928 hands out a copy, func_003DE9B8 takes one).
+/* gFileSysOpts: the file system's settings (0x24 bytes: func_003DE928 hands out a copy, func_003DE9B8 takes one).
    Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
 /* built-in file table entry (f20) */
-extern struct sC10 D_00450C10;
+extern struct sC10 gFileSysOpts;
 extern int func_003DEBF0(int, int, int, void *);
 
 extern int func_003DECA0(int a, int b);
@@ -4640,25 +4640,25 @@ extern void MEM_copy_1D68(char *, char *, int) __asm__("MEM_copy");
 int func_003E1D68(int a, int *b) {
     int sp0;
     if (func_003DEBF0(b[0], 1, a, &sp0)) {
-        char *hdr = D_00450C10.f04((char *)b[0], 0xA90, b[2]);
+        char *hdr = gFileSysOpts.f04((char *)b[0], 0xA90, b[2]);
         if (hdr) {
             func_003DEC60(sp0, 0, (int)hdr, 0xA90, a - 1);
             if (BIG_typeofheader_1D68(hdr) == 0) {
-                D_00450C10.f08(hdr);
+                gFileSysOpts.f08(hdr);
                 func_003DECA0(sp0, a - 1);
                 return 0;
             }
             {
                 int size = BIG_sizeofheader_1D68(hdr);
                 if (size > 0xA90) {
-                    char *buf = D_00450C10.f04((char *)b[0], size, b[2]);
+                    char *buf = gFileSysOpts.f04((char *)b[0], size, b[2]);
                     if (buf == 0) {
-                        D_00450C10.f08(hdr);
+                        gFileSysOpts.f08(hdr);
                         func_003DECA0(sp0, a - 1);
                         return 0;
                     }
                     MEM_copy_1D68(buf, hdr, 0xA90);
-                    D_00450C10.f08(hdr);
+                    gFileSysOpts.f08(hdr);
                     hdr = buf;
                     func_003DEC60(sp0, 0xA90, (int)(hdr + 0xA90), size - 0xA90, a - 1);
                 }
@@ -4854,21 +4854,21 @@ int func_003E2190_impl(int a, int size) {
     if (h == 0) return 0;
     buf = func_003B4818_2190(h);
     if (sz == 0 || buf == 0) return h;
-    tmp = (int)D_00450C10.f04((char *)a, sz, size ^ 0x100);
+    tmp = (int)gFileSysOpts.f04((char *)a, sz, size ^ 0x100);
     if (tmp == 0) {
-        D_00450C10.f08((void *)h);
+        gFileSysOpts.f08((void *)h);
         return 0;
     }
     func_003E6574_2190(tmp, h, sz);
-    D_00450C10.f08((void *)h);
-    h = (int)D_00450C10.f04((char *)a, buf, size);
+    gFileSysOpts.f08((void *)h);
+    h = (int)gFileSysOpts.f04((char *)a, buf, size);
     if (h != 0) {
         if (func_003B4740_2190(tmp, h) == 0) {
-            D_00450C10.f08((void *)h);
+            gFileSysOpts.f08((void *)h);
             h = 0;
         }
     }
-    D_00450C10.f08((void *)tmp);
+    gFileSysOpts.f08((void *)tmp);
     DCACHE_WB_ALL_2190();
     return h;
 }
@@ -4917,21 +4917,21 @@ int FILE_loadpackatz_pkz(int name, int dst, int max) {
     if (buffer == 0) return 0;
     n = func_003B4818_pkz(buffer);
     if (size > 0 && n > 0) {
-        buf = (int)D_00450C10.f04((char *)name, n, 0x100);
+        buf = (int)gFileSysOpts.f04((char *)name, n, 0x100);
         if (buf != 0) {
             if (func_003B4740_pkz(buffer, buf) == 0) {
-                D_00450C10.f08((void *)buf);
+                gFileSysOpts.f08((void *)buf);
                 buf = 0;
             }
         }
-        D_00450C10.f08((void *)buffer);
+        gFileSysOpts.f08((void *)buffer);
         if (buf == 0) return 0;
         size = n;
         buffer = buf;
     }
     if (max > 0 && max < size) size = max;
     MEM_copy_pkz(dst, buffer, size);
-    D_00450C10.f08((void *)buffer);
+    gFileSysOpts.f08((void *)buffer);
     /* PORT: hand-written data-cache writeback loop (see the PORT line above the function). */
     __asm__ __volatile__(
         ".set push\n\t"
@@ -5420,10 +5420,10 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3098);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00450C10: the file system's settings (0x24 bytes: func_003DE928 hands out a copy, func_003DE9B8 takes one).
+/* gFileSysOpts: the file system's settings (0x24 bytes: func_003DE928 hands out a copy, func_003DE9B8 takes one).
    Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
 /* built-in file table entry (f20) */
-extern struct sC10 D_00450C10;
+extern struct sC10 gFileSysOpts;
 extern char *D_00450C50;
 extern char D_00519AF0[0x100];                  /* the current directory */
 extern char *strchr_3098(char *, int) __asm__("strchr");
@@ -6115,7 +6115,7 @@ struct ThreadParam_4040 { int status; void (*func)(void); void *stack; int stack
 struct SemaParam_4040 { int count; int max_count; int init_count; int wait_threads; unsigned int attr; unsigned int option; };
 
 extern struct CdState_4040 D_00519C40_4040 __asm__("D_00519C40");
-extern struct Alloc_4040 D_00450C10_4040 __asm__("D_00450C10");
+extern struct Alloc_4040 D_00450C10_4040 __asm__("gFileSysOpts");
 extern struct CdCfg_4040 D_00450C58_4040 __asm__("D_00450C58");
 extern struct IsoEntry_4040 *D_00450C68;
 extern unsigned int D_00450C6C;

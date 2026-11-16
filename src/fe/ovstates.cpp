@@ -83,7 +83,7 @@ extern "C" int cFEStateTitle_onGainTransition(void* self)
 INCLUDE_ASM("fe/ovstates", cFEStateTitle_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_0039E510(void* self);
-extern int D_004A19CC;
+extern int cRealFE_mMovieList;
 
 struct sItem_1948A8 {
     char pad[0xC];
@@ -116,7 +116,7 @@ static inline int isActive_1948A8(sList_1948A8* l, int j)
  * Counts idle frames on the title screen and requests the attract movie after 1800 of them.
  *
  * After the UI update (func_0039E510), an active entry in either controller's input list resets the timer
- * (+0x48). Past 1800 frames (30 s at 60 Hz) the timer restarts and bit 0x4 of D_004A19CC is set, which
+ * (+0x48). Past 1800 frames (30 s at 60 Hz) the timer restarts and bit 0x4 of cRealFE_mMovieList is set, which
  * func_001A27A0 plays as a skippable movie.
  */
 extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
@@ -125,7 +125,7 @@ extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
     self->timer += 1;
     if (self->timer > 0x708) {
         self->timer = 0;
-        D_004A19CC |= 4;
+        cRealFE_mMovieList |= 4;
         return;
     }
     int found = 0;

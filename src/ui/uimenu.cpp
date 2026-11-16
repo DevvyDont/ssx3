@@ -137,7 +137,7 @@ INCLUDE_ASM("ui/uimenu", cUIMenu_onInput);
 extern "C" void* func_00397870_i(void*, int) __asm__("func_00397870");
 void* func_0039FF50(void* self);
 extern "C" int func_003A0318(void* self, int a);
-extern char D_004A5A58[4];
+extern char gUISoundNull[4];
 extern "C" unsigned char cUIMenu_getNext(void* self);
 extern "C" unsigned char cUIMenu_getPrev(void* self);
 extern "C" int cUIMenu_onInputChangeItem(cUIMenu* self, unsigned char old);
@@ -322,7 +322,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
     char* owner = (char*)func_0039FF50(((char*)self));
     char* listener = *(char**)(owner + 0x14);
     if (listener == 0) {
-        listener = D_004A5A58;
+        listener = gUISoundNull;
     }
     if (listener != 0) {
         sVEv_B000* vt = *(sVEv_B000**)listener;
@@ -841,7 +841,7 @@ unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void* func_0039FF50(void* self);
 extern "C" int func_003A0318(void* self, int a);
-extern char D_004A5A58[4];
+extern char gUISoundNull[4];
 
 struct sVE_BED8 { short delta; short index; int (*fn)(void*, ...); };
 struct sVEv_BED8 { short delta; short index; void (*fn)(void*, ...); };
@@ -878,7 +878,7 @@ static inline int focusMove_BED8(char* self, int dir)
 extern "C" int cUIPair_onInput(cUIPair* self, void* in)
 {
     int result = 0;
-    char* listener = D_004A5A58;
+    char* listener = gUISoundNull;
     char* owner = (char*)func_0039FF50(((char*)self));
     if (*(char**)(owner + 0x14) != 0) {
         listener = *(char**)(owner + 0x14);

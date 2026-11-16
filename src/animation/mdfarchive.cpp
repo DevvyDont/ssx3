@@ -53,11 +53,11 @@ extern "C" void* cMdfArchive_getModelPartByIndex(sMdfArchive_00314CB0* self, int
 //100%
 INCLUDE_ASM("animation/mdfarchive", func_00314D60);
 #ifdef SKIP_ASM
-extern unsigned int* D_004A3E78;
+extern unsigned int* gameanimcmphack;
 
 extern "C" int func_00314D60(int* a, int* b)
 {
-    return D_004A3E78[*a] < D_004A3E78[*b] ? -1 : 1;
+    return gameanimcmphack[*a] < gameanimcmphack[*b] ? -1 : 1;
 }
 #endif
 
@@ -70,12 +70,12 @@ struct sMdfEntry_314D98 {
     int v;
     sMdfEntry_314D98() {}
 };
-extern void* D_004A3E7C;
+extern void* cGameAnimMap_TheGameAnimMap;
 
 extern "C" void* func_00314D98(void* self)
 {
     new (self) sMdfEntry_314D98[0x206];
-    D_004A3E7C = self;
+    cGameAnimMap_TheGameAnimMap = self;
     return self;
 }
 #endif
@@ -83,12 +83,12 @@ extern "C" void* func_00314D98(void* self)
 //100%
 INCLUDE_ASM("animation/mdfarchive", func_00314DB0);
 #ifdef SKIP_ASM
-// D_004A3E7C is declared void* earlier in the unit.
+// cGameAnimMap_TheGameAnimMap is declared void* earlier in the unit.
 void operator_delete(int* ptr);
 
 extern "C" void func_00314DB0(int* self, int flags)
 {
-    D_004A3E7C = 0;
+    cGameAnimMap_TheGameAnimMap = 0;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -100,7 +100,7 @@ INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_initMap);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char* D_0048CFC0[];
-extern unsigned int* D_004A3E78;
+extern unsigned int* gameanimcmphack;
 extern "C" int func_00314D60(int* a, int* b);
 extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(int*, int*));
 extern "C" void* func_00416210(void* dst, int c, int n);
@@ -117,7 +117,7 @@ struct sMdfHashTable_00314DD8
  *
  * Hashes the 518 names of D_0048CFC0 ("G_GATEROCK", "G_SIT_CYC", ...) with GetHashValue32() into hash[],
  * sorts order[] by hash with qsort (func_00418EF8; the comparator func_00314D60 reads the hashes through
- * D_004A3E78, set only during the sort) and fills the 518-entry map with -1 (func_00416210). func_00314E88
+ * gameanimcmphack, set only during the sort) and fills the 518-entry map with -1 (func_00416210). func_00314E88
  * (On Tour lookupGAD) binary-searches this index.
  */
 extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
@@ -128,9 +128,9 @@ extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
         self->order[i] = i;
         self->hash[i] = hashValue;
     }
-    D_004A3E78 = self->hash;
+    gameanimcmphack = self->hash;
     func_00418EF8(self->order, 0x206, 4, func_00314D60);
-    D_004A3E78 = 0;
+    gameanimcmphack = 0;
     func_00416210(self->map, -1, 0x818);
 }
 #endif
@@ -214,13 +214,13 @@ extern "C" void func_00314F30(sMdfIndex_00314E88* self, int kind, char* list)
 //100%
 INCLUDE_ASM("animation/mdfarchive", func_00314FE8);
 #ifdef SKIP_ASM
-extern void* D_004A5950;
+extern void* kAnimIDInvalid;
 
 extern "C" void func_00314FE8(sMdfIndex_00314E88* self, char* list)
 {
     for (int i = 0; i < *(short*)(*(char**)(list + 4) + 2); i++)
     {
-        func_00314EF0(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), D_004A5950);
+        func_00314EF0(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), kAnimIDInvalid);
     }
 }
 #endif

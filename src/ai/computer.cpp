@@ -1706,8 +1706,8 @@ struct sQuat_EB30
     sQuat_EB30(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sQuat_EB30 D_004FF130_EB30 __asm__("D_004FF130");
-extern sQuat_EB30 D_004FF160_EB30 __asm__("D_004FF160");
+extern sQuat_EB30 D_004FF130_EB30 __asm__("t4vect_Origin");
+extern sQuat_EB30 D_004FF160_EB30 __asm__("t4vect_ZAxis");
 
 static inline sQuat_EB30 AxisAngle_EB30(const sQuat_EB30& axis, float angle)
 {
@@ -1718,7 +1718,7 @@ static inline sQuat_EB30 AxisAngle_EB30(const sQuat_EB30& axis, float angle)
 
 static inline t4Vector GetUp_EB30(cRider* rider) { return rider->mMatrix.row[2]; }
 
-// Clears the anim's position offset and sets its heading quaternion to -angle about D_004FF160.
+// Clears the anim's position offset and sets its heading quaternion to -angle about t4vect_ZAxis.
 static inline void ResetAnimOrientation_EB30(char* ra, float angle)
 {
     *(sQuat_EB30*)(ra + 0x30) = D_004FF130_EB30;
@@ -3006,20 +3006,20 @@ extern "C" void cAirStreamerFX_update(void*);
 extern "C" void cPunchFX_update(void*);
 extern "C" void cPlayerLights_Clear(void*);
 extern "C" void cCheatFX_update(void*);
-extern int D_004A4534;
+extern int cRenderToggles_m_DisableAIVisualFX;
 
 struct sVE_00111948 { short delta; short index; int (*fn)(void*); };
 
 /**
  * Updates the rider's player lights and all 11 visual FX parts for this frame.
  *
- * Skipped for computer riders while the "Disable AI Visual FX" debug option (D_004A4534) is on. The lights
+ * Skipped for computer riders while the "Disable AI Visual FX" debug option (cRenderToggles_m_DisableAIVisualFX) is on. The lights
  * (PlayerLights, +0xD30) are reset first by cPlayerLights_Clear. On Tour's version takes an a_bIsLocalHuman flag
  * that this one lacks.
  */
 extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* self)
 {
-    if (D_004A4534 != 0) {
+    if (cRenderToggles_m_DisableAIVisualFX != 0) {
         cRider* rider = self->GroundMotion.mRider;
         char* riderBeing = (char*)&rider->mVtbl;
         sVE_00111948* isComputerSlot = &(*(sVE_00111948**)riderBeing)[kRiderVt_isComputer];
@@ -3054,18 +3054,18 @@ extern "C" void cTrickBoostFX_render(void*);
 extern "C" void cAirStreamerFX_render(void*);
 extern "C" void cPunchFX_render(void*);
 void cCheatFX_render(void*);
-extern int D_004A4534;
+extern int cRenderToggles_m_DisableAIVisualFX;
 
 struct sVE_001119F8 { short delta; short index; int (*fn)(void*); };
 
 /**
  * Draws all 11 of the rider's visual FX parts.
  *
- * Skipped for computer riders while the "Disable AI Visual FX" debug option (D_004A4534) is on.
+ * Skipped for computer riders while the "Disable AI Visual FX" debug option (cRenderToggles_m_DisableAIVisualFX) is on.
  */
 extern "C" void cRiderHandler_renderRiderFX(cRiderHandler* self)
 {
-    if (D_004A4534 != 0) {
+    if (cRenderToggles_m_DisableAIVisualFX != 0) {
         cRider* rider = self->GroundMotion.mRider;
         char* riderBeing = (char*)&rider->mVtbl;
         sVE_001119F8* isComputerSlot = &(*(sVE_001119F8**)riderBeing)[kRiderVt_isComputer];
@@ -3111,7 +3111,7 @@ public:
     virtual void Write(void* p, int n);
 };
 
-extern char D_004D33A0[];
+extern char gPaths[];
 extern "C" void func_00104D68(void* self, void* s);
 extern "C" void cAnimModel_writeToReplayFrame(void* self, void* s);
 extern "C" void func_00113AA0(void* self, void* s);
@@ -3188,8 +3188,8 @@ extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, char* data
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
     int ids[2];
-    ids[0] = func_0026B508(D_004D33A0, *(void**)((char*)self->GroundMotion.mRider + 0xAB4));
-    ids[1] = func_0026B550(D_004D33A0, *(void**)((char*)self->GroundMotion.mRider + 0xAB8));
+    ids[0] = func_0026B508(gPaths, *(void**)((char*)self->GroundMotion.mRider + 0xAB4));
+    ids[1] = func_0026B550(gPaths, *(void**)((char*)self->GroundMotion.mRider + 0xAB8));
     st->Write(ids, 8);
 }
 #endif
@@ -3214,7 +3214,7 @@ struct sRefWorld_00111D98 {
     sRefSet_00111D98** sets;    // 0x8
 };
 
-extern char D_004D33A0[];
+extern char gPaths[];
 extern "C" void func_00104DE0(void* self, void* s);
 extern "C" void cAnimModel_readFromReplayFrame(void* self, void* s);
 extern "C" void func_00113AD8(void* self, void* s);
@@ -3343,8 +3343,8 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* dat
     st->Read(*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
     st->Read(*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
     st->Read(ids, 8);
-    *(void**)((char*)self->GroundMotion.mRider + 0xAB4) = func_0026AF70(D_004D33A0, ids[0]);
-    *(void**)((char*)self->GroundMotion.mRider + 0xAB8) = func_0026AF88(D_004D33A0, ids[1]);
+    *(void**)((char*)self->GroundMotion.mRider + 0xAB4) = func_0026AF70(gPaths, ids[0]);
+    *(void**)((char*)self->GroundMotion.mRider + 0xAB8) = func_0026AF88(gPaths, ids[1]);
     sQuad_00111D98* focusBox = *(sQuad_00111D98**)((char*)self->GroundMotion.mRider + 0x78C);
     if (focusBox != 0) {
         *focusBox = *(sQuad_00111D98*)((char*)self->GroundMotion.mRider + 0x110);
@@ -3359,7 +3359,7 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* dat
 INCLUDE_ASM("ai/computer", func_00112180);
 #ifdef SKIP_ASM
 extern "C" void* func_0026B5E0(void*, int, int);
-extern char D_004D33A0[];
+extern char gPaths[];
 extern "C" float func_00115B08(void* self);
 
 struct sVec4_00112180
@@ -3404,7 +3404,7 @@ static inline void vu0AddEq_112180(sVec4_00112180& dst, sVec4_00112180 b)
 
 extern "C" void func_00112180(char* self, int flag)
 {
-    float* p = (float*)func_0026B5E0(D_004D33A0, 1, *(int*)(self + 0x86C));
+    float* p = (float*)func_0026B5E0(gPaths, 1, *(int*)(self + 0x86C));
     if (flag)
     {
         sVec4_00112180 dir;
@@ -3625,7 +3625,7 @@ struct sVec4_1127F0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern char D_004D33A0[];
+extern char gPaths[];
 extern "C" int func_0026B178(void* tree, void* pos, void** out, int maxOut);
 extern "C" float func_0026A428(void* path, void* a1, void* a2, void* a3, int n);
 sVec4_1127F0 func_0026AB20_1127F0(void* path, int* inRange, float t) __asm__("func_0026AB20");
@@ -3730,7 +3730,7 @@ extern "C" void func_001127F0(void* vself, int skipCur)
         float s = func_00112588(self, 1) / len;
         pos = vu0Add_1127F0(*(sVec4_1127F0*)(self + 0x110), vu0Scale_1127F0(*(sVec4_1127F0*)(self + 0x1E0), s));
     }
-    int n = func_0026B178(D_004D33A0, &pos, paths, 3);
+    int n = func_0026B178(gPaths, &pos, paths, 3);
     for (int i = 0; i < n; i++) {
         if (skipCur && paths[i] == *(void**)(self + 0xAB4)) {
             continue;
@@ -3762,7 +3762,7 @@ struct sVec4_112A50 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern char D_004D33A0[];
+extern char gPaths[];
 extern "C" int func_0026AFB8(void* tree, void* pos, void** out, int maxOut, int a4);
 extern "C" float func_0026AC48(void* self);
 extern "C" float func_0026A638(void* path, void* a1, void* a2, void* a3, void* hint, int n);
@@ -3872,7 +3872,7 @@ extern "C" void func_00112A50(void* vself, int keep)
     } else {
         pos = vu0Add_112A50(*(sVec4_112A50*)(self + 0x110), vu0Scale_112A50(*(sVec4_112A50*)(self + 0x1E0), 796.0f / len));
     }
-    int n = func_0026AFB8(D_004D33A0, &pos, paths, 6, 0);
+    int n = func_0026AFB8(gPaths, &pos, paths, 6, 0);
     for (int i = 0; i < n; i++) {
         if (paths[i] == *(void**)(self + 0xAB8) && keep) {
             continue;
@@ -3927,7 +3927,7 @@ struct sVec4_112D58 {
 
 struct sVE_112D58 { short delta; short index; int (*fn)(void*); };
 
-extern char D_004D33A0[];
+extern char gPaths[];
 int func_0026AF98_112D58(void* self, void* a1, void** out, int maxOut) __asm__("func_0026AF98__FPv");
 extern "C" float func_0026A428(void* path, void* a1, void* a2, void* a3, int n);
 extern "C" float func_0026A638(void* path, void* a1, void* a2, void* a3, void* hint, int n);
@@ -3972,7 +3972,7 @@ extern "C" void func_00112D58(char* self)
 {
     void* paths[6];
     sVec4_112D58 pos;
-    int n = func_0026AF98_112D58(D_004D33A0, self + 0x110, paths, 6);
+    int n = func_0026AF98_112D58(gPaths, self + 0x110, paths, 6);
     void* best = 0;
     float bestD = 9.999999933815813e+36f;
     int i;
@@ -4017,7 +4017,7 @@ INCLUDE_ASM("ai/computer", func_00112FB0);
 // FAKEMATCH: an extra `dist` read and the `cp` pointer (cp->DistanceLeft re-read) keep jump.c under its duplicate-insn limit; plain form 97.81%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern float func_0026A638_2FB0(void* track, void* pos, void* iPos, float* iDistXY, int* pi, int is2D) __asm__("func_0026A638");
-extern char D_004D33A0[];
+extern char gPaths[];
 
 // cTrackPath's vtable entry (g++ 2.95 layout: this-delta, index, fn).
 struct sVEntry_112FB0 { short delta; short index; int (*fn)(void*, float, float, void*, int); };
@@ -4037,7 +4037,7 @@ extern "C" void func_00112FB0(void* vself, float* pathDistXY, float* pathParam, 
     self->mDistToFinish = d;
     if (d < cur)
     {
-        sPathSys_112FB0* tbl = (sPathSys_112FB0*)D_004D33A0;
+        sPathSys_112FB0* tbl = (sPathSys_112FB0*)gPaths;
         for (int i = 0; i < 6; i++)
         {
             tPathCheckpoint_112FB0* cp = &tbl->Checkpoints[i];

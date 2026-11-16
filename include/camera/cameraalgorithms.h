@@ -84,7 +84,7 @@ struct cBasicCameraAlgorithm {
     void** mVtbl;               // 0x10 [R] cBasicCameraAlgorithm_vtbl (cManual: D_0045BD10, cEditor: D_0045BCA8)
     char unk_14[0xC];           // 0x14 alignment gap before the 16-byte-aligned t4Vector
     // --- cBasicCameraAlgorithm
-    t4Vector Position;          // 0x20 [O]; [R] = D_004FF130; [U] func_00167ED0 setPosition (sq), func_00167EF0
+    t4Vector Position;          // 0x20 [O]; [R] = t4vect_Origin; [U] func_00167ED0 setPosition (sq), func_00167EF0
                                 //      getPosition (lq)
     float Pitch;                // 0x30 [O]; [P] getPitch/setPitch (preview 0x30); [R] 0; [U] func_00167EE0 (swc1),
                                 //      func_00167F00 (lwc1)
@@ -142,7 +142,7 @@ struct cLookAtChaseAlgorithm {
     cRiderCameraTarget* Target;     // 0x030 [O]; [P]; [U] setTarget func_00162310; 15 functions read it
     char unk_034[0xC];              // 0x034 padding
     // --- cLookAtChaseAlgorithm
-    t4Vector Position;              // 0x040 [O]; [R] = D_004FF130; [U] lq/sq/lqc2, .z/.w by lwc1/swc1
+    t4Vector Position;              // 0x040 [O]; [R] = t4vect_Origin; [U] lq/sq/lqc2, .z/.w by lwc1/swc1
     float Heading;                  // 0x050 [O]; [R] 0; [U] lwc1/swc1 (func_00166640, func_001668B8)
     float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, func_00166640)
     float CamRoll;                  // 0x058 [O]; [R] 0

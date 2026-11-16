@@ -718,7 +718,7 @@ struct sGameOpts_9AD0 {
     unsigned int flags;         // 0x000: bits 22-24 = language
     char pad[0x284];
 };
-extern sGameOpts_9AD0 D_00535610;
+extern sGameOpts_9AD0 cBEOptionInterface_mOption;
 
 // One screen dimension in pixels, set from the unsigned value the renderer reports.
 // (The stores are aggregate-member stores: the target schedules the GrMan reload above them.)
@@ -833,7 +833,7 @@ static inline unsigned short* getLocString_9AD0(char* id)
  * placed from layout D_00477000 (one rider) or D_00477B40 (two, the second mirrored).
  * Looks up "fefont" / "hudfont", the countdown (nm3w, nm2w, nm1w, go) and "switch" elements, the place digits
  * nm1w-nm6w with st_w / nd_w / rd_w / th_w and "slash", "Sphere", 26 icons and 5x3 boost textures; sizes the
- * bars; picks ":" or "'" as the time separator by the language bits 22-24 of D_00535610 and measures "00",
+ * bars; picks ":" or "'" as the time separator by the language bits 22-24 of cBEOptionInterface_mOption and measures "00",
  * "-" and "11". Builds the hint boxes: a random Uber trick (L1 or R1 + Square, BXrand() & 1 kept at +0x55C),
  * RECOVER and "%s @skip %s" (kT_OVRCMNPress, kT_OVRCMNToSkip).
  *
@@ -1019,7 +1019,7 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
     }
     }
     {
-    sGameOpts_9AD0 opts = D_00535610;
+    sGameOpts_9AD0 opts = cBEOptionInterface_mOption;
     switch ((opts.flags >> 22) & 7) {
     case 0:
     case 2:
@@ -2349,7 +2349,7 @@ struct sGs_31E0 {
     unsigned int f10hi : 16;
 };
 
-extern sGs_31E0 D_00501420_31E0 __asm__("D_00501420");
+extern sGs_31E0 D_00501420_31E0 __asm__("sDrawState_s_defaultDrawState");
 extern char t4mat_Identity[];
 extern int D_004A4EB0;
 extern sV2_31E0 D_004A4EA8;

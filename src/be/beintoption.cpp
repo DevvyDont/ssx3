@@ -5,7 +5,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void func_0014F418(void* self);
 extern const char str_BEOptionInt[];
 extern void* D_0045ADC8[16];
-extern void* D_004A120C;
+extern void* cBEOptionInterface_instance;
 
 struct cBEOptionInterface {
     char pad_0x00[8];
@@ -26,14 +26,14 @@ INCLUDE_ASM("be/beintoption", cBEOptionInterface_getThis__Fv);
  */
 void* cBEOptionInterface_getThis()
 {
-    if (D_004A120C == 0) {
+    if (cBEOptionInterface_instance == 0) {
         cBEOptionInterface* mem = (cBEOptionInterface*)cMemMan_alloc(0x10, str_BEOptionInt, 0, 0);
         mem->vtable = D_0045ADC8;
-        D_004A120C = mem;
+        cBEOptionInterface_instance = mem;
         mem->field_0x8 = 0;
         func_0014F418(mem);
     }
-    return D_004A120C;
+    return cBEOptionInterface_instance;
 }
 #endif
 
@@ -45,24 +45,24 @@ struct sOptions_0014F2A8
     int data[0x288 / 4];
 };
 
-extern sOptions_0014F2A8 D_00535610;
+extern sOptions_0014F2A8 cBEOptionInterface_mOption;
 extern sOptions_0014F2A8 D_00535898;
 
 extern "C" void func_0014F2A8(void)
 {
-    D_00535898 = D_00535610;
+    D_00535898 = cBEOptionInterface_mOption;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintoption", func_0014F360);
 #ifdef SKIP_ASM
-extern sOptions_0014F2A8 D_00535610;
+extern sOptions_0014F2A8 cBEOptionInterface_mOption;
 extern sOptions_0014F2A8 D_00535898;
 
 extern "C" void func_0014F360(void)
 {
-    D_00535610 = D_00535898;
+    cBEOptionInterface_mOption = D_00535898;
 }
 #endif
 
@@ -101,7 +101,7 @@ struct sOptBits_0014F458
     unsigned int w1a : 2;
     unsigned int rest1 : 30;
 };
-extern sOptBits_0014F458 D_00535610_v0014F458[] __asm__("D_00535610");
+extern sOptBits_0014F458 D_00535610_v0014F458[] __asm__("cBEOptionInterface_mOption");
 
 class cBEOptionInterfaceV_0014F458
 {
@@ -122,7 +122,7 @@ extern "C" void func_0014F458(void* self)
     o->g = 1;
     o->h = 1;
     o->w1a = 1;
-    ((cBEOptionInterfaceV_0014F458*)D_004A120C)->apply();
+    ((cBEOptionInterfaceV_0014F458*)cBEOptionInterface_instance)->apply();
 }
 #endif
 
@@ -145,7 +145,7 @@ struct sOptBits_0014F4F8
     unsigned char b6;
     unsigned char b7;
 };
-extern sOptBits_0014F4F8 D_00535610_v0014F4F8[] __asm__("D_00535610");
+extern sOptBits_0014F4F8 D_00535610_v0014F4F8[] __asm__("cBEOptionInterface_mOption");
 
 class cBEOptionInterfaceV_0014F4F8
 {
@@ -175,7 +175,7 @@ extern "C" void func_0014F4F8(void* self)
     D_00535610_v0014F4F8[0].l = 9;
     D_00535610_v0014F4F8[0].b5 = 0;
     D_00535610_v0014F4F8[0].b6 = 0;
-    ((cBEOptionInterfaceV_0014F4F8*)D_004A120C)->apply();
+    ((cBEOptionInterfaceV_0014F4F8*)cBEOptionInterface_instance)->apply();
 }
 #endif
 
@@ -188,7 +188,7 @@ struct sOptBits_0014F600
     unsigned int pad : 30;
     unsigned int top : 2;
 };
-extern sOptBits_0014F600 D_00535610_v0014F600[] __asm__("D_00535610");
+extern sOptBits_0014F600 D_00535610_v0014F600[] __asm__("cBEOptionInterface_mOption");
 
 class cBEOptionInterfaceV_0014F600
 {
@@ -200,7 +200,7 @@ public:
 extern "C" void func_0014F600(void* self)
 {
     D_00535610_v0014F600[0].top = 0;
-    ((cBEOptionInterfaceV_0014F600*)D_004A120C)->apply();
+    ((cBEOptionInterfaceV_0014F600*)cBEOptionInterface_instance)->apply();
 }
 #endif
 
@@ -216,7 +216,7 @@ public:
 
 extern "C" void func_0014F648(void* self)
 {
-    ((cBEOptionInterfaceV_0014F648*)D_004A120C)->apply();
+    ((cBEOptionInterfaceV_0014F648*)cBEOptionInterface_instance)->apply();
 }
 #endif
 

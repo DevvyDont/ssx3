@@ -103,7 +103,7 @@ extern "C" void cReplay_startAutoReplay(void* replay);
 extern "C" void cOVStateManager_triggerOverlay(int state);
 extern "C" void cGame_exit(void* game, int a1);
 extern "C" int func_0026FB88(void* replay, int a1);
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_004A2A54;
 extern int D_005366E8[];
 extern int D_004428F0[];
@@ -119,7 +119,7 @@ public:
     virtual void v01();
     virtual void play(int id);
 };
-extern cSnd_20DF38 D_004A5A58;
+extern cSnd_20DF38 gUISoundNull;
 
 class cPad_20DF38 {
 public:
@@ -189,7 +189,7 @@ static inline char* replay_20DF38() { return *(char**)(D_004A28A8_20DF38->game +
  */
 extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* pInput)
 {
-    cSnd_20DF38* snd = &D_004A5A58;
+    cSnd_20DF38* snd = &gUISoundNull;
     if (*(cSnd_20DF38**)(self->owner + 0x14) != 0)
         snd = *(cSnd_20DF38**)(self->owner + 0x14);
     if (pInput->port != *(int*)(replay_20DF38() + 0x28)) {
@@ -213,7 +213,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         snd->play(6);
         int n = D_004A2A54 + 1;
         D_005366E8[n] = 2;
-        D_004A2A50 = D_004428F8[0];
+        cPauseState_Flags = D_004428F8[0];
         D_004A2A54 = n;
         self->paused = 1;
         char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
@@ -227,7 +227,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         case 0:
             cReplay_stopReplay(replay_20DF38());
             cOVStateManager_triggerOverlay(0x12);
-            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             break;
         case 1: {
             func_0039F190(self->owner + 0x18, 1);
@@ -242,19 +242,19 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
             if (*(int*)(replay_20DF38() + 0x608) != 0) {
                 cGame_exit(D_004A28A8_20DF38->game, 0);
             }
-            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             break;
         }
         case 2:
             self->paused = 0;
-            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             break;
         }
         return 1;
     }
     if (self->paused != 0 && pInput->v06()) {
         snd->play(3);
-        D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+        cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
         self->paused = 0;
         char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
         *(int*)(obj + 0x90) |= 8;

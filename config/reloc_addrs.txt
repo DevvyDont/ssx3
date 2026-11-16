@@ -19,10 +19,10 @@ rom:0x51D64 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
 rom:0x51D88 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
 // ealib/seg_2DCAE8 iFILESYS_ExecCommand: `addiu $2, $20, %lo(D_00519AB0)` (siblings at rom 0x2DF028, 0x2DF0A4 are paired).
 rom:0x2DF24C reloc:MIPS_LO16 symbol:D_00519AB0
-// main/game cSectionMan_update: `addiu $2/$4, $19, %lo(D_00442168)` (sibling at rom 0x12E9D4 is paired).
-rom:0x12EA04 reloc:MIPS_LO16 symbol:D_00442168
-rom:0x12EA48 reloc:MIPS_LO16 symbol:D_00442168
-rom:0x12EA98 reloc:MIPS_LO16 symbol:D_00442168
+// main/game cSectionMan_update: `addiu $2/$4, $19, %lo(cSectionMan_mSectionMap)` (sibling at rom 0x12E9D4 is paired).
+rom:0x12EA04 reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
+rom:0x12EA48 reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
+rom:0x12EA98 reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
 // fe/festateloadhint func_002464E8: `lui $16, %hi(str_Location)` hoisted ahead of a loop (the relocated copy is at rom 0x147594),
 // and six `addiu $2, $17, %lo(cBENewRaceInterface_newRace)` (the relocated sibling at rom 0x1478C0 has the same bytes).
 rom:0x147530 reloc:MIPS_HI16 symbol:str_Location
@@ -37,7 +37,7 @@ rom:0xFEA00 reloc:MIPS_HI16 symbol:str_kT_HELPBeatPostedTimePass
 
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
 // main/game cSectionMan_unloadSection (tools/gen/reloc_from_diff.py)
-rom:0x12E608 reloc:MIPS_LO16 symbol:D_00442168
+rom:0x12E608 reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
 // fe/messagecenter getDollarString (tools/gen/reloc_from_diff.py)
 rom:0x99B40 reloc:MIPS_HI16 symbol:D_004C6310
 rom:0x99B44 reloc:MIPS_HI16 symbol:str_pct_d_b
@@ -55,18 +55,18 @@ rom:0x4B1B0 reloc:MIPS_HI16 symbol:cBELibrary_profileLib
 rom:0x4B1B4 reloc:MIPS_HI16 symbol:D_004BA348
 rom:0x4B1B8 reloc:MIPS_HI16 symbol:D_005308B8
 // main/game cSectionMan_loadSection (tools/gen/reloc_from_diff.py)
-rom:0x12E444 reloc:MIPS_LO16 symbol:D_00442168
+rom:0x12E444 reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
 // render/lightman func_0038EE78 (tools/gen/reloc_from_diff.py)
-rom:0x28FFE0 reloc:MIPS_LO16 symbol:D_004FF160
+rom:0x28FFE0 reloc:MIPS_LO16 symbol:t4vect_ZAxis
 
-// main/game cSectionMan_activateSection: four more `addiu $2/$3, $6, %lo(D_00442168)` that splat left as raw 0x2168
+// main/game cSectionMan_activateSection: four more `addiu $2/$3, $6, %lo(cSectionMan_mSectionMap)` that splat left as raw 0x2168
 // (the sibling at rom 0x12E4DC is paired).
-rom:0x12E4F4 reloc:MIPS_LO16 symbol:D_00442168
-rom:0x12E50C reloc:MIPS_LO16 symbol:D_00442168
-rom:0x12E524 reloc:MIPS_LO16 symbol:D_00442168
-rom:0x12E53C reloc:MIPS_LO16 symbol:D_00442168
-// ai/rider func_0010EB30: `addiu $2, $20, %lo(D_004FF130)` left raw (-0xED0); its lui at rom 0xFCC4 is paired.
-rom:0xFCFC reloc:MIPS_LO16 symbol:D_004FF130
+rom:0x12E4F4 reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
+rom:0x12E50C reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
+rom:0x12E524 reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
+rom:0x12E53C reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
+// ai/rider func_0010EB30: `addiu $2, $20, %lo(t4vect_Origin)` left raw (-0xED0); its lui at rom 0xFCC4 is paired.
+rom:0xFCFC reloc:MIPS_LO16 symbol:t4vect_Origin
 
 // be/belibrary func_0014A5E0: three lui of the unaligned-copy path left raw (0x4A / 0x4C / 0x53), the same trio as
 // func_0014A188's at rom 0x4B1B0 / 0x4B1B8.
@@ -233,8 +233,8 @@ rom:0x127358 reloc:MIPS_HI16 symbol:D_004C8FA8
 rom:0x1273BC reloc:MIPS_LO16 symbol:D_004C8FA8
 rom:0x1274C8 reloc:MIPS_HI16 symbol:D_004C8FF8
 rom:0x1274D0 reloc:MIPS_LO16 symbol:D_004C8FF8
-rom:0x1274F0 reloc:MIPS_HI16 symbol:D_004C9098
-rom:0x1275A8 reloc:MIPS_LO16 symbol:D_004C9098
+rom:0x1274F0 reloc:MIPS_HI16 symbol:luno_gLunoNil
+rom:0x1275A8 reloc:MIPS_LO16 symbol:luno_gLunoNil
 // visualfx/worldlightman func_002F9040 (tools/gen/reloc_from_diff.py)
 rom:0x1FA3EC reloc:MIPS_HI16 symbol:D_004FAE10
 rom:0x1FA3F4 reloc:MIPS_LO16 symbol:D_004FAE10
@@ -614,9 +614,9 @@ rom:0x21B728 reloc:MIPS_LO16 symbol:_gp
 // seg/seg_21A1C0 func_00319930: the ThreadParam gp of the thread it creates is `_gp` too (per row).
 rom:0x21A978 reloc:MIPS_HI16 symbol:_gp
 rom:0x21A97C reloc:MIPS_LO16 symbol:_gp
-// fe/festatecharequipdetail func_0019BFE8: two unpaired %lo uses of $23 = %hi(D_004FF140) (raw -0xEC0).
-rom:0x9D3FC reloc:MIPS_LO16 symbol:D_004FF140
-rom:0x9D6E0 reloc:MIPS_LO16 symbol:D_004FF140
+// fe/festatecharequipdetail func_0019BFE8: two unpaired %lo uses of $23 = %hi(t4vect_XAxis) (raw -0xEC0).
+rom:0x9D3FC reloc:MIPS_LO16 symbol:t4vect_XAxis
+rom:0x9D6E0 reloc:MIPS_LO16 symbol:t4vect_XAxis
 // be/beintaggression func_00155E58: D_004A7869/786A/786B are cBELibrary_profileLib+0xBC1/0xBC2/0xBC3 (no other users).
 rom:0x56EE4 reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC3
 rom:0x56EE8 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC3
@@ -634,18 +634,18 @@ rom:0x57040 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC2
 // ealib/seg_2B4578 func_003C4450: D_0050B9C8 is D_0050AD00+0xCC8 (the transfer queue fCC8; its only use).
 rom:0x2C5454 reloc:MIPS_HI16 symbol:D_0050AD00 addend:0xCC8
 rom:0x2C5458 reloc:MIPS_LO16 symbol:D_0050AD00 addend:0xCC8
-// visualfx/lensfx func_002ED490: D_004FA3A8 is D_004FA370+0x38 (slot 0's second vec4).
-rom:0x1EEA38 reloc:MIPS_HI16 symbol:D_004FA370 addend:0x38
-rom:0x1EEA40 reloc:MIPS_LO16 symbol:D_004FA370 addend:0x38
+// visualfx/lensfx func_002ED490: D_004FA3A8 is cRenderStateMan_m_state+0x38 (slot 0's second vec4).
+rom:0x1EEA38 reloc:MIPS_HI16 symbol:cRenderStateMan_m_state addend:0x38
+rom:0x1EEA40 reloc:MIPS_LO16 symbol:cRenderStateMan_m_state addend:0x38
 // ealib/seg_2B4578 func_003CD2B0: D_0044EBF0 is D_0044EBE8+0x8 (the .val field of the 12-byte table; its only use).
 rom:0x2CE354 reloc:MIPS_HI16 symbol:D_0044EBE8 addend:0x8
 rom:0x2CE358 reloc:MIPS_LO16 symbol:D_0044EBE8 addend:0x8
 
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
 // camera/camera func_0015EE00 (tools/gen/reloc_from_diff.py)
-rom:0x5FF70 reloc:MIPS_LO16 symbol:D_004FF160
-rom:0x5FFB0 reloc:MIPS_LO16 symbol:D_004FF160
-rom:0x60000 reloc:MIPS_LO16 symbol:D_004FF160
+rom:0x5FF70 reloc:MIPS_LO16 symbol:t4vect_ZAxis
+rom:0x5FFB0 reloc:MIPS_LO16 symbol:t4vect_ZAxis
+rom:0x60000 reloc:MIPS_LO16 symbol:t4vect_ZAxis
 // ealib/seg_2B4578 func_003C7D00 (MIX_create): the mixer's a2[]/b1[]/b2[] arrays are D_00515B40+0xA8/+0xB0/+0xD0; splat
 // named them as inner labels (only this function uses them). D_00515B40 stays sized 0x10 (D_00515B50/54 are named).
 rom:0x2C8D98 reloc:MIPS_HI16 symbol:D_00515B40 addend:0xB0

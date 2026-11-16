@@ -65,7 +65,7 @@ struct cSimpleCamera {
                                 //      [U] func_001680A0/func_001680A8 return this + 0x20, func_001680B8 (sq 0x20),
                                 //      func_001680C8 (sq 0x30), func_001680D8 (both)
     t4Matrix CamMat;            // 0x40 [O]; [U] func_00168098 returns this + 0x40; func_0015E050 writes its rows
-    t4Vector Direction;         // 0x80 [O]; [R] = D_004FF140; [U] func_001680B0 returns this + 0x80
+    t4Vector Direction;         // 0x80 [O]; [R] = t4vect_XAxis; [U] func_001680B0 returns this + 0x80
     void** mVtbl;               // 0x90 [R] cSimpleCamera_vtbl (D_0045B8B0)
     char unk_94[0xC];           // 0x94 padding to the 16-byte class alignment
 };
@@ -119,10 +119,10 @@ struct cCamera {
     int DoingCamShakeLastFrame;     // 0x45C [O] bool; [R] 0; [U] cCamera_applyCameraShake lw/sw
     float LastGroundMove;           // 0x460 [O]; [R] 0; [U] func_0015EE00 (avoidGround) lwc1/swc1
     char unk_464[0xC];              // 0x464 alignment gap
-    t4Vector LastGroundNormal;      // 0x470 [O]; [R] = D_004FF160; [U] func_0015EE00
+    t4Vector LastGroundNormal;      // 0x470 [O]; [R] = t4vect_ZAxis; [U] func_0015EE00
     char IntersectionHint[0x10];    // 0x480 [O] tIntHint (intersect: mPatch, mU/mV, mFirstTri, mPrecision); only its
                                     //       address is used (func_0015EE00)
-    t4Vector LastSafePosition;      // 0x490 [O]; [R] = D_004FF130; [U] func_0015EE00
+    t4Vector LastSafePosition;      // 0x490 [O]; [R] = t4vect_Origin; [U] func_0015EE00
     int UsingSafePositionLastFrame; // 0x4A0 [O] bool; [R] 0; [U] func_0015EE00
     int LastSafePositionInvalid;    // 0x4A4 [O] bool; [R] 1; [U] func_0015EE00
     char unk_4A8[0x8];              // 0x4A8 padding to the 16-byte class alignment

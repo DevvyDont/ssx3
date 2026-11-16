@@ -70,7 +70,7 @@ void* func_00275CF8(void* self);
 extern "C" int BIG_sizeofheader(void* data);
 struct sDmNode5B98;
 extern "C" sDmNode5B98* func_00275B98(void* self, char* big, sDmNode5B98* prev);
-extern int D_00450DD4[];
+extern int REALabortflag[];
 
 struct sDmVEntry5920 {
     short delta;
@@ -89,13 +89,13 @@ struct sDmNode5920 {
 extern "C" sDmNode5920* func_00275920(void* self, int a1, void* data, int size)
 {
     sDmNode5920* n = (sDmNode5920*)func_00275CF8(self);
-    int saved = D_00450DD4[0];
+    int saved = REALabortflag[0];
     n->data = data;
     n->refs = 1;
     n->size = size;
-    D_00450DD4[0] = 0;
+    REALabortflag[0] = 0;
     int big = BIG_sizeofheader(data);
-    D_00450DD4[0] = saved;
+    REALabortflag[0] = saved;
     if (big != 0) {
         sDmVEntry5920* vt = *(sDmVEntry5920**)((char*)self + 0xC);
         vt[4].fn((char*)self + vt[4].delta, a1, data, size, n, &n->field_0x4);
@@ -223,7 +223,7 @@ INCLUDE_ASM("scripter/datamanager", func_00275B98);
 void* func_00275CF8(void* self);
 extern "C" int BIG_sizeofheader(void* data);
 extern "C" char* BIG_locateentryz(void* big, int a1, int index, int* offset, int* size);
-extern int D_00450DD4[];
+extern int REALabortflag[];
 
 struct sDmVEntry5B98 {
     short delta;
@@ -249,10 +249,10 @@ extern "C" sDmNode5B98* func_00275B98(void* self, char* big, sDmNode5B98* prev)
     char* name = BIG_locateentryz(big, 0, 0, &ent[0], &ent[1]);
     while (name != 0) {
         char* sub = big + ent[0];
-        int saved = D_00450DD4[0];
-        D_00450DD4[0] = 0;
+        int saved = REALabortflag[0];
+        REALabortflag[0] = 0;
         int r = BIG_sizeofheader(sub);
-        D_00450DD4[0] = saved;
+        REALabortflag[0] = saved;
         if (r != 0) {
             prev = func_00275B98(self, sub, prev);
         } else {
@@ -1900,14 +1900,14 @@ struct sDmEnt7DE8 {
     int v[7];
 };
 
-extern sDmCfg7DE8 D_00535610;
+extern sDmCfg7DE8 cBEOptionInterface_mOption;
 extern sDmEnt7DE8 D_004823DC[];
 extern sDmEnt7DE8 D_0048247C[];
 
 extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key)
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    sDmCfg7DE8 cfg = D_00535610;
+    sDmCfg7DE8 cfg = cBEOptionInterface_mOption;
     if ((cfg.flags & 0x300000) != 0x200000) {
         return &D_0048247C[*key];
     }

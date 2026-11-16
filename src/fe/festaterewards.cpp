@@ -141,7 +141,7 @@ struct sSnd_F270 {
     sVEv_F270* vt;
 };
 // $gp-relative default sound player (the unit declares it later as sDefObj_1FF0).
-extern sSnd_F270 D_004A5A58_F270 __asm__("D_004A5A58");
+extern sSnd_F270 D_004A5A58_F270 __asm__("gUISoundNull");
 
 static inline int Test_F270(char* o, int slot)
 {
@@ -2425,7 +2425,7 @@ struct sDefObj_1FF0 {
     sVE_1FF0b* vt;
 };
 // $gp-relative default object (target has raw `addiu $3,$28,0x2968`, no symbol)
-extern sDefObj_1FF0 D_004A5A58;
+extern sDefObj_1FF0 gUISoundNull;
 
 /**
  * Closes the preview when the input passes its vtable slot-6 test: plays UI sound 3, hides the frames,
@@ -2440,7 +2440,7 @@ extern "C" int cFEStatePreviewReward_onInputBegin(void* self, void* obj)
     if (vt[6].fn((char*)obj + vt[6].delta) != 0) {
     sDefObj_1FF0* sound = *(sDefObj_1FF0**)(*(char**)((char*)self + 0x10) + 0x14);
     if (sound == 0) {
-        sound = &D_004A5A58;
+        sound = &gUISoundNull;
     }
     if (sound != 0) {
         sound->vt[2].fn((char*)sound + sound->vt[2].delta, 3);

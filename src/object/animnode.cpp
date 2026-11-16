@@ -281,7 +281,7 @@ struct sVE_E798 {
 };
 
 extern sVec4_E798 t4vect_Zero;
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void func_00351660(void* node, sVec4_E798* pos, sVec4_E798* rot, float t);
 
@@ -410,8 +410,8 @@ extern "C" void func_0034E798(char* self)
         func_00351660(node, &pos, &rotv, *(float*)(self + 4));
         sVec4_E798 rot;
         rot = sVec4_E798(-*(float*)(node + 0x50), -*(float*)(node + 0x54), -*(float*)(node + 0x58), 0.0f);
-        vu0ScaleEq_E798(pos, t * (float)*(int*)(D_004A5B64 + 0x10));
-        vu0ScaleEq_E798(rotv, t * (float)*(int*)(D_004A5B64 + 0x10) * d2r);
+        vu0ScaleEq_E798(pos, t * (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        vu0ScaleEq_E798(rotv, t * (float)*(int*)(cAppMan_TheAppMan + 0x10) * d2r);
         sMat_E798 m;
         {
             sVec3_E798 e;

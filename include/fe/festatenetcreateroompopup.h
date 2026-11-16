@@ -69,7 +69,7 @@ struct cFEStateNetCreateRoomPopup {
     unsigned int mMessageHintFrame; // 0x050 [R] 0; [U] func_001AAB68 stores the frame when the session's count
                                     //       (func_00262938) becomes > 0 and 0 when it drops; func_001AA9B0 (slot 27)
                                     //       blinks widgets "IconMessageHint"/"TextMessageCount" while
-                                    //       (frame - it) % 60 > 30 (frame counter D_004A5B64 + 0x18)
+                                    //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
@@ -121,14 +121,14 @@ struct cFEStateNetCreateRoomPopup {
     cUIListBox* mpLBChannelName;    // 0x6D8 [U] onWidgetCreate: widget "LBChannelName" (4 entries); onWidgetEvent
                                     //       event 9 compares the widget with it and sets mszChannelName from its
                                     //       selection (cUIListBox_getCurrentEntryData)
-    char* mszRoomName;              // 0x6DC [P] getRoomName (preview 0xB8); [R] D_004A3E90 (both ctors), destroyed by
+    char* mszRoomName;              // 0x6DC [P] getRoomName (preview 0xB8); [R] cBXString_EmptyString (both ctors), destroyed by
                                     //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
                                     //       keyboard id 1); func_001BEC78 refuses an empty name
                                     //       ("kT_POPUP231UniqueRoom")
-    char* mszChannelName;           // 0x6E0 [P] getChannelName (preview 0xBC); [R] D_004A3E90, destroyed by
+    char* mszChannelName;           // 0x6E0 [P] getChannelName (preview 0xBC); [R] cBXString_EmptyString, destroyed by
                                     //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned D_004A1A6C by onWidgetCreate and
                                     //       one of D_004A1A60/64/6C/68 per list entry by onWidgetEvent
-    char* mszPassword;              // 0x6E4 [P] getPassword (preview 0xC0); [R] D_004A3E90, destroyed by
+    char* mszPassword;              // 0x6E4 [P] getPassword (preview 0xC0); [R] cBXString_EmptyString, destroyed by
                                     //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
                                     //       keyboard id 2)
 };

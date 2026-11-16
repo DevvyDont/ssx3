@@ -144,7 +144,7 @@ struct sEventDef_00152528
     int category;       // 0x54
     char pad58[0xC];
 };
-extern sEventDef_00152528 D_0043D950[];
+extern sEventDef_00152528 cBELibrary_locationDB[];
 
 extern "C" int func_00152528(sCharProfile_00152528* self, int ev, int mode, int place)
 {
@@ -164,7 +164,7 @@ extern "C" int func_00152528(sCharProfile_00152528* self, int ev, int mode, int 
             }
             else
             {
-                int cat = D_0043D950[ev].category;
+                int cat = cBELibrary_locationDB[ev].category;
                 if (mode == 0)
                     self->medals[cat].a++;
                 else if ((unsigned int)(mode - 1) < 3)

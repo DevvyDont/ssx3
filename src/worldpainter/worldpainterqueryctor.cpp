@@ -45,7 +45,7 @@ struct sWPQueryType {
 };
 
 
-extern cWorldPainterQuery* D_004A3880_0410 __asm__("D_004A3880");
+extern cWorldPainterQuery* D_004A3880_0410 __asm__("cWorldPainterQuery_m_queryListStart");
 
 /**
  * Constructs a world painter query for a region type, creates the matching query implementation and links the
@@ -54,7 +54,7 @@ extern cWorldPainterQuery* D_004A3880_0410 __asm__("D_004A3880");
  * Kinds 0-13 get a new implementation at +0x0: tWPIGD_MusicTrigger, Mix, Ambience, Speech, Camera, Fog,
  * LightGlow, ScreenTint, SkyBox, Sun, Surface, Lighting, Weather, Danger; other kinds leave it unset. Both
  * distances (+0x8, +0xC) start at 4286578688.0, the integer 0xFF800000 (the bit pattern of -infinity)
- * converted to float. The query becomes the head of the list at D_004A3880.
+ * converted to float. The query becomes the head of the list at cWorldPainterQuery_m_queryListStart.
  *
  * @param type  the region type (On Tour tWorldPainterRegionType): low byte kept as flags, the kind above it
  * @return @p self
@@ -131,10 +131,10 @@ struct sWPQuery_06C0 {
     sWPQuery_06C0* next;
 };
 
-extern sWPQuery_06C0* D_004A3880;
+extern sWPQuery_06C0* cWorldPainterQuery_m_queryListStart;
 
 /**
- * Destroys a world painter query: frees its data and unlinks it from the global query list (D_004A3880).
+ * Destroys a world painter query: frees its data and unlinks it from the global query list (cWorldPainterQuery_m_queryListStart).
  *
  * When the query is not the list's head the list is walked until the entry before it; the null test after that walk
  * is useless (the walk dereferences each entry first). Restores the base vtable (D_00485D30) and frees the object
@@ -146,9 +146,9 @@ extern "C" void cWorldPainterQuery__cWorldPainterQuery(cWorldPainterQuery* self,
 {
     self->mVtbl = (void**)cWorldPainterQuery_vtbl;
     operator_delete((int*)self->m_data);
-    sWPQuery_06C0* query = D_004A3880;
+    sWPQuery_06C0* query = cWorldPainterQuery_m_queryListStart;
     if (query == ((sWPQuery_06C0*)self)) {
-        D_004A3880 = (sWPQuery_06C0*)self->m_next;
+        cWorldPainterQuery_m_queryListStart = (sWPQuery_06C0*)self->m_next;
     } else {
         while (query->next != ((sWPQuery_06C0*)self)) {
             query = query->next;
@@ -167,7 +167,7 @@ extern "C" void cWorldPainterQuery__cWorldPainterQuery(cWorldPainterQuery* self,
 //100%
 INCLUDE_ASM("worldpainter/worldpainterqueryctor", cWorldPainterQuery_queryPosition);
 #ifdef SKIP_ASM
-extern int D_004A3860;
+extern int cWorldPainterMan_m_iCurrSection;
 
 // PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
 static inline float Sqrt_0778(float x)
@@ -241,11 +241,11 @@ static inline void set_0778(sOut_0778* o, float* d, float v)
  * distance travelled.
  *
  * The result's value is -99999 before the first query; later queries add the distance from the previous (x, z). The
- * cell of the query's layer (id low byte) in the painter map (World +0x8) at D_004A3860 is searched for (x, z)
+ * cell of the query's layer (id low byte) in the painter map (World +0x8) at cWorldPainterMan_m_iCurrSection is searched for (x, z)
  * (cWorldPainterQuery_lookupRegion); a hit with another key (id >> 8) returns the result unchanged, a missing cell or hit ends the
  * result (end_0778). The first hit sets the data with weight -1 and the distance 0. Later hits use @p blend as the
  * weight; with @p blend == -99999 the weight is 1 (and the distance resets) when the hit's first value lies between 0
- * and the distance travelled, else minus that value. The while loop never repeats (D_004A3860 is not advanced).
+ * and the distance travelled, else minus that value. The while loop never repeats (cWorldPainterMan_m_iCurrSection is not advanced).
  *
  * @param x  the world x
  * @param z  the world z (On Tour fy)
@@ -264,7 +264,7 @@ extern "C" sOut_0778* cWorldPainterQuery_queryPosition(sQuery_0778* self, float 
         float dz = self->z - z;
         self->out->value += Sqrt_0778(dx * dx + dz * dz);
     }
-    int idx = D_004A3860;
+    int idx = cWorldPainterMan_m_iCurrSection;
     self->x = x;
     self->z = z;
     while (valid_0778(&(*(sEntry_0778**)(map + 4))[idx])) {

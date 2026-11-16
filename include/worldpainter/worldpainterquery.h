@@ -29,7 +29,7 @@
 // Methods: cWorldPainterQuery/methods.txt (queries), tWPInGameData/methods.txt (the data classes).
 //
 // Statics (not declared here: the .cpp files declare these D_ symbols with differing types):
-//   cWorldPainterQuery::m_queryListStart = D_004A3880 ([O] static member; [U] ctor, dtor, reset);
+//   cWorldPainterQuery::m_queryListStart = cWorldPainterQuery_m_queryListStart ([O] static member; [U] ctor, dtor, reset);
 //   kNullNameField (static const tWPNameField, a copy per translation unit: D_004A52E0 worldpainterlayer,
 //   D_004A5358 worldpainterman, D_004A53D0 worldpainterquery; [O] On Tour globals; [R] the static initializers zero
 //   it, the Lighting ctor/setDefaults copy it into the names);

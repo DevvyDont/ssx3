@@ -33,11 +33,11 @@ void* cBERewardInterface_getThis()
 INCLUDE_ASM("be/beintreward", func_00156A10);
 #ifdef SKIP_ASM
 extern "C" void cBERewardDB_init(void* db, int flag);
-extern void* D_004C3E98[];
+extern void* cBELibrary_rewardDB[];
 
 extern "C" void func_00156A10()
 {
-    cBERewardDB_init(D_004C3E98, 1);
+    cBERewardDB_init(cBELibrary_rewardDB, 1);
 }
 #endif
 
@@ -45,13 +45,13 @@ extern "C" void func_00156A10()
 INCLUDE_ASM("be/beintreward", func_00156A38);
 #ifdef SKIP_ASM
 // PORT: compares a pointer cast to int against -1; not 64-bit safe.
-extern void* D_004C3E98[];
+extern void* cBELibrary_rewardDB[];
 
 extern "C" int func_00156A38(void)
 {
     int r = 0;
-    if ((int)D_004C3E98[0] == -1) {
-        r = D_004C3E98[1] != 0;
+    if ((int)cBELibrary_rewardDB[0] == -1) {
+        r = cBELibrary_rewardDB[1] != 0;
     }
     return r;
 }
@@ -604,7 +604,7 @@ extern "C" int func_00157518(void* self, int a1, int a2, int kind)
 INCLUDE_ASM("be/beintreward", func_001575C0);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
-// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
@@ -619,7 +619,7 @@ extern "C" int func_001575C0(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintreward", func_00157620);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
-// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
@@ -634,7 +634,7 @@ extern "C" int func_00157620(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintreward", func_00157680);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
-// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
@@ -649,7 +649,7 @@ extern "C" int func_00157680(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintreward", func_001576E0);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
-// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
@@ -664,7 +664,7 @@ extern "C" int func_001576E0(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintreward", func_00157740);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
-// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
@@ -1066,7 +1066,7 @@ extern "C" int func_001575C0(void* self, int a1, int a2);
 int func_001572B0(void* self);
 extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
 extern int cBELibrary_profileLib[];
-// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 
 struct sRewardDef_157FD0
@@ -1109,7 +1109,7 @@ extern "C" int func_00157620(void* self, int a1, int a2);
 int func_001572D0(void* self);
 extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
 extern int cBELibrary_profileLib[];
-// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 
 struct sRewardDef_1580F8
@@ -1152,7 +1152,7 @@ extern "C" int func_00157680(void* self, int a1, int a2);
 int func_001572F0(void* self);
 extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
 extern int cBELibrary_profileLib[];
-// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 
 struct sRewardDef_158220
@@ -1195,7 +1195,7 @@ extern "C" int func_001576E0(void* self, int a1, int a2);
 int func_00157310(void* self);
 extern "C" void func_00158618(void* self, int a1, int a2, int a3, int a4);
 extern int cBELibrary_profileLib[];
-// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 
 struct sRewardDef_158348
@@ -1231,7 +1231,7 @@ INCLUDE_ASM("be/beintreward", func_00158470);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern int cBELibrary_profileLib[];
 extern "C" void func_001573F0(void* self, int bit, char* bits);
@@ -1284,7 +1284,7 @@ INCLUDE_ASM("be/beintreward", func_00158618);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &D_004C3E98).
+// PORT: the unit declares func_0015A478(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern int cBELibrary_profileLib[];
 extern "C" void func_001573F0(void* self, int bit, char* bits);
@@ -1731,42 +1731,42 @@ extern "C" int cBERewardInterface_calculateNextBigChallengesLevel(cBERewardInter
 INCLUDE_ASM("be/beintreward", cBERewardInterface_clearUserAwards);
 #ifdef SKIP_ASM
 int cBELibrary_getRiderIndex(int);
-extern void* D_004A1260;
-extern int D_00440F48[];
-extern int D_00440F58[];
-extern void* D_004C3EF0[];
+extern void* gNextEarningsLimit;
+extern int gNextCollectiblesLimit[];
+extern int gNextBigChallengesLimit[];
+extern void* cBELibrary_userAwards[];
 extern "C" void cBEUserAwards_clear(void* self);
 
 /**
  * Clears the awards log and caches the next earnings, collectibles and big-challenge targets.
  *
- * Clears D_004C3EF0 (cBEUserAwards_clear()) and computes the targets for rider 0's character on profile 0
- * into D_004A1260, D_00440F48[3] and D_00440F58[3]. Then zeroes +0x10 and stores -1 at +0x14 of
+ * Clears cBELibrary_userAwards (cBEUserAwards_clear()) and computes the targets for rider 0's character on profile 0
+ * into gNextEarningsLimit, gNextCollectiblesLimit[3] and gNextBigChallengesLimit[3]. Then zeroes +0x10 and stores -1 at +0x14 of
  * cBERewardInterface_instance (not of @p self).
  */
 extern "C" void cBERewardInterface_clearUserAwards(cBERewardInterface* self)
 {
-    cBEUserAwards_clear(D_004C3EF0);
+    cBEUserAwards_clear(cBELibrary_userAwards);
     int charID = cBELibrary_getCharacterID(cBELibrary_getRiderIndex(0));
-    D_004A1260 = cBERewardInterface_calculateNextEarningsLevel(self, 0, charID);
+    gNextEarningsLimit = cBERewardInterface_calculateNextEarningsLevel(self, 0, charID);
     for (int i = 0; i < 3; i++)
-        D_00440F48[i] = cBERewardInterface_calculateNextCollectiblesLevel(self, 0, charID, i);
+        gNextCollectiblesLimit[i] = cBERewardInterface_calculateNextCollectiblesLevel(self, 0, charID, i);
     for (int i = 0; i < 3; i++)
-        D_00440F58[i] = cBERewardInterface_calculateNextBigChallengesLevel(self, 0, charID, i);
+        gNextBigChallengesLimit[i] = cBERewardInterface_calculateNextBigChallengesLevel(self, 0, charID, i);
     char* rewardIface = (char*)cBERewardInterface_instance;
     *(int*)(rewardIface + 0x10) = 0;
     *(int*)(rewardIface + 0x14) = -1;
 }
 #endif
 
-extern void* D_004C3EF0[];
+extern void* cBELibrary_userAwards[];
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00158F20__FPv);
 #ifdef SKIP_ASM
 void* func_00158F20(void* self)
 {
-    return (void*)D_004C3EF0;
+    return (void*)cBELibrary_userAwards;
 }
 #endif
 
@@ -1777,7 +1777,7 @@ INCLUDE_ASM("be/beintreward", func_00158F30__FPv);
 #ifdef SKIP_ASM
 void* func_00158F30(void* self)
 {
-    return func_0015A6F0((void*)D_004C3EF0);
+    return func_0015A6F0((void*)cBELibrary_userAwards);
 }
 #endif
 
@@ -1785,7 +1785,7 @@ void* func_00158F30(void* self)
 INCLUDE_ASM("be/beintreward", func_00158F50);
 #ifdef SKIP_ASM
 extern "C" void *func_00158F50(void) {
-    return *D_004C3EF0;
+    return *cBELibrary_userAwards;
 }
 #endif
 
@@ -1794,7 +1794,7 @@ INCLUDE_ASM("be/beintreward", func_00158F60);
 #ifdef SKIP_ASM
 struct sReward_0015A628;
 extern "C" void func_0015A628(sReward_0015A628* self, int row, int col, int value);
-extern void* D_004C3EF0[];
+extern void* cBELibrary_userAwards[];
 extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit `long` flags word (ld/sd).
@@ -1806,7 +1806,7 @@ struct sCharRec_158F60 {
 
 extern "C" void func_00158F60(void* self, int profile, int c, int row, int mode)
 {
-    sReward_0015A628* q = (sReward_0015A628*)D_004C3EF0;
+    sReward_0015A628* q = (sReward_0015A628*)cBELibrary_userAwards;
     switch (mode)
     {
     case 0:
@@ -1959,7 +1959,7 @@ struct sRaceSettings_1591E8 {
     char pad_0x00[0x49];
     signed char b49;    // 0x49
 };
-extern sRaceSettings_1591E8 D_005305B0_1591E8 __asm__("D_005305B0");
+extern sRaceSettings_1591E8 D_005305B0_1591E8 __asm__("cBELibrary_raceDB");
 extern signed char D_005305F9[];
 
 
@@ -2126,21 +2126,21 @@ extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a,
 extern "C" void func_00150A90(void* econ, int a, int b, int amount);
 extern "C" void* cBERewardInterface_calculateNextEarningsLevel(cBERewardInterface* self, int a, int b);
 extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int a1, int a2, int kind, int tier);
-extern void* D_004A1260;
-extern void* D_004C3EF0[];
+extern void* gNextEarningsLimit;
+extern void* cBELibrary_userAwards[];
 
 extern "C" void func_00159818(void* self, int a, int b, int amount)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    *(int*)D_004C3EF0 += amount;
-    if (D_004A1260 != 0 && (unsigned int)(cBEEconInterface_getTotalMoneyEarned(econ, a, b) + amount) >= (unsigned int)D_004A1260)
+    *(int*)cBELibrary_userAwards += amount;
+    if (gNextEarningsLimit != 0 && (unsigned int)(cBEEconInterface_getTotalMoneyEarned(econ, a, b) + amount) >= (unsigned int)gNextEarningsLimit)
     {
         int before[3];
         int i;
         for (i = 0; i < 3; i++)
             before[i] = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, a, b, i, 3);
         func_00150A90(econ, a, b, amount);
-        D_004A1260 = cBERewardInterface_calculateNextEarningsLevel((cBERewardInterface*)self, a, b);
+        gNextEarningsLimit = cBERewardInterface_calculateNextEarningsLevel((cBERewardInterface*)self, a, b);
         for (i = 0; i < 3; i++)
         {
             if (before[i] == 0 && cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, a, b, i, 3))
@@ -2169,13 +2169,13 @@ extern "C" int cBERewardInterface_calculateNextCollectiblesLevel(cBERewardInterf
 extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int a1, int a2, int kind, int tier);
 extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit);
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, int a2, int bit);
-extern int D_00440F48[];
+extern int gNextCollectiblesLimit[];
 extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
 
 /**
  * Checks a rider's collectibles count on a peak against the next target and awards what it unlocks.
  *
- * Does nothing unless the cached target D_00440F48[k] is positive and reached. Then the target moves to the
+ * Does nothing unless the cached target gNextCollectiblesLimit[k] is positive and reached. Then the target moves to the
  * next level; when trophy 2 was owned and the count equals the peak's lowest target, the trophy is awarded; a
  * newly conquered mountain awards category 0.
  *
@@ -2185,7 +2185,7 @@ extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
 extern "C" void cBERewardInterface_awardUserCollectible(cBERewardInterface* self, int rider, int k)
 {
     int cur = cBEMissionInterface_getCurrentCollectForPeak(cBE_getInterface_Fv(cBE_getBE(), 0xA), rider, k);
-    int* nextLevel = &D_00440F48[k];
+    int* nextLevel = &gNextCollectiblesLimit[k];
     if (*nextLevel <= 0)
         return;
     if (cur < *nextLevel)
@@ -2219,13 +2219,13 @@ extern "C" int cBERewardInterface_calculateNextBigChallengesLevel(cBERewardInter
 extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int a1, int a2, int kind, int tier);
 extern "C" int func_0015A2E0(void* self, int a1, int a2, int bit);
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, int a2, int bit);
-extern int D_00440F58[];
+extern int gNextBigChallengesLimit[];
 extern int D_0045B018_2d[][4] __asm__("D_0045B018");
 
 extern "C" void func_00159B08(void* self, int rider, int k)
 {
     int cur = cBEMissionInterface_getNumberCompletedMissionsOnPeak(cBE_getInterface_Fv(cBE_getBE(), 0xA), k);
-    int* p = &D_00440F58[k];
+    int* p = &gNextBigChallengesLimit[k];
     if (*p <= 0)
         return;
     if (cur < *p)
@@ -2284,7 +2284,7 @@ extern sSlots2_00159CD0 D_004A1268[];
  * front-end notice (func_001E2578, func_001E2518, func_001E2428) and give a fixed reward; peak 0's trophies
  * give random rewards of kinds 4 and 3 and unlock peak 1, peak 1's give kinds 7 and 5 and unlock peaks 1 and
  * 2, peak 2's give a fixed reward; 17-31 give an item. The category bit is set (+0xF28), the rewards go into
- * the log D_004C3EF0, and the mountain, peak and trophy awards are re-checked.
+ * the log cBELibrary_userAwards, and the mountain, peak and trophy awards are re-checked.
  *
  * @param profile  profile index (On Tour: iProfileIndex)
  * @param iCharacterID  character id (On Tour: iCharacterID)
@@ -2293,7 +2293,7 @@ extern sSlots2_00159CD0 D_004A1268[];
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profile, int iCharacterID, int bit)
 {
     char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + iCharacterID * 0xF88;
-    sReward_0015A628* rewardLog = (sReward_0015A628*)D_004C3EF0;
+    sReward_0015A628* rewardLog = (sReward_0015A628*)cBELibrary_userAwards;
     sSlots4_00159CD0 slots4 = D_0045AA28;
     sSlots2_00159CD0 slots2 = D_004A1268[0];
     int item = -1;
@@ -2478,14 +2478,14 @@ struct sBERewardEntry {
     int field_0x54;
     char pad_0x58[0xc];
 };
-extern sBERewardEntry D_0043D950[];
+extern sBERewardEntry cBELibrary_locationDB[];
 
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A398);
 #ifdef SKIP_ASM
 extern "C" int func_0015A398(void* self, int a1)
 {
-    return D_0043D950[a1].field_0x54;
+    return cBELibrary_locationDB[a1].field_0x54;
 }
 #endif
 
@@ -2520,13 +2520,13 @@ extern "C" int func_0015A3B8(void* self, int a, int b)
 }
 #endif
 
-extern void* D_004C3E98[];
+extern void* cBELibrary_rewardDB[];
 
 INCLUDE_ASM("be/beintreward", func_0015A478);
 #ifdef SKIP_ASM
 void* func_0015A478(void* self)
 {
-    return (void*)D_004C3E98;
+    return (void*)cBELibrary_rewardDB;
 }
 #endif
 

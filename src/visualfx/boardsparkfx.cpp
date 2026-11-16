@@ -296,8 +296,8 @@ struct sRS_AA78 {
     short tex;      // 0x10
     short pad;
 };
-extern sV4_AA78 D_004FF130;
-extern sRS_AA78 D_00501420_AA78 __asm__("D_00501420");
+extern sV4_AA78 t4vect_Origin;
+extern sRS_AA78 D_00501420_AA78 __asm__("sDrawState_s_defaultDrawState");
 
 // Render-state field setters (mask, shift, value), as the unit's other effects write them.
 #define RS_SETA_AA78(rs, mask, shift, v) ((rs).flagsA = ((rs).flagsA & ~(mask)) | (((v) << (shift)) & (mask)))
@@ -324,7 +324,7 @@ struct sSparkFx_AA78 {
 extern "C" void cBoardSparkFX_readFromReplayFrame(cBoardSparkFX* vself)
 {
     sSparkFx_AA78* self = (sSparkFx_AA78*)vself;
-    self->pos = D_004FF130;
+    self->pos = t4vect_Origin;
     self->f70 = 0;
     self->f74 = 0;
     self->f78 = 0;
@@ -405,12 +405,12 @@ struct sSparkFx_ABC8 {
     int f78;                    // 0x78
 };
 
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern int cPowerUpFXToggles_m_SuperUberStateTest;
 extern int cPowerUpFXToggles_m_UberStateTest;
 extern int D_004A3AFC;
-// D_004FA370: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sEnt_ABC8 views a row from its +0x28 field
-extern char D_004FA370[];
+// cRenderStateMan_m_state: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sEnt_ABC8 views a row from its +0x28 field
+extern char cRenderStateMan_m_state[];
 
 extern "C" void func_0036D428(void* self, float val);
 int func_0011FE98(void* self);
@@ -539,7 +539,7 @@ static inline sV4_ABC8 RiderSide_ABC8(char* rider)
 extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
 {
     char* rider = self->rider;
-    float dt = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+    float dt = 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     char* surfaceData = (char*)SSXApp->Game->SurfPropCache + *(int*)(rider + 0x438) * 0xB0;
     func_0036D428(self->gfx, dt);
     if (self->active) {
@@ -580,7 +580,7 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
         } else {
             char* sub = self->rider + 0x6C0;
             sRiderVE_ABC8* vt = *(sRiderVE_ABC8**)sub;
-            sCol_ABC8 c = ((sEnt_ABC8*)(D_004FA370 + 0x28))[vt[7].fn(sub + vt[7].delta)].col;
+            sCol_ABC8 c = ((sEnt_ABC8*)(cRenderStateMan_m_state + 0x28))[vt[7].fn(sub + vt[7].delta)].col;
             groundColour = sV4_ABC8(c.r, c.g, c.b, c.a);
             ScaleTo_ABC8(groundColour, groundColour, 2.0f);
             groundColour.w = 1.0f;

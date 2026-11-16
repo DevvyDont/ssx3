@@ -1217,8 +1217,8 @@ extern "C" void func_0030C390(void* p);
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void func_00308988(void* self);
 extern char D_00489C00[];
-// D_004A3DD8 is declared `int` later in the unit; it holds the current process.
-extern void* func_003087D0_current __asm__("D_004A3DD8");
+// cWScriptMan_TheWScriptMan is declared `int` later in the unit; it holds the current process.
+extern void* func_003087D0_current __asm__("cWScriptMan_TheWScriptMan");
 
 extern "C" void* func_003087D0(void* self)
 {
@@ -1255,13 +1255,13 @@ extern "C" void func_00308A48(void* self);
 extern "C" void func_0030B068(void* self, int flags);
 void operator_delete(int* p);
 extern char D_00489C00[];
-extern int D_004A3DD8;
+extern int cWScriptMan_TheWScriptMan;
 
 extern "C" void func_003088D8(void* self, int flags)
 {
     *(void**)((char*)self + 0x494) = D_00489C00;
     func_00308A48(self);
-    D_004A3DD8 = 0;
+    cWScriptMan_TheWScriptMan = 0;
     if ((char*)self + 0x2C0 != 0) {
         char* p = (char*)self + 0x2C0 + 0x10C;
         while ((char*)self + 0x2C0 != p) {

@@ -110,7 +110,7 @@ struct cScreenPopup {
     cKeyboardPopup* mpKeyboard;     // 0x2A8 [O]; [R] ctor zeroes; [U] onWidgetEvent allocates the cKeyboardPopup into it
     cScreenPopup* mpConfirmPopup;   // 0x2AC [O]; [U] createConfirmationPopup stores the "Confirmation Popup" there
     char* mszInputText;             // 0x2B0 [P] getEntryBoxText (preview 0x16C, seen); [O] cBXString; [R] ctor stores
-                                    //       the empty-string rep D_004A3E90; [U] filled from the keyboard's text
+                                    //       the empty-string rep cBXString_EmptyString; [U] filled from the keyboard's text
     char* mszStaticText;            // 0x2B4 [O] cBXString; [R] ctor/dtor like mszInputText
     int mbShowing;                  // 0x2B8 [P] isShowing (preview 0x174, seen); [U] onCreateScreen 1, onDestroyScreen 0
     int mbFirstGainTran;            // 0x2BC [O]; [U] set on the first onGainTransition; redrawPopup checks it

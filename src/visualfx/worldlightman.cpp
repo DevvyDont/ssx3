@@ -124,7 +124,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F5400);
 extern char D_005047F8[];
 extern int D_004A43C4;
 extern int D_004A3B64;
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 struct sVec_5400 {
     float x, y, z, w;
@@ -311,7 +311,7 @@ extern "C" sLightSet_5400* func_002F5400(sMan_5400* self, char* obj, int force)
             break;
         }
     }
-    int prio = *(int*)(D_004A5B64 + 0x18);
+    int prio = *(int*)(cAppMan_TheAppMan + 0x18);
     if (!found) {
         if (self->count < 32) {
             node = &self->nodes[self->count++];
@@ -889,7 +889,7 @@ extern int D_004A3BC0;
 struct sVec6518 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
-extern sVec6518 D_004FF130;
+extern sVec6518 t4vect_Origin;
 
 struct sVE6518 {
     short delta;
@@ -1093,7 +1093,7 @@ extern "C" void cCheatFX_update(sWLCode6518* self)
                      scale6518(norm6518(self->rider->vel), len * (1.0f - self->rider->steer)));
     curRider = self->rider;
     if (curRider->vel.x < 0.0f && curRider->vel.x >= 0.0f) {
-        curRider->vel = D_004FF130;
+        curRider->vel = t4vect_Origin;
     }
 }
 #endif
@@ -1406,20 +1406,20 @@ struct sWlRsm {
     sWlRsm() {}
 };
 inline void* operator new[](unsigned int, void* p) { return p; }
-extern sWlAvElem D_004D5B70[];
-extern sWlAvElem D_004EDB70[];
-extern sWlFx D_004EE770[];
-// one past the end of D_004EE770[64] (the linker names that address D_004FA370)
-extern sWlFx D_004FA370_end[] __asm__("D_004FA370");
-extern sWlRsm D_004FA370[];
+extern sWlAvElem vertlist[];
+extern sWlAvElem collisionvertlist[];
+extern sWlFx cAvalanche_m_activeNodes[];
+// one past the end of cAvalanche_m_activeNodes[64] (the linker names that address cRenderStateMan_m_state)
+extern sWlFx D_004FA370_end[] __asm__("cRenderStateMan_m_state");
+extern sWlRsm cRenderStateMan_m_state[];
 static inline void initE(int* p, int n)
 {
     *(char*)p = n;
     *p = (*p & 0xFF) | (n << 8);
 }
 // Static constructors/destructors of this lump: the colour table, the avalanche particle
-// arrays and fx objects (D_004D5B70, D_004EDB70, D_004EE770), the render-state
-// entries (D_004FA370) and the light colour presets.
+// arrays and fx objects (vertlist, collisionvertlist, cAvalanche_m_activeNodes), the render-state
+// entries (cRenderStateMan_m_state) and the light colour presets.
 void sti_002F6B88(int init, int prio) __asm__("func_002F6B88");
 void sti_002F6B88(int init, int prio)
 {
@@ -1683,11 +1683,11 @@ void sti_002F6B88(int init, int prio)
             initE(kWPR_Lighting, 11);
             initE(D_004A55A0, 12);
             initE(D_004A55A8, 13);
-            new (D_004D5B70) sWlAvElem[2048];
-            new (D_004EDB70) sWlAvElem[64];
-            new (D_004EE770) sWlFx[64];
+            new (vertlist) sWlAvElem[2048];
+            new (collisionvertlist) sWlAvElem[64];
+            new (cAvalanche_m_activeNodes) sWlFx[64];
             D_004A55AC = 6.283186f;
-            new (D_004FA370) sWlRsm[8];
+            new (cRenderStateMan_m_state) sWlRsm[8];
             D_004A55B4 = 0;
             D_004A55B0 = 0;
             D_004FAAF0[0] = 1.0f;
@@ -1755,13 +1755,13 @@ void sti_002F6B88(int init, int prio)
             D_004FAC70[3] = 0.0f;
             __builtin_memcpy(D_004FAC80, D_004D5840, 16);
         } else {
-            if (D_004EE770 != 0) {
+            if (cAvalanche_m_activeNodes != 0) {
                 sWlFx* p = D_004FA370_end;
-                if (D_004EE770 != D_004FA370_end) {
+                if (cAvalanche_m_activeNodes != D_004FA370_end) {
                     do {
                         p--;
                         tActiveAvalancheNode__tActiveAvalancheNode(p, 0);
-                    } while (p != D_004EE770);
+                    } while (p != cAvalanche_m_activeNodes);
                 }
             }
         }
@@ -2013,19 +2013,19 @@ extern "C" void* func_002F7C38(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C70);
 #ifdef SKIP_ASM
-extern int D_004A3A30;
+extern int cAvalanche_m_Enable;
 
 extern "C" int *func_002F7C70(void) {
-    return &D_004A3A30;
+    return &cAvalanche_m_Enable;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C80);
 #ifdef SKIP_ASM
-extern int D_004A3A34;
+extern int cAvalanche_m_Recalc;
 
 extern "C" int *func_002F7C80(void) {
-    return &D_004A3A34;
+    return &cAvalanche_m_Recalc;
 }
 #endif
 //100%
@@ -2112,91 +2112,91 @@ extern "C" int *func_002F7D10(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D20);
 #ifdef SKIP_ASM
-extern int D_004A3A5C;
+extern int cAvalanche_m_Trigger;
 
 extern "C" int *func_002F7D20(void) {
-    return &D_004A3A5C;
+    return &cAvalanche_m_Trigger;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D30);
 #ifdef SKIP_ASM
-extern int D_004A3A60;
+extern int cAvalanche_m_Update;
 
 extern "C" int *func_002F7D30(void) {
-    return &D_004A3A60;
+    return &cAvalanche_m_Update;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D40);
 #ifdef SKIP_ASM
-extern int D_004A3A64;
+extern int cAvalanche_m_UpdateTimeStep;
 
 extern "C" int *func_002F7D40(void) {
-    return &D_004A3A64;
+    return &cAvalanche_m_UpdateTimeStep;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D50);
 #ifdef SKIP_ASM
-extern int D_004A3A68;
+extern int cAvalanche_m_RotationalVelocityScale;
 
 extern "C" int *func_002F7D50(void) {
-    return &D_004A3A68;
+    return &cAvalanche_m_RotationalVelocityScale;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D60);
 #ifdef SKIP_ASM
-extern int D_004A3A6C;
+extern int cAvalanche_m_RandomBounceChance;
 
 extern "C" int *func_002F7D60(void) {
-    return &D_004A3A6C;
+    return &cAvalanche_m_RandomBounceChance;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D70);
 #ifdef SKIP_ASM
-extern int D_004A3A70;
+extern int cAvalanche_m_RandomBounceVelocityScaleXY;
 
 extern "C" int *func_002F7D70(void) {
-    return &D_004A3A70;
+    return &cAvalanche_m_RandomBounceVelocityScaleXY;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D80);
 #ifdef SKIP_ASM
-extern int D_004A3A74;
+extern int cAvalanche_m_RandomBounceVelocityScaleZ;
 
 extern "C" int *func_002F7D80(void) {
-    return &D_004A3A74;
+    return &cAvalanche_m_RandomBounceVelocityScaleZ;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7D90);
 #ifdef SKIP_ASM
-extern int D_004A3A78;
+extern int cAvalanche_m_RandomBounceVelocityScale;
 
 extern "C" int *func_002F7D90(void) {
-    return &D_004A3A78;
+    return &cAvalanche_m_RandomBounceVelocityScale;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7DA0);
 #ifdef SKIP_ASM
-extern int D_004A3A7C;
+extern int cAvalanche_m_AvalancheId;
 
 extern "C" int *func_002F7DA0(void) {
-    return &D_004A3A7C;
+    return &cAvalanche_m_AvalancheId;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7DB0);
 #ifdef SKIP_ASM
-extern int D_004A3A80;
+extern int cAvalanche_m_Gravity;
 
 extern "C" int *func_002F7DB0(void) {
-    return &D_004A3A80;
+    return &cAvalanche_m_Gravity;
 }
 #endif
 //100%
@@ -2211,10 +2211,10 @@ extern "C" int *func_002F7DC0(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7DD0);
 #ifdef SKIP_ASM
-extern int D_004A3A88;
+extern int cAvalanche_m_NormalVelocityScale;
 
 extern "C" int *func_002F7DD0(void) {
-    return &D_004A3A88;
+    return &cAvalanche_m_NormalVelocityScale;
 }
 #endif
 //100%
@@ -2319,10 +2319,10 @@ extern "C" int func_002F7E90(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7E98);
 #ifdef SKIP_ASM
-extern int D_004A3AC4;
+extern int cAvalanche_m_badCookie;
 
 extern "C" int func_002F7E98(void) {
-    return D_004A3AC4;
+    return cAvalanche_m_badCookie;
 }
 #endif
 //100%

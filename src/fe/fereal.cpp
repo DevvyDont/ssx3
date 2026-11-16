@@ -138,7 +138,7 @@ extern int D_004A19D4;
 extern int D_004A19DC;
 extern int D_004A11B8;
 extern int D_004A1A70;
-extern int D_004A2594;
+extern int cUITemplate_MAP_mMapStyle;
 extern int D_004A2598;
 extern int cUITemplate_MAP_mPeak;
 extern char str_cPreFELoadScreen[];
@@ -316,7 +316,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             case 0:
             case 1: {
                 cUITemplate_MAP_mPeak = 1;
-                D_004A2594 = 0;
+                cUITemplate_MAP_mMapStyle = 0;
                 D_004A2598 = 0;
                 char* eventSelect = (char*)func_00186610(cMemMan_alloc(0x33C, str_cFEStateEventSelect, 0, 0), *self, 0);
                 eventSelect[0x44] = 0;
@@ -328,7 +328,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
                 if (D_004A19D4 != 0)
                     return func_001A3218(cMemMan_alloc(0x48, str_cFEStateMPCircuit, 0, 0), *self);
                 cUITemplate_MAP_mPeak = 1;
-                D_004A2594 = 0;
+                cUITemplate_MAP_mMapStyle = 0;
                 D_004A2598 = 0;
                 return func_00186610(cMemMan_alloc(0x33C, str_cFEStateEventSelect, 0, 0), *self, 0);
             }
@@ -512,7 +512,7 @@ extern "C" void* func_001F3700(void* self, void* owner);
 extern "C" void* func_001F3FF8(void* mem, void* owner);
 extern int D_004A19D8;
 extern int D_004A1A70;
-extern int D_004A2594;
+extern int cUITemplate_MAP_mMapStyle;
 extern int D_004A2598;
 extern signed char D_00535C11[];
 extern char str_cPreGameLoadScreen[];
@@ -587,14 +587,14 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
         break;
     case 20: {
         D_004A2598 = 1;
-        D_004A2594 = 0;
+        cUITemplate_MAP_mMapStyle = 0;
         char* p = (char*)func_00186610(cMemMan_alloc(0x33C, str_cFEStateEventSelect, 0, 0), *self, 0);
         p[0x44] = 0;
         return p;
     }
     case 21:
         D_004A2598 = 1;
-        D_004A2594 = 0;
+        cUITemplate_MAP_mMapStyle = 0;
         return func_00186610(cMemMan_alloc(0x33C, str_cFEStateEventSelect, 0, 0), *self, 0);
     case 12:
         return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, desc[0x44]);
@@ -750,10 +750,10 @@ extern "C" void func_00195E58(void* p);
 extern "C" void cFEFlowState_setNumStates(void* flow, int n);
 extern char D_004A4E80;
 extern char D_005308B8[];
-extern int D_004A19B8;
-extern int D_004A4324;
+extern int gWeHaveToClearTheBackEnd;
+extern int cDepthFog_m_Enable;
 extern int cScreenTint_m_Enable;
-extern int D_004A43C8;
+extern int cLightGlow_m_Enable;
 
 struct sVec3K1A1DC0 {
     int x, y, z;
@@ -766,21 +766,21 @@ extern "C" void func_001A1DC0(char* self)
 {
     char* m;
     char* vt;
-    if (D_004A19B8 != 0) {
+    if (gWeHaveToClearTheBackEnd != 0) {
         func_0014DE28(cBE_getBE(), 0);
         func_0014DE28(cBE_getBE(), 1);
         func_0014DE28(cBE_getBE(), 2);
         MEM_fill(D_005308B8, 0, 0x20);
-        D_004A19B8 = 0;
+        gWeHaveToClearTheBackEnd = 0;
     }
     *(int*)(self + 0xB5AD8) = 0;
     *(int*)(self + 0xB5ADC) = 0;
     cBE_setState(0);
     cGraphicsMan_UploadTextures(GrMan);
     func_00195E58(SSXApp->FELocale);
-    D_004A4324 = 0;
+    cDepthFog_m_Enable = 0;
     cScreenTint_m_Enable = 0;
-    D_004A43C8 = 0;
+    cLightGlow_m_Enable = 0;
     m = (char*)GrMan;
     vt = *(char**)(m + 0x10D8);
     ((tFn_1A1DC0)*(void**)(vt + 0x7C))(m + *(short*)(vt + 0x78), sVec3K1A1DC0());
@@ -810,7 +810,7 @@ extern "C" void* func_001A2E20(void* self);
 extern "C" void cIrradianceDataBase_Load(void* db);
 extern "C" void* func_0028B180();
 extern "C" void func_00285FB0(void* snd);
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern char str_data_ui_fe[];
 extern char str_FEUIInput[];
 extern char str_FEUICustom[];
@@ -855,7 +855,7 @@ struct sRealFE_1E80 {
 
 static inline void progress_1E80(float t)
 {
-    func_00317550(D_004A5B64 + 0x38, t);
+    func_00317550(cAppMan_TheAppMan + 0x38, t);
 }
 
 /**
@@ -871,7 +871,7 @@ static inline void progress_1E80(float t)
 // Front end: loads the UI files, rider data and sound for the front end.
 extern "C" void cRealFE_load(sRealFE_1E80* self)
 {
-    func_00317530(D_004A5B64 + 0x38, 3.5f);
+    func_00317530(cAppMan_TheAppMan + 0x38, 3.5f);
     progress_1E80(20.0f);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     func_0014BD78(iface);
@@ -938,7 +938,7 @@ INCLUDE_ASM("fe/fereal", func_001A2128);
 extern "C" void* cFadeScreen_loseFocus(void* self);
 extern "C" void func_00253418(void* p, int a1);
 extern "C" void func_001A06B0(void* flow);
-extern int D_004A19CC;
+extern int cRealFE_mMovieList;
 extern char D_004A4E80;
 
 extern "C" int func_001A2128(void* self)
@@ -952,7 +952,7 @@ extern "C" int func_001A2128(void* self)
         *(void**)((char*)self + 0xB5AD4) = 0;
     }
     *(int*)((char*)self + 0xB5AD8) = 0;
-    D_004A19CC = 0;
+    cRealFE_mMovieList = 0;
     *(int*)((char*)self + 0xB5ADC) = 0;
     func_001A06B0(&D_004A4E80);
     return 1;
@@ -1002,7 +1002,7 @@ extern "C" void func_001A0598(void* p);
 extern "C" void func_00397DF8(void* ui);
 extern "C" void func_00285BF8(void* snd, int a1, float t);
 extern "C" void* func_0028B180();
-extern int D_004A19CC;
+extern int cRealFE_mMovieList;
 extern char t4mat_Identity[];
 
 struct sFeGs {
@@ -1030,7 +1030,7 @@ struct sFeGs {
     void setAlpha(int v) { alpha = v; }
 };
 
-extern sFeGs D_00501420;
+extern sFeGs sDrawState_s_defaultDrawState;
 
 struct sFeVE {
     short delta;
@@ -1090,7 +1090,7 @@ extern "C" int func_001A2208(void* self)
         feCall(20);
         return 1;
     }
-    if (D_004A19CC != 0) {
+    if (cRealFE_mMovieList != 0) {
         float w = (float)feCallU(10);
         float hgt = (float)feCallU(11);
         feCall(21);
@@ -1171,7 +1171,7 @@ extern "C" int func_001A2208(void* self)
         w->top[1] = w->top[0];
         w->top++;
     }
-    *feW()->top = D_00501420;
+    *feW()->top = sDrawState_s_defaultDrawState;
     feW()->top->setG22(0);
     feW()->top->setG23(1);
     feW()->top->setG20(3);
@@ -1217,7 +1217,7 @@ extern "C" void func_00263828(void* p);
 extern "C" void func_00263CF0(void* p);
 extern "C" void func_0025AC50(void* p);
 extern const char str_MoviePlayer[];
-extern int D_004A19CC;
+extern int cRealFE_mMovieList;
 extern int D_004A19D0;
 extern int D_004A19E0;
 extern int D_004A19E4;
@@ -1225,7 +1225,7 @@ extern int D_00441248[];
 extern int D_0044124C[];
 extern int D_00441250[];
 extern int D_00441254[];
-extern unsigned int D_00535610[];
+extern unsigned int cBEOptionInterface_mOption[];
 extern int D_004A29EC;
 
 struct sVidInfo_27A0 {
@@ -1245,31 +1245,31 @@ extern "C" void func_001A27A0(char* self)
     if (*(int*)(self + 0xB5ADC) != 0) return;
     func_00231D18(self);
     if (*(void**)(self + 0xB5AD4) == 0) {
-        if (D_004A19CC != 0) {
+        if (cRealFE_mMovieList != 0) {
             *(void**)(self + 0xB5AD4) = func_002533C8(cMemMan_alloc(0x44, str_MoviePlayer, 0x100, 0));
             func_002B3A70((char*)func_0028B180() + 0x118);
             sVidInfo_27A0 info;
             func_00253390(&info);
-            int f = D_004A19CC;
+            int f = cRealFE_mMovieList;
             *(int*)(self + 0xB5AD8) = 0;
             if (f & 1) {
                 info.a = D_00441248[0];
-                D_004A19CC = f & 0xFFFFFFFE;
+                cRealFE_mMovieList = f & 0xFFFFFFFE;
                 D_004A19D0 = 1;
             } else if (f & 2) {
                 info.a = D_0044124C[0];
-                D_004A19CC = f & 0xFFFFFFFD;
+                cRealFE_mMovieList = f & 0xFFFFFFFD;
                 D_004A19D0 = 2;
             } else if (f & 4) {
                 cBE_getInterface_Fv(cBE_getBE(), 4);
-                if (((D_00535610[0] >> 22) & 7) == 0 && func_00289DE0(func_0028B180()) != 0) {
+                if (((cBEOptionInterface_mOption[0] >> 22) & 7) == 0 && func_00289DE0(func_0028B180()) != 0) {
                     info.b = D_004A19E0;
                     info.a = D_00441250[0];
                 } else {
                     info.b = D_004A19E4;
                     info.a = D_00441254[0];
                 }
-                D_004A19CC &= 0xFFFFFFFB;
+                cRealFE_mMovieList &= 0xFFFFFFFB;
                 D_004A19D0 = 4;
                 *(int*)(self + 0xB5AD8) = 1;
             }
@@ -1301,7 +1301,7 @@ extern "C" void func_001A27A0(char* self)
     if (*(void**)(self + 0xB5AD4) != 0) {
         func_00253418(*(void**)(self + 0xB5AD4), 3);
     }
-    int f = D_004A19CC;
+    int f = cRealFE_mMovieList;
     *(int*)(self + 0xB5ADC) = 1;
     *(void**)(self + 0xB5AD4) = 0;
     *(int*)(self + 0xB5AD8) = 0;
@@ -1349,14 +1349,14 @@ extern void* D_004A19C0[1];
 struct sAnimTableK1A2B00 {
     void* anims[1];
 };
-extern sAnimTableK1A2B00* D_004A3DF8_K1A2B00 __asm__("D_004A3DF8");
-extern void* D_004A3E7C;
+extern sAnimTableK1A2B00* D_004A3DF8_K1A2B00 __asm__("cAnimDataBase_TheAnimDataBase");
+extern void* cGameAnimMap_TheGameAnimMap;
 
 /**
  * Loads the front end's character animation data from "data/char/anm.big" into the game animation map.
  *
  * Opens the big file, creates one "AdfDataSourceFE" data source (func_00311250) from D_004A19C0[0], stores it
- * in the animation table D_004A3DF8 and registers it in the map D_004A3E7C (func_00314F30), resolves the map
+ * in the animation table cAnimDataBase_TheAnimDataBase and registers it in the map cGameAnimMap_TheGameAnimMap (func_00314F30), resolves the map
  * and closes the file.
  */
 extern "C" void cRealFE_loadCharAnimations(void)
@@ -1367,9 +1367,9 @@ extern "C" void cRealFE_loadCharAnimations(void)
     for (i = 0; i < 1; i++) {
         void* anim = func_00311250(cMemMan_alloc(0x18, str_AdfDataSourceFE, 0, 0), D_004A19C0[i]);
         D_004A3DF8_K1A2B00->anims[(unsigned char)i] = anim;
-        func_00314F30(D_004A3E7C, i, anim);
+        func_00314F30(cGameAnimMap_TheGameAnimMap, i, anim);
     }
-    cGameAnimMap_testResolve_p(D_004A3E7C);
+    cGameAnimMap_testResolve_p(cGameAnimMap_TheGameAnimMap);
     func_003DEDC0(handle, 0x64);
 }
 #endif
@@ -1377,8 +1377,8 @@ extern "C" void cRealFE_loadCharAnimations(void)
 //100%
 INCLUDE_ASM("fe/fereal", func_001A2BC0);
 #ifdef SKIP_ASM
-extern void** D_004A3DF8;
-extern void* D_004A3E7C;
+extern void** cAnimDataBase_TheAnimDataBase;
+extern void* cGameAnimMap_TheGameAnimMap;
 extern "C" void func_00314FE8(void* a, void* b);
 extern "C" void func_00311110(void* a);
 extern "C" void func_003112C8(void* a, int b);
@@ -1388,10 +1388,10 @@ extern "C" void func_001A2BC0(void* self)
     int i;
     for (i = 0; i < 1; i++) {
         unsigned char idx = i;
-        void* p = *(void**)((char*)D_004A3DF8 + (idx << 2));
+        void* p = *(void**)((char*)cAnimDataBase_TheAnimDataBase + (idx << 2));
         if (p != 0) {
-            func_00314FE8(D_004A3E7C, p);
-            void** tbl = D_004A3DF8;
+            func_00314FE8(cGameAnimMap_TheGameAnimMap, p);
+            void** tbl = cAnimDataBase_TheAnimDataBase;
             *(void**)((char*)tbl + (idx << 2)) = 0;
             func_00311110(tbl);
             func_003112C8(p, 3);
@@ -1424,7 +1424,7 @@ extern char str_cFEStateTitle[];
 extern char str_cFEStateLodge[];
 extern char str_cFEStateRelogin[];
 extern void* cFEStateBackground_vtbl[];
-extern int D_004A19C4;
+extern int cRealFE_mStartState;
 extern int D_004A19D8;
 extern void* D_004A33F4;
 
@@ -1449,10 +1449,10 @@ struct sRealFE_1A2C40 {
 /**
  * Pushes the front end's first states: the background, then the title, lodge or online relogin screen.
  *
- * The cFEStateBackground is created and pushed first. D_004A19C4 (why the front end was entered) then picks:
+ * The cFEStateBackground is created and pushed first. cRealFE_mStartState (why the front end was entered) then picks:
  * 0 the title screen (D_004A19D8 = 0), 0x27 the lodge (D_004A19D8 = 1), 0x34 cFEStateRelogin after restoring
  * the online session (comm system, lobby manager, the network character profile, BE state calls). The last
- * two reset D_004A19C4 to 0.
+ * two reset cRealFE_mStartState to 0.
  */
 extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
 {
@@ -1461,7 +1461,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
     backState->vt = (sVEnt_1A2C40*)cFEStateBackground_vtbl;
     backState->vt[4].fn((char*)backState + backState->vt[4].delta);
     cUIStateStack_pushExplicit(self->ui + 0x18, backState);
-    switch (D_004A19C4) {
+    switch (cRealFE_mStartState) {
     case 0: {
         D_004A19D8 = 0;
         void* st = func_00194738(cMemMan_alloc(0x4C, str_cFEStateTitle, 0, 0), self->ui);
@@ -1472,7 +1472,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
         D_004A19D8 = 1;
         void* st = func_001F3700(cMemMan_alloc(0x58, str_cFEStateLodge, 0, 0), self->ui);
         cUIStateStack_push(self->ui + 0x18, st);
-        D_004A19C4 = 0;
+        cRealFE_mStartState = 0;
         break;
     }
     case 0x34: {
@@ -1486,7 +1486,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
         cBENetworkInterface_restoreCharProfile(cBE_getInterface_Fv(SSXApp->BE, 7), 0);
         func_0014DE28(cBE_getBE(), 1);
         func_0014DE28(cBE_getBE(), 2);
-        D_004A19C4 = 0;
+        cRealFE_mStartState = 0;
         break;
     }
     }

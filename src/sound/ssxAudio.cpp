@@ -658,7 +658,7 @@ extern "C" void cSSXAudio_SetAudioUpdateState(cSSXAudio* self, int State)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00285BF8);
 #ifdef SKIP_ASM
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern "C" int func_00390EF8();
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_PlayThunder(void* p, float f);
@@ -718,7 +718,7 @@ extern "C" void func_00285BF8(char* self, float dt)
             func_0029B738(self);
             cSSXAudio_UpdateTimedEvent(self);
             cSSXAudio_UpdateTone(self);
-            if (*(int*)(self + 0x5FB4) != 0 && !(D_004A2A50 & 2))
+            if (*(int*)(self + 0x5FB4) != 0 && !(cPauseState_Flags & 2))
                 func_00289BB8(self);
         }
     }
@@ -3075,7 +3075,7 @@ void func_00289680(void* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ApplyRMSData);
 #ifdef SKIP_ASM
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 extern "C" int func_0029F088(void* self, int a1);
 extern "C" void func_00289830(void* self, float v);
 
@@ -3110,7 +3110,7 @@ extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
         if (frame == (frame / 2) * 2) {
             audio->f6C60 = 0;
             audio->f6C68 = audio->f6C6C;
-            int idx = (int)((float)(frame * audio->f6C54) / *(float*)((char*)D_004A5B64 + 0x2C));
+            int idx = (int)((float)(frame * audio->f6C54) / *(float*)((char*)cAppMan_TheAppMan + 0x2C));
             if (idx < audio->f6C50) {
                 int val = *(signed char*)(((char*)self_) + idx + 0x6868);
                 if (val > 0) {

@@ -1222,13 +1222,13 @@ extern "C" void cReplay_saveBucket(cReplay* self, cPbStream* s, int a);
 extern "C" void cReplay_saveDeadBucket(cReplay* self, cPbStream* s);
 extern "C" void func_00103480(void* self, cPbStream* s);
 
-extern int D_004A5B78;
-extern int D_004A5B7C;
+extern int cSortObjNode_ObjNodeSortIndex;
+extern int cSortObjNode_ObjNodeNoSortIndex;
 extern sPbApp* D_004A28A8_D818 __asm__("SSXApp");
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 extern void* D_004A2A00_D818 __asm__("D_004A2A00");
 extern void* D_004A3FF0;
-extern void* D_004A4028;
+extern void* cMultiParticleMan_TheMultiParticleMan;
 
 static inline cPbWorld* pbWorld(cPbObjSys* o)
 {
@@ -1239,7 +1239,7 @@ static inline cPbWorld* pbWorld(cPbObjSys* o)
  * Writes one replay key frame: the state of every game system that a restore needs.
  *
  * In order: the frame start (func_0026E9C0), a 0x18-byte time block (func_003178E0), the object-id counters
- * D_004A5B78 and D_004A5B7C, the BE state, the game and its AI (their save virtuals), func_002D9CB0 (where
+ * cSortObjNode_ObjNodeSortIndex and cSortObjNode_ObjNodeNoSortIndex, the BE state, the game and its AI (their save virtuals), func_002D9CB0 (where
  * the restore reads the avalanche), the world-script manager, D_004A2A00, D_004A3FF0, the multi-particle
  * manager, the object buckets (cReplay_saveBucket with 1, cReplay_saveDeadBucket) and the AI's focus manager.
  * cReplay_restoreFrame() reads them back in the same order.
@@ -1254,18 +1254,18 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
     func_0026E9C0(out);
     func_003178E0(&timeStamp);
     out->write(&timeStamp, 0x18);
-    id = D_004A5B78;
+    id = cSortObjNode_ObjNodeSortIndex;
     out->write(&id, 4);
-    id = D_004A5B7C;
+    id = cSortObjNode_ObjNodeNoSortIndex;
     out->write(&id, 4);
     func_0014DF08(cBE_getBE(), out);
     D_004A28A8_D818->objs->save(out);
     pbWorld(D_004A28A8_D818->objs)->save(out);
     func_002D9CB0(out);
-    func_0030BB10(D_004A3DD8, out);
+    func_0030BB10(cWScriptMan_TheWScriptMan, out);
     func_00229E20(D_004A2A00_D818, out);
     func_003441A8(D_004A3FF0, out);
-    cMultiParticleMan_writeToReplayFrame(D_004A4028, out);
+    cMultiParticleMan_writeToReplayFrame(cMultiParticleMan_TheMultiParticleMan, out);
     cReplay_saveBucket(self, out, 1);
     cReplay_saveDeadBucket(self, out);
     func_00103480(*(void**)((char*)pbWorld(D_004A28A8_D818->objs) + 0xA4), out);

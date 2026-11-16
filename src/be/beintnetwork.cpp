@@ -117,8 +117,8 @@ struct sNetState_E2C8 {
 
 extern sCharE_E2C8 D_00535B20_E2C8[] __asm__("cBELibrary_playerDB");
 extern int D_004A11B8;
-extern int D_004A11BC;
-extern sNetHdr_E2C8 D_005305B0;
+extern int cBENewRaceInterface_mNextLocation;
+extern sNetHdr_E2C8 cBELibrary_raceDB;
 extern char D_005308D0[];
 extern char D_004A6F38[];
 extern char D_004A7778[];
@@ -127,7 +127,7 @@ extern char D_004A7887[];
 /**
  * Packs one player's back-end race data into the 0xC44-byte network sync buffer.
  *
- * Copies the race settings (D_005305B0) and the words D_004A11B8/D_004A11BC, all six cBELibrary_playerDB
+ * Copies the race settings (cBELibrary_raceDB) and the words D_004A11B8/cBENewRaceInterface_mNextLocation, all six cBELibrary_playerDB
  * records, the player's own record and character ID, the shared option pair (D_005308D0) and both players'
  * option records, then from that character's cBELibrary_profileLib record the entries at +0x290, +0xAD0 and
  * +0xBDF and the BAGT data at +0xBE6.
@@ -138,8 +138,8 @@ extern char D_004A7887[];
 extern "C" void cBENetworkInterface_getSyncData(cBENetworkInterface* self, int player, sNetState_E2C8* out)
 {
     out->a = D_004A11B8;
-    out->b = D_004A11BC;
-    out->hdr = D_005305B0;
+    out->b = cBENewRaceInterface_mNextLocation;
+    out->hdr = cBELibrary_raceDB;
     for (int i = 0; i < 6; i++) {
         out->chars[i] = D_00535B20_E2C8[i];
     }
@@ -199,8 +199,8 @@ public:
 extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int player, sNetState_E2C8* in)
 {
     D_004A11B8 = in->a;
-    D_004A11BC = in->b;
-    D_005305B0 = in->hdr;
+    cBENewRaceInterface_mNextLocation = in->b;
+    cBELibrary_raceDB = in->hdr;
     ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 0))->v02();
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
     {
@@ -445,7 +445,7 @@ INCLUDE_ASM("be/beintnetwork", cBECharacterInterface_getThis);
 #ifdef SKIP_ASM
 extern const char str_BECharInt[];
 extern void* D_0045AD38[16];
-extern void* D_004A1208;
+extern void* cBECharacterInterface_instance;
 
 // cBECharacterInterface is another 0x10-byte cBEInterface (three 4-byte bools, then the vptr; see be/beintreward.h).
 struct cBECharacterInterface {
@@ -464,13 +464,13 @@ struct cBECharacterInterface {
  */
 extern "C" void* cBECharacterInterface_getThis(void)
 {
-    if (D_004A1208 == 0) {
+    if (cBECharacterInterface_instance == 0) {
         cBECharacterInterface* mem = (cBECharacterInterface*)cMemMan_alloc(0x10, str_BECharInt, 0, 0);
         mem->bIsActive = 0;
         mem->mVtbl = D_0045AD38;
-        D_004A1208 = mem;
+        cBECharacterInterface_instance = mem;
     }
-    return D_004A1208;
+    return cBECharacterInterface_instance;
 }
 #endif
 

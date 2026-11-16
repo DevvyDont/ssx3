@@ -803,7 +803,7 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" void func_00341AA0_8C80(void* self, int a, int type, void* b, const void* c) __asm__("func_00341AA0");
 extern char D_0048EC28[];
 extern char str_ComboXform[];
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
@@ -849,7 +849,7 @@ struct sMP8C80 {
 };
 
 // FAKEMATCH: the fC (life) store goes through a one-member union view (uFloat8C80), which makes it MEM_IN_STRUCT so sched1
-// no longer keeps the TheAppMan (D_004A5B64) load after it; plain form 91.43%. Byte-identical and behaves like the plain form;
+// no longer keeps the TheAppMan (cAppMan_TheAppMan) load after it; plain form 91.43%. Byte-identical and behaves like the plain form;
 // landed marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest
 // spelling matches.
 // cAnimComboNode::cAnimComboNode(int bucket, tInstanceRecord* pInstance, const tMakeAnimComboData* adata)
@@ -863,7 +863,7 @@ extern "C" void* func_00358C80(sMP8C80* self, int bucket, sMPOwner8C80* pInstanc
     *rate = (adata->f28 < 0.0f ? adata->f10 : adata->f28) * 0.03333333507180214f;
     uFloat8C80* life = (uFloat8C80*)&self->fC;
     life->v = adata->f2C < 0.0f ? *(float*)(pModel + 0x14) : adata->f2C * 0.03333333507180214f;
-    int fps = *(int*)(D_004A5B64 + 0x10);
+    int fps = *(int*)(cAppMan_TheAppMan + 0x10);
     self->f0 = adata->f30 * 0.03333333507180214f / (float)fps;
     self->b16 = adata->f34 != 0;
     self->b17 = adata->f34 < 0;

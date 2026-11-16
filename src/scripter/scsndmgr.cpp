@@ -296,7 +296,7 @@ extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_ResumeSFX(void* p);
 extern "C" void func_002EA860(void* p);
 extern int D_004A2A54;
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
 
@@ -350,7 +350,7 @@ public:
  * Stops and deletes the video player and undoes the game-state changes made when playback started.
  *
  * When a player exists it is destroyed (func_00253418, flags 3). If it was playing (+0x4), the pause-mode
- * stack (D_005366E8, top D_004A2A54) is popped and D_004A2A50 reloaded from D_004428F0, sound effects resume,
+ * stack (D_005366E8, top D_004A2A54) is popped and cPauseState_Flags reloaded from D_004428F0, sound effects resume,
  * the graphics manager's virtual slot 40 gets the value saved at +0x10, and when +0x14 is set it is cleared
  * and func_002EA860() is called on the cutscene transition manager. The first four words are then cleared.
  */
@@ -360,7 +360,7 @@ extern "C" void cVidEngine_ResetVideoEngine(void* self)
     if (*(void**)(vidEngine + 0x0) != 0) {
         func_00253418(*(void**)(vidEngine + 0x0), 3);
         if (*(int*)(vidEngine + 0x4) != 0) {
-            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             cSSXAudio_ResumeSFX(func_0028B180());
             ((cWorld_3818*)GrMan)->v40(*(int*)(vidEngine + 0x10));
             if (*(int*)(vidEngine + 0x14) != 0) {

@@ -74,7 +74,7 @@ struct cFEStateCreateStep1 {
     unsigned int mMessageHintFrame; // 0x050 [R] 0; [U] func_001AAB68 stores the frame when the session's count
                                     //       (func_00262938) becomes > 0 and 0 when it drops; func_001AA9B0 (slot 27)
                                     //       blinks widgets "IconMessageHint"/"TextMessageCount" while
-                                    //       (frame - it) % 60 > 30 (frame counter D_004A5B64 + 0x18)
+                                    //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
@@ -121,7 +121,7 @@ struct cFEStateCreateStep1 {
     tLobbyAccount* mpAccount;       // 0x6D0 [U] the account form being edited: onCreateScreen cFEStateCreateStep1_onCreateScreen stores
                                     //       (char*)LobbyMan_mLobbyMan + 0x2B0 when mbEditAccount, else + 0x260 (online/lobbyman.h); every text box
                                     //       reads / writes its mName/mPassword/unk_08/mMail/mSpam fields (func_001B95C0..func_001B97B0, func_001B9820)
-    char* mszSavedPassword;         // 0x6D4 [R] cBXString (cFEStateCreateStep1_cFEStateCreateStep1 stores the empty-string rep D_004A3E90, cFEStateCreateStep1__cFEStateCreateStep1
+    char* mszSavedPassword;         // 0x6D4 [R] cBXString (cFEStateCreateStep1_cFEStateCreateStep1 stores the empty-string rep cBXString_EmptyString, cFEStateCreateStep1__cFEStateCreateStep1
                                     //       destroys it); [U] func_001BA178 saves mpAccount->mPassword here when editing, func_001BA218 restores it,
                                     //       func_001BA358 sets mpAccount->mChangePassword when it differs
     char* mszSavedConfirm;          // 0x6D8 [R] cBXString (as above); [U] the saved mpAccount->unk_08 (func_001BA178 / func_001BA218)
@@ -214,7 +214,7 @@ struct cFEStateCreateStep2 {
     unsigned int mMessageHintFrame; // 0x050 [R] 0; [U] func_001AAB68 stores the frame when the session's count
                                     //       (func_00262938) becomes > 0 and 0 when it drops; func_001AA9B0 (slot 27)
                                     //       blinks widgets "IconMessageHint"/"TextMessageCount" while
-                                    //       (frame - it) % 60 > 30 (frame counter D_004A5B64 + 0x18)
+                                    //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;

@@ -528,7 +528,7 @@ struct sV4_70D0 {
     sV4_70D0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-extern sV4_70D0 D_004FF140_70D0 __asm__("D_004FF140");
+extern sV4_70D0 D_004FF140_70D0 __asm__("t4vect_XAxis");
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline sV4_70D0 vu0Sub_70D0(const sV4_70D0& a, const sV4_70D0& b)
@@ -1005,7 +1005,7 @@ struct sFlexBridge_75D8 {
     sBox_75D8 box;          // 0x90
 };
 
-extern sV4_75D8 D_004FF160;
+extern sV4_75D8 t4vect_ZAxis;
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float Length_75D8(const sV4_75D8& v)
@@ -1148,8 +1148,8 @@ extern "C" void cFlexBridgeNode_updateGrid(void* vself)
 {
     sFlexBridge_75D8* self = (sFlexBridge_75D8*)vself;
     int n = self->count;
-    sV4_75D8 upRef = Scale_75D8(D_004FF160, Length_75D8(self->up));
-    sV4_75D8 sideRef = Scale_75D8(D_004FF160, Length_75D8(self->side));
+    sV4_75D8 upRef = Scale_75D8(t4vect_ZAxis, Length_75D8(self->up));
+    sV4_75D8 sideRef = Scale_75D8(t4vect_ZAxis, Length_75D8(self->side));
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
     sFlexNode_75D8* node = self->nodes;

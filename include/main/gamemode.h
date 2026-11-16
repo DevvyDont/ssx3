@@ -11,7 +11,7 @@
 //
 // Size 0xA0: [R] the allocation in getGM. No vtable, no base class.
 // Statics (not in the object; [O] names, retail sizes): aHandler[10] = D_00536668 (the cGameModeHandler subclass
-// instances getGM creates; iCurrModeHandler indexes it; purgeGM deletes 10), bGiveUp[6] = D_005366D0 (restartHeat
+// instances getGM creates; iCurrModeHandler indexes it; purgeGM deletes 10), bGiveUp[6] = cGameModeMan_bGiveUp (restartHeat
 // clears 6 words), and the 10-entry score / rank tables D_00536640, D_00536708, D_00536730 that sortScores /
 // sortTimes (func_00238B70 / func_00238BF8) fill and writeToReplayFrame saves.
 //

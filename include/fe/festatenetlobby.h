@@ -66,7 +66,7 @@ struct cFEStateLobbyMenu {
     unsigned int mMessageHintFrame; // 0x050 [R] 0; [U] func_001AAB68 stores the frame when the session's count
                                     //       (func_00262938) becomes > 0 and 0 when it drops; func_001AA9B0 (slot 27)
                                     //       blinks widgets "IconMessageHint"/"TextMessageCount" while
-                                    //       (frame - it) % 60 > 30 (frame counter D_004A5B64 + 0x18)
+                                    //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
@@ -137,7 +137,7 @@ struct cFEStateLobbyMenu {
                                     //       channel arrays
     int miSelectedRoom;             // 0x768 [U] cFEStateLobbyMenu_onWidgetEvent stores the room list's selected row (list + 0x319); onGainTransition
                                     //       clamps it to the list count and selects it
-    char* mszChannelName;           // 0x76C [R] cBXString (empty rep D_004A3E90; destroyed by cFEStateLobbyMenu__cFEStateLobbyMenu); [U] func_001BD738
+    char* mszChannelName;           // 0x76C [R] cBXString (empty rep cBXString_EmptyString; destroyed by cFEStateLobbyMenu__cFEStateLobbyMenu); [U] func_001BD738
                                     //       assigns the selected list entry's text (cUIListBox_getCurrentAsciiText)
     int mbRoomHasPassword;          // 0x770 [U] func_001BD460 / func_001BD540: 1 when a password was given when entering the room;
                                     //       func_001BD8C8 asks for the password ("kT_POPUP231RoomPassword") only when it is 0
@@ -148,7 +148,7 @@ struct cFEStateLobbyMenu {
     int miNumPlayers;               // 0x77C [U] func_001BE540: LobbyMan's player count in the room (func_0025F1B0); func_001BE720
     unsigned short mustrPopupText[0x200]; // 0x780 [U] func_001BD8C8: sprintf1 (unicode) of "kT_POPUP231RoomPassword" with
                                     //       mszRoomName, the popup's message (+ 0xC4); extent: up to 0xB80
-    char* mszRoomName;              // 0xB80 [R] cBXString (empty rep D_004A3E90; destroyed by cFEStateLobbyMenu__cFEStateLobbyMenu); [U] func_001BD460 /
+    char* mszRoomName;              // 0xB80 [R] cBXString (empty rep cBXString_EmptyString; destroyed by cFEStateLobbyMenu__cFEStateLobbyMenu); [U] func_001BD460 /
                                     //       func_001BD540 assign the room being entered; func_001BD428 passes it to func_001BD540
 };
 

@@ -2303,7 +2303,7 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035F0B8);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 int BXrand();
 extern "C" void func_0035F218(cTexFlipModifier* self);
 
@@ -2325,7 +2325,7 @@ extern "C" cTexFlipModifier* func_0035F0B8(cTexFlipModifier* self, void* def, vo
     self->NumMaterials = 0;
     self->NumTexFlipMaterials = 0;
     self->Type = *(int*)(d + 0x4);
-    float rate = *(float*)(d + 0x10) * (one / (float)*(int*)(D_004A5B64 + 0x10));
+    float rate = *(float*)(d + 0x10) * (one / (float)*(int*)(cAppMan_TheAppMan + 0x10));
     self->Speed = rate;
     self->Dir = *(int*)(d + 0xC);
     self->BaseSpeed = rate;
@@ -2494,7 +2494,7 @@ INCLUDE_ASM("object/railmodifier", cTexFlipModifier_update);
  *
  * Time grows by Speed per frame (nothing happens while Speed <= 0); when it reaches 1.0 it drops by 1.0 and Type
  * decides: 0 steps TexIndex forward or, with Dir set, backward, wrapping at NumTexFlipMaterials; 1 sets Speed to 10
- * / the frame rate (D_004A5B64 + 0x10), switches to type 2 and steps forward; 2 sets Speed to BaseSpeed times a
+ * / the frame rate (cAppMan_TheAppMan + 0x10), switches to type 2 and steps forward; 2 sets Speed to BaseSpeed times a
  * random 0.25..1.0 (BXrand mantissa trick), switches to type 1 and steps forward. Ends with func_0035F378 (On Tour
  * setTexIndex). The comment above the definition calls the timer a rail timer; it is the tex-flip one.
  */
@@ -2521,7 +2521,7 @@ extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
             self->TexIndex = self->NumTexFlipMaterials - 1;
         }
     } else if (self->Type == 1) {
-        self->Speed = 10.0f / (float)*(int*)(D_004A5B64 + 0x10);
+        self->Speed = 10.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
         self->Type = 2;
         if (++self->TexIndex >= self->NumTexFlipMaterials) {
             self->TexIndex = 0;
@@ -2631,7 +2631,7 @@ extern "C" void cTexFlipModifier_writeToReplayFrame(cTexFlipModifier* self, cStr
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035F6E8);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 struct sRmQuad_F6E8 {
     float x, y, z, w;
@@ -2679,7 +2679,7 @@ extern "C" void* func_0035F6E8(sRmState_F6E8* self, sRmDesc_F6E8* d)
     self->fC = d->f1C;
     self->f4 = 0;
     self->f10 = 0;
-    self->f14 = d->f20 * (1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+    self->f14 = d->f20 * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
     self->q = sRmQuad_F6E8(d->f24, d->f28, d->f2C, 0.0f);
     self->f38 = d->f10;
     self->f3C = d->f14;
@@ -2707,7 +2707,7 @@ extern "C" void* func_0035F788(cUVScrollModifier* self, void* stream)
 //100%
 INCLUDE_ASM("object/railmodifier", cUVScrollModifier_update);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 struct sV2_F7D0 {
     float x, y;
@@ -2740,7 +2740,7 @@ struct sRmState_F7D0 {
  * Advances the UV-scroll modifier: rotates the texture, scrolls its UV offset and switches between the on and off
  * phases.
  *
- * Does nothing unless TimeOn or TimeOff is positive. Time grows by 1 / the frame rate (D_004A5B64 + 0x10). While
+ * Does nothing unless TimeOn or TimeOff is positive. Time grows by 1 / the frame rate (cAppMan_TheAppMan + 0x10). While
  * On: Angle grows by AngVel; at TimeOn the timer restarts, On clears when TimeOff > 0 and types 2 and 6 reverse
  * UVScroll. While still on, type 6 eases the UV offset with a triangle profile over the on phase (UVScroll * t /
  * TimeOn, the sign of UVScroll[0] choosing the half), other types add UVScroll per frame; each UV component wraps
@@ -2751,7 +2751,7 @@ struct sRmState_F7D0 {
 extern "C" void cUVScrollModifier_update(cUVScrollModifier* self)
 {
     if (self->TimeOn > 0.0f || self->TimeOff > 0.0f) {
-        self->Time += 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+        self->Time += 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
         if (self->On) {
             if (self->AngVel != 0.0f) {
                 self->Angle += self->AngVel;
@@ -3448,69 +3448,69 @@ int cSortObjNode_getSortIndex(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360888);
 #ifdef SKIP_ASM
-extern int D_004A5B78;
-extern int D_004A5B7C;
+extern int cSortObjNode_ObjNodeSortIndex;
+extern int cSortObjNode_ObjNodeNoSortIndex;
 
 extern "C" void func_00360888(void)
 {
-    D_004A5B78 = 1;
-    D_004A5B7C = 1;
+    cSortObjNode_ObjNodeSortIndex = 1;
+    cSortObjNode_ObjNodeNoSortIndex = 1;
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360898);
 #ifdef SKIP_ASM
-extern int D_004A5B78;
+extern int cSortObjNode_ObjNodeSortIndex;
 
 extern "C" int func_00360898(void)
 {
-    return D_004A5B78++;
+    return cSortObjNode_ObjNodeSortIndex++;
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_003608B0);
 #ifdef SKIP_ASM
-extern int D_004A5B7C;
+extern int cSortObjNode_ObjNodeNoSortIndex;
 
 extern "C" int func_003608B0(void)
 {
-    return D_004A5B7C++;
+    return cSortObjNode_ObjNodeNoSortIndex++;
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_003608C8);
 #ifdef SKIP_ASM
-extern int D_004A5B78;
+extern int cSortObjNode_ObjNodeSortIndex;
 
 extern "C" int func_003608C8(void) {
-    return D_004A5B78;
+    return cSortObjNode_ObjNodeSortIndex;
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_003608D0);
 #ifdef SKIP_ASM
-extern int D_004A5B7C;
+extern int cSortObjNode_ObjNodeNoSortIndex;
 
 extern "C" int func_003608D0(void) {
-    return D_004A5B7C;
+    return cSortObjNode_ObjNodeNoSortIndex;
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_003608D8);
 #ifdef SKIP_ASM
-extern int D_004A5B78;
+extern int cSortObjNode_ObjNodeSortIndex;
 
 extern "C" void func_003608D8(int arg0) {
-    D_004A5B78 = arg0;
+    cSortObjNode_ObjNodeSortIndex = arg0;
 }
 #endif
 //100%
 INCLUDE_ASM("object/railmodifier", func_003608E0);
 #ifdef SKIP_ASM
-extern int D_004A5B7C;
+extern int cSortObjNode_ObjNodeNoSortIndex;
 
 extern "C" void func_003608E0(int arg0) {
-    D_004A5B7C = arg0;
+    cSortObjNode_ObjNodeNoSortIndex = arg0;
 }
 #endif
 
@@ -7630,7 +7630,7 @@ struct sRmBatch_29B8 {
 };
 
 extern sRmCtx_29B8* D_004A5B80_29B8 __asm__("cGraphicsMan_TheGraphicsMan");
-extern sRmState_29B8 D_00501420_29B8 __asm__("D_00501420");
+extern sRmState_29B8 D_00501420_29B8 __asm__("sDrawState_s_defaultDrawState");
 
 static inline void set0_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, unsigned int v)
 {
@@ -7697,7 +7697,7 @@ struct sRail20_2CC8 {
     int v[5];
 };
 
-extern sRail20_2CC8 D_00501420;
+extern sRail20_2CC8 sDrawState_s_defaultDrawState;
 
 extern "C" void func_00362CC8(char* self)
 {
@@ -7713,7 +7713,7 @@ extern "C" void func_00362CC8(char* self)
     func_0038F738(b, 0x400, 2);
     *(int*)(self + 0x67CA4) = 0;
     sRail20_2CC8* d = (sRail20_2CC8*)(self + 0x69CA8);
-    *d = D_00501420;
+    *d = sDrawState_s_defaultDrawState;
     *(int*)(self + 0x6AED0) = 0;
     *(int*)(self + 0x69CC0) = -1;
     *(int*)(self + 0x69CC8) = 0;
@@ -7951,7 +7951,7 @@ extern sRmTexUse_3490 D_0053AB80_3490[] __asm__("D_0053AB80");
 
 static inline void resetState_3490(sRail20_2CC8* d)
 {
-    *d = D_00501420;
+    *d = sDrawState_s_defaultDrawState;
 }
 
 // Draws the sorted batch: counts texture use, splits the sorted list into three passes by
@@ -8367,7 +8367,7 @@ extern "C" void func_00364360(void* self, ulong** pp)
     char* gs = cGraphicsMan_TheGraphicsMan_railmodifier;
     sRmGsState4360 st;
     sRmPkt4360 pkt;
-    st = *(sRmGsState4360*)&D_00501420;
+    st = *(sRmGsState4360*)&sDrawState_s_defaultDrawState;
     (*pp)[0] = 0x10000001;
     (*pp)[1] = 0;
     (*pp)[2] = 0;

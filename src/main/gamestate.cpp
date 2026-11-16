@@ -78,15 +78,15 @@ extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(void* world, int id);
 extern "C" int func_00309DD0(void* mgr, int id, int a);
 extern "C" void func_00309E50(void* mgr, int id, int a);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 extern "C" void func_00234BE8(void* self, int a1)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* world = SSXApp->Game->SectionMan;
     int id = cSectionMan_getWorldSectionIDFromBELocationID(world, *cBENewRaceInterface_getLocation(iface));
-    if (func_00309DD0(D_004A3DD8, id, a1) != 0) {
-        func_00309E50(D_004A3DD8, id, a1);
+    if (func_00309DD0(cWScriptMan_TheWScriptMan, id, a1) != 0) {
+        func_00309E50(cWScriptMan_TheWScriptMan, id, a1);
     }
 }
 #endif
@@ -631,7 +631,7 @@ extern "C" void* func_0028B180(void);
 extern "C" void func_002B3A98(void* p);
 extern "C" void func_002A4B68(void* p);
 extern char* cGameState_mpGame;
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 
 struct sRaceMan_2355C0 {
@@ -683,8 +683,8 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
     if (mode == 4)
         cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 3);
     cBE_setState(0);
-    cWScriptMan_initMissions(D_004A3DD8);
-    cWScriptMan_runGlobalScripts(D_004A3DD8);
+    cWScriptMan_initMissions(cWScriptMan_TheWScriptMan);
+    cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
     if (func_00144CC0(race, cBENewRaceInterface_getLocationID(race)) == 1) {
         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         func_00146E10(player, 0, cBENewRaceInterface_getLocationID(race));
@@ -768,8 +768,8 @@ static inline int otherSide_235868(char* p)
  */
 extern "C" void cGFTrackStartState_loseFocus(void* self)
 {
-    func_00308F38(D_004A3DD8);
-    cWScriptMan_setupMissions(D_004A3DD8);
+    func_00308F38(cWScriptMan_TheWScriptMan);
+    cWScriptMan_setupMissions(cWScriptMan_TheWScriptMan);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cReplay_reset(*(void**)(cGameState_mpGame + 0x28));
     cReplay_startRace(*(void**)(cGameState_mpGame + 0x28));
@@ -866,7 +866,7 @@ extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* player, int i, int id);
 extern "C" void func_001473D0(void* player, int i, int v);
 extern char* cGameState_mpGame;
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 
 struct sVE_235AA0 {
@@ -885,7 +885,7 @@ struct sVE_235AA0 {
 extern "C" void cGFNextHeatState_gainFocus(void* self)
 {
     cBE_setState(0);
-    func_0030B7F8(D_004A3DD8);
+    func_0030B7F8(cWScriptMan_TheWScriptMan);
     char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
     char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
     cGameModeMan* gm = SSXApp->GameModeMan;
@@ -1145,7 +1145,7 @@ struct sColor_236058 {
 extern "C" void cGFSessionTeleportState_gainFocus(void* self)
 {
     void* gm = SSXApp->GameModeMan;
-    func_0030B7F8(D_004A3DD8);
+    func_0030B7F8(cWScriptMan_TheWScriptMan);
     float one = 1.0f;
     cGameModeMan_initGameMode(gm, 0xC);
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xA);
@@ -1239,8 +1239,8 @@ extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(void* self, int i,
 extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
 extern "C" int cSSXScriptEngine_PlayNISList(void* self, int i, int a, int b);
 extern char* cGameState_mpGame;
-extern void* D_004A3DD8;
-extern int D_004A11BC;
+extern void* cWScriptMan_TheWScriptMan;
+extern int cBENewRaceInterface_mNextLocation;
 
 static inline int isOne_6250(int m)
 {
@@ -1256,7 +1256,7 @@ static inline int isOne_6250(int m)
  */
 extern "C" void cGFUserSelectState_gainFocus(void* self, int mode)
 {
-    func_0030B7F8(D_004A3DD8);
+    func_0030B7F8(cWScriptMan_TheWScriptMan);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 3);
     *(int*)(*(char**)(*(char**)(*(char**)(cGameState_mpGame + 0xC) + 0x40) + 0x18) + 0x2F8) = 0;
@@ -1268,7 +1268,7 @@ extern "C" void cGFUserSelectState_gainFocus(void* self, int mode)
     if (mode == 1) {
         *(int*)((char*)self + 0x8) = mode;
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        *(int*)((char*)self + 0x18) = D_004A11BC;
+        *(int*)((char*)self + 0x18) = cBENewRaceInterface_mNextLocation;
     }
     if (*(int*)((char*)self + 0x18) == *cBENewRaceInterface_getLocation(iface))
         cGame_partialRestart(SSXApp->Game);
@@ -1306,9 +1306,9 @@ void func_00278DE8(void* self, int a);
 extern "C" int cSSXScriptEngine_GetNISListScriptCategory(void* self, int a, int b);
 extern "C" int cSSXScriptEngine_GetNISListPlayState(void* a, int b);
 extern "C" void cSSXScriptEngine_PlayTransportSequence(void* a, int b, int c);
-extern int D_004A2594;
+extern int cUITemplate_MAP_mMapStyle;
 extern int D_004A2A54;
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
 extern int D_004428F8[];
@@ -1339,7 +1339,7 @@ struct sGS_6418 {
 static inline void push2_6418()
 {
     D_005366E8[++D_004A2A54] = 2;
-    D_004A2A50 = D_004428F8[0];
+    cPauseState_Flags = D_004428F8[0];
 }
 
 static inline int atLeast_6418(int n)
@@ -1354,7 +1354,7 @@ static inline int isOne_6418(int m)
 
 static inline void pop_6418()
 {
-    D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 
 /**
@@ -1385,9 +1385,9 @@ extern "C" void cGFUserSelectState_update(void* self)
             if (atLeast_6418(*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))))
                 flag = one && D_00535C10[0] == 4;
             if (flag)
-                D_004A2594 = 3;
+                cUITemplate_MAP_mMapStyle = 3;
             else
-                D_004A2594 = 4;
+                cUITemplate_MAP_mMapStyle = 4;
             cOVStateManager_triggerOverlay(0x21);
             push2_6418();
             *(int*)((char*)self + 0x8) = 0;
@@ -1715,7 +1715,7 @@ struct sApp_6BB0 {
     sMgr_6BB0* mgr; // 0x84
 };
 extern sApp_6BB0* D_004A28A8_s __asm__("SSXApp");
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_004A2A54;
 extern int D_005366E8[];
 extern int D_004428F4[];
@@ -1736,7 +1736,7 @@ extern "C" void func_00236BB0(sGameState_6BB0* self)
     }
     func_0020A8F8(2);
     D_005366E8[++D_004A2A54] = 1;
-    D_004A2A50 = D_004428F4[0];
+    cPauseState_Flags = D_004428F4[0];
     func_002EA820(D_004A28A8_s->mgr->world);
     cBE_setState(0);
 }
@@ -1762,13 +1762,13 @@ INCLUDE_ASM("main/gamestate", func_00236C88);
 #ifdef SKIP_ASM
 extern "C" void func_00236CD8(void* self);
 extern int D_004A2A54;
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
 
 extern "C" void func_00236C88(void* self)
 {
-    D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
     func_00236CD8(self);
 }
 #endif
@@ -1983,7 +1983,7 @@ extern "C" void cWScriptMan_initMissions(void* a);
 extern "C" void cWScriptMan_runGlobalScripts(void* a);
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
 extern "C" void cOVStateManager_triggerOverlay(int state);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 /**
  * Starts a replay: initialises the missions and global scripts, hides the load indicator and opens the replay
@@ -1991,8 +1991,8 @@ extern void* D_004A3DD8;
  */
 extern "C" void cGFReplayStartState_gainFocus(void)
 {
-    cWScriptMan_initMissions(D_004A3DD8);
-    cWScriptMan_runGlobalScripts(D_004A3DD8);
+    cWScriptMan_initMissions(cWScriptMan_TheWScriptMan);
+    cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
     cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
     cOVStateManager_triggerOverlay(0x11);
 }
@@ -2014,7 +2014,7 @@ INCLUDE_ASM("main/gamestate", cGFReplayStartState_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void func_00308F38(void* a);
 extern "C" void cWScriptMan_setupMissions(void* a);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 /**
  * Leaves the replay-start state by purging the world script missions and setting them up again.
@@ -2023,8 +2023,8 @@ extern void* D_004A3DD8;
  */
 extern "C" void cGFReplayStartState_loseFocus(void)
 {
-    func_00308F38(D_004A3DD8);
-    cWScriptMan_setupMissions(D_004A3DD8);
+    func_00308F38(cWScriptMan_TheWScriptMan);
+    cWScriptMan_setupMissions(cWScriptMan_TheWScriptMan);
 }
 #endif
 
@@ -2496,11 +2496,11 @@ extern "C" void func_00237BE8(void* self, sPackSrc_7B28* out, char* buf)
 INCLUDE_ASM("main/gamestate", func_00237CB0);
 #ifdef SKIP_ASM
 extern "C" void cBxPseudoRng_Seed(uint* state, uint seed);
-extern uint D_004C9548[];
+extern uint GMrandom[];
 
 extern "C" void func_00237CB0(uint seed)
 {
-    cBxPseudoRng_Seed(D_004C9548, seed);
+    cBxPseudoRng_Seed(GMrandom, seed);
 }
 #endif
 
@@ -2508,11 +2508,11 @@ extern "C" void func_00237CB0(uint seed)
 INCLUDE_ASM("main/gamestate", func_00237CD8);
 #ifdef SKIP_ASM
 extern "C" uint cBxPseudoRng_NextInt(uint* state);
-extern uint D_004C9548[];
+extern uint GMrandom[];
 
 extern "C" uint func_00237CD8(void)
 {
-    return cBxPseudoRng_NextInt(D_004C9548);
+    return cBxPseudoRng_NextInt(GMrandom);
 }
 #endif
 

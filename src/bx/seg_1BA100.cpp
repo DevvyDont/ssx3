@@ -1843,18 +1843,18 @@ struct tWPHeader_B6E0 { int pad0; int numLayers; tWPLayer_B6E0* layers[1]; };
 struct cWorldPainterSection_B6E0 { int pad0; int pad4; tWPHeader_B6E0* m_pWPHeader; };
 struct cWorldPainterMan_B6E0 { unsigned int m_uiNumSections; cWorldPainterSection_B6E0* m_pCache; };
 
-extern int D_004A44B4;   // cVisualEffectsTest::m_Enable
-extern int D_004A3860;   // cWorldPainterMan::m_iCurrSection
-extern int D_004A44B8;   // cVisualEffectsTest::m_LayerId
-static inline int layerId_B6E0() { return D_004A44B8; }
-extern sDrawState D_00501420;  // sDrawState::s_defaultDrawState
+extern int cVisualEffectsTest_m_Enable;   // cVisualEffectsTest::m_Enable
+extern int cWorldPainterMan_m_iCurrSection;   // cWorldPainterMan::m_iCurrSection
+extern int cVisualEffectsTest_m_LayerId;   // cVisualEffectsTest::m_LayerId
+static inline int layerId_B6E0() { return cVisualEffectsTest_m_LayerId; }
+extern sDrawState sDrawState_s_defaultDrawState;  // sDrawState::s_defaultDrawState
 // cWorldPainterMan::render(cQuadTree*, const tQuadTreeNode*, tBxVertex*, t4Vector&, t4Vector&)
 extern "C" void func_002BB928_B6E0(cWorldPainterMan_B6E0*, cQuadTree_B6E0*, char*, tBxVertex_B6E0*, t4Vector_B6E0*, t4Vector_B6E0*) __asm__("func_002BB928");
 
 extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) __asm__("func_002BB6E0");
 extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
-    if (D_004A44B4) {
-        cWorldPainterSection_B6E0* section = &self->m_pCache[D_004A3860];
+    if (cVisualEffectsTest_m_Enable) {
+        cWorldPainterSection_B6E0* section = &self->m_pCache[cWorldPainterMan_m_iCurrSection];
         if (section) {
             tWPLayer_B6E0** layers = section->m_pWPHeader->layers;
             if (layers) {
@@ -1866,12 +1866,12 @@ extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
                         // PushDrawState + SetDefaultDrawState
                         (gm->m_pCurrentDrawState)[1] = (gm->m_pCurrentDrawState)[0];
                         (*(sDrawState**)&gm->m_pCurrentDrawState)++;
-                        *(gm->m_pCurrentDrawState) = D_00501420;
-                        tBxVertex_B6E0 vertlist[5];
+                        *(gm->m_pCurrentDrawState) = sDrawState_s_defaultDrawState;
+                        tBxVertex_B6E0 quadVerts[5];
                         tBxVertex_B6E0* v;
                         int i;
                         for (i = 0; i < 5; i++) {
-                            v = &vertlist[i];
+                            v = &quadVerts[i];
                             v->a = 255;
                             v->r = 0;
                             v->g = 255;
@@ -1884,7 +1884,7 @@ extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
                         t4Vector_B6E0 mincorner((float)(int)tree->minx, (float)(int)tree->miny, 0.0f, 1.0f);
                         t4Vector_B6E0 maxcorner((float)(int)(32768.0f / tree->scale + tree->minx),
                                                 (float)(int)(32768.0f / tree->scale + tree->miny), 0.0f, 1.0f);
-                        func_002BB928_B6E0(self, tree, tree->nodes + tree->root * 8, vertlist, &mincorner, &maxcorner);
+                        func_002BB928_B6E0(self, tree, tree->nodes + tree->root * 8, quadVerts, &mincorner, &maxcorner);
                         (*(sDrawState**)&gm->m_pCurrentDrawState)--;  // PopDrawState
                     }
                 }

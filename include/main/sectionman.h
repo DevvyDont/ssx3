@@ -9,7 +9,7 @@
 // as SSXApp->Game->SectionMan (cGame::SectionMan, main/game.h). No vtable, no base class.
 // EA's source: d:/ssx/code/source/main/sectionman.cpp (preview and retail assert strings).
 //
-// Statics (On Tour names; retail data): mSectionMap[50] = D_00442168 (tSectionMap 0x10: SectionID, iWorldSectionID,
+// Statics (On Tour names; retail data): mSectionMap[50] = cSectionMan_mSectionMap (tSectionMap 0x10: SectionID, iWorldSectionID,
 // State, Priority; the methods' views call them field_0x0..field_0xc), mLocationMap = D_00442488 (0x28 each),
 // mLocationModeMap = D_00442820, mStreamBandWidthRates[5] = D_00442150 = {256000, 460800, 819200, 819200, 819200}.
 //

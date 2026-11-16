@@ -4,7 +4,7 @@
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cBEScoreInterface_cBEScoreInterface(void* self);
 extern const char str_BEScoreInt[];
-extern void* D_004A1248;
+extern void* cBEScoreInterface_instance;
 
 struct cBEScoreInterface {
     char pad_0x00[8];
@@ -28,21 +28,21 @@ void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInte
  * The first call allocates 0x230 bytes tagged "BEScoreInt", runs the constructor, clears bIsActive (+0x8) and
  * the words at +0x10 and +0x14, and sets +0x18 and +0x1C to -1.
  *
- * @return the score interface (D_004A1248)
+ * @return the score interface (cBEScoreInterface_instance)
  */
 void* cBEScoreInterface_getThis()
 {
-    if (D_004A1248 == 0) {
+    if (cBEScoreInterface_instance == 0) {
         void* mem = cMemMan_alloc(0x230, str_BEScoreInt, 0, 0);
         cBEScoreInterface* scoreIface = (cBEScoreInterface*)cBEScoreInterface_cBEScoreInterface_impl(mem);
-        D_004A1248 = scoreIface;
+        cBEScoreInterface_instance = scoreIface;
         scoreIface->field_0x8 = 0;
         scoreIface->field_0x10 = 0;
         scoreIface->field_0x14 = 0;
         scoreIface->field_0x18 = -1;
         scoreIface->field_0x1C = -1;
     }
-    return D_004A1248;
+    return cBEScoreInterface_instance;
 }
 #endif
 
@@ -174,7 +174,7 @@ struct sRaceSettings_154AB8 {
     signed char b48;    // 0x48
     signed char b49;    // 0x49
 };
-extern sRaceSettings_154AB8 D_005305B0_154AB8 __asm__("D_005305B0");
+extern sRaceSettings_154AB8 D_005305B0_154AB8 __asm__("cBELibrary_raceDB");
 struct sRaceGlobal_154AB8 {
     char pad_0x00[0x34];
     int numHumans;      // 0x34
@@ -185,7 +185,7 @@ struct sEvent_154AB8 {
     int id;
     char pad_0x4[0x60];
 };
-extern sEvent_154AB8 D_0043D950_154AB8[] __asm__("D_0043D950");
+extern sEvent_154AB8 D_0043D950_154AB8[] __asm__("cBELibrary_locationDB");
 
 extern "C" void func_00154AB8(sScore_154AB8* self, int rider, sRaceStats_154AB8* stats, unsigned int score)
 {
@@ -271,13 +271,13 @@ struct sRaceSettings_154EE8 {
     signed char b48;    // 0x48
     signed char b49;    // 0x49
 };
-extern sRaceSettings_154EE8 D_005305B0;
+extern sRaceSettings_154EE8 cBELibrary_raceDB;
 
 struct sEvent_154EE8 {
     int id;
     char pad_0x4[0x60];
 };
-extern sEvent_154EE8 D_0043D950[];
+extern sEvent_154EE8 cBELibrary_locationDB[];
 
 // Race result: records it, refreshes the event popups and passes the medal (cleared when the record is not beaten) to the reward interface.
 extern "C" void func_00154EE8(char* self, int rider, int result, int score)
@@ -289,25 +289,25 @@ extern "C" void func_00154EE8(char* self, int rider, int result, int score)
     void* be = cBE_getInterface_Fv(cBE_getBE(), 0);
     int charID = cBELibrary_getCharacterID(rider);
     int mode = D_00535C12[0];
-    int event = D_0043D950[D_005305B0.event].id;
+    int event = cBELibrary_locationDB[cBELibrary_raceDB.event].id;
     if (event == 0x16)
         event = 0;
     int medal = func_00155328(self, result);
     if (mode == 4 || mode == 5)
         medal = result == 0 ? 1 : -1;
-    if (D_005305B0.b49 == 0)
+    if (cBELibrary_raceDB.b49 == 0)
         func_001E25D8(mode, event, result);
     if (medal == -1)
         return;
-    if (D_005305B0.b49 == 0) {
+    if (cBELibrary_raceDB.b49 == 0) {
         func_001E1EB8();
-        if (D_005305B0.b49 == 0 && mode != 4 && mode != 5)
+        if (cBELibrary_raceDB.b49 == 0 && mode != 4 && mode != 5)
             func_001E1550();
     }
     void* reward = cBE_getInterface_Fv(cBE_getBE(), 0xD);
-    if (D_005305B0.b49 != 0)
+    if (cBELibrary_raceDB.b49 != 0)
         return;
-    if (D_005305B0.b48 == 4)
+    if (cBELibrary_raceDB.b48 == 4)
         return;
     int best = func_001456A0(be, event, mode);
     if (best != -1) {
@@ -546,13 +546,13 @@ struct sRaceSettings_155420 {
     signed char b49;    // 0x49
     signed char mode;   // 0x4A
 };
-extern sRaceSettings_155420 D_005305B0_r155420 __asm__("D_005305B0");
+extern sRaceSettings_155420 D_005305B0_r155420 __asm__("cBELibrary_raceDB");
 
 struct sEvent_155420 {
     int id;
     char pad_0x4[0x60];
 };
-extern sEvent_155420 D_0043D950_r155420[] __asm__("D_0043D950");
+extern sEvent_155420 D_0043D950_r155420[] __asm__("cBELibrary_locationDB");
 
 struct sRaceStats_155420 {
     char pad_0x00[0x18];

@@ -116,7 +116,7 @@ struct sGsState_00370DC8 {
     int w4;
 };
 
-extern sGsState_00370DC8 D_00501420;
+extern sGsState_00370DC8 sDrawState_s_defaultDrawState;
 
 
 class cEmitter_00370DC8 {
@@ -225,7 +225,7 @@ extern "C" void func_00370DC8(cEmitter_00370DC8* self, char* def, float f)
         self->v02();
     }
     self->active = 1;
-    self->gs = D_00501420;
+    self->gs = sDrawState_s_defaultDrawState;
     self->setC(1);
     self->setB(0);
     self->setA(2);
@@ -1237,9 +1237,9 @@ struct sPtTrail_26C8 {
 extern int D_004A41D4;
 extern float D_004A41D8;
 extern float D_004A41DC;
-extern sPtV4_26C8 D_004FF160;
+extern sPtV4_26C8 t4vect_ZAxis;
 extern sPtVtx_26C8 D_00501440_v26C8[] __asm__("D_00501440");
-extern sPtRS_26C8 D_00501420_rs26C8 __asm__("D_00501420");
+extern sPtRS_26C8 D_00501420_rs26C8 __asm__("sDrawState_s_defaultDrawState");
 extern sPtCtx_26C8* D_004A5B80_ctx26C8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -1346,10 +1346,10 @@ extern "C" void func_003726C8(sPtTrail_26C8* self)
         return;
     }
     sPtV4_26C8 dir = Norm_26C8(Sub_26C8(self->pts[self->n], self->pts[0]));
-    sPtV4_26C8 a = Scale_26C8(Norm_26C8(Cross_26C8(dir, D_004FF160)), D_004A41D8);
+    sPtV4_26C8 a = Scale_26C8(Norm_26C8(Cross_26C8(dir, t4vect_ZAxis)), D_004A41D8);
     sPtV4_26C8 b = Scale_26C8(a, -1.0f);
-    SubEq_26C8(a, Scale_26C8(D_004FF160, D_004A41DC));
-    SubEq_26C8(b, Scale_26C8(D_004FF160, D_004A41DC));
+    SubEq_26C8(a, Scale_26C8(t4vect_ZAxis, D_004A41DC));
+    SubEq_26C8(b, Scale_26C8(t4vect_ZAxis, D_004A41DC));
     for (int i = 0; i < self->n + 1; i++) {
         D_00501440_v26C8[2 * i].pos = Add_26C8(self->pts[i], b);
         D_00501440_v26C8[2 * i + 1].pos = self->pts[i];
@@ -3845,7 +3845,7 @@ struct sPtRS_7A10 {
     short pad;
 };
 
-extern sPtRS_7A10 D_00501420_rs7A10 __asm__("D_00501420");
+extern sPtRS_7A10 D_00501420_rs7A10 __asm__("sDrawState_s_defaultDrawState");
 extern char D_005059D8[];
 extern "C" void func_00363490(void* ring, unsigned int* a, int* x, unsigned int* b, int* y);
 extern "C" void* func_00423DE0(int sema);  // WaitSema (returns in $2: the call clobbers v0)
@@ -5255,7 +5255,7 @@ extern char D_80[];
 extern char D_70[];
 extern char D_398[];
 extern int D_004A4510;
-extern int D_004A4530;
+extern int cRenderToggles_m_DisableCharacterSpecular;
 
 // The render-state record as this function sees it: bit-field words (f0 bits 4..5, 6..9 mode, 20..27 alpha; f4 test,
 // layer, blend, ...; f8 bits 0..4 key, 10..28 depth; fC address) and two texture ids.
@@ -5412,7 +5412,7 @@ static inline void SetField_A610(int& w, int shift, int width, int v)
 
 static inline void SetTest_A610(sGfx_A610* self)
 {
-    if (D_004A4530 == 0) {
+    if (cRenderToggles_m_DisableCharacterSpecular == 0) {
         SetField_A610(self->top->f4, 7, 5, 0x11);
     } else {
         SetField_A610(self->top->f4, 7, 5, 3);
@@ -11281,7 +11281,7 @@ struct sShadowOpt_6E78 {
 };
 extern sShadowOpt_6E78 D_004A45CC;
 extern int D_004A5B84;
-extern sRS_6E78 D_00501420_rs6E78 __asm__("D_00501420");
+extern sRS_6E78 D_00501420_rs6E78 __asm__("sDrawState_s_defaultDrawState");
 
 static inline void DmaBegin_6E78(sPkt_6E78* pkt, unsigned int addr)
 {
@@ -11718,7 +11718,7 @@ struct sPtGfx_83B8 {
 };
 
 extern int D_004A5B84;
-extern sPtRS_83B8 D_00501420_rs __asm__("D_00501420");
+extern sPtRS_83B8 D_00501420_rs __asm__("sDrawState_s_defaultDrawState");
 
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
 extern "C" void func_003885E0(void* self, void* a, void* b, void* c, void* d, int i0, int i1, float f0, float f1);
@@ -12291,10 +12291,10 @@ struct sVEnt_9CB8 {
 extern float D_004A43C0[];
 extern int D_004A59A4;
 extern char* D_004A5B80_9CB8 __asm__("cGraphicsMan_TheGraphicsMan");
-extern sV_9CB8 D_004FF130;
-extern sV_9CB8 D_004FF140_9CB8 __asm__("D_004FF140");
+extern sV_9CB8 t4vect_Origin;
+extern sV_9CB8 D_004FF140_9CB8 __asm__("t4vect_XAxis");
 extern sV_9CB8 D_004FF150_9CB8 __asm__("t4vect_YAxis");
-extern sV_9CB8 D_004FF160_9CB8 __asm__("D_004FF160");
+extern sV_9CB8 D_004FF160_9CB8 __asm__("t4vect_ZAxis");
 extern sMat_9CB8 D_004FF1A0_9CB8 __asm__("t4mat_Identity");
 extern sMat_9CB8 D_00500C60;
 
@@ -12599,7 +12599,7 @@ static inline void RotateAxis_9CB8(sMat_9CB8* R, const sV_9CB8* axis, float angl
 {
     sMat_9CB8 old = *R;
     sV_9CB8 t = old.r[3];
-    old.r[3] = D_004FF130;
+    old.r[3] = t4vect_Origin;
     float s;
     float c;
     func_0031BE50(&s, &c, angle);

@@ -401,17 +401,17 @@ INCLUDE_ASM("be/beintstat", cBELibrary__cBELibrary);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void func_00153050(void);
-extern int* D_004A11B4;
-extern int* D_004A11C0;
-extern int* D_004A11C4;
+extern int* cBENewRaceInterface_instance;
+extern int* cBENewPlayerInterface_instance;
+extern int* cBEStatInterface_instance;
 extern int* D_004A11C8;
-extern int* D_004A1208;
-extern int* D_004A120C;
-extern int* D_004A1210;
-extern int* D_004A1214;
-extern int* D_004A1238;
-extern int* D_004A1248;
-extern int* D_004A124C;
+extern int* cBECharacterInterface_instance;
+extern int* cBEOptionInterface_instance;
+extern int* cBEBAGTInterface_instance;
+extern int* cBEEconInterface_instance;
+extern int* cBEMissionInterface_instance;
+extern int* cBEScoreInterface_instance;
+extern int* cBEAggressionInterface_instance;
 
 /**
  * Destroys the BE library: frees every BE interface singleton, then the object itself when asked to.
@@ -423,31 +423,31 @@ extern int* D_004A124C;
  */
 extern "C" void cBELibrary__cBELibrary(void* self, int flags)
 {
-    operator_delete(D_004A11B4);
-    D_004A11B4 = 0;
-    operator_delete(D_004A11C0);
-    D_004A11C0 = 0;
-    operator_delete(D_004A1208);
-    D_004A1208 = 0;
-    operator_delete(D_004A11C4);
-    D_004A11C4 = 0;
-    operator_delete(D_004A120C);
-    D_004A120C = 0;
+    operator_delete(cBENewRaceInterface_instance);
+    cBENewRaceInterface_instance = 0;
+    operator_delete(cBENewPlayerInterface_instance);
+    cBENewPlayerInterface_instance = 0;
+    operator_delete(cBECharacterInterface_instance);
+    cBECharacterInterface_instance = 0;
+    operator_delete(cBEStatInterface_instance);
+    cBEStatInterface_instance = 0;
+    operator_delete(cBEOptionInterface_instance);
+    cBEOptionInterface_instance = 0;
     func_00153050();
-    operator_delete(D_004A1210);
-    D_004A1210 = 0;
+    operator_delete(cBEBAGTInterface_instance);
+    cBEBAGTInterface_instance = 0;
     operator_delete((int*)cBENetworkInterface_instance);
     cBENetworkInterface_instance = 0;
-    operator_delete(D_004A1248);
-    D_004A1248 = 0;
+    operator_delete(cBEScoreInterface_instance);
+    cBEScoreInterface_instance = 0;
     operator_delete(D_004A11C8);
     D_004A11C8 = 0;
-    operator_delete(D_004A1238);
-    D_004A1238 = 0;
-    operator_delete(D_004A1214);
-    D_004A1214 = 0;
-    operator_delete(D_004A124C);
-    D_004A124C = 0;
+    operator_delete(cBEMissionInterface_instance);
+    cBEMissionInterface_instance = 0;
+    operator_delete(cBEEconInterface_instance);
+    cBEEconInterface_instance = 0;
+    operator_delete(cBEAggressionInterface_instance);
+    cBEAggressionInterface_instance = 0;
     operator_delete((int*)cBERewardInterface_instance);
     cBERewardInterface_instance = 0;
     if (flags & 1)
@@ -550,8 +550,8 @@ struct sCharSrc_149BB8
 };
 
 extern char D_004A6750[];
-extern char D_004C3E98[];
-extern sCharSlot_149BB8 D_005305B0;
+extern char cBELibrary_rewardDB[];
+extern sCharSlot_149BB8 cBELibrary_raceDB;
 extern sRiderEntry_149BB8 D_00535B20_149BB8[6] __asm__("cBELibrary_playerDB");
 extern const char str_data_be_charDB_dbl[];
 extern char D_00530970[];
@@ -559,7 +559,7 @@ extern sCharStat_149BB8 D_005308D8[10];
 extern sCharSrc_149BB8 D_00440F00[10];
 extern char D_00535898[];
 
-extern int D_00530600[0x2A8 / 4];
+extern int cBELibrary_grabPointsDB[0x2A8 / 4];
 
 extern "C" void func_00149BB8(void)
 {
@@ -568,11 +568,11 @@ extern "C" void func_00149BB8(void)
     int* p;
 
     func_0014C6A0(D_004A6750);
-    cBERewardDB_init(D_004C3E98, 0);
-    func_00416210(&D_005305B0, 0, 0x4C);
+    cBERewardDB_init(cBELibrary_rewardDB, 0);
+    func_00416210(&cBELibrary_raceDB, 0, 0x4C);
     for (i = 0; i < 6; i++) {
-        D_005305B0.a[i] = i;
-        D_005305B0.b[i] = i;
+        cBELibrary_raceDB.a[i] = i;
+        cBELibrary_raceDB.b[i] = i;
     }
     func_00416210(D_00535B20_149BB8, 0, 0xA8);
     for (i = 0; i < 6; i++) {
@@ -606,7 +606,7 @@ extern "C" void func_00149BB8(void)
     for (i = 0; i < 3; i++) {
         func_001567B8(cBELibrary_profileLib + i * 0x9B50, 1);
     }
-    p = D_00530600;
+    p = cBELibrary_grabPointsDB;
     p[0x0 / 4] = 0;
     p[0x4 / 4] = 0;
     p[0x18 / 4] = 0xC8;

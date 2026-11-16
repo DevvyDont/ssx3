@@ -114,7 +114,7 @@ public:
     virtual sV4_0348* GetPos();
 };
 
-extern sV4_0348 D_004FF160_v0348 __asm__("D_004FF160");
+extern sV4_0348 D_004FF160_v0348 __asm__("t4vect_ZAxis");
 extern "C" float func_0031C228(float);
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
@@ -1541,14 +1541,14 @@ struct sList_1A28 {
     sLink_1A28* items[1];
 };
 
-extern int D_004A3DD8;
+extern int cWScriptMan_TheWScriptMan;
 extern "C" int func_0030A310(int, sLink_1A28*);
 
 extern "C" void func_00101A28(sList_1A28* list, sNode_1A28* node, int recurse)
 {
     sLink_1A28* p;
     for (p = node->items; p; p = p->next) {
-        if (func_0030A310(D_004A3DD8, p))
+        if (func_0030A310(cWScriptMan_TheWScriptMan, p))
             list->items[list->n++] = p;
     }
     if (recurse) {
@@ -1836,13 +1836,13 @@ extern "C" void func_00101B60(sFocusBoxes* self)
     if (numunfocusinstances) {
         func_0013FAD8(unfocusinstances, unfocusinstances + numunfocusinstances, sorted, InstanceCompare());
         for (int i = 0; i < numunfocusinstances; i++) {
-            func_0030A460(D_004A3DD8, sorted[i]);
+            func_0030A460(cWScriptMan_TheWScriptMan, sorted[i]);
         }
     }
     if (numfocusinstances) {
         func_0013FAD8(focusinstances, focusinstances + numfocusinstances, sorted, InstanceCompare());
         for (int i = 0; i < numfocusinstances; i++) {
-            func_0030A3A0(D_004A3DD8, sorted[i]);
+            func_0030A3A0(cWScriptMan_TheWScriptMan, sorted[i]);
         }
     }
 }
@@ -2242,7 +2242,7 @@ struct sBankTab_3AA0 {
     sBank_3AA0* banks[1];
 };
 
-extern sBankTab_3AA0* D_004A3DF8;
+extern sBankTab_3AA0* cAnimDataBase_TheAnimDataBase;
 extern "C" int func_001446A0(void*, int);
 extern "C" int func_001446B8(void*, int);
 extern "C" void func_00144670(void*, int);
@@ -2250,13 +2250,13 @@ extern "C" void func_00104CC8(void*, int);
 
 extern "C" void func_00103AA0(void* self, sObj_3AA0* o)
 {
-    int n = D_004A3DF8->banks[o->id & 0xFF]->ents[o->id >> 8].count;
+    int n = cAnimDataBase_TheAnimDataBase->banks[o->id & 0xFF]->ents[o->id >> 8].count;
     for (int i = 0; i < n; i++) {
         int ok = 0;
         if (func_001446A0(o->sub, i) && func_001446B8(o->sub, i))
             ok = 1;
         if (ok) {
-            sBank_3AA0* b = D_004A3DF8->banks[o->id & 0xFF];
+            sBank_3AA0* b = cAnimDataBase_TheAnimDataBase->banks[o->id & 0xFF];
             unsigned short r = b->recs[b->ents[o->id >> 8].first + i].b;
             if (r & 0x8000) {
                 func_00144670(o->sub, i);
@@ -2270,7 +2270,7 @@ extern "C" void func_00103AA0(void* self, sObj_3AA0* o)
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00103BE0);
 #ifdef SKIP_ASM
-extern char* D_004A3E7C;
+extern char* cGameAnimMap_TheGameAnimMap;
 extern "C" void func_00313C50(void*, int, int);
 extern "C" void func_00313CF0(void*, int, float);
 extern "C" int func_00313800(void*, float);
@@ -2278,10 +2278,10 @@ extern "C" void func_003145F8(void*, void*);
 extern "C" int func_00103BE0(void* self, void* x, char* anim, int a, int b, float dt, float v)
 {
     if (v < 0.0f) {
-        func_00313C50(anim, 0, *(int*)(D_004A3E7C + b * 4 + 0x1030));
+        func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + b * 4 + 0x1030));
         func_00313CF0(anim, 0, -v * *(float*)(anim + 0x10));
     } else {
-        func_00313C50(anim, 0, *(int*)(D_004A3E7C + a * 4 + 0x1030));
+        func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + a * 4 + 0x1030));
         func_00313CF0(anim, 0, v * *(float*)(anim + 0x10));
     }
     if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
@@ -2295,7 +2295,7 @@ extern "C" int func_00103BE0(void* self, void* x, char* anim, int a, int b, floa
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00103CC8);
 #ifdef SKIP_ASM
-extern char* D_004A3E7C;
+extern char* cGameAnimMap_TheGameAnimMap;
 extern "C" void func_00313D40(void*, int, int);
 extern "C" void func_003135B0(void*, int, float);
 extern "C" void func_00313C50(void*, int, int);
@@ -2306,12 +2306,12 @@ extern "C" void func_003145F8(void*, void*);
 
 extern "C" int func_00103CC8(void* self, void* x, char* anim, int a, int b, float dt, float w, int c)
 {
-    func_00313C50(anim, 0, *(int*)(D_004A3E7C + b * 4 + 0x1030));
+    func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + b * 4 + 0x1030));
     if (0.0f < w) {
-        func_00313C50(anim, 1, *(int*)(D_004A3E7C + c * 4 + 0x1030));
+        func_00313C50(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + c * 4 + 0x1030));
     } else {
         w = -w;
-        func_00313C50(anim, 1, *(int*)(D_004A3E7C + a * 4 + 0x1030));
+        func_00313C50(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + a * 4 + 0x1030));
     }
     func_00313D28(anim, 0, 1.0f - w);
     func_00313D28(anim, 1, w);
@@ -2330,7 +2330,7 @@ extern "C" int func_00103CC8(void* self, void* x, char* anim, int a, int b, floa
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00103E28);
 #ifdef SKIP_ASM
-extern char* D_004A3E7C;
+extern char* cGameAnimMap_TheGameAnimMap;
 extern "C" void func_00313D40(void*, int, int);
 extern "C" void func_003135B0(void*, int, float);
 extern "C" void func_00313C50(void*, int, int);
@@ -2360,12 +2360,12 @@ extern "C" int func_00103E28(void* self, void* x, char* anim, int i0, int i1, in
         to = i0;
         w = (v + 1.0f) * 2.0f;
     }
-    if (*(int*)(D_004A3E7C + from * 4 + 0x1030) != *(int*)(anim + 4)) {
+    if (*(int*)(cGameAnimMap_TheGameAnimMap + from * 4 + 0x1030) != *(int*)(anim + 4)) {
         float r = *(float*)(anim + 8) / *(float*)(anim + 0x10);
-        func_00313C50(anim, 0, *(int*)(D_004A3E7C + from * 4 + 0x1030));
+        func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + from * 4 + 0x1030));
         func_00313CF0(anim, 0, *(float*)(anim + 0x10) * r);
     }
-    func_00313C50(anim, 1, *(int*)(D_004A3E7C + to * 4 + 0x1030));
+    func_00313C50(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + to * 4 + 0x1030));
     func_00313D28(anim, 0, w);
     func_00313D28(anim, 1, 1.0f - w);
     func_00313D40(anim, 0, 1);
@@ -2383,7 +2383,7 @@ extern "C" int func_00103E28(void* self, void* x, char* anim, int i0, int i1, in
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00103FF8);
 #ifdef SKIP_ASM
-extern char* D_004A3E7C;
+extern char* cGameAnimMap_TheGameAnimMap;
 extern "C" void func_00313D40(void*, int, int);
 extern "C" void func_003135B0(void*, int, float);
 extern "C" void func_00313C50(void*, int, int);
@@ -2393,11 +2393,11 @@ extern "C" void func_003145F8(void*, void*);
 
 extern "C" int func_00103FF8(void* self, void* x, char* anim, int a, float dt, int b)
 {
-    if (*(int*)(anim + 4) == *(int*)(D_004A3E7C + a * 4 + 0x1030)) {
+    if (*(int*)(anim + 4) == *(int*)(cGameAnimMap_TheGameAnimMap + a * 4 + 0x1030)) {
         func_00313D40(anim, 0, 0);
         func_003135B0(anim, 0, dt * 0.01666666753590107f);
         if (*(float*)(anim + 8) >= *(float*)(anim + 0x10)) {
-            func_00313C50(anim, 0, *(int*)(D_004A3E7C + b * 4 + 0x1030));
+            func_00313C50(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + b * 4 + 0x1030));
             func_00313D40(anim, 0, 1);
             func_00313CF0(anim, 0, 0.0f);
         }
@@ -2597,7 +2597,7 @@ extern "C" int func_001043F8(char* self, void* x, char* anim, float dt)
     case 0x12F: slot = 0xA7; break;
     case 0x130: slot = 0xA9; break;
     }
-    func_00313C50(anim, 1, *(int*)(D_004A3E7C + slot * 4 + 0x1030));
+    func_00313C50(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + slot * 4 + 0x1030));
     func_00313D40(anim, 1, 1);
     char* rider = *(char**)(self + 0x60);
     float b = vAbs_43F8(*(float*)(rider + 0x298));
@@ -2985,7 +2985,7 @@ INCLUDE_ASM("seg/seg_1218", func_00104CF8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00311710_4CF8(int, int, int) __asm__("func_00311710");
-extern int D_004A3DFC;
+extern int cRiderAnimBase_AIAnimEventMap;
 
 extern "C" void func_00104CF8(void *arg0, int a1) {
     int var_6;
@@ -3002,7 +3002,7 @@ extern "C" void func_00104CF8(void *arg0, int a1) {
             var_6 = (*(int *)((char*)(temp_4) + (0x364)));
         }
     }
-    func_00311710_4CF8(D_004A3DFC, a1, var_6);
+    func_00311710_4CF8(cRiderAnimBase_AIAnimEventMap, a1, var_6);
 }
 #endif
 
@@ -3429,7 +3429,7 @@ extern "C" void cSSXAudio_CollisionSound_5398(void*, char*, sSurf_5398*, int) __
 extern "C" void func_0016D320(void*, void*);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern char* D_004A3500_5398 __asm__("gSSXAudio");
-extern char D_004C5830_5398[] __asm__("D_004C5830");
+extern char D_004C5830_5398[] __asm__("gCamTriggerMan");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_5398(const sV4_5398& a, const sV4_5398& b)
@@ -4323,7 +4323,7 @@ extern "C" void cRider_doRailslideModeOrientation(cRider* self);
 extern "C" void cRailslideControl_playGainFocusAnim(void*, int);
 extern "C" void cRailslideMotion_setCrookedAngle(void* p, t4Vector* n);
 extern char* D_004A3500_6848 __asm__("gSSXAudio");
-extern t4Vector D_004FF130_6848 __asm__("D_004FF130");
+extern t4Vector D_004FF130_6848 __asm__("t4vect_Origin");
 
 struct sLand_6848 {
     char pad0[0x10];
@@ -4343,7 +4343,7 @@ struct sV_6848 {
     sV_6848(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sV_6848 D_004FF160_6848 __asm__("D_004FF160");
+extern sV_6848 D_004FF160_6848 __asm__("t4vect_ZAxis");
 
 struct sQuat_6848 {
     float x, y, z, w;
@@ -6230,7 +6230,7 @@ extern "C" Fn_8E88b D_0043CF20_8E88b[4] __asm__("D_0043CF20");
 struct sQ_8E88 {
     int v[4];
 } __attribute__((aligned(16)));
-extern sQ_8E88 D_004FF130_8E88 __asm__("D_004FF130");
+extern sQ_8E88 D_004FF130_8E88 __asm__("t4vect_Origin");
 extern "C" void cComputer_initRiderDifficulty(void* self);
 extern "C" void cComputer_resetCounters(void* self);
 extern "C" void* MEM_fill_8E88(void* dst, int value, int size) __asm__("MEM_fill");

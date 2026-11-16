@@ -177,7 +177,7 @@ extern char str_SessionViewPoints[];
 extern char str_ConfirmMenu_Yes[];
 extern char str_ConfirmMenu_No[];
 extern char str_pct_s_pct_d_c[];
-extern char D_004D33A0[];
+extern char gPaths[];
 
 /**
  * Fills the session point list when the map overlay transitions in.
@@ -185,7 +185,7 @@ extern char D_004D33A0[];
  * For the 8 "SessionPoint%d" texts: points below the location's session count are enabled and labelled
  * kT_CMNTopOfRun (first), kT_CMNBottomOfRun (last, unless there are exactly 2) or "<kT_MAPSessionPt> n", with
  * misc data n; the rest are hidden and disabled. Then selects in "SessionViewPoints" the point nearest the
- * player's rider (func_0026B680 on D_004D33A0, minus 1), shows the indicators and gives the confirm Yes/No
+ * player's rider (func_0026B680 on gPaths, minus 1), shows the indicators and gives the confirm Yes/No
  * entries misc data 0/1 and the regular colour.
  *
  * @param selfp  the cOVState_MAP (raw pointer)
@@ -241,7 +241,7 @@ extern "C" int cOVState_MAP_onGainTransition(void* selfp, int on)
             riderPos3.x = riderPos.x;
             riderPos3.y = riderPos.y;
             riderPos3.z = riderPos.z;
-            int nearestPointId = func_0026B680(D_004D33A0, &riderPos3);
+            int nearestPointId = func_0026B680(gPaths, &riderPos3);
             int idx = nearestPointId - 1;
             if (nearestPointId == 0) {
                 idx = 0;
@@ -367,8 +367,8 @@ void* func_0039F190_8C28(void* self, int a1) __asm__("func_0039F190");
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern int D_004A2A54;
-extern int D_004A2A50;
-extern int D_004A26FC;
+extern int cPauseState_Flags;
+extern int cOVStateManager_mStatus;
 extern int D_005366E8[];
 extern int D_004428F0[];
 extern char str_ConfirmMenu_Yes_x[];
@@ -395,8 +395,8 @@ public:
  * Handles the session map's widget events: pick a session, confirm or cancel, and button highlights.
  *
  * Event 5 with the popup closed opens it for the picked session (misc data into +0xD8). With it open, "No"
- * closes it; "Yes" stores the session in mission interface (10) + 0x10, sets D_004A26FC = 3, pops the
- * pause-mode stack (D_005366E8/D_004A2A54 into D_004A2A50), calls func_00231250(game, 0xF, 0, 0) and closes
+ * closes it; "Yes" stores the session in mission interface (10) + 0x10, sets cOVStateManager_mStatus = 3, pops the
+ * pause-mode stack (D_005366E8/D_004A2A54 into cPauseState_Flags), calls func_00231250(game, 0xF, 0, 0) and closes
  * the overlay (func_0020A088, func_00208BB8).
  *
  * Event 6 closes the popup, or else closes the overlay, pops the state stack and marks this state pending
@@ -425,8 +425,8 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* pWidget, int Event
             *(int*)((char*)iface + 0x10) = *(int*)(self + 0xD8);
             func_0028FAE0(func_0028B180());
             void* game = SSXApp->Game;
-            D_004A26FC = 3;
-            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            cOVStateManager_mStatus = 3;
+            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             func_00231250(game, 0xF, 0, 0);
             func_0020A088(self);
             func_00208BB8(self);
@@ -820,17 +820,17 @@ struct sVEntry_func_002095E8 {
     short index;
     void (*fn)(void*, void*);
 };
-extern char D_004C8B38[];
-extern char D_004C8B28[];
+extern char kMAPCOLOR_HIGHLIGHTED[];
+extern char kMAPCOLOR_HIGHLIGHTED_LOCKED[];
 
 extern "C" void func_002095E8(void* self, void* obj, int on)
 {
     if (on != 0) {
         sVEntry_func_002095E8* vt = *(sVEntry_func_002095E8**)((char*)obj + 0x8);
-        vt[11].fn((char*)obj + vt[11].delta, D_004C8B38);
+        vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED);
     } else {
         sVEntry_func_002095E8* vt = *(sVEntry_func_002095E8**)((char*)obj + 0x8);
-        vt[11].fn((char*)obj + vt[11].delta, D_004C8B28);
+        vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED_LOCKED);
     }
 }
 #endif
@@ -1009,7 +1009,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupLocalSessionList);
 extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* iface, int id);
 extern "C" int func_0026B598(void* tbl, int kind, int idx);
 extern "C" char* func_0026B5E0(void* tbl, int kind, int idx);
-extern char D_004D33A0[];
+extern char gPaths[];
 extern char str_Map_Indicator_Icon[];
 extern char str_dot_visited[];
 extern char str_Map_Indicator_Highlight[];
@@ -1052,7 +1052,7 @@ struct sIconPos_9970 {
 /**
  * Creates the hidden map icons for every session point on the current location.
  *
- * For each point that exists (func_0026B598/func_0026B5E0 on D_004D33A0), maps its position into the 356 x
+ * For each point that exists (func_0026B598/func_0026B5E0 on gPaths), maps its position into the 356 x
  * 266 picture and adds two cUIIcons: a "dot_visited" dot and an "indicator" highlight (18 x 18), keeping the
  * highlight's position too.
  *
@@ -1066,8 +1066,8 @@ extern "C" void cOVState_MAP_setupLocalSessionList(void* selfp)
     self->nSessions = cBEMissionInterface_getNumberSessionsOnTrack(ifMap, *cBENewRaceInterface_getLocation(ifGame));
     sV3_96A8 mapPos = ((sFEObjData_96A8*)self->img)->pos;
     for (int i = 0; i < self->nSessions; i++) {
-        if (func_0026B598(D_004D33A0, 2, i + 1) != 0) {
-        const char* sp = (const char*)func_0026B5E0(D_004D33A0, 2, i + 1);
+        if (func_0026B598(gPaths, 2, i + 1) != 0) {
+        const char* sp = (const char*)func_0026B5E0(gPaths, 2, i + 1);
         sV3_96A8 spPos = *(sV3_96A8*)(sp + 0x8);
         sBounds_96A8 pictureRecord;
         func_00154678(&pictureRecord, ifMap, *cBENewRaceInterface_getLocation(ifGame));
@@ -1281,7 +1281,7 @@ struct sGameSettings_A1A8 {
     unsigned int flags;     // 0x0, bits 22..24 = language
     int pad[0x288 / 4 - 1];
 };
-extern sGameSettings_A1A8 D_00535610_A1A8 __asm__("D_00535610");
+extern sGameSettings_A1A8 D_00535610_A1A8 __asm__("cBEOptionInterface_mOption");
 
 // Format a time in seconds as minutes/seconds for the current language.
 extern "C" char* func_0020A1A8(int secs)

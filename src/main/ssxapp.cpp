@@ -12,7 +12,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
 #ifdef SKIP_ASM
 extern "C" void* cAppMan_cAppMan(void* self);
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern int D_004A3E90;
+extern int cBXString_EmptyString;
 extern void* cSSXApp_vtbl[];
 
 
@@ -29,9 +29,9 @@ extern "C" cSSXApp* cSSXApp_cSSXApp(cSSXApp* self)
 {
     cAppMan_cAppMan((self));
     self->mVtbl = cSSXApp_vtbl;
-    self->UserName = (char*)D_004A3E90;
-    self->Password = (char*)D_004A3E90;
-    self->CommandLineTrack = (char*)D_004A3E90;
+    self->UserName = (char*)cBXString_EmptyString;
+    self->Password = (char*)cBXString_EmptyString;
+    self->CommandLineTrack = (char*)cBXString_EmptyString;
     self->unk_D4[0] = 0;
     self->unk_D4[1] = 0;
     self->unk_D4[2] = 0;
@@ -645,7 +645,7 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 int cBXString_FindFirstOf(cBXString* self, char ch);
 int cBXString_FindLastOf(cBXString* self, char ch, int len);
 extern "C" int func_0041AA88(const char* a, const char* b);
-extern int D_004A4540;
+extern int cRenderToggles_m_DisableHUD;
 extern char str_track[];
 extern char str_realfe[];
 extern char str_nohud[];
@@ -663,7 +663,7 @@ extern char str_autolobby[];
  * from the constructor), -nohud clears unk_64 and -autolobby sets unk_74. An option missing its value ends
  * the scan.
  *
- * Finally D_004A4540 is set to (unk_64 == 0), so -nohud sets it.
+ * Finally cRenderToggles_m_DisableHUD is set to (unk_64 == 0), so -nohud sets it.
  *
  * @param argc  number of arguments; argv[0] is skipped
  * @param argv  the arguments
@@ -723,7 +723,7 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
         }
         i++;
     }
-    D_004A4540 = self->unk_64 == 0;
+    cRenderToggles_m_DisableHUD = self->unk_64 == 0;
 }
 #endif
 
@@ -987,7 +987,7 @@ extern "C" void cSSXApp_startGameLoad(cSSXApp* self)
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_startFELoad);
 #ifdef SKIP_ASM
-extern int D_004A203C;
+extern int cFEPopupConfirm_mUsePreFE;
 extern char str_FEModule[];
 extern "C" void* func_001A1CE8(void* p);
 extern "C" void* func_0017F7B8(void* p);
@@ -995,12 +995,12 @@ extern "C" void* func_0017F7B8(void* p);
 /**
  * Starts the front-end module: creates the real or the debug front end and queues it as the next module.
  *
- * Clears D_004A203C, then builds the 0xB5AE0-byte real front end (RealFE) when unk_60 is set, as the
+ * Clears cFEPopupConfirm_mUsePreFE, then builds the 0xB5AE0-byte real front end (RealFE) when unk_60 is set, as the
  * constructor leaves it, or else the 0x238-byte debug front end (DebugFE); both are tagged "FEModule".
  */
 extern "C" void cSSXApp_startFELoad(cSSXApp* self)
 {
-    D_004A203C = 0;
+    cFEPopupConfirm_mUsePreFE = 0;
     if (self->unk_60 != 0) {
         void* frontEnd = func_001A1CE8(cMemMan_alloc(0xB5AE0, str_FEModule, 0, 0));
         *(void**)&self->RealFE = frontEnd;
@@ -1083,8 +1083,8 @@ struct sSndCfg_82D0 {
     int pad18 : 14;
     char rest[0x288 - 4];
 };
-// PORT: D_00535610 is viewed with different types across the program; view bound by asm label
-extern sSndCfg_82D0 D_00535610_82D0 __asm__("D_00535610");
+// PORT: cBEOptionInterface_mOption is viewed with different types across the program; view bound by asm label
+extern sSndCfg_82D0 D_00535610_82D0 __asm__("cBEOptionInterface_mOption");
 
 static inline sSndCfg_82D0 Cfg_82D0()
 {
@@ -1216,7 +1216,7 @@ struct sOptions_228A78 {
     unsigned int pad25 : 7;
     int data[0x284 / 4];
 };
-extern sOptions_228A78 D_00535610_228A78 __asm__("D_00535610");
+extern sOptions_228A78 D_00535610_228A78 __asm__("cBEOptionInterface_mOption");
 
 struct sVEntry_228A78 {
     short delta;
@@ -1233,7 +1233,7 @@ static inline int optLanguage_228A78(sOptions_228A78 o)
  * Creates the front-end locale if needed and sets it to the language chosen in the options.
  *
  * Allocates the 0xC0-byte "FELocale" on first use, passes the options' language field (bits 22-24 of
- * D_00535610) to its vtable slot 3, then calls func_00195B70() on it. BE interface 4 is fetched and unused.
+ * cBEOptionInterface_mOption) to its vtable slot 3, then calls func_00195B70() on it. BE interface 4 is fetched and unused.
  */
 extern "C" void cSSXApp_initLocale(cSSXApp* self)
 {
@@ -1300,7 +1300,7 @@ struct sOptions_228C08 {
     int pad_7 : 8;
     int data[(0x288 - 8) / 4];
 };
-extern sOptions_228C08 D_00535610_228C08 __asm__("D_00535610");
+extern sOptions_228C08 D_00535610_228C08 __asm__("cBEOptionInterface_mOption");
 
 static inline sOptions_228C08 GetOptions_228C08()
 {
@@ -1362,7 +1362,7 @@ struct sVE_228C08 {
 /**
  * Applies the saved display options to the graphics manager: the TV display format and the screen offset.
  *
- * Passes the options' 2-bit display format (bits 20-21 of D_00535610; values above 2 count as 0) to GrMan's
+ * Passes the options' 2-bit display format (bits 20-21 of cBEOptionInterface_mOption; values above 2 count as 0) to GrMan's
  * slot 40 (0 normal, 1 letterbox, 2 widescreen, by the scales func_00377950 sets), then option bytes 6 and 5
  * to slot 12, the screen x and y offset. The C takes no arguments; initload passes the app anyway.
  */
@@ -2178,7 +2178,7 @@ struct sDrawState_229BA8 {
     short f12;
 };
 
-extern sDrawState_229BA8 D_00501420_229BA8 __asm__("D_00501420");
+extern sDrawState_229BA8 D_00501420_229BA8 __asm__("sDrawState_s_defaultDrawState");
 
 class cGfx_229BA8 {
 public:
@@ -3466,7 +3466,7 @@ struct sDrawState_22B008 {
     int f10;
 };
 
-extern sDrawState_22B008 D_00501420_22B008 __asm__("D_00501420");
+extern sDrawState_22B008 D_00501420_22B008 __asm__("sDrawState_s_defaultDrawState");
 extern sMat_22B008 D_004FF1A0_22B008 __asm__("t4mat_Identity");
 
 class cGfx_22B008 {
@@ -3740,7 +3740,7 @@ static inline int IsReady_22B008(sGame_22B008* self)
  * distance), gathers the visible world (func_0022ADD8 with BXNash, OcclusionMan and World), and draws
  * func_00230640, CrowdMan2d, CrowdMan3d, MultiParticleMan, the AI (riders, slot 4), models, fog volumes, light
  * halos and patches. Then a 640x480 2D pass: DebugFont at 0.8 scale, MenuSys when active, the UI engine and
- * WScriptMan (unless D_004A4540), the script engine, LoadIndicator, GrMan slot 20, the audio update for mUpdateTick
+ * WScriptMan (unless cRenderToggles_m_DisableHUD), the script engine, LoadIndicator, GrMan slot 20, the audio update for mUpdateTick
  * / 60 seconds and the world triggers; clears mUpdateTick. The local view's names are off: scene is AI, renderer
  * SkyBox, target LensFxMan, cfg BXNash, hud DebugFont, loader StreamPause, frames mUpdateTick.
  *
@@ -3876,7 +3876,7 @@ extern "C" int cGame_render(sGame_22B008* self)
     ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0x7C) | 0x14;
     self->hud->scale = sScale_22B008(2.0f, 2.0f);
     self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
-    if (D_004A4540 == 0) {
+    if (cRenderToggles_m_DisableHUD == 0) {
         self->hud->scale = sScale_22B008(0.0f, 0.0f);
         func_00397DF8(self->f48);
         func_0030B4B8(self->f30);

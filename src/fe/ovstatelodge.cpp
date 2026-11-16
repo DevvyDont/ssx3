@@ -449,7 +449,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onInputBegin);
 #ifdef SKIP_ASM
 struct sVEi1D2EA0 { short delta; short index; int (*fn)(void*); };
 struct sVEv1D2EA0 { short delta; short index; void (*fn)(void*, int); };
-extern char D_004A5A58;
+extern char gUISoundNull;
 
 static inline int IsShown1D2EA0(char* self)
 {
@@ -472,7 +472,7 @@ extern "C" int cFEStateMountainRoom_onInputBegin(char* self, char* widget)
     if (wvt[6].fn(widget + wvt[6].delta)) {
         char* snd = *(char**)(*(char**)(self + 0x10) + 0x14);
         if (snd == 0) {
-            snd = &D_004A5A58;
+            snd = &gUISoundNull;
         }
         sVEv1D2EA0* svt = *(sVEv1D2EA0**)snd;
         svt[2].fn(snd + svt[2].delta, 3);

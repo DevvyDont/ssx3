@@ -380,7 +380,7 @@ struct sAmXform_0200
     sAmQuat_0200 rot;
 };
 
-extern t4Vector D_004FF130;
+extern t4Vector t4vect_Origin;
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sAmQuat_0200 amQuatMul_0200(const sAmQuat_0200& a, const sAmQuat_0200& b)
@@ -464,7 +464,7 @@ static inline sAmXform_0200 amCombine_0200(const sAmXform_0200& a, const sAmXfor
 {
     sAmXform_0200 r;
     r.rot = amQuatMul_0200(a.rot, b.rot);
-    r.pos = amAdd_0200(amRot_0200(a.rot, amSub_0200(b.pos, *(const sAmQuat_0200*)&D_004FF130)), a.pos);
+    r.pos = amAdd_0200(amRot_0200(a.rot, amSub_0200(b.pos, *(const sAmQuat_0200*)&t4vect_Origin)), a.pos);
     return r;
 }
 
@@ -536,7 +536,7 @@ extern "C" void cAnimModel_buildSkelMatrices(cAnimModel* self)
 //100%
 INCLUDE_ASM("animation/animmodel", func_00310458);
 #ifdef SKIP_ASM
-extern t4Vector D_004FF130;
+extern t4Vector t4vect_Origin;
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
 static inline t4Vector amMulMat_0458(const t4Matrix* m, const t4Vector& v)
@@ -565,7 +565,7 @@ struct sAmPoint_0458 {
 };
 
 // Returns point `index` of the part with this id, transformed by its bone matrix (unk_034),
-// or D_004FF130 when no part has the id.
+// or t4vect_Origin when no part has the id.
 extern "C" t4Vector func_00310458(cAnimModel* model, int id, int index)
 {
     for (int i = 0; i < model->numParts; i++)
@@ -584,7 +584,7 @@ extern "C" t4Vector func_00310458(cAnimModel* model, int id, int index)
             return amMulMat_0458(m, v);
         }
     }
-    return D_004FF130;
+    return t4vect_Origin;
 }
 #endif
 
@@ -1125,7 +1125,7 @@ extern "C" sAnimNode_310F18* gGenCacheBucket(int bank, int n)
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimDataBase_cAnimDataBase);
 #ifdef SKIP_ASM
-extern void* D_004A3DF8;
+extern void* cAnimDataBase_TheAnimDataBase;
 extern "C" void func_00416210(void* dst, int c, int n);
 // PORT: prototype mismatch. cAnimDataBase_initChanCache is defined later in the unit as (void), but this
 // caller passes the model in $4.
@@ -1134,14 +1134,14 @@ void cAnimDataBase_initChanCache_1(void* self) __asm__("cAnimDataBase_initChanCa
 /**
  * Constructs the animation database: makes it the global instance, zeroes it and clears the channel cache.
  *
- * Stores @p self in D_004A3DF8 (whose start is the bank table cScriptAnimBankManager_LinkBank() installs banks
+ * Stores @p self in cAnimDataBase_TheAnimDataBase (whose start is the bank table cScriptAnimBankManager_LinkBank() installs banks
  * into), zero-fills its 0x3FC bytes (func_00416210) and calls cAnimDataBase_initChanCache().
  *
  * @return @p self
  */
 extern "C" void* cAnimDataBase_cAnimDataBase(void* self)
 {
-    D_004A3DF8 = self;
+    cAnimDataBase_TheAnimDataBase = self;
     func_00416210(self, 0, 0x3FC);
     cAnimDataBase_initChanCache_1(self);
     return self;
@@ -1158,7 +1158,7 @@ extern "C" void func_00311110_self(void* self) __asm__("func_00311110");
 
 extern "C" void func_00311088(void* self, int flags)
 {
-    D_004A3DF8 = 0;
+    cAnimDataBase_TheAnimDataBase = 0;
     func_00311110_self(self);
     if (flags & 1)
     {

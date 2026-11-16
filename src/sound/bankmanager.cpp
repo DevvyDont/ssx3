@@ -612,7 +612,7 @@ struct sCfg_BF78 {
     int flags;
     int v[(0x288 - 4) / 4];
 };
-extern sCfg_BF78 D_00535610_BF78 __asm__("D_00535610");
+extern sCfg_BF78 D_00535610_BF78 __asm__("cBEOptionInterface_mOption");
 
 extern "C" void func_0028BF78(char* self, int state)
 {

@@ -9,7 +9,7 @@
 // path online/buddyman.h is a guess. Retail: unit dirtysock/tagsunk, 0x261008-0x263660.
 //
 // Size 0xF0: func_00260F80 (the singleton creator) does operator new(0xF0, "BuddyMan", 0x20000000) and inlines the
-// constructor (0x40 = -1, 0xA4 = 0x15180, 0xEC = the empty cBXString rep D_004A3E90, zeroes 0xAC..0xE8); the
+// constructor (0x40 = -1, 0xA4 = 0x15180, 0xEC = the empty cBXString rep cBXString_EmptyString, zeroes 0xAC..0xE8); the
 // instance is D_004A3328, destroyed by func_00261008 (operator delete through func_002689B8). No base class, no
 // vtable. The preview's BuddyMan is a smaller 0x34-byte class (operator new(0x34, "BuddyMan")); its connect /
 // disconnect / onconnect have the same shape, which places mpBuddyApi, mpRoster, miError, mfTimeout, mState and

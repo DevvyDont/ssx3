@@ -565,11 +565,11 @@ struct func_00290B58_sCurve {
 };
 
 extern "C" float func_00290B58(func_00290B58_sCurve* c, float v);
-extern func_00290B58_sCurve D_00445898[];
+extern func_00290B58_sCurve gAudioTables[];
 
 extern "C" float func_00290C10(int i, float v)
 {
-    return func_00290B58(&D_00445898[i], v);
+    return func_00290B58(&gAudioTables[i], v);
 }
 #endif
 
@@ -1651,7 +1651,7 @@ extern "C" void func_00293168(void*, void*, int*, int*);
 extern "C" void func_002ABE78(void*, int);
 extern "C" void* func_0028B1C8();
 extern "C" int cReplay_isPauseAI(void* p);
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 
 extern "C" void func_00292CB8(void* self, void* obj) {
     int a;
@@ -1670,7 +1670,7 @@ extern "C" void func_00292CB8(void* self, void* obj) {
         a = 0;
     }
     int c = 0;
-    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
+    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
         c = 1;
     }
     if (c) {
@@ -1689,7 +1689,7 @@ extern "C" void func_002ABB38(void*);
 extern "C" void func_002ABE78(void*, int);
 extern "C" void* func_0028B1C8();
 extern "C" int cReplay_isPauseAI(void* p);
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 
 /**
  * Updates a human rider's glide loop for one frame: restarts it on a surface change, else sets its volume and
@@ -1697,7 +1697,7 @@ extern int D_004A2A50;
  *
  * Called for a bank-monitor instance whose rider is at +0x80. In sound states 1 and 5 only a type-2 surface
  * is
- * switched to 9; state 2, D_004A2A50 bit 0 and a playing replay (cReplay_isPauseAI) silence the loop. The volume
+ * switched to 9; state 2, cPauseState_Flags bit 0 and a playing replay (cReplay_isPauseAI) silence the loop. The volume
  * goes
  * to the instance's +0x64 and the bend through func_002ABE78().
  *
@@ -1732,7 +1732,7 @@ extern "C" void cSSXAudio_HandleGlide(cSSXAudio* self, void* obj) {
         volume = 0;
     }
     int paused = 0;
-    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
+    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
         paused = 1;
     }
     if (paused) {
@@ -1750,7 +1750,7 @@ extern "C" void func_002ABB38(void*);
 extern "C" void func_002ABE78(void*, int);
 extern "C" void* func_0028B1C8();
 extern "C" int cReplay_isPauseAI(void* p);
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 
 /**
  * Updates a computer rider's glide loop for one frame, like HandleGlide() but only in sound states 0 and 4.
@@ -1778,7 +1778,7 @@ extern "C" void cSSXAudio_HandleAIGlide(cSSXAudio* self, void* obj) {
         cSSXAudio_AIGlideProgram(self, func_00291710(self, (int)rider), rider, &volume, &bend);
     }
     int paused = 0;
-    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
+    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
         paused = 1;
     }
     if (paused) {
@@ -1797,7 +1797,7 @@ extern "C" void func_002ABB38(void*);
 extern "C" void func_002ABE78(void*, int);
 extern "C" void* func_0028B1C8();
 extern "C" int cReplay_isPauseAI(void* p);
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 
 /**
  * Updates a rider's carve loop for one frame: restarts it on a surface change, else sets its volume and bend.
@@ -1832,7 +1832,7 @@ extern "C" void cSSXAudio_HandleCarve(cSSXAudio* self, void* obj) {
         volume = 0;
     }
     int paused = 0;
-    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
+    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
         paused = 1;
     }
     if (paused) {
@@ -4981,12 +4981,12 @@ static inline int snd97B8AddVoice(void* vself, int a, int b, int type)
 extern "C" int func_00288AE0(void* self);
 extern "C" void* func_0028B1C8();
 extern "C" int cReplay_isPauseAI(void* p);
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 
 /**
  * Plays the lose-max-power sound for a local human rider that is still racing, while the race state (4) runs.
  *
- * Skipped during a replay and while the sound is muted (D_004A2A50 bit 0, or the replay check).
+ * Skipped during a replay and while the sound is muted (cPauseState_Flags bit 0, or the replay check).
  *
  * @param obj  the rider
  */
@@ -5002,7 +5002,7 @@ extern "C" void cSSXAudio_LoseMaxPowerEvent(cSSXAudio* self, void* obj)
     int playBeeps = 1;
     int pos = *(float*)((char*)obj + 0x470) >= 0.0f;
     if (pos) playBeeps = 0;
-    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) playBeeps = 0;
+    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) playBeeps = 0;
     if (*(int*)((char*)func_0028B1C8() + 0x214) != 4) playBeeps = 0;
     if (playBeeps) {
         snd97B8AddVoice(self, 0, 0x69, 9);
@@ -5610,7 +5610,7 @@ extern "C" int func_002ADCA0_AB40(void*, int, long, int, int, int, int, int) __a
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern signed char D_00535C11[];
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 
 struct sSndKey8_AB40 {
     long v;
@@ -5774,7 +5774,7 @@ extern "C" void func_0029AB40(cSSXAudio* vself)
                     int c = 1;
                     int pos = rider->f470 >= 0.0f;
                     if (pos) c = 0;
-                    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) c = 0;
+                    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) c = 0;
                     if (*(int*)((char*)func_0028B1C8() + 0x214) != 4) c = 0;
                     if (c) {
                         sndAB40Add(self, 0, 0x68, 9);
@@ -8127,7 +8127,7 @@ struct sSsOpts9F198 {
     unsigned int w0;
     int data[0x288 / 4 - 1];
 };
-extern sSsOpts9F198 D_00535610_ss9F198 __asm__("D_00535610");
+extern sSsOpts9F198 D_00535610_ss9F198 __asm__("cBEOptionInterface_mOption");
 
 extern "C" int func_0029F198(void* self)
 {

@@ -7,7 +7,7 @@ INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onCreateScreen);
 int GetHashValue32(char* str);
 extern char str_Map[];
 extern char str_femap_template[];
-extern unsigned int D_004A2594;
+extern unsigned int cUITemplate_MAP_mMapStyle;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* owner);
@@ -15,7 +15,7 @@ extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* o
 /**
  * Creates the event-select screens "Map" and "femap_template" and sets up the map template.
  *
- * Only "Map" is kept in the state's screen pointer. Clears D_004A2594, then runs
+ * Only "Map" is kept in the state's screen pointer. Clears cUITemplate_MAP_mMapStyle, then runs
  * cUITemplate_MAP_onCreateScreen() on the template at +0x48.
  */
 extern "C" void cFEStateEventSelect_onCreateScreen(void* self)
@@ -32,7 +32,7 @@ extern "C" void cFEStateEventSelect_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     void* main = *(void**)((char*)self + 0x40);
-    D_004A2594 = 0;
+    cUITemplate_MAP_mMapStyle = 0;
     cUITemplate_MAP_onCreateScreen((char*)self + 0x48, main, self);
 }
 #endif

@@ -38,7 +38,7 @@ struct tSphTreeInfo;
 struct bxSphereTree {
     // --- SphereTree (On Tour 0xC0)
     t4Vector axis[8];      // 0x000 [O]; [U] func_0032C540 fills 8 qwords from D_004FF640, operator= copies them
-    t4Vector transCenter;  // 0x080 [O]; [U] func_0032C630 adds the offset (lqc2/sqc2 0x80); reset stores D_004FF130
+    t4Vector transCenter;  // 0x080 [O]; [U] func_0032C630 adds the offset (lqc2/sqc2 0x80); reset stores t4vect_Origin
     float scale;           // 0x090 [O]; [U] func_0032C540 stores 1.0f, func_0032C5A8 multiplies the radius by it
     float worstCase;       // 0x094 [O]; [U] the riderspheretree.cpp queries keep the deepest penetration here
     tSphTreeInfo* treeInfo; // 0x098 [O]; [R] func_0032C508 zeroes it; [U] cRollerModifier's ctors read the centre

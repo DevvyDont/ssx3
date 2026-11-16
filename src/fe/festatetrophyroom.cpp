@@ -965,13 +965,13 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D5428);
 #ifdef SKIP_ASM
 extern void* D_0046C980[];
 extern void* D_00474E08[];
-extern void* D_004A2028;
+extern void* cFEMemCard_mInstance;
 extern "C" void func_0039E390(void* self, int flags);
 
 extern "C" void func_001D5428(void* self, int flags)
 {
     *(void***)((char*)self + 8) = D_0046C980;
-    D_004A2028 = 0;
+    cFEMemCard_mInstance = 0;
     *(void***)((char*)self + 8) = D_00474E08;
     func_0039E390(self, flags);
 }
@@ -1013,7 +1013,7 @@ extern "C" void func_00241D40(void* app, int a, char* buf, int n);
 extern "C" void func_00241AA0(char* buf, int n);
 extern "C" void func_002C2540(char* buf, char* s);
 extern "C" void sprintf1(void* dst, char* a, char* b, char* c);
-extern void* D_004A2028;
+extern void* cFEMemCard_mInstance;
 extern char str_pct_s_pct_s_c[];
 // PORT: callback function addresses taken through asm-label views (their real prototypes vary).
 extern char func_001D59A0_a5488[] __asm__("func_001D59A0");
@@ -1061,7 +1061,7 @@ extern "C" void func_001D5488(void* self_, int mode)
 {
     char* self = (char*)self_;
     void* gapp = SSXApp;
-    D_004A2028 = self;
+    cFEMemCard_mInstance = self;
     *(int*)(self + 0x1C0) = 0;
     *(int*)(self + 0x214) = 0;
     char* app = (char*)cSSXApp_getMCManager(gapp);
@@ -1237,7 +1237,7 @@ extern "C" void func_00241000(void* app, char* name, int a, int b);
 extern "C" void func_00241E18(void* app, char* buf, int n);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
-extern void* D_004A2028;
+extern void* cFEMemCard_mInstance;
 extern char str_pct_s_pct_spct_04d[];
 extern char str_Temp_String[];
 
@@ -1256,25 +1256,25 @@ extern "C" void func_001D59A0(void)
     char fmt1[0x200];
     char fmt2[0x200];
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
-    int mode = *(int*)((char*)D_004A2028 + 0x1BC);
+    int mode = *(int*)((char*)cFEMemCard_mInstance + 0x1BC);
     if (mode == 2) {
         func_002412A0(app);
     } else if (mode == 1) {
         void* replay = SSXApp->Game->Replay;
-        *(int*)((char*)D_004A2028 + 0x1C8) = mode;
+        *(int*)((char*)cFEMemCard_mInstance + 0x1C8) = mode;
         cReplay_initSave(replay);
         int size = func_0014E048(cBE_getBE());
-        cFEMemCard_createReadBuffer_59A0(D_004A2028, size);
-        func_0014E050(cBE_getBE(), *(int*)((char*)D_004A2028 + 0x1D4));
+        cFEMemCard_createReadBuffer_59A0(cFEMemCard_mInstance, size);
+        func_0014E050(cBE_getBE(), *(int*)((char*)cFEMemCard_mInstance + 0x1D4));
         func_00241D40(app, 0, name, 0x41);
         func_002C2540_59A0(fmt1, str_pct_s_pct_spct_04d);
         func_00241AA0(slot, 0x100);
         sprintf1_59A0(title, fmt1, slot, name, *(int*)(app + 0xF8) + 1);
-        func_00241000(app, title, *(int*)((char*)D_004A2028 + 0x1D4), size);
+        func_00241000(app, title, *(int*)((char*)cFEMemCard_mInstance + 0x1D4), size);
     } else {
         char* app2 = (char*)cSSXApp_getMCManager(SSXApp);
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
-        int a = func_00152950(iface, *(int*)((char*)D_004A2028 + 0x1CC));
+        int a = func_00152950(iface, *(int*)((char*)cFEMemCard_mInstance + 0x1CC));
         int b = func_00152BA8();
         func_00241D40(app2, 1, name, 0x41);
         func_002C2540_59A0(fmt2, str_pct_s_pct_spct_04d);
@@ -1282,14 +1282,14 @@ extern "C" void func_001D59A0(void)
         sprintf1_59A0(title, fmt2, slot, name, *(int*)(app2 + 0xF8) + 1);
         func_00241000(app2, title, a, b);
     }
-    char* fe = (char*)D_004A2028;
+    char* fe = (char*)cFEMemCard_mInstance;
     if (*(int*)(fe + 0x210) == 0 && *(int*)(fe + 0x208) == 0) {
         *(int*)(fe + 0x19C) = 0x16;
         char* buf = (char*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
         func_00241E18(app, buf, 0x320);
-        sVE_59A0* vt = *(sVE_59A0**)((char*)D_004A2028 + 8);
-        vt[36].fn((char*)D_004A2028 + vt[36].delta, buf, 1, 1, 0, 0, 1);
-        *(int*)((char*)D_004A2028 + 0x210) = 1;
+        sVE_59A0* vt = *(sVE_59A0**)((char*)cFEMemCard_mInstance + 8);
+        vt[36].fn((char*)cFEMemCard_mInstance + vt[36].delta, buf, 1, 1, 0, 0, 1);
+        *(int*)((char*)cFEMemCard_mInstance + 0x210) = 1;
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -1300,7 +1300,7 @@ extern "C" void func_001D59A0(void)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5C28);
 #ifdef SKIP_ASM
-extern int D_004A19B8;
+extern int gWeHaveToClearTheBackEnd;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1323,8 +1323,8 @@ struct sTrophyRoom_001D5C28 {
     char pad204[0x24];
     int state;          // 0x228
 };
-// PORT: D_004A2028 holds the trophy room state pointer.
-extern sTrophyRoom_001D5C28* D_004A2028_tr __asm__("D_004A2028");
+// PORT: cFEMemCard_mInstance holds the trophy room state pointer.
+extern sTrophyRoom_001D5C28* D_004A2028_tr __asm__("cFEMemCard_mInstance");
 
 extern "C" int func_001D5C28(int size)
 {
@@ -1348,7 +1348,7 @@ extern "C" int func_001D5C28(int size)
             D_004A2028_tr->state = 0;
             return 0;
         }
-        D_004A19B8 = mode;
+        gWeHaveToClearTheBackEnd = mode;
         func_0014E0C0(cBE_getBE(), (int)base);
     }
     if (size > 0) {
@@ -1365,12 +1365,12 @@ extern "C" int func_001D5C28(int size)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5D78);
 #ifdef SKIP_ASM
-extern void* D_004A2028;
+extern void* cFEMemCard_mInstance;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int cReplay_getSaveData(void* self, int* a, int* b);
 extern "C" void func_00241138(void* self, int a, int b);
 
-// D_004A2028: the active memory-card state object (passed to cFEMemCard_createReadBuffer in this unit).
+// cFEMemCard_mInstance: the active memory-card state object (passed to cFEMemCard_createReadBuffer in this unit).
 struct sFEMemCard_5D78 {
     char pad[0x1BC];
     int mode;   // 0x1BC
@@ -1379,7 +1379,7 @@ struct sFEMemCard_5D78 {
 extern "C" int func_001D5D78(int key)
 {
     int out;
-    if (((sFEMemCard_5D78*)D_004A2028)->mode == 1) {
+    if (((sFEMemCard_5D78*)cFEMemCard_mInstance)->mode == 1) {
         void* r = cSSXApp_getMCManager(SSXApp);
         if (cReplay_getSaveData(SSXApp->Game->Replay, &out, &key) != 0) {
             func_00241138(r, out, key);
@@ -1425,8 +1425,8 @@ struct sTrophyRoom_001D5DF0 {
     char pad204[0x24];
     int state;          // 0x228
 };
-// PORT: D_004A2028 holds the trophy room state pointer.
-extern sTrophyRoom_001D5DF0* D_004A2028_tr5 __asm__("D_004A2028");
+// PORT: cFEMemCard_mInstance holds the trophy room state pointer.
+extern sTrophyRoom_001D5DF0* D_004A2028_tr5 __asm__("cFEMemCard_mInstance");
 extern "C" int func_00152688(void* iface);
 extern "C" void cFEMemCard_createReadBuffer(sTrophyRoom_001D5DF0* self, int size);
 
@@ -1486,7 +1486,7 @@ extern "C" void func_00287520(void* opt, int v);
 extern "C" void func_00287558(void* opt, int v);
 extern "C" void func_002875D0(void* opt, int v);
 void cMemMan_free(void*);
-extern void* D_004A2028;
+extern void* cFEMemCard_mInstance;
 
 struct sSndCfg_1D5F40 {
     unsigned int sfxVol : 4;        // bits 0-3
@@ -1499,8 +1499,8 @@ struct sSndCfg_1D5F40 {
     int pad18 : 14;
     char rest[0x288 - 4];
 };
-// PORT: D_00535610 is viewed with different types across the program; view bound by asm label
-extern sSndCfg_1D5F40 D_00535610_1D5F40 __asm__("D_00535610");
+// PORT: cBEOptionInterface_mOption is viewed with different types across the program; view bound by asm label
+extern sSndCfg_1D5F40 D_00535610_1D5F40 __asm__("cBEOptionInterface_mOption");
 
 static inline sSndCfg_1D5F40 Cfg_1D5F40()
 {
@@ -1522,9 +1522,9 @@ struct sMemCard_1D5F40 {
 extern "C" int func_001D5F40()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
-    switch (((sMemCard_1D5F40*)D_004A2028)->op) {
+    switch (((sMemCard_1D5F40*)cFEMemCard_mInstance)->op) {
     case 2:
-        if (!func_00152BB0(iface, ((sMemCard_1D5F40*)D_004A2028)->buf))
+        if (!func_00152BB0(iface, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->buf))
             return 0;
         if (func_0028B180() != 0) {
             cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1537,18 +1537,18 @@ extern "C" int func_001D5F40()
         }
         break;
     case 0:
-        if (!func_00152DE0(iface, ((sMemCard_1D5F40*)D_004A2028)->buf, ((sMemCard_1D5F40*)D_004A2028)->slot))
+        if (!func_00152DE0(iface, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->buf, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->slot))
             return 0;
         break;
     case 1:
         break;
     }
-    if (((sMemCard_1D5F40*)D_004A2028)->busy == 1) {
-        if (((sMemCard_1D5F40*)D_004A2028)->data != 0)
-            cMemMan_free(((sMemCard_1D5F40*)D_004A2028)->data);
-        ((sMemCard_1D5F40*)D_004A2028)->buf = 0;
-        ((sMemCard_1D5F40*)D_004A2028)->data = 0;
-        ((sMemCard_1D5F40*)D_004A2028)->busy = 0;
+    if (((sMemCard_1D5F40*)cFEMemCard_mInstance)->busy == 1) {
+        if (((sMemCard_1D5F40*)cFEMemCard_mInstance)->data != 0)
+            cMemMan_free(((sMemCard_1D5F40*)cFEMemCard_mInstance)->data);
+        ((sMemCard_1D5F40*)cFEMemCard_mInstance)->buf = 0;
+        ((sMemCard_1D5F40*)cFEMemCard_mInstance)->data = 0;
+        ((sMemCard_1D5F40*)cFEMemCard_mInstance)->busy = 0;
     }
     return 1;
 }

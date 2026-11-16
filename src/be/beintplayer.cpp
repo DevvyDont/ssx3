@@ -2,7 +2,7 @@
 #include "be/beintnetwork.h"
 #include "main/ssxapp.h"
 
-extern int D_005305B0[];
+extern int cBELibrary_raceDB[];
 
 struct sPlayerCharEntry {
     char pad_0x00[0xc];
@@ -12,7 +12,7 @@ struct sPlayerCharEntry {
     signed char field_0x12; // 0x12
     char pad_0x13[0x1C - 0x12 - 1];
 };
-extern sPlayerCharEntry D_00534FE0[];
+extern sPlayerCharEntry cBENewPlayerInterface_tempPlayers[];
 
 extern "C" void cBENewPlayerInterface_discard(void* self);
 extern "C" void cBENewPlayerInterface_defaultCtrl(void* self);
@@ -47,7 +47,7 @@ cBENewPlayerInterfaceCtor* cBENewPlayerInterface_cBENewPlayerInterface(cBENewPla
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BENewPlayerInt[];
-extern void* D_004A11C0;
+extern void* cBENewPlayerInterface_instance;
 
 //99.24%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getThis__Fv);
@@ -55,17 +55,17 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getThis__Fv);
 /**
  * Returns the player interface singleton, creating it on first use.
  *
- * The instance lives in D_004A11C0; it is allocated as 0x10 bytes tagged "BENewPlayerInt".
+ * The instance lives in cBENewPlayerInterface_instance; it is allocated as 0x10 bytes tagged "BENewPlayerInt".
  *
  * @return the player interface
  */
 void* cBENewPlayerInterface_getThis()
 {
-    if (D_004A11C0 == 0) {
+    if (cBENewPlayerInterface_instance == 0) {
         void* mem = cMemMan_alloc(0x10, str_BENewPlayerInt, 0, 0);
-        D_004A11C0 = cBENewPlayerInterface_cBENewPlayerInterface((cBENewPlayerInterfaceCtor*)mem);
+        cBENewPlayerInterface_instance = cBENewPlayerInterface_cBENewPlayerInterface((cBENewPlayerInterfaceCtor*)mem);
     }
-    return D_004A11C0;
+    return cBENewPlayerInterface_instance;
 }
 #endif
 
@@ -76,21 +76,21 @@ struct sRecords_59B8 {
     int w[42];
 };
 extern sRecords_59B8 D_00535B20_59B8 __asm__("cBELibrary_playerDB");
-extern sRecords_59B8 D_00534FE0_59B8 __asm__("D_00534FE0");
-extern void* D_004A11C0;
+extern sRecords_59B8 D_00534FE0_59B8 __asm__("cBENewPlayerInterface_tempPlayers");
+extern void* cBENewPlayerInterface_instance;
 // PORT: func_00145A98 takes no arguments; this caller passes its own self through untouched in $a0.
 extern "C" void func_00145A98_59B8(void* self) __asm__("func_00145A98");
 
 /**
- * Commits the working player table D_00534FE0 to the library's cBELibrary_playerDB.
+ * Commits the working player table cBENewPlayerInterface_tempPlayers to the library's cBELibrary_playerDB.
  *
  * When the player interface singleton's flag at +0x8 is set the whole 0xA8-byte table is copied; otherwise
  * only the names and flag bit 1 of the six entries (func_00145A98).
  */
-// Copies the 0xA8-byte character table from its backup when D_004A11C0 says so, otherwise rebuilds it.
+// Copies the 0xA8-byte character table from its backup when cBENewPlayerInterface_instance says so, otherwise rebuilds it.
 extern "C" void cBENewPlayerInterface_submit(void* self)
 {
-    if (*(int*)((char*)D_004A11C0 + 8) != 0) {
+    if (*(int*)((char*)cBENewPlayerInterface_instance + 8) != 0) {
         D_00535B20_59B8 = D_00534FE0_59B8;
     } else {
         func_00145A98_59B8(self);
@@ -114,7 +114,7 @@ struct sCharEntryBits_00145A98 {
 };
 
 // Bitfield views of the two 0x1C-byte character tables.
-extern sCharEntryBits_00145A98 D_00534FE0_bits[] __asm__("D_00534FE0");
+extern sCharEntryBits_00145A98 D_00534FE0_bits[] __asm__("cBENewPlayerInterface_tempPlayers");
 extern sCharEntryBits_00145A98 D_00535B20_bits[] __asm__("cBELibrary_playerDB");
 
 extern "C" void func_00145A98(void)
@@ -138,11 +138,11 @@ struct sPlayerTable_00145B20
 extern sPlayerTable_00145B20 cBELibrary_playerDB;
 
 /**
- * Throws away player-table edits: copies cBELibrary_playerDB back over the working table D_00534FE0.
+ * Throws away player-table edits: copies cBELibrary_playerDB back over the working table cBENewPlayerInterface_tempPlayers.
  */
 extern "C" void cBENewPlayerInterface_discard(void* self)
 {
-    *(sPlayerTable_00145B20*)D_00534FE0 = cBELibrary_playerDB;
+    *(sPlayerTable_00145B20*)cBENewPlayerInterface_tempPlayers = cBELibrary_playerDB;
 }
 #endif
 
@@ -194,7 +194,7 @@ extern "C" int func_00145C38(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     int off = c * 0xF88 + profile * 0x9B50;
     char* p = (char*)cBELibrary_profileLib + off;
     return *(int*)p;
@@ -212,7 +212,7 @@ extern "C" void func_00145CB0(void* self, int index, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     int off = c * 0xF88 + profile * 0x9B50;
     char* p = (char*)cBELibrary_profileLib + off;
     *(int*)p = value;
@@ -230,7 +230,7 @@ extern "C" int func_00145D38(void* self, int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     int off = profile * 0x9B50 + c * 0xF88;
     char* p = (char*)cBELibrary_profileLib + off;
     int mask = 1 << bit;
@@ -254,7 +254,7 @@ extern "C" void func_00145DD0(void* self, bool flag, int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     func_00152430(&((sProfileSlot_00145DD0 (*)[10])cBELibrary_profileLib)[profile][c], bit, !flag);
 }
 #endif
@@ -275,7 +275,7 @@ extern "C" int func_00145E68(void* self, int index, int kind)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     return func_001523E8(&((sProfileSlot_00145E68 (*)[10])cBELibrary_profileLib)[profile][c], kind);
 }
 #endif
@@ -296,7 +296,7 @@ extern "C" int func_00145EF0(void* self, int index, int a, int b)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(&((sProfileSlot_00145EF0 (*)[10])cBELibrary_profileLib)[profile][c], a, b);
     return *stats != 0;
 }
@@ -384,7 +384,7 @@ extern "C" void func_00146070(void* self, int index, int kind, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    signed char c = D_00534FE0[id].mCharID;
+    signed char c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     if (kind == 1) {
         char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
         ((sProfBits_146070*)(p + 0x278))->b12 = value;
@@ -407,7 +407,7 @@ extern "C" int func_00146150(void* self, int index, int kind, int flag)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    signed char c = D_00534FE0[id].mCharID;
+    signed char c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     if (flag) {
         if (kind == 0) {
             int off = c * 0xF88 + profile * 0x9B50;
@@ -462,7 +462,7 @@ extern "C" void func_00146320(void* self, int index, int kind, int flag, int val
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    signed char c = D_00534FE0[id].mCharID;
+    signed char c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     if (flag) {
         if (kind == 0) {
             char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
@@ -557,16 +557,16 @@ struct sTrackInfo_1466A0 {
     int kind;                   // 0x54
     char pad58[0x64 - 0x58];
 };
-extern sTrackInfo_1466A0 D_0043D950[];
+extern sTrackInfo_1466A0 cBELibrary_locationDB[];
 
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
 extern "C" int func_001466A0(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    signed char c = D_00534FE0[id].mCharID;
-    int kind = D_0043D950[D_005305B0[16]].kind;
-    if (*(signed char*)&D_005305B0[18] == 5) {
+    signed char c = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    int kind = cBELibrary_locationDB[cBELibrary_raceDB[16]].kind;
+    if (*(signed char*)&cBELibrary_raceDB[18] == 5) {
         switch (kind) {
         case 0:
             {
@@ -768,7 +768,7 @@ extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int charID = D_00534FE0[id].mCharID;
+    int charID = cBENewPlayerInterface_tempPlayers[id].mCharID;
     int off = charID * 0xF88 + profile * 0x9B50;
     char* charProfile = (char*)cBELibrary_profileLib + off;
     return *(int*)(charProfile + 0x27C);
@@ -786,7 +786,7 @@ extern "C" void func_00146E10(void* self, int index, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     int off = c * 0xF88 + profile * 0x9B50;
     char* p = (char*)cBELibrary_profileLib + off;
     *(int*)(p + 0x27C) = value;
@@ -809,7 +809,7 @@ extern sPlayerSlot_00146E98 D_00534FEC[];
 /**
  * Finds the rider slot of the first or second human player.
  *
- * A slot counts as human when its player record (D_00534FE0, On Tour tempPlayers) has a controller ID of 0 or
+ * A slot counts as human when its player record (cBENewPlayerInterface_tempPlayers, On Tour tempPlayers) has a controller ID of 0 or
  * more (+0xC, set by cBENewPlayerInterface_setRiderCtrlID()).
  *
  * @param second  0 for the first human, nonzero for the second (On Tour bSecond)
@@ -839,7 +839,7 @@ INCLUDE_ASM("be/beintplayer", func_00146F40);
 #ifdef SKIP_ASM
 extern "C" void func_00146F40(void* self, int index, const char* name)
 {
-    strncpy((char*)&D_00534FE0[cBENewPlayerInterface_getPlayerID(index)], name, 0xC);
+    strncpy((char*)&cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)], name, 0xC);
 }
 #endif
 
@@ -851,7 +851,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 int cBENewPlayerInterface_getPlayerID(int index);
-extern unsigned int D_00535610[];
+extern unsigned int cBEOptionInterface_mOption[];
 extern char str_PLAYER_pct_d[];
 extern char str_JOUEUR_pct_d[];
 extern char str_SPIELER_pct_d[];
@@ -872,24 +872,24 @@ extern "C" char* func_00146F88(void* self, int idx)
             return net + 0x498;
         return net + 0x488;
     }
-    if (D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00[0] == 0) {
+    if (cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00[0] == 0) {
         cBE_getInterface_Fv(cBE_getBE(), 4);
-        switch ((int)((D_00535610[0] >> 22) & 7)) {
+        switch ((int)((cBEOptionInterface_mOption[0] >> 22) & 7)) {
         case 0:
-            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_PLAYER_pct_d, idx + 1);
+            sprintf(cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_PLAYER_pct_d, idx + 1);
             break;
         case 1:
-            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_JOUEUR_pct_d, idx + 1);
+            sprintf(cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_JOUEUR_pct_d, idx + 1);
             break;
         case 2:
-            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_SPIELER_pct_d, idx + 1);
+            sprintf(cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_SPIELER_pct_d, idx + 1);
             break;
         case 3:
-            sprintf(D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_JUGADOR_pct_d, idx + 1);
+            sprintf(cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00, str_JUGADOR_pct_d, idx + 1);
             break;
         }
     }
-    return D_00534FE0[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00;
+    return cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00;
 }
 #endif
 
@@ -900,7 +900,7 @@ extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 
 extern "C" void func_00147138(void* self, int a1, const char* name)
 {
-    strncpy(D_00534FE0[a1].pad_0x00, name, 0xC);
+    strncpy(cBENewPlayerInterface_tempPlayers[a1].pad_0x00, name, 0xC);
 }
 #endif
 
@@ -928,7 +928,7 @@ struct sVtEntry_00147170 {
  */
 extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx)
 {
-    char* name = (char*)&D_00534FE0[idx];
+    char* name = (char*)&cBENewPlayerInterface_tempPlayers[idx];
     if (strlen(name) == 0)
     {
         unsigned short buf[0x68];
@@ -965,9 +965,9 @@ struct sPlayerCharFlags_00147220 {
 extern "C" void cBENewPlayerInterface_setRiderCtrlID(void* self, int index, int ctrl)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    D_00534FE0[id].field_0xc = ctrl;
+    cBENewPlayerInterface_tempPlayers[id].field_0xc = ctrl;
     if (ctrl >= 0) {
-        char* entry = (char*)&D_00534FE0[0] + id * 0x1c;
+        char* entry = (char*)&cBENewPlayerInterface_tempPlayers[0] + id * 0x1c;
         sPlayerCharFlags_00147220* flags = (sPlayerCharFlags_00147220*)(entry + 0x10);
         flags->bit0 = id;
         flags->bit2 = 0;
@@ -983,7 +983,7 @@ int cBENewPlayerInterface_getPlayerID(int index);
 extern "C" int func_00147290(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    return D_00534FE0[id].field_0xc;
+    return cBENewPlayerInterface_tempPlayers[id].field_0xc;
 }
 #endif
 
@@ -999,9 +999,9 @@ struct sPlayerCharFlags_001472C8 {
 
 extern "C" void func_001472C8(void* self, int a1, int a2)
 {
-    D_00534FE0[a1].field_0xc = a2;
+    cBENewPlayerInterface_tempPlayers[a1].field_0xc = a2;
     if (a2 >= 0) {
-        char* p = (char*)&D_00534FE0[0] + a1 * 0x1c;
+        char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + a1 * 0x1c;
         sPlayerCharFlags_001472C8* f = (sPlayerCharFlags_001472C8*)(p + 0x10);
         f->bit0 = a1;
         f->bit2 = 0;
@@ -1014,7 +1014,7 @@ INCLUDE_ASM("be/beintplayer", func_00147318);
 #ifdef SKIP_ASM
 extern "C" int func_00147318(void* self, int a1)
 {
-    return D_00534FE0[a1].field_0xc;
+    return cBENewPlayerInterface_tempPlayers[a1].field_0xc;
 }
 #endif
 
@@ -1038,10 +1038,10 @@ static inline int func_00147338_isLocked(sPlayerCharEntry* e)
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* self, int index, int charID)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    sPlayerCharEntry* entry = &D_00534FE0[id];
+    sPlayerCharEntry* entry = &cBENewPlayerInterface_tempPlayers[id];
     if (func_00147338_isLocked(entry) == 1)
     {
-        entry->mCharID = D_00534FE0[0].mCharID;
+        entry->mCharID = cBENewPlayerInterface_tempPlayers[0].mCharID;
     }
     else
     {
@@ -1064,7 +1064,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderCharID__FPvi);
 signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex)
 {
     int playerID = cBENewPlayerInterface_getPlayerID(riderIndex);
-    sPlayerCharEntry* entry = &D_00534FE0[playerID];
+    sPlayerCharEntry* entry = &cBENewPlayerInterface_tempPlayers[playerID];
     return entry->mCharID;
 }
 #endif
@@ -1075,7 +1075,7 @@ INCLUDE_ASM("be/beintplayer", func_001473D0);
 extern "C" void func_001473D0(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    D_00534FE0[id].field_0x12 = value;
+    cBENewPlayerInterface_tempPlayers[id].field_0x12 = value;
 }
 #endif
 
@@ -1085,7 +1085,7 @@ INCLUDE_ASM("be/beintplayer", func_00147410);
 extern "C" signed char func_00147410(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    return D_00534FE0[id].field_0x12;
+    return cBENewPlayerInterface_tempPlayers[id].field_0x12;
 }
 #endif
 
@@ -1106,9 +1106,9 @@ static inline int func_00147448_getBit2(char* p)
 
 extern "C" void func_00147448(void* self, int a1, int charID)
 {
-    char* p = (char*)&D_00534FE0[0] + a1 * 0x1c;
+    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + a1 * 0x1c;
     if (func_00147448_getBit2(p) == 1) {
-        *(signed char*)(p + 0x11) = D_00534FE0[0].mCharID;
+        *(signed char*)(p + 0x11) = cBENewPlayerInterface_tempPlayers[0].mCharID;
     } else {
         *(signed char*)(p + 0x11) = charID;
     }
@@ -1127,7 +1127,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCharID__FPvi);
 signed char cBENewPlayerInterface_getPlayerCharID(void* self, int index)
 {
     index *= sizeof(sPlayerCharEntry);
-    return ((sPlayerCharEntry*)((char*)D_00534FE0 + index))->mCharID;
+    return ((sPlayerCharEntry*)((char*)cBENewPlayerInterface_tempPlayers + index))->mCharID;
 }
 #endif
 
@@ -1136,7 +1136,7 @@ INCLUDE_ASM("be/beintplayer", func_001474A8);
 #ifdef SKIP_ASM
 extern "C" void func_001474A8(void* self, int a1, int a2)
 {
-    char* p = (char*)&D_00534FE0[0] + a1 * 0x1c;
+    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + a1 * 0x1c;
     *(char*)(p + 0x12) = a2;
 }
 #endif
@@ -1146,7 +1146,7 @@ INCLUDE_ASM("be/beintplayer", func_001474C8);
 #ifdef SKIP_ASM
 extern "C" signed char func_001474C8(void* self, int a1)
 {
-    char* p = (char*)&D_00534FE0[0] + a1 * 0x1c;
+    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + a1 * 0x1c;
     return *(signed char*)(p + 0x12);
 }
 #endif
@@ -1165,7 +1165,7 @@ struct sPlayerCharFlags_0x10 {
 extern "C" int func_001474E8(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    char* p = (char*)&D_00534FE0[0] + id * 0x1c;
+    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + id * 0x1c;
     return ((sPlayerCharFlags_0x10*)(p + 0x10))->bit1;
 }
 #endif
@@ -1184,7 +1184,7 @@ struct sPlayerCharFlags_00147528 {
 extern "C" void func_00147528(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    sPlayerCharEntry* e = &D_00534FE0[id];
+    sPlayerCharEntry* e = &cBENewPlayerInterface_tempPlayers[id];
     ((sPlayerCharFlags_00147528*)((char*)e + 0x10))->bit1 = value;
 }
 #endif
@@ -1195,7 +1195,7 @@ INCLUDE_ASM("be/beintplayer", func_00147580);
 extern "C" int func_00147580(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    char* p = (char*)&D_00534FE0[0] + id * 0x1c;
+    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + id * 0x1c;
     return ((sPlayerCharFlags_0x10*)(p + 0x10))->bit3;
 }
 #endif
@@ -1214,7 +1214,7 @@ struct sPlayerCharFlags_001475C0 {
 extern "C" void func_001475C0(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    sPlayerCharEntry* e = &D_00534FE0[id];
+    sPlayerCharEntry* e = &cBENewPlayerInterface_tempPlayers[id];
     ((sPlayerCharFlags_001475C0*)((char*)e + 0x10))->bit3 = value;
 }
 #endif
@@ -1224,7 +1224,7 @@ INCLUDE_ASM("be/beintplayer", func_00147618);
 #ifdef SKIP_ASM
 extern "C" signed char func_00147618(void* self, int index)
 {
-    return D_00534FE0[cBENewPlayerInterface_getPlayerID(index)].pad_0x13[0];
+    return cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].pad_0x13[0];
 }
 #endif
 
@@ -1234,7 +1234,7 @@ INCLUDE_ASM("be/beintplayer", func_00147658);
 extern "C" void func_00147658(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    D_00534FE0[id].pad_0x13[0] = value;
+    cBENewPlayerInterface_tempPlayers[id].pad_0x13[0] = value;
 }
 #endif
 
@@ -1247,7 +1247,7 @@ struct sPlayerCharEntryExt_7698 {
     int field_0x14;
     char pad_0x18[4];
 };
-extern sPlayerCharEntryExt_7698 D_00534FE0_ext[] __asm__("D_00534FE0");
+extern sPlayerCharEntryExt_7698 D_00534FE0_ext[] __asm__("cBENewPlayerInterface_tempPlayers");
 
 extern "C" int func_00147698(void* self, int index)
 {
@@ -1263,7 +1263,7 @@ struct sPlayerCharEntryExt_76D8 {
     int field_0x14;
     int field_0x18;
 };
-extern sPlayerCharEntryExt_76D8 D_00534FE0_ext_76D8[] __asm__("D_00534FE0");
+extern sPlayerCharEntryExt_76D8 D_00534FE0_ext_76D8[] __asm__("cBENewPlayerInterface_tempPlayers");
 
 extern "C" void func_001476D8(void* self, int index, int value)
 {
@@ -1279,7 +1279,7 @@ struct sPlayerCharEntryExt_7718 {
     char pad_0x00[0x18];
     int field_0x18;
 };
-extern sPlayerCharEntryExt_7718 D_00534FE0_ext_7718[] __asm__("D_00534FE0");
+extern sPlayerCharEntryExt_7718 D_00534FE0_ext_7718[] __asm__("cBENewPlayerInterface_tempPlayers");
 
 extern "C" int func_00147718(void* self, int index)
 {
@@ -1294,7 +1294,7 @@ struct sPlayerCharEntryExt_7758 {
     char pad_0x00[0x18];
     int field_0x18;
 };
-extern sPlayerCharEntryExt_7758 D_00534FE0_ext_7758[] __asm__("D_00534FE0");
+extern sPlayerCharEntryExt_7758 D_00534FE0_ext_7758[] __asm__("cBENewPlayerInterface_tempPlayers");
 
 extern "C" void func_00147758(void* self, int index, int value)
 {
@@ -1307,14 +1307,14 @@ extern "C" void func_00147758(void* self, int index, int value)
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerID__Fi);
 #ifdef SKIP_ASM
 /**
- * Maps a rider slot to its player: playerID[index] of the race settings copy at D_005305B0 (a cBERaceDB).
+ * Maps a rider slot to its player: playerID[index] of the race settings copy at cBELibrary_raceDB (a cBERaceDB).
  *
  * @param index  rider slot, 0 to 5
  * @return the player ID
  */
 int cBENewPlayerInterface_getPlayerID(int index)
 {
-    return D_005305B0[index];
+    return cBELibrary_raceDB[index];
 }
 #endif
 
@@ -1330,10 +1330,10 @@ struct sPlayerFlags_001477B0 {
 
 extern "C" int func_001477B0(void* self, int index)
 {
-    if (D_00534FE0[index].field_0xc == -1) {
+    if (cBENewPlayerInterface_tempPlayers[index].field_0xc == -1) {
         return -1;
     }
-    return ((sPlayerFlags_001477B0*)D_00534FE0)[index].flag0;
+    return ((sPlayerFlags_001477B0*)cBENewPlayerInterface_tempPlayers)[index].flag0;
 }
 #endif
 
@@ -1359,7 +1359,7 @@ struct sPlayerFlags_001477E8
 int cBENewPlayerInterface_isMissionMan(int index)
 {
     int playerID = cBENewPlayerInterface_getPlayerID(index);
-    return ((sPlayerFlags_001477E8*)D_00534FE0)[playerID].missionMan;
+    return ((sPlayerFlags_001477E8*)cBENewPlayerInterface_tempPlayers)[playerID].missionMan;
 }
 #endif
 
@@ -1368,8 +1368,8 @@ INCLUDE_ASM("be/beintplayer", func_00147828);
 #ifdef SKIP_ASM
 extern "C" void func_00147828(int index)
 {
-    D_00534FE0[cBENewPlayerInterface_getPlayerID(index)].mCharID = D_00534FE0[0].mCharID;
-    sPlayerCharEntry* e = &D_00534FE0[cBENewPlayerInterface_getPlayerID(index)];
+    cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].mCharID = cBENewPlayerInterface_tempPlayers[0].mCharID;
+    sPlayerCharEntry* e = &cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)];
     ((sPlayerCharFlags_0x10*)((char*)e + 0x10))->bit2 = 1;
 }
 #endif
@@ -1384,8 +1384,8 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_resetFromMissionMan);
  */
 extern "C" void cBENewPlayerInterface_resetFromMissionMan(void* self, int index)
 {
-    D_00534FE0[cBENewPlayerInterface_getPlayerID(index)].mCharID = 0;
-    sPlayerCharEntry* entry = &D_00534FE0[cBENewPlayerInterface_getPlayerID(index)];
+    cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].mCharID = 0;
+    sPlayerCharEntry* entry = &cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)];
     ((sPlayerCharFlags_0x10*)((char*)entry + 0x10))->bit2 = 0;
 }
 #endif
@@ -1401,7 +1401,7 @@ extern "C" void* func_00147908(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     char* p = (char*)cBELibrary_profileLib + profile * 0x9B50 + c * 0xF88;
     return p + 0xE38;
 }
@@ -1418,7 +1418,7 @@ extern "C" int func_00147980(void* self, int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     int off = profile * 0x9B50 + c * 0xF88;
     char* p = (char*)cBELibrary_profileLib + off;
     p = p + (bit / 32) * 4;
@@ -1438,7 +1438,7 @@ extern "C" void func_00147A30(void* self, int index, int bit, int on)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     int off = profile * 0x9B50 + c * 0xF88;
     char* p = (char*)cBELibrary_profileLib + off;
     p += 0xF08;
@@ -1471,7 +1471,7 @@ extern "C" int func_00147B20(void* self, int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     sProfileSlot_func_00147B20* s = (sProfileSlot_func_00147B20*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib);
     return s->e[slot].a;
 }
@@ -1496,7 +1496,7 @@ extern "C" int func_00147BB0(void* self, int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
+    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
     sProfileSlot_func_00147BB0* s = (sProfileSlot_func_00147BB0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib);
     return s->e[slot].b;
 }
@@ -1681,21 +1681,21 @@ struct cBEIface_00147F78
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BECharInt[];
 extern sVTablePlayer_00147F78 cBEStatInterface_vtbl;
-extern void* D_004A11C4;
+extern void* cBEStatInterface_instance;
 
 /**
  * Returns the stat interface singleton, creating it on first use.
  *
- * The instance lives in D_004A11C4: 0x10 bytes tagged "BECharInt", with its vtable stored and slot 2
+ * The instance lives in cBEStatInterface_instance: 0x10 bytes tagged "BECharInt", with its vtable stored and slot 2
  * (discard) run on it.
  *
  * @return the stat interface
  */
 extern "C" void* cBEStatInterface_getThis(void)
 {
-    if (D_004A11C4 == 0) {
+    if (cBEStatInterface_instance == 0) {
         cBEIface_00147F78* mem = (cBEIface_00147F78*)cMemMan_alloc(0x10, str_BECharInt, 0, 0);
-        D_004A11C4 = mem;
+        cBEStatInterface_instance = mem;
         sVTablePlayer_00147F78* vt = &cBEStatInterface_vtbl;
         short thisAdjust = vt->delta;
         void (*fn)(void*) = vt->fn;
@@ -1703,7 +1703,7 @@ extern "C" void* cBEStatInterface_getThis(void)
         mem->field_0x8 = 0;
         fn((char*)mem + thisAdjust);
     }
-    return D_004A11C4;
+    return cBEStatInterface_instance;
 }
 #endif
 

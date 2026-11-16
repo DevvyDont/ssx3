@@ -1208,14 +1208,14 @@ struct sTrickId;
 extern "C" void gGenTrickName(char* buf, sTrickId* id, int size);
 extern "C" void cRiderMetrix_addHUDfx(void* self, int a, const char* b, float c, int d);
 extern "C" void func_00309918(void* self, void* d);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 extern "C" void func_00118FF8(void* self, sTrickId* id, int repeat)
 {
     char buf[0x100];
     gGenTrickName(buf, id, 0xFF);
     cRiderMetrix_addHUDfx(self, 0, buf, 3.0f, repeat);
-    func_00309918(D_004A3DD8, id);
+    func_00309918(cWScriptMan_TheWScriptMan, id);
 }
 #endif
 
@@ -2559,7 +2559,7 @@ struct sTrickBonus_11B1A8
     unsigned char g;        // 0xE
     unsigned char pad;      // 0xF
 };
-extern sTrickBonus_11B1A8 D_0043D608[];
+extern sTrickBonus_11B1A8 gMonsterComboTable[];
 
 struct sTrickBits_11B1A8
 {
@@ -2581,7 +2581,7 @@ struct sTrickBits_11B1A8
 extern "C" int func_0011B1A8(void* self, sTrickId* id)
 {
     sTrickBits_11B1A8* t = (sTrickBits_11B1A8*)id;
-    sTrickBonus_11B1A8* e = D_0043D608;
+    sTrickBonus_11B1A8* e = gMonsterComboTable;
     for (int i = 0; i < 24; i++, e++)
     {
         if (t->a != e->a) continue;
@@ -2602,7 +2602,7 @@ extern "C" int func_0011B1A8(void* self, sTrickId* id)
 //100%
 INCLUDE_ASM("ai/ridermetrix", func_0011B2C0);
 #ifdef SKIP_ASM
-extern float D_004A6310[2][3][4][2];
+extern float kTerminalVelocityTable[2][3][4][2];
 
 extern "C" void func_0011B2C0(void)
 {
@@ -2614,7 +2614,7 @@ extern "C" void func_0011B2C0(void)
                     int vb = b ? (b == 1 ? 11 : 0) : 20;
                     int vc = c ? (c == 1 ? 15 : (c == 2 ? 10 : 0)) : 20;
                     int vd = d ? 0 : 5;
-                    D_004A6310[a][b][c][d] = 120.0f - (float)(va + vb + vc + vd);
+                    kTerminalVelocityTable[a][b][c][d] = 120.0f - (float)(va + vb + vc + vd);
                 }
             }
         }
@@ -2627,7 +2627,7 @@ INCLUDE_ASM("ai/ridermetrix", func_0011B3F8);
 #ifdef SKIP_ASM
 extern "C" float func_001494C0(void* iface, int a1, int a2);
 int func_0011FE98(void* self);
-extern float D_004A6310[2][3][4][2];
+extern float kTerminalVelocityTable[2][3][4][2];
 
 // cRider::updateTerminalVelocity (On Tour name; pairing unverified, structure fits the retail asm)
 extern "C" void func_0011B3F8(char* self)
@@ -2659,10 +2659,10 @@ extern "C" void func_0011B3F8(char* self)
     float historyFactor;
     int i;
     for (i = 0; i < 2; i++) {
-        const float lowTucLowSurface = D_004A6310[i][lowSurfaceIndex][boostFactor][0];
-        const float hiTucLowSurface = D_004A6310[i][lowSurfaceIndex][boostFactor][1];
-        const float lowTucHiSurface = D_004A6310[i][lowSurfaceIndex + 1][boostFactor][0];
-        const float hiTucHiSurface = D_004A6310[i][lowSurfaceIndex + 1][boostFactor][1];
+        const float lowTucLowSurface = kTerminalVelocityTable[i][lowSurfaceIndex][boostFactor][0];
+        const float hiTucLowSurface = kTerminalVelocityTable[i][lowSurfaceIndex][boostFactor][1];
+        const float lowTucHiSurface = kTerminalVelocityTable[i][lowSurfaceIndex + 1][boostFactor][0];
+        const float hiTucHiSurface = kTerminalVelocityTable[i][lowSurfaceIndex + 1][boostFactor][1];
         const float lowTucLowSurfaceArea = (1.0f - surfaceFactor) * (1.0f - crouchFactor);
         const float lowTucHiSurfaceArea = surfaceFactor * (1.0f - crouchFactor);
         const float hiTucLowSurfaceArea = (1.0f - surfaceFactor) * crouchFactor;

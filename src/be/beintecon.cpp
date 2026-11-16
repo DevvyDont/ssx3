@@ -3,7 +3,7 @@
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEEconInt[];
 extern void* D_0045AC78[16];
-extern void* D_004A1214;
+extern void* cBEEconInterface_instance;
 
 struct cBEEconInterface {
     char pad_0x00[8];
@@ -23,13 +23,13 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getThis__Fv);
  */
 void* cBEEconInterface_getThis()
 {
-    if (D_004A1214 == 0) {
+    if (cBEEconInterface_instance == 0) {
         cBEEconInterface* mem = (cBEEconInterface*)cMemMan_alloc(0x10, str_BEEconInt, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045AC78;
-        D_004A1214 = mem;
+        cBEEconInterface_instance = mem;
     }
-    return D_004A1214;
+    return cBEEconInterface_instance;
 }
 #endif
 
@@ -755,7 +755,7 @@ struct sEcon_001519E0;
 extern "C" void func_00151A88(sEconItems_151A88* self, int k);
 extern "C" void func_001519E0(sEcon_001519E0* self, int k);
 extern "C" void func_00150558(int kind, void* dst);
-extern sEconDef_1600 D_0043EE10_v1600[] __asm__("D_0043EE10");
+extern sEconDef_1600 D_0043EE10_v1600[] __asm__("cBELibrary_missionInfo");
 extern sEconColRec_1600 D_005308D9[];
 
 extern "C" void func_00151600(sEcon_1600* self, int k, int reload)

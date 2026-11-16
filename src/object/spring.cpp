@@ -89,7 +89,7 @@ struct sSpring_53FC0 {
     sSpNode_53FC0* nodes;   // 0x24
 };
 
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern sSpVec_53FC0 D_004FF120_sp __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -234,7 +234,7 @@ static inline float spLength_53FC0(const sSpVec_53FC0& v)
 extern "C" void cSpring_update(sSpring_53FC0* self)
 {
     sSpVec_53FC0 gravity(0.0f, 0.0f, -980.0f, 0.0f);
-    float dt = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+    float dt = 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     sSpVec_53FC0 forces[16];
     float torques[16];
     forces[0] = forces[self->n - 1] = D_004FF120_sp;

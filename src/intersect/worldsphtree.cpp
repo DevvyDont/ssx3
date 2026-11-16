@@ -4970,7 +4970,7 @@ struct sObj_341388 {
 };
 
 extern void* cBoostNode_vtbl[];
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern sVec4_341388 D_004FF120_341388[] __asm__("t4vect_Zero");
 extern sVec4_341388 D_004FF150_341388[] __asm__("t4vect_YAxis");
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
@@ -5040,7 +5040,7 @@ extern "C" sObj_341388* func_00341388(sObj_341388* self, void* a1, int a2, void*
     self->vt = cBoostNode_vtbl;
     int type = def->type;
     self->type = type;
-    self->t38 = (int)(def->time * (float)*(int*)(D_004A5B64 + 0x10));
+    self->t38 = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
     if (def->x == 0.0f && def->y == 0.0f && def->z == 0.0f) {
         if (type == 2) {
             self->pos = *D_004FF150_341388;
@@ -5401,7 +5401,7 @@ extern "C" void cBoostNode_writeToReplayFrame(void* self, void* stream)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341AA0);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern void* D_00490B10[];
 extern "C" void func_0034D9B0(void* p, int a1, int a2, void* obj, int a4);
 extern "C" float func_00351508(void* inst);
@@ -5497,9 +5497,9 @@ extern "C" void* func_00341AA0(sSphFloat_1AA0* self, int a1, int a2, char* obj, 
     }
     self->value = v;
     if (def->speedVar != 0.0f) {
-        self->speed = func_00317890(def->speed * 0.03333333507180214f, def->speedVar * 0.03333333507180214f) / (float)*(int*)(D_004A5B64 + 0x10);
+        self->speed = func_00317890(def->speed * 0.03333333507180214f, def->speedVar * 0.03333333507180214f) / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     } else {
-        self->speed = def->speed * 0.03333333507180214f / (float)*(int*)(D_004A5B64 + 0x10);
+        self->speed = def->speed * 0.03333333507180214f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     }
     if (def->dir == 1) {
         self->speed = -self->speed;
@@ -5747,13 +5747,13 @@ extern "C" void cAnimObjectNode_expire(void* self, int runscript)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00341FE8);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern "C" void cMoveNode_signal(void* p);
 
 extern "C" void func_00341FE8(sClampFloat_1F38* self, int msg, float v)
 {
     if (msg == 0x64) {
-        *(int*)((char*)self + 0xC) = (int)(v * (float)*(int*)(D_004A5B64 + 0x10));
+        *(int*)((char*)self + 0xC) = (int)(v * (float)*(int*)(cAppMan_TheAppMan + 0x10));
     } else if (msg == 0x65) {
         v = v * 0.03333333507180214f;
         if (self->min <= v && v <= self->max) {
@@ -5761,7 +5761,7 @@ extern "C" void func_00341FE8(sClampFloat_1F38* self, int msg, float v)
         }
     } else if (msg == 0x66) {
         v = v * 0.03333333507180214f;
-        self->speed = v / (float)*(int*)(D_004A5B64 + 0x10);
+        self->speed = v / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     } else if (msg == 0x67) {
         v = v * 0.03333333507180214f;
         float lim = *(float*)(*(char**)(*(char**)((char*)self + 0x48) + 0x80) + 0x14);
@@ -5817,7 +5817,7 @@ extern "C" void func_00342150(void* self, void* stream)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_003421A0);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern void* D_004908F8[];
 extern "C" void func_0034D9B0(void* p, int a1, int a2, void* obj, int a4);
 extern "C" float func_00351508(void* inst);
@@ -5882,7 +5882,7 @@ extern "C" void* func_003421A0(sSphCtl_003421A0* self, int a1, char* obj, char* 
     setRateMax_003421A0((sFloat_003421A0*)&self->f14, *(float*)(def + 0x24), info);
     self->f0C = *(float*)(def + 0x8);
     self->f08 = *(float*)(def + 0x4) * 9.999999974752427e-07f;
-    self->f18 = *(float*)(def + 0xC) * 0.03333333507180214f / (float)*(int*)(D_004A5B64 + 0x10);
+    self->f18 = *(float*)(def + 0xC) * 0.03333333507180214f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     self->f2C = *(int*)(def + 0x1C);
     self->f24 = *(float*)(def + 0x14) * 0.03333333507180214f;
     self->f1C = *(float*)(def + 0x18);
@@ -6244,7 +6244,7 @@ struct sSphDef_342768 {
     float x, y, z;
 };
 extern void* cBoostModifier_vtbl[];
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 extern "C" void* func_00342768(cBoostModifier* self, sSphDef_342768* def, int a2)
 {
@@ -6253,7 +6253,7 @@ extern "C" void* func_00342768(cBoostModifier* self, sSphDef_342768* def, int a2
     self->Instance = (tInstanceRecord*)a2;
     int type = def->type;
     self->Type = type;
-    int t = (int)(def->time * (float)*(int*)(D_004A5B64 + 0x10));
+    int t = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
     self->BoostTime = t;
     sVec4_342768 v;
     v.x = def->x;
@@ -6576,7 +6576,7 @@ extern "C" void* func_00342C08(sSelf_342C08* self, void* a1, void* a2, sDef_342C
 {
     func_00355280(self, a1, 0, a2);
     self->vt = cDebounceNode_vtbl;
-    self->t2C = (int)(def->time * (float)*(int*)(D_004A5B64 + 0x10));
+    self->t2C = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
     self->t30 = def->f08;
     cMoveNode_transferFromOld(self, a4);
     if (def->mode == 0) {

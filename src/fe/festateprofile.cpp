@@ -107,14 +107,14 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00147318(void* self, int a1);
 extern "C" void* func_001D53B0(void* self, int a1, int a2);
 extern void* cFEStateProfileLoad_vtbl[];
-extern int D_004A15E8;
+extern int cFEStateProfileLoad_mScreenAction;
 
 extern "C" void* func_0018ECA0(void* self, int a1, int a2, unsigned char flags)
 {
     func_001D53B0(self, a1, 0);
     *(int*)((char*)self + 0xC) = 0x23;
     *(void***)((char*)self + 0x8) = cFEStateProfileLoad_vtbl;
-    D_004A15E8 = a2;
+    cFEStateProfileLoad_mScreenAction = a2;
     *(int*)((char*)self + 0x1CC) = 0;
     *(int*)((char*)self + 0x230) = 0;
     *(int*)((char*)self + 0x234) = 0;
@@ -152,7 +152,7 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_93profile_load[];
-extern int D_004A15E8;
+extern int cFEStateProfileLoad_mScreenAction;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cFEStateProfileLoad_initGeneral(void* self);
@@ -163,7 +163,7 @@ extern "C" void func_00190768(void* self);
 /**
  * Creates the profile load/save screen ("93profile_load") and sets it up for the current mode.
  *
- * After initGeneral, mode D_004A15E8 picks initCreateScreen (1), func_00190670 (2) or func_00190768 (3),
+ * After initGeneral, mode cFEStateProfileLoad_mScreenAction picks initCreateScreen (1), func_00190670 (2) or func_00190768 (3),
  * probably On Tour's initLoadScreen and initSaveScreen.
  */
 extern "C" void cFEStateProfileLoad_onCreateScreen(void* self)
@@ -175,7 +175,7 @@ extern "C" void cFEStateProfileLoad_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cFEStateProfileLoad_initGeneral(self);
-    switch (D_004A15E8) {
+    switch (cFEStateProfileLoad_mScreenAction) {
     case 1:
         cFEStateProfileLoad_initCreateScreen(self);
         break;
@@ -260,7 +260,7 @@ struct cList0018EEB8 {
     virtual int v54(int a);
 };
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern int D_004A15E8;
+extern int cFEStateProfileLoad_mScreenAction;
 
 extern "C" int func_0018EEB8(void* self, void* widget, unsigned int msg)
 {
@@ -272,7 +272,7 @@ extern "C" int func_0018EEB8(void* self, void* widget, unsigned int msg)
         }
         break;
     case 8:
-        if (D_004A15E8 == 2 || *(int*)((char*)self + 0x220) == 0) {
+        if (cFEStateProfileLoad_mScreenAction == 2 || *(int*)((char*)self + 0x220) == 0) {
             return 0x100;
         }
         break;
@@ -289,7 +289,7 @@ INCLUDE_ASM("fe/festateprofile", func_0018EF70);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x[];
-extern int D_004A15E8;
+extern int cFEStateProfileLoad_mScreenAction;
 extern char str_btext3[];
 extern char str_btext3a[];
 extern char str_btext5[];
@@ -314,7 +314,7 @@ extern "C" void func_0018EF70(void* self, int on)
         return;
     int off = on ^ 1;
     ((cUIObj_EF70*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x)))->setVisible(off);
-    if (D_004A15E8 != 2) {
+    if (cFEStateProfileLoad_mScreenAction != 2) {
         ((cUIObj_EF70*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(off);
         ((cUIObj_EF70*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setVisible(off);
         ((cUIObj_EF70*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setVisible(off);
@@ -332,7 +332,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_btext5[];
 extern char str_ps2sq[];
-extern int D_004A15E8;
+extern int cFEStateProfileLoad_mScreenAction;
 struct cUIObj_F0B8 {
     int f0;
     int f4;
@@ -349,7 +349,7 @@ struct cUIObj_F0B8 {
 
 extern "C" void func_0018F0B8(void* self, bool on)
 {
-    if (D_004A15E8 != 2) {
+    if (cFEStateProfileLoad_mScreenAction != 2) {
         int off = !on;
         ((cUIObj_F0B8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setActive(off);
         ((cUIObj_F0B8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setActive(off);
@@ -366,7 +366,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_btext3[];
 extern char str_btext3a[];
 extern char str_ps2x[];
-extern int D_004A15E8;
+extern int cFEStateProfileLoad_mScreenAction;
 
 struct cUIObj_F168 {
     int f0;
@@ -385,7 +385,7 @@ struct cUIObj_F168 {
 extern "C" void func_0018F168(void* self, bool a, bool b)
 {
     cUIObj_F168* o = (cUIObj_F168*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x));
-    if (D_004A15E8 != 2) {
+    if (cFEStateProfileLoad_mScreenAction != 2) {
         int v = !b;
         ((cUIObj_F168*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(v);
         *(int*)((char*)self + 0x224) = v;
@@ -428,7 +428,7 @@ extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* mp, int dev
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsigned short* buf, int len);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
-extern int D_004A15E8;
+extern int cFEStateProfileLoad_mScreenAction;
 extern char str_1percentage[];
 extern char str_Memory_card_text[];
 extern char str_playerpct_d[];
@@ -537,7 +537,7 @@ extern "C" void cFEStateProfileLoad_displayOn(void* vself)
                 && (*(cMCSub_F2B8**)(mp + 0x434))->v55()) {
                 (*(cMCSub_F2B8**)(mp + 0x434))->v14(i - 1, (char*)self + 0x238);
                 cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
-                if (D_004A15E8 != 2 && sel == 0) {
+                if (cFEStateProfileLoad_mScreenAction != 2 && sel == 0) {
                     sel = 1;
                     widget->v08(0);
                     widget->v25(0);
@@ -940,7 +940,7 @@ extern "C" void cMCOverlayManager_SetAction(void* mp, int a1);
 extern "C" void func_002C2540(void* dst, char* src);
 extern "C" void strcpy2(char* dst, void* src);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern int D_004A15E8;
+extern int cFEStateProfileLoad_mScreenAction;
 extern char str_kT_MEMPlayerName_b[];
 extern char str_Keyboard[];
 extern char str_kT_KEYUserName[];
@@ -1033,7 +1033,7 @@ extern "C" void func_0018FD90(void* vself, char* item, int event)
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         if (self->f214 != 3) break;
         ((sMgrK18FD90*)mp)->fF8 = self->f1C4 = *(int*)(item + 0x18);
-        switch (D_004A15E8) {
+        switch (cFEStateProfileLoad_mScreenAction) {
         case 1:
         case 3:
             if (self->state == 1 && self->f224 != 0) {
@@ -1089,7 +1089,7 @@ extern "C" void func_0018FD90(void* vself, char* item, int event)
         break;
     }
     case 7:
-        if (self->f1A8 != 1 && self->state != 6 && D_004A15E8 != 2 && self->f220 != 0) {
+        if (self->f1A8 != 1 && self->state != 6 && cFEStateProfileLoad_mScreenAction != 2 && self->f220 != 0) {
             char* mp = (char*)cSSXApp_getMCManager(SSXApp);
             if (VCALL_K18FD90(*(char**)(mp + 0x434), 0, 54), *(int*)(mp + 0x428)) != 0) {
                 ((sMgrK18FD90*)mp)->fF8 = self->f1C4 = *(int*)(item + 0x18);

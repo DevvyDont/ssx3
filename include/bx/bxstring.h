@@ -8,7 +8,7 @@
 // `operator new(len + 0xD, "cStringData", 0x20000000, 0)`: a 0xC-byte tStringData header, then len chars and a 0.
 // So a string's header is `(tStringData*)Str - 1`; code reads it at Str-0xC / Str-8 / Str-4.
 //
-// The empty string is shared and static: cBXString::EmptyString (retail D_004A3E90 holds 0x0048DCD4), whose header at
+// The empty string is shared and static: cBXString::EmptyString (retail cBXString_EmptyString holds 0x0048DCD4), whose header at
 // 0x0048DCC8 is {NumRefs -1, DataLength 0, AllocLength 0}. NumRefs < 0 also marks a locked buffer (lockBuffer,
 // cBXString_lockBuffer, stores -1); the copy constructor (cBXString_cBXString1) deep-copies instead of sharing then.
 //

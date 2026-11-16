@@ -230,7 +230,7 @@ struct cSplineModifier_9830 {
     char follow[0x10];      // 0xD8
 };
 
-extern sSmV3_9830 D_004FF160;
+extern sSmV3_9830 t4vect_ZAxis;
 
 
 static inline float Atan2_9830(float y, float x)
@@ -312,7 +312,7 @@ static inline void vu0CopyMat_9830(sSmM44_9830* d, const sSmM44_9830* s)
  *
  * Evaluates the spline at OffsetDistance (+0x3C) into Pos, Dir and DDir (+0xA0, +0xB0, +0xC0) and caches X2 =
  * Dir.x^2 and Y2 = Dir.y^2. OrientType (+0x34) 2 or 3 adds yaw and 1 or 3 adds pitch along Dir; that rotation
- * and Pos form Transform (+0x60), turned by HeadTweak (+0x38) about the up axis (D_004FF160) when it is
+ * and Pos form Transform (+0x60), turned by HeadTweak (+0x38) about the up axis (t4vect_ZAxis) when it is
  * nonzero. Clears RootTransformDirty (+0x58).
  */
 extern "C" void cSplineModifier_updateRootTransform(cSplineModifier_9830* self)
@@ -374,7 +374,7 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier_9830* self)
     self->mat.m[3][3] = 1.0f;
     char* sub = (char*)self + 0x10;
     if (self->angle != 0.0f) {
-        const sSmV3_9830* axis = &D_004FF160;
+        const sSmV3_9830* axis = &t4vect_ZAxis;
         func_0031BE50(&sc[3][0], &sc[3][1], *(float*)(sub + 0x28));
         float k = 1.0f - sc[3][1];
         float kx = k * axis->x;
@@ -1605,7 +1605,7 @@ struct sSmMat_AC20 {
     }
 } __attribute__((aligned(16)));
 
-extern sSmVec4_AC20 D_004FF160_AC20 __asm__("D_004FF160");
+extern sSmVec4_AC20 D_004FF160_AC20 __asm__("t4vect_ZAxis");
 extern void func_00345248_AC20(void* out, sSmVec4_AC20* pos, sSmVec4_AC20* dir, sSmVec4_AC20* c, float t) __asm__("func_00345248");
 extern "C" float func_0031C228(float);
 extern "C" void func_0031BE50(float* s, float* c, float angle);

@@ -76,7 +76,7 @@ struct cFEUseExistingAccount {
     unsigned int mMessageHintFrame; // 0x050 [R] 0; [U] func_001AAB68 stores the frame when the session's count
                                     //       (func_00262938) becomes > 0 and 0 when it drops; func_001AA9B0 (slot 27)
                                     //       blinks widgets "IconMessageHint"/"TextMessageCount" while
-                                    //       (frame - it) % 60 > 30 (frame counter D_004A5B64 + 0x18)
+                                    //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
@@ -130,7 +130,7 @@ struct cFEUseExistingAccount {
                                     //       stores 3 (forgotten account name); the net-event handler func_001ACEF8 on
                                     //       0xC9 sends it: 2 -> func_0025C3F8(mUserName), 3 ->
                                     //       func_0025C1E0(mszEmail), 4 -> func_0025C610
-    char* mszEmail;                 // 0x6DC [R] cBXString: the empty-string rep D_004A3E90 (both ctors), destroyed by
+    char* mszEmail;                 // 0x6DC [R] cBXString: the empty-string rep cBXString_EmptyString (both ctors), destroyed by
                                     //       cFEUseExistingAccount__cFEUseExistingAccount (cBXString__cBXString(.., 2)); [U] func_001AC9C0 assigns
                                     //       the e-mail address the request popup returned (popup + 0x2B0;
                                     //       cBXString_cBXString4); func_001AC448 opens "kT_POPUP204RequestAccount"
@@ -218,7 +218,7 @@ struct cFEStateSelectPersona {
     unsigned int mMessageHintFrame; // 0x050 [R] 0; [U] func_001AAB68 stores the frame when the session's count
                                     //       (func_00262938) becomes > 0 and 0 when it drops; func_001AA9B0 (slot 27)
                                     //       blinks widgets "IconMessageHint"/"TextMessageCount" while
-                                    //       (frame - it) % 60 > 30 (frame counter D_004A5B64 + 0x18)
+                                    //       (frame - it) % 60 > 30 (frame counter cAppMan_TheAppMan + 0x18)
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;

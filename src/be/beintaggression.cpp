@@ -3,7 +3,7 @@
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEAggressionInt[];
 extern void* D_0045AC48[16];
-extern void* D_004A124C;
+extern void* cBEAggressionInterface_instance;
 
 struct cBEAggressionInterface {
     char pad_0x00[8];
@@ -23,13 +23,13 @@ INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_getThis__Fv);
  */
 void* cBEAggressionInterface_getThis()
 {
-    if (D_004A124C == 0) {
+    if (cBEAggressionInterface_instance == 0) {
         cBEAggressionInterface* mem = (cBEAggressionInterface*)cMemMan_alloc(0x10, str_BEAggressionInt, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045AC48;
-        D_004A124C = mem;
+        cBEAggressionInterface_instance = mem;
     }
-    return D_004A124C;
+    return cBEAggressionInterface_instance;
 }
 #endif
 
@@ -194,12 +194,12 @@ struct sRaceSettings_155E58 {
     char pad_0x34[0x15];
     signed char b49;    // 0x49
 };
-extern sRaceSettings_155E58 D_005305B0;
+extern sRaceSettings_155E58 cBELibrary_raceDB;
 
 // Re-clamps every player's aggression level towards the other riders to the limits of its current state.
 extern "C" void func_00155E58(void)
 {
-    for (int i = 0; i < D_005305B0.numPlayers; i++) {
+    for (int i = 0; i < cBELibrary_raceDB.numPlayers; i++) {
         int profile = cBELibrary_getProfileIndex(i);
         for (int j = 0; j < 10; j++) {
             int ca = cBELibrary_getCharacterID(i);
@@ -208,7 +208,7 @@ extern "C" void func_00155E58(void)
                 pts = 0;
             int st = cBELibrary_profileLib[profile][ca].aggression[j].v[0];
             int lvl = pts / 5;
-            if (D_005305B0.b49 == 0) {
+            if (cBELibrary_raceDB.b49 == 0) {
                 func_001E2A08(j, pts);
             }
             switch (st) {
@@ -309,8 +309,8 @@ extern "C" void func_001561B0(void* self, void* stream)
 //100%
 INCLUDE_ASM("be/beintaggression", func_001562B8);
 #ifdef SKIP_ASM
-extern int D_004A11F4;
-extern char* D_005308A8[];
+extern int cBE_currentState;
+extern char* cBE_aBEState[];
 
 extern "C" void func_001562B8(int *self) {
     char* obj;
@@ -319,12 +319,12 @@ extern "C" void func_001562B8(int *self) {
     char* vtbl2;
     int next;
 
-    obj = D_005308A8[D_004A11F4];
+    obj = cBE_aBEState[cBE_currentState];
     vtbl = *(char**)(obj + 4);
     (*(void (**)(void*))(vtbl + 0x1C))(obj + *(short*)(vtbl + 0x18));
     next = *self;
-    D_004A11F4 = next;
-    obj2 = D_005308A8[next];
+    cBE_currentState = next;
+    obj2 = cBE_aBEState[next];
     vtbl2 = *(char**)(obj2 + 4);
     (*(void (**)(void*))(vtbl2 + 0x24))(obj2 + *(short*)(vtbl2 + 0x20));
 }

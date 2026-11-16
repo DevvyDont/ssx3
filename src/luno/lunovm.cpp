@@ -53,7 +53,7 @@ enum eLunoVarType {
 };
 
 class cLunoVar;
-extern cLunoVar gLunoNil __asm__("D_004C9098");
+extern cLunoVar gLunoNil __asm__("luno_gLunoNil");
 
 // luno::cLunoFunc: compiled code block and function index (stored in a value's data area; trivial destructor).
 struct cLunoFunc {
@@ -1024,7 +1024,7 @@ extern "C" cLunoTableRef* func_00225068(cLunoTableRef* self, cLunoTableRef* othe
 INCLUDE_ASM("luno/lunovm", func_002250E0);
 #ifdef SKIP_ASM
 extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags);
-extern cLunoValue D_004C9098;
+extern cLunoValue luno_gLunoNil;
 void* func_00226620(void* self);
 
 struct cLunoNode_50E0 {
@@ -1068,14 +1068,14 @@ extern "C" cLunoValue* func_002250E0(cLunoTableRef* self, unsigned int arg1)
             n = n->next;
         } while (n != 0);
     }
-    return &D_004C9098;
+    return &luno_gLunoNil;
 }
 #endif
 
 //100%
 INCLUDE_ASM("luno/lunovm", func_00225248);
 #ifdef SKIP_ASM
-extern cLunoValue D_004C9098;
+extern cLunoValue luno_gLunoNil;
 
 // Hash node: key, value, chain link (0x20 bytes, vtable at +0x1C).
 struct cLunoNode {
@@ -1115,7 +1115,7 @@ extern "C" cLunoValue* func_00225248(cLunoTableRef* self, cLunoValue* key)
             n = n->next;
         } while (n != 0);
     }
-    return &D_004C9098;
+    return &luno_gLunoNil;
 }
 #endif
 
@@ -1542,10 +1542,10 @@ extern "C" void func_00225DE8_impl(int initialize, int priority)
             new (D_004C9068) sV4_5DE8(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
             new (D_004C9078) sV4_5DE8(1.0f, 0.0f, 1.0f, 0.0f);
             new (D_004C9088) sV4_5DE8(1.0f, 1.0f, 0.0f, 0.0f);
-            D_004C9098.type = 0;
-            D_004C9098.word0 = 0;
+            luno_gLunoNil.type = 0;
+            luno_gLunoNil.word0 = 0;
         } else {
-            luno_cLunoVar__cLunoVar(&D_004C9098, 2);
+            luno_cLunoVar__cLunoVar(&luno_gLunoNil, 2);
         }
     }
 }
@@ -1588,7 +1588,7 @@ void* func_00226620(void* self)
 }
 #endif
 
-extern cLunoValue D_004C9098;
+extern cLunoValue luno_gLunoNil;
 
 //100%
 INCLUDE_ASM("luno/lunovm", func_00226628);
@@ -1611,7 +1611,7 @@ extern "C" cLunoValue* func_00226628(cLunoValue* self, const cLunoValue& a, cons
             self->type = a.type;
             *(int*)func_00226620(self) = i;
         } else {
-            *self = D_004C9098;
+            *self = luno_gLunoNil;
         }
     } else if (a.type == 2 && b.type == 1) {
         float f = *(float*)&a.word0 + (float)b.word0;
@@ -1622,7 +1622,7 @@ extern "C" cLunoValue* func_00226628(cLunoValue* self, const cLunoValue& a, cons
         self->type = a.type;
         *(int*)func_00226610(self) = i;
     } else {
-        *self = D_004C9098;
+        *self = luno_gLunoNil;
     }
     return self;
 }

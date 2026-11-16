@@ -39,7 +39,7 @@ struct cRiderAnimBase {
                                     //       copies mUpperBodyBoneMask here before play. PORT: 64-bit long on the EE
     char unk_028[0x8];              // 0x028 alignment gap before the 16-byte-aligned tPose (On Tour has it too)
     tPose OrientationOffset;        // 0x030 [P] getOrientationOffset (this + 0x30), setOrientationOffset (sq 0x30,
-                                    //       0x40); [O]; [R] reset copies D_004FF230 (the identity pose) into it;
+                                    //       0x40); [O]; [R] reset copies tPose_Identity (the identity pose) into it;
                                     //       [U] func_00311F00 copies it to the sequence (+0x60)
     cAnimSequencer* Sequencer;      // 0x050 [O] Sequencer; [R] the ctor allocates 0x30 bytes tagged "Sequencers"
                                     //       (6 x 8-byte cAnimSequencer, each cAnimSequencer_init'ed); [P] the preview

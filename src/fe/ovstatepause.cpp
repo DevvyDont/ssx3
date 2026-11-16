@@ -82,8 +82,8 @@ struct sOptionsU_PO {
     unsigned int f30 : 2;
     int data[0x288 / 4 - 1];
 };
-// PORT: D_00535610 is viewed with different types across the program; view bound by asm label
-extern sOptions_PO D_00535610_PO __asm__("D_00535610");
+// PORT: cBEOptionInterface_mOption is viewed with different types across the program; view bound by asm label
+extern sOptions_PO D_00535610_PO __asm__("cBEOptionInterface_mOption");
 
 struct cBEOptionInterface_PO {
     // PORT: reinterprets the settings global with unsigned flag bits
@@ -179,7 +179,7 @@ static inline char* riders_PO()
 /**
  * Builds the in-game options screen ("37beoptions") and loads every widget from the current settings.
  *
- * List boxes: HUD (0lb: Full / Minimal / None, settings word D_00535610 bits 30-31), player 1 and 2 camera
+ * List boxes: HUD (0lb: Full / Minimal / None, settings word cBEOptionInterface_mOption bits 30-31), player 1 and 2 camera
  * (1lb / 2lb: Near / Mid / Far = camera types 0x3C-0x3E, preselected from each game view's chase camera;
  * "camera select" / "camera 2 select" get kT_CMNCameraVar with 1 / 2), DJ and arcade audio (7lb / 8lb: Off /
  * On, bits 17 / 16). The 12-step sliders 4sl / 5sl / 6sl take the music, effects and speech volumes (bits
@@ -445,8 +445,8 @@ struct sOptions_A238 {
     unsigned int f30 : 2;
     int data[0x288 / 4 - 1];
 };
-// PORT: D_00535610 is viewed with different types across the program; view bound by asm label
-extern sOptions_A238 D_00535610_A238 __asm__("D_00535610");
+// PORT: cBEOptionInterface_mOption is viewed with different types across the program; view bound by asm label
+extern sOptions_A238 D_00535610_A238 __asm__("cBEOptionInterface_mOption");
 
 struct sVE_A238 {
     short delta;
@@ -483,7 +483,7 @@ static inline void* Sound_A238(int slot)
  *
  * Cross (5) on "save" pushes a new 0x27C-byte "Save Profile" state (func_00211088, kind 0x2A) as a special
  * state; Triangle (6) closes this state (func_0039F190).
- * A value change (9) writes the widget's value into the settings word D_00535610 and applies it: HUD mode,
+ * A value change (9) writes the widget's value into the settings word cBEOptionInterface_mOption and applies it: HUD mode,
  * player 1 / 2 camera (cChaseCameraController_switchCamera_UserChange on game view 1 / 2), music / effects /
  * speech volume, DJ and arcade audio; in a network game EATalksl sets the voice level (value x 10). The
  * options interface's virtual slot 1 then runs, probably to commit the settings.
@@ -673,7 +673,7 @@ extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void func_001FAFF8(void* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible);
 extern "C" void func_002583A8(void* self, int a1, int a2);
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 extern char str_265InGameError[];
 extern char str_SubTitle[];
 extern char str_kT_OVROnlineError[];
@@ -803,7 +803,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
     }
     if (cGameComm_mGameComm != 0) {
         func_002583A8(cGameComm_mGameComm, LobbyMan_mLobbyMan->mServerAddr, 3);
-        *(int*)(state + 0x9C) = *(int*)((char*)D_004A5B64 + 0x18);
+        *(int*)(state + 0x9C) = *(int*)((char*)cAppMan_TheAppMan + 0x18);
         func_001FAFF8(self, 0);
         cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_TextInfo));
         if (infoText != 0) {
@@ -1035,7 +1035,7 @@ extern "C" void cGame_exit(void* game, int a);
 extern "C" void cAI_finishRemotePlayer(void* p);
 // func_0039F190 returns its last list node in $v0; the unit declares it void.
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_004A2A54;
 extern int D_005366E8[];
 extern int D_004428F0[];
@@ -1047,7 +1047,7 @@ extern "C" void func_001FB2B8(void* self, void* item, int msg)
     switch (*(int*)((char*)item + 0x18)) {
     case 4:
         cAI_finishRemotePlayer(SSXApp->Game->AI);
-        D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+        cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
         break;
     case 0:
     default:
@@ -1245,7 +1245,7 @@ extern "C" void func_001FBCC8(void)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FBCE0);
 #ifdef SKIP_ASM
-extern int D_004A26FC;
+extern int cOVStateManager_mStatus;
 extern "C" void* cOVState_onUpdate(void* self);
 
 extern "C" void func_001FBCE0(void* self)
@@ -1254,7 +1254,7 @@ extern "C" void func_001FBCE0(void* self)
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0 && gameComm->mOverlayTimeout == 0) {
         gameComm->mOverlayTimeout = -1;
-        D_004A26FC = 1;
+        cOVStateManager_mStatus = 1;
     }
 }
 #endif
@@ -1900,7 +1900,7 @@ extern "C" void func_001FD118(void)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FD150);
 #ifdef SKIP_ASM
-extern int D_004A26FC;
+extern int cOVStateManager_mStatus;
 extern "C" void* cOVState_onUpdate(void* self);
 
 extern "C" void func_001FD150(void* self)
@@ -1909,7 +1909,7 @@ extern "C" void func_001FD150(void* self)
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0 && gameComm->mOverlayTimeout == 0) {
         gameComm->mOverlayTimeout = -1;
-        D_004A26FC = 1;
+        cOVStateManager_mStatus = 1;
     }
 }
 #endif
@@ -2171,7 +2171,7 @@ extern "C" void func_002872A8(void* snd);
 extern "C" void func_001FDB88(void* self, int a1, int a2)
 {
     if (a1 != 0 && a2 == 5) {
-        D_004A26FC = 3;
+        cOVStateManager_mStatus = 3;
         ((sPauseMgr_DB88*)((SSXApp)->Game)->mCurrentState)->f8 = 1;
         func_002872A8(func_0028B180());
         func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
@@ -2206,7 +2206,7 @@ extern "C" void* cUIEngine_addScreenByHashName_DC30(void* engine, void* owner, i
 extern "C" void* cUIScreen_playFrame_DC30(void* self, unsigned short frame, int flag) __asm__("cUIScreen_playFrame");
 extern "C" void* cUIScreen_getObjectByHashName_DC30(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
 extern "C" void cOVState_onCreateScreen_DC30(void* self) __asm__("cOVState_onCreateScreen");
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_004A2A54;
 extern int D_005366E8[];
 extern int D_004428F0[];
@@ -2270,7 +2270,7 @@ extern "C" void func_001FDC30(char* self)
         cUIScreen_playFrame_DC30(screen, 0, 0);
     }
     D_005366E8[++D_004A2A54] = 2;
-    D_004A2A50 = D_004428F0[2];
+    cPauseState_Flags = D_004428F0[2];
     cOVState_onCreateScreen_DC30(self);
 }
 #endif
@@ -2279,7 +2279,7 @@ extern "C" void func_001FDC30(char* self)
 INCLUDE_ASM("fe/ovstatepause", func_001FDE60);
 #ifdef SKIP_ASM
 extern int D_004A2A54;
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
 void func_00270ED8(void* self);
@@ -2292,7 +2292,7 @@ extern "C" void func_001FDE60(void* self)
         func_00270ED8(SSXApp->Game->Replay);
         *(int*)((char*)self + 0x1C8) = 0;
     }
-    D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
     func_001D58B8(self);
     cReplay_startReplay(SSXApp->Game->Replay, 0, 0, 0);
 }
@@ -3528,7 +3528,7 @@ extern "C" void cOVState_REWARDS_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onWidgetEvent);
 #ifdef SKIP_ASM
-extern int D_004A26FC;
+extern int cOVStateManager_mStatus;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -3537,7 +3537,7 @@ extern "C" void cBERewardInterface_clearUserAwards(void* iface);
 /**
  * On Cross, clears the player's new-award list and lets the overlay manager move on.
  *
- * Sets the pending overlay action D_004A26FC to 1 (func_0020CFD0 then calls func_0020CCF8, which probably
+ * Sets the pending overlay action cOVStateManager_mStatus to 1 (func_0020CFD0 then calls func_0020CCF8, which probably
  * triggers the next end-of-event overlay) and calls cBERewardInterface_clearUserAwards() on the reward
  * interface (0xD).
  *
@@ -3548,7 +3548,7 @@ extern "C" void cOVState_REWARDS_onWidgetEvent(void* self, void* pWidget, int ke
 {
     if (pWidget != 0) {
         if (key == 5) {
-            D_004A26FC = 1;
+            cOVStateManager_mStatus = 1;
             cBERewardInterface_clearUserAwards(cBE_getInterface_Fv(cBE_getBE(), 0xD));
         }
     }

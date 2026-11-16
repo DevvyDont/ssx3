@@ -440,7 +440,7 @@ extern "C" void cReplay_setCurrentReplayCamera(cReplay* self)
 INCLUDE_ASM("replay/frameptr", cReplay_setupReplayCameras);
 #ifdef SKIP_ASM
 void* func_0016D1D8(void* p);
-extern void* D_004C5830[];
+extern void* gCamTriggerMan[];
 extern "C" void cReplay_setCurrentReplayCamera(cReplay* self);
 
 /**
@@ -449,7 +449,7 @@ extern "C" void cReplay_setCurrentReplayCamera(cReplay* self);
  */
 extern "C" void cReplay_setupReplayCameras(cReplay* self)
 {
-    func_0016D1D8(D_004C5830);
+    func_0016D1D8(gCamTriggerMan);
     cReplay_setCurrentReplayCamera(self);
 }
 #endif
@@ -457,7 +457,7 @@ extern "C" void cReplay_setupReplayCameras(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_setupGameCamerasOnExitReplay);
 #ifdef SKIP_ASM
-extern void* D_004C5830[];
+extern void* gCamTriggerMan[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
 extern "C" void cCamera_setCurrentController(void* self, int mode);
 extern "C" void cChaseCameraController_switchCamera_EndReplay(void* cam);
@@ -475,7 +475,7 @@ struct sRiderList_EEA0 {
  */
 extern "C" void cReplay_setupGameCamerasOnExitReplay(cReplay* self)
 {
-    cCameraTriggerMan_setInGameTriggers(D_004C5830);
+    cCameraTriggerMan_setInGameTriggers(gCamTriggerMan);
     sRiderList_EEA0* list = (sRiderList_EEA0*)SSXApp->Game->ViewMan;
     int n = list->count;
     int i;
@@ -494,11 +494,11 @@ INCLUDE_ASM("replay/frameptr", cReplay_setupInstantReplayCameras);
 #ifdef SKIP_ASM
 /**
  * Sets up the instant-replay cameras: installs the replay camera triggers (func_0016D1D8, cCameraTriggerMan::
- * setReplayTriggers, on D_004C5830) and steps CurrentInstantReplayCamIndex to the next of 9.
+ * setReplayTriggers, on gCamTriggerMan) and steps CurrentInstantReplayCamIndex to the next of 9.
  */
 extern "C" void cReplay_setupInstantReplayCameras(cReplay* self)
 {
-    func_0016D1D8(D_004C5830);
+    func_0016D1D8(gCamTriggerMan);
     self->CurrentInstantReplayCamIndex = (self->CurrentInstantReplayCamIndex + 1) % 9;
 }
 #endif
@@ -506,13 +506,13 @@ extern "C" void cReplay_setupInstantReplayCameras(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026EF80);
 #ifdef SKIP_ASM
-extern void* D_004C5830[];
+extern void* gCamTriggerMan[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
 extern "C" void cCamera_setCurrentController(void* self, int mode);
 
 extern "C" void func_0026EF80()
 {
-    cCameraTriggerMan_setInGameTriggers(D_004C5830);
+    cCameraTriggerMan_setInGameTriggers(gCamTriggerMan);
     cCamera_setCurrentController(*(void**)((char*)SSXApp->Game->ViewMan + 0x4), 2);
 }
 #endif
@@ -1200,7 +1200,7 @@ extern "C" void func_0026FA78(int* self)
 INCLUDE_ASM("replay/frameptr", func_0026FB88);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern char D_004A5A58;
+extern char gUISoundNull;
 extern "C" void func_002305C8(void* self);
 
 struct sFpViewVEntry_FB88 {
@@ -1246,7 +1246,7 @@ extern "C" int func_0026FB88_impl(void* self, int a1)
 {
     char* s = (char*)self;
     char* g = (char*)SSXApp;
-    sFpView_FB88* v = (sFpView_FB88*)&D_004A5A58;
+    sFpView_FB88* v = (sFpView_FB88*)&gUISoundNull;
     sFpView_FB88* cur = *(sFpView_FB88**)(*(char**)(*(char**)(g + 0x84) + 0x48) + 0x14);
     if (cur != 0) v = cur;
     if (*(int*)(s + 0x618) != 0) return 0;

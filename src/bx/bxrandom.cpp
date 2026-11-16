@@ -2,20 +2,20 @@
 extern "C" void cBxPseudoRng_Seed(uint* state, uint seed);
 extern "C" uint cBxPseudoRng_NextInt(uint* state);
 void BXsrand(uint seed);
-extern const uint D_004FF018[];
+extern const uint BXrandom[];
 
 //100%
 //https://decomp.me/scratch/ViFdz
 INCLUDE_ASM("bx/bxrandom", BXsrand__FUi);
 #ifdef SKIP_ASM
 /**
- * Seeds the game's main pseudo-random generator (the state at D_004FF018) through cBxPseudoRng_Seed().
+ * Seeds the game's main pseudo-random generator (the state at BXrandom) through cBxPseudoRng_Seed().
  *
  * @param seed  the seed value
  */
 void BXsrand(uint seed)
 {
-	cBxPseudoRng_Seed((uint*)D_004FF018, seed);
+	cBxPseudoRng_Seed((uint*)BXrandom, seed);
 	return;
 }
 #endif
@@ -24,13 +24,13 @@ INCLUDE_ASM("bx/bxrandom", BXrand__Fv);
 #ifdef SKIP_ASM
 
 /**
- * Advances the game's main pseudo-random generator (D_004FF018) through cBxPseudoRng_NextInt().
+ * Advances the game's main pseudo-random generator (BXrandom) through cBxPseudoRng_NextInt().
  *
  * The new value is left in the return register although the C declaration returns void.
  */
 void BXrand()
 {
-    cBxPseudoRng_NextInt((uint*)D_004FF018);
+    cBxPseudoRng_NextInt((uint*)BXrandom);
 }
 #endif
 
@@ -38,16 +38,16 @@ void BXrand()
 //100%
 INCLUDE_ASM("bx/bxrandom", AIrand__Fv);
 #ifdef SKIP_ASM
-extern const uint D_004FF030[];
+extern const uint AIrandom[];
 
 /**
- * Draws the next number from the AI's own pseudo-random generator (the state at D_004FF030).
+ * Draws the next number from the AI's own pseudo-random generator (the state at AIrandom).
  *
  * @return the next pseudo-random value
  */
 unsigned int AIrand()
 {
-    return cBxPseudoRng_NextInt((uint*)D_004FF030);
+    return cBxPseudoRng_NextInt((uint*)AIrandom);
 }
 #endif
 
@@ -92,7 +92,7 @@ INCLUDE_ASM("bx/bxrandom", func_003178E0__FPv);
 #ifdef SKIP_ASM
 void* func_003178E0(void* self)
 {
-    return MEM_copy(self, (void*)D_004FF030, 0x18);
+    return MEM_copy(self, (void*)AIrandom, 0x18);
 }
 #endif
 
@@ -101,7 +101,7 @@ INCLUDE_ASM("bx/bxrandom", func_00317908__FPv);
 #ifdef SKIP_ASM
 void* func_00317908(void* self)
 {
-    return MEM_copy((void*)D_004FF030, self, 0x18);
+    return MEM_copy((void*)AIrandom, self, 0x18);
 }
 #endif
 

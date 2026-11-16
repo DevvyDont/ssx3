@@ -474,7 +474,7 @@ INCLUDE_ASM("world/worldcache", cWorldCache_cWorldCache);
 #ifdef SKIP_ASM
 extern "C" void cWorldView_cWorldView(void* self);
 extern "C" void cStreamMan_cStreamMan(void* self);
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 /**
  * Constructs the world cache with its world view and stream manager, nothing loaded, and a touch-stale age of
@@ -486,7 +486,7 @@ extern "C" void* cWorldCache_cWorldCache(cWorldCache* self)
 {
     cWorldView_cWorldView((char*)self + 0x10);
     cStreamMan_cStreamMan((char*)self + 0x300);
-    char* app = D_004A5B64;
+    char* app = cAppMan_TheAppMan;
     self->mp_DataHeader = 0;
     self->m_uiNumHullPage = (unsigned int)0;
     self->mp_ChunkResolve = 0;
@@ -863,11 +863,11 @@ struct sWCSlots {
     int timeBase;        // 0x1BF0
 };
 
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 extern "C" void func_003A8448(sWCSlots* self, int i, float f)
 {
-    self->slot[i].time = *(int*)(D_004A5B64 + 0x1C);
+    self->slot[i].time = *(int*)(cAppMan_TheAppMan + 0x1C);
     self->slot[i].fC = f;
     self->slot[i].f4 = 0;
     switch (self->slot[i].state) {
@@ -888,14 +888,14 @@ extern "C" void func_003A8448(sWCSlots* self, int i, float f)
 //100%
 INCLUDE_ASM("world/worldcache", func_003A84C8);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 // PORT: callers declare (void*, unsigned short); the body never masks the id
 extern "C" void func_003A84C8_i(sWCSlots* self, int i) __asm__("func_003A84C8");
 extern "C" void func_003A84C8_i(sWCSlots* self, int i)
 {
     self->slot[i].f4 = 0;
-    self->slot[i].time = *(int*)(D_004A5B64 + 0x1C) - self->timeBase;
+    self->slot[i].time = *(int*)(cAppMan_TheAppMan + 0x1C) - self->timeBase;
 }
 #endif
 
@@ -1028,7 +1028,7 @@ extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data);
 extern "C" void* cWorldView_getHull(void* self, int i);
 extern "C" void cStreamMan_addStreamRequest(void* self, int i, int a, int b);
 extern "C" void cWorldCache_purgePage(cWorldCache* self, int i);
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern char str_cHullPage[];
 
 // PORT: g++ 2.95 new-expression; the ctor and the tagged allocator are bound to their symbols by asm label.
@@ -1078,7 +1078,7 @@ static inline int Frame_8668()
 extern "C" void cWorldCache_updatePages(cWorldCache* worldCache)
 {
     sWCPCache_8668* self = (sWCPCache_8668*)worldCache;
-    int now = *(int*)(D_004A5B64 + 0x1C);
+    int now = *(int*)(cAppMan_TheAppMan + 0x1C);
     int best = -1;
     float bestPri = -1.0f;
     for (unsigned int i = 0; i < self->count; i++)
@@ -1138,7 +1138,7 @@ INCLUDE_ASM("world/worldcache", func_003A88A8);
 extern "C" void func_003A88A8(cWorldCache* worldCache)
 {
     sWCPCache_8668* self = (sWCPCache_8668*)worldCache;
-    int now = *(int*)(D_004A5B64 + 0x1C);
+    int now = *(int*)(cAppMan_TheAppMan + 0x1C);
     for (unsigned int i = 0; i < self->count; i++)
     {
         int st = self->slot[i].state;
@@ -1404,9 +1404,9 @@ struct sWorldCache8CD0 {
     sWCGroup8CD0 groups[1];     // 0x3F8
 };
 
-extern int D_004A47D0;
+extern int cStreamMan_NULLCHUNK;
 
-// PORT: a4 is a pointer carried in an int (compared against &D_004A47D0, then shifted).
+// PORT: a4 is a pointer carried in an int (compared against &cStreamMan_NULLCHUNK, then shifted).
 extern "C" void func_003A8CD0(sWorldCache8CD0* self, int group, int id, unsigned int key, int a4)
 {
     sWCSlot8CD0* tbl;
@@ -1422,7 +1422,7 @@ extern "C" void func_003A8CD0(sWorldCache8CD0* self, int group, int id, unsigned
     list->entries[list->count].lo = key;
     list->entries[list->count].hi = key >> 8;
     list->count++;
-    if (a4 == (int)&D_004A47D0) {
+    if (a4 == (int)&cStreamMan_NULLCHUNK) {
         sWCObj8CD0* o = self->obj;
         o->vt[3].fn((char*)o + o->vt[3].delta, id, key, 0);
     } else {
@@ -1485,7 +1485,7 @@ extern "C" void rel_8E20(sWorldCache_8E20* self, int cell, int type, unsigned in
         b = self->banks[bank];
     char* p = release_8E20(&b->types[type].refs[id]);
     if (p != 0) {
-        if (p == (char*)&D_004A47D0) {
+        if (p == (char*)&cStreamMan_NULLCHUNK) {
             sWCObj_8E20* o = self->obj;
             p = (char*)o->vt[4].fn((char*)o + o->vt[4].delta, type, key, 0);
         } else {
@@ -1533,7 +1533,7 @@ extern "C" void* cWorldView_cWorldView_impl(void* self) __asm__("cWorldView_cWor
  * Constructs a world view by clearing its state.
  *
  * func_003A9188() zeroes the view's counters and its 64 entry pairs, and sets both of its view slots and its two
- * position vectors to D_004FF130.
+ * position vectors to t4vect_Origin.
  *
  * @return @p self
  */
@@ -1687,7 +1687,7 @@ INCLUDE_ASM("world/worldcache", func_003A9188);
 struct func_003A9188_sVec4 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
-extern func_003A9188_sVec4 D_004FF130;
+extern func_003A9188_sVec4 t4vect_Origin;
 
 extern "C" void func_003A9658(void* self, unsigned int i, func_003A9188_sVec4* v, float f);
 
@@ -1724,15 +1724,15 @@ extern "C" void func_003A9188(func_003A9188_sCache* self)
     self->f8 = 0;
     self->fC = 0;
     self->f10 = 0;
-    self->v220 = D_004FF130;
-    self->v230 = D_004FF130;
+    self->v220 = t4vect_Origin;
+    self->v230 = t4vect_Origin;
     for (i = 0; i < 64; i++) {
         self->pairs[i].a = 0;
         self->pairs[i].b = 0;
     }
     for (i = 0; i < 2; i++) {
         self->slots[i].f0 = 0;
-        func_003A9658(self, i, &D_004FF130, 0.0f);
+        func_003A9658(self, i, &t4vect_Origin, 0.0f);
     }
     self->f2E0 = 0;
     self->f2E4 = 0;

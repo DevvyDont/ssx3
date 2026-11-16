@@ -1,7 +1,7 @@
 #include "common.h"
 #include "online/lobbyman.h"
 
-extern void* D_004A3E90;
+extern void* cBXString_EmptyString;
 
 struct cBXString2 {
     void* field_0x0;
@@ -22,21 +22,21 @@ struct cBXStrK2 {
 /**
  * Initialises nine consecutive cBXString members to the shared empty string.
  *
- * Points five single strings and a four-entry string array at D_004A3E90, the shared empty-string pointer. The
+ * Points five single strings and a four-entry string array at cBXString_EmptyString, the shared empty-string pointer. The
  * lobby manager's constructor runs it on two such blocks (offsets 0x260 and 0x2B0).
  *
  * @return @p self
  */
 cBXString2* cBXString_cBXString(cBXString2* self)
 {
-    self->field_0x0 = D_004A3E90;
-    self->field_0x4 = D_004A3E90;
-    self->field_0x8 = D_004A3E90;
-    self->field_0xC = D_004A3E90;
-    self->field_0x10 = D_004A3E90;
+    self->field_0x0 = cBXString_EmptyString;
+    self->field_0x4 = cBXString_EmptyString;
+    self->field_0x8 = cBXString_EmptyString;
+    self->field_0xC = cBXString_EmptyString;
+    self->field_0x10 = cBXString_EmptyString;
     cBXStrK2* entry = (cBXStrK2*)self->arr;
     for (int i = 3; i != -1; i--, entry++) {
-        entry->str = D_004A3E90;
+        entry->str = cBXString_EmptyString;
     }
     return self;
 }

@@ -37,12 +37,12 @@ extern "C" void cReplay_applyBucket(cReplay* self, int a);
 extern "C" void cAI_updateOverlapList(void* self);
 extern "C" void cGameViewMan_updateAll(void* self);
 extern char gBucketMan;
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 extern void* D_004A2A00;
 extern void* D_004A3FF0;
-extern void* D_004A4028;
-extern int D_004A5B78;
-extern int D_004A5B7C;
+extern void* cMultiParticleMan_TheMultiParticleMan;
+extern int cSortObjNode_ObjNodeSortIndex;
+extern int cSortObjNode_ObjNodeNoSortIndex;
 
 struct sVtS_DBF0 { short delta; short index; void (*fn)(void*, void*); };
 
@@ -68,9 +68,9 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     func_00317908(buf);
     int savedValue;
     stream->v02(&savedValue, 4);
-    D_004A5B78 = savedValue;
+    cSortObjNode_ObjNodeSortIndex = savedValue;
     stream->v02(&savedValue, 4);
-    D_004A5B7C = savedValue;
+    cSortObjNode_ObjNodeNoSortIndex = savedValue;
     cWorldPainterMan_reset_0();
     cBE_readFromReplayFrame(cBE_getBE(), stream);
     char* game = (char*)SSXApp->Game;
@@ -80,10 +80,10 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     sVtS_DBF0* vt2 = *(sVtS_DBF0**)(aiObj + 0xCC);
     vt2[8].fn(aiObj + vt2[8].delta, stream);
     cAvalanche_readFromReplayFrame((char*)stream);
-    func_0030BD20(D_004A3DD8, stream);
+    func_0030BD20(cWScriptMan_TheWScriptMan, stream);
     func_00229E58(D_004A2A00, stream);
     func_00344240(D_004A3FF0, stream);
-    func_00357D28(D_004A4028, stream);
+    func_00357D28(cMultiParticleMan_TheMultiParticleMan, stream);
     cReplay_restoreBucket(self, (void*)1, (cStreamRB*)stream);
     cReplay_restoreDeadBucket(self, (cStreamRDB*)stream);
     func_00103578(*(void**)((char*)SSXApp->Game->AI + 0xA4), stream);

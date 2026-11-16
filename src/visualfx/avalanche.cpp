@@ -197,10 +197,10 @@ struct tFrameData_5778 {
     sMat_5778 mat;              // 0x20
 };
 
-extern float D_004A3A64;
+extern float cAvalanche_m_UpdateTimeStep;
 extern float D_004A3AA8;
 extern sV4_5778 D_004FF120_5778 __asm__("t4vect_Zero");
-extern sV4_5778 D_004FF130_5778 __asm__("D_004FF130");
+extern sV4_5778 D_004FF130_5778 __asm__("t4vect_Origin");
 extern sMat_5778 D_004FF1A0_5778 __asm__("t4mat_Identity");
 extern "C" void tActiveAvalancheNode_calculateScale_Data(void* self, float t) __asm__("tActiveAvalancheNode_calculateScale");
 // PORT: sine/cosine; the angle is set up first at both calls here (other units declare it (s, c, angle),
@@ -306,7 +306,7 @@ extern "C" tFrameData_5778 tActiveAvalancheNode_getFrameData(sAvAct_5778* self, 
                             i = (int)self->data->length - 2;
                         }
                         float invBlend = 1.0f - blend;
-                        time = Min_5778(time + D_004A3A64 * self->data->rate, self->data->length * (1.0f / 30.0f));
+                        time = Min_5778(time + cAvalanche_m_UpdateTimeStep * self->data->rate, self->data->length * (1.0f / 30.0f));
                         if (!(ft < self->data->length)) {
                             break;
                         }
@@ -371,8 +371,8 @@ struct sVec4_6290 {
     sVec4_6290(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 extern float D_004A3AA8;
-extern sVec4_6290 D_004FF130;
-extern char D_00538450[];
+extern sVec4_6290 t4vect_Origin;
+extern char cAvalanche_m_nodeList[];
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sVec4_6290 vScale_6290(const sVec4_6290& v, float s)
@@ -392,7 +392,7 @@ static inline sVec4_6290 vScale_6290(const sVec4_6290& v, float s)
 
 extern "C" sVec4_6290 func_002D6290(void* self)
 {
-    char* node = ((char**)D_00538450)[*(unsigned short*)((char*)self + 0x92) >> 8];
+    char* node = ((char**)cAvalanche_m_nodeList)[*(unsigned short*)((char*)self + 0x92) >> 8];
     char* p = *(char**)(node + 0x114);
     if (p != 0) {
         return sVec4_6290(*(float*)(p + 0xCC), *(float*)(p + 0xC0), *(float*)(p + 0xC4), *(float*)(p + 0xC8));
@@ -401,7 +401,7 @@ extern "C" sVec4_6290 func_002D6290(void* self)
     if (c != 0) {
         return vScale_6290(sVec4_6290(1.0f, (float)c[3] * 0.0078125f, (float)c[4] * 0.0078125f, (float)c[5] * 0.0078125f), D_004A3AA8);
     }
-    return D_004FF130;
+    return t4vect_Origin;
 }
 #endif
 
@@ -453,17 +453,17 @@ struct cAvalanche_init_sElem {
     int a;
     char pad[0x10];
 };
-extern cAvalanche_init_sElem D_004D5B70[];
-extern cAvalanche_init_sElem D_004EDB70[];
-extern char D_00538450[];
-extern int D_004A3AC0;
+extern cAvalanche_init_sElem vertlist[];
+extern cAvalanche_init_sElem collisionvertlist[];
+extern char cAvalanche_m_nodeList[];
+extern int cAvalanche_m_numNodes;
 extern "C" void func_00416210(void* dst, int c, int n);
 
 /**
  * Initialises the avalanche's static vertex tables and clears its state.
  *
- * Sets the 0x800 entries of D_004D5B70 to alternating black and white (alpha 0xFF, z 1.0, x / y / w 0) and the 0x20
- * entries of D_004EDB70 to yellow, clears D_004A3AC0 and zeroes 0x400 bytes at D_00538450. On Tour's init is a
+ * Sets the 0x800 entries of vertlist to alternating black and white (alpha 0xFF, z 1.0, x / y / w 0) and the 0x20
+ * entries of collisionvertlist to yellow, clears cAvalanche_m_numNodes and zeroes 0x400 bytes at cAvalanche_m_nodeList. On Tour's init is a
  * member (this); this C takes no object.
  */
 extern "C" void cAvalanche_init(void)
@@ -471,7 +471,7 @@ extern "C" void cAvalanche_init(void)
     int i;
     for (i = 0; i < 0x800; i++) {
         int shade = (i & 1) ? 0xFF : 0;
-        cAvalanche_init_sElem* elem = &D_004D5B70[i];
+        cAvalanche_init_sElem* elem = &vertlist[i];
         elem->a = 0xFF;
         elem->r = shade;
         elem->g = shade;
@@ -482,7 +482,7 @@ extern "C" void cAvalanche_init(void)
         elem->y = 0.0f;
     }
     for (i = 0; i < 0x20; i++) {
-        cAvalanche_init_sElem* elem = &D_004EDB70[i];
+        cAvalanche_init_sElem* elem = &collisionvertlist[i];
         elem->a = 0xFF;
         elem->r = 0xFF;
         elem->g = 0xFF;
@@ -492,8 +492,8 @@ extern "C" void cAvalanche_init(void)
         elem->x = 0.0f;
         elem->y = 0.0f;
     }
-    D_004A3AC0 = 0;
-    func_00416210(D_00538450, 0, 0x400);
+    cAvalanche_m_numNodes = 0;
+    func_00416210(cAvalanche_m_nodeList, 0, 0x400);
 }
 #endif
 
@@ -850,7 +850,7 @@ struct sAvActive_7EF8 {
 
 struct sAvEnd_7EF8 {};  // empty trailing member of the defaults record; its value-init copies a byte through a stack temp
 
-extern float D_004A3A64;
+extern float cAvalanche_m_UpdateTimeStep;
 extern int D_004A54C8;
 // Defaults record of an animated-float spawn (read by func_00341AA0, sSphFloatDef_1AA0 in intersect/worldsphtree).
 // The original keeps it as a function-local static; the ctor's float parameters are what lets loop.c hoist -1.0f/30.0f.
@@ -903,7 +903,7 @@ extern "C" void func_002D7EF8_7EF8(sAvActive_7EF8* self)
         return;
     }
     bool alive = false;
-    self->time += D_004A3A64;
+    self->time += cAvalanche_m_UpdateTimeStep;
     int i = 0;
     for (sAvNode_7EF8* n = self->nodes; n != 0; n = n->next, i++) {
         bool ok = func_002D7CA8_7EF8(n, self->time);
@@ -1142,10 +1142,10 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
 //100%
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_LoadData);
 #ifdef SKIP_ASM
-extern void* D_004A3AB4;
+extern void* cAvalanche_m_filedata;
 extern int cAvalanche_m_fileDataDeleteable;
 extern int cAvalanche_m_resolved;
-extern int D_004A3AC4;
+extern int cAvalanche_m_badCookie;
 extern int D_004A3A4C;
 extern char str_sav[];
 // PORT: the read call returns func_003DEB50's result (bytes read); the ealib unit declares it void.
@@ -1167,12 +1167,12 @@ extern "C" void cAvalanche_LoadData(void)
     char buf[0x100];
     sprintf(buf, str_pct_s_pct_s_j, cBENewRaceInterface_getLocationFile(iface, cBENewRaceInterface_getLocationID(iface)), str_sav);
     cAvalanche_m_resolved = 0;
-    D_004A3AC4 = 1;
+    cAvalanche_m_badCookie = 1;
     int fd;
     if (func_003DEBF0(buf, 1, 0x64, &fd)) {
         cAvalanche_end();
-        if (D_004A3AB4 != 0 && cAvalanche_m_fileDataDeleteable != 0) {
-            cMemMan_free(D_004A3AB4);
+        if (cAvalanche_m_filedata != 0 && cAvalanche_m_fileDataDeleteable != 0) {
+            cMemMan_free(cAvalanche_m_filedata);
         }
         int* hdr = (int*)operator_new_tag(8, buf, 0, 0);
         func_003DEC60_i(fd, 0, hdr, 8, 0x64);
@@ -1180,7 +1180,7 @@ extern "C" void cAvalanche_LoadData(void)
             if (hdr != 0) {
                 cMemMan_free(hdr);
             }
-            D_004A3AB4 = 0;
+            cAvalanche_m_filedata = 0;
             cAvalanche_m_fileDataDeleteable = 0;
         } else {
             int size = hdr[1];
@@ -1189,10 +1189,10 @@ extern "C" void cAvalanche_LoadData(void)
             }
             void* data = operator_new_tag(size, buf, 0, 0);
             cAvalanche_m_fileDataDeleteable = 1;
-            D_004A3AB4 = data;
+            cAvalanche_m_filedata = data;
             func_003DEC60_i(fd, 0, data, size + 8, 0x64);
             func_003DECA0(fd, 0x64);
-            D_004A3AC4 = 0;
+            cAvalanche_m_badCookie = 0;
         }
     }
     D_004A3A4C = 0;
@@ -1207,13 +1207,13 @@ struct sAvalancheSlot {
     int active;
     char pad[0x18];
 };
-extern int D_004A3A30;
-extern int D_004A3A34;
-extern int D_004A3A5C;
-extern int D_004A3A60;
-extern int D_004A3A7C;
+extern int cAvalanche_m_Enable;
+extern int cAvalanche_m_Recalc;
+extern int cAvalanche_m_Trigger;
+extern int cAvalanche_m_Update;
+extern int cAvalanche_m_AvalancheId;
 extern int cAvalanche_m_resolved;
-extern int D_004A3AC4;
+extern int cAvalanche_m_badCookie;
 extern sAvalancheSlot cAvalanche_m_activeAvalanches[];
 extern "C" void cAvalanche_calculate(void);
 extern "C" void cAvalanche_resolveDataPointers(void);
@@ -1223,34 +1223,34 @@ extern "C" void func_002D7EF8(void* self);
 /**
  * Runs the avalanche system for one frame while it is enabled.
  *
- * When enabled (D_004A3A30, On Tour m_Enable): recalculates everything when the recalc flag (D_004A3A34) is set
- * and clears it and D_004A3AC4; resolves the data pointers; while the trigger flag (D_004A3A5C) is set,
- * triggers avalanche D_004A3A7C (On Tour m_AvalancheId; a negative flag fires once); once pointers are resolved
- * and the update flag (D_004A3A60) is set, updates all 16 active avalanches (func_002D7EF8, On Tour
+ * When enabled (cAvalanche_m_Enable, On Tour m_Enable): recalculates everything when the recalc flag (cAvalanche_m_Recalc) is set
+ * and clears it and cAvalanche_m_badCookie; resolves the data pointers; while the trigger flag (cAvalanche_m_Trigger) is set,
+ * triggers avalanche cAvalanche_m_AvalancheId (On Tour m_AvalancheId; a negative flag fires once); once pointers are resolved
+ * and the update flag (cAvalanche_m_Update) is set, updates all 16 active avalanches (func_002D7EF8, On Tour
  * tActiveAvalanche::update), a negative update flag again counting as one-shot.
  */
 extern "C" void cAvalanche_update(void)
 {
-    if (D_004A3A30 != 0) {
-        if (D_004A3A34 != 0) {
+    if (cAvalanche_m_Enable != 0) {
+        if (cAvalanche_m_Recalc != 0) {
             cAvalanche_calculate();
-            D_004A3A34 = 0;
-            D_004A3AC4 = 0;
+            cAvalanche_m_Recalc = 0;
+            cAvalanche_m_badCookie = 0;
         }
         cAvalanche_resolveDataPointers();
-        if (D_004A3A5C != 0) {
-            cAvalanche_triggerAvalanche(D_004A3A7C);
-            if (D_004A3A5C < 0) {
-                D_004A3A5C = 0;
+        if (cAvalanche_m_Trigger != 0) {
+            cAvalanche_triggerAvalanche(cAvalanche_m_AvalancheId);
+            if (cAvalanche_m_Trigger < 0) {
+                cAvalanche_m_Trigger = 0;
             }
         }
-        if (D_004A3A30 != 0 && cAvalanche_m_resolved != 0 && D_004A3A60 != 0) {
+        if (cAvalanche_m_Enable != 0 && cAvalanche_m_resolved != 0 && cAvalanche_m_Update != 0) {
             int i;
             for (i = 0; i < 16; i++) {
                 func_002D7EF8(&cAvalanche_m_activeAvalanches[i]);
             }
-            if (D_004A3A60 < 0) {
-                D_004A3A60 = 0;
+            if (cAvalanche_m_Update < 0) {
+                cAvalanche_m_Update = 0;
             }
         }
     }
@@ -1343,9 +1343,9 @@ struct sVE_8A00 {
 
 
 extern int D_004A3A58;
-extern sOut_8A00 D_004D5B70_8A00[] __asm__("D_004D5B70");
+extern sOut_8A00 D_004D5B70_8A00[] __asm__("vertlist");
 extern sMat_8A00 D_004FF1A0_8A00 __asm__("t4mat_Identity");
-extern sRow_8A00 D_004FF130_8A00 __asm__("D_004FF130");
+extern sRow_8A00 D_004FF130_8A00 __asm__("t4vect_Origin");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (matrix copy).
@@ -1477,7 +1477,7 @@ static inline void SetBits_8A00(int& w, int mask, int shift, int v)
  * Debug-draws an active node's recorded path when D_004A3A58 (On Tour m_RenderLines) is set.
  *
  * Walks the avalanche node's packed frames from its start (position deltas x 2, frame colours) into the
- * vertex array D_004D5B70 and draws them with the graphics manager's virtual at vtable offset 0x248. The
+ * vertex array vertlist and draws them with the graphics manager's virtual at vtable offset 0x248. The
  * rotation it builds per frame is not used for the vertices.
  *
  * @param nodep  the tActiveAvalancheNode; nothing happens without an avalanche node
@@ -1535,7 +1535,7 @@ struct sAvVert_D8EA8 {
     int r, g, b, a;             // 0x10
     sAvVec4_D8EA8 pos;          // 0x20
 };
-extern sAvVert_D8EA8 D_vtx_D8EA8[] __asm__("D_004EDB70");
+extern sAvVert_D8EA8 D_vtx_D8EA8[] __asm__("collisionvertlist");
 
 struct sAvPair_D8EA8 { float v; char* node; };
 struct sAvGroup_D8EA8 {
@@ -1760,7 +1760,7 @@ struct sCam_9130 {
     float mats[4][4];           // 0x18
 };
 extern int D_004A41EC;
-extern sRState_9130 D_00501420;
+extern sRState_9130 sDrawState_s_defaultDrawState;
 extern "C" void tActiveAvalanche_render(void* slot);
 
 static inline sCam_9130* getCam_9130() { return (sCam_9130*)SSXApp->Game->ViewMan; }
@@ -1770,24 +1770,24 @@ static inline void setB5_9130(sRCtx_9130* c, int v) { c->top->b5 = v; }
 /**
  * Renders all active avalanches with the current camera's view.
  *
- * Runs when the system is enabled (D_004A3A30) and resolved, or when D_004A41EC is set: pushes a draw state
+ * Runs when the system is enabled (cAvalanche_m_Enable) and resolved, or when D_004A41EC is set: pushes a draw state
  * set up for the camera's matrix, position and rotation and, if enabled, renders the 16 active slots.
  */
 extern "C" void cAvalanche_render(void)
 {
-    if ((D_004A3A30 != 0 && cAvalanche_m_resolved != 0) || D_004A41EC != 0)
+    if ((cAvalanche_m_Enable != 0 && cAvalanche_m_resolved != 0) || D_004A41EC != 0)
     {
         cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
         float* view = getCam_9130()->views[getCam_9130()->cur];
         ((sRCtx_9130*)ctx)->top[1] = ((sRCtx_9130*)ctx)->top[0];
         ((sRCtx_9130*)ctx)->top++;
-        *((sRCtx_9130*)ctx)->top = D_00501420;
+        *((sRCtx_9130*)ctx)->top = sDrawState_s_defaultDrawState;
         setB5_9130((sRCtx_9130*)ctx, 7);
         *(short*)((char*)((sRCtx_9130*)ctx)->top + 0x10) = -1;
         ((sRCtx_9130*)ctx)->setMatrix(getCam_9130()->mats[getCam_9130()->cur], 1);
         ((sRCtx_9130*)ctx)->setPos(view[0], view[1], view[2]);
         ((sRCtx_9130*)ctx)->setRot(view + 0x10);
-        if (D_004A3A30 != 0)
+        if (cAvalanche_m_Enable != 0)
         {
             for (int i = 0; i < 16; i++)
                 tActiveAvalanche_render(&cAvalanche_m_activeAvalanches[i]);
@@ -1804,8 +1804,8 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern char str_Avalanche[];
 extern char str_AvalancheNode[];
 extern void* cAvalanche_m_avalancheList;
-extern char D_00538450[];
-extern int D_004A3AC0;
+extern char cAvalanche_m_nodeList[];
+extern int cAvalanche_m_numNodes;
 extern int cAvalanche_m_resolved;
 
 struct sAvNodeD92D0 {
@@ -1858,7 +1858,7 @@ static inline float Abs_D92D0(float x)
  *
  * The new node takes the instance, life/fade-in/fade-out in frames (seconds x 30), the speed, a radius of 0.2
  * x the instance's smallest bound extent and a base type (5 gives 2, 2 gives 0, else 1). It is registered in
- * the node table D_00538450 and its index is written into the instance's flags at +0x92 ((index << 8) | 2).
+ * the node table cAvalanche_m_nodeList and its index is written into the instance's flags at +0x92 ((index << 8) | 2).
  *
  * @param id  avalanche id
  * @param obj  the world instance that falls
@@ -1908,11 +1908,11 @@ extern "C" void cAvalanche_addAvalancheNode(int id, char* obj, int type, float l
     }
     n->emit = 0;
     n->f114 = 0;
-    int idx = D_004A3AC0;
-    ((sAvNodeD92D0**)D_00538450)[idx] = n;
+    int idx = cAvalanche_m_numNodes;
+    ((sAvNodeD92D0**)cAvalanche_m_nodeList)[idx] = n;
     *(unsigned short*)(n->obj + 0x92) = *(unsigned char*)(n->obj + 0x92);
     *(unsigned short*)(n->obj + 0x92) |= (idx << 8) | 2;
-    D_004A3AC0 = idx + 1;
+    cAvalanche_m_numNodes = idx + 1;
     cAvalanche_m_resolved = 0;
 }
 #endif
@@ -2117,7 +2117,7 @@ struct sAvAct_D97A8 {
     int pad2E8;
     int f2EC;                   // 0x2EC
 };
-extern sAvAct_D97A8 D_act_D97A8[] __asm__("D_004EE770");
+extern sAvAct_D97A8 D_act_D97A8[] __asm__("cAvalanche_m_activeNodes");
 
 struct sAvSlot_D97A8 {
     sAvGroup_D97A8* group;      // 0x0
@@ -2263,9 +2263,9 @@ extern "C" void cAvalanche_end(void);
 extern "C" void func_00416210(void* dst, int c, int n);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern char D_00538450[];
-extern int D_004A3AC0;
-extern void* D_004A3AB4;
+extern char cAvalanche_m_nodeList[];
+extern int cAvalanche_m_numNodes;
+extern void* cAvalanche_m_filedata;
 extern int cAvalanche_m_fileDataDeleteable;
 extern int cAvalanche_m_resolved;
 
@@ -2290,11 +2290,11 @@ extern "C" void cAvalanche_reset(void* self)
         operator_delete((int*)cur);
     }
     cAvalanche_m_avalancheList = 0;
-    D_004A3AC0 = 0;
-    func_00416210(D_00538450, 0, 0x400);
-    if (D_004A3AB4 != 0 && cAvalanche_m_fileDataDeleteable != 0) {
-        cMemMan_free(D_004A3AB4);
-        D_004A3AB4 = 0;
+    cAvalanche_m_numNodes = 0;
+    func_00416210(cAvalanche_m_nodeList, 0, 0x400);
+    if (cAvalanche_m_filedata != 0 && cAvalanche_m_fileDataDeleteable != 0) {
+        cMemMan_free(cAvalanche_m_filedata);
+        cAvalanche_m_filedata = 0;
         cAvalanche_m_fileDataDeleteable = 0;
     }
     cAvalanche_m_resolved = 0;
@@ -2322,7 +2322,7 @@ struct sAvNode {
     char pad2E4[0x2F0 - 0x2E4];
 };
 
-extern sAvNode D_004EE770[64];
+extern sAvNode cAvalanche_m_activeNodes[64];
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void vu0CopyMatrixAV(sAvMatrix* dst, sAvMatrix* src)
@@ -2369,7 +2369,7 @@ extern "C" void func_002D9C00(int id, sAvMatrix* out)
 {
     int i;
     for (i = 0; i < 64; i++) {
-        sAvNode* node = &D_004EE770[i];
+        sAvNode* node = &cAvalanche_m_activeNodes[i];
         if (node->data != 0 && *(int*)((char*)node->data + 0xF8) == id) {
             vu0CopyMatrixAV(out, &node->rot);
             vu0ScaleMatrixAV(out, out, node->scale);
@@ -2526,23 +2526,23 @@ INCLUDE_ASM("visualfx/avalanche", func_002D9FB8);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void cAvalanche_resolveDataPointers(void);
-extern void* D_004A3AB4;
+extern void* cAvalanche_m_filedata;
 extern int cAvalanche_m_fileDataDeleteable;
-extern int D_004A3AC4;
+extern int cAvalanche_m_badCookie;
 
 extern "C" void func_002D9FB8(void* data)
 {
     cAvalanche_reset(data);
-    if (D_004A3AB4 != 0 && cAvalanche_m_fileDataDeleteable != 0) {
-        cMemMan_free(D_004A3AB4);
+    if (cAvalanche_m_filedata != 0 && cAvalanche_m_fileDataDeleteable != 0) {
+        cMemMan_free(cAvalanche_m_filedata);
     }
-    D_004A3AB4 = data;
+    cAvalanche_m_filedata = data;
     cAvalanche_m_fileDataDeleteable = 0;
     if (*(int*)data != 0x2BEEF00) {
-        D_004A3AB4 = 0;
-        D_004A3AC4 = 1;
+        cAvalanche_m_filedata = 0;
+        cAvalanche_m_badCookie = 1;
     } else {
-        D_004A3AC4 = 0;
+        cAvalanche_m_badCookie = 0;
         cAvalanche_resolveDataPointers();
     }
 }
@@ -2553,7 +2553,7 @@ INCLUDE_ASM("visualfx/avalanche", cAvalanche_resolveDataPointers);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern void* cAvalanche_m_avalancheList;
-extern void* D_004A3AB4;
+extern void* cAvalanche_m_filedata;
 extern int cAvalanche_m_resolved;
 
 struct sAvVec4_A028 {
@@ -2595,11 +2595,11 @@ extern "C" void cAvalanche_resolveDataPointers(void)
 {
     if (cAvalanche_m_avalancheList == 0)
         return;
-    if (D_004A3AB4 == 0)
+    if (cAvalanche_m_filedata == 0)
         return;
     if (cAvalanche_m_resolved != 0)
         return;
-    char* cursor = (char*)D_004A3AB4 + 8;
+    char* cursor = (char*)cAvalanche_m_filedata + 8;
     for (sAvGroupA028* avalanche = (sAvGroupA028*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->next) {
         for (sAvNodeA028* n = avalanche->nodes; n != 0; n = n->next) {
             cursor += 4;

@@ -318,7 +318,7 @@ public:
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
     virtual void DrawPrims(int n, sVert_EDA0* v, int flags);
 };
-extern sGs_EDA0 D_00501420_EDA0 __asm__("D_00501420");
+extern sGs_EDA0 D_00501420_EDA0 __asm__("sDrawState_s_defaultDrawState");
 extern char t4mat_Identity[];
 
 // The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).
@@ -863,7 +863,7 @@ public:
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
     virtual void DrawPrims(int n, sVert_FB40* v, int flags);
 };
-extern sGs_FB40 D_00501420_FB40 __asm__("D_00501420");
+extern sGs_FB40 D_00501420_FB40 __asm__("sDrawState_s_defaultDrawState");
 extern char t4mat_Identity[];
 
 // The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).

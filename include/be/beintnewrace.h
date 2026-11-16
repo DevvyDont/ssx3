@@ -8,7 +8,7 @@
 // game flow, front end, sound, network). The labels D_00535BF8 ... D_00535C12 are its fields (below).
 // EA's header is ../source/be/beintnewrace.h (preview assert path); the class is declared with cBENewRaceInterface.
 //
-// Size 0x4C: [R] func_00144928 / func_001449E8 save and restore it whole into D_005305B0 (a 0x4C-byte struct copy,
+// Size 0x4C: [R] func_00144928 / func_001449E8 save and restore it whole into cBELibrary_raceDB (a 0x4C-byte struct copy,
 // 0x00-0x4B). The six-rider cap is playerID[6] / riderID[6] (notes/subsystems/riders-cap.md).
 // No vtable, no base class. A FLAT layout, like main/game.h.
 //

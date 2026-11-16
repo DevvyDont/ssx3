@@ -493,7 +493,7 @@ extern "C" void func_00309848(void* self);
 extern "C" float func_00119E38(void* self, int a, int b);
 extern "C" void cRider_flagEventBoostPowerUp(void* self, int mask, float amt);
 extern "C" int func_001298C8();
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 // 4-float vector with a component constructor.
 struct sV4_4298 {
@@ -502,8 +502,8 @@ struct sV4_4298 {
     sV4_4298(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sV4_4298 D_004FF140_4298 __asm__("D_004FF140");
-extern sV4_4298 D_004FF160_4298 __asm__("D_004FF160");
+extern sV4_4298 D_004FF140_4298 __asm__("t4vect_XAxis");
+extern sV4_4298 D_004FF160_4298 __asm__("t4vect_ZAxis");
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float Len_4298(const sV4_4298& v)
@@ -751,7 +751,7 @@ extern "C" void func_00114298(char* self, float speedFactor)
         }
     }
     cReplay_eventJump((int)SSXApp->Game->Replay, *(int*)(self + 0x86C), *(char**)(self + 0x790) + 0xFC);
-    func_00309848(D_004A3DD8);
+    func_00309848(cWScriptMan_TheWScriptMan);
     cRider_flagEventBoostPowerUp(self, 1, func_00119E38(*(void**)(self + 0x790), *(int*)(self + 0x320) != *(int*)(self + 0x324), steered));
     if (*(float*)(self + 0x378) > hi + 0.019999999552965164f) {
         sV4_4298 dv = Sub_4298(VEL_4298, oldVel);
@@ -915,7 +915,7 @@ extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void func_00115168(char* s);
 extern "C" void cAirPredictor_startLaunchIntoAir(cAirPredictor* ap, t4Vector* pos, t4Vector* vel, float t);
 extern float D_004A0EA8[];
-extern t4Vector D_004FF130_4DB8 __asm__("D_004FF130");
+extern t4Vector D_004FF130_4DB8 __asm__("t4vect_Origin");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_4DB8(const t4Vector& a, const t4Vector& b)
@@ -1123,8 +1123,8 @@ struct Q_5168 {
 
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle);
-extern Q_5168 D_004FF130;
-extern Q_5168 D_004FF160;
+extern Q_5168 t4vect_Origin;
+extern Q_5168 t4vect_ZAxis;
 
 static inline Q_5168 AxisAngle_5168(const Q_5168& axis, float angle)
 {
@@ -1135,8 +1135,8 @@ static inline Q_5168 AxisAngle_5168(const Q_5168& axis, float angle)
 
 static inline void SetHeading_5168(char* a, float angle)
 {
-    *(Q_5168*)(a + 0x30) = D_004FF130;
-    *(Q_5168*)(a + 0x40) = AxisAngle_5168(D_004FF160, -angle);
+    *(Q_5168*)(a + 0x30) = t4vect_Origin;
+    *(Q_5168*)(a + 0x40) = AxisAngle_5168(t4vect_ZAxis, -angle);
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -1283,8 +1283,8 @@ extern "C" void cRider_rotateOrientation(void* self, Q_5640 dir, float angle);
 // PORT: the unit defines func_00116930 with no parameters; this caller passes the rider.
 extern "C" void func_00116930_p(void* self) __asm__("func_00116930");
 int func_0011FE98(void* self);
-extern Q_5640 D_004FF130_5640 __asm__("D_004FF130");
-extern Q_5640 D_004FF160_5640 __asm__("D_004FF160");
+extern Q_5640 D_004FF130_5640 __asm__("t4vect_Origin");
+extern Q_5640 D_004FF160_5640 __asm__("t4vect_ZAxis");
 
 static inline Q_5640 AxisAngle_5640(const Q_5640& axis, float angle)
 {
@@ -2029,7 +2029,7 @@ struct sMonsterReq_6E10 {
     unsigned char extra;
     unsigned char padF;
 };
-extern sMonsterReq_6E10 D_0043D608[];
+extern sMonsterReq_6E10 gMonsterComboTable[];
 
 /**
  * Writes the name of the monster trick that a trick requires, or an empty string when it is not in the
@@ -2042,7 +2042,7 @@ extern sMonsterReq_6E10 D_0043D608[];
 // Name of the monster trick required for `trick` (empty when it is not one).
 extern "C" void gGenMonsterTrickReqName(char* buf, int trick, int size)
 {
-    sMonsterReq_6E10* req = D_0043D608;
+    sMonsterReq_6E10* req = gMonsterComboTable;
     for (int i = 0; i < 0x18; i++, req++) {
         if (req->trick == trick) {
             sTrickId_6E10 id;

@@ -37,7 +37,7 @@ struct cInstanceNode {
                                  //       [R] func_00354720 zeroes it; [U] cMoveNode_cMoveNode sets bit 0
     // --- cSortObjNode (cSortObjNodeState) ---
     unsigned int SortIndex;      // 0x014 [P] getSortIndex (lw 0x14); [O] cSortObjNodeState::SortIndex; [R] func_00354850
-                                 //       takes it from ObjNodeSortIndex/ObjNodeNoSortIndex (D_004A5B78/7C); [U] unsigned
+                                 //       takes it from ObjNodeSortIndex/ObjNodeNoSortIndex (cSortObjNode_ObjNodeSortIndex/7C); [U] unsigned
                                  //       compare in cSortObjNode_compare
     // --- cInstanceNode ---
     tInstanceRecord* Instance;   // 0x018 [P] getInstance (lw 0x18); [O] cInstanceNode::Instance; [R] func_0034FB00 stores

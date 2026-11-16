@@ -162,7 +162,7 @@ struct cBoardTrailFX_reset_sTrail {
     int fE0;
 };
 
-extern cBoardTrailFX_reset_sVec4 D_004FF130;
+extern cBoardTrailFX_reset_sVec4 t4vect_Origin;
 extern cBoardTrailFX_reset_sVec4 t4vect_Zero;
 extern float D_004A45B0;
 extern float D_004A45B4;
@@ -171,7 +171,7 @@ extern float D_004A45B8;
 /**
  * Resets a board trail's state and the texture data of its six vertex strips.
  *
- * Clears the trail's counters, sets the first colour vector to D_004FF130 and the other two to zero, sets both
+ * Clears the trail's counters, sets the first colour vector to t4vect_Origin and the other two to zero, sets both
  * scales to 1, and rewrites the first three floats of all 54 vertices in each strip: probably texture
  * coordinates, with u fixed per strip (0.25, 0.75, 0.0, 1.0, 0.375, 0.625), v alternating 0 and 1, and q = 1.
  */
@@ -184,7 +184,7 @@ extern "C" void cBoardTrailFX_reset(cBoardTrailFX_reset_sTrail* self)
     self->f9C = 0;
     self->fA0 = 0;
     self->fA4 = 0;
-    self->colB0 = D_004FF130;
+    self->colB0 = t4vect_Origin;
     self->colC0 = t4vect_Zero;
     self->colD0 = t4vect_Zero;
     self->f4 = 1.0f;
@@ -411,8 +411,8 @@ struct sBTVEnt_8938 {
     int (*fn)(void*);
 };
 
-// D_004FA370: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sBTRSRow_8938 views a row from its +0x28 field
-extern char D_004FA370[];
+// cRenderStateMan_m_state: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sBTRSRow_8938 views a row from its +0x28 field
+extern char cRenderStateMan_m_state[];
 extern float D_004A4580;
 extern float D_004A4584;
 extern float D_004A4588;
@@ -839,7 +839,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     self->strip[5][prev].pos = btAdd(btAdd(btAdd(botEdge, outerWidth), h), h);
     char* being = self->rider + 0x6C0;
     sBTVEnt_8938* vt = *(sBTVEnt_8938**)being;
-    sBTCol_8938 c = ((sBTRSRow_8938*)(D_004FA370 + 0x28))[vt[7].fn(being + vt[7].delta)].col;
+    sBTCol_8938 c = ((sBTRSRow_8938*)(cRenderStateMan_m_state + 0x28))[vt[7].fn(being + vt[7].delta)].col;
     for (int i = 0; i < 6; i++) {
         self->strip[i][self->head].a = self->strip[i][prev].a = (int)btClamp(c.a * 255.0f, 0.0f, 255.0f);
         self->strip[i][self->head].r = self->strip[i][prev].r = (int)btClamp(c.r * 255.0f, 0.0f, 255.0f);
@@ -1201,7 +1201,7 @@ struct sFade_A900 {
     float to[4];        // 0x38
 };
 
-extern char* D_004A5B64_A900 __asm__("D_004A5B64");
+extern char* D_004A5B64_A900 __asm__("cAppMan_TheAppMan");
 
 /**
  * Blends the TV display format between regular and cut-scene mode.
@@ -1539,7 +1539,7 @@ struct sRctx_B198 {
     sRctxVE_B198* vtable;       // 0x10D8
 };
 
-extern sRS_B198 D_00501420_B198 __asm__("D_00501420");
+extern sRS_B198 D_00501420_B198 __asm__("sDrawState_s_defaultDrawState");
 
 // One strip vertex: texture coords, 0..255 colour (alpha 0..128), position.
 struct sTrailVtx_B198 {

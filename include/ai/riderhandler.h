@@ -141,7 +141,7 @@ CHECK_SIZE(cStaticMotion, 0x10);
 // cRailslideMotion (cRiderHandler + 0x0B0, 0x60 bytes): motion state 4 (MS_Railslide). Base cRailslideMotionState
 // (0x00-0x50, [O] size 0x50).
 struct cRailslideMotion {
-    t4Vector RailNorm;       // 0x00 [O]; [R] cRiderHandler ctor = D_004FF160; [U] read via handler+0xB0 (getRailNorm)
+    t4Vector RailNorm;       // 0x00 [O]; [R] cRiderHandler ctor = t4vect_ZAxis; [U] read via handler+0xB0 (getRailNorm)
     float RailLeanAngle;     // 0x10 [O]; [U] float
     float RailTime;          // 0x14 [O]; [U] float
     float RailOffCenter;     // 0x18 [O]; [R] cRiderHandler ctor = 0; [U] read via handler+0xC8 (getOffCenter)

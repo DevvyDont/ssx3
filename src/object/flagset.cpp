@@ -282,7 +282,7 @@ struct sRS_34B9B0 {
     int fC;
     int f10;
 };
-extern sRS_34B9B0 D_00501420;
+extern sRS_34B9B0 sDrawState_s_defaultDrawState;
 
 struct sVec4_34B9B0 {
     float x, y, z, w;
@@ -356,7 +356,7 @@ extern "C" void func_0034B9B0(sFlagSetEntry* e)
     }
     char* ctx = cGraphicsMan_TheGraphicsMan;
     TOP_34B9B0(ctx)[1] = TOP_34B9B0(ctx)[0];
-    *++TOP_34B9B0(ctx) = D_00501420;
+    *++TOP_34B9B0(ctx) = sDrawState_s_defaultDrawState;
     if (*(signed char*)(self + 3) != 0) {
         SetF0_12_34B9B0(TOP_34B9B0(cGraphicsMan_TheGraphicsMan), 0xFF);
         SetF4_2_34B9B0(TOP_34B9B0(cGraphicsMan_TheGraphicsMan), 11);
@@ -781,7 +781,7 @@ struct sFlagSet_C668 {
 extern "C" int func_002D1BA0();
 extern "C" void func_0034B818(void* elem);
 unsigned int BXrand();
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 // Uniform float in [0, 1) built from the random mantissa bits.
 static inline float randf_34C668()
@@ -814,7 +814,7 @@ extern "C" void cFlagManager_update(sFlagSet_C668* self)
         break;
     }
     float one = 1.0f;
-    self->t += one / (float)*(int*)(D_004A5B64 + 0x10);
+    self->t += one / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     if (one <= self->t) {
         self->t -= one;
         self->base += self->delta;
@@ -1028,7 +1028,7 @@ static inline float fabs_C8E8(float x)
 }
 
 extern void* cFenceNode_vtbl[];
-extern sVec4_C8E8 D_004FF140;
+extern sVec4_C8E8 t4vect_XAxis;
 extern "C" void* func_0034FB00(void* self, int a1, int type, void* obj);
 extern "C" void func_0034D1E8(void* self);
 extern "C" void func_0034D6F0(void* self, float dt);
@@ -1050,7 +1050,7 @@ extern "C" cFenceNode_C8E8* func_0034C8E8(cFenceNode_C8E8* self, int bucket, voi
     self->field_0x38 = 0;
     self->field_0x3c = 0;
     if (self->GridMesh != 0) {
-        sVec4_C8E8 dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)(self->Instance + 0x10), &D_004FF140));
+        sVec4_C8E8 dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)(self->Instance + 0x10), &t4vect_XAxis));
         float speed = fabs_C8E8(*(float*)(info + 0x30));
         force = Dot_C8E8(dir, *(sVec4_C8E8*)(info + 0x10));
         force = speed * (force * 0.0010000000474974513f);

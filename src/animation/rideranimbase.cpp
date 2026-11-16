@@ -106,7 +106,7 @@ struct sRabQuad32 {
     int w[8];
 } __attribute__((aligned(16)));
 
-extern sRabQuad32 D_004FF230;
+extern sRabQuad32 tPose_Identity;
 
 struct sRiderAnimBase {
     int mAnims[6];      // 0x00
@@ -122,7 +122,7 @@ struct sRiderAnimBase {
  * Resets the animation player: expires all sequences and returns to the default playback state.
  *
  * Expires each sequencer and sets its CurrentAnimID to 0x1B6 (no anim), then IsFlipped = 0, FrameRateFactor =
- * 1.0, OrientationOffset = the identity pose (D_004FF230) and GraftMask = -1 (cleared).
+ * 1.0, OrientationOffset = the identity pose (tPose_Identity) and GraftMask = -1 (cleared).
  *
  * @param riderAnimBase  the animation player (this)
  */
@@ -137,7 +137,7 @@ extern "C" void cRiderAnimBase_reset(cRiderAnimBase* riderAnimBase)
     //START
     self->m18 = 0;
     self->m1C = 1.0f;
-    self->m30 = D_004FF230;
+    self->m30 = tPose_Identity;
     self->m20 = -1;
     //END
 }
@@ -195,8 +195,8 @@ struct sRabXform_00311B48
     sRabQuat_00311B48 rot;
 };
 
-extern sRabQuat_00311B48 D_004FF130;
-extern sRabQuat_00311B48 D_004FF160;
+extern sRabQuat_00311B48 t4vect_Origin;
+extern sRabQuat_00311B48 t4vect_ZAxis;
 extern "C" void cRiderAnimBase_changeOrientationOffset(cRiderAnimBase* self, sRabXform_00311B48* xf);
 
 static inline sRabQuat_00311B48 AxisAngle_00311B48(const sRabQuat_00311B48& axis, float angle)
@@ -209,7 +209,7 @@ static inline sRabQuat_00311B48 AxisAngle_00311B48(const sRabQuat_00311B48& axis
 /**
  * Turns the orientation offset of every playing sequence by an angle about the heading axis.
  *
- * Builds a transform with position D_004FF130 and the rotation quaternion of -angle about D_004FF160
+ * Builds a transform with position t4vect_Origin and the rotation quaternion of -angle about t4vect_ZAxis
  * (half-angle sine and cosine from func_0031BE50) and applies it with
  * cRiderAnimBase_changeOrientationOffset().
  *
@@ -218,8 +218,8 @@ static inline sRabQuat_00311B48 AxisAngle_00311B48(const sRabQuat_00311B48& axis
 extern "C" void cRiderAnimBase_changeHeadingOffset(cRiderAnimBase* self, float angle)
 {
     sRabXform_00311B48 xf;
-    xf.pos = D_004FF130;
-    xf.rot = AxisAngle_00311B48(D_004FF160, -angle);
+    xf.pos = t4vect_Origin;
+    xf.rot = AxisAngle_00311B48(t4vect_ZAxis, -angle);
     cRiderAnimBase_changeOrientationOffset(self, &xf);
 }
 #endif
@@ -308,7 +308,7 @@ static inline sRabXform_00311B48 Combine_00311BF0(const sRabXform_00311B48& a, c
 {
     sRabXform_00311B48 r;
     r.rot = QuatMul_00311BF0(a.rot, b.rot);
-    r.pos = Add_00311BF0(Rot_00311BF0(a.rot, Sub_00311BF0(b.pos, D_004FF130)), a.pos);
+    r.pos = Add_00311BF0(Rot_00311BF0(a.rot, Sub_00311BF0(b.pos, t4vect_Origin)), a.pos);
     return r;
 }
 
@@ -316,8 +316,8 @@ static inline sRabXform_00311B48 Combine_00311BF0(const sRabXform_00311B48& a, c
  * Applies a transform on top of the orientation offset of every sequence in the rider's six sequencers.
  *
  * For each sequence's offset (sequence +0x60): rotation = xf rotation * offset rotation, and position = xf
- * rotation applied to (offset position - D_004FF130), plus xf position. VU0 code. The OrientationOffset field
- * itself is not changed; cRiderAnimBase_changeHeadingOffset() calls this with a rotation about D_004FF160.
+ * rotation applied to (offset position - t4vect_Origin), plus xf position. VU0 code. The OrientationOffset field
+ * itself is not changed; cRiderAnimBase_changeHeadingOffset() calls this with a rotation about t4vect_ZAxis.
  *
  * @param xf  transform to apply: a position, then a rotation quaternion
  */
@@ -397,7 +397,7 @@ extern "C" void func_00313A70(void* node, int key, float t);
 extern "C" void func_00313C50(void* node, int i, int anim);
 extern "C" void func_00313CF0(void* node, int i, float t);
 extern "C" void func_00313D28(void* node, int i, float speed);
-extern char** D_004A3DF8;
+extern char** cAnimDataBase_TheAnimDataBase;
 
 // A sequence node: three tracks, then the clip state (raw offsets from func_00311F00's uses).
 struct sSeqTrack_1F00 {
@@ -468,10 +468,10 @@ extern "C" int func_00311F00(void* vself, void* vseq, int anim, int a3, int a4, 
     nd->blendIn = ((float*)cAIAnimEventMap_getBlendInTime(anim))[6];
     nd->m84 = a5;
     // PORT: (int) address arithmetic for the clip header (index-first addu).
-    int n = *(unsigned short*)((char*)(((unsigned int)a3 >> 8) * 0x14 + *(int*)(*(char**)((char*)D_004A3DF8 + (((unsigned int)a3 & 0xFF) << 2)) + 0x8)) + 0x12);
+    int n = *(unsigned short*)((char*)(((unsigned int)a3 >> 8) * 0x14 + *(int*)(*(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)a3 & 0xFF) << 2)) + 0x8)) + 0x12);
     for (int i = 0; i < n; i++)
     {
-        char* bank = *(char**)((char*)D_004A3DF8 + (((unsigned int)a3 & 0xFF) << 2));
+        char* bank = *(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)a3 & 0xFF) << 2));
         char* clip = (char*)(((unsigned int)a3 >> 8) * 0x14 + *(int*)(bank + 0x8));
         unsigned short* keys = *(unsigned short**)(bank + 0x10);
         func_00313A70(node, i, keys[(*(unsigned short*)(clip + 0x10) + i) * 2] * 0.03333333507180214f);
@@ -629,8 +629,8 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimFrame);
 #ifdef SKIP_ASM
 extern "C" int func_00311F00(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
 extern "C" void func_00313CF0(void* node, int i, float t);
-extern char* D_004A3E7C;
-extern int D_004A5950;
+extern char* cGameAnimMap_TheGameAnimMap;
+extern int kAnimIDInvalid;
 
 struct sVEntry00312660 {
     short delta;
@@ -655,8 +655,8 @@ struct sAnimState_00312660
  * startFrameTime, tAnimID animid), and the int and the float travel in different registers.
  *
  * @param anim            the AI anim to sample (On Tour tAIAnimID anid)
- * @param startFrameTime  the clip to play (On Tour tAnimID animid); D_004A5950 (-1) means the AI anim's own
- *                        clip, found from its index (vtable slot 4) in the table at D_004A3E7C + 0x1030
+ * @param startFrameTime  the clip to play (On Tour tAnimID animid); kAnimIDInvalid (-1) means the AI anim's own
+ *                        clip, found from its index (vtable slot 4) in the table at cGameAnimMap_TheGameAnimMap + 0x1030
  * @param animid          the time to sample, given to func_00313CF0 (On Tour startFrameTime)
  * @return the first 0x50-byte blend state (On Tour tAnimBlendFrame)
  */
@@ -666,10 +666,10 @@ extern "C" sAnimState_00312660 cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* sel
     sAnimState_00312660 states[0x40];
     cAnimSequencer seq;
     cAnimSequencer_init(&seq);
-    if (animid == D_004A5950)
+    if (animid == kAnimIDInvalid)
     {
         sVEntry00312660* vt = (sVEntry00312660*)self->mVtbl;
-        animid = *(int*)(vt[4].fn(((char*)self) + vt[4].delta, anim) * 4 + D_004A3E7C + 0x1030);
+        animid = *(int*)(vt[4].fn(((char*)self) + vt[4].delta, anim) * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
     }
     func_00311F00(((char*)self), &seq, anim, animid, 1, 0, 0.0f);
     func_00313CF0(cAnimSequencer_getSequence(&seq, 0), 0, startFrameTime);
@@ -687,8 +687,8 @@ struct sVEntry00312790 {
     short index;
     int (*fn)(void*, int);
 };
-extern char* D_004A3E7C;
-extern char** D_004A3DF8;
+extern char* cGameAnimMap_TheGameAnimMap;
+extern char** cAnimDataBase_TheAnimDataBase;
 
 extern "C" float func_00312790(char* self, int a1)
 {
@@ -696,8 +696,8 @@ extern "C" float func_00312790(char* self, int a1)
     int id = vt[4].fn(self + vt[4].delta, a1);
     if (id == 0x207)
         return 0.0f;
-    unsigned int h = *(unsigned int*)(id * 4 + D_004A3E7C + 0x1030);
-    char* clip = *(char**)((char*)D_004A3DF8 + ((h & 0xFF) << 2));
+    unsigned int h = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
+    char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((h & 0xFF) << 2));
     char* q = (char*)((h >> 8) * 0x14 + *(int*)(clip + 0x8));
     return (*(unsigned short*)(q + 0xC) - 1) * 0.03333333507180214f;
 }
@@ -723,8 +723,8 @@ extern "C" float func_00312820(char* self, int a1, int frame)
     int id = vt[4].fn(self + vt[4].delta, a1);
     if (id == 0x207)
         return 0.0f;
-    unsigned int h = *(unsigned int*)(id * 4 + D_004A3E7C + 0x1030);
-    char* clip = *(char**)((char*)D_004A3DF8 + ((h & 0xFF) << 2));
+    unsigned int h = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
+    char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((h & 0xFF) << 2));
     char* q = (char*)((h >> 8) * 0x14 + *(int*)(clip + 0x8));
     float r;
     if (frame < *(unsigned short*)(q + 0x12))
@@ -746,7 +746,7 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_play);
 extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
 extern "C" int func_00311F00(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
 extern int D_0048D808[];
-extern char* D_004A3E7C;
+extern char* cGameAnimMap_TheGameAnimMap;
 
 struct sVEntry003128E8 {
     short delta;
@@ -782,7 +782,7 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend)
     {
         blend = *(float*)&cAIAnimEventMap_getBlendInTime(anim)[4];
     }
-    int animId = *(int*)(id * 4 + D_004A3E7C + 0x1030);
+    int animId = *(int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
     int slot = cAIAnimEventMap_getBlendInTime(anim)[3];
     return *(int*)(self + (slot << 2)) = func_00311F00(self, *(char**)(self + 0x50) + (slot << 3), anim, animId, flags, D_0048D808[slot], blend);
 }
@@ -1186,7 +1186,7 @@ inline sRiderAnim_00313508::sRiderAnim_00313508(int o)
     {
         slots[i].active = 0;
     }
-    pair = D_004FF230;
+    pair = tPose_Identity;
     u88 = -1;
     u80 = 0;
     u84 = 0;

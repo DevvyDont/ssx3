@@ -218,7 +218,7 @@ struct cBaseClass_DynamicEmitter {
                                     //       (its +0x240)
     sDrawState mDrawState;          // 0x1E4 [O] (On Tour 0x10; retail's carries 2 texture ids at +0x10,
                                     //       render/ps2graphicsman.h); [R] ctor: memset 0x10 + both ids -1; [U]
-                                    //       setupEmitter copies the default state D_00501420 and sets bit fields,
+                                    //       setupEmitter copies the default state sDrawState_s_defaultDrawState and sets bit fields,
                                     //       render patches the layer/blend bits and texture id and pushes it
     void** mVtbl;                   // 0x1F8 [R] ctor/dtor store cBaseClass_DynamicEmitter_vtbl (7 slots); subclasses
                                     //       store theirs; [U] setupEmitter calls slots 1, 5, 2; [P] the preview's slot
@@ -291,7 +291,7 @@ struct cDynamicEmitter {
                                     //       (its +0x240)
     sDrawState mDrawState;          // 0x1E4 [O] (On Tour 0x10; retail's carries 2 texture ids at +0x10,
                                     //       render/ps2graphicsman.h); [R] ctor: memset 0x10 + both ids -1; [U]
-                                    //       setupEmitter copies the default state D_00501420 and sets bit fields,
+                                    //       setupEmitter copies the default state sDrawState_s_defaultDrawState and sets bit fields,
                                     //       render patches the layer/blend bits and texture id and pushes it
     void** mVtbl;                   // 0x1F8 [R] ctor/dtor store cBaseClass_DynamicEmitter_vtbl (7 slots); subclasses
                                     //       store theirs; [U] setupEmitter calls slots 1, 5, 2; [P] the preview's slot
@@ -364,7 +364,7 @@ struct cDynamicColourEmitter {
                                     //       (its +0x240)
     sDrawState mDrawState;          // 0x1E4 [O] (On Tour 0x10; retail's carries 2 texture ids at +0x10,
                                     //       render/ps2graphicsman.h); [R] ctor: memset 0x10 + both ids -1; [U]
-                                    //       setupEmitter copies the default state D_00501420 and sets bit fields,
+                                    //       setupEmitter copies the default state sDrawState_s_defaultDrawState and sets bit fields,
                                     //       render patches the layer/blend bits and texture id and pushes it
     void** mVtbl;                   // 0x1F8 [R] ctor/dtor store cBaseClass_DynamicEmitter_vtbl (7 slots); subclasses
                                     //       store theirs; [U] setupEmitter calls slots 1, 5, 2; [P] the preview's slot

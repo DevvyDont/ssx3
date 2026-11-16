@@ -92,7 +92,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_00311220(void* mem, void* data);
 extern const char str_cAdfDataSource[];
 extern const char str_pTableAnimID[];
-extern void** D_004A3DF8;
+extern void** cAnimDataBase_TheAnimDataBase;
 
 struct sScLinkEntry {
     int id;             // 0x0
@@ -133,7 +133,7 @@ extern "C" void* func_002757F0_v(void* self) __asm__("func_002757F0");
  *
  * When no in-use entry has @p id yet, it takes the first free entry (no check for a full table), stores @p id
  * and @p data, wraps the data in a new 0x18-byte cAdfDataSource (func_00311220) and installs that in the anim
- * database's bank table (D_004A3DF8) at the entry's slot. It also counts the bank's non-null items and, if there
+ * database's bank table (cAnimDataBase_TheAnimDataBase) at the entry's slot. It also counts the bank's non-null items and, if there
  * are any, builds pTableAnimID, the table of their indices. An existing entry is returned unchanged.
  *
  * @param id    bank number (cSSXScriptEngine_OnAttachData passes mCurrAttachingBankNum)
@@ -164,7 +164,7 @@ extern "C" int cScriptAnimBankManager_LinkBank(sScLinkList* self, int id, void* 
                 }
             }
         }
-        void** tbl = D_004A3DF8;
+        void** tbl = cAnimDataBase_TheAnimDataBase;
         void** slot = &tbl[*(unsigned char*)&bankInfo->slot];
         *slot = bank;
     }
@@ -271,11 +271,11 @@ INCLUDE_ASM("scripter/scanimmgr", func_00275760);
 extern "C" void func_00311110(void** tbl);
 extern "C" void func_003112C8(void* self, int flags);
 void cMemMan_free(void*);
-extern void** D_004A3DF8;
+extern void** cAnimDataBase_TheAnimDataBase;
 
 extern "C" void func_00275760(void* self, sAnimEntry* e)
 {
-    void** tbl = D_004A3DF8;
+    void** tbl = cAnimDataBase_TheAnimDataBase;
     void** slot = &tbl[*(unsigned char*)&e->unk4];
     void* obj = *slot;
     *slot = 0;

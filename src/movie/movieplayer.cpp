@@ -6,7 +6,7 @@
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self);
 extern const char str_MCManager[];
-extern void* D_004A2C74;
+extern void* cMCOverlayManager_instance;
 
 //99.53%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getManager__Fv);
@@ -14,17 +14,17 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getManager__Fv);
 /**
  * Returns the memory-card overlay manager, creating it on first use.
  *
- * The single instance (0x74C bytes, allocated as "MCManager") is kept in D_004A2C74.
+ * The single instance (0x74C bytes, allocated as "MCManager") is kept in cMCOverlayManager_instance.
  *
  * @return the cMCOverlayManager instance
  */
 void* cMCOverlayManager_getManager()
 {
-    if (D_004A2C74 == 0) {
+    if (cMCOverlayManager_instance == 0) {
         void* mem = cMemMan_alloc(0x74C, str_MCManager, 0, 0);
-        D_004A2C74 = cMCOverlayManager_cMCOverlayManager((cMCOverlayManager*)mem);
+        cMCOverlayManager_instance = cMCOverlayManager_cMCOverlayManager((cMCOverlayManager*)mem);
     }
-    return D_004A2C74;
+    return cMCOverlayManager_instance;
 }
 #endif
 
@@ -32,7 +32,7 @@ void* cMCOverlayManager_getManager()
 INCLUDE_ASM("movie/movieplayer", func_0023C850);
 #ifdef SKIP_ASM
 extern "C" int func_0023C850(void) {
-    return D_004A2C74 != 0;
+    return cMCOverlayManager_instance != 0;
 }
 #endif
 
@@ -47,8 +47,8 @@ struct sMovieObj_23C860 {
 
 extern "C" void func_0023C860()
 {
-    delete (sMovieObj_23C860*)D_004A2C74;
-    D_004A2C74 = 0;
+    delete (sMovieObj_23C860*)cMCOverlayManager_instance;
+    cMCOverlayManager_instance = 0;
 }
 #endif
 

@@ -2615,9 +2615,9 @@ struct sXform_BFE8
     sQuat_BFE8 rot;
 };
 
-extern sQuat_BFE8 D_004FF140;
+extern sQuat_BFE8 t4vect_XAxis;
 extern sQuat_BFE8 t4vect_YAxis;
-extern sQuat_BFE8 D_004FF160;
+extern sQuat_BFE8 t4vect_ZAxis;
 extern "C" void func_0019F3E8(void* rider, sXform_BFE8* xf);
 extern "C" void func_0019F548(void* rider, sXform_BFE8* xf);
 extern "C" void func_0015E050(void* cam, sQuat_BFE8* a, sQuat_BFE8* b);
@@ -2801,9 +2801,9 @@ extern "C" void func_0019BFE8(void* vself)
         xf.pos = *(sQuat_BFE8*)(self + 0xAC0);
         zero = 0.0f;
 
-        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF140, zero));
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_XAxis, zero));
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_YAxis, zero));
-        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF160, (yaw + 80.0f) * 0.01745329424738884f));
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_ZAxis, (yaw + 80.0f) * 0.01745329424738884f));
         func_0019F3E8(rider, &xf);
         xf.pos = *(sQuat_BFE8*)(self + 0xAD0);
         xf.rot.w = 1.0f;
@@ -2814,9 +2814,9 @@ extern "C" void func_0019BFE8(void* vself)
         if (*(float*)(self + 0xAB0) >= 360.0f) {
             *(float*)(self + 0xAB0) -= 360.0f;
         }
-        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF160, 245.0f * 0.01745329424738884f));
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_ZAxis, 245.0f * 0.01745329424738884f));
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_YAxis, 320.0f * 0.01745329424738884f));
-        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(D_004FF140, (*(float*)(self + 0xAB0) + 90.0f) * 0.01745329424738884f));
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_XAxis, (*(float*)(self + 0xAB0) + 90.0f) * 0.01745329424738884f));
         func_0019F548(rider, &xf);
     }
     char* cam = (char*)SSXApp->RealFE;
@@ -4132,7 +4132,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3D0);
 // of a literal -1 that loop.c hoists after `e`; plain form 99.56%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sQuadPairCE { int x[8]; } __attribute__((aligned(16)));
-extern sQuadPairCE D_004FF230;
+extern sQuadPairCE tPose_Identity;
 
 struct sSlotEntryCE {
     int id;
@@ -4178,8 +4178,8 @@ extern "C" void* func_0019E3D0(sRiderSlotCE* self)
     *(int*)(p + 0xC24) = -1;
     *(int*)(p + 0xC28) = 0;
     *(int*)(p + 0xCCC) = 0;
-    *(sQuadPairCE*)(p + 0xC30) = D_004FF230;
-    *(sQuadPairCE*)(p + 0xC50) = D_004FF230;
+    *(sQuadPairCE*)(p + 0xC30) = tPose_Identity;
+    *(sQuadPairCE*)(p + 0xC50) = tPose_Identity;
     *(int*)(p + 0xCD4) = -1;
     *(int*)(p + 0xC78) = 0;
     *(int*)(p + 0xCC4) = 0;

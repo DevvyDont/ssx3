@@ -287,7 +287,7 @@ public:
 // Typed view of the render context (the unit declares GrMan as void* later).
 extern cUICtx_7DF8* D_004A289C_7df8 __asm__("GrMan");
 extern char t4mat_Identity[];
-extern sUIRS_7DF8 D_00501420_7df8 __asm__("D_00501420");
+extern sUIRS_7DF8 D_00501420_7df8 __asm__("sDrawState_s_defaultDrawState");
 extern "C" void func_0039EBE0(void* p);
 
 static inline void setF4_22_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_22 = v; }
@@ -1062,7 +1062,7 @@ struct cUIIcon_8A78 {
     sUITex_8A78* tex;        // 0x7C
 };
 extern cUICtx_8A78* D_004A289C_8a78 __asm__("GrMan");
-extern sM33_8A78 D_004FF170_8a78 __asm__("D_004FF170");
+extern sM33_8A78 D_004FF170_8a78 __asm__("t3mat_Identity");
 
 // PORT: PS2-only VU0 inline asm (a += b).
 static inline void vu0AddEq_8A78(sV4_8A78& a, const sV4_8A78& b)
@@ -1416,7 +1416,7 @@ unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void* func_0039FF50(void* self);
 extern "C" int func_003A0318(void* self, int a);
-extern char D_004A5A58[4];
+extern char gUISoundNull[4];
 
 struct sVE_9970 { short delta; short index; int (*fn)(void*, ...); };
 struct sVEv_9970 { short delta; short index; void (*fn)(void*, ...); };
@@ -1454,7 +1454,7 @@ static inline int isClear_9970(int flags)
  * (onWidgetEvent). The state's onWidgetListBox then gets the direction (0 / 3 back, 1 / 2 forward): result bit 0x100
  * plays keyframer event 8 or 9, bit 1 gives 1 and bit 0x10 the widget's mSound[0]. Previous (back) reports event 6
  * and direction 4 (keyframer event 3; bit 1 gives mSound[1]). The result goes to slot 2 of the engine's +0x14
- * listener (D_004A5A58 when none).
+ * listener (gUISoundNull when none).
  *
  * @param in  the input (On Tour const cUIInput* pInput)
  * @return 1 when the input was used, else 0 (On Tour returns bool)
@@ -1466,7 +1466,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, void* in)
     if (self->mNumEntries == 0)
         return 0;
     int result = 0;
-    char* listener = D_004A5A58;
+    char* listener = gUISoundNull;
     char* owner = (char*)func_0039FF50(((char*)self));
     if (*(char**)(owner + 0x14) != 0) {
         listener = *(char**)(owner + 0x14);

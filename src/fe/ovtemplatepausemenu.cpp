@@ -291,7 +291,7 @@ extern "C" void cGameComm_sendPauseCmd(void* self, int a1);
 extern "C" void cOVStateManager_removePDATemplate(void);
 // func_0039F190 returns its last list node in $v0; the unit declares it void.
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_004A2A54;
 extern int D_005366E8[];
 extern int D_004428F0[];
@@ -353,7 +353,7 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
     *(int*)((char*)self + 0xD0) = 1;
     cOVStateManager_removePDATemplate();
     func_0039F190_r(*(char**)((char*)self + 0x10) + 0x18, 1);
-    D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 #endif
 
@@ -423,12 +423,12 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* owne
 extern "C" void* func_0028B180();
 extern "C" void func_00289BB8(void* audio);
 extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int on);
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_004A2A54;
 extern int D_005366E8[];
 extern int D_004428F0[];
 extern unsigned char D_004A2468;
-extern int D_004A2594;
+extern int cUITemplate_MAP_mMapStyle;
 extern int D_004A2708;
 extern char str_Menu_b[];
 extern char str_help0[];
@@ -449,7 +449,7 @@ struct sVE_PMWE {
 struct sSnd_PMWE {
     sVE_PMWE* vt;
 };
-extern sSnd_PMWE D_004A5A58;
+extern sSnd_PMWE gUISoundNull;
 
 struct sWidget_PMWE {
     char pad_0x0[0x8];
@@ -503,7 +503,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
         return;
     switch (event) {
     case 5: {
-        sSnd_PMWE* snd = &D_004A5A58;
+        sSnd_PMWE* snd = &gUISoundNull;
         if (*(sSnd_PMWE**)(self->owner + 0x14) != 0)
             snd = *(sSnd_PMWE**)(self->owner + 0x14);
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Menu_b));
@@ -521,7 +521,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
             stopReplay_PMWE();
             cOVStateManager_removePDATemplate();
             func_0039F190_r(self->owner + 0x18, 1);
-            D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             func_00289BB8(func_0028B180());
             break;
         case 2:
@@ -558,7 +558,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
             cOVStateManager_triggerOverlay(0x20);
             break;
         case 11:
-            D_004A2594 = 2;
+            cUITemplate_MAP_mMapStyle = 2;
             cOVStateManager_triggerOverlay(0x21);
             break;
         case 12:
@@ -570,7 +570,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
     case 6:
         stopReplay_PMWE();
         cOVStateManager_removePDATemplate();
-        D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+        cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
         func_0039F190_r(self->owner + 0x18, 1);
         func_00289BB8(func_0028B180());
         break;

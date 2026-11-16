@@ -3534,7 +3534,7 @@ extern "C" void* cFloatMenuItem_preRender(void* self, void* item)
 //100%
 INCLUDE_ASM("util/menu", prettyFloat);
 #ifdef SKIP_ASM
-extern void* D_004A3E90;
+extern void* cBXString_EmptyString;
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cBXString_cBXString1(void* self, void* src);
 extern "C" int func_003194A8(void* str, const char* fmt, ...);
@@ -3585,7 +3585,7 @@ void* prettyFloat_impl(void* out, float value)
         fmt = str_pct_3g;
     }
     sBXStrDFD8 formatted;
-    formatted.p = (char*)D_004A3E90;
+    formatted.p = (char*)cBXString_EmptyString;
     func_003194A8(&formatted, fmt, fptodp(value));
     cBXString_cBXString1(out, &formatted);
     cBXString__cBXString(&formatted, 2);
@@ -6136,11 +6136,11 @@ extern "C" float func_002D1928(int n, float x)
 INCLUDE_ASM("util/menu", func_002D19B8);
 #ifdef SKIP_ASM
 extern "C" int func_0030A060(void* self, int a, int b, int c);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 extern "C" int func_002D19B8(int a, int b, int c)
 {
-    return func_0030A060(D_004A3DD8, a, b, c);
+    return func_0030A060(cWScriptMan_TheWScriptMan, a, b, c);
 }
 #endif
 
@@ -6149,12 +6149,12 @@ INCLUDE_ASM("util/menu", func_002D19E8);
 #ifdef SKIP_ASM
 extern "C" int func_0030A598(void* self, int id);
 extern "C" void func_0030A5C0(void* self, int id);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 extern "C" int func_002D19E8(int id)
 {
-    if (func_0030A598(D_004A3DD8, id) != 0) {
-        func_0030A5C0(D_004A3DD8, id);
+    if (func_0030A598(cWScriptMan_TheWScriptMan, id) != 0) {
+        func_0030A5C0(cWScriptMan_TheWScriptMan, id);
         return 1;
     }
     return 0;
@@ -6166,7 +6166,7 @@ INCLUDE_ASM("util/menu", cObjectInterface_runOnLoseFocusScript);
 #ifdef SKIP_ASM
 extern "C" int func_0030A2E8(void* self, int id);
 extern "C" void func_0030A548(void* self, int id);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 /**
  * Runs a world instance's on-lose-focus script, when it has one.
@@ -6179,8 +6179,8 @@ extern void* D_004A3DD8;
  */
 extern "C" int cObjectInterface_runOnLoseFocusScript(int id)
 {
-    if (func_0030A2E8(D_004A3DD8, id) != 0) {
-        func_0030A548(D_004A3DD8, id);
+    if (func_0030A2E8(cWScriptMan_TheWScriptMan, id) != 0) {
+        func_0030A548(cWScriptMan_TheWScriptMan, id);
         return 1;
     }
     return 0;
@@ -6193,7 +6193,7 @@ INCLUDE_ASM("util/menu", func_002D1A78);
 extern "C" void func_0030A610(int, int);
 
 extern "C" void func_002D1A78(int arg0) {
-    func_0030A610((*(int*)&D_004A3DD8), arg0);
+    func_0030A610((*(int*)&cWScriptMan_TheWScriptMan), arg0);
 }
 #endif
 //100%
@@ -6202,7 +6202,7 @@ INCLUDE_ASM("util/menu", func_002D1AA0);
 extern "C" void func_00309D20(int, int, int);
 
 extern "C" void func_002D1AA0(int arg0, int arg1) {
-    func_00309D20((*(int*)&D_004A3DD8), arg0, arg1);
+    func_00309D20((*(int*)&cWScriptMan_TheWScriptMan), arg0, arg1);
 }
 #endif
 
@@ -6210,11 +6210,11 @@ extern "C" void func_002D1AA0(int arg0, int arg1) {
 INCLUDE_ASM("util/menu", func_002D1AC8);
 #ifdef SKIP_ASM
 extern "C" int func_0030A688(void* self, int id);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 
 extern "C" int func_002D1AC8(int id)
 {
-    return func_0030A688(D_004A3DD8, id);
+    return func_0030A688(cWScriptMan_TheWScriptMan, id);
 }
 #endif
 

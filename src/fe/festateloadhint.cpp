@@ -75,7 +75,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onGainTransition);
 int GetHashValue32(char* str);
 extern char D_004A2BC8[];
 extern char str_pct_3dpct_pct[];
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
@@ -83,7 +83,7 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 /**
  * Shows the loading percentage on the hint screen's "%" text widget.
  *
- * The value is the float at D_004A5B64 + 0x38, printed as "%3d%%"; it is probably the load progress.
+ * The value is the float at cAppMan_TheAppMan + 0x38, printed as "%3d%%"; it is probably the load progress.
  *
  * @return always 0
  */
@@ -92,7 +92,7 @@ extern "C" int cFELoadHintState_onGainTransition(void* self)
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)D_004A5B64 + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;
@@ -180,7 +180,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadState_onGainTransition);
 int GetHashValue32(char* str);
 extern char D_004A2BC8[];
 extern char str_pct_3dpct_pct[];
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
@@ -188,7 +188,7 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 /**
  * Shows the loading percentage on the stats loading screen's "%" text widget.
  *
- * Same as cFELoadHintState_onGainTransition(): the float at D_004A5B64 + 0x38 printed as "%3d%%".
+ * Same as cFELoadHintState_onGainTransition(): the float at cAppMan_TheAppMan + 0x38 printed as "%3d%%".
  *
  * @return always 0
  */
@@ -197,7 +197,7 @@ extern "C" int cFELoadState_onGainTransition(void* self)
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)D_004A5B64 + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;
@@ -290,7 +290,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onGainTransition);
 int GetHashValue32(char* str);
 extern char D_004A2BC8[];
 extern char str_pct_3dpct_pct[];
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
@@ -298,7 +298,7 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 /**
  * Shows the loading percentage on the in-lodge loading screen's "%" text widget.
  *
- * Same as cFELoadHintState_onGainTransition(): the float at D_004A5B64 + 0x38 printed as "%3d%%".
+ * Same as cFELoadHintState_onGainTransition(): the float at cAppMan_TheAppMan + 0x38 printed as "%3d%%".
  *
  * @return always 0
  */
@@ -307,7 +307,7 @@ extern "C" int cFELoadStateInLodge_onGainTransition(void* self)
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)D_004A5B64 + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;

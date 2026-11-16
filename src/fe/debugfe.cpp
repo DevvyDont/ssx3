@@ -380,7 +380,7 @@ extern "C" void func_0017D260(void* self, void* ev)
 INCLUDE_ASM("fe/debugfe", func_0017D298);
 #ifdef SKIP_ASM
 extern void* D_0046D350[];
-extern int D_004A3E90;
+extern int cBXString_EmptyString;
 extern void* D_004A4E90;
 extern "C" void* func_002CC018(void* self);
 extern "C" void* func_001DA988(void* self, void* a, void* b);
@@ -433,7 +433,7 @@ extern "C" void* func_0017D298(char* self)
     sDbgOwner17D298 o11;
     o11.owner = self;
     func_001DB2B0(self + 0x1AAC, &o11);
-    int g = D_004A3E90;
+    int g = cBXString_EmptyString;
     char* app = (char*)SSXApp;
     *(int*)(self + 0x1C04) = g;
     *(int*)(self + 0x1C08) = g;
@@ -1869,7 +1869,7 @@ INCLUDE_ASM("fe/debugfe", cDebugFE_gainFocus);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void cGraphicsMan_UploadTextures(void* p);
-extern int D_004A4324;
+extern int cDepthFog_m_Enable;
 struct sVec3K17FA60 {
     int x, y, z;
     sVec3K17FA60() { x = 0; y = 0; z = 0; }
@@ -1877,7 +1877,7 @@ struct sVec3K17FA60 {
 typedef void (*tFn_17FA60)(void*, const sVec3K17FA60&);
 
 /**
- * Gives the debug front end focus: uploads the textures, clears D_004A4324 and sets a black clear colour.
+ * Gives the debug front end focus: uploads the textures, clears cDepthFog_m_Enable and sets a black clear colour.
  *
  * Calls cGraphicsMan_UploadTextures (On Tour cGraphicsMan::UploadTextures), then GrMan's slot 15 (SetClearColor) with (0, 0, 0).
  */
@@ -1886,7 +1886,7 @@ extern "C" void cDebugFE_gainFocus(void* self)
     char* graphicsMan;
     char* vt;
     cGraphicsMan_UploadTextures((char*)GrMan);
-    D_004A4324 = 0;
+    cDepthFog_m_Enable = 0;
     graphicsMan = (char*)GrMan;
     vt = *(char**)(graphicsMan + 0x10D8);
     ((tFn_17FA60)*(void**)(vt + 0x7C))(graphicsMan + *(short*)(vt + 0x78), sVec3K17FA60());

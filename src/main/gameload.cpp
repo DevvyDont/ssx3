@@ -91,14 +91,14 @@ extern "C" void* cObjNode_cObjNode1(void* p, int a);
 extern "C" void* func_002F0390();
 extern "C" void* cVisualEffectsMan_construct();
 extern "C" void* func_002D2100();
-extern char* D_004A5B64;
-extern int D_004A1228;
+extern char* cAppMan_TheAppMan;
+extern int cBESaveInterface_bDoReplay;
 extern int D_004A3484;
 extern void* cGameState_mpGame;
 extern char D_004A5988_gl __asm__("gBucketMan");
 extern char cBENewRaceInterface_newRace[];
 extern int D_00535BFC[];
-extern char D_004C5830[];
+extern char gCamTriggerMan[];
 extern char D_005047F8[];
 extern char str_Nash[];
 extern char str_DebugFont_b[];
@@ -208,7 +208,7 @@ struct sUIGL {
  * grid, the debug font, the world and its managers and loads the track (cGame_loadTrack). Then come the
  * replay, the network input sync (network games only) and the AI. Last are the views, the debug menu, the
  * transition and splash managers, the in-game audio, the UI engine, and the AI visual-effects, visual-effects
- * and stats nodes. When D_004A1228 is set (the 512 KB save buffer exists; probably a saved replay) the riders
+ * and stats nodes. When cBESaveInterface_bDoReplay is set (the 512 KB save buffer exists; probably a saved replay) the riders
  * are loaded here, the replay is restored from that buffer and the game enters state 16. Otherwise game state
  * 10 is preloaded and then entered.
  */
@@ -218,8 +218,8 @@ extern "C" void cGame_load(cGame* self)
     void** worlds = ((void**)&self->TransitionMan[0]);
     void* bm = &D_004A5988_gl;
     void** lights = ((void**)&self->SplashManager[0]);
-    func_00317530(D_004A5B64 + 0x38, 13.199999809265137f);
-    func_00317550(D_004A5B64 + 0x38, 43.5f);
+    func_00317530(cAppMan_TheAppMan + 0x38, 13.199999809265137f);
+    func_00317550(cAppMan_TheAppMan + 0x38, 43.5f);
     func_00195DE0(SSXApp->FELocale);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -240,7 +240,7 @@ extern "C" void cGame_load(cGame* self)
     func_0014BD98(cBE_getInterface_Fv(cBE_getBE(), 9));
     cBucketMan_init(bm, 9);
     func_00355260(bm, 1);
-    func_0016C918(D_004C5830);
+    func_0016C918(gCamTriggerMan);
     self->StreamPause = (cStreamPause*)cStreamPause_construct();
     self->OcclusionMan = (cOcclusionMan*)cOcclusionMan_cOcclusionMan(operator new(0x114, str_OcclusionMan, 0x20000000, 0));
     self->World = (cWorld*)cWorld_cWorld(operator new(0x18, str_World, 0, 0));
@@ -270,11 +270,11 @@ extern "C" void cGame_load(cGame* self)
         sVEntryVoidGL* vt = *(sVEntryVoidGL**)(ai + 0xCC);
         vt[2].fn(ai + vt[2].delta);
     }
-    func_00317550(D_004A5B64 + 0x38, 55.0f);
+    func_00317550(cAppMan_TheAppMan + 0x38, 55.0f);
     self->PlaybackMan = (cPlaybackMan*)cPlaybackMan_cPlaybackMan(operator new(0x7C, str_PlaybackMan, 0x20000000, 0), 0x28);
     cReplay_init(self->Replay);
     void* race = cBE_getInterface_Fv(SSXApp->BE, 5);
-    int replay = D_004A1228;
+    int replay = cBESaveInterface_bDoReplay;
     if (replay != 0) {
         cAI_initAIRiders((char*)self->AI);
         signed char* gs = (signed char*)cBENewRaceInterface_newRace;
@@ -327,7 +327,7 @@ extern "C" void cGame_load(cGame* self)
     }
     if (file != 0)
         cMemMan_free(file);
-    func_00317550(D_004A5B64 + 0x38, 93.0f);
+    func_00317550(cAppMan_TheAppMan + 0x38, 93.0f);
     for (unsigned int i = 0; i < 2; i++) {
         worlds[i] = func_002E4228(operator new(0x84, str_cTransitionMan, 0, 0), 3, i);
         lights[i] = cSplashManager_cSplashManager(operator new(0x1030, str_cSplashManager, 0, 0), 2, i);
@@ -337,7 +337,7 @@ extern "C" void cGame_load(cGame* self)
     self->SnowFall = (cSnowFall*)cSnowFall_cSnowFall(operator new(0x60, str_SnowFall, 0, 0), 2);
     self->mUpdateTick = 0;
     cSSXAudio_InGameLoad(gSSXAudio);
-    func_00317550(D_004A5B64 + 0x38, 99.0f);
+    func_00317550(cAppMan_TheAppMan + 0x38, 99.0f);
     sUIGL* ui = (sUIGL*)func_00397B08(operator new(0x70, str_UIEngine_b, 0, 0));
     self->UI = (cUIEngine*)ui;
     ui->p10 = (void*)SSXApp->FELocale;
@@ -417,7 +417,7 @@ struct sBXStr_F6B0 {
     sBXStr_F6B0(const sBXStr_F6B0&);
 };
 
-extern char* D_004A3E90;
+extern char* cBXString_EmptyString;
 extern int D_004A11B8;
 extern char str_data_worlds_c[];
 extern char str_big_b[];
@@ -428,7 +428,7 @@ extern char str_cWorldSound[];
 extern char str_cPS2FogParticleMan[];
 extern char D_004A2AA0[];
 extern char str_cam[];
-extern char D_004C5830[];
+extern char gCamTriggerMan[];
 extern void* D_004882E0[];
 
 extern "C" void* cBXString_cBXString2(sBXStr_F6B0* self, const char* s);
@@ -494,7 +494,7 @@ extern "C" void cGame_loadTrack(cGame* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     sBXStr_F6B0 name;
-    name.p = D_004A3E90;
+    name.p = cBXString_EmptyString;
     if (D_004A11B8 != 0) {
         sBXStr_F6B0 worldPath;
         sBXStr_F6B0 locName;
@@ -526,7 +526,7 @@ extern "C" void cGame_loadTrack(cGame* self)
     *(void**)&self->WorldSound = func_002B6AA0(cMemMan_alloc(0x250, str_cWorldSound, 0, 0), 0);
     cBXNash_initTheAIFwdDiffCache(self->BXNash);
     sBXStr_F6B0 dir;
-    dir.p = D_004A3E90;
+    dir.p = cBXString_EmptyString;
     *(int*)(*(char**)self->World + 0x3D4) = 0;
     {
         sBXStr_F6B0 worldPath;
@@ -548,7 +548,7 @@ extern "C" void cGame_loadTrack(cGame* self)
     {
         sBXStr_F6B0 worldPath;
         sBXStr_F6B0 camBasePath;
-        func_0016CA10_F6B0(D_004C5830, (func_003186D0(&camBasePath, D_004A2AA0, &dir), func_00318630(&worldPath, &camBasePath, str_cam), worldPath.p));
+        func_0016CA10_F6B0(gCamTriggerMan, (func_003186D0(&camBasePath, D_004A2AA0, &dir), func_00318630(&worldPath, &camBasePath, str_cam), worldPath.p));
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&camBasePath, 2);
     }
@@ -610,8 +610,8 @@ extern "C" void func_0036A290(void);
 
 extern void* gWorldTriggerManager;
 extern int D_004A2A54;
-extern char* D_004A5B64;
-extern char D_004D33A0[];
+extern char* cAppMan_TheAppMan;
+extern char gPaths[];
 extern char D_005047F8[];
 // The unit declares gBucketMan later as sGp2898 (8 bytes); bind a small-data alias here.
 extern char D_004A5988_gl __asm__("gBucketMan");
@@ -693,7 +693,7 @@ struct sObj20_FA98 {
  * AI, Replay, StreamPause, SectionMan, FXLoader, WorldLightMan, World, OcclusionMan, the track BigFile,
  * LoadIndicator (freed only), DebugFont and BXNash. Finally GrMan slots 113 and 50 (the box texture mBoxTextureID),
  * cGraphicsMan_PurgeTextures and func_0038ADB0, SSXApp->Game = 0, WorldSound deleted, the world triggers reset, the in-game
- * audio de-initialised and purged, the script engine purged, and D_004A2A54 and the word at D_004A5B64 + 0x34
+ * audio de-initialised and purged, the script engine purged, and D_004A2A54 and the word at cAppMan_TheAppMan + 0x34
  * cleared.
  */
 extern "C" void cGame_purge(char* self)
@@ -708,7 +708,7 @@ extern "C" void cGame_purge(char* self)
         sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)(*(char**)(iface + 0xC) + 8);
         vtEntry->fn(iface + vtEntry->delta);
     }
-    cCameraTriggerMan_cleanupOnExit(D_004C5830);
+    cCameraTriggerMan_cleanupOnExit(gCamTriggerMan);
     {
         cPS2GraphicsMan* be = GrMan;
         sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)be->mVtbl + 0x98);
@@ -724,7 +724,7 @@ extern "C" void cGame_purge(char* self)
     VDelete_FA98(*(char**)(self + 0x14), 0xC, 8);
     VDelete_FA98(*(char**)(self + 0x18), 0x4, 8);
     VDelete_FA98(*(char**)(self + 0x1C), 0x649C, 8);
-    func_0026AF00(D_004D33A0);
+    func_0026AF00(gPaths);
     func_00334850(*(void**)(self + 0x20));
     if (*(void**)(self + 0xA4) != 0) func_002CC048(*(void**)(self + 0xA4), 3);
     void* bm = &D_004A5988_gl;
@@ -736,7 +736,7 @@ extern "C" void cGame_purge(char* self)
     if (*(void**)(self + 0x40) != 0) cMultiParticleMan__cMultiParticleMan(*(void**)(self + 0x40), 3);
     if (*(void**)(self + 0x34) != 0) func_0026C588(*(void**)(self + 0x34), 3);
     if (*(void**)(self + 0x88) != 0) func_00351120(*(void**)(self + 0x88), 3);
-    cCameraTriggerMan_purge(D_004C5830);
+    cCameraTriggerMan_purge(gCamTriggerMan);
     func_002ECFA0();
     if (*(void**)(self + 0x84) != 0) func_0022E730(*(void**)(self + 0x84), 3);
     VDelete_FA98(*(char**)(self + 0xC), 0xCC, 8);
@@ -777,7 +777,7 @@ extern "C" void cGame_purge(char* self)
     cSSXScriptEngine_Purge(ScriptEngine);
     func_0036A290();
     D_004A2A54 = 0;
-    *(int*)(D_004A5B64 + 0x34) = 0;
+    *(int*)(cAppMan_TheAppMan + 0x34) = 0;
 }
 #endif
 
@@ -815,8 +815,8 @@ extern "C" void func_002867E8(void* a);
 extern void* gWorldTriggerManager;
 extern void* cOVStateManager_mpPDATemplate;
 extern cMgr230050* cBezierMan_TheBezierMan;
-extern int D_004A43C8;
-extern int D_004A4324;
+extern int cLightGlow_m_Enable;
+extern int cDepthFog_m_Enable;
 extern int cScreenTint_m_Enable;
 
 /**
@@ -824,7 +824,7 @@ extern int cScreenTint_m_Enable;
  * world.
  *
  * It also clears the PDA overlay template, calls helpers on the graphics manager, the world trigger manager
- * and the audio system, and turns the screen effects back on (D_004A4324, the screen tint, D_004A43C8).
+ * and the audio system, and turns the screen effects back on (cDepthFog_m_Enable, the screen tint, cLightGlow_m_Enable).
  */
 extern "C" void cGame_gainFocus(cGame* self)
 {
@@ -839,9 +839,9 @@ extern "C" void cGame_gainFocus(cGame* self)
     cWorld_init(self->World);
     func_002B68D0(gWorldTriggerManager);
     func_002867E8(gSSXAudio);
-    D_004A4324 = 1;
+    cDepthFog_m_Enable = 1;
     cScreenTint_m_Enable = 1;
-    D_004A43C8 = 1;
+    cLightGlow_m_Enable = 1;
 }
 #endif
 
@@ -858,7 +858,7 @@ extern "C" void cAvalanche_reset(void);
 extern "C" void cWorld_resetMap(void* world);
 extern "C" void cWScriptMan_runGlobalScripts(void* a);
 extern "C" void cWScriptMan_setupMissions(void* a);
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 // The unit declares gBucketMan later as sGp2898 (8 bytes); bind a small-data alias here.
 extern char D_004A5988_bm __asm__("gBucketMan");
 
@@ -879,7 +879,7 @@ extern "C" void cGame_resetWorld(cGame* self)
     cFocusMan_reset(*(void**)((char*)self->AI + 0xA4));
     cAvalanche_reset();
     cWorld_resetMap(self->World);
-    cWScriptMan_runGlobalScripts(D_004A3DD8);
+    cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
     cWScriptMan_setupMissions(self->WScriptMan);
 }
 #endif
@@ -945,7 +945,7 @@ extern "C" void cGame_partialRestart(cGame* self)
         sVEntry_230180b* vt2 = *(sVEntry_230180b**)(hudState + 8);
         vt2[24].fn(hudState + vt2[24].delta, 7, 0);
     }
-    cWScriptMan_runGlobalScripts(D_004A3DD8);
+    cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
     cWScriptMan_setupMissions(self->WScriptMan);
     func_00287108(func_0028B180());
 }
@@ -1017,7 +1017,7 @@ extern "C" void func_00103308(void* p, int arg);
 extern "C" void cWScriptMan_unloadSection(void* self, int i);
 extern void* D_004A2A00;
 extern void* D_004A3FF0;
-extern void* D_004A4028;
+extern void* cMultiParticleMan_TheMultiParticleMan;
 
 /**
  * Removes everything that belongs to a world section that is about to unload.
@@ -1033,7 +1033,7 @@ extern "C" void cGame_sectionUnloading(cGame* self, int id)
     func_00358700(id);
     func_00229408(D_004A2A00, id);
     func_00343C08(D_004A3FF0, id);
-    func_00357B90(D_004A4028, id);
+    func_00357B90(cMultiParticleMan_TheMultiParticleMan, id);
     cBucketMan_mergeBucket(bm, 1);
     func_003551A8(bm, 1, id);
     func_003551A8(bm, 8, id);
@@ -1082,7 +1082,7 @@ static inline bool isSectionLoaded_0430(sScriptCache_0430* c, int sectionId)
 extern "C" void func_00230430(void* self, int sectionId)
 {
     if (isSectionLoaded_0430((sScriptCache_0430*)cWorld_m_pTheWorld->m_pWScriptCache, sectionId)) {
-        func_00308B58_2(D_004A3DD8, sectionId);
+        func_00308B58_2(cWScriptMan_TheWScriptMan, sectionId);
     }
 }
 #endif
@@ -1137,7 +1137,7 @@ INCLUDE_ASM("main/gameload", func_00230558);
 extern "C" void cReplay_startReplay(void* a, int b, int c, int d);
 void func_002CC0B8(void* a, int b);
 extern int D_004A2A54;
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_00442910[];
 
@@ -1151,7 +1151,7 @@ struct sGameLoad_0558 {
 extern "C" void func_00230558(sGameLoad_0558* self)
 {
     D_005366E8[++D_004A2A54] = 8;
-    D_004A2A50 = D_00442910[0];
+    cPauseState_Flags = D_00442910[0];
     cReplay_startReplay(self->field_0x28, 0, 0, 0);
     func_002CC0B8(self->field_0xA4, 0);
 }
@@ -1164,7 +1164,7 @@ extern "C" void cReplay_stopReplay(void* a);
 void func_002CC0B8(void* a, int b);
 extern "C" void func_002CC460(void* a);
 extern int D_004A2A54;
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
 
@@ -1173,7 +1173,7 @@ extern "C" void func_002305C8(void* self)
     cReplay_stopReplay(*(void**)((char*)self + 0x28));
     func_002CC0B8(*(void**)((char*)self + 0xA4), 1);
     func_002CC460(*(void**)((char*)self + 0xA4));
-    D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 #endif
 
@@ -1264,7 +1264,7 @@ extern "C" void cFEAsyncManager_Update(void* p);
 extern "C" void func_001E1458(void);
 extern "C" void func_001F3188(void* p);
 
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern void* PadCache;
 extern unsigned int D_004A20CC;
 extern char str_90bc_fail_b[];
@@ -1295,7 +1295,7 @@ struct sObj48_2306B8 {
 static inline void pushState_2306B8(int state)
 {
     D_005366E8[++D_004A2A54] = state;
-    D_004A2A50 = D_004428F0[state];
+    cPauseState_Flags = D_004428F0[state];
 }
 
 static inline int inRace_2306B8(int s)
@@ -1313,7 +1313,7 @@ static inline int hasEvents_2306B8(char* list)
 
 static inline int paused_2306B8(void)
 {
-    return D_004A2A50 & 1;
+    return cPauseState_Flags & 1;
 }
 
 static inline int notPlaying_2306B8(char* pb)
@@ -1405,7 +1405,7 @@ static inline int updateState_2306B8(cGame* self)
                     pushState_2306B8(3);
                     func_00398038(((char*)self->UI));
                 } else {
-                    func_0030C820((char*)D_004A3DD8 + 0x1C4);
+                    func_0030C820((char*)cWScriptMan_TheWScriptMan + 0x1C4);
                 }
                 return 0;
             }
@@ -1460,15 +1460,15 @@ static inline int updateState_2306B8(cGame* self)
  *
  * While the views or the section manager are not ready, it only keeps streaming and the views going. Mission
  * overlays, the debug menu and the pause menu can take the frame first (they push a pause state). The pause
- * flags (D_004A2A50), the replay and the playback can skip the simulation buckets; then only buckets 5, 3 and
+ * flags (cPauseState_Flags), the replay and the playback can skip the simulation buckets; then only buckets 5, 3 and
  * 4 run. Every frame also updates the network, the front-end async manager and the load indicator.
  */
 extern "C" void cGame_update(cGame* self)
 {
     if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
-        *(int*)(D_004A5B64 + 0x34) = 1;
+        *(int*)(cAppMan_TheAppMan + 0x34) = 1;
     } else {
-        *(int*)(D_004A5B64 + 0x34) = func_002EE400(6) > 0.9f;
+        *(int*)(cAppMan_TheAppMan + 0x34) = func_002EE400(6) > 0.9f;
     }
     if (cGameComm_mGameComm != 0) {
         func_002570D8(cGameComm_mGameComm);
@@ -1492,14 +1492,14 @@ extern "C" void cGame_update(cGame* self)
                 if (!paused_2306B8()) {
                     cReplay_update((char*)self->Replay);
                 }
-                if (cReplay_isPauseAI((char*)self->Replay) == 0 && !(D_004A2A50 & 8)) {
+                if (cReplay_isPauseAI((char*)self->Replay) == 0 && !(cPauseState_Flags & 8)) {
                     char* w = (char*)ScriptEngine;
                     sVEntry_2306B8* vt = *(sVEntry_2306B8**)(w + 0x2A8);
                     vt[5].fn(w + vt[5].delta);
                 }
             }
             skip = 0;
-            if ((D_004A2A50 & 1) || cReplay_isPauseAI((char*)self->Replay) != 0) {
+            if ((cPauseState_Flags & 1) || cReplay_isPauseAI((char*)self->Replay) != 0) {
                 skip = 1;
             }
             if (!skip) {
@@ -1509,12 +1509,12 @@ extern "C" void cGame_update(cGame* self)
                 }
             }
             if (!skip) {
-                if (!(D_004A2A50 & 2)) {
+                if (!(cPauseState_Flags & 2)) {
                     cBucketMan_updateBucket(&gBucketMan, 1);
                 }
                 cBucketMan_updateBucket(&gBucketMan, 5);
                 cBucketMan_updateBucket(&gBucketMan, 6);
-                if (!(D_004A2A50 & 2)) {
+                if (!(cPauseState_Flags & 2)) {
                     cBucketMan_applyBucket(&gBucketMan, 1);
                 }
                 {
@@ -1522,10 +1522,10 @@ extern "C" void cGame_update(cGame* self)
                     sVEntry_2306B8* vt = *(sVEntry_2306B8**)(gameAI + 0xCC);
                     vt[3].fn(gameAI + vt[3].delta);
                 }
-                if (!(D_004A2A50 & 0x10)) {
+                if (!(cPauseState_Flags & 0x10)) {
                     cBucketMan_updateBucket(&gBucketMan, 2);
                 }
-                if (!(D_004A2A50 & 4)) {
+                if (!(cPauseState_Flags & 4)) {
                     cBucketMan_updateBucket(&gBucketMan, 3);
                 }
                 func_00309270((char*)self->WScriptMan);
@@ -1535,7 +1535,7 @@ extern "C" void cGame_update(cGame* self)
                 cBucketMan_mergeBucket(&gBucketMan, 1);
             } else {
                 cBucketMan_updateBucket(&gBucketMan, 5);
-                if (!(D_004A2A50 & 4)) {
+                if (!(cPauseState_Flags & 4)) {
                     cBucketMan_updateBucket(&gBucketMan, 3);
                 }
             }
@@ -1643,9 +1643,9 @@ extern "C" int cGame_loseFocus(cGame* self)
     cPS2GraphicsMan* mgr = GrMan;
     ((cMgr00230E98*)mgr)->v15(sVec3_00230E98(0.0f, 0.0f, 0.0f));
     ((cMgr00230E98*)GrMan)->f270 = 1;
-    D_004A4324 = 0;
+    cDepthFog_m_Enable = 0;
     cScreenTint_m_Enable = 0;
-    D_004A43C8 = 0;
+    cLightGlow_m_Enable = 0;
     func_00278718(ScriptEngine);
     func_001F3170(self->LoadIndicator);
     return 1;
@@ -1659,7 +1659,7 @@ INCLUDE_ASM("main/gameload", func_00230F40);
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0022E550(void* self);
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 
 class cGameState_0F40 {
 public:
@@ -1697,7 +1697,7 @@ extern "C" void func_00230F40(void* self_)
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame == 0 && self->hold != 0)
         return;
-    if (D_004A2A50 & 0x20)
+    if (cPauseState_Flags & 0x20)
         return;
     if (self->cur != 0 && (self->curId != 3 || self->nextId == 0))
         self->cur->tick();
@@ -2367,11 +2367,11 @@ extern "C" void func_00231B50(void* self, int value) {
 INCLUDE_ASM("main/gameload", func_00231C70);
 #ifdef SKIP_ASM
 extern "C" int cFadeScreen_loseFocus(void* self);
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 extern "C" int func_00231C70(void* self)
 {
-    if (*(float*)(D_004A5B64 + 0x38) == 100.0f) {
+    if (*(float*)(cAppMan_TheAppMan + 0x38) == 100.0f) {
         return cFadeScreen_loseFocus(self);
     }
     return 0;
@@ -2462,7 +2462,7 @@ struct sRS231D60 {
     int f10;
 };
 
-extern sRS231D60 D_00501420;
+extern sRS231D60 sDrawState_s_defaultDrawState;
 
 class cCtx231D60 {
 public:
@@ -2522,7 +2522,7 @@ extern "C" int func_00231D60(void* self)
     cPS2GraphicsMan* ctx = GrMan;
     ((cCtx231D60*)ctx)->top[1] = ((cCtx231D60*)ctx)->top[0];
     ((cCtx231D60*)ctx)->top++;
-    *((cCtx231D60*)GrMan)->top = D_00501420;
+    *((cCtx231D60*)GrMan)->top = sDrawState_s_defaultDrawState;
     ((cCtx231D60*)GrMan)->v26(0, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0);
     ((cCtx231D60*)GrMan)->v34(t4mat_Identity);
     ((cCtx231D60*)GrMan)->top->f8_5 = 31;
@@ -2620,7 +2620,7 @@ struct sGs_1FC0 {
     void SetF10(int v) { f10 = v; }
 };
 
-extern sGs_1FC0 D_00501420_1FC0 __asm__("D_00501420");
+extern sGs_1FC0 D_00501420_1FC0 __asm__("sDrawState_s_defaultDrawState");
 
 class cGfx_1FC0 {
 public:

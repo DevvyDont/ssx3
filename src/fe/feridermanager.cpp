@@ -319,7 +319,7 @@ struct sHalfED80 {
     sQuadED80 a, b;
     sHalfED80() {}
 };
-extern sHalfED80 D_004FF230;
+extern sHalfED80 tPose_Identity;
 extern "C" void cAnimModel_transform(void* model, void* pose);
 
 struct sFERiderED80 {
@@ -348,8 +348,8 @@ extern "C" void func_0019ED80(sFERiderED80* self)
     cRiderAnimBase_play(self->anim, 0x1B2, 0, -1.0f);
     func_00312598(self->anim, 0);
     sHalfED80 p[2];
-    p[1] = D_004FF230;
-    p[0] = D_004FF230;
+    p[1] = tPose_Identity;
+    p[0] = tPose_Identity;
     cAnimModel_transform(self->model, p);
     cFERider_initBoneMap(self);
 }
@@ -584,7 +584,7 @@ INCLUDE_ASM("fe/feridermanager", func_0019F2D0);
 #ifdef SKIP_ASM
 struct sQuadF2D0 { int x[4]; } __attribute__((aligned(16)));
 struct sHalfF2D0 { sQuadF2D0 a, b; };
-extern sQuadF2D0 D_004FF130;
+extern sQuadF2D0 t4vect_Origin;
 extern sQuadF2D0 D_004FF220;
 extern "C" void cAnimModel_transform(void* model, void* pose);
 extern "C" void cAnimModel_buildSkelMatrices(void* model);
@@ -600,9 +600,9 @@ extern "C" void func_0019F2D0(void* self)
     } else {
         p[0] = *(sHalfF2D0*)((char*)self + 0xC30);
         p[1] = *(sHalfF2D0*)((char*)self + 0xC50);
-        (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x24))[*(int*)((char*)self + 0xCAC)] = D_004FF130;
+        (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x24))[*(int*)((char*)self + 0xCAC)] = t4vect_Origin;
         (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x28))[*(int*)((char*)self + 0xCAC)] = D_004FF220;
-        (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x24))[*(int*)((char*)self + 0xCB0)] = D_004FF130;
+        (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x24))[*(int*)((char*)self + 0xCB0)] = t4vect_Origin;
         (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x28))[*(int*)((char*)self + 0xCB0)] = D_004FF220;
         cAnimModel_transform(*(void**)((char*)self + 0x8), p);
         cAnimModel_buildSkelMatrices(*(void**)((char*)self + 0x8));

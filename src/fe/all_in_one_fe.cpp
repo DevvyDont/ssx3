@@ -2088,7 +2088,7 @@ struct sV2_00C0 {
     sV2_00C0() {}
     sV2_00C0(const float& ax, const float& ay) : x(ax), y(ay) {}
 };
-extern sSettings_00C0 D_00535610_00C0 __asm__("D_00535610");
+extern sSettings_00C0 D_00535610_00C0 __asm__("cBEOptionInterface_mOption");
 extern char str_KM_H[];
 extern char str_MPH[];
 extern char D_004A2138[];
@@ -2209,7 +2209,7 @@ struct V2_0AD0 { float x, y; };
 struct V4_0AD0 { float x, y, z, w; };
 struct Big_0AD0 { unsigned int pad0 : 20; unsigned int mode : 2; unsigned int pad1 : 10; int rest[0xA1]; };
 struct Bits_0AD0 { int a, b; unsigned int lo : 5; int v : 5; unsigned int hi : 22; };
-extern Big_0AD0 D_00535610;
+extern Big_0AD0 cBEOptionInterface_mOption;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001E91F8(void*, void*);
@@ -2228,7 +2228,7 @@ extern "C" void func_00220AD0(char* self, char* obj, float t) {
     func_001E91F8(p, &a);
     func_001E9290(p, &b);
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    big = D_00535610;
+    big = cBEOptionInterface_mOption;
     if (ScriptEngine->mIsPlaying != 0 && big.mode != 2) {
         b.y *= 0.75f;
         a.y -= 60.0f;
@@ -3337,7 +3337,7 @@ extern char cOVState_PROFILE_vtbl[];
  * Destroys the profile overlay state through the memory-card base destructor func_001D5428().
  *
  * Stores cOVState_PROFILE_vtbl, then calls func_001D5428(), which clears the memory-card callbacks' state
- * pointer D_004A2028 and runs the cUIState destructor. Only @p self is declared: the destructor flags reach
+ * pointer cFEMemCard_mInstance and runs the cUIState destructor. Only @p self is declared: the destructor flags reach
  * func_001D5428() unchanged in the second argument register.
  *
  * @return no meaningful value (func_001D5428() returns nothing)
@@ -3671,7 +3671,7 @@ extern char cOVState_AUTOSAVE_vtbl[];
  * Destroys the autosave overlay state through the memory-card base destructor func_001D5428().
  *
  * Stores cOVState_AUTOSAVE_vtbl, then calls func_001D5428(), which clears the memory-card callbacks' state
- * pointer D_004A2028 and runs the cUIState destructor. Only @p self is declared: the destructor flags reach
+ * pointer cFEMemCard_mInstance and runs the cUIState destructor. Only @p self is declared: the destructor flags reach
  * func_001D5428() unchanged in the second argument register.
  *
  * @return no meaningful value (func_001D5428() returns nothing)
@@ -3866,7 +3866,7 @@ struct LV_24B8 {
     }
 };
 
-extern LV_24B8 D_004C9098;
+extern LV_24B8 luno_gLunoNil;
 
 extern "C" void func_002224B8(LV_24B8** out, char** state, LV_24B8* a, int c) {
     char* s = *state;
@@ -3874,7 +3874,7 @@ extern "C" void func_002224B8(LV_24B8** out, char** state, LV_24B8* a, int c) {
     LV_24B8* arr = new (str_LunoVMRegister, 0x20000000, 0) LV_24B8[n];
     *out = arr;
     arr[0].SetTable(a);
-    LV_24B8* b = &D_004C9098;
+    LV_24B8* b = &luno_gLunoNil;
     LV_24B8* p = *out;
     LV_24B8* q = &p[1];
     if (p[1].type == 4) luno_cLunoTable__cLunoTable_24B8(q, 2);

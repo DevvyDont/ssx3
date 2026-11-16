@@ -155,7 +155,7 @@ extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_00260F10(LobbyMan* self);
 // The shared empty-string pointer is read as const so one load serves several string inits.
-extern void* const D_004A3E90_94D0 __asm__("D_004A3E90");
+extern void* const D_004A3E90_94D0 __asm__("cBXString_EmptyString");
 extern char str_ps2ssx04_ea_com[];
 extern char str_StlBlock_b[];
 
@@ -5205,7 +5205,7 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void func_003194A8(void* str, const char* fmt, ...);
-extern void* D_004A3E90;
+extern void* cBXString_EmptyString;
 extern char str_Duplicate[];
 extern char str_Timeout[];
 extern char D_00480E20[];
@@ -5228,7 +5228,7 @@ extern "C" void* func_00260E50(void* ret, void* self, unsigned int tag)
     default:
     {
         sBXStr_00260E50 s;
-        s.p = (char*)D_004A3E90;
+        s.p = (char*)cBXString_EmptyString;
         func_003194A8(&s, D_00480E20, tag, tag >> 24, (tag >> 16) & 0xFF, (tag >> 8) & 0xFF, tag & 0xFF);
         cBXString_cBXString1(ret, &s);
         cBXString__cBXString(&s, 2);
@@ -5267,7 +5267,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00260F80);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_BuddyMan[];
-extern void* D_004A3E90;
+extern void* cBXString_EmptyString;
 
 // Creates the memory-card manager singleton (BuddyMan_mBuddyMan).
 extern "C" void func_00260F80(void)
@@ -5277,7 +5277,7 @@ extern "C" void func_00260F80(void)
     char* m = (char*)operator new(0xF0, str_BuddyMan, 0x20000000, 0);
     *(int*)(m + 0x40) = -1;
     *(int*)(m + 0xA4) = 0x15180;
-    *(void**)(m + 0xEC) = D_004A3E90;
+    *(void**)(m + 0xEC) = cBXString_EmptyString;
     *(int*)(m + 0xAC) = 0;
     *(int*)(m + 0xB0) = 0;
     *(int*)(m + 0xB4) = 0;
@@ -5407,14 +5407,14 @@ extern "C" void func_002614E8(BuddyMan* self, void* a1);
 extern "C" void func_003F0818(void* p, const char* a1, int tag, const char* a3, int a4);
 extern "C" void func_003F08E8(void* p, const char* name, int a2, int a3, const char* s1, const char* s2, void* cb, void* user);
 extern "C" void func_00268F18(void* self, void* a1, int a2);
-extern void* D_004A3E90;
+extern void* cBXString_EmptyString;
 extern char D_004A3330[];
 extern char str_cso[];
 
 
 struct sBXStr_261248 {
     char* p;
-    sBXStr_261248() : p((char*)D_004A3E90) {}
+    sBXStr_261248() : p((char*)cBXString_EmptyString) {}
     sBXStr_261248(const sBXStr_261248& o) : p(o.p) {}
 };
 
@@ -7384,7 +7384,7 @@ extern "C" void func_00266D58(void* self, void* ip);
 extern "C" void func_00266E30(void* self);
 extern void* D_004A33F4;
 extern float D_004A2F14;
-extern int D_00535610[];
+extern int cBEOptionInterface_mOption[];
 extern char str_pct_d_pct_d_pct_d_pct_d_b[];
 
 struct sVE_002639E0 {
@@ -7430,7 +7430,7 @@ extern "C" void func_002639E0(int* self, unsigned int ip, int chan, int a3, int 
     sprintf(buf, str_pct_d_pct_d_pct_d_pct_d_b, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
     self[1] = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, cBENetworkInterface_networkOpt.iPort, chan);
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    if ((D_00535610[0] >> 18) & 1) {
+    if ((cBEOptionInterface_mOption[0] >> 18) & 1) {
         func_00266D58(D_004A33F4, (void*)ip);
         func_00266E30(D_004A33F4);
     }
@@ -7545,7 +7545,7 @@ extern "C" void func_002642B8(void* self);
 extern "C" void func_00264CB8_2(void* self, int a) __asm__("func_00264CB8");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern void* D_004A33CC;
-extern int D_004A19C4;
+extern int cRealFE_mStartState;
 extern int D_00534B34[];
 extern int D_00534E58[];
 extern char str_cPreGameLoadScreen_c[];
@@ -7626,7 +7626,7 @@ extern "C" void func_00263CF0(int* self)
                 return;
             func_00264098();
             func_0025B800(LobbyMan_mLobbyMan);
-            D_004A19C4 = 0x34;
+            cRealFE_mStartState = 0x34;
             func_00262768((BuddyMan*)Mgr_263CF0(), 1, 9, ((int)LobbyMan_mLobbyMan->mOpponent), 0, 0);
             void* bi7 = cBE_getInterface_Fv(SSXApp->BE, 7);
             char* bi1 = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
@@ -10355,7 +10355,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00266D58);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A33F8;
-extern int D_00535610[];
+extern int cBEOptionInterface_mOption[];
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_003F6AB8(void* a0, int a1, int a2);
@@ -10374,7 +10374,7 @@ extern "C" void func_00266D58(void* self, void* a1)
             func_00266E88(self);
         } else {
             cBE_getInterface_Fv(cBE_getBE(), 4);
-            if ((D_00535610[0] >> 18) & 1) {
+            if ((cBEOptionInterface_mOption[0] >> 18) & 1) {
                 func_00266E30(self);
             }
         }

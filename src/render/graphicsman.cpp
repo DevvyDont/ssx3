@@ -133,7 +133,7 @@ fail:
 //100%
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_FlushRenderer);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern "C" void SYNCTASK_run(int a);
 extern "C" void func_003E5398(int a);
 
@@ -162,7 +162,7 @@ public:
 };
 
 /**
- * Spins until the renderer is idle: while virtual slot 18 returns 0, runs the app object's (D_004A5B64 + 8) slot 11,
+ * Spins until the renderer is idle: while virtual slot 18 returns 0, runs the app object's (cAppMan_TheAppMan + 8) slot 11,
  * SYNCTASK_run(0), func_003E5398(0) and the app's slot 12.
  */
 extern "C" void cGraphicsMan_FlushRenderer(cPS2GraphicsMan* self)
@@ -170,10 +170,10 @@ extern "C" void cGraphicsMan_FlushRenderer(cPS2GraphicsMan* self)
     for (;;) {
         sGmVEntryI_9C28* vt = (sGmVEntryI_9C28*)self->mVtbl;
         if (vt[18].fn((char*)self + vt[18].delta) != 0) break;
-        (*(cGmApp_9C28**)(D_004A5B64 + 0x8))->v11();
+        (*(cGmApp_9C28**)(cAppMan_TheAppMan + 0x8))->v11();
         SYNCTASK_run(0);
         func_003E5398(0);
-        (*(cGmApp_9C28**)(D_004A5B64 + 0x8))->v12();
+        (*(cGmApp_9C28**)(cAppMan_TheAppMan + 0x8))->v12();
     }
 }
 #endif
@@ -660,7 +660,7 @@ extern float cDepthFog_m_Density;
 struct sGmQuad_ABA0 {
     int v[4];
 };
-extern sGmQuad_ABA0 D_00504720;
+extern sGmQuad_ABA0 cDepthFog_m_Colour;
 
 struct sGmEntry_ABA0 {
     float x;            // 0x0
@@ -682,15 +682,15 @@ extern "C" void func_0036ABA0(void* self, int idx)
     *(float*)(e + 0x4) = cDepthFog_m_FarPlane;
     *(int*)(e + 0x8) = cDepthFog_m_Exponent;
     *(float*)(e + 0xC) = cDepthFog_m_Density;
-    *(sGmQuad_ABA0*)(e + 0x10) = D_00504720;
+    *(sGmQuad_ABA0*)(e + 0x10) = cDepthFog_m_Colour;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", func_0036AC00);
 #ifdef SKIP_ASM
-extern int D_004A4324;
-extern int D_004A4328;
+extern int cDepthFog_m_Enable;
+extern int cDepthFog_m_OverrideWP;
 extern void* D_004A4474;
 extern char D_00507B80[];
 extern "C" void func_0036ABA0(void* self, int idx);
@@ -725,10 +725,10 @@ struct sGmVEntry_AC00 {
 
 extern "C" void func_0036AC00(char* self, int idx, void* pkt2, int* handle)
 {
-    if (D_004A4324 == 0) {
+    if (cDepthFog_m_Enable == 0) {
         return;
     }
-    if (D_004A4328 != 0) {
+    if (cDepthFog_m_OverrideWP != 0) {
         func_0036ABA0(self, idx);
     }
     sGmEntry_AC00* e = &((sGmOwner_AC00*)self)->entries[idx];
@@ -1224,13 +1224,13 @@ extern "C" void func_0036C398(void* vself, int tbp, int tw, int th, int fbp, int
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036C740);
 #ifdef SKIP_ASM
-extern float D_004A43D4;
-extern float D_004A43D8;
-extern float D_004A43DC;
-extern float D_004A43E0;
-extern float D_004A43E4;
-extern float D_004A43F0;
-extern float D_004A43F4;
+extern float cLightGlow_m_PS2MinIntensity;
+extern float cLightGlow_m_PS2ModIntensity;
+extern float cLightGlow_m_PS2CopyIntensity;
+extern float cLightGlow_m_PS2FrameSrcScale;
+extern float cLightGlow_m_PS2FrameDstScale;
+extern float cLightGlow_m_PS2IntensityTex2;
+extern float cLightGlow_m_PS2IntensityTex3;
 
 struct sGmEntry_C740 {
     float v[7];
@@ -1244,23 +1244,23 @@ struct sGmOwner_C740 {
 extern "C" void func_0036C740(void* self, int idx)
 {
     char* e = (char*)&((sGmOwner_C740*)self)->entries[idx];
-    *(float*)(e + 0x0) = D_004A43D4;
-    *(float*)(e + 0x4) = D_004A43D8;
-    *(float*)(e + 0x8) = D_004A43DC;
-    *(float*)(e + 0xC) = D_004A43E0;
-    *(float*)(e + 0x10) = D_004A43E4;
-    *(float*)(e + 0x14) = D_004A43F0;
-    *(float*)(e + 0x18) = D_004A43F4;
+    *(float*)(e + 0x0) = cLightGlow_m_PS2MinIntensity;
+    *(float*)(e + 0x4) = cLightGlow_m_PS2ModIntensity;
+    *(float*)(e + 0x8) = cLightGlow_m_PS2CopyIntensity;
+    *(float*)(e + 0xC) = cLightGlow_m_PS2FrameSrcScale;
+    *(float*)(e + 0x10) = cLightGlow_m_PS2FrameDstScale;
+    *(float*)(e + 0x14) = cLightGlow_m_PS2IntensityTex2;
+    *(float*)(e + 0x18) = cLightGlow_m_PS2IntensityTex3;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036C790);
 #ifdef SKIP_ASM
-extern int D_004A43C8;
-extern int D_004A43CC;
+extern int cLightGlow_m_Enable;
+extern int cLightGlow_m_OverrideWP;
 extern int D_004A43D0;
-extern float D_004A43D8;
+extern float cLightGlow_m_PS2ModIntensity;
 extern float D_004A43E8;
 extern float D_004A43EC;
 extern float D_004A43F8;
@@ -1289,10 +1289,10 @@ struct sGmViews_C790 {
 extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
 {
     char* self = (char*)vself;
-    if (D_004A43C8 == 0) {
+    if (cLightGlow_m_Enable == 0) {
         return;
     }
-    if (D_004A43CC != 0) {
+    if (cLightGlow_m_OverrideWP != 0) {
         func_0036C740(self, idx);
     }
     sGmBloom_C790* e = (sGmBloom_C790*)(self + 0x6CD4) + idx;
@@ -1321,7 +1321,7 @@ extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
     int width = gmCall_AE20(self, 10);
     int fbp32 = drawFbp << 5;
     func_0036B9D8(self, fbp32, width, x0, y0, w, h, src, e->v[3] * 127.5f, tw, th, 0, 1, handle);
-    func_0036C188(self, src, tw, th, (int)(e->v[0] * 127.5f), (int)(D_004A43D8 * 127.5f), handle);
+    func_0036C188(self, src, tw, th, (int)(e->v[0] * 127.5f), (int)(cLightGlow_m_PS2ModIntensity * 127.5f), handle);
     for (int i = 0; i < 3; i++) {
         if (alpha[i] != 0) {
             func_0036C398(self, src, tw, th, fbp32, x0, y0, w, h, alpha[i], (int)(e->v[4] * 127.5f), handle);
@@ -1639,7 +1639,7 @@ struct sGmFrustum_D020 {
     sGmVec4_D020 vA0;       // 0xA0
 };
 
-extern sGmVec4_D020 D_004FF140;
+extern sGmVec4_D020 t4vect_XAxis;
 extern sGmVec4_D020 t4vect_YAxis;
 
 // PORT: PS2-only VU0 inline asm (v / s).
@@ -1777,7 +1777,7 @@ extern "C" void func_0036D020(tParticleEmitter* self, const sGmVec4_D020* dir, f
 {
     (*(sGmVec4_D020*)&self->V0) = gmDivD020(*dir, self->Damp);
     float len = gmLengthD020((*(sGmVec4_D020*)&self->V0));
-    const sGmVec4_D020* axis = (dir->x != 0.0f) ? &t4vect_YAxis : &D_004FF140;
+    const sGmVec4_D020* axis = (dir->x != 0.0f) ? &t4vect_YAxis : &t4vect_XAxis;
     sGmVec4_D020 norm = gmNormalizeD020(gmCrossD020(*dir, *axis));
     (*(sGmVec4_D020*)&self->Vr0) = gmScaleD020(gmScaleD020(norm, s), len);
     (*(sGmVec4_D020*)&self->Vr1) = gmScaleD020(gmCrossD020((*(sGmVec4_D020*)&self->V0), norm), s);
@@ -2412,10 +2412,10 @@ extern "C" void cStaticEmitter_update(cStaticEmitter* self, float dt)
         return;
     }
     if (timer < 0.0f) {
-        func_0036D428(((char*)self) + 0x10, 1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+        func_0036D428(((char*)self) + 0x10, 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
     } else {
-        func_0036D3E8((tParticleEmitter*)(((char*)self) + 0x10), 1.0f / (float)*(int*)(D_004A5B64 + 0x10));
-        self->Duration -= 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+        func_0036D3E8((tParticleEmitter*)(((char*)self) + 0x10), 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        self->Duration -= 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
         if (self->Duration < 0.0f) {
             self->Duration = 0.0f;
         }

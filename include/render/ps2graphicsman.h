@@ -132,7 +132,7 @@ struct cPS2GraphicsMan {
     tTextureRef mTexRefs[256];      // 0x280 [O]; [U] func_003696C8
     int mNumTexRefs;                // 0xE80 [O]; [P] GetNumTexRefs (func_003945F0)
     sDrawState* m_pCurrentDrawState; // 0xE84 [O]; [P] CurrentDrawState; [R] ctor points it at the stack
-    sDrawState m_drawStateStack[4]; // 0xE88 [O]; [R] ctor fills the default state (D_00501420)
+    sDrawState m_drawStateStack[4]; // 0xE88 [O]; [R] ctor fills the default state (sDrawState_s_defaultDrawState)
     sDrawState m_activeDrawState;   // 0xED8 [O]; [P] ActiveDrawState returns its address; [U] cGraphicsMan_ForceActiveDrawState
     sTextureState* m_pCurrentTextureState; // 0xEEC [O]
     sTextureState m_textureStateStack[4]; // 0xEF0 [O]; [R] ctor fills -1

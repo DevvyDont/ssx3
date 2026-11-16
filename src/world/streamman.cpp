@@ -218,7 +218,7 @@ extern "C" void cStreamMan_cancelStreamRequest(cStreamMan* self)
 //100%
 INCLUDE_ASM("world/streamman", cStreamMan_setBandWidthLimit);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 static inline int imax(int a, int b)
 {
@@ -229,14 +229,14 @@ static inline int imax(int a, int b)
  * Sets the streaming bandwidth limit and the matching number of timer ticks per 32 KB chunk.
  *
  * The rate is raised to at least 0x8000 bytes per second and kept in m_iDataRatePerSecond; m_fTicksPerChunk
- * becomes the app timer's ticks per second (word +0x10 of D_004A5B64) divided by rate / 32768.
+ * becomes the app timer's ticks per second (word +0x10 of cAppMan_TheAppMan) divided by rate / 32768.
  *
  * @param rate  bytes per second (On Tour iBytesPerSecond); values below 0x8000 are raised to it
  */
 extern "C" void cStreamMan_setBandWidthLimit(cStreamMan* self, int rate)
 {
     rate = imax(0x8000, rate);
-    char* app = D_004A5B64;
+    char* app = cAppMan_TheAppMan;
     self->m_iDataRatePerSecond = rate;
     self->m_fTicksPerChunk = (float)*(int*)(app + 0x10) / ((float)rate * 0.000030517578125f);
 }
@@ -264,7 +264,7 @@ struct sStreamMan7098 {
     int fE4;                    // 0xE4
 };
 
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 void* func_003A7218(void* self, int a1, int a2, int a3);
 extern "C" int func_003A7238(void* self, void* a, void* b);
 extern "C" void cWorldCache_signalPageLoadComplete(void* self, int a1);
@@ -284,7 +284,7 @@ extern "C" void func_003A7098(sStreamMan7098* self)
         }
     }
     if (self->fD4 != 0) {
-        int t = *(int*)(D_004A5B64 + 0x18);
+        int t = *(int*)(cAppMan_TheAppMan + 0x18);
         if (self->fE4 != t) {
             self->fE0 -= (float)(t - self->fE4);
             self->fE4 = t;
@@ -337,7 +337,7 @@ INCLUDE_ASM("world/streamman", func_003A7238);
 extern "C" unsigned int cWorldCache_addBxStreamDataTest(void* cache, int group, int id, int key, int size);
 extern "C" void func_003A8CD0_s(void* self, int group, int id, unsigned int key, int a4) __asm__("func_003A8CD0");
 extern "C" void MEM_copy(void* dst, void* src, int size);
-extern int D_004A47D0;
+extern int cStreamMan_NULLCHUNK;
 
 struct sStreamMan7238 {
     void* cache;                // 0x00
@@ -459,7 +459,7 @@ extern "C" int func_003A7238(void* self_, void* pcount_, void* pdata_)
                 self->remaining--;
                 if (self->flagC4 != 0)
                 {
-                    func_003A8CD0_s(self->cache, self->group, self->id, self->key, (int)&D_004A47D0);
+                    func_003A8CD0_s(self->cache, self->group, self->id, self->key, (int)&cStreamMan_NULLCHUNK);
                     self->flagC4 = 0;
                 }
             }

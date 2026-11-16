@@ -4,7 +4,7 @@
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEMissionInt[];
 extern void* D_0045ADF8[16];
-extern void* D_004A1238;
+extern void* cBEMissionInterface_instance;
 
 struct cBEMissionInterface {
     char pad_0x00[8];
@@ -22,13 +22,13 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getThis__Fv);
  */
 void* cBEMissionInterface_getThis()
 {
-    if (D_004A1238 == 0) {
+    if (cBEMissionInterface_instance == 0) {
         cBEMissionInterface* mem = (cBEMissionInterface*)cMemMan_alloc(0x14, str_BEMissionInt, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045ADF8;
-        D_004A1238 = mem;
+        cBEMissionInterface_instance = mem;
     }
-    return D_004A1238;
+    return cBEMissionInterface_instance;
 }
 #endif
 
@@ -85,14 +85,14 @@ struct sMissionEntry_0043D950
     char pad_0x58[0xC];
 };
 
-extern sMissionEntry_0043D950 D_0043D950[];
+extern sMissionEntry_0043D950 cBELibrary_locationDB[];
 extern signed char D_0043FA70[];
 
 /**
  * Counts the collectibles that exist across all locations of one peak.
  *
  * Sums the per-location collectible counts (D_0043FA70, On Tour cBELibrary::secCollectibles) over the 22
- * entries of the location table (D_0043D950) whose peak is @p owner.
+ * entries of the location table (cBELibrary_locationDB) whose peak is @p owner.
  *
  * @param owner  the peak (On Tour eBEPeakID)
  * @return the total number of collectibles on the peak
@@ -104,7 +104,7 @@ extern "C" int cBEMissionInterface_getTotalCollectForPeak(void* self, int owner)
     {
         for (int j = 0; j < 22; j++)
         {
-            if (D_0043D950[j].owner == owner)
+            if (cBELibrary_locationDB[j].owner == owner)
             {
                 sum += D_0043FA70[i + j];
             }
@@ -203,7 +203,7 @@ struct sEconChar_001535C0
     char pad[0xF88 - 22 * 12];
 };
 
-extern sMissionEntry_0043D950 D_0043D950[];
+extern sMissionEntry_0043D950 cBELibrary_locationDB[];
 extern sEconChar_001535C0 D_004A6CA8_econ[][10] __asm__("cBELibrary_profileLib");
 
 /**
@@ -225,7 +225,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int ride
     {
         for (int j = 0; j < 22; j++)
         {
-            if (D_0043D950[j].owner == owner)
+            if (cBELibrary_locationDB[j].owner == owner)
             {
                 sum += D_004A6CA8_econ[profile][character].records[i + j].count;
             }
@@ -252,7 +252,7 @@ struct sEconChar_00153688
     char pad[0xF88 - 22 * 12];
 };
 
-extern sMissionEntry_0043D950 D_0043D950[];
+extern sMissionEntry_0043D950 cBELibrary_locationDB[];
 extern sEconChar_00153688 cBELibrary_profileLib[][10];
 
 extern "C" int func_00153688(void* self, int profile, int character, int owner)
@@ -262,7 +262,7 @@ extern "C" int func_00153688(void* self, int profile, int character, int owner)
     {
         for (int j = 0; j < 22; j++)
         {
-            if (D_0043D950[j].owner == owner)
+            if (cBELibrary_locationDB[j].owner == owner)
             {
                 sum += cBELibrary_profileLib[profile][character].records[i + j].count;
             }
@@ -280,7 +280,7 @@ int cBELibrary_getRiderIndex(int);
 extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int rider, int owner);
 extern char D_004A6CAC[];
 
-// View of D_0043D950[].owner (offset 0x54); splat labels that address D_0043D9A4.
+// View of cBELibrary_locationDB[].owner (offset 0x54); splat labels that address D_0043D9A4.
 struct sMissionOwnerView_00153708
 {
     int owner;
@@ -383,7 +383,7 @@ struct sCfg_1539A8 {
     char pad[0x40];
     int base;           // 0x40
 };
-extern sCfg_1539A8 D_005305B0;
+extern sCfg_1539A8 cBELibrary_raceDB;
 extern char D_004A6CB0_raw[] __asm__("D_004A6CB0");
 extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 
@@ -391,19 +391,19 @@ extern "C" void func_001539A8(void* self, int rider, int idx, sBits8_1539A8* src
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
-    int bb = D_005305B0.base * 12;
+    int bb = cBELibrary_raceDB.base * 12;
     *(sBits8_1539A8*)(D_004A6CB0_raw + (idx * 12 + (c * 0xF88 + profile * 0x9B50 + bb))) = *src;
     int count = 0;
     for (int i = 0; i < 64; i++) {
         int off = i / 32 * 4;
         off += idx * 12;
-        off += D_005305B0.base * 12;
+        off += cBELibrary_raceDB.base * 12;
         off += c * 0xF88;
         off += profile * 0x9B50;
         if (*(unsigned int*)(D_004A6CB0_raw + off) & (1 << i))
             count++;
     }
-    char* p = D_004A6CA8_raw + ((idx + D_005305B0.base) * 12 + c * 0xF88 + profile * 0x9B50);
+    char* p = D_004A6CA8_raw + ((idx + cBELibrary_raceDB.base) * 12 + c * 0xF88 + profile * 0x9B50);
     *(signed char*)(p + 4) = count;
 }
 #endif
@@ -413,7 +413,7 @@ INCLUDE_ASM("be/beintmission", func_00153B00);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern int D_005305B0_3B00[] __asm__("D_005305B0");
+extern int D_005305B0_3B00[] __asm__("cBELibrary_raceDB");
 
 struct sEconRecord_00153B00
 {
@@ -474,7 +474,7 @@ struct sMissionDefView_00153C88
     int f4;
     char pad_0x08[0x1C];
 };
-extern sMissionDefView_00153C88 D_0043EE10_v00153C88[] __asm__("D_0043EE10");
+extern sMissionDefView_00153C88 D_0043EE10_v00153C88[] __asm__("cBELibrary_missionInfo");
 extern "C" int func_00154240(void* self, int id);
 
 class cMissionObj_00153C88
@@ -512,7 +512,7 @@ struct sMissionDefView_00153CD8
     int f8;
     char pad_0x0C[0x18];
 };
-extern sMissionDefView_00153CD8 D_0043EE10_v00153CD8[] __asm__("D_0043EE10");
+extern sMissionDefView_00153CD8 D_0043EE10_v00153CD8[] __asm__("cBELibrary_missionInfo");
 extern "C" int func_00154240(void* self, int id);
 
 class cMissionObj_00153CD8
@@ -544,7 +544,7 @@ struct sMissionDefView_00153D28
     int fC;
     char pad_0x10[0x14];
 };
-extern sMissionDefView_00153D28 D_0043EE10_v00153D28[] __asm__("D_0043EE10");
+extern sMissionDefView_00153D28 D_0043EE10_v00153D28[] __asm__("cBELibrary_missionInfo");
 extern "C" int func_00154240(void* self, int id);
 
 class cMissionObj_00153D28
@@ -676,7 +676,7 @@ struct sMissionDefView_00153F30
     int f14;
     char pad_0x18[0xC];
 };
-extern sMissionDefView_00153F30 D_0043EE10_v00153F30[] __asm__("D_0043EE10");
+extern sMissionDefView_00153F30 D_0043EE10_v00153F30[] __asm__("cBELibrary_missionInfo");
 extern "C" int func_00154240(void* self, int id);
 
 extern "C" int func_00153F30(void* self, int id)
@@ -697,7 +697,7 @@ struct sMissionDefView_00153F68
     int f14;
     char pad_0x18[0xC];
 };
-extern sMissionDefView_00153F68 D_0043EE10_v00153F68[] __asm__("D_0043EE10");
+extern sMissionDefView_00153F68 D_0043EE10_v00153F68[] __asm__("cBELibrary_missionInfo");
 extern "C" int func_00154240(void* self, int id);
 
 extern "C" int func_00153F68(void* self, int id)
@@ -712,7 +712,7 @@ INCLUDE_ASM("be/beintmission", func_00153FA0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's sMissionDef_0043EE10 is defined later (with func_00154240) and lacks
-// the fields at 0x18/0x1C; this local view of the same table binds to D_0043EE10.
+// the fields at 0x18/0x1C; this local view of the same table binds to cBELibrary_missionInfo.
 struct sMissionDefView_0043EE10
 {
     int id;             // 0x00
@@ -725,7 +725,7 @@ struct sMissionDefView_0043EE10
     char pad_0x20[0x2];
     short value;        // 0x22
 };
-extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("D_0043EE10");
+extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("cBELibrary_missionInfo");
 
 extern "C" int func_00154240(void* self, int id);
 
@@ -741,8 +741,8 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNextMissionID);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's sMissionDef_0043EE10 is defined later (with func_00154240) and lacks
-// the fields at 0x18/0x1C; this local view of the same table binds to D_0043EE10.
-extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("D_0043EE10");
+// the fields at 0x18/0x1C; this local view of the same table binds to cBELibrary_missionInfo.
+extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("cBELibrary_missionInfo");
 
 extern "C" int func_00154240(void* self, int id);
 
@@ -750,7 +750,7 @@ extern "C" int func_00154240(void* self, int id);
  * Returns the ID of the mission that follows a given one.
  *
  * Finds the mission's index with func_00154240() (On Tour getMissionIdx, which asserts "Mission id not found")
- * and reads the next-mission field (+0x1C) of its mission table entry (D_0043EE10, On Tour
+ * and reads the next-mission field (+0x1C) of its mission table entry (cBELibrary_missionInfo, On Tour
  * cBELibrary::missionInfo).
  *
  * @param id  the current mission's ID
@@ -855,12 +855,12 @@ struct sMissionDef_0043EE10
     short value;        // 0x22
 };
 
-extern sMissionDef_0043EE10 D_0043EE10[];
+extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
 
 extern "C" int func_00154240(void* self, int id)
 {
     for (int i = 0; i < 88; i++) {
-        if (D_0043EE10[i].id == id) {
+        if (cBELibrary_missionInfo[i].id == id) {
             return i;
         }
     }
@@ -878,7 +878,7 @@ extern int D_005305F0[];
  * Counts the missions on the current race's location.
  *
  * @return cBEMissionInterface_getNumberMissionsOnTrack() for the race's location (D_005305F0, iLocationIdx of
- *         the cBERaceDB copy at D_005305B0)
+ *         the cBERaceDB copy at cBELibrary_raceDB)
  */
 extern "C" int cBEMissionInterface_getNumberMissions(void* self)
 {
@@ -889,7 +889,7 @@ extern "C" int cBEMissionInterface_getNumberMissions(void* self)
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberMissionsOnTrack);
 #ifdef SKIP_ASM
-extern sMissionDef_0043EE10 D_0043EE10[];
+extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
 
 /**
  * Counts the missions set on one location (track).
@@ -901,7 +901,7 @@ extern "C" int cBEMissionInterface_getNumberMissionsOnTrack(void* self, int grou
 {
     int n = 0;
     for (int i = 0; i < 88; i++) {
-        if (D_0043EE10[i].group == group) {
+        if (cBELibrary_missionInfo[i].group == group) {
             n++;
         }
     }
@@ -919,9 +919,9 @@ extern "C" int func_001542E0(void* self, int group)
     int n = 0;
     for (int i = 0; i < 88; i++)
     {
-        if (D_0043EE10[i].group == group)
+        if (cBELibrary_missionInfo[i].group == group)
         {
-            if (cBEMissionInterface_isMissionCompleted(self, D_0043EE10[i].id))
+            if (cBEMissionInterface_isMissionCompleted(self, cBELibrary_missionInfo[i].id))
                 n++;
         }
     }
@@ -932,7 +932,7 @@ extern "C" int func_001542E0(void* self, int group)
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberMissionsOnPeak);
 #ifdef SKIP_ASM
-// One 0x24-byte entry of the mission table at D_0043EE10.
+// One 0x24-byte entry of the mission table at cBELibrary_missionInfo.
 struct sMissionDef_00154368
 {
     int id;             // 0x00
@@ -941,8 +941,8 @@ struct sMissionDef_00154368
     char pad_0x14[0x10];
 };
 
-extern sMissionEntry_0043D950 D_0043D950[];
-extern sMissionDef_00154368 D_0043EE10_00154368[] __asm__("D_0043EE10");
+extern sMissionEntry_0043D950 cBELibrary_locationDB[];
+extern sMissionDef_00154368 D_0043EE10_00154368[] __asm__("cBELibrary_missionInfo");
 
 /**
  * Counts the missions set on any location of one peak.
@@ -957,7 +957,7 @@ extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(void* self, int owner
     {
         for (int j = 0; j < 22; j++)
         {
-            if (D_0043D950[j].owner == owner)
+            if (cBELibrary_locationDB[j].owner == owner)
             {
                 if (D_0043EE10_00154368[i].group == j)
                 {
@@ -991,11 +991,11 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(void* self, 
     {
         for (int j = 0; j < 22; j++)
         {
-            if (D_0043EE10[i].group == j)
+            if (cBELibrary_missionInfo[i].group == j)
             {
-                if (D_0043D950[j].owner == owner)
+                if (cBELibrary_locationDB[j].owner == owner)
                 {
-                    if (cBEMissionInterface_isMissionCompleted(self, D_0043EE10[i].id))
+                    if (cBEMissionInterface_isMissionCompleted(self, cBELibrary_missionInfo[i].id))
                         n++;
                 }
             }
@@ -1011,7 +1011,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberCompletedMissionsOnP
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(void* self, int owner);
 
-// View of D_0043D950[].owner (offset 0x54); splat labels that address D_0043D9A4.
+// View of cBELibrary_locationDB[].owner (offset 0x54); splat labels that address D_0043D9A4.
 struct sMissionOwnerView_001544D0
 {
     int owner;
@@ -1049,7 +1049,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* 
     int n = 0;
     for (int i = 0; i < 88; i++)
     {
-        if (D_0043D9A4[D_0043EE10[i].group].owner == owner)
+        if (D_0043D9A4[cBELibrary_missionInfo[i].group].owner == owner)
         {
             n += (D_004A6CA8_flags[profile][character].flags[i] >> 3) & 1;
         }
@@ -1073,15 +1073,15 @@ extern "C" int func_00154588(void* self, int a)
 //100%
 INCLUDE_ASM("be/beintmission", func_001545B0);
 #ifdef SKIP_ASM
-extern sMissionDef_0043EE10 D_0043EE10[];
+extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
 
 extern "C" int func_001545B0(void* self, int index, int group)
 {
     int n = 0;
     for (int i = 0; i < 88; i++) {
-        if (D_0043EE10[i].group == group) {
+        if (cBELibrary_missionInfo[i].group == group) {
             if (n == index) {
-                return D_0043EE10[i].id;
+                return cBELibrary_missionInfo[i].id;
             }
             n++;
         }
@@ -1174,13 +1174,13 @@ extern "C" void* cBEMissionInterface_getPictureFileName(void* self, int id)
 //100%
 INCLUDE_ASM("be/beintmission", func_001547A0);
 #ifdef SKIP_ASM
-extern sMissionDef_0043EE10 D_0043EE10[];
+extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
 
 extern "C" int func_001547A0(void* self, int id)
 {
     for (int i = 0; i < 88; i++) {
-        if (D_0043EE10[i].id == id) {
-            return D_0043EE10[i].value;
+        if (cBELibrary_missionInfo[i].id == id) {
+            return cBELibrary_missionInfo[i].value;
         }
     }
     return 0;

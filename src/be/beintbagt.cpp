@@ -16,7 +16,7 @@ struct cBEBAGTInterface {
     int field_0x8;
     void* vtable;
 };
-extern void* D_004A1210;
+extern void* cBEBAGTInterface_instance;
 
 //100%
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getThis__Fv);
@@ -27,21 +27,21 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getThis__Fv);
  * The first call allocates 0x10 bytes tagged "BEBAGTInt", stores the vtable D_0045ACD8, calls its virtual
  * slot 2 (discard) and clears bIsActive (+0x8).
  *
- * @return the BAGT interface (D_004A1210)
+ * @return the BAGT interface (cBEBAGTInterface_instance)
  */
 void* cBEBAGTInterface_getThis()
 {
-    if (D_004A1210 == 0) {
+    if (cBEBAGTInterface_instance == 0) {
         cBEBAGTInterface* mem = (cBEBAGTInterface*)cMemMan_alloc(0x10, str_BEBAGTInt, 0, 0);
-        D_004A1210 = mem;
+        cBEBAGTInterface_instance = mem;
         sVTableBAGT* vt = &D_0045ACD8;
         short delta = vt->field_0x10;
         void (*fn)(void*) = vt->fn;
         mem->vtable = vt;
         fn((char*)mem + delta);
-        ((cBEBAGTInterface*)D_004A1210)->field_0x8 = 0;
+        ((cBEBAGTInterface*)cBEBAGTInterface_instance)->field_0x8 = 0;
     }
-    return D_004A1210;
+    return cBEBAGTInterface_instance;
 }
 #endif
 
@@ -452,14 +452,14 @@ extern "C" int func_001503F8(void* self, int rider, int idx, int second)
 }
 #endif
 
-extern void* D_00530600[];
+extern void* cBELibrary_grabPointsDB[];
 
 //100%
 INCLUDE_ASM("be/beintbagt", func_00150528__FPvi);
 #ifdef SKIP_ASM
 int func_00150528(void* self, int a1)
 {
-    return *(int*)((char*)(void*)D_00530600 + a1 * 8);
+    return *(int*)((char*)(void*)cBELibrary_grabPointsDB + a1 * 8);
 }
 #endif
 
@@ -477,7 +477,7 @@ struct sBAGTTable {
 
 int func_00150540(void* self, int a1)
 {
-    return ((sBAGTTable*)D_00530600)->entries[a1].value;
+    return ((sBAGTTable*)cBELibrary_grabPointsDB)->entries[a1].value;
 }
 #endif
 

@@ -10,7 +10,7 @@
 //                     readFromReplayFrame. No vtable (dtor cMultiParticle__cMultiParticle is called directly).
 //   cMultiParticleMan 0x10: operator new(0x10, "MultiParticleMan") + ctor func_003579C8 in cGame (main/gameload.cpp;
 //                     cGame::MultiParticleMan, main/game.h +0x40). Instance cMultiParticleMan::TheMultiParticleMan =
-//                     D_004A4028 (gp-relative; the ctor stores it, the dtor clears it; playbackman reads it).
+//                     cMultiParticleMan_TheMultiParticleMan (gp-relative; the ctor stores it, the dtor clears it; playbackman reads it).
 //
 // A FLAT layout, like main/game.h. Evidence tags: [R] ctors/dtor/allocation sizes; [U] matched retail use; [O] SSX On
 // Tour's DWARF (identical members and offsets).

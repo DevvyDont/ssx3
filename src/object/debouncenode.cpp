@@ -1315,13 +1315,13 @@ void* func_00344348(void* self)
 //100%
 INCLUDE_ASM("object/debouncenode", func_00344368);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern "C" void func_003443A8(void* self);
 
 extern "C" void func_00344368(void* self, int a1)
 {
     char* s = (char*)self;
-    char* g = D_004A5B64;
+    char* g = cAppMan_TheAppMan;
     *(int*)(s + 0x4) = a1;
     *(int*)(s + 0x1DC) = 0;
     *(float*)(s + 0x1E4) = 1.0f / (float)*(int*)(g + 0x10);

@@ -84,7 +84,7 @@ struct cKeyboardPopup {
     int mbTransistionDone;          // 0x41C [O] (EA's spelling); [R] ctor zeroes; [U] set by the first onGainTransition;
                                     //       setInputText calls updateEdit only when set
     int mbPopOnEnd;                 // 0x420 [O]; [R] ctor 1; [U] pressKey's accept key pops the state stack when set
-    char* mszStatic;                // 0x424 [O] cBXString; [R] ctor stores the empty-string rep D_004A3E90 then
+    char* mszStatic;                // 0x424 [O] cBXString; [R] ctor stores the empty-string rep cBXString_EmptyString then
                                     //       cBXString_Reset, the dtor destroys it; [U] setStatic(const char*) (func_001CCF00)
     unsigned short* mpustrStatic;   // 0x428 [O]; [R] ctor zeroes, the dtor frees it; [U] cKeyboardPopup_setStatic copies
                                     //       the unicode string into it before the screen exists

@@ -118,19 +118,19 @@ INCLUDE_ASM("seg/seg_2125C8", cRiderAnimBase_initAIAnimEventMap);
 extern "C" int cMemMan_alloc(int, char *, int, int);
 extern "C" void cAIAnimEventMap_initMaps(int);
 extern char str_AIAnimEventMap[];
-extern int D_004A3DFC;
+extern int cRiderAnimBase_AIAnimEventMap;
 
 /**
  * Allocates the shared AI animation event map and fills it.
  *
- * Allocates 0x6D4 bytes ("AIAnimEventMap"), keeps the pointer in D_004A3DFC and runs
+ * Allocates 0x6D4 bytes ("AIAnimEventMap"), keeps the pointer in cRiderAnimBase_AIAnimEventMap and runs
  * cAIAnimEventMap_initMaps() on it.
  */
 extern "C" void cRiderAnimBase_initAIAnimEventMap(void) {
     int temp_2;
 
     temp_2 = cMemMan_alloc(0x6D4, str_AIAnimEventMap, 0, 0);
-    D_004A3DFC = temp_2;
+    cRiderAnimBase_AIAnimEventMap = temp_2;
     cAIAnimEventMap_initMaps(temp_2);
 }
 #endif
@@ -139,10 +139,10 @@ extern "C" void cRiderAnimBase_initAIAnimEventMap(void) {
 INCLUDE_ASM("seg/seg_2125C8", func_003118A8);
 #ifdef SKIP_ASM
 extern "C" void operator_delete__FPi(int);
-extern int D_004A3DFC;
+extern int cRiderAnimBase_AIAnimEventMap;
 
 extern "C" void func_003118A8(void) {
-    operator_delete__FPi(D_004A3DFC);
-    D_004A3DFC = 0;
+    operator_delete__FPi(cRiderAnimBase_AIAnimEventMap);
+    cRiderAnimBase_AIAnimEventMap = 0;
 }
 #endif

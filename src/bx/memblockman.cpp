@@ -209,14 +209,14 @@ extern const char str_m_container64[];
 extern const char str_m_container128[];
 extern const char str_m_container256[];
 extern const char str_m_container512[];
-extern void* D_004A5B60;
-extern void* D_004A5B50;
-extern void* D_004A5B5C;
-extern void* D_004A5B6C;
-extern void* D_004A5B74;
-extern void* D_004A5B68;
-extern void* D_004A5B58;
-extern int D_004A3EC8;
+extern void* cMemBlockMan_m_container8;
+extern void* cMemBlockMan_m_container16;
+extern void* cMemBlockMan_m_container32;
+extern void* cMemBlockMan_m_container64;
+extern void* cMemBlockMan_m_container128;
+extern void* cMemBlockMan_m_container256;
+extern void* cMemBlockMan_m_container512;
+extern int cMemBlockMan_m_initialized;
 
 /**
  * Creates the seven fixed-size block pools ("m_container8" to "m_container512") and marks the block manager
@@ -224,14 +224,14 @@ extern int D_004A3EC8;
  */
 extern "C" void cMemBlockMan_initialize(void)
 {
-    D_004A5B60 = func_003200E8(cMemMan_alloc(0x804, str_m_container8, 0x1000000, 0));
-    D_004A5B50 = func_00320120(cMemMan_alloc(0x2004, str_m_container16, 0x2000000, 0));
-    D_004A5B5C = func_00320158(cMemMan_alloc(0x6004, str_m_container32, 0x3000000, 0));
-    D_004A5B6C = func_00320190(cMemMan_alloc(0x32004, str_m_container64, 0x4000000, 0));
-    D_004A5B74 = func_003201D8(cMemMan_alloc(0x25804, str_m_container128, 0x5000000, 0));
-    D_004A5B68 = func_00320220(cMemMan_alloc(0x20004, str_m_container256, 0x6000000, 0));
-    D_004A5B58 = func_00320270(cMemMan_alloc(0x20004, str_m_container512, 0x7000000, 0));
-    D_004A3EC8 = 1;
+    cMemBlockMan_m_container8 = func_003200E8(cMemMan_alloc(0x804, str_m_container8, 0x1000000, 0));
+    cMemBlockMan_m_container16 = func_00320120(cMemMan_alloc(0x2004, str_m_container16, 0x2000000, 0));
+    cMemBlockMan_m_container32 = func_00320158(cMemMan_alloc(0x6004, str_m_container32, 0x3000000, 0));
+    cMemBlockMan_m_container64 = func_00320190(cMemMan_alloc(0x32004, str_m_container64, 0x4000000, 0));
+    cMemBlockMan_m_container128 = func_003201D8(cMemMan_alloc(0x25804, str_m_container128, 0x5000000, 0));
+    cMemBlockMan_m_container256 = func_00320220(cMemMan_alloc(0x20004, str_m_container256, 0x6000000, 0));
+    cMemBlockMan_m_container512 = func_00320270(cMemMan_alloc(0x20004, str_m_container512, 0x7000000, 0));
+    cMemBlockMan_m_initialized = 1;
 }
 #endif
 
@@ -248,36 +248,36 @@ void* func_00320368_impl(void* pool, unsigned int align) __asm__("func_00320368_
 void* func_003203B8_impl(void* pool, unsigned int align) __asm__("func_003203B8__FPv");
 void* func_00320408_impl(void* pool, unsigned int align) __asm__("func_00320408__FPv");
 void* func_00320448_impl(void* pool, unsigned int align) __asm__("func_00320448__FPv");
-extern void* D_004A5B60;
-extern void* D_004A5B50;
-extern void* D_004A5B5C;
-extern void* D_004A5B6C;
-extern void* D_004A5B74;
-extern void* D_004A5B68;
-extern void* D_004A5B58;
-extern int D_004A3EC8;
+extern void* cMemBlockMan_m_container8;
+extern void* cMemBlockMan_m_container16;
+extern void* cMemBlockMan_m_container32;
+extern void* cMemBlockMan_m_container64;
+extern void* cMemBlockMan_m_container128;
+extern void* cMemBlockMan_m_container256;
+extern void* cMemBlockMan_m_container512;
+extern int cMemBlockMan_m_initialized;
 
 // PORT: binds the real 2-arg body; the unit declares a 1-arg prototype used by callers
 extern "C" void* func_00319E48_impl(unsigned int size, unsigned int align) __asm__("func_00319E48");
 extern "C" void* func_00319E48_impl(unsigned int size, unsigned int align)
 {
     size = size > align ? size : align;
-    if (D_004A3EC8) {
+    if (cMemBlockMan_m_initialized) {
         size = size + (-(size & 3) & 3);
         if (size <= 8)
-            return func_003202C0_impl(D_004A5B60, align);
+            return func_003202C0_impl(cMemBlockMan_m_container8, align);
         if (size <= 0x10)
-            return func_003202F8_impl(D_004A5B50, align);
+            return func_003202F8_impl(cMemBlockMan_m_container16, align);
         if (size <= 0x20)
-            return func_00320330_impl(D_004A5B5C, align);
+            return func_00320330_impl(cMemBlockMan_m_container32, align);
         if (size <= 0x40)
-            return func_00320368_impl(D_004A5B6C, align);
+            return func_00320368_impl(cMemBlockMan_m_container64, align);
         if (size <= 0x80)
-            return func_003203B8_impl(D_004A5B74, align);
+            return func_003203B8_impl(cMemBlockMan_m_container128, align);
         if (size <= 0x100)
-            return func_00320408_impl(D_004A5B68, align);
+            return func_00320408_impl(cMemBlockMan_m_container256, align);
         if (size <= 0x200)
-            return func_00320448_impl(D_004A5B58, align);
+            return func_00320448_impl(cMemBlockMan_m_container512, align);
     } else
         size = 0x201;
     return func_00319A90(size, align > 7 ? align : 8, 0, 0);
@@ -294,13 +294,13 @@ void func_003204B8(void* pool, void** p);
 void func_003204D0(void* pool, void** p);
 void func_003204E8(void* pool, void** p);
 void func_00320500(void* pool, void** p);
-extern void* D_004A5B60;
-extern void* D_004A5B50;
-extern void* D_004A5B5C;
-extern void* D_004A5B6C;
-extern void* D_004A5B74;
-extern void* D_004A5B68;
-extern void* D_004A5B58;
+extern void* cMemBlockMan_m_container8;
+extern void* cMemBlockMan_m_container16;
+extern void* cMemBlockMan_m_container32;
+extern void* cMemBlockMan_m_container64;
+extern void* cMemBlockMan_m_container128;
+extern void* cMemBlockMan_m_container256;
+extern void* cMemBlockMan_m_container512;
 
 template <unsigned int N>
 inline bool inPool_319F68(void* pool, void* p)
@@ -310,33 +310,33 @@ inline bool inPool_319F68(void* pool, void* p)
 
 extern "C" void func_00319F68(void* p)
 {
-    if (inPool_319F68<0x800>(D_004A5B60, p))
-        func_00320488(D_004A5B60, (void**)p);
-    else if (inPool_319F68<0x2000>(D_004A5B50, p))
-        func_00320498(D_004A5B50, (void**)p);
-    else if (inPool_319F68<0x6000>(D_004A5B5C, p))
-        func_003204A8(D_004A5B5C, (void**)p);
-    else if (inPool_319F68<0x32000>(D_004A5B6C, p))
-        func_003204B8(D_004A5B6C, (void**)p);
-    else if (inPool_319F68<0x25800>(D_004A5B74, p))
-        func_003204D0(D_004A5B74, (void**)p);
-    else if (inPool_319F68<0x20000>(D_004A5B68, p))
-        func_003204E8(D_004A5B68, (void**)p);
-    else if (inPool_319F68<0x20000>(D_004A5B58, p))
-        func_00320500(D_004A5B58, (void**)p);
+    if (inPool_319F68<0x800>(cMemBlockMan_m_container8, p))
+        func_00320488(cMemBlockMan_m_container8, (void**)p);
+    else if (inPool_319F68<0x2000>(cMemBlockMan_m_container16, p))
+        func_00320498(cMemBlockMan_m_container16, (void**)p);
+    else if (inPool_319F68<0x6000>(cMemBlockMan_m_container32, p))
+        func_003204A8(cMemBlockMan_m_container32, (void**)p);
+    else if (inPool_319F68<0x32000>(cMemBlockMan_m_container64, p))
+        func_003204B8(cMemBlockMan_m_container64, (void**)p);
+    else if (inPool_319F68<0x25800>(cMemBlockMan_m_container128, p))
+        func_003204D0(cMemBlockMan_m_container128, (void**)p);
+    else if (inPool_319F68<0x20000>(cMemBlockMan_m_container256, p))
+        func_003204E8(cMemBlockMan_m_container256, (void**)p);
+    else if (inPool_319F68<0x20000>(cMemBlockMan_m_container512, p))
+        func_00320500(cMemBlockMan_m_container512, (void**)p);
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A088);
 #ifdef SKIP_ASM
-extern void* D_004A5B50;
-extern void* D_004A5B58;
-extern void* D_004A5B5C;
-extern void* D_004A5B60;
-extern void* D_004A5B68;
-extern void* D_004A5B6C;
-extern void* D_004A5B74;
+extern void* cMemBlockMan_m_container16;
+extern void* cMemBlockMan_m_container512;
+extern void* cMemBlockMan_m_container32;
+extern void* cMemBlockMan_m_container8;
+extern void* cMemBlockMan_m_container256;
+extern void* cMemBlockMan_m_container64;
+extern void* cMemBlockMan_m_container128;
 
 static inline int func_0031A088_in(void* p, void* base, unsigned int size)
 {
@@ -345,32 +345,32 @@ static inline int func_0031A088_in(void* p, void* base, unsigned int size)
 
 extern "C" int func_0031A088(void* p)
 {
-    if (func_0031A088_in(p, D_004A5B60, 0x800))
+    if (func_0031A088_in(p, cMemBlockMan_m_container8, 0x800))
         return 1;
-    if (func_0031A088_in(p, D_004A5B50, 0x2000))
+    if (func_0031A088_in(p, cMemBlockMan_m_container16, 0x2000))
         return 1;
-    if (func_0031A088_in(p, D_004A5B5C, 0x6000))
+    if (func_0031A088_in(p, cMemBlockMan_m_container32, 0x6000))
         return 1;
-    if (func_0031A088_in(p, D_004A5B6C, 0x32000))
+    if (func_0031A088_in(p, cMemBlockMan_m_container64, 0x32000))
         return 1;
-    if (func_0031A088_in(p, D_004A5B74, 0x25800))
+    if (func_0031A088_in(p, cMemBlockMan_m_container128, 0x25800))
         return 1;
-    if (func_0031A088_in(p, D_004A5B68, 0x20000))
+    if (func_0031A088_in(p, cMemBlockMan_m_container256, 0x20000))
         return 1;
-    return func_0031A088_in(p, D_004A5B58, 0x20000);
+    return func_0031A088_in(p, cMemBlockMan_m_container512, 0x20000);
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A130);
 #ifdef SKIP_ASM
-extern void* D_004A5B50;
-extern void* D_004A5B58;
-extern void* D_004A5B5C;
-extern void* D_004A5B60;
-extern void* D_004A5B68;
-extern void* D_004A5B6C;
-extern void* D_004A5B74;
+extern void* cMemBlockMan_m_container16;
+extern void* cMemBlockMan_m_container512;
+extern void* cMemBlockMan_m_container32;
+extern void* cMemBlockMan_m_container8;
+extern void* cMemBlockMan_m_container256;
+extern void* cMemBlockMan_m_container64;
+extern void* cMemBlockMan_m_container128;
 
 static inline int func_0031A130_in(void* p, void* base, unsigned int size)
 {
@@ -379,19 +379,19 @@ static inline int func_0031A130_in(void* p, void* base, unsigned int size)
 
 extern "C" int func_0031A130(void* p)
 {
-    if (func_0031A130_in(p, D_004A5B60, 0x800))
+    if (func_0031A130_in(p, cMemBlockMan_m_container8, 0x800))
         return 0x8;
-    if (func_0031A130_in(p, D_004A5B50, 0x2000))
+    if (func_0031A130_in(p, cMemBlockMan_m_container16, 0x2000))
         return 0x10;
-    if (func_0031A130_in(p, D_004A5B5C, 0x6000))
+    if (func_0031A130_in(p, cMemBlockMan_m_container32, 0x6000))
         return 0x20;
-    if (func_0031A130_in(p, D_004A5B6C, 0x32000))
+    if (func_0031A130_in(p, cMemBlockMan_m_container64, 0x32000))
         return 0x40;
-    if (func_0031A130_in(p, D_004A5B74, 0x25800))
+    if (func_0031A130_in(p, cMemBlockMan_m_container128, 0x25800))
         return 0x80;
-    if (func_0031A130_in(p, D_004A5B68, 0x20000))
+    if (func_0031A130_in(p, cMemBlockMan_m_container256, 0x20000))
         return 0x100;
-    if (func_0031A130_in(p, D_004A5B58, 0x20000))
+    if (func_0031A130_in(p, cMemBlockMan_m_container512, 0x20000))
         return 0x200;
     return 0;
 }
@@ -400,14 +400,14 @@ extern "C" int func_0031A130(void* p)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A200);
 #ifdef SKIP_ASM
-extern int D_004A3EC8;
-extern void* D_004A5B50;
-extern void* D_004A5B58;
-extern void* D_004A5B5C;
-extern void* D_004A5B60;
-extern void* D_004A5B68;
-extern void* D_004A5B6C;
-extern void* D_004A5B74;
+extern int cMemBlockMan_m_initialized;
+extern void* cMemBlockMan_m_container16;
+extern void* cMemBlockMan_m_container512;
+extern void* cMemBlockMan_m_container32;
+extern void* cMemBlockMan_m_container8;
+extern void* cMemBlockMan_m_container256;
+extern void* cMemBlockMan_m_container64;
+extern void* cMemBlockMan_m_container128;
 // PORT: these empty stubs are defined as f(void), but this caller passes one argument.
 void func_00320518_1(void*) __asm__("func_00320518__Fv");
 void func_00320520_1(void*) __asm__("func_00320520__Fv");
@@ -419,14 +419,14 @@ void func_00320548_1(void*) __asm__("func_00320548__Fv");
 
 extern "C" void func_0031A200(void)
 {
-    if (D_004A3EC8 != 0) {
-        func_00320518_1(D_004A5B60);
-        func_00320520_1(D_004A5B50);
-        func_00320528_1(D_004A5B5C);
-        func_00320530_1(D_004A5B6C);
-        func_00320538_1(D_004A5B74);
-        func_00320540_1(D_004A5B68);
-        func_00320548_1(D_004A5B58);
+    if (cMemBlockMan_m_initialized != 0) {
+        func_00320518_1(cMemBlockMan_m_container8);
+        func_00320520_1(cMemBlockMan_m_container16);
+        func_00320528_1(cMemBlockMan_m_container32);
+        func_00320530_1(cMemBlockMan_m_container64);
+        func_00320538_1(cMemBlockMan_m_container128);
+        func_00320540_1(cMemBlockMan_m_container256);
+        func_00320548_1(cMemBlockMan_m_container512);
     }
 }
 #endif

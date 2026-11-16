@@ -55,7 +55,7 @@ INCLUDE_ASM("world/wscriptcache", func_003AC8F0);
 void cMemMan_free(void* p);
 void operator_delete(int*);
 extern "C" void func_003ACA70(int* self, int flags);
-extern int D_004A4810;
+extern int cWScriptCache_mpWScriptCache;
 
 // PORT: array cookie arithmetic through int (pointer in int).
 extern "C" void func_003AC8F0(int* self, int flags)
@@ -69,7 +69,7 @@ extern "C" void func_003AC8F0(int* self, int flags)
         }
         cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
     }
-    D_004A4810 = 0;
+    cWScriptCache_mpWScriptCache = 0;
     if (flags & 1) {
         operator_delete(self);
     }

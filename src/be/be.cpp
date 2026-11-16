@@ -4,12 +4,12 @@
 INCLUDE_ASM("be/be", cBE_getBE);
 #ifdef SKIP_ASM
 struct sBEInterface;
-extern sBEInterface* D_005308A8[];
-extern int D_004A11F4;
-extern void* D_004A11F8;
-extern int* D_004A11EC;
-extern int D_004A11F0;
-extern int* D_004A1250;
+extern sBEInterface* cBE_aBEState[];
+extern int cBE_currentState;
+extern void* cBE_library;
+extern int* cBE_instance;
+extern int cBE_BEInitialized;
+extern int* cBEState_pBE;
 extern char str_BE[];
 extern char str_BELibrary[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -31,27 +31,27 @@ public:
 /**
  * Returns the back end singleton, creating it and its three game-flow states on first use.
  *
- * The first call allocates the 4-byte "BE" object (D_004A11EC) and the "BELibrary", fetches the pre-race, race
- * and post-race states into D_005308A8[0..2], makes pre-race (0) the current state and enters it, and sets
- * D_004A11F0 and D_004A1250.
+ * The first call allocates the 4-byte "BE" object (cBE_instance) and the "BELibrary", fetches the pre-race, race
+ * and post-race states into cBE_aBEState[0..2], makes pre-race (0) the current state and enters it, and sets
+ * cBE_BEInitialized and cBEState_pBE.
  *
  * @return the back end object
  */
 extern "C" void* cBE_getBE()
 {
-    if (D_004A11EC == 0)
+    if (cBE_instance == 0)
     {
-        D_004A11EC = (int*)cMemMan_alloc(4, str_BE, 0, 0);
-        D_004A11F8 = cBELibrary_cBELibrary(cMemMan_alloc(1, str_BELibrary, 0, 0));
-        D_005308A8[0] = (sBEInterface*)cBEPreRaceState_getState((void*)0);
-        D_005308A8[1] = (sBEInterface*)cBERaceState_getState((void*)1);
-        D_005308A8[2] = (sBEInterface*)cBEPostRaceState_getState((void*)2);
-        D_004A11F4 = 0;
-        ((cBEStateV_getBE*)D_005308A8[0])->enter();
-        D_004A11F0 = 1;
-        D_004A1250 = D_004A11EC;
+        cBE_instance = (int*)cMemMan_alloc(4, str_BE, 0, 0);
+        cBE_library = cBELibrary_cBELibrary(cMemMan_alloc(1, str_BELibrary, 0, 0));
+        cBE_aBEState[0] = (sBEInterface*)cBEPreRaceState_getState((void*)0);
+        cBE_aBEState[1] = (sBEInterface*)cBERaceState_getState((void*)1);
+        cBE_aBEState[2] = (sBEInterface*)cBEPostRaceState_getState((void*)2);
+        cBE_currentState = 0;
+        ((cBEStateV_getBE*)cBE_aBEState[0])->enter();
+        cBE_BEInitialized = 1;
+        cBEState_pBE = cBE_instance;
     }
-    return D_004A11EC;
+    return cBE_instance;
 }
 #endif
 
@@ -67,16 +67,16 @@ struct sBEInterface {
     sBEInterfaceVTable* vtable;
 };
 
-extern sBEInterface* D_005308A8[];
-extern int D_004A11F4;
+extern sBEInterface* cBE_aBEState[];
+extern int cBE_currentState;
 
 //100%
 INCLUDE_ASM("be/be", func_0014DD48);
 #ifdef SKIP_ASM
-extern int D_004A11F0;
+extern int cBE_BEInitialized;
 
 extern "C" int func_0014DD48(void) {
-    return D_004A11F0 != 0;
+    return cBE_BEInitialized != 0;
 }
 #endif
 
@@ -97,13 +97,13 @@ void* cBE_getInterface_impl(void* be, int kind) __asm__("cBE_getInterface__Fv");
 /**
  * Returns one of the back end's interfaces, as provided by the current game-flow state.
  *
- * @param be    the back end object; unused, the current state (D_005308A8[D_004A11F4]) is asked
+ * @param be    the back end object; unused, the current state (cBE_aBEState[cBE_currentState]) is asked
  * @param kind  which interface to return (14 kinds, 0-13)
  * @return the current state's getInterface(kind) result (cBE_readFromReplayFrame() treats 0 as absent)
  */
 void* cBE_getInterface_impl(void* be, int kind)
 {
-    return ((cBEInterfaceV_getInterface*)D_005308A8[D_004A11F4])->getInterface(kind);
+    return ((cBEInterfaceV_getInterface*)cBE_aBEState[cBE_currentState])->getInterface(kind);
 }
 #endif
 
@@ -117,43 +117,43 @@ public:
     virtual void v1();
     virtual void shutdown();
 };
-extern void* D_004A11F8;
-extern int* D_004A11EC;
-extern int D_004A11F0;
+extern void* cBE_library;
+extern int* cBE_instance;
+extern int cBE_BEInitialized;
 extern "C" void cBELibrary__cBELibrary(void* p, int a);
 void operator_delete(int* ptr);
 
 /**
  * Tears down the back end: the BE library, the three game-flow states and the BE object.
  *
- * Destroys the library (D_004A11F8, flags 3) if there is one, calls virtual slot 2 on each state, frees the
- * 4-byte "BE" object and clears D_004A11EC and the exists flag D_004A11F0, so the next cBE_getBE() builds
- * everything again. D_004A11F8 itself is not cleared.
+ * Destroys the library (cBE_library, flags 3) if there is one, calls virtual slot 2 on each state, frees the
+ * 4-byte "BE" object and clears cBE_instance and the exists flag cBE_BEInitialized, so the next cBE_getBE() builds
+ * everything again. cBE_library itself is not cleared.
  */
 extern "C" void cBE_purgeBE(void)
 {
-    if (D_004A11F8)
-        cBELibrary__cBELibrary(D_004A11F8, 3);
-    ((cBEStateV_0014DD98*)D_005308A8[0])->shutdown();
-    ((cBEStateV_0014DD98*)D_005308A8[1])->shutdown();
-    ((cBEStateV_0014DD98*)D_005308A8[2])->shutdown();
-    operator_delete(D_004A11EC);
-    D_004A11EC = 0;
-    D_004A11F0 = 0;
+    if (cBE_library)
+        cBELibrary__cBELibrary(cBE_library, 3);
+    ((cBEStateV_0014DD98*)cBE_aBEState[0])->shutdown();
+    ((cBEStateV_0014DD98*)cBE_aBEState[1])->shutdown();
+    ((cBEStateV_0014DD98*)cBE_aBEState[2])->shutdown();
+    operator_delete(cBE_instance);
+    cBE_instance = 0;
+    cBE_BEInitialized = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/be", func_0014DE28);
 #ifdef SKIP_ASM
-extern void* D_004A11F8;
+extern void* cBE_library;
 extern "C" void func_00149A88(void* p, char c);
 extern "C" void func_0014FC40(char c);
 
 extern "C" void func_0014DE28(void* self, char c)
 {
-    if (D_004A11F8)
-        func_00149A88(D_004A11F8, c);
+    if (cBE_library)
+        func_00149A88(cBE_library, c);
     func_0014FC40(c);
 }
 #endif
@@ -180,11 +180,11 @@ public:
  */
 extern "C" void cBE_setState(int state)
 {
-    if (D_004A11F4 != state)
+    if (cBE_currentState != state)
     {
-        ((cBEStateV_setState*)D_005308A8[D_004A11F4])->leave();
-        D_004A11F4 = state;
-        ((cBEStateV_setState*)D_005308A8[state])->enter();
+        ((cBEStateV_setState*)cBE_aBEState[cBE_currentState])->leave();
+        cBE_currentState = state;
+        ((cBEStateV_setState*)cBE_aBEState[state])->enter();
     }
 }
 #endif
@@ -195,7 +195,7 @@ INCLUDE_ASM("be/be", func_0014DEE8);
 extern "C" void func_0014A078(int);
 
 extern "C" void func_0014DEE8(void) {
-    func_0014A078((*(int*)&D_004A11F8));
+    func_0014A078((*(int*)&cBE_library));
 }
 #endif
 
@@ -222,7 +222,7 @@ cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterfac
 
 extern "C" void func_0014DF08(void* self, cBEReplayStream* s)
 {
-    s->write(&D_004A11F4, 4);
+    s->write(&cBE_currentState, 4);
     for (int i = 0; i < 14; i++)
     {
         if (cBE_getInterface_Fv(self, i))
@@ -247,7 +247,7 @@ cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterfac
  */
 extern "C" void cBE_readFromReplayFrame(void* self, cBEReplayStream* data)
 {
-    data->read(&D_004A11F4, 4);
+    data->read(&cBE_currentState, 4);
     for (int i = 0; i < 14; i++)
     {
         if (cBE_getInterface_Fv(self, i))

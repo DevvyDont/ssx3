@@ -462,7 +462,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A3DC8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern void* D_00467F28[];
-extern void* D_004A3E90_v __asm__("D_004A3E90");
+extern void* D_004A3E90_v __asm__("cBXString_EmptyString");
 
 // Constructor for the memory-card screen: base init, vtable and empty-string fields.
 extern "C" void* func_001A3DC8(cFEStateNetMessenger* self, void* a1, void* a2)
@@ -584,13 +584,13 @@ extern "C" void func_001A3F68(cFEStateNetMessenger* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A3FE0);
 #ifdef SKIP_ASM
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 extern "C" void func_001A6978(cFEStateNetMessenger* self);
 extern "C" void* func_001A8770(cFEStateNet* self);
 
 extern "C" void func_001A3FE0(cFEStateNetMessenger* self)
 {
-    int now = *(int*)((char*)D_004A5B64 + 0x18);
+    int now = *(int*)((char*)cAppMan_TheAppMan + 0x18);
     int d = now - self->mLastRefreshFrame;
     if (d >= 1 && d <= 59) {
         func_001A8770((cFEStateNet*)self);
@@ -5253,7 +5253,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001AA9B0);
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 extern char str_IconChallengeHint[];
 extern char str_TextMessageCount[];
 extern char str_IconMessageHint[];
@@ -5276,7 +5276,7 @@ public:
 
 extern "C" void func_001AA9B0(cFEStateNet* self)
 {
-    unsigned int now = *(unsigned int*)((char*)D_004A5B64 + 0x18);
+    unsigned int now = *(unsigned int*)((char*)cAppMan_TheAppMan + 0x18);
     cFEVObj_001AA9B0* a = (cFEVObj_001AA9B0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_IconChallengeHint));
     if (a != 0) {
         if (self->mChallengeHintFrame != 0) {
@@ -5316,7 +5316,7 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_00262938(void* self);
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 extern char str_TextMessageCount[];
 extern char str_pct_d_b[];
 extern char D_004A1390[];
@@ -5388,7 +5388,7 @@ extern "C" void func_001AAB68(cFEStateNet* self)
     if (((cFEVObj_001AAB68*)self)->v29() == 0) {
         return;
     }
-    unsigned int now = *(unsigned int*)((char*)D_004A5B64 + 0x18);
+    unsigned int now = *(unsigned int*)((char*)cAppMan_TheAppMan + 0x18);
     unsigned int d = now - (self)->mLastPollFrame;
     if (d > 0 && d < 60) {
         return;
@@ -6101,7 +6101,7 @@ extern "C" void* func_001ABFA8(cFEStateNet* self)
 INCLUDE_ASM("fe/feasyncfile", cFEUseExistingAccount_cFEUseExistingAccount);
 #ifdef SKIP_ASM
 extern void* cFEUseExistingAccount_vtbl[];
-extern int D_004A3E90;
+extern int cBXString_EmptyString;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -6109,7 +6109,7 @@ void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
  * Constructs the "use existing account" screen state.
  *
  * Runs the cFEStateNet constructor (func_001A8500) with no parent, stores cFEUseExistingAccount_vtbl and mHashName
- * 0x35, starts mszEmail as the empty string (D_004A3E90), and clears unk_6D0, mpTextForgotPassword and unk_6A8 (so
+ * 0x35, starts mszEmail as the empty string (cBXString_EmptyString), and clears unk_6D0, mpTextForgotPassword and unk_6A8 (so
  * net messages are not filtered on this screen).
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
@@ -6118,7 +6118,7 @@ void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount(cFEUseExistingAccount* self, int pEngine)
 {
     func_001A8500_3(self, pEngine, 0);
-    int emptyStr = D_004A3E90;
+    int emptyStr = cBXString_EmptyString;
     self->mVtbl = cFEUseExistingAccount_vtbl;
     self->mszEmail = (char*)emptyStr;
     self->mHashName = 0x35;
@@ -7977,7 +7977,7 @@ extern "C" void func_001AF098_E7A0(void* self, int on) __asm__("func_001AF098");
 extern "C" void func_001AEC60_E7A0(void* self, int v) __asm__("func_001AEC60");
 extern "C" void func_001AF208_E7A0(void* self, void* item, int on) __asm__("func_001AF208");
 extern int cUITemplate_MAP_mPeak;
-extern int D_004A2594;
+extern int cUITemplate_MAP_mMapStyle;
 extern int D_004A2598;
 extern int D_00534B34[];
 extern char str_cFEStateEventSelect[];
@@ -8009,7 +8009,7 @@ static inline void commit_E7A0(char* iface)
  * Handles the challenge popup's widgets: event selection, sending or cancelling the challenge and the option boxes.
  *
  * A null widget is ignored. Event 5 by id: 7 saves the options (func_001AE680), sets cUITemplate_MAP_mPeak, clears
- * D_004A2594 / D_004A2598 and pushes a cFEStateEventSelect (mode 1); 9 (submit), unless mbChallengeSent, saves the
+ * cUITemplate_MAP_mMapStyle / D_004A2598 and pushes a cFEStateEventSelect (mode 1); 9 (submit), unless mbChallengeSent, saves the
  * options, marks the challenge sent (func_001AF568), stores the ranked flag in the network options, sets the race
  * options (all on with no AI riders when ranked, else from the multiplier, power-up, point-icon and CPU-rider boxes)
  * and sends the challenge to mOpponent (func_0025F4C0); 10 cancels a sent challenge (func_0025F628(0, 1)) and pops
@@ -8032,7 +8032,7 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
         case 7: {
             func_001AE680_E7A0((self));
             cUITemplate_MAP_mPeak = 1;
-            D_004A2594 = 0;
+            cUITemplate_MAP_mMapStyle = 0;
             D_004A2598 = 0;
             char* popup = (char*)func_00186610_E7A0(cMemMan_alloc(0x33C, str_cFEStateEventSelect, 0x100, 0), *(int*)(char**)&self->mpEngine, 1);
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
@@ -10720,18 +10720,18 @@ extern "C" void func_001B22A0()
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom_onUpdate);
 #ifdef SKIP_ASM
-extern void* D_004A5B64;
+extern void* cAppMan_TheAppMan;
 extern "C" void func_001B3BF0(cFEStateChatRoom* self);
 extern "C" void* func_001A8770(cFEStateNet* self);
 
 /**
  * Updates the chat room: refreshes the players' connection-quality icons (func_001B3BF0) every 10000th frame.
  *
- * The frame counter is D_004A5B64's word at +0x18; then the cFEStateNet update (func_001A8770) runs.
+ * The frame counter is cAppMan_TheAppMan's word at +0x18; then the cFEStateNet update (func_001A8770) runs.
  */
 extern "C" void cFEStateChatRoom_onUpdate(cFEStateChatRoom* self)
 {
-    if (*(int*)((char*)D_004A5B64 + 0x18) % 10000 == 0) {
+    if (*(int*)((char*)cAppMan_TheAppMan + 0x18) % 10000 == 0) {
         func_001B3BF0(self);
     }
     func_001A8770((cFEStateNet*)self);
@@ -10763,7 +10763,7 @@ extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 struct sFEObj_001BCB58;
 extern "C" sFEObj_001BCB58* cFEStateLobbyMenu_cFEStateLobbyMenu(sFEObj_001BCB58* self, int a1);
-extern char* D_004A3E90_p __asm__("D_004A3E90");
+extern char* D_004A3E90_p __asm__("cBXString_EmptyString");
 extern char str_PlayerListMenu[];
 extern char str_PlayerListItempct_02d[];
 extern char str_cFEStateLobbyMenu[];
@@ -13799,7 +13799,7 @@ struct sProfile1B63E8 {
     unsigned int flags;
     char rest[0x284];
 };
-extern sProfile1B63E8 D_00535610;
+extern sProfile1B63E8 cBEOptionInterface_mOption;
 
 class cFEVObj_001B63E8 {
 public:
@@ -13820,7 +13820,7 @@ public:
  * Creates the "205AuthenticatingDNAS" screen and starts the DNAS authentication object.
  *
  * Hides "dnasGroup", creates mpAuth (func_002561B8 on a 0xA50-byte "cFEStateAuthDNASCreate" block), sets miState 1
- * and starts it (func_00256258) in the mode held in bits 22-24 of the profile word D_00535610 (0-3; other values use
+ * and starts it (func_00256258) in the mode held in bits 22-24 of the profile word cBEOptionInterface_mOption (0-3; other values use
  * 0).
  */
 extern "C" void cFEStateAuthDNAS_onCreateScreen(cFEStateAuthDNAS* self)
@@ -13839,7 +13839,7 @@ extern "C" void cFEStateAuthDNAS_onCreateScreen(cFEStateAuthDNAS* self)
     self->miState = 1;
     cBE_getInterface_Fv(cBE_getBE(), 4);
     int mode = 0;
-    sProfile1B63E8 prof = D_00535610;
+    sProfile1B63E8 prof = cBEOptionInterface_mOption;
     switch ((prof.flags >> 22) & 7) {
     case 0:
         mode = 0;
@@ -15765,7 +15765,7 @@ extern "C" int func_001B8890(cFEStateNetAccountMem* self, int id)
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_cFEStateCreateStep1);
 #ifdef SKIP_ASM
 extern void* cFEStateCreateStep1_vtbl[];
-extern int D_004A3E90;
+extern int cBXString_EmptyString;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -15773,7 +15773,7 @@ void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
  * Constructs step 1 of the online account creation (or editing) screen.
  *
  * Runs the cFEStateNet constructor (func_001A8500, no parent), stores cFEStateCreateStep1_vtbl, clears
- * mpStaticContinue and unk_6A8, points the saved password, confirmation and mail texts at D_004A3E90 (an empty
+ * mpStaticContinue and unk_6A8, points the saved password, confirmation and mail texts at cBXString_EmptyString (an empty
  * string), stores @p bNewAccount in mbEditAccount and mHashName 0x4D when it is set, else 0x50. Despite the field's name a
  * nonzero flag means a new account: the callers pass 1 from "create account" (func_001BF758,
  * cFEStateOnlineAgreement id 0x14, Step2's back) and the screen then uses LobbyMan's mNewAccount form.
@@ -15785,7 +15785,7 @@ void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* self, int pEngine, int bNewAccount)
 {
     func_001A8500_3(self, pEngine, 0);
-    int emptyStr = D_004A3E90;
+    int emptyStr = cBXString_EmptyString;
     self->mpStaticContinue = 0;
     self->mVtbl = cFEStateCreateStep1_vtbl;
     self->mszSavedPassword = (char*)emptyStr;
@@ -18668,7 +18668,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_cFEStateLobbyMenu);
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern void* cFEStateLobbyMenu_vtbl[];
-extern int D_004A3E90;
+extern int cBXString_EmptyString;
 
 struct sFEObj_001BCB58 {
     char pad0[0x8];
@@ -18699,7 +18699,7 @@ struct sFEObj_001BCB58 {
  * Constructs the online lobby screen state ("231lobby_menu"): empty names and no widgets bound yet.
  *
  * Runs the cFEStateNet constructor (func_001A8500, no parent), stores cFEStateLobbyMenu_vtbl and mHashName 0x3C,
- * points mszRoomName and mszChannelName at the empty string D_004A3E90, and zeroes miFirstPlayer, both menus, the
+ * points mszRoomName and mszChannelName at the empty string cBXString_EmptyString, and zeroes miFirstPlayer, both menus, the
  * ten player texts, mpText3InRoom, the four channel lists, pairs, arrows, locks and rows, and the player up / down
  * arrows.
  *
@@ -18710,7 +18710,7 @@ extern "C" sFEObj_001BCB58* cFEStateLobbyMenu_cFEStateLobbyMenu(sFEObj_001BCB58*
 {
     func_001A8500_3(self, pEngine, 0);
     self->vt = cFEStateLobbyMenu_vtbl;
-    self->fB80 = self->f76C = D_004A3E90;
+    self->fB80 = self->f76C = cBXString_EmptyString;
     self->fC = 0x3C;
     self->f778 = 0;
     self->f6D0 = 0;
@@ -19820,7 +19820,7 @@ extern "C" int func_0025F180(void* self, int idx);
 extern "C" void cBXString_right(void* ret, void* src, int n);
 extern "C" void func_0039A670(void* self);
 extern "C" int func_004165A8(const char* a, const char* b);
-extern char* D_004A3E90_p __asm__("D_004A3E90");
+extern char* D_004A3E90_p __asm__("cBXString_EmptyString");
 extern const char* D_004A1A60;
 extern const char* D_004A1A64;
 extern const char* D_004A1A68;
@@ -20141,7 +20141,7 @@ extern "C" void func_001BE720(cFEStateLobbyMenu* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup);
 #ifdef SKIP_ASM
 extern void* cFEStateNetCreateRoomPopup_vtbl[];
-extern int D_004A3E90;
+extern int cBXString_EmptyString;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -20149,7 +20149,7 @@ void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
  * Constructs the create-room popup state.
  *
  * Runs the cFEStateNet constructor (func_001A8500) with the engine and parent, stores the vtable, starts mszRoomName,
- * mszChannelName and mszPassword as the empty string (D_004A3E90) and sets mHashName 0x47.
+ * mszChannelName and mszPassword as the empty string (cBXString_EmptyString) and sets mHashName 0x47.
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @param pParentState  the parent state, the lobby (On Tour pParentState)
@@ -20158,7 +20158,7 @@ void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup(cFEStateNetCreateRoomPopup* self, int pEngine, int pParentState)
 {
     func_001A8500_3(self, pEngine, pParentState);
-    int emptyStr = D_004A3E90;
+    int emptyStr = cBXString_EmptyString;
     self->mVtbl = cFEStateNetCreateRoomPopup_vtbl;
     self->mszRoomName = (char*)emptyStr;
     self->mszChannelName = (char*)emptyStr;
@@ -24636,7 +24636,7 @@ extern "C" void* func_001C4CD8(cFEStateStats* self, int msg)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C4D28);
 #ifdef SKIP_ASM
-extern char D_004A5A58;
+extern char gUISoundNull;
 
 struct sVE1C4D28 {
     short delta;
@@ -24653,7 +24653,7 @@ static inline void Show1C4D28(char* o, int on)
 extern "C" void func_001C4D28(cFEStateStats* self)
 {
     char* snd = *(char**)((char*)self->mpEngine + 0x14);
-    if (snd == 0) snd = &D_004A5A58;
+    if (snd == 0) snd = &gUISoundNull;
     if (snd != 0) {
         sVE1C4D28* vt = *(sVE1C4D28**)snd;
         vt[2].fn(snd + vt[2].delta, 1);
@@ -24682,7 +24682,7 @@ extern "C" void func_001C4D28(cFEStateStats* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C4E40);
 #ifdef SKIP_ASM
-extern char D_004A5A58;
+extern char gUISoundNull;
 
 struct sVE1C4E40 {
     short delta;
@@ -24699,7 +24699,7 @@ static inline void Show1C4E40(char* o, int on)
 extern "C" void func_001C4E40(cFEStateStats* self)
 {
     char* snd = *(char**)((char*)self->mpEngine + 0x14);
-    if (snd == 0) snd = &D_004A5A58;
+    if (snd == 0) snd = &gUISoundNull;
     if (snd != 0) {
         sVE1C4E40* vt = *(sVE1C4E40**)snd;
         vt[2].fn(snd + vt[2].delta, 1);

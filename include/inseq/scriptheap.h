@@ -4,7 +4,7 @@
 // cScriptHeap: the in-game sequence (InSeq) system's private first-fit heap. cInSeq embeds one (cInSeq::mHeap,
 // inseq/inseq.h) over the buffer cBXScriptEngine allocates ("InSeqHeap"); the script players, entities and channels
 // allocate from it through EA's operator new(size, cScriptHeap*) / new[] (func_00272488 / func_002724C8), which
-// store the heap pointer in the first kScriptHeapPointerSize (D_004A3488 = 4) bytes of each allocation so that
+// store the heap pointer in the first kScriptHeapPointerSize (kScriptHeapPointerSize = 4) bytes of each allocation so that
 // operator delete (func_002724E8) can find it again. No virtual functions, no base class.
 // Size 0xC [R]: cInSeq's members around it are at 0x4 (mMaxScripts) and 0x14 (mpScriptHeap), and cInSeq_cInSeq
 // runs the constructor func_002722E0 on cInSeq + 0x8. Same size, order and offsets as On Tour's class cScriptHeap.

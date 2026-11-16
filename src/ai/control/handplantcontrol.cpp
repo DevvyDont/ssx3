@@ -67,12 +67,12 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_init);
 // Global vectors and a matrix in .bss read by the handplant code (set up elsewhere at startup).
 extern t4Vector D_004FF120_8BA0 __asm__("t4vect_Zero");
 
-extern t4Vector D_004FF160_8BA0 __asm__("D_004FF160");
+extern t4Vector D_004FF160_8BA0 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C128(float x);
 extern "C" float func_0031BF60(float x);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern t4Vector D_004FF140;
+extern t4Vector t4vect_XAxis;
 
 struct sQ_8BA0 {
     float x, y, z, w;
@@ -372,14 +372,14 @@ extern "C" void cHandplantMotion_init(cHandplantMotion* self, sHit_8BA0* hit, fl
         if (ang >= 9.999999747378752e-06f)
             (*(sQ_8BA0*)&self->SnapRotationAxis) = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), func_0031BF60(ang * 0.5f));
         else
-            (*(sQ_8BA0*)&self->SnapRotationAxis) = (const sQ_8BA0&)D_004FF140;
+            (*(sQ_8BA0*)&self->SnapRotationAxis) = (const sQ_8BA0&)t4vect_XAxis;
     } else {
         ang = (1.5707963705062866f - func_0031C128(-(deltaRot.w >? -1.0f))) * 2.0f;
         self->SnapRotationRate = ang;
         if (ang >= 9.999999747378752e-06f)
             (*(sQ_8BA0*)&self->SnapRotationAxis) = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), func_0031BF60(ang * -0.5f));
         else
-            (*(sQ_8BA0*)&self->SnapRotationAxis) = (const sQ_8BA0&)D_004FF140;
+            (*(sQ_8BA0*)&self->SnapRotationAxis) = (const sQ_8BA0&)t4vect_XAxis;
     }
     self->SnapRotationRate = self->SnapRotationRate / self->EnterSec;
 }
@@ -415,7 +415,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_step);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 extern t4Vector D_004FF120_91A8 __asm__("t4vect_Zero");
-extern t4Vector D_004FF160_91A8 __asm__("D_004FF160");
+extern t4Vector D_004FF160_91A8 __asm__("t4vect_ZAxis");
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 extern "C" void func_00113648(void* ap, void* pos, void* vel, float dt);
@@ -635,7 +635,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00139548);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 extern t4Vector D_004FF120_9548 __asm__("t4vect_Zero");
-extern t4Vector D_004FF160_9548 __asm__("D_004FF160");
+extern t4Vector D_004FF160_9548 __asm__("t4vect_ZAxis");
 
 struct sHP_9548 {
     char pad0[0x10];
@@ -1070,8 +1070,8 @@ struct sInfo_139C88 {
 
 struct sVEnt_139C88 { short delta; short index; void (*fn)(void*, sHit_139C88*, const sVec4HP&); };
 
-extern int D_004A1120;
-extern void* D_004A3DD8;
+extern int kInAirSphereMask;
+extern void* cWScriptMan_TheWScriptMan;
 extern "C" float cAirMotion_intersectBoard_9C88(void* self, sHit_139C88* hit) __asm__("cAirMotion_intersectBoard");
 extern "C" void cRider_updateBoundBox_9C88(void* rider, int a) __asm__("cRider_updateBoundBox");
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
@@ -1431,12 +1431,12 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             char* r6 = RIDER_139C88;
             float k = clamp_139C88(absf_139C88(vu0Dot_139C88(row_139C88(r6, 1), vu0Normalize_139C88(V4_139C88(r6, 0x1E0)))), 1.0f, 1.0f);
             vu0ScaleEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), k);
-            func_003098B0(D_004A3DD8);
+            func_003098B0(cWScriptMan_TheWScriptMan);
         }
     }
     cRider_updateBoundBox_9C88(RIDER_139C88, 0);
     sVec4HP out;
-    *(int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = D_004A1120;
+    *(int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = kInAirSphereMask;
     int got = cAirMotion_checkTerrainCollisions(self, &out);
     *(unsigned int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = 0xFFFFFFFF;
     if (got) {
@@ -2436,7 +2436,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_0013BD80);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
-extern t4Vector D_004FF160_BD80 __asm__("D_004FF160");
+extern t4Vector D_004FF160_BD80 __asm__("t4vect_ZAxis");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -3514,7 +3514,7 @@ struct sHit_13D1B8 {
 } __attribute__((aligned(16)));
 
 extern "C" int func_00333EF8(void* world, void* seg, sHit_13D1B8* hits, int max, int flags);
-extern sVec4HP D_004FF160;
+extern sVec4HP t4vect_ZAxis;
 extern sVec4HP D_004FF120_v __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -3729,7 +3729,7 @@ extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8
     sHit_13D1B8 hits[64];
     int n = func_00333EF8(*(void**)(RIDER + 0x860), seg, hits, 0x40, *(int*)(RIDER + 0x864));
     if (n == 0) {
-        RV(0x370) = D_004FF160;
+        RV(0x370) = t4vect_ZAxis;
         RV(0x3D0) = D_004FF120_v;
         RV(0x3A0) = vu0Normalize_13D1B8(vu0SubV_13D1B8(RV(0x1B0), vu0Scale_13D1B8(RV(0x370), vu0DotV_13D1B8(RV(0x1B0), RV(0x370)))));
         RV(0x3B0) = vu0Cross_13D1B8(RV(0x370), RV(0x3A0));
@@ -3839,7 +3839,7 @@ extern "C" float func_0031C128(float x);
 int func_00312AA0(void* anim, int layer);
 
 extern t4Vector D_004FF120_13D818 __asm__("t4vect_Zero");
-extern t4Vector D_004FF160_13D818 __asm__("D_004FF160");
+extern t4Vector D_004FF160_13D818 __asm__("t4vect_ZAxis");
 
 struct sVEnt_13D818 { short delta; short index; void (*fn)(void*, sHit_13D1B8*, t4Vector*); };
 
@@ -4456,7 +4456,7 @@ extern "C" void cSSXAudio_Lift(void* snd, void* rider);
 int func_0011FE98(void* rider);
 // PORT: cRider_setMotionState is defined with one parameter but this caller passes (rider, 1).
 void cRider_setMotionState_impl_13F178(void* rider, int v) __asm__("cRider_setMotionState__FPv");
-extern int D_004A115C;
+extern int kOnGroundSphereMask;
 
 struct sInfo_13F178 {
     sVec4HP pos;
@@ -4571,7 +4571,7 @@ static inline float absf_13F178(float x)
  * With ForceNaturalAir set it pops the rider with func_00114298(rider, -1) and, while still in MS_Ground
  * after the checks, switches to MS_Air with the lift sound. Otherwise surface type 0x12 starts a wipeout
  * (anim 0x168) and reset surfaces (+0x44) or triangles with flag 0x2 force an auto reset. Walls
- * (cGroundMotion_checkWallCollisions, sphere-tree filter D_004A115C), func_00105398() and opponents are
+ * (cGroundMotion_checkWallCollisions, sphere-tree filter kOnGroundSphereMask), func_00105398() and opponents are
  * checked; rider +0x390 is blended toward mGroundNormal, the speed is capped at rider +0x2E4, and mAudioSpeed
  * (speed / 3333.33, at most 1), mAudioEdging (|channel 0|) and mAudioBraking (|channel 2|) are set.
  */
@@ -4596,7 +4596,7 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
         }
     }
     cRider_updateBoundBox_v13F178(RIDER_13F178, 0);
-    *(int*)(*(char**)(RIDER_13F178 + 0xAA0) + 0x28) = D_004A115C;
+    *(int*)(*(char**)(RIDER_13F178 + 0xAA0) + 0x28) = kOnGroundSphereMask;
     cGroundMotion_checkWallCollisions(self);
     *(unsigned int*)(*(char**)(RIDER_13F178 + 0xAA0) + 0x28) = 0xFFFFFFFF;
     func_00105398(RIDER_13F178, 0);
@@ -5017,7 +5017,7 @@ extern sIdx D_004A4C08;
 extern int D_004A4C10;
 extern int D_004A4C14;
 extern float D_004A4C84;
-extern float D_004A4C8C;
+extern float nFinishLineControl_kFinishStopThreshCPS;
 extern float D_004A4C90;
 extern float D_004A4C94;
 extern float D_004A4C98;
@@ -5355,7 +5355,7 @@ void sti_0013FB20(int init, int prio)
         InitIdx(&D_004A4C80, 13);
         D_004A4C84 = 2222.22217f;
         func_0011B2C0();
-        D_004A4C8C = 277.777771f;
+        nFinishLineControl_kFinishStopThreshCPS = 277.777771f;
         SetKeys8(D_004A61F0, 0.0f, 0.200000003f, 0.400000006f, 0.400000006f, 0.600000024f, 0.400000006f, 1.0f, 0.200000003f);
         SetKeys8(D_004A6210, 0.0f, 0.300000012f, 0.400000006f, 1.20000005f, 0.600000024f, 1.20000005f, 1.0f, 0.300000012f);
         D_004A4C90 = 0.785398245f;

@@ -991,12 +991,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244240);
 #ifdef SKIP_ASM
 extern int D_004428F0[];
 extern int D_005366E8[];
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_004A2A54;
 
 extern "C" void func_00244240(int id)
 {
-    D_004A2A50 = D_004428F0[id];
+    cPauseState_Flags = D_004428F0[id];
     D_005366E8[D_004A2A54] = id;
 }
 #endif
@@ -1999,7 +1999,7 @@ extern "C" int func_0020CBA0(void);
 extern "C" void cPlaybackMan_update(void* p);
 int GetHashValue32(char* str);
 extern void* PadCache;
-extern void* D_004A3DD8;
+extern void* cWScriptMan_TheWScriptMan;
 // Pending script pause request; 0xFFFFFFFF = none (the store is lui/ori, so the global is unsigned).
 extern unsigned int D_004A20CC_4B48 __asm__("D_004A20CC");
 extern int D_004428F8[];
@@ -2024,7 +2024,7 @@ struct sQueue_4B48 {
 extern "C" sMsg_4B48* func_0030C870(sQueue_4B48* self);
 extern "C" sMsg_4B48* func_0030C820(sQueue_4B48* self);
 
-// The script manager (D_004A3DD8); hasMessage / popMessage are inline here
+// The script manager (cWScriptMan_TheWScriptMan); hasMessage / popMessage are inline here
 // (out-of-line copies: func_0030D330, func_0030D348).
 struct sScript_4B48 {
     char pad0[0x1C4];
@@ -2098,7 +2098,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
             if (msg->type == 8) {
                 cOVStateManager_triggerOverlay(0x1D);
                 D_005366E8[++D_004A2A54] = 3;
-                D_004A2A50 = D_004428FC[0];
+                cPauseState_Flags = D_004428FC[0];
                 cSSXAudio_PlayIconSound(func_0028B180(), 4, 0, 1.0f);
                 return false;
             }
@@ -2107,10 +2107,10 @@ extern "C" bool func_00244B48(sApp_4B48* self)
                 if (cUIStateStack_findState(&self->ui->states, GetHashValue32(str_90bc_fail_b)) == 0) {
                     cOVStateManager_triggerOverlay(0x1E);
                     D_005366E8[++D_004A2A54] = 3;
-                    D_004A2A50 = D_004428FC[0];
+                    cPauseState_Flags = D_004428FC[0];
                     func_00398038(self->ui);
                 } else {
-                    ((sScript_4B48*)D_004A3DD8)->popMessage();
+                    ((sScript_4B48*)cWScriptMan_TheWScriptMan)->popMessage();
                 }
                 return false;
             }
@@ -2119,7 +2119,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
     if (pending_4B48()) {
         cOVStateManager_triggerOverlay(0x22);
         D_005366E8[++D_004A2A54] = 0xC;
-        D_004A2A50 = D_00442920[0];
+        cPauseState_Flags = D_00442920[0];
         D_004A20CC_4B48 = 0xFFFFFFFF;
         func_0029ED18(func_0028B180());
         return false;
@@ -2133,14 +2133,14 @@ extern "C" bool func_00244B48(sApp_4B48* self)
         func_00326AE0(PadCache);
         func_0020CA10();
         D_005366E8[++D_004A2A54] = 2;
-        D_004A2A50 = D_004428F8[0];
+        cPauseState_Flags = D_004428F8[0];
         sUIObj_4B48* o = self->ui->fC;
         o->vt[44].fn((char*)o + o->vt[44].delta, self->f228);
         cSSXAudio_PauseAudio(func_0028B180());
         func_00294F48(func_0028B180());
         return false;
     }
-    int wasPaused = D_004A2A50 & 1;
+    int wasPaused = cPauseState_Flags & 1;
     func_00398038(self->ui);
     if (func_0020CBA0() != 0) {
         return false;
@@ -2149,7 +2149,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
     if (func_002CC098(self->fA4) != 0) {
         return false;
     }
-    if (wasPaused && (D_004A2A50 & 1) == 0) {
+    if (wasPaused && (cPauseState_Flags & 1) == 0) {
         return false;
     }
     return true;
@@ -2176,7 +2176,7 @@ extern "C" void func_002B7848(int, int, int);
 extern "C" void cGameViewMan_updateAll(int);
 extern "C" void func_00230F40(void*);
 extern char gBucketMan[8];
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 struct sList_244E60 { int pad0; int items[3]; unsigned int count; };
 struct sApp_244E60 { char pad0[0x4C]; int f4C; char pad1[0x84-0x50]; sList_244E60* list; };
 
@@ -2194,16 +2194,16 @@ extern "C" void func_00244E60(void* self)
             obj = gBucketMan;
             func_00230F40(self);
         }
-        if ((D_004A2A50 & 1) == 0)
+        if ((cPauseState_Flags & 1) == 0)
             cReplay_update(*(int*)(s + 0x28));
-        if (cReplay_isPauseAI(*(int*)(s + 0x28)) == 0 && (D_004A2A50 & 8) == 0) {
+        if (cReplay_isPauseAI(*(int*)(s + 0x28)) == 0 && (cPauseState_Flags & 8) == 0) {
             sVE_244E60* vt = (sVE_244E60*)ScriptEngine->mVtbl;
             ((void (*)(void*))vt[5].fn)((char*)ScriptEngine + vt[5].delta);
         }
     }
     obj = gBucketMan;
     skip = 0;
-    if ((D_004A2A50 & 1) != 0 || cReplay_isPauseAI(*(int*)(s + 0x28)) != 0)
+    if ((cPauseState_Flags & 1) != 0 || cReplay_isPauseAI(*(int*)(s + 0x28)) != 0)
         skip = 1;
     if (skip == 0) {
         if (*(int*)(s + 0x7C) == 0 || func_002379C8(*(int*)(s + 0x7C)) != 0) {
@@ -2215,20 +2215,20 @@ extern "C" void func_00244E60(void* self)
         }
     }
     if (!skip) {
-        if ((D_004A2A50 & 2) == 0)
+        if ((cPauseState_Flags & 2) == 0)
             cBucketMan_updateBucket(obj, 1);
         cBucketMan_updateBucket(obj, 5);
         cBucketMan_updateBucket(obj, 6);
-        if ((D_004A2A50 & 2) == 0)
+        if ((cPauseState_Flags & 2) == 0)
             cBucketMan_applyBucket(obj, 1);
         {
             char* c = *(char**)(s + 0xC);
             sVE_244E60* vt = *(sVE_244E60**)(c + 0xCC);
             ((void (*)(void*))vt[3].fn)(c + vt[3].delta);
         }
-        if ((D_004A2A50 & 0x10) == 0)
+        if ((cPauseState_Flags & 0x10) == 0)
             cBucketMan_updateBucket(obj, 2);
-        if ((D_004A2A50 & 4) == 0)
+        if ((cPauseState_Flags & 4) == 0)
             cBucketMan_updateBucket(obj, 3);
         func_00309270(*(int*)(s + 0x30));
         func_002294C8(*(int*)(s + 0x38));
@@ -2237,7 +2237,7 @@ extern "C" void func_00244E60(void* self)
         cBucketMan_mergeBucket(obj, 1);
     } else {
         cBucketMan_updateBucket(obj, 5);
-        if ((D_004A2A50 & 4) == 0)
+        if ((cPauseState_Flags & 4) == 0)
             cBucketMan_updateBucket(obj, 3);
     }
     cBucketMan_updateBucket(obj, 4);
@@ -2481,7 +2481,7 @@ INCLUDE_ASM("main/ssxappdtor", func_002454F8);
 #ifdef SKIP_ASM
 extern char D_004A2BC8[];
 extern char str_pct_3dpct_pct[];
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 
@@ -2490,7 +2490,7 @@ extern "C" int func_002454F8(void* self, int refresh)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
         char buf[0xD0];
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(D_004A5B64 + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }
     if (refresh != 0) {
@@ -2568,7 +2568,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00245698);
 #ifdef SKIP_ASM
 extern char D_004A2BC8[];
 extern char str_pct_3dpct_pct[];
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 
@@ -2577,7 +2577,7 @@ extern "C" int func_00245698(void* self)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
         char buf[0xD0];
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(D_004A5B64 + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;
@@ -2669,7 +2669,7 @@ INCLUDE_ASM("main/ssxappdtor", func_002458B8);
 #ifdef SKIP_ASM
 extern char D_004A2BC8[];
 extern char str_pct_3dpct_pct[];
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 
@@ -2678,7 +2678,7 @@ extern "C" int func_002458B8(void* self)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
         char buf[0xD0];
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(D_004A5B64 + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;

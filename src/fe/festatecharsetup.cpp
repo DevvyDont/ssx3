@@ -296,9 +296,9 @@ struct sXform_182EC0
     sQuat_182EC0 rot;
 };
 
-extern sQuat_182EC0 D_004FF140;
+extern sQuat_182EC0 t4vect_XAxis;
 extern sQuat_182EC0 t4vect_YAxis;
-extern sQuat_182EC0 D_004FF160;
+extern sQuat_182EC0 t4vect_ZAxis;
 extern "C" void func_0019F3E8(void* rider, sXform_182EC0* xf);
 extern "C" void func_0019F548(void* rider, sXform_182EC0* xf);
 
@@ -356,10 +356,10 @@ extern "C" void func_00182EC0(void* self_)
             xf.rot.w = 1.0f;
             xf.rot.y = 0.0f;
             xf.rot.z = 0.0f;
-            xf.rot = QuatMul_182EC0(xf.rot, AxisAngle_182EC0(D_004FF140, 0.0f));
+            xf.rot = QuatMul_182EC0(xf.rot, AxisAngle_182EC0(t4vect_XAxis, 0.0f));
         }
         xf.rot = QuatMul_182EC0(xf.rot, AxisAngle_182EC0(t4vect_YAxis, 0.0f));
-        xf.rot = QuatMul_182EC0(xf.rot, AxisAngle_182EC0(D_004FF160, 1.7453293800354004f));
+        xf.rot = QuatMul_182EC0(xf.rot, AxisAngle_182EC0(t4vect_ZAxis, 1.7453293800354004f));
         func_0019F3E8(rider, &xf);
         {
             sQuat_182EC0 p;

@@ -317,9 +317,9 @@ struct sXform_184C60
     sQuat_184C60 rot;
 };
 
-extern sQuat_184C60 D_004FF140;
+extern sQuat_184C60 t4vect_XAxis;
 extern sQuat_184C60 t4vect_YAxis;
-extern sQuat_184C60 D_004FF160;
+extern sQuat_184C60 t4vect_ZAxis;
 extern "C" void func_0019F3E8(void* rider, sXform_184C60* xf);
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
@@ -382,10 +382,10 @@ extern "C" void func_00184C60(char* self)
                 xf.rot.y = 0.0f;
                 xf.rot.z = 0.0f;
                 xf.rot.w = 1.0f;
-                xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(D_004FF140, 0.0f));
+                xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_XAxis, 0.0f));
             }
             xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_YAxis, 0.0f));
-            xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(D_004FF160, 1.082104206085205f));
+            xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_ZAxis, 1.082104206085205f));
             func_0019F3E8(rider, &xf);
             func_001A0570((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44), 1);
         }
@@ -581,7 +581,7 @@ struct sVE_185268 {
 struct sSnd_185268 {
     sVE_185268* vt;
 };
-extern sSnd_185268 D_004A5A58;
+extern sSnd_185268 gUISoundNull;
 
 struct sColor_185268 {
     float a, r, g, b;
@@ -625,7 +625,7 @@ static inline void PlaySound_185268(char* self, int id)
 {
     sSnd_185268* snd = *(sSnd_185268**)(*(char**)(self + 0x10) + 0x14);
     if (snd == 0)
-        snd = &D_004A5A58;
+        snd = &gUISoundNull;
     if (snd != 0)
         ((void (*)(void*, int))snd->vt[2].fn)((char*)snd + snd->vt[2].delta, id);
 }

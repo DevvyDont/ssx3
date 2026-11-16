@@ -1838,7 +1838,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_updateDisplayError);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" char *cUIStateStack_getCurrentState_79C8(char *) __asm__("cUIStateStack_getCurrentState");
 extern "C" void cOVStateManager_triggerOverlay_79C8(int) __asm__("cOVStateManager_triggerOverlay");
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_004A2A54;
 extern int D_00442924[];
 extern int D_005366E8[];
@@ -1848,7 +1848,7 @@ extern int D_005366E8[];
  *
  * Waits while mLoading is set and until the UI stack's current state is empty or of kind 5. When
  * mDisplayError reaches 0 it triggers overlay 0x27 (cOVState_PAUSE_ONLINE_ERROR) and pushes 13 onto the stack
- * at D_005366E8 (D_004A2A50 = D_004428F0[13]), which the overlays pop.
+ * at D_005366E8 (cPauseState_Flags = D_004428F0[13]), which the overlays pop.
  */
 extern "C" void cGameComm_updateDisplayError(cGameComm* self) {
     if (self->mLoading == 0 && self->mDisplayError > 0) {
@@ -1861,7 +1861,7 @@ extern "C" void cGameComm_updateDisplayError(cGameComm* self) {
                 cOVStateManager_triggerOverlay_79C8(0x27);
                 int idx = D_004A2A54 + 1;
                 D_005366E8[idx] = 0xD;
-                D_004A2A50 = D_00442924[0];
+                cPauseState_Flags = D_00442924[0];
                 D_004A2A54 = idx;
             }
         }

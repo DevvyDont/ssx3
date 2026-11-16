@@ -365,13 +365,13 @@ struct sWV_9D60 {
     sWVCam_9D60 cams[4];
 };
 
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 extern "C" void func_003AA028(void* self, void* section, int cam, int loaded);
 
 extern "C" void func_003A9D60(sWV_9D60* self, int cam)
 {
     if (*(int*)((char*)self + cam * 0x50 + 0x240) != 0) {
-        int frame = *(int*)(D_004A5B64 + 0x18);
+        int frame = *(int*)(cAppMan_TheAppMan + 0x18);
         float v = *(float*)((char*)self + cam * 0x50 + 0x280);
         *(float*)((char*)self + cam * 0x50 + 0x284) = v;
         *(float*)((char*)self + cam * 0x50 + 0x288) = v;

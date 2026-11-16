@@ -65,7 +65,7 @@ extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_PauseSFX(void*);
 extern "C" void func_002EA820(void*);
 extern int D_004A2A54;
-extern int D_004A2A50;
+extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_00442918[];
 
@@ -84,7 +84,7 @@ extern "C" int func_002839A8(sVidPlayer* self)
     int n = D_004A2A54 + 1;
     self->active = 1;
     D_005366E8[n] = 10;
-    D_004A2A50 = D_00442918[0];
+    cPauseState_Flags = D_00442918[0];
     D_004A2A54 = n;
     sVidObj* q = ((sVidOwner*)SSXApp->Game)->obj;
     self->f14 = 0;

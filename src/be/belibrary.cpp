@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern int D_005305B0[];
+extern int cBELibrary_raceDB[];
 
 struct sCharEntry {
     char pad_0x00[0x11];
@@ -15,7 +15,7 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getCharacterID__Fi);
 /**
  * Returns the character ID of the player in a rider slot.
  *
- * Maps the slot to a player through the race settings copy at D_005305B0 and reads mCharID from that player's
+ * Maps the slot to a player through the race settings copy at cBELibrary_raceDB and reads mCharID from that player's
  * cBELibrary_playerDB record.
  *
  * @param index  rider slot
@@ -23,7 +23,7 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getCharacterID__Fi);
  */
 signed char cBELibrary_getCharacterID(int index)
 {
-    int charID = D_005305B0[index];
+    int charID = cBELibrary_raceDB[index];
     sCharEntry* entry = &cBELibrary_playerDB[charID];
     return entry->mCharID;
 }
@@ -40,7 +40,7 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getCheatCharacterID);
  */
 extern "C" signed char cBELibrary_getCheatCharacterID(int index)
 {
-    int charID = D_005305B0[index];
+    int charID = cBELibrary_raceDB[index];
     signed char* entry = (signed char*)((char*)cBELibrary_playerDB + charID * 0x1C);
     return entry[0x12];
 }
@@ -63,7 +63,7 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getProfileIndex__Fi);
  */
 int cBELibrary_getProfileIndex(int index)
 {
-    int charID = D_005305B0[index];
+    int charID = cBELibrary_raceDB[index];
     sCharEntry2* entry = (sCharEntry2*)((char*)cBELibrary_playerDB + charID * 0x1C);
     if (entry->field_0xC == -1) {
         return 2;
@@ -85,7 +85,7 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getRiderIndex__Fi);
  */
 int cBELibrary_getRiderIndex(int flag)
 {
-    int* base = D_005305B0;
+    int* base = cBELibrary_raceDB;
     int count = 0;
     while (1) {
         int charID = *base;
@@ -139,7 +139,7 @@ extern sBlk20_A188 D_005308B8_A188 __asm__("D_005308B8");
 extern "C" void func_0014A188(char* p)
 {
     int rider;
-    *(sBlk4C_A188*)p = *(sBlk4C_A188*)D_005305B0;
+    *(sBlk4C_A188*)p = *(sBlk4C_A188*)cBELibrary_raceDB;
     p += sizeof(sBlk4C_A188);
     *(sProfileBlk_A188*)p = *PROFILE_A188;
     p += sizeof(sProfileBlk_A188);
@@ -190,7 +190,7 @@ extern "C" void func_0014A5E0(char* p)
     cBEIface_14A5E0* o;
     int idx;
 
-    *(sBlk4C_14A5E0*)D_005305B0 = *(sBlk4C_14A5E0*)p;
+    *(sBlk4C_14A5E0*)cBELibrary_raceDB = *(sBlk4C_14A5E0*)p;
     cBENewRaceInterface_getThis()->onLoad();
     p += 0x4C;
     *(sBlkA8_14A5E0*)cBELibrary_playerDB = *(sBlkA8_14A5E0*)p;

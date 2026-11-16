@@ -838,9 +838,9 @@ struct sM_172278 {
 } __attribute__((aligned(16)));
 
 extern sM_172278 D_004FF1A0_v172278 __asm__("t4mat_Identity");
-extern sV_172278 D_004FF140_v172278 __asm__("D_004FF140");
+extern sV_172278 D_004FF140_v172278 __asm__("t4vect_XAxis");
 extern sV_172278 D_004FF150_v172278 __asm__("t4vect_YAxis");
-extern sV_172278 D_004FF160_v172278 __asm__("D_004FF160");
+extern sV_172278 D_004FF160_v172278 __asm__("t4vect_ZAxis");
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
 
 // PORT: PS2-only VU0 inline asm (scale the rows of m by s.x, s.y, s.z, s.w).
@@ -1057,11 +1057,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001728F8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 
-extern t4Vector D_004FF140;
+extern t4Vector t4vect_XAxis;
 
 extern t4Vector D_004FF150_28F8 __asm__("t4vect_YAxis");
 
-extern t4Vector D_004FF160_28F8 __asm__("D_004FF160");
+extern t4Vector D_004FF160_28F8 __asm__("t4vect_ZAxis");
 
 extern t4Matrix D_004FF1A0_28F8 __asm__("t4mat_Identity");
 
@@ -1295,7 +1295,7 @@ extern "C" int func_001728F8(const sXform_28F8* t, const t4Vector* pt)
     {
         sMtx_28F8* m = &M;
         sMtx_28F8 R;
-        ROT_28F8(R, &D_004FF140.x, -t->rot[1]);
+        ROT_28F8(R, &t4vect_XAxis.x, -t->rot[1]);
         *m *= R;
     }
     {
@@ -1310,7 +1310,7 @@ extern "C" int func_001728F8(const sXform_28F8* t, const t4Vector* pt)
     t4Vector dmin = Sub_28F8(q, sVec4_28F8(sVec3_28F8(-t->size.x, -t->size.y, -t->size.z), 1.0f));
     t4Vector dmax = Sub_28F8(q, sVec4_28F8(t->size.x, t->size.y, t->size.z, 1.0f));
     if (D_004A4DEC == 0) {
-        D_004C5480[0] = D_004FF140;
+        D_004C5480[0] = t4vect_XAxis;
         D_004C5480[1] = D_004FF150_28F8;
         D_004C5480[2] = D_004FF160_28F8;
         D_004A4DEC = 1;
@@ -1500,7 +1500,7 @@ struct sQuad_00173208 {
     int v[4];
 } __attribute__((aligned(16)));
 
-extern sQuad_00173208 D_004FF130_00173208 __asm__("D_004FF130");
+extern sQuad_00173208 D_004FF130_00173208 __asm__("t4vect_Origin");
 
 extern "C" void* func_00173208(void* self)
 {
@@ -1557,7 +1557,7 @@ struct sVec2 {
     sVec2(float ax, float ay) : x(ax), y(ay) {}
 };
 
-extern t4Vector D_004FF160_32E8 __asm__("D_004FF160");
+extern t4Vector D_004FF160_32E8 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C228(float x);
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
@@ -1730,7 +1730,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001736E0);
 // 2-float vector (the horizontal part of a direction, for pitch = atan2(z, |xy|)).
 
 
-extern t4Vector D_004FF160_36E0 __asm__("D_004FF160");
+extern t4Vector D_004FF160_36E0 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C228(float x);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
@@ -1958,7 +1958,7 @@ struct sPair_173E40 {
 
 extern sM_173E40 t4mat_Identity;
 extern sV_173E40 t4vect_YAxis;
-extern sV_173E40 D_004FF160_v173E40 __asm__("D_004FF160");
+extern sV_173E40 D_004FF160_v173E40 __asm__("t4vect_ZAxis");
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
 extern "C" sPair_173E40 func_0031B748(sM_173E40* m);
 
@@ -2136,7 +2136,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174200);
 // 2-float vector (the horizontal part of a direction, for pitch = atan2(z, |xy|)).
 
 
-extern t4Vector D_004FF160_4200 __asm__("D_004FF160");
+extern t4Vector D_004FF160_4200 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C228(float x);
 
@@ -2305,7 +2305,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001744B0);
 // 2-float vector (the horizontal part of a direction, for pitch = atan2(z, |xy|)).
 
 
-extern t4Vector D_004FF160_44B0 __asm__("D_004FF160");
+extern t4Vector D_004FF160_44B0 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C228(float x);
 
@@ -2769,7 +2769,7 @@ extern float D_004C5810[4];
 extern float D_004C5820[4];
 extern "C" void* func_0016C800(void*);
 extern "C" void func_0016C888(void*, int);
-extern char D_004C5830[];
+extern char gCamTriggerMan[];
 extern int D_004A4DF0;
 void sti_00175A20(int init, int prio) __asm__("func_00175A20");
 void sti_00175A20(int init, int prio)
@@ -3002,9 +3002,9 @@ void sti_00175A20(int init, int prio)
             D_004C5820[3] = 0.0f;
             *(char*)&D_004A4DF0 = -1;
             D_004A4DF0 = (D_004A4DF0 & 0xFF) | 0xFFFFFF00u;
-            func_0016C800(D_004C5830);
+            func_0016C800(gCamTriggerMan);
         } else {
-            func_0016C888(D_004C5830, 2);
+            func_0016C888(gCamTriggerMan, 2);
         }
     }
 }
@@ -4508,7 +4508,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_getDesir
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
 
-extern t4Vector D_004FF160_7FC0 __asm__("D_004FF160");
+extern t4Vector D_004FF160_7FC0 __asm__("t4vect_ZAxis");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector ctScale_00177EF8_7FC0(const t4Vector& v, float s)
@@ -4672,7 +4672,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_update);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 
-extern t4Vector D_004FF160_8208 __asm__("D_004FF160");
+extern t4Vector D_004FF160_8208 __asm__("t4vect_ZAxis");
 
 // The per-frame camera input record (0x70 bytes) that func_00162568_8208 (camera/camera) fills from the target.
 struct sCamInfo {
@@ -4860,7 +4860,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_snap);
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
 
-extern t4Vector D_004FF160_83E0 __asm__("D_004FF160");
+extern t4Vector D_004FF160_83E0 __asm__("t4vect_ZAxis");
 
 // A being: the script/AI-facing interface of a rider, at rider + 0x6C0 (seg/seg_1FBE38; slot order of the
 // prototype's vtable _vt$6cBeing).
@@ -4939,7 +4939,7 @@ static inline t4Vector ScaleP_1783E0(const t4Vector* v, float s)
  *
  * Takes the target's (+0x30) slot-4 vector into +0x390 and the desired position for its slot-3 vector
  * (cSPOKEChaseAlgorithm_getDesiredPosition, probably getDesiredPosition) into +0x40, and sets +0x20 to the rider position
- * (cSPOKEChaseAlgorithm_getRiderPosition) plus 37 along the Z axis (D_004FF160). Then runs the look-at chase snap (cLookAtChaseAlgorithm_snap),
+ * (cSPOKEChaseAlgorithm_getRiderPosition) plus 37 along the Z axis (t4vect_ZAxis). Then runs the look-at chase snap (cLookAtChaseAlgorithm_snap),
  * setupInitialCamDir (cLookAtChaseAlgorithm_setupInitialCamDir, 559.744 and 300) and the algorithm's virtual slot 5.
  *
  * @param id  the subject's AI index (On Tour subjectID); any other rider is ignored
@@ -5184,7 +5184,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_getI
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
 
-extern t4Vector D_004FF160_8758 __asm__("D_004FF160");
+extern t4Vector D_004FF160_8758 __asm__("t4vect_ZAxis");
 
 
 // PORT: PS2-only VU0 inline asm (a + b).
@@ -5244,7 +5244,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_upda
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 
-extern t4Vector D_004FF140;
+extern t4Vector t4vect_XAxis;
 
 // The per-frame camera input record (0x70 bytes) that func_00162568_87E0 (camera/camera) fills from the target.
 extern "C" void func_00162568_87E0(void* self, sCamInfo* out, float a, float b, float c, float d,
@@ -5339,7 +5339,7 @@ extern "C" void cSUPERPIPEChaseAlgorithm_update(cSUPERPIPEChaseAlgorithm* self)
     t4Vector d = Sub_1787E0(self->CamTargetPos, self->Position);
     float len = Length_1787E0(d);
     if (len < 1.0f) {
-        d = ScaleP_1787E0(&D_004FF140, 600.0f);
+        d = ScaleP_1787E0(&t4vect_XAxis, 600.0f);
     } else if (len > 600.0f) {
         ScaleEq_1787E0(d, 600.0f / len);
         self->Position = Sub_1787E0(self->CamTargetPos, d);
@@ -5543,7 +5543,7 @@ struct sQuad_1789E8
 {
     float v[4];
 } __attribute__((aligned(16)));
-extern sQuad_1789E8 D_004FF140_v1789E8 __asm__("D_004FF140");
+extern sQuad_1789E8 D_004FF140_v1789E8 __asm__("t4vect_XAxis");
 extern void* cPOST_RACE_1ChaseAlgorithm_vtbl[];
 extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
 
@@ -5558,7 +5558,7 @@ static inline sVec4_1789E8 Get_1789E8(char* o, int slot)
  *
  * Runs the look-at chase constructor, then sets AlgorithmType 0x44 (On Tour CAMERA_ALGORITHM_CHASE_POST_RACE_1 = 68),
  * cPOST_RACE_1ChaseAlgorithm_vtbl and AgeInFrames 0. StartDir is the target's velocity (slot 3) normalised when
- * longer than 1, else its front (slot 4); z is then cleared and it is renormalised, or set to the X axis (D_004FF140)
+ * longer than 1, else its front (slot 4); z is then cleared and it is renormalised, or set to the X axis (t4vect_XAxis)
  * when under 0.01.
  *
  * @param src  the rider camera target (On Tour cRiderCameraTarget* target)
@@ -5650,7 +5650,7 @@ struct sCamInfo_00178BB0 {
     char data[0x68];
 } __attribute__((aligned(16)));
 
-extern sVec_00178BB0 D_004FF160;
+extern sVec_00178BB0 t4vect_ZAxis;
 extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 
@@ -5785,9 +5785,9 @@ extern "C" void cPOST_RACE_1ChaseAlgorithm_update(cPOST_RACE_1ChaseAlgorithm* se
     float ang = wrap_00178BB0((float)self->AgeInFrames * 0.0009090909152291715f * 6.2831854820251465f);
     float a = (1.0f - func_0031C040(ang)) * 0.7482788562774658f + -0.7482788562774658f;
     a -= ffloor_00178BB0(a * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
-    sVec_00178BB0 q = AxisAngle_00178BB0(D_004FF160, a);
+    sVec_00178BB0 q = AxisAngle_00178BB0(t4vect_ZAxis, a);
     sVec_00178BB0 v = ctRot_00178BB0(q, *(sVec_00178BB0*)&self->StartDir);
-    *(sVec_00178BB0*)&self->CamTargetPos = ctAdd_00178BB0(getPos_00178BB0(((char*)self)), ctScale_00178BB0(D_004FF160, -3.0f));
+    *(sVec_00178BB0*)&self->CamTargetPos = ctAdd_00178BB0(getPos_00178BB0(((char*)self)), ctScale_00178BB0(t4vect_ZAxis, -3.0f));
     int multi = *(int*)((char*)SSXApp->Game->AI + 0x78) >= 2;
     float h = 0.0f;
     if (multi) {
@@ -5799,7 +5799,7 @@ extern "C" void cPOST_RACE_1ChaseAlgorithm_update(cPOST_RACE_1ChaseAlgorithm* se
     }
     *(sVec_00178BB0*)&self->Position =
         ctAdd_00178BB0(ctSub_00178BB0(*(sVec_00178BB0*)&self->CamTargetPos, ctScale_00178BB0(v, d + 126.0f)),
-                       ctScale_00178BB0(D_004FF160, h + -27.0f));
+                       ctScale_00178BB0(t4vect_ZAxis, h + -27.0f));
 }
 #endif
 

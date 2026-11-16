@@ -1490,7 +1490,7 @@ extern "C" void func_0034AC10(void* self, void* stream)
 //100%
 INCLUDE_ASM("object/flexrailnode", func_0034AC88);
 #ifdef SKIP_ASM
-extern char* D_004A5B64;
+extern char* cAppMan_TheAppMan;
 
 struct sFrRailDesc;
 
@@ -1522,7 +1522,7 @@ struct sFrRailSrc_AC88 {
 
 static inline float perSec_34AC88(float x)
 {
-    return x * (1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+    return x * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
 }
 
 extern "C" sFrRailDesc* func_0034AC88(sFrRailDesc* out, void* src)

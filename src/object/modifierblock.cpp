@@ -1099,7 +1099,7 @@ INCLUDE_ASM("object/modifierblock", cSkyBox_render);
 // PORT: func_002D1C58 is defined returning void*, but its value is the rider index passed to func_002D1C20(int).
 extern "C" int func_002D1C58_i() __asm__("func_002D1C58");
 extern "C" void* func_002D1C20(int i);
-extern int D_004A452C;
+extern int cRenderToggles_m_DisableSkyBox;
 extern char t4mat_Identity[];
 
 struct sMat_53B10 {
@@ -1160,7 +1160,7 @@ static inline void SetAlpha_53B10(sRS_53B10* r, int v) { r->alpha = v; }
 /**
  * Draws the sky box instance around the current view's position with its own draw state.
  *
- * Skipped when the "Disable Sky Box" debug toggle (D_004A452C) is set or there is no sky instance (+0x14, On
+ * Skipped when the "Disable Sky Box" debug toggle (cRenderToggles_m_DisableSkyBox) is set or there is no sky instance (+0x14, On
  * Tour m_pInstanceSky). Pushes a copy of the draw state with the blend field (bits 5-9 of word 8) cleared,
  * zon 1, blendm 2, zmode 0 and alpha 0x14, sets bit 2 and clears bit 1 of the record's flags, and draws
  * through the graphics manager's slot 95 with an identity matrix moved to the current view's position
@@ -1168,7 +1168,7 @@ static inline void SetAlpha_53B10(sRS_53B10* r, int v) { r->alpha = v; }
  */
 extern "C" void cSkyBox_render(void* self)
 {
-    if (D_004A452C != 0)
+    if (cRenderToggles_m_DisableSkyBox != 0)
         return;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (*(void**)((char*)self + 0x14) == 0)
