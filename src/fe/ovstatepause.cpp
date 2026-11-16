@@ -2284,7 +2284,7 @@ extern int D_005366E8[];
 extern int D_004428F0[];
 void func_00270ED8(void* self);
 extern "C" void* func_001D58B8(void* self);
-extern "C" void func_0026F8A0(void* self, void* a1, int a2, int a3);
+extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
 
 extern "C" void func_001FDE60(void* self)
 {
@@ -2294,7 +2294,7 @@ extern "C" void func_001FDE60(void* self)
     }
     D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
     func_001D58B8(self);
-    func_0026F8A0(SSXApp->Game->Replay, 0, 0, 0);
+    cReplay_startReplay(SSXApp->Game->Replay, 0, 0, 0);
 }
 #endif
 

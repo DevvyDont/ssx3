@@ -1617,7 +1617,7 @@ extern "C" void cRider_setMotionState_6120(void *, int) __asm__("cRider_setMotio
 extern "C" void func_0011FEC8_6120(void *, int) __asm__("func_0011FEC8__FPv");
 extern "C" int func_0028B180();
 extern "C" void func_0029A220(int, void *);
-extern "C" void func_00270970(int, int);
+extern "C" void cReplay_eventReset(int, int);
 
 /**
  * Resets the rider when the reset input is pressed or an automatic reset is forced.
@@ -1640,7 +1640,7 @@ extern "C" int cRider_checkForReset(cRider* self, int isResetInput, int forceAut
         func_0011FEC8_6120(((char*)self), 9);
         cRider_setMotionState_6120(((char*)self), 3);
         func_0029A220(func_0028B180(), ((char*)self));
-        func_00270970((int)SSXApp->Game->Replay, self->mAIIndex);
+        cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
         return 1;
     }
     return 0;

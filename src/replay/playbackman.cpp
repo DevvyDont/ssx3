@@ -1118,21 +1118,21 @@ void* func_0026D740(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D760);
+INCLUDE_ASM("replay/playbackman", cReplay_saveReplayFrame);
 #ifdef SKIP_ASM
 struct sPbBytes4D760 {
     char b[4];
 };
 
-extern "C" void* func_00270130(void* self);
+extern "C" void* cReplay_allocReplayFrame(void* self);
 extern "C" void cReplay_saveFrame(cReplay* self, void* out);
 // PORT: func_0026ED88 is an empty (void*) stub, but this caller passes a second
 // argument; bind the 2-arg form to the symbol.
 void func_0026ED88_2(void* self, int a) __asm__("func_0026ED88__FPv");
 
-extern "C" void* func_0026D760(cReplay* self, sPbBytes4D760* src)
+extern "C" void* cReplay_saveReplayFrame(cReplay* self, sPbBytes4D760* src)
 {
-    void* out = func_00270130(self);
+    void* out = cReplay_allocReplayFrame(self);
     *(sPbBytes4D760*)((char*)out + 0x1C) = *src;
     cReplay_saveFrame((cReplay*)self, out);
     *(int*)((char*)out + 0x30) = self->RecordTick;
@@ -1209,8 +1209,8 @@ extern "C" void func_0030BB10(void* self, cPbStream* s);
 extern "C" void func_00229E20(void* self, cPbStream* s);
 extern "C" void func_003441A8(void* self, cPbStream* s);
 extern "C" void cMultiParticleMan_writeToReplayFrame(void* self, cPbStream* s);
-extern "C" void func_0026D988(cReplay* self, cPbStream* s, int a);
-extern "C" void func_0026DA88(cReplay* self, cPbStream* s);
+extern "C" void cReplay_saveBucket(cReplay* self, cPbStream* s, int a);
+extern "C" void cReplay_saveDeadBucket(cReplay* self, cPbStream* s);
 extern "C" void func_00103480(void* self, cPbStream* s);
 
 extern int D_004A5B78;
@@ -1232,7 +1232,7 @@ static inline cPbWorld* pbWorld(cPbObjSys* o)
  * In order: the frame start (func_0026E9C0), a 0x18-byte time block (func_003178E0), the object-id counters
  * D_004A5B78 and D_004A5B7C, the BE state, the game and its AI (their save virtuals), func_002D9CB0 (where
  * the restore reads the avalanche), the world-script manager, D_004A2A00, D_004A3FF0, the multi-particle
- * manager, the object buckets (func_0026D988 with 1, func_0026DA88) and the AI's focus manager.
+ * manager, the object buckets (cReplay_saveBucket with 1, cReplay_saveDeadBucket) and the AI's focus manager.
  * cReplay_restoreFrame() reads them back in the same order.
  *
  * @param stream  the frame stream to write (On Tour: cReplayFramePtr*)
@@ -1257,14 +1257,14 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
     func_00229E20(D_004A2A00_D818, out);
     func_003441A8(D_004A3FF0, out);
     cMultiParticleMan_writeToReplayFrame(D_004A4028, out);
-    func_0026D988(self, out, 1);
-    func_0026DA88(self, out);
+    cReplay_saveBucket(self, out, 1);
+    cReplay_saveDeadBucket(self, out);
     func_00103480(*(void**)((char*)pbWorld(D_004A28A8_D818->objs) + 0xA4), out);
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D988);
+INCLUDE_ASM("replay/playbackman", cReplay_saveBucket);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct cBucketMan;
@@ -1293,7 +1293,7 @@ public:
 };
 
 // Writes the bucket's node count (8-byte header) and then each node's serialised form to the stream.
-extern "C" void func_0026D988(cReplay* self, cPbStream* s, int bucket)
+extern "C" void cReplay_saveBucket(cReplay* self, cPbStream* s, int bucket)
 {
     int hdr[2];
     void* node;
@@ -1313,7 +1313,7 @@ extern "C" void func_0026D988(cReplay* self, cPbStream* s, int bucket)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026DA88);
+INCLUDE_ASM("replay/playbackman", cReplay_saveDeadBucket);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct cBucketMan;
@@ -1326,7 +1326,7 @@ struct sVEntryDA88 {
     void (*fn)(void* self, ...);
 };
 static inline cBucketMan* bucketMan_DA88() { return (cBucketMan*)&gBucketMan; }
-extern "C" void func_0026DA88(cReplay* self, cPbStream* s)
+extern "C" void cReplay_saveDeadBucket(cReplay* self, cPbStream* s)
 {
     int hdr[2];
     void* node;
@@ -1352,14 +1352,14 @@ extern "C" void func_0026DA88(cReplay* self, cPbStream* s)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026DB88);
+INCLUDE_ASM("replay/playbackman", cReplay_restoreReplayFrame);
 #ifdef SKIP_ASM
 // PORT: cReplayFramePtr_getFrameBlock is mangled with no parameters (__Fv) but is
 // called here with (frame, 1); bind the 2-arg form to the symbol.
 void cReplayFramePtr_getFrameBlock_2(void* frame, int n) __asm__("cReplayFramePtr_getFrameBlock__Fv");
 extern "C" void cReplay_restoreFrame1_2(void* replay, void* frame) __asm__("cReplay_restoreFrame1");
 
-extern "C" void func_0026DB88(cReplay* self, void* frame)
+extern "C" void cReplay_restoreReplayFrame(cReplay* self, void* frame)
 {
     cReplayFramePtr_getFrameBlock_2(frame, 1);
     cReplay_restoreFrame1_2(self, frame);

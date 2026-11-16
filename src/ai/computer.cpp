@@ -1515,7 +1515,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cRider_doFinishEvent(void* self);
-extern "C" void func_00270AB0(void* a, int b, int c);
+extern "C" void cReplay_eventChapter(void* a, int b, int c);
 
 static inline int state_0010E5D8() { return cBENewRaceInterface_newRace.cGameMode; }
 
@@ -1545,7 +1545,7 @@ extern "C" void func_0010E5D8(void* self, int* arg, int a2, int a3)
         char* o = (char*)self + 0x6C0;
         sVEntry0010E5D8* e = &(*(sVEntry0010E5D8**)o)[7];
         void* tgt = SSXApp->Game->Replay;
-        func_00270AB0(tgt, e->fn(o + e->delta), arg[1]);
+        cReplay_eventChapter(tgt, e->fn(o + e->delta), arg[1]);
     }
 }
 #endif

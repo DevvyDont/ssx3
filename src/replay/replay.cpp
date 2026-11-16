@@ -33,7 +33,7 @@ extern "C" void func_00357D28(void* self, void* stream);
 extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cStreamRB* stream);
 extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream);
 extern "C" void func_00103578(void* self, void* stream);
-extern "C" void func_0026DE58(cReplay* self, int a);
+extern "C" void cReplay_applyBucket(cReplay* self, int a);
 extern "C" void cAI_updateOverlapList(void* self);
 extern "C" void cGameViewMan_updateAll(void* self);
 extern char gBucketMan;
@@ -87,7 +87,7 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     cReplay_restoreBucket(self, (void*)1, (cStreamRB*)stream);
     cReplay_restoreDeadBucket(self, (cStreamRDB*)stream);
     func_00103578(*(void**)((char*)SSXApp->Game->AI + 0xA4), stream);
-    func_0026DE58(self, 1);
+    cReplay_applyBucket(self, 1);
     cAI_updateOverlapList(SSXApp->Game->AI);
     cGameViewMan_updateAll(SSXApp->Game->ViewMan);
 }
@@ -132,7 +132,7 @@ extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cStreamRB* st
 #endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026DE58);
+INCLUDE_ASM("replay/replay", cReplay_applyBucket);
 #ifdef SKIP_ASM
 struct cBucketMan;
 void* cBucketMan_first(cBucketMan* self, int index);
@@ -144,7 +144,7 @@ struct sBucketVEntryDE58 {
 };
 
 // Calls virtual slot 3 on every object in the given bucket of the global bucket manager.
-extern "C" void func_0026DE58(cReplay* self, int a)
+extern "C" void cReplay_applyBucket(cReplay* self, int a)
 {
     void* node = cBucketMan_first((cBucketMan*)&gBucketMan, a);
     cBucketMan* bm = (cBucketMan*)&gBucketMan;

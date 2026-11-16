@@ -16,8 +16,8 @@
 // On Tour 0x24/0x24/0x28/0x24.
 //
 // FLAT layouts, like main/game.h: every field at its retail offset, the base fields written out in each class.
-// Names are EA's (On Tour), placed by [R] the constructors (func_002725B8, func_002734A8, func_00272D68,
-// func_00273180) and [U] how retail code uses the field; [O] = On Tour's member (same order, +4).
+// Names are EA's (On Tour), placed by [R] the constructors (cScriptPlayerChannelSpline_cScriptPlayerChannelSpline, cScriptPlayerChannelObject_cScriptPlayerChannelObject, cScriptPlayerChannelBlock_cScriptPlayerChannelBlock,
+// cScriptPlayerChannelEvent_cScriptPlayerChannelEvent) and [U] how retail code uses the field; [O] = On Tour's member (same order, +4).
 
 #include "layout.h"
 
@@ -54,7 +54,7 @@ struct cScriptPlayerChannel {
 };
 
 // cScriptPlayerChannelSpline: size 0x28 [R] (func_00273AA8 allocates 0x28); GetType() = 0;
-// vtable cScriptPlayerChannelSpline_vtbl (0x00481A10), constructor func_002725B8, no destructor.
+// vtable cScriptPlayerChannelSpline_vtbl (0x00481A10), constructor cScriptPlayerChannelSpline_cScriptPlayerChannelSpline, no destructor.
 struct cScriptPlayerChannelSpline {
     // --- cScriptPlayerChannel (see above)
     int unk_00;                    // 0x000 retail-only base word; no retail access seen
@@ -78,7 +78,7 @@ struct cScriptPlayerChannelSpline {
 };
 
 // cScriptPlayerChannelObject: size 0x28 [R] (func_00273AA8 allocates 0x28); GetType() = 1;
-// vtable cScriptPlayerChannelObject_vtbl (0x004818F0), constructor func_002734A8, destructor cScriptPlayerChannelObject__cScriptPlayerChannelObject.
+// vtable cScriptPlayerChannelObject_vtbl (0x004818F0), constructor cScriptPlayerChannelObject_cScriptPlayerChannelObject, destructor cScriptPlayerChannelObject__cScriptPlayerChannelObject.
 struct cScriptPlayerChannelObject {
     // --- cScriptPlayerChannel (see above)
     int unk_00;                    // 0x000 retail-only base word; no retail access seen
@@ -91,17 +91,17 @@ struct cScriptPlayerChannelObject {
     // --- cScriptPlayerChannelObject
     tInSeqObjectChannelHeader* mpHeader; // 0x010 [O]; [U] Play stores the data; header[0] = key count, header[1] =
                                    //       object count
-    tInSeqObjectChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; func_002738F8 (LoadNextScriptKey) steps it
-    int mNextKeyIndex;             // 0x018 [O]; [U] func_002738F8 counts it
+    tInSeqObjectChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; cScriptPlayerChannelObject_LoadNextScriptKey (LoadNextScriptKey) steps it
+    int mNextKeyIndex;             // 0x018 [O]; [U] cScriptPlayerChannelObject_LoadNextScriptKey counts it
     tObjectEntry* mpObjectArray;   // 0x01C [O]; [U] Play allocates header[1] x 0x24 (tObjectEntry); Stop frees it;
-                                   //       func_00273860 indexes it
-    tObjectEntry* mpActiveObjectList; // 0x020 [O]; [U] func_00273860 (AddActiveKey) pushes onto it; Update
+                                   //       cScriptPlayerChannelObject_AddActiveKey indexes it
+    tObjectEntry* mpActiveObjectList; // 0x020 [O]; [U] cScriptPlayerChannelObject_AddActiveKey (AddActiveKey) pushes onto it; Update
                                    //       (cScriptPlayerChannelObject_Update) unlinks ended entries; GetCustom returns it
     int mNumActiveObjects;         // 0x024 [O]; [U] ++ by AddActiveKey, -- by Update; GetValue returns its address
 };
 
 // cScriptPlayerChannelBlock: size 0x2C [R] (func_00273AA8 allocates 0x2C); GetType() = 2;
-// vtable cScriptPlayerChannelBlock_vtbl (0x004819B0), constructor func_00272D68, destructor cScriptPlayerChannelBlock__cScriptPlayerChannelBlock.
+// vtable cScriptPlayerChannelBlock_vtbl (0x004819B0), constructor cScriptPlayerChannelBlock_cScriptPlayerChannelBlock, destructor cScriptPlayerChannelBlock__cScriptPlayerChannelBlock.
 struct cScriptPlayerChannelBlock {
     // --- cScriptPlayerChannel (see above)
     int unk_00;                    // 0x000 retail-only base word; no retail access seen
@@ -114,20 +114,20 @@ struct cScriptPlayerChannelBlock {
     // --- cScriptPlayerChannelBlock
     tInSeqBlockChannelHeader* mpHeader; // 0x010 [O]; [U] Play stores the data; header[0] = key count, header[1] =
                                    //       block count
-    tInSeqBlockChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; func_00273140 (LoadNextScriptKey) steps it by
+    tInSeqBlockChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; cScriptPlayerChannelBlock_LoadNextScriptKey (LoadNextScriptKey) steps it by
                                    //       the key's size (0 at the end)
-    int mNextKeyIndex;             // 0x018 [O]; [U] func_00273140 counts it up to header[0] - 1
+    int mNextKeyIndex;             // 0x018 [O]; [U] cScriptPlayerChannelBlock_LoadNextScriptKey counts it up to header[0] - 1
     tInSeqBlock* mpDataArray;      // 0x01C [O]; no retail access seen (the ctor and Stop skip it: placed by the
                                    //       order)
     tBlockEntry* mpBlockArray;     // 0x020 [O]; [U] Play allocates header[1] x 0x1C (tBlockEntry) from the owner's
-                                   //       heap; Stop frees it; func_002730C0 indexes it
-    tBlockEntry* mpActiveBlockList; // 0x024 [O]; [U] func_002730C0 (AddActiveKey) pushes onto it; Update
+                                   //       heap; Stop frees it; cScriptPlayerChannelBlock_AddActiveKey indexes it
+    tBlockEntry* mpActiveBlockList; // 0x024 [O]; [U] cScriptPlayerChannelBlock_AddActiveKey (AddActiveKey) pushes onto it; Update
                                    //       (cScriptPlayerChannelBlock_Update) unlinks ended entries; GetCustom returns it
     int mNumActiveBlocks;          // 0x028 [O]; [U] ++ by AddActiveKey, -- by Update; GetValue returns its address
 };
 
 // cScriptPlayerChannelEvent: size 0x28 [R] (func_00273AA8 allocates 0x28); GetType() = 3;
-// vtable cScriptPlayerChannelEvent_vtbl (0x00481950), constructor func_00273180, destructor cScriptPlayerChannelEvent__cScriptPlayerChannelEvent.
+// vtable cScriptPlayerChannelEvent_vtbl (0x00481950), constructor cScriptPlayerChannelEvent_cScriptPlayerChannelEvent, destructor cScriptPlayerChannelEvent__cScriptPlayerChannelEvent.
 struct cScriptPlayerChannelEvent {
     // --- cScriptPlayerChannel (see above)
     int unk_00;                    // 0x000 retail-only base word; no retail access seen
@@ -140,11 +140,11 @@ struct cScriptPlayerChannelEvent {
     // --- cScriptPlayerChannelEvent
     tInSeqEventChannelHeader* mpHeader; // 0x010 [O]; [U] Play stores the data; header[0] = key count, header[1] =
                                    //       event count
-    tInSeqEventChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; func_00273468 (LoadNextScriptKey) steps it
-    int mNextKeyIndex;             // 0x018 [O]; [U] func_00273468 counts it
+    tInSeqEventChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; cScriptPlayerChannelEvent_LoadNextScriptKey (LoadNextScriptKey) steps it
+    int mNextKeyIndex;             // 0x018 [O]; [U] cScriptPlayerChannelEvent_LoadNextScriptKey counts it
     tEventEntry* mpEventArray;     // 0x01C [O]; [U] Play allocates header[1] x 8 (tEventEntry); Stop frees it;
-                                   //       func_00273418 fills entry [mNumActiveEvents]; GetCustom returns it
-    int mNumActiveEvents;          // 0x020 [O]; [U] func_00273418 ++; Update (cScriptPlayerChannelEvent_Update) resets it to 0 on a new
+                                   //       cScriptPlayerChannelEvent_AddActiveKey fills entry [mNumActiveEvents]; GetCustom returns it
+    int mNumActiveEvents;          // 0x020 [O]; [U] cScriptPlayerChannelEvent_AddActiveKey ++; Update (cScriptPlayerChannelEvent_Update) resets it to 0 on a new
                                    //       frame; GetValue returns its address
     float mEventFrame;             // 0x024 [O]; [U] Update compares/stores it as a float (lwc1/swc1); Play and Stop
                                    //       store 0 with sw $zero

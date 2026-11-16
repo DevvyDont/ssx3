@@ -1609,7 +1609,7 @@ INCLUDE_ASM("sound/soundsys", func_00292CB8);
 extern "C" void func_00293168(void*, void*, int*, int*);
 extern "C" void func_002ABE78(void*, int);
 extern "C" void* func_0028B1C8();
-extern "C" int func_00270280(void* p);
+extern "C" int cReplay_isPauseAI(void* p);
 extern int D_004A2A50;
 
 extern "C" void func_00292CB8(void* self, void* obj) {
@@ -1629,7 +1629,7 @@ extern "C" void func_00292CB8(void* self, void* obj) {
         a = 0;
     }
     int c = 0;
-    if ((D_004A2A50 & 1) || func_00270280(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
+    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
         c = 1;
     }
     if (c) {
@@ -1647,7 +1647,7 @@ extern "C" void cSSXAudio_GlideProgram(cSSXAudio* self, int id, void* rider, int
 extern "C" void func_002ABB38(void*);
 extern "C" void func_002ABE78(void*, int);
 extern "C" void* func_0028B1C8();
-extern "C" int func_00270280(void* p);
+extern "C" int cReplay_isPauseAI(void* p);
 extern int D_004A2A50;
 
 /**
@@ -1656,7 +1656,7 @@ extern int D_004A2A50;
  *
  * Called for a bank-monitor instance whose rider is at +0x80. In sound states 1 and 5 only a type-2 surface
  * is
- * switched to 9; state 2, D_004A2A50 bit 0 and a playing replay (func_00270280) silence the loop. The volume
+ * switched to 9; state 2, D_004A2A50 bit 0 and a playing replay (cReplay_isPauseAI) silence the loop. The volume
  * goes
  * to the instance's +0x64 and the bend through func_002ABE78().
  *
@@ -1691,7 +1691,7 @@ extern "C" void cSSXAudio_HandleGlide(cSSXAudio* self, void* obj) {
         a = 0;
     }
     int c = 0;
-    if ((D_004A2A50 & 1) || func_00270280(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
+    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
         c = 1;
     }
     if (c) {
@@ -1708,7 +1708,7 @@ extern "C" void cSSXAudio_AIGlideProgram(cSSXAudio* self, int id, void* rider, i
 extern "C" void func_002ABB38(void*);
 extern "C" void func_002ABE78(void*, int);
 extern "C" void* func_0028B1C8();
-extern "C" int func_00270280(void* p);
+extern "C" int cReplay_isPauseAI(void* p);
 extern int D_004A2A50;
 
 /**
@@ -1737,7 +1737,7 @@ extern "C" void cSSXAudio_HandleAIGlide(cSSXAudio* self, void* obj) {
         cSSXAudio_AIGlideProgram(self, func_00291710(self, (int)rider), rider, &a, &b);
     }
     int c = 0;
-    if ((D_004A2A50 & 1) || func_00270280(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
+    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
         c = 1;
     }
     if (c) {
@@ -1755,7 +1755,7 @@ extern "C" void cSSXAudio_CarveProgram(cSSXAudio* self, int id, void* rider, int
 extern "C" void func_002ABB38(void*);
 extern "C" void func_002ABE78(void*, int);
 extern "C" void* func_0028B1C8();
-extern "C" int func_00270280(void* p);
+extern "C" int cReplay_isPauseAI(void* p);
 extern int D_004A2A50;
 
 /**
@@ -1791,7 +1791,7 @@ extern "C" void cSSXAudio_HandleCarve(cSSXAudio* self, void* obj) {
         a = 0;
     }
     int c = 0;
-    if ((D_004A2A50 & 1) || func_00270280(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
+    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) {
         c = 1;
     }
     if (c) {
@@ -4945,7 +4945,7 @@ static inline int snd97B8AddVoice(void* vself, int a, int b, int type)
 
 extern "C" int func_00288AE0(void* self);
 extern "C" void* func_0028B1C8();
-extern "C" int func_00270280(void* p);
+extern "C" int cReplay_isPauseAI(void* p);
 extern int D_004A2A50;
 
 /**
@@ -4967,7 +4967,7 @@ extern "C" void cSSXAudio_LoseMaxPowerEvent(cSSXAudio* self, void* obj)
     int c = 1;
     int pos = *(float*)((char*)obj + 0x470) >= 0.0f;
     if (pos) c = 0;
-    if ((D_004A2A50 & 1) || func_00270280(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) c = 0;
+    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) c = 0;
     if (*(int*)((char*)func_0028B1C8() + 0x214) != 4) c = 0;
     if (c) {
         snd97B8AddVoice(self, 0, 0x69, 9);
@@ -5569,7 +5569,7 @@ extern "C" int func_002906B8(void* self);
 extern "C" int func_00288AE0(void* self);
 extern "C" void* func_0028B1C8();
 extern "C" void* func_0028B1D8();
-extern "C" int func_00270280(void* p);
+extern "C" int cReplay_isPauseAI(void* p);
 // PORT: func_002ADCA0 returns int; the unit declares it void elsewhere.
 extern "C" int func_002ADCA0_AB40(void*, int, long, int, int, int, int, int) __asm__("func_002ADCA0");
 extern "C" void* cBE_getBE();
@@ -5739,7 +5739,7 @@ extern "C" void func_0029AB40(cSSXAudio* vself)
                     int c = 1;
                     int pos = rider->f470 >= 0.0f;
                     if (pos) c = 0;
-                    if ((D_004A2A50 & 1) || func_00270280(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) c = 0;
+                    if ((D_004A2A50 & 1) || cReplay_isPauseAI(*(void**)((char*)func_0028B1C8() + 0x28)) != 0) c = 0;
                     if (*(int*)((char*)func_0028B1C8() + 0x214) != 4) c = 0;
                     if (c) {
                         sndAB40Add(self, 0, 0x68, 9);

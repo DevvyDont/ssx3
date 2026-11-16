@@ -98,8 +98,8 @@ class cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 int cInput_getState(void* self, int button);
 extern "C" void func_0039F190(void* self, int a1);
-extern "C" void func_0026F980(void* replay);
-extern "C" void func_002706B8(void* replay);
+extern "C" void cReplay_stopReplay(void* replay);
+extern "C" void cReplay_startAutoReplay(void* replay);
 extern "C" void cOVStateManager_triggerOverlay(int state);
 extern "C" void cGame_exit(void* game, int a1);
 extern "C" int func_0026FB88(void* replay, int a1);
@@ -225,7 +225,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00471BE0));
         switch (*(int*)(*(char**)(obj + 0xA0) + 0x18)) {
         case 0:
-            func_0026F980(replay_20DF38());
+            cReplay_stopReplay(replay_20DF38());
             cOVStateManager_triggerOverlay(0x12);
             D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
             break;
@@ -235,9 +235,9 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
             if (frame != 0xFFFF) {
                 cUIScreen_playFrame(self->screen, frame, 1);
             }
-            func_0026F980(replay_20DF38());
+            cReplay_stopReplay(replay_20DF38());
             if (self->fB4 == 0) {
-                func_002706B8(replay_20DF38());
+                cReplay_startAutoReplay(replay_20DF38());
             }
             if (*(int*)(replay_20DF38() + 0x608) != 0) {
                 cGame_exit(D_004A28A8_20DF38->game, 0);

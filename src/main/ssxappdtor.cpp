@@ -2162,7 +2162,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00244E60);
 struct sVE_244E60 { short delta; short index; void* fn; };
 extern "C" int func_00237950(int);
 extern "C" int func_002379C8(int);
-extern "C" int func_00270280(int);
+extern "C" int cReplay_isPauseAI(int);
 extern "C" void func_0026F4A8(int);
 extern "C" int func_0026CE50(int);
 extern "C" void cBucketMan_updateBucket(void*, int);
@@ -2196,14 +2196,14 @@ extern "C" void func_00244E60(void* self)
         }
         if ((D_004A2A50 & 1) == 0)
             func_0026F4A8(*(int*)(s + 0x28));
-        if (func_00270280(*(int*)(s + 0x28)) == 0 && (D_004A2A50 & 8) == 0) {
+        if (cReplay_isPauseAI(*(int*)(s + 0x28)) == 0 && (D_004A2A50 & 8) == 0) {
             sVE_244E60* vt = (sVE_244E60*)ScriptEngine->mVtbl;
             ((void (*)(void*))vt[5].fn)((char*)ScriptEngine + vt[5].delta);
         }
     }
     obj = gBucketMan;
     skip = 0;
-    if ((D_004A2A50 & 1) != 0 || func_00270280(*(int*)(s + 0x28)) != 0)
+    if ((D_004A2A50 & 1) != 0 || cReplay_isPauseAI(*(int*)(s + 0x28)) != 0)
         skip = 1;
     if (skip == 0) {
         if (*(int*)(s + 0x7C) == 0 || func_002379C8(*(int*)(s + 0x7C)) != 0) {

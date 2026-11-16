@@ -4,7 +4,7 @@
 // cReplay: the race replay recorder/player (record the race as key frames + per-rider input caches, play it back,
 // instant replays, highlights, saving to the memory card). EA's header is ../source/replay/replay.h (the July 2003
 // preview files its inline asserts under it). One instance per game: cGame::Replay (main/game.h 0x028), created in
-// main/gameload.cpp by operator new(0x688, "Replay") + the constructor func_0026EFB8; no global, no vtable, no base.
+// main/gameload.cpp by operator new(0x688, "Replay") + the constructor cReplay_cReplay; no global, no vtable, no base.
 // Size 0x688 [R] (allocation); the last field, WriteCheckSum, ends exactly there. On Tour's cReplay is 0x8F8: same
 // member order, but its cReplayFrame is 0x48 (retail 0x38), its tRiderStats 0xB0 (retail 0xAC), it keeps 4 input
 // caches / highlights / chapters (retail 2) and its bools are bytes (retail words).
@@ -14,7 +14,7 @@
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Names are EA's, from SSX On Tour's PSP DWARF
 // (class cReplay), placed by:
-//   [R] retail's constructor func_0026EFB8 / destructor func_0026F088 and allocations (tags read from the retail ELF:
+//   [R] retail's constructor cReplay_cReplay / destructor func_0026F088 and allocations (tags read from the retail ELF:
 //       "Replay", "ReplayCache", "WriteBlock", "WriteTmp");
 //   [U] how retail code uses the field (cReplay_init, cReplay_reset and the methods named per field);
 //   [O] On Tour's member order. Between the fixed points (PadNum 0x28 = setReplayPadNum's field, Frames 0x2C..0x3AC,
@@ -58,7 +58,7 @@ struct cReplayFrameList {
     cReplayFrame* Tail;    // 0x000 [O]; [U] the oldest frame: func_0026E670 (remTail) unlinks it, func_0026E5D0
                            //       (addFrame) sets it on an empty list
     cReplayFrame* Head;    // 0x004 [O]; [U] the newest frame: func_0026E5D0 appends there (frame->Prev = Head)
-    int NumFrames;         // 0x008 [O]; [U] ++/-- by func_0026E5D0/func_0026E608; func_00270130 tests
+    int NumFrames;         // 0x008 [O]; [U] ++/-- by func_0026E5D0/func_0026E608; cReplay_allocReplayFrame tests
                            //       FreeFrameList.NumFrames
 };
 
@@ -86,16 +86,16 @@ struct cReplay {
     int SaveState;                       // 0x004 [O]; [U] cReplay_reset stores 15; cPlaybackMan func_0026CC48 saves
                                          //       State here before pausing (14), func_0026CD20 restores it
     int MaxFrames;                       // 0x008 [O]; [U] cReplay_init: 0xC9800 / FrameBlockSize (= 10); bounds the
-                                         //       Frames loops (cReplay_init, cReplay_reset, func_0026F428)
+                                         //       Frames loops (cReplay_init, cReplay_reset, cReplay_purge)
     int MaxPlayerHighlights;             // 0x00C [O]; [U] cReplay_reset: 3 with one rider, else 1; func_00270C40
                                          //       (maxHighlights(land)) returns it
-    int MaxChapters;                     // 0x010 [O]; [U] cReplay_reset: 3 with one rider, else 0; func_00270AB0
+    int MaxChapters;                     // 0x010 [O]; [U] cReplay_reset: 3 with one rider, else 0; cReplay_eventChapter
                                          //       (eventChapter) bounds the chapter bit by it
     int FrameBlockSize;                  // 0x014 [O]; [U] cReplay_init stores 0x14000 and passes it to
                                          //       cReplayFramePtr_initBlock
     int SaveFrameTicks;                  // 0x018 [O]; [U] cReplay_init 0; func_0026F4A8 saves a full (type 1) frame
                                          //       when RecordTick % SaveFrameTicks == 0; written by func_00271228,
-                                         //       read by func_00271758
+                                         //       read by cReplay_load
     int SkipFrameTicks;                  // 0x01C [O]; [U] func_0026FB88 sets 10 and counts it down; cReplay_reset
                                          //       zeroes it
     int SkipFrame;                       // 0x020 [O] (On Tour: bool); [U] func_0026FB88 toggles it (^= 1);
@@ -106,7 +106,7 @@ struct cReplay {
                                          //       func_0026FA78/func_0026FB88/func_0026F4A8 read SSXApp's pad[PadNum]
                                          //       (+0xB0)
     char Frames[16][0x38];               // 0x02C [O] cReplayFrame Frames[16] (retail 0x38 each, On Tour 0x48); [R]
-                                         //       ctor func_0026EFB8 constructs 16 x 0x38 (func_0026D5E8), dtor
+                                         //       ctor cReplay_cReplay constructs 16 x 0x38 (func_0026D5E8), dtor
                                          //       func_0026F088 destroys them through vtable slot 7; each frame's
                                          //       vptr is at +0
     cReplayFrame* NextCandidate;         // 0x3AC [O]; [U] func_002701A0 (freeOneReplayFrame) walks from it for a
@@ -114,56 +114,56 @@ struct cReplay {
     cReplayFrameList FrameList;          // 0x3B0 [O]; [R] ctor func_0026E5A8(this + 0x3B0); [U] the recorded frames,
                                          //       oldest first
     cReplayFrameList FreeFrameList;      // 0x3BC [O]; [R] ctor func_0026E5A8(this + 0x3BC); [U] cReplay_reset adds
-                                         //       every Frames[i]; func_00270130 (allocReplayFrame) takes one
-    int RecordTick;                      // 0x3C8 [O]; [U] func_0026F4A8 counts it up while recording; func_0026D760
+                                         //       every Frames[i]; cReplay_allocReplayFrame (allocReplayFrame) takes one
+    int RecordTick;                      // 0x3C8 [O]; [U] func_0026F4A8 counts it up while recording; cReplay_saveReplayFrame
                                          //       stamps new frames (+0x30) with it
     int EndRecordTick;                   // 0x3CC [O]; [U] func_0026F4A8 counts it while no ReplayError; playback
-                                         //       stops there (func_002703F0, func_00270280, func_0026FB88)
-    cReplayFrame* SaveFrame;             // 0x3D0 [O]; [U] func_0026F7F8 saves it (frame type 1), func_0026F850
+                                         //       stops there (cReplay_stepFrame, cReplay_isPauseAI, func_0026FB88)
+    cReplayFrame* SaveFrame;             // 0x3D0 [O]; [U] cReplay_pushReplaySaveFrame saves it (frame type 1), cReplay_popReplaySaveFrame
                                          //       restores and frees it; playback and the writer skip it
-                                         //       (func_002703F0, func_002712F8, func_00271380)
+                                         //       (cReplay_stepFrame, func_002712F8, func_00271380)
     cReplayFrame* InstantReplayFrame;    // 0x3D4 [O]; [U] tested by func_002705B0 (endMarkInstantReplay), cleared by
-                                         //       func_00270628 (cancelMarkInstantReplay); func_0026F4A8 starts the
+                                         //       cReplay_cancelMarkInstantReplay (cancelMarkInstantReplay); func_0026F4A8 starts the
                                          //       instant replay from it
     char InstantReplayStats[0xAC];       // 0x3D8 [O] tRiderStats (retail 0xAC like cReplayHighlight::Stats, On Tour
                                          //       0xB0); [U] func_002705B0 reads the ints at +0x9C / +0xA4 (0x474 /
                                          //       0x47C)
-    int PlaybackTick;                    // 0x484 [O]; [U] the playback cursor: func_002702F8 (rewind), func_002703F0
+    int PlaybackTick;                    // 0x484 [O]; [U] the playback cursor: cReplay_rewind (rewind), cReplay_stepFrame
                                          //       (stepFrame), func_0026E4B8/E528/E568
     cReplayFrame* PlaybackFrame;         // 0x488 [O]; [U] ditto: the frame PlaybackTick lies in
     cReplayCache* InputCache[2];         // 0x48C [O] (On Tour 4); [R] cReplay_addCache: cMemMan_alloc(0x10,
-                                         //       "ReplayCache") into the first free slot of 2, ctor func_0026EFB8
+                                         //       "ReplayCache") into the first free slot of 2, ctor cReplay_cReplay
                                          //       zeroes 2; [U] moved with the playback cursor (func_0026D4D8)
-    cReplayHighlight Highlight[2];       // 0x494 [O] (On Tour 4 x 0xB8); [R] ctor func_0026EFB8 runs func_00272288
+    cReplayHighlight Highlight[2];       // 0x494 [O] (On Tour 4 x 0xB8); [R] ctor cReplay_cReplay runs func_00272288
                                          //       on 2 x 0xB4; [U] cReplay_reset sets PlayerId 0/1;
-                                         //       func_00270B88/func_00270CE8/func_00270DE0 index it by player
-    int Chapters[2];                     // 0x5FC [O] (On Tour 4); [U] func_00270AB0 (eventChapter) sets bit `pos` of
+                                         //       func_00270B88/func_00270CE8/cReplay_cancelMarkHighlight index it by player
+    int Chapters[2];                     // 0x5FC [O] (On Tour 4); [U] cReplay_eventChapter (eventChapter) sets bit `pos` of
                                          //       Chapters[player] (a bit mask)
     int NextFrame;                       // 0x604 [O] (On Tour: bool); [U] func_0026F4A8 clears it every update;
-                                         //       func_00270280 tests it; func_002702F8/func_00270378 clear it
-    int Loaded;                          // 0x608 [O] (On Tour: bool); [U] func_00271758 (load) sets it,
+                                         //       cReplay_isPauseAI tests it; cReplay_rewind/func_00270378 clear it
+    int Loaded;                          // 0x608 [O] (On Tour: bool); [U] cReplay_load (load) sets it,
                                          //       cReplay_reset clears it; fe/ovstatereplay.cpp,
                                          //       fe/ovtemplatedialog.cpp test it
     int EndReplay;                       // 0x60C [O] (On Tour: bool); [U] func_0026FA50 (endReplay) sets it;
                                          //       func_0026F4A8 ends the recording (state 13) on it
     int ReplayError;                     // 0x610 [O] (On Tour: bool); [U] while set func_0026F4A8 stops saving
                                          //       frames and EndRecordTick; blocks event marking (func_002707E0,
-                                         //       func_00270AB0); saved by func_00271228, loaded by func_00271758
+                                         //       cReplay_eventChapter); saved by func_00271228, loaded by cReplay_load
     int ShowError;                       // 0x614 [O]; [U] func_0026F4A8 counts it down to 0
     int Cmd;                             // 0x618 [O]; [U] func_0026FB88 stores the replay-menu command (0..8);
                                          //       func_0026FE50 switches on it
     int AutoReplay;                      // 0x61C [O] (On Tour: bool); [U] func_0026F4A8 sets it (state 9);
-                                         //       func_002706B8, cReplay_stopAutoReplay, func_002703F0 (loop at the
+                                         //       cReplay_startAutoReplay, cReplay_stopAutoReplay, cReplay_stepFrame (loop at the
                                          //       end)
-    int InstantReplay;                   // 0x620 [O] (On Tour: bool); [U] func_0026F8A0 (startReplay) stores its
+    int InstantReplay;                   // 0x620 [O] (On Tour: bool); [U] cReplay_startReplay (startReplay) stores its
                                          //       instantReplay argument; func_00270670 (stopInstantReplay)
     int StartInstantReplay;              // 0x624 [O] (On Tour: bool); [U] func_00270658 (startInstantReplay) sets it
                                          //       unless InstantReplay; func_0026F4A8 acts on it
     int PauseRecord;                     // 0x628 [O] (On Tour: bool); [U] cReplay_reset clears it (no other retail
                                          //       access seen)
     int PauseRecordTick;                 // 0x62C [O]; [U] cReplay_reset clears it (no other retail access seen)
-    int CurrentReplayCamIndex;           // 0x630 [O]; [U] func_0026ED98 (cycleReplayCameraAlgorithm) steps it % 9;
-                                         //       func_0026EDD8 indexes D_00445438 with it
+    int CurrentReplayCamIndex;           // 0x630 [O]; [U] cReplay_cycleReplayCameraAlgorithm (cycleReplayCameraAlgorithm) steps it % 9;
+                                         //       cReplay_setCurrentReplayCamera indexes D_00445438 with it
     int CurrentInstantReplayCamIndex;    // 0x634 [O]; [U] func_0026EF30 steps it % 9
     int WriteState;                      // 0x638 [O]; [U] the save writer's state (0..11): func_002710A8 switches on
                                          //       it, every step ++ it

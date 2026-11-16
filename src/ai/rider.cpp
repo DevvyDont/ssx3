@@ -4660,7 +4660,7 @@ extern t4Vector D_004FF140;
 // their 4-float constructor stores the components; that order decides the float-register allocation of every
 // caller (merging them changes code), so they are kept apart.
 // sVec4 stores x, y, z, w.
-extern "C" void func_00270970(int a, int b);
+extern "C" void cReplay_eventReset(int a, int b);
 extern "C" void cRider_cancelRiderTransitions(cRider* self);
 extern "C" void cRiderHandler_resetRiderFX(void* self);
 extern "C" void func_002F1A00(void* a);
@@ -4755,7 +4755,7 @@ extern "C" void cRider_transport_v(cRider* self, char* m) __asm__("cRider_transp
 /**
  * Teleports the rider to a transform, keeping its speed, with a per-rider offset so riders do not overlap.
  *
- * The rider's replay-cache slot is reset (func_00270970). The position is the matrix's row 3 plus an offset
+ * The rider's replay-cache slot is reset (cReplay_eventReset). The position is the matrix's row 3 plus an offset
  * in the matrix's frame times 100: rider 0 (2, 0), 1 (1, 0), 2 (2, -2), 3 (2, 2), 4 (1, -2), 5 (2, 1); the
  * heading is the matrix's X axis. Ends the trick, sets MS_Ground and CS_Cruise, cancels camera transitions,
  * notifies view 0's camera controller (slot 3), places the rider (func_0011D660), points the old speed along
@@ -4765,7 +4765,7 @@ extern "C" void cRider_transport_v(cRider* self, char* m) __asm__("cRider_transp
  */
 extern "C" void cRider_transport_v(cRider* self, char* m)
 {
-    func_00270970((int)SSXApp->Game->Replay, self->mAIIndex);
+    cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
     sVec4 pos = *(sVec4*)(m + 0x30);
     sVec4 off(0.0f, 0.0f, 0.0f, 0.0f);
     int i = self->mAIIndex;
@@ -4811,7 +4811,7 @@ INCLUDE_ASM("ai/rider", cRider_initForMission);
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
 extern t4Vector D_004FF140;
-extern "C" void func_00270970(int a, int b);
+extern "C" void cReplay_eventReset(int a, int b);
 extern "C" void cRider_cancelRiderTransitions(cRider* self);
 extern "C" void func_002F1A00(void* a);
 void func_0011FEC8_impl(void* self, int v) __asm__("func_0011FEC8__FPv");
@@ -4854,7 +4854,7 @@ extern "C" void cRider_initForMission(cRider* self, char* mat)
 {
     t4Vector pos;
     t4Vector dir;
-    func_00270970((int)SSXApp->Game->Replay, self->mAIIndex);
+    cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
     pos = *(t4Vector*)(mat + 0x30);
     dir = MatMulV_34D0(mat, D_004FF140);
     func_00119368(self->mMetrix, 1);

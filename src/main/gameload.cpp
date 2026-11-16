@@ -45,7 +45,7 @@ void* cBXLoadIndicator_cBXLoadIndicator(void* p);
 struct cBigFile;
 void* cBigFile_cBigFile(cBigFile* p);
 extern "C" void cGame_loadTrack(cGame* self);
-extern "C" void* func_0026EFB8(void* p);
+extern "C" void* cReplay_cReplay(void* p);
 extern "C" void* func_002DBD10(void* p, int a);
 extern "C" void* func_00237060(void* p, int n, int m);
 int BXrand();
@@ -62,7 +62,7 @@ extern "C" void cAI_loadRiders(void* ai);
 extern "C" void THREAD_yieldticks(int n);
 extern "C" int cAI_isAILoadedAndReady(void* ai);
 void func_00270EF8(void* p);
-extern "C" void func_00271758(void* p, void* a);
+extern "C" void cReplay_load(void* p, void* a);
 void func_00270F18(void* p);
 extern "C" void func_00152728(void* iface);
 extern "C" void* cGameViewMan_cGameViewMan(void* p, int a);
@@ -254,7 +254,7 @@ extern "C" void cGame_load(cGame* self)
     self->LoadIndicator = (cBXLoadIndicator*)cBXLoadIndicator_cBXLoadIndicator(operator new(0x10, D_00479A80, 0x20000000, 0));
     self->mpTrackBigFile = (cBigFile*)cBigFile_cBigFile((cBigFile*)operator new(8, D_004A2A68, 0, 0));
     cGame_loadTrack(self);
-    self->Replay = (cReplay*)func_0026EFB8(operator new(0x688, D_004A2A70, 0, 0));
+    self->Replay = (cReplay*)cReplay_cReplay(operator new(0x688, D_004A2A70, 0, 0));
     self->FXLoader = (cFXLoader*)func_002DBD10(operator new(1, D_0047B5E8, 0, 0), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
@@ -300,7 +300,7 @@ extern "C" void cGame_load(cGame* self)
             THREAD_yieldticks(1);
         }
         func_00270EF8(self->Replay);
-        func_00271758(self->Replay, func_001526D0(race));
+        cReplay_load(self->Replay, func_001526D0(race));
         func_00270F18(self->Replay);
         func_00152728(race);
     }
@@ -1117,7 +1117,7 @@ extern "C" void cGame_exit(cGame* self, int toFrontEnd)
 INCLUDE_ASM("main/gameload", func_00230558);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_0026F8A0(void* a, int b, int c, int d);
+extern "C" void cReplay_startReplay(void* a, int b, int c, int d);
 void func_002CC0B8(void* a, int b);
 extern int D_004A2A54;
 extern int D_004A2A50;
@@ -1135,7 +1135,7 @@ extern "C" void func_00230558(sGameLoad_0558* self)
 {
     D_005366E8[++D_004A2A54] = 8;
     D_004A2A50 = D_00442910[0];
-    func_0026F8A0(self->field_0x28, 0, 0, 0);
+    cReplay_startReplay(self->field_0x28, 0, 0, 0);
     func_002CC0B8(self->field_0xA4, 0);
 }
 #endif
@@ -1143,7 +1143,7 @@ extern "C" void func_00230558(sGameLoad_0558* self)
 //100%
 INCLUDE_ASM("main/gameload", func_002305C8);
 #ifdef SKIP_ASM
-extern "C" void func_0026F980(void* a);
+extern "C" void cReplay_stopReplay(void* a);
 void func_002CC0B8(void* a, int b);
 extern "C" void func_002CC460(void* a);
 extern int D_004A2A54;
@@ -1153,7 +1153,7 @@ extern int D_004428F0[];
 
 extern "C" void func_002305C8(void* self)
 {
-    func_0026F980(*(void**)((char*)self + 0x28));
+    cReplay_stopReplay(*(void**)((char*)self + 0x28));
     func_002CC0B8(*(void**)((char*)self + 0xA4), 1);
     func_002CC460(*(void**)((char*)self + 0xA4));
     D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
@@ -1233,7 +1233,7 @@ extern "C" int func_00237950(void* p);
 extern "C" int func_002379C8(void* p);
 extern "C" int func_0026CE50(void* p);
 extern "C" void func_0026F4A8(void* p);
-extern "C" int func_00270280(void* p);
+extern "C" int cReplay_isPauseAI(void* p);
 extern "C" void cBucketMan_updateBucket(void* mgr, int a);
 extern "C" void cBucketMan_applyBucket(void* mgr, int a);
 extern "C" void func_00309270(void* p);
@@ -1475,14 +1475,14 @@ extern "C" void cGame_update(cGame* self)
                 if (!paused_2306B8()) {
                     func_0026F4A8((char*)self->Replay);
                 }
-                if (func_00270280((char*)self->Replay) == 0 && !(D_004A2A50 & 8)) {
+                if (cReplay_isPauseAI((char*)self->Replay) == 0 && !(D_004A2A50 & 8)) {
                     char* w = (char*)ScriptEngine;
                     sVEntry_2306B8* vt = *(sVEntry_2306B8**)(w + 0x2A8);
                     vt[5].fn(w + vt[5].delta);
                 }
             }
             skip = 0;
-            if ((D_004A2A50 & 1) || func_00270280((char*)self->Replay) != 0) {
+            if ((D_004A2A50 & 1) || cReplay_isPauseAI((char*)self->Replay) != 0) {
                 skip = 1;
             }
             if (!skip) {

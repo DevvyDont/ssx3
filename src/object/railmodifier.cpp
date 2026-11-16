@@ -4046,9 +4046,9 @@ extern "C" void cTransformModifier__cTransformModifier(cTransformModifier* self,
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360B30__FPv);
+INCLUDE_ASM("object/railmodifier", cTransformModifier_update__FPv);
 #ifdef SKIP_ASM
-void func_00360B30(void* self)
+void cTransformModifier_update(void* self)
 {
 }
 #endif
@@ -4159,35 +4159,35 @@ void cTransformModifier_render(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360B80__FPv);
+INCLUDE_ASM("object/railmodifier", cTransformModifier_getBoundBox__FPv);
 #ifdef SKIP_ASM
-int func_00360B80(void* self)
+int cTransformModifier_getBoundBox(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360B88__FPv);
+INCLUDE_ASM("object/railmodifier", cTransformModifier_setBoundBox__FPv);
 #ifdef SKIP_ASM
-void func_00360B88(void* self)
+void cTransformModifier_setBoundBox(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360B90__FPv);
+INCLUDE_ASM("object/railmodifier", cTransformModifier_getRadius__FPv);
 #ifdef SKIP_ASM
-float func_00360B90(void* self)
+float cTransformModifier_getRadius(void* self)
 {
     return 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360BA0__FPv);
+INCLUDE_ASM("object/railmodifier", cTransformModifier_setRadius__FPv);
 #ifdef SKIP_ASM
-void func_00360BA0(void* self)
+void cTransformModifier_setRadius(void* self)
 {
 }
 #endif

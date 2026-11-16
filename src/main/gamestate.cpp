@@ -98,7 +98,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int GetHashValue32(char* str);
-extern "C" int func_00270280(void* p);
+extern "C" int cReplay_isPauseAI(void* p);
 extern "C" void func_00234BE8(void* self, int a1);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern "C" void* func_0028B180(void);
@@ -138,7 +138,7 @@ static inline float ffloor_00234C68(float x)
  */
 extern "C" void cGFGateState_update(void* self)
 {
-    if (func_00270280(*(void**)(cGameState_mpGame + 0x28)) != 0) {
+    if (cReplay_isPauseAI(*(void**)(cGameState_mpGame + 0x28)) != 0) {
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);

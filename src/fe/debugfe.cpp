@@ -2050,13 +2050,13 @@ extern "C" int cDebugFE_render(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FDF0);
+INCLUDE_ASM("fe/debugfe", cFEInput_getState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* cInput_getState(int, int) __asm__("cInput_getState__FPvi");
 
-extern "C" void func_0017FDF0(void* self, signed char k)
+extern "C" void cFEInput_getState(void* self, signed char k)
 {
     int id = 0;
     switch (k) {
@@ -2131,72 +2131,72 @@ void* cFEInput_isMisc(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FF40__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isNextHeld__FPv);
 #ifdef SKIP_ASM
-void* func_0017FF40(void* self)
+void* cFEInput_isNextHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x97);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FF60__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousHeld__FPv);
 #ifdef SKIP_ASM
-void* func_0017FF60(void* self)
+void* cFEInput_isPreviousHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x98);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FF80__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isOptionHeld__FPv);
 #ifdef SKIP_ASM
-void* func_0017FF80(void* self)
+void* cFEInput_isOptionHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x99);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FFA0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isMiscHeld__FPv);
 #ifdef SKIP_ASM
-void* func_0017FFA0(void* self)
+void* cFEInput_isMiscHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x9a);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FFC0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isNextReleased__FPv);
 #ifdef SKIP_ASM
-void* func_0017FFC0(void* self)
+void* cFEInput_isNextReleased(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x9b);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FFE0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousReleased__FPv);
 #ifdef SKIP_ASM
-void* func_0017FFE0(void* self)
+void* cFEInput_isPreviousReleased(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x9c);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180000__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isOptionReleased__FPv);
 #ifdef SKIP_ASM
-void* func_00180000(void* self)
+void* cFEInput_isOptionReleased(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x9d);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180020__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isMiscReleased__FPv);
 #ifdef SKIP_ASM
-void* func_00180020(void* self)
+void* cFEInput_isMiscReleased(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x9e);
 }
@@ -2230,45 +2230,45 @@ void* cFEInput_isLeft(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001800A0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isRight__FPv);
 #ifdef SKIP_ASM
-void* func_001800A0(void* self)
+void* cFEInput_isRight(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x75);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001800C0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isUpHeld__FPv);
 #ifdef SKIP_ASM
-void* func_001800C0(void* self)
+void* cFEInput_isUpHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x93);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001800E0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isDownHeld__FPv);
 #ifdef SKIP_ASM
-void* func_001800E0(void* self)
+void* cFEInput_isDownHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x94);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180100__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isLeftHeld__FPv);
 #ifdef SKIP_ASM
-void* func_00180100(void* self)
+void* cFEInput_isLeftHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x95);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180120__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isRightHeld__FPv);
 #ifdef SKIP_ASM
-void* func_00180120(void* self)
+void* cFEInput_isRightHeld(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x96);
 }
@@ -2338,36 +2338,36 @@ void* cFEInput_isLShift1Held(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180220__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2Held__FPv);
 #ifdef SKIP_ASM
-void* func_00180220(void* self)
+void* cFEInput_isLShift2Held(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x85);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180240__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isCamZoom__FPv);
 #ifdef SKIP_ASM
-void* func_00180240(void* self)
+void* cFEInput_isCamZoom(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x90);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180260__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isCamPan__FPv);
 #ifdef SKIP_ASM
-void* func_00180260(void* self)
+void* cFEInput_isCamPan(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x92);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180280__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isCamRotate__FPv);
 #ifdef SKIP_ASM
-void* func_00180280(void* self)
+void* cFEInput_isCamRotate(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x91);
 }
@@ -2376,27 +2376,27 @@ void* func_00180280(void* self)
 extern "C" void* cInput_getValue(int, int);
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001802A0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_getCamZoom__FPv);
 #ifdef SKIP_ASM
-void* func_001802A0(void* self)
+void* cFEInput_getCamZoom(void* self)
 {
     return cInput_getValue(*(int*)((char*)self + 0x18), 0x90);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001802C0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_getCamPan__FPv);
 #ifdef SKIP_ASM
-void* func_001802C0(void* self)
+void* cFEInput_getCamPan(void* self)
 {
     return cInput_getValue(*(int*)((char*)self + 0x18), 0x92);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001802E0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_getCamRotate__FPv);
 #ifdef SKIP_ASM
-void* func_001802E0(void* self)
+void* cFEInput_getCamRotate(void* self)
 {
     return cInput_getValue(*(int*)((char*)self + 0x18), 0x91);
 }

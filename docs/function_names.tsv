@@ -1468,3 +1468,65 @@ fn_names_c	0x0039FFA0	cUIThing_playKeyframerEvent	func_0039FFA0	[a] On Tour bool
 fn_names_c	0x003A3280	cUIVector_cUIVector	func_003A3280	[a] On Tour cUIVector(cUIScreen* pScreen, cUIThing* pParent) = retail (self, a1, a2), passed to the cUIThing base constructor func_0039FB30; [b] stores cUIVector_vtbl, clears the flag bits and the six mesh pointers; [c] caller cUIScreen_createObjectByStruct after operator new(0x90, "UIVector"); [d] directly before cUIVector__cUIVector, and 0x70 bytes like On Tour's (0x00213A14, 0x70)
 fn_names_c	0x003A5230	cUIMenu_cUIMenu	func_003A5230	[a] On Tour's only constructor cUIMenu(cUIScreen* pScreen, cUIThing* parent): retail passes a1/a2 untouched to the cUIThing base constructor func_0039FB30; [b] constructs the cUIGroup base (vtable, cList at 0x74), stores cUIMenu_vtbl, tAttrMenu() at 0x90, mStoredIndex 0xFF and zeroes the scroll fields (the inline constructor the header describes); [d] directly before cUIMenu__cUIMenu (003A52A0)
 fn_names_c	0x003A5390	cUIMenu_setDisableDirSound	func_003A5390	[a] On Tour cUIMenu::setDisableDirSound(bool a) = retail (self, int); [b] stores bit 3 of tAttrMenu (0x90), which is mDisableDirSound in On Tour's bit order (mCreateThread, mFlipInput, mScrollMenu, mDisableDirSound); [d] follows the bit-3 getter func_003A5380 and the preview's isFlipInput/setFlipInput (003A5350/003A5360), matching On Tour's declaration order isFlipInput, setFlipInput, isDisableDirSound, setDisableDirSound
+fn_cascade2	0x0017FDF0	cFEInput_getState	func_0017FDF0	vtable cFEInput_vtbl (0046D1D0) slot 2; follows cUIInput_getState__FPv
+fn_cascade2	0x0017FF40	cFEInput_isNextHeld__FPv	func_0017FF40__FPv	vtable cFEInput_vtbl (0046D1D0) slot 9; follows cUIInput_isNextHeld__FPv
+fn_cascade2	0x0017FF60	cFEInput_isPreviousHeld__FPv	func_0017FF60__FPv	vtable cFEInput_vtbl (0046D1D0) slot 10; follows cUIInput_isPreviousHeld__FPv
+fn_cascade2	0x0017FF80	cFEInput_isOptionHeld__FPv	func_0017FF80__FPv	vtable cFEInput_vtbl (0046D1D0) slot 11; follows cUIInput_isOptionHeld__FPv
+fn_cascade2	0x0017FFA0	cFEInput_isMiscHeld__FPv	func_0017FFA0__FPv	vtable cFEInput_vtbl (0046D1D0) slot 12; follows cUIInput_isMiscHeld__FPv
+fn_cascade2	0x0017FFC0	cFEInput_isNextReleased__FPv	func_0017FFC0__FPv	vtable cFEInput_vtbl (0046D1D0) slot 13; follows cUIInput_isNextReleased__FPv
+fn_cascade2	0x0017FFE0	cFEInput_isPreviousReleased__FPv	func_0017FFE0__FPv	vtable cFEInput_vtbl (0046D1D0) slot 14; follows cUIInput_isPreviousReleased__FPv
+fn_cascade2	0x00180000	cFEInput_isOptionReleased__FPv	func_00180000__FPv	vtable cFEInput_vtbl (0046D1D0) slot 15; follows cUIInput_isOptionReleased__FPv
+fn_cascade2	0x00180020	cFEInput_isMiscReleased__FPv	func_00180020__FPv	vtable cFEInput_vtbl (0046D1D0) slot 16; follows cUIInput_isMiscReleased__FPv
+fn_cascade2	0x001800A0	cFEInput_isRight__FPv	func_001800A0__FPv	vtable cFEInput_vtbl (0046D1D0) slot 20; follows cUIInput_isRight__FPv
+fn_cascade2	0x001800C0	cFEInput_isUpHeld__FPv	func_001800C0__FPv	vtable cFEInput_vtbl (0046D1D0) slot 21; follows cUIInput_isUpHeld__FPv
+fn_cascade2	0x001800E0	cFEInput_isDownHeld__FPv	func_001800E0__FPv	vtable cFEInput_vtbl (0046D1D0) slot 22; follows cUIInput_isDownHeld__FPv
+fn_cascade2	0x00180100	cFEInput_isLeftHeld__FPv	func_00180100__FPv	vtable cFEInput_vtbl (0046D1D0) slot 23; follows cUIInput_isLeftHeld__FPv
+fn_cascade2	0x00180120	cFEInput_isRightHeld__FPv	func_00180120__FPv	vtable cFEInput_vtbl (0046D1D0) slot 24; follows cUIInput_isRightHeld__FPv
+fn_cascade2	0x00180220	cFEInput_isLShift2Held__FPv	func_00180220__FPv	vtable cFEInput_vtbl (0046D1D0) slot 32; follows cUIInput_isLShift2Held__FPv
+fn_cascade2	0x00180240	cFEInput_isCamZoom__FPv	func_00180240__FPv	vtable cFEInput_vtbl (0046D1D0) slot 33; follows cUIInput_isCamZoom__FPv
+fn_cascade2	0x00180260	cFEInput_isCamPan__FPv	func_00180260__FPv	vtable cFEInput_vtbl (0046D1D0) slot 34; follows cUIInput_isCamPan__FPv
+fn_cascade2	0x00180280	cFEInput_isCamRotate__FPv	func_00180280__FPv	vtable cFEInput_vtbl (0046D1D0) slot 35; follows cUIInput_isCamRotate__FPv
+fn_cascade2	0x001802A0	cFEInput_getCamZoom__FPv	func_001802A0__FPv	vtable cFEInput_vtbl (0046D1D0) slot 36; follows cUIInput_getCamZoom__FPv
+fn_cascade2	0x001802C0	cFEInput_getCamPan__FPv	func_001802C0__FPv	vtable cFEInput_vtbl (0046D1D0) slot 37; follows cUIInput_getCamPan__FPv
+fn_cascade2	0x001802E0	cFEInput_getCamRotate__FPv	func_001802E0__FPv	vtable cFEInput_vtbl (0046D1D0) slot 38; follows cUIInput_getCamRotate__FPv
+fn_cascade2	0x0026D760	cReplay_saveReplayFrame	func_0026D760	On Tour cReplay::saveReplayFrame(tReplayFrameType) (address-order pair, held); retail typed self cReplay*, 2 params
+fn_cascade2	0x0026D988	cReplay_saveBucket	func_0026D988	On Tour cReplay::saveBucket(cReplayFramePtr *, const int) (address-order pair, held); retail typed self cReplay*, 3 params
+fn_cascade2	0x0026DA88	cReplay_saveDeadBucket	func_0026DA88	On Tour cReplay::saveDeadBucket(cReplayFramePtr *) (address-order pair, held); retail typed self cReplay*, 2 params
+fn_cascade2	0x0026DB88	cReplay_restoreReplayFrame	func_0026DB88	On Tour cReplay::restoreReplayFrame(cReplayFrame *) (address-order pair, held); retail typed self cReplay*, 2 params
+fn_cascade2	0x0026DE58	cReplay_applyBucket	func_0026DE58	On Tour cReplay::applyBucket(const int) (address-order pair, held); retail typed self cReplay*, 2 params
+fn_cascade2	0x0026ED98	cReplay_cycleReplayCameraAlgorithm	func_0026ED98	On Tour cReplay::cycleReplayCameraAlgorithm(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x0026EDD8	cReplay_setCurrentReplayCamera	func_0026EDD8	On Tour cReplay::setCurrentReplayCamera(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x0026EE68	cReplay_setupReplayCameras	func_0026EE68	On Tour cReplay::setupReplayCameras(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x0026EEA0	cReplay_setupGameCamerasOnExitReplay	func_0026EEA0	On Tour cReplay::setupGameCamerasOnExitReplay(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x0026EFB8	cReplay_cReplay	func_0026EFB8	On Tour cReplay::cReplay(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x0026F428	cReplay_purge	func_0026F428	On Tour cReplay::purge(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x0026F7F8	cReplay_pushReplaySaveFrame	func_0026F7F8	On Tour cReplay::pushReplaySaveFrame(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x0026F850	cReplay_popReplaySaveFrame	func_0026F850	On Tour cReplay::popReplaySaveFrame(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x0026F8A0	cReplay_startReplay	func_0026F8A0	On Tour cReplay::startReplay(cReplayFrame *, bool, bool) (address-order pair, held); retail typed self cReplay*, 4 params
+fn_cascade2	0x0026F980	cReplay_stopReplay	func_0026F980	On Tour cReplay::stopReplay(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x00270130	cReplay_allocReplayFrame	func_00270130	On Tour cReplay::allocReplayFrame(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x00270238	cReplay_freeReplayFrame	func_00270238	On Tour cReplay::freeReplayFrame(cReplayFrame *) (address-order pair, held); retail typed self cReplay*, 2 params
+fn_cascade2	0x00270280	cReplay_isPauseAI	func_00270280	On Tour cReplay::isPauseAI(void) const (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x002702F8	cReplay_rewind	func_002702F8	On Tour cReplay::rewind(cReplayFrame *) (address-order pair, held); retail typed self cReplay*, 2 params
+fn_cascade2	0x002703F0	cReplay_stepFrame	func_002703F0	On Tour cReplay::stepFrame(bool) (address-order pair, held); retail typed self cReplay*, 2 params
+fn_cascade2	0x00270628	cReplay_cancelMarkInstantReplay	func_00270628	On Tour cReplay::cancelMarkInstantReplay(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x002706B8	cReplay_startAutoReplay	func_002706B8	On Tour cReplay::startAutoReplay(void) (address-order pair, held); retail typed self cReplay*, 1 params
+fn_cascade2	0x00270970	cReplay_eventReset	func_00270970	On Tour cReplay::eventReset(int) (address-order pair, held); retail typed self cReplay*, 2 params
+fn_cascade2	0x00270AB0	cReplay_eventChapter	func_00270AB0	On Tour cReplay::eventChapter(int, int) (address-order pair, held); retail typed self cReplay*, 3 params
+fn_cascade2	0x00270DE0	cReplay_cancelMarkHighlight	func_00270DE0	On Tour cReplay::cancelMarkHighlight(int) (address-order pair, held); retail typed self cReplay*, 2 params
+fn_cascade2	0x00271758	cReplay_load	func_00271758	On Tour cReplay::load(char *) (address-order pair, held); retail typed self cReplay*, 2 params
+fn_cascade2	0x002725B8	cScriptPlayerChannelSpline_cScriptPlayerChannelSpline	func_002725B8	On Tour cScriptPlayerChannelSpline::cScriptPlayerChannelSpline(void) (address-order pair, held); retail typed self cScriptPlayerChannelSpline*, 1 params
+fn_cascade2	0x00272D68	cScriptPlayerChannelBlock_cScriptPlayerChannelBlock	func_00272D68	On Tour cScriptPlayerChannelBlock::cScriptPlayerChannelBlock(void) (address-order pair, held); retail typed self cScriptPlayerChannelBlock*, 1 params
+fn_cascade2	0x002730C0	cScriptPlayerChannelBlock_AddActiveKey	func_002730C0	On Tour cScriptPlayerChannelBlock::AddActiveKey(tInSeqBlockChannelKey *) (address-order pair, held); retail typed self cScriptPlayerChannelBlock*, 2 params
+fn_cascade2	0x00273140	cScriptPlayerChannelBlock_LoadNextScriptKey	func_00273140	On Tour cScriptPlayerChannelBlock::LoadNextScriptKey(void) (address-order pair, held); retail typed self cScriptPlayerChannelBlock*, 1 params
+fn_cascade2	0x00273180	cScriptPlayerChannelEvent_cScriptPlayerChannelEvent	func_00273180	On Tour cScriptPlayerChannelEvent::cScriptPlayerChannelEvent(void) (address-order pair, held); retail typed self cScriptPlayerChannelEvent*, 1 params
+fn_cascade2	0x00273418	cScriptPlayerChannelEvent_AddActiveKey	func_00273418	On Tour cScriptPlayerChannelEvent::AddActiveKey(tInSeqEventChannelKey *) (address-order pair, held); retail typed self cScriptPlayerChannelEvent*, 2 params
+fn_cascade2	0x00273468	cScriptPlayerChannelEvent_LoadNextScriptKey	func_00273468	On Tour cScriptPlayerChannelEvent::LoadNextScriptKey(void) (address-order pair, held); retail typed self cScriptPlayerChannelEvent*, 1 params
+fn_cascade2	0x002734A8	cScriptPlayerChannelObject_cScriptPlayerChannelObject	func_002734A8	On Tour cScriptPlayerChannelObject::cScriptPlayerChannelObject(void) (address-order pair, held); retail typed self cScriptPlayerChannelObject*, 1 params
+fn_cascade2	0x00273860	cScriptPlayerChannelObject_AddActiveKey	func_00273860	On Tour cScriptPlayerChannelObject::AddActiveKey(tInSeqObjectChannelKey *) (address-order pair, held); retail typed self cScriptPlayerChannelObject*, 2 params
+fn_cascade2	0x002738F8	cScriptPlayerChannelObject_LoadNextScriptKey	func_002738F8	On Tour cScriptPlayerChannelObject::LoadNextScriptKey(void) (address-order pair, held); retail typed self cScriptPlayerChannelObject*, 1 params
+fn_cascade2	0x00360B30	cTransformModifier_update__FPv	func_00360B30__FPv	vtable cTransformModifier_vtbl (004913F8) slot 2; follows cAvaSplineModifier_update, cMagnetModifier_update, cMultiSplineModifier_update, cParentModifier_update__FPv (+3)
+fn_cascade2	0x00360B80	cTransformModifier_getBoundBox__FPv	func_00360B80__FPv	vtable cTransformModifier_vtbl (004913F8) slot 12; follows cAvaSplineModifier_getBoundBox__FPv, cMagnetModifier_getBoundBox__FPv, cMultiSplineModifier_getBoundBox__FPv, cRollerModifier_getBoundBox__FPv (+1)
+fn_cascade2	0x00360B88	cTransformModifier_setBoundBox__FPv	func_00360B88__FPv	vtable cTransformModifier_vtbl (004913F8) slot 13; follows cAvaSplineModifier_setBoundBox, cMagnetModifier_setBoundBox, cMultiSplineModifier_setBoundBox, cPositionModifier_setBoundBox (+2)
+fn_cascade2	0x00360B90	cTransformModifier_getRadius__FPv	func_00360B90__FPv	vtable cTransformModifier_vtbl (004913F8) slot 14; follows cAvaSplineModifier_getRadius__FPv, cMagnetModifier_getRadius__FPv, cMultiSplineModifier_getRadius__FPv, cRollerModifier_getRadius__FPv (+1)
+fn_cascade2	0x00360BA0	cTransformModifier_setRadius__FPv	func_00360BA0__FPv	vtable cTransformModifier_vtbl (004913F8) slot 15; follows cAvaSplineModifier_setRadius__FPvf, cMagnetModifier_setRadius__FPv, cMultiSplineModifier_setRadius__FPvf, cRollerModifier_setRadius__FPvf (+1)

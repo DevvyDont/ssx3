@@ -92,7 +92,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
 int func_00158F30(void* self);
-extern "C" void func_002706B8(void* p);
+extern "C" void cReplay_startAutoReplay(void* p);
 extern char cBENewRaceInterface_newRace[];
 extern int D_004A26FC;
 extern int D_004A2704;
@@ -162,7 +162,7 @@ extern "C" void func_0020A8F8(int mode)
         }
         int z = !isKind_A8F8(kind, 6) && !isKind_A8F8(kind, 7) && !isKind_A8F8(kind, 8) && !isKind_A8F8(kind, 9) &&
                 !isKind_A8F8(kind, 10) && !isKind_A8F8(kind, 11);
-        if (z) func_002706B8(SSXApp->Game->Replay);
+        if (z) cReplay_startAutoReplay(SSXApp->Game->Replay);
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) cGameComm_mGameComm->mOverlayTimeout = 0x8CA0;
         break;
     }
@@ -1351,7 +1351,7 @@ void cReplay_stopAutoReplay(void* self);
 extern "C" void func_00231250(void* self, int a, int b, int refresh);
 extern "C" void func_00257610(void* self, int a1);
 extern "C" void cGame_exit(void* game, int a);
-extern "C" void func_0026F8A0(void* self, void* a1, int a2, int a3);
+extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
 extern signed char D_00535C12[];
 extern unsigned int D_004A2594;
 extern int D_004A2708;
@@ -1393,7 +1393,7 @@ extern "C" void func_0020CCF8(void)
         case 6:
             cReplay_stopAutoReplay(SSXApp->Game->Replay);
             cOVStateManager_triggerOverlay(0x11);
-            func_0026F8A0(SSXApp->Game->Replay, 0, 0, 0);
+            cReplay_startReplay(SSXApp->Game->Replay, 0, 0, 0);
             break;
         case 7:
             D_004A2700 = 1;
