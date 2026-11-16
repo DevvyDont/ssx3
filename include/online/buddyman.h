@@ -17,7 +17,7 @@
 //
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [R] the inlined constructor in func_00260F80 and the allocation size above;
-//   [U] how retail code uses the field (BuddyMan methods, LobbyMan func_0025E138 / func_0025AC50, the FE states
+//   [U] how retail code uses the field (BuddyMan methods, LobbyMan LobbyMan_onNewsRetrieved / func_0025AC50, the FE states
 //       through D_004A3328);
 //   [P] the preview's matching code (its assert strings name `state`); no preview accessors exist for BuddyMan.
 // STL containers (g++ 2.95 vector<T*, BXAllocator<...>>: a 4-byte allocator, then _M_start, _M_finish,
@@ -37,7 +37,7 @@ struct BuddyMan {
     char mUserName[0x20];               // 0x044 [U] connect strcpy's LobbyMan's persona name (LobbyMan + 0x80);
                                         //       reconnect passes it back; func_00261058 clears byte 0
     char mPassword[0x40];               // 0x064 [U] connect strcpy's LobbyMan + 0x4C; func_00261058 clears byte 0
-    int miMsgTimeout;                   // 0x0A4 [R] ctor 0x15180 (one day); [U] LobbyMan func_0025E138 stores the
+    int miMsgTimeout;                   // 0x0A4 [R] ctor 0x15180 (one day); [U] LobbyMan LobbyMan_onNewsRetrieved stores the
                                         //       "BUDDYMSGTIMEOUT" number; sendMessage (func_00262690) passes it
     // --- vector<cPrivateMessage*>: received private messages (cPrivateMessage: 3 cBXStrings + vptr, 0x10 bytes,
     //     operator new(0x10, "cPrivateMessage") in func_00261CD0)
@@ -71,7 +71,7 @@ struct BuddyMan {
     int mbLoggedIn;                     // 0x0E0 [R] ctor 0; [U] onconnect 'auth' ok 1, connect / disconnect 0;
                                         //       isConnected needs it
     int unk_0E4;                        // 0x0E4 [R] ctor 0; no other access seen
-    int mbRosterDone;                   // 0x0E8 [R] ctor 0; [U] onrosterupdate (func_00261770) sets it at the first
+    int mbRosterDone;                   // 0x0E8 [R] ctor 0; [U] onrosterupdate (BuddyMan_onrosterupdate) sets it at the first
                                         //       'endr' message, onconnect / disconnect clear it; FE states read it
     char* mResource;                    // 0x0EC [R] ctor stores the empty cBXString rep; a cBXString: [U] connect
                                         //       assigns the "BUDDYRESOURCE" string, setPresence / addBuddy read it

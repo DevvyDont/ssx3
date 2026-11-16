@@ -213,7 +213,7 @@ extern "C" int func_00259468(void* self, int a1, char* lhs, char* rhs)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_002594D0);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_LobbyMan);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cBXString2;
@@ -258,7 +258,7 @@ struct sList_94D0 {
  * @param self_  the memory to construct in
  * @return @p self_
  */
-extern "C" void* func_002594D0(LobbyMan* self_)
+extern "C" void* LobbyMan_LobbyMan(LobbyMan* self_)
 {
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
     int unused[4];
@@ -309,7 +309,7 @@ extern "C" void* func_002594D0(LobbyMan* self_)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00259628);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan__LobbyMan);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void func_001DB718(void* self);
@@ -357,7 +357,7 @@ static inline void dtorList_9628(char* lst)
  * @param self_  the lobby manager
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_00259628(LobbyMan* self_, int flags)
+extern "C" void LobbyMan__LobbyMan(LobbyMan* self_, int flags)
 {
     func_0025B800(self_);
     dtorSub_9628(((char*)self_) + 0x2B0);
@@ -386,7 +386,7 @@ extern "C" void func_00259628(LobbyMan* self_, int flags)
 extern "C" void* func_003E8FD0(int);
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_002598A8__FPv);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onincomingmsg__FPv);
 #ifdef SKIP_ASM
 /**
  * Logs an incoming lobby message: passes mpLobbyApi and the message to func_003E8FD0().
@@ -398,21 +398,21 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002598A8__FPv);
  *
  * @return no meaningful value (func_003E8FD0() returns nothing)
  */
-void* func_002598A8(void* self)
+void* LobbyMan_onincomingmsg(void* self)
 {
     return func_003E8FD0(*(int*)((char*)self + 0x54));
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_002598C8);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onconnectionmsg);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" int* func_002591D0();
 extern "C" void func_00263BA8(void* p, int arg);
 
@@ -444,19 +444,19 @@ static inline sMsgListIterK2 sMsgListK2_insert(sMsgListIterK2 pos, void* const& 
 /**
  * Handles a lobby connection message: on a 'disc' (disconnect) message it marks the lobby disconnected.
  *
- * When the message code at +0x4 is 'disc' it pushes a type-277 event (8 bytes, vtable D_004812B0) onto mEventList, sets
+ * When the message code at +0x4 is 'disc' it pushes a type-277 event (8 bytes, vtable online_Event_vtbl) onto mEventList, sets
  * mDisconnected (func_0025AC50() then disconnects), and when the game connection object func_002591D0() returns is
  * active it shuts that down with func_00263BA8(..., 2). Called through the functor thunk func_00268B58 (LobbyApi
  * callback 3).
  *
  * @param msg  the LobbyApi message (word +0x4 is its code)
  */
-extern "C" void func_002598C8(LobbyMan* self, int* msg)
+extern "C" void LobbyMan_onconnectionmsg(LobbyMan* self, int* msg)
 {
     if (msg[1] == 0x64697363) {
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = 277;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         void* mp = m;
         sMsgListK2_insert(*(sMsgListNodeK2**)(((char*)self) + 0xF0), mp);
         self->mDisconnected = 1;
@@ -467,14 +467,14 @@ extern "C" void func_002598C8(LobbyMan* self, int* msg)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_002599B0);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onuserlistupdate);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNodeK2b {
     sMsgListNodeK2b* next;
@@ -507,25 +507,25 @@ static inline sMsgListIterK2b sMsgListK2b_insert(sMsgListIterK2b pos, void* cons
  * Called through the functor thunk func_00268AB8, which func_0025A778() registers as the user list's (mpUserList)
  * update callback.
  */
-extern "C" void func_002599B0(LobbyMan* self)
+extern "C" void LobbyMan_onuserlistupdate(LobbyMan* self)
 {
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = 0xE0;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgListK2b_insert(*(sMsgListNodeK2b**)(((char*)self) + 0xF0), mp);
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00259A60);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onranklistupdate);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNodeK2c {
     sMsgListNodeK2c* next;
@@ -560,18 +560,18 @@ static inline sMsgListIterK2c sMsgListK2c_insert(sMsgListIterK2c pos, void* cons
  *
  * @param unused  not read
  */
-extern "C" void func_00259A60(LobbyMan* self, int unused)
+extern "C" void LobbyMan_onranklistupdate(LobbyMan* self, int unused)
 {
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = 225;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgListK2c_insert(*(sMsgListNodeK2c**)(((char*)self) + 0xF0), mp);
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00259B10);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onchatmsg);
 #ifdef SKIP_ASM
 extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const char* name);
 // PORT: TagFieldGetString really takes a 4th (default value) argument; the unit declares 3.
@@ -696,7 +696,7 @@ extern "C" sBXStr_9B10 func_00318630(const sBXStr_9B10& a, const char* b);
  *
  * @param msg  the LobbyApi message: code at +0x4, flags at +0x8, tag record pointer at +0xC
  */
-extern "C" void func_00259B10(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onchatmsg(LobbyMan* self, char* msg)
 {
     char name[0x100];
     char text[0x100];
@@ -737,7 +737,7 @@ extern "C" void func_00259B10(LobbyMan* self, char* msg)
             {
                 int* m = newMsg_9B10();
                 m[0] = 237;
-                *(void***)((char*)m + 0x4) = D_004812B0;
+                *(void***)((char*)m + 0x4) = online_Event_vtbl;
                 post_9B10(((char*)self), m);
             }
         } else if (func_004165A8(cmd, str_abortChal) == 0) {
@@ -762,7 +762,7 @@ extern "C" void func_00259B10(LobbyMan* self, char* msg)
                 {
                 int* m = newMsg_9B10();
                 m[0] = 238;
-                *(void***)((char*)m + 0x4) = D_004812B0;
+                *(void***)((char*)m + 0x4) = online_Event_vtbl;
                 post_9B10(((char*)self), m);
             }
         } else if (func_004165A8(cmd, str_ignore) == 0) {
@@ -771,7 +771,7 @@ extern "C" void func_00259B10(LobbyMan* self, char* msg)
             {
                 int* m = newMsg_9B10();
                 m[0] = 0xF0;
-                *(void***)((char*)m + 0x4) = D_004812B0;
+                *(void***)((char*)m + 0x4) = online_Event_vtbl;
                 post_9B10(((char*)self), m);
             }
         } else if (func_004165A8(cmd, str_badversion) == 0) {
@@ -780,7 +780,7 @@ extern "C" void func_00259B10(LobbyMan* self, char* msg)
             {
                 int* m = newMsg_9B10();
                 m[0] = 242;
-                *(void***)((char*)m + 0x4) = D_004812B0;
+                *(void***)((char*)m + 0x4) = online_Event_vtbl;
                 post_9B10(((char*)self), m);
             }
         }
@@ -800,7 +800,7 @@ extern "C" void func_00259B10(LobbyMan* self, char* msg)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025A1D0);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onplaymsg);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -841,7 +841,7 @@ extern int D_00534B34[];
 extern char D_005308B8[];
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNodeA1D0 {
     sMsgListNodeA1D0* next;
@@ -893,7 +893,7 @@ struct sVEntryA1D0 { short delta; short index; int (*fn)(void*); };
  *
  * @param msg  the LobbyApi message (tag record pointer at +0xC)
  */
-extern "C" void func_0025A1D0(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
 {
     char name[0x100];
     char b1[0x100];
@@ -976,7 +976,7 @@ extern "C" void func_0025A1D0(LobbyMan* self, char* msg)
     func_00259098(func_002591D0(), self->mMatchType, 0);
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     post_A1D0(((char*)self), m);
 }
 #endif
@@ -1040,7 +1040,7 @@ extern "C" int func_003E7218(void* tags, const char* key, const char* def);
 /**
  * Looks a key up in the lobby config (mpConfig, section "SSX-PS2-2004") and returns its value, or a default.
  *
- * The game-start handler func_0025A1D0() uses it to override the host's and opponent's addresses by player name.
+ * The game-start handler LobbyMan_onplaymsg() uses it to override the host's and opponent's addresses by player name.
  *
  * @param key  the key to look up
  * @param def  value returned when there is no config or func_003E7218() returns 0
@@ -1308,7 +1308,7 @@ struct cBXStrAB40 {
  * Posts a chat event carrying a sender and a text on mEventList.
  *
  * The event is 0x10 bytes from cMemMan_alloc ("ChatEvent"): type 222, vtable D_00481230, cBXString copies of @p a at
- * +0x8 and @p b at +0xC. The chat handler func_00259B10() calls it for room chat and broadcasts.
+ * +0x8 and @p b at +0xC. The chat handler LobbyMan_onchatmsg() calls it for room chat and broadcasts.
  *
  * @param a  the sender's name
  * @param b  the message text
@@ -1339,9 +1339,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025AC50);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
-extern void* D_00481290[];
-extern void* D_00481270[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
+extern void* online_BuddyErrorEvent_vtbl[];
 extern void* D_004811B0[];
 extern int D_004A3018;
 extern float D_004A5154;
@@ -1470,10 +1470,10 @@ static inline void closeConn_AC50(char* self)
  * mState:
  * - 2 (host lookup): polls mpHostLookup; on success stores the address in mServerAddr and D_004A3018, enters mState 3
  *   with a 30-second mTimeout and connects to port 11000 (func_003E8260, reply thunk func_00268BA8); on failure
- *   disconnects and posts an error event (vtable D_00481290, type 258) with 'dnsf'; either way releases the lookup.
+ *   disconnects and posts an error event (vtable online_ErrorEvent_vtbl, type 258) with 'dnsf'; either way releases the lookup.
  * - 3 (connecting): status 0x400 posts an error event (vtable D_004811B0) with 'down' and the server's 'down' text and
  *   disconnects; a timeout disconnects with error 'time' and releases the lookup.
- * - 26: a BuddyMan miError calls func_00261408() and posts it in an event (vtable D_00481270, type 259); a connected
+ * - 26: a BuddyMan miError calls func_00261408() and posts it in an event (vtable online_BuddyErrorEvent_vtbl, type 259); a connected
  *   BuddyMan (func_00261460) sets mState 1 and posts type 218.
  * - 23 and 24 (challenge waits): lower D_004A5154 to mTimeout whenever it falls more than 1 below it; on timeout post
  *   type 274, then 23 removes mOpponent's pending challenge from BuddyMan and returns to mState 1, 24 calls
@@ -1498,7 +1498,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
             func_0025B800(self);
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             m[0] = 277;
-            *(void***)((char*)m + 0x4) = D_004812B0;
+            *(void***)((char*)m + 0x4) = online_Event_vtbl;
             post_AC50(((char*)self), m);
         } else {
             int state = *(int*)self;
@@ -1518,7 +1518,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
                     func_0025B800(self);
                     int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     m[0] = 258;
-                    *(void***)((char*)m + 0x4) = D_00481290;
+                    *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
                     m[2] = 0x646E7366; // 'dnsf'
                     post_AC50(((char*)self), m);
                 }
@@ -1538,7 +1538,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
                     func_0025B800(self);
                     int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     m[0] = 258;
-                    *(void***)((char*)m + 0x4) = D_00481290;
+                    *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
                     m[2] = 0x74696D65; // 'time'
                     post_AC50(((char*)self), m);
                     closeConn_AC50(((char*)self));
@@ -1549,14 +1549,14 @@ extern "C" void func_0025AC50(LobbyMan* self)
                     int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     int val = BuddyMan_mBuddyMan->miError;
                     m[0] = 259;
-                    *(void***)((char*)m + 0x4) = D_00481270;
+                    *(void***)((char*)m + 0x4) = online_BuddyErrorEvent_vtbl;
                     m[2] = val;
                     post_AC50(((char*)self), m);
                 } else if (func_00261460(BuddyMan_mBuddyMan) != 0) {
                     *(int*)self = 1;
                     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
                     m[0] = 218;
-                    *(void***)((char*)m + 0x4) = D_004812B0;
+                    *(void***)((char*)m + 0x4) = online_Event_vtbl;
                     post_AC50(((char*)self), m);
                 }
             } else if (state == 22) {
@@ -1570,7 +1570,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
                     int type = 274;
                     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
                     m[0] = type;
-                    *(void***)((char*)m + 0x4) = D_004812B0;
+                    *(void***)((char*)m + 0x4) = online_Event_vtbl;
                     post_AC50(((char*)self), m);
                     *(int*)self = 1;
                 }
@@ -1582,7 +1582,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
                     int type = 274;
                     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
                     m[0] = type;
-                    *(void***)((char*)m + 0x4) = D_004812B0;
+                    *(void***)((char*)m + 0x4) = online_Event_vtbl;
                     post_AC50(((char*)self), m);
                     func_0025F628(self, 0, 1);
                 }
@@ -1590,7 +1590,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
                 if (expired_AC50(((char*)self))) {
                     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
                     m[0] = 230;
-                    *(void***)((char*)m + 0x4) = D_004812B0;
+                    *(void***)((char*)m + 0x4) = online_Event_vtbl;
                     post_AC50(((char*)self), m);
                     func_0025EED8(self);
                 }
@@ -1601,7 +1601,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
                     func_0025B800(self);
                     int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     m[0] = 258;
-                    *(void***)((char*)m + 0x4) = D_00481290;
+                    *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
                     m[2] = 0x74696D65; // 'time'
                     post_AC50(((char*)self), m);
                     self->mFindingPlayer = 0;
@@ -1667,17 +1667,17 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025B650);
 #ifdef SKIP_ASM
 extern char str_LobbyMan[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002594D0(LobbyMan* self);
+extern "C" void* LobbyMan_LobbyMan(LobbyMan* self);
 
 /**
- * Creates the lobby manager singleton: allocates 0x300 bytes ("LobbyMan") and constructs them with func_002594D0() into
+ * Creates the lobby manager singleton: allocates 0x300 bytes ("LobbyMan") and constructs them with LobbyMan_LobbyMan() into
  * LobbyMan_mLobbyMan.
  *
  * An existing instance is overwritten without a check. The main menu and the debug menu screen call it.
  */
 extern "C" void func_0025B650(void)
 {
-    LobbyMan_mLobbyMan = (LobbyMan*)(func_002594D0((LobbyMan*)cMemMan_alloc(0x300, str_LobbyMan, 0x20000000, 0)));
+    LobbyMan_mLobbyMan = (LobbyMan*)(LobbyMan_LobbyMan((LobbyMan*)cMemMan_alloc(0x300, str_LobbyMan, 0x20000000, 0)));
 }
 #endif
 
@@ -1685,13 +1685,13 @@ extern "C" void func_0025B650(void)
 INCLUDE_ASM("dirtysock/tagsunk", func_0025B688);
 #ifdef SKIP_ASM
 extern "C" void func_0025B800(LobbyMan* self);
-extern "C" void func_00259628(LobbyMan* self, int flags);
+extern "C" void LobbyMan__LobbyMan(LobbyMan* self, int flags);
 extern "C" void func_00256C50(void);
 
 /**
  * Destroys the lobby manager singleton and the in-race comm object.
  *
- * When LobbyMan_mLobbyMan exists it disconnects it (func_0025B800), runs the destructor func_00259628() with flags 3
+ * When LobbyMan_mLobbyMan exists it disconnects it (func_0025B800), runs the destructor LobbyMan__LobbyMan() with flags 3
  * (free) and clears the pointer; then destroys cGameComm_mGameComm with func_00256C50() if there is one.
  */
 extern "C" void func_0025B688(void)
@@ -1699,7 +1699,7 @@ extern "C" void func_0025B688(void)
     if (LobbyMan_mLobbyMan != 0) {
         func_0025B800(LobbyMan_mLobbyMan);
         if (LobbyMan_mLobbyMan != 0) {
-            func_00259628(LobbyMan_mLobbyMan, 3);
+            LobbyMan__LobbyMan(LobbyMan_mLobbyMan, 3);
         }
         LobbyMan_mLobbyMan = 0;
     }
@@ -1714,7 +1714,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025B6D8);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern int D_004A3018;
 extern "C" void func_0025A948(LobbyMan* self);
 extern "C" void func_003E8260(void* p, int a, int timeout, void* cb, void* user);
@@ -1775,7 +1775,7 @@ extern "C" void func_0025B6D8(LobbyMan* self, int conn)
     int type = 200;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgListB6D8_insert(*(sMsgListNodeB6D8**)(((char*)self) + 0xF0), mp);
 }
@@ -1804,7 +1804,7 @@ extern "C" void func_0025B800(LobbyMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025B848);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onlobbyconnect);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -1813,8 +1813,8 @@ extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern char str_ROOMS_1_USERS_1_RANKS_0_MESGS_1_GAMES_1[];
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeB848 {
     sMsgListNodeB848* next;
@@ -1852,24 +1852,24 @@ static inline void post_B848(char* self, void* msg)
  *
  * Sets mState to 1. On success (reply code at +0x8 is 0) it sends a 'sele' request with "ROOMS=1 USERS=1 RANKS=0
  * MESGS=1 GAMES=1" (no reply callback) and posts a type-201 event; otherwise it posts an error event (vtable
- * D_00481290, type 258) carrying the code and sets mDisconnected. Called through the functor thunk func_00268BA8, which
+ * online_ErrorEvent_vtbl, type 258) carrying the code and sets mDisconnected. Called through the functor thunk func_00268BA8, which
  * func_0025B6D8() and func_0025AC50() pass to func_003E8260().
  *
  * @param msg  the LobbyApi reply (error code at +0x8, 0 on success)
  */
-extern "C" void func_0025B848(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onlobbyconnect(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         func_003E8B10(self->mpLobbyApi, 0x73656C65, str_ROOMS_1_USERS_1_RANKS_0_MESGS_1_GAMES_1, 0, 0);
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = 201;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_B848(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = *(int*)(msg + 0x8);
         post_B848(((char*)self), m);
         self->mDisconnected = 1;
@@ -1883,7 +1883,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025B9C8);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern char str_pct_4dpct_02dpct_02d[];
 extern char str_NAME[];
 extern char str_LANG[];
@@ -1967,7 +1967,7 @@ extern "C" void func_0025B9C8(LobbyMan* self, char* msg)
     func_0025B608(self, 4, 0x61636374, buf, (int)func_00268BD0, 20.0f);
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgListB9C8_insert(*(sMsgListNodeB9C8**)(((char*)self) + 0xF0), mp);
 }
@@ -1993,7 +1993,7 @@ struct sDsNameListK2 {
  * Splits the reply's "OPTS" field (a comma-separated list of suggested names) into mNewAccount.mNameOptions.
  *
  * Resets mNewAccount.mNumNameOptions and stores up to 4 names as cBXStrings. The create-account reply handler
- * func_0025BD30() calls it when the name is taken ('dupl'), and func_0025D2D8() calls it too.
+ * LobbyMan_onaccountcreated() calls it when the name is taken ('dupl'), and LobbyMan_onpersonacreated() calls it too.
  *
  * @param msg  the LobbyApi reply (tag record pointer at +0xC)
  */
@@ -2018,15 +2018,15 @@ extern "C" void func_0025BC48(LobbyMan* self, char* msg)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025BD30);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onaccountcreated);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004811F0[];
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_AcctTooYoungEvent_vtbl[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 extern char str_AGE[];
 extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* tag, int defval);
 struct sDsNameListK2;
@@ -2067,27 +2067,27 @@ static inline void post_BD30(char* self, void* msg)
  * Handles the create-account reply.
  *
  * Sets mState to 1. Success (code 0 at +0x8) posts a type-203 event. 'tooy' (too young) posts a 0x10-byte error event
- * (vtable D_004811F0, type 258) with the code and the reply's "AGE" number. Any other code posts an error event (vtable
- * D_00481290, type 258) with the code, after loading the suggested names (func_0025BC48) when the code is 'dupl'.
+ * (vtable online_AcctTooYoungEvent_vtbl, type 258) with the code and the reply's "AGE" number. Any other code posts an error event (vtable
+ * online_ErrorEvent_vtbl, type 258) with the code, after loading the suggested names (func_0025BC48) when the code is 'dupl'.
  * Called through the functor thunk func_00268BD0, the reply callback of func_0025B9C8().
  *
  * @param msg  the LobbyApi reply (error code at +0x8, tag record pointer at +0xC)
  */
-extern "C" void func_0025BD30(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onaccountcreated(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     int err = *(int*)(msg + 0x8);
     if (err == 0) {
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = 203;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_BD30(((char*)self), m);
     } else if (err == 0x746F6F79) {
         int n = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_AGE), 0);
         int* m = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
         m[2] = err;
-        *(void***)((char*)m + 0x4) = D_004811F0;
+        *(void***)((char*)m + 0x4) = online_AcctTooYoungEvent_vtbl;
         m[3] = n;
         post_BD30(((char*)self), m);
     } else {
@@ -2095,7 +2095,7 @@ extern "C" void func_0025BD30(LobbyMan* self, char* msg)
             func_0025BC48(self, msg);
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = *(int*)(msg + 0x8);
         post_BD30(((char*)self), m);
     }
@@ -2108,7 +2108,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025BF18);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern char str_NAME[];
 extern char str_pct_cpct_c[];
 extern char str_PASS[];
@@ -2173,19 +2173,19 @@ extern "C" void func_0025BF18(LobbyMan* self, char* msg)
     int type = 205;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgListBF18_insert(*(sMsgListNodeBF18**)(((char*)self) + 0xF0), mp);
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025C0C0);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onaccountedited);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeC0C0 {
     sMsgListNodeC0C0* next;
@@ -2220,24 +2220,24 @@ static inline void post_C0C0(char* self, void* msg)
 
 /**
  * Handles the edit-account reply: sets mState to 1 and posts a type-206 event on success, else an error event (vtable
- * D_00481290, type 258) with the reply code.
+ * online_ErrorEvent_vtbl, type 258) with the reply code.
  *
  * Called through the functor thunk func_00268BF8, the reply callback of func_0025BF18().
  *
  * @param msg  the LobbyApi reply (error code at +0x8, 0 on success)
  */
-extern "C" void func_0025C0C0(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onaccountedited(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = 206;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_C0C0(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = *(int*)(msg + 0x8);
         post_C0C0(((char*)self), m);
     }
@@ -2249,7 +2249,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025C1E0);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern char str_MAIL[];
 extern "C" void func_00268C20(void* self, void* a1, int a2);
 
@@ -2296,19 +2296,19 @@ extern "C" void func_0025C1E0(LobbyMan* self, const char* value)
     func_0025B608(self, 6, 0x6C6F7374, buf, (int)func_00268C20, 20.0f);
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgListC1E0_insert(*(sMsgListNodeC1E0**)(((char*)self) + 0xF0), mp);
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025C2D8);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onlostaccountrequestsent);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeC2D8 {
     sMsgListNodeC2D8* next;
@@ -2343,24 +2343,24 @@ static inline void post_C2D8(char* self, void* msg)
 
 /**
  * Handles the lost-account reply: sets mState to 1 and posts a type-207 event on success, else an error event (vtable
- * D_00481290, type 258) with the reply code.
+ * online_ErrorEvent_vtbl, type 258) with the reply code.
  *
  * Called through the functor thunk func_00268C20, the reply callback of func_0025C1E0().
  *
  * @param msg  the LobbyApi reply (error code at +0x8, 0 on success)
  */
-extern "C" void func_0025C2D8(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onlostaccountrequestsent(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = 207;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_C2D8(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = *(int*)(msg + 0x8);
         post_C2D8(((char*)self), m);
     }
@@ -2372,7 +2372,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025C3F8);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern char str_NAME[];
 extern "C" void func_00268C48(void* self, void* a1, int a2);
 
@@ -2419,19 +2419,19 @@ extern "C" void func_0025C3F8(LobbyMan* self, const char* value)
     func_0025B608(self, 7, 0x6C6F7374, buf, (int)func_00268C48, 20.0f);
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgListC3F8_insert(*(sMsgListNodeC3F8**)(((char*)self) + 0xF0), mp);
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025C4F0);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onlostpasswordrequestsent);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeC4F0 {
     sMsgListNodeC4F0* next;
@@ -2466,24 +2466,24 @@ static inline void post_C4F0(char* self, void* msg)
 
 /**
  * Handles the lost-password reply: sets mState to 1 and posts a type-210 event on success, else an error event (vtable
- * D_00481290, type 258) with the reply code.
+ * online_ErrorEvent_vtbl, type 258) with the reply code.
  *
  * Called through the functor thunk func_00268C48, the reply callback of func_0025C3F8().
  *
  * @param msg  the LobbyApi reply (error code at +0x8, 0 on success)
  */
-extern "C" void func_0025C4F0(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onlostpasswordrequestsent(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = 210;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_C4F0(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = *(int*)(msg + 0x8);
         post_C4F0(((char*)self), m);
     }
@@ -2498,7 +2498,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025C610);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern char str_SSX_PS2_2004[];
 extern char str_NAME[];
 extern char str_PASS[];
@@ -2559,7 +2559,7 @@ struct sDsSlotC610 {
  * adds 0x800 and 0x100. HWFLAG adds 0x800 when bit 0 of the word at +0x88 is set in any of 8 0x8C-byte records of the
  * USB keyboard object D_004A33F0 (read with no null check, unlike the other D_004A33F0 users), and 0x100 when the
  * voice-chat manager D_004A33F4's status (func_00266F38) has bit 0x10. func_0025B608() then sends it (mState 8, 20 s
- * timeout, reply through func_00268C70 to func_0025C8A8()), and an Event of type 211 (vtable D_004812B0) is pushed onto
+ * timeout, reply through func_00268C70 to LobbyMan_onauthentication()), and an Event of type 211 (vtable online_Event_vtbl) is pushed onto
  * mEventList.
  */
 extern "C" void func_0025C610(LobbyMan* self)
@@ -2602,7 +2602,7 @@ extern "C" void func_0025C610(LobbyMan* self)
     func_0025B608(self, 8, 0x61757468, buf, (int)func_00268C70, 20.0f);
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     post_C610(((char*)self) + 0xEC, m);
 }
 #endif
@@ -2626,7 +2626,7 @@ extern "C" void func_0025C878(LobbyMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025C8A8);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onauthentication);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // FAKEMATCH: identical if/else arms around the b3 GetString block change GCSE's table size and so the spill order (permuter); plain form 99.98%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
@@ -2647,7 +2647,7 @@ extern char D_004A30F0[];
 extern char str_DATE[];
 extern char str_INTRO[];
 extern void* D_004811D0_C8A8[] __asm__("D_004811D0");
-extern void* D_00481290[];
+extern void* online_ErrorEvent_vtbl[];
 static inline void post_C8A8(char* self, void* msg)
 {
     void* mp = msg;
@@ -2667,11 +2667,11 @@ struct sBXStrC8A8 { char* p; };
  * "CPAT" into mCPAT with func_003EFD30() (setting mHaveCPAT, or clearing it when the field is missing), sets
  * mAuthenticated and pushes an Event of type 212 onto mEventList. Status 'lock' pushes a type-258 event with vtable
  * D_004811D0 holding the code and the "DATE" and "INTRO" strings; any other status pushes a type-258 error event
- * (vtable D_00481290) carrying the status. Called only from the LobbyApi callback thunk func_00268C70.
+ * (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk func_00268C70.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
-extern "C" void func_0025C8A8(LobbyMan* self, char *msg)
+extern "C" void LobbyMan_onauthentication(LobbyMan* self, char *msg)
 {
   *((int *) self) = 1;
   int status = *((int *) (msg + 8));
@@ -2730,7 +2730,7 @@ extern "C" void func_0025C8A8(LobbyMan* self, char *msg)
     }
     self->mAuthenticated = 1;
     int *m = (int *) operator new(8, str_NetEvent, 0x20000000, 0);
-    *((void ***) (((char *) m) + 0x4)) = D_004812B0;
+    *((void ***) (((char *) m) + 0x4)) = online_Event_vtbl;
     m[0] = 212;
     post_C610(((char*)self) + 0xEC, m);
   }
@@ -2754,7 +2754,7 @@ extern "C" void func_0025C8A8(LobbyMan* self, char *msg)
     int *m = (int *) operator new(0xC, str_NetEvent, 0x20000000, 0);
     m[2] = *((int *) (msg + 8));
     m[0] = 258;
-    *((void ***) (((char *) m) + 0x4)) = D_00481290;
+    *((void ***) (((char *) m) + 0x4)) = online_ErrorEvent_vtbl;
     post_C8A8(((char*)self), m);
   }
 }
@@ -2795,8 +2795,8 @@ extern "C" const char* func_003F3F78();
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void func_0025B608(LobbyMan* self, int a1, int tag, void* cb, int a4, float f);
 extern "C" void func_00268C98(void* self, void* a1, int a2);
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeCD50 {
     sMsgListNodeCD50* next;
@@ -2831,7 +2831,7 @@ extern "C" void func_0025CD50_impl(char* self, const char* name) __asm__("func_0
  *
  * Assigns @p name to mPersona, then builds PERS = @p name, MID = func_003F3F78()'s hex string, PID = "SSX-PS2-2004"
  * and, when mHaveCPAT is set, CDEV = mCPAT. func_0025B608() sends it (mState 9, 20 s timeout, reply through
- * func_00268C98 to func_0025CEB0()) and an Event of type 217 is pushed onto mEventList. Unlike most requests it does
+ * func_00268C98 to LobbyMan_onpersonaselected()) and an Event of type 217 is pushed onto mEventList. Unlike most requests it does
  * not check mState first.
  *
  * @param name  the persona name
@@ -2852,19 +2852,19 @@ extern "C" void func_0025CD50_impl(char* self, const char* name)
     int type = 217;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgListCD50_insert(*(sMsgListNodeCD50**)(self + 0xF0), mp);
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025CEB0);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onpersonaselected);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 extern "C" void func_0025CFE0(LobbyMan* self);
 
 struct sMsgListNodeCEB0 {
@@ -2902,24 +2902,24 @@ static inline void post_CEB0(char* self, void* msg)
  * Handles the lobby server's reply to the persona selection ('pers') request.
  *
  * Sets mState to 1. On success it requests the persona's online stats with func_0025CFE0() and pushes an Event of type
- * 218 onto mEventList; otherwise it pushes a type-258 error event (vtable D_00481290) carrying the status. Called only
+ * 218 onto mEventList; otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only
  * from the LobbyApi callback thunk func_00268C98.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
-extern "C" void func_0025CEB0(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onpersonaselected(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         func_0025CFE0(self);
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = 218;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_CEB0(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = *(int*)(msg + 0x8);
         post_CEB0(((char*)self), m);
     }
@@ -2967,8 +2967,8 @@ extern char D_004A2F40[];
 extern char str_l[];
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
 extern "C" void func_0025E0C8(LobbyMan* self, int value);
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeD048 {
     sMsgListNodeD048* next;
@@ -3007,7 +3007,7 @@ static inline void post_D048(char* self, void* msg)
  * Sets mState to 1. On success it decodes the "STAT" field with the "l*" template (cDirtysock_tag_TagFieldGetStructure)
  * and stores mStats.unk_04 = item 2, mStats.unk_08 = items 2 + 3 + 4, mStats.unk_0C = item 6, mStats.mRank = the "R"
  * number (default 0) and mStats.unk_10 = -1, then requests news item 0 with func_0025E0C8() (no event is posted).
- * Otherwise it pushes a type-258 error event (vtable D_00481290) carrying the status. Called only from the LobbyApi
+ * Otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi
  * callback thunk func_00268CC0.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
@@ -3029,7 +3029,7 @@ extern "C" void func_0025D048(LobbyMan* self, char* msg)
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = *(int*)(msg + 0x8);
         post_D048(((char*)self), m);
     }
@@ -3041,7 +3041,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025D1B8);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern char str_PERS[];
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void func_00268CE8(void* self, void* a1, int a2);
@@ -3076,7 +3076,7 @@ static inline sMsgListIterD1B8 sMsgListD1B8_insert(sMsgListIterD1B8 pos, void* c
  * Sends the create-persona ('cper') request and adds the name to the persona list ahead of the reply.
  *
  * Does nothing when mState is 0. Sends PERS = @p name with func_0025B608() (mState 10, 20 s timeout, reply through
- * func_00268CE8 to func_0025D2D8()), assigns @p name to mPersonas[mNumPersonas] (the count only grows when the reply
+ * func_00268CE8 to LobbyMan_onpersonacreated()), assigns @p name to mPersonas[mNumPersonas] (the count only grows when the reply
  * succeeds) and pushes an Event of type 213 onto mEventList. Likely bug: there is no check that mNumPersonas is below 4
  * (the preview asserted "numpersonas < max_personas"), so a fifth persona would overwrite mPersona.
  *
@@ -3095,7 +3095,7 @@ extern "C" void func_0025D1B8(LobbyMan* self, const char* name)
         cBXString_cBXString4(&((char**)&lobbyMan->mPersonas[0])[lobbyMan->mNumPersonas], name);
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = type;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         void* mp = m;
         sMsgListD1B8_insert(*(sMsgListNodeD1B8**)(((char*)self) + 0xF0), mp);
     }
@@ -3103,7 +3103,7 @@ extern "C" void func_0025D1B8(LobbyMan* self, const char* name)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025D2D8);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onpersonacreated);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -3112,8 +3112,8 @@ extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeD2D8 {
     sMsgListNodeD2D8* next;
@@ -3151,26 +3151,26 @@ static inline void post_D2D8(char* self, void* msg)
  *
  * Sets mState to 1. On success it increments mNumPersonas (keeping the name func_0025D1B8() stored) and pushes an Event
  * of type 214 onto mEventList. On failure it first passes a 'dupl' (name taken) reply to func_0025BC48(), which reads
- * the server's suggested names, then pushes a type-258 error event (vtable D_00481290) carrying the status. Called only
+ * the server's suggested names, then pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only
  * from the LobbyApi callback thunk func_00268CE8.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
-extern "C" void func_0025D2D8(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onpersonacreated(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         (self->mNumPersonas)++;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = 214;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_D2D8(((char*)self), m);
     } else {
         if (*(int*)(msg + 0x8) == 0x6475706C)
             func_0025BC48(self, msg);
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = *(int*)(msg + 0x8);
         post_D2D8(((char*)self), m);
     }
@@ -3182,7 +3182,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025D428);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern char str_PERS[];
 extern "C" void func_00268D10(void* self, void* a1, int a2);
 
@@ -3215,7 +3215,7 @@ static inline sMsgListIterD428 sMsgListD428_insert(sMsgListIterD428 pos, void* c
  * Sends the delete-persona ('dper') request for one of the account's personas.
  *
  * Does nothing when mState is 0. Sends PERS = mPersonas[@p idx] with func_0025B608() (mState 11, 20 s timeout, reply
- * through func_00268D10 to func_0025D538()), stores @p idx in mDeletePersonaIdx and pushes an Event of type 215 onto
+ * through func_00268D10 to LobbyMan_onpersonadeleted()), stores @p idx in mDeletePersonaIdx and pushes an Event of type 215 onto
  * mEventList.
  *
  * @param idx  index into mPersonas; not range-checked
@@ -3232,7 +3232,7 @@ extern "C" void func_0025D428(LobbyMan* self, int idx)
         self->mDeletePersonaIdx = idx;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = type;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         void* mp = m;
         sMsgListD428_insert(*(sMsgListNodeD428**)(((char*)self) + 0xF0), mp);
     }
@@ -3240,7 +3240,7 @@ extern "C" void func_0025D428(LobbyMan* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025D538);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onpersonadeleted);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -3249,8 +3249,8 @@ extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern "C" void* cBXString_operatorE(void* self, void* other);
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeD538 {
     sMsgListNodeD538* next;
@@ -3289,12 +3289,12 @@ static inline void post_D538(char* lst, void* msg)
  *
  * Sets mState to 1. On success it decrements mNumPersonas, shifts the mPersonas entries after mDeletePersonaIdx down by
  * one (the old last slot keeps a copy of its name) and pushes an Event of type 216 onto mEventList; otherwise it pushes
- * a type-258 error event (vtable D_00481290) carrying the status. Called only from the LobbyApi callback thunk
+ * a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk
  * func_00268D10.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
-extern "C" void func_0025D538(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onpersonadeleted(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
@@ -3304,13 +3304,13 @@ extern "C" void func_0025D538(LobbyMan* self, char* msg)
         for (int i = lobbyMan->mDeletePersonaIdx; i < lobbyMan->mNumPersonas; i++)
             cBXString_operatorE(&((char**)&lobbyMan->mPersonas[0])[i], &((char**)&lobbyMan->mPersonas[0])[i + 1]);
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         m[0] = 216;
         post_D538(lst, m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = *(int*)(msg + 0x8);
         post_D538(((char*)self) + 0xEC, m);
     }
@@ -3318,7 +3318,7 @@ extern "C" void func_0025D538(LobbyMan* self, char* msg)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025D6C0);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onroomlistupdate);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -3326,7 +3326,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNodeK6c0 {
     sMsgListNodeK6c0* next;
@@ -3359,12 +3359,12 @@ static inline sMsgListIterK6c0 sMsgListK6c0_insert(sMsgListIterK6c0 pos, void* c
  * It ignores the update message. Called through thunk func_00268A90, which func_0025A778 registers as the callback of
  * LobbyApi list channel 0 (mpRoomList).
  */
-extern "C" void func_0025D6C0(LobbyMan* self)
+extern "C" void LobbyMan_onroomlistupdate(LobbyMan* self)
 {
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     sMsgListNodeK6c0* list = *(sMsgListNodeK6c0**)(((char*)self) + 0xF0);
     m[0] = 223;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgListK6c0_insert(list, mp);
 }
@@ -3443,7 +3443,7 @@ extern "C" void func_00268D38(void* self, void* a1, int a2);
  * Sends the room-join ('move') request.
  *
  * Does nothing when mState is 0. Builds NAME = @p name and, when given, PASS = @p password, and sends it with
- * func_0025B608() (mState 12, 20 s timeout, reply through func_00268D38 to func_0025D8F8()).
+ * func_0025B608() (mState 12, 20 s timeout, reply through func_00268D38 to LobbyMan_onroomselected()).
  *
  * @param name      the room name (a string passed as void*)
  * @param password  the room password as a string pointer in an int, or 0 for none
@@ -3465,13 +3465,13 @@ extern "C" void func_0025D860(LobbyMan* self, void* name, int password)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025D8F8);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onroomselected);
 #ifdef SKIP_ASM
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 extern char D_004A2F40[];
 extern char str_NAME[];
 extern "C" void cBXString_Reset(void* self);
@@ -3513,12 +3513,12 @@ static inline void post_D8F8(char* self, void* msg)
  * Handles the lobby server's reply to the room-join ('move') request.
  *
  * Sets mState to 1. On success it stores the reply's "NAME" in mRoomName and pushes an Event of type 220 onto
- * mEventList; otherwise it empties mRoomName (cBXString_Reset) and pushes a type-258 error event (vtable D_00481290)
+ * mEventList; otherwise it empties mRoomName (cBXString_Reset) and pushes a type-258 error event (vtable online_ErrorEvent_vtbl)
  * carrying the status. Called only from the LobbyApi callback thunk func_00268D38.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
-extern "C" void func_0025D8F8(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onroomselected(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
@@ -3527,13 +3527,13 @@ extern "C" void func_0025D8F8(LobbyMan* self, char* msg)
         cBXString_cBXString4(((char*)self) + 0x84, buf);
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = 220;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_D8F8(((char*)self), m);
     } else {
         cBXString_Reset(((char*)self) + 0x84);
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = *(int*)(msg + 0x8);
         post_D8F8(((char*)self), m);
     }
@@ -3577,7 +3577,7 @@ extern "C" void func_00268D60(void* self, void* a1, int a2);
  * Sends the create-room ('room') request for a room named "<prefix>.<suffix>".
  *
  * Does nothing when mState is 0. Formats the name with "%s.%s", builds NAME and, when given, PASS, and sends it with
- * func_0025B608() (mState 17, 20 s timeout, reply through func_00268D60 to func_0025DB80()).
+ * func_0025B608() (mState 17, 20 s timeout, reply through func_00268D60 to LobbyMan_onRoomCreated()).
  *
  * @param namePrefix  first part of the room name (a string pointer in an int)
  * @param nameSuffix  second part of the room name (a string pointer in an int)
@@ -3601,7 +3601,7 @@ extern "C" void func_0025DAC0(LobbyMan* self, int namePrefix, int nameSuffix, co
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025DB80);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onRoomCreated);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
@@ -3614,8 +3614,8 @@ extern char D_004A2F40[];
 extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const char* name);
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeDB80 {
     sMsgListNodeDB80* next;
@@ -3652,12 +3652,12 @@ static inline void post_DB80(char* self, void* msg)
  * Handles the lobby server's reply to the create-room ('room') request.
  *
  * Sets mState to 1. On success it stores the reply's "NAME" in mRoomName and pushes an Event of type 228 onto
- * mEventList; otherwise it pushes a type-258 error event (vtable D_00481290) carrying the status. Called only from the
+ * mEventList; otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the
  * LobbyApi callback thunk func_00268D60.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
-extern "C" void func_0025DB80(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onRoomCreated(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     int v = *(int*)(msg + 0x8);
@@ -3668,12 +3668,12 @@ extern "C" void func_0025DB80(LobbyMan* self, char* msg)
         cBXString_cBXString4(((char*)self) + 0x84, buf);
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = type;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_DB80(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = v;
         post_DB80(((char*)self), m);
     }
@@ -3692,7 +3692,7 @@ extern "C" int func_003E8DC0(void* p, const char* key, int value, int timeout, v
  *
  * Does nothing when mState is 0. Calls func_003E8DC0() (a LobbyApi 'ping' with NAME and ADDR) on mpLobbyApi with @p
  * key, the address func_0025A730() returns for it (a "SSX-PS2-2004" config override of @p def), a 5000 timeout and
- * callback thunk func_00268D88 (reply to func_0025DDE0()). func_001AFA60 calls it for a found player.
+ * callback thunk func_00268D88 (reply to LobbyMan_onPingReceived()). func_001AFA60 calls it for a found player.
  *
  * @param key  the player's name (also the config key looked up)
  * @param def  the player's address, used unless the config overrides it
@@ -3734,11 +3734,11 @@ extern "C" void func_0025DD68(LobbyMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025DDE0);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onPingReceived);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern void* D_00481170[];
 extern char str_NAME[];
 extern char D_004A2F40[];
@@ -3780,7 +3780,7 @@ static inline sMsgListIterDDE0 sMsgListDDE0_insert(sMsgListIterDDE0 pos, void* c
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
-extern "C" void func_0025DDE0(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onPingReceived(LobbyMan* self, char* msg)
 {
     char name[0x20];
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_NAME), name, 0x20, D_004A2F40);
@@ -3811,7 +3811,7 @@ extern "C" void func_00268DB0(void* self, void* a1, int a2);
  * Sends the report-abuse ('rept') request about a player.
  *
  * Does nothing when mState is 0. Builds PERS = @p name and LANG = func_00259198()'s "en", and sends it with
- * func_0025B608() (mState 16, 20 s timeout, reply through func_00268DB0 to func_0025DF98()).
+ * func_0025B608() (mState 16, 20 s timeout, reply through func_00268DB0 to LobbyMan_onAbuseReportReceived()).
  *
  * @param name  the reported persona
  */
@@ -3830,12 +3830,12 @@ extern "C" void func_0025DF00(LobbyMan* self, const char* name)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025DF98);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onAbuseReportReceived);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeDF98 {
     sMsgListNodeDF98* next;
@@ -3872,11 +3872,11 @@ static inline void post_DF98(char* self, void* msg)
  * Handles the lobby server's reply to the report-abuse ('rept') request.
  *
  * Sets mState to 1. On success it pushes an Event of type 232 onto mEventList; otherwise it pushes a type-258 error
- * event (vtable D_00481290) carrying the status. Called only from the LobbyApi callback thunk func_00268DB0.
+ * event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk func_00268DB0.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
-extern "C" void func_0025DF98(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onAbuseReportReceived(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     int v = *(int*)(msg + 0x8);
@@ -3884,12 +3884,12 @@ extern "C" void func_0025DF98(LobbyMan* self, char* msg)
         int type = 232;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = type;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_DF98(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = v;
         post_DF98(((char*)self), m);
     }
@@ -3908,7 +3908,7 @@ extern "C" void func_00268DD8(void* self, void* a1, int a2);
  * Requests a news item from the lobby server ('news' with NAME = @p value as a number).
  *
  * Does nothing when mState is 0. func_0025B608() sends it with mState 14 and a 20 s timeout; the reply goes through
- * func_00268DD8 to func_0025E138(). func_0025D048() asks for item 0 after login, the news screen
+ * func_00268DD8 to LobbyMan_onNewsRetrieved(). func_0025D048() asks for item 0 after login, the news screen
  * (cFEStateNetNews_onCreateScreen) for others.
  *
  * @param value  the news item number
@@ -3926,13 +3926,13 @@ extern "C" void func_0025E0C8(LobbyMan* self, int value)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025E138);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onNewsRetrieved);
 #ifdef SKIP_ASM
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_00481210[];
-extern void* D_004812B0[];
+extern void* online_NewsEvent_vtbl[];
+extern void* online_Event_vtbl[];
 extern char str_BUDDYSERVERNAME[];
 extern char str_BUDDYPORT[];
 extern char str_BUDDYRESOURCE[];
@@ -3986,7 +3986,7 @@ static inline void post_E138(char* self, void* msg)
 /**
  * Handles the lobby server's reply to a 'news' request, starting the buddy-server login on item 0.
  *
- * Sets mState to 1. Status 'new1' pushes a news event (0xC bytes, type 226, vtable D_00481210) holding the reply record
+ * Sets mState to 1. Status 'new1' pushes a news event (0xC bytes, type 226, vtable online_NewsEvent_vtbl) holding the reply record
  * as a string. Status 'new0' sets mLoggedIn and, when BuddyMan_mBuddyMan is not already connected (func_00261460()
  * returns 0), reads "BUDDYSERVERNAME", "BUDDYPORT" (default 13505), "BUDDYRESOURCE" (default "SSX-PS2-2004") and
  * "BUDDYMSGTIMEOUT" (default 864000, stored in BuddyMan_mBuddyMan->miMsgTimeout) and connects with func_00261248()
@@ -3995,7 +3995,7 @@ static inline void post_E138(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply: status at +0x8 ('new0' or 'new1'), tag record at +0xC
  */
-extern "C" void func_0025E138(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onNewsRetrieved(LobbyMan* self, char* msg)
 {
     LobbyMan* st = self;
     st->mState = 1;
@@ -4003,7 +4003,7 @@ extern "C" void func_0025E138(LobbyMan* self, char* msg)
     if (type == 0x6E657731) {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 226;
-        *(void***)((char*)m + 0x4) = D_00481210;
+        *(void***)((char*)m + 0x4) = online_NewsEvent_vtbl;
         cBXString_cBXString2(m + 2, *(char**)(msg + 0xC));
         post_E138(((char*)self), m);
     } else if (type == 0x6E657730) {
@@ -4020,7 +4020,7 @@ extern "C" void func_0025E138(LobbyMan* self, char* msg)
         }
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = 273;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_E138(((char*)self), m);
     }
 }
@@ -4032,7 +4032,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025E348);
 extern "C" void* func_003E8F08(void* ctx, int tag);
 extern "C" unsigned int func_0025F338(LobbyMan* self);
 extern "C" void func_0025E420(LobbyMan* self, int a1, int a2, int a3);
-extern "C" void func_00259A60(LobbyMan* self, int unused);
+extern "C" void LobbyMan_onranklistupdate(LobbyMan* self, int unused);
 
 struct sDsSlotSessK2 {
     int active;                  // 0x0
@@ -4052,7 +4052,7 @@ struct sDsSlotSessK2 {
  * Does nothing when mState is 0 (the view's `active`). Stores @p slot in mRankSlot and func_003E8F08(mpLobbyApi,
  * 'slot') in mpSlotTag. When the slot's snapshot holds fewer rows (func_0025F338()) than mRankCount[@p slot], it
  * releases the slot's mRankSnapshot entry (func_003E8688(api, 4, ..)) and asks for rows 0..99 with func_0025E420()
- * (passing the previous slot); otherwise it just calls the snapshot callback func_00259A60() with no message. The
+ * (passing the previous slot); otherwise it just calls the snapshot callback LobbyMan_onranklistupdate() with no message. The
  * parameter's view type (sDsSlotSessK2) is LobbyMan read through its own layout.
  *
  * @param slot  rank-list slot, 0..28; not range-checked
@@ -4070,7 +4070,7 @@ extern "C" void func_0025E348(sDsSlotSessK2* self, int slot)
             }
             func_0025E420((LobbyMan*)self, 0, 100, old);
         } else {
-            func_00259A60((LobbyMan*)((char*)self), 0);
+            LobbyMan_onranklistupdate((LobbyMan*)((char*)self), 0);
         }
     }
 }
@@ -4113,7 +4113,7 @@ struct sDsSlotSessE420 {
  * Does nothing when mState is 0. Opens a type-4 snapshot for mRankSlot when it has none (func_003E85B0, callback thunk
  * func_00268AE0), builds INDEX = mRankSlot, CHAN = D_004A3180 + 4 (D_004A3180 is zero and only read here), START = @p
  * a1, RANGE = @p a2 and SEQN = mRankSlot, cancels the request stored for slot @p a3 (func_003E8D70) and sends 'snap'
- * with func_0025B608(), keeping the current mState (20 s timeout, reply through func_00268E00 to func_0025E590()). The
+ * with func_0025B608(), keeping the current mState (20 s timeout, reply through func_00268E00 to LobbyMan_onRanklistRetrieved()). The
  * new request id goes into mRankRequest[mRankSlot].
  *
  * @param self_  the lobby manager (LobbyMan_mLobbyMan)
@@ -4143,12 +4143,12 @@ extern "C" void func_0025E420(LobbyMan* self_, int a1, int a2, int a3)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025E590);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onRanklistRetrieved);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 extern char str_START[];
 extern char str_SEQN[];
 extern char str_RANGE[];
@@ -4183,12 +4183,12 @@ static inline sMsgListIterE590 sMsgListE590_insert(sMsgListIterE590 pos, void* c
  * Handles a rank-list ('snap') reply: records how many rows of the slot are available.
  *
  * On success it stores "START" + "RANGE" in mRankCount["SEQN"] (the index comes from the server and is not
- * range-checked); otherwise it pushes a type-258 error event (vtable D_00481290) carrying the status. mState is not
+ * range-checked); otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. mState is not
  * touched. Called only from the LobbyApi callback thunk func_00268E00.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
-extern "C" void func_0025E590(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onRanklistRetrieved(LobbyMan* self, char* msg)
 {
     int v = *(int*)(msg + 0x8);
     if (v == 0) {
@@ -4199,7 +4199,7 @@ extern "C" void func_0025E590(LobbyMan* self, char* msg)
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = v;
         void* mp = m;
         sMsgListE590_insert(*(sMsgListNodeE590**)(((char*)self) + 0xF0), mp);
@@ -4212,7 +4212,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025E6D0);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern char str_PERS[];
 extern "C" void func_00268E28(void* self, void* a1, int a2);
 
@@ -4246,7 +4246,7 @@ static inline sMsgListIterE6D0 sMsgListE6D0_insert(sMsgListIterE6D0 pos, void* c
  *
  * Does nothing when mState is 0. When @p name equals mPersona (case-insensitive) it only pushes an Event of type 270
  * onto mEventList. Otherwise it sends PERS = @p name with func_0025B608(), keeping the current mState (20 s timeout,
- * reply through func_00268E28 to func_0025E7F0()), and sets mFindingPlayer.
+ * reply through func_00268E28 to LobbyMan_onPlayerFound()), and sets mFindingPlayer.
  *
  * @param name  the persona to find
  */
@@ -4257,7 +4257,7 @@ extern "C" void func_0025E6D0(LobbyMan* self, const char* name)
             int type = 270;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             m[0] = type;
-            *(void***)((char*)m + 0x4) = D_004812B0;
+            *(void***)((char*)m + 0x4) = online_Event_vtbl;
             void* mp = m;
             sMsgListE6D0_insert(*(sMsgListNodeE6D0**)(((char*)self) + 0xF0), mp);
         } else {
@@ -4273,7 +4273,7 @@ extern "C" void func_0025E6D0(LobbyMan* self, const char* name)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025E7F0);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onPlayerFound);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* tag, void* data, int len, const char* fmt);
@@ -4292,7 +4292,7 @@ extern char str_ROOM[];
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern void* D_00481190[];
-extern void* D_00481290[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeE7F0 {
     sMsgListNodeE7F0* next;
@@ -4350,12 +4350,12 @@ struct sMsgE7F0 {
  * "RANK" (default -1), "ADDR" as a number and "ROOM", and pushes a 44-byte event: type 227, vtable D_00481190, the
  * persona and room as cBXStrings at +0x8 and +0xC, 1 at +0x10 when ADDR is positive, ADDR at +0x14, and at +0x18 a
  * tLobbyStats-shaped block (RANK, item 2, items 2 + 3 + 4, item 6, -1) that func_001AFA60 copies into mOpponentStats.
- * Otherwise it pushes a type-258 error event (vtable D_00481290) carrying the status. Called only from the LobbyApi
+ * Otherwise it pushes a type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi
  * callback thunk func_00268E28.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
-extern "C" void func_0025E7F0(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onPlayerFound(LobbyMan* self, char* msg)
 {
     self->mFindingPlayer = 0;
     int err = *(int*)(msg + 0x8);
@@ -4388,7 +4388,7 @@ extern "C" void func_0025E7F0(LobbyMan* self, char* msg)
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = err;
         post_E7F0(((char*)self), m);
     }
@@ -4482,7 +4482,7 @@ struct sUserMsg_25EB00 {
  * to +0x8 (0x20 bytes), +0x28 (0x20 bytes) and +0x48 (0x100 bytes), P at +0x148, F at +0x14C, and at +0x150 a stats
  * block (R, item 2, items 2 + 3 + 4, item 6, F). Likely bug: M and N are read into 0x100-byte buffers and strcpy'd into
  * 0x20-byte fields with no length check. Status 'uusr' posts nothing; other statuses push a type-258 error event
- * (vtable D_00481290). mState is not touched. Called only from the LobbyApi callback thunk func_00268E50.
+ * (vtable online_ErrorEvent_vtbl). mState is not touched. Called only from the LobbyApi callback thunk func_00268E50.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
@@ -4524,7 +4524,7 @@ extern "C" void func_0025EB00(LobbyMan* self, char* msg)
     } else if (type != 0x75757372) {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = type;
         sMsgList_25EB00* l = (sMsgList_25EB00*)(((char*)self) + 0xF0);
         void* mp = m;
@@ -4548,7 +4548,7 @@ extern "C" void func_00268E78(void* self, void* a1, int a2);
  *
  * Only when mState is 1: stores @p matchType in mMatchType and sends KIND = "DeathRace" plus QMFP = the 20 bytes at @p
  * data encoded with the "l*" template (cDirtysock_tag_TagFieldSetStructure) with func_0025B608() (mState 18, 20 s
- * timeout, reply through func_00268E78 to func_0025F030()).
+ * timeout, reply through func_00268E78 to LobbyMan_onQuickMatchResponse()).
  *
  * @param data       the search options (five ints; the quick-play popup's miSearchOptions)
  * @param matchType  the game kind, kept in mMatchType
@@ -4585,8 +4585,8 @@ extern char D_004A3218[];
 extern "C" int* func_002591D0();
 extern "C" void func_00263BA8(void* p, int arg);
 extern "C" void func_00268E78(void* self, void* a1, int a2);
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNodeEED8 {
     sMsgListNodeEED8* next;
@@ -4624,7 +4624,7 @@ static inline void post_EED8(char* self, void* msg)
  *
  * Does nothing when mState is 0. In state 25 (in game) it closes the game connection held at SSXApp->RealFE + 0xB5ABC
  * (func_002591D0) with func_00263BA8(conn, 2) when that is active. In any other state but 1 it sends 'quik' with KIND =
- * "*" straight to func_003E8B10() (setting mTimeout to 20.0 and mRequestId; reply to func_0025F030()). Then sets mState
+ * "*" straight to func_003E8B10() (setting mTimeout to 20.0 and mRequestId; reply to LobbyMan_onQuickMatchResponse()). Then sets mState
  * to 1 and pushes an Event of type 231 onto mEventList.
  */
 extern "C" void func_0025EED8(LobbyMan* self)
@@ -4647,20 +4647,20 @@ extern "C" void func_0025EED8(LobbyMan* self)
     int type = 231;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     post_EED8(((char*)self), m);
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025F030);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onQuickMatchResponse);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNodeK2e {
     sMsgListNodeK2e* next;
@@ -4687,18 +4687,18 @@ static inline sMsgListIterK2e sMsgListK2e_insert(sMsgListIterK2e pos, void* cons
     return tmp;
 }
 
-extern void* D_00481290[];
+extern void* online_ErrorEvent_vtbl[];
 
 /**
  * Handles the lobby server's reply to a quick-match ('quik') request.
  *
  * On success it moves mState from 18 to 20 (other states are kept). On failure it sets mState to 1 and pushes a
- * type-258 error event (vtable D_00481290) carrying the status. Called only from the LobbyApi callback thunk
+ * type-258 error event (vtable online_ErrorEvent_vtbl) carrying the status. Called only from the LobbyApi callback thunk
  * func_00268E78.
  *
  * @param msg  the LobbyApi reply: status at +0x8 (0 = success), tag record at +0xC
  */
-extern "C" void func_0025F030(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onQuickMatchResponse(LobbyMan* self, char* msg)
 {
     if (*(int*)(msg + 0x8) == 0) {
         if (*(int*)self == 18)
@@ -4708,7 +4708,7 @@ extern "C" void func_0025F030(LobbyMan* self, char* msg)
         int v = *(int*)(msg + 0x8);
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = v;
         void* mp = m;
         sMsgListK2e_insert(*(sMsgListNodeK2e**)(((char*)self) + 0xF0), mp);
@@ -5140,7 +5140,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025F628);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" void func_003E8D70(void* p, int a);
 extern "C" void func_0025F858(LobbyMan* self);
 extern "C" void func_0025F740(LobbyMan* self, int type);
@@ -5177,7 +5177,7 @@ static inline sMsgListIterF628 sMsgListF628_insert(sMsgListIterF628 pos, void* c
  * Does nothing when mState is 0. In the challenge states 21, 22 and 24 it first sends "abortChal" to mOpponent
  * (func_0025FC48) when @p flag is set, cancels the pending request (func_003E8D70(mpLobbyApi, mRequestId)) and sends an
  * empty "chal" request (func_0025F858, which sets mState to 1). In state 25 (in game) it calls func_0025F740(self, 0)
- * instead. With @p notify set it then posts an online::Event of type 238 (vtable D_004812B0) on mEventList. The update
+ * instead. With @p notify set it then posts an online::Event of type 238 (vtable online_Event_vtbl) on mEventList. The update
  * func_0025AC50 calls it when the state-24 timeout runs out; the challenge popup calls it to cancel.
  *
  * @param selfp   the lobby manager
@@ -5200,7 +5200,7 @@ extern "C" void func_0025F628(LobbyMan* selfp, int notify, int flag)
             int type = 238;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             m[0] = type;
-            *(void***)((char*)m + 0x4) = D_004812B0;
+            *(void***)((char*)m + 0x4) = online_Event_vtbl;
             void* mp = m;
             sMsgListF628_insert(*(sMsgListNodeF628**)(((char*)selfp) + 0xF0), mp);
         }
@@ -5213,7 +5213,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025F740);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern char str_PERS[];
 extern char D_004A3218[];
 
@@ -5247,7 +5247,7 @@ static inline sMsgListIterF740 sMsgListF740_insert(sMsgListIterF740 pos, void* c
  *
  * Does nothing when mState is 0. In state 25 (in game) it sets mTimeout to 20.0, sends a "chal" request (func_003E8B10,
  * no callback) whose record holds PERS="*" (D_004A3218), and sets mState to 1. When @p type is nonzero it then posts an
- * online::Event of that type (vtable D_004812B0) on mEventList. The challenge-received popup calls it to back out of an
+ * online::Event of that type (vtable online_Event_vtbl) on mEventList. The challenge-received popup calls it to back out of an
  * accepted game.
  *
  * @param selfp  the lobby manager
@@ -5267,7 +5267,7 @@ extern "C" void func_0025F740(LobbyMan* selfp, int type)
         if (type != 0) {
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             m[0] = type;
-            *(void***)((char*)m + 0x4) = D_004812B0;
+            *(void***)((char*)m + 0x4) = online_Event_vtbl;
             void* mp = m;
             sMsgListF740_insert(*(sMsgListNodeF740**)(((char*)selfp) + 0xF0), mp);
         }
@@ -5294,12 +5294,12 @@ extern "C" void func_0025F858(LobbyMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_0025F8A0);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onchallengeresponse);
 #ifdef SKIP_ASM
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_00481290[];
+extern void* online_ErrorEvent_vtbl[];
 extern char D_004A2F40[];
 extern char str_MODE[];
 extern char str_chal[];
@@ -5343,12 +5343,12 @@ static inline sMsgListIterF8A0 sMsgListF8A0_insert(sMsgListIterF8A0 pos, void* c
  * The callback thunk func_00268EA0 calls it; func_0025FA48 and func_0025FAD0 register it. It reads the reply's "MODE"
  * field (up to 15 characters, default ""). A reply with an error code (the word at @p msg + 0x8) in state 21 sets
  * mState to 1, sends "abortChal" to mOpponent (func_0025FC48) and posts an online error event of type 258 (vtable
- * D_00481290) carrying the code. Otherwise, in state 21: MODE "chal" sends "lockChal" to mOpponent and enters state 24
+ * online_ErrorEvent_vtbl) carrying the code. Otherwise, in state 21: MODE "chal" sends "lockChal" to mOpponent and enters state 24
  * (func_0025FC70); "play" sets mState to 24 and mTimeout and the countdown D_004A5154 to 20.0; "idle" does nothing.
  *
  * @param msg   the LobbyApi reply: error code at +0x8, tag record pointer at +0xC
  */
-extern "C" void func_0025F8A0(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onchallengeresponse(LobbyMan* self, char* msg)
 {
     char buf[16];
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_MODE), buf, 0x10, D_004A2F40);
@@ -5358,7 +5358,7 @@ extern "C" void func_0025F8A0(LobbyMan* self, char* msg)
             func_0025FC48(((char*)self));
             int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
             m[0] = 258;
-            *(void***)((char*)m + 0x4) = D_00481290;
+            *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
             m[2] = *(int*)(msg + 0x8);
             void* mp = m;
             sMsgListF8A0_insert(*(sMsgListNodeF8A0**)(((char*)self) + 0xF0), mp);
@@ -5389,8 +5389,8 @@ extern "C" void func_00268EA0(void* self, void* a1, int a2);
  * Sends a "chal" challenge request for the given persona as the host side and enters state 21.
  *
  * The record holds PERS = @p name and HOST="1" (D_004A3240). It sets mState to 1, then func_0025B608 sends the request
- * with the reply callback func_00268EA0 (which runs func_0025F8A0), sets mState to 21 and mTimeout to 20.0 and stores
- * mRequestId. Called from func_00259B10.
+ * with the reply callback func_00268EA0 (which runs LobbyMan_onchallengeresponse), sets mState to 21 and mTimeout to 20.0 and stores
+ * mRequestId. Called from LobbyMan_onchatmsg.
  *
  * @param name  persona name sent as PERS
  */
@@ -5544,7 +5544,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025FC70);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern char str_lockChal_b[];
 extern float D_004A5154;
 
@@ -5577,10 +5577,10 @@ static inline sMsgListIter_0025FC70 sMsgList_0025FC70_insert(sMsgListIter_0025FC
  * Sends "lockChal" to a player, switches to the given challenge state and restarts the challenge timer.
  *
  * After the private message (func_0025FB80) it stores @p a2 in mState, posts an online::Event of type 272 (vtable
- * D_004812B0) on mEventList, sets mTimeout to 20.0 and the countdown D_004A5154 to 21.0.
+ * online_Event_vtbl) on mEventList, sets mTimeout to 20.0 and the countdown D_004A5154 to 21.0.
  *
  * @param a1    name of the player (a string pointer passed as an int)
- * @param a2    the new mState (23 from func_0025FB58, 24 from func_0025F8A0)
+ * @param a2    the new mState (23 from func_0025FB58, 24 from LobbyMan_onchallengeresponse)
  */
 extern "C" void func_0025FC70(LobbyMan* self, int a1, int a2)
 {
@@ -5589,7 +5589,7 @@ extern "C" void func_0025FC70(LobbyMan* self, int a1, int a2)
     *(int*)self = a2;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgList_0025FC70_insert(*(sMsgListNode_0025FC70**)((char*)self + 0xF0), mp);
     self->mTimeout = 20.0f;
@@ -5641,7 +5641,7 @@ struct sNetState {
 };
 
 
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 extern char str_NetEvent[];
 
@@ -5657,12 +5657,12 @@ extern "C" void func_0025B608(LobbyMan* self, int a1, int tag, void* cb, int a4,
 extern "C" int cDirtysock_tag_TagFieldSetString(char* buf, int size, const char* key, const char* value);
 
 
-// Queue a simple tag message {type, D_004812B0 vtable} on the session's list.
+// Queue a simple tag message {type, online_Event_vtbl vtable} on the session's list.
 static inline void postMsg(char* self, int type)
 {
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgList_insert(*(sMsgListNode**)(self + 0xF0), mp);
 }
@@ -5856,7 +5856,7 @@ static inline int RaceTime(int end)
  * to the end time when the rider did not finish), CHEAT (mCheating), DISC (the same time when a significant comm error
  * is put on that side), CHARACTER, RACETIM or SCORE (D_00536640; SCORE when RACEEVE0 is nonzero) and the trick and
  * speed totals (SPINDEG .. PLOSTRE, floats converted with func_004139F8). It sends the record with func_0025B608 (state
- * unchanged, callback func_00268EF0, which runs func_00260C68, timeout 20.0) and posts an online::Event of type 0x100
+ * unchanged, callback func_00268EF0, which runs LobbyMan_onresultsreportresponse, timeout 20.0) and posts an online::Event of type 0x100
  * on mEventList. Likely bug: CHARACTER0 is always MyCharacterID, so on the non-host side both CHARACTER0 and CHARACTER1
  * are this player's character.
  *
@@ -6078,15 +6078,15 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00260C68);
+INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onresultsreportresponse);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 extern int D_00534B34[];
 
 struct sMsgListNode0C68 {
@@ -6125,32 +6125,32 @@ static inline void post_0C68(char* lst, void* msg)
  *
  * The callback thunk func_00268EF0 calls it (registered by func_0025FD50). A reply without an error code (the word at
  * @p msg + 0x8), or one whose error is 'rank' while the game is unranked (bIsRankedGame, D_00534B34, is 0), posts an
- * online::Event of type 257 on mEventList; any other error first posts an error event of type 258 (vtable D_00481290)
+ * online::Event of type 257 on mEventList; any other error first posts an error event of type 258 (vtable online_ErrorEvent_vtbl)
  * carrying the code, then the type-257 event. It also fetches back-end interface 7 and ignores it.
  *
  * @param msg   the LobbyApi reply: error code at +0x8
  */
-extern "C" void func_00260C68(LobbyMan* self, char* msg)
+extern "C" void LobbyMan_onresultsreportresponse(LobbyMan* self, char* msg)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (*(int*)(msg + 0x8) == 0 || (*(int*)(msg + 0x8) == 0x72616E6B && D_00534B34[0] == 0)) {
         int type = 257;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = type;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         post_0C68(((char*)self) + 0xEC, m);
     } else {
         int err = *(int*)(msg + 0x8);
         char* lst = ((char*)self) + 0xEC;
         int* m = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
         m[0] = 258;
-        *(void***)((char*)m + 0x4) = D_004812B0;
-        *(void***)((char*)m + 0x4) = D_00481290;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
+        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
         m[2] = err;
         post_0C68(lst, m);
         int type = 257;
         int* m2 = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m2 + 0x4) = D_004812B0;
+        *(void***)((char*)m2 + 0x4) = online_Event_vtbl;
         m2[0] = type;
         post_0C68(lst, m2);
     }
@@ -6218,7 +6218,7 @@ extern "C" void cBXString_Reset(void* self);
  *
  * Empties its five strings (mName, mPassword, unk_08, mMail, mParentMail) with cBXString_Reset and sets mSpam to {1,
  * 1}, mBornMonth and mBornDay to 1, mBornYear to 1985, mGender to 0 and unk_40 to 0. mNameOptions and the mChange*
- * flags are left alone. The constructor func_002594D0 and the account screens call it.
+ * flags are left alone. The constructor LobbyMan_LobbyMan and the account screens call it.
  */
 extern "C" void func_00260F10(LobbyMan* self)
 {
@@ -6391,7 +6391,7 @@ static inline void* Mgr_2610D0()
  * func_00262468() finds no roster entry for it, calls func_00261EF8(mgr, sender, 2, &result). Each step re-fetches the
  * manager through an inline accessor that creates BuddyMan_mBuddyMan when missing (func_00260F80), reconnects it when
  * it is not connected (func_002613C8) and disconnects LobbyMan_mLobbyMan (func_0025B800) if it is still null. The
- * roster callback func_00261770 calls it at the end of the first roster download.
+ * roster callback BuddyMan_onrosterupdate calls it at the end of the first roster download.
  */
 extern "C" void func_002610D0()
 {
@@ -6437,7 +6437,7 @@ struct sBXStr_261248 {
  * 'ssx3', "en", 0)). Copies the host into mServerName, @p a2 into miPort, the user into mUserName and the password into
  * mPassword; clears miError, mbDisconnected and mbLoggedIn, sets mfTimeout to 30.0 and mState to 1 (connecting). It
  * stores the resource in mResource and calls func_003F08E8(mpBuddyApi, host, port, 30, "user:password", "/cso/" +
- * resource, func_00268F18, self), whose callback runs func_002615C8. LobbyMan's func_0025E138 passes the server's
+ * resource, func_00268F18, self), whose callback runs BuddyMan_onconnect. LobbyMan's LobbyMan_onNewsRetrieved passes the server's
  * BUDDYSERVERNAME / BUDDYPORT values; func_002613C8 reconnects with the saved ones. No length checks on the strcpy's.
  *
  * @param self_  the buddy manager
@@ -6558,7 +6558,7 @@ extern "C" void func_00261408(BuddyMan* self);
 /**
  * Polls the BuddyApi and handles a lost connection; LobbyMan's update func_0025AC50 calls it every frame.
  *
- * With a BuddyApi it calls func_003F17D8(mpBuddyApi); when mbDisconnected was set (by func_002615C8) it then
+ * With a BuddyApi it calls func_003F17D8(mpBuddyApi); when mbDisconnected was set (by BuddyMan_onconnect) it then
  * disconnects (func_00261408) and clears mbDisconnected.
  */
 extern "C" void func_00261490(BuddyMan* self)
@@ -6596,7 +6596,7 @@ extern "C" void func_003F17C8(void* h, void (*cb)(void*), void* user);
 /**
  * Creates the buddy manager's BuddyApi instance and registers its incoming-message callback.
  *
- * Stores func_003F0710(@p a1, "2003-10-20") in mpBuddyApi and registers func_00268F40 (which runs func_00261A28) with
+ * Stores func_003F0710(@p a1, "2003-10-20") in mpBuddyApi and registers func_00268F40 (which runs BuddyMan_onReceiveMessage) with
  * func_003F17C8(mpBuddyApi, .., self).
  *
  * @param a1    the resource name passed on from func_00261248
@@ -6661,12 +6661,12 @@ extern "C" void func_00261530(BuddyMan* vself)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_002615C8);
+INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_onconnect);
 #ifdef SKIP_ASM
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" void* func_003F0C90(void* h, void* cb, void* user);
 extern "C" void func_003EE5A0(void* h, int a, int b, void* cb);
 extern "C" void func_00262768(BuddyMan* self, int a1, int a2, int a3, int a4, int a5);
@@ -6710,13 +6710,13 @@ static inline void post_15C8(char* owner, void* msg)
  * The callback thunk func_00268F18 (registered by func_00261248) calls it. 'conn' with status 2, 3, 4 or 6 marks a lost
  * connection: sets mbDisconnected and miError (1 when it was 0); status 6 also clears mbRosterDone. 'auth' with no
  * error (@p msg[2] == 0) creates the roster (mpRoster = func_003F0C90(mpBuddyApi, func_00268F68, self), whose callback
- * runs func_00261770), installs func_002634C0 on it with func_003EE5A0, publishes the presence (func_00262768(self, 1,
+ * runs BuddyMan_onrosterupdate), installs func_002634C0 on it with func_003EE5A0, publishes the presence (func_00262768(self, 1,
  * 0, 0, 0, 0)) and sets mState to 0 and mbLoggedIn to 1. A failed 'auth' posts an online::Event of type 260 on
  * LobbyMan_mLobbyMan's mEventList and stores the error in miError, setting mbDisconnected.
  *
  * @param msg   the BuddyApi message: kind at [0] ('conn' / 'auth'), status at [1], error at [2]
  */
-extern "C" void func_002615C8(BuddyMan* self, int* msg)
+extern "C" void BuddyMan_onconnect(BuddyMan* self, int* msg)
 {
     switch (msg[0]) {
     case 0x636F6E6E:
@@ -6753,7 +6753,7 @@ extern "C" void func_002615C8(BuddyMan* self, int* msg)
         } else {
             LobbyMan* owner = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-            *(void***)((char*)m + 0x4) = D_004812B0;
+            *(void***)((char*)m + 0x4) = online_Event_vtbl;
             m[0] = 260;
             post_15C8((char*)owner, m);
             int r = msg[2];
@@ -6766,7 +6766,7 @@ extern "C" void func_002615C8(BuddyMan* self, int* msg)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00261770);
+INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_onrosterupdate);
 #ifdef SKIP_ASM
 #include "fakematch.h"
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
@@ -6776,8 +6776,8 @@ extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern "C" void func_002610D0();
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNode1770 {
     sMsgListNode1770* next;
@@ -6814,7 +6814,7 @@ static inline void post_1770(char* self, void* msg)
 /**
  * Handles a BuddyApi roster update.
  *
- * The callback thunk func_00268F68 (registered on the roster by func_002615C8) calls it. The first 'endr' message
+ * The callback thunk func_00268F68 (registered on the roster by BuddyMan_onconnect) calls it. The first 'endr' message
  * (while mbRosterDone is 0) adds unknown message senders to the roster (func_002610D0), sets mbRosterDone and posts an
  * online::Event of type 263 on LobbyMan_mLobbyMan's mEventList; any other message posts type 262.
  *
@@ -6823,7 +6823,7 @@ static inline void post_1770(char* self, void* msg)
 // FAKEMATCH: register pin `register int type FM_REG("$17")` (local-alloc ties type and g at equal priority and
 // the lower quantity, type, takes s0; retail gives s0 to g); plain form 99.43%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" void func_00261770(BuddyMan* self, int* msg)
+extern "C" void BuddyMan_onrosterupdate(BuddyMan* self, int* msg)
 {
     if (msg[0] == 0x656E6472 && self->mbRosterDone == 0) {
         func_002610D0();
@@ -6831,13 +6831,13 @@ extern "C" void func_00261770(BuddyMan* self, int* msg)
         (self)->mbRosterDone = 1;
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         m[0] = type;
         post_1770((char*)lobbyMan, m);
     } else {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         m[0] = 262;
         post_1770((char*)lobbyMan, m);
     }
@@ -6845,14 +6845,14 @@ extern "C" void func_00261770(BuddyMan* self, int* msg)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_002618C0);
+INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_onBuddyAdd);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNode_002618C0 {
     sMsgListNode_002618C0* next;
@@ -6887,11 +6887,11 @@ static inline sMsgListIter_002618C0 sMsgList_002618C0_insert(sMsgListIter_002618
  *
  * @param unused  not read
  */
-extern "C" void func_002618C0(int unused)
+extern "C" void BuddyMan_onBuddyAdd(int unused)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     m[0] = 266;
     void* mp = m;
     sMsgList_002618C0_insert((*(sMsgListNode_002618C0**)((char*)lobbyMan + 0xF0)), mp);
@@ -6899,14 +6899,14 @@ extern "C" void func_002618C0(int unused)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00261970);
+INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_onBuddyDelete);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNode_00261970 {
     sMsgListNode_00261970* next;
@@ -6946,11 +6946,11 @@ struct sMsg_00261970 {
  *
  * @param unused  not read
  */
-extern "C" void func_00261970(int unused)
+extern "C" void BuddyMan_onBuddyDelete(int unused)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     sMsg_00261970* m = (sMsg_00261970*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    m->vt = D_004812B0;
+    m->vt = online_Event_vtbl;
     m->kind = 267;
     void* mp = m;
     sMsgList_00261970_insert((*(sMsgListNode_00261970**)((char*)lobbyMan + 0xF0)), mp);
@@ -6958,18 +6958,18 @@ extern "C" void func_00261970(int unused)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00261A20__FPv);
+INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_onBuddySend__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the reply handler for sent buddy messages (run by the thunk func_00268FE0) has an empty body.
  */
-void func_00261A20(void* self)
+void BuddyMan_onBuddySend(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00261A28);
+INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_onReceiveMessage);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: TagFieldGetUnk is called here with a 4th (default) argument left in $a3.
@@ -7028,7 +7028,7 @@ static inline void sTagVec_00261A28_remove(char* self, char* name)
 struct sMsg_00261A28 {
     int kind;
     void** vt;
-    sMsg_00261A28(int k) : kind(k), vt(D_004812B0) {}
+    sMsg_00261A28(int k) : kind(k), vt(online_Event_vtbl) {}
 };
 
 /**
@@ -7045,7 +7045,7 @@ struct sMsg_00261A28 {
  *
  * @param msg   the BuddyApi message; its tag record pointer is at +0xC
  */
-extern "C" void func_00261A28(BuddyMan* self, char* msg)
+extern "C" void BuddyMan_onReceiveMessage(BuddyMan* self, char* msg)
 {
     char raw[0x800];
     char text[2256];
@@ -7080,7 +7080,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00261CD0);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern char str_cPrivateMessage_b[];
 extern void* D_0046D8C0[];
 extern "C" int func_00262360(BuddyMan* self, int a1);
@@ -7183,7 +7183,7 @@ extern "C" void func_00261CD0(BuddyMan* self, char* name, char* a2, char* a3)
             LobbyMan* owner = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             m[0] = type;
-            *(void***)((char*)m + 0x4) = D_004812B0;
+            *(void***)((char*)m + 0x4) = online_Event_vtbl;
             post_1CD0((char*)owner, m);
         }
     }
@@ -7464,7 +7464,7 @@ int func_002623E0_2(void* self, int a1) __asm__("func_002623E0__FPv");
  * kind 1).
  *
  * Looks the name up with func_00262468() and tests the index with func_002623E0(). The front end uses it to choose
- * between "Unblock User" and "Block User", and func_00259B10 answers a challenge from such a player with "ignore".
+ * between "Unblock User" and "Block User", and LobbyMan_onchatmsg answers a challenge from such a player with "ignore".
  *
  * @param name  the player name, passed as an int
  * @return 1 when the entry exists and has the flag, otherwise 0
@@ -7893,7 +7893,7 @@ extern "C" int func_00262950(BuddyMan* self, int a1);
  * Counts the received private messages from the buddy-roster entry with a given name.
  *
  * Looks the name up with func_00262468() and passes the index to func_00262950(). The buddy-message reader
- * func_00261A28 calls it.
+ * BuddyMan_onReceiveMessage calls it.
  *
  * @param name  the player name, passed as an int
  * @return the number of messages from that player, or -1 when the name is not on the roster
@@ -7973,7 +7973,7 @@ extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern char str_cChallenger[];
 extern char D_004810E0[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNode_262AF0 {
     sMsgListNode_262AF0* next;
@@ -8042,7 +8042,7 @@ static inline void push_back_262AF0(char* o, sObjVec_262AF0* v, void* const& x)
  * with the blocked flag (func_002623E0()) is ignored. Otherwise it allocates a 0x40-byte object (tag "cChallenger",
  * vtable D_004810E0 at +0x3C) holding @p name and @p s2 as cBXStrings and the numbers below, appends it to
  * mChallengersStart..mChallengersFinish (func_002672C8 when full) and posts an event of type 236. The only caller,
- * func_00259B10, passes the fields of a "challenge" private message.
+ * LobbyMan_onchatmsg, passes the fields of a "challenge" private message.
  *
  * @param name  challenger's name; stored at +0x0
  * @param a2    first number of the message; stored at +0x8
@@ -8087,7 +8087,7 @@ extern "C" void func_00262AF0(BuddyMan* self, char* name, int a2, int a3, int a4
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             m[0] = type;
-            *(void***)((char*)m + 0x4) = D_004812B0;
+            *(void***)((char*)m + 0x4) = online_Event_vtbl;
             post_262AF0((char*)lobbyMan, m);
         }
     }
@@ -8115,7 +8115,7 @@ extern "C" void func_00262AF0(BuddyMan* self, char* name, int a2, int a3, int a4
     push_back_262AF0(((char*)self), (sObjVec_262AF0*)(((char*)self) + 0xB8), op);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     m[0] = 236;
     post_262AF0((char*)lobbyMan, m);
 }
@@ -8533,7 +8533,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002634C0);
 /**
  * Orders two buddy-roster entries by name, ignoring case; the roster's sort callback.
  *
- * func_002615C8 installs it on mpRoster with func_003EE5A0. A null entry sorts after a non-null one.
+ * BuddyMan_onconnect installs it on mpRoster with func_003EE5A0. A null entry sorts after a non-null one.
  *
  * @param a1    not read
  * @param lhs   first entry (its name is at +0), or 0
@@ -8652,44 +8652,44 @@ extern "C" void* func_00263630(BuddyMan* self, unsigned int i)
 }
 #endif
 
-extern void* D_004810C8[];
+extern void* cConnMan_vtbl[];
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00263660__FPv);
+INCLUDE_ASM("dirtysock/tagsunk", cConnMan_cConnMan__FPv);
 #ifdef SKIP_ASM
 /**
- * Constructs the front end's connection manager: clears its state word and stores vtable D_004810C8 at +0x8.
+ * Constructs the front end's connection manager: clears its state word and stores vtable cConnMan_vtbl at +0x8.
  *
  * cRealFE's constructor (func_001A1CE8) builds it at +0xB5AB0; func_002636A8() starts a connection and func_00263828()
  * updates it.
  *
  * @return the object
  */
-void* func_00263660(void* self)
+void* cConnMan_cConnMan(void* self)
 {
     *(int*)self = 0;
-    *(int*)((char*)self + 0x8) = (int)(void*)D_004810C8;
+    *(int*)((char*)self + 0x8) = (int)(void*)cConnMan_vtbl;
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00263678);
+INCLUDE_ASM("dirtysock/tagsunk", cConnMan__cConnMan);
 #ifdef SKIP_ASM
-extern void* D_004810C8[];
+extern void* cConnMan_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the connection manager: restores vtable D_004810C8 at +0x8, then frees the object when asked to.
+ * Destroys the connection manager: restores vtable cConnMan_vtbl at +0x8, then frees the object when asked to.
  *
  * cRealFE__cRealFE calls it with flags 2 for its member at +0xB5AB0.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_00263678(void* self, int flags)
+extern "C" void cConnMan__cConnMan(void* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_004810C8;
+    *(void***)((char*)self + 0x8) = cConnMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -8730,7 +8730,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002636F0);
 #ifdef SKIP_ASM
 extern char str_StlBlock_b[];
 extern char str_NetErrorEvent[];
-extern void* D_00481250[];
+extern void* online_NetErrorEvent_vtbl[];
 extern "C" void func_00260F80(void);
 extern "C" int func_00261460(void* p);
 extern "C" void func_002613C8(BuddyMan* p);
@@ -8773,7 +8773,7 @@ static inline bool isState_36F0(int st)
  * Makes sure BuddyMan_mBuddyMan exists and is connected (func_00260F80 / func_002613C8, func_0025B800 if it still does
  * not exist), then disconnects it (func_00261408()) and the lobby (func_0025B800). Unless mNetConnState is 1 (idle) it
  * also calls func_00255FA0 (netConnDisconnect), posts an online::Event of type 278 (tag "NetErrorEvent", vtable
- * D_00481250, @p val at +0x8) to LobbyMan's mEventList when @p val is non-zero, and sets the connection manager's state
+ * online_NetErrorEvent_vtbl, @p val at +0x8) to LobbyMan's mEventList when @p val is non-zero, and sets the connection manager's state
  * to 0. Quirk: it may create and reconnect BuddyMan only to disconnect it.
  *
  * @param out  the connection manager's state word (cRealFE + 0xB5AB0, from func_002591B8)
@@ -8795,7 +8795,7 @@ extern "C" void func_002636F0(int* out, int val)
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(0xC, str_NetErrorEvent, 0x20000000, 0);
             m[0] = 278;
-            *(void***)((char*)m + 0x4) = D_00481250;
+            *(void***)((char*)m + 0x4) = online_NetErrorEvent_vtbl;
             m[2] = val;
             void* mp = m;
             sMsgList36F0_insert((*(sMsgListNode36F0**)((char*)lobbyMan + 0xF0)), mp);
@@ -8820,8 +8820,8 @@ static inline bool isState_3828(int st)
 {
     return cCommSystem_mCommSystem->mNetConnState == st;
 }
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNode3828 {
     sMsgListNode3828* next;
@@ -8879,7 +8879,7 @@ extern "C" void func_00263828(int* self)
             t->state = 2;
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-            *(void***)((char*)m + 0x4) = D_004812B0;
+            *(void***)((char*)m + 0x4) = online_Event_vtbl;
             m[0] = 261;
             post_3828((char*)lobbyMan, m);
         } else if (isState_3828(6)) {
@@ -8900,44 +8900,44 @@ extern "C" void func_00263828(int* self)
 }
 #endif
 
-extern void* D_004810B0[];
+extern void* cGameConnMan_vtbl[];
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00263998__FPv);
+INCLUDE_ASM("dirtysock/tagsunk", cGameConnMan_cGameConnMan__FPv);
 #ifdef SKIP_ASM
 /**
- * Constructs the front end's game-connection manager: clears its state word and stores vtable D_004810B0 at +0x14.
+ * Constructs the front end's game-connection manager: clears its state word and stores vtable cGameConnMan_vtbl at +0x14.
  *
  * cRealFE's constructor (func_001A1CE8) builds it at +0xB5ABC; func_002639E0() starts it, func_00263CF0() updates it
  * and func_00263BA8() shuts it down.
  *
  * @return the object
  */
-void* func_00263998(void* self)
+void* cGameConnMan_cGameConnMan(void* self)
 {
     *(int*)self = 0;
-    *(int*)((char*)self + 0x14) = (int)(void*)D_004810B0;
+    *(int*)((char*)self + 0x14) = (int)(void*)cGameConnMan_vtbl;
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_002639B0);
+INCLUDE_ASM("dirtysock/tagsunk", cGameConnMan__cGameConnMan);
 #ifdef SKIP_ASM
-extern void* D_004810B0[];
+extern void* cGameConnMan_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the game-connection manager: restores vtable D_004810B0 at +0x14, then frees the object when asked to.
+ * Destroys the game-connection manager: restores vtable cGameConnMan_vtbl at +0x14, then frees the object when asked to.
  *
  * cRealFE__cRealFE calls it with flags 2 for its member at +0xB5ABC.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_002639B0(void* self, int flags)
+extern "C" void cGameConnMan__cGameConnMan(void* self, int flags)
 {
-    *(void***)((char*)self + 0x14) = D_004810B0;
+    *(void***)((char*)self + 0x14) = cGameConnMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9046,8 +9046,8 @@ extern "C" void func_00264098(void);
 extern "C" void func_00266DF8(void* self);
 extern "C" void func_00266E88(void* self);
 extern "C" void func_0025F740(LobbyMan* self, int type);
-extern void* D_004812B0[];
-extern void* D_00481290[];
+extern void* online_Event_vtbl[];
+extern void* online_ErrorEvent_vtbl[];
 
 struct sMsgListNode3BA8 {
     sMsgListNode3BA8* next;
@@ -9107,13 +9107,13 @@ extern "C" void func_00263BA8(void* p, int arg)
     if (arg == 1) {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         m[0] = 268;
         post_3BA8((char*)lobbyMan, m);
     } else if (arg == 0) {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         m[0] = 274;
         post_3BA8((char*)lobbyMan, m);
     }
@@ -9223,7 +9223,7 @@ extern "C" void func_00263CF0(int* self)
             {
                 LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
                 int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-                *(void***)((char*)m + 0x4) = D_004812B0;
+                *(void***)((char*)m + 0x4) = online_Event_vtbl;
                 m[0] = 275;
                 post_3BA8((char*)lobbyMan, m);
             }
@@ -9412,7 +9412,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002642B8);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" void func_00264A58(void* self);
 extern "C" void func_00264B20(void* p);
 extern "C" void func_00264BE8(void* self, void* msg, int size);
@@ -9545,7 +9545,7 @@ extern "C" void func_002642B8(void* vself)
             self->state = 7;
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-            *(void***)((char*)m + 4) = D_004812B0;
+            *(void***)((char*)m + 4) = online_Event_vtbl;
             m[0] = 246;
             post_42B8((char*)lobbyMan, m);
         }
@@ -10097,7 +10097,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265018);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" void func_00264CF0(void* self, int charID);
 extern "C" void func_00264E50(void* self, int type, int rider, int state);
 
@@ -10151,7 +10151,7 @@ extern "C" void func_00265018(void* self, int rider)
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = type;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         void* mp = m;
         sMsgList5018_insert((*(sMsgListNode5018**)((char*)lobbyMan + 0xF0)), mp);
     } else {
@@ -10193,7 +10193,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265190);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 struct sName7_00264D80;
 extern "C" void func_00264D80(void* self, int charID, sName7_00264D80* name);
 extern "C" void func_00264E50(void* self, int type, int rider, int state);
@@ -10228,7 +10228,7 @@ static inline sMsgListIter5190 sMsgList5190_insert(sMsgListIter5190 pos, void* c
  *
  * The setup manager (D_004A33CC, built by func_002640C0) moves its state word (+0x0) from 1 to 2, stores the opponent's
  * character and name in the back end (func_00264D80), sends a type-1 message with that character and the new state
- * (func_00264E50) and pushes an 8-byte online event of kind 243 (vtable D_004812B0, tag "NetEvent") onto LobbyMan's
+ * (func_00264E50) and pushes an 8-byte online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's
  * mEventList. func_002642B8 calls it for a type-1 message while the host is in a state below 7.
  *
  * @param rider  the opponent's character id from the message
@@ -10250,7 +10250,7 @@ extern "C" void func_00265190(void* self, int rider, sName7_00264D80* name)
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = type;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         void* mp = m;
         sMsgList5190_insert((*(sMsgListNode5190**)((char*)lobbyMan + 0xF0)), mp);
     }
@@ -10262,7 +10262,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265290);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 struct sName7_00264D80;
 extern "C" void func_00264D80(void* self, int charID, sName7_00264D80* name);
 extern "C" void func_00264E50(void* self, int type, int rider, int state);
@@ -10317,7 +10317,7 @@ extern "C" void func_00265290(void* self, int rider)
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = type;
-        *(void***)((char*)m + 0x4) = D_004812B0;
+        *(void***)((char*)m + 0x4) = online_Event_vtbl;
         void* mp = m;
         sMsgList5290_insert((*(sMsgListNode5290**)((char*)lobbyMan + 0xF0)), mp);
     }
@@ -10332,7 +10332,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265398);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNode_00265398 {
     sMsgListNode_00265398* next;
@@ -10376,7 +10376,7 @@ extern "C" void func_00265398(int* self)
         *self = 2;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     sMsg_00265398* m = (sMsg_00265398*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    m->vt = D_004812B0;
+    m->vt = online_Event_vtbl;
     m->kind = 247;
     void* mp = m;
     sMsgList_00265398_insert((*(sMsgListNode_00265398**)((char*)lobbyMan + 0xF0)), mp);
@@ -13277,7 +13277,7 @@ extern "C" void func_00267468(int initialize, int priority)
 extern "C" void* cCommChannel_channelClose(void* self);
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00267D88);
+INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_isChannelOpen);
 #ifdef SKIP_ASM
 /**
  * Tells whether a comm channel is open: returns mChannelOpen (+0x0).
@@ -13285,24 +13285,24 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00267D88);
  * @param channel  the cCommChannel
  * @return mChannelOpen
  */
-extern "C" int func_00267D88(int *channel) {
+extern "C" int cCommChannel_isChannelOpen(int *channel) {
     return *channel;
 }
 #endif
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00267D90);
+INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_setError);
 #ifdef SKIP_ASM
 /**
  * Flags an error on a comm channel: sets mError (+0x4) to 1.
  *
  * @param channel  the cCommChannel
  */
-extern "C" void func_00267D90(void *channel) {
+extern "C" void cCommChannel_setError(void *channel) {
     (*(int *)((char*)(channel) + (4))) = 1;
 }
 #endif
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00267DA0);
+INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_getError);
 #ifdef SKIP_ASM
 /**
  * Tells whether a comm channel has an error: returns mError (+0x4).
@@ -13310,7 +13310,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00267DA0);
  * @param channel  the cCommChannel
  * @return mError
  */
-extern "C" int func_00267DA0(void *channel) {
+extern "C" int cCommChannel_getError(void *channel) {
     return (*(int *)((char*)(channel) + (4)));
 }
 #endif
@@ -13439,24 +13439,24 @@ int cDSockChannel_getChannelType(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00267E18);
+INCLUDE_ASM("dirtysock/tagsunk", online_Event__Event);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a plain online event: restores the event vtable D_004812B0 at +0x4 and frees the object when bit 0 of @p
+ * Destroys a plain online event: restores the event vtable online_Event_vtbl at +0x4 and frees the object when bit 0 of @p
  * flags is set.
  *
- * Slot 1 of D_004812B0, the vtable of the 8-byte kind-only events (kind at +0x0, tag "NetEvent") posted on LobbyMan's
+ * Slot 1 of online_Event_vtbl, the vtable of the 8-byte kind-only events (kind at +0x0, tag "NetEvent") posted on LobbyMan's
  * mEventList.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_00267E18(void* self, int flags)
+extern "C" void online_Event__Event(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13464,48 +13464,48 @@ extern "C" void func_00267E18(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00267E48);
+INCLUDE_ASM("dirtysock/tagsunk", online_Event_clone);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 /**
- * Copies a plain online event: allocates 8 bytes tagged "NetEvent" with the same kind (+0x0) and vtable D_004812B0.
+ * Copies a plain online event: allocates 8 bytes tagged "NetEvent" with the same kind (+0x0) and vtable online_Event_vtbl.
  *
- * Slot 2 of D_004812B0.
+ * Slot 2 of online_Event_vtbl.
  *
  * @return the new event
  */
-extern "C" void* func_00267E48(int* self)
+extern "C" void* online_Event_clone(int* self)
 {
     int* p = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     int v = *self;
-    *(void***)((char*)p + 0x4) = D_004812B0;
+    *(void***)((char*)p + 0x4) = online_Event_vtbl;
     p[0] = v;
     return p;
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00267E98);
+INCLUDE_ASM("dirtysock/tagsunk", online_ErrorEvent__ErrorEvent);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys an error event (vtable D_00481290): restores the base event vtable D_004812B0 at +0x4 and frees the object
+ * Destroys an error event (vtable online_ErrorEvent_vtbl): restores the base event vtable online_Event_vtbl at +0x4 and frees the object
  * when bit 0 of @p flags is set.
  *
- * Slot 1 of D_00481290, the vtable of the 0xC-byte kind-258 events that carry an error code at +0x8 (LobbyMan posts
+ * Slot 1 of online_ErrorEvent_vtbl, the vtable of the 0xC-byte kind-258 events that carry an error code at +0x8 (LobbyMan posts
  * them with codes such as 'time').
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_00267E98(void* self, int flags)
+extern "C" void online_ErrorEvent__ErrorEvent(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13513,50 +13513,50 @@ extern "C" void func_00267E98(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00267EC8);
+INCLUDE_ASM("dirtysock/tagsunk", online_ErrorEvent_clone);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
-extern void* D_00481290[];
+extern void* online_ErrorEvent_vtbl[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 /**
- * Copies an error event: allocates 0xC bytes tagged "NetEvent" with kind 258, vtable D_00481290 and the error code
+ * Copies an error event: allocates 0xC bytes tagged "NetEvent" with kind 258, vtable online_ErrorEvent_vtbl and the error code
  * (+0x8) of @p self.
  *
- * Slot 2 of D_00481290.
+ * Slot 2 of online_ErrorEvent_vtbl.
  *
  * @return the new event
  */
-extern "C" void* func_00267EC8(void* self)
+extern "C" void* online_ErrorEvent_clone(void* self)
 {
     int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     int v = *(int*)((char*)self + 0x8);
     p[0] = 258;
-    *(void***)((char*)p + 0x4) = D_00481290;
+    *(void***)((char*)p + 0x4) = online_ErrorEvent_vtbl;
     p[2] = v;
     return p;
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00267F28);
+INCLUDE_ASM("dirtysock/tagsunk", online_BuddyErrorEvent__BuddyErrorEvent);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a buddy error event (vtable D_00481270): restores the base event vtable D_004812B0 at +0x4 and frees the
+ * Destroys a buddy error event (vtable online_BuddyErrorEvent_vtbl): restores the base event vtable online_Event_vtbl at +0x4 and frees the
  * object when bit 0 of @p flags is set.
  *
- * Slot 1 of D_00481270, the vtable of the kind-259 events LobbyMan's update (func_0025AC50) posts with BuddyMan's
+ * Slot 1 of online_BuddyErrorEvent_vtbl, the vtable of the kind-259 events LobbyMan's update (func_0025AC50) posts with BuddyMan's
  * miError at +0x8 when the buddy login fails.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_00267F28(void* self, int flags)
+extern "C" void online_BuddyErrorEvent__BuddyErrorEvent(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13564,51 +13564,51 @@ extern "C" void func_00267F28(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00267F58);
+INCLUDE_ASM("dirtysock/tagsunk", online_BuddyErrorEvent_clone);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
-extern void* D_00481290[];
+extern void* online_ErrorEvent_vtbl[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 /**
  * Copies a buddy error event, but as a plain error event: allocates 0xC bytes tagged "NetEvent" with kind 258, vtable
- * D_00481290 and the error code (+0x8) of @p self.
+ * online_ErrorEvent_vtbl and the error code (+0x8) of @p self.
  *
- * Slot 2 of D_00481270. Quirk: the copy gets the error event's kind (258) and vtable D_00481290, not this event's kind
- * 259 and vtable D_00481270; the body is identical to func_00267EC8 (the July 2003 preview's copy does the same).
+ * Slot 2 of online_BuddyErrorEvent_vtbl. Quirk: the copy gets the error event's kind (258) and vtable online_ErrorEvent_vtbl, not this event's kind
+ * 259 and vtable online_BuddyErrorEvent_vtbl; the body is identical to online_ErrorEvent_clone (the July 2003 preview's copy does the same).
  *
  * @return the new event
  */
-extern "C" void* func_00267F58(void* self)
+extern "C" void* online_BuddyErrorEvent_clone(void* self)
 {
     int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     int v = *(int*)((char*)self + 0x8);
     p[0] = 258;
-    *(void***)((char*)p + 0x4) = D_00481290;
+    *(void***)((char*)p + 0x4) = online_ErrorEvent_vtbl;
     p[2] = v;
     return p;
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00267FB8);
+INCLUDE_ASM("dirtysock/tagsunk", online_NetErrorEvent__NetErrorEvent);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a network error event (vtable D_00481250): restores the base event vtable D_004812B0 at +0x4 and frees the
+ * Destroys a network error event (vtable online_NetErrorEvent_vtbl): restores the base event vtable online_Event_vtbl at +0x4 and frees the
  * object when bit 0 of @p flags is set.
  *
- * Slot 1 of D_00481250, the vtable of the kind-278 events (error value at +0x8) that tagsunk allocates with the tag
+ * Slot 1 of online_NetErrorEvent_vtbl, the vtable of the kind-278 events (error value at +0x8) that tagsunk allocates with the tag
  * "NetErrorEvent".
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_00267FB8(void* self, int flags)
+extern "C" void online_NetErrorEvent__NetErrorEvent(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13616,26 +13616,26 @@ extern "C" void func_00267FB8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00267FE8);
+INCLUDE_ASM("dirtysock/tagsunk", online_NetErrorEvent_clone);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
-extern void* D_00481250[];
+extern void* online_NetErrorEvent_vtbl[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 /**
- * Copies a network error event: allocates 0xC bytes tagged "NetEvent" with kind 278, vtable D_00481250 and the value
+ * Copies a network error event: allocates 0xC bytes tagged "NetEvent" with kind 278, vtable online_NetErrorEvent_vtbl and the value
  * (+0x8) of @p self.
  *
- * Slot 2 of D_00481250.
+ * Slot 2 of online_NetErrorEvent_vtbl.
  *
  * @return the new event
  */
-extern "C" void* func_00267FE8(void* self)
+extern "C" void* online_NetErrorEvent_clone(void* self)
 {
     int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     int v = *(int*)((char*)self + 0x8);
     p[0] = 278;
-    *(void***)((char*)p + 0x4) = D_00481250;
+    *(void***)((char*)p + 0x4) = online_NetErrorEvent_vtbl;
     p[2] = v;
     return p;
 }
@@ -13644,13 +13644,13 @@ extern "C" void* func_00267FE8(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268048);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
 /**
  * Destroys a chat event (vtable D_00481230): destroys its two cBXStrings (+0xC, then +0x8), restores the base event
- * vtable D_004812B0 at +0x4 and frees the object when bit 0 of @p flags is set.
+ * vtable online_Event_vtbl at +0x4 and frees the object when bit 0 of @p flags is set.
  *
  * Slot 1 of D_00481230; func_0025AB40 builds these 0x10-byte kind-222 events (tag "ChatEvent").
  *
@@ -13660,7 +13660,7 @@ extern "C" void func_00268048(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0xC, 2);
     cBXString__cBXString((char*)self + 0x8, 2);
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13711,24 +13711,24 @@ extern "C" void* func_002680A8(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00268158);
+INCLUDE_ASM("dirtysock/tagsunk", online_NewsEvent__NewsEvent);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
 /**
- * Destroys a news event (vtable D_00481210): destroys its cBXString (+0x8), restores the base event vtable D_004812B0
+ * Destroys a news event (vtable online_NewsEvent_vtbl): destroys its cBXString (+0x8), restores the base event vtable online_Event_vtbl
  * at +0x4 and frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of D_00481210.
+ * Slot 1 of online_NewsEvent_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_00268158(void* self, int flags)
+extern "C" void online_NewsEvent__NewsEvent(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0x8, 2);
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13736,26 +13736,26 @@ extern "C" void func_00268158(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_002681B0);
+INCLUDE_ASM("dirtysock/tagsunk", online_NewsEvent_clone);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
-extern void* D_00481210[];
+extern void* online_NewsEvent_vtbl[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 
 /**
- * Copies a news event: allocates 0xC bytes tagged "NetEvent" with kind 226, vtable D_00481210 and a cBXString built
+ * Copies a news event: allocates 0xC bytes tagged "NetEvent" with kind 226, vtable online_NewsEvent_vtbl and a cBXString built
  * from @p self's string (+0x8).
  *
- * Slot 2 of D_00481210.
+ * Slot 2 of online_NewsEvent_vtbl.
  *
  * @return the new event
  */
-extern "C" void* func_002681B0(void* self)
+extern "C" void* online_NewsEvent_clone(void* self)
 {
     int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     const char* s = *(const char**)((char*)self + 0x8);
-    *(void***)((char*)p + 0x4) = D_00481210;
+    *(void***)((char*)p + 0x4) = online_NewsEvent_vtbl;
     p[0] = 226;
     cBXString_cBXString2((char*)p + 0x8, s);
     return p;
@@ -13763,24 +13763,24 @@ extern "C" void* func_002681B0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00268210);
+INCLUDE_ASM("dirtysock/tagsunk", online_AcctTooYoungEvent__AcctTooYoungEvent);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys an account-too-young event (vtable D_004811F0): restores the base event vtable D_004812B0 at +0x4 and frees
+ * Destroys an account-too-young event (vtable online_AcctTooYoungEvent_vtbl): restores the base event vtable online_Event_vtbl at +0x4 and frees
  * the object when bit 0 of @p flags is set.
  *
- * Slot 1 of D_004811F0, the vtable of the kind-258 events that func_0025BD30 posts for the 'tooy' account error, with
+ * Slot 1 of online_AcctTooYoungEvent_vtbl, the vtable of the kind-258 events that LobbyMan_onaccountcreated posts for the 'tooy' account error, with
  * the reply's "AGE" number at +0xC.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_00268210(void* self, int flags)
+extern "C" void online_AcctTooYoungEvent__AcctTooYoungEvent(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13788,27 +13788,27 @@ extern "C" void func_00268210(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", func_00268240);
+INCLUDE_ASM("dirtysock/tagsunk", online_AcctTooYoungEvent_clone);
 #ifdef SKIP_ASM
 extern char str_NetEvent[];
-extern void* D_004811F0[];
+extern void* online_AcctTooYoungEvent_vtbl[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 /**
  * Copies an account-too-young event: allocates 0x10 bytes tagged "NetEvent" with kind 258, error code 'tooy' (+0x8),
- * vtable D_004811F0 and @p self's age (+0xC).
+ * vtable online_AcctTooYoungEvent_vtbl and @p self's age (+0xC).
  *
- * Slot 2 of D_004811F0. The error code is written as the constant, not copied.
+ * Slot 2 of online_AcctTooYoungEvent_vtbl. The error code is written as the constant, not copied.
  *
  * @return the new event
  */
-extern "C" void* func_00268240(void* self)
+extern "C" void* online_AcctTooYoungEvent_clone(void* self)
 {
     int* p = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
     int b = *(int*)((char*)self + 0xC);
     p[0] = 258;
     p[2] = 0x746F6F79;
-    *(void***)((char*)p + 0x4) = D_004811F0;
+    *(void***)((char*)p + 0x4) = online_AcctTooYoungEvent_vtbl;
     p[3] = b;
     return p;
 }
@@ -13817,7 +13817,7 @@ extern "C" void* func_00268240(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002682A8);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
@@ -13825,7 +13825,7 @@ extern "C" void func_002682A8(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0x10, 2);
     cBXString__cBXString((char*)self + 0xC, 2);
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13870,14 +13870,14 @@ extern "C" void* func_00268308(char* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268398);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
 extern "C" void func_00268398(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0xC, 2);
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13904,7 +13904,7 @@ extern "C" void* func_002683F0(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268460);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
@@ -13912,7 +13912,7 @@ extern "C" void func_00268460(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0xC, 2);
     cBXString__cBXString((char*)self + 0x8, 2);
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13965,14 +13965,14 @@ extern "C" void* func_002684C0(sMsg2684C0* src)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268588);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 
 extern "C" void func_00268588(void* self, int flags)
 {
     cBXString__cBXString((char*)self + 0x8, 2);
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -14000,13 +14000,13 @@ extern "C" void* func_002685E0(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268658);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void func_00268658(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -14036,13 +14036,13 @@ extern "C" void* func_00268688(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002686F0);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void func_002686F0(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -14072,13 +14072,13 @@ extern "C" void* func_00268720(void* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00268790);
 #ifdef SKIP_ASM
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 void operator_delete(int*);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void func_00268790(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_004812B0;
+    *(void***)((char*)self + 0x4) = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

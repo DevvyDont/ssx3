@@ -9,12 +9,12 @@
 // online::Event on mEventList. No C++ base class and no virtual functions (no vptr store in the constructor).
 //
 // Size 0x300: [R] func_0025B650 creates the singleton with cMemMan_alloc(0x300, "LobbyMan", 0x20000000) +
-// the constructor func_002594D0 (which stores every field up to the second tLobbyAccount, 0x2B0 + 0x50 = 0x300);
-// func_0025B688 destroys it (destructor func_00259628). Instance: D_004A3028 (EA: LobbyMan::mLobbyMan, preview
+// the constructor LobbyMan_LobbyMan (which stores every field up to the second tLobbyAccount, 0x2B0 + 0x50 = 0x300);
+// func_0025B688 destroys it (destructor LobbyMan__LobbyMan). Instance: D_004A3028 (EA: LobbyMan::mLobbyMan, preview
 // assert "!mLobbyMan" in the create function).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] retail's constructor func_002594D0 / destructor func_00259628 / func_00260F10 (account-form reset);
+//   [R] retail's constructor LobbyMan_LobbyMan / destructor LobbyMan__LobbyMan / func_00260F10 (account-form reset);
 //   [P] the July 2003 preview's asserts in lobbyman.cpp, read at the preview offset: "state == ..." (preview 0x4),
 //       "authenticated" (lw 0x8), "loggedin" (lw 0xC), "!disconnected" (lw 0x10), "idx >= 0 && idx < numpersonas"
 //       / "numpersonas < max_personas" (lw 0x40), "idx < getnumrooms()" (lw 0x30). From 0x14 on retail inserted

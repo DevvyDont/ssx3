@@ -4751,3 +4751,11 @@ ps2_addr	name	previous	source	evidence
 00487D28	cPS2VisualEffectsMan_vtbl	cPSPVisualEffectsMan_vtbl	retail	the class is cPS2VisualEffectsMan (alloc tag "PS2VisualEffectsMan"); renamed with its methods
 0046B6F8	cFEBlankPopup_vtbl	D_0046B6F8	retail	[C] stored by cFEBlankPopup_cFEBlankPopup (func_001ABF70), [D] restored by its destructor (slot 1 = func_001DE918); slot 4 builds the "Blank" screen; preview _vt$13cFEBlankPopup
 00468050	cFEStateRelogin_vtbl	D_00468050	retail	[C] stored by the constructor fereal calls on memory tagged "cFEStateRelogin" (func_001D5038), [D] restored by its destructor (slot 1 = func_001E0F30); derives from cFEStateLogin; preview _vt$15cFEStateRelogin
+004810B0	cGameConnMan_vtbl	D_004810B0	preview	builds/x/v2 pairs it with the July preview's _vt$12cGameConnMan; stored by cGameConnMan_cGameConnMan
+004810C8	cConnMan_vtbl	D_004810C8	preview	builds/x/v2 pairs it with the preview's _vt$8cConnMan; stored by cConnMan_cConnMan
+004811F0	online_AcctTooYoungEvent_vtbl	D_004811F0	preview	builds/x/v2 pairs it with the preview's _vt$Q26online17AcctTooYoungEvent; slot 2 is its clone (the 'tooy' constant)
+00481210	online_NewsEvent_vtbl	D_00481210	preview	builds/x/v2 pairs it with the preview's _vt$Q26online9NewsEvent; slot 2 = the exact body match of clone__CQ26online9NewsEvent
+00481250	online_NetErrorEvent_vtbl	D_00481250	preview	events with this vtable are allocated with the tag "NetErrorEvent" (str_NetErrorEvent, kind 278); between BuddyErrorEvent's and NewsEvent's vtables as in the preview
+00481270	online_BuddyErrorEvent_vtbl	D_00481270	preview	its events are built only from BuddyMan's miError (kind 259); slot 2 builds an ErrorEvent-vtable copy, as the preview's clone__CQ26online15BuddyErrorEvent does
+00481290	online_ErrorEvent_vtbl	D_00481290	preview	builds/x/v2 pairs it with the preview's _vt$Q26online10ErrorEvent; the type-258 error events the lobby handlers post
+004812B0	online_Event_vtbl	D_004812B0	preview	builds/x/v2 pairs it with the preview's _vt$Q26online5Event; slot 2 = the exact body match of clone__CQ26online5Event

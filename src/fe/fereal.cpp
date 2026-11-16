@@ -703,16 +703,16 @@ extern "C" unsigned char func_001A1CD0(void* self, int index)
 INCLUDE_ASM("fe/fereal", func_001A1CE8);
 #ifdef SKIP_ASM
 extern "C" void* cFE_cFE(void* self);
-void func_00263660(void* p);
-void func_00263998(void* p);
+void cConnMan_cConnMan(void* p);
+void cGameConnMan_cGameConnMan(void* p);
 extern void* cRealFE_vtbl[];
 
 extern "C" void* func_001A1CE8(void* self)
 {
     cFE_cFE(self);
     *(void***)self = cRealFE_vtbl;
-    func_00263660((char*)self + 0xB5AB0);
-    func_00263998((char*)self + 0xB5ABC);
+    cConnMan_cConnMan((char*)self + 0xB5AB0);
+    cGameConnMan_cGameConnMan((char*)self + 0xB5ABC);
     *(int*)((char*)self + 0xB5AD4) = 0;
     *(int*)((char*)self + 0xB5AD8) = 0;
     *(int*)((char*)self + 0xB5ADC) = 0;
@@ -724,14 +724,14 @@ extern "C" void* func_001A1CE8(void* self)
 INCLUDE_ASM("fe/fereal", cRealFE__cRealFE);
 #ifdef SKIP_ASM
 extern void* cRealFE_vtbl[];
-extern "C" void func_002639B0(void* self, int flags);
-extern "C" void func_00263678(void* self, int flags);
+extern "C" void cGameConnMan__cGameConnMan(void* self, int flags);
+extern "C" void cConnMan__cConnMan(void* self, int flags);
 extern "C" void func_001957D0(void* self, int flags);
 
 /**
  * Destroys the front-end module.
  *
- * Restores cRealFE_vtbl, destroys the members at +0xB5ABC and +0xB5AB0 (func_002639B0 and func_00263678, each with
+ * Restores cRealFE_vtbl, destroys the members at +0xB5ABC and +0xB5AB0 (cGameConnMan__cGameConnMan and cConnMan__cConnMan, each with
  * flags 2: destroy without freeing), then runs the base-class destructor func_001957D0 with @p flags, which frees
  * the object when bit 0 is set.
  *
@@ -740,8 +740,8 @@ extern "C" void func_001957D0(void* self, int flags);
 extern "C" void cRealFE__cRealFE(void* self, int flags)
 {
     *(void***)self = cRealFE_vtbl;
-    func_002639B0((char*)self + 0xB5ABC, 2);
-    func_00263678((char*)self + 0xB5AB0, 2);
+    cGameConnMan__cGameConnMan((char*)self + 0xB5ABC, 2);
+    cConnMan__cConnMan((char*)self + 0xB5AB0, 2);
     func_001957D0(self, flags);
 }
 #endif

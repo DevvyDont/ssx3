@@ -133,7 +133,7 @@ extern "C" void func_002689B8(sOwner89B8* self, int flags)
 // absolute lui/lo addressing like the target
 struct sShortPad16 { short v; int pad[3]; };
 extern sShortPad16 D_004A2FB0;
-extern "C" void func_0025D6C0(int);
+extern "C" void LobbyMan_onroomlistupdate(int);
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268A80);
@@ -155,19 +155,19 @@ INCLUDE_ASM("bx/bxstringctor", func_00268A90);
 #ifdef SKIP_ASM
 extern "C" void func_00268A90(void* self, void* a1, int a2)
 {
-    func_0025D6C0(a2 + D_004A2FB0.v);
+    LobbyMan_onroomlistupdate(a2 + D_004A2FB0.v);
 }
 #endif
 
 extern sShortPad16 D_004A2FB8;
-extern "C" void func_002599B0(int);
+extern "C" void LobbyMan_onuserlistupdate(int);
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268AB8);
 #ifdef SKIP_ASM
 extern "C" void func_00268AB8(void* self, void* a1, int a2)
 {
-    func_002599B0(a2 + D_004A2FB8.v);
+    LobbyMan_onuserlistupdate(a2 + D_004A2FB8.v);
 }
 #endif
 
@@ -175,11 +175,11 @@ extern "C" void func_00268AB8(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268AE0);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A2FC0;
-extern "C" void func_00259A60(int);
+extern "C" void LobbyMan_onranklistupdate(int);
 
 extern "C" void func_00268AE0(void* self, void* a1, int a2)
 {
-    func_00259A60(a2 + D_004A2FC0.v);
+    LobbyMan_onranklistupdate(a2 + D_004A2FC0.v);
 }
 #endif
 
@@ -187,11 +187,11 @@ extern "C" void func_00268AE0(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268B08);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A2FF0;
-void* func_002598A8(void* self);
+void* LobbyMan_onincomingmsg(void* self);
 
 extern "C" void func_00268B08(void* self, void* a1, char* a2)
 {
-    func_002598A8(a2 + D_004A2FF0.v);
+    LobbyMan_onincomingmsg(a2 + D_004A2FF0.v);
 }
 #endif
 
@@ -199,11 +199,11 @@ extern "C" void func_00268B08(void* self, void* a1, char* a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268B30);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A2FF8;
-extern "C" void func_00259B10(int);
+extern "C" void LobbyMan_onchatmsg(int);
 
 extern "C" void func_00268B30(void* self, void* a1, int a2)
 {
-    func_00259B10(a2 + D_004A2FF8.v);
+    LobbyMan_onchatmsg(a2 + D_004A2FF8.v);
 }
 #endif
 
@@ -211,11 +211,11 @@ extern "C" void func_00268B30(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268B58);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3000;
-extern "C" void func_002598C8(int);
+extern "C" void LobbyMan_onconnectionmsg(int);
 
 extern "C" void func_00268B58(void* self, void* a1, int a2)
 {
-    func_002598C8(a2 + D_004A3000.v);
+    LobbyMan_onconnectionmsg(a2 + D_004A3000.v);
 }
 #endif
 
@@ -223,11 +223,11 @@ extern "C" void func_00268B58(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268B80);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3008;
-extern "C" void func_0025A1D0(int);
+extern "C" void LobbyMan_onplaymsg(int);
 
 extern "C" void func_00268B80(void* self, void* a1, int a2)
 {
-    func_0025A1D0(a2 + D_004A3008.v);
+    LobbyMan_onplaymsg(a2 + D_004A3008.v);
 }
 #endif
 
@@ -235,11 +235,11 @@ extern "C" void func_00268B80(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268BA8);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3020;
-extern "C" void func_0025B848(int);
+extern "C" void LobbyMan_onlobbyconnect(int);
 
 extern "C" void func_00268BA8(void* self, void* a1, int a2)
 {
-    func_0025B848(a2 + D_004A3020.v);
+    LobbyMan_onlobbyconnect(a2 + D_004A3020.v);
 }
 #endif
 
@@ -247,11 +247,11 @@ extern "C" void func_00268BA8(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268BD0);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3088;
-extern "C" void func_0025BD30(int);
+extern "C" void LobbyMan_onaccountcreated(int);
 
 extern "C" void func_00268BD0(void* self, void* a1, int a2)
 {
-    func_0025BD30(a2 + D_004A3088.v);
+    LobbyMan_onaccountcreated(a2 + D_004A3088.v);
 }
 #endif
 
@@ -259,11 +259,11 @@ extern "C" void func_00268BD0(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268BF8);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A30A8;
-extern "C" void func_0025C0C0(int);
+extern "C" void LobbyMan_onaccountedited(int);
 
 extern "C" void func_00268BF8(void* self, void* a1, int a2)
 {
-    func_0025C0C0(a2 + D_004A30A8.v);
+    LobbyMan_onaccountedited(a2 + D_004A30A8.v);
 }
 #endif
 
@@ -271,11 +271,11 @@ extern "C" void func_00268BF8(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268C20);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A30B0;
-extern "C" void func_0025C2D8(int);
+extern "C" void LobbyMan_onlostaccountrequestsent(int);
 
 extern "C" void func_00268C20(void* self, void* a1, int a2)
 {
-    func_0025C2D8(a2 + D_004A30B0.v);
+    LobbyMan_onlostaccountrequestsent(a2 + D_004A30B0.v);
 }
 #endif
 
@@ -283,11 +283,11 @@ extern "C" void func_00268C20(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268C48);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A30B8;
-extern "C" void func_0025C4F0(int);
+extern "C" void LobbyMan_onlostpasswordrequestsent(int);
 
 extern "C" void func_00268C48(void* self, void* a1, int a2)
 {
-    func_0025C4F0(a2 + D_004A30B8.v);
+    LobbyMan_onlostpasswordrequestsent(a2 + D_004A30B8.v);
 }
 #endif
 
@@ -295,11 +295,11 @@ extern "C" void func_00268C48(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268C70);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A30E8;
-extern "C" void func_0025C8A8(int);
+extern "C" void LobbyMan_onauthentication(int);
 
 extern "C" void func_00268C70(void* self, void* a1, int a2)
 {
-    func_0025C8A8(a2 + D_004A30E8.v);
+    LobbyMan_onauthentication(a2 + D_004A30E8.v);
 }
 #endif
 
@@ -307,11 +307,11 @@ extern "C" void func_00268C70(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268C98);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3118;
-extern "C" void func_0025CEB0(int);
+extern "C" void LobbyMan_onpersonaselected(int);
 
 extern "C" void func_00268C98(void* self, void* a1, int a2)
 {
-    func_0025CEB0(a2 + D_004A3118.v);
+    LobbyMan_onpersonaselected(a2 + D_004A3118.v);
 }
 #endif
 
@@ -331,11 +331,11 @@ extern "C" void func_00268CC0(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268CE8);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3138;
-extern "C" void func_0025D2D8(int);
+extern "C" void LobbyMan_onpersonacreated(int);
 
 extern "C" void func_00268CE8(void* self, void* a1, int a2)
 {
-    func_0025D2D8(a2 + D_004A3138.v);
+    LobbyMan_onpersonacreated(a2 + D_004A3138.v);
 }
 #endif
 
@@ -343,11 +343,11 @@ extern "C" void func_00268CE8(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268D10);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3140;
-extern "C" void func_0025D538(int);
+extern "C" void LobbyMan_onpersonadeleted(int);
 
 extern "C" void func_00268D10(void* self, void* a1, int a2)
 {
-    func_0025D538(a2 + D_004A3140.v);
+    LobbyMan_onpersonadeleted(a2 + D_004A3140.v);
 }
 #endif
 
@@ -355,11 +355,11 @@ extern "C" void func_00268D10(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268D38);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3148;
-extern "C" void func_0025D8F8(int);
+extern "C" void LobbyMan_onroomselected(int);
 
 extern "C" void func_00268D38(void* self, void* a1, int a2)
 {
-    func_0025D8F8(a2 + D_004A3148.v);
+    LobbyMan_onroomselected(a2 + D_004A3148.v);
 }
 #endif
 
@@ -367,11 +367,11 @@ extern "C" void func_00268D38(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268D60);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3158;
-extern "C" void func_0025DB80(int);
+extern "C" void LobbyMan_onRoomCreated(int);
 
 extern "C" void func_00268D60(void* self, void* a1, int a2)
 {
-    func_0025DB80(a2 + D_004A3158.v);
+    LobbyMan_onRoomCreated(a2 + D_004A3158.v);
 }
 #endif
 
@@ -379,11 +379,11 @@ extern "C" void func_00268D60(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268D88);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3160;
-extern "C" void func_0025DDE0(int);
+extern "C" void LobbyMan_onPingReceived(int);
 
 extern "C" void func_00268D88(void* self, void* a1, int a2)
 {
-    func_0025DDE0(a2 + D_004A3160.v);
+    LobbyMan_onPingReceived(a2 + D_004A3160.v);
 }
 #endif
 
@@ -391,11 +391,11 @@ extern "C" void func_00268D88(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268DB0);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3170;
-extern "C" void func_0025DF98(int);
+extern "C" void LobbyMan_onAbuseReportReceived(int);
 
 extern "C" void func_00268DB0(void* self, void* a1, int a2)
 {
-    func_0025DF98(a2 + D_004A3170.v);
+    LobbyMan_onAbuseReportReceived(a2 + D_004A3170.v);
 }
 #endif
 
@@ -403,11 +403,11 @@ extern "C" void func_00268DB0(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268DD8);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3178;
-extern "C" void func_0025E138(int);
+extern "C" void LobbyMan_onNewsRetrieved(int);
 
 extern "C" void func_00268DD8(void* self, void* a1, int a2)
 {
-    func_0025E138(a2 + D_004A3178.v);
+    LobbyMan_onNewsRetrieved(a2 + D_004A3178.v);
 }
 #endif
 
@@ -415,11 +415,11 @@ extern "C" void func_00268DD8(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268E00);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A31B0;
-extern "C" void func_0025E590(int);
+extern "C" void LobbyMan_onRanklistRetrieved(int);
 
 extern "C" void func_00268E00(void* self, void* a1, int a2)
 {
-    func_0025E590(a2 + D_004A31B0.v);
+    LobbyMan_onRanklistRetrieved(a2 + D_004A31B0.v);
 }
 #endif
 
@@ -427,11 +427,11 @@ extern "C" void func_00268E00(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268E28);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A31B8;
-extern "C" void func_0025E7F0(int);
+extern "C" void LobbyMan_onPlayerFound(int);
 
 extern "C" void func_00268E28(void* self, void* a1, int a2)
 {
-    func_0025E7F0(a2 + D_004A31B8.v);
+    LobbyMan_onPlayerFound(a2 + D_004A31B8.v);
 }
 #endif
 
@@ -451,11 +451,11 @@ extern "C" void func_00268E50(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268E78);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3210;
-extern "C" void func_0025F030(int);
+extern "C" void LobbyMan_onQuickMatchResponse(int);
 
 extern "C" void func_00268E78(void* self, void* a1, int a2)
 {
-    func_0025F030(a2 + D_004A3210.v);
+    LobbyMan_onQuickMatchResponse(a2 + D_004A3210.v);
 }
 #endif
 
@@ -463,11 +463,11 @@ extern "C" void func_00268E78(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268EA0);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3248;
-extern "C" void func_0025F8A0(int);
+extern "C" void LobbyMan_onchallengeresponse(int);
 
 extern "C" void func_00268EA0(void* self, void* a1, int a2)
 {
-    func_0025F8A0(a2 + D_004A3248.v);
+    LobbyMan_onchallengeresponse(a2 + D_004A3248.v);
 }
 #endif
 
@@ -487,11 +487,11 @@ extern "C" void func_00268EC8(void* self, void* a1, char* a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268EF0);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3318;
-extern "C" void func_00260C68(int);
+extern "C" void LobbyMan_onresultsreportresponse(int);
 
 extern "C" void func_00268EF0(void* self, void* a1, int a2)
 {
-    func_00260C68(a2 + D_004A3318.v);
+    LobbyMan_onresultsreportresponse(a2 + D_004A3318.v);
 }
 #endif
 
@@ -499,11 +499,11 @@ extern "C" void func_00268EF0(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268F18);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3340;
-extern "C" void func_002615C8(int);
+extern "C" void BuddyMan_onconnect(int);
 
 extern "C" void func_00268F18(void* self, void* a1, int a2)
 {
-    func_002615C8(a2 + D_004A3340.v);
+    BuddyMan_onconnect(a2 + D_004A3340.v);
 }
 #endif
 
@@ -511,11 +511,11 @@ extern "C" void func_00268F18(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268F40);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3348;
-extern "C" void func_00261A28(int);
+extern "C" void BuddyMan_onReceiveMessage(int);
 
 extern "C" void func_00268F40(void* self, void* a1, int a2)
 {
-    func_00261A28(a2 + D_004A3348.v);
+    BuddyMan_onReceiveMessage(a2 + D_004A3348.v);
 }
 #endif
 
@@ -523,11 +523,11 @@ extern "C" void func_00268F40(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268F68);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3350;
-extern "C" void func_00261770(int);
+extern "C" void BuddyMan_onrosterupdate(int);
 
 extern "C" void func_00268F68(void* self, void* a1, int a2)
 {
-    func_00261770(a2 + D_004A3350.v);
+    BuddyMan_onrosterupdate(a2 + D_004A3350.v);
 }
 #endif
 
@@ -535,11 +535,11 @@ extern "C" void func_00268F68(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268F90);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3380;
-extern "C" void func_00261970(int);
+extern "C" void BuddyMan_onBuddyDelete(int);
 
 extern "C" void func_00268F90(void* self, void* a1, int a2)
 {
-    func_00261970(a2 + D_004A3380.v);
+    BuddyMan_onBuddyDelete(a2 + D_004A3380.v);
 }
 #endif
 
@@ -547,11 +547,11 @@ extern "C" void func_00268F90(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268FB8);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A3388;
-extern "C" void func_002618C0(int);
+extern "C" void BuddyMan_onBuddyAdd(int);
 
 extern "C" void func_00268FB8(void* self, void* a1, int a2)
 {
-    func_002618C0(a2 + D_004A3388.v);
+    BuddyMan_onBuddyAdd(a2 + D_004A3388.v);
 }
 #endif
 
@@ -559,11 +559,11 @@ extern "C" void func_00268FB8(void* self, void* a1, int a2)
 INCLUDE_ASM("bx/bxstringctor", func_00268FE0);
 #ifdef SKIP_ASM
 extern sShortPad16 D_004A33A0;
-void func_00261A20(void* self);
+void BuddyMan_onBuddySend(void* self);
 
 extern "C" void func_00268FE0(void* self, void* a1, char* a2)
 {
-    func_00261A20(a2 + D_004A33A0.v);
+    BuddyMan_onBuddySend(a2 + D_004A33A0.v);
 }
 #endif
 
@@ -577,7 +577,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void func_00264CF0(void* self, int a1);
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNode_00269008 {
     sMsgListNode_00269008* next;
@@ -612,7 +612,7 @@ extern "C" void func_00269008(void* self, int a1, int a2)
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgList_00269008_insert((*(sMsgListNode_00269008**)((char*)lobbyMan + 0xF0)), mp);
 }
@@ -628,7 +628,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void func_00264CF0(void* self, int a1);
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNode_002690C8 {
     sMsgListNode_002690C8* next;
@@ -663,7 +663,7 @@ extern "C" void func_002690C8(void* self, int a1, int a2)
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgList_002690C8_insert((*(sMsgListNode_002690C8**)((char*)lobbyMan + 0xF0)), mp);
 }
@@ -679,7 +679,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNode_00269188 {
     sMsgListNode_00269188* next;
@@ -717,7 +717,7 @@ extern "C" void func_00269188(void* self, int a1)
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgList_00269188_insert((*(sMsgListNode_00269188**)((char*)lobbyMan + 0xF0)), mp);
 }
@@ -733,7 +733,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void func_00264D80(void* self, int a1, void* a2);
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNode_00269240 {
     sMsgListNode_00269240* next;
@@ -768,7 +768,7 @@ extern "C" void func_00269240(void* self, int a1, int a2, void* a3)
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgList_00269240_insert((*(sMsgListNode_00269240**)((char*)lobbyMan + 0xF0)), mp);
 }
@@ -784,7 +784,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void func_00264D80(void* self, int a1, void* a2);
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNode_00269300 {
     sMsgListNode_00269300* next;
@@ -819,7 +819,7 @@ extern "C" void func_00269300(void* self, int a1, int a2)
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgList_00269300_insert((*(sMsgListNode_00269300**)((char*)lobbyMan + 0xF0)), mp);
 }
@@ -835,7 +835,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 
 extern const char str_NetEvent[];
 extern const char str_StlBlock_b[];
-extern void* D_004812B0[];
+extern void* online_Event_vtbl[];
 
 struct sMsgListNode_002693C0 {
     sMsgListNode_002693C0* next;
@@ -873,7 +873,7 @@ extern "C" void func_002693C0(void* self, int a1)
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
-    *(void***)((char*)m + 0x4) = D_004812B0;
+    *(void***)((char*)m + 0x4) = online_Event_vtbl;
     void* mp = m;
     sMsgList_002693C0_insert((*(sMsgListNode_002693C0**)((char*)lobbyMan + 0xF0)), mp);
 }
@@ -1553,14 +1553,14 @@ extern "C" void func_00269CF0(void* self, int a1)
 }
 #endif
 
-extern "C" void* func_00267E18(void* self);
+extern "C" void* online_Event__Event(void* self);
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00269DA0__FPv);
 #ifdef SKIP_ASM
 void* func_00269DA0(void* self)
 {
-    return func_00267E18(self);
+    return online_Event__Event(self);
 }
 #endif
 
@@ -1593,7 +1593,7 @@ INCLUDE_ASM("bx/bxstringctor", func_00269E20__FPv);
 #ifdef SKIP_ASM
 void* func_00269E20(void* self)
 {
-    return func_00267E18(self);
+    return online_Event__Event(self);
 }
 #endif
 

@@ -8,7 +8,8 @@
 // Retail methods: constructor func_002557E0 (stores the vtable, clears both flags), destructor cCommChannel__cCommChannel,
 // channelOpen func_00255830, channelClose cCommChannel_channelClose (all in mem/memstd), and the default virtuals in tagsunk
 // (cCommChannel_disconnect = channelClose, update/isConnected/getChannelType/readPacket/writePacket return 0,
-// getLatency returns 1/60). The preview's inline getError/setError/isChannelOpen were inlined in retail.
+// getLatency returns 1/60). Retail keeps out-of-line copies of the preview's inline isChannelOpen/setError/getError
+// (cCommChannel_isChannelOpen/setError/getError, 0x267D88..0x267DA0).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [R] retail's constructor/destructor; [P] the July 2003 preview's inline accessors (same offsets as retail);

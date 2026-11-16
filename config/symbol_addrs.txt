@@ -4930,6 +4930,61 @@ _gcvt = 0x00421B98; //type:func
 _realloc_r = 0x00421F20; //type:func
 _dtoa_r = 0x00422780; //type:func
 
+// fn_online1: names by evidence (docs/function_names.tsv)
+LobbyMan_LobbyMan = 0x002594D0; //type:func
+LobbyMan__LobbyMan = 0x00259628; //type:func
+LobbyMan_onincomingmsg__FPv = 0x002598A8; //type:func
+LobbyMan_onconnectionmsg = 0x002598C8; //type:func
+LobbyMan_onuserlistupdate = 0x002599B0; //type:func
+LobbyMan_onranklistupdate = 0x00259A60; //type:func
+LobbyMan_onchatmsg = 0x00259B10; //type:func
+LobbyMan_onplaymsg = 0x0025A1D0; //type:func
+LobbyMan_onlobbyconnect = 0x0025B848; //type:func
+LobbyMan_onaccountcreated = 0x0025BD30; //type:func
+LobbyMan_onaccountedited = 0x0025C0C0; //type:func
+LobbyMan_onlostaccountrequestsent = 0x0025C2D8; //type:func
+LobbyMan_onlostpasswordrequestsent = 0x0025C4F0; //type:func
+LobbyMan_onauthentication = 0x0025C8A8; //type:func
+LobbyMan_onpersonaselected = 0x0025CEB0; //type:func
+LobbyMan_onpersonacreated = 0x0025D2D8; //type:func
+LobbyMan_onpersonadeleted = 0x0025D538; //type:func
+LobbyMan_onroomlistupdate = 0x0025D6C0; //type:func
+LobbyMan_onroomselected = 0x0025D8F8; //type:func
+LobbyMan_onRoomCreated = 0x0025DB80; //type:func
+LobbyMan_onPingReceived = 0x0025DDE0; //type:func
+LobbyMan_onAbuseReportReceived = 0x0025DF98; //type:func
+LobbyMan_onNewsRetrieved = 0x0025E138; //type:func
+LobbyMan_onRanklistRetrieved = 0x0025E590; //type:func
+LobbyMan_onPlayerFound = 0x0025E7F0; //type:func
+LobbyMan_onQuickMatchResponse = 0x0025F030; //type:func
+LobbyMan_onchallengeresponse = 0x0025F8A0; //type:func
+LobbyMan_onresultsreportresponse = 0x00260C68; //type:func
+BuddyMan_onconnect = 0x002615C8; //type:func
+BuddyMan_onrosterupdate = 0x00261770; //type:func
+BuddyMan_onBuddyAdd = 0x002618C0; //type:func
+BuddyMan_onBuddyDelete = 0x00261970; //type:func
+BuddyMan_onBuddySend__FPv = 0x00261A20; //type:func
+BuddyMan_onReceiveMessage = 0x00261A28; //type:func
+cConnMan_cConnMan__FPv = 0x00263660; //type:func
+cConnMan__cConnMan = 0x00263678; //type:func
+cGameConnMan_cGameConnMan__FPv = 0x00263998; //type:func
+cGameConnMan__cGameConnMan = 0x002639B0; //type:func
+cCommChannel_isChannelOpen = 0x00267D88; //type:func
+cCommChannel_setError = 0x00267D90; //type:func
+cCommChannel_getError = 0x00267DA0; //type:func
+online_Event__Event = 0x00267E18; //type:func
+online_Event_clone = 0x00267E48; //type:func
+online_ErrorEvent__ErrorEvent = 0x00267E98; //type:func
+online_ErrorEvent_clone = 0x00267EC8; //type:func
+online_BuddyErrorEvent__BuddyErrorEvent = 0x00267F28; //type:func
+online_BuddyErrorEvent_clone = 0x00267F58; //type:func
+online_NetErrorEvent__NetErrorEvent = 0x00267FB8; //type:func
+online_NetErrorEvent_clone = 0x00267FE8; //type:func
+online_NewsEvent__NewsEvent = 0x00268158; //type:func
+online_NewsEvent_clone = 0x002681B0; //type:func
+online_AcctTooYoungEvent__AcctTooYoungEvent = 0x00268210; //type:func
+online_AcctTooYoungEvent_clone = 0x00268240; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func
@@ -10484,3 +10539,13 @@ cLightMan_vtbl = 0x004936D8;
 // SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_relogin_blank (docs/ontour_globals.tsv)
 cFEStateRelogin_vtbl = 0x00468050;
 cFEBlankPopup_vtbl = 0x0046B6F8;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_online_vtbls (docs/ontour_globals.tsv)
+cGameConnMan_vtbl = 0x004810B0;
+cConnMan_vtbl = 0x004810C8;
+online_AcctTooYoungEvent_vtbl = 0x004811F0;
+online_NewsEvent_vtbl = 0x00481210;
+online_NetErrorEvent_vtbl = 0x00481250;
+online_BuddyErrorEvent_vtbl = 0x00481270;
+online_ErrorEvent_vtbl = 0x00481290;
+online_Event_vtbl = 0x004812B0;

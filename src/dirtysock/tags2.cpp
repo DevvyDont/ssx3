@@ -6,21 +6,21 @@ INCLUDE_ASM("dirtysock/tags2", func_00259398);
 
 INCLUDE_ASM("dirtysock/tags2", func_002593B8);
 
-INCLUDE_ASM("dirtysock/tags2", func_002594D0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_LobbyMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_00259628);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan__LobbyMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_002598A8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onincomingmsg);
 
-INCLUDE_ASM("dirtysock/tags2", func_002598C8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onconnectionmsg);
 
-INCLUDE_ASM("dirtysock/tags2", func_002599B0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onuserlistupdate);
 
-INCLUDE_ASM("dirtysock/tags2", func_00259A60);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onranklistupdate);
 
-INCLUDE_ASM("dirtysock/tags2", func_00259B10);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onchatmsg);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025A1D0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onplaymsg);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025A650);
 
@@ -54,35 +54,35 @@ INCLUDE_ASM("dirtysock/tags2", func_0025B6D8);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025B800);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025B848);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onlobbyconnect);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025B9C8);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025BC48);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025BD30);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onaccountcreated);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025BF18);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025C0C0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onaccountedited);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025C1E0);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025C2D8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onlostaccountrequestsent);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025C3F8);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025C4F0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onlostpasswordrequestsent);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025C610);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025C8A8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onauthentication);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025CD28);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025CD50);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025CEB0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onpersonaselected);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025CFE0);
 
@@ -90,13 +90,13 @@ INCLUDE_ASM("dirtysock/tags2", func_0025D048);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025D1B8);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025D2D8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onpersonacreated);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025D428);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025D538);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onpersonadeleted);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025D6C0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onroomlistupdate);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025D770);
 
@@ -104,41 +104,41 @@ INCLUDE_ASM("dirtysock/tags2", func_0025D800);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025D860);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025D8F8);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onroomselected);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025DA90);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025DAC0);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025DB80);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onRoomCreated);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025DD08);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025DDE0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onPingReceived);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025DF00);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025DF98);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onAbuseReportReceived);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025E0C8);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025E138);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onNewsRetrieved);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025E348);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025E420);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025E590);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onRanklistRetrieved);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025E6D0);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025E7F0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onPlayerFound);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025EE20);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025EED8);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F030);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onQuickMatchResponse);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025F120);
 
@@ -168,7 +168,7 @@ INCLUDE_ASM("dirtysock/tags2", func_0025F740);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025F858);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F8A0);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onchallengeresponse);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025FA48);
 
@@ -188,7 +188,7 @@ INCLUDE_ASM("dirtysock/tags2", func_0025FC70);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025FD50);
 
-INCLUDE_ASM("dirtysock/tags2", func_00260C68);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_onresultsreportresponse);
 
 INCLUDE_ASM("dirtysock/tags2", func_00260E50);
 
@@ -218,17 +218,17 @@ INCLUDE_ASM("dirtysock/tags2", func_002614E8);
 
 INCLUDE_ASM("dirtysock/tags2", func_00261530);
 
-INCLUDE_ASM("dirtysock/tags2", func_002615C8);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_onconnect);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261770);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_onrosterupdate);
 
-INCLUDE_ASM("dirtysock/tags2", func_002618C0);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_onBuddyAdd);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261970);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_onBuddyDelete);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261A20);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_onBuddySend);
 
-INCLUDE_ASM("dirtysock/tags2", func_00261A28);
+INCLUDE_ASM("dirtysock/tags2", BuddyMan_onReceiveMessage);
 
 INCLUDE_ASM("dirtysock/tags2", func_00261CD0);
 
@@ -306,9 +306,9 @@ INCLUDE_ASM("dirtysock/tags2", func_002635A8);
 
 INCLUDE_ASM("dirtysock/tags2", func_00263630);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263660);
+INCLUDE_ASM("dirtysock/tags2", cConnMan_cConnMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263678);
+INCLUDE_ASM("dirtysock/tags2", cConnMan__cConnMan);
 
 INCLUDE_ASM("dirtysock/tags2", func_002636A8);
 
@@ -316,9 +316,9 @@ INCLUDE_ASM("dirtysock/tags2", func_002636F0);
 
 INCLUDE_ASM("dirtysock/tags2", func_00263828);
 
-INCLUDE_ASM("dirtysock/tags2", func_00263998);
+INCLUDE_ASM("dirtysock/tags2", cGameConnMan_cGameConnMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_002639B0);
+INCLUDE_ASM("dirtysock/tags2", cGameConnMan__cGameConnMan);
 
 INCLUDE_ASM("dirtysock/tags2", func_002639E0);
 
@@ -524,33 +524,33 @@ INCLUDE_ASM("dirtysock/tags2", cDSockChannel_isConnected);
 
 INCLUDE_ASM("dirtysock/tags2", cDSockChannel_getChannelType);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267E18);
+INCLUDE_ASM("dirtysock/tags2", online_Event__Event);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267E48);
+INCLUDE_ASM("dirtysock/tags2", online_Event_clone);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267E98);
+INCLUDE_ASM("dirtysock/tags2", online_ErrorEvent__ErrorEvent);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267EC8);
+INCLUDE_ASM("dirtysock/tags2", online_ErrorEvent_clone);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267F28);
+INCLUDE_ASM("dirtysock/tags2", online_BuddyErrorEvent__BuddyErrorEvent);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267F58);
+INCLUDE_ASM("dirtysock/tags2", online_BuddyErrorEvent_clone);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267FB8);
+INCLUDE_ASM("dirtysock/tags2", online_NetErrorEvent__NetErrorEvent);
 
-INCLUDE_ASM("dirtysock/tags2", func_00267FE8);
+INCLUDE_ASM("dirtysock/tags2", online_NetErrorEvent_clone);
 
 INCLUDE_ASM("dirtysock/tags2", func_00268048);
 
 INCLUDE_ASM("dirtysock/tags2", func_002680A8);
 
-INCLUDE_ASM("dirtysock/tags2", func_00268158);
+INCLUDE_ASM("dirtysock/tags2", online_NewsEvent__NewsEvent);
 
-INCLUDE_ASM("dirtysock/tags2", func_002681B0);
+INCLUDE_ASM("dirtysock/tags2", online_NewsEvent_clone);
 
-INCLUDE_ASM("dirtysock/tags2", func_00268210);
+INCLUDE_ASM("dirtysock/tags2", online_AcctTooYoungEvent__AcctTooYoungEvent);
 
-INCLUDE_ASM("dirtysock/tags2", func_00268240);
+INCLUDE_ASM("dirtysock/tags2", online_AcctTooYoungEvent_clone);
 
 INCLUDE_ASM("dirtysock/tags2", func_002682A8);
 

@@ -2048,7 +2048,7 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
  *
  * Reads the value with cDirtysock_tag_TagFieldGetTime() (default 1) and converts value + @p offset with func_003EAEB8()
  * into a tm; every non-null output gets its field (year as tm_year + 1900, month as tm_mon + 1). The buddy-message
- * reader func_00261A28 calls it.
+ * reader BuddyMan_onReceiveMessage calls it.
  *
  * @param data    the field value
  * @param year    receives the full year, or 0
