@@ -990,13 +990,13 @@ extern "C" int func_0026D558(void* self, char** pp)
 //100%
 INCLUDE_ASM("replay/playbackman", func_0026D5E8);
 #ifdef SKIP_ASM
-void* func_0026E8E0(void* self);
+void* cReplayFramePtr_cReplayFramePtr(void* self);
 extern "C" void cReplayFrame_clearFrame(void* self);
 extern void* D_00481850[];
 
 extern "C" void* func_0026D5E8(void* self)
 {
-    func_0026E8E0(self);
+    cReplayFramePtr_cReplayFramePtr(self);
     *(void***)self = D_00481850;
     cReplayFrame_clearFrame(self);
     return self;

@@ -102,7 +102,7 @@ extern "C" void* func_001D4BC8(void* self, void* owner, int a, int b);
 extern "C" void func_001A0708(void* flow, int a, int b);
 extern "C" void func_001A86E8(int a);
 extern "C" void* func_00195498(void* self, void* owner);
-extern "C" void* func_001B3F78(void* self, void* owner);
+extern "C" void* cFEStateNetConfig_cFEStateNetConfig(void* self, void* owner);
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int ev);
 extern "C" int func_00145C38(void* self, int index);
@@ -261,7 +261,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             return func_00195498(cMemMan_alloc(0x48, D_00460BD8, 0, 0), *self);
         case 49:
             func_001A86E8(1);
-            return func_001B3F78(cMemMan_alloc(0x91C, D_00460BF0, 0, 0), *self);
+            return cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(0x91C, D_00460BF0, 0, 0), *self);
         }
     case 22:
         D_004A19D4 = pData != 0;

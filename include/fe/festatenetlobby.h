@@ -7,9 +7,9 @@
 // onGainTransition__17cFEStateLobbyMenub); EA's source d:/ssx/code/source/fe/festatenetlobby.cpp (the preview's
 // assert at line 518 sits between the methods paired with retail func_001BD738 and func_001BD8C8).
 //
-// Size 0xB84: cMemMan_alloc(0xB84, "cFEStateLobbyMenu") + func_001BCB58(mem, pEngine) (func_001A8E40,
+// Size 0xB84: cMemMan_alloc(0xB84, "cFEStateLobbyMenu") + cFEStateLobbyMenu_cFEStateLobbyMenu(mem, pEngine) (func_001A8E40,
 // func_001B2378, func_001B3A30, func_001BFE70); its last member, the cBXString at 0xB80, ends there. Constructors
-// func_001BCB58 and the default func_001DF780 (fe/fepopupmisc), destructor func_001DF7C8 (fe/fepopupmisc; the
+// cFEStateLobbyMenu_cFEStateLobbyMenu and the default func_001DF780 (fe/fepopupmisc), destructor cFEStateLobbyMenu__cFEStateLobbyMenu (fe/fepopupmisc; the
 // preview's _$_17cFEStateLobbyMenu). Retail vtable D_0046A7F8 (32 slots: 1 dtor, 4 onCreateScreen func_001BCC30,
 // 7 onGainTransition func_001BCD18, 12 onUpdate func_001BCE18, 17 onPopupEvent func_001BDDE8, 18 onWidgetCreate
 // func_001BCE38, 19 onWidgetEvent func_001BD1B8, 20 onWidgetMenu func_001BDC18, 21 func_001BDCA0, 25
@@ -22,7 +22,7 @@
 // this class and the preview keeps no accessors for it: widget pointers are named after the UI object
 // onWidgetCreate (func_001BCE38) binds to them, the rest from retail use. Channel arrays are indexed by the
 // channel (0 beginner, 1 voice, 2 advanced, 3 expert/elite: the RoomMenus row). Evidence tags:
-//   [R] retail's constructors func_001BCB58 / func_001DF780 and destructor func_001DF7C8 (and cFEStateNet's);
+//   [R] retail's constructors cFEStateLobbyMenu_cFEStateLobbyMenu / func_001DF780 and destructor cFEStateLobbyMenu__cFEStateLobbyMenu (and cFEStateNet's);
 //   [P] the July 2003 preview (see fe/festatenet.h);
 //   [U] how retail code uses the field;
 //   [O] SSX On Tour's DWARF for the cListNode/cUIState base only.
@@ -38,10 +38,10 @@ struct cFEStateLobbyMenu {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_0046A7F8 (32 slots), stored by func_001BCB58 / func_001DF780 after the cFEStateNet ctor and
-                                    //       by the destructor func_001DF7C8
+    void** mVtbl;                   // 0x008 [R] D_0046A7F8 (32 slots), stored by cFEStateLobbyMenu_cFEStateLobbyMenu / func_001DF780 after the cFEStateNet ctor and
+                                    //       by the destructor cFEStateLobbyMenu__cFEStateLobbyMenu
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001BCB58 stores 0x3C
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateLobbyMenu_cFEStateLobbyMenu stores 0x3C
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
     signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
@@ -137,7 +137,7 @@ struct cFEStateLobbyMenu {
                                     //       channel arrays
     int miSelectedRoom;             // 0x768 [U] func_001BD1B8 stores the room list's selected row (list + 0x319); onGainTransition
                                     //       clamps it to the list count and selects it
-    char* mszChannelName;           // 0x76C [R] cBXString (empty rep D_004A3E90; destroyed by func_001DF7C8); [U] func_001BD738
+    char* mszChannelName;           // 0x76C [R] cBXString (empty rep D_004A3E90; destroyed by cFEStateLobbyMenu__cFEStateLobbyMenu); [U] func_001BD738
                                     //       assigns the selected list entry's text (func_0039A708)
     int mbRoomHasPassword;          // 0x770 [U] func_001BD460 / func_001BD540: 1 when a password was given when entering the room;
                                     //       func_001BD8C8 asks for the password ("kT_POPUP231RoomPassword") only when it is 0
@@ -148,7 +148,7 @@ struct cFEStateLobbyMenu {
     int miNumPlayers;               // 0x77C [U] func_001BE540: LobbyMan's player count in the room (func_0025F1B0); func_001BE720
     unsigned short mustrPopupText[0x200]; // 0x780 [U] func_001BD8C8: sprintf1 (unicode) of "kT_POPUP231RoomPassword" with
                                     //       mszRoomName, the popup's message (+ 0xC4); extent: up to 0xB80
-    char* mszRoomName;              // 0xB80 [R] cBXString (empty rep D_004A3E90; destroyed by func_001DF7C8); [U] func_001BD460 /
+    char* mszRoomName;              // 0xB80 [R] cBXString (empty rep D_004A3E90; destroyed by cFEStateLobbyMenu__cFEStateLobbyMenu); [U] func_001BD460 /
                                     //       func_001BD540 assign the room being entered; func_001BD428 passes it to func_001BD540
 };
 

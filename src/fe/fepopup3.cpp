@@ -38,7 +38,7 @@ INCLUDE_ASM("fe/fepopup3", func_001DF6E8);
 
 INCLUDE_ASM("fe/fepopup3", func_001DF750);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF7C8);
+INCLUDE_ASM("fe/fepopup3", cFEStateLobbyMenu__cFEStateLobbyMenu);
 
 INCLUDE_ASM("fe/fepopup3", func_001DF878);
 
@@ -214,11 +214,11 @@ INCLUDE_ASM("fe/fepopup3", func_001E0C90);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0C98);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0CF8);
+INCLUDE_ASM("fe/fepopup3", cFEStateCreateStep1__cFEStateCreateStep1);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0D60);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0DA8);
+INCLUDE_ASM("fe/fepopup3", cFEStateCreateStep2__cFEStateCreateStep2);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0DD0);
 
@@ -230,7 +230,7 @@ INCLUDE_ASM("fe/fepopup3", func_001E0E88);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0E90);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0E98);
+INCLUDE_ASM("fe/fepopup3", cFEStateStats__cFEStateStats);
 
 INCLUDE_ASM("fe/fepopup3", func_001E0EC0);
 
@@ -450,7 +450,7 @@ INCLUDE_ASM("fe/fepopup3", func_001E3A30);
 
 INCLUDE_ASM("fe/fepopup3", func_001E3A78);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3C00);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_cOVState_MESSAGECENTER);
 
 INCLUDE_ASM("fe/fepopup3", func_001E3D58);
 
@@ -488,7 +488,7 @@ INCLUDE_ASM("fe/fepopup3", func_001E50C8);
 
 INCLUDE_ASM("fe/fepopup3", func_001E5148);
 
-INCLUDE_ASM("fe/fepopup3", func_001E51D0);
+INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_cOVState_ViewPopup);
 
 INCLUDE_ASM("fe/fepopup3", func_001E5248);
 

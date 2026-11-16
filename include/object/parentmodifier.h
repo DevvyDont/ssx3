@@ -9,7 +9,7 @@
 // Tour 0xA0 (ParentInst at 0x94 there; retail puts it at 0xA0: func_00357038 sw 0xA0, the replay ctor cParentModifier_cParentModifier
 // reads 4 bytes into +0x90 and the pointer into +0xA0).
 // Constructors func_00357038 (parent inst, mesh, offset: calls the cPositionModifier ctor func_00356EB8) and cParentModifier_cParentModifier
-// (replay; calls func_00356F68); destructor func_00361988.
+// (replay; calls func_00356F68); destructor cParentModifier__cParentModifier.
 // A FLAT layout: cPositionModifier (0x00-0x90, object/positionmodifier.h) + cParentModifierState (Mesh) + ParentInst.
 
 #include "layout.h"
@@ -21,7 +21,7 @@ struct tInstanceRecord;
 struct cParentModifier {
     // --- cPositionModifier (0x90; object/positionmodifier.h)
     void** mVtbl;                   // 0x00 [R] ctors store D_0048F5F0 (cPositionModifier; cParentModifier: D_0048F508);
-                                    //      dtor func_003618C8
+                                    //      dtor cPositionModifier__cPositionModifier
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox func_00361910 returns +0x10, setBoundBox func_00361918
                                     //      (sq 0x10/0x20)

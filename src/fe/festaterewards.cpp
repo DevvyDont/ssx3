@@ -1007,7 +1007,7 @@ extern "C" void cFEStateRewardGalleryBase_showReward(void* self)
 INCLUDE_ASM("fe/festaterewards", func_001D0510);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001CABA8(void* self, void* engine, void* owner, signed char idx);
+extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, void* owner, signed char idx);
 extern "C" void func_001CAA18(void* self, int a1, int a2, int a3, int a4);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern char D_00460790[];
@@ -1026,7 +1026,7 @@ extern "C" void func_001D0510(void* self)
 {
     sVE_0510a* vt = *(sVE_0510a**)((char*)self + 8);
     int sel = vt[34].fn((char*)self + vt[34].delta);
-    char* popup = (char*)func_001CABA8(cMemMan_alloc(0x70, D_00460790, 0, 0), *(void**)((char*)self + 0x10), self,
+    char* popup = (char*)cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, D_00460790, 0, 0), *(void**)((char*)self + 0x10), self,
                                        *(signed char*)((char*)self + 0x44));
     sVE_0510b* vt2 = *(sVE_0510b**)((char*)self + 8);
     int a = vt2[37].fn((char*)self + vt2[37].delta, sel);

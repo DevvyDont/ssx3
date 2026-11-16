@@ -5,7 +5,7 @@
 // (cMoveNode::addAvaSpline). Unnamed in retail: vtable D_0048F338 (27 slots), identified by the "AvaSplineModifier" tag
 // and On Tour's layout. Size 0x90: retail cMemMan_alloc(0x90, "AvaSplineModifier") in cMoveNode's addAvaSpline and the
 // replay loader (type 7); On Tour 0x90. Constructors func_00357750 (instance) and func_00357798 (replay frame);
-// destructor func_00361AA8. EA's source file is unknown.
+// destructor cAvaSplineModifier__cAvaSplineModifier. EA's source file is unknown.
 // A FLAT layout: cTransformModifier (0x0: vptr) + cAvaSplineModifierState (0x10-0x40) + own fields (On Tour offsets).
 
 #include "layout.h"
@@ -16,7 +16,7 @@ struct tInstanceRecord;
 
 struct cAvaSplineModifier {
     // --- cTransformModifier (vptr only)
-    void** mVtbl;                   // 0x00 [R] ctors store D_0048F338; dtor func_00361AA8
+    void** mVtbl;                   // 0x00 [R] ctors store D_0048F338; dtor cAvaSplineModifier__cAvaSplineModifier
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     // --- cAvaSplineModifierState
     tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox func_00361AD8 returns +0x10, setBoundBox func_00361AE0

@@ -5,7 +5,7 @@
 // Unnamed in retail: vtable D_0048F420 (27 slots), identified by the "MagnetModifier" tag and On Tour's layout.
 // Size 0xB0: retail cMemMan_alloc(0xB0, "MagnetModifier") in cMoveNode's addMagnet and the replay loader (type 6); On Tour 0xB0.
 // Constructors func_003572E0 (matrix, radius, speed; src/object/movenode.cpp) and func_00357358 (replay frame);
-// destructor func_003619E0. EA's source file is unknown.
+// destructor cMagnetModifier__cMagnetModifier. EA's source file is unknown.
 // A FLAT layout: cTransformModifier (0x0: vptr) + cMagnetModifierState (0x10-0x58) + own fields; On Tour's state order,
 // with 4-byte bools (RootTransformDirty 0x50, AllowCollide 0x54 instead of 0x50/0x51).
 
@@ -17,7 +17,7 @@ struct tInstanceRecord;
 
 struct cMagnetModifier {
     // --- cTransformModifier (vptr only)
-    void** mVtbl;                   // 0x00 [R] ctors store D_0048F420; dtor func_003619E0
+    void** mVtbl;                   // 0x00 [R] ctors store D_0048F420; dtor cMagnetModifier__cMagnetModifier
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     // --- cMagnetModifierState
     t4Vector Offset;                // 0x10 [O]; [R] ctor copies Transform row 3 here; [U] update func_003573F8,

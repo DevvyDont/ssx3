@@ -667,9 +667,9 @@ extern "C" int func_0026E838(void* self, void* o, int mode)
 extern void* D_00481898[];
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E8E0__FPv);
+INCLUDE_ASM("replay/replay", cReplayFramePtr_cReplayFramePtr__FPv);
 #ifdef SKIP_ASM
-void* func_0026E8E0(void* self)
+void* cReplayFramePtr_cReplayFramePtr(void* self)
 {
     int t0 = 0;
     *(int*)((char*)self + 0x4) = t0;

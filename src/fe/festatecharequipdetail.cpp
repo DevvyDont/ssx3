@@ -2839,14 +2839,14 @@ extern "C" void func_0019BFE8(void* vself)
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C7E8);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001CABA8(void* self, void* engine, void* owner, signed char idx);
+extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, void* owner, signed char idx);
 extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int a1, int a2, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00460790[];
 
 extern "C" void func_0019C7E8(void* self, void* item)
 {
-    void* popup = func_001CABA8(cMemMan_alloc(0x70, D_00460790, 0, 0), *(void**)((char*)self + 0x10), self, *(signed char*)((char*)self + 0x44));
+    void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, D_00460790, 0, 0), *(void**)((char*)self + 0x10), self, *(signed char*)((char*)self + 0x44));
     int price = *(short*)((char*)item + 0xE);
     int id = *(int*)((char*)item + 0x14);
     if (price > 0) {

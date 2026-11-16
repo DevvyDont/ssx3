@@ -7,7 +7,7 @@
 // Size 0x90: retail cMemMan_alloc(0x90, "PositionModifier") in cMoveNode's two addPosition paths (src/object/movenode.cpp)
 // and the replay loader (src/object/modifierblock.cpp type 4); On Tour 0x90.
 // Constructors (src/object/movenode.cpp): func_00356EB8 (t4Vector offset), func_00356F10 (t4Matrix), func_00356F68 (replay
-// frame); destructor func_003618C8; the rest are vtable slots (methods.txt). EA's source file is unknown (no preview
+// frame); destructor cPositionModifier__cPositionModifier; the rest are vtable slots (methods.txt). EA's source file is unknown (no preview
 // assert; On Tour builds it in all_in_one_object.cpp).
 // A FLAT layout: cTransformModifier (0x0: vptr) + cPositionModifierState (0x10-0x48) + Transform.
 // Evidence tags: [R] ctors/dtor/allocation; [U] retail use; [O] On Tour (every offset equals retail; bools are 4 bytes).
@@ -19,7 +19,7 @@
 struct cPositionModifier {
     // --- cTransformModifier (vptr only)
     void** mVtbl;                   // 0x00 [R] ctors store D_0048F5F0 (cPositionModifier; cParentModifier: D_0048F508);
-                                    //      dtor func_003618C8
+                                    //      dtor cPositionModifier__cPositionModifier
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     // --- cPositionModifierState
     tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox func_00361910 returns +0x10, setBoundBox func_00361918

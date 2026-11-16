@@ -8,8 +8,8 @@
 // Holders: D_004A33D8 (dirtysock/tagsunk.cpp creates and deletes it) and the movie player's object + 0x434
 // (movie/movieplayer.cpp).
 //
-// Size 0x1500 [R]: func_002C22C8 cMemMan_alloc(0x1500, D_00485FF0, 0x100, 0) then the ctor func_002C3FA8.
-// Base: cMemCard (On Tour DWARF: size 0x4, no data, so only its vptr; the dtor func_002C3FE0 stores cMemCard's
+// Size 0x1500 [R]: func_002C22C8 cMemMan_alloc(0x1500, D_00485FF0, 0x100, 0) then the ctor cPS2MemCard_cPS2MemCard.
+// Base: cMemCard (On Tour DWARF: size 0x4, no data, so only its vptr; the dtor cPS2MemCard__cPS2MemCard stores cMemCard's
 // vtable D_004871E8 back before the base dtor runs). cPS2MemCard's vtable D_00486F78 (76 slots; 59 slot
 // functions in this unit, 17 inline accessors emitted in seg_1D3510 at 0x002D37B8-0x002D39B0). EA's source:
 // d:/ssx/code/source/util/bxps2memcard.cpp (preview asserts below); On Tour has no cPS2MemCard.
@@ -21,7 +21,7 @@
 //   func_0040A688 sceMcGetDir, func_0040A998 sceMcFormat, func_0040AA68 sceMcDelete, func_0040AB80 sceMcFlush.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] retail's constructor func_002C3FA8, Reset func_002C4050 (vtable slot 2, called by the ctor; it sets or
+//   [R] retail's constructor cPS2MemCard_cPS2MemCard, Reset func_002C4050 (vtable slot 2, called by the ctor; it sets or
 //       clears every field from 0x4 to 0x14E8), the allocation size;
 //   [P] the July 2003 preview: inline accessors GetState (0x4), GetDevice (0xC), GetMaxFiles (0x10 -> retail
 //       0x14), GetNumDirTable (0x4C -> retail 0x54), GetMaxDevices (2) (tools/layout_xlate.py: +0x4 from 0x10,

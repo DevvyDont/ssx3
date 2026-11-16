@@ -2497,6 +2497,31 @@ cUVScrollModifier_writeToReplayFrame = 0x0035FD98; //type:func
 cFont_text = 0x00391CB0; //type:func
 cUIMenu_findFirstHighlightable = 0x0039B7B0; //type:func
 
+// fn_ctors: names by evidence (docs/function_names.tsv)
+cFEStateNetConfig_cFEStateNetConfig = 0x001B3F78; //type:func
+cFEStateNetConfig__cFEStateNetConfig = 0x001B4018; //type:func
+cFEStateNetAccountMem_cFEStateNetAccountMem = 0x001B6ED0; //type:func
+cFEStateNetAccountMem__cFEStateNetAccountMem = 0x001B7030; //type:func
+cFEStateCreateStep1_cFEStateCreateStep1 = 0x001B88F0; //type:func
+cFEStateCreateStep2_cFEStateCreateStep2 = 0x001BA3E0; //type:func
+cFEStateLobbyMenu_cFEStateLobbyMenu = 0x001BCB58; //type:func
+cFEStateStats_cFEStateStats = 0x001C2D18; //type:func
+cUIStateBuyPopup_cUIStateBuyPopup = 0x001CABA8; //type:func
+cFEStateLobbyMenu__cFEStateLobbyMenu = 0x001DF7C8; //type:func
+cFEStateCreateStep1__cFEStateCreateStep1 = 0x001E0CF8; //type:func
+cFEStateCreateStep2__cFEStateCreateStep2__FPv = 0x001E0DA8; //type:func
+cFEStateStats__cFEStateStats__FPv = 0x001E0E98; //type:func
+cOVState_MESSAGECENTER_cOVState_MESSAGECENTER = 0x001E3C00; //type:func
+cOVState_ViewPopup_cOVState_ViewPopup = 0x001E51D0; //type:func
+cReplayFramePtr_cReplayFramePtr__FPv = 0x0026E8E0; //type:func
+cReplayFramePtr__cReplayFramePtr = 0x002721D0; //type:func
+cPS2MemCard_cPS2MemCard = 0x002C3FA8; //type:func
+cPS2MemCard__cPS2MemCard = 0x002C3FE0; //type:func
+cPositionModifier__cPositionModifier = 0x003618C8; //type:func
+cParentModifier__cParentModifier = 0x00361988; //type:func
+cMagnetModifier__cMagnetModifier = 0x003619E0; //type:func
+cAvaSplineModifier__cAvaSplineModifier = 0x00361AA8; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

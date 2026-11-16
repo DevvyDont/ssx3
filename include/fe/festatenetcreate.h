@@ -9,17 +9,17 @@
 // cFEStateCreateStep1: screen "210create_step1": account name, password, confirmation, e-mail and the two
 // "inform me" / "share info" yes-no boxes. Size 0x6F4: cFEStateCreateStep1 is allocated with
 // cMemMan_alloc(0x6F4, "cFEStateCreateStep1") (func_001AD5E8, func_001BA618, func_001BF758, func_001C0D28) and
-// constructed by func_001B88F0(mem, pEngine, bEdit); every own field ends below 0x6F4. Constructors func_001B88F0
-// and the default func_001E0CA0 (fe/fepopupmisc; the preview's __19cFEStateCreateStep1), destructor func_001E0CF8
+// constructed by cFEStateCreateStep1_cFEStateCreateStep1(mem, pEngine, bEdit); every own field ends below 0x6F4. Constructors cFEStateCreateStep1_cFEStateCreateStep1
+// and the default func_001E0CA0 (fe/fepopupmisc; the preview's __19cFEStateCreateStep1), destructor cFEStateCreateStep1__cFEStateCreateStep1
 // (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep1). Retail vtable D_004686C0 (32 slots: 1 dtor, 4
 // onCreateScreen func_001B8960, 7 onGainTransition func_001B8A08, 12 onUpdate func_001B89E8, 17 onPopupEvent
 // func_001B9428, 18 onWidgetCreate func_001B8AA0, 19 onWidgetEvent func_001B8C38, 25 func_001B9088 (help text),
 // 29 func_001E0D60, 31 func_001B9488 (net event 0xCE)). Methods: fe/feasyncfile 0x1B88F0-0x1BA358.
 //
 // cFEStateCreateStep2: screen "211create_step2": birth date, gender and the spam option of the same form. Size
-// 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateStep2") + func_001BA3E0(mem, pEngine) (func_001B8C38, func_001C0D28);
-// own fields end below 0x6E0. Constructors func_001BA3E0 and the default func_001E0D68 (fe/fepopupmisc),
-// destructor func_001E0DA8 (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep2). Retail vtable D_004685B0
+// 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateStep2") + cFEStateCreateStep2_cFEStateCreateStep2(mem, pEngine) (func_001B8C38, func_001C0D28);
+// own fields end below 0x6E0. Constructors cFEStateCreateStep2_cFEStateCreateStep2 and the default func_001E0D68 (fe/fepopupmisc),
+// destructor cFEStateCreateStep2__cFEStateCreateStep2 (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep2). Retail vtable D_004685B0
 // (slots 4 onCreateScreen func_001BA428, 12 onUpdate func_001BA4E0, 17 onPopupEvent func_001BAA88, 18
 // onWidgetCreate func_001BA500, 19 onWidgetEvent func_001BA618, 25 func_001BA8B8, 29 func_001E0DD0, 31
 // func_001BAB28). Methods: fe/feasyncfile 0x1BA3E0-0x1BBC40.
@@ -46,10 +46,10 @@ struct cFEStateCreateStep1 {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004686C0 (32 slots), stored by func_001B88F0 / func_001E0CA0 after the cFEStateNet ctor
-                                    //       and by the destructor func_001E0CF8
+    void** mVtbl;                   // 0x008 [R] D_004686C0 (32 slots), stored by cFEStateCreateStep1_cFEStateCreateStep1 / func_001E0CA0 after the cFEStateNet ctor
+                                    //       and by the destructor cFEStateCreateStep1__cFEStateCreateStep1
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001B88F0 stores 0x4D (edit) or 0x50 (create)
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateCreateStep1_cFEStateCreateStep1 stores 0x4D (edit) or 0x50 (create)
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
     signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
@@ -121,7 +121,7 @@ struct cFEStateCreateStep1 {
     tLobbyAccount* mpAccount;       // 0x6D0 [U] the account form being edited: onCreateScreen func_001B8960 stores
                                     //       (char*)LobbyMan_mLobbyMan + 0x2B0 when mbEditAccount, else + 0x260 (online/lobbyman.h); every text box
                                     //       reads / writes its mName/mPassword/unk_08/mMail/mSpam fields (func_001B95C0..func_001B97B0, func_001B9820)
-    char* mszSavedPassword;         // 0x6D4 [R] cBXString (func_001B88F0 stores the empty-string rep D_004A3E90, func_001E0CF8
+    char* mszSavedPassword;         // 0x6D4 [R] cBXString (cFEStateCreateStep1_cFEStateCreateStep1 stores the empty-string rep D_004A3E90, cFEStateCreateStep1__cFEStateCreateStep1
                                     //       destroys it); [U] func_001BA178 saves mpAccount->mPassword here when editing, func_001BA218 restores it,
                                     //       func_001BA358 sets mpAccount->mChangePassword when it differs
     char* mszSavedConfirm;          // 0x6D8 [R] cBXString (as above); [U] the saved mpAccount->unk_08 (func_001BA178 / func_001BA218)
@@ -131,7 +131,7 @@ struct cFEStateCreateStep1 {
                                     //       sets mpAccount->mChangeSpam when either differs
     int unk_6E8;                    // 0x6E8 [U] func_001B92C8 (popup 0x82C events): 1 on 0x11 (option 2), 0 on 0xF/0x10/0x14; on 0x16
                                     //       it opens the "kT_POPUP204SaveAccount" yes/no popup when set, else pushes cFEStateSelectPersona
-    int mbEditAccount;              // 0x6EC [R] func_001B88F0's 3rd argument (mHashName 0x4D when set, 0x50 when not), 1 in the default
+    int mbEditAccount;              // 0x6EC [R] cFEStateCreateStep1_cFEStateCreateStep1's 3rd argument (mHashName 0x4D when set, 0x50 when not), 1 in the default
                                     //       ctor; [U] onCreateScreen picks the form from it, onWidgetCreate/onWidgetEvent/func_001BA178 test it
     cUIText* mpStaticContinue;      // 0x6F0 [R] 0; [U] onWidgetCreate func_001B8AA0: widget "StaticContinue"; onGainTransition
                                     //       func_001B8A08 enables it (its slot 8) only when all four strings are set (func_001B9558)
@@ -187,9 +187,9 @@ struct cFEStateCreateStep2 {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004685B0 (32 slots), stored by func_001BA3E0 / func_001E0D68 and the destructor func_001E0DA8
+    void** mVtbl;                   // 0x008 [R] D_004685B0 (32 slots), stored by cFEStateCreateStep2_cFEStateCreateStep2 / func_001E0D68 and the destructor cFEStateCreateStep2__cFEStateCreateStep2
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001BA3E0 stores 0x4E
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateCreateStep2_cFEStateCreateStep2 stores 0x4E
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
     signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1

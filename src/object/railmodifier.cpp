@@ -5845,12 +5845,12 @@ extern "C" void cFloatingNode_updateRootTransform(cFloatingNode* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003618C8);
+INCLUDE_ASM("object/railmodifier", cPositionModifier__cPositionModifier);
 #ifdef SKIP_ASM
 extern void* D_004913F8[];
 void operator_delete(int*);
 
-extern "C" void func_003618C8(cPositionModifier* self, int flags)
+extern "C" void cPositionModifier__cPositionModifier(cPositionModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {
@@ -5942,12 +5942,12 @@ extern "C" void* func_00361940(cPositionModifier* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361988);
+INCLUDE_ASM("object/railmodifier", cParentModifier__cParentModifier);
 #ifdef SKIP_ASM
 extern void* D_004913F8[];
 void operator_delete(int*);
 
-extern "C" void func_00361988(cParentModifier* self, int flags)
+extern "C" void cParentModifier__cParentModifier(cParentModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {
@@ -5992,12 +5992,12 @@ extern "C" void func_003619D8(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003619E0);
+INCLUDE_ASM("object/railmodifier", cMagnetModifier__cMagnetModifier);
 #ifdef SKIP_ASM
 extern void* D_004913F8[];
 void operator_delete(int*);
 
-extern "C" void func_003619E0(cMagnetModifier* self, int flags)
+extern "C" void cMagnetModifier__cMagnetModifier(cMagnetModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {
@@ -6089,12 +6089,12 @@ extern "C" void* func_00361A60(cMagnetModifier* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361AA8);
+INCLUDE_ASM("object/railmodifier", cAvaSplineModifier__cAvaSplineModifier);
 #ifdef SKIP_ASM
 extern void* D_004913F8[];
 void operator_delete(int*);
 
-extern "C" void func_00361AA8(cAvaSplineModifier* self, int flags)
+extern "C" void cAvaSplineModifier__cAvaSplineModifier(cAvaSplineModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {

@@ -1557,13 +1557,13 @@ extern "C" void func_002718E8_impl(int initialize, int priority)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002721D0);
+INCLUDE_ASM("replay/replaycache", cReplayFramePtr__cReplayFramePtr);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
 extern void* D_00481898[];
 
-extern "C" void func_002721D0(int* self, int flags)
+extern "C" void cReplayFramePtr__cReplayFramePtr(int* self, int flags)
 {
     *(void**)self = D_00481898;
     if (flags & 1) {

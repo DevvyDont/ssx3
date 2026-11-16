@@ -893,7 +893,7 @@ extern "C" void* cUIStateStack_getCurrentState(void* self);
 extern "C" void* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001B3F78(void* mem, void* owner);
+extern "C" void* cFEStateNetConfig_cFEStateNetConfig(void* mem, void* owner);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern char D_00460BF0[];
 
@@ -905,7 +905,7 @@ extern "C" void func_001D5280(void* self, void* item, int msg)
         void* state = cUIStateStack_getCurrentState((char*)*(void**)((char*)self + 0x10) + 0x18);
         *(int*)((char*)state + 0x1C) |= 0x80;
         func_002636F0(func_002591B8(), 0);
-        func_001A8A40(self, func_001B3F78(cMemMan_alloc(0x91C, D_00460BF0, 0, 0), *(void**)((char*)self + 0x10)));
+        func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(0x91C, D_00460BF0, 0, 0), *(void**)((char*)self + 0x10)));
     } else {
         func_001A97B8(self, item, msg);
     }

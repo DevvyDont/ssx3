@@ -6,19 +6,19 @@
 // the interface cBxReplayFrame (vptr only; On Tour size 4), whose virtuals it implements: vtable D_00481898, slots
 // 1..7 = write (func_0026E9D0), read (func_0026EA20), readReplayInstance() (func_0026EB48),
 // readReplayInstance(cInstanceNode*) (func_0026EC08), writeReplayInstance(const tInstanceRecord*) (func_0026ECD8),
-// writeReplayInstance(cInstanceNode*) (func_0026ED28), destructor (func_002721D0); the order is On Tour
+// writeReplayInstance(cInstanceNode*) (func_0026ED28), destructor (cReplayFramePtr__cReplayFramePtr); the order is On Tour
 // cBxReplayFrame's. cReplayFrame (replay/frame.h, vtable D_00481850, ctor func_0026D5E8) derives from it;
 // cPlaybackMan embeds one at +0x14 (its destructor func_0026C588 stores D_00481898 there).
-// Size 0x14 [R]: the constructor func_0026E8E0 stores the vptr and zeroes 0x4..0x10, and cReplayFrame's first own
+// Size 0x14 [R]: the constructor cReplayFramePtr_cReplayFramePtr stores the vptr and zeroes 0x4..0x10, and cReplayFrame's first own
 // member (Next) is at 0x14 (On Tour cReplayFrame, same offsets as here). Same size, order and offsets as On Tour's
 // class cReplayFramePtr.
 // EA's header is ../source/replay/frameptr.h: the July 2003 preview files the inline asserts "Block && ReadData" and
-// "Block && pos.Data" under it. Retail code: func_0026E8E0 (last function of unit replay/replay), unit
+// "Block && pos.Data" under it. Retail code: cReplayFramePtr_cReplayFramePtr (last function of unit replay/replay), unit
 // replay/frameptr 0x0026E908-0x0026ED98, and the out-of-line inline copies in unit replay/replaycache
 // 0x002721D0-0x00272248.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] the constructor func_0026E8E0 and the destructor func_002721D0;
+//   [R] the constructor cReplayFramePtr_cReplayFramePtr and the destructor cReplayFramePtr__cReplayFramePtr;
 //   [P] the preview's inline accessors cReplayFramePtr::getBlock (lw 0x4), GetSize / getBlockSaveSize (lw 0x10)
 //       (tools/layout_xlate.py; retail keeps identical out-of-line copies at the same offsets) and the asserts above;
 //   [U] how retail code uses the field (asm of the methods listed in methods.txt);
@@ -36,7 +36,7 @@ struct tFramePos {
 
 struct cReplayFramePtr {
     // --- cBxReplayFrame (interface: a vptr only)
-    void** mVtbl;           // 0x00 [R] ctor func_0026E8E0 and dtor func_002721D0 store D_00481898 (cReplayFrame's
+    void** mVtbl;           // 0x00 [R] ctor cReplayFramePtr_cReplayFramePtr and dtor cReplayFramePtr__cReplayFramePtr store D_00481898 (cReplayFrame's
                             //      ctor then stores D_00481850); [U] peekObjNodeType and the readReplayInstance /
                             //      writeReplayInstance bodies call slots 1/2 (write/read) through it
     // --- cReplayFramePtr

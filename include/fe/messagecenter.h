@@ -8,12 +8,12 @@
 // columns, unread-mail and FAQ icons, a scrollable "MenuFroms" menu). EA's name from the preview's linkonce sections
 // (__22cOVState_MESSAGECENTERP9cUIEngine12tOVStateEnum, _$_22cOVState_MESSAGECENTER). Size 0x180: the overlay
 // factory (cOVStateManager_triggerOverlay, fe/ovtemplatedialog.cpp) does operator new(0x180, "cOVStateOverlay") and
-// calls the out-of-line constructor func_001E3C00(this, pEngine, 0x22). Base cOVState (fe/ovstate.h, 0x9C), written
-// out flat below. Retail vtable D_00474318 (stored by func_001E3C00 after cOVState's D_00474E08; destructor
+// calls the out-of-line constructor cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(this, pEngine, 0x22). Base cOVState (fe/ovstate.h, 0x9C), written
+// out flat below. Retail vtable D_00474318 (stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER after cOVState's D_00474E08; destructor
 // func_0021CAE0 in fe/all_in_one_fe).
 //
 // cOVState_ViewPopup: the popup that shows one message (screen "113ViewMessage"), pushed by
-// cOVState_MESSAGECENTER (func_001E50C8: cMemMan_alloc(0x70, "cOVState_ViewPopup") + constructor func_001E51D0(this,
+// cOVState_MESSAGECENTER (func_001E50C8: cMemMan_alloc(0x70, "cOVState_ViewPopup") + constructor cOVState_ViewPopup_cOVState_ViewPopup(this,
 // pEngine, pParent, message, number)). Size 0x70. Base cUIState (ui/uistate.h, 0x48), written out flat (it is not a
 // cOVState: the constructor is cUIState(cUIEngine*, cUIState*) func_0039E318 and nothing stores 0x48..0x9C as
 // cOVState does). Retail vtable D_00474248 (destructor func_0021CB40 in fe/all_in_one_fe).
@@ -23,7 +23,7 @@
 // evidence only; widget pointers are named after the UI object onWidgetCreate binds to them (names read from the
 // retail ELF). Evidence tags:
 //   [R] retail's constructors: cUIState(cUIEngine*) func_0039E2A0 / cUIState(cUIEngine*, cUIState*) func_0039E318,
-//       cOVState(cUIEngine*, tOVStateEnum) (inlined in func_001E3C00), func_001E3C00, func_001E51D0, and the
+//       cOVState(cUIEngine*, tOVStateEnum) (inlined in cOVState_MESSAGECENTER_cOVState_MESSAGECENTER), cOVState_MESSAGECENTER_cOVState_MESSAGECENTER, cOVState_ViewPopup_cOVState_ViewPopup, and the
 //       allocation sizes above;
 //   [P] the July 2003 preview's inline accessors (inherited cUIState/cOVState fields only; see ui/uistate.h);
 //   [U] how retail code uses the field;
@@ -43,7 +43,7 @@ struct cOVState_MESSAGECENTER {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00474318, stored by func_001E3C00 (after cOVState's D_00474E08)
+    void** mVtbl;                   // 0x008 [R] D_00474318, stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER (after cOVState's D_00474E08)
     // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] cUIEngine_addScreenByHashName
@@ -61,12 +61,12 @@ struct cOVState_MESSAGECENTER {
     signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
     char unk_045[0x3];              // 0x045 padding
     // --- cOVState (fe/ovstate.h, 0x9C)
-    int mDoneTransition;            // 0x048 [O]; [R] func_001E3C00 zeroes it (inlined cOVState ctor)
+    int mDoneTransition;            // 0x048 [O]; [R] cOVState_MESSAGECENTER_cOVState_MESSAGECENTER zeroes it (inlined cOVState ctor)
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
     int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
     int mRemovePDA;                 // 0x054 [O]; [R] zeroed
     char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (D_004A2088, sh)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] func_001E3C00 stores its third argument (0x22)
+    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] cOVState_MESSAGECENTER_cOVState_MESSAGECENTER stores its third argument (0x22)
     // --- cOVState_MESSAGECENTER
     cUIThing* mpUnreadMail[8];      // 0x09C [R] ctor zeroes 8; [U] onWidgetCreate (func_001E3EC0): widgets "UnreadMail%d";
                                     //       func_001E48B0/func_001E4C78 show/hide row i's
@@ -157,7 +157,7 @@ struct cOVState_ViewPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00474248, stored by func_001E51D0 and the destructor func_0021CB40
+    void** mVtbl;                   // 0x008 [R] D_00474248, stored by cOVState_ViewPopup_cOVState_ViewPopup and the destructor func_0021CB40
     // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument (the message center's mpEngine);
@@ -174,7 +174,7 @@ struct cOVState_ViewPopup {
     signed char mUserNum;           // 0x044 [O]; [R] ctor stores -1
     char unk_045[0x3];              // 0x045 padding
     // --- cOVState_ViewPopup
-    cUIText* mpNumberLabel;         // 0x048 [R] func_001E51D0 zeroes it; [U] onWidgetCreate (func_001E52F8): widget "NumberLabel"
+    cUIText* mpNumberLabel;         // 0x048 [R] cOVState_ViewPopup_cOVState_ViewPopup zeroes it; [U] onWidgetCreate (func_001E52F8): widget "NumberLabel"
     cUIText* mpNumber;              // 0x04C [R] zeroed; [U] widget "Number"; func_001E5428 prints the message number
     cUIText* mpFrom;                // 0x050 [R] zeroed; [U] widget "From"; func_001E5428 cUIText_setUnicodeStringByID
     cUIText* mpSubject;             // 0x054 [R] zeroed; [U] widget "Subject"; func_001E55D0 / func_001E5638 set it

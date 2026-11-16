@@ -1058,3 +1058,26 @@ fn_held_typed_round2	0x0035FB30	cUVScrollModifier_signal	func_0035FB30	On Tour c
 fn_held_typed_round2	0x0035FD98	cUVScrollModifier_writeToReplayFrame	func_0035FD98	On Tour cUVScrollModifier::writeToReplayFrame(cBxReplayFrame *) (address-order pair, held); retail typed self cUVScrollModifier*, 2 params
 fn_held_typed_round2	0x00391CB0	cFont_text	func_00391CB0	On Tour cFont::text(float, float, const char *) (address-order pair, held); retail typed self cFont*, 4 params
 fn_held_typed_round2	0x0039B7B0	cUIMenu_findFirstHighlightable	func_0039B7B0	On Tour cUIMenu::findFirstHighlightable(unsigned char) (address-order pair, held); retail typed self cUIMenu*, 2 params
+fn_ctors	0x001B3F78	cFEStateNetConfig_cFEStateNetConfig	func_001B3F78	constructor: header agent (alloc tag "cFEStateNetConfig" + size, tools/.harness/classes); stores vtable 00468B00 whose slot 1 is the destructor
+fn_ctors	0x001B4018	cFEStateNetConfig__cFEStateNetConfig	func_001B4018	destructor: slot 1 of vtable 00468B00 (stored by the constructor); deletes self if flags & 1
+fn_ctors	0x001B6ED0	cFEStateNetAccountMem_cFEStateNetAccountMem	func_001B6ED0	constructor: header agent (alloc tag "cFEStateNetAccountMem" + size, tools/.harness/classes); stores vtable 004687D0 whose slot 1 is the destructor
+fn_ctors	0x001B7030	cFEStateNetAccountMem__cFEStateNetAccountMem	func_001B7030	destructor: slot 1 of vtable 004687D0 (stored by the constructor); deletes self if flags & 1
+fn_ctors	0x001B88F0	cFEStateCreateStep1_cFEStateCreateStep1	func_001B88F0	constructor: header agent (alloc tag "cFEStateCreateStep1" + size, tools/.harness/classes); stores vtable 004686C0 whose slot 1 is the destructor
+fn_ctors	0x001BA3E0	cFEStateCreateStep2_cFEStateCreateStep2	func_001BA3E0	constructor: header agent (alloc tag "cFEStateCreateStep2" + size, tools/.harness/classes); stores vtable 004685B0 whose slot 1 is the destructor
+fn_ctors	0x001BCB58	cFEStateLobbyMenu_cFEStateLobbyMenu	func_001BCB58	constructor: header agent (alloc tag "cFEStateLobbyMenu" + size, tools/.harness/classes); stores vtable 0046A7F8 whose slot 1 is the destructor
+fn_ctors	0x001C2D18	cFEStateStats_cFEStateStats	func_001C2D18	constructor: header agent (alloc tag "cFEStateStats" + size, tools/.harness/classes); stores vtable 00468278 whose slot 1 is the destructor
+fn_ctors	0x001CABA8	cUIStateBuyPopup_cUIStateBuyPopup	func_001CABA8	constructor: header agent (alloc tag "cUIStateBuyPopup" + size, tools/.harness/classes); called right after cMemMan_alloc(0x70, "cUIStateBuyPopup") at 5 sites
+fn_ctors	0x001DF7C8	cFEStateLobbyMenu__cFEStateLobbyMenu	func_001DF7C8	destructor: slot 1 of vtable 0046A7F8 (stored by the constructor); deletes self if flags & 1
+fn_ctors	0x001E0CF8	cFEStateCreateStep1__cFEStateCreateStep1	func_001E0CF8	destructor: slot 1 of vtable 004686C0 (stored by the constructor); deletes self if flags & 1
+fn_ctors	0x001E0DA8	cFEStateCreateStep2__cFEStateCreateStep2__FPv	func_001E0DA8__FPv	destructor: slot 1 of vtable 004685B0 (stored by the constructor); deletes self if flags & 1
+fn_ctors	0x001E0E98	cFEStateStats__cFEStateStats__FPv	func_001E0E98__FPv	destructor: slot 1 of vtable 00468278 (stored by the constructor); deletes self if flags & 1
+fn_ctors	0x001E3C00	cOVState_MESSAGECENTER_cOVState_MESSAGECENTER	func_001E3C00	constructor: header agent (alloc tag "cOVState_MESSAGECENTER" + size, tools/.harness/classes); stores vtable 00474318
+fn_ctors	0x001E51D0	cOVState_ViewPopup_cOVState_ViewPopup	func_001E51D0	constructor: header agent (alloc tag "cOVState_ViewPopup" + size, tools/.harness/classes); stores vtable 00474248
+fn_ctors	0x0026E8E0	cReplayFramePtr_cReplayFramePtr__FPv	func_0026E8E0__FPv	constructor: header agent (alloc tag "cReplayFramePtr" + size, tools/.harness/classes); stores vtable 00481898 whose slot 1 is the destructor
+fn_ctors	0x002721D0	cReplayFramePtr__cReplayFramePtr	func_002721D0	destructor: stores vtable 00481898 (the constructor's), operator delete if flags & 1 (slot 7 of that vtable)
+fn_ctors	0x002C3FA8	cPS2MemCard_cPS2MemCard	func_002C3FA8	constructor: header agent (alloc tag "cPS2MemCard" + size, tools/.harness/classes); stores vtable 00486F78 whose slot 1 is the destructor
+fn_ctors	0x002C3FE0	cPS2MemCard__cPS2MemCard	func_002C3FE0	destructor: slot 1 of vtable 00486F78 (stored by the constructor); deletes self if flags & 1
+fn_ctors	0x003618C8	cPositionModifier__cPositionModifier	func_003618C8	destructor: slot 1 of vtable 0048F5F0 (the cPositionModifier vtable per the header agent: alloc tag, On Tour layout); deletes self if flags & 1
+fn_ctors	0x00361988	cParentModifier__cParentModifier	func_00361988	destructor: slot 1 of vtable 0048F508 (the cParentModifier vtable per the header agent: alloc tag, On Tour layout); deletes self if flags & 1
+fn_ctors	0x003619E0	cMagnetModifier__cMagnetModifier	func_003619E0	destructor: slot 1 of vtable 0048F420 (the cMagnetModifier vtable per the header agent: alloc tag, On Tour layout); deletes self if flags & 1
+fn_ctors	0x00361AA8	cAvaSplineModifier__cAvaSplineModifier	func_00361AA8	destructor: slot 1 of vtable 0048F338 (the cAvaSplineModifier vtable per the header agent: alloc tag, On Tour layout); deletes self if flags & 1

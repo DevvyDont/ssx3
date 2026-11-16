@@ -106,7 +106,7 @@ INCLUDE_ASM("replay/replay2", func_00271758);
 
 INCLUDE_ASM("replay/replay2", func_002718E8);
 
-INCLUDE_ASM("replay/replay2", func_002721D0);
+INCLUDE_ASM("replay/replay2", cReplayFramePtr__cReplayFramePtr);
 
 INCLUDE_ASM("replay/replay2", func_00272258);
 

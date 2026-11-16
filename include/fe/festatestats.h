@@ -7,9 +7,9 @@
 // preview assert falls in its methods (link order puts it after cFEStateOnlineMainMenu, whose func_001BFCC0 asserts
 // in festatenetmainmenu.cpp), so the header is named after the class.
 //
-// Size 0x6F0: cMemMan_alloc(0x6F0, "cFEStateStats") + func_001C2D18(mem, pEngine) (func_001BFE70); the
-// constructor stores up to 0x6EC. Constructors func_001C2D18 and func_001C2D90 (the default one), destructor
-// func_001E0E98 (fe/fepopupmisc; the preview's _$_13cFEStateStats). Retail vtable D_00468278 (32 slots: 1 dtor, 4
+// Size 0x6F0: cMemMan_alloc(0x6F0, "cFEStateStats") + cFEStateStats_cFEStateStats(mem, pEngine) (func_001BFE70); the
+// constructor stores up to 0x6EC. Constructors cFEStateStats_cFEStateStats and func_001C2D90 (the default one), destructor
+// cFEStateStats__cFEStateStats (fe/fepopupmisc; the preview's _$_13cFEStateStats). Retail vtable D_00468278 (32 slots: 1 dtor, 4
 // onCreateScreen func_001C2E00, 7 onGainTransition func_001C32B8, 9 onInputAlways func_001C4BD8, 12 onUpdate
 // func_001C2EE0, 13 func_001E0EC0, 18 onWidgetCreate func_001C2F00, 19 onWidgetEvent func_001C3668, 20
 // onWidgetMenu func_001C4B98, 25 func_001C3570 (help), 31 func_001C4CD8 (net event 0xE1), 32 func_001C2E70).
@@ -18,7 +18,7 @@
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
 // cFEStateNet are written out inline (copied from fe/festatenet.h; keep them in step). No On Tour DWARF and no
 // preview accessors exist for this class, so the own fields are named from their retail use. Evidence tags:
-//   [R] retail's constructors func_001C2D18 / func_001C2D90 and destructor func_001E0E98 (and cFEStateNet's);
+//   [R] retail's constructors cFEStateStats_cFEStateStats / func_001C2D90 and destructor cFEStateStats__cFEStateStats (and cFEStateNet's);
 //   [P] the July 2003 preview (see fe/festatenet.h);
 //   [U] how retail code uses the field;
 //   [O] SSX On Tour's DWARF for the cListNode/cUIState base only.
@@ -32,10 +32,10 @@ struct cFEStateStats {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468278 (32 slots), stored by func_001C2D18 / func_001C2D90 after the cFEStateNet ctor and by
-                                    //       the destructor func_001E0E98
+    void** mVtbl;                   // 0x008 [R] D_00468278 (32 slots), stored by cFEStateStats_cFEStateStats / func_001C2D90 after the cFEStateNet ctor and by
+                                    //       the destructor cFEStateStats__cFEStateStats
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001C2D18 stores 0x42
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateStats_cFEStateStats stores 0x42
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
     signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
@@ -113,7 +113,7 @@ struct cFEStateStats {
                                     //       wrapping); onInputAlways func_001C4BD8 moves only while it is < 3
     int miFirstResult;              // 0x6E8 [R] 0; [U] the results list's scroll offset: onWidgetMenu func_001C4B98 stores it (event 4),
                                     //       func_001C3310 shows rows miFirstResult..+9, func_001C4B78 resets it
-    int mbShowTime;                 // 0x6EC [R] 1 (func_001C2D18); [U] func_001C3EE8 sets it for mode 1, clears it for 0 and 2;
+    int mbShowTime;                 // 0x6EC [R] 1 (cFEStateStats_cFEStateStats); [U] func_001C3EE8 sets it for mode 1, clears it for 0 and 2;
                                     //       func_001C3310 prints the score as a time (func_001C4F58) when set, else as points
 };
 

@@ -558,7 +558,7 @@ extern "C" void func_00183C08(void* self);
 extern "C" void func_00184520(void* self);
 extern "C" void func_00184780(void* self, int on);
 extern "C" void* func_001A0548(void* self, int idx);
-extern "C" void* func_001CABA8(void* mem, void* owner, void* state, int a3);
+extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* mem, void* owner, void* state, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern signed char D_00535C11[];
@@ -681,7 +681,7 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                     sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
                     int trick = func_00116938(tbl[bi].id);
                     if (points >= tbl[bi].cost) {
-                        void* popup = func_001CABA8(cMemMan_alloc(0x70, D_0045DAD8, 0x100, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44));
+                        void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, D_0045DAD8, 0x100, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44));
                         cUIStateBuyPopup_initBuyTrick(popup, trick, tbl[bi].cost, points);
                         cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, popup);
                     } else {

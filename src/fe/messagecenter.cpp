@@ -1291,7 +1291,7 @@ extern "C" void func_001988D8(void* self, int idx)
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_showBuyPopup);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001CABA8(void* self, void* engine, void* owner, signed char idx);
+extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, void* owner, signed char idx);
 extern "C" void* cFEStateRequestLine_getSongTitle(void* self, int i);
 // PORT: func_00198AE8__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
 int func_00198AE8_2(void* self, int idx) __asm__("func_00198AE8__FPv");
@@ -1321,7 +1321,7 @@ struct sMsgCenter_98988 {
  */
 extern "C" void cFEStateRequestLine_showBuyPopup(sMsgCenter_98988* self, int idx)
 {
-    char* popup = (char*)func_001CABA8(cMemMan_alloc(0x70, D_00460790, 0, 0), self->engine, self, self->rider);
+    char* popup = (char*)cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, D_00460790, 0, 0), self->engine, self, self->rider);
     int n = 0;
     for (int i = 0; i < 64; i++) {
         n += (int)((self->mask >> i) & 1);

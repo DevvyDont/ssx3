@@ -187,7 +187,7 @@ extern "C" void* func_0039E2A0(void* self, void* mgr);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void* func_001FDBF0(void* self, void* mgr, int type);
 extern "C" void* func_001FE968(void* self, void* mgr, int type);
-extern "C" void* func_001E3C00(void* self, void* mgr, int type);
+extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(void* self, void* mgr, int type);
 extern "C" void* func_00211088(void* self, void* mgr, int type, int a3);
 extern "C" void* func_00212138(void* self, void* mgr, int type);
 extern "C" void func_001F7548(void* self);
@@ -620,7 +620,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         result = p;
     }
     if (type == 0x22) {
-        result = (char*)func_001E3C00(operator new(0x180, D_00471A30, 0, 0), mgr, 0x22);
+        result = (char*)cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(operator new(0x180, D_00471A30, 0, 0), mgr, 0x22);
     }
     if (type == 0x23) {
         char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);
@@ -694,7 +694,7 @@ extern "C" void* func_0039E2A0(void* self, void* mgr);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void* func_001FDBF0(void* self, void* mgr, int type);
 extern "C" void* func_001FE968(void* self, void* mgr, int type);
-extern "C" void* func_001E3C00(void* self, void* mgr, int type);
+extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(void* self, void* mgr, int type);
 extern "C" void* func_00211088(void* self, void* mgr, int type, int a3);
 extern "C" void* func_00212138(void* self, void* mgr, int type);
 extern "C" void func_001F7548(void* self);
@@ -1117,7 +1117,7 @@ extern "C" void func_0020BAB8(int type)
         result = p;
     }
     if (type == 0x22) {
-        result = (char*)func_001E3C00(operator new(0x180, D_00471A30, 0, 0), mgr, 0x22);
+        result = (char*)cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(operator new(0x180, D_00471A30, 0, 0), mgr, 0x22);
     }
     if (type == 0x23) {
         char* p = (char*)operator new(0x9C, D_00471A30, 0, 0);

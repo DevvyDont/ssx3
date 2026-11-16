@@ -3164,14 +3164,14 @@ extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int boltName, int cost, int
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/fepopup", func_001CABA8);
+INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_cUIStateBuyPopup);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" void func_001CA8A0(cBuyPopupInfo* self);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
 extern void* cUIStateBuyPopup_vtbl[];
 
-extern "C" void* func_001CABA8(cUIStateBuyPopup* self, void* engine, void* owner, signed char idx)
+extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, void* engine, void* owner, signed char idx)
 {
     func_0039E318(self, engine, owner);
     self->mVtbl = cUIStateBuyPopup_vtbl;
