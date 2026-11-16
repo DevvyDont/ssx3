@@ -1249,7 +1249,7 @@ extern "C" void cPlaybackMan_update(void* p);
 extern "C" int func_00237950(void* p);
 extern "C" int func_002379C8(void* p);
 extern "C" int func_0026CE50(void* p);
-extern "C" void func_0026F4A8(void* p);
+extern "C" void cReplay_update(void* p);
 extern "C" int cReplay_isPauseAI(void* p);
 extern "C" void cBucketMan_updateBucket(void* mgr, int a);
 extern "C" void cBucketMan_applyBucket(void* mgr, int a);
@@ -1490,7 +1490,7 @@ extern "C" void cGame_update(cGame* self)
                     func_00230F40((self));
                 }
                 if (!paused_2306B8()) {
-                    func_0026F4A8((char*)self->Replay);
+                    cReplay_update((char*)self->Replay);
                 }
                 if (cReplay_isPauseAI((char*)self->Replay) == 0 && !(D_004A2A50 & 8)) {
                     char* w = (char*)ScriptEngine;

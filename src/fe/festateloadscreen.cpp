@@ -527,7 +527,7 @@ extern "C" void* func_00233C10(void* self)
 INCLUDE_ASM("fe/festateloadscreen", func_00233C50);
 #ifdef SKIP_ASM
 extern void* cGameState_mpGame;
-extern "C" void func_0026FA50(void* self);
+extern "C" void cReplay_endReplay(void* self);
 extern "C" void func_0039F840(void* list);
 extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
 extern "C" void func_001F36C0(void* self, int bit);
@@ -535,7 +535,7 @@ void func_00244880(void* self);
 
 extern "C" void func_00233C50(void* self)
 {
-    func_0026FA50(*(void**)((char*)cGameState_mpGame + 0x28));
+    cReplay_endReplay(*(void**)((char*)cGameState_mpGame + 0x28));
     func_0039F840(*(char**)((char*)cGameState_mpGame + 0x48) + 0x18);
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
     *(int*)((char*)self + 0x10) = 0;

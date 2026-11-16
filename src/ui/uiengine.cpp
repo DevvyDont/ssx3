@@ -1354,21 +1354,21 @@ extern "C" void cUIListBox_setUIData(sUIObj9820* self, sUIData9820* data)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00399920);
+INCLUDE_ASM("ui/uiengine", cUIListBox_getFont);
 #ifdef SKIP_ASM
 void* func_0039FF50(void*);
 
-struct func_00399920_sEntry {
+struct cUIListBox_getFont_sEntry {
     int a;
     int b;
     int c;
 };
 
-extern "C" int func_00399920(cUIListBox* self)
+extern "C" int cUIListBox_getFont(cUIListBox* self)
 {
     void* o = func_0039FF50(self);
     if (o != 0) {
-        func_00399920_sEntry* t = *(func_00399920_sEntry**)((char*)o + 0x8);
+        cUIListBox_getFont_sEntry* t = *(cUIListBox_getFont_sEntry**)((char*)o + 0x8);
         return t[(*(unsigned char*)&self->mAttrListBox & 3) + 1].a;
     }
     return 0;
@@ -1518,7 +1518,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, void* in)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00399D80);
+INCLUDE_ASM("ui/uiengine", cUIListBox_setUnicodePrivate);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -1527,19 +1527,19 @@ extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 extern char D_00493DC0[];
 
-struct func_00399D80_sEntry {
+struct cUIListBox_setUnicodePrivate_sEntry {
     unsigned short* str;
     int pad[4];
 };
 
-extern "C" void func_00399D80(cUIListBox* self, unsigned char idx, unsigned short* str)
+extern "C" void cUIListBox_setUnicodePrivate(cUIListBox* self, unsigned char idx, unsigned short* str)
 {
     void* a = self->mpScreen;
     void* b = *(void**)((char*)a + 0xD0);
     void* c = *(void**)((char*)b + 0x10);
     if (*(void**)((char*)c + 0x10) != 0) {
-        func_00399D80_sEntry* tbl = (func_00399D80_sEntry*)((char*)self + 0x9C);
-        func_00399D80_sEntry* e = &tbl[idx];
+        cUIListBox_setUnicodePrivate_sEntry* tbl = (cUIListBox_setUnicodePrivate_sEntry*)((char*)self + 0x9C);
+        cUIListBox_setUnicodePrivate_sEntry* e = &tbl[idx];
         if (e->str) {
             cMemMan_free(e->str);
         }
@@ -1553,7 +1553,7 @@ extern "C" void func_00399D80(cUIListBox* self, unsigned char idx, unsigned shor
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uiengine", cUIListBox_updateLocale);
 #ifdef SKIP_ASM
-extern "C" void func_00399D80(cUIListBox* self, unsigned char idx, unsigned short* str);
+extern "C" void cUIListBox_setUnicodePrivate(cUIListBox* self, unsigned char idx, unsigned short* str);
 
 struct cUIListBox_updateLocale_sEntry {
     int id;
@@ -1586,7 +1586,7 @@ extern "C" void cUIListBox_updateLocale(cUIListBox_updateLocale_sObj* self)
                 cUIListBox_updateLocale_sVEntry* vt = *(cUIListBox_updateLocale_sVEntry**)(loc + 4);
                 unsigned short* s = ((unsigned short* (*)(void*, int))vt[4].fn)(loc + vt[4].delta, id);
                 if (s != 0) {
-                    func_00399D80((cUIListBox*)self, i, s);
+                    cUIListBox_setUnicodePrivate((cUIListBox*)self, i, s);
                 }
             }
         }
@@ -1663,7 +1663,7 @@ static inline void setLayer_9F00(cUIListBox* self)
 
 extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
 {
-    sFont_9F00* font = (sFont_9F00*)func_00399920(self);
+    sFont_9F00* font = (sFont_9F00*)cUIListBox_getFont(self);
     if (font == 0 || *((unsigned char*)self + 0x318) == 0) {
         return;
     }

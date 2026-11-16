@@ -143,8 +143,8 @@ struct cFEStateChallengePopup {
                                     //       multipliers allowed (func_001AEC60, func_001AF098)
     cUIListBox* mpLBRankedGame;     // 0x6DC [R] 0 (cFEStateChallengePopup_cFEStateChallengePopup); [U] onWidgetCreate cFEStateChallengePopup_onWidgetCreate: widget
                                     //       "ListBoxRankedGame" (yes / no); func_001AE680 / onWidgetEvent read its
-                                    //       value (func_0039A738) into D_00534B34; onGainFocus sets it
-                                    //       (func_0039A7A8)
+                                    //       value (cUIListBox_getCurrentEntryData) into D_00534B34; onGainFocus sets it
+                                    //       (cUIListBox_setCurrentEntryByIndex)
     cUIListBox* mpLBCPURiders;      // 0x6E0 [U] onWidgetCreate: widget "ListBoxCPURiders" (none, 1-4); its value is
                                     //       the new-race interface's number of AI riders
                                     //       (cBENewRaceInterface_setNumberAI); func_001AF728 reads its slot 8

@@ -46,7 +46,7 @@ void operator_delete(int* p);
 
 #include "main/ssxapp.h"
 
-extern "C" void func_002700D8(void* self, void* p);
+extern "C" void cReplay_removeCache(void* self, void* p);
 
 // Data that sits in front of a part's virtual-base pointer.
 template <int N> struct sVbHead_rider { char head[N]; };

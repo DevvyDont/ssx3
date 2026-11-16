@@ -15,8 +15,8 @@ extern "C" void func_0039A670(void* self);
 extern "C" unsigned char cUIListBox_addEntryByStringID(void* box, int id, int idx);
 // The entry data is unsigned here: the negative time steps are passed as 0xFFFFFFFD etc.
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* box, const char* str, unsigned int data);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int v);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
 extern "C" int func_00192240(void* self, int rule);
 extern "C" void cFEStateRuleSelect_updateMenuColor(void* self);
 extern char D_004A16A8[];
@@ -159,8 +159,8 @@ extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
             }
             if (rule != 0) {
                 unsigned char out;
-                func_0039A768(lb, func_00192240(self, rule), &out);
-                func_0039A7A8(lb, out);
+                cUIListBox_getEntryByData(lb, func_00192240(self, rule), &out);
+                cUIListBox_setCurrentEntryByIndex(lb, out);
             } else {
                 SetVisible_1388(lb, 0);
             }
@@ -367,7 +367,7 @@ extern "C" void* func_001887A0(void* mem, void* owner, int a2);
 extern "C" void func_00192088(void* self, int idx, int a2);
 struct sRuleSel_2380;
 extern "C" void func_00192380(sRuleSel_2380* self, void* item);
-extern "C" int func_0039A738(void* self);
+extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char D_0045D698[];
@@ -427,7 +427,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(char* self, sMsg_1C68* msg, uns
     }
     case 9: {
         int id = msg->id;
-        func_00192088(self, id, func_0039A738(msg));
+        func_00192088(self, id, cUIListBox_getCurrentEntryData(msg));
         func_00192380((sRuleSel_2380*)self, msg);
         break;
     }
@@ -657,7 +657,7 @@ extern "C" int func_00192240(void* self, int rule)
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_00192380);
 #ifdef SKIP_ASM
-extern "C" int func_0039A738(void* self);
+extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void func_00192088(void* self, int idx, int a2);
 extern "C" void cFEStateRuleSelect_updateMenuColor(void* self);
 extern int D_004410C8[];
@@ -670,7 +670,7 @@ struct sRuleSel_2380 {
 extern "C" void func_00192380(sRuleSel_2380* self, void* item)
 {
     int mask = D_004410C8[*(int*)((char*)item + 0x18)] << 1;
-    if (func_0039A738(item) == 0) {
+    if (cUIListBox_getCurrentEntryData(item) == 0) {
         for (int i = 1; i < 15; i++) {
             int bit = 1 << i;
             if ((bit & mask) == 0) {
@@ -816,7 +816,7 @@ extern "C" void func_00192740(void* self, int a1)
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_001927B0);
 #ifdef SKIP_ASM
-extern "C" int func_0039A738(void* self);
+extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" int func_00192948(void* self, int idx);
 
 struct sColor_001927B0 {
@@ -845,7 +845,7 @@ extern "C" void func_001927B0(sRuleSel_001927B0* self)
             sObj_001927B0* o = self->items[i];
             sVEnt_001927B0* e = &o->vt[11];
             e->fn((char*)o + e->delta, sColor_001927B0(1.0f, 1.0f, 1.0f, 1.0f));
-        } else if (func_0039A738(self->items[i])) {
+        } else if (cUIListBox_getCurrentEntryData(self->items[i])) {
             sObj_001927B0* o = self->items[i];
             sVEnt_001927B0* e = &o->vt[11];
             e->fn((char*)o + e->delta, sColor_001927B0(1.0f, 0.5921568870544434f, 0.04313725605607033f, 0.0f));

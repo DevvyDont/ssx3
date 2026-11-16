@@ -1222,7 +1222,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_002412A0(void* app);
-extern "C" void func_00270E68(void* p);
+extern "C" void cReplay_initSave(void* p);
 extern "C" int func_0014E048(void* be);
 extern "C" void cFEMemCard_createReadBuffer_59A0(void* self, int size) __asm__("cFEMemCard_createReadBuffer");
 extern "C" void func_0014E050(void* be, int a);
@@ -1262,7 +1262,7 @@ extern "C" void func_001D59A0(void)
     } else if (mode == 1) {
         void* replay = SSXApp->Game->Replay;
         *(int*)((char*)D_004A2028 + 0x1C8) = mode;
-        func_00270E68(replay);
+        cReplay_initSave(replay);
         int size = func_0014E048(cBE_getBE());
         cFEMemCard_createReadBuffer_59A0(D_004A2028, size);
         func_0014E050(cBE_getBE(), *(int*)((char*)D_004A2028 + 0x1D4));
@@ -1367,7 +1367,7 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D5D78);
 #ifdef SKIP_ASM
 extern void* D_004A2028;
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern "C" int func_002710A8(void* self, int* a, int* b);
+extern "C" int cReplay_getSaveData(void* self, int* a, int* b);
 extern "C" void func_00241138(void* self, int a, int b);
 
 // D_004A2028: the active memory-card state object (passed to cFEMemCard_createReadBuffer in this unit).
@@ -1381,7 +1381,7 @@ extern "C" int func_001D5D78(int key)
     int out;
     if (((sFEMemCard_5D78*)D_004A2028)->mode == 1) {
         void* r = cSSXApp_getMCManager(SSXApp);
-        if (func_002710A8(SSXApp->Game->Replay, &out, &key) != 0) {
+        if (cReplay_getSaveData(SSXApp->Game->Replay, &out, &key) != 0) {
             func_00241138(r, out, key);
             return 1;
         }

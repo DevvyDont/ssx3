@@ -238,7 +238,7 @@ extern void* D_0045C8B8[];
 struct sVec4K9418 { float x, y, z, w; } __attribute__((aligned(16)));
 // Same object as the unit's later `extern func_001694B8_sVec4 D_004FF130;` (that type is defined below this point).
 extern sVec4K9418 D_004FF130_K9418 __asm__("D_004FF130");
-extern "C" float func_00167E30(void* self);
+extern "C" float cCameraAlgorithm_getDefaultView(void* self);
 
 struct sCamCtlK9418 {
     float fov;      // 0x0
@@ -256,7 +256,7 @@ extern "C" void* func_00169418(void* p)
 {
     sCamCtlK9418* self = (sCamCtlK9418*)p;
     self->vtbl = D_0045BDE0;
-    float fov = func_00167E30(self);
+    float fov = cCameraAlgorithm_getDefaultView(self);
     self->type = 0x55;
     self->vtbl = D_0045C8B8;
     self->fov = fov;
@@ -360,8 +360,8 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_00169570);
 float* func_0027C098(void* cam);
 extern "C" void func_0027C0F0(void* cam, void* out);
 extern "C" float func_0031C228(float x);
-extern "C" void func_00160028(void* self, float v);
-extern "C" void func_00160130(void* self, float v);
+extern "C" void cCameraJitterer_updatePositionalJitter(void* self, float v);
+extern "C" void cCameraJitterer_updateRollJitter(void* self, float v);
 
 struct sVec4_169570 {
     float x, y, z, w;
@@ -479,8 +479,8 @@ extern "C" void func_00169570(char* p)
     self->yaw = Atan2_169570(d.y, d.x);
     float h = Length_169570(sVec2_169570(d.x, d.y));
     self->x48 = Atan2_169570(d.z, h);
-    func_00160028(p + 0x74, self->r6C);
-    func_00160130(p + 0x74, self->r70);
+    cCameraJitterer_updatePositionalJitter(p + 0x74, self->r6C);
+    cCameraJitterer_updateRollJitter(p + 0x74, self->r70);
 }
 #endif
 
@@ -507,7 +507,7 @@ extern sV_9828 D_004FF160_9828 __asm__("D_004FF160");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_9828 func_0031B748_9828(sM_9828* m) __asm__("func_0031B748");
 extern "C" sV_9828 func_00160228_9828(char* p, float a, float b) __asm__("func_00160228");
-extern "C" float func_001603F0(void* self);
+extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_9828(sM_9828* dst, const sM_9828* src)
@@ -649,7 +649,7 @@ extern "C" sPair_9828 func_00169828(char* p)
     sM_9828 m;
     vu0CopyMtx_9828(&m, &D_004FF1A0_9828);
     vu0TransMtx_9828(&m, Add_9828(*(sV_9828*)(p + 0x30), func_00160228_9828(p + 0x74, *(float*)(p + 0x44), *(float*)(p + 0x48))));
-    RotAxis_9828(&m, D_004FF140_9828, *(float*)(p + 0x40) + func_001603F0(p + 0x74));
+    RotAxis_9828(&m, D_004FF140_9828, *(float*)(p + 0x40) + cCameraJitterer_getRollJitter(p + 0x74));
     RotAxis_9828(&m, D_004FF150_9828, -*(float*)(p + 0x48));
     RotAxis_9828(&m, D_004FF160_9828, *(float*)(p + 0x44));
     return func_0031B748_9828(&m);
@@ -703,8 +703,8 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_00169DB0);
 float* func_0027C2A8(void* cam);
 extern "C" void func_0027C300(void* cam, void* out);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern "C" void func_00160028(void* self, float v);
-extern "C" void func_00160130(void* self, float v);
+extern "C" void cCameraJitterer_updatePositionalJitter(void* self, float v);
+extern "C" void cCameraJitterer_updateRollJitter(void* self, float v);
 
 struct sVec4_169DB0 {
     float x, y, z, w;
@@ -807,8 +807,8 @@ extern "C" void func_00169DB0(char* p)
     func_0031BE50(&s1, &c1, self->x48);
     sVec4_169DB0 d(c1 * c0, c1 * s0, s1, 0.0f);
     self->target = Sub_169DB0(self->pos, Scale_169DB0(d, self->dist));
-    func_00160028(p + 0x74, self->r6C);
-    func_00160130(p + 0x74, self->r70);
+    cCameraJitterer_updatePositionalJitter(p + 0x74, self->r6C);
+    cCameraJitterer_updateRollJitter(p + 0x74, self->r70);
 }
 #endif
 
@@ -835,7 +835,7 @@ extern sV_9F88 D_004FF160_9F88 __asm__("D_004FF160");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_9F88 func_0031B748_9F88(sM_9F88* m) __asm__("func_0031B748");
 extern "C" sV_9F88 func_00160228_9F88(char* p, float a, float b) __asm__("func_00160228");
-extern "C" float func_001603F0(void* self);
+extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_9F88(sM_9F88* dst, const sM_9F88* src)
@@ -977,7 +977,7 @@ extern "C" sPair_9F88 func_00169F88(char* p)
     sM_9F88 m;
     vu0CopyMtx_9F88(&m, &D_004FF1A0_9F88);
     vu0TransMtx_9F88(&m, Add_9F88(*(sV_9F88*)(p + 0x30), func_00160228_9F88(p + 0x74, *(float*)(p + 0x44), *(float*)(p + 0x48))));
-    RotAxis_9F88(&m, D_004FF140_9F88, *(float*)(p + 0x40) + func_001603F0(p + 0x74));
+    RotAxis_9F88(&m, D_004FF140_9F88, *(float*)(p + 0x40) + cCameraJitterer_getRollJitter(p + 0x74));
     RotAxis_9F88(&m, D_004FF150_9F88, -*(float*)(p + 0x48));
     RotAxis_9F88(&m, D_004FF160_9F88, *(float*)(p + 0x44));
     return func_0031B748_9F88(&m);
@@ -1032,8 +1032,8 @@ float* func_0027C4B8(void* cam);
 extern "C" char* cSSXScriptEngine_GetSubjectRider(void* self, int a1, int a2);
 extern "C" void func_0027C510(void* cam, void* out);
 extern "C" float func_0031C228(float x);
-extern "C" void func_00160028(void* self, float v);
-extern "C" void func_00160130(void* self, float v);
+extern "C" void cCameraJitterer_updatePositionalJitter(void* self, float v);
+extern "C" void cCameraJitterer_updateRollJitter(void* self, float v);
 
 struct sVec4_16A510 {
     float x, y, z, w;
@@ -1200,8 +1200,8 @@ extern "C" void func_0016A510(char* p)
     self->yaw = Atan2_16A510(t.y, t.x);
     float h = Length_16A510(sVec2_16A510(t.x, t.y));
     self->x48 = Atan2_16A510(t.z, h);
-    func_00160028(p + 0x70, self->r68);
-    func_00160130(p + 0x70, self->r6C);
+    cCameraJitterer_updatePositionalJitter(p + 0x70, self->r68);
+    cCameraJitterer_updateRollJitter(p + 0x70, self->r6C);
 }
 #endif
 
@@ -1228,7 +1228,7 @@ extern sV_A868 D_004FF160_A868 __asm__("D_004FF160");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_A868 func_0031B748_A868(sM_A868* m) __asm__("func_0031B748");
 extern "C" sV_A868 func_00160228_A868(char* p, float a, float b) __asm__("func_00160228");
-extern "C" float func_001603F0(void* self);
+extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_A868(sM_A868* dst, const sM_A868* src)
@@ -1370,7 +1370,7 @@ extern "C" sPair_A868 func_0016A868(char* p)
     sM_A868 m;
     vu0CopyMtx_A868(&m, &D_004FF1A0_A868);
     vu0TransMtx_A868(&m, Add_A868(*(sV_A868*)(p + 0x30), func_00160228_A868(p + 0x70, *(float*)(p + 0x44), *(float*)(p + 0x48))));
-    RotAxis_A868(&m, D_004FF140_A868, *(float*)(p + 0x40) + func_001603F0(p + 0x70));
+    RotAxis_A868(&m, D_004FF140_A868, *(float*)(p + 0x40) + cCameraJitterer_getRollJitter(p + 0x70));
     RotAxis_A868(&m, D_004FF150_A868, -*(float*)(p + 0x48));
     RotAxis_A868(&m, D_004FF160_A868, *(float*)(p + 0x44));
     return func_0031B748_A868(&m);
@@ -1408,8 +1408,8 @@ extern "C" char* cSSXScriptEngine_GetSubjectRider(void* self, int a1, int a2);
 extern "C" void func_0027C6F8(void* cam, void* out);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" float func_0031C228(float x);
-extern "C" void func_00160028(void* self, float v);
-extern "C" void func_00160130(void* self, float v);
+extern "C" void cCameraJitterer_updatePositionalJitter(void* self, float v);
+extern "C" void cCameraJitterer_updateRollJitter(void* self, float v);
 
 struct sVec4_16AD98 {
     float x, y, z, w;
@@ -1593,8 +1593,8 @@ extern "C" void func_0016AD98(char* p)
     func_0031BE50(&s1, &c1, yaw);
     sVec4_16AD98 d(c1 * c0, c1 * s0, -s1, 0.0f);
     self->target = Sub_16AD98(self->pos, Scale_16AD98(d, k));
-    func_00160028(p + 0x70, self->r68);
-    func_00160130(p + 0x70, self->r6C);
+    cCameraJitterer_updatePositionalJitter(p + 0x70, self->r68);
+    cCameraJitterer_updateRollJitter(p + 0x70, self->r6C);
 }
 #endif
 
@@ -1848,8 +1848,8 @@ extern "C" void func_0016B180(char* p)
     self->yaw = Atan2_B180(t2.y, t2.x);
     float h = Length_B180(sVec2_B180(t2.x, t2.y));
     self->x48 = Atan2_B180(t2.z, h);
-    func_00160028(p + 0x70, self->r68);
-    func_00160130(p + 0x70, self->r6C);
+    cCameraJitterer_updatePositionalJitter(p + 0x70, self->r68);
+    cCameraJitterer_updateRollJitter(p + 0x70, self->r6C);
 }
 #endif
 
@@ -1876,7 +1876,7 @@ extern sV_B7B8 D_004FF160_B7B8 __asm__("D_004FF160");
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" sPair_B7B8 func_0031B748_B7B8(sM_B7B8* m) __asm__("func_0031B748");
 extern "C" sV_B7B8 func_00160228_B7B8(char* p, float a, float b) __asm__("func_00160228");
-extern "C" float func_001603F0(void* self);
+extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_B7B8(sM_B7B8* dst, const sM_B7B8* src)
@@ -2018,7 +2018,7 @@ extern "C" sPair_B7B8 func_0016B7B8(char* p)
     sM_B7B8 m;
     vu0CopyMtx_B7B8(&m, &D_004FF1A0_B7B8);
     vu0TransMtx_B7B8(&m, Add_B7B8(*(sV_B7B8*)(p + 0x30), func_00160228_B7B8(p + 0x70, *(float*)(p + 0x44), *(float*)(p + 0x48))));
-    RotAxis_B7B8(&m, D_004FF140_B7B8, *(float*)(p + 0x40) + func_001603F0(p + 0x70));
+    RotAxis_B7B8(&m, D_004FF140_B7B8, *(float*)(p + 0x40) + cCameraJitterer_getRollJitter(p + 0x70));
     RotAxis_B7B8(&m, D_004FF150_B7B8, -*(float*)(p + 0x48));
     RotAxis_B7B8(&m, D_004FF160_B7B8, *(float*)(p + 0x44));
     return func_0031B748_B7B8(&m);

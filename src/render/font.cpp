@@ -950,9 +950,9 @@ extern "C" void func_00392D58(cPlayerLights* arg0, void *arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00392D90);
+INCLUDE_ASM("render/font", cPlayerLights_AddDirectional);
 #ifdef SKIP_ASM
-extern "C" void func_00392D90(cPlayerLights* self, sFontQuad* q, tRGB* v)
+extern "C" void cPlayerLights_AddDirectional(cPlayerLights* self, sFontQuad* q, tRGB* v)
 {
     ((&self->mDirectionalLightColours[0]))[self->mNumDirectionalLights] = *v;
     ((sFontQuad*)&self->mDirectionalLightDirections[0])[self->mNumDirectionalLights] = *q;

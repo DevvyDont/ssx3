@@ -19,8 +19,8 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int idx);
-extern "C" int func_0039A768(void* box, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* box, unsigned char sel);
+extern "C" int cUIListBox_getEntryByData(void* box, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* box, unsigned char sel);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" void* func_0028B180();
@@ -207,8 +207,8 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
             cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F8E8), 0);
             cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F8F8), 1);
             cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F910), 2);
-            if (func_0039A768(w, iface->getOptions().f30, &sel))
-                func_0039A7A8(w, sel);
+            if (cUIListBox_getEntryByData(w, iface->getOptions().f30, &sel))
+                cUIListBox_setCurrentEntryByIndex(w, sel);
         }
     }
     {
@@ -218,8 +218,8 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
             cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F930), 0x3D);
             cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F940), 0x3E);
             char* r = *(char**)(riders_PO() + 4);
-            if (func_0039A768(w, *(int*)(*(char**)(r + 0xA8) + 0x18), &sel))
-                func_0039A7A8(w, sel);
+            if (cUIListBox_getEntryByData(w, *(int*)(*(char**)(r + 0xA8) + 0x18), &sel))
+                cUIListBox_setCurrentEntryByIndex(w, sel);
             void* t = find_PO(self, D_0046F950);
             if (t != 0) {
                 setFormatted_PO(t, D_0046F960, 1);
@@ -235,8 +235,8 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
             char* rs = riders_PO();
             if (*(unsigned int*)(rs + 0x10) >= 2) {
                 char* r = *(char**)(rs + 8);
-                if (func_0039A768(w, *(int*)(*(char**)(r + 0xA8) + 0x18), &sel))
-                    func_0039A7A8(w, sel);
+                if (cUIListBox_getEntryByData(w, *(int*)(*(char**)(r + 0xA8) + 0x18), &sel))
+                    cUIListBox_setCurrentEntryByIndex(w, sel);
             }
             void* t = find_PO(self, D_0046F970);
             if (t != 0) {
@@ -274,8 +274,8 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
             cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F980), 0);
             cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F990), 1);
             unsigned char sel2;
-            if (func_0039A768(w, iface->getOptions().f17, &sel2))
-                func_0039A7A8(w, sel2);
+            if (cUIListBox_getEntryByData(w, iface->getOptions().f17, &sel2))
+                cUIListBox_setCurrentEntryByIndex(w, sel2);
             func_00287558(func_0028B180(), Cfg_PO().f17 != 0);
         }
     }
@@ -285,8 +285,8 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
             cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F980), 0);
             cUIListBox_addEntryByStringID(w, GetHashValue32(D_0046F990), 1);
             unsigned char sel3;
-            if (func_0039A768(w, iface->getOptions().f16, &sel3))
-                func_0039A7A8(w, sel3);
+            if (cUIListBox_getEntryByData(w, iface->getOptions().f16, &sel3))
+                cUIListBox_setCurrentEntryByIndex(w, sel3);
             func_002875D0(func_0028B180(), Cfg_PO().f16 != 0);
         }
     }
@@ -409,7 +409,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_00211088(void* self, void* engine, unsigned char a2, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void func_0039F190(void* self, int a1);
-extern "C" int func_0039A738(void* obj);
+extern "C" int cUIListBox_getCurrentEntryData(void* obj);
 extern "C" void cChaseCameraController_switchCamera_UserChange(void* a0, int a1, void* a2);
 extern "C" void* func_0028B180();
 extern "C" void func_00287410(void* snd, int v);
@@ -515,11 +515,11 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
         if (IsId_A238(obj, D_004A2498)) {
             D_00535610_A238.f30 = *(unsigned char*)(obj + 0x319);
         } else if (IsId_A238(obj, D_004A24A0)) {
-            int on = func_0039A738(obj);
+            int on = cUIListBox_getCurrentEntryData(obj);
             char* p = (char*)Sound_A238(4);
             cChaseCameraController_switchCamera_UserChange(*(void**)(p + 0xA8), on, p);
         } else if (IsId_A238(obj, D_004A24A8)) {
-            int on = func_0039A738(obj);
+            int on = cUIListBox_getCurrentEntryData(obj);
             char* p = (char*)Sound_A238(8);
             cChaseCameraController_switchCamera_UserChange(*(void**)(p + 0xA8), on, p);
         } else if (IsId_A238(obj, D_004A24B0)) {
@@ -532,10 +532,10 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
             SetF4_A238(*(int*)(obj + 0x74));
             func_00287520(func_0028B180(), iface->getOptions().f4);
         } else if (IsId_A238(obj, D_004A24C8)) {
-            D_00535610_A238.f17 = func_0039A738(obj) != 0;
+            D_00535610_A238.f17 = cUIListBox_getCurrentEntryData(obj) != 0;
             func_00287558(func_0028B180(), iface->getOptions().f17 != 0);
         } else if (IsId_A238(obj, D_004A24D0)) {
-            D_00535610_A238.f16 = func_0039A738(obj) != 0;
+            D_00535610_A238.f16 = cUIListBox_getCurrentEntryData(obj) != 0;
             func_002875D0(func_0028B180(), iface->getOptions().f16 != 0);
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);

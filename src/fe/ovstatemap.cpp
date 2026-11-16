@@ -1404,7 +1404,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
-extern "C" void func_003A19F8(void* text, char* str);
+extern "C" void cUITextScroll_addAsciiString(void* text, char* str);
 extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
 extern "C" int func_00258160(int a, char* name, int len);
 extern char D_0046E660[];
@@ -1457,7 +1457,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
                 cBXString_cBXString2(&s, net + 0x498);
                 cBXString_Concat(&s, D_004A2710);
                 cBXString_Concat(&s, name);
-                func_003A19F8(obj, s.str);
+                cUITextScroll_addAsciiString(obj, s.str);
                 func_001A83D8(obj, 0x28, 4, c8, c4, c6, none, 1);
                 show_A4E0(obj, 1);
                 cBXString__cBXString(&s, 2);

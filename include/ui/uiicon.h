@@ -3,7 +3,7 @@
 
 // cUIIcon: a UI object drawn as a textured sprite (record type 0x11). Size 0x88: cUIScreen_createObjectByStruct does
 // operator new(0x88, "UIIcon") + the cUIThing ctor func_0039FB30, stores cUIIcon_vtbl (D_00494AA8), constructs mAttrIcon
-// (func_0021CCC8 on this + 0x74), mTextureID = -1, mpTextureElem = 0. Default ctors func_003A4DF0 / func_003A4E38
+// (func_0021CCC8 on this + 0x74), mTextureID = -1, mpTextureElem = 0. Default ctors func_003A4DF0 / cUIIcon_cUIIcon
 // (ui/uivector) do the same. Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below.
 // Methods: vtable slots 0 ~cUIIcon (cUIIcon__cUIIcon__FPv), 9 setUIData (cUIIcon_setUIData, ui/uiengine), 16 render2D
 // (cUIIcon_render2D = func_00398A78, ui/uiengine), 21 getType; out-of-line inline accessors in ui/uivector
@@ -33,7 +33,7 @@ struct cUIIcon {
     // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] cUIIcon_vtbl D_00494AA8 (createObjectByStruct, func_003A4DF0, func_003A4E38, the dtor)
+    void** mVtbl;                    // 0x008 [R] cUIIcon_vtbl D_00494AA8 (createObjectByStruct, func_003A4DF0, cUIIcon_cUIIcon, the dtor)
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on
@@ -51,8 +51,8 @@ struct cUIIcon {
                                      //       cUIThing_setUIData points it after the object record
     cUIThing* mpParent;              // 0x040 [P] getParent/setParent (lw/sw 0x40; retail func_003A4C00/func_003A4BF8); [R] = pParent;
                                      //       [U] func_003A0290 sums mPosition up the parent chain
-    t3Vector mPosition;              // 0x044 [P] getPosition/setPosition (retail func_003A4C08/func_003A4C28); [U] channels 0-1
-    t3Vector mScale;                 // 0x050 [P] getScale/setScale (retail func_003A4C48/func_003A4C68); [R] = {1,1,1}; [U] channels 9-10 (x 0.01)
+    t3Vector mPosition;              // 0x044 [P] getPosition/setPosition (retail cUIThing_getPosition/cUIThing_setPosition); [U] channels 0-1
+    t3Vector mScale;                 // 0x050 [P] getScale/setScale (retail cUIThing_getScale/cUIThing_setScale); [R] = {1,1,1}; [U] channels 9-10 (x 0.01)
     cUIScreen* mpScreen;             // 0x05C [P] getScreen (preview lw 0x68; retail func_003A4C88 lw 0x5C); [R] = pScreen
     t3Vector mSize;                  // 0x060 [P] getSize/setSize (preview 0x5C; retail cUIThing_getSize/setSize, vtable slots 20/21);
                                      //       [U] channels 6-7; cUIText wraps at mSize.x

@@ -6857,7 +6857,7 @@ INCLUDE_ASM("ai/rider", func_00125EB8);
 
 cRider_125EB8::~cRider_125EB8()
 {
-    func_002700D8(SSXApp->Game->Replay, mDF8);
+    cReplay_removeCache(SSXApp->Game->Replay, mDF8);
 }
 
 // PORT: the compiler names this dtor _$_13cRider_125EB8; expose it under the address-derived name.

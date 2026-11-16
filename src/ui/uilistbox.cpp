@@ -32,7 +32,7 @@ extern "C" unsigned char cUIListBox_addEntryByAsciiString(cUIListBox* self, cons
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A4B0);
+INCLUDE_ASM("ui/uilistbox", cUIListBox_addEntryByUnicodeString);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -40,7 +40,7 @@ extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 extern char D_00493DC0[];
 
-extern "C" unsigned char func_0039A4B0(cUIListBox* self, unsigned short* str, int data)
+extern "C" unsigned char cUIListBox_addEntryByUnicodeString(cUIListBox* self, unsigned short* str, int data)
 {
     unsigned short* u = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_00493DC0, 0x100, 0);
     USTR_copy(u, str);
@@ -120,9 +120,9 @@ extern "C" void func_0039A670(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A708);
+INCLUDE_ASM("ui/uilistbox", cUIListBox_getCurrentAsciiText);
 #ifdef SKIP_ASM
-extern "C" int func_0039A708(cUIListBox* self)
+extern "C" int cUIListBox_getCurrentAsciiText(cUIListBox* self)
 {
     if (self->mCurrentEntry < self->mNumEntries) {
         return *(int*)((char*)self + self->mCurrentEntry * 0x14 + 0xA0);
@@ -132,9 +132,9 @@ extern "C" int func_0039A708(cUIListBox* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A738);
+INCLUDE_ASM("ui/uilistbox", cUIListBox_getCurrentEntryData);
 #ifdef SKIP_ASM
-extern "C" int func_0039A738(cUIListBox* self)
+extern "C" int cUIListBox_getCurrentEntryData(cUIListBox* self)
 {
     if (self->mCurrentEntry < self->mNumEntries) {
         return *(int*)((char*)self + self->mCurrentEntry * 0x14 + 0xA4);
@@ -144,9 +144,9 @@ extern "C" int func_0039A738(cUIListBox* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A768);
+INCLUDE_ASM("ui/uilistbox", cUIListBox_getEntryByData);
 #ifdef SKIP_ASM
-extern "C" int func_0039A768(cUIListBox* self, int key, unsigned char* out)
+extern "C" int cUIListBox_getEntryByData(cUIListBox* self, int key, unsigned char* out)
 {
     int i;
     for (i = 0; i < self->mNumEntries; i++) {
@@ -160,9 +160,9 @@ extern "C" int func_0039A768(cUIListBox* self, int key, unsigned char* out)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A7A8);
+INCLUDE_ASM("ui/uilistbox", cUIListBox_setCurrentEntryByIndex);
 #ifdef SKIP_ASM
-extern "C" void func_0039A7A8(cUIListBox* self, int a1)
+extern "C" void cUIListBox_setCurrentEntryByIndex(cUIListBox* self, int a1)
 {
     unsigned char v = (unsigned char)a1;
     if (v < self->mNumEntries) {
@@ -172,9 +172,9 @@ extern "C" void func_0039A7A8(cUIListBox* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A7C8);
+INCLUDE_ASM("ui/uilistbox", cUIListBox_setEntryDataByIndex);
 #ifdef SKIP_ASM
-extern "C" void func_0039A7C8(cUIListBox* self, int a1, int value)
+extern "C" void cUIListBox_setEntryDataByIndex(cUIListBox* self, int a1, int value)
 {
     unsigned char v = (unsigned char)a1;
     if (v < self->mNumEntries) {
@@ -239,7 +239,7 @@ extern "C" void cUIListBox_setEntryByAsciiString(cUIListBox_sObj* self, unsigned
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A8D8);
+INCLUDE_ASM("ui/uilistbox", cUIListBox_setCallbackListBox);
 #ifdef SKIP_ASM
 struct sVEntry39A8D8 {
     short delta;
@@ -247,7 +247,7 @@ struct sVEntry39A8D8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_0039A8D8(cUIListBox* self, int count)
+extern "C" void cUIListBox_setCallbackListBox(cUIListBox* self, int count)
 {
     *(char*)&self->mNumEntries = count;
     *(char*)&self->mCurrentEntry = 0;

@@ -715,14 +715,14 @@ extern "C" void *cListNode_cListNode(cListNode* arg0) {
 INCLUDE_ASM("ui/uivector", cListNode__cListNode);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void func_003A4868(cListNode* self);
+extern "C" void cListNode_destroyListNode(cListNode* self);
 
 extern void* cListNode_vtbl[];
 
 extern "C" void cListNode__cListNode(int* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cListNode_vtbl;
-    func_003A4868((cListNode*)self);
+    cListNode_destroyListNode((cListNode*)self);
     if (flags & 1) {
         operator_delete(self);
     }
@@ -761,9 +761,9 @@ extern "C" void func_003A4860(void *arg0, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4868);
+INCLUDE_ASM("ui/uivector", cListNode_destroyListNode);
 #ifdef SKIP_ASM
-extern "C" void func_003A4868(cListNode* self)
+extern "C" void cListNode_destroyListNode(cListNode* self)
 {
     cListNode_removeFromList(self);
 }
@@ -787,9 +787,9 @@ extern "C" void cList__cList(cList* self, int flags)
     self->mVtbl = cList_vtbl;
     cList_destroyList(self);
     self->mEnd.mVtbl = cListNode_vtbl;
-    func_003A4868((cListNode*)((char*)self + 0xC));
+    cListNode_destroyListNode((cListNode*)((char*)self + 0xC));
     self->mStart.mVtbl = cListNode_vtbl;
-    func_003A4868((cListNode*)self);
+    cListNode_destroyListNode((cListNode*)self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -988,7 +988,7 @@ extern "C" void cUIThing_setVisible(cUIThing* self, int enable)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4AA8);
+INCLUDE_ASM("ui/uivector", cUIThing_setWrap);
 #ifdef SKIP_ASM
 struct sUIVectorFlags8 {
     bool bit0 : 1;
@@ -1000,7 +1000,7 @@ struct sUIVectorFlags8 {
     bool bit6 : 1;
     bool bit7 : 1;
 };
-extern "C" void func_003A4AA8(cUIThing* self, int enable)
+extern "C" void cUIThing_setWrap(cUIThing* self, int enable)
 {
     ((sUIVectorFlags8*)((char*)self + 0x14))->bit7 = enable;
 }
@@ -1176,33 +1176,33 @@ extern "C" int func_003A4C00(cUIThing* arg0) {
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4C08);
+INCLUDE_ASM("ui/uivector", cUIThing_getPosition);
 #ifdef SKIP_ASM
-extern "C" void func_003A4C08(cUIThing* self, t3Vector* out)
+extern "C" void cUIThing_getPosition(cUIThing* self, t3Vector* out)
 {
     *out = *(&self->mPosition);
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4C28);
+INCLUDE_ASM("ui/uivector", cUIThing_setPosition);
 #ifdef SKIP_ASM
-extern "C" void func_003A4C28(cUIThing* self, t3Vector* out)
+extern "C" void cUIThing_setPosition(cUIThing* self, t3Vector* out)
 {
     *(&self->mPosition) = *out;
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4C48);
+INCLUDE_ASM("ui/uivector", cUIThing_getScale);
 #ifdef SKIP_ASM
-extern "C" void func_003A4C48(cUIThing* self, t3Vector* out)
+extern "C" void cUIThing_getScale(cUIThing* self, t3Vector* out)
 {
     *out = *(&self->mScale);
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4C68);
+INCLUDE_ASM("ui/uivector", cUIThing_setScale);
 #ifdef SKIP_ASM
-extern "C" void func_003A4C68(cUIThing* self, t3Vector* out)
+extern "C" void cUIThing_setScale(cUIThing* self, t3Vector* out)
 {
     *(&self->mScale) = *out;
 }
@@ -1401,14 +1401,14 @@ extern "C" void* func_003A4DF0(cUIIcon* self)
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A4E38);
+INCLUDE_ASM("ui/uivector", cUIIcon_cUIIcon);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern "C" void* func_0021CCC8(void* p);
 extern void* cUIIcon_vtbl[];
 
-extern "C" void* func_003A4E38(cUIIcon* self)
+extern "C" void* cUIIcon_cUIIcon(cUIIcon* self)
 {
     func_0039FB30_self(((char*)self));
     self->mVtbl = cUIIcon_vtbl;
@@ -1583,14 +1583,14 @@ extern "C" void* func_003A4FE0(cUIGroup* self)
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5028);
+INCLUDE_ASM("ui/uivector", cUIGroup_cUIGroup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern "C" void* func_003977E8(void* p);
 extern void* cUIGroup_vtbl[];
 
-extern "C" void* func_003A5028(cUIGroup* self)
+extern "C" void* cUIGroup_cUIGroup(cUIGroup* self)
 {
     func_0039FB30_self(((char*)self));
     self->mVtbl = cUIGroup_vtbl;
@@ -1607,7 +1607,7 @@ extern void* cList_vtbl[];
 extern void* cListNode_vtbl[];
 // PORT: called here for its side effect only; declared void so the scheduling matches.
 extern "C" void cList_destroyList_v(void* p) __asm__("cList_destroyList");
-extern "C" void func_003A4868(cListNode* p);
+extern "C" void cListNode_destroyListNode(cListNode* p);
 // PORT: the unit declares cUIThing__cUIThing with one argument; the dtor chain passes the delete flag too.
 extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cUIThing");
 
@@ -1623,9 +1623,9 @@ extern "C" void cUIGroup__cUIGroup(cUIGroup* self, int flag)
     self->mList.mVtbl = cList_vtbl;
     cList_destroyList_v(((char*)self) + 0x74);
     self->mList.mEnd.mVtbl = cListNode_vtbl;
-    func_003A4868((cListNode*)(((char*)self) + 0x80));
+    cListNode_destroyListNode((cListNode*)(((char*)self) + 0x80));
     self->mList.mStart.mVtbl = cListNode_vtbl;
-    func_003A4868((cListNode*)(((char*)self) + 0x74));
+    cListNode_destroyListNode((cListNode*)(((char*)self) + 0x74));
     cUIThing__cUIThing_2(((char*)self), flag);
 }
 #endif
@@ -1781,7 +1781,7 @@ extern void* cList_vtbl[];
 extern void* cListNode_vtbl[];
 // PORT: called here for its side effect only; declared void so the scheduling matches.
 extern "C" void cList_destroyList_v(void* p) __asm__("cList_destroyList");
-extern "C" void func_003A4868(cListNode* p);
+extern "C" void cListNode_destroyListNode(cListNode* p);
 // PORT: the unit declares cUIThing__cUIThing with one argument; the dtor chain passes the delete flag too.
 extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cUIThing");
 
@@ -1799,9 +1799,9 @@ extern "C" void cUIMenu__cUIMenu(cUIMenu* self, int flag)
     *(void***)(((char*)self) + 0x8C) = cList_vtbl;
     cList_destroyList_v(((char*)self) + 0x74);
     *(void***)(((char*)self) + 0x88) = cListNode_vtbl;
-    func_003A4868((cListNode*)(((char*)self) + 0x80));
+    cListNode_destroyListNode((cListNode*)(((char*)self) + 0x80));
     *(void***)(((char*)self) + 0x7C) = cListNode_vtbl;
-    func_003A4868((cListNode*)(((char*)self) + 0x74));
+    cListNode_destroyListNode((cListNode*)(((char*)self) + 0x74));
     cUIThing__cUIThing_2(((char*)self), flag);
 }
 #endif
@@ -1946,14 +1946,14 @@ extern "C" void* func_003A5420(cUIPair* self)
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5468);
+INCLUDE_ASM("ui/uivector", cUIPair_cUIPair);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern "C" void* func_003A5508(void* self);
 extern void* cUIPair_vtbl[];
 
-extern "C" void* func_003A5468(cUIPair* self)
+extern "C" void* cUIPair_cUIPair(cUIPair* self)
 {
     func_0039FB30_self(((char*)self));
     self->mVtbl = cUIPair_vtbl;
@@ -2022,7 +2022,7 @@ extern "C" int func_003A5528(cUIPair* arg0) {
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5530);
+INCLUDE_ASM("ui/uivector", cUIPair_setEntry);
 #ifdef SKIP_ASM
 struct sVEntry5530 {
     short delta;
@@ -2030,7 +2030,7 @@ struct sVEntry5530 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_003A5530(cUIPair* self, void* obj)
+extern "C" void cUIPair_setEntry(cUIPair* self, void* obj)
 {
     char* old = (char*)self->mpEntry;
     if (old != 0) {
@@ -2048,7 +2048,7 @@ extern "C" int func_003A5580(cUIPair* arg0) {
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5588);
+INCLUDE_ASM("ui/uivector", cUIPair_setWidget);
 #ifdef SKIP_ASM
 struct sVEntry5588 {
     short delta;
@@ -2056,7 +2056,7 @@ struct sVEntry5588 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_003A5588(cUIPair* self, void* obj)
+extern "C" void cUIPair_setWidget(cUIPair* self, void* obj)
 {
     char* old = (char*)self->mpWidget;
     if (old != 0) {
@@ -2131,9 +2131,9 @@ extern "C" int func_003A56C8(cUIListBox* arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A56D8);
+INCLUDE_ASM("ui/uivector", cUIListBox_setShadow);
 #ifdef SKIP_ASM
-extern "C" void func_003A56D8(cUIListBox* self, int enable) {
+extern "C" void cUIListBox_setShadow(cUIListBox* self, int enable) {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit2 = enable;
 }
 #endif
@@ -2147,9 +2147,9 @@ extern "C" int func_003A56F8(cUIListBox* arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5708);
+INCLUDE_ASM("ui/uivector", cUIListBox_setUseStaticColour);
 #ifdef SKIP_ASM
-extern "C" void func_003A5708(cUIListBox* self, int enable)
+extern "C" void cUIListBox_setUseStaticColour(cUIListBox* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit5 = enable;
 }
@@ -2172,17 +2172,17 @@ extern "C" void func_003A5738(cUIListBox* self, int enable)
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5758);
+INCLUDE_ASM("ui/uivector", cUIListBox_setShadowColour);
 #ifdef SKIP_ASM
-extern "C" void func_003A5758(cUIListBox* self, tARGB* in)
+extern "C" void cUIListBox_setShadowColour(cUIListBox* self, tARGB* in)
 {
     *(&self->mShadowColour) = *in;
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5780);
+INCLUDE_ASM("ui/uivector", cUIListBox_setStaticColour);
 #ifdef SKIP_ASM
-extern "C" void func_003A5780(cUIListBox* self, tARGB* in)
+extern "C" void cUIListBox_setStaticColour(cUIListBox* self, tARGB* in)
 {
     *(&self->mStaticColour) = *in;
 }
@@ -2402,22 +2402,22 @@ extern "C" void func_003A59C0(cUIState* arg0, int arg1) {
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A59E0);
+INCLUDE_ASM("ui/uivector", cUIState_incrementPopup);
 #ifdef SKIP_ASM
 struct sUIVecMode1C {
     unsigned int bit0 : 1;
     unsigned int mode : 2;
 };
-extern "C" void func_003A59E0(cUIState* self)
+extern "C" void cUIState_incrementPopup(cUIState* self)
 {
     sUIVecMode1C* f = (sUIVecMode1C*)(((char*)self) + 0x1C);
     f->mode = f->mode + 1;
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5A10);
+INCLUDE_ASM("ui/uivector", cUIState_decrementPopup);
 #ifdef SKIP_ASM
-extern "C" void func_003A5A10(cUIState* self)
+extern "C" void cUIState_decrementPopup(cUIState* self)
 {
     sUIVecMode1C* f = (sUIVecMode1C*)(((char*)self) + 0x1C);
     if (f->mode != 0)
@@ -2646,14 +2646,14 @@ int cUIState_handleEvent(void* self)
 INCLUDE_ASM("ui/uivector", func_003A5B48);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void func_003A4868(cListNode* self);
+extern "C" void cListNode_destroyListNode(cListNode* self);
 
 extern void* cListNode_vtbl[];
 
 extern "C" void func_003A5B48(int* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cListNode_vtbl;
-    func_003A4868((cListNode*)self);
+    cListNode_destroyListNode((cListNode*)self);
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2682,14 +2682,14 @@ extern "C" void* func_003A5B98(cUIScreen* self)
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5C08);
+INCLUDE_ASM("ui/uivector", cUIScreen_cUIScreen);
 #ifdef SKIP_ASM
 extern "C" void* func_001DD580(void* self);
 extern "C" void* func_003977E8(void* p);
 extern "C" void* func_0039FB30(void* self, int a, int b);
 extern void* cUIScreen_vtbl[];
 
-extern "C" void* func_003A5C08(cUIScreen* self, int arg)
+extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, int arg)
 {
     self->mpNext = (cListNode*)((char*)self);
     self->mpPrev = (cListNode*)((char*)self);
@@ -2754,9 +2754,9 @@ extern "C" int func_003A5D10(int arg0) {
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5D18);
+INCLUDE_ASM("ui/uivector", cUIScreen_setVisible);
 #ifdef SKIP_ASM
-extern "C" void func_003A5D18(cUIScreen* self, int enable)
+extern "C" void cUIScreen_setVisible(cUIScreen* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x54))->bit6 = enable;
 }
@@ -2949,17 +2949,17 @@ extern "C" void cUIText_setEllipses(cUIText* self, int enable)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5F08);
+INCLUDE_ASM("ui/uivector", cUIText_setShadowColour);
 #ifdef SKIP_ASM
-extern "C" void func_003A5F08(cUIText* self, tARGB* in)
+extern "C" void cUIText_setShadowColour(cUIText* self, tARGB* in)
 {
     *(&self->mShadowColour) = *in;
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5F30);
+INCLUDE_ASM("ui/uivector", cUIText_setStaticColour);
 #ifdef SKIP_ASM
-extern "C" void func_003A5F30(cUIText* self, tARGB* in)
+extern "C" void cUIText_setStaticColour(cUIText* self, tARGB* in)
 {
     *(&self->mStaticColour) = *in;
 }
@@ -2985,13 +2985,13 @@ extern "C" void* func_003A5F60(cUIScrollBar* self)
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5FA0);
+INCLUDE_ASM("ui/uivector", cUIScrollBar_cUIScrollBar);
 #ifdef SKIP_ASM
 extern void* cUIScrollBar_vtbl[];
 // PORT: the other ctors in the unit call this base ctor with (self, 0, 0)
 extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 
-extern "C" void* func_003A5FA0(cUIScrollBar* self)
+extern "C" void* cUIScrollBar_cUIScrollBar(cUIScrollBar* self)
 {
     func_0039FB30_self(((char*)self));
     self->mpObjBackground = 0;
@@ -3112,13 +3112,13 @@ extern "C" void* func_003A60E0(cUIProgress* self)
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A6120);
+INCLUDE_ASM("ui/uivector", cUIProgress_cUIProgress);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern void* cUIProgress_vtbl[];
 
-extern "C" void* func_003A6120(cUIProgress* self)
+extern "C" void* cUIProgress_cUIProgress(cUIProgress* self)
 {
     func_0039FB30_self(((char*)self));
     self->mVtbl = cUIProgress_vtbl;
@@ -3187,13 +3187,13 @@ extern "C" void* func_003A6190(cUISlider* self)
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", func_003A61D0);
+INCLUDE_ASM("ui/uivector", cUISlider_cUISlider);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039FB30_self(void* self) __asm__("func_0039FB30");
 extern void* cUISlider_vtbl[];
 
-extern "C" void* func_003A61D0(cUISlider* self)
+extern "C" void* cUISlider_cUISlider(cUISlider* self)
 {
     func_0039FB30_self(((char*)self));
     self->mVtbl = cUISlider_vtbl;
@@ -3275,8 +3275,8 @@ INCLUDE_ASM("ui/uivector", cUITextScroll__cUITextScroll);
 extern void* cUITextScroll_vtbl[];
 extern void* cList_vtbl[];
 extern void* cListNode_vtbl[];
-extern "C" void func_003A4868(cListNode* self);
-extern "C" void func_003A18C0(void* self);
+extern "C" void cListNode_destroyListNode(cListNode* self);
+extern "C" void cUITextScroll_clearBuffer(void* self);
 // PORT: the unit declares cList_destroyList as returning void*; its body (util/list) is void.
 extern "C" void cList_destroyList_v(void* self) __asm__("cList_destroyList");
 // PORT: the unit declares cUIThing__cUIThing with one parameter; the real body is a
@@ -3286,13 +3286,13 @@ extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThin
 extern "C" void cUITextScroll__cUITextScroll(cUITextScroll* self, int flags)
 {
     self->mVtbl = cUITextScroll_vtbl;
-    func_003A18C0(self);
+    cUITextScroll_clearBuffer(self);
     self->mList.mVtbl = cList_vtbl;
     cList_destroyList_v((char*)self + 0x8C);
     self->mList.mEnd.mVtbl = cListNode_vtbl;
-    func_003A4868((cListNode*)((char*)self + 0x98));
+    cListNode_destroyListNode((cListNode*)((char*)self + 0x98));
     self->mList.mStart.mVtbl = cListNode_vtbl;
-    func_003A4868((cListNode*)((char*)self + 0x8C));
+    cListNode_destroyListNode((cListNode*)((char*)self + 0x8C));
     cUIThing__cUIThing_dtor(self, flags);
 }
 #endif
@@ -3329,27 +3329,27 @@ extern "C" int func_003A6368(cUITextScroll* arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A6378);
+INCLUDE_ASM("ui/uivector", cUITextScroll_setShadow);
 #ifdef SKIP_ASM
-extern "C" void func_003A6378(cUITextScroll* self, int enable)
+extern "C" void cUITextScroll_setShadow(cUITextScroll* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit3 = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A6398);
+INCLUDE_ASM("ui/uivector", cUITextScroll_setUnicode);
 #ifdef SKIP_ASM
-extern "C" void func_003A6398(cUITextScroll* self, int enable)
+extern "C" void cUITextScroll_setUnicode(cUITextScroll* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit4 = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A63B8);
+INCLUDE_ASM("ui/uivector", cUITextScroll_setShadowColour);
 #ifdef SKIP_ASM
-extern "C" void func_003A63B8(cUITextScroll* self, tARGB* in)
+extern "C" void cUITextScroll_setShadowColour(cUITextScroll* self, tARGB* in)
 {
     *(&self->mShadowColour) = *in;
 }

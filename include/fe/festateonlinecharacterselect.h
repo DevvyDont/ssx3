@@ -114,7 +114,7 @@ struct cFEStateOnlineCharacterSelect {
     // --- cFEStateOnlineCharacterSelect
     cUIListBox* mpLBChallengerSelect; // 0x6D0 [U] onWidgetCreate cFEStateOnlineCharacterSelect_onWidgetCreate: widget "LBChallengerSelect" (10 rider
                                     //       names from D_00440F68), preset to the current rider; its value
-                                    //       (func_0039A738) is the picked rider in cFEStateOnlineCharacterSelect_onGainTransition / onWidgetEvent
+                                    //       (cUIListBox_getCurrentEntryData) is the picked rider in cFEStateOnlineCharacterSelect_onGainTransition / onWidgetEvent
                                     //       cFEStateOnlineCharacterSelect_onWidgetEvent
     int unk_6D4;                    // 0x6D4 no access seen
     int miConfirmCtrl;              // 0x6D8 [R] 0 (cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect); [U] onWidgetEvent cFEStateOnlineCharacterSelect_onWidgetEvent stores

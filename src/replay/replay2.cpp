@@ -2,11 +2,11 @@
 
 INCLUDE_ASM("replay/replay2", cReplay_addCache);
 
-INCLUDE_ASM("replay/replay2", func_002700D8);
+INCLUDE_ASM("replay/replay2", cReplay_removeCache);
 
 INCLUDE_ASM("replay/replay2", cReplay_allocReplayFrame);
 
-INCLUDE_ASM("replay/replay2", func_002701A0);
+INCLUDE_ASM("replay/replay2", cReplay_freeOneReplayFrame);
 
 INCLUDE_ASM("replay/replay2", cReplay_freeReplayFrame);
 
@@ -14,21 +14,21 @@ INCLUDE_ASM("replay/replay2", cReplay_isPauseAI);
 
 INCLUDE_ASM("replay/replay2", cReplay_rewind);
 
-INCLUDE_ASM("replay/replay2", func_00270378);
+INCLUDE_ASM("replay/replay2", cReplay_lastFrame);
 
 INCLUDE_ASM("replay/replay2", cReplay_stepFrame);
 
-INCLUDE_ASM("replay/replay2", func_00270538);
+INCLUDE_ASM("replay/replay2", cReplay_purgeIdleFrames);
 
 INCLUDE_ASM("replay/replay2", func_002705A8);
 
-INCLUDE_ASM("replay/replay2", func_002705B0);
+INCLUDE_ASM("replay/replay2", cReplay_endMarkInstantReplay);
 
 INCLUDE_ASM("replay/replay2", cReplay_cancelMarkInstantReplay);
 
-INCLUDE_ASM("replay/replay2", func_00270658);
+INCLUDE_ASM("replay/replay2", cReplay_startInstantReplay);
 
-INCLUDE_ASM("replay/replay2", func_00270670);
+INCLUDE_ASM("replay/replay2", cReplay_stopInstantReplay);
 
 INCLUDE_ASM("replay/replay2", cReplay_startAutoReplay);
 
@@ -36,33 +36,33 @@ INCLUDE_ASM("replay/replay2", cReplay_stopAutoReplay__FPv);
 
 INCLUDE_ASM("replay/replay2", func_00270730);
 
-INCLUDE_ASM("replay/replay2", func_002707E0);
+INCLUDE_ASM("replay/replay2", cReplay_eventJump);
 
-INCLUDE_ASM("replay/replay2", func_00270870);
+INCLUDE_ASM("replay/replay2", cReplay_eventLand);
 
-INCLUDE_ASM("replay/replay2", func_002708F0);
+INCLUDE_ASM("replay/replay2", cReplay_eventWipeout);
 
 INCLUDE_ASM("replay/replay2", cReplay_eventReset);
 
-INCLUDE_ASM("replay/replay2", func_002709D8);
+INCLUDE_ASM("replay/replay2", cReplay_eventWScript);
 
 INCLUDE_ASM("replay/replay2", cReplay_eventChapter);
 
 INCLUDE_ASM("replay/replay2", func_00270B88);
 
-INCLUDE_ASM("replay/replay2", func_00270BD8);
+INCLUDE_ASM("replay/replay2", cReplay_countHighlights);
 
-INCLUDE_ASM("replay/replay2", func_00270C40);
+INCLUDE_ASM("replay/replay2", cReplay_maxHighlights);
 
-INCLUDE_ASM("replay/replay2", func_00270C58);
+INCLUDE_ASM("replay/replay2", cReplay_compareHighlights);
 
 INCLUDE_ASM("replay/replay2", func_00270CE8);
 
 INCLUDE_ASM("replay/replay2", cReplay_cancelMarkHighlight);
 
-INCLUDE_ASM("replay/replay2", func_00270E18);
+INCLUDE_ASM("replay/replay2", cReplay_cancelMarkHighlights);
 
-INCLUDE_ASM("replay/replay2", func_00270E68);
+INCLUDE_ASM("replay/replay2", cReplay_initSave);
 
 INCLUDE_ASM("replay/replay2", func_00270ED8);
 
@@ -70,37 +70,37 @@ INCLUDE_ASM("replay/replay2", func_00270EF8);
 
 INCLUDE_ASM("replay/replay2", func_00270F18);
 
-INCLUDE_ASM("replay/replay2", func_00270F20);
+INCLUDE_ASM("replay/replay2", cReplay_allocSaveSpace);
 
-INCLUDE_ASM("replay/replay2", func_00270F78);
+INCLUDE_ASM("replay/replay2", cReplay_purgeSaveSpace);
 
-INCLUDE_ASM("replay/replay2", func_00270FC0);
+INCLUDE_ASM("replay/replay2", cReplay_writeBuffered);
 
-INCLUDE_ASM("replay/replay2", func_00271058);
+INCLUDE_ASM("replay/replay2", cReplay_writeSetup);
 
-INCLUDE_ASM("replay/replay2", func_002710A8);
+INCLUDE_ASM("replay/replay2", cReplay_getSaveData);
 
-INCLUDE_ASM("replay/replay2", func_00271228);
+INCLUDE_ASM("replay/replay2", cReplay_writeHeaderStart);
 
-INCLUDE_ASM("replay/replay2", func_002712C0);
+INCLUDE_ASM("replay/replay2", cReplay_writeHeader);
 
 INCLUDE_ASM("replay/replay2", func_002712F8);
 
-INCLUDE_ASM("replay/replay2", func_00271348);
+INCLUDE_ASM("replay/replay2", cReplay_writeFramesStart);
 
 INCLUDE_ASM("replay/replay2", func_00271380);
 
-INCLUDE_ASM("replay/replay2", func_002714E0);
+INCLUDE_ASM("replay/replay2", cReplay_writeInputStart);
 
 INCLUDE_ASM("replay/replay2", func_00271510);
 
-INCLUDE_ASM("replay/replay2", func_00271620);
+INCLUDE_ASM("replay/replay2", cReplay_writePadStart);
 
-INCLUDE_ASM("replay/replay2", func_00271688);
+INCLUDE_ASM("replay/replay2", cReplay_writePad);
 
 INCLUDE_ASM("replay/replay2", func_002716F0);
 
-INCLUDE_ASM("replay/replay2", func_00271708);
+INCLUDE_ASM("replay/replay2", cReplay_writeCheckSum);
 
 INCLUDE_ASM("replay/replay2", cReplay_load);
 

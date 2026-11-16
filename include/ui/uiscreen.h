@@ -3,7 +3,7 @@
 
 // cUIScreen: one screen of UI objects loaded from a screen record, owned by a cUIState (cUIState::mScreens).
 // cUIEngine_addScreenByHashName creates it with `cMemMan_alloc(0xD4, "UIScreen", ...)` and constructs it inline
-// (the same stores as func_003A5C08, the cUIScreen(cUIState*) constructor): 0xD4 bytes.
+// (the same stores as cUIScreen_cUIScreen, the cUIScreen(cUIState*) constructor): 0xD4 bytes.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
 // Base class: cListNode (On Tour: mpPrev 0x0, mpNext 0x4; its vptr follows at 0x8). _vt$9cUIScreen (cUIScreen_vtbl)
@@ -13,7 +13,7 @@
 //   [P] the July 2003 preview's inline accessors; retail keeps out-of-line copies of them in the preview's order in
 //       ui/uivector (func_003A5C98 getHashName ... func_003A5D58 getParentState), which places each one: unshifted up
 //       to the root group, + 8 after it (the embedded cUIGroup grew from 0x88 to 0x90 bytes, as cUIThing did);
-//   [R] retail's constructors (func_003A5B98, func_003A5C08), destructor (cUIScreen__cUIScreen) and cUIScreen_setData;
+//   [R] retail's constructors (func_003A5B98, cUIScreen_cUIScreen), destructor (cUIScreen__cUIScreen) and cUIScreen_setData;
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order alone, where the fields on both sides of it are placed by [P] or [R].
 // Retail = On Tour up to mRootGroup; mpState is at 0xD0 (On Tour 0xE0: its cUIGroup is 0xA0 bytes).
@@ -37,7 +37,7 @@ struct tUIObjectBlock;
 struct cUIScreen {
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructors self-link it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] cUIState_updateScreens walks screens by it
-    void** mVtbl;                    // 0x008 [R] _vt$9cUIScreen (cUIScreen_vtbl), stored by func_003A5B98/func_003A5C08/cUIScreen__cUIScreen
+    void** mVtbl;                    // 0x008 [R] _vt$9cUIScreen (cUIScreen_vtbl), stored by func_003A5B98/cUIScreen_cUIScreen/cUIScreen__cUIScreen
     char* mpBuffer;                  // 0x00C [O]; [R] = 0; cUIScreen_setData stores its "UIScreenData" copy of the record here;
                                      //       cUIScreen__cUIScreen frees it when mAttrScreen bit 1 (mBufferAlloc) is set
     tUIScreenHeader* mpScreenHeader; // 0x010 [P] getHashName = mpScreenHeader's first word (preview lw 0x10; retail func_003A5C98);
@@ -57,7 +57,7 @@ struct cUIScreen {
                                      //       (cUIGroup_vtbl) at 0x48; [U] cUIScreen_onInput/cUIScreen_update/cUIScreen_parseScreenFocusLose
                                      //       pass it to cUIGroup_onInput/cUIGroup_update/cUIGroup_setFocus
     cUIState* mpState;               // 0x0D0 [P] getParentState (preview lw 0xC8; retail func_003A5D58 lw 0xD0), getEngine = mpState's
-                                     //       mpEngine (retail func_003A5D48); [R] = pState (func_003A5C08, cUIEngine_addScreenByHashName)
+                                     //       mpEngine (retail func_003A5D48); [R] = pState (cUIScreen_cUIScreen, cUIEngine_addScreenByHashName)
 };
 
 CHECK_OFFSET(cUIScreen, mpPrev, 0x000);

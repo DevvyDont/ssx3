@@ -563,7 +563,7 @@ extern "C" int func_00148CB8(void* iface, int a, int b);
 extern "C" int func_00148D08(void* iface, int a, int b);
 extern "C" int func_00148D58(void* iface, int a, int b);
 extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
-extern "C" void func_0039C428(void* bar, int v);
+extern "C" void cUIProgress_setValue(void* bar, int v);
 extern "C" double fptodp(float f);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -624,7 +624,7 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
             t->v09(1);
             cUIText_setAsciiString((cUIText*)t, buf);
             *(int*)(b + 0x80) = 0x37;
-            func_0039C428(b, c);
+            cUIProgress_setValue(b, c);
         }
     }
     total -= total % 5;
@@ -634,7 +634,7 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
     cUIText_setAsciiString(avg, buf);
     char* ob = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ovr));
     *(int*)(ob + 0x80) = 0x37;
-    func_0039C428(ob, total / 7);
+    cUIProgress_setValue(ob, total / 7);
     func_001A0508((char*)SSXApp->RealFE + 0xB0, rider, charID, 0);
 }
 #endif

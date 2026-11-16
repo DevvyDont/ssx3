@@ -52,7 +52,7 @@ int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" char* func_0039A708(void* self);
+extern "C" char* cUIListBox_getCurrentAsciiText(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 void func_001A34A8(void* self);
 extern char D_004A19E8[];
@@ -68,7 +68,7 @@ extern "C" void cFEStateMPCircuit_onGainFocus(void* self, int pPreSt)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A19E8));
     if (obj != 0) {
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(func_0039A708(obj)));
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(cUIListBox_getCurrentAsciiText(obj)));
         if (frame != 0xFFFF) {
             cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
         }
@@ -85,7 +85,7 @@ struct cUIScreen;
 int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" char* func_0039A708(void* self);
+extern "C" char* cUIListBox_getCurrentAsciiText(void* self);
 extern "C" void cUIStateStack_push(void* list, void* item);
 void func_001A34A8(void* self);
 
@@ -127,7 +127,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(void* self, void* item, unsigned
         break;
     }
     case 9: {
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(func_0039A708(item)));
+        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(cUIListBox_getCurrentAsciiText(item)));
         if (frame != 0xFFFF) {
             cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
         }

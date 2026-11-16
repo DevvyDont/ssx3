@@ -20,8 +20,8 @@ extern "C" void func_00192970_2DB0(void* panel, void* screen) __asm__("func_0019
 extern "C" int func_00193F38(void* self, int player, int which);
 extern "C" unsigned char cUIListBox_addEntryByStringID_2DB0(void* box, int id, int idx) __asm__("cUIListBox_addEntryByStringID");
 extern "C" unsigned char cUIListBox_addEntryByAsciiString_2DB0(void* box, const char* str, int data) __asm__("cUIListBox_addEntryByAsciiString");
-extern "C" int func_0039A768_2DB0(void* item, int key, unsigned char* out) __asm__("func_0039A768");
-extern "C" void func_0039A7A8_2DB0(void* item, int v) __asm__("func_0039A7A8");
+extern "C" int cUIListBox_getEntryByData_2DB0(void* item, int key, unsigned char* out) __asm__("cUIListBox_getEntryByData");
+extern "C" void cUIListBox_setCurrentEntryByIndex_2DB0(void* item, int v) __asm__("cUIListBox_setCurrentEntryByIndex");
 extern int D_004A1A70;
 extern signed char D_00535C12[];
 extern signed char D_004A1710[6];
@@ -169,8 +169,8 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
             case 6:
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(D_0045FCD8), 0);
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(D_0045DCC8), 1);
-                func_0039A768_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
-                func_0039A7A8_2DB0(lb, out);
+                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
+                cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             case 0:
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(D_0045DF40), 0);
@@ -178,8 +178,8 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
                 cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A16D8, 10);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A1758, 15);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A1760, 20);
-                func_0039A768_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
-                func_0039A7A8_2DB0(lb, out);
+                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
+                cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             case 7:
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(D_0045DF40), 0);
@@ -187,8 +187,8 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
                 cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A1770, 5000);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A1778, 10000);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, D_004A1780, 15000);
-                func_0039A768_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
-                func_0039A7A8_2DB0(lb, out);
+                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, p, self->rules[row]), &out);
+                cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             }
         }
@@ -519,7 +519,7 @@ extern "C" void func_001927B0(void* p);
 extern "C" void func_00194080(void* self);
 extern "C" void func_00193DE0(void* self, int player, int which, int value);
 extern "C" int func_00192918_38F8(void* panel, void* item) __asm__("func_00192918");
-extern "C" int func_0039A738_38F8(void* item) __asm__("func_0039A738");
+extern "C" int cUIListBox_getCurrentEntryData_38F8(void* item) __asm__("cUIListBox_getCurrentEntryData");
 extern "C" void func_00192740_38F8(void* panel, int on) __asm__("func_00192740");
 extern "C" void func_00265688(void* snd);
 extern "C" void func_00265568(void* snd, int slot, int value);
@@ -633,13 +633,13 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
         if (isOn_38F8()) {
             void* snd = D_004A33CC;
             int slot = func_00192918_38F8(self + 0x6D0, w);
-            func_00265568(snd, slot, func_0039A738_38F8(w));
+            func_00265568(snd, slot, cUIListBox_getCurrentEntryData_38F8(w));
         } else {
             panel = w->panel;
             int slot = func_00192918_38F8(self + 0x6D0 + panel * 0x34, w);
             int which = (*(signed char**)(self + 0x738))[slot];
             if (which != -1)
-                func_00193DE0(self, panel, which, func_0039A738_38F8(w));
+                func_00193DE0(self, panel, which, cUIListBox_getCurrentEntryData_38F8(w));
         }
         break;
     }
@@ -895,10 +895,10 @@ INCLUDE_ASM("fe/festatebigradio", func_001941B0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: several callees are declared with other parameter types elsewhere; bind local views by asm label
 extern "C" void cUIMenu_setSelectedByIndex_41B0(void* menu, int idx) __asm__("cUIMenu_setSelectedByIndex");
-extern "C" int func_0039A768_41B0(void* item, int key, unsigned char* out) __asm__("func_0039A768");
-extern "C" void func_0039A7A8_41B0(void* item, int v) __asm__("func_0039A7A8");
+extern "C" int cUIListBox_getEntryByData_41B0(void* item, int key, unsigned char* out) __asm__("cUIListBox_getEntryByData");
+extern "C" void cUIListBox_setCurrentEntryByIndex_41B0(void* item, int v) __asm__("cUIListBox_setCurrentEntryByIndex");
 extern "C" int func_00192918_41B0(void* panel, void* item) __asm__("func_00192918");
-extern "C" int func_0039A738_41B0(void* item) __asm__("func_0039A738");
+extern "C" int cUIListBox_getCurrentEntryData_41B0(void* item) __asm__("cUIListBox_getCurrentEntryData");
 extern "C" void func_00192740_41B0(void* panel, int on) __asm__("func_00192740");
 extern "C" void func_00192970_41B0(void* panel, void* screen) __asm__("func_00192970");
 extern "C" void func_001AB288_41B0(void* self) __asm__("func_001AB288");
@@ -935,17 +935,17 @@ extern "C" int func_001941B0(char* self, int msg, sRadioMsg_41B0* data)
     case 252: {
         unsigned char out;
         void* item = ((sRadioPanel_41B0*)(self + 0x6D0))[data->panel].items[data->idx];
-        if (!func_0039A768_41B0(item, data->key, &out)) {
+        if (!cUIListBox_getEntryByData_41B0(item, data->key, &out)) {
             break;
         }
-        func_0039A7A8_41B0(item, out);
+        cUIListBox_setCurrentEntryByIndex_41B0(item, out);
         int slot = func_00192918_41B0(&((sRadioPanel_41B0*)(self + 0x6D0))[data->panel], item);
         int which = (*(signed char**)(self + 0x738))[slot];
         if (which == -1) {
             break;
         }
         int panel = data->panel;
-        func_00193DE0(self, panel, which, func_0039A738_41B0(item));
+        func_00193DE0(self, panel, which, cUIListBox_getCurrentEntryData_41B0(item));
         break;
     }
     case 253:

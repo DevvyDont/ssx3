@@ -2711,7 +2711,7 @@ struct cUIText;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_003A1310(void* self, int a1);
+extern "C" void cUITextScroll_setInputMap(void* self, int a1);
 extern char D_004619A0[];
 extern char D_004619B8[];
 extern char D_004619C8[];
@@ -2767,7 +2767,7 @@ extern "C" void cFEStateReadMessagePopup_onCreateScreen(cFEStateReadMessagePopup
     if (o != 0) {
         cFEVObj_001A7970* obj = (cFEVObj_001A7970*)o;
         *(int*)(o + 0x74) |= 1;
-        func_003A1310(o, 1);
+        cUITextScroll_setInputMap(o, 1);
         obj->v09(1);
         *(int*)(o + 0x14) |= 0x80;
         obj->v11(sCol1A7970(1.0f, 0.0f, 0.0f, 0.0f));
@@ -3136,8 +3136,8 @@ extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
 extern "C" void sprintf1_1A81F0(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
-extern "C" void func_003A18C0(void* list);
-extern "C" void func_003A19F8(cUIText* text, char* str);
+extern "C" void cUITextScroll_clearBuffer(void* list);
+extern "C" void cUITextScroll_addAsciiString(cUIText* text, char* str);
 extern "C" char* func_004162D0(char*, const char*);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char D_00461A18[];
@@ -3204,14 +3204,14 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
     unsigned short count = *(unsigned short*)((char*)list + 0xC8);
     unsigned short top = *(unsigned short*)((char*)list + 0xC4);
     unsigned short sel = *(unsigned short*)((char*)list + 0xC6);
-    func_003A18C0(list);
+    cUITextScroll_clearBuffer(list);
     unsigned int i;
     for (i = 0; i < Count1A81F0(self); i++) {
         sEntry1A81F0* e = *(sEntry1A81F0**)((char*)((sEntry1A81F0**)(self)->mMessages.mpStart) + (i << 2));
         strcpy(buf, e->name);
         func_004162D0(buf, D_004A1A50);
         func_004162D0(buf, e->ext);
-        func_003A19F8(list, buf);
+        cUITextScroll_addAsciiString(list, buf);
     }
     func_001A83D8((sList1A83D8*)list, 0x28, 8, count, top, sel, self->mbResetScroll, 0);
     self->mbResetScroll = 0;
@@ -3221,7 +3221,7 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A83D8);
 #ifdef SKIP_ASM
-extern "C" void func_003A1F90(void* list, int a1);
+extern "C" void cUITextScroll_deleteLineByIndex(void* list, int a1);
 
 struct sList1A83D8 {
     char pad[0xC4];
@@ -3240,7 +3240,7 @@ extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int
     int removed = 0;
     if (n > 0 && trim != 0) {
         for (removed = 0; removed < n; removed++) {
-            func_003A1F90(list, 0);
+            cUITextScroll_deleteLineByIndex(list, 0);
         }
     }
     if (toEnd) {
@@ -4590,7 +4590,7 @@ public:
 
 int GetHashValue32(char* str);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_0045DCC8[];
 extern char D_0045FCD8[];
 
@@ -4599,7 +4599,7 @@ extern "C" void func_001A9A18(cFEStateNet* self, cUIListBox_001A9A18* box, int v
     *(int*)((char*)box + 0x14) = (*(int*)((char*)box + 0x14) & ~1) | 0x80;
     cUIListBox_addEntryByStringID(box, GetHashValue32(D_0045DCC8), 1);
     cUIListBox_addEntryByStringID(box, GetHashValue32(D_0045FCD8), 0);
-    func_0039A7A8(box, value == 0);
+    cUIListBox_setCurrentEntryByIndex(box, value == 0);
     box->v09(1);
 }
 #endif
@@ -4623,7 +4623,7 @@ public:
 
 int GetHashValue32(char* str);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_0045E028[];
 extern char D_0045DF40[];
 
@@ -4632,7 +4632,7 @@ extern "C" void func_001A9AB8(cFEStateNet* self, cUIListBox_001A9AB8* box, int v
     *(int*)((char*)box + 0x14) = (*(int*)((char*)box + 0x14) & ~1) | 0x80;
     cUIListBox_addEntryByStringID(box, GetHashValue32(D_0045E028), 1);
     cUIListBox_addEntryByStringID(box, GetHashValue32(D_0045DF40), 0);
-    func_0039A7A8(box, value == 0);
+    cUIListBox_setCurrentEntryByIndex(box, value == 0);
     box->v09(1);
 }
 #endif
@@ -7446,7 +7446,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_onGainFocus);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001A87D0(cFEStateNet* self, int a1);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern "C" void func_001AF098(cFEStateChallengePopup* self, int a1);
 extern "C" void func_001AEC60(cFEStateChallengePopup* self, int a1);
 extern signed char D_00535C12[];
@@ -7462,7 +7462,7 @@ extern "C" void cFEStateChallengePopup_onGainFocus(cFEStateChallengePopup* self,
 {
     func_001A87D0((cFEStateNet*)self, a1);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    func_0039A7A8(self->mpLBRankedGame, cBENetworkInterface_networkOpt.bIsRankedGame ^ 1);
+    cUIListBox_setCurrentEntryByIndex(self->mpLBRankedGame, cBENetworkInterface_networkOpt.bIsRankedGame ^ 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (D_00535C12[0]) {
     case 3:
@@ -7527,7 +7527,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern unsigned char D_004A4E88_E128[8] __asm__("D_004A4E88");
 extern char D_00461520[];
 extern char D_00463108[];
@@ -7640,7 +7640,7 @@ extern "C" void cFEStateChallengePopup_onWidgetCreate(cFEStateChallengePopup* se
         obj->v09(1);
         obj->v24(1);
         self->mpLBCPURiders = (cUIListBox*)item;
-        func_0039A7A8(item, D_004A4E88_E128[4]);
+        cUIListBox_setCurrentEntryByIndex(item, D_004A4E88_E128[4]);
     } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463238)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045DCC8), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(D_0045FCD8), 1);
@@ -7672,7 +7672,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
-extern "C" int func_0039A738(void* a);
+extern "C" int cUIListBox_getCurrentEntryData(void* a);
 // D_00534B34 is a splat label inside cBENetworkInterface_networkOpt
 extern int D_00534B34[];
 extern char D_005308B8[];
@@ -7701,16 +7701,16 @@ extern "C" void func_001AE680(cFEStateChallengePopup* self)
 {
     if (self->mpScreen != 0) {
         char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-        D_00534B34[0] = func_0039A738(self->mpLBRankedGame) != 0;
+        D_00534B34[0] = cUIListBox_getCurrentEntryData(self->mpLBRankedGame) != 0;
         sVE1AE680* vt = *(sVE1AE680**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
-        int v = func_0039A738(self->mpLBMultipliers);
+        int v = cUIListBox_getCurrentEntryData(self->mpLBMultipliers);
         sOpts1AE680* o = (sOpts1AE680*)D_005308B8;
         o->b6 = v;
-        o->b8 = func_0039A738(self->mpLBPowerUps);
-        o->b7 = func_0039A738(self->mpLBPointIcons);
+        o->b8 = cUIListBox_getCurrentEntryData(self->mpLBPowerUps);
+        o->b7 = cUIListBox_getCurrentEntryData(self->mpLBPointIcons);
         char* nr = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-        cBENewRaceInterface_setNumberAI(nr, func_0039A738(self->mpLBCPURiders));
+        cBENewRaceInterface_setNumberAI(nr, cUIListBox_getCurrentEntryData(self->mpLBCPURiders));
         sVE1AE680i* nvt = *(sVE1AE680i**)(nr + 0xC);
         nvt[1].fn(nr + nvt[1].delta);
     }
@@ -7725,7 +7725,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_onWidgetEvent);
 extern "C" int cBENewRaceInterface_setNumberAI_E7A0(void* iface, int n) __asm__("cBENewRaceInterface_setNumberAI");
 extern "C" void func_001AE680_E7A0(void* self) __asm__("func_001AE680");
 extern "C" void func_001AF568_E7A0(void* self) __asm__("func_001AF568");
-extern "C" int func_0039A738_E7A0(void* item) __asm__("func_0039A738");
+extern "C" int cUIListBox_getCurrentEntryData_E7A0(void* item) __asm__("cUIListBox_getCurrentEntryData");
 extern "C" void func_0025F4C0_E7A0(void* self, int a1, int a2) __asm__("func_0025F4C0");
 extern "C" void func_0025F628_E7A0(void* self, int a1, int a2) __asm__("func_0025F628");
 extern "C" void func_0039F600_E7A0(void* list) __asm__("func_0039F600");
@@ -7789,9 +7789,9 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
             func_001AE680_E7A0((self));
             func_001AF568_E7A0((self));
             char* opts = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-            D_00534B34[0] = func_0039A738_E7A0(self->mpLBRankedGame) != 0;
+            D_00534B34[0] = cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame) != 0;
             commit_E7A0(opts);
-            if (func_0039A738_E7A0(self->mpLBRankedGame)) {
+            if (cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame)) {
                 D_005308B8_E7A0.bit6 = 1;
                 D_005308B8_E7A0.bit7 = 1;
                 D_005308B8_E7A0.bit8 = 1;
@@ -7799,11 +7799,11 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
                 cBENewRaceInterface_setNumberAI_E7A0(race, 0);
                 commit_E7A0(race);
             } else {
-                D_005308B8_E7A0.bit6 = func_0039A738_E7A0(self->mpLBMultipliers);
-                D_005308B8_E7A0.bit8 = func_0039A738_E7A0(self->mpLBPowerUps);
-                D_005308B8_E7A0.bit7 = func_0039A738_E7A0(self->mpLBPointIcons);
+                D_005308B8_E7A0.bit6 = cUIListBox_getCurrentEntryData_E7A0(self->mpLBMultipliers);
+                D_005308B8_E7A0.bit8 = cUIListBox_getCurrentEntryData_E7A0(self->mpLBPowerUps);
+                D_005308B8_E7A0.bit7 = cUIListBox_getCurrentEntryData_E7A0(self->mpLBPointIcons);
                 char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-                cBENewRaceInterface_setNumberAI_E7A0(race, func_0039A738_E7A0(self->mpLBCPURiders));
+                cBENewRaceInterface_setNumberAI_E7A0(race, cUIListBox_getCurrentEntryData_E7A0(self->mpLBCPURiders));
                 commit_E7A0(race);
             }
             func_0025F4C0_E7A0(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mOpponent), self->mCurrentCtrl);
@@ -7824,20 +7824,20 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
     case 9:
         if (a1 == (void*)self->mpLBRankedGame) {
             char* opts = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-            D_00534B34[0] = func_0039A738_E7A0(self->mpLBRankedGame) != 0;
+            D_00534B34[0] = cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame) != 0;
             commit_E7A0(opts);
-            func_001AF098_E7A0((self), func_0039A738_E7A0(self->mpLBRankedGame) != 0);
+            func_001AF098_E7A0((self), cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame) != 0);
             func_001AEC60_E7A0((self), self->mbChallengeSent);
         } else if (a1 == (void*)self->mpLBMultipliers) {
-            D_005308B8_E7A0.bit6 = func_0039A738_E7A0(a1);
+            D_005308B8_E7A0.bit6 = cUIListBox_getCurrentEntryData_E7A0(a1);
         } else if (a1 == (void*)self->mpLBPowerUps) {
-            D_005308B8_E7A0.bit8 = func_0039A738_E7A0(a1);
+            D_005308B8_E7A0.bit8 = cUIListBox_getCurrentEntryData_E7A0(a1);
         } else if (a1 == (void*)self->mpLBPointIcons) {
-            D_005308B8_E7A0.bit7 = func_0039A738_E7A0(a1);
+            D_005308B8_E7A0.bit7 = cUIListBox_getCurrentEntryData_E7A0(a1);
         } else if (a1 == (void*)self->mpLBCPURiders) {
             char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-            cBENewRaceInterface_setNumberAI_E7A0(race, func_0039A738_E7A0(self->mpLBCPURiders));
-            D_004A4E88_w[1] = func_0039A738_E7A0(self->mpLBCPURiders);
+            cBENewRaceInterface_setNumberAI_E7A0(race, cUIListBox_getCurrentEntryData_E7A0(self->mpLBCPURiders));
+            D_004A4E88_w[1] = cUIListBox_getCurrentEntryData_E7A0(self->mpLBCPURiders);
             commit_E7A0(race);
         }
         break;
@@ -8012,41 +8012,41 @@ extern int D_005308D0[];
 extern signed char D_00535C12[];
 // D_004A4E88 is 8 bytes; the byte read is its second word's low byte (+4).
 extern unsigned char D_004A4E88_AF098[8] __asm__("D_004A4E88");
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 
 extern "C" void func_001AF098(cFEStateChallengePopup* self, int all)
 {
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
     if (all) {
-        func_0039A7A8(self->mpLBPowerUps, 1);
-        func_0039A7A8(self->mpLBMultipliers, 1);
-        func_0039A7A8(self->mpLBPointIcons, 1);
-        func_0039A7A8(self->mpLBCPURiders, 0);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBPowerUps, 1);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBMultipliers, 1);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBPointIcons, 1);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, 0);
         return;
     }
     if (*(int*)((char*)self->mpEventOptions + 0x4) != 0) {
-        func_0039A7A8(self->mpLBPowerUps, (D_005308D0[0] >> 8) & 1);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBPowerUps, (D_005308D0[0] >> 8) & 1);
     } else {
-        func_0039A7A8(self->mpLBPowerUps, 1);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBPowerUps, 1);
     }
     if (*(int*)((char*)self->mpEventOptions + 0xC) != 0) {
-        func_0039A7A8(self->mpLBMultipliers, (D_005308D0[0] >> 6) & 1);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBMultipliers, (D_005308D0[0] >> 6) & 1);
     } else {
-        func_0039A7A8(self->mpLBMultipliers, 1);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBMultipliers, 1);
     }
     if (*(int*)((char*)self->mpEventOptions + 0x8) != 0) {
         int f = D_005308D0[0] >> 7;
-        func_0039A7A8(self->mpLBPointIcons, f & 1);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBPointIcons, f & 1);
     } else {
-        func_0039A7A8(self->mpLBPointIcons, 1);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBPointIcons, 1);
     }
     if (D_00535C12[0] != 0) {
         cBENewRaceInterface_setNumberAI(iface, 0);
         sVE1ADE88i* ivt = *(sVE1ADE88i**)(iface + 0xC);
         ivt[1].fn(iface + ivt[1].delta);
-        func_0039A7A8(self->mpLBCPURiders, 0);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, 0);
     } else {
-        func_0039A7A8(self->mpLBCPURiders, D_004A4E88_AF098[4]);
+        cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, D_004A4E88_AF098[4]);
     }
 }
 #endif
@@ -8340,7 +8340,7 @@ extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" int func_00144C98(void* track);
 extern "C" const char* func_00145340(void* track);
 extern "C" const char* func_00144BF0(void* track);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern signed char D_00535C12[];
 extern char D_004634B8[];
 extern char D_004634C8[];
@@ -8402,7 +8402,7 @@ extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* s
             cRaceIface_001AF728* iface = (cRaceIface_001AF728*)cBE_getInterface_Fv(cBE_getBE(), 0);
             cBENewRaceInterface_setNumberAI(iface, 0);
             iface->v01();
-            func_0039A7A8(self->mpLBCPURiders, 0);
+            cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, 0);
             ((cFEVObj_001AF728*)self->mpLBCPURiders)->v08(1);
         }
         cUIText_setAsciiString(t, func_00145340(track));
@@ -9439,7 +9439,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineCharacterSelect_onGainTransition);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_0039A738(void* a);
+extern "C" int cUIListBox_getCurrentEntryData(void* a);
 extern "C" void func_001B1B10(cFEStateOnlineCharacterSelect* self, int sel, int flag);
 extern "C" void func_001B1760(cFEStateOnlineCharacterSelect* self, int index);
 extern "C" void func_001B1808(cFEStateOnlineCharacterSelect* self);
@@ -9447,7 +9447,7 @@ extern "C" void func_001B1808(cFEStateOnlineCharacterSelect* self);
 extern "C" int cFEStateOnlineCharacterSelect_onGainTransition(cFEStateOnlineCharacterSelect* self, int a1)
 {
     if (a1 != 0) {
-        func_001B1B10(self, func_0039A738(self->mpLBChallengerSelect), 0);
+        func_001B1B10(self, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect), 0);
         cBE_getInterface_Fv(SSXApp->BE, 7);
         char* net = ((char*)&cBENetworkInterface_networkOpt);
         if (*(int*)(net + 0x32C) >= 0) {
@@ -9472,7 +9472,7 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
 extern "C" void* func_0014EEC8(void* self, int player, int index);
 extern "C" int func_001B0F28(int c);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern signed char D_00440F68[];
 extern char D_00463818[];
 extern char D_00463830[];
@@ -9528,7 +9528,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetCreate(cFEStateOnlineChara
         box->v09(1);
         int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(SSXApp->BE, 1), 0);
         self->miCharID = id;
-        func_0039A7A8(text, (unsigned char)func_001B0F28(id));
+        cUIListBox_setCurrentEntryByIndex(text, (unsigned char)func_001B0F28(id));
         self->mpLBChallengerSelect = (cUIListBox*)text;
         box->v24(1);
     } else if (IsHash_001B10F8(*(int*)((char*)text + 0x38), D_00463830)) {
@@ -9554,7 +9554,7 @@ void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_00264F88(void* self, int a1);
 extern "C" void func_00265018(void* self, int a1);
 extern "C" void func_00265140(void* self);
-extern "C" int func_0039A738(void* a);
+extern "C" int cUIListBox_getCurrentEntryData(void* a);
 extern void* D_004A33CC;
 extern char D_00463818[];
 extern char D_0045FD98[];
@@ -9598,7 +9598,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
         if (D_004A33CC == 0) {
             return;
         }
-        if (self->miCharID != func_0039A738(self->mpLBChallengerSelect)) {
+        if (self->miCharID != cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect)) {
             char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
             func_001474A8(iface, 0, 0);
             sVE1B1280* vt = *(sVE1B1280**)(iface + 0xC);
@@ -9606,7 +9606,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
         }
         {
             void* mgr = D_004A33CC;
-            func_00265018(mgr, func_0039A738(self->mpLBChallengerSelect));
+            func_00265018(mgr, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect));
         }
         self->miConfirmCtrl = self->mCurrentCtrl;
         ((cFEVObj_001B1280*)obj)->v08(1);
@@ -9635,8 +9635,8 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
     case 9:
         if (IsHash1B1280(*(int*)(obj + 0x38), D_00463818)) {
             void* mgr = D_004A33CC;
-            func_00264F88(mgr, func_0039A738(self->mpLBChallengerSelect));
-            func_001B1B10(self, func_0039A738(self->mpLBChallengerSelect), 0);
+            func_00264F88(mgr, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect));
+            func_001B1B10(self, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect), 0);
         }
     default:
         func_001A8918((cFEStateNet*)self, a1, msg);
@@ -9977,7 +9977,7 @@ extern "C" int func_00148CB8(void* iface, int a1, int idx);
 extern "C" int func_00148D58(void* iface, int a1, int idx);
 extern "C" int func_00148D08(void* iface, int a1, int idx);
 extern "C" int func_00148C18(void* iface, int a1, int idx);
-extern "C" void func_0039C428(void* self, int v);
+extern "C" void cUIProgress_setValue(void* self, int v);
 extern char* D_004412C8[];
 extern char D_004A19F8[];
 extern char D_004A1B18[];
@@ -10066,7 +10066,7 @@ extern "C" void func_001B1B98(cFEStateOnlineCharacterSelect* self, int index, in
             a->v09(1);
             cUIText_setAsciiString((cUIText*)a, num);
             *(int*)((char*)b + 0x80) = 0x37;
-            func_0039C428(b, v);
+            cUIProgress_setValue(b, v);
         }
     }
 }
@@ -10188,7 +10188,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_001B2378(cFEStateChatRoom* self, int a1);
 extern "C" void func_001B3978(cFEStateChatRoom* self, void* a1);
-extern "C" void func_003A1310(void* self, int a1);
+extern "C" void cUITextScroll_setInputMap(void* self, int a1);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
 extern char D_00463A08[];
@@ -10217,7 +10217,7 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
     func_001B2378(self, 1);
     func_001B3978(self, LobbyMan_mLobbyMan->mPersona);
     *(int*)((char*)self->mpTextScrollChat + 0x74) |= 1;
-    func_003A1310(self->mpTextScrollChat, 1);
+    cUITextScroll_setInputMap(self->mpTextScrollChat, 1);
     *(sBlk1B2070*)((char*)self->mpTextScrollChat + 0xA8) = *(sBlk1B2070*)&self->mChatColour;
     *(void**)((char*)self->mpTextScrollChat + 0xB8) = (void*)self->mpSlider2;
     cUIText* a = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
@@ -10625,7 +10625,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B2CD0);
 struct cUIText;
 struct sList1A83D8;
 extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
-extern "C" void func_003A19F8(cUIText* text, char* str);
+extern "C" void cUITextScroll_addAsciiString(cUIText* text, char* str);
 extern char D_004A1A50[];
 extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -10664,7 +10664,7 @@ extern "C" void func_001B2CD0(cFEStateChatRoom* self, int infov)
     cBXString_cBXString1(&text, info + 0x8);
     cBXString_Concat(&text, D_004A1A50);
     func_003189A0((cBXString*)&text, (char**)(info + 0xC));
-    func_003A19F8(self->mpTextScrollChat, text.str);
+    cUITextScroll_addAsciiString(self->mpTextScrollChat, text.str);
     func_001A83D8((sList1A83D8*)self->mpTextScrollChat, 0x40, 6, a3, pos, a5, first, 1);
     cBXString__cBXString(&text, 2);
 }
@@ -12151,8 +12151,8 @@ extern "C" void func_001B4FA0(cFEStateNetConfig* self, int err);
 extern "C" void func_001B5068(cFEStateNetConfig* self, int a1);
 extern "C" int func_00255F20(void* self, int a1);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
-extern "C" void* func_00399920(void* box);
-extern "C" void func_0039A4B0(void* box, unsigned short* str, int id);
+extern "C" void* cUIListBox_getFont(void* box);
+extern "C" void cUIListBox_addEntryByUnicodeString(void* box, unsigned short* str, int id);
 extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
 extern "C" int func_004165A8(const char* a, const char* b);
 extern int D_004A1B80;
@@ -12242,7 +12242,7 @@ extern "C" void func_001B4CD8(cFEStateNetConfig* self)
             int len;
             if (self->miNumSettings >= 2) {
                 len = sprintf(buf, D_004A1B98, i + 1);
-                w = pos.x - cFont_textExtent(func_00399920(self->mpLBSettings), buf, &size, 1, scale.x, scale.y);
+                w = pos.x - cFont_textExtent(cUIListBox_getFont(self->mpLBSettings), buf, &size, 1, scale.x, scale.y);
             } else {
                 w = pos.x;
                 len = 0;
@@ -12251,8 +12251,8 @@ extern "C" void func_001B4CD8(cFEStateNetConfig* self)
             char* rec = cCommSystem_mNetConns[i].name4;
             func_003EFA48(name, 0x40, nm);
             UIAsciiToUnicode(line, buf);
-            func_00392680(func_00399920(self->mpLBSettings), scale.x, w, name, line + len, 0x40 - len);
-            func_0039A4B0(self->mpLBSettings, line, i + 0x14);
+            func_00392680(cUIListBox_getFont(self->mpLBSettings), scale.x, w, name, line + len, 0x40 - len);
+            cUIListBox_addEntryByUnicodeString(self->mpLBSettings, line, i + 0x14);
             if (func_004165A8(D_004A1B7C, rec) == 0) {
                 cUIListBox_addEntryByAsciiString(self->mpLBAdapters, rec, i + 0x1E);
             } else {
@@ -13079,7 +13079,7 @@ extern "C" void* func_001A9C50(cFEStateNet* self);
 void func_001B4198(void* self);
 extern "C" void func_001B5268(cFEStateNetConfig* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_0045DCC8[];
 extern char D_0045FCD8[];
 extern char D_004641F0[];
@@ -13149,7 +13149,7 @@ extern "C" void cFEStateNetConfig_onWidgetEvent(cFEStateNetConfig* self, int pWi
     case 9:
         if (IsHash1B60A8(*(int*)(obj + 0x38), D_00463F88)) {
             self->miSelectedSetting = *(unsigned char*)(obj + 0x319);
-            func_0039A7A8(self->mpLBAdapters, (unsigned char)self->miSelectedSetting);
+            cUIListBox_setCurrentEntryByIndex(self->mpLBAdapters, (unsigned char)self->miSelectedSetting);
         }
         break;
     case 8:
@@ -15380,7 +15380,7 @@ extern "C" void func_001BA280(cFEStateCreateStep1* self);
 extern "C" void* cFEStateCreateStep2_cFEStateCreateStep2(cFEStateCreateStep2* self, int a1);
 extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement(cFEStateOnlineAgreement* self, int a1);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
-extern "C" int func_0039A738(void* a);
+extern "C" int cUIListBox_getCurrentEntryData(void* a);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00464780[];
 extern char D_00464790[];
@@ -15434,10 +15434,10 @@ extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, cha
     switch (msg) {
     case 9:
         if (NameHash1B8C38(w) == GetHashValue32(D_00464780) && w != 0) {
-            *(int*)((char*)self->mpAccount + 0x38) = func_0039A738(w) == 1;
+            *(int*)((char*)self->mpAccount + 0x38) = cUIListBox_getCurrentEntryData(w) == 1;
         }
         if (NameHash1B8C38(w) == GetHashValue32(D_00464790) && w != 0) {
-            *(int*)((char*)self->mpAccount + 0x3C) = func_0039A738(w) == 1;
+            *(int*)((char*)self->mpAccount + 0x3C) = cUIListBox_getCurrentEntryData(w) == 1;
         }
         break;
     case 5:
@@ -15808,8 +15808,8 @@ INCLUDE_ASM("fe/feasyncfile", func_001B9740);
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_00464780[];
 
 extern "C" void func_001B9740(cFEStateCreateStep1* self)
@@ -15817,8 +15817,8 @@ extern "C" void func_001B9740(cFEStateCreateStep1* self)
     cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464780));
     if (box != 0) {
         unsigned char out = 0;
-        func_0039A768(box, *(int*)((char*)self->mpAccount + 0x38) != 0, &out);
-        func_0039A7A8(box, out);
+        cUIListBox_getEntryByData(box, *(int*)((char*)self->mpAccount + 0x38) != 0, &out);
+        cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
 #endif
@@ -15829,8 +15829,8 @@ INCLUDE_ASM("fe/feasyncfile", func_001B97B0);
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_00464790[];
 
 extern "C" void func_001B97B0(cFEStateCreateStep1* self)
@@ -15838,8 +15838,8 @@ extern "C" void func_001B97B0(cFEStateCreateStep1* self)
     cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464790));
     if (box != 0) {
         unsigned char out = 0;
-        func_0039A768(box, *(int*)((char*)self->mpAccount + 0x3C) != 0, &out);
-        func_0039A7A8(box, out);
+        cUIListBox_getEntryByData(box, *(int*)((char*)self->mpAccount + 0x3C) != 0, &out);
+        cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
 #endif
@@ -16472,7 +16472,7 @@ extern "C" void func_001BA9F8(cFEStateCreateStep2* self, int a1);
 extern "C" void func_001BB840(cFEStateCreateStep2* self, void* box, int a2, int a3, int a4);
 int func_001BBAA8(void* self);
 extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement(cFEStateOnlineAgreement* self, int a1);
-extern "C" int func_0039A738(void* a);
+extern "C" int cUIListBox_getCurrentEntryData(void* a);
 extern char D_004A1BD8[];
 extern char D_004A1BE0[];
 extern char D_004A1BE8[];
@@ -16506,7 +16506,7 @@ extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, int
     case 9:
         if (self->mbScreenReady != 0) {
             if (IsHash_001BA618(*(int*)(obj + 0x38), D_004A1BD8)) {
-                *(int*)((char*)self->mpAccount + 0x28) = func_0039A738(obj);
+                *(int*)((char*)self->mpAccount + 0x28) = cUIListBox_getCurrentEntryData(obj);
                 cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1BE0));
                 if (box != 0) {
                     char* d = (char*)self->mpAccount;
@@ -16526,13 +16526,13 @@ extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, int
                 }
             }
             if (IsHash_001BA618(*(int*)(obj + 0x38), D_004A1BE0)) {
-                *(int*)((char*)self->mpAccount + 0x2C) = func_0039A738(obj);
+                *(int*)((char*)self->mpAccount + 0x2C) = cUIListBox_getCurrentEntryData(obj);
             }
             if (IsHash_001BA618(*(int*)(obj + 0x38), D_00464A18)) {
-                *(int*)((char*)self->mpAccount + 0x34) = func_0039A738(obj);
+                *(int*)((char*)self->mpAccount + 0x34) = cUIListBox_getCurrentEntryData(obj);
             }
             if (IsHash_001BA618(*(int*)(obj + 0x38), D_00464A08)) {
-                *(int*)((char*)self->mpAccount + 0x40) = func_0039A738(obj) == 1;
+                *(int*)((char*)self->mpAccount + 0x40) = cUIListBox_getCurrentEntryData(obj) == 1;
             }
         }
         break;
@@ -16967,8 +16967,8 @@ INCLUDE_ASM("fe/feasyncfile", func_001BB2D0);
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_004A1BD8[];
 
 extern "C" void func_001BB2D0(cFEStateCreateStep2* self)
@@ -16976,8 +16976,8 @@ extern "C" void func_001BB2D0(cFEStateCreateStep2* self)
     cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1BD8));
     if (box != 0) {
         unsigned char out = 0;
-        func_0039A768(box, *(int*)((char*)self->mpAccount + 0x28), &out);
-        func_0039A7A8(box, out);
+        cUIListBox_getEntryByData(box, *(int*)((char*)self->mpAccount + 0x28), &out);
+        cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
 #endif
@@ -16988,8 +16988,8 @@ INCLUDE_ASM("fe/feasyncfile", func_001BB340);
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_004A1BE0[];
 
 extern "C" void func_001BB340(cFEStateCreateStep2* self)
@@ -16997,8 +16997,8 @@ extern "C" void func_001BB340(cFEStateCreateStep2* self)
     cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1BE0));
     if (box != 0) {
         unsigned char out = 0;
-        func_0039A768(box, *(int*)((char*)self->mpAccount + 0x2C), &out);
-        func_0039A7A8(box, out);
+        cUIListBox_getEntryByData(box, *(int*)((char*)self->mpAccount + 0x2C), &out);
+        cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
 #endif
@@ -17011,7 +17011,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void cUIListBox_setEntryByAsciiString(void* box, int index, const char* str, int a3);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_004A1BE8[];
 extern char D_004A12C0[];
 
@@ -17022,7 +17022,7 @@ extern "C" void func_001BB3B0(cFEStateCreateStep2* self)
     if (box != 0) {
         sprintf(buf, D_004A12C0, *(int*)((char*)self->mpAccount + 0x30));
         cUIListBox_setEntryByAsciiString(box, 0, buf, 0);
-        func_0039A7A8(box, (unsigned char)(*(int*)((char*)self->mpAccount + 0x30) - 0x6C));
+        cUIListBox_setCurrentEntryByIndex(box, (unsigned char)(*(int*)((char*)self->mpAccount + 0x30) - 0x6C));
     }
 }
 #endif
@@ -17033,8 +17033,8 @@ INCLUDE_ASM("fe/feasyncfile", func_001BB440);
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_00464A18[];
 
 extern "C" void func_001BB440(cFEStateCreateStep2* self)
@@ -17042,8 +17042,8 @@ extern "C" void func_001BB440(cFEStateCreateStep2* self)
     cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464A18));
     if (box != 0) {
         unsigned char out = 0;
-        func_0039A768(box, *(int*)((char*)self->mpAccount + 0x34), &out);
-        func_0039A7A8(box, out);
+        cUIListBox_getEntryByData(box, *(int*)((char*)self->mpAccount + 0x34), &out);
+        cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
 #endif
@@ -17054,8 +17054,8 @@ INCLUDE_ASM("fe/feasyncfile", func_001BB4B0);
 struct cUIText;
 int GetHashValue32(char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_00464A08[];
 
 extern "C" void func_001BB4B0(cFEStateCreateStep2* self)
@@ -17063,8 +17063,8 @@ extern "C" void func_001BB4B0(cFEStateCreateStep2* self)
     cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464A08));
     if (box != 0) {
         unsigned char out = 0;
-        func_0039A768(box, *(int*)((char*)self->mpAccount + 0x40) != 0, &out);
-        func_0039A7A8(box, out);
+        cUIListBox_getEntryByData(box, *(int*)((char*)self->mpAccount + 0x40) != 0, &out);
+        cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
 #endif
@@ -17088,8 +17088,8 @@ public:
 
 int GetHashValue32(char* str);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_00464B10[];
 extern char D_00464B20[];
 
@@ -17099,8 +17099,8 @@ extern "C" void func_001BB520(cFEStateCreateStep2* self, void* box, int flag)
     *(int*)((char*)box + 0x14) = (*(int*)((char*)box + 0x14) & ~1) | 0x80;
     cUIListBox_addEntryByStringID(box, GetHashValue32(D_00464B10), 0);
     cUIListBox_addEntryByStringID(box, GetHashValue32(D_00464B20), 1);
-    func_0039A768(box, flag == 0, &out);
-    func_0039A7A8(box, out);
+    cUIListBox_getEntryByData(box, flag == 0, &out);
+    cUIListBox_setCurrentEntryByIndex(box, out);
     ((cFEVBox_001BB520*)box)->v09(1);
 }
 #endif
@@ -17110,8 +17110,8 @@ INCLUDE_ASM("fe/feasyncfile", func_001BB5D0);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_00464B30[];
 extern char D_00464B40[];
 extern char D_00464B50[];
@@ -17156,9 +17156,9 @@ extern "C" void func_001BB5D0(cFEStateCreateStep2* self, void* box, int a2)
     cUIListBox_addEntryByStringID(box, GetHashValue32(D_00464BC0), 10);
     cUIListBox_addEntryByStringID(box, GetHashValue32(D_00464BD0), 11);
     cUIListBox_addEntryByStringID(box, GetHashValue32(D_00464BE0), 12);
-    func_0039A768(box, 1, &out);
-    func_0039A7A8(box, out);
-    func_0039A7A8(box, 1);
+    cUIListBox_getEntryByData(box, 1, &out);
+    cUIListBox_setCurrentEntryByIndex(box, out);
+    cUIListBox_setCurrentEntryByIndex(box, 1);
     ((cFEVObj_001BB5D0*)box)->v09(1);
 }
 #endif
@@ -17183,8 +17183,8 @@ public:
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cUIListBox_setEntryByAsciiString(void* box, int index, const char* str, int a3);
 extern "C" void func_0039A670(void* self);
-extern "C" void func_0039A8D8(void* self, int count);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCallbackListBox(void* self, int count);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_004A12C0[];
 
 extern "C" void func_001BB798(cFEStateCreateStep2* self, void* box, int value)
@@ -17192,10 +17192,10 @@ extern "C" void func_001BB798(cFEStateCreateStep2* self, void* box, int value)
     char buf[16];
     func_0039A670(box);
     *(int*)((char*)box + 0x14) = (*(int*)((char*)box + 0x14) & ~1) | 0x80;
-    func_0039A8D8(box, 0x67);
+    cUIListBox_setCallbackListBox(box, 0x67);
     sprintf(buf, D_004A12C0, value);
     cUIListBox_setEntryByAsciiString(box, 0, buf, 0);
-    func_0039A7A8(box, (unsigned char)(value - 0x6C));
+    cUIListBox_setCurrentEntryByIndex(box, (unsigned char)(value - 0x6C));
     ((cFEVBox_001BB798*)box)->v09(1);
 }
 #endif
@@ -17206,8 +17206,8 @@ INCLUDE_ASM("fe/feasyncfile", func_001BB840);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_001BB9B0(cFEStateCreateStep2* self, int month, int year);
 extern "C" void func_0039A670(void* self);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
 extern char D_004A12C0[];
 
@@ -17244,8 +17244,8 @@ extern "C" void func_001BB840(cFEStateCreateStep2* self, void* box, int month, i
         *(int*)((char*)self->mpAccount + 0x2C) = sel;
     }
     idx = 0;
-    func_0039A768(box, sel, &idx);
-    func_0039A7A8(box, idx);
+    cUIListBox_getEntryByData(box, sel, &idx);
+    cUIListBox_setCurrentEntryByIndex(box, idx);
     ((cFEVObj_001BB840*)box)->v09(1);
 }
 #endif
@@ -18145,7 +18145,7 @@ void func_001BDF60_1BDC18(void* self, int id) __asm__("func_001BDF60");
 extern "C" void func_001BE0A8(cFEStateLobbyMenu* self);
 extern "C" void func_001BE3A8(cFEStateLobbyMenu* self, int id);
 extern "C" void func_001BE720(cFEStateLobbyMenu*);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 
 struct sVE1BCD18 {
     short delta;
@@ -18182,7 +18182,7 @@ extern "C" int cFEStateLobbyMenu_onGainTransition(cFEStateLobbyMenu* self, int r
             if (self->miSelectedRoom >= n) {
                 self->miSelectedRoom = n - 1;
             }
-            func_0039A7A8(list, *(unsigned char*)&self->miSelectedRoom);
+            cUIListBox_setCurrentEntryByIndex(list, *(unsigned char*)&self->miSelectedRoom);
         }
         char* ids = (char*)self + 0x718;
         cUIMenu_setSelectedByIndex(self->mpMenuRoomMenus, self->miSelectedChannel);
@@ -18367,7 +18367,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onWidgetEvent);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup_D1B8(void* mem, int a1, void* owner) __asm__("cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup");
-extern "C" int func_0039A738_D1B8(void* item) __asm__("func_0039A738");
+extern "C" int cUIListBox_getCurrentEntryData_D1B8(void* item) __asm__("cUIListBox_getCurrentEntryData");
 extern "C" void func_001BD460_D1B8(void* self, int id, int a2) __asm__("func_001BD460");
 extern "C" void func_001BD428_D1B8(void* self) __asm__("func_001BD428");
 extern "C" int func_0025F180_D1B8(void* self, int id) __asm__("func_0025F180");
@@ -18434,7 +18434,7 @@ extern "C" void cFEStateLobbyMenu_onWidgetEvent(cState_D1B8* self, char* pWidget
             if (pWidget == self->items[i]) {
                 self->vals[i] = (unsigned char)pWidget[0x319];
                 self->busy = 0;
-                int id = func_0039A738_D1B8(pWidget);
+                int id = cUIListBox_getCurrentEntryData_D1B8(pWidget);
                 self->curId = id;
                 int r = func_0025F180_D1B8(LobbyMan_mLobbyMan, id);
                 sObj_D1B8* t = self->texts[i];
@@ -18460,10 +18460,10 @@ extern "C" void cFEStateLobbyMenu_onWidgetEvent(cState_D1B8* self, char* pWidget
         if (item == 0) {
             break;
         }
-        if (func_0039A738_D1B8(item) == -1) {
+        if (cUIListBox_getCurrentEntryData_D1B8(item) == -1) {
             break;
         }
-        func_001BD460_D1B8(self, func_0039A738_D1B8(item), 0);
+        func_001BD460_D1B8(self, cUIListBox_getCurrentEntryData_D1B8(item), 0);
         break;
     }
     case 6:
@@ -18632,7 +18632,7 @@ extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void func_001A8A40(void* self, void* obj);
 // PORT: func_001BE510 is defined as (self) in this unit, but this caller passes a second arg.
 void func_001BE510_BD738(void* self, int a1) __asm__("func_001BE510");
-extern "C" const char* func_0039A708(void* a);
+extern "C" const char* cUIListBox_getCurrentAsciiText(void* a);
 extern "C" void func_001BE0A8(cFEStateLobbyMenu* self);
 // PORT: func_001BE038 is defined later with its own list type; bound by asm label.
 void func_001BE038_BD738(void* self) __asm__("func_001BE038");
@@ -18657,7 +18657,7 @@ extern "C" void* func_001BD738(cFEStateLobbyMenu* self, int a1, int a2)
         int n = *(int*)(*(char**)((char*)self->mpMenuRoomMenus + 0xA0) + 0x18);
         self->miSelectedChannel = n;
         if (n < 4) {
-            cBXString_cBXString4(((char*)self) + 0x76C, func_0039A708(((sFE1BD738*)self)->boxes[n]));
+            cBXString_cBXString4(((char*)self) + 0x76C, cUIListBox_getCurrentAsciiText(((sFE1BD738*)self)->boxes[n]));
         }
         func_001BE0A8(self);
         func_001BE038_BD738(((char*)self));
@@ -19108,7 +19108,7 @@ struct sFELists1BE038 {
     unsigned int sel[4];            // 0x750
 };
 
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 
 extern "C" void func_001BE038(sFELists1BE038* self)
 {
@@ -19117,7 +19117,7 @@ extern "C" void func_001BE038(sFELists1BE038* self)
             self->sel[i] = self->boxes[i]->count - 1;
         }
         if (self->boxes[i]->count != 0) {
-            func_0039A7A8(self->boxes[i], (unsigned char)self->sel[i]);
+            cUIListBox_setCurrentEntryByIndex(self->boxes[i], (unsigned char)self->sel[i]);
         }
     }
 }
@@ -19250,7 +19250,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001BE3A8);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
-extern "C" int func_0039A738(void* a);
+extern "C" int cUIListBox_getCurrentEntryData(void* a);
 extern "C" int func_0025F180(void* self, int idx);
 extern "C" void func_0025D770(void* self, int idx);
 // PORT: func_001BE510 is defined as (self) in this unit, but this caller passes a second arg.
@@ -19301,7 +19301,7 @@ extern "C" void func_001BE3A8(cFEStateLobbyMenu* feStateLobbyMenu, int id)
         if (id == self->ids[i]) {
             void* box = self->boxes[i];
             if (*((unsigned char*)box + 0x318) != 0) {
-                sel = func_0039A738(box);
+                sel = cUIListBox_getCurrentEntryData(box);
                 int on = func_0025F180(LobbyMan_mLobbyMan, sel);
                 self->objs[i]->v09(on);
             }
@@ -19580,7 +19580,7 @@ extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" int func_001BEC78(cFEStateNetCreateRoomPopup* self);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
-extern "C" int func_0039A738(void* a);
+extern "C" int cUIListBox_getCurrentEntryData(void* a);
 extern const char* D_004A1A60;
 extern const char* D_004A1A64;
 extern const char* D_004A1A68;
@@ -19638,7 +19638,7 @@ extern "C" void cFEStateNetCreateRoomPopup_onWidgetEvent(cFEStateNetCreateRoomPo
         break;
     case 9:
         if (obj == (char*)self->mpLBChannelName) {
-            switch (func_0039A738(obj)) {
+            switch (cUIListBox_getCurrentEntryData(obj)) {
             case 0:
                 cBXString_cBXString4((char*)self + 0x6E0, D_004A1A60);
                 break;
@@ -20929,7 +20929,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* func_001A8770(cFEStateNet* self);
-extern "C" void func_003A1F18(cUIText* text, int a1);
+extern "C" void cUITextScroll_addUnicodeStringByID(cUIText* text, int a1);
 extern char D_00465710[];
 
 extern "C" void cFEStateOnlineAgreement_onUpdate(cFEStateOnlineAgreement* self)
@@ -20937,7 +20937,7 @@ extern "C" void cFEStateOnlineAgreement_onUpdate(cFEStateOnlineAgreement* self)
     if (self->miNextTOSLine < self->miNumTOSLines && self->mpTOSLines != 0) {
         cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465710));
         if (text != 0) {
-            func_003A1F18(text, (self->mpTOSLines)[(self->miNextTOSLine)++]);
+            cUITextScroll_addUnicodeStringByID(text, (self->mpTOSLines)[(self->miNextTOSLine)++]);
         }
     }
     func_001A8770((cFEStateNet*)self);
@@ -20961,7 +20961,7 @@ struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
-extern "C" void func_003A1310(void* self, int a1);
+extern "C" void cUITextScroll_setInputMap(void* self, int a1);
 extern char D_004619B8[];
 extern char D_004619C8[];
 extern char D_004619D8[];
@@ -21035,7 +21035,7 @@ extern "C" int cFEStateOnlineAgreement_onGainTransition(cFEStateOnlineAgreement*
     *(cUIText**)(o + 0x84) = c;
     char* x = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465710));
     *(char**)(x + 0xB8) = o;
-    func_003A1310(x, 1);
+    cUITextScroll_setInputMap(x, 1);
     ((cFEVObj_001C0B20*)x)->v07(1);
     if (o) {
         ((cFEVObj_001C0B20*)o)->v09(1);
@@ -21405,7 +21405,7 @@ extern "C" void func_001C13E0(cFEStateNetQuickPlayPopup* self, int show);
 extern "C" void func_001C17F8(cFEStateNetQuickPlayPopup* self, int a1);
 extern "C" void func_0025EE20(void* self, void* ids, int a2);
 extern "C" void func_0025EED8(void* self);
-extern "C" int func_0039A738(void* a);
+extern "C" int cUIListBox_getCurrentEntryData(void* a);
 // D_00534B34 is a splat label inside cBENetworkInterface_networkOpt
 extern int D_00534B34[];
 extern char D_00465938[];
@@ -21463,15 +21463,15 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
                 int* ids = o->miSearchOptions;
                 func_001C13E0(self, 0);
                 char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-                D_00534B34[0] = func_0039A738(self->mpLBRanked) != 0;
+                D_00534B34[0] = cUIListBox_getCurrentEntryData(self->mpLBRanked) != 0;
                 sVE_001C1560* vt = *(sVE_001C1560**)(iface + 0xC);
                 vt[1].fn(iface + vt[1].delta);
                 cBENewRaceInterface_setNumberAI(cBE_getInterface_Fv(SSXApp->BE, 0), 0);
-                o->miSearchOptions[0] = func_0039A738(self->mpLBRanked);
-                o->miSearchOptions[1] = func_0039A738(self->mpLBRace);
-                o->miSearchOptions[2] = func_0039A738(self->mpLBBigAir);
-                o->miSearchOptions[3] = func_0039A738(self->mpLBSuperpipe);
-                o->miSearchOptions[4] = func_0039A738(self->mpLBSlopeStyle);
+                o->miSearchOptions[0] = cUIListBox_getCurrentEntryData(self->mpLBRanked);
+                o->miSearchOptions[1] = cUIListBox_getCurrentEntryData(self->mpLBRace);
+                o->miSearchOptions[2] = cUIListBox_getCurrentEntryData(self->mpLBBigAir);
+                o->miSearchOptions[3] = cUIListBox_getCurrentEntryData(self->mpLBSuperpipe);
+                o->miSearchOptions[4] = cUIListBox_getCurrentEntryData(self->mpLBSlopeStyle);
                 func_0025EE20(LobbyMan_mLobbyMan, ids, self->mCurrentCtrl);
                 ((cFEVObj_001C1560*)self->mpTextSearching)->v09(1);
                 cUIText_setUnicodeStringByID(self->mpTextOK, GetHashValue32(D_00462C88));
@@ -22882,7 +22882,7 @@ extern "C" void func_001A8918_3668(void* self, void* w, int msg) __asm__("func_0
 extern "C" void func_001A8A40_3668(void* self, void* obj) __asm__("func_001A8A40");
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_3668(void* mem, void* a1) __asm__("cFEStateOnlineMainMenu_cFEStateOnlineMainMenu");
 extern "C" void func_001C49C8_3668(void* self) __asm__("func_001C49C8");
-extern "C" int func_0039A738_3668(void* w) __asm__("func_0039A738");
+extern "C" int cUIListBox_getCurrentEntryData_3668(void* w) __asm__("cUIListBox_getCurrentEntryData");
 extern "C" void func_001C4B78_3668(void* self, int v) __asm__("func_001C4B78");
 extern "C" void func_001C3310_3668(void* self) __asm__("func_001C3310");
 extern "C" void func_001C3EE8_3668(void* self, int mode) __asm__("func_001C3EE8");
@@ -22986,7 +22986,7 @@ extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, i
         if (isButton_3668(w, D_00465C78)) {
             func_001C49C8_3668(((char*)self));
         } else if (isButton_3668(w, D_00465C88)) {
-            func_001C4B78_3668(((char*)self), func_0039A738_3668(w));
+            func_001C4B78_3668(((char*)self), cUIListBox_getCurrentEntryData_3668(w));
             func_001C3310_3668(((char*)self));
         }
     case 1:
@@ -23474,8 +23474,8 @@ extern "C" const char* cBENewRaceInterface_getLocationName(void* iface, int id);
 extern "C" void func_001C3310(cFEStateStats* self);
 extern "C" void func_001C4B78(cFEStateStats* self, int idx);
 extern "C" void func_0039A670(void* self);
-extern "C" int func_0039A738(void* a);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" int cUIListBox_getCurrentEntryData(void* a);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char D_00465C78[];
 extern char D_00465C88[];
 extern char D_00465D50[];
@@ -23494,7 +23494,7 @@ extern "C" void func_001C49C8(cFEStateStats* self)
     if (box == 0) {
         return;
     }
-    int key = func_0039A738(box);
+    int key = cUIListBox_getCurrentEntryData(box);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465C88));
     if (box == 0) {
@@ -23517,7 +23517,7 @@ extern "C" void func_001C49C8(cFEStateStats* self)
     if (first.data >= 0) {
         if (first.data < 29) {
             func_001C4B78(self, first.data);
-            func_0039A7A8(box, 0);
+            cUIListBox_setCurrentEntryByIndex(box, 0);
             cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465D50)), 0);
         }
     }
@@ -23969,7 +23969,7 @@ extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 int cBXString_FindLastOf(cBXString* self, char ch, int len);
 extern "C" void cBXString_setAt(cBXString* self, int idx, char ch);
-extern "C" void func_003A19F8(cUIText* text, char* str);
+extern "C" void cUITextScroll_addAsciiString(cUIText* text, char* str);
 // PORT: unit declares func_001A8E40 with one arg; the handler passes (self, a1, a2) through
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern char D_00465F38[];
@@ -23998,7 +23998,7 @@ extern "C" void* func_001C5430(cFEStateNet* self, int msg, int a2)
                     cBXString_setAt((cBXString*)&s, pos, ' ');
                 }
             }
-            func_003A19F8(text, s.str);
+            cUITextScroll_addAsciiString(text, s.str);
             cBXString__cBXString(&s, 2);
             return 0;
         }

@@ -7962,7 +7962,7 @@ extern "C" void cOVState_triggerTextFade(void* self, char* text, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" void func_003A1310(void* self, int a1);
+extern "C" void cUITextScroll_setInputMap(void* self, int a1);
 extern int D_00536730[];
 extern char D_004A2170[];
 extern char D_0046E4E8[];
@@ -8024,7 +8024,7 @@ extern "C" void func_001E75D0(void* self)
         char* p = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0046E808));
         *(int*)(p + 0x74) |= 1;
         *(sRect_75D0*)(p + 0xA8) = D_004C8408;
-        func_003A1310(p, 1);
+        cUITextScroll_setInputMap(p, 1);
         ((cUIObjK1DEB90*)p)->v09(0);
     }
     func_00294F78(func_0028B180(), 0xE);

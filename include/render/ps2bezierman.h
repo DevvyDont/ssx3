@@ -6,23 +6,23 @@
 // class name (cPSPBezierMan_cPSPBezierMan__FPv, vtables.tsv); the allocation tag says "PS2BezierMan".
 // Size 0x9C90: [R] cBezierMan_construct__Fv (render/bezierman) does cMemMan_alloc(0x9C90, "PS2BezierMan") + the ctor
 // cPSPBezierMan_cPSPBezierMan__FPv (render/ps2bezierman): cBezierMan ctor func_00374C90 (vtable D_00493820, stores
-// TheBezierMan), vtable D_00493760, func_00372B30 on this + 0x10, then Init (func_0038AF30). Dtor func_0038AEB0 (Purge,
+// TheBezierMan), vtable D_00493760, func_00372B30 on this + 0x10, then Init (cPSPBezierMan_Init). Dtor cPSPBezierMan__cPSPBezierMan (Purge,
 // then cBezierMan dtor func_00374CA8, which clears TheBezierMan).
 // Bases: cBezierMan (On Tour 0x8: m_currPatchDist 0x0, then its vptr at 0x4) <- cPSPBezierMan.
-// Methods (D_00493760; the same order as On Tour's cBezierMan declarations): 0 ~ func_0038AEB0, 1 Init func_0038AF30,
-// 2 Purge func_0038B0F8, 3 Reset func_0038B158__FPv, 4 UpdatePatchesCache func_00394B80__FPv (empty), 5/6 SetNearLOD/
+// Methods (D_00493760; the same order as On Tour's cBezierMan declarations): 0 ~ cPSPBezierMan__cPSPBezierMan, 1 Init cPSPBezierMan_Init,
+// 2 Purge cPSPBezierMan_Purge, 3 Reset func_0038B158__FPv, 4 UpdatePatchesCache func_00394B80__FPv (empty), 5/6 SetNearLOD/
 // SetFarLOD func_00394BC0/C8__FPvf, 7/8 GetNearLOD/GetFarLOD func_00394BD0/D8__FPv, 9 SetLmapStart func_00394BE0__FPvi,
 // 10-12 EnableWireMode/EnableLightMaps/EnableShadows func_00394BE8/F0/F8__FPvi, 13-15 IsWireModeEnabled/
 // IsLightMapsEnabled/IsShadowsEnabled func_00394C00/08/10__FPv, 16 ClearPatches func_0038B178__FPv, 17 DrawPatches
-// func_0038B370, 18/19 SetPatchDist/GetPatchDist func_00394B88__FPvf / func_00394B90__FPv (cBezierMan's), 20 AddPatch
-// func_0038B338, 21 func_0038B190 (queues one patch by its edge LODs). cBezierMan's own slots (D_00493820):
+// cPSPBezierMan_DrawPatches, 18/19 SetPatchDist/GetPatchDist func_00394B88__FPvf / func_00394B90__FPv (cBezierMan's), 20 AddPatch
+// cPSPBezierMan_AddPatch, 21 func_0038B190 (queues one patch by its edge LODs). cBezierMan's own slots (D_00493820):
 // func_00394B78__FPv (3), func_00394B80__FPv (4), func_00394B98 (21: calls slot 20). Non-virtual accessors:
 // func_00394C18 (cache pointer + slot), func_00394C30 (lw 0x1A0), func_00394C38 (lw 0x320).
 // Instance global: cBezierMan_TheBezierMan (gp+0x1158) = cBezierMan::TheBezierMan (func_00374C90 stores it, func_00374CA8 clears
 // it); func_00394B70 returns it (getBezierMan).
 //
 // FLAT layout. Members: [O] On Tour's cBezierMan / cPSPBezierMan (mNearLODcm, mFarLODcm and the four enable flags, which
-// are bools there and words here), [R] Init (func_0038AF30), [U] the accessors and the patch-queue functions. The
+// are bools there and words here), [R] Init (cPSPBezierMan_Init), [U] the accessors and the patch-queue functions. The
 // patch cache at 0x10 and the tail from 0x5364 (used by DrawPatches) are not laid out yet.
 
 #include "layout.h"
@@ -60,7 +60,7 @@ CHECK_SIZE(tBezierMixedPatchEntry, 0x14);
 struct cPSPBezierMan {
     // --- cBezierMan
     float m_currPatchDist;           // 0x0000 [O]; [U] func_00394B88 SetPatchDist (swc1), func_00394B90 GetPatchDist (lwc1)
-    void** mVtbl;                    // 0x0004 [R] D_00493820 (cBezierMan ctor/dtor), D_00493760 (ctor, dtor func_0038AEB0)
+    void** mVtbl;                    // 0x0004 [R] D_00493820 (cBezierMan ctor/dtor), D_00493760 (ctor, dtor cPSPBezierMan__cPSPBezierMan)
     // --- cPSPBezierMan
     char unk_0008[0x8];              // 0x0008 (no retail access found)
     char mPatchCache[0x32C];         // 0x0010 [R] func_00372B30 / func_00372B78(this + 0x10, 900, 220, 140, ...) in the
@@ -86,7 +86,7 @@ struct cPSPBezierMan {
     tBezierPatchEntry m8x8Patches[50];    // 0x4A64 [U] func_0038B190 (lod 8)
     int mNumMixedPatches;            // 0x4D84 [U] ClearPatches = 0; func_0038B190 appends (limit 75)
     tBezierMixedPatchEntry mMixedPatches[75]; // 0x4D88 [U] func_0038B190 (edges differ)
-    char unk_5364[0x492C];           // 0x5364 [U] DrawPatches func_0038B370 (sw 0x5364, ...); not laid out
+    char unk_5364[0x492C];           // 0x5364 [U] DrawPatches cPSPBezierMan_DrawPatches (sw 0x5364, ...); not laid out
 };
 
 CHECK_OFFSET(cPSPBezierMan, m_currPatchDist, 0x0000);

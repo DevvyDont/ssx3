@@ -1046,7 +1046,7 @@ INCLUDE_ASM("ui/uimenu", cUIProgress_setUIData);
  * Sets up a progress bar from its UI data, then sets its default range.
  *
  * Runs the base cUIThing_setUIData(), then stores 10 at 0x80 (the full-scale value that the bar setter
- * func_0039C428() divides by) and 100 at 0x84. Only @p self is declared: the UI data pointer reaches
+ * cUIProgress_setValue() divides by) and 100 at 0x84. Only @p self is declared: the UI data pointer reaches
  * cUIThing_setUIData() unchanged in its register.
  */
 extern "C" void cUIProgress_setUIData(cUIProgress* self)
@@ -1124,16 +1124,16 @@ extern "C" void cUIProgress_update(cUIProgress* self, unsigned short ev)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039C428);
+INCLUDE_ASM("ui/uimenu", cUIProgress_setValue);
 #ifdef SKIP_ASM
-struct func_0039C428_sVec3 {
+struct cUIProgress_setValue_sVec3 {
     float x;
     float y;
     float z;
 };
-extern func_0039C428_sVec3 t3vect_Zero;
+extern cUIProgress_setValue_sVec3 t3vect_Zero;
 
-class func_0039C428_cWidget {
+class cUIProgress_setValue_cWidget {
 public:
     char pad[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -1156,15 +1156,15 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void v20(func_0039C428_sVec3*);
-    virtual void v21(func_0039C428_sVec3*);
+    virtual void v20(cUIProgress_setValue_sVec3*);
+    virtual void v21(cUIProgress_setValue_sVec3*);
 };
 
-extern "C" void func_0039C428(cUIProgress* self, int pos)
+extern "C" void cUIProgress_setValue(cUIProgress* self, int pos)
 {
     self->mValue = pos;
-    func_0039C428_cWidget* a = (func_0039C428_cWidget*)self->mpObjBackground;
-    func_0039C428_sVec3 v = t3vect_Zero;
+    cUIProgress_setValue_cWidget* a = (cUIProgress_setValue_cWidget*)self->mpObjBackground;
+    cUIProgress_setValue_sVec3 v = t3vect_Zero;
     if (a != 0) {
         a->v20(&v);
     }
@@ -1176,7 +1176,7 @@ extern "C" void func_0039C428(cUIProgress* self, int pos)
             } else {
                 v.y *= (float)self->mValue / (float)n;
             }
-            ((func_0039C428_cWidget*)self->mpObjKnob)->v21(&v);
+            ((cUIProgress_setValue_cWidget*)self->mpObjKnob)->v21(&v);
         }
     }
 }

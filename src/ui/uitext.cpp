@@ -596,7 +596,7 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_cUITextScroll);
 #ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self, int a1, int a2);
 extern "C" void* func_003977E8(void* self);
-extern "C" void func_003A1310(cUITextScroll* self, char a1);
+extern "C" void cUITextScroll_setInputMap(cUITextScroll* self, char a1);
 extern void* cUITextScroll_vtbl[];
 
 extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int a1, int a2)
@@ -612,7 +612,7 @@ extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int a1, int a2
     *(short*)&self->mLinesOffset = 0;
     *(short*)&self->mLineSize = 0;
     *(int*)&self->mPixelOffset = 0;
-    func_003A1310(self, 0);
+    cUITextScroll_setInputMap(self, 0);
     return ((void*)self);
 }
 #endif
@@ -623,8 +623,8 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_setUIData);
 // PORT: cUIThing_setUIData really takes (self, data); other units declare it with one argument.
 void* cUIThing_setUIData_2(void* self, void* data) __asm__("cUIThing_setUIData");
 // PORT: called with only self here (the unit declares two arguments).
-void func_003A18C0_1(void* self) __asm__("func_003A18C0");
-extern "C" void func_003A1F18(cUITextScroll* self, int id);
+void cUITextScroll_clearBuffer_1(void* self) __asm__("cUITextScroll_clearBuffer");
+extern "C" void cUITextScroll_addUnicodeStringByID(cUITextScroll* self, int id);
 
 struct sUIColor11B8 {
     float r, g, b, a;
@@ -656,8 +656,8 @@ extern "C" void cUITextScroll_setUIData(sUIText11B8* self, sUIData11B8* data)
     self->mode = data->mode & 3;
     self->vt[23].fn((char*)self + self->vt[23].delta, data->vis & 1);
     if (data->textId != 0) {
-        func_003A18C0_1(self);
-        func_003A1F18((cUITextScroll*)self, data->textId);
+        cUITextScroll_clearBuffer_1(self);
+        cUITextScroll_addUnicodeStringByID((cUITextScroll*)self, data->textId);
     }
     int f = *(int*)((char*)self + 0x74) >> 3;
     if (f & 1) {
@@ -668,9 +668,9 @@ extern "C" void cUITextScroll_setUIData(sUIText11B8* self, sUIData11B8* data)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A12D0);
+INCLUDE_ASM("ui/uitext", cUITextScroll_getFont);
 #ifdef SKIP_ASM
-extern "C" int func_003A12D0(cUITextScroll* self)
+extern "C" int cUITextScroll_getFont(cUITextScroll* self)
 {
     void* p = *(void**)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
     if (p != 0) {
@@ -681,9 +681,9 @@ extern "C" int func_003A12D0(cUITextScroll* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1310);
+INCLUDE_ASM("ui/uitext", cUITextScroll_setInputMap);
 #ifdef SKIP_ASM
-extern "C" void func_003A1310(cUITextScroll* self, char a1)
+extern "C" void cUITextScroll_setInputMap(cUITextScroll* self, char a1)
 {
     if (a1 == 0) {
         *(char*)((char*)self + 0x88) = 0;
@@ -702,7 +702,7 @@ extern "C" void func_003A1310(cUITextScroll* self, char a1)
 //100%
 INCLUDE_ASM("ui/uitext", cUITextScroll_updateLocale);
 #ifdef SKIP_ASM
-extern "C" void func_003A1CF0(cUITextScroll* self, void* a1);
+extern "C" void cUITextScroll_setUnicodeStringWrap(cUITextScroll* self, void* a1);
 
 class cUITextScroll_updateLocale_cVirtA {
 public:
@@ -733,7 +733,7 @@ extern "C" void cUITextScroll_updateLocale(cUITextScroll* self)
         if (a != 0) {
             void* r = a->v04(id);
             if (r != 0) {
-                func_003A1CF0(self, r);
+                cUITextScroll_setUnicodeStringWrap(self, r);
             }
             ((cUITextScroll_updateLocale_cVirtB*)self)->v05(1);
         }
@@ -781,7 +781,7 @@ static inline int pressed13E0(char* input, int key)
 
 extern "C" int cUITextScroll_onInput(sUIText13E0* self, char* input)
 {
-    sUIFont13E0* font = (sUIFont13E0*)func_003A12D0((cUITextScroll*)self);
+    sUIFont13E0* font = (sUIFont13E0*)cUITextScroll_getFont((cUITextScroll*)self);
     if (font == 0) {
         return 0;
     }
@@ -827,7 +827,7 @@ extern "C" int cUITextScroll_onInput(sUIText13E0* self, char* input)
 //100%
 INCLUDE_ASM("ui/uitext", cUITextScroll_render2D);
 #ifdef SKIP_ASM
-extern "C" int func_003A12D0(cUITextScroll* self);
+extern "C" int cUITextScroll_getFont(cUITextScroll* self);
 extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
 extern "C" void func_0039FEB8(void* self, void* pos, void* size);
 extern "C" void func_00391E30(void* font, float x, float y, int str);
@@ -907,7 +907,7 @@ extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
     if (((self->flags14 >> 2) & 1) == 0) {
         self->vt[16].fn((char*)self + self->vt[16].delta);
     }
-    sFont_1588* font = (sFont_1588*)func_003A12D0((cUITextScroll*)self);
+    sFont_1588* font = (sFont_1588*)cUITextScroll_getFont((cUITextScroll*)self);
     if (font == 0) {
         return;
     }
@@ -955,11 +955,11 @@ extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A18C0);
+INCLUDE_ASM("ui/uitext", cUITextScroll_clearBuffer);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
-extern "C" void func_003A18C0(cUITextScroll* self, void* a1)
+extern "C" void cUITextScroll_clearBuffer(cUITextScroll* self, void* a1)
 {
     if ((void**)self->mpLineOffset != 0) {
         unsigned short i;
@@ -1013,15 +1013,15 @@ extern "C" int cUITextScroll_allocLine(cUITextScroll* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A19F8);
+INCLUDE_ASM("ui/uitext", cUITextScroll_addAsciiString);
 #ifdef SKIP_ASM
 extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned short* str);
 extern "C" void func_002C2540(void* dst, void* src);
 
-extern "C" void func_003A19F8(cUITextScroll* self, char* str)
+extern "C" void cUITextScroll_addAsciiString(cUITextScroll* self, char* str)
 {
     ((cUIText_3A0C70*)self)->v05(1);
-    void* font = (void*)func_003A12D0(self);
+    void* font = (void*)cUITextScroll_getFont(self);
     if (font == 0) {
         return;
     }
@@ -1102,7 +1102,7 @@ extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned sho
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1C80);
+INCLUDE_ASM("ui/uitext", cUITextScroll_setAsciiString);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 typedef void (*fnUT1C80)(char*, int);
@@ -1113,39 +1113,39 @@ struct sUTVEntry1C80 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_003A1C80(cUITextScroll* self, char* str)
+extern "C" void cUITextScroll_setAsciiString(cUITextScroll* self, char* str)
 {
-    func_003A18C0_1(self);
+    cUITextScroll_clearBuffer_1(self);
     self->mStringID = (unsigned int)0;
     ((sUTVEntry1C80*)self->mVtbl)[5].fn((char*)self + ((sUTVEntry1C80*)self->mVtbl)[5].delta, 1);
     ((sUTVEntry1C80*)self->mVtbl)[24].fn((char*)self + ((sUTVEntry1C80*)self->mVtbl)[24].delta, 0);
-    func_003A19F8(self, str);
+    cUITextScroll_addAsciiString(self, str);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1CF0);
+INCLUDE_ASM("ui/uitext", cUITextScroll_setUnicodeStringWrap);
 #ifdef SKIP_ASM
-extern "C" void func_003A18C0(cUITextScroll*, void*);
-extern "C" void func_003A1D30(cUITextScroll*, void*);
+extern "C" void cUITextScroll_clearBuffer(cUITextScroll*, void*);
+extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll*, void*);
 
-extern "C" void func_003A1CF0(cUITextScroll* self, void* a1)
+extern "C" void cUITextScroll_setUnicodeStringWrap(cUITextScroll* self, void* a1)
 {
-    func_003A18C0(self, a1);
-    func_003A1D30(self, a1);
+    cUITextScroll_clearBuffer(self, a1);
+    cUITextScroll_addUnicodeStringWrap(self, a1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1D30);
+INCLUDE_ASM("ui/uitext", cUITextScroll_addUnicodeStringWrap);
 #ifdef SKIP_ASM
 extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned short* str);
 
-extern "C" void func_003A1D30(cUITextScroll* self, void* vstr)
+extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll* self, void* vstr)
 {
     unsigned short* str = (unsigned short*)vstr;
     ((cUIText_3A0C70*)self)->v05(1);
-    void* font = (void*)func_003A12D0(self);
+    void* font = (void*)cUITextScroll_getFont(self);
     if (font == 0) {
         return;
     }
@@ -1195,11 +1195,11 @@ extern "C" void func_003A1D30(cUITextScroll* self, void* vstr)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1F18);
+INCLUDE_ASM("ui/uitext", cUITextScroll_addUnicodeStringByID);
 #ifdef SKIP_ASM
-extern "C" void func_003A1D30(cUITextScroll*, void*);
+extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll*, void*);
 
-class func_003A1F18_cVirtA {
+class cUITextScroll_addUnicodeStringByID_cVirtA {
 public:
     char pad[0x4];
     // vptr at 0x4; slot N at vtable offset N*8
@@ -1209,7 +1209,7 @@ public:
     virtual void* v04(int);
 };
 
-class func_003A1F18_cVirtB {
+class cUITextScroll_addUnicodeStringByID_cVirtB {
 public:
     char pad[0x8];
     // vptr at 0x8; slot N at vtable offset N*8
@@ -1220,24 +1220,24 @@ public:
     virtual void v05(int);
 };
 
-extern "C" void func_003A1F18(cUITextScroll* self, int id)
+extern "C" void cUITextScroll_addUnicodeStringByID(cUITextScroll* self, int id)
 {
     self->mStringID = (unsigned int)id;
-    func_003A1F18_cVirtA* a = *(func_003A1F18_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
+    cUITextScroll_addUnicodeStringByID_cVirtA* a = *(cUITextScroll_addUnicodeStringByID_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
     if (a != 0) {
         void* r = a->v04(id);
         if (r != 0) {
-            func_003A1D30(self, r);
+            cUITextScroll_addUnicodeStringWrap(self, r);
         }
-        ((func_003A1F18_cVirtB*)self)->v05(1);
+        ((cUITextScroll_addUnicodeStringByID_cVirtB*)self)->v05(1);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1F90);
+INCLUDE_ASM("ui/uitext", cUITextScroll_deleteLineByIndex);
 #ifdef SKIP_ASM
-extern "C" void func_003A1F90(cUITextScroll* self, int idx)
+extern "C" void cUITextScroll_deleteLineByIndex(cUITextScroll* self, int idx)
 {
     if ((void**)self->mpLineOffset != 0) {
         unsigned short n = self->mLineSize;

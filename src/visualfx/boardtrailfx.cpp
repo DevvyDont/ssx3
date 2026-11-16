@@ -1372,7 +1372,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_update);
 #ifdef SKIP_ASM
 int func_0011FE98(void* self);
 void func_00392DE8(void* self, int val);
-extern "C" void func_00392D90(void* self, void* q, void* v);
+extern "C" void cPlayerLights_AddDirectional(void* self, void* q, void* v);
 extern int cPowerUpFXToggles_m_TestTrickBoost;
 
 struct sV4_2EADD0
@@ -1461,7 +1461,7 @@ static inline sV4_2EADD0 Scale_2EADD0(const sV4_2EADD0& v, float s)
  * Records the board outline for the trick boost effect while the rider's trick power-up runs.
  *
  * While mPowerUpTrickTimer (+0x2EC) is positive (or cPowerUpFXToggles_m_TestTrickBoost is set) it drives an
- * effect in the rider handler at +0xD30 (func_00392DE8, func_00392D90; blue, size 2). In the air (motion
+ * effect in the rider handler at +0xD30 (func_00392DE8, cPlayerLights_AddDirectional; blue, size 2). In the air (motion
  * state 1) it stores a 140 x 36 quad around the board bone in a ring of 3 (up to 3 kept), plus two points 12
  * to each side; otherwise the count drops to 0.
  */
@@ -1485,7 +1485,7 @@ extern "C" void cTrickBoostFX_update(sTrail_2EADD0* self)
         col.y = zero;
         col.z = 1.0f;
         col.w = zero;
-        func_00392D90(fs, &col, &sz);
+        cPlayerLights_AddDirectional(fs, &col, &sz);
     }
     if (zero < speed && func_0011FE98(self->rider) == 1)
     {

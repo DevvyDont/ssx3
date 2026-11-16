@@ -598,7 +598,7 @@ INCLUDE_ASM("camera/camera", cCamera_applyCameraShake);
 // The camera base matrix (set up by func_001673F8), followed by the camera-shake tuning
 // table: one entry per shake type, reset by func_0015E2A8, plus each type's selector in D_004C5430.
 struct sCamShake {
-    float base;     // passed to func_001656B0_E460 / func_00165938
+    float base;     // passed to cLookAtChaseAlgorithm_setupCameraShake_E460 / cLookAtChaseAlgorithm_updateCameraShake
     float spread;
     float weight;   // scales the requested amount
     float range;    // distance at which the shake fades out
@@ -630,8 +630,8 @@ static inline float Length_15E460(const t4Vector& v)
 }
 
 extern int D_004A2A50;
-extern "C" void func_00165938(cLookAtChaseAlgorithm* self, int flag, int sel, float base, float spread, float r);
-extern "C" void func_001656B0_E460(char* self, float base, float spread, float r) __asm__("func_001656B0");
+extern "C" void cLookAtChaseAlgorithm_updateCameraShake(cLookAtChaseAlgorithm* self, int flag, int sel, float base, float spread, float r);
+extern "C" void cLookAtChaseAlgorithm_setupCameraShake_E460(char* self, float base, float spread, float r) __asm__("cLookAtChaseAlgorithm_setupCameraShake");
 extern "C" void cCamera_shakeCamera_E460(char* self, int type, float amount, float dist) __asm__("cCamera_shakeCamera");
 
 /**
@@ -641,7 +641,7 @@ extern "C" void cCamera_shakeCamera_E460(char* self, int type, float amount, flo
  * requests shake type 1, 2 or 3 (boost over 0.4 or 0.7) with a strength from the target's vector at slot 3
  * (probably the velocity): 0 below 60, rising to 1 at 120 after scaling by 0.036.
  *
- * Starts the shake (func_001656B0) on the first frame, runs func_00165938 with the dominant type's table
+ * Starts the shake (cLookAtChaseAlgorithm_setupCameraShake) on the first frame, runs cLookAtChaseAlgorithm_updateCameraShake with the dominant type's table
  * values, then clears the per-frame request.
  */
 extern "C" void cCamera_applyCameraShake(cCamera* self)
@@ -676,8 +676,8 @@ extern "C" void cCamera_applyCameraShake(cCamera* self)
     char* p = ((char*)self) + 0xC0;
     float t = self->MaxShakeVariance;
     if (self->DoingCamShake != 0 && self->DoingCamShakeLastFrame == 0)
-        func_001656B0_E460(p, f21, f22, t);
-    func_00165938((cLookAtChaseAlgorithm*)p, self->DoingCamShake, sel, f21, f22, t);
+        cLookAtChaseAlgorithm_setupCameraShake_E460(p, f21, f22, t);
+    cLookAtChaseAlgorithm_updateCameraShake((cLookAtChaseAlgorithm*)p, self->DoingCamShake, sel, f21, f22, t);
     self->DoingCamShakeLastFrame = self->DoingCamShake;
     self->DoingCamShake = 0;
     *(int*)&self->MaxShakeVariance = 0;
@@ -1732,7 +1732,7 @@ extern void* D_0045BDE0[];
 extern void* cBasicCameraAlgorithm_vtbl[];
 // PORT: cQuad128 (the unit's 128-bit TImode typedef) is a 16-byte register copy.
 extern cQuad128 D_004FF130;
-extern "C" float func_00167E30(cCameraAlgorithm* self);
+extern "C" float cCameraAlgorithm_getDefaultView(cCameraAlgorithm* self);
 
 /**
  * Constructs a basic camera algorithm (a position with pitch and heading).
@@ -1744,7 +1744,7 @@ extern "C" float func_00167E30(cCameraAlgorithm* self);
 extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(cBasicCameraAlgorithm* self)
 {
     self->mVtbl = D_0045BDE0;
-    *(float*)self = func_00167E30((cCameraAlgorithm*)self);
+    *(float*)self = cCameraAlgorithm_getDefaultView((cCameraAlgorithm*)self);
     self->AlgorithmType = 0x4E;
     self->Near = 10.0f;
     self->Far = 30000.0f;
@@ -2098,7 +2098,7 @@ extern "C" void* cCameraJitterer_cCameraJitterer(cCameraJitterer* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00160028);
+INCLUDE_ASM("camera/camera", cCameraJitterer_updatePositionalJitter);
 #ifdef SKIP_ASM
 int BXrand();
 
@@ -2128,7 +2128,7 @@ static inline float randf_160028()
     return u.f - 1.0f;
 }
 
-extern "C" void func_00160028(cCameraJitterer* self, float amount)
+extern "C" void cCameraJitterer_updatePositionalJitter(cCameraJitterer* self, float amount)
 {
     self->FocusJitterFactor = amount;
     if (amount != 0.0f) {
@@ -2152,7 +2152,7 @@ extern "C" void func_00160028(cCameraJitterer* self, float amount)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00160130);
+INCLUDE_ASM("camera/camera", cCameraJitterer_updateRollJitter);
 #ifdef SKIP_ASM
 int BXrand();
 
@@ -2189,7 +2189,7 @@ static inline float fabs_160130(float x)
     return r;
 }
 
-extern "C" void func_00160130(cCameraJitterer* self, float amount)
+extern "C" void cCameraJitterer_updateRollJitter(cCameraJitterer* self, float amount)
 {
     self->RollJitterFactor = amount;
     if (amount != 0.0f) {
@@ -2289,9 +2289,9 @@ extern "C" sVec_00160228 func_00160228(char* p, float a, float b)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001603F0);
+INCLUDE_ASM("camera/camera", cCameraJitterer_getRollJitter);
 #ifdef SKIP_ASM
-extern "C" float func_001603F0(cCameraJitterer* self)
+extern "C" float cCameraJitterer_getRollJitter(cCameraJitterer* self)
 {
     float s = self->RollJitterFactor;
     if (s == 0.0f)
@@ -2530,12 +2530,12 @@ extern "C" void func_001606D8(cLookAtChaseAlgorithm* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00160760);
+INCLUDE_ASM("camera/camera", cMatrixChaseAlgorithm_cMatrixChaseAlgorithm);
 #ifdef SKIP_ASM
 extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorithm* self);
 extern void* D_0045BA58[];
 
-extern "C" void* func_00160760(cMatrixChaseAlgorithm* self)
+extern "C" void* cMatrixChaseAlgorithm_cMatrixChaseAlgorithm(cMatrixChaseAlgorithm* self)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm((cLookAtChaseAlgorithm*)self);
     self->AlgorithmType = 0x29;
@@ -2577,7 +2577,7 @@ void func_001607D8(void* self, void* other)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001607E0);
+INCLUDE_ASM("camera/camera", cMatrixChaseAlgorithm_update);
 #ifdef SKIP_ASM
 extern "C" float func_0031BF60(float x);
 extern "C" float func_0031C040(float x);
@@ -2714,7 +2714,7 @@ static inline sVec_001607E0 cmGet_001607E0(char* self, int slot)
     return e->fn(o + e->delta);
 }
 
-extern "C" void func_001607E0(cMatrixChaseAlgorithm* self)
+extern "C" void cMatrixChaseAlgorithm_update(cMatrixChaseAlgorithm* self)
 {
     sCamInfo_001607E0 info;
     func_00162568(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
@@ -2747,12 +2747,12 @@ extern "C" void func_001607E0(cMatrixChaseAlgorithm* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00160AE8);
+INCLUDE_ASM("camera/camera", cMatrixChaseAlgorithm_snap);
 #ifdef SKIP_ASM
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void func_00166550(cLookAtChaseAlgorithm* self, float a, float b);
 
-extern "C" void func_00160AE8(cMatrixChaseAlgorithm* self, int id)
+extern "C" void cMatrixChaseAlgorithm_snap(cMatrixChaseAlgorithm* self, int id)
 {
     char* obj = *(char**)((char*)self->Target + 0x4) + 0x6C0;
     sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
@@ -2767,12 +2767,12 @@ extern "C" void func_00160AE8(cMatrixChaseAlgorithm* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00160B70);
+INCLUDE_ASM("camera/camera", cRelativeChaseAlgorithm_cRelativeChaseAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045B9E0[];
 extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorithm* self);
 
-extern "C" void* func_00160B70(cRelativeChaseAlgorithm* self, float f)
+extern "C" void* cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cRelativeChaseAlgorithm* self, float f)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm((cLookAtChaseAlgorithm*)self);
     self->Angle = f;
@@ -2814,7 +2814,7 @@ void func_00160BF0(void* self, void* other)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00160BF8);
+INCLUDE_ASM("camera/camera", cRelativeChaseAlgorithm_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sVec_001607E0 cmSub_00160BF8(const sVec_001607E0& a, const sVec_001607E0& b)
@@ -2831,7 +2831,7 @@ static inline sVec_001607E0 cmSub_00160BF8(const sVec_001607E0& a, const sVec_00
     return r;
 }
 
-extern "C" void func_00160BF8(cRelativeChaseAlgorithm* self)
+extern "C" void cRelativeChaseAlgorithm_update(cRelativeChaseAlgorithm* self)
 {
     sCamInfo_001607E0 info;
     func_00162568(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
@@ -2874,12 +2874,12 @@ extern "C" void func_00160BF8(cRelativeChaseAlgorithm* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00160FD0);
+INCLUDE_ASM("camera/camera", cRelativeChaseAlgorithm_snap);
 #ifdef SKIP_ASM
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void func_00166550(cLookAtChaseAlgorithm* self, float a, float b);
 
-extern "C" void func_00160FD0(cRelativeChaseAlgorithm* self, int id)
+extern "C" void cRelativeChaseAlgorithm_snap(cRelativeChaseAlgorithm* self, int id)
 {
     char* obj = *(char**)((char*)self->Target + 0x4) + 0x6C0;
     sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
@@ -2895,7 +2895,7 @@ extern "C" void func_00160FD0(cRelativeChaseAlgorithm* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00161060);
+INCLUDE_ASM("camera/camera", cSplineCamAlgorithm_cSplineCamAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045B968[];
 extern "C" void func_0031D5E8(void* spline);
@@ -2946,7 +2946,7 @@ static inline float Length_161060(const sVec_161060& v)
     return r;
 }
 
-extern "C" void* func_00161060(cSplineCamAlgorithm* self, float* p0, float* p1, float* p2, float* p3, float dur, float a, float b,
+extern "C" void* cSplineCamAlgorithm_cSplineCamAlgorithm(cSplineCamAlgorithm* self, float* p0, float* p1, float* p2, float* p3, float dur, float a, float b,
                                float c)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm((cLookAtChaseAlgorithm*)self);
@@ -4085,12 +4085,12 @@ INCLUDE_ASM("camera/camera", cChaseAlgorithm_cChaseAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
 extern void* cChaseAlgorithm_vtbl[];
-extern "C" float func_00167E30(cCameraAlgorithm* self);
+extern "C" float cCameraAlgorithm_getDefaultView(cCameraAlgorithm* self);
 
 extern "C" void* cChaseAlgorithm_cChaseAlgorithm(cChaseAlgorithm* self)
 {
     self->mVtbl = D_0045BDE0;
-    *(float*)self = func_00167E30((cCameraAlgorithm*)self);
+    *(float*)self = cCameraAlgorithm_getDefaultView((cCameraAlgorithm*)self);
     self->AlgorithmType = 0x4E;
     self->Near = 10.0f;
     self->Far = 30000.0f;
@@ -4120,7 +4120,7 @@ extern "C" float func_00167D88(void);
 float func_00167D98_0() __asm__("func_00167D98");
 float func_00167DA8_0() __asm__("func_00167DA8");
 struct sCamFilter;
-extern "C" void func_00167DB8(cPIDFilter* self, float value);
+extern "C" void cPIDFilter_reset(cPIDFilter* self, float value);
 
 // Constructor: base ctor, five splines, the filter and default tuning.
 extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorithm* self)
@@ -4136,7 +4136,7 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorit
     self->TurningPIDFilter.ProportionFactor = func_00167D88();
     self->TurningPIDFilter.ErrorHistoryFactor = func_00167D98_0();
     self->TurningPIDFilter.DerrivativeFactor = func_00167DA8_0();
-    func_00167DB8((cPIDFilter*)filter, 0.0f);
+    cPIDFilter_reset((cPIDFilter*)filter, 0.0f);
     *(cQuad128*)&self->Position = D_004FF130;
     *(int*)&self->Pitch = 0;
     self->AlgorithmType = 0x54;
@@ -4401,9 +4401,9 @@ extern "C" void func_00162568_impl(char* self, char* out, float a, float b, floa
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00162998);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_setupHandplantBlend);
 #ifdef SKIP_ASM
-extern "C" void func_00162998(cLookAtChaseAlgorithm* self, void* obj)
+extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(cLookAtChaseAlgorithm* self, void* obj)
 {
     float v;
     if (*(int*)((char*)obj + 0x5C) == 0) {
@@ -4424,7 +4424,7 @@ extern "C" void func_00162998(cLookAtChaseAlgorithm* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00162A20);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_setupHalfPipeCam);
 #ifdef SKIP_ASM
 extern "C" int func_001298C8();
 
@@ -4478,7 +4478,7 @@ static inline void Normalize_162A20(sVec4_162A20& v)
     DivEq_162A20(v, Length_162A20(v));
 }
 
-extern "C" void func_00162A20(cLookAtChaseAlgorithm* self, char* trig)
+extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(cLookAtChaseAlgorithm* self, char* trig)
 {
     if (*(int*)(trig + 0x60))
     {
@@ -4523,9 +4523,9 @@ extern "C" void func_00162A20(cLookAtChaseAlgorithm* self, char* trig)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00162B80);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateCamTarget);
 #ifdef SKIP_ASM
-extern "C" cQuad128 func_00162B80(cLookAtChaseAlgorithm* self, void* a1)
+extern "C" cQuad128 cLookAtChaseAlgorithm_updateCamTarget(cLookAtChaseAlgorithm* self, void* a1)
 {
     cQuad128 v = *(cQuad128*)((char*)a1 + 0x10);
     *(cQuad128*)&self->CamTargetPos = v;
@@ -5142,10 +5142,10 @@ extern "C" void func_00163270_i(float a, float b, float c, float d, float e, sCa
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001633B0);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateFOVWithSpeed);
 #ifdef SKIP_ASM
 extern "C" void* func_00168150(void* self);
-extern "C" void func_001633B0(cLookAtChaseAlgorithm* self, void* obj, float a, float b, float c, float d)
+extern "C" void cLookAtChaseAlgorithm_updateFOVWithSpeed(cLookAtChaseAlgorithm* self, void* obj, float a, float b, float c, float d)
 {
     float k = *(float*)((char*)obj + 0x44);
     float x = a * (k * 1.0000000116860974e-07f) * k + 1.0f + (c - 1.0f) * *(float*)((char*)obj + 0x4C);
@@ -5161,7 +5161,7 @@ extern "C" void func_001633B0(cLookAtChaseAlgorithm* self, void* obj, float a, f
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00163450);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateHandplant);
 #ifdef SKIP_ASM
 extern "C" void* func_00168150(void* self);
 
@@ -5217,7 +5217,7 @@ static inline sVec4_163450 Scale_163450(const sVec4_163450& v, float s)
     return r;
 }
 
-extern "C" void func_00163450(cLookAtChaseAlgorithm* self, char* trig, float a, float b, float c, float d, float e, float f, float g)
+extern "C" void cLookAtChaseAlgorithm_updateHandplant(cLookAtChaseAlgorithm* self, char* trig, float a, float b, float c, float d, float e, float f, float g)
 {
     if (*(int*)(trig + 0x5C))
     {
@@ -5300,7 +5300,7 @@ extern "C" int func_001635F0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001635F8);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateAirCam);
 #ifdef SKIP_ASM
 struct sVec_1635F8 {
     float x, y, z, w;
@@ -5458,7 +5458,7 @@ static inline float CallF_1635F8(char* self, int slot)
 #define S_1635F8 ((char*)self)
 #define I_1635F8 ((char*)info)
 // Builds and evaluates the chase camera's jump/landing curves (splines at +0x304..+0x328).
-extern "C" void func_001635F8(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c, float d)
+extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c, float d)
 {
     float dist = Length_1635F8(Sub_1635F8(*(sVec_1635F8*)&self->CamTargetPos, *(sVec_1635F8*)&self->Position));
     if (*(int*)(I_1635F8 + 0x60) != 0 && self->DoingHalfPipeCam == 0) {
@@ -5835,7 +5835,7 @@ extern "C" void func_001641C0_v(char* self, float a, float b, float c, float eas
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001643A8);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateSlowSpeedCam);
 #ifdef SKIP_ASM
 struct sVec_1643A8 {
     float x, y, z, w;
@@ -5926,7 +5926,7 @@ static inline float Length_1643A8(const sVec_1643A8& v)
 
 #define S_1643A8 ((char*)self)
 #define I_1643A8 ((char*)info)
-extern "C" void func_001643A8(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c)
+extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c)
 {
     int trig = *(float*)(I_1643A8 + 0x44) * 0.035999998450279236f < a && *(int*)(I_1643A8 + 0x60) == 0 &&
                *(int*)(I_1643A8 + 0x5C) == 0;
@@ -6168,7 +6168,7 @@ extern "C" int func_00164870(void) {
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00164878);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateHalfPipeCam);
 #ifdef SKIP_ASM
 struct sVec_164878 {
     float x, y, z, w;
@@ -6483,7 +6483,7 @@ static inline sVec_164878* CallV_164878(char* self, int slot)
 #define V_164878(off) (*(sVec_164878*)(S_164878 + (off)))
 #define F_164878(off) (*(float*)(S_164878 + (off)))
 // Air swing for drops: swings the eye around the rider while airborne (spline +0x334), then blends back.
-extern "C" void func_00164878(cLookAtChaseAlgorithm* self, void* info, float blendOut)
+extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* self, void* info, float blendOut)
 {
     D_004A128C = 0;
     sVec_164878 off0 = Sub_164878(V_164878(0x20), V_164878(0x40));
@@ -6617,7 +6617,7 @@ extern "C" void func_00164878(cLookAtChaseAlgorithm* self, void* info, float ble
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00165540);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateRotation);
 #ifdef SKIP_ASM
 extern "C" void* func_00168150(void* self);
 extern "C" void func_0031BE50(float* sout, float* cout, float x);
@@ -6715,7 +6715,7 @@ static inline sVec4_165540 AxisAngle_165540(const sVec4_165540& axis, float ang)
     return r;
 }
 
-extern "C" void func_00165540(cLookAtChaseAlgorithm* self, float ang)
+extern "C" void cLookAtChaseAlgorithm_updateRotation(cLookAtChaseAlgorithm* self, float ang)
 {
     sVec4_165540 off = Sub_165540(*(sVec4_165540*)&self->CamTargetPos, *(sVec4_165540*)&self->Position);
     sVec4_165540 dir = D_004FF140_v165540;
@@ -6736,7 +6736,7 @@ extern "C" void func_00165540(cLookAtChaseAlgorithm* self, float ang)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001656B0);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_setupCameraShake);
 #ifdef SKIP_ASM
 // Uniform float in [0, 1) built from the random mantissa bits.
 static inline float randf_1656B0()
@@ -6754,7 +6754,7 @@ static inline float RandRange_1656B0(float lo, float hi)
     return lo + (hi - lo) * randf_1656B0();
 }
 
-extern "C" void func_001656B0(cLookAtChaseAlgorithm* self, float base, float spread, float r)
+extern "C" void cLookAtChaseAlgorithm_setupCameraShake(cLookAtChaseAlgorithm* self, float base, float spread, float r)
 {
     self->ShakeNextXTime = base + spread * randf_1656B0();
     self->ShakeNextYTime = base + spread * randf_1656B0();
@@ -6791,7 +6791,7 @@ extern "C" void func_001656B0(cLookAtChaseAlgorithm* self, float base, float spr
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00165938);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateCameraShake);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -6915,7 +6915,7 @@ static inline sVec4 Scale_165938(const sVec4& v, float s)
 
 // Camera shake update: re-rolls each axis's target when its timer runs out, eases between the
 // previous and new targets and adds the result (scaled by the fade-out and distance) to the position.
-extern "C" void func_00165938(cLookAtChaseAlgorithm* self, int flag, int sel, float base, float spread, float r)
+extern "C" void cLookAtChaseAlgorithm_updateCameraShake(cLookAtChaseAlgorithm* self, int flag, int sel, float base, float spread, float r)
 {
     if (flag) {
         self->ShakeBlendOutTime = 0.0f;
@@ -7003,7 +7003,7 @@ extern "C" void func_00165938(cLookAtChaseAlgorithm* self, int flag, int sel, fl
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00166228);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_doRaceCamFinalPhase);
 #ifdef SKIP_ASM
 struct sCamTarget166228 {
     float x, y, z, w;
@@ -7017,25 +7017,25 @@ struct sCamVE166228 {
 };
 
 extern "C" void func_00166640(void* self, int a1);
-extern "C" void func_001662A0(cLookAtChaseAlgorithm* self, float x, float y, float z, float w);
+extern "C" void cLookAtChaseAlgorithm_updatePitchBlending(cLookAtChaseAlgorithm* self, float x, float y, float z, float w);
 void* func_00166530(void* self);
 extern "C" void func_00166F90(void* self);
 
-extern "C" void func_00166228(cLookAtChaseAlgorithm* self)
+extern "C" void cLookAtChaseAlgorithm_doRaceCamFinalPhase(cLookAtChaseAlgorithm* self)
 {
     sCamTarget166228 t;
     sCamVE166228* vt = (sCamVE166228*)self->mVtbl;
     vt[7].fn((char*)self + vt[7].delta, &t);
     func_00166640(self, 0);
     if (t.valid != 0)
-        func_001662A0(self, t.x, t.y, t.z, t.w);
+        cLookAtChaseAlgorithm_updatePitchBlending(self, t.x, t.y, t.z, t.w);
     func_00166530(self);
     func_00166F90(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001662A0);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updatePitchBlending);
 #ifdef SKIP_ASM
 extern "C" float func_0031C128(float x);
 
@@ -7147,7 +7147,7 @@ static inline sVec_1662A0 Get_1662A0(char* self, int slot)
 }
 
 #define S_1662A0 ((char*)self)
-extern "C" void func_001662A0(cLookAtChaseAlgorithm* self, float x, float y, float z, float w)
+extern "C" void cLookAtChaseAlgorithm_updatePitchBlending(cLookAtChaseAlgorithm* self, float x, float y, float z, float w)
 {
     float k, ang;
     int up = self->LastPitch < self->Pitch;
@@ -8294,7 +8294,7 @@ extern "C" float func_00167DA8(cPIDFilter* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167DB8);
+INCLUDE_ASM("camera/camera", cPIDFilter_reset);
 #ifdef SKIP_ASM
 struct sCamFilter {
     float field_0x00[5];
@@ -8303,7 +8303,7 @@ struct sCamFilter {
     int field_0x3C;
 };
 
-extern "C" void func_00167DB8(cPIDFilter* self, float value)
+extern "C" void cPIDFilter_reset(cPIDFilter* self, float value)
 {
     int i;
     self->NextFreeIndex = 0;
@@ -8316,13 +8316,13 @@ extern "C" void func_00167DB8(cPIDFilter* self, float value)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167DE8);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm__cCameraAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
 void operator_delete(int* ptr);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_00167DE8(cCameraAlgorithm* self, int flags)
+extern "C" void cCameraAlgorithm__cCameraAlgorithm(cCameraAlgorithm* self, int flags)
 {
     self->mVtbl = D_0045BDE0;
     if (flags & 1) {
@@ -8356,9 +8356,9 @@ void func_00167E28(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167E30);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm_getDefaultView);
 #ifdef SKIP_ASM
-extern "C" float func_00167E30(cCameraAlgorithm* self)
+extern "C" float cCameraAlgorithm_getDefaultView(cCameraAlgorithm* self)
 {
     return 0.7853981852531433f;
 }
@@ -8393,9 +8393,9 @@ void func_00167E60(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167E68);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm_updateAlgorithm);
 #ifdef SKIP_ASM
-class func_00167E68_cObj {
+class cCameraAlgorithm_updateAlgorithm_cObj {
 public:
     char pad[0x10];
     // vptr lands at 0x10 (g++ 2.95 places it after the class's own data);
@@ -8407,9 +8407,9 @@ public:
     virtual void v05();
 };
 
-extern "C" void func_00167E68(cCameraAlgorithm* self)
+extern "C" void cCameraAlgorithm_updateAlgorithm(cCameraAlgorithm* self)
 {
-    ((func_00167E68_cObj*)self)->v05();
+    ((cCameraAlgorithm_updateAlgorithm_cObj*)self)->v05();
 }
 #endif
 
@@ -9341,7 +9341,7 @@ extern "C" void func_00162C78(void* self, void* info);
 extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
 extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
 extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
-extern "C" void func_001643A8(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c);
+extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c);
 extern "C" void func_00163158(cLookAtChaseAlgorithm* self, void* info, float a, float b);
 
 struct sVec_1686D0 {
@@ -9470,16 +9470,16 @@ extern "C" void func_001686D0(cLookAtChaseAlgorithm* self)
     func_00162568(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f, 0.8513929843902588f,
                   0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
     float zero = 0.0f;
-    func_00162A20(self, (char*)&info);
-    func_00162B80(self, &info);
+    cLookAtChaseAlgorithm_setupHalfPipeCam(self, (char*)&info);
+    cLookAtChaseAlgorithm_updateCamTarget(self, &info);
     func_00162C78(((char*)self), &info);
     func_00163010(((char*)self), &info, 193.1998291015625f, zero, 76.68663024902344f, zero, 1.7668397426605225f,
                   0.9239780306816101f, 0.907414972782135f);
     func_00163270(((char*)self), &info, zero, 1.2432044744491577f, zero, zero, 0.9783917665481567f);
-    func_001633B0(self, &info, zero, 0.9927757978439331f, 1.0f, 0.949999988079071f);
+    cLookAtChaseAlgorithm_updateFOVWithSpeed(self, &info, zero, 0.9927757978439331f, 1.0f, 0.949999988079071f);
     func_00162B90(((char*)self), &info, 0.721226155757904f, 0.01082259975373745f, 0.22186216711997986f, 0.5425665378570557f,
                   0.9241908192634583f);
-    func_001643A8(self, &info, 15.0f, 1.5f, 1.5f);
+    cLookAtChaseAlgorithm_updateSlowSpeedCam(self, &info, 15.0f, 1.5f, 1.5f);
     func_00163158(self, &info, 0.13458502292633057f, 1.7663990259170532f);
 
     sVec_1686D0 d = Sub_1686D0(*(sVec_1686D0*)&self->CamTargetPos, *(sVec_1686D0*)&self->Position);
@@ -9585,15 +9585,15 @@ extern "C" void func_00162C78(void* self, void* info);
 extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
 extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
 extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
-extern "C" void func_001635F8(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c, float d);
-extern "C" void func_00164878(cLookAtChaseAlgorithm* self, void* info, float a);
+extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c, float d);
+extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* self, void* info, float a);
 extern "C" void func_001646A0(char* self, char* p, float k, float t);
 extern "C" void func_001641C0(char* self, char* p, float a, float b, float c, float d);
-extern "C" void func_001643A8(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c);
+extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c);
 extern "C" void func_00163158(cLookAtChaseAlgorithm* self, void* info, float a, float b);
-// PORT: func_00163450 is defined with 7 float parameters; this caller passes 8.
-void func_00163450_8(char* self, char* trig, float a, float b, float c, float d, float e, float f, float g,
-                     float h) __asm__("func_00163450");
+// PORT: cLookAtChaseAlgorithm_updateHandplant is defined with 7 float parameters; this caller passes 8.
+void cLookAtChaseAlgorithm_updateHandplant_8(char* self, char* trig, float a, float b, float c, float d, float e, float f, float g,
+                     float h) __asm__("cLookAtChaseAlgorithm_updateHandplant");
 
 extern "C" void func_00168A70(cLookAtChaseAlgorithm* self)
 {
@@ -9602,24 +9602,24 @@ extern "C" void func_00168A70(cLookAtChaseAlgorithm* self)
                   0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
     float zero = 0.0f;
     float k = 0.9800000190734863f;
-    func_00162998(self, &info);
-    func_00162A20(self, (char*)&info);
-    func_00162B80(self, &info);
+    cLookAtChaseAlgorithm_setupHandplantBlend(self, &info);
+    cLookAtChaseAlgorithm_setupHalfPipeCam(self, (char*)&info);
+    cLookAtChaseAlgorithm_updateCamTarget(self, &info);
     func_00162C78(((char*)self), &info);
     func_00163010(((char*)self), &info, 555.0844116210938f, 11.549837112426758f, 76.68663024902344f, 307.0549621582031f,
                   1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
     func_00163270(((char*)self), &info, 12.331472396850586f, 84.0909652709961f, 38.64322280883789f, 93.62934875488281f,
                   0.9783917665481567f);
-    func_001633B0(self, &info, zero, 0.8567028641700745f, 1.0f, 0.949999988079071f);
-    func_00163450_8(((char*)self), (char*)&info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f,
+    cLookAtChaseAlgorithm_updateFOVWithSpeed(self, &info, zero, 0.8567028641700745f, 1.0f, 0.949999988079071f);
+    cLookAtChaseAlgorithm_updateHandplant_8(((char*)self), (char*)&info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f,
                     zero, k, 0.9599999785423279f, 0.4552607834339142f);
     func_00162B90(((char*)self), &info, -8.730510711669922f, 64.15198516845703f, 58.114906311035156f, 5.931424617767334f,
                   0.9241908192634583f);
-    func_001635F8(self, &info, 1.878627061843872f, 2.494720935821533f, 0.34134337306022644f, 0.8672914505004883f);
-    func_00164878(self, &info, 1.5269116163253784f);
+    cLookAtChaseAlgorithm_updateAirCam(self, &info, 1.878627061843872f, 2.494720935821533f, 0.34134337306022644f, 0.8672914505004883f);
+    cLookAtChaseAlgorithm_updateHalfPipeCam(self, &info, 1.5269116163253784f);
     func_001646A0(((char*)self), (char*)&info, 200.33114624023438f, 0.9706981778144836f);
     func_001641C0(((char*)self), (char*)&info, 600.0f, 300.0f, 100.0f, k);
-    func_001643A8(self, &info, 15.0f, 1.5f, 1.5f);
+    cLookAtChaseAlgorithm_updateSlowSpeedCam(self, &info, 15.0f, 1.5f, 1.5f);
     func_00163158(self, &info, -0.2944446802139282f, 0.6521888375282288f);
 }
 #endif
@@ -9695,15 +9695,15 @@ extern "C" void func_00162C78(void* self, void* info);
 extern "C" void func_00163010(void* self, void* info, float a, float b, float c, float d, float e, float f, float g);
 extern "C" void func_00163270(void* self, void* info, float a, float b, float c, float d, float e);
 extern "C" void func_00162B90(void* self, void* info, float a, float b, float c, float d, float e);
-extern "C" void func_001635F8(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c, float d);
-extern "C" void func_00164878(cLookAtChaseAlgorithm* self, void* info, float a);
+extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c, float d);
+extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* self, void* info, float a);
 extern "C" void func_001646A0(char* self, char* p, float k, float t);
 extern "C" void func_001641C0(char* self, char* p, float a, float b, float c, float d);
-extern "C" void func_001643A8(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c);
+extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* self, void* info, float a, float b, float c);
 extern "C" void func_00163158(cLookAtChaseAlgorithm* self, void* info, float a, float b);
-// PORT: func_00163450 is defined with 7 float parameters; this caller passes 8.
-void func_00163450_8(char* self, char* trig, float a, float b, float c, float d, float e, float f, float g,
-                     float h) __asm__("func_00163450");
+// PORT: cLookAtChaseAlgorithm_updateHandplant is defined with 7 float parameters; this caller passes 8.
+void cLookAtChaseAlgorithm_updateHandplant_8(char* self, char* trig, float a, float b, float c, float d, float e, float f, float g,
+                     float h) __asm__("cLookAtChaseAlgorithm_updateHandplant");
 
 extern "C" void func_00168D80(cLookAtChaseAlgorithm* self)
 {
@@ -9712,24 +9712,24 @@ extern "C" void func_00168D80(cLookAtChaseAlgorithm* self)
                   0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
     float zero = 0.0f;
     float k = 0.9800000190734863f;
-    func_00162998(self, &info);
-    func_00162A20(self, (char*)&info);
-    func_00162B80(self, &info);
+    cLookAtChaseAlgorithm_setupHandplantBlend(self, &info);
+    cLookAtChaseAlgorithm_setupHalfPipeCam(self, (char*)&info);
+    cLookAtChaseAlgorithm_updateCamTarget(self, &info);
     func_00162C78(((char*)self), &info);
     func_00163010(((char*)self), &info, 555.0844116210938f, 11.549837112426758f, 76.68663024902344f, 307.0549621582031f,
                   1.7668397426605225f, 0.9239780306816101f, 0.907414972782135f);
     func_00163270(((char*)self), &info, 12.331472396850586f, 84.0909652709961f, 38.64322280883789f, 93.62934875488281f,
                   0.9783917665481567f);
-    func_001633B0(self, &info, zero, 0.8567028641700745f, 1.0f, 0.949999988079071f);
-    func_00163450_8(((char*)self), (char*)&info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f,
+    cLookAtChaseAlgorithm_updateFOVWithSpeed(self, &info, zero, 0.8567028641700745f, 1.0f, 0.949999988079071f);
+    cLookAtChaseAlgorithm_updateHandplant_8(((char*)self), (char*)&info, 348.64111328125f, 66.33821868896484f, 162.2997283935547f, 2.00368070602417f,
                     zero, k, 0.9599999785423279f, 0.4552607834339142f);
     func_00162B90(((char*)self), &info, -8.730510711669922f, 64.15198516845703f, 58.114906311035156f, 5.931424617767334f,
                   0.9241908192634583f);
-    func_001635F8(self, &info, 1.878627061843872f, 2.494720935821533f, 0.34134337306022644f, 0.8672914505004883f);
-    func_00164878(self, &info, 1.5269116163253784f);
+    cLookAtChaseAlgorithm_updateAirCam(self, &info, 1.878627061843872f, 2.494720935821533f, 0.34134337306022644f, 0.8672914505004883f);
+    cLookAtChaseAlgorithm_updateHalfPipeCam(self, &info, 1.5269116163253784f);
     func_001646A0(((char*)self), (char*)&info, 200.33114624023438f, 0.9706981778144836f);
     func_001641C0(((char*)self), (char*)&info, 600.0f, 300.0f, 100.0f, k);
-    func_001643A8(self, &info, 15.0f, 1.5f, 1.5f);
+    cLookAtChaseAlgorithm_updateSlowSpeedCam(self, &info, 15.0f, 1.5f, 1.5f);
     func_00163158(self, &info, 0.2944446802139282f, 0.6521888375282288f);
 }
 #endif

@@ -488,7 +488,7 @@ INCLUDE_ASM("seg/seg_14B10", func_00114298);
 extern "C" float func_0031C040(float x);
 extern "C" float func_0031BF60(float x);
 int func_0011FE98(void* self);
-extern "C" void func_002707E0(int a, int b, void* c);
+extern "C" void cReplay_eventJump(int a, int b, void* c);
 extern "C" void func_00309848(void* self);
 extern "C" float func_00119E38(void* self, int a, int b);
 extern "C" void cRider_flagEventBoostPowerUp(void* self, int mask, float amt);
@@ -750,7 +750,7 @@ extern "C" void func_00114298(char* self, float speedFactor)
             VEL_4298 = Add_4298(Add_4298(Scale_4298(VEL_4298, 1.0f - f), Scale_4298(vdir, f * speed)), Scale_4298(Scale_4298(dir, push), 0.5f));
         }
     }
-    func_002707E0((int)SSXApp->Game->Replay, *(int*)(self + 0x86C), *(char**)(self + 0x790) + 0xFC);
+    cReplay_eventJump((int)SSXApp->Game->Replay, *(int*)(self + 0x86C), *(char**)(self + 0x790) + 0xFC);
     func_00309848(D_004A3DD8);
     cRider_flagEventBoostPowerUp(self, 1, func_00119E38(*(void**)(self + 0x790), *(int*)(self + 0x320) != *(int*)(self + 0x324), steered));
     if (*(float*)(self + 0x378) > hi + 0.019999999552965164f) {

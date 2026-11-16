@@ -6,7 +6,7 @@
 // directional light to it (cTrickBoostFX update, cTrickBoostFX_update) and the rider clears it (ai/rider.cpp, cPlayerLights_Clear).
 // EA's source: d:/ssx/code/source/render/playerlights.cpp (preview assert path). Its methods sit in the render/font
 // unit (On Tour: render/all_in_one_render.cpp), in On Tour's declaration order:
-//   cPlayerLights_Clear Clear, func_00392D58 AddAmbient (out of line in retail), func_00392D90 AddDirectional(dir, colour),
+//   cPlayerLights_Clear Clear, func_00392D58 AddAmbient (out of line in retail), cPlayerLights_AddDirectional AddDirectional(dir, colour),
 //   func_00392DE0 PlayerIsAdditive(value), func_00392DE8__FPvi BoardIsAdditive(value).
 // render/font.cpp views it as `struct sFontState` (same layout; sFontVec3 = tRGB, sFontQuad = t4Vector).
 //

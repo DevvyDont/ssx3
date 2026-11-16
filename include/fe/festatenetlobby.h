@@ -130,7 +130,7 @@ struct cFEStateLobbyMenu {
     cUIThing* mpChannelLock[4];     // 0x740 [R] 0; [U] widgets "LockBeginner", "LockVoice", "LockAdvanced", "LockElite";
                                     //       func_001BE3A8
     unsigned int miChannelRow[4];   // 0x750 [R] 0; [U] func_001BE038: the selected row of each channel list, clamped to
-                                    //       its count and selected again (func_0039A7A8)
+                                    //       its count and selected again (cUIListBox_setCurrentEntryByIndex)
     int mbRoomChanged;              // 0x760 [U] onWidgetEvent cFEStateLobbyMenu_onWidgetEvent sets it with miSelectedChannel / miSelectedRoom;
                                     //       onGainTransition cFEStateLobbyMenu_onGainTransition reselects them when set and clears it
     int miSelectedChannel;          // 0x764 [U] cFEStateLobbyMenu_onWidgetEvent / func_001BD738 (event 0xDF: the RoomMenus row); < 4 indexes the
@@ -138,7 +138,7 @@ struct cFEStateLobbyMenu {
     int miSelectedRoom;             // 0x768 [U] cFEStateLobbyMenu_onWidgetEvent stores the room list's selected row (list + 0x319); onGainTransition
                                     //       clamps it to the list count and selects it
     char* mszChannelName;           // 0x76C [R] cBXString (empty rep D_004A3E90; destroyed by cFEStateLobbyMenu__cFEStateLobbyMenu); [U] func_001BD738
-                                    //       assigns the selected list entry's text (func_0039A708)
+                                    //       assigns the selected list entry's text (cUIListBox_getCurrentAsciiText)
     int mbRoomHasPassword;          // 0x770 [U] func_001BD460 / func_001BD540: 1 when a password was given when entering the room;
                                     //       func_001BD8C8 asks for the password ("kT_POPUP231RoomPassword") only when it is 0
     int miRoomId;                   // 0x774 [U] onWidgetEvent cFEStateLobbyMenu_onWidgetEvent stores the chosen room id and asks LobbyMan for it

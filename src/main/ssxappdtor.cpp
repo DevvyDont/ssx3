@@ -2163,7 +2163,7 @@ struct sVE_244E60 { short delta; short index; void* fn; };
 extern "C" int func_00237950(int);
 extern "C" int func_002379C8(int);
 extern "C" int cReplay_isPauseAI(int);
-extern "C" void func_0026F4A8(int);
+extern "C" void cReplay_update(int);
 extern "C" int func_0026CE50(int);
 extern "C" void cBucketMan_updateBucket(void*, int);
 extern "C" void cBucketMan_mergeBucket(void*, int);
@@ -2195,7 +2195,7 @@ extern "C" void func_00244E60(void* self)
             func_00230F40(self);
         }
         if ((D_004A2A50 & 1) == 0)
-            func_0026F4A8(*(int*)(s + 0x28));
+            cReplay_update(*(int*)(s + 0x28));
         if (cReplay_isPauseAI(*(int*)(s + 0x28)) == 0 && (D_004A2A50 & 8) == 0) {
             sVE_244E60* vt = (sVE_244E60*)ScriptEngine->mVtbl;
             ((void (*)(void*))vt[5].fn)((char*)ScriptEngine + vt[5].delta);

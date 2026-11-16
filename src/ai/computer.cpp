@@ -1625,7 +1625,7 @@ void cRider_flagEventBoostPowerUp_fi(void*, float, int) __asm__("cRider_flagEven
 void func_00111AA0_impl(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 extern "C" float func_00119D40(void* self, int stance, int alternate, int style, int flag);
 extern "C" int func_00149778(void* self, int rider, int value);
-void func_00270870_10E910(void* self, int key, void* p) __asm__("func_00270870");
+void cReplay_eventLand_10E910(void* self, int key, void* p) __asm__("cReplay_eventLand");
 extern "C" void func_002948D0(void* mgr, void* rider, float v);
 
 struct sVE_0010E910 { short delta; short index; int (*fn)(void*); };
@@ -1642,7 +1642,7 @@ extern "C" void func_0010E910(char* self, int a1, int a2, int a3, char* evt, flo
     int c1 = *(int*)(m1 + 0x114);
     int b1 = *(int*)(m1 + 0x134);
     int d1 = *(int*)(m1 + 0x198);
-    func_00270870_10E910(SSXApp->Game->Replay, *(int*)(self + 0x86C), m1 + 0xFC);
+    cReplay_eventLand_10E910(SSXApp->Game->Replay, *(int*)(self + 0x86C), m1 + 0xFC);
     if (c0 < c1)
     {
         int v = *(int*)(self + 0x2F4);

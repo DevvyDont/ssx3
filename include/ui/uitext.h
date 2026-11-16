@@ -51,9 +51,9 @@ struct cUIText {
                                      //       (preview lw 0x6C; retail func_003A5DF8..cUIText_setEllipses, which in On Tour's order also have
                                      //       get/setUseDisabledColour (5) and isEllipses/setEllipses (6)); [R] ctor sets bit 2, clears 3-6;
                                      //       [U] font index in cUIText_getFont, bit 3 in cUIText_getAsciiString/getUnicodeString
-    tARGB mShadowColour;             // 0x078 [P] setShadowColour (preview 0x70; retail func_003A5F08); [U] cUIText_setUIData (setUIData)
+    tARGB mShadowColour;             // 0x078 [P] setShadowColour (preview 0x70; retail cUIText_setShadowColour); [U] cUIText_setUIData (setUIData)
                                      //       sets it from the record when the shadow bit is on; cUIText_render2D uses it for the shadow
-    tARGB mStaticColour;             // 0x088 [P] setStaticColour (preview 0x80; retail func_003A5F30); [R] = D_004C66C8;
+    tARGB mStaticColour;             // 0x088 [P] setStaticColour (preview 0x80; retail cUIText_setStaticColour); [R] = D_004C66C8;
                                      //       [U] cUIText_render2D: the colour when the thing is static and bit 4 is set
     tARGB mDisabledColour;           // 0x098 [O]; [R] = D_004C66C8; [U] cUIText_render2D: the colour when the thing is not enabled
                                      //       and bit 5 is set

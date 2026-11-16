@@ -457,9 +457,9 @@ extern "C" void cReplay_setupGameCamerasOnExitReplay(cReplay* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EF30);
+INCLUDE_ASM("replay/frameptr", cReplay_setupInstantReplayCameras);
 #ifdef SKIP_ASM
-extern "C" void func_0026EF30(cReplay* self)
+extern "C" void cReplay_setupInstantReplayCameras(cReplay* self)
 {
     func_0016D1D8(D_004C5830);
     self->CurrentInstantReplayCamIndex = (self->CurrentInstantReplayCamIndex + 1) % 9;
@@ -759,7 +759,7 @@ void cReplay_setReplayState(void* self, int val)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F4A8);
+INCLUDE_ASM("replay/frameptr", cReplay_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 void cReplay_setReplayState(void* self, int state);
@@ -775,11 +775,11 @@ extern "C" void* cReplay_saveReplayFrame_F4A8(void* self, sFrameDesc_F4A8* desc)
 void func_0026D740_F4A8(void* self, void* block) __asm__("func_0026D740__FPv");
 extern "C" void cReplay_startReplay_F4A8(void* self, int a1, int a2, int a3) __asm__("cReplay_startReplay");
 extern "C" void func_0026FB88(void* self, int a1);
-extern "C" void func_0026FE50(cReplay* self);
-extern "C" void func_00270538(void* self);
+extern "C" void cReplay_processInput(cReplay* self);
+extern "C" void cReplay_purgeIdleFrames(void* self);
 extern "C" void cReplay_cancelMarkInstantReplay(void* self);
-extern "C" void func_00270670(void* self);
-extern "C" void func_00270E18(void* self);
+extern "C" void cReplay_stopInstantReplay(void* self);
+extern "C" void cReplay_cancelMarkHighlights(void* self);
 int cInput_getState(void* obj, int id);
 struct sApp_F4A8 {
     char pad0[0xB0];
@@ -825,7 +825,7 @@ static inline void addFrame_F4A8(sReplay_F4A8* self, short type)
 }
 
 // Replay recorder/player: per-frame update of the replay state machine.
-extern "C" void func_0026F4A8(cReplay* self)
+extern "C" void cReplay_update(cReplay* self)
 {
     int s = self->State;
     bool ok = !(s == 14 || s == 15);
@@ -845,10 +845,10 @@ extern "C" void func_0026F4A8(cReplay* self)
     case 2:
         if (self->PlaybackTick < self->RecordTick - 1) {
             func_0026FB88(((sReplay_F4A8*)self), 0);
-            func_0026FE50(self);
+            cReplay_processInput(self);
             return;
         }
-        func_00270670(((sReplay_F4A8*)self));
+        cReplay_stopInstantReplay(((sReplay_F4A8*)self));
     case 0:
     case 12:
         cReplay_setReplayState(((sReplay_F4A8*)self), 0);
@@ -857,8 +857,8 @@ extern "C" void func_0026F4A8(cReplay* self)
             if (self->Loaded != 0)
                 return;
             cReplay_cancelMarkInstantReplay(((sReplay_F4A8*)self));
-            func_00270E18(((sReplay_F4A8*)self));
-            func_00270538(((sReplay_F4A8*)self));
+            cReplay_cancelMarkHighlights(((sReplay_F4A8*)self));
+            cReplay_purgeIdleFrames(((sReplay_F4A8*)self));
             addFrame_F4A8(((sReplay_F4A8*)self), 1);
             cReplay_setReplayState(((sReplay_F4A8*)self), 13);
             return;
@@ -871,7 +871,7 @@ extern "C" void func_0026F4A8(cReplay* self)
             return;
         }
         if (self->ReplayError == 0 && self->RecordTick % 60 == 0) {
-            func_00270538(((sReplay_F4A8*)self));
+            cReplay_purgeIdleFrames(((sReplay_F4A8*)self));
             if (self->RecordTick == 0 || (self->SaveFrameTicks != 0 && self->RecordTick % self->SaveFrameTicks == 0))
                 addFrame_F4A8(((sReplay_F4A8*)self), 1);
             else
@@ -885,7 +885,7 @@ extern "C" void func_0026F4A8(cReplay* self)
         void* o = D_004A28A8_F4A8->players[self->PadNum];
         if (o != 0 && cInput_getState(o, 0x6B))
             func_0026FB88(((sReplay_F4A8*)self), 0);
-        func_0026FE50(self);
+        cReplay_processInput(self);
         return;
     }
     case 9:
@@ -902,7 +902,7 @@ extern "C" void func_0026F4A8(cReplay* self)
         cReplay_setReplayState(((sReplay_F4A8*)self), 3);
         return;
     default:
-        func_0026FE50(self);
+        cReplay_processInput(self);
     case 10:
     case 13:
         return;
@@ -990,7 +990,7 @@ void func_0026F898(void* self, int val)
 INCLUDE_ASM("replay/frameptr", cReplay_startReplay);
 #ifdef SKIP_ASM
 extern "C" void cReplay_setupReplayCameras(cReplay* self);
-extern "C" void func_0026EF30(cReplay* self);
+extern "C" void cReplay_setupInstantReplayCameras(cReplay* self);
 extern "C" void cReplay_pushReplaySaveFrame(cReplay* self);
 void cReplay_setReplayState(void* self, int state);
 extern "C" void cReplay_rewind(void* self, void* a1);
@@ -1022,7 +1022,7 @@ extern "C" void cReplay_startReplay(cReplay* self, void* frame, int instantRepla
         cReplay_rewind(((cReplayFramePtr_F8A0*)self), frame);
         cReplay_stepFrame(((cReplayFramePtr_F8A0*)self), 1);
         if (instantReplay) {
-            func_0026EF30(self);
+            cReplay_setupInstantReplayCameras(self);
         } else {
             cReplay_setupReplayCameras(self);
         }
@@ -1084,9 +1084,9 @@ extern "C" void cReplay_stopReplay(cReplay* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026FA50);
+INCLUDE_ASM("replay/frameptr", cReplay_endReplay);
 #ifdef SKIP_ASM
-extern "C" void func_0026FA50(cReplay* self)
+extern "C" void cReplay_endReplay(cReplay* self)
 {
     int s = self->State;
     bool ok = !(s == 0xE || s == 0xF);
@@ -1239,15 +1239,15 @@ extern "C" int func_0026FB88_impl(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026FE50);
+INCLUDE_ASM("replay/frameptr", cReplay_processInput);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cGameViewMan_updateAll(void* list);
 // PORT: func_0026E448 is declared (void*) in replay.cpp but takes the frame index too
-extern "C" void func_00270378(void* self);
+extern "C" void cReplay_lastFrame(void* self);
 void* func_0026E448_2(void* self, int frame) __asm__("func_0026E448__FPv");
-extern "C" void func_0026E568(void* self);
-extern "C" void func_0026E528(void* self);
+extern "C" void cReplay_prevFrame(void* self);
+extern "C" void cReplay_nextFrame(void* self);
 extern "C" void cChaseCameraController_switchCamera_Chapter(void* p);
 
 struct sVE_26FE50 {
@@ -1256,7 +1256,7 @@ struct sVE_26FE50 {
     void (*fn)(void*);
 };
 
-extern "C" void func_0026FE50(cReplay* self)
+extern "C" void cReplay_processInput(cReplay* self)
 {
     int redraw = 0;
     switch (self->Cmd) {
@@ -1271,7 +1271,7 @@ extern "C" void func_0026FE50(cReplay* self)
         }
         break;
     case 2:
-        func_00270378(((char*)self));
+        cReplay_lastFrame(((char*)self));
         redraw = 1;
         cReplay_stepFrame(((char*)self), 1);
         if (self->PlaybackTick == 0) {
@@ -1285,11 +1285,11 @@ extern "C" void func_0026FE50(cReplay* self)
         char* f = (char*)func_0026E448_2(((char*)self), self->PlaybackTick);
         self->PlaybackFrame = (cReplayFrame*)f;
         if (self->PlaybackTick == *(int*)(f + 0x30)) {
-            func_0026E568(((char*)self));
+            cReplay_prevFrame(((char*)self));
         } else {
             char* n = *(char**)(f + 0x14);
             if (n != 0 && *(int*)(n + 0x30) == self->PlaybackTick) {
-                func_0026E568(((char*)self));
+                cReplay_prevFrame(((char*)self));
             }
         }
         cReplay_stepFrame(((char*)self), 1);
@@ -1303,7 +1303,7 @@ extern "C" void func_0026FE50(cReplay* self)
     case 4:
         redraw = 1;
         if (*(int*)((char*)self->PlaybackFrame + 0x14) != 0) {
-            func_0026E528(((char*)self));
+            cReplay_nextFrame(((char*)self));
             cReplay_stepFrame(((char*)self), 1);
             cReplay_setReplayState(((char*)self), 5);
         }

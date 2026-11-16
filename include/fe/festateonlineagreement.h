@@ -112,7 +112,7 @@ struct cFEStateOnlineAgreement {
                                     //       operator_new_tag(miNumTOSLines * 4, "cFEStateOnlineAgreement") filled
                                     //       with the hashes of "kT_TOS000".."kT_TOS165" (with the a/b/.. variants);
                                     //       onUpdate cFEStateOnlineAgreement_onUpdate hands mpTOSLines[miNextTOSLine++] to
-                                    //       "AgTextScroll" (func_003A1F18); the destructor frees it
+                                    //       "AgTextScroll" (cUITextScroll_addUnicodeStringByID); the destructor frees it
     unsigned int miNumTOSLines;     // 0x6D4 [U] func_001C0540 stores 0xB2; onUpdate compares miNextTOSLine with it
                                     //       (sltu)
     unsigned int miNextTOSLine;     // 0x6D8 [R] 0 (all three ctors); [U] onUpdate cFEStateOnlineAgreement_onUpdate post-increments it

@@ -878,7 +878,7 @@ extern "C" signed char func_00148680(void* self, int rider);
 extern "C" signed char func_00148750(void* self, int rider);
 extern "C" signed char func_00148820(void* self, int rider);
 extern "C" signed char func_001488F0(void* self, int rider);
-extern "C" void func_0039C428(void* self, int pos);
+extern "C" void cUIProgress_setValue(void* self, int pos);
 extern char D_004A2C10[];
 extern char D_004A2C18[];
 extern char D_004A2C20[];
@@ -990,7 +990,7 @@ extern "C" void func_00246CF8(void* self, char player)
                 vt2[9].fn(label + vt2[9].delta, 1);
                 cUIText_setUnicodeString(label, (char*)text);
                 *(int*)(bar + 0x80) = 0x37;
-                func_0039C428(bar, v);
+                cUIProgress_setValue(bar, v);
             }
         }
         char* pic = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(picName.c));

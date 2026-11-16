@@ -34,7 +34,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen__cUIScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cList_destroyList_C558(void*) __asm__("cList_destroyList");
-extern "C" void func_003A4868(void*);
+extern "C" void cListNode_destroyListNode(void*);
 extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern "C" void cMemMan_free__FPv(void* p);
 void operator_delete(int*);
@@ -64,18 +64,18 @@ extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
     cList_destroyList_C558(((char*)self) + 0xB4);
     char* m40 = ((char*)self) + 0x40;
     *(void***)(((char*)self) + 0xC8) = cListNode_vtbl;
-    func_003A4868(((char*)self) + 0xC0);
+    cListNode_destroyListNode(((char*)self) + 0xC0);
     *(void***)(((char*)self) + 0xBC) = cListNode_vtbl;
-    func_003A4868(((char*)self) + 0xB4);
+    cListNode_destroyListNode(((char*)self) + 0xB4);
     cUIThing__cUIThing(m40, 2);
     *(void***)(((char*)self) + 0x30) = cList_vtbl;
     cList_destroyList_C558(((char*)self) + 0x18);
     *(void***)(((char*)self) + 0x2C) = cListNode_vtbl;
-    func_003A4868(((char*)self) + 0x24);
+    cListNode_destroyListNode(((char*)self) + 0x24);
     *(void***)(((char*)self) + 0x20) = cListNode_vtbl;
-    func_003A4868(((char*)self) + 0x18);
+    cListNode_destroyListNode(((char*)self) + 0x18);
     self->mVtbl = cListNode_vtbl;
-    func_003A4868(((char*)self));
+    cListNode_destroyListNode(((char*)self));
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1559,7 +1559,7 @@ INCLUDE_ASM("ui/uiscreen", func_0039E390);
 #ifdef SKIP_ASM
 // PORT: unit declares cList_destroyList as returning void*; called here as void (bound by asm label).
 extern "C" void cList_destroyList_v(void*) __asm__("cList_destroyList");
-extern "C" void func_003A4868(void*);
+extern "C" void cListNode_destroyListNode(void*);
 void operator_delete(int*);
 extern void* D_004946C8[];
 extern void* cList_vtbl[];
@@ -1572,11 +1572,11 @@ extern "C" void func_0039E390(void* self, int flags)
     *(void***)((char*)self + 0x3C) = cList_vtbl;
     cList_destroyList_v((char*)self + 0x24);
     *(void***)((char*)self + 0x38) = cListNode_vtbl;
-    func_003A4868((char*)self + 0x30);
+    cListNode_destroyListNode((char*)self + 0x30);
     *(void***)((char*)self + 0x2C) = cListNode_vtbl;
-    func_003A4868((char*)self + 0x24);
+    cListNode_destroyListNode((char*)self + 0x24);
     *(void***)((char*)self + 0x8) = cListNode_vtbl;
-    func_003A4868(self);
+    cListNode_destroyListNode(self);
     if (flags & 1) {
         operator_delete((int*)self);
     }

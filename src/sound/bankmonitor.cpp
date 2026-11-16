@@ -2805,11 +2805,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002B0088);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void FileParser_FileParser(void* parser, void* src, int n);
 extern "C" void FileParser__FileParser(void* parser, int flags);
-extern "C" void func_002A7A20(void* parser);
-extern "C" int func_002A7C68(void* parser, int file);
+extern "C" void FileParser_SkipSectionNames(void* parser);
+extern "C" int FileParser_FindPartialSection(void* parser, int file);
 extern "C" char* func_002A7DA0(void* parser);
-extern "C" int func_002A7F90(void* parser);
-extern "C" int func_002A7FF8(void* parser, const char* key, char* out);
+extern "C" int FileParser_IsEOF(void* parser);
+extern "C" int FileParser_AssignString(void* parser, const char* key, char* out);
 void func_002AAB98_2B0088(void* self, int i, char* val) __asm__("func_002AAB98");
 extern "C" int func_002AFD40(cSpeechInstance* self, int a, char* name, int b, int c);
 extern "C" int func_0041AA88(const char* a, const char* b);
@@ -2831,20 +2831,20 @@ extern "C" void func_002B0088(cSpeechInstance* p, int a1, int a2, int a3)
     char path[0x80];
     char name[0x60];
     FileParser_FileParser(parser, D_004A37B0, 0x100);
-    if (func_002A7C68(parser, a2) != 0)
+    if (FileParser_FindPartialSection(parser, a2) != 0)
     {
-        func_002A7A20(parser);
-        while (func_002A7F90(parser) == 0)
+        FileParser_SkipSectionNames(parser);
+        while (FileParser_IsEOF(parser) == 0)
         {
             char* key = func_002A7DA0(parser);
             if (func_0041AA88(D_004A37C8, key) == 0)
             {
-                func_002A7FF8(parser, D_004A37C8, v40);
+                FileParser_AssignString(parser, D_004A37C8, v40);
                 func_002AAB98_2B0088(D_004A37B4->mpVStreamSys, p->unk_004, v40);
             }
             if (func_0041AA88(D_004828C0, key) == 0)
             {
-                func_002A7FF8(parser, D_004828C0, ((char*)p) + 0x6C);
+                FileParser_AssignString(parser, D_004828C0, ((char*)p) + 0x6C);
                 sprintf(value, D_004832D8, ((char*)p) + 0x6C);
                 if (func_002AFD40(p, 1, value, a1, a2) == 0)
                     break;
@@ -2857,7 +2857,7 @@ extern "C" void func_002B0088(cSpeechInstance* p, int a1, int a2, int a3)
             }
             if (func_0041AA88(D_004A37D0, key) == 0)
             {
-                func_002A7FF8(parser, D_004A37D0, value);
+                FileParser_AssignString(parser, D_004A37D0, value);
                 sprintf(path, D_004A36E0, ((char*)p) + 0x6C, name);
                 func_002B0348((sBankList_0348*)p, (int)path, (int)name, 0);
             }
@@ -4560,10 +4560,10 @@ extern char D_004A3830[];
 extern const char D_00483448[];
 extern const char D_00483458[];
 extern "C" void* FileParser_FileParser_p(void* parser, void* src, int n) __asm__("FileParser_FileParser");
-extern "C" int func_002A7BF8(void* parser, const char* name);
-extern "C" char* func_002A7B08(void* parser);
-extern "C" int func_002A80D8(void* parser, const char* key, int* out);
-extern "C" int func_002A8070(void* parser, const char* key, float* out);
+extern "C" int FileParser_FindSection(void* parser, const char* name);
+extern "C" char* FileParser_FindNextSection(void* parser);
+extern "C" int FileParser_AssignInt(void* parser, const char* key, int* out);
+extern "C" int FileParser_AssignFloat(void* parser, const char* key, float* out);
 
 // One song's configuration (func_002B1A98 ctor, 0xAC bytes).
 struct sSongCfg28C0 {
@@ -4654,17 +4654,17 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
     sLoc28C0 L;
     FileParser_FileParser_p(L.parser, D_004A37E8, 0x100);
     *(int*)(L.parser + 8) = *(int*)(L.parser + 4);
-    if (func_002A7BF8(L.parser, D_004A3570) != 0) {
-        while (func_002A7F90(L.parser) == 0) {
+    if (FileParser_FindSection(L.parser, D_004A3570) != 0) {
+        while (FileParser_IsEOF(L.parser) == 0) {
             func_002A7DA0(L.parser);
-            func_002A7FF8(L.parser, D_004828C0, self + 0x104);
+            FileParser_AssignString(L.parser, D_004828C0, self + 0x104);
         }
     }
     *(int*)(L.parser + 8) = *(int*)(L.parser + 4);
     *(int*)(self + 0x3E4) = 0;
     *(int*)(self + 0x3EC) = 0;
     while (*(int*)(self + 0x3E4) < 0x40) {
-        char* tok = func_002A7B08(L.parser);
+        char* tok = FileParser_FindNextSection(L.parser);
         if (tok == 0)
             break;
         if (func_0041AA88(tok, D_004A3570) == 0)
@@ -4676,82 +4676,82 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         *(long*)(self + 0x3F8) |= bit;
         strcpy(self + (*(int*)(self + 0x3E4) * 0xB + 0x124), tok);
         sv->ents[*(int*)(self + 0x3E4)] = (char*)func_002B1A98((cSongConfiguration*)cMemMan_alloc(0xAC, D_00483458, 0, 0));
-        while (func_002A7F90(L.parser) == 0) {
+        while (FileParser_IsEOF(L.parser) == 0) {
             char* key = func_002A7DA0(L.parser);
             if (func_0041AA88(key, D_004A37F0) == 0) {
-                func_002A7FF8(L.parser, D_004A37F0, self + (*(int*)(self + 0x3E4) * 100 + 0x934));
+                FileParser_AssignString(L.parser, D_004A37F0, self + (*(int*)(self + 0x3E4) * 100 + 0x934));
             } else if (func_0041AA88(key, D_004A37F8) == 0) {
-                func_002A7FF8(L.parser, D_004A37F8, self + (*(int*)(self + 0x3E4) * 100 + 0x2234));
+                FileParser_AssignString(L.parser, D_004A37F8, self + (*(int*)(self + 0x3E4) * 100 + 0x2234));
             } else if (func_0041AA88(key, D_004A3800) == 0) {
-                func_002A7FF8(L.parser, D_004A3800, self + (*(int*)(self + 0x3E4) * 100 + 0x3B34));
+                FileParser_AssignString(L.parser, D_004A3800, self + (*(int*)(self + 0x3E4) * 100 + 0x3B34));
             } else if (func_0041AA88(key, D_004A3808) == 0) {
-                func_002A80D8(L.parser, D_004A3808, &L.iA);
+                FileParser_AssignInt(L.parser, D_004A3808, &L.iA);
                 if (L.iA == 1)
                     *(int*)(self + 0x3EC) += 1;
             } else if (func_0041AA88(key, D_00483470) == 0) {
-                func_002A80D8(L.parser, D_00483470, &L.iB);
+                FileParser_AssignInt(L.parser, D_00483470, &L.iB);
                 if (L.iB < 5)
                     ((sSpeechMon*)self)->grid[((sSpeechMon*)self)->count][L.iB] = 1;
             } else if (func_0041AA88(key, D_00483480) == 0) {
-                func_002A7FF8(L.parser, D_00483480, L.buf);
+                FileParser_AssignString(L.parser, D_00483480, L.buf);
                 strcpy(sv->ents[*(int*)(self + 0x3E4)], L.buf);
             } else if (func_0041AA88(key, D_004A3810) == 0) {
-                func_002A7FF8(L.parser, D_004A3810, L.buf);
+                FileParser_AssignString(L.parser, D_004A3810, L.buf);
                 strcpy(sv->ents[*(int*)(self + 0x3E4)] + 0x20, L.buf);
             } else if (func_0041AA88(key, D_00483490) == 0) {
-                func_002A7FF8(L.parser, D_00483490, L.buf);
+                FileParser_AssignString(L.parser, D_00483490, L.buf);
                 strcpy(((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->bankData[((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->numBankData], L.buf);
                 ((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->numBankData++;
             } else if (func_0041AA88(key, D_004834A0) == 0) {
-                func_002A80D8(L.parser, D_004834A0, &L.iC);
+                FileParser_AssignInt(L.parser, D_004834A0, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x64) = L.iC;
             } else if (func_0041AA88(key, D_004834B0) == 0) {
-                func_002A80D8(L.parser, D_004834B0, &L.iC);
+                FileParser_AssignInt(L.parser, D_004834B0, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x68) = L.iC;
             } else if (func_0041AA88(key, D_004834C0) == 0) {
-                func_002A80D8(L.parser, D_004834C0, &L.iC);
+                FileParser_AssignInt(L.parser, D_004834C0, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x6C) = L.iC;
             } else if (func_0041AA88(key, D_004834D0) == 0) {
-                func_002A80D8(L.parser, D_004834D0, &L.iC);
+                FileParser_AssignInt(L.parser, D_004834D0, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x70) = L.iC;
             } else if (func_0041AA88(key, D_004834E0) == 0) {
-                func_002A80D8(L.parser, D_004834E0, &L.iC);
+                FileParser_AssignInt(L.parser, D_004834E0, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x74) = L.iC;
             } else if (func_0041AA88(key, D_004834F0) == 0) {
-                func_002A80D8(L.parser, D_004834F0, &L.iC);
+                FileParser_AssignInt(L.parser, D_004834F0, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x78) = L.iC;
             } else if (func_0041AA88(key, D_00483500) == 0) {
-                func_002A80D8(L.parser, D_00483500, &L.iC);
+                FileParser_AssignInt(L.parser, D_00483500, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x7C) = L.iC;
             } else if (func_0041AA88(key, D_00483510) == 0) {
-                func_002A80D8(L.parser, D_00483510, &L.iC);
+                FileParser_AssignInt(L.parser, D_00483510, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x80) = L.iC;
             } else if (func_0041AA88(key, D_00483520) == 0) {
-                func_002A80D8(L.parser, D_00483520, &L.iC);
+                FileParser_AssignInt(L.parser, D_00483520, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x84) = L.iC;
             } else if (func_0041AA88(key, D_00483530) == 0) {
-                func_002A80D8(L.parser, D_00483530, &L.iC);
+                FileParser_AssignInt(L.parser, D_00483530, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x88) = L.iC;
             } else if (func_0041AA88(key, D_00483540) == 0) {
-                func_002A80D8(L.parser, D_00483540, &L.iC);
+                FileParser_AssignInt(L.parser, D_00483540, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x8C) = L.iC;
             } else if (func_0041AA88(key, D_004A3818) == 0) {
-                func_002A8070(L.parser, D_004A3818, &L.fD);
+                FileParser_AssignFloat(L.parser, D_004A3818, &L.fD);
                 *(float*)(sv->ents[*(int*)(self + 0x3E4)] + 0x90) = L.fD;
             } else if (func_0041AA88(key, D_00483550) == 0) {
-                func_002A80D8(L.parser, D_00483550, &L.iC);
+                FileParser_AssignInt(L.parser, D_00483550, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x98) = L.iC;
             } else if (func_0041AA88(key, D_004A3820) == 0) {
-                func_002A80D8(L.parser, D_004A3820, &L.iC);
+                FileParser_AssignInt(L.parser, D_004A3820, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x9C) = L.iC;
             } else if (func_0041AA88(key, D_00483560) == 0) {
-                func_002A80D8(L.parser, D_00483560, &L.iC);
+                FileParser_AssignInt(L.parser, D_00483560, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x94) = L.iC;
             } else if (func_0041AA88(key, D_004A3828) == 0) {
-                func_002A80D8(L.parser, D_004A3828, &L.iC);
+                FileParser_AssignInt(L.parser, D_004A3828, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA0) = L.iC;
             } else if (func_0041AA88(key, D_004A3830) == 0) {
-                func_002A80D8(L.parser, D_004A3830, &L.iC);
+                FileParser_AssignInt(L.parser, D_004A3830, &L.iC);
                 *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA4) = L.iC;
             }
         }

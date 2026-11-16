@@ -378,9 +378,9 @@ void* func_0026E448(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E468);
+INCLUDE_ASM("replay/replay", cReplay_findNextFrame);
 #ifdef SKIP_ASM
-extern "C" void* func_0026E468(cReplay* self)
+extern "C" void* cReplay_findNextFrame(cReplay* self)
 {
     void* p = func_0026E448(self);
     void* q = *(void**)((char*)p + 0x14);
@@ -392,9 +392,9 @@ extern "C" void* func_0026E468(cReplay* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E490);
+INCLUDE_ASM("replay/replay", cReplay_findPrevFrame);
 #ifdef SKIP_ASM
-extern "C" void* func_0026E490(cReplay* self)
+extern "C" void* cReplay_findPrevFrame(cReplay* self)
 {
     void* p = func_0026E448(self);
     void* q = *(void**)((char*)p + 0x18);
@@ -430,15 +430,15 @@ extern "C" void func_0026E4B8(cReplay* self_)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E528);
+INCLUDE_ASM("replay/replay", cReplay_nextFrame);
 #ifdef SKIP_ASM
-// PORT: func_0026E468 really takes (self, index); the unit declares it with 1 arg
-void* func_0026E468_2(void* self, int idx) __asm__("func_0026E468");
+// PORT: cReplay_findNextFrame really takes (self, index); the unit declares it with 1 arg
+void* cReplay_findNextFrame_2(void* self, int idx) __asm__("cReplay_findNextFrame");
 extern "C" void func_0026E4B8(cReplay* self);
 
-extern "C" void func_0026E528(cReplay* self)
+extern "C" void cReplay_nextFrame(cReplay* self)
 {
-    void* p = func_0026E468_2(self, self->PlaybackTick);
+    void* p = cReplay_findNextFrame_2(self, self->PlaybackTick);
     self->PlaybackFrame = (cReplayFrame*)p;
     self->PlaybackTick = *(int*)((char*)p + 0x30);
     func_0026E4B8(self);
@@ -446,15 +446,15 @@ extern "C" void func_0026E528(cReplay* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E568);
+INCLUDE_ASM("replay/replay", cReplay_prevFrame);
 #ifdef SKIP_ASM
-// PORT: func_0026E490 really takes (self, index); the unit declares it with 1 arg
-void* func_0026E490_2(void* self, int idx) __asm__("func_0026E490");
+// PORT: cReplay_findPrevFrame really takes (self, index); the unit declares it with 1 arg
+void* cReplay_findPrevFrame_2(void* self, int idx) __asm__("cReplay_findPrevFrame");
 extern "C" void func_0026E4B8(cReplay* self);
 
-extern "C" void func_0026E568(cReplay* self)
+extern "C" void cReplay_prevFrame(cReplay* self)
 {
-    void* p = func_0026E490_2(self, self->PlaybackTick);
+    void* p = cReplay_findPrevFrame_2(self, self->PlaybackTick);
     self->PlaybackFrame = (cReplayFrame*)p;
     self->PlaybackTick = *(int*)((char*)p + 0x30);
     func_0026E4B8(self);

@@ -412,8 +412,8 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" int cUIListBox_addEntryByStringID_i(void* box, int id, int idx) __asm__("cUIListBox_addEntryByStringID");
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int v);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char D_0045DED0[];
@@ -522,8 +522,8 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF00), 2);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF10), 3);
             unsigned char sel;
-            if (func_0039A768(w, iface->getOptions().mode, &sel))
-                func_0039A7A8(w, sel);
+            if (cUIListBox_getEntryByData(w, iface->getOptions().mode, &sel))
+                cUIListBox_setCurrentEntryByIndex(w, sel);
         }
         {
             cUIText* t = (cUIText*)find_188F28(self, D_00440FB8, 0);
@@ -541,7 +541,7 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
         if (w != 0) {
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF20), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF30), 0);
-            func_0039A7A8(w, iface->getOptions().showHud);
+            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().showHud);
         }
         {
             cUIText* t = (cUIText*)find_188F28(self, D_00440FB8, 1);
@@ -560,7 +560,7 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF40), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF50), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF68), 0);
-            func_0039A7A8(w, iface->getOptions().f20);
+            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().f20);
         }
         {
             cUIText* t = (cUIText*)find_188F28(self, D_00440FB8, 2);
@@ -722,7 +722,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void cSSXApp_activateBEOptions(void* p);
 extern "C" void* func_0028B180();
 extern "C" void func_0029ED90(void* p, int a);
-extern "C" int func_0039A738(void* self);
+extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
@@ -855,11 +855,11 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
     }
     case 9:
         if (self->item[0] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[0]])) {
-            D_00535610_189980.mode = func_0039A738(widget);
+            D_00535610_189980.mode = cUIListBox_getCurrentEntryData(widget);
             char* o = (char*)SSXApp->FELocale;
             sVE_189980b* vt = *(sVE_189980b**)(o + 4);
             char* thisp = o + vt[3].delta;
-            vt[3].fn(thisp, func_0039A738(widget));
+            vt[3].fn(thisp, cUIListBox_getCurrentEntryData(widget));
             Refresh_189980(self);
             func_0029ED90(func_0028B180(), 1);
         }
@@ -884,8 +884,8 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_0039A7A8(void* self, int v);
-extern "C" int func_0039A738(void* self);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
+extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cSSXApp_activateBEOptions(void* p);
 extern char* D_00440FD8[];
 
@@ -943,10 +943,10 @@ extern "C" void func_00189D60(void* self_)
     if (self->item[0] >= 0) {
         void* w = find_189D60(self, 0);
         if (w != 0) {
-            func_0039A7A8(w, iface->getOptions().mode);
+            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().mode);
             char* o = (char*)SSXApp->FELocale;
             sVE_189D60b* vt = *(sVE_189D60b**)(o + 4);
-            vt[3].fn(o + vt[3].delta, func_0039A738(w));
+            vt[3].fn(o + vt[3].delta, cUIListBox_getCurrentEntryData(w));
             char* scr = self->screen;
             sVE_189D60a* vt2 = *(sVE_189D60a**)(scr + 0x48);
             char* sub = scr + 0x40;
@@ -956,12 +956,12 @@ extern "C" void func_00189D60(void* self_)
     if (self->item[1] >= 0) {
         void* w = find_189D60(self, 1);
         if (w != 0)
-            func_0039A7A8(w, iface->getOptions().showHud);
+            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().showHud);
     }
     if (self->item[2] >= 0) {
         void* w = find_189D60(self, 2);
         if (w != 0)
-            func_0039A7A8(w, iface->getOptions().f20);
+            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().f20);
     }
     cPS2GraphicsMan* g = GrMan;
     sVE_189D60c* vt = (sVE_189D60c*)g->mVtbl;
@@ -1177,7 +1177,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern "C" int func_0039A738(void* self);
+extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void func_0018BEF8(void* self, unsigned int mode);
 extern "C" void* func_0028B180();
 extern "C" void func_00287410(void* snd, int v);
@@ -1275,8 +1275,8 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
     }
     case 9:
         if (Is_18A8D0(*(int*)(widget + 0x38), D_004A1568)) {
-            D_00535610_18A8D0.output = func_0039A738(widget);
-            func_0018BEF8(self, func_0039A738(widget));
+            D_00535610_18A8D0.output = cUIListBox_getCurrentEntryData(widget);
+            func_0018BEF8(self, cUIListBox_getCurrentEntryData(widget));
         }
         else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A1590)) {
             unsigned char vol = *(unsigned char*)(widget + 0x74);
@@ -1294,16 +1294,16 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
             func_00287520(func_0028B180(), Cfg_18A8D0().musicVol);
         }
         else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A15A8)) {
-            D_00535610_18A8D0.f17 = func_0039A738(widget) != 0;
+            D_00535610_18A8D0.f17 = cUIListBox_getCurrentEntryData(widget) != 0;
             func_00287558(func_0028B180(), Cfg_18A8D0().f17 != 0);
         }
         else if (Is_18A8D0(*(int*)(widget + 0x38), D_004A15B0)) {
-            D_00535610_18A8D0.f16 = func_0039A738(widget) != 0;
+            D_00535610_18A8D0.f16 = cUIListBox_getCurrentEntryData(widget) != 0;
             func_002875D0(func_0028B180(), Cfg_18A8D0().f16 != 0);
         }
         bool on = D_004A1A70 == 1;
         if (on && Is_18A8D0(*(int*)(widget + 0x38), D_004A15B8))
-            D_00535610_18A8D0.f18 = func_0039A738(widget) != 0;
+            D_00535610_18A8D0.f18 = cUIListBox_getCurrentEntryData(widget) != 0;
         D_004A14D4 = 1;
         break;
     }
@@ -1319,8 +1319,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int cUIListBox_addEntryByStringID_i(void* box, int id, int idx) __asm__("cUIListBox_addEntryByStringID");
 extern "C" void func_0039A670(void* box);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int v);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
 extern "C" void* func_0028B180();
 int func_00289DC0(void* snd);
 extern "C" void func_00287410(void* snd, int v);
@@ -1416,8 +1416,8 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E000), 2);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E018), 3);
         unsigned char sel;
-        if (func_0039A768(w, func_00289DC0(func_0028B180()), &sel))
-            func_0039A7A8(w, sel);
+        if (cUIListBox_getEntryByData(w, func_00289DC0(func_0028B180()), &sel))
+            cUIListBox_setCurrentEntryByIndex(w, sel);
     }
     }
     {
@@ -1451,8 +1451,8 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF40), 0);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E028), 1);
         unsigned char sel;
-        if (func_0039A768(w, iface->getOptions().f17, &sel))
-            func_0039A7A8(w, sel);
+        if (cUIListBox_getEntryByData(w, iface->getOptions().f17, &sel))
+            cUIListBox_setCurrentEntryByIndex(w, sel);
         func_00287558(func_0028B180(), Cfg_18B380().f17 != 0);
     }
     }
@@ -1463,8 +1463,8 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF40), 0);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E028), 1);
         unsigned char sel;
-        if (func_0039A768(w, iface->getOptions().f16, &sel))
-            func_0039A7A8(w, sel);
+        if (cUIListBox_getEntryByData(w, iface->getOptions().f16, &sel))
+            cUIListBox_setCurrentEntryByIndex(w, sel);
         func_002875D0(func_0028B180(), Cfg_18B380().f16 != 0);
     }
     }
@@ -1476,8 +1476,8 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045DF40), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(D_0045E028), 1);
             unsigned char sel;
-            if (func_0039A768(w, iface->getOptions().f18, &sel))
-                func_0039A7A8(w, sel);
+            if (cUIListBox_getEntryByData(w, iface->getOptions().f18, &sel))
+                cUIListBox_setCurrentEntryByIndex(w, sel);
         }
     }
 }
@@ -1988,7 +1988,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern "C" int func_0039A738(void* self);
+extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void func_00147528(void* self, int index, int value);
 extern "C" void func_00147658(void* self, int index, int value);
 extern "C" int func_001474E8(void* iface, int a1);
@@ -2044,7 +2044,7 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
     }
     case 9:
         if (Is_0018CA10(*(int*)(widget + 0x38), D_004A1568)) {
-            func_00147528(iface, 0, func_0039A738(widget) != 0);
+            func_00147528(iface, 0, cUIListBox_getCurrentEntryData(widget) != 0);
             if (func_001474E8(iface, 0)) {
                 func_0018D108(self, 0, 10.0f, 10.0f);
                 *(int*)(self + 0x48) = 0x3C;
@@ -2053,7 +2053,7 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
                 func_0018D108(self, 0, 0.0f, 0.0f);
             }
         } else if (Is_0018CA10(*(int*)(widget + 0x38), D_004A1570)) {
-            func_00147528(iface, 1, func_0039A738(widget) != 0);
+            func_00147528(iface, 1, cUIListBox_getCurrentEntryData(widget) != 0);
             if (func_001474E8(iface, 1)) {
                 func_0018D108(self, 1, 10.0f, 10.0f);
                 *(int*)(self + 0x4C) = 0x3C;
@@ -2062,11 +2062,11 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
                 func_0018D108(self, 1, 0.0f, 0.0f);
             }
         } else if (Is_0018CA10(*(int*)(widget + 0x38), D_004A15C8)) {
-            func_00147658(iface, 0, func_0039A738(widget));
-            func_0018CF50(self, func_0039A738(widget) == 0);
+            func_00147658(iface, 0, cUIListBox_getCurrentEntryData(widget));
+            func_0018CF50(self, cUIListBox_getCurrentEntryData(widget) == 0);
         } else if (Is_0018CA10(*(int*)(widget + 0x38), D_004A1578)) {
-            func_00147658(iface, 1, func_0039A738(widget));
-            func_0018CF50(self, func_0039A738(widget) == 0);
+            func_00147658(iface, 1, cUIListBox_getCurrentEntryData(widget));
+            func_0018CF50(self, cUIListBox_getCurrentEntryData(widget) == 0);
         }
         D_004A14DC = 1;
         break;
@@ -2132,8 +2132,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_001474E8(void* iface, int a1);
 extern "C" int func_00147618(void* iface, int a1);
-extern "C" int func_0039A768(void* self, int key, unsigned char* out);
-extern "C" void func_0039A7A8(void* self, int a1);
+extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
+extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern "C" void func_0018CF50(void* self, int on);
 extern char D_004A1568[];
 extern char D_004A1570[];
@@ -2146,24 +2146,24 @@ extern "C" void func_0018CDC0(void* self)
     unsigned char vals[4];
     void* o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1568));
     if (o != 0) {
-        func_0039A768(o, func_001474E8(np, 0), &vals[0]);
-        func_0039A7A8(o, vals[0]);
+        cUIListBox_getEntryByData(o, func_001474E8(np, 0), &vals[0]);
+        cUIListBox_setCurrentEntryByIndex(o, vals[0]);
     }
     o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1570));
     if (o != 0) {
-        func_0039A768(o, func_001474E8(np, 1), &vals[1]);
-        func_0039A7A8(o, vals[1]);
+        cUIListBox_getEntryByData(o, func_001474E8(np, 1), &vals[1]);
+        cUIListBox_setCurrentEntryByIndex(o, vals[1]);
     }
     o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15C8));
     if (o != 0) {
-        func_0039A768(o, func_00147618(np, 0), &vals[2]);
-        func_0039A7A8(o, vals[2]);
+        cUIListBox_getEntryByData(o, func_00147618(np, 0), &vals[2]);
+        cUIListBox_setCurrentEntryByIndex(o, vals[2]);
         func_0018CF50(self, func_00147618(np, 0) == 0);
     }
     o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1578));
     if (o != 0) {
-        func_0039A768(o, func_00147618(np, 1), &vals[3]);
-        func_0039A7A8(o, vals[3]);
+        cUIListBox_getEntryByData(o, func_00147618(np, 1), &vals[3]);
+        cUIListBox_setCurrentEntryByIndex(o, vals[3]);
     }
 }
 #endif

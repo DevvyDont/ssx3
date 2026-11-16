@@ -1490,7 +1490,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 void cUIText_setAsciiString(cUIText* text, const char* s);
 extern "C" void cOVState_onCreateScreen(void* self);
-extern "C" void func_003A1310(void* self, int a1);
+extern "C" void cUITextScroll_setInputMap(void* self, int a1);
 extern char D_00471CE8[];
 extern char D_00471D00[];
 extern char D_00471D10[];
@@ -1529,7 +1529,7 @@ extern "C" void func_00210940(void* self)
     if (e != 0)
     {
         *(int*)((char*)e + 0x74) |= 1;
-        func_003A1310(e, 1);
+        cUITextScroll_setInputMap(e, 1);
         e->setVisible(1);
         *(int*)((char*)e + 0x14) |= 0x80;
         e->setColor(sColor_210940(1.0f, 0.0f, 0.0f, 0.0f));
@@ -1573,7 +1573,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
-extern "C" void func_003A19F8(void* text, char* str);
+extern "C" void cUITextScroll_addAsciiString(void* text, char* str);
 extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
 extern char D_0046E808[];
 extern char D_00534FB8[];
@@ -1601,14 +1601,14 @@ extern "C" void func_00210BD8(void* self, char* name, int a)
         cBXString_cBXString2(&s, D_00534FB8);
         cBXString_Concat(&s, D_004A2710);
         cBXString_Concat(&s, name);
-        func_003A19F8(obj, s.str);
+        cUITextScroll_addAsciiString(obj, s.str);
         cBXString__cBXString(&s, 2);
     } else {
         sBXString_00210BD8 s;
         cBXString_cBXString2(&s, D_00534FC8);
         cBXString_Concat(&s, D_004A2710);
         cBXString_Concat(&s, name);
-        func_003A19F8(obj, s.str);
+        cUITextScroll_addAsciiString(obj, s.str);
         cBXString__cBXString(&s, 2);
     }
     func_001A83D8(obj, 0x1E, 8, c8, c4, c6, 0, 1);

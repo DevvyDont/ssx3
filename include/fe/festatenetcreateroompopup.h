@@ -120,7 +120,7 @@ struct cFEStateNetCreateRoomPopup {
                                     //       ("kT_POPUP231AddPassword") and shows mszPassword in it
     cUIListBox* mpLBChannelName;    // 0x6D8 [U] onWidgetCreate: widget "LBChannelName" (4 entries); onWidgetEvent
                                     //       event 9 compares the widget with it and sets mszChannelName from its
-                                    //       selection (func_0039A738)
+                                    //       selection (cUIListBox_getCurrentEntryData)
     char* mszRoomName;              // 0x6DC [P] getRoomName (preview 0xB8); [R] D_004A3E90 (both ctors), destroyed by
                                     //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
                                     //       keyboard id 1); func_001BEC78 refuses an empty name

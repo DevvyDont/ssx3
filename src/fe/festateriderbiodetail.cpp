@@ -273,8 +273,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* func_0014EEC8(void* self, int player, int index);
-extern "C" void func_003A18C0(void* self);
-extern "C" void func_003A1F18(void* self, int id);
+extern "C" void cUITextScroll_clearBuffer(void* self);
+extern "C" void cUITextScroll_addUnicodeStringByID(void* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char D_0045E438[];
 extern char D_0045F7D0[];
@@ -284,7 +284,7 @@ extern char D_0045F7D0[];
  *
  * The name is what func_0014EEC8() returns for the character ID at +0x48 (its character record, which
  * probably starts with the name; character interface, BE interface 2). The scroller's old lines are freed
- * (func_003A18C0) before func_003A1F18() sets the new string ID. Nothing happens when the object is missing.
+ * (cUITextScroll_clearBuffer) before cUITextScroll_addUnicodeStringByID() sets the new string ID. Nothing happens when the object is missing.
  */
 extern "C" void cFEStateRiderBio_fillBioInfo(void* self)
 {
@@ -293,8 +293,8 @@ extern "C" void cFEStateRiderBio_fillBioInfo(void* self)
         char buf[64];
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 2);
         sprintf(buf, D_0045F7D0, func_0014EEC8(iface, *(int*)((char*)self + 0x48), 0));
-        func_003A18C0(obj);
-        func_003A1F18(obj, GetHashValue32(buf));
+        cUITextScroll_clearBuffer(obj);
+        cUITextScroll_addUnicodeStringByID(obj, GetHashValue32(buf));
     }
 }
 #endif

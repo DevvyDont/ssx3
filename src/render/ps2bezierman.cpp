@@ -3,7 +3,7 @@
 
 extern "C" void func_00374C90(void* self);
 extern "C" void func_00372B30(void* self);
-extern "C" void func_0038AF30(void* self);
+extern "C" void cPSPBezierMan_Init(void* self);
 extern void* cPSPBezierMan_vtbl[16];
 
 //100%
@@ -23,7 +23,7 @@ struct sBezSlot_8AE0 {
  * Constructs the Bezier patch manager and allocates its VIF caches.
  *
  * The base constructor func_00374C90() registers the object as the current manager (cBezierMan_TheBezierMan); then it stores
- * cPSPBezierMan's vtable, builds the vertex tables at offset 0x10, and func_0038AF30() allocates the "4x4VifCache",
+ * cPSPBezierMan's vtable, builds the vertex tables at offset 0x10, and cPSPBezierMan_Init() allocates the "4x4VifCache",
  * "6x6VifCache" and "8x8VifCache" buffers, sets the distance settings and fills the 6x6 and 8x8 UV grids.
  *
  * @return @p self
@@ -34,21 +34,21 @@ void* cPSPBezierMan_cPSPBezierMan(void* self)
     *(void**)((char*)self + 0x4) = cPSPBezierMan_vtbl;
     func_00372B30((char*)self + 0x10);
     new ((char*)self + 0x8) sBezSlot_8AE0[2];
-    func_0038AF30(self);
+    cPSPBezierMan_Init(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2bezierman", func_0038AEB0);
+INCLUDE_ASM("render/ps2bezierman", cPSPBezierMan__cPSPBezierMan);
 #ifdef SKIP_ASM
-extern "C" void func_0038B0F8(void* self);
+extern "C" void cPSPBezierMan_Purge(void* self);
 extern "C" void func_00374CA8(void* self, int flags);
 
-extern "C" void func_0038AEB0(cPSPBezierMan* self, int flags)
+extern "C" void cPSPBezierMan__cPSPBezierMan(cPSPBezierMan* self, int flags)
 {
     self->mVtbl = cPSPBezierMan_vtbl;
-    func_0038B0F8(self);
+    cPSPBezierMan_Purge(self);
     func_00374CA8(self, flags);
 }
 #endif

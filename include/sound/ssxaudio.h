@@ -99,7 +99,7 @@ CHECK_SIZE(tSoundVolume, 0x10);
 CHECK_SIZE(tAudioMix, 0x28);
 
 struct cSSXAudio {
-    // --- cBankSys (non-virtual part 0x10; ctor cBankSys_cBankSys 0x28FD00, dtor func_0028FEA0; vtable D_00483A48)
+    // --- cBankSys (non-virtual part 0x10; ctor cBankSys_cBankSys 0x28FD00, dtor cBankSys__cBankSys; vtable D_00483A48)
     cBankManager* mpVBankManager;       // 0x000 [R] g++ 2.95 virtual-base pointer to the shared cBankManager (= this + 0x6C98); every ctor in the chain stores it; [U] the inlined SFX_Begin/SFX_Play2D path loads it (39 methods)
     int* mBank;                         // 0x004 [O] cBankSys::mBank; [R] cBankSys ctor: operator new(0x10, "mBank")
     int* mPatch;                        // 0x008 [O] cBankSys::mPatch; [R] operator new(0x10, "mPath") (EA's tag spelling)

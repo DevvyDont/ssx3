@@ -27,7 +27,7 @@ extern "C" void func_001707B0(sCamTmp_D0A0* out, void* target);
 extern "C" void func_00170D20(sCamTmp_D0A0* out, void* target, int corner);
 extern "C" cCamAlgo_D0A0* func_00178520(void* mem, sCamTmp_D0A0* a, sCamTmp_D0A0* b);
 extern "C" cCamAlgo_D0A0* func_00174190(void* mem);
-extern "C" cCamAlgo_D0A0* func_00161060(void* mem, sCamTmp_D0A0* a, sCamTmp_D0A0* b, sCamTmp_D0A0* c, sCamTmp_D0A0* d,
+extern "C" cCamAlgo_D0A0* cSplineCamAlgorithm_cSplineCamAlgorithm(void* mem, sCamTmp_D0A0* a, sCamTmp_D0A0* b, sCamTmp_D0A0* c, sCamTmp_D0A0* d,
                                float f0, float f1, float f2, float f3);
 extern "C" cCamAlgo_D0A0* func_001616A8(void* mem);
 extern "C" cCamAlgo_D0A0* func_001689C8(void* mem);
@@ -36,8 +36,8 @@ extern "C" cCamAlgo_D0A0* func_00160438(void* mem);
 extern "C" cCamAlgo_D0A0* func_001682B8(void* mem);
 extern "C" cCamAlgo_D0A0* func_001774C0(void* mem, int index);
 extern "C" cCamAlgo_D0A0* func_00168650(void* mem);
-extern "C" cCamAlgo_D0A0* func_00160760(void* mem);
-extern "C" cCamAlgo_D0A0* func_00160B70(void* mem, float angle);
+extern "C" cCamAlgo_D0A0* cMatrixChaseAlgorithm_cMatrixChaseAlgorithm(void* mem);
+extern "C" cCamAlgo_D0A0* cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(void* mem, float angle);
 extern "C" cCamAlgo_D0A0* func_00176A68(void* mem);
 extern "C" cCamAlgo_D0A0* func_00177068(void* mem);
 extern "C" cCamAlgo_D0A0* func_00176D68(void* mem);
@@ -98,7 +98,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         func_00170D20(&c2, target, 2);
         sCamTmp_D0A0 c3;
         func_00170D20(&c3, target, 3);
-        r = func_00161060(mem, &c0, &c1, &c2, &c3,
+        r = cSplineCamAlgorithm_cSplineCamAlgorithm(mem, &c0, &c1, &c2, &c3,
                           *(float*)(ctx + 0x18), *(float*)(ctx + 0x14), *(float*)(ctx + 0x1C), *(float*)(ctx + 0x10));
         break;
     }
@@ -145,11 +145,11 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         r = func_00168650(cMemMan_alloc(0x390, D_0045B510, 0x20000000, 0));
         break;
     case 41:
-        r = func_00160760(cMemMan_alloc(0x3A0, D_0045B538, 0x20000000, 0));
+        r = cMatrixChaseAlgorithm_cMatrixChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B538, 0x20000000, 0));
         break;
     case 33: case 34: case 35: case 36: case 37: case 38: case 39: case 40: {
         float angle = (float)(kind - 0x21) * 0.7853982f;
-        r = func_00160B70(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), angle);
+        r = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), angle);
         *(int*)((char*)r + 0xC) = kind;
         break;
     }
@@ -176,19 +176,19 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         r = func_001789E8(cMemMan_alloc(0x3B0, D_0045B598, 0x20000000, 0), *(void**)(self + 0x20));
         break;
     case 94:
-        r = func_00160B70(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -0.3926991f);
+        r = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -0.3926991f);
         *(int*)((char*)r + 0xC) = kind;
         break;
     case 95:
-        r = func_00160B70(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 0.3926991f);
+        r = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 0.3926991f);
         *(int*)((char*)r + 0xC) = kind;
         break;
     case 96:
-        r = func_00160B70(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -2.3561945f);
+        r = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -2.3561945f);
         *(int*)((char*)r + 0xC) = kind;
         break;
     case 97:
-        r = func_00160B70(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 2.3561945f);
+        r = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 2.3561945f);
         *(int*)((char*)r + 0xC) = kind;
         break;
     }

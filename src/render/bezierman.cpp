@@ -24,7 +24,7 @@ void* cBezierMan_construct()
 #endif
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038AF30);
+INCLUDE_ASM("render/bezierman", cPSPBezierMan_Init);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -48,7 +48,7 @@ struct sUVTables_AF30 {
 
 extern sUVTables_AF30 D_005049C0_AF30 __asm__("D_005049C0");
 
-extern "C" void func_0038AF30(cPSPBezierMan* self)
+extern "C" void cPSPBezierMan_Init(cPSPBezierMan* self)
 {
     func_00372B78(((char*)self) + 0x10, 0x384, 0xDC, 0x8C, 0, 0x92, 0x5D);
     self->mVifCache[0] = operator_new_tag_AF30(0x38400, D_00492EB0, 0, 0);
@@ -86,12 +86,12 @@ extern "C" void func_0038AF30(cPSPBezierMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038B0F8);
+INCLUDE_ASM("render/bezierman", cPSPBezierMan_Purge);
 #ifdef SKIP_ASM
 void func_0038D660(void*);
 void cMemMan_free(void*);
 
-extern "C" void func_0038B0F8(cPSPBezierMan* self)
+extern "C" void cPSPBezierMan_Purge(cPSPBezierMan* self)
 {
     func_0038D660(self);
     if (self->mVifCache[0] != 0) {
@@ -217,7 +217,7 @@ extern "C" void func_0038B190(cPSPBezierMan* m, sBezObj_B190* o, unsigned char* 
 #endif
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038B338);
+INCLUDE_ASM("render/bezierman", cPSPBezierMan_AddPatch);
 #ifdef SKIP_ASM
 extern int D_004A44D4;
 
@@ -227,7 +227,7 @@ struct sBezVEntry_B338 {
     void (*fn)(void*, void*, void*, void*, void*, int);
 };
 
-extern "C" void func_0038B338(cPSPBezierMan* self, void* a, void* b, void* c, void* d)
+extern "C" void cPSPBezierMan_AddPatch(cPSPBezierMan* self, void* a, void* b, void* c, void* d)
 {
     if (D_004A44D4 == 0) {
         sBezVEntry_B338* vt = (sBezVEntry_B338*)self->mVtbl;
@@ -237,7 +237,7 @@ extern "C" void func_0038B338(cPSPBezierMan* self, void* a, void* b, void* c, vo
 #endif
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038B370);
+INCLUDE_ASM("render/bezierman", cPSPBezierMan_DrawPatches);
 #ifdef SKIP_ASM
 // REF refs/ssx3-rust crates/ssx3-game/src/packetless/bezier.rs (end_pass): field meanings.
 extern "C" void func_0031BE50(float angle, float* s, float* c);
@@ -816,7 +816,7 @@ static inline void Render_B370(sBezMan_B370* self)
     func_0038D968_B370(self, cursor);
 }
 
-extern "C" void func_0038B370(cPSPBezierMan* self)
+extern "C" void cPSPBezierMan_DrawPatches(cPSPBezierMan* self)
 {
     Render_B370(((sBezMan_B370*)self));
 }

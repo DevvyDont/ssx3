@@ -2142,7 +2142,7 @@ extern "C" void cAI_loadAnims(void)
 INCLUDE_ASM("ai/ai", cAI_finishRemotePlayer);
 #ifdef SKIP_ASM
 extern "C" void func_00258950(void* self);
-extern "C" void func_0026FA50(void* self);
+extern "C" void cReplay_endReplay(void* self);
 extern "C" void cRider_doFinishEvent(void* self);
 
 static inline bool aiRiderFar12B340(char* r)
@@ -2154,7 +2154,7 @@ static inline bool aiRiderFar12B340(char* r)
  * Ends an online race for the remote player: the link races alone and an unfinished remote rider gets a DNF.
  *
  * Only in the Race state: sets the game link's mAlone (func_00258950), then for each non-local player
- * (mIsLocal 0) returns at once if its mFinishTime is >= 10; otherwise ends the replay (func_0026FA50), sets
+ * (mIsLocal 0) returns at once if its mFinishTime is >= 10; otherwise ends the replay (cReplay_endReplay), sets
  * mDidNotFinish and calls cRider_doFinishEvent().
  */
 extern "C" void cAI_finishRemotePlayer(cAI* self)
@@ -2173,7 +2173,7 @@ extern "C" void cAI_finishRemotePlayer(cAI* self)
                 {
                     return;
                 }
-                func_0026FA50(SSXApp->Game->Replay);
+                cReplay_endReplay(SSXApp->Game->Replay);
                 *(int*)(*(char**)(rider + 0x18) + 0x480) = 1;
                 cRider_doFinishEvent(*(void**)(rider + 0x18));
             }
@@ -2556,7 +2556,7 @@ extern "C" void func_0012BB20(sAi_12BB20* self)
                             cRider_doFinishEvent(*(void**)(self->riders[i] + 0x18));
                         }
                     }
-                    func_0026FA50(SSXApp->Game->Replay);
+                    cReplay_endReplay(SSXApp->Game->Replay);
                     self->countdown = -1;
                 }
             }
@@ -2580,7 +2580,7 @@ extern "C" void func_0012BB20(sAi_12BB20* self)
                         cRider_doFinishEvent(*(void**)(self->riders[i] + 0x18));
                     }
                 }
-                func_0026FA50(SSXApp->Game->Replay);
+                cReplay_endReplay(SSXApp->Game->Replay);
                 self->countdown = -1;
             }
         }
@@ -3303,7 +3303,7 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_gainFocus);
 extern "C" void* func_0028B180();
 extern "C" void func_0029E578(void* self, void* a1);
 extern "C" int func_00311AE8(void*, int);
-extern "C" void func_002708F0(void* self, int key, int id);
+extern "C" void cReplay_eventWipeout(void* self, int key, int id);
 extern "C" void func_00309990(void* self);
 extern void* D_004A3DD8;
 extern char t4vect_Zero[];
@@ -3354,7 +3354,7 @@ struct sAiObj12CA30
  * rider's view (func_0029E578), copies the hip and board-child bone poses (plus mModelOffset) into
  * RiderPrevPose and BoardPrevPose, and sets RiderState 0 (Launch). When func_00311AE8(mRiderAnim, 2) is 0x16
  * it calls cWipeoutMotion_throwItem (rider velocity, no spin, BoardPrevPose) and clears unk_318. Then
- * notifies the replay (func_002708F0) and queues world-script op 0x70004 (func_00309990).
+ * notifies the replay (cReplay_eventWipeout) and queues world-script op 0x70004 (func_00309990).
  */
 extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
 {
@@ -3375,7 +3375,7 @@ extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
         cWipeoutMotion_throwItem(*(char**)((char*)self->mRider + 0x77C) + 0x30, (sVec4_12CA30*)((char*)self->mRider + 0x1E0), (sVec4_12CA30*)t4vect_Zero, p30);
         *(int*)((char*)self->mRider + 0x318) = 0;
     }
-    func_002708F0(SSXApp->Game->Replay, *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0x790) + 0xFC);
+    cReplay_eventWipeout(SSXApp->Game->Replay, *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0x790) + 0xFC);
     func_00309990(D_004A3DD8);
 }
 #endif

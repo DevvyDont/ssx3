@@ -6,8 +6,8 @@
 //   cRelativeChaseAlgorithm (0x3C0)  "Relative Chase Camera Algorithm" camera types 33..40 (angle = (type-33)*pi/4)
 //   cSplineCamAlgorithm     (0x3D0)  "Spline Camera Algorithm"         camera type 92
 // Sizes [R]: cChaseCameraController_createChaseAlgorithmBlend (camera/cameraalgorithms.cpp) allocates them with
-// cMemMan_alloc(size, tag) and calls their constructors (func_00160760, func_00160B70(mem, angle),
-// func_00161060(mem, p1..p4, time, leadDistance, heightOffset, fov)).
+// cMemMan_alloc(size, tag) and calls their constructors (cMatrixChaseAlgorithm_cMatrixChaseAlgorithm, cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(mem, angle),
+// cSplineCamAlgorithm_cSplineCamAlgorithm(mem, p1..p4, time, leadDistance, heightOffset, fov)).
 // Class names: the July 2003 preview's vtable slots (builds/x/v2/name_map_v2.tsv: cSplineCamAlgorithm::<virtual slot 1>
 // = cSplineCamAlgorithm__cSplineCamAlgorithm ...) and SSX On Tour's DWARF, whose functions.tsv lists ctor, dtor, snap(int), update(),
 // getRestDrop(), getRaceCamFinalPhaseData(cRaceCamFinalPhaseData*) for each (z:/main/game/source/camera/
@@ -32,8 +32,8 @@
 
 struct cRiderCameraTarget;
 
-// cMatrixChaseAlgorithm (0x3A0; On Tour 0x390). Ctor func_00160760 (stores vtable D_0045BA58, AlgorithmType),
-// dtor func_001607A0, snap func_00160AE8, update func_001607E0, getRaceCamFinalPhaseData func_001607D8,
+// cMatrixChaseAlgorithm (0x3A0; On Tour 0x390). Ctor cMatrixChaseAlgorithm_cMatrixChaseAlgorithm (stores vtable D_0045BA58, AlgorithmType),
+// dtor func_001607A0, snap cMatrixChaseAlgorithm_snap, update cMatrixChaseAlgorithm_update, getRaceCamFinalPhaseData func_001607D8,
 // getRestDrop func_001607C8.
 struct cMatrixChaseAlgorithm {
     // --- cLookAtChaseAlgorithm (camera/cameraalgorithms.h, 0x390; its own bases cChaseAlgorithm <- cCameraAlgorithm
@@ -52,65 +52,65 @@ struct cMatrixChaseAlgorithm {
     // --- cLookAtChaseAlgorithm
     t4Vector Position;              // 0x040 [O]; [R] = D_004FF130; [U] lq/sq/lqc2, .z/.w by lwc1/swc1
     float Heading;                  // 0x050 [O]; [R] 0; [U] lwc1/swc1 (func_00166640, func_001668B8)
-    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (func_001662A0, func_00166640)
+    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, func_00166640)
     float CamRoll;                  // 0x058 [O]; [R] 0
     char unk_05C[0x4];              // 0x05C alignment gap
     tPose CalculatedPose;           // 0x060 [O]; [U] func_00166F90 (calcPose) writes P and Q (sq), reads Q.x..w
     t4Vector LastCamDir;            // 0x080 [O]; [U] sq/lqc2
     t4Vector LastVelLookahead;      // 0x090 [O]; [R] = t4vect_Zero
-    t4Vector LastRiderPos;          // 0x0A0 [O]; [U] func_00163450
-    t4Vector LastHandplantLook;     // 0x0B0 [O]; [U] func_00163450
+    t4Vector LastRiderPos;          // 0x0A0 [O]; [U] cLookAtChaseAlgorithm_updateHandplant
+    t4Vector LastHandplantLook;     // 0x0B0 [O]; [U] cLookAtChaseAlgorithm_updateHandplant
     t4Vector LastRailMove;          // 0x0C0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeMove;      // 0x0D0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeDistCorrection; // 0x0E0 [O]; [R] = t4vect_Zero
     t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap (snap) clears it
     t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (func_00162568), .z by sw in snap
-    t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] func_00164878 (updateHalfPipeCam)
-    t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] func_00164878, .z lwc1/swc1
-    t4Vector HalfPipeRotator;       // 0x130 [O]; [U] func_00164878, .x/.y/.z lwc1
-    t4Vector HalfPipeNewLook;       // 0x140 [O]; [U] func_00164878
-    t4Vector HalfPipeFullOut;       // 0x150 [O]; [U] func_00164878
-    t4Vector HalfPipeOut;           // 0x160 [O]; [U] func_00164878
-    t4Vector HalfPipeBlendOutLastLook; // 0x170 [O]; [U] func_00164878, snap
-    t4Vector HalfPipeBlendOutLastTargetDelta; // 0x180 [O]; [U] func_00164878
+    t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam (updateHalfPipeCam)
+    t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .z lwc1/swc1
+    t4Vector HalfPipeRotator;       // 0x130 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .x/.y/.z lwc1
+    t4Vector HalfPipeNewLook;       // 0x140 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    t4Vector HalfPipeFullOut;       // 0x150 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    t4Vector HalfPipeOut;           // 0x160 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    t4Vector HalfPipeBlendOutLastLook; // 0x170 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, snap
+    t4Vector HalfPipeBlendOutLastTargetDelta; // 0x180 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
     t4Vector LastSlowVelocity;      // 0x190 [O]; [U] snap
     t4Vector SlowCamEnterLook;      // 0x1A0 [O]; [U] snap
     t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] func_00162568, snap
     t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] func_00162C78, snap
     float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] func_00163010
     float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] func_00163270
-    float LastPitch;                // 0x1D8 [O]; [R] = Pitch; [U] func_001662A0
-    float LastViewScalar;           // 0x1DC [O]; [R] 1.0f; [U] func_001633B0
-    float SecondsSinceLastHandplant; // 0x1E0 [O]; [R] 10.0f; [U] func_00163450 (lwc1/swc1; one sw)
+    float LastPitch;                // 0x1D8 [O]; [R] = Pitch; [U] cLookAtChaseAlgorithm_updatePitchBlending
+    float LastViewScalar;           // 0x1DC [O]; [R] 1.0f; [U] cLookAtChaseAlgorithm_updateFOVWithSpeed
+    float SecondsSinceLastHandplant; // 0x1E0 [O]; [R] 10.0f; [U] cLookAtChaseAlgorithm_updateHandplant (lwc1/swc1; one sw)
     float LastHeight;               // 0x1E4 [O]; [R] 0; [U] func_00162B90
     float ExtraBoostDist;           // 0x1E8 [O]; [U] func_00163010
     float LastBoostWarp;            // 0x1EC [O]; [U] func_00163010
     float LastCameraSwing;          // 0x1F0 [O]; [U] snap zeroes it (sw)
-    float AirCamTimeInAir;          // 0x1F4 [O]; [U] func_001635F8 (updateAirCam)
-    float AirSplineScalar;          // 0x1F8 [O]; [U] func_001635F8
-    float AirTimeScalar;            // 0x1FC [O]; [U] func_001635F8
-    float AirCamMaxTime;            // 0x200 [O]; [U] func_001635F8
+    float AirCamTimeInAir;          // 0x1F4 [O]; [U] cLookAtChaseAlgorithm_updateAirCam (updateAirCam)
+    float AirSplineScalar;          // 0x1F8 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float AirTimeScalar;            // 0x1FC [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float AirCamMaxTime;            // 0x200 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastCrouchFactor;         // 0x204 [O]; [U] func_00163270
     float LastTargetCrouchFactor;   // 0x208 [O]; [U] func_00162B90
-    float LastAirTargetDelta;       // 0x20C [O]; [U] func_001635F8
-    float LastAirPositionDelta;     // 0x210 [O]; [U] func_001635F8
+    float LastAirTargetDelta;       // 0x20C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float LastAirPositionDelta;     // 0x210 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float ViewCamLastFactor;        // 0x214 [O]; [U] func_001641C0 (updateViewCam)
-    float FullAirCamTimeInAir;      // 0x218 [O]; [U] func_001635F8
-    float LastFullAirTargetDelta;   // 0x21C [O]; [U] func_001635F8
-    float LastFullAirPositionDelta; // 0x220 [O]; [U] func_001635F8
-    float AirExitSmoothness;        // 0x224 [O]; [U] func_001635F8
-    float VerticalJumpFactor;       // 0x228 [O]; [U] func_001635F8
-    float HalfPipeInitWait;         // 0x22C [O]; [U] func_00162A20, func_00164878
-    float HalfPipeTimeToLand;       // 0x230 [O]; [U] func_00164878
-    float HalfPipeTimeInAir;        // 0x234 [O]; [U] func_00164878
-    float HalfPipeRotatorAngle;     // 0x238 [O]; [U] func_00164878
-    float HalfPipeBlendOutTimeLeft; // 0x23C [O]; [U] func_00164878
-    float HalfPipeCrossBlendTime;   // 0x240 [O]; [U] func_00164878
-    float HalfPipeCrossBlendFullTime; // 0x244 [O]; [U] func_00164878
-    float SlowCamBlend;             // 0x248 [O]; [U] func_001643A8 (updateSlowSpeedCam; one sw zero)
+    float FullAirCamTimeInAir;      // 0x218 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float LastFullAirTargetDelta;   // 0x21C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float LastFullAirPositionDelta; // 0x220 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float AirExitSmoothness;        // 0x224 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float VerticalJumpFactor;       // 0x228 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float HalfPipeInitWait;         // 0x22C [O]; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeTimeToLand;       // 0x230 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeTimeInAir;        // 0x234 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeRotatorAngle;     // 0x238 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeBlendOutTimeLeft; // 0x23C [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeCrossBlendTime;   // 0x240 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeCrossBlendFullTime; // 0x244 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float SlowCamBlend;             // 0x248 [O]; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (updateSlowSpeedCam; one sw zero)
     float LastHorizontalMoveLen;    // 0x24C [O]; [U] snap
     float LastEnemyPullback;        // 0x250 [O]; [U] snap
-    float ShakeNextXTime;           // 0x254 [O]; [U] func_001656B0 (setupCameraShake), func_00165938 (updateCameraShake)
+    float ShakeNextXTime;           // 0x254 [O]; [U] cLookAtChaseAlgorithm_setupCameraShake (setupCameraShake), cLookAtChaseAlgorithm_updateCameraShake (updateCameraShake)
     float ShakeNextYTime;           // 0x258 [O]; [U] ditto
     float ShakeNextZTime;           // 0x25C [O]; [U] ditto
     float ShakeXTarget;             // 0x260 [O]; [U] ditto
@@ -135,38 +135,38 @@ struct cMatrixChaseAlgorithm {
     float SecondaryShakeYCounter;   // 0x2AC [O]; [U] ditto
     float SecondaryShakeZCounter;   // 0x2B0 [O]; [U] ditto
     float ShakeBlendOutTime;        // 0x2B4 [O]; [U] ditto
-    float LastHandplantRise;        // 0x2B8 [O]; [U] func_00163450 (updateHandplant)
+    float LastHandplantRise;        // 0x2B8 [O]; [U] cLookAtChaseAlgorithm_updateHandplant (updateHandplant)
     float SteerTime;                // 0x2BC [O]; [U] snap
-    int FramesSinceHandplant;       // 0x2C0 [O]; [R] 5000; [U] func_00162998
-    int AirCamSetupCountdown;       // 0x2C4 [O]; [U] func_00162A20, func_001635F8
+    int FramesSinceHandplant;       // 0x2C0 [O]; [R] 5000; [U] cLookAtChaseAlgorithm_setupHandplantBlend
+    int AirCamSetupCountdown;       // 0x2C4 [O]; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateAirCam
     int JiggleFrameCount;           // 0x2C8 [O]; [U] snap
-    int LastAirFrame;               // 0x2CC [O]; [U] func_00162A20
-    int DoingHalfPipeCam;           // 0x2D0 [O] bool (a word in retail); [R] 0; [U] func_00162A20, func_001635F8,
-                                    //       func_00164878
-    int AirborneLastFrame;          // 0x2D4 [O] bool; [U] func_00162A20 (lw/sw)
-    int HalfPipeCamInitialized;     // 0x2D8 [O] bool; [R] 0; [U] func_00162A20, func_00164878
+    int LastAirFrame;               // 0x2CC [O]; [U] cLookAtChaseAlgorithm_setupHalfPipeCam
+    int DoingHalfPipeCam;           // 0x2D0 [O] bool (a word in retail); [R] 0; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateAirCam,
+                                    //       cLookAtChaseAlgorithm_updateHalfPipeCam
+    int AirborneLastFrame;          // 0x2D4 [O] bool; [U] cLookAtChaseAlgorithm_setupHalfPipeCam (lw/sw)
+    int HalfPipeCamInitialized;     // 0x2D8 [O] bool; [R] 0; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateHalfPipeCam
     int BoostingLastFrame;          // 0x2DC [O] bool; [U] snap
-    int ApplyingAirFunc;            // 0x2E0 [O] bool; [U] func_00162A20, func_001635F8
-    int HitGroundSinceStartingAirFunc; // 0x2E4 [O] bool; [U] func_001635F8
-    int ApplyingFullAirFunc;        // 0x2E8 [O] bool; [U] func_001635F8
-    int ShakingLastFrame;           // 0x2EC [O] bool; [U] func_001656B0, func_00165938
+    int ApplyingAirFunc;            // 0x2E0 [O] bool; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateAirCam
+    int HitGroundSinceStartingAirFunc; // 0x2E4 [O] bool; [U] cLookAtChaseAlgorithm_updateAirCam
+    int ApplyingFullAirFunc;        // 0x2E8 [O] bool; [U] cLookAtChaseAlgorithm_updateAirCam
+    int ShakingLastFrame;           // 0x2EC [O] bool; [U] cLookAtChaseAlgorithm_setupCameraShake, cLookAtChaseAlgorithm_updateCameraShake
     int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
                                     //       calls snapCurrent when set
     float Setup_Boost;              // 0x2F4 [O]; [U] func_00162568 (swc1)
     float Setup_VisualBoost;        // 0x2F8 [O]; [U] func_00162568 (swc1)
     int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] func_00162568 (sw)
-    int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] func_001643A8 (lw/sw)
+    int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (lw/sw)
     char AirTargetSpline[0xC];      // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
                                     //       CubicSplines); [R] constructed by func_0031D5E8, destroyed by func_0031D618
     char AirPositionSpline[0xC];    // 0x310 [O] cCubicSplineInterpolant; [R] ditto
     char FullAirTargetSpline[0xC];  // 0x31C [O] cCubicSplineInterpolant; [R] ditto
     char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto
     char HalfPipeAngleSpline[0xC];  // 0x334 [O] cCubicSplineInterpolant; [R] ditto
-    cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls func_00167DB8 (reset);
+    cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls cPIDFilter_reset (reset);
                                     //       [U] func_00162C78 runs the filter inline
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment
     // --- cMatrixChaseAlgorithm
-    float LastAngle;                // 0x390 [O] (On Tour 0x380); [R] = 0 (sw zero); [U] func_001607E0 update (lwc1/swc1)
+    float LastAngle;                // 0x390 [O] (On Tour 0x380); [R] = 0 (sw zero); [U] cMatrixChaseAlgorithm_update update (lwc1/swc1)
     char unk_394[0xC];              // 0x394 padding to the 16-byte class alignment (alloc 0x3A0)
 };
 
@@ -294,8 +294,8 @@ CHECK_OFFSET(cMatrixChaseAlgorithm, LastAngle, 0x390);
 CHECK_OFFSET(cMatrixChaseAlgorithm, unk_394, 0x394);
 CHECK_SIZE(cMatrixChaseAlgorithm, 0x3A0);
 
-// cRelativeChaseAlgorithm (0x3C0; On Tour 0x3B0). Ctor func_00160B70(this, angle) (vtable D_0045B9E0; the factory
-// then stores the camera type into AlgorithmType), dtor func_00160BB8, snap func_00160FD0, update func_00160BF8,
+// cRelativeChaseAlgorithm (0x3C0; On Tour 0x3B0). Ctor cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(this, angle) (vtable D_0045B9E0; the factory
+// then stores the camera type into AlgorithmType), dtor func_00160BB8, snap cRelativeChaseAlgorithm_snap, update cRelativeChaseAlgorithm_update,
 // getRaceCamFinalPhaseData func_00160BF0, getRestDrop func_00160BE0.
 struct cRelativeChaseAlgorithm {
     // --- cLookAtChaseAlgorithm (camera/cameraalgorithms.h, 0x390; its own bases cChaseAlgorithm <- cCameraAlgorithm
@@ -314,65 +314,65 @@ struct cRelativeChaseAlgorithm {
     // --- cLookAtChaseAlgorithm
     t4Vector Position;              // 0x040 [O]; [R] = D_004FF130; [U] lq/sq/lqc2, .z/.w by lwc1/swc1
     float Heading;                  // 0x050 [O]; [R] 0; [U] lwc1/swc1 (func_00166640, func_001668B8)
-    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (func_001662A0, func_00166640)
+    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, func_00166640)
     float CamRoll;                  // 0x058 [O]; [R] 0
     char unk_05C[0x4];              // 0x05C alignment gap
     tPose CalculatedPose;           // 0x060 [O]; [U] func_00166F90 (calcPose) writes P and Q (sq), reads Q.x..w
     t4Vector LastCamDir;            // 0x080 [O]; [U] sq/lqc2
     t4Vector LastVelLookahead;      // 0x090 [O]; [R] = t4vect_Zero
-    t4Vector LastRiderPos;          // 0x0A0 [O]; [U] func_00163450
-    t4Vector LastHandplantLook;     // 0x0B0 [O]; [U] func_00163450
+    t4Vector LastRiderPos;          // 0x0A0 [O]; [U] cLookAtChaseAlgorithm_updateHandplant
+    t4Vector LastHandplantLook;     // 0x0B0 [O]; [U] cLookAtChaseAlgorithm_updateHandplant
     t4Vector LastRailMove;          // 0x0C0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeMove;      // 0x0D0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeDistCorrection; // 0x0E0 [O]; [R] = t4vect_Zero
     t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap (snap) clears it
     t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (func_00162568), .z by sw in snap
-    t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] func_00164878 (updateHalfPipeCam)
-    t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] func_00164878, .z lwc1/swc1
-    t4Vector HalfPipeRotator;       // 0x130 [O]; [U] func_00164878, .x/.y/.z lwc1
-    t4Vector HalfPipeNewLook;       // 0x140 [O]; [U] func_00164878
-    t4Vector HalfPipeFullOut;       // 0x150 [O]; [U] func_00164878
-    t4Vector HalfPipeOut;           // 0x160 [O]; [U] func_00164878
-    t4Vector HalfPipeBlendOutLastLook; // 0x170 [O]; [U] func_00164878, snap
-    t4Vector HalfPipeBlendOutLastTargetDelta; // 0x180 [O]; [U] func_00164878
+    t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam (updateHalfPipeCam)
+    t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .z lwc1/swc1
+    t4Vector HalfPipeRotator;       // 0x130 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .x/.y/.z lwc1
+    t4Vector HalfPipeNewLook;       // 0x140 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    t4Vector HalfPipeFullOut;       // 0x150 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    t4Vector HalfPipeOut;           // 0x160 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    t4Vector HalfPipeBlendOutLastLook; // 0x170 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, snap
+    t4Vector HalfPipeBlendOutLastTargetDelta; // 0x180 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
     t4Vector LastSlowVelocity;      // 0x190 [O]; [U] snap
     t4Vector SlowCamEnterLook;      // 0x1A0 [O]; [U] snap
     t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] func_00162568, snap
     t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] func_00162C78, snap
     float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] func_00163010
     float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] func_00163270
-    float LastPitch;                // 0x1D8 [O]; [R] = Pitch; [U] func_001662A0
-    float LastViewScalar;           // 0x1DC [O]; [R] 1.0f; [U] func_001633B0
-    float SecondsSinceLastHandplant; // 0x1E0 [O]; [R] 10.0f; [U] func_00163450 (lwc1/swc1; one sw)
+    float LastPitch;                // 0x1D8 [O]; [R] = Pitch; [U] cLookAtChaseAlgorithm_updatePitchBlending
+    float LastViewScalar;           // 0x1DC [O]; [R] 1.0f; [U] cLookAtChaseAlgorithm_updateFOVWithSpeed
+    float SecondsSinceLastHandplant; // 0x1E0 [O]; [R] 10.0f; [U] cLookAtChaseAlgorithm_updateHandplant (lwc1/swc1; one sw)
     float LastHeight;               // 0x1E4 [O]; [R] 0; [U] func_00162B90
     float ExtraBoostDist;           // 0x1E8 [O]; [U] func_00163010
     float LastBoostWarp;            // 0x1EC [O]; [U] func_00163010
     float LastCameraSwing;          // 0x1F0 [O]; [U] snap zeroes it (sw)
-    float AirCamTimeInAir;          // 0x1F4 [O]; [U] func_001635F8 (updateAirCam)
-    float AirSplineScalar;          // 0x1F8 [O]; [U] func_001635F8
-    float AirTimeScalar;            // 0x1FC [O]; [U] func_001635F8
-    float AirCamMaxTime;            // 0x200 [O]; [U] func_001635F8
+    float AirCamTimeInAir;          // 0x1F4 [O]; [U] cLookAtChaseAlgorithm_updateAirCam (updateAirCam)
+    float AirSplineScalar;          // 0x1F8 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float AirTimeScalar;            // 0x1FC [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float AirCamMaxTime;            // 0x200 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastCrouchFactor;         // 0x204 [O]; [U] func_00163270
     float LastTargetCrouchFactor;   // 0x208 [O]; [U] func_00162B90
-    float LastAirTargetDelta;       // 0x20C [O]; [U] func_001635F8
-    float LastAirPositionDelta;     // 0x210 [O]; [U] func_001635F8
+    float LastAirTargetDelta;       // 0x20C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float LastAirPositionDelta;     // 0x210 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float ViewCamLastFactor;        // 0x214 [O]; [U] func_001641C0 (updateViewCam)
-    float FullAirCamTimeInAir;      // 0x218 [O]; [U] func_001635F8
-    float LastFullAirTargetDelta;   // 0x21C [O]; [U] func_001635F8
-    float LastFullAirPositionDelta; // 0x220 [O]; [U] func_001635F8
-    float AirExitSmoothness;        // 0x224 [O]; [U] func_001635F8
-    float VerticalJumpFactor;       // 0x228 [O]; [U] func_001635F8
-    float HalfPipeInitWait;         // 0x22C [O]; [U] func_00162A20, func_00164878
-    float HalfPipeTimeToLand;       // 0x230 [O]; [U] func_00164878
-    float HalfPipeTimeInAir;        // 0x234 [O]; [U] func_00164878
-    float HalfPipeRotatorAngle;     // 0x238 [O]; [U] func_00164878
-    float HalfPipeBlendOutTimeLeft; // 0x23C [O]; [U] func_00164878
-    float HalfPipeCrossBlendTime;   // 0x240 [O]; [U] func_00164878
-    float HalfPipeCrossBlendFullTime; // 0x244 [O]; [U] func_00164878
-    float SlowCamBlend;             // 0x248 [O]; [U] func_001643A8 (updateSlowSpeedCam; one sw zero)
+    float FullAirCamTimeInAir;      // 0x218 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float LastFullAirTargetDelta;   // 0x21C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float LastFullAirPositionDelta; // 0x220 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float AirExitSmoothness;        // 0x224 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float VerticalJumpFactor;       // 0x228 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float HalfPipeInitWait;         // 0x22C [O]; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeTimeToLand;       // 0x230 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeTimeInAir;        // 0x234 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeRotatorAngle;     // 0x238 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeBlendOutTimeLeft; // 0x23C [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeCrossBlendTime;   // 0x240 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeCrossBlendFullTime; // 0x244 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float SlowCamBlend;             // 0x248 [O]; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (updateSlowSpeedCam; one sw zero)
     float LastHorizontalMoveLen;    // 0x24C [O]; [U] snap
     float LastEnemyPullback;        // 0x250 [O]; [U] snap
-    float ShakeNextXTime;           // 0x254 [O]; [U] func_001656B0 (setupCameraShake), func_00165938 (updateCameraShake)
+    float ShakeNextXTime;           // 0x254 [O]; [U] cLookAtChaseAlgorithm_setupCameraShake (setupCameraShake), cLookAtChaseAlgorithm_updateCameraShake (updateCameraShake)
     float ShakeNextYTime;           // 0x258 [O]; [U] ditto
     float ShakeNextZTime;           // 0x25C [O]; [U] ditto
     float ShakeXTarget;             // 0x260 [O]; [U] ditto
@@ -397,42 +397,42 @@ struct cRelativeChaseAlgorithm {
     float SecondaryShakeYCounter;   // 0x2AC [O]; [U] ditto
     float SecondaryShakeZCounter;   // 0x2B0 [O]; [U] ditto
     float ShakeBlendOutTime;        // 0x2B4 [O]; [U] ditto
-    float LastHandplantRise;        // 0x2B8 [O]; [U] func_00163450 (updateHandplant)
+    float LastHandplantRise;        // 0x2B8 [O]; [U] cLookAtChaseAlgorithm_updateHandplant (updateHandplant)
     float SteerTime;                // 0x2BC [O]; [U] snap
-    int FramesSinceHandplant;       // 0x2C0 [O]; [R] 5000; [U] func_00162998
-    int AirCamSetupCountdown;       // 0x2C4 [O]; [U] func_00162A20, func_001635F8
+    int FramesSinceHandplant;       // 0x2C0 [O]; [R] 5000; [U] cLookAtChaseAlgorithm_setupHandplantBlend
+    int AirCamSetupCountdown;       // 0x2C4 [O]; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateAirCam
     int JiggleFrameCount;           // 0x2C8 [O]; [U] snap
-    int LastAirFrame;               // 0x2CC [O]; [U] func_00162A20
-    int DoingHalfPipeCam;           // 0x2D0 [O] bool (a word in retail); [R] 0; [U] func_00162A20, func_001635F8,
-                                    //       func_00164878
-    int AirborneLastFrame;          // 0x2D4 [O] bool; [U] func_00162A20 (lw/sw)
-    int HalfPipeCamInitialized;     // 0x2D8 [O] bool; [R] 0; [U] func_00162A20, func_00164878
+    int LastAirFrame;               // 0x2CC [O]; [U] cLookAtChaseAlgorithm_setupHalfPipeCam
+    int DoingHalfPipeCam;           // 0x2D0 [O] bool (a word in retail); [R] 0; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateAirCam,
+                                    //       cLookAtChaseAlgorithm_updateHalfPipeCam
+    int AirborneLastFrame;          // 0x2D4 [O] bool; [U] cLookAtChaseAlgorithm_setupHalfPipeCam (lw/sw)
+    int HalfPipeCamInitialized;     // 0x2D8 [O] bool; [R] 0; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateHalfPipeCam
     int BoostingLastFrame;          // 0x2DC [O] bool; [U] snap
-    int ApplyingAirFunc;            // 0x2E0 [O] bool; [U] func_00162A20, func_001635F8
-    int HitGroundSinceStartingAirFunc; // 0x2E4 [O] bool; [U] func_001635F8
-    int ApplyingFullAirFunc;        // 0x2E8 [O] bool; [U] func_001635F8
-    int ShakingLastFrame;           // 0x2EC [O] bool; [U] func_001656B0, func_00165938
+    int ApplyingAirFunc;            // 0x2E0 [O] bool; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateAirCam
+    int HitGroundSinceStartingAirFunc; // 0x2E4 [O] bool; [U] cLookAtChaseAlgorithm_updateAirCam
+    int ApplyingFullAirFunc;        // 0x2E8 [O] bool; [U] cLookAtChaseAlgorithm_updateAirCam
+    int ShakingLastFrame;           // 0x2EC [O] bool; [U] cLookAtChaseAlgorithm_setupCameraShake, cLookAtChaseAlgorithm_updateCameraShake
     int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
                                     //       calls snapCurrent when set
     float Setup_Boost;              // 0x2F4 [O]; [U] func_00162568 (swc1)
     float Setup_VisualBoost;        // 0x2F8 [O]; [U] func_00162568 (swc1)
     int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] func_00162568 (sw)
-    int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] func_001643A8 (lw/sw)
+    int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (lw/sw)
     char AirTargetSpline[0xC];      // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
                                     //       CubicSplines); [R] constructed by func_0031D5E8, destroyed by func_0031D618
     char AirPositionSpline[0xC];    // 0x310 [O] cCubicSplineInterpolant; [R] ditto
     char FullAirTargetSpline[0xC];  // 0x31C [O] cCubicSplineInterpolant; [R] ditto
     char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto
     char HalfPipeAngleSpline[0xC];  // 0x334 [O] cCubicSplineInterpolant; [R] ditto
-    cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls func_00167DB8 (reset);
+    cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls cPIDFilter_reset (reset);
                                     //       [U] func_00162C78 runs the filter inline
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment
     // --- cRelativeChaseAlgorithm
-    float Angle;                    // 0x390 [O] (On Tour 0x380); [R] = angle (swc1); [U] func_00160BF8 (lwc1)
-    int Initialized;                // 0x394 [O] bool (a word in retail); [R] = 0; [U] func_00160BF8 tests and sets it
+    float Angle;                    // 0x390 [O] (On Tour 0x380); [R] = angle (swc1); [U] cRelativeChaseAlgorithm_update (lwc1)
+    int Initialized;                // 0x394 [O] bool (a word in retail); [R] = 0; [U] cRelativeChaseAlgorithm_update tests and sets it
     char unk_398[0x8];              // 0x398 alignment gap before the 16-byte-aligned t4Vector
-    t4Vector LastLook;              // 0x3A0 [O] (On Tour 0x390); [U] func_00160BF8 (sq/lqc2)
-    t4Vector LastCamTargetPos;      // 0x3B0 [O] (On Tour 0x3A0); [U] func_00160BF8 (sq/lqc2)
+    t4Vector LastLook;              // 0x3A0 [O] (On Tour 0x390); [U] cRelativeChaseAlgorithm_update (sq/lqc2)
+    t4Vector LastCamTargetPos;      // 0x3B0 [O] (On Tour 0x3A0); [U] cRelativeChaseAlgorithm_update (sq/lqc2)
 };
 
 CHECK_OFFSET(cRelativeChaseAlgorithm, View, 0x000);
@@ -562,7 +562,7 @@ CHECK_OFFSET(cRelativeChaseAlgorithm, LastLook, 0x3A0);
 CHECK_OFFSET(cRelativeChaseAlgorithm, LastCamTargetPos, 0x3B0);
 CHECK_SIZE(cRelativeChaseAlgorithm, 0x3C0);
 
-// cSplineCamAlgorithm (0x3D0; On Tour 0x3C0). Ctor func_00161060(this, point1..point4, time, leadDistance,
+// cSplineCamAlgorithm (0x3D0; On Tour 0x3C0). Ctor cSplineCamAlgorithm_cSplineCamAlgorithm(this, point1..point4, time, leadDistance,
 // heightOffset, fov) (vtable D_0045B968; builds the three interpolants with func_0031D5E8 / func_0031D700 /
 // func_0031D7E0 / func_0031DEE0), dtor cSplineCamAlgorithm__cSplineCamAlgorithm (func_0031D618 on each interpolant), snap cSplineCamAlgorithm_snap,
 // update cSplineCamAlgorithm_update, getRaceCamFinalPhaseData func_001613E8, getRestDrop func_001613D8.
@@ -583,65 +583,65 @@ struct cSplineCamAlgorithm {
     // --- cLookAtChaseAlgorithm
     t4Vector Position;              // 0x040 [O]; [R] = D_004FF130; [U] lq/sq/lqc2, .z/.w by lwc1/swc1
     float Heading;                  // 0x050 [O]; [R] 0; [U] lwc1/swc1 (func_00166640, func_001668B8)
-    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (func_001662A0, func_00166640)
+    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, func_00166640)
     float CamRoll;                  // 0x058 [O]; [R] 0
     char unk_05C[0x4];              // 0x05C alignment gap
     tPose CalculatedPose;           // 0x060 [O]; [U] func_00166F90 (calcPose) writes P and Q (sq), reads Q.x..w
     t4Vector LastCamDir;            // 0x080 [O]; [U] sq/lqc2
     t4Vector LastVelLookahead;      // 0x090 [O]; [R] = t4vect_Zero
-    t4Vector LastRiderPos;          // 0x0A0 [O]; [U] func_00163450
-    t4Vector LastHandplantLook;     // 0x0B0 [O]; [U] func_00163450
+    t4Vector LastRiderPos;          // 0x0A0 [O]; [U] cLookAtChaseAlgorithm_updateHandplant
+    t4Vector LastHandplantLook;     // 0x0B0 [O]; [U] cLookAtChaseAlgorithm_updateHandplant
     t4Vector LastRailMove;          // 0x0C0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeMove;      // 0x0D0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeDistCorrection; // 0x0E0 [O]; [R] = t4vect_Zero
     t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap (snap) clears it
     t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (func_00162568), .z by sw in snap
-    t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] func_00164878 (updateHalfPipeCam)
-    t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] func_00164878, .z lwc1/swc1
-    t4Vector HalfPipeRotator;       // 0x130 [O]; [U] func_00164878, .x/.y/.z lwc1
-    t4Vector HalfPipeNewLook;       // 0x140 [O]; [U] func_00164878
-    t4Vector HalfPipeFullOut;       // 0x150 [O]; [U] func_00164878
-    t4Vector HalfPipeOut;           // 0x160 [O]; [U] func_00164878
-    t4Vector HalfPipeBlendOutLastLook; // 0x170 [O]; [U] func_00164878, snap
-    t4Vector HalfPipeBlendOutLastTargetDelta; // 0x180 [O]; [U] func_00164878
+    t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam (updateHalfPipeCam)
+    t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .z lwc1/swc1
+    t4Vector HalfPipeRotator;       // 0x130 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .x/.y/.z lwc1
+    t4Vector HalfPipeNewLook;       // 0x140 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    t4Vector HalfPipeFullOut;       // 0x150 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    t4Vector HalfPipeOut;           // 0x160 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    t4Vector HalfPipeBlendOutLastLook; // 0x170 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, snap
+    t4Vector HalfPipeBlendOutLastTargetDelta; // 0x180 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
     t4Vector LastSlowVelocity;      // 0x190 [O]; [U] snap
     t4Vector SlowCamEnterLook;      // 0x1A0 [O]; [U] snap
     t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] func_00162568, snap
     t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] func_00162C78, snap
     float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] func_00163010
     float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] func_00163270
-    float LastPitch;                // 0x1D8 [O]; [R] = Pitch; [U] func_001662A0
-    float LastViewScalar;           // 0x1DC [O]; [R] 1.0f; [U] func_001633B0
-    float SecondsSinceLastHandplant; // 0x1E0 [O]; [R] 10.0f; [U] func_00163450 (lwc1/swc1; one sw)
+    float LastPitch;                // 0x1D8 [O]; [R] = Pitch; [U] cLookAtChaseAlgorithm_updatePitchBlending
+    float LastViewScalar;           // 0x1DC [O]; [R] 1.0f; [U] cLookAtChaseAlgorithm_updateFOVWithSpeed
+    float SecondsSinceLastHandplant; // 0x1E0 [O]; [R] 10.0f; [U] cLookAtChaseAlgorithm_updateHandplant (lwc1/swc1; one sw)
     float LastHeight;               // 0x1E4 [O]; [R] 0; [U] func_00162B90
     float ExtraBoostDist;           // 0x1E8 [O]; [U] func_00163010
     float LastBoostWarp;            // 0x1EC [O]; [U] func_00163010
     float LastCameraSwing;          // 0x1F0 [O]; [U] snap zeroes it (sw)
-    float AirCamTimeInAir;          // 0x1F4 [O]; [U] func_001635F8 (updateAirCam)
-    float AirSplineScalar;          // 0x1F8 [O]; [U] func_001635F8
-    float AirTimeScalar;            // 0x1FC [O]; [U] func_001635F8
-    float AirCamMaxTime;            // 0x200 [O]; [U] func_001635F8
+    float AirCamTimeInAir;          // 0x1F4 [O]; [U] cLookAtChaseAlgorithm_updateAirCam (updateAirCam)
+    float AirSplineScalar;          // 0x1F8 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float AirTimeScalar;            // 0x1FC [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float AirCamMaxTime;            // 0x200 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastCrouchFactor;         // 0x204 [O]; [U] func_00163270
     float LastTargetCrouchFactor;   // 0x208 [O]; [U] func_00162B90
-    float LastAirTargetDelta;       // 0x20C [O]; [U] func_001635F8
-    float LastAirPositionDelta;     // 0x210 [O]; [U] func_001635F8
+    float LastAirTargetDelta;       // 0x20C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float LastAirPositionDelta;     // 0x210 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float ViewCamLastFactor;        // 0x214 [O]; [U] func_001641C0 (updateViewCam)
-    float FullAirCamTimeInAir;      // 0x218 [O]; [U] func_001635F8
-    float LastFullAirTargetDelta;   // 0x21C [O]; [U] func_001635F8
-    float LastFullAirPositionDelta; // 0x220 [O]; [U] func_001635F8
-    float AirExitSmoothness;        // 0x224 [O]; [U] func_001635F8
-    float VerticalJumpFactor;       // 0x228 [O]; [U] func_001635F8
-    float HalfPipeInitWait;         // 0x22C [O]; [U] func_00162A20, func_00164878
-    float HalfPipeTimeToLand;       // 0x230 [O]; [U] func_00164878
-    float HalfPipeTimeInAir;        // 0x234 [O]; [U] func_00164878
-    float HalfPipeRotatorAngle;     // 0x238 [O]; [U] func_00164878
-    float HalfPipeBlendOutTimeLeft; // 0x23C [O]; [U] func_00164878
-    float HalfPipeCrossBlendTime;   // 0x240 [O]; [U] func_00164878
-    float HalfPipeCrossBlendFullTime; // 0x244 [O]; [U] func_00164878
-    float SlowCamBlend;             // 0x248 [O]; [U] func_001643A8 (updateSlowSpeedCam; one sw zero)
+    float FullAirCamTimeInAir;      // 0x218 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float LastFullAirTargetDelta;   // 0x21C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float LastFullAirPositionDelta; // 0x220 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float AirExitSmoothness;        // 0x224 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float VerticalJumpFactor;       // 0x228 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
+    float HalfPipeInitWait;         // 0x22C [O]; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeTimeToLand;       // 0x230 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeTimeInAir;        // 0x234 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeRotatorAngle;     // 0x238 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeBlendOutTimeLeft; // 0x23C [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeCrossBlendTime;   // 0x240 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float HalfPipeCrossBlendFullTime; // 0x244 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
+    float SlowCamBlend;             // 0x248 [O]; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (updateSlowSpeedCam; one sw zero)
     float LastHorizontalMoveLen;    // 0x24C [O]; [U] snap
     float LastEnemyPullback;        // 0x250 [O]; [U] snap
-    float ShakeNextXTime;           // 0x254 [O]; [U] func_001656B0 (setupCameraShake), func_00165938 (updateCameraShake)
+    float ShakeNextXTime;           // 0x254 [O]; [U] cLookAtChaseAlgorithm_setupCameraShake (setupCameraShake), cLookAtChaseAlgorithm_updateCameraShake (updateCameraShake)
     float ShakeNextYTime;           // 0x258 [O]; [U] ditto
     float ShakeNextZTime;           // 0x25C [O]; [U] ditto
     float ShakeXTarget;             // 0x260 [O]; [U] ditto
@@ -666,34 +666,34 @@ struct cSplineCamAlgorithm {
     float SecondaryShakeYCounter;   // 0x2AC [O]; [U] ditto
     float SecondaryShakeZCounter;   // 0x2B0 [O]; [U] ditto
     float ShakeBlendOutTime;        // 0x2B4 [O]; [U] ditto
-    float LastHandplantRise;        // 0x2B8 [O]; [U] func_00163450 (updateHandplant)
+    float LastHandplantRise;        // 0x2B8 [O]; [U] cLookAtChaseAlgorithm_updateHandplant (updateHandplant)
     float SteerTime;                // 0x2BC [O]; [U] snap
-    int FramesSinceHandplant;       // 0x2C0 [O]; [R] 5000; [U] func_00162998
-    int AirCamSetupCountdown;       // 0x2C4 [O]; [U] func_00162A20, func_001635F8
+    int FramesSinceHandplant;       // 0x2C0 [O]; [R] 5000; [U] cLookAtChaseAlgorithm_setupHandplantBlend
+    int AirCamSetupCountdown;       // 0x2C4 [O]; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateAirCam
     int JiggleFrameCount;           // 0x2C8 [O]; [U] snap
-    int LastAirFrame;               // 0x2CC [O]; [U] func_00162A20
-    int DoingHalfPipeCam;           // 0x2D0 [O] bool (a word in retail); [R] 0; [U] func_00162A20, func_001635F8,
-                                    //       func_00164878
-    int AirborneLastFrame;          // 0x2D4 [O] bool; [U] func_00162A20 (lw/sw)
-    int HalfPipeCamInitialized;     // 0x2D8 [O] bool; [R] 0; [U] func_00162A20, func_00164878
+    int LastAirFrame;               // 0x2CC [O]; [U] cLookAtChaseAlgorithm_setupHalfPipeCam
+    int DoingHalfPipeCam;           // 0x2D0 [O] bool (a word in retail); [R] 0; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateAirCam,
+                                    //       cLookAtChaseAlgorithm_updateHalfPipeCam
+    int AirborneLastFrame;          // 0x2D4 [O] bool; [U] cLookAtChaseAlgorithm_setupHalfPipeCam (lw/sw)
+    int HalfPipeCamInitialized;     // 0x2D8 [O] bool; [R] 0; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateHalfPipeCam
     int BoostingLastFrame;          // 0x2DC [O] bool; [U] snap
-    int ApplyingAirFunc;            // 0x2E0 [O] bool; [U] func_00162A20, func_001635F8
-    int HitGroundSinceStartingAirFunc; // 0x2E4 [O] bool; [U] func_001635F8
-    int ApplyingFullAirFunc;        // 0x2E8 [O] bool; [U] func_001635F8
-    int ShakingLastFrame;           // 0x2EC [O] bool; [U] func_001656B0, func_00165938
+    int ApplyingAirFunc;            // 0x2E0 [O] bool; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateAirCam
+    int HitGroundSinceStartingAirFunc; // 0x2E4 [O] bool; [U] cLookAtChaseAlgorithm_updateAirCam
+    int ApplyingFullAirFunc;        // 0x2E8 [O] bool; [U] cLookAtChaseAlgorithm_updateAirCam
+    int ShakingLastFrame;           // 0x2EC [O] bool; [U] cLookAtChaseAlgorithm_setupCameraShake, cLookAtChaseAlgorithm_updateCameraShake
     int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
                                     //       calls snapCurrent when set
     float Setup_Boost;              // 0x2F4 [O]; [U] func_00162568 (swc1)
     float Setup_VisualBoost;        // 0x2F8 [O]; [U] func_00162568 (swc1)
     int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] func_00162568 (sw)
-    int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] func_001643A8 (lw/sw)
+    int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (lw/sw)
     char AirTargetSpline[0xC];      // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
                                     //       CubicSplines); [R] constructed by func_0031D5E8, destroyed by func_0031D618
     char AirPositionSpline[0xC];    // 0x310 [O] cCubicSplineInterpolant; [R] ditto
     char FullAirTargetSpline[0xC];  // 0x31C [O] cCubicSplineInterpolant; [R] ditto
     char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto
     char HalfPipeAngleSpline[0xC];  // 0x334 [O] cCubicSplineInterpolant; [R] ditto
-    cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls func_00167DB8 (reset);
+    cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls cPIDFilter_reset (reset);
                                     //       [U] func_00162C78 runs the filter inline
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment
     // --- cSplineCamAlgorithm

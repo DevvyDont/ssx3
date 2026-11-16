@@ -125,7 +125,7 @@ struct cFEStateChatRoom {
                                     //       from miMenuScroll[0] (func_0039DA20)
     cUIText* mpTextScrollChat;      // 0x6F0 [R] 0; [U] onWidgetCreate: widget "TextScrollChat" (the chat history);
                                     //       onCreateScreen gives it mChatColour (+ 0xA8) and mpSlider2 (+ 0xB8);
-                                    //       func_001B2CD0 appends "name: message" lines to it (func_003A19F8,
+                                    //       func_001B2CD0 appends "name: message" lines to it (cUITextScroll_addAsciiString,
                                     //       func_001A83D8)
     cUIThing* mpSlider2;            // 0x6F4 [R] 0; [U] onWidgetCreate: widget "slider2" (the chat history's scroll
                                     //       bar); onCreateScreen sets it up like mpSlider1

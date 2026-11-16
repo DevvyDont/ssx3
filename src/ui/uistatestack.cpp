@@ -679,7 +679,7 @@ extern "C" func_0039FB30_sUIObj* func_0039FB30(func_0039FB30_sUIObj* self, int a
 //100%
 INCLUDE_ASM("ui/uistatestack", cUIThing__cUIThing);
 #ifdef SKIP_ASM
-extern "C" void func_003A4868(void* self);
+extern "C" void cListNode_destroyListNode(void* self);
 void operator_delete(int* ptr);
 extern void* cListNode_vtbl[];
 
@@ -694,7 +694,7 @@ public:
  * Destroys a UI thing: deletes its animation, runs the list-node base destructor, then frees it when asked to.
  *
  * Stores cUIThing's vtable, deletes mpAnim through its virtual destructor when there is one, then stores the
- * base vtable (cListNode_vtbl) and calls func_003A4868() on the object.
+ * base vtable (cListNode_vtbl) and calls cListNode_destroyListNode() on the object.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -706,7 +706,7 @@ extern "C" void cUIThing__cUIThing(cUIThing* self, int flags)
         o->v01(3);
     }
     self->mVtbl = cListNode_vtbl;
-    func_003A4868(self);
+    cListNode_destroyListNode(self);
     if (flags & 1) {
         operator_delete((int*)self);
     }

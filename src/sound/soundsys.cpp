@@ -85,7 +85,7 @@ extern "C" char* cBankSys_cBankSys(cBankSys* self, int embedded, int count, int 
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0028FEA0);
+INCLUDE_ASM("sound/soundsys", cBankSys__cBankSys);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
@@ -110,7 +110,7 @@ extern const sSndDtVt7 D_00483A80;
 extern char cBankMonitor_vtbl[];
 
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
-extern "C" void func_0028FEA0(cBankSys* self, int flags)
+extern "C" void cBankSys__cBankSys(cBankSys* self, int flags)
 {
     self->mVtbl = (void**)D_00483A48;
     *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = (void*)&D_00483A60;
@@ -140,7 +140,7 @@ extern "C" void func_0028FEA0(cBankSys* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_00290018);
+INCLUDE_ASM("sound/soundsys", cBankSys_Play2DCallback);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00416210(void* dst, int c, int n);
@@ -228,7 +228,7 @@ static inline void snd0018AddVoice(void* vself, int a, int b)
 }
 
 // Adds a voice on the global sound system for the request, sets its target and volume (clamped to 0..127), then commits.
-extern "C" int func_00290018(cBankSys* self, sSnd0018Req* req)
+extern "C" int cBankSys_Play2DCallback(cBankSys* self, sSnd0018Req* req)
 {
     snd0018AddVoice((sSnd0018Sys*)gBankSys, req->f1C, req->f20);
     sSnd0018Mgr* m1 = (sSnd0018Mgr*)gBankSys->mpVBankManager;
@@ -242,7 +242,7 @@ extern "C" int func_00290018(cBankSys* self, sSnd0018Req* req)
 }
 #endif
 //100%
-INCLUDE_ASM("sound/soundsys", func_00290358);
+INCLUDE_ASM("sound/soundsys", cBankSys_Play2DCallbackWithPitchMult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00416210(void* dst, int c, int n);
@@ -333,7 +333,7 @@ static inline void snd0358AddVoice(void* vself, int a, int b)
 }
 
 // Adds a voice on the global sound system for the request, sets its target and volume (clamped to 0..127), stores its 16-bit field, then commits.
-extern "C" int func_00290358(cBankSys* self, sSnd0358Req* req)
+extern "C" int cBankSys_Play2DCallbackWithPitchMult(cBankSys* self, sSnd0358Req* req)
 {
     snd0358AddVoice((sSnd0358Sys*)gBankSys, req->f1C, req->f20);
     sSnd0358Mgr* m1 = (sSnd0358Mgr*)gBankSys->mpVBankManager;
@@ -12442,7 +12442,7 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
 extern "C" void func_002A4CF8(tCrowdEventData*);
 struct sSndFileBuf;
 extern "C" sSndFileBuf* FileParser_FileParser(FileParser* self, const char* name, int flags);
-extern "C" int func_002A7BF8(FileParser* self, const char* name);
+extern "C" int FileParser_FindSection(FileParser* self, const char* name);
 extern "C" void func_002A7040(cCrowdSys* self, void* parser);
 extern "C" void FileParser__FileParser(FileParser* self, int flags);
 extern const char D_00483108[];
@@ -12494,9 +12494,9 @@ extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* 
     sSnd6D78Parser p;
     FileParser_FileParser((FileParser*)((sSndFileBuf*)&p), name, 0x100);
     p.cur = p.data;
-    if (func_002A7BF8((FileParser*)(&p), D_004A3570)) func_002A7040((cCrowdSys*)self, &p);
+    if (FileParser_FindSection((FileParser*)(&p), D_004A3570)) func_002A7040((cCrowdSys*)self, &p);
     p.cur = p.data;
-    if (func_002A7BF8((FileParser*)(&p), key)) func_002A7040((cCrowdSys*)self, &p);
+    if (FileParser_FindSection((FileParser*)(&p), key)) func_002A7040((cCrowdSys*)self, &p);
     FileParser__FileParser((FileParser*)(&p), 2);
 }
 #endif
@@ -12553,9 +12553,9 @@ INCLUDE_ASM("sound/soundsys", func_002A7040);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_0041AA88(const char* a, const char* b);
-extern "C" int func_002A7F90(FileParser* self);
-extern "C" int func_002A7FF8(FileParser* self, const char* name, char* out);
-extern "C" int func_002A8070(FileParser* self, const char* name, float* out);
+extern "C" int FileParser_IsEOF(FileParser* self);
+extern "C" int FileParser_AssignString(FileParser* self, const char* name, char* out);
+extern "C" int FileParser_AssignFloat(FileParser* self, const char* name, float* out);
 // func_002A7DA0 returns the token buffer (the unit declares it void elsewhere).
 extern "C" const char* func_002A7DA0_s(void* self) __asm__("func_002A7DA0");
 extern const char D_004A3708[];
@@ -12570,40 +12570,40 @@ extern "C" void func_002A7040(cCrowdSys* self, void* parser)
     sSnd6D78Self* s = (sSnd6D78Self*)self;
     char val[0x200];
     char key[0x200];
-    while (!func_002A7F90((FileParser*)parser)) {
+    while (!FileParser_IsEOF((FileParser*)parser)) {
         const char* name = func_002A7DA0_s(parser);
         for (int i = 0; i < 3; i++) {
             sprintf(key, D_004A3708, i + 1);
             if (func_0041AA88(name, key) == 0) {
-                func_002A7FF8((FileParser*)parser, name, val);
+                FileParser_AssignString((FileParser*)parser, name, val);
                 func_002A4C28((sSndHandleList5*)&s->ent[i].a, (int)val, 0);
                 break;
             }
             sprintf(key, D_004A3710, i + 1);
             if (func_0041AA88(name, key) == 0) {
-                func_002A7FF8((FileParser*)parser, name, val);
+                FileParser_AssignString((FileParser*)parser, name, val);
                 func_002A4C28((sSndHandleList5*)&s->ent[i].b, (int)val, 0);
                 break;
             }
             sprintf(key, D_00483118, i + 1);
             if (func_0041AA88(name, key) == 0) {
-                func_002A7FF8((FileParser*)parser, name, val);
+                FileParser_AssignString((FileParser*)parser, name, val);
                 func_002A4C28((sSndHandleList5*)&s->ent[i].c, (int)val, 0);
                 break;
             }
             sprintf(key, D_00483128, i + 1);
             if (func_0041AA88(name, key) == 0) {
-                func_002A8070((FileParser*)parser, name, &s->ent[i].f48);
+                FileParser_AssignFloat((FileParser*)parser, name, &s->ent[i].f48);
                 break;
             }
             sprintf(key, D_004A3718, i + 1);
             if (func_0041AA88(name, key) == 0) {
-                func_002A8070((FileParser*)parser, name, &s->ent[i].f4C);
+                FileParser_AssignFloat((FileParser*)parser, name, &s->ent[i].f4C);
                 break;
             }
             sprintf(key, D_00483138, i + 1);
             if (func_0041AA88(name, key) == 0) {
-                func_002A8070((FileParser*)parser, name, (float*)&s->ent[i].f50);
+                FileParser_AssignFloat((FileParser*)parser, name, (float*)&s->ent[i].f50);
                 break;
             }
         }
@@ -12916,7 +12916,7 @@ INCLUDE_ASM("sound/soundsys", func_002A78F8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 signed char func_002A78E0(void* self);
-extern "C" int func_002A79C8(FileParser* self);
+extern "C" int FileParser_SkipComment(FileParser* self);
 
 // func_002A78F8 returns int (its body leaves a result in v0); the unit declares it void.
 int func_002A78F8_r(void*) __asm__("func_002A78F8");
@@ -12924,7 +12924,7 @@ int func_002A78F8_r(void*) __asm__("func_002A78F8");
 int func_002A78F8_r(void* self)
 {
     while (**(signed char**)((char*)self + 0x8) != 0) {
-        if (func_002A79C8((FileParser*)self) == 1) return 1;
+        if (FileParser_SkipComment((FileParser*)self) == 1) return 1;
         signed char c = **(signed char**)((char*)self + 0x8);
         if (c != ' ' && c != '\t' && c != '\n' && c != '\r') {
             int r = 0;
@@ -12938,16 +12938,16 @@ int func_002A78F8_r(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A79C8);
+INCLUDE_ASM("sound/soundsys", FileParser_SkipComment);
 #ifdef SKIP_ASM
-extern "C" int func_002A7A90(FileParser* self);
+extern "C" int FileParser_FindEOL(FileParser* self);
 
-extern "C" int func_002A79C8(FileParser* self)
+extern "C" int FileParser_SkipComment(FileParser* self)
 {
     signed char c = *(signed char*)self->mPtr;
     if (c != 0) {
         if (c == '#' || c == ';') {
-            int r = func_002A7A90(self);
+            int r = FileParser_FindEOL(self);
             if (r != 0) {
                 return 1;
             }
@@ -12959,29 +12959,29 @@ extern "C" int func_002A79C8(FileParser* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7A20);
+INCLUDE_ASM("sound/soundsys", FileParser_SkipSectionNames);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // func_002A78F8 returns int (its body leaves a result in v0); the unit declares it void.
 int func_002A78F8_r(void*) __asm__("func_002A78F8");
-extern "C" char* func_002A7B08(FileParser*);
-extern "C" int func_002A7F90(FileParser*);
+extern "C" char* FileParser_FindNextSection(FileParser*);
+extern "C" int FileParser_IsEOF(FileParser*);
 
-extern "C" void func_002A7A20(FileParser* self)
+extern "C" void FileParser_SkipSectionNames(FileParser* self)
 {
     func_002A78F8_r(self);
     while (*(signed char*)self->mPtr == '[') {
-        func_002A7B08(self);
+        FileParser_FindNextSection(self);
         func_002A78F8_r(self);
     }
-    func_002A7F90(self);
+    FileParser_IsEOF(self);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7A90);
+INCLUDE_ASM("sound/soundsys", FileParser_FindEOL);
 #ifdef SKIP_ASM
-extern "C" int func_002A7A90(FileParser* self)
+extern "C" int FileParser_FindEOL(FileParser* self)
 {
     while (*(signed char*)self->mPtr != 0) {
         signed char c = *(signed char*)self->mPtr;
@@ -12998,17 +12998,17 @@ extern "C" int func_002A7A90(FileParser* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A7B08);
+INCLUDE_ASM("sound/soundsys", FileParser_FindNextSection);
 #ifdef SKIP_ASM
 signed char func_002A78E0(void* self);
-extern "C" int func_002A79C8(FileParser* self);
-extern "C" int func_002A7EF0(FileParser* self, const char* s);
+extern "C" int FileParser_SkipComment(FileParser* self);
+extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
 extern const char D_004A3720[];
 
-extern "C" char* func_002A7B08(FileParser* self)
+extern "C" char* FileParser_FindNextSection(FileParser* self)
 {
     while (*(signed char*)self->mPtr != 0) {
-        func_002A79C8(self);
+        FileParser_SkipComment(self);
         if (func_002A78E0(self) == '[') {
             int n = 0;
             if (*(signed char*)self->mPtr != ']') {
@@ -13018,7 +13018,7 @@ extern "C" char* func_002A7B08(FileParser* self)
                     n++;
                 } while (*(signed char*)self->mPtr != ']');
             }
-            if (func_002A7EF0(self, D_004A3720) == 0) {
+            if (FileParser_ExpectToken(self, D_004A3720) == 0) {
                 char* buf = (char*)self + 0xC;
                 buf[n] = 0;
                 return buf;
@@ -13031,15 +13031,15 @@ extern "C" char* func_002A7B08(FileParser* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A7BF8);
+INCLUDE_ASM("sound/soundsys", FileParser_FindSection);
 #ifdef SKIP_ASM
-extern "C" char* func_002A7B08(FileParser*);
+extern "C" char* FileParser_FindNextSection(FileParser*);
 extern "C" int func_0041AA88(const char* a, const char* b);
 
-extern "C" int func_002A7BF8(FileParser* self, const char* name)
+extern "C" int FileParser_FindSection(FileParser* self, const char* name)
 {
     char* s;
-    while (*(signed char*)self->mPtr != 0 && (s = func_002A7B08(self)) != 0) {
+    while (*(signed char*)self->mPtr != 0 && (s = FileParser_FindNextSection(self)) != 0) {
         if (func_0041AA88(s, name) == 0) {
             return 1;
         }
@@ -13049,15 +13049,15 @@ extern "C" int func_002A7BF8(FileParser* self, const char* name)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A7C68);
+INCLUDE_ASM("sound/soundsys", FileParser_FindPartialSection);
 #ifdef SKIP_ASM
-extern "C" char* func_002A7B08(FileParser*);
+extern "C" char* FileParser_FindNextSection(FileParser*);
 extern "C" char* func_0041AD80(const char* s, const char* sub);
 
-extern "C" int func_002A7C68(FileParser* self, char* name)
+extern "C" int FileParser_FindPartialSection(FileParser* self, char* name)
 {
     char* tok;
-    while (*self->mPtr != 0 && (tok = func_002A7B08(self)) != 0) {
+    while (*self->mPtr != 0 && (tok = FileParser_FindNextSection(self)) != 0) {
         if (func_0041AD80(name, tok) == name || func_0041AD80(tok, name) == tok) {
             return 1;
         }
@@ -13067,18 +13067,18 @@ extern "C" int func_002A7C68(FileParser* self, char* name)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7CF0);
+INCLUDE_ASM("sound/soundsys", FileParser_GetString);
 #ifdef SKIP_ASM
 signed char func_002A78E0(void* self);
 extern "C" void func_002A78F8(void*);
-extern "C" int func_002A7EF0(FileParser* self, const char* s);
+extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
 extern const char D_004A3728[];
 
-extern "C" char* func_002A7CF0(FileParser* self)
+extern "C" char* FileParser_GetString(FileParser* self)
 {
     int n = 0;
     func_002A78F8(self);
-    func_002A7EF0(self, D_004A3728);
+    FileParser_ExpectToken(self, D_004A3728);
     if (*(signed char*)self->mPtr != '"') {
         char* dst = (char*)self + 0xC;
         do {
@@ -13086,7 +13086,7 @@ extern "C" char* func_002A7CF0(FileParser* self)
             n++;
         } while (*(signed char*)self->mPtr != '"');
     }
-    func_002A7EF0(self, D_004A3728);
+    FileParser_ExpectToken(self, D_004A3728);
     char* buf = (char*)self + 0xC;
     buf[n] = 0;
     return buf;
@@ -13117,14 +13117,14 @@ extern "C" char* func_002A7DA0_t(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7E60);
+INCLUDE_ASM("sound/soundsys", FileParser_GetFloat);
 #ifdef SKIP_ASM
 extern "C" void func_002A78F8(void*);
 extern "C" void func_002A7DA0(void*);
 extern "C" int func_004178B0(const char* s, const char* fmt, ...);
 extern char D_004A3730[];
 
-extern "C" float func_002A7E60(FileParser* self)
+extern "C" float FileParser_GetFloat(FileParser* self)
 {
     float f;
     func_002A78F8(self);
@@ -13135,14 +13135,14 @@ extern "C" float func_002A7E60(FileParser* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7EA8);
+INCLUDE_ASM("sound/soundsys", FileParser_GetInt);
 #ifdef SKIP_ASM
 extern "C" void func_002A78F8(void*);
 extern "C" void func_002A7DA0(void*);
 extern "C" int func_004178B0(const char* s, const char* fmt, ...);
 extern char D_004A3738[];
 
-extern "C" int func_002A7EA8(FileParser* self)
+extern "C" int FileParser_GetInt(FileParser* self)
 {
     int v;
     func_002A78F8(self);
@@ -13153,13 +13153,13 @@ extern "C" int func_002A7EA8(FileParser* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7EF0);
+INCLUDE_ASM("sound/soundsys", FileParser_ExpectToken);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 signed char func_002A78E0(void* self);
 int func_002A78F8_r(void*) __asm__("func_002A78F8");
 
-extern "C" int func_002A7EF0(FileParser* self, const char* name)
+extern "C" int FileParser_ExpectToken(FileParser* self, const char* name)
 {
     int i = 0;
     func_002A78F8_r(self);
@@ -13174,12 +13174,12 @@ extern "C" int func_002A7EF0(FileParser* self, const char* name)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7F90);
+INCLUDE_ASM("sound/soundsys", FileParser_IsEOF);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int func_002A78F8_r(void*) __asm__("func_002A78F8");
 
-extern "C" int func_002A7F90(FileParser* self)
+extern "C" int FileParser_IsEOF(FileParser* self)
 {
     if (self->mPtr - self->mBasePtr >= self->mFileSize) {
         return 1;
@@ -13195,23 +13195,23 @@ extern "C" int func_002A7F90(FileParser* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A7FF8);
+INCLUDE_ASM("sound/soundsys", FileParser_AssignString);
 #ifdef SKIP_ASM
 extern "C" int func_0041AA88(const char* a, const char* b);
-extern "C" int func_002A7EF0(FileParser* self, const char* s);
-extern "C" char* func_002A7CF0(FileParser* self);
+extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
+extern "C" char* FileParser_GetString(FileParser* self);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char D_004A3740[];
 
-extern "C" int func_002A7FF8(FileParser* self, const char* name, char* out)
+extern "C" int FileParser_AssignString(FileParser* self, const char* name, char* out)
 {
     if (func_0041AA88((char*)self + 0xC, name) != 0) {
         return 0;
     }
-    if (func_002A7EF0(self, D_004A3740) != 0) {
+    if (FileParser_ExpectToken(self, D_004A3740) != 0) {
         return 0;
     }
-    char* s = func_002A7CF0(self);
+    char* s = FileParser_GetString(self);
     if (s == 0) {
         return 0;
     }
@@ -13221,43 +13221,43 @@ extern "C" int func_002A7FF8(FileParser* self, const char* name, char* out)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A8070);
+INCLUDE_ASM("sound/soundsys", FileParser_AssignFloat);
 #ifdef SKIP_ASM
 extern "C" int func_0041AA88(const char* a, const char* b);
-extern "C" int func_002A7EF0(FileParser* self, const char* s);
-extern "C" float func_002A7E60(FileParser* self);
+extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
+extern "C" float FileParser_GetFloat(FileParser* self);
 extern char D_004A3740[];
 
-extern "C" int func_002A8070(FileParser* self, const char* name, float* out)
+extern "C" int FileParser_AssignFloat(FileParser* self, const char* name, float* out)
 {
     if (func_0041AA88((char*)self + 0xC, name) != 0) {
         return 0;
     }
-    if (func_002A7EF0(self, D_004A3740) != 0) {
+    if (FileParser_ExpectToken(self, D_004A3740) != 0) {
         return 0;
     }
-    *out = func_002A7E60(self);
+    *out = FileParser_GetFloat(self);
     return 1;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A80D8);
+INCLUDE_ASM("sound/soundsys", FileParser_AssignInt);
 #ifdef SKIP_ASM
 extern "C" int func_0041AA88(const char* a, const char* b);
-extern "C" int func_002A7EF0(FileParser* self, const char* s);
-extern "C" int func_002A7EA8(FileParser* self);
+extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
+extern "C" int FileParser_GetInt(FileParser* self);
 extern char D_004A3740[];
 
-extern "C" int func_002A80D8(FileParser* self, const char* name, int* out)
+extern "C" int FileParser_AssignInt(FileParser* self, const char* name, int* out)
 {
     if (func_0041AA88((char*)self + 0xC, name) != 0) {
         return 0;
     }
-    if (func_002A7EF0(self, D_004A3740) != 0) {
+    if (FileParser_ExpectToken(self, D_004A3740) != 0) {
         return 0;
     }
-    *out = func_002A7EA8(self);
+    *out = FileParser_GetInt(self);
     return 1;
 }
 #endif
@@ -13342,7 +13342,7 @@ void cMemMan_free(void*);
 void operator_delete(int*);
 extern "C" void func_0028BB10(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
-extern "C" void func_0028FEA0(cBankSys* self, int flags);
+extern "C" void cBankSys__cBankSys(cBankSys* self, int flags);
 extern "C" void func_003B9880();
 
 struct sSndDtBVtEnt {
@@ -13384,7 +13384,7 @@ extern "C" void func_002A82D8(cMidiSys* self, int flags)
     if (self->mMidiBanks) cMemMan_free(self->mMidiBanks);
     D_004A3744 = 0;
     func_003B9880();
-    func_0028FEA0((cBankSys*)self, 0);
+    cBankSys__cBankSys((cBankSys*)self, 0);
     if (flags & 2) {
         func_0028BB10(*(void**)self, 0);
         cSoundSys__cSoundSys(*(void**)(*(char**)self + 0x1D8), 0);

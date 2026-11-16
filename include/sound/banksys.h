@@ -4,7 +4,7 @@
 // cBankSys: the bank-sample SFX player (SFX_Begin pushes a play-option level and records the bank/patch for it,
 // SFX_End plays the patch through the shared cBankManager and hands the voice to its cBankMonitor).
 //   cBankSys : virtual cBankManager (: cAsyncSys, cBankMonitor, virtual cSoundSys)
-// Retail methods: sound/soundsys unit 0x28FD00..0x290B58 (ctor cBankSys_cBankSys, dtor func_0028FEA0, the two
+// Retail methods: sound/soundsys unit 0x28FD00..0x290B58 (ctor cBankSys_cBankSys, dtor cBankSys__cBankSys, the two
 // monitor callbacks, SFX_End func_002906B8) and the out-of-line inlines in bx/seg_1BA100 0x2B9FB8..0x2BAC30 (the
 // preview's linkonce SFX_Bank, SFX_Patch, SFX_Begin x3, SFX_Play2D, SFX_Play2DVol). EA's source file is unknown (no
 // asserts; the preview's .gnu.linkonce.t.SFX_*__8cBankSys* show the inlines live in its header); the path is ours.
@@ -18,7 +18,7 @@
 // its virtual-base tables D_00483A60 (_vt$8cBankSys$9cSoundSys) and D_00483A80 (_vt$8cBankSys$12cBankManager).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] retail constructor cBankSys_cBankSys (allocation tags) and destructor func_0028FEA0;
+//   [R] retail constructor cBankSys_cBankSys (allocation tags) and destructor cBankSys__cBankSys;
 //   [O] SSX On Tour's DWARF (class cBankSys: mBank at 0x4, mPatch at 0x8; same members);
 //   [U] how the retail methods use the field (SFX_Begin / SFX_End: index by the play-option level, mInst).
 

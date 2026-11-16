@@ -4,12 +4,12 @@
 // cUIPair: a UI object that pairs a label ("entry") with a widget (record type 0x15; menus use it for option rows).
 // Size 0x80: cUIScreen_createObjectByStruct does operator new(0x80, "UIPair") + the cUIThing ctor func_0039FB30, stores
 // cUIPair_vtbl (D_00494868), constructs mAttrPair (func_003A5508 on this + 0x74), sets cUIThing::mAttr bit 1, zeroes
-// mpEntry / mpWidget, then adopts the two children the record names. Default ctors func_003A5420 / func_003A5468
+// mpEntry / mpWidget, then adopts the two children the record names. Default ctors func_003A5420 / cUIPair_cUIPair
 // (ui/uivector). Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source:
 // d:/ssx/code/source/ui/uipair.cpp (preview assert path); retail keeps its methods in ui/uimenu (0x39BAB0-0x39C240).
 // Methods: vtable slots 0 ~cUIPair (cUIPair__cUIPair), 1-2 traverseFlat/traverseRecurse, 3 setActive, 6 setFocus,
 // 8 setVisible, 9 setUIData, 14 onInput, 15 updateLocale, 16 render2D, 18 update, 21 getType; cUIPair_destroyPair;
-// accessors func_003A5528..func_003A5588 (ui/uivector).
+// accessors func_003A5528..cUIPair_setWidget (ui/uivector).
 //
 // A FLAT layout, like main/game.h. Members: SSX On Tour's DWARF (class cUIPair 0x90; each member 0xC later there).
 
@@ -28,7 +28,7 @@ struct cUIPair {
     // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] cUIPair_vtbl D_00494868 (createObjectByStruct, func_003A5420, func_003A5468, the dtor)
+    void** mVtbl;                    // 0x008 [R] cUIPair_vtbl D_00494868 (createObjectByStruct, func_003A5420, cUIPair_cUIPair, the dtor)
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on
@@ -46,21 +46,21 @@ struct cUIPair {
                                      //       cUIThing_setUIData points it after the object record
     cUIThing* mpParent;              // 0x040 [P] getParent/setParent (lw/sw 0x40; retail func_003A4C00/func_003A4BF8); [R] = pParent;
                                      //       [U] func_003A0290 sums mPosition up the parent chain
-    t3Vector mPosition;              // 0x044 [P] getPosition/setPosition (retail func_003A4C08/func_003A4C28); [U] channels 0-1
-    t3Vector mScale;                 // 0x050 [P] getScale/setScale (retail func_003A4C48/func_003A4C68); [R] = {1,1,1}; [U] channels 9-10 (x 0.01)
+    t3Vector mPosition;              // 0x044 [P] getPosition/setPosition (retail cUIThing_getPosition/cUIThing_setPosition); [U] channels 0-1
+    t3Vector mScale;                 // 0x050 [P] getScale/setScale (retail cUIThing_getScale/cUIThing_setScale); [R] = {1,1,1}; [U] channels 9-10 (x 0.01)
     cUIScreen* mpScreen;             // 0x05C [P] getScreen (preview lw 0x68; retail func_003A4C88 lw 0x5C); [R] = pScreen
     t3Vector mSize;                  // 0x060 [P] getSize/setSize (preview 0x5C; retail cUIThing_getSize/setSize, vtable slots 20/21);
                                      //       [U] channels 6-7; cUIText wraps at mSize.x
     int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] func_003A0318/func_003A0330 get/set by index
     // --- cUIPair
     tAttrPair mAttrPair;             // 0x074 [O] tAttrPair (2 bytes); [R] its ctor func_003A5508 on this + 0x74
-                                     //       (createObjectByStruct, func_003A5420, func_003A5468)
+                                     //       (createObjectByStruct, func_003A5420, cUIPair_cUIPair)
     char unk_076[0x2];               // 0x076 padding
     cUIThing* mpEntry;               // 0x078 [O]; [R] = 0, then the record's first child (hash rec+0x20);
-                                     //       [U] func_003A5528 getEntry (lw), func_003A5530 setEntry (deletes the old one);
+                                     //       [U] func_003A5528 getEntry (lw), cUIPair_setEntry setEntry (deletes the old one);
                                      //       cUIPair_destroyPair, setActive/setVisible/setFocus, traverseRecurse, render2D, update
     cUIThing* mpWidget;              // 0x07C [O]; [R] = 0, then the second child (its mAttr bit 0 cleared);
-                                     //       [U] func_003A5580 getWidget (lw), func_003A5588 setWidget; the same methods
+                                     //       [U] func_003A5580 getWidget (lw), cUIPair_setWidget setWidget; the same methods
 };
 
 CHECK_OFFSET(cUIPair, mpPrev, 0x000);

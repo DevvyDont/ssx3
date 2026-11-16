@@ -10,11 +10,11 @@
 // accessors in ui/uivector (0x3A5658-0x3A57B8).
 // Methods: vtable cUIListBox_vtbl slots 0 ~cUIListBox (cUIListBox__cUIListBox), 9 setUIData (cUIListBox_setUIData), 14 onInput
 // (cUIListBox_onInput), 15 updateLocale (cUIListBox_updateLocale), 16 render2D (cUIListBox_render2D), 21 getType (func_003A56A0),
-// 22 setShadow (func_003A56D8), 23 setUseStaticColour (func_003A5708); cUIListBox_addEntryByAsciiString,
-// func_0039A4B0 (addEntryByUnicodeString), cUIListBox_addEntryByStringID, func_0039A670 (clear; the dtor calls it),
-// func_0039A708 / func_0039A738 (current entry's ASCII text / data), func_0039A768 (find by data), func_0039A7A8
-// (setCurrentEntry), func_0039A7C8 (setEntryData), cUIListBox_setEntryByAsciiString, func_0039A8D8, func_00399920,
-// func_00399D80 (setEntryUnicode).
+// 22 setShadow (cUIListBox_setShadow), 23 setUseStaticColour (cUIListBox_setUseStaticColour); cUIListBox_addEntryByAsciiString,
+// cUIListBox_addEntryByUnicodeString (addEntryByUnicodeString), cUIListBox_addEntryByStringID, func_0039A670 (clear; the dtor calls it),
+// cUIListBox_getCurrentAsciiText / cUIListBox_getCurrentEntryData (current entry's ASCII text / data), cUIListBox_getEntryByData (find by data), cUIListBox_setCurrentEntryByIndex
+// (setCurrentEntry), cUIListBox_setEntryDataByIndex (setEntryData), cUIListBox_setEntryByAsciiString, cUIListBox_setCallbackListBox, cUIListBox_getFont,
+// cUIListBox_setUnicodePrivate (setEntryUnicode).
 // Class name: the preview's cUIListBox::getType (builds/x/v2/name_map_v2.tsv, func_003A56A0) and On Tour.
 //
 // A FLAT layout, like main/game.h. Members: SSX On Tour's DWARF (class cUIListBox 0x340: its cUIThing is 0x80 and it
@@ -28,10 +28,10 @@
 // cUIListBox_cUIListBox touches it as a byte (lbu/sb 0x74).
 struct tAttrListBox {
     unsigned int mFont : 2;          // bits 0-1 [O]; [U] func_003A56A8 setFont
-    unsigned int mShadow : 1;        // bit 2 [O]; [R] ctor sets it; [U] func_003A56C8 hasShadow, func_003A56D8 setShadow
+    unsigned int mShadow : 1;        // bit 2 [O]; [R] ctor sets it; [U] func_003A56C8 hasShadow, cUIListBox_setShadow setShadow
     unsigned int mUnicode : 1;       // bit 3 [O]; [R] ctor clears it
     unsigned int mCallback : 1;      // bit 4 [O]; [R] ctor clears it
-    unsigned int mStaticColour : 1;  // bit 5 [O]; [U] func_003A56F8 getUseStaticColour, func_003A5708 setUseStaticColour
+    unsigned int mStaticColour : 1;  // bit 5 [O]; [U] func_003A56F8 getUseStaticColour, cUIListBox_setUseStaticColour setUseStaticColour
 };
 
 CHECK_SIZE(tAttrListBox, 0x4);
@@ -39,10 +39,10 @@ CHECK_SIZE(tAttrListBox, 0x4);
 // EA's tListBoxEntry (On Tour: 0x14, same in retail: the ctor's clear loop steps 20 bytes, 32 times).
 struct tListBoxEntry {
     unsigned int mStringID;          // 0x00 [O]; [U] cUIListBox_addEntryByStringID; updateLocale cUIListBox_updateLocale (lw 0x98 + i*0x14)
-    const unsigned short* mpString;  // 0x04 [O]; [U] func_00399D80 / setEntryByAsciiString free and replace it (lw/sw 0x9C + i*0x14)
-    const char* mpAsciiString;       // 0x08 [O]; [U] cUIListBox_addEntryBy* (sw 0xA0 + i*0x14), func_0039A708 (lw)
-    void* mpData;                    // 0x0C [O]; [U] cUIListBox_addEntryBy* (sw 0xA4 + i*0x14), func_0039A738 / func_0039A768 (lw),
-                                     //      func_0039A7C8 (sw)
+    const unsigned short* mpString;  // 0x04 [O]; [U] cUIListBox_setUnicodePrivate / setEntryByAsciiString free and replace it (lw/sw 0x9C + i*0x14)
+    const char* mpAsciiString;       // 0x08 [O]; [U] cUIListBox_addEntryBy* (sw 0xA0 + i*0x14), cUIListBox_getCurrentAsciiText (lw)
+    void* mpData;                    // 0x0C [O]; [U] cUIListBox_addEntryBy* (sw 0xA4 + i*0x14), cUIListBox_getCurrentEntryData / cUIListBox_getEntryByData (lw),
+                                     //      cUIListBox_setEntryDataByIndex (sw)
     char mUnicodeBufferSize;         // 0x10 [O]; [U] cUIListBox_setEntryByAsciiString (lb 0xA8 + i*0x14)
     char unk_11[0x3];                // 0x11 padding
 };
@@ -76,8 +76,8 @@ struct cUIListBox {
                                      //       cUIThing_setUIData points it after the object record
     cUIThing* mpParent;              // 0x040 [P] getParent/setParent (lw/sw 0x40; retail func_003A4C00/func_003A4BF8); [R] = pParent;
                                      //       [U] func_003A0290 sums mPosition up the parent chain
-    t3Vector mPosition;              // 0x044 [P] getPosition/setPosition (retail func_003A4C08/func_003A4C28); [U] channels 0-1
-    t3Vector mScale;                 // 0x050 [P] getScale/setScale (retail func_003A4C48/func_003A4C68); [R] = {1,1,1}; [U] channels 9-10 (x 0.01)
+    t3Vector mPosition;              // 0x044 [P] getPosition/setPosition (retail cUIThing_getPosition/cUIThing_setPosition); [U] channels 0-1
+    t3Vector mScale;                 // 0x050 [P] getScale/setScale (retail cUIThing_getScale/cUIThing_setScale); [R] = {1,1,1}; [U] channels 9-10 (x 0.01)
     cUIScreen* mpScreen;             // 0x05C [P] getScreen (preview lw 0x68; retail func_003A4C88 lw 0x5C); [R] = pScreen
     t3Vector mSize;                  // 0x060 [P] getSize/setSize (preview 0x5C; retail cUIThing_getSize/setSize, vtable slots 20/21);
                                      //       [U] channels 6-7; cUIText wraps at mSize.x
@@ -85,15 +85,15 @@ struct cUIListBox {
     // --- cUIListBox
     tAttrListBox mAttrListBox;       // 0x074 [O] tAttrListBox; [R] the ctor cUIListBox_cUIListBox sets mShadow, clears mUnicode /
                                      //       mCallback (lbu/sb 0x74), func_003A55D8 calls its ctor func_003A65A0; [U] setUIData
-                                     //       cUIListBox_setUIData (lw/sw), accessors func_003A56A8..func_003A5708 (lw/sw)
-    tARGB mShadowColour;             // 0x078 [O]; [U] setUIData cUIListBox_setUIData copies it from the record; func_003A5758
+                                     //       cUIListBox_setUIData (lw/sw), accessors func_003A56A8..cUIListBox_setUseStaticColour (lw/sw)
+    tARGB mShadowColour;             // 0x078 [O]; [U] setUIData cUIListBox_setUIData copies it from the record; cUIListBox_setShadowColour
                                      //       setShadowColour (ldl/ldr); render2D
-    tARGB mStaticColour;             // 0x088 [O]; [R] = D_004C66C8 (the ctor); [U] setUIData; func_003A5780 setStaticColour
+    tARGB mStaticColour;             // 0x088 [O]; [R] = D_004C66C8 (the ctor); [U] setUIData; cUIListBox_setStaticColour setStaticColour
     tListBoxEntry mpEntries[32];     // 0x098 [O]; [R] the ctor clears all 32 (sw/sb loop + memset(this + 0x98, 0, 640));
                                      //       [U] cUIListBox_addEntryBy*, cUIListBox_setEntryByAsciiString, func_0039A670 (clear),
-                                     //       func_0039A708..func_0039A7C8, updateLocale cUIListBox_updateLocale, render2D
+                                     //       cUIListBox_getCurrentAsciiText..cUIListBox_setEntryDataByIndex, updateLocale cUIListBox_updateLocale, render2D
     unsigned char mNumEntries;       // 0x318 [O]; [R] = 0; [U] lbu/sb in the add/clear functions; func_003A57B0 (lbu)
-    unsigned char mCurrentEntry;     // 0x319 [O]; [R] = 0; [U] onInput cUIListBox_onInput (lbu/sb), func_0039A7A8 setCurrent;
+    unsigned char mCurrentEntry;     // 0x319 [O]; [R] = 0; [U] onInput cUIListBox_onInput (lbu/sb), cUIListBox_setCurrentEntryByIndex setCurrent;
                                      //       func_003A57A8 getCurrentEntryIndex (lbu)
     char unk_31A[0x2];               // 0x31A padding
 };

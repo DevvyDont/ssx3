@@ -4,7 +4,7 @@
 // cUISlider: a slider widget (record type 0x16): a knob moved along a background by value / number of values, stepped
 // by input. Size 0x90: cUIScreen_createObjectByStruct does operator new(0x90, "UISlider") + the cUIThing ctor
 // func_0039FB30, zeroes 0x74..0x80 and 0x88/0x8C, stores its vtable cUISlider_vtbl and adopts the children named at
-// rec+0x24 (mpObjBackground) and rec+0x28 (mpObjKnob). Default ctors func_003A6190 / func_003A61D0 (ui/uivector).
+// rec+0x24 (mpObjBackground) and rec+0x28 (mpObjKnob). Default ctors func_003A6190 / cUISlider_cUISlider (ui/uivector).
 // Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source: ../source/ui/uislider.h
 // (preview assert path); retail keeps its methods in ui/uiscreen (0x39DF28-0x39E288).
 // Methods: vtable cUISlider_vtbl slots 0 ~cUISlider (cUISlider__cUISlider), 9 setUIData (cUISlider_setUIData), 14 onInput
@@ -20,7 +20,7 @@ struct cUISlider {
     // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] cUISlider_vtbl (createObjectByStruct, func_003A6190, func_003A61D0, the dtor cUISlider__cUISlider)
+    void** mVtbl;                    // 0x008 [R] cUISlider_vtbl (createObjectByStruct, func_003A6190, cUISlider_cUISlider, the dtor cUISlider__cUISlider)
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on
@@ -38,8 +38,8 @@ struct cUISlider {
                                      //       cUIThing_setUIData points it after the object record
     cUIThing* mpParent;              // 0x040 [P] getParent/setParent (lw/sw 0x40; retail func_003A4C00/func_003A4BF8); [R] = pParent;
                                      //       [U] func_003A0290 sums mPosition up the parent chain
-    t3Vector mPosition;              // 0x044 [P] getPosition/setPosition (retail func_003A4C08/func_003A4C28); [U] channels 0-1
-    t3Vector mScale;                 // 0x050 [P] getScale/setScale (retail func_003A4C48/func_003A4C68); [R] = {1,1,1}; [U] channels 9-10 (x 0.01)
+    t3Vector mPosition;              // 0x044 [P] getPosition/setPosition (retail cUIThing_getPosition/cUIThing_setPosition); [U] channels 0-1
+    t3Vector mScale;                 // 0x050 [P] getScale/setScale (retail cUIThing_getScale/cUIThing_setScale); [R] = {1,1,1}; [U] channels 9-10 (x 0.01)
     cUIScreen* mpScreen;             // 0x05C [P] getScreen (preview lw 0x68; retail func_003A4C88 lw 0x5C); [R] = pScreen
     t3Vector mSize;                  // 0x060 [P] getSize/setSize (preview 0x5C; retail cUIThing_getSize/setSize, vtable slots 20/21);
                                      //       [U] channels 6-7; cUIText wraps at mSize.x
