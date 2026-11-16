@@ -1100,14 +1100,14 @@ struct sDebugFEState17E118 {
     char* pass;  // 0x1C08
 };
 
-extern "C" void func_0017E118(sDebugFEState17E118* self, const char* a, const char* b)
+extern "C" void func_0017E118(sDebugFEState17E118* self, const char* userName, const char* password)
 {
     int* list = &self->list;
     while (*list != 0) {
         func_002CC460(list);
     }
-    cBXString_cBXString4(&self->user, a);
-    cBXString_cBXString4(&self->pass, b);
+    cBXString_cBXString4(&self->user, userName);
+    cBXString_cBXString4(&self->pass, password);
     self->state = 0x5;
     cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, self->user);
     cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, self->pass);
@@ -1126,14 +1126,14 @@ struct sDebugFEState17E1C0 {
 extern "C" void func_002CC460(void* list);
 extern "C" void func_0025D1B8(void* a, int b);
 
-extern "C" void func_0017E1C0(sDebugFEState17E1C0* self, int arg)
+extern "C" void func_0017E1C0(sDebugFEState17E1C0* self, int persona)
 {
     int* list = &self->list;
     while (*list != 0) {
         func_002CC460(list);
     }
     self->state = 0x8;
-    func_0025D1B8(LobbyMan_mLobbyMan, arg);
+    func_0025D1B8(LobbyMan_mLobbyMan, persona);
 }
 #endif
 
@@ -1148,14 +1148,14 @@ struct sDebugFEState17E228 {
 extern "C" void func_002CC460(void* list);
 extern "C" void func_0025D428(void* a, int b);
 
-extern "C" void func_0017E228(sDebugFEState17E228* self, int arg)
+extern "C" void func_0017E228(sDebugFEState17E228* self, int persona)
 {
     int* list = &self->list;
     while (*list != 0) {
         func_002CC460(list);
     }
     self->state = 0x9;
-    func_0025D428(LobbyMan_mLobbyMan, arg);
+    func_0025D428(LobbyMan_mLobbyMan, persona);
 }
 #endif
 
@@ -1170,14 +1170,14 @@ struct sDebugFEState17E290 {
 extern "C" void func_002CC460(void* list);
 void func_0025CD28(void* a, int b);
 
-extern "C" void func_0017E290(sDebugFEState17E290* self, int arg)
+extern "C" void func_0017E290(sDebugFEState17E290* self, int persona)
 {
     int* list = &self->list;
     while (*list != 0) {
         func_002CC460(list);
     }
     self->state = 0x7;
-    func_0025CD28(LobbyMan_mLobbyMan, arg);
+    func_0025CD28(LobbyMan_mLobbyMan, persona);
 }
 #endif
 
@@ -1192,14 +1192,14 @@ struct sDebugFEState17E2F8 {
 extern "C" void func_002CC460(void* list);
 extern "C" void func_0025D800(void* a, int b, int c);
 
-extern "C" void func_0017E2F8(sDebugFEState17E2F8* self, int arg)
+extern "C" void func_0017E2F8(sDebugFEState17E2F8* self, int room)
 {
     int* list = &self->list;
     while (*list != 0) {
         func_002CC460(list);
     }
     self->state = 0xB;
-    func_0025D800(LobbyMan_mLobbyMan, arg, 0);
+    func_0025D800(LobbyMan_mLobbyMan, room, 0);
 }
 #endif
 
@@ -1577,8 +1577,8 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         func_00256038(cCommSystem_mCommSystem, (int*)&ip);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.2f);
-        unsigned int v = ip;
-        func_001DCA40(font, 320.0f, 420.0f, str_pct_d_pct_d_pct_d_pct_d, v >> 24, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF);
+        unsigned int localAddr = ip;
+        func_001DCA40(font, 320.0f, 420.0f, str_pct_d_pct_d_pct_d_pct_d, localAddr >> 24, (localAddr >> 16) & 0xFF, (localAddr >> 8) & 0xFF, localAddr & 0xFF);
     }
 }
 #endif
@@ -1752,10 +1752,10 @@ extern "C" void* func_0017F7B8(void* self)
     *(int*)((char*)self + 0x28) = 0;
     *(int*)((char*)self + 0x2C) = 0;
     *(int*)((char*)self + 0x30) = 0;
-    sDbgList17F7B8* l = (sDbgList17F7B8*)((char*)self + 0x24);
-    new (l->e) sDbgEntry17F7B8[64];
-    l->n = 0;
-    MEM_fill(l->e, 0, 0x200);
+    sDbgList17F7B8* list = (sDbgList17F7B8*)((char*)self + 0x24);
+    new (list->e) sDbgEntry17F7B8[64];
+    list->n = 0;
+    MEM_fill(list->e, 0, 0x200);
     return self;
 }
 #endif
@@ -2766,10 +2766,10 @@ INCLUDE_ASM("fe/debugfe", func_00180618);
 #ifdef SKIP_ASM
 extern "C" void func_00180618(void* self)
 {
-    int s = *(int*)((char*)self + 0x170);
-    if (s == 0 || s == 10 || s == 20 || s == 30) {
+    int keyIndex = *(int*)((char*)self + 0x170);
+    if (keyIndex == 0 || keyIndex == 10 || keyIndex == 20 || keyIndex == 30) {
         *(int*)((char*)self + 0x170) += 9;
-    } else if (s == 39 && *(int*)((char*)self + 0xE0) == 0) {
+    } else if (keyIndex == 39 && *(int*)((char*)self + 0xE0) == 0) {
         *(int*)((char*)self + 0x170) = 37;
     } else {
         *(int*)((char*)self + 0x170) -= 1;
@@ -2782,10 +2782,10 @@ INCLUDE_ASM("fe/debugfe", func_00180678);
 #ifdef SKIP_ASM
 extern "C" void func_00180678(void* self)
 {
-    int s = *(int*)((char*)self + 0x170);
-    if (s == 9 || s == 19 || s == 29 || s == 39) {
+    int keyIndex = *(int*)((char*)self + 0x170);
+    if (keyIndex == 9 || keyIndex == 19 || keyIndex == 29 || keyIndex == 39) {
         *(int*)((char*)self + 0x170) -= 9;
-    } else if (s == 37 && *(int*)((char*)self + 0xE0) == 0) {
+    } else if (keyIndex == 37 && *(int*)((char*)self + 0xE0) == 0) {
         *(int*)((char*)self + 0x170) = 39;
     } else {
         *(int*)((char*)self + 0x170) += 1;
@@ -2798,15 +2798,15 @@ INCLUDE_ASM("fe/debugfe", func_001806D8);
 #ifdef SKIP_ASM
 extern "C" void func_001806D8(void* self)
 {
-    int s = *(int*)((char*)self + 0x170);
-    if (s >= 0 && s < 10) {
-        if (s == 8 && *(int*)((char*)self + 0xE0) == 0) {
+    int keyIndex = *(int*)((char*)self + 0x170);
+    if (keyIndex >= 0 && keyIndex < 10) {
+        if (keyIndex == 8 && *(int*)((char*)self + 0xE0) == 0) {
             *(int*)((char*)self + 0x170) = 39;
         } else {
             *(int*)((char*)self + 0x170) += 30;
         }
-    } else if (s >= 10 && s < 20 && *(int*)((char*)self + 0xD8) == 0) {
-        if (s == 18 && *(int*)((char*)self + 0xE0) == 0) {
+    } else if (keyIndex >= 10 && keyIndex < 20 && *(int*)((char*)self + 0xD8) == 0) {
+        if (keyIndex == 18 && *(int*)((char*)self + 0xE0) == 0) {
             *(int*)((char*)self + 0x170) = 39;
         } else {
             *(int*)((char*)self + 0x170) += 20;
@@ -2822,14 +2822,14 @@ INCLUDE_ASM("fe/debugfe", func_00180768);
 #ifdef SKIP_ASM
 extern "C" void func_00180768(void* self)
 {
-    int s = *(int*)((char*)self + 0x170);
-    if (s >= 30 && s < 40) {
+    int keyIndex = *(int*)((char*)self + 0x170);
+    if (keyIndex >= 30 && keyIndex < 40) {
         if (*(int*)((char*)self + 0xD8) != 0) {
-            *(int*)((char*)self + 0x170) = s - 30;
+            *(int*)((char*)self + 0x170) = keyIndex - 30;
         } else {
-            *(int*)((char*)self + 0x170) = s - 20;
+            *(int*)((char*)self + 0x170) = keyIndex - 20;
         }
-    } else if (s == 28 && *(int*)((char*)self + 0xE0) == 0) {
+    } else if (keyIndex == 28 && *(int*)((char*)self + 0xE0) == 0) {
         *(int*)((char*)self + 0x170) = 39;
     } else {
         *(int*)((char*)self + 0x170) += 10;
@@ -2842,9 +2842,9 @@ INCLUDE_ASM("fe/debugfe", func_001807C8);
 #ifdef SKIP_ASM
 extern "C" int func_001807C8(void* self)
 {
-    int v = *(int*)((char*)self + 0xe4) ^ 1;
-    *(int*)((char*)self + 0xe4) = v;
-    return v;
+    int toggled = *(int*)((char*)self + 0xe4) ^ 1;
+    *(int*)((char*)self + 0xe4) = toggled;
+    return toggled;
 }
 #endif
 
@@ -2988,25 +2988,25 @@ extern char str_spc[];
 extern char str_end[];
 extern "C" char* func_004162D0(char*, const char*);
 
-extern "C" void func_00180A90(void* self, int c, char* dst)
+extern "C" void func_00180A90(void* self, int keyIndex, char* dst)
 {
     char buf[2];
     *(sStr8*)dst = *(sStr8*)str_cursor;
-    if (c < 10) {
-        buf[0] = c + '0';
+    if (keyIndex < 10) {
+        buf[0] = keyIndex + '0';
         buf[1] = 0;
         func_004162D0(dst, buf);
-    } else if (c < 36) {
-        buf[0] = c + 'A' - 10;
+    } else if (keyIndex < 36) {
+        buf[0] = keyIndex + 'A' - 10;
         buf[1] = 0;
         func_004162D0(dst, buf);
-    } else if (c == 36) {
+    } else if (keyIndex == 36) {
         func_004162D0(dst, str_arrLeft);
-    } else if (c == 37) {
+    } else if (keyIndex == 37) {
         func_004162D0(dst, str_arrRight);
-    } else if (c == 38) {
+    } else if (keyIndex == 38) {
         func_004162D0(dst, str_spc);
-    } else if (c == 39) {
+    } else if (keyIndex == 39) {
         func_004162D0(dst, str_end);
     }
 }

@@ -148,12 +148,12 @@ extern "C" void func_001D68E8(void)
     unsigned short name[0x28];
     unsigned short* buf = (unsigned short*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    char* s = *(char**)(mp + 0x434);
-    sVEntryVK1D68E8* svt = *(sVEntryVK1D68E8**)s;
-    svt[14].fn(s + svt[14].delta, *(int*)(mp + 0xF8), name);
-    char* o = (char*)SSXApp->FELocale;
-    sVEntryK1D68E8* ovt = *(sVEntryK1D68E8**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVOverWriteFile)), name);
+    char* memCard = *(char**)(mp + 0x434);
+    sVEntryVK1D68E8* svt = *(sVEntryVK1D68E8**)memCard;
+    svt[14].fn(memCard + svt[14].delta, *(int*)(mp + 0xF8), name);
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntryK1D68E8* ovt = *(sVEntryK1D68E8**)(locale + 4);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMOVOverWriteFile)), name);
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x19C) = 1;
     sVEntryVK1D68E8* vt = *(sVEntryVK1D68E8**)(fe + 8);
@@ -191,16 +191,16 @@ struct sVEntryV001D69E0 {
 extern "C" void func_001D69E0(void)
 {
     void* buf = operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* vt = *(sVEntry001D69E0**)(o + 4);
-    strcpy1(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_POPUP200CreateEdit)));
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* vt = *(sVEntry001D69E0**)(locale + 4);
+    strcpy1(buf, vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_POPUP200CreateEdit)));
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x19C) = 2;
     sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
     vt2[36].fn(fe + vt2[36].delta, buf, 0, 0, 0, 0, 0);
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* vt3 = *(sVEntryV001D69E0**)(m + 8);
-    vt3[25].fn(m + vt3[25].delta, 1);
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* vt3 = *(sVEntryV001D69E0**)(popup + 8);
+    vt3[25].fn(popup + vt3[25].delta, 1);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -228,19 +228,19 @@ extern "C" void func_001D6AD0(void)
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVLoadFailedPS2NGC)), name);
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMOVLoadFailedPS2NGC)), name);
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x19C) = 0xA;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    char* mthis = m + mvt[26].delta;
-    char* o2 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    char* o2this = o2 + o2vt[4].delta;
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    char* mthis = popup + mvt[26].delta;
+    char* locale2 = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
+    char* o2this = locale2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
     if (buf != 0) {
@@ -271,18 +271,18 @@ extern "C" void func_001D6C28(void)
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 0xB;
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVSaveFailed)), name);
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMOVSaveFailed)), name);
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    char* mthis = m + mvt[26].delta;
-    char* o2 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    char* o2this = o2 + o2vt[4].delta;
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    char* mthis = popup + mvt[26].delta;
+    char* locale2 = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
+    char* o2this = locale2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
     if (buf != 0) {
@@ -331,18 +331,18 @@ extern "C" void func_001D6D88(void)
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVNotDetectedPS2)), name);
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMOVNotDetectedPS2)), name);
     *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 9;
     if (!(*(int*)(mp + 0xBC) || *(int*)(mp + 0xC0) || (*(int (**)())(mp + 0x78))())) {
         char* fe = (char*)cFEMemCard_mInstance;
         sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
         vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 0, 0);
         SetLine_1D6D88(str_kT_MEMOVRetry, 1);
-        char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-        sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-        mvt[25].fn(m + mvt[25].delta, 1);
+        char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+        sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+        mvt[25].fn(popup + mvt[25].delta, 1);
         SetLine_1D6D88(str_kT_BTNCancel, 0);
     } else {
         char* fe = (char*)cFEMemCard_mInstance;
@@ -423,15 +423,15 @@ extern "C" void func_001D7190(void)
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     void* app = SSXApp;
     *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 0xD;
-    char* o = *(char**)((char*)app + 0x8C);
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMCorruptSavePS2)), name);
+    char* locale = *(char**)((char*)app + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMCorruptSavePS2)), name);
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    mvt[25].fn(m + mvt[25].delta, 1);
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    mvt[25].fn(popup + mvt[25].delta, 1);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -478,16 +478,16 @@ extern "C" void func_001D7318(void)
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMFormatCardPS2)), name);
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMFormatCardPS2)), name);
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x19C) = 0xE;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    mvt[25].fn(m + mvt[25].delta, 1);
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    mvt[25].fn(popup + mvt[25].delta, 1);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -546,19 +546,19 @@ extern "C" void func_001D7548(void)
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMFEFormatFailed)), name);
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMFEFormatFailed)), name);
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x19C) = 0x11;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
-    char* o2 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    mvt[26].fn(m + mvt[26].delta, str2, 0);
+    char* locale2 = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
+    void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    mvt[26].fn(popup + mvt[26].delta, str2, 0);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -641,27 +641,27 @@ extern "C" void func_001D77E8(void)
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVNotDetectedPS2)), name);
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMOVNotDetectedPS2)), name);
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x19C) = 0x12;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 0, 0);
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    char* mthis = m + mvt[26].delta;
-    char* o2 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    char* o2this = o2 + o2vt[4].delta;
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    char* mthis = popup + mvt[26].delta;
+    char* locale2 = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
+    char* o2this = locale2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_MEMOVRetry));
     mvt[26].fn(mthis, str2, 0);
-    char* m3 = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* m3vt = *(sVEntryV001D69E0**)(m3 + 8);
-    char* m3this = m3 + m3vt[26].delta;
-    char* o3 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* o3vt = *(sVEntry001D69E0**)(o3 + 4);
-    char* o3this = o3 + o3vt[4].delta;
+    char* popup3 = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* m3vt = *(sVEntryV001D69E0**)(popup3 + 8);
+    char* m3this = popup3 + m3vt[26].delta;
+    char* locale3 = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* o3vt = *(sVEntry001D69E0**)(locale3 + 4);
+    char* o3this = locale3 + o3vt[4].delta;
     void* str3 = o3vt[4].fn(o3this, GetHashValue32(str_kT_BTNCancel));
     m3vt[26].fn(m3this, str3, 1);
     if (buf != 0) {
@@ -698,9 +698,9 @@ extern "C" void func_001D7998(void)
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 0x13;
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    unsigned short* fmt = (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMFETooBigPS2));
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    unsigned short* fmt = (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMFETooBigPS2));
     char* sf = *(char**)(mp + 0x434);
     sVEntryI_001D7998* sfvt = *(sVEntryI_001D7998**)sf;
     int n = sfvt[23].fn(sf + sfvt[23].delta);
@@ -708,12 +708,12 @@ extern "C" void func_001D7998(void)
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 3, 1, 0);
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    char* mthis = m + mvt[26].delta;
-    char* o2 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    char* o2this = o2 + o2vt[4].delta;
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    char* mthis = popup + mvt[26].delta;
+    char* locale2 = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
+    char* o2this = locale2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
     if (buf != 0) {
@@ -750,9 +750,9 @@ extern "C" void func_001D7B18(void)
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 0x13;
     func_00241DC8(mp, &name, *(int*)(mp + 0x428));
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    unsigned short* fmt = (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMFETooBigPS2));
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    unsigned short* fmt = (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMFETooBigPS2));
     char* sf = *(char**)(mp + 0x434);
     sVEntryI_001D7B18* sfvt = *(sVEntryI_001D7B18**)sf;
     int n = sfvt[23].fn(sf + sfvt[23].delta);
@@ -760,12 +760,12 @@ extern "C" void func_001D7B18(void)
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 3, 1, 0);
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    char* mthis = m + mvt[26].delta;
-    char* o2 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    char* o2this = o2 + o2vt[4].delta;
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    char* mthis = popup + mvt[26].delta;
+    char* locale2 = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
+    char* o2this = locale2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
 }
@@ -824,19 +824,19 @@ extern "C" void func_001D7D70(void)
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
     unsigned short* buf = (unsigned short*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMDifferentMemcardPS2)), name);
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMDifferentMemcardPS2)), name);
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x19C) = 0x18;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    char* mthis = m + mvt[26].delta;
-    char* o2 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    char* o2this = o2 + o2vt[4].delta;
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    char* mthis = popup + mvt[26].delta;
+    char* locale2 = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
+    char* o2this = locale2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
     *(int*)((char*)cFEMemCard_mInstance + 0x1C0) = 1;
@@ -914,19 +914,19 @@ extern "C" int func_001D8020(void)
     unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     func_00241DC8(mp, name, *(int*)(mp + 0x428));
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVDeleteFailedError)), name);
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMOVDeleteFailedError)), name);
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x19C) = 0x8;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
-    char* o2 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    mvt[26].fn(m + mvt[26].delta, str2, 0);
+    char* locale2 = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
+    void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    mvt[26].fn(popup + mvt[26].delta, str2, 0);
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -1016,9 +1016,9 @@ extern "C" void func_001D8240(void)
     char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(str_text_box_message));
     if (obj) {
         unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
-        char* o = (char*)SSXApp->FELocale;
-        sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-        strcpy1(buf, ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMNoCardsPS2)));
+        char* locale = (char*)SSXApp->FELocale;
+        sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+        strcpy1(buf, ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMNoCardsPS2)));
         cUIText_setUnicodeStringWrap(obj, buf);
         sVEntryK1D8240* vt = *(sVEntryK1D8240**)(obj + 8);
         vt[9].fn(obj + vt[9].delta, 1);
@@ -1099,9 +1099,9 @@ extern "C" void func_001D83A8(void)
         void* obj = cUIScreen_getObjectByHashName(*(void**)(st + 0x40), GetHashValue32(str_text_box_message));
         if (obj) {
             unsigned short* buf = (unsigned short*)operator_new_tag(0x7D0, str_Temp_String, 0x100, 0);
-            char* o = (char*)SSXApp->FELocale;
-            sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-            strcpy1(buf, ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMNoCardsPS2)));
+            char* locale = (char*)SSXApp->FELocale;
+            sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+            strcpy1(buf, ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMNoCardsPS2)));
             cUIText_setUnicodeStringWrap(obj, buf);
             sVEntryV001D69E0* bvt = *(sVEntryV001D69E0**)((char*)obj + 8);
             bvt[9].fn((char*)obj + bvt[9].delta, 1);
@@ -1251,7 +1251,7 @@ static inline void notifyK1D8700(char* self, char* mp)
 }
 
 // Popup button callback: 0xF/0x10/0x11 pick choice 0/1/2; 0x16 dismisses.
-extern "C" void func_001D8700(void* self_, int a1, int button)
+extern "C" void func_001D8700(void* self_, int popup, int button)
 {
     char* self = (char*)self_;
     if (button >= 0xF && button <= 0x11) {

@@ -1723,11 +1723,11 @@ struct sTable_0026A000 {
     sEntry_0026A000* entries;
 };
 
-extern "C" int func_0026A000(sTable_0026A000* t, float x) {
+extern "C" int func_0026A000(sTable_0026A000* table, float x) {
     int i;
-    for (i = 0; i < t->count; i++) {
-        sEntry_0026A000* e = &t->entries[i];
-        if (!(x < e->lo) && !(e->hi < x) && e->type == 0xD)
+    for (i = 0; i < table->count; i++) {
+        sEntry_0026A000* entry = &table->entries[i];
+        if (!(x < entry->lo) && !(entry->hi < x) && entry->type == 0xD)
             return 0;
     }
     return 1;
@@ -1818,13 +1818,13 @@ struct sTable_0026A138 {
     sEntry_0026A138* entries;
 };
 
-extern "C" float func_0026A138(sTable_0026A138* t)
+extern "C" float func_0026A138(sTable_0026A138* table)
 {
     int i;
-    for (i = 0; i < t->count; i++) {
-        sEntry_0026A138* e = &t->entries[i];
-        if (e->type == 1)
-            return e->value;
+    for (i = 0; i < table->count; i++) {
+        sEntry_0026A138* entry = &table->entries[i];
+        if (entry->type == 1)
+            return entry->value;
     }
     return -1.0f;
 }
@@ -1859,8 +1859,8 @@ extern "C" int func_0026A180(sBXStr_26A180* self, char* src)
     char* start = src;
     int n;
     int a;
-    int b;
-    int c;
+    int itemSize;
+    int itemCount;
     sVE0_26A180* vt0 = (sVE0_26A180*)self->vt;
     vt0[3].fn((char*)self + vt0[3].delta);
     func_0026BA68_A180(&n, src);
@@ -1869,18 +1869,18 @@ extern "C" int func_0026A180(sBXStr_26A180* self, char* src)
     {
         func_0026BA68_A180(&a, src);
         src += 4;
-        func_0026BA68_A180(&b, src);
+        func_0026BA68_A180(&itemSize, src);
         src += 4;
         sVE1_26A180* vt1 = (sVE1_26A180*)self->vt;
-        vt1[4].fn((char*)self + vt1[4].delta, src, a, b);
-        src += b;
+        vt1[4].fn((char*)self + vt1[4].delta, src, a, itemSize);
+        src += itemSize;
     }
-    func_0026BA68_A180(&c, src);
+    func_0026BA68_A180(&itemCount, src);
     src += 4;
-    self->count1 = c;
-    func_0026BA68_A180(&c, src);
+    self->count1 = itemCount;
+    func_0026BA68_A180(&itemCount, src);
     src += 4;
-    self->count2 = c;
+    self->count2 = itemCount;
     func_0026BA48(self->vecA, src);
     src += 0xC;
     func_0026BA48(self->vecB, src);
@@ -2334,15 +2334,15 @@ struct sTable_0026A920 {
     sEntry_0026A920* entries;
 };
 
-extern "C" sEntry_0026A920* func_0026A920(sTable_0026A920* t, int k0, int k1)
+extern "C" sEntry_0026A920* func_0026A920(sTable_0026A920* table, int firstKey, int secondKey)
 {
     int i = 0;
-    sEntry_0026A920* p = t->entries;
-    while (i < t->count) {
+    sEntry_0026A920* entry = table->entries;
+    while (i < table->count) {
         i++;
-        if (p->key0 == k0 && p->key1 == k1)
-            return p;
-        p++;
+        if (entry->key0 == firstKey && entry->key1 == secondKey)
+            return entry;
+        entry++;
     }
     return 0;
 }
@@ -2359,15 +2359,15 @@ struct sTable_0026A970 {
     sEntry_0026A970* entries;
 };
 
-extern "C" sEntry_0026A970* func_0026A970(sTable_0026A970* t, int key)
+extern "C" sEntry_0026A970* func_0026A970(sTable_0026A970* table, int key)
 {
     int i = 0;
-    sEntry_0026A970* p = t->entries;
-    while (i < t->count) {
+    sEntry_0026A970* entry = table->entries;
+    while (i < table->count) {
         i++;
-        if (p->key == key)
-            return p;
-        p++;
+        if (entry->key == key)
+            return entry;
+        entry++;
     }
     return 0;
 }
@@ -2383,25 +2383,25 @@ struct sBXBox {
 };
 
 // Largest per-axis distance from point p to the box.
-extern "C" float func_0026A9B0(sBXBox* self, float* p)
+extern "C" float func_0026A9B0(sBXBox* self, float* point)
 {
     float dx = 0.0f;
     float dy = 0.0f;
     float dz = 0.0f;
-    if (p[0] < self->min[0]) {
-        dx = self->min[0] - p[0];
-    } else if (self->max[0] < p[0]) {
-        dx = p[0] - self->max[0];
+    if (point[0] < self->min[0]) {
+        dx = self->min[0] - point[0];
+    } else if (self->max[0] < point[0]) {
+        dx = point[0] - self->max[0];
     }
-    if (p[1] < self->min[1]) {
-        dy = self->min[1] - p[1];
-    } else if (self->max[1] < p[1]) {
-        dy = p[1] - self->max[1];
+    if (point[1] < self->min[1]) {
+        dy = self->min[1] - point[1];
+    } else if (self->max[1] < point[1]) {
+        dy = point[1] - self->max[1];
     }
-    if (p[2] < self->min[2]) {
-        dz = self->min[2] - p[2];
-    } else if (self->max[2] < p[2]) {
-        dz = p[2] - self->max[2];
+    if (point[2] < self->min[2]) {
+        dz = self->min[2] - point[2];
+    } else if (self->max[2] < point[2]) {
+        dz = point[2] - self->max[2];
     }
     if (dy < dx) {
         if (dx < dz) {
@@ -2606,9 +2606,9 @@ INCLUDE_ASM("bx/bxstringctor", func_0026AD70);
 #ifdef SKIP_ASM
 extern "C" void func_0026ADF0(void* self);
 
-extern "C" int func_0026AD70(void* self, int v)
+extern "C" int func_0026AD70(void* self, int data)
 {
-    *(int*)((char*)self + 0x48) = v;
+    *(int*)((char*)self + 0x48) = data;
     *(int*)((char*)self + 0x4C) = 1;
     func_0026ADF0(self);
     return 1;
@@ -2628,17 +2628,17 @@ INCLUDE_ASM("bx/bxstringctor", func_0026ADA8);
 #ifdef SKIP_ASM
 extern "C" int func_003E22F0(int, int);
 
-extern "C" void func_0026ADA8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x48))) = func_003E22F0(arg1, 0);
-    (*(int *)((char*)(arg0) + (0x4C))) = 1;
-    func_0026ADF0(arg0);
+extern "C" void func_0026ADA8(void *pathSys, int name) {
+    (*(int *)((char*)(pathSys) + (0x48))) = func_003E22F0(name, 0);
+    (*(int *)((char*)(pathSys) + (0x4C))) = 1;
+    func_0026ADF0(pathSys);
 }
 #endif
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026ADE8);
 #ifdef SKIP_ASM
-extern "C" int func_0026ADE8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x4C)));
+extern "C" int func_0026ADE8(void *pathSys) {
+    return (*(int *)((char*)(pathSys) + (0x4C)));
 }
 #endif
 
@@ -2655,16 +2655,16 @@ extern "C" void func_0026B880(void* self, char* p);
 extern "C" void func_0026ADF0(void* self)
 {
     int header;
-    char* p = *(char**)((char*)self + 0x48);
+    char* cursor = *(char**)((char*)self + 0x48);
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x0) = 0;
-    func_0026BA68_2(&header, p);
-    p += 4;
-    p += cPathSys_loadAIPaths(self, p);
-    p += cPathSys_resolvePaths(self, p);
-    p += func_0026B7D8(self, p);
-    func_0026B880(self, p);
+    func_0026BA68_2(&header, cursor);
+    cursor += 4;
+    cursor += cPathSys_loadAIPaths(self, cursor);
+    cursor += cPathSys_resolvePaths(self, cursor);
+    cursor += func_0026B7D8(self, cursor);
+    func_0026B880(self, cursor);
 }
 #endif
 
@@ -2679,22 +2679,22 @@ void func_0026BA68_3(void* dst, void* src) __asm__("func_0026BA68");
 extern "C" int cPathSys_loadAIPaths(void* self, char* p);
 extern "C" int cPathSys_resolvePaths(void* self, char* p);
 
-extern "C" void func_0026AE70(void* self, int arg1)
+extern "C" void func_0026AE70(void* self, int name)
 {
     int header;
     void* old = *(void**)((char*)self + 0x48);
     if (old != 0) {
         cMemMan_free(old);
     } else {
-        func_0026ADA8(self, arg1);
+        func_0026ADA8(self, name);
     }
     *(int*)((char*)self + 0x48) = 0;
-    char* p = (char*)func_003E22F0(arg1, 0);
-    *(char**)((char*)self + 0x48) = p;
-    func_0026BA68_3(&header, p);
-    p += 4;
-    p += cPathSys_loadAIPaths(self, p);
-    cPathSys_resolvePaths(self, p);
+    char* cursor = (char*)func_003E22F0(name, 0);
+    *(char**)((char*)self + 0x48) = cursor;
+    func_0026BA68_3(&header, cursor);
+    cursor += 4;
+    cursor += cPathSys_loadAIPaths(self, cursor);
+    cPathSys_resolvePaths(self, cursor);
 }
 #endif
 
@@ -2721,18 +2721,18 @@ extern "C" void func_0026AF00(void* self)
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AF70);
 #ifdef SKIP_ASM
-extern "C" int func_0026AF70(void* self, int a1)
+extern "C" int func_0026AF70(void* self, int pathIndex)
 {
-    return *(int*)((char*)self + 0x14) + a1 * 0x3c;
+    return *(int*)((char*)self + 0x14) + pathIndex * 0x3c;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AF88);
 #ifdef SKIP_ASM
-extern "C" int func_0026AF88(void* self, int a1)
+extern "C" int func_0026AF88(void* self, int index)
 {
-    return *(int*)((char*)self + 0xc) + (a1 << 6);
+    return *(int*)((char*)self + 0xc) + (index << 6);
 }
 #endif
 

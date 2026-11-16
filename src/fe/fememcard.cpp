@@ -627,9 +627,9 @@ struct sVtEntK187580
   short index;
   void (*fn)(void *);
 };
-extern "C" void func_00187580(void *self, void *a1, int key)
+extern "C" void func_00187580(void *self, void *popup, int key)
 {
-  func_001D8700(self, a1, key);
+  func_001D8700(self, popup, key);
   int st = *((int *) (((char *) self) + 0x19C));
   if (st == 0x15)
   {

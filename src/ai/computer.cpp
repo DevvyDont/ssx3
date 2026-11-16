@@ -292,19 +292,19 @@ static inline int riderV7_10C9A8(char* rider)
 
 extern "C" void func_0010C9A8(cComputer* self)
 {
-    void* s = cBE_getInterface_Fv(cBE_getBE(), 3);
-    void* g = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (func_00144C98(g) == 2)
+    void* statInterface = cBE_getInterface_Fv(cBE_getBE(), 3);
+    void* newRaceInterface = cBE_getInterface_Fv(cBE_getBE(), 0);
+    if (func_00144C98(newRaceInterface) == 2)
     {
-        func_00148AA8(s, riderV7_10C9A8((char*)self->mRider), 7);
+        func_00148AA8(statInterface, riderV7_10C9A8((char*)self->mRider), 7);
     }
-    else if (func_00144C98(g) == 1)
+    else if (func_00144C98(newRaceInterface) == 1)
     {
-        func_00148AA8(s, riderV7_10C9A8((char*)self->mRider), 4);
+        func_00148AA8(statInterface, riderV7_10C9A8((char*)self->mRider), 4);
     }
     else
     {
-        func_00148AA8(s, riderV7_10C9A8((char*)self->mRider), 1);
+        func_00148AA8(statInterface, riderV7_10C9A8((char*)self->mRider), 1);
     }
 }
 #endif
@@ -666,9 +666,9 @@ static inline float wrap_0010D1A0(float x)
 extern "C" int func_0010D1A0(sComputer_0010D1A0* self)
 {
     float ang = atan2_0010D1A0(self->rider->getVel().y, self->rider->getVel().x);
-    float d = wrap_0010D1A0(self->rider->heading - ang);
+    float headingDiff = wrap_0010D1A0(self->rider->heading - ang);
     if (self->dir < 0) {
-        if (__builtin_fabsf(d) > 1.047197699546814f) {
+        if (__builtin_fabsf(headingDiff) > 1.047197699546814f) {
             self->wrongTime++;
         } else {
             self->wrongTime = 0;
@@ -1193,14 +1193,14 @@ extern "C" int func_0010DBF0(char* self, int* side)
         float hi = 2.6179940700531006f;
         if (i == id_0010DBF0(self))
             continue;
-        sRider_0010DBF0* r = *(sRider_0010DBF0**)(self + 0x18);
-        if (!(r->ent[i].dist < 200.0f))
+        sRider_0010DBF0* rider = *(sRider_0010DBF0**)(self + 0x18);
+        if (!(rider->ent[i].dist < 200.0f))
             continue;
-        sVec_0010DBF0 a = r->vel;
-        sVec_0010DBF0 b = r->vel;
-        float ang = atan2_0010DBF0(a.y, b.x, pi);
-        float d = wrap_0010DBF0(ang - (*(sRider_0010DBF0**)(self + 0x18))->ent[i].angle);
-        float ad = __builtin_fabsf(d);
+        sVec_0010DBF0 velForY = rider->vel;
+        sVec_0010DBF0 velForX = rider->vel;
+        float ang = atan2_0010DBF0(velForY.y, velForX.x, pi);
+        float angleDiff = wrap_0010DBF0(ang - (*(sRider_0010DBF0**)(self + 0x18))->ent[i].angle);
+        float ad = __builtin_fabsf(angleDiff);
         if (!(lo < ad))
             continue;
         if (!(ad < hi))
@@ -1210,7 +1210,7 @@ extern "C" int func_0010DBF0(char* self, int* side)
             continue;
         if (!((*(sRider_0010DBF0**)(self + 0x18))->lastTaunt + 120 < func_001298C8()))
             continue;
-        *side = 0.0f < d;
+        *side = 0.0f < angleDiff;
         (*(sRider_0010DBF0**)(self + 0x18))->lastTaunt = func_001298C8();
         return 1;
     }
@@ -2378,8 +2378,8 @@ extern "C" int func_0010FC30(sAi0010FC30* self, int team)
     for (int i = 0; i < self->mCount; i++)
     {
         char* obj = self->mRiders[i] + 0x6C0;
-        sVEntry0010FC30* e = &(*(sVEntry0010FC30**)obj)[9];
-        if (e->fn(obj + e->delta))
+        sVEntry0010FC30* vtEntry = &(*(sVEntry0010FC30**)obj)[9];
+        if (vtEntry->fn(obj + vtEntry->delta))
         {
             if (*(int*)(self->mRiders[i] + 0xAB8) == team)
                 n++;
@@ -3097,9 +3097,9 @@ void func_002E23E0_impl(void* self, void* a, void* b, int c, int flag, float x) 
 
 void func_00111AA0_impl(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 
-void func_00111AA0_impl(void* self, void* a, void* b, int c, float x)
+void func_00111AA0_impl(void* self, void* pos, void* dir, int c, float x)
 {
-    func_002E23E0_impl((char*)self + 0xB40, a, b, c, 0, x);
+    func_002E23E0_impl((char*)self + 0xB40, pos, dir, c, 0, x);
 }
 #endif
 

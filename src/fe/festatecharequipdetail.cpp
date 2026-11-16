@@ -1136,8 +1136,8 @@ extern "C" int func_0019A098(void* self, const char* name)
         SHAPE_name(pkg, i, nm);
         nm[4] = 0;
         if (func_004165A8(nm, name) == 0) {
-            sPkgEntK19A098* e = &pkg->ents[i];
-            char* data = (char*)pkg + e->off;
+            sPkgEntK19A098* entry = &pkg->ents[i];
+            char* data = (char*)pkg + entry->off;
             int id = *(int*)((char*)self + 0xA68);
             if (id == -1) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -1192,20 +1192,20 @@ extern "C" void func_0019A238(void* self)
     if (*(cUIText**)((char*)self + 0x48) != 0) {
         cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x48), GetHashValue32(str_kT_CMNEquipGear));
     }
-    char* o = *(char**)((char*)self + 0x60);
-    if (o != 0) {
-        sVEntry0019A238* vt = *(sVEntry0019A238**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 0);
+    char* widget = *(char**)((char*)self + 0x60);
+    if (widget != 0) {
+        sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
+        vt[9].fn(widget + vt[9].delta, 0);
     }
-    o = *(char**)((char*)self + 0x88);
-    if (o != 0) {
-        sVEntry0019A238* vt = *(sVEntry0019A238**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 0);
+    widget = *(char**)((char*)self + 0x88);
+    if (widget != 0) {
+        sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
+        vt[9].fn(widget + vt[9].delta, 0);
     }
-    o = *(char**)((char*)self + 0x80);
-    if (o != 0) {
-        sVEntry0019A238* vt = *(sVEntry0019A238**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 1);
+    widget = *(char**)((char*)self + 0x80);
+    if (widget != 0) {
+        sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
+        vt[9].fn(widget + vt[9].delta, 1);
     }
     func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 1);
     *(int*)((char*)self + 0xAE0) = 1;
@@ -1231,21 +1231,21 @@ extern "C" void func_0019A308(void* self)
     if (*(cUIText**)((char*)self + 0x48) != 0) {
         cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x48), GetHashValue32(str_kT_CMNBuyGear));
     }
-    char* o = *(char**)((char*)self + 0x80);
-    if (o != 0) {
-        sVEntry0019A308* vt = *(sVEntry0019A308**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 0);
+    char* widget = *(char**)((char*)self + 0x80);
+    if (widget != 0) {
+        sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
+        vt[9].fn(widget + vt[9].delta, 0);
     }
-    o = *(char**)((char*)self + 0x6C);
-    if (o != 0) {
-        sVEntry0019A308* vt = *(sVEntry0019A308**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 0);
+    widget = *(char**)((char*)self + 0x6C);
+    if (widget != 0) {
+        sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
+        vt[9].fn(widget + vt[9].delta, 0);
     }
     func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
-    o = *(char**)((char*)self + 0x60);
-    if (o != 0) {
-        sVEntry0019A308* vt = *(sVEntry0019A308**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 1);
+    widget = *(char**)((char*)self + 0x60);
+    if (widget != 0) {
+        sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
+        vt[9].fn(widget + vt[9].delta, 1);
     }
 }
 #endif
@@ -1345,25 +1345,25 @@ extern "C" void func_0019A4E8(void* self, int flag)
         return;
     if (idx >= *(int*)((char*)self + 0x958))
         return;
-    char* p = *(char**)(*(char**)((char*)self + (idx << 2) + 0x124) + 0x30);
-    if (p == 0)
+    char* namePart = *(char**)(*(char**)((char*)self + (idx << 2) + 0x124) + 0x30);
+    if (namePart == 0)
         return;
     if (flag)
         *(int*)((char*)self + 0x95C) = 0x14;
     else
         *(int*)((char*)self + 0x95C) = 1;
     char* buf = (char*)self + 0x960;
-    char* s = func_0014B700(cBE_getInterface_Fv(cBE_getBE(), 9), *(int*)((char*)self + 0xBC));
-    char* dot = func_0041ACC0(s, '.');
-    int len = dot - s - 1;
-    strncpy(buf, s, len);
+    char* fileName = func_0014B700(cBE_getInterface_Fv(cBE_getBE(), 9), *(int*)((char*)self + 0xBC));
+    char* dot = func_0041ACC0(fileName, '.');
+    int len = dot - fileName - 1;
+    strncpy(buf, fileName, len);
     buf[len] = 0;
-    while (*p != 0) {
-        if (*p >= '0' && *p <= '9')
+    while (*namePart != 0) {
+        if (*namePart >= '0' && *namePart <= '9')
             break;
-        p++;
+        namePart++;
     }
-    sprintf((char*)self + 0x960, str_pct_s_pct_spct_s, (char*)self + 0x960, p, dot);
+    sprintf((char*)self + 0x960, str_pct_s_pct_spct_s, (char*)self + 0x960, namePart, dot);
 }
 #endif
 
@@ -1400,11 +1400,11 @@ extern "C" void func_0019A638(void* self)
     } else if (*(int*)((char*)self + 0xA6C) >= 0) {
         char* tbl = (char*)SSXApp->RealFE + 0x1A70;
         if (func_0019E238((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C))) {
-            char* e = (char*)func_0019E2B0((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C));
-            if (e != 0) {
+            char* entry = (char*)func_0019E2B0((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C));
+            if (entry != 0) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVEntryK19A638* vt = (sVEntryK19A638*)ps2GraphicsMan->mVtbl;
-                *(int*)((char*)self + 0xA70) = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, e + *(int*)(e + 0x14), str_preview, 0, 1, -1);
+                *(int*)((char*)self + 0xA70) = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, entry + *(int*)(entry + 0x14), str_preview, 0, 1, -1);
             } else {
                 *(int*)((char*)self + 0xA70) = -1;
             }
@@ -1564,8 +1564,8 @@ extern "C" void func_0019A798(void* self);
 
 extern "C" void func_0019A9B8(void* self)
 {
-    bool b = *(int*)((char*)self + 0xC8) == 1;
-    if (b) {
+    bool buyMode = *(int*)((char*)self + 0xC8) == 1;
+    if (buyMode) {
         func_0019AB78(self);
     } else {
         func_0019AA08(self);
@@ -1596,37 +1596,37 @@ extern "C" void func_0019AA08(void* self)
 {
     if (*(void**)((char*)self + 0x5C) == 0)
         return;
-    char* o = *(char**)((char*)self + 0x6C);
-    if (o != 0)
-        showK19AA08(o, 0);
-    o = *(char**)((char*)self + 0x84);
-    if (o != 0)
-        showK19AA08(o, 0);
-    o = *(char**)((char*)self + 0x7C);
-    if (o != 0)
-        showK19AA08(o, 0);
+    char* widget = *(char**)((char*)self + 0x6C);
+    if (widget != 0)
+        showK19AA08(widget, 0);
+    widget = *(char**)((char*)self + 0x84);
+    if (widget != 0)
+        showK19AA08(widget, 0);
+    widget = *(char**)((char*)self + 0x7C);
+    if (widget != 0)
+        showK19AA08(widget, 0);
     int idx = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95);
-    int arg = 0;
+    int rowValue = 0;
     if (idx < *(int*)((char*)self + 0x958)) {
-        char* e = *(char**)((char*)self + (idx << 2) + 0x124);
-        unsigned int f = *(unsigned int*)(e + 0x34);
-        if (f & 4) {
-            if (!(f & 0x20)) {
+        char* item = *(char**)((char*)self + (idx << 2) + 0x124);
+        unsigned int flags = *(unsigned int*)(item + 0x34);
+        if (flags & 4) {
+            if (!(flags & 0x20)) {
                 showK19AA08(*(char**)((char*)self + 0x6C), 1);
-                int b = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x98);
-                char* o2 = *(char**)((char*)self + 0x84);
-                arg = *(int*)((char*)self + ((idx - b) << 2) + 0xA78);
-                if (o2 != 0 && *(char**)(e + 0x30) != 0 && *(int*)((char*)self + 0xA60) != 0) {
-                    showK19AA08(o2, 1);
-                    int r = func_0019A098(self, *(char**)(e + 0x30));
-                    char* o3 = *(char**)((char*)self + 0x84);
-                    *(int*)(o3 + 0x78) = r;
-                    *(int*)(o3 + 0x7C) = 0;
+                int topIndex = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x98);
+                char* iconWidget = *(char**)((char*)self + 0x84);
+                rowValue = *(int*)((char*)self + ((idx - topIndex) << 2) + 0xA78);
+                if (iconWidget != 0 && *(char**)(item + 0x30) != 0 && *(int*)((char*)self + 0xA60) != 0) {
+                    showK19AA08(iconWidget, 1);
+                    int iconId = func_0019A098(self, *(char**)(item + 0x30));
+                    char* iconWidget2 = *(char**)((char*)self + 0x84);
+                    *(int*)(iconWidget2 + 0x78) = iconId;
+                    *(int*)(iconWidget2 + 0x7C) = 0;
                 }
             }
         }
     }
-    func_0019BD48(self, arg);
+    func_0019BD48(self, rowValue);
 }
 #endif
 
@@ -1662,9 +1662,9 @@ extern "C" void func_0019AB78(void* self)
     if (*(void**)((char*)self + 0x88) != 0) {
         showK19AB78(*(void**)((char*)self + 0x88), 0);
         if (item != 0 && *(int*)((char*)self + 0xA70) >= 0) {
-            char* o = *(char**)((char*)self + 0x88);
-            *(int*)(o + 0x78) = *(int*)((char*)self + 0xA70);
-            *(int*)(o + 0x7C) = 0;
+            char* widget = *(char**)((char*)self + 0x88);
+            *(int*)(widget + 0x78) = *(int*)((char*)self + 0xA70);
+            *(int*)(widget + 0x7C) = 0;
             showK19AB78(*(void**)((char*)self + 0x88), 1);
         }
     }
@@ -1825,10 +1825,10 @@ static inline sEquipEntry_AFD0* getEntry_AFD0(sEquipDb_AFD0* db, int id)
     return 0;
 }
 
-extern "C" int func_0019AFD0(void* self, int a1, sEquipDb_AFD0* db, int a3)
+extern "C" int func_0019AFD0(void* self, int library, sEquipDb_AFD0* db, int itemId)
 {
     sEquipItem_AFD0* items[528];
-    int n = func_0014D7E8(a1, *(int*)((char*)self + 0xBC), a3, items, -1, 1);
+    int n = func_0014D7E8(library, *(int*)((char*)self + 0xBC), itemId, items, -1, 1);
     int i;
     for (i = 0; i < n; i++) {
         sEquipItem_AFD0* it = items[i];
@@ -1876,10 +1876,10 @@ static inline sEquipEntry_B098* getEntry_B098(sEquipDb_B098* db, int id)
     return 0;
 }
 
-extern "C" int func_0019B098(void* self, int a1, sEquipDb_B098* db, int a3)
+extern "C" int func_0019B098(void* self, int library, sEquipDb_B098* db, int itemId)
 {
     sEquipItem_B098* items[528];
-    int n = func_0014D7E8(a1, *(int*)((char*)self + 0xBC), a3, items, -1, 1);
+    int n = func_0014D7E8(library, *(int*)((char*)self + 0xBC), itemId, items, -1, 1);
     int i;
     for (i = 0; i < n; i++) {
         sEquipItem_B098* it = items[i];
@@ -1975,11 +1975,11 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
                 if (!(it->flags & 0x20))
                     continue;
             }
-            sEquipEntry_B180* e = getEntry_B180(db, it->id);
+            sEquipEntry_B180* entry = getEntry_B180(db, it->id);
             if ((it->flags & 0x20) && func_0019B098(self, lib, (sEquipDb_B098*)db, it->id) == 0) {
                 self->items[self->count] = it;
                 self->count++;
-            } else if (!(it->flags & 0x20) && !(e->flags & 2)
+            } else if (!(it->flags & 0x20) && !(entry->flags & 2)
                        && (*(int*)((char*)self + 0xCC) == -1 || *(int*)((char*)self + 0xCC) == it->slot)) {
                 self->items[self->count] = it;
                 self->count++;
@@ -1999,8 +1999,8 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
                 if (!(it->flags & 0x20))
                     continue;
             }
-            sEquipEntry_B180* e = getEntry_B180(db, it->id);
-            if ((!(it->flags & 0x20) && (e->flags & 2))
+            sEquipEntry_B180* entry = getEntry_B180(db, it->id);
+            if ((!(it->flags & 0x20) && (entry->flags & 2))
                 || ((it->flags & 0x20) && func_0019AFD0(self, lib, (sEquipDb_AFD0*)db, it->id) != 0)) {
                 self->items[self->count] = it;
                 self->count++;
@@ -2251,8 +2251,8 @@ struct sCharEquip_19B7E0 {
 extern "C" void func_0019B7E0(void* selfv, int i)
 {
     sCharEquip_19B7E0* self = (sCharEquip_19B7E0*)selfv;
-    sList_B618* l = self->list;
-    int top = l ? l->top : 0;
+    sList_B618* scrollList = self->list;
+    int top = scrollList ? scrollList->top : 0;
     sItem_19B7E0* item = self->items[top + i];
     cUIObj_B618* text = self->texts[i];
     cUIObj_B618* icon = self->icons[i];
@@ -2263,13 +2263,13 @@ extern "C" void func_0019B7E0(void* selfv, int i)
     } else {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         sProfile_19B7E0* prof = (sProfile_19B7E0*)func_0014AD28(iface, self->team, self->slot);
-        sFlagEntry_19B7E0* e = getEntry_19B7E0(prof, item->id);
+        sFlagEntry_19B7E0* flagEntry = getEntry_19B7E0(prof, item->id);
         sFlagEntry_19B7E0 save[0x20D];
         MEM_copy(save, prof->entries, 0x834);
         int before = func_0014B478(iface, self->team, self->slot);
-        if (func_0014AFB0(iface, self->team, self->slot, item->id, !IsSet_19B7E0(e))) {
+        if (func_0014AFB0(iface, self->team, self->slot, item->id, !IsSet_19B7E0(flagEntry))) {
             self->vals[i] = func_0014B478(iface, self->team, self->slot) - before;
-            if (IsSet_19B7E0(e))
+            if (IsSet_19B7E0(flagEntry))
                 col = self->colLocked;
             else
                 col = self->colFree;
@@ -2327,9 +2327,9 @@ struct sCharEquipK19BA60 {
     char* items[1];         // 0x124
 };
 
-extern "C" void func_0019BA60(void* p, int i)
+extern "C" void func_0019BA60(void* equipState, int i)
 {
-    sCharEquipK19BA60* self = (sCharEquipK19BA60*)p;
+    sCharEquipK19BA60* self = (sCharEquipK19BA60*)equipState;
     char* menu = self->menu;
     int top = 0;
     if (menu != 0)
@@ -2573,10 +2573,10 @@ extern "C" int func_0019BEE8(void* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     sItemListK19BEE8* list = (sItemListK19BEE8*)func_0014AD28(iface, *(signed char*)((char*)self + 0x44),
                                                               *(int*)((char*)self + 0xBC));
-    sItemK19BEE8* e = getItemK19BEE8(list, *(short*)(item + 4));
+    sItemK19BEE8* entry = getItemK19BEE8(list, *(short*)(item + 4));
     int mask = 4;
     if (func_0014AFB0(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC), *(short*)(item + 4),
-                      (e->flags & mask) == 0)) {
+                      (entry->flags & mask) == 0)) {
         func_0014AEA8(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC));
         return 1;
     }
@@ -2732,40 +2732,40 @@ extern "C" void func_0019BFE8(void* vself)
         float yaw = *(float*)(self + 0xAAC);
         int state = *(int*)(self + 0xAE0);
         if (state == 1) {
-            sQuat_BFE8 v;
-            v.w = 1.0f;
-            v.x = -105.0f;
-            v.y = yOff + -100.0f;
-            v.z = zOff + -80.0f;
-            *(sQuat_BFE8*)(self + 0xAC0) = v;
-            v.x = 265.75f;
-            v.y = -1073.5f;
-            v.z = -232.0f;
-            *(sQuat_BFE8*)(self + 0xAD0) = v;
+            sQuat_BFE8 point;
+            point.w = 1.0f;
+            point.x = -105.0f;
+            point.y = yOff + -100.0f;
+            point.z = zOff + -80.0f;
+            *(sQuat_BFE8*)(self + 0xAC0) = point;
+            point.x = 265.75f;
+            point.y = -1073.5f;
+            point.z = -232.0f;
+            *(sQuat_BFE8*)(self + 0xAD0) = point;
         } else if (state == 2) {
-            sQuat_BFE8 v;
-            v.x = -250.0f;
-            v.y = -650.0f;
-            v.z = -215.0f;
-            v.w = 1.0f;
-            *(sQuat_BFE8*)(self + 0xAC0) = v;
-            v.x = -100.0f;
-            v.y = 45.0f;
-            v.z = 15.0f;
-            *(sQuat_BFE8*)(self + 0xAD0) = v;
+            sQuat_BFE8 point;
+            point.x = -250.0f;
+            point.y = -650.0f;
+            point.z = -215.0f;
+            point.w = 1.0f;
+            *(sQuat_BFE8*)(self + 0xAC0) = point;
+            point.x = -100.0f;
+            point.y = 45.0f;
+            point.z = 15.0f;
+            *(sQuat_BFE8*)(self + 0xAD0) = point;
         } else if (state == 3) {
             sQuat_BFE8 pos;
-            sQuat_BFE8 at;
+            sQuat_BFE8 lookAt;
             pos.x = -250.0f;
             pos.y = -650.0f;
             pos.z = -215.0f;
             pos.w = 1.0f;
-            at.x = -100.0f;
-            at.y = 45.0f;
-            at.z = 15.0f;
-            at.w = 1.0f;
+            lookAt.x = -100.0f;
+            lookAt.y = 45.0f;
+            lookAt.z = 15.0f;
+            lookAt.w = 1.0f;
             sQuat_BFE8 dPos = VecSub_BFE8(pos, *(sQuat_BFE8*)(self + 0xAC0));
-            sQuat_BFE8 dAt = VecSub_BFE8(at, *(sQuat_BFE8*)(self + 0xAD0));
+            sQuat_BFE8 dAt = VecSub_BFE8(lookAt, *(sQuat_BFE8*)(self + 0xAD0));
             VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAC0), *(sQuat_BFE8*)(self + 0xAC0), VecScale_BFE8(dPos, 0.2f));
             VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAD0), *(sQuat_BFE8*)(self + 0xAD0), VecScale_BFE8(dAt, 0.2f));
             if (VecDot_BFE8(dAt, dAt) < 0.2f) {
@@ -2777,17 +2777,17 @@ extern "C" void func_0019BFE8(void* vself)
             }
         } else if (state == 4) {
             sQuat_BFE8 pos;
-            sQuat_BFE8 at;
+            sQuat_BFE8 lookAt;
             pos.x = -105.0f;
             pos.y = yOff + -100.0f;
             pos.z = zOff + -80.0f;
             pos.w = 1.0f;
-            at.x = 265.75f;
-            at.y = -1073.5f;
-            at.z = -232.0f;
-            at.w = 1.0f;
+            lookAt.x = 265.75f;
+            lookAt.y = -1073.5f;
+            lookAt.z = -232.0f;
+            lookAt.w = 1.0f;
             sQuat_BFE8 dPos = VecSub_BFE8(pos, *(sQuat_BFE8*)(self + 0xAC0));
-            sQuat_BFE8 dAt = VecSub_BFE8(at, *(sQuat_BFE8*)(self + 0xAD0));
+            sQuat_BFE8 dAt = VecSub_BFE8(lookAt, *(sQuat_BFE8*)(self + 0xAD0));
             VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAC0), *(sQuat_BFE8*)(self + 0xAC0), VecScale_BFE8(dPos, 0.2f));
             VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAD0), *(sQuat_BFE8*)(self + 0xAD0), VecScale_BFE8(dAt, 0.2f));
             if (VecDot_BFE8(dPos, dPos) < 0.2f) {
@@ -2821,16 +2821,16 @@ extern "C" void func_0019BFE8(void* vself)
     }
     char* cam = (char*)SSXApp->RealFE;
     sQuat_BFE8 pos;
-    sQuat_BFE8 at;
+    sQuat_BFE8 lookAt;
     pos.x = -110.0f;
     pos.y = 394.0f;
     pos.z = 0.0f;
     pos.w = 1.0f;
-    at.x = -35.0f;
-    at.y = 0.0f;
-    at.z = 0.0f;
-    at.w = 1.0f;
-    func_0015E050(cam + 0x10, &pos, &at);
+    lookAt.x = -35.0f;
+    lookAt.y = 0.0f;
+    lookAt.z = 0.0f;
+    lookAt.w = 1.0f;
+    func_0015E050(cam + 0x10, &pos, &lookAt);
     *(float*)(cam + 0x10) = 0.4363323450088501f;
 }
 #endif
@@ -2908,10 +2908,10 @@ extern "C" void* func_0019C8F8(void* self, void* item)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C920);
 #ifdef SKIP_ASM
-extern "C" int func_0019C920(void* self, int a1)
+extern "C" int func_0019C920(void* self, int nodeAddr)
 {
-    int diff = a1 - (int)self;
-    if (a1 != 0) return diff >> 4;
+    int diff = nodeAddr - (int)self;
+    if (nodeAddr != 0) return diff >> 4;
     return -1;
 }
 #endif
@@ -2937,9 +2937,9 @@ extern "C" int func_0019C920(void* self, int a1);
 extern "C" void* func_0019C938(void* self, int hi, int lo, int create)
 {
     int key = (hi << 16) | lo;
-    int b = key % 400;
+    int bucket = key % 400;
     sNodeK19C938* prev = 0;
-    sNodeK19C938* n = *(sNodeK19C938**)((char*)self + (b << 2) + 0x1900);
+    sNodeK19C938* n = *(sNodeK19C938**)((char*)self + (bucket << 2) + 0x1900);
     while (*(void**)((char*)self + 0x1F40) != 0 || n != 0) {
         if (n == 0) {
             if (create) {
@@ -2950,7 +2950,7 @@ extern "C" void* func_0019C938(void* self, int hi, int lo, int create)
                     prev->next = func_0019C920(self, (int)n);
                 } else {
                     n->prev = -1;
-                    *(sNodeK19C938**)((char*)self + (b << 2) + 0x1900) = n;
+                    *(sNodeK19C938**)((char*)self + (bucket << 2) + 0x1900) = n;
                 }
                 n->next = -1;
             }
@@ -3054,12 +3054,12 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019CBE0);
 #ifdef SKIP_ASM
 extern "C" void* func_0019C938(void* self, int a1, int a2, int a3);
 
-extern "C" int func_0019CBE0(void* self, int a1, int a2)
+extern "C" int func_0019CBE0(void* self, int bit, int lowKey)
 {
-    void* p = func_0019C938(self, a1, a2, 0);
-    if (p != 0) {
-        if ((*(short*)((char*)p + 6) >> a1) & 1) {
-            return *(short*)((char*)p + 0xA);
+    void* node = func_0019C938(self, bit, lowKey, 0);
+    if (node != 0) {
+        if ((*(short*)((char*)node + 6) >> bit) & 1) {
+            return *(short*)((char*)node + 0xA);
         }
     }
     return -1;
@@ -3106,12 +3106,12 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019CCE8);
 #ifdef SKIP_ASM
 extern "C" void* func_0019C938(void* self, int a1, int a2, int a3);
 
-extern "C" int func_0019CCE8(void* self, int a1, int a2)
+extern "C" int func_0019CCE8(void* self, int bit, int lowKey)
 {
-    void* p = func_0019C938(self, a1, a2, 0);
-    if (p != 0) {
-        if ((*(short*)((char*)p + 4) >> a1) & 1) {
-            return *(short*)((char*)p + 0x8);
+    void* node = func_0019C938(self, bit, lowKey, 0);
+    if (node != 0) {
+        if ((*(short*)((char*)node + 4) >> bit) & 1) {
+            return *(short*)((char*)node + 0x8);
         }
     }
     return -1;
@@ -3133,20 +3133,20 @@ struct sNode_CD38 {
     short next;
 };
 
-extern "C" void func_0019CD38(void* self, int bit, int a2, int val)
+extern "C" void func_0019CD38(void* self, int bit, int lowKey, int val)
 {
-    sNode_CD38* p = (sNode_CD38*)func_0019C938(self, bit, a2, val != -1);
-    if (p != 0) {
+    sNode_CD38* node = (sNode_CD38*)func_0019C938(self, bit, lowKey, val != -1);
+    if (node != 0) {
         if (val < 0) {
-            if ((p->mask >> bit) & 1) {
-                p->mask &= ~(1 << bit);
-                if (p->mask == 0 && p->fA < 0) {
-                    func_0019CA70(self, p);
+            if ((node->mask >> bit) & 1) {
+                node->mask &= ~(1 << bit);
+                if (node->mask == 0 && node->fA < 0) {
+                    func_0019CA70(self, node);
                 }
             }
         } else {
-            p->val = val;
-            p->mask |= 1 << bit;
+            node->val = val;
+            node->mask |= 1 << bit;
         }
     }
 }
@@ -3298,9 +3298,9 @@ struct sSlotK19D000 {
     int size;       // 0x118
 };
 
-extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20* p)
+extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20* rawSlot)
 {
-    sSlotK19D000* slot = (sSlotK19D000*)p;
+    sSlotK19D000* slot = (sSlotK19D000*)rawSlot;
     if (slot == 0)
         return;
     if (slot->data == 0)
@@ -3343,25 +3343,25 @@ extern "C" void func_0019D140(void* self, int bank)
     int bestIdx = -1;
     int found;
     int i;
-    sEquipSlot_D140* p = (sEquipSlot_D140*)((char*)self + bank * 0x12000);
+    sEquipSlot_D140* slot = (sEquipSlot_D140*)((char*)self + bank * 0x12000);
     found = bank;
-    for (i = 0; i < 256; i++, p++) {
-        if (p->state == 3 && (best == 0 || p->stamp < best)) {
-            best = p->stamp;
+    for (i = 0; i < 256; i++, slot++) {
+        if (slot->state == 3 && (best == 0 || slot->stamp < best)) {
+            best = slot->stamp;
             bestIdx = i;
         }
     }
     if (bestIdx == -1) {
-        int b;
-        for (b = 0; b < 10; b++) {
-            if (b == bank) {
+        int otherBank;
+        for (otherBank = 0; otherBank < 10; otherBank++) {
+            if (otherBank == bank) {
                 continue;
             }
-            p = (sEquipSlot_D140*)((char*)self + b * 0x12000);
-            for (i = 0; i < 256; i++, p++) {
-                if (p->state == 3 && (best == 0 || p->stamp < best)) {
-                    best = p->stamp;
-                    found = b;
+            slot = (sEquipSlot_D140*)((char*)self + otherBank * 0x12000);
+            for (i = 0; i < 256; i++, slot++) {
+                if (slot->state == 3 && (best == 0 || slot->stamp < best)) {
+                    best = slot->stamp;
+                    found = otherBank;
                     bestIdx = i;
                 }
             }
@@ -3407,29 +3407,29 @@ struct sTableK19D250 {
     int nPending;                // 0xB4004
 };
 
-extern "C" void func_0019D250(void* p)
+extern "C" void func_0019D250(void* table)
 {
-    sTableK19D250* self = (sTableK19D250*)p;
+    sTableK19D250* self = (sTableK19D250*)table;
     int i;
     int j;
     for (i = 0; i < 10; i++) {
-        sSlotK19D250* s = (sSlotK19D250*)((char*)self + i * 0x12000);
-        for (j = 0; j < 256; j++, s++) {
-            if (s->pending != 0 && s->state == 2) {
-                int r = ASYNCFILE_getstatus(s->handle);
-                if (r == 1) {
+        sSlotK19D250* slot = (sSlotK19D250*)((char*)self + i * 0x12000);
+        for (j = 0; j < 256; j++, slot++) {
+            if (slot->pending != 0 && slot->state == 2) {
+                int asyncStatus = ASYNCFILE_getstatus(slot->handle);
+                if (asyncStatus == 1) {
                     int status[4];
-                    ASYNCFILE_release(s->handle, 0, status);
-                    func_0019D000((sEquipTable_DC20*)self, i, (sEquipSlot_DC20*)s);
-                    if (s->timer == 0)
-                        s->state = 0;
+                    ASYNCFILE_release(slot->handle, 0, status);
+                    func_0019D000((sEquipTable_DC20*)self, i, (sEquipSlot_DC20*)slot);
+                    if (slot->timer == 0)
+                        slot->state = 0;
                     else
-                        s->state = r;
-                    s->pending = 0;
+                        slot->state = asyncStatus;
+                    slot->pending = 0;
                     if (--self->nPending <= 0)
                         func_0019D140(self, i);
                 }
-            } else if (self->nPending <= 0 && s->state == 3) {
+            } else if (self->nPending <= 0 && slot->state == 3) {
                 func_0019D8B8((sEquipTable_DC20*)self, i, j);
             }
         }
@@ -3452,14 +3452,14 @@ extern "C" int func_0019D3B0(void* self, int bank)
 {
     unsigned int best = 0;
     int bestIdx = -1;
-    sEquipSlot_D3B0* p = (sEquipSlot_D3B0*)((char*)self + bank * 0x12000);
-    for (int i = 0; i < 256; i++, p++) {
-        if (p->used == 0) {
-            if (p->valid == 0) {
+    sEquipSlot_D3B0* slot = (sEquipSlot_D3B0*)((char*)self + bank * 0x12000);
+    for (int i = 0; i < 256; i++, slot++) {
+        if (slot->used == 0) {
+            if (slot->valid == 0) {
                 return i;
             }
-            if (bestIdx < 0 || p->stamp < best) {
-                best = p->stamp;
+            if (bestIdx < 0 || slot->stamp < best) {
+                best = slot->stamp;
                 bestIdx = i;
             }
         }

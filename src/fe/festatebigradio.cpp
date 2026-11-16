@@ -848,10 +848,10 @@ static inline int isOn00194138()
     return D_004A1A70 == 1;
 }
 
-extern "C" void* func_00194138(void* self, int a1, int a2)
+extern "C" void* func_00194138(void* self, int msgId, int data)
 {
     if (isOn00194138()) {
-        return func_001A8B88(self, a1, a2);
+        return func_001A8B88(self, msgId, data);
     }
     return 0;
 }

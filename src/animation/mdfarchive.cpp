@@ -153,12 +153,12 @@ extern "C" int func_00314E88(sMdfIndex_00314E88* self, unsigned int hash)
     {
         int mid = (lo + hi) / 2;
         int idx = self->order[mid];
-        unsigned int h = self->hashes[idx];
-        if (hash == h)
+        unsigned int entryHash = self->hashes[idx];
+        if (hash == entryHash)
         {
             return idx;
         }
-        if (hash < h)
+        if (hash < entryHash)
         {
             hi = mid;
         }
@@ -201,12 +201,12 @@ void func_00314EF0_handle(sMdfIndex_00314E88* self, unsigned int hash, sMdfHandl
 
 extern "C" void func_00314F30(sMdfIndex_00314E88* self, int kind, char* list)
 {
-    sMdfHandle_00314F30 h;
+    sMdfHandle_00314F30 handle;
     for (int i = 0; i < *(short*)(*(char**)(list + 4) + 2); i++)
     {
-        SetKind_00314F30(&h, kind);
-        SetIndex_00314F30(&h, i);
-        func_00314EF0_handle(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), h);
+        SetKind_00314F30(&handle, kind);
+        SetIndex_00314F30(&handle, i);
+        func_00314EF0_handle(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), handle);
     }
 }
 #endif

@@ -1207,8 +1207,8 @@ extern "C" int func_0012A1F0(cAI* self, int idx)
 //100%
 INCLUDE_ASM("ai/ai", func_0012A240);
 #ifdef SKIP_ASM
-extern "C" int func_0012A240(int *arg0) {
-    return *arg0 == 5;
+extern "C" int func_0012A240(int *aiMan) {
+    return *aiMan == 5;
 }
 #endif
 
@@ -1465,12 +1465,12 @@ extern "C" void func_0012A560(sAiObj12A340* self, int which)
     int n = NodeCount_A560(gPaths);
     for (int i = 0; i < n; i++) {
         void* node = func_0026AF70(gPaths, i);
-        float d = func_0026A138(node);
-        if (d != -1.0f) {
-            float back = d - 1000.0f;
+        float markerDist = func_0026A138(node);
+        if (markerDist != -1.0f) {
+            float back = markerDist - 1000.0f;
             if (back < 0.0f)
                 back = 0.0f;
-            t4Vector ahead = func_0026AB20_A560(node, 0, d);
+            t4Vector ahead = func_0026AB20_A560(node, 0, markerDist);
             t4Vector pos = func_0026AB20_A560(node, 0, back);
             for (int j = 0; j < self->mCount; j++) {
                 if (which == -1 || which == j) {
@@ -1571,15 +1571,15 @@ extern "C" void func_0012A768(sAiObj12A340* self, int n)
     int count = NodeCount_A768(gPaths);
     for (int i = 0; i < count; i++) {
         void* node = func_0026AF70(gPaths, i);
-        float d = func_0026A138(node);
-        if (d != -1.0f) {
+        float markerDist = func_0026A138(node);
+        if (markerDist != -1.0f) {
             for (int j = 0; j < self->mCount; j++) {
                 if (n == 0)
                     return;
-                float back = d - (float)n-- * 1000.0f;
+                float back = markerDist - (float)n-- * 1000.0f;
                 if (back < 0.0f)
                     back = 0.0f;
-                t4Vector ahead = func_0026AB20_A768(node, d, 0);
+                t4Vector ahead = func_0026AB20_A768(node, markerDist, 0);
                 t4Vector pos = func_0026AB20_A768(node, back, 0);
                 func_0011FEC8_impl(self->mRiders[j], 0);
                 cRider_setMotionState_impl(self->mRiders[j], 0);
@@ -1618,9 +1618,9 @@ extern "C" void func_0012A998(cAI* self)
             sVEntry0012A998* vt = *(sVEntry0012A998**)sub;
             if (func_0012A1F0(self, vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta)) != 0)
             {
-                cRider* r = *(cRider**)(list[i] + 0x18);
-                r->mRenderFlag = 0;
-                r->mSafeRenderTick = -1;
+                cRider* hiddenRider = *(cRider**)(list[i] + 0x18);
+                hiddenRider->mRenderFlag = 0;
+                hiddenRider->mSafeRenderTick = -1;
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 char* obj = list[i];
                 sVEntry0012A998* gvt = (sVEntry0012A998*)ps2GraphicsMan->mVtbl;

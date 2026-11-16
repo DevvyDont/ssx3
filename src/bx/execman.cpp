@@ -51,78 +51,78 @@ void cExecutionMan_postpause()
 //100%
 INCLUDE_ASM("bx/execman", func_00320960);
 #ifdef SKIP_ASM
-extern "C" int func_00320960(void *arg0) {
-    return (*(int *)((char*)(arg0) + (4))) != 0;
+extern "C" int func_00320960(void *appMan) {
+    return (*(int *)((char*)(appMan) + (4))) != 0;
 }
 #endif
 //100%
 INCLUDE_ASM("bx/execman", func_00320970);
 #ifdef SKIP_ASM
-extern "C" void func_00320970(void *arg0, float fparg0) {
-    (*(float *)((char*)(arg0) + (0x24))) = fparg0;
+extern "C" void func_00320970(void *appMan, float fparg0) {
+    (*(float *)((char*)(appMan) + (0x24))) = fparg0;
 }
 #endif
 //100%
 INCLUDE_ASM("bx/execman", func_00320978);
 #ifdef SKIP_ASM
-extern "C" int func_00320978(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x10)));
+extern "C" int func_00320978(void *appMan) {
+    return (*(int *)((char*)(appMan) + (0x10)));
 }
 #endif
 //100%
 INCLUDE_ASM("bx/execman", func_00320980);
 #ifdef SKIP_ASM
-extern "C" float func_00320980(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x14)));
+extern "C" float func_00320980(void *appMan) {
+    return (*(float *)((char*)(appMan) + (0x14)));
 }
 #endif
 //100%
 INCLUDE_ASM("bx/execman", func_00320988);
 #ifdef SKIP_ASM
-extern "C" float func_00320988(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x24)));
+extern "C" float func_00320988(void *appMan) {
+    return (*(float *)((char*)(appMan) + (0x24)));
 }
 #endif
 //100%
 INCLUDE_ASM("bx/execman", func_00320990);
 #ifdef SKIP_ASM
-extern "C" float func_00320990(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x2C)));
+extern "C" float func_00320990(void *appMan) {
+    return (*(float *)((char*)(appMan) + (0x2C)));
 }
 #endif
 //100%
 INCLUDE_ASM("bx/execman", func_00320998);
 #ifdef SKIP_ASM
-extern "C" int func_00320998(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x1C)));
+extern "C" int func_00320998(void *appMan) {
+    return (*(int *)((char*)(appMan) + (0x1C)));
 }
 #endif
 //100%
 INCLUDE_ASM("bx/execman", func_003209A0);
 #ifdef SKIP_ASM
-extern "C" int func_003209A0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18)));
+extern "C" int func_003209A0(void *appMan) {
+    return (*(int *)((char*)(appMan) + (0x18)));
 }
 #endif
 //100%
 INCLUDE_ASM("bx/execman", func_003209A8);
 #ifdef SKIP_ASM
-extern "C" int func_003209A8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xC)));
+extern "C" int func_003209A8(void *appMan) {
+    return (*(int *)((char*)(appMan) + (0xC)));
 }
 #endif
 //100%
 INCLUDE_ASM("bx/execman", func_003209B0);
 #ifdef SKIP_ASM
-extern "C" void func_003209B0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xC))) = arg1;
+extern "C" void func_003209B0(void *appMan, int value) {
+    (*(int *)((char*)(appMan) + (0xC))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("bx/execman", func_003209B8);
 #ifdef SKIP_ASM
-extern "C" int func_003209B8(int *arg0) {
-    return *arg0;
+extern "C" int func_003209B8(int *appMan) {
+    return *appMan;
 }
 #endif
 //100%
@@ -185,8 +185,8 @@ extern "C" void func_00320A90(cExecutionMan *self) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320AC0);
 #ifdef SKIP_ASM
-extern "C" int func_00320AC0(int arg0) {
-    return arg0 + 0x38;
+extern "C" int func_00320AC0(int appMan) {
+    return appMan + 0x38;
 }
 #endif
 //100%
@@ -201,8 +201,8 @@ extern "C" int func_00320AC8(void) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320AD0);
 #ifdef SKIP_ASM
-extern "C" void func_00320AD0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x34))) = arg1;
+extern "C" void func_00320AD0(void *appMan, int value) {
+    (*(int *)((char*)(appMan) + (0x34))) = value;
 }
 #endif
 
@@ -304,8 +304,8 @@ INCLUDE_ASM("bx/execman", func_00320C18);
 #ifdef SKIP_ASM
 extern "C" void func_00321010(int, int, int, int);
 
-extern "C" void func_00320C18(void *arg0, int arg1, int arg2) {
-    func_00321010((*(int *)((char*)(arg0) + (4))), (*(int *)((char*)(arg0) + (0))), arg1, arg2);
+extern "C" void func_00320C18(void *input, int state, int arg2) {
+    func_00321010((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, arg2);
 }
 #endif
 
@@ -332,7 +332,7 @@ INCLUDE_ASM("bx/execman", func_00320C70);
 #ifdef SKIP_ASM
 extern "C" void func_00321188(int, int, int, int);
 
-extern "C" void func_00320C70(void *arg0, int arg1, int arg2) {
-    func_00321188((*(int *)((char*)(arg0) + (4))), (*(int *)((char*)(arg0) + (0))), arg1, arg2);
+extern "C" void func_00320C70(void *input, int state, int arg2) {
+    func_00321188((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, arg2);
 }
 #endif

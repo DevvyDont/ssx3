@@ -58,15 +58,15 @@ void func_0031D700(void* self)
 //99.76%
 INCLUDE_ASM("bx/cubicspline", func_0031D738__FPvff);
 #ifdef SKIP_ASM
-void func_0031D738(void* self, float a, float b)
+void func_0031D738(void* self, float start, float end)
 {
     cCubicSplineInterpolant_initCommon(self);
     unsigned int flags = *(unsigned int*)self;
     void* ptr = *(void**)((char*)self + 0x8);
     flags |= 1;
     *(unsigned int*)self = flags;
-    *(float*)((char*)ptr + 0x10) = a;
-    *(float*)((char*)self + 0x4) = b;
+    *(float*)((char*)ptr + 0x10) = start;
+    *(float*)((char*)self + 0x4) = end;
 }
 #endif
 
@@ -231,50 +231,50 @@ struct sSpline_31DEE0 {
 extern "C" float func_0031D5A8(sSplSeg_31DEE0* seg, float t);
 
 extern "C" float func_0031DEE0_impl(sSpline_31DEE0* s, float t) __asm__("func_0031DEE0");
-extern "C" float func_0031DEE0_impl(sSpline_31DEE0* s, float t)
+extern "C" float func_0031DEE0_impl(sSpline_31DEE0* spline, float time)
 {
-    int last = s->flags.count - 1;
+    int last = spline->flags.count - 1;
     float* pend;
-    if (last == (int)s->flags.cur) {
-        pend = &s->end;
+    if (last == (int)spline->flags.cur) {
+        pend = &spline->end;
     } else {
-        pend = &s->seg[s->flags.cur + 1].t;
+        pend = &spline->seg[spline->flags.cur + 1].t;
     }
-    sSplSeg_31DEE0* seg = &s->seg[s->flags.cur];
-    if (seg->t <= t && t <= *pend) {
-        return func_0031D5A8(seg, t);
+    sSplSeg_31DEE0* seg = &spline->seg[spline->flags.cur];
+    if (seg->t <= time && time <= *pend) {
+        return func_0031D5A8(seg, time);
     }
-    if (t < seg->t) {
-        if (t < s->seg[1].t) {
-            s->flags.cur = 0;
-            return func_0031D5A8(s->seg, t);
+    if (time < seg->t) {
+        if (time < spline->seg[1].t) {
+            spline->flags.cur = 0;
+            return func_0031D5A8(spline->seg, time);
         }
     } else {
-        if ((int)s->flags.cur == last - 1) {
-            s->flags.cur = last;
-            return func_0031D5A8(&s->seg[last], t);
+        if ((int)spline->flags.cur == last - 1) {
+            spline->flags.cur = last;
+            return func_0031D5A8(&spline->seg[last], time);
         }
-        if (t < s->seg[s->flags.cur + 2].t) {
-            s->flags.cur = s->flags.cur + 1;
-            return func_0031D5A8(&s->seg[s->flags.cur], t);
+        if (time < spline->seg[spline->flags.cur + 2].t) {
+            spline->flags.cur = spline->flags.cur + 1;
+            return func_0031D5A8(&spline->seg[spline->flags.cur], time);
         }
     }
     int hi = last;
     int lo = 0;
     for (;;) {
         int mid = (hi + lo) / 2;
-        sSplSeg_31DEE0* m = &s->seg[mid];
-        float t0 = m->t;
-        float t1;
+        sSplSeg_31DEE0* midSeg = &spline->seg[mid];
+        float segStart = midSeg->t;
+        float segEnd;
         if (mid < last) {
-            t1 = m[1].t;
+            segEnd = midSeg[1].t;
         } else {
-            t1 = s->end;
+            segEnd = spline->end;
         }
-        if (t0 <= t) {
-            if (t <= t1) {
-                s->flags.cur = mid;
-                return func_0031D5A8(m, t);
+        if (segStart <= time) {
+            if (time <= segEnd) {
+                spline->flags.cur = mid;
+                return func_0031D5A8(midSeg, time);
             } else {
                 lo = mid + 1;
             }
@@ -295,10 +295,10 @@ extern "C" void func_0031E0E0(void* self)
     float end = *(float*)((char*)self + 4);
     float start = *(float*)(*(char**)((char*)self + 8) + 0x10);
     float step = (end - start) * 0.010101010091602802f;
-    for (float a = start; a <= end; a += step) {
+    for (float firstPassT = start; firstPassT <= end; firstPassT += step) {
     }
-    for (float t = start; t <= end; t += step) {
-        func_0031DEE0(self, t);
+    for (float sampleT = start; sampleT <= end; sampleT += step) {
+        func_0031DEE0(self, sampleT);
     }
 }
 #endif
@@ -323,21 +323,21 @@ INCLUDE_ASM("bx/cubicspline", func_0031E1D8);
 extern "C" int func_0031E1D8(unsigned int sz)
 {
     unsigned int x = sz >> 8;
-    unsigned int m;
+    unsigned int shift;
     if (x >= 0x10000)
         return 95;
     {
         unsigned int n = ((x - 0x100) >> 16) & 8;
         x <<= n;
-        m = ((x - 0x1000) >> 16) & 4;
-        n += m;
-        x <<= m;
-        m = ((x - 0x4000) >> 16) & 2;
-        n += m;
-        x = (x << m) >> 14;
-        m = 13 - n + (x & ~(x >> 1));
+        shift = ((x - 0x1000) >> 16) & 4;
+        n += shift;
+        x <<= shift;
+        shift = ((x - 0x4000) >> 16) & 2;
+        n += shift;
+        x = (x << shift) >> 14;
+        shift = 13 - n + (x & ~(x >> 1));
     }
-    return 32 + (m << 2) + ((sz >> (m + 6)) & 3);
+    return 32 + (shift << 2) + ((sz >> (shift + 6)) & 3);
 }
 #endif
 
@@ -346,11 +346,11 @@ INCLUDE_ASM("bx/cubicspline", func_0031E260__FPv);
 #ifdef SKIP_ASM
 void func_0031E260(void* self)
 {
-    char* p = (char*)self + 0x38;
+    char* bin = (char*)self + 0x38;
     for (int i = 0x5E; i >= 0; i--) {
-        *(void**)(p + 0xC) = p;
-        *(void**)(p + 0x8) = p;
-        p += 8;
+        *(void**)(bin + 0xC) = bin;
+        *(void**)(bin + 0x8) = bin;
+        bin += 8;
     }
     *(int*)((char*)self + 0x34C) = 0x40000;
     *(int*)((char*)self + 0x344) = 0x8000;
@@ -412,7 +412,7 @@ extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
     unsigned int front_misalign;
     unsigned int end_misalign;
     char* aligned_brk;
-    sMChunk_31E2D8* p;
+    sMChunk_31E2D8* chunk;
     sMChunk_31E2D8* remainder;
     unsigned int remainder_size;
     unsigned int sum;
@@ -510,15 +510,15 @@ extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
         if (sum > av->max_total_mem)
             av->max_total_mem = sum;
 
-        p = av->top;
-        size = p->size & ~3U;
+        chunk = av->top;
+        size = chunk->size & ~3U;
         if ((unsigned int)size >= (unsigned int)(nb + 16)) {
             remainder_size = size - nb;
-            remainder = (sMChunk_31E2D8*)((char*)p + nb);
+            remainder = (sMChunk_31E2D8*)((char*)chunk + nb);
             av->top = remainder;
-            p->size = nb | 1;
+            chunk->size = nb | 1;
             remainder->size = remainder_size | 1;
-            return (char*)p + 8;
+            return (char*)chunk + 8;
         }
     }
 
@@ -552,7 +552,7 @@ struct sMState_31E6D8
     unsigned int sbrked_mem;    // 0x368
 };
 
-extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av)
+extern "C" int func_0031E6D8(void* ms, unsigned int topPad, sMState_31E6D8* av)
 {
     long top_size;
     long extra;
@@ -563,7 +563,7 @@ extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av)
 
     pagesz = av->pagesize;
     top_size = av->top->size & ~3;
-    extra = func_004114D0(func_0040FCB0(top_size - pad - 16 + (pagesz - 1), pagesz) - 1, pagesz);
+    extra = func_004114D0(func_0040FCB0(top_size - topPad - 16 + (pagesz - 1), pagesz) - 1, pagesz);
     if (extra > 0) {
         current_brk = (char*)func_0031FFD8(ms, 0);
         if (current_brk == (char*)av->top + top_size) {
@@ -956,7 +956,7 @@ extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av)
 {
     sMChunk_31EEE8** fb;
     sMChunk_31EEE8** maxfb;
-    sMChunk_31EEE8* p;
+    sMChunk_31EEE8* chunk;
     sMChunk_31EEE8* nextp;
     sMChunk_31EEE8* unsorted_bin;
     sMChunk_31EEE8* first_unsorted;
@@ -974,19 +974,19 @@ extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av)
         maxfb = &av->fastbins[(av->max_fast >> 3) - 2];
         fb = &av->fastbins[0];
         do {
-            if ((p = *fb) != 0) {
+            if ((chunk = *fb) != 0) {
                 *fb = 0;
                 do {
-                    nextp = p->fd;
-                    size = p->size & ~1U;
-                    nextchunk = (sMChunk_31EEE8*)((char*)p + size);
+                    nextp = chunk->fd;
+                    size = chunk->size & ~1U;
+                    nextchunk = (sMChunk_31EEE8*)((char*)chunk + size);
                     nextsize = nextchunk->size & ~3U;
-                    if (!(p->size & 1)) {
-                        prevsize = p->prev_size;
+                    if (!(chunk->size & 1)) {
+                        prevsize = chunk->prev_size;
                         size += prevsize;
-                        p = (sMChunk_31EEE8*)((char*)p - (long)prevsize);
-                        fwd = p->fd;
-                        bck = p->bk;
+                        chunk = (sMChunk_31EEE8*)((char*)chunk - (long)prevsize);
+                        fwd = chunk->fd;
+                        bck = chunk->bk;
                         fwd->bk = bck;
                         bck->fd = fwd;
                     }
@@ -1001,18 +1001,18 @@ extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av)
                             bck->fd = fwd;
                         }
                         first_unsorted = unsorted_bin->fd;
-                        unsorted_bin->fd = p;
-                        first_unsorted->bk = p;
-                        p->size = size | 1;
-                        p->bk = unsorted_bin;
-                        p->fd = first_unsorted;
-                        ((sMChunk_31EEE8*)((char*)p + size))->prev_size = size;
+                        unsorted_bin->fd = chunk;
+                        first_unsorted->bk = chunk;
+                        chunk->size = size | 1;
+                        chunk->bk = unsorted_bin;
+                        chunk->fd = first_unsorted;
+                        ((sMChunk_31EEE8*)((char*)chunk + size))->prev_size = size;
                     } else {
                         size += nextsize;
-                        p->size = size | 1;
-                        av->top = p;
+                        chunk->size = size | 1;
+                        av->top = chunk;
                     }
-                } while ((p = nextp) != 0);
+                } while ((chunk = nextp) != 0);
             }
         } while (fb++ != maxfb);
     } else {
@@ -1326,22 +1326,22 @@ extern "C" void* func_0031F718(void* ms, unsigned int n, unsigned int elem_size)
         if (!(csz & 2)) {
             unsigned int clearsize = (csz & ~3U) - 4;
             unsigned int nclears = clearsize >> 2;
-            unsigned int* d = (unsigned int*)mem;
+            unsigned int* words = (unsigned int*)mem;
             if (nclears > 9) {
-                MEM_fill(d, 0, clearsize);
+                MEM_fill(words, 0, clearsize);
             } else {
-                d[0] = 0;
-                d[1] = 0;
-                d[2] = 0;
+                words[0] = 0;
+                words[1] = 0;
+                words[2] = 0;
                 if (nclears > 4) {
-                    d[3] = 0;
-                    d[4] = 0;
+                    words[3] = 0;
+                    words[4] = 0;
                     if (nclears > 6) {
-                        d[5] = 0;
-                        d[6] = 0;
+                        words[5] = 0;
+                        words[6] = 0;
                         if (nclears > 8) {
-                            d[7] = 0;
-                            d[8] = 0;
+                            words[7] = 0;
+                            words[8] = 0;
                         }
                     }
                 }
@@ -1406,7 +1406,7 @@ extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, in
     unsigned int contents_size;
     unsigned int array_size;
     void* mem;
-    sMChunk_31F858* p;
+    sMChunk_31F858* chunk;
     unsigned int remainder_size;
     void** marray;
     sMChunk_31F858* array_chunk;
@@ -1448,31 +1448,31 @@ extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, in
     if (mem == 0)
         return 0;
 
-    p = (sMChunk_31F858*)((char*)mem - 8);
+    chunk = (sMChunk_31F858*)((char*)mem - 8);
     remainder_size = *(unsigned int*)((char*)mem - 4) & ~3;
 
     if (opts & 2)
         MEM_fill(mem, 0, remainder_size - 4 - array_size);
 
     if (marray == 0) {
-        array_chunk = (sMChunk_31F858*)((char*)p + contents_size);
+        array_chunk = (sMChunk_31F858*)((char*)chunk + contents_size);
         marray = (void**)((char*)array_chunk + 8);
         array_chunk->size = (remainder_size - contents_size) | 1;
         remainder_size = contents_size;
     }
 
     for (i = 0; ; ++i) {
-        marray[i] = (char*)p + 8;
+        marray[i] = (char*)chunk + 8;
         if (i != n - 1) {
             if (element_size != 0)
                 size = element_size;
             else
                 size = (sizes[i] + 4 + 15 < 16) ? 16 : (sizes[i] + 4 + 15) & ~15;
             remainder_size -= size;
-            p->size = size | 1;
-            p = (sMChunk_31F858*)((char*)p + size);
+            chunk->size = size | 1;
+            chunk = (sMChunk_31F858*)((char*)chunk + size);
         } else {
-            p->size = remainder_size | 1;
+            chunk->size = remainder_size | 1;
             break;
         }
     }
@@ -1529,11 +1529,11 @@ extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
 extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av);
 
 // dlmalloc 2.7 malloc_trim(): consolidate fastbins, then sYSTRIm.
-extern "C" int func_0031FB68(void** ms, unsigned int pad)
+extern "C" int func_0031FB68(void** ms, unsigned int topPad)
 {
     void* av = *ms;
     func_0031EEE8(ms, (sMState_31EEE8*)av);
-    return func_0031E6D8(ms, pad, (sMState_31E6D8*)av);
+    return func_0031E6D8(ms, topPad, (sMState_31E6D8*)av);
 }
 #endif
 
@@ -1544,10 +1544,10 @@ unsigned int func_0031FBB8(void* self, void* mem)
 {
     if (mem != 0) {
         unsigned int size = *(unsigned int*)((char*)mem - 4);
-        char* p = (char*)mem - 8;
+        char* chunk = (char*)mem - 8;
         if (size & 2) {
             return (size & ~3U) - 8;
-        } else if (*(unsigned int*)(p + (size & ~1U) + 4) & 1) {
+        } else if (*(unsigned int*)(chunk + (size & ~1U) + 4) & 1) {
             return (size & ~3U) - 4;
         }
     }
@@ -1609,8 +1609,8 @@ extern "C" sMallinfo_31FC20 func_0031FC20(void* ms)
     sMState_31FC20* av = *(sMState_31FC20**)ms;
     sMallinfo_31FC20 mi;
     int i;
-    sMChunk_31FC20* b;
-    sMChunk_31FC20* p;
+    sMChunk_31FC20* binHead;
+    sMChunk_31FC20* chunk;
     unsigned int avail;
     unsigned int fastavail;
     int nblocks;
@@ -1627,9 +1627,9 @@ extern "C" sMallinfo_31FC20 func_0031FC20(void* ms)
     fastavail = 0;
 
     for (i = 0; (unsigned int)i < 11U; ++i) {
-        for (p = av->fastbins[i]; p != 0; p = p->fd) {
+        for (chunk = av->fastbins[i]; chunk != 0; chunk = chunk->fd) {
             ++nfastblocks;
-            fastavail += p->size & ~3U;
+            fastavail += chunk->size & ~3U;
         }
     }
 
@@ -1637,12 +1637,12 @@ extern "C" sMallinfo_31FC20 func_0031FC20(void* ms)
 
     for (i = 1; i < 96; ++i) {
         sMChunk_31FC20** bp = &av->bins[i << 1];
-        b = (sMChunk_31FC20*)((char*)bp - 8);
-        for (p = bp[1]; p != b; p = p->bk) {
+        binHead = (sMChunk_31FC20*)((char*)bp - 8);
+        for (chunk = bp[1]; chunk != binHead; chunk = chunk->bk) {
             ++nblocks;
-            avail += p->size & ~3U;
-            if (p == p->bk->bk) break;
-            if (p == p->bk && p != b) break;
+            avail += chunk->size & ~3U;
+            if (chunk == chunk->bk->bk) break;
+            if (chunk == chunk->bk && chunk != binHead) break;
         }
     }
 
@@ -1679,9 +1679,9 @@ extern "C" int func_0031FE30(void** self, int kind, unsigned int val) {
             int low = (*(int*)ms) & 3;
             int res;
             if (val != 0) {
-                unsigned int t = val + 0x13;
-                if (t >= 0x10U) {
-                    res = (t & 0xFFFFFFF0) | low;
+                unsigned int rounded = val + 0x13;
+                if (rounded >= 0x10U) {
+                    res = (rounded & 0xFFFFFFF0) | low;
                 } else {
                     res = low | 0x10;
                 }

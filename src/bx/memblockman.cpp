@@ -377,21 +377,21 @@ static inline int func_0031A130_in(void* p, void* base, unsigned int size)
     return (unsigned int)((char*)p - (char*)base) <= size - 1;
 }
 
-extern "C" int func_0031A130(void* p)
+extern "C" int func_0031A130(void* addr)
 {
-    if (func_0031A130_in(p, cMemBlockMan_m_container8, 0x800))
+    if (func_0031A130_in(addr, cMemBlockMan_m_container8, 0x800))
         return 0x8;
-    if (func_0031A130_in(p, cMemBlockMan_m_container16, 0x2000))
+    if (func_0031A130_in(addr, cMemBlockMan_m_container16, 0x2000))
         return 0x10;
-    if (func_0031A130_in(p, cMemBlockMan_m_container32, 0x6000))
+    if (func_0031A130_in(addr, cMemBlockMan_m_container32, 0x6000))
         return 0x20;
-    if (func_0031A130_in(p, cMemBlockMan_m_container64, 0x32000))
+    if (func_0031A130_in(addr, cMemBlockMan_m_container64, 0x32000))
         return 0x40;
-    if (func_0031A130_in(p, cMemBlockMan_m_container128, 0x25800))
+    if (func_0031A130_in(addr, cMemBlockMan_m_container128, 0x25800))
         return 0x80;
-    if (func_0031A130_in(p, cMemBlockMan_m_container256, 0x20000))
+    if (func_0031A130_in(addr, cMemBlockMan_m_container256, 0x20000))
         return 0x100;
-    if (func_0031A130_in(p, cMemBlockMan_m_container512, 0x20000))
+    if (func_0031A130_in(addr, cMemBlockMan_m_container512, 0x20000))
         return 0x200;
     return 0;
 }
@@ -452,24 +452,24 @@ INCLUDE_ASM("bx/memblockman", func_0031A268);
 // PORT: PS2-only VU0 FPU-flag probe: builds two float4s from flag bits and multiplies them on VU0.
 extern "C" void func_0031A268(int flags)
 {
-    float a[4] __attribute__((aligned(16)));
-    float b[4] __attribute__((aligned(16)));
+    float lhs[4] __attribute__((aligned(16)));
+    float rhs[4] __attribute__((aligned(16)));
     int i;
     for (i = 0; i < 4; i++) {
-        float f;
+        float component;
         if ((flags & 0x8800) == 0) {
-            f = 0.0f;
+            component = 0.0f;
             if (!(flags & 8))
-                f = 1.0f;
+                component = 1.0f;
         } else {
-            f = 1.0000000031710769e-30f;
+            component = 1.0000000031710769e-30f;
             if (!(flags & 8))
-                f = 1.0000000150474662e+30f;
+                component = 1.0000000150474662e+30f;
         }
-        a[i] = f;
+        lhs[i] = component;
         if (flags & 0x80)
-            f = -f;
-        b[i] = f;
+            component = -component;
+        rhs[i] = component;
         flags <<= 1;
     }
     __asm__ __volatile__(
@@ -482,7 +482,7 @@ extern "C" void func_0031A268(int flags)
         "qmtc2.ni   $9, $vf2\n"
         "vnop\n"
         :
-        : "m"(a[0]), "m"(b[0])
+        : "m"(lhs[0]), "m"(rhs[0])
         : "$8", "$9");
 }
 #endif
@@ -618,7 +618,7 @@ INCLUDE_ASM("bx/memblockman", func_0031A490);
 #ifdef SKIP_ASM
 // PORT: PS2-only handler trampoline: saves/restores all 32 FPU registers around the
 // handler call and re-enables interrupts (sync; ei). Needs a native replacement off-PS2.
-extern "C" int func_0031A490(int arg, void (*handler)(int))
+extern "C" int func_0031A490(int handlerArg, void (*handler)(int))
 {
     int save[32];
     __asm__ __volatile__(
@@ -669,7 +669,7 @@ extern "C" int func_0031A490(int arg, void (*handler)(int))
         : "=m"(save[24]), "=m"(save[25]), "=m"(save[26]), "=m"(save[27]), "=m"(save[28]), "=m"(save[29]), "=m"(save[30]), "=m"(save[31])
         :
         : "$2");
-    handler(arg);
+    handler(handlerArg);
     __asm__ __volatile__(
         "lw $2, %0\n\tmtc1 $2, $f0\n\t"
         "lw $2, %1\n\tmtc1 $2, $f1\n\t"

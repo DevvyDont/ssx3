@@ -4968,19 +4968,19 @@ extern "C" void func_0013F8F8(sSortObj_F8F8** first, sSortObj_F8F8** last, sSort
         *first = *mid;
     else
         func_0013F8F8(mid, last, first, cmp);
-    sSortObj_F8F8** b = bmid;
+    sSortObj_F8F8** rightCur = bmid;
     sSortObj_F8F8** bend2 = bmid + (n + 1) / 2;
-    sSortObj_F8F8** a = first;
+    sSortObj_F8F8** leftCur = first;
     sSortObj_F8F8** aend = first + n / 2;
     sSortObj_F8F8** out = buf;
     while (out < bend) {
-        if (a < aend) {
-            if (b < bend2 && (*b)->key < (*a)->key)
-                *out++ = *b++;
+        if (leftCur < aend) {
+            if (rightCur < bend2 && (*rightCur)->key < (*leftCur)->key)
+                *out++ = *rightCur++;
             else
-                *out++ = *a++;
+                *out++ = *leftCur++;
         } else {
-            *out++ = *b++;
+            *out++ = *rightCur++;
         }
     }
 }
@@ -5625,105 +5625,105 @@ extern "C" sHPC140738* func_00140738(sHPC140738* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140868);
 #ifdef SKIP_ASM
-extern "C" void func_00140868(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x87C))) = arg1;
+extern "C" void func_00140868(void *rider, int isLocal) {
+    (*(int *)((char*)(rider) + (0x87C))) = isLocal;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140870);
 #ifdef SKIP_ASM
-extern "C" int func_00140870(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x87C)));
+extern "C" int func_00140870(void *rider) {
+    return (*(int *)((char*)(rider) + (0x87C)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140878);
 #ifdef SKIP_ASM
-extern "C" float func_00140878(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x5A4)));
+extern "C" float func_00140878(void *rider) {
+    return (*(float *)((char*)(rider) + (0x5A4)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140880);
 #ifdef SKIP_ASM
-extern "C" int func_00140880(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x5A8)));
+extern "C" int func_00140880(void *rider) {
+    return (*(int *)((char*)(rider) + (0x5A8)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140888);
 #ifdef SKIP_ASM
-extern "C" int func_00140888(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x5AC)));
+extern "C" int func_00140888(void *rider) {
+    return (*(int *)((char*)(rider) + (0x5AC)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140890);
 #ifdef SKIP_ASM
-extern "C" float func_00140890(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x750)));
+extern "C" float func_00140890(void *rider) {
+    return (*(float *)((char*)(rider) + (0x750)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140898);
 #ifdef SKIP_ASM
-extern "C" float func_00140898(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x754)));
+extern "C" float func_00140898(void *rider) {
+    return (*(float *)((char*)(rider) + (0x754)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408A0);
 #ifdef SKIP_ASM
-extern "C" float func_001408A0(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x758)));
+extern "C" float func_001408A0(void *rider) {
+    return (*(float *)((char*)(rider) + (0x758)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408A8);
 #ifdef SKIP_ASM
-extern "C" float func_001408A8(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x75C)));
+extern "C" float func_001408A8(void *rider) {
+    return (*(float *)((char*)(rider) + (0x75C)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408B0);
 #ifdef SKIP_ASM
-extern "C" int func_001408B0(int arg0) {
-    return arg0 + 0x400;
+extern "C" int func_001408B0(int rider) {
+    return rider + 0x400;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408B8);
 #ifdef SKIP_ASM
-extern "C" int func_001408B8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xAA0)));
+extern "C" int func_001408B8(void *rider) {
+    return (*(int *)((char*)(rider) + (0xAA0)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408C0);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *func_001408C0(long long *arg0, void *arg1) {
-    *arg0 = (*(long long *)((char*)(arg1) + (0x1B0)));
-    return arg0;
+extern "C" long long *func_001408C0(long long *outFront, void *rider) {
+    *outFront = (*(long long *)((char*)(rider) + (0x1B0)));
+    return outFront;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408D0);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *func_001408D0(long long *arg0, void *arg1) {
-    *arg0 = (*(long long *)((char*)(arg1) + (0x1A0)));
-    return arg0;
+extern "C" long long *func_001408D0(long long *outSide, void *rider) {
+    *outSide = (*(long long *)((char*)(rider) + (0x1A0)));
+    return outSide;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408E0);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *func_001408E0(long long *arg0, void *arg1) {
-    *arg0 = (*(long long *)((char*)(arg1) + (0x1C0)));
-    return arg0;
+extern "C" long long *func_001408E0(long long *outUp, void *rider) {
+    *outUp = (*(long long *)((char*)(rider) + (0x1C0)));
+    return outUp;
 }
 #endif
 
@@ -5739,17 +5739,17 @@ void* func_001408F0(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408F8);
 #ifdef SKIP_ASM
-extern "C" int func_001408F8(int arg0) {
-    return arg0 + 0x110;
+extern "C" int func_001408F8(int rider) {
+    return rider + 0x110;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140900);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *func_00140900(long long *arg0, void *arg1) {
-    *arg0 = (*(long long *)((char*)(arg1) + (0x120)));
-    return arg0;
+extern "C" long long *func_00140900(long long *outRotation, void *rider) {
+    *outRotation = (*(long long *)((char*)(rider) + (0x120)));
+    return outRotation;
 }
 #endif
 
@@ -5766,8 +5766,8 @@ void* func_00140910(void* self)
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140918);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_00140918(void *arg0, long long *arg1) {
-    (*(long long *)((char*)(arg0) + (0x1E0))) = (long long) *arg1;
+extern "C" void func_00140918(void *rider, long long *velocity) {
+    (*(long long *)((char*)(rider) + (0x1E0))) = (long long) *velocity;
 }
 #endif
 //100%
@@ -5802,9 +5802,9 @@ extern "C" void* func_00140928(void* out, char* self)
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140958);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *func_00140958(long long *arg0, void *arg1) {
-    *arg0 = (*(long long *)((char*)(arg1) + (0x370)));
-    return arg0;
+extern "C" long long *func_00140958(long long *outNormal, void *rider) {
+    *outNormal = (*(long long *)((char*)(rider) + (0x370)));
+    return outNormal;
 }
 #endif
 //100%
@@ -5847,146 +5847,146 @@ extern "C" float func_00140968(void* self) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A28);
 #ifdef SKIP_ASM
-extern "C" int func_00140A28(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x780)));
+extern "C" int func_00140A28(void *rider) {
+    return (*(int *)((char*)(rider) + (0x780)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A30);
 #ifdef SKIP_ASM
-extern "C" int func_00140A30(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x784)));
+extern "C" int func_00140A30(void *rider) {
+    return (*(int *)((char*)(rider) + (0x784)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A38);
 #ifdef SKIP_ASM
-extern "C" int func_00140A38(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x77C)));
+extern "C" int func_00140A38(void *rider) {
+    return (*(int *)((char*)(rider) + (0x77C)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A40);
 #ifdef SKIP_ASM
-extern "C" int func_00140A40(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x430)));
+extern "C" int func_00140A40(void *rider) {
+    return (*(int *)((char*)(rider) + (0x430)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A48);
 #ifdef SKIP_ASM
-extern "C" int func_00140A48(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x434)));
+extern "C" int func_00140A48(void *rider) {
+    return (*(int *)((char*)(rider) + (0x434)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A50);
 #ifdef SKIP_ASM
-extern "C" int func_00140A50(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x434))) < 0x11;
+extern "C" int func_00140A50(void *rider) {
+    return (*(int *)((char*)(rider) + (0x434))) < 0x11;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A60);
 #ifdef SKIP_ASM
-extern "C" int func_00140A60(void *arg0) {
-    return (unsigned int) ((*(int *)((char*)(arg0) + (0x434))) - 0xB) < 3U;
+extern "C" int func_00140A60(void *rider) {
+    return (unsigned int) ((*(int *)((char*)(rider) + (0x434))) - 0xB) < 3U;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A70);
 #ifdef SKIP_ASM
-extern "C" int func_00140A70(int arg0) {
-    return arg0 + 0xAAC;
+extern "C" int func_00140A70(int rider) {
+    return rider + 0xAAC;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A78);
 #ifdef SKIP_ASM
-extern "C" int func_00140A78(int arg0) {
-    return arg0 + 0x490;
+extern "C" int func_00140A78(int rider) {
+    return rider + 0x490;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A80);
 #ifdef SKIP_ASM
-extern "C" int func_00140A80(int arg0) {
-    return arg0 + 0x4A0;
+extern "C" int func_00140A80(int rider) {
+    return rider + 0x4A0;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A88);
 #ifdef SKIP_ASM
-extern "C" int func_00140A88(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xAB4)));
+extern "C" int func_00140A88(void *rider) {
+    return (*(int *)((char*)(rider) + (0xAB4)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A90);
 #ifdef SKIP_ASM
-extern "C" void func_00140A90(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xAB4))) = arg1;
+extern "C" void func_00140A90(void *rider, int value) {
+    (*(int *)((char*)(rider) + (0xAB4))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A98);
 #ifdef SKIP_ASM
-extern "C" int func_00140A98(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xAB8)));
+extern "C" int func_00140A98(void *rider) {
+    return (*(int *)((char*)(rider) + (0xAB8)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AA0);
 #ifdef SKIP_ASM
-extern "C" void func_00140AA0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xAB8))) = arg1;
+extern "C" void func_00140AA0(void *rider, int value) {
+    (*(int *)((char*)(rider) + (0xAB8))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AA8);
 #ifdef SKIP_ASM
-extern "C" void func_00140AA8(void *arg0, float fparg0) {
-    (*(float *)((char*)(arg0) + (0x4D8))) = fparg0;
+extern "C" void func_00140AA8(void *rider, float fparg0) {
+    (*(float *)((char*)(rider) + (0x4D8))) = fparg0;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AB0);
 #ifdef SKIP_ASM
-extern "C" void func_00140AB0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xE8))) = arg1;
+extern "C" void func_00140AB0(void *rider, int value) {
+    (*(int *)((char*)(rider) + (0xE8))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AB8);
 #ifdef SKIP_ASM
-extern "C" int func_00140AB8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xE8)));
+extern "C" int func_00140AB8(void *rider) {
+    return (*(int *)((char*)(rider) + (0xE8)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AC0);
 #ifdef SKIP_ASM
-extern "C" void func_00140AC0(void *arg0) {
-    (*(float *)((char*)(arg0) + (0x470))) = -1.0f;
+extern "C" void func_00140AC0(void *rider) {
+    (*(float *)((char*)(rider) + (0x470))) = -1.0f;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AD0);
 #ifdef SKIP_ASM
-extern "C" void func_00140AD0(void *arg0) {
-    if ((*(float *)((char*)(arg0) + (0x470))) < 0.0f) {
-        (*(float *)((char*)(arg0) + (0x470))) = 0.0f;
+extern "C" void func_00140AD0(void *rider) {
+    if ((*(float *)((char*)(rider) + (0x470))) < 0.0f) {
+        (*(float *)((char*)(rider) + (0x470))) = 0.0f;
     }
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140AF0);
 #ifdef SKIP_ASM
-extern "C" int func_00140AF0(void *arg0) {
+extern "C" int func_00140AF0(void *rider) {
     int var_2;
 
     var_2 = 1;
-    if (!((*(float *)((char*)(arg0) + (0x470))) >= 0.0f)) {
+    if (!((*(float *)((char*)(rider) + (0x470))) >= 0.0f)) {
         var_2 = 0;
     }
     return var_2;
@@ -5995,11 +5995,11 @@ extern "C" int func_00140AF0(void *arg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B18);
 #ifdef SKIP_ASM
-extern "C" int func_00140B18(void *arg0) {
+extern "C" int func_00140B18(void *rider) {
     int var_2;
 
     var_2 = 1;
-    if (!((*(float *)((char*)(arg0) + (0x470))) >= 10.0f)) {
+    if (!((*(float *)((char*)(rider) + (0x470))) >= 10.0f)) {
         var_2 = 0;
     }
     return var_2;
@@ -6008,57 +6008,57 @@ extern "C" int func_00140B18(void *arg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B40);
 #ifdef SKIP_ASM
-extern "C" void func_00140B40(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x474))) = arg1;
+extern "C" void func_00140B40(void *rider, int startTick) {
+    (*(int *)((char*)(rider) + (0x474))) = startTick;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B48);
 #ifdef SKIP_ASM
-extern "C" int func_00140B48(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x474)));
+extern "C" int func_00140B48(void *rider) {
+    return (*(int *)((char*)(rider) + (0x474)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B50);
 #ifdef SKIP_ASM
-extern "C" void func_00140B50(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x478))) = arg1;
+extern "C" void func_00140B50(void *rider, int finishTick) {
+    (*(int *)((char*)(rider) + (0x478))) = finishTick;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B58);
 #ifdef SKIP_ASM
-extern "C" int func_00140B58(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x478)));
+extern "C" int func_00140B58(void *rider) {
+    return (*(int *)((char*)(rider) + (0x478)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B60);
 #ifdef SKIP_ASM
-extern "C" void func_00140B60(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x47C))) = arg1;
+extern "C" void func_00140B60(void *rider, int penaltyTicks) {
+    (*(int *)((char*)(rider) + (0x47C))) = penaltyTicks;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B68);
 #ifdef SKIP_ASM
-extern "C" int func_00140B68(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x47C)));
+extern "C" int func_00140B68(void *rider) {
+    return (*(int *)((char*)(rider) + (0x47C)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B70);
 #ifdef SKIP_ASM
-extern "C" void func_00140B70(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x480))) = arg1;
+extern "C" void func_00140B70(void *rider, int didNotFinish) {
+    (*(int *)((char*)(rider) + (0x480))) = didNotFinish;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B78);
 #ifdef SKIP_ASM
-extern "C" int func_00140B78(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x480)));
+extern "C" int func_00140B78(void *rider) {
+    return (*(int *)((char*)(rider) + (0x480)));
 }
 #endif
 
@@ -6079,36 +6079,36 @@ int cRider_getAIIndex(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B88);
 #ifdef SKIP_ASM
-extern "C" void func_00140B88(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x86C))) = arg1;
+extern "C" void func_00140B88(void *rider, int aiIndex) {
+    (*(int *)((char*)(rider) + (0x86C))) = aiIndex;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B90);
 #ifdef SKIP_ASM
-extern "C" int func_00140B90(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x870)));
+extern "C" int func_00140B90(void *rider) {
+    return (*(int *)((char*)(rider) + (0x870)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140B98);
 #ifdef SKIP_ASM
-extern "C" void func_00140B98(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x870))) = arg1;
+extern "C" void func_00140B98(void *rider, int viewIndex) {
+    (*(int *)((char*)(rider) + (0x870))) = viewIndex;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BA0);
 #ifdef SKIP_ASM
-extern "C" void func_00140BA0(void *arg0) {
-    (*(int *)((char*)(arg0) + (0x874))) = 1;
+extern "C" void func_00140BA0(void *rider) {
+    (*(int *)((char*)(rider) + (0x874))) = 1;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BB0);
 #ifdef SKIP_ASM
-extern "C" void func_00140BB0(void *arg0) {
-    (*(int *)((char*)(arg0) + (0x878))) = 1;
+extern "C" void func_00140BB0(void *rider) {
+    (*(int *)((char*)(rider) + (0x878))) = 1;
 }
 #endif
 
@@ -6143,19 +6143,19 @@ extern "C" int cRider_isComputer(cRider* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BD8);
 #ifdef SKIP_ASM
-extern "C" int func_00140BD8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x878)));
+extern "C" int func_00140BD8(void *rider) {
+    return (*(int *)((char*)(rider) + (0x878)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140BE0);
 #ifdef SKIP_ASM
-extern "C" int func_00140BE0(void *arg0) {
+extern "C" int func_00140BE0(void *rider) {
     int var_3;
 
     var_3 = 0;
-    if ((*(int *)((char*)(arg0) + (0x874))) != 0) {
-        var_3 = (*(int *)((char*)(arg0) + (0x87C))) != 0;
+    if ((*(int *)((char*)(rider) + (0x874))) != 0) {
+        var_3 = (*(int *)((char*)(rider) + (0x87C))) != 0;
     }
     return var_3;
 }
@@ -6163,86 +6163,86 @@ extern "C" int func_00140BE0(void *arg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C00);
 #ifdef SKIP_ASM
-extern "C" int func_00140C00(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x884)));
+extern "C" int func_00140C00(void *rider) {
+    return (*(int *)((char*)(rider) + (0x884)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C08);
 #ifdef SKIP_ASM
-extern "C" void func_00140C08(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x884))) = arg1;
-    (*(int *)((char*)(arg0) + (0x888))) = -1;
+extern "C" void func_00140C08(void *rider, int renderFlag) {
+    (*(int *)((char*)(rider) + (0x884))) = renderFlag;
+    (*(int *)((char*)(rider) + (0x888))) = -1;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C18);
 #ifdef SKIP_ASM
-extern "C" int func_00140C18(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x888)));
+extern "C" int func_00140C18(void *rider) {
+    return (*(int *)((char*)(rider) + (0x888)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C20);
 #ifdef SKIP_ASM
-extern "C" void func_00140C20(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x888))) = arg1;
+extern "C" void func_00140C20(void *rider, int safeRenderTick) {
+    (*(int *)((char*)(rider) + (0x888))) = safeRenderTick;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C28);
 #ifdef SKIP_ASM
-extern "C" int func_00140C28(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x3FC)));
+extern "C" int func_00140C28(void *rider) {
+    return (*(int *)((char*)(rider) + (0x3FC)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C30);
 #ifdef SKIP_ASM
-extern "C" void func_00140C30(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x3FC))) = arg1;
+extern "C" void func_00140C30(void *rider, int value) {
+    (*(int *)((char*)(rider) + (0x3FC))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C38);
 #ifdef SKIP_ASM
-extern "C" int func_00140C38(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x790)));
+extern "C" int func_00140C38(void *rider) {
+    return (*(int *)((char*)(rider) + (0x790)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C40);
 #ifdef SKIP_ASM
-extern "C" int func_00140C40(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x788)));
+extern "C" int func_00140C40(void *rider) {
+    return (*(int *)((char*)(rider) + (0x788)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C48);
 #ifdef SKIP_ASM
-extern "C" int func_00140C48(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x774)));
+extern "C" int func_00140C48(void *rider) {
+    return (*(int *)((char*)(rider) + (0x774)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C50);
 #ifdef SKIP_ASM
-extern "C" void func_00140C50(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x774))) = arg1;
+extern "C" void func_00140C50(void *rider, int slideHandle) {
+    (*(int *)((char*)(rider) + (0x774))) = slideHandle;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C58);
 #ifdef SKIP_ASM
-extern "C" int func_00140C58(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x778)));
+extern "C" int func_00140C58(void *rider) {
+    return (*(int *)((char*)(rider) + (0x778)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C60);
 #ifdef SKIP_ASM
-extern "C" void func_00140C60(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x778))) = arg1;
+extern "C" void func_00140C60(void *rider, int tumbleHandle) {
+    (*(int *)((char*)(rider) + (0x778))) = tumbleHandle;
 }
 #endif
 
@@ -6281,40 +6281,40 @@ void func_00140C80(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C88);
 #ifdef SKIP_ASM
-extern "C" int func_00140C88(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x898)));
+extern "C" int func_00140C88(void *rider) {
+    return (*(int *)((char*)(rider) + (0x898)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C90);
 #ifdef SKIP_ASM
-extern "C" int func_00140C90(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x78C)));
+extern "C" int func_00140C90(void *rider) {
+    return (*(int *)((char*)(rider) + (0x78C)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140C98);
 #ifdef SKIP_ASM
-extern "C" int func_00140C98(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xAA8)));
+extern "C" int func_00140C98(void *rider) {
+    return (*(int *)((char*)(rider) + (0xAA8)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CA0);
 #ifdef SKIP_ASM
-extern "C" float func_00140CA0(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x5B4)));
+extern "C" float func_00140CA0(void *rider) {
+    return (*(float *)((char*)(rider) + (0x5B4)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CA8);
 #ifdef SKIP_ASM
-extern "C" int func_00140CA8(void *arg0) {
+extern "C" int func_00140CA8(void *rider) {
     int var_3;
 
     var_3 = 0;
-    if (((*(int *)((char*)(arg0) + (0xAC4))) != 0) && ((*(int *)((char*)(arg0) + (0xAD0))) == 0)) {
-        var_3 = (*(int *)((char*)(arg0) + (0xAFC))) != 0;
+    if (((*(int *)((char*)(rider) + (0xAC4))) != 0) && ((*(int *)((char*)(rider) + (0xAD0))) == 0)) {
+        var_3 = (*(int *)((char*)(rider) + (0xAFC))) != 0;
     }
     return var_3;
 }
@@ -6322,15 +6322,15 @@ extern "C" int func_00140CA8(void *arg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CD0);
 #ifdef SKIP_ASM
-extern "C" int func_00140CD0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xB00)));
+extern "C" int func_00140CD0(void *rider) {
+    return (*(int *)((char*)(rider) + (0xB00)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CD8);
 #ifdef SKIP_ASM
-extern "C" int func_00140CD8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xAC4)));
+extern "C" int func_00140CD8(void *rider) {
+    return (*(int *)((char*)(rider) + (0xAC4)));
 }
 #endif
 
@@ -6346,8 +6346,8 @@ void* func_00140CE0(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140CE8);
 #ifdef SKIP_ASM
-extern "C" int func_00140CE8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xB18)));
+extern "C" int func_00140CE8(void *rider) {
+    return (*(int *)((char*)(rider) + (0xB18)));
 }
 #endif
 //100%
@@ -6355,93 +6355,93 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140CF0);
 #ifdef SKIP_ASM
 extern "C" void cRider_initBoost();
 
-extern "C" void func_00140CF0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x304))) = arg1;
+extern "C" void func_00140CF0(void *rider, int boostMode) {
+    (*(int *)((char*)(rider) + (0x304))) = boostMode;
     cRider_initBoost();
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D10);
 #ifdef SKIP_ASM
-extern "C" void func_00140D10(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xB20))) = arg1;
+extern "C" void func_00140D10(void *rider, int value) {
+    (*(int *)((char*)(rider) + (0xB20))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D18);
 #ifdef SKIP_ASM
-extern "C" void func_00140D18(void *arg0, float fparg0) {
-    (*(float *)((char*)(arg0) + (0xB24))) = fparg0;
+extern "C" void func_00140D18(void *rider, float fparg0) {
+    (*(float *)((char*)(rider) + (0xB24))) = fparg0;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D20);
 #ifdef SKIP_ASM
-extern "C" void func_00140D20(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xB28))) = arg1;
+extern "C" void func_00140D20(void *rider, int sourceMask) {
+    (*(int *)((char*)(rider) + (0xB28))) = sourceMask;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D28);
 #ifdef SKIP_ASM
-extern "C" void func_00140D28(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xB30))) = arg1;
+extern "C" void func_00140D28(void *rider, int handicap) {
+    (*(int *)((char*)(rider) + (0xB30))) = handicap;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D30);
 #ifdef SKIP_ASM
-extern "C" void func_00140D30(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xB34))) = arg1;
+extern "C" void func_00140D30(void *rider, int statsIndex) {
+    (*(int *)((char*)(rider) + (0xB34))) = statsIndex;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D38);
 #ifdef SKIP_ASM
-extern "C" void func_00140D38(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x308))) = arg1;
+extern "C" void func_00140D38(void *rider, int value) {
+    (*(int *)((char*)(rider) + (0x308))) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D40);
 #ifdef SKIP_ASM
-extern "C" int func_00140D40(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x304)));
+extern "C" int func_00140D40(void *rider) {
+    return (*(int *)((char*)(rider) + (0x304)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D48);
 #ifdef SKIP_ASM
-extern "C" int func_00140D48(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xB20)));
+extern "C" int func_00140D48(void *rider) {
+    return (*(int *)((char*)(rider) + (0xB20)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D50);
 #ifdef SKIP_ASM
-extern "C" int func_00140D50(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xB2C))) & 1;
+extern "C" int func_00140D50(void *rider) {
+    return (*(int *)((char*)(rider) + (0xB2C))) & 1;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D60);
 #ifdef SKIP_ASM
-extern "C" int func_00140D60(void *arg0) {
-    return ((int) (*(int *)((char*)(arg0) + (0xB2C))) >> 1) & 1;
+extern "C" int func_00140D60(void *rider) {
+    return ((int) (*(int *)((char*)(rider) + (0xB2C))) >> 1) & 1;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D70);
 #ifdef SKIP_ASM
-extern "C" int func_00140D70(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xB30)));
+extern "C" int func_00140D70(void *rider) {
+    return (*(int *)((char*)(rider) + (0xB30)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140D78);
 #ifdef SKIP_ASM
-extern "C" int func_00140D78(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x308)));
+extern "C" int func_00140D78(void *rider) {
+    return (*(int *)((char*)(rider) + (0x308)));
 }
 #endif
 
@@ -6543,8 +6543,8 @@ extern "C" int func_001411A0(cWipeoutMotion* wipeoutMotion) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001411A8);
 #ifdef SKIP_ASM
-extern "C" int func_001411A8(int arg0) {
-    return arg0 + 0x50;
+extern "C" int func_001411A8(int wipeoutMotion) {
+    return wipeoutMotion + 0x50;
 }
 #endif
 //100%
@@ -7235,8 +7235,8 @@ extern "C" int cRiderHandler__getControlState(cRiderHandler* self) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144000);
 #ifdef SKIP_ASM
-extern "C" void func_00144000(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xF40))) = arg1;
+extern "C" void func_00144000(void *computer, int input) {
+    (*(int *)((char*)(computer) + (0xF40))) = input;
 }
 #endif
 //100%
@@ -7293,43 +7293,43 @@ void cAIStateHandler_OnLoseState(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144070);
 #ifdef SKIP_ASM
-extern "C" int func_00144070(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xA8)));
+extern "C" int func_00144070(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (0xA8)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144078);
 #ifdef SKIP_ASM
-extern "C" int func_00144078(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x78)));
+extern "C" int func_00144078(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (0x78)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144080);
 #ifdef SKIP_ASM
-extern "C" int func_00144080(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x7C)));
+extern "C" int func_00144080(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (0x7C)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144088);
 #ifdef SKIP_ASM
-extern "C" int func_00144088(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x80)));
+extern "C" int func_00144088(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (0x80)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144090);
 #ifdef SKIP_ASM
-extern "C" int func_00144090(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x84)));
+extern "C" int func_00144090(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (0x84)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144098);
 #ifdef SKIP_ASM
-extern "C" int func_00144098(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x88)));
+extern "C" int func_00144098(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (0x88)));
 }
 #endif
 //100%
@@ -7370,57 +7370,57 @@ extern "C" int func_001440E0(void *self, int index) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440F0);
 #ifdef SKIP_ASM
-extern "C" void func_001440F0(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
+extern "C" void func_001440F0(void *aiMan, int active) {
+    (*(int *)((char*)(aiMan) + (0x14))) = active;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001440F8);
 #ifdef SKIP_ASM
-extern "C" void func_001440F8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x8C))) = arg1;
+extern "C" void func_001440F8(void *aiMan, int active) {
+    (*(int *)((char*)(aiMan) + (0x8C))) = active;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144100);
 #ifdef SKIP_ASM
-extern "C" int func_00144100(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x8C)));
+extern "C" int func_00144100(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (0x8C)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144108);
 #ifdef SKIP_ASM
-extern "C" int func_00144108(void *arg0) {
-    return (*(int *)((char*)(arg0) + (8)));
+extern "C" int func_00144108(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (8)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144110);
 #ifdef SKIP_ASM
-extern "C" void func_00144110(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (8))) = arg1;
+extern "C" void func_00144110(void *aiMan, int tick) {
+    (*(int *)((char*)(aiMan) + (8))) = tick;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144118);
 #ifdef SKIP_ASM
-extern "C" int func_00144118(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xC)));
+extern "C" int func_00144118(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (0xC)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144120);
 #ifdef SKIP_ASM
-extern "C" void func_00144120(void *arg0) {
-    (*(int *)((char*)(arg0) + (0xC))) = (int) ((*(int *)((char*)(arg0) + (0xC))) + 1);
+extern "C" void func_00144120(void *aiMan) {
+    (*(int *)((char*)(aiMan) + (0xC))) = (int) ((*(int *)((char*)(aiMan) + (0xC))) + 1);
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144130);
 #ifdef SKIP_ASM
-extern "C" void func_00144130(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xC))) = arg1;
+extern "C" void func_00144130(void *aiMan, int tick) {
+    (*(int *)((char*)(aiMan) + (0xC))) = tick;
 }
 #endif
 //100%
@@ -7434,22 +7434,22 @@ extern "C" int func_00144138(char* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144158);
 #ifdef SKIP_ASM
-extern "C" int func_00144158(int *arg0) {
-    return *arg0;
+extern "C" int func_00144158(int *aiMan) {
+    return *aiMan;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144160);
 #ifdef SKIP_ASM
-extern "C" int func_00144160(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x1C)));
+extern "C" int func_00144160(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (0x1C)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144168);
 #ifdef SKIP_ASM
-extern "C" void func_00144168(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x1C))) = arg1;
+extern "C" void func_00144168(void *aiMan, int ticksLeft) {
+    (*(int *)((char*)(aiMan) + (0x1C))) = ticksLeft;
 }
 #endif
 //100%
@@ -7469,27 +7469,27 @@ extern "C" int func_00144180(void *self, int index) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144190);
 #ifdef SKIP_ASM
-extern "C" int func_00144190(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18)));
+extern "C" int func_00144190(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (0x18)));
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144198);
 #ifdef SKIP_ASM
-extern "C" int func_00144198(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xA4)));
+extern "C" int func_00144198(void *aiMan) {
+    return (*(int *)((char*)(aiMan) + (0xA4)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001441A0__FPvT0);
 #ifdef SKIP_ASM
-int func_001441A0(void* self, void* a1)
+int func_001441A0(void* self, void* entry)
 {
-    int t0 = 2;
-    *(int*)((char*)a1 + 0x8) = t0;
+    int inactiveState = 2;
+    *(int*)((char*)entry + 0x8) = inactiveState;
     *(int*)((char*)self + 0x704) = (int)((char*)*(void**)((char*)self + 0x704) - 0x1);
-    return t0;
+    return inactiveState;
 }
 #endif
 
@@ -7551,20 +7551,20 @@ extern "C" int func_001441B8(sHpCtl_41B8* self, int pl)
     if (lvl == 0) {
         return 0;
     }
-    char* o = rider + 0x6C0;
-    sHpVE_41B8* vt = *(sHpVE_41B8**)o;
-    float* pos = vt[5].fn(o + vt[5].delta);
+    char* riderObj = rider + 0x6C0;
+    sHpVE_41B8* vt = *(sHpVE_41B8**)riderObj;
+    float* pos = vt[5].fn(riderObj + vt[5].delta);
     if (self->useHeight != 0) {
-        sHpGround_41B8 g;
-        sHpVec3_41B8 p;
-        p.x = pos[0];
-        p.y = pos[1];
-        p.z = pos[2];
-        func_002DA1C0(&g, &p);
+        sHpGround_41B8 ground;
+        sHpVec3_41B8 probe;
+        probe.x = pos[0];
+        probe.y = pos[1];
+        probe.z = pos[2];
+        func_002DA1C0(&ground, &probe);
         int band = 1;
-        if (g.height < 1200.446f) {
+        if (ground.height < 1200.446f) {
             band = 3;
-        } else if (g.height < 2999.697f) {
+        } else if (ground.height < 2999.697f) {
             band = 2;
         }
         if (lvl < band) {
@@ -7584,20 +7584,20 @@ extern "C" int func_001441B8(sHpCtl_41B8* self, int pl)
             continue;
         }
         n--;
-        float d = z->center.x - pos[0];
-        float r2 = z->radius * z->radius;
-        d = d * d;
-        if (r2 < d) {
+        float distSq = z->center.x - pos[0];
+        float radiusSq = z->radius * z->radius;
+        distSq = distSq * distSq;
+        if (radiusSq < distSq) {
             continue;
         }
         float dy = z->center.y - pos[1];
         dy = dy * dy;
-        if (r2 < dy) {
+        if (radiusSq < dy) {
             continue;
         }
         float dz = z->center.z - pos[2];
-        d = d + dy + dz * dz;
-        if (!(r2 < d)) {
+        distSq = distSq + dy + dz * dz;
+        if (!(radiusSq < distSq)) {
             return lvl;
         }
     }
@@ -7727,9 +7727,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00144670);
 extern "C" void func_00144670(void* self, int bit)
 {
     ulong mask = (ulong)1 << bit;
-    ulong a = *(ulong*)self;
-    *(ulong*)self = a & ~mask;
-    *(ulong*)((char*)self + 0x8) |= mask & a;
+    ulong oldBits = *(ulong*)self;
+    *(ulong*)self = oldBits & ~mask;
+    *(ulong*)((char*)self + 0x8) |= mask & oldBits;
 }
 #endif
 

@@ -68,8 +68,8 @@ extern "C" void cRiderAnimBase__cRiderAnimBase(cRiderAnimBase* self, int flags)
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_003119E8);
 #ifdef SKIP_ASM
-extern "C" int func_003119E8(void *arg0, int arg1) {
-    return (*(int *)((char*)(arg0) + (0x50))) + (arg1 * 8);
+extern "C" int func_003119E8(void *riderAnim, int slot) {
+    return (*(int *)((char*)(riderAnim) + (0x50))) + (slot * 8);
 }
 #endif
 //100%
@@ -717,26 +717,26 @@ struct sAnimKey00312820 {
     unsigned short pad;
 };
 
-extern "C" float func_00312820(char* self, int a1, int frame)
+extern "C" float func_00312820(char* self, int anim, int frame)
 {
     sVEntry00312820* vt = *(sVEntry00312820**)(self + 0x58);
-    int id = vt[4].fn(self + vt[4].delta, a1);
+    int id = vt[4].fn(self + vt[4].delta, anim);
     if (id == 0x207)
         return 0.0f;
-    unsigned int h = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
-    char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((h & 0xFF) << 2));
-    char* q = (char*)((h >> 8) * 0x14 + *(int*)(clip + 0x8));
-    float r;
-    if (frame < *(unsigned short*)(q + 0x12))
+    unsigned int mapEntry = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
+    char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((mapEntry & 0xFF) << 2));
+    char* animRec = (char*)((mapEntry >> 8) * 0x14 + *(int*)(clip + 0x8));
+    float frameTime;
+    if (frame < *(unsigned short*)(animRec + 0x12))
     {
         sAnimKey00312820* keys = *(sAnimKey00312820**)(clip + 0x10);
-        r = keys[*(unsigned short*)(q + 0x10) + frame].value * 0.03333333507180214f;
+        frameTime = keys[*(unsigned short*)(animRec + 0x10) + frame].value * 0.03333333507180214f;
     }
     else
     {
-        r = -1.0f;
+        frameTime = -1.0f;
     }
-    return r;
+    return frameTime;
 }
 #endif
 
@@ -851,12 +851,12 @@ extern "C" int func_00312B18(void* self, cAnimSequencer* seq, char* node, int an
     float weight = *(float*)(node + 0x98);
     func_003145F8(seq, node);
     cRiderAnimBase_play(self, anim, 0, -1.0f);
-    char* s = (char*)cAnimSequencer_getSequence(seq, 0);
-    *(float*)(s + 0x98) = w;
-    *(float*)(s + 0x94) = w;
+    char* sequence = (char*)cAnimSequencer_getSequence(seq, 0);
+    *(float*)(sequence + 0x98) = w;
+    *(float*)(sequence + 0x94) = w;
     if (target != 0.0f)
     {
-        cAnimSequence_fadeWeight((cAnimSequence*)s, weight, target);
+        cAnimSequence_fadeWeight((cAnimSequence*)sequence, weight, target);
     }
     return anim;
 }
@@ -868,7 +868,7 @@ INCLUDE_ASM("animation/rideranimbase", func_00312BD0);
 extern "C" void func_00144670(void* self, int bit);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
-extern "C" void func_00312BD0(void* self, void* unused, void* rider, int anim)
+extern "C" void func_00312BD0(void* self, void* sequencer, void* rider, int anim)
 {
     func_00144670((char*)rider + 0xB0, 0x3F);
     cRiderAnimBase_play(self, anim, 0, -1.0f);
@@ -1334,10 +1334,10 @@ struct sBlend_00313800
 // finishes and notify is set.
 extern "C" int func_00313800(sBlend_00313800* self, float dt)
 {
-    float t = self->remaining;
-    if (t != 0.0f)
+    float timeLeft = self->remaining;
+    if (timeLeft != 0.0f)
     {
-        if (t <= dt)
+        if (timeLeft <= dt)
         {
             self->value = self->target;
             self->remaining = 0.0f;
@@ -1348,9 +1348,9 @@ extern "C" int func_00313800(sBlend_00313800* self, float dt)
         }
         else
         {
-            float v = self->value;
-            self->remaining = t - dt;
-            self->value = v + (dt / t) * (self->target - v);
+            float current = self->value;
+            self->remaining = timeLeft - dt;
+            self->value = current + (dt / timeLeft) * (self->target - current);
         }
     }
     return 0;
@@ -1386,22 +1386,22 @@ extern "C" void func_00313868(sAnimEvents_00313868* self, float from, float to)
         return;
     }
     int forward = from <= to;
-    for (sAnimEvent_00313868* e = self->head; e != 0; e = e->next)
+    for (sAnimEvent_00313868* event = self->head; event != 0; event = event->next)
     {
-        if (e->kind == 0)
+        if (event->kind == 0)
         {
-            float t = e->time;
+            float eventTime = event->time;
             if (forward)
             {
-                if (!(from < t && t <= to))
+                if (!(from < eventTime && eventTime <= to))
                     continue;
             }
             else
             {
-                if (!(to <= t && t < from))
+                if (!(to <= eventTime && eventTime < from))
                     continue;
             }
-            ulong bit = (ulong)1 << e->bit;
+            ulong bit = (ulong)1 << event->bit;
             ulong old = self->active;
             self->active = old | bit;
             self->triggered |= bit & ~old;
@@ -1433,11 +1433,11 @@ struct sAnimEvents_00313938
 // PORT: ulong is 64-bit here
 extern "C" void func_00313938(sAnimEvents_00313938* self, float time)
 {
-    for (sAnimEvent_00313938* e = self->head; e != 0; e = e->next)
+    for (sAnimEvent_00313938* event = self->head; event != 0; event = event->next)
     {
-        if (e->kind == 0 && e->time == time)
+        if (event->kind == 0 && event->time == time)
         {
-            ulong bit = (ulong)1 << e->bit;
+            ulong bit = (ulong)1 << event->bit;
             ulong old = self->active;
             self->active = old | bit;
             self->triggered |= bit & ~old;
@@ -1453,11 +1453,11 @@ INCLUDE_ASM("animation/rideranimbase", func_003139A8);
 extern "C" void func_003139A8(sAnimEvents_00313938* self)
 {
     self->dirty = 1;
-    for (sAnimEvent_00313938* e = self->head; e != 0; e = e->next)
+    for (sAnimEvent_00313938* event = self->head; event != 0; event = event->next)
     {
-        if (e->kind != 0)
+        if (event->kind != 0)
         {
-            ulong bit = (ulong)1 << e->bit;
+            ulong bit = (ulong)1 << event->bit;
             ulong old = self->active;
             self->active = old | bit;
             self->triggered |= bit & ~old;

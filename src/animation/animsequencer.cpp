@@ -209,10 +209,10 @@ extern "C" void func_00313C50(void* self, int i, int anim)
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313CF0);
 #ifdef SKIP_ASM
-extern "C" void func_00313CF0(void* self, int a1, float val)
+extern "C" void func_00313CF0(void* self, int index, float val)
 {
-    char* p = (char*)self + a1 * 0x1c;
-    *(float*)(p + 0x8) = val;
+    char* slot = (char*)self + index * 0x1c;
+    *(float*)(slot + 0x8) = val;
     *(int*)((char*)self + 0xc4) = 1;
 }
 #endif
@@ -220,36 +220,36 @@ extern "C" void func_00313CF0(void* self, int a1, float val)
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313D10);
 #ifdef SKIP_ASM
-extern "C" void func_00313D10(int arg0, int arg1, float fparg0) {
-    (*(float *)((char*)(((arg1 * 0x1C) + arg0)) + (0xC))) = fparg0;
+extern "C" void func_00313D10(int sequence, int index, float fparg0) {
+    (*(float *)((char*)(((index * 0x1C) + sequence)) + (0xC))) = fparg0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313D28);
 #ifdef SKIP_ASM
-extern "C" void func_00313D28(void* self, int a1, float val)
+extern "C" void func_00313D28(void* self, int index, float val)
 {
-    char* p = (char*)self + a1 * 0x1c;
-    *(float*)(p + 0x14) = val;
+    char* slot = (char*)self + index * 0x1c;
+    *(float*)(slot + 0x14) = val;
 }
 #endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313D40);
 #ifdef SKIP_ASM
-extern "C" void func_00313D40(void* self, int a1, int val)
+extern "C" void func_00313D40(void* self, int index, int val)
 {
-    char* p = (char*)self + a1 * 0x1c;
-    *(int*)(p + 0x1c) = val;
+    char* slot = (char*)self + index * 0x1c;
+    *(int*)(slot + 0x1c) = val;
 }
 #endif
 
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313D58);
 #ifdef SKIP_ASM
-extern "C" void func_00313D58(int arg0, int arg1) {
-    (*(int *)((char*)(((arg1 * 0x1C) + arg0)) + (0x18))) = 0;
+extern "C" void func_00313D58(int sequence, int index) {
+    (*(int *)((char*)(((index * 0x1C) + sequence)) + (0x18))) = 0;
 }
 #endif
 
@@ -315,36 +315,36 @@ class cAsStream;
 extern "C" void func_00313DD0(void* node, cAsStream* stream)
 {
     char* self = (char*)node;
-    char* s = (char*)stream;
-    Ser_313DD0(s, self + 0x0, 0x4);
-    Ser_313DD0(s, self + 0x4, 0x54);
-    Ser_313DD0(s, self + 0x60, 0x20);
-    Ser_313DD0(s, self + 0x80, 0x4);
-    Ser_313DD0(s, self + 0x84, 0x4);
-    Ser_313DD0(s, self + 0x88, 0x8);
-    Ser_313DD0(s, self + 0x90, 0x4);
-    Ser_313DD0(s, self + 0x94, 0x4);
-    Ser_313DD0(s, self + 0x98, 0x4);
-    Ser_313DD0(s, self + 0x9C, 0x4);
-    Ser_313DD0(s, self + 0xA0, 0x4);
-    Ser_313DD0(s, self + 0xA4, 0x4);
-    Ser_313DD0(s, self + 0xA8, 0x4);
-    Ser_313DD0(s, self + 0xB0, 0x10);
-    Ser_313DD0(s, self + 0xC0, 0x4);
-    Ser_313DD0(s, self + 0xC4, 0x4);
+    char* streamPtr = (char*)stream;
+    Ser_313DD0(streamPtr, self + 0x0, 0x4);
+    Ser_313DD0(streamPtr, self + 0x4, 0x54);
+    Ser_313DD0(streamPtr, self + 0x60, 0x20);
+    Ser_313DD0(streamPtr, self + 0x80, 0x4);
+    Ser_313DD0(streamPtr, self + 0x84, 0x4);
+    Ser_313DD0(streamPtr, self + 0x88, 0x8);
+    Ser_313DD0(streamPtr, self + 0x90, 0x4);
+    Ser_313DD0(streamPtr, self + 0x94, 0x4);
+    Ser_313DD0(streamPtr, self + 0x98, 0x4);
+    Ser_313DD0(streamPtr, self + 0x9C, 0x4);
+    Ser_313DD0(streamPtr, self + 0xA0, 0x4);
+    Ser_313DD0(streamPtr, self + 0xA4, 0x4);
+    Ser_313DD0(streamPtr, self + 0xA8, 0x4);
+    Ser_313DD0(streamPtr, self + 0xB0, 0x10);
+    Ser_313DD0(streamPtr, self + 0xC0, 0x4);
+    Ser_313DD0(streamPtr, self + 0xC4, 0x4);
     int n = 0;
-    char* p = *(char**)(self + 0xAC);
-    if (p != 0) {
-        int c = 0;
+    char* trigger = *(char**)(self + 0xAC);
+    if (trigger != 0) {
+        int count = 0;
         do {
-            p = *(char**)(p + 0xC);
-            c++;
-        } while (p != 0);
-        n = c;
+            trigger = *(char**)(trigger + 0xC);
+            count++;
+        } while (trigger != 0);
+        n = count;
     }
-    Ser_313DD0(s, &n, 4);
-    for (p = *(char**)(self + 0xAC); p; p = *(char**)(p + 0xC)) {
-        Ser_313DD0(s, p, 0x10);
+    Ser_313DD0(streamPtr, &n, 4);
+    for (trigger = *(char**)(self + 0xAC); trigger; trigger = *(char**)(trigger + 0xC)) {
+        Ser_313DD0(streamPtr, trigger, 0x10);
     }
 }
 #endif
@@ -370,35 +370,35 @@ static inline void Read_314050(char* s, void* p, int n)
 extern "C" void func_00314050(void* node, void* stream)
 {
     char* self = (char*)node;
-    char* s = (char*)stream;
-    Read_314050(s, self + 0x0, 0x4);
-    Read_314050(s, self + 0x4, 0x54);
-    Read_314050(s, self + 0x60, 0x20);
-    Read_314050(s, self + 0x80, 0x4);
-    Read_314050(s, self + 0x84, 0x4);
-    Read_314050(s, self + 0x88, 0x8);
-    Read_314050(s, self + 0x90, 0x4);
-    Read_314050(s, self + 0x94, 0x4);
-    Read_314050(s, self + 0x98, 0x4);
-    Read_314050(s, self + 0x9C, 0x4);
-    Read_314050(s, self + 0xA0, 0x4);
-    Read_314050(s, self + 0xA4, 0x4);
-    Read_314050(s, self + 0xA8, 0x4);
-    Read_314050(s, self + 0xB0, 0x10);
-    Read_314050(s, self + 0xC0, 0x4);
-    Read_314050(s, self + 0xC4, 0x4);
+    char* streamPtr = (char*)stream;
+    Read_314050(streamPtr, self + 0x0, 0x4);
+    Read_314050(streamPtr, self + 0x4, 0x54);
+    Read_314050(streamPtr, self + 0x60, 0x20);
+    Read_314050(streamPtr, self + 0x80, 0x4);
+    Read_314050(streamPtr, self + 0x84, 0x4);
+    Read_314050(streamPtr, self + 0x88, 0x8);
+    Read_314050(streamPtr, self + 0x90, 0x4);
+    Read_314050(streamPtr, self + 0x94, 0x4);
+    Read_314050(streamPtr, self + 0x98, 0x4);
+    Read_314050(streamPtr, self + 0x9C, 0x4);
+    Read_314050(streamPtr, self + 0xA0, 0x4);
+    Read_314050(streamPtr, self + 0xA4, 0x4);
+    Read_314050(streamPtr, self + 0xA8, 0x4);
+    Read_314050(streamPtr, self + 0xB0, 0x10);
+    Read_314050(streamPtr, self + 0xC0, 0x4);
+    Read_314050(streamPtr, self + 0xC4, 0x4);
     int n;
-    Read_314050(s, &n, 4);
+    Read_314050(streamPtr, &n, 4);
     char* tail = *(char**)(self + 0xAC);
     for (int i = 0; i < n; i++) {
-        char* p = (char*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
-        Read_314050(s, p, 0x10);
+        char* trigger = (char*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
+        Read_314050(streamPtr, trigger, 0x10);
         if (*(char**)(self + 0xAC) != 0) {
-            *(char**)(tail + 0xC) = p;
+            *(char**)(tail + 0xC) = trigger;
         } else {
-            *(char**)(self + 0xAC) = p;
+            *(char**)(self + 0xAC) = trigger;
         }
-        tail = p;
+        tail = trigger;
     }
 }
 #endif
@@ -464,12 +464,12 @@ extern "C" void func_00314368(sSequencer_00314368* self, sSeqNode_00314368* node
 {
     if (self->mFirstSequence != 0)
     {
-        sSeqNode_00314368* p = self->mFirstSequence;
-        while (p->next != 0)
+        sSeqNode_00314368* tail = self->mFirstSequence;
+        while (tail->next != 0)
         {
-            p = p->next;
+            tail = tail->next;
         }
-        p->next = node;
+        tail->next = node;
     }
     else
     {
@@ -806,13 +806,13 @@ struct sSequencer_003147F0 {
 
 extern "C" void func_00313DD0(void* node, cAsStream* s);
 
-extern "C" void func_003147F0(sSequencer_003147F0* self, cAsStream* s)
+extern "C" void func_003147F0(sSequencer_003147F0* self, cAsStream* stream)
 {
-    s->serialize(self, 4);
+    stream->serialize(self, 4);
     sSeqNode_003147F0* n = self->mFirstSequence;
     for (int i = 0; i < self->mCount; i++)
     {
-        func_00313DD0(n, s);
+        func_00313DD0(n, stream);
         n = n->next;
     }
 }
@@ -910,10 +910,10 @@ INCLUDE_ASM("animation/animsequencer", func_00314A18__FPvi);
 // PORT: asm label (same binding the unit uses for func_00314AA0's two-argument body).
 void func_00314AA0_impl(void* self, char* data) __asm__("func_00314AA0");
 
-void func_00314A18(void* self, int a1)
+void func_00314A18(void* self, int data)
 {
-    *(int*)self = a1;
-    func_00314AA0_impl(self, (char*)a1);
+    *(int*)self = data;
+    func_00314AA0_impl(self, (char*)data);
 }
 #endif
 
@@ -934,8 +934,8 @@ INCLUDE_ASM("animation/animsequencer", func_00314A60);
 void func_00314AA0_impl(void* self, char* data) __asm__("func_00314AA0");
 extern "C" char *func_003E22F0(int, int);
 
-extern "C" void func_00314A60(void *self, int a1, int a2) {
-    char *data = func_003E22F0(a1, a2);
+extern "C" void func_00314A60(void *self, int name, int flags) {
+    char *data = func_003E22F0(name, flags);
     *(char **)self = data;
     func_00314AA0_impl(self, data);
 }
@@ -962,9 +962,9 @@ void func_00314AA0_impl(void* self, char* data)
 INCLUDE_ASM("animation/animsequencer", func_00314AC0);
 #ifdef SKIP_ASM
 extern "C" short func_00314AC0(void *self) {
-    char *p = *(char **)((char *)self + 4);
-    if (p != 0) {
-        return *(short *)(p + 4);
+    char *header = *(char **)((char *)self + 4);
+    if (header != 0) {
+        return *(short *)(header + 4);
     }
     return 0;
 }
@@ -1043,7 +1043,7 @@ extern "C" void* cMdfArchive_getModelPart(sMdfArchive* self, const char* name)
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314C98);
 #ifdef SKIP_ASM
-extern "C" int func_00314C98(void *arg0, int arg1) {
-    return (*(int *)((char*)(arg0) + (8))) + (arg1 * 0x60);
+extern "C" int func_00314C98(void *archive, int index) {
+    return (*(int *)((char*)(archive) + (8))) + (index * 0x60);
 }
 #endif

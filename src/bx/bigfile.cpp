@@ -128,12 +128,12 @@ INCLUDE_ASM("bx/bigfile", func_00316A00__FPv);
 #ifdef SKIP_ASM
 void* func_00316A00(void* self)
 {
-    int t0 = 0;
-    *(int*)self = t0;
+    int zero = 0;
+    *(int*)self = zero;
     *(int*)((char*)self + 0x10) = 0x10;
-    *(int*)((char*)self + 0x4) = t0;
-    *(int*)((char*)self + 0x8) = t0;
-    *(int*)((char*)self + 0xc) = t0;
+    *(int*)((char*)self + 0x4) = zero;
+    *(int*)((char*)self + 0x8) = zero;
+    *(int*)((char*)self + 0xc) = zero;
     return self;
 }
 #endif

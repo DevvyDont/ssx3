@@ -322,44 +322,44 @@ extern "C" void* func_003150F8(int, int);
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158B8);
 #ifdef SKIP_ASM
-extern "C" float func_003158B8(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x1C)));
+extern "C" float func_003158B8(void *riderAnim) {
+    return (*(float *)((char*)(riderAnim) + (0x1C)));
 }
 #endif
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158C0);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long func_003158C0(void *arg0) {
-    return (*(long *)((char*)(arg0) + (0x20)));
+extern "C" long func_003158C0(void *riderAnim) {
+    return (*(long *)((char*)(riderAnim) + (0x20)));
 }
 #endif
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158C8);
 #ifdef SKIP_ASM
-extern "C" int func_003158C8(int arg0) {
-    return arg0 + 0x30;
+extern "C" int func_003158C8(int riderAnim) {
+    return riderAnim + 0x30;
 }
 #endif
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158D0);
 #ifdef SKIP_ASM
-extern "C" int func_003158D0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18)));
+extern "C" int func_003158D0(void *riderAnim) {
+    return (*(int *)((char*)(riderAnim) + (0x18)));
 }
 #endif
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158D8);
 #ifdef SKIP_ASM
-extern "C" void func_003158D8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_003158D8(void *riderAnim, int isFlipped) {
+    (*(int *)((char*)(riderAnim) + (0x18))) = isFlipped;
 }
 #endif
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158E0);
 #ifdef SKIP_ASM
-extern "C" void func_003158E0(void *arg0, float fparg0) {
-    (*(float *)((char*)(arg0) + (0x1C))) = fparg0;
+extern "C" void func_003158E0(void *riderAnim, float fparg0) {
+    (*(float *)((char*)(riderAnim) + (0x1C))) = fparg0;
 }
 #endif
 //100%
@@ -371,43 +371,43 @@ extern t4Vector t4vect_Origin;
 extern t4Vector t4vect_ZAxis;
 
 extern "C" void func_003158E8(void *self, float angle) {
-    t4Vector q;
-    float s;
-    float c;
+    t4Vector rotation;
+    float sinHalf;
+    float cosHalf;
     const t4Vector* axis = &t4vect_ZAxis;
 
     *(t4Vector *)((char*)self + 0x30) = t4vect_Origin;
-    func_0031BE50(&s, &c, -angle * 0.5f);
-    q.w = c;
-    q.x = s * axis->x;
-    q.y = s * axis->y;
-    q.z = s * axis->z;
-    *(t4Vector *)((char*)self + 0x40) = q;
+    func_0031BE50(&sinHalf, &cosHalf, -angle * 0.5f);
+    rotation.w = cosHalf;
+    rotation.x = sinHalf * axis->x;
+    rotation.y = sinHalf * axis->y;
+    rotation.z = sinHalf * axis->z;
+    *(t4Vector *)((char*)self + 0x40) = rotation;
 }
 #endif
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_00315988);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_00315988(void *arg0, void *arg1) {
-    (*(long long *)((char*)(arg0) + (0x30))) = (long long) (*(long long *)((char*)(arg1) + (0)));
-    (*(long long *)((char*)(arg0) + (0x40))) = (long long) (*(long long *)((char*)(arg1) + (0x10)));
+extern "C" void func_00315988(void *riderAnim, void *offset) {
+    (*(long long *)((char*)(riderAnim) + (0x30))) = (long long) (*(long long *)((char*)(offset) + (0)));
+    (*(long long *)((char*)(riderAnim) + (0x40))) = (long long) (*(long long *)((char*)(offset) + (0x10)));
 }
 #endif
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003159A0);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_003159A0(void *arg0, long arg1) {
-    (*(long *)((char*)(arg0) + (0x20))) = arg1;
+extern "C" void func_003159A0(void *riderAnim, long graftMask) {
+    (*(long *)((char*)(riderAnim) + (0x20))) = graftMask;
 }
 #endif
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003159A8);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_003159A8(void *arg0) {
-    (*(long *)((char*)(arg0) + (0x20))) = -1;
+extern "C" void func_003159A8(void *riderAnim) {
+    (*(long *)((char*)(riderAnim) + (0x20))) = -1;
 }
 #endif
 //100%

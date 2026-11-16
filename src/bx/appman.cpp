@@ -286,8 +286,8 @@ INCLUDE_ASM("bx/appman", func_00317308);
 #ifdef SKIP_ASM
 extern "C" void func_00317478(int);
 
-extern "C" void func_00317308(void *arg0) {
-    func_00317478((*(int *)((char*)(arg0) + (8))));
+extern "C" void func_00317308(void *appMan) {
+    func_00317478((*(int *)((char*)(appMan) + (8))));
 }
 #endif
 
@@ -483,9 +483,9 @@ int func_00317520(void)
 //100%
 INCLUDE_ASM("bx/appman", func_00317530__FPvf);
 #ifdef SKIP_ASM
-void func_00317530(void* self, float arg)
+void func_00317530(void* self, float rateScale)
 {
-    *(float*)((char*)self + 0xC) = arg;
+    *(float*)((char*)self + 0xC) = rateScale;
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0x14) = 0;
@@ -498,22 +498,22 @@ void func_00317530(void* self, float arg)
 //99.9%
 INCLUDE_ASM("bx/appman", func_00317550__FPvf);
 #ifdef SKIP_ASM
-void func_00317550(void* self, float arg)
+void func_00317550(void* self, float newValue)
 {
     float old8 = *(float*)((char*)self + 0x8);
     float raw = *(float*)((char*)self + 0xC);
-    float diff = arg - old8;
+    float diff = newValue - old8;
     float x0 = *(float*)((char*)self + 0x0);
     float rate = raw * diff;
-    int v1 = *(int*)((char*)cAppMan_TheAppMan + 0x1C);
-    x0 = x0 - arg;
+    int now = *(int*)((char*)cAppMan_TheAppMan + 0x1C);
+    x0 = x0 - newValue;
     rate = rate * 0.01f;
     *(float*)((char*)self + 0x4) = old8;
     *(float*)((char*)self + 0x18) = x0;
-    *(int*)((char*)self + 0x10) = v1;
+    *(int*)((char*)self + 0x10) = now;
     float result = -1.5f / rate;
-    *(float*)((char*)self + 0x14) = arg;
-    *(float*)((char*)self + 0x8) = arg;
+    *(float*)((char*)self + 0x14) = newValue;
+    *(float*)((char*)self + 0x8) = newValue;
     *(float*)((char*)self + 0x1C) = result;
 }
 #endif

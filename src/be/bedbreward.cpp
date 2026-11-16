@@ -324,8 +324,8 @@ INCLUDE_ASM("be/bedbreward", func_0015BBF0);
 #ifdef SKIP_ASM
 extern int cBENewRaceInterface_mNextLocation;
 
-extern "C" void func_0015BBF0(void* self, int v) {
-    cBENewRaceInterface_mNextLocation = v;
+extern "C" void func_0015BBF0(void* self, int nextLocation) {
+    cBENewRaceInterface_mNextLocation = nextLocation;
 }
 #endif
 //100%
@@ -381,8 +381,8 @@ INCLUDE_ASM("be/bedbreward", func_0015BC60);
 #ifdef SKIP_ASM
 extern void *cBENewRaceInterface_instance;
 
-extern "C" void func_0015BC60(int arg0) {
-    (*(int *)((char*)(cBENewRaceInterface_instance) + (8))) = arg0;
+extern "C" void func_0015BC60(int isActive) {
+    (*(int *)((char*)(cBENewRaceInterface_instance) + (8))) = isActive;
 }
 #endif
 //100%
@@ -413,8 +413,8 @@ INCLUDE_ASM("be/bedbreward", func_0015BCB0);
 #ifdef SKIP_ASM
 extern void *cBENewPlayerInterface_instance;
 
-extern "C" void func_0015BCB0(int arg0) {
-    (*(int *)((char*)(cBENewPlayerInterface_instance) + (8))) = arg0;
+extern "C" void func_0015BCB0(int isActive) {
+    (*(int *)((char*)(cBENewPlayerInterface_instance) + (8))) = isActive;
 }
 #endif
 
@@ -449,15 +449,15 @@ extern "C" void func_0015BCD0(void)
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015BCF8);
 #ifdef SKIP_ASM
-extern "C" int func_0015BCF8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x10)));
+extern "C" int func_0015BCF8(void *missionInterface) {
+    return (*(int *)((char*)(missionInterface) + (0x10)));
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015BD00);
 #ifdef SKIP_ASM
-extern "C" void func_0015BD00(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x10))) = arg1;
+extern "C" void func_0015BD00(void *missionInterface, int setFromFE) {
+    (*(int *)((char*)(missionInterface) + (0x10))) = setFromFE;
 }
 #endif
 //100%
@@ -465,8 +465,8 @@ INCLUDE_ASM("be/bedbreward", func_0015BD08);
 #ifdef SKIP_ASM
 extern void *cBEMissionInterface_instance;
 
-extern "C" void func_0015BD08(int arg0) {
-    (*(int *)((char*)(cBEMissionInterface_instance) + (8))) = arg0;
+extern "C" void func_0015BD08(int isActive) {
+    (*(int *)((char*)(cBEMissionInterface_instance) + (8))) = isActive;
 }
 #endif
 //100%
@@ -519,10 +519,10 @@ INCLUDE_ASM("be/bedbreward", func_0015BEC0);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015BEC0(void* self, int arg1)
+extern "C" void func_0015BEC0(void* self, int useMetricUnits)
 {
-    int b = arg1 != 0;
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x80000) | (b << 19);
+    int enabled = useMetricUnits != 0;
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x80000) | (enabled << 19);
 }
 #endif
 //100%
@@ -530,9 +530,9 @@ INCLUDE_ASM("be/bedbreward", func_0015BEE8);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015BEE8(void* self, int arg1)
+extern "C" void func_0015BEE8(void* self, int widescreen)
 {
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x300000) | ((arg1 & 3) << 20);
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x300000) | ((widescreen & 3) << 20);
 }
 #endif
 //100%
@@ -540,9 +540,9 @@ INCLUDE_ASM("be/bedbreward", func_0015BF10);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015BF10(void* self, int arg1)
+extern "C" void func_0015BF10(void* self, int language)
 {
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x1C00000) | ((arg1 & 7) << 22);
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x1C00000) | ((language & 7) << 22);
 }
 #endif
 //100%
@@ -550,9 +550,9 @@ INCLUDE_ASM("be/bedbreward", func_0015BF38);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015BF38(void* self, int arg1)
+extern "C" void func_0015BF38(void* self, int brightness)
 {
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x1E000000) | ((arg1 & 0xF) << 25);
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x1E000000) | ((brightness & 0xF) << 25);
 }
 #endif
 //100%
@@ -560,9 +560,9 @@ INCLUDE_ASM("be/bedbreward", func_0015BF60);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015BF60(void* self, int arg1)
+extern "C" void func_0015BF60(void* self, int replayOption)
 {
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x20000000) | ((arg1 & 1) << 29);
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x20000000) | ((replayOption & 1) << 29);
 }
 #endif
 //100%
@@ -585,9 +585,9 @@ INCLUDE_ASM("be/bedbreward", func_0015BFA8);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015BFA8(void* self, int arg1)
+extern "C" void func_0015BFA8(void* self, int soundMode)
 {
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x3000) | ((arg1 & 3) << 12);
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x3000) | ((soundMode & 3) << 12);
 }
 #endif
 //100%
@@ -595,9 +595,9 @@ INCLUDE_ASM("be/bedbreward", func_0015BFD0);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015BFD0(void* self, int arg1)
+extern "C" void func_0015BFD0(void* self, int audioMix)
 {
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xC000) | ((arg1 & 3) << 14);
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xC000) | ((audioMix & 3) << 14);
 }
 #endif
 //100%
@@ -605,9 +605,9 @@ INCLUDE_ASM("be/bedbreward", func_0015BFF8);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015BFF8(void* self, int arg1)
+extern "C" void func_0015BFF8(void* self, int radioVolume)
 {
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF) | (arg1 & 0xF);
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF) | (radioVolume & 0xF);
 }
 #endif
 //100%
@@ -615,9 +615,9 @@ INCLUDE_ASM("be/bedbreward", func_0015C018);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015C018(void* self, int arg1)
+extern "C" void func_0015C018(void* self, int charVolume)
 {
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF0) | ((arg1 & 0xF) << 4);
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF0) | ((charVolume & 0xF) << 4);
 }
 #endif
 //100%
@@ -625,9 +625,9 @@ INCLUDE_ASM("be/bedbreward", func_0015C040);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015C040(void* self, int arg1)
+extern "C" void func_0015C040(void* self, int sfxVolume)
 {
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF00) | ((arg1 & 0xF) << 8);
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF00) | ((sfxVolume & 0xF) << 8);
 }
 #endif
 //100%
@@ -635,10 +635,10 @@ INCLUDE_ASM("be/bedbreward", func_0015C068);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015C068(void* self, int arg1)
+extern "C" void func_0015C068(void* self, int useArcadeSfx)
 {
-    int b = arg1 != 0;
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x10000) | (b << 16);
+    int enabled = useArcadeSfx != 0;
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x10000) | (enabled << 16);
 }
 #endif
 //100%
@@ -646,10 +646,10 @@ INCLUDE_ASM("be/bedbreward", func_0015C090);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015C090(void* self, int arg1)
+extern "C" void func_0015C090(void* self, int useDJSpeech)
 {
-    int b = arg1 != 0;
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x20000) | (b << 17);
+    int enabled = useDJSpeech != 0;
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x20000) | (enabled << 17);
 }
 #endif
 //100%
@@ -657,10 +657,10 @@ INCLUDE_ASM("be/bedbreward", func_0015C0B8);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015C0B8(void* self, int arg1)
+extern "C" void func_0015C0B8(void* self, int useVoip)
 {
-    int b = arg1 != 0;
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x40000) | (b << 18);
+    int enabled = useVoip != 0;
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x40000) | (enabled << 18);
 }
 #endif
 //100%
@@ -747,9 +747,9 @@ INCLUDE_ASM("be/bedbreward", func_0015C1B8);
 #ifdef SKIP_ASM
 extern sBEOpt_BE10 cBEOptionInterface_mOption;
 
-extern "C" void func_0015C1B8(void* self, int arg1)
+extern "C" void func_0015C1B8(void* self, int value)
 {
-    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & 0x3FFFFFFF) | (arg1 << 30);
+    cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & 0x3FFFFFFF) | (value << 30);
 }
 #endif
 //100%
@@ -775,8 +775,8 @@ INCLUDE_ASM("be/bedbreward", func_0015C200);
 #ifdef SKIP_ASM
 extern void *cBEOptionInterface_instance;
 
-extern "C" void func_0015C200(int arg0) {
-    (*(int *)((char*)(cBEOptionInterface_instance) + (8))) = arg0;
+extern "C" void func_0015C200(int isActive) {
+    (*(int *)((char*)(cBEOptionInterface_instance) + (8))) = isActive;
 }
 #endif
 //100%
@@ -819,8 +819,8 @@ extern "C" void func_0015C250(void)
 INCLUDE_ASM("be/bedbreward", func_0015C278);
 #ifdef SKIP_ASM
 
-extern "C" void func_0015C278(void* self, int v) {
-    cBENetworkInterface_networkOpt.bIsNetworkGame = v;
+extern "C" void func_0015C278(void* self, int isNetworkGame) {
+    cBENetworkInterface_networkOpt.bIsNetworkGame = isNetworkGame;
 }
 #endif
 //100%
@@ -988,8 +988,8 @@ extern "C" void* func_0015C3B8(void) {
 INCLUDE_ASM("be/bedbreward", func_0015C3C8);
 #ifdef SKIP_ASM
 
-extern "C" void func_0015C3C8(int arg0) {
-    (cBENetworkInterface_instance->bIsActive) = arg0;
+extern "C" void func_0015C3C8(int isActive) {
+    (cBENetworkInterface_instance->bIsActive) = isActive;
 }
 #endif
 //100%
@@ -1154,8 +1154,8 @@ INCLUDE_ASM("be/bedbreward", func_0015C6A0);
 #ifdef SKIP_ASM
 extern void *cBEStatInterface_instance;
 
-extern "C" void func_0015C6A0(int arg0) {
-    (*(int *)((char*)(cBEStatInterface_instance) + (8))) = arg0;
+extern "C" void func_0015C6A0(int isActive) {
+    (*(int *)((char*)(cBEStatInterface_instance) + (8))) = isActive;
 }
 #endif
 //100%
@@ -1219,8 +1219,8 @@ INCLUDE_ASM("be/bedbreward", func_0015C710);
 #ifdef SKIP_ASM
 extern void *cBEBAGTInterface_instance;
 
-extern "C" void func_0015C710(int arg0) {
-    (*(int *)((char*)(cBEBAGTInterface_instance) + (8))) = arg0;
+extern "C" void func_0015C710(int isActive) {
+    (*(int *)((char*)(cBEBAGTInterface_instance) + (8))) = isActive;
 }
 #endif
 //100%
@@ -1249,11 +1249,11 @@ extern "C" void func_0015C738(void)
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C760);
 #ifdef SKIP_ASM
-extern "C" int func_0015C760(void *arg0) {
+extern "C" int func_0015C760(void *scoreInterface) {
     int var_3;
 
     var_3 = 0;
-    if (((*(int *)((char*)(arg0) + (0x10))) != 0) || ((*(int *)((char*)(arg0) + (0x14))) != 0)) {
+    if (((*(int *)((char*)(scoreInterface) + (0x10))) != 0) || ((*(int *)((char*)(scoreInterface) + (0x14))) != 0)) {
         var_3 = 1;
     }
     return var_3;
@@ -1262,11 +1262,11 @@ extern "C" int func_0015C760(void *arg0) {
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C788);
 #ifdef SKIP_ASM
-extern "C" int func_0015C788(void *arg0) {
+extern "C" int func_0015C788(void *scoreInterface) {
     int var_3;
 
     var_3 = 0;
-    if (((*(int *)((char*)(arg0) + (0x18))) >= 0) || ((*(int *)((char*)(arg0) + (0x1C))) >= 0)) {
+    if (((*(int *)((char*)(scoreInterface) + (0x18))) >= 0) || ((*(int *)((char*)(scoreInterface) + (0x1C))) >= 0)) {
         var_3 = 1;
     }
     return var_3;
@@ -1275,8 +1275,8 @@ extern "C" int func_0015C788(void *arg0) {
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C7B0);
 #ifdef SKIP_ASM
-extern "C" int func_0015C7B0(int arg0, int arg1) {
-    return (*(int *)(((char*)(arg0) + (arg1 << 2)) + (0x18)));
+extern "C" int func_0015C7B0(int scoreInterface, int profileIndex) {
+    return (*(int *)(((char*)(scoreInterface) + (profileIndex << 2)) + (0x18)));
 }
 #endif
 //100%
@@ -1284,8 +1284,8 @@ INCLUDE_ASM("be/bedbreward", func_0015C7C0);
 #ifdef SKIP_ASM
 extern void *cBEScoreInterface_instance;
 
-extern "C" void func_0015C7C0(int arg0) {
-    (*(int *)((char*)(cBEScoreInterface_instance) + (8))) = arg0;
+extern "C" void func_0015C7C0(int isActive) {
+    (*(int *)((char*)(cBEScoreInterface_instance) + (8))) = isActive;
 }
 #endif
 
@@ -1322,8 +1322,8 @@ INCLUDE_ASM("be/bedbreward", func_0015C808);
 #ifdef SKIP_ASM
 extern void *cBEAggressionInterface_instance;
 
-extern "C" void func_0015C808(int arg0) {
-    (*(int *)((char*)(cBEAggressionInterface_instance) + (8))) = arg0;
+extern "C" void func_0015C808(int isActive) {
+    (*(int *)((char*)(cBEAggressionInterface_instance) + (8))) = isActive;
 }
 #endif
 //100%

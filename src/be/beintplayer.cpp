@@ -194,10 +194,10 @@ extern "C" int func_00145C38(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = c * 0xF88 + profile * 0x9B50;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return *(int*)p;
+    int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    int off = charId * 0xF88 + profile * 0x9B50;
+    char* charRecord = (char*)cBELibrary_profileLib + off;
+    return *(int*)charRecord;
 }
 #endif
 
@@ -212,10 +212,10 @@ extern "C" void func_00145CB0(void* self, int index, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = c * 0xF88 + profile * 0x9B50;
-    char* p = (char*)cBELibrary_profileLib + off;
-    *(int*)p = value;
+    int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    int off = charId * 0xF88 + profile * 0x9B50;
+    char* charRecord = (char*)cBELibrary_profileLib + off;
+    *(int*)charRecord = value;
 }
 #endif
 
@@ -275,8 +275,8 @@ extern "C" int func_00145E68(void* self, int index, int kind)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    return func_001523E8(&((sProfileSlot_00145E68 (*)[10])cBELibrary_profileLib)[profile][c], kind);
+    int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    return func_001523E8(&((sProfileSlot_00145E68 (*)[10])cBELibrary_profileLib)[profile][charId], kind);
 }
 #endif
 
@@ -292,12 +292,12 @@ struct sProfileSlot_00145EF0 {
     char data[0xF88];
 };
 
-extern "C" int func_00145EF0(void* self, int index, int a, int b)
+extern "C" int func_00145EF0(void* self, int index, int locationId, int event)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(&((sProfileSlot_00145EF0 (*)[10])cBELibrary_profileLib)[profile][c], a, b);
+    int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(&((sProfileSlot_00145EF0 (*)[10])cBELibrary_profileLib)[profile][charId], locationId, event);
     return *stats != 0;
 }
 #endif
@@ -407,34 +407,34 @@ extern "C" int func_00146150(void* self, int index, int kind, int flag)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    signed char c = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    signed char charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
     if (flag) {
         if (kind == 0) {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 3) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 3) & 1;
         } else if (kind == 1) {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 4) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 4) & 1;
         } else if (kind == 2) {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 5) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 5) & 1;
         }
     } else {
         if (kind == 0) {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 0) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 0) & 1;
         } else if (kind == 1) {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 1) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 1) & 1;
         } else if (kind == 2) {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 2) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 2) & 1;
         }
     }
     return 0;
@@ -564,48 +564,48 @@ extern "C" int func_001466A0(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    signed char c = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    signed char charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
     int kind = cBELibrary_locationDB[cBELibrary_raceDB[16]].kind;
     if (*(signed char*)&cBELibrary_raceDB[18] == 5) {
         switch (kind) {
         case 0:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 6) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 6) & 1;
         }
         case 1:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 7) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 7) & 1;
         }
         case 2:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 8) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 8) & 1;
         }
         }
     } else {
         switch (kind) {
         case 0:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 9) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 9) & 1;
         }
         case 1:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 10) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 10) & 1;
         }
         case 2:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 11) & 1;
+            int off = charId * 0xF88 + profile * 0x9B50;
+            char* charRecord = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(charRecord + 0x278) >> 11) & 1;
         }
         }
     }
@@ -1134,20 +1134,20 @@ signed char cBENewPlayerInterface_getPlayerCharID(void* self, int index)
 //100%
 INCLUDE_ASM("be/beintplayer", func_001474A8);
 #ifdef SKIP_ASM
-extern "C" void func_001474A8(void* self, int a1, int a2)
+extern "C" void func_001474A8(void* self, int playerId, int value)
 {
-    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + a1 * 0x1c;
-    *(char*)(p + 0x12) = a2;
+    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + playerId * 0x1c;
+    *(char*)(playerEntry + 0x12) = value;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintplayer", func_001474C8);
 #ifdef SKIP_ASM
-extern "C" signed char func_001474C8(void* self, int a1)
+extern "C" signed char func_001474C8(void* self, int playerId)
 {
-    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + a1 * 0x1c;
-    return *(signed char*)(p + 0x12);
+    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + playerId * 0x1c;
+    return *(signed char*)(playerEntry + 0x12);
 }
 #endif
 
@@ -1165,8 +1165,8 @@ struct sPlayerCharFlags_0x10 {
 extern "C" int func_001474E8(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + id * 0x1c;
-    return ((sPlayerCharFlags_0x10*)(p + 0x10))->bit1;
+    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + id * 0x1c;
+    return ((sPlayerCharFlags_0x10*)(playerEntry + 0x10))->bit1;
 }
 #endif
 
@@ -1184,8 +1184,8 @@ struct sPlayerCharFlags_00147528 {
 extern "C" void func_00147528(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    sPlayerCharEntry* e = &cBENewPlayerInterface_tempPlayers[id];
-    ((sPlayerCharFlags_00147528*)((char*)e + 0x10))->bit1 = value;
+    sPlayerCharEntry* playerEntry = &cBENewPlayerInterface_tempPlayers[id];
+    ((sPlayerCharFlags_00147528*)((char*)playerEntry + 0x10))->bit1 = value;
 }
 #endif
 
@@ -1195,8 +1195,8 @@ INCLUDE_ASM("be/beintplayer", func_00147580);
 extern "C" int func_00147580(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + id * 0x1c;
-    return ((sPlayerCharFlags_0x10*)(p + 0x10))->bit3;
+    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + id * 0x1c;
+    return ((sPlayerCharFlags_0x10*)(playerEntry + 0x10))->bit3;
 }
 #endif
 
@@ -1214,8 +1214,8 @@ struct sPlayerCharFlags_001475C0 {
 extern "C" void func_001475C0(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    sPlayerCharEntry* e = &cBENewPlayerInterface_tempPlayers[id];
-    ((sPlayerCharFlags_001475C0*)((char*)e + 0x10))->bit3 = value;
+    sPlayerCharEntry* playerEntry = &cBENewPlayerInterface_tempPlayers[id];
+    ((sPlayerCharFlags_001475C0*)((char*)playerEntry + 0x10))->bit3 = value;
 }
 #endif
 
@@ -1401,9 +1401,9 @@ extern "C" void* func_00147908(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    char* p = (char*)cBELibrary_profileLib + profile * 0x9B50 + c * 0xF88;
-    return p + 0xE38;
+    int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9B50 + charId * 0xF88;
+    return charRecord + 0xE38;
 }
 #endif
 
@@ -1418,12 +1418,12 @@ extern "C" int func_00147980(void* self, int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = profile * 0x9B50 + c * 0xF88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    p = p + (bit / 32) * 4;
+    int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    int off = profile * 0x9B50 + charId * 0xF88;
+    char* charRecord = (char*)cBELibrary_profileLib + off;
+    charRecord = charRecord + (bit / 32) * 4;
     int mask = 1 << bit;
-    return (*(unsigned int*)(p + 0xF08) & mask) != 0;
+    return (*(unsigned int*)(charRecord + 0xF08) & mask) != 0;
 }
 #endif
 
@@ -1438,16 +1438,16 @@ extern "C" void func_00147A30(void* self, int index, int bit, int on)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = profile * 0x9B50 + c * 0xF88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    p += 0xF08;
+    int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    int off = profile * 0x9B50 + charId * 0xF88;
+    char* charRecord = (char*)cBELibrary_profileLib + off;
+    charRecord += 0xF08;
     int w = bit / 32;
-    int b = bit - w * 32;
+    int bitInWord = bit - w * 32;
     if (on)
-        *(unsigned int*)(p + (w << 2)) |= 1 << b;
+        *(unsigned int*)(charRecord + (w << 2)) |= 1 << bitInWord;
     else
-        *(unsigned int*)(p + (w << 2)) &= ~(1 << b);
+        *(unsigned int*)(charRecord + (w << 2)) &= ~(1 << bitInWord);
 }
 #endif
 
@@ -1471,9 +1471,9 @@ extern "C" int func_00147B20(void* self, int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    sProfileSlot_func_00147B20* s = (sProfileSlot_func_00147B20*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib);
-    return s->e[slot].a;
+    int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    sProfileSlot_func_00147B20* profileSlot = (sProfileSlot_func_00147B20*)((profile * 0x9B50 + charId * 0xF88) + (char*)cBELibrary_profileLib);
+    return profileSlot->e[slot].a;
 }
 #endif
 //100%
@@ -1496,9 +1496,9 @@ extern "C" int func_00147BB0(void* self, int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    sProfileSlot_func_00147BB0* s = (sProfileSlot_func_00147BB0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib);
-    return s->e[slot].b;
+    int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    sProfileSlot_func_00147BB0* profileSlot = (sProfileSlot_func_00147BB0*)((profile * 0x9B50 + charId * 0xF88) + (char*)cBELibrary_profileLib);
+    return profileSlot->e[slot].b;
 }
 #endif
 //100%
@@ -1509,15 +1509,15 @@ extern int cBELibrary_profileLib[];
 
 extern "C" void func_00147C40(void* self, int value, int flag)
 {
-    int c = cBELibrary_getCharacterID(0);
+    int charId = cBELibrary_getCharacterID(0);
     if (flag != 0) {
-        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
-        *(short*)(p + 0x280) = value;
-        *(short*)(p + 0x282) = 0;
+        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
+        *(short*)(charRecord + 0x280) = value;
+        *(short*)(charRecord + 0x282) = 0;
     } else {
-        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
-        *(short*)(p + 0x284) = value;
-        *(short*)(p + 0x286) = 0;
+        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
+        *(short*)(charRecord + 0x284) = value;
+        *(short*)(charRecord + 0x286) = 0;
     }
 }
 #endif
@@ -1529,16 +1529,16 @@ int cBELibrary_getCharacterID(int);
 
 extern "C" short func_00147CB8(void* self, int which)
 {
-    int c = cBELibrary_getCharacterID(0);
+    int charId = cBELibrary_getCharacterID(0);
     if (which != 0)
     {
-        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
-        return *(short*)(p + 0x280);
+        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
+        return *(short*)(charRecord + 0x280);
     }
     else
     {
-        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
-        return *(short*)(p + 0x284);
+        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
+        return *(short*)(charRecord + 0x284);
     }
 }
 #endif
@@ -1649,16 +1649,16 @@ extern int cBELibrary_profileLib[];
 
 extern "C" short func_00147F10(void* self, int flag)
 {
-    int c = cBELibrary_getCharacterID(0);
-    short r;
+    int charId = cBELibrary_getCharacterID(0);
+    short result;
     if (flag == 0) {
-        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
-        r = *(short*)(p + 0x286);
+        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
+        result = *(short*)(charRecord + 0x286);
     } else {
-        char* p = (char*)cBELibrary_profileLib + c * 0xF88;
-        r = *(short*)(p + 0x282);
+        char* charRecord = (char*)cBELibrary_profileLib + charId * 0xF88;
+        result = *(short*)(charRecord + 0x282);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -1776,42 +1776,42 @@ extern int cBELibrary_profileLib[];
 // Returns one of a character's seven stat levels for the given profile, or -1.
 extern "C" int func_00148158(void* self, int profile, unsigned int stat)
 {
-    int c = cBELibrary_getCharacterID(profile);
+    int charId = cBELibrary_getCharacterID(profile);
     switch (stat) {
     case 0: {
-        int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(p + 0xBDF);
+        int off = charId * 0xF88 + profile * 0x9B50;
+        char* charRecord = (char*)cBELibrary_profileLib + off;
+        return *(signed char*)(charRecord + 0xBDF);
     }
     case 1: {
-        int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(p + 0xBE0);
+        int off = charId * 0xF88 + profile * 0x9B50;
+        char* charRecord = (char*)cBELibrary_profileLib + off;
+        return *(signed char*)(charRecord + 0xBE0);
     }
     case 2: {
-        int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(p + 0xBE1);
+        int off = charId * 0xF88 + profile * 0x9B50;
+        char* charRecord = (char*)cBELibrary_profileLib + off;
+        return *(signed char*)(charRecord + 0xBE1);
     }
     case 3: {
-        int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(p + 0xBE2);
+        int off = charId * 0xF88 + profile * 0x9B50;
+        char* charRecord = (char*)cBELibrary_profileLib + off;
+        return *(signed char*)(charRecord + 0xBE2);
     }
     case 4: {
-        int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(p + 0xBE3);
+        int off = charId * 0xF88 + profile * 0x9B50;
+        char* charRecord = (char*)cBELibrary_profileLib + off;
+        return *(signed char*)(charRecord + 0xBE3);
     }
     case 5: {
-        int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(p + 0xBE4);
+        int off = charId * 0xF88 + profile * 0x9B50;
+        char* charRecord = (char*)cBELibrary_profileLib + off;
+        return *(signed char*)(charRecord + 0xBE4);
     }
     case 6: {
-        int off = c * 0xF88 + profile * 0x9B50;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return *(signed char*)(p + 0xBE5);
+        int off = charId * 0xF88 + profile * 0x9B50;
+        char* charRecord = (char*)cBELibrary_profileLib + off;
+        return *(signed char*)(charRecord + 0xBE5);
     }
     }
     return -1;
@@ -2116,24 +2116,24 @@ extern "C" signed char func_001488F0(void* self, int rider);
 
 extern "C" int func_00148950(void* self, int rider)
 {
-    int v;
-    v = func_001484E0(self, rider);
-    int sum = v / 5;
-    v = func_00148680(self, rider);
-    sum += v / 5;
-    v = func_00148410(self, rider);
-    sum += v / 5;
-    v = func_00148750(self, rider);
-    sum += v / 5;
-    v = func_00148820(self, rider);
-    sum += v / 5;
-    v = func_001488F0(self, rider);
-    sum += v / 5;
-    v = func_001485B0(self, rider);
-    sum += v / 5;
-    int r = sum / 7;
-    if (r > 0)
-        return r;
+    int statValue;
+    statValue = func_001484E0(self, rider);
+    int sum = statValue / 5;
+    statValue = func_00148680(self, rider);
+    sum += statValue / 5;
+    statValue = func_00148410(self, rider);
+    sum += statValue / 5;
+    statValue = func_00148750(self, rider);
+    sum += statValue / 5;
+    statValue = func_00148820(self, rider);
+    sum += statValue / 5;
+    statValue = func_001488F0(self, rider);
+    sum += statValue / 5;
+    statValue = func_001485B0(self, rider);
+    sum += statValue / 5;
+    int average = sum / 7;
+    if (average > 0)
+        return average;
     return 1;
 }
 #endif

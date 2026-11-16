@@ -396,15 +396,15 @@ extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
 // cBXString(a + b). PORT: pointer held in int for the negative header offsets.
-extern "C" cBXString* func_003185C8(cBXString* self, cBXString* a, cBXString* b)
+extern "C" cBXString* func_003185C8(cBXString* self, cBXString* left, cBXString* right)
 {
-    char* tmp = cBXString_EmptyString;
+    char* joined = cBXString_EmptyString;
     // PORT: read as int; reading a->Str (char*) schedules these loads differently (refactor gate, 2026-11-16)
-    int sa = *(int*)a;
-    int sb = *(int*)b;
-    cBXString_concatCopy((cBXString*)&tmp, *(int*)(sa - 8), (char*)sa, *(int*)(sb - 8), (char*)sb);
-    cBXString_cBXString1(self, (cBXString*)&tmp);
-    cBXString__cBXString((cBXString*)&tmp, 2);
+    int sa = *(int*)left;
+    int sb = *(int*)right;
+    cBXString_concatCopy((cBXString*)&joined, *(int*)(sa - 8), (char*)sa, *(int*)(sb - 8), (char*)sb);
+    cBXString_cBXString1(self, (cBXString*)&joined);
+    cBXString__cBXString((cBXString*)&joined, 2);
     return self;
 }
 #endif
@@ -474,12 +474,12 @@ struct sBXTmp_318760 {
 // cBXString(a + ch). PORT: pointer held in int for the negative header offset.
 extern "C" cBXString* func_00318760(cBXString* self, cBXString* bxString, char ch)
 {
-    sBXTmp_318760 tmp(cBXString_EmptyString);
-    char c = ch;
+    sBXTmp_318760 joined(cBXString_EmptyString);
+    char charBuf = ch;
     int sa = (int)bxString->Str;
-    cBXString_concatCopy((cBXString*)&tmp, *(int*)(sa - 8), (char*)sa, 1, &c);
-    cBXString_cBXString1(self, (cBXString*)&tmp);
-    cBXString__cBXString((cBXString*)&tmp, 2);
+    cBXString_concatCopy((cBXString*)&joined, *(int*)(sa - 8), (char*)sa, 1, &charBuf);
+    cBXString_cBXString1(self, (cBXString*)&joined);
+    cBXString__cBXString((cBXString*)&joined, 2);
     return self;
 }
 #endif
@@ -496,12 +496,12 @@ struct sBXTmp_3187C8 {
 // cBXString(ch + b). PORT: pointer held in int for the negative header offset.
 extern "C" cBXString* func_003187C8(cBXString* self, char ch, cBXString* bxString)
 {
-    sBXTmp_3187C8 tmp(cBXString_EmptyString);
-    char c = ch;
+    sBXTmp_3187C8 joined(cBXString_EmptyString);
+    char charBuf = ch;
     int sb = (int)bxString->Str;
-    cBXString_concatCopy((cBXString*)&tmp, 1, &c, *(int*)(sb - 8), (char*)sb);
-    cBXString_cBXString1(self, (cBXString*)&tmp);
-    cBXString__cBXString((cBXString*)&tmp, 2);
+    cBXString_concatCopy((cBXString*)&joined, 1, &charBuf, *(int*)(sb - 8), (char*)sb);
+    cBXString_cBXString1(self, (cBXString*)&joined);
+    cBXString__cBXString((cBXString*)&joined, 2);
     return self;
 }
 #endif
@@ -770,14 +770,14 @@ INCLUDE_ASM("bx/bxstring", func_00318C60);
 #ifdef SKIP_ASM
 extern "C" int func_0041AC40(int);
 
-extern "C" int func_00318C60(int *arg0) {
+extern "C" int func_00318C60(int *string) {
     int temp_2;
 
-    temp_2 = func_0041AC40(*arg0);
+    temp_2 = func_0041AC40(*string);
     if (temp_2 == 0) {
         return -1;
     }
-    return temp_2 - *arg0;
+    return temp_2 - *string;
 }
 #endif
 
@@ -963,10 +963,10 @@ extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int start
         count = len - start;
     if (len < start)
         count = 0;
-    char* tmp = cBXString_EmptyString;
-    func_003181E8(other, (cBXString*)&tmp, count, start, 0);
-    cBXString_cBXString1(self, (cBXString*)&tmp);
-    cBXString__cBXString((cBXString*)&tmp, 2);
+    char* substr = cBXString_EmptyString;
+    func_003181E8(other, (cBXString*)&substr, count, start, 0);
+    cBXString_cBXString1(self, (cBXString*)&substr);
+    cBXString__cBXString((cBXString*)&substr, 2);
     return self;
 }
 #endif

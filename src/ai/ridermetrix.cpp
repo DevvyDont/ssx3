@@ -108,12 +108,12 @@ extern "C" int func_00117400(sRiderMetrix_00117400* self, int type)
     {
         for (int i = 0; i < self->count; i++)
         {
-            int t = self->entries[i].type;
-            if (t != 0x34)
+            int entryType = self->entries[i].type;
+            if (entryType != 0x34)
             {
-                int off = (t & ~0x1F) >> 3;
-                int* b = self->bits;
-                *(int*)((char*)b + off) |= 1 << t;
+                int off = (entryType & ~0x1F) >> 3;
+                int* bitArray = self->bits;
+                *(int*)((char*)bitArray + off) |= 1 << entryType;
             }
         }
         self->dirty = 0;
@@ -255,23 +255,23 @@ static inline bool rmIsState_117638(char* p, int st)
 // PORT: g++ <? (min) operator, removed in GCC 4.3.
 extern "C" void func_00117638(void* self, int points)
 {
-    char* s = (char*)self;
+    char* metrix = (char*)self;
     if (points > 0)
     {
-        int n = *(int*)(s + 0x9C) + 1;
-        *(int*)(s + 0x9C) = n;
-        float m = ((float)n + 10.0f) * 0.05000000074505806f;
-        float k = rmClamp_117638(m, 0.5f, 2.0f);
-        *(float*)(s + 0xA4) = -1.0f;
-        *(int*)(s + 0xA0) += (int)(points * k);
-        char* r = *(char**)(s + 0x1B0);
-        if (r != 0)
+        int n = *(int*)(metrix + 0x9C) + 1;
+        *(int*)(metrix + 0x9C) = n;
+        float rawMult = ((float)n + 10.0f) * 0.05000000074505806f;
+        float k = rmClamp_117638(rawMult, 0.5f, 2.0f);
+        *(float*)(metrix + 0xA4) = -1.0f;
+        *(int*)(metrix + 0xA0) += (int)(points * k);
+        char* hudBank = *(char**)(metrix + 0x1B0);
+        if (hudBank != 0)
         {
-            int v = 0;
-            char* p = r + 0x1D4;
-            if (!rmIsState_117638(p, 0x34))
-                v = *(int*)(r + 0x1E8);
-            func_001171A8(p, 3, v, n, 0.0f);
+            int curValue = 0;
+            char* hudSlot = hudBank + 0x1D4;
+            if (!rmIsState_117638(hudSlot, 0x34))
+                curValue = *(int*)(hudBank + 0x1E8);
+            func_001171A8(hudSlot, 3, curValue, n, 0.0f);
         }
     }
 }
@@ -1426,12 +1426,12 @@ extern "C" void func_001171A8(void* self, int type, int value, int arg, float f)
 extern "C" float func_00119448(char* self, float value)
 {
     *(int*)(self + 0x130) += 1;
-    char* p = *(char**)(self + 0x1B0);
-    if (p != 0)
+    char* hudBank = *(char**)(self + 0x1B0);
+    if (hudBank != 0)
     {
         if (*(float*)(self + 0x18) < value)
         {
-            func_001171A8(p + 0x270, 4, (int)value, 0, 0.0f);
+            func_001171A8(hudBank + 0x270, 4, (int)value, 0, 0.0f);
             *(float*)(self + 0x18) = value;
         }
     }
@@ -1777,15 +1777,15 @@ INCLUDE_ASM("ai/ridermetrix", func_00119BB0);
 #ifdef SKIP_ASM
 extern "C" float func_00119BB0(void* self, int a1)
 {
-    float r;
+    float result;
     if (a1)
     {
         cRiderMetrix_addHUDfx1(self, 0x21, 0, 0, 1.5f);
-        r = 0.10000000149011612f;
+        result = 0.10000000149011612f;
     }
     else
-        r = 0.0f;
-    return r;
+        result = 0.0f;
+    return result;
 }
 #endif
 

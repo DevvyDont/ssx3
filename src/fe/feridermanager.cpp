@@ -214,9 +214,9 @@ extern "C" void func_0019EC68(void* self);
 
 extern "C" void func_0019EBA0(void* self)
 {
-    void* p = *(void**)((char*)self + 0x8);
-    if (p != 0) {
-        cAnimModel__cAnimModel(p, 3);
+    void* animModel = *(void**)((char*)self + 0x8);
+    if (animModel != 0) {
+        cAnimModel__cAnimModel(animModel, 3);
     }
     char* o = *(char**)((char*)self + 0xC);
     if (o != 0) {
@@ -676,11 +676,11 @@ static inline void AddTo_F418(sVec_F418& dst, const sVec_F418& b)
 }
 
 // Moves the rider model's first transform by the vector v rotated into its current orientation.
-extern "C" void func_0019F418(void* self, sVec_F418* v)
+extern "C" void func_0019F418(void* self, sVec_F418* delta)
 {
     sVec_F418* pos = (sVec_F418*)((char*)self + 0xC30);
     sVec_F418* rot = (sVec_F418*)((char*)self + 0xC40);
-    AddTo_F418(*pos, Rot_F418(*rot, *v));
+    AddTo_F418(*pos, Rot_F418(*rot, *delta));
     func_0019F2D0(self);
 }
 #endif
@@ -723,16 +723,16 @@ static inline sQuat_F488 QuatMul_F488(const sQuat_F488& a, const sQuat_F488& b)
 extern "C" void func_0019F488(void* self, sQuat_F488* axis, float angle)
 {
     sQuat_F488* rot = (sQuat_F488*)((char*)self + 0xC40);
-    sQuat_F488 q;
-    float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
-    sQuat_F488 r;
-    r.w = c;
-    r.x = s * axis->x;
-    r.y = s * axis->y;
-    r.z = s * axis->z;
-    q = r;
-    *rot = QuatMul_F488(*rot, q);
+    sQuat_F488 turn;
+    float sinHalf, cosHalf;
+    func_0031BE50(&sinHalf, &cosHalf, angle * 0.5f);
+    sQuat_F488 rotQuat;
+    rotQuat.w = cosHalf;
+    rotQuat.x = sinHalf * axis->x;
+    rotQuat.y = sinHalf * axis->y;
+    rotQuat.z = sinHalf * axis->z;
+    turn = rotQuat;
+    *rot = QuatMul_F488(*rot, turn);
     func_0019F2D0(self);
 }
 #endif
@@ -801,11 +801,11 @@ static inline void AddTo_F578(sVec_F578& dst, const sVec_F578& b)
 }
 
 // Moves the rider model's first transform by the vector v rotated into its current orientation.
-extern "C" void func_0019F578(void* self, sVec_F578* v)
+extern "C" void func_0019F578(void* self, sVec_F578* delta)
 {
     sVec_F578* pos = (sVec_F578*)((char*)self + 0xC50);
     sVec_F578* rot = (sVec_F578*)((char*)self + 0xC60);
-    AddTo_F578(*pos, Rot_F578(*rot, *v));
+    AddTo_F578(*pos, Rot_F578(*rot, *delta));
     func_0019F2D0(self);
 }
 #endif
@@ -848,24 +848,24 @@ static inline sQuat_F5E8 QuatMul_F5E8(const sQuat_F5E8& a, const sQuat_F5E8& b)
 extern "C" void func_0019F5E8(void* self, sQuat_F5E8* axis, float angle)
 {
     sQuat_F5E8* rot = (sQuat_F5E8*)((char*)self + 0xC60);
-    sQuat_F5E8 q;
-    float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
-    sQuat_F5E8 r;
-    r.w = c;
-    r.x = s * axis->x;
-    r.y = s * axis->y;
-    r.z = s * axis->z;
-    q = r;
-    *rot = QuatMul_F5E8(*rot, q);
+    sQuat_F5E8 turn;
+    float sinHalf, cosHalf;
+    func_0031BE50(&sinHalf, &cosHalf, angle * 0.5f);
+    sQuat_F5E8 rotQuat;
+    rotQuat.w = cosHalf;
+    rotQuat.x = sinHalf * axis->x;
+    rotQuat.y = sinHalf * axis->y;
+    rotQuat.z = sinHalf * axis->z;
+    turn = rotQuat;
+    *rot = QuatMul_F5E8(*rot, turn);
     func_0019F2D0(self);
 }
 #endif
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F6A8);
 #ifdef SKIP_ASM
-extern "C" int func_0019F6A8(void *arg0, int arg1) {
-    return (*(int *)((char*)((*(void **)((char*)(arg0) + (8)))) + (0x2C))) + ((*(int *)(((char*)(arg0) + (arg1 << 2)) + (0xC7C))) << 5);
+extern "C" int func_0019F6A8(void *riderSlot, int index) {
+    return (*(int *)((char*)((*(void **)((char*)(riderSlot) + (8)))) + (0x2C))) + ((*(int *)(((char*)(riderSlot) + (index << 2)) + (0xC7C))) << 5);
 }
 #endif
 //100%
@@ -891,8 +891,8 @@ extern "C" void func_0019F6C8(void* self, int slot, cQuad128* src)
 //100%
 INCLUDE_ASM("fe/feridermanager", func_0019F6F0);
 #ifdef SKIP_ASM
-extern "C" int func_0019F6F0(void *arg0, int arg1) {
-    return (*(int *)((char*)((*(void **)((char*)(arg0) + (8)))) + (0x2C))) + ((*(int *)(((char*)(arg0) + (arg1 << 2)) + (0xC7C))) << 5) + 0x10;
+extern "C" int func_0019F6F0(void *riderSlot, int index) {
+    return (*(int *)((char*)((*(void **)((char*)(riderSlot) + (8)))) + (0x2C))) + ((*(int *)(((char*)(riderSlot) + (index << 2)) + (0xC7C))) << 5) + 0x10;
 }
 #endif
 //100%
@@ -918,8 +918,8 @@ INCLUDE_ASM("fe/feridermanager", func_0019F740);
 #ifdef SKIP_ASM
 extern "C" void func_00312AA0__FPvi(int, int);
 
-extern "C" void func_0019F740(void *arg0) {
-    func_00312AA0__FPvi((*(int *)((char*)(arg0) + (0xC))), 2);
+extern "C" void func_0019F740(void *riderSlot) {
+    func_00312AA0__FPvi((*(int *)((char*)(riderSlot) + (0xC))), 2);
 }
 #endif
 //100%
@@ -927,8 +927,8 @@ INCLUDE_ASM("fe/feridermanager", func_0019F760);
 #ifdef SKIP_ASM
 extern "C" void func_00312AB0(int, int);
 
-extern "C" void func_0019F760(void *arg0) {
-    func_00312AB0((*(int *)((char*)(arg0) + (0xC))), 2);
+extern "C" void func_0019F760(void *riderSlot) {
+    func_00312AB0((*(int *)((char*)(riderSlot) + (0xC))), 2);
 }
 #endif
 
@@ -1523,10 +1523,10 @@ extern "C" void* func_0019E3D0(void* self);
 
 extern "C" void* func_001A03C0(void* self)
 {
-    char* p = (char*)self;
+    char* slot = (char*)self;
     int i;
-    for (i = 1; i != -1; i--, p += 0xCE0) {
-        func_0019E3D0(p);
+    for (i = 1; i != -1; i--, slot += 0xCE0) {
+        func_0019E3D0(slot);
     }
     return self;
 }
@@ -1544,10 +1544,10 @@ extern "C" void func_001A0420(void* self, int flags)
     func_001A04C8(self);
     char* base = (char*)self;
     if (base != 0) {
-        char* p = base + 0x19C0;
-        while (base != p) {
-            p -= 0xCE0;
-            func_0019E498(p, 0);
+        char* slot = base + 0x19C0;
+        while (base != slot) {
+            slot -= 0xCE0;
+            func_0019E498(slot, 0);
         }
     }
     if (flags & 1) {
@@ -1568,10 +1568,10 @@ struct sRiderSlot_001A0498 {
 extern "C" void func_001A0498(sRiderSlot_001A0498* self)
 {
     int i;
-    sRiderSlot_001A0498* p = self;
+    sRiderSlot_001A0498* slot = self;
     for (i = 0; i < 2; i++) {
-        p->index = i;
-        p++;
+        slot->index = i;
+        slot++;
     }
 }
 #endif
@@ -1604,26 +1604,26 @@ extern "C" void func_001A0508(void* self, int idx, int a2, int a3)
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A0538);
 #ifdef SKIP_ASM
-extern "C" void* func_001A0538(void* self, int a1)
+extern "C" void* func_001A0538(void* self, int index)
 {
-    return (char*)self + a1 * 0xce0;
+    return (char*)self + index * 0xce0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A0548);
 #ifdef SKIP_ASM
-extern "C" void* func_001A0548(void* self, int a1)
+extern "C" void* func_001A0548(void* self, int index)
 {
-    return (char*)self + a1 * 0xce0;
+    return (char*)self + index * 0xce0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A0558);
 #ifdef SKIP_ASM
-extern "C" int func_001A0558(int arg0, int arg1) {
-    return (*(int *)((char*)(((arg1 * 0xCE0) + arg0)) + (0xCC8)));
+extern "C" int func_001A0558(int slots, int index) {
+    return (*(int *)((char*)(((index * 0xCE0) + slots)) + (0xCC8)));
 }
 #endif
 

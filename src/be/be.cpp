@@ -150,11 +150,11 @@ extern void* cBE_library;
 extern "C" void func_00149A88(void* p, char c);
 extern "C" void func_0014FC40(char c);
 
-extern "C" void func_0014DE28(void* self, char c)
+extern "C" void func_0014DE28(void* self, char playerIndex)
 {
     if (cBE_library)
-        func_00149A88(cBE_library, c);
-    func_0014FC40(c);
+        func_00149A88(cBE_library, playerIndex);
+    func_0014FC40(playerIndex);
 }
 #endif
 
@@ -220,13 +220,13 @@ public:
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
-extern "C" void func_0014DF08(void* self, cBEReplayStream* s)
+extern "C" void func_0014DF08(void* self, cBEReplayStream* stream)
 {
-    s->write(&cBE_currentState, 4);
+    stream->write(&cBE_currentState, 4);
     for (int i = 0; i < 14; i++)
     {
         if (cBE_getInterface_Fv(self, i))
-            cBE_getInterface_Fv(self, i)->writeToReplayFrame(s);
+            cBE_getInterface_Fv(self, i)->writeToReplayFrame(stream);
     }
 }
 #endif
@@ -278,8 +278,8 @@ extern "C" void func_0014E050(void* self, char* buf)
 {
     func_0014A188(buf);
     int crc = func_003E62D0(buf, func_0014E048_self(self) - 4, 0xFBEA);
-    char* p = buf + (func_0014E048_self(self) - 4);
-    memcpy(p, &crc, 4);
+    char* crcSlot = buf + (func_0014E048_self(self) - 4);
+    memcpy(crcSlot, &crc, 4);
 }
 #endif
 

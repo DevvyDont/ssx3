@@ -457,8 +457,8 @@ struct sElem_CBA0 {
     sElem_CBA0() { func_0020EAA0(sub); }
 };
 
-extern "C" void *func_0021CBA0(void *arg0) {
-    char* self = (char*)arg0;
+extern "C" void *func_0021CBA0(void *state) {
+    char* self = (char*)state;
     func_0039E2A0_CBA0(self, 0);
     *(char**)(self + 8) = cOVStateHUD1P_vtbl;
     new (self + 0x48) sElem_CBA0[2];
@@ -469,7 +469,7 @@ extern "C" void *func_0021CBA0(void *arg0) {
     *(int*)(self + 0x484) = 0;
     *(float*)(self + 0x488) = 1.0f;
     *(float*)(self + 0x48C) = 1.0f;
-    return arg0;
+    return state;
 }
 #endif
 
@@ -506,9 +506,9 @@ extern "C" void cOVStateHUD1P__cOVStateHUD1P(void *self, int flags) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021CCC8);
 #ifdef SKIP_ASM
-extern "C" unsigned char *func_0021CCC8(unsigned char *arg0) {
-    *arg0 &= 0xF0;
-    return arg0;
+extern "C" unsigned char *func_0021CCC8(unsigned char *flags) {
+    *flags &= 0xF0;
+    return flags;
 }
 #endif
 
@@ -808,10 +808,10 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021D160);
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 extern "C" void cFont_vtextf(int, int, char*);
 
-extern "C" void func_0021D160(float x, float y, int c, int d, ...) {
+extern "C" void func_0021D160(float x, float y, int font, int fmt, ...) {
     char* ap;
     func_0021D160_va_start(ap);
-    cFont_vtextf(c, d, ap);
+    cFont_vtextf(font, fmt, ap);
 }
 #endif
 
@@ -1431,15 +1431,15 @@ extern "C" void func_0021E1B0(char* self, char* obj, int* rider, int x)
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021E750);
 #ifdef SKIP_ASM
-extern "C" float func_0021E750(int unused, int a, int flags, float x, float y, float z) {
-    int v = a;
+extern "C" float func_0021E750(int unused, int align, int flags, float x, float y, float z) {
+    int effAlign = align;
     if (flags & 1) {
         x = 640.0f - x;
-        v = (flags & 2) ? a : -v;
+        effAlign = (flags & 2) ? align : -effAlign;
     }
-    if (v == 0) {
+    if (effAlign == 0) {
         x -= z * y * 0.5f;
-    } else if (v > 0) {
+    } else if (effAlign > 0) {
         x -= z * y;
     }
     return x;
@@ -1449,13 +1449,13 @@ extern "C" float func_0021E750(int unused, int a, int flags, float x, float y, f
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_0021E7A8);
 #ifdef SKIP_ASM
-extern "C" float func_0021E7A8(int arg0, int mode, float a, float b, float c) {
+extern "C" float func_0021E7A8(int arg0, int mode, float pos, float width, float scale) {
     if (mode == 0) {
-        a -= c * b * 0.5f;
+        pos -= scale * width * 0.5f;
     } else if (mode > 0) {
-        a -= c * b;
+        pos -= scale * width;
     }
-    return a;
+    return pos;
 }
 #endif
 
@@ -1468,12 +1468,12 @@ struct Ctx_E7E0 { char pad[0xE84]; char* e84; };
 extern "C" void func_0021EA00_E7E0(void* self, Col_E7E0* col, float* pos, float w, float h, float u0, float v0, float u1, float v1) __asm__("func_0021EA00");
 
 extern "C" void func_0021E7E0(char* self, Col_E7E0* colp, float* pos, float* size,
-                              float t, float sx, float sy, float amin, float amax) {
+                              float phase, float sx, float sy, float amin, float amax) {
     Col_E7E0 col = *colp;
-    Col_E7E0* c = &col;
+    Col_E7E0* colour = &col;
     float dw, dh;
     float range = amax - amin;
-    c->r = c->r * (amin + (t > 1.0f ? range * (2.0f - t) : range * t));
+    colour->r = colour->r * (amin + (phase > 1.0f ? range * (2.0f - phase) : range * phase));
     dw = size[0] * (sx - 1.0f);
     dh = size[1] * (sy - 1.0f);
     pos[0] -= dw * 0.5f;
@@ -1484,13 +1484,13 @@ extern "C" void func_0021E7E0(char* self, Col_E7E0* colp, float* pos, float* siz
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = id;
     if (size[0] > 72.0f) {
         float mid = (*(float*)(self + 0x484) + *(float*)(self + 0x488)) * 0.5f;
-        func_0021EA00_E7E0(self, c, pos, 36.0f, size[1], *(float*)(self + 0x484), *(float*)(self + 0x480), mid, *(float*)(self + 0x48C));
+        func_0021EA00_E7E0(self, colour, pos, 36.0f, size[1], *(float*)(self + 0x484), *(float*)(self + 0x480), mid, *(float*)(self + 0x48C));
         pos[0] += 36.0f;
-        func_0021EA00_E7E0(self, c, pos, size[0] - 72.0f, size[1], mid, *(float*)(self + 0x480), mid, *(float*)(self + 0x48C));
+        func_0021EA00_E7E0(self, colour, pos, size[0] - 72.0f, size[1], mid, *(float*)(self + 0x480), mid, *(float*)(self + 0x48C));
         pos[0] += size[0] - 72.0f;
-        func_0021EA00_E7E0(self, c, pos, 36.0f, size[1], mid, *(float*)(self + 0x480), *(float*)(self + 0x488), *(float*)(self + 0x48C));
+        func_0021EA00_E7E0(self, colour, pos, 36.0f, size[1], mid, *(float*)(self + 0x480), *(float*)(self + 0x488), *(float*)(self + 0x48C));
     } else {
-        func_0021EA00_E7E0(self, c, pos, size[0], size[1], *(float*)(self + 0x484), *(float*)(self + 0x480), *(float*)(self + 0x488), *(float*)(self + 0x48C));
+        func_0021EA00_E7E0(self, colour, pos, size[0], size[1], *(float*)(self + 0x484), *(float*)(self + 0x480), *(float*)(self + 0x488), *(float*)(self + 0x48C));
     }
 }
 #endif
@@ -1518,69 +1518,69 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021EA00);
 
 // An RGBA colour as the element colour getter func_001E91A8 writes it and func_001F1190 takes it (the first component
 // is the one the fades scale).
-extern "C" void func_0021EA00(void* self, sColour* col, float* pos, float w, float h, float u0, float v0, float u1, float v1)
+extern "C" void func_0021EA00(void* self, sColour* col, float* pos, float w, float height, float uMin, float vMin, float uMax, float vMax)
 {
-    if (h > 72.0f) {
+    if (height > 72.0f) {
         sHudVertex vtx[8];
         for (int i = 0; i < 8; i++) {
-            int r = (int)(col->r * 128.0f);
-            int g = (int)(col->g * 128.0f);
-            int b = (int)(col->b * 128.0f);
-            int a = (int)(col->a * 128.0f);
-            vtx[i].r = r;
-            vtx[i].g = g;
-            vtx[i].b = b;
-            vtx[i].a = a;
+            int red = (int)(col->r * 128.0f);
+            int green = (int)(col->g * 128.0f);
+            int blue = (int)(col->b * 128.0f);
+            int alpha = (int)(col->a * 128.0f);
+            vtx[i].r = red;
+            vtx[i].g = green;
+            vtx[i].b = blue;
+            vtx[i].a = alpha;
             vtx[i].q = 1.0f;
             if (i & 1)
-                vtx[i].u = u1;
+                vtx[i].u = uMax;
             else
-                vtx[i].u = u0;
+                vtx[i].u = uMin;
         }
-        vtx[0].v = v0;
-        vtx[1].v = v0;
-        vtx[2].v = (v0 + v1) * 0.5f;
-        vtx[3].v = (v0 + v1) * 0.5f;
-        vtx[4].v = (v0 + v1) * 0.5f;
-        vtx[5].v = (v0 + v1) * 0.5f;
-        vtx[6].v = v1;
-        vtx[7].v = v1;
+        vtx[0].v = vMin;
+        vtx[1].v = vMin;
+        vtx[2].v = (vMin + vMax) * 0.5f;
+        vtx[3].v = (vMin + vMax) * 0.5f;
+        vtx[4].v = (vMin + vMax) * 0.5f;
+        vtx[5].v = (vMin + vMax) * 0.5f;
+        vtx[6].v = vMax;
+        vtx[7].v = vMax;
         vtx[0].pos = sVtxPos(pos[0], pos[1], 0.0f, 1.0f);
         vtx[1].pos = sVtxPos(pos[0] + w, pos[1], 0.0f, 1.0f);
         vtx[2].pos = sVtxPos(pos[0], pos[1] + 36.0f, 0.0f, 1.0f);
         vtx[3].pos = sVtxPos(pos[0] + w, pos[1] + 36.0f, 0.0f, 1.0f);
-        vtx[4].pos = sVtxPos(pos[0], pos[1] + h - 36.0f, 0.0f, 1.0f);
-        vtx[5].pos = sVtxPos(pos[0] + w, pos[1] + h - 36.0f, 0.0f, 1.0f);
-        vtx[6].pos = sVtxPos(pos[0], pos[1] + h, 0.0f, 1.0f);
-        vtx[7].pos = sVtxPos(pos[0] + w, pos[1] + h, 0.0f, 1.0f);
+        vtx[4].pos = sVtxPos(pos[0], pos[1] + height - 36.0f, 0.0f, 1.0f);
+        vtx[5].pos = sVtxPos(pos[0] + w, pos[1] + height - 36.0f, 0.0f, 1.0f);
+        vtx[6].pos = sVtxPos(pos[0], pos[1] + height, 0.0f, 1.0f);
+        vtx[7].pos = sVtxPos(pos[0] + w, pos[1] + height, 0.0f, 1.0f);
         cPS2GraphicsMan* ctx = GrMan;
         sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)ctx->mVtbl;
         vt[71].fn((char*)ctx + vt[71].delta, 8, vtx, 0);
     } else {
         sHudVertex vtx[4];
         for (int i = 0; i < 4; i++) {
-            int r = (int)(col->r * 128.0f);
-            int g = (int)(col->g * 128.0f);
-            int b = (int)(col->b * 128.0f);
-            int a = (int)(col->a * 128.0f);
-            vtx[i].r = r;
-            vtx[i].g = g;
-            vtx[i].b = b;
-            vtx[i].a = a;
+            int red = (int)(col->r * 128.0f);
+            int green = (int)(col->g * 128.0f);
+            int blue = (int)(col->b * 128.0f);
+            int alpha = (int)(col->a * 128.0f);
+            vtx[i].r = red;
+            vtx[i].g = green;
+            vtx[i].b = blue;
+            vtx[i].a = alpha;
             vtx[i].q = 1.0f;
             if (i & 1)
-                vtx[i].u = u1;
+                vtx[i].u = uMax;
             else
-                vtx[i].u = u0;
+                vtx[i].u = uMin;
         }
-        vtx[0].v = v0;
-        vtx[1].v = v0;
-        vtx[2].v = v1;
-        vtx[3].v = v1;
+        vtx[0].v = vMin;
+        vtx[1].v = vMin;
+        vtx[2].v = vMax;
+        vtx[3].v = vMax;
         vtx[0].pos = sVtxPos(pos[0], pos[1], 0.0f, 1.0f);
         vtx[1].pos = sVtxPos(pos[0] + w, pos[1], 0.0f, 1.0f);
-        vtx[2].pos = sVtxPos(pos[0], pos[1] + h, 0.0f, 1.0f);
-        vtx[3].pos = sVtxPos(pos[0] + w, pos[1] + h, 0.0f, 1.0f);
+        vtx[2].pos = sVtxPos(pos[0], pos[1] + height, 0.0f, 1.0f);
+        vtx[3].pos = sVtxPos(pos[0] + w, pos[1] + height, 0.0f, 1.0f);
         cPS2GraphicsMan* ctx = GrMan;
         sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)ctx->mVtbl;
         vt[71].fn((char*)ctx + vt[71].delta, 4, vtx, 0);
@@ -2217,35 +2217,35 @@ void func_001E9290(void*, void*);
 void func_001E91A8(void*, void*);
 extern "C" void func_001E95A0(void*, void*, void*, void*, int, int);
 
-extern "C" void func_00220AD0(char* self, char* obj, float t) {
-    V2_0AD0 a;
-    V4_0AD0 b;
+extern "C" void func_00220AD0(char* self, char* obj, float progress) {
+    V2_0AD0 pos;
+    V4_0AD0 scale;
     Big_0AD0 big;
-    V4_0AD0 c;
-    V2_0AD0 d;
-    V2_0AD0 e;
-    void* p = obj + 0xAD4;
-    func_001E91F8(p, &a);
-    func_001E9290(p, &b);
+    V4_0AD0 colour;
+    V2_0AD0 spriteScale;
+    V2_0AD0 drawPos;
+    void* elem = obj + 0xAD4;
+    func_001E91F8(elem, &pos);
+    func_001E9290(elem, &scale);
     cBE_getInterface_Fv(cBE_getBE(), 4);
     big = cBEOptionInterface_mOption;
     if (ScriptEngine->mIsPlaying != 0 && big.mode != 2) {
-        b.y *= 0.75f;
-        a.y -= 60.0f;
+        scale.y *= 0.75f;
+        pos.y -= 60.0f;
     }
-    func_001E91A8(obj + 0xAD4, &c);
-    if (t <= 0.5f) {
-        c.x *= t * 2.0f;
+    func_001E91A8(obj + 0xAD4, &colour);
+    if (progress <= 0.5f) {
+        colour.x *= progress * 2.0f;
     } else {
-        c.x *= (1.0f - t) * 2.0f;
+        colour.x *= (1.0f - progress) * 2.0f;
     }
-    d.x = 2.0f;
-    d.y = 2.0f;
-    *(V2_0AD0*)(*(char**)(self + 0xB50) + 0x28) = d;
+    spriteScale.x = 2.0f;
+    spriteScale.y = 2.0f;
+    *(V2_0AD0*)(*(char**)(self + 0xB50) + 0x28) = spriteScale;
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | ((obj[0xAF6] << 5) & 0x3E0);
-    e = a;
-    func_001E95A0(self + 0xB48, &e, &b, &c, obj[0xAF4], obj[0xAF5]);
+    drawPos = pos;
+    func_001E95A0(self + 0xB48, &drawPos, &scale, &colour, obj[0xAF4], obj[0xAF5]);
 }
 #endif
 
@@ -2354,10 +2354,10 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00220E58);
 extern "C" void* func_0039E2A0(void*, ...);
 extern char cFEStateCareerStats_vtbl[];
 
-extern "C" void *func_00220E58(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(char **)((char*)(arg0) + (8))) = cFEStateCareerStats_vtbl;
-    return arg0;
+extern "C" void *func_00220E58(void *state) {
+    func_0039E2A0(state, 0);
+    (*(char **)((char*)(state) + (8))) = cFEStateCareerStats_vtbl;
+    return state;
 }
 #endif
 
@@ -3354,10 +3354,10 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221DB0);
 extern "C" void* func_001D53B0(void* self, int a1, int a2);
 extern char cOVState_PROFILE_vtbl[];
 
-extern "C" void *func_00221DB0(void *arg0) {
-    func_001D53B0(arg0, 0, 0);
-    (*(char **)((char*)(arg0) + (8))) = cOVState_PROFILE_vtbl;
-    return arg0;
+extern "C" void *func_00221DB0(void *state) {
+    func_001D53B0(state, 0, 0);
+    (*(char **)((char*)(state) + (8))) = cOVState_PROFILE_vtbl;
+    return state;
 }
 #endif
 
@@ -3694,10 +3694,10 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002222B8);
 extern "C" void* func_001D53B0(void* self, int a1, int a2);
 extern char cOVState_AUTOSAVE_vtbl[];
 
-extern "C" void *func_002222B8(void *arg0) {
-    func_001D53B0(arg0, 0, 0);
-    (*(char **)((char*)(arg0) + (8))) = cOVState_AUTOSAVE_vtbl;
-    return arg0;
+extern "C" void *func_002222B8(void *state) {
+    func_001D53B0(state, 0, 0);
+    (*(char **)((char*)(state) + (8))) = cOVState_AUTOSAVE_vtbl;
+    return state;
 }
 #endif
 
@@ -3776,10 +3776,10 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002223E8);
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 extern "C" void cFont_vcentertextf(int, int, char*);
 
-extern "C" void func_002223E8(float x, float y, int c, int d, ...) {
+extern "C" void func_002223E8(float x, float y, int font, int fmt, ...) {
     char* ap;
     func_002223E8_va_start(ap);
-    cFont_vcentertextf(c, d, ap);
+    cFont_vcentertextf(font, fmt, ap);
 }
 #endif
 
@@ -3819,8 +3819,8 @@ extern "C" int func_002224A0(void) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002224A8);
 #ifdef SKIP_ASM
-extern "C" int func_002224A8(int arg0) {
-    return arg0;
+extern "C" int func_002224A8(int value) {
+    return value;
 }
 #endif
 
@@ -3868,26 +3868,26 @@ struct LV_24B8 {
 
 extern LV_24B8 luno_gLunoNil;
 
-extern "C" void func_002224B8(LV_24B8** out, char** state, LV_24B8* a, int c) {
-    char* s = *state;
-    int n = *(int*)(s + *(int*)(s + 4) + 8);
+extern "C" void func_002224B8(LV_24B8** out, char** state, LV_24B8* table, int c) {
+    char* chunk = *state;
+    int n = *(int*)(chunk + *(int*)(chunk + 4) + 8);
     LV_24B8* arr = new (str_LunoVMRegister, 0x20000000, 0) LV_24B8[n];
     *out = arr;
-    arr[0].SetTable(a);
-    LV_24B8* b = &luno_gLunoNil;
-    LV_24B8* p = *out;
-    LV_24B8* q = &p[1];
-    if (p[1].type == 4) luno_cLunoTable__cLunoTable_24B8(q, 2);
-    q->type = 0;
-    p[1].u.i = 0;
-    if (b->type == 4) {
-        func_00225068_24B8(q, b);
-    } else if (b->type == 5) {
-        p[1].u.pair = b->u.pair;
+    arr[0].SetTable(table);
+    LV_24B8* nilVal = &luno_gLunoNil;
+    LV_24B8* regs = *out;
+    LV_24B8* secondReg = &regs[1];
+    if (regs[1].type == 4) luno_cLunoTable__cLunoTable_24B8(secondReg, 2);
+    secondReg->type = 0;
+    regs[1].u.i = 0;
+    if (nilVal->type == 4) {
+        func_00225068_24B8(secondReg, nilVal);
+    } else if (nilVal->type == 5) {
+        regs[1].u.pair = nilVal->u.pair;
     } else {
-        p[1].u.i = b->u.i;
+        regs[1].u.i = nilVal->u.i;
     }
-    q->type = b->type;
+    secondReg->type = nilVal->type;
     luno_cLunoVM_execute_24B8(out, state, c);
 }
 #endif
@@ -3931,25 +3931,25 @@ struct LV_2648 {
     }
 };
 
-extern "C" void func_00222648(LV_2648** out, char** state, LV_2648* a, LV_2648* b, int c) {
-    char* s = *state;
-    int n = *(int*)(s + *(int*)(s + 4) + 8);
+extern "C" void func_00222648(LV_2648** out, char** state, LV_2648* table, LV_2648* value, int c) {
+    char* chunk = *state;
+    int n = *(int*)(chunk + *(int*)(chunk + 4) + 8);
     LV_2648* arr = new (str_LunoVMRegister, 0x20000000, 0) LV_2648[n];
     *out = arr;
-    arr[0].SetTable(a);
-    LV_2648* p = *out;
-    LV_2648* q = &p[1];
-    if (p[1].type == 4) luno_cLunoTable__cLunoTable_2648(q, 2);
-    q->type = 0;
-    p[1].u.i = 0;
-    if (b->type == 4) {
-        func_00225068_2648(q, b);
-    } else if (b->type == 5) {
-        p[1].u.pair = b->u.pair;
+    arr[0].SetTable(table);
+    LV_2648* regs = *out;
+    LV_2648* secondReg = &regs[1];
+    if (regs[1].type == 4) luno_cLunoTable__cLunoTable_2648(secondReg, 2);
+    secondReg->type = 0;
+    regs[1].u.i = 0;
+    if (value->type == 4) {
+        func_00225068_2648(secondReg, value);
+    } else if (value->type == 5) {
+        regs[1].u.pair = value->u.pair;
     } else {
-        p[1].u.i = b->u.i;
+        regs[1].u.i = value->u.i;
     }
-    q->type = b->type;
+    secondReg->type = value->type;
     luno_cLunoVM_execute_2648(out, state, c);
 }
 #endif

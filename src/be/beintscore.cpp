@@ -332,11 +332,11 @@ struct sScoreEntry_001550E8 {
 };
 extern "C" sScoreEntry_001550E8* func_0014AB20(int a, int b);
 
-extern "C" int func_001550E8(void* self, int i, int a, int b)
+extern "C" int func_001550E8(void* self, int i, int event, int mode)
 {
-    sScoreEntry_001550E8* t = func_0014AB20(a, b);
-    if (t != 0) {
-        return t[i].value;
+    sScoreEntry_001550E8* highScores = func_0014AB20(event, mode);
+    if (highScores != 0) {
+        return highScores[i].value;
     }
     return 0;
 }
@@ -413,9 +413,9 @@ extern "C" void* func_00155208(void* self, int i)
 //100%
 INCLUDE_ASM("be/beintscore", func_00155270);
 #ifdef SKIP_ASM
-extern "C" void* func_00155270(void* self, int a1)
+extern "C" void* func_00155270(void* self, int profileIndex)
 {
-    return (char*)self + (a1 * 0xb0 + 0x20);
+    return (char*)self + (profileIndex * 0xb0 + 0x20);
 }
 #endif
 
@@ -424,10 +424,10 @@ INCLUDE_ASM("be/beintscore", func_00155288);
 #ifdef SKIP_ASM
 extern char cBELibrary_profileLib[];
 
-extern "C" void* func_00155288(void* self, int a1, int a2)
+extern "C" void* func_00155288(void* self, int profileIndex, int characterId)
 {
-    char* p = cBELibrary_profileLib + (a1 * 0x9b50 + a2 * 0xf88);
-    return p + 0xde4;
+    char* charRecord = cBELibrary_profileLib + (profileIndex * 0x9b50 + characterId * 0xf88);
+    return charRecord + 0xde4;
 }
 #endif
 
@@ -459,24 +459,24 @@ signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int riderInde
 //100%
 INCLUDE_ASM("be/beintscore", func_001552F8);
 #ifdef SKIP_ASM
-extern "C" int func_001552F8(void* self, int a, int b)
+extern "C" int func_001552F8(void* self, int currentMedal, int newMedal)
 {
-    if (b == -1) {
+    if (newMedal == -1) {
         return 0;
     }
-    if (a == -1) {
+    if (currentMedal == -1) {
         return 1;
     }
-    return b < a;
+    return newMedal < currentMedal;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintscore", func_00155328);
 #ifdef SKIP_ASM
-extern "C" int func_00155328(void* self, int a)
+extern "C" int func_00155328(void* self, int rank)
 {
-    switch (a) {
+    switch (rank) {
     case 0:
         return 1;
     case 1:

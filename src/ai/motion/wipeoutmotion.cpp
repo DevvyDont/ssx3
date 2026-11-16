@@ -810,25 +810,25 @@ static inline void vu0ScaleEqW7(sVec4W7& v, float s)
 
 extern "C" void func_00137750(cWipeoutMotion* wipeoutMotion)
 {
-    char* r = (char*)wipeoutMotion->mRider;
-    float dt = *(float*)(r + 0x300) * 0.01666666753590107f;
-    func_00113648(*(void**)(r + 0x788), r + 0x110, r + 0x1E0, dt);
+    char* rider = (char*)wipeoutMotion->mRider;
+    float dt = *(float*)(rider + 0x300) * 0.01666666753590107f;
+    func_00113648(*(void**)(rider + 0x788), rider + 0x110, rider + 0x1E0, dt);
     int st = *(int*)(*(char**)((char*)wipeoutMotion->mRider + 0x788) + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
     if (ok)
     {
-        char* r2 = (char*)wipeoutMotion->mRider;
-        char* ap = *(char**)(r2 + 0x788);
-        float d = *(float*)(ap + 0x98) - *(float*)(ap + 0xA0);
-        float x = *(float*)(r2 + 0x300);
-        if (d >= 0.01666666753590107f)
-            x /= d;
+        char* airRider = (char*)wipeoutMotion->mRider;
+        char* ap = *(char**)(airRider + 0x788);
+        float timeLeft = *(float*)(ap + 0x98) - *(float*)(ap + 0xA0);
+        float x = *(float*)(airRider + 0x300);
+        if (timeLeft >= 0.01666666753590107f)
+            x /= timeLeft;
         else
             x *= 59.999996185302734f;
-        char* r3 = (char*)wipeoutMotion->mRider;
+        char* alignRider = (char*)wipeoutMotion->mRider;
         float k = 6.632251739501953f;
-        cRider_alignRiderAxis(r3, *(char**)(r3 + 0x788) + 0x20, *(char**)(r3 + 0x788) + 0x10, x, *(float*)(r3 + 0x300) * k);
+        cRider_alignRiderAxis(alignRider, *(char**)(alignRider + 0x788) + 0x20, *(char**)(alignRider + 0x788) + 0x10, x, *(float*)(alignRider + 0x300) * k);
     }
     vu0ScaleEqW7(*(sVec4W7*)&wipeoutMotion->RiderAngVelocity, 1.0f - dt * 1.5f);
     cRider_updateOrientationImplicit(wipeoutMotion->mRider);
@@ -1618,9 +1618,9 @@ extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir)
     char seg[0xB0];
     sVec4WG* pt = (sVec4WG*)(rider + 0x110);
     func_0032E100(seg, vu0Sub_138960(*pt, vu0Scale_138960(*dir, 200.0f)), vu0Add_138960(*pt, vu0Scale_138960(*dir, 200.0f)), 2, 0.574999988079071f);
-    char* r2 = *(char**)((char*)self + 0x40);
-    float d = func_003342D0(*(void**)(r2 + 0x860), seg, hit, *(int*)(r2 + 0x864));
-    if (d >= 0.0f)
+    char* probeRider = *(char**)((char*)self + 0x40);
+    float hitDist = func_003342D0(*(void**)(probeRider + 0x860), seg, hit, *(int*)(probeRider + 0x864));
+    if (hitDist >= 0.0f)
     {
         char* obj = *(char**)(hit + 0x54);
         if (obj)
@@ -1634,18 +1634,18 @@ extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir)
         {
             *(unsigned int*)(*(char**)((char*)self + 0x40) + 0x430) = 0xFFFFFFFF;
         }
-        char* o = *(char**)(hit + 0x50);
-        if (o)
+        char* hitObj = *(char**)(hit + 0x50);
+        if (hitObj)
         {
-            char* h = *(char**)(o + 0xC);
-            if (h)
+            char* hitOwner = *(char**)(hitObj + 0xC);
+            if (hitOwner)
             {
-                sVEntry_138960* vt = *(sVEntry_138960**)(h + 0xC);
-                vt[42].fn(h + vt[42].delta, hit);
+                sVEntry_138960* vt = *(sVEntry_138960**)(hitOwner + 0xC);
+                vt[42].fn(hitOwner + vt[42].delta, hit);
             }
         }
     }
-    return d;
+    return hitDist;
 }
 #endif
 

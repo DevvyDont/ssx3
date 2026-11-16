@@ -2371,8 +2371,8 @@ INCLUDE_ASM("ai/rider", func_0011FEA8);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler__getMotionStateName(int);
 
-extern "C" void func_0011FEA8(void *arg0) {
-    cRiderHandler__getMotionStateName((*(int *)((char*)(arg0) + (0x77C))));
+extern "C" void func_0011FEA8(void *rider) {
+    cRiderHandler__getMotionStateName((*(int *)((char*)(rider) + (0x77C))));
 }
 #endif
 
@@ -2401,8 +2401,8 @@ INCLUDE_ASM("ai/rider", func_0011FEF8);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler__getControlStateName(int);
 
-extern "C" void func_0011FEF8(void *arg0) {
-    cRiderHandler__getControlStateName((*(int *)((char*)(arg0) + (0x77C))));
+extern "C" void func_0011FEF8(void *rider) {
+    cRiderHandler__getControlStateName((*(int *)((char*)(rider) + (0x77C))));
 }
 #endif
 //100%
@@ -2932,8 +2932,8 @@ INCLUDE_ASM("ai/rider", func_00120EB8);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler_updateRiderFX(int);
 
-extern "C" void func_00120EB8(void *arg0) {
-    cRiderHandler_updateRiderFX((*(int *)((char*)(arg0) + (0x77C))));
+extern "C" void func_00120EB8(void *rider) {
+    cRiderHandler_updateRiderFX((*(int *)((char*)(rider) + (0x77C))));
 }
 #endif
 
@@ -3654,18 +3654,18 @@ extern "C" void func_00121F30(cRider* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEntryP_121F30* gvt = (sVEntryP_121F30*)ps2GraphicsMan->mVtbl;
-    sVec4_121F30* m = (sVec4_121F30*)gvt[35].fn((char*)ps2GraphicsMan + gvt[35].delta);
+    sVec4_121F30* viewMtx = (sVec4_121F30*)gvt[35].fn((char*)ps2GraphicsMan + gvt[35].delta);
     char* obj = (char*)&self->mVtbl;
     sVEntryP_121F30* vt = *(sVEntryP_121F30**)obj;
     sVec4_121F30* pos = (sVec4_121F30*)vt[kRiderVt_getPosition].fn(obj + vt[kRiderVt_getPosition].delta);
-    sVec4_121F30 v = mtxMulVec_121F30(m, pos);
-    float z = v.z;
-    cPS2GraphicsMan* g2 = GrMan;
-    sVEntryF_121F30* gvt2 = (sVEntryF_121F30*)g2->mVtbl;
-    float fov = gvt2[29].fn((char*)g2 + gvt2[29].delta);
-    float s, c;
-    func_0031BE50(&s, &c, fov);
-    z = z * (s / c);
+    sVec4_121F30 viewPos = mtxMulVec_121F30(viewMtx, pos);
+    float z = viewPos.z;
+    cPS2GraphicsMan* graphicsMan = GrMan;
+    sVEntryF_121F30* gvt2 = (sVEntryF_121F30*)graphicsMan->mVtbl;
+    float fov = gvt2[29].fn((char*)graphicsMan + gvt2[29].delta);
+    float sinFov, cosFov;
+    func_0031BE50(&sinFov, &cosFov, fov);
+    z = z * (sinFov / cosFov);
     z = z * 0.009999999776482582f;
     if (z < 6.0f)
     {
@@ -4060,8 +4060,8 @@ INCLUDE_ASM("ai/rider", func_00122618);
 #ifdef SKIP_ASM
 extern "C" void cRiderHandler_renderRiderFX(int);
 
-extern "C" void func_00122618(void *arg0) {
-    cRiderHandler_renderRiderFX((*(int *)((char*)(arg0) + (0x77C))));
+extern "C" void func_00122618(void *rider) {
+    cRiderHandler_renderRiderFX((*(int *)((char*)(rider) + (0x77C))));
 }
 #endif
 
@@ -4542,10 +4542,10 @@ extern "C" int cSpinControl_isUberHeld(void* p);
 extern "C" int func_00311AE8(void* self, int i);
 extern "C" int func_001446A0(void* self, int a1);
 
-extern "C" int func_00122EE8(char* self, int q)
+extern "C" int func_00122EE8(char* self, int query)
 {
     int res;
-    switch (q) {
+    switch (query) {
     case 0:
         return func_0011FE98(self) == 2;
     case 1:
@@ -6732,29 +6732,29 @@ struct sVEntryI_125B18 { short delta; short index; int (*fn)(void*); };
 struct sVEntryF_125B18 { short delta; short index; void (*fn)(void*, float, int); };
 
 // PORT: the unit declares (void*, int, int); the second argument is really an object pointer.
-extern "C" void func_00125B18(void* p, int a, int on)
+extern "C" void func_00125B18(void* vibState, int a, int on)
 {
-    float* s = (float*)p;
+    float* vibLevels = (float*)vibState;
     void* obj = (void*)a;
     if (on == 0)
     {
-        s[0] = s[1] = 0.0f;
+        vibLevels[0] = vibLevels[1] = 0.0f;
         func_00326CF0(obj);
         return;
     }
-    float v = s[0] * 0.9133333563804626f - 18.518518447875977f;
-    float r = 0.0f;
-    if (v >= 0.0f)
-        r = v;
-    s[0] = r;
-    s[1] *= 0.9916666746139526f;
+    float decayed = vibLevels[0] * 0.9133333563804626f - 18.518518447875977f;
+    float clamped = 0.0f;
+    if (decayed >= 0.0f)
+        clamped = decayed;
+    vibLevels[0] = clamped;
+    vibLevels[1] *= 0.9916666746139526f;
     sVEntryI_125B18* vt = *(sVEntryI_125B18**)obj;
     if (vt[3].fn((char*)obj + vt[3].delta) == 2)
     {
         sVEntryF_125B18* vt2 = *(sVEntryF_125B18**)obj;
-        vt2[4].fn((char*)obj + vt2[4].delta, ((s[1] - 0.5f) * 0.009999999776482582f >? (s[0] - 2.0f) / 972.2222290039062f) >? 0.0f, 0);
+        vt2[4].fn((char*)obj + vt2[4].delta, ((vibLevels[1] - 0.5f) * 0.009999999776482582f >? (vibLevels[0] - 2.0f) / 972.2222290039062f) >? 0.0f, 0);
         sVEntryF_125B18* vt3 = *(sVEntryF_125B18**)obj;
-        vt3[4].fn((char*)obj + vt3[4].delta, ((s[1] - 70.0f) * 0.0062500000931322575f >? (s[0] - 100.0f) / 5000.0f) >? 0.0f, 1);
+        vt3[4].fn((char*)obj + vt3[4].delta, ((vibLevels[1] - 70.0f) * 0.0062500000931322575f >? (vibLevels[0] - 100.0f) / 5000.0f) >? 0.0f, 1);
     }
 }
 #endif

@@ -49,11 +49,11 @@ extern void* cBELibrary_rewardDB[];
 
 extern "C" int func_00156A38(void)
 {
-    int r = 0;
+    int result = 0;
     if ((int)cBELibrary_rewardDB[0] == -1) {
-        r = cBELibrary_rewardDB[1] != 0;
+        result = cBELibrary_rewardDB[1] != 0;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -87,9 +87,9 @@ INCLUDE_ASM("be/beintreward", func_00156A90);
 #ifdef SKIP_ASM
 extern "C" void* func_0015A478(void* self);
 
-extern "C" char* func_00156A90(void* self, int a1, int a2)
+extern "C" char* func_00156A90(void* self, int peakId, int trophyId)
 {
-    return *(char**)((char*)func_0015A478(self) + 0x8) + (a2 * 3 + a1) * 0xC;
+    return *(char**)((char*)func_0015A478(self) + 0x8) + (trophyId * 3 + peakId) * 0xC;
 }
 #endif
 
@@ -98,9 +98,9 @@ INCLUDE_ASM("be/beintreward", func_00156AE0);
 #ifdef SKIP_ASM
 extern "C" void* func_0015A478(void* self);
 
-extern "C" char* func_00156AE0(void* self, int a1, int a2)
+extern "C" char* func_00156AE0(void* self, int trophyId, int medalId)
 {
-    return *(char**)((char*)func_0015A478(self) + 0xC) + (a1 * 4 + a2) * 0xC;
+    return *(char**)((char*)func_0015A478(self) + 0xC) + (trophyId * 4 + medalId) * 0xC;
 }
 #endif
 
@@ -109,66 +109,66 @@ INCLUDE_ASM("be/beintreward", func_00156B28);
 #ifdef SKIP_ASM
 extern "C" void* func_0015A478(void* self);
 
-extern "C" char* func_00156B28(void* self, int a1, int a2)
+extern "C" char* func_00156B28(void* self, int peakId, int charId)
 {
-    return *(char**)((char*)func_0015A478(self) + 0x10) + (a2 * 3 + a1) * 8;
+    return *(char**)((char*)func_0015A478(self) + 0x10) + (charId * 3 + peakId) * 8;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00156B70);
 #ifdef SKIP_ASM
-extern "C" int func_00156B70(void *arg0) {
-    return (*(int *)((char*)(func_0015A478(arg0)) + (8)));
+extern "C" int func_00156B70(void *rewardInterface) {
+    return (*(int *)((char*)(func_0015A478(rewardInterface)) + (8)));
 }
 #endif
 //100%
 INCLUDE_ASM("be/beintreward", func_00156B90);
 #ifdef SKIP_ASM
-extern "C" int func_00156B90(void *arg0) {
-    return (*(int *)((char*)(func_0015A478(arg0)) + (0xC)));
+extern "C" int func_00156B90(void *rewardInterface) {
+    return (*(int *)((char*)(func_0015A478(rewardInterface)) + (0xC)));
 }
 #endif
 //100%
 INCLUDE_ASM("be/beintreward", func_00156BB0);
 #ifdef SKIP_ASM
-extern "C" int func_00156BB0(void *arg0) {
-    return (*(int *)((char*)(func_0015A478(arg0)) + (0x10)));
+extern "C" int func_00156BB0(void *rewardInterface) {
+    return (*(int *)((char*)(func_0015A478(rewardInterface)) + (0x10)));
 }
 #endif
 //100%
 INCLUDE_ASM("be/beintreward", func_00156BD0);
 #ifdef SKIP_ASM
-extern "C" int func_00156BD0(void *arg0) {
-    return (*(int *)((char*)(func_0015A478(arg0)) + (0x14)));
+extern "C" int func_00156BD0(void *rewardInterface) {
+    return (*(int *)((char*)(func_0015A478(rewardInterface)) + (0x14)));
 }
 #endif
 //100%
 INCLUDE_ASM("be/beintreward", func_00156BF0);
 #ifdef SKIP_ASM
-extern "C" int func_00156BF0(void *arg0) {
-    return (*(int *)((char*)(func_0015A478(arg0)) + (0x18)));
+extern "C" int func_00156BF0(void *rewardInterface) {
+    return (*(int *)((char*)(func_0015A478(rewardInterface)) + (0x18)));
 }
 #endif
 //100%
 INCLUDE_ASM("be/beintreward", func_00156C10);
 #ifdef SKIP_ASM
-extern "C" int func_00156C10(void *arg0) {
-    return (*(int *)((char*)(func_0015A478(arg0)) + (0x1C)));
+extern "C" int func_00156C10(void *rewardInterface) {
+    return (*(int *)((char*)(func_0015A478(rewardInterface)) + (0x1C)));
 }
 #endif
 //100%
 INCLUDE_ASM("be/beintreward", func_00156C30);
 #ifdef SKIP_ASM
-extern "C" int func_00156C30(void *arg0) {
-    return (*(int *)((char*)(func_0015A478(arg0)) + (0x20)));
+extern "C" int func_00156C30(void *rewardInterface) {
+    return (*(int *)((char*)(func_0015A478(rewardInterface)) + (0x20)));
 }
 #endif
 //100%
 INCLUDE_ASM("be/beintreward", func_00156C50);
 #ifdef SKIP_ASM
-extern "C" int func_00156C50(void *arg0) {
-    return (*(int *)((char*)(func_0015A478(arg0)) + (0x24)));
+extern "C" int func_00156C50(void *rewardInterface) {
+    return (*(int *)((char*)(func_0015A478(rewardInterface)) + (0x24)));
 }
 #endif
 
@@ -208,79 +208,79 @@ static inline int Match_6C70(sBEEntry_6C70* e, int type)
     return (type == 0 && (e->flags & 0x100)) || (type == 1 && (e->flags & 0x200)) || (type == 2 && (e->flags & 0x400));
 }
 
-extern "C" int func_00156C70(void* self, int a1, int a2, int type)
+extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int type)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
     int n = 0;
     void* lib = func_0014BDB8_noarg();
-    int count = func_0014D988(lib, a2);
-    sBEEntry_6C70* e = (sBEEntry_6C70*)func_0014D998((sBELibTables*)lib, a2);
+    int count = func_0014D988(lib, characterId);
+    sBEEntry_6C70* def = (sBEEntry_6C70*)func_0014D998((sBELibTables*)lib, characterId);
     int i;
-    for (i = 0; i < count; i++, e++)
+    for (i = 0; i < count; i++, def++)
     {
-        if (type == 0 && (*(unsigned char*)((char*)e + 0x35) & 1))
+        if (type == 0 && (*(unsigned char*)((char*)def + 0x35) & 1))
         {
-            if ((Flag_6C70(p, e)->flags & 2) == 0)
+            if ((Flag_6C70(charRecord, def)->flags & 2) == 0)
                 n++;
         }
-        else if (type == 1 && (e->flags & 0x200))
+        else if (type == 1 && (def->flags & 0x200))
         {
-            if ((Flag_6C70(p, e)->flags & 2) == 0)
+            if ((Flag_6C70(charRecord, def)->flags & 2) == 0)
                 n++;
         }
-        else if (type == 2 && (e->flags & 0x400))
+        else if (type == 2 && (def->flags & 0x400))
         {
-            if ((Flag_6C70(p, e)->flags & 2) == 0)
+            if ((Flag_6C70(charRecord, def)->flags & 2) == 0)
                 n++;
         }
     }
     if (n > 0)
     {
         n = BXrand() % n;
-        e = (sBEEntry_6C70*)func_0014D998((sBELibTables*)lib, a2);
+        def = (sBEEntry_6C70*)func_0014D998((sBELibTables*)lib, characterId);
         int j;
-        for (j = 0; j < count; j++, e++)
+        for (j = 0; j < count; j++, def++)
         {
-            if (type == 0 && (*(unsigned char*)((char*)e + 0x35) & 1))
+            if (type == 0 && (*(unsigned char*)((char*)def + 0x35) & 1))
             {
-                short id = e->id;
-                short s = (*(short**)(p + 0x288))[id];
-                sBEFlagEntry_6C70* f;
-                if (s >= 0)
-                    f = (sBEFlagEntry_6C70*)(p + 0x290) + s;
+                short id = def->id;
+                short flagSlot = (*(short**)(charRecord + 0x288))[id];
+                sBEFlagEntry_6C70* flagEntry;
+                if (flagSlot >= 0)
+                    flagEntry = (sBEFlagEntry_6C70*)(charRecord + 0x290) + flagSlot;
                 else
-                    f = 0;
-                if ((f->flags & 2) == 0)
+                    flagEntry = 0;
+                if ((flagEntry->flags & 2) == 0)
                 {
                     if (--n < 0)
                         return id;
                 }
             }
-            else if (type == 1 && (e->flags & 0x200))
+            else if (type == 1 && (def->flags & 0x200))
             {
-                short id = e->id;
-                short s = (*(short**)(p + 0x288))[id];
-                sBEFlagEntry_6C70* f;
-                if (s >= 0)
-                    f = (sBEFlagEntry_6C70*)(p + 0x290) + s;
+                short id = def->id;
+                short flagSlot = (*(short**)(charRecord + 0x288))[id];
+                sBEFlagEntry_6C70* flagEntry;
+                if (flagSlot >= 0)
+                    flagEntry = (sBEFlagEntry_6C70*)(charRecord + 0x290) + flagSlot;
                 else
-                    f = 0;
-                if ((f->flags & 2) == 0)
+                    flagEntry = 0;
+                if ((flagEntry->flags & 2) == 0)
                 {
                     if (--n < 0)
                         return id;
                 }
             }
-            else if (type == 2 && (e->flags & 0x400))
+            else if (type == 2 && (def->flags & 0x400))
             {
-                short id = e->id;
-                short s = (*(short**)(p + 0x288))[id];
-                sBEFlagEntry_6C70* f;
-                if (s >= 0)
-                    f = (sBEFlagEntry_6C70*)(p + 0x290) + s;
+                short id = def->id;
+                short flagSlot = (*(short**)(charRecord + 0x288))[id];
+                sBEFlagEntry_6C70* flagEntry;
+                if (flagSlot >= 0)
+                    flagEntry = (sBEFlagEntry_6C70*)(charRecord + 0x290) + flagSlot;
                 else
-                    f = 0;
-                if ((f->flags & 2) == 0)
+                    flagEntry = 0;
+                if ((flagEntry->flags & 2) == 0)
                 {
                     if (--n < 0)
                         return id;
@@ -323,39 +323,39 @@ static inline sBEFlagEntry_6EE0* Flag_6EE0(char* p, sBEEntry_6EE0* e)
     return 0;
 }
 
-extern "C" int func_00156EE0(void* self, int a1, int a2)
+extern "C" int func_00156EE0(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
     int n = 0;
     void* lib = func_0014BDB8_noarg();
-    int count = func_0014D988(lib, a2);
-    sBEEntry_6EE0* e = (sBEEntry_6EE0*)func_0014D998((sBELibTables*)lib, a2);
+    int count = func_0014D988(lib, characterId);
+    sBEEntry_6EE0* def = (sBEEntry_6EE0*)func_0014D998((sBELibTables*)lib, characterId);
     int i;
-    for (i = 0; i < count; i++, e++)
+    for (i = 0; i < count; i++, def++)
     {
-        if (e->flags & 0x800)
+        if (def->flags & 0x800)
         {
-            if ((Flag_6EE0(p, e)->flags & 2) == 0)
+            if ((Flag_6EE0(charRecord, def)->flags & 2) == 0)
                 n++;
         }
     }
     if (n > 0)
     {
         n = BXrand() % n;
-        e = (sBEEntry_6EE0*)func_0014D998((sBELibTables*)lib, a2);
+        def = (sBEEntry_6EE0*)func_0014D998((sBELibTables*)lib, characterId);
         int j;
-        for (j = 0; j < count; j++, e++)
+        for (j = 0; j < count; j++, def++)
         {
-            if (e->flags & 0x800)
+            if (def->flags & 0x800)
             {
-                short id = e->id;
-                short s = (*(short**)(p + 0x288))[id];
-                sBEFlagEntry_6EE0* f;
-                if (s >= 0)
-                    f = (sBEFlagEntry_6EE0*)(p + 0x290) + s;
+                short id = def->id;
+                short flagSlot = (*(short**)(charRecord + 0x288))[id];
+                sBEFlagEntry_6EE0* flagEntry;
+                if (flagSlot >= 0)
+                    flagEntry = (sBEFlagEntry_6EE0*)(charRecord + 0x290) + flagSlot;
                 else
-                    f = 0;
-                if ((f->flags & 2) == 0)
+                    flagEntry = 0;
+                if ((flagEntry->flags & 2) == 0)
                 {
                     if (--n < 0)
                         return id;
@@ -377,23 +377,23 @@ extern "C" int func_00157210(void* self, int kind);
 extern "C" int func_00157518(void* self, int a1, int a2, int kind);
 
 // Picks a random not-yet-unlocked reward bit of the given kind for the profile/character, or -1 if all are unlocked.
-extern "C" int func_00157080(void* self, int profile, int c, int kind)
+extern "C" int func_00157080(void* self, int profile, int characterId, int kind)
 {
     int total = func_00157210(self, kind);
     int result = -1;
-    int have = func_00157518(self, profile, c, kind);
+    int have = func_00157518(self, profile, characterId, kind);
     if (have >= total) {
         return -1;
     }
     unsigned int n = BXrand() % (unsigned int)(total - have);
-    char* p = (char*)cBELibrary_profileLib + profile * 0x9B50 + c * 0xF88;
+    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9B50 + characterId * 0xF88;
     signed char* bits = 0;
     switch (kind) {
-    case 3: bits = (signed char*)(p + 0xF30); break;
-    case 4: bits = (signed char*)(p + 0xF36); break;
-    case 5: bits = (signed char*)(p + 0xF45); break;
-    case 6: bits = (signed char*)(p + 0xF52); break;
-    case 7: bits = (signed char*)(p + 0xF53); break;
+    case 3: bits = (signed char*)(charRecord + 0xF30); break;
+    case 4: bits = (signed char*)(charRecord + 0xF36); break;
+    case 5: bits = (signed char*)(charRecord + 0xF45); break;
+    case 6: bits = (signed char*)(charRecord + 0xF52); break;
+    case 7: bits = (signed char*)(charRecord + 0xF53); break;
     }
     for (int i = 0; result < 0; i++) {
         for (int k = 0; k < 8; k++) {
@@ -519,11 +519,11 @@ extern "C" int func_00157390(void* self, int count, signed char* bits)
     int total = 0;
     while (i < count)
     {
-        signed char b = *bits++;
+        signed char bitByte = *bits++;
         for (int k = 0; k < 8 && i < count; k++)
         {
             i++;
-            total += (b >> k) & 1;
+            total += (bitByte >> k) & 1;
         }
     }
     return total;
@@ -561,15 +561,15 @@ extern "C" int func_00157E60(void* self, int a1, int a2, int bit);
 extern "C" int func_00157E20(void* self, int a1, int a2, int bit);
 extern "C" int func_00157EE0(void* self, int a1, int a2, int bit);
 
-extern "C" int func_00157468(void* self, int a1, int a2, int kind, int bit)
+extern "C" int func_00157468(void* self, int profileIndex, int characterId, int kind, int bit)
 {
     switch (kind) {
-    case 3: return func_00157D60(self, a1, a2, bit);
-    case 4: return func_00157DA0(self, a1, a2, bit);
-    case 5: return func_00157DE0(self, a1, a2, bit);
-    case 6: return func_00157E60(self, a1, a2, bit);
-    case 7: return func_00157E20(self, a1, a2, bit);
-    case 8: return func_00157EE0(self, a1, a2, bit + 10);
+    case 3: return func_00157D60(self, profileIndex, characterId, bit);
+    case 4: return func_00157DA0(self, profileIndex, characterId, bit);
+    case 5: return func_00157DE0(self, profileIndex, characterId, bit);
+    case 6: return func_00157E60(self, profileIndex, characterId, bit);
+    case 7: return func_00157E20(self, profileIndex, characterId, bit);
+    case 8: return func_00157EE0(self, profileIndex, characterId, bit + 10);
     }
     return 0;
 }
@@ -586,15 +586,15 @@ extern "C" int func_00157740(void* self, int a1, int a2);
 extern "C" int func_001576E0(void* self, int a1, int a2);
 extern "C" int func_001577A0(void* self, int a1, int a2);
 
-extern "C" int func_00157518(void* self, int a1, int a2, int kind)
+extern "C" int func_00157518(void* self, int profileIndex, int characterId, int kind)
 {
     switch (kind) {
-    case 3: return func_001575C0(self, a1, a2);
-    case 4: return func_00157620(self, a1, a2);
-    case 5: return func_00157680(self, a1, a2);
-    case 6: return func_00157740(self, a1, a2);
-    case 7: return func_001576E0(self, a1, a2);
-    case 8: return func_001577A0(self, a1, a2);
+    case 3: return func_001575C0(self, profileIndex, characterId);
+    case 4: return func_00157620(self, profileIndex, characterId);
+    case 5: return func_00157680(self, profileIndex, characterId);
+    case 6: return func_00157740(self, profileIndex, characterId);
+    case 7: return func_001576E0(self, profileIndex, characterId);
+    case 8: return func_001577A0(self, profileIndex, characterId);
     }
     return 0;
 }
@@ -608,10 +608,10 @@ extern int cBELibrary_profileLib[];
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
-extern "C" int func_001575C0(void* self, int a1, int a2)
+extern "C" int func_001575C0(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x3C), (signed char*)(p + 0xF30));
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x3C), (signed char*)(charRecord + 0xF30));
 }
 #endif
 
@@ -623,10 +623,10 @@ extern int cBELibrary_profileLib[];
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
-extern "C" int func_00157620(void* self, int a1, int a2)
+extern "C" int func_00157620(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x40), (signed char*)(p + 0xF36));
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x40), (signed char*)(charRecord + 0xF36));
 }
 #endif
 
@@ -638,10 +638,10 @@ extern int cBELibrary_profileLib[];
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
-extern "C" int func_00157680(void* self, int a1, int a2)
+extern "C" int func_00157680(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x44), (signed char*)(p + 0xF45));
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x44), (signed char*)(charRecord + 0xF45));
 }
 #endif
 
@@ -653,10 +653,10 @@ extern int cBELibrary_profileLib[];
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
-extern "C" int func_001576E0(void* self, int a1, int a2)
+extern "C" int func_001576E0(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x48), (signed char*)(p + 0xF53));
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x48), (signed char*)(charRecord + 0xF53));
 }
 #endif
 
@@ -668,10 +668,10 @@ extern int cBELibrary_profileLib[];
 void* func_0015A478_noargs() __asm__("func_0015A478");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
-extern "C" int func_00157740(void* self, int a1, int a2)
+extern "C" int func_00157740(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x4C), (signed char*)(p + 0xF52));
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157390(self, *(int*)((char*)func_0015A478_noargs() + 0x4C), (signed char*)(charRecord + 0xF52));
 }
 #endif
 
@@ -681,10 +681,10 @@ INCLUDE_ASM("be/beintreward", func_001577A0);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
-extern "C" int func_001577A0(void* self, int a1, int a2)
+extern "C" int func_001577A0(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157390(self, 0x14, (signed char*)(p + 0xF57));
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157390(self, 0x14, (signed char*)(charRecord + 0xF57));
 }
 #endif
 
@@ -855,23 +855,23 @@ INCLUDE_ASM("be/beintreward", func_00157B70);
 extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit ulong flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
-extern "C" int func_00157B70(void* self, int a, int b, int peak)
+extern "C" int func_00157B70(void* self, int profileIndex, int characterId, int peak)
 {
     if (peak == 1)
     {
-        int bOff = b * 0xF88;
-        int aOff = a * 0x9B50;
+        int bOff = characterId * 0xF88;
+        int aOff = profileIndex * 0x9B50;
         int off = bOff + aOff;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return (int)(*(ulong*)(p + 0x278) >> 12) & 1;
+        char* charRecord = (char*)cBELibrary_profileLib + off;
+        return (int)(*(ulong*)(charRecord + 0x278) >> 12) & 1;
     }
     if (peak == 2)
     {
-        int bOff = b * 0xF88;
-        int aOff = a * 0x9B50;
+        int bOff = characterId * 0xF88;
+        int aOff = profileIndex * 0x9B50;
         int off = bOff + aOff;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return (int)(*(ulong*)(p + 0x278) >> 13) & 1;
+        char* charRecord = (char*)cBELibrary_profileLib + off;
+        return (int)(*(ulong*)(charRecord + 0x278) >> 13) & 1;
     }
     return 0;
 }
@@ -943,10 +943,10 @@ INCLUDE_ASM("be/beintreward", func_00157D60);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
-extern "C" int func_00157D60(void* self, int a1, int a2, int bit)
+extern "C" int func_00157D60(void* self, int profileIndex, int characterId, int bit)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157430(self, bit, p + 0xF30);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157430(self, bit, charRecord + 0xF30);
 }
 #endif
 
@@ -956,10 +956,10 @@ INCLUDE_ASM("be/beintreward", func_00157DA0);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
-extern "C" int func_00157DA0(void* self, int a1, int a2, int bit)
+extern "C" int func_00157DA0(void* self, int profileIndex, int characterId, int bit)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157430(self, bit, p + 0xF36);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157430(self, bit, charRecord + 0xF36);
 }
 #endif
 
@@ -969,10 +969,10 @@ INCLUDE_ASM("be/beintreward", func_00157DE0);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
-extern "C" int func_00157DE0(void* self, int a1, int a2, int bit)
+extern "C" int func_00157DE0(void* self, int profileIndex, int characterId, int bit)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157430(self, bit, p + 0xF45);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157430(self, bit, charRecord + 0xF45);
 }
 #endif
 
@@ -982,10 +982,10 @@ INCLUDE_ASM("be/beintreward", func_00157E20);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
-extern "C" int func_00157E20(void* self, int a1, int a2, int bit)
+extern "C" int func_00157E20(void* self, int profileIndex, int characterId, int bit)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157430(self, bit, p + 0xF53);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157430(self, bit, charRecord + 0xF53);
 }
 #endif
 
@@ -995,10 +995,10 @@ INCLUDE_ASM("be/beintreward", func_00157E60);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
-extern "C" int func_00157E60(void* self, int a1, int a2, int bit)
+extern "C" int func_00157E60(void* self, int profileIndex, int characterId, int bit)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157430(self, bit, p + 0xF52);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157430(self, bit, charRecord + 0xF52);
 }
 #endif
 
@@ -1006,10 +1006,10 @@ extern "C" int func_00157E60(void* self, int a1, int a2, int bit)
 INCLUDE_ASM("be/beintreward", func_00157EA0);
 #ifdef SKIP_ASM
 // PORT: 64-bit ulong bit test (ld/dsrlv).
-extern "C" int func_00157EA0(void* self, int a1, int a2, int bit)
+extern "C" int func_00157EA0(void* self, int profileIndex, int characterId, int bit)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return (int)((*(ulong*)(p + 0xF78) >> bit) & 1);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return (int)((*(ulong*)(charRecord + 0xF78) >> bit) & 1);
 }
 #endif
 
@@ -1019,10 +1019,10 @@ INCLUDE_ASM("be/beintreward", func_00157EE0);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
-extern "C" int func_00157EE0(void* self, int a1, int a2, int bit)
+extern "C" int func_00157EE0(void* self, int profileIndex, int characterId, int bit)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157430(self, bit-10, p + 0xF57);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157430(self, bit-10, charRecord + 0xF57);
 }
 #endif
 
@@ -1039,15 +1039,15 @@ int func_00158470_r(void* self, int a1, int a2, int bit, int give) __asm__("func
 int func_00158348_r(void* self, int a1, int a2, int bit, int give) __asm__("func_00158348");
 int func_00158618_r(void* self, int a1, int a2, int bit, int give) __asm__("func_00158618");
 
-extern "C" int func_00157F20(void* self, int a1, int a2, int kind, int bit, int give)
+extern "C" int func_00157F20(void* self, int profileIndex, int characterId, int kind, int bit, int give)
 {
     switch (kind) {
-    case 3: return func_00157FD0_r(self, a1, a2, bit, give);
-    case 4: return func_001580F8_r(self, a1, a2, bit, give);
-    case 5: return func_00158220_r(self, a1, a2, bit, give);
-    case 6: return func_00158470_r(self, a1, a2, bit, give);
-    case 7: return func_00158348_r(self, a1, a2, bit, give);
-    case 8: return func_00158618_r(self, a1, a2, bit + 10, give);
+    case 3: return func_00157FD0_r(self, profileIndex, characterId, bit, give);
+    case 4: return func_001580F8_r(self, profileIndex, characterId, bit, give);
+    case 5: return func_00158220_r(self, profileIndex, characterId, bit, give);
+    case 6: return func_00158470_r(self, profileIndex, characterId, bit, give);
+    case 7: return func_00158348_r(self, profileIndex, characterId, bit, give);
+    case 8: return func_00158618_r(self, profileIndex, characterId, bit + 10, give);
     }
     return 0;
 }
@@ -1076,23 +1076,23 @@ struct sRewardDef_157FD0
     short padE;
 };
 
-extern "C" void func_00157FD0(void* self, int a1, int a2, int bit, int give)
+extern "C" void func_00157FD0(void* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    func_001573F0(self, bit, p + 0xF30);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    func_001573F0(self, bit, charRecord + 0xF30);
     if (give)
     {
         char* defs = *(char**)((char*)func_0015A478_noargs() + 0x14);
         int amount = ((sRewardDef_157FD0*)(defs + (bit << 4)))->amount;
         if (amount > 0) amount *= 10;
-        func_00150B48(econ, a1, a2, amount);
+        func_00150B48(econ, profileIndex, characterId, amount);
     }
-    if (func_001575C0(self, a1, a2) == func_001572B0(self))
+    if (func_001575C0(self, profileIndex, characterId) == func_001572B0(self))
     {
-        func_00158618(self, a1, a2, 0x14, 0);
+        func_00158618(self, profileIndex, characterId, 0x14, 0);
     }
-    cBEEconInterface_getMoney(econ, a1, a2);
+    cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
 #endif
 
@@ -1119,23 +1119,23 @@ struct sRewardDef_1580F8
     short padE;
 };
 
-extern "C" void func_001580F8(void* self, int a1, int a2, int bit, int give)
+extern "C" void func_001580F8(void* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    func_001573F0(self, bit, p + 0xF36);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    func_001573F0(self, bit, charRecord + 0xF36);
     if (give)
     {
         char* defs = *(char**)((char*)func_0015A478_noargs() + 0x18);
         int amount = ((sRewardDef_1580F8*)(defs + (bit << 4)))->amount;
         if (amount > 0) amount *= 10;
-        func_00150B48(econ, a1, a2, amount);
+        func_00150B48(econ, profileIndex, characterId, amount);
     }
-    if (func_00157620(self, a1, a2) == func_001572D0(self))
+    if (func_00157620(self, profileIndex, characterId) == func_001572D0(self))
     {
-        func_00158618(self, a1, a2, 0x11, 0);
+        func_00158618(self, profileIndex, characterId, 0x11, 0);
     }
-    cBEEconInterface_getMoney(econ, a1, a2);
+    cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
 #endif
 
@@ -1162,23 +1162,23 @@ struct sRewardDef_158220
     short padE;
 };
 
-extern "C" void func_00158220(void* self, int a1, int a2, int bit, int give)
+extern "C" void func_00158220(void* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    func_001573F0(self, bit, p + 0xF45);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    func_001573F0(self, bit, charRecord + 0xF45);
     if (give)
     {
         char* defs = *(char**)((char*)func_0015A478_noargs() + 0x1C);
         int amount = ((sRewardDef_158220*)(defs + (bit << 4)))->amount;
         if (amount > 0) amount *= 10;
-        func_00150B48(econ, a1, a2, amount);
+        func_00150B48(econ, profileIndex, characterId, amount);
     }
-    if (func_00157680(self, a1, a2) == func_001572F0(self))
+    if (func_00157680(self, profileIndex, characterId) == func_001572F0(self))
     {
-        func_00158618(self, a1, a2, 0x16, 0);
+        func_00158618(self, profileIndex, characterId, 0x16, 0);
     }
-    cBEEconInterface_getMoney(econ, a1, a2);
+    cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
 #endif
 
@@ -1205,23 +1205,23 @@ struct sRewardDef_158348
     short padE;
 };
 
-extern "C" void func_00158348(void* self, int a1, int a2, int bit, int give)
+extern "C" void func_00158348(void* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    func_001573F0(self, bit, p + 0xF53);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    func_001573F0(self, bit, charRecord + 0xF53);
     if (give)
     {
         char* defs = *(char**)((char*)func_0015A478_noargs() + 0x20);
         int amount = ((sRewardDef_158348*)(defs + (bit << 4)))->amount;
         if (amount > 0) amount *= 10;
-        func_00150B48(econ, a1, a2, amount);
+        func_00150B48(econ, profileIndex, characterId, amount);
     }
-    if (func_001576E0(self, a1, a2) == func_00157310(self))
+    if (func_001576E0(self, profileIndex, characterId) == func_00157310(self))
     {
-        func_00158618(self, a1, a2, 0x13, 0);
+        func_00158618(self, profileIndex, characterId, 0x13, 0);
     }
-    cBEEconInterface_getMoney(econ, a1, a2);
+    cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
 #endif
 
@@ -1238,19 +1238,19 @@ extern "C" void func_001573F0(void* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int func_00150B48(void* self, int a, int b, int amount);
 
-extern "C" void func_00158470(void* self, int profile, int c, int idx, int award)
+extern "C" void func_00158470(void* self, int profile, int characterId, int idx, int award)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)cBELibrary_profileLib + profile * 0x9b50 + c * 0xf88;
-    func_001573F0(self, idx, p + 0xF52);
+    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 0xf88;
+    func_001573F0(self, idx, charRecord + 0xF52);
     if (award)
     {
-        int v = *(short*)(*(char**)((char*)func_0015A478_noargs() + 0x24) + (idx << 4) + 0xC);
-        if (v > 0)
-            v *= 10;
-        func_00150B48(econ, profile, c, v);
+        int amount = *(short*)(*(char**)((char*)func_0015A478_noargs() + 0x24) + (idx << 4) + 0xC);
+        if (amount > 0)
+            amount *= 10;
+        func_00150B48(econ, profile, characterId, amount);
     }
-    cBEEconInterface_getMoney(econ, profile, c);
+    cBEEconInterface_getMoney(econ, profile, characterId);
 }
 #endif
 
@@ -1265,16 +1265,16 @@ extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int func_00150B48(void* self, int a, int b, int amount);
 
 // PORT: 64-bit ulong bit set (sd/ld).
-extern "C" void func_00158558(void* self, int profile, int c, int bit, int award)
+extern "C" void func_00158558(void* self, int profile, int characterId, int bit, int award)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)cBELibrary_profileLib + profile * 0x9b50 + c * 0xf88;
-    *(ulong*)(p + 0xF70) |= (ulong)1 << bit;
+    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 0xf88;
+    *(ulong*)(charRecord + 0xF70) |= (ulong)1 << bit;
     if (award)
     {
-        func_00150B48(econ, profile, c, 5000);
+        func_00150B48(econ, profile, characterId, 5000);
     }
-    cBEEconInterface_getMoney(econ, profile, c);
+    cBEEconInterface_getMoney(econ, profile, characterId);
 }
 #endif
 
@@ -1291,20 +1291,20 @@ extern "C" void func_001573F0(void* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int func_00150B48(void* self, int a, int b, int amount);
 
-extern "C" void func_00158618(void* self, int profile, int c, int idx, int award)
+extern "C" void func_00158618(void* self, int profile, int characterId, int idx, int award)
 {
     idx -= 10;
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)cBELibrary_profileLib + profile * 0x9b50 + c * 0xf88;
-    func_001573F0(self, idx, p + 0xF57);
+    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 0xf88;
+    func_001573F0(self, idx, charRecord + 0xF57);
     if (award)
     {
-        int v = *(short*)(*(char**)((char*)func_0015A478_noargs() + 0x28) + (idx << 4) + 0xC);
-        if (v > 0)
-            v *= 10;
-        func_00150B48(econ, profile, c, v);
+        int amount = *(short*)(*(char**)((char*)func_0015A478_noargs() + 0x28) + (idx << 4) + 0xC);
+        if (amount > 0)
+            amount *= 10;
+        func_00150B48(econ, profile, characterId, amount);
     }
-    cBEEconInterface_getMoney(econ, profile, c);
+    cBEEconInterface_getMoney(econ, profile, characterId);
 }
 #endif
 
@@ -1313,10 +1313,10 @@ INCLUDE_ASM("be/beintreward", func_00158700);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
-extern "C" int func_00158700(void* self, int a1, int a2)
+extern "C" int func_00158700(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return *(int*)(p + 0xf80);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return *(int*)(charRecord + 0xf80);
 }
 #endif
 
@@ -1326,10 +1326,10 @@ INCLUDE_ASM("be/beintreward", func_00158728);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int cBELibrary_profileLib[];
 
-extern "C" long func_00158728(void* self, int a1, int a2)
+extern "C" long func_00158728(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return *(long*)(p + 0xf70);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return *(long*)(charRecord + 0xf70);
 }
 #endif
 
@@ -1339,20 +1339,20 @@ INCLUDE_ASM("be/beintreward", func_00158750);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int cBELibrary_profileLib[];
 
-extern "C" long func_00158750(void* self, int a1, int a2)
+extern "C" long func_00158750(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return *(long*)(p + 0xf78);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return *(long*)(charRecord + 0xf78);
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00158778);
 #ifdef SKIP_ASM
-extern "C" int func_00158778(void* self, int a1, int a2)
+extern "C" int func_00158778(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    return func_00157390(self, 0x40, (signed char*)(p + 0xF70));
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return func_00157390(self, 0x40, (signed char*)(charRecord + 0xF70));
 }
 #endif
 
@@ -1394,10 +1394,10 @@ INCLUDE_ASM("be/beintreward", func_00158820);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int cBELibrary_profileLib[];
 
-extern "C" void func_00158820(void* self, int a1, int a2, long value)
+extern "C" void func_00158820(void* self, int profileIndex, int characterId, long value)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    *(long*)(p + 0xf70) = value;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    *(long*)(charRecord + 0xf70) = value;
 }
 #endif
 
@@ -1407,10 +1407,10 @@ INCLUDE_ASM("be/beintreward", func_00158848);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int cBELibrary_profileLib[];
 
-extern "C" void func_00158848(void* self, int a1, int a2, long value)
+extern "C" void func_00158848(void* self, int profileIndex, int characterId, long value)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    *(long*)(p + 0xf78) = value;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    *(long*)(charRecord + 0xf78) = value;
 }
 #endif
 
@@ -1515,9 +1515,9 @@ signed char cBERewardInterface_getTrackMedal(void* self, int iProfileIndex, int 
 //100%
 INCLUDE_ASM("be/beintreward", func_00158960);
 #ifdef SKIP_ASM
-extern "C" int func_00158960(void* self, int b, int c, int d, int e)
+extern "C" int func_00158960(void* self, int profileIndex, int characterId, int event, int locationId)
 {
-    void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])cBELibrary_profileLib)[b][c], e, d);
+    void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])cBELibrary_profileLib)[profileIndex][characterId], locationId, event);
     if (result == 0) {
         return 0;
     }
@@ -1804,24 +1804,24 @@ struct sCharRec_158F60 {
     char pad280[0xF88 - 0x280];
 };
 
-extern "C" void func_00158F60(void* self, int profile, int c, int row, int mode)
+extern "C" void func_00158F60(void* self, int profile, int characterId, int row, int mode)
 {
-    sReward_0015A628* q = (sReward_0015A628*)cBELibrary_userAwards;
+    sReward_0015A628* awards = (sReward_0015A628*)cBELibrary_userAwards;
     switch (mode)
     {
     case 0:
         break;
     case 2:
-        if ((int)((*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).flags >> 13) & 1)
+        if ((int)((*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + characterId * 0xF88))).flags >> 13) & 1)
         {
-            (*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).flags &= ~0x2000L;
-            func_0015A628(q, row, 2, c * 3 + 2);
+            (*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + characterId * 0xF88))).flags &= ~0x2000L;
+            func_0015A628(awards, row, 2, characterId * 3 + 2);
         }
     case 1:
-        if ((int)((*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).flags >> 12) & 1)
+        if ((int)((*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + characterId * 0xF88))).flags >> 12) & 1)
         {
-            (*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).flags &= ~0x1000L;
-            func_0015A628(q, row, 2, c * 3 + 1);
+            (*(sCharRec_158F60*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + characterId * 0xF88))).flags &= ~0x1000L;
+            func_0015A628(awards, row, 2, characterId * 3 + 1);
         }
         break;
     }
@@ -2108,10 +2108,10 @@ int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern "C" void func_00159818(void* self, int a, int b, int c);
 
-extern "C" void func_001597B0(void* self, int rider, int c)
+extern "C" void func_001597B0(void* self, int rider, int money)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    func_00159818(self, profile, cBELibrary_getCharacterID(rider), c);
+    func_00159818(self, profile, cBELibrary_getCharacterID(rider), money);
 }
 #endif
 
@@ -2589,11 +2589,11 @@ extern "C" int func_0015A548(void* self, int n, unsigned char* bits)
     int bi = 0;
     int count = 0;
     while (i < n) {
-        unsigned char b = bits[bi];
+        unsigned char bitByte = bits[bi];
         int j;
         bi++;
         for (j = 0; j < 8 && i < n; j++) {
-            count += (b >> j) & 1;
+            count += (bitByte >> j) & 1;
             i++;
         }
     }
@@ -2697,9 +2697,9 @@ int func_0015A6F0_impl(sRewardGrid_0015A6F0* self)
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A750);
 #ifdef SKIP_ASM
-extern "C" signed char func_0015A750(void* self, int a1, int a2)
+extern "C" signed char func_0015A750(void* self, int row, int column)
 {
-    return *(signed char*)((char*)self + (a1 * 0xa + a2) + 0x6);
+    return *(signed char*)((char*)self + (row * 0xa + column) + 0x6);
 }
 #endif
 

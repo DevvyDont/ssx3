@@ -69,11 +69,11 @@ struct sAggrCharProfile {
 
 extern sAggrCharProfile cBELibrary_profileLib[][10];
 
-extern "C" int func_00155AB0(void* self, int a, int b)
+extern "C" int func_00155AB0(void* self, int targetRider, int rider)
 {
-    int profile = cBELibrary_getProfileIndex(b);
-    int ca = cBELibrary_getCharacterID(a);
-    int cb = cBELibrary_getCharacterID(b);
+    int profile = cBELibrary_getProfileIndex(rider);
+    int ca = cBELibrary_getCharacterID(targetRider);
+    int cb = cBELibrary_getCharacterID(rider);
     if (func_00145750(cBENewRaceInterface_getThis()) == ca)
         return 2;
     return cBELibrary_profileLib[profile][cb].aggression[ca].v[0];
@@ -90,11 +90,11 @@ extern "C" int func_00145750(void* race);
 
 extern sAggrCharProfile cBELibrary_profileLib[][10];
 
-extern "C" int func_00155B50(void* self, int a, int b)
+extern "C" int func_00155B50(void* self, int targetRider, int rider)
 {
-    int profile = cBELibrary_getProfileIndex(b);
-    int ca = cBELibrary_getCharacterID(a);
-    int cb = cBELibrary_getCharacterID(b);
+    int profile = cBELibrary_getProfileIndex(rider);
+    int ca = cBELibrary_getCharacterID(targetRider);
+    int cb = cBELibrary_getCharacterID(rider);
     if (func_00145750(cBENewRaceInterface_getThis()) == ca)
         return 3;
     return cBELibrary_profileLib[profile][cb].aggression[ca].v[1];
@@ -297,9 +297,9 @@ extern "C" void func_001561B0(void* self, void* stream)
         int profile = cBELibrary_getProfileIndex(i);
         for (int j = 0; j < 10; j++)
         {
-            int c = cBELibrary_getCharacterID(i);
+            int charId = cBELibrary_getCharacterID(i);
             sStreamVE_1561B0* vt2 = *(sStreamVE_1561B0**)stream;
-            vt2[2].fn((char*)stream + vt2[2].delta, &cBELibrary_profileLib[profile][c].aggression[j], 3);
+            vt2[2].fn((char*)stream + vt2[2].delta, &cBELibrary_profileLib[profile][charId].aggression[j], 3);
         }
     }
 }

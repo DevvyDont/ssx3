@@ -327,14 +327,14 @@ static inline void Call9_5E58(char* o, int a)
     }
 }
 
-extern "C" void func_001C5E58(void* self, int a)
+extern "C" void func_001C5E58(void* self, int visible)
 {
-    char* s = (char*)self;
-    Call9_5E58(*(char**)(s + 0x70), a);
-    Call9_5E58(*(char**)(s + 0x74), a);
-    Call9_5E58(*(char**)(s + 0x78), a);
-    Call9_5E58(*(char**)(s + 0x7C), a);
-    Call9_5E58(*(char**)(s + 0x88), a);
+    char* obj = (char*)self;
+    Call9_5E58(*(char**)(obj + 0x70), visible);
+    Call9_5E58(*(char**)(obj + 0x74), visible);
+    Call9_5E58(*(char**)(obj + 0x78), visible);
+    Call9_5E58(*(char**)(obj + 0x7C), visible);
+    Call9_5E58(*(char**)(obj + 0x88), visible);
 }
 #endif
 
@@ -1650,16 +1650,16 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
 
 extern "C" void func_001C84A8(void* self, void* text, const char* str, void* out)
 {
-    sVec3_84A8 v = *(sVec3_84A8*)((char*)text + 0x50);
-    char* f = (char*)cUIText_getFont(text);
-    float sx = *(float*)(f + 0x30) * v.x;
-    float sy = *(float*)(f + 0x34) * v.y;
-    *(float*)(f + 0x38) = sx;
-    *(float*)(f + 0x3C) = sy;
-    f = (char*)cUIText_getFont(text);
-    cFont_textExtent(f, str, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
-    f = (char*)cUIText_getFont(text);
-    *(float*)((char*)out + 0xC) = v.y * ((float)*(int*)(f + 0x14) * *(float*)(f + 0x34));
+    sVec3_84A8 scale = *(sVec3_84A8*)((char*)text + 0x50);
+    char* font = (char*)cUIText_getFont(text);
+    float sx = *(float*)(font + 0x30) * scale.x;
+    float sy = *(float*)(font + 0x34) * scale.y;
+    *(float*)(font + 0x38) = sx;
+    *(float*)(font + 0x3C) = sy;
+    font = (char*)cUIText_getFont(text);
+    cFont_textExtent(font, str, out, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+    font = (char*)cUIText_getFont(text);
+    *(float*)((char*)out + 0xC) = scale.y * ((float)*(int*)(font + 0x14) * *(float*)(font + 0x34));
 }
 #endif
 
@@ -1672,16 +1672,16 @@ extern "C" float func_003921F0(void* self, const char* str, void* out, int n, fl
 
 extern "C" void func_001C8568(void* self, void* text, const char* str, void* out)
 {
-    sVec3_8568 v = *(sVec3_8568*)((char*)text + 0x50);
-    char* f = (char*)cUIText_getFont(text);
-    float sx = *(float*)(f + 0x30) * v.x;
-    float sy = *(float*)(f + 0x34) * v.y;
-    *(float*)(f + 0x38) = sx;
-    *(float*)(f + 0x3C) = sy;
-    f = (char*)cUIText_getFont(text);
-    func_003921F0(f, str, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
-    f = (char*)cUIText_getFont(text);
-    *(float*)((char*)out + 0xC) = v.y * ((float)*(int*)(f + 0x14) * *(float*)(f + 0x34));
+    sVec3_8568 scale = *(sVec3_8568*)((char*)text + 0x50);
+    char* font = (char*)cUIText_getFont(text);
+    float sx = *(float*)(font + 0x30) * scale.x;
+    float sy = *(float*)(font + 0x34) * scale.y;
+    *(float*)(font + 0x38) = sx;
+    *(float*)(font + 0x3C) = sy;
+    font = (char*)cUIText_getFont(text);
+    func_003921F0(font, str, out, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+    font = (char*)cUIText_getFont(text);
+    *(float*)((char*)out + 0xC) = scale.y * ((float)*(int*)(font + 0x14) * *(float*)(font + 0x34));
 }
 #endif
 
@@ -2006,9 +2006,9 @@ extern "C" void func_001C8EF0(void* vself, int* item, float* size, int flag, flo
         func_001C9038(self, text, (unsigned short*)item[1], size);
         goto add;
     case 3: {
-        char* o = (char*)SSXApp->FELocale;
-        sVEntry_8EF0* vt = *(sVEntry_8EF0**)(o + 4);
-        unsigned short* str = vt[4].fn(o + vt[4].delta, item[1]);
+        char* locale = (char*)SSXApp->FELocale;
+        sVEntry_8EF0* vt = *(sVEntry_8EF0**)(locale + 4);
+        unsigned short* str = vt[4].fn(locale + vt[4].delta, item[1]);
         if (str) {
             func_001C9038(self, text, str, size);
             goto add;
@@ -2093,9 +2093,9 @@ extern "C" void func_001C9B68(void* self, float* size, float* item);
 extern char str_getTextBoxSize[];
 
 // PORT: a3 is the float* size out pointer (the unit declares it int)
-extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int a3)
+extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int sizePtr)
 {
-    float* size = (float*)a3;
+    float* size = (float*)sizePtr;
     int j = 0;
     int i = 0;
     float item[4];
@@ -2103,16 +2103,16 @@ extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int a3
     buf[0] = 0;
     int n = strlen(str);
     while (i < n) {
-        char c = str[i];
+        char chr = str[i];
         char next = str[i + 1];
-        if (c == '\\' && next == '\\') {
+        if (chr == '\\' && next == '\\') {
             buf[j] = 0;
             func_001C84A8(self, text, buf, item);
             i += 2;
             func_001C9B68(self, size, item);
             j = 0;
             size[1] += 3.0f;
-        } else if (c == '\r') {
+        } else if (chr == '\r') {
             buf[j] = 0;
             func_001C84A8(self, text, buf, item);
             i += 1;
@@ -2120,7 +2120,7 @@ extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int a3
             j = 0;
             size[1] += 3.0f;
         } else {
-            buf[j] = c;
+            buf[j] = chr;
             i++;
             j++;
         }
@@ -2475,9 +2475,9 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int a3);
 
-extern "C" void func_001C9B28(void* self, cUIText* text, const char* str, int a3)
+extern "C" void func_001C9B28(void* self, cUIText* text, const char* str, int sizePtr)
 {
-    func_001C9210(self, text, str, a3);
+    func_001C9210(self, text, str, sizePtr);
     cUIText_setAsciiString(text, str);
 }
 #endif
@@ -6034,11 +6034,11 @@ extern "C" void func_001CE408(void* self, bool on)
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CE468);
 #ifdef SKIP_ASM
-extern "C" void func_001CE468(void* self, int v)
+extern "C" void func_001CE468(void* self, int included)
 {
     int i;
     for (i = 0; i < 0xE; i++) {
-        cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, i, v, 2);
+        cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, i, included, 2);
     }
 }
 #endif

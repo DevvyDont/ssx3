@@ -72,9 +72,9 @@ void func_0030DB70(void* self, int item)
 //100%
 INCLUDE_ASM("animation/animmodel", func_0030DB90);
 #ifdef SKIP_ASM
-extern "C" int func_0030DB90(void* self, void* a1)
+extern "C" int func_0030DB90(void* self, void* other)
 {
-    return *(int*)self - *(int*)a1;
+    return *(int*)self - *(int*)other;
 }
 #endif
 
@@ -1284,10 +1284,10 @@ void operator_delete(int*);
 
 extern "C" void func_003112C8(void* self, int flags)
 {
-    void* p = *(void**)self;
-    if (p != 0)
+    void* data = *(void**)self;
+    if (data != 0)
     {
-        cMemMan_free(p);
+        cMemMan_free(data);
     }
     if (flags & 1)
     {

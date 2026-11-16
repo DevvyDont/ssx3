@@ -682,20 +682,20 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
 //100%
 INCLUDE_ASM("fe/fereal", func_001A1CB8);
 #ifdef SKIP_ASM
-extern "C" void func_001A1CB8(void* self, int a1, int val)
+extern "C" void func_001A1CB8(void* self, int index, int val)
 {
-    char* p = (char*)self + (signed char)a1;
-    *(char*)(p + 0x8) = val;
+    char* entry = (char*)self + (signed char)index;
+    *(char*)(entry + 0x8) = val;
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/fereal", func_001A1CD0);
 #ifdef SKIP_ASM
-extern "C" unsigned char func_001A1CD0(void* self, int a1)
+extern "C" unsigned char func_001A1CD0(void* self, int index)
 {
-    char* p = (char*)self + (signed char)a1;
-    return *(unsigned char*)(p + 0x8);
+    char* entry = (char*)self + (signed char)index;
+    return *(unsigned char*)(entry + 0x8);
 }
 #endif
 
@@ -1112,40 +1112,40 @@ extern "C" int func_001A2208(void* self)
             ((void (*)(void*, void*))vt[34].fn)((char*)ps2GraphicsMan + vt[34].delta, t4mat_Identity);
         }
         feW()->top->setAlpha(9);
-        sFeVert v[4];
+        sFeVert verts[4];
         for (int i = 0; i < 4; i++) {
-            v[i].a = 0x80;
-            v[i].r = 0;
-            v[i].g = 0;
-            v[i].b = 0;
-            v[i].q = 1.0f;
+            verts[i].a = 0x80;
+            verts[i].r = 0;
+            verts[i].g = 0;
+            verts[i].b = 0;
+            verts[i].q = 1.0f;
         }
-        sFePos p;
-        p.x = 0.0f;
-        p.y = 0.0f;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[0].pos = p;
-        p.x = 0.0f;
-        p.y = w;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[1].pos = p;
-        p.x = 0.0f;
-        p.y = 0.0f;
-        p.z = hgt;
-        p.w = 1.0f;
-        v[2].pos = p;
-        p.x = 0.0f;
-        p.y = w;
-        p.z = hgt;
-        p.w = 1.0f;
-        v[3].pos = p;
+        sFePos corner;
+        corner.x = 0.0f;
+        corner.y = 0.0f;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[0].pos = corner;
+        corner.x = 0.0f;
+        corner.y = w;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[1].pos = corner;
+        corner.x = 0.0f;
+        corner.y = 0.0f;
+        corner.z = hgt;
+        corner.w = 1.0f;
+        verts[2].pos = corner;
+        corner.x = 0.0f;
+        corner.y = w;
+        corner.z = hgt;
+        corner.w = 1.0f;
+        verts[3].pos = corner;
         *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
-            ((void (*)(void*, int, sFeVert*, int))vt[71].fn)((char*)ps2GraphicsMan + vt[71].delta, 4, v, 0);
+            ((void (*)(void*, int, sFeVert*, int))vt[71].fn)((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
         }
         feCall(22);
         feCall(32);
@@ -1388,13 +1388,13 @@ extern "C" void func_001A2BC0(void* self)
     int i;
     for (i = 0; i < 1; i++) {
         unsigned char idx = i;
-        void* p = *(void**)((char*)cAnimDataBase_TheAnimDataBase + (idx << 2));
-        if (p != 0) {
-            func_00314FE8(cGameAnimMap_TheGameAnimMap, p);
+        void* animData = *(void**)((char*)cAnimDataBase_TheAnimDataBase + (idx << 2));
+        if (animData != 0) {
+            func_00314FE8(cGameAnimMap_TheGameAnimMap, animData);
             void** tbl = cAnimDataBase_TheAnimDataBase;
             *(void**)((char*)tbl + (idx << 2)) = 0;
             func_00311110(tbl);
-            func_003112C8(p, 3);
+            func_003112C8(animData, 3);
         }
     }
 }

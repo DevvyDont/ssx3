@@ -602,10 +602,10 @@ extern "C" int func_00154240(void* self, int id);
 extern "C" int func_00153DD0(void* self, int id)
 {
     int i = func_00154240(self, id);
-    int c = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + c * 0xF88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return (*(unsigned int*)(p + 0x118) >> 1) & 1;
+    int charId = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + charId * 0xF88;
+    char* recordBase = (char*)cBELibrary_profileLib + off;
+    return (*(unsigned int*)(recordBase + 0x118) >> 1) & 1;
 }
 #endif
 
@@ -657,10 +657,10 @@ extern "C" int func_00154240(void* self, int id);
 extern "C" int func_00153ED8(void* self, int id)
 {
     int i = func_00154240(self, id);
-    int c = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + c * 0xF88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return (*(unsigned int*)(p + 0x118) >> 4) & 1;
+    int charId = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + charId * 0xF88;
+    char* recordBase = (char*)cBELibrary_profileLib + off;
+    return (*(unsigned int*)(recordBase + 0x118) >> 4) & 1;
 }
 #endif
 
@@ -772,10 +772,10 @@ extern "C" int func_00154240(void* self, int id);
 extern "C" void func_00154010(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
-    int c = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + c * 0xF88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~1) | (value & 1);
+    int charId = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + charId * 0xF88;
+    char* recordBase = (char*)cBELibrary_profileLib + off;
+    *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~1) | (value & 1);
 }
 #endif
 
@@ -788,10 +788,10 @@ extern "C" int func_00154240(void* self, int id);
 extern "C" void func_00154080(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
-    int c = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + c * 0xF88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 1)) | ((value & 1) << 1);
+    int charId = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + charId * 0xF88;
+    char* recordBase = (char*)cBELibrary_profileLib + off;
+    *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 1)) | ((value & 1) << 1);
 }
 #endif
 
@@ -804,10 +804,10 @@ extern "C" int func_00154240(void* self, int id);
 extern "C" void func_001540F0(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
-    int c = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + c * 0xF88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 2)) | ((value & 1) << 2);
+    int charId = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + charId * 0xF88;
+    char* recordBase = (char*)cBELibrary_profileLib + off;
+    *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 2)) | ((value & 1) << 2);
 }
 #endif
 
@@ -820,10 +820,10 @@ extern "C" int func_00154240(void* self, int id);
 extern "C" void func_00154160(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
-    int c = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + c * 0xF88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 3)) | ((value & 1) << 3);
+    int charId = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + charId * 0xF88;
+    char* recordBase = (char*)cBELibrary_profileLib + off;
+    *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 3)) | ((value & 1) << 3);
 }
 #endif
 
@@ -836,10 +836,10 @@ extern "C" int func_00154240(void* self, int id);
 extern "C" void func_001541D0(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
-    int c = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + c * 0xF88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    *(int*)(p + 0x118) = (*(int*)(p + 0x118) & ~(1 << 4)) | ((value & 1) << 4);
+    int charId = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + charId * 0xF88;
+    char* recordBase = (char*)cBELibrary_profileLib + off;
+    *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 4)) | ((value & 1) << 4);
 }
 #endif
 

@@ -6,14 +6,14 @@ INCLUDE_ASM("bx/blockman", cBlockMan_init);
 //100%
 INCLUDE_ASM("bx/blockman", func_00316BE0);
 #ifdef SKIP_ASM
-extern "C" int func_00316BE0(void *arg0, int arg1) {
+extern "C" int func_00316BE0(void *block, int addr) {
     int temp_5;
     int var_3;
 
-    temp_5 = arg1 - (*(int *)((char*)(arg0) + (0)));
+    temp_5 = addr - (*(int *)((char*)(block) + (0)));
     var_3 = 0;
     if (temp_5 > 0) {
-        var_3 = temp_5 < (*(int *)((char*)(arg0) + (4)));
+        var_3 = temp_5 < (*(int *)((char*)(block) + (4)));
     }
     return var_3;
 }

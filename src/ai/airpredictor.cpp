@@ -526,9 +526,9 @@ extern "C" float func_001139A0(void* self, sVec4_1139A0* pos, sVec4_1139A0* vel,
     *outPos = vu0Add_1139A0(*pos, vu0Scale_1139A0(*vel, 0.01666666753590107f));
     float dx = vel->x * -0.0033333336468786f;
     float dy = vel->y * -0.0033333336468786f;
-    float g = -31.666667938232422f;
-    if (vel->z > 0.0f) g = -14.166666984558105f;
-    *outVel = vu0Add_1139A0(*vel, sVec4_1139A0(dx, dy, g, 0.0f));
+    float gravity = -31.666667938232422f;
+    if (vel->z > 0.0f) gravity = -14.166666984558105f;
+    *outVel = vu0Add_1139A0(*vel, sVec4_1139A0(dx, dy, gravity, 0.0f));
     float len = vu0Length_1139A0(*outVel);
     if (*(float*)((char*)self + 0xA8) < len)
     {

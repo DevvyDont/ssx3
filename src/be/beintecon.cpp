@@ -128,14 +128,14 @@ extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider)
 //100%
 INCLUDE_ASM("be/beintecon", func_00150A58);
 #ifdef SKIP_ASM
-extern "C" void func_00150A58(void* self, int a, int b, int value)
+extern "C" void func_00150A58(void* self, int profileIndex, int characterId, int value)
 {
-    if (a < 2) {
-        int bOff = b * 0xF88;
-        int aOff = a * 0x9B50;
+    if (profileIndex < 2) {
+        int bOff = characterId * 0xF88;
+        int aOff = profileIndex * 0x9B50;
         int off = bOff + aOff;
-        char* p = (char*)cBELibrary_profileLib + off;
-        *(int*)(p + 0xAC4) = value;
+        char* profile = (char*)cBELibrary_profileLib + off;
+        *(int*)(profile + 0xAC4) = value;
     }
 }
 #endif
@@ -166,10 +166,10 @@ INCLUDE_ASM("be/beintecon", func_00150AE0);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern "C" int func_00150AE0(void* self, int rider, int a2)
+extern "C" int func_00150AE0(void* self, int rider, int amount)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    return func_00150A90(self, profile, cBELibrary_getCharacterID(rider), a2);
+    return func_00150A90(self, profile, cBELibrary_getCharacterID(rider), amount);
 }
 #endif
 
@@ -178,16 +178,16 @@ INCLUDE_ASM("be/beintecon", func_00150B48);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
-extern "C" int func_00150B48(void* self, int a, int b, int amount)
+extern "C" int func_00150B48(void* self, int profileIndex, int characterId, int amount)
 {
-    if (a >= 2) {
+    if (profileIndex >= 2) {
         return 0;
     }
-    int bOff = b * 0xF88;
-    int aOff = a * 0x9B50;
+    int bOff = characterId * 0xF88;
+    int aOff = profileIndex * 0x9B50;
     int off = bOff + aOff;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return *(int*)(p + 0xAC4) -= amount;
+    char* profile = (char*)cBELibrary_profileLib + off;
+    return *(int*)(profile + 0xAC4) -= amount;
 }
 #endif
 
@@ -205,24 +205,24 @@ struct sPeakBits_0B88 {
 };
 
 // Sets the locked state of a peak for a profile/character: stores the inverse of `unlocked`.
-extern "C" int func_00150B88(void* self, int a, int b, int peak, int unlocked)
+extern "C" int func_00150B88(void* self, int profileIndex, int characterId, int peak, int unlocked)
 {
-    if (a >= 2) {
+    if (profileIndex >= 2) {
         return 0;
     }
     unlocked ^= 1;
     if (peak == 1) {
-        int bOff = b * 0xF88;
-        int aOff = a * 0x9B50;
+        int bOff = characterId * 0xF88;
+        int aOff = profileIndex * 0x9B50;
         int off = bOff + aOff;
-        char* p = (char*)cBELibrary_profileLib + off;
-        ((sPeakBits_0B88*)(p + 0x278))->peak1 = unlocked;
+        char* profile = (char*)cBELibrary_profileLib + off;
+        ((sPeakBits_0B88*)(profile + 0x278))->peak1 = unlocked;
     } else if (peak == 2) {
-        int bOff = b * 0xF88;
-        int aOff = a * 0x9B50;
+        int bOff = characterId * 0xF88;
+        int aOff = profileIndex * 0x9B50;
         int off = bOff + aOff;
-        char* p = (char*)cBELibrary_profileLib + off;
-        ((sPeakBits_0B88*)(p + 0x278))->peak2 = unlocked;
+        char* profile = (char*)cBELibrary_profileLib + off;
+        ((sPeakBits_0B88*)(profile + 0x278))->peak2 = unlocked;
     }
     return 1;
 }
@@ -496,10 +496,10 @@ void operator_delete(int*);
 
 extern "C" void func_00151368(void* self, int flags)
 {
-    void* p = *(void**)((char*)self + 0x288);
-    if (p != 0)
+    void* buffer = *(void**)((char*)self + 0x288);
+    if (buffer != 0)
     {
-        cMemMan_free(p);
+        cMemMan_free(buffer);
     }
     *(void**)((char*)self + 0x288) = 0;
     if (flags & 1)
@@ -635,13 +635,13 @@ struct sEconItems_001515B8
 extern "C" void func_001515B8(sEconItems_001515B8* self)
 {
     int n = self->count;
-    sEconItem_001515B8* p = self->items;
-    for (int i = 0; i < n; i++, p++)
+    sEconItem_001515B8* item = self->items;
+    for (int i = 0; i < n; i++, item++)
     {
-        if (p->flags & 4)
-            p->flags |= 0x10;
+        if (item->flags & 4)
+            item->flags |= 0x10;
         else
-            p->flags &= ~0x10;
+            item->flags &= ~0x10;
     }
 }
 #endif
@@ -972,9 +972,9 @@ static inline unsigned int clearBits_151BD0(unsigned int f, unsigned int m)
 extern "C" void func_00151BD0(sEconItems_151BD0* self)
 {
     for (int i = 0; i < self->count; i++) {
-        sEconItem_151BD0* p = &self->items[i];
-        unsigned int f = p->flags;
-        p->flags = (f & 0x20) ? (f | 0x16) : clearBits_151BD0(clearBits_151BD0(f, 0x10), 4);
+        sEconItem_151BD0* item = &self->items[i];
+        unsigned int oldFlags = item->flags;
+        item->flags = (oldFlags & 0x20) ? (oldFlags | 0x16) : clearBits_151BD0(clearBits_151BD0(oldFlags, 0x10), 4);
     }
 }
 #endif
@@ -1009,15 +1009,15 @@ struct sEconItems_00151C48
 extern "C" void func_00151C48(sEconItems_00151C48* self, int id, int on)
 {
     int idx = self->lookup[id];
-    sEconItem_00151C48* p;
+    sEconItem_00151C48* item;
     if (idx >= 0)
-        p = &self->items[idx];
+        item = &self->items[idx];
     else
-        p = 0;
+        item = 0;
     if (on)
-        p->flags |= 2;
+        item->flags |= 2;
     else
-        p->flags &= ~2;
+        item->flags &= ~2;
 }
 #endif
 
@@ -1226,34 +1226,34 @@ extern "C" int func_00151EF0(void* selfp, int id, int on)
     sEconItems_151EF0* self = (sEconItems_151EF0*)selfp;
     sEconDefs_151EF0* db = (sEconDefs_151EF0*)func_0014BDB8_1EF0();
     int n = 0;
-    sEconLink_151EF0* l = func_0014DB40(db, self->kind, id, on, &n);
+    sEconLink_151EF0* link = func_0014DB40(db, self->kind, id, on, &n);
     sEconItem_151EF0* item = getItem_151EF0(self, id);
-    for (int i = 0; i < n; i++, l++)
+    for (int i = 0; i < n; i++, link++)
     {
-        if (l->target == -1)
+        if (link->target == -1)
             continue;
-        if (l->condId != -1)
+        if (link->condId != -1)
         {
-            if ((isOwned_151EF0(getItem_151EF0(self, l->condId)) != 0) != (l->cond != 0))
+            if ((isOwned_151EF0(getItem_151EF0(self, link->condId)) != 0) != (link->cond != 0))
                 continue;
         }
-        sEconItem_151EF0* t = &self->items[self->lookup[l->target]];
-        int has = isOwned_151EF0(t) != 0;
-        if (has == (l->on != 0))
+        sEconItem_151EF0* targetItem = &self->items[self->lookup[link->target]];
+        int has = isOwned_151EF0(targetItem) != 0;
+        if (has == (link->on != 0))
         {
             if (has)
                 continue;
-            if (!(getDef_151EF0(db, func_0014D448(db, self->kind, l->target))->flags & 8))
+            if (!(getDef_151EF0(db, func_0014D448(db, self->kind, link->target))->flags & 8))
                 continue;
         }
-        if (t->id == id)
+        if (targetItem->id == id)
         {
-            if (l->on)
+            if (link->on)
                 item->flags |= 0x10;
             else
                 item->flags &= ~0x10;
         }
-        else if (func_00151C90(self, t->id, l->on != 0) == 0)
+        else if (func_00151C90(self, targetItem->id, link->on != 0) == 0)
         {
             return 0;
         }
@@ -1304,16 +1304,16 @@ extern "C" int func_001520E8(sEconItems_001520E8* self, int* changed)
 {
     void* db = func_0014BDB8(self);
     int n = func_0014D988(db, *((signed char*)self + 0xBC0));
-    sEconDef_001520E8* d = (sEconDef_001520E8*)func_0014D998(db, *((signed char*)self + 0xBC0));
+    sEconDef_001520E8* def = (sEconDef_001520E8*)func_0014D998(db, *((signed char*)self + 0xBC0));
     *changed = 0;
-    for (int i = 0; i < n; i++, d++)
+    for (int i = 0; i < n; i++, def++)
     {
-        if (d->flags & 0x1000)
+        if (def->flags & 0x1000)
         {
-            if (getItem_001520E8(self, d->id)->flags & 0x10)
+            if (getItem_001520E8(self, def->id)->flags & 0x10)
             {
                 *changed = 1;
-                if (func_00151EF0(self, d->id, 1) == 0)
+                if (func_00151EF0(self, def->id, 1) == 0)
                     return 0;
             }
         }
@@ -1376,12 +1376,12 @@ extern "C" int func_001521F0(sEconItems_1521F0* self)
     int i = 0;
     int ok = 1;
     void* db = func_0014BDB8_noarg();
-    sEconGroup_1521F0* g = (sEconGroup_1521F0*)func_0014DC50(db, self->kind);
+    sEconGroup_1521F0* group = (sEconGroup_1521F0*)func_0014DC50(db, self->kind);
     int n = func_0014DC40(db, self->kind);
-    for (; i < n; i++, g++)
+    for (; i < n; i++, group++)
     {
         sEconDef_1521F0* list[528];
-        int cnt = func_0014D608(db, self->kind, g->id, (void**)list, -1, 1);
+        int cnt = func_0014D608(db, self->kind, group->id, (void**)list, -1, 1);
         int j;
         for (j = 0; j < cnt; j++)
         {
@@ -1392,7 +1392,7 @@ extern "C" int func_001521F0(sEconItems_1521F0* self)
         }
         if (j == cnt)
         {
-            if (func_00151C90(self, g->prize, 1) == 0)
+            if (func_00151C90(self, group->prize, 1) == 0)
             {
                 ok = 0;
                 break;

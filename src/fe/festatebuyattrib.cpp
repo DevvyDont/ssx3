@@ -1055,15 +1055,15 @@ extern "C" void func_001F5A38(void* self)
         show = 0;
         break;
     }
-    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_horizontal_dash_b));
-    if (o != 0) {
-        sVEK1F5A38* vt = *(sVEK1F5A38**)(o + 8);
-        vt[9].fn(o + vt[9].delta, show);
+    char* dashObj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_horizontal_dash_b));
+    if (dashObj != 0) {
+        sVEK1F5A38* vt = *(sVEK1F5A38**)(dashObj + 8);
+        vt[9].fn(dashObj + vt[9].delta, show);
     }
-    o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_vertical_dash_b));
-    if (o != 0) {
-        sVEK1F5A38* vt = *(sVEK1F5A38**)(o + 8);
-        vt[9].fn(o + vt[9].delta, show);
+    dashObj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_vertical_dash_b));
+    if (dashObj != 0) {
+        sVEK1F5A38* vt = *(sVEK1F5A38**)(dashObj + 8);
+        vt[9].fn(dashObj + vt[9].delta, show);
     }
 }
 #endif

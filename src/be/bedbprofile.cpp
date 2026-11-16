@@ -97,17 +97,17 @@ static inline int IsBetter_00152460(int stat, sScoreStat_00152460* s, unsigned i
     }
 }
 
-extern "C" int func_00152460(sCharProfile_00152460* self, int a, int stat, unsigned int value)
+extern "C" int func_00152460(sCharProfile_00152460* self, int locationId, int stat, unsigned int value)
 {
-    int type = cBELibrary_getScoreType(a, stat);
+    int type = cBELibrary_getScoreType(locationId, stat);
     if (type == 0x1A)
         return 0;
     if (value == 0)
         return 0;
-    sScoreStat_00152460* s = &self->stats[type];
-    if (s->value == 0 || IsBetter_00152460(stat, s, value))
+    sScoreStat_00152460* scoreStat = &self->stats[type];
+    if (scoreStat->value == 0 || IsBetter_00152460(stat, scoreStat, value))
     {
-        s->value = value;
+        scoreStat->value = value;
         return 1;
     }
     return 0;
@@ -153,13 +153,13 @@ extern "C" int func_00152528(sCharProfile_00152528* self, int ev, int mode, int 
         int type = cBELibrary_getScoreType(ev, mode);
         if (type != 0x1A)
         {
-            sPlaceStat_00152528* s = &self->stats[type];
-            s->done = 1;
+            sPlaceStat_00152528* placeStat = &self->stats[type];
+            placeStat->done = 1;
             if ((unsigned int)place < 2)
-                s->count++;
-            if (s->best != -1)
+                placeStat->count++;
+            if (placeStat->best != -1)
             {
-                if (place >= s->best)
+                if (place >= placeStat->best)
                     goto fail;
             }
             else
@@ -170,7 +170,7 @@ extern "C" int func_00152528(sCharProfile_00152528* self, int ev, int mode, int 
                 else if ((unsigned int)(mode - 1) < 3)
                     self->medals[cat].b++;
             }
-            s->best = place;
+            placeStat->best = place;
             return 1;
         }
     }

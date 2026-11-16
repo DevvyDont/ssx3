@@ -191,22 +191,22 @@ extern "C" float func_0031B098(float a, float b, float c, float d, float e, floa
 // 4x4 determinant by cofactor expansion along the first row.
 extern "C" float func_0031B178(void* vm)
 {
-    float (*m)[4] = (float (*)[4])vm;
+    float (*mat)[4] = (float (*)[4])vm;
     float ans;
     float a1, a2, a3, a4, b1, b2, b3, b4;
     float c1, c2, c3, c4, d1, d2, d3, d4;
 
-    a1 = m[0][0]; b1 = m[0][1];
-    c1 = m[0][2]; d1 = m[0][3];
+    a1 = mat[0][0]; b1 = mat[0][1];
+    c1 = mat[0][2]; d1 = mat[0][3];
 
-    a2 = m[1][0]; b2 = m[1][1];
-    c2 = m[1][2]; d2 = m[1][3];
+    a2 = mat[1][0]; b2 = mat[1][1];
+    c2 = mat[1][2]; d2 = mat[1][3];
 
-    a3 = m[2][0]; b3 = m[2][1];
-    c3 = m[2][2]; d3 = m[2][3];
+    a3 = mat[2][0]; b3 = mat[2][1];
+    c3 = mat[2][2]; d3 = mat[2][3];
 
-    a4 = m[3][0]; b4 = m[3][1];
-    c4 = m[3][2]; d4 = m[3][3];
+    a4 = mat[3][0]; b4 = mat[3][1];
+    c4 = mat[3][2]; d4 = mat[3][3];
 
     ans = a1 * func_0031B098(b2, b3, b4, c2, c3, c4, d2, d3, d4)
         - b1 * func_0031B098(a2, a3, a4, c2, c3, c4, d2, d3, d4)
@@ -224,41 +224,41 @@ extern "C" float func_0031B098(float a, float b, float c, float d, float e, floa
 // 4x4 adjoint (transposed cofactor matrix), in place.
 extern "C" void func_0031B310(void* vm)
 {
-    float (*m)[4] = (float (*)[4])vm;
+    float (*mat)[4] = (float (*)[4])vm;
     float a1, a2, a3, a4, b1, b2, b3, b4;
     float c1, c2, c3, c4, d1, d2, d3, d4;
 
-    a1 = m[0][0]; b1 = m[0][1];
-    c1 = m[0][2]; d1 = m[0][3];
+    a1 = mat[0][0]; b1 = mat[0][1];
+    c1 = mat[0][2]; d1 = mat[0][3];
 
-    a2 = m[1][0]; b2 = m[1][1];
-    c2 = m[1][2]; d2 = m[1][3];
+    a2 = mat[1][0]; b2 = mat[1][1];
+    c2 = mat[1][2]; d2 = mat[1][3];
 
-    a3 = m[2][0]; b3 = m[2][1];
-    c3 = m[2][2]; d3 = m[2][3];
+    a3 = mat[2][0]; b3 = mat[2][1];
+    c3 = mat[2][2]; d3 = mat[2][3];
 
-    a4 = m[3][0]; b4 = m[3][1];
-    c4 = m[3][2]; d4 = m[3][3];
+    a4 = mat[3][0]; b4 = mat[3][1];
+    c4 = mat[3][2]; d4 = mat[3][3];
 
-    m[0][0] =  func_0031B098(b2, b3, b4, c2, c3, c4, d2, d3, d4);
-    m[1][0] = -func_0031B098(a2, a3, a4, c2, c3, c4, d2, d3, d4);
-    m[2][0] =  func_0031B098(a2, a3, a4, b2, b3, b4, d2, d3, d4);
-    m[3][0] = -func_0031B098(a2, a3, a4, b2, b3, b4, c2, c3, c4);
+    mat[0][0] =  func_0031B098(b2, b3, b4, c2, c3, c4, d2, d3, d4);
+    mat[1][0] = -func_0031B098(a2, a3, a4, c2, c3, c4, d2, d3, d4);
+    mat[2][0] =  func_0031B098(a2, a3, a4, b2, b3, b4, d2, d3, d4);
+    mat[3][0] = -func_0031B098(a2, a3, a4, b2, b3, b4, c2, c3, c4);
 
-    m[0][1] = -func_0031B098(b1, b3, b4, c1, c3, c4, d1, d3, d4);
-    m[1][1] =  func_0031B098(a1, a3, a4, c1, c3, c4, d1, d3, d4);
-    m[2][1] = -func_0031B098(a1, a3, a4, b1, b3, b4, d1, d3, d4);
-    m[3][1] =  func_0031B098(a1, a3, a4, b1, b3, b4, c1, c3, c4);
+    mat[0][1] = -func_0031B098(b1, b3, b4, c1, c3, c4, d1, d3, d4);
+    mat[1][1] =  func_0031B098(a1, a3, a4, c1, c3, c4, d1, d3, d4);
+    mat[2][1] = -func_0031B098(a1, a3, a4, b1, b3, b4, d1, d3, d4);
+    mat[3][1] =  func_0031B098(a1, a3, a4, b1, b3, b4, c1, c3, c4);
 
-    m[0][2] =  func_0031B098(b1, b2, b4, c1, c2, c4, d1, d2, d4);
-    m[1][2] = -func_0031B098(a1, a2, a4, c1, c2, c4, d1, d2, d4);
-    m[2][2] =  func_0031B098(a1, a2, a4, b1, b2, b4, d1, d2, d4);
-    m[3][2] = -func_0031B098(a1, a2, a4, b1, b2, b4, c1, c2, c4);
+    mat[0][2] =  func_0031B098(b1, b2, b4, c1, c2, c4, d1, d2, d4);
+    mat[1][2] = -func_0031B098(a1, a2, a4, c1, c2, c4, d1, d2, d4);
+    mat[2][2] =  func_0031B098(a1, a2, a4, b1, b2, b4, d1, d2, d4);
+    mat[3][2] = -func_0031B098(a1, a2, a4, b1, b2, b4, c1, c2, c4);
 
-    m[0][3] = -func_0031B098(b1, b2, b3, c1, c2, c3, d1, d2, d3);
-    m[1][3] =  func_0031B098(a1, a2, a3, c1, c2, c3, d1, d2, d3);
-    m[2][3] = -func_0031B098(a1, a2, a3, b1, b2, b3, d1, d2, d3);
-    m[3][3] =  func_0031B098(a1, a2, a3, b1, b2, b3, c1, c2, c3);
+    mat[0][3] = -func_0031B098(b1, b2, b3, c1, c2, c3, d1, d2, d3);
+    mat[1][3] =  func_0031B098(a1, a2, a3, c1, c2, c3, d1, d2, d3);
+    mat[2][3] = -func_0031B098(a1, a2, a3, b1, b2, b3, d1, d2, d3);
+    mat[3][3] =  func_0031B098(a1, a2, a3, b1, b2, b3, c1, c2, c3);
 }
 #endif
 
@@ -270,12 +270,12 @@ extern "C" void func_0031B310(void* m);
 
 // Matrix inverse: adjoint (func_0031B310) scaled by 1/determinant (func_0031B178).
 // PORT: PS2-only VU0 inline asm (4x4 matrix times scalar, in place).
-extern "C" void func_0031B6C8(void* m)
+extern "C" void func_0031B6C8(void* mat)
 {
-    float det = func_0031B178(m);
-    func_0031B310(m);
-    float s = 1.0f / det;
-    int t;
+    float det = func_0031B178(mat);
+    func_0031B310(mat);
+    float invDet = 1.0f / det;
+    int scratch;
     __asm__ __volatile__(
         "mfc1      %0, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -291,8 +291,8 @@ extern "C" void func_0031B6C8(void* m)
         "sqc2      $vf9, 0x10(%1)\n"
         "sqc2      $vf10, 0x20(%1)\n"
         "sqc2      $vf11, 0x30(%1)\n"
-        : "=&r"(t)
-        : "r"(m), "f"(s)
+        : "=&r"(scratch)
+        : "r"(mat), "f"(invDet)
         : "memory");
 }
 #endif
@@ -352,14 +352,14 @@ extern "C" sQuat_B7A8* func_0031B7A8(sQuat_B7A8* qu, sMtx_B7A8* mat)
 {
     float tr = mat->m[0][0] + mat->m[1][1] + mat->m[2][2];
     if (0.0f < tr) {
-        float s = sqrtB7A8(tr + 1.0f);
-        qu->w = s * 0.5f;
-        s = 0.5f / s;
-        qu->x = (mat->m[1][2] - mat->m[2][1]) * s;
-        qu->y = (mat->m[2][0] - mat->m[0][2]) * s;
-        qu->z = (mat->m[0][1] - mat->m[1][0]) * s;
+        float scale = sqrtB7A8(tr + 1.0f);
+        qu->w = scale * 0.5f;
+        scale = 0.5f / scale;
+        qu->x = (mat->m[1][2] - mat->m[2][1]) * scale;
+        qu->y = (mat->m[2][0] - mat->m[0][2]) * scale;
+        qu->z = (mat->m[0][1] - mat->m[1][0]) * scale;
     } else {
-        float q[4];
+        float quat[4];
         int i = 0;
         if (mat->m[0][0] < mat->m[1][1]) {
             i = 1;
@@ -369,18 +369,18 @@ extern "C" sQuat_B7A8* func_0031B7A8(sQuat_B7A8* qu, sMtx_B7A8* mat)
         }
         int j = (i + 1) % 3;
         int k = (j + 1) % 3;
-        float s = sqrtB7A8(mat->m[i][i] - mat->m[j][j] - mat->m[k][k] + 1.0f);
-        q[i] = s * 0.5f;
-        if (s != 0.0f) {
-            s = 0.5f / s;
+        float scale = sqrtB7A8(mat->m[i][i] - mat->m[j][j] - mat->m[k][k] + 1.0f);
+        quat[i] = scale * 0.5f;
+        if (scale != 0.0f) {
+            scale = 0.5f / scale;
         }
-        q[3] = (mat->m[j][k] - mat->m[k][j]) * s;
-        q[j] = (mat->m[i][j] + mat->m[j][i]) * s;
-        q[k] = (mat->m[i][k] + mat->m[k][i]) * s;
-        qu->x = q[0];
-        qu->y = q[1];
-        qu->z = q[2];
-        qu->w = q[3];
+        quat[3] = (mat->m[j][k] - mat->m[k][j]) * scale;
+        quat[j] = (mat->m[i][j] + mat->m[j][i]) * scale;
+        quat[k] = (mat->m[i][k] + mat->m[k][i]) * scale;
+        qu->x = quat[0];
+        qu->y = quat[1];
+        qu->z = quat[2];
+        qu->w = quat[3];
     }
     return qu;
 }
@@ -522,11 +522,11 @@ static inline sQuat_B9B0 AxisAngle_B9B0(const t4Vector& axis, float angle)
 }
 
 // Rotates the quaternion *q by the shortest-arc rotation taking direction a onto b.
-extern "C" void func_0031B9B0(t4Vector* q, t4Vector* a, t4Vector* b)
+extern "C" void func_0031B9B0(t4Vector* quat, t4Vector* fromVec, t4Vector* toVec)
 {
     t4Vector axis;
     t4Vector cr;
-    CrossTo_B9B0(cr, *a, *b);
+    CrossTo_B9B0(cr, *fromVec, *toVec);
     axis = cr;
     float len = Length_B9B0(axis);
     if (len == 0.0f)
@@ -535,11 +535,11 @@ extern "C" void func_0031B9B0(t4Vector* q, t4Vector* a, t4Vector* b)
     if (len > 0.9999899864196777f)
         len = 0.9999899864196777f;
     float ang;
-    if (Dot_B9B0(*a, *b) < 0.0f)
+    if (Dot_B9B0(*fromVec, *toVec) < 0.0f)
         ang = 3.1415927410125732f - func_0031C128(len);
     else
         ang = func_0031C128(len);
-    *q = QuatMul_B9B0(*q, AxisAngle_B9B0(axis, ang));
+    *quat = QuatMul_B9B0(*quat, AxisAngle_B9B0(axis, ang));
 }
 #endif
 
@@ -659,11 +659,11 @@ static inline sVec4_31BB30 AxisAngle_31BB30(const sVec4_31BB30& axis, float angl
     return sVec4_31BB30(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-extern "C" void func_0031BB30(sVec4_31BB30* q, const sVec4_31BB30* a, const sVec4_31BB30* b)
+extern "C" void func_0031BB30(sVec4_31BB30* quat, const sVec4_31BB30* fromVec, const sVec4_31BB30* toVec)
 {
     sVec4_31BB30 axis;
     sVec4_31BB30 cr;
-    CrossTo_31BB30(cr, *a, *b);
+    CrossTo_31BB30(cr, *fromVec, *toVec);
     axis = cr;
     float len = Length_31BB30(axis);
     if (len == 0.0f)
@@ -672,11 +672,11 @@ extern "C" void func_0031BB30(sVec4_31BB30* q, const sVec4_31BB30* a, const sVec
     if (len > 0.9999899864196777f)
         len = 0.9999899864196777f;
     float ang;
-    if (Dot_31BB30(*a, *b) < 0.0f)
+    if (Dot_31BB30(*fromVec, *toVec) < 0.0f)
         ang = 3.1415927410125732f - func_0031C128(len);
     else
         ang = func_0031C128(len);
-    *q = QuatMul_31BB30(AxisAngle_31BB30(axis, ang), *q);
+    *quat = QuatMul_31BB30(AxisAngle_31BB30(axis, ang), *quat);
 }
 #endif
 
@@ -693,34 +693,34 @@ struct sQuat_31BCB0 {
 } __attribute__((aligned(16)));
 
 // Quaternion slerp.
-extern "C" sQuat_31BCB0 func_0031BCB0(const sQuat_31BCB0* a, const sQuat_31BCB0* b, float t)
+extern "C" sQuat_31BCB0 func_0031BCB0(const sQuat_31BCB0* fromQuat, const sQuat_31BCB0* toQuat, float blend)
 {
-    float cosom = a->x * b->x + a->y * b->y + a->z * b->z + a->w * b->w;
+    float cosom = fromQuat->x * toQuat->x + fromQuat->y * toQuat->y + fromQuat->z * toQuat->z + fromQuat->w * toQuat->w;
     sQuat_31BCB0 to;
     if (cosom < 0.0f) {
         cosom = -cosom;
-        to.x = -b->x;
-        to.y = -b->y;
-        to.z = -b->z;
-        to.w = -b->w;
+        to.x = -toQuat->x;
+        to.y = -toQuat->y;
+        to.z = -toQuat->z;
+        to.w = -toQuat->w;
     } else {
-        to.x = b->x;
-        to.y = b->y;
-        to.z = b->z;
-        to.w = b->w;
+        to.x = toQuat->x;
+        to.y = toQuat->y;
+        to.z = toQuat->z;
+        to.w = toQuat->w;
     }
-    float s0, s1;
+    float fromWeight, toWeight;
     if (1.0f - cosom > 0.0010000000474974513f) {
         float omega = 1.5707963705062866f - func_0031C128(cosom);
         float sinom = func_0031BF60(omega);
-        s0 = func_0031BF60((1.0f - t) * omega) / sinom;
-        s1 = func_0031BF60(t * omega) / sinom;
+        fromWeight = func_0031BF60((1.0f - blend) * omega) / sinom;
+        toWeight = func_0031BF60(blend * omega) / sinom;
     } else {
-        s0 = 1.0f - t;
-        s1 = t;
+        fromWeight = 1.0f - blend;
+        toWeight = blend;
     }
-    sQuat_31BCB0 r(s0 * a->x + s1 * to.x, s0 * a->y + s1 * to.y, s0 * a->z + s1 * to.z, s0 * a->w + s1 * to.w);
-    return r;
+    sQuat_31BCB0 result(fromWeight * fromQuat->x + toWeight * to.x, fromWeight * fromQuat->y + toWeight * to.y, fromWeight * fromQuat->z + toWeight * to.z, fromWeight * fromQuat->w + toWeight * to.w);
+    return result;
 }
 #endif
 
@@ -730,45 +730,45 @@ INCLUDE_ASM("bx/ps2main", func_0031BE50);
 // sincos(x): quadrant reduction by pi/2, sin polynomial, cos = sqrt(1 - sin^2).
 extern "C" void func_0031BE50(float* sout, float* cout, float x)
 {
-    float t = x * 0.6366197466850281f;
+    float quadrantF = x * 0.6366197466850281f;
     if (x < 0.0f)
-        t -= 0.5f;
+        quadrantF -= 0.5f;
     else
-        t += 0.5f;
-    int q;
+        quadrantF += 0.5f;
+    int quadrant;
     float fq;
     // PORT: PS2 float->int->float round trip kept in the FPU (cvt.w.s / mfc1 / cvt.s.w).
-    __asm__("cvt.w.s %0, %0\n\tmfc1 %1, %0\n\tcvt.s.w %0, %0" : "+f"(t), "=r"(q));
-    fq = t;
+    __asm__("cvt.w.s %0, %0\n\tmfc1 %1, %0\n\tcvt.s.w %0, %0" : "+f"(quadrantF), "=r"(quadrant));
+    fq = quadrantF;
     x = x - fq * 1.5707963705062866f;
     float x2 = x * x;
-    float r;
-    r = x2 * 2.755732339210226e-06f;
-    r = (r + -0.0001984127302421257f) * x2;
-    r = (r + 0.008333333767950535f) * x2;
-    r = (r + -0.1666666716337204f) * x2;
-    r = (r + 1.0f) * x;
-    float c2 = 1.0f - r * r;
-    float c;
+    float sinPart;
+    sinPart = x2 * 2.755732339210226e-06f;
+    sinPart = (sinPart + -0.0001984127302421257f) * x2;
+    sinPart = (sinPart + 0.008333333767950535f) * x2;
+    sinPart = (sinPart + -0.1666666716337204f) * x2;
+    sinPart = (sinPart + 1.0f) * x;
+    float cosSq = 1.0f - sinPart * sinPart;
+    float cosPart;
     // PORT: sqrt.s (sqrtf without errno check)
-    __asm__("sqrt.s %0, %1" : "=f"(c) : "f"(c2));
-    switch (q & 3)
+    __asm__("sqrt.s %0, %1" : "=f"(cosPart) : "f"(cosSq));
+    switch (quadrant & 3)
     {
     case 0:
-        *sout = r;
-        *cout = c;
+        *sout = sinPart;
+        *cout = cosPart;
         break;
     case 1:
-        *sout = c;
-        *cout = -r;
+        *sout = cosPart;
+        *cout = -sinPart;
         break;
     case 2:
-        *sout = -r;
-        *cout = -c;
+        *sout = -sinPart;
+        *cout = -cosPart;
         break;
     case 3:
-        *sout = -c;
-        *cout = r;
+        *sout = -cosPart;
+        *cout = sinPart;
         break;
     }
 }
@@ -780,38 +780,38 @@ INCLUDE_ASM("bx/ps2main", func_0031BF60);
 // sin(x): quadrant reduction by pi/2, then a cos or sin polynomial (Horner form).
 extern "C" float func_0031BF60(float x)
 {
-    float t = x * 0.6366197466850281f;
+    float quadrantF = x * 0.6366197466850281f;
     if (x < 0.0f)
-        t -= 0.5f;
+        quadrantF -= 0.5f;
     else
-        t += 0.5f;
-    int q;
+        quadrantF += 0.5f;
+    int quadrant;
     float fq;
     // PORT: PS2 float->int->float round trip kept in the FPU (cvt.w.s / mfc1 / cvt.s.w).
-    __asm__("cvt.w.s %0, %0\n\tmfc1 %1, %0\n\tcvt.s.w %0, %0" : "+f"(t), "=r"(q));
-    fq = t;
+    __asm__("cvt.w.s %0, %0\n\tmfc1 %1, %0\n\tcvt.s.w %0, %0" : "+f"(quadrantF), "=r"(quadrant));
+    fq = quadrantF;
     x = x - fq * 1.5707963705062866f;
     float x2 = x * x;
-    float r;
-    if (q & 1)
+    float result;
+    if (quadrant & 1)
     {
-        r = x2 * 2.480159128026571e-05f;
-        r = (r + -0.0013888890389353037f) * x2;
-        r = (r + 0.0416666679084301f) * x2;
-        r = (r + -0.5f) * x2;
-        r = r + 1.0f;
+        result = x2 * 2.480159128026571e-05f;
+        result = (result + -0.0013888890389353037f) * x2;
+        result = (result + 0.0416666679084301f) * x2;
+        result = (result + -0.5f) * x2;
+        result = result + 1.0f;
     }
     else
     {
-        r = x2 * 2.755732339210226e-06f;
-        r = (r + -0.0001984127302421257f) * x2;
-        r = (r + 0.008333333767950535f) * x2;
-        r = (r + -0.1666666716337204f) * x2;
-        r = r * x + x;
+        result = x2 * 2.755732339210226e-06f;
+        result = (result + -0.0001984127302421257f) * x2;
+        result = (result + 0.008333333767950535f) * x2;
+        result = (result + -0.1666666716337204f) * x2;
+        result = result * x + x;
     }
-    if (q & 2)
-        r = -r;
-    return r;
+    if (quadrant & 2)
+        result = -result;
+    return result;
 }
 #endif
 
@@ -821,38 +821,38 @@ INCLUDE_ASM("bx/ps2main", func_0031C040);
 // cos(x): quadrant reduction by pi/2, then a sin or cos polynomial (Horner form).
 extern "C" float func_0031C040(float x)
 {
-    float t = x * 0.6366197466850281f;
+    float quadrantF = x * 0.6366197466850281f;
     if (x < 0.0f)
-        t -= 0.5f;
+        quadrantF -= 0.5f;
     else
-        t += 0.5f;
-    int q;
+        quadrantF += 0.5f;
+    int quadrant;
     float fq;
     // PORT: PS2 float->int->float round trip kept in the FPU (cvt.w.s / mfc1 / cvt.s.w).
-    __asm__("cvt.w.s %0, %0\n\tmfc1 %1, %0\n\tcvt.s.w %0, %0" : "+f"(t), "=r"(q));
-    fq = t;
+    __asm__("cvt.w.s %0, %0\n\tmfc1 %1, %0\n\tcvt.s.w %0, %0" : "+f"(quadrantF), "=r"(quadrant));
+    fq = quadrantF;
     x = x - fq * 1.5707963705062866f;
     float x2 = x * x;
-    float r;
-    if (q & 1)
+    float result;
+    if (quadrant & 1)
     {
-        r = x2 * 2.755732339210226e-06f;
-        r = (r + -0.0001984127302421257f) * x2;
-        r = (r + 0.008333333767950535f) * x2;
-        r = (r + -0.1666666716337204f) * x2;
-        r = r * x + x;
+        result = x2 * 2.755732339210226e-06f;
+        result = (result + -0.0001984127302421257f) * x2;
+        result = (result + 0.008333333767950535f) * x2;
+        result = (result + -0.1666666716337204f) * x2;
+        result = result * x + x;
     }
     else
     {
-        r = x2 * 2.480159128026571e-05f;
-        r = (r + -0.0013888890389353037f) * x2;
-        r = (r + 0.0416666679084301f) * x2;
-        r = (r + -0.5f) * x2;
-        r = r + 1.0f;
+        result = x2 * 2.480159128026571e-05f;
+        result = (result + -0.0013888890389353037f) * x2;
+        result = (result + 0.0416666679084301f) * x2;
+        result = (result + -0.5f) * x2;
+        result = result + 1.0f;
     }
-    if ((q + 1) & 2)
-        r = -r;
-    return r;
+    if ((quadrant + 1) & 2)
+        result = -result;
+    return result;
 }
 #endif
 

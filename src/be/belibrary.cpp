@@ -308,9 +308,9 @@ extern "C" void* func_0014ABE0(void)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014AC30);
 #ifdef SKIP_ASM
-extern "C" signed char func_0014AC30(int a0)
+extern "C" signed char func_0014AC30(int rider)
 {
-    return cBELibrary_getCharacterID(a0);
+    return cBELibrary_getCharacterID(rider);
 }
 #endif
 
@@ -318,9 +318,9 @@ extern "C" signed char func_0014AC30(int a0)
 // callee sits at a different .text offset in our object than in the target
 INCLUDE_ASM("be/belibrary", func_0014AC50);
 #ifdef SKIP_ASM
-extern "C" int func_0014AC50(int a0)
+extern "C" int func_0014AC50(int rider)
 {
-    return cBELibrary_getProfileIndex(a0);
+    return cBELibrary_getProfileIndex(rider);
 }
 #endif
 
@@ -340,10 +340,10 @@ INCLUDE_ASM("be/belibrary", func_0014ACB0);
 extern int cBELibrary_profileLib[];
 extern "C" void* MEM_copy(void* dst, void* src, int n);
 
-extern "C" void func_0014ACB0(void* self, int a1, int a2, void* src)
+extern "C" void func_0014ACB0(void* self, int profileIndex, int characterId, void* src)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    MEM_copy(p + 0x290, src, 0x834);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    MEM_copy(charRecord + 0x290, src, 0x834);
 }
 #endif
 
@@ -353,9 +353,9 @@ INCLUDE_ASM("be/belibrary", func_0014ACF8);
 extern "C" void* func_0014AD28(void* self, int a1, int a2);
 extern "C" void func_00151A88(void*, int);
 
-extern "C" void func_0014ACF8(void* self, int a1, int a2)
+extern "C" void func_0014ACF8(void* self, int profileIndex, int characterId)
 {
-    func_00151A88(func_0014AD28(self, a1, a2), a2);
+    func_00151A88(func_0014AD28(self, profileIndex, characterId), characterId);
 }
 #endif
 
@@ -364,9 +364,9 @@ INCLUDE_ASM("be/belibrary", func_0014AD28);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
-extern "C" void* func_0014AD28(void* self, int a1, int a2)
+extern "C" void* func_0014AD28(void* self, int profileIndex, int characterId)
 {
-    return (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
+    return (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
 }
 #endif
 
@@ -383,11 +383,11 @@ extern "C" void* func_0014AD50(void* self, int rider)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014ADA8);
 #ifdef SKIP_ASM
-extern "C" void* func_0014ADA8(void* self, int a1, int a2, int a3)
+extern "C" void* func_0014ADA8(void* self, int profileIndex, int characterId, int slot)
 {
-    int off = a1 * 0x9b50 + a2 * 0xf88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return p + (a3 * 4 + 0x290);
+    int off = profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + off;
+    return charRecord + (slot * 4 + 0x290);
 }
 #endif
 //100%
@@ -396,11 +396,11 @@ INCLUDE_ASM("be/belibrary", func_0014ADD8);
 extern "C" int func_0014AC70(void* self, int rider, int* outChar);
 extern "C" void* func_0014ADA8(void* self, int a1, int a2, int a3);
 
-extern "C" void* func_0014ADD8(void* self, int rider, int a2)
+extern "C" void* func_0014ADD8(void* self, int rider, int slot)
 {
     int ch = 0;
     int profile = func_0014AC70(self, rider, &ch);
-    return func_0014ADA8(self, profile, ch, a2);
+    return func_0014ADA8(self, profile, ch, slot);
 }
 #endif
 //100%
@@ -458,17 +458,17 @@ struct sBEFlagEntry {
     short flags;
 };
 
-extern "C" void func_0014AEA8(void* self, int a1, int a2)
+extern "C" void func_0014AEA8(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
-    int count = *(int*)(p + 0x28C);
-    sBEFlagEntry* e = (sBEFlagEntry*)(p + 0x290);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    int count = *(int*)(charRecord + 0x28C);
+    sBEFlagEntry* flagEntry = (sBEFlagEntry*)(charRecord + 0x290);
     int i;
-    for (i = 0; i < count; i++, e++) {
-        if (e->flags & 0x10) {
-            e->flags |= 4;
+    for (i = 0; i < count; i++, flagEntry++) {
+        if (flagEntry->flags & 0x10) {
+            flagEntry->flags |= 4;
         } else {
-            e->flags &= ~4;
+            flagEntry->flags &= ~4;
         }
     }
 }
@@ -481,19 +481,19 @@ extern int cBELibrary_profileLib[];
 
 extern "C" void func_0014AF10(void)
 {
-    int a;
-    int b;
-    for (a = 0; a < 3; a++) {
-        for (b = 0; b < 10; b++) {
-            char* p = (char*)cBELibrary_profileLib + a * 0x9b50 + b * 0xf88;
-            int count = *(int*)(p + 0x28C);
-            sBEFlagEntry* e = (sBEFlagEntry*)(p + 0x290);
+    int profileIndex;
+    int characterId;
+    for (profileIndex = 0; profileIndex < 3; profileIndex++) {
+        for (characterId = 0; characterId < 10; characterId++) {
+            char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+            int count = *(int*)(charRecord + 0x28C);
+            sBEFlagEntry* flagEntry = (sBEFlagEntry*)(charRecord + 0x290);
             int i;
-            for (i = 0; i < count; i++, e++) {
-                if (e->flags & 4) {
-                    e->flags |= 0x10;
+            for (i = 0; i < count; i++, flagEntry++) {
+                if (flagEntry->flags & 4) {
+                    flagEntry->flags |= 0x10;
                 } else {
-                    e->flags &= ~0x10;
+                    flagEntry->flags &= ~0x10;
                 }
             }
         }
@@ -532,27 +532,27 @@ static inline sFlagEntry_14AFB0* getEntry_14AFB0(sProfile_14AFB0* p, int idx)
     return 0;
 }
 
-extern "C" int func_0014AFB0(void* self, int a, int b, int idx, int on)
+extern "C" int func_0014AFB0(void* self, int profileIndex, int characterId, int idx, int on)
 {
-    sProfile_14AFB0* p = (sProfile_14AFB0*)((char*)cBELibrary_profileLib + a * 0x9b50 + b * 0xf88);
+    sProfile_14AFB0* charRecord = (sProfile_14AFB0*)((char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88);
     sFlagEntry_14AFB0 save[0x20D];
 
-    MEM_copy(save, p->entries, 0x834);
-    if (func_00151C90(p, idx, on)) {
-        sFlagEntry_14AFB0* e = getEntry_14AFB0(p, idx);
+    MEM_copy(save, charRecord->entries, 0x834);
+    if (func_00151C90(charRecord, idx, on)) {
+        sFlagEntry_14AFB0* flagEntry = getEntry_14AFB0(charRecord, idx);
         if (on)
-            e->flags |= 0x10;
+            flagEntry->flags |= 0x10;
         else
-            e->flags &= ~0x10;
-        if (func_001521F0(p)) {
+            flagEntry->flags &= ~0x10;
+        if (func_001521F0(charRecord)) {
             int n = 0;
-            if (func_001520E8(p, &n)) {
-                if (n == 0 || func_001521F0(p))
+            if (func_001520E8(charRecord, &n)) {
+                if (n == 0 || func_001521F0(charRecord))
                     return 1;
             }
         }
     }
-    MEM_copy(p->entries, save, 0x834);
+    MEM_copy(charRecord->entries, save, 0x834);
     return 0;
 }
 #endif
@@ -560,13 +560,13 @@ extern "C" int func_0014AFB0(void* self, int a, int b, int idx, int on)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014B0F0);
 #ifdef SKIP_ASM
-extern "C" void func_0014B0F0(void* self, int a, int b, int idx)
+extern "C" void func_0014B0F0(void* self, int profileIndex, int characterId, int idx)
 {
-    sProfile_14AFB0* p = (sProfile_14AFB0*)((char*)cBELibrary_profileLib + a * 0x9b50 + b * 0xf88);
-    sFlagEntry_14AFB0* e = getEntry_14AFB0(p, idx);
+    sProfile_14AFB0* charRecord = (sProfile_14AFB0*)((char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88);
+    sFlagEntry_14AFB0* flagEntry = getEntry_14AFB0(charRecord, idx);
     int on = 1;
-    if (e->flags & 0x10) on = 0;
-    func_0014AFB0(self, a, b, idx, on);
+    if (flagEntry->flags & 0x10) on = 0;
+    func_0014AFB0(self, profileIndex, characterId, idx, on);
 }
 #endif
 //100%
@@ -574,9 +574,9 @@ INCLUDE_ASM("be/belibrary", func_0014B170);
 #ifdef SKIP_ASM
 extern "C" void func_00152368(void*, int, int);
 
-extern "C" void func_0014B170(void* self, int a1, int a2, int a3, int a4)
+extern "C" void func_0014B170(void* self, int profileIndex, int characterId, int a3, int a4)
 {
-    func_00152368((char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88, a3, a4);
+    func_00152368((char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88, a3, a4);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -856,15 +856,15 @@ extern "C" int func_0014B7A8(void* self, int profile, int ch, char* out)
     int cnt = 0;
     void* tables = func_0014BDB8_0();
     sProfile_14AFB0* prof = (sProfile_14AFB0*)func_0014AD28(self, profile, ch);
-    sBEEntry38_B7A8* e = (sBEEntry38_B7A8*)func_0014D998((sBELibTables*)tables, ch);
+    sBEEntry38_B7A8* def = (sBEEntry38_B7A8*)func_0014D998((sBELibTables*)tables, ch);
     int n = func_0014D988(tables, ch);
     int i;
-    for (i = 0; i < n; i++, e++) {
-        if (e->active != 0) {
-            sFlagEntry_14AFB0* f = getEntry_14AFB0(prof, e->slot);
-            if (f->flags & 0x10) {
+    for (i = 0; i < n; i++, def++) {
+        if (def->active != 0) {
+            sFlagEntry_14AFB0* flagEntry = getEntry_14AFB0(prof, def->slot);
+            if (flagEntry->flags & 0x10) {
                 char* dst = out + (cnt << 8);
-                if (func_0014B988_B7A8(self, profile, ch, e, dst)) {
+                if (func_0014B988_B7A8(self, profile, ch, def, dst)) {
                     int prev = cnt - 1;
                     int k;
                     for (k = prev; k >= 0; k--) {
@@ -951,10 +951,10 @@ extern "C" void* func_0014C6A0(void*);
 //100%
 INCLUDE_ASM("be/belibrary", func_0014BBA0);
 #ifdef SKIP_ASM
-extern "C" int func_0014BBA0(void* self, int rider, sBEEntry38_14B988* e, char* out)
+extern "C" int func_0014BBA0(void* self, int rider, sBEEntry38_14B988* def, char* out)
 {
     int profile = func_0014AC50(rider);
-    return func_0014B988(self, profile, func_0014AC30(rider), e, out);
+    return func_0014B988(self, profile, func_0014AC30(rider), def, out);
 }
 #endif
 //100%
@@ -977,13 +977,13 @@ extern "C" int func_0014BC18(void* self, int profile, int ch, char* out)
     void* tables = func_0014BDB8_0();
     sProfile_14AFB0* prof = (sProfile_14AFB0*)func_0014AD28(self, profile, ch);
     int n = func_0014D988(tables, ch);
-    sBEEntry38_BC18* e = (sBEEntry38_BC18*)func_0014D998((sBELibTables*)tables, ch);
+    sBEEntry38_BC18* def = (sBEEntry38_BC18*)func_0014D998((sBELibTables*)tables, ch);
     int i;
-    for (i = 0; i < n; i++, e++) {
-        char* name = e->name;
+    for (i = 0; i < n; i++, def++) {
+        char* name = def->name;
         if (name != 0) {
-            sFlagEntry_14AFB0* f = getEntry_14AFB0(prof, e->slot);
-            if (f->flags & 0x10) {
+            sFlagEntry_14AFB0* flagEntry = getEntry_14AFB0(prof, def->slot);
+            if (flagEntry->flags & 0x10) {
                 int k;
                 for (k = cnt - 1; k >= 0; k--) {
                     if (func_004165A8(name, out + (k << 8)) == 0)
@@ -1232,11 +1232,11 @@ extern "C" void func_0014C2B0(sBEGroupTable* self)
     int last = -1;
     int i;
     for (i = 0; i < self->count; i++) {
-        int g = self->entries[i].group;
-        self->groupCount[g]++;
-        if (last != g) {
-            last = g;
-            self->groupFirst[g] = i;
+        int groupId = self->entries[i].group;
+        self->groupCount[groupId]++;
+        if (last != groupId) {
+            last = groupId;
+            self->groupFirst[groupId] = i;
         }
     }
 }
@@ -1268,11 +1268,11 @@ extern "C" void func_0014C320(sBEKeyTableG* self)
     int i;
     MEM_fill(self->groupCount, 0, sizeof(self->groupCount));
     for (i = 0; i < self->count; i++) {
-        int g = self->entries[i].group;
-        self->groupCount[g]++;
-        if (last != g) {
-            last = g;
-            self->groupFirst[g] = i;
+        int groupId = self->entries[i].group;
+        self->groupCount[groupId]++;
+        if (last != groupId) {
+            last = groupId;
+            self->groupFirst[groupId] = i;
         }
     }
 }
@@ -1305,11 +1305,11 @@ extern "C" void func_0014C3C8(sBEKeyTableG1* self)
     MEM_fill(self->groupCount, 0, sizeof(self->groupCount));
     MEM_fill(self->groupFirst, 0, sizeof(self->groupFirst));
     for (i = 0; i < self->count; i++) {
-        int g = self->entries[i].group;
-        self->groupCount[g]++;
-        if (last != g) {
-            last = g;
-            self->groupFirst[g] = i;
+        int groupId = self->entries[i].group;
+        self->groupCount[groupId]++;
+        if (last != groupId) {
+            last = groupId;
+            self->groupFirst[groupId] = i;
         }
     }
 }
@@ -1342,11 +1342,11 @@ extern "C" void func_0014C488(sBEKeyTableG2* self)
     MEM_fill(self->groupCount, 0, sizeof(self->groupCount));
     MEM_fill(self->groupFirst, 0, sizeof(self->groupFirst));
     for (i = 0; i < self->count; i++) {
-        int g = self->entries[i].group;
-        self->groupCount[g]++;
-        if (last != g) {
-            last = g;
-            self->groupFirst[g] = i;
+        int groupId = self->entries[i].group;
+        self->groupCount[groupId]++;
+        if (last != groupId) {
+            last = groupId;
+            self->groupFirst[groupId] = i;
         }
     }
 }
@@ -1355,28 +1355,28 @@ extern "C" void func_0014C488(sBEKeyTableG2* self)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014C548);
 #ifdef SKIP_ASM
-extern "C" void func_0014C548(void** vself, int g, int key, int v)
+extern "C" void func_0014C548(void** vself, int groupId, int key, int value)
 {
     sBEGroupTable* self = (sBEGroupTable*)vself;
-    *(char*)((char*)&self->entries[func_0014D448(self, g, key)] + 0x10) = v;
+    *(char*)((char*)&self->entries[func_0014D448(self, groupId, key)] + 0x10) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("be/belibrary", func_0014C590);
 #ifdef SKIP_ASM
-extern "C" void func_0014C590(void** vself, int g, int key, int v)
+extern "C" void func_0014C590(void** vself, int groupId, int key, int value)
 {
     sBEGroupTable* self = (sBEGroupTable*)vself;
-    *(char*)((char*)&self->entries[func_0014D448(self, g, key)] + 0x1) = v;
+    *(char*)((char*)&self->entries[func_0014D448(self, groupId, key)] + 0x1) = value;
 }
 #endif
 //100%
 INCLUDE_ASM("be/belibrary", func_0014C5D8);
 #ifdef SKIP_ASM
-extern "C" void func_0014C5D8(void** vself, int g, int key, int v)
+extern "C" void func_0014C5D8(void** vself, int groupId, int key, int value)
 {
     sBEGroupTable* self = (sBEGroupTable*)vself;
-    *(short*)((char*)&self->entries[func_0014D448(self, g, key)] + 0xC) = v;
+    *(short*)((char*)&self->entries[func_0014D448(self, groupId, key)] + 0xC) = value;
 }
 #endif
 
@@ -1385,18 +1385,18 @@ INCLUDE_ASM("be/belibrary", func_0014C620);
 #ifdef SKIP_ASM
 extern "C" void* func_0014C620(void* self)
 {
-    int* p = (int*)self;
-    p[0] = 0;
-    p[1] = 0;
-    p[2] = 0;
-    p[3] = 0;
-    p[4] = 0;
-    p[5] = 0;
-    p[6] = 0;
-    p[7] = 0;
-    p[8] = 0;
-    p[9] = 0;
-    p[10] = 0;
+    int* words = (int*)self;
+    words[0] = 0;
+    words[1] = 0;
+    words[2] = 0;
+    words[3] = 0;
+    words[4] = 0;
+    words[5] = 0;
+    words[6] = 0;
+    words[7] = 0;
+    words[8] = 0;
+    words[9] = 0;
+    words[10] = 0;
     return self;
 }
 #endif
@@ -1433,19 +1433,19 @@ extern "C" void* func_0014C6A0(void* self)
         func_0014C3C8((sBEKeyTableG1*)self);
         func_0014C488((sBEKeyTableG2*)self);
         if (!none) {
-            int a;
-            int b;
-            for (a = 0; a < 3; a++) {
-                for (b = 0; b < 10; b++) {
-                    char* p = (char*)cBELibrary_profileLib + a * 0x9b50 + b * 0xf88;
-                    int count = *(int*)(p + 0x28C);
-                    sBEFlagEntry* e = (sBEFlagEntry*)(p + 0x290);
+            int profileIndex;
+            int characterId;
+            for (profileIndex = 0; profileIndex < 3; profileIndex++) {
+                for (characterId = 0; characterId < 10; characterId++) {
+                    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+                    int count = *(int*)(charRecord + 0x28C);
+                    sBEFlagEntry* flagEntry = (sBEFlagEntry*)(charRecord + 0x290);
                     int i;
-                    for (i = 0; i < count; i++, e++) {
-                        if (e->flags & 4) {
-                            e->flags |= 0x10;
+                    for (i = 0; i < count; i++, flagEntry++) {
+                        if (flagEntry->flags & 4) {
+                            flagEntry->flags |= 0x10;
                         } else {
-                            e->flags &= ~0x10;
+                            flagEntry->flags &= ~0x10;
                         }
                     }
                 }
@@ -1476,29 +1476,29 @@ extern "C" void func_0014D068_impl(void* self) __asm__("func_0014D068");
 
 extern "C" void func_0014D068_impl(void* self)
 {
-    int a;
-    int b;
-    for (a = 0; a < 3; a++) {
-        for (b = 0; b < 10; b++) {
-            sBEReq_14D068* r = (sBEReq_14D068*)func_0014DC10((sBELibTables*)self, b);
-            int n = func_0014DC00(self, b);
-            sProfile_14AFB0* p = (sProfile_14AFB0*)((char*)cBELibrary_profileLib + a * 0x9b50 + b * 0xf88);
+    int profileIndex;
+    int characterId;
+    for (profileIndex = 0; profileIndex < 3; profileIndex++) {
+        for (characterId = 0; characterId < 10; characterId++) {
+            sBEReq_14D068* req = (sBEReq_14D068*)func_0014DC10((sBELibTables*)self, characterId);
+            int n = func_0014DC00(self, characterId);
+            sProfile_14AFB0* charRecord = (sProfile_14AFB0*)((char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88);
             int i;
-            int count = p->count;
-            sFlagEntry_14AFB0* e = p->entries;
-            for (i = 0; i < count; i++, e++) {
-                if (e->flags & 4)
-                    e->flags |= 0x10;
+            int count = charRecord->count;
+            sFlagEntry_14AFB0* flagEntry = charRecord->entries;
+            for (i = 0; i < count; i++, flagEntry++) {
+                if (flagEntry->flags & 4)
+                    flagEntry->flags |= 0x10;
             }
-            for (i = 0; i < n; i++, r++) {
-                e = getEntry_14AFB0(p, r->a);
-                if (e->flags & 4) {
-                    if (r->b >= 0)
-                        getEntry_14AFB0(p, r->b)->flags |= 0x10;
+            for (i = 0; i < n; i++, req++) {
+                flagEntry = getEntry_14AFB0(charRecord, req->a);
+                if (flagEntry->flags & 4) {
+                    if (req->b >= 0)
+                        getEntry_14AFB0(charRecord, req->b)->flags |= 0x10;
                 }
             }
-            e = getEntry_14AFB0(p, 4);
-            e->flags |= 0x10;
+            flagEntry = getEntry_14AFB0(charRecord, 4);
+            flagEntry->flags |= 0x10;
         }
     }
     func_0014C7A0(self);
@@ -1599,15 +1599,15 @@ extern "C" int func_0014D368(sLib_0014D368* self, sLibItem_0014D368* item)
         int end = start + self->catCount[item->category];
         int i = start;
         if (i < end) {
-            sLibItem_0014D368* p = &items[start];
+            sLibItem_0014D368* candidate = &items[start];
             do {
-                if (p->id == item->id && p->sub == item->sub && p->key28 == item->key28 &&
-                    p->key18 == item->key18 && p->key2C == item->key2C) {
+                if (candidate->id == item->id && candidate->sub == item->sub && candidate->key28 == item->key28 &&
+                    candidate->key18 == item->key18 && candidate->key2C == item->key2C) {
                     idx = i;
                     goto done;
                 }
                 i++;
-                p++;
+                candidate++;
             } while (i < end);
         }
         idx = -1;
@@ -1753,18 +1753,18 @@ struct sBENodeTable_14D7E8
     int groupFirst[30]; // 0xA4
 };
 
-extern "C" int func_0014D7E8(sBENodeTable_14D7E8* self, int g, int key, sBENode_14D7E8** out, int depth, int all)
+extern "C" int func_0014D7E8(sBENodeTable_14D7E8* self, int groupId, int key, sBENode_14D7E8** out, int depth, int all)
 {
     int n = 0;
-    int i = self->groupFirst[g];
-    int end = i + self->groupCount[g];
-    sBENode_14D7E8* e = &self->entries[i];
-    for (; i < end; i++, e++) {
-        if (e->parent == key) {
-            *out++ = e;
+    int i = self->groupFirst[groupId];
+    int end = i + self->groupCount[groupId];
+    sBENode_14D7E8* node = &self->entries[i];
+    for (; i < end; i++, node++) {
+        if (node->parent == key) {
+            *out++ = node;
             n++;
-            if (depth != 0 && (!(e->flags & 0x20) || all)) {
-                int k = func_0014D7E8(self, g, e->child, out, depth - 1, all);
+            if (depth != 0 && (!(node->flags & 0x20) || all)) {
+                int k = func_0014D7E8(self, groupId, node->child, out, depth - 1, all);
                 n += k;
                 out += k;
             }
@@ -1847,15 +1847,15 @@ extern "C" void* func_0014D9D0(sBELibTables* self, int i)
 //100%
 INCLUDE_ASM("be/belibrary", func_0014DA08);
 #ifdef SKIP_ASM
-extern "C" int func_0014DA08(int arg0, int arg1) {
-    return (*(int *)(((char*)(arg0) + (arg1 << 2)) + (0xA4)));
+extern "C" int func_0014DA08(int tables, int groupId) {
+    return (*(int *)(((char*)(tables) + (groupId << 2)) + (0xA4)));
 }
 #endif
 //100%
 INCLUDE_ASM("be/belibrary", func_0014DA18);
 #ifdef SKIP_ASM
-extern "C" int func_0014DA18(int arg0, int arg1) {
-    return (*(int *)(((char*)(arg0) + (arg1 << 2)) + (0x20C)));
+extern "C" int func_0014DA18(int tables, int groupId) {
+    return (*(int *)(((char*)(tables) + (groupId << 2)) + (0x20C)));
 }
 #endif
 //100%
@@ -1877,17 +1877,17 @@ struct sBEKeyTable_DA28 {
     int first[30]; // 0x284
 };
 
-extern "C" int func_0014DA28(void* self_, int g, int key)
+extern "C" int func_0014DA28(void* self_, int groupId, int key)
 {
     sBEKeyTable_DA28* self = (sBEKeyTable_DA28*)self_;
     int n;
     int i;
-    if (self->count[g] <= 0) {
+    if (self->count[groupId] <= 0) {
         return 0;
     }
     n = 0;
-    int end = self->first[g] + self->count[g];
-    for (i = self->first[g]; i < end; i++) {
+    int end = self->first[groupId] + self->count[groupId];
+    for (i = self->first[groupId]; i < end; i++) {
         if (self->entries[i].key == key) {
             n++;
         } else if (key < self->entries[i].key) {
@@ -1902,10 +1902,10 @@ INCLUDE_ASM("be/belibrary", func_0014DAA0);
 #ifdef SKIP_ASM
 extern "C" void* func_0014DAC0(void*, int, int, int*);
 
-extern "C" void* func_0014DAA0(void* self, int a1, int a2)
+extern "C" void* func_0014DAA0(void* self, int groupId, int key)
 {
     int count;
-    return func_0014DAC0(self, a1, a2, &count);
+    return func_0014DAC0(self, groupId, key, &count);
 }
 #endif
 //100%
@@ -1931,28 +1931,28 @@ struct sLib_0014DAC0 {
 
 // Finds the first entry with this key in a sorted bucket; also counts matches.
 extern "C" int func_0014DAC0_impl(void* self, int a, int b, int* out) __asm__("func_0014DAC0");
-extern "C" int func_0014DAC0_impl(void* self, int a, int b, int* out)
+extern "C" int func_0014DAC0_impl(void* self, int groupId, int wantKey, int* out)
 {
     sLib_0014DAC0* lib = (sLib_0014DAC0*)self;
     *out = 0;
-    int n = lib->count[a];
+    int n = lib->count[groupId];
     if (n <= 0) {
         return 0;
     }
-    int start = lib->start[a];
+    int start = lib->start[groupId];
     int end = start + n;
     int i = start;
     sLibEntry_0014DAC0* found = 0;
     if (i < end) {
         do {
             int off = i * 12;
-            sLibEntry_0014DAC0* e = (sLibEntry_0014DAC0*)(off + (int)lib->entries);
-            if (e->key == b) {
+            sLibEntry_0014DAC0* entry = (sLibEntry_0014DAC0*)(off + (int)lib->entries);
+            if (entry->key == wantKey) {
                 if (found == 0) {
-                    found = e;
+                    found = entry;
                 }
                 (*out)++;
-            } else if (b < e->key) {
+            } else if (wantKey < entry->key) {
                 break;
             }
             i++;
@@ -1980,16 +1980,16 @@ struct sBEKeyTable {
     int first[30]; // 0x284
 };
 
-extern "C" sBEEntryC* func_0014DB40(sBEKeyTable* self, int g, int key, int want, int* out)
+extern "C" sBEEntryC* func_0014DB40(sBEKeyTable* self, int groupId, int key, int want, int* out)
 {
     sBEEntryC* result;
     int i;
     *out = 0;
-    if (self->count[g] <= 0) {
+    if (self->count[groupId] <= 0) {
         return 0;
     }
     result = 0;
-    for (i = self->first[g]; i < self->first[g] + self->count[g]; i++) {
+    for (i = self->first[groupId]; i < self->first[groupId] + self->count[groupId]; i++) {
         if (self->entries[i].key == key) {
             if ((self->entries[i].flag != 0) == want) {
                 if (result == 0) {
