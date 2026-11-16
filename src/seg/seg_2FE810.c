@@ -149,7 +149,7 @@ extern int D_0045161C;
 /* libcdvd state shared with its RPC callback thread: volatile in every user
    (retail re-reads each one; tools/gen/phaseb_import.py VOL_DECL_OK) */
 extern volatile int D_00451620;          /* callback thread semaphore */
-extern int D_00451624;
+extern volatile int D_00451624;  /* callback-entry flag: read by the SIF callback func_00400DD8 */
 extern volatile int D_00451628;          /* semaphores */
 extern volatile int D_0045162C;
 extern volatile int D_00451630;
@@ -272,7 +272,78 @@ extern int D_004532C0[];        /* table indexed by the top 4 bits of a command 
 extern char D_00453400[];       /* 14 bytes read from the file D_00498220 names (func_0040B938) */
 extern char D_00528FC0[];       /* buffer shared by func_0040B400 / func_0040B5B0 / func_0040B6D0 */
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FD810);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3); peak3 spelled the table as raw numbers.
+// PORT: PS2-only, not code: a function whose body is an asm table of the addresses of 59 functions and data objects
+// (the compiler adds the `jr $31; nop` after it). The loader func_003FCFD8 hands it, with its end marker func_003FD908,
+// to func_003FD660. The fork's config/text_word_relocs.txt gives retail's copy the same relocations. A port replaces
+// it with an array of pointers.
+void func_003FD810(void) {
+    __asm__ __volatile__(
+        ".word func_00425C28\n"
+        ".word func_00425C60\n"
+        ".word func_0040B6D0\n"
+        ".word func_0040B400\n"
+        ".word func_0040B5B0\n"
+        ".word func_00401718\n"
+        ".word func_00402268\n"
+        ".word func_00402520\n"
+        ".word func_00402450\n"
+        ".word func_00401350\n"
+        ".word func_00401BF0\n"
+        ".word func_004014F8\n"
+        ".word D_00451680\n"
+        ".word D_00451628\n"
+        ".word D_004527D0\n"
+        ".word func_004011E0\n"
+        ".word D_00452800\n"
+        ".word D_00453180\n"
+        ".word D_0045162C\n"
+        ".word func_00423BA0\n"
+        ".word func_00423BC0\n"
+        ".word func_00423BB0\n"
+        ".word func_00423C30\n"
+        ".word func_00423CA0\n"
+        ".word func_00423BF0\n"
+        ".word func_00423C90\n"
+        ".word func_00423DA0\n"
+        ".word func_00423DE0\n"
+        ".word func_00423DB0\n"
+        ".word func_00423DC0\n"
+        ".word func_00423DF0\n"
+        ".word func_00424020\n"
+        ".word func_00426D18\n"
+        ".word func_00427D60\n"
+        ".word func_00427FE8\n"
+        ".word func_004283A0\n"
+        ".word func_00428600\n"
+        ".word func_00428168\n"
+        ".word func_00424570\n"
+        ".word func_004245A0\n"
+        ".word func_00426B48\n"
+        ".word func_00423DD0\n"
+        ".word func_00423B80\n"
+        ".word func_00423B20\n"
+        ".word func_00423B30\n"
+        ".word func_00424880\n"
+        ".word func_00423AA0\n"
+        ".word func_004240E0\n"
+        ".word func_004239A0\n"
+        ".word func_00424558\n"
+        ".word func_00424550\n"
+        ".word func_00424460\n"
+        ".word func_00424368\n"
+        ".word func_00424488\n"
+        ".word func_00424498\n"
+        ".word func_004243E8\n"
+        ".word func_00423A80\n"
+        ".word func_004248E8\n"
+        ".word D_00455248\n"
+    );
+}
+#endif
 
 void func_003FD908(void) {
 }
@@ -2721,7 +2792,97 @@ int func_00401668(long id, int *out) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00401718);
+#ifdef SKIP_ASM
+// Has the shape of libcdvd's sceCdInit(mode): binds RPC server 0x80000592, sends the mode, reads the status words
+// back uncached; mode 5 (SCECdEXIT) tears the client down. Own match (agent fp401718, 2026-11-15); D_00451624 is
+// volatile at file scope (phaseb_import.py VIEW_SUBS).
+extern int D_00451650;
+extern int D_00451654;
+extern int D_00526740;
+extern sSifClient D_005266E8;
+extern char D_00497B18[];
+extern char D_00497B38[];
+extern int func_00401488(int);
+extern void func_00426408(int);
+extern int func_00423C90();
+extern void func_00425C60();
+extern void func_00426358(int, int);
+
+int func_00401718(int mode)
+{
+    int i;
+    int r;
+    int ret;
+    int st, a, b;
+    int *buf;
+
+    if (func_00401488(1) != 0)
+        return 0;
+    func_00426408(0);
+    D_005264D8 = func_00423C90();
+    D_00451624 = 1;
+    D_00451644 = -1;
+    D_0045163C = -1;
+    D_0045164C = -1;
+    D_00451648 = -1;
+    D_00451650 = -1;
+    D_00451640 = -1;
+    D_00451638 = 0;
+    D_00451654++;
+    while (1) {
+        if ((r = func_00426B48(&D_005266E8, 0x80000592, 0)) < 0) {
+            if (D_00451610 > 0)
+                func_00425C60(D_00497B18, r, D_00451654);
+            for (i = 0x100000; i--; )
+                ;
+            continue;
+        }
+        if (D_005266E8.server != 0) {
+            D_00526740 = mode;
+            D_00451650 = 0;
+            func_00426358((int)&D_00526740, 4);
+            buf = D_00452800;
+            if (func_00426D18(&D_005266E8, 0, 0, &D_00526740, 4, buf, 0x10, 0, 0) < 0) {
+                D_00451624 = 0;
+                return 0;
+            }
+            break;
+        }
+        for (i = 0x100000; i--; )
+            ;
+    }
+    ret = 1;
+    a = *(int *)((unsigned)(buf + 1) | 0x20000000);
+    b = *(int *)((unsigned)(buf + 2) | 0x20000000);
+    st = *(int *)((unsigned)(buf + 3) | 0x20000000);
+    if (st != 0xFF) {
+        if (st == 0xFE)
+            D_00451610 = 1;
+        else if (a / 256 < 2 || b / 256 < 2)
+            ret = 2;
+    }
+    D_00451624 = 0;
+    switch (mode) {
+    case 5:
+        if (D_00451610 > 0)
+            func_00425C60(D_00497B38);
+        func_00400CB8();
+        D_00451628 = -1;
+        D_0045162C = -1;
+        D_00451620 = -1;
+        break;
+    case 0:
+    case 1:
+    default:
+        func_00400C00();
+        func_00400E30();
+        break;
+    }
+    return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_004019F8);
