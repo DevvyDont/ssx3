@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -85,7 +86,6 @@ extern "C" void* func_002F0390();
 extern "C" void* cVisualEffectsMan_construct();
 extern "C" void* func_002D2100();
 extern char* D_004A5B64;
-extern void* D_004A28A4;
 extern void* D_004A289C;
 extern void* D_004A2EEC;
 extern void* gSSXAudio;
@@ -266,7 +266,7 @@ extern "C" void cGame_load(cGame* self)
     }
     self->IsStreamPaused = 0;
     self->m_bFlushStreamer = 0;
-    cSSXScriptEngine_Load(D_004A28A4);
+    cSSXScriptEngine_Load(ScriptEngine);
     sGridGL* grid = new (cMemMan_alloc(0xA8, D_004A2A58, 0, 0)) sGridGL;
     *pGrid = grid;
     grid->a4 = 0;
@@ -394,9 +394,9 @@ extern "C" void cGame_load(cGame* self)
     sStateGL* st = (sStateGL*)func_001E9A30(operator new(0xC98, D_0047B6D8, 0, 0), (sUIGL*)self->UI, 0);
     st->mode = 5;
     cUIStateStack_pushExplicit(((sUIGL*)self->UI)->stack, st);
-    self->mPreloadingState = (cGameState*)0;
-    self->mPrevState = (cGameState*)0;
-    self->mCurrentState = (cGameState*)0;
+    self->mPreloadingState = 0;
+    self->mPrevState = 0;
+    self->mCurrentState = 0;
     self->mPreloadStateID = 0;
     self->mPendingPreloadStateID = 0;
     self->mPrevStateID = 0;
@@ -637,7 +637,6 @@ extern "C" void func_00286C00(void* p);
 extern "C" void cSSXScriptEngine_Purge(void* p);
 extern "C" void func_0036A290(void);
 
-extern void* D_004A28A4;
 extern void* D_004A289C;
 extern void* gWorldTriggerManager;
 extern void* gSSXAudio;
@@ -731,7 +730,7 @@ extern "C" void func_0022FA98(char* self)
         e->fn(be + e->delta);
     }
     func_001A3C50(SSXApp->mFEAsyncManager);
-    cSSXScriptEngine_ForceEndScriptsAll(D_004A28A4);
+    cSSXScriptEngine_ForceEndScriptsAll(ScriptEngine);
     if (*(void**)(self + 0x48) != 0) func_00397B70(*(void**)(self + 0x48), 3);
     if (*(void**)(self + 0x7C) != 0) func_002370A0(*(void**)(self + 0x7C), 3);
     func_002EA820(*(void**)(self + 0x64));
@@ -790,7 +789,7 @@ extern "C" void func_0022FA98(char* self)
     func_002B68D0(gWorldTriggerManager);
     func_00286A80(gSSXAudio);
     func_00286C00(gSSXAudio);
-    cSSXScriptEngine_Purge(D_004A28A4);
+    cSSXScriptEngine_Purge(ScriptEngine);
     func_0036A290();
     D_004A2A54 = 0;
     *(int*)(D_004A5B64 + 0x34) = 0;
@@ -828,7 +827,6 @@ extern "C" void func_00369FF8(void* a);
 extern "C" void cWorld_init(void* a);
 extern "C" void func_002B68D0(void* a);
 extern "C" void func_002867E8(void* a);
-extern void* D_004A28A4;
 extern void* D_004A289C;
 extern void* gWorldTriggerManager;
 extern void* gSSXAudio;
@@ -844,7 +842,7 @@ extern "C" void func_00230050(cGame* self)
     void* p94 = self->LoadIndicator;
     cOVStateManager_mpPDATemplate = 0;
     func_001F30D8(p94);
-    func_00278710(D_004A28A4);
+    func_00278710(ScriptEngine);
     D_004A4248->v17();
     D_004A4248->v04();
     func_00369FF8(D_004A289C);
@@ -932,7 +930,7 @@ extern "C" void cGame_partialRestart(cGame* self)
     cGameViewMan_snapAll(self->ViewMan);
     cWorld_resetMap(self->World);
     cReplay_reset(self->Replay);
-    cSSXScriptEngine_Restart(D_004A28A4);
+    cSSXScriptEngine_Restart(ScriptEngine);
     func_0015DB58();
     func_00229498(self->CrowdMan2d);
     func_00343BC0(self->CrowdMan3d);
@@ -1476,7 +1474,7 @@ extern "C" void func_002306B8(cGame* self)
     if (D_004A2EEC != 0) {
         func_002570D8(D_004A2EEC);
     }
-    func_00278918(D_004A28A4);
+    func_00278918(ScriptEngine);
     func_00231D18_v(((cGame_2306B8*)self));
     if (canUpdate_2306B8(((cGame_2306B8*)self)) && updatePause_2306B8(((cGame_2306B8*)self))) {
         if ((char*)self->InputSync != 0) {
@@ -1496,7 +1494,7 @@ extern "C" void func_002306B8(cGame* self)
                     func_0026F4A8((char*)self->Replay);
                 }
                 if (func_00270280((char*)self->Replay) == 0 && !(D_004A2A50 & 8)) {
-                    char* w = (char*)D_004A28A4;
+                    char* w = (char*)ScriptEngine;
                     sVEntry_2306B8* vt = *(sVEntry_2306B8**)(w + 0x2A8);
                     vt[5].fn(w + vt[5].delta);
                 }
@@ -1641,7 +1639,7 @@ extern "C" int func_00230E98(cGame* self)
     D_004A4324 = 0;
     cScreenTint_m_Enable = 0;
     D_004A43C8 = 0;
-    func_00278718(D_004A28A4);
+    func_00278718(ScriptEngine);
     func_001F3170(self->LoadIndicator);
     return 1;
 }
@@ -2291,7 +2289,6 @@ extern "C" int func_00231840(char* self)
 INCLUDE_ASM("main/gameload", func_00231AB8);
 #ifdef SKIP_ASM
 extern "C" int func_00278DA0(void* a);
-extern void* D_004A28A4;
 
 extern "C" int func_00231AB8(void* self)
 {
@@ -2302,7 +2299,7 @@ extern "C" int func_00231AB8(void* self)
         }
     }
     int r = 0;
-    if (func_00278DA0(D_004A28A4) != 0) {
+    if (func_00278DA0(ScriptEngine) != 0) {
         int m = *(int*)((char*)self + 0x214);
         r = m != 5 && m != 14 && m != 1 && m != 10;
     }

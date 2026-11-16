@@ -2319,3 +2319,6 @@ cSnowfallToggles_m_TestSnowIntensity = 0x004A4740;
 cSnowfallToggles_m_TestWindIntensity = 0x004A4744;
 TheDynamicMemMan = 0x004FF250;
 cMemMan_m_mutex = 0x00538B00;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_scriptengine (docs/ontour_globals.tsv)
+ScriptEngine = 0x004A28A4;

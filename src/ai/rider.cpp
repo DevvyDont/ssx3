@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
@@ -4906,7 +4907,6 @@ extern "C" void* func_0028B180();
 extern "C" int func_002A1B58(void* self, int msg, int a);
 extern "C" int func_002A1B88(void* self, int type, int a, int b);
 extern "C" void* func_00279F18(void* self, int i, int a2);
-extern void* D_004A28A4;
 
 struct sAnimEvent_123E30
 {
@@ -4943,7 +4943,7 @@ extern "C" void func_00123E30(cRider* self, int id, float a, float b, int unused
                 ev -= 0x64;
                 void* snd = func_0028B180();
                 // PORT: id is a handle that is also read as a pointer here.
-                int v = (int)func_00279F18(D_004A28A4, *e->arg, *(int*)(id + 8));
+                int v = (int)func_00279F18(ScriptEngine, *e->arg, *(int*)(id + 8));
                 func_002A1B88(snd, ev, (int)self, v);
                 self->unk_AC8 = 1;
             }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -589,7 +590,6 @@ extern "C" int func_00276270(char* self, int a1)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276388);
 #ifdef SKIP_ASM
-extern void* D_004A28A4;
 extern char D_004A34A0[];
 int GetHashValue32(char* s);
 void* func_00230698(void* self, int a1);
@@ -701,7 +701,7 @@ int func_00276388_impl(char* self, int fade, int notify)
                         *(int*)(self + 0xB8) = tIn + tHold;
                     }
                 } else if (tIn) {
-                    int h = func_0027A4A0(D_004A28A4, 7, f->key);
+                    int h = func_0027A4A0(ScriptEngine, 7, f->key);
                     float tt = (float)tIn * 0.01666666753590107f;
                     func_002E4540(snd, 2, h, 0, tt);
                     t = tt;
@@ -1246,7 +1246,6 @@ INCLUDE_ASM("scripter/datamanager", func_002771C8);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" void* func_00282BF0(void* self, int a1);
-extern void* D_004A28A4;
 
 extern "C" int func_002771C8(void* self, void* obj)
 {
@@ -1257,7 +1256,7 @@ extern "C" int func_002771C8(void* self, void* obj)
     if (func_00277DD8(self, e) != 0) {
         return 0;
     }
-    return obj == func_00282BF0(D_004A28A4, *(int*)((char*)e + 0xC));
+    return obj == func_00282BF0(ScriptEngine, *(int*)((char*)e + 0xC));
 }
 #endif
 
@@ -1640,7 +1639,6 @@ extern "C" int func_0027A4A0(void* self, int a1, int a2);
 extern "C" void func_002E4370(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
 extern "C" void func_002E44F0(void* snd, int a1, int h, float t);
 extern "C" void func_002E4540(void* snd, int a1, int h, int a3, float t);
-extern void* D_004A28A4;
 
 struct sDmFade_7980 {
     char pad_0x0[0x10];
@@ -1672,7 +1670,7 @@ int func_00277980_impl(char* self)
     }
     char* item = (char*)func_00283D70(self + 0xC, 0);
     if (func_00277DD8(self, item) == 0) {
-        sDmFade_7980* f = (sDmFade_7980*)func_0027C070(func_00282BF0(D_004A28A4, *(int*)(item + 0xC)));
+        sDmFade_7980* f = (sDmFade_7980*)func_0027C070(func_00282BF0(ScriptEngine, *(int*)(item + 0xC)));
         void* snd = func_00230698(SSXApp->Game, 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
             func_002E4578(snd);
@@ -1687,7 +1685,7 @@ int func_00277980_impl(char* self)
                 func_002E4370(snd, 2, h, h2, 0, 0, (float)f->tIn * 0.01666666753590107f, (float)f->tHold * 0.01666666753590107f, (float)f->tOut * 0.01666666753590107f);
                 *(int*)(self + 0xB8) = f->tIn + f->tHold;
             } else {
-                int h = func_0027A4A0(D_004A28A4, 7, f->key);
+                int h = func_0027A4A0(ScriptEngine, 7, f->key);
                 func_002E4540(snd, 2, h, 0, (float)f->tIn * 0.01666666753590107f);
                 *(int*)(self + 0xB8) = 0;
             }
@@ -1708,7 +1706,7 @@ int func_00277980_impl(char* self)
                 func_002E44F0(snd, 2, h, e->t);
                 *(int*)(self + 0xB8) = 0;
             } else {
-                int h = func_0027A4A0(D_004A28A4, 7, e->key);
+                int h = func_0027A4A0(ScriptEngine, 7, e->key);
                 func_002E4540(snd, 2, h, 0, e->t);
                 *(int*)(self + 0xB8) = 0;
             }
@@ -1976,7 +1974,7 @@ extern void* D_00482260[];
 extern void* D_00482298[];
 extern void* D_004822E0[];
 extern void* D_00482318[];
-extern "C" void cSSXScriptEngine_DeInitOnce(void* self);
+extern "C" void cSSXScriptEngine_DeInitOnce(cSSXScriptEngine* self);
 extern "C" void func_00283518(void* self, int flags);
 extern "C" void func_00275498(void* self, int flags);
 extern "C" void func_00283228(void* self, int flags);
@@ -1997,26 +1995,26 @@ struct sSlot_780B8 {
 };
 
 // Script manager destructor: members in reverse order, then the base.
-extern "C" void cSSXScriptEngine__cSSXScriptEngine(char* self, int flags)
+extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int flags)
 {
-    *(void***)(self + 0x2AC) = D_00482100;
-    *(void***)(self + 0x518) = D_004821A0;
-    *(void***)(self + 0x528) = D_00482168;
-    *(void***)(self + 0x2A8) = D_004821B8;
-    if (*(int*)(self + 0x52C) != 0) {
+    self->mInSeqCommVtbl = D_00482100;
+    self->mVidEngineVtbl = D_004821A0;
+    self->mDataManagerVtbl = D_00482168;
+    self->mVtbl = D_004821B8;
+    if ((int)self->mpMasterTableHeader != 0) {
         cSSXScriptEngine_DeInitOnce(self);
     }
     D_004A34B0 = 0;
-    func_00283518(self + 0xA38, 2);
-    func_00275498(self + 0xA28, 2);
-    *(void***)(self + 0x944) = D_00482298;
-    *(void***)(self + 0x92C) = D_00482260;
-    func_00283228(self + 0x938, 0);
-    *(void***)(self + 0x928) = D_00482318;
-    *(void***)(self + 0x910) = D_004822E0;
-    func_00283228(self + 0x91C, 0);
-    sSlot_780B8* p = (sSlot_780B8*)(self + 0x910);
-    sSlot_780B8* begin = (sSlot_780B8*)(self + 0x6D0);
+    func_00283518(((char*)self) + 0xA38, 2);
+    func_00275498(((char*)self) + 0xA28, 2);
+    *(void***)(((char*)self) + 0x944) = D_00482298;
+    *(void***)(((char*)self) + 0x92C) = D_00482260;
+    func_00283228(((char*)self) + 0x938, 0);
+    *(void***)(((char*)self) + 0x928) = D_00482318;
+    *(void***)(((char*)self) + 0x910) = D_004822E0;
+    func_00283228(((char*)self) + 0x91C, 0);
+    sSlot_780B8* p = (sSlot_780B8*)(((char*)self) + 0x910);
+    sSlot_780B8* begin = (sSlot_780B8*)(((char*)self) + 0x6D0);
     if (begin != 0) {
         do {
             while (begin != p) {
@@ -2025,9 +2023,9 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(char* self, int flags)
             }
         } while (0);
     }
-    func_002758C0(self + 0x51C, 0);
-    func_002837C8(self + 0x500, 0);
-    cBXScriptEngine__cBXScriptEngine(self, flags);
+    func_002758C0(((char*)self) + 0x51C, 0);
+    func_002837C8(((char*)self) + 0x500, 0);
+    cBXScriptEngine__cBXScriptEngine(((char*)self), flags);
 }
 #endif
 
@@ -2085,17 +2083,17 @@ INCLUDE_ASM("scripter/datamanager", cSSXScriptEngine_DeInitOnce);
 extern "C" void cBXScriptEngine_PurgeBXEngine(void* self);
 extern "C" void* MEM_free(void* self);
 
-extern "C" void cSSXScriptEngine_DeInitOnce(void* self)
+extern "C" void cSSXScriptEngine_DeInitOnce(cSSXScriptEngine* self)
 {
     cBXScriptEngine_PurgeBXEngine(self);
-    MEM_free(*(void**)((char*)self + 0x52C));
-    if (*(void**)((char*)self + 0x534) != 0) {
-        MEM_free(*(void**)((char*)self + 0x534));
+    MEM_free(self->mpMasterTableHeader);
+    if (self->mpMasterTableDebug != 0) {
+        MEM_free(self->mpMasterTableDebug);
     }
-    *(int*)((char*)self + 0x52C) = 0;
-    *(int*)((char*)self + 0x530) = 0;
-    *(int*)((char*)self + 0x534) = 0;
-    *(int*)((char*)self + 0x554) = 0;
+    self->mpMasterTableHeader = 0;
+    self->mpMasterTable = 0;
+    self->mpMasterTableDebug = 0;
+    self->mNumFramesNoSkip = 0;
 }
 #endif
 

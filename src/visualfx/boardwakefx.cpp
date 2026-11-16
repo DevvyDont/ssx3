@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
@@ -5211,18 +5212,17 @@ void func_00283430(void* self);
 extern "C" int func_0027A4A0(void* tbl, int mode, int id);
 extern "C" void func_002E4370(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
 extern "C" void func_002E4540(void* self, int a1, int a3, int a5, float f2);
-extern void* D_004A28A4;
 
 extern "C" void func_002E4B98(void* self)
 {
     sWakeParams_4B98* p = (sWakeParams_4B98*)((char*)self + 0x28);
     func_00283430((char*)self + 0x10);
     if (*(int*)((char*)self + 0x28) != 7) {
-        int r1 = func_0027A4A0(D_004A28A4, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
-        int r2 = func_0027A4A0(D_004A28A4, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
+        int r1 = func_0027A4A0(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
+        int r2 = func_0027A4A0(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
         func_002E4370(self, 2, r1, r2, *(float*)((char*)self + 0x34), *(float*)((char*)self + 0x30), 0, 0, *(float*)((char*)self + 0x2C));
     } else {
-        func_002E4540(self, 2, func_0027A4A0(D_004A28A4, 7, *(int*)((char*)self + 0x38)), 0, *(float*)((char*)self + 0x34));
+        func_002E4540(self, 2, func_0027A4A0(ScriptEngine, 7, *(int*)((char*)self + 0x38)), 0, *(float*)((char*)self + 0x34));
     }
     *(float*)((char*)self + 0x48) = p->level;
 }

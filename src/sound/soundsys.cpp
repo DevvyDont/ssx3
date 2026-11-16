@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 
@@ -8266,10 +8267,9 @@ void func_0031BE50_0560(float a, float* x, float* y) __asm__("func_0031BE50");
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 extern float D_004A36D8;
-extern void* D_004A28A4;
 static inline int sndA30Mode0560(int m)
 {
-    return *(int*)((char*)D_004A28A4 + 0x550) == m;
+    return ScriptEngine->mPlayingNISList == m;
 }
 
 struct sVec4_0560 {
@@ -8402,10 +8402,9 @@ void* func_00285D98_p(void* self, int which) __asm__("func_00285D98");
 // PORT: D_004A482C is called with 4 args here (the unit's later declaration has 3).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern float D_004A36D8;
-extern void* D_004A28A4;
 static inline int sndA30Mode(int m)
 {
-    return *(int*)((char*)D_004A28A4 + 0x550) == m;
+    return ScriptEngine->mPlayingNISList == m;
 }
 
 class cSs0A30Obj {

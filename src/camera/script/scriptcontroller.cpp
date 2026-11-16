@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -998,7 +999,6 @@ extern "C" void func_0027C510(void* cam, void* out);
 extern "C" float func_0031C228(float x);
 extern "C" void func_00160028(void* self, float v);
 extern "C" void func_00160130(void* self, float v);
-extern void* D_004A28A4;
 
 struct sVec4_16A510 {
     float x, y, z, w;
@@ -1144,7 +1144,7 @@ extern "C" void func_0016A510(char* p)
     char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
     float* f = func_0027C4B8(cam);
     char* m = *(char**)(p + 0x14) + 0x30;
-    char* rider = func_00279F18(D_004A28A4, ((signed char*)f)[0x22], *(int*)(cam + 8));
+    char* rider = func_00279F18(ScriptEngine, ((signed char*)f)[0x22], *(int*)(cam + 8));
     if (rider == 0) {
         rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
     }
@@ -1375,7 +1375,6 @@ extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" float func_0031C228(float x);
 extern "C" void func_00160028(void* self, float v);
 extern "C" void func_00160130(void* self, float v);
-extern void* D_004A28A4;
 
 struct sVec4_16AD98 {
     float x, y, z, w;
@@ -1525,7 +1524,7 @@ extern "C" void func_0016AD98(char* p)
     self->x8 = f[1];
     self->roll = self->r64 * 0.01745329424738884f;
     self->pitch = self->r60 * 0.01745329424738884f + *(float*)(*(char**)(p + 0x14) + 0x70);
-    char* rider = func_00279F18(D_004A28A4, ((signed char*)f)[0x1D], *(int*)(cam + 8));
+    char* rider = func_00279F18(ScriptEngine, ((signed char*)f)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
         rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
     }
@@ -1761,7 +1760,7 @@ extern "C" void func_0016B180(char* p)
     sScrCam_B180* self = (sScrCam_B180*)p;
     char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
     float* f = func_0027C6A0(cam);
-    char* rider = func_00279F18(D_004A28A4, ((signed char*)f)[0x1D], *(int*)(cam + 8));
+    char* rider = func_00279F18(ScriptEngine, ((signed char*)f)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
         rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
     }

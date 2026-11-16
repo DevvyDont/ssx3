@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -2180,7 +2181,6 @@ struct Sh_E840 { virtual void v01(); virtual void v02(); virtual void v03(); vir
 struct Ent_E840x { char pad[0x18]; char *obj; };
 struct Lvl_E840 { char pad[0x40]; Ent_E840x *a1[12]; Ent_E840x *a2[3]; int n1; int pad80[2]; int n2; };
 struct O_E840 { int p0, p1, p2; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual int v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual char *v24(); };
-extern char *D_004A28A4_E840 __asm__("D_004A28A4");
 extern char *D_004A28A8_E840 __asm__("SSXApp");
 extern "C" void cMoveNode_addParticle_E840(void*, void*) __asm__("cMoveNode_addParticle");
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -2217,7 +2217,7 @@ static inline float vLen_E840(const V4_E840 &v) {
 static inline Lvl_E840 *lvl_E840() { return *(Lvl_E840**)(*(char**)(D_004A28A8_E840 + 0x84) + 0xC); }
 static inline Sh_E840 *shape_E840(Ent_E840x *e) { return (Sh_E840*)(e->obj + 0x6C0); }
 static inline int nearViewer_E840(const V4_E840 &pos) {
-    int notEdit = *(int*)(D_004A28A4_E840 + 0x550) != 2;
+    int notEdit = ScriptEngine->mPlayingNISList != 2;
     if (notEdit)
         return 1;
     int n = lvl_E840()->n1;
@@ -3490,7 +3490,6 @@ extern "C" R12_0B20 func_00300B20(int n, Ent_0B20* e) {
 INCLUDE_ASM("seg/seg_1FBE38", func_00300C78);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A28A4_0C78 __asm__("D_004A28A4");
 extern "C" void func_00278E50_0C78(int, int, int, int, int, int, int, int) __asm__("func_00278E50");
 extern "C" void func_00278ED0_0C78(int, int, int, int, int, int, int) __asm__("func_00278ED0");
 extern "C" void func_00278F38_0C78(int, int) __asm__("func_00278F38");
@@ -3526,15 +3525,15 @@ extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *e) {
     unsigned id = buf[0];
     switch ((int)buf[1]) {
     case 0:
-        func_00278ED0_0C78(D_004A28A4_0C78, 0, id, 3, -1, -1, -1);
-        func_00278F38_0C78(D_004A28A4_0C78, 0);
+        func_00278ED0_0C78((int)ScriptEngine, 0, id, 3, -1, -1, -1);
+        func_00278F38_0C78((int)ScriptEngine, 0);
         break;
     case 1:
-        func_00278E50_0C78(D_004A28A4_0C78, 0, id, 3, 0, -1, -1, -1);
-        func_00278F38_0C78(D_004A28A4_0C78, 0);
+        func_00278E50_0C78((int)ScriptEngine, 0, id, 3, 0, -1, -1, -1);
+        func_00278F38_0C78((int)ScriptEngine, 0);
         break;
     case 2:
-        func_00278F68_0C78(D_004A28A4_0C78, 0, 1, 0);
+        func_00278F68_0C78((int)ScriptEngine, 0, 1, 0);
         break;
     }
     return D_004C9098_0C78;
@@ -6400,7 +6399,6 @@ struct sGame {
     sCameras* cameras;          // 0x84
 };
 // The game singleton (SSXApp).
-extern char* D_004A28A4;
 extern void* D_004A4028;
 // One script argument as the VM passes it to a binding: the slot index in the defaults record, then the value
 // (cLunoValue layout: value word, second word, type).

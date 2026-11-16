@@ -90,3 +90,4 @@ ps2_addr	name	previous	source	evidence
 004A45FC	cScreenTint_m_XNColourR	D_004A45FC	On Tour cScreenTint::m_XNColourR (hand-checked correction)	initial value run (1.0f) in DWARF declaration order; font.cpp reference accessors in the same order
 004A4600	cScreenTint_m_XNColourG	D_004A4600	On Tour cScreenTint::m_XNColourG (hand-checked correction)	initial value run (1.0f) in DWARF declaration order; font.cpp reference accessors in the same order
 004A4604	cScreenTint_m_XNColourB	D_004A4604	On Tour cScreenTint::m_XNColourB (hand-checked correction)	initial value run (1.0f) in DWARF declaration order; font.cpp reference accessors in the same order
+004A28A4	ScriptEngine	D_004A28A4	On Tour ScriptEngine (cSSXScriptEngine*)	[R] cSSXApp init stores cSSXScriptEngine_cSSXScriptEngine(cMemMan_alloc(0xA50, "ScriptEngine")) here; shutdown DeInitOnce + clears it; On Tour votes 10/15 + 3/4

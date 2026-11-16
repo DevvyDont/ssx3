@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -507,7 +508,6 @@ struct sGame_C830 {
 extern char gBucketMan[4];
 extern void* gSSXAudio;
 extern void* gWorldTriggerManager;
-extern void* D_004A28A4;
 extern char t4mat_Identity[];
 extern int D_004A4324;
 extern "C" void func_003550A0(void* self, int index);
@@ -555,7 +555,7 @@ extern "C" void func_0022C830(sGame_C830* self)
     self->font->SetScale(0.8f, 0.8f);
     self->font->scale = sV2_C830(2.0f, 2.0f);
     self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
-    func_002789C0(D_004A28A4);
+    func_002789C0(ScriptEngine);
     func_00397DF8(self->f48);
     func_001F31E0(self->hudTimer);
     if (func_002CC098(self->fA4) != 0) {

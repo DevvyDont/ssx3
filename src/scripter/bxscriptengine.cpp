@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetupBXEngine);
@@ -1200,14 +1201,13 @@ INCLUDE_ASM("scripter/bxscriptengine", func_002831B0);
 #ifdef SKIP_ASM
 // PORT: func_0027A668 is declared (void*) but takes (self, idx).
 void* func_0027A668_2(void* self, int idx) __asm__("func_0027A668__FPv");
-extern void* D_004A28A4;
 
 extern "C" int func_002831B0(void* self, void* arg, int n)
 {
     if (n >= 4) {
         return 0;
     }
-    return *(int*)((char*)func_0027A668_2(D_004A28A4, *(int*)((char*)arg + 0x8)) + 0xC) ==
+    return *(int*)((char*)func_0027A668_2(ScriptEngine, *(int*)((char*)arg + 0x8)) + 0xC) ==
            *(int*)(*(char**)((char*)self + 0x10) + 0xF8);
 }
 #endif

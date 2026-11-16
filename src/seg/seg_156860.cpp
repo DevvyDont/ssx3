@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -2594,7 +2595,6 @@ INCLUDE_ASM("seg/seg_156860", func_00258CB0);
 int GetHashValue32(char* s);
 extern "C" void* cUIStateStack_findState(void* mgr, int hash);
 extern "C" void strcpy1(char* dst, const char* src);
-extern void* D_004A28A4;
 extern char D_004A2EF0[];
 extern char D_004805D8[];
 extern char D_004805F8[];
@@ -2611,10 +2611,11 @@ struct sVEntM_8CB0 {
     int (*fn)(void*, int, char*);
 };
 
-// The game's online state (D_004A28A4+0x550 == 2: connected).
-static inline int gcOnline_8CB0()
+// Whether no NIS cut-scene list is playing: mPlayingNISList is 2 when none is (the engine's constructor sets 2,
+// and IsNISActive tests != 2). An earlier reading of this field as "online: connected" was wrong.
+static inline int gcNoNISPlaying_8CB0()
 {
-    return *(int*)((char*)D_004A28A4 + 0x550) == 2;
+    return ScriptEngine->mPlayingNISList == 2;
 }
 
 // Sends message `msg` (with text `arg`) to the UI item through its vtable slot 24.
@@ -2658,7 +2659,7 @@ extern "C" void func_00258CB0(char* self)
         if (*(int*)(self + 0x74) == 0) {
             if (*(int*)(self + 0x78) != 0) {
                 int kind = *(int*)SSXApp->Game->AI;
-                if (kind == 4 || kind == 5 || !gcOnline_8CB0()) {
+                if (kind == 4 || kind == 5 || !gcNoNISPlaying_8CB0()) {
                     gcSend_8CB0(item, 0xE, buf);
                     *(int*)(self + 0x98) = 1;
                 }
@@ -2684,7 +2685,7 @@ extern "C" void func_00258CB0(char* self)
         }
         break;
     case 1:
-        if (SSXApp->Game->mCurrentStateID == 2 && gcOnline_8CB0()) {
+        if (SSXApp->Game->mCurrentStateID == 2 && gcNoNISPlaying_8CB0()) {
             gcSend_8CB0(item, 0xF, 0);
             *(int*)(self + 0x98) = 0;
         } else if (*(int*)(self + 0x78) == 0 || *(int*)(self + 0x74) != 0) {

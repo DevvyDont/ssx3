@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -2105,7 +2106,6 @@ extern "C" void cGameViewMan_updateAll(int);
 extern "C" void func_00230F40(void*);
 extern char gBucketMan[8];
 extern int D_004A2A50;
-extern char* D_004A28A4;
 struct sList_244E60 { int pad0; int items[3]; unsigned int count; };
 struct sApp_244E60 { char pad0[0x4C]; int f4C; char pad1[0x84-0x50]; sList_244E60* list; };
 
@@ -2126,8 +2126,8 @@ extern "C" void func_00244E60(void* self)
         if ((D_004A2A50 & 1) == 0)
             func_0026F4A8(*(int*)(s + 0x28));
         if (func_00270280(*(int*)(s + 0x28)) == 0 && (D_004A2A50 & 8) == 0) {
-            sVE_244E60* vt = *(sVE_244E60**)(D_004A28A4 + 0x2A8);
-            ((void (*)(void*))vt[5].fn)(D_004A28A4 + vt[5].delta);
+            sVE_244E60* vt = (sVE_244E60*)ScriptEngine->mVtbl;
+            ((void (*)(void*))vt[5].fn)((char*)ScriptEngine + vt[5].delta);
         }
     }
     obj = gBucketMan;

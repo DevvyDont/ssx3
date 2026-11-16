@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "bx/bxstring.h"
 #include "main/ssxapp.h"
 
@@ -817,7 +818,6 @@ extern "C" void cBE_purgeBE(void* p);
 extern "C" void func_002380E8(void* p);
 extern "C" void cFEAsyncManager__cFEAsyncManager(void* p, int flags);
 extern void* PadCache;
-extern void* D_004A28A4;
 extern void* D_004A289C;
 
 struct sVEPurge0 {
@@ -872,14 +872,14 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
     PadCache = 0;
     func_00326A68(mgr);
     operator_delete(mgr);
-    if (D_004A28A4) {
-        cSSXScriptEngine_DeInitOnce(D_004A28A4);
-        char* o = (char*)D_004A28A4;
-        if (o) {
-            sVEPurge* vt = *(sVEPurge**)(o + 0x2A8);
-            vt[1].fn(o + vt[1].delta, 3);
+    if (ScriptEngine) {
+        cSSXScriptEngine_DeInitOnce(ScriptEngine);
+        cSSXScriptEngine* o = ScriptEngine;
+        if (o) {  // delete ScriptEngine: the virtual destructor (slot 1) with flags 3
+            sVEPurge* vt = (sVEPurge*)o->mVtbl;
+            vt[1].fn((char*)o + vt[1].delta, 3);
         }
-        D_004A28A4 = 0;
+        ScriptEngine = 0;
     }
     {
         char* g = (char*)D_004A289C;
@@ -1104,8 +1104,8 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
         func_003DED50(D_00442100[i], 0, 100, &self->fEC[i]);
     }
     func_003DED50(D_004A29CC, 0, 100, &self->f118);
-    void* sm = cSSXScriptEngine_cSSXScriptEngine(cMemMan_alloc(0xA50, D_0047A8D0, 0, 0));
-    D_004A28A4 = sm;
+    cSSXScriptEngine* sm = (cSSXScriptEngine*)cSSXScriptEngine_cSSXScriptEngine(cMemMan_alloc(0xA50, D_0047A8D0, 0, 0));
+    ScriptEngine = sm;
     cSSXScriptEngine_InitOnce(sm);
     self->fB8[0] = cSSXApp_loadInputMap((cSSXApp*)self, D_0047A8E0);
     self->fB8[1] = cSSXApp_loadInputMap((cSSXApp*)self, D_0047A8F8);
@@ -1171,7 +1171,7 @@ static inline int optLanguage_228A78(sOptions_228A78 o)
 
 extern "C" void cSSXApp_initLocale(cSSXApp* self)
 {
-    if ((void*)self->FELocale == 0) {
+    if (self->FELocale == 0) {
         *(void**)&self->FELocale = cFELocale_cFELocale(cMemMan_alloc(0xC0, D_0047A978, 0, 0));
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -3666,7 +3666,7 @@ extern "C" int func_0022B008(sGame_22B008* self)
     if (func_00231D60(self) != 0) {
         return 1;
     }
-    if (*(int*)((char*)D_004A28A4 + 0x504) != 0) {
+    if (ScriptEngine->mIsPlaying != 0) {
         func_0022C830(self);
         return 1;
     }
@@ -3783,7 +3783,7 @@ extern "C" int func_0022B008(sGame_22B008* self)
         func_00397DF8(self->f48);
         func_0030B4B8(self->f30);
     }
-    func_002789C0(D_004A28A4);
+    func_002789C0(ScriptEngine);
     func_001F31E0(self->f94);
     D_004A289C_22B008->v20();
     func_00285BF8(gSSXAudio, (float)self->frames * (1.0f / 60.0f), 1);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -520,7 +521,6 @@ extern "C" void* func_00233C10(void* self)
 INCLUDE_ASM("fe/festateloadscreen", func_00233C50);
 #ifdef SKIP_ASM
 extern void* cGameState_mpGame;
-extern void* D_004A28A4;
 extern void* D_004A2EEC;
 extern "C" void func_0026FA50(void* self);
 extern "C" void func_0039F840(void* list);
@@ -532,7 +532,7 @@ extern "C" void func_00233C50(void* self)
 {
     func_0026FA50(*(void**)((char*)cGameState_mpGame + 0x28));
     func_0039F840(*(char**)((char*)cGameState_mpGame + 0x48) + 0x18);
-    cSSXScriptEngine_ResetNISList(D_004A28A4, 0);
+    cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x14) = 0xB4;
     func_001F36C0(SSXApp->Game->LoadIndicator, 4);
@@ -561,7 +561,6 @@ extern "C" int func_002791D8(void* self, int i);
 extern "C" int func_00279248(void* self, int i);
 extern "C" void func_0027AC60(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
-extern void* D_004A28A4;
 extern int D_005366A8[];
 // PORT: function-local `static const float` with a dynamic initializer (guard D_004A4F64),
 // spelled with splat's globals; the const object's loads are loop-invariant (RTX_UNCHANGING).
@@ -692,10 +691,10 @@ extern "C" void func_00233CD8(void* self)
         if (skip) {
             return;
         }
-        cSSXScriptEngine_ResetNISList(D_004A28A4, 0);
-        func_0027AC60(D_004A28A4);
-        func_00278F38(D_004A28A4, 0);
-        if (func_00279248(D_004A28A4, 0) > 0) {
+        cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
+        func_0027AC60(ScriptEngine);
+        func_00278F38(ScriptEngine, 0);
+        if (func_00279248(ScriptEngine, 0) > 0) {
             *(int*)s = 0xC;
         }
         sRace_233CD8* rc2 = &D_00535BC8_r233CD8;
@@ -706,7 +705,7 @@ extern "C" void func_00233CD8(void* self)
         break;
     }
     case 1: {
-        if (func_002791D8(D_004A28A4, 0) == 1) {
+        if (func_002791D8(ScriptEngine, 0) == 1) {
             break;
         }
         cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(D_0047C010));
@@ -737,7 +736,6 @@ struct sLoadScreen00234008 {
     int pad4[3];
     int mode;
 };
-extern void* D_004A28A4;
 void func_00162290_v(void* self) __asm__("func_00162290__FPv");
 extern "C" int func_00278F68(void* self, int i, int a, int b);
 void func_00278DE8(void* self, int val);
@@ -752,8 +750,8 @@ extern "C" void func_00234008(sLoadScreen00234008* self)
         func_00162290_v(*(void**)(item + 0xA8));
     }
     self->mode = 2;
-    func_00278F68(D_004A28A4, 0, 1, 0);
-    func_00278DE8(D_004A28A4, 1);
+    func_00278F68(ScriptEngine, 0, 1, 0);
+    func_00278DE8(ScriptEngine, 1);
     self->state = 7;
 }
 #endif
@@ -837,7 +835,6 @@ extern "C" void func_0027AAF8(void* a, int b);
 // PORT: func_00278F38 returns func_00276270's result (ssxscriptengine defines it void).
 extern "C" int func_00278F38(void* self, int i);
 extern void* cGameState_mpGame;
-extern void* D_004A28A4;
 extern signed char D_00535C10[];
 
 struct sVE_2341D0 {
@@ -888,15 +885,15 @@ extern "C" void cGFEventStartState_gainFocus(void* self, int mode)
     case 0:
         break;
     case 2:
-        cSSXScriptEngine_ResetNISList(D_004A28A4, 0);
-        func_0027AAF8(D_004A28A4, 1);
-        func_00278F38(D_004A28A4, 0);
+        cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
+        func_0027AAF8(ScriptEngine, 1);
+        func_00278F38(ScriptEngine, 0);
         break;
     case 1:
         if (!isMode4_2341D0()) {
-            cSSXScriptEngine_ResetNISList(D_004A28A4, 0);
-            func_0027AAF8(D_004A28A4, 0);
-            func_00278F38(D_004A28A4, 0);
+            cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
+            func_0027AAF8(ScriptEngine, 0);
+            func_00278F38(ScriptEngine, 0);
         }
         break;
     }
@@ -933,7 +930,6 @@ extern "C" int func_0012ABD0(void* o);
 extern "C" int func_0012ACF8(void* o);
 extern "C" void cAI_cleanupAfterRace(void* o);
 extern "C" void cAI_cleanupActors(void* o);
-extern void* D_004A28A4;
 extern void* cGameState_mpGame;
 extern signed char D_00535BC8[];
 extern signed char D_00535C10[];
@@ -973,16 +969,16 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
 {
     if (self->state < 3) {
         func_001F36C0(hud_43B0(), 2);
-        if (func_00279220(D_004A28A4, 0) == 4)
-            func_00279040(D_004A28A4, 0, 1);
+        if (func_00279220(ScriptEngine, 0) == 4)
+            func_00279040(ScriptEngine, 0, 1);
     } else {
-        if (func_00279220(D_004A28A4, 0) == 3)
-            func_00279040(D_004A28A4, 0, 0);
+        if (func_00279220(ScriptEngine, 0) == 3)
+            func_00279040(ScriptEngine, 0, 0);
         cBXLoadIndicator_Hide(hud_43B0(), 2);
     }
     switch (self->state) {
     case 0:
-        if (cSSXScriptEngine_IsActiveNISInTransition(D_004A28A4) == 0)
+        if (cSSXScriptEngine_IsActiveNISInTransition(ScriptEngine) == 0)
             self->state = 1;
         break;
     case 1: {
@@ -1022,18 +1018,18 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
             self->state = 3;
         break;
     case 3: {
-        if (func_00279220(D_004A28A4, 1) != 0)
+        if (func_00279220(ScriptEngine, 1) != 0)
             break;
         if (MGR_43B0->obj->f84 > 0)
             MGR_43B0->obj->f8C = 1;
         if (MGR_43B0->obj->f80 > 0)
             MGR_43B0->obj->f14 = 1;
-        if (func_002791D8(D_004A28A4, 0) == 2) {
-            func_00278F68(D_004A28A4, 0, self->f14 == 0, 1);
+        if (func_002791D8(ScriptEngine, 0) == 2) {
+            func_00278F68(ScriptEngine, 0, self->f14 == 0, 1);
             break;
         }
-        int r1 = func_00279220(D_004A28A4, 0);
-        int r2 = func_00279148(D_004A28A4, 0, 0);
+        int r1 = func_00279220(ScriptEngine, 0);
+        int r2 = func_00279148(ScriptEngine, 0, 0);
         int busy = r1 && r2 != 5;
         if (busy)
             break;
@@ -1082,7 +1078,6 @@ extern "C" void cWScriptMan_setupMissions(void* a);
 extern "C" void func_00129160(void* p);
 extern "C" void func_00155E58(void* p);
 extern void* cGameState_mpGame;
-extern void* D_004A28A4;
 extern void* D_004A3DD8;
 
 struct sRace_234750 {
@@ -1115,7 +1110,7 @@ static inline int otherSide_234750(char* p)
 
 extern "C" void cGFEventStartState_loseFocus(void* self)
 {
-    cSSXScriptEngine_ResetNISList(D_004A28A4, 1);
+    cSSXScriptEngine_ResetNISList(ScriptEngine, 1);
     cBE_getInterface_4750(cBE_getBE(), 0);
     sRace_234750* r = &D_00535BC8_r234750;
     int mode = r->mode48;
@@ -1159,7 +1154,6 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
 //100%
 INCLUDE_ASM("fe/festateloadscreen", func_00234910);
 #ifdef SKIP_ASM
-extern void* D_004A28A4;
 extern "C" int func_00278F68(void* self, int i, int a, int b);
 
 static inline int isState00234910(void* e, int s)
@@ -1169,14 +1163,14 @@ static inline int isState00234910(void* e, int s)
 
 extern "C" void func_00234910(void* self)
 {
-    if (isState00234910(D_004A28A4, 2)) {
-        func_00278F68(D_004A28A4, 1, 1, 1);
+    if (isState00234910(ScriptEngine, 2)) {
+        func_00278F68(ScriptEngine, 1, 1, 1);
     }
-    if (isState00234910(D_004A28A4, 2)) {
-        func_00278F68(D_004A28A4, 0, 1, 1);
+    if (isState00234910(ScriptEngine, 2)) {
+        func_00278F68(ScriptEngine, 0, 1, 1);
     }
     *(int*)((char*)self + 0x14) = 0;
-    if (*(int*)((char*)D_004A28A4 + 0x550) == 1) {
+    if (ScriptEngine->mPlayingNISList == 1) {
         *(int*)((char*)self + 0x14) = 1;
     }
 }

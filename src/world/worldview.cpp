@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -1333,7 +1334,6 @@ extern "C" void func_003ACA10(void* self, int a, void* obj);
 extern "C" void* func_003AD188();
 extern "C" void func_00230430(void* self, int a);
 void func_0016CEC8(void* a, int b);
-extern void* D_004A28A4;
 extern "C" void func_00278A10(void* self, int a, void* obj);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1449,7 +1449,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int arg,
         }
         break;
     case 18:
-        func_00278A10(D_004A28A4, arg & 0xFF, obj);
+        func_00278A10(ScriptEngine, arg & 0xFF, obj);
         break;
     case 20:
         func_00286CA8(func_0028B180(), arg, obj);
@@ -1501,7 +1501,6 @@ extern "C" void cAvalanche_reset();
 extern "C" void func_003284B8(void* node, int idx, void* item, const void* target, const void* cur);
 extern "C" void func_00328F28(void* out, const void* box);
 extern "C" void* func_003AD198();
-extern void* D_004A28A4;
 extern char*** D_004A47B8;
 extern char* D_004A5B80;
 
@@ -1654,7 +1653,7 @@ extern "C" void* func_003AB498(char* self, unsigned int msg, unsigned int param,
         }
         break;
     case 18:
-        func_00278A58(D_004A28A4, param);
+        func_00278A58(ScriptEngine, param);
         break;
     case 20:
         func_00286D18(func_0028B180(), param, data);

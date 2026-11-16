@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -2164,9 +2165,7 @@ struct V2_0AD0 { float x, y; };
 struct V4_0AD0 { float x, y, z, w; };
 struct Big_0AD0 { unsigned int pad0 : 20; unsigned int mode : 2; unsigned int pad1 : 10; int rest[0xA1]; };
 struct Bits_0AD0 { int a, b; unsigned int lo : 5; int v : 5; unsigned int hi : 22; };
-struct Glob_0AD0 { char pad[0x504]; int f504; };
 extern Big_0AD0 D_00535610;
-extern Glob_0AD0* D_004A28A4;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001E91F8(void*, void*);
@@ -2186,7 +2185,7 @@ extern "C" void func_00220AD0(char* self, char* obj, float t) {
     func_001E9290(p, &b);
     cBE_getInterface_Fv(cBE_getBE(), 4);
     big = D_00535610;
-    if (D_004A28A4->f504 != 0 && big.mode != 2) {
+    if (ScriptEngine->mIsPlaying != 0 && big.mode != 2) {
         b.y *= 0.75f;
         a.y -= 60.0f;
     }
