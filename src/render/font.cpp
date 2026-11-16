@@ -1848,9 +1848,9 @@ void func_00394648(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394650__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_ResolveCharModel__FPv);
 #ifdef SKIP_ASM
-void func_00394650(void* self)
+void cGraphicsMan_ResolveCharModel(void* self)
 {
 }
 #endif

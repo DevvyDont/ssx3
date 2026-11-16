@@ -22,9 +22,9 @@ INCLUDE_ASM("fe/fepopup3", func_001DF440);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateBraggingRights__cFEStateBraggingRights);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF578);
+INCLUDE_ASM("fe/fepopup3", cFEStateBraggingRights_onMenuGainFocus);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF5C0);
+INCLUDE_ASM("fe/fepopup3", cFEStateChatRoom_onMenuGainFocus);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateOnlineMainMenu__cFEStateOnlineMainMenu);
 
@@ -232,7 +232,7 @@ INCLUDE_ASM("fe/fepopup3", func_001E0E90);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateStats__cFEStateStats);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0EC0);
+INCLUDE_ASM("fe/fepopup3", cFEStateStats_onMenuGainFocus);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetNews__cFEStateNetNews);
 

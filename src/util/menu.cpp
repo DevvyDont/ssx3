@@ -2764,9 +2764,9 @@ cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CD2E8__FPv);
+INCLUDE_ASM("util/menu", cNullMenuItem_canHaveFocus__FPv);
 #ifdef SKIP_ASM
-int func_002CD2E8(void* self)
+int cNullMenuItem_canHaveFocus(void* self)
 {
     return 0;
 }
@@ -2850,9 +2850,9 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CD398__FPv);
+INCLUDE_ASM("util/menu", cSpaceMenuItem_canHaveFocus__FPv);
 #ifdef SKIP_ASM
-int func_002CD398(void* self)
+int cSpaceMenuItem_canHaveFocus(void* self)
 {
     return 0;
 }
@@ -5136,9 +5136,9 @@ extern "C" cRGBTitleMenuItem_sItem* cRGBTitleMenuItem_cRGBTitleMenuItem(cRGBTitl
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002CFF80__FPv);
+INCLUDE_ASM("util/menu", cRGBTitleMenuItem_canHaveFocus__FPv);
 #ifdef SKIP_ASM
-int func_002CFF80(void* self)
+int cRGBTitleMenuItem_canHaveFocus(void* self)
 {
     return 0;
 }

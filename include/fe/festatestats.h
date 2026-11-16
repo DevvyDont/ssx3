@@ -11,7 +11,7 @@
 // constructor stores up to 0x6EC. Constructors cFEStateStats_cFEStateStats and func_001C2D90 (the default one), destructor
 // cFEStateStats__cFEStateStats (fe/fepopupmisc; the preview's _$_13cFEStateStats). Retail vtable cFEStateStats_vtbl (32 slots: 1 dtor, 4
 // onCreateScreen cFEStateStats_onCreateScreen, 7 onGainTransition cFEStateStats_onGainTransition, 9 onInputAlways cFEStateStats_onInputAlways, 12 onUpdate
-// cFEStateStats_onUpdate, 13 func_001E0EC0, 18 onWidgetCreate cFEStateStats_onWidgetCreate, 19 onWidgetEvent cFEStateStats_onWidgetEvent, 20
+// cFEStateStats_onUpdate, 13 cFEStateStats_onMenuGainFocus, 18 onWidgetCreate cFEStateStats_onWidgetCreate, 19 onWidgetEvent cFEStateStats_onWidgetEvent, 20
 // onWidgetMenu cFEStateStats_onWidgetMenu, 25 func_001C3570 (help), 31 func_001C4CD8 (net event 0xE1), 32 func_001C2E70).
 // Methods: fe/feasyncfile 0x1C2D18-0x1C4F58. tools/layout_xlate.py: preview 0xC4 = retail 0x6E4 (+0x620).
 //

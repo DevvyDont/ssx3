@@ -3142,13 +3142,13 @@ extern "C" void* func_00176358(void* self, void* scriptAlgo)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176368);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptManualAlgorithm__cScriptManualAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
 void operator_delete(int* ptr);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_00176368(void* self, int flags)
+extern "C" void cScriptManualAlgorithm__cScriptManualAlgorithm(void* self, int flags)
 {
     *(void***)((char*)self + 0x10) = D_0045BDE0;
     if (flags & 1) {
@@ -3158,13 +3158,13 @@ extern "C" void func_00176368(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176398);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptPointAlgorithm__cScriptPointAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
 void operator_delete(int* ptr);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_00176398(void* self, int flags)
+extern "C" void cScriptPointAlgorithm__cScriptPointAlgorithm(void* self, int flags)
 {
     *(void***)((char*)self + 0x10) = D_0045BDE0;
     if (flags & 1) {
@@ -3174,13 +3174,13 @@ extern "C" void func_00176398(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001763C8);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptTargetAlgorithm__cScriptTargetAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
 void operator_delete(int* ptr);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_001763C8(void* self, int flags)
+extern "C" void cScriptTargetAlgorithm__cScriptTargetAlgorithm(void* self, int flags)
 {
     *(void***)((char*)self + 0x10) = D_0045BDE0;
     if (flags & 1) {
@@ -3190,13 +3190,13 @@ extern "C" void func_001763C8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001763F8);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptRelativeAlgorithm__cScriptRelativeAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
 void operator_delete(int* ptr);
 
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_001763F8(void* self, int flags)
+extern "C" void cScriptRelativeAlgorithm__cScriptRelativeAlgorithm(void* self, int flags)
 {
     *(void***)((char*)self + 0x10) = D_0045BDE0;
     if (flags & 1) {

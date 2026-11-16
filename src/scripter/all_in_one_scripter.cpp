@@ -274,14 +274,14 @@ extern "C" int func_00284898(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002848A0);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCameraManager__cScriptObjCameraManager);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cScriptObject__cScriptObject_48A0(void *) __asm__("cScriptObject__cScriptObject");
 extern char D_00482360[];
 extern char cScriptObjCameraManager_vtbl[];
 
-extern "C" void func_002848A0(void *arg0) {
+extern "C" void cScriptObjCameraManager__cScriptObjCameraManager(void *arg0) {
     *(char **)((char*)arg0 + 0x10) = D_00482360;
     *(char **)((char*)arg0 + 0xC) = cScriptObjCameraManager_vtbl;
     cScriptObject__cScriptObject_48A0(arg0);

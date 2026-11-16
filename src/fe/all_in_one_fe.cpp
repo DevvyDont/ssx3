@@ -3201,12 +3201,12 @@ extern "C" void *func_00221B58(void *arg0, int arg1, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221BC8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_ONLINE__cOVState_PAUSE_ONLINE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
-extern "C" void* func_00221BC8(void *self) {
+extern "C" void* cOVState_PAUSE_ONLINE__cOVState_PAUSE_ONLINE(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);
 }

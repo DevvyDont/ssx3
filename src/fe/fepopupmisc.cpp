@@ -556,9 +556,9 @@ extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(void* self, int f
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF578__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateBraggingRights_onMenuGainFocus__FPv);
 #ifdef SKIP_ASM
-void func_001DF578(void* self)
+void cFEStateBraggingRights_onMenuGainFocus(void* self)
 {
 }
 #endif
@@ -579,9 +579,9 @@ extern "C" void* func_001DF580(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF5C0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateChatRoom_onMenuGainFocus__FPv);
 #ifdef SKIP_ASM
-void func_001DF5C0(void* self)
+void cFEStateChatRoom_onMenuGainFocus(void* self)
 {
 }
 #endif
@@ -2994,9 +2994,9 @@ void* cFEStateStats__cFEStateStats(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0EC0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateStats_onMenuGainFocus__FPv);
 #ifdef SKIP_ASM
-void func_001E0EC0(void* self)
+void cFEStateStats_onMenuGainFocus(void* self)
 {
 }
 #endif

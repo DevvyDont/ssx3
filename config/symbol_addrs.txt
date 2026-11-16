@@ -4544,6 +4544,37 @@ iSetTLBEntry = 0x0042CCF8; //type:func
 iGetTLBEntry = 0x0042CD18; //type:func
 ProbeTLBEntry = 0x0042CD28; //type:func
 
+// fn_cascade6: names by evidence (docs/function_names.tsv)
+cScriptManualAlgorithm_snap = 0x00169518; //type:func
+cScriptManualAlgorithm_snapCurrent = 0x00169540; //type:func
+cScriptManualAlgorithm_update = 0x00169570; //type:func
+cScriptManualAlgorithm_getPose = 0x00169828; //type:func
+cScriptPointAlgorithm_snap = 0x00169D58; //type:func
+cScriptPointAlgorithm_snapCurrent = 0x00169D80; //type:func
+cScriptPointAlgorithm_update = 0x00169DB0; //type:func
+cScriptPointAlgorithm_getPose = 0x00169F88; //type:func
+cScriptTargetAlgorithm_snap = 0x0016A4B8; //type:func
+cScriptTargetAlgorithm_snapCurrent = 0x0016A4E0; //type:func
+cScriptTargetAlgorithm_update = 0x0016A510; //type:func
+cScriptTargetAlgorithm_getPose = 0x0016A868; //type:func
+cScriptRelativeAlgorithm_snap = 0x0016AD98; //type:func
+cScriptRelativeAlgorithm_snapCurrent = 0x0016B150; //type:func
+cScriptRelativeAlgorithm_update = 0x0016B180; //type:func
+cScriptRelativeAlgorithm_getPose = 0x0016B7B8; //type:func
+cScriptManualAlgorithm__cScriptManualAlgorithm = 0x00176368; //type:func
+cScriptPointAlgorithm__cScriptPointAlgorithm = 0x00176398; //type:func
+cScriptTargetAlgorithm__cScriptTargetAlgorithm = 0x001763C8; //type:func
+cScriptRelativeAlgorithm__cScriptRelativeAlgorithm = 0x001763F8; //type:func
+cFEStateBraggingRights_onMenuGainFocus__FPv = 0x001DF578; //type:func
+cFEStateChatRoom_onMenuGainFocus__FPv = 0x001DF5C0; //type:func
+cFEStateStats_onMenuGainFocus__FPv = 0x001E0EC0; //type:func
+cOVState_PAUSE_ONLINE__cOVState_PAUSE_ONLINE = 0x00221BC8; //type:func
+cScriptObjCameraManager__cScriptObjCameraManager = 0x002848A0; //type:func
+cNullMenuItem_canHaveFocus__FPv = 0x002CD2E8; //type:func
+cSpaceMenuItem_canHaveFocus__FPv = 0x002CD398; //type:func
+cRGBTitleMenuItem_canHaveFocus__FPv = 0x002CFF80; //type:func
+cGraphicsMan_ResolveCharModel__FPv = 0x00394650; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

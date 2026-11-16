@@ -13,7 +13,7 @@
 // mChatColour at 0x72C. Constructors cFEStateChatRoom_cFEStateChatRoom (cFEStateNet(pEngine, 0), vtable cFEStateChatRoom_vtbl, mHashName 0x3D) and
 // the default func_001DF580 (fe/fepopupmisc); destructor cFEStateChatRoom__cFEStateChatRoom (slot 1; the preview's _$_16cFEStateChatRoom).
 // Retail vtable cFEStateChatRoom_vtbl (32 slots: 4 onCreateScreen cFEStateChatRoom_onCreateScreen, 6 onGainFocus cFEStateChatRoom_onGainFocus, 7 cFEStateChatRoom_onGainTransition,
-// 8 cFEStateChatRoom_onInputBegin, 12 onUpdate cFEStateChatRoom_onUpdate, 13 func_001DF5C0, 17 onPopupEvent cFEStateChatRoom_onPopupEvent, 18 onWidgetCreate
+// 8 cFEStateChatRoom_onInputBegin, 12 onUpdate cFEStateChatRoom_onUpdate, 13 cFEStateChatRoom_onMenuGainFocus, 17 onPopupEvent cFEStateChatRoom_onPopupEvent, 18 onWidgetCreate
 // cFEStateChatRoom_onWidgetCreate, 19 onWidgetEvent cFEStateChatRoom_onWidgetEvent, 20 onWidgetMenu cFEStateChatRoom_onWidgetMenu, 25 func_001B2DA0 (help), 31
 // func_001B3A30 (net events), 32 func_001B22A0). Methods: fe/feasyncfile 0x1B1F88-0x1B3D20.
 //

@@ -350,7 +350,7 @@ extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169518);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptManualAlgorithm_snap);
 #ifdef SKIP_ASM
 class cScriptCtlVirt {
 public:
@@ -364,14 +364,14 @@ public:
     virtual void v05();
 };
 
-extern "C" void func_00169518(cScriptCtlVirt* self)
+extern "C" void cScriptManualAlgorithm_snap(cScriptCtlVirt* self)
 {
     self->v05();
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169540);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptManualAlgorithm_snapCurrent);
 #ifdef SKIP_ASM
 class cScriptCtlVirt2 {
 public:
@@ -382,14 +382,14 @@ public:
     virtual void v03(int);
 };
 
-extern "C" void func_00169540(cScriptCtlVirt2* self)
+extern "C" void cScriptManualAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
     self->v03(0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169570);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptManualAlgorithm_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
 float* func_0027C098(void* cam);
@@ -496,7 +496,7 @@ struct sScrCam_169570 {
     float r70;              // 0x70
 };
 
-extern "C" void func_00169570(char* p)
+extern "C" void cScriptManualAlgorithm_update(char* p)
 {
     sScrCam_169570* self = (sScrCam_169570*)p;
     char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
@@ -520,7 +520,7 @@ extern "C" void func_00169570(char* p)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169828);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptManualAlgorithm_getPose);
 #ifdef SKIP_ASM
 struct sV_9828 {
     float x, y, z, w;
@@ -679,7 +679,7 @@ static inline void RotAxis_9828(sM_9828* m, const sV_9828& axis, float angle)
     vu0MulMtx_9828(m, m, &r);
 }
 
-extern "C" sPair_9828 func_00169828(char* p)
+extern "C" sPair_9828 cScriptManualAlgorithm_getPose(char* p)
 {
     sM_9828 m;
     vu0CopyMtx_9828(&m, &D_004FF1A0_9828);
@@ -722,25 +722,25 @@ extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169D58);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_snap);
 #ifdef SKIP_ASM
-extern "C" void func_00169D58(cScriptCtlVirt* self)
+extern "C" void cScriptPointAlgorithm_snap(cScriptCtlVirt* self)
 {
     self->v05();
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169D80);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_snapCurrent);
 #ifdef SKIP_ASM
-extern "C" void func_00169D80(cScriptCtlVirt2* self)
+extern "C" void cScriptPointAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
     self->v03(0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169DB0);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
 float* func_0027C2A8(void* cam);
@@ -828,7 +828,7 @@ struct sScrCam_169DB0 {
     float r70;              // 0x70
 };
 
-extern "C" void func_00169DB0(char* p)
+extern "C" void cScriptPointAlgorithm_update(char* p)
 {
     sScrCam_169DB0* self = (sScrCam_169DB0*)p;
     char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
@@ -856,7 +856,7 @@ extern "C" void func_00169DB0(char* p)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_00169F88);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_getPose);
 #ifdef SKIP_ASM
 struct sV_9F88 {
     float x, y, z, w;
@@ -1015,7 +1015,7 @@ static inline void RotAxis_9F88(sM_9F88* m, const sV_9F88& axis, float angle)
     vu0MulMtx_9F88(m, m, &r);
 }
 
-extern "C" sPair_9F88 func_00169F88(char* p)
+extern "C" sPair_9F88 cScriptPointAlgorithm_getPose(char* p)
 {
     sM_9F88 m;
     vu0CopyMtx_9F88(&m, &D_004FF1A0_9F88);
@@ -1058,25 +1058,25 @@ extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016A4B8);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_snap);
 #ifdef SKIP_ASM
-extern "C" void func_0016A4B8(cScriptCtlVirt* self)
+extern "C" void cScriptTargetAlgorithm_snap(cScriptCtlVirt* self)
 {
     self->v05();
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016A4E0);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_snapCurrent);
 #ifdef SKIP_ASM
-extern "C" void func_0016A4E0(cScriptCtlVirt2* self)
+extern "C" void cScriptTargetAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
     self->v03(0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016A510);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
 float* func_0027C4B8(void* cam);
@@ -1224,7 +1224,7 @@ struct sVEp_16A510 {
     sVec4_16A510* (*fn)(void*);
 };
 
-extern "C" void func_0016A510(char* p)
+extern "C" void cScriptTargetAlgorithm_update(char* p)
 {
     sScrCam_16A510* self = (sScrCam_16A510*)p;
     char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
@@ -1257,7 +1257,7 @@ extern "C" void func_0016A510(char* p)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016A868);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_getPose);
 #ifdef SKIP_ASM
 struct sV_A868 {
     float x, y, z, w;
@@ -1416,7 +1416,7 @@ static inline void RotAxis_A868(sM_A868* m, const sV_A868& axis, float angle)
     vu0MulMtx_A868(m, m, &r);
 }
 
-extern "C" sPair_A868 func_0016A868(char* p)
+extern "C" sPair_A868 cScriptTargetAlgorithm_getPose(char* p)
 {
     sM_A868 m;
     vu0CopyMtx_A868(&m, &D_004FF1A0_A868);
@@ -1459,7 +1459,7 @@ extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016AD98);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_snap);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
 float* func_0027C6A0(void* cam);
@@ -1608,7 +1608,7 @@ struct sVEp_16AD98 {
     sVec4_16AD98* (*fn)(void*);
 };
 
-extern "C" void func_0016AD98(char* p)
+extern "C" void cScriptRelativeAlgorithm_snap(char* p)
 {
     sScrCam_16AD98* self = (sScrCam_16AD98*)p;
     char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
@@ -1658,16 +1658,16 @@ extern "C" void func_0016AD98(char* p)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016B150);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_snapCurrent);
 #ifdef SKIP_ASM
-extern "C" void func_0016B150(cScriptCtlVirt2* self)
+extern "C" void cScriptRelativeAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
     self->v03(0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016B180);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_update);
 #ifdef SKIP_ASM
 struct sVec4_B180 {
     float x, y, z, w;
@@ -1849,7 +1849,7 @@ static inline float Length4_B180(const sVec4_B180& v)
     return r;
 }
 
-extern "C" void func_0016B180(char* p)
+extern "C" void cScriptRelativeAlgorithm_update(char* p)
 {
     sScrCam_B180* self = (sScrCam_B180*)p;
     char* cam = *(char**)(*(char**)(*(char**)(p + 0x14) + 0x14) + 0x8);
@@ -1913,7 +1913,7 @@ extern "C" void func_0016B180(char* p)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016B7B8);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_getPose);
 #ifdef SKIP_ASM
 struct sV_B7B8 {
     float x, y, z, w;
@@ -2072,7 +2072,7 @@ static inline void RotAxis_B7B8(sM_B7B8* m, const sV_B7B8& axis, float angle)
     vu0MulMtx_B7B8(m, m, &r);
 }
 
-extern "C" sPair_B7B8 func_0016B7B8(char* p)
+extern "C" sPair_B7B8 cScriptRelativeAlgorithm_getPose(char* p)
 {
     sM_B7B8 m;
     vu0CopyMtx_B7B8(&m, &D_004FF1A0_B7B8);
