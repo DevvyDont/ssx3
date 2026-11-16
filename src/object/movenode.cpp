@@ -137,7 +137,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addModifierBlock__FP9cMoveNode);
  */
 void cMoveNode_addModifierBlock(cMoveNode* self)
 {
-    void* mem = cMemMan_alloc(0x28, str_ModifierBlock, 0x20000000, 0);
+    void* mem = cMemMan_alloc(40, str_ModifierBlock, 0x20000000, 0);
     (*(void**)&self->ModifierBlock) = tModifierBlock_tModifierBlock((tModifierBlock*)mem);
 }
 #endif
@@ -446,7 +446,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_003558B8(cMoveNode* self, sMoveQuad* pos)
 {
-    cMoveNode_addTransformModifier(self, func_00356EB8((cPositionModifier*)cMemMan_alloc(0x90, str_PositionModifier, 0x20000000, 0), pos));
+    cMoveNode_addTransformModifier(self, func_00356EB8((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), pos));
 }
 #endif
 
@@ -459,7 +459,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_00355918(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTransformModifier(self, func_00356F10((cPositionModifier*)cMemMan_alloc(0x90, str_PositionModifier, 0x20000000, 0), desc));
+    cMoveNode_addTransformModifier(self, func_00356F10((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), desc));
 }
 #endif
 
@@ -481,7 +481,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addParent(cMoveNode* self, void* parentinst, void* mesh, sMoveQuad* pos)
 {
-    cMoveNode_addTransformModifier(self, func_00357038((cParentModifier*)cMemMan_alloc(0xB0, str_ParentModifier, 0x20000000, 0), parentinst, mesh, pos));
+    cMoveNode_addTransformModifier(self, func_00357038((cParentModifier*)cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), parentinst, mesh, pos));
 }
 #endif
 
@@ -502,7 +502,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addMagnet(cMoveNode* self, void* mat, float radius, float magnetSpeed)
 {
-    cMoveNode_addTransformModifier(self, func_003572E0((cMagnetModifier*)cMemMan_alloc(0xB0, str_MagnetModifier, 0x20000000, 0),
+    cMoveNode_addTransformModifier(self, func_003572E0((cMagnetModifier*)cMemMan_alloc(176, str_MagnetModifier, 0x20000000, 0),
                                       self->Instance, mat, radius, magnetSpeed));
 }
 #endif
@@ -518,7 +518,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 extern "C" void func_00355A78(cMoveNode* self)
 {
     if (cAvalanche_m_badCookie == 0) {
-        cMoveNode_addTransformModifier(self, func_00357750((cAvaSplineModifier*)cMemMan_alloc(0x90, str_AvaSplineModifier, 0x20000000, 0), self->Instance));
+        cMoveNode_addTransformModifier(self, func_00357750((cAvaSplineModifier*)cMemMan_alloc(144, str_AvaSplineModifier, 0x20000000, 0), self->Instance));
     }
 }
 #endif
@@ -558,7 +558,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addSpline(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTransformModifier(self, cMultiSplineModifier_cMultiSplineModifier(cMemMan_alloc(0x58, str_MultiSplineModifier, 0x20000000, 0), desc,
+    cMoveNode_addTransformModifier(self, cMultiSplineModifier_cMultiSplineModifier(cMemMan_alloc(88, str_MultiSplineModifier, 0x20000000, 0), desc,
                                       self->Instance));
 }
 #endif
@@ -577,7 +577,7 @@ extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addUVScroll(cMoveNode* self, void* desc)
 {
-    cMoveNode_addUVScrollModifier(self, func_0035F6E8(cMemMan_alloc(0x50, str_UVScrollModifier, 0x20000000, 0), desc));
+    cMoveNode_addUVScrollModifier(self, func_0035F6E8(cMemMan_alloc(80, str_UVScrollModifier, 0x20000000, 0), desc));
 }
 #endif
 
@@ -596,7 +596,7 @@ extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addTexFlip(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTexFlipModifier(self, func_0035F0B8(cMemMan_alloc(0xE8, str_TexFlipModifier, 0x20000000, 0), desc, self->Instance));
+    cMoveNode_addTexFlipModifier(self, func_0035F0B8(cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
@@ -615,7 +615,7 @@ extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addBoost(cMoveNode* self, void* desc)
 {
-    cMoveNode_addPhysicsModifier(self, func_00342768(cMemMan_alloc(0x50, str_BoostModifier, 0x20000000, 0), desc, self->Instance));
+    cMoveNode_addPhysicsModifier(self, func_00342768(cMemMan_alloc(80, str_BoostModifier, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
@@ -659,7 +659,7 @@ extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int in
         operator_delete((int*)desc);
         return;
     }
-    cMoveNode_addEffectModifier(self, func_00345C90(cMemMan_alloc(0x270, str_DynamicParticleModifier, 0x20000000, 0), desc, self->Instance, index, offset));
+    cMoveNode_addEffectModifier(self, func_00345C90(cMemMan_alloc(624, str_DynamicParticleModifier, 0x20000000, 0), desc, self->Instance, index, offset));
 }
 #endif
 
@@ -679,7 +679,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addRoller(cMoveNode* self, void* rdata, void* ii, void* ci)
 {
-    cMoveNode_addTransformModifier(self, cRollerModifier_cRollerModifier(cMemMan_alloc(0x2D0, str_RollerModifier, 0x20000000, 0), rdata, ii, ci));
+    cMoveNode_addTransformModifier(self, cRollerModifier_cRollerModifier(cMemMan_alloc(720, str_RollerModifier, 0x20000000, 0), rdata, ii, ci));
 }
 #endif
 
@@ -703,7 +703,7 @@ extern "C" void cMoveNode_addRail(cMoveNode* self, void* desc)
     if (block != 0 && tModifierBlock_findRail(block, *(int*)((char*)desc + 0x4)) != 0) {
         return;
     }
-    cMoveNode_addRailModifier(self, cRailModifier_cRailModifier(cMemMan_alloc(0x90, str_RailModifier, 0x20000000, 0), desc,
+    cMoveNode_addRailModifier(self, cRailModifier_cRailModifier(cMemMan_alloc(144, str_RailModifier, 0x20000000, 0), desc,
                                       self->Instance));
 }
 #endif
@@ -1874,7 +1874,7 @@ extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
 
 extern "C" void* func_00356DB0(void* self, void* a1, void* a2, int a3, int a4)
 {
-    func_00355280(self, a1, 0x11, a2);
+    func_00355280(self, a1, 17, a2);
     *(void***)((char*)self + 0xC) = D_00490E80;
     if (a4 != 0 || ((*(sMoveFlags_6DB0**)((char*)self + 0x18))->w & 3) == 3) {
         sMoveFlags_6DB0* f = *(sMoveFlags_6DB0**)((char*)self + 0x18);
@@ -2347,7 +2347,7 @@ extern "C" void* func_00357358(cMagnetModifier* self, void* stream)
     sMnVEntryRd7358* readInstFn = &(*(sMnVEntryRd7358**)stream)[3];
     self->Instance = (tInstanceRecord*)readInstFn->fn((char*)stream + readInstFn->delta);
     sMnVEntrySer7358* readFn = &(*(sMnVEntrySer7358**)stream)[2];
-    readFn->fn((char*)stream + readFn->delta, payload, 0x50);
+    readFn->fn((char*)stream + readFn->delta, payload, 80);
     readFn = &(*(sMnVEntrySer7358**)stream)[2];
     readFn->fn((char*)stream + readFn->delta, (char*)self + 0x60, 0x40);
     self->RootTransformDirty = 1;
@@ -2549,7 +2549,7 @@ extern "C" void cMagnetModifier_writeToReplayFrame(cMagnetModifier* self, void* 
     sMnVEntryPtr76D0* writePtrEntry = &(*(sMnVEntryPtr76D0**)stream)[5];
     writePtrEntry->fn((char*)stream + writePtrEntry->delta, self->Instance);
     sMnVEntrySer76D0* writeEntry = &(*(sMnVEntrySer76D0**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 0x50);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 80);
     writeEntry = &(*(sMnVEntrySer76D0**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x60, 0x40);
 }
@@ -2673,7 +2673,7 @@ extern void* cParticleNode_vtbl[];
 
 extern "C" void* func_003578A8(cParticleNode* self, void* a1, void* a2, void* particle, void* a4)
 {
-    func_00355280(((cMoveNode*)self), a1, 0xD, a2);
+    func_00355280(((cMoveNode*)self), a1, 13, a2);
     self->mVtbl = cParticleNode_vtbl;
     cMoveNode_transferFromOld(((cMoveNode*)self), a4);
     cMoveNode_addParticle(((cMoveNode*)self), particle);
@@ -2814,7 +2814,7 @@ extern "C" void cMultiParticleMan_addParticle(cMultiParticleMan* self, int i, vo
 {
     void** slot = (void**)((char*)self + (i << 2));
     if (*slot == 0) {
-        *slot = func_00357DD8((cMultiParticle*)cMemMan_alloc(0x50, str_MultiParticle, 0x20000000, 0), pdata, numInst);
+        *slot = func_00357DD8((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), pdata, numInst);
     }
 }
 #endif
@@ -2981,7 +2981,7 @@ extern "C" void cMultiParticleMan_readFromReplayFrame(void** self, void* stream)
         sMnVEntrySer7D28* e = &(*(sMnVEntrySer7D28**)stream)[2];
         e->fn((char*)stream + e->delta, &has, 4);
         if (has) {
-            self[i] = func_00357E80((cMultiParticle*)cMemMan_alloc(0x50, str_MultiParticle, 0x20000000, 0), stream);
+            self[i] = func_00357E80((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), stream);
         } else {
             self[i] = 0;
         }
@@ -3023,9 +3023,9 @@ extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2)
     cMultiParticle* self = mem;
     (*(void**)&self->MaxInst) = a2;
     self->NumInst = 0;
-    void* buf = cMemMan_alloc(0xD8, str_Particle_b, 0x20000000, 0);
+    void* buf = cMemMan_alloc(216, str_Particle_b, 0x20000000, 0);
     (*(void**)&self->Particle) = buf;
-    MEM_copy(buf, a1, 0xD8);
+    MEM_copy(buf, a1, 216);
     cMultiParticle_setupMultiParticle(self);
     sPartDesc_7DD8* d = ((sPartDesc_7DD8*)self->Emitter);
     (*(sQuad_7DD8*)&self->BoundBox) = d->a;
@@ -3058,9 +3058,9 @@ extern "C" void* func_00357E80(cMultiParticle* mem, void* stream)
     sQuad_7DD8* ab = &(*(sQuad_7DD8*)&self->BoundBox);
     read_357E80(stream, self, 4);
     read_357E80(stream, &self->NumInst, 4);
-    void* buf = cMemMan_alloc(0xD8, str_Particle_b, 0x20000000, 0);
+    void* buf = cMemMan_alloc(216, str_Particle_b, 0x20000000, 0);
     (*(void**)&self->Particle) = buf;
-    read_357E80(stream, buf, 0xD8);
+    read_357E80(stream, buf, 216);
     cMultiParticle_setupMultiParticle(self);
     cStaticEmitter_readFromReplayFrame(((sPartDesc_7DD8*)self->Emitter), stream);
     read_357E80(stream, &(*(sQuad_7DD8*)&self->Offset), 0x10);

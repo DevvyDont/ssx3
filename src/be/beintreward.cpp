@@ -210,7 +210,7 @@ static inline int Match_6C70(sBEEntry_6C70* e, int type)
 
 extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int type)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     int n = 0;
     void* lib = func_0014BDB8_noarg();
     int count = func_0014D988(lib, characterId);
@@ -325,7 +325,7 @@ static inline sBEFlagEntry_6EE0* Flag_6EE0(char* p, sBEEntry_6EE0* e)
 
 extern "C" int func_00156EE0(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     int n = 0;
     void* lib = func_0014BDB8_noarg();
     int count = func_0014D988(lib, characterId);
@@ -386,7 +386,7 @@ extern "C" int func_00157080(void* self, int profile, int characterId, int kind)
         return -1;
     }
     unsigned int n = BXrand() % (unsigned int)(total - have);
-    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9B50 + characterId * 0xF88;
+    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9B50 + characterId * 3976;
     signed char* bits = 0;
     switch (kind) {
     case 3: bits = (signed char*)(charRecord + 0xF30); break;
@@ -610,7 +610,7 @@ extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_001575C0(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157390(self, *(int*)((char*)cBERewardInterface_getDB_noargs() + 0x3C), (signed char*)(charRecord + 0xF30));
 }
 #endif
@@ -625,7 +625,7 @@ extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_00157620(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157390(self, *(int*)((char*)cBERewardInterface_getDB_noargs() + 0x40), (signed char*)(charRecord + 0xF36));
 }
 #endif
@@ -640,7 +640,7 @@ extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_00157680(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157390(self, *(int*)((char*)cBERewardInterface_getDB_noargs() + 0x44), (signed char*)(charRecord + 0xF45));
 }
 #endif
@@ -655,7 +655,7 @@ extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_001576E0(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157390(self, *(int*)((char*)cBERewardInterface_getDB_noargs() + 0x48), (signed char*)(charRecord + 0xF53));
 }
 #endif
@@ -670,7 +670,7 @@ extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_00157740(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157390(self, *(int*)((char*)cBERewardInterface_getDB_noargs() + 0x4C), (signed char*)(charRecord + 0xF52));
 }
 #endif
@@ -683,8 +683,8 @@ extern "C" int func_00157390(void* self, int count, signed char* bits);
 
 extern "C" int func_001577A0(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
-    return func_00157390(self, 0x14, (signed char*)(charRecord + 0xF57));
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    return func_00157390(self, 20, (signed char*)(charRecord + 0xF57));
 }
 #endif
 
@@ -859,16 +859,16 @@ extern "C" int func_00157B70(void* self, int profileIndex, int characterId, int 
 {
     if (peak == 1)
     {
-        int bOff = characterId * 0xF88;
-        int aOff = profileIndex * 0x9B50;
+        int bOff = characterId * 3976;
+        int aOff = profileIndex * 39760;
         int off = bOff + aOff;
         char* charRecord = (char*)cBELibrary_profileLib + off;
         return (int)(*(ulong*)(charRecord + 0x278) >> 12) & 1;
     }
     if (peak == 2)
     {
-        int bOff = characterId * 0xF88;
-        int aOff = profileIndex * 0x9B50;
+        int bOff = characterId * 3976;
+        int aOff = profileIndex * 39760;
         int off = bOff + aOff;
         char* charRecord = (char*)cBELibrary_profileLib + off;
         return (int)(*(ulong*)(charRecord + 0x278) >> 13) & 1;
@@ -945,7 +945,7 @@ extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157D60(void* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157430(self, bit, charRecord + 0xF30);
 }
 #endif
@@ -958,7 +958,7 @@ extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157DA0(void* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157430(self, bit, charRecord + 0xF36);
 }
 #endif
@@ -971,7 +971,7 @@ extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157DE0(void* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157430(self, bit, charRecord + 0xF45);
 }
 #endif
@@ -984,7 +984,7 @@ extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157E20(void* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157430(self, bit, charRecord + 0xF53);
 }
 #endif
@@ -997,7 +997,7 @@ extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157E60(void* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157430(self, bit, charRecord + 0xF52);
 }
 #endif
@@ -1008,7 +1008,7 @@ INCLUDE_ASM("be/beintreward", func_00157EA0);
 // PORT: 64-bit ulong bit test (ld/dsrlv).
 extern "C" int func_00157EA0(void* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return (int)((*(ulong*)(charRecord + 0xF78) >> bit) & 1);
 }
 #endif
@@ -1021,7 +1021,7 @@ extern "C" int func_00157430(void* self, int bit, char* bits);
 
 extern "C" int func_00157EE0(void* self, int profileIndex, int characterId, int bit)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157430(self, bit-10, charRecord + 0xF57);
 }
 #endif
@@ -1078,8 +1078,8 @@ struct sRewardDef_157FD0
 
 extern "C" void func_00157FD0(void* self, int profileIndex, int characterId, int bit, int give)
 {
-    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     func_001573F0(self, bit, charRecord + 0xF30);
     if (give)
     {
@@ -1090,7 +1090,7 @@ extern "C" void func_00157FD0(void* self, int profileIndex, int characterId, int
     }
     if (func_001575C0(self, profileIndex, characterId) == func_001572B0(self))
     {
-        func_00158618(self, profileIndex, characterId, 0x14, 0);
+        func_00158618(self, profileIndex, characterId, 20, 0);
     }
     cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
@@ -1121,8 +1121,8 @@ struct sRewardDef_1580F8
 
 extern "C" void func_001580F8(void* self, int profileIndex, int characterId, int bit, int give)
 {
-    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     func_001573F0(self, bit, charRecord + 0xF36);
     if (give)
     {
@@ -1133,7 +1133,7 @@ extern "C" void func_001580F8(void* self, int profileIndex, int characterId, int
     }
     if (func_00157620(self, profileIndex, characterId) == func_001572D0(self))
     {
-        func_00158618(self, profileIndex, characterId, 0x11, 0);
+        func_00158618(self, profileIndex, characterId, 17, 0);
     }
     cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
@@ -1164,8 +1164,8 @@ struct sRewardDef_158220
 
 extern "C" void func_00158220(void* self, int profileIndex, int characterId, int bit, int give)
 {
-    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     func_001573F0(self, bit, charRecord + 0xF45);
     if (give)
     {
@@ -1176,7 +1176,7 @@ extern "C" void func_00158220(void* self, int profileIndex, int characterId, int
     }
     if (func_00157680(self, profileIndex, characterId) == func_001572F0(self))
     {
-        func_00158618(self, profileIndex, characterId, 0x16, 0);
+        func_00158618(self, profileIndex, characterId, 22, 0);
     }
     cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
@@ -1207,8 +1207,8 @@ struct sRewardDef_158348
 
 extern "C" void func_00158348(void* self, int profileIndex, int characterId, int bit, int give)
 {
-    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     func_001573F0(self, bit, charRecord + 0xF53);
     if (give)
     {
@@ -1219,7 +1219,7 @@ extern "C" void func_00158348(void* self, int profileIndex, int characterId, int
     }
     if (func_001576E0(self, profileIndex, characterId) == func_00157310(self))
     {
-        func_00158618(self, profileIndex, characterId, 0x13, 0);
+        func_00158618(self, profileIndex, characterId, 19, 0);
     }
     cBEEconInterface_getMoney(econ, profileIndex, characterId);
 }
@@ -1240,8 +1240,8 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount);
 
 extern "C" void func_00158470(void* self, int profile, int characterId, int idx, int award)
 {
-    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 0xf88;
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
+    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 3976;
     func_001573F0(self, idx, charRecord + 0xF52);
     if (award)
     {
@@ -1267,8 +1267,8 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount);
 // PORT: 64-bit ulong bit set (sd/ld).
 extern "C" void func_00158558(void* self, int profile, int characterId, int bit, int award)
 {
-    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 0xf88;
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
+    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 3976;
     *(ulong*)(charRecord + 0xF70) |= (ulong)1 << bit;
     if (award)
     {
@@ -1294,8 +1294,8 @@ extern "C" int func_00150B48(void* self, int a, int b, int amount);
 extern "C" void func_00158618(void* self, int profile, int characterId, int idx, int award)
 {
     idx -= 10;
-    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 0xf88;
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
+    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9b50 + characterId * 3976;
     func_001573F0(self, idx, charRecord + 0xF57);
     if (award)
     {
@@ -1315,7 +1315,7 @@ extern int cBELibrary_profileLib[];
 
 extern "C" int func_00158700(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return *(int*)(charRecord + 0xf80);
 }
 #endif
@@ -1328,7 +1328,7 @@ extern int cBELibrary_profileLib[];
 
 extern "C" long func_00158728(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return *(long*)(charRecord + 0xf70);
 }
 #endif
@@ -1341,7 +1341,7 @@ extern int cBELibrary_profileLib[];
 
 extern "C" long func_00158750(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return *(long*)(charRecord + 0xf78);
 }
 #endif
@@ -1351,7 +1351,7 @@ INCLUDE_ASM("be/beintreward", func_00158778);
 #ifdef SKIP_ASM
 extern "C" int func_00158778(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     return func_00157390(self, 0x40, (signed char*)(charRecord + 0xF70));
 }
 #endif
@@ -1371,7 +1371,7 @@ extern "C" int func_00157390(void* self, int count, signed char* bits);
  */
 extern "C" int cBERewardInterface_getNumSongsInPlayList(cBERewardInterface* self, int iProfileIndex, int iCharacterID)
 {
-    char* charProfile = (char*)cBELibrary_profileLib + iProfileIndex * 0x9b50 + iCharacterID * 0xf88;
+    char* charProfile = (char*)cBELibrary_profileLib + iProfileIndex * 0x9b50 + iCharacterID * 3976;
     return func_00157390(self, 0x40, (signed char*)(charProfile + 0xF78));
 }
 #endif
@@ -1383,7 +1383,7 @@ extern int cBELibrary_profileLib[];
 
 extern "C" void func_001587F8(void* self, int a1, int a2, int value)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 3976;
     *(int*)(p + 0xf80) = value;
 }
 #endif
@@ -1396,7 +1396,7 @@ extern int cBELibrary_profileLib[];
 
 extern "C" void func_00158820(void* self, int profileIndex, int characterId, long value)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     *(long*)(charRecord + 0xf70) = value;
 }
 #endif
@@ -1409,7 +1409,7 @@ extern int cBELibrary_profileLib[];
 
 extern "C" void func_00158848(void* self, int profileIndex, int characterId, long value)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     *(long*)(charRecord + 0xf78) = value;
 }
 #endif
@@ -1545,7 +1545,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* iface, i
  */
 extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
 {
-    int collected = cBEMissionInterface_getCurrentCollectForPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 0xA), iProfileIndex, iCharacterID, kind);
+    int collected = cBEMissionInterface_getCurrentCollectForPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 10), iProfileIndex, iCharacterID, kind);
     int* thresholds = D_0045AFE8 + kind * 4;
     for (int i = 0; i < 4; i++)
     {
@@ -1576,7 +1576,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* 
  */
 extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
 {
-    int completed = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 0xA), iProfileIndex, iCharacterID, kind);
+    int completed = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 10), iProfileIndex, iCharacterID, kind);
     int* thresholds = D_0045B018 + kind * 4;
     for (int i = 0; i < 4; i++)
     {
@@ -1605,7 +1605,7 @@ int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
  */
 extern "C" int cBERewardInterface_getEarningsMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int medal)
 {
-    unsigned int earned = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_Fv(cBE_getBE(), 0xB), iProfileIndex, iCharacterID);
+    unsigned int earned = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_Fv(cBE_getBE(), 11), iProfileIndex, iCharacterID);
     if (earned >= *(unsigned int*)((char*)(void*)D_0045B048 + medal * 4))
         return 1;
     return -1;
@@ -1980,7 +1980,7 @@ extern "C" void func_001591E8(void* self, int profile, int c, int mode, int even
 {
     sProfileChar_1591E8* pc = &D_004A6CA8_1591E8[profile][c];
     int bit = -1;
-    void* score = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    void* score = cBE_getInterface_Fv(cBE_getBE(), 11);
     sScoreStat_1591E8* stats = cBECharProfileDB_getScoreStats_1591E8(pc, event, mode);
     int tier = func_0015A3B8(self, mode, event);
     int group = func_0015A398(self, event);
@@ -1998,23 +1998,23 @@ extern "C" void func_001591E8(void* self, int profile, int c, int mode, int even
     case 1:
     case 2:
     case 3:
-        bit = group + 0x11;
+        bit = group + 17;
         break;
     case 4:
-        bit = group + 0x14;
+        bit = group + 20;
         break;
     case 5:
-        bit = group + 0x17;
+        bit = group + 23;
         break;
     case 6:
     case 7:
     case 8:
-        bit = group + 0x1A;
+        bit = group + 26;
         break;
     case 9:
     case 10:
     case 11:
-        bit = group + 0x1D;
+        bit = group + 29;
         break;
     case 12:
     case 13:
@@ -2144,7 +2144,7 @@ extern void* cBELibrary_userAwards[];
 
 extern "C" void func_00159818(void* self, int a, int b, int amount)
 {
-    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     *(int*)cBELibrary_userAwards += amount;
     if (gNextEarningsLimit != 0 && (unsigned int)(cBEEconInterface_getTotalMoneyEarned(econ, a, b) + amount) >= (unsigned int)gNextEarningsLimit)
     {
@@ -2197,7 +2197,7 @@ extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
  */
 extern "C" void cBERewardInterface_awardUserCollectible(cBERewardInterface* self, int rider, int k)
 {
-    int cur = cBEMissionInterface_getCurrentCollectForPeak(cBE_getInterface_Fv(cBE_getBE(), 0xA), rider, k);
+    int cur = cBEMissionInterface_getCurrentCollectForPeak(cBE_getInterface_Fv(cBE_getBE(), 10), rider, k);
     int* nextLevel = &gNextCollectiblesLimit[k];
     if (*nextLevel <= 0)
         return;
@@ -2250,7 +2250,7 @@ extern int D_0045B018_2d[][4] __asm__("D_0045B018");
  */
 extern "C" void cBERewardInterface_awardUserBigChallenge(void* self, int rider, int k)
 {
-    int cur = cBEMissionInterface_getNumberCompletedMissionsOnPeak(cBE_getInterface_Fv(cBE_getBE(), 0xA), k);
+    int cur = cBEMissionInterface_getNumberCompletedMissionsOnPeak(cBE_getInterface_Fv(cBE_getBE(), 10), k);
     int* p = &gNextBigChallengesLimit[k];
     if (*p <= 0)
         return;
@@ -2318,14 +2318,14 @@ extern sSlots2_00159CD0 D_004A1268[];
  */
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profile, int iCharacterID, int bit)
 {
-    char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + iCharacterID * 0xF88;
+    char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + iCharacterID * 3976;
     sReward_0015A628* rewardLog = (sReward_0015A628*)cBELibrary_userAwards;
     sSlots4_00159CD0 slots4 = D_0045AA28;
     sSlots2_00159CD0 slots2 = D_004A1268[0];
     int item = -1;
     int value = 0;
 
-    if (bit < 0x11 || bit > 0x13) {
+    if (bit < 17 || bit > 19) {
         if (cBERewardInterface_isAwardReceived(self, profile, iCharacterID, bit))
             return;
     }
@@ -2333,7 +2333,7 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profi
     switch (bit) {
     case 0:
         func_001E2578();
-        value = 0x1D;
+        value = 29;
         break;
     case 1:
         func_001E2518();
@@ -2341,15 +2341,15 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profi
         break;
     case 2:
         func_001E2428(0);
-        value = 0x12;
+        value = 18;
         break;
     case 3:
         func_001E2428(1);
-        value = 0x19;
+        value = 25;
         break;
     case 4:
         func_001E2428(2);
-        value = 0x1A;
+        value = 26;
         break;
     case 5:
     case 8:
@@ -2392,16 +2392,16 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int profi
         break;
     }
     case 7:
-        value = 0x1B;
+        value = 27;
         break;
     case 10:
-        value = 0x17;
+        value = 23;
         break;
     case 13:
         value = 0x1C;
         break;
     case 16:
-        value = 0x15;
+        value = 21;
         break;
     case 17:
         item = func_00156C70(self, profile, iCharacterID, 0);
@@ -2482,7 +2482,7 @@ extern "C" int func_0015A320(void* self, int bit, unsigned char* bits);
  */
 extern "C" int cBERewardInterface_isAwardReceived(void* self, int iProfileIndex, int iCharacterID, int bit)
 {
-    char* p = (char*)cBELibrary_profileLib + iProfileIndex * 0x9b50 + iCharacterID * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + iProfileIndex * 0x9b50 + iCharacterID * 3976;
     return func_0015A320(self, bit, (unsigned char*)(p + 0xF28));
 }
 #endif
@@ -2616,7 +2616,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  */
 extern "C" void cBEUserAwards_clear(void* self)
 {
-    MEM_fill(self, 0, 0x174);
+    MEM_fill(self, 0, 372);
     *(short*)((char*)self + 0x4) = -1;
 }
 #endif

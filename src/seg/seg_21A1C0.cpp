@@ -364,7 +364,7 @@ extern "C" void func_003198A0(int sema)
 {
     for (;;) {
         WaitSema(sema);
-        while (func_0042A538(str_dev9x, 0x4402, 0, 0, 0, 0) < 0)
+        while (func_0042A538(str_dev9x, 17410, 0, 0, 0, 0) < 0)
             ;
         int status = 0;
         while (func_00402398(&status) == 0 || status != 0)

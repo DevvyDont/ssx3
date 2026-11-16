@@ -352,8 +352,8 @@ extern "C" void* MEM_copy(void* dst, void* src, int n);
 
 extern "C" void func_0014ACB0(void* self, int profileIndex, int characterId, void* src)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
-    MEM_copy(charRecord + 0x290, src, 0x834);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    MEM_copy(charRecord + 0x290, src, 2100);
 }
 #endif
 
@@ -376,7 +376,7 @@ extern int cBELibrary_profileLib[];
 
 extern "C" void* func_0014AD28(void* self, int profileIndex, int characterId)
 {
-    return (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    return (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
 }
 #endif
 
@@ -395,9 +395,9 @@ INCLUDE_ASM("be/belibrary", func_0014ADA8);
 #ifdef SKIP_ASM
 extern "C" void* func_0014ADA8(void* self, int profileIndex, int characterId, int slot)
 {
-    int off = profileIndex * 0x9b50 + characterId * 0xf88;
+    int off = profileIndex * 39760 + characterId * 3976;
     char* charRecord = (char*)cBELibrary_profileLib + off;
-    return charRecord + (slot * 4 + 0x290);
+    return charRecord + (slot * 4 + 656);
 }
 #endif
 //100%
@@ -470,7 +470,7 @@ struct sBEFlagEntry {
 
 extern "C" void func_0014AEA8(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     int count = *(int*)(charRecord + 0x28C);
     sBEFlagEntry* flagEntry = (sBEFlagEntry*)(charRecord + 0x290);
     int i;
@@ -495,7 +495,7 @@ extern "C" void func_0014AF10(void)
     int characterId;
     for (profileIndex = 0; profileIndex < 3; profileIndex++) {
         for (characterId = 0; characterId < 10; characterId++) {
-            char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+            char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
             int count = *(int*)(charRecord + 0x28C);
             sBEFlagEntry* flagEntry = (sBEFlagEntry*)(charRecord + 0x290);
             int i;
@@ -545,9 +545,9 @@ static inline sFlagEntry_14AFB0* getEntry_14AFB0(sProfile_14AFB0* p, int idx)
 extern "C" int func_0014AFB0(void* self, int profileIndex, int characterId, int idx, int on)
 {
     sProfile_14AFB0* charRecord = (sProfile_14AFB0*)((char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88);
-    sFlagEntry_14AFB0 save[0x20D];
+    sFlagEntry_14AFB0 save[525];
 
-    MEM_copy(save, charRecord->entries, 0x834);
+    MEM_copy(save, charRecord->entries, 2100);
     if (func_00151C90(charRecord, idx, on)) {
         sFlagEntry_14AFB0* flagEntry = getEntry_14AFB0(charRecord, idx);
         if (on)
@@ -562,7 +562,7 @@ extern "C" int func_0014AFB0(void* self, int profileIndex, int characterId, int 
             }
         }
     }
-    MEM_copy(charRecord->entries, save, 0x834);
+    MEM_copy(charRecord->entries, save, 2100);
     return 0;
 }
 #endif
@@ -586,7 +586,7 @@ extern "C" void func_00152368(void*, int, int);
 
 extern "C" void func_0014B170(void* self, int profileIndex, int characterId, int a3, int a4)
 {
-    func_00152368((char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88, a3, a4);
+    func_00152368((char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976, a3, a4);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -599,7 +599,7 @@ extern "C" void func_0014B1B0(void* self, int rider, int b, int c)
 {
     int ch = 0;
     int profile = func_0014AC70(self, rider, &ch);
-    func_00152368((char*)cBELibrary_profileLib + profile * 0x9b50 + ch * 0xf88, b, c);
+    func_00152368((char*)cBELibrary_profileLib + profile * 0x9b50 + ch * 3976, b, c);
 }
 #endif
 //100%
@@ -732,7 +732,7 @@ struct sBEEntry38B {
 
 extern "C" int func_0014B478(void* self, int a1, int a2)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 3976;
     int sum = 0;
     int count = func_0014D988(D_004A6750, a2);
     sBEEntry38B* e = (sBEEntry38B*)func_0014D998((sBELibTables*)D_004A6750, a2);
@@ -794,8 +794,8 @@ static inline int scale10_14B560(int v)
 
 extern "C" void func_0014B560(void* self, int a1, int a2, int key, int flag)
 {
-    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
+    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 3976;
     func_00151C48(p, key, 1);
     sBEEntry38_14B560* e = (sBEEntry38_14B560*)func_0014D998((sBELibTables*)func_0014BDB8_0(), a2);
     int n = func_0014D988(func_0014BDB8_0(), a2);
@@ -1447,7 +1447,7 @@ extern "C" void* func_0014C6A0(void* self)
             int characterId;
             for (profileIndex = 0; profileIndex < 3; profileIndex++) {
                 for (characterId = 0; characterId < 10; characterId++) {
-                    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 0xf88;
+                    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
                     int count = *(int*)(charRecord + 0x28C);
                     sBEFlagEntry* flagEntry = (sBEFlagEntry*)(charRecord + 0x290);
                     int i;

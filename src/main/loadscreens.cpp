@@ -386,12 +386,12 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     if (self->sub.e[self->f8C20].f84 == 0) {
         D_004A11B8 = 0;
     }
-    if (kind == 0x16) {
+    if (kind == 22) {
         cBENewRaceInterface_setDebugLocationFile(iface0, lsEntryName_B1B0(&self->sub, self->f8C20));
     }
     self->f8C1C = 4;
     cBENetworkInterface_networkOpt.fLatency = 0.016666668f;
-    cBENetworkInterface_networkOpt.iPort = 0xE4A;
+    cBENetworkInterface_networkOpt.iPort = 3658;
     cBENetworkInterface_networkOpt.bIsHost = 0;
     sVE_B1B0* vt7 = *(sVE_B1B0**)((char*)iface7 + 0xC);
     vt7[1].fn((char*)iface7 + vt7[1].delta);
@@ -561,7 +561,7 @@ static inline int bgCount_B4E0(sBgMan_17ACC8* bg)
  */
 extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
 {
-    if (cInput_getState(D_004A28A8_b4->input, 0x65)) {
+    if (cInput_getState(D_004A28A8_b4->input, 101)) {
         func_0017D0A8(self);
         if (self->f8C1C == 14) {
             D_004A28A8_b4->f60 = 1;
@@ -570,7 +570,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         }
     }
-    int dir = (int)cInput_getValue(D_004A28A8_b4->input, 0x3D);
+    int dir = (int)cInput_getValue(D_004A28A8_b4->input, 61);
     if (dir == 0 && self->f8C30 == -1) {
         self->f8C1C = (self->f8C1C + 15 - 1) % 15;
         if (self->f8C1C == 13) {
@@ -648,7 +648,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             if (self->sub.e[self->f8C20].f84 == 0) {
                 D_004A11B8 = 0;
             }
-            if (kind == 0x16) {
+            if (kind == 22) {
                 cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&self->sub, self->f8C20));
             }
         }
@@ -703,7 +703,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             if (self->sub.e[self->f8C20].f84 == 0) {
                 D_004A11B8 = 0;
             }
-            if (kind == 0x16) {
+            if (kind == 22) {
                 cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&self->sub, self->f8C20));
             }
         }
@@ -804,7 +804,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         if (sub->e[self->f8C20].f84 == 0) {
             D_004A11B8 = 0;
         }
-        if (kind == 0x16) {
+        if (kind == 22) {
             cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(sub, self->f8C20));
         }
         update_B4E0(race);

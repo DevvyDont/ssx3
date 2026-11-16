@@ -47,11 +47,11 @@ struct sCodexAbout_HUFF {
  */
 extern "C" void* HUFF_about(void)
 {
-    sCodexAbout_HUFF* about = (sCodexAbout_HUFF*)operator new(0x84, str_CODEXABOUT, 0x20000000, 0);
+    sCodexAbout_HUFF* about = (sCodexAbout_HUFF*)operator new(132, str_CODEXABOUT, 0x20000000, 0);
     if (about != 0) {
-        func_00416210(about, 0, 0x84);
+        func_00416210(about, 0, 132);
         about->signature = 'HUFF';
-        about->size = 0x84;
+        about->size = 132;
         about->version = 100;
         about->b0 = 1;
         about->b1 = 1;
@@ -91,12 +91,12 @@ extern "C" unsigned func_002C8468(unsigned char *p, int n);
 
 extern "C" int func_002C84A0(unsigned char *compressed) {
     int confidence = 0;
-    if (func_002C8468(compressed, 2) == 0x30FB
-        || func_002C8468(compressed, 2) == 0x31FB
-        || func_002C8468(compressed, 2) == 0x32FB
-        || func_002C8468(compressed, 2) == 0x33FB
-        || func_002C8468(compressed, 2) == 0x34FB
-        || func_002C8468(compressed, 2) == 0x35FB) {
+    if (func_002C8468(compressed, 2) == 12539
+        || func_002C8468(compressed, 2) == 12795
+        || func_002C8468(compressed, 2) == 13051
+        || func_002C8468(compressed, 2) == 13307
+        || func_002C8468(compressed, 2) == 13563
+        || func_002C8468(compressed, 2) == 13819) {
         confidence = 100;
     }
     return confidence;
@@ -746,24 +746,24 @@ extern "C" int HUFF_packfile(HuffState_9F60* EC, HuffBuf_9F60* in, HuffBuf_9F60*
     EC->bitcount = 0;
     EC->bitbuf = 0;
     EC->nbytes = 0;
-    HUFF_analysis(EC, 0x39, 0xF);
+    HUFF_analysis(EC, 57, 0xF);
     if (len == in->len) {
         code = 0;
-        if (mode == 0) code = 0x30FB;
-        else if (mode == 1) code = 0x32FB;
-        else if (mode == 2) code = 0x34FB;
+        if (mode == 0) code = 12539;
+        else if (mode == 1) code = 13051;
+        else if (mode == 2) code = 13563;
         HUFF_writebits_9F60(EC, out, code, 16);
         HUFF_writebits_9F60(EC, out, in->len, 24);
     } else {
         code = 0;
-        if (mode == 0) code = 0x31FB;
-        else if (mode == 1) code = 0x33FB;
-        else if (mode == 2) code = 0x35FB;
+        if (mode == 0) code = 12795;
+        else if (mode == 1) code = 13307;
+        else if (mode == 2) code = 13819;
         HUFF_writebits_9F60(EC, out, code, 16);
         HUFF_writebits_9F60(EC, out, len, 24);
         HUFF_writebits_9F60(EC, out, in->len, 24);
     }
-    HUFF_pack(EC, out, 0x39);
+    HUFF_pack(EC, out, 57);
     return out->len;
 }
 #endif
@@ -805,7 +805,7 @@ extern "C" int HUFF_encode(void* src, int len, void* dst, int* opts)
     int result = 0;
     void* encodeCtx;
     if (opts) mode = *opts;
-    encodeCtx = cMemMan_alloc(0x31EC, str_HuffEncodeContext, 0x20000000, 0);
+    encodeCtx = cMemMan_alloc(12780, str_HuffEncodeContext, 0x20000000, 0);
     if (encodeCtx) {
         HuffBuf_A100 in;
         HuffBuf_A100 out;

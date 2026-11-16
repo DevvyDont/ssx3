@@ -163,8 +163,8 @@ extern "C" void cUIVector_setChannelData(cUIVector_36D0* self, unsigned short ke
     if (self->verts == 0) {
         return;
     }
-    if (key >= 0x15) {
-        key -= 0x15;
+    if (key >= 21) {
+        key -= 21;
         unsigned short idx = key / 9;
         if (idx >= self->cnt.count) {
             return;
@@ -248,8 +248,8 @@ extern "C" void cUIVector_setChannelDataKCP(cUIVector_3808* self, unsigned int n
     for (unsigned int i = 0; i < n; i++, keys++) {
         float data = (float)keys->value;
         int key = keys->key;
-        if (key >= 0x15) {
-            key -= 0x15;
+        if (key >= 21) {
+            key -= 21;
             unsigned short idx = key / 9;
             if (idx >= self->cnt.count) {
                 continue;
@@ -1109,7 +1109,7 @@ extern "C" void func_003A4B70(cUIThing* uiThing, int layer) {
 INCLUDE_ASM("ui/uivector", func_003A4B90);
 #ifdef SKIP_ASM
 extern "C" void func_003A4B90(cUIThing* uiThing, int pivot) {
-    (uiThing->mAttr) = (int) (((uiThing->mAttr) & 0xFFF81FFF) | ((pivot & 0x3F) << 0xD));
+    (uiThing->mAttr) = (int) (((uiThing->mAttr) & 0xFFF81FFF) | ((pivot & 0x3F) << 13));
 }
 #endif
 //100%
@@ -1494,7 +1494,7 @@ INCLUDE_ASM("ui/uivector", cUIIcon_getType__FPv);
  */
 int cUIIcon_getType(void* self)
 {
-    return 0x11;
+    return 17;
 }
 #endif
 
@@ -1703,7 +1703,7 @@ INCLUDE_ASM("ui/uivector", func_003A5100);
 extern "C" void cList_first__FP5cList(int);
 
 extern "C" void func_003A5100(int group) {
-    cList_first__FP5cList(group + 0x74);
+    cList_first__FP5cList(group + 116);
 }
 #endif
 //100%
@@ -1712,7 +1712,7 @@ INCLUDE_ASM("ui/uivector", func_003A5120);
 extern "C" void func_00397858(int);
 
 extern "C" void func_003A5120(int group) {
-    func_00397858(group + 0x74);
+    func_00397858(group + 116);
 }
 #endif
 //100%
@@ -1721,7 +1721,7 @@ INCLUDE_ASM("ui/uivector", func_003A5140);
 extern "C" void cList_getByIndex(int);
 
 extern "C" void func_003A5140(int group) {
-    cList_getByIndex(group + 0x74);
+    cList_getByIndex(group + 116);
 }
 #endif
 //100%
@@ -1730,7 +1730,7 @@ INCLUDE_ASM("ui/uivector", func_003A5160);
 extern "C" void cList_addToFront__FP5cListP9cListNode(int);
 
 extern "C" void func_003A5160(int group) {
-    cList_addToFront__FP5cListP9cListNode(group + 0x74);
+    cList_addToFront__FP5cListP9cListNode(group + 116);
 }
 #endif
 //100%
@@ -1739,7 +1739,7 @@ INCLUDE_ASM("ui/uivector", func_003A5180);
 extern "C" void cList_addToEnd__FP5cListP9cListNode(int);
 
 extern "C" void func_003A5180(int group) {
-    cList_addToEnd__FP5cListP9cListNode(group + 0x74);
+    cList_addToEnd__FP5cListP9cListNode(group + 116);
 }
 #endif
 
@@ -1879,7 +1879,7 @@ INCLUDE_ASM("ui/uivector", cUIMenu_getType__FPv);
  */
 int cUIMenu_getType(void* self)
 {
-    return 0x13;
+    return 19;
 }
 #endif
 
@@ -2073,7 +2073,7 @@ INCLUDE_ASM("ui/uivector", cUIPair_getType__FPv);
  */
 int cUIPair_getType(void* self)
 {
-    return 0x15;
+    return 21;
 }
 #endif
 
@@ -2203,7 +2203,7 @@ INCLUDE_ASM("ui/uivector", func_003A56A0__FPv);
 #ifdef SKIP_ASM
 int func_003A56A0(void* self)
 {
-    return 0x12;
+    return 18;
 }
 #endif
 
@@ -2736,7 +2736,7 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetMenu__FPv);
  */
 int cUIState_onWidgetMenu(void* self)
 {
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -2750,7 +2750,7 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetPair__FPv);
  */
 int cUIState_onWidgetPair(void* self)
 {
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -2764,7 +2764,7 @@ INCLUDE_ASM("ui/uivector", cUIState_onWidgetListBox__FPv);
  */
 int cUIState_onWidgetListBox(void* self)
 {
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -2908,7 +2908,7 @@ INCLUDE_ASM("ui/uivector", func_003A5CF0);
 extern "C" void cList_addToEnd__FP5cListP9cListNode(int);
 
 extern "C" void func_003A5CF0(int screen) {
-    cList_addToEnd__FP5cListP9cListNode(screen + 0xB4);
+    cList_addToEnd__FP5cListP9cListNode(screen + 180);
 }
 #endif
 //100%
@@ -2998,7 +2998,7 @@ INCLUDE_ASM("ui/uivector", func_003A5DF0__FPv);
 #ifdef SKIP_ASM
 int func_003A5DF0(void* self)
 {
-    return 0x17;
+    return 23;
 }
 #endif
 
@@ -3202,7 +3202,7 @@ INCLUDE_ASM("ui/uivector", func_003A6000__FPv);
 #ifdef SKIP_ASM
 int func_003A6000(void* self)
 {
-    return 0x21;
+    return 33;
 }
 #endif
 
@@ -3256,7 +3256,7 @@ extern "C" char* strcpy(char*, const char*);
 
 extern "C" void func_003A6038(cUIScrollBar* self, char* str)
 {
-    if (strlen(str) >= 0x19U) {
+    if (strlen(str) >= 25U) {
         *(((char*)self) + 0x8C) = 0;
         return;
     }
@@ -3271,7 +3271,7 @@ extern "C" char* strcpy(char*, const char*);
 
 extern "C" void func_003A6088(cUIScrollBar* self, char* str)
 {
-    if (strlen(str) >= 0x19U) {
+    if (strlen(str) >= 25U) {
         ((char*)self)[0xA5] = 0;
         return;
     }
@@ -3334,7 +3334,7 @@ INCLUDE_ASM("ui/uivector", cUIProgress_getType__FPv);
  */
 int cUIProgress_getType(void* self)
 {
-    return 0x19;
+    return 25;
 }
 #endif
 
@@ -3411,7 +3411,7 @@ INCLUDE_ASM("ui/uivector", func_003A6220__FPv);
 #ifdef SKIP_ASM
 int func_003A6220(void* self)
 {
-    return 0x16;
+    return 22;
 }
 #endif
 
@@ -3580,7 +3580,7 @@ INCLUDE_ASM("ui/uivector", func_003A63E0);
 extern "C" void cList_first__FP5cList(int);
 
 extern "C" void func_003A63E0(int textScroll) {
-    cList_first__FP5cList(textScroll + 0x8C);
+    cList_first__FP5cList(textScroll + 140);
 }
 #endif
 //100%
@@ -3589,7 +3589,7 @@ INCLUDE_ASM("ui/uivector", func_003A6400);
 extern "C" void func_00397858(int);
 
 extern "C" void func_003A6400(int textScroll) {
-    func_00397858(textScroll + 0x8C);
+    func_00397858(textScroll + 140);
 }
 #endif
 //100%
@@ -3598,7 +3598,7 @@ INCLUDE_ASM("ui/uivector", func_003A6420);
 extern "C" void cList_getByIndex(int);
 
 extern "C" void func_003A6420(int textScroll) {
-    cList_getByIndex(textScroll + 0x8C);
+    cList_getByIndex(textScroll + 140);
 }
 #endif
 //100%
@@ -3607,7 +3607,7 @@ INCLUDE_ASM("ui/uivector", func_003A6440);
 extern "C" void cList_addToFront__FP5cListP9cListNode(int);
 
 extern "C" void func_003A6440(int textScroll) {
-    cList_addToFront__FP5cListP9cListNode(textScroll + 0x8C);
+    cList_addToFront__FP5cListP9cListNode(textScroll + 140);
 }
 #endif
 //100%
@@ -3616,7 +3616,7 @@ INCLUDE_ASM("ui/uivector", func_003A6460);
 extern "C" void cList_addToEnd__FP5cListP9cListNode(int);
 
 extern "C" void func_003A6460(int textScroll) {
-    cList_addToEnd__FP5cListP9cListNode(textScroll + 0x8C);
+    cList_addToEnd__FP5cListP9cListNode(textScroll + 140);
 }
 #endif
 //100%
@@ -3771,7 +3771,7 @@ INCLUDE_ASM("ui/uivector", func_003A65D8);
 #ifdef SKIP_ASM
 extern "C" void* func_003A65D8(void* self)
 {
-    *(short*)self = 0x218;
+    *(short*)self = 536;
     return self;
 }
 #endif

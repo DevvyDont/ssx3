@@ -514,7 +514,7 @@ extern "C" void func_002461E0(void* self, void* item, int msg)
         if (msg == 5) {
             int hash = *(int*)((char*)item + 0x38);
             if (hash == GetHashValue32(str_yes_c)) {
-                void* state = func_00186A08(cMemMan_alloc(0x248, str_cFEStateMemCard, 0, 0), *(void**)((char*)self + 0x10));
+                void* state = func_00186A08(cMemMan_alloc(584, str_cFEStateMemCard, 0, 0), *(void**)((char*)self + 0x10));
                 cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, state);
             }
         }
@@ -527,7 +527,7 @@ INCLUDE_ASM("fe/festateloadhint", func_00246268);
 #ifdef SKIP_ASM
 extern "C" int func_00246268(void* self, int menu, int event)
 {
-    return event == 6 ? 0x101 : 0;
+    return event == 6 ? 257 : 0;
 }
 #endif
 
@@ -989,7 +989,7 @@ extern "C" void func_00246CF8(void* self, char player)
                 sVEntry_6CF8<void(void*, int)>* vt2 = *(sVEntry_6CF8<void(void*, int)>**)(label + 8);
                 vt2[9].fn(label + vt2[9].delta, 1);
                 cUIText_setUnicodeString(label, (char*)text);
-                *(int*)(bar + 0x80) = 0x37;
+                *(int*)(bar + 0x80) = 55;
                 cUIProgress_setValue(bar, v);
             }
         }

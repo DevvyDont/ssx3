@@ -849,10 +849,10 @@ extern "C" void func_002CB180()
     ((func_002CB180_cCtx*)ctx)->top++;
     ((func_002CB180_cCtx*)GrMan)->v21();
     ((func_002CB180_cCtx*)GrMan)->v31();
-    func_002CB180_setF8_5(((func_002CB180_cCtx*)GrMan)->top, 0x11);
+    func_002CB180_setF8_5(((func_002CB180_cCtx*)GrMan)->top, 17);
     func_002CB180_setF4_23(((func_002CB180_cCtx*)GrMan)->top, 2);
     func_002CB180_setF4_20(((func_002CB180_cCtx*)GrMan)->top, 3);
-    func_002CB180_setF4_12(((func_002CB180_cCtx*)GrMan)->top, 0x14);
+    func_002CB180_setF4_12(((func_002CB180_cCtx*)GrMan)->top, 20);
     func_002CB180_setF4_2(((func_002CB180_cCtx*)GrMan)->top, 5);
     ((func_002CB180_cCtx*)GrMan)->v26(0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
     ((func_002CB180_cCtx*)GrMan)->v34(t4mat_Identity);
@@ -904,7 +904,7 @@ extern "C" void func_002CB2F8()
 {
     ((func_002CB2F8_cObj*)GrMan)->v32();
     ((func_002CB2F8_cObj*)GrMan)->v22();
-    *(int*)&GrMan->m_pCurrentDrawState = (int)GrMan->m_pCurrentDrawState - 0x14;
+    *(int*)&GrMan->m_pCurrentDrawState = (int)GrMan->m_pCurrentDrawState - 20;
 }
 #endif
 
@@ -1804,7 +1804,7 @@ extern "C" void func_002CC0C0(sMenu2CC0C0* self)
     if (!PadValid2CC0C0(self->pad)) {
         return;
     }
-    int input = (int)cInput_getValue_f(self->pad, 0x3D);
+    int input = (int)cInput_getValue_f(self->pad, 61);
     int* key = &self->key;
     int* chr = &self->chr;
     *key = -1;
@@ -1815,14 +1815,14 @@ extern "C" void func_002CC0C0(sMenu2CC0C0* self)
             self->chr = input;
         }
         switch (self->key) {
-        case 0x26: self->input = 0; break;
-        case 0x28: self->input = 1; break;
-        case 0x25: self->input = 2; break;
-        case 0x27: self->input = 3; break;
-        case 0x2D: self->input = 9; break;
-        case 0x2E: self->input = 10; break;
-        case 0xD: self->input = 6; break;
-        case 0x1B: self->input = 7; break;
+        case 38: self->input = 0; break;
+        case 40: self->input = 1; break;
+        case 37: self->input = 2; break;
+        case 39: self->input = 3; break;
+        case 45: self->input = 9; break;
+        case 46: self->input = 10; break;
+        case 13: self->input = 6; break;
+        case 27: self->input = 7; break;
         }
     }
     char* item = self->items[self->depth - 1];
@@ -1901,7 +1901,7 @@ INCLUDE_ASM("util/menu", func_002CC2C0__FPv);
 #ifdef SKIP_ASM
 void* func_002CC2C0(void* self)
 {
-    return cInput_getValue(*(int*)((char*)self + 0x5c), 0x41);
+    return cInput_getValue(*(int*)((char*)self + 0x5c), 65);
 }
 #endif
 
@@ -1915,7 +1915,7 @@ int func_002CC2E0_impl(void* self) __asm__("func_002CC2E0");
 
 int func_002CC2E0_impl(void* self)
 {
-    return cInput_getValue_f(*(int*)((char*)self + 0x5c), 0x42) != 0.0f;
+    return cInput_getValue_f(*(int*)((char*)self + 0x5c), 66) != 0.0f;
 }
 #endif
 
@@ -1929,7 +1929,7 @@ int func_002CC318_impl(void* self) __asm__("func_002CC318");
 
 int func_002CC318_impl(void* self)
 {
-    return cInput_getValue_f(*(int*)((char*)self + 0x5c), 0x43) != 0.0f;
+    return cInput_getValue_f(*(int*)((char*)self + 0x5c), 67) != 0.0f;
 }
 #endif
 
@@ -3038,7 +3038,7 @@ extern "C" int func_002CD5A0(void* self)
     if (dir != 0) {
         int n = *(int*)(item + 0x20);
         step *= 0.1f;
-        step *= (float)(n * n / 0x120);
+        step *= (float)(n * n / 288);
         float div = 1.0f;
         if (func_002CA488(self) != 0 && func_002CA4A8(self) != 0) {
             div = 50.0f;
@@ -3294,7 +3294,7 @@ extern "C" int cIntMenuItem_input(void* self)
     if (dir != 0) {
         int n = *(int*)(menuItem + 0x24);
         side *= 0.1f;
-        side *= (float)(n * n / 0x120);
+        side *= (float)(n * n / 288);
         float div = 1.0f;
         if (func_002CA488(self) != 0 && func_002CA4A8(self) != 0) {
             div = 50.0f;
@@ -4232,7 +4232,7 @@ extern "C" int cColorMenuItem_input(void* self)
     }
     if (dir != 0) {
         int n = *(int*)(menuItem + 0x1C);
-        int accel = (n * n / 0x120) >? 1;
+        int accel = (n * n / 288) >? 1;
         float* chanPtr = (float*)(*(char**)(menuItem + 0x14) + (*(int*)(menuItem + 0x18) << 2));
         float step = 0.0003906250058207661f;
         step = (float)accel * step;
@@ -5786,7 +5786,7 @@ extern "C" sMenuRect_2D0D48* func_002D0D48(sMenuRect_2D0D48* ret, char* item)
     if (item == cMenu_getFocusItem((cMenu*)(*(void**)item))) {
         focused = *(int*)(item + 0x40) != 0;
     }
-    int minHeight = focused ? 0x50 : 0x14;
+    int minHeight = focused ? 80 : 20;
     char* font = font_2D0D48(item);
     float lh = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
     float w = cFont_textExtent(font, *(char**)(item + 0x14), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
@@ -6174,7 +6174,7 @@ extern "C" void* func_002D1740(void* self)
     cMenu_cMenu(self);
     *(void***)(s + 0x12C) = D_004867B0;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)nullItem, 0);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)spaceItem, (void*)0xA);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)spaceItem, (void*)10);
     func_002CCDF0((s2CCDF0Item*)item3, 0);
     cMenu_addItem((cMenuList*)self, (void**)nullItem, -1);
     cMenu_addItem((cMenuList*)self, (void**)spaceItem, -1);

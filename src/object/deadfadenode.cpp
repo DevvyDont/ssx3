@@ -192,7 +192,7 @@ typedef void (*DfSetFn_0750)(void*, int);
 extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* self, int bucket, void* obj, sDfDesc_0750* desc, sDfOther_0750* other)
 {
     sDfMatElem_0750** pm = &self->mats;
-    func_0034FB00(self, bucket, 0x16, obj);
+    func_0034FB00(self, bucket, 22, obj);
     self->vt = cDeadFadeNode_vtbl;
     self->block.w[0] = 0xFFFFFFFF;
     self->block = *(sDfBlock_0750*)desc;
@@ -527,7 +527,7 @@ extern char D_00491680[];
 
 extern "C" void* func_00350F60(void* self, void* a1)
 {
-    func_0034FB00(self, 1, 0x13, a1);
+    func_0034FB00(self, 1, 19, a1);
     *(void**)((char*)self + 0xC) = D_00491680;
     unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
     *f &= 0xFFFFFF9F;

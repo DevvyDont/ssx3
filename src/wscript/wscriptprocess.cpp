@@ -811,7 +811,7 @@ extern "C" void func_00308038(void* self, func_00308038_cStream* stream)
     }
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        func_00308760(*(char**)((char*)self + 0x14) + i * 0x44, (func_00308760_cObj*)stream);
+        func_00308760(*(char**)((char*)self + 0x14) + i * 68, (func_00308760_cObj*)stream);
     }
 }
 #endif
@@ -851,7 +851,7 @@ extern "C" void func_00308118(void* self, func_00308118_cStream* stream)
     }
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        func_00308798(*(char**)((char*)self + 0x14) + i * 0x44, (func_00308798_cObj*)stream);
+        func_00308798(*(char**)((char*)self + 0x14) + i * 68, (func_00308798_cObj*)stream);
     }
 }
 #endif
@@ -1339,7 +1339,7 @@ extern "C" void* cWScriptMan_cWScriptMan(void* self)
     }
     cWScriptMan_cWScriptMan_current = self;
     *(char**)((char*)self + 0x28C) = (char*)cWorld_m_pTheWorld;
-    MEM_fill((char*)self + 0x3CC, 0, 0xC8);
+    MEM_fill((char*)self + 0x3CC, 0, 200);
     cWScriptMan_init(self);
     return self;
 }
@@ -1401,29 +1401,29 @@ extern "C" void cWScriptMan_rebuildGlobalTables(void* self);
  */
 extern "C" void cWScriptMan_init(void* self)
 {
-    WSP308988_I(0x290) = 0;
+    WSP308988_I(656) = 0;
     WSP308988_I(0x0) = 0;
-    WSP308988_I(0x294) = 0;
-    WSP308988_I(0x298) = 0;
-    WSP308988_I(0x2A4) = 0;
-    WSP308988_I(0x2A8) = 0;
-    WSP308988_I(0x29C) = 0;
-    WSP308988_I(0x2AC) = 0;
+    WSP308988_I(660) = 0;
+    WSP308988_I(664) = 0;
+    WSP308988_I(676) = 0;
+    WSP308988_I(680) = 0;
+    WSP308988_I(668) = 0;
+    WSP308988_I(684) = 0;
     WSP308988_I(0x4) = 0;
     WSP308988_I(0x8) = 0;
     WSP308988_I(0x10) = 0;
-    WSP308988_I(0x14) = 0;
+    WSP308988_I(20) = 0;
     WSP308988_I(0x18) = 0;
     WSP308988_I(0x1C) = 0;
     WSP308988_I(0x20) = 0;
-    WSP308988_I(0x28) = 0;
+    WSP308988_I(40) = 0;
     WSP308988_I(0x30) = 0;
-    WSP308988_I(0x34) = 0;
-    WSP308988_U(0x2A0) = 0xFFFFFFFF;
-    WSP308988_U(0x2B0) = 0xFFFFFFFF;
+    WSP308988_I(52) = 0;
+    WSP308988_U(672) = 0xFFFFFFFF;
+    WSP308988_U(688) = 0xFFFFFFFF;
     WSP308988_I(0xC) = -1;
-    WSP308988_I(0x24) = -1;
-    WSP308988_U(0x2C) = 0xFFFFFFFF;
+    WSP308988_I(36) = -1;
+    WSP308988_U(44) = 0xFFFFFFFF;
     MEM_fill((char*)self + 0x38, 0, 8);
     tMissionMenuQueue_init((char*)self + 0x1C4);
     WSP308988_I(0x40) = 0;
@@ -1848,7 +1848,7 @@ extern "C" void cWScriptMan_processLocalMissionCmd(void* vself)
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 3, 0);
         break;
     case 3:
-        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 0x12, 0);
+        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 18, 0);
         cWScriptMan_updateWorld(self);
         cSSXAudio_BigChallengeFailed(func_0028B180(), 1);
         break;
@@ -1863,7 +1863,7 @@ extern "C" void cWScriptMan_processLocalMissionCmd(void* vself)
         cWScriptMan_updateWorld(self);
         break;
     case 6:
-        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 0x12, 0);
+        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 18, 0);
         cWScriptMan_updateWorld(self);
         break;
     }

@@ -113,16 +113,16 @@ extern "C" void cScriptCameraController_addCamera(char* self, char* cam)
     switch (func_002743C8(*(void**)(*(char**)(cam + 0x14) + 8)))
     {
     case 0:
-        ctl = cScriptManualAlgorithm_cScriptManualAlgorithm(cMemMan_alloc(0xB0, str_Manual_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptManualAlgorithm_cScriptManualAlgorithm(cMemMan_alloc(176, str_Manual_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 1:
-        ctl = cScriptPointAlgorithm_cScriptPointAlgorithm(cMemMan_alloc(0xB0, str_Target_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptPointAlgorithm_cScriptPointAlgorithm(cMemMan_alloc(176, str_Target_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 2:
-        ctl = cScriptTargetAlgorithm_cScriptTargetAlgorithm(cMemMan_alloc(0xA0, str_Subject_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptTargetAlgorithm_cScriptTargetAlgorithm(cMemMan_alloc(160, str_Subject_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 3:
-        ctl = cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(cMemMan_alloc(0xA0, str_Algorithmic_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(cMemMan_alloc(160, str_Algorithmic_Script_Camera_Algo, 0x20000000, 0));
         break;
     default:
         return;
@@ -276,7 +276,7 @@ extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* object)
     sCamCtlK9418* self = (sCamCtlK9418*)object;
     self->vtbl = D_0045BDE0;
     float fov = cCameraAlgorithm_getDefaultView(self);
-    self->type = 0x55;
+    self->type = 85;
     self->vtbl = D_0045C8B8;
     self->fov = fov;
     self->nearZ = 10.0f;
@@ -341,7 +341,7 @@ extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(void* self)
     *(void***)((char*)self + 0x10) = D_0045C850;
     cCameraJitterer_cCameraJitterer((char*)self + 0x74);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
-    *(int*)((char*)self + 0xC) = 0x56;
+    *(int*)((char*)self + 0xC) = 86;
     *(int*)((char*)self + 0x44) = 0;
     *(int*)((char*)self + 0x48) = 0;
     *(int*)((char*)self + 0x40) = 0;
@@ -713,7 +713,7 @@ extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(void* self)
     *(void***)((char*)self + 0x10) = D_0045C7E8;
     cCameraJitterer_cCameraJitterer((char*)self + 0x74);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
-    *(int*)((char*)self + 0xC) = 0x57;
+    *(int*)((char*)self + 0xC) = 87;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x44) = 0;
     *(int*)((char*)self + 0x48) = 0;
@@ -1049,7 +1049,7 @@ extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(void* self)
     *(void***)((char*)self + 0x10) = D_0045C780;
     cCameraJitterer_cCameraJitterer((char*)self + 0x70);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
-    *(int*)((char*)self + 0xC) = 0x58;
+    *(int*)((char*)self + 0xC) = 88;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x44) = 0;
     *(int*)((char*)self + 0x48) = 0;
@@ -1450,7 +1450,7 @@ extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(void* self)
     *(void***)((char*)self + 0x10) = D_0045C718;
     cCameraJitterer_cCameraJitterer((char*)self + 0x70);
     *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
-    *(int*)((char*)self + 0xC) = 0x59;
+    *(int*)((char*)self + 0xC) = 89;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x44) = 0;
     *(int*)((char*)self + 0x48) = 0;

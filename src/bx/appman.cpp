@@ -122,7 +122,7 @@ extern "C" int cAppMan_run(char* self, char* exec, int ac, int av)
     callv_6D60(next, 0, 5);
     *(int*)(self + 0x58) = 0;
     cAppMan_mainLoop(self);
-    callv_6D60(self, 0x5C, 4);
+    callv_6D60(self, 92, 4);
     callv_6D60(*(char**)(self + 0x8), 8, 3);
     char* execMan = *(char**)(self + 0x8);
     if (execMan)
@@ -195,7 +195,7 @@ extern "C" void cAppMan_mainLoop(void* appMan)
 {
     char* self = (char*)appMan;
     int count = 0;
-    calli_6F00(self, 0x5C, 5);
+    calli_6F00(self, 92, 5);
     for (;;) {
         callv_6D60(*(char**)(self + 0x8), 8, 11);
         SYNCTASK_run(0);
@@ -225,7 +225,7 @@ extern "C" void cAppMan_mainLoop(void* appMan)
                 *(char**)(self + 0x0) = next;
                 callv_6D60(next, 0, 5);
                 cAppMan_checkHalt_v((cAppMan*)self);
-                calli_6F00(self, 0x5C, 5);
+                calli_6F00(self, 92, 5);
                 *(int*)(self + 0x2C) = 0;
                 *(volatile int*)(self + 0x58) = 0;
             }
@@ -250,11 +250,11 @@ extern "C" void cAppMan_mainLoop(void* appMan)
             }
             break;
         }
-        while (calli_6F00(self, 0x5C, 6)) {
+        while (calli_6F00(self, 92, 6)) {
             cAppMan_checkHalt_v((cAppMan*)self);
             count++;
             if (*(int*)(self + 0x20) < count) {
-                count += calli_6F00(self, 0x5C, 5);
+                count += calli_6F00(self, 92, 5);
                 break;
             }
             (*(int*)(self + 0x1C))++;

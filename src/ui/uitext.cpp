@@ -411,7 +411,7 @@ extern "C" void cUIText_setUnicodeStringWrap(cUIText* self, unsigned short* str)
                 last = i;
             }
             if (w > self->mSize.x && last >= 0) {
-                buf[last] = 0xD;
+                buf[last] = 13;
                 i = last;
                 w = 0.0f;
                 last = -1;
@@ -475,7 +475,7 @@ extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self_, const unsigned s
     ((cUIText_3A0C70*)self_)->v24(1);
     cUIText_deleteText(self_);
     int len = USTR_length((unsigned short*)str);
-    if (len < 0x321) {
+    if (len < 801) {
         *(short*)&self_->mStringSize = len + 1;
         self_->mpString = (unsigned short*)operator_new_tag((len + 1) * 2, str_UITextUStr, 0x100, 0);
         USTR_copy(self_->mpString, (unsigned short*)str);
@@ -496,7 +496,7 @@ extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self_, const unsigned s
                     *cursor = 0;
                     cursor += 2;
                     lines[k++] = cursor;
-                } else if (curChar == 0xD) {
+                } else if (curChar == 13) {
                     *cursor = 0;
                     cursor++;
                     lines[k++] = cursor;
@@ -1111,14 +1111,14 @@ extern "C" void cUITextScroll_addAsciiString(cUITextScroll* self, char* str)
     int start = 0;
     func_002C2540(buf, str);
     while (i < len) {
-        if (buf[i] == 0x5C && buf[i + 1] == buf[i]) {
+        if (buf[i] == 92 && buf[i + 1] == buf[i]) {
             buf[i] = 0;
             i += 2;
             cUITextScroll_addUnicodeString(self, &buf[start]);
             last = -1;
             w = 0.0f;
             start = i;
-        } else if (buf[i] == 0xD) {
+        } else if (buf[i] == 13) {
             buf[i] = 0;
             i += 1;
             cUITextScroll_addUnicodeString(self, &buf[start]);
@@ -1256,7 +1256,7 @@ extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll* self, void* vs
     int start = 0;
     USTR_copy(buf, str);
     while (i < len) {
-        if (buf[i] == 0x5C && buf[i + 1] == buf[i]) {
+        if (buf[i] == 92 && buf[i + 1] == buf[i]) {
             buf[i] = 0;
             i += 2;
             cUITextScroll_addUnicodeString(self, &buf[start]);

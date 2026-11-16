@@ -73,8 +73,8 @@ struct sGMMode_D0 {
 extern "C" int* cGameModeMan_getGM(void)
 {
     if (cGameModeMan_instance == 0) {
-        cGameModeMan_instance = (cGameModeMan*)((int*)cMemMan_alloc(0xA0, str_GameModeMan, 0, 0));
-        func_00416210(D_00536668, 0, 0x28);
+        cGameModeMan_instance = (cGameModeMan*)((int*)cMemMan_alloc(160, str_GameModeMan, 0, 0));
+        func_00416210(D_00536668, 0, 40);
         if (D_00536668[0] == 0) {
             D_00536668[0] = new (str_GM_Handler, 0, 0) sGMMode_7C(D_0047CFA0);
             if (D_00536668[0] == 0) {
@@ -338,7 +338,7 @@ extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int pRiderS
     void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_00238358* vt = *(sVEntry_00238358**)obj;
     vt[8].fn((char*)obj + vt[8].delta, idx);
-    if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) < 0x11) {
+    if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) < 17) {
         int n = *(int*)SSXApp->Game->Replay;
         int ok = n != 0 && n < 10;
         if (!ok) {
@@ -348,7 +348,7 @@ extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int pRiderS
             if (idx == 0) {
                 int prof = cBELibrary_getProfileIndex(0);
                 int ch = cBELibrary_getCharacterID(0);
-                void* rewardInt = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+                void* rewardInt = cBE_getInterface_Fv(cBE_getBE(), 13);
                 if (cBERewardInterface_isMountainConquered(rewardInt, prof, ch)) {
                     if (cBERewardInterface_isAwardReceived(rewardInt, prof, prof, 0) == 0) {
                         cBERewardInterface_awardUser(rewardInt, prof, ch, 0);
@@ -485,16 +485,16 @@ extern "C" void cGameModeMan_writeToReplayFrame(cGameModeMan* self, cGmStream_38
     data->write(((char*)self) + 8, 4);
     data->write(((char*)self) + 0x10, 4);
     data->write(((char*)self) + 0x14, 4);
-    data->write(((char*)self) + 0x18, 0x28);
+    data->write(((char*)self) + 0x18, 40);
     data->write(((char*)self) + 0x68, 4);
     data->write(((char*)self) + 0x6C, 4);
     data->write(((char*)self) + 0x70, 4);
-    data->write(D_00536730, 0x28);
-    data->write(D_00536708, 0x28);
+    data->write(D_00536730, 40);
+    data->write(D_00536708, 40);
     data->write(((char*)self) + 0x78, 4);
     data->write(((char*)self) + 0x7C, 4);
     data->write(((char*)self) + 0x80, 4);
-    data->write(D_00536640, 0x28);
+    data->write(D_00536640, 40);
     data->write(((char*)self) + 0x84, 4);
     data->write(((char*)self) + 0x88, 4);
     data->write(((char*)self) + 0x8C, 4);
@@ -538,16 +538,16 @@ extern "C" void cGameModeMan_readFromReplayFrame(cGameModeMan* self, cGmStream_3
     data->read(((char*)self) + 8, 4);
     data->read(((char*)self) + 0x10, 4);
     data->read(((char*)self) + 0x14, 4);
-    data->read(((char*)self) + 0x18, 0x28);
+    data->read(((char*)self) + 0x18, 40);
     data->read(((char*)self) + 0x68, 4);
     data->read(((char*)self) + 0x6C, 4);
     data->read(((char*)self) + 0x70, 4);
-    data->read(D_00536730, 0x28);
-    data->read(D_00536708, 0x28);
+    data->read(D_00536730, 40);
+    data->read(D_00536708, 40);
     data->read(((char*)self) + 0x78, 4);
     data->read(((char*)self) + 0x7C, 4);
     data->read(((char*)self) + 0x80, 4);
-    data->read(D_00536640, 0x28);
+    data->read(D_00536640, 40);
     data->read(((char*)self) + 0x84, 4);
     data->read(((char*)self) + 0x88, 4);
     data->read(((char*)self) + 0x8C, 4);
@@ -657,8 +657,8 @@ extern "C" void func_00238C80(void* self)
     gm->bHasPointTarget = 0;
     gm->unk_90 = 0;
     gm->unk_94 = 0;
-    func_00416210(gm->iCharacters, 0, 0x28);
-    func_00416210(cGameModeHandler_pManager->iCheatCharacters, 0, 0x28);
+    func_00416210(gm->iCharacters, 0, 40);
+    func_00416210(cGameModeHandler_pManager->iCheatCharacters, 0, 40);
     sVEntry00238C80* e = &(*(sVEntry00238C80**)self)[5];
     e->fn((char*)self + e->delta);
 }
@@ -676,10 +676,10 @@ extern int cGameModeMan_bGiveUp[];
 
 extern "C" void func_00238D30(void)
 {
-    func_00416210(D_00536730, 9, 0x28);
-    func_00416210(D_00536708, 0, 0x28);
-    func_00416210(D_00536640, 0, 0x28);
-    func_00416210(D_005366A8, 0, 0x28);
+    func_00416210(D_00536730, 9, 40);
+    func_00416210(D_00536708, 0, 40);
+    func_00416210(D_00536640, 0, 40);
+    func_00416210(D_005366A8, 0, 40);
     func_00416210(cGameModeMan_bGiveUp, 0, 0x18);
 }
 #endif
@@ -696,10 +696,10 @@ extern int cGameModeMan_bGiveUp[];
 
 extern "C" void func_00238DA8(void)
 {
-    func_00416210(D_00536730, 9, 0x28);
-    func_00416210(D_00536708, 0, 0x28);
-    func_00416210(D_00536640, 9, 0x28);
-    func_00416210(D_005366A8, 0, 0x28);
+    func_00416210(D_00536730, 9, 40);
+    func_00416210(D_00536708, 0, 40);
+    func_00416210(D_00536640, 9, 40);
+    func_00416210(D_005366A8, 0, 40);
     func_00416210(cGameModeMan_bGiveUp, 0, 0x18);
 }
 #endif
@@ -1195,7 +1195,7 @@ public:
 
 extern "C" void func_00239D18(void* self, cGameModeStream* s)
 {
-    s->v01((char*)self + 0x4, 0xA0);
+    s->v01((char*)self + 0x4, 160);
 }
 #endif
 
@@ -1205,7 +1205,7 @@ INCLUDE_ASM("main/gamemode", func_00239D50);
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 extern "C" void func_00239D50(void* self, cGameModeStream* s)
 {
-    s->v02((char*)self + 0x4, 0xA0);
+    s->v02((char*)self + 0x4, 160);
 }
 #endif
 
@@ -1274,7 +1274,7 @@ extern "C" void func_00239D88(void* self)
     gm2->uiPointTarget = 0;
     gm2->bHasPointTarget = 0;
     gm2->uiTimeLimit = t * 60;
-    func_00416210(gm2->iCharacters, -1, 0x28);
+    func_00416210(gm2->iCharacters, -1, 40);
     sVEntry_239D88* e = &(*(sVEntry_239D88**)self)[4];
     e->fn((char*)self + e->delta);
     cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
@@ -1490,9 +1490,9 @@ extern "C" void func_0023A108(sMode_23A108* self)
             g->iNextHeat = 2;
             g->iRestoreHeat = 2;
         }
-        func_00416210(D_00536640, 9, 0x28);
-        func_00416210(D_00536730, 0, 0x28);
-        func_00416210(self->tbl[1], 9, 0x28);
+        func_00416210(D_00536640, 9, 40);
+        func_00416210(D_00536730, 0, 40);
+        func_00416210(self->tbl[1], 9, 40);
         {
             cGameModeMan* g = cGameModeHandler_pManager;
             g->uiTimeLimit = 0;
@@ -1531,9 +1531,9 @@ extern "C" void func_0023A108(sMode_23A108* self)
             g->iNextHeat = 3;
             g->iRestoreHeat = 3;
         }
-        func_00416210(D_00536640, 9, 0x28);
-        func_00416210(D_00536730, 9, 0x28);
-        func_00416210(self->tbl[2], 9, 0x28);
+        func_00416210(D_00536640, 9, 40);
+        func_00416210(D_00536730, 9, 40);
+        func_00416210(self->tbl[2], 9, 40);
         {
             cGameModeMan* g = cGameModeHandler_pManager;
             g->uiTimeLimit = 0;
@@ -1849,7 +1849,7 @@ INCLUDE_ASM("main/gamemode", func_0023AC18);
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 extern "C" void func_0023AC18(void* self, cGameModeStream* s)
 {
-    s->v01(self, 0xD0);
+    s->v01(self, 208);
 }
 #endif
 
@@ -1859,7 +1859,7 @@ INCLUDE_ASM("main/gamemode", func_0023AC50);
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 extern "C" void func_0023AC50(void* self, cGameModeStream* s)
 {
-    s->v02(self, 0xD0);
+    s->v02(self, 208);
 }
 #endif
 
@@ -1933,7 +1933,7 @@ extern "C" void func_0023AC88(void* self)
     gm2->uiTimeLimit = 0;
     gm2->uiPointTarget = 0;
     gm2->bHasPointTarget = 0;
-    func_00416210((char*)self + 4, 9, 0x28);
+    func_00416210((char*)self + 4, 9, 40);
     sVEntry_23AC88* e = &(*(sVEntry_23AC88**)self)[5];
     e->fn((char*)self + e->delta);
     cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
@@ -2034,7 +2034,7 @@ INCLUDE_ASM("main/gamemode", func_0023B038);
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 extern "C" void func_0023B038(void* self, cGameModeStream* s)
 {
-    s->v01(self, 0x2C);
+    s->v01(self, 44);
 }
 #endif
 
@@ -2044,7 +2044,7 @@ INCLUDE_ASM("main/gamemode", func_0023B070);
 // Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
 extern "C" void func_0023B070(void* self, cGameModeStream* s)
 {
-    s->v02(self, 0x2C);
+    s->v02(self, 44);
 }
 #endif
 
@@ -2099,7 +2099,7 @@ extern "C" void func_0023B170(void* self)
     gm->bIsLastHeat = one;
     gm->iNumberAI = 0;
     gm->iSimAI = 0;
-    func_00416210(gm->iCharacters, -1, 0x28);
+    func_00416210(gm->iCharacters, -1, 40);
     int p = cBENewPlayerInterface_getHumanRider(iface, 0);
     cGameModeHandler_pManager->iCharacters[p] = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
     sVEntry_23B170* e = &(*(sVEntry_23B170**)self)[4];
@@ -2214,7 +2214,7 @@ extern "C" void func_0023B268(void* self)
     gm2->iRestoreHeat = 2;
     sVEntry_23B268* vt = *(sVEntry_23B268**)self;
     vt[5].fn((char*)self + vt[5].delta);
-    func_00416210(cGameModeHandler_pManager->iCharacters, -1, 0x28);
+    func_00416210(cGameModeHandler_pManager->iCharacters, -1, 40);
     int p = cBENewPlayerInterface_getHumanRider(player, 0);
     cGameModeHandler_pManager->iCharacters[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
     cGameModeMan* gm3 = cGameModeHandler_pManager;
@@ -2417,7 +2417,7 @@ extern "C" void func_0023B6C0(void* self)
         cGameModeHandler_pManager->iCharacters[p1] = cBENewPlayerInterface_getRiderCharID(player, p1);
         cGameModeHandler_pManager->iCheatCharacters[p1] = func_00147410(player, p1);
     } else {
-        func_00416210(cGameModeHandler_pManager->iCharacters, -1, 0x28);
+        func_00416210(cGameModeHandler_pManager->iCharacters, -1, 40);
         int p = cBENewPlayerInterface_getHumanRider(player, 0);
         cGameModeHandler_pManager->iCharacters[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
         cGameModeHandler_pManager->iCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = func_00145750(race);
@@ -2602,7 +2602,7 @@ extern "C" void func_0023BB98(void* self)
         cGameModeHandler_pManager->iCharacters[p1] = cBENewPlayerInterface_getRiderCharID(player, p1);
         cGameModeHandler_pManager->iCheatCharacters[p1] = func_00147410(player, p1);
     } else {
-        func_00416210(cGameModeHandler_pManager->iCharacters, -1, 0x28);
+        func_00416210(cGameModeHandler_pManager->iCharacters, -1, 40);
         int p = cBENewPlayerInterface_getHumanRider(player, 0);
         cGameModeHandler_pManager->iCharacters[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
         cGameModeHandler_pManager->iCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = func_00145750(race);
@@ -2783,7 +2783,7 @@ extern "C" void func_0023C0D0(void* self)
     gm3->uiTimeLimit = u * 60;
     sVEntry_23C0D0* vt = *(sVEntry_23C0D0**)self;
     vt[4].fn((char*)self + vt[4].delta);
-    func_00416210(cGameModeHandler_pManager->iCharacters, -1, 0x28);
+    func_00416210(cGameModeHandler_pManager->iCharacters, -1, 40);
     int p = cBENewPlayerInterface_getHumanRider(player, 0);
     cGameModeHandler_pManager->iCharacters[p] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
     cGameModeMan* gm4 = cGameModeHandler_pManager;

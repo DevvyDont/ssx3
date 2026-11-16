@@ -145,7 +145,7 @@ extern char D_005309BC[];
 
 extern "C" void* func_0014F108(void* self, int riderIndex)
 {
-    return D_005309BC + cBELibrary_getCharacterID(riderIndex) * 0x88;
+    return D_005309BC + cBELibrary_getCharacterID(riderIndex) * 136;
 }
 #endif
 //100%
@@ -185,7 +185,7 @@ extern char D_005309D4[];
 
 extern "C" void* func_0014F1B0(void* self, int riderIndex)
 {
-    return D_005309D4 + cBELibrary_getCharacterID(riderIndex) * 0x88;
+    return D_005309D4 + cBELibrary_getCharacterID(riderIndex) * 136;
 }
 #endif
 //100%
@@ -195,7 +195,7 @@ extern char D_005309E4[];
 
 extern "C" void* func_0014F1E0(void* self, int riderIndex)
 {
-    return D_005309E4 + cBELibrary_getCharacterID(riderIndex) * 0x88;
+    return D_005309E4 + cBELibrary_getCharacterID(riderIndex) * 136;
 }
 #endif
 //100%

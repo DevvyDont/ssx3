@@ -18,7 +18,7 @@ INCLUDE_ASM("render/bezierman", cBezierMan_construct__Fv);
  */
 void* cBezierMan_construct()
 {
-    void* mem = cMemMan_alloc(0x9C90, str_PS2BezierMan, 0, 0);
+    void* mem = cMemMan_alloc(40080, str_PS2BezierMan, 0, 0);
     return cPSPBezierMan_cPSPBezierMan(mem);
 }
 #endif
@@ -59,10 +59,10 @@ extern sUVTables_AF30 D_005049C0_AF30 __asm__("D_005049C0");
  */
 extern "C" void cPSPBezierMan_Init(cPSPBezierMan* self)
 {
-    func_00372B78(((char*)self) + 0x10, 0x384, 0xDC, 0x8C, 0, 0x92, 0x5D);
+    func_00372B78(((char*)self) + 0x10, 900, 220, 140, 0, 146, 93);
     self->mVifCache[0] = operator_new_tag_AF30(0x38400, str_4x4VifCache, 0, 0);
-    self->mVifCache[1] = operator_new_tag_AF30(0xDC00, str_6x6VifCache, 0, 0);
-    self->mVifCache[2] = operator_new_tag_AF30(0x8C00, str_8x8VifCache, 0, 0);
+    self->mVifCache[1] = operator_new_tag_AF30(56320, str_6x6VifCache, 0, 0);
+    self->mVifCache[2] = operator_new_tag_AF30(35840, str_8x8VifCache, 0, 0);
     self->mVifCachePos[0] = self->mVifCache[0];
     self->mVifCachePos[1] = self->mVifCache[1];
     self->mVifCachePos[2] = self->mVifCache[2];
@@ -918,7 +918,7 @@ extern "C" void func_0038C788(void* self, int type, int idx)
         v3Addr = *(int*)(manager + 0x58) + idx * 0xC0;
         break;
     case 1:
-        v3Addr = *(int*)(manager + 0x5C) + idx * 0x1B0;
+        v3Addr = *(int*)(manager + 0x5C) + idx * 432;
         break;
     case 2:
         v3Addr = *(int*)(manager + 0x60) + idx * 0x300;
@@ -933,7 +933,7 @@ extern "C" void func_0038C788(void* self, int type, int idx)
         v2AddrA = *(int*)(manager + 0x64) + idx * 0x80;
         break;
     case 1:
-        v2AddrA = *(int*)(manager + 0x68) + idx * 0x120;
+        v2AddrA = *(int*)(manager + 0x68) + idx * 288;
         break;
     case 2:
         v2AddrA = *(int*)(manager + 0x6C) + idx * 0x200;
@@ -948,7 +948,7 @@ extern "C" void func_0038C788(void* self, int type, int idx)
         v2AddrB = *(int*)(manager + 0x70) + idx * 0x80;
         break;
     case 1:
-        v2AddrB = *(int*)(manager + 0x74) + idx * 0x120;
+        v2AddrB = *(int*)(manager + 0x74) + idx * 288;
         break;
     case 2:
         v2AddrB = *(int*)(manager + 0x78) + idx * 0x200;
@@ -1077,7 +1077,7 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
 {
     int draw = 0;
     int a1 = self->base28[kind] + sub * 12;
-    char* o = (char*)func_0038F708(patch->obj, 0x1B0, 2);
+    char* o = (char*)func_0038F708(patch->obj, 432, 2);
     sGfx_CA70* gfx = D_004A5B80_CA70;
     unsigned int addr = self->base44C[kind] + (sub << 8);
     unsigned int n = kind * 2 + 4;
@@ -1135,7 +1135,7 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
         *handle = next;
         sRing_CA70* ring = gfx->ring;
         sRS_CA70* rs = gfx->top;
-        if (ring->count < 0xA28) {
+        if (ring->count < 2600) {
             rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
             int key = *(int*)((char*)ring + 0x69CC0);
             sEnt_CA70* e = (sEnt_CA70*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
@@ -1217,7 +1217,7 @@ extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int 
 extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, int* ext, unsigned int* handle)
 {
     int a1 = self->base28[2] + sub * 12;
-    char* o = (char*)func_0038F708(patch->obj, 0x1B0, 2);
+    char* o = (char*)func_0038F708(patch->obj, 432, 2);
     sGfx_CE20* gfx = D_004A5B80_CE20;
     unsigned int addr = self->base44C[2] + (sub << 8);
     int doA = (*(int*)(o + 0xC) & 0x600000) != 0;
@@ -1273,7 +1273,7 @@ extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, i
     *handle = next;
     sRing_CE20* ring = gfx->ring;
     sRS_CE20* rs = gfx->top;
-    if (ring->count < 0xA28) {
+    if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sEnt_CE20* e = (sEnt_CE20*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
@@ -1380,7 +1380,7 @@ extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type,
         a = *(int*)(s + 0x1C4) + idx * 0xC0;
         break;
     case 1:
-        a = *(int*)(s + 0x1C8) + idx * 0x1B0;
+        a = *(int*)(s + 0x1C8) + idx * 432;
         break;
     case 2:
         a = *(int*)(s + 0x1CC) + idx * 0x300;
@@ -1703,7 +1703,7 @@ extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* 
     *handle = next;
     sRing_D690* ring = gfx->ring;
     sRS_D690* rs = gfx->top;
-    if (ring->count < 0xA28) {
+    if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sEnt_D690* e = (sEnt_D690*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
@@ -1792,12 +1792,12 @@ extern "C" void func_0038D968(sBezMan_D968* self, unsigned int* a1)
     ctx->top->flagsB = ctx->top->flagsB & 0xE00003FF;
     for (int i = 0; i < self->n8; i++) {
         sBezPatch_D968* e = &self->list8[i];
-        func_0038D690(self, func_0038F708(e->obj, 0x1B0, 2), e, a1);
+        func_0038D690(self, func_0038F708(e->obj, 432, 2), e, a1);
     }
     for (int i = 0; i < self->nMix; i++) {
         sBezMixPatch_D968* e = &self->mix[i];
         if (e->kind > 0) {
-            func_0038D690(self, func_0038F708(e->obj, 0x1B0, 2), e, a1);
+            func_0038D690(self, func_0038F708(e->obj, 432, 2), e, a1);
         }
     }
     ctx->top--;

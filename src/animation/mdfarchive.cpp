@@ -84,7 +84,7 @@ extern void* cGameAnimMap_TheGameAnimMap;
 
 extern "C" void* func_00314D98(void* self)
 {
-    new (self) sMdfEntry_314D98[0x206];
+    new (self) sMdfEntry_314D98[518];
     cGameAnimMap_TheGameAnimMap = self;
     return self;
 }
@@ -132,16 +132,16 @@ struct sMdfHashTable_00314DD8
  */
 extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
 {
-    for (int i = 0; i < 0x206; i++)
+    for (int i = 0; i < 518; i++)
     {
         int hashValue = GetHashValue32(D_0048CFC0[i]);
         self->order[i] = i;
         self->hash[i] = hashValue;
     }
     gameanimcmphack = self->hash;
-    func_00418EF8(self->order, 0x206, 4, gameanimcmp);
+    func_00418EF8(self->order, 518, 4, gameanimcmp);
     gameanimcmphack = 0;
-    func_00416210(self->map, -1, 0x818);
+    func_00416210(self->map, -1, 2072);
 }
 #endif
 
@@ -158,7 +158,7 @@ struct sMdfIndex_00314E88
 extern "C" int func_00314E88(sMdfIndex_00314E88* self, unsigned int hash)
 {
     int lo = 0;
-    int hi = 0x206;
+    int hi = 518;
     while (lo < hi)
     {
         int mid = (lo + hi) / 2;
@@ -243,7 +243,7 @@ extern char str_error[];
 
 extern "C" char* func_00315070(char* self, void* value)
 {
-    for (int i = 0; i < 0x206; i++)
+    for (int i = 0; i < 518; i++)
     {
         if (value == ((void**)(self + 0x1030))[i])
         {

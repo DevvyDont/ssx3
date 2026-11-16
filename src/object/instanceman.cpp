@@ -27,7 +27,7 @@ INCLUDE_ASM("object/instanceman", cInstanceMan_copyInstance__FPvP15sInstanceStru
 void cInstanceMan_copyInstance(void* self, sInstanceStruct* dst, void* src)
 {
     void* saved = dst->field_0x78;
-    MEM_copy(dst, src, 0xA0);
+    MEM_copy(dst, src, 160);
     dst->field_0x78 = saved;
     dst->field_0x8 |= 0x2000;
 }
@@ -770,7 +770,7 @@ struct sImSrc {
 
 extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def, sImSrc* src, sImObj* owner)
 {
-    func_0034FB00(self, a1, 0xB, a2);
+    func_0034FB00(self, a1, 11, a2);
     self->vt = cMeshAnimNode_vtbl;
     new (&self->rot) sImV4[24];
     new (&self->arr1) sImV4[24];
@@ -1389,7 +1389,7 @@ extern "C" void cMeshAnimNode_render(sDebris_352810* self)
         fade = self->timer;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].fn((char*)ps2GraphicsMan + ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].delta, self->model, *(void**)(self->model + 0x94), D_004FF1A0_2810, animMats, 0, 0x420, fade);
+    ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].fn((char*)ps2GraphicsMan + ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].delta, self->model, *(void**)(self->model + 0x94), D_004FF1A0_2810, animMats, 0, 1056, fade);
 }
 #endif
 

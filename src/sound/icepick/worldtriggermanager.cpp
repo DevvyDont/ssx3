@@ -15,7 +15,7 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", WORLDTRIGGERMANAGER_Init__Fv);
 void WORLDTRIGGERMANAGER_Init()
 {
     if (gWorldTriggerManager == 0) {
-        void* mem = cMemMan_alloc(0x344, str_WorldTriggerManager, 0, 0);
+        void* mem = cMemMan_alloc(836, str_WorldTriggerManager, 0, 0);
         gWorldTriggerManager = cWorldTriggerManager_cWorldTriggerManager(mem);
     }
 }
@@ -455,7 +455,7 @@ extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self)
     *(int*)((char*)self + 0x328) = -1;
     *(int*)((char*)self + 0x32C) = -1;
     *(int*)((char*)self + 0x334) = 1;
-    int* mem = (int*)operator_new_tag(0x1190, str_m_aWorldTriggerInstances, 0, 0);
+    int* mem = (int*)operator_new_tag(4496, str_m_aWorldTriggerInstances, 0, 0);
     mem[0] = 40;
     sWorldTrigger58D0* arr = (sWorldTrigger58D0*)((char*)mem + 0x10);
     sWorldTrigger58D0* trigger = arr;
@@ -931,7 +931,7 @@ extern "C" int func_002B6550(void* self, int type, int* bank, int* patch, int* n
     *bank = 0;
     *patch = 0;
     *noAudio = 0;
-    if (type == 0x4D) {
+    if (type == 77) {
         *noAudio = 1;
         found = func_002A34D0(func_0028B180(), 0, 1, viewPort);
     }
@@ -1635,7 +1635,7 @@ extern "C" void func_002B7410(void* self, sWtmEnt18* e)
     (*(int*)(base + 0xA0))++;
     sCell_2B7410 cell;
     GetCell_2B7410(&cell, &box);
-    sQNode_2B7410* n = (sQNode_2B7410*)Child_2B7410(Child_2B7410(Child_2B7410(base, cell.ix, 0x50), cell.iy, 0x28), cell.iz, 0x14);
+    sQNode_2B7410* n = (sQNode_2B7410*)Child_2B7410(Child_2B7410(Child_2B7410(base, cell.ix, 80), cell.iy, 40), cell.iz, 20);
     Remove_2B7410(n, e, &cell);
     if (QEmpty_2B7410(n->items)) {
         operator_delete(n->items);

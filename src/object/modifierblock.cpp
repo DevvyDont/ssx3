@@ -929,7 +929,7 @@ extern "C" void tModifierBlock_writeToReplayFrame(char* self, char* stream)
     }
     {
         sVEw_353448* writeEntry = &(*(sVEw_353448**)stream)[1];
-        writeEntry->fn(stream + writeEntry->delta, &info, 0x34);
+        writeEntry->fn(stream + writeEntry->delta, &info, 52);
     }
     char* w0 = *(char**)(self + 0x0);
     if (w0 != 0) {
@@ -1031,40 +1031,40 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
     self->field_0x4 = 0;
     self->field_0x8 = 0;
     self->field_0xC = 0;
-    stream->vt[2].fn((char*)stream + stream->vt[2].delta, &hdr, 0x34);
+    stream->vt[2].fn((char*)stream + stream->vt[2].delta, &hdr, 52);
 
     if (hdr.flags & 1) {
         if (hdr.type == 1) {
             *(void**)&self->node = cSplineModifier_cSplineModifier(cMemMan_alloc(0xF0, str_SplineModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 2) {
-            *(void**)&self->node = cMultiSplineModifier_cMultiSplineModifier1(cMemMan_alloc(0x58, str_SplineModifier, 0x20000000, 0), stream);
+            *(void**)&self->node = cMultiSplineModifier_cMultiSplineModifier1(cMemMan_alloc(88, str_SplineModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 4) {
-            *(void**)&self->node = cParentModifier_cParentModifier(cMemMan_alloc(0xB0, str_ParentModifier, 0x20000000, 0), stream);
+            *(void**)&self->node = cParentModifier_cParentModifier(cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 3) {
-            *(void**)&self->node = func_00356F68(cMemMan_alloc(0x90, str_PositionModifier, 0x20000000, 0), stream);
+            *(void**)&self->node = func_00356F68(cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 5) {
-            *(void**)&self->node = func_0035DF70(cMemMan_alloc(0x2D0, str_RollerModifier, 0x20000000, 0), stream);
+            *(void**)&self->node = func_0035DF70(cMemMan_alloc(720, str_RollerModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 6) {
-            *(void**)&self->node = func_00357358(cMemMan_alloc(0xB0, str_MagnetModifier, 0x20000000, 0), stream);
+            *(void**)&self->node = func_00357358(cMemMan_alloc(176, str_MagnetModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 7) {
-            *(void**)&self->node = func_00357798(cMemMan_alloc(0x90, str_AvaSplineModifier, 0x20000000, 0), stream);
+            *(void**)&self->node = func_00357798(cMemMan_alloc(144, str_AvaSplineModifier, 0x20000000, 0), stream);
         }
     }
     if (hdr.flags & 2) {
-        self->field_0x4 = (int)func_0035F788(cMemMan_alloc(0x50, str_UVScrollModifier, 0x20000000, 0), stream);
+        self->field_0x4 = (int)func_0035F788(cMemMan_alloc(80, str_UVScrollModifier, 0x20000000, 0), stream);
     }
     if (hdr.flags & 4) {
-        self->field_0x8 = (int)func_0035F1A8(cMemMan_alloc(0xE8, str_TexFlipModifier, 0x20000000, 0), stream);
+        self->field_0x8 = (int)func_0035F1A8(cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), stream);
     }
     if ((hdr.flags & 8) && hdr.kind == 1) {
-        self->field_0xC = (int)func_00342808(cMemMan_alloc(0x50, str_BoostModifier, 0x20000000, 0), stream);
+        self->field_0xC = (int)func_00342808(cMemMan_alloc(80, str_BoostModifier, 0x20000000, 0), stream);
     }
     for (i = 0; i < hdr.numA; i++) {
         void* effect;
         if (hdr.typesA[i] == 1) {
             effect = func_003459A8(cMemMan_alloc(0x1F0, str_ParticleModifier, 0x20000000, 0), stream);
         } else if (hdr.typesA[i] == 2) {
-            effect = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(0x270, str_DynamicParticleModifier, 0x20000000, 0), stream);
+            effect = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(624, str_DynamicParticleModifier, 0x20000000, 0), stream);
         } else if (hdr.typesA[i] == 3) {
             effect = func_003461C0(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), stream);
         } else {
@@ -1073,7 +1073,7 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
         cEffectLink_append((char*)self + 0x10, effect);
     }
     for (i = 0; i < hdr.numB; i++) {
-        cRailLink_append((char*)self + 0x1C, cRailModifier_cRailModifier1(cMemMan_alloc(0x90, str_RailModifier, 0x20000000, 0), stream));
+        cRailLink_append((char*)self + 0x1C, cRailModifier_cRailModifier1(cMemMan_alloc(144, str_RailModifier, 0x20000000, 0), stream));
     }
 }
 #endif
@@ -1217,14 +1217,14 @@ extern "C" void cSkyBox_render(void* self)
     SetZOn_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 1);
     SetBlendM_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 2);
     SetZMode_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 0);
-    SetAlpha_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 0x14);
+    SetAlpha_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 20);
     char* skyInstance = *(char**)((char*)self + 0x14);
     if (skyInstance != 0)
     {
         *(unsigned int*)(skyInstance + 8) = (*(unsigned int*)(skyInstance + 8) & ~2u) | 4;
         char* instToDraw = *(char**)((char*)self + 0x14);
         sVE_53B10* vt = (sVE_53B10*)ctx->mVtbl;
-        vt[95].fn((char*)ctx + vt[95].delta, instToDraw, 1.0f, *(void**)(*(char**)(instToDraw + 0x80) + 0xC), &skyMatrix, 0, 0, 0x5420);
+        vt[95].fn((char*)ctx + vt[95].delta, instToDraw, 1.0f, *(void**)(*(char**)(instToDraw + 0x80) + 0xC), &skyMatrix, 0, 0, 21536);
     }
     sRS_53B10* topDrawState = (sRS_53B10*)ctx->m_pCurrentDrawState;
     *(sRS_53B10**)&ctx->m_pCurrentDrawState = topDrawState - 1;
@@ -1408,10 +1408,10 @@ extern "C" void cSpring_setupNodes(void* self);
 extern "C" void* func_00353E80(void* self, void* stream)
 {
     sMbVEntrySer3E80* e = &(*(sMbVEntrySer3E80**)stream)[2];
-    e->fn((char*)stream + e->delta, self, 0x24);
+    e->fn((char*)stream + e->delta, self, 36);
     cSpring_setupNodes(self);
     e = &(*(sMbVEntrySer3E80**)stream)[2];
-    e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x24), *(int*)self * 0x50);
+    e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x24), *(int*)self * 80);
     return self;
 }
 #endif

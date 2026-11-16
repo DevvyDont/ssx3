@@ -350,7 +350,7 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
             *p++ = c;
             adv_321AF0(s);
             *p = 0;
-            s->tok = 0x13;
+            s->tok = 19;
         } else {
             *p = 0;
             s->tok = 0x18;
@@ -366,7 +366,7 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
             s->tok = 1;
         } else {
             *p = 0;
-            s->tok = 0x14;
+            s->tok = 20;
         }
     } else if (c == '-') {
         adv_321AF0(s);
@@ -379,7 +379,7 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
             s->tok = 1;
         } else {
             *p = 0;
-            s->tok = 0x15;
+            s->tok = 21;
         }
     } else if (c == '.') {
         adv_321AF0(s);
@@ -388,11 +388,11 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
     } else if (c == '*') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 0x16;
+        s->tok = 22;
     } else if (c == '/') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 0x17;
+        s->tok = 23;
     } else if (c == '=') {
         adv_321AF0(s);
         PKC_321AF0(c);
@@ -400,7 +400,7 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
             *p++ = c;
             adv_321AF0(s);
             *p = 0;
-            s->tok = 0x12;
+            s->tok = 18;
         } else {
             *p = 0;
             s->tok = 3;
@@ -412,7 +412,7 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
             *p++ = c;
             adv_321AF0(s);
             *p = 0;
-            s->tok = 0x11;
+            s->tok = 17;
         } else {
             *p = 0;
             s->tok = 0x10;
@@ -434,7 +434,7 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
         *p++ = pk_321AF0(s);
         adv_321AF0(s);
         *p = 0;
-        s->tok = 0xD;
+        s->tok = 13;
     } else if (c == '|' && pk1_321AF0(s) == c) {
         adv_321AF0(s);
         *p++ = pk_321AF0(s);
@@ -448,7 +448,7 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
     } else if (c == ')') {
         adv_321AF0(s);
         *p = 0;
-        s->tok = 0xA;
+        s->tok = 10;
     } else if (c == ',') {
         adv_321AF0(s);
         *p = 0;
@@ -478,15 +478,15 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
         }
         *p = 0;
         if (strcasecmp(text, str_max) == 0) {
-            s->tok = 0x19;
+            s->tok = 25;
         } else if (strcasecmp(text, str_min) == 0) {
-            s->tok = 0x1A;
+            s->tok = 26;
         } else if (strcasecmp(text, str_pow) == 0) {
-            s->tok = 0x1B;
+            s->tok = 27;
         } else if (strcasecmp(text, str_atan2) == 0) {
             s->tok = 0x1C;
         } else if (strcasecmp(text, str_atan) == 0) {
-            s->tok = 0x1D;
+            s->tok = 29;
         } else if (strcasecmp(text, str_sin) == 0) {
             s->tok = 0x1E;
         } else if (strcasecmp(text, str_cos) == 0) {
@@ -494,17 +494,17 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
         } else if (strcasecmp(text, str_exp) == 0) {
             s->tok = 0x20;
         } else if (strcasecmp(text, str_log_b) == 0) {
-            s->tok = 0x21;
+            s->tok = 33;
         } else if (strcasecmp(text, str_floor) == 0) {
-            s->tok = 0x22;
+            s->tok = 34;
         } else if (strcasecmp(text, str_ceil) == 0) {
-            s->tok = 0x23;
+            s->tok = 35;
         } else if (strcasecmp(text, str_abs) == 0) {
-            s->tok = 0x24;
+            s->tok = 36;
         } else if (strcasecmp(text, str_sqrt) == 0) {
-            s->tok = 0x25;
+            s->tok = 37;
         } else if (strcasecmp(text, str_minradian) == 0) {
-            s->tok = 0x26;
+            s->tok = 38;
         } else {
             s->tok = 2;
         }
@@ -550,7 +550,7 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
         }
         *p = 0;
         func_004178B0(text, str_pct_f_b, &s->value);
-        s->tok = 0xB;
+        s->tok = 11;
         return;
     } else {
         cInputMapParser_error(s, str_Unexpected_character_in_input_pct_c, c);
@@ -822,7 +822,7 @@ extern "C" void* cInputMapParser_parseAnd(cInputMapParser* self)
     if (left->type == 4 && left->value == 0.0f) {
         isFalse = 1;
     }
-    while (self->CurrentToken == 0xD) {
+    while (self->CurrentToken == 13) {
         cInputMapParser_readToken(self);
         sAndNode_00323540* right = (sAndNode_00323540*)cInputMapParser_parseCompare(self);
         if (right == 0) {
@@ -887,10 +887,10 @@ extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
         int op;
         switch (self->CurrentToken) {
         case 0x10:
-            op = 0xA;
+            op = 10;
             break;
-        case 0x11:
-            op = 0xB;
+        case 17:
+            op = 11;
             break;
         case 0xF:
             op = 9;
@@ -898,11 +898,11 @@ extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
         case 0xE:
             op = 8;
             break;
-        case 0x12:
+        case 18:
             op = 0xC;
             break;
-        case 0x13:
-            op = 0xD;
+        case 19:
+            op = 13;
             break;
         default:
             return left;
@@ -915,10 +915,10 @@ extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
         }
         if (left->type == 4 && right->type == 4) {
             switch (op) {
-            case 0xA:
+            case 10:
                 left->value = left->value < right->value ? 1.0f : 0.0f;
                 break;
-            case 0xB:
+            case 11:
                 left->value = left->value <= right->value ? 1.0f : 0.0f;
                 break;
             case 9:
@@ -930,7 +930,7 @@ extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
             case 0xC:
                 left->value = left->value == right->value ? 1.0f : 0.0f;
                 break;
-            case 0xD:
+            case 13:
                 left->value = left->value != right->value ? 1.0f : 0.0f;
                 break;
             }
@@ -983,10 +983,10 @@ extern "C" void* cInputMapParser_parseSum(cInputMapParser* self)
     for (;;) {
         int op;
         switch (self->CurrentToken) {
-        case 0x14:
+        case 20:
             op = 0xE;
             break;
-        case 0x15:
+        case 21:
             op = 0xF;
             break;
         default:
@@ -1068,11 +1068,11 @@ extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self)
     for (;;) {
         int op;
         switch (self->CurrentToken) {
-        case 0x16:
+        case 22:
             op = 0x10;
             break;
-        case 0x17:
-            op = 0x11;
+        case 23:
+            op = 17;
             break;
         default:
             return left;
@@ -1089,14 +1089,14 @@ extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self)
                 case 0x10:
                     konst->value = konst->value * right->value;
                     break;
-                case 0x11:
+                case 17:
                     konst->value = konst->value / right->value;
                     break;
                 }
                 cInputMapParser_freeParseNode(self, right);
             } else {
                 konst = right;
-                if (op == 0x11) {
+                if (op == 17) {
                     right->value = 1.0f / right->value;
                 }
                 sMulNode_00323A68* n = (sMulNode_00323A68*)func_003215F8(self);
@@ -1252,7 +1252,7 @@ again:
             return operand;
         }
         node = (sTermNode_3BD8*)func_003215F8(self);
-        node->type = 0x12;
+        node->type = 18;
         node->a = operand;
         return node;
     case 24:
@@ -1265,7 +1265,7 @@ again:
             return operand;
         }
         node = (sTermNode_3BD8*)func_003215F8(self);
-        node->type = 0x13;
+        node->type = 19;
         node->a = operand;
         return node;
     case 9:
@@ -1280,34 +1280,34 @@ again:
         return node;
     case 25:
         cInputMapParser_readToken(self);
-        return cInputMapParser_parseBinaryFunc(self, 0x14);
+        return cInputMapParser_parseBinaryFunc(self, 20);
     case 26:
         cInputMapParser_readToken(self);
-        return cInputMapParser_parseBinaryFunc(self, 0x15);
+        return cInputMapParser_parseBinaryFunc(self, 21);
     case 27:
         cInputMapParser_readToken(self);
-        return cInputMapParser_parseBinaryFunc(self, 0x16);
+        return cInputMapParser_parseBinaryFunc(self, 22);
     case 28:
         cInputMapParser_readToken(self);
-        return cInputMapParser_parseBinaryFunc(self, 0x17);
+        return cInputMapParser_parseBinaryFunc(self, 23);
     case 29:
         cInputMapParser_readToken(self);
         return cInputMapParser_parseUnaryFunc(self, 0x18);
     case 30:
         cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 0x19);
+        return cInputMapParser_parseUnaryFunc(self, 25);
     case 31:
         cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 0x1A);
+        return cInputMapParser_parseUnaryFunc(self, 26);
     case 32:
         cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 0x1B);
+        return cInputMapParser_parseUnaryFunc(self, 27);
     case 33:
         cInputMapParser_readToken(self);
         return cInputMapParser_parseUnaryFunc(self, 0x1C);
     case 34:
         cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 0x1D);
+        return cInputMapParser_parseUnaryFunc(self, 29);
     case 35:
         cInputMapParser_readToken(self);
         return cInputMapParser_parseUnaryFunc(self, 0x1E);
@@ -1319,7 +1319,7 @@ again:
         return cInputMapParser_parseUnaryFunc(self, 0x20);
     case 38:
         cInputMapParser_readToken(self);
-        return cInputMapParser_parseUnaryFunc(self, 0x21);
+        return cInputMapParser_parseUnaryFunc(self, 33);
     default:
         cInputMapParser_error(self, str_Expected_term_in_expression);
         return 0;
@@ -1408,7 +1408,7 @@ extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
     if (secondArg == 0) {
         return 0;
     }
-    if (self->CurrentToken != 0xA) {
+    if (self->CurrentToken != 10) {
         cInputMapParser_error(self, str_Expected_in_expression);
         cInputMapParser_freeParseNode(self, firstArg);
         cInputMapParser_freeParseNode(self, secondArg);
@@ -1417,16 +1417,16 @@ extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
     cInputMapParser_readToken(self);
     if (firstArg->type == 4 && secondArg->type == 4) {
         switch (op) {
-        case 0x15:
+        case 21:
             firstArg->value = secondArg->value <? firstArg->value;
             break;
-        case 0x14:
+        case 20:
             firstArg->value = secondArg->value >? firstArg->value;
             break;
-        case 0x16:
+        case 22:
             firstArg->value = pow_4138(firstArg->value, secondArg->value);
             break;
-        case 0x17:
+        case 23:
             firstArg->value = atan2_4138(firstArg->value, secondArg->value);
             break;
         }
@@ -1519,7 +1519,7 @@ extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
     if (operand == 0) {
         return 0;
     }
-    if (self->CurrentToken != 0xA) {
+    if (self->CurrentToken != 10) {
         cInputMapParser_error(self, str_Expected_in_expression);
         cInputMapParser_freeParseNode(self, operand);
         return 0;
@@ -1530,19 +1530,19 @@ extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
         case 0x18:
             operand->value = func_0031C228(operand->value);
             break;
-        case 0x19:
+        case 25:
             operand->value = func_0031BF60(operand->value);
             break;
-        case 0x1A:
+        case 26:
             operand->value = func_0031C040(operand->value);
             break;
-        case 0x1B:
+        case 27:
             operand->value = func_0040D758(operand->value);
             break;
         case 0x1C:
             operand->value = func_0040DA10(operand->value);
             break;
-        case 0x1D:
+        case 29:
             operand->value = floor_43A0(operand->value);
             break;
         case 0x1E:
@@ -1554,7 +1554,7 @@ extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
         case 0x20:
             operand->value = sqrt_43A0(operand->value);
             break;
-        case 0x21: {
+        case 33: {
             float x = operand->value;
             operand->value = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
@@ -1966,7 +1966,7 @@ extern "C" float func_00325260(sInputParse_325260* self, unsigned int id)
         return func_00325430(self, id - 0x40);
     }
     id -= 0x60;
-    if (id < 0x39C) {
+    if (id < 924) {
         return func_003252F8(self, (int)id / 6, (int)id % 6);
     }
     return 0.0f;
@@ -2380,7 +2380,7 @@ struct sParseStream_326078 {
  */
 extern "C" void cInputPreProcessor_readFile(void* self, int path, int fn)
 {
-    char name[0xA0];
+    char name[160];
     sParseStream_326078 st;
     sprintf(name, D_004A3FA0, path, fn);
     unsigned char* fileData = func_003E1A10(name, &st.size, 0);
@@ -2540,7 +2540,7 @@ extern char D_0048E3C8[];
  */
 extern "C" void cInputPreProcessor_writeTagLine(void* self, int line, int name)
 {
-    char buf[0xB0];
+    char buf[176];
     sprintf(buf, D_0048E3C8, line, name);
     cInputPreProcessor_writeString(self, buf);
 }
@@ -2716,8 +2716,8 @@ static inline int isAlpha_3266E8(int c)
 extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, int path, int fn)
 {
     char word[16];
-    char name[0xA0];
-    char buf[0xA0];
+    char name[160];
+    char buf[160];
     int ch;
     while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
         cInputPreProcessor_readChar(self, isrc);
@@ -2793,7 +2793,7 @@ extern "C" int func_00326D60(void* p, int n);
 extern "C" void func_00326A28(void* self)
 {
     *(int*)((char*)self + 0x2EE8) = func_00326D60((char*)self + 0x2EEC, 4);
-    *(int*)((char*)self + 0x2EE0) = 0x1D;
+    *(int*)((char*)self + 0x2EE0) = 29;
     *(int*)((char*)self + 0x2EE4) = 0;
 }
 #endif
@@ -3025,7 +3025,7 @@ extern "C" void* func_00326DF0(void* self, int a1, int a2)
     *(void***)self = D_0048E488;
     *(int*)((char*)self + 0x4) = a1;
     *(int*)((char*)self + 0x8) = a2;
-    func_00416210((char*)self + 0xC, 0, 0x24);
+    func_00416210((char*)self + 0xC, 0, 36);
     *(int*)((char*)self + 0x54) = 0;
     *(int*)((char*)self + 0x58) = 0;
     *(int*)((char*)self + 0x50) = 0;
@@ -3257,14 +3257,14 @@ extern "C" int func_00326EB0(sPad_326EB0* self, float* out)
             out[15] = !(data[3] & 0x02) ? 1.0f : 0.0f;
         }
         if (self->analog != 0) {
-            out[16] = Analog_326EB0(((0x4F - data[4]) * 0xFF) / 0x4F);
-            out[17] = Analog_326EB0(((data[4] - 0xB0) * 0xFF) / 0x4F);
-            out[18] = Analog_326EB0(((0x4F - data[5]) * 0xFF) / 0x4F);
-            out[19] = Analog_326EB0(((data[5] - 0xB0) * 0xFF) / 0x4F);
-            out[20] = Analog_326EB0(((0x4F - data[6]) * 0xFF) / 0x4F);
-            out[21] = Analog_326EB0(((data[6] - 0xB0) * 0xFF) / 0x4F);
-            out[22] = Analog_326EB0(((0x4F - data[7]) * 0xFF) / 0x4F);
-            out[23] = Analog_326EB0(((data[7] - 0xB0) * 0xFF) / 0x4F);
+            out[16] = Analog_326EB0(((79 - data[4]) * 0xFF) / 79);
+            out[17] = Analog_326EB0(((data[4] - 176) * 0xFF) / 79);
+            out[18] = Analog_326EB0(((79 - data[5]) * 0xFF) / 79);
+            out[19] = Analog_326EB0(((data[5] - 176) * 0xFF) / 79);
+            out[20] = Analog_326EB0(((79 - data[6]) * 0xFF) / 79);
+            out[21] = Analog_326EB0(((data[6] - 176) * 0xFF) / 79);
+            out[22] = Analog_326EB0(((79 - data[7]) * 0xFF) / 79);
+            out[23] = Analog_326EB0(((data[7] - 176) * 0xFF) / 79);
         } else {
             out[16] = 0.0f;
             out[17] = 0.0f;

@@ -281,10 +281,10 @@ extern "C" void* func_003459A8(cParticleModifier* self, void* stream)
     sEffectLinkVEntry_3459A8* e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
     e->fn((char*)stream + e->delta, ((char*)self) + 0x1E4, 4);
     if (self->Complete == 0) {
-        void* buf = operator_new1(0xD8);
+        void* buf = operator_new1(216);
         self->ParticleData = (tParticleData*)buf;
         e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
-        e->fn((char*)stream + e->delta, buf, 0xD8);
+        e->fn((char*)stream + e->delta, buf, 216);
         e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
         e->fn((char*)stream + e->delta, ((char*)self) + 0x10, 0x40);
         cStaticEmitter_setupEmitter(((char*)self) + 0x50, ((char*)self) + 0x10, (int)self->ParticleData);
@@ -398,7 +398,7 @@ extern "C" void cParticleModifier_writeToReplayFrame(cParticleModifier* self, vo
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x1E4, 4);
     if (self->Complete == 0) {
         writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-        writeEntry->fn((char*)stream + writeEntry->delta, self->ParticleData, 0xD8);
+        writeEntry->fn((char*)stream + writeEntry->delta, self->ParticleData, 216);
         writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
         writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 0x40);
         cStaticEmitter_writeToReplayFrame((char*)self + 0x50, stream);
@@ -490,12 +490,12 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&self->Emitter));
     self->Emitter.mVtbl = cDynamicEmitter_vtbl;
     sEffectLinkVEntry_345D80* vt = *(sEffectLinkVEntry_345D80**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, data, 0x50);
+    vt[2].fn((char*)stream + vt[2].delta, data, 80);
     if (self->Complete == 0) {
-        void* t = operator_new1(0xD8);
+        void* t = operator_new1(216);
         self->ParticleData = (tParticleData*)((sTarget00345C90*)t);
         sEffectLinkVEntry_345D80* vt2 = *(sEffectLinkVEntry_345D80**)stream;
-        vt2[2].fn((char*)stream + vt2[2].delta, t, 0xD8);
+        vt2[2].fn((char*)stream + vt2[2].delta, t, 216);
         cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
         cBaseClass_DynamicEmitter_readFromReplayFrame(((char*)&self->Emitter), (cStream00371318*)stream);
         func_003710D0(((char*)&self->Emitter), &(*(sVec4_00345C90*)&self->Pos), &(*(sVec4_00345C90*)&self->Vel), 1, 0.01666666753590107f);
@@ -692,10 +692,10 @@ extern "C" void cDynamicParticleModifier_writeToReplayFrame(cDynamicParticleModi
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
     sEffectLinkVEntry60A0* writeEntry = &(*(sEffectLinkVEntry60A0**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 0x50);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 80);
     if (self->Complete == 0) {
         writeEntry = &(*(sEffectLinkVEntry60A0**)stream)[1];
-        writeEntry->fn((char*)stream + writeEntry->delta, self->ParticleData, 0xD8);
+        writeEntry->fn((char*)stream + writeEntry->delta, self->ParticleData, 216);
         cBaseClass_DynamicEmitter_writeToReplayFrame((char*)self + 0x60, stream);
     }
 }

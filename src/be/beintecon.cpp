@@ -50,8 +50,8 @@ extern "C" int cBEEconInterface_getMoney(void* self, int iHuman, int charType)
     if (iHuman >= 2) {
         return 0;
     }
-    int bOff = charType * 0xF88;
-    int aOff = iHuman * 0x9B50;
+    int bOff = charType * 3976;
+    int aOff = iHuman * 39760;
     int off = bOff + aOff;
     char* profile = (char*)cBELibrary_profileLib + off;
     return *(int*)(profile + 0xAC4);
@@ -68,8 +68,8 @@ extern "C" int func_00150960(void* self, int rider)
 {
     int a = cBELibrary_getProfileIndex(rider);
     int b = cBELibrary_getCharacterID(rider);
-    int bOff = b * 0xF88;
-    int aOff = a * 0x9B50;
+    int bOff = b * 3976;
+    int aOff = a * 39760;
     int off = bOff + aOff;
     char* p = (char*)cBELibrary_profileLib + off;
     return *(int*)(p + 0xAC4);
@@ -93,8 +93,8 @@ int cBEEconInterface_getTotalMoneyEarned(void* self, int iHuman, int charType)
     if (iHuman >= 2) {
         return 0;
     }
-    int bOff = charType * 0xF88;
-    int aOff = iHuman * 0x9B50;
+    int bOff = charType * 3976;
+    int aOff = iHuman * 39760;
     int off = bOff + aOff;
     char* profile = (char*)cBELibrary_profileLib + off;
     return *(int*)(profile + 0xAC8);
@@ -117,8 +117,8 @@ extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider)
 {
     int profileIndex = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    int bOff = characterId * 0xF88;
-    int aOff = profileIndex * 0x9B50;
+    int bOff = characterId * 3976;
+    int aOff = profileIndex * 39760;
     int off = bOff + aOff;
     char* profile = (char*)cBELibrary_profileLib + off;
     return *(int*)(profile + 0xAC8);
@@ -131,8 +131,8 @@ INCLUDE_ASM("be/beintecon", func_00150A58);
 extern "C" void func_00150A58(void* self, int profileIndex, int characterId, int value)
 {
     if (profileIndex < 2) {
-        int bOff = characterId * 0xF88;
-        int aOff = profileIndex * 0x9B50;
+        int bOff = characterId * 3976;
+        int aOff = profileIndex * 39760;
         int off = bOff + aOff;
         char* profile = (char*)cBELibrary_profileLib + off;
         *(int*)(profile + 0xAC4) = value;
@@ -150,8 +150,8 @@ extern "C" int func_00150A90(void* self, int a, int b, int amount)
     if (a >= 2) {
         return 0;
     }
-    int bOff = b * 0xF88;
-    int aOff = a * 0x9B50;
+    int bOff = b * 3976;
+    int aOff = a * 39760;
     int off = bOff + aOff;
     char* p = (char*)cBELibrary_profileLib + off;
     *(int*)(p + 0xAC4) += amount;
@@ -183,8 +183,8 @@ extern "C" int func_00150B48(void* self, int profileIndex, int characterId, int 
     if (profileIndex >= 2) {
         return 0;
     }
-    int bOff = characterId * 0xF88;
-    int aOff = profileIndex * 0x9B50;
+    int bOff = characterId * 3976;
+    int aOff = profileIndex * 39760;
     int off = bOff + aOff;
     char* profile = (char*)cBELibrary_profileLib + off;
     return *(int*)(profile + 0xAC4) -= amount;
@@ -212,14 +212,14 @@ extern "C" int func_00150B88(void* self, int profileIndex, int characterId, int 
     }
     unlocked ^= 1;
     if (peak == 1) {
-        int bOff = characterId * 0xF88;
-        int aOff = profileIndex * 0x9B50;
+        int bOff = characterId * 3976;
+        int aOff = profileIndex * 39760;
         int off = bOff + aOff;
         char* profile = (char*)cBELibrary_profileLib + off;
         ((sPeakBits_0B88*)(profile + 0x278))->peak1 = unlocked;
     } else if (peak == 2) {
-        int bOff = characterId * 0xF88;
-        int aOff = profileIndex * 0x9B50;
+        int bOff = characterId * 3976;
+        int aOff = profileIndex * 39760;
         int off = bOff + aOff;
         char* profile = (char*)cBELibrary_profileLib + off;
         ((sPeakBits_0B88*)(profile + 0x278))->peak2 = unlocked;
@@ -281,7 +281,7 @@ extern "C" int func_00150C20(void* self, int arg1, int arg2, unsigned int arg3) 
             break;
         }
         cost = func_00150E50(self, *p / 5 - 1);
-        if (cur < cost || *p == 0x37) {
+        if (cur < cost || *p == 55) {
             return 0;
         }
         sEconRec_0C20* r = (sEconRec_0C20*)((arg2 * 0xF88 + arg1 * 0x9B50) + (char*)cBELibrary_profileLib);
@@ -339,7 +339,7 @@ extern "C" int func_00150E68(void* self, int profile, int c, unsigned int kind)
     if (*p == 5) return 0;
     {
         int v = D_00440550_0E68[(*p - 1) / 5].b;
-        int off = c * 0xF88 + profile * 0x9B50;
+        int off = c * 3976 + profile * 39760;
         char* q = (char*)cBELibrary_profileLib + off;
         *(int*)(q + 0xAC4) += v;
     }
@@ -818,7 +818,7 @@ extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
             self->ents[j][i].flag = 0;
         }
     }
-    for (i = 0; i < 0x58; i++) {
+    for (i = 0; i < 88; i++) {
         sEconDef_1600* d = &D_0043EE10_v1600[i];
         self->flags[i].f0 = d->a;
         self->flags[i].f1 = 1;
@@ -833,7 +833,7 @@ extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
     func_001519E0((sEcon_001519E0*)self, self->kind);
     func_00150558(self->kind, self->fBE6);
     func_00416210(self->fBB8, 0, 8);
-    func_00416210(self->fDE4, 0, 0x54);
+    func_00416210(self->fDE4, 0, 84);
     self->fF04 = 0;
     for (int i = 0; i < 25; i++) {
         *(int*)((char*)self + 0xE38 + i * 8) = 0;
@@ -843,9 +843,9 @@ extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
         self->fF08[i / 32] &= ~(1 << (i % 32));
     }
     MEM_fill(self->fF28, 0, 4);
-    MEM_fill(self->fF30, 0, 0x50);
+    MEM_fill(self->fF30, 0, 80);
     self->fF80 = 0;
-    *(int*)((char*)self + 0x27C) = 0x11;
+    *(int*)((char*)self + 0x27C) = 17;
 }
 #endif
 
@@ -950,7 +950,7 @@ extern "C" void func_00151A88(sEconItems_151A88* self, int k)
         p->id = id;
         self->lookup[d->id] = i;
     }
-    for (i = n; i < 0x20D; i++)
+    for (i = n; i < 525; i++)
     {
         sEconItem_151A88* q = &self->items[i];
         q->id = -1;

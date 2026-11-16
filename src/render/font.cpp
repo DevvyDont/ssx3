@@ -75,10 +75,10 @@ extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
         if (((sGlyph_1788*)self->Glyphs)[i].code == ' ') {
             space = i;
         }
-        if (((sGlyph_1788*)self->Glyphs)[i].code == 0xAC) {
+        if (((sGlyph_1788*)self->Glyphs)[i].code == 172) {
             (*(sGlyph_1788**)&self->MissingGlyph) = &((sGlyph_1788*)self->Glyphs)[i];
         }
-        if (((sGlyph_1788*)self->Glyphs)[i].code == 0xA0) {
+        if (((sGlyph_1788*)self->Glyphs)[i].code == 160) {
             ((sGlyph_1788*)self->Glyphs)[i].w = src[space].w;
             ((sGlyph_1788*)self->Glyphs)[i].h = src[space].h;
             ((sGlyph_1788*)self->Glyphs)[i].u = src[space].u;
@@ -258,7 +258,7 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
         palEntry += 4;
     }
     sFontVEntryDL* vt = (sFontVEntryDL*)ps2GraphicsMan->mVtbl;
-    self->TextureID = vt[47].fn((char*)ps2GraphicsMan + vt[47].delta, pix, ((char*)self) + 0x64, img->w, newHeight, 0, 0xB, 1, pal, 0, 1, -1);
+    self->TextureID = vt[47].fn((char*)ps2GraphicsMan + vt[47].delta, pix, ((char*)self) + 0x64, img->w, newHeight, 0, 11, 1, pal, 0, 1, -1);
     if (pix != 0)
         cMemMan_free(pix);
     if (pal != 0)
@@ -996,7 +996,7 @@ extern "C" float func_0031BF60(float a);
 extern "C" void* func_00392DF0(void* self)
 {
     int i;
-    for (i = 0; i < 0x280; i++) {
+    for (i = 0; i < 640; i++) {
         ((float*)self)[i] = func_0031BF60((float)i * 0.01227184571325779f);
     }
     return self;
@@ -1703,7 +1703,7 @@ extern "C" int func_00394588(cPS2GraphicsMan* ps2GraphicsMan) {
 INCLUDE_ASM("render/font", func_00394598);
 #ifdef SKIP_ASM
 extern "C" unsigned int func_00394598(cPS2GraphicsMan* ps2GraphicsMan) {
-    return (unsigned int) ((*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (8))) & 0x1FFFFC00) >> 0xA;
+    return (unsigned int) ((*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (8))) & 0x1FFFFC00) >> 10;
 }
 #endif
 
@@ -2035,7 +2035,7 @@ extern "C" void cGraphicsMan_PushDrawState(cPS2GraphicsMan* self)
 INCLUDE_ASM("render/font", func_003947C8);
 #ifdef SKIP_ASM
 extern "C" void func_003947C8(void *graphicsMan) {
-    (*(int *)((char*)(graphicsMan) + (0xE84))) = (int) ((*(int *)((char*)(graphicsMan) + (0xE84))) - 0x14);
+    (*(int *)((char*)(graphicsMan) + (0xE84))) = (int) ((*(int *)((char*)(graphicsMan) + (0xE84))) - 20);
 }
 #endif
 //100%
@@ -2476,8 +2476,8 @@ extern "C" void func_00394C98(cPS2LightMan* self, int n)
 {
     self->m_iStartDynLight = n;
     self->m_iDynLight = 0;
-    self->m_iMaxLights = n + 0x32;
-    self->m_pLights = (cLightInst**)operator_new_tag((n + 0x32) * 4, str_LightInst, 0, 0);
+    self->m_iMaxLights = n + 50;
+    self->m_pLights = (cLightInst**)operator_new_tag((n + 50) * 4, str_LightInst, 0, 0);
 }
 #endif
 
@@ -2946,7 +2946,7 @@ extern "C" void* func_003953B8(void* out, void* self)
 INCLUDE_ASM("render/font", func_00395418);
 #ifdef SKIP_ASM
 extern "C" int func_00395418(int graphicsMan) {
-    return graphicsMan + 0x5800;
+    return graphicsMan + 22528;
 }
 #endif
 
@@ -2971,7 +2971,7 @@ INCLUDE_ASM("render/font", func_00395430);
 #ifdef SKIP_ASM
 extern "C" char* func_00395430(cPS2GraphicsMan* base, int idx)
 {
-    return ((char*)base) + 0x13F0 + idx * 0xA0;
+    return ((char*)base) + 0x13F0 + idx * 160;
 }
 #endif
 //100%
@@ -3187,7 +3187,7 @@ extern "C" void func_003955B0(cPS2GraphicsMan* gfx, unsigned int buf, unsigned i
 {
     sDrawState* rs = gfx->m_pCurrentDrawState;
     sRing_55B0* ring = (sRing_55B0*)gfx->mpDeferMan;
-    if (ring->count < 0xA28) {
+    if (ring->count < 2600) {
         rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sEnt_55B0* e = (sEnt_55B0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
@@ -4479,7 +4479,7 @@ extern "C" int func_003965B8(int arg0) {
 INCLUDE_ASM("render/font", func_003965C0);
 #ifdef SKIP_ASM
 extern "C" int func_003965C0(int arg0) {
-    return arg0 + 0x160;
+    return arg0 + 352;
 }
 #endif
 //100%

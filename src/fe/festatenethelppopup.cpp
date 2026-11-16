@@ -61,7 +61,7 @@ extern "C" void cFEStateNetHelpPopup_onUpdate(void* self)
     for (i = 0; i < 2; i++) {
         int** input = *(int***)((char*)SSXApp + (i << 2) + 0xB0);
         int ok = *input != 0 && **input != 0;
-        if (ok && cInput_getValue(input, 0x99) != 0.0f) {
+        if (ok && cInput_getValue(input, 153) != 0.0f) {
             found = 1;
         }
     }
@@ -483,7 +483,7 @@ extern "C" void* func_001DA648(void* self, void* vinfo, void* a2)
     *(void***)((char*)self + 0x12C) = D_0046D690;
     *(int*)((char*)self + 0x130) = *(int*)vinfo;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), str_Create_Account);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xA);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)10);
     func_002CE418((char*)self + 0x168, str_Login_Name, D_004A1408);
     func_002CE418((char*)self + 0x194, str_Password, D_004A1408);
     func_002CCF98((char*)self + 0x1C0, 0, a2, 0);
@@ -532,7 +532,7 @@ extern "C" void* func_001DA7E8(void* self, void* vinfo, void* a2)
     *(void***)((char*)self + 0x12C) = D_0046D6E8;
     *(int*)((char*)self + 0x130) = *(int*)vinfo;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), str_Create_Account);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xA);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)10);
     func_002CE418((char*)self + 0x168, str_Login_Name, D_004A1408);
     func_002CE418((char*)self + 0x194, str_Password, D_004A1408);
     func_002CCF98((char*)self + 0x1C0, 0, a2, 0);
@@ -573,7 +573,7 @@ extern "C" void* func_001DA988(void* self, void* a1, void* a2)
     func_001DA648((char*)self + 0x130, a1, str_Create_Account);
     func_001DA7E8((char*)self + 0x32C, a2, str_Login);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x528), str_Login_Method);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x544), (void*)0xA);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x544), (void*)10);
     cSubMenuItem_cSubMenuItem((char*)self + 0x55C, (char*)self + 0x130, str_Create_Account);
     cSubMenuItem_cSubMenuItem((char*)self + 0x578, (char*)self + 0x32C, str_Login);
     cMenu_addItem(self, (char*)self + 0x528, -1);
@@ -648,7 +648,7 @@ extern "C" void* func_001DABD0(void* self, int* info)
     cMenu_addItem(self, (char*)self + 0x150, -1);
     int j;
     for (j = 0; j < 4; j++) {
-        cMenu_addItem(self, (char*)self + 0x168 + j * 0x24, -1);
+        cMenu_addItem(self, (char*)self + 0x168 + j * 36, -1);
     }
     return self;
 }
@@ -694,7 +694,7 @@ extern "C" void* func_001DACB8(void* self, int* info, int* a2, int* a3)
     cMenu_addItem(self, (char*)self + 0x500, -1);
     int j;
     for (j = 0; j < 4; j++) {
-        cMenu_addItem(self, (char*)self + 0x518 + j * 0x24, -1);
+        cMenu_addItem(self, (char*)self + 0x518 + j * 36, -1);
     }
     cMenu_addItem(self, (char*)self + 0x5A8, -1);
     cMenu_addItem(self, (char*)self + 0x5C4, -1);
@@ -732,7 +732,7 @@ extern "C" void* func_001DAE20(void* self, int* info)
     cMenu_addItem(self, (char*)self + 0x150, -1);
     int j;
     for (j = 0; j < 12; j++) {
-        cMenu_addItem(self, (char*)self + 0x168 + j * 0x24, -1);
+        cMenu_addItem(self, (char*)self + 0x168 + j * 36, -1);
     }
     return self;
 }
@@ -756,7 +756,7 @@ extern char str_Chat[];
 extern "C" void* func_001DAF08(void* self, int* a, int* b)
 {
     char* p = (char*)self + 0x16C;
-    int i = 0x17;
+    int i = 23;
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D480;
     *(int*)((char*)self + 0x130) = *a;
@@ -772,7 +772,7 @@ extern "C" void* func_001DAF08(void* self, int* a, int* b)
     cMenu_addItem(self, (char*)self + 0x154, -1);
     int j;
     for (j = 0; j < 0x18; j++) {
-        cMenu_addItem(self, (char*)self + 0x16C + j * 0x24, -1);
+        cMenu_addItem(self, (char*)self + 0x16C + j * 36, -1);
     }
     cMenu_addItem(self, (char*)self + 0x4CC, -1);
     return self;
@@ -799,7 +799,7 @@ extern int D_00467D70[];
 extern "C" void* func_001DB028(void* self, int* info)
 {
     char* p = (char*)self + 0x194;
-    int i = 0xD;
+    int i = 13;
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D428;
     *(int*)((char*)self + 0x130) = *info;
@@ -814,7 +814,7 @@ extern "C" void* func_001DB028(void* self, int* info)
     cMenu_addItem(self, (char*)self + 0x150, -1);
     int j;
     for (j = 0; j < 0xE; j++) {
-        char* item = (char*)self + 0x194 + j * 0x24;
+        char* item = (char*)self + 0x194 + j * 36;
         *(int*)(item + 0x8) = j;
         *(int*)(item + 0x14) = D_00467D70[j];
         cMenu_addItem(self, item, -1);

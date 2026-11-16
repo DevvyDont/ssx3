@@ -1186,7 +1186,7 @@ extern "C" int func_002BACF8(void) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BAD00);
 #ifdef SKIP_ASM
 extern "C" char* func_002BAD00(cSpeechSys* speechSys, int i) {
-    int off = i * 0x14 + 0x158;
+    int off = i * 20 + 344;
     return ((char*)speechSys) + off;
 }
 #endif
@@ -1195,7 +1195,7 @@ extern "C" char* func_002BAD00(cSpeechSys* speechSys, int i) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BAD18);
 #ifdef SKIP_ASM
 extern "C" char* func_002BAD18(cCrowdSys* crowdSys, int i) {
-    int off = i * 0x54 + 0x1C;
+    int off = i * 84 + 0x1C;
     return ((char*)crowdSys) + off;
 }
 #endif
@@ -1271,7 +1271,7 @@ extern "C" int func_002BAD78(void *audio) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BAD80);
 #ifdef SKIP_ASM
 extern "C" char* func_002BAD80(char *audio, int i) {
-    int off = i * 0x14 + 0x60A4;
+    int off = i * 20 + 24740;
     return audio + off;
 }
 #endif
@@ -3003,24 +3003,24 @@ extern "C" void* func_002BCAF8(char *self) {
     *(char**)(self + 4) = D_00484058;
     F_CAF8(0) = -99999.0f;
     F_CAF8(0x8) = F_CAF8(0xC) = 0.0f;
-    F_CAF8(0x10) = F_CAF8(0x14) = 6.0f;
+    F_CAF8(0x10) = F_CAF8(20) = 6.0f;
     F_CAF8(0x18) = F_CAF8(0x1C) = 0.0f;
-    F_CAF8(0x20) = F_CAF8(0x24) = 0.0f;
-    F_CAF8(0x28) = F_CAF8(0x2C) = 0.0f;
-    F_CAF8(0x30) = F_CAF8(0x34) = 10.0f;
+    F_CAF8(0x20) = F_CAF8(36) = 0.0f;
+    F_CAF8(40) = F_CAF8(44) = 0.0f;
+    F_CAF8(0x30) = F_CAF8(52) = 10.0f;
     F_CAF8(0x38) = F_CAF8(0x3C) = 1.0f;
-    F_CAF8(0x40) = F_CAF8(0x44) = 1.0f;
-    F_CAF8(0x48) = F_CAF8(0x4C) = 0.0f;
-    F_CAF8(0x50) = F_CAF8(0x54) = 0.0f;
-    F_CAF8(0x58) = F_CAF8(0x5C) = 0.0f;
-    F_CAF8(0x60) = F_CAF8(0x64) = 1.0f;
-    F_CAF8(0x68) = F_CAF8(0x6C) = 1.0f;
-    F_CAF8(0x70) = F_CAF8(0x74) = 1.0f;
+    F_CAF8(0x40) = F_CAF8(68) = 1.0f;
+    F_CAF8(72) = F_CAF8(76) = 0.0f;
+    F_CAF8(80) = F_CAF8(84) = 0.0f;
+    F_CAF8(88) = F_CAF8(92) = 0.0f;
+    F_CAF8(0x60) = F_CAF8(100) = 1.0f;
+    F_CAF8(104) = F_CAF8(108) = 1.0f;
+    F_CAF8(0x70) = F_CAF8(116) = 1.0f;
     F_CAF8(0x78) = F_CAF8(0x7C) = 1.0f;
-    F_CAF8(0x80) = F_CAF8(0x84) = 0.05999999865889549f;
-    F_CAF8(0x88) = F_CAF8(0x8C) = 1.0f;
-    F_CAF8(0x90) = F_CAF8(0x94) = 1.0f;
-    F_CAF8(0x98) = F_CAF8(0x9C) = 1.0f;
+    F_CAF8(0x80) = F_CAF8(132) = 0.05999999865889549f;
+    F_CAF8(136) = F_CAF8(140) = 1.0f;
+    F_CAF8(144) = F_CAF8(148) = 1.0f;
+    F_CAF8(152) = F_CAF8(156) = 1.0f;
     return self;
 }
 #undef F_CAF8

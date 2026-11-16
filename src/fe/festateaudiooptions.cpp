@@ -240,7 +240,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             return;
         if (self->f74 == 0 && self->f7C == 0)
             return;
-        char* popup = (char*)func_00196B90(cMemMan_alloc(0x210, str_cFEStateRequestLine, 0, 0), (int)self->owner, self->player, self->f74);
+        char* popup = (char*)func_00196B90(cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), (int)self->owner, self->player, self->f74);
         if (online_AOWE()) {
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(self->owner + 0x18, popup, 0, 0);
@@ -347,7 +347,7 @@ extern "C" int cFEStateAudioOptions_onWidgetMenu(void* self, int pMenu, int Even
     } else if (Event == 8 || Event == 9) {
         return 0;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -417,7 +417,7 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
 {
     sAudioState_196B90* self = (sAudioState_196B90*)p;
     func_0039E2A0(self);
-    *(int*)((char*)self + 0xC) = 0x11;
+    *(int*)((char*)self + 0xC) = 17;
     *(void***)((char*)self + 0x8) = cFEStateRequestLine_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     if (**(void***)((char*)self + 0x10) != 0)
@@ -462,8 +462,8 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
         self->f20C = Find_196B90(mgr, GetHashValue32(str_yell_dollar_sign));
     }
     *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-    self->f168 = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
-    void* ifc = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    self->f168 = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
+    void* ifc = cBE_getInterface_Fv(cBE_getBE(), 13);
     self->f160 = func_00158728(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
     self->f158 = func_00158750(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
     self->f14C = *(int*)((char*)func_0028B180() + 0x504);

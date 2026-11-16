@@ -36,7 +36,7 @@ extern "C" void cFEStateLodge_onCreateScreen(void* self)
     D_00441B14[0] = 0;
     func_0028F140(func_0028B180(), 1);
     *(int*)((char*)self + 0x4C) = 0;
-    *(int*)((char*)self + 0x50) = 0x12;
+    *(int*)((char*)self + 0x50) = 18;
     *(int*)((char*)self + 0x54) = 0;
 }
 #endif
@@ -178,7 +178,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(char* self, char* w, int event)
         char* mgr = (char*)SSXApp->FELocale;
         sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
         unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_CMNSaveProgress));
-        void* mem = cMemMan_alloc(0xBFC, str_cFEPopupConfirm_b, 0x100, 0);
+        void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
         *(int*)(self + 0x50) = 0x10;
         cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, newState);
@@ -189,15 +189,15 @@ extern "C" void cFEStateLodge_onWidgetEvent(char* self, char* w, int event)
         char* mgr = (char*)SSXApp->FELocale;
         sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
         unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_OVRCMNQuitTitlePrompt));
-        void* mem = cMemMan_alloc(0xBFC, str_cFEPopupConfirm_b, 0x100, 0);
+        void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
         *(int*)(self + 0x50) = k;
         cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, newState);
         return;
     }
     if (k == 8) {
-        *(int*)(**(char***)(self + 0x10) + 0xC) = 0x27;
-        void* mem = cMemMan_alloc(0x280, str_cFEStateProfileLoad_b, 0, 0);
+        *(int*)(**(char***)(self + 0x10) + 0xC) = 39;
+        void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0, 0);
         void* newState = cFEStateProfileLoad_cFEStateProfileLoad(mem, *(void**)(self + 0x10), 3, 1 << *(signed char*)(self + 0x14));
         cUIStateStack_push(*(char**)(self + 0x10) + 0x18, newState);
         return;
@@ -229,10 +229,10 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onWidgetMenu);
 // Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateLodge_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
-    int result = 0x101;
+    int result = 257;
     if (key < 10) {
         if (key < 7) {
-            result = 0x101;
+            result = 257;
         } else {
             return 0x100;
         }
@@ -295,7 +295,7 @@ extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int i
     switch (id) {
     case 0xF:
         *(int*)(self + 0x54) = 1;
-        if (*(int*)(self + 0x50) == 6 || *(int*)(self + 0x50) == 0x10 || *(int*)(self + 0x50) == 0x11) {
+        if (*(int*)(self + 0x50) == 6 || *(int*)(self + 0x50) == 0x10 || *(int*)(self + 0x50) == 17) {
             func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
         }
         break;
@@ -309,7 +309,7 @@ extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int i
             vt[19].fn(self + vt[19].delta, cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_option_0)), 5);
             break;
         }
-        case 0x11: {
+        case 17: {
             *(int*)(self + 0x4C) = 1;
             cUIScreen_playFrame(*(void**)(self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_TransitionOut_b)), 1);
             char* obj = **(char***)(self + 0x10);
@@ -322,9 +322,9 @@ extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int i
         }
         }
         break;
-    case 0x15:
+    case 21:
         break;
-    case 0x16:
+    case 22:
         if (*(int*)(msg + 0xC) != 0) {
             break;
         }
@@ -333,15 +333,15 @@ extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int i
         }
         switch (*(int*)(self + 0x50)) {
         case 0x10: {
-            void* mem = cMemMan_alloc(0x280, str_cFEStateProfileLoad_b, 0x100, 0);
+            void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0x100, 0);
             char* newState = (char*)cFEStateProfileLoad_cFEStateProfileLoad(mem, *(void**)(self + 0x10), 3, *(unsigned char*)(self + 0x15));
             *(int*)(newState + 0x27C) = 1;
             *(int*)(newState + 0x1C) = (*(int*)(newState + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, newState, 0, 1);
             break;
         }
-        case 0x11: {
-            void* mem = cMemMan_alloc(0x280, str_cFEStateProfileLoad_b, 0x100, 0);
+        case 17: {
+            void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0x100, 0);
             char* newState = (char*)cFEStateProfileLoad_cFEStateProfileLoad(mem, *(void**)(self + 0x10), 3, *(unsigned char*)(self + 0x15));
             *(int*)(newState + 0x27C) = 2;
             *(int*)(newState + 0x1C) = (*(int*)(newState + 0x1C) & ~0x3F00) | 0x100;
@@ -352,9 +352,9 @@ extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int i
             char* mgr = (char*)SSXApp->FELocale;
             sVE_1F3CF0s* vt = *(sVE_1F3CF0s**)(mgr + 4);
             unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_CMNSaveBeforeQuit));
-            void* mem = cMemMan_alloc(0xBFC, str_cFEPopupConfirm_b, 0x100, 0);
+            void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
             void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
-            *(int*)(self + 0x50) = 0x11;
+            *(int*)(self + 0x50) = 17;
             cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, newState);
             break;
         }
@@ -375,7 +375,7 @@ extern "C" void* func_001F3FF8(void* self)
 {
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = cFEStateLodgeRiderDetail_vtbl;
-    *(int*)((char*)self + 0xC) = 0x28;
+    *(int*)((char*)self + 0xC) = 40;
     *(char*)((char*)self + 0x44) = 0;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), 0);
     return self;
@@ -411,7 +411,7 @@ extern "C" void cFEStateLodgeRiderDetail_onCreateScreen(void* self)
     }
     *(int*)((char*)self + 0x48) = 1;
     int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-    if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44), charID) == 0) {
+    if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44), charID) == 0) {
         *(int*)((char*)self + 0x48) = 0;
     }
 }
@@ -460,7 +460,7 @@ static inline void commitK1F4108(void* np)
 extern "C" void cFEStateLodgeRiderDetail_onPopupEvent(void* self, char* popup, int event)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
-    if (event != 0x16)
+    if (event != 22)
         return;
     if (IsK1F4108(*(int*)(popup + 0xC), str_131cheat_char_b)) {
         int cheatCharId = *(int*)(popup + 0x70);
@@ -577,10 +577,10 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateLodgeRiderDetail_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
-    int result = 0x101;
+    int result = 257;
     if (key < 10) {
         if (key < 8) {
-            result = 0x101;
+            result = 257;
         } else {
             return 0x100;
         }
@@ -645,32 +645,32 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(char* self, char* w, int 
             return;
         }
         if (k == 14) {
-            void* mem = cMemMan_alloc(0x444, str_cKeyboardPopup_b, 0x100, 0);
+            void* mem = cMemMan_alloc(1092, str_cKeyboardPopup_b, 0x100, 0);
             char* popup = (char*)cKeyboardPopup_cKeyboardPopup(mem, *(void**)(self + 0x10), self, 0, *(unsigned char*)(self + 0x15));
             *(char*)(popup + 0x44) = 0;
-            *(int*)(popup + 0x140) = 0x37;
+            *(int*)(popup + 0x140) = 55;
             cKeyboardPopup_setMaxCharacters(popup, 8);
-            cKeyboardPopup_setIncludeKey(popup, 0x4B, 1, 2);
+            cKeyboardPopup_setIncludeKey(popup, 75, 1, 2);
             *(int*)(popup + 0x58) = 1;
             func_001CE408(popup, 1);
             cKeyboardPopup_setIncludeKey(popup, 0xE, 0, 2);
-            cKeyboardPopup_setIncludeKey(popup, 0x27, 0, 2);
-            cKeyboardPopup_setIncludeKey(popup, 0x28, 0, 2);
-            cKeyboardPopup_setIncludeKey(popup, 0x34, 0, 2);
-            cKeyboardPopup_setIncludeKey(popup, 0x1A, 0, 2);
-            cKeyboardPopup_setIncludeKey(popup, 0x19, 0, 2);
-            cKeyboardPopup_setIncludeKey(popup, 0x35, 0, 2);
+            cKeyboardPopup_setIncludeKey(popup, 39, 0, 2);
+            cKeyboardPopup_setIncludeKey(popup, 40, 0, 2);
+            cKeyboardPopup_setIncludeKey(popup, 52, 0, 2);
+            cKeyboardPopup_setIncludeKey(popup, 26, 0, 2);
+            cKeyboardPopup_setIncludeKey(popup, 25, 0, 2);
+            cKeyboardPopup_setIncludeKey(popup, 53, 0, 2);
             cKeyboardPopup_setIncludeKey(popup, 0x40, 0, 2);
-            cKeyboardPopup_setIncludeKey(popup, 0x41, 0, 2);
-            cKeyboardPopup_setIncludeKey(popup, 0x42, 0, 2);
+            cKeyboardPopup_setIncludeKey(popup, 65, 0, 2);
+            cKeyboardPopup_setIncludeKey(popup, 66, 0, 2);
             cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, popup);
             cKeyboardPopup_setInputText(popup, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44)));
             return;
         }
         if (k == 11) {
             int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44));
-            if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)(self + 0x44), id) > 0) {
-                void* mem = cMemMan_alloc(0x1E4, str_cFEStateCheatCharSelect_b, 0, 0);
+            if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)(self + 0x44), id) > 0) {
+                void* mem = cMemMan_alloc(484, str_cFEStateCheatCharSelect_b, 0, 0);
                 void* popup = func_00182220(mem, *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), id);
                 cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, popup);
             }
@@ -724,7 +724,7 @@ extern "C" void* func_001F4728(void* p, int a1)
     sLodgeStats_4728* self = (sLodgeStats_4728*)p;
     char* s = (char*)p;
     func_0039E2A0_4728(self, a1);
-    *(int*)(s + 0xC) = 0x29;
+    *(int*)(s + 0xC) = 41;
     *(void***)(s + 0x8) = cFEStateBuyAttrib_vtbl;
     *(signed char*)(s + 0x44) = 0;
     *(unsigned char*)(s + 0x15) = func_001A1CD0_4728(**(void***)(s + 0x10), 0);

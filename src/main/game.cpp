@@ -557,7 +557,7 @@ extern "C" void func_0022C830(sGame_C830* self)
         SetBits_C830(&((cGfx_C830*)ps2GraphicsMan)->stateTop->w0, 0x30, 0x30);
         Set1_C830((cGfx_C830*)ps2GraphicsMan, 0x1800000, 23, 1);
         SetBits_C830(&((cGfx_C830*)ps2GraphicsMan)->stateTop->w4, 0x300000, 0x300000);
-        Set1_C830((cGfx_C830*)ps2GraphicsMan, 0xFF000, 12, 0xD);
+        Set1_C830((cGfx_C830*)ps2GraphicsMan, 0xFF000, 12, 13);
         Set2_C830((cGfx_C830*)ps2GraphicsMan, 0x3E0, 5, 4);
         cBucketMan_renderBucket(gBucketMan, 3);
         i++;
@@ -684,7 +684,7 @@ extern "C" void cSectionMan_init(cSectionMan* self)
     self->mbLocationIsActivated = 0;
     self->mWaitTransport = 0;
     self->mModeReset = 0;
-    self->mBELocationID = 0x16;
+    self->mBELocationID = 22;
     self->m_bStreamReady = 1;
     cSectionMan_initEventPool(self);
     self->m_iNextSkySectionID = -1;
@@ -743,11 +743,11 @@ extern "C" void cSectionMan_load_impl(void* self, int idx, int mode)
     } else {
         v = mode;
     }
-    int extra = 0x31;
+    int extra = 49;
     if (D_00442488_CEA8[idx].a >= 0) {
         extra = D_00442488_CEA8[idx].a;
     }
-    for (int i = 0; i < 0x32; i++) {
+    for (int i = 0; i < 50; i++) {
         int found = 1;
         for (int j = 0; j < D_00442488_CEA8[idx].count; j++) {
             if (i == D_00442488_CEA8[idx].ids[j]) {
@@ -755,10 +755,10 @@ extern "C" void cSectionMan_load_impl(void* self, int idx, int mode)
                 break;
             }
         }
-        if ((unsigned)(i - 0x2C) <= 4) {
+        if ((unsigned)(i - 44) <= 4) {
             found = 0;
         }
-        if (i == 0x2B) {
+        if (i == 43) {
             found = 0;
         }
         if (found) {
@@ -823,11 +823,11 @@ extern "C" void cSectionMan_activate(cSectionMan* self, int idx, int mode)
     } else {
         sectionMode = mode;
     }
-    int extra = 0x31;
+    int extra = 49;
     if (D_00442488_D088[idx].a >= 0) {
         extra = D_00442488_D088[idx].a;
     }
-    for (int i = 0; i < 0x32; i++) {
+    for (int i = 0; i < 50; i++) {
         int found = 1;
         for (int j = 0; j < D_00442488_D088[idx].count; j++) {
             if (i == D_00442488_D088[idx].ids[j]) {
@@ -835,10 +835,10 @@ extern "C" void cSectionMan_activate(cSectionMan* self, int idx, int mode)
                 break;
             }
         }
-        if ((unsigned)(i - 0x2C) <= 4) {
+        if ((unsigned)(i - 44) <= 4) {
             found = 0;
         }
-        if (i == 0x2B) {
+        if (i == 43) {
             found = 0;
         }
         if (found) {
@@ -1437,7 +1437,7 @@ extern "C" void cSectionMan_skySwap(cSectionMan* self)
         return;
     }
     int i;
-    for (i = 0x2C; i < 0x31; i++) {
+    for (i = 44; i < 49; i++) {
         if (i != self->m_iNextSkySectionID) {
             cSectionMan_unloadSection(self, i);
         }
@@ -1476,12 +1476,12 @@ extern int D_004A11B8;
  */
 extern "C" void cSectionMan_preLoadMode(cSectionMan* self)
 {
-    cGame_setState(self->mpGame, 0xB, 0, 1);
+    cGame_setState(self->mpGame, 11, 0, 1);
     cBEIface22DF50* iface = (cBEIface22DF50*)cBE_getInterface_Fv(cBE_getBE(), 0);
     D_00535C08[0] = self->mBELocationID;
     D_004A11B8 = 1;
     iface->v01();
-    func_00231278(self->mpGame, 0xA);
+    func_00231278(self->mpGame, 10);
 }
 #endif
 
@@ -1529,7 +1529,7 @@ extern "C" void cSectionMan_changeMode(cSectionMan* self)
         self->mModeReset = 0;
         ((cRace22DFF0*)SSXApp->Game->AI)->v05(3);
     }
-    cGame_setState(self->mpGame, 0xA, 0, 0);
+    cGame_setState(self->mpGame, 10, 0, 0);
 }
 #endif
 

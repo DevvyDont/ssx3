@@ -39,7 +39,7 @@ extern "C" void cFELocale_addFile(void* self, int lang)
     if (i >= 0) {
         cFELocale_sFiles* arr = (cFELocale_sFiles*)((char*)self + 8);
         if (arr->items[i] == 0) {
-            cFELocale_sFile* file = (cFELocale_sFile*)operator new(0x14, str_LocaleFile, 0, 0);
+            cFELocale_sFile* file = (cFELocale_sFile*)operator new(20, str_LocaleFile, 0, 0);
             arr->items[i] = file;
             file->lang = -1;
             file->f4 = 0;
@@ -196,13 +196,13 @@ extern "C" void func_00195BE0(void* locale)
         id = 0x10;
         break;
     case 1:
-        id = 0x11;
+        id = 17;
         break;
     case 2:
-        id = 0x12;
+        id = 18;
         break;
     case 3:
-        id = 0x13;
+        id = 19;
         break;
     }
     cFELocale_addFile(self, id);
@@ -223,9 +223,9 @@ extern "C" void func_00195D50(void* self)
         func_00195A50(self, 6);
         func_00195A50(self, 7);
         func_00195A50(self, 0x10);
-        func_00195A50(self, 0x11);
-        func_00195A50(self, 0x12);
-        func_00195A50(self, 0x13);
+        func_00195A50(self, 17);
+        func_00195A50(self, 18);
+        func_00195A50(self, 19);
     }
 }
 #endif
@@ -244,7 +244,7 @@ extern "C" void func_00195DE0(void* self)
         file = 0xC;
         break;
     case 1:
-        file = 0xD;
+        file = 13;
         break;
     case 2:
         file = 0xE;
@@ -267,7 +267,7 @@ extern "C" void func_00195E58(void* self)
     int flags = *(signed char*)((char*)self + 3);
     if ((flags & 1) == 0) {
         func_00195A50(self, 0xC);
-        func_00195A50(self, 0xD);
+        func_00195A50(self, 13);
         func_00195A50(self, 0xE);
         func_00195A50(self, 0xF);
     }
@@ -390,7 +390,7 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* eng
     int emptyBoxHash = GetHashValue32(str_empty_box);
     *(void**)(selfBytes + 0x60) = cUITextureBank_getElementByHashname(engineObj2 + 0x58, emptyBoxHash);
     *(int*)(selfBytes + 0x70) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(selfBytes + 0x44));
-    void* ri = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* ri = cBE_getInterface_Fv(cBE_getBE(), 13);
     *(int*)(selfBytes + 0x78) = func_00158700(ri, *(signed char*)(selfBytes + 0x44), *(int*)(selfBytes + 0x70));
     *(int*)(selfBytes + 0x7C) = cBERewardInterface_getNumSongsInPlayList(ri, *(signed char*)(selfBytes + 0x44), *(int*)(selfBytes + 0x70)) > 0;
     return self;

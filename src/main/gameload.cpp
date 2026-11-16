@@ -229,12 +229,12 @@ extern "C" void cGame_load(cGame* self)
     self->IsStreamPaused = 0;
     self->m_bFlushStreamer = 0;
     cSSXScriptEngine_Load(ScriptEngine);
-    sGridGL* grid = new (cMemMan_alloc(0xA8, str_Nash, 0, 0)) sGridGL;
+    sGridGL* grid = new (cMemMan_alloc(168, str_Nash, 0, 0)) sGridGL;
     *pGrid = grid;
     grid->a4 = 0;
     grid->a0 = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    self->DebugFont = (cFont*)cFont_cFont(operator new(0x84, str_DebugFont_b, 0, 0), str_data_fonts_debugfnt_sfn_b, 0);
+    self->DebugFont = (cFont*)cFont_cFont(operator new(132, str_DebugFont_b, 0, 0), str_data_fonts_debugfnt_sfn_b, 0);
     if (cGameComm_mGameComm != 0)
         cGameComm_syncGame(cGameComm_mGameComm);
     func_0014BD98(cBE_getInterface_Fv(cBE_getBE(), 9));
@@ -242,36 +242,36 @@ extern "C" void cGame_load(cGame* self)
     cBucketMan_setsortflag(bm, 1);
     cCameraTriggerMan_init(gCamTriggerMan);
     self->StreamPause = (cStreamPause*)cStreamPause_construct();
-    self->OcclusionMan = (cOcclusionMan*)cOcclusionMan_cOcclusionMan(operator new(0x114, str_OcclusionMan, 0x20000000, 0));
+    self->OcclusionMan = (cOcclusionMan*)cOcclusionMan_cOcclusionMan(operator new(276, str_OcclusionMan, 0x20000000, 0));
     self->World = (cWorld*)cWorld_cWorld(operator new(0x18, str_World, 0, 0));
-    self->WorldLightMan = (cWorldLightMan*)cWorldLightMan_cWorldLightMan(operator new(0x32A0, str_WorldLightMan, 0x20000000, 0), (sGridGL*)self->BXNash);
-    self->WScriptMan = (cWScriptMan*)cWScriptMan_cWScriptMan(operator new(0x498, str_WScriptMan, 0x20000000, 0));
-    self->CrowdMan2d = (cCrowdMan2d*)func_00229180(operator new(0x2720, str_CrowdMan2d, 0x20000000, 0));
-    self->CrowdMan3d = (cCrowdMan3d*)func_00343A68(operator new(0x9C4, str_CrowdMan3d, 0x20000000, 0));
+    self->WorldLightMan = (cWorldLightMan*)cWorldLightMan_cWorldLightMan(operator new(12960, str_WorldLightMan, 0x20000000, 0), (sGridGL*)self->BXNash);
+    self->WScriptMan = (cWScriptMan*)cWScriptMan_cWScriptMan(operator new(1176, str_WScriptMan, 0x20000000, 0));
+    self->CrowdMan2d = (cCrowdMan2d*)func_00229180(operator new(10016, str_CrowdMan2d, 0x20000000, 0));
+    self->CrowdMan3d = (cCrowdMan3d*)func_00343A68(operator new(2500, str_CrowdMan3d, 0x20000000, 0));
     self->MultiParticleMan = (cMultiParticleMan*)func_003579C8(operator new(0x10, str_MultiParticleMan, 0x20000000, 0));
     self->InstanceMan = (cInstanceMan*)cWScriptCompile_parseKeywords(operator new(0x10, str_InstancesMan, 0x20000000, 0), 0x80, 0x40);
     cIrradianceDataBase_Load(D_005047F8);
     self->LoadIndicator = (cBXLoadIndicator*)cBXLoadIndicator_cBXLoadIndicator(operator new(0x10, str_LoadIndicator, 0x20000000, 0));
     self->mpTrackBigFile = (cBigFile*)cBigFile_cBigFile((cBigFile*)operator new(8, str_BigFile, 0, 0));
     cGame_loadTrack(self);
-    self->Replay = (cReplay*)cReplay_cReplay(operator new(0x688, str_Replay, 0, 0));
+    self->Replay = (cReplay*)cReplay_cReplay(operator new(1672, str_Replay, 0, 0));
     self->FXLoader = (cFXLoader*)cFXLoader_cFXLoader(operator new(1, str_FXLoader, 0, 0), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         float dt = *(float*)((char*)SSXApp + 0x14);
         int n = (int)((cBENetworkInterface_networkOpt.fLatency + (float)cGameComm_mGameComm->mNumSamples * dt) / dt) + 2;
-        self->InputSync = (cInputSync*)func_00237060(operator new(0x44, str_InputSync, 0, 0), n, cGameComm_mGameComm->mNumSamples);
+        self->InputSync = (cInputSync*)func_00237060(operator new(68, str_InputSync, 0, 0), n, cGameComm_mGameComm->mNumSamples);
     } else {
         GMsrand(BXrand());
     }
     {
-        char* ai = (char*)cAI_cAI(operator new(0xD0, str_AI, 0, 0));
+        char* ai = (char*)cAI_cAI(operator new(208, str_AI, 0, 0));
         self->AI = (cAI*)ai;
         sVEntryVoidGL* vt = *(sVEntryVoidGL**)(ai + 0xCC);
         vt[2].fn(ai + vt[2].delta);
     }
     func_00317550(cAppMan_TheAppMan + 0x38, 55.0f);
-    self->PlaybackMan = (cPlaybackMan*)cPlaybackMan_cPlaybackMan(operator new(0x7C, str_PlaybackMan, 0x20000000, 0), 0x28);
+    self->PlaybackMan = (cPlaybackMan*)cPlaybackMan_cPlaybackMan(operator new(0x7C, str_PlaybackMan, 0x20000000, 0), 40);
     cReplay_init(self->Replay);
     void* race = cBE_getInterface_Fv(SSXApp->BE, 5);
     int replay = cBESaveInterface_bDoReplay;
@@ -313,7 +313,7 @@ extern "C" void cGame_load(cGame* self)
         void* cam = secondPlayer != 0 ? *(void**)(secondPlayer + 0x18) : 0;
         cCamera_switchChaseControllerTargetRider(*(void**)((char*)self->ViewMan + 0x4), cam);
     }
-    char* hud = (char*)cMenuSys_cMenuSys(operator new(0x68, str_MenuSys, 0, 0));
+    char* hud = (char*)cMenuSys_cMenuSys(operator new(104, str_MenuSys, 0, 0));
     self->MenuSys = (cMenuSys*)hud;
     *(void**)(hud + 0x58) = (void*)self->DebugFont;
     *(void**)((char*)self->MenuSys + 0x5C) = (void*)SSXApp->Inputs[0];
@@ -329,11 +329,11 @@ extern "C" void cGame_load(cGame* self)
         cMemMan_free(file);
     func_00317550(cAppMan_TheAppMan + 0x38, 93.0f);
     for (unsigned int i = 0; i < 2; i++) {
-        worlds[i] = cTransitionMan_cTransitionMan(operator new(0x84, str_cTransitionMan, 0, 0), 3, i);
-        lights[i] = cSplashManager_cSplashManager(operator new(0x1030, str_cSplashManager, 0, 0), 2, i);
+        worlds[i] = cTransitionMan_cTransitionMan(operator new(132, str_cTransitionMan, 0, 0), 3, i);
+        lights[i] = cSplashManager_cSplashManager(operator new(4144, str_cSplashManager, 0, 0), 2, i);
     }
-    self->CutSceneTransitionMan = (cCutSceneTransitionMan*)cCutSceneTransitionMan_cCutSceneTransitionMan(operator new(0x48, str_cCutSceneTransitionMan, 0, 0), 3);
-    self->FlagManager = (cFlagManager*)cFlagManager_cFlagManager(operator new(0x1718, str_cFlagManager, 0, 0), 2);
+    self->CutSceneTransitionMan = (cCutSceneTransitionMan*)cCutSceneTransitionMan_cCutSceneTransitionMan(operator new(72, str_cCutSceneTransitionMan, 0, 0), 3);
+    self->FlagManager = (cFlagManager*)cFlagManager_cFlagManager(operator new(5912, str_cFlagManager, 0, 0), 2);
     self->SnowFall = (cSnowFall*)cSnowFall_cSnowFall(operator new(0x60, str_SnowFall, 0, 0), 2);
     self->mUpdateTick = 0;
     cSSXAudio_InGameLoad(gSSXAudio);
@@ -353,7 +353,7 @@ extern "C" void cGame_load(cGame* self)
     ((sUIGL*)self->UI)->data = data;
     ((sUIGL*)self->UI)->p14 = cOVSound_cOVSound(operator new(8, str_OVUISound, 0, 0));
     ((sUIGL*)self->UI)->p8 = (void*)SSXApp->Fonts;
-    sStateGL* st = (sStateGL*)cOVStateHUD1P_cOVStateHUD1P(operator new(0xC98, str_cOVStateHUD1P, 0, 0), (sUIGL*)self->UI, 0);
+    sStateGL* st = (sStateGL*)cOVStateHUD1P_cOVStateHUD1P(operator new(3224, str_cOVStateHUD1P, 0, 0), (sUIGL*)self->UI, 0);
     st->mode = 5;
     cUIStateStack_pushExplicit(((sUIGL*)self->UI)->stack, st);
     self->mPreloadingState = 0;
@@ -370,7 +370,7 @@ extern "C" void cGame_load(cGame* self)
         func_0026F898(self->Replay, D_004A3484);
         cGame_setState((self), 0x10, 0, 0);
     } else {
-        func_00231278((self), 0xA);
+        func_00231278((self), 10);
         do {
             cGame_updateState((self));
             func_003E5398(0);
@@ -378,23 +378,23 @@ extern "C" void cGame_load(cGame* self)
         if (cGameComm_mGameComm != 0)
             cGameComm_syncWait(cGameComm_mGameComm);
         if (cBENewRaceInterface_newRace[0x49] == 0)
-            cGame_setState((self), 0xA, 0, 0);
+            cGame_setState((self), 10, 0, 0);
         else
-            cGame_setState((self), 0xA, 0, 0);
+            cGame_setState((self), 10, 0, 0);
     }
-    sNamedGL* objNode = (sNamedGL*)operator new(0x14, str_AIVisualEffectsMan, 0, 0);
+    sNamedGL* objNode = (sNamedGL*)operator new(20, str_AIVisualEffectsMan, 0, 0);
     cObjNode_cObjNode1(objNode, 6);
     objNode->vtbl = D_0047CB60;
     void* r = cAIVisualEffectsMan_construct();
     self->AIVisualEffectsMan = (cAIVisualEffectsObjNode*)objNode;
     objNode->obj = r;
-    objNode = (sNamedGL*)operator new(0x14, str_VisualEffectsMan, 0, 0);
+    objNode = (sNamedGL*)operator new(20, str_VisualEffectsMan, 0, 0);
     cObjNode_cObjNode1(objNode, 3);
     objNode->vtbl = D_0047D070;
     r = cVisualEffectsMan_construct();
     self->VisualEffectsMan = (cVisualEffectsObjNode*)objNode;
     objNode->obj = r;
-    objNode = (sNamedGL*)operator new(0x14, str_SSXStatsMan, 0, 0);
+    objNode = (sNamedGL*)operator new(20, str_SSXStatsMan, 0, 0);
     cObjNode_cObjNode1(objNode, 4);
     objNode->vtbl = cSSXStatsObjNode_vtbl;
     r = func_002D2100();
@@ -520,10 +520,10 @@ extern "C" void cGame_loadTrack(cGame* self)
     char*& ent = (char*)self->FogMan;
     cWorld_load(self->World, name.p, self->BXNash);
     *(void**)&self->SkyBox = cSkyBox_cSkyBox(cMemMan_alloc(0x18, str_SkyBox, 0, 0));
-    *(void**)&self->SectionMan = cSectionMan_cSectionMan(cMemMan_alloc(0x1D4, str_SectionMan, 0, 0), ((char*)self));
+    *(void**)&self->SectionMan = cSectionMan_cSectionMan(cMemMan_alloc(468, str_SectionMan, 0, 0), ((char*)self));
     tbl = new (str_SurfPropCache, 0, 0) sTbl_F6B0;
     func_002C2F18(self->SurfPropCache);
-    *(void**)&self->WorldSound = func_002B6AA0(cMemMan_alloc(0x250, str_cWorldSound, 0, 0), 0);
+    *(void**)&self->WorldSound = func_002B6AA0(cMemMan_alloc(592, str_cWorldSound, 0, 0), 0);
     cBXNash_initTheAIFwdDiffCache(self->BXNash);
     sBXStr_F6B0 dir;
     dir.p = cBXString_EmptyString;
@@ -552,7 +552,7 @@ extern "C" void cGame_loadTrack(cGame* self)
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&camBasePath, 2);
     }
-    char* obj = (char*)cMemMan_alloc(0x3010, str_cPS2FogParticleMan, 0, 0);
+    char* obj = (char*)cMemMan_alloc(12304, str_cPS2FogParticleMan, 0, 0);
     func_002DBF80(obj);
     *(void***)(obj + 4) = D_004882E0;
     new (obj + 0x10) sElemFF_F6B0[256];
@@ -723,14 +723,14 @@ extern "C" void cGame_purge(char* self)
     operator_delete(*(int**)(self + 0x44));
     VDelete_FA98(*(char**)(self + 0x14), 0xC, 8);
     VDelete_FA98(*(char**)(self + 0x18), 0x4, 8);
-    VDelete_FA98(*(char**)(self + 0x1C), 0x649C, 8);
+    VDelete_FA98(*(char**)(self + 0x1C), 25756, 8);
     cPathSys_purgePaths(gPaths);
     cBXNash_purgeTheAIFwdDiffCache(*(void**)(self + 0x20));
     if (*(void**)(self + 0xA4) != 0) cMenuSys__cMenuSys(*(void**)(self + 0xA4), 3);
     void* bm = &D_004A5988_gl;
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purge(bm);
-    VDelete_FA98(*(char**)(self + 0x30), 0x494, 8);
+    VDelete_FA98(*(char**)(self + 0x30), 1172, 8);
     if (*(void**)(self + 0x38) != 0) func_00229278(*(void**)(self + 0x38), 3);
     if (*(void**)(self + 0x3C) != 0) func_00343B28(*(void**)(self + 0x3C), 3);
     if (*(void**)(self + 0x40) != 0) cMultiParticleMan__cMultiParticleMan(*(void**)(self + 0x40), 3);
@@ -739,7 +739,7 @@ extern "C" void cGame_purge(char* self)
     cCameraTriggerMan_purge(gCamTriggerMan);
     cRenderStateMan_purge();
     if (*(void**)(self + 0x84) != 0) cGameViewMan__cGameViewMan(*(void**)(self + 0x84), 3);
-    VDelete_FA98(*(char**)(self + 0xC), 0xCC, 8);
+    VDelete_FA98(*(char**)(self + 0xC), 204, 8);
     if (*(void**)(self + 0x28) != 0) cReplay__cReplay(*(void**)(self + 0x28), 3);
     VDelete_FA98(*(char**)(self + 0x98), 0x0, 8);
     if (*(void**)(self + 0x78) != 0) cSectionMan__cSectionMan(*(void**)(self + 0x78), 3);
@@ -2602,7 +2602,7 @@ extern "C" int func_00231D60(void* self)
     col[2] = 0.0f;
     col[3] = 0.0f;
     func_0038EC40((void*)D_004A28AC, p0, p1, col, 0.0f);
-    *(int*)&GrMan->m_pCurrentDrawState -= 0x14;
+    *(int*)&GrMan->m_pCurrentDrawState -= 20;
     return a >= 1.0f;
     }
     return 0;
@@ -2740,7 +2740,7 @@ extern "C" void func_00231FC0(sFade_1FC0* self)
     *((cGfx_1FC0*)GrMan)->stateTop = D_00501420_1FC0;
     ((cGfx_1FC0*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_1FC0*)GrMan)->stateTop->f4_20 = 0;
-    ((cGfx_1FC0*)GrMan)->stateTop->f4_12 = 0x14;
+    ((cGfx_1FC0*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_1FC0*)GrMan)->stateTop->f4_2 = 5;
     ((cGfx_1FC0*)GrMan)->stateTop->f8_5 = 0x1F;
     ((cGfx_1FC0*)GrMan)->SetTexture(t4mat_Identity);

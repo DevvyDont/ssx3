@@ -37,7 +37,7 @@ struct sVidParams38E8 {
 extern "C" int cVidEngine_ReadyVideo(void** self, int file)
 {
     if (*self != 0) return 0;
-    *self = func_002533C8(cMemMan_alloc(0x44, str_VidEnginePlayer, 0x100, 0));
+    *self = func_002533C8(cMemMan_alloc(68, str_VidEnginePlayer, 0x100, 0));
     sVidParams38E8 params;
     func_00253390(&params);
     //S

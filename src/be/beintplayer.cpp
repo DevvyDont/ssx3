@@ -195,7 +195,7 @@ extern "C" int func_00145C38(void* self, int index)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = charId * 0xF88 + profile * 0x9B50;
+    int off = charId * 3976 + profile * 39760;
     char* charRecord = (char*)cBELibrary_profileLib + off;
     return *(int*)charRecord;
 }
@@ -213,7 +213,7 @@ extern "C" void func_00145CB0(void* self, int index, int value)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = charId * 0xF88 + profile * 0x9B50;
+    int off = charId * 3976 + profile * 39760;
     char* charRecord = (char*)cBELibrary_profileLib + off;
     *(int*)charRecord = value;
 }
@@ -242,7 +242,7 @@ extern "C" int cBENewPlayerInterface_isFirstTimeOnTrack(void* self, int index, i
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = profile * 0x9B50 + c * 0xF88;
+    int off = profile * 39760 + c * 3976;
     char* p = (char*)cBELibrary_profileLib + off;
     int mask = 1 << bit;
     return (*(int*)(p + 0xACC) & mask) == 0;
@@ -345,16 +345,16 @@ extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int iProfileIndex,
     {
         if (peak == 1)
         {
-            int bOff = iCharacterID * 0xF88;
-            int aOff = iProfileIndex * 0x9B50;
+            int bOff = iCharacterID * 3976;
+            int aOff = iProfileIndex * 39760;
             int off = bOff + aOff;
             char* charProfile = (char*)cBELibrary_profileLib + off;
             return (int)(*(ulong*)(charProfile + 0x278) >> 12) & 1;
         }
         else
         {
-            int bOff = iCharacterID * 0xF88;
-            int aOff = iProfileIndex * 0x9B50;
+            int bOff = iCharacterID * 3976;
+            int aOff = iProfileIndex * 39760;
             int off = bOff + aOff;
             char* charProfile = (char*)cBELibrary_profileLib + off;
             return (int)(*(ulong*)(charProfile + 0x278) >> 13) & 1;
@@ -431,29 +431,29 @@ extern "C" int func_00146150(void* self, int index, int kind, int flag)
     signed char charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
     if (flag) {
         if (kind == 0) {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 3) & 1;
         } else if (kind == 1) {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 4) & 1;
         } else if (kind == 2) {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 5) & 1;
         }
     } else {
         if (kind == 0) {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 0) & 1;
         } else if (kind == 1) {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 1) & 1;
         } else if (kind == 2) {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 2) & 1;
         }
@@ -524,19 +524,19 @@ extern "C" int func_001464D0(void* self, int index, int c, int kind, int flag)
         switch (kind) {
         case 0:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
+            int off = c * 3976 + profile * 39760;
             char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 6) & 1;
         }
         case 1:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
+            int off = c * 3976 + profile * 39760;
             char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 7) & 1;
         }
         case 2:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
+            int off = c * 3976 + profile * 39760;
             char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 8) & 1;
         }
@@ -545,19 +545,19 @@ extern "C" int func_001464D0(void* self, int index, int c, int kind, int flag)
         switch (kind) {
         case 0:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
+            int off = c * 3976 + profile * 39760;
             char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 9) & 1;
         }
         case 1:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
+            int off = c * 3976 + profile * 39760;
             char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 10) & 1;
         }
         case 2:
             {
-            int off = c * 0xF88 + profile * 0x9B50;
+            int off = c * 3976 + profile * 39760;
             char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(p + 0x278) >> 11) & 1;
         }
@@ -591,19 +591,19 @@ extern "C" int func_001466A0(void* self, int index)
         switch (kind) {
         case 0:
             {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 6) & 1;
         }
         case 1:
             {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 7) & 1;
         }
         case 2:
             {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 8) & 1;
         }
@@ -612,19 +612,19 @@ extern "C" int func_001466A0(void* self, int index)
         switch (kind) {
         case 0:
             {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 9) & 1;
         }
         case 1:
             {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 10) & 1;
         }
         case 2:
             {
-            int off = charId * 0xF88 + profile * 0x9B50;
+            int off = charId * 3976 + profile * 39760;
             char* charRecord = (char*)cBELibrary_profileLib + off;
             return (int)(*(long*)(charRecord + 0x278) >> 11) & 1;
         }
@@ -708,32 +708,32 @@ extern "C" int cBENewPlayerInterface_isEventLocked(void* self, int index, int ch
     int profile = cBELibrary_getProfileIndex(index);
     switch (kind) {
     case 6: {
-        int off = character * 0xF88 + profile * 0x9B50;
+        int off = character * 3976 + profile * 39760;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 14) & 1;
     }
     case 7: {
-        int off = character * 0xF88 + profile * 0x9B50;
+        int off = character * 3976 + profile * 39760;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 15) & 1;
     }
     case 8: {
-        int off = character * 0xF88 + profile * 0x9B50;
+        int off = character * 3976 + profile * 39760;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 16) & 1;
     }
     case 9: {
-        int off = character * 0xF88 + profile * 0x9B50;
+        int off = character * 3976 + profile * 39760;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 17) & 1;
     }
     case 10: {
-        int off = character * 0xF88 + profile * 0x9B50;
+        int off = character * 3976 + profile * 39760;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 18) & 1;
     }
     case 11: {
-        int off = character * 0xF88 + profile * 0x9B50;
+        int off = character * 3976 + profile * 39760;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 19) & 1;
     }
@@ -801,7 +801,7 @@ extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charID = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = charID * 0xF88 + profile * 0x9B50;
+    int off = charID * 3976 + profile * 39760;
     char* charProfile = (char*)cBELibrary_profileLib + off;
     return *(int*)(charProfile + 0x27C);
 }
@@ -827,7 +827,7 @@ extern "C" void cBENewPlayerInterface_setLastHub(void* self, int index, int valu
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = c * 0xF88 + profile * 0x9B50;
+    int off = c * 3976 + profile * 39760;
     char* p = (char*)cBELibrary_profileLib + off;
     *(int*)(p + 0x27C) = value;
 }
@@ -971,7 +971,7 @@ extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx)
     char* name = (char*)&cBENewPlayerInterface_tempPlayers[idx];
     if (strlen(name) == 0)
     {
-        unsigned short buf[0x68];
+        unsigned short buf[104];
         char* db = (char*)SSXApp->FELocale;
         sVtEntry_00147170* vt = *(sVtEntry_00147170**)(db + 4);
         sprintf1(buf, vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_MEMPlayerName)), idx + 1);
@@ -1503,7 +1503,7 @@ extern "C" void* func_00147908(void* self, int index)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9B50 + charId * 0xF88;
+    char* charRecord = (char*)cBELibrary_profileLib + profile * 0x9B50 + charId * 3976;
     return charRecord + 0xE38;
 }
 #endif
@@ -1520,7 +1520,7 @@ extern "C" int func_00147980(void* self, int index, int bit)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = profile * 0x9B50 + charId * 0xF88;
+    int off = profile * 39760 + charId * 3976;
     char* charRecord = (char*)cBELibrary_profileLib + off;
     charRecord = charRecord + (bit / 32) * 4;
     int mask = 1 << bit;
@@ -1540,7 +1540,7 @@ extern "C" void func_00147A30(void* self, int index, int bit, int on)
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = profile * 0x9B50 + charId * 0xF88;
+    int off = profile * 39760 + charId * 3976;
     char* charRecord = (char*)cBELibrary_profileLib + off;
     charRecord += 0xF08;
     int w = bit / 32;
@@ -1880,37 +1880,37 @@ extern "C" int func_00148158(void* self, int profile, unsigned int stat)
     int charId = cBELibrary_getCharacterID(profile);
     switch (stat) {
     case 0: {
-        int off = charId * 0xF88 + profile * 0x9B50;
+        int off = charId * 3976 + profile * 39760;
         char* charRecord = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(charRecord + 0xBDF);
     }
     case 1: {
-        int off = charId * 0xF88 + profile * 0x9B50;
+        int off = charId * 3976 + profile * 39760;
         char* charRecord = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(charRecord + 0xBE0);
     }
     case 2: {
-        int off = charId * 0xF88 + profile * 0x9B50;
+        int off = charId * 3976 + profile * 39760;
         char* charRecord = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(charRecord + 0xBE1);
     }
     case 3: {
-        int off = charId * 0xF88 + profile * 0x9B50;
+        int off = charId * 3976 + profile * 39760;
         char* charRecord = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(charRecord + 0xBE2);
     }
     case 4: {
-        int off = charId * 0xF88 + profile * 0x9B50;
+        int off = charId * 3976 + profile * 39760;
         char* charRecord = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(charRecord + 0xBE3);
     }
     case 5: {
-        int off = charId * 0xF88 + profile * 0x9B50;
+        int off = charId * 3976 + profile * 39760;
         char* charRecord = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(charRecord + 0xBE4);
     }
     case 6: {
-        int off = charId * 0xF88 + profile * 0x9B50;
+        int off = charId * 3976 + profile * 39760;
         char* charRecord = (char*)cBELibrary_profileLib + off;
         return *(signed char*)(charRecord + 0xBE5);
     }

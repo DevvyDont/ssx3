@@ -90,19 +90,19 @@ static inline int ItemType_7D38(char* item)
 
 extern "C" int func_00187D38(char* code)
 {
-    void* gear = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-    void* unlocks = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* gear = cBE_getInterface_Fv(cBE_getBE(), 11);
+    void* unlocks = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* profiles = cBE_getInterface_Fv(cBE_getBE(), 9);
     char buf[0x80];
     strcpy(buf, code);
     func_002C2868(buf);
     if (GetHashValue32(buf) == 0x7E68D) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0xB, 0);
+            func_00158618(unlocks, 0, i, 11, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x699649F) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0xD, 0);
+            func_00158618(unlocks, 0, i, 13, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x80C4F45) {
         for (int i = 0; i < 10; i++)
@@ -110,35 +110,35 @@ extern "C" int func_00187D38(char* code)
         return 1;
     } else if (GetHashValue32(buf) == 0xFA26044) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x11, 0);
+            func_00158618(unlocks, 0, i, 17, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x539AB42) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0xA, 0);
+            func_00158618(unlocks, 0, i, 10, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x61C8197) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x12, 0);
+            func_00158618(unlocks, 0, i, 18, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x64694E5) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x13, 0);
+            func_00158618(unlocks, 0, i, 19, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x3F22E2B) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x14, 0);
+            func_00158618(unlocks, 0, i, 20, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xCD28689) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x15, 0);
+            func_00158618(unlocks, 0, i, 21, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xB582D1C) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x16, 0);
+            func_00158618(unlocks, 0, i, 22, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x1CB90E5) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x17, 0);
+            func_00158618(unlocks, 0, i, 23, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x715E0E4) {
         for (int i = 0; i < 10; i++)
@@ -146,11 +146,11 @@ extern "C" int func_00187D38(char* code)
         return 1;
     } else if (GetHashValue32(buf) == 0xF3223E) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x19, 0);
+            func_00158618(unlocks, 0, i, 25, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xEAFC69E) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x1B, 0);
+            func_00158618(unlocks, 0, i, 27, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xDD36D88) {
         for (int i = 0; i < 10; i++)
@@ -158,7 +158,7 @@ extern "C" int func_00187D38(char* code)
         return 1;
     } else if (GetHashValue32(buf) == 0xDE3475) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x1A, 0);
+            func_00158618(unlocks, 0, i, 26, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x82DE683) {
         for (int i = 0; i < 10; i++)

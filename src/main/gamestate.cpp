@@ -496,7 +496,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
         int range = locationId >= 14 && locationId <= 16;
         if (*(int*)((char*)self + 0x14) != 0) {
             if (locationId == 14) {
-                cSSXScriptEngine_AddToNISListByVideoCategory(ScriptEngine, 1, 0x1D, 3);
+                cSSXScriptEngine_AddToNISListByVideoCategory(ScriptEngine, 1, 29, 3);
                 func_0028CD48(func_0028B180());
                 func_002B3A70((char*)func_0028B180() + 0x118);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0, 3, 0, -1, -1, -1);
@@ -504,12 +504,12 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
             } else {
                 cSSXScriptEngine_AddToNISListByVideoCategory(ScriptEngine, 1, locationId == 15 ? 0x1E : 0x1F, 3);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x10, 3, 0, -1, -1, -1);
-                cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x11, 3, 0, -1, -1, -1);
+                cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 17, 3, 0, -1, -1, -1);
             }
             cSSXScriptEngine_ReadyNISList(ScriptEngine, 1);
         } else if (*(int*)(sectionMan + 0x1C8) != 0 && range) {
             cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x10, 3, 0, -1, -1, -1);
-            cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x11, 3, 0, -1, -1, -1);
+            cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 17, 3, 0, -1, -1, -1);
         }
         *(int*)((char*)self + 0x10) = 1;
         break;
@@ -697,7 +697,7 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
     if (cSSXScriptEngine_IsInTransportSequence(ScriptEngine))
         *(int*)((char*)self + 0x1C) = 1;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    cBERewardInterface_clearUserAwards(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    cBERewardInterface_clearUserAwards(cBE_getInterface_Fv(cBE_getBE(), 13));
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
     int flag = beRaceDB->cGamePath;
     int mode = beRaceDB->cGameMode;
@@ -1208,12 +1208,12 @@ extern "C" void cGFSessionTeleportState_gainFocus(void* self)
     cWScriptMan_failActiveLocalMission(cWScriptMan_TheWScriptMan);
     float one = 1.0f;
     cGameModeMan_initGameMode(gm, 0xC);
-    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xA);
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 10);
     cGame_partialRestart(SSXApp->Game);
     cRider_putAtStartpoint(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), *(int*)(iface + 0x10), 2);
     cRider_cleanupAfterPutAt(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
     void* transitionMan = func_00230698(SSXApp->Game, 0);
-    char* fade = (char*)cTransitionObj_operator_new_sz(0x14);
+    char* fade = (char*)cTransitionObj_operator_new_sz(20);
     sColor_236058 colour;
     colour.r = one;
     colour.g = one;
@@ -1285,7 +1285,7 @@ extern "C" void* func_00236208(void* self)
     cGameState_mpGame = 0;
     *(void**)((char*)self + 0xC) = cGFUserSelectState_vtbl;
     *(int*)((char*)self + 0x0) = 4;
-    *(int*)((char*)self + 0x18) = 0x17;
+    *(int*)((char*)self + 0x18) = 23;
     *(int*)((char*)self + 0x4) = 0;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0x14) = 0;
@@ -1330,7 +1330,7 @@ extern "C" void cGFUserSelectState_gainFocus(void* self, int mode)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 3);
     *(int*)(*(char**)(*(char**)(*(char**)(cGameState_mpGame + 0xC) + 0x40) + 0x18) + 0x2F8) = 0;
-    *(int*)((char*)self + 0x18) = 0x17;
+    *(int*)((char*)self + 0x18) = 23;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x14) = mode;
     *(int*)((char*)self + 0x8) = 0;
@@ -1344,14 +1344,14 @@ extern "C" void cGFUserSelectState_gainFocus(void* self, int mode)
         cGame_partialRestart(SSXApp->Game);
     int curMode = *(int*)((char*)self + 0x14);
     if (curMode == 0) {
-        cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x16, 3, 0, -1, -1, -1);
-        cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x17, 1, 0, -1, -1, -1);
+        cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 22, 3, 0, -1, -1, -1);
+        cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 23, 1, 0, -1, -1, -1);
         cSSXScriptEngine_ReadyNISList(ScriptEngine, 1);
         cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 0);
     } else if (curMode >= 0) {
         if (curMode < 4) {
             if (!isOne_6250(curMode))
-                cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0xB, 3, 0, -1, -1, -1);
+                cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 11, 3, 0, -1, -1, -1);
             cSSXScriptEngine_ReadyNISList(ScriptEngine, 1);
             cRider_initAlways(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18));
             cSSXScriptEngine_PlayNISList(ScriptEngine, 1, *(int*)((char*)self + 0x14) == 2, 0);
@@ -1458,7 +1458,7 @@ extern "C" void cGFUserSelectState_update(void* self)
                 cUITemplate_MAP_mMapStyle = 3;
             else
                 cUITemplate_MAP_mMapStyle = 4;
-            cOVStateManager_triggerOverlay(0x21);
+            cOVStateManager_triggerOverlay(33);
             push2_6418();
             *(int*)((char*)self + 0x8) = 0;
         }
@@ -1482,7 +1482,7 @@ extern "C" void cGFUserSelectState_update(void* self)
             int destInBackcountry = (unsigned)(destLocation - 0xE) < 3;
             if (destLocation == curLocation && !destInBackcountry) {
                 *(int*)((char*)self + 0x10) = 3;
-                ((sIface_6418*)cBE_getInterface_Fv(cBE_getBE(), 0xA))->f10 = one;
+                ((sIface_6418*)cBE_getInterface_Fv(cBE_getBE(), 10))->f10 = one;
                 cGame_setState(SSXApp->Game, 0xF, 0, 0);
                 return;
             }
@@ -1495,7 +1495,7 @@ extern "C" void cGFUserSelectState_update(void* self)
     case 2:
         if (*(int*)((char*)self + 0x14) != 0) {
             int r = cSSXScriptEngine_GetNISListScriptCategory(ScriptEngine, 1, 0);
-            if (r == 0xE || r == 0x14) {
+            if (r == 0xE || r == 20) {
                 if (*(int*)((char*)self + 0x8) == 0) {
                     if (*(int*)((char*)self + 0x1C) != 0)
                         return;
@@ -1509,7 +1509,7 @@ extern "C" void cGFUserSelectState_update(void* self)
                 ns = 3;
                 break;
             }
-            if (r == 0xD || r == 0x13)
+            if (r == 13 || r == 19)
                 cBXLoadIndicator_Show(SSXApp->Game->LoadIndicator, 0);
             return;
         }
@@ -1604,7 +1604,7 @@ extern "C" void* func_00236868(void* self)
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
     *(void**)((char*)self + 0xC) = D_0047D2C8;
-    *(int*)((char*)self + 0x0) = 0xA;
+    *(int*)((char*)self + 0x0) = 10;
     *(int*)((char*)self + 0x4) = 0;
     return self;
 }
@@ -1686,7 +1686,7 @@ extern "C" void func_00236960(void* self)
         if (cSectionMan_isLoaded(game, *(int*)(game + 0x1BC)) != 0) {
             char* aiPlayer = *(char**)((char*)SSXApp->Game->AI + 0x40);
             sVec4_236960 pos = cRider_GetNISEndPosition(*(void**)(aiPlayer + 0x18));
-            char* viewEntry = *cache + idx * 0x50;
+            char* viewEntry = *cache + idx * 80;
             *(int*)(viewEntry + 0x250) = 1;
             cWorldView_setFocus(*cache + 0x10, idx, &pos, 45000.0f);
             *(int*)((char*)self + 0x10) = 1;
@@ -2130,7 +2130,7 @@ extern "C" void cGFReplayStartState_gainFocus(void)
     cWScriptMan_initMissions(cWScriptMan_TheWScriptMan);
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
     cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
-    cOVStateManager_triggerOverlay(0x11);
+    cOVStateManager_triggerOverlay(17);
 }
 #endif
 
@@ -2277,7 +2277,7 @@ extern "C" void* cInputSync_createlocalinput(sOwner_237140* self, int* realinput
     e->f4 = 0;
     e->f8 = self->f0;
     e->fC = realinput[0];
-    e->f10 = (int*)cMemMan_alloc(0x2A4, str_SyncedPad, 0, 0);
+    e->f10 = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
     *e->f10 = 0;
     void* o = initObj_237140(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)e->f10, realinput[1]);
     e->f14 = o;
@@ -2348,7 +2348,7 @@ extern "C" void* cInputSync_createremoteinput(sOwner_237280* self, int realinput
     e->f4 = 0;
     e->f8 = self->f0;
     e->fC = 0;
-    e->f10 = (int*)cMemMan_alloc(0x2A4, str_SyncedPad, 0, 0);
+    e->f10 = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
     *e->f10 = 0;
     void* o = initObj_237280(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)e->f10, realinputmap);
     e->f14 = o;

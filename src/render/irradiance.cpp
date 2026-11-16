@@ -33,7 +33,7 @@ extern "C" void cIrradianceDataBase_Load(cIrradianceDataBase_ACD0* self)
     int n = file[0];
     char* src = (char*)(file + 1);
     int indexSize = n * 8;
-    int sampleSize = n * 0xA0;
+    int sampleSize = n * 160;
     self->count = n;
     self->index = operator_new_tag(indexSize, str_IrradianceNames, 0, 0);
     char* src2 = src + indexSize;

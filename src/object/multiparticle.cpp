@@ -42,7 +42,7 @@ extern "C" void cMultiParticle_setupMultiParticle(sMultiParticle* self)
 {
     sMPRef** slot = &self->refs;
     *slot = new (str_InstIds, 0x20000000, 0) sMPRef[self->count];
-    self->sys = cStaticEmitter_cStaticEmitter(cMemMan_alloc(0x190, str_Emitter, 0x20000000, 0));
+    self->sys = cStaticEmitter_cStaticEmitter(cMemMan_alloc(400, str_Emitter, 0x20000000, 0));
     for (int i = 0; i < self->count; i++) {
         self->refs[i].id = 0xFFFFFFFF;
     }
@@ -290,7 +290,7 @@ extern "C" void cMultiParticle_writeToReplayFrame(cMultiParticle* self, void* st
     writeEntry = &(*(sSerVEntry_58380**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, &self->NumInst, 4);
     writeEntry = &(*(sSerVEntry_58380**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, self->Particle, 0xD8);
+    writeEntry->fn((char*)stream + writeEntry->delta, self->Particle, 216);
     cStaticEmitter_writeToReplayFrame(self->Emitter, stream);
     writeEntry = &(*(sSerVEntry_58380**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x40, 0x10);
@@ -354,7 +354,7 @@ extern "C" void* func_003584F0(void* self, void* a1)
 {
     char* s = (char*)self;
     int i;
-    func_00354850(self, a1, 0x12);
+    func_00354850(self, a1, 18);
     *(void***)(s + 0xC) = cRailManNode_vtbl;
     unsigned int* p = (unsigned int*)(s + 0x18);
     for (i = 0x7F; i != -1; i--, p++) {
@@ -733,7 +733,7 @@ extern "C" void func_00358998(void* self, int idx);
 extern "C" void func_00358B28(sMPRef8B28 key, int add)
 {
     if (D_004A4040 == 0) {
-        func_003584F0(cMemMan_alloc(0x218, str_RailMan_b, 0x20000000, 0), (void*)1);
+        func_003584F0(cMemMan_alloc(536, str_RailMan_b, 0x20000000, 0), (void*)1);
     }
     sMPRef8B28 kFree;
     int idx = -1;
@@ -1025,7 +1025,7 @@ extern "C" void func_00359030(void*);
 
 extern "C" void func_00358FD0(void* self, int msg)
 {
-    if (msg == 0x82) {
+    if (msg == 130) {
         if (*(unsigned short*)((char*)self + 0x14) == 0) {
             *(float*)((char*)self + 0x10) = *(float*)((char*)self + 0x38);
             func_00359030(self);
@@ -1350,7 +1350,7 @@ extern "C" void func_00341FE8_set(void* self, int id, float v) __asm__("func_003
 
 extern "C" void func_003593D0(void* self, int id, float signalArg)
 {
-    if (id == 0x8C) {
+    if (id == 140) {
         *(float*)((char*)self + 0x6C) += signalArg * 0.03333333507180214f;
     } else {
         func_00341FE8_set(self, id, signalArg);

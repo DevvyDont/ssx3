@@ -745,7 +745,7 @@ extern "C" void cReplay_reset(cReplay* self)
         if (*pp) func_0026D168(*pp);
         highlight->fB0 = 0;
         highlight->id = none;
-        MEM_fill(highlightData, 0, 0xAC);
+        MEM_fill(highlightData, 0, 172);
         highlightData += 0xB4;
         pp++;
         highlight->id = i;
@@ -945,7 +945,7 @@ extern "C" void cReplay_update(cReplay* self)
         return;
     case 3: {
         void* o = D_004A28A8_F4A8->players[self->PadNum];
-        if (o != 0 && cInput_getState(o, 0x6B))
+        if (o != 0 && cInput_getState(o, 107))
             cReplay_updateInput((self), 0);
         cReplay_processInput(self);
         return;
@@ -1211,14 +1211,14 @@ extern "C" void cReplay_updateCameraSelect(int* self)
         return;
     }
     void* pad = *(void**)((char*)SSXApp + (self[0x28 / 4] << 2) + 0xB0);
-    if (cInput_getState(pad, 0x6C) != 0) {
+    if (cInput_getState(pad, 108) != 0) {
         cGameViewMan_updateAll(SSXApp->Game->ViewMan);
     }
-    if (D_00445438[self[0x630 / 4]] != 0xB) {
+    if (D_00445438[self[1584 / 4]] != 11) {
         return;
     }
-    if (cInput_getValue(pad, 0x31) != 0.0f || cInput_getValue(pad, 0x30) != 0.0f ||
-        cInput_getValue(pad, 0x32) != 0.0f || cInput_getValue(pad, 0x33) != 0.0f) {
+    if (cInput_getValue(pad, 49) != 0.0f || cInput_getValue(pad, 0x30) != 0.0f ||
+        cInput_getValue(pad, 50) != 0.0f || cInput_getValue(pad, 51) != 0.0f) {
         cGameViewMan_updateAll(SSXApp->Game->ViewMan);
     }
 }
@@ -1295,22 +1295,22 @@ extern "C" int cReplay_updateInput_impl(void* self, int debug)
     int r = 0;
     void* pad = *(void**)(g + (*(int*)(s + 0x28) << 2) + 0xB0);
     if (*(int*)(s + 0x61C) == 0 && *(int*)(s + 0x620) == 0) {
-        if (cInput_getState(pad, 0x6A)) {
+        if (cInput_getState(pad, 106)) {
             *(int*)(s + 0x1C) = 10;
             *(int*)(s + 0x20) = 0;
             if (!isStateFB88(s, 3)) r = 7;
             else r = isIdleFB88(s) ? 0 : 5;
-        } else if (cInput_getState(pad, 0x6B)) {
+        } else if (cInput_getState(pad, 107)) {
             if (*(int*)(s + 0x1C) > 0) *(int*)(s + 0x1C) -= 1;
             *(int*)(s + 0x20) ^= 1;
             if (*(int*)(s + 0x1C) <= 0 && *(int*)(s + 0x20) == 0) {
                 if (!isStateFB88(s, 3)) r = 7;
                 else r = isIdleFB88(s) ? 0 : 5;
             }
-        } else if (cInput_getState(pad, 0x67)) {
+        } else if (cInput_getState(pad, 103)) {
             if (!isStateFB88(s, 3)) r = 7;
             else r = isIdleFB88(s) ? 0 : 6;
-        } else if (cInput_getState(pad, 0x66)) {
+        } else if (cInput_getState(pad, 102)) {
             if (debug) {
                 cGame_stopReplay(SSXApp->Game);
                 *(int*)(s + 0x618) = 8;
@@ -1318,7 +1318,7 @@ extern "C" int cReplay_updateInput_impl(void* self, int debug)
                 *(int*)(s + 0x618) = 7;
             }
             return 0;
-        } else if (cInput_getState(pad, 0x68)) {
+        } else if (cInput_getState(pad, 104)) {
             if (!isStateFB88(s, 3)) r = 7;
             else if (!isIdleFB88(s)) {
                 v->vt[2].fn((char*)v + v->vt[2].delta, 2);
@@ -1326,7 +1326,7 @@ extern "C" int cReplay_updateInput_impl(void* self, int debug)
             } else {
                 v->vt[2].fn((char*)v + v->vt[2].delta, 4);
             }
-        } else if (cInput_getState(pad, 0x69)) {
+        } else if (cInput_getState(pad, 105)) {
             if (isStateFB88(s, 3)) {
                 if (!isIdleNoCamFB88(s)) {
                     v->vt[2].fn((char*)v + v->vt[2].delta, 2);
@@ -1337,7 +1337,7 @@ extern "C" int cReplay_updateInput_impl(void* self, int debug)
             } else {
                 r = 7;
             }
-        } else if (cInput_getState(pad, 0x6C)) {
+        } else if (cInput_getState(pad, 108)) {
             v->vt[2].fn((char*)v + v->vt[2].delta, 2);
             cReplay_cycleReplayCameraAlgorithm((cReplay*)self);
         }

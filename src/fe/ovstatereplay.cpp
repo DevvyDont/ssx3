@@ -78,7 +78,7 @@ extern "C" int cOVState_REPLAY_onWidgetMenu(void* self, int pMenu, unsigned int 
     register int result FM_REG("$2") = 0;
     if (*(int*)((char*)self + 0x9c) != 0) {
         if (key - 2 <= 3) {
-            result = 0x101;
+            result = 257;
         }
     }
     return result;
@@ -195,14 +195,14 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
     if (pInput->port != *(int*)(replay_20DF38() + 0x28)) {
         return 1;
     }
-    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 0xCA)) {
+    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 202)) {
         if (self->pos == self->end || self->speed == 4) {
             snd->play(2);
         }
         self->speed = -4;
         return 1;
     }
-    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 0xCB)) {
+    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 203)) {
         if (self->pos == self->start || self->speed == -4) {
             snd->play(2);
         }
@@ -226,7 +226,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         switch (*(int*)(*(char**)(obj + 0xA0) + 0x18)) {
         case 0:
             cReplay_stopReplay(replay_20DF38());
-            cOVStateManager_triggerOverlay(0x12);
+            cOVStateManager_triggerOverlay(18);
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             break;
         case 1: {
@@ -260,7 +260,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         *(int*)(obj + 0x90) |= 8;
         return 1;
     }
-    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 0xCC)) {
+    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 204)) {
         snd->play(6);
         self->hudHidden ^= 1;
         if (self->hudHidden != 0) {

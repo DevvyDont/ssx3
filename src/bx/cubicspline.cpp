@@ -37,7 +37,7 @@ extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int 
         func_0031D790(self);
     }
     self->flags.count = n - 1;
-    self->data = operator_new_tag(self->flags.count * 0x14, str_cCSICubicSpline, 0, 0);
+    self->data = operator_new_tag(self->flags.count * 20, str_cCSICubicSpline, 0, 0);
     self->flags.b1 = 1;
     self->flags.f3 = 0;
 }
@@ -347,7 +347,7 @@ INCLUDE_ASM("bx/cubicspline", func_0031E260__FPv);
 void func_0031E260(void* self)
 {
     char* bin = (char*)self + 0x38;
-    for (int i = 0x5E; i >= 0; i--) {
+    for (int i = 94; i >= 0; i--) {
         *(void**)(bin + 0xC) = bin;
         *(void**)(bin + 0x8) = bin;
         bin += 8;
@@ -1685,11 +1685,11 @@ extern "C" int func_0031FE30(void** self, int kind, unsigned int val) {
     func_0031EEE8(self, (sMState_31EEE8*)ms);
     switch (kind) {
     case 1:
-        if (val < 0x51U) {
+        if (val < 81U) {
             int low = (*(int*)ms) & 3;
             int res;
             if (val != 0) {
-                unsigned int rounded = val + 0x13;
+                unsigned int rounded = val + 19;
                 if (rounded >= 0x10U) {
                     res = (rounded & 0xFFFFFFF0) | low;
                 } else {
@@ -1769,7 +1769,7 @@ extern "C" void cDynamicMemMan_init(void* self, unsigned int base, unsigned int 
     *(unsigned int*)((char*)self + 0x4) = start;
     *(unsigned int*)((char*)self + 0x0) = start;
     *(unsigned int*)((char*)self + 0xC) = (size - (start - base)) & 0xFFFFFFF0;
-    MEM_fill((void*)start, 0, 0x378);
+    MEM_fill((void*)start, 0, 888);
     *(unsigned int*)((char*)self + 0x4) += 0x380;
     *(unsigned int*)((char*)self + 0xC) -= 0x380;
     *(unsigned int*)((char*)self + 0x8) = *(unsigned int*)((char*)self + 0x4);
@@ -1910,7 +1910,7 @@ void* func_00320158(void* self)
     *(void**)((char*)self + 0x6000) = self;
     char* p = (char*)self;
     char* next = (char*)self + 0x20;
-    for (unsigned int i = 0; i < 0x2FF; i++) {
+    for (unsigned int i = 0; i < 767; i++) {
         *(void**)p = next;
         p += 0x20;
         next += 0x20;
@@ -1929,7 +1929,7 @@ void* func_00320190(void* self)
     *(void**)((char*)self + 0x32000) = self;
     char* p = (char*)self;
     char* next = (char*)self + 0x40;
-    for (; i < 0xC7F; i++) {
+    for (; i < 3199; i++) {
         *(void**)p = next;
         p += 0x40;
         next += 0x40;
@@ -1948,7 +1948,7 @@ void* func_003201D8(void* self)
     *(void**)((char*)self + 0x25800) = self;
     char* p = (char*)self;
     char* next = (char*)self + 0x80;
-    for (; i < 0x4AF; i++) {
+    for (; i < 1199; i++) {
         *(void**)p = next;
         p += 0x80;
         next += 0x80;
@@ -2024,7 +2024,7 @@ void* func_003202F8(void* self)
         *(void**)((char*)self + 0x2000) = next;
         return node;
     }
-    return cMemBlockMan_alloc(0x14);
+    return cMemBlockMan_alloc(20);
 }
 #endif
 
@@ -2039,7 +2039,7 @@ void* func_00320330(void* self)
         *(void**)((char*)self + 0x6000) = next;
         return node;
     }
-    return cMemBlockMan_alloc(0x24);
+    return cMemBlockMan_alloc(36);
 }
 #endif
 
@@ -2058,7 +2058,7 @@ void* func_00320368(void* self)
     if (*(void**)((char*)self + 0x32000) != 0) {
         return popFreeNode((void**)((char*)self + 0x32000));
     }
-    return cMemBlockMan_alloc(0x44);
+    return cMemBlockMan_alloc(68);
 }
 #endif
 
@@ -2070,7 +2070,7 @@ void* func_003203B8(void* self)
     if (*(void**)((char*)self + 0x25800) != 0) {
         return popFreeNode((void**)((char*)self + 0x25800));
     }
-    return cMemBlockMan_alloc(0x84);
+    return cMemBlockMan_alloc(132);
 }
 #endif
 
@@ -2104,7 +2104,7 @@ void* func_00320408(TMemContainer_0408* self, unsigned int align)
     if (self->m_freeList != 0) {
         return reserveBlock_0408(&self->m_freeList);
     }
-    return cMemBlockMan_alloc_0408(0x104, align);
+    return cMemBlockMan_alloc_0408(260, align);
 }
 #endif
 
@@ -2138,7 +2138,7 @@ void* func_00320448(TMemContainer_0448* self, unsigned int align)
     if (self->m_freeList != 0) {
         return reserveBlock_0448(&self->m_freeList);
     }
-    return cMemBlockMan_alloc_0448(0x204, align);
+    return cMemBlockMan_alloc_0448(516, align);
 }
 #endif
 

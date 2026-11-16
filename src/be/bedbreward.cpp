@@ -34,7 +34,7 @@ extern "C" void cBERewardDB_init(int* self, int async)
     }
     else
     {
-        *self = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, 0, gRewardsFileName, 0xA, async, 0);
+        *self = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, 0, gRewardsFileName, 10, async, 0);
     }
 }
 #endif

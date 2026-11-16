@@ -141,7 +141,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
                 vcall_43F0(w, 9, 0);
                 vcall_43F0(w, 8, 1);
             } else if (i == 0) {
-                cUIText_setAsciiString((cUIText*)w, *(char**)func_00156A90(cBE_getInterface_Fv(cBE_getBE(), 0xD), self->f54, self->f58));
+                cUIText_setAsciiString((cUIText*)w, *(char**)func_00156A90(cBE_getInterface_Fv(cBE_getBE(), 13), self->f54, self->f58));
             } else {
                 setChallengeName(w, self->f54, self->f58, i - 1);
             }
@@ -177,7 +177,7 @@ extern "C" int cFEStateTrophyRoom_onWidgetMenu(void* self, int pMenu, unsigned i
     case 9:
         return 0x100;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -299,7 +299,7 @@ extern "C" void func_001D47A0(void* self, int index)
     textureId = -1;
     {
         if (index == 0) {
-            if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+            if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
                               *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x54),
                               *(int*)((char*)self + 0x58)) != 0) {
                 textureId = *(int*)((char*)self + 0x60);
@@ -383,14 +383,14 @@ struct sTrophyRoom_4918 {
 
 extern "C" void func_001D4918(sTrophyRoom_4918* self)
 {
-    void* pi = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* pi = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* snd = (char*)SSXApp->RealFE + 0x1A70;
-    self->ids[0] = func_0019DA10(snd, self->bank, *(int*)(func_00156A90(pi, self->f54, self->f58) + 4), 0xA, 1, 0);
+    self->ids[0] = func_0019DA10(snd, self->bank, *(int*)(func_00156A90(pi, self->f54, self->f58) + 4), 10, 1, 0);
     self->count = 1;
     for (int i = 0; i < 4; i++) {
         int id = *(int*)(func_00156AE0(pi, self->f58, i) + 4);
         if (id != 0) {
-            self->ids[i + 1] = func_0019DA10(snd, self->bank, id, 0xA, 1, 0);
+            self->ids[i + 1] = func_0019DA10(snd, self->bank, id, 10, 1, 0);
             self->count++;
         }
     }
@@ -582,7 +582,7 @@ extern void* cFEStateRewardsRoom_vtbl[];
 extern "C" void* func_001D4BC8(void* self, int engine, signed char idx, int a3)
 {
     func_0039E2A0(self);
-    *(int*)((char*)self + 0xC) = 0x2E;
+    *(int*)((char*)self + 0xC) = 46;
     *(void***)((char*)self + 0x8) = cFEStateRewardsRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
@@ -739,10 +739,10 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateRewardsRoom_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
-    int result = 0x101;
+    int result = 257;
     if (key < 10) {
         if (key < 8) {
-            result = 0x101;
+            result = 257;
         } else {
             return 0x100;
         }
@@ -767,7 +767,7 @@ extern char str_pct_d_pct_d[];
 extern "C" void func_001D4F90(void* self, int index, cUIText* text)
 {
     char buf[256];
-    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
     int total = func_00157210(iface, index);
     int got = func_00157518(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48), index);
     sprintf(buf, str_pct_d_pct_d, got, total);
@@ -785,7 +785,7 @@ extern "C" void* func_001D5038(void* self)
 {
     cFEStateLogin_cFEStateLogin(self);
     *(void***)((char*)self + 0x8) = D_00468050;
-    *(int*)((char*)self + 0xC) = 0x34;
+    *(int*)((char*)self + 0xC) = 52;
     return self;
 }
 #endif
@@ -844,16 +844,16 @@ extern char str_cFEStateOnlineMainMenu[];
 extern "C" int func_001D5138(void* self, int msg)
 {
     switch (msg) {
-    case 0xC9:
+    case 201:
         func_0025C610(LobbyMan_mLobbyMan);
         break;
-    case 0xD4:
+    case 212:
         func_0025CD50(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mPersona));
         break;
-    case 0x101:
-        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(0x6D0, str_cFEStateOnlineMainMenu, 0, 0), *(int*)((char*)self + 0x10)));
+    case 257:
+        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), *(int*)((char*)self + 0x10)));
         break;
-    case 0x111: {
+    case 273: {
         cBE_getInterface_Fv(SSXApp->BE, 7);
         char* netOpt = ((char*)&cBENetworkInterface_networkOpt);
         func_0025FD50(LobbyMan_mLobbyMan, *(int*)(netOpt + 4), *(int*)(netOpt + 8) == 0, *(int*)(netOpt + 8) != 0, netOpt + 0x330, netOpt + 0x3DC);
@@ -875,7 +875,7 @@ extern "C" int cFEStateLogin_onPopupEvent(void* self, void* a1, int a2);
 extern "C" int func_001D5240(void* self, void* popup, int event)
 {
     int result;
-    if (*(int*)((char*)popup + 0x18) == 0x102) {
+    if (*(int*)((char*)popup + 0x18) == 258) {
         result = func_001A9668(self, popup, event);
     } else {
         result = cFEStateLogin_onPopupEvent(self, popup, event);
@@ -899,13 +899,13 @@ extern char str_cFEStateNetConfig[];
 
 extern "C" void func_001D5280(void* self, void* item, int msg)
 {
-    if (msg == 0xF || msg == 0x14) {
+    if (msg == 0xF || msg == 20) {
         func_001A97B8(self, item, msg);
         func_0039F698((char*)*(void**)((char*)self + 0x10) + 0x18);
         void* state = cUIStateStack_getCurrentState((char*)*(void**)((char*)self + 0x10) + 0x18);
         *(int*)((char*)state + 0x1C) |= 0x80;
         func_002636F0(func_002591B8(), 0);
-        func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(0x91C, str_cFEStateNetConfig, 0, 0), *(void**)((char*)self + 0x10)));
+        func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), *(void**)((char*)self + 0x10)));
     } else {
         func_001A97B8(self, item, msg);
     }
@@ -994,10 +994,10 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D5460);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int func_001D5460(void* self, int menu, unsigned int key)
 {
-    int result = 0x101;
+    int result = 257;
     if (key < 10) {
         if (key < 8) {
-            result = 0x101;
+            result = 257;
         } else {
             return 0x100;
         }
@@ -1116,7 +1116,7 @@ extern "C" void func_001D5488(void* self_, int mode)
     *(void**)(app + 0x5C) = func_001D7B18_a5488;
     *(void**)(app + 0xA0) = cFEMemCard_callbackFileExists_a5488;
     *(void**)(app + 0xA8) = func_001D7D70_a5488;
-    *(int*)(self + 0x19C) = 0x19;
+    *(int*)(self + 0x19C) = 25;
     *(int*)(self + 0x1BC) = mode;
     *(int*)(self + 0x1A8) = 0;
     *(int*)(self + 0x1AC) = 0;
@@ -1278,8 +1278,8 @@ struct sVE_59A0 {
 // Memory-card "save" step: builds the save-file title for the current mode and starts the save; on first entry shows the saving dialog.
 extern "C" void cFEMemCard_writeStart(void)
 {
-    char name[0x90];
-    char title[0x90];
+    char name[144];
+    char title[144];
     char slot[0x200];
     char fmt1[0x200];
     char fmt2[0x200];
@@ -1294,7 +1294,7 @@ extern "C" void cFEMemCard_writeStart(void)
         int size = cBE_getDataSize(cBE_getBE());
         cFEMemCard_createReadBuffer_59A0(cFEMemCard_mInstance, size);
         func_0014E050(cBE_getBE(), *(int*)((char*)cFEMemCard_mInstance + 0x1D4));
-        func_00241D40(app, 0, name, 0x41);
+        func_00241D40(app, 0, name, 65);
         func_002C2540_59A0(fmt1, str_pct_s_pct_spct_04d);
         func_00241AA0(slot, 0x100);
         sprintf1_59A0(title, fmt1, slot, name, *(int*)(app + 0xF8) + 1);
@@ -1304,7 +1304,7 @@ extern "C" void cFEMemCard_writeStart(void)
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
         int a = cBESaveInterface_generateSaveProfile(iface, *(int*)((char*)cFEMemCard_mInstance + 0x1CC));
         int b = cBESaveInterface_getSaveProfileSize();
-        func_00241D40(app2, 1, name, 0x41);
+        func_00241D40(app2, 1, name, 65);
         func_002C2540_59A0(fmt2, str_pct_s_pct_spct_04d);
         func_00241AA0(slot, 0x100);
         sprintf1_59A0(title, fmt2, slot, name, *(int*)(app2 + 0xF8) + 1);
@@ -1312,9 +1312,9 @@ extern "C" void cFEMemCard_writeStart(void)
     }
     char* fe = (char*)cFEMemCard_mInstance;
     if (*(int*)(fe + 0x210) == 0 && *(int*)(fe + 0x208) == 0) {
-        *(int*)(fe + 0x19C) = 0x16;
-        char* buf = (char*)operator_new_tag(0x640, str_Temp_String, 0x100, 0);
-        cMCOverlayManager_GetMessage(app, buf, 0x320);
+        *(int*)(fe + 0x19C) = 22;
+        char* buf = (char*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
+        cMCOverlayManager_GetMessage(app, buf, 800);
         sVE_59A0* vt = *(sVE_59A0**)((char*)cFEMemCard_mInstance + 8);
         vt[36].fn((char*)cFEMemCard_mInstance + vt[36].delta, buf, 1, 1, 0, 0, 1);
         *(int*)((char*)cFEMemCard_mInstance + 0x210) = 1;
@@ -1375,7 +1375,7 @@ extern "C" int cFEMemCard_callbackReadUpdate(int size)
     if (g->pending != 0) {
         g->pending = 0;
         char* base = g->cur;
-        int crc = func_003E62D0(g->cur, cBE_getDataSize(cBE_getBE()) - 4, 0xFBEA);
+        int crc = func_003E62D0(g->cur, cBE_getDataSize(cBE_getBE()) - 4, 64490);
         D_004A2028_tr->cur += cBE_getDataSize(cBE_getBE()) - 4;
         int stored = 0;
         memcpy(&stored, D_004A2028_tr->cur, 4);

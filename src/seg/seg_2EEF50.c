@@ -103,8 +103,8 @@ extern int* func_002591E8(int);
 extern void func_00416210(void*, int, int);
 extern int func_003EE028(int*);
 int* func_003EE1E8(int initialSize, int growCount, int growPercent) {
-    int* list = func_002591E8(0x44);
-    func_00416210(list, 0, 0x44);
+    int* list = func_002591E8(68);
+    func_00416210(list, 0, 68);
     list[0] = initialSize;
     func_003EE028(list);
     list[0] = growCount;
@@ -389,8 +389,8 @@ int* func_003EE778(int n, int bucketCount) {
     int cnt = n > 0 ? n : 1;
     int nb = bucketCount > 15 ? bucketCount : 16;
     int* table;
-    table = func_002591E8(0x24);
-    func_00416210_p(table, 0, 0x24);
+    table = func_002591E8(36);
+    func_00416210_p(table, 0, 36);
     table[4] = nb;
     table[5] = (int)func_002591E8(nb * 4);
     func_00416210_p((void*)table[5], 0, table[4] * 4);

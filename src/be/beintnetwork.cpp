@@ -62,7 +62,7 @@ INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_getSyncDataSize__FPv);
  */
 int cBENetworkInterface_getSyncDataSize(void* self)
 {
-    return 0xC44;
+    return 3140;
 }
 #endif
 
@@ -156,14 +156,14 @@ extern "C" void cBENetworkInterface_getSyncData(cBENetworkInterface* self, int p
     out->pair = *(sNetPair_E2C8*)D_005308D0;
     out->t0 = *(sNetTrip_E2C8*)(D_005308D0 - 0x18);
     out->t1 = *(sNetTrip_E2C8*)(D_005308D0 - 0xC);
-    for (int k = 0; k < 0x20D; k++) {
+    for (int k = 0; k < 525; k++) {
         out->blob[k] = ((sNetHW_E2C8*)(D_004A6F38 + (characterId * 0xF88 + player * 0x9B50)))[k];
     }
-    for (int k = 0; k < 0x1A; k++) {
+    for (int k = 0; k < 26; k++) {
         out->moves[k] = ((sNetDW_E2C8*)(D_004A7778 + (characterId * 0xF88 + player * 0x9B50)))[k];
     }
     out->tag = *(sNetTag_E2C8*)(D_004A7887 + (characterId * 0xF88 + player * 0x9B50));
-    for (int k = 0; k < 0x55; k++) {
+    for (int k = 0; k < 85; k++) {
         out->keys[k] = ((sNetKey_E2C8*)(D_004A7887 + 7 + (characterId * 0xF88 + player * 0x9B50)))[k];
     }
 }
@@ -222,12 +222,12 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
     D_005308B8_E5C8[player] = (&in->t0)[player];
     cBECharProfileDB_init(&D_004A6CA8_E5C8[player][characterId], characterId, 1);
     func_00156810(D_004A6CA8_E5C8[player]);
-    for (int k = 0; k < 0x20D; k++)
+    for (int k = 0; k < 525; k++)
         ((sNetHW_E2C8*)((char*)D_004A6CA8_E5C8 + 0x290 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->blob[k];
-    for (int k = 0; k < 0x1A; k++)
+    for (int k = 0; k < 26; k++)
         ((sNetDW_E2C8*)(D_004A7778 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->moves[k];
     *(sNetTag_E2C8*)(D_004A7887 + (characterId * 0xF88 + player * 0x9B50)) = in->tag;
-    for (int k = 0; k < 0x55; k++)
+    for (int k = 0; k < 85; k++)
         ((sNetKey_E2C8*)(D_004A7887 + 7 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->keys[k];
     ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 6))->v02();
 }

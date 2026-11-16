@@ -362,7 +362,7 @@ extern "C" void func_00313DD0(void* node, cAsStream* stream)
     char* self = (char*)node;
     char* streamPtr = (char*)stream;
     Ser_313DD0(streamPtr, self + 0x0, 0x4);
-    Ser_313DD0(streamPtr, self + 0x4, 0x54);
+    Ser_313DD0(streamPtr, self + 0x4, 84);
     Ser_313DD0(streamPtr, self + 0x60, 0x20);
     Ser_313DD0(streamPtr, self + 0x80, 0x4);
     Ser_313DD0(streamPtr, self + 0x84, 0x4);
@@ -417,7 +417,7 @@ extern "C" void func_00314050(void* node, void* stream)
     char* self = (char*)node;
     char* streamPtr = (char*)stream;
     Read_314050(streamPtr, self + 0x0, 0x4);
-    Read_314050(streamPtr, self + 0x4, 0x54);
+    Read_314050(streamPtr, self + 0x4, 84);
     Read_314050(streamPtr, self + 0x60, 0x20);
     Read_314050(streamPtr, self + 0x80, 0x4);
     Read_314050(streamPtr, self + 0x84, 0x4);
@@ -493,7 +493,7 @@ extern "C" void* func_00313508(void* mem, int arg);
 extern "C" void* cAnimSequencer_newSequence(void* seq, int sequenceID)
 {
     sSequencer_003142F8* self = (sSequencer_003142F8*)seq;
-    sSeqNode_003142F8* node = (sSeqNode_003142F8*)func_00313508(cMemMan_alloc(0xD0, str_AnimSequence, 0x20000000, 0), sequenceID);
+    sSeqNode_003142F8* node = (sSeqNode_003142F8*)func_00313508(cMemMan_alloc(208, str_AnimSequence, 0x20000000, 0), sequenceID);
     node->next = self->mFirstSequence;
     self->mFirstSequence = node;
     self->mCount++;
@@ -960,7 +960,7 @@ extern "C" void func_00314880(void* self, void* stream)
     for (int i = 0; i < n; i++)
     {
         sSeqNode_314880* node = new (str_AnimSequence, 0x20000000, 0) sSeqNode_314880;
-        MEM_fill(node, 0, 0xD0);
+        MEM_fill(node, 0, 208);
         func_00314050(node, stream);
         func_00314368((sSequencer_00314368*)self, (sSeqNode_00314368*)node);
     }

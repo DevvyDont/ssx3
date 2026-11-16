@@ -366,7 +366,7 @@ extern "C" int func_003EB9E8(unsigned char* record, int len, char* name, const s
     }
     start = nameEnd - 1;
     nameEnd = start;
-    while (start != record && start[-1] >= 0x21) {
+    while (start != record && start[-1] >= 33) {
         start--;
     }
     delta = strlen((const char*)value) - (nameEnd - start);
@@ -721,7 +721,7 @@ extern "C" int cDirtysock_tag_TagFieldSetString_impl(char* record, int len, char
  */
 extern "C" int cDirtysock_tag_TagFieldSetString_impl(char* record, int len, char* name, const unsigned char* value)
 {
-    char fieldBuf[0xA00];
+    char fieldBuf[2560];
     char* data;
     const unsigned char* scan;
 

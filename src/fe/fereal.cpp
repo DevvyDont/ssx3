@@ -36,7 +36,7 @@ extern "C" void* cFECustom_cFECustom(void* self, void* owner)
     *(void**)((char*)self + 0x0) = owner;
     *(void**)((char*)self + 0x10) = 0;
     *(void***)((char*)self + 0x4) = cFECustom_vtbl;
-    char* transition = (char*)cMemMan_alloc(0x50, str_cFEStateTransition, 0, 0);
+    char* transition = (char*)cMemMan_alloc(80, str_cFEStateTransition, 0, 0);
     func_0039E2A0(transition, *(void**)((char*)self + 0x0));
     *(int*)(transition + 0x48) = 0;
     *(int*)(transition + 0x4C) = 0;
@@ -242,37 +242,37 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
         }
     case 1:
         func_001A0708(&D_004A4E80, 2, 0);
-        return func_00194A60(cMemMan_alloc(0x58, str_cFEStateMainMenu, 0, 0), *self);
+        return func_00194A60(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
     case 59:
         func_001A86E8(1);
-        return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, st->x44);
+        return func_00181090(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, st->x44);
     case 2:
         switch (pData) {
         case 11:
             func_001A86E8(0);
-            return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, 0);
+            return func_00181090(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 0);
         case 9:
             func_001A86E8(0);
-            return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, 0);
+            return func_00181090(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 0);
         case 22:
             func_001A86E8(0);
-            return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, 0);
+            return func_00181090(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 0);
         case 5:
-            return func_00195498(cMemMan_alloc(0x48, str_cFEStateBonusMaterial, 0, 0), *self);
+            return func_00195498(cMemMan_alloc(72, str_cFEStateBonusMaterial, 0, 0), *self);
         case 49:
             func_001A86E8(1);
-            return cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(0x91C, str_cFEStateNetConfig, 0, 0), *self);
+            return cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), *self);
         }
     case 22:
         D_004A19D4 = pData != 0;
-        return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, 0);
+        return func_00181090(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 0);
     case 23:
         cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         return 0;
     case 9:
     case 11:
         if (isOneGNS(D_004A1A70))
-            return func_001828C0(cMemMan_alloc(0x50, str_cFEStateCharSetup, 0, 0), *self, 0);
+            return func_001828C0(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 0);
         {
             int one = 1;
             void* nr = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -280,7 +280,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
             switch (beRaceDB->cGamePath) {
             case 1:
-                return func_001828C0(cMemMan_alloc(0x50, str_cFEStateCharSetup, 0, 0), *self, 0);
+                return func_001828C0(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 0);
             case 0: {
                 cBENewRaceInterface_setGameMode(nr, 4);
                 cBENewRaceInterface_setGameEvent(nr, 12);
@@ -298,7 +298,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
                 break;
             }
             case 2:
-                return func_001828C0(cMemMan_alloc(0x50, str_cFEStateCharSetup, 0, 0), *self, st->x44);
+                return func_001828C0(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, st->x44);
             default:
                 return 0;
             }
@@ -308,9 +308,9 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
         switch (pData) {
         case 0:
             if (isOneGNS(D_004A1A70))
-                return cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(0x6D0, str_cFEStateOnlineMainMenu, 0, 0), *self);
+                return cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), *self);
             if (D_004A19D4 != 0 && st->x44 == 1)
-                return func_001A3218(cMemMan_alloc(0x48, str_cFEStateMPCircuit, 0, 0), *self);
+                return func_001A3218(cMemMan_alloc(72, str_cFEStateMPCircuit, 0, 0), *self);
             cBE_getInterface_Fv(cBE_getBE(), 0);
             switch (D_00535C11[0]) {
             case 0:
@@ -318,25 +318,25 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
                 cUITemplate_MAP_mPeak = 1;
                 cUITemplate_MAP_mMapStyle = 0;
                 D_004A2598 = 0;
-                char* eventSelect = (char*)func_00186610(cMemMan_alloc(0x33C, str_cFEStateEventSelect, 0, 0), *self, 0);
+                char* eventSelect = (char*)func_00186610(cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0), *self, 0);
                 eventSelect[0x44] = 0;
                 return eventSelect;
             }
             case 2:
                 if (st->x44 == 0)
-                    return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, 1);
+                    return func_00181090(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 1);
                 if (D_004A19D4 != 0)
-                    return func_001A3218(cMemMan_alloc(0x48, str_cFEStateMPCircuit, 0, 0), *self);
+                    return func_001A3218(cMemMan_alloc(72, str_cFEStateMPCircuit, 0, 0), *self);
                 cUITemplate_MAP_mPeak = 1;
                 cUITemplate_MAP_mMapStyle = 0;
                 D_004A2598 = 0;
-                return func_00186610(cMemMan_alloc(0x33C, str_cFEStateEventSelect, 0, 0), *self, 0);
+                return func_00186610(cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0), *self, 0);
             }
             break;
         case 1:
-            return cFEStateCharEquip_cFEStateCharEquip(cMemMan_alloc(0xAF0, str_cFEStateCharEquip, 0, 0), *self, st->x44, 0, 0);
+            return cFEStateCharEquip_cFEStateCharEquip(cMemMan_alloc(2800, str_cFEStateCharEquip, 0, 0), *self, st->x44, 0, 0);
         case 2:
-            return func_00183238(cMemMan_alloc(0x54, str_cFEStateRiderDetail, 0, 0), *self, st->x44);
+            return func_00183238(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, st->x44);
         case 3:
             return cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), *self, st->x44, 0);
         case 4:
@@ -345,42 +345,42 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
     case 13:
         switch (pData) {
         case 5:
-            return func_001D4BC8(cMemMan_alloc(0x50, str_cFEStateRewardsRoom, 0, 0), *self, st->x44, 1);
+            return func_001D4BC8(cMemMan_alloc(80, str_cFEStateRewardsRoom, 0, 0), *self, st->x44, 1);
         case 7:
             return func_00183A98(cMemMan_alloc(0x60, str_cFEStateUberTrick, 0, 0), *self, st->x44);
         case 9:
-            return func_00190858(cMemMan_alloc(0x50, str_cFEStateRiderBio, 0, 0), *self, st->x44);
+            return func_00190858(cMemMan_alloc(80, str_cFEStateRiderBio, 0, 0), *self, st->x44);
         }
     case 16:
-        return func_00196B90(cMemMan_alloc(0x210, str_cFEStateRequestLine, 0, 0), *self, st->x44, D_004A19D8);
+        return func_00196B90(cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), *self, st->x44, D_004A19D8);
     case 19:
         cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (D_00535C11[0]) {
         case 0:
         case 1:
-            return func_00191360(cMemMan_alloc(0x9C, str_cFEStateRuleSelect, 0, 0), *self);
+            return func_00191360(cMemMan_alloc(156, str_cFEStateRuleSelect, 0, 0), *self);
         case 2:
-            return func_00192D00(cMemMan_alloc(0x73C, str_cFEStateBraggingRights, 0, 0), *self);
+            return func_00192D00(cMemMan_alloc(1852, str_cFEStateBraggingRights, 0, 0), *self);
         }
-        return func_00191360(cMemMan_alloc(0x9C, str_cFEStateRuleSelect, 0, 0), *self);
+        return func_00191360(cMemMan_alloc(156, str_cFEStateRuleSelect, 0, 0), *self);
     case 24:
         switch (pData) {
         case 28:
-            return func_00188EE8(cMemMan_alloc(0x4C, str_cFEStateOptionsGame, 0, 0), *self);
+            return func_00188EE8(cMemMan_alloc(76, str_cFEStateOptionsGame, 0, 0), *self);
         case 29:
-            return func_0018A258(cMemMan_alloc(0x48, str_cFEStateOptionsSound, 0, 0), *self);
+            return func_0018A258(cMemMan_alloc(72, str_cFEStateOptionsSound, 0, 0), *self);
         case 30:
-            return func_0018C0E8(cMemMan_alloc(0x48, str_cFEStateOptionsHUD, 0, 0), *self);
+            return func_0018C0E8(cMemMan_alloc(72, str_cFEStateOptionsHUD, 0, 0), *self);
         case 31:
-            return func_0018C658(cMemMan_alloc(0x54, str_cFEStateOptionsController, 0, 0), *self);
+            return func_0018C658(cMemMan_alloc(84, str_cFEStateOptionsController, 0, 0), *self);
         case 32:
             ((int*)self)[3] = 0x18;
-            return func_0018D240(cMemMan_alloc(0x4C, str_cFEStateOptionsSaveLoad, 0, 0), *self);
+            return func_0018D240(cMemMan_alloc(76, str_cFEStateOptionsSaveLoad, 0, 0), *self);
         case 36:
-            return func_00185A18(cMemMan_alloc(0x68, str_cFEOptionsCredits, 0, 0), *self);
+            return func_00185A18(cMemMan_alloc(104, str_cFEOptionsCredits, 0, 0), *self);
         case 34:
-            ((int*)self)[3] = 0x22;
-            return func_0018D7F0(cMemMan_alloc(0x23C, str_cFEStateOptionsDeviceSelect, 0, 0), *self, 2, 1, 0);
+            ((int*)self)[3] = 34;
+            return func_0018D7F0(cMemMan_alloc(572, str_cFEStateOptionsDeviceSelect, 0, 0), *self, 2, 1, 0);
         }
         break;
     case 32:
@@ -388,25 +388,25 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
     case 38:
         switch (pData) {
         case 0:
-            return func_0018D7F0(cMemMan_alloc(0x23C, str_cFEStateOptionsDeviceSelect, 0, 0), *self, 2, 1, 0);
+            return func_0018D7F0(cMemMan_alloc(572, str_cFEStateOptionsDeviceSelect, 0, 0), *self, 2, 1, 0);
         case 1:
-            return func_0018D7F0(cMemMan_alloc(0x23C, str_cFEStateOptionsDeviceSelect, 0, 0), *self, 1, 0, 0);
+            return func_0018D7F0(cMemMan_alloc(572, str_cFEStateOptionsDeviceSelect, 0, 0), *self, 1, 0, 0);
         case 2:
-            return func_0018D7F0(cMemMan_alloc(0x23C, str_cFEStateOptionsDeviceSelect, 0, 0), *self, 2, 0, 0);
+            return func_0018D7F0(cMemMan_alloc(572, str_cFEStateOptionsDeviceSelect, 0, 0), *self, 2, 0, 0);
         }
         {
             int hi = pData >> 8;
             int lo = pData & 0xFF;
-            return cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(0x280, str_cFEStateProfileLoad, 0, 0), *self, hi, lo);
+            return cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(640, str_cFEStateProfileLoad, 0, 0), *self, hi, lo);
         }
     case 8:
         cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (D_00535C11[0]) {
         case 0:
-            return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, 0);
+            return func_00181090(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 0);
         case 1:
         case 2:
-            return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, 0);
+            return func_00181090(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 0);
         }
         break;
     case 20:
@@ -429,13 +429,13 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             break;
         }
         case 1:
-            return cFEStateCharEquip_cFEStateCharEquip(cMemMan_alloc(0xAF0, str_cFEStateCharEquip, 0, 0), *self, 0, 0, 1);
+            return cFEStateCharEquip_cFEStateCharEquip(cMemMan_alloc(2800, str_cFEStateCharEquip, 0, 0), *self, 0, 0, 1);
         case 2:
-            return cFEStateCharEquip_cFEStateCharEquip(cMemMan_alloc(0xAF0, str_cFEStateCharEquip, 0, 0), *self, 0, 1, 1);
+            return cFEStateCharEquip_cFEStateCharEquip(cMemMan_alloc(2800, str_cFEStateCharEquip, 0, 0), *self, 0, 1, 1);
         case 3:
-            return func_001F4728(cMemMan_alloc(0xB0, str_cFEStateBuyAttrib, 0, 0), *self);
+            return func_001F4728(cMemMan_alloc(176, str_cFEStateBuyAttrib, 0, 0), *self);
         case 4:
-            return func_001F3FF8(cMemMan_alloc(0x4C, str_cFEStateLodgeRiderDetail, 0, 0), *self);
+            return func_001F3FF8(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
         case 5:
             return cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), *self, 0, 1);
         case 7:
@@ -443,41 +443,41 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
         case 6:
             D_004A19D8 = 0;
             cBE_getInterface_Fv(cBE_getBE(), 4);
-            return func_00194738(cMemMan_alloc(0x4C, str_cFEStateTitle, 0, 0), *self);
+            return func_00194738(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), *self);
         }
         break;
     case 40:
         switch (pData) {
         case 9:
-            return func_001D4BC8(cMemMan_alloc(0x50, str_cFEStateRewardsRoom, 0, 0), *self, st->x44, 1);
+            return func_001D4BC8(cMemMan_alloc(80, str_cFEStateRewardsRoom, 0, 0), *self, st->x44, 1);
         case 10:
-            return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(0xC8, str_cFEStateMountainRoom, 0, 0), *self, st->x44);
+            return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(200, str_cFEStateMountainRoom, 0, 0), *self, st->x44);
         case 12:
             return func_00183A98(cMemMan_alloc(0x60, str_cFEStateUberTrick, 0, 0), *self, st->x44);
         case 13:
             return func_001F54B0(cMemMan_alloc(0x78, str_cFEStateCareerStats, 0, 0), *self);
         case 15:
-            return func_00190858(cMemMan_alloc(0x50, str_cFEStateRiderBio, 0, 0), *self, st->x44);
+            return func_00190858(cMemMan_alloc(80, str_cFEStateRiderBio, 0, 0), *self, st->x44);
         }
         break;
     case 43:
-        return func_001D3780(cMemMan_alloc(0xE4, str_cFEStatePeakRoom, 0, 0), *self, st->x44, pData);
+        return func_001D3780(cMemMan_alloc(228, str_cFEStatePeakRoom, 0, 0), *self, st->x44, pData);
     case 44:
-        return func_001D4268(cMemMan_alloc(0xA0, str_cFEStateTrophyRoom, 0, 0), *self, st->x44, pData >> 16, pData & 0xFFFF);
+        return func_001D4268(cMemMan_alloc(160, str_cFEStateTrophyRoom, 0, 0), *self, st->x44, pData >> 16, pData & 0xFFFF);
     case 46:
         switch (pData) {
         case 3:
-            return func_001D1128(cMemMan_alloc(0xAD4, str_cFEStateRewardGalleryPosters, 0, 0), *self, st->x44, D_004A19D8);
+            return func_001D1128(cMemMan_alloc(2772, str_cFEStateRewardGalleryPosters, 0, 0), *self, st->x44, D_004A19D8);
         case 4:
-            return func_001D12C8(cMemMan_alloc(0xBF8, str_cFEStateRewardGalleryTradingCards, 0, 0), *self, st->x44, D_004A19D8);
+            return func_001D12C8(cMemMan_alloc(3064, str_cFEStateRewardGalleryTradingCards, 0, 0), *self, st->x44, D_004A19D8);
         case 5:
-            return func_001D1460(cMemMan_alloc(0xBB8, str_cFEStateRewardGalleryConceptArts, 0, 0), *self, st->x44, D_004A19D8);
+            return func_001D1460(cMemMan_alloc(3000, str_cFEStateRewardGalleryConceptArts, 0, 0), *self, st->x44, D_004A19D8);
         case 7:
-            return func_001D1790(cMemMan_alloc(0xA98, str_cFEStateRewardGalleryToys, 0, 0), *self, st->x44, D_004A19D8);
+            return func_001D1790(cMemMan_alloc(2712, str_cFEStateRewardGalleryToys, 0, 0), *self, st->x44, D_004A19D8);
         case 6:
-            return func_001D15F8(cMemMan_alloc(0xA30, str_cFEStateRewardGalleryVideos, 0, 0), *self, st->x44, D_004A19D8);
+            return func_001D15F8(cMemMan_alloc(2608, str_cFEStateRewardGalleryVideos, 0, 0), *self, st->x44, D_004A19D8);
         case 8:
-            return func_001D1928(cMemMan_alloc(0xA98, str_cFEStateRewardGalleryCheatChars, 0, 0), *self, st->x44, D_004A19D8);
+            return func_001D1928(cMemMan_alloc(2712, str_cFEStateRewardGalleryCheatChars, 0, 0), *self, st->x44, D_004A19D8);
         }
         break;
     }
@@ -543,36 +543,36 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
     switch (*(int*)(desc + 0xC)) {
     case 9:
         if (IsMode1_1A16C0()) {
-            return cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(0x6D0, str_cFEStateOnlineMainMenu, 0, 0), *self);
+            return cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), *self);
         }
         cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (D_00535C11[0]) {
         case 1:
-            return func_00194A60(cMemMan_alloc(0x58, str_cFEStateMainMenu, 0, 0), *self);
+            return func_00194A60(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
         case 0:
-            return func_00194A60(cMemMan_alloc(0x58, str_cFEStateMainMenu, 0, 0), *self);
+            return func_00194A60(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
         case 2:
             if (desc[0x44] == 1) {
-                return func_001828C0(cMemMan_alloc(0x50, str_cFEStateCharSetup, 0, 0), *self, 0);
+                return func_001828C0(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 0);
             }
-            return func_00194A60(cMemMan_alloc(0x58, str_cFEStateMainMenu, 0, 0), *self);
+            return func_00194A60(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
         }
         break;
     case 23:
-        return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, 1);
+        return func_00181090(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 1);
     case 13:
     case 14:
     case 16:
         if (D_004A19D8 != 0) {
-            return func_001F3700(cMemMan_alloc(0x58, str_cFEStateLodge, 0, 0), *self);
+            return func_001F3700(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), *self);
         }
-        return func_001828C0(cMemMan_alloc(0x50, str_cFEStateCharSetup, 0, 0), *self, desc[0x44]);
+        return func_001828C0(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, desc[0x44]);
     case 15:
     case 18:
         if (D_004A19D8 != 0) {
-            return func_001F3FF8(cMemMan_alloc(0x4C, str_cFEStateLodgeRiderDetail, 0, 0), *self);
+            return func_001F3FF8(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
         }
-        return func_00183238(cMemMan_alloc(0x54, str_cFEStateRiderDetail, 0, 0), *self, desc[0x44]);
+        return func_00183238(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, desc[0x44]);
     case 17:
         return cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), *self, desc[0x44], D_004A19D8);
     case 19:
@@ -580,24 +580,24 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
         switch (D_00535C11[0]) {
         case 0:
         case 1:
-            return func_001828C0(cMemMan_alloc(0x50, str_cFEStateCharSetup, 0, 0), *self, 0);
+            return func_001828C0(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 0);
         case 2:
-            return func_001828C0(cMemMan_alloc(0x50, str_cFEStateCharSetup, 0, 0), *self, 1);
+            return func_001828C0(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 1);
         }
         break;
     case 20: {
         D_004A2598 = 1;
         cUITemplate_MAP_mMapStyle = 0;
-        char* p = (char*)func_00186610(cMemMan_alloc(0x33C, str_cFEStateEventSelect, 0, 0), *self, 0);
+        char* p = (char*)func_00186610(cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0), *self, 0);
         p[0x44] = 0;
         return p;
     }
     case 21:
         D_004A2598 = 1;
         cUITemplate_MAP_mMapStyle = 0;
-        return func_00186610(cMemMan_alloc(0x33C, str_cFEStateEventSelect, 0, 0), *self, 0);
+        return func_00186610(cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0), *self, 0);
     case 12:
-        return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, desc[0x44]);
+        return func_00181090(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, desc[0x44]);
     case 8: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         int c = D_00535C11[0];
@@ -611,16 +611,16 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
     case 5:
     case 11:
     case 22:
-        return func_00194A60(cMemMan_alloc(0x58, str_cFEStateMainMenu, 0, 0), *self);
+        return func_00194A60(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
     case 35:
     other: {
         int sc = ((int*)self)[3];
         if (sc == 24) {
-            return func_0018D240(cMemMan_alloc(0x4C, str_cFEStateOptionsSaveLoad, 0, 0), *self);
+            return func_0018D240(cMemMan_alloc(76, str_cFEStateOptionsSaveLoad, 0, 0), *self);
         } else if (sc == 9) {
-            return func_00181090(cMemMan_alloc(0x90, str_cFEStateCharSelect, 0, 0), *self, desc[0x44]);
+            return func_00181090(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, desc[0x44]);
         } else if (sc == 39) {
-            return func_001F3700(cMemMan_alloc(0x58, str_cFEStateLodge, 0, 0), *self);
+            return func_001F3700(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), *self);
         }
         break;
     }
@@ -632,48 +632,48 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
     case 36:
     case 37:
     case 38:
-        return func_001887A0(cMemMan_alloc(0x54, str_cFEStateOptions, 0, 0), *self, 0);
+        return func_001887A0(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), *self, 0);
     case 33:
         switch (arg) {
         case 0:
-            if (((int*)self)[3] == 0x22) {
-                return func_001887A0(cMemMan_alloc(0x54, str_cFEStateOptions, 0, 0), *self, 0);
+            if (((int*)self)[3] == 34) {
+                return func_001887A0(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), *self, 0);
             }
-            return func_0018D240(cMemMan_alloc(0x4C, str_cFEStateOptionsSaveLoad, 0, 0), *self);
+            return func_0018D240(cMemMan_alloc(76, str_cFEStateOptionsSaveLoad, 0, 0), *self);
         case 1:
             cAppMan_setNextModule((struct cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
             break;
         case 2:
             if (IsMode1_1A16C0()) {
-                return cFEStateNetSSXWorld_cFEStateNetSSXWorld(cMemMan_alloc(0x6D0, str_cFEStateNetSSXWorld, 0, 0), *self);
+                return cFEStateNetSSXWorld_cFEStateNetSSXWorld(cMemMan_alloc(1744, str_cFEStateNetSSXWorld, 0, 0), *self);
             }
             break;
         }
         break;
     case 2:
     case 39:
-        return func_00194738(cMemMan_alloc(0x4C, str_cFEStateTitle, 0, 0), *self);
+        return func_00194738(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), *self);
     case 40:
     case 41:
-        return func_001F3700(cMemMan_alloc(0x58, str_cFEStateLodge, 0, 0), *self);
+        return func_001F3700(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), *self);
     case 43:
         if (D_004A19D8 != 0) {
-            return func_001F3FF8(cMemMan_alloc(0x4C, str_cFEStateLodgeRiderDetail, 0, 0), *self);
+            return func_001F3FF8(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
         }
-        return func_001828C0(cMemMan_alloc(0x50, str_cFEStateCharSetup, 0, 0), *self, desc[0x44]);
+        return func_001828C0(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, desc[0x44]);
     case 42:
-        return func_001F3FF8(cMemMan_alloc(0x4C, str_cFEStateLodgeRiderDetail, 0, 0), *self);
+        return func_001F3FF8(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
     case 46:
         if (D_004A19D8 != 0) {
-            return func_001F3FF8(cMemMan_alloc(0x4C, str_cFEStateLodgeRiderDetail, 0, 0), *self);
+            return func_001F3FF8(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
         }
-        return func_00183238(cMemMan_alloc(0x54, str_cFEStateRiderDetail, 0, 0), *self, desc[0x44]);
+        return func_00183238(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, desc[0x44]);
     case 44:
-        return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(0xC8, str_cFEStateMountainRoom, 0, 0), *self, desc[0x44]);
+        return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(200, str_cFEStateMountainRoom, 0, 0), *self, desc[0x44]);
     case 45:
-        return func_001D3780(cMemMan_alloc(0xE4, str_cFEStatePeakRoom, 0, 0), *self, desc[0x44], arg);
+        return func_001D3780(cMemMan_alloc(228, str_cFEStatePeakRoom, 0, 0), *self, desc[0x44], arg);
     case 47:
-        return func_001D4BC8(cMemMan_alloc(0x50, str_cFEStateRewardsRoom, 0, 0), *self, desc[0x44], arg != 0);
+        return func_001D4BC8(cMemMan_alloc(80, str_cFEStateRewardsRoom, 0, 0), *self, desc[0x44], arg != 0);
     }
     return 0;
 }
@@ -784,7 +784,7 @@ extern "C" void func_001A1DC0(char* self)
     m = (char*)GrMan;
     vt = *(char**)(m + 0x10D8);
     ((tFn_1A1DC0)*(void**)(vt + 0x7C))(m + *(short*)(vt + 0x78), sVec3K1A1DC0());
-    cFEFlowState_setNumStates(&D_004A4E80, 0x56);
+    cFEFlowState_setNumStates(&D_004A4E80, 86);
     ((tVoid_1A1DC0)*(void**)(*(char**)self + 0x44))(self + *(short*)(*(char**)self + 0x40));
 }
 #endif
@@ -920,7 +920,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     *(int*)(in + 0x10) = 0;
     *(int*)(in + 0x14) = 0;
     ui2->input = in;
-    self->ui->custom = cFECustom_cFECustom(cMemMan_alloc(0x14, str_FEUICustom, 0, 0), self->ui);
+    self->ui->custom = cFECustom_cFECustom(cMemMan_alloc(20, str_FEUICustom, 0, 0), self->ui);
     self->ui->sound = func_001A2E20(cMemMan_alloc(8, str_FEUISound, 0, 0));
     char* g = (char*)SSXApp;
     void* feLocale = *(void**)(g + 0x8C);
@@ -1175,8 +1175,8 @@ extern "C" int func_001A2208(void* self)
     feW()->top->setG22(0);
     feW()->top->setG23(1);
     feW()->top->setG20(3);
-    feW()->top->setG12(0xD);
-    feW()->top->setAlpha(0x15);
+    feW()->top->setG12(13);
+    feW()->top->setAlpha(21);
     feW()->top->setG2(5);
     func_00398018(*(void**)((char*)self + 0xC));
     func_001A0598((char*)self + 0xB0);
@@ -1246,7 +1246,7 @@ extern "C" void func_001A27A0(char* self)
     cFadeScreen_update(self);
     if (*(void**)(self + 0xB5AD4) == 0) {
         if (cRealFE_mMovieList != 0) {
-            *(void**)(self + 0xB5AD4) = func_002533C8(cMemMan_alloc(0x44, str_MoviePlayer, 0x100, 0));
+            *(void**)(self + 0xB5AD4) = func_002533C8(cMemMan_alloc(68, str_MoviePlayer, 0x100, 0));
             func_002B3A70((char*)func_0028B180() + 0x118);
             sVidInfo_27A0 info;
             func_00253390(&info);
@@ -1288,7 +1288,7 @@ extern "C" void func_001A27A0(char* self)
                 void** p = *(void***)((char*)SSXApp + (i << 2) + 0xB0);
                 int ok = *p != 0 && **(int**)p != 0;
                 if (ok) {
-                    if (cInput_getState(p, 0x70) != 0 || cInput_getState(p, 0x7A) != 0) {
+                    if (cInput_getState(p, 0x70) != 0 || cInput_getState(p, 122) != 0) {
                         done = 1;
                         goto out;
                     }
@@ -1363,14 +1363,14 @@ extern "C" void cRealFE_loadCharAnimations(void)
 {
     void* handle;
     int i;
-    func_003DED50(str_data_char_anm_big_b, 0, 0x64, &handle);
+    func_003DED50(str_data_char_anm_big_b, 0, 100, &handle);
     for (i = 0; i < 1; i++) {
         void* anim = func_00311250(cMemMan_alloc(0x18, str_AdfDataSourceFE, 0, 0), D_004A19C0[i]);
         D_004A3DF8_K1A2B00->anims[(unsigned char)i] = anim;
         func_00314F30(cGameAnimMap_TheGameAnimMap, i, anim);
     }
     cGameAnimMap_testResolve_p(cGameAnimMap_TheGameAnimMap);
-    func_003DEDC0(handle, 0x64);
+    func_003DEDC0(handle, 100);
 }
 #endif
 
@@ -1464,20 +1464,20 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
     switch (cRealFE_mStartState) {
     case 0: {
         D_004A19D8 = 0;
-        void* st = func_00194738(cMemMan_alloc(0x4C, str_cFEStateTitle, 0, 0), self->ui);
+        void* st = func_00194738(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), self->ui);
         cUIStateStack_push(self->ui + 0x18, st);
         break;
     }
-    case 0x27: {
+    case 39: {
         D_004A19D8 = 1;
-        void* st = func_001F3700(cMemMan_alloc(0x58, str_cFEStateLodge, 0, 0), self->ui);
+        void* st = func_001F3700(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), self->ui);
         cUIStateStack_push(self->ui + 0x18, st);
         cRealFE_mStartState = 0;
         break;
     }
-    case 0x34: {
+    case 52: {
         D_004A19D8 = 0;
-        void* st = func_001D5038(cMemMan_alloc(0x6D4, str_cFEStateRelogin, 0, 0), self->ui);
+        void* st = func_001D5038(cMemMan_alloc(1748, str_cFEStateRelogin, 0, 0), self->ui);
         cUIStateStack_push(self->ui + 0x18, st);
         func_00255CC8(cCommSystem_mCommSystem, cGameComm_mGameComm->unk_06C);
         func_00266E88(D_004A33F4);
@@ -1601,7 +1601,7 @@ extern void* cFEStateSelectMultiplayerMode_vtbl[];
 extern "C" void* func_001A3050(void* self, void* owner)
 {
     func_0039E2A0(self, owner);
-    *(int*)((char*)self + 0xC) = 0x16;
+    *(int*)((char*)self + 0xC) = 22;
     *(void***)((char*)self + 0x8) = cFEStateSelectMultiplayerMode_vtbl;
     return self;
 }

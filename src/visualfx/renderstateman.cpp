@@ -868,7 +868,7 @@ INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_readFromReplayFrame);
  */
 extern "C" void cAirStreamerFX_readFromReplayFrame(cAirStreamerFX* self)
 {
-    int mode = (*(int*)(*(char**)self + 0x870) >= 0) ? 0x19 : 0x12;
+    int mode = (*(int*)(*(char**)self + 0x870) >= 0) ? 25 : 18;
     *(int*)((char*)self + 0x10) = 0;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0xC) = 0;
@@ -1208,7 +1208,7 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
     rsSetA_EF950(ctx, 0x400000, 22, 1);
     rsSetA_EF950(ctx, 0x1800000, 23, 0);
     rsSetA_EF950(ctx, 0x300000, 20, 0);
-    rsSetA_EF950(ctx, 0xFF000, 12, 0x14);
+    rsSetA_EF950(ctx, 0xFF000, 12, 20);
     rsSetA_EF950(ctx, 0x3, 0, 0);
     rsSetB_EF950(ctx, 0x1FFFFC00, 10, 0);
     rsSetB_EF950(ctx, 0x3E0, 5, 8);
@@ -1331,14 +1331,14 @@ extern "C" void* cVisualEffectsMan_cVisualEffectsMan(sRSMan_002EFF98* self)
     self->f[14] = 0;
     self->f[15] = 0;
     self->f[16] = 0;
-    D_004A45D4.texIndex = 0x37;
+    D_004A45D4.texIndex = 55;
     D_004A443C = 0x30;
     D_004A3B78 = self;
     sRSEntry_002EFF98* rsEntries = cGraphicsMan_TheGraphicsMan_renderstateman;
-    rsEntries[1].f4 = 0x2E;
-    rsEntries[2].f4 = 0x31;
-    rsEntries[4].f4 = 0x2F;
-    rsEntries[3].f4 = 0x44;
+    rsEntries[1].f4 = 46;
+    rsEntries[2].f4 = 49;
+    rsEntries[4].f4 = 47;
+    rsEntries[3].f4 = 68;
     rsEntries[5].f4 = 0; rsEntries[5].f8 = 0;
     rsEntries[6].f4 = 0; rsEntries[6].f8 = 0;
     rsEntries[7].f4 = 0; rsEntries[7].f8 = 0;
@@ -1679,7 +1679,7 @@ extern char str_PS2VisualEffectsMan[];
  */
 extern "C" void* cVisualEffectsMan_construct(void)
 {
-    return cPSPVisualEffectsMan_cPSPVisualEffectsMan(cMemMan_alloc(0x48, str_PS2VisualEffectsMan, 0, 0));
+    return cPSPVisualEffectsMan_cPSPVisualEffectsMan(cMemMan_alloc(72, str_PS2VisualEffectsMan, 0, 0));
 }
 #endif
 

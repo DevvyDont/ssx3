@@ -1989,7 +1989,7 @@ extern "C" int cFEPopupSelectMultiplayerMode_onWidgetMenu(void* self, void* menu
     case 6:
     case 7:
         if (key < 6) {
-            return 0x101;
+            return 257;
         }
         break;
     case 2:
@@ -1998,7 +1998,7 @@ extern "C" int cFEPopupSelectMultiplayerMode_onWidgetMenu(void* self, void* menu
         cUIMenu_setSelectedByIndex(menu, idx + 1);
         break;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -4114,7 +4114,7 @@ extern "C" void func_001E1458(void)
             func_001E12F0();
         }
         int t = *(int*)((char*)cAppMan_TheAppMan + 0x1C);
-        if (t - D_004A20BC > 0x258) {
+        if (t - D_004A20BC > 600) {
             func_001E14C0(1);
             D_004A20BC = t;
         }
@@ -4138,7 +4138,7 @@ extern sEntry14_14C0 D_00441630_14C0[] __asm__("D_00441630");
 extern "C" void func_001E14C0(int type)
 {
     int i;
-    for (i = 0; i < 0x3D; i++) {
+    for (i = 0; i < 61; i++) {
         if (func_001E3A30((void*)i) == 0) {
             int t = D_00441630_14C0[i].type;
             if (t == type || t == 5) {
@@ -4211,9 +4211,9 @@ extern "C" void func_001E1550(void)
             if (func_001464D0(iface, 0, ch, 0, 0) == 0 && func_00145EF0(iface, 0, 0xE, 5) == 0) {
                 func_001E3A78(4, 1);
                 if (ch != 3) {
-                    func_001E2FE0(BXrand() % 3 + 0x12, 0);
+                    func_001E2FE0(BXrand() % 3 + 18, 0);
                 } else {
-                    func_001E2FE0(BXrand() % 3 + 0x15, 0);
+                    func_001E2FE0(BXrand() % 3 + 21, 0);
                 }
             }
         } else if (func_001E3A30((void*)5) == 0) {
@@ -4222,7 +4222,7 @@ extern "C" void func_001E1550(void)
                 if (ch != 7) {
                     func_001E2FE0(BXrand() % 3 + 0x18, 0);
                 } else {
-                    func_001E2FE0(BXrand() % 3 + 0x1B, 0);
+                    func_001E2FE0(BXrand() % 3 + 27, 0);
                 }
             }
         } else if (func_001E3A30((void*)6) == 0) {
@@ -4231,7 +4231,7 @@ extern "C" void func_001E1550(void)
                 if (ch != 8) {
                     func_001E2FE0(BXrand() % 3 + 0x1E, 0);
                 } else {
-                    func_001E2FE0(BXrand() % 3 + 0x21, 0);
+                    func_001E2FE0(BXrand() % 3 + 33, 0);
                 }
             }
         }
@@ -4340,7 +4340,7 @@ extern "C" void func_001E1C10(int which)
             if (func_001E3A30((void*)0x1C) != 0) {
                 break;
             }
-            if (func_001E3A30((void*)0x1D) != 0) {
+            if (func_001E3A30((void*)29) != 0) {
                 break;
             }
             sEntry14_1C10* r;
@@ -4349,7 +4349,7 @@ extern "C" void func_001E1C10(int which)
                 r = &tbl[0x1C];
             } else {
                 sEntry14_1C10* tbl = D_00441630_1C10;
-                r = &tbl[0x1D];
+                r = &tbl[29];
             }
             id = func_001E1AD0((sRangeK1E1AD0*)r, ch);
             if (id != 0x100) {
@@ -4382,7 +4382,7 @@ extern "C" void func_001E1C10(int which)
             if (func_001E3A30((void*)0x20) != 0) {
                 break;
             }
-            if (func_001E3A30((void*)0x21) != 0) {
+            if (func_001E3A30((void*)33) != 0) {
                 break;
             }
             sEntry14_1C10* r;
@@ -4391,7 +4391,7 @@ extern "C" void func_001E1C10(int which)
                 r = &tbl[0x20];
             } else {
                 sEntry14_1C10* tbl = D_00441630_1C10;
-                r = &tbl[0x21];
+                r = &tbl[33];
             }
             id = func_001E1AD0((sRangeK1E1AD0*)r, ch);
             if (id != 0x100) {
@@ -4421,12 +4421,12 @@ extern "C" void func_001E1DD0(void* self, int kind, int alt)
     if (IsBusy001E1DD0()) return;
     int id = 0;
     switch (kind) {
-    case 6: id = func_001E3A30((void*)0x22) == 0 ? 0x28 : 0; break;
-    case 7: id = func_001E3A30((void*)0x24) == 0 ? 0x2C : 0; break;
-    case 8: id = func_001E3A30((void*)0x26) == 0 ? 0x30 : 0; break;
-    case 9: id = func_001E3A30((void*)0x23) == 0 ? 0x2A : 0; break;
-    case 10: id = func_001E3A30((void*)0x25) == 0 ? 0x2E : 0; break;
-    case 11: id = func_001E3A30((void*)0x27) == 0 ? 0x32 : 0; break;
+    case 6: id = func_001E3A30((void*)34) == 0 ? 40 : 0; break;
+    case 7: id = func_001E3A30((void*)36) == 0 ? 44 : 0; break;
+    case 8: id = func_001E3A30((void*)38) == 0 ? 0x30 : 0; break;
+    case 9: id = func_001E3A30((void*)35) == 0 ? 42 : 0; break;
+    case 10: id = func_001E3A30((void*)37) == 0 ? 46 : 0; break;
+    case 11: id = func_001E3A30((void*)39) == 0 ? 50 : 0; break;
     }
     if (id != 0) {
         if (alt != 0) id++;
@@ -4448,47 +4448,47 @@ extern "C" void func_001E1EB8(void)
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
-        if (func_001E3A30((void*)0x28) != 0) {
+        if (func_001E3A30((void*)40) != 0) {
             func_001E2220(0, 0);
-            func_001E3A78(0x28, 0);
-        } else if (func_001E3A30((void*)0x29) != 0) {
+            func_001E3A78(40, 0);
+        } else if (func_001E3A30((void*)41) != 0) {
             func_001E2220(0, 1);
-            func_001E3A78(0x29, 0);
+            func_001E3A78(41, 0);
         }
-        if (func_001E3A30((void*)0x2C) != 0) {
+        if (func_001E3A30((void*)44) != 0) {
             func_001E2220(1, 0);
-            func_001E3A78(0x2C, 0);
-        } else if (func_001E3A30((void*)0x2D) != 0) {
+            func_001E3A78(44, 0);
+        } else if (func_001E3A30((void*)45) != 0) {
             func_001E2220(1, 1);
-            func_001E3A78(0x2D, 0);
+            func_001E3A78(45, 0);
         }
         if (func_001E3A30((void*)0x30) != 0) {
             func_001E2220(2, 0);
             func_001E3A78(0x30, 0);
-        } else if (func_001E3A30((void*)0x31) != 0) {
+        } else if (func_001E3A30((void*)49) != 0) {
             func_001E2220(2, 1);
-            func_001E3A78(0x31, 0);
+            func_001E3A78(49, 0);
         }
-        if (func_001E3A30((void*)0x2A) != 0) {
+        if (func_001E3A30((void*)42) != 0) {
             func_001E20D0(0, 0);
-            func_001E3A78(0x2A, 0);
-        } else if (func_001E3A30((void*)0x2B) != 0) {
+            func_001E3A78(42, 0);
+        } else if (func_001E3A30((void*)43) != 0) {
             func_001E20D0(0, 1);
-            func_001E3A78(0x2B, 0);
+            func_001E3A78(43, 0);
         }
-        if (func_001E3A30((void*)0x2E) != 0) {
+        if (func_001E3A30((void*)46) != 0) {
             func_001E20D0(1, 0);
-            func_001E3A78(0x2E, 0);
-        } else if (func_001E3A30((void*)0x2F) != 0) {
+            func_001E3A78(46, 0);
+        } else if (func_001E3A30((void*)47) != 0) {
             func_001E20D0(1, 1);
-            func_001E3A78(0x2F, 0);
+            func_001E3A78(47, 0);
         }
-        if (func_001E3A30((void*)0x32) != 0) {
+        if (func_001E3A30((void*)50) != 0) {
             func_001E20D0(2, 0);
-            func_001E3A78(0x32, 0);
-        } else if (func_001E3A30((void*)0x33) != 0) {
+            func_001E3A78(50, 0);
+        } else if (func_001E3A30((void*)51) != 0) {
             func_001E20D0(2, 1);
-            func_001E3A78(0x33, 0);
+            func_001E3A78(51, 0);
         }
     }
 }
@@ -4516,35 +4516,35 @@ extern "C" void func_001E20D0(int which, int flag)
     if (busy == 0) {
         switch (which) {
         case 0:
-            if (func_001E3A30((void*)0x23) == 0) {
+            if (func_001E3A30((void*)35) == 0) {
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
-                    func_001E3A78(0x23, 1);
-                    func_001E2FE0(tbl[0x23].f4 + 1, 0);
+                    func_001E3A78(35, 1);
+                    func_001E2FE0(tbl[35].f4 + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[0x23].f4, 0);
+                    func_001E2FE0(tbl[35].f4, 0);
                 }
             }
             break;
         case 1:
-            if (func_001E3A30((void*)0x25) == 0) {
+            if (func_001E3A30((void*)37) == 0) {
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
-                    func_001E3A78(0x25, 1);
-                    func_001E2FE0(tbl[0x25].f4 + 1, 0);
+                    func_001E3A78(37, 1);
+                    func_001E2FE0(tbl[37].f4 + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[0x25].f4, 0);
+                    func_001E2FE0(tbl[37].f4, 0);
                 }
             }
             break;
         case 2:
-            if (func_001E3A30((void*)0x27) == 0) {
+            if (func_001E3A30((void*)39) == 0) {
                 sEntry14_20D0* tbl = D_00441630_20D0;
                 if (flag) {
-                    func_001E3A78(0x27, 1);
-                    func_001E2FE0(tbl[0x27].f4 + 1, 0);
+                    func_001E3A78(39, 1);
+                    func_001E2FE0(tbl[39].f4 + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[0x27].f4, 0);
+                    func_001E2FE0(tbl[39].f4, 0);
                 }
             }
             break;
@@ -4575,35 +4575,35 @@ extern "C" void func_001E2220(int which, int flag)
     if (busy == 0) {
         switch (which) {
         case 0:
-            if (func_001E3A30((void*)0x22) == 0) {
+            if (func_001E3A30((void*)34) == 0) {
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
-                    func_001E3A78(0x22, 1);
-                    func_001E2FE0(tbl[0x22].f4 + 1, 0);
+                    func_001E3A78(34, 1);
+                    func_001E2FE0(tbl[34].f4 + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[0x22].f4, 0);
+                    func_001E2FE0(tbl[34].f4, 0);
                 }
             }
             break;
         case 1:
-            if (func_001E3A30((void*)0x24) == 0) {
+            if (func_001E3A30((void*)36) == 0) {
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
-                    func_001E3A78(0x24, 1);
-                    func_001E2FE0(tbl[0x24].f4 + 1, 0);
+                    func_001E3A78(36, 1);
+                    func_001E2FE0(tbl[36].f4 + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[0x24].f4, 0);
+                    func_001E2FE0(tbl[36].f4, 0);
                 }
             }
             break;
         case 2:
-            if (func_001E3A30((void*)0x26) == 0) {
+            if (func_001E3A30((void*)38) == 0) {
                 sEntry14_2220* tbl = D_00441630_2220;
                 if (flag) {
-                    func_001E3A78(0x26, 1);
-                    func_001E2FE0(tbl[0x26].f4 + 1, 0);
+                    func_001E3A78(38, 1);
+                    func_001E2FE0(tbl[38].f4 + 1, 0);
                 } else {
-                    func_001E2FE0(tbl[0x26].f4, 0);
+                    func_001E2FE0(tbl[38].f4, 0);
                 }
             }
             break;
@@ -4625,7 +4625,7 @@ extern "C" void func_001E2370(int which)
         switch (which) {
         case 0:
             func_001E3A78(0x1C, 1);
-            func_001E3A78(0x1D, 1);
+            func_001E3A78(29, 1);
             break;
         case 1:
             func_001E3A78(0x1E, 1);
@@ -4633,7 +4633,7 @@ extern "C" void func_001E2370(int which)
             break;
         case 2:
             func_001E3A78(0x20, 1);
-            func_001E3A78(0x21, 1);
+            func_001E3A78(33, 1);
             break;
         }
     }
@@ -4654,20 +4654,20 @@ extern "C" void func_001E2428(int which)
     if (busy == 0) {
         switch (which) {
         case 0:
-            if (func_001E3A30((void*)0x39) == 0) {
-                func_001E3A78(0x39, 1);
+            if (func_001E3A30((void*)57) == 0) {
+                func_001E3A78(57, 1);
                 func_001E2FE0(0xFC, 0);
             }
             break;
         case 1:
-            if (func_001E3A30((void*)0x3A) == 0) {
-                func_001E3A78(0x39, 1);
-                func_001E2FE0(0xFD, 0);
+            if (func_001E3A30((void*)58) == 0) {
+                func_001E3A78(57, 1);
+                func_001E2FE0(253, 0);
             }
             break;
         case 2:
-            if (func_001E3A30((void*)0x3B) == 0) {
-                func_001E3A78(0x3B, 1);
+            if (func_001E3A30((void*)59) == 0) {
+                func_001E3A78(59, 1);
                 func_001E2FE0(0xFE, 0);
             }
             break;
@@ -4707,7 +4707,7 @@ extern "C" void func_001E2578(void)
     int busy = n != 0 && n < 10;
     if (busy == 0 && func_001E3A30((void*)0x38) == 0) {
         func_001E3A78(0x38, 1);
-        func_001E2FE0(0xFB, 0);
+        func_001E2FE0(251, 0);
     }
 }
 #endif
@@ -4758,44 +4758,44 @@ extern "C" void func_001E2648_impl(int which, int flag)
         int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
         switch (which) {
         case 0xE:
-            if (func_001E3A30((void*)0x16) != 0) {
+            if (func_001E3A30((void*)22) != 0) {
                 break;
             }
             func_001E32C8(1);
-            func_001E32C8(0x16);
+            func_001E32C8(22);
             if (flag == 0) {
-                func_001E3A78(0x16, 1);
+                func_001E3A78(22, 1);
                 if (ch != 3) {
-                    func_001E2FE0(0x74, 0);
+                    func_001E2FE0(116, 0);
                 } else {
-                    func_001E2FE0(0x76, 0);
+                    func_001E2FE0(118, 0);
                 }
             } else {
                 if (ch != 3) {
-                    func_001E2FE0(0x73, 0);
+                    func_001E2FE0(115, 0);
                 } else {
-                    func_001E2FE0(0x75, 0);
+                    func_001E2FE0(117, 0);
                 }
             }
             break;
         case 0xF:
-            if (func_001E3A30((void*)0x17) != 0) {
+            if (func_001E3A30((void*)23) != 0) {
                 break;
             }
             func_001E32C8(2);
-            func_001E32C8(0x17);
+            func_001E32C8(23);
             if (flag == 0) {
-                func_001E3A78(0x17, 1);
+                func_001E3A78(23, 1);
                 if (ch != 7) {
                     func_001E2FE0(0x78, 0);
                 } else {
-                    func_001E2FE0(0x7A, 0);
+                    func_001E2FE0(122, 0);
                 }
             } else {
                 if (ch != 7) {
-                    func_001E2FE0(0x77, 0);
+                    func_001E2FE0(119, 0);
                 } else {
-                    func_001E2FE0(0x79, 0);
+                    func_001E2FE0(121, 0);
                 }
             }
             break;
@@ -4814,9 +4814,9 @@ extern "C" void func_001E2648_impl(int which, int flag)
                 }
             } else {
                 if (ch != 8) {
-                    func_001E2FE0(0x7B, 0);
+                    func_001E2FE0(123, 0);
                 } else {
-                    func_001E2FE0(0x7D, 0);
+                    func_001E2FE0(125, 0);
                 }
             }
             break;
@@ -4848,65 +4848,65 @@ extern "C" void func_001E2828_impl(int which, int flag)
         int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
         switch (which) {
         case 0xE:
-            if (func_001E3A30((void*)0x19) != 0) {
+            if (func_001E3A30((void*)25) != 0) {
                 break;
             }
             func_001E32C8(4);
-            func_001E32C8(0x19);
+            func_001E32C8(25);
             if (flag == 0) {
-                func_001E3A78(0x19, 1);
+                func_001E3A78(25, 1);
                 if (ch != 3) {
                     func_001E2FE0(0x80, 0);
                 } else {
-                    func_001E2FE0(0x82, 0);
+                    func_001E2FE0(130, 0);
                 }
             } else {
                 if (ch != 3) {
                     func_001E2FE0(0x7F, 0);
                 } else {
-                    func_001E2FE0(0x81, 0);
+                    func_001E2FE0(129, 0);
                 }
             }
             break;
         case 0xF:
-            if (func_001E3A30((void*)0x1A) != 0) {
+            if (func_001E3A30((void*)26) != 0) {
                 break;
             }
             func_001E32C8(5);
-            func_001E32C8(0x1A);
+            func_001E32C8(26);
             if (flag == 0) {
-                func_001E3A78(0x1A, 1);
+                func_001E3A78(26, 1);
                 if (ch != 7) {
-                    func_001E2FE0(0x84, 0);
+                    func_001E2FE0(132, 0);
                 } else {
-                    func_001E2FE0(0x86, 0);
+                    func_001E2FE0(134, 0);
                 }
             } else {
                 if (ch != 7) {
-                    func_001E2FE0(0x83, 0);
+                    func_001E2FE0(131, 0);
                 } else {
-                    func_001E2FE0(0x85, 0);
+                    func_001E2FE0(133, 0);
                 }
             }
             break;
         case 0x10:
-            if (func_001E3A30((void*)0x1B) != 0) {
+            if (func_001E3A30((void*)27) != 0) {
                 break;
             }
             func_001E32C8(6);
-            func_001E32C8(0x1B);
+            func_001E32C8(27);
             if (flag == 0) {
-                func_001E3A78(0x1B, 1);
+                func_001E3A78(27, 1);
                 if (ch != 8) {
-                    func_001E2FE0(0x88, 0);
+                    func_001E2FE0(136, 0);
                 } else {
-                    func_001E2FE0(0x8A, 0);
+                    func_001E2FE0(138, 0);
                 }
             } else {
                 if (ch != 8) {
-                    func_001E2FE0(0x87, 0);
+                    func_001E2FE0(135, 0);
                 } else {
-                    func_001E2FE0(0x89, 0);
+                    func_001E2FE0(137, 0);
                 }
             }
             break;
@@ -4966,18 +4966,18 @@ extern "C" int func_001E2B38(int x)
 {
     switch (x) {
     case 0: return 0xC;
-    case 1: return 0xD;
+    case 1: return 13;
     case 2: return 0xE;
     case 3: return 0xF;
     case 4: return 0x10;
-    case 5: return 0x11;
-    case 6: return 0x12;
-    case 7: return 0x13;
-    case 8: return 0x14;
-    case 9: return 0x15;
+    case 5: return 17;
+    case 6: return 18;
+    case 7: return 19;
+    case 8: return 20;
+    case 9: return 21;
     case 10:
     default:
-        return 0x3D;
+        return 61;
     }
 }
 #endif
@@ -5001,7 +5001,7 @@ extern "C" int func_001E2BB8(int type, int all)
 {
     int total = 0;
     int i;
-    for (i = 0; i < 0x3D; i++) {
+    for (i = 0; i < 61; i++) {
         sEntry14_2BB8* e = &D_00441630_2BB8[i];
         if (e->type == type) {
             if (all != 0 || (e->f10 != 0 && func_001E3A30((void*)i) != 0)) {
@@ -5054,7 +5054,7 @@ extern "C" int func_001E2C80(int type, int idx, int mode)
     int base = 0;
     int result = -1;
     int i;
-    for (i = 0; i < 0x3D; i++) {
+    for (i = 0; i < 61; i++) {
         sEntry14_2C80* e = &D_00441630_2C80[i];
         if (e->type == type) {
             int n;
@@ -5245,7 +5245,7 @@ struct sVEntryK1E2FE0 {
 extern "C" void func_001E2FE0(int id, unsigned char flag)
 {
     sPopupList_2FE0* t = func_001E39F8_list2FE0();
-    if (t->count == 0x19)
+    if (t->count == 25)
         func_001E31B8(0);
     if (D_004C6C08_2FE0[id].field_0x8 == 1)
         flag = func_001E3100(id);
@@ -5607,18 +5607,18 @@ extern "C" void func_001E2FE0(int a, unsigned char b);
 extern "C" void func_001E3760(int rider, int amt)
 {
     if (rider == 0) {
-        void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-        void* rew = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+        void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
+        void* rew = cBE_getInterface_Fv(cBE_getBE(), 13);
         void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
         if (cBENewPlayerInterface_isPeakLocked1(pl, 0, 1)) {
-            if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ, 0) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 0) && func_001E3A30((void*)0x34) == 0) {
-                func_001E3A78(0x34, 1);
-                func_001E2FE0(0xF7, 0);
+            if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ, 0) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 0) && func_001E3A30((void*)52) == 0) {
+                func_001E3A78(52, 1);
+                func_001E2FE0(247, 0);
             }
         }
         if (cBENewPlayerInterface_isPeakLocked1(pl, rider, 2)) {
-            if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ, rider) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 1) && func_001E3A30((void*)0x35) == 0) {
-                func_001E3A78(0x35, 1);
+            if ((unsigned)(cBEEconInterface_getTotalMoneyEarned1(econ, rider) + amt) >= (unsigned)cBERewardInterface_getEarningsTarget(rew, 1) && func_001E3A30((void*)53) == 0) {
+                func_001E3A78(53, 1);
                 func_001E2FE0(0xF8, 0);
             }
         }
@@ -5643,19 +5643,19 @@ extern "C" void func_001E2FE0(int a, unsigned char b);
 extern "C" void func_001E38B8(int player)
 {
     if (player == 0) {
-        void* stats = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+        void* stats = cBE_getInterface_Fv(cBE_getBE(), 13);
         void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
         int charID = cBENewPlayerInterface_getRiderCharID(np, cBENewPlayerInterface_getHumanRider(np, 0));
         if (cBENewPlayerInterface_isPeakLocked1(np, player, 1)) {
-            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 0, 2) && func_001E3A30((void*)0x36) == 0) {
-                func_001E3A78(0x36, 1);
-                func_001E2FE0(0xF9, 0);
+            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 0, 2) && func_001E3A30((void*)54) == 0) {
+                func_001E3A78(54, 1);
+                func_001E2FE0(249, 0);
             }
         }
         if (cBENewPlayerInterface_isPeakLocked1(np, player, 2)) {
-            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 1, 2) && func_001E3A30((void*)0x37) == 0) {
-                func_001E3A78(0x37, 1);
-                func_001E2FE0(0xFA, 0);
+            if (cBERewardInterface_isTrophyOwned(stats, player, charID, 1, 2) && func_001E3A30((void*)55) == 0) {
+                func_001E3A78(55, 1);
+                func_001E2FE0(250, 0);
             }
         }
     }
@@ -6051,11 +6051,11 @@ extern "C" void func_001E4168(cOVState_MESSAGECENTER* self)
     }
     if (state == 1) {
     reset:
-        cUIMenu_setSelectedByIndex(self->mpMenu, func_001E3680(0x25));
+        cUIMenu_setSelectedByIndex(self->mpMenu, func_001E3680(37));
         void* menu = self->mpMenu;
         sVEntry001E4168* vt = *(sVEntry001E4168**)((char*)menu + 8);
         vt[7].fn((char*)menu + vt[7].delta, 1);
-        func_001E50C8(self, 0x25, -1);
+        func_001E50C8(self, 37, -1);
     } else {
         void* menu = self->mpMenu;
         sVEntry001E4168* vt = *(sVEntry001E4168**)((char*)menu + 8);
@@ -6248,7 +6248,7 @@ extern "C" int func_001E4578(cOVState_MESSAGECENTER* self, void* widget, int eve
         break;
     case 5:
         func_001E4458(self);
-        return 0x101;
+        return 257;
     case 9:
         return 0;
     case 8:
@@ -6257,7 +6257,7 @@ extern "C" int func_001E4578(cOVState_MESSAGECENTER* self, void* widget, int eve
     case 7:
         return 1;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -6270,7 +6270,7 @@ extern "C" void func_0039F190(void* self, int a1);
 
 extern "C" void func_001E4610(cOVState_MESSAGECENTER* self, int popup, int event)
 {
-    if (event == 0x14) {
+    if (event == 20) {
         func_001E48B0(self);
         func_001E4758(self);
         func_0039F190((char*)self->mpEngine + 0x18, 1);
@@ -6722,10 +6722,10 @@ extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, un
     char buf[48];
     if (func_001E2D58(3, id)) {
         switch (id) {
-        case 0x73: case 0x75: case 0x77: case 0x79: case 0x7B: case 0x7D: case 0x7F: case 0x81: case 0x83: case 0x85: case 0x87: case 0x89:
+        case 115: case 117: case 119: case 121: case 123: case 125: case 0x7F: case 129: case 131: case 133: case 135: case 137:
             sprintf(buf, str_kT_MSGSubjectBCFinishLosspct_d, lvl);
             break;
-        case 0x74: case 0x76: case 0x78: case 0x7A: case 0x7C: case 0x7E: case 0x80: case 0x82: case 0x84: case 0x86: case 0x88: case 0x8A:
+        case 116: case 118: case 0x78: case 122: case 0x7C: case 0x7E: case 0x80: case 130: case 132: case 134: case 136: case 138:
             sprintf(buf, str_kT_MSGSubjectBCFinishWinpct_d, lvl);
             break;
         }
@@ -7075,10 +7075,10 @@ extern "C" void func_001E5638(cOVState_ViewPopup* self, int id)
     }
     if (func_001E2D58(3, id)) {
         switch (id) {
-        case 0x73: case 0x75: case 0x77: case 0x79: case 0x7B: case 0x7D: case 0x7F: case 0x81: case 0x83: case 0x85: case 0x87: case 0x89:
+        case 115: case 117: case 119: case 121: case 123: case 125: case 0x7F: case 129: case 131: case 133: case 135: case 137:
             sprintf(buf, str_kT_MSGSubjectBCFinishLosspct_d, lvl);
             break;
-        case 0x74: case 0x76: case 0x78: case 0x7A: case 0x7C: case 0x7E: case 0x80: case 0x82: case 0x84: case 0x86: case 0x88: case 0x8A:
+        case 116: case 118: case 0x78: case 122: case 0x7C: case 0x7E: case 0x80: case 130: case 132: case 134: case 136: case 138:
             sprintf(buf, str_kT_MSGSubjectBCFinishWinpct_d, lvl);
             break;
         }
@@ -7168,13 +7168,13 @@ extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void*
     case 5: {
         char* parentState = (char*)self->mpParentState;
         sVE5800* vt = *(sVE5800**)(parentState + 8);
-        vt[17].fn(parentState + vt[17].delta, self, 0x14);
+        vt[17].fn(parentState + vt[17].delta, self, 20);
         break;
     }
     case 6: {
         char* parentState = (char*)self->mpParentState;
         sVE5800* vt = *(sVE5800**)(parentState + 8);
-        vt[17].fn(parentState + vt[17].delta, self, 0x14);
+        vt[17].fn(parentState + vt[17].delta, self, 20);
         break;
     }
     }
@@ -7202,7 +7202,7 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
         if (n == -1) {
             char* o = (char*)self->mpParentState;
             sVE5800* vt = *(sVE5800**)(o + 8);
-            vt[17].fn(o + vt[17].delta, self, 0x14);
+            vt[17].fn(o + vt[17].delta, self, 20);
             return;
         }
         self->miMessage = n;
@@ -7218,7 +7218,7 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
     } else {
         char* o = (char*)self->mpParentState;
         sVE5800* vt = *(sVE5800**)(o + 8);
-        vt[17].fn(o + vt[17].delta, self, 0x14);
+        vt[17].fn(o + vt[17].delta, self, 20);
     }
 }
 #endif
@@ -7247,7 +7247,7 @@ extern "C" int cOVState_ViewPopup_onWidgetMenu(cOVState_ViewPopup* self, int pMe
         return *(int*)typeEntry->pad_0x0 != 4;
     }
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -7366,7 +7366,7 @@ public:
 extern "C" void func_001E5B80(void* self)
 {
     unsigned short title[0x38];
-    unsigned short line[0x68];
+    unsigned short line[104];
     void* engine = *(void**)((char*)self + 0x10);
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_42freestyle_standings), 0);
     *(void**)((char*)self + 0x40) = screen;
@@ -7610,7 +7610,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E6630);
 #ifdef SKIP_ASM
 extern "C" int func_001E6630(void* self, int widget, int event)
 {
-    return event == 6 ? 0x101 : 0;
+    return event == 6 ? 257 : 0;
 }
 #endif
 
@@ -7824,7 +7824,7 @@ extern "C" int func_001E6718(void* self)
             str = Loc1E6718(str_kT_cmnPipeCaps);
             break;
         }
-        unsigned short title[0x68];
+        unsigned short title[104];
         // titleFmt ("%s - %s") is a variable: the target loads its %hi before the track test, which a literal
         // argument (loaded in the else arm only) does not.
         char* titleFmt = D_004A2140;
@@ -8245,7 +8245,7 @@ extern "C" int func_001E7AA8(void* self, void* a1)
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
         sVEntry001E7AA8* vt = *(sVEntry001E7AA8**)((char*)a1 + 8);
         if (vt[27].fn((char*)a1 + vt[27].delta) != 0) {
-            cOVStateManager_triggerOverlay(0x28);
+            cOVStateManager_triggerOverlay(40);
         }
     }
     return 0;
@@ -8257,7 +8257,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E7B78);
 #ifdef SKIP_ASM
 extern "C" int func_001E7B78(void* self, int widget, int event)
 {
-    return event == 6 ? 0x101 : 0;
+    return event == 6 ? 257 : 0;
 }
 #endif
 
@@ -8350,7 +8350,7 @@ extern "C" void func_001E7BB0(void* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     char* iface8 = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
-    char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     int mode = *p;
     int sel = D_00536730[pl];
@@ -8470,7 +8470,7 @@ extern "C" int func_001E81B0(void* self, int widget, int key)
         if (*(int*)((char*)self + 0xa0) == 0) {
             result = 0;
         } else {
-            return 0x101;
+            return 257;
         }
     }
     return result;
@@ -8527,8 +8527,8 @@ struct sVEntry8200 {
 extern "C" void func_001E8200(void* self)
 {
     char buf[32];
-    unsigned short fmt[0x68];
-    unsigned short text[0x68];
+    unsigned short fmt[104];
+    unsigned short text[104];
     void* engine = *(void**)((char*)self + 0x10);
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_finishov), 0);
     *(void**)((char*)self + 0x40) = screen;
@@ -8544,7 +8544,7 @@ extern "C" void func_001E8200(void* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     char* iface8 = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
-    char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
     int* p = (int*)SSXApp->GameModeMan;
     signed char event = cBENewRaceInterface_newRace.cGameMode;
     cUIState_hideObjSafe(self, str_firstrun);
@@ -8685,7 +8685,7 @@ extern "C" int func_001E88D0(void* self, int widget, int key)
         if (*(int*)((char*)self + 0xa0) == 0) {
             result = 0;
         } else {
-            return 0x101;
+            return 257;
         }
     }
     return result;
@@ -8890,7 +8890,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E8E98);
 #ifdef SKIP_ASM
 extern "C" int func_001E8E98(void* self, int widget, int event)
 {
-    return event == 6 ? 0x101 : 0;
+    return event == 6 ? 257 : 0;
 }
 #endif
 

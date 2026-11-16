@@ -418,16 +418,16 @@ extern "C" void func_00156858(char* dst, char* src)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        char* d = dst + i * 0xF88;
+        char* d = dst + i * 3976;
         short* index = ((sProfile_156858*)d)->index;
-        MEM_copy(d, src + i * 0xF88, 0xF88);
+        MEM_copy(d, src + i * 3976, 3976);
         ((sProfile_156858*)d)->index = index;
         int j;
         for (j = 0; j < D_004A11E8; j++)
             index[j] = -1;
         sEnt_156858* e = (sEnt_156858*)(dst + i * 0xF88 + 0x290);
         int n;
-        for (n = 0; n < 0x20D; n++, e++) {
+        for (n = 0; n < 525; n++, e++) {
             short k = e->id;
             if (k >= 0)
                 index[k] = n;
@@ -446,7 +446,7 @@ extern char D_004C4090[];
 extern "C" void func_00156950(char* base, int idx)
 {
     D_004A125C = idx;
-    MEM_copy(D_004C4090, base + idx * 0xF88, 0xF88);
+    MEM_copy(D_004C4090, base + idx * 3976, 3976);
 }
 #endif
 
@@ -459,7 +459,7 @@ extern char D_004C4090[];
 
 extern "C" void func_00156988(char* base)
 {
-    MEM_copy(base + D_004A125C * 0xF88, D_004C4090, 0xF88);
+    MEM_copy(base + D_004A125C * 3976, D_004C4090, 3976);
 }
 #endif
 

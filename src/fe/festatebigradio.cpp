@@ -581,10 +581,10 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
     case 5: {
         int i = 0;
         do {
-            if (func_00192918_38F8(self + 0x6D0 + i * 0x34, w) != -1) {
+            if (func_00192918_38F8(self + 0x6D0 + i * 52, w) != -1) {
                 if (isOn_38F8() && i == 0)
                     func_00265688(D_004A33CC);
-                func_00192740_38F8(self + 0x6D0 + i * 0x34, 1);
+                func_00192740_38F8(self + 0x6D0 + i * 52, 1);
                 func_00194080(self);
                 break;
             }
@@ -610,7 +610,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
             *(int*)(popup + 0xC0) = 3;
             func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
             func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
-            *(int*)(popup + 0x150) = 0x838;
+            *(int*)(popup + 0x150) = 2104;
             *(int*)(popup + 0x168) = 1;
             func_001A9BC0(self, popup);
         } else {
@@ -623,7 +623,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
     case 1:
     case 2:
         panel = w->panel;
-        func_001927B0(self + 0x6D0 + panel * 0x34);
+        func_001927B0(self + 0x6D0 + panel * 52);
         break;
     case 7:
         if (isOn_38F8())
@@ -636,7 +636,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
             func_00265568(snd, slot, cUIListBox_getCurrentEntryData_38F8(w));
         } else {
             panel = w->panel;
-            int slot = func_00192918_38F8(self + 0x6D0 + panel * 0x34, w);
+            int slot = func_00192918_38F8(self + 0x6D0 + panel * 52, w);
             int which = (*(signed char**)(self + 0x738))[slot];
             if (which != -1)
                 func_00193DE0(self, panel, which, cUIListBox_getCurrentEntryData_38F8(w));
@@ -717,15 +717,15 @@ extern "C" int cFEStateBraggingRights_onWidgetMenu(void* self, void* ctrl, int m
             func_00265458(D_004A33CC, *((unsigned char*)ctrl + 0x95));
         }
         func_001927B0(item);
-        return 0x101;
+        return 257;
     case 6:
         if (*(int*)((char*)self + 0x6F8) == 0 || *(int*)((char*)self + 0x72C) == 0) return 1;
-        return 0x101;
+        return 257;
     case 7:
         if (isOn00193CF8()) return 0;
         break;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -880,7 +880,7 @@ static inline int isOn00194168()
 extern "C" void cFEStateBraggingRights_onPopupEvent(void* self, void* pPopup, int Event)
 {
     if (isOn00194168()) {
-        if (*(int*)((char*)pPopup + 0x18) == 0x838) {
+        if (*(int*)((char*)pPopup + 0x18) == 2104) {
             func_00194440(self, pPopup, Event);
         } else {
             func_001A97B8(self, pPopup, Event);
@@ -957,9 +957,9 @@ extern "C" int func_001941B0(char* self, int msg, sRadioMsg_41B0* data)
         break;
     case 268:
         if (func_0025DA90_41B0(LobbyMan_mLobbyMan)) {
-            func_001A8A40_41B0(self, cFEStateChatRoom_cFEStateChatRoom_41B0(cMemMan_alloc_41B0(0x73C, str_cFEStateChatRoom, 0, 0), *(int*)(self + 0x10)));
+            func_001A8A40_41B0(self, cFEStateChatRoom_cFEStateChatRoom_41B0(cMemMan_alloc_41B0(1852, str_cFEStateChatRoom, 0, 0), *(int*)(self + 0x10)));
         } else {
-            func_001A8A40_41B0(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(cMemMan_alloc_41B0(0x6D0, str_cFEStateOnlineMainMenu, 0, 0), *(int*)(self + 0x10)));
+            func_001A8A40_41B0(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(cMemMan_alloc_41B0(1744, str_cFEStateOnlineMainMenu, 0, 0), *(int*)(self + 0x10)));
         }
         break;
     case 254: {
@@ -992,7 +992,7 @@ extern "C" void func_00194440(void* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
         if (D_004A33CC != 0) {
-            func_00265768(D_004A33CC, 0xF9);
+            func_00265768(D_004A33CC, 249);
         }
         func_001A94D8(self);
     } else {

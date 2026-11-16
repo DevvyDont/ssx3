@@ -22,7 +22,7 @@ extern const char str_SSXAudioSystem[];
 extern "C" void SSXAUDIO_Init(int mode)
 {
     if (gSSXAudio == 0) {
-        gSSXAudio = (cSSXAudio*)(cSSXAudio_cSSXAudio(cMemMan_alloc(0x7780, str_SSXAudioSystem, 0x80000400, 0), 1, 0x1C, 3, mode));
+        gSSXAudio = (cSSXAudio*)(cSSXAudio_cSSXAudio(cMemMan_alloc(30592, str_SSXAudioSystem, 0x80000400, 0), 1, 0x1C, 3, mode));
     }
     cMonitor_MONITOR_BeginMonitoring(*((char**)gSSXAudio->MusicSys.mpVStreamSys) + 0x1D8);
 }
@@ -908,7 +908,7 @@ extern "C" void func_00285FB0(char* self)
     sSaVt5FB0* vt = *(sSaVt5FB0**)(self + 0x5558);
     char* thisp = mon + vt[2].delta;
     vt[2].fn(thisp, str_charsel, 0xC, func_00287968(self, 1, 0), 1);
-    func_002B49C0(mon, 0x12D);
+    func_002B49C0(mon, 301);
     *(int*)(self + 0x6290) = 10;
     *(int*)(self + 0x6090) = *(int*)(self + 0x608C);
     func_00289BB8(self);
@@ -1142,20 +1142,20 @@ public:
  */
 extern "C" void cSSXAudio_InGameInit(char* self)
 {
-    void* be = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* be = cBE_getInterface_Fv(cBE_getBE(), 13);
     char* bm = cAudioInterface_getAI();
     void* rider = cRider_getIdentity(*(void**)(bm + 0x28));
     int a = func_00158750(be, 0, (int)rider);
     func_0028BF78(self, func_00158700(be, 0, (int)rider));
     func_0028C2D0(self, a);
     char* t118 = self + 0x118;
-    if (*(int*)(self + 0x530) == 0 || func_002B49E0(t118) != 0x191) {
+    if (*(int*)(self + 0x530) == 0 || func_002B49E0(t118) != 401) {
         func_0028D488(self);
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (sa_state_867E8() == 0) {
             func_0028CF98(self, 0, 0, -1, 0);
         } else {
-            func_0028CF98(self, 0x24, 0, -1, 0);
+            func_0028CF98(self, 36, 0, -1, 0);
         }
     }
     cSSXAudio_ResetLift(self);
@@ -1346,7 +1346,7 @@ extern "C" void cSSXAudio_UnAttachAudioBank(cSSXAudio* self, unsigned int handle
         char* mgr = *(char**)self->MusicSys.mpVStreamSys;
         char* cfg = *(char**)(mgr + 0xACC);
         char* bm = mgr + 0x1D8;
-        int id = saIsOn(cfg, 0x360);
+        int id = saIsOn(cfg, 864);
         if (id) id = *(int*)(cfg + 0x364); else id = -1;
         cBankMonitor_BANKMONITOR_StopBank(bm, id, 0.0f);
     }
@@ -1441,7 +1441,7 @@ extern "C" void func_00286EA0(char* self, char* rider)
         if (func_0028D960(self)) {
             char* mon = self + 0x118;
             sSaVt6EA0* vt = *(sSaVt6EA0**)(self + 0x5558);
-            vt[4].fn(mon + vt[4].delta, 0x24);
+            vt[4].fn(mon + vt[4].delta, 36);
             flag = 0;
             *(int*)(self + 0x627C) = 0;
         }
@@ -1450,7 +1450,7 @@ extern "C" void func_00286EA0(char* self, char* rider)
         if (func_0028D960(self)) {
             char* mon = self + 0x118;
             sSaVt6EA0* vt = *(sSaVt6EA0**)(self + 0x5558);
-            vt[4].fn(mon + vt[4].delta, 0xA);
+            vt[4].fn(mon + vt[4].delta, 10);
         }
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1919,7 +1919,7 @@ INCLUDE_ASM("sound/ssxAudio", func_002879A0);
 #ifdef SKIP_ASM
 extern "C" char* func_002879A0(char* self, int idx)
 {
-    return &self[0x62BC + (idx << 4)];
+    return &self[25276 + (idx << 4)];
 }
 #endif
 //100%
@@ -3030,7 +3030,7 @@ extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
 // PORT: 64-bit long sound key
 extern "C" void cSSXAudio_DelayMonitorTriggers(cSSXAudio* self)
 {
-    func_002ADCA0(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, 0xFA, D_004A3600->v, 0, 0, 0, 0, 0);
+    func_002ADCA0(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, 250, D_004A3600->v, 0, 0, 0, 0, 0);
 }
 #endif
 //100%
@@ -3058,10 +3058,10 @@ struct sAudio_9470 { char pad[0x60A4]; char names[20][0x14]; };
 extern "C" void func_00289470(void* self)
 {
     if (BXFILE_exists(str_x_H) != 0) {
-        char parser[0x810];
+        char parser[2064];
         FileParser_FileParser(parser, str_x_H, 0x100);
         *(int*)((char*)self + 0x6234) = 0;
-        while (*(int*)((char*)self + 0x6234) < 0x14) {
+        while (*(int*)((char*)self + 0x6234) < 20) {
             char* section = FileParser_FindNextSection(parser);
             if (section == 0) {
                 break;
@@ -3097,7 +3097,7 @@ extern char str_SONG[];
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern "C" void func_00289520(cSSXAudio* self, const char* name)
 {
-    char parser[0x810];
+    char parser[2064];
     char buf[0x40];
     func_002B3EB0((char*)self + 0x118);
     FileParser_FileParser(parser, str_x_H, 0x100);
@@ -3364,14 +3364,14 @@ extern "C" void func_002899F8(void* self, void* rider, void* obj)
     int id = *vt[4].fn((char*)obj + vt[4].delta);
     if (id == -1) return;
     if (id == 0x1F) {
-        if (func_002B49E0((char*)self + 0x118) != 0x65) {
+        if (func_002B49E0((char*)self + 0x118) != 101) {
             func_0028CF98(self, 0, 0, 1, 0);
         }
     } else if (id == 0x20) {
-        if (func_002B49E0((char*)self + 0x118) != 0x66) {
+        if (func_002B49E0((char*)self + 0x118) != 102) {
             func_0028CF98(self, 0, 0, 2, 0);
         }
-    } else if (id != 0x21) {
+    } else if (id != 33) {
         char* mon = (char*)self + 0x118;
         sSaVt99F8b* vb = *(sSaVt99F8b**)((char*)self + 0x5558);
         vb[4].fn(mon + vb[4].delta, id);
@@ -3412,11 +3412,11 @@ extern "C" void cSSXAudio_UndoBindings(void* a0, void* a1);
 
 extern "C" void func_00289B18(cSSXAudio* ssxAudio, void* rider, int type)
 {
-    if (type == 0x50) {
+    if (type == 80) {
         cSSXAudio_BindingsOff(ssxAudio, rider);
-    } else if (type == 0x51) {
+    } else if (type == 81) {
         cSSXAudio_BindingsOn(ssxAudio, rider);
-    } else if (type == 0x52) {
+    } else if (type == 82) {
         cSSXAudio_UndoBindings(ssxAudio, rider);
     }
 }

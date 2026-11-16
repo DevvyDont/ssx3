@@ -264,7 +264,7 @@ extern "C" void func_00113200(char* vself)
         if (self->state == 2) {
             self->state = 3;
             *(sQuadR*)&self->f20 = t4vect_ZAxis;
-            self->f90 = 0xD;
+            self->f90 = 13;
         } else if (self) { // FAKEMATCH: identical arms, see header
             self->state = 1;
             self->f20 = ti.normal;
@@ -410,7 +410,7 @@ extern "C" void cAirPredictor_updateFlightPath(char* self, sQuad* airPos, sQuad*
             *(sQuadR*)(self + 0x0) = t4vect_Origin;
             *(sQuadR*)(self + 0x10) = t4vect_XAxis;
             *(sQuadR*)(self + 0x20) = t4vect_ZAxis;
-            *(int*)(self + 0x90) = 0xD;
+            *(int*)(self + 0x90) = 13;
         } else {
             cAirPredictor_initLaunch(self, airPos, airVel);
             *(int*)(self + 0xAC) = 2;
@@ -576,7 +576,7 @@ struct sVEntry00113AA0 {
 extern "C" void func_00113AA0(void* self, void* obj)
 {
     sVEntry00113AA0* vt = *(sVEntry00113AA0**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0xB0);
+    vt[1].fn((char*)obj + vt[1].delta, self, 176);
 }
 #endif
 
@@ -592,7 +592,7 @@ struct sVEntry00113AD8 {
 extern "C" void func_00113AD8(void* self, void* obj)
 {
     sVEntry00113AD8* vt = *(sVEntry00113AD8**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0xB0);
+    vt[2].fn((char*)obj + vt[2].delta, self, 176);
 }
 #endif
 

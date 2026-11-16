@@ -521,7 +521,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, self->rider, self->player);
         refresh_17E8(iface);
-        char* st = (char*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0), self->engine, 1);
+        char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->engine, 1);
         *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(self->engine + 0x18, st, 0, 0);
         func_0019E538(riderSlot_17E8(self), 0);
@@ -532,7 +532,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, self->rider, self->player);
         refresh_17E8(iface);
-        void* st = cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(0x280, str_cFEStateProfileLoad, 0x100, 0), self->engine, 2, 1 << self->player);
+        void* st = cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(640, str_cFEStateProfileLoad, 0x100, 0), self->engine, 2, 1 << self->player);
         cUIStateStack_push(self->engine + 0x18, st);
         char* top = *(char**)self->engine;
         if (top != 0)
@@ -623,7 +623,7 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
             sprintf(buf, &str_pct_1f, fptodp((float)v * k));
             t->v09(1);
             cUIText_setAsciiString((cUIText*)t, buf);
-            *(int*)(b + 0x80) = 0x37;
+            *(int*)(b + 0x80) = 55;
             cUIProgress_setValue(b, c);
         }
     }
@@ -633,7 +633,7 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
     sprintf(buf, &str_pct_1f, fptodp((float)total * 0.02857142873108387f));
     cUIText_setAsciiString(avg, buf);
     char* ob = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ovr));
-    *(int*)(ob + 0x80) = 0x37;
+    *(int*)(ob + 0x80) = 55;
     cUIProgress_setValue(ob, total / 7);
     func_001A0508((char*)SSXApp->RealFE + 0xB0, rider, charID, 0);
 }
@@ -731,7 +731,7 @@ extern "C" void func_00181EF0(void* vself)
             void* anim = *(void**)(rider + 0xC);
             if (anim != 0) {
                 cRiderAnimBase_reset(anim);
-                cRiderAnimBase_play(anim, 0x1B2, 0, -1.0f);
+                cRiderAnimBase_play(anim, 434, 0, -1.0f);
             }
             *(int*)(rider + 0xCCC) = 0;
             *(int*)(self + 0x54) = 0;
@@ -1052,7 +1052,7 @@ extern "C" int cFEStateCheatCharSelect_onWidgetMenu(void* self, int pMenu, unsig
         func_00182870(self);
         break;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 

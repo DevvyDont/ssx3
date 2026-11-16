@@ -95,13 +95,13 @@ extern "C" void func_001DB330_impl(char *self, char *src) {
     int next;
     while (i < *(int*)(src + 0x6C) - 1) {
         next = i + 1;
-        setItemData_B330(self + i * 0x24, *(int*)(src + next * 4 + 0x70));
-        func_002CA388(self + (i * 0x24 + 0x168), 1);
+        setItemData_B330(self + i * 36, *(int*)(src + next * 4 + 0x70));
+        func_002CA388(self + (i * 36 + 360), 1);
         *(int*)(self + i * 0x24 + 0x170) = next;
         i = next;
     }
     while (i < 4) {
-        func_002CA388(self + i * 0x24 + 0x168, 0);
+        func_002CA388(self + i * 36 + 0x168, 0);
         i++;
     }
 }
@@ -1227,7 +1227,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCB70);
 extern "C" void func_001A0538(int);
 
 extern "C" void func_001DCB70(int realFe) {
-    func_001A0538(realFe + 0xB0);
+    func_001A0538(realFe + 176);
 }
 #endif
 
@@ -1237,7 +1237,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DCB90);
 extern "C" void func_001A0548(int);
 
 extern "C" void func_001DCB90(int realFe) {
-    func_001A0548(realFe + 0xB0);
+    func_001A0548(realFe + 176);
 }
 #endif
 
@@ -1245,7 +1245,7 @@ extern "C" void func_001DCB90(int realFe) {
 INCLUDE_ASM("main/all_in_one_main", func_001DCBB0);
 #ifdef SKIP_ASM
 extern "C" int func_001DCBB0(int realFe) {
-    return realFe + 0xB0;
+    return realFe + 176;
 }
 #endif
 
@@ -1253,7 +1253,7 @@ extern "C" int func_001DCBB0(int realFe) {
 INCLUDE_ASM("main/all_in_one_main", func_001DCBB8);
 #ifdef SKIP_ASM
 extern "C" int func_001DCBB8(int realFe) {
-    return realFe + 0xB0;
+    return realFe + 176;
 }
 #endif
 
@@ -1261,7 +1261,7 @@ extern "C" int func_001DCBB8(int realFe) {
 INCLUDE_ASM("main/all_in_one_main", func_001DCBC0);
 #ifdef SKIP_ASM
 extern "C" int func_001DCBC0(int realFe) {
-    return realFe + 0x1A70;
+    return realFe + 6768;
 }
 #endif
 
@@ -1269,7 +1269,7 @@ extern "C" int func_001DCBC0(int realFe) {
 INCLUDE_ASM("main/all_in_one_main", func_001DCBC8);
 #ifdef SKIP_ASM
 extern "C" int func_001DCBC8(int realFe) {
-    return realFe + 0x1A70;
+    return realFe + 6768;
 }
 #endif
 
@@ -1474,7 +1474,7 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DCD58(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 0x130, 2);
+    cMenuItem__cMenuItem(menu + 304, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -1486,12 +1486,12 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DCDA0(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 0x1E4, 2);
+    cMenuItem__cMenuItem(menu + 484, 2);
     cMenuItem__cMenuItem(menu + 0x1C0, 2);
-    cMenuItem__cMenuItem(menu + 0x194, 2);
-    cMenuItem__cMenuItem(menu + 0x168, 2);
-    cMenuItem__cMenuItem(menu + 0x150, 2);
-    cMenuItem__cMenuItem(menu + 0x134, 2);
+    cMenuItem__cMenuItem(menu + 404, 2);
+    cMenuItem__cMenuItem(menu + 360, 2);
+    cMenuItem__cMenuItem(menu + 336, 2);
+    cMenuItem__cMenuItem(menu + 308, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -1503,12 +1503,12 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DCE20(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 0x1E4, 2);
+    cMenuItem__cMenuItem(menu + 484, 2);
     cMenuItem__cMenuItem(menu + 0x1C0, 2);
-    cMenuItem__cMenuItem(menu + 0x194, 2);
-    cMenuItem__cMenuItem(menu + 0x168, 2);
-    cMenuItem__cMenuItem(menu + 0x150, 2);
-    cMenuItem__cMenuItem(menu + 0x134, 2);
+    cMenuItem__cMenuItem(menu + 404, 2);
+    cMenuItem__cMenuItem(menu + 360, 2);
+    cMenuItem__cMenuItem(menu + 336, 2);
+    cMenuItem__cMenuItem(menu + 308, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -1549,7 +1549,7 @@ static inline void SubMenuA_CEA0(int m)
 
 extern "C" void func_001DCEA0(int self, int flags)
 {
-    SubMenuA_CEA0(self + 0x130);
+    SubMenuA_CEA0(self + 304);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -1573,8 +1573,8 @@ extern "C" void func_001DCFC8(Obj *self, int flags) {
             elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
     }
-    cMenuItem__cMenuItem((int)self + 0x150, 2);
-    cMenuItem__cMenuItem((int)self + 0x134, 2);
+    cMenuItem__cMenuItem((int)self + 336, 2);
+    cMenuItem__cMenuItem((int)self + 308, 2);
     cMenu__cMenu((int)self, flags);
 }
 #endif
@@ -1586,10 +1586,10 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DD060(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 0x194, 2);
-    cMenuItem__cMenuItem(menu + 0x168, 2);
-    cMenuItem__cMenuItem(menu + 0x150, 2);
-    cMenuItem__cMenuItem(menu + 0x134, 2);
+    cMenuItem__cMenuItem(menu + 404, 2);
+    cMenuItem__cMenuItem(menu + 360, 2);
+    cMenuItem__cMenuItem(menu + 336, 2);
+    cMenuItem__cMenuItem(menu + 308, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -1671,8 +1671,8 @@ extern "C" void func_001DD258(Obj_D258 *self, int flags) {
             elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
     }
-    cMenuItem__cMenuItem((int)self + 0x150, 2);
-    cMenuItem__cMenuItem((int)self + 0x134, 2);
+    cMenuItem__cMenuItem((int)self + 336, 2);
+    cMenuItem__cMenuItem((int)self + 308, 2);
     cMenu__cMenu((int)self, flags);
 }
 #endif
@@ -1686,7 +1686,7 @@ struct Elem_D2F0 { char pad[0x10]; VTab_D2F0 *vt; char pad2[0x24 - 0x14]; };
 struct Obj_D2F0 { char pad[0x16C]; Elem_D2F0 elems[24]; };
 
 extern "C" void func_001DD2F0(Obj_D2F0 *self, int flags) {
-    cMenuItem__cMenuItem((int)self + 0x4CC, 2);
+    cMenuItem__cMenuItem((int)self + 1228, 2);
     if (self->elems != 0) {
         Elem_D2F0 *elem = self->elems + 24;
         while (self->elems != elem) {
@@ -1694,8 +1694,8 @@ extern "C" void func_001DD2F0(Obj_D2F0 *self, int flags) {
             elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
     }
-    cMenuItem__cMenuItem((int)self + 0x154, 2);
-    cMenuItem__cMenuItem((int)self + 0x138, 2);
+    cMenuItem__cMenuItem((int)self + 340, 2);
+    cMenuItem__cMenuItem((int)self + 312, 2);
     cMenu__cMenu((int)self, flags);
 }
 #endif
@@ -1716,9 +1716,9 @@ extern "C" void func_001DD398(Obj_D398 *self, int flags) {
             elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
     }
-    cMenuItem__cMenuItem((int)self + 0x168, 2);
-    cMenuItem__cMenuItem((int)self + 0x150, 2);
-    cMenuItem__cMenuItem((int)self + 0x134, 2);
+    cMenuItem__cMenuItem((int)self + 360, 2);
+    cMenuItem__cMenuItem((int)self + 336, 2);
+    cMenuItem__cMenuItem((int)self + 308, 2);
     cMenu__cMenu((int)self, flags);
 }
 #endif
@@ -1730,12 +1730,12 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DD440(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 0x1C8, 2);
-    cMenuItem__cMenuItem(menu + 0x1A4, 2);
-    cMenuItem__cMenuItem(menu + 0x18C, 2);
-    cMenuItem__cMenuItem(menu + 0x170, 2);
-    cMenuItem__cMenuItem(menu + 0x154, 2);
-    cMenuItem__cMenuItem(menu + 0x138, 2);
+    cMenuItem__cMenuItem(menu + 456, 2);
+    cMenuItem__cMenuItem(menu + 420, 2);
+    cMenuItem__cMenuItem(menu + 396, 2);
+    cMenuItem__cMenuItem(menu + 368, 2);
+    cMenuItem__cMenuItem(menu + 340, 2);
+    cMenuItem__cMenuItem(menu + 312, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -1747,7 +1747,7 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_001DD4C0(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 0x134, 2);
+    cMenuItem__cMenuItem(menu + 308, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
@@ -1893,7 +1893,7 @@ extern "C" void *func_001DD5B8(char *self) {
 INCLUDE_ASM("main/all_in_one_main", func_001DD648);
 #ifdef SKIP_ASM
 extern "C" int func_001DD648(int screen) {
-    return screen + 0xEC;
+    return screen + 236;
 }
 #endif
 
@@ -2474,7 +2474,7 @@ extern "C" void func_001DDB00(V8_DDB00* dst, V8_DDB00* src) {
 INCLUDE_ASM("main/all_in_one_main", func_001DDB18);
 #ifdef SKIP_ASM
 extern "C" int func_001DDB18(int popupInfo) {
-    return popupInfo + 0x14;
+    return popupInfo + 20;
 }
 #endif
 
@@ -2562,7 +2562,7 @@ extern "C" void func_001DDBA0(V8_DDBA0* dst, V8_DDBA0* src) {
 INCLUDE_ASM("main/all_in_one_main", func_001DDBB8);
 #ifdef SKIP_ASM
 extern "C" int func_001DDBB8(int popupInfo) {
-    return popupInfo + 0x4C;
+    return popupInfo + 76;
 }
 #endif
 
@@ -2612,7 +2612,7 @@ extern "C" S_DBD0 *func_001DDBD0(S_DBD0 *self) {
 INCLUDE_ASM("main/all_in_one_main", func_001DDC20);
 #ifdef SKIP_ASM
 extern "C" int func_001DDC20(int screenPopup) {
-    return screenPopup + 0xBC;
+    return screenPopup + 188;
 }
 #endif
 
@@ -2688,7 +2688,7 @@ extern "C" void cUIStateBuyPopup__cUIStateBuyPopup(cUIStateBuyPopup* self) {
 INCLUDE_ASM("main/all_in_one_main", func_001DDCB8);
 #ifdef SKIP_ASM
 extern "C" int func_001DDCB8(int buyPopup) {
-    return buyPopup + 0x48;
+    return buyPopup + 72;
 }
 #endif
 
@@ -2706,7 +2706,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDCC8);
 extern "C" void cBuyPopupInfo_initBuySongByCredit(int);
 
 extern "C" void func_001DDCC8(int buyPopup) {
-    cBuyPopupInfo_initBuySongByCredit(buyPopup + 0x48);
+    cBuyPopupInfo_initBuySongByCredit(buyPopup + 72);
 }
 #endif
 
@@ -2716,7 +2716,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDCE8);
 extern "C" void cBuyPopupInfo_initBuySong(int);
 
 extern "C" void func_001DDCE8(int buyPopup) {
-    cBuyPopupInfo_initBuySong(buyPopup + 0x48);
+    cBuyPopupInfo_initBuySong(buyPopup + 72);
 }
 #endif
 
@@ -2726,7 +2726,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDD08);
 extern "C" void func_001CAA18(int);
 
 extern "C" void func_001DDD08(int buyPopup) {
-    func_001CAA18(buyPopup + 0x48);
+    func_001CAA18(buyPopup + 72);
 }
 #endif
 
@@ -3313,7 +3313,7 @@ extern "C" int cKeyboardPopup_onLoseTransition(void) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE2E0);
 #ifdef SKIP_ASM
 extern "C" int func_001DE2E0(int keyboard) {
-    return keyboard + 0x74;
+    return keyboard + 116;
 }
 #endif
 
@@ -3323,7 +3323,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE2E8);
 extern "C" void strlen(int);
 
 extern "C" void func_001DE2E8(int keyboard) {
-    strlen(keyboard + 0x74);
+    strlen(keyboard + 116);
 }
 #endif
 
@@ -3406,7 +3406,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE350);
 extern "C" void cKeyboardPopup_setIncludeKey_DE350(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
 extern "C" void func_001DE350(int keyboard, int includeSpace) {
-    cKeyboardPopup_setIncludeKey_DE350(keyboard, 0x4B, includeSpace, 2);
+    cKeyboardPopup_setIncludeKey_DE350(keyboard, 75, includeSpace, 2);
 }
 #endif
 
@@ -3428,7 +3428,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE3A0);
 extern "C" void cKeyboardPopup_setIncludeKey_DE3A0(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
 extern "C" void func_001DE3A0(int keyboard, int includeKey) {
-    cKeyboardPopup_setIncludeKey_DE3A0(keyboard, 0x45, includeKey, 2);
+    cKeyboardPopup_setIncludeKey_DE3A0(keyboard, 69, includeKey, 2);
 }
 #endif
 
@@ -3439,7 +3439,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE3C8);
 extern "C" void cKeyboardPopup_setIncludeKey_DE3C8(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
 extern "C" void func_001DE3C8(int keyboard, int includeKey) {
-    cKeyboardPopup_setIncludeKey_DE3C8(keyboard, 0x4F, includeKey, 2);
+    cKeyboardPopup_setIncludeKey_DE3C8(keyboard, 79, includeKey, 2);
 }
 #endif
 
@@ -3450,7 +3450,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE3F0);
 extern "C" void cKeyboardPopup_setIncludeKey_DE3F0(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
 extern "C" void func_001DE3F0(int keyboard, int includeKey) {
-    cKeyboardPopup_setIncludeKey_DE3F0(keyboard, 0x29, includeKey, 2);
+    cKeyboardPopup_setIncludeKey_DE3F0(keyboard, 41, includeKey, 2);
 }
 #endif
 
@@ -3461,7 +3461,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE418);
 extern "C" void cKeyboardPopup_setIncludeKey_DE418(int, int, int, int) __asm__("cKeyboardPopup_setIncludeKey");
 
 extern "C" void func_001DE418(int keyboard, int includeKey) {
-    cKeyboardPopup_setIncludeKey_DE418(keyboard, 0x42, includeKey, 2);
+    cKeyboardPopup_setIncludeKey_DE418(keyboard, 66, includeKey, 2);
 }
 #endif
 
@@ -4064,10 +4064,10 @@ INCLUDE_ASM("main/all_in_one_main", func_001DEA80);
 // Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
 extern "C" int func_001DEA80(void* self, int menu, unsigned int key)
 {
-    int result = 0x101;
+    int result = 257;
     if (key < 10) {
         if (key < 7) {
-            result = 0x101;
+            result = 257;
         } else {
             return 0x100;
         }

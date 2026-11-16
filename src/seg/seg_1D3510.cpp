@@ -1088,11 +1088,11 @@ extern "C" void cMenu__cMenu(int, int);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cARGBMenuItem__cARGBMenuItem(int menuItem, int flags) {
-    cMenuItem__cMenuItem_3E20(menuItem + 0x640, 2);
-    cMenuItem__cMenuItem_3E20(menuItem + 0x61C, 2);
-    cMenuItem__cMenuItem_3E20(menuItem + 0x5F8, 2);
-    cMenuItem__cMenuItem_3E20(menuItem + 0x5D4, 2);
-    cMenuItem__cMenuItem_3E20(menuItem + 0x5B0, 2);
+    cMenuItem__cMenuItem_3E20(menuItem + 1600, 2);
+    cMenuItem__cMenuItem_3E20(menuItem + 1564, 2);
+    cMenuItem__cMenuItem_3E20(menuItem + 1528, 2);
+    cMenuItem__cMenuItem_3E20(menuItem + 1492, 2);
+    cMenuItem__cMenuItem_3E20(menuItem + 1456, 2);
     cMenu__cMenu(menuItem + 0x18, 2);
     cMenuItem__cMenuItem_3E20(menuItem, flags);
 }
@@ -1138,10 +1138,10 @@ extern "C" void cMenu__cMenu(int, int);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cVectorMenuItem__cVectorMenuItem(int menuItem, int flags) {
-    cMenuItem__cMenuItem_3ED0(menuItem + 0x654, 2);
-    cMenuItem__cMenuItem_3ED0(menuItem + 0x620, 2);
-    cMenuItem__cMenuItem_3ED0(menuItem + 0x5EC, 2);
-    cMenuItem__cMenuItem_3ED0(menuItem + 0x5B8, 2);
+    cMenuItem__cMenuItem_3ED0(menuItem + 1620, 2);
+    cMenuItem__cMenuItem_3ED0(menuItem + 1568, 2);
+    cMenuItem__cMenuItem_3ED0(menuItem + 1516, 2);
+    cMenuItem__cMenuItem_3ED0(menuItem + 1464, 2);
     cMenu__cMenu(menuItem + 0x18, 2);
     cMenuItem__cMenuItem_3ED0(menuItem, flags);
 }
@@ -1180,9 +1180,9 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 extern "C" void func_002D3F78(int menu, int flags) {
-    cMenuItem__cMenuItem(menu + 0x164, 2);
-    cMenuItem__cMenuItem(menu + 0x14C, 2);
-    cMenuItem__cMenuItem(menu + 0x130, 2);
+    cMenuItem__cMenuItem(menu + 356, 2);
+    cMenuItem__cMenuItem(menu + 332, 2);
+    cMenuItem__cMenuItem(menu + 304, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif

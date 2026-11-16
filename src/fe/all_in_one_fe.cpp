@@ -926,7 +926,7 @@ extern "C" void func_0021D1A0(float fill, float sx, float sy, char* self, char* 
     t2Vector sc;
     t2Vector one;
     sHudSprite** sprites = (sHudSprite**)(self + (idx * 0xC + 0x4FC));
-    char* e = elems + sel * 0x24;
+    char* e = elems + sel * 36;
     func_001E91F8(e, &a);
     func_001E9220(e, &size, 0);
     func_001E9290(e, &sc);
@@ -1215,7 +1215,7 @@ extern "C" void func_0021D9A0(float fill, float alpha, char* self, char* elems, 
         vtx[i].q = 1.0f;
     }
     {
-        sHudSprite* s = ((sHudRoot_D9A0*)self)->sprites[alt == 0 ? 0x12 : 0x13];
+        sHudSprite* s = ((sHudRoot_D9A0*)self)->sprites[alt == 0 ? 18 : 19];
         v.x = sc.x * 20.0f;
         v.y = sc.y * 20.0f;
         t2Vector c;
@@ -1246,7 +1246,7 @@ extern "C" void func_0021D9A0(float fill, float alpha, char* self, char* elems, 
         p.x += segW;
     }
     if (bar->count > 0) {
-        sHudSprite* s = ((sHudRoot_D9A0*)self)->sprites[0x11];
+        sHudSprite* s = ((sHudRoot_D9A0*)self)->sprites[17];
         setTex_D9A0(s);
         float midW = t.x - (segW + segW);
         setUV(vtx, s);
@@ -1359,7 +1359,7 @@ extern "C" void func_0021E1B0(char* self, char* obj, int* rider, int x)
     scale.y = 1.0f;
     float k = 1.0f;
     char* r = *(char**)((char*)SSXApp->Game->AI + (rider[0] << 2) + 0x28);
-    func_001E91A8(D_00477F30 + *(int*)(r + 0xEC) * 0x24, &col);
+    func_001E91A8(D_00477F30 + *(int*)(r + 0xEC) * 36, &col);
     float t = ((float*)rider)[0x12];
     if (t >= 0.0f) {
         if (*(int*)(r + 0xEC) == 0) {
@@ -1375,7 +1375,7 @@ extern "C" void func_0021E1B0(char* self, char* obj, int* rider, int x)
     size1.x *= sc.x;
     size1.y *= sc.y;
     int off = *(int*)(r + 0xEC) << 2;
-    func_001E9220(D_00477F30 + *(int*)(r + 0xEC) * 0x24, &size2, *(int*)((char*)tex + off));
+    func_001E9220(D_00477F30 + *(int*)(r + 0xEC) * 36, &size2, *(int*)((char*)tex + off));
     size2.x *= sc.x;
     size2.y *= sc.y;
     dim.x = size2.x + size1.x;
@@ -1803,12 +1803,12 @@ extern "C" void func_0021F660(char* self, int elems, int* rider, int x, int flag
     V4_F660 c;
     char buf[64];
     V4_F660 col;
-    int idx = 0x42;
+    int idx = 66;
     char* r = *(char**)((char*)SSXApp->Game->AI + (*rider << 2) + 0x28);
     int sz = *(int*)(self + 0x4B4);
     if (flag) {
         sz = *(int*)(self + 0x49C);
-        idx = 0x1B;
+        idx = 27;
     }
     char* e = (char*)(idx * 0x24 + elems); // PORT: pointer passed as int
     scale.x = 1.0f;
@@ -3800,7 +3800,7 @@ extern unsigned short D_00441D38[];
 
 extern "C" unsigned int func_00222448(const unsigned char *p, int n) {
     const unsigned char *end = p + n;
-    unsigned int crc = 0xFBEA;
+    unsigned int crc = 64490;
     while (p < end) {
         crc = D_00441D38[(*p++ ^ crc) & 0xFF] ^ (crc >> 8);
     }

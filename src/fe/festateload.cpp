@@ -211,7 +211,7 @@ extern "C" int func_00202738(void* self, int a1, int a2);
 extern "C" int func_00186950(void* self, int menu, int event)
 {
     if (func_00202738((char*)self + 0x48, menu, event) != 0) {
-        return 0x101;
+        return 257;
     }
     return 0;
 }
@@ -341,7 +341,7 @@ extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* e
     self->f234 = 0;
     self->f240 = 0;
     self->f244 = 0;
-    self->f19C = 0x1A;
+    self->f19C = 26;
     self->f22C = -1;
     self->f238 = -1;
     sMemCardK186A08* mc = (sMemCardK186A08*)cSSXApp_getMCManager(SSXApp);

@@ -66,7 +66,7 @@ extern "C" void* MEM_fill(void* dst, int c, int n);
 
 extern "C" void func_002D4BE0(cAngerFX* self)
 {
-    MEM_fill(*(void**)((char*)self + 4), 0, 0x58);
+    MEM_fill(*(void**)((char*)self + 4), 0, 88);
 }
 #endif
 

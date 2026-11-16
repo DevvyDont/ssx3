@@ -56,9 +56,9 @@ extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* rangeTable)
     Groups_15E0 tab = D_00489D60;
     int prev;
     int i, j;
-    for (j = 0x1B4; j >= 0; j--) rangeTable->r[j].count = 0;
-    prev = 0x1B6;
-    for (i = 0; i < 0x1D8; i++) {
+    for (j = 436; j >= 0; j--) rangeTable->r[j].count = 0;
+    prev = 438;
+    for (i = 0; i < 472; i++) {
         int group = tab.v[i];
         if (group != prev) {
             prev = group;
@@ -129,7 +129,7 @@ extern int cRiderAnimBase_AIAnimEventMap;
 extern "C" void cRiderAnimBase_initAIAnimEventMap(void) {
     int temp_2;
 
-    temp_2 = cMemMan_alloc(0x6D4, str_AIAnimEventMap, 0, 0);
+    temp_2 = cMemMan_alloc(1748, str_AIAnimEventMap, 0, 0);
     cRiderAnimBase_AIAnimEventMap = temp_2;
     cAIAnimEventMap_initMaps(temp_2);
 }

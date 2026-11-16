@@ -452,73 +452,73 @@ static inline sObj_6260* find_6260(void* self, char* name)
 extern "C" void cScreenPopup_FillObjectPointers(cScreenPopup* self)
 {
     if (sObj_6260* uiObj = find_6260(self, str_whitefg)) {
-        POS_6260(0x188) = uiObj->pos;
+        POS_6260(392) = uiObj->pos;
         uiObj->GetRect((char*)self + 0x1F4);
-        OBJ_6260(0x48) = uiObj;
+        OBJ_6260(72) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_redbg)) {
-        POS_6260(0x194) = uiObj->pos;
-        OBJ_6260(0x4C) = uiObj;
+        POS_6260(404) = uiObj->pos;
+        OBJ_6260(76) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_grey_background))
-        OBJ_6260(0x64) = uiObj;
+        OBJ_6260(100) = uiObj;
     if (sObj_6260* uiObj = find_6260(self, str_Big_outline)) {
-        POS_6260(0x230) = uiObj->pos;
-        OBJ_6260(0x54) = uiObj;
+        POS_6260(560) = uiObj->pos;
+        OBJ_6260(84) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_Big_shape)) {
-        POS_6260(0x224) = uiObj->pos;
-        OBJ_6260(0x50) = uiObj;
+        POS_6260(548) = uiObj->pos;
+        OBJ_6260(80) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_Small_outline)) {
-        POS_6260(0x248) = uiObj->pos;
-        OBJ_6260(0x5C) = uiObj;
+        POS_6260(584) = uiObj->pos;
+        OBJ_6260(92) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_Small_shape)) {
-        POS_6260(0x23C) = uiObj->pos;
+        POS_6260(572) = uiObj->pos;
         uiObj->GetRect((char*)self + 0x218);
-        OBJ_6260(0x58) = uiObj;
+        OBJ_6260(88) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_Shadow)) {
-        POS_6260(0x254) = uiObj->pos;
+        POS_6260(596) = uiObj->pos;
         OBJ_6260(0x60) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_black_bg))
-        OBJ_6260(0x68) = uiObj;
+        OBJ_6260(104) = uiObj;
     if (sObj_6260* uiObj = find_6260(self, str_Menu0000)) {
-        POS_6260(0x1A0) = uiObj->pos;
-        OBJ_6260(0x6C) = uiObj;
+        POS_6260(416) = uiObj->pos;
+        OBJ_6260(108) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_buttons)) {
-        POS_6260(0x1AC) = uiObj->pos;
+        POS_6260(428) = uiObj->pos;
         OBJ_6260(0x70) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_popupText)) {
-        POS_6260(0x1C4) = uiObj->pos;
-        OBJ_6260(0x74) = uiObj;
+        POS_6260(452) = uiObj->pos;
+        OBJ_6260(116) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_popupTitle)) {
-        POS_6260(0x1B8) = uiObj->pos;
+        POS_6260(440) = uiObj->pos;
         OBJ_6260(0x7C) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_popupPost)) {
-        POS_6260(0x1D0) = uiObj->pos;
+        POS_6260(464) = uiObj->pos;
         OBJ_6260(0x78) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_EnterTextBox)) {
-        POS_6260(0x1DC) = uiObj->pos;
+        POS_6260(476) = uiObj->pos;
         OBJ_6260(0x80) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_TextBoxPair)) {
-        POS_6260(0x1E8) = uiObj->pos;
-        OBJ_6260(0x88) = uiObj;
+        POS_6260(488) = uiObj->pos;
+        OBJ_6260(136) = uiObj;
     }
     if (sObj_6260* uiObj = find_6260(self, str_StaticTextBoxLabel))
-        OBJ_6260(0x84) = uiObj;
+        OBJ_6260(132) = uiObj;
     if (sObj_6260* uiObj = find_6260(self, str_EnterBackground)) {
         POS_6260(0x200) = uiObj->pos;
         uiObj->GetRect((char*)self + 0x20C);
-        OBJ_6260(0x8C) = uiObj;
+        OBJ_6260(140) = uiObj;
     }
     for (int i = 0; i < 5; i++) {
         char name[32];
@@ -895,7 +895,7 @@ extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, void* pInfo)
             *(sVec3_7040*)(postText + 0x44) = textPos;
             cScreenPopup_getTextBoxWrapSize(self, (char*)pInfo + 0x4C, (char*)self + 0x260, 0, 10.0f);
             if (self->mbCenterText != 0) {
-                cScreenPopup_changePivot(self, self->mpPostText, 0x11, 0.0f);
+                cScreenPopup_changePivot(self, self->mpPostText, 17, 0.0f);
             }
         }
     }
@@ -1008,7 +1008,7 @@ extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, void* pInfo)
         }
         cScreenPopup_getTextBoxWrapSize(self, message, (char*)self + 0x260, 1, 10.0f);
         if (self->mbCenterText != 0)
-            cScreenPopup_changePivot(self, self->mpMessageText, 0x11, 0.0f);
+            cScreenPopup_changePivot(self, self->mpMessageText, 17, 0.0f);
     }
     *(sVec3_7258*)&self->mvMenuSize[0] = *(sVec3_7258*)&self->mvCurSize[0];
 }
@@ -1779,7 +1779,7 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, void* pInfo)
             cScreenPopup_increaseBoxSize(self, (float*)((char*)self + 0x260), item);
             self->mvCurSize[1] += 5.0f;
             if (self->mbCenterText != 0) {
-                cScreenPopup_changePivot(self, self->mpTitleText, 0x11, 0.0f);
+                cScreenPopup_changePivot(self, self->mpTitleText, 17, 0.0f);
             }
         } else {
             sVE8678* vt = *(sVE8678**)((char*)text + 8);
@@ -1821,7 +1821,7 @@ extern "C" void cScreenPopup_adjustMenuPosition(cScreenPopup* self)
             for (i = 0; i < 5; i++) {
                 void* option = *(void**)((char*)self + 0x90 + i * 4);
                 if (option != 0)
-                    cScreenPopup_changePivot(self, option, 0x12, self->mvLargestOption[0] * 0.5f);
+                    cScreenPopup_changePivot(self, option, 18, self->mvLargestOption[0] * 0.5f);
             }
         }
         self->mvButtonOffset[0] = x;
@@ -1936,61 +1936,61 @@ extern "C" void cScreenPopup_adjustLayer(void* self, int v);
 // Resets the popup's widgets: unit scale and home positions, then re-anchors the side items.
 extern "C" void cScreenPopup_restoreElements(cScreenPopup* self)
 {
-    if (OBJ_8A38(0x48) != 0) {
-        VEC_8A38(OBJ_8A38(0x48), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(0x48), 0x44) = VEC_8A38(self, 0x188);
+    if (OBJ_8A38(72) != 0) {
+        VEC_8A38(OBJ_8A38(72), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(72), 68) = VEC_8A38(self, 392);
     }
-    if (OBJ_8A38(0x4C) != 0) {
-        VEC_8A38(OBJ_8A38(0x4C), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(0x4C), 0x44) = VEC_8A38(self, 0x194);
+    if (OBJ_8A38(76) != 0) {
+        VEC_8A38(OBJ_8A38(76), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(76), 68) = VEC_8A38(self, 404);
     }
-    if (OBJ_8A38(0x50) != 0) {
-        VEC_8A38(OBJ_8A38(0x50), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(0x50), 0x44) = VEC_8A38(self, 0x224);
+    if (OBJ_8A38(80) != 0) {
+        VEC_8A38(OBJ_8A38(80), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(80), 68) = VEC_8A38(self, 548);
     }
-    if (OBJ_8A38(0x54) != 0) {
-        VEC_8A38(OBJ_8A38(0x54), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(0x54), 0x44) = VEC_8A38(self, 0x230);
+    if (OBJ_8A38(84) != 0) {
+        VEC_8A38(OBJ_8A38(84), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(84), 68) = VEC_8A38(self, 560);
     }
-    if (OBJ_8A38(0x58) != 0) {
-        VEC_8A38(OBJ_8A38(0x58), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(0x58), 0x44) = VEC_8A38(self, 0x23C);
+    if (OBJ_8A38(88) != 0) {
+        VEC_8A38(OBJ_8A38(88), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(88), 68) = VEC_8A38(self, 572);
     }
-    if (OBJ_8A38(0x5C) != 0) {
-        VEC_8A38(OBJ_8A38(0x5C), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(0x5C), 0x44) = VEC_8A38(self, 0x248);
+    if (OBJ_8A38(92) != 0) {
+        VEC_8A38(OBJ_8A38(92), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(92), 68) = VEC_8A38(self, 584);
     }
     if (OBJ_8A38(0x60) != 0) {
-        VEC_8A38(OBJ_8A38(0x60), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(0x60), 0x44) = VEC_8A38(self, 0x254);
+        VEC_8A38(OBJ_8A38(0x60), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(0x60), 68) = VEC_8A38(self, 596);
     }
-    if (OBJ_8A38(0x8C) != 0) {
-        VEC_8A38(OBJ_8A38(0x8C), 0x50) = sVec3_8A38(1.0f, 1.0f, 1.0f);
-        VEC_8A38(OBJ_8A38(0x8C), 0x44) = VEC_8A38(self, 0x200);
+    if (OBJ_8A38(140) != 0) {
+        VEC_8A38(OBJ_8A38(140), 80) = sVec3_8A38(1.0f, 1.0f, 1.0f);
+        VEC_8A38(OBJ_8A38(140), 68) = VEC_8A38(self, 0x200);
     }
-    if (OBJ_8A38(0x6C) != 0) {
-        VEC_8A38(OBJ_8A38(0x6C), 0x44) = VEC_8A38(self, 0x1A0);
+    if (OBJ_8A38(108) != 0) {
+        VEC_8A38(OBJ_8A38(108), 68) = VEC_8A38(self, 416);
     }
     if (OBJ_8A38(0x70) != 0) {
-        VEC_8A38(OBJ_8A38(0x70), 0x44) = VEC_8A38(self, 0x1AC);
+        VEC_8A38(OBJ_8A38(0x70), 68) = VEC_8A38(self, 428);
     }
-    if (OBJ_8A38(0x74) != 0) {
-        VEC_8A38(OBJ_8A38(0x74), 0x44) = VEC_8A38(self, 0x1C4);
-        cScreenPopup_changePivot(self, OBJ_8A38(0x74), 9, 0.0f);
+    if (OBJ_8A38(116) != 0) {
+        VEC_8A38(OBJ_8A38(116), 68) = VEC_8A38(self, 452);
+        cScreenPopup_changePivot(self, OBJ_8A38(116), 9, 0.0f);
     }
     if (OBJ_8A38(0x7C) != 0) {
-        VEC_8A38(OBJ_8A38(0x7C), 0x44) = VEC_8A38(self, 0x1B8);
-        cScreenPopup_changePivot(self, OBJ_8A38(0x74), 9, 0.0f);
+        VEC_8A38(OBJ_8A38(0x7C), 68) = VEC_8A38(self, 440);
+        cScreenPopup_changePivot(self, OBJ_8A38(116), 9, 0.0f);
     }
     if (OBJ_8A38(0x78) != 0) {
-        VEC_8A38(OBJ_8A38(0x78), 0x44) = VEC_8A38(self, 0x1D0);
-        cScreenPopup_changePivot(self, OBJ_8A38(0x74), 9, 0.0f);
+        VEC_8A38(OBJ_8A38(0x78), 68) = VEC_8A38(self, 464);
+        cScreenPopup_changePivot(self, OBJ_8A38(116), 9, 0.0f);
     }
     if (OBJ_8A38(0x80) != 0) {
-        VEC_8A38(OBJ_8A38(0x80), 0x44) = VEC_8A38(self, 0x1DC);
+        VEC_8A38(OBJ_8A38(0x80), 68) = VEC_8A38(self, 476);
     }
-    if (OBJ_8A38(0x88) != 0) {
-        VEC_8A38(OBJ_8A38(0x88), 0x44) = VEC_8A38(self, 0x1E8);
+    if (OBJ_8A38(136) != 0) {
+        VEC_8A38(OBJ_8A38(136), 68) = VEC_8A38(self, 488);
     }
     int i;
     for (i = 0; i < 5; i++) {
@@ -2006,7 +2006,7 @@ extern "C" void cScreenPopup_restoreElements(cScreenPopup* self)
     one.x = 1.0f;
     one.y = 1.0f;
     one.z = 1.0f;
-    VEC_8A38(self, 0x278) = one;
+    VEC_8A38(self, 632) = one;
     cScreenPopup_adjustLayer(self, -self->miLayerOffset);
 }
 
@@ -2579,7 +2579,7 @@ struct sSelfK1C9B98 { char pad[0x2D0]; sEntryK1C9B98 entries[4]; };
  */
 extern "C" void cScreenPopup_createConfirmationPopup(cScreenPopup* self, int idx)
 {
-    char* popup = (char*)cScreenPopup_cScreenPopup((cScreenPopup*)cMemMan_alloc(0x360, str_Confirmation_Popup, 0x100, 0), self->mpEngine, self);
+    char* popup = (char*)cScreenPopup_cScreenPopup((cScreenPopup*)cMemMan_alloc(864, str_Confirmation_Popup, 0x100, 0), self->mpEngine, self);
     self->mpConfirmPopup = (cScreenPopup*)popup;
     char* slots = popup + 0xBC;
     *(int*)(popup + 0xBC) = 2;
@@ -2626,26 +2626,26 @@ extern "C" void cScreenPopup_adjustLayer(void* self, int v)
     // gives different registers.
     int layer;
 #define ADD_LAYER(e) o = (e); if (o) { layer = o->getLayer(); o->setLayer(layer + v); }
-    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x48));
-    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x4C));
-    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x50));
-    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x54));
-    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x58));
-    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x5C));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 72));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 76));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 80));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 84));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 88));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 92));
     ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x60));
-    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x64));
-    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x68));
-    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x74));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 100));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 104));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 116));
     ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x7C));
     ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x78));
     ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x80));
-    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x84));
-    ADD_LAYER(*(sUIObj_C9CD0**)(s + 0x8C));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 132));
+    ADD_LAYER(*(sUIObj_C9CD0**)(s + 140));
     ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(str_ngca)));
     ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(str_xba)));
     ADD_LAYER((sUIObj_C9CD0*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(str_ps2x)));
     for (int i = 0; i < 5; i++) {
-        ADD_LAYER(((sUIObj_C9CD0**)(s + 0x90))[i]);
+        ADD_LAYER(((sUIObj_C9CD0**)(s + 144))[i]);
     }
 #undef ADD_LAYER
 }
@@ -2756,11 +2756,11 @@ extern "C" int cScreenPopup_onWidgetMenu(cScreenPopup* self, char* menu, int msg
     case 8: case 9:
         return 0;
     case 7:
-        return self->mbReceivePrev ? 0x101 : 0;
+        return self->mbReceivePrev ? 257 : 0;
     case 6:
-        return self->mbNoEntryOnNext ? 0 : 0x101;
+        return self->mbNoEntryOnNext ? 0 : 257;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -2834,7 +2834,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
             if (id != (int)self->mpTextBoxPair) {
                 break;
             }
-            void* mem = cMemMan_alloc(0x444, str_cKeyboardPopup, 0x100, 0);
+            void* mem = cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0);
             self->mpKeyboard = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup((cKeyboardPopup*)mem, self->mpEngine, ((char*)self), 0, 0xF);
             cKeyboardPopup_setMaxCharacters(self->mpKeyboard, self->miMaxChars);
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, self->mpKeyboard);
@@ -2847,7 +2847,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
         break;
     case 6:
         if (self->mbReceivePrev != 0) {
-            Notify_1CA298((sPopupOwner_1CA298*)self->mpParentState, 17, ((char*)self), 0x14);
+            Notify_1CA298((sPopupOwner_1CA298*)self->mpParentState, 17, ((char*)self), 20);
         }
         break;
     case 7:
@@ -3040,7 +3040,7 @@ struct sVE1CA598 {
 extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, void* child, int msg)
 {
     switch (msg) {
-    case 0x15:
+    case 21:
         if (child == (void*)self->mpKeyboard) {
             cKeyboardPopup_setInputText((cKeyboardPopup*)child, (const char*)self->mszInputText);
             func_001CCF00(self->mpKeyboard, (const char*)self->mszStaticText);
@@ -3050,14 +3050,14 @@ extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, void* child, int m
         func_0039F190_i((char*)self->mpEngine + 0x18, 1);
         self->miConfimationReturnCode = self->miActiveConfirmation + 0xF;
         break;
-    case 0x10: case 0x14:
+    case 0x10: case 20:
         self->miConfimationReturnCode = -1;
         func_0039F190_i((char*)self->mpEngine + 0x18, 1);
         break;
-    case 0x11: case 0x12: case 0x13:
+    case 17: case 18: case 19:
         func_0039F190_i((char*)self->mpEngine + 0x18, 1);
         break;
-    case 0x16:
+    case 22:
         if (child == (void*)self->mpKeyboard) {
             self->mpKeyboard = 0;
         }
@@ -3485,10 +3485,10 @@ INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_onWidgetMenu);
 // Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cUIStateBuyPopup_onWidgetMenu(cUIStateBuyPopup* self, int pMenu, unsigned int key)
 {
-    int result = 0x101;
+    int result = 257;
     if (key < 10) {
         if (key < 7) {
-            result = 0x101;
+            result = 257;
         } else {
             return 0x100;
         }
@@ -3634,13 +3634,13 @@ extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, void* engin
     self->mbClearOnFirst = 0;
     self->mbDisableForFirst = 0;
     self->mVtbl = cKeyboardPopup_vtbl;
-    self->miCurrentKey = 0x1D;
+    self->miCurrentKey = 29;
     self->mszStatic = (char*)defaultStr;
     self->miMaxCharacters = 0x3F;
     cBXString_Reset((char*)self + 0x424);
     void* bx = D_004A33F0;
     self->meSkipState = 2;
-    self->miLastKey = 0x2B;
+    self->miLastKey = 43;
     self->meType = 1;
     self->mpustrStatic = 0;
     self->muiStatic = (unsigned int)0;
@@ -3885,12 +3885,12 @@ extern "C" void cKeyboardPopup_setInputText(cKeyboardPopup* self, const char* st
     self->miViewableStartIndex = 0;
     self->miViewableEndIndex = strlen(buf);
     if (self->mbDisableForFirst != 0) {
-        cKeyboardPopup_setIncludeKey(self, 0x4B, strlen(buf) ? one : 0, 2);
+        cKeyboardPopup_setIncludeKey(self, 75, strlen(buf) ? one : 0, 2);
     }
     if (strlen(buf) < self->miMinCharacters) {
-        cKeyboardPopup_setIncludeKey(self, 0x37, 0, 2);
+        cKeyboardPopup_setIncludeKey(self, 55, 0, 2);
     } else {
-        cKeyboardPopup_setIncludeKey(self, 0x37, 1, 2);
+        cKeyboardPopup_setIncludeKey(self, 55, 1, 2);
     }
     cKeyboardPopup_redrawScreen(self);
     if (self->mbTransistionDone != 0) {
@@ -3947,7 +3947,7 @@ extern "C" void cKeyboardPopup_kbMoveLeft(cKeyboardPopup* self, int bControllerI
         self->miCurrentKey += 13;
     else
         self->miCurrentKey = curKey - 1;
-    while (D_00441390[self->miCurrentKey] == 0x2A)
+    while (D_00441390[self->miCurrentKey] == 42)
         self->miCurrentKey -= 1;
     int val;
     if (cKeyboardPopup_allowSelection_out(self, self->miCurrentKey, &val)) {
@@ -4015,7 +4015,7 @@ extern "C" void cKeyboardPopup_kbMoveRight(cKeyboardPopup* self, int bController
         self->miCurrentKey -= 13;
     else
         self->miCurrentKey = curKey + 1;
-    while (D_00441390[self->miCurrentKey] == 0x2A)
+    while (D_00441390[self->miCurrentKey] == 42)
         self->miCurrentKey += 1;
     int val;
     if (cKeyboardPopup_allowSelection_out(self, self->miCurrentKey, &val)) {
@@ -4096,7 +4096,7 @@ extern "C" void cKeyboardPopup_kbMoveUp(cKeyboardPopup* self, int bControllerInp
         self->miCurrentKey = curKey + 70;
     else
         self->miCurrentKey -= 14;
-    while (D_00441390[self->miCurrentKey] == 0x2A)
+    while (D_00441390[self->miCurrentKey] == 42)
         self->miCurrentKey -= 1;
     int val;
     if (cKeyboardPopup_allowSelection_out(self, self->miCurrentKey, &val)) {
@@ -4176,7 +4176,7 @@ extern "C" void cKeyboardPopup_kbMoveDown(cKeyboardPopup* self, int bControllerI
         self->miCurrentKey = updatedKey - 70;
     else
         self->miCurrentKey = updatedKey + 14;
-    while (D_00441390[self->miCurrentKey] == 0x2A)
+    while (D_00441390[self->miCurrentKey] == 42)
         self->miCurrentKey += 1;
     int val;
     if (cKeyboardPopup_allowSelection_out(self, self->miCurrentKey, &val)) {
@@ -4211,8 +4211,8 @@ extern "C" int cKeyboardPopup_handleMovementUpFromQuickKeyRow(cKeyboardPopup* se
     int val;
     int state = self->miCurrentKey;
     if (state >= 5 && state <= 8) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x4B, &val)) {
-            self->miCurrentKey = 0x4B;
+        if (cKeyboardPopup_allowSelection_out(self, 75, &val)) {
+            self->miCurrentKey = 75;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4221,8 +4221,8 @@ extern "C" int cKeyboardPopup_handleMovementUpFromQuickKeyRow(cKeyboardPopup* se
         }
         return 1;
     } else if (state >= 9 && state <= 10) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x4C, &val)) {
-            self->miCurrentKey = 0x4C;
+        if (cKeyboardPopup_allowSelection_out(self, 76, &val)) {
+            self->miCurrentKey = 76;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4231,8 +4231,8 @@ extern "C" int cKeyboardPopup_handleMovementUpFromQuickKeyRow(cKeyboardPopup* se
         }
         return 1;
     } else if (state >= 11 && state <= 12) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x4F, &val)) {
-            self->miCurrentKey = 0x4F;
+        if (cKeyboardPopup_allowSelection_out(self, 79, &val)) {
+            self->miCurrentKey = 79;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4273,8 +4273,8 @@ extern "C" int cKeyboardPopup_handleMovementDownFromQuickKeyRow(cKeyboardPopup* 
         }
         return 1;
     } else if (state == 5) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x12, &val)) {
-            self->miCurrentKey = 0x12;
+        if (cKeyboardPopup_allowSelection_out(self, 18, &val)) {
+            self->miCurrentKey = 18;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4309,11 +4309,11 @@ extern "C" int cKeyboardPopup_handleMovementDownFromLast(cKeyboardPopup* self, i
     int val;
     int otherCaseAllowed;
     int state = self->miCurrentKey;
-    if (state == 0x4C) {
+    if (state == 76) {
         if (cKeyboardPopup_allowSelection_out(self, 0, &val)) {
             self->miCurrentKey = 9;
-        } else if (cKeyboardPopup_allowSelection_out(self, 0x17, &val)) {
-            self->miCurrentKey = 0x17;
+        } else if (cKeyboardPopup_allowSelection_out(self, 23, &val)) {
+            self->miCurrentKey = 23;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4321,9 +4321,9 @@ extern "C" int cKeyboardPopup_handleMovementDownFromLast(cKeyboardPopup* self, i
             cKeyboardPopup_skipRowToTop(self);
         }
         return 1;
-    } else if (state == 0x4B) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x13, &otherCaseAllowed)) {
-            self->miCurrentKey = 0x13;
+    } else if (state == 75) {
+        if (cKeyboardPopup_allowSelection_out(self, 19, &otherCaseAllowed)) {
+            self->miCurrentKey = 19;
         } else {
             if (otherCaseAllowed) {
                 self->meSkipState = bUseReg == 0;
@@ -4369,13 +4369,13 @@ extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self
         return 0;
     }
     if (state >= 15 && state <= 22) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x4B, &val)) {
-            self->miCurrentKey = 0x4B;
+        if (cKeyboardPopup_allowSelection_out(self, 75, &val)) {
+            self->miCurrentKey = 75;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
             }
-            if (self->miCurrentKey == 0x14) {
+            if (self->miCurrentKey == 20) {
                 cKeyboardPopup_skipRowToBottom(self, 0x3E);
             } else {
                 cKeyboardPopup_skipRowToBottom(self, -1);
@@ -4383,8 +4383,8 @@ extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self
         }
         return 1;
     } else if (state == 23) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x4C, &val)) {
-            self->miCurrentKey = 0x4C;
+        if (cKeyboardPopup_allowSelection_out(self, 76, &val)) {
+            self->miCurrentKey = 76;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4393,8 +4393,8 @@ extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self
         }
         return 1;
     } else if (state == 26) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x53, &val)) {
-            self->miCurrentKey = 0x53;
+        if (cKeyboardPopup_allowSelection_out(self, 83, &val)) {
+            self->miCurrentKey = 83;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4403,8 +4403,8 @@ extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self
         }
         return 1;
     } else if (state >= 24 && state <= 25) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x4F, &val)) {
-            self->miCurrentKey = 0x4F;
+        if (cKeyboardPopup_allowSelection_out(self, 79, &val)) {
+            self->miCurrentKey = 79;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4434,9 +4434,9 @@ extern "C" int cKeyboardPopup_handleMovementUpFromLast(cKeyboardPopup* self, int
 {
     int val;
     int state = self->miCurrentKey;
-    if (state == 0x4C) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x42, &val)) {
-            self->miCurrentKey = 0x42;
+    if (state == 76) {
+        if (cKeyboardPopup_allowSelection_out(self, 66, &val)) {
+            self->miCurrentKey = 66;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4444,9 +4444,9 @@ extern "C" int cKeyboardPopup_handleMovementUpFromLast(cKeyboardPopup* self, int
             cKeyboardPopup_moveUpRows(self);
         }
         return 1;
-    } else if (state == 0x4F) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x42, &val)) {
-            self->miCurrentKey = 0x42;
+    } else if (state == 79) {
+        if (cKeyboardPopup_allowSelection_out(self, 66, &val)) {
+            self->miCurrentKey = 66;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4479,9 +4479,9 @@ extern "C" int cKeyboardPopup_handleMovementDownToLast(cKeyboardPopup* self, int
 {
     int val;
     int state = self->miCurrentKey;
-    if (state == 0x39) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x4B, &val)) {
-            self->miCurrentKey = 0x4B;
+    if (state == 57) {
+        if (cKeyboardPopup_allowSelection_out(self, 75, &val)) {
+            self->miCurrentKey = 75;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4489,9 +4489,9 @@ extern "C" int cKeyboardPopup_handleMovementDownToLast(cKeyboardPopup* self, int
             cKeyboardPopup_skipRowToTop(self);
         }
         return 1;
-    } else if (state >= 0x3A && state <= 0x41) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x4B, &val)) {
-            self->miCurrentKey = 0x4B;
+    } else if (state >= 58 && state <= 65) {
+        if (cKeyboardPopup_allowSelection_out(self, 75, &val)) {
+            self->miCurrentKey = 75;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4499,9 +4499,9 @@ extern "C" int cKeyboardPopup_handleMovementDownToLast(cKeyboardPopup* self, int
             cKeyboardPopup_skipRowToTop(self);
         }
         return 1;
-    } else if (state == 0x42) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x4C, &val)) {
-            self->miCurrentKey = 0x4C;
+    } else if (state == 66) {
+        if (cKeyboardPopup_allowSelection_out(self, 76, &val)) {
+            self->miCurrentKey = 76;
         } else {
             if (val) {
                 self->meSkipState = bUseReg == 0;
@@ -4684,9 +4684,9 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
     int moved;
     if (self->pendingAccept != 0) {
         int key = self->key;
-        if (key != 0x37 && key != 0x46) {
+        if (key != 55 && key != 70) {
             self->pendingAccept = 0;
-            self->key = 0x46;
+            self->key = 70;
             cKeyboardPopup_pressKey((cKeyboardPopup*)self, 0);
             redo = 1;
             self->key = key;
@@ -4761,10 +4761,10 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
             if (self->closeOnAccept != 0)
                 func_0039F190_r(self->owner + 0x18, 1);
             self->done = 1;
-            self->parent->vt[19].fn((char*)self->parent + self->parent->vt[19].delta, 0, 0xD);
+            self->parent->vt[19].fn((char*)self->parent + self->parent->vt[19].delta, 0, 13);
             break;
         case 75:
-            if (cKeyboardPopup_allowSelection_out(self, 0x4B, 0) != 0)
+            if (cKeyboardPopup_allowSelection_out(self, 75, 0) != 0)
                 cKeyboardPopup_AddCharacterEdit((cKeyboardPopup*)self);
             break;
         case 0:
@@ -4794,15 +4794,15 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
     }
     cKeyboardPopup_updateEdit((cKeyboardPopup*)self, moved);
     if (self->needText != 0)
-        cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, 0x4B, strlen(self->text) != 0, 2);
+        cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, 75, strlen(self->text) != 0, 2);
     if (strlen(self->text) < self->minLen)
-        cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, 0x37, 0, 2);
+        cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, 55, 0, 2);
     else
-        cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, 0x37, 1, 2);
+        cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, 55, 1, 2);
     cKeyboardPopup_redrawScreen((cKeyboardPopup*)self);
     if (redo) {
         char name[32];
-        cKeyboardPopup_getObjName((cKeyboardPopup*)self, 0x46, name, 1);
+        cKeyboardPopup_getObjName((cKeyboardPopup*)self, 70, name, 1);
         sUIObj_C1E0* keyObj = (sUIObj_C1E0*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
         if (keyObj != 0) {
             // PORT: takes the address of a temporary (accepted by g++ 2.95); use a named local elsewhere.
@@ -4878,7 +4878,7 @@ extern "C" int cKeyboardPopup_updateToAscii(cKeyboardPopup* self, int value)
         self->miCurrentKey = 0xE;
         return 1;
     }
-    for (i = 0; i < 0x54; i++) {
+    for (i = 0; i < 84; i++) {
         if ((D_00441390[i] == asciiChar || D_004413E8[i] == asciiChar) && D_00441390[i] != '*'
             && (D_00441390[i] != '@' || D_004413E8[i] != D_00441390[i])) {
             if (cKeyboardPopup_allowSelection((cKeyboardPopup*)self, i, 0)) {
@@ -5623,7 +5623,7 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
         return;
     }
     ch[1] = 0;
-    for (int i = 0; i < 0x54; i++) {
+    for (int i = 0; i < 84; i++) {
         if (cKeyboardPopup_getObjName(self, i, name, 0) == 0) {
             continue;
         }
@@ -5638,7 +5638,7 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
             } else {
                 upper = caps;
             }
-            if (i >= 0xF && i < 0x1B) {
+            if (i >= 0xF && i < 27) {
                 upper = !Shift_D708(((char*)self));
             }
             cKeyboardPopup_checkAndFixConflict(self);
@@ -5917,7 +5917,7 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
             if (isOnK1CDB98()) {
                 if ((int)SSXApp->Game == 0) {
                     changed = 1;
-                    void* popup = func_001D9D48(cMemMan_alloc(0x140, str_cFEStateNetHelpPopup, 0x100, 0), self->mpEngine, self);
+                    void* popup = func_001D9D48(cMemMan_alloc(320, str_cFEStateNetHelpPopup, 0x100, 0), self->mpEngine, self);
                     func_001DA528(popup, 6);
                     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELPKeyboard);
                     func_001DA530(popup, 0, GetHashValue32(str_kT_HELPKeyboardMessage));
@@ -5952,47 +5952,47 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
                 int typed = 0;
                 switch (InputK1CDB98(ev, 42)) {
                 case 8:
-                    if (cKeyboardPopup_allowSelection(self, 0x1B, 0)) self->miCurrentKey = 0x1B;
+                    if (cKeyboardPopup_allowSelection(self, 27, 0)) self->miCurrentKey = 27;
                     else fail = 1;
                     break;
-                case 0xD:
-                    self->miCurrentKey = 0x37;
+                case 13:
+                    self->miCurrentKey = 55;
                     break;
                 case 0x10:
                     if (cKeyboardPopup_allowSelection(self, 0x38, 0)) self->miCurrentKey = 0x38;
                     else fail = 1;
                     break;
-                case 0x14:
-                    if (cKeyboardPopup_allowSelection(self, 0x2A, 0)) self->miCurrentKey = 0x2A;
+                case 20:
+                    if (cKeyboardPopup_allowSelection(self, 42, 0)) self->miCurrentKey = 42;
                     else fail = 1;
                     break;
-                case 0x1B:
+                case 27:
                     if (cKeyboardPopup_allowSelection(self, 0, 0)) self->miCurrentKey = 0;
                     else fail = 1;
                     break;
-                case 0x25:
-                    if (cKeyboardPopup_allowSelection(self, 0x4C, 0)) self->miCurrentKey = 0x4C;
+                case 37:
+                    if (cKeyboardPopup_allowSelection(self, 76, 0)) self->miCurrentKey = 76;
                     else fail = 1;
                     break;
-                case 0x27:
-                    if (cKeyboardPopup_allowSelection(self, 0x53, 0)) self->miCurrentKey = 0x53;
+                case 39:
+                    if (cKeyboardPopup_allowSelection(self, 83, 0)) self->miCurrentKey = 83;
                     else fail = 1;
                     break;
-                case 0x26:
-                    if (cKeyboardPopup_allowSelection(self, 0x45, 0)) self->miCurrentKey = 0x45;
+                case 38:
+                    if (cKeyboardPopup_allowSelection(self, 69, 0)) self->miCurrentKey = 69;
                     else fail = 1;
                     break;
-                case 0x28:
-                    if (cKeyboardPopup_allowSelection(self, 0x4F, 0)) self->miCurrentKey = 0x4F;
+                case 40:
+                    if (cKeyboardPopup_allowSelection(self, 79, 0)) self->miCurrentKey = 79;
                     else fail = 1;
                     break;
                 case 9:
                     if (cKeyboardPopup_allowSelection(self, 0x1C, 0)) self->miCurrentKey = 0x1C;
                     else fail = 1;
                     break;
-                case 0x70: case 0x71: case 0x72: case 0x73: case 0x74:
-                case 0x75: case 0x76: case 0x77: case 0x78: case 0x79: {
-                    int key = InputK1CDB98(ev, 42) - 0x6C;
+                case 0x70: case 113: case 114: case 115: case 116:
+                case 117: case 118: case 119: case 0x78: case 121: {
+                    int key = InputK1CDB98(ev, 42) - 108;
                     if (cKeyboardPopup_allowSelection(self, key, 0)) self->miCurrentKey = key;
                     else fail = 1;
                     break;
@@ -6054,12 +6054,12 @@ extern signed char D_00441390[];
 extern "C" void cKeyboardPopup_fillSelectableKeys(cKeyboardPopup* self)
 {
     int i;
-    for (i = 0; i < 0x54; i++) {
+    for (i = 0; i < 84; i++) {
         if (D_00441390[i] == '*' || i == 0x1C) {
             cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, i, 0, 2);
-        } else if (i == 0x45 || i == 0x4F || i == 0x29) {
+        } else if (i == 69 || i == 79 || i == 41) {
             cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, i, 0, 2);
-        } else if (i == 0x4B) {
+        } else if (i == 75) {
             if (strlen((char*)self + 0x74) != 0 && self->mbDisableForFirst != 0)
                 cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, i, 1, 2);
             else
@@ -6099,7 +6099,7 @@ INCLUDE_ASM("fe/fepopup", func_001CE408);
 extern "C" void func_001CE408(void* self, bool on)
 {
     int i;
-    for (i = 0xF; i < 0x19; i++) {
+    for (i = 0xF; i < 25; i++) {
         cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, i, !on, 1);
     }
 }

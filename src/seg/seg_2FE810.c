@@ -604,12 +604,12 @@ int func_003FDFB0(int a) {
             t[0] = 0;
             t[0x30 / 4] = 0;
             t[0x10 / 4] = 0;
-            t[0x50 / 4] = 0;
+            t[80 / 4] = 0;
             t[0x40 / 4] = 0;
             t[0x80 / 4] = 0;
         }
     }
-    *(volatile int *)0x1000E010 = 0xFF1F;
+    *(volatile int *)0x1000E010 = 65311;
     *(int *)0x1000E010 &= 0xFF1F0000;
     func_003FDF50((char *)&env, 20);
     func_003FE090(&env);
@@ -1511,7 +1511,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FED60);
 extern void func_003FEB78(void *, int);
 unsigned short func_003FED60(void) {
     unsigned short value;
-    func_003FEB78(&value, 0x43A);
+    func_003FEB78(&value, 1082);
     return value;
 }
 #endif
@@ -1532,15 +1532,15 @@ int func_003FED88_impl(S3ED88 *cnd) {
     for (i = 0; i < 0x20; i++) {
         cnd->a[i].q = e3ED88_b(0x400 + i).q;
     }
-    cnd->b[0] = e3ED88_b(0x430).w[0];
-    cnd->b[1] = e3ED88_b(0x431).w[0];
-    cnd->b[2] = e3ED88_b(0x432).w[0];
-    cnd->b[3] = e3ED88_b(0x434).w[0];
-    cnd->b[4] = e3ED88_b(0x435).w[0];
-    cnd->b[5] = e3ED88_b(0x436).w[0];
-    cnd->b[6] = e3ED88_b(0x437).w[0];
+    cnd->b[0] = e3ED88_b(1072).w[0];
+    cnd->b[1] = e3ED88_b(1073).w[0];
+    cnd->b[2] = e3ED88_b(1074).w[0];
+    cnd->b[3] = e3ED88_b(1076).w[0];
+    cnd->b[4] = e3ED88_b(1077).w[0];
+    cnd->b[5] = e3ED88_b(1078).w[0];
+    cnd->b[6] = e3ED88_b(1079).w[0];
     for (i = 0; i < 0x10; i++)
-        cnd->c[i] = e3ED88_b(0x420 + i).h[0];
+        cnd->c[i] = e3ED88_b(1056 + i).h[0];
     return 1;
 }
 #endif
@@ -1565,22 +1565,22 @@ int func_003FEF18_impl(S3EF18 *cnd) {
     }
     value.q = 0;
     value.d[0] = cnd->b[0];
-    e3EF18_b(0x430, value);
+    e3EF18_b(1072, value);
     value.d[0] = cnd->b[1];
-    e3EF18_b(0x431, value);
+    e3EF18_b(1073, value);
     value.d[0] = cnd->b[2];
-    e3EF18_b(0x432, value);
+    e3EF18_b(1074, value);
     value.d[0] = cnd->b[3];
-    e3EF18_b(0x434, value);
+    e3EF18_b(1076, value);
     value.d[0] = cnd->b[4];
-    e3EF18_b(0x435, value);
+    e3EF18_b(1077, value);
     value.d[0] = cnd->b[5];
-    e3EF18_b(0x436, value);
+    e3EF18_b(1078, value);
     value.d[0] = cnd->b[6];
-    e3EF18_b(0x437, value);
+    e3EF18_b(1079, value);
     for (i = 0; i < 0x10; i++) {
         value.d[0] = cnd->c[i];
-        e3EF18_b(0x420 + i, value);
+        e3EF18_b(1056 + i, value);
     }
     return 1;
 }
@@ -2028,7 +2028,7 @@ int func_003FFFA0(int port, int slot, int term, int offs) {
     switch (term) {
     case 1:
         t = p->f65;
-        if (t == 0xF3) return 0;
+        if (t == 243) return 0;
         return t >> 4;
     case 2:
         if (p->f64 == 1) return 0;
@@ -2574,8 +2574,8 @@ int f0EA8(char *out, char *name, int arg) {
         func_00425C60(D_00497A28, D_00526564);
     D_00526540.arg = arg;
     D_00526540.self = &D_00526540;
-    func_00426358((int)&D_00526540, 0x12C);
-    if (func_00426D18(&D_005266C0, 0, 0, &D_00526540, 0x12C, D_00526680, 4, 0, 0) < 0) {
+    func_00426358((int)&D_00526540, 300);
+    if (func_00426D18(&D_005266C0, 0, 0, &D_00526540, 300, D_00526680, 4, 0, 0) < 0) {
         SignalSema(D_00451628);
         return 0;
     }
@@ -2755,14 +2755,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_00401668);
 #ifdef SKIP_ASM
 int func_00401668(long id, int *out) {
     int v;
-    if (id != 0x8001) {
-        if (id != 0x8003) {
-            if (id != 0x8002) {
-                if (id != 0x8004) {
-                    if (id != 0x8011) {
-                        if (id != 0x8013) {
-                            if (id != 0x8012) {
-                                if (id == 0x8014)
+    if (id != 32769) {
+        if (id != 32771) {
+            if (id != 32770) {
+                if (id != 32772) {
+                    if (id != 32785) {
+                        if (id != 32787) {
+                            if (id != 32786) {
+                                if (id == 32788)
                                     v = (int)&D_00453180;
                                 else
                                     v = 0;
@@ -2982,7 +2982,7 @@ int func_00401BF0(int a) {
                 D_00451648 = 0;
                 break;
             }
-            if (i >= 0x11) {
+            if (i >= 17) {
                 b1_3DC0(semaId1BF0());
                 return b1_19F8(a);
             }
@@ -3034,10 +3034,10 @@ int func_00401DF8(int lsn, int sectors, int buf, unsigned char *mode) {
     p->res = D_004527C0;
     switch (mode[2]) {
     case 1:
-        size = sectors * 0x918;
+        size = sectors * 2328;
         break;
     case 2:
-        size = sectors * 0x924;
+        size = sectors * 2340;
         break;
     case 0:
     default:
@@ -3047,7 +3047,7 @@ int func_00401DF8(int lsn, int sectors, int buf, unsigned char *mode) {
     D_004527C0[0] = 0;
     if ((D_00451638 & 2) == 0)
         func_00426358(buf, size);
-    func_00426358((int)D_00452700, 0x90);
+    func_00426358((int)D_00452700, 144);
     func_00426358((int)p, 0x18);
     func_00426358((int)D_004527C0, 4);
     if (D_00451610 > 0)
@@ -3078,7 +3078,7 @@ int func_00401FD8(char *dst) {
     if (func_004011E0(8) == 0)
         return 0;
     p[0] = (int)D_00526780;
-    func_00426358((int)D_00526780, 0x810);
+    func_00426358((int)D_00526780, 2064);
     func_00426358((int)p, 12);
     D_00451658 = 3;
     if (func_00426D18(&D_004527D0, 4, 0, p, 12, D_00451680, 8, 0, 0) < 0) {
@@ -3091,7 +3091,7 @@ int func_00401FD8(char *dst) {
     if (D_00451680[1] == 0)
         __builtin_memcpy(dst, (char *)((unsigned)D_00526780 | 0x20000000), 0x400);
     else
-        __builtin_memcpy(dst, (char *)((unsigned)D_00526780 | 0x20000000), 0x810);
+        __builtin_memcpy(dst, (char *)((unsigned)D_00526780 | 0x20000000), 2064);
     SignalSema(D_00451628);
     return v;
 }
@@ -3142,9 +3142,9 @@ extern int func_004014F8();
 extern void SignalSema(int);
 int func_00402398(int *out) {
     int v;
-    if (func_004014F8(0x21) == 0)
+    if (func_004014F8(33) == 0)
         return 0;
-    if (func_00426D18(&D_00453180, 0x21, 0, 0, 0, D_00452800, 8, 0, 0) < 0) {
+    if (func_00426D18(&D_00453180, 33, 0, 0, 0, D_00452800, 8, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return 0;
     }
@@ -3275,13 +3275,13 @@ int func_004027B8(int *a, int buf, int size) {
     i7B8_memset(buf, 0, size);
     p = (int *)(((unsigned)(buf + 3) >> 2) << 2);
     rem = size - ((int)p - buf);
-    if ((unsigned)rem < 0x10C0) {
+    if ((unsigned)rem < 4288) {
         i7B8_34A8(p, D_00497C20);
         return 0;
     }
-    q = p + 0x108 / 4;
+    q = p + 264 / 4;
     a[16] = (int)p;
-    i7B8_2D50(q, (int)p + 0x10C0, rem - 0x10C0);
+    i7B8_2D50(q, (int)p + 4288, rem - 4288);
     v = -1;
     a[0] = 0;
     a[1] = 0;
@@ -3334,15 +3334,15 @@ int func_004027B8(int *a, int buf, int size) {
     i7B8_3338(p);
     i7B8_2B58(a);
     i7B8_2BB0(a);
-    p[110] = (int)p + 0x1E8;
-    p[111] = (int)p + 0x250;
-    p[113] = (int)p + 0x2B8;
-    p[114] = (int)p + 0x320;
-    p[115] = (int)p + 0x388;
+    p[110] = (int)p + 488;
+    p[111] = (int)p + 592;
+    p[113] = (int)p + 696;
+    p[114] = (int)p + 800;
+    p[115] = (int)p + 904;
     p[117] = (int)p + 0x3F0;
-    p[118] = (int)p + 0x458;
-    p[119] = (int)p + 0x4C0;
-    p[121] = (int)p + 0x528;
+    p[118] = (int)p + 1112;
+    p[119] = (int)p + 1216;
+    p[121] = (int)p + 1320;
     i7B8_2D68(q);
     p[532] = v;
     p[533] = 0;
@@ -3423,7 +3423,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402AF0);
 #ifdef SKIP_ASM
 void func_00402AF0(int *mpeg) {
     int *mpegSys = (int *)mpeg[16];
-    mpegSys[0x428] = 1;
+    mpegSys[1064] = 1;
 }
 #endif
 
@@ -3888,15 +3888,15 @@ extern char D_00497CC8[];
 extern void func_004086C0(int *, int, int);
 extern void func_004087D0(int *, int, int, int);
 void func_004032B8(int *p) {
-    int n = p[0x118 / 4];
-    if (p[0x120 / 4] != 0) {
+    int n = p[280 / 4];
+    if (p[288 / 4] != 0) {
         func_004034A8(p, (int)D_00497CC8);
-    } else if (p[0x174 / 4] == 3) {
-        func_004086C0(p, p[0x1BC / 4], n - 1);
+    } else if (p[372 / 4] == 3) {
+        func_004086C0(p, p[444 / 4], n - 1);
     } else {
-        func_004087D0(p, p[0x1CC / 4], p[0x1DC / 4], n - 1);
+        func_004087D0(p, p[460 / 4], p[476 / 4], n - 1);
     }
-    p[0x120 / 4] = 0;
+    p[288 / 4] = 0;
 }
 #endif
 
@@ -3923,8 +3923,8 @@ extern void func_0042C0C0(void);
 extern void func_00409638_2(int, int) __asm__("func_00409638");
 void func_00403398(int *mpegSys) {
     int intrState;
-    mpegSys[0x818 / 4] = 1;
-    mpegSys[0x1B0 / 4] = 0;
+    mpegSys[2072 / 4] = 1;
+    mpegSys[432 / 4] = 0;
     intrState = func_0042C078_0();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
     *(volatile int *)0x1000B000 = 0;
@@ -3989,7 +3989,7 @@ extern int func_0042C078();
 extern void func_0042C0C0(void);
 void q3500(int base, unsigned addr, int n) __asm__("func_00403500");
 void q3500(int base, unsigned addr, int n) {
-    unsigned tagBase = ((unsigned)(base + 0x88F) >> 4) << 4;
+    unsigned tagBase = ((unsigned)(base + 2191) >> 4) << 4;
     long *tag = (long *)tagBase;
     int ret;
     while (n > 0) {
@@ -4007,7 +4007,7 @@ void q3500(int base, unsigned addr, int n) {
     ret = func_0042C078();
     *(volatile int *)0x1000B430 = tagBase & 0xFFFFFFF;
     *(volatile int *)0x1000B420 = 0;
-    *(volatile int *)0x1000B400 = 0x105;
+    *(volatile int *)0x1000B400 = 261;
     if (ret)
         func_0042C0C0();
 }
@@ -4039,18 +4039,18 @@ void func_00403620(int *p) {
     unsigned v;
     int w;
     int b;
-    p[0xD4 / 4] = 0;
+    p[212 / 4] = 0;
     v = func_004072E8(p, 32);
     w = (v >> 8) & 0xFFF;
-    p[0x124 / 4] = v >> 20;
-    p[0x128 / 4] = w;
-    if (w >= 0xAF1)
+    p[292 / 4] = v >> 20;
+    p[296 / 4] = w;
+    if (w >= 2801)
         func_004034A8(p, (int)D_00497CF8);
     v = func_004072E8(p, 30);
-    p[0x134 / 4] = v >> 12;
-    p[0x138 / 4] = (v >> 1) & 0x3FF;
+    p[308 / 4] = v >> 12;
+    p[312 / 4] = (v >> 1) & 0x3FF;
     b = func_004072E8(p, 1);
-    p[0x840 / 4] = b;
+    p[2112 / 4] = b;
     if (b != 0) {
         func_00406E20((int)p);
         func_00406DF0(p, 0x50000000);
@@ -4059,7 +4059,7 @@ void func_00403620(int *p) {
         func_00403AD0(p, 0x50000000, D_00453200);
     }
     b = func_004072E8(p, 1);
-    p[0x844 / 4] = b;
+    p[2116 / 4] = b;
     if (b != 0) {
         func_00406E20((int)p);
         func_00406DF0(p, 0x58000000);
@@ -4068,7 +4068,7 @@ void func_00403620(int *p) {
         func_00403AD0(p, 0x58000000, D_00453240);
     }
     func_004076F8(p);
-    func_00403748(p[0x858 / 4]);
+    func_00403748(p[2136 / 4]);
 }
 #endif
 
@@ -4114,7 +4114,7 @@ void func_00403AD0(int *mpegSys, int ipuCmd, int srcAddr) {
     intrState = f3AD0_DI();
     *(volatile int *)0x1000B410 = srcAddr & 0xFFFFFFF;
     *(volatile int *)0x1000B420 = 4;
-    *(volatile int *)0x1000B400 = 0x101;
+    *(volatile int *)0x1000B400 = 257;
     if (intrState) f3AD0_EI();
     f3AD0_6DF0(mpegSys, ipuCmd);
     f3AD0_6E20(mpegSys);
@@ -4137,25 +4137,25 @@ void func_00403BB0(int *p) {
     unsigned x;
     unsigned y;
     unsigned z;
-    p[0x848 / 4] = 1;
+    p[2120 / 4] = 1;
     func_00405B48(0);
     v = func_004072E8(p, 28);
     x = (v >> 1) & 0xFFF;
     t = (v >> 17) & 3;
     y = (v >> 13) & 3;
     z = (v >> 15) & 3;
-    p[0x140 / 4] = t;
+    p[320 / 4] = t;
     if (t != 1)
         func_004034A8(p, (int)D_00497D10);
-    p[0x13C / 4] = (v >> 19) & 1;
+    p[316 / 4] = (v >> 19) & 1;
     h = v >> 20;
     w = (unsigned)func_004072E8(p, 16) >> 8;
-    if (h != 0x48 && h != 0x58 && h != 0x44)
+    if (h != 72 && h != 88 && h != 68)
         func_004034A8(p, (int)D_00497D38);
-    p[0x124 / 4] = (z << 12) | (p[0x124 / 4] & 0xFFF);
-    p[0x128 / 4] = (y << 12) | (p[0x128 / 4] & 0xFFF);
-    p[0x134 / 4] = p[0x134 / 4] + (x << 18);
-    p[0x138 / 4] = p[0x138 / 4] + (w << 10);
+    p[292 / 4] = (z << 12) | (p[292 / 4] & 0xFFF);
+    p[296 / 4] = (y << 12) | (p[296 / 4] & 0xFFF);
+    p[308 / 4] = p[308 / 4] + (x << 18);
+    p[312 / 4] = p[312 / 4] + (w << 10);
 }
 #endif
 
@@ -4168,11 +4168,11 @@ void func_00403CE0(int *mpegSys) {
     if (func_004072E8((int)mpegSys, 1)) {
         func_004072E8((int)mpegSys, 8);
         func_004072E8((int)mpegSys, 8);
-        mpegSys[0x144 / 4] = func_004072E8((int)mpegSys, 8);
+        mpegSys[324 / 4] = func_004072E8((int)mpegSys, 8);
     }
-    mpegSys[0x148 / 4] = func_004072E8((int)mpegSys, 0xE);
+    mpegSys[328 / 4] = func_004072E8((int)mpegSys, 0xE);
     func_004072E8((int)mpegSys, 1);
-    mpegSys[0x14C / 4] = func_004072E8((int)mpegSys, 0xE);
+    mpegSys[332 / 4] = func_004072E8((int)mpegSys, 0xE);
 }
 #endif
 
@@ -4271,29 +4271,29 @@ void func_00404050(int *p, int bx, int by, int mbtype, int mtype, int PMV[2][2][
     avg = 0;
     *(int *)((char *)p + p[0x810 / 4] * 0x140 + 0x6BC) = 0;
     fwd = mbtype & 8;
-    if (fwd || p[0x150 / 4] == 2) {
-        if (p[0x174 / 4] == 3) {
+    if (fwd || p[336 / 4] == 2) {
+        if (p[372 / 4] == 3) {
             if (mtype == 2 || !fwd) {
-                q4050_4758(p, p[0x1B8 / 4], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
+                q4050_4758(p, p[440 / 4], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
             } else if (mtype == 1) {
-                q4050_4758(p, p[0x1B8 / 4], mvfs[0][0], 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, 1, 0);
-                q4050_4758(p, p[0x1B8 / 4], mvfs[1][0], 1, 0, 8, bx, by, PMV[1][0][0], PMV[1][0][1] >> 1, 1, 0);
+                q4050_4758(p, p[440 / 4], mvfs[0][0], 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, 1, 0);
+                q4050_4758(p, p[440 / 4], mvfs[1][0], 1, 0, 8, bx, by, PMV[1][0][0], PMV[1][0][1] >> 1, 1, 0);
             } else if (mtype == 3) {
                 q4050_5E30(p, &DMV[0][0], dmv, PMV[0][0][0], PMV[0][0][1] >> 1);
-                q4050_4758(p, p[0x1B8 / 4], 0, 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, sel, 0);
-                q4050_4758(p, p[0x1B8 / 4], 1, 0, 0, 8, bx, by, DMV[0][0], DMV[0][1], sel, sel);
-                q4050_4758(p, p[0x1B8 / 4], 1, 1, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, sel, 0);
-                q4050_4758(p, p[0x1B8 / 4], 0, 1, 0, 8, bx, by, DMV[1][0], DMV[1][1], sel, sel);
+                q4050_4758(p, p[440 / 4], 0, 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, sel, 0);
+                q4050_4758(p, p[440 / 4], 1, 0, 0, 8, bx, by, DMV[0][0], DMV[0][1], sel, sel);
+                q4050_4758(p, p[440 / 4], 1, 1, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, sel, 0);
+                q4050_4758(p, p[440 / 4], 0, 1, 0, 8, bx, by, DMV[1][0], DMV[1][1], sel, sel);
             } else {
                 q4050_3470(p, D_00497E38, mtype);
             }
         } else {
-            cur = p[0x174 / 4] == 2;
-            ref[0][0] = p[0x1C8 / 4];
-            ref[0][1] = p[0x1D8 / 4];
-            ref[1][0] = p[0x1CC / 4];
-            ref[1][1] = p[0x1DC / 4];
-            if (p[0x150 / 4] == 2 && p[0x120 / 4] && cur != mvfs[0][0])
+            cur = p[372 / 4] == 2;
+            ref[0][0] = p[456 / 4];
+            ref[0][1] = p[472 / 4];
+            ref[1][0] = p[460 / 4];
+            ref[1][1] = p[476 / 4];
+            if (p[336 / 4] == 2 && p[288 / 4] && cur != mvfs[0][0])
                 sel = 1;
             else
                 sel = 0;
@@ -4301,13 +4301,13 @@ void func_00404050(int *p, int bx, int by, int mbtype, int mtype, int PMV[2][2][
                 q4050_4758(p, ref[sel][mvfs[0][0]], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
             } else if (mtype == 2) {
                 q4050_4758(p, ref[sel][mvfs[0][0]], 0, 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
-                if (p[0x150 / 4] == 2 && p[0x120 / 4] && cur != mvfs[1][0])
+                if (p[336 / 4] == 2 && p[288 / 4] && cur != mvfs[1][0])
                     sel = 1;
                 else
                     sel = 0;
                 q4050_4758(p, ref[sel][mvfs[1][0]], 0, 0, 8, 8, bx, by, PMV[1][0][0], PMV[1][0][1], 0, 0);
             } else if (mtype == 3) {
-                if (p[0x120 / 4])
+                if (p[288 / 4])
                     sel = 1;
                 else
                     sel = 0;
@@ -4321,20 +4321,20 @@ void func_00404050(int *p, int bx, int by, int mbtype, int mtype, int PMV[2][2][
         avg = 1;
     }
     if (mbtype & 4) {
-        if (p[0x174 / 4] == 3) {
+        if (p[372 / 4] == 3) {
             sel = 1;
             if (mtype == 2) {
-                q4050_4758(p, p[0x1BC / 4], 0, 0, 0, 16, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
+                q4050_4758(p, p[444 / 4], 0, 0, 0, 16, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
             } else {
-                q4050_4758(p, p[0x1BC / 4], mvfs[0][1], 0, 0, 8, bx, by, PMV[0][1][0], PMV[0][1][1] >> 1, sel, avg);
-                q4050_4758(p, p[0x1BC / 4], mvfs[1][1], 1, 0, 8, bx, by, PMV[1][1][0], PMV[1][1][1] >> 1, sel, avg);
+                q4050_4758(p, p[444 / 4], mvfs[0][1], 0, 0, 8, bx, by, PMV[0][1][0], PMV[0][1][1] >> 1, sel, avg);
+                q4050_4758(p, p[444 / 4], mvfs[1][1], 1, 0, 8, bx, by, PMV[1][1][0], PMV[1][1][1] >> 1, sel, avg);
             }
         } else {
             if (mtype == 1) {
-                q4050_4758(p, mvfs[0][1] ? p[0x1DC / 4] : p[0x1CC / 4], 0, 0, 0, 16, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
+                q4050_4758(p, mvfs[0][1] ? p[476 / 4] : p[460 / 4], 0, 0, 0, 16, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
             } else if (mtype == 2) {
-                q4050_4758(p, mvfs[0][1] ? p[0x1DC / 4] : p[0x1CC / 4], 0, 0, 0, 8, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
-                q4050_4758(p, mvfs[1][1] ? p[0x1DC / 4] : p[0x1CC / 4], 0, 0, 8, 8, bx, by, PMV[1][1][0], PMV[1][1][1], 0, avg);
+                q4050_4758(p, mvfs[0][1] ? p[476 / 4] : p[460 / 4], 0, 0, 0, 8, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
+                q4050_4758(p, mvfs[1][1] ? p[476 / 4] : p[460 / 4], 0, 0, 8, 8, bx, by, PMV[1][1][0], PMV[1][1][1], 0, avg);
             } else {
                 q4050_3470(p, D_00497E78, mtype);
             }
@@ -5621,22 +5621,22 @@ int func_00405FB8(int *p) {
     do {
         c = lx5_6F78(p, 0);
         switch ((unsigned)c) {
-        case 0x23:
+        case 35:
             again = 1;
-            sum += 0x21;
+            sum += 33;
             break;
-        case 0x22:
+        case 34:
             again = 1;
             break;
         case 0:
             t = lx5_70F0(p, 11);
-            if (p[0x848 / 4] != 0 && t == 15) {
+            if (p[2120 / 4] != 0 && t == 15) {
                 lx5_71F8(p, 11);
                 again = 1;
                 break;
             }
             lx5_3470(p, D_00497ED0, c);
-            p[0x11C / 4] = 1;
+            p[284 / 4] = 1;
             return 1;
         default:
             sum += c;
@@ -5660,10 +5660,10 @@ extern void func_004034A8(int *, int);
 int func_004060C8(int *p) {
     int n;
     int r;
-    p[0x810 / 4] = 0;
-    n = p[0x12C / 4] * p[0x130 / 4];
-    p[0x814 / 4] = 0;
-    if (p[0x174 / 4] != 3)
+    p[2064 / 4] = 0;
+    n = p[300 / 4] * p[304 / 4];
+    p[2068 / 4] = 0;
+    if (p[372 / 4] != 3)
         n >>= 1;
     do {
         r = func_00406318(p, n);
@@ -5671,15 +5671,15 @@ int func_004060C8(int *p) {
     func_00406E20((int)p);
     if (func_00405B70(p) == 0) {
         r = 4;
-        if (p[0x10A0 / 4] != 0)
-            p[0x10A0 / 4] = 0;
+        if (p[4256 / 4] != 0)
+            p[4256 / 4] = 0;
         else
             r = 2;
     }
     while ((*(volatile unsigned *)0x1000D400 >> 8) & 1)
         ;
     if (r == 0)
-        func_00404B78(p, p[0x810 / 4] == 0);
+        func_00404B78(p, p[2064 / 4] == 0);
     if ((unsigned)(r - 1) < 2)
         func_004034A8(p, (int)D_00497F08);
     return r == 0;
@@ -5715,10 +5715,10 @@ int _sliceA0(int *self, int mbCount, int *mbAddress, int *mbIncrement, int *pred
     int startCode;
     int rowExtension;
     int mbAddrInc;
-    self[0x11C / 4] = 0;
+    self[284 / 4] = 0;
     func_00407438();
     startCode = func_004070F0((int)self, 32);
-    if ((unsigned)(startCode - 0x101) >= 0xAF) {
+    if ((unsigned)(startCode - 257) >= 175) {
         func_00403470_k(self, D_00497F28, startCode);
         return 2;
     }
@@ -5726,13 +5726,13 @@ int _sliceA0(int *self, int mbCount, int *mbAddress, int *mbIncrement, int *pred
     rowExtension = func_004074B8(self);
     mbAddrInc = func_00405FB8(self);
     *mbIncrement = mbAddrInc;
-    if (self[0x11C / 4] != 0) {
+    if (self[284 / 4] != 0) {
         func_004034A8(self, (int)D_00497F50);
         return 1;
     }
-    *mbAddress = ((((rowExtension << 7) + (startCode & 0xFF)) - 1) * self[0x12C / 4] + mbAddrInc) - 1;
+    *mbAddress = ((((rowExtension << 7) + (startCode & 0xFF)) - 1) * self[300 / 4] + mbAddrInc) - 1;
     *mbIncrement = 1;
-    self[0x1B0 / 4] = 1;
+    self[432 / 4] = 1;
     predictors[5] = 0;
     predictors[4] = 0;
     predictors[1] = 0;
@@ -5773,30 +5773,30 @@ int func_00406318(int *p, int n) {
     v = _sliceA0(p, n, &a, &b, s);
     if (v != 0)
         return v;
-    p[0x11C / 4] = 0;
+    p[284 / 4] = 0;
     for (;;) {
         if (a >= n)
             return 0;
-        p[(0x6CC + p[0x810 / 4] * 0x140) / 4] = 0;
+        p[(1740 + p[2064 / 4] * 320) / 4] = 0;
         if (func_00405B70(p) == 0) {
-            if (p[0x10A0 / 4] != 0) {
-                p[0x10A0 / 4] = 0;
+            if (p[4256 / 4] != 0) {
+                p[4256 / 4] = 0;
                 return 4;
             }
             return 2;
         }
         if (b == 0) {
-            if (func_004070F0((int)p, 0x17) == 0) {
-                p[0x11C / 4] = 0;
+            if (func_004070F0((int)p, 23) == 0) {
+                p[284 / 4] = 0;
                 return 3;
             }
-            if (p[0x11C / 4] != 0) {
-                p[0x11C / 4] = 0;
+            if (p[284 / 4] != 0) {
+                p[284 / 4] = 0;
                 return 3;
             }
             b = func_00405FB8(p);
-            if (p[0x11C / 4] != 0) {
-                p[0x11C / 4] = 0;
+            if (p[284 / 4] != 0) {
+                p[284 / 4] = 0;
                 return 1;
             }
         }
@@ -5806,23 +5806,23 @@ int func_00406318(int *p, int n) {
         }
         if (b == 1) {
             if (func_004065D0(p, &c, &d, &e, s, q, r) == 0) {
-                p[0x11C / 4] = 0;
+                p[284 / 4] = 0;
                 return 1;
             }
         } else {
             if (func_00406510(p, s, &d, q, &c) == 0) {
-                p[0x11C / 4] = 0;
+                p[284 / 4] = 0;
                 return 2;
             }
         }
         if (func_00403E00_k(p, a, b, c, d, s, q, r) == 0) {
-            p[0x11C / 4] = 0;
+            p[284 / 4] = 0;
             return 2;
         }
         if (a != 0)
-            func_00404B78(p, p[0x810 / 4] ^ 1);
+            func_00404B78(p, p[2064 / 4] ^ 1);
         a++;
-        p[0x810 / 4] ^= 1;
+        p[2064 / 4] ^= 1;
         b--;
     }
 }
@@ -5836,23 +5836,23 @@ extern void func_004034A8(int *, int);
 int func_00406510(int *p, int *q, int *r, int *s, int *t) {
     int ok = 1;
     int v;
-    p[p[0x810 / 4] * 0x140 / 4 + 0x6CC / 4] = 1;
-    p[0x1B0 / 4] = 1;
-    if (p[0x150 / 4] == 2) {
+    p[p[2064 / 4] * 320 / 4 + 1740 / 4] = 1;
+    p[432 / 4] = 1;
+    if (p[336 / 4] == 2) {
         q[5] = 0;
         q[4] = 0;
         q[1] = 0;
         q[0] = 0;
     }
-    if (p[0x174 / 4] == 3) {
+    if (p[372 / 4] == 3) {
         *r = 2;
     } else {
         *r = 1;
-        v = p[0x174 / 4] == 2;
+        v = p[372 / 4] == 2;
         s[1] = v;
         s[0] = v;
     }
-    if (p[0x150 / 4] == 1) {
+    if (p[336 / 4] == 1) {
         func_004034A8(p, (int)D_00497F90);
         ok = 0;
     }
@@ -5880,23 +5880,23 @@ extern void m65D0_8AF8(int, int) __asm__("func_00408AF8");
 int func_004065D0(int *p, int *mbtype, int *motion_type, int *dct_type, int *PMV, int *mvfs, int *dmvector) {
     int macroblock_type;
     int motion_vector_count, mv_format, dmv, mvscale;
-    *(volatile unsigned int *)0x10002010 = (*(volatile unsigned int *)0x10002010 & 0xF8FFFFFF) | (p[0x150 / 4] << 24);
+    *(volatile unsigned int *)0x10002010 = (*(volatile unsigned int *)0x10002010 & 0xF8FFFFFF) | (p[336 / 4] << 24);
     macroblock_type = m65D0_6F78(p, 1);
     *mbtype = macroblock_type;
     if (macroblock_type == 0) {
         func_004034A8(p, (int)D_00497FC0);
-        p[0x11C / 4] = 1;
+        p[284 / 4] = 1;
         return 0;
     }
     if (macroblock_type & 0xC) {
-        if (p[0x174 / 4] == 3 && p[0x17C / 4])
+        if (p[372 / 4] == 3 && p[380 / 4])
             *motion_type = 2;
         else
             *motion_type = m65D0_72E8(p, 2);
     } else if ((macroblock_type & 1) && p[0x180 / 4]) {
-        *motion_type = (p[0x174 / 4] == 3) ? 2 : 1;
+        *motion_type = (p[372 / 4] == 3) ? 2 : 1;
     }
-    if (p[0x174 / 4] == 3) {
+    if (p[372 / 4] == 3) {
         motion_vector_count = (*motion_type == 1) ? 2 : 1;
         mv_format = (*motion_type == 2);
     } else {
@@ -5904,59 +5904,59 @@ int func_004065D0(int *p, int *mbtype, int *motion_type, int *dct_type, int *PMV
         mv_format = 0;
     }
     dmv = (*motion_type == 3);
-    mvscale = (mv_format == 0 && p[0x174 / 4] == 3);
-    *dct_type = (p[0x174 / 4] == 3 && !p[0x17C / 4] && (*mbtype & 3)) ? m65D0_72E8(p, 1) : 0;
+    mvscale = (mv_format == 0 && p[372 / 4] == 3);
+    *dct_type = (p[372 / 4] == 3 && !p[380 / 4] && (*mbtype & 3)) ? m65D0_72E8(p, 1) : 0;
 
     if (*mbtype & 0x10)
-        p[0x1B4 / 4] = m65D0_72E8(p, 5);
+        p[436 / 4] = m65D0_72E8(p, 5);
 
     if ((*mbtype & 8) || ((*mbtype & 1) && p[0x180 / 4])) {
-        if (p[0x848 / 4])
-            m65D0_6B00(p, PMV, dmvector, mvfs, 0, motion_vector_count, mv_format, p[0x164 / 4] - 1, p[0x168 / 4] - 1, dmv, mvscale);
+        if (p[2120 / 4])
+            m65D0_6B00(p, PMV, dmvector, mvfs, 0, motion_vector_count, mv_format, p[356 / 4] - 1, p[360 / 4] - 1, dmv, mvscale);
         else
-            m65D0_6CA0(p, PMV, dmvector, p[0x158 / 4] - 1, p[0x158 / 4] - 1, 0, 0, p[0x154 / 4]);
+            m65D0_6CA0(p, PMV, dmvector, p[344 / 4] - 1, p[344 / 4] - 1, 0, 0, p[340 / 4]);
     }
-    if (p[0x11C / 4])
+    if (p[284 / 4])
         return 0;
 
     if (*mbtype & 4) {
-        if (p[0x848 / 4])
-            m65D0_6B00(p, PMV, dmvector, mvfs, 1, motion_vector_count, mv_format, p[0x16C / 4] - 1, p[0x170 / 4] - 1, 0, mvscale);
+        if (p[2120 / 4])
+            m65D0_6B00(p, PMV, dmvector, mvfs, 1, motion_vector_count, mv_format, p[364 / 4] - 1, p[368 / 4] - 1, 0, mvscale);
         else
-            m65D0_6CA0(p, PMV + 2, dmvector, p[0x160 / 4] - 1, p[0x160 / 4] - 1, 0, 0, p[0x15C / 4]);
+            m65D0_6CA0(p, PMV + 2, dmvector, p[352 / 4] - 1, p[352 / 4] - 1, 0, 0, p[348 / 4]);
     }
-    if (p[0x11C / 4])
+    if (p[284 / 4])
         return 0;
 
     if ((*mbtype & 1) && p[0x180 / 4])
         m65D0_71F8(p, 1);
 
     if (*mbtype & 3) {
-        m65D0_8AF8(p[p[0x810 / 4] * 0x140 / 4 + 0x594 / 4], 0x300);
+        m65D0_8AF8(p[p[2064 / 4] * 320 / 4 + 1428 / 4], 0x300);
         m65D0_6E20(p);
-        m65D0_6DF0(p, 0x20000000 | ((*mbtype & 1) << 27) | (p[0x1B0 / 4] << 26) | (*dct_type << 25) | (p[0x1B4 / 4] << 16));
+        m65D0_6DF0(p, 0x20000000 | ((*mbtype & 1) << 27) | (p[432 / 4] << 26) | (*dct_type << 25) | (p[436 / 4] << 16));
     } else {
-        p[p[0x810 / 4] * 0x140 / 4 + 0x6CC / 4] = 1;
+        p[p[2064 / 4] * 320 / 4 + 1740 / 4] = 1;
     }
-    p[0x1B0 / 4] = 0;
-    if (p[0x11C / 4])
+    p[432 / 4] = 0;
+    if (p[284 / 4])
         return 0;
 
     if (!(*mbtype & 1))
-        p[0x1B0 / 4] = 1;
+        p[432 / 4] = 1;
 
     if ((*mbtype & 1) && !p[0x180 / 4]) {
         PMV[0] = PMV[1] = PMV[4] = PMV[5] = 0;
         PMV[2] = PMV[3] = PMV[6] = PMV[7] = 0;
     }
 
-    if (p[0x150 / 4] == 2 && !(*mbtype & 9)) {
+    if (p[336 / 4] == 2 && !(*mbtype & 9)) {
         PMV[0] = PMV[1] = PMV[4] = PMV[5] = 0;
-        if (p[0x174 / 4] == 3) {
+        if (p[372 / 4] == 3) {
             *motion_type = 2;
         } else {
             *motion_type = 1;
-            mvfs[0] = (p[0x174 / 4] == 2);
+            mvfs[0] = (p[372 / 4] == 2);
         }
     }
     return 1;
@@ -6064,7 +6064,7 @@ void func_00406E20(int mpegSys) {
     int n = 0;
     if ((*(volatile unsigned *)0x10002010 & 0x80004000) == 0x80000000) {
         do {
-            if (n++ >= 0x1389) {
+            if (n++ >= 5001) {
                 func_00402C80(*(int **)(mpegSys + 0x858));
                 n = 0;
             }
@@ -6082,7 +6082,7 @@ long func_00406EC8(int mpegSys) {
     long cmdResult = *(volatile long *)0x10002000;
     if (cmdResult < 0 && !(*(volatile unsigned *)0x10002010 & 0x4000)) {
         do {
-            if (n++ >= 0x1389) {
+            if (n++ >= 5001) {
                 func_00402C80(*(int **)(mpegSys + 0x858));
                 n = 0;
             }
@@ -6106,7 +6106,7 @@ int func_00406F78(int p, int cmd) {
     int s;
     if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
         do {
-            if (n++ >= 0x1389) {
+            if (n++ >= 5001) {
                 func_00402C80(*(int **)(p + 0x858));
                 n = 0;
             }
@@ -6118,7 +6118,7 @@ int func_00406F78(int p, int cmd) {
     v = *(volatile long *)0x10002000;
     if (v < 0) {
         do {
-            if (m++ >= 0x1389) {
+            if (m++ >= 5001) {
                 func_00402C80(*(int **)(p + 0x858));
                 m = 0;
             }
@@ -6150,7 +6150,7 @@ int func_004070F0(int p, int n) {
         c = 0;
         if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
             do {
-                if (c++ >= 0x1389) {
+                if (c++ >= 5001) {
                     func_00402C80(*(int **)(p + 0x858));
                     c = 0;
                 }
@@ -6178,7 +6178,7 @@ void func_004071F8(int p, int v) {
     int *e;
     if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
         do {
-            if (n++ >= 0x1389) {
+            if (n++ >= 5001) {
                 func_00402C80(*(int **)(p + 0x858));
                 n = 0;
             }
@@ -6207,7 +6207,7 @@ int func_004072E8(int p, int n) {
     int *e;
     if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
         do {
-            if (c++ >= 0x1389) {
+            if (c++ >= 5001) {
                 func_00402C80(*(int **)(p + 0x858));
                 c = 0;
             }
@@ -6281,13 +6281,13 @@ int func_00407520(struct S_7520 *a) {
     for (;;) {
         s7_7438(a);
         switch ((unsigned)s7_72E8(a, 0x20)) {
-        case 0x1B3:
+        case 435:
             s7_3620(a);
             break;
-        case 0x1B8:
+        case 440:
             s7_7AD0(a);
             break;
-        case 0x1B7:
+        case 439:
             return 0;
         case 0x100:
             s7_7630(a);
@@ -6312,15 +6312,15 @@ extern void func_004076F8(int);
 extern void func_00407A58(int, int);
 void func_00407630(int *mpegSys) {
     int temporalRef = func_004072E8((int)mpegSys, 10);
-    mpegSys[0x150 / 4] = func_004072E8((int)mpegSys, 3);
+    mpegSys[336 / 4] = func_004072E8((int)mpegSys, 3);
     func_004072E8((int)mpegSys, 16);
-    if ((unsigned)(mpegSys[0x150 / 4] - 2) < 2) {
-        mpegSys[0x154 / 4] = func_004072E8((int)mpegSys, 1);
-        mpegSys[0x158 / 4] = func_004072E8((int)mpegSys, 3);
+    if ((unsigned)(mpegSys[336 / 4] - 2) < 2) {
+        mpegSys[340 / 4] = func_004072E8((int)mpegSys, 1);
+        mpegSys[344 / 4] = func_004072E8((int)mpegSys, 3);
     }
-    if (mpegSys[0x150 / 4] == 3) {
-        mpegSys[0x15C / 4] = func_004072E8((int)mpegSys, 1);
-        mpegSys[0x160 / 4] = func_004072E8((int)mpegSys, 3);
+    if (mpegSys[336 / 4] == 3) {
+        mpegSys[348 / 4] = func_004072E8((int)mpegSys, 1);
+        mpegSys[352 / 4] = func_004072E8((int)mpegSys, 3);
     }
     func_00407A10((int)mpegSys);
     func_004076F8((int)mpegSys);
@@ -6341,8 +6341,8 @@ void func_004076F8(int p) {
     unsigned i;
     int r;
     func_00407438(p);
-    while ((r = func_004070F0(p, 32)) == 0x1B5 || r == 0x1B2) {
-        if (r == 0x1B5) {
+    while ((r = func_004070F0(p, 32)) == 437 || r == 434) {
+        if (r == 437) {
             func_004071F8(p, 32);
             i = func_004072E8(p, 4);
             i = i > 10 ? 0 : i;
@@ -6361,29 +6361,29 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407820);
 #ifdef SKIP_ASM
 extern int Q_72E8(int, int) __asm__("func_004072E8");
 void func_00407820(int *mpegSys) {
-    mpegSys[0x164 / 4] = Q_72E8((int)mpegSys, 4);
-    mpegSys[0x168 / 4] = Q_72E8((int)mpegSys, 4);
-    mpegSys[0x16C / 4] = Q_72E8((int)mpegSys, 4);
-    mpegSys[0x170 / 4] = Q_72E8((int)mpegSys, 4);
+    mpegSys[356 / 4] = Q_72E8((int)mpegSys, 4);
+    mpegSys[360 / 4] = Q_72E8((int)mpegSys, 4);
+    mpegSys[364 / 4] = Q_72E8((int)mpegSys, 4);
+    mpegSys[368 / 4] = Q_72E8((int)mpegSys, 4);
     {
         int v = Q_72E8((int)mpegSys, 2);
         *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFFCFFFF) | (v << 16);
     }
     {
         int v = Q_72E8((int)mpegSys, 2);
-        mpegSys[0x174 / 4] = v;
-        if (mpegSys[0xD4 / 4] == 0)
-            mpegSys[0xD4 / 4] = v;
+        mpegSys[372 / 4] = v;
+        if (mpegSys[212 / 4] == 0)
+            mpegSys[212 / 4] = v;
     }
-    mpegSys[0x178 / 4] = Q_72E8((int)mpegSys, 1);
-    mpegSys[0x17C / 4] = Q_72E8((int)mpegSys, 1);
+    mpegSys[376 / 4] = Q_72E8((int)mpegSys, 1);
+    mpegSys[380 / 4] = Q_72E8((int)mpegSys, 1);
     mpegSys[0x180 / 4] = Q_72E8((int)mpegSys, 1);
     *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFBFFFFF) | (Q_72E8((int)mpegSys, 1) << 22);
     *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFDFFFFF) | (Q_72E8((int)mpegSys, 1) << 21);
     *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFEFFFFF) | (Q_72E8((int)mpegSys, 1) << 20);
-    mpegSys[0x184 / 4] = Q_72E8((int)mpegSys, 1);
+    mpegSys[388 / 4] = Q_72E8((int)mpegSys, 1);
     Q_72E8((int)mpegSys, 1);
-    mpegSys[0x188 / 4] = Q_72E8((int)mpegSys, 1);
+    mpegSys[392 / 4] = Q_72E8((int)mpegSys, 1);
     if (Q_72E8((int)mpegSys, 1)) {
         Q_72E8((int)mpegSys, 1);
         Q_72E8((int)mpegSys, 3);
@@ -6439,17 +6439,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407AD0);
 extern int func_004072E8(int, int);
 extern void func_004076F8();
 void func_00407AD0(int *mpegSys) {
-    mpegSys[0xE8 / 4] = 0;
-    mpegSys[0x84C / 4] = mpegSys[0x850 / 4] + 1;
-    mpegSys[0x854 / 4] = 1;
+    mpegSys[232 / 4] = 0;
+    mpegSys[2124 / 4] = mpegSys[2128 / 4] + 1;
+    mpegSys[2132 / 4] = 1;
     func_004072E8((int)mpegSys, 1);
     func_004072E8((int)mpegSys, 5);
     func_004072E8((int)mpegSys, 6);
     func_004072E8((int)mpegSys, 1);
     func_004072E8((int)mpegSys, 6);
     func_004072E8((int)mpegSys, 6);
-    mpegSys[0x1A4 / 4] = func_004072E8((int)mpegSys, 1);
-    mpegSys[0x1A8 / 4] = func_004072E8((int)mpegSys, 1);
+    mpegSys[420 / 4] = func_004072E8((int)mpegSys, 1);
+    mpegSys[424 / 4] = func_004072E8((int)mpegSys, 1);
     func_004076F8(mpegSys);
 }
 #endif
@@ -6463,12 +6463,12 @@ extern void func_004034A8(int *, int);
 extern char D_00498010[];
 extern char D_00498038[];
 void func_00407B70(int *p) {
-    if ((p[0x840 / 4] = func_004072E8((int)p, 1)) != 0) {
+    if ((p[2112 / 4] = func_004072E8((int)p, 1)) != 0) {
         func_00406E20((int)p);
         func_00406DF0(p, 0x50000000);
         func_00406E20((int)p);
     }
-    if ((p[0x844 / 4] = func_004072E8((int)p, 1)) != 0) {
+    if ((p[2116 / 4] = func_004072E8((int)p, 1)) != 0) {
         func_00406E20((int)p);
         func_00406DF0(p, 0x58000000);
         func_00406E20((int)p);
@@ -6514,11 +6514,11 @@ void func_00407D30(int mpegSys) {
     func_004072E8(mpegSys, 1);
     func_004072E8(mpegSys, 7);
     func_004072E8(mpegSys, 1);
-    func_004072E8(mpegSys, 0x14);
+    func_004072E8(mpegSys, 20);
     func_004072E8(mpegSys, 1);
-    func_004072E8(mpegSys, 0x16);
+    func_004072E8(mpegSys, 22);
     func_004072E8(mpegSys, 1);
-    func_004072E8(mpegSys, 0x16);
+    func_004072E8(mpegSys, 22);
 }
 #endif
 
@@ -6532,16 +6532,16 @@ extern int func_004060C8(int *);
 int func_00407DC0(int *p) {
     int *q;
     int r;
-    if (p[0x174 / 4] == 3 && p[0x120 / 4] != 0) {
+    if (p[372 / 4] == 3 && p[288 / 4] != 0) {
         func_004034A8(p, D_00498068);
-        p[0x120 / 4] = 0;
+        p[288 / 4] = 0;
     }
-    switch (p[0x174 / 4]) {
+    switch (p[372 / 4]) {
     case 3:
         q = (int *)p[0x1C0 / 4];
         break;
     case 1:
-        q = (int *)p[0x1D0 / 4];
+        q = (int *)p[464 / 4];
         break;
     case 2:
         q = (int *)p[0x1E0 / 4];
@@ -6553,7 +6553,7 @@ int func_00407DC0(int *p) {
     }
     r = func_004060C8(p);
     if (r != 0)
-        q[0x28 / 4] = 1;
+        q[40 / 4] = 1;
     return r;
 }
 #endif
@@ -6566,19 +6566,19 @@ extern void func_004087D0(int *, int, int, int);
 void func_00407E90(int *mpegSys, int n, int flag) {
     int a, b;
     if (flag) {
-        if (mpegSys[0x174 / 4] == 3) {
-            if (mpegSys[0x150 / 4] == 3)
-                a = mpegSys[0x1C4 / 4];
+        if (mpegSys[372 / 4] == 3) {
+            if (mpegSys[336 / 4] == 3)
+                a = mpegSys[452 / 4];
             else
-                a = mpegSys[0x1B8 / 4];
+                a = mpegSys[440 / 4];
             func_004086C0(mpegSys, a, n - 1);
         } else {
-            if (mpegSys[0x150 / 4] == 3) {
-                a = mpegSys[0x1D4 / 4];
-                b = mpegSys[0x1E4 / 4];
+            if (mpegSys[336 / 4] == 3) {
+                a = mpegSys[468 / 4];
+                b = mpegSys[484 / 4];
             } else {
-                a = mpegSys[0x1C8 / 4];
-                b = mpegSys[0x1D8 / 4];
+                a = mpegSys[456 / 4];
+                b = mpegSys[472 / 4];
             }
             func_004087D0(mpegSys, a, b, n - 1);
         }
@@ -6714,9 +6714,9 @@ int func_004081D8(int *p, int *q) {
     int r;
     int n = p[0xE0 / 4];
     if (n != 0)
-        r = p[0xDC / 4] >= q[1] && n >= q[2];
+        r = p[220 / 4] >= q[1] && n >= q[2];
     else
-        r = p[0xE4 / 4] >= q[3] * q[4];
+        r = p[228 / 4] >= q[3] * q[4];
     if (r == 0) {
         sprintf(buf, D_004980A8, q[1], q[2]);
         func_004034A8(p, (int)buf);
@@ -6760,7 +6760,7 @@ void func_00408278(struct S8278 *s, unsigned *p) {
             *(volatile int *)0x1000D480 = 0;
             *(volatile int *)0x1000D410 = src;
             *(volatile int *)0x1000D420 = qwc;
-            *(volatile int *)0x1000D400 = 0x101;
+            *(volatile int *)0x1000D400 = 257;
             if (st)
                 func_0042C0C0();
             while (*(volatile int *)0x1000D400 & 0x100)
@@ -6969,7 +6969,7 @@ void q8988(struct P_8988 *p) {
     *(volatile int *)0x1000D480 = p->e[p->idx].f0;
     *(volatile int *)0x1000D430 = (int)D_00526FC0;
     *(volatile int *)0x1000D420 = 0;
-    *(volatile int *)0x1000D400 = 0x105;
+    *(volatile int *)0x1000D400 = 261;
     if (s)
         q8988_C0C0();
 }
@@ -7124,13 +7124,13 @@ int func_00408FB0(int a, struct S408FB0 *s) {
     if (n > 0xFFFF) {
         *(volatile int *)0x1000B410 = s->f4;
         *(volatile int *)0x1000B420 = 0xFFFF;
-        *(volatile int *)0x1000B400 = 0x101;
+        *(volatile int *)0x1000B400 = 257;
         s->f4 = (s->f4 + 0xFFFF0) & 0xFFFFFFF;
         s->f0 = s->f0 - 0xFFFF;
     } else {
         *(volatile int *)0x1000B410 = s->f4;
         *(volatile int *)0x1000B420 = s->f0;
-        *(volatile int *)0x1000B400 = 0x101;
+        *(volatile int *)0x1000B400 = 257;
         s->f0 = 0;
     }
     SYNC_0810();
@@ -7176,7 +7176,7 @@ void q9088(char *mpegSys, unsigned *picInfo) {
         intrState = E_C078();
         *(volatile unsigned *)0x1000B410 = xferState.addr;
         *(volatile unsigned *)0x1000B420 = 0xFFFF;
-        *(volatile unsigned *)0x1000B400 = 0x101;
+        *(volatile unsigned *)0x1000B400 = 257;
         if (intrState)
             E_C0C0();
         xferState.addr = (xferState.addr + 0xFFFF0) & 0xFFFFFFF;
@@ -7191,7 +7191,7 @@ void q9088(char *mpegSys, unsigned *picInfo) {
         int intrState = E_C078();
         *(volatile unsigned *)0x1000B410 = picInfo[0] & 0xFFFFFFF;
         *(volatile unsigned *)0x1000B420 = xferState.cnt;
-        *(volatile unsigned *)0x1000B400 = 0x101;
+        *(volatile unsigned *)0x1000B400 = 257;
         if (intrState)
             E_C0C0();
         xferState.cnt = 0;
@@ -7419,12 +7419,12 @@ int func_00409940(void) {
         D_005271C0.server = 0;
         return r - 100;
     }
-    if (D_00528780[1] < 0x20A) {
+    if (D_00528780[1] < 522) {
         Q_log(D_00498108);
         D_005271C0.server = 0;
         return -120;
     }
-    if (D_00528780[2] < 0x20E) {
+    if (D_00528780[2] < 526) {
         Q_log(D_00498130);
         D_005271C0.server = 0;
         return -121;
@@ -7523,7 +7523,7 @@ int func_00409D10(int a, int b, int s_, int c) {
     D_00527270.mode = c;
     D_00527270.slot = b;
     D_00527270.name[0x3FF] = 0;
-    r = func_00426D18(&D_005271C0, 2, 1, &D_00527270, 0x414, D_00528780, 4, 0, 0);
+    r = func_00426D18(&D_005271C0, 2, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 2;
     else
@@ -7539,7 +7539,7 @@ extern int func_00409D10(int, int, int, int);
 int func_00409E38(int a, int b, int c) {
     int r = func_00409D10(a, b, c, 0x40);
     if (r == 0) {
-        D_004533C0 = 0xB;
+        D_004533C0 = 11;
     }
     return r;
 }
@@ -7816,7 +7816,7 @@ int func_0040A688(int a, int b, char *s, int c, int d, int e) {
     D_00527270.name[0x3FF] = 0;
     if (d >= 0)
         func_00426358(e, d << 6);
-    r = func_00426D18(&D_005271C0, 13, 1, &D_00527270, 0x414, D_00528780, 4, 0, 0);
+    r = func_00426D18(&D_005271C0, 13, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 13;
     else
@@ -7868,7 +7868,7 @@ int func_0040A858(int a, int b, char *s, void *u) {
     strncpy(D_00527270.name, s, 0x3FF);
     D_00527270.name[0x3FF] = 0;
     func_00426358((int)D_00527780, 0x400);
-    r = func_00426D18(&D_005271C0, 12, 1, &D_00527270, 0x414, D_00528780, 4, func_0040A7D0, u);
+    r = func_00426D18(&D_005271C0, 12, 1, &D_00527270, 1044, D_00528780, 4, func_0040A7D0, u);
     if (r == 0)
         D_004533C0 = 12;
     else
@@ -7920,7 +7920,7 @@ int func_0040AA68(int a, int b, char *s) {
     D_00527270.slot = b;
     D_00527270.name[0x3FF] = 0;
     D_00527270.mode = 0;
-    r = func_00426D18(&D_005271C0, 15, 1, &D_00527270, 0x414, D_00528780, 4, 0, 0);
+    r = func_00426D18(&D_005271C0, 15, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 15;
     else
@@ -7977,7 +7977,7 @@ int func_0040AC38(int a, int b, char *s, sMcDirEntry *c, int e) {
     strncpy(D_00527270.name, s, 0x3FF);
     D_00527270.name[0x3FF] = 0;
     R_4020(0);
-    r = func_00426D18(h, 14, 1, &D_00527270, 0x414, D_00528780, 4, 0, 0);
+    r = func_00426D18(h, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 14;
     else
@@ -8014,7 +8014,7 @@ int func_0040AE00(int a, int b, char *s, char *t) {
     p[0x3F] = 0;
     D_00527270.buffer = (int)p;
     FlushCache(0);
-    r = func_00426D18(&D_005271C0, 14, 1, &D_00527270, 0x414, D_00528780, 4, 0, 0);
+    r = func_00426D18(&D_005271C0, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 19;
     else
@@ -8065,7 +8065,7 @@ int func_0040B028(int a, int b, char *s) {
     D_00527270.slot = b;
     strncpy(D_00527270.name, s, 0x3FF);
     D_00527270.name[0x3FF] = 0;
-    r = func_00426D18(&D_005271C0, 18, 1, &D_00527270, 0x414, D_00528780, 4, 0, 0);
+    r = func_00426D18(&D_005271C0, 18, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 18;
     else
@@ -8425,7 +8425,7 @@ extern int func_0040B938(void);
 int func_0040B9A8(void) {
     if (D_00453400[0] == 0)
         func_0040B938();
-    return D_00453400[4] == 0x54;
+    return D_00453400[4] == 84;
 }
 #endif
 
@@ -8499,7 +8499,7 @@ int func_0040BAE8(void) {
         r = D_004533F8.f0;
     } else {
         GetOsdConfigParam(buf);
-        if (((buf[0] >> 13) & 7) == 0) r = 0x21C; else r = (int)buf[0] >> 21;
+        if (((buf[0] >> 13) & 7) == 0) r = 540; else r = (int)buf[0] >> 21;
     }
     return r;
 }
@@ -8904,7 +8904,7 @@ int sceUsbKbGetInfo(void *info) {
     if (D_00453438 == -1)
         return -1;
     WaitSema(D_00453438);
-    result = func_00426D18(&D_005290A0, 1, 1, D_00529100, 16, D_00529140, 0x90, func_0040C8B0, 0);
+    result = func_00426D18(&D_005290A0, 1, 1, D_00529100, 16, D_00529140, 144, func_0040C8B0, 0);
     if (result != 0) {
         func_00425C60(D_004982D0, result);
         return -2;
@@ -8940,7 +8940,7 @@ int sceUsbKbRead(unsigned kbdNo, void *data) {
     D_00529100[0] = kbdNo;
     WaitSema(D_00453438);
     {
-        int result = func_00426D18(&D_005290A0, 2, 1, D_00529100, 16, D_00529140, 0x50, func_0040C8B0, 0);
+        int result = func_00426D18(&D_005290A0, 2, 1, D_00529100, 16, D_00529140, 80, func_0040C8B0, 0);
         if (result != 0) {
             func_00425C60(D_004982F8, result);
             return -2;
@@ -9492,9 +9492,9 @@ unsigned short func_0040D268(int mode, int a, int b, unsigned short ch) {
         v = u268_0040D3C0(b & 0xFF, ch & 0xFF);
     if (v == 0x8000)
         v = ch | 0x8000;
-    if ((unsigned short)(v - 0x61) < 0x1A && (b & 2))
+    if ((unsigned short)(v - 97) < 26 && (b & 2))
         v -= 0x20;
-    if ((unsigned short)(v - 0x41) < 0x1A) {
+    if ((unsigned short)(v - 65) < 26) {
         if (b & 2) {
             if (up)
                 v += 0x20;

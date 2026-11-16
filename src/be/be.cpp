@@ -268,7 +268,7 @@ INCLUDE_ASM("be/be", cBE_getDataSize);
  */
 extern "C" int cBE_getDataSize()
 {
-    return 0xBB78;
+    return 47992;
 }
 #endif
 
@@ -284,7 +284,7 @@ extern "C" void* memcpy(void*, const void*, unsigned int);
 extern "C" void func_0014E050(void* self, char* buf)
 {
     func_0014A188(buf);
-    int crc = func_003E62D0(buf, cBE_getDataSize_self(self) - 4, 0xFBEA);
+    int crc = func_003E62D0(buf, cBE_getDataSize_self(self) - 4, 64490);
     char* crcSlot = buf + (cBE_getDataSize_self(self) - 4);
     memcpy(crcSlot, &crc, 4);
 }

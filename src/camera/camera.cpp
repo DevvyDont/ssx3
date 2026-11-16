@@ -72,7 +72,7 @@ extern "C" void* cCamera_cCamera(cCamera* self, int idx)
     self->mVtbl = cCamera_vtbl;
     cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm((char*)self + 0xC0);
     self->ManualController = (cManualCameraController*)cManualCameraController_cManualCameraController(cMemMan_alloc(0x20, str_Manual_Cam_Controller, 0, 0), self);
-    self->ChaseController = (cChaseCameraController*)cChaseCameraController_cChaseCameraController((cChaseCameraController*)cMemMan_alloc(0x44, str_Chase_Cam_Controller, 0, 0), idx, (int)self);
+    self->ChaseController = (cChaseCameraController*)cChaseCameraController_cChaseCameraController((cChaseCameraController*)cMemMan_alloc(68, str_Chase_Cam_Controller, 0, 0), idx, (int)self);
     self->ScriptController = (cScriptCameraController*)cScriptCameraController_cScriptCameraController(cMemMan_alloc(0x20, str_Script_Cam_Controller, 0, 0), idx, self);
     self->StreamFocusID = -1;
     self->bStreamIsReady = 0;
@@ -217,13 +217,13 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int riderIndex, float view, f
     self->index = riderIndex;
     self->f460 = 0;
     self->manual->viewport = ((sApp_15DE60*)SSXApp)->viewports[0];
-    cManualCameraController_setCurrentAlgorithmType(self->manual, 0x51);
+    cManualCameraController_setCurrentAlgorithmType(self->manual, 81);
     self->chase->viewport = ((sApp_15DE60*)SSXApp)->viewports[riderIndex];
     sRiderRef_15DE60* riderRef = (sRiderRef_15DE60*)operator new(8, str_RiderCameraTarget, 0, 0);
     riderRef->vt = D_0045B7A8;
     riderRef->rider = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (riderIndex << 2) + 0x28);
     cChaseCameraController_setTarget((cChaseCameraController*)self->chase, (int*)riderRef);
-    cChaseCameraController_switchCamera_Volume((cChaseCameraController*)((sCam162060*)self->chase), 0x4C, 0, 1.0f);
+    cChaseCameraController_switchCamera_Volume((cChaseCameraController*)((sCam162060*)self->chase), 76, 0, 1.0f);
     cChaseAlgorithm_setTarget((char*)self + 0xC0, (int)riderRef);
     cCamera_snapResultAlgorithm(self);
     self->f454 = 0;
@@ -655,7 +655,7 @@ extern "C" void cCamera_applyCameraShake(cCamera* self)
 {
     char* tgt = *(char**)((char*)self->ChaseController + 0x20);
     sVEntry<float(void*)>* vf = *(sVEntry<float(void*)>**)tgt;
-    float spd = vf[0x11].fn(tgt + vf[0x11].delta);
+    float spd = vf[17].fn(tgt + vf[17].delta);
     if (((cPauseState_Flags & 1) ^ 1) != 0 && spd > 0.10000000149011612f) {
         sVEntry<t4Vector(void*)>* vv = *(sVEntry<t4Vector(void*)>**)tgt;
         t4Vector velocity = vv[3].fn(tgt + vv[3].delta);
@@ -962,7 +962,7 @@ extern "C" void func_0015E668_E668(cCamera_E668* self)
     algoNode = self->controller->list->head;
     cCameraAlgorithm_E668* algo = algoNode->algo;
     bool listLengthOne = self->controller->list->length == 1;
-    if (listLengthOne || algo->type == 0x4A) {
+    if (listLengthOne || algo->type == 74) {
         self->pose = algo->getPose();
         if (self->controller == self->prevController) {
             self->blendPos = self->pose.pos;
@@ -1320,7 +1320,7 @@ extern "C" void func_0015EE00_impl(char* self)
     if (Dot_EE00(*(sVec_EE00*)(self + 0x470), screenLeft) > 0.0f)
         dir = -1.0f;
     ScaleEq_EE00(screenLeft, dir * 50.0f / Length_EE00(screenLeft));
-    char line[0xB0];
+    char line[176];
     func_0032E100(line, Add_EE00(testHigh, screenLeft), Add_EE00(testLow, screenLeft), 0.5f, 2);
     float param = func_00336850(nash, line, &info, (int)(self + 0x480));
     if (param > 0.0f) {
@@ -1363,7 +1363,7 @@ extern "C" void func_0015EE00_impl(char* self)
     if (func_0015D020(*(void**)(self + 0xA8)) != 0) {
         sVec_EE00 riderPoint = Add_EE00(*(sVec_EE00*)(self + 0xE0), Scale_EE00(D_004FF160_vEE00, 100.0f));
         sVec_EE00 viewPoint = *(sVec_EE00*)(self + 0x100);
-        char line2[0xB0];
+        char line2[176];
         func_0032E100(line2, riderPoint, viewPoint, 0.5f, 2);
         sHit_EE00 info2;
         if (func_00336850(SSXApp->Game->BXNash, line2, &info2, 0) > 0.0f) {
@@ -1944,14 +1944,14 @@ extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(cBasicCameraAlgorit
 {
     self->mVtbl = D_0045BDE0;
     *(float*)self = cCameraAlgorithm_getDefaultView((cCameraAlgorithm*)self);
-    self->AlgorithmType = 0x4E;
+    self->AlgorithmType = 78;
     self->Near = 10.0f;
     self->Far = 30000.0f;
     self->mVtbl = cBasicCameraAlgorithm_vtbl;
     *(int*)&self->Pitch = 0;
     *(int*)&self->Heading = 0;
     cQuad128 initPos = t4vect_Origin;
-    self->AlgorithmType = 0x4F;
+    self->AlgorithmType = 79;
     *(cQuad128*)&self->Position = initPos;
     return ((void*)self);
 }
@@ -2126,7 +2126,7 @@ extern void* cManualCameraAlgorithm_vtbl[];
 extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(cBasicCameraAlgorithm* self)
 {
     cBasicCameraAlgorithm_cBasicCameraAlgorithm(self);
-    self->AlgorithmType = 0x51;
+    self->AlgorithmType = 81;
     self->mVtbl = cManualCameraAlgorithm_vtbl;
     return ((void*)self);
 }
@@ -2243,11 +2243,11 @@ static inline float ffloor_0015FD50(float x)
 extern "C" void cManualCameraAlgorithm_update(cBasicCameraAlgorithm* self)
 {
     int input = *(int*)(*(char**)(*(char**)((char*)SSXApp->Game->ViewMan + 0x4) + 0xA4) + 0xC);
-    float speed = cInput_getValue(input, 0x34);
-    float ry = cInput_getValue(input, 0x31);
+    float speed = cInput_getValue(input, 52);
+    float ry = cInput_getValue(input, 49);
     float rx = cInput_getValue(input, 0x30);
-    float mf = cInput_getValue(input, 0x32);
-    float ms = cInput_getValue(input, 0x33);
+    float mf = cInput_getValue(input, 50);
+    float ms = cInput_getValue(input, 51);
     float rs = speed >? 2.0f;
     float pitch = fcClamp_0015FD50(self->Pitch + rs * (ry * 0.6283185482025146f) * 0.01666666753590107f,
                                    -1.5707963705062866f, 1.5707963705062866f);
@@ -2280,7 +2280,7 @@ extern void* cEditorCameraAlgorithm_vtbl[];
 extern "C" void* cEditorCameraAlgorithm_cEditorCameraAlgorithm(cBasicCameraAlgorithm* self)
 {
     cBasicCameraAlgorithm_cBasicCameraAlgorithm(self);
-    self->AlgorithmType = 0x50;
+    self->AlgorithmType = 80;
     self->mVtbl = cEditorCameraAlgorithm_vtbl;
     return ((void*)self);
 }
@@ -2558,7 +2558,7 @@ extern void* cManualChaseAlgorithm_vtbl[];
 extern "C" void* cManualChaseAlgorithm_cManualChaseAlgorithm(cManualChaseAlgorithm* self)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((cLookAtChaseAlgorithm*)self));
-    self->AlgorithmType = 0xB;
+    self->AlgorithmType = 11;
     self->mVtbl = cManualChaseAlgorithm_vtbl;
     return ((void*)self);
 }
@@ -2749,8 +2749,8 @@ extern "C" void cManualChaseAlgorithm_update(cManualChaseAlgorithm* self)
                   0.6000000238418579f);
     sGame_1604B8* g = (sGame_1604B8*)SSXApp;
     int pad = g->pads[*(int*)(*(char**)(g->f84 + 0x28) + 0x28)];
-    float ax = cInput_getValue(pad, 0xBE);
-    float ay = cInput_getValue(pad, 0xBF);
+    float ax = cInput_getValue(pad, 190);
+    float ay = cInput_getValue(pad, 191);
     float az = -cInput_getValue(pad, 0xC0);
     ax *= Abs_1604B8(ax);
     ay *= Abs_1604B8(ay);
@@ -2832,7 +2832,7 @@ extern void* cMatrixChaseAlgorithm_vtbl[];
 extern "C" void* cMatrixChaseAlgorithm_cMatrixChaseAlgorithm(cMatrixChaseAlgorithm* self)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm((cLookAtChaseAlgorithm*)self);
-    self->AlgorithmType = 0x29;
+    self->AlgorithmType = 41;
     self->mVtbl = cMatrixChaseAlgorithm_vtbl;
     *(int*)&self->LastAngle = 0;
     return ((void*)self);
@@ -3348,7 +3348,7 @@ extern "C" void* cSplineCamAlgorithm_cSplineCamAlgorithm(cSplineCamAlgorithm* se
     self->LeadDistance = leadDistance;
     self->HeightOffset = heightOffset;
     self->View = fov;
-    self->AlgorithmType = 0x4B;
+    self->AlgorithmType = 75;
     func_0031D700_2(sx, 4);
     func_0031D700_2(sy, 4);
     func_0031D700_2(sz, 4);
@@ -3945,14 +3945,14 @@ extern int persistentPlayerChoiceType[2];
  */
 extern "C" void cChaseCameraController_switchCamera_HardReset(cChaseCameraController* self, int i)
 {
-    self->PreferredChaseAlgoLastFrame = 0x3D;
+    self->PreferredChaseAlgoLastFrame = 61;
     *(int*)&self->TimeSinceLastSuggestedVolumeTrigger = 0;
     ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b1 = 0; ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b0 = 0; ((cChaseCameraController_switchCamera_HardReset_flags*)((char*)self + 0x30))->b2 = 0;
     self->GoingSlow = 0;
     self->NumFramesSlowGround = 0;
-    self->CamSwitchRecord.LatestReplayType = 0x3D;
+    self->CamSwitchRecord.LatestReplayType = 61;
     self->CamSwitchRecord.PlayerChoiceType = persistentPlayerChoiceType[i];
-    self->CamSwitchRecord.VolumeType = 0x3D;
+    self->CamSwitchRecord.VolumeType = 61;
     self->CamSwitchRecord.TriggerAction = 0;
 }
 #endif
@@ -4090,8 +4090,8 @@ static inline float vlength_161AB0(const sCamVec4_161AB0& v)
  */
 extern "C" void cChaseCameraController_processInput(cChaseCameraController* self)
 {
-    int mode = 0x3D;
-    if (self->PreferredChaseAlgoLastFrame != mode && self->LatestAlgoType != 0x4A)
+    int mode = 61;
+    if (self->PreferredChaseAlgoLastFrame != mode && self->LatestAlgoType != 74)
         cChaseCameraController_switchCamera_UserChange(self, mode);
     self->PreferredChaseAlgoLastFrame = mode;
     float speed = vlength_161AB0(((cCamRider_161AB0*)self->Target)->getVelocity()) * 0.035999998450279236f;
@@ -4200,7 +4200,7 @@ extern "C" void cChaseCameraController_update(cChaseCameraController* self)
         n = n->next;
         while (n) {
             Smooth_161BB8(n, ApproachZero_161BB8(n->weight, rate));
-            if (n->algo->type == 0x4A)
+            if (n->algo->type == 74)
                 n->weight = 0.0f;
             if (n->weight <= 0.0f || n->blend <= 0.0f) {
                 n = func_0015CA50((sAlgoList_161BB8*)self->AlgorithmList, n);
@@ -4211,10 +4211,10 @@ extern "C" void cChaseCameraController_update(cChaseCameraController* self)
         }
     }
     int* st = (int*)SSXApp->Game->Replay;
-    int idle = InRace_161BB8(st) && st[0x484 / 4] == 0;
+    int idle = InRace_161BB8(st) && st[1156 / 4] == 0;
     if (idle)
         self->TimeSinceLastSuggestedVolumeTrigger = 0.0f;
-    if (InRace_161BB8(st) && self->CamSwitchRecord.LatestReplayType == 0x5D && self->LatestAlgoType != self->CamSwitchRecord.PlayerChoiceType) {
+    if (InRace_161BB8(st) && self->CamSwitchRecord.LatestReplayType == 93 && self->LatestAlgoType != self->CamSwitchRecord.PlayerChoiceType) {
         self->TimeSinceLastSuggestedVolumeTrigger += 0.01666666753590107f;
         if (self->TimeSinceLastSuggestedVolumeTrigger > 10.0f) {
             self->TimeSinceLastSuggestedVolumeTrigger = 0.0f;
@@ -4308,7 +4308,7 @@ extern "C" void cChaseCameraController_switchCamera_EndReplay(cChaseCameraContro
     int mode;
     ((sCam161F50*)self)->b1 = 0;
     ((sCam161F50*)self)->b0 = 0;
-    mode = 0x42;
+    mode = 66;
     if (!((sCam161F50*)self)->b2) {
         mode = self->CamSwitchRecord.PlayerChoiceType;
     }
@@ -4332,14 +4332,14 @@ extern "C" void cChaseCameraController_switchCamera_ReplayToggle(cChaseCameraCon
 {
     int flags = *(int*)((char*)self + 0x30) | 2;
     *(int*)((char*)self + 0x30) = flags;
-    if (mode == 0x4C) {
+    if (mode == 76) {
         mode = self->CamSwitchRecord.PlayerChoiceType;
         cChaseCameraController_createChaseAlgorithmCut(self, mode, 0);
-    } else if (mode == 0x5D) {
+    } else if (mode == 93) {
         if (flags & 1)
             cChaseCameraController_createChaseAlgorithmCut(self, self->CamSwitchRecord.VolumeType, (int)self->CamSwitchRecord.TriggerAction);
         else if (flags & 4)
-            cChaseCameraController_createChaseAlgorithmCut(self, 0x42, 0);
+            cChaseCameraController_createChaseAlgorithmCut(self, 66, 0);
         else
             cChaseCameraController_createChaseAlgorithmCut(self, self->CamSwitchRecord.PlayerChoiceType, 0);
     } else {
@@ -4378,7 +4378,7 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, in
  */
 extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraController* self, int mode, int action, float blend)
 {
-    if (mode == 0x4C) {
+    if (mode == 76) {
         ((sCam162060*)self)->b0 = 0;
         mode = self->CamSwitchRecord.PlayerChoiceType;
     } else {
@@ -4386,7 +4386,7 @@ extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraControlle
         ((sCam162060*)self)->b0 = 1;
         self->CamSwitchRecord.TriggerAction = (cCTAction*)action;
     }
-    int ok = !((sCam162060*)self)->b1 ? 1 : self->CamSwitchRecord.LatestReplayType == 0x5D;
+    int ok = !((sCam162060*)self)->b1 ? 1 : self->CamSwitchRecord.LatestReplayType == 93;
     if (ok) {
         cChaseCameraController_createChaseAlgorithmBlend(((sCam162060*)self), mode, action, blend);
     }
@@ -4421,7 +4421,7 @@ extern "C" void cChaseCameraController_switchCamera_Chapter(cChaseCameraControll
 {
     int mode = self->CamSwitchRecord.LatestReplayType;
     ((sCam1620D0*)self)->b0 = 0;
-    if (mode == 0x5D)
+    if (mode == 93)
         mode = self->CamSwitchRecord.PlayerChoiceType;
     cCamera_invalidateSafePosition();
     cChaseCameraController_createChaseAlgorithmBlend(((sCam1620D0*)self), mode, 0, 1.0f);
@@ -4498,7 +4498,7 @@ extern "C" void cChaseCameraController_switchCamera_Slow(cChaseCameraController*
     ((sCam162138*)self)->b2 = 1;
     if (!((sCam162138*)self)->b0 && !((sCam162138*)self)->b1) {
         float blendTime = func_0011FE98(*(void**)((char*)self->Target + 4)) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
-        cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), 0x42, 0, blendTime * 0.01666666753590107f);
+        cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), 66, 0, blendTime * 0.01666666753590107f);
     }
 }
 #endif
@@ -4530,7 +4530,7 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndRace);
 extern "C" void cChaseCameraController_switchCamera_EndRace(cChaseCameraController* self)
 {
     if (!((sCam162138*)self)->b0) {
-        cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), 0x44, 0, 0.016793444752693176f);
+        cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), 68, 0, 0.016793444752693176f);
     }
 }
 #endif
@@ -4565,11 +4565,11 @@ extern "C" void* cChaseAlgorithm_cChaseAlgorithm(cChaseAlgorithm* self)
 {
     self->mVtbl = D_0045BDE0;
     *(float*)self = cCameraAlgorithm_getDefaultView((cCameraAlgorithm*)self);
-    self->AlgorithmType = 0x4E;
+    self->AlgorithmType = 78;
     self->Near = 10.0f;
     self->Far = 30000.0f;
     self->mVtbl = cChaseAlgorithm_vtbl;
-    self->AlgorithmType = 0x53;
+    self->AlgorithmType = 83;
     return ((void*)self);
 }
 #endif
@@ -4631,7 +4631,7 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorit
     cPIDFilter_reset((cPIDFilter*)filter, 0.0f);
     *(cQuad128*)&self->Position = t4vect_Origin;
     *(int*)&self->Pitch = 0;
-    self->AlgorithmType = 0x54;
+    self->AlgorithmType = 84;
     *(int*)&self->Heading = 0;
     *(int*)&self->CamRoll = 0;
     *(cQuad128*)&self->LastVelLookahead = D_004FF120_q162318;
@@ -4924,7 +4924,7 @@ extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(cLookAtChaseAlgorithm*
 {
     float handplantBlendOut;
     if (*(int*)((char*)obj + 0x5C) == 0) {
-        if (self->FramesSinceHandplant < 0x334)
+        if (self->FramesSinceHandplant < 820)
             self->FramesSinceHandplant = self->FramesSinceHandplant + 1;
         int elapsedFrames = self->FramesSinceHandplant;
         handplantBlendOut = 1.0f;
@@ -5395,7 +5395,7 @@ extern "C" void cLookAtChaseAlgorithm_setupCamDirection_impl(char* self, sInfo_1
         float s = (1.0f - ((val * 2.5214130878448486f) <? 1.0f >? 0.0f)) * 0.03946405649185181f +
                   0.95552659034729f;
         h->idx = (h->idx + 1) % 5;
-        if ((unsigned)(*(int*)(*(char**)(*(char**)(self + 0x30) + 4) + 0x434) - 0xB) < 3) {
+        if ((unsigned)(*(int*)(*(char**)(*(char**)(self + 0x30) + 4) + 0x434) - 11) < 3) {
             s = Sqrt_162C78(Sqrt_162C78(s));
         }
         LerpTo_162C78(n, *(sV_162C78*)(self + 0x80), Scale_162C78(info->dir, 1.0f / info->speed), s);
@@ -7225,14 +7225,14 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
     sVec_164878 eye0 = V_164878(0x40);
     if (self->DoingHalfPipeCam != 0) {
         if (self->HalfPipeCamInitialized == 0) {
-            F_164878(0x22C) += 0.01666666753590107f;
+            F_164878(556) += 0.01666666753590107f;
             if (CallI_164878(S_164878, 19)) {
-                V_164878(0x110) = Sub_164878(V_164878(0x20), V_164878(0x40));
-                float dist = Length_164878(V_164878(0x110));
-                float* dur = &F_164878(0x230);
-                *dur = MAX_164878(CallF_164878(S_164878, 12) - F_164878(0x22C), 2.299999952316284f);
-                F_164878(0x23C) = blendOut;
-                F_164878(0x234) = 0.0f;
+                V_164878(272) = Sub_164878(V_164878(0x20), V_164878(0x40));
+                float dist = Length_164878(V_164878(272));
+                float* dur = &F_164878(560);
+                *dur = MAX_164878(CallF_164878(S_164878, 12) - F_164878(556), 2.299999952316284f);
+                F_164878(572) = blendOut;
+                F_164878(564) = 0.0f;
                 sVec_164878* up = CallV_164878(S_164878, 16);
                 sVec_164878 side = Cross_164878(D_004FF160_v164878, *up);
                 Normalize_164878(side);
@@ -7240,34 +7240,34 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
                     ScaleEq_164878(side, -1.0f);
                 }
                 ScaleEq_164878(side, dist / Length_164878(side));
-                V_164878(0x120) = Sub_164878(V_164878(0x110), Scale_164878(Project_164878(V_164878(0x110), *up), 2.0f));
-                V_164878(0x120).z = -V_164878(0x120).z;
-                if (Dot_164878(V_164878(0x120), V_164878(0x120)) <= 0.0f) {
-                    V_164878(0x120) = side;
+                V_164878(288) = Sub_164878(V_164878(272), Scale_164878(Project_164878(V_164878(272), *up), 2.0f));
+                V_164878(288).z = -V_164878(288).z;
+                if (Dot_164878(V_164878(288), V_164878(288)) <= 0.0f) {
+                    V_164878(288) = side;
                 }
-                ScaleEq_164878(V_164878(0x120), 0.800000011920929f);
-                AddEq_164878(V_164878(0x120), Scale_164878(side, 0.20000000298023224f));
-                ScaleEq_164878(V_164878(0x120), dist / Length_164878(V_164878(0x120)));
-                V_164878(0x150) = Project_164878(V_164878(0x120), *up);
-                sVec_164878 lat = Sub_164878(V_164878(0x120), V_164878(0x150));
+                ScaleEq_164878(V_164878(288), 0.800000011920929f);
+                AddEq_164878(V_164878(288), Scale_164878(side, 0.20000000298023224f));
+                ScaleEq_164878(V_164878(288), dist / Length_164878(V_164878(288)));
+                V_164878(336) = Project_164878(V_164878(288), *up);
+                sVec_164878 lat = Sub_164878(V_164878(288), V_164878(336));
                 if (Dot_164878(lat, lat) < 40000.0f) {
                     lat.z = 0.0f;
                     float l = Length_164878(lat);
                     if (1.0f < l) {
                         ScaleEq_164878(lat, 200.0f / l);
-                        AddEq_164878(V_164878(0x120), lat);
-                        SubEq_164878(V_164878(0x120), Scale_164878(D_004FF160_v164878, 100.0f));
+                        AddEq_164878(V_164878(288), lat);
+                        SubEq_164878(V_164878(288), Scale_164878(D_004FF160_v164878, 100.0f));
                     }
                 }
-                V_164878(0x130) = Cross_164878(V_164878(0x110), V_164878(0x120));
-                Normalize_164878(V_164878(0x130));
+                V_164878(304) = Cross_164878(V_164878(272), V_164878(288));
+                Normalize_164878(V_164878(304));
                 float ang;
-                float len = Dot_164878(V_164878(0x110), V_164878(0x110)) * Dot_164878(V_164878(0x120), V_164878(0x120));
+                float len = Dot_164878(V_164878(272), V_164878(272)) * Dot_164878(V_164878(288), V_164878(288));
                 len = Sqrt_164878(len);
                 if (len < 0.0010000000474974513f) {
                     ang = 0.0f;
                 } else {
-                    float c = Dot_164878(V_164878(0x110), V_164878(0x120)) / len;
+                    float c = Dot_164878(V_164878(272), V_164878(288)) / len;
                     if (-1.0f <= c) {
                         c = c <? 1.0f;
                     } else {
@@ -7275,7 +7275,7 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
                     }
                     ang = 1.5707963705062866f - func_0031C128(c);
                 }
-                F_164878(0x238) = ang;
+                F_164878(568) = ang;
                 void* spl = S_164878 + 0x334;
                 func_0031D738_ivff(spl, 9, 0.0f, 0.0f);
                 func_0031D7E0(spl, 0.0f, 0.0f);
@@ -7291,44 +7291,44 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
             }
         }
         if (self->HalfPipeCamInitialized != 0) {
-            F_164878(0x234) += 0.01666666753590107f;
-            if (F_164878(0x234) < F_164878(0x230)) {
-                float t = F_164878(0x234) / F_164878(0x230);
+            F_164878(564) += 0.01666666753590107f;
+            if (F_164878(564) < F_164878(560)) {
+                float t = F_164878(564) / F_164878(560);
                 D_004A128C = 1;
                 // PORT: spline pointer kept in an int global.
                 D_004A4DE0 = (int)(S_164878 + 0x334);
                 float s = func_0031DEE0(S_164878 + 0x334, t);
                 float sn, cs;
-                func_0031BE50(&sn, &cs, s * F_164878(0x238) * 0.5f);
-                sQuat_164878 q = Quat_164878(sn * V_164878(0x130).x, sn * V_164878(0x130).y, sn * V_164878(0x130).z, cs);
-                V_164878(0x140) = RotQ_164878(q, V_164878(0x110));
-                V_164878(0x160) = Scale_164878(V_164878(0x150), s);
+                func_0031BE50(&sn, &cs, s * F_164878(568) * 0.5f);
+                sQuat_164878 q = Quat_164878(sn * V_164878(304).x, sn * V_164878(304).y, sn * V_164878(304).z, cs);
+                V_164878(320) = RotQ_164878(q, V_164878(272));
+                V_164878(352) = Scale_164878(V_164878(336), s);
             }
-            float k = (F_164878(0x234) / (F_164878(0x230) * 0.30000001192092896f)) <? 1.0f >? 0.0f;
+            float k = (F_164878(564) / (F_164878(560) * 0.30000001192092896f)) <? 1.0f >? 0.0f;
             k = Smooth_164878(k);
             V_164878(0x20) = Add_164878(Scale_164878(V_164878(0x20), 1.0f - k), Scale_164878(*(sVec_164878*)(I_164878 + 0x10), k));
-            V_164878(0x40) = Add_164878(Sub_164878(V_164878(0x20), V_164878(0x140)), V_164878(0x160));
+            V_164878(0x40) = Add_164878(Sub_164878(V_164878(0x20), V_164878(320)), V_164878(352));
         }
-    } else if (0.0f < F_164878(0x23C)) {
-        float bt = (F_164878(0x23C) - 0.01666666753590107f) >? 0.0f;
+    } else if (0.0f < F_164878(572)) {
+        float bt = (F_164878(572) - 0.01666666753590107f) >? 0.0f;
         float s = bt / blendOut;
-        F_164878(0x23C) = bt;
+        F_164878(572) = bt;
         s = Smooth_164878(s);
         sVec_164878 eye = V_164878(0x20);
         V_164878(0x20) = Add_164878(Scale_164878(V_164878(0x20), 1.0f - s), Scale_164878(*(sVec_164878*)(I_164878 + 0x10), s));
         V_164878(0x40) = Add_164878(Scale_164878(V_164878(0x40), 1.0f - s),
-                                    Scale_164878(Add_164878(Sub_164878(*(sVec_164878*)(I_164878 + 0x10), V_164878(0x140)), V_164878(0x160)), s));
-        V_164878(0x170) = Sub_164878(V_164878(0x20), V_164878(0x40));
+                                    Scale_164878(Add_164878(Sub_164878(*(sVec_164878*)(I_164878 + 0x10), V_164878(320)), V_164878(352)), s));
+        V_164878(368) = Sub_164878(V_164878(0x20), V_164878(0x40));
         V_164878(0x180) = Sub_164878(V_164878(0x20), eye);
-        F_164878(0x244) = F_164878(0x240) = F_164878(0x23C);
+        F_164878(580) = F_164878(576) = F_164878(572);
     }
-    if (self->DoingHalfPipeCam != 0 && 0.0f < F_164878(0x240) && 0.0f < F_164878(0x244)) {
-        float bt = (F_164878(0x240) - 0.01666666753590107f) >? 0.0f;
-        float s = bt / F_164878(0x244);
-        F_164878(0x240) = bt;
+    if (self->DoingHalfPipeCam != 0 && 0.0f < F_164878(576) && 0.0f < F_164878(580)) {
+        float bt = (F_164878(576) - 0.01666666753590107f) >? 0.0f;
+        float s = bt / F_164878(580);
+        F_164878(576) = bt;
         s = Smooth_164878(s);
         sVec_164878 d = Sub_164878(V_164878(0x20), V_164878(0x40));
-        sVec_164878 dd = Add_164878(Scale_164878(V_164878(0x170), s), Scale_164878(d, 1.0f - s));
+        sVec_164878 dd = Add_164878(Scale_164878(V_164878(368), s), Scale_164878(d, 1.0f - s));
         AddEq_164878(V_164878(0x20), Scale_164878(V_164878(0x180), s));
         V_164878(0x40) = Sub_164878(V_164878(0x20), dd);
     }
@@ -9093,8 +9093,8 @@ extern "C" void func_001673F8_impl(int initialize, int priority)
                                          0.0f, 0.0f, 0.0f, 1.0f);
         func_0015E2A8();
         new (&D_004A4DC0) sFlags_1673F8(-1, -1);
-        persistentPlayerChoiceType[0] = 0x3D;
-        persistentPlayerChoiceType[1] = 0x3D;
+        persistentPlayerChoiceType[0] = 61;
+        persistentPlayerChoiceType[1] = 61;
     }
 }
 #endif
@@ -9541,7 +9541,7 @@ extern "C" void func_00168010(void) {
 INCLUDE_ASM("camera/camera", func_00168018);
 #ifdef SKIP_ASM
 extern "C" int func_00168018(void) {
-    return 0x3D;
+    return 61;
 }
 #endif
 //100%
@@ -9914,7 +9914,7 @@ extern void* cLazyChaseAlgorithm_vtbl[];
 extern "C" void* cLazyChaseAlgorithm_cLazyChaseAlgorithm(cLazyChaseAlgorithm* self)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((cLookAtChaseAlgorithm*)self));
-    self->AlgorithmType = 0xD;
+    self->AlgorithmType = 13;
     self->mVtbl = cLazyChaseAlgorithm_vtbl;
     return ((void*)self);
 }

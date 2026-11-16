@@ -144,7 +144,7 @@ extern "C" void func_002C7260(int self, int *day, int *month, int *year, int cou
                 count = rest - (dim - cur);
                 newMonth = *month + 1;
                 *month = newMonth;
-                if (newMonth >= 0xD) {
+                if (newMonth >= 13) {
                     *month = 1;
                     *year += 1;
                 }
@@ -164,7 +164,7 @@ extern "C" int func_002C7328(void* self, int* sec, int* min, int* hour, int add)
     int rem;
     int days;
 
-    total = *hour * 0xE10 + *min * 0x3C + *sec + add;
+    total = *hour * 3600 + *min * 0x3C + *sec + add;
     days = total / 86400;
     rem = total % 86400;
     *hour = (rem / 3600) % 24;
@@ -703,14 +703,14 @@ extern "C" int func_002C76C0(unsigned char* packbuf, unsigned char* unpackbuf)
                 int i;
                 int nextchar;
 
-                if (type == 0x32fb) { /* deltaed? */
+                if (type == 13051) { /* deltaed? */
                     i = 0;
                     qd = unpackbuf;
                     while (qd < unpackbuf + ulen) {
                         i += (int)*qd;
                         *qd++ = (unsigned char)i;
                     }
-                } else if (type == 0x34fb) { /* accelerated? */
+                } else if (type == 13563) { /* accelerated? */
                     i = 0;
                     nextchar = 0;
                     qd = unpackbuf;

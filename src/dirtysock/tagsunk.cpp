@@ -344,7 +344,7 @@ extern "C" void func_002598C8(LobbyMan* self, int* msg)
 {
     if (msg[1] == 0x64697363) {
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x115;
+        m[0] = 277;
         *(void***)((char*)m + 0x4) = D_004812B0;
         void* mp = m;
         sMsgListK2_insert(*(sMsgListNodeK2**)(((char*)self) + 0xF0), mp);
@@ -438,7 +438,7 @@ static inline sMsgListIterK2c sMsgListK2c_insert(sMsgListIterK2c pos, void* cons
 extern "C" void func_00259A60(LobbyMan* self, int unused)
 {
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = 0xE1;
+    m[0] = 225;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
     sMsgListK2c_insert(*(sMsgListNodeK2c**)(((char*)self) + 0xF0), mp);
@@ -568,25 +568,25 @@ extern "C" void func_00259B10(LobbyMan* self, char* msg)
                 func_0025FB80(self, (int)name, D_004807E8);
             } else if (func_002623B0((BuddyMan*)Mgr_9B10(), (int)name) != 0) {
                 func_0025FB80(self, (int)name, D_004A2F50);
-            } else if (*(int*)self == 0x16 && func_004165A8(self->mOpponent, name) == 0) {
+            } else if (*(int*)self == 22 && func_004165A8(self->mOpponent, name) == 0) {
                 func_0025F628(self, 1, 1);
             } else {
                 func_00262AF0((BuddyMan*)((char*)Mgr_9B10()), name, a, b, c, d != 0, e != 0, f != 0, g, h != 0, text, i, j, k, l);
             }
         } else if (func_004165A8(cmd, str_lockChal) == 0) {
-            if (*(int*)self == 0x16 && func_004165A8(self->mOpponent, name) == 0) {
+            if (*(int*)self == 22 && func_004165A8(self->mOpponent, name) == 0) {
                 func_0025FA48(self, name);
-            } else if (*(int*)self == 0x17) {
+            } else if (*(int*)self == 23) {
                 func_0025FAD0(self, name);
             } else {
                 func_0025FB80(self, (int)name, D_004807F8);
             }
         } else if (func_004165A8(cmd, str_decline) == 0) {
-            if (*(int*)self == 0x16)
+            if (*(int*)self == 22)
                 *(int*)self = 1;
             {
                 int* m = newMsg_9B10();
-                m[0] = 0xED;
+                m[0] = 237;
                 *(void***)((char*)m + 0x4) = D_004812B0;
                 post_9B10(((char*)self), m);
             }
@@ -600,7 +600,7 @@ extern "C" void func_00259B10(LobbyMan* self, char* msg)
                     func_0025F858(self);
                     send = 1;
                 }
-            } else if (*(int*)self == 0x16 || *(int*)self == 0x17) {
+            } else if (*(int*)self == 22 || *(int*)self == 23) {
                 if (gone) {
                     *(int*)self = 1;
                     send = 1;
@@ -611,12 +611,12 @@ extern "C" void func_00259B10(LobbyMan* self, char* msg)
             if (send)
                 {
                 int* m = newMsg_9B10();
-                m[0] = 0xEE;
+                m[0] = 238;
                 *(void***)((char*)m + 0x4) = D_004812B0;
                 post_9B10(((char*)self), m);
             }
         } else if (func_004165A8(cmd, str_ignore) == 0) {
-            if (*(int*)self == 0x16)
+            if (*(int*)self == 22)
                 *(int*)self = 1;
             {
                 int* m = newMsg_9B10();
@@ -625,11 +625,11 @@ extern "C" void func_00259B10(LobbyMan* self, char* msg)
                 post_9B10(((char*)self), m);
             }
         } else if (func_004165A8(cmd, str_badversion) == 0) {
-            if (*(int*)self == 0x16)
+            if (*(int*)self == 22)
                 *(int*)self = 1;
             {
                 int* m = newMsg_9B10();
-                m[0] = 0xF2;
+                m[0] = 242;
                 *(void***)((char*)m + 0x4) = D_004812B0;
                 post_9B10(((char*)self), m);
             }
@@ -754,13 +754,13 @@ extern "C" void func_0025A1D0(LobbyMan* self, char* msg)
     self->mIsHost = same;
     cBXString_cBXString4(((char*)self) + 0x98, same ? b3 : b2);
     self->mSeed = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SEED), 0);
-    if (*(int*)self != 0x18 && *(int*)self != 0x14)
+    if (*(int*)self != 0x18 && *(int*)self != 20)
     {
-        *(int*)self = 0x19;
+        *(int*)self = 25;
         func_00263BA8(func_002591D0(), 0);
         return;
     }
-    *(int*)self = 0x19;
+    *(int*)self = 25;
     if (strlen(b5))
     {
         char* ri = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -806,7 +806,7 @@ extern "C" void func_0025A1D0(LobbyMan* self, char* msg)
             vt[1].fn(ri + vt[1].delta);
         }
     }
-    int type = 0xEF;
+    int type = 239;
     func_00259098(func_002591D0(), self->mMatchType, 0);
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
@@ -1085,7 +1085,7 @@ extern "C" void func_0025AB40(LobbyMan* self, const char* a, const char* b)
     cBXString_cBXString2(&sa, a);
     cBXStrAB40 sb;
     cBXString_cBXString2(&sb, b);
-    m[0] = 0xDE;
+    m[0] = 222;
     *(void***)((char*)m + 0x4) = D_00481230;
     cBXString_cBXString1((char*)m + 0x8, &sa);
     cBXString_cBXString1((char*)m + 0xC, &sb);
@@ -1236,7 +1236,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
             self->mDisconnected = 0;
             func_0025B800(self);
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-            m[0] = 0x115;
+            m[0] = 277;
             *(void***)((char*)m + 0x4) = D_004812B0;
             post_AC50(((char*)self), m);
         } else {
@@ -1252,11 +1252,11 @@ extern "C" void func_0025AC50(LobbyMan* self)
                     sess->mState = 3;
                     sess->mTimeout = 30.0f;
                     // PORT: function pointer passed as a callback argument.
-                    func_003E8260(((void*)sess->mpLobbyApi), g, 0x2AF8, (void*)func_00268BA8, ((char*)self));
+                    func_003E8260(((void*)sess->mpLobbyApi), g, 11000, (void*)func_00268BA8, ((char*)self));
                 } else if (r < 0) {
                     func_0025B800(self);
                     int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-                    m[0] = 0x102;
+                    m[0] = 258;
                     *(void***)((char*)m + 0x4) = D_00481290;
                     m[2] = 0x646E7366; // 'dnsf'
                     post_AC50(((char*)self), m);
@@ -1267,7 +1267,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
                 if (ev == 0x400) {
                     char* s = func_003E8A70(self->mpLobbyApi, 0x646F776E);
                     int* m = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
-                    m[0] = 0x102;
+                    m[0] = 258;
                     m[2] = 0x646F776E; // 'down'
                     *(void***)((char*)m + 0x4) = D_004811B0;
                     cBXString_cBXString2((char*)m + 0xC, s);
@@ -1276,37 +1276,37 @@ extern "C" void func_0025AC50(LobbyMan* self)
                 } else if (expired_AC50(((char*)self))) {
                     func_0025B800(self);
                     int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-                    m[0] = 0x102;
+                    m[0] = 258;
                     *(void***)((char*)m + 0x4) = D_00481290;
                     m[2] = 0x74696D65; // 'time'
                     post_AC50(((char*)self), m);
                     closeConn_AC50(((char*)self));
                 }
-            } else if (state == 0x1A) {
+            } else if (state == 26) {
                 if (BuddyMan_mBuddyMan->miError != 0) {
                     func_00261408(BuddyMan_mBuddyMan);
                     int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     int val = BuddyMan_mBuddyMan->miError;
-                    m[0] = 0x103;
+                    m[0] = 259;
                     *(void***)((char*)m + 0x4) = D_00481270;
                     m[2] = val;
                     post_AC50(((char*)self), m);
                 } else if (func_00261460(BuddyMan_mBuddyMan) != 0) {
                     *(int*)self = 1;
                     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-                    m[0] = 0xDA;
+                    m[0] = 218;
                     *(void***)((char*)m + 0x4) = D_004812B0;
                     post_AC50(((char*)self), m);
                 }
-            } else if (state == 0x16) {
-            } else if (state == 0x17) {
+            } else if (state == 22) {
+            } else if (state == 23) {
                 float t = self->mTimeout;
                 if (t < D_004A5154 - 1.0f)
                     D_004A5154 = t;
                 if (isNeg_AC50(t)) {
                     if (func_00263128((BuddyMan*)((char*)Mgr_AC50()), self->mOpponent) != 0)
                         func_00263018((BuddyMan*)Mgr_AC50(), self->mOpponent);
-                    int type = 0x112;
+                    int type = 274;
                     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
                     m[0] = type;
                     *(void***)((char*)m + 0x4) = D_004812B0;
@@ -1318,28 +1318,28 @@ extern "C" void func_0025AC50(LobbyMan* self)
                 if (t < D_004A5154 - 1.0f)
                     D_004A5154 = t;
                 if (isNeg_AC50(t)) {
-                    int type = 0x112;
+                    int type = 274;
                     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
                     m[0] = type;
                     *(void***)((char*)m + 0x4) = D_004812B0;
                     post_AC50(((char*)self), m);
                     func_0025F628(self, 0, 1);
                 }
-            } else if (state == 0x14) {
+            } else if (state == 20) {
                 if (expired_AC50(((char*)self))) {
                     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-                    m[0] = 0xE6;
+                    m[0] = 230;
                     *(void***)((char*)m + 0x4) = D_004812B0;
                     post_AC50(((char*)self), m);
                     func_0025EED8(self);
                 }
-            } else if (state != 0x19) {
+            } else if (state != 25) {
                 int notIdle = state != 1;
                 int active = notIdle || self->mFindingPlayer != 0;
                 if (active && expired_AC50(((char*)self))) {
                     func_0025B800(self);
                     int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-                    m[0] = 0x102;
+                    m[0] = 258;
                     *(void***)((char*)m + 0x4) = D_00481290;
                     m[2] = 0x74696D65; // 'time'
                     post_AC50(((char*)self), m);
@@ -1348,7 +1348,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
                 }
             }
         }
-        int notJoined = *(int*)self != 0x19;
+        int notJoined = *(int*)self != 25;
         if (notJoined) {
             if (*func_002591D0() != 0)
                 func_00263BA8(func_002591D0(), 0);
@@ -1472,12 +1472,12 @@ extern "C" void func_0025B6D8(LobbyMan* self, int conn)
         self->mTimeout = 30.0f;
         self->mServerAddr = g;
         // PORT: function pointer passed as a callback argument.
-        func_003E8260(self->mpLobbyApi, g, 0x2AF8, (void*)func_00268BA8, ((char*)self));
+        func_003E8260(self->mpLobbyApi, g, 11000, (void*)func_00268BA8, ((char*)self));
     } else {
         *(int*)self = 2;
         self->mpHostLookup = (void*)func_003F3A98(self->mServerName, 0);
     }
-    int type = 0xC8;
+    int type = 200;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
     *(void***)((char*)m + 0x4) = D_004812B0;
@@ -1554,12 +1554,12 @@ extern "C" void func_0025B848(LobbyMan* self, char* msg)
     if (*(int*)(msg + 0x8) == 0) {
         func_003E8B10(self->mpLobbyApi, 0x73656C65, str_ROOMS_1_USERS_1_RANKS_0_MESGS_1_GAMES_1, 0, 0);
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 0xC9;
+        m[0] = 201;
         *(void***)((char*)m + 0x4) = D_004812B0;
         post_B848(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = *(int*)(msg + 0x8);
         post_B848(((char*)self), m);
@@ -1636,12 +1636,12 @@ extern "C" void func_0025B9C8(LobbyMan* self, char* msg)
     // PORT: string length read from the header before the characters.
     if (*(int*)((int)email - 8) != 0)
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PMAIL, email);
-    int type = 0xCA;
+    int type = 202;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_GEND, mf);
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_BORN, ver);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_DEFPER, 0);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_ALTS, 4);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_MINAGE, 0xD);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_MINAGE, 13);
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_LANG, func_00259198());
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608(self, 4, 0x61636374, buf, (int)func_00268BD0, 20.0f);
@@ -1741,13 +1741,13 @@ extern "C" void func_0025BD30(LobbyMan* self, char* msg)
     int err = *(int*)(msg + 0x8);
     if (err == 0) {
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 0xCB;
+        m[0] = 203;
         *(void***)((char*)m + 0x4) = D_004812B0;
         post_BD30(((char*)self), m);
     } else if (err == 0x746F6F79) {
         int n = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_AGE), 0);
         int* m = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         m[2] = err;
         *(void***)((char*)m + 0x4) = D_004811F0;
         m[3] = n;
@@ -1756,7 +1756,7 @@ extern "C" void func_0025BD30(LobbyMan* self, char* msg)
         if (err == 0x6475706C)
             func_0025BC48(self, msg);
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = *(int*)(msg + 0x8);
         post_BD30(((char*)self), m);
@@ -1823,7 +1823,7 @@ extern "C" void func_0025BF18(LobbyMan* self, char* msg)
     }
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608(self, 5, 0x65646974, buf, (int)func_00268BF8, 20.0f);
-    int type = 0xCD;
+    int type = 205;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
     *(void***)((char*)m + 0x4) = D_004812B0;
@@ -1876,12 +1876,12 @@ extern "C" void func_0025C0C0(LobbyMan* self, char* msg)
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 0xCE;
+        m[0] = 206;
         *(void***)((char*)m + 0x4) = D_004812B0;
         post_C0C0(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = *(int*)(msg + 0x8);
         post_C0C0(((char*)self), m);
@@ -1928,7 +1928,7 @@ extern "C" void func_0025C1E0(LobbyMan* self, const char* value)
     char buf[0x200];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MAIL, value);
-    int type = 0xD1;
+    int type = 209;
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608(self, 6, 0x6C6F7374, buf, (int)func_00268C20, 20.0f);
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -1983,12 +1983,12 @@ extern "C" void func_0025C2D8(LobbyMan* self, char* msg)
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 0xCF;
+        m[0] = 207;
         *(void***)((char*)m + 0x4) = D_004812B0;
         post_C2D8(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = *(int*)(msg + 0x8);
         post_C2D8(((char*)self), m);
@@ -2035,7 +2035,7 @@ extern "C" void func_0025C3F8(LobbyMan* self, const char* value)
     char buf[0x200];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, value);
-    int type = 0xD0;
+    int type = 208;
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608(self, 7, 0x6C6F7374, buf, (int)func_00268C48, 20.0f);
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -2090,12 +2090,12 @@ extern "C" void func_0025C4F0(LobbyMan* self, char* msg)
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 0xD2;
+        m[0] = 210;
         *(void***)((char*)m + 0x4) = D_004812B0;
         post_C4F0(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = *(int*)(msg + 0x8);
         post_C4F0(((char*)self), m);
@@ -2197,7 +2197,7 @@ extern "C" void func_0025C610(LobbyMan* self)
     if ((int)func_00266F38(conn) & 0x10)
         flags |= 0x100;
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_HWFLAG, flags);
-    int type = 0xD3;
+    int type = 211;
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_HWMASK, caps);
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608(self, 8, 0x61757468, buf, (int)func_00268C70, 20.0f);
@@ -2297,13 +2297,13 @@ extern "C" void func_0025C8A8(LobbyMan* self, char *msg)
       if (p)
       {
         cDirtysock_tag_TagFieldGetString4(t, b3, 0x100, D_004A2F40);
-        func_003EFD30(b3, strlen(b3), ((char*)self) + 0x1C, 0x21);
+        func_003EFD30(b3, strlen(b3), ((char*)self) + 0x1C, 33);
         self->mHaveCPAT = 1;
       }
       else
       {
         cDirtysock_tag_TagFieldGetString4(t, b3, 0x100, D_004A2F40);
-        func_003EFD30(b3, strlen(b3), ((char*)self) + 0x1C, 0x21);
+        func_003EFD30(b3, strlen(b3), ((char*)self) + 0x1C, 33);
         self->mHaveCPAT = 1;
       }
     }
@@ -2314,7 +2314,7 @@ extern "C" void func_0025C8A8(LobbyMan* self, char *msg)
     self->mAuthenticated = 1;
     int *m = (int *) operator new(8, str_NetEvent, 0x20000000, 0);
     *((void ***) (((char *) m) + 0x4)) = D_004812B0;
-    m[0] = 0xD4;
+    m[0] = 212;
     post_C610(((char*)self) + 0xEC, m);
   }
   else
@@ -2324,8 +2324,8 @@ extern "C" void func_0025C8A8(LobbyMan* self, char *msg)
     char b[0x100];
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_DATE), a, 0x100, D_004A2F40);
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_INTRO), b, 0x100, D_004A2F40);
-    int *m = (int *) operator new(0x14, str_NetEvent, 0x20000000, 0);
-    m[0] = 0x102;
+    int *m = (int *) operator new(20, str_NetEvent, 0x20000000, 0);
+    m[0] = 258;
     *((void ***) (((char *) m) + 0x4)) = D_004811D0_C8A8;
     m[2] = 0x6C6F636B;
     cBXString_cBXString2(m + 3, a);
@@ -2336,7 +2336,7 @@ extern "C" void func_0025C8A8(LobbyMan* self, char *msg)
   {
     int *m = (int *) operator new(0xC, str_NetEvent, 0x20000000, 0);
     m[2] = *((int *) (msg + 8));
-    m[0] = 0x102;
+    m[0] = 258;
     *((void ***) (((char *) m) + 0x4)) = D_00481290;
     post_C8A8(((char*)self), m);
   }
@@ -2416,7 +2416,7 @@ extern "C" void func_0025CD50_impl(char* self, const char* name)
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_CDEV, self + 0x1C);
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608((LobbyMan*)self, 9, 0x70657273, buf, (int)func_00268C98, 20.0f);
-    int type = 0xD9;
+    int type = 217;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
     *(void***)((char*)m + 0x4) = D_004812B0;
@@ -2471,12 +2471,12 @@ extern "C" void func_0025CEB0(LobbyMan* self, char* msg)
     if (*(int*)(msg + 0x8) == 0) {
         func_0025CFE0(self);
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 0xDA;
+        m[0] = 218;
         *(void***)((char*)m + 0x4) = D_004812B0;
         post_CEB0(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = *(int*)(msg + 0x8);
         post_CEB0(((char*)self), m);
@@ -2498,7 +2498,7 @@ extern "C" void func_0025CFE0(LobbyMan* self)
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, (const char*)self->mPersona);
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608(self, 0x1B, 0x6F6E6C6E, buf, (int)func_00268CC0, 20.0f);
+    func_0025B608(self, 27, 0x6F6E6C6E, buf, (int)func_00268CC0, 20.0f);
 }
 #endif
 
@@ -2570,7 +2570,7 @@ extern "C" void func_0025D048(LobbyMan* self, char* msg)
         func_0025E0C8(self, 0);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = *(int*)(msg + 0x8);
         post_D048(((char*)self), m);
@@ -2620,9 +2620,9 @@ extern "C" void func_0025D1B8(LobbyMan* self, const char* name)
         char buf[0x200];
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, name);
-        int type = 0xD5;
+        int type = 213;
         // PORT: function pointer passed through func_0025B608's int parameter.
-        func_0025B608(self, 0xA, 0x63706572, buf, (int)func_00268CE8, 20.0f);
+        func_0025B608(self, 10, 0x63706572, buf, (int)func_00268CE8, 20.0f);
         LobbyMan* lobbyMan = self;
         cBXString_cBXString4(&((char**)&lobbyMan->mPersonas[0])[lobbyMan->mNumPersonas], name);
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -2684,14 +2684,14 @@ extern "C" void func_0025D2D8(LobbyMan* self, char* msg)
     if (*(int*)(msg + 0x8) == 0) {
         (self->mNumPersonas)++;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 0xD6;
+        m[0] = 214;
         *(void***)((char*)m + 0x4) = D_004812B0;
         post_D2D8(((char*)self), m);
     } else {
         if (*(int*)(msg + 0x8) == 0x6475706C)
             func_0025BC48(self, msg);
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = *(int*)(msg + 0x8);
         post_D2D8(((char*)self), m);
@@ -2739,9 +2739,9 @@ extern "C" void func_0025D428(LobbyMan* self, int idx)
         char buf[0x200];
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, *(const char**)(((char*)self) + 0x70 + (idx << 2)));
-        int type = 0xD7;
+        int type = 215;
         // PORT: function pointer passed through func_0025B608's int parameter.
-        func_0025B608(self, 0xB, 0x64706572, buf, (int)func_00268D10, 20.0f);
+        func_0025B608(self, 11, 0x64706572, buf, (int)func_00268D10, 20.0f);
         self->mDeletePersonaIdx = idx;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = type;
@@ -2808,11 +2808,11 @@ extern "C" void func_0025D538(LobbyMan* self, char* msg)
             cBXString_operatorE(&((char**)&lobbyMan->mPersonas[0])[i], &((char**)&lobbyMan->mPersonas[0])[i + 1]);
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         *(void***)((char*)m + 0x4) = D_004812B0;
-        m[0] = 0xD8;
+        m[0] = 216;
         post_D538(lst, m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = *(int*)(msg + 0x8);
         post_D538(((char*)self) + 0xEC, m);
@@ -2860,7 +2860,7 @@ extern "C" void func_0025D6C0(LobbyMan* self)
 {
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     sMsgListNodeK6c0* list = *(sMsgListNodeK6c0**)(((char*)self) + 0xF0);
-    m[0] = 0xDF;
+    m[0] = 223;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
     sMsgListK6c0_insert(list, mp);
@@ -2987,13 +2987,13 @@ extern "C" void func_0025D8F8(LobbyMan* self, char* msg)
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_NAME), buf, 0x100, D_004A2F40);
         cBXString_cBXString4(((char*)self) + 0x84, buf);
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 0xDC;
+        m[0] = 220;
         *(void***)((char*)m + 0x4) = D_004812B0;
         post_D8F8(((char*)self), m);
     } else {
         cBXString_Reset(((char*)self) + 0x84);
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = *(int*)(msg + 0x8);
         post_D8F8(((char*)self), m);
@@ -3041,7 +3041,7 @@ extern "C" void func_0025DAC0(LobbyMan* self, int namePrefix, int nameSuffix, co
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PASS, password);
         }
         // PORT: function pointer passed through func_0025B608's int parameter.
-        func_0025B608(self, 0x11, 0x726F6F6D, buf, (int)func_00268D60, 20.0f);
+        func_0025B608(self, 17, 0x726F6F6D, buf, (int)func_00268D60, 20.0f);
     }
 }
 #endif
@@ -3099,7 +3099,7 @@ extern "C" void func_0025DB80(LobbyMan* self, char* msg)
     *(int*)self = 1;
     int v = *(int*)(msg + 0x8);
     if (v == 0) {
-        int type = 0xE4;
+        int type = 228;
         char buf[0x100];
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_NAME), buf, 0x100, D_004A2F40);
         cBXString_cBXString4(((char*)self) + 0x84, buf);
@@ -3109,7 +3109,7 @@ extern "C" void func_0025DB80(LobbyMan* self, char* msg)
         post_DB80(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = v;
         post_DB80(((char*)self), m);
@@ -3127,7 +3127,7 @@ extern "C" int func_003E8DC0(void* p, const char* key, int value, int timeout, v
 extern "C" void func_0025DD08(LobbyMan* self, const char* key, int def)
 {
     if (*(int*)self != 0) {
-        func_003E8DC0(self->mpLobbyApi, key, func_0025A730(self, key, def), 0x1388, (void*)func_00268D88, self);
+        func_003E8DC0(self->mpLobbyApi, key, func_0025A730(self, key, def), 5000, (void*)func_00268D88, self);
     }
 }
 #endif
@@ -3146,7 +3146,7 @@ extern "C" void func_0025DD68(LobbyMan* self)
         char* userEntry = (char*)func_003EE560(self->mpUserList);
         if (userEntry != 0) {
             const char* key = userEntry + 8;
-            func_003E8DC0(self->mpLobbyApi, key, func_0025A730(self, key, *(int*)(userEntry + 0x30)), 0x1388, (void*)func_00268D88, ((char*)self));
+            func_003E8DC0(self->mpLobbyApi, key, func_0025A730(self, key, *(int*)(userEntry + 0x30)), 5000, (void*)func_00268D88, ((char*)self));
         }
     }
 }
@@ -3196,11 +3196,11 @@ extern "C" void func_0025DDE0(LobbyMan* self, char* msg)
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_NAME), name, 0x20, D_004A2F40);
     int v;
     if (*(int*)(msg + 0x8) != 0)
-        v = 0x7F90;
+        v = 32656;
     else
         v = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_PING), 0);
     int* m = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
-    m[0] = 0xE5;
+    m[0] = 229;
     *(void***)((char*)m + 0x4) = D_00481170;
     cBXString_cBXString2((char*)m + 0x8, name);
     m[3] = v;
@@ -3275,14 +3275,14 @@ extern "C" void func_0025DF98(LobbyMan* self, char* msg)
     *(int*)self = 1;
     int v = *(int*)(msg + 0x8);
     if (v == 0) {
-        int type = 0xE8;
+        int type = 232;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = type;
         *(void***)((char*)m + 0x4) = D_004812B0;
         post_DF98(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = v;
         post_DF98(((char*)self), m);
@@ -3375,7 +3375,7 @@ extern "C" void func_0025E138(LobbyMan* self, char* msg)
     int type = *(int*)(msg + 0x8);
     if (type == 0x6E657731) {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0xE2;
+        m[0] = 226;
         *(void***)((char*)m + 0x4) = D_00481210;
         cBXString_cBXString2(m + 2, *(char**)(msg + 0xC));
         post_E138(((char*)self), m);
@@ -3385,14 +3385,14 @@ extern "C" void func_0025E138(LobbyMan* self, char* msg)
             char host[0x100];
             char name[0x100];
             cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_BUDDYSERVERNAME), host, 0x100, D_004A2F40);
-            int port = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_BUDDYPORT), 0x34C1);
+            int port = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_BUDDYPORT), 13505);
             cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_BUDDYRESOURCE), name, 0x100, str_SSX_PS2_2004);
             BuddyMan_mBuddyMan->miMsgTimeout = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_BUDDYMSGTIMEOUT), 0xD2F00);
             // PORT: a pointer passed through func_00261248's int parameter.
             func_00261248(BuddyMan_mBuddyMan, host, port, self->mPersona, self->mPassword, (int)name);
         }
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x111;
+        m[0] = 273;
         *(void***)((char*)m + 0x4) = D_004812B0;
         post_E138(((char*)self), m);
     }
@@ -3537,7 +3537,7 @@ extern "C" void func_0025E590(LobbyMan* self, char* msg)
         *(int*)(((char*)self) + (idx << 2) + 0x104) = a + b;
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = v;
         void* mp = m;
@@ -3584,7 +3584,7 @@ extern "C" void func_0025E6D0(LobbyMan* self, const char* name)
 {
     if (*(int*)self != 0) {
         if (strcasecmp(self->mPersona, (void*)name) == 0) {
-            int type = 0x10E;
+            int type = 270;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             m[0] = type;
             *(void***)((char*)m + 0x4) = D_004812B0;
@@ -3694,8 +3694,8 @@ extern "C" void func_0025E7F0(LobbyMan* self, char* msg)
         int count = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_ADDR), 0);
         int on = count > 0;
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_ROOM), text, 0x100, D_004A2F40);
-        sMsgE7F0* m = (sMsgE7F0*)operator new(0x2C, str_NetEvent, 0x20000000, 0);
-        m->type = 0xE3;
+        sMsgE7F0* m = (sMsgE7F0*)operator new(44, str_NetEvent, 0x20000000, 0);
+        m->type = 227;
         m->vt = D_00481190;
         cBXString_cBXString2(m->name, name);
         cBXString_cBXString2(m->text, text);
@@ -3705,7 +3705,7 @@ extern "C" void func_0025E7F0(LobbyMan* self, char* msg)
         post_E7F0(((char*)self), m);
     } else {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = err;
         post_E7F0(((char*)self), m);
@@ -3798,7 +3798,7 @@ extern "C" void func_0025EB00(LobbyMan* self, char* msg)
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31E0), s3, 0x100, D_004A2F40);
         int n1 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31E8), -1);
         int n2 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31F0), -1);
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31F8), raw, 0x14, D_004A2F40);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31F8), raw, 20, D_004A2F40);
         int n3 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3130), 0);
         cDirtysock_tag_TagFieldGetStructure(raw, st, 0x40, str_l);
         sUserStats_25EB00 info;
@@ -3807,8 +3807,8 @@ extern "C" void func_0025EB00(LobbyMan* self, char* msg)
         info.c = st[2] + st[3] + st[4];
         info.d = st[6];
         info.e = n1;
-        sUserMsg_25EB00* m = (sUserMsg_25EB00*)operator new(0x164, str_NetEvent, 0x20000000, 0);
-        m->kind = 0x10D;
+        sUserMsg_25EB00* m = (sUserMsg_25EB00*)operator new(356, str_NetEvent, 0x20000000, 0);
+        m->kind = 269;
         m->vt = D_00481110;
         m->n2 = n2;
         m->n1 = n1;
@@ -3821,7 +3821,7 @@ extern "C" void func_0025EB00(LobbyMan* self, char* msg)
         l->insert(l->end(), mp);
     } else if (type != 0x75757372) {
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = type;
         sMsgList_25EB00* l = (sMsgList_25EB00*)(((char*)self) + 0xF0);
@@ -3851,9 +3851,9 @@ extern "C" void func_0025EE20(LobbyMan* self, const void* data, int matchType)
             self->mMatchType = matchType;
             buf[0] = 0;
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_KIND, str_DeathRace);
-            cDirtysock_tag_TagFieldSetStructure(buf, 0x100, str_QMFP, data, 0x14, str_l);
+            cDirtysock_tag_TagFieldSetStructure(buf, 0x100, str_QMFP, data, 20, str_l);
             // PORT: function pointer passed through func_0025B608's int parameter.
-            func_0025B608(self, 0x12, 0x7175696B, buf, (int)func_00268E78, 20.0f);
+            func_0025B608(self, 18, 0x7175696B, buf, (int)func_00268E78, 20.0f);
         }
     }
 }
@@ -3912,7 +3912,7 @@ extern "C" void func_0025EED8(LobbyMan* self)
     int st = *(int*)self;
     if (st == 0)
         return;
-    if (st == 0x19) {
+    if (st == 25) {
         if (*func_002591D0() != 0)
             func_00263BA8(func_002591D0(), 2);
     } else if (st != 1) {
@@ -3924,7 +3924,7 @@ extern "C" void func_0025EED8(LobbyMan* self)
         self->mRequestId = func_003E8B10(self->mpLobbyApi, 0x7175696B, buf, (int)func_00268E78, ((char*)self));
     }
     *(int*)self = 1;
-    int type = 0xE7;
+    int type = 231;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = type;
     *(void***)((char*)m + 0x4) = D_004812B0;
@@ -3972,13 +3972,13 @@ extern void* D_00481290[];
 extern "C" void func_0025F030(LobbyMan* self, char* msg)
 {
     if (*(int*)(msg + 0x8) == 0) {
-        if (*(int*)self == 0x12)
-            *(int*)self = 0x14;
+        if (*(int*)self == 18)
+            *(int*)self = 20;
     } else {
         *(int*)self = 1;
         int v = *(int*)(msg + 0x8);
         int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = v;
         void* mp = m;
@@ -4306,7 +4306,7 @@ extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2)
             cCommSystem_getSignature_F4C0(cCommSystem_mCommSystem),
             ((sDsStats_25F4C0*)self)->fBC, ((sDsStats_25F4C0*)self)->fC0, ((sDsStats_25F4C0*)self)->fC4, ((sDsStats_25F4C0*)self)->fB8);
     func_0025FB80_v(self, *(int*)(self + 0x98), buf);
-    *(int*)self = 0x16;
+    *(int*)self = 22;
 }
 #endif
 
@@ -4350,16 +4350,16 @@ extern "C" void func_0025F628(LobbyMan* selfp, int notify, int flag)
 {
     int st = *(int*)selfp;
     if (st != 0) {
-        if (st == 0x15 || st == 0x16 || st == 0x18) {
+        if (st == 21 || st == 22 || st == 0x18) {
             if (flag)
                 func_0025FC48(((char*)selfp));
             func_003E8D70(selfp->mpLobbyApi, selfp->mRequestId);
             func_0025F858(selfp);
-        } else if (st == 0x19) {
+        } else if (st == 25) {
             func_0025F740(selfp, 0);
         }
         if (notify) {
-            int type = 0xEE;
+            int type = 238;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             m[0] = type;
             *(void***)((char*)m + 0x4) = D_004812B0;
@@ -4407,7 +4407,7 @@ static inline sMsgListIterF740 sMsgListF740_insert(sMsgListIterF740 pos, void* c
 extern "C" void func_0025F740(LobbyMan* selfp, int type)
 {
     if (*(int*)selfp != 0) {
-        if (*(int*)selfp == 0x19) {
+        if (*(int*)selfp == 25) {
             char buf[0x100];
             selfp->mTimeout = 20.0f;
             buf[0] = 0;
@@ -4488,22 +4488,22 @@ extern "C" void func_0025F8A0(LobbyMan* self, char* msg)
     char buf[16];
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_MODE), buf, 0x10, D_004A2F40);
     if (*(int*)(msg + 0x8) != 0) {
-        if (*(int*)self == 0x15) {
+        if (*(int*)self == 21) {
             *(int*)self = 1;
             func_0025FC48(((char*)self));
             int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-            m[0] = 0x102;
+            m[0] = 258;
             *(void***)((char*)m + 0x4) = D_00481290;
             m[2] = *(int*)(msg + 0x8);
             void* mp = m;
             sMsgListF8A0_insert(*(sMsgListNodeF8A0**)(((char*)self) + 0xF0), mp);
         }
     } else if (func_004165A8(buf, str_chal) == 0) {
-        if (*(int*)self == 0x15)
+        if (*(int*)self == 21)
             func_0025FC70(self, (int)self->mOpponent, 0x18);
     } else if (func_004165A8(buf, str_idle) == 0) {
     } else if (func_004165A8(buf, str_play) == 0) {
-        if (*(int*)self == 0x15) {
+        if (*(int*)self == 21) {
             *(int*)self = 0x18;
             self->mTimeout = 20.0f;
             D_004A5154 = 20.0f;
@@ -4528,7 +4528,7 @@ extern "C" void func_0025FA48(LobbyMan* self, const char* name)
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_HOST, D_004A3240);
     *(int*)self = 1;
     // PORT: function pointer passed through func_0025B608's int parameter.
-    func_0025B608(self, 0x15, 0x6368616C, buf, (int)func_00268EA0, 20.0f);
+    func_0025B608(self, 21, 0x6368616C, buf, (int)func_00268EA0, 20.0f);
 }
 #endif
 
@@ -4561,7 +4561,7 @@ extern "C" void func_0025FB58(LobbyMan* self, int recipient, int matchType)
 {
     if (*(int*)self != 0) {
         self->mMatchType = matchType;
-        func_0025FC70(self, recipient, 0x17);
+        func_0025FC70(self, recipient, 23);
     }
 }
 #endif
@@ -4660,7 +4660,7 @@ static inline sMsgListIter_0025FC70 sMsgList_0025FC70_insert(sMsgListIter_0025FC
 extern "C" void func_0025FC70(LobbyMan* self, int a1, int a2)
 {
     func_0025FB80(self, a1, str_lockChal_b);
-    int kind = 0x110;
+    int kind = 272;
     *(int*)self = a2;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     m[0] = kind;
@@ -5175,7 +5175,7 @@ extern "C" void func_00260C68(LobbyMan* self, char* msg)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (*(int*)(msg + 0x8) == 0 || (*(int*)(msg + 0x8) == 0x72616E6B && D_00534B34[0] == 0)) {
-        int type = 0x101;
+        int type = 257;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         m[0] = type;
         *(void***)((char*)m + 0x4) = D_004812B0;
@@ -5184,12 +5184,12 @@ extern "C" void func_00260C68(LobbyMan* self, char* msg)
         int err = *(int*)(msg + 0x8);
         char* lst = ((char*)self) + 0xEC;
         int* m = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 0x102;
+        m[0] = 258;
         *(void***)((char*)m + 0x4) = D_004812B0;
         *(void***)((char*)m + 0x4) = D_00481290;
         m[2] = err;
         post_0C68(lst, m);
-        int type = 0x101;
+        int type = 257;
         int* m2 = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
         *(void***)((char*)m2 + 0x4) = D_004812B0;
         m2[0] = type;
@@ -5256,7 +5256,7 @@ extern "C" void func_00260F10(LobbyMan* self)
     self->mNewAccount.mBornMonth = 1;
     self->mNewAccount.mGender = 0;
     self->mNewAccount.mBornDay = 1;
-    self->mNewAccount.mBornYear = 0x7C1;
+    self->mNewAccount.mBornYear = 1985;
     self->mNewAccount.unk_40 = 0;
 }
 #endif
@@ -5668,7 +5668,7 @@ extern "C" void func_002615C8(BuddyMan* self, int* msg)
             LobbyMan* owner = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             *(void***)((char*)m + 0x4) = D_004812B0;
-            m[0] = 0x104;
+            m[0] = 260;
             post_15C8((char*)owner, m);
             int r = msg[2];
             self->mbDisconnected = 1;
@@ -5732,7 +5732,7 @@ extern "C" void func_00261770(BuddyMan* self, int* msg)
 {
     if (msg[0] == 0x656E6472 && self->mbRosterDone == 0) {
         func_002610D0();
-        register int type FM_REG("$17") = 0x107;
+        register int type FM_REG("$17") = 263;
         (self)->mbRosterDone = 1;
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -5743,7 +5743,7 @@ extern "C" void func_00261770(BuddyMan* self, int* msg)
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         *(void***)((char*)m + 0x4) = D_004812B0;
-        m[0] = 0x106;
+        m[0] = 262;
         post_1770((char*)lobbyMan, m);
     }
 }
@@ -5789,7 +5789,7 @@ extern "C" void func_002618C0(int unused)
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     *(void***)((char*)m + 0x4) = D_004812B0;
-    m[0] = 0x10A;
+    m[0] = 266;
     void* mp = m;
     sMsgList_002618C0_insert((*(sMsgListNode_002618C0**)((char*)lobbyMan + 0xF0)), mp);
 }
@@ -5840,7 +5840,7 @@ extern "C" void func_00261970(int unused)
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     sMsg_00261970* m = (sMsg_00261970*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m->vt = D_004812B0;
-    m->kind = 0x10B;
+    m->kind = 267;
     void* mp = m;
     sMsgList_00261970_insert((*(sMsgListNode_00261970**)((char*)lobbyMan + 0xF0)), mp);
 }
@@ -5920,7 +5920,7 @@ struct sMsg_00261A28 {
 extern "C" void func_00261A28(BuddyMan* self, char* msg)
 {
     char raw[0x800];
-    char text[0x8D0];
+    char text[2256];
     char name[0x40];
     char date[0x40];
     char flag[0x10];
@@ -5930,7 +5930,7 @@ extern "C" void func_00261A28(BuddyMan* self, char* msg)
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_USER), name, 0x40, str_Not_Present);
     if (func_002623B0(self, (int)name))
         return;
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SUBJ), text, 0x8CF, D_004A2ED0);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SUBJ), text, 2255, D_004A2ED0);
     cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_BODY), raw, 0x800, str_Not_Present);
     strcat(text, raw);
     func_003EDD70(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_TIME), &t0, &t1, &t2, &t3, &t4, &t5, 0);
@@ -5939,7 +5939,7 @@ extern "C" void func_00261A28(BuddyMan* self, char* msg)
     if (func_00262A08(self, (int)name) >= 0x1F) {
         sTagVec_00261A28_remove(((char*)self), name);
     }
-    int kind = 0x109;
+    int kind = 265;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     sMsg_00261A28* m = new (str_NetEvent, 0x20000000, 0) sMsg_00261A28(kind);
     sMsgList_00261A28_insert((*(sMsgListNode_00261A28**)((char*)lobbyMan + 0xF0)), m);
@@ -6037,7 +6037,7 @@ extern "C" void func_00261CD0(BuddyMan* self, char* name, char* a2, char* a3)
                 }
             }
             func_002620D8(self, name, 2, &err, 0);
-            int type = 0x108;
+            int type = 264;
             LobbyMan* owner = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             m[0] = type;
@@ -6159,21 +6159,21 @@ extern "C" int func_002620D8(BuddyMan* self, char* name, int kind, int* err, cha
     rec.x20[0] = 0;
     switch (kind) {
     case 0:
-        if (func_00262280(self) + a >= 0x29) {
+        if (func_00262280(self) + a >= 41) {
             *err = 1;
             return 0;
         }
         rec.flags |= 4;
         break;
     case 1:
-        if (func_00262280(self) + a >= 0x29) {
+        if (func_00262280(self) + a >= 41) {
             *err = 1;
             return 0;
         }
         rec.flags |= 0x200;
         break;
     case 2:
-        if (func_002622F0(self) + b >= 0xB) {
+        if (func_002622F0(self) + b >= 11) {
             *err = 2;
             return 0;
         }
@@ -6462,26 +6462,26 @@ extern "C" void func_00262768(BuddyMan* self_, int a1, int a2, int a3, int a4, i
 {
     if (self_->mpBuddyApi == 0)
         return;
-    char buf[0x50];
+    char buf[80];
     buf[0] = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 0x50, D_004A31F8, (const char*)self_->mResource);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x50, str_SSXID, 3);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x50, str_LOCID_b, a2);
+    cDirtysock_tag_TagFieldSetString(buf, 80, D_004A31F8, (const char*)self_->mResource);
+    cDirtysock_tag_TagFieldSetNumber(buf, 80, str_SSXID, 3);
+    cDirtysock_tag_TagFieldSetNumber(buf, 80, str_LOCID_b, a2);
     if (a3 != 0)
     {
-        cDirtysock_tag_TagFieldSetString(buf, 0x50, str_SZ1_b, (const char*)a3);
+        cDirtysock_tag_TagFieldSetString(buf, 80, str_SZ1_b, (const char*)a3);
         if (a4 != 0)
         {
-            cDirtysock_tag_TagFieldSetString(buf, 0x50, str_SZ2_b, (const char*)a4);
+            cDirtysock_tag_TagFieldSetString(buf, 80, str_SZ2_b, (const char*)a4);
             if (a5 != 0)
-                cDirtysock_tag_TagFieldSetString(buf, 0x50, str_SZ3_b, (const char*)a5);
+                cDirtysock_tag_TagFieldSetString(buf, 80, str_SZ3_b, (const char*)a5);
         }
     }
     func_003F1538(self_->mpBuddyApi);
     func_003F1548(self_->mpBuddyApi, buf);
     func_003F1578(self_->mpBuddyApi, str_is_playing_SSX_3, str_en);
     const char* name = (const char*)self_->mResource;
-    func_003F15C8(self_->mpBuddyApi, name, func_002628C0(self_, a1), 0x7D0);
+    func_003F15C8(self_->mpBuddyApi, name, func_002628C0(self_, a1), 2000);
 }
 #endif
 
@@ -6692,7 +6692,7 @@ extern "C" void func_00262AF0(BuddyMan* self, char* name, int a2, int a3, int a4
                     break;
                 }
             }
-            int type = 0x108;
+            int type = 264;
             func_002620D8(self, name, 2, &err, 0);
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -6726,7 +6726,7 @@ extern "C" void func_00262AF0(BuddyMan* self, char* name, int a2, int a3, int a4
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     *(void***)((char*)m + 0x4) = D_004812B0;
-    m[0] = 0xEC;
+    m[0] = 236;
     post_262AF0((char*)lobbyMan, m);
 }
 #endif
@@ -7244,7 +7244,7 @@ extern "C" void func_002636F0(int* out, int val)
         if (val != 0) {
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(0xC, str_NetErrorEvent, 0x20000000, 0);
-            m[0] = 0x116;
+            m[0] = 278;
             *(void***)((char*)m + 0x4) = D_00481250;
             m[2] = val;
             void* mp = m;
@@ -7322,7 +7322,7 @@ extern "C" void func_00263828(int* self)
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             *(void***)((char*)m + 0x4) = D_004812B0;
-            m[0] = 0x105;
+            m[0] = 261;
             post_3828((char*)lobbyMan, m);
         } else if (isState_3828(6)) {
             func_002636F0(self, cCommSystem_mCommSystem->mNetConnError);
@@ -7422,7 +7422,7 @@ extern "C" void func_002639E0(int* self, unsigned int ip, int chan, int a3, int 
     sIf_002639E0* r = (sIf_002639E0*)cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.bIsNetworkGame = one;
     cBENetworkInterface_networkOpt.fLatency = 0.01666666753590107f;
-    cBENetworkInterface_networkOpt.iPort = 0xE4A;
+    cBENetworkInterface_networkOpt.iPort = 3658;
     cBENetworkInterface_networkOpt.bIsHost = chan;
     r->vt[1].fn((char*)r + r->vt[1].delta);
     r->vt[1].fn((char*)r + r->vt[1].delta);
@@ -7507,13 +7507,13 @@ extern "C" void func_00263BA8(void* p, int arg)
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         *(void***)((char*)m + 0x4) = D_004812B0;
-        m[0] = 0x10C;
+        m[0] = 268;
         post_3BA8((char*)lobbyMan, m);
     } else if (arg == 0) {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         *(void***)((char*)m + 0x4) = D_004812B0;
-        m[0] = 0x112;
+        m[0] = 274;
         post_3BA8((char*)lobbyMan, m);
     }
 }
@@ -7603,12 +7603,12 @@ extern "C" void func_00263CF0(int* self)
     case 2:
         if (func_00255E40(cCommSystem_mCommSystem, self[1]))
         {
-            if (!tsIsState_263CF0(0xB))
+            if (!tsIsState_263CF0(11))
             {
                 LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
                 int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
                 *(void***)((char*)m + 0x4) = D_004812B0;
-                m[0] = 0x113;
+                m[0] = 275;
                 post_3BA8((char*)lobbyMan, m);
             }
             func_00263BA8(self, 2);
@@ -7618,15 +7618,15 @@ extern "C" void func_00263CF0(int* self)
             func_002642B8(D_004A33CC);
             int go = 0;
             int st = *(int*)D_004A33CC;
-            if (st == 0xD)
+            if (st == 13)
                 go = 1;
-            else if (st == 0xB)
+            else if (st == 11)
                 func_00263BA8(self, 2);
             if (go == 0)
                 return;
             func_00264098();
             func_0025B800(LobbyMan_mLobbyMan);
-            cRealFE_mStartState = 0x34;
+            cRealFE_mStartState = 52;
             func_00262768((BuddyMan*)Mgr_263CF0(), 1, 9, ((int)LobbyMan_mLobbyMan->mOpponent), 0, 0);
             void* bi7 = cBE_getInterface_Fv(SSXApp->BE, 7);
             char* bi1 = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
@@ -7655,7 +7655,7 @@ extern "C" void* func_002640C0(void* self, int a1, int a2, int a3);
 
 extern "C" void func_00264030(int a1, int a2, int a3)
 {
-    D_004A33CC = func_002640C0(cMemMan_alloc(0x12C, str_cSetupMan, 0x20000000, 0), a1, a2, a3);
+    D_004A33CC = func_002640C0(cMemMan_alloc(300, str_cSetupMan, 0x20000000, 0), a1, a2, a3);
 }
 #endif
 
@@ -7877,18 +7877,18 @@ extern "C" void func_002642B8(void* vself)
                 msg.type = 0xF;
                 msg.a = 0;
                 msg.b = 0;
-                func_00264BE8(self, &msg, 0x14);
+                func_00264BE8(self, &msg, 20);
             }
         } else {
             self->state = 7;
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
             *(void***)((char*)m + 4) = D_004812B0;
-            m[0] = 0xF6;
+            m[0] = 246;
             post_42B8((char*)lobbyMan, m);
         }
     }
-    if (func_002649B0_3(self, &msg, 0x14) == 0)
+    if (func_002649B0_3(self, &msg, 20) == 0)
         return;
     if (msg.type == 0xF) {
         if (self->host == 0) {
@@ -7897,9 +7897,9 @@ extern "C" void func_002642B8(void* vself)
             r.type = 0xF;
             r.a = 0;
             r.b = 0;
-            func_00264BE8(self, &r, 0x14);
+            func_00264BE8(self, &r, 20);
         }
-        self->state = 0xD;
+        self->state = 13;
         return;
     }
     if (msg.type == 0x10) {
@@ -7916,8 +7916,8 @@ extern "C" void func_002642B8(void* vself)
             case 3: func_00265290(self, msg.a); break;
             case 5: func_00265398((int*)self); break;
             case 0xF8:
-            case 0xFA: {
-                self->state = 0xB;
+            case 250: {
+                self->state = 11;
                 if (func_00263128((BuddyMan*)((char*)Mgr_42B8()), LobbyMan_mLobbyMan->mOpponent) != 0)
                     func_00263018((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
                 func_0025F740(LobbyMan_mLobbyMan, msg.type);
@@ -7928,11 +7928,11 @@ extern "C" void func_002642B8(void* vself)
             switch (msg.type) {
             case 7: func_00269478(self, msg.a); break;
             case 9: func_00269538(self, msg.a, msg.b); break;
-            case 0xB: func_00269608(self); break;
-            case 0xD: func_002696F8(self); break;
+            case 11: func_00269608(self); break;
+            case 13: func_002696F8(self); break;
             case 0xF8:
-            case 0xFA: {
-                self->state = 0xB;
+            case 250: {
+                self->state = 11;
                 if (func_00263128((BuddyMan*)((char*)Mgr_42B8()), LobbyMan_mLobbyMan->mOpponent) != 0)
                     func_00263018((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
                 func_0025F740(LobbyMan_mLobbyMan, msg.type);
@@ -7950,8 +7950,8 @@ extern "C" void func_002642B8(void* vself)
             case 2: func_00269300(self, msg.a, msg.b); break;
             case 4: func_002693C0(self, msg.b); break;
             case 0xF8:
-            case 0xFA: {
-                self->state = 0xB;
+            case 250: {
+                self->state = 11;
                 if (func_00263128((BuddyMan*)((char*)Mgr_42B8()), LobbyMan_mLobbyMan->mOpponent) != 0)
                     func_00263018((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
                 func_0025F740(LobbyMan_mLobbyMan, msg.type);
@@ -7964,13 +7964,13 @@ extern "C" void func_002642B8(void* vself)
             case 7: func_00269890(self, msg.a); break;
             case 8: func_00269948(self, msg.a, msg.b); break;
             case 9: func_00269A18(self, msg.a, msg.b); break;
-            case 0xA: func_00269AE0(self, msg.a); break;
-            case 0xB: func_00269B90(self, msg.a); break;
+            case 10: func_00269AE0(self, msg.a); break;
+            case 11: func_00269B90(self, msg.a); break;
             case 0xC: func_00269C40(self, msg.a); break;
-            case 0xD: func_00269CF0(self, msg.a); break;
+            case 13: func_00269CF0(self, msg.a); break;
             case 0xF8:
-            case 0xFA: {
-                self->state = 0xB;
+            case 250: {
+                self->state = 11;
                 if (func_00263128((BuddyMan*)((char*)Mgr_42B8()), LobbyMan_mLobbyMan->mOpponent) != 0)
                     func_00263018((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
                 func_0025F740(LobbyMan_mLobbyMan, msg.type);
@@ -8377,7 +8377,7 @@ extern "C" void func_00265018(void* self, int rider)
                 *(int*)self = 5;
         }
         func_00264CF0(self, rider);
-        int type = 0xF4;
+        int type = 244;
         func_00264E50(self, 2, rider, *(int*)self);
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -8458,7 +8458,7 @@ extern "C" void func_00265190(void* self, int rider, sName7_00264D80* name)
         }
     }
     func_00264D80(self, rider, name);
-    int type = 0xF3;
+    int type = 243;
     func_00264E50(self, 1, rider, *(int*)self);
     {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
@@ -8515,7 +8515,7 @@ extern "C" void func_00265290(void* self, int rider)
         else if (st == 4)
             *(int*)self = 5;
     }
-    int type = 0xF5;
+    int type = 245;
     func_00264D80(self, rider, 0);
     func_00264E50(self, 3, rider, *(int*)self);
     {
@@ -8576,7 +8576,7 @@ extern "C" void func_00265398(int* self)
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     sMsg_00265398* m = (sMsg_00265398*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     m->vt = D_004812B0;
-    m->kind = 0xF7;
+    m->kind = 247;
     void* mp = m;
     sMsgList_00265398_insert((*(sMsgListNode_00265398**)((char*)lobbyMan + 0xF0)), mp);
 }
@@ -8650,7 +8650,7 @@ extern "C" void func_00265458(void* self, int id)
         msg.id = id;
         func_00264BE8(self, &msg, sizeof(msg));
         sNetMsg5458* m = (sNetMsg5458*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
-        m->type = 0xFB;
+        m->type = 251;
         m->vt = D_00481150;
         m->v0 = id;
         m->flag = 0;
@@ -8727,7 +8727,7 @@ extern "C" void func_00265568(void* self, int a, int b)
         msg.a = a;
         msg.b = b;
         func_00264BE8(self, &msg, sizeof(msg));
-        sNetMsg5568* m = (sNetMsg5568*)cMemMan_alloc(0x14, str_cSetupMan_Update, 0x20000000, 0);
+        sNetMsg5568* m = (sNetMsg5568*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
         m->type = 0xFC;
         m->vt = D_00481130;
         m->v0 = a;
@@ -8755,9 +8755,9 @@ struct sMsg_5688 {
 extern "C" void func_00265688(int* self)
 {
     sMsg_5688 statusMsg;
-    int code = 0xB;
-    if (self[0x124 / 4] != 0) {
-        code = 0xA;
+    int code = 11;
+    if (self[292 / 4] != 0) {
+        code = 10;
         int st = self[0];
         if (st >= 5) {
             int nst;
@@ -8768,14 +8768,14 @@ extern "C" void func_00265688(int* self)
             else
                 goto send;
             self[0] = nst;
-            code = 0xA;
+            code = 10;
         }
     }
 send:
     statusMsg.code = code;
     statusMsg.state = self[0];
     statusMsg.arg = 0xFFFFFFFF;
-    func_00264BE8_5688(self, &statusMsg, 0x14);
+    func_00264BE8_5688(self, &statusMsg, 20);
 }
 #endif
 
@@ -8826,9 +8826,9 @@ extern "C" void func_00265768(int* self, int ev)
 {
     if (self[0] != 10) {
         int code = ev;
-        if (ev == 0xF9) {
+        if (ev == 249) {
             code = 0xF8;
-            postMsg((char*)LobbyMan_mLobbyMan, 0x10C);
+            postMsg((char*)LobbyMan_mLobbyMan, 268);
         }
         sTagMsg5768 msg;
         msg.type = code;
@@ -9102,9 +9102,9 @@ extern "C" void func_00265A68(int* state)
     case 20:
         if (!((cDsObj265A68*)D_004A33D8)->v11()) {
             if (D_004A3940 != 0) {
-                *state = 0x16;
+                *state = 22;
             } else {
-                *state = 0x15;
+                *state = 21;
             }
         }
         break;
@@ -9403,7 +9403,7 @@ extern "C" void func_00265D98(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
     D_004A33E0 = 0;
-    MEM_fill(D_00536760, 0, 0x24);
+    MEM_fill(D_00536760, 0, 36);
     func_003F8000(D_00536760);
     *(int*)self = 3;
 }
@@ -9483,7 +9483,7 @@ extern "C" void func_00265E80(void* self)
     *(int*)((char*)self + 0x4) = 0;
     D_004A33E0 = 0;
     func_003F7F48(D_00442A60, D_00536760);
-    *(int*)self = 0xB;
+    *(int*)self = 11;
 }
 #endif
 
@@ -9511,7 +9511,7 @@ extern "C" void func_00265F00(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
     D_004A33E0 = 0;
-    *(int*)self = 0x13;
+    *(int*)self = 19;
 }
 #endif
 
@@ -9524,7 +9524,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 
 extern "C" void func_00265F18(const char* name)
 {
-    MEM_fill(D_00536760, 0, 0x11);
+    MEM_fill(D_00536760, 0, 17);
     strcpy(D_00536760, name);
 }
 #endif
@@ -9538,7 +9538,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 
 extern "C" void func_00265F68(const char* name)
 {
-    MEM_fill(D_00536771, 0, 0x11);
+    MEM_fill(D_00536771, 0, 17);
     strcpy(D_00536771, name);
 }
 #endif
@@ -9602,7 +9602,7 @@ extern "C" void func_00266038(int code)
 {
     sDsErr266038 err;
     func_003FA1D0(code, &err);
-    D_004A33D4 = 0xA;
+    D_004A33D4 = 10;
 }
 #endif
 
@@ -9712,7 +9712,7 @@ extern "C" void func_00266170(const char* name, int a1, int code)
     func_003FA1D0(code, &err);
     strcpy(buf, name);
     func_002C6C50(D_004A33D8, buf, a1);
-    D_004A33D4 = 0xB;
+    D_004A33D4 = 11;
 }
 #endif
 
@@ -9763,7 +9763,7 @@ extern "C" void func_00266240(const char* name, int code)
     func_003FA1D0(code, &err);
     strcpy(buf, name);
     func_002C6CE0(D_004A33D8, buf);
-    D_004A33D4 = 0xD;
+    D_004A33D4 = 13;
 }
 #endif
 
@@ -9972,16 +9972,16 @@ extern "C" int func_00266578(int err)
         break;
     case 9:
         switch (err) {
-        case -2: return 0x11;
+        case -2: return 17;
         }
         break;
     case 4:
         switch (err) {
         case -2: return 9;
-        case -3: return 0xD;
+        case -3: return 13;
         case -4: return 4;
-        case -5: return 0xD;
-        case -7: return 0xD;
+        case -5: return 13;
+        case -7: return 13;
         }
         break;
     case 8:
@@ -9989,14 +9989,14 @@ extern "C" int func_00266578(int err)
         case -2: return 9;
         case -4: return 4;
         }
-        return 0x11;
+        return 17;
     case 5:
         switch (err) {
         case -2: return 9;
         case -3: return 0xE;
         case -4: return 4;
-        case -5: return 0xD;
-        case -8: return 0xD;
+        case -5: return 13;
+        case -8: return 13;
         }
         break;
     case 7:
@@ -10009,7 +10009,7 @@ extern "C" int func_00266578(int err)
         switch (err) {
         case -2: return 9;
         case -4: return 4;
-        case -5: return 0xD;
+        case -5: return 13;
         }
         break;
     case 14:
@@ -10017,8 +10017,8 @@ extern "C" int func_00266578(int err)
         case -2: return 9;
         case -3: return 0xE;
         case -4: return 4;
-        case -5: return 0xD;
-        case -8: return 0xD;
+        case -5: return 13;
+        case -8: return 13;
         }
         break;
     case 11:
@@ -10082,7 +10082,7 @@ extern "C" void* func_002667E8(void* self);
 
 extern "C" void func_00266788(void)
 {
-    D_004A33F0 = func_002667E8(cMemMan_alloc(0x464, str_cUsbKeyboard, 0x20000000, 0));
+    D_004A33F0 = func_002667E8(cMemMan_alloc(1124, str_cUsbKeyboard, 0x20000000, 0));
 }
 #endif
 
@@ -10113,7 +10113,7 @@ extern "C" void* func_002667E8(void* self)
     if (func_003F61D0(0, 0, D_005371D0, (void*)func_002668A8, 0) >= 0) {
         *(int*)((char*)self + 0x460) = 1;
     }
-    MEM_fill(self, 0, 0x460);
+    MEM_fill(self, 0, 1120);
     return self;
 }
 #endif
@@ -10369,7 +10369,7 @@ extern "C" void func_00266D58(void* self, void* a1)
         func_003F6AB8(a1, 6000, 6000);
         int n = D_004A33F8;
         *(int*)self = 1;
-        func_003F6C10(n, 0x55);
+        func_003F6C10(n, 85);
         if (D_004A33F8 < 10) {
             func_00266E88(self);
         } else {
@@ -11107,7 +11107,7 @@ extern "C" void* func_00267EC8(void* self)
 {
     int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     int v = *(int*)((char*)self + 0x8);
-    p[0] = 0x102;
+    p[0] = 258;
     *(void***)((char*)p + 0x4) = D_00481290;
     p[2] = v;
     return p;
@@ -11141,7 +11141,7 @@ extern "C" void* func_00267F58(void* self)
 {
     int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     int v = *(int*)((char*)self + 0x8);
-    p[0] = 0x102;
+    p[0] = 258;
     *(void***)((char*)p + 0x4) = D_00481290;
     p[2] = v;
     return p;
@@ -11175,7 +11175,7 @@ extern "C" void* func_00267FE8(void* self)
 {
     int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     int v = *(int*)((char*)self + 0x8);
-    p[0] = 0x116;
+    p[0] = 278;
     *(void***)((char*)p + 0x4) = D_00481250;
     p[2] = v;
     return p;
@@ -11225,7 +11225,7 @@ extern "C" void* func_002680A8(char* self)
     cBXString_cBXString1(&a, self + 0x8);
     cBXString_cBXString1(&b, self + 0xC);
     *(void***)(p + 0x4) = D_00481230;
-    *(int*)p = 0xDE;
+    *(int*)p = 222;
     cBXString_cBXString1(p + 0x8, &a);
     cBXString_cBXString1(p + 0xC, &b);
     cBXString__cBXString(&a, 2);
@@ -11264,7 +11264,7 @@ extern "C" void* func_002681B0(void* self)
     int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     const char* s = *(const char**)((char*)self + 0x8);
     *(void***)((char*)p + 0x4) = D_00481210;
-    p[0] = 0xE2;
+    p[0] = 226;
     cBXString_cBXString2((char*)p + 0x8, s);
     return p;
 }
@@ -11297,7 +11297,7 @@ extern "C" void* func_00268240(void* self)
 {
     int* p = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
     int b = *(int*)((char*)self + 0xC);
-    p[0] = 0x102;
+    p[0] = 258;
     p[2] = 0x746F6F79;
     *(void***)((char*)p + 0x4) = D_004811F0;
     p[3] = b;
@@ -11352,7 +11352,7 @@ static inline void Init268308(sLockMsg268308* m, const char* a, const char* b)
 // Builds a "lock" message carrying the two name strings of this request.
 extern "C" void* func_00268308(char* self)
 {
-    sLockMsg268308* lockMsg = (sLockMsg268308*)operator new(0x14, str_NetEvent, 0x20000000, 0);
+    sLockMsg268308* lockMsg = (sLockMsg268308*)operator new(20, str_NetEvent, 0x20000000, 0);
     Init268308(lockMsg, *(const char**)(self + 0xC), *(const char**)(self + 0x10));
     return lockMsg;
 }
@@ -11386,7 +11386,7 @@ extern "C" void* func_002683F0(void* self)
     const char* s = *(const char**)((char*)self + 0xC);
     p[2] = 0x646F776E;
     *(void***)((char*)p + 0x4) = D_004811B0;
-    p[0] = 0x102;
+    p[0] = 258;
     cBXString_cBXString2((char*)p + 0xC, s);
     return p;
 }
@@ -11446,7 +11446,7 @@ static inline void Init2684C0(sMsg2684C0* m, const char* a, const char* b, int c
 // Clones a 0xE3 message (strings, ids and trailing data block).
 extern "C" void* func_002684C0(sMsg2684C0* src)
 {
-    sMsg2684C0* m = (sMsg2684C0*)operator new(0x2C, str_NetEvent, 0x20000000, 0);
+    sMsg2684C0* m = (sMsg2684C0*)operator new(44, str_NetEvent, 0x20000000, 0);
     Init2684C0(m, *(const char**)src->a, *(const char**)src->b, src->f10, src->f14);
     m->blk = src->blk;
     return m;
@@ -11481,7 +11481,7 @@ extern "C" void* func_002685E0(void* self)
     int b = *(int*)((char*)self + 0xC);
     const char* s = *(const char**)((char*)self + 0x8);
     *(void***)((char*)p + 0x4) = D_00481170;
-    p[0] = 0xE5;
+    p[0] = 229;
     cBXString_cBXString2((char*)p + 0x8, s);
     p[3] = b;
     return p;
@@ -11516,7 +11516,7 @@ extern "C" void* func_00268688(void* self)
     int* p = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
     int a = *(int*)((char*)self + 0x8);
     int b = *(int*)((char*)self + 0xC);
-    p[0] = 0xFB;
+    p[0] = 251;
     *(void***)((char*)p + 0x4) = D_00481150;
     p[2] = a;
     p[3] = b;
@@ -11547,7 +11547,7 @@ extern void* D_00481130[];
 
 extern "C" void* func_00268720(void* self)
 {
-    int* p = (int*)cMemMan_alloc(0x14, str_NetEvent, 0x20000000, 0);
+    int* p = (int*)cMemMan_alloc(20, str_NetEvent, 0x20000000, 0);
     int a = *(int*)((char*)self + 0x8);
     int b = *(int*)((char*)self + 0xC);
     int c = *(int*)((char*)self + 0x10);
@@ -11591,13 +11591,13 @@ struct sDsBlob14K2b {
 // Clone of a message of type 0x10D (three names, two ints, a 20-byte blob).
 extern "C" void* func_002687C0(char* self)
 {
-    char* p = (char*)cMemMan_alloc(0x164, str_NetEvent, 0x20000000, 0);
+    char* p = (char*)cMemMan_alloc(356, str_NetEvent, 0x20000000, 0);
     const char* b = self + 0x28;
     int x = *(int*)(self + 0x148);
     int y = *(int*)(self + 0x14C);
     const char* c;
     *(void***)(p + 0x4) = D_00481110;
-    *(int*)p = 0x10D;
+    *(int*)p = 269;
     c = self + 0x48;
     *(int*)(p + 0x148) = x;
     *(int*)(p + 0x14C) = y;

@@ -124,40 +124,40 @@ extern "C" void cFEStateCredits_onGainFocus(void* self, void* pPrevState)
         }
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS006a));
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS006b));
-        for (i = 7; i < 0x2F; i++)
+        for (i = 7; i < 47; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
             cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
-        for (i = 0x31; i < 0x4B; i++)
+        for (i = 49; i < 75; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
             cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS074a));
-        for (i = 0x4B; i < 0x51; i++)
+        for (i = 75; i < 81; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
             cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS087));
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS088));
-        for (i = 0x5A; i < 0x92; i++)
+        for (i = 90; i < 146; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
             cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS147));
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS148));
-        sprintf(buf, str_kT_CREDITSpct_03d, 0x96);
+        sprintf(buf, str_kT_CREDITSpct_03d, 150);
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
-        sprintf(buf, str_kT_CREDITSpct_03d, 0x97);
+        sprintf(buf, str_kT_CREDITSpct_03d, 151);
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
-        sprintf(buf, str_kT_CREDITSpct_03d, 0x98);
+        sprintf(buf, str_kT_CREDITSpct_03d, 152);
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
-        sprintf(buf, str_kT_CREDITSpct_03d, 0x99);
+        sprintf(buf, str_kT_CREDITSpct_03d, 153);
         cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
-        for (i = 0x9A; i < 0xA8; i++)
+        for (i = 154; i < 168; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
             cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
@@ -412,7 +412,7 @@ extern "C" int cFEStateCredits_onWidgetMenu(void* self, int pMenu, unsigned int 
     case 9:
         return 0x100;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -437,7 +437,7 @@ extern "C" void cFEStateCredits_onWidgetEvent(void* self, void* item, int msg)
     if (item != 0 && msg == 6) {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry001864B0* vt = *(sVEntry001864B0**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, 0x24);
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, 36);
         if (nextState != 0) {
             cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
@@ -524,7 +524,7 @@ extern void* cFEStateEventSelect_vtbl[];
 extern "C" void* func_00186610(void* self)
 {
     func_0039E2A0(self);
-    *(int*)((char*)self + 0xC) = 0x13;
+    *(int*)((char*)self + 0xC) = 19;
     *(void***)((char*)self + 0x8) = cFEStateEventSelect_vtbl;
     func_002006B8((char*)self + 0x48);
     return self;

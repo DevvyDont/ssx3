@@ -157,7 +157,7 @@ INCLUDE_ASM("fe/festatecharsetup", func_00182C68);
 #ifdef SKIP_ASM
 extern "C" int func_00182C68(void* self, int menu, int event)
 {
-    return event != 9 ? 0x101 : 0x100;
+    return event != 9 ? 257 : 0x100;
 }
 #endif
 
@@ -220,7 +220,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(void* self, void* item, unsigned
         break;
     }
     case 7: {
-        sStateK182C80* st = (sStateK182C80*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0),
+        sStateK182C80* st = (sStateK182C80*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0),
                                                           *(void**)((char*)self + 0x10), 1);
         st->mode = 1;
         cUIStateStack_pushSpecial(*(char**)((char*)self + 0x10) + 0x18, st, 0, 0);
@@ -374,7 +374,7 @@ extern "C" void func_00182EC0(void* self_)
             void* anim = *(void**)(rider + 0xC);
             if (anim != 0) {
                 cRiderAnimBase_reset(anim);
-                cRiderAnimBase_play(anim, 0x1B3, 0, -1.0f);
+                cRiderAnimBase_play(anim, 435, 0, -1.0f);
             }
             *(int*)(rider + 0xCCC) = 0;
             *(int*)(self + 0x48) = 0;
@@ -417,7 +417,7 @@ extern void* cFEStateRiderDetail_vtbl[];
 extern "C" void* func_00183238(void* self, void* engine, signed char idx)
 {
     func_001828C0(self, engine, idx);
-    *(int*)((char*)self + 0xC) = 0xD;
+    *(int*)((char*)self + 0xC) = 13;
     *(void***)((char*)self + 0x8) = cFEStateRiderDetail_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(unsigned char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);

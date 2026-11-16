@@ -231,7 +231,7 @@ extern "C" int func_0026B648(void *list, int index) {
     if ((temp_2 <= 0) || (index >= temp_2) || (index < 0)) {
         return 0;
     }
-    return (*(int *)((char*)(list) + (4))) + (index * 0x28);
+    return (*(int *)((char*)(list) + (4))) + (index * 40);
 }
 #endif
 

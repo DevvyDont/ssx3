@@ -88,10 +88,10 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cOVState_ENTERLODGE_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
-    int result = 0x101;
+    int result = 257;
     if (key < 10) {
         if (key < 8) {
-            result = 0x101;
+            result = 257;
         } else {
             return 0x100;
         }
@@ -143,7 +143,7 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(sSelf001F72E0* self, void* wid
             case 0:
                 {
                     void* game = SSXApp->Game;
-                    cRealFE_mStartState = 0x27;
+                    cRealFE_mStartState = 39;
                     cGame_exit(game, 0);
                 }
                 break;
@@ -214,7 +214,7 @@ extern char str_ObjText[];
 extern "C" int cOVState_BIGCHALLENGE_START_onGainTransition(void* self, int gained)
 {
     if (gained) {
-        void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xA);
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
         void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_chalname));
         if (obj) {
             cUIText_setUnicodeString(obj, cBEMissionInterface_getMissionName(iface, *(int*)((char*)self + 0x9C)));
@@ -283,7 +283,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetMenu);
  */
 extern "C" int cOVState_BIGCHALLENGE_START_onWidgetMenu(void* self, int pMenu, int Event)
 {
-    return Event == 6 ? 0x101 : 0;
+    return Event == 6 ? 257 : 0;
 }
 #endif
 
@@ -419,7 +419,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", func_001F77F0);
 #ifdef SKIP_ASM
 extern "C" int func_001F77F0(void* self, int menu, int event)
 {
-    return event == 6 ? 0x101 : 0;
+    return event == 6 ? 257 : 0;
 }
 #endif
 
@@ -450,7 +450,7 @@ extern "C" void func_001F7800(void* self, void* item, int msg)
             return;
         }
         if (v == 2) {
-            cOVStateManager_triggerOverlay(0x1D);
+            cOVStateManager_triggerOverlay(29);
             return;
         }
         break;
@@ -551,7 +551,7 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
 {
     char buf[0x40];
     char line[0x40];
-    unsigned short wtext[0x68];
+    unsigned short wtext[104];
     unsigned short wfmt[0x10];
     int full;
     *(int*)(self + 0xA0) = 0;
@@ -757,7 +757,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetMenu);
  */
 extern "C" int cOVState_TOPTIMES_onWidgetMenu(void* self, int pMenu, int Event)
 {
-    return Event == 6 ? 0x101 : 0;
+    return Event == 6 ? 257 : 0;
 }
 #endif
 
@@ -808,7 +808,7 @@ extern "C" void func_001F8118(void* self, void* a1)
             break;
         case 1:
             *(int*)((char*)self + 0xA0) = choice;
-            cOVStateManager_triggerOverlay(0x13);
+            cOVStateManager_triggerOverlay(19);
             break;
         }
     }

@@ -2742,7 +2742,7 @@ extern "C" void cSSXAudio_MenuSound(void* self, int cue)
         id = 0x10;
         break;
     case 8:
-        id = 0x11;
+        id = 17;
         break;
     case 0: case 9:
         id = 3;
@@ -2757,10 +2757,10 @@ extern "C" void cSSXAudio_MenuSound(void* self, int cue)
         id = 1;
         break;
     case 4: case 13:
-        id = 0xD;
+        id = 13;
         break;
     case 14:
-        id = 0x12;
+        id = 18;
         break;
     case 15:
         id = 7;
@@ -3493,7 +3493,7 @@ extern "C" void func_00296868(cSSXAudio* vself, sSndOwner* t)
     }
     func_00290B58_sCurve curve = D_00482DA0;
     int vol = (int)func_00290B58(&curve, *(float*)(t->rider + 0x770));
-    int b = 0x33;
+    int b = 51;
     if (vol > 0x7F) {
         vol = 0x7F;
     }
@@ -3629,7 +3629,7 @@ extern "C" void func_00296E80(cSSXAudio* vself, sSndOwner* t)
     }
     func_00290B58_sCurve curve = D_00482DA0;
     int vol = (int)func_00290B58(&curve, *(float*)(t->rider + 0x770));
-    int b = 0x34;
+    int b = 52;
     if (vol > 0x7F) {
         vol = 0x7F;
     }
@@ -3844,10 +3844,10 @@ extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* self, void* evt, int h, int 
 extern "C" void cSSXAudio_WorldSound(cSSXAudio* self, char* evt, int n)
 {
     if (n == 0) return;
-    if (n == 0x66 && *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0) return;
+    if (n == 102 && *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0) return;
     if (*(int*)((char*)self + 0x62A8) >= 0) return;
     if (cSSXAudio_PlayHistoryExists(self, (int)evt, 0) != 0) return;
-    int pri = 0x50;
+    int pri = 80;
     sSndVec4 pos = *(sSndVec4*)(evt + 0x40);
     int type = 2;
     int patch;
@@ -3966,7 +3966,7 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int 
 {
     if (type == 0)
         return;
-    if (type == 0x66) {
+    if (type == 102) {
         if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0)
             return;
     }
@@ -4032,12 +4032,12 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int 
         curPatch = type - 200;
     }
     float radius = 300.0f;
-    int pri = 0x50;
+    int pri = 80;
     *(int*)((char*)self + i * 0x30 + 0x5A20) = type;
-    if (type == 0xC9) {
+    if (type == 201) {
         if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)) == 8) {
             radius = 400.0f;
-            pri = 0x32;
+            pri = 50;
         }
     }
     sndPushVoice(((sSSXAudioView*)self), curBank, curPatch);
@@ -4265,7 +4265,7 @@ extern "C" void cSSXAudio_Punch(cSSXAudio* self, void* obj, void* obj2)
     if (cSSXAudio_PlayHistoryExists(self, 5, 0) != 0) {
         return;
     }
-    int handle = snd8138AddVoice(self, obj, 0, 0x5A, 5);
+    int handle = snd8138AddVoice(self, obj, 0, 90, 5);
     cSSXAudio_PlayHistoryAdd(self, (void*)5, handle, *(volatile int*)(*(char**)self->MusicSys.mpVStreamSys + 0x260) + 50, 0, 0);
 }
 #endif
@@ -4439,8 +4439,8 @@ void func_00298488_8488(void* self, sSs8488Rider* a, sSs8488Rider* b)
     if (cSSXAudio_PlayHistoryExists((cSSXAudio*)self, 7, 0) != 0) return;
     sVec4_8488 sum = vu0Add_8488(*a->v02(), *b->v02());
     int c = (int)func_00290C10(1, (float)(int)vu0Length_8488(sum));
-    int h = snd8488Add(self, a, 0, 0x36, c);
-    cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)7, h, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 0x32, 0, 0);
+    int h = snd8488Add(self, a, 0, 54, c);
+    cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)7, h, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
 }
 #endif
 
@@ -4552,7 +4552,7 @@ extern "C" void cSSXAudio_WallCollision(cSSXAudio* self, void* obj)
     if (cSSXAudio_PlayHistoryExists(self, 6, 0) != 0) {
         return;
     }
-    int handle = snd89A8AddVoice(self, obj, 0, 0x36, 5);
+    int handle = snd89A8AddVoice(self, obj, 0, 54, 5);
     cSSXAudio_PlayHistoryAdd(self, (void*)6, handle, *(volatile int*)(*(char**)self->MusicSys.mpVStreamSys + 0x260) + 50, 0, 0);
 }
 #endif
@@ -4580,7 +4580,7 @@ extern "C" void cSSXAudio_KnockdownSFX(cSSXAudio* self, void* obj)
         char* bankMon = *(char**)self->MusicSys.mpVStreamSys + 0x1D8;
         sSndKey8* key = D_004A3678;
         int volumePtr = (int)func_00287968(self, 9, 0);
-        func_002ADCA0(bankMon, 0xFA, key->v, volumePtr, 0, 0x72, 0x7F, 0);
+        func_002ADCA0(bankMon, 250, key->v, volumePtr, 0, 114, 0x7F, 0);
     }
 }
 #endif
@@ -4726,9 +4726,9 @@ extern "C" void func_00298D90(cSSXAudio* vself, void* obj, int flag)
     if (!ok) return;
     const sSndKey8_8D90* key = D_004A36A8_8D90;
     func_002ADDE0_8D90(&(*self->p118)->sub, key->v);
-    snd8D90Start(self, 0, 0x7A);
+    snd8D90Start(self, 0, 122);
     if (flag != 0) {
-        snd8D90Add(self, 0, 0x4A);
+        snd8D90Add(self, 0, 74);
     }
     *(int*)((char*)self + 0x59E4) = *(int*)((char*)self + 0x59E4) + 1;
 }
@@ -4863,7 +4863,7 @@ extern "C" void cSSXAudio_TurboDeny(cSSXAudio* self, char* obj)
         return;
     }
     func_002ADDE0(&(*(sSnd9368Mgr**)self->MusicSys.mpVStreamSys)->sub, D_004A36A8_9368[0].v);
-    AddVoice299368((self), 0, 0x6C, 9);
+    AddVoice299368((self), 0, 108, 9);
     cBankSys_SFX_End((cBankSys*)(self));
 }
 #endif
@@ -4900,7 +4900,7 @@ extern "C" void func_00299638(void* self, char* obj)
     char* p = **(char***)((char*)self + 0x118) + 0x1D8;
     sSndKey8_9638* key = D_004A3678_key;
     int r = (int)func_00287968(self, 9, 0);
-    func_002ADCA0_key(p, 400, key->v, r, 0, 0x6B, 0x7F, 0);
+    func_002ADCA0_key(p, 400, key->v, r, 0, 107, 0x7F, 0);
     int m = *(int*)(obj + 0x2F4);
     if (m == 10) {
         func_002A3C00((cSSXAudio*)self, obj, 0x10);
@@ -5037,7 +5037,7 @@ extern "C" void cSSXAudio_LoseMaxPowerEvent(cSSXAudio* self, void* obj)
     if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)cAudioInterface_getGame() + 0x28)) != 0) playBeeps = 0;
     if (*(int*)((char*)cAudioInterface_getGame() + 0x214) != 4) playBeeps = 0;
     if (playBeeps) {
-        snd97B8AddVoice(self, 0, 0x69, 9);
+        snd97B8AddVoice(self, 0, 105, 9);
     }
 }
 #endif
@@ -5139,7 +5139,7 @@ extern "C" void cSSXAudio_UberRailDeny(cSSXAudio* self, void* obj)
     }
     bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
     if (ok) {
-        snd9B70AddVoice(self, 0, 0x6C, 9);
+        snd9B70AddVoice(self, 0, 108, 9);
     }
 }
 #endif
@@ -5274,7 +5274,7 @@ extern "C" void cSSXAudio_ChangePosition(cSSXAudio* self, void* obj, void* pPrev
         return;
     }
     if (n == 0 && cSSXAudio_PlayHistoryExists(self, 1, 0) == 0 && cSSXAudio_ReplayMode(self) == 0) {
-        int handle = snd9E28AddVoice(self, 0, 0x6D, 9);
+        int handle = snd9E28AddVoice(self, 0, 109, 9);
         cSSXAudio_PlayHistoryAdd(self, (void*)1, handle, *(volatile int*)(*(char**)self->MusicSys.mpVStreamSys + 0x260) + 200, 0, 0);
     }
     if (n < lim) {
@@ -5385,7 +5385,7 @@ extern "C" void func_0029A220(void* self, void* obj)
 {
     bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
     if (ok && cSSXAudio_ReplayMode(self) == 0) {
-        sndA220AddVoice(self, 0, 0x7B, 5);
+        sndA220AddVoice(self, 0, 123, 5);
     }
     func_00296E20(self, obj);
     func_00297438(self, obj);
@@ -5490,7 +5490,7 @@ extern "C" void cSSXAudio_Tweak(cSSXAudio* self, void* obj)
 {
     bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
     if (ok) {
-        sndA530AddVoice(self, 0, 0x77, 9);
+        sndA530AddVoice(self, 0, 119, 9);
     }
 }
 #endif
@@ -5608,7 +5608,7 @@ extern "C" void cSSXAudio_PointsEvent(cSSXAudio* self, void* obj, int n)
             if (!busy) {
                 cBankMonitor_BANKMONITOR_StopHandle(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, self->mPointsEventHandle, 1, 0.0f);
             }
-            self->mPointsEventHandle = sndA7D8AddVoice(self, 0, 0x4D, 9);
+            self->mPointsEventHandle = sndA7D8AddVoice(self, 0, 77, 9);
         }
         self->mPointsLastValue = curPoints;
     }
@@ -5793,7 +5793,7 @@ extern "C" void func_0029AB40(cSSXAudio* vself)
         if (self->arr1[i] < v && v > 0) {
             void* sub = &(*self->p118)->sub;
             int h = (int)func_00287968(self, 9, 0);
-            func_002ADCA0_AB40(sub, 0x96, D_004A36C0_AB40[0].v, h, 0, 0x65, 0x7F, self->arr2[rider->f870]);
+            func_002ADCA0_AB40(sub, 150, D_004A36C0_AB40[0].v, h, 0, 101, 0x7F, self->arr2[rider->f870]);
             self->arr2[rider->f870] += 0x100;
         }
         self->arr1[i] = v;
@@ -5809,7 +5809,7 @@ extern "C" void func_0029AB40(cSSXAudio* vself)
                     if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)cAudioInterface_getGame() + 0x28)) != 0) c = 0;
                     if (*(int*)((char*)cAudioInterface_getGame() + 0x214) != 4) c = 0;
                     if (c) {
-                        sndAB40Add(self, 0, 0x68, 9);
+                        sndAB40Add(self, 0, 104, 9);
                     }
                 }
             }
@@ -5920,7 +5920,7 @@ extern "C" void cSSXAudio_StartUberSpin(cSSXAudio* self, void* obj)
         if (self->mUberSpinHandle != -1) {
             cBankMonitor_BANKMONITOR_StopHandle(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, self->mUberSpinHandle, 1, 0.0f);
         }
-        self->mUberSpinHandle = sndB0E0AddVoice(self, 0, 0x66, 9);
+        self->mUberSpinHandle = sndB0E0AddVoice(self, 0, 102, 9);
     }
 }
 #endif
@@ -6055,7 +6055,7 @@ extern "C" void cSSXAudio_LandedUberTrick(cSSXAudio* self, void* obj, int iNum, 
     }
     bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
     if (ok) {
-        sndB430AddVoice(self, 0, 0x67, 9);
+        sndB430AddVoice(self, 0, 103, 9);
         int total = iPrevious + iNum;
         if (iPrevious < 4) {
             if (total >= 4) {
@@ -6231,7 +6231,7 @@ extern "C" void cSSXAudio_BindingsOn(cSSXAudio* self, void* obj)
 {
     bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
     if (ok) {
-        sndB968AddVoice(self, obj, 0, 0x50, 5);
+        sndB968AddVoice(self, obj, 0, 80, 5);
     }
 }
 #endif
@@ -6342,7 +6342,7 @@ extern "C" void cSSXAudio_BindingsOff(cSSXAudio* self, void* obj)
 {
     bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
     if (ok) {
-        sndBCF8AddVoice(self, obj, 0, 0x51, 5);
+        sndBCF8AddVoice(self, obj, 0, 81, 5);
     }
 }
 #endif
@@ -6453,7 +6453,7 @@ extern "C" void cSSXAudio_UndoBindings(cSSXAudio* self, void* obj)
 {
     bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
     if (ok) {
-        sndC088AddVoice(self, obj, 0, 0x52, 5);
+        sndC088AddVoice(self, obj, 0, 82, 5);
     }
 }
 #endif
@@ -6562,10 +6562,10 @@ extern "C" void func_0029C420(void* self, int mode)
         return;
     }
     char* mon = (char*)self + 0x118;
-    sndC420AddVoice(self, mon, 0, 0x4E, 5);
+    sndC420AddVoice(self, mon, 0, 78, 5);
     if (mode == 3) {
         int st = func_002B49E0((char*)self + 0x118);
-        if (st == 0xC9 || st == 1 || st == 2 || st == 3) {
+        if (st == 201 || st == 1 || st == 2 || st == 3) {
             if (*(int*)((char*)self + 0x627C) != 0) {
                 func_002B3D48((char*)self + 0x118, 2.0f);
             }
@@ -6573,7 +6573,7 @@ extern "C" void func_0029C420(void* self, int mode)
     }
     if (mode == 1) {
         int st = func_002B49E0((char*)self + 0x118);
-        if (*(int*)((char*)self + 0x530) == 0 || st == 0xC9 || st == 1 || st == 2 || st == 3) {
+        if (*(int*)((char*)self + 0x530) == 0 || st == 201 || st == 1 || st == 2 || st == 3) {
             if (*(int*)((char*)self + 0x627C) != 0) {
                 func_0028D488(self);
                 func_0028CF98(self, 0, 0, -1, 0);
@@ -6707,9 +6707,9 @@ extern "C" void func_0029C7B0(void* vself)
     func_002B3A98_C7B0(base + 0x118);
     func_0028DF08_C7B0(vself);
     *(int*)(base + 0x582C) = *(int*)(*(int*)((char*)cAudioInterface_getGame() + 0xC) + 8);
-    ((sSs7B0Self*)vself)->v01(0, 0x62);
+    ((sSs7B0Self*)vself)->v01(0, 98);
     if (cSSXAudio_ReplayMode(vself) == 0) {
-        snd7B0Add(vself, 0, 0x5E);
+        snd7B0Add(vself, 0, 94);
     }
     if (*(int*)(base + 0x627C) != 0) {
         ((sSs7B0Obj*)(base + 0x118))->v04(0);
@@ -6723,7 +6723,7 @@ extern "C" void func_0029C7B0(void* vself)
             func_002A3170(vself);
         } else {
             int* p = (int*)SSXApp->GameModeMan;
-            if (p[0x98 / 4] != 0) {
+            if (p[152 / 4] != 0) {
                 func_002A3400((cSSXAudio*)vself);
                 func_002B1758(base + 0x5560, 0);
                 if (func_002A4078(vself) != 0 || func_002A40E8(vself) != 0) {
@@ -6747,12 +6747,12 @@ extern "C" void func_0029C7B0(void* vself)
     if (*(int*)(base + 0x627C) == 0) {
         if (cSSXAudio_ReplayMode(vself) == 0) {
             *(int*)(base + 0x627C) = 1;
-            ((sSs7B0Obj*)(base + 0x118))->v04(0x25);
+            ((sSs7B0Obj*)(base + 0x118))->v04(37);
         } else if (*(int*)(base + 0x6298) != 0) {
-            ((sSs7B0Obj*)(base + 0x118))->v04(0x25);
+            ((sSs7B0Obj*)(base + 0x118))->v04(37);
         }
     }
-    cSSXAudio_PlayHistoryUpdateTime((cSSXAudio*)vself, 0, *(volatile int*)(**(char***)(base + 0x118) + 0x260) + 0x32, 0);
+    cSSXAudio_PlayHistoryUpdateTime((cSSXAudio*)vself, 0, *(volatile int*)(**(char***)(base + 0x118) + 0x260) + 50, 0);
     *(int*)(base + 0x5824) = *(int*)SSXApp->GameModeMan;
 }
 #endif
@@ -6801,7 +6801,7 @@ extern "C" void cSSXAudio_UpdateTimedEvent(cSSXAudio* self)
         char* bankMon = *(char**)self->MusicSys.mpVStreamSys + 0x1D8;
         sSndKey8* key = D_004A3678;
         int volumePtr = (int)func_00287968(((char*)self), 9, 0);
-        func_002ADCA0(bankMon, 0x1C2, key->v, volumePtr, 0, 0x4E, 0x7F, 0);
+        func_002ADCA0(bankMon, 450, key->v, volumePtr, 0, 78, 0x7F, 0);
     }
     self->mLastTime = secsLeft;
 }
@@ -6952,15 +6952,15 @@ extern "C" void cSSXAudio_PlayIconSound(cSSXAudio* self, int kind, void* obj, fl
             return;
         }
     }
-    int id = 0x74;
+    int id = 116;
     if (kind == 0) {
         id = 0x70;
     } else if (kind == 1) {
-        id = 0x71;
+        id = 113;
     } else if (kind == 2) {
-        id = 0x75;
+        id = 117;
     } else if (kind == 3) {
-        id = 0x76;
+        id = 118;
     }
     sndCED8AddVoice(self, 0, id, 9);
     if (kind == 2) {
@@ -7004,7 +7004,7 @@ extern "C" void cSSXAudio_UpdateTrackBanks(cSSXAudio* self)
     if (ok) {
         if ((patchRID & 0xFF) != *(unsigned char*)&self->mLastPatchRID) {
             self->mLastPatchRID = (unsigned int)patchRID;
-            if (*(int*)(rider + 0x434) < 0x16) {
+            if (*(int*)(rider + 0x434) < 22) {
                 func_0029D370(self);
             } else {
                 cSSXAudio_StopTone(self, 5.029983997344971f);
@@ -7241,18 +7241,18 @@ extern "C" void func_0029D6E0(char* self, int mission)
         func_002ADDE0_D6E0(**(char***)(self + 0x118) + 0x1D8, D_004A3648[0]);
         func_002ADDE0_D6E0(**(char***)(self + 0x118) + 0x1D8, D_004A3650_D6E0[0]);
         func_002ADDE0_D6E0(**(char***)(self + 0x118) + 0x1D8, D_004A3658[0]);
-        func_0028DEF0_D6E0(self, 0x12);
+        func_0028DEF0_D6E0(self, 18);
         func_0028D488(self);
         func_0028CF98(self, 0, 0, -1, 0);
         return;
     }
     int track = -1;
-    int kind = func_001547A0(cBE_getInterface__Fv(cBE_getBE(), 0xA), mission);
+    int kind = func_001547A0(cBE_getInterface__Fv(cBE_getBE(), 10), mission);
     *(int*)(self + 0x5FD0) = kind;
     switch (kind) {
-    case 1: track = 0x21; break;
-    case 2: track = 0x22; break;
-    case 3: track = 0x26; break;
+    case 1: track = 33; break;
+    case 2: track = 34; break;
+    case 3: track = 38; break;
     case 0:
     case 4: track = -1; break;
     }
@@ -7361,11 +7361,11 @@ extern "C" void func_0029D8E0(void* self)
     if (*(int*)((char*)self + 0x5FD4) != 0) {
         char* musicSys = (char*)self + 0x118;
         sSndVtEntD8E0* entry = &(*(sSndVtEntD8E0**)((char*)self + 0x5558))[4];
-        entry->fn(musicSys + entry->delta, 0x27);
+        entry->fn(musicSys + entry->delta, 39);
         *(int*)((char*)self + 0x5FD0) = 0;
         *(int*)((char*)self + 0x5FD4) = 0;
     }
-    sndD8E0AddVoice(self, 0, 0x6D, 9);
+    sndD8E0AddVoice(self, 0, 109, 9);
     func_002A3C00((cSSXAudio*)self, *(void**)((char*)cAudioInterface_getAI() + 0x28), 1);
 }
 #endif
@@ -7400,7 +7400,7 @@ extern "C" void cSSXAudio_BigChallengeFailed(void* self, int keep)
         cSSXAudio_EndUberSpin((cSSXAudio*)self, 0);
         char* o = (char*)self + 0x118;
         sSndVtEnt* e = &(*(sSndVtEnt**)((char*)self + 0x5558))[4];
-        e->fn(o + e->delta, 0x27);
+        e->fn(o + e->delta, 39);
         *(int*)((char*)self + 0x5FD0) = 0;
         *(int*)((char*)self + 0x5FD4) = 0;
     }
@@ -7499,7 +7499,7 @@ extern "C" void cSSXAudio_HandPlantSound(cSSXAudio* self, void* obj)
 {
     bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
     if (ok) {
-        sndDC48AddVoice(self, 0, 0x61, 9);
+        sndDC48AddVoice(self, 0, 97, 9);
     }
 }
 #endif
@@ -7837,8 +7837,8 @@ extern "C" void cSSXAudio_PlayWipeoutRecoverHit(cSSXAudio* self, void* obj, floa
     if (ok) {
         int idx = *(int*)((char*)obj + 0x870);
         float prev = *(float*)(sndE590Tbl(self) + (idx << 2));
-        unsigned short pitch = (int)((x <? prev) * 5.0f) * 0x50 + 0x1000;
-        sndE590AddVoice(self, 0, 0x5F, 9, pitch);
+        unsigned short pitch = (int)((x <? prev) * 5.0f) * 80 + 0x1000;
+        sndE590AddVoice(self, 0, 95, 9, pitch);
         *(float*)(sndE590Tbl(self) + (idx << 2)) = x;
     }
 }
@@ -8076,7 +8076,7 @@ extern "C" void* func_0029F000(cSSXAudio* self, int instanceIndex, int type, int
         if (type == 2) {
             func_00287F00(self, 0, 0.9999024868011475f, 0.6499993801116943f);
         }
-        if (type == 0xB) {
+        if (type == 11) {
             return (char*)self + 0x5730;
         }
         return func_00287968(self, type, a3);
@@ -8150,7 +8150,7 @@ extern "C" float func_00287920(void* self, int ch);
 
 extern "C" int func_0029F160(void* self)
 {
-    if (func_00287920(self, 0xA) == 0.0f) {
+    if (func_00287920(self, 10) == 0.0f) {
         return 0;
     }
     return 1;
@@ -8517,16 +8517,16 @@ extern "C" void func_0029FCC8(cSSXAudio* self, void* vrider)
     if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
     int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
     if (sel == 1) {
-        if (func_002B1458(snd, 0, 0x2084, (int)rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x2084), 2, r, 3);
+        if (func_002B1458(snd, 0, 8324, (int)rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8324), 2, r, 3);
         }
     } else if (sel == 2) {
-        if (func_002B1458(snd, 0, 0x2083, (int)rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x2083), 2, r, 3);
+        if (func_002B1458(snd, 0, 8323, (int)rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8323), 2, r, 3);
         }
     } else {
-        if (func_002B1458(snd, 0, 0x2091, (int)rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x2091), 2, r, 3);
+        if (func_002B1458(snd, 0, 8337, (int)rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8337), 2, r, 3);
         }
     }
 }
@@ -8587,31 +8587,31 @@ extern "C" void func_0029FF80(cSSXAudio* self, sSsFF80Rider* rider, int alt)
     if (alt != 0) {
         int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
         if (sel == 1) {
-            if (func_002B1458((char*)self + 0x5560, 0, 0x2090, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 0x2090), 1, r);
+            if (func_002B1458((char*)self + 0x5560, 0, 8336, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 8336), 1, r);
             }
         } else if (sel == 2) {
-            if (func_002B1458((char*)self + 0x5560, 0, 0x209B, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 0x209B), 1, r);
+            if (func_002B1458((char*)self + 0x5560, 0, 8347, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 8347), 1, r);
             }
         } else {
-            if (func_002B1458((char*)self + 0x5560, 0, 0x209D, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 0x209D), 1, r);
+            if (func_002B1458((char*)self + 0x5560, 0, 8349, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 8349), 1, r);
             }
         }
     } else {
         int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
         if (sel == 1) {
-            if (func_002B1458((char*)self + 0x5560, 0, 0x2082, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 0x2082), 1, r);
+            if (func_002B1458((char*)self + 0x5560, 0, 8322, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 8322), 1, r);
             }
         } else if (sel == 2) {
-            if (func_002B1458((char*)self + 0x5560, 0, 0x209A, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 0x209A), 1, r);
+            if (func_002B1458((char*)self + 0x5560, 0, 8346, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 8346), 1, r);
             }
         } else {
-            if (func_002B1458((char*)self + 0x5560, 0, 0x209C, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 0x209C), 1, r);
+            if (func_002B1458((char*)self + 0x5560, 0, 8348, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+                D_004A482C(func_003D8008(1, 0, 8348), 1, r);
             }
         }
     }
@@ -8681,16 +8681,16 @@ extern "C" void func_002A02D8(cSSXAudio* self, sSs02D8Rider* rider)
     if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
     int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
     if (sel == 1) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x2088, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x2088), 2, r, mode);
+        if (func_002B1458((char*)self + 0x5560, 0, 8328, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8328), 2, r, mode);
         }
     } else if (sel == 2) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20A0, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x20A0), 2, r, mode);
+        if (func_002B1458((char*)self + 0x5560, 0, 8352, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8352), 2, r, mode);
         }
     } else {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20A1, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x20A1), 2, r, mode);
+        if (func_002B1458((char*)self + 0x5560, 0, 8353, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8353), 2, r, mode);
         }
     }
 }
@@ -8779,7 +8779,7 @@ void func_002A0560_0560(void* self, sSs0560Rider* a, sSs0560Rider* b)
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cRider_getCheatIdentity(a) != 0) return;
     if (cRider_getCheatIdentity(b) != 0) return;
-    if (*(int*)(*(int*)((char*)cAudioInterface_getGame() + 0xC) + 8) - *(int*)((char*)self + 0x582C) < 0x258) return;
+    if (*(int*)(*(int*)((char*)cAudioInterface_getGame() + 0xC) + 8) - *(int*)((char*)self + 0x582C) < 600) return;
     int posA = a->f470 >= 0.0f;
     if (posA) return;
     int posB = b->f470 >= 0.0f;
@@ -8815,20 +8815,20 @@ void func_002A0560_0560(void* self, sSs0560Rider* a, sSs0560Rider* b)
     unsigned sel = func_002A1820_0560(self, a, b);
     if (sel == 2) {
         d = 0.0f;
-        if (func_002B1458_f(snd, 0, 0x2081, (int)a, cRider_getIdentity(a), d, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x2081), 2, rA, mode);
+        if (func_002B1458_f(snd, 0, 8321, (int)a, cRider_getIdentity(a), d, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8321), 2, rA, mode);
         }
-        if (func_002B1458_f(snd, 0, 0x207F, (int)b, cRider_getIdentity(b), d, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x207F), 2, rB, mode);
+        if (func_002B1458_f(snd, 0, 8319, (int)b, cRider_getIdentity(b), d, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8319), 2, rB, mode);
         }
     } else if (sel < 2) {
         d = 0.0f;
-        if (func_002B1458_f(snd, 0, 0x2080, (int)a, cRider_getIdentity(a), d, 0, 0) != 0) {
+        if (func_002B1458_f(snd, 0, 8320, (int)a, cRider_getIdentity(a), d, 0, 0) != 0) {
             s |= 0x1000;
-            D_004A482C_5(func_003D8008(1, 0, 0x2080), 3, rA, mode, s);
+            D_004A482C_5(func_003D8008(1, 0, 8320), 3, rA, mode, s);
         }
-        if (func_002B1458_f(snd, 0, 0x207D, (int)b, cRider_getIdentity(b), d, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x207D), 2, rB, mode);
+        if (func_002B1458_f(snd, 0, 8317, (int)b, cRider_getIdentity(b), d, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8317), 2, rB, mode);
         }
     }
 }
@@ -8911,25 +8911,25 @@ extern "C" void func_002A0A30(cSSXAudio* self, sSs0A30Rider* a, sSs0A30Rider* b,
     if (p7 != 0) return;
     int sel = func_002A1820(self, (sSs1820Rider*)a, (sSs1820Rider*)b);
     if (sel == 2) {
-        if (func_002B1458_f(snd, 0, 0x208F, (int)b, cRider_getIdentity(b), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x208F), 2, rB, 3);
+        if (func_002B1458_f(snd, 0, 8335, (int)b, cRider_getIdentity(b), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8335), 2, rB, 3);
         }
-        if (func_002B1458_f(snd, 0, 0x208A, (int)a, cRider_getIdentity(a), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x208A), 2, rA, 3);
+        if (func_002B1458_f(snd, 0, 8330, (int)a, cRider_getIdentity(a), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8330), 2, rA, 3);
         }
     } else if (sel == 1) {
-        if (func_002B1458_f(snd, 0, 0x207E, (int)b, cRider_getIdentity(b), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x207E), 2, rB, 3);
+        if (func_002B1458_f(snd, 0, 8318, (int)b, cRider_getIdentity(b), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8318), 2, rB, 3);
         }
-        if (func_002B1458_f(snd, 0, 0x208A, (int)a, cRider_getIdentity(a), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x208A), 2, rA, 3);
+        if (func_002B1458_f(snd, 0, 8330, (int)a, cRider_getIdentity(a), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8330), 2, rA, 3);
         }
     } else if (sel == 0) {
-        if (func_002B1458_f(snd, 0, 0x2078, (int)b, cRider_getIdentity(b), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x2078), 2, rB, 3);
+        if (func_002B1458_f(snd, 0, 8312, (int)b, cRider_getIdentity(b), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8312), 2, rB, 3);
         }
-        if (func_002B1458_f(snd, 0, 0x208E, (int)a, cRider_getIdentity(a), 0.0f, 0, 0) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 0x208E), 2, rA, 3);
+        if (func_002B1458_f(snd, 0, 8334, (int)a, cRider_getIdentity(a), 0.0f, 0, 0) != 0) {
+            D_004A482C_4(func_003D8008(1, 0, 8334), 2, rA, 3);
         }
     }
 }
@@ -8993,8 +8993,8 @@ extern "C" void func_002A0E70(cSSXAudio* self, sSs0E70Rider* rider, int play)
     int ok = rider->f874 != 0 && rider->f87C != 0;
     if (!ok) return;
     int r = func_0029F330_i(rider);
-    if (func_002B1458(snd, 0, 0x2077, (int)rider, cRider_getIdentity(rider), 0, 0, zero) == 0) return;
-    D_004A482C(func_003D8008(1, 0, 0x2077), 1, r);
+    if (func_002B1458(snd, 0, 8311, (int)rider, cRider_getIdentity(rider), 0, 0, zero) == 0) return;
+    D_004A482C(func_003D8008(1, 0, 8311), 1, r);
 }
 #endif
 
@@ -9073,10 +9073,10 @@ void func_002A1138_impl(void* self, char* rider, void* obj)
     char* o = rider + 0x6C0;
     sSsVt1138* e = &(*(sSsVt1138**)o)[5];
     if (cSSXAudio_CameraInRange(self, e->fn(o + e->delta), D_004A36D8) < 0) return;
-    if (func_002B1458((char*)self + 0x5560, 0, 0x20D3, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 8403, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
     int r = func_0029F330_i(rider);
     int s = func_002A1D48_i(self, obj);
-    D_004A482C_5(func_003D8008(1, 0, 0x20D3), 3, r, s, 4);
+    D_004A482C_5(func_003D8008(1, 0, 8403), 3, r, s, 4);
 }
 #endif
 
@@ -9105,10 +9105,10 @@ void func_002A1280_impl(void* self, char* rider, void* obj)
     char* o = rider + 0x6C0;
     sSsVt1280* e = &(*(sSsVt1280**)o)[5];
     if (cSSXAudio_CameraInRange(self, e->fn(o + e->delta), D_004A36D8) < 0) return;
-    if (func_002B1458((char*)self + 0x5560, 0, 0x20D4, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 8404, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
     int r = func_0029F330_i(rider);
     int s = func_002A1D48_i(self, obj);
-    D_004A482C_4(func_003D8008(1, 0, 0x20D4), 2, r, s);
+    D_004A482C_4(func_003D8008(1, 0, 8404), 2, r, s);
 }
 #endif
 
@@ -9150,7 +9150,7 @@ void func_002A1400_impl(void* self, char* rider)
     char* o = rider + 0x6C0;
     sSsVt1280* e = &(*(sSsVt1280**)o)[5];
     if (cSSXAudio_CameraInRange(self, e->fn(o + e->delta), D_004A36D8) < 0) return;
-    if (func_002B1458((char*)self + 0x5560, 0, 0x20B9, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 8377, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
     int r = func_0029F330_i(rider);
     int k = func_002A1E68(self, rider);
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -9166,7 +9166,7 @@ void func_002A1400_impl(void* self, char* rider)
     } else {
         v = 2;
     }
-    D_004A482C_4(func_003D8008(1, 0, 0x20B9), 2, r, v);
+    D_004A482C_4(func_003D8008(1, 0, 8377), 2, r, v);
 }
 #endif
 
@@ -9190,9 +9190,9 @@ extern "C" void func_002A1560(cSSXAudio* self, char* rider)
     char* o2 = rider + 0x6C0;
     sSsVt1280* e = &(*(sSsVt1280**)o2)[5];
     if (cSSXAudio_CameraInRange(self, e->fn(o2 + e->delta), D_004A36D8) < 0) return;
-    if (func_002B1458(bm, 0, 0x20B8, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
+    if (func_002B1458(bm, 0, 8376, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
     int r = func_0029F330_i(rider);
-    D_004A482C(func_003D8008(1, 0, 0x20B8), 1, r);
+    D_004A482C(func_003D8008(1, 0, 8376), 1, r);
 }
 #endif
 
@@ -9218,9 +9218,9 @@ extern "C" void func_002A16B0(cSSXAudio* self, int a1)
         if (func_002B0E28(bm, 0) != 0) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
             if (D_00535C11[0] != 0) {
-                if (func_002B1458(bm, 0, 0x20BC, 0, a1, 0, 1, 0.0f) != 0) {
+                if (func_002B1458(bm, 0, 8380, 0, a1, 0, 1, 0.0f) != 0) {
                     int r = func_0029F2B0_r(a1, 0);
-                    D_004A482C(func_003D8008(1, 0, 0x20BC), 1, r);
+                    D_004A482C(func_003D8008(1, 0, 8380), 1, r);
                 }
             }
         }
@@ -9245,9 +9245,9 @@ extern "C" void func_002A1778(cSSXAudio* self, int a1)
     if (func_0029F0A0(self) != 0) {
         char* bm = (char*)self + 0x5560;
         if (func_002B0E28(bm, 0) != 0) {
-            if (func_002B1458(bm, 0, 0x20BD, 0, a1, 0, 1, 0.0f) != 0) {
+            if (func_002B1458(bm, 0, 8381, 0, a1, 0, 1, 0.0f) != 0) {
                 int r = func_0029F2B0_r(a1, 0);
-                D_004A482C(func_003D8008(1, 0, 0x20BD), 1, r);
+                D_004A482C(func_003D8008(1, 0, 8381), 1, r);
             }
         }
     }
@@ -9426,25 +9426,25 @@ extern "C" int func_002A1BD8(void* self, int location, int b)
     case 16: return 0x20000;
     }
     if (b != -1) {
-        if (location == 0x11) {
+        if (location == 17) {
             if (b == 0xE) return 0x1;
             if (b == 0xF) return 0x40;
             if (b == 0x10) return 0x200;
-        } else if (location == 0x12) {
+        } else if (location == 18) {
             if (b == 0xE) return 0x2;
-            if (b == 0x11) return 0x1000;
-        } else if (location == 0x13) {
+            if (b == 17) return 0x1000;
+        } else if (location == 19) {
             if (b == 0xE) return 0x4;
             if (b == 0x10) return 0x400;
-            if (b == 0x11) return 0x2000;
-        } else if (location == 0x14) {
+            if (b == 17) return 0x2000;
+        } else if (location == 20) {
             if (b == 0xE) return 0x8;
             if (b == 0xF) return 0x80;
-        } else if (location == 0x15) {
+        } else if (location == 21) {
             if (b == 0xE) return 0x10;
             if (b == 0xF) return 0x100;
             if (b == 0x10) return 0x800;
-            if (b == 0x11) return 0x4000;
+            if (b == 17) return 0x4000;
         }
     }
     return 0;
@@ -9628,10 +9628,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2018(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20C8, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8392, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 0x20C8), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8392), 2, r, m);
         }
     }
 }
@@ -9655,10 +9655,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A20D0(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20C9, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8393, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 0x20C9), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8393), 2, r, m);
         }
     }
 }
@@ -9685,11 +9685,11 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2188(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20CA, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8394, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int a = func_002A1D48_r(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
             int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
-            D_004A482C_5(func_003D8008(1, 0, 0x20CA), 3, r, a, m);
+            D_004A482C_5(func_003D8008(1, 0, 8394), 3, r, a, m);
         }
     }
 }
@@ -9713,10 +9713,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2260(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20E7, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8423, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 0x20E7), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8423), 2, r, m);
         }
     }
 }
@@ -9740,10 +9740,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2318(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20E8, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8424, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 0x20E8), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8424), 2, r, m);
         }
     }
 }
@@ -9767,7 +9767,7 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A23D0(cSSXAudio* self, int mode)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20E9, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8425, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m;
             if (mode == -1) {
@@ -9775,7 +9775,7 @@ extern "C" void func_002A23D0(cSSXAudio* self, int mode)
             } else {
                 m = func_002A1E20(self, mode);
             }
-            D_004A482C_4(func_003D8008(1, 0, 0x20E9), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8425), 2, r, m);
         }
     }
 }
@@ -9796,10 +9796,10 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A24B0(cSSXAudio* self, int a1)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20CC, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1BD8(self, a1, -1);
-            D_004A482C_5(func_003D8008(1, 0, 0x20CC), 3, r, m, 3);
+            D_004A482C_5(func_003D8008(1, 0, 8396), 3, r, m, 3);
         }
     }
 }
@@ -9823,10 +9823,10 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2568(cSSXAudio* self, int a1)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20CC, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), a1);
-            D_004A482C_5(func_003D8008(1, 0, 0x20CC), 3, r, m, 3);
+            D_004A482C_5(func_003D8008(1, 0, 8396), 3, r, m, 3);
         }
     }
 }
@@ -9850,10 +9850,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2638(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20BA, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8378, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 0x20BA), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8378), 2, r, m);
         }
     }
 }
@@ -9876,7 +9876,7 @@ extern "C" void func_002A26F0(void* self, int a, int b)
     if (func_0029F0D8(self) != 0) {
         char* bm = (char*)self + 0x5560;
         func_002B11B0(bm, 0);
-        if (func_002B1458(bm, 0, 0x20E5, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458(bm, 0, 8421, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int x = 2;
             if (a) x = 1;
@@ -9885,7 +9885,7 @@ extern "C" void func_002A26F0(void* self, int a, int b)
             }
             int y = 2;
             if (!b) y = 1;
-            D_004A482C_5(func_003D8008(1, 0, 0x20E5), 3, r, x, y);
+            D_004A482C_5(func_003D8008(1, 0, 8421), 3, r, x, y);
         }
     }
 }
@@ -9903,9 +9903,9 @@ extern void (*D_004A482C)(void*, int, int);
 extern "C" void func_002A27D8(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20E6, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8422, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            D_004A482C(func_003D8008(1, 0, 0x20E6), 1, r);
+            D_004A482C(func_003D8008(1, 0, 8422), 1, r);
         }
     }
 }
@@ -9925,7 +9925,7 @@ extern void (*D_004A482C_6)(void*, int, int, int, int, int) __asm__("D_004A482C"
 extern "C" void func_002A2860(cSSXAudio* self, int n)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20CF, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8399, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int lo = 0;
             int hi = 0;
@@ -9937,7 +9937,7 @@ extern "C" void func_002A2860(cSSXAudio* self, int n)
                     hi = 1 << n;
                 }
             }
-            D_004A482C_6(func_003D8008(1, 0, 0x20CF), 4, r, 3, lo, hi);
+            D_004A482C_6(func_003D8008(1, 0, 8399), 4, r, 3, lo, hi);
         }
     }
 }
@@ -9964,11 +9964,11 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2938(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x2102, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8450, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int a = func_002A1D48_r(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
             int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
-            D_004A482C_5(func_003D8008(1, 0, 0x2102), 3, r, a, m);
+            D_004A482C_5(func_003D8008(1, 0, 8450), 3, r, a, m);
         }
     }
 }
@@ -9993,10 +9993,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2A10(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x210B, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8459, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1DA0_r(self, func_00145750(cBE_getInterface_Fv(func_0028B1E8(), 0)), 0);
-            D_004A482C_4(func_003D8008(1, 0, 0x210B), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8459), 2, r, m);
         }
     }
 }
@@ -10020,10 +10020,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2AD0(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x212B, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8491, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 0x212B), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8491), 2, r, m);
         }
     }
 }
@@ -10043,10 +10043,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2B88(void* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x212C, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8492, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int v = *(int*)((char*)self + 0x5780);
-            D_004A482C_4(func_003D8008(1, 0, 0x212C), 2, r, v);
+            D_004A482C_4(func_003D8008(1, 0, 8492), 2, r, v);
         }
         *(int*)((char*)self + 0x5780) = 1;
     }
@@ -10071,10 +10071,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2C30(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x212D, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8493, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
-            D_004A482C_4(func_003D8008(1, 0, 0x212D), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8493), 2, r, m);
         }
     }
 }
@@ -10095,10 +10095,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2CF0(cSSXAudio* self, int a1)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x212E, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8494, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1BD8(self, a1, -1);
-            D_004A482C_4(func_003D8008(1, 0, 0x212E), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8494), 2, r, m);
         }
     }
 }
@@ -10119,10 +10119,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2DA0(cSSXAudio* self, int a1)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x212F, 0, 0xA, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8495, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1BD8(self, a1, -1);
-            D_004A482C_4(func_003D8008(1, 0, 0x212F), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8495), 2, r, m);
         }
     }
 }
@@ -10186,7 +10186,7 @@ extern "C" void func_002A2E50(void* vself, int bonus)
                 if (sel != 1) {
                     track = sel == 2 ? 0xF : 0x10;
                 }
-                void* rewards = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+                void* rewards = cBE_getInterface_Fv(cBE_getBE(), 13);
                 int gold = cBERewardInterface_getTrackMedal(rewards, 0, ch, 4, track) != -1;
                 int plat = cBERewardInterface_getTrackMedal(rewards, 0, ch, 5, track) != -1;
                 if (gold && plat) {
@@ -10273,9 +10273,9 @@ extern "C" void func_002A31C0(cSSXAudio* self)
     if (D_00535C11[0] != 0) return;
     if (*(int*)SSXApp->GameModeMan < 2) {
         if (cSSXAudio_PlayHistoryExists(self, 0, 0) != 0) return;
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20C0, 0, 0xB, 0, 0, 0.0f) == 0) return;
+        if (func_002B1458((char*)self + 0x5560, 0, 8384, 0, 11, 0, 0, 0.0f) == 0) return;
         int r = func_0029F198(self);
-        D_004A482C_4(func_003D8008(1, 0, 0x20C0), 2, r, 1);
+        D_004A482C_4(func_003D8008(1, 0, 8384), 2, r, 1);
     }
 }
 #endif
@@ -10297,10 +10297,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A32B0(cSSXAudio* self)
 {
     if (func_0029F128(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20C1, 0, 0xB, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8385, 0, 11, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int a = func_002A1D48_r(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
-            D_004A482C_4(func_003D8008(1, 0, 0x20C1), 2, r, a);
+            D_004A482C_4(func_003D8008(1, 0, 8385), 2, r, a);
         }
     }
 }
@@ -10323,10 +10323,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A3358(cSSXAudio* self)
 {
     if (func_0029F128(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20C2, 0, 0xB, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8386, 0, 11, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int a = func_002A1D48_r(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
-            D_004A482C_4(func_003D8008(1, 0, 0x20C2), 2, r, a);
+            D_004A482C_4(func_003D8008(1, 0, 8386), 2, r, a);
         }
     }
 }
@@ -10352,10 +10352,10 @@ extern "C" void func_002A3400(cSSXAudio* self)
 {
     if (func_0029F128(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (func_002B1458((char*)self + 0x5560, 0, 0x20C3, 0, 0xB, 0, 0, 0.0f) == 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 8387, 0, 11, 0, 0, 0.0f) == 0) return;
     int r = func_0029F198(self);
     int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
-    D_004A482C_4(func_003D8008(1, 0, 0x20C3), 2, r, m);
+    D_004A482C_4(func_003D8008(1, 0, 8387), 2, r, m);
 }
 #endif
 
@@ -10393,7 +10393,7 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
         sSsVt_34D0 *vt = *(sSsVt_34D0 **)obj;
         char *dst = *(char**)vself->MusicSys.mpVStreamSys + 0x1D8;
         int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
-        func_002ADCA0_i(dst, 0x3E8, key->v, 0, idx, 0, 0, 0);
+        func_002ADCA0_i(dst, 1000, key->v, 0, idx, 0, 0, 0);
         return 1;
     }
     if (func_002A42C8_p(((char*)vself)) != 0) {
@@ -10418,7 +10418,7 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
     if (cRider_getCheatIdentity(rider) != 0) {
         return 1;
     }
-    if (func_002B1458_f(((char*)vself) + 0x5560, 0, 0x20C4, 0, 0xB, 0.0f, 0, 0) == 0) {
+    if (func_002B1458_f(((char*)vself) + 0x5560, 0, 8388, 0, 11, 0.0f, 0, 0) == 0) {
         return 1;
     }
     a = func_0029F198(((char*)vself));
@@ -10450,7 +10450,7 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
             break;
         }
     }
-    D_004A482C_5(func_003D8008(1, 0, 0x20C4), 3, a, b, c);
+    D_004A482C_5(func_003D8008(1, 0, 8388), 3, a, b, c);
     return 1;
 }
 #endif
@@ -10483,11 +10483,11 @@ extern "C" void func_002A3708(cSSXAudio* self, char* rider)
         func_002ADCA0(p, 1000, key->v, 0, v, 0, 0, 0);
         return;
     }
-    if (func_002B1458((char*)self + 0x5560, 0, 0x20C5, 0, 0xB, 0, 0, 0.0f) == 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 8389, 0, 11, 0, 0, 0.0f) == 0) return;
     int a = func_0029F198(self);
     int b = func_002A1D48_i(self, rider);
     int c = func_002A1E68(self, rider);
-    D_004A482C_5(func_003D8008(1, 0, 0x20C5), 3, a, b, c);
+    D_004A482C_5(func_003D8008(1, 0, 8389), 3, a, b, c);
 }
 #endif
 
@@ -10518,12 +10518,12 @@ extern "C" void func_002A3860(cSSXAudio* self)
     if (g[0x49] == 2) {
         n = D_00536730[1] < D_00536730[0];
     }
-    if (func_002B1458((char*)self + 0x5560, 0, 0x20C7, 0, 0xB, 0, 0, 0.0f) == 0) return;
+    if (func_002B1458((char*)self + 0x5560, 0, 8391, 0, 11, 0, 0, 0.0f) == 0) return;
     int a = func_0029F198(self);
     sSndRiderList3860* lst = (sSndRiderList3860*)((char*)cAudioInterface_getAI() + 0x28);
     FM_OPAQUE(lst);
     int b = func_002A1D48_i(self, lst->r[n]);
-    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
     if (g[0x49] != 2 && *(int*)(iface + 0x14) == 0) {
         n = 8;
     } else {
@@ -10538,7 +10538,7 @@ extern "C" void func_002A3860(cSSXAudio* self)
             if (z) n = 0;
         }
     }
-    D_004A482C_5(func_003D8008(1, 0, 0x20C7), 3, a, b, n);
+    D_004A482C_5(func_003D8008(1, 0, 8391), 3, a, b, n);
 }
 #endif
 
@@ -10560,10 +10560,10 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A39E0(cSSXAudio* self)
 {
     if (func_0029F128(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 0x20BB, 0, 0xB, 0, 0, 0.0f) != 0) {
+        if (func_002B1458((char*)self + 0x5560, 0, 8379, 0, 11, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
-            D_004A482C_4(func_003D8008(1, 0, 0x20BB), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8379), 2, r, m);
         }
     }
 }
@@ -10611,8 +10611,8 @@ extern "C" void func_002A3B18(cSSXAudio* self, void* obj, int a2)
     if (done) return;
     if (obj != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (func_002B1458((char*)self + 0x5560, 0, 0x20A7, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(func_003D8008(1, 0, 0x20A7), 1, a2);
+    if (func_002B1458((char*)self + 0x5560, 0, 8359, 0, 0xC, 0, 0, 0.0f) != 0) {
+        D_004A482C(func_003D8008(1, 0, 8359), 1, a2);
     }
 }
 #endif
@@ -10639,8 +10639,8 @@ extern "C" void func_002A3C00(cSSXAudio* self, void* obj, int a2)
     }
     if (obj != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (func_002B1458((char*)self + 0x5560, 0, 0x20A8, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(func_003D8008(1, 0, 0x20A8), 1, a2);
+    if (func_002B1458((char*)self + 0x5560, 0, 8360, 0, 0xC, 0, 0, 0.0f) != 0) {
+        D_004A482C(func_003D8008(1, 0, 8360), 1, a2);
     }
 }
 #endif
@@ -10665,8 +10665,8 @@ extern "C" void func_002A3CE8(cSSXAudio* self, char* rider, int n)
     if (n != 1 && rider != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (n == 0) return;
-    if (func_002B1458((char*)self + 0x5560, 0, 0x20A9, 0, 0xC, 0, 0, zero) != 0) {
-        D_004A482C(func_003D8008(1, 0, 0x20A9), 1, n);
+    if (func_002B1458((char*)self + 0x5560, 0, 8361, 0, 0xC, 0, 0, zero) != 0) {
+        D_004A482C(func_003D8008(1, 0, 8361), 1, n);
     }
 }
 #endif
@@ -10687,8 +10687,8 @@ extern "C" void func_002A3DE0(cSSXAudio* self, void* obj, int ev)
     int done = *(float*)((char*)obj + 0x470) >= 0.0f;
     if (done) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (func_002B1458((char*)self + 0x5560, 0, 0x2133, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(func_003D8008(1, 0, 0x2133), 1, ev);
+    if (func_002B1458((char*)self + 0x5560, 0, 8499, 0, 0xC, 0, 0, 0.0f) != 0) {
+        D_004A482C(func_003D8008(1, 0, 8499), 1, ev);
     }
 }
 #endif
@@ -10709,8 +10709,8 @@ extern "C" void func_002A3EB8(cSSXAudio* self, void* obj, int ev)
     int done = *(float*)((char*)obj + 0x470) >= 0.0f;
     if (done) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (func_002B1458((char*)self + 0x5560, 0, 0x2145, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(func_003D8008(1, 0, 0x2145), 1, ev);
+    if (func_002B1458((char*)self + 0x5560, 0, 8517, 0, 0xC, 0, 0, 0.0f) != 0) {
+        D_004A482C(func_003D8008(1, 0, 8517), 1, ev);
     }
 }
 #endif
@@ -10735,7 +10735,7 @@ INCLUDE_ASM("sound/soundsys", func_002A3FD8);
 #ifdef SKIP_ASM
 extern "C" int func_002A3FD8(void* self, unsigned int location)
 {
-    return location - 0x11 < 5;
+    return location - 17 < 5;
 }
 #endif
 
@@ -10896,7 +10896,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4238);
 #ifdef SKIP_ASM
 extern "C" int func_002A4238(void* self, unsigned int location)
 {
-    return location - 0xb < 3;
+    return location - 11 < 3;
 }
 #endif
 
@@ -11099,7 +11099,7 @@ extern "C" void func_002A4590(void* self, int flag)
     if (flag) {
         *(int*)((char*)self + 0x580C) = -1;
     }
-    *(int*)((char*)self + 0x5814) = 0x17;
+    *(int*)((char*)self + 0x5814) = 23;
 }
 #endif
 
@@ -11165,7 +11165,7 @@ extern "C" int func_002A4718(void* self)
 {
     int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     int cur = *(int*)((char*)self + 0x5814);
-    if (id == cur || cur == 0x17) {
+    if (id == cur || cur == 23) {
         return 0;
     }
     return 1;
@@ -11206,11 +11206,11 @@ extern "C" int func_002A4770(void* self)
             }
             int lim;
             if (func_002A40E0(self, *(int*)(audio + 0x5810))) {
-                lim = 0x1B;
+                lim = 27;
             } else if (func_002A4158(self, *(int*)(audio + 0x5810))) {
-                lim = 0x1B;
+                lim = 27;
             } else {
-                lim = func_002A4238(self, *(int*)(audio + 0x5810)) ? 0x1B : 0x18;
+                lim = func_002A4238(self, *(int*)(audio + 0x5810)) ? 27 : 0x18;
             }
             if (*(int*)(audio + 0x5808) >= lim) {
                 flags[2] = 1;
@@ -11221,7 +11221,7 @@ extern "C" int func_002A4770(void* self)
         if (n == 0) {
             if (*(int*)(audio + 0x6254) != 0) {
                 int cur = *(int*)(audio + 0x5814);
-                if (cur != 0x17) {
+                if (cur != 23) {
                     if (func_002A3FD8(self, cur)) {
                         func_002A2E50(self, 0);
                         return 1;
@@ -11284,7 +11284,7 @@ extern "C" void func_002ADCA0(void* bank, int a1, long id, int a3, int a4, int a
 extern "C" void func_002A49E8(char* self)
 {
     *(int*)(self + 0x5818) = 1;
-    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0x7530, D_004A36F0[0].v, 0, 0, 0, 0, 0);
+    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 30000, D_004A36F0[0].v, 0, 0, 0, 0, 0);
 }
 #endif
 
@@ -11328,7 +11328,7 @@ extern "C" void func_002A4A78(void* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (*(int*)((char*)self + 0x578C) == 0 && D_00535C11[0] == 0) {
         if (func_002A3F90(self) != 0) {
-            func_0028DEF0(self, 0xD);
+            func_0028DEF0(self, 13);
             func_002ADCA0(**(char***)((char*)self + 0x118) + 0x1D8, 2, D_004A3650->v, 0, 2, 0, 0, 0);
         } else {
             char* p = **(char***)((char*)self + 0x118) + 0x1D8;
@@ -11348,7 +11348,7 @@ extern "C" void func_002B11B0(void*, int);
 
 extern "C" void func_002A4B68(cSSXAudio* self)
 {
-    if (func_002B49E0((char*)self + 0x118) == 0x191) {
+    if (func_002B49E0((char*)self + 0x118) == 401) {
         func_002B11B0((char*)self + 0x5560, 0);
     }
 }
@@ -12478,7 +12478,7 @@ extern "C" void func_002A6B50(cCrowdSys* self, int flags)
     func_002A6F38((sSsMgr6F38*)self);
     D_004A36F8 = 0;
     if (((char*)self) + 0x1C != 0) {
-        char* p = ((char*)self) + 0x1C + 3 * 0x54;
+        char* p = ((char*)self) + 0x1C + 3 * 84;
         while (((char*)self) + 0x1C != p) {
             p -= 0x54;
             func_002A4BE0((tCrowdEventData*)(p + 0x30), 2);
@@ -12601,7 +12601,7 @@ extern "C" void func_002A6F38(sSsMgr6F38* self)
     func_002A7718((cCrowdSys*)self);
     char* base = self->arr;
     if (base != 0) {
-        char* p = base + *(int*)(base - 0x10) * 0x190;
+        char* p = base + *(int*)(base - 0x10) * 400;
         while (self->arr != p) {
             p -= 0x190;
             func_002A4E38((cCrowdInstance*)p, 0);
@@ -13988,9 +13988,9 @@ extern "C" int func_002A8D90(cPS2SoundManager* self, int mode)
         cfg.f30 = 0x18;
         cfg.f47 = 4;
         cfg.f4C = 3;
-        cfg.f4E = 0x28;
-        cfg.f50 = 0x120;
-        cfg.f52 = 0x24;
+        cfg.f4E = 40;
+        cfg.f50 = 288;
+        cfg.f52 = 36;
         cfg.f49 = 2;
         func_003BC930();
         self->unk_008 = 2;
@@ -14003,12 +14003,12 @@ extern "C" int func_002A8D90(cPS2SoundManager* self, int mode)
         cfg.f49 = 1;
         cfg.f47 = 2;
         cfg.f4C = 6;
-        cfg.f4E = 0x48;
-        cfg.f50 = 0x140;
-        cfg.f52 = 0x44;
-        cfg.f54 = 0x28;
-        cfg.f56 = 0x120;
-        cfg.f58 = 0x24;
+        cfg.f4E = 72;
+        cfg.f50 = 320;
+        cfg.f52 = 68;
+        cfg.f54 = 40;
+        cfg.f56 = 288;
+        cfg.f58 = 36;
         self->unk_008 = 1;
         break;
     case 0:
@@ -14020,9 +14020,9 @@ extern "C" int func_002A8D90(cPS2SoundManager* self, int mode)
         cfg.f49 = 1;
         cfg.f47 = 2;
         cfg.f4C = 3;
-        cfg.f4E = 0x28;
-        cfg.f50 = 0x120;
-        cfg.f52 = 0x24;
+        cfg.f4E = 40;
+        cfg.f50 = 288;
+        cfg.f52 = 36;
         self->unk_008 = 1;
         break;
     }
@@ -14066,7 +14066,7 @@ extern const char str_PS2SoundManager[];
 
 extern "C" void* func_002A8FA0()
 {
-    return func_002A8C20((cPS2SoundManager*)cMemMan_alloc(0x320, str_PS2SoundManager, 0, 0));
+    return func_002A8C20((cPS2SoundManager*)cMemMan_alloc(800, str_PS2SoundManager, 0, 0));
 }
 #endif
 

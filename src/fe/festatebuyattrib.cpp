@@ -36,7 +36,7 @@ extern "C" void cFEStateBuyAttrib_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
     *(int*)((char*)self + 0xA4) = cBEEconInterface_getMoney(iface, 0, cBELibrary_getCharacterID(0));
     *(int*)((char*)self + 0xA8) = 0;
     *(int*)((char*)self + 0xA0) = 0;
@@ -151,10 +151,10 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateBuyAttrib_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
-    int result = 0x101;
+    int result = 257;
     if (key < 10) {
         if (key < 8) {
-            result = 0x101;
+            result = 257;
         } else {
             return 0x100;
         }
@@ -179,7 +179,7 @@ extern "C" void func_001F5300(void* self);
  */
 extern "C" void cFEStateBuyAttrib_onPopupEvent(void* self, void* sender, int msg)
 {
-    if (msg == 0x16) {
+    if (msg == 22) {
         if (*(int*)((char*)sender + 0x6C) != 0) {
             func_001F5300(self);
         }
@@ -338,7 +338,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(sBuyAttrib_4C30* self, char* w)
 {
     int changed = 0;
     cUIState_onInputAlways_2(self, w);
-    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
     unsigned char idx = *((unsigned char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_AttribMenu)) + 0x95);
     if (self->busy == 0) {
         sVEi_4C30* vt = *(sVEi_4C30**)(w + 8);
@@ -460,13 +460,13 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(void* self)
     char buf[32];
     int i;
     int* levels = (int*)((char*)self + 0x68);
-    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
     for (i = 0; i < 7; i++, levels++) {
         sprintf(buf, str_costpct_d, i);
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x48), GetHashValue32(buf));
         if (text != 0) {
             cUIText_setAsciiString(text, getDollarString(func_00150E50(iface, *levels - 1)));
-            if (*levels >= 0xB) {
+            if (*levels >= 11) {
                 sVE4FC0* vt = *(sVE4FC0**)((char*)text + 8);
                 vt[9].fn((char*)text + vt[9].delta, 0);
             }
@@ -650,7 +650,7 @@ extern "C" void func_001F5300(void* p)
     cUIState_hideObjSafe(self, str_PopupGroup);
     sObj_5300* o = self->confirm;
     o->vt[7].fn((char*)o + o->vt[7].delta, 1);
-    sIface_5300* iface = (sIface_5300*)cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    sIface_5300* iface = (sIface_5300*)cBE_getInterface_Fv(cBE_getBE(), 11);
     int* bought = self->bought;
     for (int i = 0; i < 7; i++) {
         for (int j = 0; j < self->bought[i]; j++) {
@@ -690,7 +690,7 @@ extern "C" void* func_001F54B0(void* self)
 {
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = cFEStateCareerStats_vtbl;
-    *(int*)((char*)self + 0xC) = 0x2A;
+    *(int*)((char*)self + 0xC) = 42;
     *(char*)((char*)self + 0x44) = 0;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), 0);
     return self;
@@ -806,7 +806,7 @@ extern "C" int cFEStateCareerStats_onWidgetMenu(void* self, int pMenu, unsigned 
     case 9:
         return 0x100;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -1713,7 +1713,7 @@ extern int D_00478110[];
 extern "C" void func_001F6F30(void* vself)
 {
     char* self = (char*)vself;
-    void* reward = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* reward = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* game = cBE_getInterface_Fv(cBE_getBE(), 0);
     char charID = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));

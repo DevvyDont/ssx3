@@ -110,7 +110,7 @@ extern "C" void* func_001A3218(void* self)
 {
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = cFEStateMPCircuit_vtbl;
-    *(int*)((char*)self + 0xC) = 0x17;
+    *(int*)((char*)self + 0xC) = 23;
     return self;
 }
 #endif

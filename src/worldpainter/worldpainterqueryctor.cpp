@@ -96,16 +96,16 @@ extern "C" cWorldPainterQuery* cWorldPainterQuery_cWorldPainterQuery(cWorldPaint
         self->m_data = (tWPInGameData*)func_002BC8E8(cMemMan_alloc(0x10, str_tWPIGD_SkyBox, 0, 0));
         break;
     case 9:
-        self->m_data = (tWPInGameData*)tWPInGameData_Sun_tWPInGameData_Sun(cMemMan_alloc(0x50, str_tWPIGD_Sun, 0, 0));
+        self->m_data = (tWPInGameData*)tWPInGameData_Sun_tWPInGameData_Sun(cMemMan_alloc(80, str_tWPIGD_Sun, 0, 0));
         break;
     case 10:
         self->m_data = (tWPInGameData*)func_002BC980(cMemMan_alloc(0x10, str_tWPIGD_Surface, 0, 0));
         break;
     case 11:
-        self->m_data = (tWPInGameData*)func_002BC9B0(cMemMan_alloc(0x58, str_tWPIGD_Lighting, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC9B0(cMemMan_alloc(88, str_tWPIGD_Lighting, 0, 0));
         break;
     case 12:
-        self->m_data = (tWPInGameData*)func_002BCAF8(cMemMan_alloc(0xA0, str_tWPIGD_Weather, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BCAF8(cMemMan_alloc(160, str_tWPIGD_Weather, 0, 0));
         break;
     case 13:
         self->m_data = (tWPInGameData*)func_002BCBD0(cMemMan_alloc(0x18, str_tWPIGD_Danger, 0, 0));

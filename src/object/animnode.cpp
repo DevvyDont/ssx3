@@ -436,7 +436,7 @@ extern "C" void cAnimNode_updateMeshVelocity(char* self)
         ((sDelta_E798*)*(char**)(self + 0x4C))[i].rot = t4vect_Zero;
         float d2r = 0.01745329424738884f;
         if (ent->active == 0) continue;
-        char* node = *(char**)(self + 0x48) + k * 0xD0;
+        char* node = *(char**)(self + 0x48) + k * 208;
         k++;
         sVE_E798* vt = *(sVE_E798**)(self + 0x20);
         float t = ((float (*)(void*))vt[53].fn)(self + vt[53].delta);
@@ -643,7 +643,7 @@ extern "C" void* func_0034ED88(cFloatingNode* self, void* bucket, void* stream)
         cFloatingNode_initInfo((cFloatingNode*)self);
     }
     sStreamVE_ED88* vt2 = *(sStreamVE_ED88**)stream;
-    vt2[2].fn((char*)stream + vt2[2].delta, ((char*)self) + 0x2C, 0x48);
+    vt2[2].fn((char*)stream + vt2[2].delta, ((char*)self) + 0x2C, 72);
     sAnimFrame_ED88** pf = (sAnimFrame_ED88**)(((char*)self) + 0x74);
     *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_ED88[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
     self->Flags |= 1;

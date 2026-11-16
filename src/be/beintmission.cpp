@@ -23,7 +23,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getThis__Fv);
 void* cBEMissionInterface_getThis()
 {
     if (cBEMissionInterface_instance == 0) {
-        cBEMissionInterface* mem = (cBEMissionInterface*)cMemMan_alloc(0x14, str_BEMissionInt, 0, 0);
+        cBEMissionInterface* mem = (cBEMissionInterface*)cMemMan_alloc(20, str_BEMissionInt, 0, 0);
         mem->field_0x8 = 0;
         mem->vtable = D_0045ADF8;
         cBEMissionInterface_instance = mem;
@@ -127,7 +127,7 @@ extern "C" int func_001533F8(void* self, int rider, int idx)
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
     int sum = 0;
-    int off = idx * 12 + c * 0xF88 + profile * 0x9B50;
+    int off = idx * 12 + c * 3976 + profile * 39760;
     char* p = D_004A6CA8_raw + off;
     for (int i = 0; i < 17; i++)
     {
@@ -152,7 +152,7 @@ extern "C" int func_00153498(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
-    int off = (idx + D_005305F0[0]) * 12 + c * 0xF88 + profile * 0x9B50;
+    int off = (idx + D_005305F0[0]) * 12 + c * 3976 + profile * 39760;
     char* p = D_004A6CA8_raw + off;
     return *(signed char*)(p + 4);
 }
@@ -172,7 +172,7 @@ extern "C" int func_00153520(void* self, int rider, int idx)
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
     int sum = 0;
-    int off = idx * 12 + c * 0xF88 + profile * 0x9B50;
+    int off = idx * 12 + c * 3976 + profile * 39760;
     char* p = D_004A6CA8_raw + off;
     for (int i = 0; i < 1; i++)
     {
@@ -305,7 +305,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* self, in
     if ((void*)SSXApp->Game != 0)
         return cBEMissionInterface_getCurrentCollectForPeak(self, cBELibrary_getRiderIndex(profile), owner);
     int sum = 0;
-    int off = profile * 0x9B50 + character * 0xF88;
+    int off = profile * 39760 + character * 3976;
     for (int i = 0; i < 1; i++)
     {
         for (int j = 0; j < 22; j++)
@@ -341,7 +341,7 @@ extern "C" char* func_00153858(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
-    char* b = D_004A6CA8_raw + c * 0xF88;
+    char* b = D_004A6CA8_raw + c * 3976;
     // PORT: pointer held as int (index-first addu)
     char* p = (char*)(profile * 0x9B50 + (int)b);
     char* q = p + (D_005305F0[0] * 12 + 4);
@@ -361,7 +361,7 @@ extern "C" int func_001538E8(void* self, int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
-    int off = profile * 0x9B50 + c * 0xF88 + D_005305F0[0] * 12;
+    int off = profile * 39760 + c * 3976 + D_005305F0[0] * 12;
     char* p = D_004A6CAC + (idx * 12 + off);
     p = p + (bit / 32) * 4;
     int mask = 1 << bit;
@@ -398,12 +398,12 @@ extern "C" void func_001539A8(void* self, int rider, int idx, sBits8_1539A8* src
         int off = i / 32 * 4;
         off += idx * 12;
         off += cBELibrary_raceDB.base * 12;
-        off += c * 0xF88;
-        off += profile * 0x9B50;
+        off += c * 3976;
+        off += profile * 39760;
         if (*(unsigned int*)(D_004A6CB0_raw + off) & (1 << i))
             count++;
     }
-    char* p = D_004A6CA8_raw + ((idx + cBELibrary_raceDB.base) * 12 + c * 0xF88 + profile * 0x9B50);
+    char* p = D_004A6CA8_raw + ((idx + cBELibrary_raceDB.base) * 12 + c * 3976 + profile * 39760);
     *(signed char*)(p + 4) = count;
 }
 #endif
@@ -447,7 +447,7 @@ extern "C" void func_00153B00(void* self, int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
-    int off = profile * 0x9B50 + c * 0xF88 + D_005305B0_3B00[16] * 12;
+    int off = profile * 39760 + c * 3976 + D_005305B0_3B00[16] * 12;
     // PORT: address accumulated in an int (base symbol unknown to alias analysis).
     int addr = idx * 12 + off;
     addr += (int)D_004A6CAC_bits153B00;
@@ -587,7 +587,7 @@ extern "C" int cBEMissionInterface_isMissionCompleted(void* self, int id)
 {
     int i = func_00154240(self, id);
     int characterId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + characterId * 0xF88;
+    int off = (i << 2) + characterId * 3976;
     char* profile = (char*)cBELibrary_profileLib + off;
     return (*(unsigned int*)(profile + 0x118) >> 3) & 1;
 }
@@ -603,7 +603,7 @@ extern "C" int func_00153DD0(void* self, int id)
 {
     int i = func_00154240(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 0xF88;
+    int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
     return (*(unsigned int*)(recordBase + 0x118) >> 1) & 1;
 }
@@ -628,7 +628,7 @@ extern "C" int cBEMissionInterface_isMissionLocked(void* self, int id)
 {
     int i = func_00154240(self, id);
     int c = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + c * 0xF88;
+    int off = (i << 2) + c * 3976;
     char* p = (char*)cBELibrary_profileLib + off;
     return (*(unsigned int*)(p + 0x118)) & 1;
 }
@@ -651,7 +651,7 @@ extern "C" int cBEMissionInterface_isMissionAvailable(void* self, int id)
 {
     int i = func_00154240(self, id);
     int characterId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + characterId * 0xF88;
+    int off = (i << 2) + characterId * 3976;
     char* profile = (char*)cBELibrary_profileLib + off;
     return (*(unsigned int*)(profile + 0x118) >> 2) & 1;
 }
@@ -667,7 +667,7 @@ extern "C" int func_00153ED8(void* self, int id)
 {
     int i = func_00154240(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 0xF88;
+    int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
     return (*(unsigned int*)(recordBase + 0x118) >> 4) & 1;
 }
@@ -782,7 +782,7 @@ extern "C" void func_00154010(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 0xF88;
+    int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
     *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~1) | (value & 1);
 }
@@ -798,7 +798,7 @@ extern "C" void func_00154080(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 0xF88;
+    int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
     *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 1)) | ((value & 1) << 1);
 }
@@ -814,7 +814,7 @@ extern "C" void func_001540F0(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 0xF88;
+    int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
     *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 2)) | ((value & 1) << 2);
 }
@@ -830,7 +830,7 @@ extern "C" void func_00154160(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 0xF88;
+    int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
     *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 3)) | ((value & 1) << 3);
 }
@@ -846,7 +846,7 @@ extern "C" void func_001541D0(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
     int charId = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + charId * 0xF88;
+    int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
     *(int*)(recordBase + 0x118) = (*(int*)(recordBase + 0x118) & ~(1 << 4)) | ((value & 1) << 4);
 }
@@ -1262,12 +1262,12 @@ extern "C" void func_001547E8(void* self, void* stream)
 {
     int c = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;
-    int off = c * 0xF88;
+    int off = c * 3976;
     sSerVEntry_001547E8* e = &(*(sSerVEntry_001547E8**)stream)[1];
-    e->fn((char*)stream + e->delta, base + off, 0x114);
+    e->fn((char*)stream + e->delta, base + off, 276);
     e = &(*(sSerVEntry_001547E8**)stream)[1];
     char* base2 = base + 0x114;
-    e->fn((char*)stream + e->delta, base2 + off, 0x160);
+    e->fn((char*)stream + e->delta, base2 + off, 352);
     e = &(*(sSerVEntry_001547E8**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 8, 4);
 }
@@ -1288,12 +1288,12 @@ extern "C" void func_00154898(void* self, void* stream)
 {
     int c = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;
-    int off = c * 0xF88;
+    int off = c * 3976;
     sSerVEntry_00154898* e = &(*(sSerVEntry_00154898**)stream)[2];
-    e->fn((char*)stream + e->delta, base + off, 0x114);
+    e->fn((char*)stream + e->delta, base + off, 276);
     e = &(*(sSerVEntry_00154898**)stream)[2];
     char* base2 = base + 0x114;
-    e->fn((char*)stream + e->delta, base2 + off, 0x160);
+    e->fn((char*)stream + e->delta, base2 + off, 352);
     e = &(*(sSerVEntry_00154898**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 8, 4);
 }

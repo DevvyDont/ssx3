@@ -95,14 +95,14 @@ extern "C" int func_002439A0(void *ssxApp) {
 INCLUDE_ASM("main/ssxappdtor", func_002439A8);
 #ifdef SKIP_ASM
 extern "C" int func_002439A8(int ssxApp) {
-    return ssxApp + 0xC4;
+    return ssxApp + 196;
 }
 #endif
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002439B0);
 #ifdef SKIP_ASM
 extern "C" int func_002439B0(int ssxApp) {
-    return ssxApp + 0xC8;
+    return ssxApp + 200;
 }
 #endif
 //100%
@@ -571,7 +571,7 @@ extern "C" void *func_00243DE8(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
-    *(int *)((char *)self + 0) = 0xA;
+    *(int *)((char *)self + 0) = 10;
     *(void **)((char *)self + 0xC) = D_0047D588;
     *(int *)((char *)self + 4) = 0;
     return self;
@@ -771,7 +771,7 @@ extern "C" void *func_00243FF0(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
-    *(int *)((char *)self + 0) = 0xA;
+    *(int *)((char *)self + 0) = 10;
     *(void **)((char *)self + 0xC) = cGFSessionTeleportState_vtbl;
     *(int *)((char *)self + 4) = 0;
     return self;
@@ -1703,7 +1703,7 @@ INCLUDE_ASM("main/ssxappdtor", func_002447F0);
 extern "C" void strcpy1(int);
 
 extern "C" void func_002447F0(int overlayManager) {
-    strcpy1(overlayManager + 0x276);
+    strcpy1(overlayManager + 630);
 }
 #endif
 //100%
@@ -1712,14 +1712,14 @@ INCLUDE_ASM("main/ssxappdtor", func_00244810);
 extern "C" void func_002C2540(int);
 
 extern "C" void func_00244810(int overlayManager) {
-    func_002C2540(overlayManager + 0x276);
+    func_002C2540(overlayManager + 630);
 }
 #endif
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244830);
 #ifdef SKIP_ASM
 extern "C" int func_00244830(int overlayManager) {
-    return overlayManager + 0x276;
+    return overlayManager + 630;
 }
 #endif
 //100%
@@ -2096,7 +2096,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
         if (sm->hasMessage()) {
             sMsg_4B48* msg = tMissionMenuQueue_getEntry(q);
             if (msg->type == 8) {
-                cOVStateManager_triggerOverlay(0x1D);
+                cOVStateManager_triggerOverlay(29);
                 D_005366E8[++D_004A2A54] = 3;
                 cPauseState_Flags = D_004428FC[0];
                 cSSXAudio_PlayIconSound(func_0028B180(), 4, 0, 1.0f);
@@ -2117,7 +2117,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
         }
     }
     if (pending_4B48()) {
-        cOVStateManager_triggerOverlay(0x22);
+        cOVStateManager_triggerOverlay(34);
         D_005366E8[++D_004A2A54] = 0xC;
         cPauseState_Flags = D_00442920[0];
         D_004A20CC_4B48 = 0xFFFFFFFF;
@@ -2422,7 +2422,7 @@ INCLUDE_ASM("main/ssxappdtor", func_002453E0);
 #ifdef SKIP_ASM
 extern "C" int func_002453E0(void* self, int menu, int event)
 {
-    return event == 6 ? 0x101 : 0;
+    return event == 6 ? 257 : 0;
 }
 #endif
 
@@ -2489,7 +2489,7 @@ extern "C" int func_002454F8(void* self, int refresh)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
-        char buf[0xD0];
+        char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }
@@ -2576,7 +2576,7 @@ extern "C" int func_00245698(void* self)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
-        char buf[0xD0];
+        char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }
@@ -2677,7 +2677,7 @@ extern "C" int func_002458B8(void* self)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
     if (obj != 0) {
-        char buf[0xD0];
+        char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
     }

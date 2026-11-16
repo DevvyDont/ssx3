@@ -132,7 +132,7 @@ extern "C" void cRiderAnimBase_reset(cRiderAnimBase* riderAnimBase)
     for (int i = 0; i < 6; i++)
     {
         cAnimSequencer_expireAll(self->mSequencers + (i << 3));
-        self->mAnims[i] = 0x1B6;
+        self->mAnims[i] = 438;
     }
     //START
     self->m18 = 0;
@@ -162,7 +162,7 @@ extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* self, int i)
 {
     int anim = *(int*)((char*)self + (i << 2));
-    if (anim == 0x1B6) {
+    if (anim == 438) {
         return 0;
     }
     return *cAIAnimEventMap_getBlendInTime(anim);
@@ -382,7 +382,7 @@ INCLUDE_ASM("animation/rideranimbase", func_00311E38);
 extern "C" void func_00311E38(sRiderAnimBase* self, int i)
 {
     cAnimSequencer_expireAll(self->mSequencers + (i << 3));
-    self->mAnims[i] = 0x1B6;
+    self->mAnims[i] = 438;
 }
 #endif
 
@@ -405,7 +405,7 @@ extern "C" void cRiderAnimBase_blendOutAll(char* self, int i, float blendOut)
 {
     cAnimSequencer_removeAllEndTriggers(*(char**)(self + 0x50) + (i << 3), 0x3F);
     cAnimSequencer_fadeOutAndExpireAll(*(char**)(self + 0x50) + (i << 3), blendOut);
-    *(int*)(self + (i << 2)) = 0x1B6;
+    *(int*)(self + (i << 2)) = 438;
 }
 #endif
 
@@ -781,7 +781,7 @@ extern "C" float cRiderAnimBase_getAIAnimDuration(char* self, int aid)
 {
     sVEntry00312790* vt = *(sVEntry00312790**)(self + 0x58);
     int id = vt[4].fn(self + vt[4].delta, aid);
-    if (id == 0x207)
+    if (id == 519)
         return 0.0f;
     unsigned int h = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
     char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((h & 0xFF) << 2));
@@ -808,7 +808,7 @@ extern "C" float func_00312820(char* self, int anim, int frame)
 {
     sVEntry00312820* vt = *(sVEntry00312820**)(self + 0x58);
     int id = vt[4].fn(self + vt[4].delta, anim);
-    if (id == 0x207)
+    if (id == 519)
         return 0.0f;
     unsigned int mapEntry = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
     char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((mapEntry & 0xFF) << 2));
@@ -863,8 +863,8 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend)
 {
     sVEntry003128E8* vt = *(sVEntry003128E8**)(self + 0x58);
     int id = vt[4].fn(self + vt[4].delta, anim);
-    if (id == 0x207)
-        return 0x1B6;
+    if (id == 519)
+        return 438;
     if (blend < 0.0f)
     {
         blend = *(float*)&cAIAnimEventMap_getBlendInTime(anim)[4];

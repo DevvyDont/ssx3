@@ -1516,7 +1516,7 @@ extern "C" void* func_00173208(void* self)
     *(int*)((char*)self + 0x74) = 0;
     *(float*)((char*)self + 0x78) = 20.0f;
     *(sQuad_00173208*)((char*)self + 0x40) = D_004FF130_00173208;
-    *(int*)((char*)self + 0xC) = 0x5A;
+    *(int*)((char*)self + 0xC) = 90;
     *(int*)((char*)self + 0x54) = 0;
     *(int*)((char*)self + 0x50) = 0;
     return self;
@@ -2102,7 +2102,7 @@ extern "C" void* func_00173208(void* self);
 extern "C" void* func_00174190(void* self)
 {
     func_00173208(self);
-    *(int*)((char*)self + 0xC) = 0x5B;
+    *(int*)((char*)self + 0xC) = 91;
     *(void***)((char*)self + 0x10) = D_0045C458;
     *(int*)((char*)self + 0x80) = 0;
     *(int*)((char*)self + 0x74) = 0;
@@ -2579,7 +2579,7 @@ extern "C" void func_00174848(int hit, void* ctx1, void* ctx2, sBox_4848* box, s
     sOctNode_4848* ch;
 
     WalkList_4848(node->list, ctx1);
-    if (cell->level == 0xB) {
+    if (cell->level == 11) {
         return;
     }
     int bits = (cell->level + 0x7E) << 23;
@@ -3374,7 +3374,7 @@ sCTBoundLineK::sCTBoundLineK() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001767F8);
 #ifdef SKIP_ASM
 extern "C" int func_001767F8(int boundLine) {
-    return boundLine + 0x2C;
+    return boundLine + 44;
 }
 #endif
 //100%
@@ -3708,7 +3708,7 @@ extern void* cDEFAULT_3ChaseAlgorithm_vtbl[];
 extern "C" void* cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(cDEFAULT_3ChaseAlgorithm* self)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
-    self->AlgorithmType = 0x3D;
+    self->AlgorithmType = 61;
     self->mVtbl = cDEFAULT_3ChaseAlgorithm_vtbl;
     return ((void*)self);
 }
@@ -4096,7 +4096,7 @@ extern void* cDirectionChaseAlgorithm_vtbl[];
 extern "C" void* cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cDirectionChaseAlgorithm* self, int n)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
-    self->AlgorithmType = n + 0x12;
+    self->AlgorithmType = n + 18;
     self->mVtbl = cDirectionChaseAlgorithm_vtbl;
     self->Angle = (float)n * 0.7853981852531433f;
     return ((void*)self);
@@ -4361,7 +4361,7 @@ extern void* cSPOKEChaseAlgorithm_vtbl[];
 extern "C" void* cSPOKEChaseAlgorithm_cSPOKEChaseAlgorithm(cSPOKEChaseAlgorithm* self)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
-    self->AlgorithmType = 0x42;
+    self->AlgorithmType = 66;
     self->mVtbl = cSPOKEChaseAlgorithm_vtbl;
     return ((void*)self);
 }
@@ -4982,7 +4982,7 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
 extern "C" void* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(cSUPERPIPEChaseAlgorithm* self, cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4* point1, cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4* point2)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
-    self->AlgorithmType = 0x43;
+    self->AlgorithmType = 67;
     self->mVtbl = cSUPERPIPEChaseAlgorithm_vtbl;
     *(cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4*)&self->Point1 = *point1;
     *(cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4*)&self->Point2 = *point2;
@@ -5568,7 +5568,7 @@ extern "C" void* cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cPOST_RAC
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((char*)self));
     sVec4_1789E8* d = (sVec4_1789E8*)(((char*)self) + 0x390);
-    self->AlgorithmType = 0x44;
+    self->AlgorithmType = 68;
     self->mVtbl = cPOST_RACE_1ChaseAlgorithm_vtbl;
     self->AgeInFrames = 0;
     sVec4_1789E8 dir = (Length_1789E8(Get_1789E8(src, 3)) > 1.0f) ? Normalize_1789E8(Get_1789E8(src, 3)) : Get_1789E8(src, 4);
@@ -5781,7 +5781,7 @@ extern "C" void cPOST_RACE_1ChaseAlgorithm_update(cPOST_RACE_1ChaseAlgorithm* se
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     (self->AgeInFrames)++;
-    self->AgeInFrames %= 0x44C;
+    self->AgeInFrames %= 1100;
     float ang = wrap_00178BB0((float)self->AgeInFrames * 0.0009090909152291715f * 6.2831854820251465f);
     float angle = (1.0f - func_0031C040(ang)) * 0.7482788562774658f + -0.7482788562774658f;
     angle -= ffloor_00178BB0(angle * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
@@ -6453,7 +6453,7 @@ extern "C" void func_0017A378(void* selfp, const char* file)
         if (func_0017A830_17A378(self, str.s, str.s)) {
             strcpy(self->entries[self->count].name, str.s);
             strcpy(self->entries[self->count].tag, str.s);
-            self->entries[self->count].type = 0x16;
+            self->entries[self->count].type = 22;
             self->entries[self->count].f84 = 0;
             self->count++;
         }
@@ -6516,13 +6516,13 @@ extern "C" void cTrackFileMan_scanLocations(sCamMgr* self)
     self->count = 0;
     self->numActive = 0;
     self->numValid = 0;
-    MEM_fill(self->entries, 0, 0x8C00);
+    MEM_fill(self->entries, 0, 35840);
     void* iface = cBE_getInterface_17A638(cBE_getBE(), 0);
-    for (i = 0; i < 0x16; i++)
+    for (i = 0; i < 22; i++)
         names[i].name = cBENewRaceInterface_getLocationFile(iface, i);
-    if (func_0017A978_A638(self, 0x16, names, (char*)str_BAM_b)) {
+    if (func_0017A978_A638(self, 22, names, (char*)str_BAM_b)) {
         int j;
-        for (j = 0; j < 0x16 && self->count < 0x100; j++) {
+        for (j = 0; j < 22 && self->count < 0x100; j++) {
             if (names[j].ok) {
                 int* ip = &self->entries[0].idx;
                 int* ap = &self->entries[0].active;

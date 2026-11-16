@@ -275,7 +275,7 @@ extern "C" void* func_003430D0(void* self, void* unused, void* stream)
     cInstanceNode_cInstanceNode(self, unused, stream);
     *(void**)((char*)self + 0xC) = D_00490570;
     sDebounceVEntry30D0* vt = *(sDebounceVEntry30D0**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 0x2C);
+    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 44);
     return self;
 }
 #endif
@@ -727,7 +727,7 @@ extern "C" void func_00343718(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sDebounceVEntry* vt = *(sDebounceVEntry**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x2C);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 44);
 }
 #endif
 
@@ -842,7 +842,7 @@ extern "C" void cCounterNode_signal(void* self, int msg, float level)
         bit = 0x100;
     else if (level == 10.0f)
         bit = 0x200;
-    if (msg == 0x1F4)
+    if (msg == 500)
     {
         int seenLevels = *(int*)((char*)self + 0x20);
         if ((seenLevels & bit) == 0)
@@ -851,7 +851,7 @@ extern "C" void cCounterNode_signal(void* self, int msg, float level)
             *(int*)((char*)self + 0x20) = seenLevels | bit;
         }
     }
-    else if (msg == 0x1F5)
+    else if (msg == 501)
     {
         int seenLevels = *(int*)((char*)self + 0x20);
         if ((seenLevels & bit) == 0)
@@ -870,7 +870,7 @@ extern "C" void cCounterNode_signal(void* self, int msg, float level)
     }
     else
     {
-        fire = msg == 0x1F6;
+        fire = msg == 502;
     }
     if (fire)
     {
@@ -1512,7 +1512,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
             break;
         }
     }
-    MEM_fill(&self->total, 0, 0xC4);
+    MEM_fill(&self->total, 0, 196);
     self->total = self->count;
     for (i = 0; i < self->count; i++) {
         sDbItem_43A8* item = animModel->list->items[i];
@@ -2004,7 +2004,7 @@ public:
 
 extern "C" void func_00344FC0(void* self, cDebounceStream* s)
 {
-    s->v01(self, 0x10C);
+    s->v01(self, 268);
 }
 #endif
 
@@ -2015,7 +2015,7 @@ extern "C" void func_003443A8(void* self);
 
 extern "C" void func_00344FF8(void* self, cDebounceStream* s)
 {
-    s->v02(self, 0x10C);
+    s->v02(self, 268);
     func_00344800(self);
     func_003443A8(self);
 }

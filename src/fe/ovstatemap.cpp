@@ -203,7 +203,7 @@ extern "C" int cOVState_MAP_onGainTransition(void* selfp, int on)
         int n = cBEMissionInterface_getNumberSessionsOnTrack(ifMap, *cBENewRaceInterface_getLocation(ifGame));
         for (i = 0; i < 8; i++) {
             char buf[0x20];
-            unsigned short text[0x28];
+            unsigned short text[40];
             sprintf(buf, str_SessionPointpct_d, i);
             menuItem = (sUIObj_87F0*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(buf));
             if (i < n) {
@@ -491,7 +491,7 @@ INCLUDE_ASM("fe/ovstatemap", func_00208EF8);
 #ifdef SKIP_ASM
 extern "C" int func_00208EF8(void* self, int menu, int event)
 {
-    return ((unsigned int)(event - 8) < 2) ? 0 : 0x101;
+    return ((unsigned int)(event - 8) < 2) ? 0 : 257;
 }
 #endif
 
@@ -593,7 +593,7 @@ extern "C" void cOVState_MAP_setupPopup(void* selfp)
     sUIObj_9010* menu = (sUIObj_9010*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_ConfirmMenu));
     sUIObj_9010* list = (sUIObj_9010*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_SessionViewPoints));
     if (*(int*)(self + 0xBC) != 0) {
-        unsigned short text[0x28];
+        unsigned short text[40];
         char buf[0x10];
         cUIState_showObjSafe(self, str_ConfirmPopup);
         if (menu != 0) {
@@ -620,7 +620,7 @@ extern "C" void cOVState_MAP_setupPopup(void* selfp)
                 cUIText_setUnicodeString(label, text);
             }
         }
-        int id = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), 0, cBELibrary_getCharacterID(0));
+        int id = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), 0, cBELibrary_getCharacterID(0));
         sprintf(buf, str_pct_d_f, id);
         cUIText* label = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(str_P1_CashAvailable));
         if (label != 0) {
@@ -997,7 +997,7 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
     int px = (int)(fx * 356.0f);
     float fy = Absf_96A8((pp.y - bounds.minY) / (bounds.maxY - bounds.minY));
     int py = (int)(fy * 266.0f);
-    char* ind = (char*)cMemMan_alloc(0x88, str_Player_Indicator_Icon, 0x20000000, 0);
+    char* ind = (char*)cMemMan_alloc(136, str_Player_Indicator_Icon, 0x20000000, 0);
     cUIThing_cUIThing(ind, self->screen, 0);
     *(void***)(ind + 0x8) = cUIIcon_vtbl;
     func_0021CCC8(ind + 0x74);
@@ -1005,7 +1005,7 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
     self->ind = (cFEObj_96A8*)ind;
     *(int*)(ind + 0x7C) = 0;
     {
-        sV3_96A8 indicatorPos((float)(unsigned int)(px + 0xFC) - 5.0f, (float)(unsigned int)(py + 0x61) - 5.0f, mapPos.z);
+        sV3_96A8 indicatorPos((float)(unsigned int)(px + 0xFC) - 5.0f, (float)(unsigned int)(py + 97) - 5.0f, mapPos.z);
         ((sFEObjData_96A8*)self->ind)->pos = indicatorPos;
     }
     self->ind->SetScale(sV3_96A8(17.0f, 17.0f));
@@ -1098,7 +1098,7 @@ extern "C" void cOVState_MAP_setupLocalSessionList(void* selfp)
         }
 
         self->markA[i] = (cFEObj_96A8*)new (str_Map_Indicator_Icon, 0x20000000, 0) cUIIcon_9970(self->screen);
-        ((sIconPos_9970*)self->markA[i])->setPosition(sV3_96A8((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 0x61) - 5.0f, mapPos.z));
+        ((sIconPos_9970*)self->markA[i])->setPosition(sV3_96A8((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 97) - 5.0f, mapPos.z));
         self->markA[i]->SetScale(sV3_96A8(18.0f, 18.0f));
         cUIIcon_setTextureByHashValue(self->markA[i], GetHashValue32(str_dot_visited));
         self->markA[i]->SetVisible(0);
@@ -1107,7 +1107,7 @@ extern "C" void cOVState_MAP_setupLocalSessionList(void* selfp)
         cList_addToEnd((cList*)(self->screen + 0xB4), (cListNode*)self->markA[i]);
 
         self->markB[i] = (cFEObj_96A8*)new (str_Map_Indicator_Highlight, 0x20000000, 0) cUIIcon_9970(self->screen);
-        self->posB[i] = sV3_96A8((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 0x61) - 5.0f, mapPos.z);
+        self->posB[i] = sV3_96A8((float)(sessionPoint_x + 0xFC) - 5.0f, (float)(sessionPoint_y + 97) - 5.0f, mapPos.z);
         ((sIconPos_9970*)self->markB[i])->setPosition(self->posB[i]);
         self->markB[i]->SetScale(sV3_96A8(18.0f, 18.0f));
         cUIIcon_setTextureByHashValue(self->markB[i], GetHashValue32(str_indicator));
@@ -1472,7 +1472,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
         cGameComm* sess = cGameComm_mGameComm;
         if (sess != 0 && sess->mConnected != 0) {
             char* name = ((char*)self) + 0x58;
-            if (func_00258160((int)sess, name, 0x41) != 0) {
+            if (func_00258160((int)sess, name, 65) != 0) {
                 char* helpText = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
                 if (helpText != 0)
                     show_A4E0(helpText, 0);
@@ -1490,7 +1490,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
                 cBXString_Concat(&chatLine, D_004A2710);
                 cBXString_Concat(&chatLine, name);
                 cUITextScroll_addAsciiString(obj, chatLine.str);
-                func_001A83D8(obj, 0x28, 4, origNumLines, selectedIndex, linesOffset, none, 1);
+                func_001A83D8(obj, 40, 4, origNumLines, selectedIndex, linesOffset, none, 1);
                 show_A4E0(obj, 1);
                 cBXString__cBXString(&chatLine, 2);
             }

@@ -92,7 +92,7 @@ extern "C" void* cBoardTrailFX_initialize(sBoardTrailFXView* self, int inChrg)
         strips[i] = self->strip[0] + i * 54;
     }
     self->fC = 0;
-    MEM_fill(self->strip[0], 0, 0x3CC0);
+    MEM_fill(self->strip[0], 0, 15552);
     cBoardTrailFX_reset((cBoardTrailFX_reset_sTrail*)self);
     return self;
 }
@@ -322,7 +322,7 @@ extern "C" int func_002E87E8(char** self)
         if (!boardTrailCanDraw(self[0])) return 0;
         if (*(int*)(self[0] + 0xB00) == 0) return 0;
     }
-    if (cRiderAnimBase_getCurrentAnimID(*(void**)(self[0] + 0x784), 2) == 0x16) {
+    if (cRiderAnimBase_getCurrentAnimID(*(void**)(self[0] + 0x784), 2) == 22) {
         if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2) + 0xB0, 0)) {
             if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2) + 0xB0, 1)) {
                 return 0;
@@ -710,9 +710,9 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     }
     self->lift = D_004A4588 - self->fade * D_004A458C;
     sBTV4_8938 pts[4];
-    const sBTV4_8938& pos = btBoneRow(self->rider, 0x8A4, 3);
-    const sBTV4_8938& side = btBoneRow(self->rider, 0x8A4, 2);
-    const sBTV4_8938& fwd = btBoneRow(self->rider, 0x8A4, 0);
+    const sBTV4_8938& pos = btBoneRow(self->rider, 2212, 3);
+    const sBTV4_8938& side = btBoneRow(self->rider, 2212, 2);
+    const sBTV4_8938& fwd = btBoneRow(self->rider, 2212, 0);
     sBTV4_8938 halfLengthVec = btScale(fwd, 87.5f);
     sBTV4_8938 halfWidthVec = btScale(side, 17.5f);
     if (func_0011FE98(self->rider) == 0 || (btCanDraw(self->rider) && *(int*)(self->rider + 0xB00) != 0)) {
@@ -721,7 +721,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
         sBTV4_8938 right = btAdd(pos, halfLengthVec);
         if (*(int*)(self->rider + 0x330) != 0) {
             int k = cRiderAnimBase_getCurrentAnimID(*(void**)(self->rider + 0x784), 2);
-            if (k >= 0x17 && k <= 0x1E) {
+            if (k >= 23 && k <= 0x1E) {
                 sideSign = -1.0f;
                 if (*(int*)(self->rider + 0x320) != 0) sideSign = 1.0f;
             } else {
@@ -740,11 +740,11 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
         pts[3] = btSub(left, halfWidthVec);
     } else {
         char* riderObj = self->rider;
-        pts[0] = btBonePos(riderObj, 0x8B0);
-        pts[1] = btBonePos(riderObj, 0x8B8);
+        pts[0] = btBonePos(riderObj, 2224);
+        pts[1] = btBonePos(riderObj, 2232);
         if (*(int*)(riderObj + 0x150) != 0) {
-            pts[2] = btBonePos(riderObj, 0x918);
-            pts[3] = btBonePos(riderObj, 0x8E8);
+            pts[2] = btBonePos(riderObj, 2328);
+            pts[3] = btBonePos(riderObj, 2280);
         } else {
             sBTV4_8938 left = btSub(pos, halfLengthVec);
             pts[2] = btAdd(left, halfWidthVec);
@@ -990,16 +990,16 @@ extern "C" void func_002EA538(char** trails, int n)
         char* t = *trails;
         int len = *(int*)(t + 0x90);
         if (len < 2) continue;
-        int k = len - 0x39;
+        int k = len - 57;
         int start = *(int*)(t + 0x8C) - k;
         int cnt = len - 2;
-        int over = len - 0x32;
+        int over = len - 50;
         if (over > 0) {
             cnt -= over;
             start += over;
         }
         if (cnt < 2) continue;
-        int st = start % 0x36;
+        int st = start % 54;
         float sc = 1.0f / (float)D_004A45C8;
         if (count < 16) {
             strips[count].pts = t + 0x10;
@@ -2034,10 +2034,10 @@ extern "C" void cCircle_TObj_Draw(char* self, float amount)
 
     char* obj = (char*)cGraphicsMan_TheGraphicsMan;
     sBTVEntryDraw* drawEntry = &(*(sBTVEntryDraw**)(obj + 0x10D8))[71];
-    drawEntry->fn(obj + drawEntry->delta, 0x50, top, 0);
+    drawEntry->fn(obj + drawEntry->delta, 80, top, 0);
     obj = (char*)cGraphicsMan_TheGraphicsMan;
     drawEntry = &(*(sBTVEntryDraw**)(obj + 0x10D8))[71];
-    drawEntry->fn(obj + drawEntry->delta, 0x50, bot, 0);
+    drawEntry->fn(obj + drawEntry->delta, 80, bot, 0);
 }
 #endif
 

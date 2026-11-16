@@ -193,7 +193,7 @@ INCLUDE_ASM("seg/seg_14B10", cCountdownHandler_OnGainState);
  * @param aiManager  the AI (cAI)
  */
 extern "C" void cCountdownHandler_OnGainState(void *handler, void *aiManager) {
-    (*(int *)((char*)(aiManager) + (0x1C))) = 0xB4;
+    (*(int *)((char*)(aiManager) + (0x1C))) = 180;
 }
 #endif
 
@@ -386,7 +386,7 @@ extern "C" void cRider_setupLean(char *self, float desLean) {
     float d = Abs_3E80(desLean - *(float *)(self + 0x1F0)) * 12.002403259277344f;
     float m = Clamp_3E80(d, 0.10000000149011612f, 14.001209259033203f);
     int st = *(int *)(self + 0x438);
-    if (st == 2 || st == 3 || st == 0xD)
+    if (st == 2 || st == 3 || st == 13)
         m = m * 0.7561339735984802f;
     *(float *)(self + 0x1F8) = desLean;
     *(float *)(self + 0x1F4) = m * 0.01666666753590107f;
@@ -880,7 +880,7 @@ extern "C" void func_00114298(char* self, float speedFactor)
     float len = Len_4298(VEL_4298);
     if (*(float*)(self + 0x2E4) < len)
         ScaleEq_4298(VEL_4298, *(float*)(self + 0x2E4) / len);
-    if (speedFactor >= 0.0f && (*(int*)(self + 0x434) < 0xB || *(int*)(self + 0x434) > 0xD)) {
+    if (speedFactor >= 0.0f && (*(int*)(self + 0x434) < 11 || *(int*)(self + 0x434) > 13)) {
         float t = (float)(AITick() - *(int*)(*(char**)(self + 0x77C) + 0x10)) * 0.01666666753590107f;
         float k;
         if (t <= 0.5388872623443604f) {
@@ -1184,7 +1184,7 @@ extern "C" int cRider_isChangeFakieAir(cRider* rider)
     t4Vector dir;
     t4Vector vel;
     t4Vector up = rider->unk_180;
-    if (n == 0x12 || *(int*)(tbl + 0x44) != 0) {
+    if (n == 18 || *(int*)(tbl + 0x44) != 0) {
         dir = up;
         vel = rider->mVelocity;
     } else {
@@ -1441,11 +1441,11 @@ extern "C" void cRider_undoRailslideModeOrientation(char* self)
         if (*(int*)(self + 0x328) == 3 || *(int*)(self + 0x328) == 4)
             SetHeading_5640(*(char**)(self + 0x784), 0.0f);
         if (*(int*)(self + 0x328) == 3)
-            cRiderAnimBase_play(*(void**)(self + 0x784), 0x11A, 0, -1.0f);
+            cRiderAnimBase_play(*(void**)(self + 0x784), 282, 0, -1.0f);
         else if (*(int*)(self + 0x328) == 4)
-            cRiderAnimBase_play(*(void**)(self + 0x784), 0x115, 0, -1.0f);
+            cRiderAnimBase_play(*(void**)(self + 0x784), 277, 0, -1.0f);
         else
-            cRiderAnimBase_play(*(void**)(self + 0x784), 0x10C, 0, -1.0f);
+            cRiderAnimBase_play(*(void**)(self + 0x784), 268, 0, -1.0f);
     } else if (func_0011FE98(self) == 0) {
         if (*(int*)(self + 0x328) == 3) {
             cRider_rotateOrientation(self, *(Q_5640*)(self + 0x1C0), 1.5707964f);
@@ -1627,30 +1627,30 @@ extern "C" void cRider_checkForReaction(char* self)
         switch (*(int*)(self + 0x358)) {
         case 1:
             *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
-            cRiderAnimBase_play(*(void**)(self + 0x784), 0x13B, 0, -1.0f);
+            cRiderAnimBase_play(*(void**)(self + 0x784), 315, 0, -1.0f);
             *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
             func_0029FF80(func_0028B180(), self, 0);
             break;
         case 2:
             *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
-            cRiderAnimBase_play(*(void**)(self + 0x784), 0x13B, 0, -1.0f);
+            cRiderAnimBase_play(*(void**)(self + 0x784), 315, 0, -1.0f);
             *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
             func_0029FF80(func_0028B180(), self, 1);
             break;
         case 3:
             *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
-            cRiderAnimBase_play(*(void**)(self + 0x784), 0x13B, 0, -1.0f);
+            cRiderAnimBase_play(*(void**)(self + 0x784), 315, 0, -1.0f);
             *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
             break;
         case 4:
             *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
-            cRiderAnimBase_play(*(void**)(self + 0x784), 0x13A, 0, -1.0f);
+            cRiderAnimBase_play(*(void**)(self + 0x784), 314, 0, -1.0f);
             *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
             break;
         case 5:
         case 6:
             if (vAbs_115B58(*(float*)(self + 0x1FC)) < 0.75f && func_0011FEE8(self) == 0) {
-                cRiderAnimBase_play(*(void**)(self + 0x784), 0x13E, 0, -1.0f);
+                cRiderAnimBase_play(*(void**)(self + 0x784), 318, 0, -1.0f);
             }
             break;
         }
@@ -1724,13 +1724,13 @@ extern "C" void cRider_checkForProximityAction(cRider* self)
                             // PORT: 64-bit long
                             *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
                             if (ad > behind) {
-                                cRiderAnimBase_play(self->mRiderAnim, 0x13F, 0, -1.0f);
+                                cRiderAnimBase_play(self->mRiderAnim, 319, 0, -1.0f);
                             } else {
                                 int left = diff < 0.0f;
                                 if (left == self->unk_320)
-                                    cRiderAnimBase_play(self->mRiderAnim, 0x141, 0, -1.0f);
+                                    cRiderAnimBase_play(self->mRiderAnim, 321, 0, -1.0f);
                                 else
-                                    cRiderAnimBase_play(self->mRiderAnim, 0x140, 0, -1.0f);
+                                    cRiderAnimBase_play(self->mRiderAnim, 320, 0, -1.0f);
                             }
                             *(long*)((char*)self->mRiderAnim + 0x20) = -1;
                             return;
@@ -1751,9 +1751,9 @@ extern "C" void cRider_checkForProximityAction(cRider* self)
                         *(long*)((char*)self->mRiderAnim + 0x20) = self->mHeadBoneMask;
                         int left = diff < 0.0f;
                         if (left == self->unk_320)
-                            cRiderAnimBase_play(self->mRiderAnim, 0x13D, 0, -1.0f);
+                            cRiderAnimBase_play(self->mRiderAnim, 317, 0, -1.0f);
                         else
-                            cRiderAnimBase_play(self->mRiderAnim, 0x13C, 0, -1.0f);
+                            cRiderAnimBase_play(self->mRiderAnim, 316, 0, -1.0f);
                         *(long*)((char*)self->mRiderAnim + 0x20) = -1;
                         return;
                     }
@@ -1976,7 +1976,7 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
             if (seqDone_163B0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0)) {
                 *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x90) = 0.0f;
                 *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
-                cRiderAnimBase_play(self->mRiderAnim, 0x145, 0, -1.0f);
+                cRiderAnimBase_play(self->mRiderAnim, 325, 0, -1.0f);
                 float w = *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x94);
                 float targWeight = *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x98);
                 float weightTimer = *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x9C);
@@ -1992,20 +1992,20 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
             cRiderAnimBase_blendOutAll(self->mRiderAnim, 0, 0.1f);
         }
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 0xD) {
+    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13) {
         int id = cRiderAnimBase_getCurrentAnimID(self->mRiderAnim, 1);
-        int match = self->unk_320 ? id == 0x143 : id == 0x144;
+        int match = self->unk_320 ? id == 323 : id == 324;
         if ((isLeft != 0 && isRight == 0 && match) || (isLeft == 0 && isRight != 0 && !match)) {
             if (seqDone_163B0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0)) {
                 *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x90) = 0.0f;
                 *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
-                if (id == 0x143)
-                    cRiderAnimBase_play(self->mRiderAnim, 0x146, 0, -1.0f);
+                if (id == 323)
+                    cRiderAnimBase_play(self->mRiderAnim, 326, 0, -1.0f);
                 else
-                    cRiderAnimBase_play(self->mRiderAnim, 0x147, 0, -1.0f);
+                    cRiderAnimBase_play(self->mRiderAnim, 327, 0, -1.0f);
                 *(long*)((char*)self->mRiderAnim + 0x20) = -1;
             }
-            if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 0) == 0xD) {
+            if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 0) == 13) {
                 float blendStep = self->mTimeScale * 0.01111111231148243f;
                 float cur = self->mAttackBlend;
                 float newBlend = 1.0f;
@@ -2027,35 +2027,35 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
         }
     }
     if (isLeft != 0 && isRight != 0) {
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 0xD && func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
+        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
             func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
         *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
-        cRiderAnimBase_play(self->mRiderAnim, 0x142, 1, -1.0f);
+        cRiderAnimBase_play(self->mRiderAnim, 322, 1, -1.0f);
         *(long*)((char*)self->mRiderAnim + 0x20) = -1;
         self->mAttackBlend = 0.0f;
     } else if (isLeft != 0 || isRight != 0) {
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
             func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 0xD && func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
         int anim;
         if (isLeft != 0) {
-            anim = self->unk_320 ? 0x143 : 0x144;
+            anim = self->unk_320 ? 323 : 324;
             self->mAttackDir = Scale_163B0(GetSide_163B0(self), -1.0f);
         } else {
             self->mAttackDir = GetSide_163B0(self);
-            anim = self->unk_320 ? 0x144 : 0x143;
+            anim = self->unk_320 ? 324 : 323;
         }
         *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
         cRiderAnimBase_play(self->mRiderAnim, anim, 1, -1.0f);
         *(long*)((char*)self->mRiderAnim + 0x20) = -1;
         self->mAttackBlend = 0.0f;
     }
-    return cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 || cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 0xD;
+    return cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 || cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13;
 }
 #endif
 
@@ -2248,7 +2248,7 @@ extern "C" void gGenMonsterTrickReqName(char* buf, int trick, int size)
 INCLUDE_ASM("seg/seg_14B10", func_00116FA8);
 #ifdef SKIP_ASM
 extern "C" int* func_00116FA8(int *arg0) {
-    *arg0 = 0x34;
+    *arg0 = 52;
     return arg0;
 }
 #endif
@@ -2264,13 +2264,13 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_update);
  * cRiderMetrix_update (the rider metrics update).
  */
 extern "C" void cHUDFX_update(void *self) {
-    if (*(int *)((char*)self + 0) != 0x34) {
+    if (*(int *)((char*)self + 0) != 52) {
         float lim = *(float *)((char*)self + 4);
         if (lim != -1.0f) {
             float t = *(float *)((char*)self + 8) + 0.01666666753590107f;
             *(float *)((char*)self + 8) = t;
             if (lim <= t)
-                *(int *)((char*)self + 0) = 0x34;
+                *(int *)((char*)self + 0) = 52;
         }
     }
 }

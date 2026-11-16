@@ -29,7 +29,7 @@ struct sCharProfile_00152398
 void* cBECharProfileDB_getScoreStats(void* self, int locID, int event)
 {
     int type = cBELibrary_getScoreType(locID, event);
-    if (type == 0x1A) {
+    if (type == 26) {
         return 0;
     }
     return &((sCharProfile_00152398*)self)->stats[type];
@@ -108,7 +108,7 @@ static inline int IsBetter_00152460(int stat, sScoreStat_00152460* s, unsigned i
 extern "C" int func_00152460(sCharProfile_00152460* self, int locationId, int stat, unsigned int value)
 {
     int type = cBELibrary_getScoreType(locationId, stat);
-    if (type == 0x1A)
+    if (type == 26)
         return 0;
     if (value == 0)
         return 0;
@@ -159,7 +159,7 @@ extern "C" int func_00152528(sCharProfile_00152528* self, int ev, int mode, int 
     if (place != -1)
     {
         int type = cBELibrary_getScoreType(ev, mode);
-        if (type != 0x1A)
+        if (type != 26)
         {
             sPlaceStat_00152528* placeStat = &self->stats[type];
             placeStat->done = 1;

@@ -156,11 +156,11 @@ extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char*
 {
     char* base = (char*)&D_0043D984;
     char* g = (char*)&(*(&cBENewRaceInterface_newRace));
-    strcpy(base + *(int*)(g + 0x40) * 0x64, name);
+    strcpy(base + *(int*)(g + 0x40) * 100, name);
     char* p1 = base + 0x10;
-    strcpy(p1 + *(int*)(g + 0x40) * 0x64, name);
+    strcpy(p1 + *(int*)(g + 0x40) * 100, name);
     char* p2 = base - 0x30;
-    strcpy(p2 + *(int*)(g + 0x40) * 0x64, name);
+    strcpy(p2 + *(int*)(g + 0x40) * 100, name);
     strcpy(str_dbg, name);
 }
 #endif
@@ -212,7 +212,7 @@ extern char str_Snow_Jam[];
 
 extern "C" void* func_00144C10(void* self)
 {
-    return str_Snow_Jam + D_00535C08.value * 0x64;
+    return str_Snow_Jam + D_00535C08.value * 100;
 }
 #endif
 //100%
@@ -222,7 +222,7 @@ extern char str_BAM[];
 
 extern "C" void* func_00144C30(void* self, int i)
 {
-    return str_BAM + i * 0x64;
+    return str_BAM + i * 100;
 }
 #endif
 
@@ -603,7 +603,7 @@ extern char str_World_Circuit[]; // 0x43-byte records at an odd address
 
 extern "C" void* func_00145378()
 {
-    return str_World_Circuit + D_00535C11[0] * 0x43;
+    return str_World_Circuit + D_00535C11[0] * 67;
 }
 #endif
 

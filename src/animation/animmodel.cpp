@@ -1018,7 +1018,7 @@ extern "C" ulong cAnimModel_getGraftMask(cAnimModel* self, int idx, char* names)
             int j = 0;
             ulong one = 1;
             for (; j < part->numBones; j++) {
-                if (func_00416B18(list + j * 0x50, token, len) == 0 && *(list + len + j * 0x50) == 0) {
+                if (func_00416B18(list + j * 80, token, len) == 0 && *(list + len + j * 80) == 0) {
                     mask |= one << (part->firstBone + j);
                     break;
                 }

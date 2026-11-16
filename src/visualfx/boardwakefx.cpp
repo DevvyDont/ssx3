@@ -185,7 +185,7 @@ extern "C" void cBoardWakeFX_readFromReplayFrame(sWakeDCF28* self)
         self->fBC = 1.25f;
     } else {
         self->count = 4;
-        self->fB8 = 0x16;
+        self->fB8 = 22;
         self->fBC = 0.800000011920929f;
     }
     one = 1.0f;
@@ -743,7 +743,7 @@ extern "C" void cBoardWakeFX_render(sWake_DAB8* self)
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->SetF22(1);
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_23 = 0;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_20 = 0;
-    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_12 = 0x14;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_12 = 20;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_0 = 2;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f8_10 = 0;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f8_5 = 7;
@@ -1931,7 +1931,7 @@ extern "C" void func_002DF448(func_002DF448_sFx* self)
         // PORT: pointer held in int (index-first address arithmetic)
         func_002DF448_sElem* e = (func_002DF448_sElem*)(i * 0x210 + (int)self->elems);
         sVEntry2DF448* vt = e->vt;
-        vt[3].fn((char*)e + vt[3].delta, self->data + i * 0xE8, e->f58);
+        vt[3].fn((char*)e + vt[3].delta, self->data + i * 232, e->f58);
     }
     self->f60 = 0;
 }
@@ -2893,8 +2893,8 @@ extern "C" void func_002E1598(sWakeFx1598* self)
         }
         sWakeVecE398 col = self->col;
         col.w = self->f120;
-        cDynamicColourEmitter_update(self->p28 + a * 0x210, &pos, &vel, &col, 1, 0.01666666753590107f);
-        cDynamicColourEmitter_update(self->p28 + b * 0x210, &self->vF0, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(self->p28 + a * 528, &pos, &vel, &col, 1, 0.01666666753590107f);
+        cDynamicColourEmitter_update(self->p28 + b * 528, &self->vF0, 0, 0, 0, 0.01666666753590107f);
         if (self->fE0 < 83.33333587646484f) {
             self->fE0 = 0.0f;
         } else {
@@ -3426,45 +3426,45 @@ extern "C" void func_002E2550(void* self)
     *(int*)((char*)self + 0x128) = mode;
     switch (mode) {
     case 0:
-        S28(0xBC4) = 1;
-        S28(0xDD4) = 1;
-        S28(0x174) = 1;
+        S28(3012) = 1;
+        S28(3540) = 1;
+        S28(372) = 1;
         {
             int enabled = 0;
             if (*(int*)((char*)self + 0x124) != 0 || *(int*)((char*)*(void**)self + 0xAC4) != 0)
                 enabled = 1;
-            S28(0x9B4) = enabled;
+            S28(2484) = enabled;
         }
-        S28(0x384) = *(int*)((char*)self + 0x124);
-        S28(0x594) = *(int*)((char*)self + 0x124);
-        S28(0x7A4) = *(int*)((char*)self + 0x124);
-        S28(0xFE4) = *(int*)((char*)self + 0x124);
-        S28(0x11F4) = *(int*)((char*)self + 0x124);
-        S28(0x1404) = *(int*)((char*)self + 0x124);
+        S28(900) = *(int*)((char*)self + 0x124);
+        S28(1428) = *(int*)((char*)self + 0x124);
+        S28(1956) = *(int*)((char*)self + 0x124);
+        S28(4068) = *(int*)((char*)self + 0x124);
+        S28(4596) = *(int*)((char*)self + 0x124);
+        S28(5124) = *(int*)((char*)self + 0x124);
         break;
     case 1:
-        S28(0xBC4) = 1;
-        S28(0xDD4) = 1;
-        S28(0x174) = 1;
-        S28(0x384) = *(int*)((char*)self + 0x124);
-        S28(0x594) = *(int*)((char*)self + 0x124);
-        S28(0x7A4) = *(int*)((char*)self + 0x124);
-        S28(0xFE4) = *(int*)((char*)self + 0x124);
-        S28(0x11F4) = *(int*)((char*)self + 0x124);
-        S28(0x9B4) = 0;
-        S28(0x1404) = 0;
+        S28(3012) = 1;
+        S28(3540) = 1;
+        S28(372) = 1;
+        S28(900) = *(int*)((char*)self + 0x124);
+        S28(1428) = *(int*)((char*)self + 0x124);
+        S28(1956) = *(int*)((char*)self + 0x124);
+        S28(4068) = *(int*)((char*)self + 0x124);
+        S28(4596) = *(int*)((char*)self + 0x124);
+        S28(2484) = 0;
+        S28(5124) = 0;
         break;
     default:
-        S28(0xBC4) = 1;
-        S28(0xDD4) = *(int*)((char*)self + 0x124);
-        S28(0x384) = 0;
-        S28(0x174) = 0;
-        S28(0x594) = 0;
-        S28(0x7A4) = 0;
-        S28(0xFE4) = 0;
-        S28(0x9B4) = 0;
-        S28(0x11F4) = 0;
-        S28(0x1404) = 0;
+        S28(3012) = 1;
+        S28(3540) = *(int*)((char*)self + 0x124);
+        S28(900) = 0;
+        S28(372) = 0;
+        S28(1428) = 0;
+        S28(1956) = 0;
+        S28(4068) = 0;
+        S28(2484) = 0;
+        S28(4596) = 0;
+        S28(5124) = 0;
         break;
     }
 }
@@ -3721,12 +3721,12 @@ extern "C" void func_002E2868(sWake_2868* self, int idx)
         col.a = self->part->alpha[idx];
         rsSetA_2868(ctx, 0x1800000, 23, 2);
         rsSetA_2868(ctx, 0x300000, 20, 0);
-        rsSetA_2868(ctx, 0xFF000, 12, 0x14);
+        rsSetA_2868(ctx, 0xFF000, 12, 20);
     } else {
         col.a = 1.0f;
         rsSetA_2868(ctx, 0x1800000, 23, 1);
         rsSetA_2868(ctx, 0x300000, 20, 0);
-        rsSetA_2868(ctx, 0xFF000, 12, 0x14);
+        rsSetA_2868(ctx, 0xFF000, 12, 20);
     }
     if (col.a <= 0.0f) {
         return;
@@ -5139,7 +5139,7 @@ extern "C" void func_002E4578(void* self)
         if (~*(int*)((char*)self + 0x6C) != 0) {
             char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
             *(int*)((char*)self + 0x7C) = 1;
-            sBWVEntryR_4578* entry = &(*(sBWVEntryR_4578**)(obj + 0x10D8))[0x72];
+            sBWVEntryR_4578* entry = &(*(sBWVEntryR_4578**)(obj + 0x10D8))[114];
             *(int*)((char*)self + 0x80) = entry->fn(obj + entry->delta);
             *(int*)((char*)self + 0x64) = 0;
             *(int*)((char*)self + 0x60) = 0;
@@ -5366,7 +5366,7 @@ extern "C" void cTransitionMan_render(sFade47E8* self)
     rsSetA47E8(ctx, 0x400000, 22, 1);
     rsSetA47E8(ctx, 0x1800000, 23, 2);
     rsSetA47E8(ctx, 0x300000, 20, 0);
-    rsSetA47E8(ctx, 0xFF000, 12, 0x14);
+    rsSetA47E8(ctx, 0xFF000, 12, 20);
     rsSetA47E8(ctx, 0x7C, 2, 5);
     rsSet047E8(ctx, 0xC, 2, 3);
     rsSetA47E8(ctx, 0x3, 0, 2);
@@ -6656,7 +6656,7 @@ extern "C" void cSpeedBoostFX_readFromReplayFrame(cSpeedBoostFX* self)
     defaultSide.y = 0.0f;
     defaultSide.z = 0.0f;
     defaultSide.w = 1.0f;
-    *(int*)((char*)self + 0x398) = 0x39;
+    *(int*)((char*)self + 0x398) = 57;
     *(int*)((char*)self + 0x8) = 0;
     *(sWakeVec4*)((char*)self + 0x40) = defaultSide;
     *(int*)((char*)self + 0xC) = 0;
@@ -6666,7 +6666,7 @@ extern "C" void cSpeedBoostFX_readFromReplayFrame(cSpeedBoostFX* self)
     *(int*)((char*)self + 0x30) = 0;
     *(int*)((char*)self + 0x3A0) = 0;
     *(int*)((char*)self + 0x39C) = 0;
-    *(int*)((char*)self + 0x3A4) = (*(int*)(*(char**)self + 0x870) >= 0) ? 0x14 : 0x12;
+    *(int*)((char*)self + 0x3A4) = (*(int*)(*(char**)self + 0x870) >= 0) ? 20 : 18;
     *(int*)((char*)self + 0x3A8) = 0;
 }
 #endif
@@ -7472,7 +7472,7 @@ extern "C" void cSpeedBoostFX_render(sBoardWake_7A10* self)
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->SetF22(1);
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_23 = 0;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_20 = 0;
-    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_12 = 0x14;
+    ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_12 = 20;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_0 = 2;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f8_10 = 0;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f8_5 = 7;

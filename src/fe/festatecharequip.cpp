@@ -113,7 +113,7 @@ extern "C" void* cFELocale_cFELocale(void* self)
     *(char*)((char*)self + 0x58) = 0;
     *(void***)((char*)self + 0x4) = D_0046BF98;
     *(char*)((char*)self + 0x2) = 4;
-    func_00416210((char*)self + 8, 0, 0x50);
+    func_00416210((char*)self + 8, 0, 80);
     return self;
 }
 #endif

@@ -342,7 +342,7 @@ extern "C" void cWorldMemoryMan_activateSectionMem(cWorldMemoryMan* self, int in
 {
     void** mem = (void**)((char*)self + 0x3C);
     void** slot = &mem[index];
-    *slot = func_003A77B0(cMemMan_alloc(0x14, str_Section_Allocator, 0x20000000, 0),
+    *slot = func_003A77B0(cMemMan_alloc(20, str_Section_Allocator, 0x20000000, 0),
                           (int)((cWorldMemoryMan_sSection*)self + section), index);
 }
 #endif
@@ -659,7 +659,7 @@ struct sVE_7FC0 { short delta; short index; void (*fn)(void*, int); };
  */
 extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
 {
-    self->m_pWorldMemMan = (cWorldMemoryMan*)cWorldMemoryMan_cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(0x13C, str_WORLD_MEMMAN, 0, 0));
+    self->m_pWorldMemMan = (cWorldMemoryMan*)cWorldMemoryMan_cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(316, str_WORLD_MEMMAN, 0, 0));
     sBXStr_7FC0 path;
     sBXStr_7FC0 full;
     sBXStr_7FC0 base;
@@ -671,7 +671,7 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
     cBXString__cBXString(&base, 2);
     char* hdr = (char*)self->mp_DataHeader;
     *(char**)(hdr + 0x14) = hdr + 0x50;
-    self->m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(0xE8, str_SharedTable, 0, 0), (char*)self->mp_DataHeader + 0x18);
+    self->m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232, str_SharedTable, 0, 0), (char*)self->mp_DataHeader + 0x18);
     self->m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag(*(int*)((char*)self->mp_DataHeader + 0x8) * 4, str_SectionTables, 0, 0));
     for (unsigned int i = 0; i < *(unsigned int*)((char*)self->mp_DataHeader + 0x8); i++)
         ((void**)self->m_pSectionCacheTable)[i] = 0;
@@ -707,8 +707,8 @@ extern "C" void cWorldCache_activateSectionMem(cWorldCache* self, int i, int sec
     cWorldMemoryMan_activateSectionMem(self->m_pWorldMemMan, i, section);
     // PORT: pointer held in int (index-first address arithmetic)
     void** slot = (void**)(i * 4 + (int)self->m_pSectionCacheTable);
-    *slot = cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(0xE8, str_SectionTable, 0, 0),
-        *(char**)((char*)self->mp_DataHeader + 0x14) + i * 0x58 + 0x20);
+    *slot = cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232, str_SectionTable, 0, 0),
+        *(char**)((char*)self->mp_DataHeader + 0x14) + i * 88 + 0x20);
 }
 #endif
 

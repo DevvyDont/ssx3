@@ -68,7 +68,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
 {
     signed char pl = idx;
     func_0039E2A0_Room(self, (int)ui);
-    *(int*)((char*)self + 0xC) = 0x2B;
+    *(int*)((char*)self + 0xC) = 43;
     *(void***)((char*)self + 0x8) = cFEStateMountainRoom_vtbl;
     sMountainRoomK2678* room = (sMountainRoomK2678*)self;
     room->player = pl;
@@ -109,7 +109,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
     }
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
     room->fB8 = func_00148950(iface3, cBELibrary_getRiderIndex(room->player));
-    void* iface13 = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* iface13 = cBE_getInterface_Fv(cBE_getBE(), 13);
     char* item = func_00156B28(iface13, room->fB4, room->charID);
     room->fBC = -1;
     room->fC4 = -1;
@@ -318,11 +318,11 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         return;
     }
     if (widgetHash == GetHashValue32(str_Group_peak_pass)) {
-        setW_2AD0(state, 0x48, w);
+        setW_2AD0(state, 72, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_Front)) {
-        setW_2AD0(state, 0x4C, w);
+        setW_2AD0(state, 76, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_peak_pass)) {
@@ -342,11 +342,11 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_0)) {
-        setW_2AD0(state, 0x58, w);
+        setW_2AD0(state, 88, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_1)) {
-        setW_2AD0(state, 0x5C, w);
+        setW_2AD0(state, 92, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_2)) {
@@ -354,15 +354,15 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_3)) {
-        setW_2AD0(state, 0x64, w);
+        setW_2AD0(state, 100, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_4)) {
-        setW_2AD0(state, 0x68, w);
+        setW_2AD0(state, 104, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_slopestyle_0)) {
-        setW_2AD0(state, 0x6C, w);
+        setW_2AD0(state, 108, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_slopestyle_1)) {
@@ -370,19 +370,19 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_slopestyle_2)) {
-        setW_2AD0(state, 0x74, w);
+        setW_2AD0(state, 116, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_superpipe_0)) {
-        setW_2AD0(state, 0x90, w);
+        setW_2AD0(state, 144, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_superpipe_1)) {
-        setW_2AD0(state, 0x94, w);
+        setW_2AD0(state, 148, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_superpipe_2)) {
-        setW_2AD0(state, 0x98, w);
+        setW_2AD0(state, 152, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_racebackcountry_0)) {
@@ -398,27 +398,27 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_0)) {
-        setW_2AD0(state, 0x84, w);
+        setW_2AD0(state, 132, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_1)) {
-        setW_2AD0(state, 0x88, w);
+        setW_2AD0(state, 136, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_2)) {
-        setW_2AD0(state, 0x8C, w);
+        setW_2AD0(state, 140, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_bigair_0)) {
-        setW_2AD0(state, 0x9C, w);
+        setW_2AD0(state, 156, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_bigair_1)) {
-        setW_2AD0(state, 0xA0, w);
+        setW_2AD0(state, 160, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_bigair_2)) {
-        setW_2AD0(state, 0xA4, w);
+        setW_2AD0(state, 164, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_Peak_pass_text)) {
@@ -438,7 +438,7 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         return;
     }
     if (widgetHash == GetHashValue32(str_helptext)) {
-        setW_2AD0(state, 0x54, w);
+        setW_2AD0(state, 84, w);
         return;
     }
 }
@@ -499,10 +499,10 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateMountainRoom_onWidgetMenu(void* self, int menu, unsigned int key)
 {
-    int result = 0x101;
+    int result = 257;
     if (key < 10) {
         if (key < 8) {
-            result = 0x101;
+            result = 257;
         } else {
             return 0x100;
         }
@@ -652,7 +652,7 @@ extern "C" void func_001D3160(void* self)
     if (*(int*)((char*)self + 0xBC) < 0) {
         void* item = *(void**)((char*)self + 0xC0);
         if (item != 0) {
-            *(int*)((char*)self + 0xBC) = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0xB0), *(int*)((char*)item + 4), 0xA, 1, 0);
+            *(int*)((char*)self + 0xBC) = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0xB0), *(int*)((char*)item + 4), 10, 1, 0);
         }
     }
 }
@@ -861,7 +861,7 @@ extern "C" void* func_001D3780(void* self, int a1, int a2, int a3)
 {
     signed char idx = a2;
     func_0039E2A0(self);
-    *(int*)((char*)self + 0xC) = 0x2C;
+    *(int*)((char*)self + 0xC) = 44;
     *(void***)((char*)self + 0x8) = cFEStatePeakRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
@@ -1001,7 +1001,7 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
         wShow_38F8(w, 0);
         return;
     }
-    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
     for (int i = 0; i < 4; i++) {
         if (widgetHash == GetHashValue32(D_004415F0[i])) {
             self->slots[i] = w;
@@ -1113,7 +1113,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(void* self, void* item, unsigned 
     }
     switch (key) {
     case 5:
-        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
                           *(int*)((char*)self + 0xDC), *(int*)((char*)self + 0xE0), *(int*)((char*)item + 0x18)) != 0) {
             void* obj = **(void***)((char*)self + 0x10);
             sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
@@ -1171,7 +1171,7 @@ extern "C" int cFEStatePeakRoom_onWidgetMenu(void* self, void* item, unsigned in
     case 9:
         return 0x100;
     case 6: {
-        void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
         void* entry = cList_getByIndex((char*)item + 0x74, id);
         if (cBERewardInterface_isTrophyOwned(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xDC),
                           *(int*)((char*)self + 0xE0), *(int*)((char*)entry + 0x18)) == 0) {
@@ -1180,7 +1180,7 @@ extern "C" int cFEStatePeakRoom_onWidgetMenu(void* self, void* item, unsigned in
         break;
     }
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -1219,7 +1219,7 @@ public:
 extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int index)
 {
     if (*(void**)((char*)self + 0xD0) != 0) {
-        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
                           *(int*)((char*)self + 0xDC), *(int*)((char*)self + 0xE0), index) != 0) {
             cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0xD0), GetHashValue32(str_kT_HELPSelectGoal));
         } else {
@@ -1295,7 +1295,7 @@ extern "C" void func_001D3F80(void* vself, int peak)
         self->medal[j]->show(0);
         self->lock[j]->show(0);
     }
-    iface = cBE_getInterface_Fv_3F80(cBE_getBE(), 0xD);
+    iface = cBE_getInterface_Fv_3F80(cBE_getBE(), 13);
     for (i = 0; i < n; i++) {
         int ch = func_001CED90(self->player, self->charId, self->mountain, peak, i);
         setChallengeName(name[i], self->mountain, peak, i);
@@ -1355,7 +1355,7 @@ extern "C" void* func_001D4268(void* self, int a1, int a2, int a3, int a4)
 {
     signed char idx = a2;
     func_0039E2A0(self);
-    *(int*)((char*)self + 0xC) = 0x2D;
+    *(int*)((char*)self + 0xC) = 45;
     *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);

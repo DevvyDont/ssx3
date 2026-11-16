@@ -179,9 +179,9 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg
     new (&self->slotA) sBsSlot;
     new (&self->slotB) sBsSlot;
     float zeroF = 0.0f;
-    self->emitter = (sBsEmitter*)cDynamicColourEmitter_cDynamicColourEmitter(cMemMan_alloc(0x210, str_mEmitter, 0, 0));
-    self->params = (sBsParams*)cMemMan_alloc(0xD8, str_mEmitterData, 0, 0);
-    self->gfx = func_002F7A68(cMemMan_alloc(0x150, str_Board_Spark_Emitter, 0, 0));
+    self->emitter = (sBsEmitter*)cDynamicColourEmitter_cDynamicColourEmitter(cMemMan_alloc(528, str_mEmitter, 0, 0));
+    self->params = (sBsParams*)cMemMan_alloc(216, str_mEmitterData, 0, 0);
+    self->gfx = func_002F7A68(cMemMan_alloc(336, str_Board_Spark_Emitter, 0, 0));
     func_0036CCB8(self->gfx);
     sBsVec4 force;
     force.x = zeroF;

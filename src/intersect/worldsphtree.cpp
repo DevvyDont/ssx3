@@ -51,7 +51,7 @@ extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* ast, int isLow)
     corner.z = center.z - radius;
     corner.w = 1.0f;
     *(sSphV4*)((char*)self + 0x30) = corner;
-    void* localTree = cMemMan_alloc(0x140, str_SphereTree, 0, 0);
+    void* localTree = cMemMan_alloc(320, str_SphereTree, 0, 0);
     SphereTree_SphereTree(localTree);
     *(void**)((char*)self + 0x68) = localTree;
     return self;
@@ -1207,7 +1207,7 @@ extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int ca
     int n = 0;
     for (unsigned int i = 0; i < self->ntris; i++) {
         sTriObj_333EF8* obj = self->tris[i];
-        if ((obj->flags & 0x41) != 0x41) {
+        if ((obj->flags & 0x41) != 65) {
             continue;
         }
         if (!overlapTri_333EF8(query, obj)) {
@@ -1518,7 +1518,7 @@ extern "C" void cBXNash_initTheAIFwdDiffCache(void* self)
 {
     void* cache = cAIFwdDiffCache_cAIFwdDiffCache(cMemMan_alloc(0x10, str_AIFwdDiffCache, 0, 0));
     *(void**)((char*)self + 0xA4) = cache;
-    cAIFwdDiffCache_Init(cache, 0x28);
+    cAIFwdDiffCache_Init(cache, 40);
 }
 #endif
 
@@ -2405,7 +2405,7 @@ extern "C" void func_00335960(void* vctx, void* vobj)
     sVec4_335960 uv;
     void* node;
     float dist;
-    if ((obj->flags & 0x41) != 0x41) return;
+    if ((obj->flags & 0x41) != 65) return;
     if (!overlap_335960(ctx->q, obj)) return;
     func_003279D0(ctx->cache, obj, &node);
     if (!func_0032B6E0(ctx->q, obj, node, &pos, &nrm, &dist, &uv, ctx->arg)) return;
@@ -2773,7 +2773,7 @@ static inline void visit_003369D8(sCell_369D8* c, char* flag, sQuery_369D8* q, s
 
 extern "C" int func_003369D8(sCell_369D8* self, float* pos, sQuad_369D8* outP, sQuad_369D8* outN)
 {
-    char seg[0xB0];
+    char seg[176];
     float lo = pos[2] - 100000.0f;
     float hi = pos[2] + 100000.0f;
     float t = clamp_003369D8((pos[2] + 20.0f - lo) / (hi - lo), 0.0f, 1.0f);
@@ -5645,7 +5645,7 @@ extern "C" int func_00341D48(void* self)
         return 1;
     }
     sVEntry_00341D48* vt = *(sVEntry_00341D48**)((char*)self + 0x3C);
-    vt[0x22].fn(obj + vt[0x22].delta, 1);
+    vt[34].fn(obj + vt[34].delta, 1);
     return 0;
 }
 #endif
@@ -5782,17 +5782,17 @@ extern "C" void cMoveNode_signal(void* p);
 
 extern "C" void func_00341FE8(sClampFloat_1F38* self, int msg, float msgValue)
 {
-    if (msg == 0x64) {
+    if (msg == 100) {
         *(int*)((char*)self + 0xC) = (int)(msgValue * (float)*(int*)(cAppMan_TheAppMan + 0x10));
-    } else if (msg == 0x65) {
+    } else if (msg == 101) {
         msgValue = msgValue * 0.03333333507180214f;
         if (self->min <= msgValue && msgValue <= self->max) {
             self->value = msgValue;
         }
-    } else if (msg == 0x66) {
+    } else if (msg == 102) {
         msgValue = msgValue * 0.03333333507180214f;
         self->speed = msgValue / (float)*(int*)(cAppMan_TheAppMan + 0x10);
-    } else if (msg == 0x67) {
+    } else if (msg == 103) {
         msgValue = msgValue * 0.03333333507180214f;
         float lim = *(float*)(*(char**)(*(char**)((char*)self + 0x48) + 0x80) + 0x14);
         if (lim < msgValue) {
@@ -5805,7 +5805,7 @@ extern "C" void func_00341FE8(sClampFloat_1F38* self, int msg, float msgValue)
         if (msgValue < self->value) {
             self->value = msgValue;
         }
-    } else if (msg == 0x68) {
+    } else if (msg == 104) {
         msgValue = msgValue * 0.03333333507180214f;
         float lim = *(float*)(*(char**)(*(char**)((char*)self + 0x48) + 0x80) + 0x14);
         if (lim < msgValue) {
@@ -5818,7 +5818,7 @@ extern "C" void func_00341FE8(sClampFloat_1F38* self, int msg, float msgValue)
         if (self->value < msgValue) {
             self->value = msgValue;
         }
-    } else if (msg == 0x69) {
+    } else if (msg == 105) {
         *(short*)self = 0;
     } else {
         cMoveNode_signal((char*)self + 0x30);
@@ -6533,7 +6533,7 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_signal);
  */
 extern "C" void cBoostModifier_signal(cBoostModifier* self, int signal)
 {
-    if (signal == 0x258) {
+    if (signal == 600) {
         self->Time = self->BoostTime;
     }
 }

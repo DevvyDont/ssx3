@@ -130,7 +130,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* state)
     for (i = 0; i < 14; i++) {
         self->aD8[i] = 1;
     }
-    if (SSXApp->Game->mCurrentStateID == 0xB) {
+    if (SSXApp->Game->mCurrentStateID == 11) {
         self->aD8[6] = 0;
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -396,7 +396,7 @@ extern "C" int cOVTemplate_PauseMenu_onWidgetMenu(void* self, int menu, unsigned
     case 6:
         return 0;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -526,7 +526,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
             break;
         case 2:
             D_004A2708 = 1;
-            cOVStateManager_triggerOverlay(0x17);
+            cOVStateManager_triggerOverlay(23);
             break;
         case 3:
             cOVStateManager_triggerOverlay(7);
@@ -546,23 +546,23 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
             cOVStateManager_triggerOverlay(0x1C);
             break;
         case 7:
-            cOVStateManager_triggerOverlay(0x19);
+            cOVStateManager_triggerOverlay(25);
             break;
         case 8:
-            cOVStateManager_triggerOverlay(0x1A);
+            cOVStateManager_triggerOverlay(26);
             break;
         case 9:
-            cOVStateManager_triggerOverlay(0x1B);
+            cOVStateManager_triggerOverlay(27);
             break;
         case 10:
             cOVStateManager_triggerOverlay(0x20);
             break;
         case 11:
             cUITemplate_MAP_mMapStyle = 2;
-            cOVStateManager_triggerOverlay(0x21);
+            cOVStateManager_triggerOverlay(33);
             break;
         case 12:
-            cOVStateManager_triggerOverlay(0x22);
+            cOVStateManager_triggerOverlay(34);
             break;
         }
         break;

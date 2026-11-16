@@ -105,7 +105,7 @@ extern "C" int cFXLoader_cFXLoader(int loader, long particlesOnly) {
         }
     }
     Mgr_BD10* m = D_BD10;
-    for (int k = 0; k < 0x51; k++) {
+    for (int k = 0; k < 81; k++) {
         r = 0;
         for (int i = 0; i < n; i++) {
             r = SHAPE_locatez(files[i], gFXShape_BD10[k].name);
@@ -120,7 +120,7 @@ extern "C" int cFXLoader_cFXLoader(int loader, long particlesOnly) {
     for (int i = 0; i < n; i++)
         MEM_free(files[i]);
     for (int i = 0; i < 10; i++)
-        m->dst[i] = m->GetEffectTexMap(0x47 + i);
+        m->dst[i] = m->GetEffectTexMap(71 + i);
     return loader;
 }
 #endif
@@ -196,7 +196,7 @@ void operator_delete(int *);
 extern "C" void cFXLoader__cFXLoader(int *self, int flags) {
     Mgr_BEE0 *m = cGraphicsMan_TheGraphicsMan_seg_1DCD10;
     int i;
-    for (i = 0; i < 0x51; i++) {
+    for (i = 0; i < 81; i++) {
         int *slot = (int*)((char*)m + 0xF50) + i;
         if (*slot != -1) {
             m->v50(*slot);
@@ -692,9 +692,9 @@ extern "C" void func_002DC7B0(cPS2FogParticleMan* list)
         p[3] = (unsigned long)(qwc | 0x50000000) << 32;
         p[4] = ((unsigned long)0x14000000 << 32) | 0x8001;
         p[5] = 0;
-        p[6] = 0x56;
+        p[6] = 86;
         p[7] = 0;
-        p[8] = (n | 0x8000) | ((unsigned long)0xA800 << 47);
+        p[8] = (n | 0x8000) | ((unsigned long)43008 << 47);
         p[9] = 0x52512;
         int rest = left - n;
         p += 10;
@@ -712,7 +712,7 @@ extern "C" void func_002DC7B0(cPS2FogParticleMan* list)
         unsigned int next = func_0038F668_C7B0(D_004A4474_C7B0, p, 4);
         sRing_C7B0* ring = g->ring;
         sRS_C7B0* rs = g->top;
-        if (ring->count < 0xA28) {
+        if (ring->count < 2600) {
             rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
             int key = *(int*)((char*)ring + 0x69CC0);
             sEnt_C7B0* e = (sEnt_C7B0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));

@@ -382,37 +382,37 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
                 case 0x10:
                     cUIScreen_parseKeyframePause_4(self, list, cmd, uiThread);
                     break;
-                case 0x11:
+                case 17:
                     cUIScreen_parseKeyframeJump_4(self, list, cmd, uiThread);
                     break;
-                case 0x12:
+                case 18:
                     cUIScreen_parseKeyframeSpawn_4(self, list, cmd, uiThread);
                     break;
                 case 0x20:
                     cUIScreen_parseObjectAnim_4(self, list, cmd, uiThread);
                     break;
-                case 0x21:
+                case 33:
                     cUIScreen_parseObjectSetPos_4(self, list, cmd, uiThread);
                     break;
-                case 0x22:
+                case 34:
                     cUIScreen_parseObjectVisible_4(self, list, cmd, uiThread);
                     break;
                 case 0x30:
                     cUIScreen_parseEventTrigger_4(self, list, cmd, uiThread);
                     break;
-                case 0x31:
+                case 49:
                     func_0039CD98_4(self, list, cmd, uiThread);
                     break;
                 case 0x40:
                     cUIScreen_parseScreenStart_4(self, list, cmd, uiThread);
                     break;
-                case 0x41:
+                case 65:
                     cUIScreen_parseScreenEnd_4(self, list, cmd, uiThread);
                     break;
-                case 0x42:
+                case 66:
                     cUIScreen_parseScreenFocusGain_4(self, list, cmd, uiThread);
                     break;
-                case 0x43:
+                case 67:
                     cUIScreen_parseScreenFocusLose_4(self, list, cmd, uiThread);
                     break;
                 }
@@ -857,8 +857,8 @@ static inline char* alloc_D078(unsigned int size, const char* tag)
 extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
 {
     switch (*(unsigned short*)rec) {
-    case 0x11: {
-        char* created = alloc_D078(0x88, str_UIIcon);
+    case 17: {
+        char* created = alloc_D078(136, str_UIIcon);
         cUIThing_cUIThing(created, self, 0);
         *(void***)(created + 8) = cUIIcon_vtbl;
         func_0021CCC8(created + 0x74);
@@ -868,7 +868,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         return created;
     }
     case 0x10: {
-        char* created = alloc_D078(0x90, str_cUIGroup);
+        char* created = alloc_D078(144, str_cUIGroup);
         cUIThing_cUIThing(created, self, 0);
         *(void***)(created + 8) = cUIGroup_vtbl;
         cList_cList(created + 0x74);
@@ -884,13 +884,13 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         initFromRec_D078(created, rec);
         return created;
     }
-    case 0x12: {
-        char* created = (char*)cUIListBox_cUIListBox(alloc_D078(0x31C, str_UIListBox), self, 0);
+    case 18: {
+        char* created = (char*)cUIListBox_cUIListBox(alloc_D078(796, str_UIListBox), self, 0);
         initFromRec_D078(created, rec);
         return created;
     }
-    case 0x13: {
-        char* created = alloc_D078(0xA8, str_UIMenu);
+    case 19: {
+        char* created = alloc_D078(168, str_UIMenu);
         cUIThing_cUIThing(created, self, 0);
         *(void***)(created + 8) = cUIGroup_vtbl;
         cList_cList(created + 0x74);
@@ -915,7 +915,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         initFromRec_D078(created, rec);
         return created;
     }
-    case 0x15: {
+    case 21: {
         char* created = alloc_D078(0x80, str_UIPair);
         int* hashes = (int*)(rec + 0x20);
         cUIThing_cUIThing(created, self, 0);
@@ -946,8 +946,8 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         }
         return created;
     }
-    case 0x19: {
-        char* created = alloc_D078(0x88, str_cUIProgress);
+    case 25: {
+        char* created = alloc_D078(136, str_cUIProgress);
         cUIThing_cUIThing(created, self, 0);
         *(int*)(created + 0x74) = 0;
         *(int*)(created + 0x78) = 0;
@@ -974,8 +974,8 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         }
         return created;
     }
-    case 0x21: {
-        char* created = alloc_D078(0xCC, str_cUIScroll);
+    case 33: {
+        char* created = alloc_D078(204, str_cUIScroll);
         cUIThing_cUIThing(created, self, 0);
         *(int*)(created + 0x74) = 0;
         *(int*)(created + 0x78) = 0;
@@ -1008,8 +1008,8 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         }
         return created;
     }
-    case 0x16: {
-        char* created = alloc_D078(0x90, str_cUISlider);
+    case 22: {
+        char* created = alloc_D078(144, str_cUISlider);
         cUIThing_cUIThing(created, self, 0);
         *(int*)(created + 0x74) = 0;
         *(int*)(created + 0x78) = 0;
@@ -1037,13 +1037,13 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         }
         return created;
     }
-    case 0x17: {
-        char* created = (char*)func_003A0348(alloc_D078(0xBC, str_UIText), self, 0);
+    case 23: {
+        char* created = (char*)func_003A0348(alloc_D078(188, str_UIText), self, 0);
         initFromRec_D078(created, rec);
         return created;
     }
     case 0x20: {
-        char* created = (char*)cUITextScroll_cUITextScroll(alloc_D078(0xD0, str_cUITextScroll), self, 0);
+        char* created = (char*)cUITextScroll_cUITextScroll(alloc_D078(208, str_cUITextScroll), self, 0);
         int* hashes = (int*)(rec + 0x2C);
         for (unsigned int i = 0; i < *(unsigned char*)(rec + 0x22); i++, hashes++) {
             char* child = (char*)cUIScreen_getObjectByHashName(self, *hashes);
@@ -1057,7 +1057,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         return created;
     }
     case 0x18: {
-        char* created = (char*)cUIVector_cUIVector(alloc_D078(0x90, str_UIVector), self, 0);
+        char* created = (char*)cUIVector_cUIVector(alloc_D078(144, str_UIVector), self, 0);
         initFromRec_D078(created, rec);
         return created;
     }
@@ -1224,12 +1224,12 @@ extern "C" void cUIScrollBar_render2D(cUIScrollBar* self, float x, float y)
         float py = y + self->mPosition.y;
         if ((*(int*)(background + 0x14) >> 6) & 1) {
             cUIScrollBar_render2D_sVEntry* vt = *(cUIScrollBar_render2D_sVEntry**)(background + 8);
-            vt[0x11].fn(background + vt[0x11].delta, px, py);
+            vt[17].fn(background + vt[17].delta, px, py);
         }
         char* knob = (char*)self->mpObjKnob;
         if ((*(int*)(knob + 0x14) >> 6) & 1) {
             cUIScrollBar_render2D_sVEntry* vt = *(cUIScrollBar_render2D_sVEntry**)(knob + 8);
-            vt[0x11].fn(knob + vt[0x11].delta, px, py);
+            vt[17].fn(knob + vt[17].delta, px, py);
         }
     }
 }
@@ -1656,7 +1656,7 @@ extern "C" void* func_0039E2A0(void* self, int a1)
     *(int*)(s + 0x10) = a1;
     *(signed char*)(s + 0x14) = -1;
     *(signed char*)(s + 0x15) = 0xF;
-    *(short*)(s + 0x1C) = 0x218;
+    *(short*)(s + 0x1C) = 536;
     *(int*)(s + 0x20) = 0;
     cList_cList(s + 0x24);
     *(int*)(s + 0x40) = 0;
@@ -1681,7 +1681,7 @@ extern "C" void* func_0039E318(void* self, int a1, int a2)
     *(int*)(s + 0x10) = a1;
     *(signed char*)(s + 0x14) = -1;
     *(signed char*)(s + 0x15) = 0xF;
-    *(short*)(s + 0x1C) = 0x218;
+    *(short*)(s + 0x1C) = 536;
     *(int*)(s + 0x20) = a2;
     cList_cList(s + 0x24);
     *(int*)(s + 0x40) = 0;
@@ -1778,7 +1778,7 @@ extern "C" void cUIState_onGainFocus(cUIState* self)
     void* n = cList_first((cList*)((char*)self + 0x24));
     if (n != 0) {
         sVEntry39E4C0* vt = (sVEntry39E4C0*)self->mVtbl;
-        vt[0xD].fn((char*)self + vt[0xD].delta, (char*)n + 0x40);
+        vt[13].fn((char*)self + vt[0xD].delta, (char*)n + 0x40);
     }
 }
 #endif
@@ -1936,7 +1936,7 @@ extern "C" void cUIState_onRender2D(void* self)
             char* obj = (char*)n + 0x40;
             if ((*(int*)((char*)n + 0x54) >> 6) & 1) {
                 sVEntry39E6B8b* vt2 = *(sVEntry39E6B8b**)((char*)n + 0x48);
-                vt2[0x11].fn(obj + vt2[0x11].delta, 0.0f, 0.0f);
+                vt2[17].fn(obj + vt2[17].delta, 0.0f, 0.0f);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));

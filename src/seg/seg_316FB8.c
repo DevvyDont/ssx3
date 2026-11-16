@@ -1110,7 +1110,7 @@ char *func_00416EB0_(int ptr, char *file, char *mode) {
         return 0;
     if ((stream = func_00420010(ptr)) == 0)
         return 0;
-    if ((fileDesc = func_0041FCB0(*(int **)(stream + 0x54), (int)file, oflags, 0x1B6)) < 0) {
+    if ((fileDesc = func_0041FCB0(*(int **)(stream + 0x54), (int)file, oflags, 438)) < 0) {
         *(short *)(stream + 0xC) = 0;
         return 0;
     }
@@ -1199,7 +1199,7 @@ int func_00417008_(struct F17008 *stream, long offset, int whence) {
     long (*seekfn)(int, long, int);
     long target, curoff;
     unsigned n;
-    int st[0x68 / 4];
+    int st[104 / 4];
     int havepos;
     struct R17008 *ptr;
     if (stream->data == 0)
@@ -1207,10 +1207,10 @@ int func_00417008_(struct F17008 *stream, long offset, int whence) {
     if (stream->data->didinit == 0)
         g17008_init(stream->data);
     ptr = stream->data;
-    if ((*(int *)&stream->flags & 0x108) == 0x108)
+    if ((*(int *)&stream->flags & 0x108) == 264)
         g17008_fflush(stream);
     if ((seekfn = stream->seek) == 0) {
-        ptr->err = 0x1D;
+        ptr->err = 29;
         return -1;
     }
     switch (whence) {
@@ -1238,7 +1238,7 @@ int func_00417008_(struct F17008 *stream, long offset, int whence) {
         havepos = 0;
         break;
     default:
-        ptr->err = 0x16;
+        ptr->err = 22;
         return -1;
     }
     if (stream->base == 0)
@@ -1360,7 +1360,7 @@ struct F174B0 {
 extern long func_00417A30();
 extern int func_0041FBF0(int *, int, int);
 void func_004174B0(struct F174B0 *stream) {
-    int st[0x68 / 4];
+    int st[104 / 4];
     if (stream->flags & 2) {
         stream->p = stream->nbuf;
         stream->base = stream->nbuf;
@@ -1535,7 +1535,7 @@ void func_004177B0(int reent, char *buf, int fmt, ...) {
     func_004177B0_va_start(ap);
     strStream.p = buf;
     strStream.w = 0x7FFFFFFF;
-    strStream.flags = 0x208;
+    strStream.flags = 520;
     strStream.base = buf;
     strStream.size = 0x7FFFFFFF;
     strStream.ent = reent;
@@ -1578,7 +1578,7 @@ void sprintf(char *buf, int fmt, ...) {
     sprintf_va_start(ap);
     strFile.p = buf;
     strFile.w = 0x7FFFFFFF;
-    strFile.flags = 0x208;
+    strFile.flags = 520;
     strFile.base = buf;
     strFile.size = 0x7FFFFFFF;
     strFile.ent = D_00454944;
@@ -1642,9 +1642,9 @@ INCLUDE_ASM("seg/seg_316FB8", func_00417948);
 #ifdef SKIP_ASM
 extern long func_0041FD10(int *, int, int, int);
 long func_00417948(int *stream, int buf, int count) {
-    int bytesRead = func_0041FD10((int *)stream[0x54 / 4], ((short *)stream)[7], buf, count);
+    int bytesRead = func_0041FD10((int *)stream[84 / 4], ((short *)stream)[7], buf, count);
     if (bytesRead >= 0) {
-        stream[0x50 / 4] += bytesRead;
+        stream[80 / 4] += bytesRead;
     } else {
         ((unsigned short *)stream)[6] &= 0xEFFF;
     }
@@ -1659,9 +1659,9 @@ extern long func_0041FDD0(int *, int, int, int);
 int func_004179B0_(int *f, int a, int b) __asm__("func_004179B0");
 int func_004179B0_(int *stream, int buf, int count) {
     if (((unsigned short *)stream)[6] & 0x100)
-        func_0041FC50((int *)stream[0x54 / 4], ((short *)stream)[7], 0, 2);
+        func_0041FC50((int *)stream[84 / 4], ((short *)stream)[7], 0, 2);
     ((unsigned short *)stream)[6] &= 0xEFFF;
-    return func_0041FDD0((int *)stream[0x54 / 4], ((short *)stream)[7], buf, count);
+    return func_0041FDD0((int *)stream[84 / 4], ((short *)stream)[7], buf, count);
 }
 #endif
 
@@ -1670,12 +1670,12 @@ INCLUDE_ASM("seg/seg_316FB8", func_00417A30);
 #ifdef SKIP_ASM
 extern long func_0041FC50(int *, int, int, int);
 long func_00417A30(int *stream, int offset, int whence) {
-    long newOffset = func_0041FC50((int *)stream[0x54 / 4], ((short *)stream)[7], offset, whence);
+    long newOffset = func_0041FC50((int *)stream[84 / 4], ((short *)stream)[7], offset, whence);
     unsigned short *flagsPtr = (unsigned short *)stream + 6;
     if (newOffset == -1) {
         *flagsPtr &= 0xEFFF;
     } else {
-        stream[0x50 / 4] = newOffset;
+        stream[80 / 4] = newOffset;
         *flagsPtr |= 0x1000;
     }
     return newOffset;
@@ -1687,7 +1687,7 @@ INCLUDE_ASM("seg/seg_316FB8", func_00417A98);
 #ifdef SKIP_ASM
 extern int func_0041FB98(int, int);
 void func_00417A98(int *stream) {
-    func_0041FB98(stream[0x54 / 4], ((short *)stream)[7]);
+    func_0041FB98(stream[84 / 4], ((short *)stream)[7]);
 }
 #endif
 
@@ -2465,7 +2465,7 @@ void func_004186C8(char *buf, int fmt, char *ap) {
     struct Fvsprintf f;
     f.p = buf;
     f.w = 0x7FFFFFFF;
-    f.flags = 0x208;
+    f.flags = 520;
     f.base = buf;
     f.size = 0x7FFFFFFF;
     f.ent = D_00454944;
@@ -2493,7 +2493,7 @@ int func_00418720(char *buf, unsigned n, int fmt, char *ap) {
     int r;
     f.p = buf;
     f.w = n;
-    f.flags = 0x208;
+    f.flags = 520;
     f.base = buf;
     f.size = n;
     f.ent = D_00454944;
@@ -4812,7 +4812,7 @@ char *func_0041EA38_(int *p, int category, char *locale) {
             else
                 *(int *)D_00455140 = 1;
         }
-        p[0xD] = (int)locale;
+        p[13] = (int)locale;
         p[0xC] = category;
         return category == 2 ? D_00455150 : D_0049A7D0b;
     }
@@ -5607,7 +5607,7 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041FF98);
 #ifdef SKIP_ASM
 extern void *func_00416210(void *, int, int);
 int *func_0041FF98(int reent, int cnt) {
-    int sz = cnt * 0x58;
+    int sz = cnt * 88;
     int *glue = (int *)func_0041DBF8(reent, sz + 0xC);
     if (!glue)
         return 0;
@@ -5739,7 +5739,7 @@ void func_004200F0(char *reent) {
     *(int *)(reent + 0x38) = 1;
     func_0041FF40((void *)stdinStream, 4, 0, (int)reent);
     func_0041FF40((void *)(reent + 0x23C), 9, 1, (int)reent);
-    func_0041FF40((void *)(reent + 0x294), 0xA, 2, (int)reent);
+    func_0041FF40((void *)(reent + 0x294), 10, 2, (int)reent);
     *(char **)(reent + 0x1E0) = stdinStream;
     *(int *)(reent + 0x1DC) = 3;
     *(int *)(reent + 0x1D8) = 0;
@@ -6046,9 +6046,9 @@ int *func_00420510(int ep_, int k) {
     int *ep = (int *)ep_;
     int x;
     int *rv;
-    if (ep[0x4C / 4] == 0) {
-        ep[0x4C / 4] = (int)func_004224A0(ep, 4, 16);
-        if (ep[0x4C / 4] == 0)
+    if (ep[76 / 4] == 0) {
+        ep[76 / 4] = (int)func_004224A0(ep, 4, 16);
+        if (ep[76 / 4] == 0)
             return 0;
     }
     rv = ((int **)ep[0x4C / 4])[k];

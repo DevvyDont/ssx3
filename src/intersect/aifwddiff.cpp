@@ -233,7 +233,7 @@ INCLUDE_ASM("intersect/aifwddiff", func_00327C68);
 extern "C" void func_00327C68(void* self, void* patch)
 {
     float* cell = (float*)((char*)patch + 0x650);
-    int n = 0x50;
+    int n = 80;
     do {
         cell[0] = 10000000000.0f;
         cell[4] = 10000000000.0f;
@@ -318,8 +318,8 @@ extern "C" int bxSphereTree_Load(sFwdDiff_27CC8* self, char* buf, int aTreeID)
     MEM_copy((char*)self->blkp + 0xC, buf + 0xC, 4);
     MEM_copy((char*)self->blkp + 0x14, buf + 0x10, 0xC);
     MEM_copy((char*)self->blkp + 0x2C, buf + 0x1C, 0xC);
-    MEM_copy((char*)self->blkp + 0x38, buf + 0x28, 0x24);
-    MEM_copy((char*)self->blkp + 0x5C, buf + 0x4C, 0x24);
+    MEM_copy((char*)self->blkp + 0x38, buf + 0x28, 36);
+    MEM_copy((char*)self->blkp + 0x5C, buf + 0x4C, 36);
     char* p = buf + 0x70;
     *(char**)((char*)self->blkp + 0x20) = p;
     p += (*(int*)((char*)self->blkp + 0xC) + 1) * 0xC;

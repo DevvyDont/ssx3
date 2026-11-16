@@ -136,7 +136,7 @@ struct sFlexRailElem_348D98 {
 
 extern "C" void* func_00348D98(char* self, void* a1, char* desc)
 {
-    func_00347D90(self, 0x14, a1, desc);
+    func_00347D90(self, 20, a1, desc);
     *(void**)(self + 0xC) = D_0048FF30;
     *(float*)(self + 0x60) = *(float*)(desc + 0x48);
     *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
@@ -210,7 +210,7 @@ extern "C" void* func_00348FA0(char* self, void* a1, void* stream)
     sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(self + 0x70);
     *elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348FA0[*(int*)(self + 0x20)];
     sFrStreamVEntry_348FA0* vt2 = *(sFrStreamVEntry_348FA0**)stream;
-    vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 0x50);
+    vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 80);
     func_003492A8(self);
     func_00349110((sFrBoxRail*)self);
     cFlexRailNode_addSpaceHash(self);
@@ -692,7 +692,7 @@ extern "C" void func_00349AD0(void* self, void* stream)
     sFlexRailVEntry9AD0* writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
     writeFn->fn((char*)stream + writeFn->delta, (char*)self + 0x60, 0xC);
     writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
-    writeFn->fn((char*)stream + writeFn->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 0x50);
+    writeFn->fn((char*)stream + writeFn->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 80);
 }
 #endif
 
@@ -743,7 +743,7 @@ struct sFlexElem_9B48 {
 
 extern "C" void* func_00349B48(char* self, void* a1, char* desc)
 {
-    func_00347D90(self, 0x15, a1, desc);
+    func_00347D90(self, 21, a1, desc);
     *(void**)(self + 0xC) = D_0048FD90;
     *(float*)(self + 0x60) = *(float*)(desc + 0x48);
     *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
@@ -1585,7 +1585,7 @@ extern "C" void func_0034C548(void* mgr, void* node, sFrRailDesc* desc);
 extern "C" void* func_0034ADD8(void* self, void* bucket, void* node, void* src)
 {
     sFrRailDesc desc;
-    func_0034FB00(self, bucket, 0xA, node);
+    func_0034FB00(self, bucket, 10, node);
     *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
     *(unsigned int*)((char*)node + 0x8) = (*(unsigned int*)((char*)node + 0x8) & 0xFFFFFFFD) | 4;
     func_0034AC88(&desc, src);
@@ -1746,7 +1746,7 @@ extern "C" int func_0034AFE8(void* self, void* data, void* ctx)
     if (**(int**)((char*)ctx + 0x80) != *(int*)((char*)self + 0x58)) {
         return 0;
     }
-    return func_00415FC8(data, self, 0x58) == 0;
+    return func_00415FC8(data, self, 88) == 0;
 }
 #endif
 

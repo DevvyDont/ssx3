@@ -60,7 +60,7 @@ extern "C" void cBXString_Realloc(cBXString* self, int size)
         self->Str = cBXString_EmptyString;
         return;
     }
-    int* hdr = (int*)operator new(size + 0xD, str_cStringData, 0x20000000, 0);
+    int* hdr = (int*)operator new(size + 13, str_cStringData, 0x20000000, 0);
     char* buffer = (char*)(hdr + 3);
     hdr[0] = 1;
     self->Str = buffer;

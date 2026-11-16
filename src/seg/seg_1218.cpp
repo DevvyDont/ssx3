@@ -2503,12 +2503,12 @@ extern "C" int func_00104110(void *riderAnim, void *sequencer, int *sequence, fl
         var_f13 = -var_f13;
     }
     if (*sequence == 7) {
-        return func_00103CC8_4110(riderAnim, sequencer, sequence, 0x11, 0xF, 0x10, deltaTime, var_f13);
+        return func_00103CC8_4110(riderAnim, sequencer, sequence, 17, 0xF, 0x10, deltaTime, var_f13);
     }
-    if (*sequence == 0xA) {
-        return func_00103CC8_4110(riderAnim, sequencer, sequence, 0x1A, 0x17, 0x19, deltaTime, var_f13);
+    if (*sequence == 10) {
+        return func_00103CC8_4110(riderAnim, sequencer, sequence, 26, 23, 25, deltaTime, var_f13);
     }
-    return func_00103CC8_4110(riderAnim, sequencer, sequence, 0x1A, 0x18, 0x19, deltaTime, var_f13);
+    return func_00103CC8_4110(riderAnim, sequencer, sequence, 26, 0x18, 25, deltaTime, var_f13);
 }
 #endif
 
@@ -2525,15 +2525,15 @@ extern "C" int func_00104178(char* self, void* x, int* anim, float dt)
     int negEndAnim, negMidAnim, cenAnim, posMidAnim, posEndAnim;
     int animId = *anim;
     if (animId == 6) {
-        negEndAnim = 0xE; negMidAnim = 0xD; cenAnim = 0xA; posMidAnim = 0xB; posEndAnim = 0xC;
+        negEndAnim = 0xE; negMidAnim = 13; cenAnim = 10; posMidAnim = 11; posEndAnim = 0xC;
     } else if (animId == 8) {
-        negEndAnim = 0x16; negMidAnim = 0x15; cenAnim = 0x12; posMidAnim = 0x13; posEndAnim = 0x14;
+        negEndAnim = 22; negMidAnim = 21; cenAnim = 18; posMidAnim = 19; posEndAnim = 20;
     } else if (animId == 14) {
-        negEndAnim = 0x20; negMidAnim = 0x1F; cenAnim = 0x1B; posMidAnim = 0x1D; posEndAnim = 0x1E;
+        negEndAnim = 0x20; negMidAnim = 0x1F; cenAnim = 27; posMidAnim = 29; posEndAnim = 0x1E;
     } else if (animId != 15) {
         negEndAnim = 9; negMidAnim = 8; cenAnim = 5; posMidAnim = 6; posEndAnim = 7;
     } else {
-        negEndAnim = 0x20; negMidAnim = 0x1F; cenAnim = 0x1C; posMidAnim = 0x1D; posEndAnim = 0x1E;
+        negEndAnim = 0x20; negMidAnim = 0x1F; cenAnim = 0x1C; posMidAnim = 29; posEndAnim = 0x1E;
     }
     return func_00103E28(self, x, (char*)anim, negEndAnim, negMidAnim, cenAnim, posMidAnim, posEndAnim, dt, weight);
 }
@@ -2558,20 +2558,20 @@ extern "C" void func_00104238(void *riderAnim, void *sequencer, int *sequence, f
         var_f13 = -var_f13;
     }
     switch (*sequence) {
-    case 0x12:
-        var_7 = 0x41;
+    case 18:
+        var_7 = 65;
         var_8 = 0x3F;
         var_9 = 0x40;
         break;
     default:
-        var_7 = 0x47;
-        var_8 = 0x45;
-        var_9 = 0x46;
+        var_7 = 71;
+        var_8 = 69;
+        var_9 = 70;
         break;
-    case 0x13:
-        var_7 = 0x44;
-        var_8 = 0x42;
-        var_9 = 0x43;
+    case 19:
+        var_7 = 68;
+        var_8 = 66;
+        var_9 = 67;
         break;
     }
     func_00103CC8_4238(riderAnim, sequencer, sequence, var_7, var_8, var_9, deltaTime, var_f13);
@@ -2593,7 +2593,7 @@ extern "C" void func_001042A8(void *riderAnim, void *sequencer, char *sequence, 
     if ((*(int *)((char*)(temp_3) + (0x320))) == 0) {
         var_f13 = -var_f13;
     }
-    func_00103CC8_42A8(riderAnim, sequencer, sequence, 0x24, 0x21, 0x22, dt, var_f13);
+    func_00103CC8_42A8(riderAnim, sequencer, sequence, 36, 33, 34, dt, var_f13);
 }
 #endif
 
@@ -2605,16 +2605,16 @@ extern "C" int func_00103BE0_42E0(void *, void *, int *, int, int, float, float)
 
 extern "C" int func_001042E0(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     int x = *sequence;
-    if (x == 0xDA) {
-        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 0x16A, 0x16B, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+    if (x == 218) {
+        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 362, 363, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
     }
-    if (x == 0xE2) {
-        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 0x173, 0x174, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+    if (x == 226) {
+        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 371, 372, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
     }
-    if (x == 0xEA) {
-        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 0x17C, 0x17D, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+    if (x == 234) {
+        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 380, 381, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
     }
-    return func_00103BE0_42E0(riderAnim, sequencer, sequence, 0x185, 0x186, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+    return func_00103BE0_42E0(riderAnim, sequencer, sequence, 389, 390, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
 }
 #endif
 
@@ -2661,16 +2661,16 @@ static inline float clamp_43F8(float v, float lo, float hi)
 
 extern "C" int func_001043F8(char* self, void* x, char* anim, float dt)
 {
-    int slot = 0xA5;
+    int slot = 165;
     switch (*(int*)anim) {
-    case 0x129: slot = 0xA5; break;
-    case 0x12A: slot = 0xAB; break;
-    case 0x12B: slot = 0xA8; break;
-    case 0x12C: slot = 0xAC; break;
-    case 0x12D: slot = 0xA6; break;
-    case 0x12E: slot = 0xAA; break;
-    case 0x12F: slot = 0xA7; break;
-    case 0x130: slot = 0xA9; break;
+    case 297: slot = 165; break;
+    case 298: slot = 171; break;
+    case 299: slot = 168; break;
+    case 300: slot = 172; break;
+    case 301: slot = 166; break;
+    case 302: slot = 170; break;
+    case 303: slot = 167; break;
+    case 304: slot = 169; break;
     }
     cAnimSequence_setSubAnim(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + slot * 4 + 0x1030));
     func_00313D40(anim, 1, 1);
@@ -2700,7 +2700,7 @@ INCLUDE_ASM("seg/seg_1218", func_001045B8);
 extern "C" void func_00103FF8_45B8(int, int, int, int, int) __asm__("func_00103FF8");
 
 extern "C" void func_001045B8(int riderAnim, int sequencer, int sequence) {
-    func_00103FF8_45B8(riderAnim, sequencer, sequence, 0x89, 0x8A);
+    func_00103FF8_45B8(riderAnim, sequencer, sequence, 137, 138);
 }
 #endif
 
@@ -2726,10 +2726,10 @@ extern "C" int func_00103BE0_4660(void *, void *, int *, int, int, float, float)
 extern "C" int func_00104660(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     float w = (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x244)));
 
-    if (*sequence == 0x2D) {
-        return func_00103BE0_4660(riderAnim, sequencer, sequence, 0x161, 0x160, deltaTime, w);
+    if (*sequence == 45) {
+        return func_00103BE0_4660(riderAnim, sequencer, sequence, 353, 352, deltaTime, w);
     }
-    return func_00103BE0_4660(riderAnim, sequencer, sequence, 0x15B, 0x15A, deltaTime, w);
+    return func_00103BE0_4660(riderAnim, sequencer, sequence, 347, 346, deltaTime, w);
 }
 #endif
 
@@ -2751,9 +2751,9 @@ extern "C" int func_001046B0(char* self, void* x, int* anim, float dt)
     int negAnim, cenAnim, posAnim;
     negAnim = 0x3C;
     if (*anim != 0x1C) {
-        cenAnim = 0x3A; posAnim = 0x3B;
+        cenAnim = 58; posAnim = 59;
     } else {
-        negAnim = 0x31; cenAnim = 0x30; posAnim = 0x32;
+        negAnim = 49; cenAnim = 0x30; posAnim = 50;
     }
     return func_00103CC8(self, x, (char*)anim, negAnim, cenAnim, dt, w, posAnim);
 }
@@ -2770,7 +2770,7 @@ static inline float clamp_4728(float v, float lo, float hi)
 extern "C" int func_00104728(char* self, void* x, char* anim, float dt) {
     float framePercent;
     int animId = *(int*)anim;
-    if (animId == 0x19 || animId == 0x21) {
+    if (animId == 25 || animId == 33) {
         framePercent = clamp_4728(1.0f - *(float*)(*(char**)(self + 0x60) + 0x268), 0.0f, 1.0f);
     } else {
         framePercent = *(float*)(*(char**)(self + 0x60) + 0x268);
@@ -2802,9 +2802,9 @@ static inline float clamp_47F0(float v, float lo, float hi)
 extern "C" int func_001047F0(char* self, void* x, char* anim, float dt) {
     float framePercent;
     int animId = *(int*)anim;
-    if (animId == 0x25) {
+    if (animId == 37) {
         framePercent = 1.0f - vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
-    } else if (animId == 0x26) {
+    } else if (animId == 38) {
         framePercent = 1.0f - vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
     } else {
         framePercent = vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
@@ -2888,7 +2888,7 @@ INCLUDE_ASM("seg/seg_1218", func_00104A40);
 extern "C" void func_00312B18_4A40(int, int, int, int) __asm__("func_00312B18");
 
 extern "C" void func_00104A40(int riderAnim, int sequencer, int sequence) {
-    func_00312B18_4A40(riderAnim, sequencer, sequence, 0x11F);
+    func_00312B18_4A40(riderAnim, sequencer, sequence, 287);
 }
 #endif
 
@@ -2903,24 +2903,24 @@ extern "C" int func_00312B18_4A60(void*, void*, int*, int) __asm__("func_00312B1
 extern "C" int func_00104A60(void* riderAnim, void* sequencer, int* sequence)
 {
     switch (*sequence) {
-    case 0x10F: case 0x11D:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x123);
-    case 0x110: case 0x118: case 0x119: case 0x11E:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x124);
-    case 0x10D: case 0x116: case 0x11B:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x121);
-    case 0x10E: case 0x117: case 0x11C:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x122);
-    case 0x111:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x125);
-    case 0x112:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x126);
-    case 0x113:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x127);
-    case 0x114:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 0x128);
+    case 271: case 285:
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 291);
+    case 272: case 280: case 281: case 286:
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 292);
+    case 269: case 278: case 283:
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 289);
+    case 270: case 279: case 284:
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 290);
+    case 273:
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 293);
+    case 274:
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 294);
+    case 275:
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 295);
+    case 276:
+        return func_00312B18_4A60(riderAnim, sequencer, sequence, 296);
     }
-    return 0x1B6;
+    return 438;
 }
 #endif
 
@@ -2932,9 +2932,9 @@ extern "C" int func_00312BD0_4B48(void*, int, int, int) __asm__("func_00312BD0")
 
 extern "C" int func_00104B48(void *riderAnim, int sequencer, int sequence) {
     if (*(int *)((char*)riderAnim + 0x64) != 0) {
-        return func_00312BD0_4B48(riderAnim, sequencer, sequence, 0x1B4);
+        return func_00312BD0_4B48(riderAnim, sequencer, sequence, 436);
     }
-    return func_00312BD0_4B48(riderAnim, sequencer, sequence, 0x11F);
+    return func_00312BD0_4B48(riderAnim, sequencer, sequence, 287);
 }
 #endif
 
@@ -2967,7 +2967,7 @@ INCLUDE_ASM("seg/seg_1218", func_00104BB8);
 extern "C" void func_00312B18_4BB8(int, int, int, int) __asm__("func_00312B18");
 
 extern "C" void func_00104BB8(int riderAnim, int sequencer, int sequence) {
-    func_00312B18_4BB8(riderAnim, sequencer, sequence, 0x13);
+    func_00312B18_4BB8(riderAnim, sequencer, sequence, 19);
 }
 #endif
 
@@ -2981,7 +2981,7 @@ extern "C" int func_00104BD8(void *riderAnim, int sequencer, int sequence) {
     if ((*(int *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x330))) == 1) {
         return func_00312BD0_4BD8(riderAnim, sequencer, sequence, 0x1C);
     }
-    return func_00312BD0_4BD8(riderAnim, sequencer, sequence, 0x24);
+    return func_00312BD0_4BD8(riderAnim, sequencer, sequence, 36);
 }
 #endif
 
@@ -3005,14 +3005,14 @@ extern "C" void func_00312BD0_4C38(int, int, int*, int) __asm__("func_00312BD0")
 extern "C" void func_00104C38(int riderAnim, int sequencer, int *sequence) {
     int var_7;
     switch (*sequence) {
-    case 0x45:
-        var_7 = 0x14;
+    case 69:
+        var_7 = 20;
         break;
-    case 0x46:
-        var_7 = 0x13;
+    case 70:
+        var_7 = 19;
         break;
     default:
-        var_7 = 0x12;
+        var_7 = 18;
         break;
     }
     func_00312BD0_4C38(riderAnim, sequencer, sequence, var_7);
@@ -3026,7 +3026,7 @@ INCLUDE_ASM("seg/seg_1218", func_00104C80);
 extern "C" void func_00312BD0_4C80(int, int, int, int) __asm__("func_00312BD0");
 
 extern "C" void func_00104C80(int riderAnim, int sequencer, int sequence) {
-    func_00312BD0_4C80(riderAnim, sequencer, sequence, 0x1B2);
+    func_00312BD0_4C80(riderAnim, sequencer, sequence, 434);
 }
 #endif
 
@@ -3035,7 +3035,7 @@ INCLUDE_ASM("seg/seg_1218", func_00104CA0);
 #ifdef SKIP_ASM
 extern "C" int func_00104CA0(int riderAnim, void* sequencer, void* sequence) {
     cAnimSequencer_expire(sequencer, sequence);
-    return 0x1B6;
+    return 438;
 }
 #endif
 
@@ -3130,7 +3130,7 @@ public:
 };
 extern "C" void func_003147F0(void*, cStream_4D68*);
 extern "C" void func_00104D68(char* self, cStream_4D68* stream) {
-    stream->Read(self, 0x50);
+    stream->Read(self, 80);
     for (int i = 0; i < 6; i++) {
         func_003147F0(*(char**)(self + 0x50) + i * 8, stream);
     }
@@ -3148,7 +3148,7 @@ public:
 extern "C" void cAnimSequencer_expireAll(void*);
 extern "C" void func_00314880(void*, cStream_4DE0*);
 extern "C" void func_00104DE0(char* self, cStream_4DE0* stream) {
-    stream->Read(self, 0x50);
+    stream->Read(self, 80);
     for (int i = 0; i < 6; i++) {
         cAnimSequencer_expireAll(*(char**)(self + 0x50) + i * 8);
         func_00314880(*(char**)(self + 0x50) + i * 8, stream);
@@ -3941,7 +3941,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
     }
     int anim = cRiderAnimBase_getCurrentAnimCategory(rider->mRiderAnim, 2);
     int state = func_0011FE98(rider);
-    if (state == 1 && (anim == 9 || anim == 2 || anim == 0xB || anim == state) && facing > 0.30000001192092896f) {
+    if (state == 1 && (anim == 9 || anim == 2 || anim == 11 || anim == state) && facing > 0.30000001192092896f) {
         t4Vector w = Add_57B8(Sub_57B8(rider->mVelocity, hit->vel), Scale_57B8(hit->n, vn));
         float speed = Len_57B8(w);
         float out = Max_57B8(bounce - vn, 277.77777099609375f);
@@ -3954,13 +3954,13 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         rider->mVelocity = Add_57B8(w, Scale_57B8(hit->n, out));
         sVEf_57B8* vt = *(sVEf_57B8**)&rider->mVtbl;
         vt[kRiderVt_vibrationBump].fn((char*)rider + vt[kRiderVt_vibrationBump].delta, vn);
-        if (cRiderAnimBase_getCurrentAnimID(rider->mRiderAnim, 2) != 0x10C || func_00312AB0(rider->mRiderAnim, 2) > 0.20000000298023224f) {
+        if (cRiderAnimBase_getCurrentAnimID(rider->mRiderAnim, 2) != 268 || func_00312AB0(rider->mRiderAnim, 2) > 0.20000000298023224f) {
             rider->mSurfaceType = 0;
             cRider_flagEventLand(rider, 0, 0, 0, hit, speed);
             cRiderMetrix_evTakeoff(rider->mMetrix, rider->unk_320 != rider->mNaturalStance, 0);
-            cRider_setControlState_57B8(rider, 0xD);
+            cRider_setControlState_57B8(rider, 13);
             cRider_setControlState_57B8(rider, 5);
-            cRiderAnimBase_play(rider->mRiderAnim, 0x10C, 1, -1.0f);
+            cRiderAnimBase_play(rider->mRiderAnim, 268, 1, -1.0f);
         }
         char* sub = (char*)&rider->mVtbl;
         sVEv_57B8* vt2 = *(sVEv_57B8**)sub;
@@ -4150,20 +4150,20 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
     t4Vector rel = Sub_5D98(info->pos, origin);
     float h = Dot_5D98(rel, Get_5D98((char*)self + 0x180));
     int cur = cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2);
-    int anim = 0x1B6;
-    if (func_0011FEE8_5D98(self) != 0xB) {
+    int anim = 438;
+    if (func_0011FEE8_5D98(self) != 11) {
         if (func_0011FE98(self) == 1 && info->off.z > 0.800000011920929f) {
-            if (cur == 0x14 || cur == 0x15) {
-                anim = 0x169;
+            if (cur == 20 || cur == 21) {
+                anim = 361;
             } else if (Abs_5D98(d1) > Abs_5D98(d0) && Abs_5D98(d1) > Abs_5D98(d2)) {
-                anim = d1 < 0.0f ? 0x162 : 0x163;
+                anim = d1 < 0.0f ? 354 : 355;
             } else if (Abs_5D98(d2) > Abs_5D98(d0) && Abs_5D98(d2) > Abs_5D98(d1)) {
                 if (d2 < 0.0f)
-                    anim = 0x15E;
-                else if (cur == 0x12 || cur == 0x13)
-                    anim = 0x15F;
+                    anim = 350;
+                else if (cur == 18 || cur == 19)
+                    anim = 351;
             } else {
-                anim = d0 < 0.0f ? 0x165 : 0x164;
+                anim = d0 < 0.0f ? 357 : 356;
             }
         } else if (func_0011FE98(self) == 1) {
             if (Abs_5D98(d1) > Abs_5D98(d0) && Abs_5D98(d1) > Abs_5D98(d2)) {
@@ -4172,7 +4172,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                     if (d1 < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
                         if (h < 60.0f && len > D_004A4C84) {
-                            anim = 0x156;
+                            anim = 342;
                         } else {
                             unsigned int k;
                             if (len > D_004A4C84)
@@ -4180,32 +4180,32 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                             else
                                 k = (unsigned int)AIrand() % 3;
                             if (k == 0)
-                                anim = 0x15B;
+                                anim = 347;
                             else if (k == 1)
-                                anim = 0x157;
+                                anim = 343;
                             else if (k == 2)
-                                anim = 0x158;
+                                anim = 344;
                             else if (k == 3)
-                                anim = 0x15A;
+                                anim = 346;
                             else
-                                anim = 0x159;
+                                anim = 345;
                         }
                     } else {
-                        anim = (AIrand() & 1) == 0 ? 0x154 : 0x155;
+                        anim = (AIrand() & 1) == 0 ? 340 : 341;
                     }
                 }
             } else if (Abs_5D98(d2) > Abs_5D98(d0) && Abs_5D98(d2) > Abs_5D98(d1)) {
                 if (d2 < 0.0f)
-                    anim = 0x15E;
-                else if (cur >= 0x12 && cur <= 0x15)
-                    anim = 0x15F;
+                    anim = 350;
+                else if (cur >= 18 && cur <= 21)
+                    anim = 351;
             } else {
                 float minSpeed = 833.337646484375f;
                 if (minSpeed < info->vn)
-                    anim = d0 < 0.0f ? 0x153 : 0x152;
+                    anim = d0 < 0.0f ? 339 : 338;
             }
-            if (anim != 0x1B6 && (cur == 0x14 || cur == 0x15))
-                anim = 0x169;
+            if (anim != 438 && (cur == 20 || cur == 21))
+                anim = 361;
         } else {
             float k = Clamp_5D98(Get_5D98((char*)&self->mMatrix.row[2]).z + 1.0f - Abs_5D98(info->off.z),
                                  0.20000000298023224f, 1.399999976158142f);
@@ -4214,7 +4214,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                     if (d1 < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
                         if (h < 60.0f && len > D_004A4C84) {
-                            anim = 0x14C;
+                            anim = 332;
                         } else {
                             unsigned int n;
                             if (len > D_004A4C84)
@@ -4222,27 +4222,27 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                             else
                                 n = (unsigned int)AIrand() % 3;
                             if (n == 0)
-                                anim = 0x14E;
+                                anim = 334;
                             else if (n == 1)
-                                anim = 0x14F;
+                                anim = 335;
                             else if (n == 2)
-                                anim = 0x151;
+                                anim = 337;
                             else if (n == 3)
-                                anim = 0x14D;
+                                anim = 333;
                             else
-                                anim = 0x150;
+                                anim = 336;
                         }
                     } else {
-                        anim = (AIrand() & 1) == 0 ? 0x14A : 0x14B;
+                        anim = (AIrand() & 1) == 0 ? 330 : 331;
                     }
                 }
             } else if (Abs_5D98(d2) > Abs_5D98(d0) && Abs_5D98(d2) > Abs_5D98(d1)) {
             } else if (info->vn > k * 2083.227294921875f) {
-                anim = d0 < 0.0f ? 0x149 : 0x148;
+                anim = d0 < 0.0f ? 329 : 328;
             }
         }
     }
-    if (anim != 0x1B6)
+    if (anim != 438)
         cRider_flagEventWipeout(self, anim, 0, id, info);
     else
         cRider_doBump((char*)self, (char*)info, 1);
@@ -4752,18 +4752,18 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
     *(int*)(D_004A3500_6848 + 0x598C) = land.mat;
     cRider_setMotionState_6848(self, 4);
     int st = func_0011FEE8_57B8(self);
-    if (st == 0 || func_0011FEE8_57B8(self) == 4 || func_0011FEE8_57B8(self) == 5 || func_0011FEE8_57B8(self) == 0xB) {
+    if (st == 0 || func_0011FEE8_57B8(self) == 4 || func_0011FEE8_57B8(self) == 5 || func_0011FEE8_57B8(self) == 11) {
         int fall = 0;
         if (func_0011FEE8_57B8(self) == 5 || func_0011FEE8_57B8(self) == 4)
             fall = 1;
-        cRider_setControlState_57B8(self, 0xD);
+        cRider_setControlState_57B8(self, 13);
         cRider_doRailslideModeOrientation(self);
         int kind = PRESS_TYPE(self);
         if (kind != 0) {
             if (kind == 1)
-                cRiderAnimBase_play(self->mRiderAnim, 0x1A, 0, -1.0f);
+                cRiderAnimBase_play(self->mRiderAnim, 26, 0, -1.0f);
             else
-                cRiderAnimBase_play(self->mRiderAnim, 0x22, 0, -1.0f);
+                cRiderAnimBase_play(self->mRiderAnim, 34, 0, -1.0f);
             cRider_setControlState_57B8(self, 1);
         } else {
             cRailslideControl_playGainFocusAnim((char*)self->mRiderHandler + 0x2B0, fall);
@@ -5318,7 +5318,7 @@ extern "C" int cRider_checkHandplantCollisions(char* self)
             return 0;
         if (Up_7578(self).z < 0.0f)
             return 0;
-        if ((unsigned int)(cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) - 0x12) < 3)
+        if ((unsigned int)(cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) - 18) < 3)
             return 0;
     }
     float spd = Len(*(sVec4*)(self + 0x1E0));
@@ -5344,10 +5344,10 @@ extern "C" int cRider_checkHandplantCollisions(char* self)
     float s = r * 0.5f;
     if (Dot(hit.normal, *(sVec4*)(self + 0x1E0)) < 0.0f)
         ScaleEq(hit.normal, -1.0f);
-    cRider_setControlState_2(self, 0xD);
+    cRider_setControlState_2(self, 13);
     cHandplantMotion_init(s, *(char**)(self + 0x77C) + 0x110, &hit);
     cHandplantControl_init(s, *(char**)(self + 0x77C) + 0x370, &hit, *(int*)(*(char**)(self + 0x77C) + 0x1A4));
-    cRider_setControlState_2(self, 0xB);
+    cRider_setControlState_2(self, 11);
     cRider_setMotionState_7578(self, 5);
     return 1;
 }
@@ -5548,7 +5548,7 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
 {
     int busy = 0;
     float mass = cRider_getMass(self);
-    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) != 0xD ||
+    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) != 13 ||
         func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) ||
         !func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0))
         busy = 1;
@@ -5862,24 +5862,24 @@ extern "C" void cRider_doOpponentCollision(char* self, char* other, sV4_7E70* n,
                 else
                     k = (unsigned int)AIrand() % 3;
                 if (k == 0)
-                    anim = 0x14E;
+                    anim = 334;
                 else if (k == 1)
-                    anim = 0x14F;
+                    anim = 335;
                 else if (k == 2)
-                    anim = 0x151;
+                    anim = 337;
                 else if (k == 3)
-                    anim = 0x14D;
+                    anim = 333;
                 else
-                    anim = 0x150;
+                    anim = 336;
             } else {
-                anim = (AIrand() & 1) == 0 ? 0x14A : 0x14B;
+                anim = (AIrand() & 1) == 0 ? 330 : 331;
             }
         } else if (Abs_7E70(dz) < Abs_7E70(dx) && Abs_7E70(dy) < Abs_7E70(dx)) {
-            anim = 0x14B;
+            anim = 331;
         } else if (dz < 0.0f) {
-            anim = 0x149;
+            anim = 329;
         } else {
-            anim = 0x148;
+            anim = 328;
         }
         cRider_flagEventWipeout_7E70(self, anim, flag, 0, &info);
         if (flag)
@@ -5989,7 +5989,7 @@ extern "C" void cRider_doBump(char* self, char* info, int flag)
     int played = 0;
     float d = Dot_8388(Get_8388(self + 0x1B0), *(sV4_8388*)(info + 0x20));
     if (d > 0.7071067690849304f) {
-        cRiderAnimBase_play(*(void**)(self + 0x784), 0x37, 0, -1.0f);
+        cRiderAnimBase_play(*(void**)(self + 0x784), 55, 0, -1.0f);
     } else if (d < -0.7071067690849304f) {
         cRiderAnimBase_play(*(void**)(self + 0x784), 0x38, 0, -1.0f);
     } else {
@@ -6007,10 +6007,10 @@ extern "C" void cRider_doBump(char* self, char* info, int flag)
                 else
                     *(float*)(self + 0x2DC) += ((int)((unsigned int)AIrand() % 5) - 2) * 3.1415927410125732f;
             }
-            cRiderAnimBase_play(*(void**)(self + 0x784), side < 0.0f ? 0x3A : 0x3C, 0, -1.0f);
+            cRiderAnimBase_play(*(void**)(self + 0x784), side < 0.0f ? 58 : 0x3C, 0, -1.0f);
             played = 1;
         } else {
-            cRiderAnimBase_play(*(void**)(self + 0x784), side < 0.0f ? 0x39 : 0x3B, 0, -1.0f);
+            cRiderAnimBase_play(*(void**)(self + 0x784), side < 0.0f ? 57 : 59, 0, -1.0f);
         }
     }
     if (flag)
@@ -6323,12 +6323,12 @@ extern "C" int cRider_isRailLandSuccess(char* self, sVec4_8A48* tgt)
         if (vDot_8A48(d, *(sVec4_8A48*)(self + 0x1E0)) < spd * -0.20000000298023224f)
             return 0;
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) == 0x12) {
+    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) == 18) {
         if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self + 0x784), 2) + 0xB0, 2) &&
             func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self + 0x784), 2) + 0xB0, 0))
             return 0;
-    } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) == 0x13 ||
-               cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) == 0x14) {
+    } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) == 19 ||
+               cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) == 20) {
         if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self + 0x784), 2) + 0xB0, 2))
             return 0;
     }
@@ -6680,7 +6680,7 @@ struct C_A898 {
 
 extern "C" void func_0010A898(cComputer* computer, C_A898 *arg1) {
     cRiderHandler_writeToReplayFrame_A898(((char*)computer), arg1);
-    arg1->m0(((char*)computer) + 0xDF0, 0x150);
+    arg1->m0(((char*)computer) + 0xDF0, 336);
 }
 #endif
 
@@ -6702,7 +6702,7 @@ public:
 extern "C" void func_0010A8E8(char* self, cStream_A8E8* in)
 {
     cRiderHandler_readFromReplayFrame(self, in);
-    in->read(self + 0xDF0, 0x150);
+    in->read(self + 0xDF0, 336);
     short state = *(short*)(self + 0xF38);
     *(Fn_A8E8*)(self + 0xF44) = D_0043CF20_A8E8[state];
     *(short*)(self + 0xF38) = state;
@@ -6881,8 +6881,8 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
         sV4_AA70 toTarget = Sub_AA70(pos, half);
         cmd->w0 = (int)(func_00100348_AA70(((char*)self), &toTarget) * 31.0f);
     }
-    cmd->b15 = (int)(ctl[0x12] * 31.0f);
-    cmd->b21 = (int)(ctl[0x13] * 31.0f);
+    cmd->b15 = (int)(ctl[18] * 31.0f);
+    cmd->b21 = (int)(ctl[19] * 31.0f);
 }
 #endif
 
@@ -7173,7 +7173,7 @@ extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
                 self->mGrabEndTime = gap;
                 self->mIsNaturalAir = 0;
             } else if (self->mGrabID == -1 && gap > 0.5f && gap < self->mGrabEndTime &&
-                       cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) != 0x14) {
+                       cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) != 20) {
                 self->mGrabID = cComputer_chooseGrabMain(((char*)self), gap);
             } else {
                 int stop = 0;
@@ -7195,8 +7195,8 @@ extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
                 self->mIsTweak = 1;
         }
         float* ctl = (float*)(((char*)self) + 0xDF0);
-        cmd->b24 = (int)(ctl[0x12] * 31.0f);
-        cmd->w0 = (int)(ctl[0x13] * 31.0f);
+        cmd->b24 = (int)(ctl[18] * 31.0f);
+        cmd->w0 = (int)(ctl[19] * 31.0f);
         cmd->b16 = self->mGrabID;
         if (self->mIsUber)
             cmd->b14 = 1;
@@ -7427,7 +7427,7 @@ extern "C" int func_0010BB18(cComputer* self_, float* out, int* ok) {
     char* vt = *(char**)(track + 0x34);
     int n = (*(int (**)(char*, sHit_BB18*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4) + 600.0f);
     for (int i = 0; i < n; i++) {
-        if (buf[i].type == 0x11) {
+        if (buf[i].type == 17) {
             *out = (float)buf[i].val * 27.777780532836914f;
             *ok = buf[i].lim <= *(float*)((char*)self_->mRider + 0x4C4);
             return 1;
@@ -7449,7 +7449,7 @@ extern "C" int func_0010BBF8(cComputer* self_, int* out) {
     int n = (*(int (**)(char*, sHit_BBF8*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4) + 50.0f);
     *out = 0;
     for (int i = 0; i < n; i++) {
-        if (buf[i].type == 0x13) {
+        if (buf[i].type == 19) {
             *out = buf[i].val > 0;
             return 1;
         }

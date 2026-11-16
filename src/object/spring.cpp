@@ -293,9 +293,9 @@ struct sSpringVEntry45D8 {
 extern "C" void cSpring_writeToReplayFrame(void* self, void* stream)
 {
     sSpringVEntry45D8* e = &(*(sSpringVEntry45D8**)stream)[1];
-    e->fn((char*)stream + e->delta, self, 0x24);
+    e->fn((char*)stream + e->delta, self, 36);
     e = &(*(sSpringVEntry45D8**)stream)[1];
-    e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x24), *(int*)self * 0x50);
+    e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x24), *(int*)self * 80);
 }
 #endif
 

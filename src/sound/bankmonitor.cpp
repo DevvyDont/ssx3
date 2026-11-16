@@ -1054,7 +1054,7 @@ extern "C" int func_002ADCA0_pl(sSndPlayer* self, int freq, sSndCallback cb, int
     self->busy = self->busy + 1;
     int idx = cMonitor_MONITOR_GetFreeInstance((cMonitor*)self, self->busy);
     if (idx >= 0) {
-        cMonitorInstance_Create_cb((char*)self + 0x98 + idx * 0x2C, freq, cb, userPtr, data1, data2, data3, data4);
+        cMonitorInstance_Create_cb((char*)self + 0x98 + idx * 44, freq, cb, userPtr, data1, data2, data3, data4);
     }
     self->busy = self->busy - 1;
     return idx;
@@ -1071,7 +1071,7 @@ INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_Destroy);
  */
 extern "C" void cMonitor_MONITOR_Destroy(cMonitor* self, int idx)
 {
-    int off = idx * 0x2C + 0x98;
+    int off = idx * 44 + 152;
     cMonitorInstance_Reset((cMonitorInstance*)(((char*)self) + off));
 }
 #endif
@@ -1128,7 +1128,7 @@ void func_002ADDE0_impl(void* self, sBmKeyDDE0 key) __asm__("func_002ADDE0");
 void func_002ADDE0_impl(void* self, sBmKeyDDE0 key)
 {
     for (int i = 0; i < 48; i++) {
-        if (func_002ADDE0_match((char*)self + 0x98 + i * 0x2C, key)) {
+        if (func_002ADDE0_match((char*)self + 0x98 + i * 44, key)) {
             cMonitorInstance_Reset((cMonitorInstance*)((char*)self + 0x98 + i * 0x2C));
         }
         ASSERT_DDE0(i < 48);
@@ -1423,7 +1423,7 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 
 extern "C" void func_002AE1F0(int* self)
 {
-    func_00416210(self, 0, 0x28);
+    func_00416210(self, 0, 40);
     self[2] = -1;
     self[1] = -1;
     self[0] = -1;
@@ -2524,7 +2524,7 @@ void* func_002AF960_impl(const char* name, int unused, void* data) __asm__("func
 
 void* func_002AF960_impl(const char* name, int unused, void* data)
 {
-    char buf[0x50];
+    char buf[80];
     int owned = data == 0;
     sprintf(buf, str_pct_s_hdr, name);
     if (data == 0) {
@@ -2533,7 +2533,7 @@ void* func_002AF960_impl(const char* name, int unused, void* data)
         }
         data = FILE_load(buf, 0);
     }
-    char* obj = (char*)func_002AF8E0(cMemMan_alloc(0x4C, str_SpeechBank, 0, 0));
+    char* obj = (char*)func_002AF8E0(cMemMan_alloc(76, str_SpeechBank, 0, 0));
     *(int*)(obj + 0x48) = owned;
     *(void**)(obj + 0x44) = data;
     *(int*)obj = func_003D69F0(data);
@@ -2819,7 +2819,7 @@ extern "C" int func_002AFD40(cSpeechInstance* selfp, int isHeaders, char* name, 
                 int len = strlen(path);
                 path[len - 4] = 0;
                 int j = len - 4;
-                while (path[j] != 0x5C && j >= 0)
+                while (path[j] != 92 && j >= 0)
                     j--;
                 func_002B0348_l((sBankList*)self, (int)path, (int)(path + j + 1), (int)entryData);
             }
@@ -2863,7 +2863,7 @@ extern "C" void func_002B0348(sBankList_0348* self, int a, int b, int c);
 
 extern "C" void func_002B0088(cSpeechInstance* speechInstance, int a1, int a2, int a3)
 {
-    char parser[0x810];
+    char parser[2064];
     char value[0x100];
     char v40[0x40];
     char path[0x80];
@@ -3038,7 +3038,7 @@ extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* a)
         sBmObj** slot = at_04D8(self->streams, idx);
         int lang = func_002B03B8((char*)*slot + 4);
         char buf[0x100];
-        sprintf(buf, str_pct_spct_spct_s_dat, str_data_b, (char*)D_004A37B4 + 0x158 + lang * 0x14, (char*)*slot + 4);
+        sprintf(buf, str_pct_spct_spct_s_dat, str_data_b, (char*)D_004A37B4 + 0x158 + lang * 20, (char*)*slot + 4);
         cSpeechSys* speechSys = D_004A37B4;
         sSndVtSlot* vt0 = (sSndVtSlot*)speechSys->mVtbl;
         int h = ((int (*)(void*, int, int))vt0[2].fn)((char*)speechSys + vt0[2].delta, self->f0, (*slot)->f40);
@@ -3059,7 +3059,7 @@ extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* a)
             vt = *(sSndVtSlot**)(d + 0x1BC);
             r = ((Fn1_04D8)vt[1].fn)(d + vt[1].delta, self->id, buf, a->f4, *(int*)((char*)self + 0x8CC), -1, *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
             if (r >= 0) {
-                func_002ADCA0_c(&(*((cBankManager**)D_004A37B4->mpVStreamSys))->sub, 0xC8, D_004A37E0[0], (int)self, r, h, 0, 0);
+                func_002ADCA0_c(&(*((cBankManager**)D_004A37B4->mpVStreamSys))->sub, 200, D_004A37E0[0], (int)self, r, h, 0, 0);
             }
             return r;
         }
@@ -3284,7 +3284,7 @@ extern char str_bank_mem[];
  */
 extern "C" void SPCH_Init(cSpeechSys* self)
 {
-    int buf = func_003D6778(0x5622, 0x10, 1);
+    int buf = func_003D6778(22050, 0x10, 1);
     int seed = func_002ADF60_a(*(int*)(**(char***)self + 0x1D8));
     bxLogPrint(D_00483390, seed);
     func_003D6840((void*)func_002AF8A8, seed, buf);
@@ -3343,7 +3343,7 @@ extern "C" void func_002B0E60(cSpeechSys* self, int i, int streamId, int section
 {
     // PORT: pointer arithmetic through int
     void** slot = (void**)(i * 4 + (int)self->mSpeechInstance);
-    *slot = func_002AFA68((cSpeechInstance*)cMemMan_alloc(0x904, str_SpeechInstance, 0, 0), i, streamId, section, memType, loadLangHead, e);
+    *slot = func_002AFA68((cSpeechInstance*)cMemMan_alloc(2308, str_SpeechInstance, 0, 0), i, streamId, section, memType, loadLangHead, e);
 }
 #endif
 
@@ -3522,7 +3522,7 @@ extern "C" int func_002B1268(cSpeechSys* self, void* msg)
 {
     char* ent = *(char**)((char*)msg + 0x18);
     if (func_002AB150(*(void**)self, func_002B1220((cSpeechSys*)((char*)D_004A37B4), *(int*)ent)) != *(int*)((char*)msg + 0x1C)) {
-        func_002ADCA0(*((int*)D_004A37B4->mpVStreamSys) + 0x1D8, 0xC8, D_004A37E0_2B1268[0].v, *(void**)((char*)msg + 0x18), *(int*)((char*)msg + 0x1C), *(int*)((char*)msg + 0x20), 0, 0);
+        func_002ADCA0(*((int*)D_004A37B4->mpVStreamSys) + 472, 200, D_004A37E0_2B1268[0].v, *(void**)((char*)msg + 0x18), *(int*)((char*)msg + 0x1C), *(int*)((char*)msg + 0x20), 0, 0);
         return 1;
     }
     int slot = *(int*)((char*)msg + 0x20);
@@ -3553,7 +3553,7 @@ extern "C" int func_002B1348(cSpeechSys* self, void* msg)
     if (func_002AAE08(*(void**)self, *(int*)(ent + 4)) - 1 > 0) {
         if (func_002AB028(*(void**)self, *(int*)(ent + 4)) != 0) {
             float f = func_002AAE78(*(void**)self, *(int*)(ent + 4));
-            func_002ADCA0(*((int*)D_004A37B4->mpVStreamSys) + 0x1D8, (int)f, D_004A37D8_2B1348[0].v, ent, *(int*)((char*)msg + 0x1C), *(int*)((char*)msg + 0x20), 0, 0);
+            func_002ADCA0(*((int*)D_004A37B4->mpVStreamSys) + 472, (int)f, D_004A37D8_2B1348[0].v, ent, *(int*)((char*)msg + 0x1C), *(int*)((char*)msg + 0x20), 0, 0);
             return 1;
         }
         if (func_002AB150(*(void**)self, func_002B1220((cSpeechSys*)((char*)D_004A37B4), *(int*)ent)) != *(int*)((char*)msg + 0x1C)) {
@@ -3873,9 +3873,9 @@ extern "C" void* func_002B1A98(cSongConfiguration* self)
     self->mBeatsPerPhrase = 8;
     self->mPhraseAlign = 0x10;
     self->mDelayCount = 0;
-    self->mDelayFeedback = 0x5A;
+    self->mDelayFeedback = 90;
     self->mDelayTime = 100;
-    self->mDelayLevel = 0x32;
+    self->mDelayLevel = 50;
     self->mPathlevel = 100;
     self->mAsynclevel = 100;
     self->mBPM = 120.0f;
@@ -3917,7 +3917,7 @@ extern const char str_SongInstance[];
 
 extern "C" void* func_002B1B98(int songName, int a1, int config, int playOpts, char baseVol, int volControl, int bankIndex, int syncLoad)
 {
-    return func_002B1C50(cMemMan_alloc(0xC4, str_SongInstance, 0, 0), songName, a1, config, playOpts, baseVol, volControl, bankIndex, syncLoad);
+    return func_002B1C50(cMemMan_alloc(196, str_SongInstance, 0, 0), songName, a1, config, playOpts, baseVol, volControl, bankIndex, syncLoad);
 }
 #endif
 
@@ -4670,7 +4670,7 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
     *(int*)(self + 0x5438) = 0;
     *(int*)(self + 0x543C) = 0;
     gMusicSys = (cMusicSys*)((void***)self);
-    *(char**)(self + 0x5434) = new (str_MPF_data_file, 0, 0) char[0x6400];
+    *(char**)(self + 0x5434) = new (str_MPF_data_file, 0, 0) char[25600];
     sBank28C0* sv = (sBank28C0*)self;
     int i = 0;
     do {
@@ -4684,10 +4684,10 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         for (int j = 4; j >= 0; j--)
             e[j] = 0;
     }
-    for (int p = 0; p < 0x1900; p += 0x64) {
-        self[p + 0x934] = D_004A35A8[0];
-        self[p + 0x2234] = D_004A35A8[0];
-        self[p + 0x3B34] = D_004A35A8[0];
+    for (int p = 0; p < 6400; p += 100) {
+        self[p + 2356] = D_004A35A8[0];
+        self[p + 8756] = D_004A35A8[0];
+        self[p + 15156] = D_004A35A8[0];
     }
     sLoc28C0 L;
     FileParser_FileParser_p(L.parser, D_004A37E8, 0x100);
@@ -4712,16 +4712,16 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         long bit = 1;
         bit <<= *(int*)(self + 0x3E4);
         *(long*)(self + 0x3F8) |= bit;
-        strcpy(self + (*(int*)(self + 0x3E4) * 0xB + 0x124), tok);
-        sv->ents[*(int*)(self + 0x3E4)] = (char*)func_002B1A98((cSongConfiguration*)cMemMan_alloc(0xAC, str_cSongConfiguration, 0, 0));
+        strcpy(self + (*(int*)(self + 0x3E4) * 11 + 292), tok);
+        sv->ents[*(int*)(self + 0x3E4)] = (char*)func_002B1A98((cSongConfiguration*)cMemMan_alloc(172, str_cSongConfiguration, 0, 0));
         while (FileParser_IsEOF(L.parser) == 0) {
             char* key = FileParser_GetName(L.parser);
             if (strcasecmp(key, str_TITLE) == 0) {
-                FileParser_AssignString(L.parser, str_TITLE, self + (*(int*)(self + 0x3E4) * 100 + 0x934));
+                FileParser_AssignString(L.parser, str_TITLE, self + (*(int*)(self + 0x3E4) * 100 + 2356));
             } else if (strcasecmp(key, str_ARTIST) == 0) {
-                FileParser_AssignString(L.parser, str_ARTIST, self + (*(int*)(self + 0x3E4) * 100 + 0x2234));
+                FileParser_AssignString(L.parser, str_ARTIST, self + (*(int*)(self + 0x3E4) * 100 + 8756));
             } else if (strcasecmp(key, str_ALBUM) == 0) {
-                FileParser_AssignString(L.parser, str_ALBUM, self + (*(int*)(self + 0x3E4) * 100 + 0x3B34));
+                FileParser_AssignString(L.parser, str_ALBUM, self + (*(int*)(self + 0x3E4) * 100 + 15156));
             } else if (strcasecmp(key, str_ADDTOFE) == 0) {
                 FileParser_AssignInt(L.parser, str_ADDTOFE, &L.iA);
                 if (L.iA == 1)
@@ -5275,7 +5275,7 @@ extern "C" void func_002B3D80(void* self, signed char target, float duration)
         *(int*)((char*)self + 0x414) = target;
         *(float*)((char*)self + 0x410) = (float)cur;
         *(float*)((char*)self + 0x40C) = (float)steps / duration;
-        func_002ADCA0_3D80(**(int**)self + 0x1D8, 0x28, D_004A3850_3D80[0].v, 0, 0, 0, 0, 0);
+        func_002ADCA0_3D80(**(int**)self + 472, 40, D_004A3850_3D80[0].v, 0, 0, 0, 0, 0);
     }
 }
 #endif
@@ -5613,7 +5613,7 @@ extern "C" void func_002B4470(void* self)
     void* p = *(void**)((char*)self + 0x408);
     if (p != 0 && *(int*)((char*)p + 0x4C) == 0) {
         *(int*)((char*)p + 0x4C) = 1;
-        func_002ADCA0_4470(*(int*)(*(int*)self) + 0x1D8, 0, D_004A3838_4470[0].v, 0, 0, 0, 0, 0);
+        func_002ADCA0_4470(*(int*)(*(int*)self) + 472, 0, D_004A3838_4470[0].v, 0, 0, 0, 0, 0);
     }
 }
 #endif
@@ -5631,8 +5631,8 @@ extern "C" void func_002B4708(void* self);
 extern "C" void func_002B44D8(void* self)
 {
     if (*(void**)((char*)self + 0x408) != 0) {
-        func_002ADDE0(*(int*)(*(int*)self) + 0x1D8, D_004A3838_2B44D8[0].v);
-        func_002ADDE0(*(int*)(*(int*)self) + 0x1D8, D_004A3840_2B44D8[0].v);
+        func_002ADDE0(*(int*)(*(int*)self) + 472, D_004A3838_2B44D8[0].v);
+        func_002ADDE0(*(int*)(*(int*)self) + 472, D_004A3840_2B44D8[0].v);
         func_002B4708(self);
     }
 }
@@ -5670,7 +5670,7 @@ extern "C" void func_002B4568(void* self, void* ent)
         float b = func_002B2718((cSongInstance*)ent);
         int c = func_002B2778((cSongInstance*)ent) + 1;
         int d = func_002B2500((cSongInstance*)ent);
-        func_002ADCA0(**(int**)self + 0x1D8, (int)b, D_004A3840_2B4568[0].v, *(void**)((char*)self + 0x408), d, c, (int)a, 0);
+        func_002ADCA0(**(int**)self + 472, (int)b, D_004A3840_2B4568[0].v, *(void**)((char*)self + 0x408), d, c, (int)a, 0);
     }
 }
 #endif
@@ -5967,9 +5967,9 @@ extern "C" void func_002B4A20(void* self, void* name, int sync)
         ASYNCFILE_release(*(void**)((char*)self + 0x5438), 0, 0);
     }
     if (sync == 0) {
-        *(void**)((char*)self + 0x5438) = func_003DF748(name, *(void**)((char*)self + 0x5434), 0x6400);
+        *(void**)((char*)self + 0x5438) = func_003DF748(name, *(void**)((char*)self + 0x5434), 25600);
     } else {
-        FILE_loadat(name, *(void**)((char*)self + 0x5434), 0x6400);
+        FILE_loadat(name, *(void**)((char*)self + 0x5434), 25600);
     }
 }
 #endif

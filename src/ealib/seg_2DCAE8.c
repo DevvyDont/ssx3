@@ -250,16 +250,16 @@ void fBEF0_BEF0(unsigned short *dst, unsigned short *fmt, unsigned short *insert
     cur = *fmt;
     if (cur != 0) {
         do {
-            if (cur != 0x25) {
+            if (cur != 37) {
                 *dst++ = *fmt++;
             } else {
                 next = fmt[1];
-                if (next == 0x31) {
+                if (next == 49) {
                     ucopy_BEF0(dst, insert1);
                     fmt += 2;
                     insert = insert1;
                     dst += ulen_BEF0(insert);
-                } else if (next == 0x32) {
+                } else if (next == 50) {
                     ucopy_BEF0(dst, insert2);
                     fmt += 2;
                     insert = insert2;
@@ -421,10 +421,10 @@ int output_number_impl(unsigned short **pp, double val, int base, unsigned int f
     }
     if (base == 10 && !(flags & 0x20)) {
         if (f500_C148(val, 0.0) < 0) {
-            *--p = 0x2D;
+            *--p = 45;
         }
         if (f500_C148(val, 0.0) > 0 && (flags & 1)) {
-            *--p = 0x2B;
+            *--p = 43;
         }
         if (f500_C148(val, 0.0) == 0 && (flags & 1)) {
             *--p = 0x20;
@@ -732,7 +732,7 @@ extern int sprintf_CB20(char *, const char *, ...) __asm__("sprintf");
 void USTR_strcpyW(char *dst, unsigned short *src) {
     int wideChar;
     while ((wideChar = *src) != 0) {
-        if ((unsigned short)wideChar >= 0x100 || ((unsigned short)wideChar == 0x5C && src[1] == 0x78)) {
+        if ((unsigned short)wideChar >= 0x100 || ((unsigned short)wideChar == 92 && src[1] == 0x78)) {
             sprintf_CB20(dst, D_00495D18_CB20, *src);
             dst += 6;
         } else {
@@ -819,7 +819,7 @@ int FILESYS_initadr(int maxopenfiles, int maxdirfiles, int maxfileops, int mem) 
         MEM_fill_CC88(D_00519AB0_CC88[10], 0, FILESYS_overhead_CC88(maxopenfiles, maxdirfiles, maxfileops));
         D_00519AB0_CC88[11] = D_00519AB0_CC88[10] + D_00519AB0_CC88[0] * 0x30;
         if (D_00450C60_CC88 != 0) {
-            v = func_003E4040_CC88(maxdirfiles, D_00519AB0_CC88[1] * 0x110 + D_00519AB0_CC88[11]);
+            v = func_003E4040_CC88(maxdirfiles, D_00519AB0_CC88[1] * 272 + D_00519AB0_CC88[11]);
         } else {
             v = 0;
         }
@@ -849,10 +849,10 @@ extern int D_00450C5C_CD98[] __asm__("D_00450C5C");
  */
 int FILESYS_overhead(int maxopenfiles, int maxdirfiles, int maxfileops) {
     int x = maxopenfiles ? maxopenfiles : 0x10;
-    int y = maxdirfiles ? maxdirfiles : 0x3E8;
+    int y = maxdirfiles ? maxdirfiles : 1000;
     int z = maxfileops ? maxfileops : 0x20;
     int sz = D_00450C5C_CD98[0] + 0xC;
-    return z * 0x30 + x * 0x110 + y * sz + 0x40;
+    return z * 0x30 + x * 272 + y * sz + 0x40;
 }
 #endif
 
@@ -1047,7 +1047,7 @@ void FILESYS_cancelop(struct H_D148 ophandle) {
     }
     if (ok != 0) {
         t = (u >> 20) & 0xF;
-        if (t != 3 && t != 0xA) {
+        if (t != 3 && t != 10) {
             *(int *)(((unsigned char *)&ophandle)[3] * 0x30 + D_00519AD8_D148[0] + 4) = 1;
         }
     }
@@ -1755,7 +1755,7 @@ void func_003DDE78(char *a) {
     strcpy_DE78(D_00519AF0_DE78, a);
     if (D_00519AF0_DE78[0xFF] == 0) {
         len = strlen_DE78(D_00519AF0_DE78);
-        if (len > 0 && D_00519AF0_DE78[len - 1] != 0x2F) {
+        if (len > 0 && D_00519AF0_DE78[len - 1] != 47) {
             strcat_DE78(D_00519AF0_DE78, D_00495D78_DE78);
         }
     }
@@ -2167,7 +2167,7 @@ extern void MUTEX_unlock(int *);
  */
 void freehandle(int handle) {
     MUTEX_lock(D_00519AC4_9AC4);
-    MEM_fill(handle, 0, 0x110);
+    MEM_fill(handle, 0, 272);
     MUTEX_unlock(D_00519AC4_9AC4);
 }
 #endif
@@ -2198,7 +2198,7 @@ extern void MEM_copy_E928(int *, void *, int) __asm__("MEM_copy");
 
 int func_003DE928(int *arg0) {
     int n = *arg0;
-    if (n >= 0x25) {
+    if (n >= 37) {
         MEM_clear_E928(arg0, n);
     }
     D_00450C10_E928.f18 = D_00450C58_E928.f0;
@@ -2223,8 +2223,8 @@ extern void MEM_clear_E9B8(void *, int) __asm__("MEM_clear");
 extern void MEM_copy_E9B8(void *, int *, int) __asm__("MEM_copy");
 
 int func_003DE9B8(int *arg0) {
-    if (*arg0 < 0x24) {
-        MEM_clear_E9B8(&D_00450C10_E9B8, 0x24);
+    if (*arg0 < 36) {
+        MEM_clear_E9B8(&D_00450C10_E9B8, 36);
     }
     MEM_copy_E9B8(&D_00450C10_E9B8, arg0, *arg0);
     D_00450C58_E9B8.f0 = D_00450C10_E9B8.f18;
@@ -2741,7 +2741,7 @@ void func_003DF0F0(int request, int status, int *job) {
     job[2] += n;
     job[11] += n;
     if (n <= 0x7FFF || job[4] != 0) {
-        *(volatile int *)&job[7] = FILESYS_close(job[8], 0x63, job);
+        *(volatile int *)&job[7] = FILESYS_close(job[8], 99, job);
         if (*(volatile int *)&job[7] != 0) {
             FILESYS_callbackop(*(volatile int *)&job[7], func_003DF0B8);
         }
@@ -2750,7 +2750,7 @@ void func_003DF0F0(int request, int status, int *job) {
         int rem = job[10] - n;
         job[9] = off;
         job[10] = rem;
-        *(volatile int *)&job[7] = FILESYS_read(job[8], off, job[11], rem <= 0x8000 ? rem : 0x8000, 0x63, job);
+        *(volatile int *)&job[7] = FILESYS_read(job[8], off, job[11], rem <= 0x8000 ? rem : 0x8000, 99, job);
         if (*(volatile int *)&job[7] != 0) {
             FILESYS_callbackop(*(volatile int *)&job[7], func_003DF0F0);
         }
@@ -2785,7 +2785,7 @@ void loadfilesizecallback(int opHandle, int opStatus, char *userdata) {
     int fileSize, buffer, readSize, old;
     fileSize = fD310_F1E0(*(volatile int *)(userdata + 0x1C));
     if (*(int *)(userdata + 0x10) != 0) {
-        *(volatile int *)(userdata + 0x1C) = fD5A0_F1E0(*(int *)(userdata + 0x20), 0x63, userdata);
+        *(volatile int *)(userdata + 0x1C) = fD5A0_F1E0(*(int *)(userdata + 0x20), 99, userdata);
         if (*(volatile int *)(userdata + 0x1C) != 0) fCF70_F1E0(*(volatile int *)(userdata + 0x1C), fF0B8_F1E0);
     } else {
         old = *(int *)(userdata + 0x28);
@@ -2794,7 +2794,7 @@ void loadfilesizecallback(int opHandle, int opStatus, char *userdata) {
         readSize = *(int *)(userdata + 0x28);
         *(int *)(userdata + 0x14) = buffer;
         *(int *)(userdata + 0x2C) = buffer;
-        *(volatile int *)(userdata + 0x1C) = fD648_F1E0(*(int *)(userdata + 0x20), *(int *)(userdata + 0x24), buffer, readSize <= 0x8000 ? readSize : 0x8000, 0x63, userdata);
+        *(volatile int *)(userdata + 0x1C) = fD648_F1E0(*(int *)(userdata + 0x20), *(int *)(userdata + 0x24), buffer, readSize <= 0x8000 ? readSize : 0x8000, 99, userdata);
         if (*(volatile int *)(userdata + 0x1C) != 0) fCF70_F1E0(*(volatile int *)(userdata + 0x1C), fF0F0_F1E0);
     }
 }
@@ -2819,18 +2819,18 @@ void func_003DF2C0(int a, int b, struct sReq *s) {
         return;
     }
     if (s->f10 != 0) {
-        s->f1C = FILESYS_close(n, 0x63, s);
+        s->f1C = FILESYS_close(n, 99, s);
         if (s->f1C != 0) {
             FILESYS_callbackop(s->f1C, func_003DF0B8_F2C0);
         }
     } else if (s->f14 == 0) {
         int m = s->f28;
-        s->f1C = FILESYS_read(n, s->f24, s->f2C, m <= 0x8000 ? m : 0x8000, 0x63, s);
+        s->f1C = FILESYS_read(n, s->f24, s->f2C, m <= 0x8000 ? m : 0x8000, 99, s);
         if (s->f1C != 0) {
             FILESYS_callbackop(s->f1C, func_003DF0F0_F2C0);
         }
     } else {
-        s->f1C = func_003DD7E0_F2C0(n, 0x63, s);
+        s->f1C = func_003DD7E0_F2C0(n, 99, s);
         if (s->f1C != 0) {
             FILESYS_callbackop(s->f1C, loadfilesizecallback_F2C0);
         }
@@ -2891,7 +2891,7 @@ extern void MUTEX_create_F488(void *) __asm__("MUTEX_create");
 void ASYNCFILE_init(int n, int x) {
     E_F488 *reqs;
     int i;
-    if (D_00450C34_F488 == 0 && n < 0x101) {
+    if (D_00450C34_F488 == 0 && n < 257) {
         D_00519BF0_F488 = n;
         reqs = D_00450C14_F488(D_00495DB8_F488, n * 0x30, x);
         D_00519BF8_F488[1] = &reqs[n - 1];
@@ -2982,7 +2982,7 @@ int ASYNCFILE_load(int name, int memtype) {
         t->w24 = 0;
         t->w2C = 0;
         t->w14 = 1;
-        t->w1C = f_D4E8_F690(name, 1, 0x64, t);
+        t->w1C = f_D4E8_F690(name, 1, 100, t);
         if (t->w1C != 0) {
             f_CF70_F690(t->w1C, f_F2C0_F690);
             return t->w0;
@@ -3044,7 +3044,7 @@ int func_003DF808(int file, int offset, int buffer, int size) {
         *(int *)(job + 0x24) = offset;
         *(int *)(job + 0x28) = size;
         *(int *)(job + 0x2C) = buffer;
-        *(volatile int *)(job + 0x1C) = fD648_F808(file, offset, buffer, size <= 0x8000 ? size : 0x8000, 0x64, job);
+        *(volatile int *)(job + 0x1C) = fD648_F808(file, offset, buffer, size <= 0x8000 ? size : 0x8000, 100, job);
         if (*(volatile int *)(job + 0x1C) != 0) {
             fCF70_F808(*(volatile int *)(job + 0x1C), fF3C0_F808);
             return *(int *)job;
@@ -3367,7 +3367,7 @@ void *func_003DFDD0(void *stream, int requestId) {
     if (temp_3 >= (*(int *)((char*)(stream) + (0x18)))) {
         return 0;
     }
-    temp_2 = (*(int *)((char*)(stream) + (0x14))) + (temp_3 * 0x124);
+    temp_2 = (*(int *)((char*)(stream) + (0x14))) + (temp_3 * 292);
     if (requestId == (*(int *)((char*)(temp_2) + (0)))) {
         return ((*(int *)((char*)(temp_2) + (4))) == 0) ? 0 : temp_2;
     }
@@ -3456,7 +3456,7 @@ int func_003DFED0(char *self) {
             break;
         }
         if (*(int *)rec == *(int *)(current + 0x11C)) {
-            len = ALIGN64_FED0(len, *(char **)(self + 0x54));
+            len = ALIGN64_FED0(len, *(char **)(self + 84));
         }
         channel = func_003DFE88_FED0(self, rec);
         if (channel < 0) {
@@ -3491,7 +3491,7 @@ int func_003DFED0(char *self) {
         }
         if (busy) {
             if (*(int *)rec != *(int *)(current + 0x11C)) {
-                len = ALIGN64_FED0(len, *(char **)(self + 0x54));
+                len = ALIGN64_FED0(len, *(char **)(self + 84));
                 *(int *)(rec + 4) = len | (channel << 24);
             }
             return 0;
@@ -3730,7 +3730,7 @@ void func_003E03D0(struct S_03D0 *self, int arg1) {
     rd = self->f50;
     wr = self->f58;
     if (wr < rd) {
-        avail = rd - wr - 0x41;
+        avail = rd - wr - 65;
     } else {
         int used;
         avail = self->f34 - wr - 0x40;
@@ -3805,7 +3805,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_overhead);
  */
 int STREAM_overhead(int requests, int filters, int taps) {
     int t = filters * 0xC + 0x180;
-    return requests * 0x124 + t + taps * 0x10 + 0x40;
+    return requests * 292 + t + taps * 0x10 + 0x40;
 }
 #endif
 
@@ -3870,8 +3870,8 @@ void *STREAM_create(int nslots, int nq, int nreq, char *mem, int size) {
     *(int *)(mem + 0x30) = data;
     *(char **)(mem + 0x34) = mem + size;
     *(volatile int *)(mem + 0x38) = 0;
-    *(int *)(mem + 0x3C) = 0x96;
-    *(int *)(mem + 0x40) = 0x32;
+    *(int *)(mem + 0x3C) = 150;
+    *(int *)(mem + 0x40) = 50;
     *(int *)(mem + 0x44) = 0;
     *(int *)(mem + 0x48) = 0;
     *(int *)(mem + 0x4C) = 0;
@@ -3898,10 +3898,10 @@ void *STREAM_create(int nslots, int nq, int nreq, char *mem, int size) {
     for (i = 0; i < nslots; i++) {
         char *e;
 
-        e = *(char **)(mem + 0x14) + i * 0x124;
+        e = *(char **)(mem + 0x14) + i * 292;
         *(int *)(e + 0) = i;
         *(int *)(e + 4) = 0;
-        *(char **)(e + 0xC) = *(char **)(mem + 0x14) + (i + 1) * 0x124;
+        *(char **)(e + 0xC) = *(char **)(mem + 0x14) + (i + 1) * 292;
     }
     *(char **)(*(char **)(mem + 0x14) + (nslots - 1) * 0x124 + 0xC) = 0;
     for (i = 0; i < nq; i++) {
@@ -3982,7 +3982,7 @@ void STREAM_destroy(int handle) {
         sp0->w0 = 0;
         f_56E0_0A28((char *)sp0 + 4);
         if (sp0->w16C != 0)
-            f_ECA0_0A28(sp0->w16C, 0x64);
+            f_ECA0_0A28(sp0->w16C, 100);
     }
 }
 #endif
@@ -4965,9 +4965,9 @@ extern void MEM_copy_1D68(char *, char *, int) __asm__("MEM_copy");
 int func_003E1D68(int a, int *b) {
     int sp0;
     if (func_003DEBF0(b[0], 1, a, &sp0)) {
-        char *hdr = gFileSysOpts.f04((char *)b[0], 0xA90, b[2]);
+        char *hdr = gFileSysOpts.f04((char *)b[0], 2704, b[2]);
         if (hdr) {
-            FILESYS_readsync(sp0, 0, (int)hdr, 0xA90, a - 1);
+            FILESYS_readsync(sp0, 0, (int)hdr, 2704, a - 1);
             if (BIG_typeofheader_1D68(hdr) == 0) {
                 gFileSysOpts.f08(hdr);
                 FILESYS_closesync(sp0, a - 1);
@@ -4975,17 +4975,17 @@ int func_003E1D68(int a, int *b) {
             }
             {
                 int size = BIG_sizeofheader_1D68(hdr);
-                if (size > 0xA90) {
+                if (size > 2704) {
                     char *buf = gFileSysOpts.f04((char *)b[0], size, b[2]);
                     if (buf == 0) {
                         gFileSysOpts.f08(hdr);
                         FILESYS_closesync(sp0, a - 1);
                         return 0;
                     }
-                    MEM_copy_1D68(buf, hdr, 0xA90);
+                    MEM_copy_1D68(buf, hdr, 2704);
                     gFileSysOpts.f08(hdr);
                     hdr = buf;
-                    FILESYS_readsync(sp0, 0xA90, (int)(hdr + 0xA90), size - 0xA90, a - 1);
+                    FILESYS_readsync(sp0, 2704, (int)(hdr + 0xA90), size - 2704, a - 1);
                 }
             }
             FILESYS_closesync(sp0, a - 1);
@@ -5053,7 +5053,7 @@ unsigned int func_003E1F48(char *name, char *data, int len) {
         strcpy(buf, D_00450C50_1F48[0]);
     }
     strcat_1F48(buf, name);
-    fd = func_00427D60_1F48(buf, 0x602);
+    fd = func_00427D60_1F48(buf, 1538);
     if (fd >= 0) {
         do {
             if (len > 0x1000) {
@@ -5090,7 +5090,7 @@ unsigned int func_003E2030(char *name, char *data, int len) {
         strcpy(buf, D_00450C50_2030[0]);
     }
     strcat_2030(buf, name);
-    fd = func_00427D60_2030(buf, 0x602);
+    fd = func_00427D60_2030(buf, 1538);
     if (fd >= 0) {
         do {
             if (len > 0x1000) {
@@ -5351,7 +5351,7 @@ int BIG_typeofheader(unsigned char *header) {
     unsigned char byte0 = header[0];
     unsigned char byte1 = header[1];
     unsigned int magic;
-    if (((byte0 << 8) | byte1) == 0xC0FB) {
+    if (((byte0 << 8) | byte1) == 49403) {
         type = 1;
     } else {
         magic = (byte0 << 24) | (byte1 << 16) | (header[2] << 8) | header[3];
@@ -5414,7 +5414,7 @@ int BIG_debuginfo(char *base, int *num, int *tag) {
     unsigned char *headerEnd = (unsigned char *)base + BIG_sizeofheader_debuginfo(base);
     unsigned char firstChar = headerEnd[-8];
     unsigned char *venomPtr = headerEnd - 8;
-    if (((unsigned)(firstChar - 0x41) < 0x1A || (unsigned)(firstChar - 0x61) < 0x1A)
+    if (((unsigned)(firstChar - 65) < 26 || (unsigned)(firstChar - 97) < 26)
         && (unsigned)(venomPtr[1] - 0x30) < 10
         && (unsigned)(venomPtr[2] - 0x30) < 10
         && (unsigned)(venomPtr[3] - 0x30) < 10) {
@@ -5656,12 +5656,12 @@ void func_003E2E50(int bigBase, signed char *names, int *out) {
     signed char *temp_2;
     signed char *name = names;
     do {
-        temp_2 = strchr_2E50(name, 0x2C);
+        temp_2 = strchr_2E50(name, 44);
         if (temp_2 != 0) *temp_2 = 0;
         *out = func_003E2DF0_2E50(bigBase, name);
         out++;
         if (temp_2 == 0) break;
-        *temp_2 = 0x2C;
+        *temp_2 = 44;
         temp_2++; name = temp_2;
     } while (temp_2 != 0);
 }
@@ -5779,7 +5779,7 @@ void func_003E3098_i(char *path, char *out, int *kind) {
     int k;
     out[0] = 0;
     k = D_00450C44;
-    if (strchr_3098(path, 0x3A) != 0) {
+    if (strchr_3098(path, 58) != 0) {
         int n = strlen_3098(D_00450C50);
         if (func_00416B18_3098(path, D_00450C3C, 3) == 0) {
             k = 1;
@@ -5789,19 +5789,19 @@ void func_003E3098_i(char *path, char *out, int *kind) {
             k = 2;
         } else {
             if (D_00450C44 == 1) return;
-            if (path[2] != 0x3A) return;
+            if (path[2] != 58) return;
         }
     }
     if (k == 2) {
         strcat(out, D_00450C50);
     }
-    if (path[0] != 0x5C && path[0] != 0x2F && path[0] != 0x7E) {
+    if (path[0] != 92 && path[0] != 47 && path[0] != 0x7E) {
         strcat(out, D_00519AF0);
     }
     strcat(out, path);
     for (; *out != 0; out++) {
-        if (*out == 0x5C) {
-            *out = 0x2F;
+        if (*out == 92) {
+            *out = 47;
         }
     }
     if (kind != 0) {
@@ -5837,13 +5837,13 @@ int func_003E3208(int path, unsigned int flags, int *out) {
             mode = 1;
             break;
         case 0:
-            mode = 0x103;
+            mode = 259;
             break;
         case 2:
-            mode = 0x203;
+            mode = 515;
             break;
         case 6:
-            mode = 0x603;
+            mode = 1539;
             break;
         default:
             *out = -1;
@@ -6068,7 +6068,7 @@ int func_003E36F8(unsigned int str, int seed) {
     do {
         signed char chr = *cursor;
         cursor -= 1;
-        hash = hash * 0x21 + chr;
+        hash = hash * 33 + chr;
     } while ((unsigned int)cursor >= str);
     return hash;
 }
@@ -6129,7 +6129,7 @@ int func_003E39A8(char *src, char *dst, int n, int seed) {
         D_0051ED80_39A8[0] = 0;
         func_00418EF8_39A8(dst, n, D_00450C58_39A8[1] + 0xC, func_003E3968_39A8);
         if (D_0051ED80_39A8[0] != 0) {
-            seed = seed * 0x65 + 7;
+            seed = seed * 101 + 7;
         } else {
             done = 1;
         }
@@ -6317,9 +6317,9 @@ int func_003E3D78(void) {
     do {
         tries++;
         while (func_00401718_3D78(0) == 0) {
-            func_003E35B0(0x1C20);
+            func_003E35B0(7200);
             while (func_00401718_3D78(5) == 0) {
-                func_003E35B0(0x1C20);
+                func_003E35B0(7200);
             }
         }
         func_00402450_3D78(D_00450C58[2]);
@@ -6342,7 +6342,7 @@ int func_003E3D78(void) {
                     func_003E35B0(tries * 0x1E0);
                 } while (busy != 0);
                 if (func_00402300_3D78() != 0) {
-                    func_003E35B0(0x1C20);
+                    func_003E35B0(7200);
                     break;
                 }
                 req.lba++;
@@ -6352,7 +6352,7 @@ int func_003E3D78(void) {
             } while (req.count > 0);
         }
     } while (func_00402300_3D78() != 0);
-    func_00400A78_3D78(0xB, D_0051A480, 0x800);
+    func_00400A78_3D78(11, D_0051A480, 0x800);
     func_004008A0_3D78(func_003E3AD8);
     SignalSema_3D78(D_00519C40_3D78.fC);
     return 0;
@@ -6492,7 +6492,7 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     }
     func_00402450_4040(D_00450C58_4040.mmode);
     func_00401BF0_4040(0);
-    if (func_00402268_4040() == 0x12 || func_00402268_4040() == 0x14) {
+    if (func_00402268_4040() == 18 || func_00402268_4040() == 20) {
         ok = 1;
     }
     if (!ok) {
@@ -6505,8 +6505,8 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     D_00519C40_4040.mode[0] = 0;
     D_00519C40_4040.mode[2] = 0;
     FlushCache_4040(0);
-    D_00450C68 = D_00450C10_4040.alloc(str_Named_Dir, n * 0x108, 0);
-    MEM_clear_4040(D_00450C68, n * 0x108);
+    D_00450C68 = D_00450C10_4040.alloc(str_Named_Dir, n * 264, 0);
+    MEM_clear_4040(D_00450C68, n * 264);
     if (D_00450C10_4040.files != 0) {
         e = D_00450C10_4040.files;
         t = D_00450C68;
@@ -6568,7 +6568,7 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     tp.option = 0;
     D_00519C40_4040.tid = CreateThread_4040(&tp);
     StartThread_4040(D_00519C40_4040.tid, 0);
-    func_00400A78_4040(0xB, D_0051A480, 0x800);
+    func_00400A78_4040(11, D_0051A480, 0x800);
     func_004008A0_4040(func_003E3AD8_4040);
     D_00519C40_4040.sector = D_00519C80;
     SYNCTASK_add(func_003E4000_4040, 0, 0);
@@ -6819,8 +6819,8 @@ int func_003E4AF0(int hz) {
     if (hz == 0) {
         hz = 100;
     }
-    if (hz < 0xC4E) {
-        if (hz < 0xC4) {
+    if (hz < 3150) {
+        if (hz < 196) {
             D_00450DE0 = (hz / 2 + 0x8CA00) / hz;
             D_00450DC8 = 0x8CA00 / D_00450DE0;
             mode = 2;
@@ -6837,12 +6837,12 @@ int func_003E4AF0(int hz) {
     T1_COUNT_4AF0 = 0;
     T1_COMP_4AF0 = D_00450DE0;
     T1_MODE_4AF0 = mode | 0x180;
-    D_00450DDC = func_00423A80_4AF0(0xA, func_003E4DB8_4AF0, 0);
-    func_004248E8_4AF0(0xA);
+    D_00450DDC = func_00423A80_4AF0(10, func_003E4DB8_4AF0, 0);
+    func_004248E8_4AF0(10);
     if (D_00450DA0 == 0) {
         count = T0_COUNT_4AF0;
         tmode = T0_MODE_4AF0;
-        T0_MODE_4AF0 = 0x83;
+        T0_MODE_4AF0 = 131;
         end = D_00450DCC + D_00450DC8;
         if (D_00450DCC < end) {
             do {
@@ -6854,11 +6854,11 @@ int func_003E4AF0(int hz) {
         if (d < 0) {
             d += 0x10000;
         }
-        if ((unsigned int)(d - 0x3D55) < 0x63) {
+        if ((unsigned int)(d - 15701) < 99) {
             func_003E6690_4AF0(1);
-        } else if ((unsigned int)(d - 0x3CD8) < 0x63) {
+        } else if ((unsigned int)(d - 15576) < 99) {
             func_003E6690_4AF0(2);
-        } else if ((unsigned int)(d - 0x7081) < 0xC7F) {
+        } else if ((unsigned int)(d - 28801) < 3199) {
             func_003E6690_4AF0(3);
         }
     }
@@ -6881,8 +6881,8 @@ void func_003E4D68(void) {
     if (D_00450DDC_0DDC[0] != 0) {
         reg = (volatile int *)0x10000810;
         *reg = 0;
-        func_00424880(0xA);
-        RemoveIntcHandler(0xA, D_00450DDC_0DDC[0]);
+        func_00424880(10);
+        RemoveIntcHandler(10, D_00450DDC_0DDC[0]);
         D_00450DDC_0DDC[0] = 0;
     }
 }
@@ -7103,26 +7103,26 @@ int func_003E50C8_a(int *self, int arg1, int arg2, int arg3, int arg4, int arg5)
     int kind;
 
     switch (arg5) {
-    case 0x61:
-        kind = 0x61;
+    case 97:
+        kind = 97;
         break;
-    case 0x62:
-        kind = 0x62;
+    case 98:
+        kind = 98;
         break;
-    case 0x63:
-        kind = 0x63;
+    case 99:
+        kind = 99;
         break;
-    case 0x65:
-        kind = 0x65;
+    case 101:
+        kind = 101;
         break;
-    case 0x66:
-        kind = 0x66;
+    case 102:
+        kind = 102;
         break;
-    case 0x67:
-        kind = 0x67;
+    case 103:
+        kind = 103;
         break;
     default:
-        kind = 0x64;
+        kind = 100;
         break;
     }
     req.a = arg1;
@@ -7368,7 +7368,7 @@ extern int D_00450DE4_0DE4[] __asm__("D_00450DE4");
 typedef struct { int pad; int f4; } A_5580;
 
 int func_003E5580(A_5580 *arg0) {
-    struct { int v; char rest[0x2C]; } st;
+    struct { int v; char rest[44]; } st;
     int r;
 
     if (D_00450DE4_0DE4[0] != 0) {
@@ -8430,13 +8430,13 @@ extern int D_00450DA0_0DA0[] __asm__("D_00450DA0");
 void func_003E6690(int arg0) {
     switch (arg0) {
     case 1:
-        D_00450DA0_0DA0[0] = 0x3D86;
+        D_00450DA0_0DA0[0] = 15750;
         return;
     case 2:
-        D_00450DA0_0DA0[0] = 0x3D09;
+        D_00450DA0_0DA0[0] = 15625;
         return;
     case 3:
-        D_00450DA0_0DA0[0] = 0x7080;
+        D_00450DA0_0DA0[0] = 28800;
         return;
     }
 }
@@ -8459,7 +8459,7 @@ char *func_003E66F0(int arg0, int arg1, int n) {
     int size;
     int buf;
     char *block;
-    size = n + 0x394;
+    size = n + 916;
     block = RpcAlloc_66F0(size);
     func_00416210_66F0(block, 0, size);
     buf = (int)(block + 0x1BF) & ~0x3F;
@@ -8471,10 +8471,10 @@ char *func_003E66F0(int arg0, int arg1, int n) {
     buf &= ~0x3F;
     *(int *)(block + 0x174) = n;
     *(int *)(block + 0x158) = buf;
-    buf += 0x18F;
+    buf += 399;
     buf &= ~0x3F;
     *(int *)(block + 0x17C) = buf;
-    func_003F4E80_66F0(*(int *)(block + 0x158), 0x150);
+    func_003F4E80_66F0(*(int *)(block + 0x158), 336);
     func_003F4E80_66F0(*(int *)(block + 0x16C), *(int *)(block + 0x168));
     func_003F4E80_66F0(*(int *)(block + 0x17C), 4);
     func_003F4C98_66F0(msg, 0x676D6C6B, 0x63726561);
@@ -8515,7 +8515,7 @@ struct S_6878 { int f0; int f4; char pad[0x158 - 8]; int f158; };
 
 int func_003E6878(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, struct S_6878 *self) {
     char *src = (char *)((self->f158 & 0x0FFFFFFF) | 0x20000000);
-    __builtin_memcpy((char *)self + 8, src, 0x150);
+    __builtin_memcpy((char *)self + 8, src, 336);
     self->f4 = 0;
     return 0;
 }
@@ -8542,9 +8542,9 @@ char *func_003E6958(G_6958 *self) {
         self->f4 = 1;
         func_003F4C98_6958(D_0051EEA8_6958, 0x676D6C6B, 0x73746174);
         if (was == 0) {
-            func_003F4C68_6958(D_0051EEA8_6958, 0, self->f0, 0, 0, 0, self->f158, 0x150, func_003E6878_6958, self);
+            func_003F4C68_6958(D_0051EEA8_6958, 0, self->f0, 0, 0, 0, self->f158, 336, func_003E6878_6958, self);
         } else {
-            func_003F4C68_6958(D_0051EEA8_6958, 1, self->f0, 0, 0, 0, self->f158, 0x150, (void *)1, 0);
+            func_003F4C68_6958(D_0051EEA8_6958, 1, self->f0, 0, 0, 0, self->f158, 336, (void *)1, 0);
             func_003E6878_6958(0, 0, 0, 0, 0, 0, 0, 0, self);
         }
     }
@@ -8895,8 +8895,8 @@ extern void *memset_7340(void *, int, int) __asm__("func_00416210");
 
 char *func_003E7340(void) {
     int buf[4];
-    char *block = RpcAlloc_7340(0x854);
-    memset_7340(block, 0, 0x854);
+    char *block = RpcAlloc_7340(2132);
+    memset_7340(block, 0, 2132);
     *(unsigned int *)(block + 0x10) = (unsigned int)(block + 0x53) & 0xFFFFFFC0;
     func_003F4C98_7340(buf, 0x70696E67, 0x63726561);
     func_003F4C68_7340(buf, 1, 0, 0, 0, 0, 0, 0, 1, block + 0xC);
@@ -9037,7 +9037,7 @@ void *func_003E7718(char *lobby, int tag, int arg2, int arg3) {
     char *nx;
     char *head;
 
-    n = func_002591E8_7718(0x44);
+    n = func_002591E8_7718(68);
     if (n != 0) {
         *(int*)(n + 4) = tag;
         *(int*)(n + 0x38) = arg2;
@@ -9071,7 +9071,7 @@ extern void *memset_77F0(void *, int, unsigned int) __asm__("func_00416210");
 extern void func_00259210_77F0(void *) __asm__("func_00259210");
 int func_003E77F0(char *self, N_77F0 *dst, int key) {
     N_77F0 *n;
-    memset_77F0(dst, 0, 0x44);
+    memset_77F0(dst, 0, 68);
     n = *(N_77F0 **)(self + 0x53C);
     if (n != 0 && (n->key == key || key == 0x44515545)) {
         *(N_77F0 **)(self + 0x53C) = n->next;
@@ -9118,7 +9118,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7AC0);
 int func_003E77F0_7AC0(int, void *, int) __asm__("func_003E77F0");
 
 void func_003E7AC0(int lobby) {
-    char buf[0x50];
+    char buf[80];
     while (func_003E77F0_7AC0(lobby, buf, 0x44515545) != 0) {
     }
 }
@@ -9338,11 +9338,11 @@ void *func_003E7FF0(char *arg0, int arg1, int arg2) {
     char *r;
     int t;
 
-    r = func_002591E8_7FF0(0x550);
+    r = func_002591E8_7FF0(1360);
     if (r != 0) {
-        func_00416210_7FF0(r, 0, 0x550);
+        func_00416210_7FF0(r, 0, 1360);
         if (arg0 != 0) {
-            if (strchr_7FF0(arg0, 0x3D) != 0) {
+            if (strchr_7FF0(arg0, 61) != 0) {
                 cDirtysock_tag_TagFieldDupl_7FF0(r + 0x34, 0x100, arg0);
             } else {
                 cDirtysock_tag_TagFieldSetString_7FF0(r + 0x34, 0x100, D_004A48A8_7FF0, arg0);
@@ -9655,8 +9655,8 @@ int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *arg) {
             if (func_003EEC88_8778(self->s[3].h, arg) != 0) {
                 return 0;
             }
-            p = func_002591E8_8778(0x138);
-            func_00416210_8778(p, 0, 0x138);
+            p = func_002591E8_8778(312);
+            func_00416210_8778(p, 0, 312);
             strcpy(p + 8, arg);
             r = func_003EE320_8778(self->s[3].f4, p);
             func_003EEB30_8778(self->s[3].h, p + 8, r);
@@ -9668,7 +9668,7 @@ int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *arg) {
             if (func_003EEC88_8778(self->s[i].h, arg + 8) != 0) {
                 return 0;
             }
-            p = func_002591E8_8778(0xA8);
+            p = func_002591E8_8778(168);
             *(struct B_8778 *)p = *(struct B_8778 *)arg;
             r = func_003EE320_8778(self->s[i].f4, p);
             func_003EEB30_8778(self->s[i].h, p + 8, r);
@@ -10148,7 +10148,7 @@ void func_003E94F0(void *arg0, void *arg1) {
             }
         } else {
             *(int *)((char *)arg0 + 0x1C) = n;
-            *(int *)((char *)arg0 + 0x18) = func_003F4330_94F0() + 0x7530;
+            *(int *)((char *)arg0 + 0x18) = func_003F4330_94F0() + 30000;
             *(int *)((char *)arg0 + 0x20) = 0;
         }
     }
@@ -10164,7 +10164,7 @@ extern char D_004A4900_9590[] __asm__("D_004A4900");
 extern char func_003E94F0_9590[] __asm__("func_003E94F0");
 
 void func_003E9590(void *arg0) {
-    func_003E8DC0_9590(arg0, D_004A4900_9590, *(int *)((char *)arg0 + 0x3B4), 0xBB8, func_003E94F0_9590, 0);
+    func_003E8DC0_9590(arg0, D_004A4900_9590, *(int *)((char *)arg0 + 0x3B4), 3000, func_003E94F0_9590, 0);
 }
 #endif
 

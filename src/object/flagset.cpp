@@ -1184,7 +1184,7 @@ extern "C" void* cFenceNode_cFenceNode(void* self, void* bucket, void* stream)
     *(void***)((char*)self + 0xC) = cFenceNode_vtbl;
     new ((char*)self + 0x40) sFlagElem_CBE8[16];
     sFlagSetVEntry_CBE8* vtEntry = &(*(sFlagSetVEntry_CBE8**)stream)[2];
-    vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x1C, 0x24);
+    vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x1C, 36);
     cFenceNode_setupFence(self);
     return self;
 }
@@ -1265,7 +1265,7 @@ extern "C" void func_0034CC80(char* self, char* obj, int flag)
             func_0034CDE8(neighborNode, 0, force);
         }
     } else if (0.25f <= fabs_34CC80(force)) {
-        void* fence = cMemMan_alloc(0x10C, str_Fence_b, 0x20000000, 0);
+        void* fence = cMemMan_alloc(268, str_Fence_b, 0x20000000, 0);
         func_0034CAB8(fence, 1, obj, self + 0x1C, flag, force);
     }
 }
@@ -1738,7 +1738,7 @@ extern "C" void cFenceNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_0034D960* vt = *(sSerVEntry_0034D960**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x24);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 36);
 }
 #endif
 
@@ -1815,7 +1815,7 @@ extern "C" void* func_0034DAC8(char* self, void* a1, void* stream)
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34DAC8[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
     cAnimNode_setAnimMeshCache(self);
     sStreamVE_DAC8* vt = *(sStreamVE_DAC8**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, self, 0x14);
+    vt[2].fn((char*)stream + vt[2].delta, self, 20);
     sStreamVE_DAC8* vt2 = *(sStreamVE_DAC8**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, &unusedFlag, 4);
     cAnimNode_cacheFrame((sFlagOwner_E348*)self);
@@ -2092,7 +2092,7 @@ extern "C" void* func_0034E320(void* self, int i) {
     if (base == 0) {
         return t4mat_Identity;
     }
-    return base + i * 0xD0 + 0x90;
+    return base + i * 208 + 0x90;
 }
 #endif
 
@@ -2159,7 +2159,7 @@ extern "C" void func_0034E3D8(void* self, void* stream)
     int dummy;
     cMoveNode_writeToReplayFrame((char*)self + 0x14, stream);
     sSerVEntry_0034E3D8* writeFn = &(*(sSerVEntry_0034E3D8**)stream)[1];
-    writeFn->fn((char*)stream + writeFn->delta, self, 0x14);
+    writeFn->fn((char*)stream + writeFn->delta, self, 20);
     writeFn = &(*(sSerVEntry_0034E3D8**)stream)[1];
     writeFn->fn((char*)stream + writeFn->delta, &dummy, 4);
 }

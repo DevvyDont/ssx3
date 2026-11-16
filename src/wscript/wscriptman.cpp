@@ -2301,7 +2301,7 @@ extern "C" void cWScriptMan_collect(void* self, int rider, int id, int instId)
             func_0030C3E0((func_0030C3E0_sTable*)&slots[i], instId);
             cSSXAudio_PlayIconSound(func_0028B180(), 5, 0, 1.0f);
             void* newRace = cBE_getInterface_Fv(cBE_getBE(), 0);
-            void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+            void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
             int lvl = func_00144C98(newRace);
             int cash = func_00151178(econ, lvl);
             cRider_flagEventAddCollectible(*(void**)((char*)SSXApp->Game->AI + (rider << 2) + 0x28), lvl, cash);
@@ -2398,7 +2398,7 @@ extern "C" void func_0030BB10(sWSManBB10* self, void* stream)
     int j;
     {
         sWSVtVBB10* vtEntry = &(*(sWSVtVBB10**)stream)[1];
-        vtEntry->fn((char*)stream + vtEntry->delta, self, 0x28C);
+        vtEntry->fn((char*)stream + vtEntry->delta, self, 652);
     }
     {
         int k;
@@ -2504,7 +2504,7 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cStream_30BD20* s
  */
 extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cStream_30BD20* stream)
 {
-    stream->Read(self, 0x28C);
+    stream->Read(self, 652);
     {
         int k;
         for (k = 0; k < 1; k++) {
@@ -2893,7 +2893,7 @@ public:
 
 extern "C" int func_0030C6C8(void* a, func_0030C6C8_cObj* obj)
 {
-    return obj->v01(a, 0x10C);
+    return obj->v01(a, 268);
 }
 #endif
 
@@ -2909,7 +2909,7 @@ public:
 
 extern "C" int func_0030C700(void* a, func_0030C700_cObj* obj)
 {
-    return obj->v02(a, 0x10C);
+    return obj->v02(a, 268);
 }
 #endif
 
@@ -4044,8 +4044,8 @@ extern "C" void func_0030D840(func_0030D840_sPool* self, int count, int a2)
 {
     self->field_0x4 = a2;
     self->count = count;
-    self->items = operator_new_tag(count * 0x58, str_ModelRefs, 0, 0);
-    MEM_fill(self->items, 0, self->count * 0x58);
+    self->items = operator_new_tag(count * 88, str_ModelRefs, 0, 0);
+    MEM_fill(self->items, 0, self->count * 88);
     self->field_0x8 = 0;
     self->field_0x60 = 0;
 }

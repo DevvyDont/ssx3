@@ -29,7 +29,7 @@ extern "C" void* cUIAnimationBank_getAnimationByHashName(unsigned int** self, in
     sUIAnimEntry* entry = (sUIAnimEntry*)(*self + 1);
     for (unsigned int i = 0; i < **self; i++) {
         if (entry->hash == hash) {
-            return cUIAnimation_cUIAnimation(cMemMan_alloc(0x14, str_UIAnim, 0x100, 0), entry);
+            return cUIAnimation_cUIAnimation(cMemMan_alloc(20, str_UIAnim, 0x100, 0), entry);
         }
         entry = (sUIAnimEntry*)((char*)entry + entry->size);
     }

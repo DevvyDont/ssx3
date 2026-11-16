@@ -141,7 +141,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
 {
     SSXApp = (cSSXApp*)self;
     *(void**)&self->ConsoleConfig = cConsoleConfig_construct();
-    cPlayerMgr_6900* volatile pm = (cPlayerMgr_6900*)cMemMan_alloc(0x2EFC, str_PadCache, 0, 0);
+    cPlayerMgr_6900* volatile pm = (cPlayerMgr_6900*)cMemMan_alloc(12028, str_PadCache, 0, 0);
     func_00326A28(pm);
     PadCache = pm;
     char* graphicsMan = (char*)func_00375A08();
@@ -153,7 +153,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     D_004A28AC = cMemMan_alloc(1, str_2DRender, 0, 0);
     int i;
     for (i = 0; i < 2; i++) {
-        int* inputPad = (int*)cMemMan_alloc(0x2A4, str_InputPad, 0, 0);
+        int* inputPad = (int*)cMemMan_alloc(676, str_InputPad, 0, 0);
         ((int**)(((char*)self) + 0xA8))[i] = inputPad;
         *inputPad = 0;
     }
@@ -173,7 +173,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     *(sTint_6900**)&self->LoadIndicator = new (str_LoadIndicator, 0, 0) sTint_6900;
     cAppMan_setNextModule((cAppMan*)self, (unsigned int)cPreStartScreen_cPreStartScreen(cMemMan_alloc(0xC, str_PreStartScreen, 0x100, 0)));
     *(void**)&self->GameModeMan = cGameModeMan_getGM();
-    void* feAsyncManager = cFEAsyncManager_cFEAsyncManager(cMemMan_alloc(0x590, str_FEAsyncManager, 0, 0));
+    void* feAsyncManager = cFEAsyncManager_cFEAsyncManager(cMemMan_alloc(1424, str_FEAsyncManager, 0, 0));
     *(void**)&self->mFEAsyncManager = feAsyncManager;
     cFEAsyncManager_Init(feAsyncManager);
 }
@@ -418,7 +418,7 @@ extern "C" int cSSXApp_loadInputMap(cSSXApp* self, const char* path)
     int size;
     void* data = cInputPreProcessor_loadFileSize(&buf, path, &size);
     void* map = cMemMan_alloc(0x18, str_InputMap, 0, 0);
-    cInputMap_init(map, 0xCD);
+    cInputMap_init(map, 205);
     cInputMap_loadMapFile(map, data, size);
     if (data != 0) {
         cMemMan_free(data);
@@ -977,7 +977,7 @@ extern char str_GameModule[];
  */
 extern "C" void cSSXApp_startGameLoad(cSSXApp* self)
 {
-    void* game = cGame_cGame(cMemMan_alloc(0x22C, str_GameModule, 0, 0));
+    void* game = cGame_cGame(cMemMan_alloc(556, str_GameModule, 0, 0));
     *(void**)&self->Game = game;
     cAppMan_setNextModule((cAppMan*)self, (unsigned int)game);
     *(void**)&self->GameModeMan = cGameModeMan_getGM();
@@ -1006,7 +1006,7 @@ extern "C" void cSSXApp_startFELoad(cSSXApp* self)
         *(void**)&self->RealFE = frontEnd;
         cAppMan_setNextModule((cAppMan*)self, (unsigned int)frontEnd);
     } else {
-        void* frontEnd = func_0017F7B8(cMemMan_alloc(0x238, str_FEModule, 0, 0));
+        void* frontEnd = func_0017F7B8(cMemMan_alloc(568, str_FEModule, 0, 0));
         *(void**)&self->DebugFE = frontEnd;
         cAppMan_setNextModule((cAppMan*)self, (unsigned int)frontEnd);
     }
@@ -1164,7 +1164,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
         func_003DED50(D_00442100[i], 0, 100, &self->fEC[i]);
     }
     func_003DED50(D_004A29CC, 0, 100, &self->f118);
-    cSSXScriptEngine* sm = (cSSXScriptEngine*)cSSXScriptEngine_cSSXScriptEngine(cMemMan_alloc(0xA50, str_ScriptEngine, 0, 0));
+    cSSXScriptEngine* sm = (cSSXScriptEngine*)cSSXScriptEngine_cSSXScriptEngine(cMemMan_alloc(2640, str_ScriptEngine, 0, 0));
     ScriptEngine = sm;
     cSSXScriptEngine_InitOnce(sm);
     self->fB8[0] = cSSXApp_loadInputMap((cSSXApp*)self, str_data_config_input_map);
@@ -1181,7 +1181,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cSSXApp_activateBEOptions_self(self);
     cSSXApp_initLocale((cSSXApp*)self);
     cRiderAnimBase_initAIAnimEventMap();
-    self->f94 = func_00314D98(cMemMan_alloc(0x1848, str_GameAnimMap, 0, 0));
+    self->f94 = func_00314D98(cMemMan_alloc(6216, str_GameAnimMap, 0, 0));
     cGameAnimMap_initMap(self->f94);
     self->f90 = cAnimDataBase_cAnimDataBase(cMemMan_alloc(0x3FC, str_AnimDataBase, 0, 0));
     cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1442,15 +1442,15 @@ extern "C" void func_00266788();
 extern "C" void initOnline()
 {
     char buf[0x100];
-    func_00319718(D_004A3E94, str_USBD_IRX, 0, 0x2B, str_hub_1);
+    func_00319718(D_004A3E94, str_USBD_IRX, 0, 43, str_hub_1);
     int ok = 0;
     func_00319718(D_004A3E94, str_USBKB_IRX, 0, 0x10, str_keybd_2);
     func_00319718(D_004A3E94, str_DEV9_IRX, 0, 0, 0);
     func_00319930(D_004A3E94);
-    func_00319718(D_004A3E94, str_INET_IRX, 1, 0x12, str_mem_96KB);
+    func_00319718(D_004A3E94, str_INET_IRX, 1, 18, str_mem_96KB);
     int n = sprintf(buf, str_icon_pct_sCNF_SYS_NET_ICOpct_spct_cicons, str_cdrom0, str_1, 0, str_cdrom0, str_1);
     func_00319718(D_004A3E94, str_NETCNF_IRX, 1, n + 1, buf);
-    func_00319718(D_004A3E94, str_INETCTL_IRX, 1, 0x14, str_no_auto);
+    func_00319718(D_004A3E94, str_INETCTL_IRX, 1, 20, str_no_auto);
     D_004A29EC = 0;
     if (func_00319718(D_004A3E94, str_SMAP_IRX, 0, 0, 0) >= 0) {
         D_004A29EC = 1;
@@ -1470,7 +1470,7 @@ extern "C" void initOnline()
         func_00319718(D_004A3E94, str_LIBNET_IRX, 1, 0, 0);
         func_0040B130(0);
         func_00319718(D_004A3E94, str_DRTYSCKF_IRX, 1, 0, 0);
-        func_00319718(D_004A3E94, str_LGAUD_IRX, 0, 0x12, str_rpc_0);
+        func_00319718(D_004A3E94, str_LGAUD_IRX, 0, 18, str_rpc_0);
         if (func_00319718(D_004A3E94, str_VOIPF_IRX, 0, 0, 0) >= 0) {
             func_003F6A40();
         } else {
@@ -1610,7 +1610,7 @@ extern "C" void func_002292E0(void* self)
         crowd->slots[i].delay = BXrand() % 300 + 300;
     }
     crowd->count2 = 0;
-    MEM_fill(crowd->rest, 0, 0x500);
+    MEM_fill(crowd->rest, 0, 1280);
 }
 #endif
 
@@ -1678,7 +1678,7 @@ extern "C" void func_002294C8(void* self)
     t = *(int*)((char*)*(void**)((char*)self + 0x4) + 0x10);
     D_00536690[0] = t;
     p = (char*)self;
-    for (i = 0x27; i >= 0; i--) {
+    for (i = 39; i >= 0; i--) {
         if (*(int*)(p + 0x2230) > 0) {
             *(int*)(p + 0x2230) = *(int*)(p + 0x2230) - 1;
         }
@@ -2268,7 +2268,7 @@ extern "C" void func_00229BA8(void* p)
                 SetBits_229BA8(&((cGfx_229BA8*)ps2GraphicsMan)->top->f4, 0x400000, 0x400000);
                 set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x1800000, 23, 0);
                 set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x300000, 20, 0);
-                set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0xFF000, 12, 0x14);
+                set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0xFF000, 12, 20);
                 set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x3, 0, 1);
                 set2_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x1FFFFC00, 10, 0);
                 set2_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x3E0, 5, 4);
@@ -2397,7 +2397,7 @@ extern "C" void func_00229F88(int index, void* vector, void* matrix)
         "vsqi.xyzw $vf5, ($vi1++)\n"
         ".set reorder\n"
         :
-        : "r"(index * 5 + 0x50), "r"(vector), "r"(matrix)
+        : "r"(index * 5 + 80), "r"(vector), "r"(matrix)
         : "memory");
 }
 #endif
@@ -2650,7 +2650,7 @@ extern "C" void func_0022A270_impl(sVisOwner_A270* self, sVisObj_A270* obj, int 
 "
             "ctc2.ni   %3, $vi14
 "
-            "vcallms   0xDB8
+            "vcallms   3512
 "
             :
             : "r"(lo), "r"(hi), "r"(obj->sphere), "r"(frustum));

@@ -184,7 +184,7 @@ extern "C" float func_00325450(void* parser, void* a1, void* a2);
  */
 extern "C" float cInputMap_getValue(void* self, void* inputPad, int id)
 {
-    char parser[0x190];
+    char parser[400];
     func_00325250(parser);
     return func_00325450(parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2));
 }
@@ -237,7 +237,7 @@ extern "C" float func_00325450(void* parser, void* a1, void* a2);
  */
 extern "C" int cInputMap_getState(void* self, void* inputPad, int id)
 {
-    char parser[0x190];
+    char parser[400];
     func_00325250(parser);
     return func_00325450(parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2)) != 0.0f;
 }
@@ -572,7 +572,7 @@ extern "C" int cInputMapParser_lookupButtonName(cInputMapParser* self, char* nam
     if (alpha) {
         return -1;
     }
-    if (*cursor != '_' && n < 0x39C) {
+    if (*cursor != '_' && n < 924) {
         return n;
     }
     return -1;

@@ -174,7 +174,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* mem, void* owner, sig
     self->fA70 = -1;
     self->fA74 = -1;
     self->fAE0 = 1;
-    MEM_fill(self->bufD0, D_004A11D0_c, 0x50);
+    MEM_fill(self->bufD0, D_004A11D0_c, 80);
     self->f120 = 0;
     for (int i = 0; i < 6; i++) {
         self->a8C[i] = 0;
@@ -202,7 +202,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* mem, void* owner, sig
     }
     self->fAA0 = 0;
     func_001A0508((char*)SSXApp->RealFE + 0xB0, self->team, self->slot, 1);
-    self->fC0 = cBEEconInterface_getMoney(cBE_getInterface(cBE_getBE(), 0xB), self->team, self->slot);
+    self->fC0 = cBEEconInterface_getMoney(cBE_getInterface(cBE_getBE(), 11), self->team, self->slot);
     void* shop = cBE_getInterface(cBE_getBE(), 9);
     func_0014AEA8(shop, self->team, self->slot);
     self->fC4 = func_0014B478(shop, self->team, self->slot);
@@ -322,14 +322,14 @@ extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
-    *(int*)(feRider + 0xC2C) = 0x11;
+    *(int*)(feRider + 0xC2C) = 17;
     *(int*)(feRider + 0xCCC) = 0;
     int ok = *(unsigned int*)feRider < 10 && *(int*)(feRider + 0xCB8) != 0 && *(int*)(feRider + 0xCB4) != 0;
     if (ok) {
         void* anim = *(void**)(feRider + 0xC);
         if (anim != 0) {
             cRiderAnimBase_reset(anim);
-            cRiderAnimBase_play(anim, 0x1B2, 0, -1.0f);
+            cRiderAnimBase_play(anim, 434, 0, -1.0f);
         }
     }
     *(int*)((char*)self + 0xAA4) = 0;
@@ -641,12 +641,12 @@ extern "C" void func_0019B618(void* self, int a1, int a2);
 extern "C" void cFEStateCharEquip_onPopupEvent(void* self, void* widget, int msg)
 {
     switch (msg) {
-    case 0x15:
+    case 21:
         if (*(int*)((char*)widget + 0xC) != 7) {
             *(int*)((char*)self + 0x1C) &= ~8;
         }
         break;
-    case 0x16:
+    case 22:
         if (((*(int*)((char*)self + 0x1C) >> 3) & 1) == 0) {
             *(int*)((char*)self + 0x1C) |= 8;
         }
@@ -1054,20 +1054,20 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu
     case 6: {
         char* selected = self->sel;
         int selIndex = *(unsigned char*)(selected + 0x95);
-        if (selIndex < 0) return 0x110;
+        if (selIndex < 0) return 272;
         if (selIndex < self->count) {
             sEquipItem_9F20* item = self->items[selIndex];
-            if (item->flags & 0x20) return 0x101;
+            if (item->flags & 0x20) return 257;
             if (isMode_9F20(self->fC8, 1)) {
                 int cost = item->cost;
                 if (cost > 0) cost *= 10;
                 if (cost >= self->fC0) break;
-                return 0x101;
+                return 257;
             } else {
                 if (D_004A18D8 >= self->prices[selIndex - *(unsigned char*)(selected + 0x98)] + self->fC4) break;
             }
         }
-        return 0x110;
+        return 272;
     }
     case 7:
         if (self->f120 > 0) {
@@ -1078,13 +1078,13 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu
     case 8:
         if (self->fAE4 != 0) {
             func_0019A3D0(self);
-            return 0x101;
+            return 257;
         }
         return 0x100;
     case 9:
         return 0x100;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -1289,7 +1289,7 @@ extern "C" void func_0019A3D0(void* self)
         }
     }
     ((sEquipDetailK19A3D0*)self)->f120 = 0;
-    MEM_fill((char*)self + 0xD0, D_004A11D0, 0x50);
+    MEM_fill((char*)self + 0xD0, D_004A11D0, 80);
     cFEStateCharEquip_updateHeading(self, D_004A11D0);
     func_0019B180(self, D_004A11D0);
     func_0019B618(self, 1, 1);
@@ -1349,7 +1349,7 @@ extern "C" void func_0019A4E8(void* self, int flag)
     if (namePart == 0)
         return;
     if (flag)
-        *(int*)((char*)self + 0x95C) = 0x14;
+        *(int*)((char*)self + 0x95C) = 20;
     else
         *(int*)((char*)self + 0x95C) = 1;
     char* buf = (char*)self + 0x960;
@@ -1965,7 +1965,7 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
     sEquipItem_B180* list[528];
     int n = func_0014D7E8(lib, self->slot, cat, list, -1, 0);
     self->count = 0;
-    MEM_fill(self->items, 0, 0x834);
+    MEM_fill(self->items, 0, 2100);
     if (isMode1_B180(self)) {
         for (int i = 0; i < n; i++) {
             sEquipItem_B180* it = list[i];
@@ -2264,8 +2264,8 @@ extern "C" void func_0019B7E0(void* selfv, int i)
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         sProfile_19B7E0* prof = (sProfile_19B7E0*)func_0014AD28(iface, self->team, self->slot);
         sFlagEntry_19B7E0* flagEntry = getEntry_19B7E0(prof, item->id);
-        sFlagEntry_19B7E0 save[0x20D];
-        MEM_copy(save, prof->entries, 0x834);
+        sFlagEntry_19B7E0 save[525];
+        MEM_copy(save, prof->entries, 2100);
         int before = func_0014B478(iface, self->team, self->slot);
         if (func_0014AFB0(iface, self->team, self->slot, item->id, !IsSet_19B7E0(flagEntry))) {
             self->vals[i] = func_0014B478(iface, self->team, self->slot) - before;
@@ -2455,7 +2455,7 @@ extern "C" void func_0019BC90(void* self)
 {
     char* o = *(char**)((char*)self + 0x70);
     if (o != 0) {
-        float t = (float)(*(int*)((char*)self + 0xC4) - 0x5DC) / (float)(D_004A18D8 - 0x5DC);
+        float t = (float)(*(int*)((char*)self + 0xC4) - 1500) / (float)(D_004A18D8 - 1500);
         if (t < 0.0f) {
             t = 0.0f;
         }
@@ -3035,8 +3035,8 @@ struct sNode0019CB60 {
 
 extern "C" void func_0019CB60(void* self)
 {
-    MEM_fill(self, 0xFFFFFFFF, 0x1900);
-    MEM_fill((char*)self + 0x1900, 0, 0x640);
+    MEM_fill(self, 0xFFFFFFFF, 6400);
+    MEM_fill((char*)self + 0x1900, 0, 1600);
     *(void**)((char*)self + 0x1F40) = self;
     sNode0019CB60* n = (sNode0019CB60*)self;
     for (int i = 0; i < 400; i++) {
@@ -3232,7 +3232,7 @@ extern "C" void func_0019CE68(void* self)
     t->fB4004 = 0;
     t->fB4000 = 0;
     if (D_004A1968 == 0) {
-        D_004A1968 = func_0019CB38(cMemMan_alloc(0x1F44, str_BoltFileIndexManager, 0, 0));
+        D_004A1968 = func_0019CB38(cMemMan_alloc(8004, str_BoltFileIndexManager, 0, 0));
     } else {
         func_0019CB60(D_004A1968);
     }
@@ -3920,13 +3920,13 @@ extern "C" int func_0019DE18(const int* a, const int* b)
     sRowK19DE18* row = (sRowK19DE18*)D_004A196C + (ka >> 16);
     sSlotK19DE18* sa = &row->slots[ka & 0xFFFF];
     sSlotK19DE18* sb = &row->slots[*b & 0xFFFF];
-    if (sa->state == 3 && sa->type == 0xB && sa->f11C == 0) {
-        if (sb->state == 3 && sb->type == 0xB && sb->f11C == 0)
+    if (sa->state == 3 && sa->type == 11 && sa->f11C == 0) {
+        if (sb->state == 3 && sb->type == 11 && sb->f11C == 0)
             return strcasecmp(sa->name, sb->name);
         return -1;
     }
-    if (sb->state == 3 && sb->type == 0xB && sb->f11C == 0) {
-        if (sa->state == 3 && sa->type == 0xB && sa->f11C == 0)
+    if (sb->state == 3 && sb->type == 11 && sb->f11C == 0) {
+        if (sa->state == 3 && sa->type == 11 && sa->f11C == 0)
             return strcasecmp(sa->name, sb->name);
         return 1;
     }
@@ -4016,7 +4016,7 @@ extern "C" void func_0019E070(sFileCache* self, int bank)
     for (int i = 0; i < 256; i++) {
         unsigned short idx = keys[i] & 0xFFFF;
         sFileSlot* slot = &self->banks[bank].slots[idx];
-        if (slot->stamp != 0 || slot->type != 0xB)
+        if (slot->stamp != 0 || slot->type != 11)
             break;
         slot->stamp = self->counts[bank]++;
         if (self->nPending <= 0 && slot->state == 3)
@@ -4100,7 +4100,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E330);
 extern "C" int func_0019E330(char* base, int bank, int slotIndex) {
     char* pb = base + 0x104;
     char* qb = base + 0x118;
-    int slotOffset = slotIndex * 0x120 + bank * 0x12000;
+    int slotOffset = slotIndex * 288 + bank * 0x12000;
     int* dataField = (int*)(pb + slotOffset);
     int* sizeField = (int*)(qb + slotOffset);
     int data = *dataField;

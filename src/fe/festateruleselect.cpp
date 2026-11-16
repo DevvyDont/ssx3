@@ -169,7 +169,7 @@ extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
             name.c[0]++;
             label.c[0]++;
         } else {
-            label.c[0] = name.c[0] = i + 0x58;
+            label.c[0] = name.c[0] = i + 88;
         }
     }
     unsigned int sel = 0xFF;
@@ -336,7 +336,7 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
             label.c[0]++;
             name.c[0]++;
         } else {
-            name.c[0] = label.c[0] = i + 0x58;
+            name.c[0] = label.c[0] = i + 88;
         }
     }
 }
@@ -432,7 +432,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(char* self, sMsg_1C68* msg, uns
         break;
     }
     case 7: {
-        char* st = (char*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
+        char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
         *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, st, 0, 0);
         break;
@@ -456,7 +456,7 @@ extern char D_004A13A0[];
 extern "C" int cFEStateRuleSelect_onWidgetPair(void* self, void* msg)
 {
     int id = *(int*)((char*)msg + 0x38);
-    return (id == GetHashValue32(D_004A13A0)) ? 0x101 : 0x100;
+    return (id == GetHashValue32(D_004A13A0)) ? 257 : 0x100;
 }
 #endif
 
@@ -543,9 +543,9 @@ extern "C" int cFEStateRuleSelect_onWidgetMenu(char* self, void* pMenu, unsigned
     }
     case 4:
         cFEStateRuleSelect_setupMenu(self, idx);
-        return 0x101;
+        return 257;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -760,7 +760,7 @@ extern "C" void cFEStateRuleSelect_updateMenuColor(void* selfp)
             name0[0]++;
             name1[0]++;
         } else {
-            name1[0] = name0[0] = i + 0x58;
+            name1[0] = name0[0] = i + 88;
         }
     }
 }
@@ -997,7 +997,7 @@ extern "C" void* func_00192D00(void* self, int engine)
     for (i = 1; i != -1; i--, ruleSel += 0x34) {
         func_001926F0(ruleSel);
     }
-    *(int*)((char*)self + 0xC) = 0x14;
+    *(int*)((char*)self + 0xC) = 20;
     *(int*)((char*)self + 0x738) = 0;
     return self;
 }

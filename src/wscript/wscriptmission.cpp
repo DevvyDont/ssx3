@@ -291,7 +291,7 @@ extern "C" void func_00184520(sWSMission4520* self)
     cUIText* t2 = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_num));
     if (t2 != 0) {
         signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->player);
-        cUIText_setAsciiString(t2, getDollarString(cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), self->player, cid)));
+        cUIText_setAsciiString(t2, getDollarString(cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->player, cid)));
     }
 }
 #endif

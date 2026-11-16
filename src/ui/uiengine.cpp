@@ -309,7 +309,7 @@ extern "C" void func_00397DF8(void* self)
     setF4_22_7DF8(D_004A289C_7df8->top, 1);
     setF4_23_7DF8(D_004A289C_7df8->top, 2);
     setF4_20_7DF8(D_004A289C_7df8->top, 0);
-    setF4_12_7DF8(D_004A289C_7df8->top, 0x14);
+    setF4_12_7DF8(D_004A289C_7df8->top, 20);
     setF4_2_7DF8(D_004A289C_7df8->top, 5);
     D_004A289C_7df8->top->f0_2 = 3;
     func_0039EBE0((char*)self + 0x18);
@@ -345,7 +345,7 @@ extern "C" void func_00398038(void* self)
 {
     void* obj = *(void**)((char*)self + 0xC);
     sVEntry398038* vt = *(sVEntry398038**)((char*)obj + 8);
-    vt[0x2E].fn((char*)obj + vt[0x2E].delta);
+    vt[46].fn((char*)obj + vt[0x2E].delta);
     func_0039F100((char*)self + 0x18);
 }
 #endif
@@ -366,7 +366,7 @@ extern "C" void func_00398078(void* self, int flags)
     for (i = 0; i < *(int*)((char*)self + 0x8); i++) {
         char* obj = (char*)GrMan_uiengine;
         sVEntry398078* vt = *(sVEntry398078**)(obj + 0x10D8);
-        vt[0x32].fn(obj + vt[0x32].delta, (*(int**)((char*)self + 0x4))[i]);
+        vt[50].fn(obj + vt[50].delta, (*(int**)((char*)self + 0x4))[i]);
     }
     if (*(void**)((char*)self + 0x4) != 0) {
         cMemMan_free(*(void**)((char*)self + 0x4));
@@ -675,7 +675,7 @@ extern "C" void cUIFontInterface_loadFonts(s3983F0* self)
 {
     for (int i = 0; i < self->count; i++) {
         signed char j = i;
-        *(int*)((char*)self + j * 12 + 0xC) = cFont_cFont(cMemMan_alloc(0x84, str_UI_Font, 0, 0), uiFontNameOf(&self->entries[i]), 0);
+        *(int*)((char*)self + j * 12 + 0xC) = cFont_cFont(cMemMan_alloc(132, str_UI_Font, 0, 0), uiFontNameOf(&self->entries[i]), 0);
     }
 }
 #endif
@@ -861,7 +861,7 @@ extern "C" void cUIGroup_render3D(cUIGroup* self, int pRenCon)
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIGroup_render3D_sVEntry* vt = *(cUIGroup_render3D_sVEntry**)((char*)n + 8);
-            vt[0x12].fn((char*)n + vt[0x12].delta, pRenCon);
+            vt[18].fn((char*)n + vt[0x12].delta, pRenCon);
             n = *(void**)((char*)n + 4);
         }
     }
@@ -890,7 +890,7 @@ extern "C" void cUIGroup_render2D(cUIGroup* self, float x, float y)
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
                 cUIGroup_render2D_sVEntry* vt = *(cUIGroup_render2D_sVEntry**)((char*)n + 8);
-                vt[0x11].fn((char*)n + vt[0x11].delta, self->mPosition.x + x, self->mPosition.y + y);
+                vt[17].fn((char*)n + vt[0x11].delta, self->mPosition.x + x, self->mPosition.y + y);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -1267,7 +1267,7 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
     int* w = &rc->top->f8;
     *w = (*w & ~0x3E0) | ((((self->f15 & 0x1F) + 9) << 5) & 0x3E0);
     sVE_8A78* vt = rc->vt;
-    vt[0x238 / 8].fn((char*)rc + vt[0x238 / 8].delta, 4, verts, 0);
+    vt[568 / 8].fn((char*)rc + vt[0x238 / 8].delta, 4, verts, 0);
     PopRS_8A78();
 }
 #endif
@@ -1327,7 +1327,7 @@ extern "C" cUIListBox* cUIListBox_cUIListBox(cUIListBox* self)
     }
     *(char*)&self->mNumEntries = 0;
     *(char*)&self->mCurrentEntry = 0;
-    func_00416210(((&self->mpEntries[0])), 0, 0x280);
+    func_00416210(((&self->mpEntries[0])), 0, 640);
     (*(&self->mStaticColour)) = D_004C66C8;
     return (self);
 }

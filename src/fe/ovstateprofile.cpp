@@ -410,7 +410,7 @@ static inline cUIObj_1380* getObj_1380(cState_1380* self, char* name)
 extern "C" void func_00211380(void* p)
 {
     cState_1380* self = (cState_1380*)p;
-    unsigned short buf[0x320];
+    unsigned short buf[800];
     char name[0x40];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     if (self->v42()) {
@@ -423,7 +423,7 @@ extern "C" void func_00211380(void* p)
             self->v35(3);
     }
     if (self->v42()) {
-        cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 0x320);
+        cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 800);
         int first = 0;
         cUIText_setUnicodeStringWrap(getObj_1380(self, str_Memory_card_text_b), buf);
         *(int*)((char*)self + 0x21C) = *(int*)(mp + 0x428);
@@ -689,7 +689,7 @@ extern "C" int func_00211B38(void* self, int a1, unsigned int key)
     case 9:
         return 0x100;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -815,23 +815,23 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
         ((sMgrK211BC8*)mp)->fF8 = self->f1C4 = *(int*)(item + 0x18);
         if (self->state == 1) {
             if (self->keyboard == 0) {
-                char* kb = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, str_Keyboard_b, 0x100, 0), self->engine, vself, 0, self->f15);
+                char* kb = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_Keyboard_b, 0x100, 0), self->engine, vself, 0, self->f15);
                 self->keyboard = kb;
-                *(int*)(kb + 0x140) = 0x37;
+                *(int*)(kb + 0x140) = 55;
                 cKeyboardPopup_setMaxCharacters(self->keyboard, 8);
-                cKeyboardPopup_setIncludeKey(self->keyboard, 0x4B, 1, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 75, 1, 2);
                 *(int*)(self->keyboard + 0x58) = 1;
                 func_001CE408(self->keyboard, 1);
                 cKeyboardPopup_setIncludeKey(self->keyboard, 0xE, 0, 2);
-                cKeyboardPopup_setIncludeKey(self->keyboard, 0x27, 0, 2);
-                cKeyboardPopup_setIncludeKey(self->keyboard, 0x28, 0, 2);
-                cKeyboardPopup_setIncludeKey(self->keyboard, 0x34, 0, 2);
-                cKeyboardPopup_setIncludeKey(self->keyboard, 0x1A, 0, 2);
-                cKeyboardPopup_setIncludeKey(self->keyboard, 0x19, 0, 2);
-                cKeyboardPopup_setIncludeKey(self->keyboard, 0x35, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 39, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 40, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 52, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 26, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 25, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 53, 0, 2);
                 cKeyboardPopup_setIncludeKey(self->keyboard, 0x40, 0, 2);
-                cKeyboardPopup_setIncludeKey(self->keyboard, 0x41, 0, 2);
-                cKeyboardPopup_setIncludeKey(self->keyboard, 0x42, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 65, 0, 2);
+                cKeyboardPopup_setIncludeKey(self->keyboard, 66, 0, 2);
                 cKeyboardPopup_setMinCharacters(self->keyboard, 1);
             }
             cKeyboardPopup_setStatic(self->keyboard, GetText_K211BC8(str_kT_KEYUserName_b));
@@ -850,7 +850,7 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
             if (st != 6) {
                 self->f1E4 = 1;
                 if (st == 0 || st == 2 || st == 1) {
-                    VCALLV_K211BC8(mp, 0x748, 1), 0);
+                    VCALLV_K211BC8(mp, 1864, 1), 0);
                 }
                 self->state = 6;
             }
@@ -860,14 +860,14 @@ extern "C" void func_00211BC8(void* vself, char* item, int event)
     case 7:
         if (self->f1A8 != 1 && self->state != 6) {
             char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-            if (VCALL_K211BC8(*(char**)(mp + 0x434), 0, 54), *(int*)(mp + 0x428)) != 0) {
+            if (VCALL_K211BC8(*(char**)(mp + 1076), 0, 54), *(int*)(mp + 0x428)) != 0) {
                 ((sMgrK211BC8*)mp)->fF8 = self->f1C4 = *(int*)(item + 0x18);
                 if (self->state == 1) {
-                    if (VCALL_K211BC8(*(char**)(mp + 0x434), 0, 67), self->f1C4) != 0) {
+                    if (VCALL_K211BC8(*(char**)(mp + 1076), 0, 67), self->f1C4) != 0) {
                         self->f1A8 = 1;
                         self->state = 4;
                         cMCOverlayManager_SetAction(mp, 0);
-                        VCALLV_K211BC8(mp, 0x748, 1), 0x18);
+                        VCALLV_K211BC8(mp, 1864, 1), 0x18);
                     }
                 }
             }
@@ -927,7 +927,7 @@ extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(void* self, void* pEngine, 
 {
     cFEMemCard_cFEMemCard(self, pEngine, 0);
     *(void***)((char*)self + 0x8) = cOVState_AUTOSAVE_vtbl;
-    *(int*)((char*)self + 0xC) = 0x25;
+    *(int*)((char*)self + 0xC) = 37;
     *(int*)((char*)self + 0x208) = 1;
     *(int*)((char*)self + 0x22C) = iParent;
     *(int*)((char*)self + 0x1C4) = 0;
@@ -1177,10 +1177,10 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(void* self)
     if (parentScreen == 1) {
         cGame_exit(SSXApp->Game, 0);
     } else if (parentScreen == 6) {
-        void* nextState = func_00194738(cMemMan_alloc(0x4C, str_cFEStateTitle_b, 0, 0), *(void**)((char*)self + 0x10));
+        void* nextState = func_00194738(cMemMan_alloc(76, str_cFEStateTitle_b, 0, 0), *(void**)((char*)self + 0x10));
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
     } else if (parentScreen == 7) {
-        void* nextState = func_001F3700(cMemMan_alloc(0x58, str_cFEStateLodge_b, 0, 0), *(void**)((char*)self + 0x10));
+        void* nextState = func_001F3700(cMemMan_alloc(88, str_cFEStateLodge_b, 0, 0), *(void**)((char*)self + 0x10));
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
     } else if (parentScreen == 0) {
         void* race = cBE_getInterface_Fv(cBE_getBE(), 0);

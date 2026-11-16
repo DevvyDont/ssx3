@@ -549,12 +549,12 @@ struct sVE_FD18 {
 extern "C" void func_001CFD18(void* self, void* widget, int msg)
 {
     switch (msg) {
-    case 0x15:
+    case 21:
         if (*(int*)((char*)widget + 0xC) != 7) {
             *(int*)((char*)self + 0x1C) &= ~8;
         }
         break;
-    case 0x16:
+    case 22:
         if (((*(int*)((char*)self + 0x1C) >> 3) & 1) == 0) {
             *(int*)((char*)self + 0x1C) |= 8;
         }
@@ -859,7 +859,7 @@ struct sVE_0180 {
 
 extern "C" void func_001D0180(void* self)
 {
-    void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
     if (func_00156A38(iface) == 0) {
         *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) & ~2) | 1;
         func_00156A10(iface);
@@ -898,7 +898,7 @@ struct sVE_0238c {
 extern "C" void func_001D0238(void* self)
 {
     if (((*(int*)((char*)self + 0x48) >> 1) & 1) == 0) {
-        if (func_00156A38(cBE_getInterface_Fv(cBE_getBE(), 0xD)) != 0) {
+        if (func_00156A38(cBE_getInterface_Fv(cBE_getBE(), 13)) != 0) {
             *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) & ~1) | 2;
             sVE_0238a* vt = *(sVE_0238a**)((char*)self + 8);
             vt[28].fn((char*)self + vt[28].delta);
@@ -936,9 +936,9 @@ struct sVE_0320b {
 
 extern "C" void func_001D0320(void* self, int rewardIndex)
 {
-    func_00157F20(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+    func_00157F20(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
                   *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), rewardIndex, 1);
-    *(int*)((char*)self + 0x54) = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)((char*)self + 0x44),
+    *(int*)((char*)self + 0x54) = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)((char*)self + 0x44),
                                                 *(int*)((char*)self + 0x50));
     sVE_0320a* vt = *(sVE_0320a**)((char*)self + 8);
     vt[42].fn((char*)self + vt[42].delta);
@@ -992,7 +992,7 @@ extern "C" void cFEStateRewardGalleryBase_showReward(void* self)
         func_001D20D8(nextState, *(int*)((char*)self + 0x4C), data);
         break;
     case 6:
-        nextState = func_001D22F0(cMemMan_alloc(0x280, str_cFEStateVideoPlayer, 0, 0), *(void**)((char*)self + 0x10), self,
+        nextState = func_001D22F0(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), *(void**)((char*)self + 0x10), self,
                           *(signed char*)((char*)self + 0x44));
         func_001D2598(nextState, *(const char**)((char*)data + 4), 0);
         break;
@@ -1047,7 +1047,7 @@ extern "C" void func_00157468(void* iface, int a, int b, int c, int d);
 
 extern "C" void func_001D05F0(void* self, int rewardIndex)
 {
-    func_00157468(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44),
+    func_00157468(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
                   *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), rewardIndex);
 }
 #endif
@@ -1641,7 +1641,7 @@ struct sRewardList_11F8 {
 
 extern "C" void func_001D11F8(sRewardList_11F8* self)
 {
-    int n = func_001572B0(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    int n = func_001572B0(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x14);
     for (int i = 0; i < n; i++) {
@@ -1728,7 +1728,7 @@ struct sRewardList_1390 {
 
 extern "C" void func_001D1390(sRewardList_1390* self)
 {
-    int n = func_001572D0(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    int n = func_001572D0(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x18);
     for (int i = 0; i < n; i++) {
@@ -1815,7 +1815,7 @@ struct sRewardList_1528 {
 
 extern "C" void func_001D1528(sRewardList_1528* self)
 {
-    int n = func_001572F0(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    int n = func_001572F0(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x1C);
     for (int i = 0; i < n; i++) {
@@ -1902,7 +1902,7 @@ struct sRewardList_16C0 {
 
 extern "C" void func_001D16C0(sRewardList_16C0* self)
 {
-    int n = func_00157330(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    int n = func_00157330(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x24);
     for (int i = 0; i < n; i++) {
@@ -1989,7 +1989,7 @@ struct sRewardList_1858 {
 
 extern "C" void func_001D1858(sRewardList_1858* self)
 {
-    int n = func_00157310(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    int n = func_00157310(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x20);
     for (int i = 0; i < n; i++) {
@@ -2049,7 +2049,7 @@ struct sRewardList_1990 {
 
 extern "C" void func_001D1990(sRewardList_1990* self)
 {
-    int n = func_00157370(cBE_getInterface_Fv(cBE_getBE(), 0xD));
+    int n = func_00157370(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x28);
     for (int i = 0; i < n; i++) {
@@ -2376,7 +2376,7 @@ extern "C" int cFEStatePreviewReward_onWidgetMenu(void* self, int menu, unsigned
     case 9:
         return 0x100;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -2614,7 +2614,7 @@ extern char str_MoviePlayer[];
 
 extern "C" void func_001D23E0(void* self)
 {
-    *(void**)((char*)self + 0x248) = func_002533C8(cMemMan_alloc(0x44, str_MoviePlayer, 0, 0));
+    *(void**)((char*)self + 0x248) = func_002533C8(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
     func_001D25E8(self);
 }
 #endif

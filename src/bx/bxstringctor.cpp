@@ -606,7 +606,7 @@ static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_002690
 
 extern "C" void func_00269008(void* self, int a1, int a2)
 {
-    int kind = 0xF3;
+    int kind = 243;
     *(int*)self = a2;
     func_00264CF0(self, a1);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
@@ -657,7 +657,7 @@ static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690
 
 extern "C" void func_002690C8(void* self, int a1, int a2)
 {
-    int kind = 0xF4;
+    int kind = 244;
     *(int*)self = a2;
     func_00264CF0(self, a1);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
@@ -712,7 +712,7 @@ struct sMsgSelf_00269188 {
 
 extern "C" void func_00269188(void* self, int a1)
 {
-    int kind = 0xF7;
+    int kind = 247;
     ((sMsgSelf_00269188*)self)->f0 = a1;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
@@ -762,7 +762,7 @@ static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_002692
 
 extern "C" void func_00269240(void* self, int a1, int a2, void* a3)
 {
-    int kind = 0xF3;
+    int kind = 243;
     *(int*)self = a2;
     func_00264D80(self, a1, a3);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
@@ -813,7 +813,7 @@ static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_002693
 
 extern "C" void func_00269300(void* self, int a1, int a2)
 {
-    int kind = 0xF5;
+    int kind = 245;
     *(int*)self = a2;
     func_00264D80(self, a1, 0);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
@@ -868,7 +868,7 @@ struct sMsgSelf_002693C0 {
 
 extern "C" void func_002693C0(void* self, int a1)
 {
-    int kind = 0xF7;
+    int kind = 247;
     ((sMsgSelf_002693C0*)self)->f0 = a1;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
@@ -925,7 +925,7 @@ struct sMsg_00269478 {
 extern "C" void func_00269478(void* self, int a1)
 {
     sMsg_00269478* m = (sMsg_00269478*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFB;
+    m->kind = 251;
     m->vt = D_00481150;
     m->f8 = 1;
     m->fC = a1;
@@ -980,7 +980,7 @@ struct sMsg_00269538 {
 
 extern "C" void func_00269538(void* self, int a1, int a2)
 {
-    sMsg_00269538* m = (sMsg_00269538*)cMemMan_alloc(0x14, str_cSetupMan_Update, 0x20000000, 0);
+    sMsg_00269538* m = (sMsg_00269538*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFC;
     m->vt = D_00481130;
     m->f8 = 1;
@@ -1046,9 +1046,9 @@ extern "C" void func_00269608(void* self)
         *(int*)self = 10;
         break;
     }
-    func_00264E50(self, 0xB, *(int*)self, 0);
+    func_00264E50(self, 11, *(int*)self, 0);
     sMsg_00269608* m = (sMsg_00269608*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFD;
+    m->kind = 253;
     m->vt = D_004813E0;
     m->f8 = 1;
     void* mp = m;
@@ -1159,7 +1159,7 @@ struct sMsg_002697D0 {
 extern "C" void func_002697D0(void* self, int a1)
 {
     sMsg_002697D0* m = (sMsg_002697D0*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFB;
+    m->kind = 251;
     m->vt = D_00481150;
     m->f8 = 1;
     m->fC = a1;
@@ -1214,7 +1214,7 @@ struct sMsg_00269890 {
 extern "C" void func_00269890(void* self, int a1)
 {
     sMsg_00269890* m = (sMsg_00269890*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFB;
+    m->kind = 251;
     m->vt = D_00481150;
     m->f8 = 0;
     m->fC = a1;
@@ -1269,7 +1269,7 @@ struct sMsg_00269948 {
 
 extern "C" void func_00269948(void* self, int a1, int a2)
 {
-    sMsg_00269948* m = (sMsg_00269948*)cMemMan_alloc(0x14, str_cSetupMan_Update, 0x20000000, 0);
+    sMsg_00269948* m = (sMsg_00269948*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFC;
     m->vt = D_00481130;
     m->f8 = 1;
@@ -1326,7 +1326,7 @@ struct sMsg_00269A18 {
 
 extern "C" void func_00269A18(void* self, int a1, int a2)
 {
-    sMsg_00269A18* m = (sMsg_00269A18*)cMemMan_alloc(0x14, str_cSetupMan_Update, 0x20000000, 0);
+    sMsg_00269A18* m = (sMsg_00269A18*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     m->kind = 0xFC;
     m->vt = D_00481130;
     m->f8 = 0;
@@ -1383,7 +1383,7 @@ extern "C" void func_00269AE0(void* self, int a1)
 {
     *(int*)self = a1;
     sMsg_00269AE0* m = (sMsg_00269AE0*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFD;
+    m->kind = 253;
     m->vt = D_004813E0;
     m->f8 = 1;
     void* mp = m;
@@ -1437,7 +1437,7 @@ extern "C" void func_00269B90(void* self, int a1)
 {
     *(int*)self = a1;
     sMsg_00269B90* m = (sMsg_00269B90*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFD;
+    m->kind = 253;
     m->vt = D_004813E0;
     m->f8 = 0;
     void* mp = m;
@@ -1581,7 +1581,7 @@ extern "C" sNode00269DC0* func_00269DC0(void* self)
 {
     sNode00269DC0* n = (sNode00269DC0*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
     int v = *(int*)((char*)self + 8);
-    n->kind = 0xFD;
+    n->kind = 253;
     n->vtbl = D_004813E0;
     n->value = v;
     return n;
@@ -1645,7 +1645,7 @@ INCLUDE_ASM("bx/bxstringctor", cAIPath_populateDataWithDefaults__FPv);
  */
 int cAIPath_populateDataWithDefaults(void* self)
 {
-    int t0 = 0x2e;
+    int t0 = 46;
     *(int*)((char*)self + 0x38) = t0;
     *(int*)((char*)self + 0x3c) = 1;
     return t0;
@@ -1669,9 +1669,9 @@ extern "C" void pathREAD_tInt32(void* p);
  */
 extern "C" void cAIPath_populateData(void* self, int data, int id)
 {
-    if (id == 0x64) {
+    if (id == 100) {
         pathREAD_tInt32((char*)self + 0x38);
-    } else if (id == 0x65) {
+    } else if (id == 101) {
         pathREAD_tInt32((char*)self + 0x3C);
     }
 }
@@ -1757,7 +1757,7 @@ extern "C" int func_0026A000(sTable_0026A000* table, float x) {
     int i;
     for (i = 0; i < table->count; i++) {
         sEntry_0026A000* entry = &table->entries[i];
-        if (!(x < entry->lo) && !(entry->hi < x) && entry->type == 0xD)
+        if (!(x < entry->lo) && !(entry->hi < x) && entry->type == 13)
             return 0;
     }
     return 1;
@@ -2683,7 +2683,7 @@ extern "C" int cPath_isForkInPath(sBXRangeList* self, float lo, float hi)
     int i;
     for (i = 0; i < self->count; i++) {
         if (!(hi < self->items[i].min) && !(self->items[i].max < lo)) {
-            if (self->items[i].field_0x0 == 0x14 || self->items[i].field_0x0 == 0x12) {
+            if (self->items[i].field_0x0 == 20 || self->items[i].field_0x0 == 18) {
                 return 1;
             }
         }

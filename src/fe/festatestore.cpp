@@ -365,7 +365,7 @@ extern "C" void func_00184C60(char* self)
             void* anim = *(void**)(rider + 0xC);
             if (anim != 0) {
                 cRiderAnimBase_reset(anim);
-                cRiderAnimBase_play(anim, 0x1B4, 0, -1.0f);
+                cRiderAnimBase_play(anim, 436, 0, -1.0f);
             }
             sQuat_184C60 pos;
             sXform_184C60 xf;
@@ -421,12 +421,12 @@ struct sVE_4F40 {
 extern "C" void func_00184F40(void* self, void* item, int msg)
 {
     switch (msg) {
-    case 0x15:
+    case 21:
         break;
-    case 0x16:
+    case 22:
         if (*(int*)((char*)item + 0x6C) != 0) {
             int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-            func_00150B48(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)((char*)self + 0x44), charID, *(int*)((char*)item + 0x48));
+            func_00150B48(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)((char*)self + 0x44), charID, *(int*)((char*)item + 0x48));
             int entryIndex = *(signed char*)(*(char**)(*(char**)((char*)self + 0x4C) + 0xA0) + 0x18);
             int flagBit = *(signed char*)(*(char**)(*(char**)((char*)self + 0x50) + 0xA0) + 0x18);
             void* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
@@ -676,7 +676,7 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                         sVE_185268* vt = *(sVE_185268**)(player + 0xC);
                         ((void (*)(void*))vt[2].fn)(player + vt[2].delta);
                     }
-                    int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)(self + 0x44), charID);
+                    int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)(self + 0x44), charID);
                     int n;
                     sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
                     int trick = func_00116938(tbl[bi].id);
@@ -759,7 +759,7 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                             sVE_185268* vt = *(sVE_185268**)(player + 0xC);
                             ((void (*)(void*))vt[2].fn)(player + vt[2].delta);
                         }
-                        int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 0xB), *(signed char*)(self + 0x44), charID);
+                        int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)(self + 0x44), charID);
                         int n;
                         sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
                         if (points >= tbl[bi].cost)
@@ -798,7 +798,7 @@ extern "C" int func_001859D8(void* self, int menu, unsigned int event)
             return 0x100;
         }
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -814,7 +814,7 @@ extern "C" void* func_00185A18(void* self)
     *(void***)((char*)self + 0x8) = cFEStateCredits_vtbl;
     *(int*)((char*)self + 0x60) = -100;
     *(int*)((char*)self + 0x64) = 1;
-    *(int*)((char*)self + 0xC) = 0x24;
+    *(int*)((char*)self + 0xC) = 36;
     *(int*)((char*)self + 0x58) = 0;
     *(int*)((char*)self + 0x5C) = 0;
     *(int*)((char*)self + 0x48) = 0;

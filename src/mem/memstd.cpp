@@ -69,25 +69,25 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int size
     }
     char* data = mem;
     data += hdr + 0x60;
-    data += align + 0x2F;
+    data += align + 47;
     data = (char*)((int)data & -align);
     char* end = mem + size;
     end -= hdr + 0x30;
     sprintf(buf, str_pct_s_LOW, name);
     sMemNode_251718* blk = (sMemNode_251718*)(data - 0x10);
     sMemClass_251718* cls = (sMemClass_251718*)(mem + 0x10);
-    MEM_initblock(mem, buf, 0x50, hdr, flags | 0x8000, 0, blk);
+    MEM_initblock(mem, buf, 80, hdr, flags | 0x8000, 0, blk);
     MEM_initblock(blk, 0, end - (char*)blk - 0x10, hdr, flags, mem, end);
     sprintf(buf, str_pct_s_HIGH, name);
     MEM_initblock(end, buf, 0, hdr, flags | 0x8100, blk, 0);
     D_004D2438[id & 0x3F] = cls;
-    MEM_fill(cls, 0, 0x50);
+    MEM_fill(cls, 0, 80);
     strcpy(cls->name, name);
     *(char**)(mem + 0x1C) = end;
     *(char**)(mem + 0x18) = mem;
-    cls->first->tag = 0x4253;
-    cls->last->tag = 0x4253;
-    *(unsigned short*)(mem + 0x20) = 0x4253;
+    cls->first->tag = 16979;
+    cls->last->tag = 16979;
+    *(unsigned short*)(mem + 0x20) = 16979;
     *(int*)(mem + 0x24) = 0x7FFFFFFF;
     *(int*)(mem + 0x38) = sizeAlign;
     *(int*)(mem + 0x3C) = align;
@@ -116,7 +116,7 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int size
     blk->prev = prevNode;
     prevNode->next = blk;
     nextNode->prev = blk;
-    blk->tag = 0x4246;
+    blk->tag = 16966;
     blk->flags |= 0x4000;
     if (lock) {
         MUTEX_create(cls->sema);
@@ -140,7 +140,7 @@ extern "C" int func_00251998(int id)
         if (cls->locked != 0) {
             func_003E56E0(cls->sema);
         }
-        MEM_fill(cls, 0, 0x50);
+        MEM_fill(cls, 0, 80);
         *slot = 0;
         r = 1;
     }
@@ -208,7 +208,7 @@ extern "C" int func_00251AC0(int id)
     int v = 0;
     for (;;) {
         if (v < n->size - 0x10) {
-            if (n->tag == 0x4253) {
+            if (n->tag == 16979) {
                 break;
             }
             best = n;
@@ -241,7 +241,7 @@ extern "C" int func_00251B50(int id)
     sMemClass_251718* cls = (sMemClass_251718*)D_004D2438[id & 0x3F];
     int total = 0;
     sMemNode_251718* n = cls->head.next;
-    while (n->tag != 0x4253) {
+    while (n->tag != 16979) {
         ASSERT_1B50(n != 0);
         total += n->size - 0x10;
         n = n->next;
@@ -421,7 +421,7 @@ extern "C" int MEMCLASS_link(int id, char* mem, int size)
     char* end = mem + size;
     char* data = mem;
     data += hdr + 0x10;
-    data += align + 0x2F;
+    data += align + 47;
     data = (char*)((int)data & -align);
     end -= hdr + 0x30;
     int flags = cls->flags;
@@ -453,7 +453,7 @@ extern "C" int MEMCLASS_link(int id, char* mem, int size)
     blk->prev = prevNode;
     prevNode->next = blk;
     nextNode->prev = blk;
-    blk->tag = 0x4246;
+    blk->tag = 16966;
     blk->flags |= 0x4000;
     return 1;
 }
@@ -592,7 +592,7 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
         if (blk->flags & 0x4000) {
             int sz = blk->size;
             if (sz > 0x10 && !(blk->flags & 0x8000))
-                crc = func_003E62D0((char*)blk + 0x18, sz - 0x18, 0xFBEA);
+                crc = func_003E62D0((char*)blk + 0x18, sz - 0x18, 64490);
             total += sz;
             int st = func_002522B0((sMemBlock002522B0*)blk);
             cb(fmt, str_FREE, str_SPACE, data, sz, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], D_004A2E58);
@@ -600,7 +600,7 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
             int sz = blk->size;
             crc = 0;
             if (sz != 0 && !(blk->flags & 0x8000))
-                crc = func_003E62D0(data, sz, 0xFBEA);
+                crc = func_003E62D0(data, sz, 64490);
             int st = func_002522B0((sMemBlock002522B0*)blk);
             cb(fmt, str_unknown, blockName, data, blk->size, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], comment);
         }
@@ -622,7 +622,7 @@ extern "C" int func_00252248(void* self)
     int ok = 0;
     if (func_003E6240(self, 0x18, 0) != 0) {
         unsigned short m = *(unsigned short*)self;
-        if (m == 0x4246 || m == 0x4253) {
+        if (m == 16966 || m == 16979) {
             ok = 1;
         } else {
             D_004A2E74 = 1;
@@ -657,20 +657,20 @@ extern "C" int func_002522B0(sMemBlock002522B0* blk)
 {
     int ok = 0;
     unsigned short tag = blk->tag;
-    if (tag == 0x4253) {
+    if (tag == 16979) {
         if (blk->flags & 0x8000) {
             ok = 1;
         } else {
             D_004A2E74 = 2;
         }
-    } else if (tag == 0x4246) {
+    } else if (tag == 16966) {
         if (blk->flags & 0x4000) {
             ok = func_00252248(blk->a);
             if (ok) {
                 ok = func_00252248(blk->b);
             }
         }
-    } else if (tag == 0x424D) {
+    } else if (tag == 16973) {
         if (!(blk->flags & 0x2000) || readBE32_002522B0((unsigned char*)(blk->size + (int)blk) + 0x10) == 0x42454E44) {
             ok = 1;
         } else {
@@ -771,7 +771,7 @@ extern "C" int func_002523D0(void* mem)
         fwd = *(sMemNode_2523D0**)((int)mem - 8);
         if (back->flags & 0x4000) {
             Unlink_2523D0(back);
-            back->tag = 0x424F;
+            back->tag = 16975;
             back->flags &= ~0x4000;
             blk = back;
             back = blk->back;
@@ -781,7 +781,7 @@ extern "C" int func_002523D0(void* mem)
         }
         if (fwd->flags & 0x4000) {
             Unlink_2523D0(fwd);
-            fwd->tag = 0x424F;
+            fwd->tag = 16975;
             fwd->flags &= ~0x4000;
             fwd = fwd->end;
             blk->back = back;
@@ -820,7 +820,7 @@ extern "C" int func_002523D0(void* mem)
         blk->prev = p;
         p->next = blk;
         q->prev = blk;
-        blk->tag = 0x4246;
+        blk->tag = 16966;
         blk->flags |= 0x4000;
         if (cls->locked) {
             MUTEX_unlock(cls->mutex);
@@ -981,7 +981,7 @@ extern "C" void* func_00252718(void* mem, int size)
     fwd = *(sMemNode_252718**)((int)mem - 8);
     if (fwd->flags & 0x4000) {
         Unlink_252718(fwd);
-        fwd->tag = 0x424F;
+        fwd->tag = 16975;
         fwd->flags &= ~0x4000;
         fwd = fwd->end;
         *(sMemNode_252718**)((int)mem - 8) = fwd;
@@ -1026,7 +1026,7 @@ extern "C" void* func_00252718(void* mem, int size)
         nb->prev = p;
         p->next = nb;
         q->prev = nb;
-        nb->tag = 0x4246;
+        nb->tag = 16966;
         nb->flags |= 0x4000;
         fwd->back = nb;
         blk->end = nb;
@@ -1411,7 +1411,7 @@ extern "C" sMemNode_251718* func_00253100(sMemClass_251718* cls, int size, int b
             n = n->prev;
         } while (n->size < size);
     }
-    return n->tag != 0x4253 ? n : 0;
+    return n->tag != 16979 ? n : 0;
 }
 #endif
 //100%
@@ -1432,7 +1432,7 @@ extern "C" sMemNode_251718* func_00253170(sMemClass_251718* cls, int size, int d
         node = cls->head.next;
         for (;;) {
             if (best < node->size - 0x10) {
-                if (node->tag == 0x4253) {
+                if (node->tag == 16979) {
                     break;
                 }
                 bestNode = node;
@@ -1444,7 +1444,7 @@ extern "C" sMemNode_251718* func_00253170(sMemClass_251718* cls, int size, int d
         node = cls->head.prev;
         for (;;) {
             if (best < node->size - 0x10) {
-                if (node->tag == 0x4253) {
+                if (node->tag == 16979) {
                     break;
                 }
                 bestNode = node;
@@ -1464,7 +1464,7 @@ extern "C" int func_00253230(sMemClass_251718* cls, int back)
     int total = 0;
     if (back == 0) {
         sMemNode_251718* n = cls->head.next;
-        while (n->tag != 0x4253) {
+        while (n->tag != 16979) {
             int size = n->size;
             int rest = total - 0x10;
             n = n->next;
@@ -1472,7 +1472,7 @@ extern "C" int func_00253230(sMemClass_251718* cls, int back)
         }
     } else {
         sMemNode_251718* n = cls->head.prev;
-        while (n->tag != 0x4253) {
+        while (n->tag != 16979) {
             int size = n->size;
             int rest = total - 0x10;
             n = n->prev;
@@ -1506,7 +1506,7 @@ extern "C" void func_002532B0(sMemClass_251D50* cls, sMemNode_251D50* blk)
     blk->prev = prevNode;
     prevNode->next = blk;
     nextNode->prev = blk;
-    blk->tag = 0x4246;
+    blk->tag = 16966;
     blk->flags |= 0x4000;
 }
 #endif
@@ -1527,7 +1527,7 @@ extern "C" void func_00253368(sMemBlock* blk) {
     sMemBlock* next = blk->next;
     prev->next = next;
     next->prev = prev;
-    blk->magic = 0x424F;
+    blk->magic = 16975;
     blk->flags &= 0xBFFF;
 }
 #endif
@@ -1750,7 +1750,7 @@ extern "C" void func_002536C8(void* self)
     *(int*)(s + 0x0) = 0;
     *(int*)(s + 0x4) = 0;
     *(int*)(s + 0xC) = 0;
-    *(int*)(s + 0xC) = func_003AE450(*(void**)(s + 0x38), 1, 0x21);
+    *(int*)(s + 0xC) = func_003AE450(*(void**)(s + 0x38), 1, 33);
     *(int*)(s + 0x40) = 1;
     func_003AE938(*(void**)(s + 0x38));
     *(void**)(s + 0x3C) = func_00254368(*(void**)(*(char**)(s + 0x38) + 0x64), *(int*)(s + 0xC), (int)cGraphicsMan_TheGraphicsMan, *(int*)(s + 0x30));
@@ -2120,7 +2120,7 @@ typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
 
 extern "C" void* func_00254368(void* a0, int a1, int a2, int a3)
 {
-    void* p = ((tMemAlloc5_00254368)D_00509430.alloc)(D_004A2EA0, 0x54, 0, 0, D_00509430.field_0x8);
+    void* p = ((tMemAlloc5_00254368)D_00509430.alloc)(D_004A2EA0, 84, 0, 0, D_00509430.field_0x8);
     return func_00254410(p, a0, a1, a2, a3);
 }
 #endif

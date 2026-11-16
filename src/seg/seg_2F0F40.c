@@ -55,7 +55,7 @@ void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) {
         func_003EFED0(self, D_00496B70_FF40);
     } else if (flag == 1) {
         func_003EFED0(self, D_00496B80_FF40);
-    } else if (n >= 0x201) {
+    } else if (n >= 513) {
         func_003EFED0(self, D_00496B90_FF40);
     } else {
         func_003EFED0(self, D_004A4AD0_FF40, s);
@@ -73,7 +73,7 @@ extern void func_003EFF40(int*, char*, int*);
 void func_003F00D8(int* buddyApi, int cmdTag, int message) {
     int logInfo[4];
     func_003F5910(buddyApi[1], cmdTag, 0, message, -1);
-    if (buddyApi[0x508 / 4]) {
+    if (buddyApi[1288 / 4]) {
         logInfo[1] = cmdTag;
         logInfo[3] = message;
         logInfo[2] = 0;
@@ -179,9 +179,9 @@ void func_003F02D0(char* self, char* ev, char* out) {
     if (f) {
         *(int*)(out + 0xA8) |= 0x2000;
     }
-    cDirtysock_tag_TagFieldGetString(f, out + 0x54, 0x50, (char*)D_004A4AE8);
+    cDirtysock_tag_TagFieldGetString(f, out + 0x54, 80, (char*)D_004A4AE8);
     if (out[0x54] != 0) {
-        func_003EFE20(self, *(int*)(self + 0x1C), (short*)(self + 0x30C), 1, out + 0x40, 0x14);
+        func_003EFE20(self, *(int*)(self + 0x1C), (short*)(self + 0x30C), 1, out + 0x40, 20);
         out[0xA4] = *(unsigned short*)(self + 0x30C) >> 8;
         w = *(short*)(self + 0x30C);
         out[0xA6] = 0;
@@ -200,20 +200,20 @@ void func_003F02D0(char* self, char* ev, char* out) {
                 f = cDirtysock_tag_TagFieldFind(buf, key);
                 if (f) {
                     unsigned char b0, b1;
-                    cDirtysock_tag_TagFieldGetString(f, out + 0x54, 0x50, (char*)D_004A4AE8);
+                    cDirtysock_tag_TagFieldGetString(f, out + 0x54, 80, (char*)D_004A4AE8);
                     b1 = key[1];
                     b0 = key[0];
                     out[0xA4] = b0;
                     out[0xA5] = b1;
                     out[0xA6] = 0;
                     v = (short)((((int)(b1 << 24) >> 8) | (b0 << 24)) >> 16);
-                    func_003EFE20(self, fourcc, &v, 1, out + 0x40, 0x14);
+                    func_003EFE20(self, fourcc, &v, 1, out + 0x40, 20);
                     break;
                 }
             }
         }
         if (out[0xA4] == 0) {
-            int r = func_003EFE20(self, fourcc, (short*)(self + 0x30C), *(int*)(self + 0x308), out + 0x40, 0x14);
+            int r = func_003EFE20(self, fourcc, (short*)(self + 0x30C), *(int*)(self + 0x308), out + 0x40, 20);
             short s = r;
             out[0xA6] = 0;
             v = r;
@@ -257,12 +257,12 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F0610);
 void func_003F0610(int* buddyApi, int state) {
     int event[4];
     buddyApi[2] = state;
-    if (buddyApi[0x4C4 / 4]) {
+    if (buddyApi[1220 / 4]) {
         event[0] = 0x636F6E6E;
         event[1] = state;
         event[2] = 0;
         event[3] = 0;
-        ((void (*)(int*, int*, int))buddyApi[0x4C4 / 4])(buddyApi, event, buddyApi[0x4C0 / 4]);
+        ((void (*)(int*, int*, int))buddyApi[1220 / 4])(buddyApi, event, buddyApi[1216 / 4]);
     }
 }
 #endif
@@ -298,13 +298,13 @@ extern void func_00416210(void*, int, int);
 extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
 extern int func_003F5478(int);
 int* func_003F0710(const char* product, const char* version) {
-    int* buddyApi = (int*)func_002591E8(0x50C);
+    int* buddyApi = (int*)func_002591E8(1292);
     if (buddyApi) {
-        func_00416210(buddyApi, 0, 0x50C);
+        func_00416210(buddyApi, 0, 1292);
         cDirtysock_tag_TagFieldDupl((char*)buddyApi + 0x314, 0x40, product);
         cDirtysock_tag_TagFieldDupl((char*)buddyApi + 0x354, 0x40, version);
         buddyApi[1] = func_003F5478(0x8000);
-        buddyApi[5] = 0x64;
+        buddyApi[5] = 100;
     }
     return buddyApi;
 }
@@ -352,8 +352,8 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F0808);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 void func_003F0808(int* buddyApi, int debugContext, int debugFunc) {
-    buddyApi[0x504 / 4] = debugContext;
-    buddyApi[0x508 / 4] = debugFunc;
+    buddyApi[1284 / 4] = debugContext;
+    buddyApi[1288 / 4] = debugFunc;
 }
 #endif
 
@@ -369,7 +369,7 @@ int func_003F0818(char* buddyApi, const char* src, int key, char* langCodes, int
     j = 0;
     langSlot = (short*)(buddyApi + 0x30C);
     do {
-        if (langCodes[0] < 0x61 || langCodes[1] < 0x61) {
+        if (langCodes[0] < 97 || langCodes[1] < 97) {
             break;
         }
         *langSlot = 0;
@@ -497,24 +497,24 @@ void func_003F0BE0(struct S07A0* sp) {
     int* buddyApi = (int*)sp;
     int event[4];
     int x;
-    if (buddyApi[0x4A8 / 4]) {
-        while ((x = func_003EE9A0(buddyApi[0x4A4 / 4]))) {
-            func_00259210(func_003EE480(buddyApi[0x4A8 / 4], x));
+    if (buddyApi[1192 / 4]) {
+        while ((x = func_003EE9A0(buddyApi[1188 / 4]))) {
+            func_00259210(func_003EE480(buddyApi[1192 / 4], x));
         }
-        if (buddyApi[0x4B8 / 4]) {
+        if (buddyApi[1208 / 4]) {
             event[0] = 0x726F7374;
             event[1] = 0;
             event[2] = 0;
-            event[3] = buddyApi[0x4A8 / 4];
-            ((void (*)(int*, int*, int))buddyApi[0x4B8 / 4])(buddyApi, event, buddyApi[0x4B4 / 4]);
+            event[3] = buddyApi[1192 / 4];
+            ((void (*)(int*, int*, int))buddyApi[1208 / 4])(buddyApi, event, buddyApi[1204 / 4]);
         }
-        func_003EE820(buddyApi[0x4A4 / 4]);
-        buddyApi[0x4A4 / 4] = 0;
-        func_003EE260(buddyApi[0x4A8 / 4]);
-        buddyApi[0x4A8 / 4] = 0;
-        buddyApi[0x4A8 / 4] = 0;
-        buddyApi[0x4B4 / 4] = 0;
-        buddyApi[0x4B8 / 4] = 0;
+        func_003EE820(buddyApi[1188 / 4]);
+        buddyApi[1188 / 4] = 0;
+        func_003EE260(buddyApi[1192 / 4]);
+        buddyApi[1192 / 4] = 0;
+        buddyApi[1192 / 4] = 0;
+        buddyApi[1204 / 4] = 0;
+        buddyApi[1208 / 4] = 0;
     }
 }
 #endif
@@ -541,8 +541,8 @@ void* func_003F0C90(char* self, int a, int b) {
         char* s = self + 0x494;
         *(int*)(self + 0x4B8) = a;
         *(int*)(self + 0x4B4) = b;
-        *(int*)(self + 0x4A4) = func_003EE778(0x3E8, 0x7D0);
-        *(int*)(self + 0x4A8) = func_003EE1E8(0x64, 0x64, 0);
+        *(int*)(self + 0x4A4) = func_003EE778(1000, 2000);
+        *(int*)(self + 0x4A8) = func_003EE1E8(100, 100, 0);
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, s);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B48);
@@ -566,7 +566,7 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F0E30);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F0E30(int* buddyApi) {
-    return buddyApi[0x4A8 / 4];
+    return buddyApi[1192 / 4];
 }
 #endif
 
@@ -609,7 +609,7 @@ int func_003F0E38(char* self, char* e, int a, int b, int c) {
         return 0;
     x = func_003EEC88(*(int*)(self + 0x4A4), (int)e);
     if (x == 0) {
-        ent = (char*)func_002591E8(0xB8);
+        ent = (char*)func_002591E8(184);
         *(Ent_0E38*)ent = *(Ent_0E38*)e;
         func_003EEB30(*(int*)(self + 0x4A4), (int)ent, func_003EE320(*(int*)(self + 0x4A8), (int)ent));
     } else {
@@ -731,10 +731,10 @@ extern int func_003EEC88(int, int);
 extern int func_003EE468(int, int);
 int func_003F14D8(int* buddyApi, int buddyName) {
     int rosterEntry = 0;
-    if (buddyApi[0x4A4 / 4] && buddyName) {
-        int x = func_003EEC88(buddyApi[0x4A4 / 4], buddyName);
+    if (buddyApi[1188 / 4] && buddyName) {
+        int x = func_003EEC88(buddyApi[1188 / 4], buddyName);
         if (x) {
-            rosterEntry = func_003EE468(buddyApi[0x4A8 / 4], x);
+            rosterEntry = func_003EE468(buddyApi[1192 / 4], x);
         }
     }
     return rosterEntry;
@@ -838,8 +838,8 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F17C8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 void func_003F17C8(int* buddyApi, int a, int b) {
-    buddyApi[0x4B0 / 4] = a;
-    buddyApi[0x4AC / 4] = b;
+    buddyApi[1200 / 4] = a;
+    buddyApi[1196 / 4] = b;
 }
 #endif
 
@@ -1035,8 +1035,8 @@ void func_003F17D8(struct Conn_17D8* self) {
                 id = func_003EEC88(self->names, (int)name);
                 if (id == 0) {
                     if ((unsigned int)strlen(name) < 0x20) {
-                        ent = (char*)func_002591E8(0xB8);
-                        func_00416210(ent, 0, 0xB8);
+                        ent = (char*)func_002591E8(184);
+                        func_00416210(ent, 0, 184);
                         strcpy(ent, name);
                         id = func_003EE320(self->roster, (int)ent);
                         func_003EEB30(self->names, (int)ent, id);
@@ -1061,7 +1061,7 @@ void func_003F17D8(struct Conn_17D8* self) {
                 ent = (char*)func_003EE468(self->roster, id);
                 old = *(Ent_17D8*)ent;
                 func_003F02D0((char*)self, (char*)&ev, ent);
-                if (func_00415FC8(&old, ent, 0xB8) != 0) {
+                if (func_00415FC8(&old, ent, 184) != 0) {
                     func_003EE600(self->roster, 1);
                     func_003EFED0((char*)self, D_00496BB8, ent, ent[0xA7], ent + 0x40, ent + 0x54, ent + 0xA4);
                 }

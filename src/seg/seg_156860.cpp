@@ -24,7 +24,7 @@ extern char str_cCommSystem[];
  * it.
  */
 extern "C" void cCommSystem_construct(void) {
-    cCommSystem_mCommSystem = (cCommSystem*)(cCommSystem_cCommSystem_5860(cMemMan_alloc_5860(0x34, str_cCommSystem, 0x20000000, 0)));
+    cCommSystem_mCommSystem = (cCommSystem*)(cCommSystem_cCommSystem_5860(cMemMan_alloc_5860(52, str_cCommSystem, 0x20000000, 0)));
 }
 #endif
 
@@ -196,7 +196,7 @@ extern "C" void func_00255A20(sComm_5A20* self)
     case 3: {
         if (func_003F3CC0_5A20(0x6F6E6C6E, 0, 0) != 0 && func_003F3CC0_5A20(0x686F7374, 0, 0) != 0) {
             self->state = 4;
-            self->timer = 0x708;
+            self->timer = 1800;
             self->type = func_003F3CC0_5A20(0x74797065, 0, 0);
             int bb = func_003F3CC0_5A20(0x62626E64, 0, 0);
             if (bb == 1) {
@@ -403,7 +403,7 @@ extern char cCommSystem_mNetConns[];
 extern int cCommSystem_mNumNetConn;
 
 extern "C" int func_00255F20(void *arg0, int arg1) {
-    cCommSystem_mNumNetConn = func_003F3BC8_5F20(arg1, cCommSystem_mNetConns, 0xA);
+    cCommSystem_mNumNetConn = func_003F3BC8_5F20(arg1, cCommSystem_mNetConns, 10);
     return 1;
 }
 #endif
@@ -417,7 +417,7 @@ extern "C" void func_00255F50(void *commSystem, int configIndex) {
     func_00255FA0(commSystem);
     (*(int *)((char*)(commSystem) + (0x1C))) = configIndex;
     (*(int *)((char*)(commSystem) + (0x30))) = 1;
-    (*(int *)((char*)(commSystem) + (0x24))) = 0x2328;
+    (*(int *)((char*)(commSystem) + (0x24))) = 9000;
     (*(int *)((char*)(commSystem) + (0x20))) = 2;
     (*(int *)((char*)(commSystem) + (0x2C))) = 0;
 }
@@ -503,7 +503,7 @@ extern char str_DNASMAN[];
 static inline int ge3_60B0(int *o) { return *o >= 3; }
 
 extern "C" void func_002560B0(void) {
-    int *dnasMan = func_002561B8_60B0(cMemMan_alloc_60B0(0xA50, str_DNASMAN, 0x20000000, 0));
+    int *dnasMan = func_002561B8_60B0(cMemMan_alloc_60B0(2640, str_DNASMAN, 0x20000000, 0));
     func_00256258_60B0(dnasMan, 0);
     while (!ge3_60B0(dnasMan)) {
         func_002563F8_60B0(dnasMan);
@@ -532,7 +532,7 @@ extern char str_data_config_slusovf_big[];
 extern int D_004A2ED4;
 
 extern "C" void func_00256188(void) {
-    func_003DED50_6188(str_data_config_slusovf_big, 0, 0x64, &D_004A2ED4);
+    func_003DED50_6188(str_data_config_slusovf_big, 0, 100, &D_004A2ED4);
 }
 #endif
 
@@ -614,17 +614,17 @@ extern "C" char *strcpy(char *, const char *);
 extern "C" void func_002562D0(int *self)
 {
     self[7] = 0;
-    MEM_fill_62D0(self + 9, 0, 0xA0);
-    self[0x1B] = self[3];
+    MEM_fill_62D0(self + 9, 0, 160);
+    self[27] = self[3];
     self[0x1C] = self[4];
-    self[0x24] = 0;
-    self[0x23] = 0;
+    self[36] = 0;
+    self[35] = 0;
     *(sKey_62D0 *)(self + 0x1D) = D_004A2ED8;
-    self[0x21] = 8;
+    self[33] = 8;
     strcpy((char *)(self + 0x26), func_003F3F78());
     strcpy((char *)(self + 0x2A), "SLUS_20772");
-    self[0x2E] = 0;
-    self[0x2F] = self[8];
+    self[46] = 0;
+    self[47] = self[8];
     self[0x30] = 1;
     self[0] = 4;
     func_003FD0D8(self + 9);
@@ -754,7 +754,7 @@ extern "C" void USTR_copy_65E0(char *, char *) __asm__("USTR_copy");
 extern "C" void func_002565E0(char *self) {
     if (func_003FD100_65E0(*(int *)(self + 0x14)) == 0) {
         char *infoBuf = self + 0xC4;
-        MEM_fill_65E0(infoBuf, 0, 0x38C);
+        MEM_fill_65E0(infoBuf, 0, 908);
         char *b = self + 0x650;
         char *c = self + 0x850;
         int result = func_003FD128_65E0(infoBuf);
@@ -836,7 +836,7 @@ extern "C" int func_003E6B10_6730(int, char *, int) __asm__("func_003E6B10");
  * @return the payload length (1-255), or 0 when not connected, when nothing usable arrived or on a bad packet
  */
 extern "C" unsigned char cDSockChannel_readPacket(cDSockChannel* self, char *dst, int maxlen) {
-    unsigned char buf[0x108];
+    unsigned char buf[264];
     if (self->mState == 2) {
         while (func_003E6B10_6730((int)self->mGameLink, (char *)buf, 1) > 0) {
             if (buf[2] == 5) {
@@ -873,7 +873,7 @@ extern "C" int NetGameLinkSend(int, void *, int);
  * @return 1 when NetGameLinkSend reports a positive result, otherwise 0
  */
 extern "C" int cDSockChannel_writePacket(cDSockChannel* self, int data, int len) {
-    char buf[0x108];
+    char buf[264];
     if (self->mState != 2) return 0;
     int error = self->mError;
     if (error != 0) return 0;
@@ -917,7 +917,7 @@ extern "C" void cDSockChannel_listen(cDSockChannel* self, int addr, int port) {
     self->mGameUtil = (NetGameUtilRefT*)gameUtil;
     if (gameUtil != 0) {
         sprintf_6860(buf, str_pct_s_pct_d_pct_d, addr, n, n);
-        func_003E6F40_6860((int)self->mGameUtil, 0x101, buf);
+        func_003E6F40_6860((int)self->mGameUtil, 257, buf);
         self->mState = 1;
     }
 }
@@ -954,7 +954,7 @@ extern "C" void cDSockChannel_connect(cDSockChannel* self, int addr, int port) {
     self->mGameUtil = (NetGameUtilRefT*)gameUtil;
     if (gameUtil != 0) {
         sprintf_68F8(buf, str_pct_s_pct_d_pct_d, addr, n, n);
-        func_003E6F40_68F8((int)self->mGameUtil, 0x102, buf);
+        func_003E6F40_68F8((int)self->mGameUtil, 258, buf);
         self->mState = 1;
     }
 }
@@ -1040,7 +1040,7 @@ extern "C" void func_00256A58(void *channel) {
 
     temp_2 = func_003E6FC8((*(int *)((char*)(channel) + (0x18))));
     if (temp_2 != 0) {
-        temp_2_2 = func_003E66F0(temp_2, 0, 0x237C);
+        temp_2_2 = func_003E66F0(temp_2, 0, 9084);
         (*(int *)((char*)(channel) + (0x1C))) = temp_2_2;
         if (temp_2_2 != 0) {
             (*(int *)((char*)(channel) + (0xC))) = 2;
@@ -1161,7 +1161,7 @@ extern int D_004804B8[];
  * @param isServer  nonzero to run the server side of the handshake (mServer)
  */
 extern "C" void cGameComm_construct(int channel, int isServer) {
-    cGameComm_mGameComm = (cGameComm*)(cGameComm_cGameComm(cMemMan_alloc(0x5F0, D_004804B8, 0x20000000, 0), channel, isServer));
+    cGameComm_mGameComm = (cGameComm*)(cGameComm_cGameComm(cMemMan_alloc(1520, D_004804B8, 0x20000000, 0), channel, isServer));
 }
 #endif
 
@@ -1463,7 +1463,7 @@ extern "C" void cGameComm_setState(cGameComm* self, int mode)
     switch (mode) {
     case 14:
         func_00258330(self);
-        func_00258870(self, 0xE10, 0);
+        func_00258870(self, 3600, 0);
         func_0031AD18();
         self->mState = mode;
         return;
@@ -1472,7 +1472,7 @@ extern "C" void cGameComm_setState(cGameComm* self, int mode)
         self->mPauseMenu[1] = 0;
         break;
     case 1: case 3: case 5: case 7: case 9: case 11: case 13:
-        func_00258870(self, 0x708, 0);
+        func_00258870(self, 1800, 0);
         break;
     case 2: case 4: case 6: case 8: case 10: case 12:
         break;
@@ -1541,7 +1541,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             if (func_003E7500_70D8((int)vs->unk_140, msg, &len, info) == 0) {
                 break;
             }
-            if (func_00416B18_70D8(msg, str_SSXPingServer, 0xD) != 0) {
+            if (func_00416B18_70D8(msg, str_SSXPingServer, 13) != 0) {
                 continue;
             }
             for (int i = 0; i < vs->unk_0B8; i++) {
@@ -1594,7 +1594,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             cGameComm_setState_70D8(((char*)vs), 1);
             break;
         case 1:
-            func_00258290_70D8(((char*)vs), (int)(((char*)vs) + 0xD4), 0x2C);
+            func_00258290_70D8(((char*)vs), (int)(((char*)vs) + 0xD4), 44);
             cGameComm_setState_70D8(((char*)vs), 2);
             break;
         case 2:
@@ -1603,7 +1603,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             }
             break;
         case 3:
-            func_002581E8_70D8(((char*)vs), (int)(((char*)vs) + 0x100), 0x14);
+            func_002581E8_70D8(((char*)vs), (int)(((char*)vs) + 0x100), 20);
             cGameComm_setState_70D8(((char*)vs), 4);
             break;
         case 4:
@@ -1665,7 +1665,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             cGameComm_setState_70D8(((char*)vs), 3);
             break;
         case 3:
-            func_002581E8_70D8(((char*)vs), (int)(((char*)vs) + 0xD4), 0x2C);
+            func_002581E8_70D8(((char*)vs), (int)(((char*)vs) + 0xD4), 44);
             cGameComm_setState_70D8(((char*)vs), 4);
             break;
         case 4:
@@ -1674,7 +1674,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             }
             break;
         case 1:
-            func_00258290_70D8(((char*)vs), (int)(((char*)vs) + 0x100), 0x14);
+            func_00258290_70D8(((char*)vs), (int)(((char*)vs) + 0x100), 20);
             cGameComm_setState_70D8(((char*)vs), 2);
             break;
         case 2:
@@ -1934,9 +1934,9 @@ extern "C" void cGameComm_updateDisplayError(cGameComm* self) {
             int n = self->mDisplayError - 1;
             self->mDisplayError = n;
             if (n <= 0) {
-                cOVStateManager_triggerOverlay_79C8(0x27);
+                cOVStateManager_triggerOverlay_79C8(39);
                 int idx = D_004A2A54 + 1;
-                D_005366E8[idx] = 0xD;
+                D_005366E8[idx] = 13;
                 cPauseState_Flags = D_00442924[0];
                 D_004A2A54 = idx;
             }
@@ -2044,7 +2044,7 @@ extern "C" int cGameComm_readPacket(cGameComm* self, int ch, int dst, int maxsiz
             gameComm->mStallThreshold = 0;
             gameComm->mWaitingMessage = 0;
         }
-        if (gameComm->unk_094 > 0) func_00258870((cGameComm*)gameComm, 0x708, 0);
+        if (gameComm->unk_094 > 0) func_00258870((cGameComm*)gameComm, 1800, 0);
         return len;
     }
     return 0;
@@ -2231,7 +2231,7 @@ extern "C" void func_00257F98(sGameComm_7F98* self)
         switch (msg.type) {
         case 0:
             if (self->f7C == 0) {
-                func_00258870((cGameComm*)self, 0xE4C, 1);
+                func_00258870((cGameComm*)self, 3660, 1);
             } else {
                 self->f3F8 = 1;
             }
@@ -2244,13 +2244,13 @@ extern "C" void func_00257F98(sGameComm_7F98* self)
             self->f5C = 0;
             self->f78 = 0;
             if (self->f74 != 0 && self->f64 > 0) {
-                self->f64 = 0x4B0;
+                self->f64 = 1200;
             }
             self->f3F8 = 0;
             self->f60 = 0;
             self->f84 = 0;
             if (self->f7C == 0) {
-                func_00258870((cGameComm*)self, 0x708, 0);
+                func_00258870((cGameComm*)self, 1800, 0);
             } else {
                 cGameComm_setUnPauseTimer_7F98(self);
             }
@@ -2342,7 +2342,7 @@ extern "C" void func_002581F8(cGameComm* gameComm) {
     int readData;
     while ((readData = (int)gameComm->mAsyncReadData) != 0) {
         int n = gameComm->mAsyncReadSize;
-        if (n >= 0xED) n = 0xEC;
+        if (n >= 237) n = 236;
         if (cGameComm_readPacket(gameComm, 2, readData, n) == 0) break;
         gameComm->mAsyncReadData = (char*)((int)gameComm->mAsyncReadData + n);
         int rem = gameComm->mAsyncReadSize - n;
@@ -2382,7 +2382,7 @@ extern "C" void func_002582A0(cGameComm* gameComm) {
     int writeData = (int)gameComm->mAsyncWriteData;
     if (writeData != 0 && gameComm->mWriteQueue.mTail == gameComm->mWriteQueue.mHead) {
         int n = gameComm->mAsyncWriteSize;
-        if (n >= 0xED) n = 0xEC;
+        if (n >= 237) n = 236;
         if (func_00257E98_82A0(((char*)gameComm), 2, writeData, n) != 0) {
             gameComm->mAsyncWriteData = (char*)((int)gameComm->mAsyncWriteData + n);
             int rem = gameComm->mAsyncWriteSize - n;
@@ -2577,7 +2577,7 @@ extern "C" void cGameComm_syncWait(cGameComm* self) {
         buf[0] = 3;
         func_00257E98(self, 3, (int)buf, 0xC);
     }
-    func_00258870(self, 0xE10, 0);
+    func_00258870(self, 3600, 0);
     while (self->mSyncWaitComplete == 0 && self->mError == 0) {
         cGameComm_update(self);
         THREAD_yieldticks(1);
@@ -2613,7 +2613,7 @@ extern "C" void cGameComm_sendPauseCmd(cGameComm* self, int pause) {
     if (self->mError == 0 && self->mConnected != 0) {
         if (pause != 0) {
             if (self->mGameStartGate == 0) {
-                func_00258870(self, 0xE4C, 1);
+                func_00258870(self, 3660, 1);
             } else {
                 self->mUnPauseFlag = 1;
             }
@@ -2630,7 +2630,7 @@ extern "C" void cGameComm_sendPauseCmd(cGameComm* self, int pause) {
             self->mWaitingMessage = 0;
             self->unk_05C = 0;
             if (self->mGameStartGate == 0) {
-                func_00258870(self, 0x708, 0);
+                func_00258870(self, 1800, 0);
             } else {
                 cGameComm_setUnPauseTimer_8790(self);
             }
@@ -2671,9 +2671,9 @@ extern "C" void cGameComm_setUnPauseTimer(cGameComm* self) {
     game = ((SSXApp)->Game);
     if (game->mCurrentStateID != 2 && self->mError == 0 && self->mAlone == 0 && self->mConnected != 0
         && self->mState < 0xF
-        && ((gameAI = ((S88A8_4*)game->AI), gameAI->k0 != 4) || gameAI->k1c < 0x97)
+        && ((gameAI = ((S88A8_4*)game->AI), gameAI->k0 != 4) || gameAI->k1c < 151)
         && gameAI->k18 <= 0 && self->mPauseMenu[0] == 0 && self->mPauseMenu[1] == 0) {
-        self->mUnPauseTimer = 0xB4;
+        self->mUnPauseTimer = 180;
     }
 }
 #endif

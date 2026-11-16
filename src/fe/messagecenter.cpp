@@ -334,7 +334,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, void* item,
         break;
     }
     case 6: {
-        void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
         func_00158848(iface, self->player, self->f48, self->done);
         func_00158820(iface, self->player, self->f48, self->sel);
         func_0028C2D0(func_0028B180(), self->done);
@@ -342,7 +342,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, void* item,
             char* pl = (char*)func_0028B180();
             sVE_7500* vt = *(sVE_7500**)(pl + 0x5558);
             char* obj = pl + 0x118;
-            vt[3].fn(obj + vt[3].delta, 0xA);
+            vt[3].fn(obj + vt[3].delta, 10);
         }
         if ((int)SSXApp->Game != 0) {
             func_0039F190(self->engine + 0x18, 1);
@@ -403,13 +403,13 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, void* item, u
         if (onlyBit_7500(self->done, idx)) {
             if (self->f16C != 0) {
                 if (!isSet_7500(self->sel, idx))
-                    return 0x101;
+                    return 257;
             }
             return 0x10;
         }
         if (self->f16C == 0) {
             if (isSet_7500(self->sel, idx))
-                return 0x101;
+                return 257;
         } else {
             if (self->limit < cFEStateRequestLine_getSongCost(self, idx)) {
                 if (countSel_7500(self) >= 6)
@@ -446,7 +446,7 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, void* item, u
         cFEStateRequestLine_updatePlayList_77D0(self);
         break;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -485,12 +485,12 @@ struct sMsgCenter_979D8 {
 extern "C" void cFEStateRequestLine_onPopupEvent(sMsgCenter_979D8* self, void* item, int msg)
 {
     switch (msg) {
-    case 0x15:
+    case 21:
         if (*(int*)((char*)item + 0xC) != 7) {
             self->flags &= ~8;
         }
         break;
-    case 0x16:
+    case 22:
         if (((self->flags >> 3) & 1) == 0) {
             self->flags |= 8;
         }
@@ -1280,7 +1280,7 @@ extern "C" void func_001988D8(void* self, int idx)
         n += (int)((s->mask >> j) & 1);
     }
     int full = n >= 6;
-    s->result = func_00158558(cBE_getInterface_Fv(cBE_getBE(), 0xD), s->rider, s->a48, idx, full);
+    s->result = func_00158558(cBE_getInterface_Fv(cBE_getBE(), 13), s->rider, s->a48, idx, full);
     ulong bit = (ulong)1 << idx;
     s->mask |= bit;
     s->seen |= bit;
@@ -1377,7 +1377,7 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongCost__FPv);
  */
 int cFEStateRequestLine_getSongCost(void* self)
 {
-    return 0x1388;
+    return 5000;
 }
 #endif
 

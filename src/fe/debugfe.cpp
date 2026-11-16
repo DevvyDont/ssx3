@@ -194,7 +194,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     y += lineheight;
     font->setColor(self->cursor == 11 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Playlist);
-    func_001DCA80(font, 580.0f, y, str_pct_s, func_0028B180() + (self->optTrack * 0x14 + 0x60A4));
+    func_001DCA80(font, 580.0f, y, str_pct_s, func_0028B180() + (self->optTrack * 20 + 24740));
     y += lineheight;
     unsigned int ip = 0;
     if (cCommSystem_mCommSystem != 0)
@@ -657,7 +657,7 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
 {
     sDebugFE17D6F0* self = (sDebugFE17D6F0*)vself;
     switch (*(int*)ev) {
-    case 0x115: {
+    case 277: {
         int* list = self->menu;
         while (*list != 0) {
             func_002CC460(list);
@@ -665,15 +665,15 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         if (SSXApp->unk_74 != 0) {
             self->state = 0;
         } else {
-            self->state = 0x13;
+            self->state = 19;
             func_002CC3B8(self->menu, self->items604);
         }
         break;
     }
-    case 0x102:
+    case 258:
         func_0017DA30(self, *(int*)((char*)ev + 8));
         break;
-    case 0xC9:
+    case 201:
         if (SSXApp->unk_74 != 0) {
             cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, SSXApp->UserName);
             cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, SSXApp->Password);
@@ -684,13 +684,13 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
             func_002CC3B8(self->menu, self->items70);
         }
         break;
-    case 0xCB:
+    case 203:
         self->state = 5;
         cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, self->user);
         cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, self->pass);
         func_0025C610(LobbyMan_mLobbyMan);
         break;
-    case 0xD4:
+    case 212:
         if (SSXApp->unk_74 != 0) {
             self->state = 7;
             func_0025CD28(LobbyMan_mLobbyMan, 0);
@@ -700,39 +700,39 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
             self->state = 6;
         }
         break;
-    case 0xDA:
+    case 218:
         if (SSXApp->unk_74 != 0) {
             int i;
             for (i = 0; i < func_0025F120(LobbyMan_mLobbyMan); i++) {
                 if (func_004165A8(func_0025F150(LobbyMan_mLobbyMan, i), str_A_West) == 0) {
                     func_0025D800(LobbyMan_mLobbyMan, i, 0);
-                    self->state = 0xB;
+                    self->state = 11;
                 }
             }
         } else {
             func_002CC3B8(self->menu, self->itemsD2C);
-            self->state = 0xA;
+            self->state = 10;
         }
         break;
-    case 0xD6:
-    case 0xD8:
+    case 214:
+    case 216:
         func_001DB418(self->items74C, LobbyMan_mLobbyMan);
         func_002CC3B8(self->menu, self->items74C);
         self->state = 6;
         break;
-    case 0xDC:
+    case 220:
         if (func_0025F430(LobbyMan_mLobbyMan) != 0) {
             func_002CC3B8(self->menu, self->items1044);
             self->state = 0xC;
         } else {
             func_002CC3B8(self->menu, self->itemsD2C);
-            self->state = 0xA;
+            self->state = 10;
         }
         break;
-    case 0xED:
+    case 237:
     case 0xF0:
-    case 0xF1: {
-        self->state = 0x11;
+    case 241: {
+        self->state = 17;
         int* list = self->menu;
         while (*list != 0) {
             func_002CC460(list);
@@ -740,11 +740,11 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         func_002CC3B8(self->menu, self->items604);
         break;
     }
-    case 0xEF:
+    case 239:
         func_0017DE70((char*)self);
         self->state = 0x10;
         break;
-    case 0xEC:
+    case 236:
         if (self->state == 0xC) {
             int* list = self->menu;
             while (*list != 0) {
@@ -780,10 +780,10 @@ extern "C" void func_0017DA30(void* self, int a1)
     *(int*)((char*)self + 0x1C14) = a1;
     switch (*(int*)((char*)self + 0x4)) {
     case 2:
-        SetMode0017DA30(self, 0x12);
+        SetMode0017DA30(self, 18);
         break;
     case 4:
-        SetMode0017DA30(self, 0x14);
+        SetMode0017DA30(self, 20);
         break;
     case 5:
         if (SSXApp->unk_74 != 0) {
@@ -791,20 +791,20 @@ extern "C" void func_0017DA30(void* self, int a1)
             cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, SSXApp->Password);
             func_0025C610(LobbyMan_mLobbyMan);
         } else {
-            SetMode0017DA30(self, 0x15);
+            SetMode0017DA30(self, 21);
         }
         break;
     case 7:
-        SetMode0017DA30(self, 0x16);
+        SetMode0017DA30(self, 22);
         break;
     case 8:
-        SetMode0017DA30(self, 0x16);
+        SetMode0017DA30(self, 22);
         break;
     case 9:
-        SetMode0017DA30(self, 0x16);
+        SetMode0017DA30(self, 22);
         break;
     case 11:
-        SetMode0017DA30(self, 0x17);
+        SetMode0017DA30(self, 23);
         break;
     case 13:
         SetMode0017DA30(self, 0x18);
@@ -917,7 +917,7 @@ extern "C" void func_0017DB18(void* vself)
         case 23:
             if (cMenuSys_isActive(self->menu) == 0) {
                 func_002CC3B8(self->menu, self->itemsD2C);
-                self->state = 0xA;
+                self->state = 10;
             }
             break;
         case 15: {
@@ -946,7 +946,7 @@ extern "C" void func_0017DB18(void* vself)
         case 12:
             if (self->menu[0] == 0) {
                 func_0025D800(LobbyMan_mLobbyMan, -1, 0);
-                self->state = 0xB;
+                self->state = 11;
             } else {
                 func_001DB620(self->items1044, LobbyMan_mLobbyMan);
             }
@@ -1093,7 +1093,7 @@ extern "C" void func_0017E030(sDebugFEState17E030* self, const char* a, const ch
     cBXString_cBXString4(&lobbyMan->mNewAccount.mPassword, b);
     cBXString_cBXString4(&lobbyMan->mNewAccount.unk_08, b);
     cBXString_cBXString4(&lobbyMan->mNewAccount.mMail, str_pleaseat_get_lost);
-    lobbyMan->mNewAccount.mBornYear = 0x79E;
+    lobbyMan->mNewAccount.mBornYear = 1950;
     lobbyMan->mNewAccount.mGender = 1;
     lobbyMan->mNewAccount.mBornMonth = 1;
     lobbyMan->mNewAccount.mSpam[1] = 0;
@@ -1217,7 +1217,7 @@ extern "C" void func_0017E2F8(sDebugFEState17E2F8* self, int room)
     while (*list != 0) {
         func_002CC460(list);
     }
-    self->state = 0xB;
+    self->state = 11;
     func_0025D800(LobbyMan_mLobbyMan, room, 0);
 }
 #endif
@@ -1233,7 +1233,7 @@ extern "C" void func_0017E368(void* self)
     while (*list != 0) {
         func_002CC460(list);
     }
-    *(int*)((char*)self + 0x4) = 0xD;
+    *(int*)((char*)self + 0x4) = 13;
 }
 #endif
 
@@ -1295,7 +1295,7 @@ extern "C" void func_0017E490(sDebugFEState17E490* self)
     while (*list != 0) {
         func_002CC460(list);
     }
-    self->state = 0xD;
+    self->state = 13;
     func_0025FB58(LobbyMan_mLobbyMan, *(int*)((char*)self + 0x1C0C), 0);
 }
 #endif
@@ -1731,7 +1731,7 @@ extern "C" void func_0017F500(void* p_, int tex)
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     set1_17F500((char*)ps2GraphicsMan, 0x1800000, 23, 2);
     set1_17F500((char*)ps2GraphicsMan, 0x300000, 20, 3);
-    set1_17F500((char*)ps2GraphicsMan, 0xFF000, 12, 0xD);
+    set1_17F500((char*)ps2GraphicsMan, 0xFF000, 12, 13);
     set1_17F500((char*)ps2GraphicsMan, 0x7C, 2, 5);
     set1_17F500((char*)ps2GraphicsMan, 0x400000, 22, 1);
     sV2_17F500 size(6.0f, 6.0f);
@@ -1857,7 +1857,7 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEnt_17F868* vt = (sVEnt_17F868*)ps2GraphicsMan->mVtbl;
     ((Fn1_17F868)vt[44].fn)((char*)ps2GraphicsMan + vt[44].delta, 0);
-    self->font = (char*)cFont_cFont(cMemMan_alloc(0x84, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
+    self->font = (char*)cFont_cFont(cMemMan_alloc(132, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
     sVec2_17F868 sc(1.600000023841858f, 1.600000023841858f);
     *(sVec2_17F868*)(self->font + 0x30) = sc;
     *(sVec2_17F868*)(self->font + 0x38) = *(sVec2_17F868*)(self->font + 0x30);
@@ -1882,8 +1882,8 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
     for (int i = 0; i < 2; i++) {
         self->objs[i] = 0;
     }
-    self->cur = self->objs[0] = cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(0x8C48, str_DebugMenu, 0, 0));
-    self->objs[1] = func_0017D298((char*)cMemMan_alloc(0x1C18, str_LobbyMenu, 0, 0));
+    self->cur = self->objs[0] = cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(35912, str_DebugMenu, 0, 0));
+    self->objs[1] = func_0017D298((char*)cMemMan_alloc(7192, str_LobbyMenu, 0, 0));
     if (SSXApp->unk_74) {
         self->cur = self->objs[1];
     } else {
@@ -2103,7 +2103,7 @@ extern "C" int cDebugFE_render(char* self)
         cPS2GraphicsMan* graphicsMan4 = GrMan;
         setB23_17FBF0(rs_17FBF0((char*)graphicsMan4), 2);
         setB20_17FBF0(rs_17FBF0((char*)graphicsMan4), 3);
-        setB12_17FBF0(rs_17FBF0((char*)graphicsMan4), 0xD);
+        setB12_17FBF0(rs_17FBF0((char*)graphicsMan4), 13);
         setB2_17FBF0(rs_17FBF0((char*)graphicsMan4), 5);
         setB22_17FBF0(rs_17FBF0((char*)graphicsMan4), 1);
         func_0017F500(self + 0x24, *(int*)(self + 0x1C));
@@ -2138,14 +2138,14 @@ extern "C" void cFEInput_getState(void* self, signed char k)
 {
     int id = 0;
     switch (k) {
-    case 0: id = 0x72; break;
-    case 1: id = 0x73; break;
-    case 2: id = 0x74; break;
-    case 3: id = 0x75; break;
-    case 4: id = 0x76; break;
-    case 5: id = 0x77; break;
+    case 0: id = 114; break;
+    case 1: id = 115; break;
+    case 2: id = 116; break;
+    case 3: id = 117; break;
+    case 4: id = 118; break;
+    case 5: id = 119; break;
     case 6: id = 0x78; break;
-    case 7: id = 0x79; break;
+    case 7: id = 121; break;
     }
     cInput_getState(*(int*)((char*)self + 0x18), id);
 }
@@ -2178,7 +2178,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isSelect__FPv);
  */
 void* cFEInput_isSelect(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x71);
+    return cInput_getState(*(int*)((char*)self + 0x18), 113);
 }
 #endif
 
@@ -2192,7 +2192,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNext__FPv);
  */
 void* cFEInput_isNext(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x7a);
+    return cInput_getState(*(int*)((char*)self + 0x18), 122);
 }
 #endif
 
@@ -2206,7 +2206,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPrevious__FPv);
  */
 void* cFEInput_isPrevious(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x7b);
+    return cInput_getState(*(int*)((char*)self + 0x18), 123);
 }
 #endif
 
@@ -2234,7 +2234,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMisc__FPv);
  */
 void* cFEInput_isMisc(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x7d);
+    return cInput_getState(*(int*)((char*)self + 0x18), 125);
 }
 #endif
 
@@ -2248,7 +2248,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNextHeld__FPv);
  */
 void* cFEInput_isNextHeld(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x97);
+    return cInput_getState(*(int*)((char*)self + 0x18), 151);
 }
 #endif
 
@@ -2262,7 +2262,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousHeld__FPv);
  */
 void* cFEInput_isPreviousHeld(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x98);
+    return cInput_getState(*(int*)((char*)self + 0x18), 152);
 }
 #endif
 
@@ -2276,7 +2276,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isOptionHeld__FPv);
  */
 void* cFEInput_isOptionHeld(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x99);
+    return cInput_getState(*(int*)((char*)self + 0x18), 153);
 }
 #endif
 
@@ -2290,7 +2290,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMiscHeld__FPv);
  */
 void* cFEInput_isMiscHeld(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x9a);
+    return cInput_getState(*(int*)((char*)self + 0x18), 154);
 }
 #endif
 
@@ -2304,7 +2304,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNextReleased__FPv);
  */
 void* cFEInput_isNextReleased(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x9b);
+    return cInput_getState(*(int*)((char*)self + 0x18), 155);
 }
 #endif
 
@@ -2318,7 +2318,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousReleased__FPv);
  */
 void* cFEInput_isPreviousReleased(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x9c);
+    return cInput_getState(*(int*)((char*)self + 0x18), 156);
 }
 #endif
 
@@ -2332,7 +2332,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isOptionReleased__FPv);
  */
 void* cFEInput_isOptionReleased(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x9d);
+    return cInput_getState(*(int*)((char*)self + 0x18), 157);
 }
 #endif
 
@@ -2346,7 +2346,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMiscReleased__FPv);
  */
 void* cFEInput_isMiscReleased(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x9e);
+    return cInput_getState(*(int*)((char*)self + 0x18), 158);
 }
 #endif
 
@@ -2360,7 +2360,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isUp__FPv);
  */
 void* cFEInput_isUp(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x72);
+    return cInput_getState(*(int*)((char*)self + 0x18), 114);
 }
 #endif
 
@@ -2374,7 +2374,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isDown__FPv);
  */
 void* cFEInput_isDown(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x73);
+    return cInput_getState(*(int*)((char*)self + 0x18), 115);
 }
 #endif
 
@@ -2388,7 +2388,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLeft__FPv);
  */
 void* cFEInput_isLeft(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x74);
+    return cInput_getState(*(int*)((char*)self + 0x18), 116);
 }
 #endif
 
@@ -2402,7 +2402,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRight__FPv);
  */
 void* cFEInput_isRight(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x75);
+    return cInput_getState(*(int*)((char*)self + 0x18), 117);
 }
 #endif
 
@@ -2416,7 +2416,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isUpHeld__FPv);
  */
 void* cFEInput_isUpHeld(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x93);
+    return cInput_getState(*(int*)((char*)self + 0x18), 147);
 }
 #endif
 
@@ -2430,7 +2430,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isDownHeld__FPv);
  */
 void* cFEInput_isDownHeld(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x94);
+    return cInput_getState(*(int*)((char*)self + 0x18), 148);
 }
 #endif
 
@@ -2444,7 +2444,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLeftHeld__FPv);
  */
 void* cFEInput_isLeftHeld(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x95);
+    return cInput_getState(*(int*)((char*)self + 0x18), 149);
 }
 #endif
 
@@ -2458,7 +2458,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRightHeld__FPv);
  */
 void* cFEInput_isRightHeld(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x96);
+    return cInput_getState(*(int*)((char*)self + 0x18), 150);
 }
 #endif
 
@@ -2514,7 +2514,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2__FPv);
  */
 void* cFEInput_isLShift2(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x81);
+    return cInput_getState(*(int*)((char*)self + 0x18), 129);
 }
 #endif
 
@@ -2528,7 +2528,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift1Held__FPv);
  */
 void* cFEInput_isRShift1Held(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x82);
+    return cInput_getState(*(int*)((char*)self + 0x18), 130);
 }
 #endif
 
@@ -2542,7 +2542,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift2Held__FPv);
  */
 void* cFEInput_isRShift2Held(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x83);
+    return cInput_getState(*(int*)((char*)self + 0x18), 131);
 }
 #endif
 
@@ -2556,7 +2556,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift1Held__FPv);
  */
 void* cFEInput_isLShift1Held(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x84);
+    return cInput_getState(*(int*)((char*)self + 0x18), 132);
 }
 #endif
 
@@ -2570,7 +2570,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2Held__FPv);
  */
 void* cFEInput_isLShift2Held(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x85);
+    return cInput_getState(*(int*)((char*)self + 0x18), 133);
 }
 #endif
 
@@ -2584,7 +2584,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamZoom__FPv);
  */
 void* cFEInput_isCamZoom(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x90);
+    return cInput_getState(*(int*)((char*)self + 0x18), 144);
 }
 #endif
 
@@ -2598,7 +2598,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamPan__FPv);
  */
 void* cFEInput_isCamPan(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x92);
+    return cInput_getState(*(int*)((char*)self + 0x18), 146);
 }
 #endif
 
@@ -2612,7 +2612,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamRotate__FPv);
  */
 void* cFEInput_isCamRotate(void* self)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x91);
+    return cInput_getState(*(int*)((char*)self + 0x18), 145);
 }
 #endif
 
@@ -2628,7 +2628,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamZoom__FPv);
  */
 void* cFEInput_getCamZoom(void* self)
 {
-    return cInput_getValue(*(int*)((char*)self + 0x18), 0x90);
+    return cInput_getValue(*(int*)((char*)self + 0x18), 144);
 }
 #endif
 
@@ -2642,7 +2642,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamPan__FPv);
  */
 void* cFEInput_getCamPan(void* self)
 {
-    return cInput_getValue(*(int*)((char*)self + 0x18), 0x92);
+    return cInput_getValue(*(int*)((char*)self + 0x18), 146);
 }
 #endif
 
@@ -2656,7 +2656,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamRotate__FPv);
  */
 void* cFEInput_getCamRotate(void* self)
 {
-    return cInput_getValue(*(int*)((char*)self + 0x18), 0x91);
+    return cInput_getValue(*(int*)((char*)self + 0x18), 145);
 }
 #endif
 
@@ -2673,14 +2673,14 @@ INCLUDE_ASM("fe/debugfe", cFEInput_keyPressed);
 extern "C" int cFEInput_keyPressed(void* self)
 {
     int r = 0;
-    if (cInput_getState(*(int*)((char*)self + 0x18), 0x72) || cInput_getState(*(int*)((char*)self + 0x18), 0x73) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 0x74) || cInput_getState(*(int*)((char*)self + 0x18), 0x75) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 0x76) || cInput_getState(*(int*)((char*)self + 0x18), 0x77) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 0x78) || cInput_getState(*(int*)((char*)self + 0x18), 0x79) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 0x7A) || cInput_getState(*(int*)((char*)self + 0x18), 0x7B) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 0x7D) || cInput_getState(*(int*)((char*)self + 0x18), 0x7C) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 0x90) || cInput_getState(*(int*)((char*)self + 0x18), 0x92) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 0x91) || cInput_getState(*(int*)((char*)self + 0x18), 0x71))
+    if (cInput_getState(*(int*)((char*)self + 0x18), 114) || cInput_getState(*(int*)((char*)self + 0x18), 115) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 116) || cInput_getState(*(int*)((char*)self + 0x18), 117) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 118) || cInput_getState(*(int*)((char*)self + 0x18), 119) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 0x78) || cInput_getState(*(int*)((char*)self + 0x18), 121) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 122) || cInput_getState(*(int*)((char*)self + 0x18), 123) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 125) || cInput_getState(*(int*)((char*)self + 0x18), 0x7C) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 144) || cInput_getState(*(int*)((char*)self + 0x18), 146) ||
+        cInput_getState(*(int*)((char*)self + 0x18), 145) || cInput_getState(*(int*)((char*)self + 0x18), 113))
         r = 1;
     return r;
 }
@@ -2782,7 +2782,7 @@ extern "C" void* func_00180508(char* self, int a1)
     *(int*)(self + 0xE4) = 1;
     *(int*)(self + 0xE8) = 1;
     *(int*)(self + 0x170) = 10;
-    *(int*)(self + 0xD4) = 0x2D;
+    *(int*)(self + 0xD4) = 45;
     *(char*)(self + 0xEC) = 0;
     *(int*)(self + 0x16C) = 0;
     return self;

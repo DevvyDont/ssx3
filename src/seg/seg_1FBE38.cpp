@@ -45,15 +45,15 @@ extern "C" int checkActiveNode(void *node, int type, void *buf) {
     switch (type) {
     case 13:
         *(int*)(inst + 0xC) = 0;
-        func_003578A8_AE38(cMemMan_alloc(0x2C, D_00489618_AE38, 0x20000000, 0), 1, inst, buf, n);
+        func_003578A8_AE38(cMemMan_alloc(44, D_00489618_AE38, 0x20000000, 0), 1, inst, buf, n);
         return -1;
     case 11:
         *(int*)(inst + 0xC) = 0;
-        func_00351B40_AE38(cMemMan_alloc(0x6C0, D_00489628_AE38, 0x20000000, 0), 1, inst, buf, *(int*)(D_004A3DD8_AE38 + 0x294), n);
+        func_00351B40_AE38(cMemMan_alloc(1728, D_00489628_AE38, 0x20000000, 0), 1, inst, buf, *(int*)(D_004A3DD8_AE38 + 0x294), n);
         return -1;
     case 0:
         *(int*)(inst + 0xC) = 0;
-        func_00342C08_AE38(cMemMan_alloc(0x34, D_00489638_AE38, 0x20000000, 0), 1, inst, buf, n);
+        func_00342C08_AE38(cMemMan_alloc(52, D_00489638_AE38, 0x20000000, 0), 1, inst, buf, n);
         return -1;
     case 22:
         *(int*)(inst + 0xC) = 0;
@@ -216,7 +216,7 @@ extern "C" V3_B270 func_002FB270(int n, Ent_B270 *e) {
     void *p = *(void**)(obj + 0xC);
     if (p && checkActiveNode(p, 3, buf))
         return D_004C9098_B270;
-    func_00358C80_B270(cMemMan_alloc(0x88, D_00489668_B270, 0x20000000, 0), 1, obj, buf);
+    func_00358C80_B270(cMemMan_alloc(136, D_00489668_B270, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_B270;
 }
 #endif
@@ -371,7 +371,7 @@ extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *e) {
     void *p = *(void**)(obj + 0xC);
     if (p && checkActiveNode(p, 15, buf))
         return D_004C9098_B6B8;
-    func_00343010_B6B8(cMemMan_alloc(0x48, D_00489688_B6B8, 0x20000000, 0), 1, obj, buf);
+    func_00343010_B6B8(cMemMan_alloc(72, D_00489688_B6B8, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_B6B8;
 }
 #endif
@@ -439,7 +439,7 @@ extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *e) {
     void *p = *(void**)(obj + 0xC);
     if (p && checkActiveNode(p, 7, buf))
         return D_004C9098_B8D0;
-    func_00343768_B8D0(cMemMan_alloc(0x24, D_004A3BE8_B8D0, 0x20000000, 0), 1, obj, buf);
+    func_00343768_B8D0(cMemMan_alloc(36, D_004A3BE8_B8D0, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_B8D0;
 }
 #endif
@@ -588,7 +588,7 @@ extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *e) {
     void *p = *(void**)(obj + 0xC);
     if (p && checkActiveNode(p, 1, buf))
         return D_004C9098_BCB8;
-    func_00341AA0_BCB8(cMemMan_alloc(0x6C, D_004896A8_BCB8, 0x20000000, 0), 1, 1, obj, buf);
+    func_00341AA0_BCB8(cMemMan_alloc(108, D_004896A8_BCB8, 0x20000000, 0), 1, 1, obj, buf);
     return D_004C9098_BCB8;
 }
 #endif
@@ -663,7 +663,7 @@ extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *e) {
     void *p = *(void**)(obj + 0xC);
     if (p && checkActiveNode(p, 8, buf))
         return D_004C9098_BEC8;
-    func_00341388_BEC8(cMemMan_alloc(0x50, D_004A3BF0_BEC8, 0x20000000, 0), 1, 8, obj, buf);
+    func_00341388_BEC8(cMemMan_alloc(80, D_004A3BF0_BEC8, 0x20000000, 0), 1, 8, obj, buf);
     return D_004C9098_BEC8;
 }
 #endif
@@ -732,7 +732,7 @@ extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *e) {
     void *p = *(void**)(obj + 0xC);
     if (p && checkActiveNode(p, 17, buf))
         return D_004C9098_C0D0;
-    func_00356DB0_C0D0(cMemMan_alloc(0x2C, D_004A3BF8_C0D0, 0x20000000, 0), 1, obj, buf[1], buf[2] != 0);
+    func_00356DB0_C0D0(cMemMan_alloc(44, D_004A3BF8_C0D0, 0x20000000, 0), 1, obj, buf[1], buf[2] != 0);
     return D_004C9098_C0D0;
 }
 #endif
@@ -781,7 +781,7 @@ extern "C" void func_002FC2C0(char* self, char* ev) {
         char* curNode = *(char**)(self + 0xC);
         if (curNode) {
             short ty = *(short*)(curNode + 0x10);
-            if (ty == 6 || ty == 0x13)
+            if (ty == 6 || ty == 19)
                 break;
             del_obj(curNode);
         }
@@ -1018,7 +1018,7 @@ extern "C" V3_C7D0 MakeDebounceFunc(int n, Ent_C7D0 *params) {
     void *p = *(void**)(obj + 0xC);
     if (p && checkActiveNode(p, 0, buf))
         return D_004C9098_C7D0;
-    func_00342C08_C7D0(cMemMan_alloc(0x34, D_004896E8_C7D0, 0x20000000, 0), 1, obj, buf, 0);
+    func_00342C08_C7D0(cMemMan_alloc(52, D_004896E8_C7D0, 0x20000000, 0), 1, obj, buf, 0);
     return D_004C9098_C7D0;
 }
 #endif
@@ -1263,7 +1263,7 @@ extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
     void *activeNode = *(void**)(obj + 0xC);
     if (activeNode && checkActiveNode(activeNode, 5, buf))
         return D_004C9098_CDC8;
-    cFlexBridgeNode_cFlexBridgeNode_CDC8(cMemMan_alloc(0xB0, D_004896F8_CDC8, 0x20000000, 0), 1, obj, buf);
+    cFlexBridgeNode_cFlexBridgeNode_CDC8(cMemMan_alloc(176, D_004896F8_CDC8, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_CDC8;
 }
 #endif
@@ -1359,7 +1359,7 @@ extern "C" V3_CFF0 MakeMeshAnimFunc(int n, Ent_CFF0 *params) {
     void *p = *(void**)(obj + 0xC);
     if (p && checkActiveNode(p, 11, buf))
         return D_004C9098_CFF0;
-    func_00351B40_CFF0(cMemMan_alloc(0x6C0, D_00489708_CFF0, 0x20000000, 0), 1, obj, buf, *(int*)(D_004A3DD8_CFF0 + 0x294), 0);
+    func_00351B40_CFF0(cMemMan_alloc(1728, D_00489708_CFF0, 0x20000000, 0), 1, obj, buf, *(int*)(D_004A3DD8_CFF0 + 0x294), 0);
     return D_004C9098_CFF0;
 }
 #endif
@@ -1564,7 +1564,7 @@ extern "C" V3_D420 func_002FD420(int n, Ent_D420 *e) {
     }
     if (*(float*)&buf[7] > *(float*)&buf[5])
         *(float*)&buf[7] = *(float*)&buf[5];
-    func_003578A8_D420(cMemMan_alloc(0x2C, D_00489730_D420, 0x20000000, 0), 1, obj, buf, 0);
+    func_003578A8_D420(cMemMan_alloc(44, D_00489730_D420, 0x20000000, 0), 1, obj, buf, 0);
     return D_004C9098_D420;
 }
 #endif
@@ -2434,7 +2434,7 @@ extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *params) {
     } else {
         V4_E840 pos = *(V4_E840*)(obj + 0x40);
         if (nearViewer_E840(pos)) {
-            func_003578A8_E840(cMemMan_alloc(0x2C, D_00489730_E840, 0x20000000, 0), 1, obj, buf, 0);
+            func_003578A8_E840(cMemMan_alloc(44, D_00489730_E840, 0x20000000, 0), 1, obj, buf, 0);
             return D_004C9098_E840;
         }
     }
@@ -3729,7 +3729,7 @@ extern "C" V3_0F50 func_00300F50(int n, Ent_0F50 *e) {
     buf64[18] = 0xFFFFFFFF;
     buf64[19] = 0xFFFFFFFF;
     buf64[20] = 0xFFFFFFFF;
-    MEM_copy_0F50(buf, D_0F50, 0x58);
+    MEM_copy_0F50(buf, D_0F50, 88);
     Ent_0F50 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -5611,7 +5611,7 @@ extern "C" V3_3BA0 func_00303BA0(int n, Ent_3BA0 *e) {
     unsigned buf64[5];
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
-    MEM_copy_3BA0(buf, &D_4FBC80_3BA0, 0x14);
+    MEM_copy_3BA0(buf, &D_4FBC80_3BA0, 20);
     Ent_3BA0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -6077,7 +6077,7 @@ extern "C" V3_45B8 func_003045B8(int n, Ent_45B8 *e) {
     }
     Rec_45B8 rec;
     Rec_45B8 *buf = &rec;
-    MEM_copy_45B8(buf, &D_4FBCC8_45B8, 0x44);
+    MEM_copy_45B8(buf, &D_4FBCC8_45B8, 68);
     BF_45B8 bf;
     Ent_45B8 *x = e;
     for (int i = 0; i < n; i++, x++) {
@@ -6589,7 +6589,7 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
     Rec_50F0 rec;
     Rec_50F0 *buf = &rec;
     rec.id = 0xFFFFFFFF;
-    MEM_copy(buf, &D_004FBD40_50F0, 0x14);
+    MEM_copy(buf, &D_004FBD40_50F0, 20);
     sBindArg_1FBE38 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -6795,7 +6795,7 @@ extern "C" V3_57C0 func_003057C0(int n, Ent_57C0 *e) {
     Rec_57C0 rec;
     Rec_57C0 *buf = &rec;
     rec.id = 0xFFFFFFFF;
-    MEM_copy_57C0(buf, &D_4FBD68_57C0, 0x28);
+    MEM_copy_57C0(buf, &D_4FBD68_57C0, 40);
     Ent_57C0 *x = e;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -6883,7 +6883,7 @@ extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* e) {
     Rec_59A0 rec;
     Rec_59A0* vp = &rec;
     rec.id[7] = rec.id[6] = rec.id[5] = rec.id[4] = rec.id[3] = rec.id[2] = rec.id[1] = rec.id[0] = 0xFFFFFFFF;
-    MEM_copy(vp, &D_004FBD90_59A0, 0xC8);
+    MEM_copy(vp, &D_004FBD90_59A0, 200);
     sBindArg_1FBE38* x = e;
     for (int i = 0; i < n; i++, x++) {
         int k = x->idx;
@@ -7608,7 +7608,7 @@ extern "C" V3_6A90 MultiParticleFunc(int n, Ent_6A90 *params) {
     }
     Rec_6A90 rec;
     Rec_6A90 *buf = &rec;
-    MEM_copy_6A90(buf, &D_4FBF68_6A90, 0xE4);
+    MEM_copy_6A90(buf, &D_4FBF68_6A90, 228);
     Ent_6A90 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
@@ -7744,7 +7744,7 @@ extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *e) {
             obj = t;
         }
         if (obj)
-            cSSXAudio_WorldSound_6E68(func_0028B180_6E68(), obj, 0x5C);
+            cSSXAudio_WorldSound_6E68(func_0028B180_6E68(), obj, 92);
     }
     ((int*)ret)[2] = 1;
     *func_00226610(ret) = r;
@@ -7943,11 +7943,11 @@ struct sGame_7308 {
 extern "C" void cWScriptMission_missionPass(char* self)
 {
     int money = 0;
-    void* missions = cBE_getInterface_Fv(cBE_getBE(), 0xA);
+    void* missions = cBE_getInterface_Fv(cBE_getBE(), 10);
     if (cBEMissionInterface_isMissionCompleted(missions, *(int*)(self + 0x20)) == 0) {
         func_00154160(missions, *(int*)(self + 0x20), 1);
         int reward = func_00153FA0(missions, *(int*)(self + 0x20));
-        money = func_001511B0(cBE_getInterface_Fv(cBE_getBE(), 0xB), reward);
+        money = func_001511B0(cBE_getInterface_Fv(cBE_getBE(), 11), reward);
     }
     int pl = func_00144C98(cBE_getInterface_Fv(cBE_getBE(), 0));
     sGame_7308* game = *(sGame_7308**)(*(char**)(D_004A28A8_7308 + 0x84) + 0xC);

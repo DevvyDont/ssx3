@@ -730,7 +730,7 @@ extern "C" void func_0028BF78(char* self, int state)
         int st = func_002B49E0(self + 0x118);
         if ((unsigned int)(st - 1) < 3)
             return;
-        if (func_002B4AF0(self + 0x118) != 0 && st != 0x12D)
+        if (func_002B4AF0(self + 0x118) != 0 && st != 301)
             return;
         func_0028D488(self);
         func_0028CF98(self, 0, 0, -1, 0);
@@ -1150,7 +1150,7 @@ extern "C" void func_0028CD48(void* self)
     char* mon = (char*)self + 0x118;
     sBmVtCD48* vt = *(sBmVtCD48**)((char*)self + 0x5558);
     ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, str_pktrans, 0xC, func_00287968(self, 1, 0), 1);
-    func_002B49C0(mon, 0x191);
+    func_002B49C0(mon, 401);
     sBmVtCD48* vt2 = *(sBmVtCD48**)((char*)self + 0x5558);
     ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, 1);
     func_002B3C28(mon, 0x7F);
@@ -1207,7 +1207,7 @@ extern "C" void func_0028CDF8(char* self)
     *(int*)(self + 0x62AC) = *(int*)(self + 0x508);
     sBmVtCD48* vt = *(sBmVtCD48**)(self + 0x5558);
     ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, str_chartune, 0xC, func_00287968(self, 1, 0), 0);
-    func_002B49C0(mon, 0xC9);
+    func_002B49C0(mon, 201);
     sBmVtCD48* vt2 = *(sBmVtCD48**)(self + 0x5558);
     ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, track);
     func_002B4A08(mon, 1);
@@ -1263,11 +1263,11 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     if (*(int*)((char*)self + 0x608C) == 2) {
         int t = type == -1 ? func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0))) : type;
         if (t == 1) {
-            bmLoad_CF98(self, str_Peak1Amb, 8, 0x65);
+            bmLoad_CF98(self, str_Peak1Amb, 8, 101);
         } else if (t == 2) {
-            bmLoad_CF98(self, str_Peak2Amb, 8, 0x66);
+            bmLoad_CF98(self, str_Peak2Amb, 8, 102);
         } else {
-            bmLoad_CF98(self, str_Peak3Amb, 8, 0x67);
+            bmLoad_CF98(self, str_Peak3Amb, 8, 103);
         }
         char* mon = (char*)self + 0x118;
         func_002B46D0(mon);
@@ -1278,7 +1278,7 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     }
     sBmInfo_CF98 info = *(sBmInfo_CF98*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     char* mon = (char*)self + 0x118;
-    if (info.f0 >= 0x11 && a2 == 0 && a4 == 0 && func_002A42C8(self) == 0) {
+    if (info.f0 >= 17 && a2 == 0 && a4 == 0 && func_002A42C8(self) == 0) {
         int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
         if (t == 1) {
             bmLoad_CF98(self, str_Peak1_b, 1, 1);
@@ -1298,8 +1298,8 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     *(int*)((char*)self + 0x62A4) = *(int*)((char*)self + 0x508);
     *(int*)((char*)self + 0x5778) = func_002B4908(mon);
     func_002B3CC0(mon, 1);
-    if (a4 != 0 && info.f0 >= 0x11) {
-        a1 = 0x24;
+    if (a4 != 0 && info.f0 >= 17) {
+        a1 = 36;
     }
     sBmVtCD48* vt2 = *(sBmVtCD48**)((char*)self + 0x5558);
     ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, a1);
@@ -1345,17 +1345,17 @@ extern "C" void func_0028D5A0(void* self, int id)
     int cur;
     int type;
     int want;
-    if (*(int*)((char*)self + 0x6284) == 0x17) {
+    if (*(int*)((char*)self + 0x6284) == 23) {
         return;
     }
     cur = func_002B49E0((char*)self + 0x118);
     type = func_002A1E20(self, id);
     if (type == 1) {
-        want = 0x65;
+        want = 101;
     } else if (type == 2) {
-        want = 0x66;
+        want = 102;
     } else {
-        want = 0x67;
+        want = 103;
     }
     if (want != cur) {
         func_0028CF98(self, 0, 0, type, 0);
@@ -1589,22 +1589,22 @@ typedef int (*tBmSetDF18)(void*, int);
 extern "C" int func_0028DF18(void* self, int quiet)
 {
     int ok = 0;
-    if (func_002A10C0(self, 0xA) == 0) {
+    if (func_002A10C0(self, 10) == 0) {
         char* mon = (char*)self + 0x118;
         if (*(int*)((char*)self + 0x62B8) == 0) {
             func_002B3D48(mon, 2.0f);
         }
         sBmVtDF18* vt = *(sBmVtDF18**)((char*)self + 0x5558);
         ok = 1;
-        ((tBmSetDF18)vt[4].fn)(mon + vt[4].delta, 0x12);
+        ((tBmSetDF18)vt[4].fn)(mon + vt[4].delta, 18);
         func_0028D488(self);
-        func_002ADCA0_DF18(**(char***)((char*)self + 0x118) + 0x1D8, 0x7D0, D_004A3648_DF18->v, 0, 1, 1, 0, 0);
+        func_002ADCA0_DF18(**(char***)((char*)self + 0x118) + 0x1D8, 2000, D_004A3648_DF18->v, 0, 1, 1, 0, 0);
         char* p = **(char***)((char*)self + 0x118) + 0x1D8;
         const sSndKey8_DF18* key = D_004A3650_DF18;
         int r = func_002B4908(mon);
-        func_002ADCA0_DF18(p, 0x5DC, key->v, 0, 3, r, 0, 0);
+        func_002ADCA0_DF18(p, 1500, key->v, 0, 3, r, 0, 0);
     } else if (quiet == 0) {
-        func_002ADCA0_DF18(**(char***)((char*)self + 0x118) + 0x1D8, 0x64, D_004A3658_DF18->v, 0, 0, 0, 0, 0);
+        func_002ADCA0_DF18(**(char***)((char*)self + 0x118) + 0x1D8, 100, D_004A3658_DF18->v, 0, 0, 0, 0, 0);
     }
     return ok;
 }
@@ -1704,26 +1704,26 @@ extern "C" void func_0028E100(char* self)
         if (func_0028D960(self)) {
             int locGroup;
             id = *(int*)(self + 0x6284);
-            if (id == 0x17) {
+            if (id == 23) {
                 locGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             } else {
                 locGroup = func_002A1E20(self, id);
-                *(int*)(self + 0x6284) = 0x17;
+                *(int*)(self + 0x6284) = 23;
             }
             bmLoadBank_E100(self, locGroup);
         }
     } else if (st == 2) {
         if (func_0028D960(self)) {
             id = *(int*)(self + 0x6284);
-            if (id != 0x17) {
+            if (id != 23) {
                 if (func_002A4030(self)) {
                     func_0028D488(self);
-                    func_0028CF98(self, 0x24, 1, -1, 0);
+                    func_0028CF98(self, 36, 1, -1, 0);
                 } else {
                     id = *(int*)(self + 0x6284);
                     bmLoadBank_E100(self, func_002A1E20(self, id));
                 }
-                *(int*)(self + 0x6284) = 0x17;
+                *(int*)(self + 0x6284) = 23;
             }
         }
     } else if (st == 4) {
@@ -1731,7 +1731,7 @@ extern "C" void func_0028E100(char* self)
     } else {
         if (func_0028D960(self)) {
             if (*(int*)(self + 0x6278) == 3)
-                func_0028CF98(self, 0x24, 0, -1, 0);
+                func_0028CF98(self, 36, 0, -1, 0);
             else
                 func_0028CF98(self, 0, 0, -1, 0);
         }
@@ -1851,7 +1851,7 @@ extern "C" void func_0028E8C0(void* self, int id, int a2);
 extern "C" void func_0028E888(void* self)
 {
     if (*(int*)((char*)self + 0x6254) != 0) {
-        func_0028E8C0(self, 0x13, 1);
+        func_0028E8C0(self, 19, 1);
         *(int*)((char*)self + 0x6254) = 0;
     }
 }
@@ -1901,7 +1901,7 @@ typedef int (*tBmSetE8C0)(void*, int);
 extern "C" void func_0028E8C0(void* vself, int id, int a2)
 {
     char* self = (char*)vself;
-    if (id == 0x13 && a2 != 0 && *(int*)(self + 0x627C) != 0) {
+    if (id == 19 && a2 != 0 && *(int*)(self + 0x627C) != 0) {
         if (func_002A3FE8(self) != 0 && *(int*)(self + 0x578C) == 0) {
             if (func_0028D960(self)) {
                 cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1932,15 +1932,15 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
                     func_002B3D48(self + 0x118, 2.0f);
                 }
                 if (t == wantType) {
-                    if (func_0028DEF0(self, 0xB)) {
-                        func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0xBB8, D_004A3648_E8C0->v, 0, 0, 1, 0, 0);
-                        func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0x9C4, D_004A3650_E8C0->v, 0, 0, 0, 0, 0);
+                    if (func_0028DEF0(self, 11)) {
+                        func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 3000, D_004A3648_E8C0->v, 0, 0, 1, 0, 0);
+                        func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 2500, D_004A3650_E8C0->v, 0, 0, 0, 0, 0);
                     }
                 } else {
                     func_0028DF08(self);
                     func_0028D488(self);
-                    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0x7D0, D_004A3648_E8C0->v, 0, 1, 1, 0, 0);
-                    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0x5DC, D_004A3650_E8C0->v, 0, 7, 0, 0, 0);
+                    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 2000, D_004A3648_E8C0->v, 0, 1, 1, 0, 0);
+                    func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 1500, D_004A3650_E8C0->v, 0, 7, 0, 0, 0);
                 }
             }
         } else {
@@ -1951,7 +1951,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
             }
         }
         *(int*)(self + 0x6258) = 0;
-    } else if (id == 0x14) {
+    } else if (id == 20) {
         if (a2 != 0) {
             *(int*)(self + 0x6258) = 0;
             *(int*)(self + 0x577C) = 0;
@@ -1976,15 +1976,15 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
                         if (*(int*)SSXApp->GameModeMan >= 2) {
                             func_0028D488(self);
                             flag = 0;
-                            func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0xA, key, 0, 3, 1, 0, 0);
+                            func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 10, key, 0, 3, 1, 0, 0);
                         }
                     }
                 }
-                if (*(int*)(self + 0x6284) == 0x17 || func_002A4030_id(self, *(int*)(self + 0x6284)) == 0
+                if (*(int*)(self + 0x6284) == 23 || func_002A4030_id(self, *(int*)(self + 0x6284)) == 0
                     || *(int*)(self + (*(int*)(self + 0x6284) << 2) + 0x579C) != 1) {
-                    if (flag && *(int*)(self + 0x6284) != 0x17) {
+                    if (flag && *(int*)(self + 0x6284) != 23) {
                         func_0028D488(self);
-                        func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0xA, D_004A3648_E8C0->v, 0, 2, 1, 0, 0);
+                        func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 10, D_004A3648_E8C0->v, 0, 2, 1, 0, 0);
                     }
                     if (func_002A4718(self) && func_002A4A38(self) == 0) {
                         func_002A26F0(self, 0, 1);
@@ -1999,7 +1999,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
                     }
                     sBmVtE8C0* vt = *(sBmVtE8C0**)(self + 0x5558);
                     ((tBmLoadE8C0)vt[2].fn)(mon2 + vt[2].delta, str_pktrans, 0xC, func_00287968(self, 1, 0), 1);
-                    func_002B49C0(mon2, 0x191);
+                    func_002B49C0(mon2, 401);
                     if (func_002A1E20(self, *(int*)(self + 0x6284)) == 2) {
                         sBmVtE8C0* vt2 = *(sBmVtE8C0**)(self + 0x5558);
                         ((tBmSetE8C0)vt2[4].fn)(mon2 + vt2[4].delta, 2);
@@ -2017,11 +2017,11 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
             }
             *(int*)(self + 0x627C) = 1;
         }
-    } else if (id >= 0x15 && id <= 0x19) {
+    } else if (id >= 21 && id <= 25) {
         if (func_0028D960(self)) {
             func_0028D488(self);
             func_002B3D48(self + 0x118, 1.0f);
-            func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 0xBB8, D_004A3648_E8C0->v, 0, 3, 1, 0, 0);
+            func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 3000, D_004A3648_E8C0->v, 0, 3, 1, 0, 0);
         }
     } else {
         char* mon = self + 0x118;
@@ -2049,7 +2049,7 @@ extern "C" void func_0028EF90(void* self)
     func_0028DF08(self);
     *(int*)((char*)self + 0x578C) = 0;
     func_0028D488(self);
-    func_002ADCA0(**(char***)((char*)self + 0x118) + 0x1D8, 0xA, D_004A3648_EF90->v, 0, 2, 1, 0, 0);
+    func_002ADCA0(**(char***)((char*)self + 0x118) + 0x1D8, 10, D_004A3648_EF90->v, 0, 2, 1, 0, 0);
 }
 #endif
 
@@ -2154,12 +2154,12 @@ extern "C" void func_0028F200(void* self)
     char* mon = (char*)self + 0x118;
     *(int*)((char*)self + 0x6294) = 0;
     *(int*)((char*)self + 0x6298) = 0;
-    if (*(int*)((char*)self + 0x530) == 0 || func_002B49E0(mon) == 0xC9) {
+    if (*(int*)((char*)self + 0x530) == 0 || func_002B49E0(mon) == 201) {
         if (func_0028D960(self)) {
-            if (func_002B49E0(mon) == 0xC9) {
+            if (func_002B49E0(mon) == 201) {
                 *(int*)((char*)self + 0x508) = *(int*)((char*)self + 0x62AC);
             }
-            func_002ADCA0(**(char***)((char*)self + 0x118) + 0x1D8, 0xA, D_004A3648[0].v, 0, 3, 1, 0, 0);
+            func_002ADCA0(**(char***)((char*)self + 0x118) + 0x1D8, 10, D_004A3648[0].v, 0, 3, 1, 0, 0);
         }
         *(int*)((char*)self + 0x6294) = 1;
     } else {
@@ -2186,7 +2186,7 @@ extern "C" void func_0028F2C0(void* self)
     } else if (*(int*)((char*)self + 0x6298) != 0) {
         char* obj = (char*)self + 0x118;
         sBankMgrVEntry* vt = *(sBankMgrVEntry**)((char*)self + 0x5558);
-        vt[4].fn(obj + vt[4].delta, 0x24);
+        vt[4].fn(obj + vt[4].delta, 36);
     }
     *(int*)((char*)self + 0x6294) = 0;
     *(int*)((char*)self + 0x6298) = 0;
@@ -2213,7 +2213,7 @@ extern "C" void func_0028F328(void* self, int code)
     void* monitor = (char*)self + 0x118;
     func_002B3B88(monitor, code);
     if (func_002B49E0(monitor) == -1) {
-        if ((unsigned)(code - 10) < 2 || code == 0x12) {
+        if ((unsigned)(code - 10) < 2 || code == 18) {
             if (D_004A3620 == 1) {
                 ((cBankMonitor_F328*)((char*)self + 0x118))->v3(8);
             }
@@ -2233,7 +2233,7 @@ extern "C" int func_0028F3C8(void* self, int code)
     void* monitor = (char*)self + 0x118;
     int r = func_002B3BC0(monitor, code);
     if (func_002B49E0(monitor) == -1) {
-        if ((unsigned)(code - 10) < 2 || code == 0x12) {
+        if ((unsigned)(code - 10) < 2 || code == 18) {
             if (D_004A3620 == 1) {
                 ((cBankMonitor_F328*)((char*)self + 0x118))->v3(8);
             }
@@ -2407,7 +2407,7 @@ extern void* D_004A3624;
 
 extern "C" void func_0028F700(void* self)
 {
-    func_0028BC58(**(void***)((char*)self + 0x118), 0xD, D_004A3624, 0);
+    func_0028BC58(**(void***)((char*)self + 0x118), 13, D_004A3624, 0);
 }
 #endif
 
@@ -2557,8 +2557,8 @@ extern "C" void func_0028FAE0(char* self)
     func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3650_FAE0[0].v);
     func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3658_FAE0[0].v);
     int st = func_002B49E0(self + 0x118);
-    if ((unsigned int)(st - 1) < 3 || st == 0x191 || *(int*)(self + 0x530) == 0) {
-        func_0028DEF0(self, 0x12);
+    if ((unsigned int)(st - 1) < 3 || st == 401 || *(int*)(self + 0x530) == 0) {
+        func_0028DEF0(self, 18);
         *(int*)(self + 0x5828) = 1;
         func_002B3AC0(self + 0x118);
         func_0028D488(self);
@@ -2566,7 +2566,7 @@ extern "C" void func_0028FAE0(char* self)
         char* p = **(char***)(self + 0x118) + 0x1D8;
         const sBmKeyFAE0* key = D_004A3650_FAE0;
         int v = func_002B4908(self + 0x118);
-        func_002ADCA0_FAE0(p, 0xBB8, key->v, 0, 4, v, 0, 0);
+        func_002ADCA0_FAE0(p, 3000, key->v, 0, 4, v, 0, 0);
     }
 }
 #endif
@@ -2603,7 +2603,7 @@ extern "C" void func_0028FC58(void* self)
     char* mon = (char*)self + 0x118;
     sBmVtFC58* vt = *(sBmVtFC58**)((char*)self + 0x5558);
     ((tBmLoadFC58)vt[2].fn)(mon + vt[2].delta, str_charsel, 0xC, func_00287968(self, 1, 0), 1);
-    func_002B49C0(mon, 0x12D);
+    func_002B49C0(mon, 301);
     sBmVtFC58* vt2 = *(sBmVtFC58**)((char*)self + 0x5558);
     ((tBmSetFC58)vt2[4].fn)(mon + vt2[4].delta, *(int*)((char*)self + 0x6290));
 }

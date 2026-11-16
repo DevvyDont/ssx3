@@ -76,7 +76,7 @@ extern "C" void systemInit(void)
     func_003E6690(1);
     func_003E4AF0(0x3C);
     sIoCfg_SysInit cfg;
-    cfg.size = 0x24;
+    cfg.size = 36;
     func_003DE928(&cfg);
     cfg.fnA = MEM_alloc;
     cfg.fnB = MEM_free;

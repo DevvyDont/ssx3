@@ -46,7 +46,7 @@ extern "C" cSplineModifier* cSplineModifier_cSplineModifier(cSplineModifier* sel
     self->Spline.Seg = 0;
     self->Spline.SegIndex = 0;
     self->Spline.Length = 0;
-    stream->v02((char*)self + 0x10, 0x50);
+    stream->v02((char*)self + 0x10, 80);
     cSpline_readFromReplayFrame(follower, stream);
     (*(sSmQuad_95D8*)&self->Dir) = t4vect_Zero;
     (*(sSmQuad_95D8*)&self->DDir) = t4vect_Zero;
@@ -637,14 +637,14 @@ extern "C" void cSplineModifier_setSpeed(void* self);
  */
 extern "C" void cSplineModifier_signal(cSplineModifier* self, int msg)
 {
-    if (msg == 0x190) {
+    if (msg == 400) {
         cSplineModifier_setSpeed(self);
         self->Complete = 0;
         self->Start = 1;
-    } else if (msg == 0x191) {
+    } else if (msg == 401) {
         self->Complete = 0;
         self->Start = 1;
-    } else if (msg == 0x192) {
+    } else if (msg == 402) {
         self->Velocity = -self->Velocity;
         self->Complete = 0;
         self->Start = 1;
@@ -670,7 +670,7 @@ extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
  */
 extern "C" void cSplineModifier_writeToReplayFrame(cSplineModifier* self, cStream00359F30* stream)
 {
-    stream->v01((char*)self + 0x10, 0x50);
+    stream->v01((char*)self + 0x10, 80);
     cSpline_writeToReplayFrame((char*)self + 0xD8, stream);
 }
 #endif
@@ -791,7 +791,7 @@ extern "C" cMultiSplineModifier* cMultiSplineModifier_cMultiSplineModifier1(cMul
     self->Spline.Seg = 0;
     self->Spline.SegIndex = 0;
     self->Spline.Length = 0;
-    stream->v02((char*)self + 0x4, 0x34);
+    stream->v02((char*)self + 0x4, 52);
     cSpline_readFromReplayFrame_A118(follower, stream);
     self->Instance = (tInstanceRecord*)stream->v03();
     cMultiSplineModifier_allocNodes(self);
@@ -953,7 +953,7 @@ extern "C" void cMultiSplineModifier_setupNodes(cMultiSplineModifier* multiSplin
     cMultiSplineModifier* self = multiSpline;
     int i;
     int keep = ((sSplineInstA458**)self->NodeInst)[0]->field_0x78;
-    MEM_copy(((sSplineInstA458**)self->NodeInst)[0], ((void*)self->Instance), 0xA0);
+    MEM_copy(((sSplineInstA458**)self->NodeInst)[0], ((void*)self->Instance), 160);
     ((sSplineInstA458**)self->NodeInst)[0]->field_0x78 = keep;
     for (i = 1; i < self->NumModels; i++) {
         cInstanceMan_copyInstance(cObjectInterface_getInstanceMan(), (sInstanceStruct*)((sSplineInstA458**)self->NodeInst)[i], ((void*)self->Instance));
@@ -1928,7 +1928,7 @@ extern "C" void cMultiSplineModifier_render(cMultiSpline_35B418* self)
             mvt[33].fn(model + mvt[33].delta, self->insts[i] + 0x10, self->mode);
             if (hit != 0) {
                 sSmVEModel_35B418* mvt2 = *(sSmVEModel_35B418**)(model + 0xC);
-                mvt2[5].fn(model + mvt2[5].delta, (void*)self->mode, 0x420);
+                mvt2[5].fn(model + mvt2[5].delta, (void*)self->mode, 1056);
             } else {
                 sSmVEModel_35B418* mvt2 = *(sSmVEModel_35B418**)(model + 0xC);
                 mvt2[5].fn(model + mvt2[5].delta, (void*)self->mode, 0x400);
@@ -1968,7 +1968,7 @@ extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
  */
 extern "C" void cMultiSplineModifier_writeToReplayFrame(cMultiSplineModifier* self, cStream0035B5A8* stream)
 {
-    stream->v01((char*)self + 0x4, 0x34);
+    stream->v01((char*)self + 0x4, 52);
     cSpline_writeToReplayFrame((char*)self + 0x48, (cStream00359F30*)stream);
     stream->v05(self->Instance);
     for (int i = 0; i < self->NumModels; i++) {

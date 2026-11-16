@@ -32,7 +32,7 @@ extern "C" void* cWorld_cWorld(void** self)
     self[2] = cWorldPainterMan_cWorldPainterMan(cMemMan_alloc(8, str_cWorldPainterMan_b, 0, 0));
     self[4] = 0;
     self[5] = 0;
-    SphereTree_initCache(0xA, 4, 2, 5);
+    SphereTree_initCache(10, 4, 2, 5);
     return self;
 }
 #endif

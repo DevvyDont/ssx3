@@ -74,9 +74,9 @@ SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
         fmt = 0;
         if (TYPE_3578(shape) == 0x60) {
             fmt = 1;
-        } else if (TYPE_3578(shape) == 0x61) {
+        } else if (TYPE_3578(shape) == 97) {
             fmt = 3;
-        } else if (TYPE_3578(shape) == 0x62) {
+        } else if (TYPE_3578(shape) == 98) {
             fmt = 5;
         }
         if (fmt) {
@@ -148,7 +148,7 @@ int SHAPE_cluttype(int bpp) {
         var_5 = 0;
         break;
     case 32:
-        var_5 = 0x21;
+        var_5 = 33;
         break;
     }
     return var_5;
@@ -299,7 +299,7 @@ int func_003B3A50(int shptype, int width, int height, unsigned int mipmaps, int 
     if (bpp == 15) {
         bpp = 16;
     }
-    if ((shptype == 0x20 || shptype == 0x21) && swizzled) {
+    if ((shptype == 0x20 || shptype == 33) && swizzled) {
         if ((unsigned int)((width & 0x1F) - 0x10) < 8U) {
             width = (width & ~0x1F) + 0x18;
         } else if ((unsigned int)((width & 0x1F) - 8) < 8U) {
@@ -316,7 +316,7 @@ int func_003B3A50(int shptype, int width, int height, unsigned int mipmaps, int 
             if (mipheight < 1) {
                 mipheight = 1;
             }
-            if (shptype == 0x60 || shptype == 0x61 || shptype == 0x62) {
+            if (shptype == 0x60 || shptype == 97 || shptype == 98) {
                 mipwidth = (mipwidth + 3) & ~3;
                 mipheight = (mipheight + 3) & ~3;
             }
@@ -359,11 +359,11 @@ int SHAPE_size(char *shp) {
     switch (shapeType) {
     case 0x70:
         return strlen_3BB0(shp + 4) + 5;
-    case 0x6F:
+    case 111:
         return *(int *)(shp + 4) + 8;
     case 0x7C:
         return (*(int *)(shp + 4) << 3) + 8;
-    case 0x69:
+    case 105:
         if (*(unsigned short *)(shp + 6) & 0x10) {
             payloadSize = *(unsigned short *)(shp + 4);
             if (payloadSize == 0) payloadSize = 0xF0;
@@ -483,7 +483,7 @@ void *func_003B3D40(int *arg0) {
     var_5 = arg0;
     var_6 = 0;
     if (var_5 != 0) {
-        if (*(unsigned char *)var_5 == 0x69) {
+        if (*(unsigned char *)var_5 == 105) {
             var_6 = (char *)var_5 + 0x10;
             var_2_2 = *(unsigned short *)((char *)var_5 + 6);
             goto block_10;
@@ -494,7 +494,7 @@ loop_5:
             temp_4 = (temp_2 != 0) ? (int *)((char *)var_5 + temp_2) : 0;
             var_5 = temp_4;
             if (temp_4 != 0) {
-                if (*(unsigned char *)temp_4 != 0x69) {
+                if (*(unsigned char *)temp_4 != 105) {
                     goto loop_5;
                 }
                 var_2_2 = *(unsigned short *)((char *)temp_4 + 6);
@@ -522,8 +522,8 @@ int SHAPE_type(int bpp) {
     switch (bpp) {
     case 4: type = 1; break;
     case 8: type = 2; break;
-    case 0xF: case 0x10: case 0x22B: case 0x613: type = 3; break;
-    case 0x20: case 0x22B8: type = 5; break;
+    case 0xF: case 0x10: case 555: case 1555: type = 3; break;
+    case 0x20: case 8888: type = 5; break;
     }
     return type;
 }
@@ -570,12 +570,12 @@ int func_003B3E40(SH_3E40 *shp, int x, int y, int level) {
         px = x / 4;
         py = y / 4;
     }
-    if ((shp->fmt == 0x20 || shp->fmt == 0x21) && (shp->flags & 0x2000)) {
+    if ((shp->fmt == 0x20 || shp->fmt == 33) && (shp->flags & 0x2000)) {
         bitOffset = px;
         if ((unsigned int)((px & 0x1F) - 8) <= 15) {
             bitOffset = px ^ 0x18;
         }
-        if (shp->fmt == 0x21) {
+        if (shp->fmt == 33) {
             bitOffset <<= 5;
         } else if (shp->fmt == 0x20) {
             bitOffset <<= 4;
@@ -653,12 +653,12 @@ char *func_003B4010(struct Img_4010 *img, int x, int y, int mip) {
         px = x / 4;
         py = y / 4;
     }
-    if ((img->fmt == 0x20 || img->fmt == 0x21) && (img->flags & 0x2000)) {
+    if ((img->fmt == 0x20 || img->fmt == 33) && (img->flags & 0x2000)) {
         pos = px;
         if ((unsigned int)((pos & 0x1F) - 8) < 16) {
             pos ^= 0x18;
         }
-        if (img->fmt == 0x21) {
+        if (img->fmt == 33) {
             pos <<= 5;
         } else if (img->fmt == 0x20) {
             pos <<= 4;
@@ -861,7 +861,7 @@ void SHAPE_cloneat(char *dst, char *src) {
             *(int *)prev = *(unsigned char *)prev;
             if (size != 0) {
                 MEM_move_neat(prev, curShape, size);
-                if (*(unsigned char *)prev == 0x69 && size >= 0x15) {
+                if (*(unsigned char *)prev == 105 && size >= 21) {
                     sprintf_neat(prev + 0x10, D_004957B8_neat, *(short *)(prev + 4));
                 }
             }
@@ -918,18 +918,18 @@ int SHAPE_isclut(int shptype) {
     var_5 = 0;
     switch (shptype) {
     case 0x20:
-    case 0x21:
-    case 0x22:
-    case 0x24:
-    case 0x29:
-    case 0x2A:
-    case 0x2C:
-    case 0x2D:
-    case 0x2E:
+    case 33:
+    case 34:
+    case 36:
+    case 41:
+    case 42:
+    case 44:
+    case 45:
+    case 46:
     case 0x30:
-    case 0x31:
-    case 0x32:
-    case 0x33:
+    case 49:
+    case 50:
+    case 51:
     case 0x38:
         var_5 = 1;
         break;
@@ -958,16 +958,16 @@ int f_4740(unsigned char *src, unsigned char *dst) __asm__("unpackz");
  */
 int f_4740(unsigned char *src, unsigned char *dst) {
     int len = 0;
-    if (src[1] == 0xFB) {
+    if (src[1] == 251) {
         switch (src[0] & 0xFE) {
         case 0x10:
-        case 0x90:
+        case 144:
             len = REF_decode(dst, src, 0);
             break;
-        case 0x18: case 0x1A: case 0x1C: case 0x1E:
-        case 0x30: case 0x32: case 0x34: case 0x46:
-        case 0x98: case 0x9A: case 0x9C: case 0x9E:
-        case 0xB0: case 0xB2: case 0xB4: case 0xC6:
+        case 0x18: case 26: case 0x1C: case 0x1E:
+        case 0x30: case 50: case 52: case 70:
+        case 152: case 154: case 156: case 158:
+        case 176: case 178: case 180: case 198:
             break;
         }
     }
@@ -1009,14 +1009,14 @@ static __inline__ int get32_4818(unsigned char *q) { return (q[0] << 24) | (q[1]
  */
 int f_4818(unsigned char *src) {
     int v = 0;
-    if (src[1] == 0xFB) {
+    if (src[1] == 251) {
         switch (src[0] & 0xFE) {
-        case 0x10: case 0x18: case 0x1A: case 0x1E:
-        case 0x30: case 0x32: case 0x34: case 0x46:
+        case 0x10: case 0x18: case 26: case 0x1E:
+        case 0x30: case 50: case 52: case 70:
             v = get24_4818(src + 2);
             break;
-        case 0x90: case 0x98: case 0x9A: case 0x9E:
-        case 0xB0: case 0xB2: case 0xB4: case 0xC6:
+        case 144: case 152: case 154: case 158:
+        case 176: case 178: case 180: case 198:
             v = get32_4818(src + 2);
             break;
         case 0xC0:
@@ -1169,7 +1169,7 @@ int func_003B4D00(unsigned char *packed, int *outlen) {
                 }
                 {
                     k = ((command & 0x1F) << 2) + 4;
-                    if (k < 0x71) {
+                    if (k < 113) {
                         cursor += k;
                         continue;
                     }
@@ -1221,7 +1221,7 @@ int func_003B4DD8_4DD8(struct Cfg_4DD8 *out) {
         D_0044C460 = func_003C0C90_4DD8();
         D_0044C45C = 1;
         D_0050A8E8_4DD8.cfg.sub.f08 = 0x10;
-        D_0050A8E8_4DD8.cfg.sub.f2B = 0x5A;
+        D_0050A8E8_4DD8.cfg.sub.f2B = 90;
         D_0050A8E8_4DD8.cfg.sub.f1C = 1;
         D_0050A8E8_4DD8.cfg.sub.f14 = -1.0f;
         D_0050A8E8_4DD8.saved = D_0050A8E8_4DD8.cfg.sub;
@@ -1489,7 +1489,7 @@ int func_003B5158_impl(void *buf, int size, int arg2) {
     func_003C3300();
     D_0050A8E8.f174 = 1;
     func_003B58A0();
-    D_0050A8E8.f1F0 = func_003B5C60_5158(D_0050A8E8.f17E * 0x8C);
+    D_0050A8E8.f1F0 = func_003B5C60_5158(D_0050A8E8.f17E * 140);
     D_0050A8E8.f1F4 = func_003B5C60_5158(D_0050A8E8.setup.cfg.f08 << 4);
     func_003B58D8();
     D_0050A8E8.f330 = 0;
@@ -1517,17 +1517,17 @@ int func_003B5158_impl(void *buf, int size, int arg2) {
     D_0050A8E8.f2E0[2][2] = D_0050A8E8.setup.cfg.f58[2][1];
     D_0050A8E8.f2E0[3][0] = 0xE000;
     D_0050A8E8.f2E0[3][1] = 0x2000;
-    D_0050A8E8.f2E0[3][2] = 0xA000;
+    D_0050A8E8.f2E0[3][2] = 40960;
     D_0050A8E8.f2E0[3][3] = 0x6000;
     D_0050A8E8.f2E0[4][0] = 0xE000;
     D_0050A8E8.f2E0[4][1] = 0;
     D_0050A8E8.f2E0[4][2] = 0x2000;
-    D_0050A8E8.f2E0[4][3] = 0xA000;
+    D_0050A8E8.f2E0[4][3] = 40960;
     D_0050A8E8.f2E0[4][4] = 0x6000;
     D_0050A8E8.f2E0[5][0] = 0xE000;
     D_0050A8E8.f2E0[5][1] = 0;
     D_0050A8E8.f2E0[5][2] = 0x2000;
-    D_0050A8E8.f2E0[5][3] = 0xA000;
+    D_0050A8E8.f2E0[5][3] = 40960;
     D_0050A8E8.f2E0[5][4] = 0x6000;
     D_0050A8E8.f2E0[5][5] = 0;
     func_003BC0B0();
@@ -2177,7 +2177,7 @@ int func_003B6098(int *out, struct Hdr_6098 *hdr) {
         }
         for (i = 0; i < hdr->size1; i += 0x1000) {
             n = hdr->size1 - i;
-            h = f_42D8_6098(0x100, (char *)hdr + hdr->off + i, ent->buf1 + i, n < 0x1001 ? n : 0x1000);
+            h = f_42D8_6098(0x100, (char *)hdr + hdr->off + i, ent->buf1 + i, n < 4097 ? n : 0x1000);
             while (f_42F8_6098(h) == 0) {
             }
         }
@@ -2199,7 +2199,7 @@ fail:
         }
         for (i = 0; i < hdr->size2; i += 0x1000) {
             n = hdr->size2 - i;
-            h = f_42D8_6098(8, (char *)hdr + hdr->off + hdr->size1 + i, ent->buf2 + i, n < 0x1001 ? n : 0x1000);
+            h = f_42D8_6098(8, (char *)hdr + hdr->off + hdr->size1 + i, ent->buf2 + i, n < 4097 ? n : 0x1000);
             while (f_42F8_6098(h) == 0) {
             }
         }
@@ -2254,7 +2254,7 @@ extern void func_003C4D78_6300(int a, int p) __asm__("func_003C4D78");
 extern char *func_003C6540_6300(void *p, int i) __asm__("func_003C6540");
 
 int func_003B6300(int arg0) {
-    char buf[0xD0];
+    char buf[208];
     char *q;
     void *obj;
     int i;
@@ -2316,7 +2316,7 @@ int func_003B64D8(int arg0) {
     }
     r = (struct sA8E8Slot *)(arg0 * 16 + (int)D_0050A8E8.f1F4);
     if (r->f00 != 0) {
-        return r->f0C ? -0x12 : 0;
+        return r->f0C ? -18 : 0;
     }
     return -8;
 }
@@ -2432,7 +2432,7 @@ extern int func_003BAAC0_6788(char **, void *) __asm__("func_003BAAC0");
 extern void func_003C3EA8_6788(void *, int, int) __asm__("func_003C3EA8");
 
 int func_003B6788(int renderMask, char *taggedPatch, int sampleData, int firstOffset) {
-    char sp[0xD0];
+    char sp[208];
     char *cursor;
     int moreTags;
 
@@ -2501,10 +2501,10 @@ int func_003B6948(unsigned char *sampleFormat) {
     int numChannels = sampleFormat[2];
     int sampleRep = sampleFormat[3];
     w = w * numChannels;
-    if (sampleRep == 5) ratio = 0x92;
-    else if (sampleRep == 10) ratio = 0x88;
-    else if (sampleRep == 4) ratio = 0x33;
-    else if (sampleRep == 22) ratio = 0x66;
+    if (sampleRep == 5) ratio = 146;
+    else if (sampleRep == 10) ratio = 136;
+    else if (sampleRep == 4) ratio = 51;
+    else if (sampleRep == 22) ratio = 102;
     else if (sampleRep == 8) ratio = 0x200;
     else if (sampleRep == 16) return numChannels << 3;
     else if (sampleRep == 23) return numChannels << 3;
@@ -2739,7 +2739,7 @@ int func_003B6BD0(int h, int *chunk) {
     }
     func_003E13E8_6BD0(p->f00, chunk);
     n->f10 = func_003B6948_6BD0((unsigned char *)&p->f18);
-    if (func_00415FC8(&p->f14, &p->f18, 4) != 0 || func_00415FC8(&p->f1C, &p->f84, 0x68) != 0 || p->f84.f18[0] != 0) {
+    if (func_00415FC8(&p->f14, &p->f18, 4) != 0 || func_00415FC8(&p->f1C, &p->f84, 104) != 0 || p->f84.f18[0] != 0) {
         if (*(unsigned short *)&p->f14 != 0) {
             p->f10 = 2;
             return 0;
@@ -3032,12 +3032,12 @@ int f_7450(struct sA0A0Parm *src, int n, int a2, char *buf, int size, int h, int
 found:
     slot = i;
     s = (struct sA0A0Strm *)buf;
-    f_6210_7450(s, 0, 0x138);
+    f_6210_7450(s, 0, 312);
     buf += 0x138;
     ents = (struct sA0A0Node *)buf;
-    buf += n * 0x28;
-    size -= 0x138;
-    size -= n * 0x28;
+    buf += n * 40;
+    size -= 312;
+    size -= n * 40;
     k = func_003C65F0_7450(a2);
     q = buf;
     buf += k;
@@ -3109,7 +3109,7 @@ int func_003B76E8_76E8(int a0, int a1, int a2, int a3, int a4) {
     func_003B58A0();
     a4 = (int)f_62E8_76E8(&o->f128);
     s = (struct sA0A0Node *)a4;
-    f_6210_76E8(s, 0, 0x28);
+    f_6210_76E8(s, 0, 40);
     f_62B8_76E8(&o->f11C, s);
     s->f08 = r;
     o->f0C += 0x100;
@@ -3227,8 +3227,8 @@ int func_003B78F8(int arg0) {
     o->f10 = 0;
     f_6210_78F8(&o->f14, 0, 4);
     f_6210_78F8(&o->f18, 0, 4);
-    f_6210_78F8(&o->f1C, 0, 0x68);
-    f_6210_78F8(&o->f84, 0, 0x68);
+    f_6210_78F8(&o->f1C, 0, 104);
+    f_6210_78F8(&o->f84, 0, 104);
     func_003B58D8();
     return 0;
 }
@@ -3261,7 +3261,7 @@ extern int func_003C65F0(int);
 int func_003B7AC8_7AC8(int arg0, int arg1) __asm__("func_003B7AC8");
 
 int func_003B7AC8_7AC8(int maxRequests, int maxChunks) {
-    int overhead = maxRequests * 0x28 + 0x138;
+    int overhead = maxRequests * 40 + 312;
     return overhead + func_003C65F0(maxChunks);
 }
 #endif
@@ -3675,11 +3675,11 @@ extern char D_0050AB08_8218[] __asm__("D_0050AB08");
 void *func_003B8218(int arg0, int arg1) {
     switch (arg1 & 0x71C) {
     case 8:
-        return (arg0 * 0x14) + D_0050AB08_8218;
+        return (arg0 * 20) + D_0050AB08_8218;
     case 4:
-        return (arg0 * 0x14) + D_0050AAE0_8218;
+        return (arg0 * 20) + D_0050AAE0_8218;
     case 0x100:
-        return (arg0 * 0x14) + D_0050AAF4_8218;
+        return (arg0 * 20) + D_0050AAF4_8218;
     }
     return 0;
 }
@@ -3813,7 +3813,7 @@ int func_003B8530(int a, int n, int v) {
         sp0 = -1;
         v <<= 16;
         while (func_003BAA00_8530(h, &sp0)) {
-            char *e = D_0050A8E8_8530[0].tab + sp0 * 0x8C;
+            char *e = D_0050A8E8_8530[0].tab + sp0 * 140;
             *(int *)(e + 0x34) = v;
             *(int *)(e + 0x30) = (v - *(int *)(e + 0x38)) / n;
         }
@@ -3925,7 +3925,7 @@ int func_003B8790_8790(int a0, int arg1) {
         g = D_0050A8E8_8790;
         while (func_003BAA00_8790(h, &sp0) != 0) {
             i = sp0;
-            e = *(char **)(g + 0x1F0) + i * 0x8C;
+            e = *(char **)(g + 0x1F0) + i * 140;
             if (*(unsigned short *)(e + 0x88) == arg1) {
                 return 0;
             }
@@ -4275,7 +4275,7 @@ int func_003B8DE8_impl(int id) {
         func_003B9920_8DE8(e->f10);
         return 1;
     }
-    i = 0x17;
+    i = 23;
     v = D_0050A820;
     do {
         if (v->f04 == id && v->f00 >= 0) {
@@ -4344,7 +4344,7 @@ void func_003B8F78(struct sSongHandle_8F78 h, struct sA120Chan *c, int ch, int k
     unsigned short pitch;
     unsigned char t17;
 
-    end = D_0044C474 + 0x19;
+    end = D_0044C474 + 25;
     i = ++D_0044C474;
     for (; i < end; i++) {
         D_0044C474 = i % 24;
@@ -4470,7 +4470,7 @@ void func_003B91E0(int h, struct Bits_91E0 *bits, int x, int cmd) {
     } else if (cmd == 7) {
         s = e->p8;
         p = (struct V_91E0 *)((char *)p + 0x700);
-        i = 0x17;
+        i = 23;
         bits->b = *s;
         e->p8 = s + 1;
         do {
@@ -4483,7 +4483,7 @@ void func_003B91E0(int h, struct Bits_91E0 *bits, int x, int cmd) {
         return;
     } else if (cmd == 10) {
         p = (struct V_91E0 *)((char *)p + 0x700);
-        i = 0x17;
+        i = 23;
         bits->a = func_003BC570_91E0(*e->p8++) >> 6;
         do {
             if (p->ch == h && p->x == x) {
@@ -4514,7 +4514,7 @@ void func_003B93C8(int seqIndex, struct B_93C8 *midiChan, int channel, int data)
     struct R_93C8 *seqInst = &D_a120_93C8.r[seqIndex];
     int value, i;
     struct E_93C8 *partial = &D_a120_93C8.e[0];
-    i = 0x17;
+    i = 23;
     value = (*seqInst->cur++ << 7) + data;
     midiChan->f = value / 128;
     do {
@@ -4556,7 +4556,7 @@ void func_003B94B0(int h) {
     c->f08 = s + 1;
     b = s[1];
     c->f08 = s - 1;
-    if (hi == 0xF0 && b == 0x2F) {
+    if (hi == 0xF0 && b == 47) {
         if (f8EE8_94B0(h) != 0) f9920_94B0(c->f10);
         return;
     }
@@ -4570,13 +4570,13 @@ void func_003B94B0(int h) {
         lo = a & 0xF;
         q = &c->f30[lo];
         switch (hi) {
-        case 0x90:
+        case 144:
             f8F78_94B0(h, q, lo, b);
             break;
         case 0x80:
             f9140_94B0(h, lo, b);
             break;
-        case 0xB0:
+        case 176:
             f91E0_94B0(h, q, lo, b);
             break;
         case 0xE0:
@@ -4586,7 +4586,7 @@ void func_003B94B0(int h) {
             q->b24 = b;
             break;
         case 0xF0:
-            if (b == 0x2F) {
+            if (b == 47) {
                 if (f8EE8_94B0(h) != 0) {
                     f9920_94B0(c->f10);
                 } else {
@@ -4778,7 +4778,7 @@ int func_003B9A00(struct H_9A00 *hdr, unsigned char *data, int arg2, int arg3) {
     struct sA120Song *e;
     int i;
     int j;
-    if (*(short *)data == 0x444D) {
+    if (*(short *)data == 17485) {
         data += 8;
     } else if (*(int *)data == 0x7844494D) {
         data += 4;
@@ -4841,7 +4841,7 @@ int func_003B9B68(int h, int v) {
         if (c->f28 != 3) goto out;
         c->f22 = v;
         p = (struct V_9B68 *)((char *)D_0050A120_9B68 + 0x700);
-        for (i = 0x17; i >= 0; i--, p++) {
+        for (i = 23; i >= 0; i--, p++) {
             if (p->ch == ch && p->h >= 0) func_003B8790_9B68(p->h, v);
         }
     }
@@ -4876,7 +4876,7 @@ int func_003B9C20(int h, int v) {
         if (c->f28 != 3) goto out;
         c->f20 = v;
         p = (struct V_9C20 *)((char *)D_0050A120_9C20 + 0x700);
-        for (i = 0x17; i >= 0; i--, p++) {
+        for (i = 23; i >= 0; i--, p++) {
             if (p->ch == ch && p->h >= 0) {
                 v = c->f20 + ((*(int *)((char *)c + (p->b5 << 2) + 0x30) & 0x3FF) << 6);
                 func_003B8C00_9C20(p->h, v, 0);
@@ -4913,7 +4913,7 @@ int func_003B9D00(int arg0) {
     if (*(signed char*)(t + 0x28) == 3) {
         p = (E_9D00*)(((char*)D_0050A120_9D00) + 0x700);
         *(signed char*)(t + 0x28) = 5;
-        i = 0x17;
+        i = 23;
         do {
             i--;
             if (p->b == h) {
@@ -4982,7 +4982,7 @@ int func_003B9E48(int a0, int vol) {
                 int i;
                 *(int *)(e + 0x14) = key;
                 p = D_0050A120_9E48 + 0x700;
-                i = 0x17;
+                i = 23;
                 do {
                     if (*(signed char *)(p + 4) == idx) {
                         int v = *(int *)p;
@@ -5149,7 +5149,7 @@ short func_003BA0B0(int n, int tag, unsigned int *out, int lo, int hi) {
         for (k = lo; k < hi; k++) {
             if (f_A078_A0B0(k, sel) == 0) {
                 e = &D_0050A8E8.f1F0[k];
-                if (e->f2A < 0x65) {
+                if (e->f2A < 101) {
                     if (e->f2A < lim) {
                         lim = e->f2A;
                         key = e->f2C;
@@ -5281,7 +5281,7 @@ int func_003BA6E8_A6E8(int arg0) {
     if ((arg0 < 0) || (g = D_0050A8E8_A8E8, var_5 = arg0 & 0xFF, (var_5 < *(short *)(g + 0x17E)) == 0)) {
         return -8;
     }
-    temp_2 = *(char **)(g + 0x1F0) + (var_5 * 0x8C);
+    temp_2 = *(char **)(g + 0x1F0) + (var_5 * 140);
     if ((*(signed char *)(temp_2 + 0x69) == 0) || (*(int *)temp_2 != arg0)) {
         var_5 = -8;
     }
@@ -5316,15 +5316,15 @@ extern unsigned char D_0044C480_A888[] __asm__("D_0044C480");
 int func_003BA888(int x) {
     int scale = 0x1000;
     int t;
-    while (x >= 0x4B0) {
-        x -= 0x4B0;
+    while (x >= 1200) {
+        x -= 1200;
         scale <<= 1;
     }
-    while (x < -0x4AF) {
-        x += 0x4B0;
+    while (x < -1199) {
+        x += 1200;
         scale >>= 1;
     }
-    t = (x * 0x369D) >> 16;
+    t = (x * 13981) >> 16;
     if (t <= -0x100)
         t = -0xFF;
     if (t < 0)
@@ -5519,22 +5519,22 @@ int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) {
     stc[37] = 1;
     stp[0] = 0;
     stp[2] = 1;
-    stp[4] = 0x5622;
+    stp[4] = 22050;
     stp[5] = 0;
     stp[6] = -1;
     stp[7] = -1;
     stp[8] = 0;
     stp[0x1C] = 0;
     stp[9] = 0;
-    stp[0x1D] = 0;
-    stp[0x14] = 0;
+    stp[29] = 0;
+    stp[20] = 0;
     stp[0x1E] = 0;
-    stp[0x15] = 0;
+    stp[21] = 0;
     stp[0x1F] = 0;
-    stp[0x22] = 0;
-    stp[0x26] = 0;
-    stp[0x23] = 0;
-    stp[0x27] = 0;
+    stp[34] = 0;
+    stp[38] = 0;
+    stp[35] = 0;
+    stp[39] = 0;
     stp[0x20] = 5;
     stp[0xC] = 8;
     moretags = 0;
@@ -5542,7 +5542,7 @@ int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) {
         if (sti.tagtype < 43) {
             stc[sti.tagtype] = sti.tagval;
             pstc[sti.tagtype] = sti.tagptr;
-            if (sti.tagtype == 0x14) {
+            if (sti.tagtype == 20) {
                 pph->puserdata[pph->numuserdata] = sti.tagptr;
                 pph->userdatasize[pph->numuserdata] = sti.tagsize;
                 pph->numuserdata++;
@@ -5550,22 +5550,22 @@ int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) {
         } else if (sti.tagtype >= 128 && sti.tagtype < 174) {
             stp[sti.tagtype - 128] = sti.tagval;
             pstp[sti.tagtype - 128] = sti.tagptr;
-            if (sti.tagtype == 0x98) {
+            if (sti.tagtype == 152) {
                 pph->ptimestretchdata[0] = sti.tagptr;
                 pph->timestretchsize[0] = sti.tagsize;
-            } else if (sti.tagtype == 0x99) {
+            } else if (sti.tagtype == 153) {
                 pph->ptimestretchdata[1] = sti.tagptr;
                 pph->timestretchsize[1] = sti.tagsize;
-            } else if (sti.tagtype == 0x9A) {
+            } else if (sti.tagtype == 154) {
                 pph->ptimestretchdata[2] = sti.tagptr;
                 pph->timestretchsize[2] = sti.tagsize;
-            } else if (sti.tagtype == 0x9B) {
+            } else if (sti.tagtype == 155) {
                 pph->ptimestretchdata[3] = sti.tagptr;
                 pph->timestretchsize[3] = sti.tagsize;
-            } else if (sti.tagtype == 0xA4) {
+            } else if (sti.tagtype == 164) {
                 pph->ptimestretchdata[4] = sti.tagptr;
                 pph->timestretchsize[4] = sti.tagsize;
-            } else if (sti.tagtype == 0xA5) {
+            } else if (sti.tagtype == 165) {
                 pph->ptimestretchdata[5] = sti.tagptr;
                 pph->timestretchsize[5] = sti.tagsize;
             }
@@ -5617,19 +5617,19 @@ int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) {
     pph->sustainstart = stp[6];
     pph->sustainend = stp[7];
     pph->rendermode = stp[0xC];
-    pph->paudioramaddr = (int *)pstp[0xA];
+    pph->paudioramaddr = (int *)pstp[10];
     pph->sampleoffset[0] = stp[8];
     azoffsets[0] = stp[0x1C];
     pph->sampleoffset[1] = stp[9];
-    azoffsets[1] = stp[0x1D];
-    pph->sampleoffset[2] = stp[0x14];
+    azoffsets[1] = stp[29];
+    pph->sampleoffset[2] = stp[20];
     azoffsets[2] = stp[0x1E];
-    pph->sampleoffset[3] = stp[0x15];
+    pph->sampleoffset[3] = stp[21];
     azoffsets[3] = stp[0x1F];
-    pph->sampleoffset[4] = stp[0x22];
-    azoffsets[4] = stp[0x26];
-    pph->sampleoffset[5] = stp[0x23];
-    azoffsets[5] = stp[0x27];
+    pph->sampleoffset[4] = stp[34];
+    azoffsets[4] = stp[38];
+    pph->sampleoffset[5] = stp[35];
+    azoffsets[5] = stp[39];
     for (i = 0; i < pph->numchan; i++) {
         if (D_0050A8E8.setup.cfg.f27 == 2 && pph->numchan == 2) {
             azoffsets[i] = 0;
@@ -6008,7 +6008,7 @@ int func_003BB588_impl(int *self, int *cur, int a2, int a3, signed char *pos) {
     if (n == 1) {
         k = f_A6E8_B588(ids[0]);
         if (k >= 0) {
-            e = D_0050AAD8_B588 + k * 0x8C;
+            e = D_0050AAD8_B588 + k * 140;
             e[0x26] = 0;
             e[0x27] = 0;
         }
@@ -6016,7 +6016,7 @@ int func_003BB588_impl(int *self, int *cur, int a2, int a3, signed char *pos) {
         for (i = 0; i < n; i++) {
             k = f_A6E8_B588(ids[i]);
             if (k >= 0) {
-                e = D_0050A8E8_B588.ents + k * 0x8C;
+                e = D_0050A8E8_B588.ents + k * 140;
                 e[0x26] = tag;
                 e[0x27] = 0;
             }
@@ -6083,7 +6083,7 @@ void func_003BB820(int base, unsigned char *src, struct Hdr_B820 *hdr, struct Ou
     flags = 8;
     f_6210_B820(hdr, 0, 4);
     ref = 0;
-    f_6210_B820(out, 0, 0x68);
+    f_6210_B820(out, 0, 104);
     f_6210_B820(extra, 0, 0x1C);
     if (!(src[0] == 'P' && src[1] == 'T') && src[0] == 'G' && src[1] == 'S' && src[2] == 'T' && src[3] == 'R') {
         f_BDA0_B820(0, src, hdr, out, extra);
@@ -6102,75 +6102,75 @@ void func_003BB820(int base, unsigned char *src, struct Hdr_B820 *hdr, struct Ou
     hdr->f3 = 5;
     extra->f0 = 0;
     while (f_7388_B820(&rec)) {
-        if (rec.id == 0xA0) {
+        if (rec.id == 160) {
             hdr->f3 = rec.v1;
-        } else if (rec.id == 0x9C) {
+        } else if (rec.id == 156) {
             vals[0] = rec.v1;
-        } else if (rec.id == 0x9D) {
+        } else if (rec.id == 157) {
             vals[1] = rec.v1;
-        } else if (rec.id == 0x9E) {
+        } else if (rec.id == 158) {
             vals[2] = rec.v1;
-        } else if (rec.id == 0x9F) {
+        } else if (rec.id == 159) {
             vals[3] = rec.v1;
-        } else if (rec.id == 0xA6) {
+        } else if (rec.id == 166) {
             vals[4] = rec.v1;
-        } else if (rec.id == 0xA7) {
+        } else if (rec.id == 167) {
             vals[5] = rec.v1;
-        } else if (rec.id == 0x98) {
+        } else if (rec.id == 152) {
             out->data[0] = f_5C60_B820(rec.v3);
             f_51E8_B820(out->data[0], (void *)rec.v2, rec.v3);
             out->size[0] = rec.v3;
-        } else if (rec.id == 0x99) {
+        } else if (rec.id == 153) {
             out->data[1] = f_5C60_B820(rec.v3);
             f_51E8_B820(out->data[1], (void *)rec.v2, rec.v3);
             out->size[1] = rec.v3;
-        } else if (rec.id == 0x9A) {
+        } else if (rec.id == 154) {
             out->data[2] = f_5C60_B820(rec.v3);
             f_51E8_B820(out->data[2], (void *)rec.v2, rec.v3);
             out->size[2] = rec.v3;
-        } else if (rec.id == 0x9B) {
+        } else if (rec.id == 155) {
             out->data[3] = f_5C60_B820(rec.v3);
             f_51E8_B820(out->data[3], (void *)rec.v2, rec.v3);
             out->size[3] = rec.v3;
-        } else if (rec.id == 0xA4) {
+        } else if (rec.id == 164) {
             out->data[4] = f_5C60_B820(rec.v3);
             f_51E8_B820(out->data[4], (void *)rec.v2, rec.v3);
             out->size[4] = rec.v3;
-        } else if (rec.id == 0xA5) {
+        } else if (rec.id == 165) {
             out->data[5] = f_5C60_B820(rec.v3);
             f_51E8_B820(out->data[5], (void *)rec.v2, rec.v3);
             out->size[5] = rec.v3;
         } else if (rec.id == 0x80) {
             out->f7 = rec.v1;
-        } else if (rec.id == 0x82) {
+        } else if (rec.id == 130) {
             hdr->channels = rec.v1;
-        } else if (rec.id == 0x84) {
+        } else if (rec.id == 132) {
             hdr->rate = rec.v1;
-        } else if (rec.id == 0x85) {
+        } else if (rec.id == 133) {
             extra->f0 = rec.v1;
-        } else if (rec.id == 0x8A) {
+        } else if (rec.id == 138) {
             ref = (int *)rec.v2;
-        } else if (rec.id == 0x13) {
+        } else if (rec.id == 19) {
             out->f5 = rec.v1;
-        } else if (rec.id == 0x0A) {
+        } else if (rec.id == 10) {
             out->f6 = rec.v1;
         } else if (rec.id == 0x06) {
             out->f2 = rec.v1;
-        } else if (rec.id == 0x8C) {
+        } else if (rec.id == 140) {
             flags = rec.v1;
-        } else if (rec.id == 0x88) {
+        } else if (rec.id == 136) {
             extra->offs[0] = rec.v1;
-        } else if (rec.id == 0x89) {
+        } else if (rec.id == 137) {
             extra->offs[1] = rec.v1;
-        } else if (rec.id == 0x94) {
+        } else if (rec.id == 148) {
             extra->offs[2] = rec.v1;
-        } else if (rec.id == 0x95) {
+        } else if (rec.id == 149) {
             extra->offs[3] = rec.v1;
-        } else if (rec.id == 0xA2) {
+        } else if (rec.id == 162) {
             extra->offs[4] = rec.v1;
-        } else if (rec.id == 0xA3) {
+        } else if (rec.id == 163) {
             extra->offs[5] = rec.v1;
-        } else if (rec.id == 0x14) {
+        } else if (rec.id == 20) {
             out->a48[n] = rec.v2;
             out->a58[n] = rec.v3;
             n++;
@@ -6218,7 +6218,7 @@ void func_003BBDA0(int unused, int src, unsigned char *hdr, char *out, int *extr
 
     k = 0;
     f_6210_BDA0(hdr, 0, 4);
-    f_6210_BDA0(out, 0, 0x68);
+    f_6210_BDA0(out, 0, 104);
     f_6210_BDA0(extra, 0, 0x1C);
     f_7218_BDA0(out);
     rec.p = src + 8;
@@ -6233,15 +6233,15 @@ void func_003BBDA0(int unused, int src, unsigned char *hdr, char *out, int *extr
     d[0x20] = 10;
     d[5] = 0;
     while (f_7388_BDA0(&rec) != 0) {
-        if (rec.id < 0x2B) {
+        if (rec.id < 43) {
             a[rec.id] = rec.v1;
             c[rec.id] = rec.v2;
-            if (rec.id == 0x14) {
+            if (rec.id == 20) {
                 ((struct O_BDA0 *)out)->a[k] = rec.v2;
                 ((struct O_BDA0 *)out)->b[k] = rec.v3;
                 k++;
             }
-        } else if ((unsigned int)(rec.id - 0x80) >= 0x2E) {
+        } else if ((unsigned int)(rec.id - 0x80) >= 46) {
             if (rec.id != 0xFE) {
                 continue;
             }
@@ -6405,7 +6405,7 @@ int func_003BC6B8(int arg0, int arg1) {
     if (r >= 0) {
         sp0 = -1;
         while (f_AA00_C6B8(r, &sp0) != 0) {
-            e = D_0050A8E8_C6B8[0].tab + sp0 * 0x8C;
+            e = D_0050A8E8_C6B8[0].tab + sp0 * 140;
             if (*(char *)(e + 0x64) == arg1)
                 return 0;
             if (*(short *)(e + 0x82) != 0) {
@@ -6589,10 +6589,10 @@ void func_003BCBA0(void) {
     } else {
         func_003BCAE8(9, 6);
     }
-    func_003BCAE8(0x6E000, 0x13);
-    func_003BCAE8((D_0050AC68_CBA0->unk1 - 1) | 0x021C0000, 0x1A);
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) func_003BCAE8(0x16, 5);
-    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) func_003BCAE8(0x17, 5);
+    func_003BCAE8(0x6E000, 19);
+    func_003BCAE8((D_0050AC68_CBA0->unk1 - 1) | 0x021C0000, 26);
+    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) func_003BCAE8(22, 5);
+    for (i = 0; i < D_0050AC68_CBA0->unk1; i++) func_003BCAE8(23, 5);
     for (i = 0; i < D_0050AC68_CBA0->unk1; i++) func_003BCAE8(0, 3);
     for (i = 0; i < D_0050AC68_CBA0->unk1; i++) func_003BCAE8(3, 2);
     for (i = 0; i < D_0050AC68_CBA0->unk1; i++) func_003BCAE8(6, 3);
@@ -6610,13 +6610,13 @@ void func_003BCBA0(void) {
         j = 0;
         switch (D_0050AC68_CBA0->unk0) {
         case 1:
-            for (; j < 14; j++) func_003BCAE8(0xD, 5);
-            for (; j < 24; j++) func_003BCAE8(0xB, 5);
+            for (; j < 14; j++) func_003BCAE8(13, 5);
+            for (; j < 24; j++) func_003BCAE8(11, 5);
             break;
         case 2:
         default:
-            for (; j < 5; j++) func_003BCAE8(0xD, 5);
-            for (; j < 14; j++) func_003BCAE8(0xB, 5);
+            for (; j < 5; j++) func_003BCAE8(13, 5);
+            for (; j < 14; j++) func_003BCAE8(11, 5);
             for (; j < 24; j++) func_003BCAE8(8, 5);
             break;
         }
@@ -6673,7 +6673,7 @@ void func_003BD078(int a0, signed char *out, signed char *out8) {
     if (max < 4.0f) {
         idx = D_0044DD38_D078[(int)max];
     } else {
-        n = (int)((float)*(int *)&max * 6.524646209982166e-07f) - 0x2B8;
+        n = (int)((float)*(int *)&max * 6.524646209982166e-07f) - 696;
         idx = n + 1;
         if (max < (float)D_0044C760_D078[n]) {
             idx = n;
@@ -6768,7 +6768,7 @@ void func_003BD220(unsigned int a0, int a1, unsigned int a2) {
         if (b) {
             if (D_0050AC68_D220->f04 == 0xE0) {
                 fF4C0_D220((int)D_0050AC6C_D220->fA20 + i * 0x200, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
-            } else if (D_0050AC68_D220->f04 == 0x160) {
+            } else if (D_0050AC68_D220->f04 == 352) {
                 fF5A0_D220((int)D_0050AC6C_D220->fA20 + i * 0x200, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
             } else {
                 fF6B0_D220((int)D_0050AC6C_D220->fA20 + i * 0x200, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
@@ -6777,7 +6777,7 @@ void func_003BD220(unsigned int a0, int a1, unsigned int a2) {
             fF440_D220(a0, (int)D_0050AC6C_D220->fA20 + D_0050AC68_D220->f04 * 4, 0x80);
             if (D_0050AC68_D220->f04 == 0xE0) {
                 fF4C0_D220((int)D_0050AC6C_D220->fA20, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
-            } else if (D_0050AC68_D220->f04 == 0x160) {
+            } else if (D_0050AC68_D220->f04 == 352) {
                 fF5A0_D220((int)D_0050AC6C_D220->fA20, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
             } else {
                 fF6B0_D220((int)D_0050AC6C_D220->fA20, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
@@ -6856,7 +6856,7 @@ void func_003BD5B8(int ch) {
         if (x < 4.0f) {
             idx = D_0044DD38_D5B8[(int)x];
         } else {
-            n = (int)((float)*(int *)&x * 6.5246462099821656e-07f) - 0x2B8;
+            n = (int)((float)*(int *)&x * 6.5246462099821656e-07f) - 696;
             idx = n + 1;
             if (x < (float)D_0044C760_D5B8[n]) {
                 idx = n;
@@ -6864,7 +6864,7 @@ void func_003BD5B8(int ch) {
         }
         blk->sf[i] = idx;
     }
-    out = D_0050AC68_D5B8->out + (ch * 0xDC + 0xEA);
+    out = D_0050AC68_D5B8->out + (ch * 220 + 234);
     q = D_0050AC6C_D5B8->q;
     for (i = 0; i < 14; i++) {
         f0564_D5B8((char *)D_0050AC6C_D5B8 + i * 0x40, q, 1.0f / (float)D_0044C760_D5B8[sf[i]]);
@@ -6930,7 +6930,7 @@ void func_003BD9C0(void) {
     void *var_6;
 
     var_7 = 0;
-    var_6 = (*(int *)((char*)(D_0050AC68) + (8))) + 0x8D;
+    var_6 = (*(int *)((char*)(D_0050AC68) + (8))) + 141;
     if ((*(unsigned char *)((char*)(D_0050AC68) + (1))) != 0) {
         var_8 = 4;
         do {
@@ -7038,7 +7038,7 @@ void func_003BDE08(int ch) {
         if (x < 4.0f) {
             idx = D_0044DD38_DE08[(int)x];
         } else {
-            n = (int)((float)*(int *)&x * 6.5246462099821656e-07f) - 0x2B8;
+            n = (int)((float)*(int *)&x * 6.5246462099821656e-07f) - 696;
             idx = n + 1;
             if (x < (float)D_0044C760_DE08[n]) {
                 idx = n;
@@ -7046,7 +7046,7 @@ void func_003BDE08(int ch) {
         }
         blk->sf[i] = idx;
     }
-    out = D_0050AC68_DE08->out + (ch * 0xAC + 0x11C);
+    out = D_0050AC68_DE08->out + (ch * 172 + 284);
     q = D_0050AC6C_DE08->q;
     for (i = 0; i < 5; i++) {
         f0564_DE08((char *)D_0050AC6C_DE08 + i * 0x40, q, 1.0f / (float)D_0044C760_DE08[sf[i]]);
@@ -7229,14 +7229,14 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BECA0);
 int func_003BECA0(int a, int b, int *o1, int *o2) {
     int w, m;
     if (b < 0) return -2;
-    if (b < 0x22) w = 0xE0;
-    else if (b < 0x43) w = 0x160;
-    else if (b < 0x65) w = 0x1E0;
+    if (b < 34) w = 0xE0;
+    else if (b < 67) w = 352;
+    else if (b < 101) w = 0x1E0;
     else return -2;
     if (a == 1) m = 4;
     else if (a == 2) m = 5;
     else return -1;
-    *o1 = (w * 4 + 0x3C) * m + 0xA8;
+    *o1 = (w * 4 + 0x3C) * m + 168;
     *o2 = (w + (w + 0x200)) * 4 + 0xC00;
     return 0;
 }
@@ -7262,11 +7262,11 @@ int func_003BED30(int mode, int rate, char *buf) {
     if (rate < 0) {
         return -2;
     }
-    if (rate < 0x22) {
+    if (rate < 34) {
         D_0050AC68_ED30->f04 = 0xE0;
-    } else if (rate < 0x43) {
-        D_0050AC68_ED30->f04 = 0x160;
-    } else if (rate < 0x65) {
+    } else if (rate < 67) {
+        D_0050AC68_ED30->f04 = 352;
+    } else if (rate < 101) {
         D_0050AC68_ED30->f04 = 0x1E0;
     } else {
         return -2;
@@ -7385,7 +7385,7 @@ int func_003BF0F0(int *data, int key, char *buf) {
         if (D_0050AC68_F0F0->n4 == 0xE0) {
             f_C968_F0F0(D_0044CB00_F0F0, buf, 0x40, 0);
             buf += 0x400;
-        } else if (D_0050AC68_F0F0->n4 == 0x160) {
+        } else if (D_0050AC68_F0F0->n4 == 352) {
             f_C968_F0F0(D_0044CF00_F0F0, buf, 0x60, 0);
             buf += 0x600;
         } else {
@@ -7399,12 +7399,12 @@ int func_003BF0F0(int *data, int key, char *buf) {
         D_0050AC6C_F0F0->pA30 = buf + 0x30;
         D_0050AC6C_F0F0->pA34 = buf + 0x60;
         D_0050AC6C_F0F0->pA38 = buf + 0xC0;
-        f_C968_F0F0(D_0044C980_F0F0, buf, 0x12, 0x10000);
+        f_C968_F0F0(D_0044C980_F0F0, buf, 18, 0x10000);
     } else {
         D_0050AC6C_F0F0->pA20 = buf + 0xA40;
         if (D_0050AC68_F0F0->n4 == 0xE0) {
             D_0050AC6C_F0F0->pA24 = D_0044CB00_F0F0;
-        } else if (D_0050AC68_F0F0->n4 == 0x160) {
+        } else if (D_0050AC68_F0F0->n4 == 352) {
             D_0050AC6C_F0F0->pA24 = D_0044CF00_F0F0;
         } else if (D_0050AC68_F0F0->n4 == 0x1E0) {
             D_0050AC6C_F0F0->pA24 = D_0044D500_F0F0;
@@ -9510,7 +9510,7 @@ void func_003C08F8(void* buf)
 "
         "lqc2       $vf5, 0x40($8)
 "
-        "lqc2       $vf6, 0x50($8)
+        "lqc2       $vf6, 80($8)
 "
         ".set pop
 "
@@ -9531,17 +9531,17 @@ void func_003C08F8(void* buf)
 "
         "lqc2       $vf9, 0x80($8)
 "
-        "lqc2       $vf10, 0x90($8)
+        "lqc2       $vf10, 144($8)
 "
-        "lqc2       $vf11, 0xA0($8)
+        "lqc2       $vf11, 160($8)
 "
-        "lqc2       $vf12, 0xB0($8)
+        "lqc2       $vf12, 176($8)
 "
-        "lw         $9, 0x204($8)
+        "lw         $9, 516($8)
 "
         "lqc2       $vf13, 0xC0($8)
 "
-        "lqc2       $vf14, 0xD0($8)
+        "lqc2       $vf14, 208($8)
 "
         "ctc2.ni    $9, $vi16
 "
@@ -9551,31 +9551,31 @@ void func_003C08F8(void* buf)
 "
         "lqc2       $vf17, 0x100($8)
 "
-        "lqc2       $vf18, 0x110($8)
+        "lqc2       $vf18, 272($8)
 "
-        "lqc2       $vf19, 0x120($8)
+        "lqc2       $vf19, 288($8)
 "
-        "lqc2       $vf20, 0x130($8)
+        "lqc2       $vf20, 304($8)
 "
-        "lqc2       $vf21, 0x140($8)
+        "lqc2       $vf21, 320($8)
 "
-        "lqc2       $vf22, 0x150($8)
+        "lqc2       $vf22, 336($8)
 "
-        "lqc2       $vf23, 0x160($8)
+        "lqc2       $vf23, 352($8)
 "
-        "lqc2       $vf24, 0x170($8)
+        "lqc2       $vf24, 368($8)
 "
         "lqc2       $vf25, 0x180($8)
 "
-        "lqc2       $vf26, 0x190($8)
+        "lqc2       $vf26, 400($8)
 "
-        "lqc2       $vf27, 0x1A0($8)
+        "lqc2       $vf27, 416($8)
 "
-        "lqc2       $vf28, 0x1B0($8)
+        "lqc2       $vf28, 432($8)
 "
         "lqc2       $vf29, 0x1C0($8)
 "
-        "lqc2       $vf30, 0x1D0($8)
+        "lqc2       $vf30, 464($8)
 "
         "lqc2       $vf31, 0x1E0($8)
 "
@@ -9873,52 +9873,52 @@ extern struct S_0C90 D_0050A8E8_0C90 __asm__("D_0050A8E8");
 extern int D_0044DD3C_0C90[] __asm__("D_0044DD3C");
 int func_003C0C90(void) {
     D_0050A8E8_0C90.fC = 0;
-    D_0050A8E8_0C90.f0 = 0x5DC0;
+    D_0050A8E8_0C90.f0 = 24000;
     D_0050A8E8_0C90.f6 = 0x20;
-    D_0050A8E8_0C90.f2 = 0xBB80;
+    D_0050A8E8_0C90.f2 = 48000;
     D_0050A8E8_0C90.f7 = 0x10;
     D_0050A8E8_0C90.f5 = 5;
     D_0050A8E8_0C90.f4 = 1;
     D_0050A8E8_0C90.f49 = 1;
     D_0050A8E8_0C90.f8 = 0x30;
-    D_0050A8E8_0C90.f14 = 0x28;
+    D_0050A8E8_0C90.f14 = 40;
     D_0050A8E8_0C90.f13 = 6;
     D_0050A8E8_0C90.f3E = 0;
     D_0050A8E8_0C90.f2E = 8;
-    D_0050A8E8_0C90.f1A = 0x48;
-    D_0050A8E8_0C90.f16 = 0x24;
-    D_0050A8E8_0C90.f1C = 0x44;
-    D_0050A8E8_0C90.f18 = 0x120;
+    D_0050A8E8_0C90.f1A = 72;
+    D_0050A8E8_0C90.f16 = 36;
+    D_0050A8E8_0C90.f1C = 68;
+    D_0050A8E8_0C90.f18 = 288;
     D_0050A8E8_0C90.f2F = 8;
-    D_0050A8E8_0C90.f4E = 0x28;
-    D_0050A8E8_0C90.f50 = 0x24;
-    D_0050A8E8_0C90.f2A = 0xBB80;
-    D_0050A8E8_0C90.f1E = 0x140;
+    D_0050A8E8_0C90.f4E = 40;
+    D_0050A8E8_0C90.f50 = 36;
+    D_0050A8E8_0C90.f2A = 48000;
+    D_0050A8E8_0C90.f1E = 320;
     D_0050A8E8_0C90.f4C = 3;
-    D_0050A8E8_0C90.f52 = 0x120;
+    D_0050A8E8_0C90.f52 = 288;
     D_0050A8E8_0C90.f30 = 0x30;
     D_0050A8E8_0C90.f46 = 8;
-    D_0050A8E8_0C90.f2C = 0xBB80;
+    D_0050A8E8_0C90.f2C = 48000;
     D_0050A8E8_0C90.f47 = 2;
     D_0050A8E8_0C90.f42 = 0;
-    D_0050A8E8_0C90.f40 = 0x19;
+    D_0050A8E8_0C90.f40 = 25;
     D_0050A8E8_0C90.f3F = 1;
     D_0050A8E8_0C90.f6C = D_0044DD3C_0C90[0];
-    D_0050A8E8_0C90.f41 = 0x19;
+    D_0050A8E8_0C90.f41 = 25;
     D_0050A8E8_0C90.f78 = 0;
     D_0050A8E8_0C90.f84 = 0x4000;
     D_0050A8E8_0C90.f86 = 0xC000;
-    D_0050A8E8_0C90.f90 = 0x2AAA;
+    D_0050A8E8_0C90.f90 = 10922;
     D_0050A8E8_0C90.f92 = 0x8000;
-    D_0050A8E8_0C90.f94 = 0xD555;
+    D_0050A8E8_0C90.f94 = 54613;
     D_0050A8E8_0C90.f9C = 0x2000;
     D_0050A8E8_0C90.f9E = 0x6000;
-    D_0050A8E8_0C90.fA0 = 0xA000;
+    D_0050A8E8_0C90.fA0 = 40960;
     D_0050A8E8_0C90.fA2 = 0xE000;
     D_0050A8E8_0C90.fA8 = 0;
     D_0050A8E8_0C90.fAA = 0x2000;
     D_0050A8E8_0C90.fAC = 0x6000;
-    D_0050A8E8_0C90.fAE = 0xA000;
+    D_0050A8E8_0C90.fAE = 40960;
     D_0050A8E8_0C90.fB0 = 0xE000;
     return 0;
 }
@@ -10232,7 +10232,7 @@ void func_003C1638(void) {
     int i;
 
     D_0050AD00_1638.buf = (char *)((int)D_00512B80_1638 | 0x20000000);
-    memset_1638(D_0050AD00_1638.buf, 0, 0x2C00);
+    memset_1638(D_0050AD00_1638.buf, 0, 11264);
     len = rate = (D_0050A8E8_1638.rate << 9) / 48000;
     D_0050AD00_1638.pos = 0;
     *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 0;
@@ -10244,8 +10244,8 @@ void func_003C1638(void) {
     p = (int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
     D_0050AD00_1638.pos += 4;
     D_0050AD00_1638.cb0 = D_0050AD00_1638.buf + D_0050AD00_1638.pos;
-    *p = 0x2A0;
-    D_0050AD00_1638.pos += 0x2A0;
+    *p = 672;
+    D_0050AD00_1638.pos += 672;
     while (D_0050AD00_1638.pos & 0xF) {
         D_0050AD00_1638.pos++;
         (*p)++;
@@ -10473,10 +10473,10 @@ void func_003C19A8(void) {
         if (D_0050AD00_19A8.f1AAD == 0) continue;
         D_0044C46C_19A8();
         if (D_0050A8E8.f328 != 0) D_0050A8E8.f328();
-        func_003B5540_19A8(0x5E);
+        func_003B5540_19A8(94);
         if (D_0050AD00_19A8.f1AA8 < 0) D_0050A8E8.f1C0++;
         func_003B54E0_19A8();
-        func_003C51E8(D_0050AD00_19A8.f000 + 0x800, (char *)&D_0050AD00_19A8 + 0xA40, 0x240);
+        func_003C51E8(D_0050AD00_19A8.f000 + 0x800, (char *)&D_0050AD00_19A8 + 0xA40, 576);
         func_003C1298_19A8();
         func_003C0858_19A8(D_0050C910);
         if (D_0050AD00_19A8.f1AAE != 0) func_003C09B8_19A8();
@@ -10716,12 +10716,12 @@ int func_003C1B80(void) {
             D_0050AD00_1B80.f1AE4 = base + 0x400;
             D_0050AD00_1B80.f1AE8 = base + 0xC00;
             D_0050AD00_1B80.f1AEC = base + 0x800;
-            D_0050AD00_1B80.f1AF0 = base + 0x1400;
+            D_0050AD00_1B80.f1AF0 = base + 5120;
         }
     }
     func_003C36C8_1B80(0, 8);
     D_0050AD00_1B80.fCB0->f13 = D_0050A8E8_1B80.f41;
-    D_0050AD00_1B80.f1A9A = 0x141;
+    D_0050AD00_1B80.f1A9A = 321;
     D_0050AD00_1B80.f1A9C = 0x8000;
     func_003B58D8_1B80();
     D_0050ACB0_1B80.f4 = 1;
@@ -10814,7 +10814,7 @@ int func_003C1B80(void) {
     } else {
         D_0050ACC8_1B80.f13 = 0;
     }
-    func_003C0B10_1B80(0, &D_0050ACC8_1B80, 0x14);
+    func_003C0B10_1B80(0, &D_0050ACC8_1B80, 20);
     D_0050AD00_1B80.f1AAD = D_0044DD40_1B80 = 1;
     func_003C7480_1B80();
     return 0;
@@ -11283,7 +11283,7 @@ extern struct G_3178 D_0050A8E8_3178 __asm__("D_0050A8E8");
 extern void func_003C8D00_3178(int, float) __asm__("func_003C8D00");
 
 void func_003C3178(int idx, int a) {
-    char *e = D_0050A8E8_3178.f1F0 + idx * 0x8C;
+    char *e = D_0050A8E8_3178.f1F0 + idx * 140;
     int i;
     short *p;
     float s;
@@ -11436,7 +11436,7 @@ extern int D_0050ACE0_3300[] __asm__("D_0050ACE0");
 extern int CreateSema_3300(int *) __asm__("CreateSema");
 
 void func_003C3300(void) {
-    D_0050ACE0_3300[1] = 0x14;
+    D_0050ACE0_3300[1] = 20;
     D_0050AD00.f1B14 = -1;
     D_0050ACE0_3300[2] = 1;
     D_0050AD00.f1B18 = 0;
@@ -12361,10 +12361,10 @@ extern struct sAD00 D_0050AD00;
 
 int func_003C4E50(int a, int b) {
     if (a == -1) {
-        D_0050AD00.f1A9A = 0x141;
+        D_0050AD00.f1A9A = 321;
     } else {
         a = (a + 0x3F) >> 6;
-        if (a < 0x141) return -8;
+        if (a < 321) return -8;
         D_0050AD00.f1A9A = a;
     }
     if (b == -1) {
@@ -12405,7 +12405,7 @@ int f_4EC8(int *out) {
             seg = &D_0050AD00_4EC8.segs[i];
             if (i == 0) {
                 start = seg->a;
-                len = seg->a - 0x141;
+                len = seg->a - 321;
                 func_003C4AF8(&start, &len);
                 if (best < len) {
                     best = len;
@@ -13180,24 +13180,24 @@ int func_003C5C30(int arg0) {
     func_003B4DD8(&info);
     info.n = 0;
     if (D_0044E1C4 == 8) {
-        info.list[0] = 0x44;
+        info.list[0] = 68;
         info.n = 1;
     }
-    info.list[info.n] = 0x24;
+    info.list[info.n] = 36;
     info.n += 1;
     if (info.b2F != 0) {
         if (D_0044E1C4 == 8) {
-            info.list[info.n] = 0x140;
+            info.list[info.n] = 320;
             info.n += 1;
         }
-        info.list[info.n] = 0x120;
+        info.list[info.n] = 288;
         info.n += 1;
     }
     if (D_0044E1C4 == 8) {
-        info.list[info.n] = 0x48;
+        info.list[info.n] = 72;
         info.n += 1;
     }
-    info.list[info.n] = 0x28;
+    info.list[info.n] = 40;
     info.f49 = 1;
     info.f48 = 0;
     info.n += 1;
@@ -13220,7 +13220,7 @@ int func_003C5C30(int arg0) {
     }
     ia = info.w2A;
     t = ia & 0xFFFF;
-    if (t != info.w2C && (t != 0x8CA0 || info.w2C != 0x5DC0)) {
+    if (t != info.w2C && (t != 36000 || info.w2C != 24000)) {
         info.w2C = ia;
     }
     func_003B4FC0_i(&info);
@@ -13466,7 +13466,7 @@ int func_003C6240_6240(void) {
     int temp_3;
 
     temp_3 = (*(int *)((char*)(D_0050AB1C_6240[0]) + (8)));
-    return (int) ((temp_3 - (*(int *)((char*)(D_0050AB1C_6240[0]) + (0x10)))) * 0x64) / temp_3;
+    return (int) ((temp_3 - (*(int *)((char*)(D_0050AB1C_6240[0]) + (0x10)))) * 100) / temp_3;
 }
 #endif
 
@@ -13653,7 +13653,7 @@ void *func_003C6540(char *bank, int patchNum) {
     if (temp_3 == 0) {
         return 0;
     }
-    return bank + ((patchNum << 2) + 0x14) + temp_3;
+    return bank + ((patchNum << 2) + 20) + temp_3;
 }
 #endif
 
@@ -13684,7 +13684,7 @@ int func_003C6580(int a, int n) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C65E0);
 #ifdef SKIP_ASM
 int func_003C65E0(int maxPackets) {
-    return (maxPackets << 5) + 0x9C;
+    return (maxPackets << 5) + 156;
 }
 #endif
 
@@ -13782,7 +13782,7 @@ found:
     pmem += func_003CE198();
     memsize -= func_003CE198();
     ppchan = (struct s7B8Queue *)pmem;
-    ppchan->f40 = (memsize - 0x9C) >> 5;
+    ppchan->f40 = (memsize - 156) >> 5;
     ppchan->f50 = (int)pplatformmem;
     ppchan->f54 = preleasefunc;
     ppchan->f58 = pframesfunc;
@@ -13883,7 +13883,7 @@ int func_003C6760_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSAMPL
             break;
         }
         f_0C18_6760(rendermode, &minvoicerange, &maxvoicerange);
-        voice = f_A0B0_6760(voicesneeded, 0x65, &shandle, minvoicerange, maxvoicerange);
+        voice = f_A0B0_6760(voicesneeded, 101, &shandle, minvoicerange, maxvoicerange);
         if (voice < 0) {
             ppchan->f00 = -9;
         } else {
@@ -14246,7 +14246,7 @@ int func_003C7138(void) {
         setVoice = -1;
         sndGlobals = D_A8E8_7138;
         while (fAA00_7138(voice, &setVoice) != 0) {
-            char *chanPub = *(char **)(sndGlobals + 0x1F0) + setVoice * 0x8C;
+            char *chanPub = *(char **)(sndGlobals + 0x1F0) + setVoice * 140;
             signed char nextSegment = *(signed char *)(chanPub + 0x5E);
             if (nextSegment < 0) {
                 f2440_7138(setVoice);
@@ -14359,7 +14359,7 @@ int func_003C7388(struct S_7388 *s) {
         return 0;
     }
     s->p = r + 1;
-    if (cur == 0xFD) {
+    if (cur == 253) {
         return 1;
     }
     if (cur == 0xFE) {
@@ -14610,13 +14610,13 @@ void func_003C7D00(struct Cfg_7D00 *cfg) {
     D_00515D24_7D00 = D_0050A8E8_7D00.size;
     pool = D_0050A8E8_7D00.pool;
     for (i = 0; i < 2; i++) {
-        if (D_00515D24_7D00 >= 0x2058) {
-            D_00515D24_7D00 -= 0x2058;
+        if (D_00515D24_7D00 >= 8280) {
+            D_00515D24_7D00 -= 8280;
             D_00515B40_7D00.a1[i] = pool;
             D_00515B40_7D00.a2[i] = pool;
             pool += 0x2058;
         } else {
-            D_00515B40_7D00.a1[i] = f_5C60_7D00(0x2058);
+            D_00515B40_7D00.a1[i] = f_5C60_7D00(8280);
             D_00515B40_7D00.a2[i] = D_00515B40_7D00.a1[i];
         }
         while ((int)D_00515B40_7D00.a2[i] & 0x3F) {
@@ -14624,13 +14624,13 @@ void func_003C7D00(struct Cfg_7D00 *cfg) {
         }
     }
     for (i = 0; i < D_00515B40_7D00.cfg.n5; i++) {
-        if (D_00515D24_7D00 >= 0x840) {
-            D_00515D24_7D00 -= 0x840;
+        if (D_00515D24_7D00 >= 2112) {
+            D_00515D24_7D00 -= 2112;
             D_00515B40_7D00.b1[i] = pool;
             D_00515B40_7D00.b2[i] = pool;
             pool += 0x840;
         } else {
-            D_00515B40_7D00.b1[i] = f_5C60_7D00(0x840);
+            D_00515B40_7D00.b1[i] = f_5C60_7D00(2112);
             D_00515B40_7D00.b2[i] = D_00515B40_7D00.b1[i];
         }
         while ((int)D_00515B40_7D00.b2[i] & 0x3F) {
@@ -14816,9 +14816,9 @@ void func_003C8158(int id, int fmt, int ch, int a, int b, int strm, int c, int d
         if (ch != 0) {
             id = -1;
         }
-        ent->strm = f_5C60_8158(0x1828);
+        ent->strm = f_5C60_8158(6184);
         ent->strm->x4 = 0;
-        ent->strm->x18 = 0xC8;
+        ent->strm->x18 = 200;
         ent->strm->x1A = prio;
         f_B280_8158(ent->strm, strm, id);
         f_8F48_8158(&ent->x40, ent->strm);
@@ -15101,7 +15101,7 @@ void func_003C8968(int *src, int len) {
         buf[i] = src[i];
     }
     while (len > 0) {
-        func_003C85D0_8968(buf, len < 0x201 ? len : 0x200);
+        func_003C85D0_8968(buf, len < 513 ? len : 0x200);
         for (i = 0; i < D_00515B40_8968[0].cnt; i++) {
             buf[i] += D_00515B40_8968[0].add;
         }
@@ -15221,9 +15221,9 @@ void func_003C8A88(int idx, int n) {
     if (e->f50 == 0) {
         int big;
         e->f50 = func_003B5C60_8A88(0x38);
-        big = D_00515B40_8A88.f0E >= 0x32;
+        big = D_00515B40_8A88.f0E >= 50;
         e->f50->f04 = 0;
-        e->f50->f18 = 0xA0;
+        e->f50->f18 = 160;
         e->f50->f1A = 0;
         func_003CBB28_8A88(e->f50, D_0050AA62, big);
         func_003C8F48_8A88(&e->f40, e->f50);
@@ -15269,7 +15269,7 @@ void func_003C8B80(int arg0, int arg1) {
     struct E_8B80 *p = D_00515D1C_8B80[0] + arg0;
     if (arg1 > 0) {
         if (p->q == 0) {
-            struct Q_8B80 *n = (struct Q_8B80 *)f_5C60_8B80(0x50);
+            struct Q_8B80 *n = (struct Q_8B80 *)f_5C60_8B80(80);
             p->q = n;
             n->w4 = 0;
             p->q->h18 = 0x78;
@@ -15308,10 +15308,10 @@ void func_003C8C30(int arg0, int arg1) {
     e = D_00515D1C_8C30[0] + arg0 * 0x60;
     if (arg1 > 0) {
         if (*(char**)(e + 0x5C) == 0) {
-            char *t2 = func_003B5C60_8C30(0x120);
+            char *t2 = func_003B5C60_8C30(288);
             *(char**)(e + 0x5C) = t2;
             *(int*)(t2 + 4) = 0;
-            *(short*)(*(char**)(e + 0x5C) + 0x18) = 0x50;
+            *(short*)(*(char**)(e + 0x5C) + 0x18) = 80;
             *(signed char*)(*(char**)(e + 0x5C) + 0x1A) = 0;
             func_003CA990_8C30(*(char**)(e + 0x5C));
             func_003C8F48_8C30(e + 0x40, *(char**)(e + 0x5C));
@@ -15555,11 +15555,11 @@ extern void f_9268_c(void) __asm__("func_003C9D28");
 
 void func_003C9268(void) {
 D_00515B40_9268.p18 = f_9268_a;
-    D_00515B40_9268.i60 = 0x2C;
+    D_00515B40_9268.i60 = 44;
     D_00515B40_9268.p1c = f_9268_b;
     D_00515B40_9268.i64 = 0x30;
     D_00515B40_9268.p20 = f_9268_c;
-    D_00515B40_9268.i68 = 0x34;
+    D_00515B40_9268.i68 = 52;
 }
 #endif
 
@@ -15580,8 +15580,8 @@ extern void f_92B0_c(void) __asm__("func_003CA610");
 
 void func_003C92B0(void) {
 D_00515B40_92B0.p24 = f_92B0_a;
-    D_00515B40_92B0.i6c = 0x2C;
-    D_00515B40_92B0.i70 = 0x54;
+    D_00515B40_92B0.i6c = 44;
+    D_00515B40_92B0.i70 = 84;
     D_00515B40_92B0.p28 = f_92B0_b;
     D_00515B40_92B0.p2c = f_92B0_c;
     D_00515B40_92B0.i74 = 0x3C;
@@ -15605,13 +15605,13 @@ extern G_92F8 D_00515B40_5B40 __asm__("D_00515B40");
 
 void func_003C92F8(void) {
     D_00515B40_5B40.f30 = func_003C9420_9420;
-    D_00515B40_5B40.i78 = 0x2C;
+    D_00515B40_5B40.i78 = 44;
     D_00515B40_5B40.f38 = func_003C9960_9960;
     D_00515B40_5B40.i80 = 0x3C;
     D_00515B40_5B40.f34 = func_003C9618_9618;
     D_00515B40_5B40.i7C = 0x30;
 D_00515B40_5B40.f3C = func_003C9420_9420;
-    D_00515B40_5B40.i84 = 0x2C;
+    D_00515B40_5B40.i84 = 44;
     D_00515B40_5B40.f44 = func_003C9960_9960;
     D_00515B40_5B40.i8C = 0x3C;
     D_00515B40_5B40.f40 = func_003C9618_9618;
@@ -15694,7 +15694,7 @@ void func_003C9420(struct S_9420 *self, struct C_9420 *cfg) {
     self->f24 = cfg->f24;
     cfg->f28 = func_003C9358_9420;
     self->f4 = func_003C93F8_9420;
-    self->f28 = func_003CDDB8_9420(func_003CD1A8_9420(0xD68));
+    self->f28 = func_003CDDB8_9420(func_003CD1A8_9420(3432));
     t = func_003CE078_9420(self->f28);
     q = t;
     q.c = 1;
@@ -15793,7 +15793,7 @@ void func_003C9618(struct S_9618 *self, struct C_9618 *cfg) {
     self->f20 = 0;
     self->f24 = cfg->f10;
     self->f28 = cfg->f14;
-    self->f1C = func_003CDDB8_9618(func_003CD1A8_9618(0xD68));
+    self->f1C = func_003CDDB8_9618(func_003CD1A8_9618(3432));
     t = func_003CE078_9618(self->f1C);
     q = t;
     q.c = 1;
@@ -15920,7 +15920,7 @@ void func_003C9960(void *node, void *source) {
     (*(int *)((char*)(node) + (0x30))) = (*(int *)((char*)(source) + (0x24)));
     (*(int *)((char*)(node) + (0x20))) = (*(int *)((char*)(source) + (0xC)));
     (*(int **)((char*)(node) + (4))) = func_003C9938_9960;
-    (*(int *)((char*)(node) + (0x34))) = func_003CDDB8_9960(func_003CD1A8_9960(0xD68));
+    (*(int *)((char*)(node) + (0x34))) = func_003CDDB8_9960(func_003CD1A8_9960(3432));
     (*(int *)((char*)(node) + (0x28))) = 0;
 }
 #endif
@@ -16273,7 +16273,7 @@ void func_003CA028(char *node, char *source) {
     *(int *)(node + 0x20) = *(int *)(source + 0);
     *(int *)(node + 0x24) = *(int *)(source + 0xC);
     *(int *)(node + 0x28) = 0;
-    *(int *)(node + 0x1C) = func_003CCF40_A028(func_003CCEF0_A028(0xA8));
+    *(int *)(node + 0x1C) = func_003CCF40_A028(func_003CCEF0_A028(168));
     *(char **)(source + 0x28) = func_003C9FF8_A028;
     n = *(int *)(node + 0x24);
     func_003CCF60_A028(*(int *)(node + 0x1C), *(int *)(node + 0x20), n * 4, n);
@@ -16404,7 +16404,7 @@ void func_003CA388(int *self, int *source) {
     self[12] = source[9];
     self[9] = source[4];
     self[10] = source[5];
-    self[7] = func_003CCF40_A388(func_003CCEF0_A388(0xA8));
+    self[7] = func_003CCF40_A388(func_003CCEF0_A388(168));
     source[10] = (int)func_003CA358_A388;
     if (self[12] < 3) {
         self[13] = source[0];
@@ -16514,7 +16514,7 @@ void func_003CA610(void *node, void *source) {
     (*(int *)((char*)(node) + (0x24))) = (int) (*(int *)((char*)(source) + (0xC)));
     (*(int *)((char*)(node) + (0x28))) = 0;
     (*(int *)((char*)(node) + (0x34))) = 0;
-    (*(int *)((char*)(node) + (0x1C))) = func_003CCF40_A610(func_003CCEF0_A610(0xA8));
+    (*(int *)((char*)(node) + (0x1C))) = func_003CCF40_A610(func_003CCEF0_A610(168));
 }
 #endif
 
@@ -16796,7 +16796,7 @@ void func_003CAC88(char *stretcher, char **cursor, int shift) {
         if (shift > 0) {
             int shiftBytes = shift * 4;
             func_003C51E8_AC88(stretcher + 0x838, prevBlock, shiftBytes);
-            func_003CAA28_AC88(prevBlock, nextBlock, stretcher + (shiftBytes + 0x838), *(int *)(stretcher + 0x2C), shift);
+            func_003CAA28_AC88(prevBlock, nextBlock, stretcher + (shiftBytes + 2104), *(int *)(stretcher + 0x2C), shift);
             *(int *)(stretcher + 0x30) = *(int *)(stretcher + 0x30) - *(int *)(stretcher + 0x2C);
             *(int *)(stretcher + 0x38) = *(int *)(stretcher + 0x2C) + shift;
             *cursor = nextBlock;
@@ -16804,7 +16804,7 @@ void func_003CAC88(char *stretcher, char **cursor, int shift) {
             int blockLen, consumed, n;
             func_003CAA28_AC88(prevBlock, nextBlock, stretcher + 0x838, *(int *)(stretcher + 0x2C), shift);
             blockLen = *(int *)(stretcher + 0x2C);
-            func_003C51E8_AC88(stretcher + ((blockLen * 4) + 0x838), nextBlock - shift * 4, (blockLen + shift) * 4);
+            func_003C51E8_AC88(stretcher + ((blockLen * 4) + 2104), nextBlock - shift * 4, (blockLen + shift) * 4);
             n = *(int *)(stretcher + 0x2C);
             consumed = n * 2;
             *(int *)(stretcher + 0x30) = *(int *)(stretcher + 0x30) - consumed;
@@ -16834,7 +16834,7 @@ int func_003CADF0(void *stretcher, int *remaining, int *outCursor) {
     copied = temp_16_2;
     if (temp_16_2 >= temp_3) copied = temp_3;
     byteCount = copied * 4;
-    func_003C51E8_ADF0(*outCursor, stretcher + (((*(int *)((char*)(stretcher) + (0x3C))) * 4) + 0x838), byteCount);
+    func_003C51E8_ADF0(*outCursor, stretcher + (((*(int *)((char*)(stretcher) + (0x3C))) * 4) + 2104), byteCount);
     (*(int *)((char*)(stretcher) + (0x3C))) = (int) ((*(int *)((char*)(stretcher) + (0x3C))) + copied);
     (*(int *)((char*)(stretcher) + (0x38))) = (int) ((*(int *)((char*)(stretcher) + (0x38))) - copied);
     *remaining -= copied;
@@ -17057,7 +17057,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CB4A8);
 struct P { char pad[0x20]; short A[8]; short B[8]; short C[8]; };
 void func_003CB4A8(struct P* filter, int x)
 {
-    int t = (x * 0x7D00) >> 15;
+    int t = (x * 32000) >> 15;
     int b = 0x7FFF - t;
     int i;
     filter->A[0] = t - 0x8000;
@@ -17106,7 +17106,7 @@ void func_003CBB28(int *self) {
     ((short *)self)[0x24 / 2] = 0;
     ((short *)self)[0x26 / 2] = 0;
     for (i = 3; i >= 0; i--)
-        self[0xA + i] = 0;
+        self[10 + i] = 0;
 }
 #endif
 
@@ -17252,7 +17252,7 @@ void func_003CBC58(int n) {
             D_00515B40_BC58.set(n, b, D_00515B40_BC58.vals[i], 1.0f);
             done[i] = 1;
             q = (signed char *)D_0044E164_BC58[D_00515D58_BC58];
-            p = q + D_00515B40_BC58.n * 0x24 + i * 6;
+            p = q + D_00515B40_BC58.n * 36 + i * 6;
             for (j = 0; j < D_00515B40_BC58.n; j++, p++) {
                 if (*p >= 0) {
                     D_00515B40_BC58.set(n, b, D_00515B40_BC58.vals[*p], 1.0f);
@@ -17612,7 +17612,7 @@ void func_003CC938(S_C938 *decoder) {
     unsigned char swapped[2];
     unsigned int i;
 
-    if (*decoder->src == 0xEE) {
+    if (*decoder->src == 238) {
         decoder->src++;
         swapped[0] = decoder->src[1];
         swapped[1] = decoder->src[0];
@@ -18206,8 +18206,8 @@ void func_003CD2B0_impl(char *bs, int flag, float *out, int stride) {
             pos += stride;
         } else if (sym >= 2) {
             n = f_D1F8_D2B0(bs, 6) + 7;
-            if (stride * n + pos > 0x6C) {
-                n = (0x6C - pos) / stride;
+            if (stride * n + pos > 108) {
+                n = (108 - pos) / stride;
             }
             for (i = 0; i < n; i++) {
                 out[pos] = 0.0f;
@@ -18225,9 +18225,9 @@ void func_003CD2B0_impl(char *bs, int flag, float *out, int stride) {
             }
             pos += stride;
         }
-        } while (pos < 0x6C);
+        } while (pos < 108);
     } else {
-        for (i = 0; i < 0x6C; i += stride) {
+        for (i = 0; i < 108; i += stride) {
             pos = *(int *)(bs + 4) & 3;
             if (pos == 1) {
                 out[i] = -2.0f;
@@ -18252,7 +18252,7 @@ void func_003CD518(void *samples) {
     void *var_4;
 
     var_4 = samples;
-    var_2 = 0x6A;
+    var_2 = 106;
     do {
         var_2 -= 2;
         (*(float *)((char*)(var_4) + (0))) = (float) ((((*(float *)((char*)(var_4) + (-4))) + (*(float *)((char*)(var_4) + (4)))) * 0.59738594f) + (((*(float *)((char*)(var_4) + (-0xC))) + (*(float *)((char*)(var_4) + (0xC)))) * -0.11459156f) + (((*(float *)((char*)(var_4) + (-0x14))) + (*(float *)((char*)(var_4) + (0x14)))) * 0.01803268f));
@@ -18298,7 +18298,7 @@ void func_003CD690(char *arg0, int arg1, int arg2) {
     char buf[0x30];
 
     func_003CD590(arg0 + 0x114, buf);
-    func_003CE410(arg2, buf, arg0 + 0x144, arg0 + (arg1 * 4 + 0x684));
+    func_003CE410(arg2, buf, arg0 + 0x144, arg0 + (arg1 * 4 + 1668));
 }
 #endif
 
@@ -18334,7 +18334,7 @@ void func_003CD6F0(char *arg0, unsigned char *arg1, char *arg2, int arg3) {
             s->z1[i] = 0;
             s->z2[i] = 0;
         }
-        for (i = 0x143; i >= 0; i--) {
+        for (i = 323; i >= 0; i--) {
             s->z3[i] = 0;
         }
     }
@@ -18460,7 +18460,7 @@ int func_003CDDE8(char *decoder, unsigned char *data, int byteSize, int sampleCo
     *(int *)(decoder + 0xD44) = 0;
     *(unsigned char **)(decoder + 0xD48) = data;
     if (temp_8 == 1) {
-        if (*data == 0xEE) {
+        if (*data == 238) {
             *(int *)(decoder + 0xD60) = temp_8;
         } else {
             *(int *)(decoder + 0xD60) = 0;
@@ -18504,8 +18504,8 @@ int func_003CDE68(struct S_DE68 *s, char **arg1, int max) {
         s->cnt -= chunk;
         if (rem > 0) {
             func_003CD878_DE68(s);
-            s->cnt = 0x1B0;
-            chunk = 0x1B0;
+            s->cnt = 432;
+            chunk = 432;
             if (s->mode == 1) {
                 unsigned char *src = s->src;
                 unsigned char *p;
@@ -18532,7 +18532,7 @@ int func_003CDE68(struct S_DE68 *s, char **arg1, int max) {
                     }
                     s->flag = 0;
                 }
-                if (*s->p48 == 0xEE) s->flag = 1;
+                if (*s->p48 == 238) s->flag = 1;
                 s->w8 = 8;
                 s->w4 = *s->src;
                 s->src++;
@@ -19102,9 +19102,9 @@ void func_003CEBE8(char *filter, int n, int src, int dst) {
     if (*(signed char *)(filter + 0xFC) != 0) {
         float *matrix = (float *)filter;
         float coef0 = matrix[0xE0 / 4];
-        float coef1 = matrix[0xE4 / 4];
-        float coef2 = matrix[0xE8 / 4];
-        float coef3 = matrix[0xEC / 4];
+        float coef1 = matrix[228 / 4];
+        float coef2 = matrix[232 / 4];
+        float coef3 = matrix[236 / 4];
         float coef4 = matrix[0xF0 / 4];
         matrix[0] = coef0;
         matrix[5] = coef0;
@@ -20872,7 +20872,7 @@ int func_003D1F80(unsigned int mask, char *entry) {
     for (i = 0; i < 4; i++) {
         if (D_7610_1F80[i].m_b != 0 && (D_7610_1F80[i].m_a & groupMask) == groupMask) {
             int slot = D_7610_1F80[i].count;
-            if (slot >= 0x10) return -0xD;
+            if (slot >= 0x10) return -13;
             ret = 0;
             {
                 int t = f2AF370_1F80();
@@ -20914,8 +20914,8 @@ unsigned int PATHI_copyevent(void *event) {
     unsigned int cur;
     unsigned int i;
 
-    temp_6 = D_0044F420_2068[0] + 0x91C;
-    cur = D_0044F420_2068[0] + 0x11C;
+    temp_6 = D_0044F420_2068[0] + 2332;
+    cur = D_0044F420_2068[0] + 284;
     eventSlot = (unsigned int*)(D_0044F420_2068[0] + 0xDC);
     temp_9 = (((*(unsigned short*)((char*)event + 0xE)) & 0x3F) * 0x10) + 0x10;
     for (i = 0; i < 0x10; i++, eventSlot++) {
@@ -21023,7 +21023,7 @@ extern int D_0044F43C;                  /* flags */
 
 int func_003D2290(void) {
     int i, j;
-    if (D_0044F430 != 0) return -0x12;
+    if (D_0044F430 != 0) return -18;
     for (i = 0; i < 4; i++) {
         D_00517610[i].f34 = 0;
         D_00517610[i].f924 = 0;
@@ -21141,7 +21141,7 @@ int func_003D2C20(int m, int arg1) {
     ratio = 0.0f;
     max = 0.0f;
     if (D_0044F42C_2C20[0] == 0 || D_0044F430_2C20[0] != 0 || func_003D5450_2C20(-1) == 0) {
-        return -0x12;
+        return -18;
     }
     if (func_003D4BB0_2C20(m & 0xFF000000) == 0) {
         return 0;
@@ -21194,13 +21194,13 @@ int func_003D2DF8(int h, int idx, int arg2) {
 
     if (D_0044F42C_2DF8[0] != 0) {
         if (D_0044F430_2DF8[0] != 0) {
-            return -0x12;
+            return -18;
         }
         if (func_003D5450_2DF8(-1) != 0) {
             goto ok;
         }
     }
-    return -0x12;
+    return -18;
 ok:
     t = func_003D5290_2DF8(h);
     if (t != 0) {
@@ -21307,7 +21307,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D3058);
 extern int func_002AE478_3058() __asm__("func_002AE478");
 
 int func_003D3058(int n) {
-    int size = func_002AE478_3058() + 0x110;
+    int size = func_002AE478_3058() + 272;
     size += n * 0x10;
     return (size / 16) * 16 + 0x10;
 }
@@ -21359,13 +21359,13 @@ int func_003D3140_3140(int arg0, int arg1) {
     r = 0;
     if (D_0044F42C_3140[0] != 0) {
         if (D_0044F430_3140[0] != 0) {
-            return -0x12;
+            return -18;
         }
         if (func_003D5450_3140(-1) != 0) {
             goto ok;
         }
     }
-    return -0x12;
+    return -18;
 ok:
     t = func_003D5290_3140(arg0);
     if (t != 0) {
@@ -21669,7 +21669,7 @@ int func_003D3900(int id, int start, int vel) {
                 }
                 ev.f1 = (t >> 7) & 1;
                 ev.b9 = 6;
-                ev.hE = 0x25A0;
+                ev.hE = 9632;
                 ev.f7 = ((e->w8 >> 10) & 0x1F) - 1;
                 ev.b8 = -1;
                 q.p1 = ev.hE;
@@ -21865,7 +21865,7 @@ int func_003D4050(int idx) {
                 func_003D32B8_4050(((struct G_4050 *)D_0044F420_4050[0])->a[*(int *)D_0044F420_4050[0]], &buf);
                 m.b9 = 2;
                 m.w0 = h;
-                *(int *)&m.sc = buf.w18 - 0xA;
+                *(int *)&m.sc = buf.w18 - 10;
                 func_003D0B18_4050(&a, &m);
             }
             m.b9 = 4;
@@ -22392,7 +22392,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D54E8);
 extern void func_003D5128(int);
 
 void func_003D54E8(void) {
-    func_003D5128(0x42);
+    func_003D5128(66);
 }
 #endif
 

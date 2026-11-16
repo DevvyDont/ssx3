@@ -172,9 +172,9 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
 {
     unsigned short buf[100];
     char num[200];
-    void* reward = cBE_getInterface_CE758(cBE_getBE(), 0xD);
+    void* reward = cBE_getInterface_CE758(cBE_getBE(), 13);
     if (kind == 3) {
-        int money = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_CE758(cBE_getBE(), 0xB), profileIndex, characterID);
+        int money = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_CE758(cBE_getBE(), 11), profileIndex, characterID);
         int fmt = Loc_CE758(str_kT_CMNYouEarnedNum);
         sprintf2(num, str_pct_S, getDollarString_price(money));
         if (fmt != 0) {
@@ -182,7 +182,7 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
             cUIText_setUnicodeString(text, buf);
         }
     } else if (kind == 2) {
-        void* iface = cBE_getInterface_CE758(cBE_getBE(), 0xA);
+        void* iface = cBE_getInterface_CE758(cBE_getBE(), 10);
         if (idx == 0) {
             int total = cBEMissionInterface_getTotalCollectForPeak(iface, peak);
             int current = func_00153688(iface, profileIndex, characterID, peak);
@@ -244,7 +244,7 @@ extern sReq_ED90 D_0045AAD8_ED90[][4][5] __asm__("D_0045AAD8");
 
 extern "C" void func_001CED90(int arg0, int arg1, int arg2, int arg3, int arg4)
 {
-    void* r = cBE_getInterface_ED90(cBE_getBE(), 0xD);
+    void* r = cBE_getInterface_ED90(cBE_getBE(), 13);
     if (arg3 == 2)
     {
         if (arg4 == 0)
@@ -322,7 +322,7 @@ extern "C" sChallenge_1CEEA0* func_001CEEA0(sChallenge_1CEEA0* self, void* paren
     int i;
     int j;
     func_0039E2A0(self, parent);
-    self->type = 0x2F;
+    self->type = 47;
     self->vtbl = D_0046A3C8;
     self->player = player;
     self->f15 = func_001A1CD0(*self->mgr, player);
@@ -371,7 +371,7 @@ extern "C" sChallenge_1CEEA0* func_001CEEA0(sChallenge_1CEEA0* self, void* paren
     }
     sVEntry_1CEEA0* vt = *(sVEntry_1CEEA0**)(iface + 0xC);
     vt[2].fn(iface + vt[2].delta);
-    self->f54 = cBEEconInterface_getMoney(cBE_getInterface_ED90(cBE_getBE(), 0xB), self->player, self->charId);
+    self->f54 = cBEEconInterface_getMoney(cBE_getInterface_ED90(cBE_getBE(), 11), self->player, self->charId);
     return self;
 }
 #endif

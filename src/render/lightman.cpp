@@ -23,7 +23,7 @@ INCLUDE_ASM("render/lightman", cLightMan_construct__Fv);
  */
 void* cLightMan_construct()
 {
-    void* mem = cMemMan_alloc(0x14, str_LightMan, 0, 0);
+    void* mem = cMemMan_alloc(20, str_LightMan, 0, 0);
     cPSPLightMan_cPSPLightMan((cPSPLightMan*)mem);
     *(void**)mem = D_00493650;
     return mem;
@@ -929,7 +929,7 @@ extern "C" void func_0038F300(sLightBufs_F300* self, int mode)
     case 2: self->stride = 0x200; break;
     case 3: self->stride = 0x1C0; break;
     case 4: self->stride = 0x180; break;
-    case 6: self->stride = 0x140; break;
+    case 6: self->stride = 320; break;
     case 5:
     case 7:
         self->stride = 0x100;
@@ -1882,7 +1882,7 @@ extern "C" void func_00390F20()
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF22(1);
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_23 = 2;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_20 = 0;
-        ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_12 = 0x14;
+        ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_12 = 20;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF2(D_004A46AC_i);
         *(short*)((char*)((cGfx_0F20*)ps2GraphicsMan)->stateTop + 0x10) = -1;
         sHudVert_0F20 v[4];
@@ -1940,7 +1940,7 @@ extern "C" void func_003912A8(void)
     }
     *(volatile int*)0x10008030 = (int)D_0043BD00;
     *(volatile int*)0x10008020 = 0;
-    *(volatile int*)0x10008000 = 0x104;
+    *(volatile int*)0x10008000 = 260;
     while (*(volatile int*)0x10008000 & 0x100) {
     }
     FlushCache(0);
@@ -1961,7 +1961,7 @@ extern "C" void func_00391360(void)
     }
     *(volatile int*)0x10008030 = (int)D_0043CCA0;
     *(volatile int*)0x10008020 = 0;
-    *(volatile int*)0x10008000 = 0x104;
+    *(volatile int*)0x10008000 = 260;
     while (*(volatile int*)0x10008000 & 0x100) {
     }
     FlushCache(0);

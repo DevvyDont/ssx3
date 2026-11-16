@@ -33,7 +33,7 @@ void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInte
 void* cBEScoreInterface_getThis()
 {
     if (cBEScoreInterface_instance == 0) {
-        void* mem = cMemMan_alloc(0x230, str_BEScoreInt, 0, 0);
+        void* mem = cMemMan_alloc(560, str_BEScoreInt, 0, 0);
         cBEScoreInterface* scoreIface = (cBEScoreInterface*)cBEScoreInterface_cBEScoreInterface_impl(mem);
         cBEScoreInterface_instance = scoreIface;
         scoreIface->field_0x8 = 0;
@@ -213,7 +213,7 @@ extern "C" void func_00154AB8(sScore_154AB8* self, int rider, sRaceStats_154AB8*
     pc = &D_004A6CA8_154AB8[profile][charID];
     self->best[profile] = 0;
     self->rank[profile] = -1;
-    if (event == 0x16)
+    if (event == 22)
         event = 0;
     if (D_005305B0_154AB8.b48 == 0 || D_005305B0_154AB8.b48 == 5) {
         timed = 1;
@@ -298,7 +298,7 @@ extern "C" void func_00154EE8(char* self, int rider, int result, int score)
     int charID = cBELibrary_getCharacterID(rider);
     int mode = D_00535C12[0];
     int event = cBELibrary_locationDB[cBELibrary_raceDB.event].id;
-    if (event == 0x16)
+    if (event == 22)
         event = 0;
     int medal = func_00155328(self, result);
     if (mode == 4 || mode == 5)
@@ -312,7 +312,7 @@ extern "C" void func_00154EE8(char* self, int rider, int result, int score)
         if (cBELibrary_raceDB.b49 == 0 && mode != 4 && mode != 5)
             func_001E1550();
     }
-    void* reward = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* reward = cBE_getInterface_Fv(cBE_getBE(), 13);
     if (cBELibrary_raceDB.b49 != 0)
         return;
     if (cBELibrary_raceDB.b48 == 4)
@@ -434,7 +434,7 @@ extern char cBELibrary_profileLib[];
 
 extern "C" void* func_00155288(void* self, int profileIndex, int characterId)
 {
-    char* charRecord = cBELibrary_profileLib + (profileIndex * 0x9b50 + characterId * 0xf88);
+    char* charRecord = cBELibrary_profileLib + (profileIndex * 39760 + characterId * 3976);
     return charRecord + 0xde4;
 }
 #endif
@@ -459,7 +459,7 @@ struct sHL { char pad[0xBB8]; signed char lv[1]; };
 signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int riderIndex)
 {
     int charID = cBELibrary_getCharacterID(0);
-    int offset = riderIndex + charID * 0xF88;
+    int offset = riderIndex + charID * 3976;
     return ((sHL*)cBELibrary_profileLib)->lv[offset];
 }
 #endif
@@ -594,11 +594,11 @@ extern "C" void func_00155420(int rider, int statsArg, int a2, int a3)
     if ((unsigned int)profile > 2)
         return;
     int charID = cBELibrary_getCharacterID(rider);
-    char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + charID * 0xF88;
+    char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + charID * 3976;
     int event = D_0043D950_r155420[rs->event].id;
     int kind = rs->b48;
     int mode = rs->mode;
-    if (event == 0x16)
+    if (event == 22)
         event = 0;
     sRecord_155420* best = (sRecord_155420*)(rec + 0xDE4);
     int start = 0;
@@ -734,7 +734,7 @@ extern "C" int func_00155848(void* self, int rider, int a, int b)
     if ((unsigned int)profile >= 3)
         return 0;
     int c = cBELibrary_getCharacterID(rider);
-    unsigned short* stats = (unsigned short*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 0x9b50 + c * 0xf88, a, b);
+    unsigned short* stats = (unsigned short*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 39760 + c * 3976, a, b);
     if (stats == 0)
         return 0;
     return stats[1];
@@ -758,7 +758,7 @@ extern "C" int func_001558F8(void* self, int rider, int a, int b)
     if ((unsigned int)profile >= 3)
         return -1;
     int c = cBELibrary_getCharacterID(rider);
-    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 0x9b50 + c * 0xf88, a, b);
+    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 39760 + c * 3976, a, b);
     if (stats == 0)
         return -1;
     return stats[1];
@@ -781,6 +781,6 @@ extern "C" void func_001559A8(void* self, int rider, int a, int b, int c)
     if ((unsigned int)profile >= 3)
         return;
     int ch = cBELibrary_getCharacterID(rider);
-    func_00152528(cBELibrary_profileLib + profile * 0x9b50 + ch * 0xf88, a, b, c);
+    func_00152528(cBELibrary_profileLib + profile * 39760 + ch * 3976, a, b, c);
 }
 #endif

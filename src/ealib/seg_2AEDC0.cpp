@@ -110,14 +110,14 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
         *(void**)(self + 0x8) = D_00509430_ADEC8.alloc(str_AV_AudioStreamBuffer, a6, 0, 0, D_00509430_ADEC8.flags);
         *(int*)(self + 0x30) = STREAM_create(2, 2, 1, *(void**)(self + 0x4), a3);
         *(int*)(self + 0x34) = STREAM_create(2, 2, 1, *(void**)(self + 0x8), a6);
-        func_003E0AD8(*(int*)(self + 0x34), 0x98, 0x34);
-        func_003E0AD8(*(int*)(self + 0x30), 0x98, 0x34);
-        func_003E0948(*(int*)(self + 0x30), 1, 0xFF, 0x4D, 1);
+        func_003E0AD8(*(int*)(self + 0x34), 152, 52);
+        func_003E0AD8(*(int*)(self + 0x30), 152, 52);
+        func_003E0948(*(int*)(self + 0x30), 1, 0xFF, 77, 1);
         func_003E0948(*(int*)(self + 0x30), 2, 0, 0, -2);
         if (*(int*)(self + 0x1C) == 0) {
-            func_003E0948(*(int*)(self + 0x34), 1, 0xFFFF, 0x4353, 1);
+            func_003E0948(*(int*)(self + 0x34), 1, 0xFFFF, 17235, 1);
         } else {
-            func_003E0948(*(int*)(self + 0x34), 1, 0xFFFF, 0x4353, -1);
+            func_003E0948(*(int*)(self + 0x34), 1, 0xFFFF, 17235, -1);
         }
         func_003E0948(*(int*)(self + 0x34), 2, 0, 0, -2);
         int type = *(int*)(self + 0x18);
@@ -137,14 +137,14 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
         *(void**)(self + 0x8) = 0;
         *(int*)(self + 0x30) = STREAM_create(2, 3, 2, *(void**)(self + 0x4), a3);
         *(int*)(self + 0x34) = func_003E0BF8(*(int*)(self + 0x30), 2);
-        func_003E0AD8(*(int*)(self + 0x34), 0x98, 0x34);
-        func_003E0AD8(*(int*)(self + 0x30), 0x98, 0x34);
-        func_003E0948(*(int*)(self + 0x30), 1, 0xFF, 0x4D, 1);
+        func_003E0AD8(*(int*)(self + 0x34), 152, 52);
+        func_003E0AD8(*(int*)(self + 0x30), 152, 52);
+        func_003E0948(*(int*)(self + 0x30), 1, 0xFF, 77, 1);
         func_003E0948(*(int*)(self + 0x30), 3, 0, 0, -2);
         if (*(int*)(self + 0x1C) == 0) {
-            func_003E0948(*(int*)(self + 0x30), 2, 0xFFFF, 0x4353, 2);
+            func_003E0948(*(int*)(self + 0x30), 2, 0xFFFF, 17235, 2);
         } else {
-            func_003E0948(*(int*)(self + 0x30), 2, 0xFFFF, 0x4353, -1);
+            func_003E0948(*(int*)(self + 0x30), 2, 0xFFFF, 17235, -1);
         }
         int type = *(int*)(self + 0x18);
         if (type == 1) {
@@ -295,8 +295,8 @@ static inline bool wsCanAlloc_AE450(sAlloc_AE450* a)
 // PORT: 64-bit long tick counter
 extern "C" int func_003AE450(char* self, int a1, int a2)
 {
-    func_003E0AD8(*(int*)(self + 0x34), 0x97, 0x33);
-    func_003E0AD8(*(int*)(self + 0x30), 0x97, 0x33);
+    func_003E0AD8(*(int*)(self + 0x34), 151, 51);
+    func_003E0AD8(*(int*)(self + 0x30), 151, 51);
     if (*(int*)(self + 0x24) != 0) {
         int size;
         ASYNCFILE_release(*(int*)(self + 0x24), self + 0x20, &size);
@@ -311,7 +311,7 @@ extern "C" int func_003AE450(char* self, int a1, int a2)
         *(int*)(self + 0x3C) = *(int*)(self + 0x38);
     }
     if (*(int*)(self + 0x1C) == 0) {
-        char* s = (char*)func_003AED40(wsAlloc_AE450(&D_00509430_AE450, 0x14), *(int*)(self + 0x34), *(int*)(self + 0x3C));
+        char* s = (char*)func_003AED40(wsAlloc_AE450(&D_00509430_AE450, 20), *(int*)(self + 0x34), *(int*)(self + 0x3C));
         *(char**)(self + 0x0) = s;
         *(unsigned int*)(self + 0x54) = *(int*)(s + 0xC) >= 0;
     } else {
@@ -547,7 +547,7 @@ extern "C" int func_003AE9A0(func_003AE9A0_sSync* self)
             self->drift = self->drift - self->drift / 8 + (d - res);
             int av = -self->drift;
             if (av < self->drift) av = self->drift;
-            if (av > 0x108) {
+            if (av > 264) {
                 self->offset -= self->drift / 8;
                 self->drift = 0;
                 res = ms - self->offset;
@@ -899,7 +899,7 @@ extern "C" void func_003AF0C8(void* vself, unsigned int count, int a2, int a3, i
     unsigned int k;
 
     i = count - 1;
-    raw = (unsigned int*)D_00509430_F0C8.alloc(D_00495260, count * 0x34 + 0x10, 0, 0, D_00509430_F0C8.flags);
+    raw = (unsigned int*)D_00509430_F0C8.alloc(D_00495260, count * 52 + 0x10, 0, 0, D_00509430_F0C8.flags);
     arr = (char*)raw + 0x10;
     *raw = count;
     p = arr;
@@ -970,7 +970,7 @@ extern "C" void* func_003AF258_impl(void* self, unsigned int key)
     int i = hi - 1;
     if (i < 0) i = 0;
     i = (i < s->n - 1) ? i : s->n - 1;
-    return arr + i * 0x34;
+    return arr + i * 52;
 }
 #endif
 //100%
@@ -1130,9 +1130,9 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0340);
 #ifdef SKIP_ASM
 extern "C" void *func_003B0340(void *self) {
     *(int *)((char *)self + 0x00) = 0x20;
-    *(int *)((char *)self + 0x04) = 0x15E;
-    *(int *)((char *)self + 0x08) = 0x258;
-    *(int *)((char *)self + 0x0C) = 0x32;
+    *(int *)((char *)self + 0x04) = 350;
+    *(int *)((char *)self + 0x08) = 600;
+    *(int *)((char *)self + 0x0C) = 50;
     *(unsigned *)((char *)self + 0x10) = 0xFFFFFFFFu;
     *(unsigned char *)((char *)self + 0x24) = 0xFF;
     *(unsigned char *)((char *)self + 0x25) = 0xFF;
@@ -1569,8 +1569,8 @@ extern "C" void* func_003B07F8(void* self, unsigned int w, int h)
     char* img = (char*)SHAPE_create(w, h, 0x20, 0, 0, D_00509438[0], 0, 0xF0);
     *(char**)((char*)self + 0x4) = img;
     char* hdr = (char*)func_003B3D40(img);
-    hdr[4] = 0x32;
-    hdr[5] = 0x34;
+    hdr[4] = 50;
+    hdr[5] = 52;
     hdr[6] = 0x30;
     unsigned int size = ((w >> 4) * h >> 4) << 10;
     MEM_fill(func_003B07F8_data(*(char**)((char*)self + 0x4)), 0, size);
@@ -1844,7 +1844,7 @@ extern "C" int func_003B0C58(sPlayer_B0C58* self, sScript_B0C58* script, sData_B
     ld = (layer_data*)D_00509648;
     func_003B1228(data);
     func_003B13D8();
-    int mode = D_00509648[0x420 / 4];
+    int mode = D_00509648[1056 / 4];
     if (mode == 0) {
         D_00509524_s = 1;
         D_005095A0_s = 1;
@@ -1866,7 +1866,7 @@ extern "C" int func_003B0C58(sPlayer_B0C58* self, sScript_B0C58* script, sData_B
     for (int i = 0; i < n; i++) {
         int cw = self->w;
         int ch = self->h;
-        char* r = (char*)func_003B07F8(D_00509430_B0C58.alloc(D_004953E8, 0x14, 0, 0, D_00509430_B0C58.flags), cw, ch);
+        char* r = (char*)func_003B07F8(D_00509430_B0C58.alloc(D_004953E8, 20, 0, 0, D_00509430_B0C58.flags), cw, ch);
         sWSNode_B0C58* node = r ? (sWSNode_B0C58*)(r + 8) : 0;
         sWSNode_B0C58* head = &self->frames;
         sWSNode_B0C58* old = head->next;
@@ -1875,11 +1875,11 @@ extern "C" int func_003B0C58(sPlayer_B0C58* self, sScript_B0C58* script, sData_B
         node->next = old;
         node->prev = head;
     }
-    self->work = D_00509430_B0C58.alloc(str_RCMP_mpegbuff, self->w * self->h * 9 / 2 + 0x176C, 0, 0, D_00509430_B0C58.flags | 0x400);
+    self->work = D_00509430_B0C58.alloc(str_RCMP_mpegbuff, self->w * self->h * 9 / 2 + 5996, 0, 0, D_00509430_B0C58.flags | 0x400);
     self->ipuBuf = D_00509430_B0C58.alloc(str_RCMP_chunkbuff, 0x32000, 0, 0, D_00509430_B0C58.flags | 0x400);
     self->ipuBufUc = (void*)(((unsigned int)self->ipuBuf & 0x0FFFFFFF) | 0x30000000);
     func_00402708();
-    func_004027B8(self->mpeg, self->work, self->w * self->h * 9 / 2 + 0x176C);
+    func_004027B8(self->mpeg, self->work, self->w * self->h * 9 / 2 + 5996);
     func_00402C08(self->mpeg, 1, (void*)func_003B0B10, self);
     return 2;
 }
@@ -2220,13 +2220,13 @@ extern "C" int func_003B13D8(void)
     for (;;) {
         func_003B1498_noarg();
         switch ((int)func_003B13A8()) {
-        case 0x1B3:
+        case 435:
             func_003B14F0();
             break;
-        case 0x1B8:
+        case 440:
             group_of_pictures_header();
             break;
-        case 0x1B7:
+        case 439:
             return 0;
         case 0x100:
             func_003B17A8();
@@ -2296,9 +2296,9 @@ extern "C" void func_003B14F0(void)
     D_005094F8[0] = (int)func_003B1300(0xC);
     D_0050950C[0] = func_003B1300(4);
     D_00509510[0] = (int)func_003B1300(4);
-    D_00509514[0] = (int)func_003B1300(0x12);
+    D_00509514[0] = (int)func_003B1300(18);
     func_003B2360(str_sequence_header);
-    D_00509518[0] = (int)func_003B1300(0xA);
+    D_00509518[0] = (int)func_003B1300(10);
     D_0050951C[0] = func_003B1300(1);
     if ((ld->load_intra_quantizer_matrix = func_003B1300(1)) != 0) {
         for (i = 0; i < 64; i++)
@@ -2383,7 +2383,7 @@ extern "C" void func_003B2440(void);
 extern "C" void func_003B17A8(void)
 {
     *(int*)((char*)ld + 0x430) = 0;
-    D_00509554[0] = (int)func_003B1300(0xA);
+    D_00509554[0] = (int)func_003B1300(10);
     D_00509558[0] = (int)func_003B1300(3);
     D_0050955C[0] = func_003B1300(0x10);
     if (D_00509558[0] == 2 || D_00509558[0] == 3) {
@@ -2415,7 +2415,7 @@ extern "C" int func_003B1878(void)
 
     if (*(int*)((char*)ld + 0x420) != 0) {
         r = 0;
-        if (D_005094F8_B1878[0] >= 0xAF1) {
+        if (D_005094F8_B1878[0] >= 2801) {
             r = (int)func_003B1300(3);
         }
     } else {
@@ -2468,8 +2468,8 @@ extern "C" void func_003B1988(void)
 {
     unsigned int tok;
     func_003B1498_v();
-    while ((tok = func_003B1258(0x20)) == 0x1B5 || tok == 0x1B2) {
-        if (tok == 0x1B5) {
+    while ((tok = func_003B1258(0x20)) == 437 || tok == 434) {
+        if (tok == 437) {
             func_003B1340();
             switch (func_003B1300_u(4)) {
             case 1: func_003B1AB0(); break;
@@ -2542,7 +2542,7 @@ extern "C" void func_003B1AB0(void)
     D_00509508.value = D_0044C388[D_00509510[0]] * ((float)(D_00509530[0] + 1) / (float)(D_00509534[0] + 1));
     if ((D_00509520[0] >> 7) & 1) {
         if ((D_00509520[0] & 0xF) == 5) {
-            D_005094EC[0] = 0x85;
+            D_005094EC[0] = 133;
             D_005094F0[0] = 8;
         }
     } else {
@@ -2827,7 +2827,7 @@ void* func_003B2360(void* self);
 extern "C" void picture_spatial_scalable_extension(void)
 {
     *(int*)((char*)ld + 0x430) = 1;
-    D_005095F8[0] = func_003B1300(0xA);
+    D_005095F8[0] = func_003B1300(10);
     func_003B2360(str_picture_spatial_scalable_extension_first);
     D_005095FC[0] = (int)func_003B1300(0xF);
     if (D_005095FC[0] >= 0x4000) {
@@ -2920,11 +2920,11 @@ extern "C" void copyright_extension(void)
     D_00509618[0] = func_003B1300(1);
     func_003B1300(7);
     func_003B2360(str_copyright_extension_first_marker_bit);
-    D_0050961C[0] = func_003B1300(0x14);
+    D_0050961C[0] = func_003B1300(20);
     func_003B2360(str_copyright_extension_second_marker_bit);
-    D_00509620[0] = func_003B1300(0x16);
+    D_00509620[0] = func_003B1300(22);
     func_003B2360(str_copyright_extension_third_marker_bit);
-    D_00509624[0] = func_003B1300(0x16);
+    D_00509624[0] = func_003B1300(22);
 }
 #endif
 
@@ -3201,13 +3201,13 @@ extern "C" void SHAPE_createat(void* tex, int w, int height, int fmt, int clut, 
         hdr = (sTexHdr_27C8*)cursor;
         MEM_fill(cursor, 0, extra1 + 8);
         *(int*)(cursor + 4) = extra1;
-        cursor[0] = 0x6F;
+        cursor[0] = 111;
         cursor += extra1 + 8;
     }
     if (extra2 != 0) {
         hdr->next = cursor - (unsigned char*)hdr;
         MEM_fill(cursor, 0, extra2 + 0x10);
-        cursor[0] = 0x69;
+        cursor[0] = 105;
         *(short*)(cursor + 6) = 0x10;
         *(int*)(cursor + 0x10) = 0x455355;
     }

@@ -93,7 +93,7 @@ extern "C" void cBucketMan_purge(cBucketMan* self)
     }
     char* buckets = self->mBuckets;
     if (buckets != 0) {
-        char* bucket = buckets + ((int*)buckets)[-4] * 0x44;
+        char* bucket = buckets + ((int*)buckets)[-4] * 68;
         while (self->mBuckets != bucket) {
             bucket -= 0x44;
             cObjNode__cObjNode(bucket + 0x34, 2);
@@ -294,7 +294,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_first__FP10cBucketMani);
 // PORT: holds a pointer in an int (needed to match); not 64-bit safe.
 void* cBucketMan_first(cBucketMan* self, int index)
 {
-    index *= 0x44;
+    index *= 68;
     index += (int)self->mBuckets;
     void* head = *(void**)(index + 0x8);
     return (head == (void*)(index + 0x14)) ? 0 : head;
@@ -316,7 +316,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_last);
 // PORT: holds a pointer in an int (same shape as cBucketMan_first); not 64-bit safe.
 extern "C" void* cBucketMan_last(cBucketMan* self, int index)
 {
-    index *= 0x44;
+    index *= 68;
     index += (int)self->mBuckets;
     void* tail = *(void**)(index + 0x1C);
     return (tail == (void*)(index + 0x4)) ? 0 : tail;
@@ -337,7 +337,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_next__FP10cBucketManPvi);
  */
 void* cBucketMan_next(cBucketMan* self, void* node, int index)
 {
-    char* bucket = self->mBuckets + index * 0x44;
+    char* bucket = self->mBuckets + index * 68;
     void* next = *(void**)((char*)node + 0x4);
     return (next == (void*)(bucket + 0x14)) ? 0 : next;
 }
@@ -374,7 +374,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_addfirst__FP10cBucketMani);
 // PORT: holds a pointer in an int (needed to match); not 64-bit safe.
 void* cBucketMan_addfirst(cBucketMan* self, int index)
 {
-    index *= 0x44;
+    index *= 68;
     index += (int)self->mBuckets;
     void* head = *(void**)(index + 0x28);
     return (head == (void*)(index + 0x34)) ? 0 : head;

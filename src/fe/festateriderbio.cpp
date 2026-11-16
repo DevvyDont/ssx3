@@ -49,7 +49,7 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(void* self)
     func_001A0508((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
     func_0028F140(func_0028B180(), 1);
     *(int*)((char*)self + 0x50) = 1;
-    if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)((char*)self + 0x44), charID) == 0) {
+    if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44), charID) == 0) {
         *(int*)((char*)self + 0x50) = 0;
     }
 }
@@ -193,7 +193,7 @@ static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s);
 extern "C" void cFEStateRiderDetail_onPopupEvent(void* self, void* item, int msg)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
-    if (msg == 0x16) {
+    if (msg == 22) {
         if (Is_001835F8(*(int*)((char*)item + 0xC), str_131cheat_char)) {
             int cheatCharId = *(int*)((char*)item + 0x70);
             if (*(int*)((char*)item + 0x74) != 0) {
@@ -269,29 +269,29 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
     case 5: {
         int sub = *(int*)(item + 0x18);
         if (sub == 8) {
-            char* w = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, str_cKeyboardPopup, 0x100, 0), *(void**)(self + 0x10), self, 0, 0xF);
-            *(int*)(w + 0x140) = 0x37;
+            char* w = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0), *(void**)(self + 0x10), self, 0, 0xF);
+            *(int*)(w + 0x140) = 55;
             cKeyboardPopup_setMaxCharacters(w, 8);
-            cKeyboardPopup_setIncludeKey(w, 0x4B, 1, 2);
+            cKeyboardPopup_setIncludeKey(w, 75, 1, 2);
             *(int*)(w + 0x58) = 1;
             func_001CE408(w, 1);
             cKeyboardPopup_setIncludeKey(w, 0xE, 0, 2);
-            cKeyboardPopup_setIncludeKey(w, 0x27, 0, 2);
-            cKeyboardPopup_setIncludeKey(w, 0x28, 0, 2);
-            cKeyboardPopup_setIncludeKey(w, 0x34, 0, 2);
-            cKeyboardPopup_setIncludeKey(w, 0x1A, 0, 2);
-            cKeyboardPopup_setIncludeKey(w, 0x19, 0, 2);
-            cKeyboardPopup_setIncludeKey(w, 0x35, 0, 2);
+            cKeyboardPopup_setIncludeKey(w, 39, 0, 2);
+            cKeyboardPopup_setIncludeKey(w, 40, 0, 2);
+            cKeyboardPopup_setIncludeKey(w, 52, 0, 2);
+            cKeyboardPopup_setIncludeKey(w, 26, 0, 2);
+            cKeyboardPopup_setIncludeKey(w, 25, 0, 2);
+            cKeyboardPopup_setIncludeKey(w, 53, 0, 2);
             cKeyboardPopup_setIncludeKey(w, 0x40, 0, 2);
-            cKeyboardPopup_setIncludeKey(w, 0x41, 0, 2);
-            cKeyboardPopup_setIncludeKey(w, 0x42, 0, 2);
+            cKeyboardPopup_setIncludeKey(w, 65, 0, 2);
+            cKeyboardPopup_setIncludeKey(w, 66, 0, 2);
             cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, w);
             cKeyboardPopup_setInputText(w, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44)));
             func_001831D0(self, 0);
         } else if (sub == 6) {
             int cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44));
-            if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(signed char*)(self + 0x44), cid) > 0) {
-                char* w = (char*)func_00182220(cMemMan_alloc(0x1E4, str_cFEStateCheatCharSelect, 0, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), cid);
+            if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)(self + 0x44), cid) > 0) {
+                char* w = (char*)func_00182220(cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), cid);
                 *(unsigned char*)(w + 0x15) = func_001A1CD0(**(void***)(self + 0x10), *(signed char*)(self + 0x44));
                 cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, w);
                 func_001831D0(self, 0);
@@ -318,7 +318,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
         break;
     }
     case 7: {
-        char* w = (char*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
+        char* w = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
         ((sBits_3710*)(w + 0x1C))->mode = 1;
         cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, w, 0, 0);
         break;
@@ -339,7 +339,7 @@ extern "C" void* func_00183A98(void* self, int a1, int a2)
     signed char idx = a2;
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = D_0046CCC0;
-    *(int*)((char*)self + 0xC) = 0x12;
+    *(int*)((char*)self + 0xC) = 18;
     *(signed char*)((char*)self + 0x44) = idx;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
     *(int*)((char*)self + 0x4C) = 0;

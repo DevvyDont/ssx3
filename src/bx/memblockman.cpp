@@ -250,9 +250,9 @@ extern int cMemBlockMan_m_initialized;
  */
 extern "C" void cMemBlockMan_initialize(void)
 {
-    cMemBlockMan_m_container8 = func_003200E8(cMemMan_alloc(0x804, str_m_container8, 0x1000000, 0));
-    cMemBlockMan_m_container16 = func_00320120(cMemMan_alloc(0x2004, str_m_container16, 0x2000000, 0));
-    cMemBlockMan_m_container32 = func_00320158(cMemMan_alloc(0x6004, str_m_container32, 0x3000000, 0));
+    cMemBlockMan_m_container8 = func_003200E8(cMemMan_alloc(2052, str_m_container8, 0x1000000, 0));
+    cMemBlockMan_m_container16 = func_00320120(cMemMan_alloc(8196, str_m_container16, 0x2000000, 0));
+    cMemBlockMan_m_container32 = func_00320158(cMemMan_alloc(24580, str_m_container32, 0x3000000, 0));
     cMemBlockMan_m_container64 = func_00320190(cMemMan_alloc(0x32004, str_m_container64, 0x4000000, 0));
     cMemBlockMan_m_container128 = func_003201D8(cMemMan_alloc(0x25804, str_m_container128, 0x5000000, 0));
     cMemBlockMan_m_container256 = func_00320220(cMemMan_alloc(0x20004, str_m_container256, 0x6000000, 0));
@@ -317,7 +317,7 @@ extern "C" void* cMemBlockMan_alloc_impl(unsigned int size, unsigned int align)
         if (size <= 0x200)
             return func_00320448_impl(cMemBlockMan_m_container512, align);
     } else
-        size = 0x201;
+        size = 513;
     return cMemMan_internalAlloc(size, align > 7 ? align : 8, 0, 0);
 }
 #endif
@@ -792,7 +792,7 @@ extern "C" void ChangeThreadPriority(int, int);
 
 extern "C" void func_0031A6B8(void)
 {
-    ChangeThreadPriority(D_004A3ECC, 0x65);
+    ChangeThreadPriority(D_004A3ECC, 101);
 }
 #endif
 

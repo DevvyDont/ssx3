@@ -71,7 +71,7 @@ extern "C" void cWorldLightMan_initLightCache(sWLCMan* self)
         sWLCLightHdr* light = &self->hdr[i];
         light->id = 0xFFFFFFFF;
         light->f14 = 0;
-        sWLCBuf* buf = (sWLCBuf*)operator new(0xA14, str_RTLOverlapList, 0x20000000, 0);
+        sWLCBuf* buf = (sWLCBuf*)operator new(2580, str_RTLOverlapList, 0x20000000, 0);
         buf->owner = self->f00;
         buf->count = 0;
         buf->lists[0].head = 0xFFFFFFFF;

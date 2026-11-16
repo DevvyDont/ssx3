@@ -147,7 +147,7 @@ extern "C" void* func_00152758(void* self)
     char* p = (char*)cBESaveInterface_buffer;
     *(sSaveHdr_2758*)p = D_00535898;
     p += sizeof(sSaveHdr_2758);
-    func_0041605C(p, D_00535C18, 0xA28);
+    func_0041605C(p, D_00535C18, 2600);
     p += 0xA28;
     sSaveBits6_2758 bits;
     for (int i = 0; i < 6; i++) {
@@ -156,7 +156,7 @@ extern "C" void* func_00152758(void* self)
     }
     *(sSaveBits6_2758*)p = bits;
     p += sizeof(sSaveBits6_2758);
-    int crc = func_003E62D0(cBESaveInterface_buffer, size - 4, 0xFBEA);
+    int crc = func_003E62D0(cBESaveInterface_buffer, size - 4, 64490);
     __builtin_memcpy(p, &crc, 4);
     return cBESaveInterface_buffer;
 }
@@ -174,7 +174,7 @@ INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getSaveGameSize__FPv);
  */
 int cBESaveInterface_getSaveGameSize(void* self)
 {
-    return 0xCCC;
+    return 3276;
 }
 #endif
 
@@ -247,7 +247,7 @@ extern "C" void* cBESaveInterface_generateSaveProfile(void* self, int idx)
     o->v2();
     o = cBEStatInterface_getThis_2950();
     o->v2();
-    int crc = func_003E62D0(cBESaveInterface_buffer, size - 4, 0xFBEA);
+    int crc = func_003E62D0(cBESaveInterface_buffer, size - 4, 64490);
     __builtin_memcpy(p, &crc, 4);
     return cBESaveInterface_buffer;
 }
@@ -265,7 +265,7 @@ INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getSaveProfileSize);
  */
 extern "C" int cBESaveInterface_getSaveProfileSize()
 {
-    return 0x9B61;
+    return 39777;
 }
 #endif
 
@@ -288,7 +288,7 @@ extern "C" void cSSXApp_activateBEOptions(void* app);
 extern "C" int func_00152BB0(void* self, char* buf)
 {
     int size = cBESaveInterface_getSaveGameSize(self) - 4;
-    int crc = func_003E62D0(buf, size, 0xFBEA);
+    int crc = func_003E62D0(buf, size, 64490);
     int stored = 0;
     __builtin_memcpy(&stored, buf + size, 4);
     if (crc != stored) {
@@ -300,7 +300,7 @@ extern "C" int func_00152BB0(void* self, char* buf)
     o = cBEOptionInterface_getThis();
     p += sizeof(sSaveHdr_2758);
     o->onLoad();
-    func_0041605C(D_00535C18, p, 0xA28);
+    func_0041605C(D_00535C18, p, 2600);
     p += 0xA28;
     o = cBEScoreInterface_getThis();
     o->onLoad();
@@ -336,7 +336,7 @@ extern sCharFlag_2DE0 D_00535B31[];
 extern "C" int func_00152DE0(void* self, char* buf, int idx)
 {
     int size = cBESaveInterface_getSaveProfileSize() - 4;
-    int crc = func_003E62D0(buf, size, 0xFBEA);
+    int crc = func_003E62D0(buf, size, 64490);
     int stored = 0;
     __builtin_memcpy(&stored, buf + size, 4);
     if (crc != stored) {

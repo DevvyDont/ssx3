@@ -419,11 +419,11 @@ void func_004245F0(unsigned lo, unsigned hi) {
         CACHE_4248(0x10, 0, i);
         MFC0_TAGLO_4248(t);
         t = (t & 0xFFFFF000) + i;
-        if (!(t < lo) && !(hi < t)) CACHE_4248(0x14, 0, i);
+        if (!(t < lo) && !(hi < t)) CACHE_4248(20, 0, i);
         CACHE_4248(0x10, 1, i);
         MFC0_TAGLO_4248(t);
         t = (t & 0xFFFFF000) + i;
-        if (!(t < lo) && !(hi < t)) CACHE_4248(0x14, 1, i);
+        if (!(t < lo) && !(hi < t)) CACHE_4248(20, 1, i);
         SYNC_4248();
     }
 }
@@ -463,11 +463,11 @@ void func_00424730(unsigned lo, unsigned hi) {
         CACHE_4248(0x10, 0, i);
         MFC0_TAGLO_4248(t);
         t = (t & 0xFFFFF000) + i;
-        if (!(t < lo) && !(hi < t)) CACHE_4248(0x16, 0, i);
+        if (!(t < lo) && !(hi < t)) CACHE_4248(22, 0, i);
         CACHE_4248(0x10, 1, i);
         MFC0_TAGLO_4248(t);
         t = (t & 0xFFFFF000) + i;
-        if (!(t < lo) && !(hi < t)) CACHE_4248(0x16, 1, i);
+        if (!(t < lo) && !(hi < t)) CACHE_4248(22, 1, i);
         SYNC_4248();
     }
 }
@@ -705,7 +705,7 @@ int func_00424C50_r(int a0) __asm__("func_00424C50");
 int func_00424C50_r(int a0) {
     int id;
     unsigned i;
-    SYSCALL_RET_4C50(-0x2F, id);
+    SYSCALL_RET_4C50(-47, id);
     if (id != a0) return _iWakeupThread();
     if ((unsigned)id >= 0x100 || D_00455170 == 0) return -1;
     i = D_0052B3A8.idx & 0x1FF;
@@ -743,7 +743,7 @@ int func_00424D68_r(int a0) __asm__("func_00424D68");
 int func_00424D68_r(int a0) {
     int id;
     unsigned i;
-    SYSCALL_RET_4C50(-0x2F, id);
+    SYSCALL_RET_4C50(-47, id);
     if (id != a0) return _iSuspendThread();
     if ((unsigned)id >= 0x100 || D_00455170 == 0) return -1;
     i = D_0052B3A8.idx & 0x1FF;
@@ -804,7 +804,7 @@ void func_00424EA8(int cmd, int n, sTty *s) {
     case 1:
     case 2:
         if (n != 0) {
-            if ((unsigned)(s->pos + n) > 0x140)
+            if ((unsigned)(s->pos + n) > 320)
                 pf_4EA8(D_0049AB08);
             {
                 int pos = s->pos;
@@ -923,7 +923,7 @@ extern int f5260_open(int, void *, void *) __asm__("func_0042C8A0");
 int func_00425260(void) {
     struct Pkt_5260 *p;
     FlushCache(0);
-    D_0052B8D0.fd = f5260_open(0x210, &D_0052B8D0, func_00424EA8);
+    D_0052B8D0.fd = f5260_open(528, &D_0052B8D0, func_00424EA8);
     if (D_0052B8D0.fd < 0) return 0;
     D_0052B8D0.fC = 0;
     D_0052B8D0.wlen = 0;
@@ -931,9 +931,9 @@ int func_00425260(void) {
     D_0052B8D0.buf = (unsigned char *)((int)D_0052BA40 | 0x20000000);
     p = (struct Pkt_5260 *)((int)D_0052B900 | 0x20000000);
     D_0052B8D0.wp = (char *)p;
-    p->f4 = 0x210;
-    p->f6 = 0x45;
-    p->f7 = 0x48;
+    p->f4 = 528;
+    p->f6 = 69;
+    p->f7 = 72;
     p->f2 = 0;
     p->f8 = 0;
     D_0052B8D0.ring = func_00424E00(0x100);
@@ -1000,12 +1000,12 @@ int f5440(long a0) __asm__("func_00425440");
 int f5440(long bits) {
     unsigned long mantissa = bits;
     long exponent = mantissa << 1 >> 53;
-    exponent -= 0x433;
-    if (exponent < -0x35) {
+    exponent -= 1075;
+    if (exponent < -53) {
         return 0;
     }
-    if (exponent >= 0xD) {
-        return 0x270F;
+    if (exponent >= 13) {
+        return 9999;
     }
     mantissa = mantissa << 12 >> 12;
     mantissa = mantissa | 0x10000000000000UL;
@@ -1041,7 +1041,7 @@ void func_004254D0(double x) {
     int n = 0;
     if (dpcmp(x, 0.0) < 0) {
         x = dpsub(0.0, x);
-        D_00455178(0x2D);
+        D_00455178(45);
     }
     if (dpcmp(x, 0.1) < 0) {
         while (dpcmp(x, 0.1) < 0) {
@@ -1411,7 +1411,7 @@ void func_00425D38(void) {
     cmd_5D38.iopbuf = (void *)f5D38_getreg(0x80000000);
     if (cmd_5D38.iopbuf) {
         D_0052BCC0[4] = (int)D_0052BC00;
-        f5D38_send(0x80000000, D_0052BCC0, 0x14, 0, 0, 0);
+        f5D38_send(0x80000000, D_0052BCC0, 20, 0, 0, 0);
         return;
     } else {
         while (!(f5D38_getreg(4) & 0x20000))
@@ -1421,7 +1421,7 @@ void func_00425D38(void) {
         sceSifSetReg(0x80000001, (int)&cmd_5D38);
         D_0052BCC0[4] = (int)D_0052BC00;
         D_0052BCC0[3] = 0;
-        f5D38_send(0x80000002, D_0052BCC0, 0x14, 0, 0, 0);
+        f5D38_send(0x80000002, D_0052BCC0, 20, 0, 0, 0);
     }
 }
 #endif
@@ -1526,7 +1526,7 @@ int func_00426078_d(int a0, int a1, int *a2, unsigned a3, int a4, int a5, int a6
     ent[n].size = a3;
     a2[2] = a0;
     *(unsigned char *)a2 = a3;
-    ent[n].attr = 0x44;
+    ent[n].attr = 68;
     func_00426358((int)a2, a3);
     n++;
     if (a1 & 1) {
@@ -2479,7 +2479,7 @@ void func_00427590(int *a0) {
         }
         break;
     }
-    case 0xB:
+    case 11:
         *(struct W7590 *)&buf = *(struct W7590 *)(p + 0x14);
         *(struct B7590 *)buf = *(struct B7590 *)(p + 0x18);
         break;
@@ -2487,9 +2487,9 @@ void func_00427590(int *a0) {
         *(struct W7590 *)&buf = *(struct W7590 *)(p + 0x14);
         *(struct C7590 *)buf = *(struct C7590 *)(p + 0x18);
         break;
-    case 0x17:
-    case 0x19:
-    case 0x1A:
+    case 23:
+    case 25:
+    case 26:
         *(struct W7590 *)&buf = *(struct W7590 *)(p + 0x14);
         *(struct W7590 *)&len = *(struct W7590 *)(p + 0x18);
         if (len > 0x400)
@@ -2559,7 +2559,7 @@ void (*func_004279C8(void (*a0)(int), int a1))(int) {
     int r;
     void (*old)(int);
     sFioCb *p = &D_0052EE80;
-    func_00427988_a(0x1B);
+    func_00427988_a(27);
     if (D_0045520C == 0) {
         func_00427A90();
     }
@@ -2629,7 +2629,7 @@ int func_00427A90_d(void) {
         p->f4 = 0;
     SignalSema_z(D_00455218);
     D_0052D6C0[0] = (int)D_0052E380;
-    D_0052D6C0[1] = D_0052D6C0[0] + 0x440;
+    D_0052D6C0[1] = D_0052D6C0[0] + 1088;
     if (func_00426D18(&D_0052EE00, 0xFF, 0, D_0052D6C0, 8, D_0052E340, 8, 0, 0) < 0)
         return 0xFFFEFFFF;
     D_0052EE28 = *(sRpcVer *)((int)D_0052E340 | 0x20000000);
@@ -2704,7 +2704,7 @@ int func_00427D60_d(unsigned char *s, unsigned flags, ...) {
     t = func_00427498();
     if (t == 0) {
         func_004279B8();
-        return -0x13;
+        return -19;
     }
     ap = (char *)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
     mode = *(int *)ap;
@@ -2732,16 +2732,16 @@ int func_00427D60_d(unsigned char *s, unsigned flags, ...) {
     p->f0 = sem;
     p->f4 = (int)&buf[8];
     p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 0, 0, &D_0052D700.open, 0x418, D_0052E340, 4, 0, 0) < 0) {
+    if (func_00426D18(&D_0052EE00, 0, 0, &D_0052D700.open, 1048, D_0052E340, 4, 0, 0) < 0) {
         db0i(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         db0i(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     db0i(sem);
@@ -2794,17 +2794,17 @@ int func_00427FE8(int a0) {
     p->f0 = sem;
     p->f4 = (int)&buf[8];
     p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 1, 0, p, 0x14, D_0052E340, 4, 0, 0) < 0) {
+    if (func_00426D18(&D_0052EE00, 1, 0, p, 20, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     t->f4 = 0;
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -2882,14 +2882,14 @@ int func_00428168(int a0, int a1, int a2)
   {
     DeleteSema(sem);
     func_004279B8();
-    return -0xB;
+    return -11;
   }
   v = *((int *) (((int) D_0052E340) | 0x20000000));
   func_004279B8();
   if (v == 0)
   {
     DeleteSema(sem);
-    return -0xB;
+    return -11;
   }
   if (fl & 0x8000)
   {
@@ -2969,14 +2969,14 @@ int func_004283A0(int a0, int a1, int a2)
   {
     DeleteSema(sem);
     func_004279B8();
-    return -0xB;
+    return -11;
   }
   v = *((int *) (((int) D_0052E340) | 0x20000000));
   func_004279B8();
   if (v == 0)
   {
     DeleteSema(sem);
-    return -0xB;
+    return -11;
   }
   if (fl & 0x8000)
   {
@@ -3070,14 +3070,14 @@ int func_00428600(int a0, unsigned a1, int a2)
   {
     DeleteSema(sem);
     func_004279B8();
-    return -0xB;
+    return -11;
   }
   v = *((int *) (((int) D_0052E340) | 0x20000000));
   func_004279B8();
   if (v == 0)
   {
     DeleteSema(sem);
-    return -0xB;
+    return -11;
   }
   if (fl & 0x8000)
   {
@@ -3167,17 +3167,17 @@ int func_004288C0(int fd, int req, void *arg) {
         p->f0 = sem;
         p->f4 = (int)&buf[8];
         p->f8 = 4;
-        func_00426358((int)&D_0052D700.ioctl2, 0x420);
-        if (func_00426D18(&D_0052EE00, 5, 0, &D_0052D700.ioctl2, 0x420, D_0052E340, 4, 0, 0) < 0) {
+        func_00426358((int)&D_0052D700.ioctl2, 1056);
+        if (func_00426D18(&D_0052EE00, 5, 0, &D_0052D700.ioctl2, 1056, D_0052E340, 4, 0, 0) < 0) {
             DeleteSema(sem);
             func_004279B8();
-            return -0xB;
+            return -11;
         }
         v = *(int *)((int)D_0052E340 | 0x20000000);
         func_004279B8();
         if (v == 0) {
             DeleteSema(sem);
-            return -0xB;
+            return -11;
         }
         WaitSema_i(sem);
         DeleteSema(sem);
@@ -3205,7 +3205,7 @@ int func_00428C38_d(int a0, int a1, void *data, unsigned len, int a4, unsigned a
     sFioFile *t;
     sFioIoctl2Cmd *p = &D_0052D700.ioctl2;
     t = func_00427520(a0);
-    func_00427988_b(0x1A);
+    func_00427988_b(26);
     if (D_0045520C == 0) {
         func_00427A90();
     }
@@ -3215,7 +3215,7 @@ int func_00428C38_d(int a0, int a1, void *data, unsigned len, int a4, unsigned a
     }
     if (len > 0x400 || a5 > 0x400) {
         func_004279B8();
-        return -0x16;
+        return -22;
     }
     if (data == 0) {
         p->f41C = 0;
@@ -3234,17 +3234,17 @@ int func_00428C38_d(int a0, int a1, void *data, unsigned len, int a4, unsigned a
     p->f8 = 4;
     p->f414 = a4;
     p->f0 = sem;
-    func_00426358((int)&D_0052D700.ioctl2, 0x420);
-    if (func_00426D18(&D_0052EE00, 0x1A, 0, &D_0052D700.ioctl2, 0x420, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&D_0052D700.ioctl2, 1056);
+    if (func_00426D18(&D_0052EE00, 26, 0, &D_0052D700.ioctl2, 1056, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -3291,16 +3291,16 @@ int func_00428E18_d(char *s, int a1) {
     p->f4 = (int)&buf[8];
     p->f0 = sem;
     p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, a1, 0, &D_0052D700.path, n + 0xD, D_0052E340, 4, 0, 0) < 0) {
+    if (func_00426D18(&D_0052EE00, a1, 0, &D_0052D700.path, n + 13, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -3357,16 +3357,16 @@ int func_00428FE0_d(char *s, int a1) {
     p->f4 = (int)&buf[8];
     p->f0 = sem;
     p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 7, 0, &D_0052D700.mkdir, n + 0x11, D_0052E340, 4, 0, 0) < 0) {
+    if (func_00426D18(&D_0052EE00, 7, 0, &D_0052D700.mkdir, n + 17, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -3446,17 +3446,17 @@ int func_004291B0_d(char *s, char *t, char *data, int len) {
     p->f4 = (int)&buf[8];
     p->f0 = sem;
     p->f8 = 4;
-    func_00426358((int)&D_0052D700.format, 0xC10);
-    if (func_00426D18(&D_0052EE00, 0xE, 0, &D_0052D700.format, 0xC10, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&D_0052D700.format, 3088);
+    if (func_00426D18(&D_0052EE00, 0xE, 0, &D_0052D700.format, 3088, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -3535,7 +3535,7 @@ int func_00429560(int a0) {
     func_004279B8();
     p = func_00427498();
     if (p == 0) {
-        return -0x13;
+        return -19;
     }
     r = func_00428E18(a0, 9);
     if (r < 0) {
@@ -3568,7 +3568,7 @@ int func_00429628(int a0) {
     sFioFile *e;
     sFioFdCmd *p = &D_0052D700.dclose;
     e = func_00427520(a0);
-    func_00427988_b(0xA);
+    func_00427988_b(10);
     if (D_0045520C == 0) {
         func_004279B8();
         return -1;
@@ -3585,17 +3585,17 @@ int func_00429628(int a0) {
     p->f0 = sem;
     p->f4 = (int)&buf[8];
     p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 0xA, 0, p, 0x14, D_0052E340, 4, 0, 0) < 0) {
+    if (func_00426D18(&D_0052EE00, 10, 0, p, 20, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     e->f4 = 0;
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -3624,7 +3624,7 @@ int func_00429790_d(int a0, int a1) {
     sFioFile *t;
     sFioFdCmd *p = &D_0052D700.dread;
     t = func_00427520(a0);
-    func_00427988_b(0xB);
+    func_00427988_b(11);
     if (D_0045520C == 0) {
         func_004279B8();
         return -1;
@@ -3642,16 +3642,16 @@ int func_00429790_d(int a0, int a1) {
     p->f0 = sem;
     p->f4 = (int)&buf[8];
     p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 0xB, 0, p, 0x20, D_0052E340, 4, 0, 0) < 0) {
+    if (func_00426D18(&D_0052EE00, 11, 0, p, 0x20, D_0052E340, 4, 0, 0) < 0) {
         WaitSema_i(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -3701,16 +3701,16 @@ int func_004298E8(char *a0, int a1) {
     p->f4 = (int)&buf[8];
     p->f0 = sem;
     p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 0xC, 0, &D_0052D700.getstat, i + 0x11, D_0052E340, 4, 0, 0) < 0) {
+    if (func_00426D18(&D_0052EE00, 0xC, 0, &D_0052D700.getstat, i + 17, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -3736,7 +3736,7 @@ int func_00429A88_d(char *s, sFioStat *src, int a2) {
     int n;
     unsigned char c;
     sFioChstatCmd *p = &D_0052D700.chstat;
-    func_00427988_b(0xD);
+    func_00427988_b(13);
     if (D_0045520C == 0) {
         func_00427A90();
     }
@@ -3763,17 +3763,17 @@ int func_00429A88_d(char *s, sFioStat *src, int a2) {
     p->f0 = sem;
     p->f4 = (int)&buf[8];
     p->f8 = 4;
-    func_00426358((int)&D_0052D700.chstat, 0x450);
-    if (func_00426D18(&D_0052EE00, 0xD, 0, &D_0052D700.chstat, n + 0x51, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&D_0052D700.chstat, 1104);
+    if (func_00426D18(&D_0052EE00, 13, 0, &D_0052D700.chstat, n + 81, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -3798,7 +3798,7 @@ int func_00429CC8_d(char *s, char *t) {
     int v;
     int n;
     sFioPath2Cmd *p = &D_0052D700.rename;
-    func_00427988_b(0x11);
+    func_00427988_b(17);
     if (D_0045520C == 0) {
         func_00427A90();
     }
@@ -3831,17 +3831,17 @@ int func_00429CC8_d(char *s, char *t) {
     p->f4 = (int)&buf[8];
     p->f0 = sem;
     p->f8 = 4;
-    func_00426358((int)&D_0052D700.rename, 0x80C);
-    if (func_00426D18(&D_0052EE00, 0x11, 0, &D_0052D700.rename, 0x80C, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&D_0052D700.rename, 2060);
+    if (func_00426D18(&D_0052EE00, 17, 0, &D_0052D700.rename, 2060, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -3854,7 +3854,7 @@ INCLUDE_ASM("seg/seg_325220", func_00429EB8);
 #ifdef SKIP_ASM
 extern int func_00428E18(int a0, int a1);
 int func_00429EB8(int path) {
-    return func_00428E18(path, 0x12);
+    return func_00428E18(path, 18);
 }
 #endif
 
@@ -3874,7 +3874,7 @@ int func_00429ED8_d(char *s, int a1) {
     int v;
     int n;
     sFioPathArgCmd *p = &D_0052D700.sync;
-    func_00427988_b(0x13);
+    func_00427988_b(19);
     if (D_0045520C == 0) {
         func_00427A90();
     }
@@ -3898,16 +3898,16 @@ int func_00429ED8_d(char *s, int a1) {
     p->f4 = (int)&buf[8];
     p->f0 = sem;
     p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 0x13, 0, &D_0052D700.sync, 0x414, D_0052E340, 4, 0, 0) < 0) {
+    if (func_00426D18(&D_0052EE00, 19, 0, &D_0052D700.sync, 1044, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -3933,7 +3933,7 @@ int func_0042A070_d(char *s, char *t, int a2, char *data, int len) {
     int n;
     int i;
     sFioMountCmd *p = &D_0052D700.mount;
-    func_00427988_b(0x14);
+    func_00427988_b(20);
     if (D_0045520C == 0) {
         func_00427A90();
     }
@@ -3975,17 +3975,17 @@ int func_0042A070_d(char *s, char *t, int a2, char *data, int len) {
     p->f4 = (int)&buf[8];
     p->f0 = sem;
     p->f8 = 4;
-    func_00426358((int)&D_0052D700.mount, 0xC14);
-    if (func_00426D18(&D_0052EE00, 0x14, 0, &D_0052D700.mount, 0xC14, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&D_0052D700.mount, 3092);
+    if (func_00426D18(&D_0052EE00, 20, 0, &D_0052D700.mount, 3092, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -3998,7 +3998,7 @@ INCLUDE_ASM("seg/seg_325220", func_0042A2E0);
 #ifdef SKIP_ASM
 extern int func_00428E18(int a0, int a1);
 int func_0042A2E0(int path) {
-    return func_00428E18(path, 0x15);
+    return func_00428E18(path, 21);
 }
 #endif
 
@@ -4023,7 +4023,7 @@ long func_0042A300(int a0, long a1, int a2)
   unsigned fl;
   sFioLseek64Cmd *p = &D_0052D700.lseek64;
   t = func_00427520(a0);
-  func_00427988_b(0x16);
+  func_00427988_b(22);
   if (D_0045520C == 0)
   {
     func_004279B8();
@@ -4061,18 +4061,18 @@ long func_0042A300(int a0, long a1, int a2)
 
     SignalSema(D_0045521C);
   }
-  if (func_00426D18(&D_0052EE00, 0x16, 0, &D_0052D700.lseek64, 0x20, D_0052E340, 4, 0, 0) < 0)
+  if (func_00426D18(&D_0052EE00, 22, 0, &D_0052D700.lseek64, 0x20, D_0052E340, 4, 0, 0) < 0)
   {
     DeleteSema(sem);
     func_004279B8();
-    return -0xB;
+    return -11;
   }
   v = *((int *) (((int) D_0052E340) | 0x20000000));
   func_004279B8();
   if (v == 0)
   {
     DeleteSema(sem);
-    return -0xB;
+    return -11;
   }
   if (fl & 0x8000)
   {
@@ -4103,7 +4103,7 @@ int func_0042A538_d(char *s, int a1, char *data, unsigned len, int a4, unsigned 
     int n;
     unsigned i;
     sFioDevctlCmd *p = &D_0052D700.devctl;
-    func_00427988_b(0x17);
+    func_00427988_b(23);
     if (D_0045520C == 0) {
         func_00427A90();
     }
@@ -4120,7 +4120,7 @@ int func_0042A538_d(char *s, int a1, char *data, unsigned len, int a4, unsigned 
     }
     if (len > 0x400 || a5 > 0x400) {
         func_004279B8();
-        return -0x16;
+        return -22;
     }
     for (i = 0; i < len; i++) {
         p->data[i] = data[i];
@@ -4136,17 +4136,17 @@ int func_0042A538_d(char *s, int a1, char *data, unsigned len, int a4, unsigned 
     p->f8 = 4;
     p->f814 = a4;
     p->f0 = sem;
-    func_00426358((int)&D_0052D700.devctl, 0x81C);
-    if (func_00426D18(&D_0052EE00, 0x17, 0, &D_0052D700.devctl, 0x81C, D_0052E340, 4, 0, 0) < 0) {
+    func_00426358((int)&D_0052D700.devctl, 2076);
+    if (func_00426D18(&D_0052EE00, 23, 0, &D_0052D700.devctl, 2076, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -4170,7 +4170,7 @@ int func_0042A770_d(char *s, char *t) {
     int v;
     int n;
     sFioPath2Cmd *p = &D_0052D700.symlink;
-    func_00427988_b(0x11);
+    func_00427988_b(17);
     if (D_0045520C == 0) {
         func_00427A90();
     }
@@ -4203,16 +4203,16 @@ int func_0042A770_d(char *s, char *t) {
     p->f4 = (int)&buf[8];
     p->f0 = sem;
     p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 0x18, 0, &D_0052D700.symlink, 0x80C, D_0052E340, 4, 0, 0) < 0) {
+    if (func_00426D18(&D_0052EE00, 0x18, 0, &D_0052D700.symlink, 2060, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -4237,7 +4237,7 @@ int func_0042A950_d(char *s, int a1, unsigned len) {
     int v;
     int n;
     sFioPathArgCmd *p = &D_0052D700.readlink;
-    func_00427988_b(0x11);
+    func_00427988_b(17);
     if (D_0045520C == 0) {
         func_00427A90();
     }
@@ -4265,16 +4265,16 @@ int func_0042A950_d(char *s, int a1, unsigned len) {
     p->f4 = (int)&buf[8];
     p->f0 = sem;
     p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 0x19, 0, &D_0052D700.readlink, 0x80C, D_0052E340, 4, 0, 0) < 0) {
+    if (func_00426D18(&D_0052EE00, 25, 0, &D_0052D700.readlink, 2060, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
-        return -0xB;
+        return -11;
     }
     v = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
     if (v == 0) {
         DeleteSema(sem);
-        return -0xB;
+        return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
@@ -4384,7 +4384,7 @@ int func_0042AD28(char *a0, int a1) {
     }
     if (i == 0xFC) {
         D_0052EF80.name[0xFB] = 0;
-        i = 0xFB;
+        i = 251;
     }
     D_0052EF80.cmd = a1;
     D_0052EF80.name[0xFB] = 0;
@@ -4541,7 +4541,7 @@ int func_0042B230_i(int a0, int a1, sLfData *a2, int *a3) {
     }
     D_0052F080.cmd.f0 = a0;
     if (a2 != 0) {
-        if (a1 >= 0xFD) {
+        if (a1 >= 253) {
             *(sLfData *)D_0052F080.cmd.n2 = *a2;
             D_0052F080.cmd.f4 = 0xFC;
         } else {
@@ -4577,7 +4577,7 @@ int func_0042B438_i(int a0, int a1, sLfData *a2, int *a3) {
     }
     D_0052F080.cmd.f0 = a0;
     if (a2 != 0) {
-        if (a1 >= 0xFD) {
+        if (a1 >= 253) {
             *(sLfData *)D_0052F080.cmd.n2 = *a2;
             D_0052F080.cmd.f4 = 0xFC;
         } else {
@@ -4651,7 +4651,7 @@ int func_0042B770(int a0) {
         return 0xFFFEFFFC;
     }
     D_0052F080.cmd.f0 = a0;
-    if (func_00426D18(&D_0052F280, 0xA, 0, &D_0052F080, 4, &D_0052F080, 4, 0, 0) < 0) {
+    if (func_00426D18(&D_0052F280, 10, 0, &D_0052F080, 4, &D_0052F080, 4, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
     return D_0052F080.cmd.f0;
@@ -4696,7 +4696,7 @@ int func_0042B840_i(char *a0, int a1, sLfData *a2, int *a3, int a4) {
     strncpy(D_0052F080.cmd.n1, a0, 0xFC);
     D_0052F080.cmd.n1[0xFB] = 0;
     if (a2 != 0) {
-        if (a1 >= 0xFD) {
+        if (a1 >= 253) {
             *(sLfData *)D_0052F080.cmd.n2 = *a2;
             D_0052F080.cmd.f0 = 0xFC;
         } else {
@@ -4869,12 +4869,12 @@ int func_0042BDC8(char *s, int mode) {
     D_0052F2C0.size = n;
     D_0052F2C0.cid = 0x80000003;
     D_0052F2C0.dsize = 0;
-    D_0052F2C0.psize = 0x68;
+    D_0052F2C0.psize = 104;
     dma.data = (int)&D_0052F2C0;
     dma.addr = reg;
-    dma.size = 0x68;
-    dma.attr = 0x44;
-    func_00426358((int)&D_0052F2C0, 0x68);
+    dma.size = 104;
+    dma.attr = 68;
+    func_00426358((int)&D_0052F2C0, 104);
     fBDC8_setreg(4, 0x40000);
     if (sceSifSetDma(&dma, 1) != 0) {
         fBDC8_setreg(4, 0x10000);
@@ -4994,7 +4994,7 @@ void func_0042C0D8(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C120);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042C120, 0x5A)
+SYSCALL_STUB(func_0042C120, 90)
 #endif
 
 //100%
@@ -5023,7 +5023,7 @@ int *func_0042C168(int *cursor, int *end, int value) {
 //100%
 INCLUDE_ASM("seg/seg_325220", FindAddress);
 #ifdef SKIP_ASM
-SYSCALL_STUB(FindAddress, 0x83)
+SYSCALL_STUB(FindAddress, 131)
 #endif
 
 //100%
@@ -5051,16 +5051,16 @@ void func_0042C1F0(void) {
     func_0042C2F0(D_00455238[0], D_00455238[1]);
     func_0042C2F0(D_00455238[2], D_00455238[3]);
     a = FindAddress(0x80000000, 0x80080000, (void *)func_0042C168);
-    x = a - 0x20C;
+    x = a - 524;
     b = FindAddress(0x80000000, 0x80080000, (void *)func_0042C130);
-    y = b - 0x168;
+    y = b - 360;
     while (x != y) {
         if (x < y) {
             a = FindAddress(a + 4, 0x80080000, (void *)func_0042C168);
-            x = a - 0x20C;
+            x = a - 524;
         } else {
             b = FindAddress(b + 4, 0x80080000, (void *)func_0042C130);
-            y = b - 0x168;
+            y = b - 360;
         }
     }
     D_00455230 = x;
@@ -5070,7 +5070,7 @@ void func_0042C1F0(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C2F0);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042C2F0, 0x74)
+SYSCALL_STUB(func_0042C2F0, 116)
 #endif
 
 //100%
@@ -5095,13 +5095,13 @@ void func_0042C300(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C340);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042C340, 0x74)
+SYSCALL_STUB(func_0042C340, 116)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C350);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042C350, 0x5A)
+SYSCALL_STUB(func_0042C350, 90)
 #endif
 
 //100%
@@ -5121,7 +5121,7 @@ int func_0042C360(int *dst, int *src, unsigned int size) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C398);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042C398, 0x5B)
+SYSCALL_STUB(func_0042C398, 91)
 #endif
 
 //100%
@@ -5155,7 +5155,7 @@ void func_0042C410(void) {
     unsigned i;
     if (func_0042C3A8() != 0) {
         func_0042C340(D_004559F8[0].a, D_004559F8[0].b);
-        func_0042C350(0x80074000, D_00455250, 0x7A8);
+        func_0042C350(0x80074000, D_00455250, 1960);
         FlushCache(0);
         FlushCache(2);
         func_0042C340(D_004559F8[1].a, D_004559F8[1].b);
@@ -5169,7 +5169,7 @@ void func_0042C410(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C4C0);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042C4C0, 0x5A)
+SYSCALL_STUB(func_0042C4C0, 90)
 #endif
 
 //100%
@@ -5188,7 +5188,7 @@ int func_0042C4D0(unsigned char *dst, unsigned char *src, unsigned int size) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C500);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042C500, 0x74)
+SYSCALL_STUB(func_0042C500, 116)
 #endif
 
 //100%
@@ -5293,13 +5293,13 @@ void func_0042C710(int a0, int a1) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C760);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042C760, 0x74)
+SYSCALL_STUB(func_0042C760, 116)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C770);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042C770, 0x5A)
+SYSCALL_STUB(func_0042C770, 90)
 #endif
 
 //100%
@@ -5319,7 +5319,7 @@ int func_0042C780(int *dst, int *src, unsigned int size) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C7B8);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042C7B8, 0x5B)
+SYSCALL_STUB(func_0042C7B8, 91)
 #endif
 
 //100%
@@ -5337,8 +5337,8 @@ void func_0042C7C8(void) {
     int *p;
     if (!(*(volatile int *)0x10001810 & 0x100)) {
         func_0042C760(D_00456180[0], D_00456180[1]);
-        func_0042C770(0x80076000, D_00455A18, 0x740);
-        func_0042C770(0x82000, D_00456158, 0x28);
+        func_0042C770(0x80076000, D_00455A18, 1856);
+        func_0042C770(0x82000, D_00456158, 40);
         FlushCache(0);
         FlushCache(2);
         func_0042C760(D_00456180[2], D_00456180[3]);
@@ -5503,7 +5503,7 @@ unsigned func_0042CAE0(int a0, int a1) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042CB68);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042CB68, 0x5A)
+SYSCALL_STUB(func_0042CB68, 90)
 #endif
 
 //100%
@@ -5523,13 +5523,13 @@ int func_0042CB78(int *dst, int *src, unsigned int size) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042CBB0);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042CBB0, 0x5B)
+SYSCALL_STUB(func_0042CBB0, 91)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042CBC0);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042CBC0, 0x74)
+SYSCALL_STUB(func_0042CBC0, 116)
 #endif
 
 //100%
@@ -5545,7 +5545,7 @@ void func_0042CBD0(void) {
     unsigned i;
     int *p;
     func_0042CBC0(D_00456540[0], D_00456540[1]);
-    func_0042CB68(0x80075000, D_004561C0, 0x330);
+    func_0042CB68(0x80075000, D_004561C0, 816);
     FlushCache(0);
     FlushCache(2);
     func_0042CBC0(D_00456540[2], D_00456540[3]);
@@ -5562,19 +5562,19 @@ void func_0042CBD0(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", PutTLBEntry);
 #ifdef SKIP_ASM
-SYSCALL_STUB(PutTLBEntry, 0x55)
+SYSCALL_STUB(PutTLBEntry, 85)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042CCA8);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042CCA8, -0x55)
+SYSCALL_STUB(func_0042CCA8, -85)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042CCB8);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042CCB8, 0x56)
+SYSCALL_STUB(func_0042CCB8, 86)
 #endif
 
 //100%
@@ -5582,7 +5582,7 @@ INCLUDE_ASM("seg/seg_325220", func_0042CCC8);
 #ifdef SKIP_ASM
 extern int func_0042CCB8(int a0);
 int func_0042CCC8(int tlbIndex) {
-    if ((unsigned int)(tlbIndex - 13) >= 0x23)
+    if ((unsigned int)(tlbIndex - 13) >= 35)
         return -1;
     return func_0042CCB8(tlbIndex);
 }
@@ -5591,37 +5591,37 @@ int func_0042CCC8(int tlbIndex) {
 //100%
 INCLUDE_ASM("seg/seg_325220", iSetTLBEntry);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iSetTLBEntry, -0x56)
+SYSCALL_STUB(iSetTLBEntry, -86)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042CD08);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042CD08, 0x57)
+SYSCALL_STUB(func_0042CD08, 87)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", iGetTLBEntry);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iGetTLBEntry, -0x57)
+SYSCALL_STUB(iGetTLBEntry, -87)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", ProbeTLBEntry);
 #ifdef SKIP_ASM
-SYSCALL_STUB(ProbeTLBEntry, 0x58)
+SYSCALL_STUB(ProbeTLBEntry, 88)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042CD38);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042CD38, -0x58)
+SYSCALL_STUB(func_0042CD38, -88)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042CD48);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_0042CD48, 0x59)
+SYSCALL_STUB(func_0042CD48, 89)
 #endif
 
 //100%

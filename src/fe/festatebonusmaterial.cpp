@@ -65,10 +65,10 @@ INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateBonusMaterial_onWidgetMenu(void* self, int menu, unsigned int key)
 {
-    int result = 0x101;
+    int result = 257;
     if (key < 10) {
         if (key < 8) {
-            result = 0x101;
+            result = 257;
         } else {
             return 0x100;
         }
@@ -124,7 +124,7 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(void* self, void* item, unsi
     case 4:
         break;
     case 5: {
-        void* popup = func_001D22F0(cMemMan_alloc(0x280, str_cFEStateVideoPlayer, 0, 0), *(void**)((char*)self + 0x10), self,
+        void* popup = func_001D22F0(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), *(void**)((char*)self + 0x10), self,
                                 *(signed char*)((char*)self + 0x44));
         func_001D2598(popup, D_00441128[*(int*)((char*)item + 0x18)], 0);
         cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, popup);

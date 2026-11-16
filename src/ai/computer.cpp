@@ -468,10 +468,10 @@ extern "C" int cComputer_chooseRandomTweakGrab(cComputer* computer, float time)
     for (; i < 15; i++)
     {
         int anim = func_00150138(iface, riderV7_10CD20(((char*)self->mRider)), i);
-        if (anim == 0x1B6)
+        if (anim == 438)
             continue;
-        int alt = (*(int*)(((char*)self->mRider) + 0xB2C) & 1) ? func_00150198(iface, riderV7_10CD20(((char*)self->mRider)), i, *(int*)(((char*)self->mRider) + 0x2F4) >= 5) : 0x1B6;
-        if (0.0f < *(float*)(((char*)self->mRider) + 0x2F0) && alt != 0x1B6)
+        int alt = (*(int*)(((char*)self->mRider) + 0xB2C) & 1) ? func_00150198(iface, riderV7_10CD20(((char*)self->mRider)), i, *(int*)(((char*)self->mRider) + 0x2F4) >= 5) : 438;
+        if (0.0f < *(float*)(((char*)self->mRider) + 0x2F0) && alt != 438)
             continue;
         int anim2 = func_001500D8(iface, riderV7_10CD20(((char*)self->mRider)), i);
         float normalTime = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim2, 1) / spd;
@@ -543,7 +543,7 @@ extern "C" int cComputer_chooseRandomUberGrab(cComputer* computer, float time)
     for (; i < 15; i++)
     {
         int anim = func_00150198(iface, riderV7_10CF68(((char*)self->mRider)), i, *(int*)(((char*)self->mRider) + 0x2F4) >= 5);
-        if (anim == 0x1B6)
+        if (anim == 438)
             continue;
         int anim2 = func_001500D8(iface, riderV7_10CF68(((char*)self->mRider)), i);
         float normalTime = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim2, 1) / spd;
@@ -676,7 +676,7 @@ extern "C" int func_0010D1A0(sComputer_0010D1A0* self)
     } else {
         self->wrongTime = 0;
     }
-    int wrong = self->wrongTime >= 0x3D;
+    int wrong = self->wrongTime >= 61;
     if (func_0011FE98(self->rider) == 2) {
         wrong = 0;
         self->stuckTime++;
@@ -691,7 +691,7 @@ extern "C" int func_0010D1A0(sComputer_0010D1A0* self)
     } else {
         self->stuckTime++;
     }
-    int stuck = wrong || self->stuckTime >= 0xDF;
+    int stuck = wrong || self->stuckTime >= 223;
     if (func_0011FEE8(self->rider) != 8) {
         stuck = stuck && self->dir < 0;
     }
@@ -1993,7 +1993,7 @@ extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, in
     cSSXAudio_PlayGrunt(func_0028B180(), rider, 0, 0);
     func_002961F0(func_0028B180(), rider, amt);
     func_00111AA0_impl(rider->mRiderHandler, evt, evt + 0x20, surf, *(float*)(evt + 0x30));
-    cRider_setControlState_EB30(rider, 0xD);
+    cRider_setControlState_EB30(rider, 13);
     if (rider->mRailStyle == 3) {
         float ang = 1.5707963705062866f;
         cRider_rotateOrientation(rider, GetUp_EB30(rider), ang);
@@ -2019,7 +2019,7 @@ extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, in
     rider->mSlewed[8].cur = 0.0f;
     rider->mSlewed[8].rate = 0.0f;
     rider->mPressType = 0;
-    char buf[0x50];
+    char buf[80];
     cRiderAnimBase_getAIAnimFrame(buf, rider->mRiderAnim, anim, D_004A4C08.a, rider->mSlewed[0].target);
     sXf_EB30 a;
     func_0030ECD8(&a, rider->mAnimModel, buf, 0);
@@ -2131,7 +2131,7 @@ extern "C" void cBERewardInterface_awardUserBigChallenge(void*, int, int);
 extern "C" void cRider_flagEventMissionSuccess(void* self, int peakID, int money)
 {
     cRiderMetrix_evMissionSuccess(*(int*)((char*)self + 0x790), money);
-    cBERewardInterface_awardUserBigChallenge(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(int*)((char*)self + 0x86C), peakID);
+    cBERewardInterface_awardUserBigChallenge(cBE_getInterface_Fv(cBE_getBE(), 13), *(int*)((char*)self + 0x86C), peakID);
 }
 #endif
 
@@ -2156,7 +2156,7 @@ extern "C" void cBERewardInterface_awardUserCollectible(void*, int, int);
 extern "C" void cRider_flagEventAddCollectible(cRider* self, int peakID)
 {
     cRiderMetrix_evAddCash((int)self->mMetrix, 3);
-    cBERewardInterface_awardUserCollectible(cBE_getInterface_Fv(cBE_getBE(), 0xD), self->mAIIndex, peakID);
+    cBERewardInterface_awardUserCollectible(cBE_getInterface_Fv(cBE_getBE(), 13), self->mAIIndex, peakID);
 }
 #endif
 
@@ -3303,7 +3303,7 @@ extern "C" int func_0026B550(void* tree, void* path);
 extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, char* data)
 {
     cStream_00111AC0* st = (cStream_00111AC0*)data;
-    st->Write(self->GroundMotion.mRider, 0x6C0);
+    st->Write(self->GroundMotion.mRider, 1728);
     func_00104D68(*(void**)((char*)self->GroundMotion.mRider + 0x784), data);
     cAnimModel_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x780), data);
     func_00113AA0(*(void**)((char*)self->GroundMotion.mRider + 0x788), data);
@@ -3450,7 +3450,7 @@ struct sQuad_00111D98 {
 extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* data)
 {
     cStream_00111D98* st = (cStream_00111D98*)data;
-    st->Read(self->GroundMotion.mRider, 0x6C0);
+    st->Read(self->GroundMotion.mRider, 1728);
     func_00104DE0(*(void**)((char*)self->GroundMotion.mRider + 0x784), data);
     cAnimModel_readFromReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x780), data);
     func_00113AD8(*(void**)((char*)self->GroundMotion.mRider + 0x788), data);

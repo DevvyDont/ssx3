@@ -776,7 +776,7 @@ extern "C" void cFloatingNode_writeToReplayFrame(cFloatingNode* self, void* stre
     sFloatingVEntryFA88* vtEntry = &(*(sFloatingVEntryFA88**)stream)[1];
     vtEntry->fn((char*)stream + vtEntry->delta, &has, 4);
     vtEntry = &(*(sFloatingVEntryFA88**)stream)[1];
-    vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x2C, 0x48);
+    vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x2C, 72);
 }
 #endif
 
@@ -795,7 +795,7 @@ extern "C" void* func_0034FB00(cInstanceNode* self, void* a1, int type, void* no
     self->mVtbl = (void**)cInstanceNode_vtbl;
     func_0034FC78(self, node);
     if ((*(int*)((char*)node + 0x8) & 0x100) == 0) {
-        if (type != 6 && type != 0x10 && type != 0x16) {
+        if (type != 6 && type != 0x10 && type != 22) {
             func_002D1BF0(node);
         }
     }

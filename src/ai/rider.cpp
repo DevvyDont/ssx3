@@ -88,7 +88,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mSafeRenderTick = -1;
     self->mScriptObjRiderVtbl = D_00459B90;
     self->mVtbl = D_00459C18;
-    self->mGroundMaterial = 0x31;
+    self->mGroundMaterial = 49;
     self->mLoadStep = 0;
     self->mRenderFlag = one;
     self->mIsHuman = 0;
@@ -110,8 +110,8 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     aux->f10C = none;
     aux->f210 = none;
     self->mOverlapList = aux;
-    self->mAttachedEmitterFX = func_002F1850(cMemMan_alloc(0xA8, str_AttachedEmitterFX, 0, 0), self);
-    self->mBoltOnFX = func_002EC9E0(cMemMan_alloc(0xC8, str_cBoltOnFXInterface, 0, 0), (int)self, (int)self->mAttachedEmitterFX);
+    self->mAttachedEmitterFX = func_002F1850(cMemMan_alloc(168, str_AttachedEmitterFX, 0, 0), self);
+    self->mBoltOnFX = func_002EC9E0(cMemMan_alloc(200, str_cBoltOnFXInterface, 0, 0), (int)self, (int)self->mAttachedEmitterFX);
     self->mLineHint = cMemMan_alloc(0x10, str_Line_Intersect_Hint, 0, 0);
     self->mWallHint = cMemMan_alloc(0x10, str_Wall_Intersect_Hint, 0, 0);
     MEM_fill_v(self->unk_794, 0, 0x20);
@@ -132,7 +132,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
         self->unk_B08[i] = -1;
     }
     int invalidHandle = -1;
-    self->mShadow = cPlayerShadow_cPlayerShadow(cMemMan_alloc(0x1A0, str_BoaderShadow, 0, 0));
+    self->mShadow = cPlayerShadow_cPlayerShadow(cMemMan_alloc(416, str_BoaderShadow, 0, 0));
     self->unk_450 = invalidHandle;
     self->unk_AA4 = 0;
     self->mIsOnScreen = 0;
@@ -209,7 +209,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
     cScriptObject_DeInitScriptObject(self->unk_6DC);
     char* polyMember = (char*)self->mRiderAnim;
     if (polyMember != 0)
-        vdel_11B978(polyMember, 0x58);
+        vdel_11B978(polyMember, 88);
     void* member = self->mAnimModel;
     if (member != 0)
         cAnimModel__cAnimModel(member, 3);
@@ -233,10 +233,10 @@ extern "C" void cRider__cRider(cRider* self, int flags)
     operator_delete((int*)self->mLineHint);
     polyMember = (char*)self->mBoltOnFX;
     if (polyMember != 0)
-        vdel_11B978(polyMember, 0xC4);
+        vdel_11B978(polyMember, 196);
     polyMember = (char*)self->mAttachedEmitterFX;
     if (polyMember != 0)
-        vdel_11B978(polyMember, 0xA4);
+        vdel_11B978(polyMember, 164);
     member = self->mShadow;
     if (member != 0)
         cPlayerShadow__cPlayerShadow(member, 3);
@@ -290,7 +290,7 @@ extern "C" void cRiderMetrix_linkToRider_impl(void* metrix, cRider* rider) __asm
  */
 void cRider_addRiderMetrix(cRider* self)
 {
-    void* mem = cMemMan_alloc(0x1CC, str_RiderMetrix, 0, 0);
+    void* mem = cMemMan_alloc(460, str_RiderMetrix, 0, 0);
     void* metrix = cRiderMetrix_cRiderMetrix(mem);
     self->mMetrix = (cRiderMetrix*)metrix;
     cRiderMetrix_linkToRider_impl(metrix, self);
@@ -420,7 +420,7 @@ extern "C" void func_0011BD60(cRider* self, void** list, int n)
     next:;
     }
     sAnimNameTable_11BD60* t2 = ((sAnimNameTable_11BD60*)self->mLoadList);
-    func_00418EF8(t2, t2->count, 0x108, func_0011B678);
+    func_00418EF8(t2, t2->count, 264, func_0011B678);
 }
 #endif
 
@@ -501,7 +501,7 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
         }
     }
     sAnimNameTable_11BE88* t2 = ((sAnimNameTable_11BE88*)self->mLoadList);
-    func_00418EF8(&t2->e[t2->start], t2->count, 0x108, func_0011B678);
+    func_00418EF8(&t2->e[t2->start], t2->count, 264, func_0011B678);
 }
 #endif
 
@@ -666,7 +666,7 @@ void cRider_initAlways_impl(cRider* self)
     if (self->mLoadStep == 7)
     {
         *(int*)((char*)self->mRiderHandler + 0xDE0) = 3;
-        *(int*)((char*)self->mRiderHandler + 0xDE4) = 0xD;
+        *(int*)((char*)self->mRiderHandler + 0xDE4) = 13;
         self->mRubberBandBehind = 0;
         self->mRubberBandAhead = 0;
         self->unk_0D8 = -1;
@@ -1273,7 +1273,7 @@ extern "C" void cRider_putAtDropOffBC(cRider* self)
     pos.z = startPoint[4];
     pos.w = 1.0f;
     vu0AddEq_11DD98(pos, vu0Scale_11DD98(dir, func_00115B08(self)));
-    cRider_putAt_11DD98(self, &pos, &dir, 0x11F, 2999.942626953125f);
+    cRider_putAt_11DD98(self, &pos, &dir, 287, 2999.942626953125f);
 }
 #endif
 
@@ -2875,9 +2875,9 @@ extern "C" void func_00120378(void* vself)
             AddEq_120378(v, sV_120378(0.0f, 0.0f, 1000.0f, 0.0f));
         }
         sV_120378 q;
-        LOOK_120378(3, self->mBoneHead, (sLook_120378*)((char*)self + 0x940), 0x19B)
-        LOOK_120378(4, *(int*)((char*)self + 0x8AC), (sLook_120378*)((char*)self + 0x970), 0x1A2)
-        LOOK_120378(5, self->mBoneHips, (sLook_120378*)((char*)self + 0x9A0), 0x1A9)
+        LOOK_120378(3, self->mBoneHead, (sLook_120378*)((char*)self + 2368), 411)
+        LOOK_120378(4, *(int*)((char*)self + 2220), (sLook_120378*)((char*)self + 2416), 418)
+        LOOK_120378(5, self->mBoneHips, (sLook_120378*)((char*)self + 2464), 425)
     }
 }
 #endif
@@ -2925,7 +2925,7 @@ static inline float riderApproach_00120D90(float v, float t, float s)
 extern "C" void cRider_updateLegIK(cRider* self)
 {
     int animState = cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2);
-    if (animState >= 0x14 && animState <= 0x1A)
+    if (animState >= 20 && animState <= 26)
         self->unk_318 = riderApproach_00120D90(self->unk_318, 0.0f, 0.05000000447034836f);
     else
         self->unk_318 = riderApproach_00120D90(self->unk_318, 1.0f, 0.05000000447034836f);
@@ -3827,7 +3827,7 @@ extern "C" void func_00389C38(void* rec, int flags);
 
 extern "C" void func_00122048()
 {
-    char rec[0xA0];
+    char rec[160];
     func_00389C38(rec, 0);
     ((cRiderSys_122048*)GrMan)->v69(rec, 0);
 }
@@ -4953,7 +4953,7 @@ extern "C" void cRider_initForMission(cRider* self, char* mat)
     dir = MatMulV_34D0(mat, t4vect_XAxis);
     cRiderMetrix_evReset(self->mMetrix, 1);
     cRider_setMotionState_impl(self, 3);
-    cRider_setControlState_impl(self, 0xD);
+    cRider_setControlState_impl(self, 13);
     cRider_putAt_34D0(self, &pos, &dir, 5, 0.0f);
     *(int*)((char*)self->mRiderHandler + 0x290) = 2;
     cRider_setControlState_impl(self, 6);
@@ -5135,7 +5135,7 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
 {
     int buf[12];
     cScriptObjRider_OnStartObjectUse(&self->mScriptObjRiderVtbl);
-    cRider_setControlState_impl(self, 0xD);
+    cRider_setControlState_impl(self, 13);
     cRider_setMotionState_impl(self, 3);
     cRiderAnimBase_reset(self->mRiderAnim);
     cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
@@ -5180,23 +5180,23 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
     cRiderHandler_resetRiderFX(self->mRiderHandler);
     initTrack_3640(self, 0x1F0, zeroF, zeroF);
     initTrack_3640(self, 0x1FC, zeroF, zeroF);
-    initTrack_3640(self, 0x208, zeroF, zeroF);
-    initTrack_3640(self, 0x214, zeroF, zeroF);
-    initTrack_3640(self, 0x220, zeroF, zeroF);
-    initTrack_3640(self, 0x22C, zeroF, zeroF);
-    initTrack_3640(self, 0x238, zeroF, zeroF);
-    initTrack_3640(self, 0x244, zeroF, zeroF);
-    initTrack_3640(self, 0x250, zeroF, zeroF);
-    initTrack_3640(self, 0x25C, one, zeroF);
-    initTrack_3640(self, 0x268, zeroF, zeroF);
-    initTrack_3640(self, 0x274, zeroF, zeroF);
-    initTrack_3640(self, 0x280, zeroF, zeroF);
-    initTrack_3640(self, 0x28C, zeroF, zeroF);
-    initTrack_3640(self, 0x298, zeroF, zeroF);
-    initTrack_3640(self, 0x2A4, zeroF, zeroF);
-    initTrack_3640(self, 0x2B0, zeroF, zeroF);
-    initTrack_3640(self, 0x2BC, zeroF, zeroF);
-    initTrack_3640(self, 0x2C8, zeroF, zeroF);
+    initTrack_3640(self, 520, zeroF, zeroF);
+    initTrack_3640(self, 532, zeroF, zeroF);
+    initTrack_3640(self, 544, zeroF, zeroF);
+    initTrack_3640(self, 556, zeroF, zeroF);
+    initTrack_3640(self, 568, zeroF, zeroF);
+    initTrack_3640(self, 580, zeroF, zeroF);
+    initTrack_3640(self, 592, zeroF, zeroF);
+    initTrack_3640(self, 604, one, zeroF);
+    initTrack_3640(self, 616, zeroF, zeroF);
+    initTrack_3640(self, 628, zeroF, zeroF);
+    initTrack_3640(self, 640, zeroF, zeroF);
+    initTrack_3640(self, 652, zeroF, zeroF);
+    initTrack_3640(self, 664, zeroF, zeroF);
+    initTrack_3640(self, 676, zeroF, zeroF);
+    initTrack_3640(self, 688, zeroF, zeroF);
+    initTrack_3640(self, 700, zeroF, zeroF);
+    initTrack_3640(self, 712, zeroF, zeroF);
     func_0030E9E0(self->mAnimModel, 5, 0);
     func_0030E9E0(self->mAnimModel, 6, 0);
     func_0030E9E0(self->mAnimModel, 8, 0);
@@ -5443,15 +5443,15 @@ extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float currFrame, fl
         {
             sAnimEvent_123E30* event = &info.events[i];
             int ev = event->id;
-            if (ev == 0x66) continue;
-            if (ev < 0x64)
+            if (ev == 102) continue;
+            if (ev < 100)
             {
                 func_002A1B58(func_0028B180(), ev, (int)self);
                 self->unk_AC8 = 1;
             }
             else
             {
-                ev -= 0x64;
+                ev -= 100;
                 void* snd = func_0028B180();
                 // PORT: id is a handle that is also read as a pointer here.
                 int subjectRider = (int)cSSXScriptEngine_GetSubjectRider(ScriptEngine, *event->arg, *(int*)(id + 8));
@@ -6209,8 +6209,8 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
         func_00280520(&self->mScriptObjRiderVtbl, pCurrMainAnim->name, &animID, &sourceID);
         tAnimID animInfo(sourceID, animID);
         if (pCurrMainAnimCustom->root != 0) {
-            char buf[0x50];
-            cRiderAnimBase_getAIAnimFrame(buf, self->mRiderAnim, 0x1B0, animInfo, startTime);
+            char buf[80];
+            cRiderAnimBase_getAIAnimFrame(buf, self->mRiderAnim, 432, animInfo, startTime);
             sXf_124788 a;
             func_0030ECD8(&a, self->mAnimModel, buf, 0);
             cAnimModel* trk = self->mAnimModel;
@@ -6245,7 +6245,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
         }
         float start = pCurrMainAnim->start;
         *(float*)((char*)self->mRiderAnim + 0x1C) = pCurrMainAnim->speed;
-        cRiderAnimBase_playFromAnimID(self->mRiderAnim, 0x1B0, animInfo, start * 0.01666666753590107f);
+        cRiderAnimBase_playFromAnimID(self->mRiderAnim, 432, animInfo, start * 0.01666666753590107f);
         func_00313CF0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2), 0, startTime);
         cRiderAnimBase_setupAnimation(self->mRiderAnim, 0);
         *(float*)((char*)self->mRiderAnim + 0x1C) = 1.0f;
@@ -6286,7 +6286,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
         on = func_001446B8(ch, 0) != 0;
     }
     if (on) {
-        func_0030E9E0(self->mAnimModel, 0xB, 0);
+        func_0030E9E0(self->mAnimModel, 11, 0);
         func_00144670(ch, 0);
     } else {
         int on2 = 0;
@@ -6294,7 +6294,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
             on2 = func_001446B8(ch, 1) != 0;
         }
         if (on2) {
-            func_0030EA80(self->mAnimModel, 0xB, 0);
+            func_0030EA80(self->mAnimModel, 11, 0);
             func_00144670(ch, 1);
         }
     }
@@ -7080,31 +7080,31 @@ extern "C" int func_001276F0(char* self)
         return 0;
     if (cInput_getState(*(void**)(self + 0xDF0), 0x20))
         return 1;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x21))
+    if (cInput_getState(*(void**)(self + 0xDF0), 33))
         return 2;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x22))
+    if (cInput_getState(*(void**)(self + 0xDF0), 34))
         return 3;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x23))
+    if (cInput_getState(*(void**)(self + 0xDF0), 35))
         return 4;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x24))
+    if (cInput_getState(*(void**)(self + 0xDF0), 36))
         return 5;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x25))
+    if (cInput_getState(*(void**)(self + 0xDF0), 37))
         return 6;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x26))
+    if (cInput_getState(*(void**)(self + 0xDF0), 38))
         return 7;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x27))
+    if (cInput_getState(*(void**)(self + 0xDF0), 39))
         return 8;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x28))
+    if (cInput_getState(*(void**)(self + 0xDF0), 40))
         return 9;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x29))
+    if (cInput_getState(*(void**)(self + 0xDF0), 41))
         return 10;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x2A))
+    if (cInput_getState(*(void**)(self + 0xDF0), 42))
         return 11;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x2B))
+    if (cInput_getState(*(void**)(self + 0xDF0), 43))
         return 12;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x2C))
+    if (cInput_getState(*(void**)(self + 0xDF0), 44))
         return 13;
-    if (cInput_getState(*(void**)(self + 0xDF0), 0x2D))
+    if (cInput_getState(*(void**)(self + 0xDF0), 45))
         return 14;
     return -1;
 }
@@ -7117,11 +7117,11 @@ int cInput_getState(void*, int);
 
 extern "C" int func_00127848(void* self)
 {
-    if (cInput_getState(*(void**)((char*)self + 0xDF0), 0x1B))
+    if (cInput_getState(*(void**)((char*)self + 0xDF0), 27))
         return 0;
     if (cInput_getState(*(void**)((char*)self + 0xDF0), 0x1C))
         return 1;
-    if (cInput_getState(*(void**)((char*)self + 0xDF0), 0x1D))
+    if (cInput_getState(*(void**)((char*)self + 0xDF0), 29))
         return 2;
     if (cInput_getState(*(void**)((char*)self + 0xDF0), 0x1E))
         return 3;
@@ -7263,12 +7263,12 @@ extern "C" void func_00127998(char* self, sRiderInput_127998* in)
     switch (func_0011FEE8(*(void**)(self + 0x18))) {
     case 0: {
         float k = 31.0f;
-        in->s0.b12 = cInput_getState(PAD_127998, 0x2E);
-        in->s0.b13 = cInput_getState(PAD_127998, 0x19);
-        in->s0.b14 = cInput_getState(PAD_127998, 0x11);
-        in->s0.b15 = cInput_getState(PAD_127998, 0x12);
-        in->s0.b16 = cInput_getState(PAD_127998, 0x13);
-        in->s0.b17 = cInput_getState(PAD_127998, 0x14);
+        in->s0.b12 = cInput_getState(PAD_127998, 46);
+        in->s0.b13 = cInput_getState(PAD_127998, 25);
+        in->s0.b14 = cInput_getState(PAD_127998, 17);
+        in->s0.b15 = cInput_getState(PAD_127998, 18);
+        in->s0.b16 = cInput_getState(PAD_127998, 19);
+        in->s0.b17 = cInput_getState(PAD_127998, 20);
         in->s0.b18 = cInput_getState(PAD_127998, 5);
         in->s0.b19 = cInput_getState(PAD_127998, 6);
         in->s0.a20 = (int)(cInput_getValue(PAD_127998, 0) * k);
@@ -7278,71 +7278,71 @@ extern "C" void func_00127998(char* self, sRiderInput_127998* in)
         break;
     }
     case 11:
-        in->s11.b12 = cInput_getState(PAD_127998, 0x2E);
-        in->s11.b13 = cInput_getState(PAD_127998, 0x19);
+        in->s11.b12 = cInput_getState(PAD_127998, 46);
+        in->s11.b13 = cInput_getState(PAD_127998, 25);
         in->s11.a14 = (int)(cInput_getValue(PAD_127998, 0x18) * 31.0f);
         break;
     case 1: {
         float k = 31.0f;
-        in->s1.b12 = cInput_getState(PAD_127998, 0x2E);
-        in->s1.b13 = cInput_getState(PAD_127998, 0x13);
-        in->s1.b14 = cInput_getState(PAD_127998, 0x14);
-        in->s1.b16 = cInput_getState(PAD_127998, 0x11);
-        in->s1.b15 = cInput_getState(PAD_127998, 0x12);
-        in->s1.b17 = cInput_getState(PAD_127998, 0x16);
-        in->s1.a24 = (int)(cInput_getValue(PAD_127998, 0x17) * k);
+        in->s1.b12 = cInput_getState(PAD_127998, 46);
+        in->s1.b13 = cInput_getState(PAD_127998, 19);
+        in->s1.b14 = cInput_getState(PAD_127998, 20);
+        in->s1.b16 = cInput_getState(PAD_127998, 17);
+        in->s1.b15 = cInput_getState(PAD_127998, 18);
+        in->s1.b17 = cInput_getState(PAD_127998, 22);
+        in->s1.a24 = (int)(cInput_getValue(PAD_127998, 23) * k);
         in->s1.a18 = (int)(cInput_getValue(PAD_127998, 0) * k);
         in->s1.w0 = (int)(cInput_getValue(PAD_127998, 3) * k);
         in->s1.w6 = (int)(cInput_getValue(PAD_127998, 4) * k);
         break;
     }
     case 6:
-        in->s6.a12 = (int)(cInput_getValue(PAD_127998, 0x1A) * 31.0f);
+        in->s6.a12 = (int)(cInput_getValue(PAD_127998, 26) * 31.0f);
         break;
     case 7: {
         float k = 31.0f;
-        in->s7.b12 = cInput_getState(PAD_127998, 0x2E);
-        in->s7.b13 = cInput_getState(PAD_127998, 0x11);
-        in->s7.b14 = cInput_getState(PAD_127998, 0x12);
-        in->s7.b15 = cInput_getState(PAD_127998, 0x13);
-        in->s7.b16 = cInput_getState(PAD_127998, 0x14);
+        in->s7.b12 = cInput_getState(PAD_127998, 46);
+        in->s7.b13 = cInput_getState(PAD_127998, 17);
+        in->s7.b14 = cInput_getState(PAD_127998, 18);
+        in->s7.b15 = cInput_getState(PAD_127998, 19);
+        in->s7.b16 = cInput_getState(PAD_127998, 20);
         in->s7.v17 = func_00127848(self);
-        in->s7.a25 = (int)(cInput_getValue(PAD_127998, 0x17) * k);
-        in->s7.w0 = (int)(cInput_getValue(PAD_127998, 0xD) * k);
+        in->s7.a25 = (int)(cInput_getValue(PAD_127998, 23) * k);
+        in->s7.w0 = (int)(cInput_getValue(PAD_127998, 13) * k);
         in->s7.w6 = (int)(cInput_getValue(PAD_127998, 3) * k);
         break;
     }
     case 12:
-        in->s12.b12 = cInput_getState(PAD_127998, 0x2E);
-        in->s12.b13 = cInput_getState(PAD_127998, 0x13);
-        in->s12.b14 = cInput_getState(PAD_127998, 0x14);
+        in->s12.b12 = cInput_getState(PAD_127998, 46);
+        in->s12.b13 = cInput_getState(PAD_127998, 19);
+        in->s12.b14 = cInput_getState(PAD_127998, 20);
         in->s12.v15 = func_00127848(self);
-        in->s12.a23 = (int)(cInput_getValue(PAD_127998, 0x17) * 31.0f);
+        in->s12.a23 = (int)(cInput_getValue(PAD_127998, 23) * 31.0f);
         break;
     case 2: {
         float k = 31.0f;
-        in->s2.b12 = cInput_getState(PAD_127998, 0x2E);
-        in->s2.b13 = cInput_getState(PAD_127998, 0x12);
-        in->s2.b14 = cInput_getState(PAD_127998, 0x14);
+        in->s2.b12 = cInput_getState(PAD_127998, 46);
+        in->s2.b13 = cInput_getState(PAD_127998, 18);
+        in->s2.b14 = cInput_getState(PAD_127998, 20);
         in->s2.a15 = (int)(cInput_getValue(PAD_127998, 8) * k);
         in->s2.a21 = (int)(cInput_getValue(PAD_127998, 9) * k);
         in->s2.w0 = (int)(cInput_getValue(PAD_127998, 7) * k);
-        in->s2.w6 = (int)(cInput_getValue(PAD_127998, 0x17) * k);
+        in->s2.w6 = (int)(cInput_getValue(PAD_127998, 23) * k);
         break;
     }
     case 3: {
         float k = 31.0f;
-        in->s2.b12 = cInput_getState(PAD_127998, 0x2E);
-        in->s2.b13 = cInput_getState(PAD_127998, 0x13);
-        in->s2.b14 = cInput_getState(PAD_127998, 0x14);
+        in->s2.b12 = cInput_getState(PAD_127998, 46);
+        in->s2.b13 = cInput_getState(PAD_127998, 19);
+        in->s2.b14 = cInput_getState(PAD_127998, 20);
         in->s2.a15 = (int)(cInput_getValue(PAD_127998, 0) * k);
-        in->s2.a21 = (int)(cInput_getValue(PAD_127998, 0x17) * k);
+        in->s2.a21 = (int)(cInput_getValue(PAD_127998, 23) * k);
         break;
     }
     case 4: {
         float k = 31.0f;
-        in->s4.b12 = cInput_getState(PAD_127998, 0x2E);
-        in->s4.b13 = cInput_getState(PAD_127998, 0x19);
+        in->s4.b12 = cInput_getState(PAD_127998, 46);
+        in->s4.b13 = cInput_getState(PAD_127998, 25);
         in->s4.b14 = cInput_getState(PAD_127998, 5);
         in->s4.b15 = cInput_getState(PAD_127998, 6);
         in->s4.v16 = func_001276F0(self);
@@ -7352,15 +7352,15 @@ extern "C" void func_00127998(char* self, sRiderInput_127998* in)
     }
     case 5: {
         float k = 31.0f;
-        in->s4.b12 = cInput_getState(PAD_127998, 0x2E);
-        in->s4.b13 = cInput_getState(PAD_127998, 0x19);
-        in->s4.b14 = cInput_getState(PAD_127998, 0x15);
+        in->s4.b12 = cInput_getState(PAD_127998, 46);
+        in->s4.b13 = cInput_getState(PAD_127998, 25);
+        in->s4.b14 = cInput_getState(PAD_127998, 21);
         in->s4.b15 = cInput_getState(PAD_127998, 0xC);
         in->s4.v16 = func_001276F0(self);
         in->s4.a24 = (int)(cInput_getValue(PAD_127998, 0xE) * k);
         in->s4.w0 = (int)(cInput_getValue(PAD_127998, 0xF) * k);
-        in->s4.w12 = (int)(cInput_getValue(PAD_127998, 0xB) * k);
-        in->s4.w6 = (int)(cInput_getValue(PAD_127998, 0xA) * k);
+        in->s4.w12 = (int)(cInput_getValue(PAD_127998, 11) * k);
+        in->s4.w6 = (int)(cInput_getValue(PAD_127998, 10) * k);
         float v = cInput_getValue(PAD_127998, 3);
         int t;
         if (-0.5f <= v) {
@@ -7372,7 +7372,7 @@ extern "C" void func_00127998(char* self, sRiderInput_127998* in)
         break;
     }
     case 8:
-        in->s11.b12 = cInput_getState(PAD_127998, 0x2E);
+        in->s11.b12 = cInput_getState(PAD_127998, 46);
         in->s11.b13 = cInput_getState(PAD_127998, 0x10);
         break;
     case 10:

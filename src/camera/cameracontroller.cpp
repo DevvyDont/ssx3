@@ -182,7 +182,7 @@ extern "C" void* cManualCameraController_cManualCameraController(void* self, int
     *(int*)((char*)self + 0x0) = 1;
     *(void**)((char*)self + 0x18) = cManualCameraAlgorithm_cManualCameraAlgorithm(cMemMan_alloc(0x40, str_Manual_Cam_Algo, 0x20000000, 0));
     *(void**)((char*)self + 0x1C) = cEditorCameraAlgorithm_cEditorCameraAlgorithm(cMemMan_alloc(0x40, str_Editor_Cam_Algo, 0x20000000, 0));
-    cManualCameraController_setCurrentAlgorithmType(self, 0x51);
+    cManualCameraController_setCurrentAlgorithmType(self, 81);
     return self;
 }
 #endif
@@ -317,10 +317,10 @@ extern "C" void cManualCameraController_addAlgorithm(void* self, int a, int b);
 extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int msg)
 {
     switch (msg) {
-    case 0x50:
+    case 80:
         cManualCameraController_addAlgorithm(self, *(int*)((char*)self + 0x1C), 0);
         break;
-    case 0x51:
+    case 81:
         cManualCameraController_addAlgorithm(self, *(int*)((char*)self + 0x18), 0);
         break;
     }
@@ -357,7 +357,7 @@ extern "C" int func_0015D020(void* self)
     int replayCamActive = 0;
     if (*(int*)((char*)self + 0x30) & 2) {
         int replayType = *(int*)((char*)self + 0x2C);
-        if (replayType != 0x5D) {
+        if (replayType != 93) {
             replayCamActive = replayType != 0x3C;
         }
     }

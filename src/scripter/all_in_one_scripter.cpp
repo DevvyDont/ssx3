@@ -698,6 +698,6 @@ extern "C" void func_00284B80(void) {
 INCLUDE_ASM("scripter/all_in_one_scripter", func_00284BA0);
 #ifdef SKIP_ASM
 extern "C" int func_00284BA0(int duckStream) {
-    return (duckStream != 0) ? 0 : 0x173;
+    return (duckStream != 0) ? 0 : 371;
 }
 #endif

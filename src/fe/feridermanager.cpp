@@ -103,7 +103,7 @@ extern "C" void func_0019E7F0(int* self)
             if (func_0019CCE8(D_004A1968, self[1], it->id) < 0) {
                 char buf[0x100];
                 if (func_0014B988(iface, self[1], self[0], e, buf)) {
-                    int r = func_0019DA10(mgr, self[0], buf, 0xB, 1, 1);
+                    int r = func_0019DA10(mgr, self[0], buf, 11, 1, 1);
                     func_0019CD38(D_004A1968, self[1], it->id, r);
                 }
             }
@@ -160,24 +160,24 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
     if (self[0] >= 0) {
         func_0019EBA0(self);
     }
-    int dirty = (self[0xCC4 / 4] != 0) | (self[0xCC8 / 4] != 0);
+    int dirty = (self[3268 / 4] != 0) | (self[3272 / 4] != 0);
     self[4] = slot;
     self[1] = profile;
     self[0] = character;
-    self[0xC28 / 4] = 0;
-    self[0x14 / 4] = 0;
-    self[0xCC8 / 4] = 0;
-    self[0xCB4 / 4] = 0;
-    self[0xCB8 / 4] = 0;
-    self[0xCBC / 4] = 0;
-    self[0xCC0 / 4] = 0;
-    self[0xC24 / 4] = -1;
-    self[0xCC4 / 4] = dirty;
-    *(void**)&self[0xC70 / 4] = func_002F1890(cMemMan_alloc(0xA8, str_AttachedEmitterFX_b, 0, 0), self);
-    *(void**)&self[0xC74 / 4] = func_002ECA68(cMemMan_alloc(0xC8, str_cBoltOnFXInterface_b, 0, 0), self, *(void**)&self[0xC70 / 4]);
-    *(void**)&self[2] = func_0030D4B8(cMemMan_alloc(0x160, str_AnimModel, 0, 0));
+    self[3112 / 4] = 0;
+    self[20 / 4] = 0;
+    self[3272 / 4] = 0;
+    self[3252 / 4] = 0;
+    self[3256 / 4] = 0;
+    self[3260 / 4] = 0;
+    self[3264 / 4] = 0;
+    self[3108 / 4] = -1;
+    self[3268 / 4] = dirty;
+    *(void**)&self[3184 / 4] = func_002F1890(cMemMan_alloc(168, str_AttachedEmitterFX_b, 0, 0), self);
+    *(void**)&self[3188 / 4] = func_002ECA68(cMemMan_alloc(200, str_cBoltOnFXInterface_b, 0, 0), self, *(void**)&self[3184 / 4]);
+    *(void**)&self[2] = func_0030D4B8(cMemMan_alloc(352, str_AnimModel, 0, 0));
     func_0030D840(*(void**)&self[2], 100, 15);
-    func_002F19F0(*(void**)&self[0xC70 / 4], *(void**)&self[2]);
+    func_002F19F0(*(void**)&self[3184 / 4], *(void**)&self[2]);
     void* list = func_0014AD28(iface, profile, character);
     func_0019FF00_E980(self, list, 0, self[4], 1);
     if (self[4] != 0) {
@@ -186,16 +186,16 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
     func_0019FBE0_E980(self, list, 0, 1);
     func_0019F138_E980(self);
     switch (self[0]) {
-    case 0: self[0xCD8 / 4] = 1; break;
-    case 1: self[0xCD8 / 4] = 4; break;
-    case 2: self[0xCD8 / 4] = 0x20; break;
-    case 3: self[0xCD8 / 4] = 2; break;
-    case 4: self[0xCD8 / 4] = 8; break;
-    case 5: self[0xCD8 / 4] = 0x100; break;
-    case 6: self[0xCD8 / 4] = 0x200; break;
-    case 7: self[0xCD8 / 4] = 0x80; break;
-    case 8: self[0xCD8 / 4] = 0x10; break;
-    case 9: self[0xCD8 / 4] = 0x40; break;
+    case 0: self[3288 / 4] = 1; break;
+    case 1: self[3288 / 4] = 4; break;
+    case 2: self[3288 / 4] = 0x20; break;
+    case 3: self[3288 / 4] = 2; break;
+    case 4: self[3288 / 4] = 8; break;
+    case 5: self[3288 / 4] = 0x100; break;
+    case 6: self[3288 / 4] = 0x200; break;
+    case 7: self[3288 / 4] = 0x80; break;
+    case 8: self[3288 / 4] = 0x10; break;
+    case 9: self[3288 / 4] = 0x40; break;
     }
     return 1;
 }
@@ -345,7 +345,7 @@ extern "C" void func_0019ED80(sFERiderED80* self)
     self->anim = anim;
     *(int*)(anim + 0x64) = 0;
     func_00104D50(anim, self);
-    cRiderAnimBase_play(self->anim, 0x1B2, 0, -1.0f);
+    cRiderAnimBase_play(self->anim, 434, 0, -1.0f);
     cRiderAnimBase_setupAnimation(self->anim, 0);
     sHalfED80 p[2];
     p[1] = tPose_Identity;
@@ -1218,7 +1218,7 @@ extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int a2, int a3)
             if (it->flags & 0x10) {
                 char buf[0x100];
                 if (func_0014B988(iface, self[1], self[0], e, buf)) {
-                    int r = func_0019DA10(mgr, self[0], buf, 0xB, a3, 1);
+                    int r = func_0019DA10(mgr, self[0], buf, 11, a3, 1);
                     func_0019CD38(D_004A1968, self[1], it->id, r);
                 }
             }
@@ -1647,11 +1647,11 @@ extern "C" void func_0019EE88(void* rider);
 extern "C" void func_001A0598(char* self)
 {
     char* p = (char*)GrMan;
-    *(int*)(p + 0x24) = 0x2E;
-    *(int*)(p + 0x84) = 0x2F;
+    *(int*)(p + 0x24) = 46;
+    *(int*)(p + 0x84) = 47;
     *(int*)(p + 0x10A8) = *(int*)(p + 0x1008);
     for (int i = 0; i < 2; i++) {
-        p = self + i * 0xCE0;
+        p = self + i * 3296;
         if (*(int*)(p + 0xCC8) != 0)
             func_0019EE88(p);
     }

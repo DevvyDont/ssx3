@@ -1006,7 +1006,7 @@ int func_00283D28_count(void* list) __asm__("func_00283D28");
 extern "C" int func_00276A08(void* self, int i)
 {
     void* list = (char*)self + 0xC;
-    if (i < func_00283D28_count(list) && *(int*)func_00283D70(list, i) >= 0x1D) {
+    if (i < func_00283D28_count(list) && *(int*)func_00283D70(list, i) >= 29) {
         return *(int*)func_00283D70(list, i);
     }
     return 0x20;
@@ -2007,7 +2007,7 @@ INCLUDE_ASM("scripter/datamanager", func_00277DD8);
 #ifdef SKIP_ASM
 extern "C" int func_00277DD8(void* self, void* entry)
 {
-    return *(int*)entry >= 0x1d;
+    return *(int*)entry >= 29;
 }
 #endif
 
@@ -2131,7 +2131,7 @@ extern "C" sScriptMgr_7F20* cSSXScriptEngine_cSSXScriptEngine(sScriptMgr_7F20* s
     cScriptObjGS_cScriptObjGS((char*)self + 0x910);
     cScriptObjEvent_cScriptObjEvent((char*)self + 0x92C);
     cScriptAnimBankManager_cScriptAnimBankManager((char*)self + 0xA28, 0, 10, 0xF0);
-    cScriptSoundBankManager_cScriptSoundBankManager((char*)self + 0xA38, 0, 10, 0x11);
+    cScriptSoundBankManager_cScriptSoundBankManager((char*)self + 0xA38, 0, 10, 17);
     self->f52C = 0;
     self->f530 = 0;
     self->f534 = 0;

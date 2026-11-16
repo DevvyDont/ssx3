@@ -116,7 +116,7 @@ extern "C" void cFELoadScreen_load(void* self)
     char* gm = (char*)SSXApp->GameModeMan;
     cBE_getInterface_3438(cBE_getBE(), 0);
     char* screen;
-    if (cRealFE_mStartState == 0x27) {
+    if (cRealFE_mStartState == 39) {
         screen = newScreenA_233438(self);
     } else if (*(int*)(gm + 0x9C) == 0 || D_00535C11[0] == 0) {
         screen = newScreenB_233438(self);
@@ -465,7 +465,7 @@ extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 
 extern "C" void func_00233B60(void)
 {
-    cGame_setState(cGameState_mpGame, 0xA, 0, 0);
+    cGame_setState(cGameState_mpGame, 10, 0, 0);
 }
 #endif
 
@@ -574,7 +574,7 @@ extern "C" void func_00233C50(void* self)
     cUIStateStack_purgeNormalStates(*(char**)((char*)cGameState_mpGame + 0x48) + 0x18);
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
     *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0xB4;
+    *(int*)((char*)self + 0x14) = 180;
     cBXLoadIndicator_Show(SSXApp->Game->LoadIndicator, 4);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {

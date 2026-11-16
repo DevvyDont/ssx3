@@ -859,7 +859,7 @@ struct sVEntry00139970 {
 extern "C" void cHandplantMotion_writeToReplayFrame(cHandplantMotion* self, void* obj)
 {
     sVEntry00139970* vt = *(sVEntry00139970**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0xA0);
+    vt[1].fn((char*)obj + vt[1].delta, self, 160);
 }
 #endif
 
@@ -882,7 +882,7 @@ struct sVEntry001399A8 {
 extern "C" void cHandplantMotion_readFromReplayFrame(cHandplantMotion* self, void* obj)
 {
     sVEntry001399A8* vt = *(sVEntry001399A8**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0xA0);
+    vt[2].fn((char*)obj + vt[2].delta, self, 160);
 }
 #endif
 
@@ -1006,7 +1006,7 @@ extern "C" void cAirMotion_step(cAirMotion* self)
             int orientableBit = sf & 8;
             flag = orientableBit != 0;
         }
-        if (idx != 0x12 && *(int*)(snow + 0x44) == 0 && flag) {
+        if (idx != 18 && *(int*)(snow + 0x44) == 0 && flag) {
             float timeLeft = *(float*)(ap + 0x98) - *(float*)(ap + 0xA0);
             float timeScale = *(float*)(rider2 + 0x300);
             float x;
@@ -1294,7 +1294,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
     if (intParam >= 0.5f && vn < 0.0f) {
         float spd = vu0Len_139C88(V4_139C88(RIDER_139C88, 0x1E0));
         if (func_0011FEE8(RIDER_139C88) == 5) {
-            cRider_setControlState_9C88(RIDER_139C88, 0xD);
+            cRider_setControlState_9C88(RIDER_139C88, 13);
         }
         func_00113998_9C88(*(void**)(RIDER_139C88 + 0x788), RIDER_139C88 + 0x110, RIDER_139C88 + 0x1E0);
         char* surf = (char*)SSXApp->Game->SurfPropCache + hit.surface * 0xB0;
@@ -1303,15 +1303,15 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             cRider_checkForReset(RIDER_139C88, 0, 1);
             return;
         }
-        float pen = vu0Dot_139C88(vu0Sub_139C88(hit.pos, V4_139C88(RIDER_139C88, 0x110)), hit.normal) - *(float*)(surf + 0x18);
+        float pen = vu0Dot_139C88(vu0Sub_139C88(hit.pos, V4_139C88(RIDER_139C88, 272)), hit.normal) - *(float*)(surf + 0x18);
         if (0.0f < pen) {
             sVec4HP push = vu0Scale_139C88(hit.normal, pen);
             func_00106538(RIDER_139C88, &push);
         }
-        V4_139C88(RIDER_139C88, 0x370) = hit.normal;
-        V4_139C88(RIDER_139C88, 0x3D0) = hit.vel;
+        V4_139C88(RIDER_139C88, 880) = hit.normal;
+        V4_139C88(RIDER_139C88, 976) = hit.vel;
         *(float*)(RIDER_139C88 + 0x770) = -vn;
-        V4_139C88(RIDER_139C88, 0x380) = V4_139C88(RIDER_139C88, 0x370);
+        V4_139C88(RIDER_139C88, 0x380) = V4_139C88(RIDER_139C88, 880);
         if (hit.obj54 != 0) {
             *(int*)(RIDER_139C88 + 0x430) = *(int*)(hit.obj54 + 0x150);
             *(float*)(RIDER_139C88 + 0xAAC) = hit.f6C;
@@ -1319,13 +1319,13 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         } else {
             *(unsigned int*)(RIDER_139C88 + 0x430) = 0xFFFFFFFF;
         }
-        sVec4HP imp = vu0Scale_139C88(V4_139C88(RIDER_139C88, 0x370), -vn);
+        sVec4HP imp = vu0Scale_139C88(V4_139C88(RIDER_139C88, 880), -vn);
         vu0ScaleEq_139C88(imp, *(float*)(surf + 0x3C));
         vu0AddEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), imp);
         char* r = RIDER_139C88;
-        float vn2 = -vu0Dot_139C88(V4_139C88(r, 0x1E0), V4_139C88(r, 0x370));
+        float vn2 = -vu0Dot_139C88(V4_139C88(r, 0x1E0), V4_139C88(r, 880));
         if (*(float*)(surf + 0x40) < vn2) {
-            vu0AddEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), vu0Scale_139C88(V4_139C88(r, 0x370), vn2 - *(float*)(surf + 0x40)));
+            vu0AddEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), vu0Scale_139C88(V4_139C88(r, 880), vn2 - *(float*)(surf + 0x40)));
         }
         if (hit.obj50 != 0) {
             char* handler = *(char**)(hit.obj50 + 0xC);
@@ -1334,65 +1334,65 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
                 vt[43].fn(handler + vt[43].delta, &hit, vu0Scale_139C88(vu0Scale_139C88(imp, -1.0f), (float)*(int*)((char*)SSXApp + 0x10)));
             }
         }
-        int anim = 0x1B6;
+        int anim = 438;
         char* r2 = RIDER_139C88;
-        V4_139C88(r2, 0x3A0) = vu0Normalize_139C88(vu0Sub_139C88(row_139C88(r2, 1), vu0Scale_139C88(V4_139C88(r2, 0x370), vu0Dot_139C88(row_139C88(r2, 1), V4_139C88(r2, 0x370)))));
-        V4_139C88(RIDER_139C88, 0x3B0) = vu0Cross_139C88(V4_139C88(RIDER_139C88, 0x370), V4_139C88(RIDER_139C88, 0x3A0));
+        V4_139C88(r2, 928) = vu0Normalize_139C88(vu0Sub_139C88(row_139C88(r2, 1), vu0Scale_139C88(V4_139C88(r2, 880), vu0Dot_139C88(row_139C88(r2, 1), V4_139C88(r2, 880)))));
+        V4_139C88(RIDER_139C88, 944) = vu0Cross_139C88(V4_139C88(RIDER_139C88, 880), V4_139C88(RIDER_139C88, 928));
         *(int*)(RIDER_139C88 + 0x438) = hit.surface;
-        V4_139C88(RIDER_139C88, 0x460) = hit.pos;
-        *(float*)(RIDER_139C88 + 0x454) = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 0x110), hit.pos), V4_139C88(RIDER_139C88, 0x370));
-        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 0x14) {
-            if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2)) anim = 0x169;
-        } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 0x15) {
-            if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 3)) anim = 0x169;
+        V4_139C88(RIDER_139C88, 1120) = hit.pos;
+        *(float*)(RIDER_139C88 + 0x454) = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 272), hit.pos), V4_139C88(RIDER_139C88, 880));
+        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 20) {
+            if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2)) anim = 361;
+        } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 21) {
+            if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 3)) anim = 361;
         } else {
             int flip = 0;
-            if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 0x13) {
+            if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 19) {
                 flip = func_001446A0_i(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2) == 0;
-            } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 0x12 &&
+            } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 18 &&
                        !func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2)) {
                 flip = func_001446A0_i(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 0) != 0;
             }
             char* r4 = RIDER_139C88;
-            if (vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x370)) < 0.0f) {
+            if (vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 880)) < 0.0f) {
                 flip = 1;
             }
             if (flip) {
-                float sideDot = vu0Dot_139C88(row_139C88(r4, 0), V4_139C88(r4, 0x370));
-                float frontDot = vu0Dot_139C88(row_139C88(r4, 1), V4_139C88(r4, 0x370));
-                float upDot = vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x370));
+                float sideDot = vu0Dot_139C88(row_139C88(r4, 0), V4_139C88(r4, 880));
+                float frontDot = vu0Dot_139C88(row_139C88(r4, 1), V4_139C88(r4, 880));
+                float upDot = vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 880));
                 if (absf_139C88(frontDot) > absf_139C88(sideDot) && absf_139C88(frontDot) > absf_139C88(upDot)) {
-                    anim = frontDot < 0.0f ? 0x162 : 0x163;
+                    anim = frontDot < 0.0f ? 354 : 355;
                 } else if (absf_139C88(upDot) > absf_139C88(sideDot) && absf_139C88(upDot) > absf_139C88(frontDot)) {
                     if (upDot < 0.0f) {
-                        anim = 0x15E;
+                        anim = 350;
                     } else {
                         int k;
                         if (vu0Len_139C88(V4_139C88(RIDER_139C88, 0x1E0)) > 2222.22216796875f) {
-                            anim = 0x160;
+                            anim = 352;
                             k = AIrand() & 3;
                         } else {
-                            anim = 0x160;
+                            anim = 352;
                             k = AIrand() & 1;
                         }
                         if (k != 0) {
-                            anim = k == 1 ? 0x161 : 0x15F;
+                            anim = k == 1 ? 353 : 351;
                         }
                     }
                 } else {
-                    anim = sideDot < 0.0f ? 0x165 : 0x164;
+                    anim = sideDot < 0.0f ? 357 : 356;
                 }
             } else if (*(int*)(r4 + 0x330) == 0) {
-                float tiltDot = vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 0x3A0));
+                float tiltDot = vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 928));
                 float k = cBEStatInterface_getLandingAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER_139C88 + 0x86C), *(int*)(RIDER_139C88 + 0xB34)) * 0.29999101161956787f + 1.0f;
                 if (k * 0.699962317943573f < tiltDot) {
-                    anim = 0x15C;
+                    anim = 348;
                 } else if (tiltDot < k * -0.699962317943573f) {
-                    anim = 0x15D;
+                    anim = 349;
                 }
             }
         }
-        if (anim != 0x1B6) {
+        if (anim != 438) {
             sInfo_139C88 info;
             info.pos = hit.pos;
             info.dir = vu0Normalize_139C88(V4_139C88(RIDER_139C88, 0x1E0));
@@ -1412,9 +1412,9 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
                 } else if (*(int*)(RIDER_139C88 + 0x330) != 0) {
                     if (func_0011FEE8(RIDER_139C88) != 1) {
                         if (*(int*)(RIDER_139C88 + 0x330) == 1) {
-                            cRiderAnimBase_play_i(*(void**)(RIDER_139C88 + 0x784), 0x1A, 0, -1.0f);
+                            cRiderAnimBase_play_i(*(void**)(RIDER_139C88 + 0x784), 26, 0, -1.0f);
                         } else {
-                            cRiderAnimBase_play_i(*(void**)(RIDER_139C88 + 0x784), 0x22, 0, -1.0f);
+                            cRiderAnimBase_play_i(*(void**)(RIDER_139C88 + 0x784), 34, 0, -1.0f);
                         }
                         cRider_setControlState_9C88(RIDER_139C88, 1);
                     }
@@ -1516,7 +1516,7 @@ extern "C" float cAirMotion_intersectBoard(cAirMotion* self, char* hit)
     char* rider = (char*)self->mRider;
     sVec4HP* pt = (sVec4HP*)(*(char**)(*(char**)(rider + 0x780) + 0x2C) + (*(int*)(rider + 0x8A0) << 5));
     sVec4HP dir = *(sVec4HP*)(rider + 0x180);
-    char seg[0xB0];
+    char seg[176];
     func_0032E100(seg, vu0Sub_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), vu0Add_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), 2, 0.574999988079071f);
     char* rider2 = (char*)self->mRider;
     float hitParam = func_003342D0(*(void**)(rider2 + 0x860), seg, hit, *(int*)(rider2 + 0x864));
@@ -1554,7 +1554,7 @@ extern "C" void cAirMotion_chooseFakieLandAnim(cAirMotion* self, float normSpeed
 {
     if (normSpeed < -2222.22216796875f)
     {
-        cRiderAnimBase_play_i(*(void**)((char*)self->mRider + 0x784), 0x41, 0, -1.0f);
+        cRiderAnimBase_play_i(*(void**)((char*)self->mRider + 0x784), 65, 0, -1.0f);
         *(int*)((char*)self->mRider + 0x2DC) = 0;
     }
     else
@@ -1588,13 +1588,13 @@ extern "C" void cAirMotion_chooseLandAnim(cAirMotion* self, float normSpeed)
         float pi = 3.1415929794311523f;
         float spinRate = *(float*)(rider + 0x2DC);
         if (spinRate < -pi)
-            cRiderAnimBase_play_i(*(void**)(rider + 0x784), 0x42, 0, -1.0f);
+            cRiderAnimBase_play_i(*(void**)(rider + 0x784), 66, 0, -1.0f);
         else if (spinRate > pi)
-            cRiderAnimBase_play_i(*(void**)(rider + 0x784), 0x43, 0, -1.0f);
+            cRiderAnimBase_play_i(*(void**)(rider + 0x784), 67, 0, -1.0f);
         else if (normSpeed < -1250.0f)
             cRiderAnimBase_play_i(*(void**)(rider + 0x784), 0x3E, 0, -1.0f);
         else
-            cRiderAnimBase_play_i(*(void**)(rider + 0x784), 0x3D, 0, -1.0f);
+            cRiderAnimBase_play_i(*(void**)(rider + 0x784), 61, 0, -1.0f);
     }
 }
 #endif
@@ -2658,7 +2658,7 @@ extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
         char* rider = RIDER_BFA8;
         *(int*)(*(char**)(rider + 0xAA0) + 0x28) = tbl.v[*(int*)(*(char**)(rider + 0x77C) + 0x394)];
     } else {
-        *(int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 0x16;
+        *(int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 22;
     }
     cRider_checkObjectCollisions(RIDER_BFA8, 0);
     *(int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 3;
@@ -2861,24 +2861,24 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
     float penetration = func_003342D0(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
     if (penetration < 0.0f) { cWorldRider__cWorldRider(&sph, 2); return; }
     {
-        float dot = vu0Dot_13C140(RV(0x370), hit.normal);
+        float dot = vu0Dot_13C140(RV(880), hit.normal);
         if (dot < -0.9998999834060669f) { cWorldRider__cWorldRider(&sph, 2); return; }
         if (dot < 0.0f)
-            hit.normal = vu0Normalize_13C140(vu0Sub_13C140(hit.normal, vu0Scale_13C140(RV(0x370), dot)));
+            hit.normal = vu0Normalize_13C140(vu0Sub_13C140(hit.normal, vu0Scale_13C140(RV(880), dot)));
     }
     {
         sVec4HP push = vu0Scale_13C140(vu0Scale_13C140(hit.normal, 1.100000023841858f), penetration);
         func_00106538(RIDER, &push);
         cRider_updateOrientationImplicit(RIDER);
-        sVec4HP posDelta = vu0Sub_13C140(SV(0x30), RV(0x110));
+        sVec4HP posDelta = vu0Sub_13C140(SV(0x30), RV(272));
         float len = vu0Length_13C140(posDelta);
-        SV(0x30) = RV(0x110);
+        SV(0x30) = RV(272);
         if (2.0f < len) {
             self->StuckSec = 0.0f;
         } else {
             self->StuckSec += 0.01666666753590107f;
             if (0.5f < self->StuckSec) {
-                sVec4HP fwd = RV(0x1B0);
+                sVec4HP fwd = RV(432);
                 float dd = vu0Dot_13C140(fwd, hit.normal);
                 float spd = 1111.111083984375f;
                 if (dd < -0.9990000128746033f) {
@@ -2947,7 +2947,7 @@ struct sVEntry0013C5E0 {
 extern "C" void cRailslideMotion_writeToReplayFrame(cRailslideMotion* self, void* obj)
 {
     sVEntry0013C5E0* vt = *(sVEntry0013C5E0**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0x50);
+    vt[1].fn((char*)obj + vt[1].delta, self, 80);
 }
 #endif
 
@@ -2970,7 +2970,7 @@ struct sVEntry0013C618 {
 extern "C" void cRailslideMotion_readFromReplayFrame(cRailslideMotion* self, void* obj)
 {
     sVEntry0013C618* vt = *(sVEntry0013C618**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0x50);
+    vt[2].fn((char*)obj + vt[2].delta, self, 80);
 }
 #endif
 
@@ -3095,8 +3095,8 @@ extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
     self->m10 = aiTick;
     int ticksOutOfGround = aiTick - self->m14;
     float penaltyFraction;
-    if (ticksOutOfGround > 0x28)
-        penaltyFraction = (ticksOutOfGround - 0x28) * 0.010000000707805157f + 0.699999988079071f;
+    if (ticksOutOfGround > 40)
+        penaltyFraction = (ticksOutOfGround - 40) * 0.010000000707805157f + 0.699999988079071f;
     else
         penaltyFraction = 0.699999988079071f;
     vu0ScaleEq_13C7A8(*(sHpVec4_13C7A8*)(self->mRider + 0x1E0), penaltyFraction <? 1.0f);
@@ -3286,7 +3286,7 @@ extern "C" float cGroundMotion_getBoostForce(cGroundMotion* self, char* snow)
     if (0.0f < boostDelta)
     {
         func_001493D8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34));
-        float getGoingFactor = cRiderAnimBase_getCurrentAnimID(*(void**)(RIDER + 0x784), 2) == 0x16 ? 0.20000000298023224f : 0.0f;
+        float getGoingFactor = cRiderAnimBase_getCurrentAnimID(*(void**)(RIDER + 0x784), 2) == 22 ? 0.20000000298023224f : 0.0f;
         int st = *(int*)(RIDER + 0x434);
         if (st == 11 || st == 12 || st == 13)
             boostDelta *= hpAbs_13C948(*(float*)(RIDER + 0x378));
@@ -3720,30 +3720,30 @@ struct sVEnt_13D1B8 { short delta; short index; void (*fn)(void*, void*); };
  */
 extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8* out, float* dist)
 {
-    RV(0x380) = RV(0x370);
-    sVec4HP pos = vu0Add_13D1B8(RV(0x110), vu0Scale_13D1B8(RV(0x3B0), *(float*)(*(char**)(RIDER + 0x780) + 0x140) * (*(float*)(RIDER + 0x1F0) * 45.0f)));
-    sVec4HP lineBottom = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(0x370), -100.0f));
-    sVec4HP lineTop = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(0x370), 200.0f));
-    char seg[0xB0];
+    RV(0x380) = RV(880);
+    sVec4HP pos = vu0Add_13D1B8(RV(272), vu0Scale_13D1B8(RV(944), *(float*)(*(char**)(RIDER + 0x780) + 0x140) * (*(float*)(RIDER + 0x1F0) * 45.0f)));
+    sVec4HP lineBottom = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(880), -100.0f));
+    sVec4HP lineTop = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(880), 200.0f));
+    char seg[176];
     func_0032E100(seg, lineBottom, lineTop, 2, 0.5f);
     sHit_13D1B8 hits[64];
     int n = func_00333EF8(*(void**)(RIDER + 0x860), seg, hits, 0x40, *(int*)(RIDER + 0x864));
     if (n == 0) {
-        RV(0x370) = t4vect_ZAxis;
-        RV(0x3D0) = D_004FF120_v;
-        RV(0x3A0) = vu0Normalize_13D1B8(vu0SubV_13D1B8(RV(0x1B0), vu0Scale_13D1B8(RV(0x370), vu0DotV_13D1B8(RV(0x1B0), RV(0x370)))));
-        RV(0x3B0) = vu0Cross_13D1B8(RV(0x370), RV(0x3A0));
+        RV(880) = t4vect_ZAxis;
+        RV(976) = D_004FF120_v;
+        RV(928) = vu0Normalize_13D1B8(vu0SubV_13D1B8(RV(432), vu0Scale_13D1B8(RV(880), vu0DotV_13D1B8(RV(432), RV(880)))));
+        RV(944) = vu0Cross_13D1B8(RV(880), RV(928));
         *(int*)(RIDER + 0x438) = 0;
         *dist = 0.0f;
         return 0;
     }
     int best = 0;
-    float up0 = vu0Dot_13D1B8(hits[0].normal, RV(0x370));
+    float up0 = vu0Dot_13D1B8(hits[0].normal, RV(880));
     float bestDiff = absf_13D1B8(hits[0].dist - 0.5f);
     int ok = up0 >= 0.3f;
     for (int i = 1; i < n; i++) {
         float paramDiff = absf_13D1B8(hits[i].dist - 0.5f);
-        float up = vu0Dot_13D1B8(hits[i].normal, RV(0x370));
+        float up = vu0Dot_13D1B8(hits[i].normal, RV(880));
         if (!ok) {
             if (up >= 0.3f) {
                 bestDiff = paramDiff;
@@ -3783,14 +3783,14 @@ extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8
     if (*(int*)(RIDER + 0x438) == -1) {
         *(int*)(RIDER + 0x438) = 0;
     }
-    RV(0x370) = out->normal;
-    RV(0x460) = out->pos;
-    RV(0x3D0) = out->v20;
-    RV(0x3A0) = vu0Normalize_13D1B8(vu0SubV_13D1B8(RV(0x1B0), vu0Scale_13D1B8(RV(0x370), vu0DotV_13D1B8(RV(0x1B0), RV(0x370)))));
-    RV(0x3B0) = vu0Cross_13D1B8(RV(0x370), RV(0x3A0));
+    RV(880) = out->normal;
+    RV(1120) = out->pos;
+    RV(976) = out->v20;
+    RV(928) = vu0Normalize_13D1B8(vu0SubV_13D1B8(RV(432), vu0Scale_13D1B8(RV(880), vu0DotV_13D1B8(RV(432), RV(880)))));
+    RV(944) = vu0Cross_13D1B8(RV(880), RV(928));
     sVec4HP delta = vu0Sub_13D1B8(pos, out->pos);
-    *(float*)(RIDER + 0x454) = vu0Dot_13D1B8(delta, RV(0x370));
-    *dist = vu0Length_13D1B8(vu0Sub_13D1B8(delta, vu0Scale_13D1B8(RV(0x370), *(float*)(RIDER + 0x454))));
+    *(float*)(RIDER + 0x454) = vu0Dot_13D1B8(delta, RV(880));
+    *dist = vu0Length_13D1B8(vu0Sub_13D1B8(delta, vu0Scale_13D1B8(RV(880), *(float*)(RIDER + 0x454))));
     return 1;
 }
 #undef RV
@@ -4268,7 +4268,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     ch *= 1.0f - dt * 20.0f;
     ch = clamp_13D818(ch, lo2, hi2);
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 10 || cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 4 ||
-        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 5 || cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) == 0x16)
+        cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 5 || cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) == 22)
         ch = 0.0f;
     cRider* rider = self->mRider;
     rider->mSlewed[18].target = ch * scale;
@@ -4408,7 +4408,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         int layer = cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2);
         int anim = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
         int onSlope = func_0011FEE8(self->mRider) != 1 && (self->mRider->mSurfaceType == 2 || self->mRider->mSurfaceType == 3);
-        int brace = !onSlope && layer != 10 && layer != 5 && anim != 0x16 && anim != 2;
+        int brace = !onSlope && layer != 10 && layer != 5 && anim != 22 && anim != 2;
         if (onSlope) {
             float tgt = curve_13D818(D_004A1128, vu0Len_13D818(rel) * 0.035999998450279236f);
             cRider* rider2 = self->mRider;
@@ -4584,13 +4584,13 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
         int idx = *(int*)(rider + 0x438);
         char* snow = (char*)SSXApp->Game->SurfPropCache + idx * 0xB0;
         int fl;
-        if (idx == 0x12) {
+        if (idx == 18) {
             sInfo_13F178 info;
             info.pos = *(sVec4HP*)(rider + 0x110);
             info.dir = vu0Normalize_13F178(*(sVec4HP*)(rider + 0x1E0));
             info.up = *(sVec4HP*)(RIDER_13F178 + 0x370);
             info.f30 = 0;
-            cRider_flagEventWipeout(RIDER_13F178, 0x168, 0, *(int*)(RIDER_13F178 + 0x438), &info);
+            cRider_flagEventWipeout(RIDER_13F178, 360, 0, *(int*)(RIDER_13F178 + 0x438), &info);
         } else if (*(int*)(snow + 0x44) != 0 || (fl = *(short*)(rider + 0x2D4), (fl & 2) != 0)) {
             cRider_checkForReset(rider, 0, 1);
         }
@@ -4834,7 +4834,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
     char* rider = RIDER;
     cWorldRider_cWorldRider(&sph, *(void**)(rider + 0xAA0), !riderFlag_13F488(rider));
     sph.f8 = 1;
-    sph.dir = RV(0x370);
+    sph.dir = RV(880);
     float penetration = func_003342D0(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
     if (penetration < 0.0f)
         { cWorldRider__cWorldRider(&sph, 2); return; }
@@ -4846,11 +4846,11 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
         }
     }
     {
-        float dot = vu0Dot_13F488(RV(0x370), hit.normal);
+        float dot = vu0Dot_13F488(RV(880), hit.normal);
         if (dot < -0.9998999834060669f)
             { cWorldRider__cWorldRider(&sph, 2); return; }
         if (dot < 0.0f)
-            hit.normal = vu0Normalize_13F488(vu0Sub_13F488(hit.normal, vu0Scale_13F488(RV(0x370), dot)));
+            hit.normal = vu0Normalize_13F488(vu0Sub_13F488(hit.normal, vu0Scale_13F488(RV(880), dot)));
     }
     {
         sVec4HP push = vu0Scale_13F488(vu0Scale_13F488(hit.normal, 1.100000023841858f), penetration);
@@ -5754,7 +5754,7 @@ void* func_001408F0(void* self)
 INCLUDE_ASM("ai/control/handplantcontrol", func_001408F8);
 #ifdef SKIP_ASM
 extern "C" int func_001408F8(int rider) {
-    return rider + 0x110;
+    return rider + 272;
 }
 #endif
 //100%
@@ -5902,35 +5902,35 @@ extern "C" int func_00140A48(void *rider) {
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A50);
 #ifdef SKIP_ASM
 extern "C" int func_00140A50(void *rider) {
-    return (*(int *)((char*)(rider) + (0x434))) < 0x11;
+    return (*(int *)((char*)(rider) + (0x434))) < 17;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A60);
 #ifdef SKIP_ASM
 extern "C" int func_00140A60(void *rider) {
-    return (unsigned int) ((*(int *)((char*)(rider) + (0x434))) - 0xB) < 3U;
+    return (unsigned int) ((*(int *)((char*)(rider) + (0x434))) - 11) < 3U;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A70);
 #ifdef SKIP_ASM
 extern "C" int func_00140A70(int rider) {
-    return rider + 0xAAC;
+    return rider + 2732;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A78);
 #ifdef SKIP_ASM
 extern "C" int func_00140A78(int rider) {
-    return rider + 0x490;
+    return rider + 1168;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00140A80);
 #ifdef SKIP_ASM
 extern "C" int func_00140A80(int rider) {
-    return rider + 0x4A0;
+    return rider + 1184;
 }
 #endif
 //100%
@@ -6563,7 +6563,7 @@ extern "C" int func_001411A0(cWipeoutMotion* wipeoutMotion) {
 INCLUDE_ASM("ai/control/handplantcontrol", func_001411A8);
 #ifdef SKIP_ASM
 extern "C" int func_001411A8(int wipeoutMotion) {
-    return wipeoutMotion + 0x50;
+    return wipeoutMotion + 80;
 }
 #endif
 //100%

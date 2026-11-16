@@ -81,7 +81,7 @@ int cBigFile_close(cBigFile* self)
 {
     int result = 1;
     if (self->field_0x4 != 0) {
-        result = func_003DEDC0_ret(self->field_0x0, 0x64) != 0;
+        result = func_003DEDC0_ret(self->field_0x0, 100) != 0;
     }
     self->field_0x4 = 0;
     return result;
@@ -110,12 +110,12 @@ int cBigFile_open_impl(cBigFile* self, const char* name, int memclass) __asm__("
  */
 int cBigFile_open_impl(cBigFile* self, const char* name, int memclass)
 {
-    if (func_003DEE18(name, 0x64) == 0) {
+    if (func_003DEE18(name, 100) == 0) {
         return 0;
     }
     int saved = D_004A2E78;
     D_004A2E78 = memclass;
-    if (func_003DED50(name, memclass, 0x64, self) != 0) {
+    if (func_003DED50(name, memclass, 100, self) != 0) {
         self->field_0x4 = 1;
     }
     D_004A2E78 = saved;

@@ -213,7 +213,7 @@ extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r)
     } else {
         h = 30.0f;
     }
-    float m = D_004C8C58_f[0x48 / 4];
+    float m = D_004C8C58_f[72 / 4];
     ((sTrophyBox_20EC18*)self)->pos = sVec2_20EC18(r->x + r->w * 0.5f, (r->y + r->h) - h);
     ((sTrophyBox_20EC18*)self)->top = r->y;
     ((sTrophyBox_20EC18*)self)->bottom = r->y + r->h - h - m;
@@ -486,7 +486,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     *((cGfx_EDA0*)GrMan)->stateTop = D_00501420_EDA0;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_20 = 0;
-    ((cGfx_EDA0*)GrMan)->stateTop->f4_12 = 0x14;
+    ((cGfx_EDA0*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_2 = 5;
     ((cGfx_EDA0*)GrMan)->SetTexture(t4mat_Identity);
 
@@ -665,7 +665,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
             x -= D_004C8BC8_EDA0[i].rel * 0.0050000004f;
             char* r = race->riders[i];
             if (((cBeing_EDA0*)(r + 0x6C0))->isHuman()) {
-                prim = 0xD;
+                prim = 13;
                 icon = 3;
             } else {
                 prim = 0xE;
@@ -786,7 +786,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
             p.z = 0.0f;
             p.w = 1.0f;
             v[3].pos = p;
-            ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(0xB);
+            ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(11);
             *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = t->GetHandle();
             ((cGfx_EDA0*)GrMan)->DrawPrims(4, v, 0);
         }
@@ -993,7 +993,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     *((cGfx_FB40*)GrMan)->stateTop = D_00501420_FB40;
     ((cGfx_FB40*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_FB40*)GrMan)->stateTop->f4_20 = 0;
-    ((cGfx_FB40*)GrMan)->stateTop->f4_12 = 0x14;
+    ((cGfx_FB40*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_FB40*)GrMan)->stateTop->f4_2 = 5;
     ((cGfx_FB40*)GrMan)->SetTexture(t4mat_Identity);
 
@@ -1049,7 +1049,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
         if (me != i) {
             char* r = race->riders[i];
             if (((cBeing_FB40*)(r + 0x6C0))->isHuman()) {
-                prim = 0xD;
+                prim = 13;
                 icon = 10;
             } else {
                 prim = 0xE;
@@ -1232,7 +1232,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
                 p.w = 1.0f;
                 v[3].pos = p;
             }
-            ((cGfx_FB40*)GrMan)->stateTop->SetPrim(0xB);
+            ((cGfx_FB40*)GrMan)->stateTop->SetPrim(11);
             *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = t->GetHandle();
             ((cGfx_FB40*)GrMan)->DrawPrims(4, v, 0);
         }
@@ -1552,11 +1552,11 @@ extern "C" int func_00210B58(void* self, int ok)
 {
     if (ok != 0) {
         char* name = (char*)self + 0x9C;
-        if (func_00258160((int)cGameComm_mGameComm, name, 0x41) != 0) {
+        if (func_00258160((int)cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8(self, name, 0);
         } else {
             // PORT: func_00210F40's unit definition takes these string pointers as int.
-            func_00210F40(self, 0, (int)D_004A2560, (int)D_004A2560, 0, 0, 0x3D);
+            func_00210F40(self, 0, (int)D_004A2560, (int)D_004A2560, 0, 0, 61);
         }
     }
     return 1;
@@ -1637,7 +1637,7 @@ extern "C" void func_00210D20(void* self)
     }
     if (*(int*)((char*)self + 0x40) != 0) {
         char* name = (char*)self + 0x9C;
-        if (func_00258160((int)cGameComm_mGameComm, name, 0x41) != 0) {
+        if (func_00258160((int)cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8(self, name, 0);
         }
     }
@@ -1649,7 +1649,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210DD0);
 #ifdef SKIP_ASM
 extern "C" void func_00210DD0(void* self, int popup, int event)
 {
-    if (event == 0x16) {
+    if (event == 22) {
         if (popup == *(int*)((char*)self + 0xe0)) {
             *(int*)((char*)self + 0xe0) = 0;
         }
@@ -1683,13 +1683,13 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
     case 5:
         if (*(int*)((char*)self + 0xE0) == 0) {
             // PORT: func_00210F40's unit definition takes these string pointers as int.
-            func_00210F40(self, 0, (int)D_004A2560, (int)D_004A2560, 0, 0, 0x3D);
-            cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 0x4B, 1, 2);
+            func_00210F40(self, 0, (int)D_004A2560, (int)D_004A2560, 0, 0, 61);
+            cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 75, 1, 2);
         }
         break;
-    case 0xD: {
+    case 13: {
         char* name = (char*)self + 0x9C;
-        if (func_00258160((int)cGameComm_mGameComm, name, 0x41) != 0) {
+        if (func_00258160((int)cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8(self, name, 0);
         }
         char* p = *(char**)((char*)self + 0xE0) + 0x74;
@@ -1734,13 +1734,13 @@ extern char str_cKeyboardPopup_b[];
 
 extern "C" void func_00210FA0(void* self, int a1, int password, int miscData, int maxChars)
 {
-    void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(0x444, str_cKeyboardPopup_b, 0x100, 0), *(void**)((char*)self + 0x10), self, password, 0xF);
+    void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup_b, 0x100, 0), *(void**)((char*)self + 0x10), self, password, 0xF);
     *(void**)((char*)self + 0xE0) = w;
     cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, w);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x18) = miscData;
     cKeyboardPopup_setMaxCharacters(*(void**)((char*)self + 0xE0), maxChars);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x43C) = 0;
-    cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 0x4B, 1, 2);
+    cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 75, 1, 2);
     func_001CE468(*(void**)((char*)self + 0xE0), 1);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x440) = 1;
     *(int*)((char*)self + 0xDC) = a1;
@@ -1787,7 +1787,7 @@ extern "C" sOVTrophy_1088* cOVState_PROFILE_cOVState_PROFILE(sOVTrophy_1088* sel
 {
     int idx = 0;
     cFEMemCard_cFEMemCard(self, pEngine, 0);
-    self->f0C = 0x24;
+    self->f0C = 36;
     self->vtable = cOVState_PROFILE_vtbl;
     self->f278 = parentOverlay;
     self->f1CC = 0;

@@ -1353,7 +1353,7 @@ public:
  */
 extern "C" void cRigidBody_writeToReplayFrame(cRigidBody* self, cRigidBody_writeToReplayFrame_cObj* obj)
 {
-    obj->v01(self, 0x50);
+    obj->v01(self, 80);
 }
 #endif
 
@@ -1377,7 +1377,7 @@ public:
  */
 extern "C" void cRigidBody_readFromReplayFrame(void* self, cRigidBody_readFromReplayFrame_cObj* obj)
 {
-    obj->v02(self, 0x50);
+    obj->v02(self, 80);
 }
 #endif
 
@@ -1812,7 +1812,7 @@ extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
     self->vt = cRollerModifier_vtbl;
     SphereTree_SphereTree(self->mover);
     cRigidBody_readFromReplayFrame(self->body, (cRigidBody_readFromReplayFrame_cObj*)stream);
-    stream->v02(self->data, 0x28);
+    stream->v02(self->data, 40);
     self->id = stream->v03();
     void* r = tSphTreeList_getMeshTree(func_003A6CD8(cObjectInterface_getWorld_DF70(), (void*)self->id), 0);
     func_00327CC8(self->mover, r);
@@ -1867,7 +1867,7 @@ public:
 extern "C" void cRollerModifier_writeToReplayFrame(void* self, cRollerModifier_writeToReplayFrame_cObj* obj)
 {
     cRigidBody_writeToReplayFrame((cRigidBody*)((char*)self + 0x30), (cRigidBody_writeToReplayFrame_cObj*)obj);
-    obj->v01((char*)self + 0x4, 0x28);
+    obj->v01((char*)self + 0x4, 40);
     obj->v05(*(void**)((char*)self + 0xD0));
 }
 #endif
@@ -2476,7 +2476,7 @@ extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* selfv)
         }
     }
     sel_F218(self, self->index);
-    ms_F218(&self->f24, 0, 0xC4);
+    ms_F218(&self->f24, 0, 196);
     self->f24 = self->count;
     for (i = 0; i < self->count; i++) {
         sRailItemF218* item = *(sRailItemF218**)(*(char**)(self->owner + 0x94) + (i << 2) + 4);
@@ -2765,7 +2765,7 @@ struct sRailSerVEntry {
 extern "C" void* func_0035F788(cUVScrollModifier* self, void* stream)
 {
     sRailSerVEntry* vt = *(sRailSerVEntry**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, self, 0x50);
+    vt[2].fn((char*)stream + vt[2].delta, self, 80);
     return ((void*)self);
 }
 #endif
@@ -3027,7 +3027,7 @@ public:
  */
 extern "C" void cUVScrollModifier_writeToReplayFrame(cUVScrollModifier* self, cUVScrollModifier_writeToReplayFrame_cObj* obj)
 {
-    obj->v01(self, 0x50);
+    obj->v01(self, 80);
 }
 #endif
 
@@ -4962,7 +4962,7 @@ extern "C" int cMoveNode_getMaterialBlock(cMoveNode* self)
     if (cond != 0) {
         int matRec = *(int*)(modBlock + 8);
         if (matRec != 0) {
-            return matRec + 0x24;
+            return matRec + 36;
         }
         return 0;
     }
@@ -5394,7 +5394,7 @@ extern "C" void func_003612C0(void* self)
 INCLUDE_ASM("object/railmodifier", func_003612F8);
 #ifdef SKIP_ASM
 extern "C" int func_003612F8(int frame) {
-    return frame + 0x90;
+    return frame + 144;
 }
 #endif
 //100%
@@ -7382,7 +7382,7 @@ extern "C" void func_003623D8(sGifPacket* pkt, int x, int w, int y, int height)
     pkt->cur[0] = scissor;
     pkt->cur[1] = 0x40;
     pkt->cur[2] = scissor;
-    pkt->cur[3] = 0x41;
+    pkt->cur[3] = 65;
     pkt->cur += 4;
     pkt->qwc += 2;
 }
@@ -7417,34 +7417,34 @@ extern "C" void func_00362478(sGifPacket* pkt, int mode, int fix, int ctx)
 {
     switch (ctx) {
     case 0:
-        pkt->cur[1] = 0x42;
+        pkt->cur[1] = 66;
         break;
     case 1:
-        pkt->cur[1] = 0x43;
+        pkt->cur[1] = 67;
         break;
     default:
-        pkt->cur[1] = 0x42;
+        pkt->cur[1] = 66;
         break;
     }
     switch (mode) {
-    case 0: pkt->cur[0] = 0xAA; break;
-    case 1: pkt->cur[0] = 0x2A; break;
-    case 5: pkt->cur[0] = 0x44; break;
-    case 6: pkt->cur[0] = 0x46; break;
-    case 7: pkt->cur[0] = 0x48; break;
-    case 8: pkt->cur[0] = 0x81; break;
-    case 9: pkt->cur[0] = 0x42; break;
-    case 4: pkt->cur[0] = 0x89; break;
-    case 3: pkt->cur[0] = 0x6A; break;
+    case 0: pkt->cur[0] = 170; break;
+    case 1: pkt->cur[0] = 42; break;
+    case 5: pkt->cur[0] = 68; break;
+    case 6: pkt->cur[0] = 70; break;
+    case 7: pkt->cur[0] = 72; break;
+    case 8: pkt->cur[0] = 129; break;
+    case 9: pkt->cur[0] = 66; break;
+    case 4: pkt->cur[0] = 137; break;
+    case 3: pkt->cur[0] = 106; break;
     case 11: pkt->cur[0] = ((ulong)fix << 32) | 0x64; break;
     case 12: pkt->cur[0] = ((ulong)fix << 32) | 0x68; break;
     case 13:
     case 14: pkt->cur[0] = ((ulong)fix << 32) | 0x88; break;
     case 2: pkt->cur[0] = ((ulong)0x80 << 32) | 0x68; break;
-    case 16: pkt->cur[0] = 0x98; break;
-    case 17: pkt->cur[0] = 0x58; break;
+    case 16: pkt->cur[0] = 152; break;
+    case 17: pkt->cur[0] = 88; break;
     case 10:
-    case 21: pkt->cur[0] = 0x49; break;
+    case 21: pkt->cur[0] = 73; break;
     case 15:
     case 18:
     case 19:
@@ -7503,13 +7503,13 @@ extern "C" void func_00362660(sGifPacket* pkt, unsigned int zbp, unsigned int ps
     ulong reg;
     switch (ctx) {
     case 0:
-        reg = 0x4E;
+        reg = 78;
         break;
     case 1:
-        reg = 0x4F;
+        reg = 79;
         break;
     default:
-        reg = 0x4E;
+        reg = 78;
         break;
     }
     pkt->cur[0] = (ulong)zbp | ((ulong)(psm - 0x30) << 24) | ((zmsk == 1) ? ((ulong)1 << 32) : 0);
@@ -7537,13 +7537,13 @@ extern "C" void func_003626D8(sRmGsPacket* pkt, int ztest, int atest, unsigned i
 
     switch (ctx) {
     case 0:
-        reg = 0x47;
+        reg = 71;
         break;
     case 1:
-        reg = 0x48;
+        reg = 72;
         break;
     default:
-        reg = 0x47;
+        reg = 71;
         break;
     }
 
@@ -7731,11 +7731,11 @@ extern "C" void func_003629B8(sRmBatch_29B8* self)
     set2_29B8(ctx, 0x1FFFFC00, 10, 0);
     set1_29B8(ctx, 0x1800000, 23, 1);
     set1_29B8(ctx, 0x300000, 20, 0);
-    set1_29B8(ctx, 0xFF000, 12, 0x14);
+    set1_29B8(ctx, 0xFF000, 12, 20);
     set0_29B8(ctx, 0x30, 4, 3);
     set0_29B8(ctx, 0x3C0, 6, 3);
     set1_29B8(ctx, 0x7C, 2, 1);
-    set1_29B8(ctx, 0xF80, 7, 0x11);
+    set1_29B8(ctx, 0xF80, 7, 17);
     self->a = save_29B8(self, ctx);
     set1_29B8(ctx, 0xF80, 7, 2);
     self->b = save_29B8(self, ctx);
@@ -7745,7 +7745,7 @@ extern "C" void func_003629B8(sRmBatch_29B8* self)
     set2_29B8(ctx, 0x1FFFFC00, 10, 0);
     set1_29B8(ctx, 0x1800000, 23, 1);
     set1_29B8(ctx, 0x300000, 20, 3);
-    set1_29B8(ctx, 0xFF000, 12, 0x5C);
+    set1_29B8(ctx, 0xFF000, 12, 92);
     self->c = save_29B8(self, ctx);
     self->base = self->count;
 }
@@ -8315,7 +8315,7 @@ extern "C" void func_00364050(char* self)
     int n = *(int*)(self + 0x67CA4);
     sRmSortItem4050* src = (sRmSortItem4050*)(self + 0x67CA8);
     int (*hist)[257] = (int (*)[257])func_0038F460(ring, 0, -1, 0);
-    MEM_fill(hist, 0, 0x1010);
+    MEM_fill(hist, 0, 4112);
     for (int i = 0; i < n; i++) {
         unsigned int key = src[i].key;
         hist[0][(key & 0xFF) + 1]++;
@@ -8794,18 +8794,18 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[11];
             ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[12];
             ((cQuad128*)pk.p)[8] = ((cQuad128*)M)[13];
-            pk.p[0x12] = 0x0000008000000080;
-            pk.p[0x13] = 0x0000008000000080;
-            pk.p[0x14] = 0x302E400000008000;
-            pk.p[0x15] = 0x412;
-            pk.p[0x16] = 0x312E400000008000;
-            pk.p[0x17] = 0x412;
+            pk.p[18] = 0x0000008000000080;
+            pk.p[19] = 0x0000008000000080;
+            pk.p[20] = 0x302E400000008000;
+            pk.p[21] = 1042;
+            pk.p[22] = 0x312E400000008000;
+            pk.p[23] = 1042;
             pk.p[0x18] = 0x302EC00000008000;
-            pk.p[0x19] = 0x412;
-            pk.p[0x1A] = 0x312EC00000008000;
-            pk.p[0x1B] = 0x412;
+            pk.p[25] = 1042;
+            pk.p[26] = 0x312EC00000008000;
+            pk.p[27] = 1042;
             pk.p[0x1C] = 0;
-            pk.p[0x1D] = 0x6C2A020000000000;
+            pk.p[29] = 0x6C2A020000000000;
             char* g = cBezierMan_TheBezierMan;
             pk.p[0x1E] = ((ulong)*(int*)(g + 0x1A0) << 32) | 0x30000012;
             pk.p[0x1F] = 0;
@@ -8867,8 +8867,8 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[11];
             ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[12];
             ((cQuad128*)pk.p)[8] = ((cQuad128*)M)[13];
-            pk.p[0x12] = 0x000002C20000010C;
-            pk.p[0x13] = 0;
+            pk.p[18] = 0x000002C20000010C;
+            pk.p[19] = 0;
             pk.p += 0x14;
             pk.p[0] = ((ulong)(int)D_0044B140 << 32) | 0x30000007;
             pk.p[1] = 0;
@@ -9008,12 +9008,12 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[11];
             ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[12];
             ((cQuad128*)pk.p)[8] = ((cQuad128*)M)[13];
-            pk.p[0x12] = 0x10000005;
-            pk.p[0x13] = 0;
-            pk.p[0x14] = 0;
-            pk.p[0x15] = 0x6C04039200000000;
-            pk.p[0x16] = 0x312E400000008000;
-            pk.p[0x17] = 0x412;
+            pk.p[18] = 0x10000005;
+            pk.p[19] = 0;
+            pk.p[20] = 0;
+            pk.p[21] = 0x6C04039200000000;
+            pk.p[22] = 0x312E400000008000;
+            pk.p[23] = 1042;
             sMtx_4CD0 m = M->world;
             m = D_004FFB80_4CD0 * m;
             ((cQuad128*)pk.p)[0xC] = *(cQuad128*)&m.m[0];
@@ -9039,11 +9039,11 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[12];
             ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[13];
             pk.p[0x10] = 0x10000005;
-            pk.p[0x11] = 0;
-            pk.p[0x12] = 0;
-            pk.p[0x13] = 0x6C04039200000000;
-            pk.p[0x14] = 0x312E400000008000;
-            pk.p[0x15] = 0x412;
+            pk.p[17] = 0;
+            pk.p[18] = 0;
+            pk.p[19] = 0x6C04039200000000;
+            pk.p[20] = 0x312E400000008000;
+            pk.p[21] = 1042;
             sMtx_4CD0 m = M->world;
             m = D_004FFB80_4CD0 * m;
             ((cQuad128*)pk.p)[0xB] = *(cQuad128*)&m.m[0];
@@ -9151,11 +9151,11 @@ extern "C" void func_00365E40(void* list, int a1, int a2, void* pool)
     self->links[0].fC = -1;
     self->links[0].next = -1;
     self->links[0].prev = -1;
-    for (i = 1; i < 0x123; i++) {
+    for (i = 1; i < 291; i++) {
         self->links[i].flags &= ~1;
         self->links[i].next = i + 1;
     }
-    self->links[0x123].next = -1;
+    self->links[291].next = -1;
     for (i = 0; i < 17; i++) {
         self->slotsA[i].b = -1;
         self->slotsA[i].a = -1;
@@ -9951,7 +9951,7 @@ extern "C" void func_003670E0(void* self)
     int i;
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x4) = 0;
-    MEM_fill((char*)self + 0x8, 0, 0x1F40);
+    MEM_fill((char*)self + 0x8, 0, 8000);
     *(void***)((char*)self + 0x1F48) = (void**)((char*)self + 0x1778);
     for (i = 0; i < 499; i++) {
         void** list = *(void***)((char*)self + 0x1F48);

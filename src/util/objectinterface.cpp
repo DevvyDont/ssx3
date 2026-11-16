@@ -118,8 +118,8 @@ extern "C" void cObjectInterface_renderSimpleLightHalo(void* obj, float* src, in
     setB_1D10((ctx->m_pCurrentDrawState), 8, 0x1F, 5);
     setA_1D10((ctx->m_pCurrentDrawState), 1, 3, 23);
     setA_1D10((ctx->m_pCurrentDrawState), 0, 3, 20);
-    setA_1D10((ctx->m_pCurrentDrawState), 0x14, 0xFF, 12);
-    (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex_1D10((sRCtx_1D10*)ctx, kind + 0x25);
+    setA_1D10((ctx->m_pCurrentDrawState), 20, 0xFF, 12);
+    (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex_1D10((sRCtx_1D10*)ctx, kind + 37);
     if (angle != 0.0f) {
         ((DrawRotFn_1D10)((sVE_1D10*)ctx->mVtbl)[79].fn)((char*)ctx + ((sVE_1D10*)ctx->mVtbl)[79].delta, angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
         if (kind == 1 || kind == 4) {

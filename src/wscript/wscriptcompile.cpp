@@ -43,7 +43,7 @@ extern "C" cWScriptCompileKw* cWScriptCompile_parseKeywords(cWScriptCompileKw* s
     self->f0 = instanceSectionId;
     self->count = n;
     cWScriptKeyword** slot = &self->pool;
-    cWScriptKeyword* mem = (cWScriptKeyword*)operator_new_tag(n * 0xB0, str_Instance, 0x20000000, 0);
+    cWScriptKeyword* mem = (cWScriptKeyword*)operator_new_tag(n * 176, str_Instance, 0x20000000, 0);
     cWScriptKeyword* keyword = mem;
     int j;
     for (j = n - 1; j != -1; j--, keyword++) {

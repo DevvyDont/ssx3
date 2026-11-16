@@ -792,12 +792,12 @@ extern "C" void func_0016D320(char* self, char* rider)
                 if (func_0016D260((sCamTrigStack*)(self + (idx * 32 + 0x1C)), *(int*)trigger, &changed, &top)) {
                     func_0016E1D8_D320(*(void**)(trigger + 0x10), rider);
                 } else if (changed) {
-                    char* topActive = (char*)func_0016C6E0(self + (idx * 4 + 0x14), top);
+                    char* topActive = (char*)func_0016C6E0(self + (idx * 4 + 20), top);
                     if (topActive) {
                         func_0016E1D8_D320(*(void**)(topActive + 0xC), rider);
                     }
                 }
-                n = (char*)cActiveTriggerList_remove(self + (idx * 4 + 0x14), n);
+                n = (char*)cActiveTriggerList_remove(self + (idx * 4 + 20), n);
             } else {
                 n = *(char**)(n + 4);
             }
@@ -841,7 +841,7 @@ extern "C" void func_0016E1D8(sCamEvt_E1D8* evt, char* rider)
             rate = 1.0f / evt->dur * 0.016666668f;
         else
             rate = 1.0f;
-        cChaseCameraController_switchCamera_Volume(cam, 0x5C, (int)evt, rate);
+        cChaseCameraController_switchCamera_Volume(cam, 92, (int)evt, rate);
         break;
     }
     case 1: {
@@ -850,7 +850,7 @@ extern "C" void func_0016E1D8(sCamEvt_E1D8* evt, char* rider)
             rate = 1.0f / evt->dur * 0.016666668f;
         else
             rate = 1.0f;
-        cChaseCameraController_switchCamera_Volume(cam, 0x5B, (int)evt, rate);
+        cChaseCameraController_switchCamera_Volume(cam, 91, (int)evt, rate);
         break;
     }
     case 0: {
@@ -893,41 +893,41 @@ extern "C" void func_0016E1D8(sCamEvt_E1D8* evt, char* rider)
         case 30: mode = 30; break;
         case 31: mode = 31; break;
         case 32: mode = 32; break;
-        case 33: mode = 0x29; break;
+        case 33: mode = 41; break;
         case 34: case 35: case 36: case 37: case 38: case 39: case 40: case 41: mode = evt->id - 1; break;
-        case 44: mode = 0x2A; break;
-        case 45: mode = 0x2B; break;
-        case 46: mode = 0x2C; break;
-        case 47: mode = 0x2D; break;
-        case 48: mode = 0x2E; break;
-        case 49: mode = 0x2F; break;
+        case 44: mode = 42; break;
+        case 45: mode = 43; break;
+        case 46: mode = 44; break;
+        case 47: mode = 45; break;
+        case 48: mode = 46; break;
+        case 49: mode = 47; break;
         case 50: mode = 0x30; break;
-        case 51: mode = 0x31; break;
-        case 52: mode = 0x32; break;
-        case 53: mode = 0x33; break;
-        case 54: mode = 0x34; break;
-        case 55: mode = 0x35; break;
-        case 56: mode = 0x36; break;
-        case 57: mode = 0x37; break;
+        case 51: mode = 49; break;
+        case 52: mode = 50; break;
+        case 53: mode = 51; break;
+        case 54: mode = 52; break;
+        case 55: mode = 53; break;
+        case 56: mode = 54; break;
+        case 57: mode = 55; break;
         case 58: mode = 0x38; break;
-        case 59: mode = 0x39; break;
-        case 60: mode = 0x3A; break;
-        case 61: mode = 0x3B; break;
+        case 59: mode = 57; break;
+        case 60: mode = 58; break;
+        case 61: mode = 59; break;
         case 62: mode = 0x3C; break;
-        case 63: mode = 0x3D; break;
+        case 63: mode = 61; break;
         case 64: mode = 0x3E; break;
         case 65: mode = 0x3F; break;
         case 66: mode = 0x40; break;
-        case 67: mode = 0x41; break;
-        case 68: mode = 0x42; break;
-        case 69: mode = 0x43; break;
-        case 70: mode = 0x44; break;
-        case 71: mode = 0x45; break;
-        case 72: mode = 0x46; break;
-        case 73: mode = 0x47; break;
-        case 74: mode = 0x48; break;
-        case 75: mode = 0x49; break;
-        case 42: mode = 0x4C; break;
+        case 67: mode = 65; break;
+        case 68: mode = 66; break;
+        case 69: mode = 67; break;
+        case 70: mode = 68; break;
+        case 71: mode = 69; break;
+        case 72: mode = 70; break;
+        case 73: mode = 71; break;
+        case 74: mode = 72; break;
+        case 75: mode = 73; break;
+        case 42: mode = 76; break;
         case 0:
         case 43:
         default: mode = 0; break;

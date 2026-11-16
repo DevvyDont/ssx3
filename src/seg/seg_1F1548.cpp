@@ -533,17 +533,17 @@ extern "C" void cPunchFX_update(sFx_1150* self)
     int flag = 0;
     int a = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 0);
     int layer1Anim = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 1);
-    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self->owner + 0x784), 1) == 0xD) {
+    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self->owner + 0x784), 1) == 13) {
         if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1) + 0xB0, 1) == 0) {
             flag = func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1) + 0xB0, 0) != 0;
         }
     }
-    if (a == 0x146 || (layer1Anim == 0x143 && flag)) {
+    if (a == 326 || (layer1Anim == 323 && flag)) {
         if (*(int*)(self->owner + 0x320))
             bone = *(int*)(self->owner + 0x8B0);
         else
             bone = *(int*)(self->owner + 0x8B8);
-    } else if (a == 0x147 || (layer1Anim == 0x144 && flag)) {
+    } else if (a == 327 || (layer1Anim == 324 && flag)) {
         if (*(int*)(self->owner + 0x320))
             bone = *(int*)(self->owner + 0x8B8);
         else
@@ -672,7 +672,7 @@ extern "C" void cPunchFX_render(sFx_1150* self)
     ((cGfx_1510*)GrMan)->stateTop->w0 |= 0xC;
     ((cGfx_1510*)GrMan)->stateTop->f4_23 = 0;
     ((cGfx_1510*)GrMan)->stateTop->f4_20 = 0;
-    ((cGfx_1510*)GrMan)->stateTop->f4_12 = 0x14;
+    ((cGfx_1510*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_1510*)GrMan)->stateTop->f4_0 = 2;
     ((cGfx_1510*)GrMan)->stateTop->f8_10 = 0;
     ((cGfx_1510*)GrMan)->stateTop->f8_5 = 7;
@@ -725,7 +725,7 @@ extern char str_AttachedEmitterTypeData[];
 extern int D_004A3BB0;
 
 extern "C" void func_002F17D0(void) {
-    D_004A3BB0 = (int)operator_new__FUi_17D0(0x1540, str_AttachedEmitterTypeData, 0, 0);
+    D_004A3BB0 = (int)operator_new__FUi_17D0(5440, str_AttachedEmitterTypeData, 0, 0);
     func_002F83B0();
     func_002F9838();
 }
@@ -1132,7 +1132,7 @@ extern "C" void func_002F2088(sOwner_2088* self)
         if (self->items[i] != 0) {
             int level = 7;
             if (self->b != 0)
-                level = (self->b->fC2C < 0) ? 0x16 : self->b->fC2C + 1;
+                level = (self->b->fC2C < 0) ? 22 : self->b->fC2C + 1;
             sRiderInfo_2088* r = self->b;
             if ((self->a != 0 && self->a->fB18 != 0) || (r != 0 && r->fCC8 != 0))
                 cDynamicEmitter_render(self->items[i], level);
@@ -1160,8 +1160,8 @@ extern "C" int func_002F2130(void *arg0, int arg1, int arg2) {
     int i;
     for (i = 0; i < 10; i++, p++) {
         if (*p == 0) {
-            Obj2130 *n = (Obj2130 *)func_002F1768(cMemMan_alloc(0x210, str_cAttachedDynamicEmitter, 0, 0));
-            int t = D_004A3BB0 + arg1 * 0x110;
+            Obj2130 *n = (Obj2130 *)func_002F1768(cMemMan_alloc(528, str_cAttachedDynamicEmitter, 0, 0));
+            int t = D_004A3BB0 + arg1 * 272;
             *p = n;
             *(int *)((char*)*p + 0x200) = arg2;
             *(int *)((char*)*p + 0x204) = 0;
@@ -3061,7 +3061,7 @@ extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
     ((cGfx_4A08*)gfx)->stateTop->SetF22(1);
     ((cGfx_4A08*)gfx)->stateTop->f4_23 = 2;
     ((cGfx_4A08*)gfx)->stateTop->f4_20 = 0;
-    ((cGfx_4A08*)gfx)->stateTop->f4_12 = 0x14;
+    ((cGfx_4A08*)gfx)->stateTop->f4_12 = 20;
     ((cGfx_4A08*)gfx)->stateTop->f4_0 = 0;
     ((cGfx_4A08*)gfx)->stateTop->f8_10 = 0;
     ((cGfx_4A08*)gfx)->stateTop->f4_2 = 7;

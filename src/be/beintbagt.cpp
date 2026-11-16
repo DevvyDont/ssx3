@@ -112,7 +112,7 @@ extern "C" int func_0014FD80(void* self, int rider, int idx, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int c = cBELibrary_getCharacterID(rider);
-    int off = idx * 6 + c * 0x1FE + profile * 0x13EC;
+    int off = idx * 6 + c * 0x1FE + profile * 5100;
     char* p = D_00530EC0_raw + off;
     p[1] = value;
     return 1;
@@ -168,12 +168,12 @@ extern "C" int func_0014FEA8(void* self, int rider, int idx, int second)
     int r;
     if (second)
     {
-        char* p = D_00530EC0_raw + (idx * 6 + c * 0x1FE + profile * 0x13EC);
+        char* p = D_00530EC0_raw + (idx * 6 + c * 0x1FE + profile * 5100);
         r = (unsigned char)p[1];
     }
     else
     {
-        char* p = D_00530EC0_raw + (idx * 6 + c * 0x1FE + profile * 0x13EC);
+        char* p = D_00530EC0_raw + (idx * 6 + c * 0x1FE + profile * 5100);
         r = (unsigned char)p[0];
     }
     return r;
@@ -333,21 +333,21 @@ extern "C" int func_00150198(void* self, int rider, int idx, int second)
     if (ch != 0)
     switch (ch)
     {
-    case 0x14:
-        if (idx == 4) return 0xA0;
+    case 20:
+        if (idx == 4) return 160;
         break;
     case 0x18:
-        if (idx == 4) return 0x9F;
+        if (idx == 4) return 159;
         break;
-    case 0x19:
-        if (idx == 9) return 0xA2;
+    case 25:
+        if (idx == 9) return 162;
         break;
     case 0x1C:
-        if (idx == 4) return 0xA1;
+        if (idx == 4) return 161;
         break;
     }
     int k = func_0014FEA8(self, rider, idx, second);
-    if (k < 0) return 0x1B6;
+    if (k < 0) return 438;
     return D_0045AEB8_150198[idx].anims[k].anim;
 }
 #endif
@@ -383,21 +383,21 @@ extern "C" int func_001502C8(void* self, int rider, int idx, int second)
     if (ch != 0)
     switch (ch)
     {
-    case 0x14:
-        if (idx == 4) return 0xD2;
+    case 20:
+        if (idx == 4) return 210;
         break;
     case 0x18:
-        if (idx == 4) return 0xD1;
+        if (idx == 4) return 209;
         break;
-    case 0x19:
-        if (idx == 9) return 0xD4;
+    case 25:
+        if (idx == 9) return 212;
         break;
     case 0x1C:
-        if (idx == 4) return 0xD3;
+        if (idx == 4) return 211;
         break;
     }
     int k = func_0014FEA8(self, rider, idx, second);
-    if (k < 0) return 0x1B6;
+    if (k < 0) return 438;
     return D_0045AEB8_1502C8[idx].anims[k].anim2;
 }
 #endif
@@ -433,17 +433,17 @@ extern "C" int func_001503F8(void* self, int rider, int idx, int second)
     if (ch != 0)
     switch (ch)
     {
-    case 0x14:
-        if (idx == 4) return 0x52;
+    case 20:
+        if (idx == 4) return 82;
         break;
     case 0x18:
-        if (idx == 4) return 0x51;
+        if (idx == 4) return 81;
         break;
-    case 0x19:
-        if (idx == 9) return 0x54;
+    case 25:
+        if (idx == 9) return 84;
         break;
     case 0x1C:
-        if (idx == 4) return 0x53;
+        if (idx == 4) return 83;
         break;
     }
     int k = func_0014FEA8(self, rider, idx, second);
@@ -520,7 +520,7 @@ extern "C" void MEM_fill(void*, int, int);
 extern "C" void func_00150558(int mode, sBagtSlot0558* e)
 {
     int i;
-    MEM_fill(e, 0, 0x5A);
+    MEM_fill(e, 0, 90);
     switch (mode) {
     case 0:
         e[0].a = 1; e[0].b = 3; e[1].a = 0; e[1].b = 2; e[2].a = 0; e[2].b = 2;

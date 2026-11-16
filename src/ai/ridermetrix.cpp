@@ -35,8 +35,8 @@ extern "C" void cRiderMetrix_linkToRider(char* self, char* rider)
     if (*(int*)(rider + 0x870) >= 0)
     {
         sMetrixEntry_001172E0** slot = (sMetrixEntry_001172E0**)(self + 0x1B0);
-        *(int*)(self + 0x1B4) = 0x2C;
-        *slot = new (operator_new_tag(0x2C * sizeof(sMetrixEntry_001172E0), str_cHUDFX, 0, 0)) sMetrixEntry_001172E0[0x2C];
+        *(int*)(self + 0x1B4) = 44;
+        *slot = new (operator_new_tag(44 * sizeof(sMetrixEntry_001172E0), str_cHUDFX, 0, 0)) sMetrixEntry_001172E0[44];
         for (int i = 0; i < *(int*)(self + 0x1B4); i++)
         {
             ((sMetrixEntry_001172E0*)(i * 0x9C + *(int*)(self + 0x1B0)))->index = i;
@@ -70,7 +70,7 @@ extern "C" void cRiderMetrix_resetHUDfx(sRiderMetrix_001173B8* self)
     {
         for (int i = 0; i < self->count; i++)
         {
-            self->entries[i].state = 0x34;
+            self->entries[i].state = 52;
         }
     }
 }
@@ -109,7 +109,7 @@ extern "C" int func_00117400(sRiderMetrix_00117400* self, int type)
         for (int i = 0; i < self->count; i++)
         {
             int entryType = self->entries[i].type;
-            if (entryType != 0x34)
+            if (entryType != 52)
             {
                 int off = (entryType & ~0x1F) >> 3;
                 int* bitArray = self->bits;
@@ -134,7 +134,7 @@ struct sVEntry001174B0 {
 extern "C" void func_001174B0(void* self, void* obj)
 {
     sVEntry001174B0* vt = *(sVEntry001174B0**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0x1AC);
+    vt[1].fn((char*)obj + vt[1].delta, self, 428);
 }
 #endif
 
@@ -150,7 +150,7 @@ struct sVEntry001174E8 {
 extern "C" void func_001174E8(void* self, void* obj)
 {
     sVEntry001174E8* vt = *(sVEntry001174E8**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0x1AC);
+    vt[2].fn((char*)obj + vt[2].delta, self, 428);
 }
 #endif
 
@@ -193,7 +193,7 @@ extern "C" void cRiderMetrix_reset(char* self)
 {
     cRiderMetrix_resetTotals(self);
     cRiderMetrix_resetHUDfx((sRiderMetrix_001173B8*)self);
-    MEM_fill(self + 0xA8, 0, 0x50);
+    MEM_fill(self + 0xA8, 0, 80);
     *(int*)(self + 0xF8) = 0;
     cRiderMetrix_resetCurTrick(self);
     cRiderMetrix_resetComboChain(self);
@@ -216,7 +216,7 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  */
 extern "C" void cRiderMetrix_resetTotals(char* self)
 {
-    MEM_fill(self + 0xFC, 0, 0xAC);
+    MEM_fill(self + 0xFC, 0, 172);
     *(int*)(self + 0x18C) = -1;
     *(int*)(self + 0x198) = *(int*)(self + 0x1C8);
 }
@@ -277,7 +277,7 @@ extern "C" void func_00117638(void* self, int points)
         {
             int curValue = 0;
             char* hudSlot = hudBank + 0x1D4;
-            if (!rmIsState_117638(hudSlot, 0x34))
+            if (!rmIsState_117638(hudSlot, 52))
                 curValue = *(int*)(hudBank + 0x1E8);
             func_001171A8(hudSlot, 3, curValue, n, 0.0f);
         }
@@ -368,7 +368,7 @@ extern "C" void cRiderMetrix_earnComboChain(void* self_)
             if (D_00535BC8_117718.mode == 4)
                 offline = D_00535BC8_117718.online == 0;
             if (!offline) {
-                cRiderMetrix_addHUDfx1_f(self, 0x26, *(int*)(self + 0xA0), 1.5f, *(int*)(self + 0x9C));
+                cRiderMetrix_addHUDfx1_f(self, 38, *(int*)(self + 0xA0), 1.5f, *(int*)(self + 0x9C));
                 cRiderMetrix_addHUDfx1_f(self, 0x18, *(int*)(self + 0xA0), 0.7f, 0);
             } else {
                 int v = *(int*)(self + 0xA0) / 500;
@@ -526,17 +526,17 @@ extern "C" void cRiderMetrix_removeHUDfx(void* self_, int type)
     sMetrixSlots* self = (sMetrixSlots*)self_;
     if (self->slots != 0)
     {
-        if (type < 0x22)
+        if (type < 34)
         {
-            self->slots[type].type = 0x34;
+            self->slots[type].type = 52;
         }
         else
         {
-            for (int i = 0x23; i < self->count; i++)
+            for (int i = 35; i < self->count; i++)
             {
                 if (self->slots[i].type == type)
                 {
-                    self->slots[i].type = 0x34;
+                    self->slots[i].type = 52;
                 }
             }
         }
@@ -578,13 +578,13 @@ static inline bool slotIsFreeR(const sMetrixSlotR& s)
 extern "C" int cRiderMetrix_allocHUDfx(void* self_, int type)
 {
     sMetrixSlotsR* self = (sMetrixSlotsR*)self_;
-    if (type < 0x22)
+    if (type < 34)
     {
         return type;
     }
     float best = 1.0f;
     int bestIdx = -1;
-    for (int i = 0x23; i < self->count; i++)
+    for (int i = 35; i < self->count; i++)
     {
         if (slotIsFreeR(self->slots[i]))
         {
@@ -809,7 +809,7 @@ extern "C" void cRiderMetrix_update(sMetrix17C28* self)
         if (up.z < 0.0f) {
             self->f1C += d * 0.0002f;
         }
-        self->points += cRiderMetrix_updateBonusLevelAndCalcPoints(self, &self->idx98, D_00459F68, 0x1D, self->airTime);
+        self->points += cRiderMetrix_updateBonusLevelAndCalcPoints(self, &self->idx98, D_00459F68, 29, self->airTime);
     }
     if (self->t2C >= 0.0f) {
         self->t2C += dt;
@@ -999,16 +999,16 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
     else
         cRiderMetrix_removeHUDfx(self, 11);
     cRiderMetrix_removeHUDfx(self, 0x10);
-    cRiderMetrix_removeHUDfx(self, 0x11);
-    cRiderMetrix_removeHUDfx(self, 0x12);
-    cRiderMetrix_removeHUDfx(self, 0x13);
-    cRiderMetrix_removeHUDfx(self, 0x14);
-    cRiderMetrix_removeHUDfx(self, 0x15);
-    cRiderMetrix_removeHUDfx(self, 0x16);
-    cRiderMetrix_removeHUDfx(self, 0x17);
+    cRiderMetrix_removeHUDfx(self, 17);
+    cRiderMetrix_removeHUDfx(self, 18);
+    cRiderMetrix_removeHUDfx(self, 19);
+    cRiderMetrix_removeHUDfx(self, 20);
+    cRiderMetrix_removeHUDfx(self, 21);
+    cRiderMetrix_removeHUDfx(self, 22);
+    cRiderMetrix_removeHUDfx(self, 23);
     if (func_0011FEE8(self->rider) != 2 && func_0011FEE8(self->rider) != 5) {
         cRiderMetrix_removeHUDfx(self, 0xC);
-        cRiderMetrix_removeHUDfx(self, 0xD);
+        cRiderMetrix_removeHUDfx(self, 13);
         cRiderMetrix_removeHUDfx(self, 0xF);
         cRiderMetrix_removeHUDfx(self, 0xE);
     } else {
@@ -1019,7 +1019,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
         else
             angle = cSpinControl_getFlipSpinInputAng((char*)self->rider->sub + 0x230, &fail);
         if (fail != 0) {
-            cRiderMetrix_removeHUDfx(self, 0xD);
+            cRiderMetrix_removeHUDfx(self, 13);
         } else {
             float a = angle * 0.15915493667125702f + func_0031C040((float)AITick() * 0.10471976548433304f) * 0.029999999329447746f;
             if (a < 0.0f)
@@ -1039,7 +1039,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
                     a = approach_117FE0(a, cur, 0.03333333507180214f);
                 }
             }
-            func_001171A8_f(&self->slots[13], 0xD, 0, a, 0);
+            func_001171A8_f(&self->slots[13], 13, 0, a, 0);
         }
         if (func_0011FEE8(self->rider) == 2) {
             if (fail != 0)
@@ -1051,59 +1051,59 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
             float yaw = cSpinControl_getFlipSpinAng((char*)self->rider->sub + 0x230, &fail2);
             if (fail2 != 0) {
                 cRiderMetrix_removeHUDfx(self, 0xC);
-                cRiderMetrix_removeHUDfx(self, 0xD);
+                cRiderMetrix_removeHUDfx(self, 13);
                 cRiderMetrix_removeHUDfx(self, 0xF);
                 cRiderMetrix_removeHUDfx(self, 0xE);
             } else {
                 cRiderMetrix_addHUDfx1(self, 0xC, 0, 0, -1.0f);
-                int s1 = 0x34;
-                int s2 = 0x34;
-                int s3 = 0x34;
-                int s4 = 0x34;
+                int s1 = 52;
+                int s2 = 52;
+                int s3 = 52;
+                int s4 = 52;
                 int main;
                                 if (abs_117FE0(yaw) > 2.7488937377929688f) {
                     main = 0x10;
                 } else if (yaw > 1.9634956121444702f) {
-                    main = 0x17;
-                    s1 = 0x15;
-                    s2 = 0x16;
-                    s3 = 0x11;
+                    main = 23;
+                    s1 = 21;
+                    s2 = 22;
+                    s3 = 17;
                     s4 = 0x10;
                 } else if (yaw > 1.1780973672866821f) {
-                    main = 0x16;
+                    main = 22;
                 } else if (yaw > 0.39269912242889404f) {
-                    main = 0x15;
-                    s1 = 0x17;
-                    s2 = 0x16;
-                    s3 = 0x13;
-                    s4 = 0x14;
+                    main = 21;
+                    s1 = 23;
+                    s2 = 22;
+                    s3 = 19;
+                    s4 = 20;
                 } else if (yaw < -1.9634956121444702f) {
-                    main = 0x11;
-                    s1 = 0x13;
-                    s2 = 0x12;
-                    s3 = 0x17;
+                    main = 17;
+                    s1 = 19;
+                    s2 = 18;
+                    s3 = 23;
                     s4 = 0x10;
                 } else if (yaw < -1.1780973672866821f) {
-                    main = 0x12;
+                    main = 18;
                 } else if (yaw < -0.39269912242889404f) {
-                    main = 0x13;
-                    s1 = 0x11;
-                    s2 = 0x12;
-                    s3 = 0x15;
-                    s4 = 0x14;
+                    main = 19;
+                    s1 = 17;
+                    s2 = 18;
+                    s3 = 21;
+                    s4 = 20;
                 } else {
-                    main = 0x14;
+                    main = 20;
                 }
                 float w1 = cSpinControl_getInvertScale((char*)self->rider->sub + 0x230);
                 float w2 = cSpinControl_getOffAxisScale((char*)self->rider->sub + 0x230);
                 func_001171A8_f(&self->slots[main], main, 0, 1.0f, 0);
-                if (s1 != 0x34)
+                if (s1 != 52)
                     func_001171A8_f(&self->slots[s1], s1, 0, w1, 1);
-                if (s2 != 0x34)
+                if (s2 != 52)
                     func_001171A8_f(&self->slots[s2], s2, 0, w1, 1);
-                if (s3 != 0x34)
+                if (s3 != 52)
                     func_001171A8_f(&self->slots[s3], s3, 0, w2, 2);
-                if (s4 != 0x34)
+                if (s4 != 52)
                     func_001171A8_f(&self->slots[s4], s4, 0, w2, 2);
                 int prev = 0;
                 if (!slotFree_117FE0(&self->slots[14]))
@@ -1244,10 +1244,10 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
         int have = self->slots[3].f14;
         float cur = self->slots[3].value / self->slots[3].total;
         int v;
-        if (want + 0x46 < have)
-            v = have - 0x46;
-        else if (have < want - 0x46)
-            v = have + 0x46;
+        if (want + 70 < have)
+            v = have - 70;
+        else if (have < want - 70)
+            v = have + 70;
         else
             v = want;
         func_001171A8_f(s, 3, v, approach_117FE0(1.0f, cur, 0.01666666753590107f), self->f9C);
@@ -1269,11 +1269,11 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
     } else if (val > 0) {
         func_001171A8_f(s2, 2, val, 0.0f, x);
     }
-    void* stats = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    void* stats = cBE_getInterface_Fv(cBE_getBE(), 11);
     char* obj = (char*)self->rider + 0x6C0;
     sVE_117FE0* vt = *(sVE_117FE0**)obj;
     int n25 = func_00150960(stats, vt[7].fn(obj + vt[7].delta));
-    func_001171A8_f(&self->slots[0x19], 0x19, n25, 0.0f, 0);
+    func_001171A8_f(&self->slots[25], 25, n25, 0.0f, 0);
     if (!slotFree_117FE0(&self->slots[4])) {
         int have = self->slots[4].f14;
         float cur = self->slots[4].value / self->slots[4].total;
@@ -1438,7 +1438,7 @@ extern "C" int cRiderMetrix_updateBonusLevelAndCalcPoints(void* self, int* idx, 
         int v = (int)(e->mult * m + 0.5f);
         *idx = *idx + 1;
         cRiderMetrix_removeHUDfx(self, 0x1C);
-        cRiderMetrix_removeHUDfx(self, 0x1D);
+        cRiderMetrix_removeHUDfx(self, 29);
         cRiderMetrix_removeHUDfx(self, 0x1E);
         cRiderMetrix_removeHUDfx(self, 0x1F);
         cRiderMetrix_removeHUDfx(self, 0x20);
@@ -1545,7 +1545,7 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
 extern "C" float cRiderMetrix_evFrag(char* self)
 {
     *(int*)(self + 0x128) += 1;
-    cRiderMetrix_addHUDfx1(self, 0x2C, 0, 0, 1.5f);
+    cRiderMetrix_addHUDfx1(self, 44, 0, 0, 1.5f);
     return 1.0f;
 }
 #endif
@@ -1607,7 +1607,7 @@ extern "C" float cRiderMetrix_evCheckpoint(char* self, int timeBonusSec)
         sVEntry001194C0* vt2 = *(sVEntry001194C0**)sub2;
         if (cGameModeMan_riderCheckpointHit(mgr, vt2[7].fn(sub2 + vt2[7].delta), timeBonusSec) != 0)
         {
-            cRiderMetrix_addHUDfx1(self, 0x29, timeBonusSec, 0, 2.5f);
+            cRiderMetrix_addHUDfx1(self, 41, timeBonusSec, 0, 2.5f);
             if (rmRiderFlags_1194C0(*(char**)(self + 0x1AC)))
             {
                 func_002A3CE8(func_0028B180(), *(void**)(self + 0x1AC), 1);
@@ -1625,7 +1625,7 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
 
 extern "C" float func_001195A8(void* self, int value)
 {
-    cRiderMetrix_addHUDfx1(self, 0x2A, value, 0, 5.0f);
+    cRiderMetrix_addHUDfx1(self, 42, value, 0, 5.0f);
     return 0.0f;
 }
 #endif
@@ -1637,7 +1637,7 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
 
 extern "C" float func_001195D8(void* self, int value)
 {
-    cRiderMetrix_addHUDfx1(self, 0x2B, value, 0, 5.0f);
+    cRiderMetrix_addHUDfx1(self, 43, value, 0, 5.0f);
     return 0.0f;
 }
 #endif
@@ -1666,7 +1666,7 @@ extern "C" float func_00119608(void* self, int pts)
     int career = D_00535BC8_119608.eventKind == 4 && D_00535BC8_119608.gameType == 0;
     if (!career)
     {
-        cRiderMetrix_addHUDfx1(self, 0x23, v, 0, 2.5f);
+        cRiderMetrix_addHUDfx1(self, 35, v, 0, 2.5f);
         cRiderMetrix_addHUDfx1(self, 0x18, v, 0, 0.699999988079071f);
     }
     else
@@ -1715,7 +1715,7 @@ extern "C" float cRiderMetrix_evGrabHold(char* self, int id)
     {
         *(float*)(self + 0x40) = zero;
     }
-    if (id >= 0x23)
+    if (id >= 35)
     {
         *(int*)(self + 0x5C) = 1;
     }
@@ -1746,13 +1746,13 @@ extern "C" float cRiderMetrix_evReleaseGrab(void* riderMetrix, int grabID)
 {
     char* self = (char*)riderMetrix;
     func_00119068(self, grabID);
-    if (grabID >= 0x23)
+    if (grabID >= 35)
     {
         (*(int*)(self + 0x54))++;
         if (*(int*)(*(char**)(self + 0x1AC) + 0x2F4) >= 6)
             (*(int*)(self + 0x58))++;
     }
-    else if (grabID >= 0x13)
+    else if (grabID >= 19)
     {
         (*(int*)(self + 0x50))++;
     }
@@ -2005,7 +2005,7 @@ extern "C" float cRiderMetrix_evWipeout(void* self, int flag)
     if (flag)
     {
         (*(int*)((char*)self + 0x12C))++;
-        cRiderMetrix_addHUDfx1(self, 0x2D, 0, 0, 1.5f);
+        cRiderMetrix_addHUDfx1(self, 45, 0, 0, 1.5f);
     }
     else
     {
@@ -2029,7 +2029,7 @@ extern "C" float func_00119BB0(void* self, int a1)
     float result;
     if (a1)
     {
-        cRiderMetrix_addHUDfx1(self, 0x21, 0, 0, 1.5f);
+        cRiderMetrix_addHUDfx1(self, 33, 0, 0, 1.5f);
         result = 0.10000000149011612f;
     }
     else
@@ -2265,19 +2265,19 @@ float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount) __a
 float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount)
 {
     if (amount != 0 && !IsBusy119EF8()) {
-        void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+        void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
         func_001E3760(GetId119EF8(self), amount);
         func_001597B0(iface, GetId119EF8(self), amount);
         cRiderMetrix_addHUDfx1_i(self, 0x18, amount, 0, 0.7f);
         switch (kind) {
         case 3:
-            cRiderMetrix_addHUDfx1_i(self, 0x31, amount, amount, 1.5f);
+            cRiderMetrix_addHUDfx1_i(self, 49, amount, amount, 1.5f);
             break;
         case 1:
-            cRiderMetrix_addHUDfx1_i(self, 0x2E, amount, 0, 2.5f);
+            cRiderMetrix_addHUDfx1_i(self, 46, amount, 0, 2.5f);
             break;
         case 0:
-            cRiderMetrix_addHUDfx1_i(self, 0x2F, amount, 0, 2.5f);
+            cRiderMetrix_addHUDfx1_i(self, 47, amount, 0, 2.5f);
             break;
         case 2:
             cRiderMetrix_addHUDfx1_i(self, 0x30, amount, *(int*)(self + 0x9C), 2.5f);
@@ -2303,7 +2303,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAutoResetSurface__FPv);
  */
 float cRiderMetrix_evAutoResetSurface(void* self)
 {
-    cRiderMetrix_addHUDfx(self, 0x33, str_Wrong_Way, 1.5f, 0);
+    cRiderMetrix_addHUDfx(self, 51, str_Wrong_Way, 1.5f, 0);
     return 0.0f;
 }
 #endif
@@ -2332,7 +2332,7 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
 
 extern "C" float func_0011A0E0(void* self)
 {
-    cRiderMetrix_addHUDfx1(self, 0x1A, 0, 0, 1.0f);
+    cRiderMetrix_addHUDfx1(self, 26, 0, 0, 1.0f);
     return 0.0f;
 }
 #endif
@@ -2351,7 +2351,7 @@ extern "C" void cRiderMetrix_evAddCash(void* self, int kind, int amount);
  */
 extern "C" float cRiderMetrix_evMissionSuccess(void* self, int amount)
 {
-    cRiderMetrix_addHUDfx1(self, 0x1B, amount, 0, 1.5f);
+    cRiderMetrix_addHUDfx1(self, 27, amount, 0, 1.5f);
     cRiderMetrix_evAddCash(self, 4, amount);
     return 0.0f;
 }
@@ -2397,7 +2397,7 @@ extern "C" void cRiderMetrix_earnName(void* self, int stance, int alternate, int
         if (pts > 0)
         {
             *(float*)((char*)self + 0x14) += pts * 9.999999747378752e-05f;
-            cRiderMetrix_addHUDfx1(self, 0x32, pts, 0, 1.5f);
+            cRiderMetrix_addHUDfx1(self, 50, pts, 0, 1.5f);
             cSSXAudio_LandedMonsterCombo(func_0028B180(), *(int*)((char*)self + 0x1AC));
         }
         cRiderMetrix_addTrick(self, id, func_001190F0(self, id) > 0);
@@ -2506,7 +2506,7 @@ extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alte
     cRiderMetrix_removeHUDfx(self, 2);
     cRiderMetrix_removeHUDfx(self, 4);
     cRiderMetrix_removeHUDfx(self, 0x1c);
-    cRiderMetrix_removeHUDfx(self, 0x1d);
+    cRiderMetrix_removeHUDfx(self, 29);
     cRiderMetrix_removeHUDfx(self, 0x1e);
     cRiderMetrix_removeHUDfx(self, 0x1f);
     cRiderMetrix_removeHUDfx(self, 0x20);
@@ -2523,7 +2523,7 @@ extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alte
             int bonus = cRiderMetrix_checkForMonsterTrick(self, &id);
             if (bonus > 0) {
                 *(float*)((char*)self + 0x14) += (float)bonus * 0.0001f;
-                cRiderMetrix_addHUDfx1(self, 0x32, bonus, 0, 1.5f);
+                cRiderMetrix_addHUDfx1(self, 50, bonus, 0, 1.5f);
                 cSSXAudio_LandedMonsterCombo(func_0028B180(), *(int*)((char*)self + 0x1ac));
             }
             repeats = func_001190F0(self, &id);
@@ -2565,10 +2565,10 @@ extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alte
         *(int*)((char*)self + 0x114) += *(int*)((char*)self + 0x54);
         *(int*)((char*)self + 0x118) += *(int*)((char*)self + 0x58);
         *(int*)((char*)self + 0x11c) += *(int*)((char*)self + 0x74);
-        *(float*)((char*)self + 0x14c) = MAX(*(float*)((char*)self + 0x30), *(float*)((char*)self + 0x14c));
-        *(float*)((char*)self + 0x150) = MAX(*(float*)((char*)self + 0x48), *(float*)((char*)self + 0x150));
-        *(float*)((char*)self + 0x154) = MAX(*(float*)((char*)self + 0x24), *(float*)((char*)self + 0x154));
-        *(float*)((char*)self + 0x158) = MAX(*(float*)((char*)self + 0x78), *(float*)((char*)self + 0x158));
+        *(float*)((char*)self + 0x14c) = MAX(*(float*)((char*)self + 0x30), *(float*)((char*)self + 332));
+        *(float*)((char*)self + 0x150) = MAX(*(float*)((char*)self + 72), *(float*)((char*)self + 336));
+        *(float*)((char*)self + 0x154) = MAX(*(float*)((char*)self + 36), *(float*)((char*)self + 340));
+        *(float*)((char*)self + 0x158) = MAX(*(float*)((char*)self + 0x78), *(float*)((char*)self + 344));
         *(int*)((char*)self + 0x198) += *(int*)((char*)self + 0x84);
         total = points + *(int*)((char*)self + 0x84) + inverted;
 
@@ -2577,9 +2577,9 @@ extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alte
         career = cBENewRaceInterface_newRace.eventKind == 4 && cBENewRaceInterface_newRace.gameType == 0;
         if (!career) {
             if (repeats > 0) {
-                cRiderMetrix_addHUDfx1(self, 0x24, total, grade, 2.5f);
+                cRiderMetrix_addHUDfx1(self, 36, total, grade, 2.5f);
             } else {
-                cRiderMetrix_addHUDfx1(self, 0x23, total, grade, 2.5f);
+                cRiderMetrix_addHUDfx1(self, 35, total, grade, 2.5f);
             }
             cRiderMetrix_addHUDfx1(self, 0x18, total, 0, 0.7f);
         } else {
@@ -2628,23 +2628,23 @@ extern "C" int cRiderMetrix_losePoints(void* self)
     if (n > 0)
     {
         cRiderMetrix_removeHUDfx(self, 1);
-        cRiderMetrix_addHUDfx1(self, 0x25, n, 0, 1.5f);
+        cRiderMetrix_addHUDfx1(self, 37, n, 0, 1.5f);
     }
     if (*(int*)((char*)self + 0xA0) > 0)
     {
         cRiderMetrix_removeHUDfx(self, 3);
-        cRiderMetrix_addHUDfx1(self, 0x27, *(int*)((char*)self + 0xA0), 0, 1.5f);
+        cRiderMetrix_addHUDfx1(self, 39, *(int*)((char*)self + 0xA0), 0, 1.5f);
     }
     int total = *(int*)((char*)self + 0x84) + cRiderMetrix_getCurTrickStyleSubPoints(self);
     if (total > 0)
     {
         cRiderMetrix_removeHUDfx(self, 2);
-        cRiderMetrix_removeHUDfx(self, 0x1D);
+        cRiderMetrix_removeHUDfx(self, 29);
         cRiderMetrix_removeHUDfx(self, 0x1C);
         cRiderMetrix_removeHUDfx(self, 0x1E);
         cRiderMetrix_removeHUDfx(self, 0x1F);
         cRiderMetrix_removeHUDfx(self, 0x20);
-        cRiderMetrix_addHUDfx1(self, 0x28, total, 0, 1.5f);
+        cRiderMetrix_addHUDfx1(self, 40, total, 0, 1.5f);
     }
     cRiderMetrix_removeHUDfx(self, 4);
     return n;
@@ -3025,7 +3025,7 @@ extern "C" void cRider_updateTerminalVelocity(char* self)
     // NOTE: the retail code adds and subtracts 1.0 (likely an inlined bx range helper).
     speedAttribute = speedAttribute + 1.0f - 1.0f;
     char* surfPropCache = (char*)SSXApp->Game;
-    char* snow = *(char**)(surfPropCache + 0x44) + *(int*)(self + 0x438) * 0xB0;
+    char* snow = *(char**)(surfPropCache + 0x44) + *(int*)(self + 0x438) * 176;
     const int motionState = func_0011FE98(self);
     const float surfaceProperty = (motionState == 0) ? *(float*)(snow + 4) : 1.0f;
     const bool fasterThanPacked = 0.0f < surfaceProperty;
@@ -3077,7 +3077,7 @@ extern "C" void cRider_updateTerminalVelocity(char* self)
     }
     *(float*)(self + 0x2E4) = newTerminalVelocity;
     if (*(int*)(self + 0x2F4) >= 11 && 0.0f < *(float*)(self + 0x2FC)) {
-        *(float*)(self + 0x2E4) = MAX(*(float*)(self + 0x30C), newTerminalVelocity);
+        *(float*)(self + 0x2E4) = MAX(*(float*)(self + 780), newTerminalVelocity);
     }
 }
 #endif

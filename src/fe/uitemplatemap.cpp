@@ -290,7 +290,7 @@ extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, sMapEvent_0
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* rw = cBE_getInterface_Fv(cBE_getBE(), 13);
     int cid = cBELibrary_getCharacterID(0);
-    if (ev.track == 0x17)
+    if (ev.track == 23)
         return 0;
     if (ev.kind == 4) {
         int x = 6;
@@ -710,7 +710,7 @@ extern "C" int func_00202738(void* self, int menu, int event)
     if (event == 6 || event == 9 || event == 8) {
         return 0;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -1525,9 +1525,9 @@ static inline int isKind(int kind, const int& k) { return kind == k; }
 extern "C" void cUITemplate_MAP_setupPeakInfo(void* tmpl)
 {
     sPeakInfo_MAP* self = (sPeakInfo_MAP*)tmpl;
-    void* rew = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* rew = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* mis = cBE_getInterface_Fv(cBE_getBE(), 10);
-    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
     int ch = cBELibrary_getCharacterID(0);
     if (self->popup != 0) {
@@ -1970,9 +1970,9 @@ extern "C" void cUITemplate_MAP_setupPeakGoals(void* tmpl)
     cUIThing* widget;
     unsigned char goalGroup = 0;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    void* rew = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* rew = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* mis = cBE_getInterface_Fv(cBE_getBE(), 10);
-    void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+    void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     int ch = cBELibrary_getCharacterID(0);
     sprintf(buf, D_004706D8_oals, cUITemplate_MAP_mPeak + 1);
     char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x2E8), GetHashValue32(buf));
@@ -2649,9 +2649,9 @@ extern "C" void func_00207430_r(sMapTmpl_207430* self)
     cUIObj_200700* mapObj = (cUIObj_200700*)getObj_207430(self, str_HelpText);
     if (cUITemplate_MAP_mMapState == 2)
         mapObj->v09(1);
-    void* mission = cBE_getInterface_Fv(cBE_getBE(), 0xA);
+    void* mission = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    void* reward = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    void* reward = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
     int charID = cBELibrary_getCharacterID(0);
     if (self->popup != 0) {
@@ -2737,7 +2737,7 @@ extern "C" void func_00207430_r(sMapTmpl_207430* self)
     cUIText_setAsciiString(text, cBENewRaceInterface_getLocationName(race, desc.w[0]));
     text = (cUIText*)getObj_207430(self, str_SE_Event);
     int type = desc.w[2];
-    if ((unsigned int)(desc.w[0] - 0x11) < 5) {
+    if ((unsigned int)(desc.w[0] - 17) < 5) {
         type = 0xC;
         if (cUITemplate_MAP_mMapState == 2)
             cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32(str_kT_CMNHELPStations));
@@ -2760,9 +2760,9 @@ extern "C" void func_00207430_r(sMapTmpl_207430* self)
                 cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32(str_kT_HELPChalAvail));
             } else {
                 short fmt[16];
-                short part[0x130];
-                short pre[0x130];
-                short line[0x130];
+                short part[304];
+                short pre[304];
+                short line[304];
                 func_002C2540(fmt, D_004A2590);
                 sprintf1_v(part, fmt, cBENewRaceInterface_getLocationName(race, desc.w[0]));
                 char* loc = (char*)SSXApp->FELocale;
@@ -2776,10 +2776,10 @@ extern "C" void func_00207430_r(sMapTmpl_207430* self)
             if (self->eventUnlocked[cUITemplate_MAP_mPeak][cUITemplate_MAP_mSelectedEvent][sel] != 0) {
                 cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32(str_kT_HELPChalAvail));
             } else {
-                short part[0x130];
+                short part[304];
                 short fmt[16];
-                short pre[0x138];
-                short line[0x130];
+                short pre[312];
+                short line[304];
                 func_002C2540(fmt, str_pct_S_Jam_b);
                 sprintf1_v(part, fmt, cBENewRaceInterface_getLocationName(race, desc.w[0]));
                 char* loc = (char*)SSXApp->FELocale;
@@ -3040,7 +3040,7 @@ INCLUDE_ASM("fe/uitemplatemap", func_00208610);
 extern "C" int func_00208610(void* self, int menu, int event)
 {
     if (func_00202738((char*)self + 0x9C, menu, event) != 0) {
-        return 0x101;
+        return 257;
     }
     return 0;
 }

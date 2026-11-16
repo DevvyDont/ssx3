@@ -60,13 +60,13 @@ SYSCALL_STUB(func_00423A10, 0x9)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", AddSbusIntcHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(AddSbusIntcHandler, 0xA)
+SYSCALL_STUB(AddSbusIntcHandler, 10)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", RemoveSbusIntcHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(RemoveSbusIntcHandler, 0xB)
+SYSCALL_STUB(RemoveSbusIntcHandler, 11)
 #endif
 
 //100%
@@ -78,7 +78,7 @@ SYSCALL_STUB(Interrupt2Iop, 0xC)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SetVTLBRefillHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SetVTLBRefillHandler, 0xD)
+SYSCALL_STUB(SetVTLBRefillHandler, 13)
 #endif
 
 //100%
@@ -108,49 +108,49 @@ SYSCALL_STUB(func_00423A90, 0x10)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", RemoveIntcHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(RemoveIntcHandler, 0x11)
+SYSCALL_STUB(RemoveIntcHandler, 17)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423AB0);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423AB0, 0x12)
+SYSCALL_STUB(func_00423AB0, 18)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423AC0);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423AC0, 0x12)
+SYSCALL_STUB(func_00423AC0, 18)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", RemoveDmacHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(RemoveDmacHandler, 0x13)
+SYSCALL_STUB(RemoveDmacHandler, 19)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _EnableIntc);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_EnableIntc, 0x14)
+SYSCALL_STUB(_EnableIntc, 20)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _DisableIntc);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_DisableIntc, 0x15)
+SYSCALL_STUB(_DisableIntc, 21)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _EnableDmac);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_EnableDmac, 0x16)
+SYSCALL_STUB(_EnableDmac, 22)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _DisableDmac);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_DisableDmac, 0x17)
+SYSCALL_STUB(_DisableDmac, 23)
 #endif
 
 //100%
@@ -162,19 +162,19 @@ SYSCALL_STUB(SetAlarm, 0xFC)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423B30);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423B30, 0xFD)
+SYSCALL_STUB(func_00423B30, 253)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _iEnableIntc);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_iEnableIntc, -0x1A)
+SYSCALL_STUB(_iEnableIntc, -26)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _iDisableIntc);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_iDisableIntc, -0x1B)
+SYSCALL_STUB(_iDisableIntc, -27)
 #endif
 
 //100%
@@ -186,7 +186,7 @@ SYSCALL_STUB(_iEnableDmac, -0x1C)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _iDisableDmac);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_iDisableDmac, -0x1D)
+SYSCALL_STUB(_iDisableDmac, -29)
 #endif
 
 //100%
@@ -210,91 +210,91 @@ SYSCALL_STUB(CreateThread, 0x20)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", DeleteThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(DeleteThread, 0x21)
+SYSCALL_STUB(DeleteThread, 33)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", StartThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(StartThread, 0x22)
+SYSCALL_STUB(StartThread, 34)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", ExitThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(ExitThread, 0x23)
+SYSCALL_STUB(ExitThread, 35)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", ExitDeleteThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(ExitDeleteThread, 0x24)
+SYSCALL_STUB(ExitDeleteThread, 36)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", TerminateThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(TerminateThread, 0x25)
+SYSCALL_STUB(TerminateThread, 37)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iTerminateThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iTerminateThread, -0x26)
+SYSCALL_STUB(iTerminateThread, -38)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", DisableDispatchThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(DisableDispatchThread, 0x27)
+SYSCALL_STUB(DisableDispatchThread, 39)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", EnableDispatchThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(EnableDispatchThread, 0x28)
+SYSCALL_STUB(EnableDispatchThread, 40)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", ChangeThreadPriority);
 #ifdef SKIP_ASM
-SYSCALL_STUB(ChangeThreadPriority, 0x29)
+SYSCALL_STUB(ChangeThreadPriority, 41)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iChangeThreadPriority);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iChangeThreadPriority, -0x2A)
+SYSCALL_STUB(iChangeThreadPriority, -42)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", RotateThreadReadyQueue);
 #ifdef SKIP_ASM
-SYSCALL_STUB(RotateThreadReadyQueue, 0x2B)
+SYSCALL_STUB(RotateThreadReadyQueue, 43)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _iRotateThreadReadyQueue);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_iRotateThreadReadyQueue, -0x2C)
+SYSCALL_STUB(_iRotateThreadReadyQueue, -44)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", ReleaseWaitThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(ReleaseWaitThread, 0x2D)
+SYSCALL_STUB(ReleaseWaitThread, 45)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iReleaseWaitThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iReleaseWaitThread, -0x2E)
+SYSCALL_STUB(iReleaseWaitThread, -46)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", GetThreadId);
 #ifdef SKIP_ASM
-SYSCALL_STUB(GetThreadId, 0x2F)
+SYSCALL_STUB(GetThreadId, 47)
 #endif
 
 //100%
@@ -306,43 +306,43 @@ SYSCALL_STUB(ReferThreadStatus, 0x30)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iReferThreadStatus);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iReferThreadStatus, -0x31)
+SYSCALL_STUB(iReferThreadStatus, -49)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SleepThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SleepThread, 0x32)
+SYSCALL_STUB(SleepThread, 50)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", WakeupThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(WakeupThread, 0x33)
+SYSCALL_STUB(WakeupThread, 51)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _iWakeupThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_iWakeupThread, -0x34)
+SYSCALL_STUB(_iWakeupThread, -52)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", CancelWakeupThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(CancelWakeupThread, 0x35)
+SYSCALL_STUB(CancelWakeupThread, 53)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iCancelWakeupThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iCancelWakeupThread, -0x36)
+SYSCALL_STUB(iCancelWakeupThread, -54)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SuspendThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SuspendThread, 0x37)
+SYSCALL_STUB(SuspendThread, 55)
 #endif
 
 //100%
@@ -354,19 +354,19 @@ SYSCALL_STUB(_iSuspendThread, -0x38)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", ResumeThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(ResumeThread, 0x39)
+SYSCALL_STUB(ResumeThread, 57)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iResumeThread);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iResumeThread, -0x3A)
+SYSCALL_STUB(iResumeThread, -58)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423D50);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423D50, 0x3B)
+SYSCALL_STUB(func_00423D50, 59)
 #endif
 
 //100%
@@ -378,7 +378,7 @@ SYSCALL_STUB(func_00423D60, 0x3C)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423D70);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423D70, 0x3D)
+SYSCALL_STUB(func_00423D70, 61)
 #endif
 
 //100%
@@ -402,211 +402,211 @@ SYSCALL_STUB(CreateSema, 0x40)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", DeleteSema);
 #ifdef SKIP_ASM
-SYSCALL_STUB(DeleteSema, 0x41)
+SYSCALL_STUB(DeleteSema, 65)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SignalSema);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SignalSema, 0x42)
+SYSCALL_STUB(SignalSema, 66)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iSignalSema);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iSignalSema, -0x43)
+SYSCALL_STUB(iSignalSema, -67)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", WaitSema);
 #ifdef SKIP_ASM
-SYSCALL_STUB(WaitSema, 0x44)
+SYSCALL_STUB(WaitSema, 68)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", PollSema);
 #ifdef SKIP_ASM
-SYSCALL_STUB(PollSema, 0x45)
+SYSCALL_STUB(PollSema, 69)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iPollSema);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iPollSema, -0x46)
+SYSCALL_STUB(iPollSema, -70)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", ReferSemaStatus);
 #ifdef SKIP_ASM
-SYSCALL_STUB(ReferSemaStatus, 0x47)
+SYSCALL_STUB(ReferSemaStatus, 71)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iReferSemaStatus);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iReferSemaStatus, -0x48)
+SYSCALL_STUB(iReferSemaStatus, -72)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423E30);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423E30, 0x49)
+SYSCALL_STUB(func_00423E30, 73)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SetOsdConfigParam);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SetOsdConfigParam, 0x4A)
+SYSCALL_STUB(SetOsdConfigParam, 74)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", GetOsdConfigParam);
 #ifdef SKIP_ASM
-SYSCALL_STUB(GetOsdConfigParam, 0x4B)
+SYSCALL_STUB(GetOsdConfigParam, 75)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", GetGsHParam);
 #ifdef SKIP_ASM
-SYSCALL_STUB(GetGsHParam, 0x4C)
+SYSCALL_STUB(GetGsHParam, 76)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", GetGsVParam);
 #ifdef SKIP_ASM
-SYSCALL_STUB(GetGsVParam, 0x4D)
+SYSCALL_STUB(GetGsVParam, 77)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SetGsHParam);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SetGsHParam, 0x4E)
+SYSCALL_STUB(SetGsHParam, 78)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SetGsVParam);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SetGsVParam, 0x4F)
+SYSCALL_STUB(SetGsVParam, 79)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", CreateEventFlag);
 #ifdef SKIP_ASM
-SYSCALL_STUB(CreateEventFlag, 0x50)
+SYSCALL_STUB(CreateEventFlag, 80)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", DeleteEventFlag);
 #ifdef SKIP_ASM
-SYSCALL_STUB(DeleteEventFlag, 0x51)
+SYSCALL_STUB(DeleteEventFlag, 81)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SetEventFlag);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SetEventFlag, 0x52)
+SYSCALL_STUB(SetEventFlag, 82)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423ED0);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423ED0, -0x53)
+SYSCALL_STUB(func_00423ED0, -83)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", xlaunch);
 #ifdef SKIP_ASM
-SYSCALL_STUB(xlaunch, 0x54)
+SYSCALL_STUB(xlaunch, 84)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423EF0);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423EF0, -0x55)
+SYSCALL_STUB(func_00423EF0, -85)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423F00);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423F00, 0x56)
+SYSCALL_STUB(func_00423F00, 86)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423F10);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423F10, 0x57)
+SYSCALL_STUB(func_00423F10, 87)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423F20);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423F20, -0x58)
+SYSCALL_STUB(func_00423F20, -88)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423F30);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423F30, 0x59)
+SYSCALL_STUB(func_00423F30, 89)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423F40);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423F40, -0x5A)
+SYSCALL_STUB(func_00423F40, -90)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00423F50);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00423F50, 0x5B)
+SYSCALL_STUB(func_00423F50, 91)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", EnableIntcHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(EnableIntcHandler, 0x5C)
+SYSCALL_STUB(EnableIntcHandler, 92)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iEnableIntcHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iEnableIntcHandler, -0x5C)
+SYSCALL_STUB(iEnableIntcHandler, -92)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", DisableIntcHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(DisableIntcHandler, 0x5D)
+SYSCALL_STUB(DisableIntcHandler, 93)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iDisableIntcHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iDisableIntcHandler, -0x5D)
+SYSCALL_STUB(iDisableIntcHandler, -93)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", EnableDmacHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(EnableDmacHandler, 0x5E)
+SYSCALL_STUB(EnableDmacHandler, 94)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iEnableDmacHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iEnableDmacHandler, -0x5E)
+SYSCALL_STUB(iEnableDmacHandler, -94)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", DisableDmacHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(DisableDmacHandler, 0x5F)
+SYSCALL_STUB(DisableDmacHandler, 95)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iDisableDmacHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iDisableDmacHandler, -0x5F)
+SYSCALL_STUB(iDisableDmacHandler, -95)
 #endif
 
 //100%
@@ -618,79 +618,79 @@ SYSCALL_STUB(KSeg0, 0x60)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", EnableCache);
 #ifdef SKIP_ASM
-SYSCALL_STUB(EnableCache, 0x61)
+SYSCALL_STUB(EnableCache, 97)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", DisableCache);
 #ifdef SKIP_ASM
-SYSCALL_STUB(DisableCache, 0x62)
+SYSCALL_STUB(DisableCache, 98)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", GetCop0);
 #ifdef SKIP_ASM
-SYSCALL_STUB(GetCop0, 0x63)
+SYSCALL_STUB(GetCop0, 99)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", FlushCache);
 #ifdef SKIP_ASM
-SYSCALL_STUB(FlushCache, 0x64)
+SYSCALL_STUB(FlushCache, 100)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", CpuConfig);
 #ifdef SKIP_ASM
-SYSCALL_STUB(CpuConfig, 0x66)
+SYSCALL_STUB(CpuConfig, 102)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iGetCop0);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iGetCop0, -0x67)
+SYSCALL_STUB(iGetCop0, -103)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iFlushCache);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iFlushCache, -0x68)
+SYSCALL_STUB(iFlushCache, -104)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iCpuConfig);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iCpuConfig, -0x6A)
+SYSCALL_STUB(iCpuConfig, -106)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", sceSifStopDma);
 #ifdef SKIP_ASM
-SYSCALL_STUB(sceSifStopDma, 0x6B)
+SYSCALL_STUB(sceSifStopDma, 107)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SetCPUTimerHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SetCPUTimerHandler, 0x6C)
+SYSCALL_STUB(SetCPUTimerHandler, 108)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SetCPUTimer);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SetCPUTimer, 0x6D)
+SYSCALL_STUB(SetCPUTimer, 109)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SetOsdConfigParam2);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SetOsdConfigParam2, 0x6E)
+SYSCALL_STUB(SetOsdConfigParam2, 110)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", GetOsdConfigParam2);
 #ifdef SKIP_ASM
-SYSCALL_STUB(GetOsdConfigParam2, 0x6F)
+SYSCALL_STUB(GetOsdConfigParam2, 111)
 #endif
 
 //100%
@@ -708,61 +708,61 @@ SYSCALL_STUB(iGsGetIMR, -0x70)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", GsPutIMR);
 #ifdef SKIP_ASM
-SYSCALL_STUB(GsPutIMR, 0x71)
+SYSCALL_STUB(GsPutIMR, 113)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", iGsPutIMR);
 #ifdef SKIP_ASM
-SYSCALL_STUB(iGsPutIMR, -0x71)
+SYSCALL_STUB(iGsPutIMR, -113)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SetPgifHandler);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SetPgifHandler, 0x72)
+SYSCALL_STUB(SetPgifHandler, 114)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SetVSyncFlag);
 #ifdef SKIP_ASM
-SYSCALL_STUB(SetVSyncFlag, 0x73)
+SYSCALL_STUB(SetVSyncFlag, 115)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", func_00424120);
 #ifdef SKIP_ASM
-SYSCALL_STUB(func_00424120, 0x74)
+SYSCALL_STUB(func_00424120, 116)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _print);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_print, 0x75)
+SYSCALL_STUB(_print, 117)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", sceSifDmaStat);
 #ifdef SKIP_ASM
-SYSCALL_STUB(sceSifDmaStat, 0x76)
+SYSCALL_STUB(sceSifDmaStat, 118)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", isceSifDmaStat);
 #ifdef SKIP_ASM
-SYSCALL_STUB(isceSifDmaStat, -0x76)
+SYSCALL_STUB(isceSifDmaStat, -118)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", sceSifSetDma);
 #ifdef SKIP_ASM
-SYSCALL_STUB(sceSifSetDma, 0x77)
+SYSCALL_STUB(sceSifSetDma, 119)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", isceSifSetDma);
 #ifdef SKIP_ASM
-SYSCALL_STUB(isceSifSetDma, -0x77)
+SYSCALL_STUB(isceSifSetDma, -119)
 #endif
 
 //100%
@@ -780,19 +780,19 @@ SYSCALL_STUB(isceSifSetDChain, -0x78)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", sceSifSetReg);
 #ifdef SKIP_ASM
-SYSCALL_STUB(sceSifSetReg, 0x79)
+SYSCALL_STUB(sceSifSetReg, 121)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", sceSifGetReg);
 #ifdef SKIP_ASM
-SYSCALL_STUB(sceSifGetReg, 0x7A)
+SYSCALL_STUB(sceSifGetReg, 122)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _ExecOSD);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_ExecOSD, 0x7B)
+SYSCALL_STUB(_ExecOSD, 123)
 #endif
 
 //100%
@@ -804,7 +804,7 @@ SYSCALL_STUB(Deci2Call, 0x7C)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", PSMode);
 #ifdef SKIP_ASM
-SYSCALL_STUB(PSMode, 0x7D)
+SYSCALL_STUB(PSMode, 125)
 #endif
 
 //100%
@@ -822,5 +822,5 @@ SYSCALL_STUB(GetMemorySize, 0x7F)
 //100%
 INCLUDE_ASM("seg/seg_3249A0", _InitTLB);
 #ifdef SKIP_ASM
-SYSCALL_STUB(_InitTLB, 0x82)
+SYSCALL_STUB(_InitTLB, 130)
 #endif

@@ -151,7 +151,7 @@ struct sLocalK186C98 {
 
 extern "C" void func_00186C98(void)
 {
-    unsigned short buf[0x320];
+    unsigned short buf[800];
     sLocalK186C98 loc;
     void* mp = cSSXApp_getMCManager(SSXApp);
     cMCOverlayManager_getDeviceNumberString(mp, &loc, *(int*)((char*)mp + 0x428));
@@ -190,7 +190,7 @@ struct sLocal_86D60 { int v[8]; };
 extern "C" void func_00186D60(void)
 {
     sLocal_86D60 loc;
-    unsigned short buf[0x320];
+    unsigned short buf[800];
     void* mp = cSSXApp_getMCManager(SSXApp);
     cMCOverlayManager_getDeviceNumberString(mp, &loc, *(int*)((char*)mp + 0x428));
     cBE_getInterface_Fv(cBE_getBE(), 5);
@@ -309,7 +309,7 @@ extern "C" void func_00186F90(void)
         if (fail) {
             *(int*)(D_004A14B8_86F90 + 0x234) = 1;
             sVtV_86F90* vt = *(sVtV_86F90**)(mp + 0x748);
-            vt[1].fn(mp + vt[1].delta, 0x17);
+            vt[1].fn(mp + vt[1].delta, 23);
             return;
         }
     }
@@ -421,7 +421,7 @@ extern "C" void func_001871A8(void)
     cMoviePlayerK1871A8* mp = (cMoviePlayerK1871A8*)cSSXApp_getMCManager(SSXApp);
     func_0023FB18(mp, 0);
     cMCOverlayManager_setSelectedDevice(mp);
-    mp->v01(0x36);
+    mp->v01(54);
     D_004A14BC = 0;
     D_004A14B8_K1871A8->f22C = -1;
     D_004A14B8_K1871A8->f234 = 0;
@@ -546,11 +546,11 @@ struct sLocal_00187360 {
 
 extern "C" void func_00187360(void)
 {
-    unsigned short buf[0x320];
+    unsigned short buf[800];
     sLocal_00187360 loc;
     void* mp = cSSXApp_getMCManager(SSXApp);
     cBE_getInterface_Fv(cBE_getBE(), 5);
-    *(int*)((char*)D_004A14B8 + 0x19C) = 0x14;
+    *(int*)((char*)D_004A14B8 + 0x19C) = 20;
     char* sf = *(char**)((char*)mp + 0x434);
     sVtI_00187360* sfvt = *(sVtI_00187360**)sf;
     int size = sfvt[22].fn(sf + sfvt[22].delta, cBESaveInterface_getSaveProfileSize());
@@ -631,7 +631,7 @@ extern "C" void func_00187580(void *self, void *popup, int key)
 {
   func_001D8700(self, popup, key);
   int st = *((int *) (((char *) self) + 0x19C));
-  if (st == 0x15)
+  if (st == 21)
   {
     void *mp = cSSXApp_getMCManager(SSXApp);
     func_0023FB18(mp, 0);
@@ -660,7 +660,7 @@ extern "C" void func_00187580(void *self, void *popup, int key)
     func_00187318(self);
     return;
   }
-  if (((key == 0xF) || (key == 0x10)) && ((*((int *) (((char *) self) + 0x19C))) == 0x14))
+  if (((key == 0xF) || (key == 0x10)) && ((*((int *) (((char *) self) + 0x19C))) == 20))
   {
     int cancel = key == 0x10;
     if (!cancel)
@@ -698,10 +698,10 @@ extern "C" void func_001876A8(void)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_mc_messages));
     void* mp = cSSXApp_getMCManager(SSXApp);
     int e = *(int*)((char*)mp + 0x130);
-    if (e == 0x1F || e == 0x21 || e == 0x20 || e == 0x22 || e == 0x31 || e == 0x32 || e == 0x33
-        || e == 0x35 || e == 0x36 || e == 0x34 || e == 2 || e == 3 || e == 6) {
-        unsigned short buf[0x320];
-        cMCOverlayManager_GetMessage(mp, buf, 0x320);
+    if (e == 0x1F || e == 33 || e == 0x20 || e == 34 || e == 49 || e == 50 || e == 51
+        || e == 53 || e == 54 || e == 52 || e == 2 || e == 3 || e == 6) {
+        unsigned short buf[800];
+        cMCOverlayManager_GetMessage(mp, buf, 800);
         cUIText_setUnicodeStringWrap(obj, buf);
         sVtEntK1876A8* vt = *(sVtEntK1876A8**)((char*)obj + 8);
         vt[9].fn((char*)obj + vt[9].delta, 1);
@@ -746,7 +746,7 @@ struct sVtEnt_001877B0 {
 
 extern "C" void func_001877B0(void)
 {
-    unsigned short name[0x14];
+    unsigned short name[20];
     unsigned short desc[0x10];
     unsigned short fmt[8];
     int five = 5;
@@ -764,8 +764,8 @@ extern "C" void func_001877B0(void)
     *(int*)((char*)s1 + 0x1C4) = t;
     *(int*)((char*)s1 + 0x1BC) = 0;
     sVtEnt_001877B0* vt = *(sVtEnt_001877B0**)((char*)mp + 0x748);
-    vt[1].fn((char*)mp + vt[1].delta, 0x35);
-    func_00241D40_r(mp, 1, name, 0x14);
+    vt[1].fn((char*)mp + vt[1].delta, 53);
+    func_00241D40_r(mp, 1, name, 20);
     func_002C2540(fmt, str_pct_s_pct_s_c);
     func_00241AA0_r(desc, 0x10);
     sprintf1((unsigned short*)((char*)D_004A14B8 + 0x11C), fmt, desc, name);
@@ -814,7 +814,7 @@ extern "C" void func_00187920(void)
     func_0023CAA0(mp, cBESaveInterface_getSaveGameSize_K187920());
     func_0023C8F0(mp, 2);
     sVtEntK187920* vt = *(sVtEntK187920**)((char*)mp + 0x748);
-    vt[1].fn((char*)mp + vt[1].delta, 0x35);
+    vt[1].fn((char*)mp + vt[1].delta, 53);
     void* st = D_004A14B8;
     *(int*)((char*)st + 0x1BC) = two;
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_exclam));
@@ -875,7 +875,7 @@ extern "C" void func_00187A38(void* p)
         if (cardCall_87A38(card, 13))
             self->flags.b1 = 0;
         func_0023C8F0(mp, 1);
-        mpNotify_87A38(mp, 0x33);
+        mpNotify_87A38(mp, 51);
         D_004A14BC++;
         self->f1BC = 0;
         break;
@@ -889,7 +889,7 @@ extern "C" void func_00187A38(void* p)
                 D_004A14B4 = 0;
         }
         func_0023C8F0(mp, 0);
-        mpNotify_87A38(mp, 0x33);
+        mpNotify_87A38(mp, 51);
         D_004A14BC++;
         self->f1BC = 1;
         break;

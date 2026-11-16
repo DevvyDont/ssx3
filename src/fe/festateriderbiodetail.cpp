@@ -357,7 +357,7 @@ extern "C" void* func_00191360(void* self)
     *(int*)((char*)self + 0x48) = 0;
     *(char*)((char*)self + 0x44) = 0;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), 0);
-    *(int*)((char*)self + 0xC) = 0x14;
+    *(int*)((char*)self + 0xC) = 20;
     return self;
 }
 #endif

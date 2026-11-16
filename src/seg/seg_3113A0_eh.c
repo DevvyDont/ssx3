@@ -445,7 +445,7 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
                 calleeFrame = cur;
                 cur = f_b80_410C18(pc, calleeFrame, (struct S410C18 *)prev);
                 prev = (struct S410C18 *)calleeFrame;
-                for (i = 0; i < 0x4F; i++) {
+                for (i = 0; i < 79; i++) {
                     if (i != cur->idx && cur->kind[i] != 0) {
                         if (in_reg_window_410C18(i, cur) && cur->kind[cur->idx] == 2 && cur->reg_or_offset[cur->idx] == i)
                             continue;

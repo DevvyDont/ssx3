@@ -299,7 +299,7 @@ extern "C" void cUIListBox_setCallbackListBox(cUIListBox* self, int count)
     *(int*)&self->mAttrListBox |= 0x10;
     void* obj = *(void**)((char*)self->mpScreen + 0xD0);
     sVEntry39A8D8* vt = *(sVEntry39A8D8**)((char*)obj + 8);
-    vt[0x13].fn((char*)obj + vt[0x13].delta, self, 9);
+    vt[19].fn((char*)obj + vt[0x13].delta, self, 9);
 }
 #endif
 

@@ -205,7 +205,7 @@ extern char str_data_ui_mapgfx_big[];
 extern "C" void* cFEAsyncManager_cFEAsyncManager(void* self)
 {
     if (BXFILE_exists(str_data_ui_mapgfx_big) != 0) {
-        func_003DED50(str_data_ui_mapgfx_big, 0, 0x64, (char*)self + 0x58C);
+        func_003DED50(str_data_ui_mapgfx_big, 0, 100, (char*)self + 0x58C);
     }
     return self;
 }
@@ -227,7 +227,7 @@ extern char str_data_ui_mapgfx_big[];
 extern "C" void cFEAsyncManager__cFEAsyncManager(void* self, int flags)
 {
     if (BXFILE_exists(str_data_ui_mapgfx_big) != 0) {
-        func_003DEDC0(*(void**)((char*)self + 0x58C), 0x64);
+        func_003DEDC0(*(void**)((char*)self + 0x58C), 100);
     }
     if (flags & 1) {
         operator_delete((int*)self);

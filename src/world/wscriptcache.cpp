@@ -380,7 +380,7 @@ extern "C" void func_003ACCD8(sWScriptCacheItem* ep, void* world, int index)
                 char* r = (*(char***)(WSD_CCD8 + 0x50))[i];
                 int type = *(int*)r;
                 if (type == 1 || type == 3) {
-                    *(void**)(r + 0xC) = resolve_CCD8(*wp, *(sRef_CCD8*)(r + 0xC), 0x64);
+                    *(void**)(r + 0xC) = resolve_CCD8(*wp, *(sRef_CCD8*)(r + 0xC), 100);
                 } else {
                     *(void**)(r + 0xC) = 0;
                 }
@@ -389,7 +389,7 @@ extern "C" void func_003ACCD8(sWScriptCacheItem* ep, void* world, int index)
             for (int i = 0; i < n54; i++) {
                 char* w = *wp;
                 ref.slot = i;
-                char* o = (char*)resolve_CCD8(w, ref, 0x44);
+                char* o = (char*)resolve_CCD8(w, ref, 68);
                 sPair_CCD8 p = (*(sPair_CCD8**)(WSD_CCD8 + 0x58))[i];
                 *(int*)(o + 0x28) = (short)p.b;
                 unsigned int v = p.a << 16;

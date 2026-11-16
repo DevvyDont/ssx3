@@ -691,10 +691,10 @@ extern "C" void func_00232B28(void* self)
     (*(sUI_232B28**)((char*)self + 0xC))->f8 = (int)SSXApp->Fonts;
     int mode = *(int*)((char*)self + 0x18);
     if (mode == 0) {
-        void* item = func_00186A08(operator new(0x248, str_cFEStateMemCard, 0, 0), *(void**)((char*)self + 0xC));
+        void* item = func_00186A08(operator new(584, str_cFEStateMemCard, 0, 0), *(void**)((char*)self + 0xC));
         cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, item);
     } else if (mode == 2) {
-        void* p = operator new(0x48, str_cFEStateProgressive, 0, 0);
+        void* p = operator new(72, str_cFEStateProgressive, 0, 0);
         func_0039E2A0(p, *(void**)((char*)self + 0xC));
         *(void**)((char*)p + 8) = D_0047CA18;
         cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, p);

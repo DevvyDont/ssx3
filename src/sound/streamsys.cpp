@@ -673,7 +673,7 @@ extern char str_StreamBuffer[];
 extern "C" void func_002AA7F0(void* self, int idx, int heap, int extra)
 {
     sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + *(int*)((char*)self + 0x8));
-    void* mem = cMemMan_alloc(0x84, str_StreamBuffer, heap, 0);
+    void* mem = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
     *slot = cStreamInstance_cStreamInstance((sStreamInst_99D8*)mem, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), heap, extra);
 }
 #endif
@@ -688,7 +688,7 @@ extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D
 extern "C" void func_002AA870(void* self, int idx, int heap, char* mem, int size, int n, int m)
 {
     sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + *(int*)((char*)self + 0x8));
-    void* obj = cMemMan_alloc(0x84, str_StreamBuffer, heap, 0);
+    void* obj = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
     *slot = func_002A9C00((sStreamInst_99D8*)obj, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), mem, size, n, m);
 }
 #endif
@@ -1380,7 +1380,7 @@ extern "C" void func_002AB8E8(void* self)
     if (*(int*)(snd + 0x26C) == 0) {
         cMonitor_MONITOR_Update(bm);
         for (int i = 0; i < 48; i++) {
-            func_002AB828(**(char***)((char*)self + 0x118) + 0x270 + i * 0x2C, self);
+            func_002AB828(**(char***)((char*)self + 0x118) + 0x270 + i * 44, self);
         }
     }
 }
@@ -1898,12 +1898,12 @@ extern "C" void cBankMonitorInstance_StopSound(void* self)
     switch (*(int*)self) {
     case 1:
         func_003B58A0();
-        func_003B8530(*(int*)((char*)self + 0x4), 0x19, -1);
+        func_003B8530(*(int*)((char*)self + 0x4), 25, -1);
         func_003B58D8();
         break;
     case 2:
         func_003B58A0();
-        func_003B9F38(*(int*)((char*)self + 0x4), 0x19, -1);
+        func_003B9F38(*(int*)((char*)self + 0x4), 25, -1);
         func_003B58D8();
         break;
     }

@@ -18,7 +18,7 @@ INCLUDE_ASM("visualfx/lensfx", cLensFxMan_construct__Fv);
  */
 void* cLensFxMan_construct()
 {
-    void* mem = cMemMan_alloc(0x6820, str_LensFX, 0, 0);
+    void* mem = cMemMan_alloc(26656, str_LensFX, 0, 0);
     return cPS2LensFxMan_cPS2LensFxMan(mem);
 }
 #endif
@@ -298,7 +298,7 @@ extern "C" void func_002ECCB8(void* vself)
         short tableIndex = (*(short**)(tbl + 0x288))[item->slot];
         char* tableEntry;
         if (tableIndex >= 0) {
-            tableEntry = tbl + (tableIndex * 4 + 0x290);
+            tableEntry = tbl + (tableIndex * 4 + 656);
         } else {
             tableEntry = 0;
         }

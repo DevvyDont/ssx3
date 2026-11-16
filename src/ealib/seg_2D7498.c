@@ -27,7 +27,7 @@ int func_003D6498_6498(unsigned short *arg0, unsigned int arg1) {
     int a, b;
     int i;
     int ok = 0;
-    if (*arg0 == 0xC03) {
+    if (*arg0 == 3075) {
         func_003DA3A8(arg0, &a, &b);
         for (i = 0; i < 8; i++) {
             unsigned char *p = D_0044FFB8_6498[i].p;
@@ -2630,7 +2630,7 @@ struct S_A810 {
 
 int func_003DA810(struct S_A810 *list, int value) {
     int added = 0;
-    if (list->n < 0xC8U) {
+    if (list->n < 200U) {
         added = 1;
         list->buf[list->n] = value;
         list->n++;
@@ -2683,7 +2683,7 @@ int func_003DA8E0(int arg0) {
 
     var_2 = 0;
     if (D_004A4838 != 0) {
-        var_2 = (int) (arg0 * 0x64) / (int) D_004A4838;
+        var_2 = (int) (arg0 * 100) / (int) D_004A4838;
     }
     return var_2;
 }
@@ -2973,7 +2973,7 @@ void func_003DAFD0(void *arg0) {
     signed char *var_2;
 
     (*(signed char *)((char*)(arg0) + (0x61))) = 0;
-    var_3 = 0xB;
+    var_3 = 11;
     (*(signed char *)((char*)(arg0) + (0x60))) = 0;
     var_2 = arg0 + 0x5F;
     do {
@@ -2990,7 +2990,7 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DB008);
 extern int func_003DB5C0(int, int);
 
 int func_003DB008(unsigned char *arg0) {
-    return func_003DB5C0(0x64, -1) < (int) arg0[1];
+    return func_003DB5C0(100, -1) < (int) arg0[1];
 }
 #endif
 

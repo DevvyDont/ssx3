@@ -147,7 +147,7 @@ extern void f33B0w(void *, int, int, int) __asm__("func_003F33B0");
 extern void f3530w(void *, unsigned char *, int) __asm__("func_003F3530");
 extern char str_ru_paranoid[];
 int func_003F35D0(char *out, int n, unsigned char *in, int a, int b, int c) {
-    unsigned char ctx[0x110];
+    unsigned char ctx[272];
     unsigned char ch;
     unsigned char k;
     k = 0;
@@ -163,7 +163,7 @@ int func_003F35D0(char *out, int n, unsigned char *in, int a, int b, int c) {
             in++;
             if (ch == 0) in = 0;
         }
-        if ((unsigned)(ch - 0x20) > 0x5E) ch = 0x7F;
+        if ((unsigned)(ch - 0x20) > 94) ch = 0x7F;
         f3530w(ctx, &k, 1);
         *out = (ch + 0x40 + (int)(k % 0x60U)) % 0x60 + 0x20;
         out++;
@@ -181,7 +181,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3748);
 extern void f33B0(void *, int, int, int) __asm__("func_003F33B0");
 extern void f3530(void *, unsigned char *, int) __asm__("func_003F3530");
 int func_003F3748(char *out, int n, unsigned char *in, int key, int keyLen, int rounds) {
-    unsigned char ctx[0x110];
+    unsigned char ctx[272];
     unsigned char k;
     int i;
     int ch;
@@ -215,7 +215,7 @@ extern char D_0051F000[];
 extern int func_003F4C98(char *, int, int);
 extern int f4C68g(char *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
 int func_003F3860(int *self) {
-    int id = self[0x58 / 4];
+    int id = self[88 / 4];
     func_003F4C98(D_0051F000, 'name', 'done');
     f4C68g(D_0051F000, 1, id, 0, 0, 0, 0, 0, 1, self);
     if (self[0] > 0) {
@@ -234,7 +234,7 @@ extern char D_0051F010[];
 extern int func_003F4C98(char *, int, int);
 extern void func_00256BD8(int *);
 void func_003F3940(int *self) {
-    int v = self[0x58 / 4];
+    int v = self[88 / 4];
     func_003F4C98(D_0051F010, 'name', 'free');
     func_003F4C68(D_0051F010, 1, v, 0, 0, 0, 0, 0, 0, 0);
     func_00256BD8(self);
@@ -256,15 +256,15 @@ extern void func_003F3940(int *);
 int *f39C8impl(int a, int b) __asm__("func_003F39C8");
 int *f39C8impl(int a, int b) {
     int f;
-    int *p = RpcAlloc(0x5C);
+    int *p = RpcAlloc(92);
     if (p) {
-        f6210k(p, 0, 0x5C);
+        f6210k(p, 0, 92);
         f = (int)func_003F3860;
         p[3] = (int)func_003F3940;
         p[2] = f;
         func_003F4C98(D_0051F020, 'name', 'look');
         f = 1;
-        f4C68k(D_0051F020, f, 0, b, a, -f, 0, 0, f, p + 0x58 / 4);
+        f4C68k(D_0051F020, f, 0, b, a, -f, 0, 0, f, p + 88 / 4);
     }
     return p;
 }
@@ -968,7 +968,7 @@ int f4C98impl(struct sSifEnt *c, int k1, int k2) {
     if (k1 == c->k1 && k2 == c->k2) {
         int i = c->idx;
         if (i >= 0) {
-            if (i < 0x81) {
+            if (i < 129) {
                 struct sSifEnt *ent = (struct sSifEnt *)(i * 16 + (int)g->beg);
                 if (ent->v == c->v && ent->k1 == k1) return 0;
             }
@@ -1150,7 +1150,7 @@ int func_003F5000(void) {
     int id;
 
     if (func_003F4F40() == 0) return -1;
-    f5000_6210(g, 0, 0x4E40);
+    f5000_6210(g, 0, 20032);
     *(int *)&g->buf[0x4D80] = 0x10;
     *(int *)&g->buf[0x4D84] = 0x7FFFFFFF;
     g->beg = (struct sSifEnt *)(((int)&g->buf[0] & 0xFFFFFFF) | 0x20000000);
@@ -1229,7 +1229,7 @@ int func_003F5000(void) {
     g->h4DEC = -1;
     g->h4DF0 = -1;
     tp.func = func_003F44F8;
-    tp.initPriority = 0xA;
+    tp.initPriority = 10;
     tp.stack = D_00523F00;
     tp.stackSize = 0x2000;
     tp.gpReg = &_gp;
@@ -1302,9 +1302,9 @@ int *func_003F5478(int size) {
     if (size < 0x1000) size = 0x1000;
     if (size > 0x2000) size = 0x2000;
 
-    p = RpcAlloc(size + 0x9C);
+    p = RpcAlloc(size + 156);
     if (p == 0) return 0;
-    f6210h(p, 0, 0x9C);
+    f6210h(p, 0, 156);
     p[1] = ((int)p + 0x5B) & ~0x3F;
     p[5] = size;
     p[6] = p[1] + 0x40;
@@ -1796,7 +1796,7 @@ int func_003F61D0(char *name, char *str, unsigned char *ents, void (*cb1)(int, i
     for (i = 0; i < ctl()->cnt; i++) {
         ctl()->v[i] = 0;
         ctl()->prev[i] = 0;
-        ents[i * 0x8C + 0x88] = 0;
+        ents[i * 140 + 136] = 0;
     }
     D_00525F80.cur = 0;
     D_00525F80.period = 0x3C;
@@ -1910,9 +1910,9 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F64E0);
 extern struct sKb D_00525F80;
 
 unsigned char *func_003F64E0(int n) {
-    int off = n * 0x8C;
-    if (D_00525F80.ents[off + 0x88] == 1) {
-        D_00525F80.ents[off + 0x88] = 0;
+    int off = n * 140;
+    if (D_00525F80.ents[off + 136] == 1) {
+        D_00525F80.ents[off + 136] = 0;
         return D_00525F80.ents + off;
     }
     return 0;
@@ -1953,8 +1953,8 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F65A0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern short D_004513DC[], D_0045133A[], D_00451350[];
 short *func_003F65A0(unsigned int c) {
-    if (c - 0x2E < 8) return &D_004513DC[c];
-    if (c - 0x87 >= 5) return &D_00451350[c];
+    if (c - 46 < 8) return &D_004513DC[c];
+    if (c - 135 >= 5) return &D_00451350[c];
     return &D_0045133A[c];
 }
 #endif
@@ -1968,7 +1968,7 @@ extern short *func_003F65A0(unsigned int);
 void func_003F65F8(char *out, char *flags, int mode, int c) {
     unsigned char *p;
     unsigned int t;
-    if ((*(int *)flags & 1) && (t = c - 0x59, t < 0xB)) {
+    if ((*(int *)flags & 1) && (t = c - 89, t < 11)) {
         p = (unsigned char *)&D_00451420[t];
     } else if (mode == 0) {
         p = (unsigned char *)&D_00451350[c];
@@ -1988,9 +1988,9 @@ extern unsigned char D_00451458[];
 extern int f268(int, int, int, int) __asm__("func_0040D268");
 void func_003F6670_impl(unsigned char *self, int *fl, int kb, unsigned code) __asm__("func_003F6670");
 void func_003F6670_impl(unsigned char *self, int *fl, int kb, unsigned code) {
-    unsigned t = code - 0x54;
+    unsigned t = code - 84;
     if (t < 0x10) {
-        if (code < 0x59 || (fl[0] & 1)) self[1] = D_00451458[t];
+        if (code < 89 || (fl[0] & 1)) self[1] = D_00451458[t];
         else self[1] = 0;
     } else {
         int r = f268(kb, fl[1], fl[0], code & 0xFFFF);
@@ -2010,17 +2010,17 @@ int func_003F6700_impl(unsigned flags, unsigned key, unsigned *out) {
     int ok = 1;
     unsigned v = 0;
     switch (key) {
-    case 0x5B: v = flags & 0x8; break;
-    case 0xA3: v = flags & 0x10; break;
-    case 0xA1: v = flags & 0x20; break;
-    case 0xA0:
+    case 91: v = flags & 0x8; break;
+    case 163: v = flags & 0x10; break;
+    case 161: v = flags & 0x20; break;
+    case 160:
     case 0x10: v = flags & 0x2; break;
-    case 0x12:
-    case 0xA4: v = flags & 0x4; break;
-    case 0x11: v = flags & 0x11; break;
-    case 0x5C: v = flags & 0x80; break;
-    case 0xA2: v = flags & 0x1; break;
-    case 0xA5: v = flags & 0x40; break;
+    case 18:
+    case 164: v = flags & 0x4; break;
+    case 17: v = flags & 0x11; break;
+    case 92: v = flags & 0x80; break;
+    case 162: v = flags & 0x1; break;
+    case 165: v = flags & 0x40; break;
     default: ok = 0; break;
     }
     if (ok) *out = v;
@@ -2036,9 +2036,9 @@ int func_003F67E0(int lockFlags, unsigned int mode, int *out) {
     int handled = 1;
     int lockState = 0;
     switch (mode) {
-    case 0x90: lockState = lockFlags & 1; break;
-    case 0x14: lockState = lockFlags & 2; break;
-    case 0x91: lockState = lockFlags & 4; break;
+    case 144: lockState = lockFlags & 1; break;
+    case 20: lockState = lockFlags & 2; break;
+    case 145: lockState = lockFlags & 4; break;
     default: handled = 0; break;
     }
     if (handled) *out = lockState;
@@ -2137,7 +2137,7 @@ extern void func_003F6960b(int, int, int, int *, int) __asm__("func_003F6960");
 void func_003F6A40(void) {
     int *p;
     D_004A5B14 = 1;
-    func_00426B48(D_00526100, 0x237, 0);
+    func_00426B48(D_00526100, 567, 0);
     p = (int *)(((int)D_005261C0 & 0xFFFFFFF) | 0x20000000);
     D_004A5B18 = p;
     func_003F6960b(0, (int)p, 0, D_00526140, 0x80);
@@ -2307,8 +2307,8 @@ int func_003F6C70_impl(int *arg) __asm__("func_003F6C70");
 int func_003F6C70_impl(int *arg) {
     struct sNetAcct *d;
     struct sNetAcct *e;
-    D_004A4BC4 = f6728(arg[1], 0x14C, 4);
-    f6210x(D_004A4BC4, 0, 0x14C);
+    D_004A4BC4 = f6728(arg[1], 332, 4);
+    f6210x(D_004A4BC4, 0, 332);
     d = D_004A4BC4;
     d->heap = arg[1];
     d->hdr = *(struct sNetHdr *)arg[0];
@@ -2317,7 +2317,7 @@ int func_003F6C70_impl(int *arg) {
     e->f104 = 4;
     e->f148 = 0;
     e->f138 = 0;
-    e->cur.mode = 0xA;
+    e->cur.mode = 10;
     e->cur.fEC = 5;
     e->f13C = -1;
     return 0;
@@ -2334,7 +2334,7 @@ extern struct sNetAcct *D_004A4BC4;
 
 extern int func_00266760(int, char *, int, int);
 int func_003F6D98(void) {
-    func_00266760(D_004A4BC4->heap, (char *)D_004A4BC4, 0x14C, 4);
+    func_00266760(D_004A4BC4->heap, (char *)D_004A4BC4, 332, 4);
     D_004A4BC4 = 0;
     return 0;
 }
@@ -2363,7 +2363,7 @@ int func_003F6DC8(void) {
     req.a = 2;
     req.p = &d->f138;
     req.d = d;
-    req.len = 0x1A;
+    req.len = 26;
     req.buf = &buf;
     req.r = fB800();
     req.v = D_004A4BC4->heap;
@@ -2394,7 +2394,7 @@ int func_003F6E98(int a) {
     if (D_004A4BC4->st == 4) {
         func_003F7990(a);
     } else {
-        r = 0x16;
+        r = 22;
     }
     return r;
 }
@@ -2439,8 +2439,8 @@ int func_003F6F68(int *out) {
     *out = 0;
     if (out == 0) r = 7;
     if (D_004A4BC4->cur.mode >= 9) {
-        if (D_004A4BC4->cur.mode == 0xA) r = 0xC;
-        else r = 0xD;
+        if (D_004A4BC4->cur.mode == 10) r = 0xC;
+        else r = 13;
     }
     if (r == 0) {
         switch (D_004A4BC4->cur.fEC) {
@@ -2484,7 +2484,7 @@ int func_003F6F68(int *out) {
             r = 0x10;
             break;
         default:
-            r = 0x11;
+            r = 17;
             break;
         }
     }
@@ -2690,12 +2690,12 @@ int func_003F7478(void) {
     struct sNetAcct *d = D_004A4BC4;
     d->cur.fFC = fn78E0;
     d->cur.f100 = fn7920;
-    r = func_003F8178_7478(func_003FCE10((char *)&d->f144, d->heap, 0x11, 0));
+    r = func_003F8178_7478(func_003FCE10((char *)&d->f144, d->heap, 17, 0));
     if (r == 0) {
         struct sNetAcct *e = D_004A4BC4;
         struct sName17 *dst = (struct sName17 *)e->f144;
         *dst = *(struct sName17 *)e->name;
-        r = func_003F8178_7478(fC548(&D_004A4BC4->params, 0x41434354, 0, (int)D_004A4BC4->f144, 0x11));
+        r = func_003F8178_7478(fC548(&D_004A4BC4->params, 0x41434354, 0, (int)D_004A4BC4->f144, 17));
     }
     return r;
 }
@@ -2721,12 +2721,12 @@ int func_003F7528(void) {
     struct sNetAcct *d = D_004A4BC4;
     d->cur.fFC = fn7900;
     d->cur.f100 = fn7958;
-    r = func_003F8178_7528(func_003FCE10((char *)&d->f144, d->heap, 0x11, 0));
+    r = func_003F8178_7528(func_003FCE10((char *)&d->f144, d->heap, 17, 0));
     if (r == 0) {
         struct sNetAcct *e = D_004A4BC4;
         struct sName17 *dst = (struct sName17 *)e->f144;
         *dst = *(struct sName17 *)e->pass;
-        r = func_003F8178_7528(fC548(&D_004A4BC4->params, 0x50415353, 0, (int)D_004A4BC4->f144, 0x11));
+        r = func_003F8178_7528(fC548(&D_004A4BC4->params, 0x50415353, 0, (int)D_004A4BC4->f144, 17));
     }
     return r;
 }
@@ -2751,10 +2751,10 @@ int func_003F75D8(void) {
     struct sNetAcct *d = D_004A4BC4;
     d->cur.fFC = fn7840;
     d->cur.f100 = fn7920;
-    r = func_003F8178_75D8(func_003FCE10((char *)&d->f144, d->heap, 0x11, 0));
+    r = func_003F8178_75D8(func_003FCE10((char *)&d->f144, d->heap, 17, 0));
     if (r == 0) {
         struct sNetAcct *e = D_004A4BC4;
-        r = func_003F8178_75D8(func_003FC708(&e->params, 0x41434354, 0, (int)e->f144, 0x11));
+        r = func_003F8178_75D8(func_003FC708(&e->params, 0x41434354, 0, (int)e->f144, 17));
     }
     return r;
 }
@@ -2779,10 +2779,10 @@ int func_003F7658(void) {
     struct sNetAcct *d = D_004A4BC4;
     d->cur.fFC = fn7890;
     d->cur.f100 = fn7958;
-    r = func_003F8178_7658(func_003FCE10((char *)&d->f144, d->heap, 0x11, 0));
+    r = func_003F8178_7658(func_003FCE10((char *)&d->f144, d->heap, 17, 0));
     if (r == 0) {
         struct sNetAcct *e = D_004A4BC4;
-        r = func_003F8178_7658(func_003FC708(&e->params, 0x50415353, 0, (int)e->f144, 0x11));
+        r = func_003F8178_7658(func_003FC708(&e->params, 0x50415353, 0, (int)e->f144, 17));
     }
     return r;
 }
@@ -2831,7 +2831,7 @@ int func_003F7708(int *out) {
         *out = 0;
         switch (s) {
         case 0:
-            err = 0x17;
+            err = 23;
             break;
         case 2:
             if (D_004A4BC4->cur.fFC) {
@@ -2844,7 +2844,7 @@ int func_003F7708(int *out) {
             *out = s;
             break;
         default:
-            err = 0x12;
+            err = 18;
             break;
         }
     } else {
@@ -2947,7 +2947,7 @@ extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003FCF00(int, int, int, int);
 extern int func_003F8178_7920(int) __asm__("func_003F8178");
-int func_003F7920(int unused) { return func_003F8178_7920(func_003FCF00((int)D_004A4BC4->f144, D_004A4BC4->heap, 0x11, 0)); }
+int func_003F7920(int unused) { return func_003F8178_7920(func_003FCF00((int)D_004A4BC4->f144, D_004A4BC4->heap, 17, 0)); }
 #endif
 
 //100%
@@ -2961,7 +2961,7 @@ extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003FCF00(int, int, int, int);
 extern int func_003F8178_7958(int) __asm__("func_003F8178");
-int func_003F7958(int unused) { return func_003F8178_7958(func_003FCF00((int)D_004A4BC4->f144, D_004A4BC4->heap, 0x11, 0)); }
+int func_003F7958(int unused) { return func_003F8178_7958(func_003FCF00((int)D_004A4BC4->f144, D_004A4BC4->heap, 17, 0)); }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -3053,7 +3053,7 @@ int func_003F7A60(int mode, unsigned char copy) {
     if (D_004A4BC4->cur.mode < 9)
         D_004A4BC4->cur.fDC = (void *)func_003F6F68;
     else
-        err = 0xD;
+        err = 13;
     if (err == 0) {
         switch (D_004A4BC4->cur.mode) {
         case 0: case 1: case 2: case 3: case 4: case 5:
@@ -3066,7 +3066,7 @@ int func_003F7A60(int mode, unsigned char copy) {
             D_004A4BC4->cur.fE0 = (void *)func_003F72F8;
             break;
         default:
-            err = 0xD;
+            err = 13;
             break;
         }
     }
@@ -3163,14 +3163,14 @@ int func_003F7C00(void) {
     case 6:
     case 7: D_004A4BC4->cur.fF0 = (void *)func_003F76D8; break;
     case 8: D_004A4BC4->cur.fF0 = (void *)func_003F7438; break;
-    default: r = 0xD;
+    default: r = 13;
     }
     if (r == 0) {
         if (D_004A4BC4->cur.mode < 9) D_004A4BC4->cur.fF4 = (void *)func_003F7708;
-        else r = 0xD;
+        else r = 13;
         if (r == 0) {
             if (D_004A4BC4->cur.mode < 9) D_004A4BC4->cur.fF8 = (void *)func_003F77F0_7C00;
-            else r = 0xD;
+            else r = 13;
         }
     }
     D_004A4BC4->cur.fFC = 0;
@@ -3219,11 +3219,11 @@ int func_003F7DE0(int a) {
     W7DE0 *w;
     r = o->f0();
     if (r == 0) {
-        r = o->f1(a, 0x296E);
+        r = o->f1(a, 10606);
         if (r == 0) {
             r = o->f2(&w);
             if (r == 0) {
-                err = 0x15;
+                err = 21;
                 if (**(unsigned **)((char *)w + 4) == 0x836C71D) err = 0;
             }
         }
@@ -3298,8 +3298,8 @@ int func_003F7F48(int a, int b) {
     if (a == 0 && b == 0) {
         err = 7;
     } else {
-        f7E90(D_004A4BC4->name, b, 0x11);
-        f7E90(D_004A4BC4->pass, b + 0x11, 0x11);
+        f7E90(D_004A4BC4->name, b, 17);
+        f7E90(D_004A4BC4->pass, b + 17, 17);
     }
     if (err == 0) {
         err = func_003F7DE0_7F48(a);
@@ -3351,8 +3351,8 @@ int func_003F8048(char *name) {
     if (name == 0) {
         r = 7;
     } else {
-        func_003F7E90_8048(D_004A4BC4->name, name, 0x11);
-        func_003F7E90_8048(D_004A4BC4->pass, name + 0x11, 0x11);
+        func_003F7E90_8048(D_004A4BC4->name, name, 17);
+        func_003F7E90_8048(D_004A4BC4->pass, name + 0x11, 17);
     }
     if (r == 0) r = func_003F6E98(1);
     return r;
@@ -3416,11 +3416,11 @@ int func_003F8178(int sysError) {
     case 7:
     case 110: return 5;
     case 9: return 6;
-    case 1: return 0x13;
-    case 2: return 0x14;
+    case 1: return 19;
+    case 2: return 20;
     case 4: return 7;
     case 6:
-    case 107: return 0xB;
+    case 107: return 11;
     }
     return 0x18;
 }
@@ -3453,7 +3453,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8230);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003FCF98(int, int);
-int func_003F8230(int sizeOut) { func_003FCF98(0x22, sizeOut); return 0; }
+int func_003F8230(int sizeOut) { func_003FCF98(34, sizeOut); return 0; }
 #endif
 
 //100%
@@ -3529,8 +3529,8 @@ int func_003F8258(int port) {
         __builtin_memcpy(p.icon.FnameCopy, str_view_ico, 9);
         __builtin_memcpy(p.icon.FnameDel, str_view_ico, 9);
         p.port = port;
-        p.id = 0x296E;
-        p.f3CC = 0x22;
+        p.id = 10606;
+        p.f3CC = 34;
         err = func_003F8178(func_003FCDC8(&p));
     }
     return err;
@@ -3599,7 +3599,7 @@ int func_003F85C0(unsigned short v, int dir) {
         while (i >= 0 && !((v >> i) & 1)) i--;
         if (i < 0) r = -1; else r = i;
     } else {
-        return 0x12;
+        return 18;
     }
     return r;
 }
@@ -3685,7 +3685,7 @@ int func_003F8720(int a, int *out) {
     *out = 1;
     d = D_004A4BD8;
     e = D_004A4BDC;
-    d->op = 0xB;
+    d->op = 11;
     d->st = 0x18;
     e->f38(d->body.port);
     return 0;
@@ -3709,7 +3709,7 @@ int func_003F8768(int a, int *out) {
     d = D_004A4BD8;
     e = D_004A4BDC;
     d->op = 0xC;
-    d->st = 0x19;
+    d->st = 25;
     e->f1C(d->body.port);
     return 0;
 }
@@ -3731,8 +3731,8 @@ int func_003F87B0(int a, int *out) {
     *out = 1;
     d = D_004A4BD8;
     e = D_004A4BDC;
-    d->op = 0xD;
-    d->st = 0x1A;
+    d->op = 13;
+    d->st = 26;
     e->f14(a);
     return 0;
 }
@@ -3753,8 +3753,8 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8800);
 extern struct sMcReq *D_004A4BD8;
 
 int func_003F8800(int a) {
-    if (D_004A4BD8->st != 1) return 0x12;
-    if (a != 0 && a != 3 && a != 0x11) return 0x10;
+    if (D_004A4BD8->st != 1) return 18;
+    if (a != 0 && a != 3 && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3767,8 +3767,8 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8838);
 extern struct sMcReq *D_004A4BD8;
 
 int func_003F8838(int a) {
-    if (D_004A4BD8->st != 2) return 0x12;
-    if (a != 0 && a != 4 && a != 3 && a != 9 && a != 0x11) return 0x10;
+    if (D_004A4BD8->st != 2) return 18;
+    if (a != 0 && a != 4 && a != 3 && a != 9 && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3782,8 +3782,8 @@ extern struct sMcReq *D_004A4BD8;
 
 int func_003F8880(int a) {
     int m = D_004A4BD8->st;
-    if (m != 0x1B && m != 0x1D && m != 0x1C && m != 7 && m != 0xB && m != 0x18) return 0x12;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 0xE && a != 0xD && a != 0x11 && a != 0xA) return 0x10;
+    if (m != 27 && m != 29 && m != 0x1C && m != 7 && m != 11 && m != 0x18) return 18;
+    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 0xE && a != 13 && a != 17 && a != 10) return 0x10;
     return a;
 }
 #endif
@@ -3797,8 +3797,8 @@ extern struct sMcReq *D_004A4BD8;
 
 int func_003F8908(int a) {
     int m = D_004A4BD8->st;
-    if (m != 0x18 && m != 8 && m != 0xC && m != 0x10) return 0x12;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 0x11) return 0x10;
+    if (m != 0x18 && m != 8 && m != 0xC && m != 0x10) return 18;
+    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3812,8 +3812,8 @@ extern struct sMcReq *D_004A4BD8;
 
 int func_003F8968(int a) {
     int m = D_004A4BD8->st;
-    if (m != 0x19 && m != 9 && m != 0xD && m != 0x11) return 0x12;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 0x11) return 0x10;
+    if (m != 25 && m != 9 && m != 13 && m != 17) return 18;
+    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3826,8 +3826,8 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F89C8);
 extern struct sMcReq *D_004A4BD8;
 
 int func_003F89C8(int a) {
-    if (D_004A4BD8->st != 0x1A) return 0x12;
-    if (a != 0 && a != 3 && a != 9 && a != 0x11) return 0x10;
+    if (D_004A4BD8->st != 26) return 18;
+    if (a != 0 && a != 3 && a != 9 && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3840,8 +3840,8 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8A08);
 extern struct sMcReq *D_004A4BD8;
 
 int func_003F8A08(int a) {
-    if (D_004A4BD8->st != 5) return 0x12;
-    if (a != 0 && a != 3 && a != 9 && a != 0xE && a != 8 && a != 0x11) return 0x10;
+    if (D_004A4BD8->st != 5) return 18;
+    if (a != 0 && a != 3 && a != 9 && a != 0xE && a != 8 && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3855,8 +3855,8 @@ extern struct sMcReq *D_004A4BD8;
 
 int func_003F8A58(int a) {
     int m = D_004A4BD8->st;
-    if (m != 0x16 && m != 6 && m != 0xE && m != 0xA) return 0x12;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 0xD && a != 0x11) return 0x10;
+    if (m != 22 && m != 6 && m != 0xE && m != 10) return 18;
+    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 13 && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3869,8 +3869,8 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8AC0);
 extern struct sMcReq *D_004A4BD8;
 
 int func_003F8AC0(int a) {
-    if ((unsigned)(D_004A4BD8->st - 0x13) >= 3) return 0x12;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 0xD && a != 6 && a != 5 && a != 0x11) return 0x10;
+    if ((unsigned)(D_004A4BD8->st - 19) >= 3) return 18;
+    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 13 && a != 6 && a != 5 && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3883,8 +3883,8 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8B28);
 extern struct sMcReq *D_004A4BD8;
 
 int func_003F8B28(int a) {
-    if (D_004A4BD8->st != 0x12) return 0x12;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 0xD && a != 0x11) return 0x10;
+    if (D_004A4BD8->st != 18) return 18;
+    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 13 && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3898,8 +3898,8 @@ extern struct sMcReq *D_004A4BD8;
 
 int func_003F8B78(int a) {
     int m = D_004A4BD8->st;
-    if (m != 3) return 0x12;
-    if (a != 0 && a != m && a != 0x11) return 0x10;
+    if (m != 3) return 18;
+    if (a != 0 && a != m && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3912,8 +3912,8 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8BB0);
 extern struct sMcReq *D_004A4BD8;
 
 int func_003F8BB0(int a) {
-    if (D_004A4BD8->st != 4) return 0x12;
-    if (a != 0 && a != 3 && a != 0x11) return 0x10;
+    if (D_004A4BD8->st != 4) return 18;
+    if (a != 0 && a != 3 && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3926,8 +3926,8 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8BE8);
 extern struct sMcReq *D_004A4BD8;
 
 int func_003F8BE8(int a) {
-    if (D_004A4BD8->st != 0x17) return 0x12;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 0x11) return 0x10;
+    if (D_004A4BD8->st != 23) return 18;
+    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 17) return 0x10;
     return a;
 }
 #endif
@@ -3956,11 +3956,11 @@ extern void fA818(char *, char *, int, char *) __asm__("func_003FA818");
 int func_003F8C38(int a, int *out, int *c) {
     int op;
     int slot;
-    char buf[0x50];
-    if (out == 0) return 0x12;
-    if (c == 0) return 0x12;
+    char buf[80];
+    if (out == 0) return 18;
+    if (c == 0) return 18;
     op = D_004A4BD8->op;
-    if (op != 3 && op != 6) return 0x12;
+    if (op != 3 && op != 6) return 18;
     *out = 1;
     switch ((unsigned)D_004A4BD8->st) {
     case 1:
@@ -3989,22 +3989,22 @@ int func_003F8C38(int a, int *out, int *c) {
         if (a == 0) {
             if (*c == 1) {
                 fA818((char *)D_004A4BD8->body.pad08, (char *)&D_004A4BD8->body.pad08[8], (int)D_004A4BDC->f50, D_004A4BD8->body.name);
-                D_004A4BD8->st = 0x16;
+                D_004A4BD8->st = 22;
                 ((void (*)(int *, int *, int, int))D_004A4BDC->f18)(D_004A4BD8->body.pad08, &D_004A4BD8->body.pad08[8], D_004A4BD8->body.slot, 3);
                 break;
             }
             if (*c == 0) {
                 f86F0(4);
-                D_004A4BD8->st = 0x1A;
+                D_004A4BD8->st = 26;
                 D_004A4BDC->f14(D_004A4BD8->body.slot);
                 break;
             }
             *out = 2;
-            return 0xA;
+            return 10;
         }
         f86F0(a);
         return func_003F87B0(D_004A4BD8->body.slot, out);
-    case 0x16:
+    case 22:
         if (a == 0) {
             if (*c >= 0) {
                 D_004A4BD8->body.port = *c;
@@ -4013,11 +4013,11 @@ int func_003F8C38(int a, int *out, int *c) {
             }
             D_004A4BD8->body.port = *c;
             *out = 2;
-            return 0xA;
+            return 10;
         }
         f86F0(a);
         return func_003F87B0(D_004A4BD8->body.slot, out);
-    case 0x1A:
+    case 26:
         if (a == 0) {
             if (D_004A4BD8->op == 4 || D_004A4BD8->op == 6) {
                 *out = 2;
@@ -4041,7 +4041,7 @@ int func_003F8C38(int a, int *out, int *c) {
         return a;
     default:
         *out = 2;
-        return 0x12;
+        return 18;
     }
     return 0;
 }
@@ -4057,13 +4057,13 @@ extern struct sMcReq *D_004A4BD8;
 extern void f86F0(int) __asm__("func_003F86F0");
 int func_003F8EF8(int a, int *out, int *c) {
     int op;
-    if (out == 0) return 0x12;
-    if (c == 0) return 0x12;
+    if (out == 0) return 18;
+    if (c == 0) return 18;
     op = D_004A4BD8->op;
-    if (op != 8 && op != 0xA && op != 9) return 0x12;
+    if (op != 8 && op != 10 && op != 9) return 18;
     *out = 1;
     switch ((unsigned)D_004A4BD8->st) {
-    case 0x1B:
+    case 27:
         if (a == 0) {
             *out = 2;
             return 0;
@@ -4071,20 +4071,20 @@ int func_003F8EF8(int a, int *out, int *c) {
         f86F0(a);
         return func_003F8720((int)&D_004A4BD8->body, out);
     case 0x1C:
-    case 0x1D:
+    case 29:
         if (a == 0) {
             if (D_004A4BD8->f70 == *c) {
                 *out = 2;
                 return 0;
             }
             *out = 2;
-            return 0xA;
+            return 10;
         }
         f86F0(a);
         return func_003F8720((int)&D_004A4BD8->body, out);
     }
     *out = 2;
-    return 0x12;
+    return 18;
 }
 #endif
 
@@ -4099,28 +4099,28 @@ extern struct sMcDrv *D_004A4BDC;
 
 extern void f86F0(int) __asm__("func_003F86F0");
 int func_003F8FF0(int a, int *out, int c) {
-    if (out == 0) return 0x12;
-    if (c == 0) return 0x12;
-    if (D_004A4BD8->op != 7) return 0x12;
+    if (out == 0) return 18;
+    if (c == 0) return 18;
+    if (D_004A4BD8->op != 7) return 18;
     *out = 1;
     switch ((unsigned)D_004A4BD8->st) {
     case 0x18:
         if (a == 0) {
-            D_004A4BD8->st = 0x19;
+            D_004A4BD8->st = 25;
             D_004A4BDC->f1C(D_004A4BD8->body.port);
             break;
         }
         f86F0(a);
         return func_003F8768((int)&D_004A4BD8->body, out);
-    case 0x19:
+    case 25:
         if (a == 0) {
-            D_004A4BD8->st = 0x1A;
+            D_004A4BD8->st = 26;
             D_004A4BDC->f14(D_004A4BD8->body.slot);
             break;
         }
         f86F0(a);
         return func_003F87B0(D_004A4BD8->body.slot, out);
-    case 0x1A:
+    case 26:
         if (a == 0) {
             *out = 2;
             return 0;
@@ -4129,7 +4129,7 @@ int func_003F8FF0(int a, int *out, int c) {
         return a;
     default:
         *out = 2;
-        return 0x12;
+        return 18;
     }
     return 0;
 }
@@ -4146,23 +4146,23 @@ extern struct sMcDrv *D_004A4BDC;
 
 extern int func_003F8710(void);
 int func_003F9130(int a, int *out, int c) {
-    if (out == 0 || c == 0 || (unsigned)(D_004A4BD8->op - 0xB) > 2) return 0x12;
+    if (out == 0 || c == 0 || (unsigned)(D_004A4BD8->op - 11) > 2) return 18;
     *out = 1;
     switch ((unsigned)D_004A4BD8->st) {
     case 0x18:
-        D_004A4BD8->st = 0x19;
+        D_004A4BD8->st = 25;
         D_004A4BDC->f1C(D_004A4BD8->body.port);
         break;
-    case 0x19:
-        D_004A4BD8->st = 0x1A;
+    case 25:
+        D_004A4BD8->st = 26;
         D_004A4BDC->f14(D_004A4BD8->body.slot);
         break;
-    case 0x1A:
+    case 26:
         *out = 2;
         return func_003F8710();
     default:
         *out = 2;
-        return 0x12;
+        return 18;
     }
     return 0;
 }
@@ -4212,9 +4212,9 @@ int func_003F9218_impl(int *ports, struct sMcCallbacks *cb, int heap) {
         cb->f[12] == 0 || cb->f[13] == 0 || cb->f[14] == 0 || cb->f[15] == 0 || cb->f[16] == 0)
         return 0xC;
     if (D_004A4BDC != 0 || D_004A4BD8 != 0) return 1;
-    D_004A4BDC = (struct sMcDrv *)func_00266728(heap, 0x42C, 4);
+    D_004A4BDC = (struct sMcDrv *)func_00266728(heap, 1068, 4);
     if (D_004A4BDC == 0) return 7;
-    D_004A4BD8 = (struct sMcReq *)func_00266728(heap, 0x74, 4);
+    D_004A4BD8 = (struct sMcReq *)func_00266728(heap, 116, 4);
     if (D_004A4BD8 == 0) return 7;
     D_004A4BDC->h = heap;
     D_004A4BDC->ports = 0;
@@ -4290,9 +4290,9 @@ int func_003F9530(void) {
     e->f44 = 0;
     s->op = 0;
     s->st = 0;
-    func_00266760(e->h, (char *)s, 0x74, 4);
+    func_00266760(e->h, (char *)s, 116, 4);
     D_004A4BD8 = 0;
-    func_00266760(D_004A4BDC->h, (char *)D_004A4BDC, 0x42C, 4);
+    func_00266760(D_004A4BDC->h, (char *)D_004A4BDC, 1068, 4);
     D_004A4BDC = 0;
     return 0;
 }
@@ -4344,9 +4344,9 @@ int func_003F9698(char *str, int a, int b) {
     if ((unsigned)(a + 1) >= 9) return 9;
     if (a != -1) {
         m = 1 << a;
-        if (!(D_004A4BDC->ports & m)) return 0xB;
+        if (!(D_004A4BDC->ports & m)) return 11;
     }
-    if (D_004A4BD8->op != 0) return 0xD;
+    if (D_004A4BD8->op != 0) return 13;
     c9698_6210(&D_004A4BD8->body, 0, 0x60);
     if (a == -1) {
         if (c9698_86B8(D_004A4BDC->ports) == 1) {
@@ -4417,9 +4417,9 @@ int func_003F9818(char *str, int a, int b) {
     if ((unsigned)(a + 1) >= 9) return 9;
     if (a != -1) {
         m = 1 << a;
-        if (!(D_004A4BDC->ports & m)) return 0xB;
+        if (!(D_004A4BDC->ports & m)) return 11;
     }
-    if (D_004A4BD8->op != 0) return 0xD;
+    if (D_004A4BD8->op != 0) return 13;
     c9818_6210(&D_004A4BD8->body, 0, 0x60);
     if (a == -1) {
         if (c9818_86B8(D_004A4BDC->ports) == 1) {
@@ -4487,9 +4487,9 @@ int func_003F99B8_impl(char *str, int a, int b) {
     if ((unsigned)(a + 1) >= 9) return 9;
     if (a != -1) {
         m = 1 << a;
-        if (!(D_004A4BDC->ports & m)) return 0xB;
+        if (!(D_004A4BDC->ports & m)) return 11;
     }
-    if (D_004A4BD8->op != 0) return 0xD;
+    if (D_004A4BD8->op != 0) return 13;
     c99b8_6210(&D_004A4BD8->body, 0, 0x60);
     if (a == -1) {
         if (c99b8_86B8(D_004A4BDC->ports) == 1) {
@@ -4541,7 +4541,7 @@ int func_003F9B38_impl(int *src) __asm__("func_003F9B38");
 int func_003F9B38_impl(int *src) {
     if (f9208() == 0) return 2;
     if (src == 0) return 0xC;
-    if (D_004A4BD8->op != 0) return 0xD;
+    if (D_004A4BD8->op != 0) return 13;
     __builtin_memcpy(&D_004A4BD8->body, src, 0x60);
     D_004A4BD8->op = 7;
     D_004A4BD8->st = 0x18;
@@ -4574,9 +4574,9 @@ int func_003F9C48_impl(int *src, int a, int b) {
     if (func_003F9208() == 0) return 2;
     if (src == 0) return 0xC;
     s = D_004A4BD8;
-    if (s->op != 0) return 0xD;
+    if (s->op != 0) return 13;
     s->op = 8;
-    s->st = 0x1B;
+    s->st = 27;
     c9c48_86F0(0);
     __builtin_memcpy(&D_004A4BD8->body, (char *)src, 0x60);
     if (b == 0) {
@@ -4617,9 +4617,9 @@ int func_003F9DC0_impl(int *src, int a, int b) {
     if (func_003F9208() == 0) return 2;
     if (src == 0) return 0xC;
     s = D_004A4BD8;
-    if (s->op != 0) return 0xD;
-    s->op = 0xA;
-    s->st = 0x1D;
+    if (s->op != 0) return 13;
+    s->op = 10;
+    s->st = 29;
     f86F0(0);
     __builtin_memcpy(&D_004A4BD8->body, (char *)src, 0x60);
     t = D_004A4BD8;
@@ -4651,7 +4651,7 @@ int func_003F9F00_impl(int *src, int a, int b) {
     if (func_003F9208() == 0) return 2;
     if (src == 0) return 0xC;
     s = D_004A4BD8;
-    if (s->op != 0) return 0xD;
+    if (s->op != 0) return 13;
     s->op = 9;
     s->st = 0x1C;
     f86F0(0);
@@ -4681,7 +4681,7 @@ extern void fB2F8w(int) __asm__("func_003FB2F8");
 int func_003FA040(int *p, int *q) {
     int r;
     if (func_003F9208() == 0) return 2;
-    if (D_004A4BDC->f40 == 0) return 0xD;
+    if (D_004A4BDC->f40 == 0) return 13;
     if (p == 0) return 0xC;
     if (q == 0) return 0xC;
     r = D_004A4BDC->f40(p, q);
@@ -4701,7 +4701,7 @@ int func_003FA040(int *p, int *q) {
     if (p[0] == 2) {
         int s = D_004A4BD8->op;
         struct sMcReq *g;
-        if (s == 5 || s == 2 || s == 7 || s == 0xB || s == 0xC || s == 0xD) fB2F8w(0);
+        if (s == 5 || s == 2 || s == 7 || s == 11 || s == 0xC || s == 13) fB2F8w(0);
         g = D_004A4BD8;
         g->op = 0;
         g->st = 0;
@@ -4740,7 +4740,7 @@ int func_003FA240_impl(char *src) __asm__("func_003FA240");
 int func_003FA240_impl(char *src) {
     if (src == 0) return 0xC;
     if (func_003F9208() == 0) return 2;
-    __builtin_memcpy(D_004A4BDC->f50, src, 0x3D0);
+    __builtin_memcpy(D_004A4BDC->f50, src, 976);
     fA6A8(src, &D_004A4BDC->f420, &D_004A4BDC->f424);
     return fB308(src);
 }
@@ -4765,22 +4765,22 @@ void func_003FA380(char *src, unsigned short *dst) {
     unsigned char i = 0;
     unsigned short c = *src++;
     while (c != 0) {
-        if ((unsigned short)(c - 0x81) < 0x18) {
+        if ((unsigned short)(c - 129) < 0x18) {
             c = (c << 8) + *src++;
-        } else if (c >= 0x7B) {
-            c = tbl.b[c - 0x5E] + 0x8100;
-        } else if (c >= 0x61) {
-            c = c + 0x8220;
-        } else if (c >= 0x5B) {
-            c = tbl.b[c - 0x44] + 0x8100;
-        } else if (c >= 0x41) {
-            c = c + 0x821F;
-        } else if (c >= 0x3A) {
-            c = tbl.b[c - 0x2A] + 0x8100;
+        } else if (c >= 123) {
+            c = tbl.b[c - 94] + 33024;
+        } else if (c >= 97) {
+            c = c + 33312;
+        } else if (c >= 91) {
+            c = tbl.b[c - 68] + 33024;
+        } else if (c >= 65) {
+            c = c + 33311;
+        } else if (c >= 58) {
+            c = tbl.b[c - 42] + 33024;
         } else if (c >= 0x30) {
-            c = c + 0x821F;
+            c = c + 33311;
         } else {
-            c = tbl.b[c - 0x20] + 0x8100;
+            c = tbl.b[c - 0x20] + 33024;
         }
         c = (c >> 8) | ((c & 0xFF) << 8);
         dst[i++] = c;
@@ -4799,30 +4799,30 @@ void func_003FA4F0(unsigned short *src, char *dst) {
     unsigned short c = *src++;
     while (c != 0) {
         c = (c >> 8) | ((c & 0xFF) << 8 & 0xFF00);
-        if ((c & 0x8100) == 0x8100) {
+        if ((c & 0x8100) == 33024) {
             char j;
             c &= 0xFF;
             for (j = 0; j < 33; j++) {
                 if (tbl.b[j] == c) {
                     c = j;
-                    if (c >= 0x1D) {
-                        dst[i++] = c + 0x7B;
-                    } else if (c >= 0x17) {
-                        dst[i++] = c + 0x5B;
+                    if (c >= 29) {
+                        dst[i++] = c + 123;
+                    } else if (c >= 23) {
+                        dst[i++] = c + 91;
                     } else if (c >= 0x10) {
-                        dst[i++] = c + 0x3A;
+                        dst[i++] = c + 58;
                     } else {
                         dst[i++] = c + 0x20;
                     }
                     break;
                 }
             }
-        } else if ((c & 0x8200) == 0x8200) {
-            if ((unsigned short)(c - 0x8281) < 0x1A) {
+        } else if ((c & 0x8200) == 33280) {
+            if ((unsigned short)(c - 33409) < 26) {
                 dst[i++] = c - 0x20;
-            } else if ((unsigned short)(c - 0x8260) < 0x1A) {
+            } else if ((unsigned short)(c - 33376) < 26) {
                 dst[i++] = c - 0x1F;
-            } else if ((unsigned short)(c - 0x824F) < 10) {
+            } else if ((unsigned short)(c - 33359) < 10) {
                 dst[i++] = c - 0x1F;
             }
         } else {
@@ -4936,12 +4936,12 @@ extern char *fA8F8_A7A0(char *, char *, char *) __asm__("func_003FA7A0");
 
 /* Per-op handler for ops 1 and 4 (D_00451468): steps the request through its states. */
 int func_003FA8F8(int a, int *st, int *res) {
-    char path[0x50];
+    char path[80];
     int r;
 
-    if (st == 0) return 0x12;
-    if (res == 0) return 0x12;
-    if (D_004A4BD8->op != 1 && D_004A4BD8->op != 4) return 0x12;
+    if (st == 0) return 18;
+    if (res == 0) return 18;
+    if (D_004A4BD8->op != 1 && D_004A4BD8->op != 4) return 18;
     *st = 1;
     switch (D_004A4BD8->st) {
     case 1:
@@ -4977,12 +4977,12 @@ int func_003FA8F8(int a, int *st, int *res) {
             }
             if (r == 1) {
                 fA8F8_86F0(8);
-                D_004A4BD8->st = 0x1A;
+                D_004A4BD8->st = 26;
                 D_004A4BDC->f14(D_004A4BD8->body.slot);
                 break;
             }
             *st = 2;
-            return 0xA;
+            return 10;
         }
         fA8F8_86F0(a);
         return func_003F87B0(D_004A4BD8->body.slot, st);
@@ -4991,7 +4991,7 @@ int func_003FA8F8(int a, int *st, int *res) {
             r = *res;
             if (r < 0) {
                 *st = 2;
-                return 0xA;
+                return 10;
             }
             if ((unsigned)r >= (unsigned)D_004A4BDC->f420) {
                 D_004A4BD8->st = 4;
@@ -4999,7 +4999,7 @@ int func_003FA8F8(int a, int *st, int *res) {
                 break;
             }
             fA8F8_86F0(0xE);
-            D_004A4BD8->st = 0x1A;
+            D_004A4BD8->st = 26;
             D_004A4BDC->f14(D_004A4BD8->body.slot);
             break;
         }
@@ -5010,7 +5010,7 @@ int func_003FA8F8(int a, int *st, int *res) {
             r = *res;
             if (r < 0) {
                 *st = 2;
-                return 0xA;
+                return 10;
             }
             if ((unsigned)r >= (unsigned)D_004A4BDC->f424) {
                 func_003FA818_impl((char *)D_004A4BD8->body.pad08, (char *)&D_004A4BD8->body.pad08[8], (int)D_004A4BDC->f50,
@@ -5021,7 +5021,7 @@ int func_003FA8F8(int a, int *st, int *res) {
                 break;
             }
             fA8F8_86F0(0xE);
-            D_004A4BD8->st = 0x1A;
+            D_004A4BD8->st = 26;
             D_004A4BDC->f14(D_004A4BD8->body.slot);
             break;
         }
@@ -5031,7 +5031,7 @@ int func_003FA8F8(int a, int *st, int *res) {
         if (a == 0) {
             D_004A4BD8->st = 0xE;
             ((void (*)(char *, char *, int, int))D_004A4BDC->f18)((char *)D_004A4BD8->body.pad08,
-                                                                  (char *)D_004A4BD8->body.pad08, D_004A4BD8->body.slot, 0x203);
+                                                                  (char *)D_004A4BD8->body.pad08, D_004A4BD8->body.slot, 515);
             break;
         }
         fA8F8_86F0(a);
@@ -5052,17 +5052,17 @@ int func_003FA8F8(int a, int *st, int *res) {
         return func_003F8720((int)&D_004A4BD8->body, st);
     case 0x10:
         if (a == 0) {
-            D_004A4BD8->st = 0x11;
+            D_004A4BD8->st = 17;
             D_004A4BDC->f1C(D_004A4BD8->body.port);
             break;
         }
         fA8F8_86F0(a);
         return func_003F8768((int)&D_004A4BD8->body, st);
-    case 0x11:
+    case 17:
         if (a == 0) {
             D_004A4BD8->st = 6;
             ((void (*)(char *, char *, int, int))D_004A4BDC->f18)((char *)D_004A4BD8->body.pad08, str_view_ico_b,
-                                                                  D_004A4BD8->body.slot, 0x203);
+                                                                  D_004A4BD8->body.slot, 515);
             break;
         }
         fA8F8_86F0(a);
@@ -5095,24 +5095,24 @@ int func_003FA8F8(int a, int *st, int *res) {
         return func_003F8768((int)&D_004A4BD8->body, st);
     case 9:
         if (a == 0) {
-            D_004A4BD8->st = 0xA;
+            D_004A4BD8->st = 10;
             ((void (*)(char *, char *, int, int))D_004A4BDC->f18)((char *)D_004A4BD8->body.pad08, str_icon_sys_b,
-                                                                  D_004A4BD8->body.slot, 0x203);
+                                                                  D_004A4BD8->body.slot, 515);
             break;
         }
         fA8F8_86F0(a);
         return func_003F87B0(D_004A4BD8->body.slot, st);
-    case 0xA:
+    case 10:
         if (a == 0) {
                 int v = *res;
             D_004A4BD8->body.port = v;
-            D_004A4BD8->st = 0xB;
-            D_004A4BDC->f30(v, (int)&D_004A4BDC->f50[8], 0x3C4);
+            D_004A4BD8->st = 11;
+            D_004A4BDC->f30(v, (int)&D_004A4BDC->f50[8], 964);
             break;
         }
         fA8F8_86F0(a);
         return func_003F87B0(D_004A4BD8->body.slot, st);
-    case 0xB:
+    case 11:
         if (a == 0) {
             D_004A4BD8->st = 0xC;
             D_004A4BDC->f38(D_004A4BD8->body.port);
@@ -5122,21 +5122,21 @@ int func_003FA8F8(int a, int *st, int *res) {
         return func_003F8720((int)&D_004A4BD8->body, st);
     case 0xC:
         if (a == 0) {
-            D_004A4BD8->st = 0xD;
+            D_004A4BD8->st = 13;
             D_004A4BDC->f1C(D_004A4BD8->body.port);
             break;
         }
         fA8F8_86F0(a);
         return func_003F8768((int)&D_004A4BD8->body, st);
-    case 0xD:
+    case 13:
         if (a == 0) {
-            D_004A4BD8->st = 0x1A;
+            D_004A4BD8->st = 26;
             D_004A4BDC->f14(D_004A4BD8->body.slot);
             break;
         }
         fA8F8_86F0(a);
         return func_003F87B0(D_004A4BD8->body.slot, st);
-    case 0x1A:
+    case 26:
         if (a == 0) {
             if (D_004A4BD8->op == 4) {
                 *st = 2;
@@ -5159,7 +5159,7 @@ int func_003FA8F8(int a, int *st, int *res) {
         return a;
     default:
         *st = 2;
-        return 0x12;
+        return 18;
     }
     return 0;
 }
@@ -5182,11 +5182,11 @@ extern char *fAE50_A7A0(char *, char *, char *) __asm__("func_003FA7A0");
 
 /* Per-op handler for ops 2 and 5 (D_00451468): steps the request through its states. */
 int func_003FAE50(int a, int *st, int *res) {
-    char path[0x50];
+    char path[80];
 
-    if (st == 0) return 0x12;
-    if (res == 0) return 0x12;
-    if (D_004A4BD8->op != 2 && D_004A4BD8->op != 5) return 0x12;
+    if (st == 0) return 18;
+    if (res == 0) return 18;
+    if (D_004A4BD8->op != 2 && D_004A4BD8->op != 5) return 18;
     *st = 1;
     switch (D_004A4BD8->st) {
     case 1:
@@ -5217,7 +5217,7 @@ int func_003FAE50(int a, int *st, int *res) {
         if (a == 0) {
             if (*res == 1) {
                 ((void (*)(char *))D_004A4BDC->f44)((char *)D_004A4BD8->body.pad08);
-                D_004A4BD8->st = 0x13;
+                D_004A4BD8->st = 19;
                 ((void (*)(char *, char *, int))D_004A4BDC->f24)((char *)D_004A4BD8->body.pad08, str_icon_sys_b,
                                                                 D_004A4BD8->body.slot);
                 break;
@@ -5227,11 +5227,11 @@ int func_003FAE50(int a, int *st, int *res) {
                 return func_003F87B0(D_004A4BD8->body.slot, st);
             }
             *st = 2;
-            return 0xA;
+            return 10;
         }
         fAE50_86F0(a);
         return func_003F87B0(D_004A4BD8->body.slot, st);
-    case 0x13:
+    case 19:
         if (a == 3) {
             if (func_003F8710() == 0) fAE50_86F0(a);
             return func_003F87B0(D_004A4BD8->body.slot, st);
@@ -5239,11 +5239,11 @@ int func_003FAE50(int a, int *st, int *res) {
         if (a != 4) {
             if (func_003F8710() == 0) fAE50_86F0(a);
         }
-        D_004A4BD8->st = 0x14;
+        D_004A4BD8->st = 20;
         ((void (*)(char *, char *, int))D_004A4BDC->f24)((char *)D_004A4BD8->body.pad08, str_view_ico_b,
                                                         D_004A4BD8->body.slot);
         break;
-    case 0x14:
+    case 20:
         if (a == 3) {
             if (func_003F8710() == 0) fAE50_86F0(a);
             return func_003F87B0(D_004A4BD8->body.slot, st);
@@ -5251,11 +5251,11 @@ int func_003FAE50(int a, int *st, int *res) {
         if (a != 4) {
             if (func_003F8710() == 0) fAE50_86F0(a);
         }
-        D_004A4BD8->st = 0x15;
+        D_004A4BD8->st = 21;
         ((void (*)(char *, char *, int))D_004A4BDC->f24)((char *)D_004A4BD8->body.pad08,
                                                         (char *)D_004A4BD8->body.pad08, D_004A4BD8->body.slot);
         break;
-    case 0x15:
+    case 21:
         if (a == 3) {
             if (func_003F8710() == 0) fAE50_86F0(a);
             return func_003F87B0(D_004A4BD8->body.slot, st);
@@ -5263,19 +5263,19 @@ int func_003FAE50(int a, int *st, int *res) {
         if (a != 4) {
             if (func_003F8710() == 0) fAE50_86F0(a);
         }
-        D_004A4BD8->st = 0x12;
+        D_004A4BD8->st = 18;
         ((void (*)(char *, int))D_004A4BDC->f28)((char *)D_004A4BD8->body.pad08, D_004A4BD8->body.slot);
         break;
-    case 0x12:
+    case 18:
         if (a == 0) {
             if (func_003F8710() == 0) fAE50_86F0(0);
-            D_004A4BD8->st = 0x1A;
+            D_004A4BD8->st = 26;
             D_004A4BDC->f14(D_004A4BD8->body.slot);
             break;
         }
         if (func_003F8710() == 0) fAE50_86F0(a);
         return func_003F87B0(D_004A4BD8->body.slot, st);
-    case 0x1A:
+    case 26:
         if (a == 0) {
             if (D_004A4BD8->op == 5) {
                 *st = 2;
@@ -5298,7 +5298,7 @@ int func_003FAE50(int a, int *st, int *res) {
         return a;
     default:
         *st = 2;
-        return 0x12;
+        return 18;
     }
     return 0;
 }
@@ -5319,7 +5319,7 @@ static inline unsigned roundup_kb(unsigned v) { if (v & 0x3FF) return ((v >> 10)
 void func_003FB280(char *p, int *out, int *kind) {
     unsigned a = roundup_kb(*(unsigned *)(p + 0x3CC));
     unsigned b = roundup_kb(*(unsigned *)(p + 4));
-    *out = a + b + 0x1400;
+    *out = a + b + 5120;
     *kind = 3;
 }
 #endif
@@ -6079,7 +6079,7 @@ int func_003FBE40(void) {
     int r;
     int p, q;
     x[1] = 0;
-    D_004A5B20->f78 = 0xB;
+    D_004A5B20->f78 = 11;
     r = fBCD8(D_004A5B20->f80, 0xC);
     if (r != 0) return r;
     fB9D0(D_004A5B20->f80, &x[0], &x[1], D_004A5B20->f88.b);
@@ -6164,20 +6164,20 @@ extern void fB9D0(int, int *, int *, char *) __asm__("func_003FB9D0");
 extern int fBB50(int, int, P3FBFE0 **) __asm__("func_003FBB50");
 extern int f5FC8(int, char *, int) __asm__("func_00415FC8");
 int func_003FBFE0(void) {
-    L3FBFE0 x; int h; int r; int err = 0xA; int hh;
+    L3FBFE0 x; int h; int r; int err = 10; int hh;
     x.p = 0; hh = D_004A5B20->f7C; x.b = 0;
     D_004A5B20->f78 = err;
     h = func_003FB910(hh, 0);
     r = fBCD8(h, 0xC);
     if (r != 0) return r;
     fB9D0(h, &x.a, &x.b, D_004A5B20->f88.b);
-    if (x.a != D_004A5B20->f8C) return 0xB;
-    if (x.b != D_004A5B20->f84) return 0x6E;
+    if (x.a != D_004A5B20->f8C) return 11;
+    if (x.b != D_004A5B20->f84) return 110;
     r = fBCD8(D_004A5B20->f7C, x.b);
     if (r != 0) return r;
     r = fBB50(D_004A5B20->f7C, D_004A5B20->f84, &x.p);
     if (r != 0) return r;
-    if (x.p->tag != 4) return 0xB;
+    if (x.p->tag != 4) return 11;
     if (f5FC8(x.p->p, D_004A5B20->f88.b, 4) == 0) err = 0;
     return err;
 }
@@ -6219,7 +6219,7 @@ int func_003FC0E8(P0E8 *p) {
     if (func_003FC0D8() != 0) return 1;
     r = func_003F9218(p->f4, p->f8, p->f18);
     if (r != 0) return func_003FB810(r);
-    D_004A5B20 = c0e8_6728(p->f18, 0xAC, 4);
+    D_004A5B20 = c0e8_6728(p->f18, 172, 4);
     if (D_004A5B20 == 0) return 6;
     c0e8_A6C8(&D_004A5B20->f70);
     r = D_004A5B20->f70->f00(p->f18);
@@ -6293,7 +6293,7 @@ int func_003FC260(void) {
     D_004A5B20->f70 = 0;
     r = c260_9530();
     if (r != 0) return c260_B810(r, D_004A5B20);
-    c260_6760(D_004A5B20->fA0, D_004A5B20, 0xAC, 4);
+    c260_6760(D_004A5B20->fA0, D_004A5B20, 172, 4);
     D_004A5B20 = 0;
     return 0;
 }
@@ -6413,7 +6413,7 @@ int func_003FC548(S64C548 *p, int a, int b, int c, int d) {
     r[0] = 0;
     D_004A5B20->f74 = 6;
     D_004A5B20->f78 = 5;
-    __builtin_memcpy(D_004A5B20, p, 0x64);
+    __builtin_memcpy(D_004A5B20, p, 100);
     D_004A5B20->f84 = d;
     D_004A5B20->f7C = c;
     D_004A5B20->f8C = a;
@@ -6461,7 +6461,7 @@ int func_003FC708_impl(struct sMcParams *src, int a, int b, int c, int d) {
     D_004A5B20->f84 = d;
     r = func_003FBA20(a, b);
     if (r == 0) return 7;
-    if (d != r->b) return 0x6E;
+    if (d != r->b) return 110;
     v = r->a;
     D_004A5B20->fA4 = v;
     return func_003FB810(c708_9C48(src, v, 0));
@@ -6577,7 +6577,7 @@ int func_003FCA40(int *st, int *res) {
             int h = func_003FB910(D_004A5B20->f7C, 0);
             int e;
             fCA40_B9A0(h);
-            if (func_003FB898(D_004A5B20->f84, 2) != *res) return 0x6E;
+            if (func_003FB898(D_004A5B20->f84, 2) != *res) return 110;
             *res = D_004A5B20->f84;
             e = func_003FBCD8(D_004A5B20->f7C, D_004A5B20->f84);
             if (e != 0) return func_003FB828(e);
@@ -6589,14 +6589,14 @@ int func_003FCA40(int *st, int *res) {
             *st = 1;
             return func_003FBF80();
         }
-        if (D_004A5B20->f78 == 0xA) {
+        if (D_004A5B20->f78 == 10) {
             int h = func_003FB910(D_004A5B20->f7C, 0);
             int e;
             if (func_003FB898(D_004A5B20->f84, 1) == *res) {
                 *res = D_004A5B20->f84;
                 e = func_003FBFE0();
             } else {
-                e = 0x6E;
+                e = 110;
             }
             fCA40_B9A0(h);
             return e;
@@ -6627,11 +6627,11 @@ int func_003FCA40(int *st, int *res) {
             return func_003FBDF0();
         }
         if (D_004A5B20->f78 == 7) {
-            if (r != 0 && r != 0xA) {
+            if (r != 0 && r != 10) {
                 D_004A5B20->fA8 = 0;
                 return func_003FB810(r);
             }
-            if (r == 0xA || D_004A5B20->f94 == D_004A5B20->f90) {
+            if (r == 10 || D_004A5B20->f94 == D_004A5B20->f90) {
                 *st = 2;
                 fCA40_B9A0(D_004A5B20->f80);
                 func_003FBBE0((struct sMcKey *)&key);

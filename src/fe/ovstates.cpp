@@ -123,7 +123,7 @@ extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
 {
     cUIState_onUpdate(self);
     self->timer += 1;
-    if (self->timer > 0x708) {
+    if (self->timer > 1800) {
         self->timer = 0;
         cRealFE_mMovieList |= 4;
         return;
@@ -226,7 +226,7 @@ INCLUDE_ASM("fe/ovstates", cFEStateTitle_onWidgetMenu);
  */
 extern "C" int cFEStateTitle_onWidgetMenu(void* self, int pMenu, int Event)
 {
-    return Event != 6 ? 0x100 : 0x101;
+    return Event != 6 ? 0x100 : 257;
 }
 #endif
 
@@ -403,7 +403,7 @@ extern "C" void cFEStateMainMenu_onWidgetCreate(void* self, void* item)
     int id;
     id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(str_1conquer)) {
-        *(int*)((char*)item + 0x18) = 0xB;
+        *(int*)((char*)item + 0x18) = 11;
         return;
     }
     id = *(int*)((char*)item + 0x38);
@@ -413,7 +413,7 @@ extern "C" void cFEStateMainMenu_onWidgetCreate(void* self, void* item)
     }
     id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(str_3multi_play)) {
-        *(int*)((char*)item + 0x18) = 0x16;
+        *(int*)((char*)item + 0x18) = 22;
         return;
     }
     id = *(int*)((char*)item + 0x38);
@@ -423,7 +423,7 @@ extern "C" void cFEStateMainMenu_onWidgetCreate(void* self, void* item)
     }
     id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(str_5online)) {
-        *(int*)((char*)item + 0x18) = 0x31;
+        *(int*)((char*)item + 0x18) = 49;
     }
 }
 #endif
@@ -630,9 +630,9 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
         }
         sVE_194EB0* ivt = *(sVE_194EB0**)(iface + 0xC);
         ((void (*)(void*))ivt[1].fn)(iface + ivt[1].delta);
-        if (*(int*)(item + 0x18) == 0x16 && *(int*)(self + 0x48) == 0) {
+        if (*(int*)(item + 0x18) == 22 && *(int*)(self + 0x48) == 0) {
             *(int*)(self + 0x50) = *(signed char*)(self + 0x14);
-            char* popup = (char*)operator new(0x4C, str_cFEPopupSelectMultiplayerMode, 0, 0);
+            char* popup = (char*)operator new(76, str_cFEPopupSelectMultiplayerMode, 0, 0);
             func_0039E318(popup, *(void**)(self + 0x10), self);
             *(void***)(popup + 0x8) = cFEPopupSelectMultiplayerMode_vtbl;
             int bit = 1;
@@ -661,7 +661,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
         break;
     }
     case 7: {
-        char* optionsState = (char*)func_001887A0(cMemMan_alloc(0x54, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
+        char* optionsState = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
         *(int*)(optionsState + 0x1C) = (*(int*)(optionsState + 0x1C) & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, optionsState, 0, 0);
         break;
@@ -693,11 +693,11 @@ extern "C" int cFEStateMainMenu_onWidgetMenu(void* self, int pMenu, int Event)
 {
     switch (Event) {
     case 6:
-        return *(int*)((char*)self + 0x48) == 0 ? 1 : 0x101;
+        return *(int*)((char*)self + 0x48) == 0 ? 1 : 257;
     case 9:
         return 0x100;
     }
-    return 0x101;
+    return 257;
 }
 #endif
 
@@ -747,10 +747,10 @@ static inline void Show195328(void* self, char* name)
 // On confirm (msg 0x16) commits the selected entry, then re-shows the four main-menu buttons.
 extern "C" void cFEStateMainMenu_onPopupEvent(void* self, char* obj, int msg)
 {
-    if (msg == 0x15) {
+    if (msg == 21) {
         return;
     }
-    if (msg != 0x16) {
+    if (msg != 22) {
         return;
     }
     sVEi_195328* ovt = *(sVEi_195328**)(obj + 8);

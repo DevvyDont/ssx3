@@ -240,10 +240,10 @@ INCLUDE_ASM("seg/seg_2FDDC8", func_003FD2B8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 unsigned func_003FD2B8(int *elfModule, unsigned n) {
     unsigned sectionBase;
-    if (n <= 0xFEFF) {
+    if (n <= 65279) {
         sectionBase = ((unsigned *)func_003FD1F0(elfModule, n))[4];
     } else {
-        sectionBase = n == 0xFFF1 ? 0xFFF00000 : 0;
+        sectionBase = n == 65521 ? 0xFFF00000 : 0;
     }
     return sectionBase;
 }

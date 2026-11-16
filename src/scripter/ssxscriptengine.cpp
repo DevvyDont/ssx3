@@ -67,7 +67,7 @@ struct sSse278358
  */
 extern "C" void cSSXScriptEngine_Load(sSse278358* self)
 {
-    self->links = (sLink_278358*)operator_new_tag(0xC8, str_SetupInfoHeap, 0, 0);
+    self->links = (sLink_278358*)operator_new_tag(200, str_SetupInfoHeap, 0, 0);
     for (int i = 0; i < 10; i++)
     {
         self->links[i].a = -1;
@@ -289,7 +289,7 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
             for (int j = 0; j < n; j++)
             {
                 void* obj = *(void**)(lvl->riders[j] + 0xDF0);
-                if (**(int**)obj != 0 && self->delay == 0 && cInput_getState(obj, 0x6F))
+                if (**(int**)obj != 0 && self->delay == 0 && cInput_getState(obj, 111))
                 {
                     func_00276F48(nisList);
                     goto done;
@@ -622,7 +622,7 @@ extern "C" void func_00278DF0(void *scriptEngine, int viewIndex) {
     do {
         var_3 -= 1;
         (*(int *)((char*)((var_6 + (*(int *)((char*)(scriptEngine) + (0x54C))))) + (8))) = viewIndex;
-        var_6 += 0xCC;
+        var_6 += 204;
     } while (var_3 >= 0);
 }
 #endif
@@ -896,7 +896,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00279178);
 extern "C" void func_00276A08(int, int);
 
 extern "C" void func_00279178(void *scriptEngine, int nisList, int listIndex) {
-    func_00276A08((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 0xCC), listIndex);
+    func_00276A08((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 204), listIndex);
 }
 #endif
 //100%
@@ -905,7 +905,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_002791A8);
 extern "C" void func_00276A78(int, int);
 
 extern "C" void func_002791A8(void *scriptEngine, int nisList, int listIndex) {
-    func_00276A78((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 0xCC), listIndex);
+    func_00276A78((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 204), listIndex);
 }
 #endif
 
@@ -969,7 +969,7 @@ extern "C" void func_00277100(int, int);
 extern "C" void func_00279270(void *scriptEngine, int nisList) {
     int temp_5;
 
-    temp_5 = nisList * 0xCC;
+    temp_5 = nisList * 204;
     func_00277100((*(int *)((char*)(scriptEngine) + (0x54C))) + temp_5, temp_5);
 }
 #endif
@@ -1881,7 +1881,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         break;
     }
     case 25:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 1, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 1, pos, flag, pitch, yaw, 50, 0);
         ((float*)pos)[2] -= 1000.0f;
         {
             sVec_27A0D8 n;
@@ -1891,7 +1891,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         }
         break;
     case 26:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 2, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 2, pos, flag, pitch, yaw, 50, 0);
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
@@ -1900,7 +1900,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         }
         break;
     case 27:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 3, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 3, pos, flag, pitch, yaw, 50, 0);
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
@@ -1909,7 +1909,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         }
         break;
     case 28:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 4, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 4, pos, flag, pitch, yaw, 50, 0);
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
@@ -1919,22 +1919,22 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         break;
     case 29:
     {
-        int cat = 0x32;
+        int cat = 50;
         if (*func_0027C070_p(obj) != 0)
-            cat = 0x2B;
+            cat = 43;
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 5, pos, flag, pitch, yaw, cat, 0);
     }
         break;
     case 30:
     {
-        int cat = 0x32;
+        int cat = 50;
         if (*func_0027C070_p(obj) != 0)
-            cat = 0x2B;
+            cat = 43;
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 6, pos, flag, pitch, yaw, cat, 0);
     }
         break;
     case 31:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 9, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 9, pos, flag, pitch, yaw, 50, 0);
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
@@ -1943,13 +1943,13 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         }
         break;
     case 32:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 10, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 10, pos, flag, pitch, yaw, 50, 0);
         break;
     case 33:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 11, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 11, pos, flag, pitch, yaw, 50, 0);
         break;
     case 34: case 35: case 36:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, id - 22, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, id - 22, pos, flag, pitch, yaw, 50, 0);
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
@@ -1958,10 +1958,10 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         }
         break;
     case 37: case 38: case 39:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, id - 22, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, id - 22, pos, flag, pitch, yaw, 50, 0);
         break;
     case 19:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 7, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 7, pos, flag, pitch, yaw, 50, 0);
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
@@ -1984,11 +1984,11 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         }
         sV3_27A0D8* t = &D_004D3680[id];
         sVec_27A0D8 off(t->x, t->y, t->z, 0.0f);
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 0, pos, flag, pitch, yaw, 0x32, &off);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 0, pos, flag, pitch, yaw, 50, &off);
         break;
     }
     case 23:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 0, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 0, pos, flag, pitch, yaw, 50, 0);
         {
             sVec_27A0D8 n;
             sVec_27A0D8 p;
@@ -1997,7 +1997,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         }
         break;
     case 24:
-        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 8, pos, flag, pitch, yaw, 0x32, 0);
+        cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 8, pos, flag, pitch, yaw, 50, 0);
         break;
     }
 }
@@ -2066,7 +2066,7 @@ extern "C" void* cSSXScriptEngine_MakeTransitionObject(cSSXScriptEngine* self, i
     }
     switch (type) {
     case 1: {
-        sFx_27A4A0* fxObj = (sFx_27A4A0*)cTransitionObj_operator_new_sz(0x14);
+        sFx_27A4A0* fxObj = (sFx_27A4A0*)cTransitionObj_operator_new_sz(20);
         sColor_27A4A0 fxColor = color;
         return initFx_27A4A0(fxObj, fxColor);
     }
@@ -2081,7 +2081,7 @@ extern "C" void* cSSXScriptEngine_MakeTransitionObject(cSSXScriptEngine* self, i
     case 6:
         return func_002EBE20(cTransitionObj_operator_new_sz(0x1C), &color);
     case 7: {
-        sFx_27A4A0* fxObj = (sFx_27A4A0*)cTransitionObj_operator_new_sz(0x14);
+        sFx_27A4A0* fxObj = (sFx_27A4A0*)cTransitionObj_operator_new_sz(20);
         sColor_27A4A0 fxColor;
         fxColor.r = 1.0f;
         fxColor.g = 1.0f;
@@ -2116,7 +2116,7 @@ extern "C" int cSectionMan_getWorldSectionIDFromBESectionID(void* self, int a1);
 
 extern "C" int func_0027A688()
 {
-    return cSectionMan_getWorldSectionIDFromBESectionID(SSXApp->Game->SectionMan, 0x2B);
+    return cSectionMan_getWorldSectionIDFromBESectionID(SSXApp->Game->SectionMan, 43);
 }
 #endif
 
@@ -2240,19 +2240,19 @@ extern "C" void cSSXScriptEngine_PlayTransportSequence(cSSXScriptEngine* self, i
 {
     if (online) {
         if (intro) {
-            cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 0x12, 1, 1, -1, -1, -1);
+            cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 18, 1, 1, -1, -1, -1);
         }
-        cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 0x13, 0, 0, -1, -1, -1);
+        cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 19, 0, 0, -1, -1, -1);
         if (sseWorldMode_A860() == 1) {
-            cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 0x14, 8, 0, -1, -1, -1);
+            cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 20, 8, 0, -1, -1, -1);
         } else {
-            cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 0x15, 8, 0, -1, -1, -1);
+            cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 21, 8, 0, -1, -1, -1);
         }
     } else {
         if (intro) {
             cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 0xC, 1, 1, -1, -1, -1);
         }
-        cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 0xD, 0, 1, -1, -1, -1);
+        cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 13, 0, 1, -1, -1, -1);
         GrMan->mSkipNextPageFlip = 1;
         if (sseWorldMode_A860() == 1) {
             cSSXScriptEngine_AddToNISListByScriptCategory(self, 1, 0xE, 8, 1, -1, -1, -1);
@@ -2262,7 +2262,7 @@ extern "C" void cSSXScriptEngine_PlayTransportSequence(cSSXScriptEngine* self, i
     }
     cSSXScriptEngine_ReadyNISList(self, 1);
     cSSXScriptEngine_PlayNISList(self, 1, 0, 1);
-    func_0028E8C0(func_0028B180(), 0x14, 1);
+    func_0028E8C0(func_0028B180(), 20, 1);
 }
 #endif
 
@@ -2323,7 +2323,7 @@ extern "C" int cSSXScriptEngine_IsInTransportSequence(cSSXScriptEngine* self)
     }
     int category = cSSXScriptEngine_GetNISListScriptCategory_int(self, 1, 0);
     int inTransport = 0;
-    if (category == 0x12 || category == 0xC || category == 0x13 || category == 0xD || category == 0x14 || category == 0xE) {
+    if (category == 18 || category == 0xC || category == 19 || category == 13 || category == 20 || category == 0xE) {
         inTransport = 1;
     }
     return inTransport;
@@ -2532,7 +2532,7 @@ done:
         v = Call_AC60(list->other->rider, 7);
     }
     cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 0, 0x18, 1, 0, v, -1, -1);
-    cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 0, 0x19, 3, 0, v, -1, -1);
+    cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 0, 25, 3, 0, v, -1, -1);
     func_00146320(players, idx, blk.kind, first, 1);
 }
 #endif
@@ -3216,7 +3216,7 @@ static inline char* Bone_27BB08(char* model, unsigned int code)
 extern "C" void cSSXScriptEngine_FillOrientationFromObjectOrientationInfo(cSSXScriptEngine* self, int slot, sVec_27BB08* pos, int* flag, float* pitch, float* yaw, int cat,
                               const sVec_27BB08* off)
 {
-    if (cat == 0x32) {
+    if (cat == 50) {
         int k = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
         cat = D_00482660[k];
     }
@@ -4218,7 +4218,7 @@ extern "C" int func_0027D330(void* self, int idx, void* item)
 {
     int i;
     for (i = 0; i < 30; i++) {
-        int off = i * 0x14 + 0x50;
+        int off = i * 20 + 80;
         if (*(void**)((char*)self + off) == 0) {
             *(int*)((char*)self + off + 4) = idx;
             *(void**)((char*)self + off) = item;
@@ -5203,7 +5203,7 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
     LoadIdentity_F9F8(&m);
     Translate_F9F8(&m, v);
     ROTATE_F9F8(&m, t4vect_ZAxis, -*(float*)(self + 0x78));
-    ROTATE_F9F8(&m, t4vect_YAxis, *(float*)(self + 0x74));
+    ROTATE_F9F8(&m, t4vect_YAxis, *(float*)(self + 116));
     ROTATE_F9F8(&m, t4vect_XAxis, *(float*)(self + 0x70));
     sVec_F9F8 pos;
     float rx, ry, rz;
@@ -5327,7 +5327,7 @@ extern "C" int func_00280560(void* self, void* rider, int id, int playerMain)
 {
     if (id != 0) {
         if (id >= 0) {
-            if (id < 0x16) {
+            if (id < 22) {
                 return cSSXScriptEngine_GetSubjectRider(ScriptEngine, id - 1, playerMain) == rider;
             }
         }
@@ -5743,7 +5743,7 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float
     for (i = 0; i < info.nCmds; i++) {
         sSeCmd_08E8* c = &info.cmds[i];
         int id = c->id;
-        if (id != 0x11) {
+        if (id != 17) {
             if (id == 0x10) {
                 self->field_0xF4 = 1;
             } else {
@@ -5913,7 +5913,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00281168__FPv);
 #ifdef SKIP_ASM
 int func_00281168(void* self)
 {
-    return 0xA;
+    return 10;
 }
 #endif
 

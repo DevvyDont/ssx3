@@ -207,10 +207,10 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
         return 0;
     }
     char* cur = (char*)self->mpSelected;
-    if (!bit_B000(((char*)self), 0x14, 4)) {
+    if (!bit_B000(((char*)self), 20, 4)) {
         return 0;
     }
-    if (bit_B000(cur, 0x14, 3) && !bit_B000(cur, 0x14, 5)) {
+    if (bit_B000(cur, 20, 3) && !bit_B000(cur, 20, 5)) {
         sVE_B000* vt = *(sVE_B000**)(cur + 8);
         if (vt[15].fn(cur + vt[15].delta, in) != 0) {
             return 1;
@@ -235,7 +235,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
         }
         self->mScrollItemCurrent = cUIMenu_getNext(((char*)self));
         int moved = cUIMenu_onInputChangeItem(self, old);
-        if (!bit_B000(((char*)self), 0x90, 3)) {
+        if (!bit_B000(((char*)self), 144, 3)) {
             if (moved) {
                 result = 1;
             } else {
@@ -258,7 +258,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
         }
         self->mScrollItemCurrent = cUIMenu_getPrev(((char*)self));
         int moved = cUIMenu_onInputChangeItem(self, old);
-        if (!bit_B000(((char*)self), 0x90, 3)) {
+        if (!bit_B000(((char*)self), 144, 3)) {
             if (moved) {
                 result = 1;
             } else {
@@ -364,7 +364,7 @@ extern "C" void cUIMenu_render2D(cUIMenu* self, float x, float y)
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
                 cUIMenu_render2D_sVEntry* vt = *(cUIMenu_render2D_sVEntry**)((char*)n + 8);
-                vt[0x11].fn((char*)n + vt[0x11].delta, self->mPosition.x + x, self->mPosition.y + y);
+                vt[17].fn((char*)n + vt[0x11].delta, self->mPosition.x + x, self->mPosition.y + y);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));

@@ -119,9 +119,9 @@ public:
 extern "C" void func_0014F458(void* self)
 {
     sOptBits_0014F458* o = D_00535610_v0014F458;
-    o->a = 0xA;
-    o->b = 0xA;
-    o->c = 0xA;
+    o->a = 10;
+    o->b = 10;
+    o->c = 10;
     o->d = 0;
     o->e = 0;
     o->f = 1;

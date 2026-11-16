@@ -202,7 +202,7 @@ extern "C" int func_003A9A48(sWV_9A48* self, unsigned int idx)
 INCLUDE_ASM("world/worldview", func_003A9A90);
 #ifdef SKIP_ASM
 extern "C" int func_003A9A90(int arg0) {
-    return arg0 + 0x220;
+    return arg0 + 544;
 }
 #endif
 
@@ -243,7 +243,7 @@ extern "C" int func_003A9AC0(cWorldView* vself, int box)
     int ok;
     unsigned i;
     int off = *(int*)(cur + 0x18);
-    off *= 0x44;
+    off *= 68;
     if (*(unsigned short*)(off + (int)vself->mp_Hulls) != 0) {
         if (cWorldCache_isPageLoaded(vself->mp_WorldCache, *(int*)(cur + 0x18)) == 0)
             return 0;
@@ -1276,11 +1276,11 @@ extern "C" int cChunkResolve_resolveCollideModel(void* self, void* ctx, sChunk_3
         l->count = pCollideModel->n;
         l->items = pCollideModel->items;
         for (int i = 0; i < l->count; i++) {
-            SphereTree_init(l->items + i * 0x140);
+            SphereTree_init(l->items + i * 320);
         }
         char* data = pCollideModel->data;
         for (int i = 0; i < l->count; i++) {
-            data += bxSphereTree_Load(l->items + i * 0x140, data, ctx);
+            data += bxSphereTree_Load(l->items + i * 320, data, ctx);
         }
     } else if (pCollideModel->type == 1) {
         sList_3AAA08* l = pCollideModel->list;
@@ -1443,7 +1443,7 @@ extern void* cPS2ChunkResolve_vtbl[];
  */
 extern "C" void* cChunkResolve_construct()
 {
-    void* chunkResolve = cMemMan_alloc(0x14, str_cPS2ChunkResolve, 0, 0);
+    void* chunkResolve = cMemMan_alloc(20, str_cPS2ChunkResolve, 0, 0);
     cChunkResolve_cChunkResolve(chunkResolve);
     *(void***)((char*)chunkResolve + 0x8) = cPS2ChunkResolve_vtbl;
     return chunkResolve;
@@ -1599,7 +1599,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
     switch (msg) {
     case 1:
         *(unsigned short*)(obj + 0x1A2) += *(int*)((char*)self + 0x10);
-        insert_AE68(self, 1, obj, 0x158);
+        insert_AE68(self, 1, obj, 344);
         break;
     case 9: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
@@ -1614,46 +1614,46 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         break;
     }
     case 3:
-        CALL1_AE68(self, 0x68, obj);
+        CALL1_AE68(self, 104, obj);
         insert_AE68(self, 0, obj, 0x60);
         break;
     case 2:
-        CALL1_AE68(self, 0x28, obj);
+        CALL1_AE68(self, 40, obj);
         break;
     case 0:
-        CALL1_AE68(self, 0x48, obj);
+        CALL1_AE68(self, 72, obj);
         break;
     case 6:
-        if (CALL1_AE68(self, 0xA8, obj)) {
+        if (CALL1_AE68(self, 168, obj)) {
             *(int*)(obj + 8) = 6;
-            insert_AE68(self, 2, obj, 0x44);
+            insert_AE68(self, 2, obj, 68);
         }
         break;
     case 7:
-        CALL1_AE68(self, 0xA0, obj);
+        CALL1_AE68(self, 160, obj);
         *(int*)(obj + 8) = 8;
-        insert_AE68(self, 2, obj, 0x28);
+        insert_AE68(self, 2, obj, 40);
         break;
     case 8: {
-        CALL1_AE68(self, 0x90, obj);
+        CALL1_AE68(self, 144, obj);
         char* child = *(char**)(obj + 0x24);
         for (int i = 0; i < *(int*)(obj + 0x20); i++) {
             *(int*)(child + 8) = 1;
-            insert_AE68(self, 2, child, 0x6C);
+            insert_AE68(self, 2, child, 108);
             child = *(char**)(child + 0x64);
         }
         break;
     }
     case 5:
-        CALL1_AE68(self, 0x88, obj);
+        CALL1_AE68(self, 136, obj);
         *(int*)(obj + 8) = 7;
-        insert_AE68(self, 2, obj, 0x68);
+        insert_AE68(self, 2, obj, 104);
         break;
     case 4:
         CALL1_AE68(self, 0x70, obj);
         break;
     case 12:
-        ((tMsg2_AE68)VT_AE68(self, 0x98)->fn)((char*)self + VT_AE68(self, 0x98)->delta, RID, obj);
+        ((tMsg2_AE68)VT_AE68(self, 152)->fn)((char*)self + VT_AE68(self, 0x98)->delta, RID, obj);
         break;
     case 13:
         func_002B6B08(*(void**)(cAudioInterface_getGame_AE68() + 0x4C), obj, RID);
@@ -1680,7 +1680,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         func_00286CA8(func_0028B180(), RID, obj);
         break;
     case 19:
-        func_001547D8_AE68(cBE_getInterface_Fv(cBE_getBE(), 0xA), RID & 0xFF, obj + 4, *(int*)obj);
+        func_001547D8_AE68(cBE_getInterface_Fv(cBE_getBE(), 10), RID & 0xFF, obj + 4, *(int*)obj);
         break;
     case 21:
         func_002105D0(obj);
@@ -1816,7 +1816,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         break;
     case 1: {
         sWVBox_B498 box;
-        WV_MAKEBOX_B498(box, data, 0x158);
+        WV_MAKEBOX_B498(box, data, 344);
         update_B498(*(char**)(self + 0xC), 1, data, &box);
         break;
     }
@@ -1846,7 +1846,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
             do {
                 *(int*)(e + 0x8) = one;
                 sWVBox_B498 box;
-                WV_MAKEBOX_B498(box, e, 0x6C);
+                WV_MAKEBOX_B498(box, e, 108);
                 update_B498(*(char**)(self + 0xC), 2, e, &box);
                 e = *(char**)(e + 0x64);
                 i++;
@@ -1859,7 +1859,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         if (((int (*)(void*, void*))vt[22].fn)(self + vt[22].delta, data)) {
             *(int*)(data + 0x8) = 6;
             sWVBox_B498 box;
-            WV_MAKEBOX_B498(box, data, 0x44);
+            WV_MAKEBOX_B498(box, data, 68);
             update_B498(*(char**)(self + 0xC), 2, data, &box);
         }
         break;
@@ -1867,14 +1867,14 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
     case 7: {
         *(int*)(data + 0x8) = 8;
         sWVBox_B498 box;
-        WV_MAKEBOX_B498(box, data, 0x28);
+        WV_MAKEBOX_B498(box, data, 40);
         update_B498(*(char**)(self + 0xC), 2, data, &box);
         break;
     }
     case 5: {
         *(int*)(data + 0x8) = 7;
         sWVBox_B498 box;
-        WV_MAKEBOX_B498(box, data, 0x68);
+        WV_MAKEBOX_B498(box, data, 104);
         update_B498(*(char**)(self + 0xC), 2, data, &box);
         break;
     }

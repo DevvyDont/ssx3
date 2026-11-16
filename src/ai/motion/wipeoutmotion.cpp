@@ -79,7 +79,7 @@ extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
 {
     if (self->BoardSphereTree == 0)
     {
-        self->BoardSphereTree = (cRiderSphereTree*)cRiderSphereTree_cRiderSphereTree((cRiderSphereTree*)cMemMan_alloc(0x2B0, str_BoardSphereTree, 0, 0));
+        self->BoardSphereTree = (cRiderSphereTree*)cRiderSphereTree_cRiderSphereTree((cRiderSphereTree*)cMemMan_alloc(688, str_BoardSphereTree, 0, 0));
     }
     char* rider = (char*)self->mRider;
     sVec4WG* pos = (sVec4WG*)(rider + 0x110);
@@ -1315,8 +1315,8 @@ extern "C" void func_00137D18(void* vself)
     float tl = vu0Length_137D18(tang);
     float fric = curve_137D18(mat, tl * 0.035999998450279236f) * 3.0f + 1.5f;
     if (tl < 1111.111083984375f
-        && (RIDER->mUseRootPoseOverride != 0 || cRiderAnimBase_getCurrentAnimCategory(RIDER->mRiderAnim, 2) == 0x1D
-            || cRiderAnimBase_getCurrentAnimCategory(RIDER->mRiderAnim, 2) == 0x19)) {
+        && (RIDER->mUseRootPoseOverride != 0 || cRiderAnimBase_getCurrentAnimCategory(RIDER->mRiderAnim, 2) == 29
+            || cRiderAnimBase_getCurrentAnimCategory(RIDER->mRiderAnim, 2) == 25)) {
         float q = 1.0f - tl * 0.0009000000427477062f;
         q *= q;
         q *= q;
@@ -1647,7 +1647,7 @@ struct sVEntry_138960 { short delta; short index; void (*fn)(void*, void*); };
 extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir)
 {
     char* rider = *(char**)((char*)self + 0x40);
-    char seg[0xB0];
+    char seg[176];
     sVec4WG* pt = (sVec4WG*)(rider + 0x110);
     func_0032E100(seg, vu0Sub_138960(*pt, vu0Scale_138960(*dir, 200.0f)), vu0Add_138960(*pt, vu0Scale_138960(*dir, 200.0f)), 2, 0.574999988079071f);
     char* probeRider = *(char**)((char*)self + 0x40);

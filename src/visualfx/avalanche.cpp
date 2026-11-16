@@ -939,7 +939,7 @@ extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self)
                 new (&D_004D5770) sAvFloatDef_7EF8();
                 D_004A54C8 = 1;
             }
-            func_00341AA0(cMemMan_alloc(0x6C, str_AnimObject_b, 0x20000000, 0), 1, 1, self->data->events[self->nextEvent].obj, &D_004D5770);
+            func_00341AA0(cMemMan_alloc(108, str_AnimObject_b, 0x20000000, 0), 1, 1, self->data->events[self->nextEvent].obj, &D_004D5770);
         }
         func_0029E560_7EF8(func_0028B180(), pos_7EF8(self->data->events[self->nextEvent].obj));
         self->nextEvent++;
@@ -1117,7 +1117,7 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
     char buf[0x100];
     sprintf(buf, str_pct_s_pct_s_j, cBENewRaceInterface_getLocationFile(iface, cBENewRaceInterface_getLocationID(iface)), name);
     int fd;
-    if (func_003DEBF0(buf, 0x26, 0x64, &fd)) {
+    if (func_003DEBF0(buf, 38, 100, &fd)) {
         sAvGroup_83B8* avalanche;
         for (avalanche = (sAvGroup_83B8*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->next) {
             for (sAvPart_83B8* node = avalanche->parts; node != 0; node = node->next) {
@@ -1139,7 +1139,7 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
         for (avalanche = (sAvGroup_83B8*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->next) {
             unsigned short header;
             for (sAvPart_83B8* node = avalanche->parts; node != 0; node = node->next) {
-                header = 0xBEEF;
+                header = 48879;
                 off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
                 header = (int)node->count * 10 + 0xC;
                 off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
@@ -1160,7 +1160,7 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
                 off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&avalanche->pairs[k].a, 2, 1);
             }
         }
-        FILESYS_closesync(fd, 0x64);
+        FILESYS_closesync(fd, 100);
     }
     D_004A3A48 = 0;
 }
@@ -1196,13 +1196,13 @@ extern "C" void cAvalanche_LoadData(void)
     cAvalanche_m_resolved = 0;
     cAvalanche_m_badCookie = 1;
     int fd;
-    if (func_003DEBF0(buf, 1, 0x64, &fd)) {
+    if (func_003DEBF0(buf, 1, 100, &fd)) {
         cAvalanche_end();
         if (cAvalanche_m_filedata != 0 && cAvalanche_m_fileDataDeleteable != 0) {
             cMemMan_free(cAvalanche_m_filedata);
         }
         int* hdr = (int*)operator_new_tag(8, buf, 0, 0);
-        FILESYS_readsync_i(fd, 0, hdr, 8, 0x64);
+        FILESYS_readsync_i(fd, 0, hdr, 8, 100);
         if (hdr[0] != 0x2BEEF00) {
             if (hdr != 0) {
                 cMemMan_free(hdr);
@@ -1217,8 +1217,8 @@ extern "C" void cAvalanche_LoadData(void)
             void* data = operator_new_tag(size, buf, 0, 0);
             cAvalanche_m_fileDataDeleteable = 1;
             cAvalanche_m_filedata = data;
-            FILESYS_readsync_i(fd, 0, data, size + 8, 0x64);
-            FILESYS_closesync(fd, 0x64);
+            FILESYS_readsync_i(fd, 0, data, size + 8, 100);
+            FILESYS_closesync(fd, 100);
             cAvalanche_m_badCookie = 0;
         }
     }
@@ -1916,9 +1916,9 @@ extern "C" void cAvalanche_addAvalancheNode(int id, char* obj, int type, float l
     n->obj = obj;
     // The target materialises &n->radius (addiu v1,a0,0x110; swc1 0(v1)): the source bound the field by reference.
     float& radius = n->radius;
-    radius = AV_MIN_D92D0(AV_MIN_D92D0(Abs_D92D0(*(float*)(obj + 0x6C) - *(float*)(obj + 0x60)),
-                                         Abs_D92D0(*(float*)(obj + 0x70) - *(float*)(obj + 0x64))),
-                             Abs_D92D0(*(float*)(obj + 0x74) - *(float*)(obj + 0x68))) *
+    radius = AV_MIN_D92D0(AV_MIN_D92D0(Abs_D92D0(*(float*)(obj + 108) - *(float*)(obj + 0x60)),
+                                         Abs_D92D0(*(float*)(obj + 0x70) - *(float*)(obj + 100))),
+                             Abs_D92D0(*(float*)(obj + 116) - *(float*)(obj + 104))) *
                 0.20000000298023224f;
     n->data = 0;
     n->owned = 0;

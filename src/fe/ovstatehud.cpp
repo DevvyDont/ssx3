@@ -861,7 +861,7 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
         entry->uv1 = t2Vector(it->getX1(), it->getY1());
         entry++;
     }
-    self->f3C4 = 0x50;
+    self->f3C4 = 80;
     self->f3B4 = 0xF0000000;
     self->f3D0 = -1.0f;
     self->f3C0 = -1.0f;
@@ -1150,7 +1150,7 @@ extern "C" int cOVStateHUD1P_handleEvent(char* self, int msg, unsigned short* st
         break;
     case 7:
         *(unsigned int*)(self + 0x3CC) &= 0xFFBDC3FF;
-        *(int*)(self + 0x3C4) = 0x50;
+        *(int*)(self + 0x3C4) = 80;
         *(int*)(self + 0x3C0) = 0;
         *(int*)(self + 0xA44) = 0;
         *(unsigned short*)(self + 0x944) = 0;
@@ -2091,7 +2091,7 @@ extern "C" void func_001F2AA0(void* self, sFont_001F2AA0* font, sHudElemDef_001F
     sf->f3C = sf->f34 * escale[1];
     const char* p = str;
     while (p != 0) {
-        p = func_00392430(*(sFont_001F2AA0**)((char*)self + 0x428), p, lines[n], 0x32, (*(sFont_001F2AA0**)((char*)self + 0x428))->f38, wrap[0]);
+        p = func_00392430(*(sFont_001F2AA0**)((char*)self + 0x428), p, lines[n], 50, (*(sFont_001F2AA0**)((char*)self + 0x428))->f38, wrap[0]);
         n++;
     }
     func_001E91A8(&defs[idx], &col);
@@ -2182,7 +2182,7 @@ extern "C" void func_001F2DB0(void* self, sFont_001F2DB0* font, sHudElemDef_001F
     sf->f3C = sf->f34 * escale[1];
     const unsigned short* p = str;
     while (p != 0) {
-        p = func_00392680(*(sFont_001F2DB0**)((char*)self + 0x428), (*(sFont_001F2DB0**)((char*)self + 0x428))->f38, wrap[0], p, lines[n], 0x32);
+        p = func_00392680(*(sFont_001F2DB0**)((char*)self + 0x428), (*(sFont_001F2DB0**)((char*)self + 0x428))->f38, wrap[0], p, lines[n], 50);
         n++;
     }
     func_001E91A8(&defs[idx], &col);
@@ -2459,7 +2459,7 @@ extern "C" void func_001F31E0(sHudTimer_001F31E0* self)
     *((cGfx_31E0*)GrMan)->stateTop = D_00501420_31E0;
     ((cGfx_31E0*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_31E0*)GrMan)->stateTop->f4_20 = 0;
-    ((cGfx_31E0*)GrMan)->stateTop->f4_12 = 0x14;
+    ((cGfx_31E0*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_31E0*)GrMan)->stateTop->f4_2 = 5;
     ((cGfx_31E0*)GrMan)->SetTexture(t4mat_Identity);
     {
@@ -2543,7 +2543,7 @@ extern void* cFEStateLodge_vtbl[];
 extern "C" void* func_001F3700(void* self)
 {
     func_0039E2A0(self);
-    *(int*)((char*)self + 0xC) = 0x27;
+    *(int*)((char*)self + 0xC) = 39;
     *(void***)((char*)self + 0x8) = cFEStateLodge_vtbl;
     int idx = cBENewPlayerInterface_getPlayerCtrlID(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     *(signed char*)((char*)self + 0x44) = 0;

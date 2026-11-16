@@ -73,7 +73,7 @@ extern "C" cPlaybackMan_C458* cPlaybackMan_cPlaybackMan(cPlaybackMan_C458* self,
     int* info = *(int**)(*(char**)(level + 0x40) + 0xDF0);
     int n = info[1];
     self->field_0x64 = info[0];
-    self->buf = (int*)cMemMan_alloc(0x2A4, str_cInputPad, 0x20000000, 0);
+    self->buf = (int*)cMemMan_alloc(676, str_cInputPad, 0x20000000, 0);
     self->buf[0] = 0;
     void* replayStream = cMemMan_alloc(8, str_cInput, 0x20000000, 0);
     func_00244400(replayStream, (int)self->buf);
@@ -884,7 +884,7 @@ extern "C" void func_0026D228(sPbStream_D2B0* stream, sPbChunk_D2B0* chunkp)
     if (self->count >= 0x1000) {
         char* replay = (char*)SSXApp->Game->Replay;
         *(int*)(replay + 0x610) = 1;
-        *(int*)(replay + 0x614) = 0xB4;
+        *(int*)(replay + 0x614) = 180;
         return;
     }
     self->chunks[self->count] = *chunk;
@@ -1198,7 +1198,7 @@ extern "C" int cReplayFrame_loadFrame(sPbFrame_D678* self, char** pp)
     sPbHeader_D678 h;
     char* p = *pp;
     *pp = p + 0x28;
-    MEM_copy(&h, p, 0x28);
+    MEM_copy(&h, p, 40);
     self->field_0x10 = h.field_0x4;
     self->field_0x30 = h.field_0x8;
     self->field_0x34 = h.field_0xc;
