@@ -291,12 +291,6 @@ struct sBox0035C4E0 {
     float max[4];
 } __attribute__((aligned(16)));
 
-struct sObj0035C4E0 {
-    char pad_0x00[0x10];
-    sBox0035C4E0 box;
-    char pad_0x30[0x14];
-    int id;
-};
 
 extern "C" void cRailModifier_updateBoundBox(void* self);
 extern "C" void* cObjectInterface_getNash();
@@ -312,7 +306,7 @@ extern "C" void cRailModifier_update(cRailModifier* self)
 {
     sBox0035C4E0* box = &(*(sBox0035C4E0*)&self->BoundBox);
     sBox0035C4E0 old = (*(sBox0035C4E0*)&self->BoundBox);
-    cRailModifier_updateBoundBox(((sObj0035C4E0*)self));
+    cRailModifier_updateBoundBox((self));
     nash_Nash_movenode(cObjectInterface_getNash(), 2, (int)self->Node, box, &old);
 }
 #endif
@@ -484,13 +478,6 @@ struct sRmRef_C698 {
     }
 };
 
-struct sRmObj_C698 {
-    char pad_0x00[0x30];
-    sRmRef_C698 spline;     // 0x30
-    int bone;               // 0x34
-    char pad_0x38[0x8];
-    void* model;            // 0x40
-};
 
 // Hit record (position, normal, distance, type, ids, spline parameter).
 struct sRmHit_C698 {
@@ -767,7 +754,7 @@ extern "C" void cRailModifier_splineIntersect(cRailModifier* self, void* box, vo
         return;
     }
     sRmMat44 mat;
-    cRailModifier_getInvMat_C698(((sRmObj_C698*)self), &mat);
+    cRailModifier_getInvMat_C698((self), &mat);
     sRmSeg_C698* seg = spline->segs;
     for (int i = 0; i < spline->numSegs; i++, seg = seg->next) {
         float a = 0.0f;
@@ -2296,17 +2283,6 @@ extern char* D_004A5B64;
 int BXrand();
 extern "C" void func_0035F218(cTexFlipModifier* self);
 
-struct sRailTimer {
-    int f0;
-    int f4;
-    float f8;
-    float fC;
-    int f10;
-    int f14;
-    void* f18;
-    int f1C;
-    int f20;
-};
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 static inline float ftrunc_0035F0B8(float x)
@@ -2316,7 +2292,7 @@ static inline float ftrunc_0035F0B8(float x)
     return t;
 }
 
-extern "C" sRailTimer* func_0035F0B8(cTexFlipModifier* self, void* def, void* owner)
+extern "C" cTexFlipModifier* func_0035F0B8(cTexFlipModifier* self, void* def, void* owner)
 {
     char* d = (char*)def;
     float one = 1.0f;
@@ -2344,7 +2320,7 @@ extern "C" sRailTimer* func_0035F0B8(cTexFlipModifier* self, void* def, void* ow
         self->TexIndex = n;
     }
     func_0035F218(self);
-    return ((sRailTimer*)self);
+    return (self);
 }
 #endif
 
@@ -5861,9 +5837,6 @@ struct sVEntry00361800 {
     void (*fn)(void*);
 };
 
-struct sElem00361800 {
-    char data[0x40];
-};
 
 /**
  * Returns one of the floating node's animation matrices, first refreshing the root transform when it is dirty.
@@ -5874,13 +5847,13 @@ struct sElem00361800 {
  * @param i  index of the matrix in the array at +0x74 (0x40-byte matrices)
  * @return the address of matrix @p i
  */
-extern "C" sElem00361800* cFloatingNode_getAnimMat(cFloatingNode* self, int i)
+extern "C" t4Matrix* cFloatingNode_getAnimMat(cFloatingNode* self, int i)
 {
     if (self->Flags & 1) {
         sVEntry00361800* vt = (sVEntry00361800*)self->mVtbl;
         vt[51].fn((char*)self + vt[51].delta);
     }
-    return &((sElem00361800*)self->AnimMats)[i];
+    return &(self->AnimMats)[i];
 }
 #endif
 

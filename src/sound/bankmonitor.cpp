@@ -3208,7 +3208,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B0C78);
 #ifdef SKIP_ASM
 struct sBankSlots;
 extern "C" void func_002AFC88(cSpeechInstance*, int);
-extern "C" void func_002B1720(sBankSlots*);
+extern "C" void func_002B1720(cSpeechSys*);
 
 extern "C" void func_002B0C78(cSpeechSys* self)
 {
@@ -3218,7 +3218,7 @@ extern "C" void func_002B0C78(cSpeechSys* self)
             func_002AFC88((cSpeechInstance*)p, i);
         }
     }
-    func_002B1720((sBankSlots*)self);
+    func_002B1720(self);
 }
 #endif
 
@@ -3533,10 +3533,6 @@ extern "C" int func_002B1348(cSpeechSys* self, void* msg)
 INCLUDE_ASM("sound/bankmonitor", func_002B1428);
 #ifdef SKIP_ASM
 
-struct sBankSlots {
-    char pad[0x18];
-    tSpeechRequest slots[10];
-};
 
 extern "C" void func_002B1428(cSpeechSys* self)
 {
@@ -3706,12 +3702,12 @@ extern "C" void func_002B16A0(cSpeechSys* self, int idx, int key)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1720);
 #ifdef SKIP_ASM
-extern "C" void func_002B1720(sBankSlots* self)
+extern "C" void func_002B1720(cSpeechSys* self)
 {
     for (int i = 0; i < 10; i++) {
-        if (self->slots[i].used != 0) {
-            if (--self->slots[i].timer <= 0) {
-                self->slots[i].used = 0;
+        if (self->mRequest[i].used != 0) {
+            if (--self->mRequest[i].timer <= 0) {
+                self->mRequest[i].used = 0;
             }
         }
     }
@@ -4150,7 +4146,6 @@ extern "C" int func_003D25F0(int id, char* name, int a2, void* a3, int a4, int a
 extern char D_004A36E0[];
 extern float D_004A3508;
 
-struct sBmStrm_2B21E0 { char pad[0x2C]; int f2C; };
 
 // PORT: g++ `<?` / `>?` (min/max) operators.
 extern "C" void func_002B21E0(cSongInstance* mon, int force)
@@ -4159,7 +4154,7 @@ extern "C" void func_002B21E0(cSongInstance* mon, int force)
     {
         if (func_002B4AA0((void***)gMusicSys, force) == 0)
             return;
-        ((sBmStrm_2B21E0*)mon)->f2C = 1;
+        (mon)->unk_2C = 1;
         func_003D2350(func_002B4AE8((void***)gMusicSys));
         char buf[256];
         sprintf(buf, D_004A36E0, ((char*)mon) + 0x60, *(char**)mon + 0x20);

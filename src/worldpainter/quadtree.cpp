@@ -1328,26 +1328,19 @@ extern "C" void func_002C4480(cPS2MemCard* self, int a1)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C44E0);
 #ifdef SKIP_ASM
-struct sQTLevel {
-    int f00;
-    void* f04;
-    int f08;
-    int f0C;
-    int f10;
-};
 
 struct sQTState {
     char pad000[0xC];
     int level;
     char pad010[0x16C];
-    sQTLevel levels[1];
+    tPS2MemCardDevice levels[1];
 };
 
 extern "C" void func_002C44E0(sQTState* self)
 {
-    self->levels[self->level].f10 = 0;
-    if (self->levels[self->level].f08 == -1) {
-        self->levels[self->level].f08 = 0;
+    self->levels[self->level].unk_10 = 0;
+    if (self->levels[self->level].unk_08 == -1) {
+        self->levels[self->level].unk_08 = 0;
     }
 }
 #endif
@@ -2017,7 +2010,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C5168);
 #ifdef SKIP_ASM
 extern "C" int func_002C5168(cPS2MemCard* self)
 {
-    switch (((sQTLevel*)&self->unk_17C[0])[self->mDevice].f08) {
+    switch (((&self->unk_17C[0]))[self->mDevice].unk_08) {
     case -1:
     case -3:
     case -8:
@@ -2040,7 +2033,7 @@ extern "C" int func_002C51D0_impl(sQTState* self, int i) __asm__("func_002C51D0"
 
 extern "C" int func_002C51D0_impl(sQTState* self, int i)
 {
-    switch (self->levels[i].f08) {
+    switch (self->levels[i].unk_08) {
     case -10002:
     case -10001:
     case -7:
@@ -2051,7 +2044,7 @@ extern "C" int func_002C51D0_impl(sQTState* self, int i)
     case -2:
     case -1:
     case 0:
-        return self->levels[i].f08;
+        return self->levels[i].unk_08;
     case -10:
     case -9:
     case -8:
@@ -2077,8 +2070,8 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C5250);
 #ifdef SKIP_ASM
 extern "C" void func_002C5250(cPS2MemCard* self)
 {
-    ((sQTLevel*)&self->unk_17C[0])[self->mDevice].f00 = 0;
-    ((sQTLevel*)&self->unk_17C[0])[self->mDevice].f04 = 0;
+    ((&self->unk_17C[0]))[self->mDevice].unk_00 = 0;
+    (*(void**)&((&self->unk_17C[0]))[self->mDevice].unk_04) = 0;
 }
 #endif
 
@@ -2143,7 +2136,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C5358);
 #ifdef SKIP_ASM
 extern "C" int func_002C5358(cPS2MemCard* self, int i)
 {
-    switch (((sQTLevel*)&self->unk_17C[0])[i].f08) {
+    switch (((&self->unk_17C[0]))[i].unk_08) {
     case -10001:
     case -7:
     case -5:
@@ -2973,7 +2966,7 @@ extern "C" void func_002C6360(cPS2MemCard* p)
         D_004A3940 = 0;
         func_0040A360(0, 0, &D_004A3940);
         if (D_004A3940 == -1) {
-            self->levels[self->level].f10 = 1;
+            self->levels[self->level].unk_10 = 1;
         }
     }
     *(int*)((char*)self + 0x40) = 0;

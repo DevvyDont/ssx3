@@ -1030,22 +1030,15 @@ extern "C" void func_003A4AD8(cUIThing* arg0, int arg1) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setColour);
 #ifdef SKIP_ASM
-// 16 bytes, 4-byte aligned (copied with ldl/ldr pairs). Float fields are a guess.
-struct sVec4 {
-    float x;
-    float y;
-    float z;
-    float w;
-};
 
 /**
  * Sets the UI thing's colour by copying a 16-byte tARGB value into mColour.
  *
  * @param in  colour to copy
  */
-extern "C" void cUIThing_setColour(cUIThing* self, sVec4* in)
+extern "C" void cUIThing_setColour(cUIThing* self, tARGB* in)
 {
-    *(sVec4*)&self->mColour = *in;
+    *(&self->mColour) = *in;
 }
 #endif
 
@@ -1059,9 +1052,9 @@ extern "C" int func_003A4B20(int arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4B28);
 #ifdef SKIP_ASM
-extern "C" void func_003A4B28(cUIThing* self, sVec4* out)
+extern "C" void func_003A4B28(cUIThing* self, tARGB* out)
 {
-    *out = *(sVec4*)&self->mColour;
+    *out = *(&self->mColour);
 }
 #endif
 //100%
@@ -1185,37 +1178,33 @@ extern "C" int func_003A4C00(cUIThing* arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4C08);
 #ifdef SKIP_ASM
-struct sVec3_003A4C08 { float x; float y; float z; };
-extern "C" void func_003A4C08(cUIThing* self, sVec3_003A4C08* out)
+extern "C" void func_003A4C08(cUIThing* self, t3Vector* out)
 {
-    *out = *(sVec3_003A4C08*)&self->mPosition;
+    *out = *(&self->mPosition);
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4C28);
 #ifdef SKIP_ASM
-struct sVec3_003A4C28 { float x; float y; float z; };
-extern "C" void func_003A4C28(cUIThing* self, sVec3_003A4C28* out)
+extern "C" void func_003A4C28(cUIThing* self, t3Vector* out)
 {
-    *(sVec3_003A4C28*)&self->mPosition = *out;
+    *(&self->mPosition) = *out;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4C48);
 #ifdef SKIP_ASM
-struct sVec3_003A4C48 { float x; float y; float z; };
-extern "C" void func_003A4C48(cUIThing* self, sVec3_003A4C48* out)
+extern "C" void func_003A4C48(cUIThing* self, t3Vector* out)
 {
-    *out = *(sVec3_003A4C48*)&self->mScale;
+    *out = *(&self->mScale);
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4C68);
 #ifdef SKIP_ASM
-struct sVec3_003A4C68 { float x; float y; float z; };
-extern "C" void func_003A4C68(cUIThing* self, sVec3_003A4C68* out)
+extern "C" void func_003A4C68(cUIThing* self, t3Vector* out)
 {
-    *(sVec3_003A4C68*)&self->mScale = *out;
+    *(&self->mScale) = *out;
 }
 #endif
 //100%
@@ -2185,17 +2174,17 @@ extern "C" void func_003A5738(cUIListBox* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5758);
 #ifdef SKIP_ASM
-extern "C" void func_003A5758(cUIListBox* self, sVec4* in)
+extern "C" void func_003A5758(cUIListBox* self, tARGB* in)
 {
-    *(sVec4*)&self->mShadowColour = *in;
+    *(&self->mShadowColour) = *in;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5780);
 #ifdef SKIP_ASM
-extern "C" void func_003A5780(cUIListBox* self, sVec4* in)
+extern "C" void func_003A5780(cUIListBox* self, tARGB* in)
 {
-    *(sVec4*)&self->mStaticColour = *in;
+    *(&self->mStaticColour) = *in;
 }
 #endif
 //100%
@@ -2962,17 +2951,17 @@ extern "C" void cUIText_setEllipses(cUIText* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5F08);
 #ifdef SKIP_ASM
-extern "C" void func_003A5F08(cUIText* self, sVec4* in)
+extern "C" void func_003A5F08(cUIText* self, tARGB* in)
 {
-    *(sVec4*)&self->mShadowColour = *in;
+    *(&self->mShadowColour) = *in;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5F30);
 #ifdef SKIP_ASM
-extern "C" void func_003A5F30(cUIText* self, sVec4* in)
+extern "C" void func_003A5F30(cUIText* self, tARGB* in)
 {
-    *(sVec4*)&self->mStaticColour = *in;
+    *(&self->mStaticColour) = *in;
 }
 #endif
 //100%
@@ -3360,9 +3349,9 @@ extern "C" void func_003A6398(cUITextScroll* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A63B8);
 #ifdef SKIP_ASM
-extern "C" void func_003A63B8(cUITextScroll* self, sVec4* in)
+extern "C" void func_003A63B8(cUITextScroll* self, tARGB* in)
 {
-    *(sVec4*)&self->mShadowColour = *in;
+    *(&self->mShadowColour) = *in;
 }
 #endif
 //100%
@@ -3427,9 +3416,9 @@ extern "C" int func_003A6490(cUITextScroll* arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A64A0);
 #ifdef SKIP_ASM
-extern "C" void func_003A64A0(cUITextScroll* self, sVec4* in)
+extern "C" void func_003A64A0(cUITextScroll* self, tARGB* in)
 {
-    *(sVec4*)&self->mSelectedColour = *in;
+    *(&self->mSelectedColour) = *in;
 }
 #endif
 //100%

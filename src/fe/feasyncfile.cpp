@@ -2291,11 +2291,6 @@ static inline void* GetSession_001A6E70()
     return BuddyMan_mBuddyMan;
 }
 
-struct sIntVec1A6E70 {
-    int f0;
-    int* mBegin;
-    int* mEnd;
-};
 
 static inline int* Copy1A6E70(int* first, int* last, int* result)
 {
@@ -2307,16 +2302,16 @@ static inline int* Copy1A6E70(int* first, int* last, int* result)
 extern "C" void func_001A6E70(cFEStateNetMessenger* self)
 {
     int i;
-    for (i = ((*(sIntVec1A6E70*)&self->mNames).mEnd - (*(sIntVec1A6E70*)&self->mNames).mBegin) - 1; i >= 0; i--) {
-        sIntVec1A6E70* v = &(*(sIntVec1A6E70*)&self->mNames);
-        int id = *(int*)((char*)(*(sIntVec1A6E70*)&self->mNames).mBegin + (i << 2));
+    for (i = (((int*)(*(&self->mNames)).mpFinish) - ((int*)(*(&self->mNames)).mpStart)) - 1; i >= 0; i--) {
+        tFEStringPtrVector* v = &(*(&self->mNames));
+        int id = *(int*)((char*)((int*)(*(&self->mNames)).mpStart) + (i << 2));
         if (func_002624F8(GetSession_001A6E70(), id) < 0) {
             // PORT: pointer arithmetic through int
-            int* pos = (int*)(i * 4 + (int)(*(sIntVec1A6E70*)&self->mNames).mBegin);
-            if (pos + 1 != (*(sIntVec1A6E70*)&self->mNames).mEnd) {
-                Copy1A6E70(pos + 1, v->mEnd, pos);
+            int* pos = (int*)(i * 4 + (int)((int*)(*(&self->mNames)).mpStart));
+            if (pos + 1 != ((int*)(*(&self->mNames)).mpFinish)) {
+                Copy1A6E70(pos + 1, ((int*)v->mpFinish), pos);
             }
-            (*(sIntVec1A6E70*)&self->mNames).mEnd--;
+            (*(int**)&(*(&self->mNames)).mpFinish)--;
         }
     }
 }
@@ -3016,35 +3011,31 @@ static inline sObj1A7DD8** Copy1A7DD8(sObj1A7DD8** first, sObj1A7DD8** last, sOb
     return result + (last - first);
 }
 
-struct sOwner1A7DD8 {
-    char pad0[0x6D8];
-    sObjVec1A7DD8 mVec;
-};
 
 extern "C" void func_001A7DD8(cFEStateReadMessagePopup* selfp, void* item)
 {
-    sOwner1A7DD8* self = (sOwner1A7DD8*)selfp;
+    cFEStateReadMessagePopup* self = selfp;
     sObj1A7DD8* x = (sObj1A7DD8*)item;
     for (;;) {
-        if ((unsigned int)(self->mVec.mEnd - self->mVec.mBegin) < 31) break;
-        sObjVec1A7DD8* v = &self->mVec;
-        sObj1A7DD8** pos = self->mVec.mBegin;
+        if ((unsigned int)((*(sObjVec1A7DD8*)&self->mMessages).mEnd - (*(sObjVec1A7DD8*)&self->mMessages).mBegin) < 31) break;
+        sObjVec1A7DD8* v = &(*(sObjVec1A7DD8*)&self->mMessages);
+        sObj1A7DD8** pos = (*(sObjVec1A7DD8*)&self->mMessages).mBegin;
         sObj1A7DD8* p = *pos;
         if (p) {
-            if (pos + 1 != self->mVec.mEnd) {
+            if (pos + 1 != (*(sObjVec1A7DD8*)&self->mMessages).mEnd) {
                 Copy1A7DD8(pos + 1, v->mEnd, pos);
             }
-            self->mVec.mEnd--;
+            (*(sObjVec1A7DD8*)&self->mMessages).mEnd--;
             p->vt[1].fn((char*)p + p->vt[1].delta, 3);
         }
     }
-    sObjVec1A7DD8* v2 = &self->mVec;
-    if (self->mVec.mEnd != self->mVec.mCap) {
+    sObjVec1A7DD8* v2 = &(*(sObjVec1A7DD8*)&self->mMessages);
+    if ((*(sObjVec1A7DD8*)&self->mMessages).mEnd != (*(sObjVec1A7DD8*)&self->mMessages).mCap) {
         sObj1A7DD8** e = v2->mEnd;
         if (e) *e = x;
-        self->mVec.mEnd++;
+        (*(sObjVec1A7DD8*)&self->mMessages).mEnd++;
     } else {
-        func_001DB918(v2, self->mVec.mEnd, &x);
+        func_001DB918(v2, (*(sObjVec1A7DD8*)&self->mMessages).mEnd, &x);
     }
 }
 #endif
@@ -3174,13 +3165,8 @@ struct sEntry1A81F0 {
     char* desc;
 };
 
-struct sOwner1A81F0 {
-    char pad[0x6DC];
-    sEntry1A81F0** mBegin;
-    sEntry1A81F0** mEnd;
-};
 
-static inline unsigned int Count1A81F0(sOwner1A81F0* s) { return s->mEnd - s->mBegin; }
+static inline unsigned int Count1A81F0(cFEStateReadMessagePopup* s) { return ((sEntry1A81F0**)s->mMessages.mpFinish) - ((sEntry1A81F0**)s->mMessages.mpStart); }
 
 class cFEVObj_001A81F0 {
 public:
@@ -3204,8 +3190,8 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
         return;
     }
     cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00461A18));
-    if (text != 0 && Count1A81F0((sOwner1A81F0*)self) != 0) {
-        sEntry1A81F0* e = ((sOwner1A81F0*)self)->mBegin[0];
+    if (text != 0 && Count1A81F0(self) != 0) {
+        sEntry1A81F0* e = ((sEntry1A81F0**)(self)->mMessages.mpStart)[0];
         char* who = self->mszSender;
         sprintf1_1A81F0(buf, Loc1A81F0(D_00461A28), who, e->desc, D_004A1408);
         cUIText_setUnicodeString(text, buf);
@@ -3220,8 +3206,8 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
     unsigned short sel = *(unsigned short*)((char*)list + 0xC6);
     func_003A18C0(list);
     unsigned int i;
-    for (i = 0; i < Count1A81F0((sOwner1A81F0*)self); i++) {
-        sEntry1A81F0* e = *(sEntry1A81F0**)((char*)((sOwner1A81F0*)self)->mBegin + (i << 2));
+    for (i = 0; i < Count1A81F0(self); i++) {
+        sEntry1A81F0* e = *(sEntry1A81F0**)((char*)((sEntry1A81F0**)(self)->mMessages.mpStart) + (i << 2));
         strcpy(buf, e->name);
         func_004162D0(buf, D_004A1A50);
         func_004162D0(buf, e->ext);
@@ -6348,10 +6334,6 @@ extern char D_00462CD0[];
 extern char D_00462CE8[];
 extern char D_00462D00[];
 
-struct sState_C5C0 {
-    char pad0[0x6D8];
-    int mode;   // 0x6D8
-};
 
 // Message handler for the network-config menu.
 extern "C" void cFEUseExistingAccount_onWidgetEvent(cFEUseExistingAccount* self, void* a1, unsigned int msg)
@@ -6371,7 +6353,7 @@ extern "C" void cFEUseExistingAccount_onWidgetEvent(cFEUseExistingAccount* self,
             func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
             *(int*)((char*)p + 0x150) = 0x80E;
             func_001A9BC0((cFEStateNet*)self, p);
-            ((sState_C5C0*)self)->mode = 4;
+            (self)->miRequest = 4;
             func_0025B6D8_C5C0(LobbyMan_mLobbyMan, 0);
             break;
         }
@@ -6386,7 +6368,7 @@ extern "C" void cFEUseExistingAccount_onWidgetEvent(cFEUseExistingAccount* self,
             *(int*)((char*)p + 0x164) = 0;
             *(int*)((char*)p + 0x150) = 0x812;
             func_001A9BC0((cFEStateNet*)self, p);
-            ((sState_C5C0*)self)->mode = 2;
+            (self)->miRequest = 2;
             func_0025B6D8_C5C0(LobbyMan_mLobbyMan, 0);
             break;
         }
@@ -7780,19 +7762,6 @@ static inline void commit_E7A0(char* iface)
     ivt[1].fn(iface + ivt[1].delta);
 }
 
-struct cState_E7A0 {
-    char pad0[0x10];
-    char* engine;            // 0x10
-    signed char f14;         // 0x14
-    char pad15[0x6D0 - 0x15];
-    int f6D0;                // 0x6D0
-    char pad6D4[0x6DC - 0x6D4];
-    void* aiOn;              // 0x6DC
-    void* numAI;             // 0x6E0
-    void* opt8;              // 0x6E4
-    void* opt6;              // 0x6E8
-    void* opt7;              // 0x6EC
-};
 
 // Message handler for the race-options screen.
 extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* self, void* a1, int msg)
@@ -7804,7 +7773,7 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
     case 5:
         switch (*(int*)((char*)a1 + 0x18)) {
         case 7: {
-            func_001AE680_E7A0(((cState_E7A0*)self));
+            func_001AE680_E7A0((self));
             cUITemplate_MAP_mPeak = 1;
             D_004A2594 = 0;
             D_004A2598 = 0;
@@ -7817,8 +7786,8 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
             if (self->mbChallengeSent) {
                 break;
             }
-            func_001AE680_E7A0(((cState_E7A0*)self));
-            func_001AF568_E7A0(((cState_E7A0*)self));
+            func_001AE680_E7A0((self));
+            func_001AF568_E7A0((self));
             char* opts = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
             D_00534B34[0] = func_0039A738_E7A0(self->mpLBRankedGame) != 0;
             commit_E7A0(opts);
@@ -7857,8 +7826,8 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
             char* opts = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
             D_00534B34[0] = func_0039A738_E7A0(self->mpLBRankedGame) != 0;
             commit_E7A0(opts);
-            func_001AF098_E7A0(((cState_E7A0*)self), func_0039A738_E7A0(self->mpLBRankedGame) != 0);
-            func_001AEC60_E7A0(((cState_E7A0*)self), self->mbChallengeSent);
+            func_001AF098_E7A0((self), func_0039A738_E7A0(self->mpLBRankedGame) != 0);
+            func_001AEC60_E7A0((self), self->mbChallengeSent);
         } else if (a1 == (void*)self->mpLBMultipliers) {
             D_005308B8_E7A0.bit6 = func_0039A738_E7A0(a1);
         } else if (a1 == (void*)self->mpLBPowerUps) {
@@ -7873,10 +7842,10 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
         }
         break;
     case 1:
-        func_001AF208_E7A0(((cState_E7A0*)self), a1, 1);
+        func_001AF208_E7A0((self), a1, 1);
         break;
     case 2:
-        func_001AF208_E7A0(((cState_E7A0*)self), a1, 0);
+        func_001AF208_E7A0((self), a1, 0);
         break;
     case 7:
         break;
@@ -17561,10 +17530,6 @@ extern const char D_00462D68[];
 extern char D_00464C78[];
 extern char D_00464CC8[];
 
-struct sStrs_001BBF18 {
-    char pad[0x14];
-    char* strs[1];
-};
 
 static inline void* GetSession_001BBF18()
 {
@@ -17600,8 +17565,8 @@ extern "C" void cFEStateCreateDuplicate_onWidgetEvent(cFEStateCreateDuplicate* s
                 cKeyboardPopup_setIncludeKey(self->mpKeyboard, 0x35, 0, 2);
             }
         } else if (self->mbAccount != 0) {
-            sStrs_001BBF18* s = (sStrs_001BBF18*)self->mpAccount;
-            cBXString_operatorE(s, &s->strs[a1]);
+            tLobbyAccount* s = self->mpAccount;
+            cBXString_operatorE(s, &((char**)&s->mNameOptions[0])[a1]);
             func_001BC290(self);
         } else {
             func_001BC300(self, ((char**)((char*)self->mpAccount + 0x14))[a1]);
@@ -17740,11 +17705,6 @@ public:
     virtual void v08(int a1);
 };
 
-struct sNames1BC400 {
-    char pad[0x14];
-    char* mNames[4];
-    int mCount;
-};
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 int GetHashValue32(char* str);
@@ -17762,8 +17722,8 @@ extern "C" void func_001BC400(cFEStateCreateDuplicate* self)
         sprintf(buf, D_00464CB8, i);
         cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         if (text != 0) {
-            sNames1BC400* names = (sNames1BC400*)self->mpAccount;
-            if (i < names->mCount) {
+            tLobbyAccount* names = self->mpAccount;
+            if (i < names->mNumNameOptions) {
                 cUIText_setAsciiString(text, ((char**)((char*)names + 0x14))[i]);
                 ((cFEVText_001BC400*)text)->v08(0);
             } else {
@@ -21451,10 +21411,6 @@ extern int D_00534B34[];
 extern char D_00465938[];
 extern char D_00462C88[];
 
-struct sSelf_001C1560 {
-    char pad[0x6D0];
-    int ids[5];
-};
 
 struct sVE_001C1560 {
     short delta;
@@ -21503,19 +21459,19 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
             } else {
                 self->unk_6F0 = 0;
                 self->mbSearching = 1;
-                sSelf_001C1560* o = (sSelf_001C1560*)self;
-                int* ids = o->ids;
+                cFEStateNetQuickPlayPopup* o = self;
+                int* ids = o->miSearchOptions;
                 func_001C13E0(self, 0);
                 char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
                 D_00534B34[0] = func_0039A738(self->mpLBRanked) != 0;
                 sVE_001C1560* vt = *(sVE_001C1560**)(iface + 0xC);
                 vt[1].fn(iface + vt[1].delta);
                 cBENewRaceInterface_setNumberAI(cBE_getInterface_Fv(SSXApp->BE, 0), 0);
-                o->ids[0] = func_0039A738(self->mpLBRanked);
-                o->ids[1] = func_0039A738(self->mpLBRace);
-                o->ids[2] = func_0039A738(self->mpLBBigAir);
-                o->ids[3] = func_0039A738(self->mpLBSuperpipe);
-                o->ids[4] = func_0039A738(self->mpLBSlopeStyle);
+                o->miSearchOptions[0] = func_0039A738(self->mpLBRanked);
+                o->miSearchOptions[1] = func_0039A738(self->mpLBRace);
+                o->miSearchOptions[2] = func_0039A738(self->mpLBBigAir);
+                o->miSearchOptions[3] = func_0039A738(self->mpLBSuperpipe);
+                o->miSearchOptions[4] = func_0039A738(self->mpLBSlopeStyle);
                 func_0025EE20(LobbyMan_mLobbyMan, ids, self->mCurrentCtrl);
                 ((cFEVObj_001C1560*)self->mpTextSearching)->v09(1);
                 cUIText_setUnicodeStringByID(self->mpTextOK, GetHashValue32(D_00462C88));

@@ -104,29 +104,24 @@ struct sRcNode1A0 {
     unsigned char used;     // 0x1F
 };
 
-struct sRcCursor1A0 {
-    char pad_0x000[0x3AC];
-    sRcNode1A0* cursor;     // 0x3AC
-    sRcNode1A0* head;       // 0x3B0
-};
 
 extern "C" void func_002701A0(cReplay* self)
 {
-    sRcCursor1A0* c = (sRcCursor1A0*)self;
+    cReplay* c = self;
     int i;
     for (i = 0; i < 2; i++) {
-        while (c->cursor != 0 && c->cursor->next != 0 && c->cursor->next->next != 0) {
-            sRcNode1A0* n = c->cursor->next;
+        while (((sRcNode1A0*)c->NextCandidate) != 0 && ((sRcNode1A0*)c->NextCandidate)->next != 0 && ((sRcNode1A0*)c->NextCandidate)->next->next != 0) {
+            sRcNode1A0* n = ((sRcNode1A0*)c->NextCandidate)->next;
             if (n->used == 0) {
                 if (n->locked == 0) {
-                    c->cursor = n->next;
+                    (*(sRcNode1A0**)&c->NextCandidate) = n->next;
                     cReplay_freeReplayFrame(self, n);
                     return;
                 }
             }
-            c->cursor = c->cursor->next;
+            (*(sRcNode1A0**)&c->NextCandidate) = ((sRcNode1A0*)c->NextCandidate)->next;
         }
-        c->cursor = c->head;
+        (*(sRcNode1A0**)&c->NextCandidate) = (*(sRcNode1A0**)&c->FrameList);
     }
 }
 #endif
@@ -225,20 +220,12 @@ extern "C" int func_0026D4D8(void* stream, unsigned int pos);
 // passes (self, pos); bind the 2-arg form to the symbol.
 void* func_0026E448_2(void* self, int pos) __asm__("func_0026E448__FPv");
 
-struct sReplay00270378 {
-    char pad_0x000[0x484];
-    int pos;
-    void* frame;
-    void* streams[2];
-    char pad_0x494[0x604 - 0x494];
-    int unk_0x604;
-};
 
 extern "C" void func_00270378(cReplay* self)
 {
     int i;
     self->NextFrame = 0;
-    void* p = func_0026E448_2(((sReplay00270378*)self), 100000000);
+    void* p = func_0026E448_2((self), 100000000);
     self->PlaybackFrame = (cReplayFrame*)p;
     self->PlaybackTick = *(int*)((char*)p + 0x30);
     for (i = 0; i < 2; i++) {
@@ -265,23 +252,12 @@ struct sRcVEntry03F0 {
     void (*fn)(void*);
 };
 
-struct sReplay002703F0 {
-    char pad_0x000[0x3CC];
-    int end;                // 0x3CC
-    void* tail;             // 0x3D0
-    char pad_0x3D4[0x484 - 0x3D4];
-    int pos;                // 0x484
-    void* frame;            // 0x488
-    void* streams[2];       // 0x48C
-    char pad_0x494[0x61C - 0x494];
-    int loop;               // 0x61C
-};
 
 extern "C" void cReplay_stepFrame(cReplay* self, int reset)
 {
     int i;
     if (reset) {
-        self->PlaybackFrame = (cReplayFrame*)func_0026E448_2(((sReplay002703F0*)self), self->PlaybackTick);
+        self->PlaybackFrame = (cReplayFrame*)func_0026E448_2((self), self->PlaybackTick);
     }
     void* f = self->PlaybackFrame;
     if (f != 0 && f == (void*)self->SaveFrame) {
@@ -294,7 +270,7 @@ extern "C" void cReplay_stepFrame(cReplay* self, int reset)
                 func_0026D4D8(((void**)&self->InputCache[0])[i], self->PlaybackTick);
             }
         }
-        cReplay_restoreReplayFrame(((sReplay002703F0*)self), self->PlaybackFrame);
+        cReplay_restoreReplayFrame((self), self->PlaybackFrame);
         return;
     }
     if (self->PlaybackTick >= self->EndRecordTick) {
@@ -309,7 +285,7 @@ extern "C" void cReplay_stepFrame(cReplay* self, int reset)
             cGameViewMan_updateAll(list);
         } else {
             self->PlaybackTick = self->EndRecordTick;
-            cReplay_setReplayState(((sReplay002703F0*)self), 3);
+            cReplay_setReplayState((self), 3);
         }
     } else {
         self->PlaybackTick++;
@@ -675,19 +651,12 @@ struct sRcSlotB88 {
     bool isFree() { return busy == 0; }
 };
 
-struct sRcSlotsB88 {
-    int state;
-    char pad_0x004[0x3B4 - 4];
-    void* rider;
-    char pad_0x3B8[0x494 - 0x3B8];
-    sRcSlotB88 slots[1];
-};
 
 extern "C" void func_00270B88(cReplay* replay, int playerId, int id)
 {
-    sRcSlotsB88* self = (sRcSlotsB88*)replay;
-    if (self->state == 0 && self->slots[playerId].isFree()) {
-        func_0026E6E0_3(&self->slots[playerId], self->rider, id);
+    cReplay* self = replay;
+    if (self->State == 0 && ((sRcSlotB88*)&self->Highlight[0])[playerId].isFree()) {
+        func_0026E6E0_3(&((sRcSlotB88*)&self->Highlight[0])[playerId], ((void*)self->FrameList.Head), id);
     }
 }
 #endif
@@ -784,24 +753,20 @@ struct sRcSlotCE8 {
     sReplayCacheNode2* getNode() { return node; }
 };
 
-struct sRcSlotsCE8 {
-    char pad[0x494];
-    sRcSlotCE8 slots[1];
-};
 
 extern "C" void func_00270CE8(cReplay* replay, int playerId, int id, int positive)
 {
-    sRcSlotsCE8* self = (sRcSlotsCE8*)replay;
-    if (self->slots[playerId].isActive()) {
-        if (func_0026E838_s(&self->slots[playerId], id, positive)) {
+    cReplay* self = replay;
+    if (((sRcSlotCE8*)&self->Highlight[0])[playerId].isActive()) {
+        if (func_0026E838_s(&((sRcSlotCE8*)&self->Highlight[0])[playerId], id, positive)) {
             if (!(func_00270BD8((cReplay*)self, playerId, positive) < func_00270C40((cReplay*)self, positive))) {
-                sReplayCacheNode2* n = func_00270C58((cReplay*)self, playerId, self->slots[playerId].getNode(), positive);
+                sReplayCacheNode2* n = func_00270C58((cReplay*)self, playerId, ((sRcSlotCE8*)&self->Highlight[0])[playerId].getNode(), positive);
                 n->mask &= ~(1 << playerId);
             }
         } else {
-            func_0026E800(&self->slots[playerId]);
+            func_0026E800(&((sRcSlotCE8*)&self->Highlight[0])[playerId]);
         }
-        func_0026E7F8(&self->slots[playerId]);
+        func_0026E7F8(&((sRcSlotCE8*)&self->Highlight[0])[playerId]);
     }
 }
 #endif
@@ -811,20 +776,17 @@ INCLUDE_ASM("replay/replaycache", cReplay_cancelMarkHighlight);
 #ifdef SKIP_ASM
 extern "C" void func_0026E800(void* p);
 
-struct sRcSlot {
-    char data[0xB4];
-};
 
 struct sRcSlots {
     int state;
     char pad[0x494 - 4];
-    sRcSlot slots[1];
+    cReplayHighlight slots[1];
 };
 
 extern "C" void cReplay_cancelMarkHighlight(cReplay* self, int i)
 {
     if (self->State == 0) {
-        func_0026E800(&((sRcSlot*)&self->Highlight[0])[i]);
+        func_0026E800(&((&self->Highlight[0]))[i]);
     }
 }
 #endif
@@ -836,7 +798,7 @@ extern "C" void func_00270E18(cReplay* self)
 {
     if (self->State == 0) {
         for (int i = 0; i < 2; i++) {
-            func_0026E800(&((sRcSlot*)&self->Highlight[0])[i]);
+            func_0026E800(&((&self->Highlight[0]))[i]);
         }
     }
 }
@@ -989,7 +951,7 @@ extern "C" void func_00271228(cReplay* self);
 extern "C" void func_002712C0(cReplay* self);
 extern "C" void func_00271348(cReplay* self);
 struct sReplayCache1380;
-extern "C" void func_00271380(sReplayCache1380* self);
+extern "C" void func_00271380(cReplay* self);
 extern "C" void func_002714E0(cReplay* self);
 struct sReplayCache1510;
 extern "C" void func_00271510(sReplayCache1510* self);
@@ -998,14 +960,6 @@ extern "C" void func_00271688(cReplay* self);
 void* func_002716F0(void* self);
 extern "C" void func_00271708(cReplay* self);
 
-struct sRcCache10A8 {
-    char pad_0x000[0x638];
-    int state;      // 0x638
-    char* buf;      // 0x63C
-    char pad_0x640[0xC];
-    int used;       // 0x64C
-    char* dst;      // 0x650
-};
 
 // Runs the replay-cache writer state machine until the 16 KB block is full or the stream is done (state 11);
 // returns the block and its size, or 0 if there was nothing to write.
@@ -1026,12 +980,12 @@ extern "C" int func_002710A8(cReplay* self, char** block, int* size)
         case 0: func_00271228(self); break;
         case 1: func_002712C0(self); break;
         case 2: func_00271348(self); break;
-        case 3: func_00271380((sReplayCache1380*)self); break;
+        case 3: func_00271380(self); break;
         case 4: func_002714E0(self); break;
         case 5: func_00271510((sReplayCache1510*)self); break;
         case 6: func_00271620(self); break;
         case 7: func_00271688(self); break;
-        case 8: func_002716F0(((sRcCache10A8*)self)); break;
+        case 8: func_002716F0((self)); break;
         case 9: func_00271708(self); break;
         case 10: self->WriteState++; break;
         case 11: break;
@@ -1048,7 +1002,7 @@ done:
 INCLUDE_ASM("replay/replaycache", func_00271228);
 #ifdef SKIP_ASM
 struct sReplayCache;
-extern "C" int func_002712F8(sReplayCache* self);
+extern "C" int func_002712F8(cReplay* self);
 extern "C" void cAI_getPodiumActorList(void* self, int* dst);
 
 struct sReplayHdr_1228 {
@@ -1066,7 +1020,7 @@ struct sReplayHdr_1228 {
 extern "C" void func_00271228(cReplay* self)
 {
     sReplayHdr_1228* hdr = (sReplayHdr_1228*)self->WriteTmp;
-    hdr->count = func_002712F8((sReplayCache*)self);
+    hdr->count = func_002712F8(self);
     char* g = (char*)SSXApp;
     hdr->a = self->SaveFrameTicks;
     hdr->b = self->ReplayError;
@@ -1100,27 +1054,19 @@ struct sCacheNode {
     sCacheNode* next;
 };
 
-struct sReplayCache {
-    char pad[0x3b0];
-    sCacheNode* head;
-    char pad2[0x3d0 - 0x3b4];
-    sCacheNode* skip;
-    char pad3[0x65c - 0x3d4];
-    sCacheNode* iter;
-};
 
-extern "C" int func_002712F8(sReplayCache* self)
+extern "C" int func_002712F8(cReplay* self)
 {
     int count = 0;
-    self->iter = self->head;
-    while (self->iter) {
-        if (self->iter == self->skip) {
-            self->iter = self->iter->next;
+    (*(sCacheNode**)&self->WriteFrame) = (*(sCacheNode**)&self->FrameList);
+    while (((sCacheNode*)self->WriteFrame)) {
+        if (((sCacheNode*)self->WriteFrame) == ((sCacheNode*)self->SaveFrame)) {
+            (*(sCacheNode**)&self->WriteFrame) = ((sCacheNode*)self->WriteFrame)->next;
         } else {
             count++;
         }
-        if (self->iter) {
-            self->iter = self->iter->next;
+        if (((sCacheNode*)self->WriteFrame)) {
+            (*(sCacheNode**)&self->WriteFrame) = ((sCacheNode*)self->WriteFrame)->next;
         }
     }
     return count;
@@ -1169,61 +1115,46 @@ struct sRcFrame1380 {
     int f34;                // 0x34
 };
 
-struct sReplayCache1380 {
-    char pad_0x0[0x3D0];
-    sRcFrame1380* tail;     // 0x3D0
-    char pad_0x3D4[0x638 - 0x3D4];
-    int field_0x638;        // 0x638
-    char pad_0x63C[0x4];
-    int* out;               // 0x640
-    int field_0x644;        // 0x644
-    int field_0x648;        // 0x648
-    char pad_0x64C[0x10];
-    sRcFrame1380* frame;    // 0x65C
-    void* pending;          // 0x660
-    int pendingSize;        // 0x664
-    int frames;             // 0x668
-};
 
-extern "C" void func_00271380(sReplayCache1380* self)
+extern "C" void func_00271380(cReplay* self)
 {
-    if (self->pending != 0) {
+    if (((void*)self->WriteBlockData) != 0) {
         int state = 0;
-        int n = HUFF_encode(self->pending, self->pendingSize, self->out + 1, &state);
-        *self->out = n;
-        func_00271058((cReplay*)self, (signed char*)self->out, n + 4);
-        self->pending = 0;
+        int n = HUFF_encode(((void*)self->WriteBlockData), self->WriteBlockDataSize, ((int*)self->WriteTmp) + 1, &state);
+        *((int*)self->WriteTmp) = n;
+        func_00271058((cReplay*)self, (signed char*)((int*)self->WriteTmp), n + 4);
+        (*(void**)&self->WriteBlockData) = 0;
         return;
     }
-    if (self->frame != 0) {
-        self->frames++;
-        cReplayFramePtr_getFrameBlock_2(self->frame, 1);
-        int* hdr = self->out;
+    if (((sRcFrame1380*)self->WriteFrame) != 0) {
+        self->WriteFrameCount++;
+        cReplayFramePtr_getFrameBlock_2(((sRcFrame1380*)self->WriteFrame), 1);
+        int* hdr = ((int*)self->WriteTmp);
         hdr[0] = 0x11111113;
-        hdr[2] = self->frame->f30;
-        hdr[3] = self->frame->f34;
-        hdr[1] = self->frame->size;
+        hdr[2] = ((sRcFrame1380*)self->WriteFrame)->f30;
+        hdr[3] = ((sRcFrame1380*)self->WriteFrame)->f34;
+        hdr[1] = ((sRcFrame1380*)self->WriteFrame)->size;
         hdr[9] = 0x11111111;
-        hdr[5] = self->frame->f20;
-        hdr[6] = self->frame->f24;
-        hdr[7] = self->frame->f28;
-        hdr[8] = self->frame->f2C;
-        hdr[7] = self->frame->f28;
-        hdr[8] = self->frame->f2C;
+        hdr[5] = ((sRcFrame1380*)self->WriteFrame)->f20;
+        hdr[6] = ((sRcFrame1380*)self->WriteFrame)->f24;
+        hdr[7] = ((sRcFrame1380*)self->WriteFrame)->f28;
+        hdr[8] = ((sRcFrame1380*)self->WriteFrame)->f2C;
+        hdr[7] = ((sRcFrame1380*)self->WriteFrame)->f28;
+        hdr[8] = ((sRcFrame1380*)self->WriteFrame)->f2C;
         func_00271058((cReplay*)self, (signed char*)hdr, 0x28);
-        sRcFrame1380* f = self->frame;
-        self->pending = f->data;
-        self->pendingSize = f->size;
+        sRcFrame1380* f = ((sRcFrame1380*)self->WriteFrame);
+        (*(void**)&self->WriteBlockData) = f->data;
+        self->WriteBlockDataSize = f->size;
         sRcFrame1380* next = f->next;
-        self->frame = next;
-        if (next != 0 && next == self->tail) {
-            self->frame = next->next;
+        (*(sRcFrame1380**)&self->WriteFrame) = next;
+        if (next != 0 && next == ((sRcFrame1380*)self->SaveFrame)) {
+            (*(sRcFrame1380**)&self->WriteFrame) = next->next;
         }
         return;
     }
-    self->field_0x644 = 0;
-    self->field_0x648 = 0;
-    self->field_0x638++;
+    (*(int*)&self->WriteSrc) = 0;
+    self->WriteSrcSize = 0;
+    self->WriteState++;
 }
 #endif
 
@@ -2134,26 +2065,21 @@ struct sRcNode272938 {
     sRcNode272938* prev;
 };
 
-struct sRcList272938 {
-    char pad_0x00[0x18];
-    sRcNode272938* freeHead;
-    sRcNode272938* usedHead;
-};
 
-extern "C" int func_00272938(sRcList272938* self, void* src)
+extern "C" int func_00272938(cInSeq* self, void* src)
 {
-    sRcNode272938* n = self->freeHead;
-    self->freeHead = n->next;
+    sRcNode272938* n = ((sRcNode272938*)self->mpScriptUnused);
+    (*(sRcNode272938**)&self->mpScriptUnused) = n->next;
     n->next = 0;
-    if (self->freeHead != 0) {
-        self->freeHead->prev = 0;
+    if (((sRcNode272938*)self->mpScriptUnused) != 0) {
+        ((sRcNode272938*)self->mpScriptUnused)->prev = 0;
     }
     func_002745C0(n->data, src, self, n->id);
-    n->next = self->usedHead;
-    if (self->usedHead != 0) {
-        self->usedHead->prev = n;
+    n->next = ((sRcNode272938*)self->mpScriptUsed);
+    if (((sRcNode272938*)self->mpScriptUsed) != 0) {
+        ((sRcNode272938*)self->mpScriptUsed)->prev = n;
     }
-    self->usedHead = n;
+    (*(sRcNode272938**)&self->mpScriptUsed) = n;
     return n->id;
 }
 #endif
@@ -2164,17 +2090,17 @@ INCLUDE_ASM("replay/replaycache", func_002729A8);
 extern "C" void cInSeq_Stop(cInSeq* self, int a1);
 extern "C" void func_002746F8(cScriptPlayerMain* p);
 
-extern "C" void func_002729A8(sRcList272938* self, int i)
+extern "C" void func_002729A8(cInSeq* self, int i)
 {
     cInSeq_Stop((cInSeq*)self, i);
     char* base = *(char**)((char*)self + 0x14);
     sRcNode272938* n = (sRcNode272938*)(base + i * 0x58);
     func_002746F8((cScriptPlayerMain*)n->data);
     if (n->prev == 0) {
-        self->usedHead = n->next;
+        (*(sRcNode272938**)&self->mpScriptUsed) = n->next;
         n->next = 0;
-        if (self->usedHead != 0) {
-            self->usedHead->prev = 0;
+        if (((sRcNode272938*)self->mpScriptUsed) != 0) {
+            ((sRcNode272938*)self->mpScriptUsed)->prev = 0;
         }
     } else {
         n->prev->next = n->next;
@@ -2184,11 +2110,11 @@ extern "C" void func_002729A8(sRcList272938* self, int i)
         n->next = 0;
         n->prev = 0;
     }
-    n->next = self->freeHead;
-    if (self->freeHead != 0) {
-        self->freeHead->prev = n;
+    n->next = ((sRcNode272938*)self->mpScriptUnused);
+    if (((sRcNode272938*)self->mpScriptUnused) != 0) {
+        ((sRcNode272938*)self->mpScriptUnused)->prev = n;
     }
-    self->freeHead = n;
+    (*(sRcNode272938**)&self->mpScriptUnused) = n;
 }
 #endif
 
@@ -2200,7 +2126,7 @@ extern "C" void cInSeq_RecycleAll(cInSeq* self)
     sRcNode272938* n = (sRcNode272938*)self->mpScriptUsed;
     while (n != 0) {
         sRcNode272938* next = n->next;
-        func_002729A8(((sRcList272938*)self), n->id);
+        func_002729A8((self), n->id);
         n = next;
     }
 }
@@ -3627,11 +3553,6 @@ public:
     virtual int nextTime();
 };
 
-struct sTrackHdr_274100 {
-    char pad0[2];
-    unsigned char count;    // 0x2
-    unsigned char id;       // 0x3
-};
 
 
 // Plays the track from prev to time; when jumping, stops at every channel event in between.
@@ -3644,7 +3565,7 @@ extern "C" int func_00274100(cScriptPlayerEntity* self_, float prev, float time,
     if (jump) {
         for (;;) {
             float next = time;
-            for (int i = 0; i < ((sTrackHdr_274100*)self->mpSystemHeader)->count; i++) {
+            for (int i = 0; i < (self->mpSystemHeader)->numChannels; i++) {
                 float f = (float)((cChan_274100**)self->mpChannelPlayers)[i]->nextTime();
                 if (f >= 0.0f && f < next) {
                     next = f;
@@ -3832,12 +3753,6 @@ extern "C" unsigned char func_002743D8(void *arg0) {
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_DoFrameUpdate);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sInfo2743E8 {
-    char pad0[2];
-    unsigned char count;
-    unsigned char b3;
-};
 class cA2743E8 {
 public:
     int pad0;
@@ -3872,7 +3787,7 @@ extern "C" int cScriptPlayerEntity_DoFrameUpdate(cScriptPlayerEntity* p, float c
     cScriptPlayerEntity* self = p;
     int flags = 0;
     bool any = false;
-    for (int i = 0; i < ((sInfo2743E8*)self->mpSystemHeader)->count; i++) {
+    for (int i = 0; i < (self->mpSystemHeader)->numChannels; i++) {
         int out = 0;
         any = ((cA2743E8**)self->mpChannelPlayers)[i]->a3(currFrameNum, dt, &out) | any;
         flags |= out;
@@ -3880,9 +3795,9 @@ extern "C" int cScriptPlayerEntity_DoFrameUpdate(cScriptPlayerEntity* p, float c
     cB2743E8* s = ((cB2743E8*)self->mpEntityComm);
     if (s != 0) {
         if (flags != 0) {
-            s->b3(self, currFrameNum, ((sInfo2743E8*)self->mpSystemHeader)->b3, flags);
+            s->b3(self, currFrameNum, (self->mpSystemHeader)->type, flags);
         }
-        ((cB2743E8*)self->mpEntityComm)->b4(self, currFrameNum, dt, ((sInfo2743E8*)self->mpSystemHeader)->b3, flags);
+        ((cB2743E8*)self->mpEntityComm)->b4(self, currFrameNum, dt, (self->mpSystemHeader)->type, flags);
     }
     return any;
 }
@@ -4002,14 +3917,7 @@ INCLUDE_ASM("replay/replaycache", func_002746F8);
 extern "C" void cScriptPlayerEntity__cScriptPlayerEntity(cScriptPlayerEntity* self, int flags);
 void* func_00272510(void* self);
 
-struct sRcElem46F8 {
-    char pad_0x0[0x3C];
-};
 
-struct sRcHdr46F8 {
-    unsigned char field_0x0;
-    unsigned char count;    // 0x1
-};
 
 
 extern "C" void func_002746F8(cScriptPlayerMain* scriptPlayerMain)
@@ -4019,27 +3927,27 @@ extern "C" void func_002746F8(cScriptPlayerMain* scriptPlayerMain)
         return;
     }
     cScriptPlayerMain_Stop((cScriptPlayerMain*)self);
-    for (int i = 0; i < ((sRcHdr46F8*)self->mpSystemHeader)->count; i++) {
-        cScriptPlayerEntity_DeInit((cScriptPlayerEntity*)(&((sRcElem46F8*)self->mpEntityPlayers)[i]));
+    for (int i = 0; i < (self->mpSystemHeader)->numEntities; i++) {
+        cScriptPlayerEntity_DeInit((cScriptPlayerEntity*)(&(self->mpEntityPlayers)[i]));
     }
     // delete[] self->elems (element count in the 16-byte array cookie)
-    sRcElem46F8* e = ((sRcElem46F8*)self->mpEntityPlayers);
+    cScriptPlayerEntity* e = (self->mpEntityPlayers);
     if (e != 0) {
-        sRcElem46F8* q = e + *(int*)((char*)e - 0x10);
-        while (((sRcElem46F8*)self->mpEntityPlayers) != q) {
+        cScriptPlayerEntity* q = e + *(int*)((char*)e - 0x10);
+        while ((self->mpEntityPlayers) != q) {
             q--;
             cScriptPlayerEntity__cScriptPlayerEntity((cScriptPlayerEntity*)q, 0);
         }
-        func_00272510((char*)((sRcElem46F8*)self->mpEntityPlayers) - 0x10);
+        func_00272510((char*)(self->mpEntityPlayers) - 0x10);
     }
     self->mNumSteps = 0;
     self->mID = -1;
     (*(void**)&self->mpData) = 0;
     (*(void**)&self->mpManager) = 0;
     (*(int*)&self->mpUserData) = 0;
-    (*(sRcHdr46F8**)&self->mpSystemHeader) = 0;
+    (*(tInSeqScriptHeader**)&self->mpSystemHeader) = 0;
     (*(char**)&self->mpDataHeader) = 0;
-    (*(sRcElem46F8**)&self->mpEntityPlayers) = 0;
+    (*(cScriptPlayerEntity**)&self->mpEntityPlayers) = 0;
     self->mLoopScript = 0;
     self->mPlayState = 0;
     (*(int*)&self->mCurrFrame) = 0;

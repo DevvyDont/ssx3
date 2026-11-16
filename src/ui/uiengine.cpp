@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "ui/uilistbox.h"
 #include "ui/uiicon.h"
 #include "ui/uigroup.h"
@@ -1282,47 +1283,28 @@ extern "C" void* func_0039FB30(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* cUIListBox_vtbl[];
 
-struct cUIListBox_cUIListBox_sQuad {
-    int a, b, c, d;
-};
-extern cUIListBox_cUIListBox_sQuad D_004C66C8;
+extern tARGB D_004C66C8;
 
-struct cUIListBox_cUIListBox_sEntry {
-    int a;
-    int b;
-    int c;
-    int d;
-    char e;
-};
 
-struct cUIListBox_cUIListBox_sObj {
-    char base[0x74];
-    unsigned char flags;
-    char pad75[0x88 - 0x75];
-    cUIListBox_cUIListBox_sQuad quad;
-    cUIListBox_cUIListBox_sEntry entries[32];
-    char c318;
-    char c319;
-};
 
-extern "C" cUIListBox_cUIListBox_sObj* cUIListBox_cUIListBox(cUIListBox* self)
+extern "C" cUIListBox* cUIListBox_cUIListBox(cUIListBox* self)
 {
-    func_0039FB30(((cUIListBox_cUIListBox_sObj*)self));
+    func_0039FB30((self));
     self->mVtbl = cUIListBox_vtbl;
     *(unsigned char*)&self->mAttrListBox = (*(unsigned char*)&self->mAttrListBox | 4) & 0xC4;
-    cUIListBox_cUIListBox_sEntry* p = ((cUIListBox_cUIListBox_sEntry*)&self->mpEntries[0]);
+    tListBoxEntry* p = ((&self->mpEntries[0]));
     for (int i = 31; i != -1; i--, p++) {
-        p->a = 0;
-        p->b = 0;
-        p->c = 0;
-        p->d = 0;
-        p->e = 0;
+        p->mStringID = 0;
+        (*(int*)&p->mpString) = 0;
+        (*(int*)&p->mpAsciiString) = 0;
+        (*(int*)&p->mpData) = 0;
+        p->mUnicodeBufferSize = 0;
     }
     *(char*)&self->mNumEntries = 0;
     *(char*)&self->mCurrentEntry = 0;
-    func_00416210(((cUIListBox_cUIListBox_sEntry*)&self->mpEntries[0]), 0, 0x280);
-    (*(cUIListBox_cUIListBox_sQuad*)&self->mStaticColour) = D_004C66C8;
-    return ((cUIListBox_cUIListBox_sObj*)self);
+    func_00416210(((&self->mpEntries[0])), 0, 0x280);
+    (*(&self->mStaticColour)) = D_004C66C8;
+    return (self);
 }
 #endif
 
@@ -1638,9 +1620,6 @@ struct sV4_9F00 {
     sV4_9F00() {}
     sV4_9F00(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
-struct sCol_9F00 {
-    float r, g, b, a;
-};
 struct sRect_9F00 {
     float x0, y0, x1, y1;
 };
@@ -1652,8 +1631,8 @@ struct sFont_9F00 {
     sV2_9F00 shadowOfs;     // 0x28
     sV2_9F00 scale;         // 0x30
     sV2_9F00 cur;           // 0x38
-    sCol_9F00 color;        // 0x40
-    sCol_9F00 shadowColor;  // 0x50
+    tARGB color;        // 0x40
+    tARGB shadowColor;  // 0x50
 };
 
 struct sLayerBits_9F00 {
@@ -1666,26 +1645,6 @@ struct sStrEntry_9F00 {
     int pad[4];
 };
 
-struct sText_9F00 {
-    char pad0[0x14];
-    int flags14;            // 0x14
-    char pad18[0x4];
-    sCol_9F00 color;        // 0x1C
-    char pad2C[0x18];
-    sV3_9F00 pos;           // 0x44
-    float sx;               // 0x50
-    float sy;               // 0x54
-    char pad58[0x4];
-    char* owner;            // 0x5C
-    float w;                // 0x60
-    float h;                // 0x64
-    char pad68[0xC];
-    int flags;              // 0x74
-    sCol_9F00 shadowColor;  // 0x78
-    sCol_9F00 hiColor;      // 0x88
-    char pad98[0x4];
-    sStrEntry_9F00 strs[1]; // 0x9C
-};
 
 struct sVert_9F00 {
     float u, v, q;
@@ -1696,10 +1655,10 @@ struct sVert_9F00 {
 
 struct sVE_9F00 { short delta; short index; void (*fn)(void*, int, void*, int); };
 
-static inline void setLayer_9F00(sText_9F00* self)
+static inline void setLayer_9F00(cUIListBox* self)
 {
     int* d = (int*)(*(char**)(D_004A289C_9F00 + 0xE84) + 8);
-    *d = (*d & ~0x3E0) | (((((sLayerBits_9F00*)&self->flags14)->layer + 9) << 5) & 0x3E0);
+    *d = (*d & ~0x3E0) | (((((sLayerBits_9F00*)&self->mAttr)->layer + 9) << 5) & 0x3E0);
 }
 
 extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
@@ -1712,13 +1671,13 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
     font->cur.x = font->scale.x * s.x;
     font->cur.y = font->scale.y * s.y;
     if (((self->mAttr >> 5) & 1) && ((*(int*)&self->mAttrListBox >> 5) & 1)) {
-        font->color = (*(sCol_9F00*)&self->mStaticColour);
+        font->color = (*(&self->mStaticColour));
     } else {
-        font->color = (*(sCol_9F00*)&self->mColour);
+        font->color = (*(&self->mColour));
     }
     if ((*(int*)&self->mAttrListBox >> 2) & 1) {
-        sCol_9F00 c = (*(sCol_9F00*)&self->mShadowColour);
-        c.r = self->mColour.A;
+        tARGB c = (*(&self->mShadowColour));
+        c.A = self->mColour.A;
         font->shadowColor = c;
         font->shadowOfs = sV2_9F00(2.0f, 2.0f);
     } else {
@@ -1730,7 +1689,7 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
     } else {
         str = ((sStrEntry_9F00*)&self->mpEntries[0].mpString)[*((unsigned char*)self + 0x319)].str;
     }
-    setLayer_9F00(((sText_9F00*)self));
+    setLayer_9F00((self));
     int over = 0;
     float* box = &self->mSize.x;
     {
@@ -1741,7 +1700,7 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
         }
         sV3_9F00 size(r.x1, self->mScale.y * ((float)font->height * font->scale.y), 0.0f);
         sV3_9F00 p(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
-        func_0039FEB8(((sText_9F00*)self), &p, &size);
+        func_0039FEB8((self), &p, &size);
         func_00391E30(font, p.x, p.y, str);
     }
     char* loc = *(char**)(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
@@ -1752,8 +1711,8 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
         sV3_9F00 p = (*(sV3_9F00*)&self->mPosition);
         p.x += x;
         p.y += y;
-        func_0039FEB8(((sText_9F00*)self), &p, box);
-        setLayer_9F00(((sText_9F00*)self));
+        func_0039FEB8((self), &p, box);
+        setLayer_9F00((self));
         sVert_9F00 verts[5];
         unsigned int i;
         if (!over) {

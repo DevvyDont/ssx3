@@ -413,23 +413,17 @@ INCLUDE_ASM("replay/replay", func_0026E4B8);
 void* func_0026E448_2(void* self, int idx) __asm__("func_0026E448__FPv");
 extern "C" int func_0026D4D8(void* stream, unsigned int pos);
 
-struct sReplay0026E4B8 {
-    char pad_0x000[0x484];
-    int pos;
-    void* frame;
-    void* streams[2];
-};
 
 extern "C" void func_0026E4B8(cReplay* self_)
 {
-    sReplay0026E4B8* self = (sReplay0026E4B8*)self_;
+    cReplay* self = self_;
     int i;
-    void* p = func_0026E448_2(self, self->pos);
-    self->frame = p;
-    self->pos = *(int*)((char*)p + 0x30);
+    void* p = func_0026E448_2(self, self->PlaybackTick);
+    (*(void**)&self->PlaybackFrame) = p;
+    self->PlaybackTick = *(int*)((char*)p + 0x30);
     for (i = 0; i < 2; i++) {
-        if (self->streams[i] != 0) {
-            func_0026D4D8(self->streams[i], self->pos);
+        if (((void**)&self->InputCache[0])[i] != 0) {
+            func_0026D4D8(((void**)&self->InputCache[0])[i], self->PlaybackTick);
         }
     }
 }
