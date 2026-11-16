@@ -402,11 +402,13 @@ struct sVec4_2F650;
 /**
  * Computes the bounding box of the rider spheres selected by the tree's mask.
  *
- * Starts from an empty box (min 1e10, max -1e10). With no mask bits set, returns the box of the bounding sphere;
- * otherwise grows the box by each masked sphere's centre plus and minus its radius.
+ * Starts from an empty box (min 1e10, max -1e10). With no bits in sphMask (+0x28) the box is the bounding sphere's
+ * (boundCen +0x10, boundRad +0x20); otherwise it grows the box by each masked sphere of sphList (+0x30, listLen +0x2C
+ * entries of 0x20 bytes) as centre plus and minus radius.
  *
- * @param mnp  out: the box minimum
- * @param mxp  out: the box maximum
+ * @param tree  the rider sphere tree (On Tour cRiderSphereTree)
+ * @param mnp   out: the box minimum
+ * @param mxp   out: the box maximum
  */
 extern "C" void cRiderSphereTree_GetMaskBoundBox(void* tree, sVec4_2F650* mnp, sVec4_2F650* mxp)
 {
@@ -1702,7 +1704,11 @@ struct sSphereRadius12 {
 };
 
 /**
- * Returns the tree's collision resolution: half the radius of its deepest level, times its scale.
+ * Returns the tree's collision resolution: half the radius of the level at the tree's depth, times its scale.
+ *
+ * Reads treeInfo (+0x98): levels[depth].radius (levels at +0x20, depth at +0xC) * scale (+0x90) * 0.5.
+ *
+ * @return the resolution
  */
 extern "C" float SphereTree_GetResolution(void* self)
 {
@@ -2641,19 +2647,26 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* a1, sSp
 /**
  * Recursive step of the sphere tree's triangle test: checks one sphere and descends into its children.
  *
- * Skips the sphere when it is farther from the triangle's plane than the level's radius times the scale; at the
- * deepest level tests it against the triangle (func_0032D440) and records the deepest penetration below the best
- * so far in @p outA and @p outB; otherwise recurses into the children present in the bit tree.
+ * The sphere's signed distance d from the triangle's plane is uNorm . (pos - point1); its radius r is
+ * levels[depth].radius * scale (+0x90). It is skipped when it is behind the plane at the root, or when d is not below r
+ * plus the deepest penetration so far (worstCase, +0x94). When the sphere's centre projected on the plane is rejected
+ * by the VU0 triangle test func_0032D440, a leaf, or a sphere smaller than 20, is skipped, and a larger one goes on
+ * only if it contains point1 or touches one of the three edges.
  *
- * @param point1     first triangle corner
- * @param point2     second triangle corner
- * @param point3     third triangle corner
- * @param uNorm      the triangle's unit normal
- * @param pos    this sphere's centre
- * @param depth  the tree level
- * @param base   this sphere's index at that level
- * @param outA   out: the push-out vector (On Tour overlap)
- * @param outB   out: the contact point (On Tour loc)
+ * A non-leaf sphere (depth below both 3 and the tree's depth, with child bits in the bit tree) recurses into each
+ * present child, in sortAxis (+0x9C) order, at pos + axis[k] * levels[depth + 1].cenOffset; a leaf whose d - r is below
+ * worstCase stores it there, with the push-out vector uNorm * (r - d) in @p outA and the projected point in @p outB.
+ *
+ * @param selfp   the sphere tree (On Tour SphereTree)
+ * @param point1  first triangle corner
+ * @param point2  second triangle corner
+ * @param point3  third triangle corner
+ * @param uNorm   the triangle's unit normal
+ * @param pos     this sphere's centre
+ * @param depth   the tree level
+ * @param base    this sphere's index at that level
+ * @param outA    out: the push-out vector (On Tour overlap)
+ * @param outB    out: the contact point (On Tour loc)
  */
 // Sphere tree against the triangle (a1, a2, a3) moving along v: records the deepest
 // penetration below self->best (*outA = push-out vector, *outB = contact point).
@@ -2821,12 +2834,13 @@ struct sBox_DB40 {
 };
 
 /**
- * Orders the tree's eight child axes by how far they point against a direction (nearest first).
+ * Orders the tree's eight child axes by how far they point against a direction, most opposed first.
  *
- * Projects each of the four axes on -1000 times @p vdir (the opposite axes get the negated value) and sorts the
- * eight indices by it with BXSORT_shell.
+ * Projects each of the four axes (+0x0) on -1000 times @p vdir (the four opposite axes get the negated value) and sorts
+ * the eight indices in sortAxis (+0x9C) by it, descending, with BXSORT_shell.
  *
- * @param vdir  the direction (On Tour norm)
+ * @param vself  the sphere tree (On Tour SphereTree)
+ * @param vdir   the direction (On Tour norm)
  */
 extern "C" void SphereTree_populateSortAxis(void* vself, void* vdir)
 {
@@ -2997,11 +3011,13 @@ struct sSphereData_DF28 {
 /**
  * Returns the unpacked bit tree for a sphere tree, decompressing it into a cache slot when it is not cached.
  *
- * Trees smaller than SphereTree_bigBufDepth use the small cache, others the big one. Checks the remembered slot,
- * then searches the cache by id; on a miss unpacks the tree with func_0032B620 into the next slot (round robin),
- * records its id and remembers the slot in the tree info.
+ * Trees whose depth (+0xC) is below SphereTree_bigBufDepth use the small cache (SphereTree_buffers, SphereTree_bufID),
+ * deeper ones the big one (SphereTree_bigBuffers, SphereTree_bigBufID). Checks the slot remembered in lastBufID (+0x4),
+ * then searches the cache for treeID (+0x0); on a miss unpacks cmpTree (+0x24) with func_0032B620 into the next slot
+ * (round robin through bufPtr / bigBufPtr), records the id and remembers the slot.
  *
- * @return the buffer address
+ * @param selfp  the tree info (On Tour tSphTreeInfo)
+ * @return the buffer address (as an int)
  */
 // PORT: returns the cached buffer pointer as int (the unit declares it int-returning).
 extern "C" int SphereTree_AllocBuf(void* selfp)

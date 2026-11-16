@@ -178,9 +178,12 @@ extern "C" void* cGameState_writeToReplayFrame(void* self);
 INCLUDE_ASM("main/gamestate", cGFGateState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Gate state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ * Saves the gate game-flow state into a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_writeToReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
 void* cGFGateState_writeToReplayFrame(void* self)
 {
@@ -194,9 +197,12 @@ extern "C" void* cGameState_readFromReplayFrame(void* self);
 INCLUDE_ASM("main/gamestate", cGFGateState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Gate state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ * Restores the gate game-flow state from a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_readFromReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
 void* cGFGateState_readFromReplayFrame(void* self)
 {
@@ -239,9 +245,12 @@ extern "C" void func_00234E20(void)
 INCLUDE_ASM("main/gamestate", cGFRidingState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Riding state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ * Saves the riding game-flow state into a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_writeToReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
 void* cGFRidingState_writeToReplayFrame(void* self)
 {
@@ -253,9 +262,12 @@ void* cGFRidingState_writeToReplayFrame(void* self)
 INCLUDE_ASM("main/gamestate", cGFRidingState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Riding state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ * Restores the riding game-flow state from a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_readFromReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
 void* cGFRidingState_readFromReplayFrame(void* self)
 {
@@ -1247,9 +1259,12 @@ extern "C" void cGFSessionTeleportState_update(void)
 INCLUDE_ASM("main/gamestate", cGFSessionTeleportState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Session-teleport state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ * Saves the session-teleport game-flow state into a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_writeToReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
 void* cGFSessionTeleportState_writeToReplayFrame(void* self)
 {
@@ -1261,9 +1276,12 @@ void* cGFSessionTeleportState_writeToReplayFrame(void* self)
 INCLUDE_ASM("main/gamestate", cGFSessionTeleportState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Session-teleport state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ * Restores the session-teleport game-flow state from a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_readFromReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
 void* cGFSessionTeleportState_readFromReplayFrame(void* self)
 {
@@ -1733,9 +1751,12 @@ void func_00236AF0(void* self)
 INCLUDE_ASM("main/gamestate", cGFSectionLoadState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Section-load state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ * Saves the section-load game-flow state into a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_writeToReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
 void* cGFSectionLoadState_writeToReplayFrame(void* self)
 {
@@ -1747,9 +1768,12 @@ void* cGFSectionLoadState_writeToReplayFrame(void* self)
 INCLUDE_ASM("main/gamestate", cGFSectionLoadState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Section-load state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ * Restores the section-load game-flow state from a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_readFromReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
 void* cGFSectionLoadState_readFromReplayFrame(void* self)
 {
@@ -1781,9 +1805,12 @@ extern "C" void func_00236B38(void)
 INCLUDE_ASM("main/gamestate", cGFTransportWaitState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Transport-wait state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ * Saves the transport-wait game-flow state into a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_writeToReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
 void* cGFTransportWaitState_writeToReplayFrame(void* self)
 {
@@ -1795,9 +1822,12 @@ void* cGFTransportWaitState_writeToReplayFrame(void* self)
 INCLUDE_ASM("main/gamestate", cGFTransportWaitState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Transport-wait state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ * Restores the transport-wait game-flow state from a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_readFromReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
 void* cGFTransportWaitState_readFromReplayFrame(void* self)
 {
@@ -1921,9 +1951,12 @@ extern "C" void func_00236CD8(void* self)
 INCLUDE_ASM("main/gamestate", cGFPreEventState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Pre-event state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ * Saves the pre-event game-flow state into a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_writeToReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
 void* cGFPreEventState_writeToReplayFrame(void* self)
 {
@@ -1935,9 +1968,12 @@ void* cGFPreEventState_writeToReplayFrame(void* self)
 INCLUDE_ASM("main/gamestate", cGFPreEventState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Pre-event state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ * Restores the pre-event game-flow state from a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_readFromReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
 void* cGFPreEventState_readFromReplayFrame(void* self)
 {
@@ -2007,9 +2043,12 @@ extern "C" void func_00236EA0(void)
 INCLUDE_ASM("main/gamestate", cGFPostEventState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Post-event state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ * Saves the post-event game-flow state into a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_writeToReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
 void* cGFPostEventState_writeToReplayFrame(void* self)
 {
@@ -2021,9 +2060,12 @@ void* cGFPostEventState_writeToReplayFrame(void* self)
 INCLUDE_ASM("main/gamestate", cGFPostEventState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Post-event state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ * Restores the post-event game-flow state from a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_readFromReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
 void* cGFPostEventState_readFromReplayFrame(void* self)
 {
@@ -2088,9 +2130,12 @@ extern "C" void cGFPodiumState_loseFocus(void)
 INCLUDE_ASM("main/gamestate", cGFPodiumState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Podium state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ * Saves the podium game-flow state into a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_writeToReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
 void* cGFPodiumState_writeToReplayFrame(void* self)
 {
@@ -2102,9 +2147,12 @@ void* cGFPodiumState_writeToReplayFrame(void* self)
 INCLUDE_ASM("main/gamestate", cGFPodiumState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Podium state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ * Restores the podium game-flow state from a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_readFromReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
 void* cGFPodiumState_readFromReplayFrame(void* self)
 {
@@ -2682,7 +2730,9 @@ extern "C" uint cBxPseudoRng_NextInt(uint* state);
 extern uint GMrandom[];
 
 /**
- * Returns the next number from the shared game random generator GMrandom.
+ * Returns the next number from the shared game random generator GMrandom (cBxPseudoRng_NextInt).
+ *
+ * @return the next pseudo-random number
  */
 extern "C" uint GMrand(void)
 {

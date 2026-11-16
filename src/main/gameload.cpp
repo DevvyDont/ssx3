@@ -1704,13 +1704,22 @@ struct sGameLoad_0F40 {
 };
 
 /**
- * Runs the game-flow state machine: updates the current state and switches to a requested one.
+ * Runs the game-flow state machine: updates the current state, drives a preload and switches to a requested state.
  *
- * Returns early when a local game is held or the pause flags have bit 0x20. Ticks the current state, enters a
- * pending preload state and updates it; when a next state id is set, exits the current state, remembers it as the
- * previous one and makes the matching member state (+0xB0 ... +0x1EC, ids 1-16) current, then refreshes the views
- * with func_0022E550. (The C's "Game load state machine" comment and sGameLoad_0F40 name come from the unit name;
- * this is the game-flow state switch.)
+ * Returns at once in an offline game (cBENetworkInterface_networkOpt.bIsNetworkGame 0) while ControllerUnplugged
+ * (+0x224) is set, or while cPauseState_Flags has bit 0x20. Calls the current state's update() (virtual slot 6) unless
+ * it is the gate state (3) with a switch pending. A pending preload id (mPendingPreloadStateID, +0x208) picks the
+ * member state for that id (ids 1-16: +0xB0 ... +0x1EC) as mPreloadingState (+0x204), moves the id to mPreloadStateID
+ * (+0x20C) and calls its preloadInit() (slot 2); a preloading state gets preloadUpdate() (slot 3) on every call.
+ *
+ * When mPendingStateID (+0x210) is set, the current state gets loseFocus() (slot 7) and becomes the previous one
+ * (mPrevState, mPrevStateID), the member state for the id becomes mCurrentState / mCurrentStateID, the pending id and
+ * mPendingStateStartupFlag (+0x21C) are cleared, a preload of that same state is forgotten, the split-screen layout is
+ * refreshed (func_0022E550 on ViewMan, +0x84) and the new state gets gainFocus(startup flag) (slot 5). The per-function
+ * view names these slots enter/update/start/tick/exit. It also calls cBE_getInterface(SSXApp->BE, 7) and ignores the
+ * result.
+ *
+ * @param self_  the game (cGame, this)
  */
 // Game load state machine: runs the current state and switches to the requested one.
 extern "C" void cGame_updateState(void* self_)
@@ -1932,8 +1941,10 @@ struct sVEntry_002312D8 {
 /**
  * Tells whether the state being preloaded is ready to run.
  *
- * Returns 0 while a preload request is pending (+0x208), 1 when there is no preloaded state (+0x204), else that
- * state's answer from its virtual slot 8.
+ * Returns 0 while a preload request is still pending (mPendingPreloadStateID, +0x208), 1 when nothing is being
+ * preloaded (mPreloadingState, +0x204), else that state's isPreloadComplete() (virtual slot 8).
+ *
+ * @return nonzero when ready
  */
 extern "C" int cGame_isPreloadedStateReady(void* self)
 {
@@ -2354,8 +2365,10 @@ extern "C" int cSSXScriptEngine_IsPauseMenuAllowed(void* a);
 /**
  * Tells whether the player may open the pause menu now.
  *
- * Not while the pending state (+0x210) or the current state (+0x214) is 1, 5, 10 or 14, and only when the
- * script engine allows it (cSSXScriptEngine_IsPauseMenuAllowed).
+ * Not while mPendingStateID (+0x210) or mCurrentStateID (+0x214) is 1, 5, 10 or 14 (On Tour eGFState EventStart,
+ * Finishline, TrackStart, UserSelect), and only when the script engine allows it (cSSXScriptEngine_IsPauseMenuAllowed).
+ *
+ * @return 1 when the pause menu may open, otherwise 0
  */
 extern "C" int cGame_canUserActivatePauseMenu(void* self)
 {
@@ -2481,8 +2494,10 @@ INCLUDE_ASM("main/gameload", cFadeScreen_update);
 /**
  * Advances a screen fade by one frame.
  *
- * When fading in (+0x8 set) adds 1/60 to the level (+0x4), otherwise subtracts it and clamps at 0. The fade-in
- * side is not clamped at 1 here (also so in On Tour).
+ * While IsEnding (+0x8) is set adds 1/60 to FadeTimer (+0x4); otherwise subtracts 1/60 and clamps at 0. The growing
+ * side is not clamped here (also so in On Tour).
+ *
+ * @return no meaningful value (the body returns nothing)
  */
 // PORT: the unit declares this void*-returning; the body returns nothing meaningful.
 extern "C" void* cFadeScreen_update(void* self)

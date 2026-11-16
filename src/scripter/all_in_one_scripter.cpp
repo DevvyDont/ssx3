@@ -281,6 +281,16 @@ extern "C" void cScriptObject__cScriptObject_48A0(void *) __asm__("cScriptObject
 extern char D_00482360[];
 extern char cScriptObjCameraManager_vtbl[];
 
+/**
+ * Destroys the script camera manager through the cScriptObject destructor.
+ *
+ * Stores the vtable of its cScriptEntity base part (D_00482360; its overridden entries adjust this by -0x10) at +0x10
+ * and its own vtable cScriptObjCameraManager_vtbl at +0xC, then calls cScriptObject__cScriptObject, which receives the
+ * g++ delete flags untouched in the second argument register (this declaration leaves them out). Nothing of the
+ * manager's own is torn down.
+ *
+ * @param arg0  the camera manager being destroyed (this)
+ */
 extern "C" void cScriptObjCameraManager__cScriptObjCameraManager(void *arg0) {
     *(char **)((char*)arg0 + 0x10) = D_00482360;
     *(char **)((char*)arg0 + 0xC) = cScriptObjCameraManager_vtbl;

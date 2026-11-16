@@ -3147,6 +3147,14 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptManualAlgorithm__cScri
 extern void* D_0045BDE0[];
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a manual script camera algorithm, freeing it when asked to.
+ *
+ * Stores the cCameraAlgorithm vtable D_0045BDE0 at +0x10 (the last vtable store of the inlined destructor chain; no
+ * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptManualAlgorithm__cScriptManualAlgorithm(void* self, int flags)
 {
@@ -3163,6 +3171,14 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptPointAlgorithm__cScrip
 extern void* D_0045BDE0[];
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a point script camera algorithm, freeing it when asked to.
+ *
+ * Stores the cCameraAlgorithm vtable D_0045BDE0 at +0x10 (the last vtable store of the inlined destructor chain; no
+ * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptPointAlgorithm__cScriptPointAlgorithm(void* self, int flags)
 {
@@ -3179,6 +3195,14 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptTargetAlgorithm__cScri
 extern void* D_0045BDE0[];
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a target script camera algorithm, freeing it when asked to.
+ *
+ * Stores the cCameraAlgorithm vtable D_0045BDE0 at +0x10 (the last vtable store of the inlined destructor chain; no
+ * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptTargetAlgorithm__cScriptTargetAlgorithm(void* self, int flags)
 {
@@ -3195,6 +3219,14 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptRelativeAlgorithm__cSc
 extern void* D_0045BDE0[];
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a relative script camera algorithm, freeing it when asked to.
+ *
+ * Stores the cCameraAlgorithm vtable D_0045BDE0 at +0x10 (the last vtable store of the inlined destructor chain; no
+ * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptRelativeAlgorithm__cScriptRelativeAlgorithm(void* self, int flags)
 {

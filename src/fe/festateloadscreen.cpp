@@ -445,10 +445,11 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
 /**
  * Saves the base game-state data into a replay frame: the state's first word.
  *
- * Writes 4 bytes from @p self through the stream's virtual slot 1 (write). Every game-flow state's own
- * writeToReplayFrame calls this first (cGFEndState_writeToReplayFrame__FPv, cGFEventStartState_writeToReplayFrame...).
+ * Writes 4 bytes from @p self (mNextState, +0x0) through the stream's virtual slot 1 (write). Every game-flow state's
+ * own writeToReplayFrame calls this (cGFEndState_writeToReplayFrame__FPv, cGFGateState_writeToReplayFrame__FPv, ...).
  *
  * @param obj  the replay frame stream (On Tour cReplayFramePtr)
+ * @return the stream write's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
 void* cGameState_writeToReplayFrame_2(void* self, void* obj)
 {
@@ -473,9 +474,11 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
 /**
  * Restores the base game-state data from a replay frame: the state's first word.
  *
- * Reads 4 bytes into @p self through the stream's virtual slot 2 (read); the mirror of cGameState_writeToReplayFrame.
+ * Reads 4 bytes into @p self (mNextState, +0x0) through the stream's virtual slot 2 (read); the mirror of
+ * cGameState_writeToReplayFrame.
  *
  * @param obj  the replay frame stream (On Tour cReplayFramePtr)
+ * @return the stream read's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
 void* cGameState_readFromReplayFrame_2(void* self, void* obj)
 {
@@ -510,9 +513,12 @@ extern "C" void* cGameState_writeToReplayFrame(void* self);
 INCLUDE_ASM("fe/festateloadscreen", cGFEndState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * End state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ * Saves the end game-flow state into a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_writeToReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
 void* cGFEndState_writeToReplayFrame(void* self)
 {
@@ -526,9 +532,12 @@ extern "C" void* cGameState_readFromReplayFrame(void* self);
 INCLUDE_ASM("fe/festateloadscreen", cGFEndState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * End state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ * Restores the end game-flow state from a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_readFromReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
 void* cGFEndState_readFromReplayFrame(void* self)
 {
@@ -540,9 +549,12 @@ void* cGFEndState_readFromReplayFrame(void* self)
 INCLUDE_ASM("fe/festateloadscreen", cGFEndWaitState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * End-wait state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ * Saves the end-wait game-flow state into a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_writeToReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_writeToReplayFrame's result, passed through (On Tour's writeToReplayFrame returns nothing)
  */
 void* cGFEndWaitState_writeToReplayFrame(void* self)
 {
@@ -554,9 +566,12 @@ void* cGFEndWaitState_writeToReplayFrame(void* self)
 INCLUDE_ASM("fe/festateloadscreen", cGFEndWaitState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * End-wait state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ * Restores the end-wait game-flow state from a replay frame: only the base game-state part.
  *
- * The replay stream is passed through in the second argument register, which this declaration does not name.
+ * Calls cGameState_readFromReplayFrame; the replay frame stream passes through in the second argument register, which
+ * this declaration does not name.
+ *
+ * @return cGameState_readFromReplayFrame's result, passed through (On Tour's readFromReplayFrame returns nothing)
  */
 void* cGFEndWaitState_readFromReplayFrame(void* self)
 {

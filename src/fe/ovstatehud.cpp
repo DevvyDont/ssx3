@@ -528,10 +528,12 @@ struct sElem_9A30 {
 /**
  * Constructs the one-player HUD overlay state.
  *
- * Runs the cUIState constructor, installs cOVStateHUD1P_vtbl, constructs the two HUD elements at +0x48
- * (func_0020EAA0), sets +0x474 to -1, clears +0x3D4/+0x3D8/+0x480/+0x484 and sets the four scales
- * (+0x478, +0x47C, +0x488, +0x48C) to 1.0.
+ * Runs the cUIState constructor (func_0039E2A0) with @p pEngine, installs cOVStateHUD1P_vtbl at +0x8, constructs the
+ * two 0x8C-byte HUD elements at +0x48 (func_0020EAA0 on each one's +0x8), sets +0x474 to -1, clears +0x3D4, +0x3D8,
+ * +0x480 and +0x484 and sets the four scales +0x478, +0x47C, +0x488 and +0x48C to 1.0. The caller (gameload) passes a
+ * third argument, 0, which is not used.
  *
+ * @param arg0     the memory for the state (this; the caller allocates 3224 bytes)
  * @param pEngine  the UI engine
  * @return @p arg0
  */

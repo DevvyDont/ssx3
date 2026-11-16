@@ -5023,6 +5023,12 @@ int *func_0042C168(int *cursor, int *end, int value) {
 //100%
 INCLUDE_ASM("seg/seg_325220", FindAddress);
 #ifdef SKIP_ASM
+/**
+ * Calls EE kernel syscall 131 (FindAddress in the PS2 SDK's syscall table).
+ *
+ * Loads the number into $v1 and executes `syscall`; the kernel does the work. The stub declares no parameters; the
+ * caller's arguments reach the kernel in the argument registers untouched.
+ */
 SYSCALL_STUB(FindAddress, 131)
 #endif
 
@@ -5562,6 +5568,12 @@ void func_0042CBD0(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", PutTLBEntry);
 #ifdef SKIP_ASM
+/**
+ * Calls EE kernel syscall 85 (PutTLBEntry in the PS2 SDK's syscall table).
+ *
+ * Loads the number into $v1 and executes `syscall`; the kernel does the work. The stub declares no parameters; the
+ * caller's arguments reach the kernel in the argument registers untouched.
+ */
 SYSCALL_STUB(PutTLBEntry, 85)
 #endif
 
@@ -5591,6 +5603,13 @@ int func_0042CCC8(int tlbIndex) {
 //100%
 INCLUDE_ASM("seg/seg_325220", iSetTLBEntry);
 #ifdef SKIP_ASM
+/**
+ * Calls EE kernel syscall -86 (iSetTLBEntry in the PS2 SDK's syscall table).
+ *
+ * Loads the number into $v1 and executes `syscall`; the kernel does the work. The stub declares no parameters; the
+ * caller's arguments reach the kernel in the argument registers untouched. A negative number selects the
+ * interrupt-context (i-prefixed) variant.
+ */
 SYSCALL_STUB(iSetTLBEntry, -86)
 #endif
 
@@ -5603,12 +5622,25 @@ SYSCALL_STUB(func_0042CD08, 87)
 //100%
 INCLUDE_ASM("seg/seg_325220", iGetTLBEntry);
 #ifdef SKIP_ASM
+/**
+ * Calls EE kernel syscall -87 (iGetTLBEntry in the PS2 SDK's syscall table).
+ *
+ * Loads the number into $v1 and executes `syscall`; the kernel does the work. The stub declares no parameters; the
+ * caller's arguments reach the kernel in the argument registers untouched. A negative number selects the
+ * interrupt-context (i-prefixed) variant.
+ */
 SYSCALL_STUB(iGetTLBEntry, -87)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", ProbeTLBEntry);
 #ifdef SKIP_ASM
+/**
+ * Calls EE kernel syscall 88 (ProbeTLBEntry in the PS2 SDK's syscall table).
+ *
+ * Loads the number into $v1 and executes `syscall`; the kernel does the work. The stub declares no parameters; the
+ * caller's arguments reach the kernel in the argument registers untouched.
+ */
 SYSCALL_STUB(ProbeTLBEntry, 88)
 #endif
 

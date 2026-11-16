@@ -61,7 +61,9 @@ extern "C" void cMCOverlayManager_purge()
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_isManagerDone);
 #ifdef SKIP_ASM
 /**
- * Tells whether the memory card manager has finished its operation (state +0x130 is 1).
+ * Tells whether the memory card manager has finished its operation: mState (+0x130) is 1 (On Tour kMCOverlay_Done).
+ *
+ * @return 1 when done, otherwise 0
  */
 extern "C" int cMCOverlayManager_isManagerDone(void* self)
 {
@@ -97,7 +99,11 @@ extern "C" int func_0023C8C0(void) {
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_hasCardStatusCriticalError);
 #ifdef SKIP_ASM
 /**
- * Tells whether the card status (+0x43C) has an error bit other than the non-critical ones (0x4 and 0x1E0).
+ * Tells whether the last card state has an error other than the non-critical ones.
+ *
+ * Masks bit 0x4 (card full) and bits 0x1E0 out of mCurrDeviceStateLast (+0x43C) and tests what is left.
+ *
+ * @return 1 when another bit is set, otherwise 0
  */
 extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* self)
 {

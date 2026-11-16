@@ -488,7 +488,9 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_Purge__FPv);
 /**
  * Purges (stops and releases) a stream instance's stream.
  *
- * Calls func_003B78F8 (On Tour SNDSTRM_purge) on the stream handle at +0x8 and returns its result.
+ * Calls func_003B78F8 (On Tour SNDSTRM_purge) on the stream handle at +0x8.
+ *
+ * @return SNDSTRM_purge's result
  */
 void* cStreamInstance_Purge(void* self)
 {
@@ -1284,12 +1286,13 @@ struct sStrmVoiceCb {
 /**
  * Updates one bank-monitor instance for a frame.
  *
- * Only when the instance is not free (cBankMonitorInstance_IsFree) and @p time is positive: calls the member-function callback at +0xA8
- * on the controller (if set), then cBankMonitorInstance_Update3D with the controller's bank monitor (its sound object +0x1D8). Note the
- * parameter named self is the controller, not this.
+ * Only when the instance is in use (cBankMonitorInstance_IsFree returns 0) and @p time is positive: calls the
+ * member-function callback at +0xA8 on the controller (if set), then cBankMonitorInstance_Update3D with the
+ * controller's bank monitor (its sound object's +0x1D8, or 0 without a controller). The parameter named self is the
+ * controller (On Tour cController* Monitor), not this.
  *
- * @param self  the controller (On Tour cController* Monitor)
- * @param time  elapsed time (On Tour Time)
+ * @param voice  the bank-monitor instance (this)
+ * @param time   elapsed time (On Tour Time)
  */
 extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float time)
 {
@@ -2107,16 +2110,22 @@ static inline float Sqrt_C868(float x)
 /**
  * Updates the 3D audio of an instance: Doppler pitch, position and distance volume.
  *
- * Streams whose request has not started are skipped. For a positioned instance (+0x68) when the monitor has 3D enabled
- * (+0x8E4), the distance is the square root of the monitor's virtual slot 6; the sound is started/stopped by
- * cBankMonitorInstance_CheckActive, and while active the Doppler factor (cBankMonitorInstance_Doppler, from the previous distance at +0x5C, when +0x8E0
- * enables it), azimuth/elevation (cBankMonitorInstance_PosUpdate), pitch (cBankMonitorInstance_PitchUpdate, factor * 4096) and volume (cBankMonitorInstance_Dist2Vol__FPvi over
- * the range at +0x88, default 30, rescaled by 127 / the maximum at +0x98) are applied. Otherwise the fixed volume at
- * +0x64 is used. The volume is multiplied by the optional factor at +0x60 and set with cBankMonitorInstance_VolUpdate; a stopping
- * instance whose sound is done (cBankMonitorInstance_DonePlaying) is cleared instead.
+ * A free instance (type +0x0 is 0) is skipped, and so is a stream (type 3) when func_003B7C40 returns 0 or less and the
+ * status word is not 2. For a positioned instance (+0x68) while the monitor has 3D on (+0x8E4), the distance is the
+ * square root of the monitor's virtual slot 6. When the instance is held active (+0x94) or
+ * cBankMonitorInstance_CheckActive says so, the Doppler factor (cBankMonitorInstance_Doppler, from the previous
+ * distance at +0x5C, when +0x8E0 enables it), azimuth and elevation (cBankMonitorInstance_PosUpdate), pitch
+ * (cBankMonitorInstance_PitchUpdate, factor * 4096) and volume (the fixed +0x64 when held, else
+ * cBankMonitorInstance_Dist2Vol__FPvi over the range at +0x88, default 30, rescaled by 127 / the maximum at +0x98) are
+ * applied; an inactive one gets volume 0. The distance is kept at +0x5C. Otherwise the fixed volume at +0x64 is used.
  *
- * @param bm  the bank monitor (On Tour Monitor)
- * @param time  elapsed time (On Tour Time)
+ * Unless the instance is stopping (+0x54), the volume is multiplied by the optional factor at +0x60 and set with
+ * cBankMonitorInstance_VolUpdate; a stopping instance whose sound is done (cBankMonitorInstance_DonePlaying) is cleared
+ * instead (+0x8 and +0x54 zeroed, handle +0x4 set to -1).
+ *
+ * @param voice  the bank-monitor instance (this)
+ * @param bm     the bank monitor (On Tour Monitor)
+ * @param time   elapsed time (On Tour Time); reused for the Doppler factor
  */
 extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float time)
 {

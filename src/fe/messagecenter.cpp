@@ -1373,7 +1373,9 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongCost__FPv);
 /**
  * Returns the price of a request-line song: always 5000 points.
  *
- * The song index the callers pass is not declared or used.
+ * The song index the callers pass (On Tour songIndex) is not declared or used.
+ *
+ * @return 5000
  */
 int cFEStateRequestLine_getSongCost(void* self)
 {

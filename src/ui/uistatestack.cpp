@@ -463,9 +463,12 @@ static inline void cUIStateStack_purgeNormalStates_setB7(cUIStateStack_purgeNorm
 static inline void cUIStateStack_purgeNormalStates_setB5(cUIStateStack_purgeNormalStates_node* n, int v) { n->b5 = v; }
 
 /**
- * Marks every state on the UI state stack for removal.
+ * Marks every state on a UI state list for removal.
  *
- * Walks the list from cList_first to the sentinel and sets each state's mode to 7 and its bits 7 and 5.
+ * Walks the list from cList_first to the sentinel and, in each state's mAttrState (+0x1C), sets mMode to 7 and
+ * mPendingDelete and mEnabled to 1. Callers pass the UI engine's state stack (+0x18).
+ *
+ * @param list  the state list
  */
 extern "C" void cUIStateStack_purgeNormalStates(cList* list)
 {
@@ -931,7 +934,9 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_getEngine__FPv);
 /**
  * Returns the UI engine a widget belongs to.
  *
- * Follows the widget's screen (+0x5C) to its owning state (+0xD0) and returns that state's engine (+0x10).
+ * Follows the widget's mpScreen (+0x5C) to the screen's mpState (+0xD0) and returns that state's mpEngine (+0x10).
+ *
+ * @return the UI engine
  */
 int cUIThing_getEngine(void* self)
 {

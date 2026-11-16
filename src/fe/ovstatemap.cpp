@@ -1269,10 +1269,12 @@ struct sMap_A088 {
 };
 
 /**
- * Removes the map's rider indicators: hides and deletes every indicator widget.
+ * Removes the map overlay's indicators: hides and deletes every indicator widget.
  *
- * For the cursor and each of the two eight-entry indicator arrays, hides the widget, deletes it and clears the
- * pointer.
+ * For the player icon (+0xE0) and each of the two eight-entry icon arrays (+0xE4 and +0x104; On Tour mpPlayerIcon,
+ * mpSessionIcons, mpSessionHighlights) it hides a present widget (setVisible(0)), deletes it and clears the pointer.
+ *
+ * @param p  the map overlay state (this)
  */
 extern "C" void cOVState_MAP_cleanupIndicators(void* p)
 {

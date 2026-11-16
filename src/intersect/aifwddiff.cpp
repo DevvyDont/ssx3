@@ -692,9 +692,10 @@ struct sCell_003284B8 {
 /**
  * Removes a node from the spatial hash cell that holds it, freeing cells that become empty.
  *
- * When this cell is at the key's level, unlinks @p item from the list for its type. Otherwise picks the child
- * octant from the key's coordinate bits, recurses into it and deletes the child when it no longer holds anything.
+ * When this cell is at the key's level, unlinks @p item from the list for its type. Otherwise picks the child octant
+ * from the key's coordinate bits, recurses into it and deletes the child when it no longer holds anything.
  *
+ * @param node    this cell (On Tour Cell)
  * @param idx     the node type (On Tour NodeType)
  * @param item    the node to remove
  * @param target  the node's cell key
@@ -762,13 +763,15 @@ struct sCell_00328660 {
 /**
  * Adds a node to the spatial hash below this cell, creating the cells on the way.
  *
- * Steps from @p mykey down to the target key's level, choosing the child octant from the key bits and allocating
- * (str_Cell, cleared with MEM_fill) any child that does not exist, then pushes @p item on the list for its type.
+ * Steps from @p mykey down to the target key's level, choosing the child octant from the key's coordinate bits and
+ * allocating (memory tag "Cell", children cleared) any child that does not exist, then pushes @p item on the reached
+ * cell's list for its type.
  *
+ * @param node    this cell (On Tour Cell): eight children, then one list per node type
  * @param idx     the node type (On Tour NodeType)
  * @param item    the node to add
  * @param target  the cell key the node belongs in
- * @param mykey      this cell's key
+ * @param mykey   this cell's key
  */
 extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, sItem_00328660* item, sCell_00328660* target, const sCell_00328660* mykey)
 {
@@ -798,11 +801,13 @@ INCLUDE_ASM("intersect/aifwddiff", nash_Cell_movenode);
 /**
  * Moves a node from one spatial hash cell to another, touching only the part of the octree that changes.
  *
- * When the new key is at this cell's level, removes the node from the old place (nash_Cell_remnode) and links it
- * here; when the old key is at this level, unlinks it here and adds it below (nash_Cell_addnode); while both keys
- * lead into the same child, recurses into it (creating it if needed), else removes and adds separately. Empty
- * children are deleted.
+ * When the new key is at this cell's level, removes the node from its old place (nash_Cell_remnode from this cell) and
+ * links it here; when the old key is at this level, unlinks it here and adds it below (nash_Cell_addnode). Otherwise,
+ * when both keys lead into the same child octant it recurses into that child; else it removes the node through the old
+ * child (deleting that child when it becomes empty) and adds it through the new child, allocating the new child if
+ * needed.
  *
+ * @param node    this cell (On Tour Cell)
  * @param type    the node type (On Tour NodeType)
  * @param item    the node to move
  * @param oldkey  the cell key it was in
@@ -911,10 +916,11 @@ static inline sCell_00328660 Parent_8C20(const sCell_00328660& c)
 /**
  * Adds a node to one octant of the spatial hash, growing the octant's root cell as needed.
  *
- * With no root yet, the root becomes a new cell at the key (str_Cell) holding the node. Otherwise, while the
- * root does not contain the key, wraps it in a new parent cell one level up; then adds the node below it with
- * nash_Cell_addnode.
+ * With no root cell yet, the root becomes a new cell (memory tag "Cell") at the node's key holding the node. Otherwise,
+ * while the root's key does not contain the node's key, wraps the root in a new parent cell one level up (coordinates
+ * halved) with the old root as its matching child; then adds the node below the root with nash_Cell_addnode.
  *
+ * @param root  the octant (On Tour Octant): its root cell key and root cell
  * @param idx   the node type (On Tour NodeType)
  * @param item  the node to add
  * @param cell  the node's cell key

@@ -1906,6 +1906,12 @@ void func_00394648(void* self)
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_ResolveCharModel__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the retail graphics manager's ResolveCharModel is an empty stub.
+ *
+ * On Tour's version takes the model header and data, part bone offsets, blended matrices and morph weights; this
+ * declaration names none of them.
+ */
 void cGraphicsMan_ResolveCharModel(void* self)
 {
 }

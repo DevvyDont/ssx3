@@ -2580,13 +2580,14 @@ extern char str_unexpected_EOF_in_comment[];
 /**
  * Skips a block comment, keeping its line breaks so line numbers stay right.
  *
- * Reads characters until the closing star-slash; each newline inside is counted on @p s and written out, and a
- * comment without newlines is replaced by one space. Reports "unexpected EOF in comment" through func_00326A20
- * when the input ends first.
+ * Reads characters (the current one is at +0xC) until the closing star-slash: each newline inside counts a line on
+ * @p isrc (+0xC) and is written out, and a comment without newlines is replaced by one space. When the input ends first
+ * it calls the error reporter func_00326A20 with "unexpected EOF in comment"; that function is an empty stub in retail,
+ * so nothing is reported.
  *
- * @param s   the input source (On Tour tInputSource)
- * @param a2  the file path, for the error message
- * @param a3  the file name, for the error message
+ * @param isrc      the input source (On Tour tInputSource); its line counter (+0xC) is advanced
+ * @param path      directory of the file, for the error message
+ * @param fileName  file name, for the error message
  */
 // Skips a /* */ comment; newlines inside it are kept, otherwise it becomes one space.
 extern "C" void cInputPreProcessor_skipCComment(void* self, sParseStream* isrc, int path, int fileName)

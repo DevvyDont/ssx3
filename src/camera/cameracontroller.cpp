@@ -142,9 +142,11 @@ extern "C" void* cCameraAlgoList_removeAll(int);
 INCLUDE_ASM("camera/cameracontroller", cCameraController_clearAlgorithms__FPv);
 #ifdef SKIP_ASM
 /**
- * Removes (and deletes the owned) algorithms from the controller's algorithm list.
+ * Removes every algorithm from the controller's algorithm list, deleting the ones the list owns.
  *
- * Calls cCameraAlgoList_removeAll on AlgorithmList (+0x8) and returns what it returns.
+ * Calls cCameraAlgoList_removeAll on the list that AlgorithmList (+0x8) points to.
+ *
+ * @return no meaningful value (cCameraAlgoList_removeAll returns nothing)
  */
 void* cCameraController_clearAlgorithms(void* self)
 {
@@ -373,10 +375,12 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, in
 /**
  * Switches the chase camera to an algorithm type with an immediate cut (no blend).
  *
- * Calls cChaseCameraController_createChaseAlgorithmBlend(self, @p type, @p action, 1.0f) and returns its result.
+ * Calls cChaseCameraController_createChaseAlgorithmBlend(self, @p type, @p action, 1.0f): a blend rate of 1 switches at
+ * once.
  *
- * @param type  the camera algorithm type (On Tour eCamAlgoType)
+ * @param type    the camera algorithm type (On Tour eCamAlgoType)
  * @param action  the camera-trigger action that asked for the switch, if any (On Tour cCTAction*)
+ * @return no meaningful value (cChaseCameraController_createChaseAlgorithmBlend returns nothing)
  */
 extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void* self, int type, int action)
 {

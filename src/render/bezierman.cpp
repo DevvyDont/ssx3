@@ -129,6 +129,8 @@ INCLUDE_ASM("render/bezierman", cPS2BezierMan_Reset__FPv);
  *
  * Calls func_003739D0 on the patch cache at +0x10 (mPatchCache), which zero-fills its three pools and resets its
  * counters.
+ *
+ * @return no meaningful value (func_003739D0 returns nothing)
  */
 void* cPS2BezierMan_Reset(void* self)
 {

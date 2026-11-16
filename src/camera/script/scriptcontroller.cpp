@@ -364,6 +364,11 @@ public:
     virtual void v05();
 };
 
+/**
+ * Snaps the camera into place by running a full update at once.
+ *
+ * Calls the object's virtual update() (vtable slot 5, cScriptManualAlgorithm_update).
+ */
 extern "C" void cScriptManualAlgorithm_snap(cScriptCtlVirt* self)
 {
     self->v05();
@@ -382,6 +387,12 @@ public:
     virtual void v03(int);
 };
 
+/**
+ * Snaps the camera onto its current subject: calls the virtual snap() with subject 0.
+ *
+ * Calls vtable slot 3 (cScriptManualAlgorithm_snap) with 0 as the subject id (cCameraAlgorithm::snap's argument in On
+ * Tour), which the script algorithm's snap ignores.
+ */
 extern "C" void cScriptManualAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
     self->v03(0);
@@ -496,6 +507,21 @@ struct sScrCam_169570 {
     float r70;              // 0x70
 };
 
+/**
+ * Updates the manual script camera: position and look-at point straight from the script, transformed to the world.
+ *
+ * The playing camera entity is ScriptObj (+0x14) -> mpCameraEntity (+0x14) -> mpEntity (+0x8); its header
+ * (func_0027C098, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and func_0027C0F0 reads this frame's channel
+ * values into FrameInfo (+0x4C, On Tour tSSXFrameCameraManual). FrameInfo angles are in degrees (converted with *
+ * 0.0174533).
+ *
+ * View (+0x0) becomes fov (+0x68); Position (+0x30) is mBaseTransform (ScriptObj +0x30) times (posX, posY, posZ, 1)
+ * (+0x4C); Roll (+0x40) is roll (+0x64) plus mBaseRotX (ScriptObj +0x70); Target (+0x20) is mBaseTransform times
+ * (targetX, targetY, targetZ, 1) (+0x58). Heading (+0x44) and Pitch (+0x48) are the yaw and elevation of Target -
+ * Position. Finally the jitterer (+0x74) is updated with jitterFocus (+0x6C) and jitterRoll (+0x70).
+ *
+ * @param p  the cScriptManualAlgorithm (this)
+ */
 extern "C" void cScriptManualAlgorithm_update(char* p)
 {
     sScrCam_169570* self = (sScrCam_169570*)p;
@@ -679,6 +705,18 @@ static inline void RotAxis_9828(sM_9828* m, const sV_9828& axis, float angle)
     vu0MulMtx_9828(m, m, &r);
 }
 
+/**
+ * Returns the camera pose: Position plus jitter, turned by Roll, Pitch and Heading.
+ *
+ * Starts from t4mat_Identity translated to Position (+0x30) plus the jitterer's (+0x74) positional jitter for Heading
+ * (+0x44) and Pitch (+0x48) (func_00160228, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
+ * t4vect_XAxis by Roll (+0x40) plus cCameraJitterer_getRollJitter, about t4vect_YAxis by -Pitch and about t4vect_ZAxis
+ * by Heading, and splits the matrix into a position and a rotation quaternion with func_0031B748. The four script
+ * algorithms share this body; only the jitterer offset differs.
+ *
+ * @param p  the cScriptManualAlgorithm (this)
+ * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
+ */
 extern "C" sPair_9828 cScriptManualAlgorithm_getPose(char* p)
 {
     sM_9828 m;
@@ -724,6 +762,11 @@ extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(void* self)
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_snap);
 #ifdef SKIP_ASM
+/**
+ * Snaps the camera into place by running a full update at once.
+ *
+ * Calls the object's virtual update() (vtable slot 5, cScriptPointAlgorithm_update).
+ */
 extern "C" void cScriptPointAlgorithm_snap(cScriptCtlVirt* self)
 {
     self->v05();
@@ -733,6 +776,12 @@ extern "C" void cScriptPointAlgorithm_snap(cScriptCtlVirt* self)
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_snapCurrent);
 #ifdef SKIP_ASM
+/**
+ * Snaps the camera onto its current subject: calls the virtual snap() with subject 0.
+ *
+ * Calls vtable slot 3 (cScriptPointAlgorithm_snap) with 0 as the subject id (cCameraAlgorithm::snap's argument in On
+ * Tour), which the script algorithm's snap ignores.
+ */
 extern "C" void cScriptPointAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
     self->v03(0);
@@ -828,6 +877,23 @@ struct sScrCam_169DB0 {
     float r70;              // 0x70
 };
 
+/**
+ * Updates the point script camera: orbits a scripted point at a distance, heading and pitch.
+ *
+ * The playing camera entity is ScriptObj (+0x14) -> mpCameraEntity (+0x14) -> mpEntity (+0x8); its header
+ * (func_0027C2A8, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and func_0027C300 reads this frame's channel
+ * values into FrameInfo (+0x4C, On Tour tSSXFrameCameraTarget). FrameInfo angles are in degrees (converted with *
+ * 0.0174533).
+ *
+ * Near and Far are stored a second time after the fill. View (+0x0) becomes fov (+0x68); Heading (+0x44) is heading
+ * (+0x60) plus mBaseRotZ (ScriptObj +0x78), Pitch (+0x48) is pitch (+0x5C) plus mBaseRotY (+0x74) and Roll (+0x40) is
+ * roll (+0x64) plus mBaseRotX (+0x70). Target (+0x20) is mBaseTransform (ScriptObj +0x30) times (targetX, targetY,
+ * targetZ, 1) (+0x4C), and Position (+0x30) is Target minus the direction (cos Pitch cos Heading, cos Pitch sin
+ * Heading, sin Pitch) times targetDistance (+0x58). Finally the jitterer (+0x74) is updated with jitterFocus (+0x6C)
+ * and jitterRoll (+0x70).
+ *
+ * @param p  the cScriptPointAlgorithm (this)
+ */
 extern "C" void cScriptPointAlgorithm_update(char* p)
 {
     sScrCam_169DB0* self = (sScrCam_169DB0*)p;
@@ -1015,6 +1081,18 @@ static inline void RotAxis_9F88(sM_9F88* m, const sV_9F88& axis, float angle)
     vu0MulMtx_9F88(m, m, &r);
 }
 
+/**
+ * Returns the camera pose: Position plus jitter, turned by Roll, Pitch and Heading.
+ *
+ * Starts from t4mat_Identity translated to Position (+0x30) plus the jitterer's (+0x74) positional jitter for Heading
+ * (+0x44) and Pitch (+0x48) (func_00160228, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
+ * t4vect_XAxis by Roll (+0x40) plus cCameraJitterer_getRollJitter, about t4vect_YAxis by -Pitch and about t4vect_ZAxis
+ * by Heading, and splits the matrix into a position and a rotation quaternion with func_0031B748. The four script
+ * algorithms share this body; only the jitterer offset differs.
+ *
+ * @param p  the cScriptPointAlgorithm (this)
+ * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
+ */
 extern "C" sPair_9F88 cScriptPointAlgorithm_getPose(char* p)
 {
     sM_9F88 m;
@@ -1060,6 +1138,11 @@ extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(void* self)
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_snap);
 #ifdef SKIP_ASM
+/**
+ * Snaps the camera into place by running a full update at once.
+ *
+ * Calls the object's virtual update() (vtable slot 5, cScriptTargetAlgorithm_update).
+ */
 extern "C" void cScriptTargetAlgorithm_snap(cScriptCtlVirt* self)
 {
     self->v05();
@@ -1069,6 +1152,12 @@ extern "C" void cScriptTargetAlgorithm_snap(cScriptCtlVirt* self)
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_snapCurrent);
 #ifdef SKIP_ASM
+/**
+ * Snaps the camera onto its current subject: calls the virtual snap() with subject 0.
+ *
+ * Calls vtable slot 3 (cScriptTargetAlgorithm_snap) with 0 as the subject id (cCameraAlgorithm::snap's argument in On
+ * Tour), which the script algorithm's snap ignores.
+ */
 extern "C" void cScriptTargetAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
     self->v03(0);
@@ -1224,6 +1313,25 @@ struct sVEp_16A510 {
     sVec4_16A510* (*fn)(void*);
 };
 
+/**
+ * Updates the target script camera: a scripted position that looks at the subject rider.
+ *
+ * The playing camera entity is ScriptObj (+0x14) -> mpCameraEntity (+0x14) -> mpEntity (+0x8); its header
+ * (func_0027C4B8, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and func_0027C510 reads this frame's channel
+ * values into FrameInfo (+0x4C, On Tour tSSXFrameCameraSubject). The subject rider is
+ * cSSXScriptEngine_GetSubjectRider(ScriptEngine, the header's subject byte (+0x22), the entity's script player at
+ * +0x8), or the first rider (SSXApp->Game->AI->Riders[0]) when there is none. FrameInfo angles are in degrees
+ * (converted with * 0.0174533).
+ *
+ * View (+0x0) becomes fov (+0x64) and Roll (+0x40) roll (+0x60) plus mBaseRotX (ScriptObj +0x70). Position (+0x30) is
+ * mBaseTransform (ScriptObj +0x30) times (posX, posY, posZ) (+0x4C) with Position's previous w. Target (+0x20) is the
+ * rider's position (virtual getPosition) plus its front row (mMatrix +0x1B0) times targetLeadDistance (+0x58) and its
+ * up row (+0x1C0) times targetLeadHeight (+0x5C), the two scaled by the rider model's scale vector (mAnimModel +0x140:
+ * .y for the distance, .x for the height). Heading (+0x44) and Pitch (+0x48) are the yaw and elevation of Target -
+ * Position. Finally the jitterer (+0x70) is updated with jitterFocus (+0x68) and jitterRoll (+0x6C).
+ *
+ * @param p  the cScriptTargetAlgorithm (this)
+ */
 extern "C" void cScriptTargetAlgorithm_update(char* p)
 {
     sScrCam_16A510* self = (sScrCam_16A510*)p;
@@ -1416,6 +1524,18 @@ static inline void RotAxis_A868(sM_A868* m, const sV_A868& axis, float angle)
     vu0MulMtx_A868(m, m, &r);
 }
 
+/**
+ * Returns the camera pose: Position plus jitter, turned by Roll, Pitch and Heading.
+ *
+ * Starts from t4mat_Identity translated to Position (+0x30) plus the jitterer's (+0x70) positional jitter for Heading
+ * (+0x44) and Pitch (+0x48) (func_00160228, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
+ * t4vect_XAxis by Roll (+0x40) plus cCameraJitterer_getRollJitter, about t4vect_YAxis by -Pitch and about t4vect_ZAxis
+ * by Heading, and splits the matrix into a position and a rotation quaternion with func_0031B748. The four script
+ * algorithms share this body; only the jitterer offset differs.
+ *
+ * @param p  the cScriptTargetAlgorithm (this)
+ * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
+ */
 extern "C" sPair_A868 cScriptTargetAlgorithm_getPose(char* p)
 {
     sM_A868 m;
@@ -1608,6 +1728,31 @@ struct sVEp_16AD98 {
     sVec4_16AD98* (*fn)(void*);
 };
 
+/**
+ * Snaps the relative script camera straight to its ideal place behind (or around) the subject rider.
+ *
+ * The playing camera entity is ScriptObj (+0x14) -> mpCameraEntity (+0x14) -> mpEntity (+0x8); its header
+ * (func_0027C6A0, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and func_0027C6F8 reads this frame's channel
+ * values into FrameInfo (+0x4C, On Tour tSSXFrameCameraAlgorithmic). The subject rider is
+ * cSSXScriptEngine_GetSubjectRider(ScriptEngine, the header's subject byte (+0x1D), the entity's script player at
+ * +0x8), or the first rider (SSXApp->Game->AI->Riders[0]) when there is none. FrameInfo angles are in degrees
+ * (converted with * 0.0174533).
+ *
+ * View (+0x0) becomes fov (+0x64) and Roll (+0x40) roll (+0x60) plus mBaseRotX (ScriptObj +0x70). Target (+0x20) is the
+ * rider's position (virtual getPosition) plus its front row (mMatrix +0x1B0) times targetLeadDistance (+0x4C) and its
+ * up row (+0x1C0) times targetLeadHeight (+0x50), the two scaled by the rider model's scale vector (mAnimModel +0x140:
+ * .y for the distance, .x for the height). When the header's areAnglesWorldRelative byte (+0x1E) is 0 the angles follow
+ * the rider's front row: heading = optimalHeading (+0x5C) + its yaw, pitch = its elevation - optimalPitch (+0x58);
+ * otherwise they are the two values as they are. mBaseRotZ (ScriptObj +0x78) is added to the heading and mBaseRotY
+ * (+0x74) to the pitch. Position (+0x30) is Target minus the direction (cos pitch cos heading, cos pitch sin heading,
+ * -sin pitch) times optimalTargetDistance (+0x54). Finally the jitterer (+0x70) is updated with jitterFocus (+0x68) and
+ * jitterRoll (+0x6C).
+ *
+ * Unlike cScriptRelativeAlgorithm_update it does not recompute Heading (+0x44) and Pitch (+0x48), so a getPose straight
+ * after a snap still uses the old angles.
+ *
+ * @param p  the cScriptRelativeAlgorithm (this)
+ */
 extern "C" void cScriptRelativeAlgorithm_snap(char* p)
 {
     sScrCam_16AD98* self = (sScrCam_16AD98*)p;
@@ -1660,6 +1805,12 @@ extern "C" void cScriptRelativeAlgorithm_snap(char* p)
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_snapCurrent);
 #ifdef SKIP_ASM
+/**
+ * Snaps the camera onto its current subject: calls the virtual snap() with subject 0.
+ *
+ * Calls vtable slot 3 (cScriptRelativeAlgorithm_snap) with 0 as the subject id (cCameraAlgorithm::snap's argument in On
+ * Tour), which the script algorithm's snap ignores.
+ */
 extern "C" void cScriptRelativeAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
     self->v03(0);
@@ -1849,6 +2000,32 @@ static inline float Length4_B180(const sVec4_B180& v)
     return r;
 }
 
+/**
+ * Updates the relative script camera: follows the subject rider, easing towards its ideal place at a capped speed.
+ *
+ * The playing camera entity is ScriptObj (+0x14) -> mpCameraEntity (+0x14) -> mpEntity (+0x8); its header
+ * (func_0027C6A0, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and func_0027C6F8 reads this frame's channel
+ * values into FrameInfo (+0x4C, On Tour tSSXFrameCameraAlgorithmic). The subject rider is
+ * cSSXScriptEngine_GetSubjectRider(ScriptEngine, the header's subject byte (+0x1D), the entity's script player at
+ * +0x8), or the first rider (SSXApp->Game->AI->Riders[0]) when there is none. FrameInfo angles are in degrees
+ * (converted with * 0.0174533).
+ *
+ * View (+0x0) becomes fov (+0x64) and Roll (+0x40) roll (+0x60) plus mBaseRotX (ScriptObj +0x70). Target (+0x20) is the
+ * rider's position (virtual getPosition) plus its front row (mMatrix +0x1B0) times targetLeadDistance (+0x4C) and its
+ * up row (+0x1C0) times targetLeadHeight (+0x50), the two scaled by the rider model's scale vector (mAnimModel +0x140:
+ * .y for the distance, .x for the height). When the header's areAnglesWorldRelative byte (+0x1E) is 0 the angles follow
+ * the rider's front row: heading = optimalHeading (+0x5C) + its yaw, pitch = its elevation - optimalPitch (+0x58);
+ * otherwise they are the two values as they are. mBaseRotZ (ScriptObj +0x78) is added to the heading and mBaseRotY
+ * (+0x74) to the pitch. The ideal position is Target minus the direction (cos pitch cos heading, cos pitch sin heading,
+ * -sin pitch) times optimalTargetDistance (+0x54).
+ *
+ * Position (+0x30) moves to ideal * stickiness + Position * (1 - stickiness) (header +0x14), with w 1, but by at most
+ * maxSpeed / 60 per call (header +0x18; the step is compared at 60 per second). Heading (+0x44) and Pitch (+0x48) are
+ * then the yaw and elevation of Target - Position, and the jitterer (+0x70) is updated with jitterFocus (+0x68) and
+ * jitterRoll (+0x6C).
+ *
+ * @param p  the cScriptRelativeAlgorithm (this)
+ */
 extern "C" void cScriptRelativeAlgorithm_update(char* p)
 {
     sScrCam_B180* self = (sScrCam_B180*)p;
@@ -2072,6 +2249,18 @@ static inline void RotAxis_B7B8(sM_B7B8* m, const sV_B7B8& axis, float angle)
     vu0MulMtx_B7B8(m, m, &r);
 }
 
+/**
+ * Returns the camera pose: Position plus jitter, turned by Roll, Pitch and Heading.
+ *
+ * Starts from t4mat_Identity translated to Position (+0x30) plus the jitterer's (+0x70) positional jitter for Heading
+ * (+0x44) and Pitch (+0x48) (func_00160228, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
+ * t4vect_XAxis by Roll (+0x40) plus cCameraJitterer_getRollJitter, about t4vect_YAxis by -Pitch and about t4vect_ZAxis
+ * by Heading, and splits the matrix into a position and a rotation quaternion with func_0031B748. The four script
+ * algorithms share this body; only the jitterer offset differs.
+ *
+ * @param p  the cScriptRelativeAlgorithm (this)
+ * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
+ */
 extern "C" sPair_B7B8 cScriptRelativeAlgorithm_getPose(char* p)
 {
     sM_B7B8 m;

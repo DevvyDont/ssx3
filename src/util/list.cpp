@@ -163,10 +163,10 @@ INCLUDE_ASM("util/list", cList_getByIndex);
  * Returns the list node at a given position.
  *
  * Starts at cList_first and follows the next links @p count times, stopping early at a null node or the sentinel.
- * Returns the node reached, or 0 if it is null or the sentinel.
  *
+ * @param list   the list (this)
  * @param count  zero-based position (On Tour index)
- * @return the node, or 0 when the list is shorter
+ * @return the node, or 0 when it is null or the sentinel (the list is shorter)
  */
 extern "C" cListNode* cList_getByIndex(cList* list, int count)
 {

@@ -2766,6 +2766,11 @@ cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text)
 //100%
 INCLUDE_ASM("util/menu", cNullMenuItem_canHaveFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether this menu item can take the focus: never.
+ *
+ * @return 0
+ */
 int cNullMenuItem_canHaveFocus(void* self)
 {
     return 0;
@@ -2852,6 +2857,11 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text)
 //100%
 INCLUDE_ASM("util/menu", cSpaceMenuItem_canHaveFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether this menu item can take the focus: never.
+ *
+ * @return 0
+ */
 int cSpaceMenuItem_canHaveFocus(void* self)
 {
     return 0;
@@ -5148,6 +5158,11 @@ extern "C" cRGBTitleMenuItem_sItem* cRGBTitleMenuItem_cRGBTitleMenuItem(cRGBTitl
 //100%
 INCLUDE_ASM("util/menu", cRGBTitleMenuItem_canHaveFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether this menu item can take the focus: never.
+ *
+ * @return 0
+ */
 int cRGBTitleMenuItem_canHaveFocus(void* self)
 {
     return 0;

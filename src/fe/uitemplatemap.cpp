@@ -278,12 +278,14 @@ extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, sMapEvent_0
 /**
  * Tells whether the map location's event has been completed by the current character.
  *
- * Track 0x17 never is. Rival events (kind 4, or 5) map the peak to game events 6-8 (or 9-11) and count as done
- * when cBENewPlayerInterface_isEventLocked reports them unlocked; any other event is done when cBERewardInterface_getTrackMedal returns
- * a medal (not -1) for its kind and track.
+ * Track 23 never is. Kind 4 maps @p peak (0, 1, 2) to game event 6, 7 or 8 and kind 5 to 9, 10 or 11, and counts as
+ * done when cBENewPlayerInterface_isEventLocked reports that event unlocked for character cBELibrary_getCharacterID(0);
+ * any other kind is done when cBERewardInterface_getTrackMedal returns a medal (not -1) for its kind and track. The
+ * location is taken by value (a 0x6C-byte sPeakGoal).
  *
- * @param ev    the map location (event kind and track)
+ * @param ev    the map location: track (+0x0) and event kind (+0x8) (On Tour tMapLocation)
  * @param peak  the peak (On Tour eBEPeakID)
+ * @return 1 when completed, otherwise 0
  */
 extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, sMapEvent_0B50 ev, int peak)
 {
@@ -324,12 +326,13 @@ extern "C" int cBENewPlayerInterface_isEventLocked(void* iface, int player, int 
 /**
  * Tells whether a map event is still locked for the current character.
  *
- * Nothing is locked when cUITemplate_MAP_mMapStyle is below 2. Kind 4 and 5 ask func_001464D0 (On Tour
- * isRivalEventLocked) for the peak with 1 or 0; kinds 6 to 11 ask cBENewPlayerInterface_isEventLocked (isEventLocked); others are
- * unlocked.
+ * Nothing is locked while cUITemplate_MAP_mMapStyle is below 2. Kinds 4 and 5 ask func_001464D0 (On Tour
+ * isRivalEventLocked) for the peak, with its time-challenge flag 1 for kind 4 and 0 for kind 5; kinds 6 to 11 ask
+ * cBENewPlayerInterface_isEventLocked; every other kind is unlocked. The character is cBELibrary_getCharacterID(0).
  *
- * @param kind  the game event
+ * @param kind  the game event kind
  * @param x     the peak (On Tour eBEPeakID)
+ * @return nonzero when the event is locked
  */
 extern "C" int cUITemplate_MAP_isMapEventLocked(void* self, int kind, int x)
 {

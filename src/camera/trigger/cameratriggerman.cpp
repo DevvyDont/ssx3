@@ -554,7 +554,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_setReplayTrigge
 /**
  * Switches the camera triggers to the replay set.
  *
- * Calls cCameraTriggerMan_setTriggers with game mode 1 and returns its result.
+ * Calls cCameraTriggerMan_setTriggers(self, 1): every trigger whose mode mask has bit 0 set is registered in
+ * SSXApp->Game->BXNash (if it is not already) and every other registered trigger is removed from it.
+ *
+ * @return no meaningful value (cCameraTriggerMan_setTriggers returns nothing)
  */
 void* cCameraTriggerMan_setReplayTriggers(void* self)
 {

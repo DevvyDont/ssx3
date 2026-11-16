@@ -3164,6 +3164,8 @@ extern int D_004A3940;
  * device's changed flag on a -1 result. Then clears unk_040, mDevice (back to port 0), the first four words of device
  * record 0 (unk_17C[0]: type, free clusters, result, format word), unk_03C and the directory table (func_002C5278).
  * mState is left as it is. Called by the destructor.
+ *
+ * @param pS2MemCard  the memory card object (this)
  */
 extern "C" void cPS2MemCard_CleanUp(cPS2MemCard* pS2MemCard)
 {

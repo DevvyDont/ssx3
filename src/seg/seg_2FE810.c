@@ -470,7 +470,18 @@ static inline int sync_timeout(char *msg)
     func_00425C60(D_00497710, *SYNC_GIF_STAT);
     return -1;
 }
-/* Wait for (mode 0) or poll (mode 1) the DMA ch.1/ch.2, VIF1, VU1 and GIF paths (libgraph). */
+/**
+ * Waits for (mode 0) or polls (mode 1) the DMA ch.1 and ch.2, VIF1, VU1 and GIF paths (libgraph).
+ *
+ * Mode 0 spins until DMA ch.1 and ch.2 CHCR bit 0x100 (STR) clear, VIF1_STAT & 0x1F000003, the VU1 busy bit 0x100 of
+ * VPU_STAT and GIF_STAT & 0xC00 are all clear, one after the other, with one shared counter: past 0x1000000 polls it
+ * prints "sceGsSyncPath: <path> does not terminate" and the DMA, VIF1 and GIF registers (func_00425C60) and returns -1.
+ * Any other mode returns at once a bit mask of the paths still busy: 1 ch.1, 2 ch.2, 4 VIF1, 8 VU1, 0x10 GIF.
+ *
+ * @param mode     0 to wait, otherwise poll
+ * @param timeout  not used: the wait limit is fixed at 0x1000000 polls
+ * @return mode 0: 0, or -1 on a timeout; otherwise the busy mask
+ */
 int sceGsSyncPath(int mode, unsigned short timeout) {
     unsigned int cnt;
     unsigned int stat;

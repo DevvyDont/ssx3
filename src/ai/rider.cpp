@@ -7446,8 +7446,10 @@ INCLUDE_ASM("ai/rider", cPlayer_writeToReplayFrame__FPv);
 /**
  * Writes the player controller's state into a replay frame: only its cRiderHandler part.
  *
- * Calls cRiderHandler_writeToReplayFrame on the same object with the frame pointer (the second argument, which the C
- * declaration leaves out) passed through; cPlayer records nothing of its own.
+ * Calls cRiderHandler_writeToReplayFrame on the same object; the frame pointer (the second argument, which this
+ * declaration leaves out) passes through untouched. cPlayer records nothing of its own.
+ *
+ * @return no meaningful value (cRiderHandler_writeToReplayFrame returns nothing)
  */
 void* cPlayer_writeToReplayFrame(void* self)
 {
@@ -7463,8 +7465,10 @@ INCLUDE_ASM("ai/rider", cPlayer_readFromReplayFrame__FPv);
 /**
  * Restores the player controller's state from a replay frame: only its cRiderHandler part.
  *
- * Calls cRiderHandler_readFromReplayFrame on the same object with the frame pointer (the second argument, which the C
- * declaration leaves out) passed through; cPlayer reads nothing of its own.
+ * Calls cRiderHandler_readFromReplayFrame on the same object; the frame pointer (the second argument, which this
+ * declaration leaves out) passes through untouched. cPlayer reads nothing of its own.
+ *
+ * @return no meaningful value (cRiderHandler_readFromReplayFrame returns nothing)
  */
 void* cPlayer_readFromReplayFrame(void* self)
 {

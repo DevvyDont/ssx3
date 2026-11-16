@@ -1792,11 +1792,10 @@ extern "C" void cFEInput__cFEInput(void *self, int flags) {
 INCLUDE_ASM("main/all_in_one_main", cFEInput_getKeyReady);
 #ifdef SKIP_ASM
 /**
- * Tells whether a typed key is waiting.
- *
- * Returns the key-ready flag (+0xC, On Tour mbKeyReady).
+ * Tells whether a typed key is waiting: the key-ready flag at +0xC (On Tour mbKeyReady).
  *
  * @param input  the input (this)
+ * @return nonzero when a key is ready
  */
 extern "C" int cFEInput_getKeyReady(void *input) {
     return (*(int *)((char*)(input) + (0xC)));
@@ -1807,11 +1806,10 @@ extern "C" int cFEInput_getKeyReady(void *input) {
 INCLUDE_ASM("main/all_in_one_main", cFEInput_getVKey);
 #ifdef SKIP_ASM
 /**
- * Returns the virtual key code of the last typed key.
- *
- * Reads +0x10 (On Tour miVKey).
+ * Returns the virtual key code of the last typed key: +0x10 (On Tour miVKey).
  *
  * @param input  the input (this)
+ * @return the virtual key code
  */
 extern "C" int cFEInput_getVKey(void *input) {
     return (*(int *)((char*)(input) + (0x10)));
@@ -1822,11 +1820,10 @@ extern "C" int cFEInput_getVKey(void *input) {
 INCLUDE_ASM("main/all_in_one_main", cFEInput_getAsciiKey);
 #ifdef SKIP_ASM
 /**
- * Returns the character code of the last typed key.
- *
- * Reads +0x14 (On Tour miAsciiKey).
+ * Returns the character code of the last typed key: +0x14 (On Tour miAsciiKey).
  *
  * @param input  the input (this)
+ * @return the character code
  */
 extern "C" int cFEInput_getAsciiKey(void *input) {
     return (*(int *)((char*)(input) + (0x14)));

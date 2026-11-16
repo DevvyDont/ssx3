@@ -1491,7 +1491,9 @@ extern "C" void* cGame_isPreloadedStateReady(int);
 INCLUDE_ASM("main/game", cSectionMan_isPreLoadModeDone__FPv);
 #ifdef SKIP_ASM
 /**
- * Tells whether the preloaded game state is ready (cGame_isPreloadedStateReady on the game at +0x1B0).
+ * Tells whether the preloaded game state is ready: asks cGame_isPreloadedStateReady on mpGame (+0x1B0).
+ *
+ * @return cGame_isPreloadedStateReady's answer (nonzero when ready)
  */
 void* cSectionMan_isPreLoadModeDone(void* self)
 {

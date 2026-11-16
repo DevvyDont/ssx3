@@ -1832,14 +1832,17 @@ extern "C" void cReplay_startRace(void* p);
 extern "C" void cPlaybackMan_startPreview(void* p);
 
 /**
- * Carries out the local mission request queued by the menus.
+ * Carries out the local mission request queued by the menus, then clears it.
  *
- * Switches on the request at +0x2AC (2, 3 and 4 are set by cWScriptMan_restartLocalMission,
- * cWScriptMan_cancelLocalMission and cWScriptMan_quitLocalMission) for the mission saved in +0x2B0: 1 updates the
- * world, sends mission command 1, plays the big-challenge start audio (func_0029D6E0) and restarts the race; 2 sends
- * command 3; 3 and 4 send commands 18 and 5, update the world and play the failure audio (cSSXAudio_BigChallengeFailed); 5 starts the
- * playback preview (cPlaybackMan_startPreview), sends command 1 for rider 1 and updates the world; 6 sends 18 and updates the
- * world. The request is then cleared (0, id -1).
+ * Switches on the request at +0x2AC for the mission saved in +0x2B0: 1 (func_0030B540) updates the world, sends mission
+ * command 1, plays the big-challenge start audio (func_0029D6E0) and calls cReplay_startRace; 2
+ * (cWScriptMan_restartLocalMission) sends command 3; 3 (cWScriptMan_cancelLocalMission) and 4
+ * (cWScriptMan_quitLocalMission) send commands 18 and 5, update the world and play the failure audio
+ * (cSSXAudio_BigChallengeFailed); 5 (func_0030B590) starts the playback preview (cPlaybackMan_startPreview), sends
+ * command 1 with argument 1 and updates the world; 6 (func_0030B608) sends 18 and updates the world. The request is
+ * then cleared (0, mission -1). Mission commands go through cWScriptMan_doMissionCmd.
+ *
+ * @param vself  the world script manager (this)
  */
 // Runs the pending gate action (replay, sounds, camera) and clears it.
 extern "C" void cWScriptMan_processLocalMissionCmd(void* vself)

@@ -995,7 +995,9 @@ INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_BeginMonitoring__FPv);
  * Starts the bank monitor's periodic update by registering func_002AD998 as a sound-system client.
  *
  * func_002AD998 forwards to gMonitor's first virtual method; func_003B5910 (On Tour SNDSYS_add100hzclient) adds it to
- * the sound library's 100 Hz client list. The object pointer is not used.
+ * the sound library's 100 Hz client list when the library's enable flag is set. The object pointer is not used.
+ *
+ * @return no meaningful value (func_003B5910 returns nothing)
  */
 void* cMonitor_MONITOR_BeginMonitoring(void* self)
 {

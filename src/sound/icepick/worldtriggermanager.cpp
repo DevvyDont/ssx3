@@ -348,10 +348,13 @@ struct sWorldTrigger70;
 /**
  * Stops a world audio trigger instance's sound and resets the instance.
  *
- * If the handle at +0x30 is live (not -9999) it is stopped with a 0.25 s fade: through func_002A72D8 on the audio
- * interface (func_0028B180) when the flag at +0x38 is set, else through cBankMonitor_BANKMONITOR_StopHandle on the bank
- * monitor. Then the handle becomes -1, the name at +0x40 is emptied (On Tour strcpy(name, "")), +0x68 is set to -1.0f
- * and +0x60, +0x64, +0x6C are zeroed.
+ * If the handle at +0x30 (On Tour m_iAudioHandle) is live (not -9999) it is stopped with a 0.25 s fade: through the
+ * crowd system (func_002A72D8 on gSSXAudio, func_0028B180) when the crowd flag at +0x38 is set, else through
+ * cBankMonitor_BANKMONITOR_StopHandle on the bank monitor. Then the handle becomes -1, the swap name at +0x40 is
+ * emptied (On Tour strcpy(name, "")), +0x68 (On Tour m_iLastAnimFrame) is set to -1.0f and +0x60, +0x64 and +0x6C are
+ * zeroed.
+ *
+ * @param instance  the trigger instance (this)
  */
 extern "C" void cWorldTriggerInstance_Stop(sWorldTrigger70* instance)
 {
@@ -886,6 +889,24 @@ struct sWTMEntry {
     sWTMObj* obj;
 };
 
+/**
+ * Looks up the sound bank and patch a world audio trigger plays.
+ *
+ * Clears *noAudio. A trigger number at or past the count (+0x340) gives bank 0, patch 0 and returns 0. Otherwise the
+ * entry in the table at +0x33C (type, then type data; On Tour tTriggerTypePointer) decides: type 1 (On Tour Banked)
+ * gives the bank (+0x10) and patch (+0x14) of its data; type 2 (Random) gives the bank (+0x10) and one of four patches
+ * (+0x14 .. +0x20) picked with BXrand (func_002ADF60) by the weights at +0x24, +0x28 and +0x2C out of the total at
+ * +0x34; type 3 (Swap) gives bank 3 and patch 0. Other types go to cWorldTriggerManager_AdvancedTriggerToPatch when
+ * @p check is 0; with another @p check they return 1 and leave *bank and *patch unwritten.
+ *
+ * @param trigger   the trigger number
+ * @param bank      out: the sound bank
+ * @param patch     out: the patch in the bank
+ * @param noAudio   out: 1 when the trigger plays no bank sound (set only by the advanced path)
+ * @param viewPort  the viewport the trigger fired in
+ * @param check     which lookup is wanted (On Tour eTriggerToPatchCheck: 0 general, 1 crowd, 2 swap)
+ * @return 1 when the trigger was resolved, 0 for a trigger number out of range (or the advanced path's result)
+ */
 extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
 {
     *noAudio = 0;
@@ -925,6 +946,19 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_AdvancedTr
 extern "C" void* func_0028B180();
 extern "C" int func_002A34D0(void* mgr, int a1, int a2, int a3);
 
+/**
+ * Resolves an advanced world audio trigger: only trigger 77 is known, and it plays through the audio system itself.
+ *
+ * Clears *bank, *patch and *noAudio. For trigger 77 it sets *noAudio to 1 and returns func_002A34D0(gSSXAudio, no
+ * rider, 1, @p viewPort); any other trigger returns 0.
+ *
+ * @param trigger   the trigger number
+ * @param bank      out: the sound bank (always 0)
+ * @param patch     out: the patch in the bank (always 0)
+ * @param noAudio   out: 1 when the trigger plays no bank sound of its own (On Tour noaudio)
+ * @param viewPort  the viewport the trigger fired in
+ * @return 0, or func_002A34D0's result for trigger 77
+ */
 extern "C" int cWorldTriggerManager_AdvancedTriggerToPatch(void* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort)
 {
     int found = 0;

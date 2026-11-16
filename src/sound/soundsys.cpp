@@ -670,11 +670,12 @@ struct sSnd0CC0Mgr {
  * Plays a 2D (non-positional) sound effect from a bank at the sound-effects volume.
  *
  * Pushes a play-option level on the bank manager (mpVBankManager) with default options (the inlined
- * cBankSys::SFX_Begin(Bank, Patch)) and records @p bank in mBank and @p patch in mPatch for that level; sets the level's
- * volume-control pointer to func_00287968(this, 5, 0) (On Tour GetCurrAppliedVolumePtr(5, 0)); then plays it with
- * cBankSys_SFX_End. Virtual slot 1 of cSSXAudio_vtbl, overriding cBankSys's func_002BA6B0.
+ * cBankSys::SFX_Begin(Bank, Patch)) and records @p bank in mBank and @p patch in mPatch for that level; sets the
+ * level's volume-control pointer to func_00287968(this, 5, 0) (On Tour GetCurrAppliedVolumePtr(5, 0)); then plays it
+ * with cBankSys_SFX_End. Virtual slot 1 of cSSXAudio_vtbl, overriding cBankSys's func_002BA6B0.
  *
- * @param bank  the sound bank (On Tour Bank)
+ * @param vself  the audio system (this)
+ * @param bank   the sound bank (On Tour Bank)
  * @param patch  the patch in the bank (On Tour Patch)
  * @return cBankSys_SFX_End's result (the voice handle)
  */
@@ -2591,15 +2592,21 @@ struct sSsVt48D0 { short delta; short index; int (*fn)(void*); };
 /**
  * Plays a rider's landing sound and the crowd's reaction to it.
  *
- * For the focus rider the crowd reacts through func_002A7438 (nothing gained) or func_002A73A8 at level 0, 1 or 2 (gain
- * below 0.25, below 0.65, above). Off-screen AI or remote riders out of camera range (cSSXAudio_CameraInRange, 100 units) are
- * skipped. The volume comes from the landing curve D_00482D30 (func_00290B58) applied to the rider's +0x770, clamped to
- * 0..127; the priority is cSSXAudio_Surface's surface class * 8 + 1 for a local human, + 5 otherwise. A still playing
- * previous landing (handle at +0x5FB8) is stopped, a new bank-monitor entry is filled in (position, radius 30, camera,
- * local viewport when the race mode at D_00535C11 is 2 and not replaying) and cBankSys_SFX_End starts it, storing the
- * new handle at +0x5FB8.
+ * When the rider is the focus rider of its view (cSSXAudio_GetFocusRider with view 0 when replaying, mViewIndex for a
+ * local human, else -1) the crowd reacts through func_002A7438 (nothing gained) or func_002A73A8 at level 0, 1 or 2
+ * (gain below 0.25, below 0.65, above). Computer and non-local riders farther than 100 units from the camera
+ * (cSSXAudio_CameraInRange) play nothing more. The volume comes from the landing curve D_00482D30 (func_00290B58)
+ * applied to the rider's +0x770, clamped to 0..127.
  *
- * @param rider  the rider that landed (On Tour Rider)
+ * A previous landing still playing (handle at +0x5FB8) is stopped. Then a play-option level is pushed with defaults
+ * (the inlined SFX_Begin) for bank 10 and patch cSSXAudio_Surface's surface class * 8 + 1 for a local human, + 5
+ * otherwise (the local `prio` holds this patch); the level gets the volume, the volume-control pointer
+ * func_00287968(this, 6, 0), a 3D distance of 30 (func_002A9988), the rider's mPosition to follow, the listening view
+ * from func_00288A20, and, for a local human when the byte at D_00535C11 is 2 and not replaying, its own viewport.
+ * cBankSys_SFX_End starts it and the new handle is stored at +0x5FB8.
+ *
+ * @param vself          the audio system (cSSXAudio, this)
+ * @param rider          the rider that landed (On Tour Rider)
  * @param powerupGained  power gained by the landing (On Tour PowerupGained); drives the crowd reaction
  */
 extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGained)

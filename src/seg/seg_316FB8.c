@@ -7843,5 +7843,11 @@ void func_00423980(void) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", ResetEE);
 #ifdef SKIP_ASM
+/**
+ * Calls EE kernel syscall 0x1 (ResetEE in the PS2 SDK's syscall table).
+ *
+ * Loads the number into $v1 and executes `syscall`; the kernel does the work. The stub declares no parameters; the
+ * caller's arguments reach the kernel in the argument registers untouched.
+ */
 SYSCALL_STUB(ResetEE, 0x1)
 #endif

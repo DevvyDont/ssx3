@@ -124,10 +124,11 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByIndex);
 /**
  * Finds a screen's keyframe header by frame number.
  *
- * The frame table at +0x34 starts with a count; each header follows the previous one by the size stored at its +0x4.
- * Returns the header whose 16-bit number at +0x8 equals @p frame, or 0.
+ * The keyframe block (mpKeyframeBlock, +0x34) starts with the frame count; each header follows the previous one by its
+ * mByteSize (+0x4). Returns the first header whose 16-bit mFrameNumber (+0x8) equals @p frame.
  *
  * @param frame  the frame number to find (On Tour index)
+ * @return the frame header (On Tour tUIFrameHeader), or 0
  */
 extern "C" void* cUIScreen_getFrameByIndex(void* self, unsigned short frame)
 {

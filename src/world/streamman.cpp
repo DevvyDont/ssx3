@@ -372,15 +372,18 @@ struct sStreamMan7238 {
 /**
  * Hands a buffer of streamed world data, block by block, to the world cache.
  *
- * While data remains, a new block's 8-byte header (id byte, 24-bit size, key word; a header split across buffers is
- * completed from the carry buffer at +0xA4) is read and cWorldCache_addBxStreamDataTest asked for a destination: -1
- * means no room yet (the test is retried next call and 0 is returned), 0 means the block is skipped (an empty one is
- * submitted as cStreamMan_NULLCHUNK). Block data is copied with MEM_copy and each completed block is submitted with
- * func_003A8CD0, counting down the blocks left in the page (+0x98). Leftover bytes shorter than a header are kept for
- * the next call.
+ * While data remains, a new block's 8-byte header is read (type byte m_BxChunkDataType, 24-bit m_uiBxChunkSizeLeft,
+ * resource id word; a header split across buffers is completed from m_sCarryData, m_iCarrySize bytes) and
+ * cWorldCache_addBxStreamDataTest asked for a destination for page m_ActiveHull: -1 means no room yet and 0 is returned
+ * (the caller, cStreamMan_update, then sets m_bAllocFailed so the next call retests first); 0 means the block is
+ * skipped (an empty one is submitted as cStreamMan_NULLCHUNK). Block data is copied with MEM_copy and each completed
+ * block is submitted with func_003A8CD0, counting down the blocks left in the page (m_uiNumHullChunk). Leftover bytes
+ * shorter than a header are kept for the next call; when the page's last block is done the rest of the buffer is
+ * dropped.
  *
+ * @param self_    the stream manager (cStreamMan, this)
  * @param pcount_  bytes left in the buffer; updated as data is consumed (On Tour iSize)
- * @param pdata_  read position in the buffer; advanced as data is consumed (On Tour pData)
+ * @param pdata_   read position in the buffer; advanced as data is consumed (On Tour pData)
  * @return 1 when the buffer was used up, 0 when the cache had no room and the call must be repeated
  */
 // PORT: header fields are packed in a 64-bit long; data pointers pass through int parameters.

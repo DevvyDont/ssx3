@@ -5385,14 +5385,16 @@ extern "C" sPartEmitter_A540* func_00385138(void* mem, void* a1, void* a2, void*
 extern const char str_cPS2GridMesh[];
 
 /**
- * Creates a grid mesh (flags, fences, flex bridges) of the given size.
+ * Creates a grid mesh of the given size.
  *
- * Allocates 460 bytes tagged str_cPS2GridMesh with @p flags and constructs a cPS2GridMesh (func_00385138). When bit 30
- * of @p flags is set it calls the mesh's slot 2 and, if that fails, destroys it (slot 1 with flags 3) and returns 0.
+ * Allocates 460 bytes tagged str_cPS2GridMesh with @p flags and constructs a cPS2GridMesh there (func_00385138, given
+ * @p width, @p height, the manager and @p flags). When bit 30 of @p flags is set it calls the mesh's virtual slot 2 (On
+ * Tour cPSPGridMesh::IsOk) and, if that fails, deletes the mesh (slot 1 with flags 3) and returns 0.
  *
- * @param width  the grid width
- * @param height  the grid height
- * @param flags  the memory flags (On Tour memtype)
+ * @param pS2GraphicsMan  the graphics manager (this)
+ * @param width           the grid width
+ * @param height          the grid height
+ * @param flags           the memory flags (On Tour memtype)
  * @return the new mesh, or 0
  */
 extern "C" sPartEmitter_A540* cPS2GraphicsMan_CreateGridMesh(cPS2GraphicsMan* pS2GraphicsMan, void* width, void* height, unsigned int flags)
@@ -6470,7 +6472,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_PlatformUploadTextures__FPv);
 /**
  * Makes the staged texture table current.
  *
- * MEM_copy()s 0x1F40 bytes from +0x3838 to +0x18F8. Called by cGraphicsMan_UploadTextures() through slot 121.
+ * MEM_copy()s 8000 bytes (0x1F40) from +0x3838 to +0x18F8. Called by cGraphicsMan_UploadTextures() through slot 121.
+ *
+ * @return no meaningful value (MEM_copy returns nothing)
  */
 void* cPS2GraphicsMan_PlatformUploadTextures(void* self)
 {
@@ -9352,16 +9356,22 @@ static inline sPt2170 Add2170(const sPt2170& a, const sPt2170& b)
 }
 
 /**
- * Draws a debug sphere.
+ * Draws a debug sphere as a camera-facing circle.
  *
- * Transforms @p pos into view space and returns when it is more than 3000 units away. @p segs > 0 forces the step
- * through the circle table; otherwise the step is 4 beyond 2000 units, 2 beyond 750 and 1 nearer. The first call fills
- * the static circle table D_004FFBC0.
+ * Transforms @p pos by the view matrix (virtual GetView, slot 35) and returns when its view depth is more than 3000.
+ * @p segs > 0 sets the step through the 16-point circle table; otherwise the step is 4 beyond 2000 units, 2 beyond 750
+ * and 1 nearer. The first call fills the static unit-circle table D_004FFBC0 (flag D_004A59A0).
  *
- * @param pos  the centre
- * @param col  the colour
+ * Sets the current draw state untextured (texture id -1, bits 0x7C of its word 1 to 4), pushes the view and loads the
+ * identity (slots 31 and 37), then builds the points centre + table[k] * radius in view space, closed back to the
+ * first, coloured from @p col (A, R, G, B scaled by 128), and draws them with slot 73 (func_00381AD0) before popping
+ * the view (slot 32).
+ *
+ * @param mgr     the graphics manager (this)
+ * @param pos     the centre
+ * @param col     the colour, four floats A, R, G, B (On Tour tARGB)
  * @param radius  the radius
- * @param segs  the detail step, or 0 to pick it from the distance
+ * @param segs    the detail step, or 0 to pick it from the distance
  */
 extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, sPt2170* pos, float* col, float radius, int segs)
 {

@@ -270,6 +270,7 @@ INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetDevice);
  *
  * An out-of-line inline (virtual slot 4): the whole body is `return mDevice;`.
  *
+ * @param pS2MemCard  the memory card object (this)
  * @return mDevice (0 or 1)
  */
 extern "C" int cPS2MemCard_GetDevice(cPS2MemCard* pS2MemCard) {

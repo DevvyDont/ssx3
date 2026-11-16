@@ -517,10 +517,11 @@ struct s398380Item {
 /**
  * Looks up a texture element by its hashed name.
  *
- * Scans the @p id field of each 0x20-byte element in the array at +0xC (count at +0x10) and returns the first whose
- * hash matches, or 0.
+ * Scans the elements (mpElements, +0xC; mNumElements at +0x10; 0x20 bytes each) and returns the first whose mHashID
+ * (+0x1C) equals @p id.
  *
  * @param id  hashed element name (On Tour hashname)
+ * @return the element (On Tour cTextureElement), or 0
  */
 extern "C" s398380Item* cUITextureBank_getElementByHashname(void* self, int id)
 {

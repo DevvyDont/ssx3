@@ -3206,6 +3206,15 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_ONLINE__cOVState_PAUSE_ONLINE);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E390_x(void*) __asm__("func_0039E390");
 extern char D_00474E08[];
+/**
+ * Destroys the online pause overlay state through the cOVState and cUIState destructors.
+ *
+ * Stores the cOVState vtable (D_00474E08) at +0x8, then calls the cUIState destructor func_0039E390: the same body as
+ * cOVState's own destructor func_0021C6D8, so the class tears down nothing of its own (the store of its own vtable
+ * D_00472C60 is dropped). The g++ delete flags reach func_0039E390 untouched in the second argument register.
+ *
+ * @return no meaningful value (func_0039E390 returns nothing)
+ */
 extern "C" void* cOVState_PAUSE_ONLINE__cOVState_PAUSE_ONLINE(void *self) {
     *(char**)((char*)self + 8) = D_00474E08;
     return func_0039E390_x(self);

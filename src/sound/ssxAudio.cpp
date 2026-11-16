@@ -1792,14 +1792,15 @@ struct sSaMix7700 {
 /**
  * Sets one volume control's level and applies it.
  *
- * @p v is clamped to 0..1 and stored as the control's user level; its base level is the level times a per-control
- * constant (D_004A3504..D_004A3528). The gain is base * the control's volume (+0x6394) and the output gain * the
- * current factor (+0x63E4). Control 0 then sets the library master volume (func_003B8160, out * 127), control 1 updates
- * the music monitor (func_002B4388) and control 4 rescales the ten mix levels at +0x636C. Quirk: control 1 calls
- * func_002B4388 twice, the first time before the new gain is computed.
+ * @p v is clamped to 0..1 and stored as the control's user level; its base level is the level itself for control 0 and
+ * the level times a per-control constant (D_004A3504 .. D_004A3528) for the others. The gain is base * the control's
+ * volume (+0x6394) and the output gain * the current factor (+0x63E4). Control 0 then sets the library master volume
+ * (func_003B8160, out * 127), control 1 updates the music monitor (func_002B4388) and control 4 rescales the ten mix
+ * levels at +0x636C. Quirk: control 1 calls func_002B4388 twice, the first time before the new gain is computed.
  *
- * @param v  the new level, 0..1 (On Tour v)
- * @param ch  the volume control (On Tour eVolumeControl volumeControl)
+ * @param self_  the audio system (this)
+ * @param v      the new level, 0..1 (On Tour v)
+ * @param ch     the volume control (On Tour eVolumeControl volumeControl)
  */
 // PORT: `<?`/`>?` are the g++ min/max operators (EE min.s/max.s).
 extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float v, int ch)

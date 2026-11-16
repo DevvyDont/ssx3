@@ -6685,7 +6685,8 @@ struct C_A898 {
  * +0xDF0 (336 bytes, up to +0xF40: it includes mCruiseLogicID at +0xF38 but not the cruise-logic pointer at +0xF44,
  * which cComputer_readFromReplayFrame rebuilds).
  *
- * @param data  the replay frame stream written to (On Tour cReplayFramePtr* data)
+ * @param computer  the AI rider (this)
+ * @param data      the replay frame stream written to (On Tour cReplayFramePtr* data)
  */
 extern "C" void cComputer_writeToReplayFrame(cComputer* computer, C_A898 *data) {
     cRiderHandler_writeToReplayFrame_A898(((char*)computer), data);

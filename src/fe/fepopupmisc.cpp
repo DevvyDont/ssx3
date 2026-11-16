@@ -558,6 +558,11 @@ extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(void* self, int f
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateBraggingRights_onMenuGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when a menu of this state gains the focus (an empty onMenuGainFocus override).
+ *
+ * On Tour's version also takes the root group (cUIGroup*), which this declaration leaves out.
+ */
 void cFEStateBraggingRights_onMenuGainFocus(void* self)
 {
 }
@@ -581,6 +586,11 @@ extern "C" void* func_001DF580(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateChatRoom_onMenuGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when a menu of this state gains the focus (an empty onMenuGainFocus override).
+ *
+ * On Tour's version also takes the root group (cUIGroup*), which this declaration leaves out.
+ */
 void cFEStateChatRoom_onMenuGainFocus(void* self)
 {
 }
@@ -3016,6 +3026,11 @@ void* cFEStateStats__cFEStateStats(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateStats_onMenuGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when a menu of this state gains the focus (an empty onMenuGainFocus override).
+ *
+ * On Tour's version also takes the root group (cUIGroup*), which this declaration leaves out.
+ */
 void cFEStateStats_onMenuGainFocus(void* self)
 {
 }
