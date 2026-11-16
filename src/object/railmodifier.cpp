@@ -8452,7 +8452,7 @@ extern char D_00439A40[];
 extern char D_0043B3F0[];
 extern char D_0044B080[];
 extern char D_0044B140[];
-extern char* D_004A4248;
+extern char* cBezierMan_TheBezierMan;
 extern int D_004A5990;
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
@@ -8649,7 +8649,7 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[0x1B] = 0x412;
             pk.p[0x1C] = 0;
             pk.p[0x1D] = 0x6C2A020000000000;
-            char* g = D_004A4248;
+            char* g = cBezierMan_TheBezierMan;
             pk.p[0x1E] = ((ulong)*(int*)(g + 0x1A0) << 32) | 0x30000012;
             pk.p[0x1F] = 0;
             ulong ref2 = ((ulong)*(int*)(g + 0x320) << 32) | 0x30000012;

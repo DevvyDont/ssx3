@@ -227,7 +227,7 @@ gWorldTriggerManager = 0x004A52D4; //type:u32
 gBucketMan = 0x004A5988; //type:u32
 D_004A5B64 = 0x004A5B64; //type:u32
 cGraphicsMan_TheGraphicsMan = 0x004A5B80; //type:u32
-D_004A5B8C = 0x004A5B8C; //type:u32
+cLightMan_TheLightMan = 0x004A5B8C; //type:u32
 
 cRider_addRiderMetrix__FP6cRider = 0x0011BB98; //type:func
 cBECharProfileDB_getScoreStats__FPvii = 0x00152398; //type:func
@@ -4388,3 +4388,8 @@ cUISlider_vtbl = 0x00494348;
 cUIScrollBar_vtbl = 0x004944C8;
 cUIListBox_vtbl = 0x00494798;
 cListNode_vtbl = 0x00494CC0;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_sound_statics (docs/ontour_globals.tsv)
+gBankSys = 0x004A3664;
+SoundSys = 0x004A377C;
+cBezierMan_TheBezierMan = 0x004A4248;

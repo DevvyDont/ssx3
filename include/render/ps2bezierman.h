@@ -18,7 +18,7 @@
 // func_0038B338, 21 func_0038B190 (queues one patch by its edge LODs). cBezierMan's own slots (D_00493820):
 // func_00394B78__FPv (3), func_00394B80__FPv (4), func_00394B98 (21: calls slot 20). Non-virtual accessors:
 // func_00394C18 (cache pointer + slot), func_00394C30 (lw 0x1A0), func_00394C38 (lw 0x320).
-// Instance global: D_004A4248 (gp+0x1158) = cBezierMan::TheBezierMan (func_00374C90 stores it, func_00374CA8 clears
+// Instance global: cBezierMan_TheBezierMan (gp+0x1158) = cBezierMan::TheBezierMan (func_00374C90 stores it, func_00374CA8 clears
 // it); func_00394B70 returns it (getBezierMan).
 //
 // FLAT layout. Members: [O] On Tour's cBezierMan / cPSPBezierMan (mNearLODcm, mFarLODcm and the four enable flags, which

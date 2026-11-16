@@ -12,7 +12,7 @@
 // this + 0x18 (sw this + 0x18 into 0x0, this + 0x10 into cBankManager + 0x1D8 = 0x1F0); vtable D_00483A48 (one slot,
 // func_002BA6B0) is stored at 0xC. The struct below is the NON-VIRTUAL part, so it can be embedded where the object
 // lives: cMidiSys / cCrowdSys / cController / cSSXAudio all start with it (sound/midisys.h, sound/crowdsys.h,
-// sound/ssxaudio.h). The only instance is cSSXAudio + 0x0; the ctor stores it in D_004A3664 (EA name unknown).
+// sound/ssxaudio.h). The only instance is cSSXAudio + 0x0; the ctor stores it in gBankSys (EA name unknown).
 // Vtables: D_00483A48 is cBankSys's primary vtable (preview _vt$8cBankSys). cMidiSys adds no primary-table virtual, so
 // its ctor/dtor (cController_cController, func_002A82D8) store the same D_00483A48 at 0xC; cBankSys's dtor lives in
 // its virtual-base tables D_00483A60 (_vt$8cBankSys$9cSoundSys) and D_00483A80 (_vt$8cBankSys$12cBankManager).
@@ -40,6 +40,6 @@ CHECK_OFFSET(cBankSys, mVtbl, 0x00C);
 CHECK_SIZE(cBankSys, 0x10);
 
 // The bank SFX system: cBankSys_cBankSys stores itself here (the cBankSys base of the one cSSXAudio). EA name unknown.
-// instance global: cBankSys* D_004A3664 (typed by tools/unify_global.py once its units agree)
+// instance global: cBankSys* gBankSys (typed by tools/unify_global.py once its units agree)
 
 #endif /* SOUND_BANKSYS_H */

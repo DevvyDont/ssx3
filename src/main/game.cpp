@@ -78,7 +78,7 @@ extern "C" void cGame_renderModels(cGame* self, void* world)
 //100%
 INCLUDE_ASM("main/game", func_0022C1B0);
 #ifdef SKIP_ASM
-extern void* D_004A4248;
+extern void* cBezierMan_TheBezierMan;
 
 struct sVec_C1B0 {
     float x, y, z, w;
@@ -150,7 +150,7 @@ sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self) __asm__("func_0022C1B
 
 sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self)
 {
-    self->cam = (sCamObj_C1B0*)D_004A4248;
+    self->cam = (sCamObj_C1B0*)cBezierMan_TheBezierMan;
     self->pos = Scale_C1B0(sVec_C1B0(*(sVec_C1B0*)viewMat_C1B0()->m[3]), -1.0f);
     sMat_C1B0* m = viewMat_C1B0();
     self->pos = sVec_C1B0(self->pos.x * m->m[0][0] + self->pos.y * m->m[0][1] + self->pos.z * m->m[0][2] + self->pos.w * m->m[0][3],
@@ -296,7 +296,7 @@ INCLUDE_ASM("main/game", cGame_renderPatches);
 extern "C" void func_0022C1B0(void* ctx);
 extern "C" void func_0022C410(void* ctx, int patch, int flag);
 extern "C" void func_0022C3B8(void* self, int flags);
-extern void* D_004A4248;
+extern void* cBezierMan_TheBezierMan;
 
 struct sVEntry0022C620 {
     short delta;
@@ -308,7 +308,7 @@ struct sVEntry0022C620 {
  * Draws the visible terrain patches of the frustum query (two lists, passes 0 and 1), then flushes the patch
  * batch.
  *
- * With no second view (ViewMan + 0x14 is 0) it also calls slot 5 of D_004A4248 before the flush.
+ * With no second view (ViewMan + 0x14 is 0) it also calls slot 5 of cBezierMan_TheBezierMan before the flush.
  *
  * @param world  the frustum query results (On Tour const FrustumIntersector& fi)
  */
@@ -327,7 +327,7 @@ extern "C" void cGame_renderPatches(cGame* self, void* world)
         func_0022C410(ctx, items[i], 1);
     }
     if (*(int*)((char*)self->ViewMan + 0x14) == 0) {
-        void* obj = D_004A4248;
+        void* obj = cBezierMan_TheBezierMan;
         sVEntry0022C620* vt = *(sVEntry0022C620**)((char*)obj + 4);
         vt[5].fn((char*)obj + vt[5].delta);
     }

@@ -2476,13 +2476,13 @@ extern "C" void func_00374B38(sPartLists* self)
 //100%
 INCLUDE_ASM("render/particle", func_00374C90);
 #ifdef SKIP_ASM
-extern void* D_004A4248;
+extern void* cBezierMan_TheBezierMan;
 extern void* D_00493820[];
 
 extern "C" void* func_00374C90(cPSPBezierMan* self)
 {
     self->mVtbl = D_00493820;
-    D_004A4248 = ((void*)self);
+    cBezierMan_TheBezierMan = ((void*)self);
     return ((void*)self);
 }
 #endif
@@ -2490,14 +2490,14 @@ extern "C" void* func_00374C90(cPSPBezierMan* self)
 //100%
 INCLUDE_ASM("render/particle", func_00374CA8);
 #ifdef SKIP_ASM
-extern void* D_004A4248;
+extern void* cBezierMan_TheBezierMan;
 extern void* D_00493820[];
 void operator_delete(int* ptr);
 
 extern "C" void func_00374CA8(cPSPBezierMan* self, int flags)
 {
     self->mVtbl = D_00493820;
-    D_004A4248 = 0;
+    cBezierMan_TheBezierMan = 0;
     if (flags & 1) {
         operator_delete((int*)self);
     }

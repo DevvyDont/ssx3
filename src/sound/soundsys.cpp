@@ -36,14 +36,14 @@ extern const char D_004A3668[];
 extern const char D_004A3670[];
 extern const sSndBsVt4 D_00483A60_bs __asm__("D_00483A60");
 extern const sSndBsVt7 D_00483A80_bs __asm__("D_00483A80");
-extern int D_004A3664;
+extern int gBankSys;
 
 /**
  * Constructs the cBankSys part of the audio system and allocates its bank and patch tables.
  *
  * When @p embedded is set it first builds the shared virtual bases (cSoundSys, cBankManager); otherwise it
  * patches
- * stack copies of the base vtables with this object's offset. Records the instance in D_004A3664 and
+ * stack copies of the base vtables with this object's offset. Records the instance in gBankSys and
  * allocates
  * the 16-byte "mBank" and "mPath" tables.
  *
@@ -78,7 +78,7 @@ extern "C" char* cBankSys_cBankSys(cBankSys* self, int embedded, int count, int 
         t2.e[1].delta = D_00483A80_bs.e[1].delta + adj2;
     }
     self->mVtbl = (void**)D_00483A48;
-    D_004A3664 = (int)self;
+    gBankSys = (int)self;
     self->mBank = (int*)(new (D_004A3668, 0, 0) char[0x10]);
     self->mPatch = (int*)(new (D_004A3670, 0, 0) char[0x10]);
     return ((char*)self);
@@ -109,7 +109,7 @@ extern char D_00483A48[];
 extern const sSndDtVt4 D_00483A60;
 extern const sSndDtVt7 D_00483A80;
 extern char cBankMonitor_vtbl[];
-extern int D_004A3664;
+extern int gBankSys;
 
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
 extern "C" void func_0028FEA0(cBankSys* self, int flags)
@@ -132,7 +132,7 @@ extern "C" void func_0028FEA0(cBankSys* self, int flags)
     }
     if (self->mBank) cMemMan_free(self->mBank);
     if (self->mPatch) cMemMan_free(self->mPatch);
-    D_004A3664 = 0;
+    gBankSys = 0;
     if (flags & 2) {
         func_0028BB10(*(void**)self, 0);
         cSoundSys__cSoundSys(*(void**)(*(char**)self + 0x1D8), 0);
@@ -196,7 +196,7 @@ struct sSnd0018Req {
     int vol;                 // 0x24
 };
 
-extern sSnd0018Sys* D_004A3664_0018 __asm__("D_004A3664");
+extern sSnd0018Sys* D_004A3664_0018 __asm__("gBankSys");
 
 #define SND_0018_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define SND_0018_MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -302,7 +302,7 @@ struct sSnd0358Req {
     unsigned short f28;      // 0x28
 };
 
-extern sSnd0358Sys* D_004A3664_0358 __asm__("D_004A3664");
+extern sSnd0358Sys* D_004A3664_0358 __asm__("gBankSys");
 
 #define SND_0358_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define SND_0358_MAX(a, b) ((a) > (b) ? (a) : (b))

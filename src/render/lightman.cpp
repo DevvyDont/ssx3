@@ -16,7 +16,7 @@ INCLUDE_ASM("render/lightman", cLightMan_construct__Fv);
 /**
  * Creates the light manager: allocates 0x14 bytes ("LightMan"), constructs it and installs the PS2 vtable.
  *
- * Runs cPSPLightMan_cPSPLightMan(), which registers the object as the global light manager (D_004A5B8C), then
+ * Runs cPSPLightMan_cPSPLightMan(), which registers the object as the global light manager (cLightMan_TheLightMan), then
  * overwrites the vtable with D_00493650 (cPS2LightMan's: its slot 1 is cPS2LightMan__cPS2LightMan).
  *
  * @return the new manager

@@ -2,7 +2,7 @@
 #include "render/ps2lightman.h"
 
 extern void* D_004936D8[16];
-extern void* D_004A5B8C;
+extern void* cLightMan_TheLightMan;
 
 struct cPSPLightMan {
     void* vtable;
@@ -12,7 +12,7 @@ struct cPSPLightMan {
 INCLUDE_ASM("render/ps2lightman", cPSPLightMan_cPSPLightMan__FP12cPSPLightMan);
 #ifdef SKIP_ASM
 /**
- * Constructs the light manager and registers it as the global one (D_004A5B8C, returned by func_00394C40()).
+ * Constructs the light manager and registers it as the global one (cLightMan_TheLightMan, returned by func_00394C40()).
  *
  * Only the vtable is stored; the class keeps On Tour's PSP name.
  *
@@ -21,7 +21,7 @@ INCLUDE_ASM("render/ps2lightman", cPSPLightMan_cPSPLightMan__FP12cPSPLightMan);
 cPSPLightMan* cPSPLightMan_cPSPLightMan(cPSPLightMan* self)
 {
     self->vtable = D_004936D8;
-    D_004A5B8C = self;
+    cLightMan_TheLightMan = self;
     return self;
 }
 #endif
@@ -29,14 +29,14 @@ cPSPLightMan* cPSPLightMan_cPSPLightMan(cPSPLightMan* self)
 //100%
 INCLUDE_ASM("render/ps2lightman", func_0038AE28);
 #ifdef SKIP_ASM
-extern void* D_004A5B8C;
+extern void* cLightMan_TheLightMan;
 extern void* D_004936D8[];
 void operator_delete(int* ptr);
 
 extern "C" void func_0038AE28(cPS2LightMan* self, int flags)
 {
     *(void***)self = D_004936D8;
-    D_004A5B8C = 0;
+    cLightMan_TheLightMan = 0;
     if (flags & 1) {
         operator_delete((int*)self);
     }

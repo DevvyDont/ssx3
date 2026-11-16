@@ -8,7 +8,7 @@
 // methods head the sound/bankmonitor unit's soundsys part, 0x2ADE88..0x2ADFB0; the rest of that part is the EA
 // driver glue: C functions, no this). Preview vtables _vt$9cSoundSys and _vt$<class>$9cSoundSys.
 // Size 0x8 [R]: in a complete cBankSys it occupies this + 0x10 .. + 0x18 (cBankManager follows at + 0x18); [O] 0x8.
-// The ctor cSoundSys_cSoundSys stores cSoundSys_vtbl (0x483C00: dtor, SetMode) at 0x4 and itself in D_004A377C.
+// The ctor cSoundSys_cSoundSys stores cSoundSys_vtbl (0x483C00: dtor, SetMode) at 0x4 and itself in SoundSys.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [R] the constructor cSoundSys_cSoundSys / destructor cSoundSys__cSoundSys;
@@ -30,6 +30,6 @@ CHECK_SIZE(cSoundSys, 0x8);
 
 // The current sound system: cSoundSys_cSoundSys stores itself here, cSoundSys__cSoundSys clears it. EA name unknown.
 // [U] SndRand (func_002ADF60) is called with it.
-// instance global: cSoundSys* D_004A377C (typed by tools/unify_global.py once its units agree)
+// instance global: cSoundSys* SoundSys (typed by tools/unify_global.py once its units agree)
 
 #endif /* SOUND_SOUNDSYS_H */

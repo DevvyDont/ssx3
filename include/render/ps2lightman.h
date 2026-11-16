@@ -12,7 +12,7 @@
 // 2 Init(n) func_00394C98, 3 Purge cPS2LightMan_Purge, 4 CreateLights func_0038DC70, 5 ResetDynamicLights,
 // 6 GetDynamicLight func_00394D18, 7 SetAmbient (empty), 8-11 CreateAmbient/Directional/Point/Spot func_0038DEE8,
 // func_0038DF38, func_0038DF98, func_0038E008 (render/lightman), 12-14 func_00394D38/40/48 (empty).
-// Instance global: D_004A5B8C (gp+0x2A9C) = cLightMan::TheLightMan, returned by func_00394C40 (getTheLightMan).
+// Instance global: cLightMan_TheLightMan (gp+0x2A9C) = cLightMan::TheLightMan, returned by func_00394C40 (getTheLightMan).
 //
 // FLAT layout. Members: [O] On Tour's cPSPLightMan (0x18: m_iStartDynLight 4, m_iDynLight 8, m_iMaxLights 0xC,
 // m_pLights 0x10, m_iHighWaterLightCount 0x14); retail has no high-water count and a different order, so each member is

@@ -1117,10 +1117,10 @@ public:
 
 extern "C" cSoundSys_cSoundSys_cObj* func_002A8FA0();
 extern char cSoundSys_vtbl[];
-extern void* D_004A377C;
+extern void* SoundSys;
 
 /**
- * Constructs the sound system base and makes it the current one (D_004A377C).
+ * Constructs the sound system base and makes it the current one (SoundSys).
  *
  * It creates the platform sound object (func_002A8FA0) and calls that object's first virtual with the mode.
  *
@@ -1131,7 +1131,7 @@ extern void* D_004A377C;
 extern "C" void* cSoundSys_cSoundSys(cSoundSys* self, int audioMode)
 {
     self->mVtbl = (void**)cSoundSys_vtbl;
-    D_004A377C = ((void*)self);
+    SoundSys = ((void*)self);
     cSoundSys_cSoundSys_cObj* obj = func_002A8FA0();
     *(cSoundSys_cSoundSys_cObj**)self = obj;
     obj->v01(audioMode);
@@ -1151,10 +1151,10 @@ public:
 
 void operator_delete(int* ptr);
 extern char cSoundSys_vtbl[];
-extern void* D_004A377C;
+extern void* SoundSys;
 
 /**
- * Destroys the sound system base: shuts down and deletes the platform sound object and clears D_004A377C.
+ * Destroys the sound system base: shuts down and deletes the platform sound object and clears SoundSys.
  *
  * The shutdown is the platform object's third virtual, called with @p flags.
  *
@@ -1166,7 +1166,7 @@ extern "C" void cSoundSys__cSoundSys(cSoundSys* self, int flags)
     self->mVtbl = (void**)cSoundSys_vtbl;
     (*(cSoundSys__cSoundSys_cObj**)self)->v03(flags);
     operator_delete(*(int**)self);
-    D_004A377C = 0;
+    SoundSys = 0;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -4248,11 +4248,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002B24C0);
 #ifdef SKIP_ASM
 // PORT: func_002ADF60 is defined () but this caller passes the monitor.
 unsigned int func_002ADF60_p(void* p) __asm__("func_002ADF60");
-extern void* D_004A377C;
+extern void* SoundSys;
 
 extern "C" int func_002B24C0(cSongInstance* p)
 {
-    return func_002ADF60_p(D_004A377C) % *(unsigned int*)(*(char**)p + 0x40);
+    return func_002ADF60_p(SoundSys) % *(unsigned int*)(*(char**)p + 0x40);
 }
 #endif
 
@@ -4262,7 +4262,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B2500);
 extern "C" int func_002B2500(cSongInstance* self)
 {
     char* p;
-    unsigned int r = func_002ADF60_p(D_004A377C);
+    unsigned int r = func_002ADF60_p(SoundSys);
     p = *(char**)self;
     return (r % (unsigned int)(*(int*)(p + 0x6C) - 1)) * *(int*)(p + 0x74);
 }

@@ -392,3 +392,7 @@ ps2_addr	name	previous	source	evidence
 004944C8	cUIScrollBar_vtbl	D_004944C8	retail vtable (tools/vtables.py)	[D] slot 1 cUIScrollBar__cUIScrollBar; g++ 2.95 symbol _vt$12cUIScrollBar
 00494798	cUIListBox_vtbl	D_00494798	retail vtable (tools/vtables.py)	[D] slot 1 cUIListBox__cUIListBox; g++ 2.95 symbol _vt$10cUIListBox
 00494CC0	cListNode_vtbl	D_00494CC0	retail vtable (tools/vtables.py)	[D] slot 1 cListNode__cListNode; g++ 2.95 symbol _vt$9cListNode
+004A3664	gBankSys	D_004A3664	On Tour static gBankSys (cBankSys*, all_in_one_sound.cpp)	[R] cBankSys_cBankSys stores self, its dtor func_0028FEA0 clears it
+004A377C	SoundSys	D_004A377C	On Tour global SoundSys (cSoundSys*, all_in_one_sound.cpp)	[R] cSoundSys_cSoundSys stores self, cSoundSys__cSoundSys clears it
+004A5B8C	cLightMan_TheLightMan	D_004A5B8C	On Tour static cLightMan::TheLightMan (cLightMan*)	[R] the light manager ctor (render/ps2lightman) stores self, its dtor clears it
+004A4248	cBezierMan_TheBezierMan	D_004A4248	On Tour static cBezierMan::TheBezierMan (cBezierMan*)	[R] the bezier manager ctor (render/particle) stores self, its dtor clears it

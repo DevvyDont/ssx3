@@ -2114,10 +2114,10 @@ void func_00394B68(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394B70);
 #ifdef SKIP_ASM
-extern int D_004A4248;
+extern int cBezierMan_TheBezierMan;
 
 extern "C" int func_00394B70(void) {
-    return D_004A4248;
+    return cBezierMan_TheBezierMan;
 }
 #endif
 
@@ -2316,10 +2316,10 @@ extern "C" int func_00394C38(cPSPBezierMan* arg0) {
 //100%
 INCLUDE_ASM("render/font", func_00394C40);
 #ifdef SKIP_ASM
-extern int D_004A5B8C;
+extern int cLightMan_TheLightMan;
 
 extern "C" int func_00394C40(void) {
-    return D_004A5B8C;
+    return cLightMan_TheLightMan;
 }
 #endif
 
@@ -2366,7 +2366,7 @@ INCLUDE_ASM("render/font", cPS2LightMan__cPS2LightMan__FPv);
 /**
  * Destroys the PS2 light manager through the light-manager destructor func_0038AE28().
  *
- * That destructor clears the global D_004A5B8C and frees the object when bit 0 of the destructor flags is set.
+ * That destructor clears the global cLightMan_TheLightMan and frees the object when bit 0 of the destructor flags is set.
  * Only @p self is declared here: the flags reach func_0038AE28() unchanged in their register.
  *
  * @return no meaningful value (func_0038AE28() returns nothing)

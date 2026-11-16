@@ -22,7 +22,7 @@ struct sBezSlot_8AE0 {
 /**
  * Constructs the Bezier patch manager and allocates its VIF caches.
  *
- * The base constructor func_00374C90() registers the object as the current manager (D_004A4248); then it stores
+ * The base constructor func_00374C90() registers the object as the current manager (cBezierMan_TheBezierMan); then it stores
  * cPSPBezierMan's vtable, builds the vertex tables at offset 0x10, and func_0038AF30() allocates the "4x4VifCache",
  * "6x6VifCache" and "8x8VifCache" buffers, sets the distance settings and fills the 6x6 and 8x8 UV grids.
  *
