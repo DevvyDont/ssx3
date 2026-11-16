@@ -8,6 +8,13 @@ extern void* D_0045AD98[16];
 //99.58%
 INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_getThis__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the back end's network interface singleton, creating it on first use.
+ *
+ * The first call allocates 0x10 bytes tagged "BENetworkInt", clears bIsActive and stores the vtable.
+ *
+ * @return the network interface
+ */
 void* cBENetworkInterface_getThis()
 {
     if (cBENetworkInterface_instance == 0) {
@@ -167,7 +174,7 @@ public:
     virtual void v02();
 };
 
-extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p, sNetState_E2C8* in)
+extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int player, sNetState_E2C8* in)
 {
     D_004A11B8 = in->a;
     D_004A11BC = in->b;
@@ -178,21 +185,21 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
         for (int i = 2; i < 6; i++)
             D_00535B20_E2C8[i] = in->chars[i];
     }
-    D_00535B20_E2C8[p] = in->me;
+    D_00535B20_E2C8[player] = in->me;
     ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 1))->v02();
     signed char c = in->charID;
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
         *(sNetPair_E2C8*)D_005308D0 = in->pair;
-    D_005308B8_E5C8[p] = (&in->t0)[p];
-    func_00151600(&D_004A6CA8_E5C8[p][c], c, 1);
-    func_00156810(D_004A6CA8_E5C8[p]);
+    D_005308B8_E5C8[player] = (&in->t0)[player];
+    func_00151600(&D_004A6CA8_E5C8[player][c], c, 1);
+    func_00156810(D_004A6CA8_E5C8[player]);
     for (int k = 0; k < 0x20D; k++)
-        ((sNetHW_E2C8*)((char*)D_004A6CA8_E5C8 + 0x290 + (c * 0xF88 + p * 0x9B50)))[k] = in->blob[k];
+        ((sNetHW_E2C8*)((char*)D_004A6CA8_E5C8 + 0x290 + (c * 0xF88 + player * 0x9B50)))[k] = in->blob[k];
     for (int k = 0; k < 0x1A; k++)
-        ((sNetDW_E2C8*)(D_004A7778 + (c * 0xF88 + p * 0x9B50)))[k] = in->moves[k];
-    *(sNetTag_E2C8*)(D_004A7887 + (c * 0xF88 + p * 0x9B50)) = in->tag;
+        ((sNetDW_E2C8*)(D_004A7778 + (c * 0xF88 + player * 0x9B50)))[k] = in->moves[k];
+    *(sNetTag_E2C8*)(D_004A7887 + (c * 0xF88 + player * 0x9B50)) = in->tag;
     for (int k = 0; k < 0x55; k++)
-        ((sNetKey_E2C8*)(D_004A7887 + 7 + (c * 0xF88 + p * 0x9B50)))[k] = in->keys[k];
+        ((sNetKey_E2C8*)(D_004A7887 + 7 + (c * 0xF88 + player * 0x9B50)))[k] = in->keys[k];
     ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 6))->v02();
 }
 #endif
@@ -387,6 +394,13 @@ struct cBECharacterInterface {
     void** mVtbl;
 };
 
+/**
+ * Returns the back end's character interface singleton, creating it on first use.
+ *
+ * The first call allocates 0x10 bytes tagged "BECharInt", clears bIsActive and stores the vtable.
+ *
+ * @return the character interface
+ */
 extern "C" void* cBECharacterInterface_getThis(void)
 {
     if (D_004A1208 == 0) {
@@ -437,6 +451,16 @@ struct sNetEntry88_0014EE58
 extern sNetEntry8_0014EE58 D_0043FA38_0014EE58[] __asm__("D_0043FA38");
 extern sNetEntry88_0014EE58 D_00530990_0014EE58[] __asm__("D_00530990");
 
+/**
+ * Returns a rider's short character name.
+ *
+ * A cheat character (cheat index 10 to 29) gets its 8-byte name from the table based at D_0043FA38 (index 10 is
+ * "Brodi"); any other rider gets the address of its character's 0x88-byte record in D_00530990 (probably On
+ * Tour's cBELibrary::characterDB), which presumably starts with the name.
+ *
+ * @param rider  the rider whose character is used
+ * @return the name
+ */
 extern "C" void* cBECharacterInterface_getShortName(void* self, int rider)
 {
     int c = cBELibrary_getCharacterID(rider);

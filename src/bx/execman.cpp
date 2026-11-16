@@ -12,6 +12,11 @@ void operator_delete(int* ptr);
 //100%
 INCLUDE_ASM("bx/execman", cExecutionMan__cExecutionMan__FP13cExecutionMani);
 #ifdef SKIP_ASM
+/**
+ * Destroys an execution manager: restores the base vtable at +0x8, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 void cExecutionMan__cExecutionMan(cExecutionMan* self, int flags)
 {
     self->field_0x8 = cExecutionMan_vtbl;
@@ -277,9 +282,9 @@ INCLUDE_ASM("bx/execman", cInput_getValue);
 #ifdef SKIP_ASM
 extern "C" void* cInputMap_getValue(int, int, int);
 
-extern "C" void* cInput_getValue(void* self, int a1)
+extern "C" void* cInput_getValue(void* self, int state)
 {
-    return cInputMap_getValue(*(int*)((char*)self + 0x4), *(int*)self, a1);
+    return cInputMap_getValue(*(int*)((char*)self + 0x4), *(int*)self, state);
 }
 #endif
 
@@ -298,9 +303,9 @@ extern "C" void func_00320C18(void *arg0, int arg1, int arg2) {
 //100%
 INCLUDE_ASM("bx/execman", cInput_getState__FPvi);
 #ifdef SKIP_ASM
-void* cInput_getState(void* self, int a1)
+void* cInput_getState(void* self, int state)
 {
-    return cInputMap_getState(*(int*)((char*)self + 0x4), *(int*)self, a1);
+    return cInputMap_getState(*(int*)((char*)self + 0x4), *(int*)self, state);
 }
 #endif
 

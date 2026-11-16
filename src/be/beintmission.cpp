@@ -83,6 +83,15 @@ struct sMissionEntry_0043D950
 extern sMissionEntry_0043D950 D_0043D950[];
 extern signed char D_0043FA70[];
 
+/**
+ * Counts the collectibles that exist across all locations of one peak.
+ *
+ * Sums the per-location collectible counts (D_0043FA70, On Tour cBELibrary::secCollectibles) over the 22
+ * entries of the location table (D_0043D950) whose peak is @p owner.
+ *
+ * @param owner  the peak (On Tour eBEPeakID)
+ * @return the total number of collectibles on the peak
+ */
 extern "C" int cBEMissionInterface_getTotalCollectForPeak(void* self, int owner)
 {
     int sum = 0;
@@ -192,6 +201,16 @@ struct sEconChar_001535C0
 extern sMissionEntry_0043D950 D_0043D950[];
 extern sEconChar_001535C0 D_004A6CA8_econ[][10] __asm__("cBELibrary_profileLib");
 
+/**
+ * Counts the collectibles a rider's character has picked up across all locations of one peak.
+ *
+ * Looks up the rider's profile and character, then sums that character's collected count for each of the 22
+ * locations whose peak is @p owner (cBELibrary_profileLib records).
+ *
+ * @param rider  the rider whose profile and character are used
+ * @param owner  the peak (On Tour eBEPeakID)
+ * @return the number of collectibles collected on the peak
+ */
 extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int rider, int owner)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -683,6 +702,16 @@ extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("D_0043EE10");
 
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Returns the ID of the mission that follows a given one.
+ *
+ * Finds the mission's index with func_00154240() (On Tour getMissionIdx, which asserts "Mission id not found")
+ * and reads the next-mission field (+0x1C) of its mission table entry (D_0043EE10, On Tour
+ * cBELibrary::missionInfo).
+ *
+ * @param id  the current mission's ID
+ * @return the next mission's ID
+ */
 extern "C" int cBEMissionInterface_getNextMissionID(void* self, int id)
 {
     int i = func_00154240(self, id);
@@ -801,6 +830,12 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberMissions);
 extern "C" int cBEMissionInterface_getNumberMissionsOnTrack(void* self, int group);
 extern int D_005305F0[];
 
+/**
+ * Counts the missions on the current race's location.
+ *
+ * @return cBEMissionInterface_getNumberMissionsOnTrack() for the race's location (D_005305F0, iLocationIdx of
+ *         the cBERaceDB copy at D_005305B0)
+ */
 extern "C" int cBEMissionInterface_getNumberMissions(void* self)
 {
     return cBEMissionInterface_getNumberMissionsOnTrack(self, D_005305F0[0]);
@@ -812,6 +847,12 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberMissionsOnTrack);
 #ifdef SKIP_ASM
 extern sMissionDef_0043EE10 D_0043EE10[];
 
+/**
+ * Counts the missions set on one location (track).
+ *
+ * @param group  the location (On Tour eBELocationID), compared with each of the 88 mission table entries
+ * @return the number of missions on that location
+ */
 extern "C" int cBEMissionInterface_getNumberMissionsOnTrack(void* self, int group)
 {
     int n = 0;
@@ -859,6 +900,12 @@ struct sMissionDef_00154368
 extern sMissionEntry_0043D950 D_0043D950[];
 extern sMissionDef_00154368 D_0043EE10_00154368[] __asm__("D_0043EE10");
 
+/**
+ * Counts the missions set on any location of one peak.
+ *
+ * @param owner  the peak (On Tour eBEPeakID)
+ * @return the number of missions whose location belongs to the peak
+ */
 extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(void* self, int owner)
 {
     int n = 0;
@@ -882,6 +929,15 @@ extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(void* self, int owner
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberCompletedMissionsOnPeak);
 #ifdef SKIP_ASM
+/**
+ * Counts the completed missions on one peak for the current game.
+ *
+ * Counts the missions whose location belongs to the peak and that cBEMissionInterface_isMissionCompleted()
+ * reports as done.
+ *
+ * @param owner  the peak (On Tour eBEPeakID)
+ * @return the number of completed missions on the peak
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Counts missions of an owner's groups that cBEMissionInterface_isMissionCompleted reports as done.
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(void* self, int owner)
@@ -928,6 +984,18 @@ struct sEconFlags_001544D0
 };
 extern sEconFlags_001544D0 D_004A6CA8_flags[][10] __asm__("cBELibrary_profileLib");
 
+/**
+ * Counts the missions one profile's character has completed on a peak.
+ *
+ * While a game is running (SSXApp->Game set) it returns cBEMissionInterface_getNumberCompletedMissionsOnPeak()
+ * instead. Otherwise it counts bit 3 of the character's mission flag words in cBELibrary_profileLib for each
+ * mission whose location belongs to the peak.
+ *
+ * @param profile    profile index
+ * @param character  character ID within the profile
+ * @param owner      the peak (On Tour eBEPeakID)
+ * @return the number of completed missions
+ */
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* self, int profile, int character, int owner)
 {
     if ((void*)SSXApp->Game != 0)
@@ -1042,6 +1110,12 @@ extern "C" sMissionEntry func_00154678(void* self, int id)
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getPictureFileName);
 #ifdef SKIP_ASM
+/**
+ * Returns the picture file name for a location from the picture table (cBELibrary_pictureDB, 22 entries).
+ *
+ * @param id  the location ID (On Tour eBELocationID)
+ * @return the file name stored after the matching entry's ID, or 0 when no entry matches
+ */
 extern "C" void* cBEMissionInterface_getPictureFileName(void* self, int id)
 {
     for (int i = 0; i < 22; i++) {

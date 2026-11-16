@@ -290,11 +290,11 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_startLaunchIntoAir);
 struct sQuad;
 void cAirPredictor_initLaunch(char* self, sQuad* a, sQuad* b);
 
-extern "C" void cAirPredictor_startLaunchIntoAir(char* self, sQuad* a, sQuad* b, float t)
+extern "C" void cAirPredictor_startLaunchIntoAir(char* self, sQuad* launchPos, sQuad* launchVel, float terminalVel)
 {
     cAirPredictor_reset(self);
-    *(float*)(self + 0xA8) = t;
-    cAirPredictor_initLaunch(self, a, b);
+    *(float*)(self + 0xA8) = terminalVel;
+    cAirPredictor_initLaunch(self, launchPos, launchVel);
 }
 #endif
 
@@ -307,13 +307,13 @@ struct sQuad {
 //100%
 INCLUDE_ASM("ai/airpredictor", cAirPredictor_initLaunch__FPcP5sQuadT1);
 #ifdef SKIP_ASM
-void cAirPredictor_initLaunch(char* self, sQuad* a, sQuad* b)
+void cAirPredictor_initLaunch(char* self, sQuad* launchPos, sQuad* launchVel)
 {
     *(int*)(self + 0xAC) = 0;
-    *(sQuad*)(self + 0x70) = *a;
-    *(sQuad*)(self + 0x80) = *b;
-    *(sQuad*)(self + 0x50) = *a;
-    *(sQuad*)(self + 0x60) = *b;
+    *(sQuad*)(self + 0x70) = *launchPos;
+    *(sQuad*)(self + 0x80) = *launchVel;
+    *(sQuad*)(self + 0x50) = *launchPos;
+    *(sQuad*)(self + 0x60) = *launchVel;
     *(float*)(self + 0x98) = *(float*)(self + 0xA0);
 }
 #endif

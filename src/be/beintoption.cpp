@@ -16,6 +16,14 @@ struct cBEOptionInterface {
 //100%
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_getThis__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the back end's option interface singleton, creating it on first use.
+ *
+ * The first call allocates 0x10 bytes tagged "BEOptionInt", stores the vtable, clears the word at +0x8 and runs
+ * func_0014F418(), which calls four setup helpers on it (probably resetting the options to their defaults).
+ *
+ * @return the option interface
+ */
 void* cBEOptionInterface_getThis()
 {
     if (D_004A120C == 0) {
@@ -219,6 +227,12 @@ extern const char D_0045A6C0[];
 //100%
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_getDefaultQuickKeyMessageHashValue__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the hash of a quick message's default text key, "kT_206QuickMessage<n>".
+ *
+ * @param value  the quick message number put into the key
+ * @return GetHashValue32() of the key
+ */
 int cBEOptionInterface_getDefaultQuickKeyMessageHashValue(void* self, int value)
 {
     char buf[24];

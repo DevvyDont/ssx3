@@ -69,12 +69,12 @@ extern "C" int func_0030DB90(void* self, void* a1)
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimModel_setScale);
 #ifdef SKIP_ASM
-extern "C" void cAnimModel_setScale(cAnimModel* self, float a, float b)
+extern "C" void cAnimModel_setScale(cAnimModel* self, float lengthScale, float widthScale)
 {
     t4Vector v;
-    v.x = a;
-    v.y = b;
-    v.z = b;
+    v.x = lengthScale;
+    v.y = widthScale;
+    v.z = widthScale;
     v.w = 1.0f;
     self->unk_140 = v;
 }
@@ -242,7 +242,7 @@ INCLUDE_ASM("animation/animmodel", func_00310120);
 // (rot, rows 0-2) and position (pos, row 3), then unk_034[i] = unk_030[i] with each row scaled
 // by the matching component of unk_140.
 // PORT: index-first (int) address arithmetic (pointer in int).
-extern "C" void func_00310120(cAnimModel* self, int i, sAnimModelBone* p)
+extern "C" void func_00310120(cAnimModel* self, int i, sAnimModelBone* animModelBone)
 {
     __asm__ __volatile__(
         ".set push\n"
@@ -282,7 +282,7 @@ extern "C" void func_00310120(cAnimModel* self, int i, sAnimModelBone* p)
         "sqc2       $vf12, 0x20(%1)\n"
         ".set pop\n"
         :
-        : "r"(p), "r"((t4Matrix*)((i << 6) + (int)self->unk_030))
+        : "r"(animModelBone), "r"((t4Matrix*)((i << 6) + (int)self->unk_030))
         : "memory");
     __asm__ __volatile__(
         ".set push\n"
@@ -547,18 +547,18 @@ static inline t4Vector amVecAdd(const t4Vector& src, t4Vector* b)
     return r;
 }
 
-extern "C" void cAnimModel_applyOffset(cAnimModel* self, t4Vector* v)
+extern "C" void cAnimModel_applyOffset(cAnimModel* self, t4Vector* offset)
 {
     for (int i = 0; i < self->numParts; i++) {
         for (int j = 0; j < self->parts[i].numBones; j++) {
             int k = j + self->parts[i].firstBone;
-            amVecAddEq(&self->bones[k].pos, v);
+            amVecAddEq(&self->bones[k].pos, offset);
             {
-                t4Vector t = amVecAdd(self->unk_030[k].row[3], v);
+                t4Vector t = amVecAdd(self->unk_030[k].row[3], offset);
                 self->unk_030[k].row[3] = t;
             }
             {
-                t4Vector t = amVecAdd(self->unk_034[k].row[3], v);
+                t4Vector t = amVecAdd(self->unk_034[k].row[3], offset);
                 self->unk_034[k].row[3] = t;
             }
         }

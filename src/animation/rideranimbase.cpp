@@ -612,18 +612,18 @@ struct sAnimState_00312660
 } __attribute__((aligned(16)));
 
 // Samples anim at time t on a scratch sequencer and returns the first resulting state.
-extern "C" sAnimState_00312660 cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* self, int anim, int h, float t)
+extern "C" sAnimState_00312660 cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* self, int anim, int startFrameTime, float animid)
 {
     sAnimState_00312660 states[0x40];
     cAnimSequencer seq;
     cAnimSequencer_init(&seq);
-    if (h == D_004A5950)
+    if (startFrameTime == D_004A5950)
     {
         sVEntry00312660* vt = (sVEntry00312660*)self->mVtbl;
-        h = *(int*)(vt[4].fn(((char*)self) + vt[4].delta, anim) * 4 + D_004A3E7C + 0x1030);
+        startFrameTime = *(int*)(vt[4].fn(((char*)self) + vt[4].delta, anim) * 4 + D_004A3E7C + 0x1030);
     }
-    func_00311F00(((char*)self), &seq, anim, h, 1, 0, 0.0f);
-    func_00313CF0(cAnimSequencer_getSequence(&seq, 0), 0, t);
+    func_00311F00(((char*)self), &seq, anim, startFrameTime, 1, 0, 0.0f);
+    func_00313CF0(cAnimSequencer_getSequence(&seq, 0), 0, animid);
     func_00314418(&seq, (sAnimState_00312598*)states, 0x40);
     cAnimSequencer_expireAll(&seq);
     return states[0];

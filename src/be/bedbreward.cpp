@@ -14,9 +14,9 @@ extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a
 extern int D_004A1270;
 extern char D_0045AB78[];
 
-extern "C" void cBERewardDB_init(int* self, int a1)
+extern "C" void cBERewardDB_init(int* self, int async)
 {
-    if (a1 == 0)
+    if (async == 0)
     {
         int size = BXFILE_sizez(D_004A1270);
         void* data = operator_new_tag(size, D_0045AB78, 0, 0);
@@ -26,7 +26,7 @@ extern "C" void cBERewardDB_init(int* self, int a1)
     }
     else
     {
-        *self = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, 0, D_004A1270, 0xA, a1, 0);
+        *self = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, 0, D_004A1270, 0xA, async, 0);
     }
 }
 #endif

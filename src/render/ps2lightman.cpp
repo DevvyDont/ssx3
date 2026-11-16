@@ -10,6 +10,13 @@ struct cPSPLightMan {
 //99.83%
 INCLUDE_ASM("render/ps2lightman", cPSPLightMan_cPSPLightMan__FP12cPSPLightMan);
 #ifdef SKIP_ASM
+/**
+ * Constructs the light manager and registers it as the global one (D_004A5B8C, returned by func_00394C40()).
+ *
+ * Only the vtable is stored; the class keeps On Tour's PSP name.
+ *
+ * @return @p self
+ */
 cPSPLightMan* cPSPLightMan_cPSPLightMan(cPSPLightMan* self)
 {
     self->vtable = D_004936D8;

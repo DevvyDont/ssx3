@@ -12,6 +12,13 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp__cSSXApp);
 extern "C" void cBXString__cBXString(void* self, int flags);
 void cAppMan__cAppMan(void* self, int flags);
 
+/**
+ * Destroys the SSX application: destroys its three cBXString members, then runs the cAppMan destructor.
+ *
+ * The strings at +0xCC, +0xC8 and +0xC4 are destroyed without being freed (flags 2).
+ *
+ * @param flags  g++ destructor flags, passed to cAppMan__cAppMan(); bit 0 set frees the object's memory
+ */
 extern "C" void cSSXApp__cSSXApp(cSSXApp* self, int flags)
 {
     cBXString__cBXString((char*)self + 0xCC, 2);
@@ -1824,6 +1831,14 @@ INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode__cSSXStatsObjNode);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* cSSXStatsObjNode_vtbl[];
 
+/**
+ * Destroys a stats object node: frees the object it holds, then runs the cObjNode destructor.
+ *
+ * Stores cSSXStatsObjNode's vtable at +0xC and releases the pointer at +0x10 with operator delete (no
+ * destructor runs on it).
+ *
+ * @param flags  g++ destructor flags, passed to cObjNode__cObjNode(); bit 0 set frees the object's memory
+ */
 extern "C" void cSSXStatsObjNode__cSSXStatsObjNode(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = cSSXStatsObjNode_vtbl;
@@ -1837,6 +1852,9 @@ void func_002D21B0(void*);
 //100%
 INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode_update);
 #ifdef SKIP_ASM
+/**
+ * Updates the stats node by calling func_002D21B0() on the object it holds (+0x10); that function is empty.
+ */
 extern "C" void cSSXStatsObjNode_update(void* self)
 {
     func_002D21B0(*(void**)((char*)self + 0x10));
@@ -1848,6 +1866,9 @@ void func_002D21B8(void*);
 //100%
 INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode_render);
 #ifdef SKIP_ASM
+/**
+ * Renders the stats node by calling func_002D21B8() on the object it holds (+0x10); that function is empty.
+ */
 extern "C" void cSSXStatsObjNode_render(void* self)
 {
     func_002D21B8(*(void**)((char*)self + 0x10));
@@ -2622,6 +2643,14 @@ INCLUDE_ASM("main/ssxappdtor", cFELoadHintState__cFELoadHintState);
 extern void* cFELoadHintState_vtbl[];
 extern "C" void* func_0039E390(void* self);
 
+/**
+ * Destroys the front-end load-hint state: stores its vtable at +0x8, then runs the cUIState destructor.
+ *
+ * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * untouched.
+ *
+ * @return no meaningful value (func_0039E390 returns nothing)
+ */
 extern "C" void* cFELoadHintState__cFELoadHintState(void* self)
 {
     *(void**)((char*)self + 0x8) = cFELoadHintState_vtbl;

@@ -98,6 +98,15 @@ extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cStreamRB* st
 extern "C" void cBucketMan_mergeBucket(void* mgr, void* bucket);
 extern char gBucketMan;
 
+/**
+ * Restores one bucket of scene objects from a replay stream and merges it into the global bucket manager.
+ *
+ * Reads an 8-byte header whose first word is the object count, then calls cReplay_restoreObject() that many
+ * times.
+ *
+ * @param bucket  the bucket the objects are restored into
+ * @param stream  the replay stream to read from
+ */
 extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cStreamRB* stream)
 {
     struct {
@@ -313,6 +322,15 @@ struct sRdbRef {
     }
 };
 
+/**
+ * Recreates the dead (removed) objects recorded in a replay stream.
+ *
+ * Reads an 8-byte header with the count, then for each a 4-byte world cache reference (low byte model set,
+ * upper bits index); allocates a 0x1C-byte "Dead Object" and builds a cDeadNode (func_003506D8) for the
+ * referenced instance.
+ *
+ * @param stream  the replay stream to read from
+ */
 extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream)
 {
     struct {

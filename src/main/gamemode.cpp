@@ -1654,9 +1654,9 @@ static inline sRace* GetRace()
     return D_004A28A8_A760->game->race;
 }
 
-static inline int Finished(cRider* r)
+static inline int Finished(cRider* rider)
 {
-    return r->mFinishTime >= 0.0f;
+    return rider->mFinishTime >= 0.0f;
 }
 
 extern "C" void* cBE_getBE();

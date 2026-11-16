@@ -34,14 +34,14 @@ void* func_002D1CF0(void* self)
 INCLUDE_ASM("util/objectinterface", func_002D1D10);
 #ifdef SKIP_ASM
 
-static inline void setA_1D10(sDrawState* r, int v, int mask, int shift)
+static inline void setA_1D10(sDrawState* drawState, int v, int mask, int shift)
 {
-    r->unk_00[1] = (((int)r->unk_00[1]) & ~(mask << shift)) | ((v << shift) & (mask << shift));
+    drawState->unk_00[1] = (((int)drawState->unk_00[1]) & ~(mask << shift)) | ((v << shift) & (mask << shift));
 }
 
-static inline void setB_1D10(sDrawState* r, int v, int mask, int shift)
+static inline void setB_1D10(sDrawState* drawState, int v, int mask, int shift)
 {
-    r->unk_00[2] = (((int)r->unk_00[2]) & ~(mask << shift)) | ((v << shift) & (mask << shift));
+    drawState->unk_00[2] = (((int)drawState->unk_00[2]) & ~(mask << shift)) | ((v << shift) & (mask << shift));
 }
 
 // 2D vector (8 bytes, BLKmode: its temporaries share 16-byte frame slots that combine when freed).

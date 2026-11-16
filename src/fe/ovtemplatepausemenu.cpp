@@ -209,7 +209,7 @@ static inline void setColor_001F85C0(char* obj, void* c)
     vt[11].fn(obj + vt[11].delta, c);
 }
 
-extern "C" void cOVTemplate_PauseMenu_onGainFocus(void* self, int a1)
+extern "C" void cOVTemplate_PauseMenu_onGainFocus(void* self, int pPrevState)
 {
     char buf[32];
     char* obj;
@@ -237,7 +237,7 @@ extern "C" void cOVTemplate_PauseMenu_onGainFocus(void* self, int a1)
         sel++;
         i++;
     }
-    cUIState_onGainFocus(self, a1);
+    cUIState_onGainFocus(self, pPrevState);
 }
 #endif
 
@@ -330,6 +330,14 @@ extern "C" void* cOVState_onDestroyScreen(void*);
 //100%
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the pause menu's screens: forgets its playing screen animation (+0xC4), then runs
+ * cOVState_onDestroyScreen().
+ *
+ * The pointer at +0xC4 holds the result of cUIScreen_playFrame() while a frame animation plays.
+ *
+ * @return cOVState_onDestroyScreen()'s return value (On Tour's returns nothing)
+ */
 void* cOVTemplate_PauseMenu_onDestroyScreen(void* self)
 {
     *(int*)((char*)self + 0xc4) = 0;

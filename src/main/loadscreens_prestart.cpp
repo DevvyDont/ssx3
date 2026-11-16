@@ -259,6 +259,11 @@ extern void* cPreGameLoadScreen_vtbl[];
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_cPreGameLoadScreen__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a pre-game load screen: clears the word at +0x4 and stores the vtable at +0x0.
+ *
+ * @return @p self
+ */
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;

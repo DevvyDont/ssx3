@@ -11,6 +11,15 @@ struct cWorldPainterManArg {
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", cWorldPainterMan_getQuery__FPvP19cWorldPainterManArg);
 #ifdef SKIP_ASM
+/**
+ * Creates a new world painter query for one painted resource.
+ *
+ * Allocates 0x18 bytes tagged "WorldPainterQuery" and constructs a cWorldPainterQuery from the first word
+ * of @p x. The manager itself is not used.
+ *
+ * @param x  the painted resource record (such as kWPR_Lighting; the lens effects pass nine of them)
+ * @return the new query
+ */
 void* cWorldPainterMan_getQuery(void* self, cWorldPainterManArg* x)
 {
     void* mem = cMemMan_alloc(0x18, D_00483DE8, 0, 0);

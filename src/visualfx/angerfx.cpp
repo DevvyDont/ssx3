@@ -11,6 +11,12 @@ INCLUDE_ASM("visualfx/angerfx", cAngerFX_cAngerFX);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "visualfx/angerfx_classes.h"
 
+/**
+ * Constructs an anger effect: allocates its two 0x2C-byte parts tagged "cAngerFX" and clears them.
+ *
+ * func_002D4BE0() fills the 0x58 bytes of the parts with zeros. In this unit's model the class derives
+ * virtually from cRider, so g++ also builds that base when constructing the complete object.
+ */
 cAngerFX_ang::cAngerFX_ang()
 {
     cAngerPart_ang** slot = &parts;
@@ -483,6 +489,15 @@ void operator_delete(int* ptr);
 extern "C" void cDynamicColourEmitter_purge(void* p, int a1);
 extern "C" void cDynamicColourEmitter__cDynamicColourEmitter(void* p, int a1);
 
+/**
+ * Destroys an active avalanche node: purges and destroys its colour emitter (+0xD0), then frees it when asked
+ * to.
+ *
+ * The emitter is purged with cDynamicColourEmitter_purge(emitter, 1) and destroyed without being freed (flags
+ * 2).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void tActiveAvalancheNode__tActiveAvalancheNode(int* self, int flags)
 {
     cDynamicColourEmitter_purge((char*)self + 0xD0, 1);

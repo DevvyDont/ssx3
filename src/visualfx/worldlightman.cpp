@@ -2454,6 +2454,14 @@ INCLUDE_ASM("visualfx/worldlightman", cFade_TObj__cFade_TObj);
 extern void* D_004880E0[];
 extern "C" void func_002E4D30(void* p);
 
+/**
+ * Destroys a fade transition object: stores the base vtable (D_004880E0), then releases its slot when asked to.
+ *
+ * Release goes through func_002E4D30(), which clears the in-use flag of the matching slot in a 4-entry static
+ * pool (D_005382C0) instead of freeing heap memory.
+ *
+ * @param flags  g++ destructor flags; bit 0 set releases the object
+ */
 extern "C" void cFade_TObj__cFade_TObj(void* self, int flags)
 {
     *(void***)self = D_004880E0;
@@ -2486,6 +2494,14 @@ INCLUDE_ASM("visualfx/worldlightman", cWipe_TObj__cWipe_TObj);
 extern void* D_004880E0[];
 extern "C" void func_002E4D30(void* p);
 
+/**
+ * Destroys a wipe transition object: stores the base vtable (D_004880E0), then releases its slot when asked to.
+ *
+ * Release goes through func_002E4D30(), which clears the in-use flag of the matching slot in a 4-entry static
+ * pool (D_005382C0) instead of freeing heap memory.
+ *
+ * @param flags  g++ destructor flags; bit 0 set releases the object
+ */
 extern "C" void cWipe_TObj__cWipe_TObj(void* self, int flags)
 {
     *(void***)self = D_004880E0;
@@ -2501,6 +2517,15 @@ INCLUDE_ASM("visualfx/worldlightman", cCircle_TObj__cCircle_TObj);
 extern void* D_004880E0[];
 extern "C" void func_002E4D30(void* p);
 
+/**
+ * Destroys a circle transition object: stores the base vtable (D_004880E0), then releases its slot when asked
+ * to.
+ *
+ * Release goes through func_002E4D30(), which clears the in-use flag of the matching slot in a 4-entry static
+ * pool (D_005382C0) instead of freeing heap memory.
+ *
+ * @param flags  g++ destructor flags; bit 0 set releases the object
+ */
 extern "C" void cCircle_TObj__cCircle_TObj(void* self, int flags)
 {
     *(void***)self = D_004880E0;

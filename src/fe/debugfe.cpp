@@ -558,10 +558,10 @@ struct sDebugFE17D688 {
     sMenuStack17D688 stack; // 0x8
 };
 
-static inline void* sMenuStack17D688_top(sMenuStack17D688* s)
+static inline void* sMenuStack17D688_top(sMenuStack17D688* self)
 {
-    if (s->count > 0)
-        return s->items[s->count - 1];
+    if (self->count > 0)
+        return self->items[self->count - 1];
     return 0;
 }
 

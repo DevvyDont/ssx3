@@ -334,6 +334,16 @@ INCLUDE_ASM("mem/memstd", MEM_initadr);
 #ifdef SKIP_ASM
 extern char D_004A2E48[];
 
+/**
+ * Creates the main "RAM" memory class over a block of memory.
+ *
+ * Calls MEMCLASS_create() for class 0 with that name and fixed settings (0x40, alignment 0x80, no header, lock
+ * on).
+ *
+ * @param mem   start of the memory block
+ * @param size  size of the block in bytes
+ * @return MEMCLASS_create()'s result
+ */
 extern "C" int MEM_initadr(char* mem, int size)
 {
     return MEMCLASS_create(0, D_004A2E48, mem, size, 0x40, 0x80, 0, 0, 0, 1);
@@ -446,6 +456,14 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
 //100%
 INCLUDE_ASM("mem/memstd", MEM_printclass__FPv);
 #ifdef SKIP_ASM
+/**
+ * Prints a report of a memory class's blocks to the debug output.
+ *
+ * Calls MEM_printclassf() with the row format "%-12s %-24.24s %08lx %11lu %11lu %04x %04x %3s %s" and
+ * func_00251F68(), a printf that writes through PRINT_string(2, ...).
+ *
+ * @param thing  the memory class to report
+ */
 void MEM_printclass(void* thing)
 {
     MEM_printclassf(thing, D_004800A8, func_00251F68);
@@ -457,6 +475,9 @@ extern void* D_004A2E78;
 //99.25%
 INCLUDE_ASM("mem/memstd", MEM_print__Fv);
 #ifdef SKIP_ASM
+/**
+ * Prints a report of the default memory class (D_004A2E78) through MEM_printclass().
+ */
 void MEM_print()
 {
     MEM_printclass(D_004A2E78);

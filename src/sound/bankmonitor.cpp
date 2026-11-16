@@ -304,6 +304,19 @@ static inline void setCallback_Create(sBmVoice* v, sSndCallback k)
     v->callback = k;
 }
 
+/**
+ * Starts monitoring a playing sound in a free bank monitor voice, using the current play options.
+ *
+ * The voice is reset (func_002ABB38) and gets the handle, kind and volume, plus the current option slot's
+ * target position, callback and other settings; the target is copied into the voice when the options ask for
+ * that. With no free voice it logs "Out of BankMonitor instances" and releases the handle with func_003B89E0()
+ * (kind 1) or func_003B9920() (kind 2). The busy counter (+0x8DC) is raised for the duration.
+ *
+ * @param id    the sound handle; negative marks the voice invalid
+ * @param vol   the volume to store
+ * @param kind  the kind of sound, 1 or 2 (which release call is used on failure)
+ * @return the voice, or 0 when no voice was free
+ */
 extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(sBankMonitorView* self, int id, int vol, int kind)
 {
     sBmVoice* v = 0;
@@ -494,12 +507,12 @@ extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx,
 extern "C" void func_002ABB38(void*);
 extern "C" void func_002ACB80(void* voice, int a, int b, float v);
 
-extern "C" void cBankMonitor_BANKMONITOR_StopHandle(cBankMonitor* self, int idx, int a2, float v)
+extern "C" void cBankMonitor_BANKMONITOR_StopHandle(cBankMonitor* self, int idx, int FadeTime, float type)
 {
-    void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, a2);
+    void* voice = cBankMonitor_BANKMONITOR_GetHandle(self, idx, FadeTime);
     if (voice != 0) {
-        if (v != 0.0f) {
-            func_002ACB80(voice, -1, 1, v);
+        if (type != 0.0f) {
+            func_002ACB80(voice, -1, 1, type);
         } else {
             func_002ABB38(voice);
         }
@@ -987,13 +1000,13 @@ extern "C" cSoundSys_cSoundSys_cObj* func_002A8FA0();
 extern char cSoundSys_vtbl[];
 extern void* D_004A377C;
 
-extern "C" void* cSoundSys_cSoundSys(void* self, int a)
+extern "C" void* cSoundSys_cSoundSys(void* self, int audioMode)
 {
     *(void**)((char*)self + 0x4) = cSoundSys_vtbl;
     D_004A377C = self;
     cSoundSys_cSoundSys_cObj* obj = func_002A8FA0();
     *(cSoundSys_cSoundSys_cObj**)self = obj;
-    obj->v01(a);
+    obj->v01(audioMode);
     return self;
 }
 #endif
@@ -5205,8 +5218,8 @@ void func_002B4060(void* self)
 INCLUDE_ASM("sound/bankmonitor", func_002B4068);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long func_002B4068(cMusicSys* arg0) {
-    return ((long)arg0->mActiveMap);
+extern "C" long func_002B4068(cMusicSys* musicSys) {
+    return ((long)musicSys->mActiveMap);
 }
 #endif
 

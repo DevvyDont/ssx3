@@ -9,9 +9,9 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00460B80[];
 
-extern "C" void cFEFlowState_setNumStates(void* self, int a1)
+extern "C" void cFEFlowState_setNumStates(void* self, int NumStates)
 {
-    signed char n = a1;
+    signed char n = NumStates;
     func_001A06B0(self);
     *(signed char*)self = n;
     void* p = operator_new_tag(n, D_00460B80, 0x100, 0);

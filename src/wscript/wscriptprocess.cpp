@@ -32,11 +32,11 @@ struct sDef_307598 {
     int b[10];          // 0x18
 };
 
-extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a2, sDef_307598* def)
+extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int sectionId, sDef_307598* def)
 {
     *(void**)((char*)self + 0x5C) = cWScriptProcess_vtbl;
     MEM_fill((char*)self + 0x28, 0, 0xC);
-    *(int*)((char*)self + 0x24) = a2;
+    *(int*)((char*)self + 0x24) = sectionId;
     *(void**)((char*)self + 0x10) = man;
     *(int*)((char*)self + 0x20) = def->f0;
     *(int*)((char*)self + 0x1C) = 0;

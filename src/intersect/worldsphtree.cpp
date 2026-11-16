@@ -12,20 +12,20 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 
 struct sSphV4 { float x, y, z, w; } __attribute__((aligned(16)));
 
-extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* a1, int a2)
+extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* ast, int isLow)
 {
     *(void***)((char*)self + 0x50) = cWorldSphTree_vtbl;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0x4) = 0;
-    if (a2 != 0) {
+    if (isLow != 0) {
         *(int*)self = 0;
     } else {
         *(int*)self = 1;
     }
-    *(void**)((char*)self + 0x64) = a1;
-    *(void**)((char*)self + 0x60) = a1;
-    sSphV4 c = *(sSphV4*)((char*)a1 + 0x80);
-    float r = func_0032C590(a1);
+    *(void**)((char*)self + 0x64) = ast;
+    *(void**)((char*)self + 0x60) = ast;
+    sSphV4 c = *(sSphV4*)((char*)ast + 0x80);
+    float r = func_0032C590(ast);
     sSphV4 t;
     *(sSphV4*)((char*)self + 0x40) = c;
     t.x = c.x + r;
@@ -4971,9 +4971,9 @@ struct sVEntry_cBoostNode_cBoostNode {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void* cBoostNode_cBoostNode(void* self, void* a1, void* stream)
+extern "C" void* cBoostNode_cBoostNode(void* self, void* bucket, void* stream)
 {
-    cInstanceNode_cInstanceNode(self, a1, stream);
+    cInstanceNode_cInstanceNode(self, bucket, stream);
     *(void***)((char*)self + 0xC) = cBoostNode_vtbl;
     sVEntry_cBoostNode_cBoostNode* vt = *(sVEntry_cBoostNode_cBoostNode**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x20, 0x30);
@@ -5393,9 +5393,9 @@ struct sVEntry00341C80 {
 extern "C" void* func_0034DAC8(void* p, int a1, void* stream);
 extern void* D_00490B10[];
 
-extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, int a1, sVEntry00341C80** stream)
+extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, int bucket, sVEntry00341C80** stream)
 {
-    func_0034DAC8((char*)self + 0x1C, a1, stream);
+    func_0034DAC8((char*)self + 0x1C, bucket, stream);
     *(void***)((char*)self + 0x3C) = D_00490B10;
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x1C);
     *(unsigned short*)((char*)self + 0x42) |= 1;
@@ -5585,9 +5585,9 @@ void func_0034FCC0(void*);
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cAnimObjectNode_expire);
 #ifdef SKIP_ASM
-extern "C" void cAnimObjectNode_expire(void* self, int a1)
+extern "C" void cAnimObjectNode_expire(void* self, int runscript)
 {
-    if (a1 != 0) {
+    if (runscript != 0) {
         func_0034FCC0((char*)self + 0x30);
     }
 }
@@ -5756,9 +5756,9 @@ struct sVEntry003422E8 {
 extern "C" void* func_0034DAC8(void* p, int a1, void* stream);
 extern void* D_004908F8[];
 
-extern "C" void* cAnimTeeterNode_cAnimTeeterNode(void* self, int a1, sVEntry003422E8** stream)
+extern "C" void* cAnimTeeterNode_cAnimTeeterNode(void* self, int bucket, sVEntry003422E8** stream)
 {
-    func_0034DAC8((char*)self + 0x30, a1, stream);
+    func_0034DAC8((char*)self + 0x30, bucket, stream);
     *(void***)((char*)self + 0x50) = D_004908F8;
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x30);
     *(unsigned short*)((char*)self + 0x56) |= 1;

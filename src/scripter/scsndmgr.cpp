@@ -73,14 +73,14 @@ extern "C" sSndEntry* func_00283760(sSndList* self);
 extern "C" void* func_0028B180();
 extern "C" void func_0028BE60(void* bank, int handle, void* data, int b);
 
-extern "C" int cScriptSoundBankManager_LinkBank(sSndList* self, int id, void* data, int b)
+extern "C" int cScriptSoundBankManager_LinkBank(sSndList* self, int id, void* data, int dataSize)
 {
     char* e = (char*)func_002836D8(self, id);
     if (e == 0) {
         e = (char*)func_00283760(self);
         *(int*)(e + 0x0) = id;
         *(void**)(e + 0x8) = data;
-        func_0028BE60(**(void***)((char*)func_0028B180() + 0x118), *(int*)(e + 0x4), data, b);
+        func_0028BE60(**(void***)((char*)func_0028B180() + 0x118), *(int*)(e + 0x4), data, dataSize);
     }
     return *(int*)(e + 0x4);
 }
@@ -131,6 +131,14 @@ struct sDmTable283658 {
     sDmVEntry283658* vt;
 };
 
+/**
+ * Unlinks every bank slot in use from the script sound bank manager.
+ *
+ * Calls the manager's virtual slot 2 (func_00283720) on each used slot of the bank table (On Tour mpBankInfo);
+ * it releases the bank from the audio object's sound system and resets the slot's ID to -1.
+ *
+ * @param self_  the script sound bank manager (this)
+ */
 extern "C" void cScriptSoundBankManager_UnlinkBanksAll(void* self_)
 {
     sDmTable283658* self = (sDmTable283658*)self_;
@@ -202,6 +210,11 @@ INCLUDE_ASM("scripter/scsndmgr", cVidEngine_cVidEngine);
 #ifdef SKIP_ASM
 extern char cVidEngine_vtbl[];
 
+/**
+ * Constructs a video engine object: zeroes its first six words and stores cVidEngine's vtable at +0x18.
+ *
+ * @return @p self
+ */
 extern "C" void* cVidEngine_cVidEngine(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;

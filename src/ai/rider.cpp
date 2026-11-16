@@ -1193,9 +1193,9 @@ struct sVec4_0011DE60
 
 extern "C" void func_0011D660(void* self, sVec4_0011DE60* a, sVec4_0011DE60* b, int n, float t);
 
-extern "C" void cRider_putAtStartpoint(cRider* self, int a1, int a2)
+extern "C" void cRider_putAtStartpoint(cRider* self, int StartpointID, int StartpointType)
 {
-    float* p = (float*)func_0026B5E0(D_004D33A0, a2, a1);
+    float* p = (float*)func_0026B5E0(D_004D33A0, StartpointType, StartpointID);
     sVec4_0011DE60 pos;
     sVec4_0011DE60 dir;
     float px = p[2];
@@ -2302,6 +2302,14 @@ extern "C" void func_0011FF18(cRider* self, void* out)
 INCLUDE_ASM("ai/rider", cRider_getHipPosition);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the position of the rider's hip bone (mBoneHips) in its animation model, as a 16-byte vector.
+ *
+ * The vector is returned through @p dst (On Tour returns a t4Vector by value).
+ *
+ * @param dst  receives the hip bone's position quadword
+ * @return @p dst
+ */
 // Copies the quadword of the anim model's transform unk_89C into dst.
 extern "C" void* cRider_getHipPosition(cRider* dst, cRider* self)
 {
@@ -2906,19 +2914,19 @@ INCLUDE_ASM("ai/rider", cRider_updateSplit4);
 #ifdef SKIP_ASM
 extern "C" void func_00120378(void* self);
 
-static inline void approach_11F8(sRiderChannel* t)
+static inline void approach_11F8(sRiderChannel* riderChannel)
 {
     float res;
-    float target = t->target;
-    float rate = t->rate;
-    float cur = t->cur;
+    float target = riderChannel->target;
+    float rate = riderChannel->rate;
+    float cur = riderChannel->cur;
     if (target + rate < cur)
         res = cur - rate;
     else if (cur < target - rate)
         res = cur + rate;
     else
         res = target;
-    t->cur = res;
+    riderChannel->cur = res;
 }
 
 extern "C" void cRider_updateSplit4(cRider* self)
@@ -3980,10 +3988,10 @@ static inline void Set3_2898(sV3_2898& v, float x, float y, float z)
     v.z = z;
 }
 
-static inline cAnimModel* Model_2898(cRider* r) { return r->mAnimModel; }
-static inline sObj_2898* Shadow_2898(cRider* r) { return (sObj_2898*)r->mShadow; }
+static inline cAnimModel* Model_2898(cRider* rider) { return rider->mAnimModel; }
+static inline sObj_2898* Shadow_2898(cRider* rider) { return (sObj_2898*)rider->mShadow; }
 // Translation row of bone i's 0x40-byte matrix.
-static inline sV4_2898 BonePos_2898(cRider* r, int i) { return *(sV4_2898*)((char*)Model_2898(r)->unk_030 + (i << 6) + 0x30); }
+static inline sV4_2898 BonePos_2898(cRider* rider, int i) { return *(sV4_2898*)((char*)Model_2898(rider)->unk_030 + (i << 6) + 0x30); }
 
 static inline void* Tex_2898(sObj_2898* o) { return o->f170; }
 
@@ -4879,14 +4887,14 @@ extern "C" void func_0027C9B0(int, void*);
 extern "C" void func_00124788(void*, void*, float, float, int);
 extern "C" void func_00125448(void*, void*, float, float, int);
 
-extern "C" void cRider_OnInSeqUpdate(cRider* self, int id, float a, float b, int unused, int flags)
+extern "C" void cRider_OnInSeqUpdate(cRider* self, int id, float type, float currFrame, int frameDelta, int flags)
 {
     int buf[12];
     if (self->mIsInNIS)
     {
         func_0027C9B0(id, buf);
-        func_00124788(self, buf, a, b, flags);
-        func_00125448(self, buf, a, b, flags);
+        func_00124788(self, buf, type, currFrame, flags);
+        func_00125448(self, buf, type, currFrame, flags);
     }
 }
 #endif
@@ -5598,9 +5606,9 @@ static inline sXf_124788 Combine_124788(const sXf_124788& a, const sXf_124788& b
     return r;
 }
 
-static inline sQ_124788 GetFront_124788(cRider* r)
+static inline sQ_124788 GetFront_124788(cRider* rider)
 {
-    return *(sQ_124788*)&r->mMatrix.row[1];
+    return *(sQ_124788*)&rider->mMatrix.row[1];
 }
 
 struct sAnimFlags_124788 {

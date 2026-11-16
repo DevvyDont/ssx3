@@ -27,6 +27,14 @@ struct cBENewPlayerInterfaceCtor {
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_cBENewPlayerInterface__FP25cBENewPlayerInterfaceCtor);
 #ifdef SKIP_ASM
+/**
+ * Constructs the back end's player interface and resets its player records and controller assignments.
+ *
+ * Zeroes the word at +0x8, stores the vtable, then calls cBENewPlayerInterface_discard() and
+ * cBENewPlayerInterface_defaultCtrl().
+ *
+ * @return @p self
+ */
 cBENewPlayerInterfaceCtor* cBENewPlayerInterface_cBENewPlayerInterface(cBENewPlayerInterfaceCtor* self)
 {
     self->field_0x8 = 0;
@@ -44,6 +52,13 @@ extern void* D_004A11C0;
 //99.24%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getThis__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the player interface singleton, creating it on first use.
+ *
+ * The instance lives in D_004A11C0; it is allocated as 0x10 bytes tagged "BENewPlayerInt".
+ *
+ * @return the player interface
+ */
 void* cBENewPlayerInterface_getThis()
 {
     if (D_004A11C0 == 0) {
@@ -279,22 +294,22 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isPeakLocked);
 extern int cBELibrary_profileLib[];
 
 // PORT: 64-bit ulong flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
-extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int peak)
+extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int iProfileIndex, int iCharacterID, int peak)
 {
     if (peak != 0)
     {
         if (peak == 1)
         {
-            int bOff = b * 0xF88;
-            int aOff = a * 0x9B50;
+            int bOff = iCharacterID * 0xF88;
+            int aOff = iProfileIndex * 0x9B50;
             int off = bOff + aOff;
             char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(ulong*)(p + 0x278) >> 12) & 1;
         }
         else
         {
-            int bOff = b * 0xF88;
-            int aOff = a * 0x9B50;
+            int bOff = iCharacterID * 0xF88;
+            int aOff = iProfileIndex * 0x9B50;
             int off = bOff + aOff;
             char* p = (char*)cBELibrary_profileLib + off;
             return (int)(*(ulong*)(p + 0x278) >> 13) & 1;
@@ -761,6 +776,15 @@ struct sPlayerSlot_00146E98
 
 extern sPlayerSlot_00146E98 D_00534FEC[];
 
+/**
+ * Finds the rider slot of the first or second human player.
+ *
+ * A slot counts as human when its player record (D_00534FE0, On Tour tempPlayers) has a controller ID of 0 or
+ * more (+0xC, set by cBENewPlayerInterface_setRiderCtrlID()).
+ *
+ * @param second  0 for the first human, nonzero for the second (On Tour bSecond)
+ * @return the rider slot (0-5), or -1 when there is no such human
+ */
 extern "C" int cBENewPlayerInterface_getHumanRider(void* self, int second)
 {
     int n = 0;
@@ -957,6 +981,15 @@ static inline int func_00147338_isLocked(sPlayerCharEntry* e)
     return (*(unsigned int*)((char*)e + 0x10) >> 2) & 1;
 }
 
+/**
+ * Sets the character of the player in a rider slot.
+ *
+ * When bit 2 of the player record's flag word (+0x10) is set, player 0's character is copied instead
+ * of @p charID.
+ *
+ * @param index   rider slot, mapped to a player through cBENewPlayerInterface_getPlayerID()
+ * @param charID  character ID to store
+ */
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* self, int index, int charID)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -977,6 +1010,12 @@ int cBENewPlayerInterface_getPlayerID(int index);
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderCharID__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the character ID of the player in a rider slot (mCharID of its player record).
+ *
+ * @param riderIndex  rider slot, mapped to a player through cBENewPlayerInterface_getPlayerID()
+ * @return the character ID
+ */
 signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex)
 {
     int playerID = cBENewPlayerInterface_getPlayerID(riderIndex);
@@ -1216,6 +1255,12 @@ extern "C" void func_00147758(void* self, int index, int value)
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerID__Fi);
 #ifdef SKIP_ASM
+/**
+ * Maps a rider slot to its player: playerID[index] of the race settings copy at D_005305B0 (a cBERaceDB).
+ *
+ * @param index  rider slot, 0 to 5
+ * @return the player ID
+ */
 int cBENewPlayerInterface_getPlayerID(int index)
 {
     return D_005305B0[index];

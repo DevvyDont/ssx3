@@ -17,6 +17,14 @@ struct sVEntry39E8B8 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Hides a named object on the UI state's screens, doing nothing when no screen has it.
+ *
+ * Searches the screens in order for an object with the name's hash and calls its virtual setVisible(0) (slot 9)
+ * on the first one found.
+ *
+ * @param name  the object's name
+ */
 extern "C" void cUIState_hideObjSafe(cUIState* self, char* name)
 {
     cListNode* n = cList_first((cList*)((char*)self + 0x24));
@@ -50,6 +58,14 @@ struct sVEntry39E948 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Shows a named object on the UI state's screens, doing nothing when no screen has it.
+ *
+ * Searches the screens in order for an object with the name's hash and calls its virtual setVisible(1) (slot 9)
+ * on the first one found.
+ *
+ * @param name  the object's name
+ */
 extern "C" void cUIState_showObjSafe(cUIState* self, char* name)
 {
     cListNode* n = cList_first((cList*)((char*)self + 0x24));

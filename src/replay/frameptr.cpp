@@ -20,6 +20,14 @@ static inline void cReplayFramePtr_setBlockInl(void* self, char* buf, int size)
     *(int*)((char*)self + 0x10) = size;
 }
 
+/**
+ * Allocates a replay frame block and points the frame pointer at it as an empty block.
+ *
+ * Allocates @p size bytes tagged "Frame Block", then sets the start and read position to it and the end and
+ * used size to the start and 0.
+ *
+ * @param size  size of the block in bytes
+ */
 extern "C" void cReplayFramePtr_initBlock(void* self, unsigned int size)
 {
     cReplayFramePtr_setBlockInl(self, (char*)operator_new_tag(size, D_00481730, 0, 0), 0);
@@ -63,6 +71,9 @@ struct cReplayFramePtr {
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_readRewind__FP15cReplayFramePtr);
 #ifdef SKIP_ASM
+/**
+ * Rewinds the frame pointer's read position (+0xC) to the start of its block (+0x4).
+ */
 void cReplayFramePtr_readRewind(cReplayFramePtr* self)
 {
     self->field_0xC = self->field_0x4;
@@ -549,6 +560,12 @@ extern "C" void cReplayFramePtr_initBlock(void* self, unsigned int size);
 extern "C" void cReplay_reset(cReplay* self);
 void cReplay_setReplayState(void* self, int state);
 
+/**
+ * Sets up the replay system: allocates its frame blocks, enters the pre-race state and resets.
+ *
+ * Uses 0x14000-byte blocks, as many as fit in 0xC9800 bytes (10), clears SaveFrameTicks, sets the state to
+ * kPreRace (10) and calls cReplay_reset().
+ */
 extern "C" void cReplay_init(cReplay* self)
 {
     self->FrameBlockSize = 0x14000;
@@ -698,6 +715,11 @@ void func_0026F498(void* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_setReplayState__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets the replay state (State, +0x0).
+ *
+ * @param val  the new state (On Tour tReplayState)
+ */
 void cReplay_setReplayState(void* self, int val)
 {
     *(int*)((char*)self + 0x0) = val;
@@ -861,6 +883,11 @@ INCLUDE_ASM("replay/frameptr", cReplay_startRace);
 #ifdef SKIP_ASM
 void cReplay_setReplayState(void* self, int state);
 
+/**
+ * Marks the race start for the replay: moves the state from kPreRace (10) to kStartRace (11).
+ *
+ * Any other state is left alone.
+ */
 extern "C" void cReplay_startRace(int* self)
 {
     int s = *self;

@@ -355,21 +355,21 @@ void func_002E2F98(void* self, int a1);
 extern "C" void func_002E2FF8(void* self, void* list, int n, int mode, int a4);
 extern "C" void func_002E30D0(void* self, int a1);
 
-extern "C" void cGame_renderLightHalos(cGame* self, void* world, int a2)
+extern "C" void cGame_renderLightHalos(cGame* self, void* world, int ViewID)
 {
     *(int*)((char*)self->LensFxMan + 0x6494) = 1;
-    func_002E2F98(self->LensFxMan, a2);
+    func_002E2F98(self->LensFxMan, ViewID);
     void* p = (char*)world + 0x7BC4;
     int n = *(int*)((char*)world + 0x7BC0);
     if (n != 0) {
-        func_002E2FF8(self->LensFxMan, p, n, 0, a2);
+        func_002E2FF8(self->LensFxMan, p, n, 0, ViewID);
     }
     p = (char*)world + 0x7FC8;
     n = *(int*)((char*)world + 0x7FC4);
     if (n != 0) {
-        func_002E2FF8(self->LensFxMan, p, n, 2, a2);
+        func_002E2FF8(self->LensFxMan, p, n, 2, ViewID);
     }
-    func_002E30D0(self->LensFxMan, a2);
+    func_002E30D0(self->LensFxMan, ViewID);
     *(int*)((char*)self->LensFxMan + 0x6494) = 0;
 }
 #endif
@@ -574,9 +574,9 @@ INCLUDE_ASM("main/game", cSectionMan_cSectionMan);
 #ifdef SKIP_ASM
 extern "C" void cSectionMan_init(cSectionMan* self);
 
-extern "C" void* cSectionMan_cSectionMan(cSectionMan* self, int a1)
+extern "C" void* cSectionMan_cSectionMan(cSectionMan* self, int Game)
 {
-    self->mpGame = (cGame*)a1;
+    self->mpGame = (cGame*)Game;
     cSectionMan_init(self);
     return ((void*)self);
 }
@@ -1265,11 +1265,11 @@ INCLUDE_ASM("main/game", cSectionMan_skyLoadComplete);
 #ifdef SKIP_ASM
 extern "C" void cSectionMan_activateSection(cSectionMan* self, int v);
 
-extern "C" void cSectionMan_skyLoadComplete(cSectionMan* self, int v)
+extern "C" void cSectionMan_skyLoadComplete(cSectionMan* self, int SectionID)
 {
-    if (self->m_iNextSkySectionID != v) {
-        self->m_iNextSkySectionID = v;
-        cSectionMan_activateSection(self, v);
+    if (self->m_iNextSkySectionID != SectionID) {
+        self->m_iNextSkySectionID = SectionID;
+        cSectionMan_activateSection(self, SectionID);
         self->m_bSkySwapPending = 1;
     }
 }

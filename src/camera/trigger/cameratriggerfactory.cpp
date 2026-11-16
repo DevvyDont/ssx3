@@ -3368,12 +3368,12 @@ struct sVec4A16 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern "C" void cCTBoundObjPoint_limitPoint(float* v, sVec4A16* out)
+extern "C" void cCTBoundObjPoint_limitPoint(float* self, sVec4A16* out)
 {
     sVec4A16 t;
-    t.x = v[0];
-    t.y = v[1];
-    t.z = v[2];
+    t.x = self[0];
+    t.y = self[1];
+    t.z = self[2];
     t.w = 1.0f;
     *out = t;
 }

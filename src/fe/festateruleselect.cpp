@@ -454,7 +454,7 @@ static inline void SetVisible_1E48(char* o, int on)
     vt[9].fn(o + vt[9].delta, on);
 }
 
-extern "C" int cFEStateRuleSelect_onWidgetMenu(char* self, void* unused, unsigned int type, int idx)
+extern "C" int cFEStateRuleSelect_onWidgetMenu(char* self, void* pMenu, unsigned int type, int idx)
 {
     switch (type) {
     case 9:

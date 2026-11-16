@@ -798,6 +798,12 @@ extern "C" void* func_001D58B8(void*);
 //100%
 INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the profile-load screen: runs the shared profile screen teardown, then clears the word at +0x1A4.
+ *
+ * The teardown, func_001D58B8(), calls helpers of back-end interface 5, runs three memory card manager calls
+ * when its word at +0x434 is set, and frees the buffer at +0x1D4 when one is held.
+ */
 void cFEStateProfileLoad_onDestroyScreen(void* self)
 {
     func_001D58B8(self);

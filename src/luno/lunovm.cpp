@@ -912,6 +912,15 @@ struct cLunoNode_ct {
 };
 
 extern "C" void luno_cLunoTable_constructTable_n(cLunoTableRef* ref, int n) __asm__("luno_cLunoTable_constructTable");
+/**
+ * Creates a Luno script table with room for @p n nodes and points a table reference at it.
+ *
+ * Allocates the table ("LunoTable") and its node array ("TableData"); the modulus is set to n - 1 and the
+ * reference count to 1.
+ *
+ * @param ref  the table reference that receives the new table
+ * @param n    the number of node slots (the modulus n - 1 suggests a power of two)
+ */
 extern "C" void luno_cLunoTable_constructTable_n(cLunoTableRef* ref, int n)
 {
     cLunoTable* t = (cLunoTable*)new (D_00479860, 0xA0000000, 0) cLunoTable;

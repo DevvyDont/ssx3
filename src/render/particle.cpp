@@ -61,6 +61,12 @@ struct sVec4A {
 
 extern sVec4A t4vect_Zero;
 
+/**
+ * Resets a dynamic emitter: zeroes both of its vector arrays and its counters.
+ *
+ * For each of the +0x178 entries, the vectors at +0x1A0 and +0x1A4 are set to zero; the words at +0x17C and
+ * +0x1E0 are cleared.
+ */
 extern "C" void cBaseClass_DynamicEmitter_reset(void* self)
 {
     int i;
@@ -439,6 +445,13 @@ extern void* cDynamicColourEmitter_vtbl[];
 extern "C" void cDynamicColourEmitter_purge(void* self, int a1);
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags);
 
+/**
+ * Destroys a dynamic colour emitter: purges its particles, then runs the base emitter destructor.
+ *
+ * Stores cDynamicColourEmitter's vtable at +0x1F8 and calls cDynamicColourEmitter_purge(self, 0) first.
+ *
+ * @param flags  g++ destructor flags, passed to cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter()
+ */
 extern "C" void cDynamicColourEmitter__cDynamicColourEmitter(void* self, int flags)
 {
     *(void***)((char*)self + 0x1F8) = cDynamicColourEmitter_vtbl;
@@ -473,14 +486,14 @@ INCLUDE_ASM("render/particle", cDynamicColourEmitter_purge);
 void cMemMan_free(void* p);
 extern "C" void func_00370CF8(void* self, int a1);
 
-extern "C" void cDynamicColourEmitter_purge(void* self, int a1)
+extern "C" void cDynamicColourEmitter_purge(void* self, int resetEmitter)
 {
     void* p = *(void**)((char*)self + 0x204);
     if (p != 0) {
         cMemMan_free(p);
         *(void**)((char*)self + 0x204) = 0;
     }
-    func_00370CF8(self, a1);
+    func_00370CF8(self, resetEmitter);
 }
 #endif
 
@@ -3042,9 +3055,9 @@ struct sPtVEntryI6938 {
 
 
 // Clips the rectangle to the screen (negative origins shrink the size) and stores it as the scissor box.
-extern "C" void func_00376938(cPS2GraphicsMan* p, float x, float y, float w, float h)
+extern "C" void func_00376938(cPS2GraphicsMan* pS2GraphicsMan, float x, float y, float w, float h)
 {
-    cPS2GraphicsMan* self = p;
+    cPS2GraphicsMan* self = pS2GraphicsMan;
     sPtVEntryI6938* e = &((sPtVEntryI6938*)self->mVtbl)[10];
     int width = e->fn((char*)self + e->delta);
     e = &((sPtVEntryI6938*)self->mVtbl)[11];
@@ -5152,9 +5165,9 @@ struct sPartEmitter_A540 {
 extern "C" sPartEmitter_A540* func_00385138(void* mem, void* a1, void* a2, void* a3, unsigned int flags);
 extern const char D_004928D8[];
 
-extern "C" sPartEmitter_A540* func_0037A540(cPS2GraphicsMan* a0, void* a1, void* a2, unsigned int flags)
+extern "C" sPartEmitter_A540* func_0037A540(cPS2GraphicsMan* pS2GraphicsMan, void* a1, void* a2, unsigned int flags)
 {
-    sPartEmitter_A540* e = func_00385138(cMemMan_alloc(0x1CC, D_004928D8, flags, 0), a1, a2, a0, flags);
+    sPartEmitter_A540* e = func_00385138(cMemMan_alloc(0x1CC, D_004928D8, flags, 0), a1, a2, pS2GraphicsMan, flags);
     if (flags & 0x40000000) {
         if (e == 0) {
             return 0;

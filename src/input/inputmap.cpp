@@ -63,9 +63,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* self, void* a1, void* a2);
 extern char D_0048DD10[];
 
-extern "C" void cInputMap_loadMapFile(void* self, void* a1, void* a2)
+extern "C" void cInputMap_loadMapFile(void* self, void* mem, void* len)
 {
-    *(void**)((char*)self + 0x8) = cInputMapParser_cInputMapParser((cInputMapParser*)cMemMan_alloc(0x109EC, D_0048DD10, 0x100, 0), a1, a2);
+    *(void**)((char*)self + 0x8) = cInputMapParser_cInputMapParser((cInputMapParser*)cMemMan_alloc(0x109EC, D_0048DD10, 0x100, 0), mem, len);
 }
 #endif
 
@@ -139,11 +139,11 @@ INCLUDE_ASM("input/inputmap", cInputMap_getValue);
 void* func_00325250(void* self);
 extern "C" float func_00325450(void* parser, void* a1, void* a2);
 
-extern "C" float cInputMap_getValue(void* self, void* a1, int a2)
+extern "C" float cInputMap_getValue(void* self, void* a1, int id)
 {
     char parser[0x190];
     func_00325250(parser);
-    return func_00325450(parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[a2] << 2));
+    return func_00325450(parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2));
 }
 #endif
 
@@ -183,11 +183,11 @@ INCLUDE_ASM("input/inputmap", cInputMap_getState);
 void* func_00325250(void* self);
 extern "C" float func_00325450(void* parser, void* a1, void* a2);
 
-extern "C" int cInputMap_getState(void* self, void* a1, int a2)
+extern "C" int cInputMap_getState(void* self, void* a1, int id)
 {
     char parser[0x190];
     func_00325250(parser);
-    return func_00325450(parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[a2] << 2)) != 0.0f;
+    return func_00325450(parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2)) != 0.0f;
 }
 #endif
 
@@ -320,12 +320,12 @@ struct sMapData_1428 {
 };
 
 // Initialises a compiled input map: id stack 63..1 and the node free list.
-extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* vself, void* a1, void* a2)
+extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* vself, void* file, void* length)
 {
     sMapData_1428* self = (sMapData_1428*)vself;
-    self->f4 = a2;
-    self->f0 = a1;
-    self->f8 = a1;
+    self->f4 = length;
+    self->f0 = file;
+    self->f8 = file;
     self->f80E4 = 0;
     self->f8C = 1;
     self->f90 = 1;

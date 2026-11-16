@@ -47,6 +47,11 @@ INCLUDE_ASM("ui/uithing", cUIThing_update);
 extern "C" void cUIAnimation_updateThing(void*, void*, unsigned char, unsigned short);
 extern "C" void cUIAnimation_updateFrame(void*, unsigned char);
 
+/**
+ * Advances the UI thing's current animation, if any, through cUIAnimation_updateThing() and _updateFrame().
+ *
+ * @param ev  the animation frame number, passed to cUIAnimation_updateThing() (On Tour FrameNum)
+ */
 extern "C" void cUIThing_update(cUIThing* self, unsigned short ev)
 {
     void* a = self->mpAnim;
@@ -86,50 +91,50 @@ struct sUIThing0048 {
 };
 
 // Sets one animatable property (position, rotation, scale, colour, frame...) from a keyframe value.
-extern "C" void cUIThing_setChannelData(cUIThing* self, unsigned short key, float v)
+extern "C" void cUIThing_setChannelData(cUIThing* self, unsigned short key, float data)
 {
     switch (key) {
     case 0:
-        self->mPosition.x = v;
+        self->mPosition.x = data;
         break;
     case 1:
-        self->mPosition.y = v;
+        self->mPosition.y = data;
         break;
     case 9:
-        self->mScale.x = v * 0.01f;
+        self->mScale.x = data * 0.01f;
         break;
     case 10:
-        self->mScale.y = v * 0.01f;
+        self->mScale.y = data * 0.01f;
         break;
     case 3:
-        self->mAngle.x = v * 0.017444444820284843f;
+        self->mAngle.x = data * 0.017444444820284843f;
         break;
     case 4:
-        self->mAngle.y = v * 0.017444444820284843f;
+        self->mAngle.y = data * 0.017444444820284843f;
         break;
     case 5:
-        self->mAngle.z = v * 0.017444444820284843f;
+        self->mAngle.z = data * 0.017444444820284843f;
         break;
     case 12:
-        ((sUIThing0048*)self)->frame = (int)v;
+        ((sUIThing0048*)self)->frame = (int)data;
         break;
     case 13:
-        self->mColour.A = v * 0.003921568859368563f;
+        self->mColour.A = data * 0.003921568859368563f;
         break;
     case 14:
-        self->mColour.R = v * 0.003921568859368563f;
+        self->mColour.R = data * 0.003921568859368563f;
         break;
     case 15:
-        self->mColour.G = v * 0.003921568859368563f;
+        self->mColour.G = data * 0.003921568859368563f;
         break;
     case 16:
-        self->mColour.B = v * 0.003921568859368563f;
+        self->mColour.B = data * 0.003921568859368563f;
         break;
     case 6:
-        self->mSize.x = v;
+        self->mSize.x = data;
         break;
     case 7:
-        self->mSize.y = v;
+        self->mSize.y = data;
         break;
     }
 }
@@ -138,14 +143,25 @@ extern "C" void cUIThing_setChannelData(cUIThing* self, unsigned short key, floa
 //100%
 INCLUDE_ASM("ui/uithing", cUIThing_setChannelDataKCP);
 #ifdef SKIP_ASM
-extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, short *p)
+/**
+ * Applies a list of animation key values to the UI thing, one channel per pair.
+ *
+ * Each pair is a channel ID and a value: 0 and 1 position x/y, 3 to 5 angle x/y/z (degrees), 6 and 7 size x/y,
+ * 9 and 10 scale x/y (percent), 12 attribute bits 13-18, 13 to 16 colour alpha, red, green and blue (0-255).
+ * Other IDs are ignored.
+ *
+ * @param vself  the UI thing (this)
+ * @param count  the number of pairs
+ * @param p      the pairs, as shorts: channel ID, then value
+ */
+extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, short *pPtr)
 {
     unsigned int i = 0;
 
     if (count != 0) {
         do {
-            float v = (float)p[1];
-            short id = p[0];
+            float v = (float)pPtr[1];
+            short id = pPtr[0];
             switch (id) {
             case 0:
                 vself->mPosition.x = v;
@@ -191,7 +207,7 @@ extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, 
                 break;
             }
             i++;
-            p += 2;
+            pPtr += 2;
         } while (i < count);
     }
 }

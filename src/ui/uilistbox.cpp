@@ -188,6 +188,17 @@ struct cUIListBox_sObj {
     unsigned char cur;
 };
 
+/**
+ * Sets a list box entry's text from an ASCII string, plus its data word.
+ *
+ * The text is converted to 16-bit characters in the entry's buffer. An existing buffer is reused unless the new
+ * length is below the entry's recorded size, in which case it is freed and a new "UIListBoxEntry" buffer of the
+ * new length is allocated; the size is not updated. The ASCII pointer is kept too.
+ *
+ * @param idx   the entry index
+ * @param text  the ASCII text
+ * @param data  the data word stored with the entry
+ */
 extern "C" void cUIListBox_setEntryByAsciiString(cUIListBox_sObj* self, unsigned char idx, const char* text, int data)
 {
     int len = strlen(text) + 1;
@@ -323,9 +334,9 @@ extern "C" void cUIMenu_setUIData(cUIMenu* self)
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIMenu_setInputMap);
 #ifdef SKIP_ASM
-extern "C" void cUIMenu_setInputMap(cUIMenu* self, char a1)
+extern "C" void cUIMenu_setInputMap(cUIMenu* self, char value)
 {
-    if (a1 == 0) {
+    if (value == 0) {
         *(char*)((char*)self + 0x91) = 0;
         *(char*)((char*)self + 0x92) = 1;
         *(char*)((char*)self + 0x93) = 2;

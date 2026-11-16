@@ -629,9 +629,9 @@ struct sFlState_70D0 {
     int idx;            // 0x60
 };
 
-extern "C" void cFlexBridgeNode_updateIntersectInfo(sFlBridge_70D0* self, sFlState_70D0* p)
+extern "C" void cFlexBridgeNode_updateIntersectInfo(sFlBridge_70D0* self, sFlState_70D0* intInfo)
 {
-    int idx = p->idx;
+    int idx = intInfo->idx;
     if (idx >= 0) {
         int h = idx / 2;
         sFlEnt_70D0* ents = self->ents;
@@ -639,10 +639,10 @@ extern "C" void cFlexBridgeNode_updateIntersectInfo(sFlBridge_70D0* self, sFlSta
         sV4_70D0* m = vt[24].fn((char*)self + vt[24].delta);
         sFlEnt_70D0* e = (sFlEnt_70D0*)(h * 0x50 + (int)ents);
         sV4_70D0 r = vu0MtxMul_70D0(m, vu0ScaleP_70D0(&D_004FF140_70D0, e->f24));
-        sV4_70D0 d = vu0Sub_70D0(p->v[0], vu0MtxMul_70D0(m, e->a));
+        sV4_70D0 d = vu0Sub_70D0(intInfo->v[0], vu0MtxMul_70D0(m, e->a));
         sV4_70D0 t = vu0Add_70D0(vu0MtxMul_70D0(m, e->b), vu0Cross_70D0(d, r));
-        vu0AddEq_70D0(p->v[2], t);
-        vu0AddEq_70D0(p->v[3], r);
+        vu0AddEq_70D0(intInfo->v[2], t);
+        vu0AddEq_70D0(intInfo->v[3], r);
     }
 }
 #endif
@@ -874,6 +874,11 @@ INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_update);
 extern "C" void cSpring_update(void*);
 extern "C" void cFlexBridgeNode_updateGrid(void*);
 
+/**
+ * Updates a flexible bridge for one frame: steps its spring mesh (Mesh, +0x50), then rebuilds its grid.
+ *
+ * Calls cSpring_update() and then cFlexBridgeNode_updateGrid().
+ */
 extern "C" void cFlexBridgeNode_update(void* self)
 {
     cSpring_update((char*)self + 0x50);
@@ -1242,6 +1247,15 @@ struct sFlexBridgeVEntry7D38 {
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void func_003545D8(void* p, void* stream);
 
+/**
+ * Writes a flexible bridge to a replay frame: the cInstanceNode data, its spring mesh, then 0x30 bytes from
+ * +0x20.
+ *
+ * The spring (+0x50) is written by func_003545D8 (On Tour cSpring::writeToReplayFrame); the last block goes
+ * through the stream's virtual write (slot 1).
+ *
+ * @param stream  the replay frame stream to write to (On Tour cBxReplayFrame*)
+ */
 extern "C" void cFlexBridgeNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
@@ -1358,6 +1372,12 @@ struct sFlexBridgeVEntry8008 {
 
 extern "C" void cFlexRailNode_updateSpaceHash(void* self);
 
+/**
+ * Updates a flexible rail for one frame: calls its virtual slots 47 and 48, then updates its space hash.
+ *
+ * Slots 47 and 48 differ between the three vtables that use this update, and are empty in one of them; they are
+ * probably per-type hooks that move the rail's points and matrices.
+ */
 extern "C" void cFlexRailNode_update(void* self)
 {
     sFlexBridgeVEntry8008* vt1 = *(sFlexBridgeVEntry8008**)((char*)self + 0xC);

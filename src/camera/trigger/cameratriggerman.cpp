@@ -14,6 +14,12 @@ void cCameraTriggerList_init(cCameraTriggerList* self);
 extern "C" void cCameraTriggerMan_purge(void* self);
 extern "C" void cCamera_resetChaseControllerSwitches();
 
+/**
+ * Clears all camera trigger state when leaving a track.
+ *
+ * Purges both active trigger lists (+0x14, +0x18), resets both trigger stacks (+0x1C, +0x3C), purges the
+ * manager, re-initialises its trigger list and resets the chase camera controller switches.
+ */
 extern "C" void cCameraTriggerMan_cleanupOnExit(void* self)
 {
     cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x14));
@@ -256,6 +262,12 @@ struct sCamTrigMan {
 
 extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* file);
 
+/**
+ * Loads the camera triggers from a file and clears the word at +0x20 of each loaded trigger.
+ *
+ * @param file  the trigger file name
+ * @return 0 on success, otherwise cCameraTriggerList_loadFromFile()'s error code
+ */
 extern "C" int cCameraTriggerMan_loadTriggers(sCamTrigMan* self, const char* file)
 {
     int err = cCameraTriggerList_loadFromFile(self, file);
@@ -509,6 +521,9 @@ extern "C" int func_0016D1F8(int arg0) {
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerStack_init__FP19cCameraTriggerStack);
 #ifdef SKIP_ASM
+/**
+ * Empties a camera trigger stack by zeroing its first two words.
+ */
 void cCameraTriggerStack_init(cCameraTriggerStack* self)
 {
     self->field_0x0 = 0;

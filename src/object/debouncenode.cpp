@@ -14,9 +14,9 @@ struct sDebounceVEntry2D10 {
 extern "C" void* cMoveNode_cMoveNode(void* self, void*, void*);
 extern char cDebounceNode_vtbl[];
 
-extern "C" void* cDebounceNode_cDebounceNode(void* self, void* unused, void* stream)
+extern "C" void* cDebounceNode_cDebounceNode(void* self, void* bucket, void* stream)
 {
-    cMoveNode_cMoveNode(self, unused, stream);
+    cMoveNode_cMoveNode(self, bucket, stream);
     *(void**)((char*)self + 0xC) = cDebounceNode_vtbl;
     sDebounceVEntry2D10* e = &(*(sDebounceVEntry2D10**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x2C, 4);
@@ -727,9 +727,9 @@ struct sDebounceVEntry37C0 {
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void*, void*);
 extern char cCounterNode_vtbl[];
 
-extern "C" void* cCounterNode_cCounterNode(void* self, void* unused, void* stream)
+extern "C" void* cCounterNode_cCounterNode(void* self, void* bucket, void* stream)
 {
-    cInstanceNode_cInstanceNode(self, unused, stream);
+    cInstanceNode_cInstanceNode(self, bucket, stream);
     *(void**)((char*)self + 0xC) = cCounterNode_vtbl;
     sDebounceVEntry37C0* vt = *(sDebounceVEntry37C0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 0x8);

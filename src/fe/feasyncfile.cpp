@@ -30,11 +30,19 @@ struct sFE3PeakPicFiles {
     sFE3PeakPicEntry mFiles[1];
 };
 
-extern "C" void cFEAsyncManager_Load3PeakPic(cFEAsyncManager* self, int slot, int param)
+/**
+ * Requests the whole-mountain map picture ("|map_mtn.ssh") into an async file slot.
+ *
+ * Writes the name into the slot, stores @p param with it and sets the slot's status to 1.
+ *
+ * @param slot   index of the async file slot
+ * @param param  value stored with the request (On Tour's LoadLocationPic calls it useAsync)
+ */
+extern "C" void cFEAsyncManager_Load3PeakPic(cFEAsyncManager* self, int slot, int useAsync)
 {
     sFE3PeakPicFiles* files = (sFE3PeakPicFiles*)self;
     sprintf(files->mFiles[slot].mName, D_004A19F8, D_004A19F0, D_004A1A00);
-    files->mFiles[slot].mParam = param;
+    files->mFiles[slot].mParam = useAsync;
     cFEAsyncManager_SetFileStatus(self, slot, 1);
 }
 #endif
@@ -59,11 +67,20 @@ struct sFEPeakPicFiles {
     sFEPeakPicEntry mFiles[1];
 };
 
-extern "C" void cFEAsyncManager_Load1PeakPic(cFEAsyncManager* self, int pic, int slot, int param)
+/**
+ * Requests one peak's map picture ("|map_peakA.ssh", B or C) into an async file slot.
+ *
+ * Writes the name into the slot, stores @p param with it and sets the slot's status to 1.
+ *
+ * @param pic    the peak, 0 to 2
+ * @param slot   index of the async file slot
+ * @param param  value stored with the request (On Tour's LoadLocationPic calls it useAsync)
+ */
+extern "C" void cFEAsyncManager_Load1PeakPic(cFEAsyncManager* self, int pic, int slot, int useAsync)
 {
     sFEPeakPicFiles* files = (sFEPeakPicFiles*)self;
     sprintf(files->mFiles[slot].mName, D_004A19F8, D_00441258[pic], D_004A1A00);
-    files->mFiles[slot].mParam = param;
+    files->mFiles[slot].mParam = useAsync;
     cFEAsyncManager_SetFileStatus(self, slot, 1);
 }
 #endif
@@ -78,13 +95,22 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBEMissionInterface_getPictureFileName(void* self, int id);
 
-extern "C" void cFEAsyncManager_LoadLocationPic(cFEAsyncManager* self, int id, int slot, int param)
+/**
+ * Requests a location's picture into an async file slot.
+ *
+ * The name is "|" + cBEMissionInterface_getPictureFileName() + ".ssh". A negative location ID requests nothing.
+ *
+ * @param id     the location ID (On Tour eBELocationID locID)
+ * @param slot   index of the async file slot (On Tour pos)
+ * @param param  value stored with the request (On Tour useAsync)
+ */
+extern "C" void cFEAsyncManager_LoadLocationPic(cFEAsyncManager* self, int id, int slot, int useAsync)
 {
     if (id >= 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
         sFEPeakPicFiles* files = (sFEPeakPicFiles*)self;
         sprintf(files->mFiles[slot].mName, D_004A1A08, D_004A1A10, cBEMissionInterface_getPictureFileName(iface, id), D_004A1A00);
-        files->mFiles[slot].mParam = param;
+        files->mFiles[slot].mParam = useAsync;
         cFEAsyncManager_SetFileStatus(self, slot, 1);
     }
 }
@@ -1489,14 +1515,14 @@ struct sPtrVec1A54D8 {
 };
 
 
-static inline void PushBack1A54D8(cFEStateNetMessenger* o, void* x)
+static inline void PushBack1A54D8(cFEStateNetMessenger* feStateNetMessenger, void* x)
 {
-    sPtrVec1A54D8* v = &(*(sPtrVec1A54D8*)&o->mNames);
-    if ((*(sPtrVec1A54D8*)&o->mNames).mEnd != (*(sPtrVec1A54D8*)&o->mNames).mCap) {
+    sPtrVec1A54D8* v = &(*(sPtrVec1A54D8*)&feStateNetMessenger->mNames);
+    if ((*(sPtrVec1A54D8*)&feStateNetMessenger->mNames).mEnd != (*(sPtrVec1A54D8*)&feStateNetMessenger->mNames).mCap) {
         Construct1A54D8(v->mEnd, x);
-        ++(*(sPtrVec1A54D8*)&o->mNames).mEnd;
+        ++(*(sPtrVec1A54D8*)&feStateNetMessenger->mNames).mEnd;
     } else {
-        func_001DB778(v, (void**)(*(sPtrVec1A54D8*)&o->mNames).mEnd, &x);
+        func_001DB778(v, (void**)(*(sPtrVec1A54D8*)&feStateNetMessenger->mNames).mEnd, &x);
     }
 }
 
@@ -1521,7 +1547,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A56D0);
 extern "C" int func_0041AA88(const char* a, const char* b);
 
 
-static inline unsigned int Count1A56D0(cFEStateNetMessenger* s) { return ((char***)s->mNames.mpFinish) - ((char***)s->mNames.mpStart); }
+static inline unsigned int Count1A56D0(cFEStateNetMessenger* feStateNetMessenger) { return ((char***)feStateNetMessenger->mNames.mpFinish) - ((char***)feStateNetMessenger->mNames.mpStart); }
 
 extern "C" int func_001A56D0(cFEStateNetMessenger* self, const char* name)
 {
@@ -1539,7 +1565,7 @@ extern "C" int func_001A56D0(cFEStateNetMessenger* self, const char* name)
 INCLUDE_ASM("fe/feasyncfile", func_001A5768);
 #ifdef SKIP_ASM
 
-static inline unsigned int Count1A5768(cFEStateNetMessenger* s) { return ((char***)s->mNames.mpFinish) - ((char***)s->mNames.mpStart); }
+static inline unsigned int Count1A5768(cFEStateNetMessenger* feStateNetMessenger) { return ((char***)feStateNetMessenger->mNames.mpFinish) - ((char***)feStateNetMessenger->mNames.mpStart); }
 
 extern "C" int func_001A5768(cFEStateNetMessenger* self, const char* name)
 {
@@ -1559,7 +1585,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A5800);
 extern "C" int func_0041AA88(const char* a, const char* b);
 
 
-static inline unsigned int Count1A5800(cFEStateNetMessenger* s) { return ((char***)s->mNames.mpFinish) - ((char***)s->mNames.mpStart); }
+static inline unsigned int Count1A5800(cFEStateNetMessenger* feStateNetMessenger) { return ((char***)feStateNetMessenger->mNames.mpFinish) - ((char***)feStateNetMessenger->mNames.mpStart); }
 
 extern "C" int func_001A5800(cFEStateNetMessenger* self, char** name)
 {
@@ -1639,15 +1665,15 @@ struct sPtrVec1A5898 {
 };
 
 
-static inline void PushBack1A5898(cFEStateNetMessenger* o, void* x)
+static inline void PushBack1A5898(cFEStateNetMessenger* feStateNetMessenger, void* x)
 {
-    sPtrVec1A5898* v = &(*(sPtrVec1A5898*)&o->mNames);
+    sPtrVec1A5898* v = &(*(sPtrVec1A5898*)&feStateNetMessenger->mNames);
     void* const* px = &x;
-    if ((*(sPtrVec1A5898*)&o->mNames).mEnd != (*(sPtrVec1A5898*)&o->mNames).mCap) {
+    if ((*(sPtrVec1A5898*)&feStateNetMessenger->mNames).mEnd != (*(sPtrVec1A5898*)&feStateNetMessenger->mNames).mCap) {
         Construct1A5898(v->mEnd, x);
-        ++(*(sPtrVec1A5898*)&o->mNames).mEnd;
+        ++(*(sPtrVec1A5898*)&feStateNetMessenger->mNames).mEnd;
     } else {
-        func_001DB778(v, (void**)(*(sPtrVec1A5898*)&o->mNames).mEnd, px);
+        func_001DB778(v, (void**)(*(sPtrVec1A5898*)&feStateNetMessenger->mNames).mEnd, px);
     }
 }
 
@@ -2052,7 +2078,7 @@ struct sIntVec_001A6978 {
 };
 
 
-static inline unsigned int Size_001A6978(cFEStateNetMessenger* o) { return (*(sIntVec_001A6978*)&o->mNames).mEnd - (*(sIntVec_001A6978*)&o->mNames).mBegin; }
+static inline unsigned int Size_001A6978(cFEStateNetMessenger* feStateNetMessenger) { return (*(sIntVec_001A6978*)&feStateNetMessenger->mNames).mEnd - (*(sIntVec_001A6978*)&feStateNetMessenger->mNames).mBegin; }
 
 extern "C" void func_001A6978(cFEStateNetMessenger* vself)
 {
@@ -5784,9 +5810,9 @@ extern char D_00462AA8[];
 
 
 // PORT: passes D_004A1408 through an int parameter.
-extern "C" void func_001ABB30(cFEStateNet* p, int a1, void* a2, int a3)
+extern "C" void func_001ABB30(cFEStateNet* feStateNet, int a1, void* a2, int a3)
 {
-    cFEStateNet* self = p;
+    cFEStateNet* self = feStateNet;
     self->unk_6C4 = 0;
     if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();

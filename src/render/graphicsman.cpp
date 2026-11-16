@@ -31,7 +31,7 @@ struct sGfxManBlend {
 
 extern "C" int func_00369A78(void* a, void* b, int tol0, int tol1, int tol2);
 
-extern "C" void cGraphicsMan_AddBlendedMatrix(sGfxManBlend* self, sBlendMatrix* m)
+extern "C" void cGraphicsMan_AddBlendedMatrix(sGfxManBlend* self, sBlendMatrix* blendedMatrix)
 {
     if (self->blend == 0) {
         sBlendMatrix* mem = (sBlendMatrix*)operator_new_tag(0x3000, D_00492638, 0x100, 0);
@@ -44,16 +44,16 @@ extern "C" void cGraphicsMan_AddBlendedMatrix(sGfxManBlend* self, sBlendMatrix* 
     }
     sBlendMatrix* e = self->blend;
     for (int i = 0; i < self->nBlend; i++, e++) {
-        if (func_00369A78(e, m, 10, 20, 20)) {
+        if (func_00369A78(e, blendedMatrix, 10, 20, 20)) {
             for (int j = 0; j < e->count; j++) {
-                m->weights[j].bone = e->weights[j].bone;
+                blendedMatrix->weights[j].bone = e->weights[j].bone;
             }
             return;
         }
     }
-    self->blend[self->nBlend].count = m->count;
-    for (int j = 0; j < m->count; j++) {
-        self->blend[self->nBlend].weights[j] = m->weights[j];
+    self->blend[self->nBlend].count = blendedMatrix->count;
+    for (int j = 0; j < blendedMatrix->count; j++) {
+        self->blend[self->nBlend].weights[j] = blendedMatrix->weights[j];
     }
     self->nBlend++;
 }
@@ -2299,10 +2299,10 @@ struct sGmQuad2 {
 
 extern "C" void cStaticEmitter_render1(void* self);
 
-extern "C" void cStaticEmitter_render(void* self, const sGmQuad2* m, const sGmQuad* v)
+extern "C" void cStaticEmitter_render(void* self, const sGmQuad2* bbox, const sGmQuad* pos)
 {
-    *(sGmQuad2*)((char*)self + 0x160) = *m;
-    *(sGmQuad*)((char*)self + 0xC0) = *v;
+    *(sGmQuad2*)((char*)self + 0x160) = *bbox;
+    *(sGmQuad*)((char*)self + 0xC0) = *pos;
     cStaticEmitter_render1(self);
 }
 #endif

@@ -174,10 +174,10 @@ typedef int (*DfBoolFn_0750)(void*);
 typedef sDfMat_0750* (*DfMatFn_0750)(void*);
 typedef void (*DfSetFn_0750)(void*, int);
 
-extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* self, int a1, void* obj, sDfDesc_0750* desc, sDfOther_0750* other)
+extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* self, int bucket, void* obj, sDfDesc_0750* desc, sDfOther_0750* other)
 {
     sDfMatElem_0750** pm = &self->mats;
-    func_0034FB00(self, a1, 0x16, obj);
+    func_0034FB00(self, bucket, 0x16, obj);
     self->vt = cDeadFadeNode_vtbl;
     self->block.w[0] = 0xFFFFFFFF;
     self->block = *(sDfBlock_0750*)desc;
@@ -285,6 +285,14 @@ INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_loseFocus);
 // pass-through wrapper and this caller passes two args (prototype mismatch).
 void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
 
+/**
+ * Applies the dead fade node's stored instance event (+0x1C) to its instance record (+0x18) when it loses
+ * focus.
+ *
+ * func_002D1CC0() passes both to func_002FC2C0(), which by event kind deletes the record's node (1), replaces
+ * it with a new "DeadNode" (0) or with a "RestoreNode" (3); the update does the same once the fade timer runs
+ * out.
+ */
 extern "C" void cDeadFadeNode_loseFocus(void* self)
 {
     func_002D1CC0_2(*(void**)((char*)self + 0x18), (char*)self + 0x1C);

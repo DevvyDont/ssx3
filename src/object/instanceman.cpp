@@ -14,12 +14,12 @@ struct sInstanceStruct {
 //100%
 INCLUDE_ASM("object/instanceman", cInstanceMan_copyInstance__FPvP15sInstanceStructT0);
 #ifdef SKIP_ASM
-void cInstanceMan_copyInstance(void* self, sInstanceStruct* a, void* b)
+void cInstanceMan_copyInstance(void* self, sInstanceStruct* dst, void* src)
 {
-    void* saved = a->field_0x78;
-    MEM_copy(a, b, 0xA0);
-    a->field_0x78 = saved;
-    a->field_0x8 |= 0x2000;
+    void* saved = dst->field_0x78;
+    MEM_copy(dst, src, 0xA0);
+    dst->field_0x78 = saved;
+    dst->field_0x8 |= 0x2000;
 }
 #endif
 
@@ -455,14 +455,14 @@ struct sImRangeTable {
     sImRange* entries;  // 0x4
 };
 
-static inline bool sImRange_contains(sImRange* e, float x)
+static inline bool sImRange_contains(sImRange* self, float x)
 {
-    return e->lo <= x && x < e->hi;
+    return self->lo <= x && x < self->hi;
 }
 
-static inline bool sImRange_below(sImRange* e, float x)
+static inline bool sImRange_below(sImRange* self, float x)
 {
-    return x < e->hi;
+    return x < self->hi;
 }
 
 extern "C" sImRange* func_00351A80(sImRangeTable* t, int* cur, float x)
@@ -792,9 +792,9 @@ struct sInstElem2168 {
     sInstElem2168() {}
 };
 
-extern "C" void* cMeshAnimNode_cMeshAnimNode(void* self, void* a1, void* stream)
+extern "C" void* cMeshAnimNode_cMeshAnimNode(void* self, void* bucket, void* stream)
 {
-    cInstanceNode_cInstanceNode(self, a1, stream);
+    cInstanceNode_cInstanceNode(self, bucket, stream);
     *(void***)((char*)self + 0xC) = cMeshAnimNode_vtbl;
     new ((char*)self + 0x30) sInstElem2168[24];
     new ((char*)self + 0x1B0) sInstElem2168[24];
@@ -813,6 +813,15 @@ extern "C" void* cInstanceNode__cInstanceNode(void*);
 //100%
 INCLUDE_ASM("object/instanceman", cMeshAnimNode__cMeshAnimNode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a mesh animation node: stores cMeshAnimNode's vtable at +0xC, then runs the cInstanceNode
+ * destructor.
+ *
+ * The g++ delete flags in the second argument register pass through untouched to
+ * cInstanceNode__cInstanceNode().
+ *
+ * @return no meaningful value (cInstanceNode__cInstanceNode returns nothing)
+ */
 void* cMeshAnimNode__cMeshAnimNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cMeshAnimNode_vtbl;
@@ -1071,6 +1080,15 @@ struct sInstanceManVEntry2708 {
 int func_0034FCC0(void* self);
 extern "C" void func_0034FE28(void* self);
 
+/**
+ * Expires a mesh animation node according to its end mode (+0x6B0).
+ *
+ * When @p check is set and func_0034FCC0() runs a script for the instance (probably its on-expire script),
+ * nothing else happens. Mode 0 replaces the node with a new cDeadNode for the same instance (func_0034FE28);
+ * mode 2 deletes the node through its virtual destructor; other modes leave it.
+ *
+ * @param check  nonzero to give the instance's script the first chance (On Tour expire's runscript)
+ */
 extern "C" void cMeshAnimNode_expire(void* self, int check)
 {
     if (check != 0 && func_0034FCC0(self) != 0) {
@@ -1097,6 +1115,13 @@ struct sInstManVEntry2780 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Handles a mesh animation node losing focus: deletes it or swaps it for a dead node, by its end mode (+0x6B0).
+ *
+ * A nonzero mode resets the instance record's flag word (+0x8) the way cInstanceNode_expire() does (keeps bits
+ * 8-9 and the upper half, copies the upper half down, sets bit 1) and deletes the node. Mode 0 replaces the
+ * node with a new cDeadNode for the same instance (func_0034FE28).
+ */
 extern "C" void cMeshAnimNode_loseFocus(void* self)
 {
     if (*(int*)((char*)self + 0x6B0) != 0) {
@@ -1285,6 +1310,13 @@ struct sSerVEntry_00352A58 {
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes the mesh animation node to a replay frame: the cInstanceNode data, then 12 bytes from +0x1C.
+ *
+ * The extra bytes go through the stream's virtual write (slot 1).
+ *
+ * @param stream  the replay frame stream to write to
+ */
 extern "C" void cMeshAnimNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);

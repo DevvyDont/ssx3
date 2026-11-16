@@ -495,14 +495,14 @@ static inline void update_B4E0(void* iface)
     vt[1].fn((char*)iface + vt[1].delta);
 }
 
-static inline bool commIdle_B4E0(cCommSystem* c)
+static inline bool commIdle_B4E0(cCommSystem* commSystem)
 {
-    return c->mNetConnState == 1;
+    return commSystem->mNetConnState == 1;
 }
 
-static inline bool commBusy_B4E0(cCommSystem* c)
+static inline bool commBusy_B4E0(cCommSystem* commSystem)
 {
-    return c->mNetConnState == 3 || c->mNetConnState == 4;
+    return commSystem->mNetConnState == 3 || commSystem->mNetConnState == 4;
 }
 
 static inline bool netOn_B4E0(int mode)

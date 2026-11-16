@@ -357,12 +357,12 @@ public:
     virtual void v02(void* buf, int size);
 };
 
-extern "C" void* cRailManNode_cRailManNode(void* self, void* a1, cRailManNode_cRailManNode_cStream* stream)
+extern "C" void* cRailManNode_cRailManNode(void* self, void* bucket, cRailManNode_cRailManNode_cStream* stream)
 {
     char* s = (char*)self;
     int i;
     int j;
-    cSortObjNode_cSortObjNode(self, a1, stream);
+    cSortObjNode_cSortObjNode(self, bucket, stream);
     *(void***)(s + 0xC) = cRailManNode_vtbl;
     unsigned int* p = (unsigned int*)(s + 0x18);
     for (j = 0x7F; j != -1; j--, p++) {
@@ -851,11 +851,11 @@ struct sParticle_8DB0 {
     sParticle_8DB0() {}
 };
 
-extern "C" void* cAnimComboNode_cAnimComboNode(void* self, void* a1, void* stream)
+extern "C" void* cAnimComboNode_cAnimComboNode(void* self, void* bucket, void* stream)
 {
     char* s = (char*)self;
     sParticle_8DB0** pp = (sParticle_8DB0**)(s + 0x84);
-    cAnimObjectNode_cAnimObjectNode(s + 0x18, a1, stream);
+    cAnimObjectNode_cAnimObjectNode(s + 0x18, bucket, stream);
     *(void**)(s + 0x54) = D_0048EC28;
     sStreamVE_8DB0* vt = *(sStreamVE_8DB0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self, 0x18);
@@ -1196,9 +1196,9 @@ struct sVEntry00359270 {
 extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, void* a, void* stream);
 extern void* D_0048EA70[];
 
-extern "C" void* cAnimDeltaNode_cAnimDeltaNode(void* self, void* a, void* stream)
+extern "C" void* cAnimDeltaNode_cAnimDeltaNode(void* self, void* bucket, void* stream)
 {
-    cAnimObjectNode_cAnimObjectNode(self, a, stream);
+    cAnimObjectNode_cAnimObjectNode(self, bucket, stream);
     *(void***)((char*)self + 0x3C) = D_0048EA70;
     sVEntry00359270* vt = *(sVEntry00359270**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x6C, 4);

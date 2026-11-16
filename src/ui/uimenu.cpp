@@ -337,10 +337,10 @@ INCLUDE_ASM("ui/uimenu", cUIMenu_setScrollableMenu);
 #ifdef SKIP_ASM
 extern "C" char cList_size(void*);
 
-extern "C" void cUIMenu_setScrollableMenu(cUIMenu* self, char a1)
+extern "C" void cUIMenu_setScrollableMenu(cUIMenu* self, char NumItems)
 {
     *(char*)&self->mScrollItemCurrent = 0;
-    *(char*)&self->mScrollItemNum = a1;
+    *(char*)&self->mScrollItemNum = NumItems;
     *(int*)&self->mAttrMenu |= 4;
     *(char*)&self->mScrollItemNumVisible = cList_size((char*)self + 0x74);
     *(char*)&self->mScrollItemOffset = 0;
@@ -634,9 +634,9 @@ public:
  * @param obj  the list operator (On Tour: pOperator)
  * @return the operator's onListNode result
  */
-extern "C" int cUIPair_traverseFlat(void* a, cUIPair_traverseFlat_cVirt* obj)
+extern "C" int cUIPair_traverseFlat(void* self, cUIPair_traverseFlat_cVirt* obj)
 {
-    return obj->v02(a);
+    return obj->v02(self);
 }
 #endif
 

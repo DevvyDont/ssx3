@@ -54,6 +54,14 @@ extern "C" void cMoveNode_restoreOverlapSystem(void* self);
 extern "C" void tModifierBlock__tModifierBlock(void* block, int flags);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
+/**
+ * Destroys a move node: restores the overlap system, deletes its modifier block, then runs the base destructor.
+ *
+ * Stores cMoveNode's vtable at +0xC, calls cMoveNode_restoreOverlapSystem(), destroys and frees the
+ * ModifierBlock (+0x1C) when there is one, then calls cInstanceNode__cInstanceNode() with the same flags.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cMoveNode__cMoveNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cMoveNode_vtbl;
@@ -75,6 +83,12 @@ struct sMoveNodeVEntryI {
     int (*fn)(void*);
 };
 
+/**
+ * Tells whether a rider should rebound off this node, asking its transform modifier when it has one.
+ *
+ * @return 1 when the node has no modifier block or no transform modifier in it, otherwise the modifier's
+ *         shouldRebound() (vtable slot 8)
+ */
 extern "C" int cMoveNode_shouldRebound(void* self)
 {
     void* block = *(void**)((char*)self + 0x1C);
@@ -237,6 +251,9 @@ INCLUDE_ASM("object/movenode", cMoveNode_postUpdateModifierBlock);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_postUpdate(void*);
 
+/**
+ * Runs tModifierBlock_postUpdate() on the node's modifier block (+0x1C), when it has one.
+ */
 extern "C" void cMoveNode_postUpdateModifierBlock(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
@@ -271,23 +288,23 @@ struct cMN_355770_VEnt {
     int (*fn)(void*, int);
 };
 
-extern "C" void cMoveNode_onCollide(cMoveNode* self, int a1, int a2, int a3)
+extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
 {
     cMN_355770_Obj** p = (cMN_355770_Obj**)self->field_0x1C;
     if (p != 0) {
         cMN_355770_Obj* obj = *p;
         if (obj != 0) {
-            obj->v10(a1, a2);
+            obj->v10(tc, ti);
             char* o = *(char**)self->field_0x1C;
             cMN_355770_VEnt* vt = *(cMN_355770_VEnt**)o;
-            if (vt[9].fn(o + vt[9].delta, func_002D1B30(a3)) == 0) {
+            if (vt[9].fn(o + vt[9].delta, func_002D1B30(pBeing)) == 0) {
                 return;
             }
         }
     }
     if (*(int*)((char*)self + 0x20) <= 0) {
         *(int*)((char*)self + 0x20) = *(int*)(D_004A5B64 + 0x10) / 2;
-        func_0034FE00(self, a1, a2, a3);
+        func_0034FE00(self, tc, ti, pBeing);
     }
 }
 #endif
@@ -408,6 +425,14 @@ extern char D_0048E8D0[];
 extern "C" void* cSplineModifier_cSplineModifier1(void* mem, void* desc);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
+/**
+ * Gives the node a spline path: builds a cSplineModifier from the spline data and attaches it.
+ *
+ * Allocates 0xF0 bytes tagged "SplineModifier", runs cSplineModifier_cSplineModifier1() on them, and passes the
+ * result to cMoveNode_addTransformModifier().
+ *
+ * @param desc  the spline setup data (On Tour const tAddSplineData&)
+ */
 extern "C" void cMoveNode_addSpline1(cMoveNode* self, void* desc)
 {
     cMoveNode_addTransformModifier(self, cSplineModifier_cSplineModifier1(cMemMan_alloc(0xF0, D_0048E8D0, 0x20000000, 0), desc));
@@ -488,13 +513,13 @@ void operator_delete(int* ptr);
 extern "C" void* func_00345C90(void* mem, void* desc, void* inst, int index, void* a4);
 extern const char D_0048E990[];
 
-extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int index, void* a4)
+extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int index, void* offset)
 {
     if (index < 0 || index >= *(int*)(*(char**)(*(char**)((char*)self + 0x18) + 0x80) + 4)) {
         operator_delete((int*)desc);
         return;
     }
-    cMoveNode_addEffectModifier(self, func_00345C90(cMemMan_alloc(0x270, D_0048E990, 0x20000000, 0), desc, *(void**)((char*)self + 0x18), index, a4));
+    cMoveNode_addEffectModifier(self, func_00345C90(cMemMan_alloc(0x270, D_0048E990, 0x20000000, 0), desc, *(void**)((char*)self + 0x18), index, offset));
 }
 #endif
 
@@ -505,9 +530,9 @@ extern char D_0048E908[];
 extern "C" void* cRollerModifier_cRollerModifier(void* mem, void* a1, void* a2, void* a3);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
-extern "C" void cMoveNode_addRoller(cMoveNode* self, void* a1, void* a2, void* a3)
+extern "C" void cMoveNode_addRoller(cMoveNode* self, void* rdata, void* ii, void* ci)
 {
-    cMoveNode_addTransformModifier(self, cRollerModifier_cRollerModifier(cMemMan_alloc(0x2D0, D_0048E908, 0x20000000, 0), a1, a2, a3));
+    cMoveNode_addTransformModifier(self, cRollerModifier_cRollerModifier(cMemMan_alloc(0x2D0, D_0048E908, 0x20000000, 0), rdata, ii, ci));
 }
 #endif
 
@@ -681,12 +706,12 @@ static inline int VCall23_60C0(char*& o, int a)
     return vt[23].fn(o + vt[23].delta, a);
 }
 // Asks the modifier object (slot 23, passing a through), then falls back to the node's own slot 27.
-extern "C" int cMoveNode_getInstAnimMats(char* self, int a)
+extern "C" int cMoveNode_getInstAnimMats(char* self, int inst)
 {
     char** h = *(char***)(self + 0x1C);
     char* o = h ? *h : 0;
     if (o != 0) {
-        int r = VCall23_60C0(o, a);
+        int r = VCall23_60C0(o, inst);
         if (r != 0) return r;
     }
     sMnVEntryI_60C0* vs = *(sMnVEntryI_60C0**)(self + 0xC);
@@ -1072,6 +1097,16 @@ extern "C" void cMoveNode_render(cMnNode_6298* self)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_renderModel);
 #ifdef SKIP_ASM
+/**
+ * Draws the node's model with caller-supplied animation matrices and draw flags.
+ *
+ * Returns early when the same world-cache visibility test as cMoveNode_render() fails. Otherwise draws through
+ * the graphics manager's virtual slot 95 with an identity root transform, the modifier block's texture matrix
+ * (adding flag 2) and light override when present, and the node's Fade (+0x24).
+ *
+ * @param tex    the animation matrices to draw with (On Tour renderModel's animMats)
+ * @param flags  draw flags passed on to the graphics manager
+ */
 // Draws the node with a caller-supplied texture and flags (visibility, rotation and light as in cMoveNode_render).
 extern "C" void cMoveNode_renderModel(cMnNode_6298* self, void* tex, int flags)
 {
@@ -1106,6 +1141,14 @@ struct sBox_3567 {
     float v[8];
 } __attribute__((aligned(16)));
 
+/**
+ * Copies the instance's bounding box and radius into the node's modifier block.
+ *
+ * Does nothing unless the node has a modifier block that holds a transform modifier. The box and radius come
+ * from cInstanceNode_getBoundBoxInfo().
+ *
+ * @param self_  the move node
+ */
 // Copies the instance's bounding box and radius into its modifier block, when it has one with data.
 extern "C" void cMoveNode_setupOverlapSystem(void* self_)
 {
@@ -1277,6 +1320,11 @@ INCLUDE_ASM("object/movenode", cMoveNode_hasBoundBox);
 #ifdef SKIP_ASM
 extern "C" int tModifierBlock_getBoundBox(void*);
 
+/**
+ * Tells whether the node's modifier block provides a bounding box.
+ *
+ * @return 1 when the node has a modifier block whose tModifierBlock_getBoundBox() is non-null, otherwise 0
+ */
 extern "C" int cMoveNode_hasBoundBox(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
@@ -1291,6 +1339,11 @@ INCLUDE_ASM("object/movenode", cMoveNode_getBoundBox);
 #ifdef SKIP_ASM
 extern "C" int tModifierBlock_getBoundBox(void*);
 
+/**
+ * Returns the bounding box of the node's modifier block.
+ *
+ * @return tModifierBlock_getBoundBox() of the block at +0x1C, or 0 when the node has no modifier block
+ */
 extern "C" int cMoveNode_getBoundBox(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
@@ -1309,6 +1362,12 @@ struct sMoveNodeVEntryA28 {
     int (*fn)(void*);
 };
 
+/**
+ * Tells whether the node can be intersected, asking its transform modifier.
+ *
+ * @return 0 without a modifier block or transform modifier, otherwise the modifier's hasIntersect() (vtable
+ *         slot 20)
+ */
 extern "C" int cMoveNode_hasIntersect(void* self)
 {
     void* block = *(void**)((char*)self + 0x1C);
@@ -1333,7 +1392,7 @@ struct sMoveNodeVEntryA70 {
     int (*fn)(void*, int, int, int, int);
 };
 
-extern "C" int cMoveNode_intersect(void* self, int a, int b, int c, int d)
+extern "C" int cMoveNode_intersect(void* self, int w, int intInfo, int num, int flags)
 {
     void* block = *(void**)((char*)self + 0x1C);
     if (block == 0) {
@@ -1344,7 +1403,7 @@ extern "C" int cMoveNode_intersect(void* self, int a, int b, int c, int d)
         return 0;
     }
     sMoveNodeVEntryA70* vt = *(sMoveNodeVEntryA70**)node;
-    return vt[21].fn((char*)node + vt[21].delta, a, b, c, d);
+    return vt[21].fn((char*)node + vt[21].delta, w, intInfo, num, flags);
 }
 #endif
 
@@ -1353,6 +1412,11 @@ INCLUDE_ASM("object/movenode", cMoveNode_applyForce);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_applyForce(void*);
 
+/**
+ * Passes a force to the node's modifier block through tModifierBlock_applyForce(), when it has one.
+ *
+ * The intersect info and force (On Tour applyForce(intInfo, force)) pass through in their registers.
+ */
 extern "C" void cMoveNode_applyForce(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
@@ -1366,6 +1430,12 @@ INCLUDE_ASM("object/movenode", cMoveNode_updateIntersectInfo);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_updateIntersectInfo(void*);
 
+/**
+ * Lets the node's modifier block fill in intersect info through tModifierBlock_updateIntersectInfo().
+ *
+ * Does nothing without a modifier block. The intersect info (On Tour updateIntersectInfo(intInfo)) passes
+ * through in its register.
+ */
 extern "C" void cMoveNode_updateIntersectInfo(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
@@ -1379,6 +1449,12 @@ INCLUDE_ASM("object/movenode", cMoveNode_signal);
 #ifdef SKIP_ASM
 extern "C" void func_00352F40(void*);
 
+/**
+ * Passes a signal to the node's modifier block (func_00352F40, On Tour tModifierBlock::signal), when it has
+ * one.
+ *
+ * The signal number and argument (On Tour signal(int signal, float arg)) pass through in their registers.
+ */
 extern "C" void cMoveNode_signal(cMoveNode* self)
 {
     if (self->field_0x1C != 0) {
@@ -1461,7 +1537,7 @@ struct sMnVEntryI6C48 {
 // the original declaration it was compiled against must have had two parameters.
 int func_0035AAD0_2(void* self, void* a1) __asm__("func_0035AAD0__FPv");
 
-extern "C" int cMoveNode_incFocusCount(cMoveNode* self, void* a1)
+extern "C" int cMoveNode_incFocusCount(cMoveNode* self, void* pInst)
 {
     void* block = self->field_0x1C;
     if (block != 0) {
@@ -1469,7 +1545,7 @@ extern "C" int cMoveNode_incFocusCount(cMoveNode* self, void* a1)
         if (node != 0) {
             sMnVEntryI6C48* vt = *(sMnVEntryI6C48**)node;
             if (vt[26].fn((char*)node + vt[26].delta) == 2) {
-                return func_0035AAD0_2(*(void**)self->field_0x1C, a1);
+                return func_0035AAD0_2(*(void**)self->field_0x1C, pInst);
             }
         }
         return 0;
@@ -1491,7 +1567,7 @@ struct sMnVEntryI6CC8 {
 // the original declaration it was compiled against must have had two parameters.
 int func_0035AAE0_2(void* self, void* a1) __asm__("func_0035AAE0__FPv");
 
-extern "C" int cMoveNode_decFocusCount(cMoveNode* self, void* a1)
+extern "C" int cMoveNode_decFocusCount(cMoveNode* self, void* pInst)
 {
     void* block = self->field_0x1C;
     if (block != 0) {
@@ -1499,7 +1575,7 @@ extern "C" int cMoveNode_decFocusCount(cMoveNode* self, void* a1)
         if (node != 0) {
             sMnVEntryI6CC8* vt = *(sMnVEntryI6CC8**)node;
             if (vt[26].fn((char*)node + vt[26].delta) == 2) {
-                return func_0035AAE0_2(*(void**)self->field_0x1C, a1);
+                return func_0035AAE0_2(*(void**)self->field_0x1C, pInst);
             }
         }
         return 0;
@@ -1511,6 +1587,14 @@ extern "C" int cMoveNode_decFocusCount(cMoveNode* self, void* a1)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_getFocusCount);
 #ifdef SKIP_ASM
+/**
+ * Returns the focus count of a node driven by a multi-spline modifier.
+ *
+ * Only a transform modifier whose getTransformType() (slot 26) is 2, cMultiSplineModifier, has one: the word at
+ * +0x34 of that modifier.
+ *
+ * @return the modifier's count, or 0 when there is no modifier block, no modifier or another modifier type
+ */
 extern "C" int cMoveNode_getFocusCount(void* self)
 {
     void* block = *(void**)((char*)self + 0x1C);
@@ -2279,6 +2363,14 @@ INCLUDE_ASM("object/movenode", cParticleNode_cParticleNode);
 extern "C" void* cMoveNode_cMoveNode(void* self);
 extern void* cParticleNode_vtbl[];
 
+/**
+ * Constructs a particle node: runs the cMoveNode constructor, then stores cParticleNode's vtable at +0xC.
+ *
+ * On Tour's version takes a bucket and a replay frame; they pass through in their registers to
+ * cMoveNode_cMoveNode().
+ *
+ * @return @p self
+ */
 extern "C" void* cParticleNode_cParticleNode(void* self)
 {
     cMoveNode_cMoveNode(self);
@@ -2298,6 +2390,12 @@ struct sMnDtorVEntry7950 {
 
 extern "C" void cMoveNode_update(void* self);
 
+/**
+ * Updates a particle node and deletes it once nothing keeps it alive.
+ *
+ * After cMoveNode_update(), returns when the modifier block's word at +0x10 is set (probably the head of its
+ * effect link list, so an effect is still attached); otherwise calls the virtual destructor with flags 3.
+ */
 extern "C" void cParticleNode_update(void* self)
 {
     cMoveNode_update(self);

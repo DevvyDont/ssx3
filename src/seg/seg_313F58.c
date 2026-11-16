@@ -1116,6 +1116,15 @@ INCLUDE_ASM("seg/seg_313F58", fptodp);
 #ifdef SKIP_ASM
 extern void func_00413068(float *, int *);
 extern int func_00412778(int, int, int, unsigned long long);
+/**
+ * Converts a float to a double in software (fp-bit.c's GOFAST fptodp).
+ *
+ * Unpacks the float (func_00413068, unpack_d) and packs the parts as a double (func_00412778), shifting the
+ * fraction into the double's position.
+ *
+ * @param x  the value to convert
+ * @return the packed double, left by func_00412778() in the return registers (the C declaration says int)
+ */
 int fptodp(float x) {
     int o[4];
     float f = x;

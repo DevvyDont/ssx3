@@ -8,6 +8,11 @@ extern const uint D_004FF018[];
 //https://decomp.me/scratch/ViFdz
 INCLUDE_ASM("bx/bxrandom", BXsrand__FUi);
 #ifdef SKIP_ASM
+/**
+ * Seeds the game's main pseudo-random generator (the state at D_004FF018) through cBxPseudoRng_Seed().
+ *
+ * @param seed  the seed value
+ */
 void BXsrand(uint seed)
 {
 	cBxPseudoRng_Seed((uint*)D_004FF018, seed);
@@ -18,6 +23,11 @@ void BXsrand(uint seed)
 INCLUDE_ASM("bx/bxrandom", BXrand__Fv);
 #ifdef SKIP_ASM
 
+/**
+ * Advances the game's main pseudo-random generator (D_004FF018) through cBxPseudoRng_NextInt().
+ *
+ * The new value is left in the return register although the C declaration returns void.
+ */
 void BXrand()
 {
     cBxPseudoRng_NextInt((uint*)D_004FF018);
@@ -30,6 +40,11 @@ INCLUDE_ASM("bx/bxrandom", AIrand__Fv);
 #ifdef SKIP_ASM
 extern const uint D_004FF030[];
 
+/**
+ * Draws the next number from the AI's own pseudo-random generator (the state at D_004FF030).
+ *
+ * @return the next pseudo-random value
+ */
 unsigned int AIrand()
 {
     return cBxPseudoRng_NextInt((uint*)D_004FF030);
@@ -121,6 +136,15 @@ extern "C" void cBxPseudoRng_Seed(uint* state, uint seed)
 //100%
 INCLUDE_ASM("bx/bxrandom", cBxPseudoRng_NextInt);
 #ifdef SKIP_ASM
+/**
+ * Advances a six-word pseudo-random state and returns its top word.
+ *
+ * Adds state[5] into state[4], then ripples the running sum with carries up through state[3] to state[0]. Then
+ * state[5] is incremented as a counter that carries into the higher words when it wraps.
+ *
+ * @param state  the six-word generator state
+ * @return the new state[0]
+ */
 extern "C" uint cBxPseudoRng_NextInt(uint* state)
 {
     uint a = state[5];

@@ -839,9 +839,9 @@ struct sEffFlags_346350 {
     unsigned int b6 : 1;
 };
 
-extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int a1, int a2, int a3)
+extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int bucket, int pInst, int tdata)
 {
-    func_0034FB00(self, a1, 5, a2);
+    func_0034FB00(self, bucket, 5, pInst);
     *(void***)((char*)self + 0xC) = cFlexBridgeNode_vtbl;
     func_00353DA8((char*)self + 0x50);
     *(int*)((char*)self + 0x44) = 12;
@@ -855,7 +855,7 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int a1, int a2, int
     d.x = pts[1].x - pts[0].x;
     d.y = pts[1].y - pts[0].y;
     d.z = pts[1].z - pts[0].z;
-    func_00353E08((char*)self + 0x50, a3, sqrtf_346350(d.x * d.x + d.y * d.y + d.z * d.z));
+    func_00353E08((char*)self + 0x50, tdata, sqrtf_346350(d.x * d.x + d.y * d.y + d.z * d.z));
     cFlexBridgeNode_setupGrid(self);
     cFlexBridgeNode_initSpringNodes(self);
     cFlexBridgeNode_updateGrid(self);
@@ -882,10 +882,10 @@ struct sEffectLinkVEntry64E0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(void* self, void* a1, void* stream)
+extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(void* self, void* bucket, void* stream)
 {
     void* p = (char*)self + 0x20;
-    cInstanceNode_cInstanceNode(self, a1, stream);
+    cInstanceNode_cInstanceNode(self, bucket, stream);
     *(void***)((char*)self + 0xC) = cFlexBridgeNode_vtbl;
     func_00353E80((char*)self + 0x50, stream);
     cFlexBridgeNode_setupGrid(self);

@@ -667,11 +667,11 @@ public:
 };
 
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveModel(cChunkResolve_resolveModel_cObj* self, void* a1)
+extern "C" int cChunkResolve_resolveModel(cChunkResolve_resolveModel_cObj* self, void* pModel)
 {
-    *(int*)((char*)a1 + 0x8) += (int)a1;
-    *(int*)((char*)a1 + 0xC) += (int)a1;
-    self->v06(a1);
+    *(int*)((char*)pModel + 0x8) += (int)pModel;
+    *(int*)((char*)pModel + 0xC) += (int)pModel;
+    self->v06(pModel);
     return 1;
 }
 #endif
@@ -1246,6 +1246,14 @@ void operator_delete(int*);
 extern void* cPS2ChunkResolve_vtbl[];
 extern void* cChunkResolve_vtbl[];
 
+/**
+ * Destroys a PS2 chunk resolver: runs its empty cleanup, restores the base cChunkResolve vtable, then frees it.
+ *
+ * Stores cPS2ChunkResolve's vtable at +0x8 and calls func_003AAE60(), whose body is empty. On Tour calls this
+ * destructor cPspChunkResolve::~cPspChunkResolve.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cPS2ChunkResolve__cPS2ChunkResolve(int* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cPS2ChunkResolve_vtbl;
@@ -1358,7 +1366,7 @@ static inline void insert_AE68(void* self, int type, char* obj, int off)
 #define CALL1_AE68(self, off, obj) \
     ((tMsg1_AE68)VT_AE68(self, off)->fn)((char*)(self) + VT_AE68(self, off)->delta, obj)
 
-extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int arg, char* obj)
+extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID, char* obj)
 {
     switch (msg) {
     case 1:
@@ -1368,13 +1376,13 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int arg,
     case 9: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
         sVEntry_AE68* e = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
-        ((tMsgS_AE68)e->fn)((char*)w + e->delta, obj, D_00494F88, 0, 0, arg >> 8);
+        ((tMsgS_AE68)e->fn)((char*)w + e->delta, obj, D_00494F88, 0, 0, RID >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
         sVEntry_AE68* e = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
-        ((tMsgS_AE68)e->fn)((char*)w + e->delta, obj, D_00494F98, 0, 0, (arg >> 8) + *(int*)((char*)self + 0x10));
+        ((tMsgS_AE68)e->fn)((char*)w + e->delta, obj, D_00494F98, 0, 0, (RID >> 8) + *(int*)((char*)self + 0x10));
         break;
     }
     case 3:
@@ -1417,34 +1425,34 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int arg,
         CALL1_AE68(self, 0x70, obj);
         break;
     case 12:
-        ((tMsg2_AE68)VT_AE68(self, 0x98)->fn)((char*)self + VT_AE68(self, 0x98)->delta, arg, obj);
+        ((tMsg2_AE68)VT_AE68(self, 0x98)->fn)((char*)self + VT_AE68(self, 0x98)->delta, RID, obj);
         break;
     case 13:
-        func_002B6B08(*(void**)(func_0028B1C8_AE68() + 0x4C), obj, arg);
+        func_002B6B08(*(void**)(func_0028B1C8_AE68() + 0x4C), obj, RID);
         break;
     case 17:
-        func_0016CEC8((void*)arg, (int)obj);
+        func_0016CEC8((void*)RID, (int)obj);
         break;
     case 15:
         if (cWorld_m_pTheWorld) {
-            func_002BB348((char**)cWorld_m_pTheWorld->m_pWorldPainterMan, arg & 0xFF, obj);
+            func_002BB348((char**)cWorld_m_pTheWorld->m_pWorldPainterMan, RID & 0xFF, obj);
         }
         break;
     case 16:
         if (cWorld_m_pTheWorld) {
-            int a = arg & 0xFF;
+            int a = RID & 0xFF;
             func_003ACA10((char**)cWorld_m_pTheWorld->m_pWScriptCache, a, obj);
             func_00230430(func_003AD188(), a);
         }
         break;
     case 18:
-        func_00278A10(ScriptEngine, arg & 0xFF, obj);
+        func_00278A10(ScriptEngine, RID & 0xFF, obj);
         break;
     case 20:
-        func_00286CA8(func_0028B180(), arg, obj);
+        func_00286CA8(func_0028B180(), RID, obj);
         break;
     case 19:
-        func_001547D8_AE68(cBE_getInterface_Fv(cBE_getBE(), 0xA), arg & 0xFF, obj + 4, *(int*)obj);
+        func_001547D8_AE68(cBE_getInterface_Fv(cBE_getBE(), 0xA), RID & 0xFF, obj + 4, *(int*)obj);
         break;
     case 21:
         func_002105D0(obj);
@@ -1453,7 +1461,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int arg,
         func_00242540(func_003AD198(), obj);
         break;
     case 14:
-        if (!func_0012A340(*(void**)(*(char**)(D_004A28A8_AE68 + 0x84) + 0xC), arg & 0xFF, arg >> 8, obj)) {
+        if (!func_0012A340(*(void**)(*(char**)(D_004A28A8_AE68 + 0x84) + 0xC), RID & 0xFF, RID >> 8, obj)) {
             if (obj) {
                 cMemMan_free(obj);
             }
@@ -2145,9 +2153,9 @@ INCLUDE_ASM("world/worldview", cWScriptCache_cWScriptCache);
 #ifdef SKIP_ASM
 extern "C" void cWScriptCache_init(void* self, int a1);
 
-extern "C" void* cWScriptCache_cWScriptCache(void* self, int a1)
+extern "C" void* cWScriptCache_cWScriptCache(void* self, int world)
 {
-    *(int*)((char*)self + 0x0) = a1;
+    *(int*)((char*)self + 0x0) = world;
     *(int*)((char*)self + 0x4) = 0;
     cWScriptCache_init(self, 1);
     return self;

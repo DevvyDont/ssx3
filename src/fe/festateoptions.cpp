@@ -192,9 +192,9 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onInputBegin);
 #ifdef SKIP_ASM
 extern int D_004A3484;
 
-extern "C" int cFEStateOptions_onInputBegin(void* self, void* a1)
+extern "C" int cFEStateOptions_onInputBegin(void* self, void* pInput)
 {
-    D_004A3484 = *(unsigned char*)((char*)a1 + 4);
+    D_004A3484 = *(unsigned char*)((char*)pInput + 4);
     return 0;
 }
 #endif

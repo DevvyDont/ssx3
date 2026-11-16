@@ -5979,14 +5979,14 @@ static inline void sPtrVec1CD0_construct(void** p, void* const& v)
         *p = v;
 }
 
-static inline void sOwner1CD0_push_back(BuddyMan* s, void* const& x)
+static inline void sOwner1CD0_push_back(BuddyMan* buddyMan, void* const& x)
 {
-    sPtrVec1CD0* v = &(*(sPtrVec1CD0*)&s->mMessagesAlloc);
-    if ((*(sPtrVec1CD0*)&s->mMessagesAlloc).finish != (*(sPtrVec1CD0*)&s->mMessagesAlloc).eos) {
+    sPtrVec1CD0* v = &(*(sPtrVec1CD0*)&buddyMan->mMessagesAlloc);
+    if ((*(sPtrVec1CD0*)&buddyMan->mMessagesAlloc).finish != (*(sPtrVec1CD0*)&buddyMan->mMessagesAlloc).eos) {
         sPtrVec1CD0_construct(v->finish, x);
-        ++(*(sPtrVec1CD0*)&s->mMessagesAlloc).finish;
+        ++(*(sPtrVec1CD0*)&buddyMan->mMessagesAlloc).finish;
     } else {
-        func_00267128((sPtrVec7128*)v, (*(sPtrVec1CD0*)&s->mMessagesAlloc).finish, x);
+        func_00267128((sPtrVec7128*)v, (*(sPtrVec1CD0*)&buddyMan->mMessagesAlloc).finish, x);
     }
 }
 

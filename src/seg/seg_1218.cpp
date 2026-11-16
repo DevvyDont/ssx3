@@ -920,7 +920,7 @@ static inline float Floor_0F88(float x)
 
 static inline sRec_0F88* Rec_0F88(char* self) { return &((sRec_0F88*)*(char**)(self + 0x18))[*(int*)(self + 0xE70)]; }
 
-extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* pad)
+extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
 {
     sV4_0F88 v;
     int below, o3, o4, o5, o6;
@@ -937,9 +937,9 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* pad)
         func_00100610_0F88(&v, ((char*)self));
         steer = func_00100348_0F88(((char*)self), &v);
         if (mySpd < hisSpd)
-            func_0010C140_0F88(((char*)self), pad);
+            func_0010C140_0F88(((char*)self), cmd);
         else
-            func_0010C0A8_0F88(((char*)self), pad);
+            func_0010C0A8_0F88(((char*)self), cmd);
     } else {
         float d = Rec_0F88(((char*)self))->dist;
         float lim;
@@ -953,16 +953,16 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* pad)
         if (Abs_0F88(ang) > lim || mySpd <= hisSpd) {
             func_00100610_0F88(&v, ((char*)self));
             steer = func_00100348_0F88(((char*)self), &v);
-            func_0010C0A8_0F88(((char*)self), pad);
+            func_0010C0A8_0F88(((char*)self), cmd);
         } else if (tgt->Ready()) {
             if (*(int*)((char*)tgt + 0xAB8) == *(int*)((char*)self->mRider + 0xAB8))
                 func_00112A50((char*)self->mRider, 0);
             func_00100610_0F88(&v, ((char*)self));
             steer = func_00100348_0F88(((char*)self), &v);
-            func_0010C0A8_0F88(((char*)self), pad);
+            func_0010C0A8_0F88(((char*)self), cmd);
         }
     }
-    pad->b20 = (int)(steer * 31.0f);
+    cmd->b20 = (int)(steer * 31.0f);
     z = 0;
     if (cComputer_checkForJumpEvent_0F88(((char*)self), (float*)(((char*)self) + 0xDF0), &below, &o3, &o4, &o5, &o6)) {
         self->mTargetID = -1;
@@ -1847,14 +1847,14 @@ extern "C" void func_00103308(S_3308 *arg0, int arg1) {
 INCLUDE_ASM("seg/seg_1218", cFocusMan_reset);
 #ifdef SKIP_ASM
 struct S_3358 { char pad[0xD0]; int f_d0; int pad2; int cnt; void *arr[8]; };
-extern "C" void cFocusMan_reset(S_3358 *arg0) {
+extern "C" void cFocusMan_reset(S_3358 *self) {
     int i;
 
-    for (i = 0; i < arg0->cnt; i++) {
-        *(int *)((char*)arg0->arr[i] + 8) &= 0xFFFFFEFF;
+    for (i = 0; i < self->cnt; i++) {
+        *(int *)((char*)self->arr[i] + 8) &= 0xFFFFFEFF;
     }
-    arg0->cnt = 0;
-    arg0->f_d0 = -1;
+    self->cnt = 0;
+    self->f_d0 = -1;
 }
 #endif
 
@@ -4408,9 +4408,9 @@ static inline float Atan2_6848(float y, float x)
     return a;
 }
 
-static inline t4Vector GetUp_6848(cRider* r)
+static inline t4Vector GetUp_6848(cRider* rider)
 {
-    return r->mMatrix.row[2];
+    return rider->mMatrix.row[2];
 }
 
 static inline float AtLeast_6848(float x, float lo)
@@ -4423,27 +4423,27 @@ static inline float AtMost_6848(float x, float hi)
     return x <= hi ? x : hi;
 }
 
-static inline sV_6848 Side_6848(const sAnimModelBone* b)
+static inline sV_6848 Side_6848(const sAnimModelBone* animModelBone)
 {
-    return sV_6848(1.0f - 2.0f * (b->rot.y * b->rot.y + b->rot.z * b->rot.z),
-                   2.0f * (b->rot.x * b->rot.y + b->rot.w * b->rot.z),
-                   2.0f * (b->rot.x * b->rot.z - b->rot.w * b->rot.y),
+    return sV_6848(1.0f - 2.0f * (animModelBone->rot.y * animModelBone->rot.y + animModelBone->rot.z * animModelBone->rot.z),
+                   2.0f * (animModelBone->rot.x * animModelBone->rot.y + animModelBone->rot.w * animModelBone->rot.z),
+                   2.0f * (animModelBone->rot.x * animModelBone->rot.z - animModelBone->rot.w * animModelBone->rot.y),
                    0.0f);
 }
 
-static inline sV_6848 Front_6848(const sAnimModelBone* b)
+static inline sV_6848 Front_6848(const sAnimModelBone* animModelBone)
 {
-    return sV_6848(2.0f * (b->rot.y * b->rot.x - b->rot.w * b->rot.z),
-                   1.0f - 2.0f * (b->rot.z * b->rot.z + b->rot.x * b->rot.x),
-                   2.0f * (b->rot.y * b->rot.z + b->rot.w * b->rot.x),
+    return sV_6848(2.0f * (animModelBone->rot.y * animModelBone->rot.x - animModelBone->rot.w * animModelBone->rot.z),
+                   1.0f - 2.0f * (animModelBone->rot.z * animModelBone->rot.z + animModelBone->rot.x * animModelBone->rot.x),
+                   2.0f * (animModelBone->rot.y * animModelBone->rot.z + animModelBone->rot.w * animModelBone->rot.x),
                    0.0f);
 }
 
-static inline sV_6848 Up_6848(const sAnimModelBone* b)
+static inline sV_6848 Up_6848(const sAnimModelBone* animModelBone)
 {
-    return sV_6848(2.0f * (b->rot.z * b->rot.x + b->rot.w * b->rot.y),
-                   2.0f * (b->rot.z * b->rot.y - b->rot.w * b->rot.x),
-                   1.0f - 2.0f * (b->rot.x * b->rot.x + b->rot.y * b->rot.y),
+    return sV_6848(2.0f * (animModelBone->rot.z * animModelBone->rot.x + animModelBone->rot.w * animModelBone->rot.y),
+                   2.0f * (animModelBone->rot.z * animModelBone->rot.y - animModelBone->rot.w * animModelBone->rot.x),
+                   1.0f - 2.0f * (animModelBone->rot.x * animModelBone->rot.x + animModelBone->rot.y * animModelBone->rot.y),
                    0.0f);
 }
 
@@ -4785,11 +4785,11 @@ struct sV4_6F78 : t4Vector {
     }
 };
 
-static inline sV4_6F78 Front_6F78(const sAnimModelBone* b)
+static inline sV4_6F78 Front_6F78(const sAnimModelBone* animModelBone)
 {
-    return sV4_6F78(2.0f * (b->rot.y * b->rot.x - b->rot.w * b->rot.z),
-                    1.0f - 2.0f * (b->rot.z * b->rot.z + b->rot.x * b->rot.x),
-                    2.0f * (b->rot.y * b->rot.z + b->rot.w * b->rot.x),
+    return sV4_6F78(2.0f * (animModelBone->rot.y * animModelBone->rot.x - animModelBone->rot.w * animModelBone->rot.z),
+                    1.0f - 2.0f * (animModelBone->rot.z * animModelBone->rot.z + animModelBone->rot.x * animModelBone->rot.x),
+                    2.0f * (animModelBone->rot.y * animModelBone->rot.z + animModelBone->rot.w * animModelBone->rot.x),
                     0.0f);
 }
 
@@ -5277,7 +5277,7 @@ static inline t4Vector Div_7888(const t4Vector& v, float s)
 // Vector times scalar.
 static inline t4Vector operator*(const t4Vector& v, float s) { return Scale_7888(v, s); }
 
-static inline sRec_7888* Rec_7888(cRider* r, int idx) { return &((sRec_7888*)r)[idx]; }
+static inline sRec_7888* Rec_7888(cRider* rider, int idx) { return &((sRec_7888*)rider)[idx]; }
 
 extern "C" void cRider_checkOpponentCollisions(cRider* self)
 {
@@ -6339,9 +6339,9 @@ struct C_A898 {
     virtual void m0(char*, int);
 };
 
-extern "C" void func_0010A898(cComputer* arg0, C_A898 *arg1) {
-    cRiderHandler_writeToReplayFrame_A898(((char*)arg0), arg1);
-    arg1->m0(((char*)arg0) + 0xDF0, 0x150);
+extern "C" void func_0010A898(cComputer* computer, C_A898 *arg1) {
+    cRiderHandler_writeToReplayFrame_A898(((char*)computer), arg1);
+    arg1->m0(((char*)computer) + 0xDF0, 0x150);
 }
 #endif
 
@@ -6889,8 +6889,8 @@ extern "C" void func_0010B590(cComputer* self, sPad_B590* pad)
 //100%
 INCLUDE_ASM("seg/seg_1218", func_0010B750);
 #ifdef SKIP_ASM
-extern "C" void func_0010B750(cComputer* arg0, int *arg1) {
-    *arg1 = (*arg1 & ~0x1000) | ((func_0010D1A0(arg0) & 1) << 0xC);
+extern "C" void func_0010B750(cComputer* computer, int *arg1) {
+    *arg1 = (*arg1 & ~0x1000) | ((func_0010D1A0(computer) & 1) << 0xC);
 }
 #endif
 
@@ -6962,7 +6962,7 @@ public:
 
 extern "C" sVec4_B980 func_0026AB20(cTrack_B980*, int, float);
 
-extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6)
+extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* approachSpeed, int* below, int* toPipe, int* toRail, int* isSpin, int* isFlip)
 {
     sRec_B980 buf[12];
     char* rider = (char*)self->mRider;
@@ -6971,11 +6971,11 @@ extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* speed, int* b
     for (int i = 0; i < n; i++) {
         if (buf[i].type == 0x10) {
             int fl = buf[i].flags;
-            *speed = (float)(fl >> 4) * 27.777780532836914f;
-            *o3 = (fl >> 3) & 1;
-            *o4 = (fl >> 2) & 1;
-            *o5 = (fl >> 1) & 1;
-            *o6 = fl & 1;
+            *approachSpeed = (float)(fl >> 4) * 27.777780532836914f;
+            *toPipe = (fl >> 3) & 1;
+            *toRail = (fl >> 2) & 1;
+            *isSpin = (fl >> 1) & 1;
+            *isFlip = fl & 1;
             *below = (buf[i].a <= *(float*)((char*)self->mRider + 0x4C4)) ? 1 : 0;
             *(sVec4_B980*)&self->mStartJumpPos = func_0026AB20(trk, 0, buf[i].a);
             *(sVec4_B980*)&self->mEndJumpPos = func_0026AB20(trk, 0, buf[i].b);

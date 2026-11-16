@@ -74,8 +74,8 @@ INCLUDE_ASM("object/instancenode", func_0034FCA0);
 #ifdef SKIP_ASM
 extern "C" void func_002D1A78(int);
 
-extern "C" void func_0034FCA0(cInstanceNode* arg0) {
-    func_002D1A78(((int)arg0->Instance));
+extern "C" void func_0034FCA0(cInstanceNode* instanceNode) {
+    func_002D1A78(((int)instanceNode->Instance));
 }
 #endif
 
@@ -93,6 +93,13 @@ extern "C" void* cObjectInterface_runOnLoseFocusScript(int);
 //100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_runOnLoseFocusScript__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the lose-focus script of the node's instance through cObjectInterface_runOnLoseFocusScript().
+ *
+ * The instance record pointer at +0x18 is passed as the argument.
+ *
+ * @return cObjectInterface_runOnLoseFocusScript()'s result
+ */
 void* cInstanceNode_runOnLoseFocusScript(void* self)
 {
     return cObjectInterface_runOnLoseFocusScript(*(int*)((char*)self + 0x18));
@@ -108,9 +115,9 @@ struct sInstNodeVEntryFD00 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cInstanceNode_expire(cInstanceNode* self, int a1)
+extern "C" void cInstanceNode_expire(cInstanceNode* self, int runscript)
 {
-    if (a1 != 0) {
+    if (runscript != 0) {
         if (func_0034FCC0(self) != 0) return;
     }
     *(int*)((char*)self->Instance + 8) &= 0xFFFF0300;
@@ -197,6 +204,13 @@ struct sInstNodeVEntry {
 
 extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes an instance node to a replay frame: the cSortObjNode data, then the node through the stream's slot 6.
+ *
+ * The stream's virtual slot 6 takes the node itself, probably to record which instance it belongs to.
+ *
+ * @param stream  the replay frame stream to write to (On Tour cBxReplayFrame*)
+ */
 extern "C" void cInstanceNode_writeToReplayFrame(cInstanceNode* self, void* stream)
 {
     cSortObjNode_writeToReplayFrame(self, stream);

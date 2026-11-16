@@ -17,11 +17,11 @@ struct sBXSlot {
     short b;
 };
 
-extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int a2, int size)
+extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int maxUniqueAnimPlayers, int size)
 {
     *(void**)((char*)self + 0x2BC) = operator_new_tag(size, D_00481F48, 0, 0);
     *(void**)((char*)self + 0x2B8) = cInSeq_cInSeq(cMemMan_alloc(0x20, D_004A34F0, 0, 0),
-        *(void**)((char*)self + 0x2BC), size, a2, (char*)self + 0x2AC);
+        *(void**)((char*)self + 0x2BC), size, maxUniqueAnimPlayers, (char*)self + 0x2AC);
     *(int*)((char*)self + 0x2B4) = count;
     *(sBXSlot**)((char*)self + 0x2B0) = (sBXSlot*)operator_new_tag(count * 8, D_00481F58, 0, 0);
     for (int i = 0; i < *(int*)((char*)self + 0x2B4); i++) {
@@ -1239,10 +1239,10 @@ extern void* cScriptObject_vtbl[];
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_cScriptObject__FPvi);
 #ifdef SKIP_ASM
-void* cScriptObject_cScriptObject(void* self, int a1)
+void* cScriptObject_cScriptObject(void* self, int objType)
 {
     *(void***)((char*)self + 0xc) = cScriptObject_vtbl;
-    *(int*)self = a1;
+    *(int*)self = objType;
     *(int*)((char*)self + 0x4) = -1;
     *(int*)((char*)self + 0x8) = 0;
     return self;

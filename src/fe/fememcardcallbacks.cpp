@@ -1894,6 +1894,15 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_checkNextAvailableDevice);
 #ifdef SKIP_ASM
+/**
+ * Tells whether there is another memory card device in the given direction of the device list.
+ *
+ * @param list  the memory card overlay manager holding the device list (On Tour cMCOverlayManager*); the device
+ *              count is at +0x424
+ * @param idx   the current device index
+ * @param back  nonzero to step backwards
+ * @return 1 when idx + 1 (or idx - 1) is a valid device index, otherwise -1
+ */
 extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* list, int idx, int back)
 {
     int step = 1;
@@ -2031,7 +2040,7 @@ struct sMemCardPopupK1D99C8 {
     int f17C;      // 0x17C
 };
 
-extern "C" sMemCardPopupK1D99C8* cFEPopupConfirm_cFEPopupConfirm(sMemCardPopupK1D99C8* self, void* engine, void* owner, int a3, int a4, int a5, int a6, int a7, int a8)
+extern "C" sMemCardPopupK1D99C8* cFEPopupConfirm_cFEPopupConfirm(sMemCardPopupK1D99C8* self, void* engine, void* owner, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
     cScreenPopup_cScreenPopup(self, engine, owner);
     self->vtbl = cFEPopupConfirm_vtbl;
@@ -2041,7 +2050,7 @@ extern "C" sMemCardPopupK1D99C8* cFEPopupConfirm_cFEPopupConfirm(sMemCardPopupK1
         self->f17C = 2;
         self->f14C = 4;
     }
-    cFEPopupConfirm_initPopup(self, a3, a4, a5, a6, a7, a8);
+    cFEPopupConfirm_initPopup(self, ustrDisplay, bYesOnly, bNoButtons, layerOffset, passUpdate, bSnowFlake);
     return self;
 }
 #endif
@@ -2060,15 +2069,15 @@ extern char D_0045FCD8[];
 extern char D_004A1408[];
 
 // PORT: the unit declares the string pointer as int; a6 is unused
-extern "C" void cFEPopupConfirm_initPopup(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
+extern "C" void cFEPopupConfirm_initPopup(void* self, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
-    void* str = (void*)a1;
+    void* str = (void*)ustrDisplay;
     char* s = (char*)self;
     char* sub = s + 0xBC;
     func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
     func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
     *(int*)(s + 0xBC) = 2;
-    *(int*)(s + 0x14C) = a4;
+    *(int*)(s + 0x14C) = layerOffset;
     *(int*)(s + 0x168) = 0;
     *(int*)(s + 0x154) = 0;
     *(int*)(s + 0x164) = 0;
@@ -2081,17 +2090,17 @@ extern "C" void cFEPopupConfirm_initPopup(void* self, int a1, int a2, int a3, in
         func_002C2540(p, D_004A1408);
     }
     strcpy1(p, str);
-    if (a3) {
+    if (bNoButtons) {
         *(int*)(s + 0xBF8) = 0;
         *(int*)(sub + 0x98) = 1;
         *(int*)(sub + 0) = 0;
-    } else if (a2) {
+    } else if (bYesOnly) {
         *(int*)(s + 0xBF8) = 1;
         *(int*)(sub + 0) = 1;
-        *(int*)(sub + 0x98) = a5;
+        *(int*)(sub + 0x98) = passUpdate;
     } else {
         *(int*)(s + 0xBF8) = 2;
-        *(int*)(sub + 0x98) = a5;
+        *(int*)(sub + 0x98) = passUpdate;
     }
     *(char**)(sub + 8) = p;
     *(int*)(sub + 4) = 1;
@@ -2143,6 +2152,15 @@ extern "C" void* strcpy1(void* dst, void* src);
 // PORT: cScreenPopup_redrawPopup takes only self; the unit's later (void*, int) declaration is a guess. Bound by asm label.
 void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup");
 
+/**
+ * Sets the confirm popup's message text, redrawing the popup when it is already up.
+ *
+ * Copies the 16-bit string into the popup's own buffer (+0x360, On Tour mDisplayText), points the popup info's
+ * text (+0xC4) at it and sets +0xC0 to 1; when +0x40 is set, calls cScreenPopup_redrawPopup(). A null or empty
+ * string changes nothing.
+ *
+ * @param src  the new 16-bit message
+ */
 extern "C" void cFEPopupConfirm_setMessage(void* self, void* src)
 {
     if (src != 0 && strlen1(src) != 0) {
@@ -2162,11 +2180,11 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEPopupConfirm_setDefaultButton);
 #ifdef SKIP_ASM
 extern "C" void cScreenPopup_redrawPopup(void*, int);
 
-extern "C" void cFEPopupConfirm_setDefaultButton(void* self, int a1)
+extern "C" void cFEPopupConfirm_setDefaultButton(void* self, int uiButton)
 {
-    *(int*)((char*)self + 0x168) = a1;
+    *(int*)((char*)self + 0x168) = uiButton;
     if (*(int*)((char*)self + 0x40) != 0) {
-        cScreenPopup_redrawPopup(self, a1);
+        cScreenPopup_redrawPopup(self, uiButton);
     }
 }
 #endif

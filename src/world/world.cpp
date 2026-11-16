@@ -288,12 +288,12 @@ struct cWorld_load_sBXString {
     char* str;
 };
 
-extern "C" void cWorld_load(void** self, const char* name, int a2)
+extern "C" void cWorld_load(void** self, const char* name, int nash)
 {
     cWorld_load_sBXString s;
     cBXString_cBXString2(&s, name);
     cWorldCache_reset(self[0]);
-    cWorldCache_init(self[0], name, a2);
+    cWorldCache_init(self[0], name, nash);
     cWScriptCache_init(self[1], cWorldView_getNumSections((cWorldView*)((char*)self[0] + 0x10)));
     func_002BB1D0(self[2], cWorldView_getNumSections((cWorldView*)((char*)self[0] + 0x10)));
     cBXString__cBXString(&s, 2);

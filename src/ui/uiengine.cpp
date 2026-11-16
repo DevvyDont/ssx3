@@ -761,7 +761,7 @@ struct cUIGroup_onInput_sFunctor {
 
 extern "C" int func_003979F8(void* list, cUIGroup_onInput_sFunctor* fn);
 
-extern "C" int cUIGroup_onInput(void* self, int a1)
+extern "C" int cUIGroup_onInput(void* self, int pInput)
 {
     if ((*(int*)((char*)self + 0x14) >> 5) & 1) {
         return 0;
@@ -769,7 +769,7 @@ extern "C" int cUIGroup_onInput(void* self, int a1)
     cUIGroup_onInput_sFunctor f;
     f.vt = cListOperator_vtbl;
     f.vt = cListOpOnInput_vtbl;
-    f.arg = a1;
+    f.arg = pInput;
     int r = func_003979F8((char*)self + 0x74, &f);
     f.vt = cListOperator_vtbl;
     return r != 0;
@@ -785,13 +785,13 @@ struct cUIGroup_render3D_sVEntry {
     void (*fn)(void*, int);
 };
 
-extern "C" void cUIGroup_render3D(void* self, int a1)
+extern "C" void cUIGroup_render3D(void* self, int pRenCon)
 {
     void* n = cList_first((cList*)((char*)self + 0x74));
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIGroup_render3D_sVEntry* vt = *(cUIGroup_render3D_sVEntry**)((char*)n + 8);
-            vt[0x12].fn((char*)n + vt[0x12].delta, a1);
+            vt[0x12].fn((char*)n + vt[0x12].delta, pRenCon);
             n = *(void**)((char*)n + 4);
         }
     }

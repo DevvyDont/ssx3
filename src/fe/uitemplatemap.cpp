@@ -558,6 +558,12 @@ extern unsigned int D_004A2594;
 //99.9%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupEventUnlock__FP15cUITemplate_MAP);
 #ifdef SKIP_ASM
+/**
+ * Sets which map events are unlocked, probably On Tour's mbEventUnlocked[4] (+0x10 to +0x1C).
+ *
+ * The first two are unlocked and the fourth locked; the third is unlocked only in map state (D_004A2594) 2 or
+ * above.
+ */
 void cUITemplate_MAP_setupEventUnlock(cUITemplate_MAP* self)
 {
     self->field_0x1C = 0;
@@ -1667,6 +1673,15 @@ static inline int setPic00204FF0(char* name)
     return vt[4].fn((char*)obj + vt[4].delta, GetHashValue32(name));
 }
 
+/**
+ * Returns the localised name of a medal.
+ *
+ * Looks up "kT_CMNPlatinum", "kT_CMNGold", "kT_CMNSilver" or "kT_CMNBronze" by hash through the front-end
+ * locale's virtual slot 4.
+ *
+ * @param peak  the medal: 0 platinum, 1 gold, 2 silver, 3 bronze (On Tour names it medal); others give platinum
+ * @return the localised string (On Tour: unsigned short*)
+ */
 extern "C" int cUITemplate_MAP_getMedalStr(void* self, int peak)
 {
     switch (peak) {
@@ -2759,6 +2774,15 @@ struct sVEntry_cUITemplate_MAP_setWidgetUnHiliteColor {
 extern char kMAPCOLOR_REGULAR[];
 extern char kMAPCOLOR_REGULAR_LOCKED[];
 
+/**
+ * Sets a map text widget's unhighlighted colour: regular when unlocked, the locked colour otherwise.
+ *
+ * Calls the widget's virtual slot 11 with kMAPCOLOR_REGULAR or kMAPCOLOR_REGULAR_LOCKED. Does nothing for a
+ * null widget.
+ *
+ * @param obj  the text widget (On Tour cUIText* pText)
+ * @param on   nonzero when the item is unlocked (On Tour unlocked)
+ */
 extern "C" void cUITemplate_MAP_setWidgetUnHiliteColor(void* self, void* obj, int on)
 {
     if (obj != 0) {

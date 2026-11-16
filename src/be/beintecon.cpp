@@ -14,6 +14,13 @@ struct cBEEconInterface {
 //99.58%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getThis__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the back end's economy interface singleton, creating it on first use.
+ *
+ * The first call allocates 0x10 bytes tagged "BEEconInt", clears the word at +0x8 and stores the vtable.
+ *
+ * @return the economy interface
+ */
 void* cBEEconInterface_getThis()
 {
     if (D_004A1214 == 0) {
@@ -31,13 +38,13 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getMoney);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
-extern "C" int cBEEconInterface_getMoney(void* self, int a, int b)
+extern "C" int cBEEconInterface_getMoney(void* self, int iHuman, int charType)
 {
-    if (a >= 2) {
+    if (iHuman >= 2) {
         return 0;
     }
-    int bOff = b * 0xF88;
-    int aOff = a * 0x9B50;
+    int bOff = charType * 0xF88;
+    int aOff = iHuman * 0x9B50;
     int off = bOff + aOff;
     char* p = (char*)cBELibrary_profileLib + off;
     return *(int*)(p + 0xAC4);
@@ -67,13 +74,13 @@ extern int cBELibrary_profileLib[];
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getTotalMoneyEarned__FPvii);
 #ifdef SKIP_ASM
-int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b)
+int cBEEconInterface_getTotalMoneyEarned(void* self, int iHuman, int charType)
 {
-    if (a >= 2) {
+    if (iHuman >= 2) {
         return 0;
     }
-    int bOff = b * 0xF88;
-    int aOff = a * 0x9B50;
+    int bOff = charType * 0xF88;
+    int aOff = iHuman * 0x9B50;
     int off = bOff + aOff;
     char* p = (char*)cBELibrary_profileLib + off;
     return *(int*)(p + 0xAC8);

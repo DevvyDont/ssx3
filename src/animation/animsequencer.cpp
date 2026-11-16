@@ -406,6 +406,10 @@ extern "C" void func_00314050(void* node, void* stream)
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_init__FPv);
 #ifdef SKIP_ASM
+/**
+ * Initialises an animation sequencer as empty: zeroes its count (On Tour NumPlaying) and its sequence list
+ * head.
+ */
 void cAnimSequencer_init(void* self)
 {
     *(int*)self = 0;
@@ -664,6 +668,12 @@ struct sSequencer_00314668 {
     sSeqNode_00314668* mFirstSequence; // 0x4
 };
 
+/**
+ * Removes and deletes every sequence in the animation sequencer.
+ *
+ * Each sequence is unlinked from the list head, has its triggers removed (func_00313C08, On Tour
+ * cAnimSequence::removeAllTriggers) and is freed with operator delete; the count drops by one for each.
+ */
 extern "C" void cAnimSequencer_expireAll(sSequencer_00314668* self)
 {
     while (self->mFirstSequence != 0)

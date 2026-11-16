@@ -352,10 +352,10 @@ static inline int isOn00193568()
 
 static inline int get6F8_3568(void* p) { return *(int*)((char*)p + 0x6F8); }
 
-extern "C" void cFEStateBraggingRights_onGainFocus(void* self, int a1)
+extern "C" void cFEStateBraggingRights_onGainFocus(void* self, int pPrevState)
 {
     if (isOn00193568()) {
-        func_001A87D0(self, a1);
+        func_001A87D0(self, pPrevState);
         return;
     }
     cUIState_onGainFocus_v(self);
@@ -813,13 +813,13 @@ static inline int isOn00194168()
     return D_004A1A70 == 1;
 }
 
-extern "C" void cFEStateBraggingRights_onPopupEvent(void* self, void* a1, int a2)
+extern "C" void cFEStateBraggingRights_onPopupEvent(void* self, void* pPopup, int Event)
 {
     if (isOn00194168()) {
-        if (*(int*)((char*)a1 + 0x18) == 0x838) {
-            func_00194440(self, a1, a2);
+        if (*(int*)((char*)pPopup + 0x18) == 0x838) {
+            func_00194440(self, pPopup, Event);
         } else {
-            func_001A97B8(self, a1, a2);
+            func_001A97B8(self, pPopup, Event);
         }
     }
 }

@@ -573,10 +573,10 @@ struct sAvalancheData {
     float f108;
 };
 
-extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t)
+extern "C" void tActiveAvalancheNode_calculateScale(void* self, float currTime)
 {
     sAvalancheData* d = *(sAvalancheData**)((char*)self + 0x2E0);
-    float x = t * 30.0f;
+    float x = currTime * 30.0f;
     if (x < d->f104) {
         *(float*)((char*)self + 0xB0) = 1.0f;
         *(float*)((char*)self + 0xB4) = x / d->f104;
@@ -734,6 +734,12 @@ struct tActiveAvalanche {
     tActiveAvalanche_node** array; // 0x8
 };
 
+/**
+ * Builds an array of pointers to the active avalanche's nodes, in list order.
+ *
+ * Counts the nodes linked from the list head, allocates that many pointers tagged "ActiveNodeArray", stores the
+ * array in the avalanche and fills it.
+ */
 extern "C" void tActiveAvalanche_buildArray(tActiveAvalanche* self)
 {
     tActiveAvalanche_node* p;
@@ -925,6 +931,12 @@ extern char D_004A3AD8[];
 extern char D_004A3AE0[];
 extern "C" void cAvalanche_SaveData1(int, char*);
 
+/**
+ * Saves the avalanche data through cAvalanche_SaveData1() three times, for the extensions "xav", "sav" and
+ * "gav".
+ *
+ * The first argument is 1 for "xav" and "sav" and 0 for "gav".
+ */
 extern "C" void cAvalanche_SaveData(void)
 {
     cAvalanche_SaveData1(1, D_004A3AD0);
@@ -1146,6 +1158,15 @@ extern "C" void cAvalanche_resolveDataPointers(void);
 extern "C" int cAvalanche_triggerAvalanche(int a);
 extern "C" void func_002D7EF8(void* self);
 
+/**
+ * Runs the avalanche system for one frame while it is enabled.
+ *
+ * When enabled (D_004A3A30, On Tour m_Enable): recalculates everything when the recalc flag (D_004A3A34) is set
+ * and clears it and D_004A3AC4; resolves the data pointers; while the trigger flag (D_004A3A5C) is set,
+ * triggers avalanche D_004A3A7C (On Tour m_AvalancheId; a negative flag fires once); once pointers are resolved
+ * and the update flag (D_004A3A60) is set, updates all 16 active avalanches (func_002D7EF8, On Tour
+ * tActiveAvalanche::update), a negative update flag again counting as one-shot.
+ */
 extern "C" void cAvalanche_update(void)
 {
     if (D_004A3A30 != 0) {
@@ -1840,6 +1861,9 @@ INCLUDE_ASM("visualfx/avalanche", tAvalanche_calculate);
 #ifdef SKIP_ASM
 extern "C" void tAvalancheNode_calculate(void* node, void* self);
 
+/**
+ * Runs tAvalancheNode_calculate() on every node of the avalanche, following each node's next link (+0xF4).
+ */
 extern "C" void tAvalanche_calculate(void* self)
 {
     void* n = *(void**)((char*)self + 0x4);

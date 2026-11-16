@@ -74,14 +74,14 @@ static inline void call1_6D60(char* o, int vtoff, int slot, int a)
     vt[slot].fn(o + vt[slot].delta, a);
 }
 
-extern "C" int cAppMan_run(char* self, char* exec, int a2, int a3)
+extern "C" int cAppMan_run(char* self, char* exec, int ac, int av)
 {
     *(float*)(self + 0x14) = 0.01666666753590107f;
     *(char**)(self + 0x8) = exec;
     *(int*)(self + 0x10) = 60;
     call1_6D60(exec, 8, 2, 60);
     sVt2_6D60* vt = *(sVt2_6D60**)(self + 0x5C);
-    vt[3].fn(self + vt[3].delta, a2, a3);
+    vt[3].fn(self + vt[3].delta, ac, av);
     call1_6D60(*(char**)(self + 0x8), 8, 9, *(int*)(self + 0x4));
     while (call0_6D60(*(char**)(self + 0x8), 8, 10) == 0) {
         callv_6D60(*(char**)(self + 0x8), 8, 11);
@@ -354,6 +354,14 @@ extern void* cExecutionMan_vtbl[16];
 //100%
 INCLUDE_ASM("bx/appman", cExecutionMan_halt__FP13cExecutionMan);
 #ifdef SKIP_ASM
+/**
+ * Initialises an execution manager; despite the name, it acts as the base constructor.
+ *
+ * Clears the halt callback (+0x0) and its argument (+0x4) and stores the base cExecutionMan vtable (+0x8).
+ * main() calls it on the "PS2ExecutionMan" object before storing the PS2 vtable.
+ *
+ * @return @p self
+ */
 cExecutionMan* cExecutionMan_halt(cExecutionMan* self)
 {
     self->field_0x0 = 0;
@@ -389,6 +397,16 @@ extern "C" void func_00317478_impl(cExecutionMan* self, int a1, int a2)
 //100%
 INCLUDE_ASM("bx/appman", cExecutionMan_checkHalt__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Runs the execution manager's halt callback, when one is set, and optionally its virtual halt.
+ *
+ * Calls the callback (+0x0) with its argument (+0x4). When @p flag is set it then calls virtual slot 14, which
+ * is pure in the base class; the PS2 execution manager's version (func_0031AB10) wakes a thread and then idles
+ * forever.
+ *
+ * @param flag  nonzero to also call the virtual halt (cAppMan_checkHalt() passes 1, func_0031AB30() passes 0)
+ * @return no meaningful value; the body sets no return value
+ */
 int cExecutionMan_checkHalt(void* self, int flag)
 {
     void (*fn)(void*) = *(void (**)(void*))self;

@@ -155,29 +155,29 @@ struct sReplay_20DF38 {
 
 static inline char* replay_20DF38() { return *(char**)(D_004A28A8_20DF38->game + 0x28); }
 
-extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* pad)
+extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* pInput)
 {
     cSnd_20DF38* snd = &D_004A5A58;
     if (*(cSnd_20DF38**)(self->owner + 0x14) != 0)
         snd = *(cSnd_20DF38**)(self->owner + 0x14);
-    if (pad->port != *(int*)(replay_20DF38() + 0x28)) {
+    if (pInput->port != *(int*)(replay_20DF38() + 0x28)) {
         return 1;
     }
-    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pad->port], 0xCA)) {
+    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 0xCA)) {
         if (self->pos == self->end || self->speed == 4) {
             snd->play(2);
         }
         self->speed = -4;
         return 1;
     }
-    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pad->port], 0xCB)) {
+    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 0xCB)) {
         if (self->pos == self->start || self->speed == -4) {
             snd->play(2);
         }
         self->speed = 4;
         return 1;
     }
-    if (pad->v03() && self->paused == 0) {
+    if (pInput->v03() && self->paused == 0) {
         snd->play(6);
         int n = D_004A2A54 + 1;
         D_005366E8[n] = 2;
@@ -188,7 +188,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         *(int*)(obj + 0x90) &= ~8;
         return 1;
     }
-    if (self->paused != 0 && pad->v05()) {
+    if (self->paused != 0 && pInput->v05()) {
         snd->play(6);
         char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00471BE0));
         switch (*(int*)(*(char**)(obj + 0xA0) + 0x18)) {
@@ -220,7 +220,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         }
         return 1;
     }
-    if (self->paused != 0 && pad->v06()) {
+    if (self->paused != 0 && pInput->v06()) {
         snd->play(3);
         D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
         self->paused = 0;
@@ -228,7 +228,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         *(int*)(obj + 0x90) |= 8;
         return 1;
     }
-    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pad->port], 0xCC)) {
+    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 0xCC)) {
         snd->play(6);
         self->hudHidden ^= 1;
         if (self->hudHidden != 0) {
@@ -242,12 +242,12 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
         }
         return 1;
     }
-    if (pad->v17()) {
+    if (pInput->v17()) {
         char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00471BE0));
         if (obj != 0 && self->fB4 != 0 && *(unsigned char*)(obj + 0x95) == 1) {
             return 1;
         }
-    } else if (pad->v18()) {
+    } else if (pInput->v18()) {
         char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00471BE0));
         if (obj != 0 && self->fB4 != 0 && *(unsigned char*)(obj + 0x95) == 2) {
             return 1;

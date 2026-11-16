@@ -36,13 +36,13 @@ struct sSpring_53EF0 {
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char D_0048E9C8[];
 extern sSpVec_53EF0 D_004FF120_53EF0 __asm__("t4vect_Zero");
-extern "C" void cSpring_setupNodes(sSpring_53EF0* s)
+extern "C" void cSpring_setupNodes(sSpring_53EF0* self)
 {
     int i;
-    sSpNode_53EF0** dst = &s->nodes;
-    *dst = new (D_0048E9C8, 0x20000000, 0) sSpNode_53EF0[s->n];
-    sSpNode_53EF0* nd = s->nodes;
-    for (i = 0; i < s->n; i++, nd++) {
+    sSpNode_53EF0** dst = &self->nodes;
+    *dst = new (D_0048E9C8, 0x20000000, 0) sSpNode_53EF0[self->n];
+    sSpNode_53EF0* nd = self->nodes;
+    for (i = 0; i < self->n; i++, nd++) {
         nd->p = D_004FF120_53EF0;
         nd->v = D_004FF120_53EF0;
         nd->f = D_004FF120_53EF0;
@@ -301,10 +301,10 @@ struct cObjNode {
  * @param param2  bucket index (callers pass 3, 4, 6 and others)
  * @return @p self
  */
-extern "C" cObjNode* cObjNode_cObjNode1(cObjNode* self, void* param2)
+extern "C" cObjNode* cObjNode_cObjNode1(cObjNode* self, void* bucket)
 {
     self->field_0xC = cObjNode_vtbl;
-    cBucketMan_add(&gBucketMan, self, param2);
+    cBucketMan_add(&gBucketMan, self, bucket);
     return self;
 }
 #endif

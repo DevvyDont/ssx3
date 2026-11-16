@@ -171,11 +171,11 @@ struct sRiderRef_15DE60
     int rider;
 };
 
-extern "C" void cCamera_init(sCamera_15DE60* self, int idx, float a, float b, float c)
+extern "C" void cCamera_init(sCamera_15DE60* self, int idx, float nearPlane, float farPlane, float riderIndex)
 {
-    self->f0C = a;
-    self->f10 = b;
-    self->f14 = c;
+    self->f0C = nearPlane;
+    self->f10 = farPlane;
+    self->f14 = riderIndex;
     self->index = idx;
     self->f460 = 0;
     self->manual->viewport = ((sApp_15DE60*)SSXApp)->viewports[0];
@@ -3398,9 +3398,9 @@ extern "C" void cChaseCameraController_switchCamera_HardReset(cChaseCameraContro
  * @param a    owning cCamera, passed as an int to the base constructor
  * @return @p self
  */
-extern "C" void* cChaseCameraController_cChaseCameraController(cChaseCameraController* self, int idx, int a)
+extern "C" void* cChaseCameraController_cChaseCameraController(cChaseCameraController* self, int idx, int camera)
 {
-    cCameraController_cCameraController(self, a);
+    cCameraController_cCameraController(self, camera);
     self->mVtbl = cChaseCameraController_vtbl;
     self->Type = 2;
     self->BlendType = 1;
@@ -3451,8 +3451,8 @@ extern "C" void func_00161A60(cChaseCameraController* self, int* p)
 //100%
 INCLUDE_ASM("camera/camera", func_00161AA0);
 #ifdef SKIP_ASM
-extern "C" int func_00161AA0(cChaseCameraController* arg0) {
-    return (*(int *)((char*)((arg0->Target)) + (4)));
+extern "C" int func_00161AA0(cChaseCameraController* chaseCameraController) {
+    return (*(int *)((char*)((chaseCameraController->Target)) + (4)));
 }
 #endif
 
@@ -8410,15 +8410,15 @@ extern "C" int func_00167FE0(void *arg0) {
 //100%
 INCLUDE_ASM("camera/camera", func_00167FE8);
 #ifdef SKIP_ASM
-extern "C" int func_00167FE8(cChaseCameraController* arg0) {
-    return (arg0->LatestAlgoType);
+extern "C" int func_00167FE8(cChaseCameraController* chaseCameraController) {
+    return (chaseCameraController->LatestAlgoType);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00167FF0);
 #ifdef SKIP_ASM
-extern "C" int func_00167FF0(cChaseCameraController* arg0) {
-    return ((int)arg0->Target);
+extern "C" int func_00167FF0(cChaseCameraController* chaseCameraController) {
+    return ((int)chaseCameraController->Target);
 }
 #endif
 //100%
@@ -8608,43 +8608,43 @@ extern "C" void func_00168108(void *arg0, float fparg0) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168110);
 #ifdef SKIP_ASM
-extern "C" int func_00168110(cCamera* arg0) {
-    return ((int)arg0->Controller);
+extern "C" int func_00168110(cCamera* camera) {
+    return ((int)camera->Controller);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00168118);
 #ifdef SKIP_ASM
-extern "C" int func_00168118(cCamera* arg0) {
-    return ((int)arg0->ManualController);
+extern "C" int func_00168118(cCamera* camera) {
+    return ((int)camera->ManualController);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00168120);
 #ifdef SKIP_ASM
-extern "C" int func_00168120(cCamera* arg0) {
-    return ((int)arg0->ChaseController);
+extern "C" int func_00168120(cCamera* camera) {
+    return ((int)camera->ChaseController);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00168128);
 #ifdef SKIP_ASM
-extern "C" int func_00168128(cCamera* arg0) {
-    return ((int)arg0->ScriptController);
+extern "C" int func_00168128(cCamera* camera) {
+    return ((int)camera->ScriptController);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00168130);
 #ifdef SKIP_ASM
-extern "C" int func_00168130(cCamera* arg0) {
-    return (arg0->bStreamIsReady);
+extern "C" int func_00168130(cCamera* camera) {
+    return (camera->bStreamIsReady);
 }
 #endif
 //100%
 INCLUDE_ASM("camera/camera", func_00168138);
 #ifdef SKIP_ASM
-extern "C" int func_00168138(cCamera* arg0) {
-    return (arg0->StreamFocusID);
+extern "C" int func_00168138(cCamera* camera) {
+    return (camera->StreamFocusID);
 }
 #endif
 //100%

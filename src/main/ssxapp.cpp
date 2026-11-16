@@ -16,6 +16,15 @@ extern int D_004A3E90;
 extern void* cSSXApp_vtbl[];
 
 
+/**
+ * Constructs the SSX application object on top of cAppMan, with empty settings.
+ *
+ * After cAppMan_cAppMan() and the vtable, UserName, Password and CommandLineTrack point at the shared empty
+ * string, several state words are zeroed, +0x60 and +0x64 are set to 1, and the two-entry InputPads, InputMaps
+ * and Inputs arrays are cleared.
+ *
+ * @return @p self
+ */
 extern "C" cSSXApp* cSSXApp_cSSXApp(cSSXApp* self)
 {
     cAppMan_cAppMan((self));

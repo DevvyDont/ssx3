@@ -137,15 +137,15 @@ INCLUDE_ASM("world/streamman", cStreamMan_addStreamRequest);
 #ifdef SKIP_ASM
 extern "C" int func_003E0C88(int h, void* p, int a, int tag);
 
-extern "C" int cStreamMan_addStreamRequest(cStreamMan* self, int a1, int a2, int a3)
+extern "C" int cStreamMan_addStreamRequest(cStreamMan* self, int uiHullID, int uiNumHullChunk, int uiFileOffset)
 {
     if (self->m_bActive == 0) {
-        int r = func_003E0C88(self->m_streamHandle, (char*)self + 0x4, a3, 0x444E4543);
+        int r = func_003E0C88(self->m_streamHandle, (char*)self + 0x4, uiFileOffset, 0x444E4543);
         self->m_streamRequest = r;
         if (r != 0) {
-            self->m_ActiveHull = a1;
+            self->m_ActiveHull = uiHullID;
             self->m_bActive = 1;
-            self->m_uiNumHullChunk = (unsigned int)a2;
+            self->m_uiNumHullChunk = (unsigned int)uiNumHullChunk;
             self->m_iCarrySize = 0;
             self->m_bBxNullChunk = 0;
             self->m_iLastTimerTick = 0;

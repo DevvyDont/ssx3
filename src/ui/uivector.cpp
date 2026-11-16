@@ -1637,9 +1637,9 @@ public:
  * @param obj  the list operator (On Tour: pOperator)
  * @return the operator's onListNode result
  */
-extern "C" int cUIGroup_traverseFlat(void* a, cUIGroup_traverseFlat_cVirt* obj)
+extern "C" int cUIGroup_traverseFlat(void* self, cUIGroup_traverseFlat_cVirt* obj)
 {
-    return obj->v02(a);
+    return obj->v02(self);
 }
 #endif
 
@@ -1744,8 +1744,8 @@ extern "C" void* func_003A5338(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5350);
 #ifdef SKIP_ASM
-extern "C" int func_003A5350(cUIMenu* arg0) {
-    return ((int) (*(int*)&arg0->mAttrMenu) >> 1) & 1;
+extern "C" int func_003A5350(cUIMenu* uiMenu) {
+    return ((int) (*(int*)&uiMenu->mAttrMenu) >> 1) & 1;
 }
 #endif
 //100%
@@ -1759,8 +1759,8 @@ extern "C" void func_003A5360(cUIMenu* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5380);
 #ifdef SKIP_ASM
-extern "C" int func_003A5380(cUIMenu* arg0) {
-    return ((int) (*(int*)&arg0->mAttrMenu) >> 3) & 1;
+extern "C" int func_003A5380(cUIMenu* uiMenu) {
+    return ((int) (*(int*)&uiMenu->mAttrMenu) >> 3) & 1;
 }
 #endif
 //100%
@@ -1774,71 +1774,71 @@ extern "C" void func_003A5390(cUIMenu* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53B0);
 #ifdef SKIP_ASM
-extern "C" int func_003A53B0(cUIMenu* arg0) {
-    return (*(int*)&arg0->mAttrMenu) & 1;
+extern "C" int func_003A53B0(cUIMenu* uiMenu) {
+    return (*(int*)&uiMenu->mAttrMenu) & 1;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53C0);
 #ifdef SKIP_ASM
-extern "C" void func_003A53C0(cUIMenu* arg0, int arg1) {
-    (*(int*)&arg0->mAttrMenu) = (int) (((*(int*)&arg0->mAttrMenu) & ~1) | (arg1 != 0));
+extern "C" void func_003A53C0(cUIMenu* uiMenu, int arg1) {
+    (*(int*)&uiMenu->mAttrMenu) = (int) (((*(int*)&uiMenu->mAttrMenu) & ~1) | (arg1 != 0));
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53E0);
 #ifdef SKIP_ASM
-extern "C" unsigned char func_003A53E0(cUIMenu* arg0) {
-    return (arg0->mScrollItemCurrent);
+extern "C" unsigned char func_003A53E0(cUIMenu* uiMenu) {
+    return (uiMenu->mScrollItemCurrent);
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53E8);
 #ifdef SKIP_ASM
-extern "C" unsigned char func_003A53E8(cUIMenu* arg0) {
-    return (arg0->mScrollItemOffset);
+extern "C" unsigned char func_003A53E8(cUIMenu* uiMenu) {
+    return (uiMenu->mScrollItemOffset);
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53F0);
 #ifdef SKIP_ASM
-extern "C" unsigned char func_003A53F0(cUIMenu* arg0) {
-    return (arg0->mScrollItemNum);
+extern "C" unsigned char func_003A53F0(cUIMenu* uiMenu) {
+    return (uiMenu->mScrollItemNum);
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53F8);
 #ifdef SKIP_ASM
-extern "C" void func_003A53F8(cUIMenu* arg0, signed char arg1) {
-    (*(signed char*)&arg0->mScrollItemCurrent) = arg1;
+extern "C" void func_003A53F8(cUIMenu* uiMenu, signed char arg1) {
+    (*(signed char*)&uiMenu->mScrollItemCurrent) = arg1;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5400);
 #ifdef SKIP_ASM
-extern "C" void func_003A5400(cUIMenu* arg0, signed char arg1) {
-    (*(signed char*)&arg0->mScrollItemNum) = arg1;
+extern "C" void func_003A5400(cUIMenu* uiMenu, signed char arg1) {
+    (*(signed char*)&uiMenu->mScrollItemNum) = arg1;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5408);
 #ifdef SKIP_ASM
-extern "C" void func_003A5408(cUIMenu* arg0, signed char arg1) {
-    (*(signed char*)&arg0->mScrollItemOffset) = arg1;
+extern "C" void func_003A5408(cUIMenu* uiMenu, signed char arg1) {
+    (*(signed char*)&uiMenu->mScrollItemOffset) = arg1;
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5410);
 #ifdef SKIP_ASM
-extern "C" int func_003A5410(cUIMenu* arg0) {
-    return ((int)arg0->mpSelected);
+extern "C" int func_003A5410(cUIMenu* uiMenu) {
+    return ((int)uiMenu->mpSelected);
 }
 #endif
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5418);
 #ifdef SKIP_ASM
-extern "C" unsigned char func_003A5418(cUIMenu* arg0) {
-    return (arg0->mScrollItemCurrent);
+extern "C" unsigned char func_003A5418(cUIMenu* uiMenu) {
+    return (uiMenu->mScrollItemCurrent);
 }
 #endif
 //100%

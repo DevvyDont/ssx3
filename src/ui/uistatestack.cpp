@@ -53,6 +53,14 @@ static inline void cUIStateStack_pushPopup_cover(cUIStateStack_pushPopup_sState*
     st->level = st->level + 1;
 }
 
+/**
+ * Pushes a popup state onto the front of the state stack, covering the state beneath it.
+ *
+ * The covered state is the popup's parent when it has one, else the current front of the stack: it loses its
+ * enabled bit and its popup level goes up by one. The popup gets its is-popup and enabled bits set.
+ *
+ * @param st  the popup state to push (On Tour pPushState)
+ */
 // Pushes a state, covering its parent if it has one, else the current top of the stack.
 extern "C" void cUIStateStack_pushPopup(cList* self, cUIStateStack_pushPopup_sState* st)
 {
@@ -94,20 +102,20 @@ static inline int cUIStateStack_stateId(cUIStateStack_sState* s) { return s->id;
 
 extern "C" void* cUIStateStack_getCurrentState(void* self);
 
-extern "C" void cUIStateStack_pushSpecial(cList* self, cUIStateStack_sState* st, int a2, int a3)
+extern "C" void cUIStateStack_pushSpecial(cList* self, cUIStateStack_sState* st, int bEnable, int bDestroyCurrent)
 {
     cUIStateStack_sState* cur = (cUIStateStack_sState*)cUIStateStack_getCurrentState(self);
     if (cur != 0) {
         if (((*(int*)((char*)cur + 0x1C) >> 5) & 1) && cUIStateStack_stateId(cur) == 5) {
             cur->id = 7;
-            cur->b7 = a3;
+            cur->b7 = bDestroyCurrent;
         }
     } else {
-        a2 = 1;
+        bEnable = 1;
         st->id = 2;
     }
     cList_addToFront(self, (cListNode*)st);
-    st->b5 = a2;
+    st->b5 = bEnable;
 }
 #endif
 
@@ -473,6 +481,12 @@ INCLUDE_ASM("ui/uistatestack", cUIStateStack_findState);
 struct cListNode;
 int cListNode_isSentinel(cListNode*);
 
+/**
+ * Finds a state by its hash name, searching the state stack and then the explicit-state list (+0x1C).
+ *
+ * @param id  the state's hash name (mHashName, On Tour hashName)
+ * @return the first state with that hash name, or 0 when there is none
+ */
 extern "C" void* cUIStateStack_findState(void* self, int id)
 {
     char* n = (char*)cList_first((cList*)self);
@@ -505,6 +519,11 @@ void* cList_first(cList*);
 struct cListNode;
 int cListNode_isSentinel(cListNode*);
 
+/**
+ * Returns the current state: the first state on the stack whose enabled bit (bit 5 of mAttrState) is set.
+ *
+ * @return that state, or 0 when no state on the stack is enabled
+ */
 extern "C" void* cUIStateStack_getCurrentState(void* self)
 {
     void* n = cList_first((cList*)self);
@@ -642,6 +661,14 @@ public:
     virtual void v01(int);
 };
 
+/**
+ * Destroys a UI thing: deletes its animation, runs the list-node base destructor, then frees it when asked to.
+ *
+ * Stores cUIThing's vtable, deletes mpAnim through its virtual destructor when there is one, then stores the
+ * base vtable (D_00494CC0) and calls func_003A4868() on the object.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cUIThing__cUIThing(cUIThing* self, int flags)
 {
     self->mVtbl = (void**)cUIThing_vtbl;
@@ -663,6 +690,16 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_playAnimation);
 extern "C" void cUIThing_deleteAnimation(cUIThing* self);
 extern "C" void cUIAnimation_start(void* self, int mode, unsigned short v);
 
+/**
+ * Starts an animation on the UI thing, deleting the previous animation when it is a different one.
+ *
+ * Stores the playback mode in mAnimPlaybackStatus and the animation in mpAnim, then calls cUIAnimation_start().
+ * On Tour's version also takes an expire flag, which this one does not.
+ *
+ * @param anim  the animation to play (On Tour cUIAnimation* pAnim)
+ * @param mode  playback mode (On Tour playback)
+ * @param v     frame to start from (On Tour FrameNum)
+ */
 extern "C" void cUIThing_playAnimation(cUIThing* self, void* anim, unsigned char mode, unsigned short v)
 {
     if ((void*)self->mpAnim != anim) {
@@ -683,6 +720,11 @@ struct sVEntry39FD38 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Deletes the UI thing's animation through its virtual destructor (flags 3) and clears mpAnim.
+ *
+ * Does nothing when there is no animation.
+ */
 extern "C" void cUIThing_deleteAnimation(cUIThing* self)
 {
     void* obj = self->mpAnim;
@@ -822,9 +864,15 @@ int func_0039FF50(void* self)
 //100%
 INCLUDE_ASM("ui/uistatestack", cUIThing_getObjectByHashName);
 #ifdef SKIP_ASM
-extern "C" void* cUIThing_getObjectByHashName(cUIThing* self, int a1)
+/**
+ * Returns this UI thing when its hash name matches; the base version does not search any children.
+ *
+ * @param a1  the hash name to look for
+ * @return this object when its mHashName equals @p a1, otherwise 0
+ */
+extern "C" void* cUIThing_getObjectByHashName(cUIThing* self, int hashname)
 {
-    return self->mHashName == a1 ? ((void*)self) : 0;
+    return self->mHashName == hashname ? ((void*)self) : 0;
 }
 #endif
 

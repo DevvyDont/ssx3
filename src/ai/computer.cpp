@@ -361,9 +361,9 @@ static inline int riderV7_10CBE0(char* rider)
 }
 
 
-extern "C" int func_0010CBE0(cComputer* p, float t)
+extern "C" int func_0010CBE0(cComputer* computer, float t)
 {
-    cComputer* self = p;
+    cComputer* self = computer;
     self->mIsUber = 0;
     self->mIsTweak = 0;
     self->mGrabStartTime = t;
@@ -406,9 +406,9 @@ static inline int riderV7_10CD20(char* rider)
 }
 
 
-extern "C" int func_0010CD20(cComputer* p, float t)
+extern "C" int func_0010CD20(cComputer* computer, float t)
 {
-    cComputer* self = p;
+    cComputer* self = computer;
     self->mIsUber = 0;
     self->mGrabStartTime = t;
     int found = -1;
@@ -467,9 +467,9 @@ static inline int riderV7_10CF68(char* rider)
 }
 
 
-extern "C" int func_0010CF68(cComputer* p, float t)
+extern "C" int func_0010CF68(cComputer* computer, float t)
 {
-    cComputer* self = p;
+    cComputer* self = computer;
     self->mIsTweak = 0;
     if (*(float*)(((char*)self->mRider) + 0x2F0) <= 0.0f)
         return -1;
@@ -823,32 +823,32 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
 //100%
 INCLUDE_ASM("ai/computer", cComputer_calculateDifficultyScore);
 #ifdef SKIP_ASM
-extern "C" float cComputer_calculateDifficultyScore(cComputer* self, int a1, int a2, int a3)
+extern "C" float cComputer_calculateDifficultyScore(cComputer* self, int IsEasy, int IsMedium, int IsHard)
 {
     short s = self->mPathDifficulty;
     if (s == 0)
     {
-        if (!a1)
+        if (!IsEasy)
             return 0.0f;
     }
     else if (s == 1)
     {
-        if (!a2)
+        if (!IsMedium)
             return 0.0f;
     }
     else if (s == 2)
     {
-        if (!a3)
+        if (!IsHard)
             return 0.0f;
     }
-    else if ((a1 == a2) != a3)
+    else if ((IsEasy == IsMedium) != IsHard)
         return 0.0f;
     int n = 4;
-    if (a1)
+    if (IsEasy)
         n--;
-    if (a2)
+    if (IsMedium)
         n--;
-    if (a3)
+    if (IsHard)
         n--;
     return n * 33.29999923706055f;
 }
@@ -916,12 +916,12 @@ extern "C" int func_0010D990(cComputer* self)
 //100%
 INCLUDE_ASM("ai/computer", cComputer_checkForAttack);
 #ifdef SKIP_ASM
-extern "C" int cComputer_checkForAttack(cComputer* self, int a1)
+extern "C" int cComputer_checkForAttack(cComputer* self, int oppID)
 {
     void* p = self->mRider;
     int r = 0;
     if (*(int*)((char*)p + 0xf0) != 0) {
-        r = *(int*)((char*)p + 0xf8) == a1;
+        r = *(int*)((char*)p + 0xf8) == oppID;
     }
     return r;
 }
@@ -2324,11 +2324,11 @@ extern "C" void cRiderHandler_gainMotionState(cRiderHandler*, int);
  *
  * @param v  the new motion state
  */
-extern "C" void cRiderHandler__setMotionState(cRiderHandler* self, int v)
+extern "C" void cRiderHandler__setMotionState(cRiderHandler* self, int mstate)
 {
     cRiderHandler_loseMotionState();
     int old = self->MotionState;
-    self->MotionState = v;
+    self->MotionState = mstate;
     cRiderHandler_gainMotionState(self, old);
 }
 #endif
@@ -2388,23 +2388,23 @@ extern "C" void cWipeoutMotion_gainFocus(void* motion, int a1);
 extern "C" void cRailslideMotion_gainFocus(void* motion, int a1);
 extern "C" void cHandplantMotion_gainFocus(void* motion, int a1);
 
-extern "C" void cRiderHandler_gainMotionState(cRiderHandler* self, int a1)
+extern "C" void cRiderHandler_gainMotionState(cRiderHandler* self, int prev)
 {
     switch (self->MotionState) {
     case 0:
-        cGroundMotion_gainFocus(self, a1);
+        cGroundMotion_gainFocus(self, prev);
         break;
     case 1:
-        cAirMotion_gainFocus((char*)self + 0x20, a1);
+        cAirMotion_gainFocus((char*)self + 0x20, prev);
         break;
     case 2:
-        cWipeoutMotion_gainFocus((char*)self + 0x30, a1);
+        cWipeoutMotion_gainFocus((char*)self + 0x30, prev);
         break;
     case 4:
-        cRailslideMotion_gainFocus((char*)self + 0xB0, a1);
+        cRailslideMotion_gainFocus((char*)self + 0xB0, prev);
         break;
     case 5:
-        cHandplantMotion_gainFocus((char*)self + 0x110, a1);
+        cHandplantMotion_gainFocus((char*)self + 0x110, prev);
         break;
     }
 }
@@ -2488,11 +2488,11 @@ INCLUDE_ASM("ai/computer", cRiderHandler__setControlState);
 extern "C" void cRiderHandler_loseControlState();
 extern "C" void cRiderHandler_gainControlState(cRiderHandler*, int);
 
-extern "C" void cRiderHandler__setControlState(cRiderHandler* self, int v)
+extern "C" void cRiderHandler__setControlState(cRiderHandler* self, int cstate)
 {
     cRiderHandler_loseControlState();
     int old = self->ControlState;
-    self->ControlState = v;
+    self->ControlState = cstate;
     cRiderHandler_gainControlState(self, old);
 }
 #endif
@@ -2562,7 +2562,7 @@ extern "C" void cFinishLineControl_gainFocus(void* p, int a1);
 extern "C" void cHandplantControl_gainFocus(void* p, int a1);
 extern "C" void cUberGrindControl_gainFocus(void* p, int a1);
 // Forwards to the handler for the AI's current state.
-extern "C" void cRiderHandler_gainControlState(cRiderHandler* self, int a1)
+extern "C" void cRiderHandler_gainControlState(cRiderHandler* self, int prev)
 {
     switch (self->ControlState) {
     case 0:
@@ -2572,34 +2572,34 @@ extern "C" void cRiderHandler_gainControlState(cRiderHandler* self, int a1)
         cBoardPressControl_gainFocus((char*)self + 0x1D0);
         break;
     case 2:
-        cPrewindControl_gainFocus((char*)self + 0x1F0, a1);
+        cPrewindControl_gainFocus((char*)self + 0x1F0, prev);
         break;
     case 4:
-        cNaturalAirControl_gainFocus((char*)self + 0x210, a1);
+        cNaturalAirControl_gainFocus((char*)self + 0x210, prev);
         break;
     case 5:
-        cSpinControl_gainFocus((char*)self + 0x230, a1);
+        cSpinControl_gainFocus((char*)self + 0x230, prev);
         break;
     case 6:
-        cGateControl_gainFocus((char*)self + 0x290, a1);
+        cGateControl_gainFocus((char*)self + 0x290, prev);
         break;
     case 7:
-        cRailslideControl_gainFocus((char*)self + 0x2B0, a1);
+        cRailslideControl_gainFocus((char*)self + 0x2B0, prev);
         break;
     case 8:
-        cWipeoutControl_gainFocus((char*)self + 0x2C0, a1);
+        cWipeoutControl_gainFocus((char*)self + 0x2C0, prev);
         break;
     case 9:
-        cResetControl_gainFocus((char*)self + 0x350, a1);
+        cResetControl_gainFocus((char*)self + 0x350, prev);
         break;
     case 10:
-        cFinishLineControl_gainFocus((char*)self + 0x360, a1);
+        cFinishLineControl_gainFocus((char*)self + 0x360, prev);
         break;
     case 11:
-        cHandplantControl_gainFocus((char*)self + 0x370, a1);
+        cHandplantControl_gainFocus((char*)self + 0x370, prev);
         break;
     case 12:
-        cUberGrindControl_gainFocus((char*)self + 0x390, a1);
+        cUberGrindControl_gainFocus((char*)self + 0x390, prev);
         break;
     case 3:
     case 13:
@@ -2626,47 +2626,47 @@ extern "C" void cFinishLineControl_update(void* p, int a1);
 extern "C" void cHandplantControl_update(void* p, int a1);
 extern "C" void cUberGrindControl_update(void* p, int a1);
 // Forwards to the second handler for the AI's current state.
-extern "C" void cRiderHandler_updateControl(cRiderHandler* self, int a1)
+extern "C" void cRiderHandler_updateControl(cRiderHandler* self, int cmd)
 {
     switch (self->ControlState) {
     case 0:
-        cCruiseControl_update((char*)self + 0x1C0, a1);
+        cCruiseControl_update((char*)self + 0x1C0, cmd);
         break;
     case 1:
-        cBoardPressControl_update((char*)self + 0x1D0, a1);
+        cBoardPressControl_update((char*)self + 0x1D0, cmd);
         break;
     case 2:
-        cPrewindControl_update((char*)self + 0x1F0, a1);
+        cPrewindControl_update((char*)self + 0x1F0, cmd);
         break;
     case 3:
-        cBumpControl_update((char*)self + 0x200, a1);
+        cBumpControl_update((char*)self + 0x200, cmd);
         break;
     case 4:
-        cNaturalAirControl_update((char*)self + 0x210, a1);
+        cNaturalAirControl_update((char*)self + 0x210, cmd);
         break;
     case 5:
-        cSpinControl_update((char*)self + 0x230, a1);
+        cSpinControl_update((char*)self + 0x230, cmd);
         break;
     case 6:
-        cGateControl_update((char*)self + 0x290, a1);
+        cGateControl_update((char*)self + 0x290, cmd);
         break;
     case 7:
-        cRailslideControl_update((char*)self + 0x2B0, a1);
+        cRailslideControl_update((char*)self + 0x2B0, cmd);
         break;
     case 8:
-        cWipeoutControl_update((char*)self + 0x2C0, a1);
+        cWipeoutControl_update((char*)self + 0x2C0, cmd);
         break;
     case 9:
-        cResetControl_update((char*)self + 0x350, a1);
+        cResetControl_update((char*)self + 0x350, cmd);
         break;
     case 10:
-        cFinishLineControl_update((char*)self + 0x360, a1);
+        cFinishLineControl_update((char*)self + 0x360, cmd);
         break;
     case 11:
-        cHandplantControl_update((char*)self + 0x370, a1);
+        cHandplantControl_update((char*)self + 0x370, cmd);
         break;
     case 12:
-        cUberGrindControl_update((char*)self + 0x390, a1);
+        cUberGrindControl_update((char*)self + 0x390, cmd);
         break;
     case 13:
         break;
@@ -2886,14 +2886,14 @@ extern "C" void cCheatFX_writeToReplayFrame(void* self, void* s);
 extern "C" int func_0026B508(void* tree, void* path);
 extern "C" int func_0026B550(void* tree, void* path);
 
-extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, char* s)
+extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, char* data)
 {
-    cStream_00111AC0* st = (cStream_00111AC0*)s;
+    cStream_00111AC0* st = (cStream_00111AC0*)data;
     st->Write(self->GroundMotion.mRider, 0x6C0);
-    func_00104D68(*(void**)((char*)self->GroundMotion.mRider + 0x784), s);
-    func_00310EA8(*(void**)((char*)self->GroundMotion.mRider + 0x780), s);
-    func_00113AA0(*(void**)((char*)self->GroundMotion.mRider + 0x788), s);
-    func_001174B0(*(void**)((char*)self->GroundMotion.mRider + 0x790), s);
+    func_00104D68(*(void**)((char*)self->GroundMotion.mRider + 0x784), data);
+    func_00310EA8(*(void**)((char*)self->GroundMotion.mRider + 0x780), data);
+    func_00113AA0(*(void**)((char*)self->GroundMotion.mRider + 0x788), data);
+    func_001174B0(*(void**)((char*)self->GroundMotion.mRider + 0x790), data);
     unsigned int id0 = 0xFFFFFFFF;
     char* p0 = **(char***)((char*)self->GroundMotion.mRider + 0x864);
     if (p0 != 0) {
@@ -2910,22 +2910,22 @@ extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, char* s)
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0x868), 0x10);
     st->Write(((char*)self) + 0xDE0, 4);
     st->Write(((char*)self) + 0xDE4, 4);
-    cGroundMotion_writeToReplayFrame(((char*)self), s);
-    cAirMotion_writeToReplayFrame(((char*)self) + 0x20, s);
-    cWipeoutMotion_writeToReplayFrame(((char*)self) + 0x30, s);
-    cRailslideMotion_writeToReplayFrame(((char*)self) + 0xB0, s);
-    cHandplantMotion_writeToReplayFrame(((char*)self) + 0x110, s);
-    cBoardPressControl_writeToReplayFrame(((char*)self) + 0x1D0, s);
-    cNaturalAirControl_writeToReplayFrame(((char*)self) + 0x210, s);
-    cSpinControl_writeToReplayFrame(((char*)self) + 0x230, s);
-    cGateControl_writeToReplayFrame(((char*)self) + 0x290, s);
-    cRailslideControl_writeToReplayFrame(((char*)self) + 0x2B0, s);
-    cWipeoutControl_writeToReplayFrame(((char*)self) + 0x2C0, s);
-    cResetControl_writeToReplayFrame(((char*)self) + 0x350, s);
-    cFinishLineControl_writeToReplayFrame(((char*)self) + 0x360, s);
-    cHandplantControl_writeToReplayFrame(((char*)self) + 0x370, s);
-    cUberGrindControl_writeToReplayFrame(((char*)self) + 0x390, s);
-    cCheatFX_writeToReplayFrame(((char*)self) + 0xD20, s);
+    cGroundMotion_writeToReplayFrame(((char*)self), data);
+    cAirMotion_writeToReplayFrame(((char*)self) + 0x20, data);
+    cWipeoutMotion_writeToReplayFrame(((char*)self) + 0x30, data);
+    cRailslideMotion_writeToReplayFrame(((char*)self) + 0xB0, data);
+    cHandplantMotion_writeToReplayFrame(((char*)self) + 0x110, data);
+    cBoardPressControl_writeToReplayFrame(((char*)self) + 0x1D0, data);
+    cNaturalAirControl_writeToReplayFrame(((char*)self) + 0x210, data);
+    cSpinControl_writeToReplayFrame(((char*)self) + 0x230, data);
+    cGateControl_writeToReplayFrame(((char*)self) + 0x290, data);
+    cRailslideControl_writeToReplayFrame(((char*)self) + 0x2B0, data);
+    cWipeoutControl_writeToReplayFrame(((char*)self) + 0x2C0, data);
+    cResetControl_writeToReplayFrame(((char*)self) + 0x350, data);
+    cFinishLineControl_writeToReplayFrame(((char*)self) + 0x360, data);
+    cHandplantControl_writeToReplayFrame(((char*)self) + 0x370, data);
+    cUberGrindControl_writeToReplayFrame(((char*)self) + 0x390, data);
+    cCheatFX_writeToReplayFrame(((char*)self) + 0xD20, data);
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
     int ids[2];
@@ -3023,14 +3023,14 @@ struct sQuad_00111D98 {
     int v[4];
 } __attribute__((aligned(16)));
 
-extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* s)
+extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* data)
 {
-    cStream_00111D98* st = (cStream_00111D98*)s;
+    cStream_00111D98* st = (cStream_00111D98*)data;
     st->Read(self->GroundMotion.mRider, 0x6C0);
-    func_00104DE0(*(void**)((char*)self->GroundMotion.mRider + 0x784), s);
-    func_00310EE0(*(void**)((char*)self->GroundMotion.mRider + 0x780), s);
-    func_00113AD8(*(void**)((char*)self->GroundMotion.mRider + 0x788), s);
-    func_001174E8(*(void**)((char*)self->GroundMotion.mRider + 0x790), s);
+    func_00104DE0(*(void**)((char*)self->GroundMotion.mRider + 0x784), data);
+    func_00310EE0(*(void**)((char*)self->GroundMotion.mRider + 0x780), data);
+    func_00113AD8(*(void**)((char*)self->GroundMotion.mRider + 0x788), data);
+    func_001174E8(*(void**)((char*)self->GroundMotion.mRider + 0x790), data);
     int ids[2];
     sRef_00111D98 r0;
     st->Read(&r0, 4);
@@ -3046,21 +3046,21 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* s)
     }
     st->Read(((char*)self) + 0xDE0, 4);
     st->Read(((char*)self) + 0xDE4, 4);
-    cGroundMotion_readFromReplayFrame(((char*)self), s);
-    cAirMotion_readFromReplayFrame(((char*)self) + 0x20, s);
-    cWipeoutMotion_readFromReplayFrame(((char*)self) + 0x30, s);
-    cRailslideMotion_readFromReplayFrame(((char*)self) + 0xB0, s);
-    cHandplantMotion_readFromReplayFrame(((char*)self) + 0x110, s);
-    cBoardPressControl_readFromReplayFrame(((char*)self) + 0x1D0, s);
-    cNaturalAirControl_readFromReplayFrame(((char*)self) + 0x210, s);
-    cSpinControl_readFromReplayFrame(((char*)self) + 0x230, s);
-    cGateControl_readFromReplayFrame(((char*)self) + 0x290, s);
-    cRailslideControl_readFromReplayFrame(((char*)self) + 0x2B0, s);
-    cWipeoutControl_readFromReplayFrame(((char*)self) + 0x2C0, s);
-    cResetControl_readFromReplayFrame(((char*)self) + 0x350, s);
-    cFinishLineControl_readFromReplayFrame(((char*)self) + 0x360, s);
-    cHandplantControl_readFromReplayFrame(((char*)self) + 0x370, s);
-    cUberGrindControl_readFromReplayFrame(((char*)self) + 0x390, s);
+    cGroundMotion_readFromReplayFrame(((char*)self), data);
+    cAirMotion_readFromReplayFrame(((char*)self) + 0x20, data);
+    cWipeoutMotion_readFromReplayFrame(((char*)self) + 0x30, data);
+    cRailslideMotion_readFromReplayFrame(((char*)self) + 0xB0, data);
+    cHandplantMotion_readFromReplayFrame(((char*)self) + 0x110, data);
+    cBoardPressControl_readFromReplayFrame(((char*)self) + 0x1D0, data);
+    cNaturalAirControl_readFromReplayFrame(((char*)self) + 0x210, data);
+    cSpinControl_readFromReplayFrame(((char*)self) + 0x230, data);
+    cGateControl_readFromReplayFrame(((char*)self) + 0x290, data);
+    cRailslideControl_readFromReplayFrame(((char*)self) + 0x2B0, data);
+    cWipeoutControl_readFromReplayFrame(((char*)self) + 0x2C0, data);
+    cResetControl_readFromReplayFrame(((char*)self) + 0x350, data);
+    cFinishLineControl_readFromReplayFrame(((char*)self) + 0x360, data);
+    cHandplantControl_readFromReplayFrame(((char*)self) + 0x370, data);
+    cUberGrindControl_readFromReplayFrame(((char*)self) + 0x390, data);
     cBoardWakeFX_readFromReplayFrame(((char*)self) + 0x3B0);
     cBoardSparkFX_readFromReplayFrame(((char*)self) + 0x470);
     cBoardTrailFX_reset(((char*)self) + 0x520);
@@ -3070,7 +3070,7 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* s)
     func_002D4BE0(((char*)self) + 0xAF0);
     cPlayerIndicatorFX_readFromReplayFrame(((char*)self) + 0xB00);
     cPunchFX_readFromReplayFrame(((char*)self) + 0xC70);
-    cCheatFX_readFromReplayFrame(((char*)self) + 0xD20, s);
+    cCheatFX_readFromReplayFrame(((char*)self) + 0xD20, data);
     st->Read(*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
     st->Read(*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
     st->Read(ids, 8);

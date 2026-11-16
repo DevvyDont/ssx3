@@ -777,10 +777,10 @@ extern "C" void cCommChannel__cCommChannel_66E8(void *, int) __asm__("cCommChann
 extern "C" void func_00256998(void *);
 extern char cDSockChannel_vtbl[];
 
-extern "C" void func_002566E8(cDSockChannel* arg0, int arg1) {
-    ((char*)arg0->mVtbl) = cDSockChannel_vtbl;
-    func_00256998(arg0);
-    cCommChannel__cCommChannel_66E8(arg0, arg1);
+extern "C" void func_002566E8(cDSockChannel* dSockChannel, int arg1) {
+    ((char*)dSockChannel->mVtbl) = cDSockChannel_vtbl;
+    func_00256998(dSockChannel);
+    cCommChannel__cCommChannel_66E8(dSockChannel, arg1);
 }
 #endif
 
@@ -817,7 +817,7 @@ INCLUDE_ASM("seg/seg_156860", cDSockChannel_writePacket);
 extern "C" void MEM_copy(char *, int, int);
 extern "C" int NetGameLinkSend(int, void *, int);
 
-extern "C" int cDSockChannel_writePacket(cDSockChannel* self, int a1, int len) {
+extern "C" int cDSockChannel_writePacket(cDSockChannel* self, int data, int len) {
     char buf[0x108];
     if (self->mState != 2) return 0;
     int t = self->mError;
@@ -825,7 +825,7 @@ extern "C" int cDSockChannel_writePacket(cDSockChannel* self, int a1, int len) {
     if (len > 0) {
         buf[2] = 5;
         buf[3] = len;
-        MEM_copy(buf + 4, a1, len);
+        MEM_copy(buf + 4, data, len);
         return t < NetGameLinkSend((int)self->mGameLink, buf, 1);
     }
     return 0;
@@ -969,28 +969,28 @@ struct VEnt_6AA8 {
 
 extern "C" char* func_003E6958(int id);
 
-extern "C" void func_00256AA8(cDSockChannel* s)
+extern "C" void func_00256AA8(cDSockChannel* dSockChannel)
 {
-    char* st = func_003E6958((int)s->mGameLink);
+    char* st = func_003E6958((int)dSockChannel->mGameLink);
     if (st) {
         if (*(int*)(st + 0x0) - *(int*)(st + 0x20) > 30000) {
-            s->mState = 3;
-            s->mError = 1;
+            dSockChannel->mState = 3;
+            dSockChannel->mError = 1;
             return;
         }
         if (*(unsigned char*)(st + 0x45) == 0) {
-            VEnt_6AA8* vt = (VEnt_6AA8*)s->mVtbl;
-            vt[2].fn(((char*)s) + vt[2].delta);
-            s->mError = 1;
+            VEnt_6AA8* vt = (VEnt_6AA8*)dSockChannel->mVtbl;
+            vt[2].fn(((char*)dSockChannel) + vt[2].delta);
+            dSockChannel->mError = 1;
             return;
         }
         float f = (float)*(unsigned int*)(st + 0xC) * 0.0010000000474974513f;
         if (f > 1.0f) f = 1.0f;
-        s->mLatency = (s->mLatency * 4.0f + f) * 0.20000000298023224f;
+        dSockChannel->mLatency = (dSockChannel->mLatency * 4.0f + f) * 0.20000000298023224f;
     }
-    if (s->mPacketError) {
-        s->mState = 4;
-        s->mError = 1;
+    if (dSockChannel->mPacketError) {
+        dSockChannel->mState = 4;
+        dSockChannel->mError = 1;
     }
 }
 #endif
@@ -998,8 +998,8 @@ extern "C" void func_00256AA8(cDSockChannel* s)
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00256BA8);
 #ifdef SKIP_ASM
-extern "C" float func_00256BA8(cDSockChannel* arg0) {
-    return (arg0->mLatency);
+extern "C" float func_00256BA8(cDSockChannel* dSockChannel) {
+    return (dSockChannel->mLatency);
 }
 #endif
 
@@ -1573,14 +1573,14 @@ extern "C" void func_002570D8(cGameComm* vs)
 INCLUDE_ASM("seg/seg_156860", func_00257610);
 #ifdef SKIP_ASM
 
-extern "C" void func_00257610(cGameComm* arg0, int arg1) {
-    if (((arg1 != 0) || (((arg0->mError) == 0) && ((arg0->mState) < 0xF))) && ((arg0->unk_038) == 0)) {
-        (arg0->unk_038) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));
+extern "C" void func_00257610(cGameComm* gameComm, int arg1) {
+    if (((arg1 != 0) || (((gameComm->mError) == 0) && ((gameComm->mState) < 0xF))) && ((gameComm->unk_038) == 0)) {
+        (gameComm->unk_038) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));
     }
-    (arg0->mConnected) = 0;
-    (arg0->mRaceInProgress) = 0;
-    (arg0->mPauseMenu[1]) = 0;
-    (arg0->mLocalDisconnected) = 1;
+    (gameComm->mConnected) = 0;
+    (gameComm->mRaceInProgress) = 0;
+    (gameComm->mPauseMenu[1]) = 0;
+    (gameComm->mLocalDisconnected) = 1;
 }
 #endif
 
@@ -1608,17 +1608,17 @@ extern "C" void func_00257678(cGameComm* self) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00257750);
 #ifdef SKIP_ASM
-extern "C" void func_00257750(cGameComm* p) {
-    if (p->mDisplayError == 0 && p->mAlone == 0 && (p->mError == 0 || p->mRaceInProgress == 0)) {
-        int a = p->mOverlayTimeout;
+extern "C" void func_00257750(cGameComm* gameComm) {
+    if (gameComm->mDisplayError == 0 && gameComm->mAlone == 0 && (gameComm->mError == 0 || gameComm->mRaceInProgress == 0)) {
+        int a = gameComm->mOverlayTimeout;
         if (a > 0) {
-            if (p->mPauseMenu[0] == 0 || p->mPauseMenu[1] == 0) {
-                p->mOverlayTimeout = a - 1;
+            if (gameComm->mPauseMenu[0] == 0 || gameComm->mPauseMenu[1] == 0) {
+                gameComm->mOverlayTimeout = a - 1;
             }
         }
-        int b = p->mPauseTimeout;
+        int b = gameComm->mPauseTimeout;
         if (b > 0) {
-            p->mPauseTimeout = b - 1;
+            gameComm->mPauseTimeout = b - 1;
         }
     }
 }
@@ -1633,52 +1633,52 @@ extern "C" void func_00257678(cGameComm* self);
 extern "C" void func_002578F8(cGameComm* self);
 extern "C" void func_002579C8(cGameComm* self);
 
-extern "C" int func_002577C8(cGameComm* s)
+extern "C" int func_002577C8(cGameComm* gameComm)
 {
-    if (s->mDisplayError > 0) {
-        func_002579C8(s);
+    if (gameComm->mDisplayError > 0) {
+        func_002579C8(gameComm);
         return 1;
     }
-    if (s->mError != 0) return 1;
-    if (s->mRemoteEndGame != 0) {
-        func_002578F8(s);
+    if (gameComm->mError != 0) return 1;
+    if (gameComm->mRemoteEndGame != 0) {
+        func_002578F8(gameComm);
         return 1;
     }
-    if (func_00255E40_77C8((int)cCommSystem_mCommSystem, s->unk_06C) != 0) {
-        func_00257678(s);
-        func_002578F8(s);
+    if (func_00255E40_77C8((int)cCommSystem_mCommSystem, gameComm->unk_06C) != 0) {
+        func_00257678(gameComm);
+        func_002578F8(gameComm);
         return 1;
     }
-    if (s->unk_054 >= 3) {
-        s->mCheating[0] = 3;
-        func_002578F8(s);
+    if (gameComm->unk_054 >= 3) {
+        gameComm->mCheating[0] = 3;
+        func_002578F8(gameComm);
         return 1;
     }
-    if (s->mPauseCount[0] >= 6) {
-        s->mCheating[0] = 2;
-        func_002578F8(s);
+    if (gameComm->mPauseCount[0] >= 6) {
+        gameComm->mCheating[0] = 2;
+        func_002578F8(gameComm);
         return 1;
     }
-    if (s->unk_058 >= 3) {
-        s->mCheating[1] = 3;
-        func_002578F8(s);
+    if (gameComm->unk_058 >= 3) {
+        gameComm->mCheating[1] = 3;
+        func_002578F8(gameComm);
         return 1;
     }
-    if (s->mPauseCount[1] >= 6) {
-        s->mCheating[1] = 2;
-        func_002578F8(s);
+    if (gameComm->mPauseCount[1] >= 6) {
+        gameComm->mCheating[1] = 2;
+        func_002578F8(gameComm);
         return 1;
     }
-    if (s->mStallTimer >= 3600.0f) {
-        func_00257678(s);
-        func_002578F8(s);
+    if (gameComm->mStallTimer >= 3600.0f) {
+        func_00257678(gameComm);
+        func_002578F8(gameComm);
         return 1;
     }
-    if (s->unk_094 <= 0) return 0;
-    if (--s->unk_094 > 0) return 0;
-    s->unk_02C = 1;
-    func_00257678(s);
-    func_002578F8(s);
+    if (gameComm->unk_094 <= 0) return 0;
+    if (--gameComm->unk_094 > 0) return 0;
+    gameComm->unk_02C = 1;
+    func_00257678(gameComm);
+    func_002578F8(gameComm);
     return 1;
 }
 #endif
@@ -1755,41 +1755,41 @@ extern "C" void func_00257678(cGameComm* self);
 extern "C" void func_002578F8(cGameComm* self);
 extern int D_004A3ED0;
 
-extern "C" void func_00257A80(cGameComm* s)
+extern "C" void func_00257A80(cGameComm* gameComm)
 {
-    if (s->mCheating[0] != 0) return;
-    if (s->mPauseMenu[0] == 0) {
-        if (s->mGameStartGate != 0) {
-            if (s->mPauseMenu[1] == 0 && s->mUnPauseTimer <= 0) {
+    if (gameComm->mCheating[0] != 0) return;
+    if (gameComm->mPauseMenu[0] == 0) {
+        if (gameComm->mGameStartGate != 0) {
+            if (gameComm->mPauseMenu[1] == 0 && gameComm->mUnPauseTimer <= 0) {
                 char* g = (char*)SSXApp;
-                int n = ++s->mStallThreshold;
-                ++s->unk_060;
+                int n = ++gameComm->mStallThreshold;
+                ++gameComm->unk_060;
                 unsigned int st = *(int*)(*(char**)(*(char**)(g + 0x84) + 0xC)) - 4;
                 if (st < 2) {
-                    if (n >= 10) s->mStallTimer += 1.0f;
-                    if (s->mStallThreshold == 10) ++s->mStallCount;
+                    if (n >= 10) gameComm->mStallTimer += 1.0f;
+                    if (gameComm->mStallThreshold == 10) ++gameComm->mStallCount;
                 }
             }
-            if (s->unk_060 == 60) s->mWaitingMessage = 1;
+            if (gameComm->unk_060 == 60) gameComm->mWaitingMessage = 1;
         }
-        if (s->mRaceInProgress != 0) {
-            if (s->mDesync != 0) {
-                func_00257678(s);
-                func_002578F8(s);
+        if (gameComm->mRaceInProgress != 0) {
+            if (gameComm->mDesync != 0) {
+                func_00257678(gameComm);
+                func_002578F8(gameComm);
                 return;
             }
-            if (s->mPauseMenu[1] == 0) ++s->unk_05C;
-            if (s->unk_05C >= 1800) {
-                s->unk_02C = 1;
-                func_00257678(s);
-                func_002578F8(s);
+            if (gameComm->mPauseMenu[1] == 0) ++gameComm->unk_05C;
+            if (gameComm->unk_05C >= 1800) {
+                gameComm->unk_02C = 1;
+                func_00257678(gameComm);
+                func_002578F8(gameComm);
                 return;
             }
         }
     }
     if (D_004A3ED0 != 0) {
-        s->mCheating[0] = 1;
-        func_002578F8(s);
+        gameComm->mCheating[0] = 1;
+        func_002578F8(gameComm);
     }
 }
 #endif
@@ -2095,7 +2095,7 @@ INCLUDE_ASM("seg/seg_156860", func_002581B8);
 #ifdef SKIP_ASM
 extern "C" void operator_delete__FPi(int *);
 
-extern "C" void func_002581B8(cGameComm* arg0, int *arg1) {
+extern "C" void func_002581B8(cGameComm* gameComm, int *arg1) {
     operator_delete__FPi(arg1);
 }
 #endif
@@ -2103,8 +2103,8 @@ extern "C" void func_002581B8(cGameComm* arg0, int *arg1) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_002581D8);
 #ifdef SKIP_ASM
-extern "C" int func_002581D8(cGameComm* arg0) {
-    return ((int)arg0->mAsyncReadData) == 0;
+extern "C" int func_002581D8(cGameComm* gameComm) {
+    return ((int)gameComm->mAsyncReadData) == 0;
 }
 #endif
 
@@ -2122,18 +2122,18 @@ INCLUDE_ASM("seg/seg_156860", func_002581F8);
 #ifdef SKIP_ASM
 extern "C" int func_00257BD8(cGameComm*, int, int, int);
 
-extern "C" void func_002581F8(cGameComm* p) {
+extern "C" void func_002581F8(cGameComm* gameComm) {
     int a;
-    while ((a = (int)p->mAsyncReadData) != 0) {
-        int n = p->mAsyncReadSize;
+    while ((a = (int)gameComm->mAsyncReadData) != 0) {
+        int n = gameComm->mAsyncReadSize;
         if (n >= 0xED) n = 0xEC;
-        if (func_00257BD8(p, 2, a, n) == 0) break;
-        p->mAsyncReadData = (char*)((int)p->mAsyncReadData + n);
-        int rem = p->mAsyncReadSize - n;
-        p->mAsyncReadSize = rem;
+        if (func_00257BD8(gameComm, 2, a, n) == 0) break;
+        gameComm->mAsyncReadData = (char*)((int)gameComm->mAsyncReadData + n);
+        int rem = gameComm->mAsyncReadSize - n;
+        gameComm->mAsyncReadSize = rem;
         if (rem <= 0) {
-            p->mAsyncReadData = 0;
-            p->mAsyncReadSize = 0;
+            gameComm->mAsyncReadData = 0;
+            gameComm->mAsyncReadSize = 0;
         }
     }
 }
@@ -2142,8 +2142,8 @@ extern "C" void func_002581F8(cGameComm* p) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00258280);
 #ifdef SKIP_ASM
-extern "C" int func_00258280(cGameComm* arg0) {
-    return ((int)arg0->mAsyncWriteData) == 0;
+extern "C" int func_00258280(cGameComm* gameComm) {
+    return ((int)gameComm->mAsyncWriteData) == 0;
 }
 #endif
 
@@ -2162,18 +2162,18 @@ INCLUDE_ASM("seg/seg_156860", func_002582A0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00257E98_82A0(void *, int, int, int) __asm__("func_00257E98");
 
-extern "C" void func_002582A0(cGameComm* p) {
-    int a = (int)p->mAsyncWriteData;
-    if (a != 0 && p->mWriteQueue.mTail == p->mWriteQueue.mHead) {
-        int n = p->mAsyncWriteSize;
+extern "C" void func_002582A0(cGameComm* gameComm) {
+    int a = (int)gameComm->mAsyncWriteData;
+    if (a != 0 && gameComm->mWriteQueue.mTail == gameComm->mWriteQueue.mHead) {
+        int n = gameComm->mAsyncWriteSize;
         if (n >= 0xED) n = 0xEC;
-        if (func_00257E98_82A0(((char*)p), 2, a, n) != 0) {
-            p->mAsyncWriteData = (char*)((int)p->mAsyncWriteData + n);
-            int rem = p->mAsyncWriteSize - n;
-            p->mAsyncWriteSize = rem;
+        if (func_00257E98_82A0(((char*)gameComm), 2, a, n) != 0) {
+            gameComm->mAsyncWriteData = (char*)((int)gameComm->mAsyncWriteData + n);
+            int rem = gameComm->mAsyncWriteSize - n;
+            gameComm->mAsyncWriteSize = rem;
             if (rem <= 0) {
-                p->mAsyncWriteData = 0;
-                p->mAsyncWriteSize = 0;
+                gameComm->mAsyncWriteData = 0;
+                gameComm->mAsyncWriteSize = 0;
             }
         }
     }
@@ -2185,15 +2185,15 @@ INCLUDE_ASM("seg/seg_156860", func_00258330);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 
-extern "C" void func_00258330(cGameComm* arg0) {
+extern "C" void func_00258330(cGameComm* gameComm) {
     char *p = (char*)SSXApp;
-    float b = arg0->mNetLatency[1];
-    float a = arg0->mNetLatency[0];
+    float b = gameComm->mNetLatency[1];
+    float a = gameComm->mNetLatency[0];
     float r = b >? a;
-    arg0->mLatency = r;
+    gameComm->mLatency = r;
     float c = *(float *)(p + 0x14);
     if (r < c) {
-        arg0->mLatency = c;
+        gameComm->mLatency = c;
     }
 }
 #endif
@@ -2203,8 +2203,8 @@ INCLUDE_ASM("seg/seg_156860", func_00258360);
 #ifdef SKIP_ASM
 extern "C" float func_00255D88(int, int);
 
-extern "C" float func_00258360(cGameComm* arg0) {
-    return func_00255D88((int)cCommSystem_mCommSystem, (arg0->unk_06C)) + ((float) (arg0->mNumSamples) * (*(float *)((char*)(SSXApp) + (0x14))));
+extern "C" float func_00258360(cGameComm* gameComm) {
+    return func_00255D88((int)cCommSystem_mCommSystem, (gameComm->unk_06C)) + ((float) (gameComm->mNumSamples) * (*(float *)((char*)(SSXApp) + (0x14))));
 }
 #endif
 
@@ -2366,10 +2366,10 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_sendPauseCmd);
 extern "C" void func_00257E98(void *, int, int, int);
 extern "C" void func_00258870(cGameComm*, int, int);
 extern void func_002588A8_8790(void *) __asm__("func_002588A8");
-extern "C" void cGameComm_sendPauseCmd(cGameComm* self, int arg1) {
+extern "C" void cGameComm_sendPauseCmd(cGameComm* self, int pause) {
     char buf[12];
     if (self->mError == 0 && self->mConnected != 0) {
-        if (arg1 != 0) {
+        if (pause != 0) {
             if (self->mGameStartGate == 0) {
                 func_00258870(self, 0xE4C, 1);
             } else {
@@ -2401,9 +2401,9 @@ extern "C" void cGameComm_sendPauseCmd(cGameComm* self, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00258870);
 #ifdef SKIP_ASM
-extern "C" void func_00258870(cGameComm* arg0, int arg1, int arg2) {
-    if ((arg2 != 0) || (((arg0->mPauseMenu[1]) == 0) && ((arg0->mPauseMenu[0]) == 0)) || ((arg0->mGameStartGate) != 0)) {
-        (arg0->unk_094) = arg1;
+extern "C" void func_00258870(cGameComm* gameComm, int arg1, int arg2) {
+    if ((arg2 != 0) || (((gameComm->mPauseMenu[1]) == 0) && ((gameComm->mPauseMenu[0]) == 0)) || ((gameComm->mGameStartGate) != 0)) {
+        (gameComm->unk_094) = arg1;
     }
 }
 #endif
@@ -2432,20 +2432,20 @@ extern "C" void func_002588A8(cGameComm* self) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00258950);
 #ifdef SKIP_ASM
-extern "C" void func_00258950(cGameComm* arg0) {
-    (arg0->mWaitingMessage) = 0;
-    (arg0->mAlone) = 1;
-    (arg0->mPauseMenu[1]) = 0;
+extern "C" void func_00258950(cGameComm* gameComm) {
+    (gameComm->mWaitingMessage) = 0;
+    (gameComm->mAlone) = 1;
+    (gameComm->mPauseMenu[1]) = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00258968);
 #ifdef SKIP_ASM
-extern "C" void func_00258968(cGameComm* arg0) {
-    if ((arg0->mState) < 0xF) {
-        (arg0->unk_094) = 0;
-        (arg0->mGameStartGate) = 1;
+extern "C" void func_00258968(cGameComm* gameComm) {
+    if ((gameComm->mState) < 0xF) {
+        (gameComm->unk_094) = 0;
+        (gameComm->mGameStartGate) = 1;
     }
 }
 #endif
@@ -2488,17 +2488,17 @@ INCLUDE_ASM("seg/seg_156860", func_00258A48);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cGameComm_setState_8A48(void *, int) __asm__("cGameComm_setState");
 
-extern "C" void func_00258A48(cGameComm* arg0) {
-    (arg0->mRaceInProgress) = 0;
-    (arg0->mSyncInput) = 0;
-    if ((arg0->mState) < 0xF) {
-        cGameComm_setState_8A48(arg0, 0xF);
+extern "C" void func_00258A48(cGameComm* gameComm) {
+    (gameComm->mRaceInProgress) = 0;
+    (gameComm->mSyncInput) = 0;
+    if ((gameComm->mState) < 0xF) {
+        cGameComm_setState_8A48(gameComm, 0xF);
     }
-    if ((arg0->unk_038) == 0) {
-        (arg0->unk_038) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));
+    if ((gameComm->unk_038) == 0) {
+        (gameComm->unk_038) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));
     }
-    if ((arg0->unk_03C) == 0) {
-        (arg0->unk_03C) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));
+    if ((gameComm->unk_03C) == 0) {
+        (gameComm->unk_03C) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));
     }
 }
 #endif
@@ -2550,11 +2550,11 @@ INCLUDE_ASM("seg/seg_156860", func_00258BC8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00257E98_8BC8(void *, int, void *, int) __asm__("func_00257E98");
 
-extern "C" void func_00258BC8(cGameComm* arg0) {
-    if ((arg0->mError) == 0) {
+extern "C" void func_00258BC8(cGameComm* gameComm) {
+    if ((gameComm->mError) == 0) {
         char buf[12];
         buf[0] = 5;
-        func_00257E98_8BC8(arg0, 3, buf, 0xC);
+        func_00257E98_8BC8(gameComm, 3, buf, 0xC);
     }
 }
 #endif
@@ -2565,12 +2565,12 @@ INCLUDE_ASM("seg/seg_156860", func_00258C00);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00257E98_8C00(void *, int, void *, int) __asm__("func_00257E98");
 
-extern "C" void func_00258C00(cGameComm* arg0) {
-    if (arg0->mError == 0 && arg0->mConnected != 0) {
+extern "C" void func_00258C00(cGameComm* gameComm) {
+    if (gameComm->mError == 0 && gameComm->mConnected != 0) {
         char buf[12];
         buf[0] = 2;
-        arg0->unk_054 = arg0->unk_054 + 1;
-        func_00257E98_8C00(arg0, 3, buf, 0xC);
+        gameComm->unk_054 = gameComm->unk_054 + 1;
+        func_00257E98_8C00(gameComm, 3, buf, 0xC);
     }
 }
 #endif
@@ -2581,9 +2581,9 @@ INCLUDE_ASM("seg/seg_156860", func_00258C50);
 extern "C" void func_00257E98(void *, int, int, int);
 extern "C" int strlen(int);
 
-extern "C" void func_00258C50(cGameComm* arg0, int arg1) {
-    if (((arg0->mError) == 0) && ((arg0->mConnected) != 0)) {
-        func_00257E98(arg0, 1, arg1, strlen(arg1) + 1);
+extern "C" void func_00258C50(cGameComm* gameComm, int arg1) {
+    if (((gameComm->mError) == 0) && ((gameComm->mConnected) != 0)) {
+        func_00257E98(gameComm, 1, arg1, strlen(arg1) + 1);
     }
 }
 #endif
@@ -2721,7 +2721,7 @@ static inline int& RingAt_8F20(Ring_8F20* r, int frame)
     return r->v[(frame / 60) % 60];
 }
 
-extern "C" void func_00258F20(cGameComm* s, int frame, int value)
+extern "C" void func_00258F20(cGameComm* gameComm, int frame, int value)
 {
     char* gs = (char*)SSXApp->Game;
     int st = **(int**)(gs + 0xC);
@@ -2729,32 +2729,32 @@ extern "C" void func_00258F20(cGameComm* s, int frame, int value)
         if (st != 3) return;
         if (*(int*)(gs + 0x214) != st) return;
     }
-    if (s->mSyncInput == 0) return;
-    if (s->mError != 0) return;
-    if (s->mConnected == 0) return;
-    if (s->mDesync != 0) return;
-    RingAt_8F20((Ring_8F20*)(((char*)s) + 0x410), frame) = value;
-    s->mAITick[0] = frame;
-    if (s->mCheckSumSent != 0) {
-        if (s->mCheckSumReceived != 0) {
-            s->mCheckSumReceived = 0;
-            s->mCheckSumSent = 0;
+    if (gameComm->mSyncInput == 0) return;
+    if (gameComm->mError != 0) return;
+    if (gameComm->mConnected == 0) return;
+    if (gameComm->mDesync != 0) return;
+    RingAt_8F20((Ring_8F20*)(((char*)gameComm) + 0x410), frame) = value;
+    gameComm->mAITick[0] = frame;
+    if (gameComm->mCheckSumSent != 0) {
+        if (gameComm->mCheckSumReceived != 0) {
+            gameComm->mCheckSumReceived = 0;
+            gameComm->mCheckSumSent = 0;
         }
     } else {
         SyncMsg_8F20 msg;
         msg.frame = frame;
         msg.value = value;
         msg.type = 4;
-        func_00257E98_8F20(((char*)s), 3, &msg, 12);
-        s->mCheckSumSent = 1;
+        func_00257E98_8F20(((char*)gameComm), 3, &msg, 12);
+        gameComm->mCheckSumSent = 1;
     }
     {
-        int f = s->mAITick[0];
+        int f = gameComm->mAITick[0];
         if (f < 0) return;
-        int g = s->mAITick[1];
+        int g = gameComm->mAITick[1];
         if (g < 0) return;
         int m = g < f ? g : f;
-        if (RingAt_8F20((Ring_8F20*)(((char*)s) + 0x410), m) != RingAt_8F20((Ring_8F20*)(((char*)s) + 0x500), m)) s->mDesync = 1;
+        if (RingAt_8F20((Ring_8F20*)(((char*)gameComm) + 0x410), m) != RingAt_8F20((Ring_8F20*)(((char*)gameComm) + 0x500), m)) gameComm->mDesync = 1;
     }
 }
 #endif

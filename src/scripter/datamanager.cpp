@@ -168,6 +168,9 @@ struct sDmTable275B08 {
     sDmEntry275B08* entries;
 };
 
+/**
+ * Detaches every data entry of the data manager that is in use, through cDataManager_DetachData().
+ */
 extern "C" void cDataManager_DetachAll(sDmTable275B08* self)
 {
     int i;
@@ -253,6 +256,14 @@ extern "C" sDmNode5B98* func_00275B98(void* self, char* big, sDmNode5B98* prev)
 //100%
 INCLUDE_ASM("scripter/datamanager", cDataManager_AddToEmptyInstanceList__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Clears a data instance record and pushes it onto the data manager's free list.
+ *
+ * Zeroes the record's first five words, links it in front of the list head at +0x8 through its next field
+ * (+0x14), and makes it the new head.
+ *
+ * @param node  the instance record (On Tour tDataInstanceInfo*)
+ */
 void cDataManager_AddToEmptyInstanceList(void* self, void* node)
 {
     *(int*)((char*)node + 0x8) = 0;
@@ -1291,6 +1302,11 @@ extern "C" int func_00277298(void* self)
 //100%
 INCLUDE_ASM("scripter/datamanager", tNISList_IsInTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the NIS list is between scripts: returns its transition flag at +0xB0.
+ *
+ * @return the transition flag (nonzero during a transition)
+ */
 int tNISList_IsInTransition(void* self)
 {
     return *(int*)((char*)self + 0xB0);
@@ -1305,7 +1321,17 @@ char* func_0027C070(void* obj);
 extern "C" void func_002EF378(int a0);
 extern char D_004A34A8[];
 
-extern "C" void tNISList_OnScriptPlay(void* self, int a1, void* obj)
+/**
+ * Reacts to a script starting to play: for a script this NIS list owns, switches the custom irradiance.
+ *
+ * When func_002771C8 (On Tour IsPlayingScriptOwner) accepts the player and the script header from func_0027C070
+ * (GetSSXScriptHeader) starts with a non-zero byte, calls func_002EF378 (On Tour
+ * cRenderStateMan::setCustomIrradiance) with "TRANSP".
+ *
+ * @param a1   the play request handle (On Tour requestHandle); unused
+ * @param obj  the script player (On Tour cScriptPlayerMain*)
+ */
+extern "C" void tNISList_OnScriptPlay(void* self, int requestHandle, void* obj)
 {
     if (func_002771C8(self, obj) != 0) {
         char* name = func_0027C070(obj);
@@ -1863,6 +1889,9 @@ extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key)
 //100%
 INCLUDE_ASM("scripter/datamanager", tSSXScriptBankInfo_Clear__FPv);
 #ifdef SKIP_ASM
+/**
+ * Resets a script bank info record: zeroes its words at +0x0, +0x8 and +0xC and sets +0x4 to -1.
+ */
 void tSSXScriptBankInfo_Clear(void* self)
 {
     *(int*)self = 0;

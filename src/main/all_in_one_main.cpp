@@ -556,7 +556,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DBC98);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sE { unsigned int id:8; int val:24; };
-static inline void sE_init(sE* e, int n) { e->id = n; e->val = n; }
+static inline void sE_init(sE* self, int n) { self->id = n; self->val = n; }
 extern int D_004A4E00;
 extern int D_004A4E04;
 extern sE D_004A4E08;
@@ -1045,6 +1045,11 @@ INCLUDE_ASM("main/all_in_one_main", cDebugScreen__cDebugScreen);
 void operator_delete(int*);
 extern void* cDebugScreen_vtbl[];
 
+/**
+ * Destroys a debug screen: restores cDebugScreen's vtable at +0x0, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cDebugScreen__cDebugScreen(void *self, int flags) {
     *(void***)((char*)self + 0) = cDebugScreen_vtbl;
     if (flags & 1) {
@@ -1416,6 +1421,14 @@ void operator_delete(int*);
 extern void* cDebugScreen_vtbl[];
 
 
+/**
+ * Destroys a debug menu screen: tears down its id list member, then runs the cDebugScreen part.
+ *
+ * func_0017ABE0(self + 0x8C10, 2) releases each non-negative id in that list through the graphics manager's
+ * virtual slot 50 and frees the array; then cDebugScreen's vtable is stored at +0x0.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cDebugMenuScreen__cDebugMenuScreen(void *self, int flags) {
     func_0017ABE0_CD00((char *)self + 0x8C10, 2);
     *(void ***)self = cDebugScreen_vtbl;
@@ -1733,6 +1746,11 @@ INCLUDE_ASM("main/all_in_one_main", cFEInput__cFEInput);
 void operator_delete(int*);
 extern void* cUIInput_vtbl[];
 
+/**
+ * Destroys a front-end input object: stores the base cUIInput vtable at +0x8, then frees it when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cFEInput__cFEInput(void *self, int flags) {
     *(void***)((char*)self + 8) = cUIInput_vtbl;
     if (flags & 1) {
@@ -3020,6 +3038,14 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsDeviceSelect__cFEStateOptions
 extern "C" void* func_001D5428_E150(void*) __asm__("func_001D5428");
 extern void* cFEStateOptionsDeviceSelect_vtbl[];
 
+/**
+ * Destroys the options device-select state: stores its vtable at +0x8, then runs the base destructor.
+ *
+ * The base, func_001D5428(), clears the global D_004A2028 and runs the cUIState destructor (func_0039E390). The
+ * g++ delete flags in the second argument register pass through untouched.
+ *
+ * @return no meaningful value (func_001D5428 returns nothing)
+ */
 extern "C" void* cFEStateOptionsDeviceSelect__cFEStateOptionsDeviceSelect(void *self) {
     *(void***)((char*)self + 8) = cFEStateOptionsDeviceSelect_vtbl;
     return func_001D5428_E150(self);
@@ -3074,6 +3100,14 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateProfileLoad__cFEStateProfileLoad);
 extern "C" void* func_001D5428_E218(void*) __asm__("func_001D5428");
 extern void* cFEStateProfileLoad_vtbl[];
 
+/**
+ * Destroys the profile-load state: stores its vtable at +0x8, then runs the base destructor.
+ *
+ * The base, func_001D5428(), clears the global D_004A2028 and runs the cUIState destructor (func_0039E390). The
+ * g++ delete flags in the second argument register pass through untouched.
+ *
+ * @return no meaningful value (func_001D5428 returns nothing)
+ */
 extern "C" void* cFEStateProfileLoad__cFEStateProfileLoad(void *self) {
     *(void***)((char*)self + 8) = cFEStateProfileLoad_vtbl;
     return func_001D5428_E218(self);
@@ -3451,6 +3485,14 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateBackground__cFEStateBackground);
 extern "C" void* func_0039E390_E5C8(void*) __asm__("func_0039E390");
 extern void* cFEStateBackground_vtbl[];
 
+/**
+ * Destroys the front-end background state: stores its vtable at +0x8, then runs the cUIState destructor.
+ *
+ * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * untouched.
+ *
+ * @return no meaningful value (func_0039E390 returns nothing)
+ */
 extern "C" void* cFEStateBackground__cFEStateBackground(void *self) {
     *(void***)((char*)self + 8) = cFEStateBackground_vtbl;
     return func_0039E390_E5C8(self);
@@ -3494,6 +3536,14 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateTransition__cFEStateTransition);
 extern "C" void* func_0039E390_E668(void*) __asm__("func_0039E390");
 extern void* cFEStateTransition_vtbl[];
 
+/**
+ * Destroys the front-end transition state: stores its vtable at +0x8, then runs the cUIState destructor.
+ *
+ * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * untouched.
+ *
+ * @return no meaningful value (func_0039E390 returns nothing)
+ */
 extern "C" void* cFEStateTransition__cFEStateTransition(void *self) {
     *(void***)((char*)self + 8) = cFEStateTransition_vtbl;
     return func_0039E390_E668(self);
@@ -3630,8 +3680,8 @@ extern "C" void* func_001DE7B0(cFEStateNet* self)
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE860);
 #ifdef SKIP_ASM
-extern "C" int func_001DE860(cFEStateNet* arg0) {
-    return (arg0->unk_058);
+extern "C" int func_001DE860(cFEStateNet* feStateNet) {
+    return (feStateNet->unk_058);
 }
 #endif
 
@@ -3669,16 +3719,16 @@ extern "C" int func_001DE880(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE890);
 #ifdef SKIP_ASM
-extern "C" void func_001DE890(cFEStateNet* arg0) {
-    (arg0->unk_6B0) = 1;
+extern "C" void func_001DE890(cFEStateNet* feStateNet) {
+    (feStateNet->unk_6B0) = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DE8A0);
 #ifdef SKIP_ASM
-extern "C" void func_001DE8A0(cFEStateNet* arg0, int arg1) {
-    (arg0->unk_6C4) = arg1;
+extern "C" void func_001DE8A0(cFEStateNet* feStateNet, int arg1) {
+    (feStateNet->unk_6C4) = arg1;
 }
 #endif
 
@@ -3775,6 +3825,14 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateLegal__cFEStateLegal);
 extern "C" void* func_0039E390_E9C8(void*) __asm__("func_0039E390");
 extern void* cFEStateLegal_vtbl[];
 
+/**
+ * Destroys the legal-screen state: stores its vtable at +0x8, then runs the cUIState destructor.
+ *
+ * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * untouched.
+ *
+ * @return no meaningful value (func_0039E390 returns nothing)
+ */
 extern "C" void* cFEStateLegal__cFEStateLegal(void *self) {
     *(void***)((char*)self + 8) = cFEStateLegal_vtbl;
     return func_0039E390_E9C8(self);
@@ -3890,6 +3948,14 @@ INCLUDE_ASM("main/all_in_one_main", cFEPopupVideoCalibration__cFEPopupVideoCalib
 extern "C" void* func_0039E390_EB58(void*) __asm__("func_0039E390");
 extern void* cFEPopupVideoCalibration_vtbl[];
 
+/**
+ * Destroys the video calibration popup: stores its vtable at +0x8, then runs the cUIState destructor.
+ *
+ * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * untouched.
+ *
+ * @return no meaningful value (func_0039E390 returns nothing)
+ */
 extern "C" void* cFEPopupVideoCalibration__cFEPopupVideoCalibration(void *self) {
     *(void***)((char*)self + 8) = cFEPopupVideoCalibration_vtbl;
     return func_0039E390_EB58(self);

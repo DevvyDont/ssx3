@@ -216,18 +216,18 @@ extern "C" void* func_00144C30(void* self, int i)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationFile);
 #ifdef SKIP_ASM
-extern "C" void* cBENewRaceInterface_getLocationFile(void* self, int a1)
+extern "C" void* cBENewRaceInterface_getLocationFile(void* self, int iLocation)
 {
-    return (char*)&D_0043D984 + a1 * 0x64;
+    return (char*)&D_0043D984 + iLocation * 0x64;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationName);
 #ifdef SKIP_ASM
-extern "C" void* cBENewRaceInterface_getLocationName(void* self, int a1)
+extern "C" void* cBENewRaceInterface_getLocationName(void* self, int iLocation)
 {
-    return (char*)&D_0043D954 + a1 * 0x64;
+    return (char*)&D_0043D954 + iLocation * 0x64;
 }
 #endif
 
@@ -310,11 +310,11 @@ extern "C" int func_00144D50(void* self, int a1)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_assignPlayer__FPvii);
 #ifdef SKIP_ASM
-void* cBENewRaceInterface_assignPlayer(void* self, int a1, int a2)
+void* cBENewRaceInterface_assignPlayer(void* self, int iGate, int iPlayer)
 {
-    *(int*)((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + a1 * 4) = a2;
-    *(int*)((char*)((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + a2 * 4) + 0x18) = a1;
-    return ((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + a1 * 4);
+    *(int*)((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + iGate * 4) = iPlayer;
+    *(int*)((char*)((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + iPlayer * 4) + 0x18) = iGate;
+    return ((char*)(void*)&(*(&cBENewRaceInterface_newRace)) + iGate * 4);
 }
 #endif
 

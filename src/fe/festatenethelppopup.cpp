@@ -267,9 +267,9 @@ static inline void show_1DA238(sWidget_1DA238* w, int on)
     w->vt[9].fn((char*)w + w->vt[9].delta, on);
 }
 
-extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int a1)
+extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int bFirstTime)
 {
-    if (a1) {
+    if (bFirstTime) {
         if (self->title) {
             cUIText_setUnicodeStringByID((cUIText*)self->wA8, self->title);
         } else {
@@ -314,7 +314,7 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void func_0039F190(void*, int);
 
-extern "C" void cFEStateNetHelpPopup_onWidgetEvent(void* self, int a1, int msg)
+extern "C" void cFEStateNetHelpPopup_onWidgetEvent(void* self, int pWidget, int msg)
 {
     if (msg == 6) {
         func_0039F190((char*)*(void**)((char*)self + 0x10) + 0x18, 1);

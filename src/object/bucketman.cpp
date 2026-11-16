@@ -110,6 +110,15 @@ struct sBucketLists {
     char pad_0x30[0x14];    // 0x30
 };
 
+/**
+ * Appends a scene node to the end of one of a bucket's two node lists.
+ *
+ * Each bucket is a 0x44-byte record; bit 0 of its flags picks the list headed at +0x24, otherwise the list at
+ * +0x4 is used.
+ *
+ * @param node   the node to add
+ * @param index  the bucket index
+ */
 extern "C" void cBucketMan_add(cBucketMan* self, sBucketLink* node, int index)
 {
     if (((sBucketLists*)self->mBuckets)[index].flags & 1) {
@@ -387,6 +396,11 @@ struct sBucketVEntryPurge {
     void (*fn)(void*, int);
 };
 
+/**
+ * Deletes every node in a bucket through each node's virtual destructor (flags 3).
+ *
+ * @param index  the bucket index
+ */
 extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index)
 {
     void* node = cBucketMan_first(self, index);

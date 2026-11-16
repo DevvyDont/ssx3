@@ -28,6 +28,15 @@ public:
     virtual void enter();
 };
 
+/**
+ * Returns the back end singleton, creating it and its three game-flow states on first use.
+ *
+ * The first call allocates the 4-byte "BE" object (D_004A11EC) and the "BELibrary", fetches the pre-race, race
+ * and post-race states into D_005308A8[0..2], makes pre-race (0) the current state and enters it, and sets
+ * D_004A11F0 and D_004A1250.
+ *
+ * @return the back end object
+ */
 extern "C" void* cBE_getBE()
 {
     if (D_004A11EC == 0)
@@ -85,6 +94,13 @@ public:
 // to the current state's virtual getInterface.
 void* cBE_getInterface_impl(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
+/**
+ * Returns one of the back end's interfaces, as provided by the current game-flow state.
+ *
+ * @param be    the back end object; unused, the current state (D_005308A8[D_004A11F4]) is asked
+ * @param kind  which interface to return (14 kinds, 0-13)
+ * @return the current state's getInterface(kind) result (cBE_readFromReplayFrame() treats 0 as absent)
+ */
 void* cBE_getInterface_impl(void* be, int kind)
 {
     return ((cBEInterfaceV_getInterface*)D_005308A8[D_004A11F4])->getInterface(kind);
@@ -148,6 +164,13 @@ public:
     virtual void enter();
 };
 
+/**
+ * Switches the back end to another game-flow state, calling the old state's leave and the new state's enter.
+ *
+ * Does nothing when @p state is already current.
+ *
+ * @param state  0 pre-race, 1 race, 2 post-race
+ */
 extern "C" void cBE_setState(int state)
 {
     if (D_004A11F4 != state)
@@ -207,13 +230,21 @@ INCLUDE_ASM("be/be", cBE_readFromReplayFrame);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
-extern "C" void cBE_readFromReplayFrame(void* self, cBEReplayStream* s)
+/**
+ * Restores the back end from a replay frame: the current state index, then each interface's own data.
+ *
+ * The state index is read directly, with no leave or enter call. Each of the 14 interfaces that exists reads
+ * its data through its virtual readFromReplayFrame.
+ *
+ * @param s  the replay stream to read from
+ */
+extern "C" void cBE_readFromReplayFrame(void* self, cBEReplayStream* data)
 {
-    s->read(&D_004A11F4, 4);
+    data->read(&D_004A11F4, 4);
     for (int i = 0; i < 14; i++)
     {
         if (cBE_getInterface_Fv(self, i))
-            cBE_getInterface_Fv(self, i)->readFromReplayFrame(s);
+            cBE_getInterface_Fv(self, i)->readFromReplayFrame(data);
     }
 }
 #endif

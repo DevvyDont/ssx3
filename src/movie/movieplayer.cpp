@@ -1167,6 +1167,12 @@ struct sMovieVEntryE4F8 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Waits out the memory-card check display delay, then moves on with state code 3.
+ *
+ * Decrements mDisplayWaitTicks (SetAction(1) sets it to 60); once it was already 0 or less, passes code 3 to
+ * the manager's virtual state handler (vtable slot 1, func_0023CF38).
+ */
 extern "C" void cMCOverlayManager_UpdateCheckCardsWait(cMCOverlayManager* self)
 {
     if ((self->mDisplayWaitTicks)-- <= 0) {
@@ -1216,6 +1222,16 @@ static inline int Ready_E540(void* self)
 
 #define S_E540 ((char*)self)
 
+/**
+ * Polls the memory cards while checking them and passes the next state code to the virtual state handler.
+ *
+ * Waits while the card object is busy (its virtual slot 11). A pending save, delete or load press means the
+ * user wants to leave: a changed card with mShowCardChangeNotify set gives 0x38. On a device state change it
+ * raises the no-card error (TriggerPollNoCardError) when polling for it, posts 5 (state bit 1) or 0x27
+ * (unformatted, when mPollForUnformatted), or starts a file check when a card arrives or its state clears.
+ * Without a pending action it rechecks a changed card or posts 0x31 for no card. Otherwise it posts 6 when the
+ * card object's slots 55 and 58 report true and 51 and 59 false, else 7 when saving or 0x1D when not.
+ */
 extern "C" void cMCOverlayManager_UpdateCheckCards(cMCOverlayManager* self)
 {
     if (Pad_E540(self, 11))
@@ -1368,13 +1384,13 @@ struct sMovieVEntryEA30 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v)
+extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int showFailMessage)
 {
     int on = self->mSave;
     cMCOverlayManager_mSaveInProgress = 0;
     if (on != 0) {
         self->mSave = 0;
-        cMCOverlayManager_WriteFailed(self, v);
+        cMCOverlayManager_WriteFailed(self, showFailMessage);
     }
     self->mDelete = 0;
     self->mCurrDeviceStateAck = 1;
@@ -1442,6 +1458,9 @@ struct sMovieVEntry2 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Reports a missing memory card by passing code 4 to the manager's virtual state handler (vtable slot 1).
+ */
 extern "C" void cMCOverlayManager_TriggerPollNoCardError(cMCOverlayManager* self)
 {
     sMovieVEntry2* vt = (sMovieVEntry2*)self->mVtbl;
@@ -1821,6 +1840,9 @@ extern "C" void cMCOverlayManager_UpdateNoFreeBlocks(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateSaveDone);
 #ifdef SKIP_ASM
+/**
+ * Finishes a completed save by passing code 1 to the manager's virtual state handler (vtable slot 1).
+ */
 extern "C" void cMCOverlayManager_UpdateSaveDone(cMCOverlayManager* self)
 {
     sMovieVEntry2* vt = (sMovieVEntry2*)self->mVtbl;
@@ -2237,12 +2259,12 @@ void func_0023FB18(void* self, int val)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_checkDevice);
 #ifdef SKIP_ASM
-extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int v)
+extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int iSlot)
 {
-    self->mCurrCheckDevice = v;
+    self->mCurrCheckDevice = iSlot;
     void* obj = self->mpMemCard;
     sMovieVEntry2* vt = *(sMovieVEntry2**)obj;
-    vt[5].fn((char*)obj + vt[5].delta, v);
+    vt[5].fn((char*)obj + vt[5].delta, iSlot);
 }
 #endif
 
@@ -2257,6 +2279,14 @@ struct sMovieVEntryFB58 {
 
 extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int v);
 
+/**
+ * Returns the memory-card screens to device selection, dropping any pending save, delete or format.
+ *
+ * Resets mLastCheckDevice to -1 and mCurrCheckDevice to 0, clears mSave, mDelete and mFormatPressedBuffered,
+ * passes code 0 to the virtual state handler (vtable slot 1), then calls cMCOverlayManager_SetAction(self, 1).
+ *
+ * @return no meaningful value (cMCOverlayManager_SetAction returns nothing)
+ */
 extern "C" void* cMCOverlayManager_ReturnToDevSelectScreen(cMCOverlayManager* self)
 {
     self->mLastCheckDevice = -1;
@@ -2495,6 +2525,9 @@ extern "C" void cMCOverlayManager_UpdateLoadDoneWait(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadDone);
 #ifdef SKIP_ASM
+/**
+ * Finishes a completed load by passing code 1 to the manager's virtual state handler (vtable slot 1).
+ */
 extern "C" void cMCOverlayManager_UpdateLoadDone(cMCOverlayManager* self)
 {
     sMovieVEntry2* vt = (sMovieVEntry2*)self->mVtbl;
@@ -3140,6 +3173,12 @@ struct sMovieVEntry0C30 {
 
 extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int v);
 
+/**
+ * Handles a failed format during the initial card check: once cancel is pressed, rechecks the selected card.
+ *
+ * When callbackIsCancelPressed() returns nonzero: passes code 1 to the virtual state handler (vtable slot 1),
+ * calls cMCOverlayManager_checkDevice() on mSelectedDevice and sets mCheckCard. Otherwise it keeps waiting.
+ */
 extern "C" void cMCOverlayManager_UpdateInitFormatFailed(cMCOverlayManager* self)
 {
     if ((self->callbackIsCancelPressed)() != 0) {
@@ -3154,6 +3193,10 @@ extern "C" void cMCOverlayManager_UpdateInitFormatFailed(cMCOverlayManager* self
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitFormatDone);
 #ifdef SKIP_ASM
+/**
+ * Finishes a format during the initial card check by passing code 6 to the virtual state handler (vtable slot
+ * 1).
+ */
 extern "C" void cMCOverlayManager_UpdateInitFormatDone(cMCOverlayManager* self)
 {
     sMovieVEntry2* vt = (sMovieVEntry2*)self->mVtbl;
@@ -3304,6 +3347,10 @@ extern "C" void cMCOverlayManager_UpdateInitDeleteProgress(cMCOverlayManager* se
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitDeleteFailed);
 #ifdef SKIP_ASM
+/**
+ * Handles a failed delete during the initial check by passing code 1 to the virtual state handler (vtable slot
+ * 1).
+ */
 extern "C" void cMCOverlayManager_UpdateInitDeleteFailed(cMCOverlayManager* self)
 {
     sMovieVEntry2* vt = (sMovieVEntry2*)self->mVtbl;
@@ -3314,6 +3361,9 @@ extern "C" void cMCOverlayManager_UpdateInitDeleteFailed(cMCOverlayManager* self
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitDeleteDone);
 #ifdef SKIP_ASM
+/**
+ * Finishes a delete during the initial check by passing code 6 to the virtual state handler (vtable slot 1).
+ */
 extern "C" void cMCOverlayManager_UpdateInitDeleteDone(cMCOverlayManager* self)
 {
     sMovieVEntry2* vt = (sMovieVEntry2*)self->mVtbl;
@@ -3497,7 +3547,7 @@ struct sMovieVEntry1180b {
     void (*fn)(void*, int);
 };
 
-extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int a1)
+extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int showWriteFailPopup)
 {
     int on = self->mWriteInProgress;
     cMCOverlayManager_mSaveInProgress = 0;
@@ -3506,7 +3556,7 @@ extern "C" void cMCOverlayManager_WriteFailed(cMCOverlayManager* self, int a1)
         sMovieVEntry1180a* vt = *(sMovieVEntry1180a**)o;
         vt[44].fn((char*)o + vt[44].delta);
     }
-    if (a1 != 0) {
+    if (showWriteFailPopup != 0) {
         cMCOverlayManager_SetAction_v(self, 0);
         sMovieVEntry1180b* vt2 = (sMovieVEntry1180b*)self->mVtbl;
         vt2[1].fn((char*)self + vt2[1].delta, 0x14);
@@ -3800,6 +3850,14 @@ static inline int prevChapter_241540(char* self, int i)
     return i;
 }
 
+/**
+ * Moves the device highlight to the previous memory-card device that the card object reports as available.
+ *
+ * Does nothing while mMaxDevices is -1. Steps mSelectedDevice down, wrapping to mMaxDevices - 1 when mWrapItems
+ * is set, until the card object's virtual slot 52 accepts the device or the search gives up. Without wrapping,
+ * an unavailable device 0 keeps the current device (or 0 if that one is unavailable too). A new selection goes
+ * through func_0023FB18() and func_0023FAE0(), which resets the device state monitor. Always clears mGetDir.
+ */
 extern "C" void cMCOverlayManager_OnHighlightPrevDevice(cMCOverlayManager* self)
 {
     int i = self->mSelectedDevice;
@@ -4053,6 +4111,15 @@ struct sMCOverlayMgr {
     sMCDev dev[1];
 };
 
+/**
+ * Writes a device's total space as "<total> Total" into a 16-bit string, when the device is usable.
+ *
+ * Writes nothing unless the device is plugged in, valid, formatted and correctly encoded; the format "%d %s"
+ * and "Total" are converted to 16-bit strings first.
+ *
+ * @param idx  index of the device record (cMCOverlayManager_sdevice)
+ * @param dst  destination 16-bit string
+ */
 extern "C" void cMCOverlayManager_GetDeviceTotalString(sMCOverlayMgr* self, int idx, void* dst)
 {
     unsigned short str[256];
@@ -4206,6 +4273,14 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_updateDeviceStateMonitor);
 #ifdef SKIP_ASM
 extern "C" int cMCOverlayManager_getDeviceState(void* self);
 
+/**
+ * Polls the selected device's state and tells whether an unacknowledged state change is waiting.
+ *
+ * Stores the state from cMCOverlayManager_getDeviceState() in mCurrDeviceStateLast. On a change, the front
+ * end's callbackAcknowledgeCardStatusChange() decides whether it is acknowledged (mCurrDeviceStateAck).
+ *
+ * @return 1 when the current state is not acknowledged, otherwise 0
+ */
 extern "C" int cMCOverlayManager_updateDeviceStateMonitor(cMCOverlayManager* self)
 {
     int v = cMCOverlayManager_getDeviceState(self);
@@ -4339,6 +4414,11 @@ extern "C" void* cMCOverlayManager_GatherDeviceInfo1(void*, int);
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GatherDeviceInfo__FPv);
 #ifdef SKIP_ASM
+/**
+ * Refreshes the info record of the device being checked (mCurrCheckDevice) through GatherDeviceInfo1().
+ *
+ * @return no meaningful value (cMCOverlayManager_GatherDeviceInfo1 returns nothing)
+ */
 void* cMCOverlayManager_GatherDeviceInfo(void* self)
 {
     return cMCOverlayManager_GatherDeviceInfo1(self, *(int*)((char*)self + 0x42c));

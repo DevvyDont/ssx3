@@ -198,10 +198,10 @@ extern "C" void cFEState_onGainFocus(void* self, int a1);
  *
  * @param a1  the state that had focus before (On Tour: pPrevState), passed on to cFEState_onGainFocus()
  */
-extern "C" void cFEStateMountainRoom_onGainFocus(void* self, int a1)
+extern "C" void cFEStateMountainRoom_onGainFocus(void* self, int pPrevState)
 {
     func_001D3340(self);
-    cFEState_onGainFocus(self, a1);
+    cFEState_onGainFocus(self, pPrevState);
 }
 #endif
 

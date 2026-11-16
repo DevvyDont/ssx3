@@ -298,20 +298,20 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
 //100%
 INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cFEStateAudioOptions_onWidgetMenu(void* self, int a1, int a2, int a3)
+extern "C" int cFEStateAudioOptions_onWidgetMenu(void* self, int pMenu, int Event, int index)
 {
-    if (a2 == 6 && (a3 == 2 || a3 == 3 || a3 == 4)) {
-        if (a3 == 2 && *(int*)((char*)self + 0x7C) == 0) {
+    if (Event == 6 && (index == 2 || index == 3 || index == 4)) {
+        if (index == 2 && *(int*)((char*)self + 0x7C) == 0) {
             goto ok;
         }
-        if (a3 == 3 && *(int*)((char*)self + 0x7C) == 0) {
+        if (index == 3 && *(int*)((char*)self + 0x7C) == 0) {
             goto ok;
         }
-        if (a3 == 4 && *(int*)((char*)self + 0x74) == 0 && *(int*)((char*)self + 0x7C) == 0) {
+        if (index == 4 && *(int*)((char*)self + 0x74) == 0 && *(int*)((char*)self + 0x7C) == 0) {
         ok:
             return 0x10;
         }
-    } else if (a2 == 8 || a2 == 9) {
+    } else if (Event == 8 || Event == 9) {
         return 0;
     }
     return 0x101;
@@ -546,9 +546,9 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
  * @param a1  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
  * @return always 0
  */
-extern "C" int cFEStateRequestLine_onGainTransition(void* self, int a1)
+extern "C" int cFEStateRequestLine_onGainTransition(void* self, int bFirstTime)
 {
-    if (a1 != 0) {
+    if (bFirstTime != 0) {
         cFEStateRequestLine_updatePlayListArrows(self);
         cFEStateRequestLine_updateButtonsText(self, 0);
         cFEStateRequestLine_updateHelpText(self, 0);

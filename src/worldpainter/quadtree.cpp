@@ -36,6 +36,14 @@ static inline unsigned short getNodeId_17D0(cQuadTree* self, tQuadTreeNode* node
     return ((unsigned int)node - (unsigned int)self->m_nodes) >> 3;
 }
 
+/**
+ * Takes a node from the quad tree's free list, growing the node array by 1024 when the list is empty.
+ *
+ * Growing allocates a new "QuadTreeNodeList" array, copies the old nodes over, chains the new nodes into the
+ * free list (index 0 ends it) and frees the old array. The taken node is counted in m_numUsedNodes.
+ *
+ * @return the index of the node taken
+ */
 // cQuadTree::getFreeNode(void)
 extern "C" unsigned short cQuadTree_getFreeNode(cQuadTree* self)
 {
@@ -386,6 +394,12 @@ extern "C" unsigned char func_002C2430_impl(unsigned int code)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", strlen1);
 #ifdef SKIP_ASM
+/**
+ * Returns the length of a 16-bit character string (On Tour: strlen for unsigned short strings).
+ *
+ * @param s  the NUL-terminated 16-bit string
+ * @return the number of characters before the terminator
+ */
 extern "C" int strlen1(unsigned short* s)
 {
     int n = 0;
@@ -569,6 +583,15 @@ INCLUDE_ASM("worldpainter/quadtree", sprintf2);
 #ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 
+/**
+ * Formats into a 16-bit string from an 8-bit format string (On Tour: sprintf for unsigned short strings).
+ *
+ * Widens @p fmt into a 1024-character buffer, then formats the variable arguments with USTR_vsprintf().
+ *
+ * @param dst  the 16-bit destination string
+ * @param fmt  the 8-bit format string
+ * @return USTR_vsprintf()'s result
+ */
 // PORT: hand-rolled EE EABI va_start (sprintf1_va_start, defined above); use <stdarg.h> off-PS2.
 extern "C" int sprintf2(unsigned short* dst, const char* fmt, ...)
 {

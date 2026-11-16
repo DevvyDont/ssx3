@@ -52,7 +52,7 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
 void func_001A34A8(void* self);
 extern char D_004A19E8[];
 
-extern "C" void cFEStateMPCircuit_onGainFocus(void* self, int a1)
+extern "C" void cFEStateMPCircuit_onGainFocus(void* self, int pPreSt)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A19E8));
     if (obj != 0) {
@@ -62,7 +62,7 @@ extern "C" void cFEStateMPCircuit_onGainFocus(void* self, int a1)
         }
     }
     func_001A34A8(self);
-    cUIState_onGainFocus(self, a1);
+    cUIState_onGainFocus(self, pPreSt);
 }
 #endif
 

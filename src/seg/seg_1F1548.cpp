@@ -359,8 +359,8 @@ __asm__("_vt$15cVbDtor002F0FE8$13cRiderVbC_s1f = D_004887D8\n"
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cPunchFX_readFromReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void cPunchFX_readFromReplayFrame(cPunchFX* arg0) {
-    (*(int *)((char*)(arg0) + (0xA0))) = 0;
+extern "C" void cPunchFX_readFromReplayFrame(cPunchFX* self) {
+    (*(int *)((char*)(self) + (0xA0))) = 0;
 }
 #endif
 
@@ -1953,11 +1953,11 @@ extern "C" void func_002F39C8(void* arg0);
 extern char cSplashManager_vtbl[];
 
 // Particle emitter constructor: builds the two 30-entry element pools and resets the emitter state.
-extern "C" void* cSplashManager_cSplashManager(void* p, void* a1, int a2)
+extern "C" void* cSplashManager_cSplashManager(void* p, void* bucket, int viewIndex)
 {
     char* self = (char*)p;
-    cObjNode_cObjNode1(self, a1);
-    *(int*)(self + 0x10) = a2;
+    cObjNode_cObjNode1(self, bucket);
+    *(int*)(self + 0x10) = viewIndex;
     *(int*)(self + 0x14) = 0;
     *(char**)(self + 0xC) = cSplashManager_vtbl;
     *(int*)(self + 0x18) = 0;
@@ -1997,9 +1997,9 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager__cSplashManager);
 extern "C" void cObjNode__cObjNode(void *);
 extern char cSplashManager_vtbl[];
 
-extern "C" void cSplashManager__cSplashManager(void *arg0) {
-    *(char **)((char*)arg0 + 0xC) = cSplashManager_vtbl;
-    cObjNode__cObjNode(arg0);
+extern "C" void cSplashManager__cSplashManager(void *self) {
+    *(char **)((char*)self + 0xC) = cSplashManager_vtbl;
+    cObjNode__cObjNode(self);
 }
 #endif
 
@@ -3137,14 +3137,14 @@ extern char kWPR_Lighting;
 struct A5180 { unsigned int v; char pad[0x3C]; A5180() { v = 0xFFFFFFFF; } };
 struct B5180 { unsigned int v; char pad[0x17C]; B5180() { v = 0xFFFFFFFF; } };
 
-extern "C" void *cWorldLightMan_cWorldLightMan(void *arg0, int arg1) {
-    new ((char*)arg0 + 0x10) A5180[8];
-    new ((char*)arg0 + 0x210) B5180[32];
-    *(int *)arg0 = arg1;
-    cWorldLightMan_initLightCache(arg0);
+extern "C" void *cWorldLightMan_cWorldLightMan(void *self, int pNash) {
+    new ((char*)self + 0x10) A5180[8];
+    new ((char*)self + 0x210) B5180[32];
+    *(int *)self = pNash;
+    cWorldLightMan_initLightCache(self);
     char *t = (char*)SSXApp->Game->World;
-    *(void **)((char*)arg0 + 4) = cWorldPainterMan_getQuery(*(void **)(t + 8), (cWorldPainterManArg *)&kWPR_Lighting);
-    return arg0;
+    *(void **)((char*)self + 4) = cWorldPainterMan_getQuery(*(void **)(t + 8), (cWorldPainterManArg *)&kWPR_Lighting);
+    return self;
 }
 #endif
 

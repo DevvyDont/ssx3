@@ -1441,7 +1441,7 @@ static inline void SetBits_DA70(unsigned int* w, unsigned int mask, unsigned int
     *w = (*w & mask) | bits;
 }
 
-extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* a1, char* a2, char* a3)
+extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rdata, char* ii, char* ci)
 {
     float* timing = (float*)(((char*)self) + 0x4);
     *(void***)self = D_004913F8;
@@ -1449,11 +1449,11 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* a1
     *(void***)self = cRollerModifier_vtbl;
     func_0032C508(((char*)self) + 0xE0);
     *(int*)&self->Life = 0;
-    self->m_pInstance = (tInstanceRecord*)(*(int*)(a2 + 0x50));
-    func_00327CC8(((char*)self) + 0xE0, *(void**)(a2 + 0x48));
-    self->mMass = *(float*)(a1 + 0x4);
+    self->m_pInstance = (tInstanceRecord*)(*(int*)(ii + 0x50));
+    func_00327CC8(((char*)self) + 0xE0, *(void**)(ii + 0x48));
+    self->mMass = *(float*)(rdata + 0x4);
     char* t = (char*)self->SphTree.treeInfo;
-    self->mElast = *(float*)(a1 + 0x8);
+    self->mElast = *(float*)(rdata + 0x8);
     self->InvM = 1.0f / timing[1];
     sRmVec4 v;
     v.x = *(float*)(t + 0x2C);
@@ -1494,7 +1494,7 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* a1
     SetBits_DA70((unsigned int*)((char*)self->m_pInstance + 0x8), 0xFFFFFFDFu, 0x40);
     SetBits_DA70((unsigned int*)((char*)self->m_pInstance + 0x8), 0xFFFFFFFDu, 0x4);
     *(unsigned int*)((char*)self->m_pInstance + 0x8) |= 0x1;
-    cRollerModifier_Collision_DA70(((char*)self), a3, a2);
+    cRollerModifier_Collision_DA70(((char*)self), ci, ii);
     return ((char*)self);
 }
 #endif
@@ -1636,6 +1636,15 @@ struct cRollerModifier_DDE8 : public cTransformModifier_DDE8, public cRollerNode
     void Collision(const sRmPath_35DDE8* tc) __asm__("cRollerModifier_Collision");
 };
 
+/**
+ * Sets a roller's motion from a collision: a push along the hit direction plus an upward kick and a spin.
+ *
+ * Zeroes HitFrequency, sets V (and momentum P) to tc->dir * tc->len / 2 plus z = min(5000 / mMass + 100, 600),
+ * so lighter bodies get a bigger kick, sets W (and L) to tc->up * 10, then stores mKineticEnergy = V.P + W.L.
+ * On Tour's Collision also takes a tIntersectInfo*, which this body never reads.
+ *
+ * @param tc  collision info (On Tour tCollideInfo): direction at +0x10, up vector at +0x20, length at +0x30
+ */
 // PORT: the unit declares cRollerModifier_Collision(void*) for its caller; this is the method (On Tour: cRollerModifier::Collision).
 void cRollerModifier_DDE8::Collision(const sRmPath_35DDE8* tc)
 {
@@ -2149,29 +2158,29 @@ static inline sRmVec4 toDirEDC8(sRmBody* b, const sRmVec4& v)
     return vu0DivEDC8(v, b->scale);
 }
 
-static inline sRmVec4 xformEDC8(cRollerModifier* r)
+static inline sRmVec4 xformEDC8(cRollerModifier* rollerModifier)
 {
     sRmVec4 o;
-    float x = (*(sRmBody*)&r->Pose).pos.x;
-    float y = (*(sRmBody*)&r->Pose).pos.y;
-    float z = (*(sRmBody*)&r->Pose).pos.z;
-    o.x = (*(sRmBody*)&r->Pose).rot.m[0][0] * x + (*(sRmBody*)&r->Pose).rot.m[1][0] * y + (*(sRmBody*)&r->Pose).rot.m[2][0] * z;
-    o.y = (*(sRmBody*)&r->Pose).rot.m[0][1] * x + (*(sRmBody*)&r->Pose).rot.m[1][1] * y + (*(sRmBody*)&r->Pose).rot.m[2][1] * z;
-    o.z = (*(sRmBody*)&r->Pose).rot.m[0][2] * x + (*(sRmBody*)&r->Pose).rot.m[1][2] * y + (*(sRmBody*)&r->Pose).rot.m[2][2] * z;
-    o.w = (*(sRmBody*)&r->Pose).pos.w;
+    float x = (*(sRmBody*)&rollerModifier->Pose).pos.x;
+    float y = (*(sRmBody*)&rollerModifier->Pose).pos.y;
+    float z = (*(sRmBody*)&rollerModifier->Pose).pos.z;
+    o.x = (*(sRmBody*)&rollerModifier->Pose).rot.m[0][0] * x + (*(sRmBody*)&rollerModifier->Pose).rot.m[1][0] * y + (*(sRmBody*)&rollerModifier->Pose).rot.m[2][0] * z;
+    o.y = (*(sRmBody*)&rollerModifier->Pose).rot.m[0][1] * x + (*(sRmBody*)&rollerModifier->Pose).rot.m[1][1] * y + (*(sRmBody*)&rollerModifier->Pose).rot.m[2][1] * z;
+    o.z = (*(sRmBody*)&rollerModifier->Pose).rot.m[0][2] * x + (*(sRmBody*)&rollerModifier->Pose).rot.m[1][2] * y + (*(sRmBody*)&rollerModifier->Pose).rot.m[2][2] * z;
+    o.w = (*(sRmBody*)&rollerModifier->Pose).pos.w;
     return o;
 }
 
-static inline void setPosEDC8(cRollerModifier* r, const sRmVec4& v)
+static inline void setPosEDC8(cRollerModifier* rollerModifier, const sRmVec4& v)
 {
-    (*(sRmBody*)&r->Pose).pos = v;
-    (*(sRmBody*)&r->Pose).outPos = xformEDC8(r);
+    (*(sRmBody*)&rollerModifier->Pose).pos = v;
+    (*(sRmBody*)&rollerModifier->Pose).outPos = xformEDC8(rollerModifier);
 }
 
-static inline void setOutDirEDC8(cRollerModifier* r, const sRmVec4& v)
+static inline void setOutDirEDC8(cRollerModifier* rollerModifier, const sRmVec4& v)
 {
-    (*(sRmBody*)&r->Pose).dir = toDirEDC8(&(*(sRmBody*)&r->Pose), v);
-    (*(sRmBody*)&r->Pose).outDir = v;
+    (*(sRmBody*)&rollerModifier->Pose).dir = toDirEDC8(&(*(sRmBody*)&rollerModifier->Pose), v);
+    (*(sRmBody*)&rollerModifier->Pose).outDir = v;
 }
 
 extern "C" void cRollerModifier_collide(cRollerModifier* self)
@@ -3189,9 +3198,9 @@ int cTypeObjNode_shouldRebound(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTypeObjNode_isType);
 #ifdef SKIP_ASM
-extern "C" int cTypeObjNode_isType(void* self, int a1)
+extern "C" int cTypeObjNode_isType(void* self, int type)
 {
-    return *(short*)((char*)self + 0x10) == a1;
+    return *(short*)((char*)self + 0x10) == type;
 }
 #endif
 
@@ -3243,6 +3252,14 @@ struct sRailVEntryU800 {
     unsigned int (*fn)(void*);
 };
 
+/**
+ * Orders two sort nodes: tells whether @p obj sorts at or after this node.
+ *
+ * Compares obj's virtual getSortIndex() (vtable slot 8) with this node's SortIndex (+0x14), unsigned.
+ *
+ * @param obj  the other node (On Tour cObjNode*)
+ * @return 1 when obj's sort index is greater than or equal to this node's, otherwise 0
+ */
 extern "C" int cSortObjNode_compare(void* self, void* obj)
 {
     sRailVEntryU800* vt = *(sRailVEntryU800**)((char*)obj + 0xC);
@@ -3259,6 +3276,14 @@ struct sRailVEntryU840 {
     unsigned int (*fn)(void*);
 };
 
+/**
+ * Tells whether another node has the same sort index as this one.
+ *
+ * Compares this node's SortIndex (+0x14) with obj's virtual getSortIndex() (vtable slot 8).
+ *
+ * @param obj  the other node (On Tour cObjNode*)
+ * @return 1 when the two sort indices are equal, otherwise 0
+ */
 extern "C" int cSortObjNode_equal(void* self, void* obj)
 {
     sRailVEntryU840* vt = *(sRailVEntryU840**)((char*)obj + 0xC);
@@ -3269,6 +3294,11 @@ extern "C" int cSortObjNode_equal(void* self, void* obj)
 //100%
 INCLUDE_ASM("object/railmodifier", cSortObjNode_getSortIndex__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the node's sort index, the word at +0x14 (cSortObjNodeState::SortIndex).
+ *
+ * @return the sort index
+ */
 int cSortObjNode_getSortIndex(void* self)
 {
     return *(int*)((char*)self + 0x14);
@@ -3406,6 +3436,11 @@ public:
     virtual void v50();
 };
 
+/**
+ * Updates an instance node by calling its virtual updateNode() (vtable slot 15).
+ *
+ * @return updateNode()'s result (On Tour's update returns nothing)
+ */
 extern "C" int cInstanceNode_update(cInstanceNode* self)
 {
     return ((cRailVirt*)self)->v15();
@@ -3547,8 +3582,8 @@ int cInstanceNode_getFocusCount(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360968);
 #ifdef SKIP_ASM
-extern "C" int func_00360968(cInstanceNode* arg0) {
-    return ((int)arg0->Instance);
+extern "C" int func_00360968(cInstanceNode* instanceNode) {
+    return ((int)instanceNode->Instance);
 }
 #endif
 
@@ -3790,6 +3825,14 @@ extern "C" void* cInstanceNode__cInstanceNode(void*);
 //100%
 INCLUDE_ASM("object/railmodifier", cDeadNode__cDeadNode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a dead node: stores cDeadNode's vtable at +0xC, then runs the cInstanceNode destructor.
+ *
+ * The g++ delete flags arrive in the second argument register, which this body leaves untouched, so they pass
+ * through to cInstanceNode__cInstanceNode(), which frees the object when bit 0 is set.
+ *
+ * @return no meaningful value (cInstanceNode__cInstanceNode returns nothing)
+ */
 void* cDeadNode__cDeadNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cDeadNode_vtbl;
@@ -4257,6 +4300,11 @@ INCLUDE_ASM("object/railmodifier", cPhysicsModifier__cPhysicsModifier);
 extern void* cPhysicsModifier_vtbl[];
 void operator_delete(int*);
 
+/**
+ * Destroys a physics modifier: restores cPhysicsModifier's vtable at +0x4, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cPhysicsModifier__cPhysicsModifier(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = cPhysicsModifier_vtbl;
@@ -4291,6 +4339,11 @@ void cPhysicsModifier_signal(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cPhysicsModifier_isActive__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the physics modifier is active: returns its first word (+0x0).
+ *
+ * @return the active flag (nonzero when active)
+ */
 int cPhysicsModifier_isActive(void* self)
 {
     return *(int*)((char*)self + 0x0);
@@ -4337,6 +4390,13 @@ extern "C" void func_00345760(void* self);
 void operator_delete(int*);
 extern void* cEffectLink_vtbl[];
 
+/**
+ * Destroys an effect link: restores its vtable at +0x8, unlinks it from its list, then frees it when asked to.
+ *
+ * func_00345760() joins the link's neighbours and clears its next/prev pointers.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cEffectLink__cEffectLink(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cEffectLink_vtbl;
@@ -4480,6 +4540,13 @@ extern "C" void func_0035B6D0(void* self);
 void operator_delete(int*);
 extern void* cRailLink_vtbl[];
 
+/**
+ * Destroys a rail link: restores its vtable at +0x8, unlinks it from its list, then frees it when asked to.
+ *
+ * func_0035B6D0() joins the link's neighbours and clears its next/prev pointers.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cRailLink__cRailLink(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cRailLink_vtbl;
@@ -4512,6 +4579,9 @@ extern "C" int func_00360D98(void *arg0) {
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_apply);
 #ifdef SKIP_ASM
+/**
+ * Applies a move node by calling its virtual updateOverlapSystem() (vtable slot 50).
+ */
 extern "C" void cMoveNode_apply(cRailVirt* self)
 {
     self->v50();
@@ -4798,6 +4868,13 @@ int func_00361060(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimFrame);
 #ifdef SKIP_ASM
+/**
+ * Returns the animation position in frames: the float at +0x0 times 30.
+ *
+ * The stored value is probably a time in seconds, converted at 30 frames per second.
+ *
+ * @return the float at +0x0 multiplied by 30
+ */
 extern "C" float cAnimNode_getAnimFrame(void* self)
 {
     float input = *(float*)((char*)self + 0x0);
@@ -4837,6 +4914,14 @@ struct sRailVEntry1098 {
     void (*fn)(void*);
 };
 
+/**
+ * Returns the animation matrix array, first refreshing the root transform when it is dirty.
+ *
+ * When bit 0 (RootTransformDirty) of the embedded node's Flags (+0x26) is set, calls that node's (+0x14)
+ * virtual slot 51, updateRootTransform in the cMoveNode family's vtables.
+ *
+ * @return the matrix array pointer stored at +0x44
+ */
 extern "C" int cAnimNode_getAnimMats(void* self)
 {
     if (*(unsigned short*)((char*)self + 0x26) & 1) {
@@ -4861,6 +4946,15 @@ struct sElem003610E0 {
     char data[0x40];
 };
 
+/**
+ * Returns one animation matrix, first refreshing the root transform when it is dirty.
+ *
+ * The refresh is the same as cAnimNode_getAnimMats(): virtual slot 51 of the embedded node at +0x14 when bit 0
+ * of its Flags (+0x26) is set.
+ *
+ * @param i  index of the matrix in the array at +0x44 (0x40-byte matrices)
+ * @return the address of matrix @p i
+ */
 extern "C" sElem003610E0* cAnimNode_getAnimMat(void* self, int i)
 {
     char* obj = (char*)self + 0x14;
@@ -4915,6 +5009,11 @@ extern "C" int func_00361170(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cAnimObjectNode_isComplete__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the animated object node has finished: returns the word at +0x8 of the object it is called on.
+ *
+ * @return the completion flag (nonzero when complete)
+ */
 int cAnimObjectNode_isComplete(void* self)
 {
     return *(int*)((char*)self + 0x8);
@@ -4941,6 +5040,11 @@ INCLUDE_ASM("object/railmodifier", cAnimFrame__cAnimFrame);
 extern void* cAnimFrame_vtbl[];
 void operator_delete(int*);
 
+/**
+ * Destroys an animation frame: restores cAnimFrame's vtable at +0x84, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cAnimFrame__cAnimFrame(void* self, int flags)
 {
     *(void***)((char*)self + 0x84) = cAnimFrame_vtbl;
@@ -4991,6 +5095,14 @@ INCLUDE_ASM("object/railmodifier", cMeshAnimFrame__cMeshAnimFrame);
 extern void* cAnimFrame_vtbl[];
 void operator_delete(int*);
 
+/**
+ * Destroys a mesh animation frame: stores the base cAnimFrame vtable at +0x84, then frees the object when asked
+ * to.
+ *
+ * The cMeshAnimFrame part has nothing to destroy; the vtable store is the inlined cAnimFrame destructor.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cMeshAnimFrame__cMeshAnimFrame(void* self, int flags)
 {
     *(void***)((char*)self + 0x84) = cAnimFrame_vtbl;
@@ -5157,6 +5269,12 @@ INCLUDE_ASM("object/railmodifier", cBoostModifier__cBoostModifier);
 extern void* cPhysicsModifier_vtbl[];
 void operator_delete(int*);
 
+/**
+ * Destroys a boost modifier: stores the base cPhysicsModifier vtable at +0x4, then frees the object when asked
+ * to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cBoostModifier__cBoostModifier(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = cPhysicsModifier_vtbl;
@@ -5208,6 +5326,13 @@ extern "C" void* cMoveNode__cMoveNode(void*);
 //100%
 INCLUDE_ASM("object/railmodifier", cDebounceNode__cDebounceNode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a debounce node: stores cDebounceNode's vtable at +0xC, then runs the cMoveNode destructor.
+ *
+ * The g++ delete flags in the second argument register pass through untouched to cMoveNode__cMoveNode().
+ *
+ * @return no meaningful value (cMoveNode__cMoveNode returns nothing)
+ */
 void* cDebounceNode__cDebounceNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cDebounceNode_vtbl;
@@ -5254,6 +5379,14 @@ extern "C" void* cInstanceNode__cInstanceNode(void*);
 //100%
 INCLUDE_ASM("object/railmodifier", cCounterNode__cCounterNode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a counter node: stores cCounterNode's vtable at +0xC, then runs the cInstanceNode destructor.
+ *
+ * The g++ delete flags in the second argument register pass through untouched to
+ * cInstanceNode__cInstanceNode().
+ *
+ * @return no meaningful value (cInstanceNode__cInstanceNode returns nothing)
+ */
 void* cCounterNode__cCounterNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cCounterNode_vtbl;
@@ -5306,6 +5439,11 @@ int cFlexBridgeNode_hasBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cFlexBridgeNode_getBoundBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the flex bridge's bounding box, stored at +0x90.
+ *
+ * @return the address of the bound box (On Tour const tBoundBox*)
+ */
 void* cFlexBridgeNode_getBoundBox(void* self)
 {
     return (char*)self + 0x90;
@@ -5491,6 +5629,11 @@ extern "C" float func_00361760(void *arg0) {
 //100%
 INCLUDE_ASM("object/railmodifier", cFloatingNode_getNodeState__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the floating node's state block, which starts at +0x2C.
+ *
+ * @return the address of the node state
+ */
 void* cFloatingNode_getNodeState(void* self)
 {
     return (char*)self + 0x2C;
@@ -5549,6 +5692,14 @@ struct sRailVEntry17B8 {
     void (*fn)(void*);
 };
 
+/**
+ * Returns the floating node's animation matrices, first refreshing the root transform when it is dirty.
+ *
+ * When bit 0 (RootTransformDirty) of Flags (+0x12) is set, calls the virtual updateRootTransform() (slot 51,
+ * cFloatingNode_updateRootTransform).
+ *
+ * @return the matrix array pointer stored at +0x74
+ */
 extern "C" int cFloatingNode_getAnimMats(void* self)
 {
     if (*(unsigned short*)((char*)self + 0x12) & 1) {
@@ -5572,6 +5723,15 @@ struct sElem00361800 {
     char data[0x40];
 };
 
+/**
+ * Returns one of the floating node's animation matrices, first refreshing the root transform when it is dirty.
+ *
+ * The refresh is the same as cFloatingNode_getAnimMats(): updateRootTransform() (slot 51) when Flags bit 0 is
+ * set.
+ *
+ * @param i  index of the matrix in the array at +0x74 (0x40-byte matrices)
+ * @return the address of matrix @p i
+ */
 extern "C" sElem00361800* cFloatingNode_getAnimMat(void* self, int i)
 {
     if (*(unsigned short*)((char*)self + 0x12) & 1) {
@@ -5934,6 +6094,11 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier__cSplineModifier);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
+/**
+ * Destroys a spline modifier: stores the base cTransformModifier vtable, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cSplineModifier__cSplineModifier(void* self, int flags)
 {
     *(void***)self = D_004913F8;
@@ -5946,6 +6111,11 @@ extern "C" void cSplineModifier__cSplineModifier(void* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier_isComplete__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the spline modifier has completed: returns the flag at +0x50.
+ *
+ * @return the completion flag (nonzero when complete)
+ */
 int cSplineModifier_isComplete(void* self)
 {
     return *(int*)((char*)self + 0x50);
@@ -5955,6 +6125,9 @@ int cSplineModifier_isComplete(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier_clearComplete__FPv);
 #ifdef SKIP_ASM
+/**
+ * Clears the spline modifier's completion flag at +0x50.
+ */
 void cSplineModifier_clearComplete(void* self)
 {
     *(int*)((char*)self + 0x50) = 0;
@@ -5964,6 +6137,11 @@ void cSplineModifier_clearComplete(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier_getBoundBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the spline modifier's bounding box, stored at +0x10.
+ *
+ * @return the address of the bound box (On Tour const tBoundBox*)
+ */
 void* cSplineModifier_getBoundBox(void* self)
 {
     return (char*)self + 0x10;
@@ -5973,16 +6151,21 @@ void* cSplineModifier_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void cSplineModifier_setBoundBox(void* self, void* a1)
+extern "C" void cSplineModifier_setBoundBox(void* self, void* boundbox)
 {
-    *(cQuad128*)((char*)self + 0x10) = *(cQuad128*)a1;
-    *(cQuad128*)((char*)self + 0x20) = *(cQuad128*)((char*)a1 + 0x10);
+    *(cQuad128*)((char*)self + 0x10) = *(cQuad128*)boundbox;
+    *(cQuad128*)((char*)self + 0x20) = *(cQuad128*)((char*)boundbox + 0x10);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier_getRadius__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the spline modifier's radius, the float at +0x4C.
+ *
+ * @return the radius
+ */
 float cSplineModifier_getRadius(void* self)
 {
     return *(float*)((char*)self + 0x4C);
@@ -5992,6 +6175,11 @@ float cSplineModifier_getRadius(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier_setRadius__FPvf);
 #ifdef SKIP_ASM
+/**
+ * Sets the spline modifier's radius, the float at +0x4C.
+ *
+ * @param val  the new radius
+ */
 void cSplineModifier_setRadius(void* self, float val)
 {
     *(float*)((char*)self + 0x4C) = val;
@@ -6001,6 +6189,11 @@ void cSplineModifier_setRadius(void* self, float val)
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier_isRootTransformDirty__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the spline modifier's root transform needs rebuilding: returns the flag at +0x58.
+ *
+ * @return the dirty flag (nonzero when the root transform is out of date)
+ */
 int cSplineModifier_isRootTransformDirty(void* self)
 {
     return *(int*)((char*)self + 0x58);
@@ -6016,6 +6209,13 @@ struct sRailVEntry1B90 {
     void (*fn)(void*);
 };
 
+/**
+ * Returns the spline modifier's root transform, rebuilding it first when it is dirty.
+ *
+ * When the dirty flag at +0x58 is set, calls the virtual updateRootTransform() (slot 3).
+ *
+ * @return the address of the root transform matrix at +0x60
+ */
 extern "C" void* cSplineModifier_getRootTransform(void* self)
 {
     if (*(int*)((char*)self + 0x58) != 0) {
@@ -6043,6 +6243,14 @@ int cSplineModifier_getTransformType(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getBoundBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the multi-spline modifier's bounding box, held 0x30 bytes into its first spline segment.
+ *
+ * The segment array (0x60-byte elements) is the pointer at +0x3C, allocated by
+ * cMultiSplineModifier_allocNodes().
+ *
+ * @return the address of the bound box (On Tour const tBoundBox*)
+ */
 void* cMultiSplineModifier_getBoundBox(void* self)
 {
     return (char*)*(void**)((char*)self + 0x3c) + 0x30;
@@ -6052,11 +6260,11 @@ void* cMultiSplineModifier_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void cMultiSplineModifier_setBoundBox(void* self, void* a1)
+extern "C" void cMultiSplineModifier_setBoundBox(void* self, void* boundbox)
 {
     void* p = *(void**)((char*)self + 0x3c);
-    *(cQuad128*)((char*)p + 0x30) = *(cQuad128*)a1;
-    *(cQuad128*)((char*)p + 0x40) = *(cQuad128*)((char*)a1 + 0x10);
+    *(cQuad128*)((char*)p + 0x30) = *(cQuad128*)boundbox;
+    *(cQuad128*)((char*)p + 0x40) = *(cQuad128*)((char*)boundbox + 0x10);
 }
 #endif
 
@@ -6071,6 +6279,11 @@ extern "C" int func_00361C08(void *arg0) {
 //100%
 INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getRadius__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the multi-spline modifier's radius, the float at +0x18.
+ *
+ * @return the radius
+ */
 float cMultiSplineModifier_getRadius(void* self)
 {
     return *(float*)((char*)self + 0x18);
@@ -6080,6 +6293,11 @@ float cMultiSplineModifier_getRadius(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_setRadius__FPvf);
 #ifdef SKIP_ASM
+/**
+ * Sets the multi-spline modifier's radius, the float at +0x18.
+ *
+ * @param val  the new radius
+ */
 void cMultiSplineModifier_setRadius(void* self, float val)
 {
     *(float*)((char*)self + 0x18) = val;
@@ -6095,6 +6313,14 @@ struct sRailVEntry1C20 {
     void (*fn)(void*);
 };
 
+/**
+ * Returns the root transform of the modifier's first instance, rebuilding the transforms first when dirty.
+ *
+ * When the dirty flag at +0x30 is set, calls the virtual updateRootTransform() (slot 3). The result is +0x10 of
+ * the first entry in the instance array at +0x44 (an instance record's root transform).
+ *
+ * @return the address of the first instance's root transform matrix
+ */
 extern "C" void* cMultiSplineModifier_getRootTransform1(void* self)
 {
     if (*(int*)((char*)self + 0x30) != 0) {
@@ -6125,6 +6351,11 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier__cRollerModifier);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
+/**
+ * Destroys a roller modifier: stores the base cTransformModifier vtable, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cRollerModifier__cRollerModifier(cRollerModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
@@ -6169,6 +6400,13 @@ extern "C" void* cRollerModifier_Collision(void*);
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_collide1__FPv);
 #ifdef SKIP_ASM
+/**
+ * Handles a new collision on a roller: resets its Life (+0x20) to 0 and runs cRollerModifier_Collision().
+ *
+ * The collision info (On Tour collide(tc, ti)) arrives in the argument registers and passes through untouched.
+ *
+ * @return no meaningful value (cRollerModifier_Collision returns nothing)
+ */
 void* cRollerModifier_collide1(void* self)
 {
     *(int*)((char*)self + 0x20) = 0;
@@ -6193,16 +6431,21 @@ int cRollerModifier_runCollide(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void cRollerModifier_setBoundBox(cRollerModifier* self, void* a1)
+extern "C" void cRollerModifier_setBoundBox(cRollerModifier* self, void* bb)
 {
-    *(cQuad128*)&self->boundbox = *(cQuad128*)a1;
-    *(cQuad128*)&self->boundbox.MaxPoint = *(cQuad128*)((char*)a1 + 0x10);
+    *(cQuad128*)&self->boundbox = *(cQuad128*)bb;
+    *(cQuad128*)&self->boundbox.MaxPoint = *(cQuad128*)((char*)bb + 0x10);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_getBoundBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the roller's bounding box, boundbox at +0x220.
+ *
+ * @return the address of the bound box
+ */
 void* cRollerModifier_getBoundBox(void* self)
 {
     return (char*)self + 0x220;
@@ -6212,6 +6455,11 @@ void* cRollerModifier_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_getRadius__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the roller's radius, Radius at +0x24.
+ *
+ * @return the radius
+ */
 float cRollerModifier_getRadius(void* self)
 {
     return *(float*)((char*)self + 0x24);
@@ -6221,6 +6469,11 @@ float cRollerModifier_getRadius(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_setRadius__FPvf);
 #ifdef SKIP_ASM
+/**
+ * Sets the roller's radius, Radius at +0x24.
+ *
+ * @param val  the new radius
+ */
 void cRollerModifier_setRadius(void* self, float val)
 {
     *(float*)((char*)self + 0x24) = val;
@@ -6230,6 +6483,11 @@ void cRollerModifier_setRadius(void* self, float val)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_getRootTransform__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the roller's root transform, the matrix Transform at +0x240.
+ *
+ * @return the address of the transform matrix
+ */
 void* cRollerModifier_getRootTransform(void* self)
 {
     return (char*)self + 0x240;
@@ -6239,6 +6497,14 @@ void* cRollerModifier_getRootTransform(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_getRootTransform1__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the roller's root transform for an instance; every instance gets the same matrix, Transform at
+ * +0x240.
+ *
+ * On Tour's overload takes a tInstanceRecord*, which this body ignores.
+ *
+ * @return the address of the transform matrix
+ */
 void* cRollerModifier_getRootTransform1(void* self)
 {
     return (char*)self + 0x240;
@@ -6273,6 +6539,13 @@ extern "C" int func_00361D48(void *arg0) {
 //100%
 INCLUDE_ASM("object/railmodifier", cParticleNode__cParticleNode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a particle node: stores cParticleNode's vtable at +0xC, then runs the cMoveNode destructor.
+ *
+ * The g++ delete flags in the second argument register pass through untouched to cMoveNode__cMoveNode().
+ *
+ * @return no meaningful value (cMoveNode__cMoveNode returns nothing)
+ */
 void* cParticleNode__cParticleNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cParticleNode_vtbl;

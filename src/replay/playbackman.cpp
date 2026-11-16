@@ -41,7 +41,7 @@ struct cPlaybackMan_C458 {
     int field_0x78;         // 0x78
 };
 
-extern "C" cPlaybackMan_C458* cPlaybackMan_cPlaybackMan(cPlaybackMan_C458* self, int a1)
+extern "C" cPlaybackMan_C458* cPlaybackMan_cPlaybackMan(cPlaybackMan_C458* self, int maxPlaybackFiles)
 {
     func_0026D5E8((char*)self + 0x14);
     char* world = (char*)SSXApp->Game;
@@ -49,7 +49,7 @@ extern "C" cPlaybackMan_C458* cPlaybackMan_cPlaybackMan(cPlaybackMan_C458* self,
     char* level = *(char**)(world + 0xC);
     self->level = level;
     self->field_0x74 = -1;
-    self->field_0x54 = a1;
+    self->field_0x54 = maxPlaybackFiles;
     self->field_0x78 = -1;
     self->field_0x10 = 0;
     self->field_0x4C = 0;

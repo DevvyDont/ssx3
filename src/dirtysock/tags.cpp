@@ -38,6 +38,19 @@ extern "C" int func_00415FC8(const void* a, const void* b, unsigned int n);
 extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
 extern "C" void* func_0041605C(void* dst, const void* src, unsigned int n);
 
+/**
+ * Adds a "name=value" term to a tag record, replacing an existing term of the same name.
+ *
+ * Names compare case-insensitively up to their '=' or ':'. A new term goes at the end of the record, or before
+ * a term that starts with '=' or ':'; a name starting with '~' is always appended without a search. Each term
+ * ends with the divider character (D_004A4A70, '\n'); the record's later terms are moved to make room.
+ *
+ * @param record  the tag record to edit (NUL-terminated)
+ * @param len     size of the record buffer in bytes
+ * @param temp    the term to store, "name=value"; must start with a printable character
+ * @return the stored term's length, 0 when an identical term was already there, or -1 on a null record, an
+ *         invalid term or no room
+ */
 // Adds or replaces the "name=value" term temp in the record. Names compare
 // through the D_004964C0 class table; "~..." terms are appended at the end.
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp)
@@ -183,6 +196,17 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldFind);
 extern unsigned char D_004963C0[];
 
 extern "C" const unsigned char* cDirtysock_tag_TagFieldFind_impl(const unsigned char* pRecord, const unsigned char* pName) __asm__("cDirtysock_tag_TagFieldFind");
+/**
+ * Finds a named field in a tag record and returns its value.
+ *
+ * Looks for an '=' or ':' preceded by the name, compared case-insensitively, where the name starts the record
+ * or follows whitespace. One space after the separator is skipped. The search ends at a lone separator between
+ * whitespace and a control character.
+ *
+ * @param pRecord  the tag record, or 0
+ * @param pName    the field name, or 0
+ * @return the start of the field's value text, or 0 when the record or name is empty or the field is not found
+ */
 extern "C" const unsigned char* cDirtysock_tag_TagFieldFind_impl(const unsigned char* pRecord, const unsigned char* pName)
 {
     const unsigned char* pTerm;
@@ -279,6 +303,15 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldDelete);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" unsigned char* cDirtysock_tag_TagFieldFind(char* record, char* name);
 
+/**
+ * Removes a named field from a tag record, shifting the rest of the record down.
+ *
+ * Deletes from the start of the field's name through its value and the control characters after it.
+ *
+ * @param record  the tag record to edit
+ * @param name    the field name
+ * @return 0 when the field was removed, -1 when it was not found
+ */
 extern "C" int cDirtysock_tag_TagFieldDelete(unsigned char* record, char* name)
 {
     unsigned char* p = cDirtysock_tag_TagFieldFind((char*)record, name);
@@ -542,6 +575,18 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetFlags);
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 extern char D_004965C0[];
 
+/**
+ * Stores a bit set in a tag record as a string of flag letters.
+ *
+ * Bit 0 is written as '@', bit 1 as 'A', and so on through "@ABCDEFGHIJKLMNOPQRSTUVWXYZ0123", one letter per
+ * set bit, lowest bit first. TagFieldGetFlags() reads it back.
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field name (0 clears the record first)
+ * @param value   the bits to store
+ * @return cDirtysock_tag__TagFieldSetupTerm()'s result
+ */
 extern "C" int cDirtysock_tag_TagFieldSetFlags(char* record, int len, char* name, int value)
 {
     char temp[256 + 32];
@@ -562,6 +607,15 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetAddress);
 #ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 
+/**
+ * Stores an IPv4 address in a tag record as dotted decimal text, most significant byte first.
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field name (0 clears the record first)
+ * @param addr    the address, as a 32-bit value
+ * @return cDirtysock_tag__TagFieldSetupTerm()'s result
+ */
 extern "C" int cDirtysock_tag_TagFieldSetAddress(char* record, int len, char* name, unsigned int addr)
 {
     int i;
@@ -600,6 +654,18 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldSetFourCC);
 #ifdef SKIP_ASM
 extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* temp);
 
+/**
+ * Stores a four-character code in a tag record as text.
+ *
+ * Writes the code's bytes from the most significant down, skipping any byte that is a space or control
+ * character or has its top bit set.
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field name (0 clears the record first)
+ * @param value   the packed four-character code
+ * @return cDirtysock_tag__TagFieldSetupTerm()'s result
+ */
 extern "C" int cDirtysock_tag_TagFieldSetFourCC(char* record, int len, char* name, int value)
 {
     char temp[256 + 32];
@@ -676,6 +742,18 @@ extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* te
 extern unsigned char D_00495FC0[];
 extern unsigned char D_004960C0[];
 
+/**
+ * Stores binary data in a tag record as '$' followed by two lowercase hex digits per byte.
+ *
+ * TagFieldGetBinary() decodes it.
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field name (0 clears the record first)
+ * @param value   the bytes to store
+ * @param size    number of bytes
+ * @return cDirtysock_tag__TagFieldSetupTerm()'s result
+ */
 extern "C" int cDirtysock_tag_TagFieldSetBinary(char* record, int len, char* name, const void* value, int size)
 {
     const unsigned char* src = (const unsigned char*)value;
@@ -702,6 +780,23 @@ extern const unsigned char kHexHi[] __asm__("D_00495FC0");
 extern const unsigned char kHexLo[] __asm__("D_004960C0");
 extern const unsigned char kSafe[] __asm__("D_004964C0");
 
+/**
+ * Stores a C structure in a tag record as comma-separated values, laid out by a template string.
+ *
+ * Template items: an optional "#label=" (skipped), a decimal count, then a type letter: 'a' skips count bytes
+ * (1 if no count), 'b', 'w' and 'l' read an 8-, 16- or 32-bit value written in hex ("-" plus the negated value
+ * above 0xFFFF0000, nothing for zero), and 's' reads a count-byte string, %xx-escaping all but letters, digits,
+ * '_', '=' and ':'. A '*' after an item repeats it. Trailing commas are trimmed; reading stops at the end of
+ * the buffer.
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field name (0 clears the record first)
+ * @param buffer  the structure to read
+ * @param size    size of the structure in bytes; negative means 64 KiB
+ * @param tmpl    the template describing the structure's fields
+ * @return cDirtysock_tag__TagFieldSetupTerm()'s result
+ */
 extern "C" int cDirtysock_tag_TagFieldSetStructure(char* record, int len, char* name, const char* buffer, int size, const char* tmpl)
 {
     char temp[2560];
@@ -825,6 +920,19 @@ extern const unsigned char kHexHi[] __asm__("D_00495FC0");
 extern const unsigned char kHexLo[] __asm__("D_004960C0");
 extern char D_004A4A88[];
 
+/**
+ * Stores a string in a tag record lightly obfuscated with a key, as '$' followed by hex digits.
+ *
+ * Each byte is XORed with the previous output byte, rotated left 3 bits and XORed with the next key character
+ * (the key repeats; an empty or null key means "GS"). TagFieldGetCrypt() reverses it.
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field name (0 clears the record first)
+ * @param key     the key string, or 0
+ * @param data    the NUL-terminated string to store
+ * @return cDirtysock_tag__TagFieldSetupTerm()'s result
+ */
 // Same key handling as the matched TagFieldGetCrypt: a working copy kbase of the key, defaulted when empty.
 extern "C" int cDirtysock_tag_TagFieldSetCrypt(char* record, int len, char* name, const unsigned char* key, const unsigned char* data)
 {
@@ -883,6 +991,15 @@ struct sDsTmK2 {
 extern "C" unsigned int func_003EF088();
 extern "C" sDsTmK2* func_003EAEB8(sDsTmK2* tm, unsigned long secs);
 
+/**
+ * Stores a time in a tag record as "year.month.day hour:mm:ss".
+ *
+ * @param record  the tag record to edit
+ * @param len     size of the record buffer in bytes
+ * @param name    the field name (0 clears the record first)
+ * @param epoch   seconds since 1970; 0 means the current time (func_003EF088)
+ * @return cDirtysock_tag__TagFieldSetupTerm()'s result, or -1 when the time cannot be converted
+ */
 // PORT: epoch is widened to 64-bit `unsigned long` (zero-extended) for ds_secstotime.
 extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name, unsigned int epoch)
 {
@@ -1147,6 +1264,16 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetFlags);
 #ifdef SKIP_ASM
 extern int D_004965E0[];
 
+/**
+ * Parses a string of flag letters from a tag field value back into a bit set.
+ *
+ * ORs together the bit of each letter (the D_004965E0 table, the inverse of TagFieldSetFlags()'s letters) up to
+ * the first character that is not one. A non-null @p data with no flag letters gives 0, not @p defval.
+ *
+ * @param data    field text, or 0
+ * @param defval  value returned when @p data is 0
+ * @return the bit set, or @p defval
+ */
 extern "C" int cDirtysock_tag_TagFieldGetFlags(const char* data, int defval)
 {
     if (data != 0) {
@@ -1305,6 +1432,20 @@ extern "C" int func_003ED0F8(const char* pData, char* pBuffer, int iLength, cons
 //100%
 INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetString);
 #ifdef SKIP_ASM
+/**
+ * Copies a tag field value into a buffer, removing quotes and decoding %xx escapes.
+ *
+ * A value may be wrapped in double or single quotes; it ends at the closing quote or a control character, and
+ * "%%" gives '%'. With a null @p pData the default string is copied instead. With a null @p pBuffer nothing is
+ * copied and the decoded length is returned.
+ *
+ * @param pData    field text, or 0
+ * @param pBuffer  destination buffer, or 0 to measure
+ * @param iLength  size of the buffer, including the terminator
+ * @param pDefval  default string used when @p pData is 0, or 0
+ * @return the number of characters copied (or needed), or -1 when there is no data and no default, or
+ *         @p iLength is not positive
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Copies a tag field value (quoted or bare, with %xx decoding) into pBuffer, or the default.
 extern "C" int cDirtysock_tag_TagFieldGetString(const char* pData, char* pBuffer, int iLength, const char* pDefval)
@@ -1370,6 +1511,17 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetBinary);
 extern unsigned char D_004961C0[];
 extern unsigned char D_004962C0[];
 
+/**
+ * Decodes a '$'-prefixed hex tag field value into bytes.
+ *
+ * With a null @p buffer nothing is written and the number of encoded bytes is returned.
+ *
+ * @param data    field text, or 0
+ * @param buffer  destination buffer, or 0 to measure
+ * @param len     size of the buffer in bytes
+ * @return the number of bytes decoded (or available), or -1 when @p data is 0, does not start with '$', or
+ *         @p len is not positive
+ */
 extern "C" int cDirtysock_tag_TagFieldGetBinary(const char* data, void* buffer, int len)
 {
     int count;
@@ -1511,6 +1663,20 @@ extern unsigned char D_004962C0[];
 extern char D_004A4A88[];
 extern "C" int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
 
+/**
+ * Decodes a string stored by TagFieldSetCrypt(), or copies a plain value through TagFieldGetString().
+ *
+ * A value starting with '$' is hex decoded and de-obfuscated with the key (an empty or null key means "GS");
+ * anything else is treated as plain text, with @p defval as its default.
+ *
+ * @param data    field text, or 0
+ * @param buf     destination buffer, or 0 to measure
+ * @param len     size of the buffer, including the terminator
+ * @param key     the key string, or 0
+ * @param defval  default string for the plain-text path
+ * @return the number of characters written (or encoded bytes when @p buf is 0), or -1 when @p data is 0 or
+ *         @p len is not positive
+ */
 extern "C" int cDirtysock_tag_TagFieldGetCrypt(const char* data, char* buf, int len, const unsigned char* key, const char* defval)
 {
     int count;
@@ -1565,6 +1731,17 @@ extern "C" void* func_00416210(void* dst, int value, int size);
 // PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
 extern "C" unsigned long func_003EB090(sDsTmK2* tm);
 
+/**
+ * Parses a time from a tag field value, as seconds since 1970.
+ *
+ * Accepts '$' plus hex digits, a plain decimal number of seconds, or "year.month.day hour:min:sec" (the date
+ * may use '-' instead of '.'). A date outside 1970-2099 or a field out of range is rejected.
+ *
+ * @param data    field text, or 0
+ * @param defval  value used when nothing could be parsed
+ * @return the time in seconds; when parsing gives 0, @p defval, or the current time (func_003EF088) when that
+ *         is 0 too
+ */
 extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int defval)
 {
     sDsTmK2 tm;

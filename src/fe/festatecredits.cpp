@@ -89,7 +89,7 @@ public:
     virtual void v21(float* pos);
 };
 
-extern "C" void cFEStateCredits_onGainFocus(void* self, void* a1)
+extern "C" void cFEStateCredits_onGainFocus(void* self, void* pPrevState)
 {
     cUIObjK185BA0* t = (cUIObjK185BA0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBC0));
     *(cUIObjK185BA0**)((char*)self + 0x5C) = t;
@@ -148,7 +148,7 @@ extern "C" void cFEStateCredits_onGainFocus(void* self, void* a1)
             func_003A1F18(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
         }
     }
-    cFEState_onGainFocus(self, a1);
+    cFEState_onGainFocus(self, pPrevState);
 }
 #endif
 
@@ -316,6 +316,12 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E510(void* self);
 
+/**
+ * Scrolls the credits by one step, then runs the base UI state update.
+ *
+ * Adds the scroll speed (+0x64, which input moves between -8 and 8) to the scroll position (+0x60), then calls
+ * func_0039E510().
+ */
 extern "C" void cFEStateCredits_onUpdate(void* self)
 {
     *(int*)((char*)self + 0x60) += *(int*)((char*)self + 0x64);
@@ -332,17 +338,17 @@ struct sVEntry001863E8 {
     int (*fn)(void*);
 };
 
-extern "C" int cFEStateCredits_onInputBegin(void* self, void* pad)
+extern "C" int cFEStateCredits_onInputBegin(void* self, void* pInput)
 {
-    sVEntry001863E8* e = &(*(sVEntry001863E8**)((char*)pad + 8))[17];
-    if (e->fn((char*)pad + e->delta)) {
+    sVEntry001863E8* e = &(*(sVEntry001863E8**)((char*)pInput + 8))[17];
+    if (e->fn((char*)pInput + e->delta)) {
         if (*(int*)((char*)self + 0x64) >= -7) {
             *(int*)((char*)self + 0x64) -= 1;
         }
         return 1;
     }
-    e = &(*(sVEntry001863E8**)((char*)pad + 8))[18];
-    if (e->fn((char*)pad + e->delta)) {
+    e = &(*(sVEntry001863E8**)((char*)pInput + 8))[18];
+    if (e->fn((char*)pInput + e->delta)) {
         if (*(int*)((char*)self + 0x64) < 8) {
             *(int*)((char*)self + 0x64) += 1;
         }
@@ -408,7 +414,7 @@ struct sFlowState_865A8 {
 };
 extern sFlowState_865A8 D_004A4E80;
 
-extern "C" void cFEState_onGainFocus(void* self, void* a1)
+extern "C" void cFEState_onGainFocus(void* self, void* pPrevState)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     if (screen != 0) {
@@ -417,7 +423,7 @@ extern "C" void cFEState_onGainFocus(void* self, void* a1)
             cUIMenu_setSelectedByIndex(menu, func_001A06F0(&D_004A4E80, *(signed char*)((char*)self + 0xC)));
         }
     }
-    cUIState_onGainFocus(self, a1);
+    cUIState_onGainFocus(self, pPrevState);
 }
 #endif
 

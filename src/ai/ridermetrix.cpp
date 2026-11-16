@@ -194,6 +194,12 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_resetComboChain);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_removeHUDfx(void* self, int type);
 
+/**
+ * Ends the rider's trick combo chain and removes its HUD effect.
+ *
+ * Removes HUD effect 3 (the combo display that func_00117638() shows), zeroes the combo count (+0x9C) and combo
+ * score (+0xA0), and sets the chain timer (+0xA4) back to -1.
+ */
 extern "C" void cRiderMetrix_resetComboChain(void* self)
 {
     cRiderMetrix_removeHUDfx(self, 3);
@@ -415,6 +421,15 @@ struct sMetrixSlots {
     int count;
 };
 
+/**
+ * Removes the rider's HUD effects of one type by marking their slots free (type 0x34).
+ *
+ * A type below 0x22 has its own fixed slot; any other type is searched for in the slots from 0x23 up to the
+ * slot count. Does nothing when the slot array (+0x1B0) is not allocated.
+ *
+ * @param self_  the rider metrics (this)
+ * @param type   the HUD effect type (On Tour eHUDFXID)
+ */
 extern "C" void cRiderMetrix_removeHUDfx(void* self_, int type)
 {
     sMetrixSlots* self = (sMetrixSlots*)self_;

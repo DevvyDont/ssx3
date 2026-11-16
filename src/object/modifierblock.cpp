@@ -457,7 +457,7 @@ struct sMbVEntryVII3020 {
     void (*fn)(void*, int, int);
 };
 
-extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int a1, int a2)
+extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int intInfo, int force)
 {
     sBoundBoxNode* node = self->node;
     void* obj;
@@ -469,7 +469,7 @@ extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int a1, int a2)
     }
     if (obj != 0) {
         sMbVEntryVII3020* vt2 = *(sMbVEntryVII3020**)((char*)obj + 0xC);
-        vt2[43].fn((char*)obj + vt2[43].delta, a1, a2);
+        vt2[43].fn((char*)obj + vt2[43].delta, intInfo, force);
     }
 }
 #endif
@@ -477,12 +477,12 @@ extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int a1, int a2)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_updateIntersectInfo);
 #ifdef SKIP_ASM
-extern "C" void tModifierBlock_updateIntersectInfo(tModifierBlock* self, void* arg)
+extern "C" void tModifierBlock_updateIntersectInfo(tModifierBlock* self, void* intInfo)
 {
     sBoundBoxNode* node = self->node;
     if (node != 0) {
         sMbVEntry* vt = *(sMbVEntry**)node;
-        vt[22].fn((char*)node + vt[22].delta, arg);
+        vt[22].fn((char*)node + vt[22].delta, intInfo);
     }
 }
 #endif

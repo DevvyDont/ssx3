@@ -20,12 +20,12 @@ extern "C" void cAI_forceAIState(void *);
  * @param arg0  the AI
  * @param arg1  the new AI state (tAIState)
  */
-extern "C" void cAI_setAIState(cAI* arg0, int arg1) {
-    int old = arg0->CurrentAIState;
-    if (arg1 != old) {
-        arg0->PreviousAIState = old;
-        arg0->PreviousAIStateHandler = (cAIStateHandler*)((int)arg0->CurrentAIStateHandler);
-        cAI_forceAIState(arg0);
+extern "C" void cAI_setAIState(cAI* self, int state) {
+    int old = self->CurrentAIState;
+    if (state != old) {
+        self->PreviousAIState = old;
+        self->PreviousAIStateHandler = (cAIStateHandler*)((int)self->CurrentAIStateHandler);
+        cAI_forceAIState(self);
     }
 }
 #endif
@@ -260,8 +260,8 @@ extern "C" void cAI_shutdown(int);
  * @param arg0  the shutdown state handler (unused)
  * @param arg1  the AI that gains the state
  */
-extern "C" void cShutdownHandler_OnGainState(int arg0, int arg1) {
-    cAI_shutdown(arg1);
+extern "C" void cShutdownHandler_OnGainState(int self, int ai) {
+    cAI_shutdown(ai);
 }
 #endif
 
@@ -1500,9 +1500,9 @@ static inline float Wrap_5D48(float x)
     return x - Floor_5D48(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
 }
 
-static inline t4Vector GetFront_5D48(cRider* r)
+static inline t4Vector GetFront_5D48(cRider* rider)
 {
-    return r->mMatrix.row[1];
+    return rider->mMatrix.row[1];
 }
 
 // Plays a glance animation towards a nearby rider (sRiderPair mDistance/mAngle).
@@ -1584,13 +1584,13 @@ extern "C" int func_0028B180();
 extern "C" void func_0029A220(int, void *);
 extern "C" void func_00270970(int, int);
 
-extern "C" int cRider_checkForReset(cRider* self, int arg1, int arg2) {
-    if (arg1 != 0 || arg2 != 0) {
+extern "C" int cRider_checkForReset(cRider* self, int isResetInput, int forceAutoReset) {
+    if (isResetInput != 0 || forceAutoReset != 0) {
         *(int*)&self->mPowerUpBoostTimer = 0;
         *(int*)&self->mPowerUpTrickTimer = 0;
-        if (arg2 == 1 || arg2 == 4)
+        if (forceAutoReset == 1 || forceAutoReset == 4)
             cRiderMetrix_evAutoResetSurface(self->mMetrix);
-        *(int *)((char*)self->mRiderHandler + 0x350) = (arg2 != 0);
+        *(int *)((char*)self->mRiderHandler + 0x350) = (forceAutoReset != 0);
         func_0011FEC8_6120(((char*)self), 9);
         cRider_setMotionState_6120(((char*)self), 3);
         func_0029A220(func_0028B180(), ((char*)self));
@@ -1706,9 +1706,9 @@ struct cAnimSequence;
 void cAnimSequence_fadeWeight(cAnimSequence* seq, float a, float b);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline t4Vector GetSide_163B0(cRider* r)
+static inline t4Vector GetSide_163B0(cRider* rider)
 {
-    return r->mMatrix.row[0];
+    return rider->mMatrix.row[0];
 }
 
 static inline t4Vector Scale_163B0(const t4Vector& v, float s)
@@ -1732,10 +1732,10 @@ static inline int seqDone_163B0(char* p)
     return func_001446A0(p, 2) && func_001446B8(p, 2);
 }
 
-extern "C" int cRider_checkForPunch(cRider* self, int a1, int a2)
+extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
 {
     if (func_00311AE8(self->mRiderAnim, 1) == 3) {
-        if (a1 != 0 && a2 != 0) {
+        if (isLeft != 0 && isRight != 0) {
             if (seqDone_163B0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0)) {
                 *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x90) = 0.0f;
                 *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
@@ -1758,7 +1758,7 @@ extern "C" int cRider_checkForPunch(cRider* self, int a1, int a2)
     if (func_00311AE8(self->mRiderAnim, 1) == 0xD) {
         int id = func_00312AA0(self->mRiderAnim, 1);
         int match = self->unk_320 ? id == 0x143 : id == 0x144;
-        if ((a1 != 0 && a2 == 0 && match) || (a1 == 0 && a2 != 0 && !match)) {
+        if ((isLeft != 0 && isRight == 0 && match) || (isLeft == 0 && isRight != 0 && !match)) {
             if (seqDone_163B0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0)) {
                 *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x90) = 0.0f;
                 *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
@@ -1789,7 +1789,7 @@ extern "C" int cRider_checkForPunch(cRider* self, int a1, int a2)
             func_00311E88(self->mRiderAnim, 0, 0.1f);
         }
     }
-    if (a1 != 0 && a2 != 0) {
+    if (isLeft != 0 && isRight != 0) {
         if (func_00311AE8(self->mRiderAnim, 1) == 0xD && func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
             func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
@@ -1799,14 +1799,14 @@ extern "C" int cRider_checkForPunch(cRider* self, int a1, int a2)
         cRiderAnimBase_play(self->mRiderAnim, 0x142, 1, -1.0f);
         *(long*)((char*)self->mRiderAnim + 0x20) = -1;
         self->mAttackBlend = 0.0f;
-    } else if (a1 != 0 || a2 != 0) {
+    } else if (isLeft != 0 || isRight != 0) {
         if (func_00311AE8(self->mRiderAnim, 1) == 3 && func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
             func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
         if (func_00311AE8(self->mRiderAnim, 1) == 0xD && func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
         int anim;
-        if (a1 != 0) {
+        if (isLeft != 0) {
             anim = self->unk_320 ? 0x143 : 0x144;
             self->mAttackDir = Scale_163B0(GetSide_163B0(self), -1.0f);
         } else {
@@ -2018,9 +2018,9 @@ extern "C" void func_00116FB8(void *self) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", cHUDFX_copyDispStr);
 #ifdef SKIP_ASM
-extern "C" void cHUDFX_copyDispStr(char *arg0, signed char *arg1) {
+extern "C" void cHUDFX_copyDispStr(char *self, signed char *arg1) {
     signed char *s = arg1;
-    unsigned char *d = (unsigned char*)(arg0 + 0x18);
+    unsigned char *d = (unsigned char*)(self + 0x18);
     if (s != 0) {
         while (*s != 0) {
             *d = *s;
@@ -2037,13 +2037,13 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_set);
 #ifdef SKIP_ASM
 extern "C" void cHUDFX_copyDispStr(char *, signed char *);
 
-extern "C" void cHUDFX_set(char *arg0, int arg1, signed char *arg2, int arg3, float fparg0) {
-    cHUDFX_copyDispStr(arg0, arg2);
-    *(int *)(arg0 + 0) = arg1;
-    *(float *)(arg0 + 4) = fparg0;
-    *(int *)(arg0 + 0xC) = arg3;
-    *(int *)(arg0 + 8) = 0;
-    *(int *)(arg0 + 0x14) = 0;
+extern "C" void cHUDFX_set(char *self, int id, signed char *displayStr, int decayTime, float fparg0) {
+    cHUDFX_copyDispStr(self, displayStr);
+    *(int *)(self + 0) = id;
+    *(float *)(self + 4) = fparg0;
+    *(int *)(self + 0xC) = decayTime;
+    *(int *)(self + 8) = 0;
+    *(int *)(self + 0x14) = 0;
 }
 #endif
 
@@ -2056,14 +2056,14 @@ extern signed char D_004A5E20[];
 extern char D_004A1070[];
 
 // Variant of cHUDFX_set that names the entry from a number (formatted into a shared buffer).
-extern "C" void cHUDFX_set1(char *arg0, int arg1, int arg2, float fparg0, int arg3) {
-    sprintf((char*)D_004A5E20, D_004A1070, arg2);
-    cHUDFX_copyDispStr(arg0, D_004A5E20);
-    *(int *)(arg0 + 0x14) = arg2;
-    *(int *)(arg0 + 0) = arg1;
-    *(float *)(arg0 + 4) = fparg0;
-    *(int *)(arg0 + 0xC) = arg3;
-    *(int *)(arg0 + 8) = 0;
+extern "C" void cHUDFX_set1(char *self, int id, int displayInt, float fparg0, int data) {
+    sprintf((char*)D_004A5E20, D_004A1070, displayInt);
+    cHUDFX_copyDispStr(self, D_004A5E20);
+    *(int *)(self + 0x14) = displayInt;
+    *(int *)(self + 0) = id;
+    *(float *)(self + 4) = fparg0;
+    *(int *)(self + 0xC) = data;
+    *(int *)(self + 8) = 0;
 }
 #endif
 
@@ -2107,14 +2107,14 @@ INCLUDE_ASM("seg/seg_14B10", cRiderMetrix_cRiderMetrix);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_reset(void *);
 
-extern "C" void *cRiderMetrix_cRiderMetrix(void *arg0) {
-    *(int *)((char*)arg0 + 0x1AC) = 0;
-    *(int *)((char*)arg0 + 0x1B0) = 0;
-    *(int *)((char*)arg0 + 0x1B4) = 0;
-    *(int *)((char*)arg0 + 0x1C8) = 0;
-    *(float *)((char*)arg0 + 0x1C4) = 1.0f;
-    cRiderMetrix_reset(arg0);
-    return arg0;
+extern "C" void *cRiderMetrix_cRiderMetrix(void *self) {
+    *(int *)((char*)self + 0x1AC) = 0;
+    *(int *)((char*)self + 0x1B0) = 0;
+    *(int *)((char*)self + 0x1B4) = 0;
+    *(int *)((char*)self + 0x1C8) = 0;
+    *(float *)((char*)self + 0x1C4) = 1.0f;
+    cRiderMetrix_reset(self);
+    return self;
 }
 #endif
 

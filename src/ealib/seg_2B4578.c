@@ -190,11 +190,11 @@ extern unsigned char shapetypetobpp[];
  *
  * Looks up the low 7 bits of the shape header's first byte in shapetypetobpp.
  *
- * @param arg0  the shape header
+ * @param shp  the shape header
  * @return bits per pixel, or 0 for types with no entry
  */
-unsigned char SHAPE_depth(unsigned char *arg0) {
-    return shapetypetobpp[*arg0 & 0x7F];
+unsigned char SHAPE_depth(unsigned char *shp) {
+    return shapetypetobpp[*shp & 0x7F];
 }
 #endif
 
@@ -209,11 +209,11 @@ extern unsigned char D_0044C3D0_39F8[128] __asm__("shapetypetobpp");
  *
  * Same lookup as SHAPE_depth() (shapetypetobpp at the low 7 bits), but takes the type itself.
  *
- * @param arg0  shape type code
+ * @param shptype  shape type code
  * @return bits per pixel, or 0 for types with no entry
  */
-unsigned char SHAPE_depth1(int arg0) {
-    return D_0044C3D0_39F8[arg0 & 0x7F];
+unsigned char SHAPE_depth1(int shptype) {
+    return D_0044C3D0_39F8[shptype & 0x7F];
 }
 #endif
 
@@ -226,19 +226,19 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_longname);
  * Follows each block's 24-bit next offset (the upper three bytes of its first word) until it reaches a
  * block of type 0x70.
  *
- * @param p  the shape header
+ * @param shp  the shape header
  * @return the name text just after that block's 4-byte header, or 0 if the chain has none
  */
-unsigned char *SHAPE_longname(unsigned char *p) {
-    while (p) {
+unsigned char *SHAPE_longname(unsigned char *shp) {
+    while (shp) {
         int off;
         unsigned char *n;
-        if (*p == 0x70) {
-            return p + 4;
+        if (*shp == 0x70) {
+            return shp + 4;
         }
-        off = *(int *)p >> 8;
-        n = p + off;
-        p = off ? n : 0;
+        off = *(int *)shp >> 8;
+        n = shp + off;
+        shp = off ? n : 0;
     }
     return 0;
 }
@@ -312,41 +312,41 @@ extern int func_003B3A50_3BB0(unsigned char, short, short, unsigned int, int) __
 extern int func_003B4D00_3BB0(char *, int *) __asm__("func_003B4D00");
 extern int strlen_3BB0(char *) __asm__("strlen");
 
-int SHAPE_size(char *p) {
+int SHAPE_size(char *shp) {
     int sp0;
     int r = 0;
     int w;
     unsigned int u;
     char *q;
-    unsigned int t = *(unsigned char *)p;
+    unsigned int t = *(unsigned char *)shp;
     switch (t) {
     case 0x70:
-        return strlen_3BB0(p + 4) + 5;
+        return strlen_3BB0(shp + 4) + 5;
     case 0x6F:
-        return *(int *)(p + 4) + 8;
+        return *(int *)(shp + 4) + 8;
     case 0x7C:
-        return (*(int *)(p + 4) << 3) + 8;
+        return (*(int *)(shp + 4) << 3) + 8;
     case 0x69:
-        if (*(unsigned short *)(p + 6) & 0x10) {
-            u = *(unsigned short *)(p + 4);
+        if (*(unsigned short *)(shp + 6) & 0x10) {
+            u = *(unsigned short *)(shp + 4);
             if (u == 0) u = 0xF0;
             return u + 0x10;
         }
         return 0x10;
     default:
-        if (*(unsigned char *)p & 0x80) {
+        if (*(unsigned char *)shp & 0x80) {
             sp0 = 0;
-            if (*(int *)(p + 0xC) & 0x1000) {
-                q = p + *(int *)(p + 0x10);
+            if (*(int *)(shp + 0xC) & 0x1000) {
+                q = shp + *(int *)(shp + 0x10);
             } else {
-                q = p + 0x10;
+                q = shp + 0x10;
             }
             if (func_003B4D00_3BB0(q, &sp0) != 0) {
                 r = sp0 + 0x10;
             }
         } else {
-            w = *(int *)(p + 0xC);
-            r = func_003B3A50_3BB0(*(unsigned char *)p, *(short *)(p + 4), *(short *)(p + 6), (unsigned int)w >> 28, (w >> 13) & 1);
+            w = *(int *)(shp + 0xC);
+            r = func_003B3A50_3BB0(*(unsigned char *)shp, *(short *)(shp + 4), *(short *)(shp + 6), (unsigned int)w >> 28, (w >> 13) & 1);
         }
         return r;
     }
@@ -474,9 +474,9 @@ block_10:
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_type);
 #ifdef SKIP_ASM
-int SHAPE_type(int arg0) {
+int SHAPE_type(int bpp) {
     int r = 0;
-    switch (arg0) {
+    switch (bpp) {
     case 4: r = 1; break;
     case 8: r = 2; break;
     case 0xF: case 0x10: case 0x22B: case 0x613: r = 3; break;
@@ -738,21 +738,21 @@ extern int SHAPE_isclut_4478(int) __asm__("SHAPE_isclut");
  * Computes how many bytes SHAPE_clone() needs to copy a shape and its attached blocks.
  *
  * Adds SHAPE_size() for each block in the chain, starting each block after the first at the next 16-byte
- * boundary relative to @p p's own alignment. The palette and non-palette branches compute the same rounding.
+ * boundary relative to @p shp's own alignment. The palette and non-palette branches compute the same rounding.
  *
- * @param p  the shape header
- * @return total size in bytes, or 0 for a null @p p
+ * @param shp  the shape header
+ * @return total size in bytes, or 0 for a null @p shp
  */
-int SHAPE_clonesize(unsigned char *p) {
+int SHAPE_clonesize(unsigned char *shp) {
     int size = 0;
-    int pad = (((int)p + 15) & ~15) - (int)p;
+    int pad = (((int)shp + 15) & ~15) - (int)shp;
 
-    if (p) {
+    if (shp) {
         do {
-            int n = SHAPE_size_4478(p);
+            int n = SHAPE_size_4478(shp);
             int off;
             if (size) {
-                if (SHAPE_isclut_4478(*p)) {
+                if (SHAPE_isclut_4478(*shp)) {
                     int a = (size - pad + 0x1F) & ~0xF;
                     int t = pad - 0x10;
                     size = a + t;
@@ -760,10 +760,10 @@ int SHAPE_clonesize(unsigned char *p) {
                     size = ((size - pad + 0xF) & ~0xF) + pad;
                 }
             }
-            off = *(int *)p >> 8;
-            { unsigned char *q = p + off; p = off ? q : 0; }
+            off = *(int *)shp >> 8;
+            { unsigned char *q = shp + off; shp = off ? q : 0; }
             size += n;
-        } while (p);
+        } while (shp);
     }
     return size;
 }
@@ -839,14 +839,14 @@ extern void *(*D_0044C454_4690)(void *, int, int, int, int) __asm__("SHAPE_memal
  * Allocates SHAPE_clonesize() bytes through the SHAPE_memallocalign hook (16-byte aligned, tagged with the
  * shape's long name) and fills it with SHAPE_cloneat(). The allocation is not checked for failure.
  *
- * @param arg0  the shape to copy
+ * @param shp  the shape to copy
  * @return the copy
  */
-void *SHAPE_clone(int arg0) {
-    int sz = SHAPE_clonesize_4690(arg0);
-    void *r = D_0044C454_4690(SHAPE_longname_4690(arg0), sz, 0, 0x10, 0x400);
+void *SHAPE_clone(int shp) {
+    int sz = SHAPE_clonesize_4690(shp);
+    void *r = D_0044C454_4690(SHAPE_longname_4690(shp), sz, 0, 0x10, 0x400);
 
-    SHAPE_cloneat_4690(r, arg0);
+    SHAPE_cloneat_4690(r, shp);
     return r;
 }
 #endif
@@ -854,11 +854,11 @@ void *SHAPE_clone(int arg0) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_isclut);
 #ifdef SKIP_ASM
-int SHAPE_isclut(int arg0) {
+int SHAPE_isclut(int shptype) {
     int var_5;
 
     var_5 = 0;
-    switch (arg0) {
+    switch (shptype) {
     case 0x20:
     case 0x21:
     case 0x22:

@@ -17,6 +17,15 @@ extern void* cMenuItem_vtbl[16];
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_cMenuItem__FP9cMenuItemPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a base menu item: active, with the given ID and no argument.
+ *
+ * Stores cMenuItem's vtable at +0x10, Flags (+0x4) = 1 (active), ID (+0x8) = @p text and Arg (+0xC) = 0.
+ * Menu (+0x0) is left for cMenu_addItem() to fill.
+ *
+ * @param text  the item's ID (On Tour cMenuItem::ID); derived items pass -1 for none
+ * @return @p self
+ */
 cMenuItem* cMenuItem_cMenuItem(cMenuItem* self, void* text)
 {
     self->vtable = cMenuItem_vtbl;
@@ -32,6 +41,11 @@ INCLUDE_ASM("util/menu", cMenuItem__cMenuItem);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a menu item: restores cMenuItem's vtable at +0x10, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cMenuItem__cMenuItem(int* self, int flags)
 {
     *(void***)((char*)self + 0x10) = cMenuItem_vtbl;
@@ -100,6 +114,11 @@ void func_002CA370(void* self)
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_isActive);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the menu item is active: bit 0 of its Flags (+0x4).
+ *
+ * @return 1 when the item is active, otherwise 0
+ */
 extern "C" int cMenuItem_isActive(void* self)
 {
     return *(int*)((char*)self + 0x4) & 1;
@@ -122,6 +141,13 @@ extern "C" void func_002CA388(void* self, int enable)
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_isLocked);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the menu item is locked: bit 3 of its Flags (+0x4).
+ *
+ * A locked item still takes input but ignores value changes (the item input handlers return early).
+ *
+ * @return 8 when the item is locked, otherwise 0
+ */
 extern "C" int cMenuItem_isLocked(void* self)
 {
     return *(int*)((char*)self + 0x4) & 8;
@@ -410,6 +436,11 @@ void operator_delete(int* ptr);
 
 extern void* cMenu_vtbl[];
 
+/**
+ * Destroys a menu: restores cMenu's vtable at +0x12C, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cMenu__cMenu(int* self, int flags)
 {
     *(void***)((char*)self + 0x12C) = cMenu_vtbl;
@@ -433,6 +464,12 @@ public:
 
 extern "C" void cMenu_nextFocus(cMenu* self);
 
+/**
+ * Moves focus off the focused item when that item can no longer hold it.
+ *
+ * Asks Items[FocusItem] through its virtual slot 3 (the base version: active and not locked); on 0, calls
+ * cMenu_nextFocus().
+ */
 extern "C" void cMenu_checkFocus(cMenu* self)
 {
     cMenu_checkFocus_cItem* item = (cMenu_checkFocus_cItem*)self->Items[self->FocusItem];
@@ -465,6 +502,15 @@ struct cMenu_nextFocus_sMenu {
     cMenu_nextFocus_cItem* items[1];
 };
 
+/**
+ * Moves the menu's focus forward to the next item that can take it, wrapping past the last item.
+ *
+ * Steps FocusItem by one modulo NumItems until an item's virtual slot 3 accepts focus. If the search comes back
+ * to the starting item, focus stays there and nothing is notified; otherwise the old item gets its loseFocus
+ * (slot 7) and the new one gainFocus(0) (slot 6).
+ *
+ * @param menu  the menu to update
+ */
 extern "C" void cMenu_nextFocus(cMenu* menu)
 {
     cMenu_nextFocus_sMenu* self = (cMenu_nextFocus_sMenu*)menu;
@@ -503,6 +549,15 @@ struct cMenu_prevFocus_sMenu {
     cMenu_prevFocus_cItem* items[1];
 };
 
+/**
+ * Moves the menu's focus back to the previous item that can take it, wrapping past the first item.
+ *
+ * Steps FocusItem down by one modulo NumItems until an item's virtual slot 3 accepts focus. If the search comes
+ * back to the starting item, focus stays there and nothing is notified; otherwise the old item gets its
+ * loseFocus (slot 7) and the new one gainFocus(1) (slot 6).
+ *
+ * @param menu  the menu to update
+ */
 extern "C" void cMenu_prevFocus(cMenu* menu)
 {
     cMenu_prevFocus_sMenu* self = (cMenu_prevFocus_sMenu*)menu;
@@ -1457,6 +1512,15 @@ struct cMenu_setFocus_sMenu {
     int wrap;           // 0x124
 };
 
+/**
+ * Gives focus to the item at an index, notifying the old and new items.
+ *
+ * A negative index counts from the end (NumItems is added once). Nothing happens when the index is already
+ * focused; otherwise the old item gets loseFocus (slot 7), FocusItem is set, the new item gets gainFocus(2)
+ * (slot 6), and cMenu_checkFocus() moves on if that item cannot hold focus.
+ *
+ * @param index  index of the item to focus; -1 is the last item
+ */
 extern "C" void cMenu_setFocus(cMenu_setFocus_sMenu* self, int index)
 {
     if (index < 0) {
@@ -1494,6 +1558,11 @@ extern "C" int cMenu_getFocus(cMenu* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cMenu_getFocusItem);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu's focused item after checking that it can hold focus.
+ *
+ * @return Items[cMenu_getFocus()], the focused cMenuItem
+ */
 extern "C" void* cMenu_getFocusItem(cMenu* self)
 {
     return *(void**)((char*)self + (cMenu_getFocus(self) << 2) + 0xC);
@@ -1523,6 +1592,14 @@ struct cMenu_onGainFocus_sMenu {
     int wrap;           // 0x124
 };
 
+/**
+ * Activates the menu: records its owner, clamps the focus index and tells the focused item it has focus.
+ *
+ * Clamps FocusItem to NumItems - 1, calls that item's gainFocus(2) (slot 6), then cMenu_checkFocus().
+ *
+ * @param p     the menu (this)
+ * @param wrap  the owning cMenuSys (On Tour's onGainFocus parent), stored in MenuSys (+0x124)
+ */
 extern "C" void cMenu_onGainFocus(cMenu* p, int wrap)
 {
     cMenu_onGainFocus_sMenu* self = (cMenu_onGainFocus_sMenu*)p;
@@ -2206,11 +2283,22 @@ struct cSubMenuItem_sItem {
     void* field_0x18;
 };
 
-extern "C" cSubMenuItem_sItem* cSubMenuItem_cSubMenuItem(cSubMenuItem_sItem* self, void* a1, void* a2)
+/**
+ * Constructs a menu item that opens a sub-menu.
+ *
+ * Runs the base constructor with ID -1, stores the label at +0x14 and the sub-menu at +0x18, then
+ * cSubMenuItem's vtable. The help popup menus (festatenethelppopup.cpp) pass another embedded cMenu and a
+ * string.
+ *
+ * @param a1  the sub-menu the item opens, stored at +0x18
+ * @param a2  the item's label text, stored at +0x14
+ * @return @p self
+ */
+extern "C" cSubMenuItem_sItem* cSubMenuItem_cSubMenuItem(cSubMenuItem_sItem* self, void* sub, void* cap)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    self->field_0x14 = a2;
-    self->field_0x18 = a1;
+    self->field_0x14 = cap;
+    self->field_0x18 = sub;
     self->vtable = cSubMenuItem_vtbl;
     return self;
 }
@@ -2254,9 +2342,9 @@ INCLUDE_ASM("util/menu", cSubMenuItem_render__FPvi);
 // The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
-void* cSubMenuItem_render(void* self, int a1)
+void* cSubMenuItem_render(void* self, int rect)
 {
-    return func_002CA988_5(self, a1, 0, *(int*)((char*)self + 0x14), 0);
+    return func_002CA988_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
 }
 #endif
 
@@ -2566,6 +2654,15 @@ INCLUDE_ASM("util/menu", cNullMenuItem_cNullMenuItem__FP13cNullMenuItemPv);
 // A void* constant -1 materializes as lui/ori; the original passed an int.
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 
+/**
+ * Constructs a text-only menu item that has no value to edit.
+ *
+ * Runs the base constructor with ID -1, stores the text at +0x14 (render draws it), then cNullMenuItem's
+ * vtable.
+ *
+ * @param text  the text the item shows, stored at +0x14
+ * @return @p self
+ */
 cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
@@ -2603,9 +2700,9 @@ INCLUDE_ASM("util/menu", cNullMenuItem_render__FPvi);
 // The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
-void* cNullMenuItem_render(void* self, int a1)
+void* cNullMenuItem_render(void* self, int rect)
 {
-    return func_002CA988_5(self, a1, 0, *(int*)((char*)self + 0x14), 0);
+    return func_002CA988_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
 }
 #endif
 
@@ -2624,6 +2721,15 @@ INCLUDE_ASM("util/menu", cSpaceMenuItem_cSpaceMenuItem__FP14cSpaceMenuItemPv);
 // A void* constant -1 materializes as lui/ori; the original passed an int.
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 
+/**
+ * Constructs a blank spacer menu item of a given size.
+ *
+ * Runs the base constructor with ID -1, stores the size at +0x14, then cSpaceMenuItem's vtable. preRender
+ * returns it as the last component of the item's rectangle, and render draws nothing.
+ *
+ * @param text  the spacer's size (callers pass 10 or 30); despite the name it is a number, not text
+ * @return @p self
+ */
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
@@ -2934,13 +3040,27 @@ struct cIntMenuItem_sItem {
     int field_0x2C;
 };
 
-extern "C" cIntMenuItem_sItem* cIntMenuItem_cIntMenuItem(cIntMenuItem_sItem* self, void* text, int a2, int a3, int a4, int a5)
+/**
+ * Constructs a menu item that edits an integer variable within a range.
+ *
+ * Runs cMenuItem_cMenuItem() with the ID, then stores the label (+0x14), the variable's address (+0x18), the
+ * minimum (+0x1C) and maximum (+0x20), and zeroes the input repeat state (+0x24 to +0x2C). The debug menu
+ * (main/debugmenu.cpp) builds its switches this way.
+ *
+ * @param text  the item's ID, passed to the base constructor
+ * @param a2    address of the int the item edits
+ * @param a3    smallest allowed value
+ * @param a4    largest allowed value
+ * @param a5    the item's label text
+ * @return @p self
+ */
+extern "C" cIntMenuItem_sItem* cIntMenuItem_cIntMenuItem(cIntMenuItem_sItem* self, void* text, int value, int mini, int maxi, int cap)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->field_0x14 = a5;
-    self->field_0x18 = a2;
-    self->field_0x1C = a3;
-    self->field_0x20 = a4;
+    self->field_0x14 = cap;
+    self->field_0x18 = value;
+    self->field_0x1C = mini;
+    self->field_0x20 = maxi;
     self->vtable = cIntMenuItem_vtbl;
     self->field_0x28 = 0;
     self->field_0x24 = 0;
@@ -3096,11 +3216,11 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 extern char D_004A3970[];
 
-extern "C" void cIntMenuItem_render(void* self, int a1)
+extern "C" void cIntMenuItem_render(void* self, int rect)
 {
     char buf[0x70];
     sprintf(buf, D_004A3970, **(int**)((char*)self + 0x18));
-    func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, buf);
+    func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, buf);
 }
 #endif
 
@@ -3145,13 +3265,27 @@ struct cFloatMenuItem_sItem {
     int field_0x30;
 };
 
-extern "C" cFloatMenuItem_sItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem_sItem* self, void* text, int a2, int a3, float f1, float f2)
+/**
+ * Constructs a menu item that edits a float variable within a range.
+ *
+ * Runs cMenuItem_cMenuItem() with the ID, then stores the label (+0x14), the variable's address (+0x18), the
+ * range (+0x1C, +0x20), a display scale of 1.0 (+0x24), and zeroes the display offset and input repeat state
+ * (+0x28 to +0x30). cFloatMenuItem_input() edits the value as scale * value + offset.
+ *
+ * @param text  the item's ID, passed to the base constructor
+ * @param a2    address of the float the item edits
+ * @param a3    the item's label text
+ * @param f1    smallest allowed value
+ * @param f2    largest allowed value
+ * @return @p self
+ */
+extern "C" cFloatMenuItem_sItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem_sItem* self, void* text, int value, int minf, float maxf, float cap)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->field_0x14 = a3;
-    self->field_0x18 = a2;
-    self->field_0x1C = f1;
-    self->field_0x20 = f2;
+    self->field_0x14 = minf;
+    self->field_0x18 = value;
+    self->field_0x1C = maxf;
+    self->field_0x20 = cap;
     self->vtable = cFloatMenuItem_vtbl;
     self->field_0x24 = 1.0f;
     self->field_0x30 = 0;
@@ -3289,6 +3423,16 @@ struct sBXStrDFD8 { char* p; };
 // returns a cBXString by value (hidden result pointer in $4); the unit's later declaration says void.
 void* prettyFloat_impl(void* out, float v) __asm__("prettyFloat");
 
+/**
+ * Formats a float as a string with fewer decimals the larger it is.
+ *
+ * Takes floor(log10(v)) (plus a small epsilon) and picks "%.4f" below 1, "%.3f" up to 10, "%.2f" up to 100,
+ * "%.1f" up to 1000, "%.0f" below 10^7 and "%.3g" above, printing through a temporary cBXString.
+ *
+ * @param out  the cBXString to construct with the result (the hidden return slot)
+ * @param v    the value to format
+ * @return @p out
+ */
 void* prettyFloat_impl(void* out, float v)
 {
     float d = func_0040DA10(v) / func_0040DA10(10.0f) + 4.3431620724732056e-05f;
@@ -3334,11 +3478,11 @@ struct cFloatMenuItem_render_sString {
 // returns a cBXString by value (hidden result pointer in $4)
 extern "C" void prettyFloat(cFloatMenuItem_render_sString* out, float v);
 
-extern "C" void cFloatMenuItem_render(void* self, int a1)
+extern "C" void cFloatMenuItem_render(void* self, int rect)
 {
     cFloatMenuItem_render_sString s;
     prettyFloat(&s, **(float**)((char*)self + 0x18) * *(float*)((char*)self + 0x24) + *(float*)((char*)self + 0x28));
-    func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, s.str);
+    func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, s.str);
     cBXString__cBXString(&s, 2);
 }
 #endif
@@ -3439,11 +3583,11 @@ extern "C" int fptodp(float f);
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 extern char D_004A39C8[];
 
-extern "C" void cAngleMenuItem_render(void* self, int a1)
+extern "C" void cAngleMenuItem_render(void* self, int rect)
 {
     char buf[0x70];
     sprintf(buf, D_004A39C8, fptodp(**(float**)((char*)self + 0x18) * 57.2957763671875f));
-    func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, buf);
+    func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, buf);
 }
 #endif
 
@@ -3803,6 +3947,17 @@ struct cColorMenuItem__cColorMenuItem_sItem {
     void* field_0x18;
 };
 
+/**
+ * Constructs a menu item that edits one channel of a colour.
+ *
+ * Despite the destructor-style name, this is a constructor: it runs the base constructor with ID -1, stores the
+ * colour at +0x14 and the channel at +0x18, then cColorMenuItem's vtable. cARGBMenuItem_cARGBMenuItem() makes
+ * four, for channels 0 to 3.
+ *
+ * @param a1  the colour being edited, stored at +0x14
+ * @param a2  channel index 0 to 3, stored at +0x18
+ * @return @p self
+ */
 extern "C" cColorMenuItem__cColorMenuItem_sItem* cColorMenuItem__cColorMenuItem(cColorMenuItem__cColorMenuItem_sItem* self, void* a1, void* a2)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
@@ -4179,9 +4334,9 @@ public:
     virtual int v10(int a);
 };
 
-extern "C" int cExpandMenuItemMenu_onCommand(void* self, int a, int b)
+extern "C" int cExpandMenuItemMenu_onCommand(void* self, int item, int b)
 {
-    return (*(cExpandMenuItemMenu_onCommand_cItem**)((char*)self + 0x130))->v09(a, b);
+    return (*(cExpandMenuItemMenu_onCommand_cItem**)((char*)self + 0x130))->v09(item, b);
 }
 #endif
 
@@ -4204,9 +4359,9 @@ public:
     virtual void v10(int a);
 };
 
-extern "C" void cExpandMenuItemMenu_onChange(void* self, int a)
+extern "C" void cExpandMenuItemMenu_onChange(void* self, int item)
 {
-    (*(cExpandMenuItemMenu_onChange_cItem**)((char*)self + 0x130))->v10(a);
+    (*(cExpandMenuItemMenu_onChange_cItem**)((char*)self + 0x130))->v10(item);
 }
 #endif
 
@@ -4306,6 +4461,13 @@ void cMenu_addItem2(void* menu, void* item) __asm__("cMenu_addItem");
 //100%
 INCLUDE_ASM("util/menu", cExpandMenuItem_addItem__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Adds an item to an expandable menu item's embedded sub-menu (at +0x18) through cMenu_addItem2().
+ *
+ * The third argument register (the insert index, -1 to append) passes through untouched.
+ *
+ * @param item  the menu item to add
+ */
 void cExpandMenuItem_addItem(void* self, void* item)
 {
     cMenu_addItem2((char*)self + 0x18, item);
@@ -4376,6 +4538,16 @@ struct cExpandMenuItem_input_sOwner {
     cMenu_setFocus_sMenu menu;
 };
 
+/**
+ * Handles input for an expandable menu item by passing it to the focused item of its embedded menu.
+ *
+ * Checks the embedded menu's focus, then calls the focused item's input (slot 2). If this item is locked, the
+ * result is returned as is. Result 3 moves to the next sub-item and 4 to the previous one; when that wraps
+ * around, the focus is put back and the 3 or 4 is returned so the parent menu moves on instead.
+ *
+ * @param p  the expandable menu item
+ * @return 0 when the move was handled inside the sub-menu, otherwise the focused item's input result (tMIR)
+ */
 // PORT: returns a key code (int) through the unit's void* declaration.
 extern "C" void* cExpandMenuItem_input(void* p)
 {
@@ -4609,11 +4781,21 @@ struct cRGBTitleMenuItem_sItem {
     void* field_0x18;
 };
 
-extern "C" cRGBTitleMenuItem_sItem* cRGBTitleMenuItem_cRGBTitleMenuItem(cRGBTitleMenuItem_sItem* self, void* a1, void* a2)
+/**
+ * Constructs the title row of a colour editor menu item.
+ *
+ * Runs the base constructor with ID -1, stores the colour at +0x14 and the title at +0x18, then
+ * cRGBTitleMenuItem's vtable. cARGBMenuItem_cARGBMenuItem() builds one as its expand title.
+ *
+ * @param a1  the title text, stored at +0x18
+ * @param a2  the colour the row shows, stored at +0x14
+ * @return @p self
+ */
+extern "C" cRGBTitleMenuItem_sItem* cRGBTitleMenuItem_cRGBTitleMenuItem(cRGBTitleMenuItem_sItem* self, void* cap, void* a2)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = a2;
-    self->field_0x18 = a1;
+    self->field_0x18 = cap;
     self->vtable = cRGBTitleMenuItem_vtbl;
     return self;
 }
@@ -5006,6 +5188,14 @@ static inline void menuNormalizeD6E8(sMenuVecD6E8& out, const sMenuVecD6E8& v)
     }
 }
 
+/**
+ * Handles input for a vector editor menu item, keeping the vector normalised when its channels are linked.
+ *
+ * Runs cExpandMenuItem_input(); then, when the linked flag is set, rebuilds the vector from its three channels
+ * (scale * value + offset), normalises it and writes the components back.
+ *
+ * @return cExpandMenuItem_input()'s result
+ */
 extern "C" void* cVectorMenuItem_input(sMenuColD6E8* self)
 {
     void* ret = cExpandMenuItem_input(self);
@@ -5706,6 +5896,15 @@ extern "C" int func_0030A2E8(void* self, int id);
 extern "C" void func_0030A548(void* self, int id);
 extern void* D_004A3DD8;
 
+/**
+ * Runs a world instance's on-lose-focus script, when it has one.
+ *
+ * Asks the world script manager (TheWScriptMan) whether the instance has an on-lose-focus script
+ * (func_0030A2E8) and runs it (func_0030A548).
+ *
+ * @param id  the instance record (On Tour tInstanceRecord*)
+ * @return 1 when a script was run, otherwise 0
+ */
 extern "C" int cObjectInterface_runOnLoseFocusScript(int id)
 {
     if (func_0030A2E8(D_004A3DD8, id) != 0) {

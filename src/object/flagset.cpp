@@ -619,11 +619,11 @@ struct sFlagSet_C428 {
     sFlagSetElem_C428 elems[15];    // 0x20
 };
 
-extern "C" sFlagSet_C428* cFlagManager_cFlagManager(sFlagSet_C428* self, void* a1)
+extern "C" sFlagSet_C428* cFlagManager_cFlagManager(sFlagSet_C428* self, void* bucket)
 {
     int i;
     sFlagSetElem_C428* p = self->elems;
-    cObjNode_cObjNode1(self, a1);
+    cObjNode_cObjNode1(self, bucket);
     self->vtable = cFlagManager_vtbl;
     for (i = 14; i != -1; i--, p++) {
         func_0034AF38(p);
@@ -1137,9 +1137,9 @@ struct sFlagElem_CBE8 {
     void* operator new[](unsigned int, void* p) { return p; }
 };
 
-extern "C" void* cFenceNode_cFenceNode(void* self, void* a1, void* stream)
+extern "C" void* cFenceNode_cFenceNode(void* self, void* bucket, void* stream)
 {
-    cInstanceNode_cInstanceNode(self, a1, stream);
+    cInstanceNode_cInstanceNode(self, bucket, stream);
     *(unsigned int*)((char*)self + 0x1C) = 0xFFFFFFFF;
     *(void***)((char*)self + 0xC) = cFenceNode_vtbl;
     new ((char*)self + 0x40) sFlagElem_CBE8[16];

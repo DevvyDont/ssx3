@@ -839,6 +839,12 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_allocInstances);
 void* cObjectInterface_getInstanceMan();
 extern "C" void* func_00351170(void* man);
 
+/**
+ * Allocates one instance record from the instance manager for each node of a multi-spline modifier.
+ *
+ * Fills the array at +0x44 (On Tour NodeInst) with func_00351170() (On Tour cInstanceMan::allocInstance)
+ * results, one for each of the +0x4 nodes.
+ */
 extern "C" void cMultiSplineModifier_allocInstances(void* self)
 {
     int i;
@@ -1313,6 +1319,16 @@ struct sSmVEntryP_AAF0 {
     void* (*fn)(void*);
 };
 
+/**
+ * Returns the transform matrix of an instance moved by the multi-spline modifier.
+ *
+ * When the dirty flag (+0x30) is set, first calls the virtual updateRootTransform() (slot 3). For the
+ * modifier's own instance (+0x40, On Tour Instance), asks that instance's node (+0xC) through its virtual slot
+ * 24, which by default returns its instance record + 0x10; any other record gets its own matrix at +0x10.
+ *
+ * @param item  the instance record (On Tour tInstanceRecord*)
+ * @return the transform matrix
+ */
 extern "C" void* cMultiSplineModifier_getRootTransform(void* self, void* item)
 {
     if (*(int*)((char*)self + 0x30) != 0) {

@@ -64,7 +64,7 @@ static inline void vu0SubWG(sVec4WG& dst, const sVec4WG& a, const sVec4WG& b)
         : "m"(a), "m"(b));
 }
 
-extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int a1)
+extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
 {
     if (self->BoardSphereTree == 0)
     {
@@ -74,7 +74,7 @@ extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int a1)
     sVec4WG* pos = (sVec4WG*)(r + 0x110);
     *(sVec4WG*)&self->BoardIntersectBox = *pos;
     *(sVec4WG*)&self->BoardIntersectBox.MaxPoint = *pos;
-    if (a1 == 0)
+    if (prev == 0)
     {
         sVec4WG* n = (sVec4WG*)(r + 0x370);
         float d = vu0DotWG(*(sVec4WG*)(r + 0x1E0), *n);
@@ -756,17 +756,17 @@ static inline void vu0ScaleEqW7(sVec4W7& v, float s)
         : "m"(v), "f"(s));
 }
 
-extern "C" void func_00137750(cWipeoutMotion* p)
+extern "C" void func_00137750(cWipeoutMotion* wipeoutMotion)
 {
-    char* r = (char*)p->mRider;
+    char* r = (char*)wipeoutMotion->mRider;
     float dt = *(float*)(r + 0x300) * 0.01666666753590107f;
     func_00113648(*(void**)(r + 0x788), r + 0x110, r + 0x1E0, dt);
-    int st = *(int*)(*(char**)((char*)p->mRider + 0x788) + 0xAC);
+    int st = *(int*)(*(char**)((char*)wipeoutMotion->mRider + 0x788) + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
     if (ok)
     {
-        char* r2 = (char*)p->mRider;
+        char* r2 = (char*)wipeoutMotion->mRider;
         char* ap = *(char**)(r2 + 0x788);
         float d = *(float*)(ap + 0x98) - *(float*)(ap + 0xA0);
         float x = *(float*)(r2 + 0x300);
@@ -774,12 +774,12 @@ extern "C" void func_00137750(cWipeoutMotion* p)
             x /= d;
         else
             x *= 59.999996185302734f;
-        char* r3 = (char*)p->mRider;
+        char* r3 = (char*)wipeoutMotion->mRider;
         float k = 6.632251739501953f;
         func_00121AA0(r3, *(char**)(r3 + 0x788) + 0x20, *(char**)(r3 + 0x788) + 0x10, x, *(float*)(r3 + 0x300) * k);
     }
-    vu0ScaleEqW7(*(sVec4W7*)&p->RiderAngVelocity, 1.0f - dt * 1.5f);
-    cRider_updateOrientationImplicit(p->mRider);
+    vu0ScaleEqW7(*(sVec4W7*)&wipeoutMotion->RiderAngVelocity, 1.0f - dt * 1.5f);
+    cRider_updateOrientationImplicit(wipeoutMotion->mRider);
 }
 #endif
 
@@ -892,9 +892,9 @@ static inline void vu0SubEq_137860(t4Vector& a, const t4Vector& b)
         : "m"(b));
 }
 
-static inline bool isHuman_137860(cRider* r)
+static inline bool isHuman_137860(cRider* rider)
 {
-    char* sub = (char*)&r->mVtbl;
+    char* sub = (char*)&rider->mVtbl;
     sVEntR_137860* vt = *(sVEntR_137860**)sub;
     return vt[kRiderVt_isHuman].fn(sub + vt[kRiderVt_isHuman].delta);
 }
@@ -1220,9 +1220,9 @@ static inline short triFlags_137D18(char* t)
     return *(short*)(t + 0xA);
 }
 
-static inline t4Vector getFront_137D18(cRider* r)
+static inline t4Vector getFront_137D18(cRider* rider)
 {
-    return r->mMatrix.row[1];
+    return rider->mMatrix.row[1];
 }
 
 #define RIDER (*(cRider**)(self + 0x40))

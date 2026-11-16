@@ -652,6 +652,12 @@ public:
     virtual void show(int on);
 };
 
+/**
+ * Shows or hides the play list's scroll arrows.
+ *
+ * The up arrow (+0x1EC) shows when the list is scrolled (+0x150 above 0); the down arrow (+0x1F0) shows while
+ * more than 8 rows lie below the scroll position (+0x150 + 8 below the count at +0x14C).
+ */
 extern "C" void cFEStateRequestLine_updatePlayListArrows(void* self)
 {
     if (*(int*)((char*)self + 0x150) == 0) {
@@ -929,6 +935,18 @@ static inline int countSel_UBT(sReqLine_UBT* self)
     return n;
 }
 
+/**
+ * Sets the action label for one song on the request line screen and shows or hides the buttons.
+ *
+ * For a song whose bit is set in the mask at +0x160, the label is "kT_BTNRemSong" when it is in the play list
+ * mask (+0x158) with other songs, or "kT_BTNAddSong" when it is not in the play list. For any other song, when
+ * +0x16C is set, the label is "kT_16BuyMusicTracks" if the cash (+0x168) is at least the 5000 price or fewer
+ * than 6 songs have their bit set. In a game (SSXApp->Game set), the two buttons hide for songs without their
+ * bit.
+ *
+ * @param p    the request line state (this)
+ * @param idx  the song index (bit number in the masks)
+ */
 // Updates the action button label of the selected request line and shows or hides the buttons.
 extern "C" void cFEStateRequestLine_updateButtonsText(void* p, int idx)
 {
@@ -984,6 +1002,9 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" const char* getDollarString(void* a0);
 
+/**
+ * Shows the player's cash (+0x168) in the cash text (+0x1E0) through getDollarString(), when the text exists.
+ */
 extern "C" void cFEStateRequestLine_updateCash(void* self)
 {
     if (*(cUIText**)((char*)self + 0x1E0) != 0) {
@@ -1223,6 +1244,12 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongTitle);
 extern "C" void* func_0028B180();
 extern "C" void* func_002B40F0(void* self, int i);
 
+/**
+ * Returns a song title from the audio object's music list (gSSXAudio + 0x118) through func_002B40F0().
+ *
+ * @param i  the song index
+ * @return the song title
+ */
 extern "C" void* cFEStateRequestLine_getSongTitle(void* self, int i)
 {
     return func_002B40F0((char*)func_0028B180() + 0x118, i);
@@ -1273,6 +1300,15 @@ struct cBEOptionInterface_8AF0 {
     sOptions_8AF0 getOptions() { return D_00535610_8AF0; }
 };
 
+/**
+ * Formats a money amount with the currency sign and thousands separator chosen in the options.
+ *
+ * Money format 0 gives "$ 1,234", 2 gives "$ 1.234", and 1 and 3 give "1 234 $". Negative amounts get a '-'.
+ * The text is built in the static buffer D_004C6310, which the next call overwrites.
+ *
+ * @param amount_  the amount, passed as void*
+ * @return the formatted string
+ */
 // Formats a money amount with the currency sign and thousands separator chosen in the options.
 extern "C" const char* getDollarString(void* amount_)
 {

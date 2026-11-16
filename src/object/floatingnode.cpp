@@ -29,6 +29,9 @@ INCLUDE_ASM("object/floatingnode", cFloatingNode_purgeInfo);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Frees the floating node's info block (+0x78) with operator delete, when there is one, and clears the pointer.
+ */
 extern "C" void cFloatingNode_purgeInfo(cFloatingNode* self)
 {
     if (self->field_0x78 != 0) {
@@ -474,15 +477,15 @@ struct sFloat_F600 {
     float f70;
 };
 
-extern "C" void cFloatingNode_applyForce(sFloat_F600* self, sV4_F600* a, sV4_F600* b)
+extern "C" void cFloatingNode_applyForce(sFloat_F600* self, sV4_F600* intInfo, sV4_F600* force)
 {
     sFlVE_F600* vt = self->vt;
     sV4_F600* m = vt[24].fn((char*)self + vt[24].delta);
-    sV4_F600 d = vu0Sub_F600(a[0], pos_F600(m));
+    sV4_F600 d = vu0Sub_F600(intInfo[0], pos_F600(m));
     sV4_F600 u = vu0MtxMul_F600(m, &D_004FF140_F600[0]);
     sV4_F600 v = vu0MtxMul_F600(m, &D_004FF150_F600[0]);
-    self->f44 += vu0Dot_F600(*b, a[1]);
-    sV4_F600 c = vu0Cross_F600(*b, d);
+    self->f44 += vu0Dot_F600(*force, intInfo[1]);
+    sV4_F600 c = vu0Cross_F600(*force, d);
     self->f60 += vu0Dot_F600(c, u);
     self->f70 += vu0Dot_F600(c, v);
 }
@@ -625,18 +628,18 @@ struct sFloat_F790 {
     sFlVE_F790* vt;     // 0x0C
 };
 
-extern "C" void cFloatingNode_updateIntersectInfo(sFloat_F790* self, sV4_F790* a)
+extern "C" void cFloatingNode_updateIntersectInfo(sFloat_F790* self, sV4_F790* intInfo)
 {
-    cMoveNode_updateIntersectInfo(self, a);
+    cMoveNode_updateIntersectInfo(self, intInfo);
     sFlVE_F790* vt = self->vt;
     sV4_F790* m = vt[24].fn((char*)self + vt[24].delta);
     sFlBase_F790* b = (sFlBase_F790*)((char*)self + 0x2C);
-    sV4_F790 d = vu0Sub_F790(a[0], pos_F790(m));
+    sV4_F790 d = vu0Sub_F790(intInfo[0], pos_F790(m));
     sV4_F790 u = vu0MtxMul_F790(m, &D_004FF140_F790[0]);
     sV4_F790 v = vu0MtxMul_F790(m, &D_004FF150_F790[0]);
     sV4_F790 s = vu0Add_F790(vu0Scale_F790(u, b->f30), vu0Scale_F790(v, b->f40));
-    vu0AddEq_F790(a[2], vu0Add_F790(sV4_F790(0.0f, 0.0f, b->f1C, 0.0f), vu0Cross_F790(d, s)));
-    vu0AddEq_F790(a[3], s);
+    vu0AddEq_F790(intInfo[2], vu0Add_F790(sV4_F790(0.0f, 0.0f, b->f1C, 0.0f), vu0Cross_F790(d, s)));
+    vu0AddEq_F790(intInfo[3], s);
 }
 #endif
 

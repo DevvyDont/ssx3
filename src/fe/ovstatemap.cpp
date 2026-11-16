@@ -365,16 +365,16 @@ public:
 };
 
 // Map overlay message handler: confirm/cancel of the map popup and toggling of the legend objects.
-extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* a1, int a2)
+extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* pWidget, int Event)
 {
     char* self = (char*)selfp;
-    if (a1 == 0) {
+    if (pWidget == 0) {
         return;
     }
-    switch (a2) {
+    switch (Event) {
     case 5:
         if (*(int*)(self + 0xBC) != 0) {
-            if (*(int*)((char*)a1 + 0x18) != 0) {
+            if (*(int*)((char*)pWidget + 0x18) != 0) {
                 *(int*)(self + 0xBC) = 0;
                 cOVState_MAP_setupPopup(self);
                 break;
@@ -390,7 +390,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* a1, int a2)
             func_00208BB8(self);
         } else {
             *(int*)(self + 0xBC) = 1;
-            *(int*)(self + 0xD8) = *(int*)((char*)a1 + 0x18);
+            *(int*)(self + 0xD8) = *(int*)((char*)pWidget + 0x18);
             cOVState_MAP_setupPopup(self);
             cObjV_00208C28* o = (cObjV_00208C28*)cUIScreen_getObjectByHashName(*(void**)(self + 0xD4), GetHashValue32(D_004706C8));
             o->set(cVec_00208C28(1.0f, 0.0f, 0.0f, 0.0f));
@@ -409,8 +409,8 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* a1, int a2)
         break;
     case 1:
         if (*(int*)(self + 0xBC) != 0) {
-            func_002095E8(self, a1, 1);
-            if (*(int*)((char*)a1 + 0x18) == 0) {
+            func_002095E8(self, pWidget, 1);
+            if (*(int*)((char*)pWidget + 0x18) == 0) {
                 cUIState_showObjSafe(self, D_004706E8);
                 cUIState_hideObjSafe(self, D_00470700);
                 cUIState_showObjSafe(self, D_00470718);
@@ -429,7 +429,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* a1, int a2)
         break;
     case 2:
         if (*(int*)(self + 0xBC) != 0) {
-            cOVState_MAP_setWidgetUnHiliteColor(self, a1, 1);
+            cOVState_MAP_setWidgetUnHiliteColor(self, pWidget, 1);
         }
         break;
     case 7:
@@ -617,9 +617,9 @@ struct sObj00209300 {
 
 extern "C" void cOVState_MAP_showIndicators(void* self);
 
-extern "C" void cOVState_MAP_onInputAlways(void* self, sObj00209300* o)
+extern "C" void cOVState_MAP_onInputAlways(void* self, sObj00209300* pInput)
 {
-    if (o->vt[17].fn((char*)o + o->vt[17].delta) != 0 || o->vt[18].fn((char*)o + o->vt[18].delta) != 0) {
+    if (pInput->vt[17].fn((char*)pInput + pInput->vt[17].delta) != 0 || pInput->vt[18].fn((char*)pInput + pInput->vt[18].delta) != 0) {
         cOVState_MAP_showIndicators(self);
     }
 }
@@ -1381,14 +1381,14 @@ struct sVEntry0020A6A8 {
 };
 
 
-extern "C" void cOVState_onWidgetEvent(cOVState* self, int a1, int a2)
+extern "C" void cOVState_onWidgetEvent(cOVState* self, int pWidget, int Event)
 {
     char* w = (char*)SSXApp->Game;
     if (w != 0) {
         char* o = *(char**)(w + 0x200);
         if (o != 0) {
             sVEntry0020A6A8* vt = *(sVEntry0020A6A8**)(o + 0xC);
-            vt[9].fn(o + vt[9].delta, a1, a2);
+            vt[9].fn(o + vt[9].delta, pWidget, Event);
         }
     }
 }

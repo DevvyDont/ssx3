@@ -862,7 +862,7 @@ extern int D_004A55E8;
 extern const int D_00445FA0[];
 extern "C" void* MEM_copy_C5D8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C5D8 { int idx; int val; int pad; int type; };
-extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *e) {
+extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
     if (D_004A55E8 == 0) {
         D_C5D8[0] = 0xFFFFFFFF;
         ((int*)D_C5D8)[1] = 0;
@@ -876,7 +876,7 @@ extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_C5D8(buf, D_C5D8, 20);
-    Ent_C5D8 *x = e;
+    Ent_C5D8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445FA0[idx];
@@ -1160,7 +1160,7 @@ extern int D_004A55F8;
 extern const int D_00446038[];
 extern "C" void* MEM_copy_CDC8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_CDC8 { int idx; int val; int pad; int type; };
-extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *e) {
+extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
     if (D_004A55F8 == 0) {
         *(float*)&D_CDC8[0] = 500.0f;
         *(float*)&D_CDC8[1] = 1.0f;
@@ -1179,7 +1179,7 @@ extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *e) {
     unsigned *buf = buf64;
     buf64[8] = 0xFFFFFFFF;
     MEM_copy_CDC8(buf, D_CDC8, 40);
-    Ent_CDC8 *x = e;
+    Ent_CDC8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446038[idx];
@@ -1315,7 +1315,7 @@ extern int D_004A5600;
 extern const int D_004460A0[];
 extern "C" void* MEM_copy_D250(void*, void*, int) __asm__("MEM_copy");
 struct Ent_D250 { int idx; int val; int pad; int type; };
-extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *e) {
+extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *params) {
     if (D_004A5600 == 0) {
         D_D250[0] = 0xFFFFFFFF;
         *(float*)&D_D250[1] = 1.0f;
@@ -1329,7 +1329,7 @@ extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_D250(buf, D_D250, 20);
-    Ent_D250 *x = e;
+    Ent_D250 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004460A0[idx];
@@ -1800,7 +1800,7 @@ extern int D_004A5614;
 extern const int D_004461D8[];
 extern "C" void* MEM_copy_DED0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_DED0 { int idx; int val; int pad; int type; };
-extern "C" V3_DED0 AddSplineFunc(int n, Ent_DED0 *e) {
+extern "C" V3_DED0 AddSplineFunc(int n, Ent_DED0 *params) {
     if (D_004A5614 == 0) {
         D_DED0[0] = 0xFFFFFFFF;
         D_DED0[1] = 0xFFFFFFFF;
@@ -1823,7 +1823,7 @@ extern "C" V3_DED0 AddSplineFunc(int n, Ent_DED0 *e) {
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
     MEM_copy_DED0(buf, D_DED0, 48);
-    Ent_DED0 *x = e;
+    Ent_DED0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004461D8[idx];
@@ -1879,7 +1879,7 @@ extern int D_004A5618;
 extern const int D_00446208[];
 extern "C" void* MEM_copy_E0C0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E0C0 { int idx; int val; int pad; int type; };
-extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *e) {
+extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *params) {
     if (D_004A5618 == 0) {
         D_E0C0[0] = 0xFFFFFFFF;
         D_E0C0[1] = 0xFFFFFFFF;
@@ -1903,7 +1903,7 @@ extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *e) {
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
     MEM_copy_E0C0(buf, D_E0C0, 52);
-    Ent_E0C0 *x = e;
+    Ent_E0C0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446208[idx];
@@ -2475,7 +2475,7 @@ extern int D_004A5630;
 extern const int D_00446470[];
 extern "C" void* MEM_copy_F1C8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_F1C8 { int idx; int val; int pad; int type; };
-extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *e) {
+extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *params) {
     if (D_004A5630 == 0) {
         D_F1C8[0] = 0xFFFFFFFF;
         D_F1C8[1] = 0xFFFFFFFF;
@@ -2488,7 +2488,7 @@ extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *e) {
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
     MEM_copy_F1C8(buf, D_F1C8, 16);
-    Ent_F1C8 *x = e;
+    Ent_F1C8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446470[idx];
@@ -7627,13 +7627,13 @@ INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_cWScriptMission);
 extern char D_00489A30_7128[] __asm__("cWScriptMission_vtbl");
 extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a1, int a2);
 extern "C" int cWScriptMan_getScriptCode_7128(int, int) __asm__("cWScriptMan_getScriptCode");
-extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int a1, char* a2, int a3) {
-    cWScriptProcess_cWScriptProcess(self, man, a1, (int)a2);
+extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int sectionId, char* data, int key) {
+    cWScriptProcess_cWScriptProcess(self, man, sectionId, (int)data);
     *(void**)((char*)self + 0x5C) = D_00489A30_7128;
-    *(int*)((char*)self + 0x60) = *(int*)(a2 + 0x50);
-    *(int*)((char*)self + 0x64) = a3;
+    *(int*)((char*)self + 0x60) = *(int*)(data + 0x50);
+    *(int*)((char*)self + 0x64) = key;
     for (int i = 0; i < 4; i++)
-        ((int*)((char*)self + 0x68))[i] = cWScriptMan_getScriptCode_7128(*(int*)((char*)self + 0x10), ((int*)(a2 + 0x40))[i]);
+        ((int*)((char*)self + 0x68))[i] = cWScriptMan_getScriptCode_7128(*(int*)((char*)self + 0x10), ((int*)(data + 0x40))[i]);
     return self;
 }
 #endif

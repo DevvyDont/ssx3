@@ -86,9 +86,9 @@ struct sObj001E9130 {
 
 extern "C" void cUIStateStack_push(void* list, void* item);
 
-extern "C" void cOVStateHiScoreList_onWidgetEvent(void* self, void* item, int a2)
+extern "C" void cOVStateHiScoreList_onWidgetEvent(void* self, void* item, int Event)
 {
-    if (item != 0 && a2 == 5) {
+    if (item != 0 && Event == 5) {
         void* r = 0;
         if (*(int*)((char*)item + 0x18) == 1) {
             sObj001E9130* o = **(sObj001E9130***)((char*)self + 0x10);
@@ -2154,6 +2154,13 @@ extern "C" void func_001F2DB0(void* self, sFont_001F2DB0* font, sHudElemDef_001F
 //100%
 INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_cBXLoadIndicator__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs the loading indicator with everything cleared.
+ *
+ * Zeroes its four words, On Tour mpLoadText, mLoadIndicators, mAnimFrame and mpFont.
+ *
+ * @return @p self
+ */
 void* cBXLoadIndicator_cBXLoadIndicator(void* self)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
@@ -2411,6 +2418,14 @@ extern "C" void func_001F36C0(void* self, int bit)
 //100%
 INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Hide);
 #ifdef SKIP_ASM
+/**
+ * Hides one reason for showing the loading indicator, and restarts its animation once none are left.
+ *
+ * Clears bit @p bit in the indicator mask (+0x4, On Tour mLoadIndicators); when the mask becomes 0, the
+ * animation frame (+0x8) is reset to 0.
+ *
+ * @param bit  the indicator to hide (On Tour eLoadIndicator); callers use 0 to 4
+ */
 extern "C" void cBXLoadIndicator_Hide(void* self, int bit)
 {
     *(int*)((char*)self + 0x4) &= ~(1 << bit);

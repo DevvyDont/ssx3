@@ -260,17 +260,17 @@ INCLUDE_ASM("world/worldcache", cWorldMemoryMan_cWorldMemoryMan);
 #ifdef SKIP_ASM
 struct cWorldMemoryMan_cWorldMemoryMan_sCfg {
     int id;
-    int size;
-    int count;
+    int count;     // blocks in the pool (e.g. 53)
+    int blockSize; // bytes per block (e.g. 128 KB)
 };
 extern cWorldMemoryMan_cWorldMemoryMan_sCfg D_0044C1E0[];
-extern "C" void cWorldBlockAllocator_init(void* self, int size, int count);
+extern "C" void cWorldBlockAllocator_init(void* self, int count, int blockSize);
 
 extern "C" void* cWorldMemoryMan_cWorldMemoryMan(cWorldMemoryMan* self)
 {
-    cWorldBlockAllocator_init(self, D_0044C1E0[0].size, D_0044C1E0[0].count);
-    cWorldBlockAllocator_init((char*)self + 0x14, D_0044C1E0[1].size, D_0044C1E0[1].count);
-    cWorldBlockAllocator_init((char*)self + 0x28, D_0044C1E0[2].size, D_0044C1E0[2].count);
+    cWorldBlockAllocator_init(self, D_0044C1E0[0].count, D_0044C1E0[0].blockSize);
+    cWorldBlockAllocator_init((char*)self + 0x14, D_0044C1E0[1].count, D_0044C1E0[1].blockSize);
+    cWorldBlockAllocator_init((char*)self + 0x28, D_0044C1E0[2].count, D_0044C1E0[2].blockSize);
     int i;
     for (i = 63; i >= 0; i--) {
         ((int*)((char*)self + 0x3C))[i] = 0;
@@ -608,7 +608,7 @@ extern "C" void cBXString__cBXString(sBXStr_7FC0* self, int flags);
 
 struct sVE_7FC0 { short delta; short index; void (*fn)(void*, int); };
 
-extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int arg)
+extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
 {
     self->m_pWorldMemMan = (cWorldMemoryMan*)cWorldMemoryMan_cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(0x13C, D_00494E30, 0, 0));
     sBXStr_7FC0 path;
@@ -629,7 +629,7 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int arg)
     char* x = (char*)cChunkResolve_construct();
     self->mp_ChunkResolve = (cChunkResolve*)x;
     sVE_7FC0* vt = *(sVE_7FC0**)(x + 8);
-    vt[2].fn(x + vt[2].delta, arg);
+    vt[2].fn(x + vt[2].delta, pNash);
     if (cStreamMan_init((char*)self + 0x300, name, self) == 0)
         return 0;
     int r = cWorldView_init_p((char*)self + 0x10, self->mp_DataHeader, self);
@@ -1044,9 +1044,9 @@ extern "C" void cWorldCache_updatePages(cWorldCache* p)
 INCLUDE_ASM("world/worldcache", func_003A88A8);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_003A88A8(cWorldCache* p)
+extern "C" void func_003A88A8(cWorldCache* worldCache)
 {
-    sWCPCache_8668* self = (sWCPCache_8668*)p;
+    sWCPCache_8668* self = (sWCPCache_8668*)worldCache;
     int now = *(int*)(D_004A5B64 + 0x1C);
     for (unsigned int i = 0; i < self->count; i++)
     {

@@ -12,6 +12,15 @@ extern sCharEntry cBELibrary_playerDB[];
 //100%
 INCLUDE_ASM("be/belibrary", cBELibrary_getCharacterID__Fi);
 #ifdef SKIP_ASM
+/**
+ * Returns the character ID of the player in a rider slot.
+ *
+ * Maps the slot to a player through the race settings copy at D_005305B0 and reads mCharID from that player's
+ * cBELibrary_playerDB record.
+ *
+ * @param index  rider slot
+ * @return the character ID
+ */
 signed char cBELibrary_getCharacterID(int index)
 {
     int charID = D_005305B0[index];
@@ -217,6 +226,17 @@ struct sScoreTypeMap {
 };
 extern sScoreTypeMap D_0045A2F8[][2];
 
+/**
+ * Maps a location and an event or stat kind to an index into the 26-entry score tables (0x1A means none).
+ *
+ * Kinds 6 to 11 map to 0 to 5 at any location. Otherwise the location's row of D_0045A2F8 (two key/type pairs)
+ * gives the index: kind 0 to 3 at locations 0 to 13 gives 12 to 25, kinds 4 and 5 at locations 14 to 16 give 6
+ * to 11. Callers use it to pick a score stats record in the character profile and in D_00535C18.
+ *
+ * @param a  the location (On Tour eBELocationID); above 16 gives 26
+ * @param b  the event or stat kind
+ * @return the score type index, or 26 when the pair has none
+ */
 extern "C" int cBELibrary_getScoreType(int a, int b)
 {
     int i;

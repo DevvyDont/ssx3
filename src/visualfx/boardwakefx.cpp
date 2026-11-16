@@ -413,14 +413,14 @@ static inline float wakeClampD0B8(float v, float lo, float hi)
     return r;
 }
 
-static inline t4Vector wakeRow34D0B8(cRider* r, int k)
+static inline t4Vector wakeRow34D0B8(cRider* rider, int k)
 {
-    return *(t4Vector*)((char*)r->mAnimModel->unk_034 + (r->mBoneBoardChild << 6) + k * 16);
+    return *(t4Vector*)((char*)rider->mAnimModel->unk_034 + (rider->mBoneBoardChild << 6) + k * 16);
 }
 
-static inline t4Vector wakeRowD0B8(cRider* r, int k)
+static inline t4Vector wakeRowD0B8(cRider* rider, int k)
 {
-    return *(t4Vector*)((char*)r->mAnimModel->unk_030 + (r->mBoneBoardChild << 6) + k * 16);
+    return *(t4Vector*)((char*)rider->mAnimModel->unk_030 + (rider->mBoneBoardChild << 6) + k * 16);
 }
 
 static inline float wakeMaxSpeedD0B8()
@@ -5947,9 +5947,9 @@ struct sWake5920 {
     sVec5920 v[2];              // 0x40
 };
 
-extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* a1)
+extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* bucket)
 {
-    cObjNode_cObjNode1(self, a1);
+    cObjNode_cObjNode1(self, bucket);
     self->vtbl = cSnowFall_vtbl;
     new (self->v) sVec5920[2];
     func_00319CC8();
@@ -6798,9 +6798,9 @@ static inline float wakeDotE6C08(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-static inline t4Vector wakeRowE6C08(cRider* r, int k)
+static inline t4Vector wakeRowE6C08(cRider* rider, int k)
 {
-    return ((t4Vector*)((char*)r->mAnimModel->unk_030 + (r->mBoneBoardChild << 6)))[k];
+    return ((t4Vector*)((char*)rider->mAnimModel->unk_030 + (rider->mBoneBoardChild << 6)))[k];
 }
 
 // Pull a corner down onto the ground plane, 10 units below.
@@ -7123,9 +7123,9 @@ static inline int texId_7A10(int i)
 }
 
 // Bone position (row 3 of the rider's bone matrix unk_89C).
-static inline sWakeV4_7A10 bonePos_7A10(cRider* r)
+static inline sWakeV4_7A10 bonePos_7A10(cRider* rider)
 {
-    return *(sWakeV4_7A10*)((char*)r->mAnimModel->unk_030 + (r->mBoneHips << 6) + 0x30);
+    return *(sWakeV4_7A10*)((char*)rider->mAnimModel->unk_030 + (rider->mBoneHips << 6) + 0x30);
 }
 
 // Fills vertex i of a strip: colour (alpha scaled to 0..128), q = 1, position, then st.

@@ -578,18 +578,18 @@ extern "C" int cOVState_PAUSE_OPTIONS_onWidgetMenu(void* self, void* menu, unsig
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetListBox);
 #ifdef SKIP_ASM
-extern "C" int cOVState_PAUSE_OPTIONS_onWidgetListBox(void* self, int a1, int a2)
+extern "C" int cOVState_PAUSE_OPTIONS_onWidgetListBox(void* self, int pListBox, int Event)
 {
-    return a2 != 4 ? 0x101 : 0x100;
+    return Event != 4 ? 0x101 : 0x100;
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetPair);
 #ifdef SKIP_ASM
-extern "C" int cOVState_PAUSE_OPTIONS_onWidgetPair(void* self, int a1, int a2)
+extern "C" int cOVState_PAUSE_OPTIONS_onWidgetPair(void* self, int pPair, int Event)
 {
-    return a2 != 0 ? 0x101 : 0x100;
+    return Event != 0 ? 0x101 : 0x100;
 }
 #endif
 
@@ -3423,9 +3423,9 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBERewardInterface_clearUserAwards(void* iface);
 
-extern "C" void cOVState_REWARDS_onWidgetEvent(void* self, void* a1, int key)
+extern "C" void cOVState_REWARDS_onWidgetEvent(void* self, void* pWidget, int key)
 {
-    if (a1 != 0) {
+    if (pWidget != 0) {
         if (key == 5) {
             D_004A26FC = 1;
             cBERewardInterface_clearUserAwards(cBE_getInterface_Fv(cBE_getBE(), 0xD));
@@ -3440,11 +3440,11 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onWidgetMenu);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cOVState_REWARDS_updateMenu(void* self, int a);
 
-extern "C" int cOVState_REWARDS_onWidgetMenu(void* self, int id, int event, int arg)
+extern "C" int cOVState_REWARDS_onWidgetMenu(void* self, int id, int event, int index)
 {
     switch (event) {
     case 4:
-        cOVState_REWARDS_updateMenu(self, arg);
+        cOVState_REWARDS_updateMenu(self, index);
         return 1;
     case 7: case 8: case 9:
         return 0;

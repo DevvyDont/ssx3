@@ -1807,18 +1807,18 @@ extern "C" void cUIVector__cUIVector(cUIVector* self, int flags)
 INCLUDE_ASM("ui/uitext", cUIVector_setColour);
 #ifdef SKIP_ASM
 
-extern "C" void cUIVector_setColour(cUIVector* self, tARGB* c)
+extern "C" void cUIVector_setColour(cUIVector* self, tARGB* colour)
 {
-    tARGB tmp = *c;
+    tARGB tmp = *colour;
     unsigned int i;
-    *(&self->mColour) = *c;
+    *(&self->mColour) = *colour;
     if (self->mpVertexColour == 0) {
         return;
     }
-    tmp.A = (int)(c->A * 255.0f);
-    tmp.R = (int)(c->R * 255.0f);
-    tmp.G = (int)(c->G * 255.0f);
-    tmp.B = (int)(c->B * 255.0f);
+    tmp.A = (int)(colour->A * 255.0f);
+    tmp.R = (int)(colour->R * 255.0f);
+    tmp.G = (int)(colour->G * 255.0f);
+    tmp.B = (int)(colour->B * 255.0f);
     for (i = 0; i < *(unsigned int*)&self->mAttrVector >> 17; i++) {
         (self->mpVertexColour)[i] = tmp;
     }

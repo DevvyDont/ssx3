@@ -383,17 +383,17 @@ struct sRect1FB0 {
     float x0, y0, x1, y1;
 };
 
-static inline sGlyph1FB0* sFontRes1FB0_find(cFont* f, int c)
+static inline sGlyph1FB0* sFontRes1FB0_find(cFont* font, int c)
 {
-    if (c < f->FirstCode)
+    if (c < font->FirstCode)
         return 0;
-    if (c <= f->LastLinearCode)
-        return ((sGlyph1FB0*)f->Glyphs) + c - f->FirstCode;
-    int lo = f->LastLinearCode - f->FirstCode;
-    int hi = f->NumGlyphs;
+    if (c <= font->LastLinearCode)
+        return ((sGlyph1FB0*)font->Glyphs) + c - font->FirstCode;
+    int lo = font->LastLinearCode - font->FirstCode;
+    int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph1FB0* p = ((sGlyph1FB0*)f->Glyphs) + mid;
+        sGlyph1FB0* p = ((sGlyph1FB0*)font->Glyphs) + mid;
         if (c == p->code)
             return p;
         if (c < p->code)
@@ -401,7 +401,7 @@ static inline sGlyph1FB0* sFontRes1FB0_find(cFont* f, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return ((sGlyph1FB0*)f->MissingGlyph);
+    return ((sGlyph1FB0*)font->MissingGlyph);
 }
 
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
@@ -472,17 +472,17 @@ struct sRect21F0 {
     float x0, y0, x1, y1;
 };
 
-static inline sGlyph21F0* sFontRes21F0_find(cFont* f, int c)
+static inline sGlyph21F0* sFontRes21F0_find(cFont* font, int c)
 {
-    if (c < f->FirstCode)
+    if (c < font->FirstCode)
         return 0;
-    if (c <= f->LastLinearCode)
-        return ((sGlyph21F0*)f->Glyphs) + c - f->FirstCode;
-    int lo = f->LastLinearCode - f->FirstCode;
-    int hi = f->NumGlyphs;
+    if (c <= font->LastLinearCode)
+        return ((sGlyph21F0*)font->Glyphs) + c - font->FirstCode;
+    int lo = font->LastLinearCode - font->FirstCode;
+    int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph21F0* p = ((sGlyph21F0*)f->Glyphs) + mid;
+        sGlyph21F0* p = ((sGlyph21F0*)font->Glyphs) + mid;
         if (c == p->code)
             return p;
         if (c < p->code)
@@ -490,7 +490,7 @@ static inline sGlyph21F0* sFontRes21F0_find(cFont* f, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return ((sGlyph21F0*)f->MissingGlyph);
+    return ((sGlyph21F0*)font->MissingGlyph);
 }
 
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
@@ -557,17 +557,17 @@ struct sGlyph2430 {
 };
 
 
-static inline sGlyph2430* sFontRes2430_find(cFont* f, int c)
+static inline sGlyph2430* sFontRes2430_find(cFont* font, int c)
 {
-    if (c < f->FirstCode)
+    if (c < font->FirstCode)
         return 0;
-    if (c <= f->LastLinearCode)
-        return ((sGlyph2430*)f->Glyphs) + c - f->FirstCode;
-    int lo = f->LastLinearCode - f->FirstCode;
-    int hi = f->NumGlyphs;
+    if (c <= font->LastLinearCode)
+        return ((sGlyph2430*)font->Glyphs) + c - font->FirstCode;
+    int lo = font->LastLinearCode - font->FirstCode;
+    int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph2430* p = ((sGlyph2430*)f->Glyphs) + mid;
+        sGlyph2430* p = ((sGlyph2430*)font->Glyphs) + mid;
         if (c == p->code)
             return p;
         if (c < p->code)
@@ -575,7 +575,7 @@ static inline sGlyph2430* sFontRes2430_find(cFont* f, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return ((sGlyph2430*)f->MissingGlyph);
+    return ((sGlyph2430*)font->MissingGlyph);
 }
 
 // PORT: PS2-only abs.s asm helper (fabsf off-PS2).
@@ -660,17 +660,17 @@ struct sGlyph2680 {
 };
 
 
-static inline sGlyph2680* sFontRes2680_find(cFont* f, int c)
+static inline sGlyph2680* sFontRes2680_find(cFont* font, int c)
 {
-    if (c < f->FirstCode)
+    if (c < font->FirstCode)
         return 0;
-    if (c <= f->LastLinearCode)
-        return ((sGlyph2680*)f->Glyphs) + c - f->FirstCode;
-    int lo = f->LastLinearCode - f->FirstCode;
-    int hi = f->NumGlyphs;
+    if (c <= font->LastLinearCode)
+        return ((sGlyph2680*)font->Glyphs) + c - font->FirstCode;
+    int lo = font->LastLinearCode - font->FirstCode;
+    int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph2680* p = ((sGlyph2680*)f->Glyphs) + mid;
+        sGlyph2680* p = ((sGlyph2680*)font->Glyphs) + mid;
         if (c == p->code)
             return p;
         if (c < p->code)
@@ -678,7 +678,7 @@ static inline sGlyph2680* sFontRes2680_find(cFont* f, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return ((sGlyph2680*)f->MissingGlyph);
+    return ((sGlyph2680*)font->MissingGlyph);
 }
 
 // PORT: PS2-only abs.s asm helper (fabsf off-PS2).
@@ -845,17 +845,17 @@ struct sGlyph {
 };
 
 
-static inline sGlyph* findGlyph(cFont* t, int c)
+static inline sGlyph* findGlyph(cFont* font, int c)
 {
-    if (c < t->FirstCode)
+    if (c < font->FirstCode)
         return 0;
-    if (c <= t->LastLinearCode)
-        return ((sGlyph*)t->Glyphs) + c - t->FirstCode;
-    int lo = t->LastLinearCode - t->FirstCode;
-    int hi = t->NumGlyphs;
+    if (c <= font->LastLinearCode)
+        return ((sGlyph*)font->Glyphs) + c - font->FirstCode;
+    int lo = font->LastLinearCode - font->FirstCode;
+    int hi = font->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph* g = &((sGlyph*)t->Glyphs)[mid];
+        sGlyph* g = &((sGlyph*)font->Glyphs)[mid];
         if (c == g->code)
             return g;
         if (c < g->code)
@@ -863,12 +863,12 @@ static inline sGlyph* findGlyph(cFont* t, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return ((sGlyph*)t->MissingGlyph);
+    return ((sGlyph*)font->MissingGlyph);
 }
 
-extern "C" float func_00392BA8(cFont* t, char c)
+extern "C" float func_00392BA8(cFont* font, char c)
 {
-    sGlyph* g = findGlyph((t), c);
+    sGlyph* g = findGlyph((font), c);
     if (g)
         return g->width;
     return 0.0f;
@@ -878,9 +878,9 @@ extern "C" float func_00392BA8(cFont* t, char c)
 //100%
 INCLUDE_ASM("render/font", func_00392C60);
 #ifdef SKIP_ASM
-extern "C" float func_00392C60(cFont* t, unsigned short c)
+extern "C" float func_00392C60(cFont* font, unsigned short c)
 {
-    sGlyph* g = findGlyph((t), c);
+    sGlyph* g = findGlyph((font), c);
     if (g)
         return g->width;
     return 0.0f;
@@ -2409,6 +2409,9 @@ extern "C" void cPS2LightMan_Purge(void* self)
 //100%
 INCLUDE_ASM("render/font", cPS2LightMan_ResetDynamicLights__FPv);
 #ifdef SKIP_ASM
+/**
+ * Removes all dynamic lights by zeroing the light manager's dynamic light count (+0xC).
+ */
 void cPS2LightMan_ResetDynamicLights(void* self)
 {
     *(int*)((char*)self + 0xC) = 0;
@@ -2841,8 +2844,8 @@ void func_00395420(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00395428);
 #ifdef SKIP_ASM
-extern "C" int func_00395428(cPS2GraphicsMan* arg0) {
-    return (arg0->mNumProjTextures);
+extern "C" int func_00395428(cPS2GraphicsMan* pS2GraphicsMan) {
+    return (pS2GraphicsMan->mNumProjTextures);
 }
 #endif
 //100%
@@ -2958,8 +2961,8 @@ extern "C" int func_00395530(void *arg0) {
 //100%
 INCLUDE_ASM("render/font", func_00395538);
 #ifdef SKIP_ASM
-extern "C" int func_00395538(cPS2GraphicsMan* arg0) {
-    return ((int)arg0->mpTextureMan);
+extern "C" int func_00395538(cPS2GraphicsMan* pS2GraphicsMan) {
+    return ((int)pS2GraphicsMan->mpTextureMan);
 }
 #endif
 //100%
@@ -3075,8 +3078,8 @@ extern "C" void func_003955B0(cPS2GraphicsMan* gfx, unsigned int buf, unsigned i
 //100%
 INCLUDE_ASM("render/font", func_00395658);
 #ifdef SKIP_ASM
-extern "C" int func_00395658(cPS2GraphicsMan* arg0) {
-    return ((int)arg0->mpDeferMan);
+extern "C" int func_00395658(cPS2GraphicsMan* pS2GraphicsMan) {
+    return ((int)pS2GraphicsMan->mpDeferMan);
 }
 #endif
 //100%
@@ -3114,8 +3117,8 @@ extern "C" void func_003956B0(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/font", func_003956D8);
 #ifdef SKIP_ASM
-extern "C" int func_003956D8(cPS2GraphicsMan* arg0) {
-    return (arg0->unk_59C0);
+extern "C" int func_003956D8(cPS2GraphicsMan* pS2GraphicsMan) {
+    return (pS2GraphicsMan->unk_59C0);
 }
 #endif
 

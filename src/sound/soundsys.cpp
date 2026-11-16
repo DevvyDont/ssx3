@@ -2600,14 +2600,14 @@ static inline int ring5028Get(sSnd5028Sys* s, int i)
     return r->data[(s->ring.tail + i) % s->ring.cap];
 }
 
-extern "C" int cSSXAudio_PlayHistoryExists(cSSXAudio* vself, int a, int b)
+extern "C" int cSSXAudio_PlayHistoryExists(cSSXAudio* vself, int Ptr, int Hull)
 {
     sSnd5028Sys* self = (sSnd5028Sys*)vself;
     int n = ring5028Count(self);
     for (int i = 0; i < n; i += 5) {
         int x = ring5028Get(self, i);
         int y = ring5028Get(self, i + 4);
-        if (a == x && b == y) {
+        if (Ptr == x && Hull == y) {
             int v = ring5028Get(self, i + 1);
             if (v != 0 && cBankMonitor_BANKMONITOR_GetHandle(*self->mgr + 0x1D8, v, 1) == 0) continue;
             return 1;
@@ -2709,7 +2709,7 @@ static inline void ring5628Push(sSnd5028Sys* s, int v)
 }
 
 // PORT: the event pointer is stored in an int ring slot.
-extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* vself, void* evt, int h, int t, int a, int idx)
+extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* vself, void* evt, int Handle, int Time, int Looping, int idx)
 {
     sSnd5028Sys* self = (sSnd5028Sys*)vself;
     if (ring5628Full(self)) {
@@ -2720,9 +2720,9 @@ extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* vself, void* evt, int h, int
         ring5628Pop(self);
     }
     ring5628Push(self, (int)evt);
-    ring5628Push(self, h);
-    ring5628Push(self, t);
-    ring5628Push(self, a);
+    ring5628Push(self, Handle);
+    ring5628Push(self, Time);
+    ring5628Push(self, Looping);
     ring5628Push(self, idx);
 }
 #endif
@@ -7223,12 +7223,12 @@ extern "C" void func_002DA1C0(void *, float *);
 
 struct sVEntryP_29E4A0 { short delta; short index; float* (*fn)(void*); };
 
-extern "C" void func_0029E4A0(cSSXAudio* arg0, void *arg1) {
-    if (arg0->mpAvalancheRiderIndex < *(int *)((char*)func_0028B1D8() + 0x78)) {
+extern "C" void func_0029E4A0(cSSXAudio* ssxAudio, void *arg1) {
+    if (ssxAudio->mpAvalancheRiderIndex < *(int *)((char*)func_0028B1D8() + 0x78)) {
         tAvalanchePositionalData q;
         float v[3];
-        tAvalanchePositionalData* dst = &(*(&arg0->mAvalancheData));
-        cRider* rider = *(cRider**)((char*)func_0028B1D8() + (arg0->mpAvalancheRiderIndex << 2) + 0x28);
+        tAvalanchePositionalData* dst = &(*(&ssxAudio->mAvalancheData));
+        cRider* rider = *(cRider**)((char*)func_0028B1D8() + (ssxAudio->mpAvalancheRiderIndex << 2) + 0x28);
         char* obj = (char*)&rider->mVtbl;
         sVEntryP_29E4A0* vt = *(sVEntryP_29E4A0**)obj;
         float* pos = vt[kRiderVt_getPosition].fn(obj + vt[kRiderVt_getPosition].delta);
@@ -7236,8 +7236,8 @@ extern "C" void func_0029E4A0(cSSXAudio* arg0, void *arg1) {
         v[1] = pos[1];
         v[2] = pos[2];
         func_002DA1C0(&q, v);
-        (*(&arg0->mAvalancheData)) = q;
-        *(int *)((char*)arg1 + 0x64) = func_0029E438((arg0), dst);
+        (*(&ssxAudio->mAvalancheData)) = q;
+        *(int *)((char*)arg1 + 0x64) = func_0029E438((ssxAudio), dst);
     }
 }
 #endif

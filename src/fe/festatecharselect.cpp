@@ -110,7 +110,7 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern signed char D_00440F68[];
 extern char D_004A1398[];
 
-extern "C" void cFEStateCharSelect_onGainFocus(void* self, int a1)
+extern "C" void cFEStateCharSelect_onGainFocus(void* self, int pPrevState)
 {
     int i = 0;
     int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
@@ -126,7 +126,7 @@ extern "C" void cFEStateCharSelect_onGainFocus(void* self, int a1)
     char* r = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
     *(int*)(r + 0xCCC) = 0;
     func_00181EF0(self);
-    cUIState_onGainFocus(self, a1);
+    cUIState_onGainFocus(self, pPrevState);
 }
 #endif
 
@@ -205,11 +205,11 @@ static inline float clamp_1450(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" int cFEStateCharSelect_onInputBegin(char* self, char* pad)
+extern "C" int cFEStateCharSelect_onInputBegin(char* self, char* pInput)
 {
     int changed = 0;
-    if (padBtn_1450(pad, 35)) {
-        *(float*)(self + 0x60) += padAxis_1450(pad, 38) * 3.0f;
+    if (padBtn_1450(pInput, 35)) {
+        *(float*)(self + 0x60) += padAxis_1450(pInput, 38) * 3.0f;
         if (*(float*)(self + 0x60) >= 360.0f) {
             float a = *(float*)(self + 0x60);
             do
@@ -229,12 +229,12 @@ extern "C" int cFEStateCharSelect_onInputBegin(char* self, char* pad)
         }
         changed = 1;
     }
-    if (padBtn_1450(pad, 33)) {
-        *(float*)(self + 0x58) = clamp_1450(*(float*)(self + 0x58) + padAxis_1450(pad, 36) * -0.10000000149011612f, 0.0f, 1.0f);
+    if (padBtn_1450(pInput, 33)) {
+        *(float*)(self + 0x58) = clamp_1450(*(float*)(self + 0x58) + padAxis_1450(pInput, 36) * -0.10000000149011612f, 0.0f, 1.0f);
         changed = 1;
     }
-    if (padBtn_1450(pad, 34)) {
-        *(float*)(self + 0x5C) = clamp_1450(*(float*)(self + 0x5C) + padAxis_1450(pad, 37) * -0.10000000149011612f, -1.0f, 1.0f);
+    if (padBtn_1450(pInput, 34)) {
+        *(float*)(self + 0x5C) = clamp_1450(*(float*)(self + 0x5C) + padAxis_1450(pInput, 37) * -0.10000000149011612f, -1.0f, 1.0f);
         changed = 1;
     }
     return changed;
@@ -956,7 +956,7 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onWidgetMenu);
 #ifdef SKIP_ASM
 extern "C" void func_00182870(void* self);
 
-extern "C" int cFEStateCheatCharSelect_onWidgetMenu(void* self, int a1, unsigned int msg, int value)
+extern "C" int cFEStateCheatCharSelect_onWidgetMenu(void* self, int pMenu, unsigned int msg, int value)
 {
     switch (msg) {
     case 7:

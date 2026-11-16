@@ -494,15 +494,15 @@ struct sRange_EBE0 {
  * @return 1 if @p t is inside the range, otherwise 0
  */
 // Is t between the two bounds: [start, end) when start < end, else [end, start).
-extern "C" int cAnimNode_frameUpdateEvent(sRange_EBE0* self, float t)
+extern "C" int cAnimNode_frameUpdateEvent(sRange_EBE0* self, float frame)
 {
     int r = 0;
     if (self->start != 1e10f) {
         if (self->start < self->end) {
-            if (self->start <= t && t < self->end) r = 1;
+            if (self->start <= frame && frame < self->end) r = 1;
         } else {
-            if (!(self->end <= t)) return 0;
-            r = t < self->start;
+            if (!(self->end <= frame)) return 0;
+            r = frame < self->start;
         }
     }
     return r;

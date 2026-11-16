@@ -72,14 +72,23 @@ static inline void showObj_001833D0(void* self, char* name, int id)
     }
 }
 
-extern "C" void cFEStateRiderDetail_onGainFocus(void* self, int a1)
+/**
+ * Gives focus to the rider detail screen: shows its five option objects and tags them, then runs the base
+ * handler.
+ *
+ * Each of "Option_1" to "Option_5" found on the screen (+0x40) is made visible (setVisible, slot 9) and gets 5
+ * to 9 in mMiscData (+0x18). Then calls cFEState_onGainFocus().
+ *
+ * @param a1  the state that had focus before (On Tour pPrevState), passed on to cFEState_onGainFocus()
+ */
+extern "C" void cFEStateRiderDetail_onGainFocus(void* self, int pPrevState)
 {
     showObj_001833D0(self, D_0045D888, 5);
     showObj_001833D0(self, D_0045D898, 6);
     showObj_001833D0(self, D_0045D8A8, 7);
     showObj_001833D0(self, D_0045D8B8, 8);
     showObj_001833D0(self, D_0045D8C8, 9);
-    cFEState_onGainFocus(self, a1);
+    cFEState_onGainFocus(self, pPrevState);
 }
 #endif
 

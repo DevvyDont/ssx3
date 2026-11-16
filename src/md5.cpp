@@ -135,6 +135,11 @@ extern "C" void md5_process(md5_ctx* ctx, const unsigned char* data)
 //100%
 INCLUDE_ASM("md5", md5_init__FP7md5_ctx);
 #ifdef SKIP_ASM
+/**
+ * Starts an MD5 computation: loads the four standard initial chaining values and zeroes the bit count.
+ *
+ * @param ctx  the MD5 state to initialise
+ */
 void md5_init(md5_ctx* ctx)
 {
     unsigned int a = 0x67452301;
@@ -216,6 +221,15 @@ struct md5_state_K4 {
 extern "C" void md5_append(md5_ctx* ctx, const unsigned char* data, int nbytes);
 extern unsigned char D_0048DAF8[];
 
+/**
+ * Finishes an MD5 computation and writes the 16-byte digest.
+ *
+ * Appends the 0x80 padding (D_0048DAF8) up to 56 bytes mod 64, then the 64-bit bit count in little-endian
+ * order, and stores a, b, c and d little-endian. The structure matches L. Peter Deutsch's md5.c.
+ *
+ * @param ctx     the MD5 state
+ * @param digest  receives the 16-byte digest
+ */
 extern "C" void md5_finish(md5_ctx* ctx, unsigned char* digest)
 {
     md5_state_K4* pms = (md5_state_K4*)ctx;

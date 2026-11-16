@@ -195,11 +195,11 @@ struct sVEntry0GNS {
 
 // Cross-jumping keeps the later copy of identical case bodies, so the cases
 // whose code the original shares with a later case come first.
-extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
+extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
 {
     switch (st->id) {
     case 0:
-        switch (a2) {
+        switch (pData) {
         case 0: {
             void* obj = self[4];
             if (obj != 0) {
@@ -220,7 +220,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
         func_001A86E8(1);
         return func_00181090(cMemMan_alloc(0x90, D_00460BC0, 0, 0), *self, st->x44);
     case 2:
-        switch (a2) {
+        switch (pData) {
         case 11:
             func_001A86E8(0);
             return func_00181090(cMemMan_alloc(0x90, D_00460BC0, 0, 0), *self, 0);
@@ -237,7 +237,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
             return func_001B3F78(cMemMan_alloc(0x91C, D_00460BF0, 0, 0), *self);
         }
     case 22:
-        D_004A19D4 = a2 != 0;
+        D_004A19D4 = pData != 0;
         return func_00181090(cMemMan_alloc(0x90, D_00460BC0, 0, 0), *self, 0);
     case 23:
         cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
@@ -278,7 +278,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
         }
         break;
     case 12:
-        switch (a2) {
+        switch (pData) {
         case 0:
             if (isOneGNS(D_004A1A70))
                 return func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *self);
@@ -316,7 +316,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
             break;
         }
     case 13:
-        switch (a2) {
+        switch (pData) {
         case 5:
             return func_001D4BC8(cMemMan_alloc(0x50, D_00460C80, 0, 0), *self, st->x44, 1);
         case 7:
@@ -337,7 +337,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
         }
         return func_00191360(cMemMan_alloc(0x9C, D_00460CE0, 0, 0), *self);
     case 24:
-        switch (a2) {
+        switch (pData) {
         case 28:
             return func_00188EE8(cMemMan_alloc(0x4C, D_00460CF8, 0, 0), *self);
         case 29:
@@ -359,7 +359,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
     case 32:
     case 37:
     case 38:
-        switch (a2) {
+        switch (pData) {
         case 0:
             return func_0018D7F0(cMemMan_alloc(0x23C, D_00460D90, 0, 0), *self, 2, 1, 0);
         case 1:
@@ -368,8 +368,8 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
             return func_0018D7F0(cMemMan_alloc(0x23C, D_00460D90, 0, 0), *self, 2, 0, 0);
         }
         {
-            int hi = a2 >> 8;
-            int lo = a2 & 0xFF;
+            int hi = pData >> 8;
+            int lo = pData & 0xFF;
             return func_0018ECA0(cMemMan_alloc(0x280, D_0045D6A8, 0, 0), *self, hi, lo);
         }
     case 8:
@@ -387,7 +387,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
         cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
         break;
     case 39:
-        switch (a2) {
+        switch (pData) {
         case 0: {
             cBE_getInterface_Fv(cBE_getBE(), 4);
             void* nr = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -420,7 +420,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
         }
         break;
     case 40:
-        switch (a2) {
+        switch (pData) {
         case 9:
             return func_001D4BC8(cMemMan_alloc(0x50, D_00460C80, 0, 0), *self, st->x44, 1);
         case 10:
@@ -434,11 +434,11 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int a2)
         }
         break;
     case 43:
-        return func_001D3780(cMemMan_alloc(0xE4, D_00460E28, 0, 0), *self, st->x44, a2);
+        return func_001D3780(cMemMan_alloc(0xE4, D_00460E28, 0, 0), *self, st->x44, pData);
     case 44:
-        return func_001D4268(cMemMan_alloc(0xA0, D_00460E40, 0, 0), *self, st->x44, a2 >> 16, a2 & 0xFFFF);
+        return func_001D4268(cMemMan_alloc(0xA0, D_00460E40, 0, 0), *self, st->x44, pData >> 16, pData & 0xFFFF);
     case 46:
-        switch (a2) {
+        switch (pData) {
         case 3:
             return func_001D1128(cMemMan_alloc(0xAD4, D_00460E58, 0, 0), *self, st->x44, D_004A19D8);
         case 4:

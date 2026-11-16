@@ -14,6 +14,13 @@ struct cBEAggressionInterface {
 //99.58%
 INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_getThis__Fv);
 #ifdef SKIP_ASM
+/**
+ * Returns the back end's aggression interface singleton, creating it on first use.
+ *
+ * The first call allocates 0x10 bytes tagged "BEAggressionInt", clears the word at +0x8 and stores the vtable.
+ *
+ * @return the aggression interface
+ */
 void* cBEAggressionInterface_getThis()
 {
     if (D_004A124C == 0) {

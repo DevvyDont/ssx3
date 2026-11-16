@@ -164,10 +164,10 @@ extern "C" void cSectionMan_addActiveEvent(cSectionMan* self, int id)
 //100%
 INCLUDE_ASM("main/sectionman", cSectionMan_getNextActiveEvent);
 #ifdef SKIP_ASM
-extern "C" int cSectionMan_getNextActiveEvent(cSectionMan* self, void* a1)
+extern "C" int cSectionMan_getNextActiveEvent(cSectionMan* self, void* pPrevEvent)
 {
-    if (a1 != 0) {
-        return *(int*)((char*)a1 + 0x4);
+    if (pPrevEvent != 0) {
+        return *(int*)((char*)pPrevEvent + 0x4);
     }
     return (int)self->m_pActiveEventList;
 }

@@ -12,6 +12,12 @@ struct cObjNode {
 //99.94%
 INCLUDE_ASM("object/objnode", cObjNode_cObjNode__FP8cObjNodePv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a scene object node and adds it to a bucket of the global bucket manager (gBucketMan).
+ *
+ * @param param2  the bucket to add the node to (On Tour: const int bucket)
+ * @return @p self
+ */
 cObjNode* cObjNode_cObjNode(cObjNode* self, void* param2)
 {
     self->field_0xC = cObjNode_vtbl;
@@ -26,6 +32,13 @@ INCLUDE_ASM("object/objnode", cObjNode__cObjNode);
 extern "C" void cBucketMan_remove(void* mgr, void* node);
 void operator_delete(int*);
 
+/**
+ * Destroys a scene object node: removes it from the global bucket manager, then frees it when asked to.
+ *
+ * Restores cObjNode's vtable at +0xC first.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cObjNode__cObjNode(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = cObjNode_vtbl;
@@ -153,6 +166,13 @@ extern "C" void* cTypeObjNode__cTypeObjNode(void*);
 //99.5%
 INCLUDE_ASM("object/objnode", cSortObjNode__cSortObjNode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a sort object node: stores cSortObjNode's vtable at +0xC, then runs the cTypeObjNode destructor.
+ *
+ * The g++ delete flags in the second argument register pass through untouched to cTypeObjNode__cTypeObjNode().
+ *
+ * @return no meaningful value (the base destructor returns nothing)
+ */
 void* cSortObjNode__cSortObjNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)cSortObjNode_vtbl;

@@ -51,7 +51,7 @@ struct cUIAnimationChannel_evalAtFrameFloat_sAnim {
  * @param t  frame number (On Tour: FrameNum)
  * @return the channel's value at that frame
  */
-extern "C" float cUIAnimationChannel_evalAtFrameFloat(cUIAnimationChannel_evalAtFrameFloat_sAnim** self, int t)
+extern "C" float cUIAnimationChannel_evalAtFrameFloat(cUIAnimationChannel_evalAtFrameFloat_sAnim** self, int FrameNum)
 {
     cUIAnimationChannel_evalAtFrameFloat_sAnim* a = *self;
     if (a == 0) {
@@ -67,8 +67,8 @@ extern "C" float cUIAnimationChannel_evalAtFrameFloat(cUIAnimationChannel_evalAt
         int dt = k->dt;
         accT += dt;
         v = k->value;
-        if (accT >= t) {
-            return (float)(t - prevT) / (float)dt * (v - prevV) + prevV;
+        if (accT >= FrameNum) {
+            return (float)(FrameNum - prevT) / (float)dt * (v - prevV) + prevV;
         }
         prevT = accT;
         prevV = v;
@@ -180,11 +180,11 @@ extern "C" short func_00397458(void **arg0) {
 //100%
 INCLUDE_ASM("ui/uianimation", cUIAnimation_start);
 #ifdef SKIP_ASM
-extern "C" void cUIAnimation_start(void* self, int mode, unsigned short v)
+extern "C" void cUIAnimation_start(void* self, int mode, unsigned short FrameNum)
 {
     mode &= 7;
     if (mode == 0) {
-        *(unsigned short*)((char*)self + 0xc) = v;
+        *(unsigned short*)((char*)self + 0xc) = FrameNum;
     }
     if (mode == 2) {
         *(unsigned char*)((char*)self + 0xe) = 1;
@@ -288,12 +288,12 @@ struct sUIAnim75E0 {
     unsigned short start;       // 0xC
 };
 
-extern "C" void cUIAnimation_updateThing(sUIAnim75E0* self, char* obj, int mode, unsigned short t)
+extern "C" void cUIAnimation_updateThing(sUIAnim75E0* self, char* obj, int mode, unsigned short FrameNum)
 {
     unsigned short frame = self->frame;
     if ((mode & 7) == 0 && self->start != 0xFFFF) {
-        if (t < self->start) return;
-        frame = t - self->start;
+        if (FrameNum < self->start) return;
+        frame = FrameNum - self->start;
         if (self->frame == frame) return;
         self->frame = frame;
     }

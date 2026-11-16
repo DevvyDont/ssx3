@@ -34,7 +34,7 @@ extern char D_004A23E8[];
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_onGainFocus(void* self, void* a1);
 
-extern "C" void cOVState_ENTERLODGE_onGainFocus(void* self, void* a1)
+extern "C" void cOVState_ENTERLODGE_onGainFocus(void* self, void* pPrevState)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A23E0));
     if (obj != 0) {
@@ -44,7 +44,7 @@ extern "C" void cOVState_ENTERLODGE_onGainFocus(void* self, void* a1)
     if (obj != 0) {
         *(int*)((char*)obj + 0x18) = 1;
     }
-    cUIState_onGainFocus(self, a1);
+    cUIState_onGainFocus(self, pPrevState);
 }
 #endif
 
@@ -53,6 +53,11 @@ extern "C" void* cOVState_onDestroyScreen(void*);
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the enter-lodge overlay's screens: clears the word at +0x50, then runs cOVState_onDestroyScreen().
+ *
+ * @return cOVState_onDestroyScreen()'s return value (On Tour's returns nothing)
+ */
 void* cOVState_ENTERLODGE_onDestroyScreen(void* self)
 {
     *(int*)((char*)self + 0x50) = 0;
@@ -631,9 +636,9 @@ static inline void LoadRider1F7F08(void* self, int n)
     cOVState_triggerTextFade(self, name, D_0046E4E8);
 }
 
-extern "C" void cOVState_TOPTIMES_onGainFocus(void* self, void* a1)
+extern "C" void cOVState_TOPTIMES_onGainFocus(void* self, void* pPrevState)
 {
-    cUIState_onGainFocus(self, a1);
+    cUIState_onGainFocus(self, pPrevState);
     char* prof = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int id = *(int*)(prof + 0x18);
@@ -667,10 +672,10 @@ struct sVEntry_001F80D8 {
     void (*fn)(void*);
 };
 
-extern "C" void cOVState_TOPTIMES_onWidgetEvent(void* self, void* a1, int a2)
+extern "C" void cOVState_TOPTIMES_onWidgetEvent(void* self, void* pWidget, int Event)
 {
-    if (a1 != 0) {
-        if (a2 == 5) {
+    if (pWidget != 0) {
+        if (Event == 5) {
             sVEntry_001F80D8* vt = *(sVEntry_001F80D8**)((char*)self + 0x8);
             vt[26].fn((char*)self + vt[26].delta);
         }

@@ -524,9 +524,9 @@ static inline sQ_91A8 AxisAngle_91A8(const sQ_91A8& axis, float angle)
     return sQ_91A8(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-static inline int eq_91A8(cHandplantMotion* a, const sQ_91A8& b)
+static inline int eq_91A8(cHandplantMotion* handplantMotion, const sQ_91A8& b)
 {
-    return (*(sQ_91A8*)&a->ExitVel).x == b.x && (*(sQ_91A8*)&a->ExitVel).y == b.y && (*(sQ_91A8*)&a->ExitVel).z == b.z && (*(sQ_91A8*)&a->ExitVel).w == b.w;
+    return (*(sQ_91A8*)&handplantMotion->ExitVel).x == b.x && (*(sQ_91A8*)&handplantMotion->ExitVel).y == b.y && (*(sQ_91A8*)&handplantMotion->ExitVel).z == b.z && (*(sQ_91A8*)&handplantMotion->ExitVel).w == b.w;
 }
 
 static inline int landed_91A8(char* ap)
@@ -907,22 +907,22 @@ static inline float absf_139A20(float x)
     return r;
 }
 
-extern "C" void cAirMotion_step(cAirMotion* p)
+extern "C" void cAirMotion_step(cAirMotion* self)
 {
-    func_00125970((char*)p->mRider);
-    char* r = (char*)p->mRider;
+    func_00125970((char*)self->mRider);
+    char* r = (char*)self->mRider;
     func_00113648(*(void**)(r + 0x788), r + 0x110, r + 0x1E0, *(float*)(r + 0x300) * 0.01666666753590107f);
-    char* r1 = (char*)p->mRider;
+    char* r1 = (char*)self->mRider;
     {
         sVec4HP up = *(sVec4HP*)(r1 + 0x180);
         *(sVec4HP*)(r1 + 0x370) = up;
     }
-    *(sVec4HP*)((char*)p->mRider + 0x3D0) = *(sVec4HP*)t4vect_Zero;
-    int st = *(int*)(*(char**)((char*)p->mRider + 0x788) + 0xAC);
+    *(sVec4HP*)((char*)self->mRider + 0x3D0) = *(sVec4HP*)t4vect_Zero;
+    int st = *(int*)(*(char**)((char*)self->mRider + 0x788) + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
     if (ok) {
-        char* r2 = (char*)p->mRider;
+        char* r2 = (char*)self->mRider;
         char* ap = *(char**)(r2 + 0x788);
         int idx = *(int*)(ap + 0x90);
         char* e = (char*)SSXApp->Game->SurfPropCache + idx * 0xB0;
@@ -940,9 +940,9 @@ extern "C" void cAirMotion_step(cAirMotion* p)
                 x = t / d;
             else
                 x = t * 59.999996185302734f;
-            float y = *(float*)((char*)p->mRider + 0x300) * 1.396263599395752f;
-            if (func_0011FEE8(p->mRider) == 5) {
-                char* r3 = (char*)p->mRider;
+            float y = *(float*)((char*)self->mRider + 0x300) * 1.396263599395752f;
+            if (func_0011FEE8(self->mRider) == 5) {
+                char* r3 = (char*)self->mRider;
                 int big = 1;
                 if (!(0.0872664749622345f < absf_139A20(*(float*)(*(char**)(r3 + 0x77C) + 0x258)))) big = 0;
                 if (big) {
@@ -950,15 +950,15 @@ extern "C" void cAirMotion_step(cAirMotion* p)
                     goto done;
                 }
             }
-            char* r4 = (char*)p->mRider;
+            char* r4 = (char*)self->mRider;
             char* ap4 = *(char**)(r4 + 0x788);
             char* tgt = ap4 + 0x20;
-            if (*(float*)(ap4 + 0x28) < 0.30000001192092896f || *(int*)p != 0) {
+            if (*(float*)(ap4 + 0x28) < 0.30000001192092896f || *(int*)self != 0) {
                 sVec4HP v = *(sVec4HP*)(ap4 + 0x10);
                 if (vu0Dot_139A20(v, *(sVec4HP*)(r4 + 0x1B0)) < 0.0f) {
                     vu0ScaleEq_139A20(v, -1.0f);
                 }
-                char* r5 = (char*)p->mRider;
+                char* r5 = (char*)self->mRider;
                 func_00121AA0(r5, *(char**)(r5 + 0x788) + 0x20, &v, x, y);
             } else {
                 func_00121AA0(r4, tgt, t4vect_Zero, x, y);
@@ -966,7 +966,7 @@ extern "C" void cAirMotion_step(cAirMotion* p)
         }
     }
 done:
-    cRider_updateOrientationImplicit(p->mRider);
+    cRider_updateOrientationImplicit(self->mRider);
 }
 #endif
 
@@ -3776,8 +3776,8 @@ static inline float clamp_13D818(float v, float lo, float hi)
 }
 
 // The rider's front and up rows, by value.
-static inline t4Vector front_13D818(cRider* r) { return r->mMatrix.row[1]; }
-static inline t4Vector up_13D818(cRider* r) { return r->mMatrix.row[2]; }
+static inline t4Vector front_13D818(cRider* rider) { return rider->mMatrix.row[1]; }
+static inline t4Vector up_13D818(cRider* rider) { return rider->mMatrix.row[2]; }
 
 struct sVec4C_13D818 : t4Vector {
     sVec4C_13D818(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
@@ -6157,8 +6157,8 @@ __asm__("_vt$15cVbDtor00141040$13cRiderVbC_hpc = D_004598A8\n"
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001411A0);
 #ifdef SKIP_ASM
-extern "C" int func_001411A0(cWipeoutMotion* arg0) {
-    return ((int)arg0->BoardSphereTree);
+extern "C" int func_001411A0(cWipeoutMotion* wipeoutMotion) {
+    return ((int)wipeoutMotion->BoardSphereTree);
 }
 #endif
 //100%
@@ -6171,15 +6171,15 @@ extern "C" int func_001411A8(int arg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutMotion_getWipeoutMotionState);
 #ifdef SKIP_ASM
-extern "C" int cWipeoutMotion_getWipeoutMotionState(int *arg0) {
-    return *arg0;
+extern "C" int cWipeoutMotion_getWipeoutMotionState(int *self) {
+    return *self;
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cWipeoutMotion_getRiderAngVel);
 #ifdef SKIP_ASM
-extern "C" int cWipeoutMotion_getRiderAngVel(int arg0) {
-    return arg0 + 0x30;
+extern "C" int cWipeoutMotion_getRiderAngVel(int self) {
+    return self + 0x30;
 }
 #endif
 
@@ -6661,15 +6661,15 @@ __asm__("_vt$15cVbDtor00142A50 = D_00458710\n"
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRiderHandler__getMotionState);
 #ifdef SKIP_ASM
-extern "C" int cRiderHandler__getMotionState(cRiderHandler* arg0) {
-    return (arg0->MotionState);
+extern "C" int cRiderHandler__getMotionState(cRiderHandler* self) {
+    return (self->MotionState);
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRiderHandler__getControlState);
 #ifdef SKIP_ASM
-extern "C" int cRiderHandler__getControlState(cRiderHandler* arg0) {
-    return (arg0->ControlState);
+extern "C" int cRiderHandler__getControlState(cRiderHandler* self) {
+    return (self->ControlState);
 }
 #endif
 //100%
@@ -6682,18 +6682,18 @@ extern "C" void func_00144000(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144008);
 #ifdef SKIP_ASM
-extern "C" int func_00144008(cComputer* arg0) {
-    return (arg0->mTargetID);
+extern "C" int func_00144008(cComputer* computer) {
+    return (computer->mTargetID);
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144010);
 #ifdef SKIP_ASM
-extern "C" int func_00144010(cComputer* arg0, float fparg0) {
+extern "C" int func_00144010(cComputer* computer, float fparg0) {
     int var_3;
 
     var_3 = 0;
-    if (((arg0->mToRail) != 0) && (fparg0 < 1.0f)) {
+    if (((computer->mToRail) != 0) && (fparg0 < 1.0f)) {
         var_3 = 1;
     }
     return var_3;
@@ -7196,8 +7196,8 @@ extern "C" void func_001446D0(cPlayer* self, int a, int b) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_001446E0);
 #ifdef SKIP_ASM
-extern "C" int func_001446E0(cPlayer* arg0) {
-    return ((int)arg0->Input);
+extern "C" int func_001446E0(cPlayer* player) {
+    return ((int)player->Input);
 }
 #endif
 

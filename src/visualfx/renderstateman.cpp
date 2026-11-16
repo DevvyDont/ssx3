@@ -700,6 +700,14 @@ public:
     virtual void v65(void* frame);
 };
 
+/**
+ * Restores the render states from a replay frame.
+ *
+ * For each of the 6 render state entries (D_004FA370, 0xF0 bytes each), calls virtual slot 65 of the object at
+ * *p20 (+0x20) twice with the frame.
+ *
+ * @param frame  the replay frame stream to read from
+ */
 extern "C" void cRenderStateMan_readFromReplayFrame(void* frame)
 {
     int i;

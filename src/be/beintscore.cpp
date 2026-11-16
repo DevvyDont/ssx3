@@ -48,6 +48,14 @@ extern void* cBEScoreInterface_vtbl[];
 // the body returns self, so it is bound to the symbol with an asm label.
 void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInterface_cBEScoreInterface");
 
+/**
+ * Constructs the back end's score interface: stores its vtable at +0xC and resets its score state.
+ *
+ * The reset, func_001549E8(), zeroes the words at +0x10 and +0x14, sets +0x18 and +0x1C to -1, and clears both
+ * 0xB0-byte slots at +0x20, setting each slot's last word to -1.
+ *
+ * @return @p self
+ */
 void* cBEScoreInterface_cBEScoreInterface_impl(void* self)
 {
     *(void***)((char*)self + 0xC) = cBEScoreInterface_vtbl;

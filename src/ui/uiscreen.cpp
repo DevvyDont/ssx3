@@ -39,34 +39,34 @@ extern void* cList_vtbl[];
 extern void* D_00494CC0[];
 
 // Destructor of a UI screen: frees its buffers and tears down the embedded members.
-extern "C" void cUIScreen__cUIScreen(cUIScreen* p, int flags)
+extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
 {
-    p->mVtbl = cUIScreen_vtbl;
-    if ((void*)p->mppObjectList != 0) {
-        cMemMan_free__FPv(p->mppObjectList);
+    self->mVtbl = cUIScreen_vtbl;
+    if ((void*)self->mppObjectList != 0) {
+        cMemMan_free__FPv(self->mppObjectList);
     }
-    if ((void*)p->mpBuffer != 0 && (p->mAttrScreen & 2)) {
-        cMemMan_free__FPv(p->mpBuffer);
+    if ((void*)self->mpBuffer != 0 && (self->mAttrScreen & 2)) {
+        cMemMan_free__FPv(self->mpBuffer);
     }
-    *(void***)(((char*)p) + 0xCC) = cList_vtbl;
-    *(void***)(((char*)p) + 0x48) = cUIGroup_vtbl;
-    cList_destroyList_C558(((char*)p) + 0xB4);
-    char* m40 = ((char*)p) + 0x40;
-    *(void***)(((char*)p) + 0xC8) = D_00494CC0;
-    func_003A4868(((char*)p) + 0xC0);
-    *(void***)(((char*)p) + 0xBC) = D_00494CC0;
-    func_003A4868(((char*)p) + 0xB4);
+    *(void***)(((char*)self) + 0xCC) = cList_vtbl;
+    *(void***)(((char*)self) + 0x48) = cUIGroup_vtbl;
+    cList_destroyList_C558(((char*)self) + 0xB4);
+    char* m40 = ((char*)self) + 0x40;
+    *(void***)(((char*)self) + 0xC8) = D_00494CC0;
+    func_003A4868(((char*)self) + 0xC0);
+    *(void***)(((char*)self) + 0xBC) = D_00494CC0;
+    func_003A4868(((char*)self) + 0xB4);
     cUIThing__cUIThing(m40, 2);
-    *(void***)(((char*)p) + 0x30) = cList_vtbl;
-    cList_destroyList_C558(((char*)p) + 0x18);
-    *(void***)(((char*)p) + 0x2C) = D_00494CC0;
-    func_003A4868(((char*)p) + 0x24);
-    *(void***)(((char*)p) + 0x20) = D_00494CC0;
-    func_003A4868(((char*)p) + 0x18);
-    p->mVtbl = D_00494CC0;
-    func_003A4868(((char*)p));
+    *(void***)(((char*)self) + 0x30) = cList_vtbl;
+    cList_destroyList_C558(((char*)self) + 0x18);
+    *(void***)(((char*)self) + 0x2C) = D_00494CC0;
+    func_003A4868(((char*)self) + 0x24);
+    *(void***)(((char*)self) + 0x20) = D_00494CC0;
+    func_003A4868(((char*)self) + 0x18);
+    self->mVtbl = D_00494CC0;
+    func_003A4868(((char*)self));
     if (flags & 1) {
-        operator_delete((int*)p);
+        operator_delete((int*)self);
     }
 }
 #endif
@@ -154,6 +154,12 @@ struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
+/**
+ * Returns the screen's primary animation thread: the first one in mThreads with bit 25 of its word at +0x10
+ * set.
+ *
+ * @return that thread, or 0 when there is none
+ */
 extern "C" void* cUIScreen_getPrimaryThread(cUIScreen* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x18));
@@ -380,13 +386,13 @@ extern "C" void func_0039CBC8(void* p0, void* p1, void* p2, void* p3)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeJump);
 #ifdef SKIP_ASM
-extern "C" void cUIScreen_parseKeyframeJump(cUIScreen* self, void* p1, void* p2, void* p3)
+extern "C" void cUIScreen_parseKeyframeJump(cUIScreen* self, void* pFrame, void* pKCP, void* pThread)
 {
     sFrameEntry* e = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
     unsigned int i;
     for (i = 0; i < (unsigned int)((sFrameList*)self->mpKeyframeBlock)->count; i++) {
-        if (e->label == *(int*)((char*)p2 + 4)) {
-            *(unsigned short*)((char*)p3 + 0xC) = e->field_0x8;
+        if (e->label == *(int*)((char*)pKCP + 4)) {
+            *(unsigned short*)((char*)pThread + 0xC) = e->field_0x8;
             return;
         }
         e = (sFrameEntry*)((char*)e + e->stride);
@@ -924,6 +930,13 @@ extern "C" void* cUIGroup_onInput(void*);
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_onInput__FPv);
 #ifdef SKIP_ASM
+/**
+ * Passes controller input to the screen's root group (+0x40) through cUIGroup_onInput().
+ *
+ * The input object (On Tour onInput(pInput)) passes through in its register.
+ *
+ * @return cUIGroup_onInput()'s result (On Tour: whether the input was handled)
+ */
 void* cUIScreen_onInput(void* self)
 {
     return cUIGroup_onInput((char*)self + 0x40);
@@ -1510,6 +1523,11 @@ extern "C" void func_0039E470(void* self, signed char bit)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIState_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys all screens of a UI state by destroying its screen list (mScreens, +0x24) with cList_destroyList().
+ *
+ * @return cList_destroyList()'s return value (On Tour's onDestroyScreen returns nothing)
+ */
 void* cUIState_onDestroyScreen(void* self)
 {
     return cList_destroyList(((char*)self + 0x24));
@@ -1684,6 +1702,11 @@ void cList_addToEnd(cList*, cListNode*);
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIState_addScreen);
 #ifdef SKIP_ASM
+/**
+ * Appends a screen to the UI state's screen list (mScreens, +0x24).
+ *
+ * @param node  the screen to add (On Tour cUIScreen* pScreen)
+ */
 extern "C" void cUIState_addScreen(cUIState* self, cListNode* node)
 {
     cList_addToEnd((cList*)((char*)self + 0x24), node);
@@ -1758,6 +1781,9 @@ void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 extern "C" void cUIScreen_update(cUIScreen*);
 
+/**
+ * Updates every screen of the UI state with cUIScreen_update(), in list order.
+ */
 extern "C" void cUIState_updateScreens(cUIState* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));

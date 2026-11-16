@@ -147,9 +147,9 @@ struct sWSOpList {
     sWSOp ops[1];
 };
 
-static inline void sWSOpList_push(sWSOpList* l, sWSOp o)
+static inline void sWSOpList_push(sWSOpList* self, sWSOp o)
 {
-    l->ops[l->count++] = o;
+    self->ops[self->count++] = o;
 }
 
 extern "C" void func_003097E0(void* self, int v)
@@ -225,6 +225,11 @@ struct cWScriptListNode;
 extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
 int func_0030B260(void* self, void* a1);
 
+/**
+ * Moves a world script process from the idle list (+0x2B4) to the active list (+0x2B8).
+ *
+ * @param node  the process (On Tour cWScriptProcess*)
+ */
 extern "C" void cWScriptMan_processStart(void* self, cWScriptListNode* node)
 {
     cProcessList_removeProcess((cWScriptListHead*)((char*)self + 0x2B4), node);
@@ -241,6 +246,13 @@ extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNo
 extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode* node);
 int func_0030B260(void* self, void* a1);
 
+/**
+ * Moves a world script process back from the active list (+0x2B8) to the idle list (+0x2B4).
+ *
+ * Does nothing when the process is not on the active list.
+ *
+ * @param node  the process (On Tour cWScriptProcess*)
+ */
 extern "C" void cWScriptMan_processEnd(void* self, cWScriptListNode* node)
 {
     cWScriptListHead* list = (cWScriptListHead*)((char*)self + 0x2B8);
@@ -276,6 +288,14 @@ extern "C" int func_003A6D18(void*, int*);
 
 static inline bool cWScriptMan_getScriptCode_valid(int id) { return id != -1; }
 
+/**
+ * Looks up the code of a world script by its resource ID.
+ *
+ * Asks the world (the pointer at +0x28C) through func_003A6D18 (On Tour cWorld::getWScriptScript).
+ *
+ * @param id  the script's resource ID; -1 means none
+ * @return the script code, or 0 for ID -1
+ */
 extern "C" int cWScriptMan_getScriptCode(void* self, int id)
 {
     if (cWScriptMan_getScriptCode_valid(id)) {
@@ -1267,7 +1287,7 @@ struct cWScriptMan_runScriptCode_sCall {
     int pad[4];
 };
 
-extern "C" void cWScriptMan_runScriptCode(void* self, void* obj, int a2)
+extern "C" void cWScriptMan_runScriptCode(void* self, void* obj, int data)
 {
     cWScriptMan_runScriptCode_sValue arg;
     cWScriptMan_runScriptCode_sValue ret;
@@ -1276,7 +1296,7 @@ extern "C" void cWScriptMan_runScriptCode(void* self, void* obj, int a2)
     void* savedObj = *(void**)((char*)self + 0x2A4);
     *(void**)((char*)self + 0x2A4) = obj;
     savedId = *(int*)((char*)self + 0x290);
-    func_00226600(&arg, a2, 0);
+    func_00226600(&arg, data, 0);
     ret.type = 0;
     ret.word0 = 0;
     func_002224A8(&call);
@@ -1632,6 +1652,12 @@ int func_0030B2C0(void* self, void* a1)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cProcessList_removeProcess);
 #ifdef SKIP_ASM
+/**
+ * Unlinks a process from a singly linked process list.
+ *
+ * @param node  the process to remove
+ * @return 1 when the process was found and removed, otherwise 0
+ */
 extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node)
 {
     if (node == self->head) {
@@ -1721,6 +1747,12 @@ extern "C" void func_0030B3F0(void* self, int name)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cProcessList_findProcess);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a process is on a process list.
+ *
+ * @param node  the process to look for
+ * @return 1 when the process is on the list, otherwise 0
+ */
 extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode* node)
 {
     cWScriptListNode* p;
@@ -2046,13 +2078,13 @@ struct sWSSlot_B9A0 {
     char pad[0x10C - 4];
 };
 
-extern "C" void cWScriptMan_collect(void* self, int rider, int id, int a3)
+extern "C" void cWScriptMan_collect(void* self, int rider, int id, int instId)
 {
     sWSSlot_B9A0* slots = (sWSSlot_B9A0*)((char*)self + 0x2C0);
     int i;
     for (i = 0; i < 1; i++) {
         if (slots[i].id == id) {
-            func_0030C3E0((func_0030C3E0_sTable*)&slots[i], a3);
+            func_0030C3E0((func_0030C3E0_sTable*)&slots[i], instId);
             func_0029CED8(func_0028B180(), 5, 0, 1.0f);
             void* i0 = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* i11 = cBE_getInterface_Fv(cBE_getBE(), 0xB);
@@ -3462,6 +3494,11 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptTask__cWScriptTask);
 extern void* cWScriptTask_vtbl[];
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a world script task: restores cWScriptTask's vtable at +0x40, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cWScriptTask__cWScriptTask(void* self, int flags)
 {

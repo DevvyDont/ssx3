@@ -8,11 +8,11 @@ extern char D_0045B220[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cCameraAlgoList_cCameraAlgoList(void* self);
 
-extern "C" void* cCameraController_cCameraController(void* self, int a1)
+extern "C" void* cCameraController_cCameraController(void* self, int camera)
 {
     *(void***)((char*)self + 0x14) = cCameraController_vtbl;
     *(void**)((char*)self + 0x8) = cCameraAlgoList_cCameraAlgoList(cMemMan_alloc(8, D_0045B220, 0x20000000, 0));
-    *(int*)((char*)self + 0x10) = a1;
+    *(int*)((char*)self + 0x10) = camera;
     *(int*)((char*)self + 0xC) = 0;
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x4) = 0;
@@ -129,9 +129,9 @@ extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(void* self);
 extern "C" void* cEditorCameraAlgorithm_cEditorCameraAlgorithm(void* self);
 extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int msg);
 
-extern "C" void* cManualCameraController_cManualCameraController(void* self, int a1)
+extern "C" void* cManualCameraController_cManualCameraController(void* self, int camera)
 {
-    cCameraController_cCameraController(self, a1);
+    cCameraController_cCameraController(self, camera);
     *(void***)((char*)self + 0x14) = cManualCameraController_vtbl;
     *(int*)((char*)self + 0x0) = 1;
     *(void**)((char*)self + 0x18) = cManualCameraAlgorithm_cManualCameraAlgorithm(cMemMan_alloc(0x40, D_0045B230, 0x20000000, 0));

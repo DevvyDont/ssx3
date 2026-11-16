@@ -47,6 +47,11 @@ extern "C" void* cUITemplate_MAP_onGainTransition(void*);
 //100%
 INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onGainTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Forwards the gain-transition event to the event select state's map template (+0x48).
+ *
+ * @return cUITemplate_MAP_onGainTransition()'s result
+ */
 void* cFEStateEventSelect_onGainTransition(void* self)
 {
     return cUITemplate_MAP_onGainTransition((char*)self + 0x48);
@@ -59,6 +64,9 @@ INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onGainFocus);
 extern "C" void* cUIState_onGainFocus(void* self);
 extern "C" void cUITemplate_MAP_onGainFocus(void* tmpl);
 
+/**
+ * Gives focus to the event select state: runs cUIState_onGainFocus(), then the map template's (+0x48) handler.
+ */
 extern "C" void cFEStateEventSelect_onGainFocus(void* self)
 {
     cUIState_onGainFocus(self);
@@ -72,6 +80,12 @@ INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onDestroyScreen);
 void* cUIState_onDestroyScreen(void* self);
 extern "C" void func_00200AF0(void* tmpl);
 
+/**
+ * Destroys the event select state's screens, then tears down its map template (+0x48).
+ *
+ * After cUIState_onDestroyScreen(), func_00200AF0() unloads the template's async file, removes the PDA template
+ * in map states 1, 3 and 4, and calls func_0028F678() on the audio object with 0.
+ */
 extern "C" void cFEStateEventSelect_onDestroyScreen(void* self)
 {
     cUIState_onDestroyScreen(self);
@@ -202,6 +216,9 @@ void func_00202768(void*);
 //100%
 INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onInputBegin);
 #ifdef SKIP_ASM
+/**
+ * Passes the start of input handling to the map template (+0x48) through func_00202768(), which returns 0.
+ */
 extern "C" void cFEStateEventSelect_onInputBegin(void* self)
 {
     func_00202768((char*)self + 0x48);
@@ -215,10 +232,10 @@ extern "C" void cUITemplate_MAP_onInputAlways(void* self, int a1);
 // PORT: cUIState_onInputAlways__FPv is called with (self, a1) here; bind the 2-arg form to that symbol.
 void cUIState_onInputAlways_2(void* self, int a1) __asm__("cUIState_onInputAlways__FPv");
 
-extern "C" void cFEStateEventSelect_onInputAlways(void* self, int a1)
+extern "C" void cFEStateEventSelect_onInputAlways(void* self, int pInput)
 {
-    cUITemplate_MAP_onInputAlways((char*)self + 0x48, a1);
-    cUIState_onInputAlways_2(self, a1);
+    cUITemplate_MAP_onInputAlways((char*)self + 0x48, pInput);
+    cUIState_onInputAlways_2(self, pInput);
 }
 #endif
 

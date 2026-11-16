@@ -28,16 +28,16 @@ extern "C" void *func_0039E2A0(void*, ...);
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
-extern "C" void *func_0021C678(cOVState* arg0, int arg1, int arg2) {
-    func_0039E2A0(arg0);
-    (arg0->mOVID) = arg2;
-    (arg0->mDoneTransition) = 0;
-    ((char*)arg0->mVtbl) = D_00474E08;
-    (arg0->mAllowPauseMenu) = 0;
-    (arg0->mRemovePDA) = 0;
+extern "C" void *func_0021C678(cOVState* ovState, int arg1, int arg2) {
+    func_0039E2A0(ovState);
+    (ovState->mOVID) = arg2;
+    (ovState->mDoneTransition) = 0;
+    ((char*)ovState->mVtbl) = D_00474E08;
+    (ovState->mAllowPauseMenu) = 0;
+    (ovState->mRemovePDA) = 0;
     unsigned short t = D_004A2088[0];
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return ((void*)arg0);
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = t;
+    return ((void*)ovState);
 }
 #endif
 
@@ -63,8 +63,8 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_allowPauseMenu);
  * @param arg0  the overlay state
  * @return mAllowPauseMenu
  */
-extern "C" int cOVState_allowPauseMenu(cOVState* arg0) {
-    return (arg0->mAllowPauseMenu);
+extern "C" int cOVState_allowPauseMenu(cOVState* self) {
+    return (self->mAllowPauseMenu);
 }
 #endif
 
@@ -89,17 +89,17 @@ extern char D_00474D30[];
 extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
-extern "C" void *func_0021C730(cOVState* arg0, int arg1, int arg2) {
-    func_0039E2A0(arg0);
-    (arg0->mOVID) = arg2;
-    (arg0->mDoneTransition) = 0;
-    ((char*)arg0->mVtbl) = D_00474E08;
-    (arg0->mAllowPauseMenu) = 0;
-    (arg0->mRemovePDA) = 0;
+extern "C" void *func_0021C730(cOVState* ovState, int arg1, int arg2) {
+    func_0039E2A0(ovState);
+    (ovState->mOVID) = arg2;
+    (ovState->mDoneTransition) = 0;
+    ((char*)ovState->mVtbl) = D_00474E08;
+    (ovState->mAllowPauseMenu) = 0;
+    (ovState->mRemovePDA) = 0;
     unsigned short t = D_004A2088[0];
-    ((char*)arg0->mVtbl) = D_00474D30;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return ((void*)arg0);
+    ((char*)ovState->mVtbl) = D_00474D30;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = t;
+    return ((void*)ovState);
 }
 #endif
 
@@ -457,16 +457,16 @@ extern "C" void func_0020EB08(void *, int);
 extern "C" void func_0039E390(void *, int);
 extern char cOVStateHUD1P_vtbl[];
 
-extern "C" void cOVStateHUD1P__cOVStateHUD1P(void *arg0, int arg1) {
-    (*(char **)((char*)(arg0) + (8))) = cOVStateHUD1P_vtbl;
-    if ((char*)arg0 + 0x48 != 0) {
-        char *p = (char*)arg0 + 0x48 + 0x118;
-        while ((char*)arg0 + 0x48 != p) {
+extern "C" void cOVStateHUD1P__cOVStateHUD1P(void *self, int flags) {
+    (*(char **)((char*)(self) + (8))) = cOVStateHUD1P_vtbl;
+    if ((char*)self + 0x48 != 0) {
+        char *p = (char*)self + 0x48 + 0x118;
+        while ((char*)self + 0x48 != p) {
             p -= 0x8C;
             func_0020EB08(p + 8, 2);
         }
     }
-    func_0039E390(arg0, arg1);
+    func_0039E390(self, flags);
 }
 #endif
 
@@ -753,9 +753,9 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateHiScoreList__cOVStateHiScoreList);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
-extern "C" void cOVStateHiScoreList__cOVStateHiScoreList(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void cOVStateHiScoreList__cOVStateHiScoreList(void *self) {
+    *(char **)((char*)self + 8) = D_00474E08;
+    func_0039E390_a(self);
 }
 #endif
 
@@ -2229,9 +2229,9 @@ INCLUDE_ASM("fe/all_in_one_fe", cFEStateLodge__cFEStateLodge);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
-extern "C" void cFEStateLodge__cFEStateLodge(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_0046D0D0;
-    func_0039E390_a(arg0);
+extern "C" void cFEStateLodge__cFEStateLodge(void *self) {
+    *(char **)((char*)self + 8) = D_0046D0D0;
+    func_0039E390_a(self);
 }
 #endif
 
@@ -2255,9 +2255,9 @@ INCLUDE_ASM("fe/all_in_one_fe", cFEStateLodgeRiderDetail__cFEStateLodgeRiderDeta
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
-extern "C" void cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_0046D0D0;
-    func_0039E390_a(arg0);
+extern "C" void cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail(void *self) {
+    *(char **)((char*)self + 8) = D_0046D0D0;
+    func_0039E390_a(self);
 }
 #endif
 
@@ -2281,9 +2281,9 @@ INCLUDE_ASM("fe/all_in_one_fe", cFEStateBuyAttrib__cFEStateBuyAttrib);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
-extern "C" void cFEStateBuyAttrib__cFEStateBuyAttrib(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_0046D0D0;
-    func_0039E390_a(arg0);
+extern "C" void cFEStateBuyAttrib__cFEStateBuyAttrib(void *self) {
+    *(char **)((char*)self + 8) = D_0046D0D0;
+    func_0039E390_a(self);
 }
 #endif
 
@@ -2307,9 +2307,9 @@ INCLUDE_ASM("fe/all_in_one_fe", cFEStateCareerStats__cFEStateCareerStats);
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_0046D0D0[];
 
-extern "C" void cFEStateCareerStats__cFEStateCareerStats(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_0046D0D0;
-    func_0039E390_a(arg0);
+extern "C" void cFEStateCareerStats__cFEStateCareerStats(void *self) {
+    *(char **)((char*)self + 8) = D_0046D0D0;
+    func_0039E390_a(self);
 }
 #endif
 
@@ -2403,9 +2403,9 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLEN
 extern "C" void func_0039E390_a(void *) __asm__("func_0039E390");
 extern char D_00474E08[];
 
-extern "C" void cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START(void *self) {
+    *(char **)((char*)self + 8) = D_00474E08;
+    func_0039E390_a(self);
 }
 #endif
 

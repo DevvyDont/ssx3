@@ -30,6 +30,12 @@ public:
 };
 
 
+/**
+ * Shuts the game audio down: deletes the music system's stream system, then clears gSSXAudio.
+ *
+ * The stream system (MusicSys.mpVStreamSys) is deleted through its virtual destructor with flags 3. Nothing is
+ * deleted when gSSXAudio is already null.
+ */
 extern "C" void SSXAUDIO_DeInit()
 {
     if (gSSXAudio != 0) {
@@ -698,9 +704,9 @@ struct sAudSys5D98 {
     int numUsed;                // 0x7C
 };
 
-static inline int sAudVoice5D98_isOn(sAudVoice5D98* v)
+static inline int sAudVoice5D98_isOn(sAudVoice5D98* self)
 {
-    return v->active && v->enabled;
+    return self->active && self->enabled;
 }
 
 // PORT: returns a voice pointer; the unit declares the return type as int.
@@ -1842,11 +1848,11 @@ struct sSaMix7A10 {
     float cur[10];          // 0x63E8 (cur[j-1])
 };
 
-static inline void sSaMix7A10_set(sSaMix7A10* s, int j, float v)
+static inline void sSaMix7A10_set(sSaMix7A10* self, int j, float v)
 {
-    s->vol[j - 1] = v;
-    s->chan[j].gain = s->chan[j].base * v;
-    s->chan[j].out = s->chan[j].gain * s->cur[j - 1];
+    self->vol[j - 1] = v;
+    self->chan[j].gain = self->chan[j].base * v;
+    self->chan[j].out = self->chan[j].gain * self->cur[j - 1];
 }
 
 extern "C" void func_00287A10(cSSXAudio* self_, int mask, float v, float time)
@@ -1936,11 +1942,11 @@ struct sSaMix7C48 {
     float cur[10];          // 0x63E8 (cur[j-1])
 };
 
-static inline void sSaMix7C48_set(sSaMix7C48* s, int j, float v)
+static inline void sSaMix7C48_set(sSaMix7C48* self, int j, float v)
 {
-    s->vol[j - 1] = v;
-    s->chan[j].gain = s->chan[j].base * v;
-    s->chan[j].out = s->chan[j].gain * s->cur[j - 1];
+    self->vol[j - 1] = v;
+    self->chan[j].gain = self->chan[j].base * v;
+    self->chan[j].out = self->chan[j].gain * self->cur[j - 1];
 }
 
 extern "C" void func_00287C48(cSSXAudio* self_)
@@ -2068,6 +2074,13 @@ struct sAudio7FC8 {
     sSfxEntry7FC8 entries[25];      // 0x647C
 };
 
+/**
+ * Loads up to 25 audio mixes from "data/config/mix.inf".
+ *
+ * Every mix first gets 100 for each of its nine volumes and a time of 0. Then each section of the file fills
+ * the next mix from its MUSIC, DJ, PA, CHARACTER, BOARD, COLLISION, AMBIENT, ARCADESFX and ARCADESPEECH values;
+ * TIME is given in milliseconds and stored in seconds. The number of mixes read goes into the count.
+ */
 extern "C" void cSSXAudio_LoadMixes(sAudio7FC8* self)
 {
     sIniParser7FC8 parser;
@@ -3145,14 +3158,14 @@ extern "C" void func_0029BCF8(void* a0, void* a1);
 extern "C" void func_0029B968(void* a0, void* a1);
 extern "C" void func_0029C088(void* a0, void* a1);
 
-extern "C" void func_00289B18(cSSXAudio* a0, void* a1, int type)
+extern "C" void func_00289B18(cSSXAudio* ssxAudio, void* a1, int type)
 {
     if (type == 0x50) {
-        func_0029BCF8(a0, a1);
+        func_0029BCF8(ssxAudio, a1);
     } else if (type == 0x51) {
-        func_0029B968(a0, a1);
+        func_0029B968(ssxAudio, a1);
     } else if (type == 0x52) {
-        func_0029C088(a0, a1);
+        func_0029C088(ssxAudio, a1);
     }
 }
 #endif

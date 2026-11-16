@@ -103,6 +103,17 @@ extern void* D_0048DB68[];
 // the target calls func_0040FC90 (__main) explicitly. Off-PS2 this is plain main().
 int main_impl(int argc, char** argv) __asm__("main");
 
+/**
+ * Program entry point: initialises the system, creates the PS2 execution manager and runs the application.
+ *
+ * Calls __main (func_0040FC90) and systemInit(), allocates the 0x142C0-byte "PS2ExecutionMan", initialises it
+ * with cExecutionMan_halt() and gives it the PS2 vtable (D_0048DB68), then hands it to cAppMan_run() on the
+ * application object (D_004A5B64).
+ *
+ * @param argc  the argument count, passed to cAppMan_run()
+ * @param argv  the argument strings, passed to cAppMan_run()
+ * @return cAppMan_run()'s result
+ */
 int main_impl(int argc, char** argv)
 {
     func_0040FC90();

@@ -337,7 +337,7 @@ extern void* cFEStateAudioOptions_vtbl[];
 extern char D_0045DA48[];
 extern char D_0045DA38[];
 
-extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* engine, signed char idx, int a3)
+extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* engine, signed char idx, int inStore)
 {
     char* s = (char*)self;
     func_0039E2A0(self, engine);
@@ -355,7 +355,7 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* eng
     for (int i = 3; i >= 0; i--) {
         ((int*)(s + 0x4C))[i] = 0;
     }
-    *(int*)(s + 0x74) = a3;
+    *(int*)(s + 0x74) = inStore;
     char* t = *(char**)(s + 0x10);
     int h = GetHashValue32(D_0045DA48);
     *(void**)(s + 0x5C) = func_00398380(t + 0x58, h);
@@ -502,9 +502,9 @@ static inline void cFEStateAudioOptions_onGainTransition_show(char* o, int on)
     vt[9].fn(o + vt[9].delta, on);
 }
 
-extern "C" int cFEStateAudioOptions_onGainTransition(void* self, int a1)
+extern "C" int cFEStateAudioOptions_onGainTransition(void* self, int bFirstTime)
 {
-    if (a1 != 0 && *(int*)((char*)self + 0x7C) == 0) {
+    if (bFirstTime != 0 && *(int*)((char*)self + 0x7C) == 0) {
         cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x68), 0);
         cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x6C), 0);
         cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x50), 0);
@@ -547,7 +547,7 @@ static inline void cFEStateAudioOptions_onGainFocus_callp(char* o, int slot, voi
     vt[slot].fn(o + vt[slot].delta, a);
 }
 
-extern "C" void cFEStateAudioOptions_onGainFocus(void* self, int a1)
+extern "C" void cFEStateAudioOptions_onGainFocus(void* self, int pPrevState)
 {
     char* s = (char*)self;
     if (*(int*)(s + 0x7C) == 0) {
@@ -567,7 +567,7 @@ extern "C" void cFEStateAudioOptions_onGainFocus(void* self, int a1)
             cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x64), 6, 0);
         }
     }
-    cFEState_onGainFocus(self, a1);
+    cFEState_onGainFocus(self, pPrevState);
 }
 #endif
 

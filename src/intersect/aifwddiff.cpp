@@ -1020,6 +1020,19 @@ static inline void Move_91E0(sRoot_8C20* root, int idx, sItem_00328660* item, sC
     }
 }
 
+/**
+ * Moves a node in the spatial hash (On Tour nash::Nash) after its bounding box has changed.
+ *
+ * Computes the cell keys of the old and new boxes; nothing happens when they are equal. The signs of the key's
+ * x, y and z pick one of eight octant roots: when the octant changes the node is removed from the old one and
+ * added to the new one, otherwise it is moved within its octant.
+ *
+ * @param roots   the eight octant roots, indexed by the key's sign bits
+ * @param idx     the node type (On Tour nash::NodeType)
+ * @param item    the node (On Tour nash::Node*)
+ * @param box     the node's new bounding box
+ * @param oldBox  the node's previous bounding box
+ */
 extern "C" void nash_Nash_movenode(sRoot_8C20 (*roots)[2][2], int idx, sItem_00328660* item, sBox_8F28* box,
                               sBox_8F28* oldBox)
 {

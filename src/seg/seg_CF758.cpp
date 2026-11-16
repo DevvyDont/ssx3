@@ -53,6 +53,19 @@ static inline int Loc_CE758(char* key)
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
 }
 
+/**
+ * Sets a text widget to the name of one entry of a peak's challenge table (D_0045AAD8).
+ *
+ * Kind 3 gives "kT_OVRCMNEarnings"; kind 2 gives "kT_OVRCMNCollectibles" for entry 0 and
+ * "kT_TITLEBigChallenges" otherwise. Other kinds look up the entry's type: 4 is the peak's
+ * "Happiness/Ruthless/Throne %s" with the localised "kT_cmnRaceCaps", 5 the peak's "... Jam", 6 to 11 the peak
+ * race and jam event names ("kT_EventPk1Race" and so on), and any other type the name of the entry's location.
+ *
+ * @param text  the text widget to set
+ * @param peak  the peak, 0 to 2
+ * @param kind  the table group, 0 to 3
+ * @param idx   the entry within the group, 0 to 4
+ */
 extern "C" void setChallengeName(cUIText* text, int peak, int kind, int idx)
 {
     if (kind == 3) {

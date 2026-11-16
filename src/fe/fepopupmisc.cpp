@@ -1775,13 +1775,13 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onWidgetEvent);
 extern int D_004A19D4;
 extern "C" void func_0039F190(void* self, int a1);
 
-extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(void* self, void* a1, int a2)
+extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(void* self, void* pWidget, int Event)
 {
-    switch (a2) {
+    switch (Event) {
     case 5: {
         char* p = *(char**)((char*)self + 0x10);
         *(char*)((char*)self + 0x48) = 1;
-        D_004A19D4 = *(int*)((char*)a1 + 0x18) != 0;
+        D_004A19D4 = *(int*)((char*)pWidget + 0x18) != 0;
         func_0039F190(p + 0x18, 1);
         break;
     }

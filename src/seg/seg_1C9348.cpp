@@ -122,6 +122,16 @@ extern "C" int func_002C85A0(int a, int b, int c) {
 //100%
 INCLUDE_ASM("seg/seg_1C9348", HUFF_deltabytes);
 #ifdef SKIP_ASM
+/**
+ * Delta-encodes a byte buffer for the Huffman compressor: each output byte is the input byte minus the previous
+ * one.
+ *
+ * The first byte is taken relative to 0.
+ *
+ * @param src  the bytes to encode
+ * @param dst  receives the deltas (n bytes)
+ * @param n    the number of bytes
+ */
 extern "C" void HUFF_deltabytes(unsigned char *src, unsigned char *dst, int n) {
     unsigned char *end = src + n;
     int prev = 0;
@@ -177,13 +187,13 @@ extern "C" void HUFF_writebits_impl(HuffState_8600* s, HuffOut_8600* out, unsign
 INCLUDE_ASM("seg/seg_1C9348", HUFF_treechase);
 #ifdef SKIP_ASM
 struct HS_86F8 { char pad[0x1524]; int l[0x208]; int r[0x208]; int a[256]; };
-extern "C" void HUFF_treechase(HS_86F8 *self, unsigned i, int d) {
+extern "C" void HUFF_treechase(HS_86F8 *self, unsigned i, int bits) {
     if (i < 0x100) {
-        self->a[i] = d;
+        self->a[i] = bits;
         return;
     }
-    HUFF_treechase(self, self->l[i], d + 1);
-    HUFF_treechase(self, self->r[i], d + 1);
+    HUFF_treechase(self, self->l[i], bits + 1);
+    HUFF_treechase(self, self->r[i], bits + 1);
 }
 #endif
 
@@ -270,24 +280,24 @@ struct HS_8970 {
     int b[0x11A];           // 0x2964
     int cur;                // 0x2DCC
 };
-extern "C" int HUFF_minrep(HS_8970* self, unsigned v, unsigned n)
+extern "C" int HUFF_minrep(HS_8970* self, unsigned remaining, unsigned n)
 {
     int best;
     if (n != 0) {
-        best = HUFF_minrep(self, v, n - 1);
+        best = HUFF_minrep(self, remaining, n - 1);
         if (self->used[self->cur + n] != 0) {
-            unsigned q = v / n;
-            int c = HUFF_minrep(self, v - q * n, n - 1) + self->a[self->cur + n] * q;
+            unsigned q = remaining / n;
+            int c = HUFF_minrep(self, remaining - q * n, n - 1) + self->a[self->cur + n] * q;
             if (c < best) {
                 best = c;
             }
         }
     } else {
         best = 0;
-        if (v != 0) {
+        if (remaining != 0) {
             best = 20;
-            if (v < 0xFC) {
-                best = self->a[self->cur] + 3 + self->len[v] * 2;
+            if (remaining < 0xFC) {
+                best = self->a[self->cur] + 3 + self->len[remaining] * 2;
             }
         }
     }
@@ -403,32 +413,40 @@ struct HuffState_8CF8 {
     unsigned int base[252];     // 0x1134
 };
 
-extern "C" void HUFF_init(HuffState_8CF8* s)
+/**
+ * Fills the Huffman encoder's length and base tables for byte values 0 to 251.
+ *
+ * Values are grouped in runs of 4, 8, 16, 32, 64 and 128: each run gets the extra-bit count 0 to 5 in len[] and
+ * its first value (0, 4, 12, 28, 60, 124) in base[].
+ *
+ * @param s  the encoder state (On Tour HuffEncodeContext*)
+ */
+extern "C" void HUFF_init(HuffState_8CF8* EC)
 {
     unsigned int i;
     for (i = 0; i < 4; i++) {
-        s->len[i] = 0;
-        s->base[i] = 0;
+        EC->len[i] = 0;
+        EC->base[i] = 0;
     }
     for (; i < 12; i++) {
-        s->len[i] = 1;
-        s->base[i] = 4;
+        EC->len[i] = 1;
+        EC->base[i] = 4;
     }
     for (; i < 28; i++) {
-        s->len[i] = 2;
-        s->base[i] = 12;
+        EC->len[i] = 2;
+        EC->base[i] = 12;
     }
     for (; i < 60; i++) {
-        s->len[i] = 3;
-        s->base[i] = 28;
+        EC->len[i] = 3;
+        EC->base[i] = 28;
     }
     for (; i < 124; i++) {
-        s->len[i] = 4;
-        s->base[i] = 60;
+        EC->len[i] = 4;
+        EC->base[i] = 60;
     }
     for (; i < 252; i++) {
-        s->len[i] = 5;
-        s->base[i] = 124;
+        EC->len[i] = 5;
+        EC->base[i] = 124;
     }
 }
 #endif
@@ -476,7 +494,7 @@ extern "C" void huffSym_9A48(void* s, void* out, unsigned int sym) __asm__("func
 // Locals are reused the way the original does (run doubles as the MTF cursor, last holds the order
 // value, k is also the "coded as delta" flag, d becomes the delta code index); the register
 // allocation depends on that reuse.
-extern "C" void HUFF_pack(void* vs, void* out, int a)
+extern "C" void HUFF_pack(void* vs, void* out, int opt)
 {
     HS_9A48* s = (HS_9A48*)vs;
     HS2_9A48* t = (HS2_9A48*)vs;
@@ -617,46 +635,46 @@ extern "C" void HUFF_writebits_9F60(HuffState_9F60* s, HuffBuf_9F60* out, unsign
 extern "C" void HUFF_analysis(void* s, int a, int b);
 extern "C" void HUFF_pack(void* s, void* out, int a);
 
-extern "C" int HUFF_packfile(HuffState_9F60* s, HuffBuf_9F60* in, HuffBuf_9F60* out, int len, int mode)
+extern "C" int HUFF_packfile(HuffState_9F60* EC, HuffBuf_9F60* in, HuffBuf_9F60* out, int len, int mode)
 {
     unsigned int i;
     unsigned int code;
-    s->bitcount = 0;
-    s->bitbuf = 0;
-    s->mask[0] = 0;
+    EC->bitcount = 0;
+    EC->bitbuf = 0;
+    EC->mask[0] = 0;
     for (i = 1; i < 17; i++) {
-        s->mask[i] = s->mask[i - 1] * 2 + 1;
+        EC->mask[i] = EC->mask[i - 1] * 2 + 1;
     }
-    HUFF_init_9F60(s);
-    s->src = in->buf;
+    HUFF_init_9F60(EC);
+    EC->src = in->buf;
     {
         int n = in->len;
-        s->srclen = n;
-        s->remaining = n;
-        s->srcend = s->src + n;
+        EC->srclen = n;
+        EC->remaining = n;
+        EC->srcend = EC->src + n;
     }
     out->len = 0;
-    s->bitcount = 0;
-    s->bitbuf = 0;
-    s->nbytes = 0;
-    HUFF_analysis(s, 0x39, 0xF);
+    EC->bitcount = 0;
+    EC->bitbuf = 0;
+    EC->nbytes = 0;
+    HUFF_analysis(EC, 0x39, 0xF);
     if (len == in->len) {
         code = 0;
         if (mode == 0) code = 0x30FB;
         else if (mode == 1) code = 0x32FB;
         else if (mode == 2) code = 0x34FB;
-        HUFF_writebits_9F60(s, out, code, 16);
-        HUFF_writebits_9F60(s, out, in->len, 24);
+        HUFF_writebits_9F60(EC, out, code, 16);
+        HUFF_writebits_9F60(EC, out, in->len, 24);
     } else {
         code = 0;
         if (mode == 0) code = 0x31FB;
         else if (mode == 1) code = 0x33FB;
         else if (mode == 2) code = 0x35FB;
-        HUFF_writebits_9F60(s, out, code, 16);
-        HUFF_writebits_9F60(s, out, len, 24);
-        HUFF_writebits_9F60(s, out, in->len, 24);
+        HUFF_writebits_9F60(EC, out, code, 16);
+        HUFF_writebits_9F60(EC, out, len, 24);
+        HUFF_writebits_9F60(EC, out, in->len, 24);
     }
-    HUFF_pack(s, out, 0x39);
+    HUFF_pack(EC, out, 0x39);
     return out->len;
 }
 #endif

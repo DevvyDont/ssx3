@@ -1517,7 +1517,7 @@ extern char D_0048E208[];
 extern char D_0048E228[];
 
 // Compiles one named statement into out (space-terminated); returns the new length or -1.
-extern "C" int cInputMapParser_compileStatement(cInputMapParser* self, const char* name, int* out, int max, int a5)
+extern "C" int cInputMapParser_compileStatement(cInputMapParser* self, const char* name, int* out, int max, int defaultModifier)
 {
     sEntry_324590* e = cInputMapParser_lookupIdentifierName_K(self, name);
     if (e == 0) {
@@ -1526,7 +1526,7 @@ extern "C" int cInputMapParser_compileStatement(cInputMapParser* self, const cha
     }
     int sep = ' ';
     int state = 0;
-    int n = cInputMapParser_compileParseNode(self, e->code, &state, out, max, a5);
+    int n = cInputMapParser_compileParseNode(self, e->code, &state, out, max, defaultModifier);
     max -= n;
     out += n;
     if (max <= 0) {
@@ -1582,7 +1582,7 @@ union sInsn_324678 {
     } j;
     float f;
 };
-extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vnode, int* dst, void* vcode, int cap, int a5)
+extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vnode, int* dst, void* vcode, int cap, int defaultModifier)
 {
     sNode_324678* node = (sNode_324678*)vnode;
     sInsn_324678* code = (sInsn_324678*)vcode;
@@ -1608,9 +1608,9 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
         code[1].f = node->value;
         return 2;
     case 1:
-        return cInputMapParser_compileParseNode(self, ((sVar_324678*)node->a)->expr, dst, code, cap, node->b != 5 ? node->b : a5);
+        return cInputMapParser_compileParseNode(self, ((sVar_324678*)node->a)->expr, dst, code, cap, node->b != 5 ? node->b : defaultModifier);
     case 2: {
-        int idx = func_00321AD8(self, node->index, node->b == 5 ? a5 : node->b);
+        int idx = func_00321AD8(self, node->index, node->b == 5 ? defaultModifier : node->b);
         if (*dst == -1) {
             *dst = idx;
             return 0;
@@ -1641,7 +1641,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
         return 1;
     case 5: {
         int cond = -1;
-        int n1 = cInputMapParser_compileParseNode(self, node->a, &cond, code, cap, a5);
+        int n1 = cInputMapParser_compileParseNode(self, node->a, &cond, code, cap, defaultModifier);
         if (n1 < 0) {
             return -1;
         }
@@ -1658,7 +1658,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
             self->FreeRegisters[self->NumFreeRegisters++] = reg;
         }
         cap--;
-        int n2 = cInputMapParser_compileParseNode(self, node->then_, dst, code + 1, cap, a5);
+        int n2 = cInputMapParser_compileParseNode(self, node->then_, dst, code + 1, cap, defaultModifier);
         if (n2 < 0) {
             return -1;
         }
@@ -1675,7 +1675,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
         }
         code->j.op = 3;
         code->j.reg = 0;
-        int n3 = cInputMapParser_compileParseNode(self, node->else_, dst, code + 1, cap - 1, a5);
+        int n3 = cInputMapParser_compileParseNode(self, node->else_, dst, code + 1, cap - 1, defaultModifier);
         if (n3 < 0) {
             return -1;
         }
@@ -1686,34 +1686,34 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
         code->j.offset = n3;
         return n1 + n2 + n3 + 2;
     }
-    case 6: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 4, a5);
-    case 7: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 5, a5);
-    case 8: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 6, a5);
-    case 9: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 7, a5);
-    case 10: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 8, a5);
-    case 11: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 9, a5);
-    case 12: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 10, a5);
-    case 13: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 11, a5);
-    case 14: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 12, a5);
-    case 15: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 13, a5);
-    case 16: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 14, a5);
-    case 17: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 15, a5);
-    case 20: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 16, a5);
-    case 21: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 17, a5);
-    case 22: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 18, a5);
-    case 23: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 19, a5);
-    case 24: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 20, a5);
-    case 25: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 21, a5);
-    case 26: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 22, a5);
-    case 27: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 23, a5);
-    case 28: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 24, a5);
-    case 29: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 25, a5);
-    case 30: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 26, a5);
-    case 31: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 27, a5);
-    case 32: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 28, a5);
-    case 33: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 29, a5);
-    case 18: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 30, a5);
-    case 19: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 31, a5);
+    case 6: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 4, defaultModifier);
+    case 7: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 5, defaultModifier);
+    case 8: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 6, defaultModifier);
+    case 9: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 7, defaultModifier);
+    case 10: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 8, defaultModifier);
+    case 11: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 9, defaultModifier);
+    case 12: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 10, defaultModifier);
+    case 13: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 11, defaultModifier);
+    case 14: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 12, defaultModifier);
+    case 15: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 13, defaultModifier);
+    case 16: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 14, defaultModifier);
+    case 17: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 15, defaultModifier);
+    case 20: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 16, defaultModifier);
+    case 21: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 17, defaultModifier);
+    case 22: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 18, defaultModifier);
+    case 23: return cInputMapParser_compileBinaryNode_K(self, node, dst, code, cap, 19, defaultModifier);
+    case 24: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 20, defaultModifier);
+    case 25: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 21, defaultModifier);
+    case 26: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 22, defaultModifier);
+    case 27: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 23, defaultModifier);
+    case 28: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 24, defaultModifier);
+    case 29: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 25, defaultModifier);
+    case 30: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 26, defaultModifier);
+    case 31: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 27, defaultModifier);
+    case 32: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 28, defaultModifier);
+    case 33: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 29, defaultModifier);
+    case 18: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 30, defaultModifier);
+    case 19: return cInputMapParser_compileUnaryNode_K(self, node, dst, code, cap, 31, defaultModifier);
     }
     return -1;
 }
@@ -1733,17 +1733,17 @@ struct sInsn_00324EC8 {
     unsigned int src : 10;
     unsigned int arg : 10;
 };
-extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, void* node, int* dst, sInsn_00324EC8* code, int cap, int op, int a6)
+extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, void* node, int* dst, sInsn_00324EC8* code, int cap, int op, int defaultModifier)
 {
     int src = -1;
-    int n1 = cInputMapParser_compileParseNode(self, *(void**)((char*)node + 4), &src, code, cap, a6);
+    int n1 = cInputMapParser_compileParseNode(self, *(void**)((char*)node + 4), &src, code, cap, defaultModifier);
     if (n1 < 0) {
         return -1;
     }
     code += n1;
     cap -= n1;
     int arg = -1;
-    int n2 = cInputMapParser_compileParseNode(self, *(void**)((char*)node + 8), &arg, code, cap, a6);
+    int n2 = cInputMapParser_compileParseNode(self, *(void**)((char*)node + 8), &arg, code, cap, defaultModifier);
     if (n2 < 0) {
         return -1;
     }
@@ -1790,11 +1790,11 @@ struct sInsn_003250D8 {
     unsigned int src : 10;
     unsigned int arg : 10;
 };
-extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, void* node, int* dst, sInsn_003250D8* code, int cap, int op, int a6)
+extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, void* node, int* dst, sInsn_003250D8* code, int cap, int op, int defaultModifier)
 {
     void* arg = *(void**)((char*)node + 4);
     int src = -1;
-    int n = cInputMapParser_compileParseNode(self, arg, &src, code, cap, a6);
+    int n = cInputMapParser_compileParseNode(self, arg, &src, code, cap, defaultModifier);
     if (n < 0) {
         return -1;
     }
@@ -2248,18 +2248,18 @@ struct sParseStream_326078 {
     int line;
 };
 
-extern "C" void cInputPreProcessor_readFile(void* self, int a1, int a2)
+extern "C" void cInputPreProcessor_readFile(void* self, int path, int fn)
 {
     char name[0xA0];
     sParseStream_326078 st;
-    sprintf(name, D_004A3FA0, a1, a2);
+    sprintf(name, D_004A3FA0, path, fn);
     unsigned char* p = func_003E1A10(name, &st.size, 0);
     st.cur = st.base = p;
     st.line = 1;
     cInputPreProcessor_readChar(self, (sParseStream*)&st);
     // PORT: the unit declares cInputPreProcessor_writeTagLine's third parameter as int; it receives a char*.
     cInputPreProcessor_writeTagLine(self, st.line, (int)name);
-    while (cInputPreProcessor_copyLine(self, (sParseStream*)&st, a1, a2)) {
+    while (cInputPreProcessor_copyLine(self, (sParseStream*)&st, path, fn)) {
     }
     if (st.base) {
         cMemMan_free(st.base);
@@ -2282,7 +2282,7 @@ static inline int isWS_326150(int c)
     return c == ' ' || c == '\t' || c == '\r';
 }
 
-extern "C" int cInputPreProcessor_copyLine(void* self, sParseStream* s, int a2, int a3)
+extern "C" int cInputPreProcessor_copyLine(void* self, sParseStream* isrc, int path, int fn)
 {
     int ch;
     for (;;) {
@@ -2290,25 +2290,25 @@ extern "C" int cInputPreProcessor_copyLine(void* self, sParseStream* s, int a2, 
         if (!isWS_326150(ch))
             break;
         cInputPreProcessor_writeChar(self, (char)*(int*)((char*)self + 0xC));
-        cInputPreProcessor_readChar(self, s);
+        cInputPreProcessor_readChar(self, isrc);
         if (*(int*)((char*)self + 0xC) < 0)
             return 0;
     }
     if (ch == '#') {
-        cInputPreProcessor_readChar(self, s);
-        cInputPreProcessor_readCmdLine(self, s, a2, a3);
+        cInputPreProcessor_readChar(self, isrc);
+        cInputPreProcessor_readCmdLine(self, isrc, path, fn);
         return *(int*)((char*)self + 0xC) >= 0;
     }
     if (ch == '/') {
-        cInputPreProcessor_readChar(self, s);
+        cInputPreProcessor_readChar(self, isrc);
         int c = *(int*)((char*)self + 0xC);
         if (c == '/') {
-            func_003265C0(self, s, a2, a3);
+            func_003265C0(self, isrc, path, fn);
             return *(int*)((char*)self + 0xC) >= 0;
         }
         if (c == '*') {
-            cInputPreProcessor_readChar(self, s);
-            func_003264B0(self, s, a2, a3);
+            cInputPreProcessor_readChar(self, isrc);
+            func_003264B0(self, isrc, path, fn);
             return *(int*)((char*)self + 0xC) >= 0;
         }
         cInputPreProcessor_writeChar(self, '/');
@@ -2316,11 +2316,11 @@ extern "C" int cInputPreProcessor_copyLine(void* self, sParseStream* s, int a2, 
     while (*(int*)((char*)self + 0xC) >= 0) {
         cInputPreProcessor_writeChar(self, (char)*(int*)((char*)self + 0xC));
         if (*(int*)((char*)self + 0xC) == '\n') {
-            *(int*)((char*)s + 0xC) += 1;
-            cInputPreProcessor_readChar(self, s);
+            *(int*)((char*)isrc + 0xC) += 1;
+            cInputPreProcessor_readChar(self, isrc);
             break;
         }
-        cInputPreProcessor_readChar(self, s);
+        cInputPreProcessor_readChar(self, isrc);
     }
     return *(int*)((char*)self + 0xC) >= 0;
 }
@@ -2387,10 +2387,10 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cInputPreProcessor_writeString(void* self, char* msg);
 extern char D_0048E3C8[];
 
-extern "C" void cInputPreProcessor_writeTagLine(void* self, int a1, int a2)
+extern "C" void cInputPreProcessor_writeTagLine(void* self, int line, int name)
 {
     char buf[0xB0];
-    sprintf(buf, D_0048E3C8, a1, a2);
+    sprintf(buf, D_0048E3C8, line, name);
     cInputPreProcessor_writeString(self, buf);
 }
 #endif
@@ -2404,12 +2404,12 @@ struct sParseStream {
     unsigned char* cur;
 };
 
-extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s)
+extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* isrc)
 {
-    if (s->cur == s->base + s->size) {
+    if (isrc->cur == isrc->base + isrc->size) {
         *(int*)((char*)self + 0xc) = -1;
     } else {
-        *(int*)((char*)self + 0xc) = *s->cur++;
+        *(int*)((char*)self + 0xc) = *isrc->cur++;
     }
 }
 #endif
@@ -2483,13 +2483,13 @@ error:
 //100%
 INCLUDE_ASM("input/inputparse", cInputPreProcessor_skipToEOL);
 #ifdef SKIP_ASM
-extern "C" void cInputPreProcessor_skipToEOL(void* self, sParseStream* s)
+extern "C" void cInputPreProcessor_skipToEOL(void* self, sParseStream* isrc)
 {
     while (*(int*)((char*)self + 0xC) >= 0) {
-        cInputPreProcessor_readChar(self, s);
+        cInputPreProcessor_readChar(self, isrc);
         if (*(int*)((char*)self + 0xC) == 10) {
-            cInputPreProcessor_readChar(self, s);
-            *(int*)((char*)s + 0xC) += 1;
+            cInputPreProcessor_readChar(self, isrc);
+            *(int*)((char*)isrc + 0xC) += 1;
             break;
         }
     }
@@ -2519,16 +2519,16 @@ static inline int isAlpha_3266E8(int c)
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* s, int a2, int a3)
+extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, int path, int fn)
 {
     char word[16];
     char name[0xA0];
     char buf[0xA0];
     int ch;
     while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
-        cInputPreProcessor_readChar(self, s);
+        cInputPreProcessor_readChar(self, isrc);
     if (ch <= 0) {
-        func_00326A20_5(self, s, a2, a3, "unexpected EOF in pre-processor command");
+        func_00326A20_5(self, isrc, path, fn, "unexpected EOF in pre-processor command");
         return;
     }
     char* p = word;
@@ -2536,49 +2536,49 @@ extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* s, int 
         if (!isAlpha_3266E8(*(int*)((char*)self + 0xC)))
             break;
         *p = *(int*)((char*)self + 0xC);
-        cInputPreProcessor_readChar(self, s);
+        cInputPreProcessor_readChar(self, isrc);
         p++;
     } while (p - word < 15);
     *p = 0;
     if (func_004165A8(word, "include") == 0) {
         while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
-            cInputPreProcessor_readChar(self, s);
+            cInputPreProcessor_readChar(self, isrc);
         if (ch != '"') {
-            func_00326A20_5(self, s, a2, a3, "illegal 'include' directive");
-            cInputPreProcessor_skipToEOL(self, s);
+            func_00326A20_5(self, isrc, path, fn, "illegal 'include' directive");
+            cInputPreProcessor_skipToEOL(self, isrc);
             return;
         }
-        cInputPreProcessor_readChar(self, s);
+        cInputPreProcessor_readChar(self, isrc);
         int n = 0;
         while (*(int*)((char*)self + 0xC) != '"') {
             int c = *(int*)((char*)self + 0xC);
             if (c < 0 || c == '\n') {
-                func_00326A20_5(self, s, a2, a3, "illegal 'include' directive");
-                cInputPreProcessor_skipToEOL(self, s);
+                func_00326A20_5(self, isrc, path, fn, "illegal 'include' directive");
+                cInputPreProcessor_skipToEOL(self, isrc);
                 return;
             }
             name[n++] = *(int*)((char*)self + 0xC);
-            cInputPreProcessor_readChar(self, s);
+            cInputPreProcessor_readChar(self, isrc);
         }
         name[n] = 0;
-        cInputPreProcessor_readChar(self, s);
+        cInputPreProcessor_readChar(self, isrc);
         while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
-            cInputPreProcessor_readChar(self, s);
+            cInputPreProcessor_readChar(self, isrc);
         if (ch >= 0 && ch != '\n') {
-            func_00326A20_5(self, s, a2, a3, "illegal 'include' directive");
-            cInputPreProcessor_skipToEOL(self, s);
+            func_00326A20_5(self, isrc, path, fn, "illegal 'include' directive");
+            cInputPreProcessor_skipToEOL(self, isrc);
             return;
         }
         if (ch == '\n')
-            *(int*)((char*)s + 0xC) += 1;
+            *(int*)((char*)isrc + 0xC) += 1;
         // PORT: the unit declares cInputPreProcessor_readFile's third parameter as int; it receives a char*.
-        cInputPreProcessor_readFile(self, a2, (int)name);
-        sprintf(buf, "%s%s", a2, a3);
-        cInputPreProcessor_writeTagLine(self, *(int*)((char*)s + 0xC), (int)buf);
-        cInputPreProcessor_readChar(self, s);
+        cInputPreProcessor_readFile(self, path, (int)name);
+        sprintf(buf, "%s%s", path, fn);
+        cInputPreProcessor_writeTagLine(self, *(int*)((char*)isrc + 0xC), (int)buf);
+        cInputPreProcessor_readChar(self, isrc);
     } else {
-        func_00326A20_5(self, s, a2, a3, "illegal pre-processor directive");
-        cInputPreProcessor_skipToEOL(self, s);
+        func_00326A20_5(self, isrc, path, fn, "illegal pre-processor directive");
+        cInputPreProcessor_skipToEOL(self, isrc);
     }
 }
 #endif
@@ -2696,13 +2696,13 @@ struct sInputParse_00326B88 {
     cInputDevice_326B88* devices[4];
 };
 
-extern "C" void cPadCache_cacheInput(sInputParse_00326B88* s)
+extern "C" void cPadCache_cacheInput(sInputParse_00326B88* self)
 {
     int i;
-    for (i = 0; i < s->count; i++) {
-        s->slots[s->tail][i].value = s->devices[i]->read(s->slots[s->tail][i].data, 0x18);
+    for (i = 0; i < self->count; i++) {
+        self->slots[self->tail][i].value = self->devices[i]->read(self->slots[self->tail][i].data, 0x18);
     }
-    s->tail = (s->tail + 1) % 30;
+    self->tail = (self->tail + 1) % 30;
 }
 #endif
 
@@ -2720,11 +2720,11 @@ struct sInputParse_00326C60 {
     int tail;
 };
 
-extern "C" int cPadCache_flush(sInputParse_00326C60* s)
+extern "C" int cPadCache_flush(sInputParse_00326C60* self)
 {
-    int tail = s->tail;
-    int head = s->head;
-    s->head = (tail + 29) % 30;
+    int tail = self->tail;
+    int head = self->head;
+    self->head = (tail + 29) % 30;
     return (tail - head + 30) % 30;
 }
 #endif

@@ -103,6 +103,14 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadState__cFELoadState);
 extern void* cFELoadState_vtbl[];
 extern "C" void* func_0039E390(void* self);
 
+/**
+ * Destroys the front-end load state: stores its vtable at +0x8, then runs the cUIState destructor.
+ *
+ * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * untouched.
+ *
+ * @return no meaningful value (func_0039E390 returns nothing)
+ */
 extern "C" void* cFELoadState__cFELoadState(void* self)
 {
     *(void**)((char*)self + 0x8) = cFELoadState_vtbl;
@@ -179,6 +187,14 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget);
 extern signed char D_00535C11[];
 
+/**
+ * Creates the load screen's quick-play widget, except on the online game path.
+ *
+ * Fetches back-end interface 0 (the result is unused), then calls cFELoadState_widgetCreateQP() unless the
+ * race's game path (cGamePath, D_00535C11) is 2, online.
+ *
+ * @param widget  the widget being created
+ */
 extern "C" void cFELoadState_onWidgetCreate(void* self, void* widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -194,6 +210,14 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge__cFELoadStateInLodge);
 extern void* cFELoadStateInLodge_vtbl[];
 extern "C" void* func_0039E390(void* self);
 
+/**
+ * Destroys the in-lodge load state: stores its vtable at +0x8, then runs the cUIState destructor.
+ *
+ * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * untouched.
+ *
+ * @return no meaningful value (func_0039E390 returns nothing)
+ */
 extern "C" void* cFELoadStateInLodge__cFELoadStateInLodge(void* self)
 {
     *(void**)((char*)self + 0x8) = cFELoadStateInLodge_vtbl;

@@ -1063,24 +1063,24 @@ extern "C" int func_002BAC38(void *arg0) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAC60);
 #ifdef SKIP_ASM
-extern "C" int func_002BAC60(cMusicSys* arg0) {
-    return (arg0->mNumSongs);
+extern "C" int func_002BAC60(cMusicSys* musicSys) {
+    return (musicSys->mNumSongs);
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAC68);
 #ifdef SKIP_ASM
-extern "C" int func_002BAC68(cMusicSys* arg0) {
-    return (arg0->mNumActiveSongs);
+extern "C" int func_002BAC68(cMusicSys* musicSys) {
+    return (musicSys->mNumActiveSongs);
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAC70);
 #ifdef SKIP_ASM
-extern "C" int func_002BAC70(cMusicSys* arg0) {
-    return (arg0->mNumFESongs);
+extern "C" int func_002BAC70(cMusicSys* musicSys) {
+    return (musicSys->mNumFESongs);
 }
 #endif
 
@@ -1088,16 +1088,16 @@ extern "C" int func_002BAC70(cMusicSys* arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BAC78);
 #ifdef SKIP_ASM
 struct S78 { char x[0xB]; };
-extern "C" void *func_002BAC78(cMusicSys* arg0) {
-    return (S78 *)((char *)arg0 + 0x124) + arg0->mCurrentSongNum;
+extern "C" void *func_002BAC78(cMusicSys* musicSys) {
+    return (S78 *)((char *)musicSys + 0x124) + musicSys->mCurrentSongNum;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAC90);
 #ifdef SKIP_ASM
-extern "C" int func_002BAC90(cMusicSys* arg0) {
-    return (arg0->mCurrentSongNum);
+extern "C" int func_002BAC90(cMusicSys* musicSys) {
+    return (musicSys->mCurrentSongNum);
 }
 #endif
 
@@ -1148,16 +1148,16 @@ extern "C" long func_002BACD8(void *arg0) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BACE0);
 #ifdef SKIP_ASM
-extern "C" void func_002BACE0(cMusicSys* arg0, int arg1) {
-    (arg0->mCurrentSongNum) = arg1;
+extern "C" void func_002BACE0(cMusicSys* musicSys, int arg1) {
+    (musicSys->mCurrentSongNum) = arg1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BACE8);
 #ifdef SKIP_ASM
-extern "C" int func_002BACE8(cMusicSys* arg0) {
-    return (*(int *)((char*)(arg0) + (0x41C)));
+extern "C" int func_002BACE8(cMusicSys* musicSys) {
+    return (*(int *)((char*)(musicSys) + (0x41C)));
 }
 #endif
 
@@ -1180,9 +1180,9 @@ extern "C" int func_002BACF8(void) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAD00);
 #ifdef SKIP_ASM
-extern "C" char* func_002BAD00(cSpeechSys* p, int i) {
+extern "C" char* func_002BAD00(cSpeechSys* speechSys, int i) {
     int off = i * 0x14 + 0x158;
-    return ((char*)p) + off;
+    return ((char*)speechSys) + off;
 }
 #endif
 
@@ -1496,9 +1496,9 @@ extern "C" int func_002BB100(void *arg0, void *arg1) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_cWorldPainterMan);
 #ifdef SKIP_ASM
-extern "C" void *cWorldPainterMan_cWorldPainterMan(void *arg0) {
-    (*(int *)((char*)(arg0) + (4))) = 0;
-    return arg0;
+extern "C" void *cWorldPainterMan_cWorldPainterMan(void *self) {
+    (*(int *)((char*)(self) + (4))) = 0;
+    return self;
 }
 #endif
 

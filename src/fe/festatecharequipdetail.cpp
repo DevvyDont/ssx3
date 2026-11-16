@@ -108,7 +108,7 @@ static inline int Find_8DB8(char* mgr, int hash)
     return func_00398380(mgr + 0x58, hash);
 }
 
-extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* p, void* owner, signed char team, int a3, int a4)
+extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* p, void* owner, signed char team, int inStore, int canSwitchMode)
 {
     sCharEquip_8DB8* self = (sCharEquip_8DB8*)p;
     func_0039E2A0(self);
@@ -126,7 +126,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* p, void* owner, signe
     self->f15 = func_001A1CD0(*self->mgr, team);
     void* player = cBE_getInterface(cBE_getBE(), 1);
     self->slot = cBENewPlayerInterface_getPlayerCharID(player, self->team);
-    if (a3 != 0) {
+    if (inStore != 0) {
         self->fC8 = 1;
     } else {
         self->fC8 = 0;
@@ -187,8 +187,8 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* p, void* owner, signe
     void* shop = cBE_getInterface(cBE_getBE(), 9);
     func_0014AEA8(shop, self->team, self->slot);
     self->fC4 = func_0014B478(shop, self->team, self->slot);
-    self->fAE4 = a4;
-    if (a3 != 0 || a4 != 0) {
+    self->fAE4 = canSwitchMode;
+    if (inStore != 0 || canSwitchMode != 0) {
         switch (cBENewPlayerInterface_getLastHub(player, cBELibrary_getRiderIndex(self->team))) {
         case 17:
             self->fCC = 1;
@@ -331,7 +331,7 @@ extern "C" void func_0019BD48(void* self, int a1);
 extern "C" void func_0019B618(void* self, int a1, int a2);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 
-extern "C" void cFEStateCharEquip_onGainFocus(void* self, int a1)
+extern "C" void cFEStateCharEquip_onGainFocus(void* self, int pPrevState)
 {
     bool off = !*(bool*)((char*)self + 0xC8);
     if (!off) {
@@ -342,7 +342,7 @@ extern "C" void cFEStateCharEquip_onGainFocus(void* self, int a1)
     func_0019BC90(self);
     func_0019BD48(self, 0);
     func_0019B618(self, 1, 1);
-    cFEState_onGainFocus(self, a1);
+    cFEState_onGainFocus(self, pPrevState);
 }
 #endif
 
@@ -352,6 +352,12 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onLoseFocus);
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0019E538(void* rider, int a1);
 
+/**
+ * Clears two flags of the front-end rider record this equip screen works on when the screen loses focus.
+ *
+ * The record is entry @p self+0x44 (a signed char rider index) of the 0xCE0-byte records at SSXApp->RealFE +
+ * 0xB0 (func_001A0548); func_0019E538(record, 0) zeroes its words at +0xCC4 and +0xCC8.
+ */
 extern "C" void cFEStateCharEquip_onLoseFocus(void* self)
 {
     func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
@@ -908,7 +914,7 @@ static inline bool hasFlag_9F20(sEquipItem_9F20* item, int f)
     return (item->flags & f) != 0;
 }
 
-extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int a1, int kind, int idx)
+extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu, int kind, int idx)
 {
     switch (kind) {
     case 2:

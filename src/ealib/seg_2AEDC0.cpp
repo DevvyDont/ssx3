@@ -2340,6 +2340,13 @@ extern char D_00495468[];
 void* func_003B2360(void* self);
 extern "C" void func_003B1988(void);
 
+/**
+ * Parses an MPEG-2 group-of-pictures header from the bitstream (mpeg2decode's getheader.c).
+ *
+ * On the base layer it first resets the temporal reference base to the last frame number + 1 and flags a GOP
+ * reset. Then reads drop_flag, hour, minute, a marker bit, second, frame, closed_gop and broken_link into the
+ * decoder's globals (D_00509628-D_00509640), and finishes with the extension and user data (func_003B1988).
+ */
 extern "C" void group_of_pictures_header(void)
 {
     if (ld == (layer_data*)D_00509648) {
@@ -2676,6 +2683,13 @@ void* func_003B2360(void* self);
 extern "C" int Get_Bits(int n) __asm__("func_003B1300");
 void func_003B11E8(void* self);
 
+/**
+ * Parses an MPEG-2 sequence scalable extension from the bitstream (mpeg2decode's getheader.c).
+ *
+ * Reads the scalable mode (stored + 1) and layer ID; spatial scalability also reads the lower layer's
+ * prediction size and the subsampling factors. Temporal scalability is reported as unsupported through the
+ * error routine (func_003B11E8).
+ */
 // mpeg2decode getheader.c sequence_scalable_extension(); func_003B1300 = Get_Bits, func_003B2360 = marker_bit,
 // func_003B11E8 = Error.
 extern "C" void sequence_scalable_extension(void)
@@ -2976,20 +2990,33 @@ INCLUDE_ASM("ealib/seg_2AEDC0", SHAPE_imagesize);
 // (the format's bits per pixel); bound via asm label.
 extern "C" int SHAPE_bpctobpp_bits(int fmt) __asm__("SHAPE_bpctobpp");
 
-extern "C" int SHAPE_imagesize(int w, int h, int fmt, int maxLevel)
+/**
+ * Computes the bytes needed for a texture's pixels, including its mipmap levels.
+ *
+ * The bits per pixel come from SHAPE_bpctobpp_bits(fmt) (16 when it returns 15). Each level halves the size
+ * (down to 1x1, where it stops), rows round up to whole bytes, and each level after the first starts 16-byte
+ * aligned.
+ *
+ * @param w         width in pixels, 1 to 65536
+ * @param h         height in pixels, 1 to 65536
+ * @param fmt       pixel format code (On Tour: bpc)
+ * @param maxLevel  last mipmap level to include (0 for none)
+ * @return the size in bytes, or 0 for an invalid size or a format SHAPE_type() rejects
+ */
+extern "C" int SHAPE_imagesize(int w, int height, int fmt, int maxLevel)
 {
     int total = 0;
     int c = SHAPE_bpctobpp_bits(fmt);
     int bpp = 0x10;
     if (c != 0xF) bpp = c;
-    if (w < 1 || w > 0x10000 || h < 1) return 0;
-    if (h > 0x10000) return 0;
-    if (w * h > 1000000000) return 0;
+    if (w < 1 || w > 0x10000 || height < 1) return 0;
+    if (height > 0x10000) return 0;
+    if (w * height > 1000000000) return 0;
     if (SHAPE_type(c) == 0) return 0;
     int i;
     for (i = 0; i <= maxLevel; i++) {
         int lw = w >> i;
-        int lh = h >> i;
+        int lh = height >> i;
         if (lw <= 0) lw = 1;
         if (lh <= 0) lh = 1;
         if (total != 0) total = (total + 0xF) & ~0xF;
@@ -3003,9 +3030,15 @@ extern "C" int SHAPE_imagesize(int w, int h, int fmt, int maxLevel)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", GetNumberOfColours);
 #ifdef SKIP_ASM
-extern "C" int GetNumberOfColours(int v)
+/**
+ * Returns the palette size for a palettised bit depth.
+ *
+ * @param v  bits per pixel
+ * @return 256 for 8, 16 for 4, otherwise 0
+ */
+extern "C" int GetNumberOfColours(int bpp)
 {
-    switch (v) {
+    switch (bpp) {
     case 8:
         return 0x100;
     case 4:
@@ -3023,10 +3056,26 @@ INCLUDE_ASM("ealib/seg_2AEDC0", SHAPE_createsize);
 extern "C" int SHAPE_bpctobpp_bits(int fmt) __asm__("SHAPE_bpctobpp");
 extern "C" int SHAPE_imagesize(int w, int h, int fmt, int maxLevel);
 
-extern "C" int SHAPE_createsize(int w, int h, int fmt, int clut, int maxLevel, int extra1, int extra2)
+/**
+ * Computes the full size of a SHAPE texture: header, pixels, palette and optional comment and metal-bin blocks.
+ *
+ * Adds a 16-byte header to SHAPE_imagesize(); a palettised format (8 bits or fewer) with a palette depth gets a
+ * 16-byte aligned palette with its own 16-byte header (depth 15 counts as 16). A comment adds 8 bytes plus its
+ * size, a metal bin 16 bytes plus its size.
+ *
+ * @param w         width in pixels
+ * @param h         height in pixels
+ * @param fmt       pixel format code (On Tour: bpc)
+ * @param clut      palette entry depth in bits (On Tour: clutbpp), 0 for none
+ * @param maxLevel  last mipmap level to include
+ * @param extra1    comment size in bytes (On Tour: commentsize), 0 for none
+ * @param extra2    metal bin size in bytes (On Tour: metalbinsize), 0 for none
+ * @return the total size in bytes
+ */
+extern "C" int SHAPE_createsize(int w, int height, int fmt, int clut, int maxLevel, int extra1, int extra2)
 {
     int c = SHAPE_bpctobpp_bits(fmt);
-    int size = SHAPE_imagesize(w, h, fmt, maxLevel);
+    int size = SHAPE_imagesize(w, height, fmt, maxLevel);
     size += 0x10;
     if (c < 9 && clut != 0) {
         if (clut == 0xF) clut = 0x10;
@@ -3146,16 +3195,32 @@ extern "C" void SHAPE_createat(void* tex, int w, int h, int fmt, int clut, int m
 extern void* (*SHAPE_memallocalign[])(char* name, int size, int a2, int align, int heap);
 extern char D_004956B0[];
 
-extern "C" void* SHAPE_create(unsigned int w, int h, int fmt, int clut, int maxLevel, int heap, int extra1, int extra2)
+/**
+ * Allocates and initialises a SHAPE texture.
+ *
+ * Sizes it with SHAPE_createsize(), allocates it 16-byte aligned through the SHAPE_memallocalign hook under the
+ * name "SHP<w>x<h>x<fmt>", then lays it out with SHAPE_createat().
+ *
+ * @param w         width in pixels
+ * @param h         height in pixels
+ * @param fmt       pixel format code (On Tour: bpp)
+ * @param clut      palette entry depth in bits, 0 for none
+ * @param maxLevel  last mipmap level to include
+ * @param heap      memory type passed to the allocator (On Tour: memtype)
+ * @param extra1    comment size in bytes, 0 for none
+ * @param extra2    metal bin size in bytes, 0 for none
+ * @return the new texture, or 0 when the size is invalid or the allocation fails
+ */
+extern "C" void* SHAPE_create(unsigned int w, int height, int fmt, int clut, int maxLevel, int heap, int extra1, int extra2)
 {
     char name[16];
     void* tex = 0;
-    int size = SHAPE_createsize(w, h, fmt, clut, maxLevel, extra1, extra2);
+    int size = SHAPE_createsize(w, height, fmt, clut, maxLevel, extra1, extra2);
     if (size != 0) {
-        sprintf(name, D_004956B0, w, h, fmt);
+        sprintf(name, D_004956B0, w, height, fmt);
         tex = SHAPE_memallocalign[0](name, size, 0, 0x10, heap);
         if (tex != 0) {
-            SHAPE_createat(tex, w, h, fmt, clut, maxLevel, extra1, extra2);
+            SHAPE_createat(tex, w, height, fmt, clut, maxLevel, extra1, extra2);
         }
     }
     return tex;
@@ -3324,6 +3389,17 @@ extern "C" void decodeRGB(char* src, int pitch, char* dst)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", hasAlpha);
 #ifdef SKIP_ASM
+/**
+ * Tells whether DXT-compressed data has any alpha that is not fully opaque.
+ *
+ * Checks @p size / 16 blocks. Type 3 steps 16 bytes and needs both 64-bit words of each block to equal
+ * 0xFFFFFFFF; any other type steps 32 bytes and needs the first 16-bit word to be 0xFFFF.
+ *
+ * @param buf   the compressed data
+ * @param size  number of pixels (blocks are counted as size / 16)
+ * @param type  DXT type (On Tour: dxttype)
+ * @return 1 at the first block that fails the test, 0 when all pass
+ */
 // PORT: 64-bit `long` compares (ld); `long` is 8 bytes on this compiler.
 extern "C" int hasAlpha(void* buf, int size, int type)
 {
@@ -3363,15 +3439,27 @@ extern "C" int hasAlpha(void* buf, int size, int type);
 extern "C" void decodeRGB(char* src, int pitch, char* dst);
 extern "C" void decodeAlpha(char* src, int pitch, char* dst, int fmt);
 
+/**
+ * Decompresses a DXT-compressed image into pixels, one 4x4 block at a time.
+ *
+ * Types 3 and 5 use 16-byte blocks: decodeRGB() decodes the colour half (+8), and decodeAlpha() the alpha half
+ * only when hasAlpha() finds non-opaque alpha. Other types use 8-byte colour-only blocks.
+ *
+ * @param out  the compressed data (On Tour: compressed); despite the name it is the input
+ * @param src  the destination pixels (On Tour: uncompressed); despite the name it is the output
+ * @param w    width in pixels
+ * @param h    height in pixels
+ * @param fmt  DXT type (On Tour: dxttype)
+ */
 // Compress a w x h image into 4x4 blocks.
-extern "C" void undxtpack(void* out, char* src, int w, int h, int fmt)
+extern "C" void undxtpack(void* out, char* src, int w, int height, int fmt)
 {
     char* dst = (char*)out;
     int x, y;
-    int n = w * h;
+    int n = w * height;
     if (fmt == 3 || fmt == 5) {
         if (hasAlpha(dst, n, fmt)) {
-            for (y = 0; y < h; y += 4) {
+            for (y = 0; y < height; y += 4) {
                 for (x = 0; x < w; x += 4) {
                     decodeRGB(src, w * 8, dst + 8);
                     decodeAlpha(src, w * 8, dst, fmt);
@@ -3381,7 +3469,7 @@ extern "C" void undxtpack(void* out, char* src, int w, int h, int fmt)
                 src += w * 0x18;
             }
         } else {
-            for (y = 0; y < h; y += 4) {
+            for (y = 0; y < height; y += 4) {
                 for (x = 0; x < w; x += 4) {
                     decodeRGB(src, w * 8, dst + 8);
                     src += 0x20;
@@ -3391,7 +3479,7 @@ extern "C" void undxtpack(void* out, char* src, int w, int h, int fmt)
             }
         }
     } else {
-        for (y = 0; y < h; y += 4) {
+        for (y = 0; y < height; y += 4) {
             for (x = 0; x < w; x += 4) {
                 decodeRGB(src, w * 4, dst);
                 src += 0x20;

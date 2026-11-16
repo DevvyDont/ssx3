@@ -103,6 +103,15 @@ extern "C" sWSNode* func_00351170(sWSPool* self)
 //100%
 INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan_allocInstance);
 #ifdef SKIP_ASM
+/**
+ * Takes a specific instance record out of the instance manager's free list.
+ *
+ * The record's index is @p id >> 8. When it is found on the free list it is unlinked, given the manager's type
+ * (On Tour InstanceSectionId), flag 0x2000 and its index.
+ *
+ * @param id  the resource ID of the instance (On Tour tResourceID); bits 8 and up are the record index
+ * @return the record, or 0 when it is not on the free list
+ */
 extern "C" sWSNode* cInstanceMan_allocInstance(sWSPool* self, unsigned int id)
 {
     sWSNode** link = &self->free;

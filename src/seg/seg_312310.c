@@ -37,6 +37,14 @@ extern unsigned dtou_411340(double) __asm__("dptoul");
 extern double ltod_411340(long) __asm__("__floatdidf");
 extern double add_411340(double, double) __asm__("dpadd");
 extern double sub_411340(double, double) __asm__("dpsub");
+/**
+ * Converts a float to an unsigned 64-bit integer (libgcc2's __fixunssfdi), using the soft-double routines.
+ *
+ * Widens the value with fptodp, takes the high word from value / 2^32, then adds or subtracts the remainder.
+ *
+ * @param a  the value to convert
+ * @return the unsigned 64-bit result; 0 for a negative value
+ */
 unsigned long __fixunssfdi(double a) {
     unsigned long hi;
     double v;
@@ -66,6 +74,14 @@ INCLUDE_ASM("seg/seg_312310", __floatdidf);
 extern double itod_411438(int) __asm__("litodp");
 extern double dmul_411438(double, double) __asm__("dpmul");
 extern double dadd_411438(double, double) __asm__("dpadd");
+/**
+ * Converts a signed 64-bit integer to a double (libgcc2's __floatdidf), using the soft-double routines.
+ *
+ * Computes high word * 65536 * 65536 plus the low word, read as unsigned.
+ *
+ * @param a  the value to convert
+ * @return the value as a double
+ */
 double __floatdidf(long a) {
     double hi = itod_411438((int)(a >> 32));
     double lo;
@@ -938,6 +954,15 @@ struct S412778;
 extern void func_00411C38(long *, int *);
 extern struct S412778 *func_00411CD8(int *, int *, int *);
 extern void func_00411B08(struct S412778 *);
+/**
+ * Adds two doubles in software (fp-bit.c's GOFAST dpadd).
+ *
+ * Unpacks both operands (func_00411C38), adds the parts (func_00411CD8) and packs the result (func_00411B08);
+ * the packed sum is left in the return registers although the C declaration returns void.
+ *
+ * @param a  first operand, as the raw 64-bit pattern of a double
+ * @param b  second operand, as the raw 64-bit pattern of a double
+ */
 void dpadd(long a, long b) {
     int x[8];
     int y[8];
@@ -955,6 +980,14 @@ struct S412778;
 extern void func_00411C38(long *, int *);
 extern struct S412778 *func_00411CD8(int *, int *, int *);
 extern void func_00411B08(struct S412778 *);
+/**
+ * Subtracts two doubles in software (fp-bit.c's GOFAST dpsub): flips the sign of @p b and adds.
+ *
+ * Like dpadd(), the packed result is left in the return registers although the C declaration returns void.
+ *
+ * @param a  the minuend, as the raw 64-bit pattern of a double
+ * @param b  the subtrahend, as the raw 64-bit pattern of a double
+ */
 void dpsub(long a, long b) {
     int x[8];
     int y[8];
@@ -1091,6 +1124,13 @@ _fpmul_parts ( fp_number_type *  a,
   return tmp;
 }
 
+/**
+ * Multiplies two doubles in software (fp-bit.c's multiply, exported as GOFAST dpmul).
+ *
+ * @param arg_a  first factor
+ * @param arg_b  second factor
+ * @return the product
+ */
 FLO_type
 multiply (FLO_type arg_a, FLO_type arg_b)
 {
@@ -1260,6 +1300,15 @@ INCLUDE_ASM("seg/seg_312310", dpcmp);
 #ifdef SKIP_ASM
 extern void func_00411C38(long *, int *);
 extern void func_004123E8(int *, int *);
+/**
+ * Compares two doubles in software (fp-bit.c's GOFAST dpcmp) through the unpacked-parts compare func_004123E8.
+ *
+ * The comparison result (negative, zero or positive) is left in the return register although the C declaration
+ * returns void.
+ *
+ * @param a  first operand, as the raw 64-bit pattern of a double
+ * @param b  second operand, as the raw 64-bit pattern of a double
+ */
 void dpcmp(long a, long b) {
     int x[8];
     int y[8];

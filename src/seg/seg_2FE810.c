@@ -4187,10 +4187,10 @@ extern void func_004034A8(int *, int);
  * Passes "_sequenceScalableExtension() is not implemented" to func_004034A8(), which hands it to the decoder's
  * error callback when one is set and prints it otherwise.
  *
- * @param p  the MPEG decoder state
+ * @param self  the MPEG decoder state
  */
-void _sequenceScalableExtension(int *p) {
-    func_004034A8(p, (int)D_00497D58);
+void _sequenceScalableExtension(int *self) {
+    func_004034A8(self, (int)D_00497D58);
 }
 #endif
 
@@ -5696,28 +5696,28 @@ extern int func_004070F0(int, int);
 extern void func_004071F8(int, int);
 extern void func_00407438();
 extern int func_00405FB8(int *);
-int _sliceA0(int *p, int unused, int *o1, int *o2, int *s) {
+int _sliceA0(int *self, int unused, int *o1, int *o2, int *s) {
     int v;
     int a;
     int b;
-    p[0x11C / 4] = 0;
+    self[0x11C / 4] = 0;
     func_00407438();
-    v = func_004070F0((int)p, 32);
+    v = func_004070F0((int)self, 32);
     if ((unsigned)(v - 0x101) >= 0xAF) {
-        func_00403470_k(p, D_00497F28, v);
+        func_00403470_k(self, D_00497F28, v);
         return 2;
     }
-    func_004071F8((int)p, 32);
-    a = func_004074B8(p);
-    b = func_00405FB8(p);
+    func_004071F8((int)self, 32);
+    a = func_004074B8(self);
+    b = func_00405FB8(self);
     *o2 = b;
-    if (p[0x11C / 4] != 0) {
-        func_004034A8(p, (int)D_00497F50);
+    if (self[0x11C / 4] != 0) {
+        func_004034A8(self, (int)D_00497F50);
         return 1;
     }
-    *o1 = ((((a << 7) + (v & 0xFF)) - 1) * p[0x12C / 4] + b) - 1;
+    *o1 = ((((a << 7) + (v & 0xFF)) - 1) * self[0x12C / 4] + b) - 1;
     *o2 = 1;
-    p[0x1B0 / 4] = 1;
+    self[0x1B0 / 4] = 1;
     s[5] = 0;
     s[4] = 0;
     s[1] = 0;

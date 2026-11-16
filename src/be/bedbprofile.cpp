@@ -17,9 +17,9 @@ struct sCharProfile_00152398
     sScoreStat_00152398 stats[0x1A];  // 0xAD0
 };
 
-void* cBECharProfileDB_getScoreStats(void* self, int a, int b)
+void* cBECharProfileDB_getScoreStats(void* self, int locID, int event)
 {
-    int type = cBELibrary_getScoreType(a, b);
+    int type = cBELibrary_getScoreType(locID, event);
     if (type == 0x1A) {
         return 0;
     }

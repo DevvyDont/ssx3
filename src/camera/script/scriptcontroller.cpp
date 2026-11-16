@@ -16,10 +16,10 @@ extern void* cScriptCameraController_vtbl[];
 extern char D_0045BE88[];
 extern char D_0045BEA0[];
 
-extern "C" void* cScriptCameraController_cScriptCameraController(void* self, void* script, void* arg)
+extern "C" void* cScriptCameraController_cScriptCameraController(void* self, void* script, void* camera)
 {
     int i;
-    cCameraController_cCameraController(self, arg);
+    cCameraController_cCameraController(self, camera);
     *(void***)((char*)self + 0x14) = cScriptCameraController_vtbl;
     *(int*)self = 3;
     *(void***)((char*)self + 0x1C) = (void**)operator_new_K2(8, D_0045BE88, 0, 0);
@@ -48,6 +48,15 @@ public:
     virtual ~cScrCamScriptK2();
 };
 
+/**
+ * Destroys a script camera controller: releases its two script objects, then runs the cCameraController
+ * destructor.
+ *
+ * Stores the vtable at +0x14; each of the two script objects in the array at +0x1C (On Tour ScriptObj) is
+ * de-initialised with cScriptObject_DeInitScriptObject() and deleted, then the array itself is freed.
+ *
+ * @param flags  g++ destructor flags, passed to cCameraController__cCameraController()
+ */
 extern "C" void cScriptCameraController__cScriptCameraController(void* self, int flags)
 {
     int i;

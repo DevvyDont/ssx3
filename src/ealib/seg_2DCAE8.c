@@ -679,18 +679,18 @@ INCLUDE_ASM("ealib/seg_2DCAE8", USTR_strcpyW);
 extern char D_00495D18_CB20[] __asm__("D_00495D18");
 extern int sprintf_CB20(char *, const char *, ...) __asm__("sprintf");
 
-void USTR_strcpyW(char *d, unsigned short *s) {
+void USTR_strcpyW(char *dst, unsigned short *src) {
     int c;
-    while ((c = *s) != 0) {
-        if ((unsigned short)c >= 0x100 || ((unsigned short)c == 0x5C && s[1] == 0x78)) {
-            sprintf_CB20(d, D_00495D18_CB20, *s);
-            d += 6;
+    while ((c = *src) != 0) {
+        if ((unsigned short)c >= 0x100 || ((unsigned short)c == 0x5C && src[1] == 0x78)) {
+            sprintf_CB20(dst, D_00495D18_CB20, *src);
+            dst += 6;
         } else {
-            *d++ = *s;
+            *dst++ = *src;
         }
-        s++;
+        src++;
     }
-    *d = 0;
+    *dst = 0;
 }
 #endif
 
@@ -713,17 +713,17 @@ extern int D_00519AE8_CBD8[] __asm__("D_00519AE8");
  * Zero arguments take func_003DCC88's defaults: 16 file handles of 0x110 bytes, 1000 disc-directory entries
  * and 32 command slots of 0x30 bytes.
  *
- * @param arg0  number of file handles (0 for 16)
- * @param arg1  size of the disc directory table, probably in entries (0 for 1000)
- * @param arg2  number of queued-command slots (0 for 32)
+ * @param maxopenfiles  number of file handles (0 for 16)
+ * @param maxdirfiles  size of the disc directory table, probably in entries (0 for 1000)
+ * @param maxfileops  number of queued-command slots (0 for 32)
  * @return 1 when the file system was set up by this call, 0 if it already was
  */
-int FILESYS_init(int arg0, int arg1, int arg2) {
+int FILESYS_init(int maxopenfiles, int maxdirfiles, int maxfileops) {
     int r;
     if (D_00519AB0_CBD8[0] == 0) {
-        r = D_00450C10_CBD8[1](D_00495D28_CBD8, func_003DCD98_CBD8(arg0, arg1, arg2), 0x100);
+        r = D_00450C10_CBD8[1](D_00495D28_CBD8, func_003DCD98_CBD8(maxopenfiles, maxdirfiles, maxfileops), 0x100);
         D_00519AE8_CBD8[0] = r;
-        return func_003DCC88_CBD8(arg0, arg1, arg2, r);
+        return func_003DCC88_CBD8(maxopenfiles, maxdirfiles, maxfileops, r);
     }
     return 0;
 }
@@ -2804,14 +2804,14 @@ extern void munlock_F980(char *) __asm__("MUTEX_unlock");
  *
  * Looks the request up under the request-list mutex (func_003DEF70 checks the handle's sequence number).
  *
- * @param h  request handle
+ * @param handle  request handle
  * @return 1 when the request has no file-system command pending, 0 while one is, -1 for an invalid handle
  */
-int ASYNCFILE_getstatus(int h) {
+int ASYNCFILE_getstatus(int handle) {
     struct sReq *e;
     int r;
     mlock_F980(D_00519C08);
-    e = func_003DEF70(h);
+    e = func_003DEF70(handle);
     r = e ? e->f1C == 0 : -1;
     munlock_F980(D_00519C08);
     return r;
@@ -2881,14 +2881,14 @@ extern char *fEF70_FAF0(int) __asm__("func_003DEF70");
 extern void rel_FAF0(char *) __asm__("releaserequest");
 extern char D_9C08_FAF0[] __asm__("D_00519C08");
 
-int ASYNCFILE_cancel(int a0) {
+int ASYNCFILE_cancel(int handle) {
     int v18, v19, v20, r;
     char *t;
     v19 = 0;
     v20 = 0;
     mlock_FAF0(D_9C08_FAF0);
     v18 = 0;
-    t = fEF70_FAF0(a0);
+    t = fEF70_FAF0(handle);
     if (t != 0 && ((v19 = *(volatile int *)(t + 0x1C), v20 = *(int *)(t + 0x10), v18 = *(int *)(t + 0xC), v19 != 0) || v18 == 0)) {
         *(int *)(t + 0x10) = 1;
     }
@@ -4315,15 +4315,15 @@ extern int D_00450C38_1908[] __asm__("sync_priority");
  * block's fourth word is 0 instead of 1. The C is declared void, but the buffer (or 0) is left in the return
  * register and callers use it.
  *
- * @param arg0  file name
- * @param arg1  allocation flags for the buffer
+ * @param name  file name
+ * @param flags  allocation flags for the buffer
  */
-void FILE_loadz(int arg0, int arg1) {
+void FILE_loadz(int name, int flags) {
     int buf[8];
 
-    buf[0] = arg0;
+    buf[0] = name;
     buf[3] = 0;
-    buf[4] = arg1;
+    buf[4] = flags;
     FILESYS_atomic_1908(func_003E1810_1908, 0, D_00450C38_1908[0], buf);
 }
 #endif

@@ -170,6 +170,15 @@ extern "C" unsigned int strlen(const char* s);
 extern "C" void cBXString_Realloc(cBXString* self, int size);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
+/**
+ * Constructs a string object holding a copy of a C string.
+ *
+ * Starts from the shared empty string (D_004A3E90); for a non-empty @p str, cBXString_Realloc() allocates room
+ * for its length and the characters are copied in.
+ *
+ * @param str  the text to copy; null counts as empty
+ * @return @p self
+ */
 extern "C" cBXString* cBXString_cBXString2(cBXString* self, const char* str)
 {
     self->Str = D_004A3E90;
@@ -332,16 +341,16 @@ extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
 // cBXString(a + str). PORT: pointer held in int for the negative header offsets.
-extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* str)
+extern "C" cBXString* func_00318630(cBXString* self, cBXString* bxString, const char* str)
 {
     char* tmp = D_004A3E90;
-    int* lenp = (int*)((int)a->Str - 8);
+    int* lenp = (int*)((int)bxString->Str - 8);
     int len;
     if (str != 0)
         len = strlen(str);
     else
         len = 0;
-    func_00318540((cBXString*)&tmp, *lenp, a->Str, len, str);
+    func_00318540((cBXString*)&tmp, *lenp, bxString->Str, len, str);
     cBXString_cBXString1(self, (cBXString*)&tmp);
     cBXString__cBXString((cBXString*)&tmp, 2);
     return self;
@@ -358,7 +367,7 @@ extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
 // cBXString(str + b). PORT: pointer held in int for the negative header offset.
-extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b)
+extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* bxString)
 {
     char* tmp = D_004A3E90;
     int len;
@@ -366,7 +375,7 @@ extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString*
         len = strlen(str);
     else
         len = 0;
-    int sb = (int)b->Str;
+    int sb = (int)bxString->Str;
     func_00318540((cBXString*)&tmp, len, str, *(int*)(sb - 8), (char*)sb);
     cBXString_cBXString1(self, (cBXString*)&tmp);
     cBXString__cBXString((cBXString*)&tmp, 2);
@@ -385,11 +394,11 @@ struct sBXTmp_318760 {
 };
 
 // cBXString(a + ch). PORT: pointer held in int for the negative header offset.
-extern "C" cBXString* func_00318760(cBXString* self, cBXString* a, char ch)
+extern "C" cBXString* func_00318760(cBXString* self, cBXString* bxString, char ch)
 {
     sBXTmp_318760 tmp(D_004A3E90);
     char c = ch;
-    int sa = (int)a->Str;
+    int sa = (int)bxString->Str;
     func_00318540((cBXString*)&tmp, *(int*)(sa - 8), (char*)sa, 1, &c);
     cBXString_cBXString1(self, (cBXString*)&tmp);
     cBXString__cBXString((cBXString*)&tmp, 2);
@@ -407,11 +416,11 @@ struct sBXTmp_3187C8 {
 };
 
 // cBXString(ch + b). PORT: pointer held in int for the negative header offset.
-extern "C" cBXString* func_003187C8(cBXString* self, char ch, cBXString* b)
+extern "C" cBXString* func_003187C8(cBXString* self, char ch, cBXString* bxString)
 {
     sBXTmp_3187C8 tmp(D_004A3E90);
     char c = ch;
-    int sb = (int)b->Str;
+    int sb = (int)bxString->Str;
     func_00318540((cBXString*)&tmp, 1, &c, *(int*)(sb - 8), (char*)sb);
     cBXString_cBXString1(self, (cBXString*)&tmp);
     cBXString__cBXString((cBXString*)&tmp, 2);

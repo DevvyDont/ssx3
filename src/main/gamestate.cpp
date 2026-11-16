@@ -550,6 +550,12 @@ INCLUDE_ASM("main/gamestate", cGFTrackStartState_preloadCancel);
 extern "C" void cSSXScriptEngine_PurgeTrack(void* a);
 extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
 
+/**
+ * Cancels the track-start preload: purges the script engine's track and marks the preload as finished.
+ *
+ * Calls cSSXScriptEngine_PurgeTrack() and cSSXScriptEngine_ResetNISList(ScriptEngine, 1), then sets the preload
+ * state (+0x10, On Tour mPreLoadState) to 5, the value cGFTrackStartState_isPreloadComplete() tests.
+ */
 extern "C" void cGFTrackStartState_preloadCancel(void* self)
 {
     cSSXScriptEngine_PurgeTrack(ScriptEngine);
@@ -561,6 +567,11 @@ extern "C" void cGFTrackStartState_preloadCancel(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFTrackStartState_isPreloadComplete);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the track-start preload has finished: its preload state (+0x10) is 5.
+ *
+ * @return 1 when the preload is complete, otherwise 0
+ */
 extern "C" int cGFTrackStartState_isPreloadComplete(void* self)
 {
     return *(int*)((char*)self + 0x10) == 5;
@@ -665,6 +676,13 @@ extern "C" int cSSXScriptEngine_IsInTransportSequence(void* a);
 extern "C" int cSSXScriptEngine_GetNISListPlayState(void* a, int b);
 extern "C" void cGameState_gotoNextState(void* self);
 
+/**
+ * Waits for the track-start NIS to finish, then moves the game to its next state.
+ *
+ * While the transport-end check flag (+0x1C, On Tour mCheckTransportEnd) is set and the script engine has left
+ * its transport sequence, sets the word at SectionMan + 0x1A4 and clears the flag. Calls
+ * cGameState_gotoNextState() once NIS list 1 reports play state 0.
+ */
 extern "C" void cGFTrackStartState_update(void* self)
 {
     if (*(int*)((char*)self + 0x1C) != 0 && cSSXScriptEngine_IsInTransportSequence(ScriptEngine) == 0) {
@@ -1816,6 +1834,12 @@ INCLUDE_ASM("main/gamestate", cGFPodiumState_gainFocus);
 extern "C" void* func_0028B180(void);
 extern "C" void func_0028CDF8(void* mgr);
 
+/**
+ * Enters the podium state: calls func_0028CDF8() on the audio object and turns the AI's computer actors on.
+ *
+ * func_0028B180() returns gSSXAudio; the AI's ComputerActorsActive (+0x8C) is set to 1. On Tour's version takes
+ * this and a startup flag, which the body does not use.
+ */
 extern "C" void cGFPodiumState_gainFocus(void)
 {
     func_0028CDF8(func_0028B180());
@@ -1829,6 +1853,11 @@ INCLUDE_ASM("main/gamestate", cGFPodiumState_update);
 extern "C" int cSSXScriptEngine_GetNISListPlayState(void* a, int b);
 extern "C" void cGameState_gotoNextState(void* self);
 
+/**
+ * Waits for the podium NIS to end, then moves the game to its next state.
+ *
+ * Calls cGameState_gotoNextState() once NIS list 0 reports play state 0 or 5.
+ */
 extern "C" void cGFPodiumState_update(void* self)
 {
     int r = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0);
@@ -1843,6 +1872,9 @@ extern "C" void cGFPodiumState_update(void* self)
 INCLUDE_ASM("main/gamestate", cGFPodiumState_loseFocus);
 #ifdef SKIP_ASM
 
+/**
+ * Leaves the podium state by turning the AI's computer actors off (ComputerActorsActive = 0).
+ */
 extern "C" void cGFPodiumState_loseFocus(void)
 {
     *(int*)((char*)SSXApp->Game->AI + 0x8C) = 0;
@@ -1903,6 +1935,11 @@ extern "C" void func_00308F38(void* a);
 extern "C" void cWScriptMan_setupMissions(void* a);
 extern void* D_004A3DD8;
 
+/**
+ * Leaves the replay-start state by purging the world script missions and setting them up again.
+ *
+ * Calls func_00308F38 (On Tour cWScriptMan::purgeMissions) and cWScriptMan_setupMissions() on TheWScriptMan.
+ */
 extern "C" void cGFReplayStartState_loseFocus(void)
 {
     func_00308F38(D_004A3DD8);
