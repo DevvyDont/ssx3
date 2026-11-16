@@ -1566,17 +1566,17 @@ extern "C" int func_0028B180();
 extern "C" void func_0029A220(int, void *);
 extern "C" void func_00270970(int, int);
 
-extern "C" int cRider_checkForReset(char *self, int arg1, int arg2) {
+extern "C" int cRider_checkForReset(cRider* self, int arg1, int arg2) {
     if (arg1 != 0 || arg2 != 0) {
-        *(int *)(self + 0x2E8) = 0;
-        *(int *)(self + 0x2EC) = 0;
+        *(int*)&self->mPowerUpBoostTimer = 0;
+        *(int*)&self->mPowerUpTrickTimer = 0;
         if (arg2 == 1 || arg2 == 4)
-            cRiderMetrix_evAutoResetSurface(*(void **)(self + 0x790));
-        *(int *)(*(char **)(self + 0x77C) + 0x350) = (arg2 != 0);
-        func_0011FEC8_6120(self, 9);
-        cRider_setMotionState_6120(self, 3);
-        func_0029A220(func_0028B180(), self);
-        func_00270970((int)SSXApp->Game->Replay, *(int *)(self + 0x86C));
+            cRiderMetrix_evAutoResetSurface(self->mMetrix);
+        *(int *)((char*)self->mRiderHandler + 0x350) = (arg2 != 0);
+        func_0011FEC8_6120(((char*)self), 9);
+        cRider_setMotionState_6120(((char*)self), 3);
+        func_0029A220(func_0028B180(), ((char*)self));
+        func_00270970((int)SSXApp->Game->Replay, self->mAIIndex);
         return 1;
     }
     return 0;

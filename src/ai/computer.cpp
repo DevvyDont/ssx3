@@ -1890,10 +1890,10 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRiderMetrix_evAddCash(int, int);
 extern "C" void cBERewardInterface_awardUserCollectible(void*, int, int);
 
-extern "C" void cRider_flagEventAddCollectible(void* self, int a)
+extern "C" void cRider_flagEventAddCollectible(cRider* self, int a)
 {
-    cRiderMetrix_evAddCash(*(int*)((char*)self + 0x790), 3);
-    cBERewardInterface_awardUserCollectible(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(int*)((char*)self + 0x86C), a);
+    cRiderMetrix_evAddCash((int)self->mMetrix, 3);
+    cBERewardInterface_awardUserCollectible(cBE_getInterface_Fv(cBE_getBE(), 0xD), self->mAIIndex, a);
 }
 #endif
 

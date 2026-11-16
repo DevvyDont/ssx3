@@ -2282,13 +2282,13 @@ struct sRiderXform {
 };
 
 // Copies the quadword of the anim model's transform unk_89C into dst.
-extern "C" void* cRider_getHipPosition(void* dst, cRider* self)
+extern "C" void* cRider_getHipPosition(cRider* dst, cRider* self)
 {
     cAnimModel* q = self->mAnimModel;
     int i = self->mBoneHips;
     sRiderXform* b = (sRiderXform*)q->bones;
     *(cQuad128*)dst = b[i].q;
-    return dst;
+    return ((void*)dst);
 }
 #endif
 
@@ -3477,7 +3477,7 @@ extern "C" void func_002F5B68(void* a, void* q, void* b, void* c, int d);
 extern "C" void func_00122088(cRider* self)
 {
     cQuad128 q;
-    cRider_getHipPosition(&q, self);
+    cRider_getHipPosition((cRider*)(&q), self);
     func_002F5B68(SSXApp->Game->WorldLightMan, &q, self->mOverlapList, self->unk_794, 8);
 }
 #endif
@@ -3510,7 +3510,7 @@ struct sPath_20D8 {
 extern "C" void func_00389260(void* p);
 extern "C" void* func_002EDFB8(void* p);
 extern "C" float func_002EEFA8(void* p);
-extern "C" void* cRider_getHipPosition(void* dst, cRider* self);
+extern "C" void* cRider_getHipPosition(cRider* dst, cRider* self);
 extern "C" void func_00389CB8(void* m, void* q, float f);
 extern "C" void func_0038A6A8(void* m, void* q, void* p);
 extern "C" void func_00389558(void* m, sV3_20D8* v);
@@ -3525,7 +3525,7 @@ extern "C" void func_001220D8(cRider* self)
         sVE_20D8* vt = *(sVE_20D8**)obj;
         *(sXf_20D8*)&self->unk_7C0[0] = *(sXf_20D8*)func_002EDFB8(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta));
     }
-    cRider_getHipPosition(&q, self);
+    cRider_getHipPosition((cRider*)(&q), self);
     char* m = self->unk_7C0;
     {
         char* obj = (char*)&self->mVtbl;

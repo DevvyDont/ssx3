@@ -5756,9 +5756,9 @@ int cRider_isHuman(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRider_isComputer);
 #ifdef SKIP_ASM
-extern "C" int cRider_isComputer(void* self)
+extern "C" int cRider_isComputer(cRider* self)
 {
-    return *(int*)((char*)self + 0x874) ^ 1;
+    return self->mIsHuman ^ 1;
 }
 #endif
 
