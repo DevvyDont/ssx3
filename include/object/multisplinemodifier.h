@@ -24,7 +24,7 @@ struct tMultiNode;
 
 struct cMultiSplineModifier {
     // --- cTransformModifier (vptr only)
-    void** mVtbl;                   // 0x00 [R] ctors store the 0x0048F168 vtable; the dtor stores it, then D_004913F8
+    void** mVtbl;                   // 0x00 [R] ctors store the 0x0048F168 vtable; the dtor stores it, then cTransformModifier_vtbl
     // --- cMultiSplineModifierState (0x34 bytes; [R] the replay ctor reads 0x34 bytes here)
     int NumModels;                  // 0x04 [O]; [R] ctor; [U] every per-car loop (allocNodes, setupNodes, render,
                                     //      writeToReplayFrame, dtor)

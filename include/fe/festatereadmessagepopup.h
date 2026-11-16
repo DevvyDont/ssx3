@@ -10,9 +10,9 @@
 //
 // Size 0x6FC: cMemMan_alloc(0x6FC, "cFEStateReadMessagePopup") + cFEStateReadMessagePopup_cFEStateReadMessagePopup(mem, pEngine, pParent, szSender)
 // (func_001ABB30, the only site); the constructor's last store is the 16-byte mTextColour at 0x6EC. Constructors
-// cFEStateReadMessagePopup_cFEStateReadMessagePopup (cFEStateNet(pEngine, pParent), vtable D_00467E18, mHashName 0x49) and the default func_001E0FF0
+// cFEStateReadMessagePopup_cFEStateReadMessagePopup (cFEStateNet(pEngine, pParent), vtable cFEStateReadMessagePopup_vtbl, mHashName 0x49) and the default func_001E0FF0
 // (fe/fepopupmisc); destructor cFEStateReadMessagePopup__cFEStateReadMessagePopup (slot 1: deletes every message, frees the vector, destroys mszSender).
-// Retail vtable D_00467E18 (32 slots; vtables.tsv lists 24: 4 onCreateScreen func_001A7970, 7 func_001A7D90, 10
+// Retail vtable cFEStateReadMessagePopup_vtbl (32 slots; vtables.tsv lists 24: 4 onCreateScreen func_001A7970, 7 func_001A7D90, 10
 // func_001E1040 (onLoseTransition), 12 onUpdate func_001A7B20, 18 onWidgetCreate func_001A7BB0, 19 onWidgetEvent
 // func_001A7BB8, 20 func_001A7D10, 24 handleEvent func_001A8B88, 31 func_001A7D40 (net events), 32 func_001A7B40).
 // Methods: fe/feasyncfile 0x1A77A0-0x1A81F0.
@@ -59,7 +59,7 @@ struct cFEStateReadMessagePopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00467E18 (vtables.tsv), stored by cFEStateReadMessagePopup_cFEStateReadMessagePopup / func_001E0FF0
+    void** mVtbl;                   // 0x008 [R] cFEStateReadMessagePopup_vtbl (vtables.tsv), stored by cFEStateReadMessagePopup_cFEStateReadMessagePopup / func_001E0FF0
                                     //       after the cFEStateNet ctor and by the destructor cFEStateReadMessagePopup__cFEStateReadMessagePopup
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateReadMessagePopup_cFEStateReadMessagePopup stores

@@ -7,7 +7,7 @@
 // type 5), On Tour 0x2D0 too. EA's source path: d:/ssx/code/source/object/rollermodifier.cpp (preview assert).
 // Constructors: cRollerModifier_cRollerModifier (tAddRollerData, tIntersectInfo*, tCollideInfo*) and func_0035DF70
 // (from a replay frame); destructor cRollerModifier__cRollerModifier; vtable cRollerModifier_vtbl (0x0048F080, 27
-// slots; the cTransformModifier base vtable is D_004913F8). Methods are in src/object/railmodifier.cpp.
+// slots; the cTransformModifier base vtable is cTransformModifier_vtbl). Methods are in src/object/railmodifier.cpp.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. The real bases are
 //   cTransformModifier (0x000: vptr only) + cRollerNodeState (0x004-0x02C) + cRigidBody (0x030-0x0D0, see
@@ -61,8 +61,8 @@ CHECK_SIZE(bxSphereTree, 0x140);
 
 struct cRollerModifier {
     // --- cTransformModifier (On Tour 0x4: the vptr)
-    void** mVtbl;                 // 0x000 [R] ctors store D_004913F8 (cTransformModifier) then cRollerModifier_vtbl;
-                                  //       the destructor stores D_004913F8 back
+    void** mVtbl;                 // 0x000 [R] ctors store cTransformModifier_vtbl (cTransformModifier) then cRollerModifier_vtbl;
+                                  //       the destructor stores cTransformModifier_vtbl back
     // --- cRollerNodeState (On Tour 0x28; [R] cRollerModifier_writeToReplayFrame writes these 0x28 bytes to the replay frame)
     float mKineticEnergy;         // 0x004 [O]; [U] cRollerModifier_Collision stores V.P + W.L; update reads/writes it
     float mMass;                  // 0x008 [O]; [R] ctor: rdata + 0x4, InvM = 1 / mMass; [U] Collision: 5000 / mMass

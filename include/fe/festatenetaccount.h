@@ -9,9 +9,9 @@
 // "forgot account" requests (by e-mail) and the verify step, then the memory-card save popup
 // (cFEStateNetAccountMem) and cFEStateSelectPersona. EA's name: the preview's __21cFEUseExistingAccount and
 // _vt$21cFEUseExistingAccount. Size 0x6E4: cMemMan_alloc(0x6E4, "cFEUseExistingAccount") + cFEUseExistingAccount_cFEUseExistingAccount(mem,
-// pEngine) (func_001BF758, the only site). Constructors cFEUseExistingAccount_cFEUseExistingAccount (cFEStateNet(pEngine, 0), vtable D_00469068,
+// pEngine) (func_001BF758, the only site). Constructors cFEUseExistingAccount_cFEUseExistingAccount (cFEStateNet(pEngine, 0), vtable cFEUseExistingAccount_vtbl,
 // mHashName 0x35) and the default func_001E0880 (fe/fepopupmisc); destructor cFEUseExistingAccount__cFEUseExistingAccount (slot 1: destroys
-// mszEmail, then cFEStateNet's func_001A85D0). Retail vtable D_00469068 (32 slots: 1 dtor, 4 onCreateScreen
+// mszEmail, then cFEStateNet's func_001A85D0). Retail vtable cFEUseExistingAccount_vtbl (32 slots: 1 dtor, 4 onCreateScreen
 // func_001AC0B8, 12 onUpdate func_001AC150, 17 onPopupEvent func_001AC920, 18 onWidgetCreate func_001AC170,
 // 19 onWidgetEvent func_001AC5C0, 20 func_001AC5A8, 25 func_001AC4F0 (help texts), 29 func_001E08D0,
 // 31 func_001ACEF8 (net events 0xC9/0xCF/0xD2/0xD4)). Methods: fe/feasyncfile 0x1AC010-0x1ACEF8.
@@ -19,9 +19,9 @@
 // cFEStateSelectPersona: screen "220select_persona": the account's persona list ("PersonaMenu"), create / delete
 // persona. EA's name: the preview's __21cFEStateSelectPersona / _$_21cFEStateSelectPersona. Size 0x6D8:
 // cMemMan_alloc(0x6D8, "cFEStateSelectPersona") + cFEStateSelectPersona_cFEStateSelectPersona(mem, pEngine) at all 10 sites (fe/feasyncfile).
-// Constructors cFEStateSelectPersona_cFEStateSelectPersona (vtable D_00468F50, mHashName 0x38) and the default func_001E08D8 (fe/fepopupmisc);
+// Constructors cFEStateSelectPersona_cFEStateSelectPersona (vtable cFEStateSelectPersona_vtbl, mHashName 0x38) and the default func_001E08D8 (fe/fepopupmisc);
 // destructor cFEStateSelectPersona__cFEStateSelectPersona (fe/fepopupmisc; slot 1; the preview's _$_21cFEStateSelectPersona). Retail vtable
-// D_00468F50 (33 slots: 4 onCreateScreen func_001AD178, 12 onUpdate func_001AD1E8, 17 onPopupEvent func_001AD8C0,
+// cFEStateSelectPersona_vtbl (33 slots: 4 onCreateScreen func_001AD178, 12 onUpdate func_001AD1E8, 17 onPopupEvent func_001AD8C0,
 // 18 onWidgetCreate func_001AD308, 19 onWidgetEvent func_001AD5E8, 25 func_001AD4F0 (help), 29 func_001E0940,
 // 31 func_001ADA30 (net events), 32 func_001E0948, 33 func_001AD9C8). Methods: fe/feasyncfile 0x1AD130-0x1ADC30.
 //
@@ -46,7 +46,7 @@ struct cFEUseExistingAccount {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00469068 (vtables.tsv; 32 slots), stored by cFEUseExistingAccount_cFEUseExistingAccount /
+    void** mVtbl;                   // 0x008 [R] cFEUseExistingAccount_vtbl (vtables.tsv; 32 slots), stored by cFEUseExistingAccount_cFEUseExistingAccount /
                                     //       func_001E0880 after the cFEStateNet ctor and by the destructor
                                     //       cFEUseExistingAccount__cFEUseExistingAccount
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
@@ -188,7 +188,7 @@ struct cFEStateSelectPersona {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468F50 (vtables.tsv; 33 slots), stored by cFEStateSelectPersona_cFEStateSelectPersona /
+    void** mVtbl;                   // 0x008 [R] cFEStateSelectPersona_vtbl (vtables.tsv; 33 slots), stored by cFEStateSelectPersona_cFEStateSelectPersona /
                                     //       func_001E08D8 after the cFEStateNet ctor and by the destructor
                                     //       cFEStateSelectPersona__cFEStateSelectPersona
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)

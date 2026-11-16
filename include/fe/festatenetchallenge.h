@@ -11,9 +11,9 @@
 // __22cFEStateChallengePopup,
 // _$_22cFEStateChallengePopup and onLoseTransition__22cFEStateChallengePopup. Size 0x6F0: cMemMan_alloc(0x6F0,
 // "cFEStateChallengePopup") + cFEStateChallengePopup_cFEStateChallengePopup(mem, pEngine, pParent) (func_001ABCD0, the only site). Constructors
-// cFEStateChallengePopup_cFEStateChallengePopup (cFEStateNet(pEngine, pParent), vtable D_00468E38, mHashName 0x3F; resets the new-race interface) and
+// cFEStateChallengePopup_cFEStateChallengePopup (cFEStateNet(pEngine, pParent), vtable cFEStateChallengePopup_vtbl, mHashName 0x3F; resets the new-race interface) and
 // the default func_001E0950 (fe/fepopupmisc); destructor cFEStateChallengePopup__cFEStateChallengePopup (fe/fepopupmisc; slot 1: calls mpParentState's
-// slot 32, then cFEStateNet's func_001A85D0). Retail vtable D_00468E38 (33 slots; vtables.tsv lists 24: 4
+// slot 32, then cFEStateNet's func_001A85D0). Retail vtable cFEStateChallengePopup_vtbl (33 slots; vtables.tsv lists 24: 4
 // onCreateScreen func_001ADE88,
 // 6 onGainFocus func_001ADFE8, 7 func_001ADFB8, 10 func_001E0A00, 12 onUpdate func_001AE0E0, 17 onPopupEvent
 // func_001AF428, 18 onWidgetCreate func_001AE128, 19 onWidgetEvent func_001AE7A0, 20 func_001AE100, 31 func_001AF470
@@ -25,9 +25,9 @@
 // onGainTransition__30...
 // and onLoseTransition__30.... Size 0x6D8: cMemMan_alloc(0x6D8, "cFEStateChallengeReceivedPopup") +
 // cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup(mem,
-// pEngine, pParent, szChallenger) (func_001ABCD0, the only site). Constructors cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup (vtable D_00468D20,
+// pEngine, pParent, szChallenger) (func_001ABCD0, the only site). Constructors cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup (vtable cFEStateChallengeReceivedPopup_vtbl,
 // mHashName 0x40) and the default func_001E0A08 (fe/fepopupmisc); destructor cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup (fe/fepopupmisc; slot 1:
-// mpParentState's slot 32, destroys mszChallenger, cFEStateNet's dtor). Retail vtable D_00468D20 (33 slots;
+// mpParentState's slot 32, destroys mszChallenger, cFEStateNet's dtor). Retail vtable cFEStateChallengeReceivedPopup_vtbl (33 slots;
 // vtables.tsv lists 24: 4
 // onCreateScreen func_001AFE68, 7 func_001B0670, 10 func_001E0AB8, 12 onUpdate func_001B0130, 17 onPopupEvent
 // func_001B05E0, 18 onWidgetCreate func_001B0150, 19 onWidgetEvent func_001B0538, 20 func_001B06E0, 24 handleEvent
@@ -55,7 +55,7 @@ struct cFEStateChallengePopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468E38 (33 slots), stored by cFEStateChallengePopup_cFEStateChallengePopup / func_001E0950 after
+    void** mVtbl;                   // 0x008 [R] cFEStateChallengePopup_vtbl (33 slots), stored by cFEStateChallengePopup_cFEStateChallengePopup / func_001E0950 after
                                     //       the cFEStateNet ctor and by the destructor cFEStateChallengePopup__cFEStateChallengePopup
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateChallengePopup_cFEStateChallengePopup stores
@@ -206,7 +206,7 @@ struct cFEStateChallengeReceivedPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468D20 (33 slots), stored by cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup / func_001E0A08 after
+    void** mVtbl;                   // 0x008 [R] cFEStateChallengeReceivedPopup_vtbl (33 slots), stored by cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup / func_001E0A08 after
                                     //       the cFEStateNet ctor and by the destructor cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup stores

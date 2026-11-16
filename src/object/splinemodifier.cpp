@@ -850,7 +850,7 @@ void* cObjectInterface_getInstanceMan();
 void func_00351260(void* man, void* inst);
 extern "C" void func_0035A780(cMultiSplineModifier* self);
 extern void* cMultiSplineModifier_vtbl[];
-extern void* D_004913F8[];
+extern void* cTransformModifier_vtbl[];
 
 struct cMultiSplineModifier_A250 {
     void** vtable;          // 0x0
@@ -868,7 +868,7 @@ struct cMultiSplineModifier_A250 {
  *
  * func_0035A780 removes copies 1 to n-1 from the Nash octree; AnimMats (+0x38) and Nodes (+0x3C) are freed,
  * each copy's record goes back on the instance manager's free list (func_00351260, probably On Tour
- * freeInstance), NodeInst (+0x44) is freed and the base cTransformModifier vtable (D_004913F8) is restored.
+ * freeInstance), NodeInst (+0x44) is freed and the base cTransformModifier vtable (cTransformModifier_vtbl) is restored.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -888,7 +888,7 @@ extern "C" void cMultiSplineModifier__cMultiSplineModifier(cMultiSplineModifier*
     if ((void**)self->NodeInst != 0) {
         cMemMan_free((void**)self->NodeInst);
     }
-    self->mVtbl = D_004913F8;
+    self->mVtbl = cTransformModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

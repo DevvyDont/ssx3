@@ -4190,3 +4190,24 @@ cAvaSplineModifier_vtbl = 0x0048F338;
 cMagnetModifier_vtbl = 0x0048F420;
 cParentModifier_vtbl = 0x0048F508;
 cPositionModifier_vtbl = 0x0048F5F0;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_vtables_round5 (docs/ontour_globals.tsv)
+cFEStateReadMessagePopup_vtbl = 0x00467E18;
+cFEStateNetNews_vtbl = 0x00468168;
+cFEStateLogin_vtbl = 0x00468388;
+cFEStateCreateDuplicate_vtbl = 0x004684A0;
+cFEStateAuthDNASError_vtbl = 0x004688E0;
+cFEStateAuthDNAS_vtbl = 0x004689F0;
+cFEStateOnlineCharacterSelect_vtbl = 0x00468C10;
+cFEStateChallengeReceivedPopup_vtbl = 0x00468D20;
+cFEStateChallengePopup_vtbl = 0x00468E38;
+cFEStateSelectPersona_vtbl = 0x00468F50;
+cFEUseExistingAccount_vtbl = 0x00469068;
+cFEStateNetCreateRoomPopup_vtbl = 0x0046A6E8;
+cFEStateNetQuickMessages_vtbl = 0x0046A908;
+cFEStateNetSSXWorld_vtbl = 0x0046AA18;
+cFEStateNetQuickPlayPopup_vtbl = 0x0046AB28;
+cFEStateOnlineAgreement_vtbl = 0x0046AC38;
+cFEStateOnlineMainMenu_vtbl = 0x0046AD48;
+cFEStateChatRoom_vtbl = 0x0046AE58;
+cTransformModifier_vtbl = 0x004913F8;

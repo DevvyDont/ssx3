@@ -13,8 +13,8 @@
 //
 // Size 0x6E8: cMemMan_alloc(0x6E8, "cFEStateNetCreateRoomPopup") + cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup(mem, pEngine, pParent)
 // (cFEStateLobbyMenu's onWidgetEvent, the only site); mszPassword ends at 0x6E8. Constructors cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup
-// (cFEStateNet(pEngine, pParent), vtable D_0046A6E8, mHashName 0x47) and the default func_001DF828 (fe/fepopupmisc);
-// destructor cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup (fe/fepopupmisc; slot 1: destroys the three strings). Retail vtable D_0046A6E8 (32 slots;
+// (cFEStateNet(pEngine, pParent), vtable cFEStateNetCreateRoomPopup_vtbl, mHashName 0x47) and the default func_001DF828 (fe/fepopupmisc);
+// destructor cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup (fe/fepopupmisc; slot 1: destroys the three strings). Retail vtable cFEStateNetCreateRoomPopup_vtbl (32 slots;
 // vtables.tsv lists 24: 4 onCreateScreen func_001BE828, 10 func_001DF8E0 (onLoseTransition), 12 onUpdate
 // func_001BE890, 18 onWidgetCreate func_001BE8B0, 19 onWidgetEvent func_001BEA38, 21 func_001BEA30, 25
 // func_001BED58 (help), 31 func_001BED28). Methods: fe/feasyncfile 0x1BE7D8-0x1BED58.
@@ -40,7 +40,7 @@ struct cFEStateNetCreateRoomPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_0046A6E8 (32 slots), stored by cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup / func_001DF828 after
+    void** mVtbl;                   // 0x008 [R] cFEStateNetCreateRoomPopup_vtbl (32 slots), stored by cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup / func_001DF828 after
                                     //       the cFEStateNet ctor and by the destructor cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup stores

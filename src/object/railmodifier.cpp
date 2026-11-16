@@ -1350,7 +1350,7 @@ extern "C" void func_0035DA38(void* self, func_0035DA38_cObj* obj)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_cRollerModifier);
 #ifdef SKIP_ASM
-extern void* D_004913F8[];
+extern void* cTransformModifier_vtbl[];
 extern void* cRollerModifier_vtbl[];
 void* func_0035CFE8(void* self);
 extern "C" void func_0032C508(void* p);
@@ -1501,7 +1501,7 @@ static inline void SetBits_DA70(unsigned int* w, unsigned int mask, unsigned int
 extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rdata, char* ii, char* ci)
 {
     float* timing = (float*)(((char*)self) + 0x4);
-    *(void***)self = D_004913F8;
+    *(void***)self = cTransformModifier_vtbl;
     func_0035CFE8(((char*)self) + 0x30);
     *(void***)self = cRollerModifier_vtbl;
     func_0032C508(((char*)self) + 0xE0);
@@ -1721,7 +1721,7 @@ void cRollerModifier_DDE8::Collision(const sRmPath_35DDE8* tc)
 INCLUDE_ASM("object/railmodifier", func_0035DF70);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_004913F8[];
+extern void* cTransformModifier_vtbl[];
 extern void* cRollerModifier_vtbl[];
 void* func_0035CFE8(void* self);
 extern "C" void func_0032C508(void* self);
@@ -1773,7 +1773,7 @@ struct sRailDF70 {
 
 extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
 {
-    self->vt = D_004913F8;
+    self->vt = cTransformModifier_vtbl;
     func_0035CFE8(self->body);
     self->vt = cRollerModifier_vtbl;
     func_0032C508(self->mover);
@@ -4110,12 +4110,12 @@ void func_00360AF8(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier__cTransformModifier);
 #ifdef SKIP_ASM
-extern void* D_004913F8[];
+extern void* cTransformModifier_vtbl[];
 void operator_delete(int*);
 
 extern "C" void cTransformModifier__cTransformModifier(cTransformModifier* self, int flags)
 {
-    *(void***)self = D_004913F8;
+    *(void***)self = cTransformModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -5924,18 +5924,18 @@ extern "C" void cFloatingNode_updateRootTransform(cFloatingNode* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cPositionModifier__cPositionModifier);
 #ifdef SKIP_ASM
-extern void* D_004913F8[];
+extern void* cTransformModifier_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a position modifier: restores the cTransformModifier base vtable (D_004913F8) and frees the object when
+ * Destroys a position modifier: restores the cTransformModifier base vtable (cTransformModifier_vtbl) and frees the object when
  * bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cPositionModifier__cPositionModifier(cPositionModifier* self, int flags)
 {
-    *(void***)self = D_004913F8;
+    *(void***)self = cTransformModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -6030,18 +6030,18 @@ extern "C" void* cPositionModifier_getRootTransform(cPositionModifier* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cParentModifier__cParentModifier);
 #ifdef SKIP_ASM
-extern void* D_004913F8[];
+extern void* cTransformModifier_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a parent modifier: restores the cTransformModifier base vtable (D_004913F8) and frees the object when
+ * Destroys a parent modifier: restores the cTransformModifier base vtable (cTransformModifier_vtbl) and frees the object when
  * bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cParentModifier__cParentModifier(cParentModifier* self, int flags)
 {
-    *(void***)self = D_004913F8;
+    *(void***)self = cTransformModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -6095,18 +6095,18 @@ extern "C" void func_003619D8(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("object/railmodifier", cMagnetModifier__cMagnetModifier);
 #ifdef SKIP_ASM
-extern void* D_004913F8[];
+extern void* cTransformModifier_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a magnet modifier: restores the cTransformModifier base vtable (D_004913F8) and frees the object when
+ * Destroys a magnet modifier: restores the cTransformModifier base vtable (cTransformModifier_vtbl) and frees the object when
  * bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cMagnetModifier__cMagnetModifier(cMagnetModifier* self, int flags)
 {
-    *(void***)self = D_004913F8;
+    *(void***)self = cTransformModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -6227,18 +6227,18 @@ extern "C" void* cMagnetModifier_getRootTransform(cMagnetModifier* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cAvaSplineModifier__cAvaSplineModifier);
 #ifdef SKIP_ASM
-extern void* D_004913F8[];
+extern void* cTransformModifier_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys an avalanche spline modifier: restores the cTransformModifier base vtable (D_004913F8) and frees the
+ * Destroys an avalanche spline modifier: restores the cTransformModifier base vtable (cTransformModifier_vtbl) and frees the
  * object when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cAvaSplineModifier__cAvaSplineModifier(cAvaSplineModifier* self, int flags)
 {
-    *(void***)self = D_004913F8;
+    *(void***)self = cTransformModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -6323,7 +6323,7 @@ void* func_00361B10(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier__cSplineModifier);
 #ifdef SKIP_ASM
-extern void* D_004913F8[];
+extern void* cTransformModifier_vtbl[];
 void operator_delete(int*);
 
 /**
@@ -6333,7 +6333,7 @@ void operator_delete(int*);
  */
 extern "C" void cSplineModifier__cSplineModifier(cSplineModifier* self, int flags)
 {
-    *(void***)self = D_004913F8;
+    *(void***)self = cTransformModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -6590,7 +6590,7 @@ int cMultiSplineModifier_getTransformType(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier__cRollerModifier);
 #ifdef SKIP_ASM
-extern void* D_004913F8[];
+extern void* cTransformModifier_vtbl[];
 void operator_delete(int*);
 
 /**
@@ -6600,7 +6600,7 @@ void operator_delete(int*);
  */
 extern "C" void cRollerModifier__cRollerModifier(cRollerModifier* self, int flags)
 {
-    *(void***)self = D_004913F8;
+    *(void***)self = cTransformModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

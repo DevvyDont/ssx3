@@ -9,10 +9,10 @@
 // both builds; no assert of its own), so this header could also be merged into fe/festatenetcreate.h.
 //
 // Size 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateDuplicate") + cFEStateCreateDuplicate_cFEStateCreateDuplicate(mem, pEngine, bAccount) at both sites
-// (func_001ADC30 with 0, func_001BAC90). Constructors cFEStateCreateDuplicate_cFEStateCreateDuplicate (cFEStateNet(pEngine, 0), vtable D_004684A0,
+// (func_001ADC30 with 0, func_001BAC90). Constructors cFEStateCreateDuplicate_cFEStateCreateDuplicate (cFEStateNet(pEngine, 0), vtable cFEStateCreateDuplicate_vtbl,
 // mHashName 0x4F, unk_6A8 = 0) and the default func_001E0DD8 (fe/fepopupmisc); destructor cFEStateCreateDuplicate__cFEStateCreateDuplicate
 // (fe/fepopupmisc;
-// slot 1; the preview's _$_23cFEStateCreateDuplicate). Retail vtable D_004684A0 (32 slots: 4 onCreateScreen
+// slot 1; the preview's _$_23cFEStateCreateDuplicate). Retail vtable cFEStateCreateDuplicate_vtbl (32 slots: 4 onCreateScreen
 // func_001BBD60, 12 onUpdate func_001BBDE0, 17 onPopupEvent func_001BC6A0, 18 onWidgetCreate func_001BBE00,
 // 19 onWidgetEvent func_001BBF18, 25 func_001BC190 (help), 29 func_001E0E40, 31 func_001BC4F0 (net events)).
 // Methods: fe/feasyncfile 0x1BBD08-0x1BC990.
@@ -38,7 +38,7 @@ struct cFEStateCreateDuplicate {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004684A0 (vtables.tsv; 32 slots), stored by cFEStateCreateDuplicate_cFEStateCreateDuplicate /
+    void** mVtbl;                   // 0x008 [R] cFEStateCreateDuplicate_vtbl (vtables.tsv; 32 slots), stored by cFEStateCreateDuplicate_cFEStateCreateDuplicate /
                                     //       func_001E0DD8 after the cFEStateNet ctor and by the destructor
                                     //       cFEStateCreateDuplicate__cFEStateCreateDuplicate
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)

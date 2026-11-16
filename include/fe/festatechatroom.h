@@ -10,9 +10,9 @@
 //
 // Size 0x73C: cMemMan_alloc(0x73C, "cFEStateChatRoom") + cFEStateChatRoom_cFEStateChatRoom(mem, pEngine) at all 4 sites (func_001A9578,
 // func_001B15D8, func_001BD738; fe/festatebigradio func_001941B0); the constructor's last store is the 16-byte
-// mChatColour at 0x72C. Constructors cFEStateChatRoom_cFEStateChatRoom (cFEStateNet(pEngine, 0), vtable D_0046AE58, mHashName 0x3D) and
+// mChatColour at 0x72C. Constructors cFEStateChatRoom_cFEStateChatRoom (cFEStateNet(pEngine, 0), vtable cFEStateChatRoom_vtbl, mHashName 0x3D) and
 // the default func_001DF580 (fe/fepopupmisc); destructor cFEStateChatRoom__cFEStateChatRoom (slot 1; the preview's _$_16cFEStateChatRoom).
-// Retail vtable D_0046AE58 (32 slots: 4 onCreateScreen func_001B2070, 6 onGainFocus func_001B3528, 7 func_001B3490,
+// Retail vtable cFEStateChatRoom_vtbl (32 slots: 4 onCreateScreen func_001B2070, 6 onGainFocus func_001B3528, 7 func_001B3490,
 // 8 func_001B38D0, 12 onUpdate func_001B2320, 13 func_001DF5C0, 17 onPopupEvent func_001B3850, 18 onWidgetCreate
 // func_001B2EB8, 19 onWidgetEvent func_001B31A0, 20 onWidgetMenu func_001B3568, 25 func_001B2DA0 (help), 31
 // func_001B3A30 (net events), 32 func_001B22A0). Methods: fe/feasyncfile 0x1B1F88-0x1B3D20.
@@ -40,7 +40,7 @@ struct cFEStateChatRoom {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_0046AE58 (vtables.tsv; 32 slots), stored by cFEStateChatRoom_cFEStateChatRoom /
+    void** mVtbl;                   // 0x008 [R] cFEStateChatRoom_vtbl (vtables.tsv; 32 slots), stored by cFEStateChatRoom_cFEStateChatRoom /
                                     //       func_001DF580 after the cFEStateNet ctor and by the destructor
                                     //       cFEStateChatRoom__cFEStateChatRoom
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)

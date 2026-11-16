@@ -21,7 +21,7 @@
 struct cSplineModifier {
     // --- cTransformModifier (vptr only)
     void** mVtbl;                   // 0x00 [R] ctors store cSplineModifier_vtbl; the dtor stores it, then the base
-                                    //      D_004913F8
+                                    //      cTransformModifier_vtbl
     char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
     // --- cSplineModifierState (0x50 bytes; [R] the replay ctor reads 0x50 bytes here)
     tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox returns +0x10, setBoundBox (sq 0x10/0x20)

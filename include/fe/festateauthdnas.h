@@ -11,9 +11,9 @@
 // (slot 17: 0xF ok, 0x10 error with the three texts copied into cFEStateNetConfig's mpustrAuthError[], 0x14 cancel).
 // EA's name: the preview's __16cFEStateAuthDNAS, onGainTransition__16cFEStateAuthDNASb, onLoseTransition__16...
 // Size 0x700: cMemMan_alloc(0x700, "NetConfigAuthPopup") + cFEStateAuthDNAS_cFEStateAuthDNAS(mem, pEngine, pParent) (func_001B55B0, the
-// only site). Constructors cFEStateAuthDNAS_cFEStateAuthDNAS (cFEStateNet(pEngine, pParent), vtable D_004689F0, mHashName 0x44, unk_6A8 =
+// only site). Constructors cFEStateAuthDNAS_cFEStateAuthDNAS (cFEStateNet(pEngine, pParent), vtable cFEStateAuthDNAS_vtbl, mHashName 0x44, unk_6A8 =
 // 0) and the default func_001E0BB0 (fe/fepopupmisc); destructor cFEStateAuthDNAS__cFEStateAuthDNAS (slot 1: deletes mpAuth, frees
-// mpustrText). Retail vtable D_004689F0 (32 slots; vtables.tsv lists 24: 4 onCreateScreen func_001B63E8, 7
+// mpustrText). Retail vtable cFEStateAuthDNAS_vtbl (32 slots; vtables.tsv lists 24: 4 onCreateScreen func_001B63E8, 7
 // func_001E0C10
 // (onGainTransition), 8 func_001B66B8, 10 func_001E0C18 (onLoseTransition), 12 onUpdate func_001B6798, 18
 // onWidgetCreate func_001B65C0, 19 onWidgetEvent func_001B6770, 20 func_001B6A90, 24 handleEvent func_001B6740, 29
@@ -23,9 +23,9 @@
 // cFEStateAuthDNASError: screen "207DNASerror": shows the three DNAS error texts. EA's name: the allocation tag.
 // Size 0x6E8: cMemMan_alloc(0x6E8, "cFEStateAuthDNASError") + cFEStateAuthDNASError_cFEStateAuthDNASError(mem, pEngine, pParent,
 // mpustrAuthError[1],
-// [2], [0]) (cFEStateNetConfig's func_001B5830, the only site). Constructors cFEStateAuthDNASError_cFEStateAuthDNASError (vtable D_004688E0,
+// [2], [0]) (cFEStateNetConfig's func_001B5830, the only site). Constructors cFEStateAuthDNASError_cFEStateAuthDNASError (vtable cFEStateAuthDNASError_vtbl,
 // mHashName
-// 0x45) and the default func_001E0C30 (fe/fepopupmisc); destructor cFEStateAuthDNASError__cFEStateAuthDNASError (slot 1). Retail vtable D_004688E0
+// 0x45) and the default func_001E0C30 (fe/fepopupmisc); destructor cFEStateAuthDNASError__cFEStateAuthDNASError (slot 1). Retail vtable cFEStateAuthDNASError_vtbl
 // (32 slots; vtables.tsv lists 24: 4 onCreateScreen func_001B6B50, 7 func_001B6C98, 10 func_001E0C78, 12 onUpdate
 // cFEStateNet's func_001A8770, 18 onWidgetCreate func_001B6BB8, 19 onWidgetEvent func_001B6E40, 20 func_001B6EA8, 24
 // handleEvent func_001B6E10, 29 func_001E0C88, 32 func_001E0C80). Methods: fe/feasyncfile 0x1B6AB8-0x1B6EA8.
@@ -51,7 +51,7 @@ struct cFEStateAuthDNAS {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004689F0 (vtables.tsv), stored by cFEStateAuthDNAS_cFEStateAuthDNAS / func_001E0BB0
+    void** mVtbl;                   // 0x008 [R] cFEStateAuthDNAS_vtbl (vtables.tsv), stored by cFEStateAuthDNAS_cFEStateAuthDNAS / func_001E0BB0
                                     //       after the cFEStateNet ctor and by the destructor cFEStateAuthDNAS__cFEStateAuthDNAS
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateAuthDNAS_cFEStateAuthDNAS stores
@@ -201,7 +201,7 @@ struct cFEStateAuthDNASError {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004688E0 (vtables.tsv), stored by cFEStateAuthDNASError_cFEStateAuthDNASError / func_001E0C30
+    void** mVtbl;                   // 0x008 [R] cFEStateAuthDNASError_vtbl (vtables.tsv), stored by cFEStateAuthDNASError_cFEStateAuthDNASError / func_001E0C30
                                     //       after the cFEStateNet ctor and by the destructor cFEStateAuthDNASError__cFEStateAuthDNASError
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateAuthDNASError_cFEStateAuthDNASError stores

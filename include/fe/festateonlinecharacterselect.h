@@ -9,9 +9,9 @@
 //
 // Size 0x6E4: cMemMan_alloc(0x6E4, "cFEStateOnlineCharacterSelect") + cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(mem, pEngine) at all 7 sites
 // (func_001A9268, func_001AF470, func_001B0708, func_001B3760, func_001B37D8, func_001C0358, func_001C19C8).
-// Constructors cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect (cFEStateNet(pEngine, 0), vtable D_00468C10, mHashName 0x41) and the default
+// Constructors cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect (cFEStateNet(pEngine, 0), vtable cFEStateOnlineCharacterSelect_vtbl, mHashName 0x41) and the default
 // func_001E0AC0 (fe/fepopupmisc); destructor cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect (fe/fepopupmisc; slot 1; the preview's
-// _$_29cFEStateOnlineCharacterSelect). Retail vtable D_00468C10 (32 slots: 4 onCreateScreen func_001B0FB0, 7
+// _$_29cFEStateOnlineCharacterSelect). Retail vtable cFEStateOnlineCharacterSelect_vtbl (32 slots: 4 onCreateScreen func_001B0FB0, 7
 // func_001B1068, 8 func_001B1590 (input filter), 12 onUpdate func_001B1048, 17 onPopupEvent func_001B1EC0,
 // 18 onWidgetCreate func_001B10F8, 19 onWidgetEvent func_001B1280, 25 func_001B14D8 (help), 31 func_001B15D8 (net
 // events)). Methods: fe/feasyncfile 0x1B0F60-0x1B1F18. The online game object D_004A33CC (func_00264F88 /
@@ -38,7 +38,7 @@ struct cFEStateOnlineCharacterSelect {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00468C10 (vtables.tsv; 32 slots), stored by cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect /
+    void** mVtbl;                   // 0x008 [R] cFEStateOnlineCharacterSelect_vtbl (vtables.tsv; 32 slots), stored by cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect /
                                     //       func_001E0AC0 after the cFEStateNet ctor and by the destructor
                                     //       cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)

@@ -2591,7 +2591,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateReadMessagePopup_cFEStateReadMessagePopup)
 #ifdef SKIP_ASM
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
-extern char D_00467E18[];
+extern char cFEStateReadMessagePopup_vtbl[];
 
 struct sColor1A77A0 {
     float r, g, b, a;
@@ -2620,7 +2620,7 @@ extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(sScreen1
     // An unused 16-byte local is needed to reproduce the 0x50-byte frame.
     int unused[4];
     func_001A8500_3(self, a1, a2);
-    self->vt = D_00467E18;
+    self->vt = cFEStateReadMessagePopup_vtbl;
     cBXString_cBXString2(self->name, name);
     self->f6E8 = 1;
     self->id = 0x49;
@@ -2647,7 +2647,7 @@ extern "C" void* func_0041610C(void* dst, void* src, int n);
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 void cMemMan_free(void* p);
 void operator_delete(int* ptr);
-extern char D_00467E18[];
+extern char cFEStateReadMessagePopup_vtbl[];
 
 struct sVE1A7848 {
     short delta;
@@ -2688,7 +2688,7 @@ struct sOwner1A7848 {
 
 extern "C" void cFEStateReadMessagePopup__cFEStateReadMessagePopup(sOwner1A7848* self, int flags)
 {
-    self->vt = D_00467E18;
+    self->vt = cFEStateReadMessagePopup_vtbl;
     for (;;) {
         if (self->mVec.mBegin == self->mVec.mEnd) break;
         sObj1A7848* p = self->mVec.mEnd[-1];
@@ -6047,7 +6047,7 @@ extern "C" void* func_001ABFA8(cFEStateNet* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEUseExistingAccount_cFEUseExistingAccount);
 #ifdef SKIP_ASM
-extern void* D_00469068[];
+extern void* cFEUseExistingAccount_vtbl[];
 extern int D_004A3E90;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -6056,7 +6056,7 @@ extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount(cFEUseExistingAccou
 {
     func_001A8500_3(self, a1, 0);
     int d = D_004A3E90;
-    self->mVtbl = D_00469068;
+    self->mVtbl = cFEUseExistingAccount_vtbl;
     self->mszEmail = (char*)d;
     self->mHashName = 0x35;
     self->unk_6D0 = 0;
@@ -6069,14 +6069,14 @@ extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount(cFEUseExistingAccou
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEUseExistingAccount__cFEUseExistingAccount);
 #ifdef SKIP_ASM
-extern void* D_00469068[];
+extern void* cFEUseExistingAccount_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
 extern "C" void cFEUseExistingAccount__cFEUseExistingAccount(cFEUseExistingAccount* self, int flags)
 {
-    self->mVtbl = D_00469068;
+    self->mVtbl = cFEUseExistingAccount_vtbl;
     cBXString__cBXString((char*)self + 0x6DC, 2);
     func_001A85D0_dtor(self, flags);
 }
@@ -6768,7 +6768,7 @@ extern "C" int func_001ACEF8(cFEUseExistingAccount* self, int id, int a2)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateSelectPersona_cFEStateSelectPersona);
 #ifdef SKIP_ASM
-extern void* D_00468F50[];
+extern void* cFEStateSelectPersona_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -6776,7 +6776,7 @@ extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPerso
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x38;
-    self->mVtbl = D_00468F50;
+    self->mVtbl = cFEStateSelectPersona_vtbl;
     self->mbExistingPersona = 0;
     return ((void*)self);
 }
@@ -7316,7 +7316,7 @@ extern int D_004A4E88;
 extern int D_004A11B8;
 extern int D_00535C08[];
 extern char D_00441268[];
-extern void* D_00468E38[];
+extern void* cFEStateChallengePopup_vtbl[];
 
 class cRace_DDD0 {
 public:
@@ -7328,7 +7328,7 @@ public:
 extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup(cFEStateChallengePopup* self, void* engine, void* owner)
 {
     func_001A8500_DDD0(self, engine, owner);
-    self->mVtbl = D_00468E38;
+    self->mVtbl = cFEStateChallengePopup_vtbl;
     self->mpEventOptions = (int*)D_00441268;
     self->mHashName = 0x3F;
     self->mbChallengeSent = 0;
@@ -8609,7 +8609,7 @@ extern "C" void func_001AFD88(void* self, void* a1)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup);
 #ifdef SKIP_ASM
-extern void* D_00468D20[];
+extern void* cFEStateChallengeReceivedPopup_vtbl[];
 extern int D_004A4E88;
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
@@ -8618,7 +8618,7 @@ void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" void* cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup(cFEStateChallengeReceivedPopup* self, int a1, int a2, const char* name)
 {
     func_001A8500_3(self, a1, a2);
-    self->mVtbl = D_00468D20;
+    self->mVtbl = cFEStateChallengeReceivedPopup_vtbl;
     cBXString_cBXString2((char*)self + 0x6D0, name);
     self->mbAccepted = 0;
     self->mHashName = 0x40;
@@ -9416,14 +9416,14 @@ extern "C" int func_001B0F28(int c)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect);
 #ifdef SKIP_ASM
-extern void* D_00468C10[];
+extern void* cFEStateOnlineCharacterSelect_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
 extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
-    self->mVtbl = D_00468C10;
+    self->mVtbl = cFEStateOnlineCharacterSelect_vtbl;
     self->mbConfirmed = 1;
     self->mHashName = 0x41;
     self->miConfirmCtrl = 0;
@@ -10151,7 +10151,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom_cFEStateChatRoom);
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" char* strcpy(char* dst, const char* src);
-extern void* D_0046AE58[];
+extern void* cFEStateChatRoom_vtbl[];
 
 struct sCol_001B1F88 {
     float r, g, b, a;
@@ -10175,7 +10175,7 @@ struct sFEObj_001B1F88 {
 extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
-    self->vt = D_0046AE58;
+    self->vt = cFEStateChatRoom_vtbl;
     self->fC = 0x3D;
     self->f6F8 = 0;
     for (int i = 0; i < 2; i++) {
@@ -10196,7 +10196,7 @@ extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* s
 }
 #endif
 
-extern void* D_0046AE58[];
+extern void* cFEStateChatRoom_vtbl[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
@@ -10204,7 +10204,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom__cFEStateChatRoom__FPv);
 #ifdef SKIP_ASM
 void* cFEStateChatRoom__cFEStateChatRoom(void* self)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)D_0046AE58;
+    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateChatRoom_vtbl;
     return func_001A85D0(self);
 }
 #endif
@@ -13206,7 +13206,7 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" int USTR_length(void* s);
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
-extern void* D_004689F0[];
+extern void* cFEStateAuthDNAS_vtbl[];
 extern char D_00464208[];
 extern char D_00464220[];
 
@@ -13237,7 +13237,7 @@ extern "C" sFEObj_001B6288* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS* 
 {
     func_001A8500_3(((sFEObj_001B6288*)self), a1, a2);
     self->unk_6F4 = 2;
-    self->mVtbl = D_004689F0;
+    self->mVtbl = cFEStateAuthDNAS_vtbl;
     self->unk_6F8 = 0x1E;
     self->mHashName = 0x44;
     self->mpAuth = 0;
@@ -13260,7 +13260,7 @@ extern "C" sFEObj_001B6288* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS* 
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNAS__cFEStateAuthDNAS);
 #ifdef SKIP_ASM
-extern void* D_004689F0[];
+extern void* cFEStateAuthDNAS_vtbl[];
 void cMemMan_free(void* p);
 extern "C" void func_002563A8(void* p);
 extern "C" void func_002561E0(void* p, int flags);
@@ -13269,7 +13269,7 @@ extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0
 
 extern "C" void cFEStateAuthDNAS__cFEStateAuthDNAS(cFEStateAuthDNAS* self, int flags)
 {
-    self->mVtbl = D_004689F0;
+    self->mVtbl = cFEStateAuthDNAS_vtbl;
     if (self->mpAuth != 0) {
         func_002563A8(self->mpAuth);
         if (self->mpAuth != 0) {
@@ -13614,7 +13614,7 @@ extern "C" int func_001B6A90(cFEStateAuthDNAS* self, int a1, unsigned int key)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNASError_cFEStateAuthDNASError);
 #ifdef SKIP_ASM
-extern void* D_004688E0[];
+extern void* cFEStateAuthDNASError_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -13624,13 +13624,13 @@ extern "C" void* cFEStateAuthDNASError_cFEStateAuthDNASError(cFEStateAuthDNASErr
     self->mpustrBody = (unsigned short*)a3;
     self->mpustrFooter = (unsigned short*)a4;
     self->mpustrTitle = (unsigned short*)a5;
-    self->mVtbl = D_004688E0;
+    self->mVtbl = cFEStateAuthDNASError_vtbl;
     self->mHashName = 0x45;
     return ((void*)self);
 }
 #endif
 
-extern void* D_004688E0[];
+extern void* cFEStateAuthDNASError_vtbl[];
 extern "C" void* func_001A85D0(void*);
 
 //100%
@@ -13638,7 +13638,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNASError__cFEStateAuthDNASError__FPv)
 #ifdef SKIP_ASM
 void* cFEStateAuthDNASError__cFEStateAuthDNASError(void* self)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)D_004688E0;
+    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateAuthDNASError_vtbl;
     return func_001A85D0(self);
 }
 #endif
@@ -17446,7 +17446,7 @@ extern "C" int func_001BBC40_r(void* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateDuplicate_cFEStateCreateDuplicate);
 #ifdef SKIP_ASM
-extern void* D_004684A0[];
+extern void* cFEStateCreateDuplicate_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -17454,7 +17454,7 @@ extern "C" void* cFEStateCreateDuplicate_cFEStateCreateDuplicate(cFEStateCreateD
 {
     func_001A8500_3(self, a1, 0);
     self->mbAccount = a2;
-    self->mVtbl = D_004684A0;
+    self->mVtbl = cFEStateCreateDuplicate_vtbl;
     self->mHashName = 0x4F;
     self->unk_6A8 = 0;
     return ((void*)self);
@@ -19503,7 +19503,7 @@ extern "C" void func_001BE720(cFEStateLobbyMenu* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup);
 #ifdef SKIP_ASM
-extern void* D_0046A6E8[];
+extern void* cFEStateNetCreateRoomPopup_vtbl[];
 extern int D_004A3E90;
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
@@ -19512,7 +19512,7 @@ extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup(cFEStateN
 {
     func_001A8500_3(self, a1, a2);
     int d = D_004A3E90;
-    self->mVtbl = D_0046A6E8;
+    self->mVtbl = cFEStateNetCreateRoomPopup_vtbl;
     self->mszRoomName = (char*)d;
     self->mszChannelName = (char*)d;
     self->mszPassword = (char*)d;
@@ -19811,7 +19811,7 @@ extern "C" void func_001BED58(cFEStateNetCreateRoomPopup* self, void* popup)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateLogin_cFEStateLogin);
 #ifdef SKIP_ASM
-extern void* D_00468388[];
+extern void* cFEStateLogin_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -19819,7 +19819,7 @@ extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x33;
-    self->mVtbl = D_00468388;
+    self->mVtbl = cFEStateLogin_vtbl;
     self->mpustrDisconnect = 0;
     self->unk_6A8 = 0;
     return ((void*)self);
@@ -19829,14 +19829,14 @@ extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* self, int a1)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateLogin__cFEStateLogin);
 #ifdef SKIP_ASM
-extern void* D_00468388[];
+extern void* cFEStateLogin_vtbl[];
 void cMemMan_free(void* p);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
 extern "C" void cFEStateLogin__cFEStateLogin(cFEStateLogin* self, int flags)
 {
-    self->mVtbl = D_00468388;
+    self->mVtbl = cFEStateLogin_vtbl;
     if (self->mpustrDisconnect != 0) {
         cMemMan_free(self->mpustrDisconnect);
         self->mpustrDisconnect = 0;
@@ -20421,7 +20421,7 @@ extern "C" void func_001BFAE0(cFEStateLogin* self, void* popup)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineMainMenu_cFEStateOnlineMainMenu);
 #ifdef SKIP_ASM
-extern void* D_0046AD48[];
+extern void* cFEStateOnlineMainMenu_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -20429,7 +20429,7 @@ extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* self
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x3B;
-    self->mVtbl = D_0046AD48;
+    self->mVtbl = cFEStateOnlineMainMenu_vtbl;
     return ((void*)self);
 }
 #endif
@@ -20769,14 +20769,14 @@ extern "C" void* func_001C0358(cFEStateNet* self, int a1, int a2)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C03D0);
 #ifdef SKIP_ASM
-extern void* D_0046AC38[];
+extern void* cFEStateOnlineAgreement_vtbl[];
 extern "C" void* func_001A8500(void* self);
 
 extern "C" void* func_001C03D0(cFEStateOnlineAgreement* self)
 {
     func_001A8500(self);
     self->mHashName = 0x43;
-    self->mVtbl = D_0046AC38;
+    self->mVtbl = cFEStateOnlineAgreement_vtbl;
     self->mpTOSLines = 0;
     self->miNextTOSLine = (unsigned int)0;
     return ((void*)self);
@@ -20786,7 +20786,7 @@ extern "C" void* func_001C03D0(cFEStateOnlineAgreement* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement_cFEStateOnlineAgreement);
 #ifdef SKIP_ASM
-extern void* D_0046AC38[];
+extern void* cFEStateOnlineAgreement_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -20794,7 +20794,7 @@ extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement(cFEStateOnlineA
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x43;
-    self->mVtbl = D_0046AC38;
+    self->mVtbl = cFEStateOnlineAgreement_vtbl;
     self->mpTOSLines = 0;
     self->miNextTOSLine = (unsigned int)0;
     return ((void*)self);
@@ -20804,7 +20804,7 @@ extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement(cFEStateOnlineA
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C0460);
 #ifdef SKIP_ASM
-extern void* D_0046AC38[];
+extern void* cFEStateOnlineAgreement_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -20812,7 +20812,7 @@ extern "C" void* func_001C0460(cFEStateOnlineAgreement* self)
 {
     func_001A8500_3(self, 0, 0);
     self->mpTOSLines = 0;
-    self->mVtbl = D_0046AC38;
+    self->mVtbl = cFEStateOnlineAgreement_vtbl;
     self->miNextTOSLine = (unsigned int)0;
     return ((void*)self);
 }
@@ -20946,14 +20946,14 @@ extern "C" void func_001C0540(cFEStateOnlineAgreement* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement__cFEStateOnlineAgreement);
 #ifdef SKIP_ASM
-extern void* D_0046AC38[];
+extern void* cFEStateOnlineAgreement_vtbl[];
 void cMemMan_free(void* p);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
 extern "C" void cFEStateOnlineAgreement__cFEStateOnlineAgreement(cFEStateOnlineAgreement* self, int flags)
 {
-    self->mVtbl = D_0046AC38;
+    self->mVtbl = cFEStateOnlineAgreement_vtbl;
     if (self->mpTOSLines != 0) {
         cMemMan_free(self->mpTOSLines);
         self->mpTOSLines = 0;
@@ -21188,14 +21188,14 @@ extern "C" void func_001C0EA8(cFEStateOnlineAgreement* self, void* popup)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup);
 #ifdef SKIP_ASM
-extern void* D_0046AB28[];
+extern void* cFEStateNetQuickPlayPopup_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
 extern "C" void* cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup(cFEStateNetQuickPlayPopup* self, int a1, int a2)
 {
     func_001A8500_3(self, a1, a2);
-    self->mVtbl = D_0046AB28;
+    self->mVtbl = cFEStateNetQuickPlayPopup_vtbl;
     self->mHashName = 0x48;
     self->mbSearching = 0;
     self->mpRankedPair = 0;
@@ -21739,7 +21739,7 @@ extern "C" int func_001C1B88(cFEStateNetQuickPlayPopup* self, void* a1, int a2)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetSSXWorld_cFEStateNetSSXWorld);
 #ifdef SKIP_ASM
-extern void* D_0046AA18[];
+extern void* cFEStateNetSSXWorld_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -21747,7 +21747,7 @@ extern "C" void* cFEStateNetSSXWorld_cFEStateNetSSXWorld(cFEStateNet* self, int 
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x4A;
-    self->mVtbl = D_0046AA18;
+    self->mVtbl = cFEStateNetSSXWorld_vtbl;
     return ((void*)self);
 }
 #endif
@@ -21927,7 +21927,7 @@ extern "C" void func_001C1EA8(cFEStateNet* self, char* msg, int ev)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickMessages_cFEStateNetQuickMessages);
 #ifdef SKIP_ASM
-extern void* D_0046A908[];
+extern void* cFEStateNetQuickMessages_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -21935,7 +21935,7 @@ extern "C" void* cFEStateNetQuickMessages_cFEStateNetQuickMessages(cFEStateNetQu
 {
     func_001A8500_3(((cFEStateNet*)self), a1, 0);
     self->mHashName = 0x4B;
-    self->mVtbl = D_0046A908;
+    self->mVtbl = cFEStateNetQuickMessages_vtbl;
     return ((void*)self);
 }
 #endif
@@ -23789,7 +23789,7 @@ extern "C" void func_001C4F58(cFEStateStats* self, char* buf, int frames)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetNews_cFEStateNetNews);
 #ifdef SKIP_ASM
-extern void* D_00468168[];
+extern void* cFEStateNetNews_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
@@ -23797,7 +23797,7 @@ extern "C" void* cFEStateNetNews_cFEStateNetNews(cFEStateNet* self, int a1)
 {
     func_001A8500_3(self, a1, 0);
     self->mHashName = 0x43;
-    self->mVtbl = D_00468168;
+    self->mVtbl = cFEStateNetNews_vtbl;
     return ((void*)self);
 }
 #endif
@@ -23805,14 +23805,14 @@ extern "C" void* cFEStateNetNews_cFEStateNetNews(cFEStateNet* self, int a1)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C5058);
 #ifdef SKIP_ASM
-extern void* D_00468168[];
+extern void* cFEStateNetNews_vtbl[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
 extern "C" void* func_001C5058(cFEStateNet* self)
 {
     func_001A8500_3(self, 0, 0);
-    self->mVtbl = D_00468168;
+    self->mVtbl = cFEStateNetNews_vtbl;
     return ((void*)self);
 }
 #endif

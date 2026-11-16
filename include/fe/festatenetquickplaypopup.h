@@ -11,9 +11,9 @@
 // Size 0x734: cMemMan_alloc(0x734, "cFEStateNetQuickPlayPopup") + cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup(mem, pEngine, pParent)
 // (func_001BFE70,
 // cFEStateOnlineMainMenu's onWidgetEvent; the only site); the constructor zeroes up to 0x730. Constructors
-// cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup (cFEStateNet(pEngine, pParent), vtable D_0046AB28, mHashName 0x48) and the default func_001DF638
+// cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup (cFEStateNet(pEngine, pParent), vtable cFEStateNetQuickPlayPopup_vtbl, mHashName 0x48) and the default func_001DF638
 // (fe/fepopupmisc); destructor cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup (fe/fepopupmisc; slot 1; the preview's _$_25cFEStateNetQuickPlayPopup).
-// Retail vtable D_0046AB28 (32 slots: 4 onCreateScreen func_001C0FC0, 10 func_001DF6A0 (onLoseTransition), 12
+// Retail vtable cFEStateNetQuickPlayPopup_vtbl (32 slots: 4 onCreateScreen func_001C0FC0, 10 func_001DF6A0 (onLoseTransition), 12
 // onUpdate func_001C1038, 17 onPopupEvent func_001C1B48, 18 onWidgetCreate func_001C1080, 19 onWidgetEvent
 // func_001C1560, 20 func_001C17E0, 21 func_001C17D8, 25 func_001C1488 (help), 31 func_001C19C8 (net events)).
 // Methods: fe/feasyncfile 0x1C0F40-0x1C1B88.
@@ -41,7 +41,7 @@ struct cFEStateNetQuickPlayPopup {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_0046AB28 (vtables.tsv; 32 slots), stored by cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup /
+    void** mVtbl;                   // 0x008 [R] cFEStateNetQuickPlayPopup_vtbl (vtables.tsv; 32 slots), stored by cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup /
                                     //       func_001DF638 after the cFEStateNet ctor and by the destructor
                                     //       cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
