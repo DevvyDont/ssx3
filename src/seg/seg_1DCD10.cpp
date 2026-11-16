@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/fog.h"
 #include "render/ps2graphicsman.h"
 
 //100%
@@ -241,9 +242,9 @@ static inline void G3_BF98(int c, int f, int g, int e, int d) {
     ctx->top->d = d;
 }
 
-extern "C" void func_002DBF98(Obj_BF98* self) {
-    if (self->n) {
-        func_00418EF8_BF98(D_00537AC0, self->n, 8, func_002DC168);
+extern "C" void func_002DBF98(cFogParticleMan* self) {
+    if (self->miNumSphere) {
+        func_00418EF8_BF98(D_00537AC0, self->miNumSphere, 8, func_002DC168);
         Push_BF98();
         {
             Ctx_BF98* ctx = GrMan_seg_1DCD10;
@@ -260,11 +261,11 @@ extern "C" void func_002DBF98(Obj_BF98* self) {
         }
         G3_BF98(5, 1, 0, 3, 0);
         {
-            VEnt_BF98* e = (VEnt_BF98*)(self->vt + 0x18);
+            VEnt_BF98* e = (VEnt_BF98*)((char*)self->mVtbl + 0x18);
             e->fn((char*)self + e->delta);
         }
         Pop_BF98();
-        self->n = 0;
+        self->miNumSphere = 0;
     }
 }
 #endif
@@ -519,7 +520,7 @@ static inline int outcode_C190(const sCtx_C190* g, const sV4_C190& v)
     return code;
 }
 
-extern "C" void func_002DC190(sOut_C190* out, sObj_C190** objs, int n, int clip)
+extern "C" void func_002DC190(cPS2FogParticleMan* out, sObj_C190** objs, int n, int clip)
 {
     sCtx_C190* g = D_C190;
     if (g->ready == 0)
@@ -558,24 +559,24 @@ extern "C" void func_002DC190(sOut_C190* out, sObj_C190** objs, int n, int clip)
                         float a = fade * t;
                         if (a != 0.0f) {
                             p.w = 1.0f / p.w;
-                            unsigned short id = out->count;
+                            unsigned short id = out->miNumSphere;
                             D_00537AC0_C190[id].idx = id;
                             D_00537AC0_C190[id].depth = depth;
                             p.x *= p.w;
                             p.y *= p.w;
                             float s = v->size * p.w;
                             sV4_C190 off(g->sx * s, g->sy * s);
-                            out->e[out->count].a = sub_C190(p, off);
-                            out->e[out->count].b = add4_C190(p, off);
+                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].a = sub_C190(p, off);
+                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].b = add4_C190(p, off);
                             if (clip != 0) {
-                                if (outcode_C190(g, out->e[out->count].a) & outcode_C190(g, out->e[out->count].b))
+                                if (outcode_C190(g, ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].a) & outcode_C190(g, ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].b))
                                     continue;
                             }
-                            out->e[out->count].col[0] = a * 128.0f;
-                            out->e[out->count].col[1] = v->col[0] * 128.0f;
-                            out->e[out->count].col[2] = v->col[1] * 128.0f;
-                            out->e[out->count].col[3] = v->col[2] * 128.0f;
-                            out->count++;
+                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].col[0] = a * 128.0f;
+                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].col[1] = v->col[0] * 128.0f;
+                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].col[2] = v->col[1] * 128.0f;
+                            ((sSprite_C190*)&out->mSprites[0])[out->miNumSphere].col[3] = v->col[2] * 128.0f;
+                            out->miNumSphere++;
                         }
                     }
                 }
@@ -643,9 +644,9 @@ extern "C" unsigned int func_0038F668_C7B0(sDma_C7B0* dma, unsigned long* p, int
 
 static inline int FBits_C7B0(float f) { return *(int*)&f; }
 
-extern "C" void func_002DC7B0(sList_C7B0* list)
+extern "C" void func_002DC7B0(cPS2FogParticleMan* list)
 {
-    int left = list->count;
+    int left = list->miNumSphere;
     int start = 0;
     int max = (D_004A4474_C7B0->size - 4) * 2 / 5 - 1;
     sGfx_C7B0* g = D_004A5B80_C7B0;
@@ -684,7 +685,7 @@ extern "C" void func_002DC7B0(sList_C7B0* list)
         int rest = left - n;
         p += 10;
         for (int i = start; i < start + n; i++) {
-            sVtx_C7B0* v = &list->v[((sSort_C7B0*)D_00537AC0)[i].idx];
+            sVtx_C7B0* v = &((sVtx_C7B0*)&list->mSprites[0])[((sSort_C7B0*)D_00537AC0)[i].idx];
             float q = v->q;
             p[0] = FBits_C7B0(st0[0] * q) | ((unsigned long)FBits_C7B0(st0[1] * q) << 32);
             p[1] = (int)v->r | ((unsigned long)(int)v->g << 8) | ((unsigned long)(int)v->b << 16) | ((unsigned long)(int)v->a << 24) | ((unsigned long)FBits_C7B0(q) << 32);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/effectmodifier.h"
 #include "render/ps2graphicsman.h"
 #include "object/effectlink.h"
 
@@ -69,7 +70,7 @@ struct sEffectLinkObj_5798 {
     int value;         // 0xC
 };
 
-extern "C" void* func_00345798(void* self, int a1)
+extern "C" void* func_00345798(cEffectModifier* self, int a1)
 {
     sEffectLinkObj_5798* o = (sEffectLinkObj_5798*)self;
     o->link.next = 0;
@@ -77,7 +78,7 @@ extern "C" void* func_00345798(void* self, int a1)
     o->vt = cEffectModifier_vtbl;
     o->value = a1;
     D_004A3FF4++;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -99,7 +100,7 @@ struct sEffVEntry57C8 {
     int (*fn)(void*);
 };
 
-extern "C" void* func_003457C8(void* p, void* obj)
+extern "C" void* func_003457C8(cEffectModifier* p, void* obj)
 {
     sEffectLinkObj_57C8* self = (sEffectLinkObj_57C8*)p;
     self->link.next = 0;
@@ -108,7 +109,7 @@ extern "C" void* func_003457C8(void* p, void* obj)
     sEffVEntry57C8* vt = *(sEffVEntry57C8**)obj;
     self->value = vt[3].fn((char*)obj + vt[3].delta);
     D_004A3FF4++;
-    return p;
+    return ((void*)p);
 }
 #endif
 
@@ -132,7 +133,7 @@ struct sEffectLinkObj_5828 {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cEffectModifier__cEffectModifier(void* self, int flags)
+extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags)
 {
     sEffectLinkObj_5828* o = (sEffectLinkObj_5828*)self;
     o->vt = cEffectModifier_vtbl;
@@ -161,17 +162,17 @@ struct sEffVEntry {
  *
  * @param obj  replay stream to write to
  */
-extern "C" void cEffectModifier_writeToReplayFrame(void* self, void* obj)
+extern "C" void cEffectModifier_writeToReplayFrame(cEffectModifier* self, void* obj)
 {
     sEffVEntry* vt = *(sEffVEntry**)obj;
-    vt[5].fn((char*)obj + vt[5].delta, *(void**)((char*)self + 0xC));
+    vt[5].fn((char*)obj + vt[5].delta, self->Instance);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/effectlink", func_003458C0);
 #ifdef SKIP_ASM
-extern "C" void* func_00345798(void* self, int a1);
+extern "C" void* func_00345798(cEffectModifier* self, int a1);
 extern "C" void* func_00370018(void* self);
 extern "C" void func_003705E0(void* self, void* mat, int a2);
 extern int D_004A3FF8;
@@ -207,26 +208,25 @@ struct sEffObj003458C0 {
     int f1E4;
 };
 
-extern "C" void* func_003458C0(void* self, int a1, int owner)
+extern "C" void* func_003458C0(cParticleModifier* self, int a1, int owner)
 {
-    char* s = (char*)self;
-    func_00345798(self, owner);
-    *(void***)(s + 0x8) = cParticleModifier_vtbl;
-    func_00370018(s + 0x50);
-    *(int*)(s + 0x1E0) = a1;
-    char* own = *(char**)(s + 0xC);
+    func_00345798((cEffectModifier*)self, owner);
+    self->mVtbl = cParticleModifier_vtbl;
+    func_00370018(((char*)self) + 0x50);
+    self->ParticleData = (tParticleData*)a1;
+    char* own = (char*)self->Instance;
     void* obj = *(void**)(own + 0xC);
     void* m;
     if (obj != 0) {
         sVEntry003458C0* vt = *(sVEntry003458C0**)((char*)obj + 0xC);
-        m = vu0CopyMatrix003458C0(s + 0x10, vt[24].fn((char*)obj + vt[24].delta));
+        m = vu0CopyMatrix003458C0(((char*)self) + 0x10, vt[24].fn((char*)obj + vt[24].delta));
     } else {
-        m = vu0CopyMatrix003458C0(s + 0x10, own + 0x10);
+        m = vu0CopyMatrix003458C0(((char*)self) + 0x10, own + 0x10);
     }
-    func_003705E0(s + 0x50, m, *(int*)(s + 0x1E0));
+    func_003705E0(((char*)self) + 0x50, m, (int)self->ParticleData);
     ((sEffObj003458C0*)self)->f1E4 = 0;
     D_004A3FF8++;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -243,29 +243,28 @@ struct sEffectLinkVEntry_3459A8 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void* func_003459A8(void* self, void* stream)
+extern "C" void* func_003459A8(cParticleModifier* self, void* stream)
 {
-    char* s = (char*)self;
-    func_003457C8(self, stream);
-    *(void***)(s + 0x8) = cParticleModifier_vtbl;
-    func_00370018(s + 0x50);
+    func_003457C8((cEffectModifier*)self, stream);
+    self->mVtbl = cParticleModifier_vtbl;
+    func_00370018(((char*)self) + 0x50);
     sEffectLinkVEntry_3459A8* e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
-    e->fn((char*)stream + e->delta, s + 0x1E4, 4);
-    if (*(int*)(s + 0x1E4) == 0) {
+    e->fn((char*)stream + e->delta, ((char*)self) + 0x1E4, 4);
+    if (self->Complete == 0) {
         void* buf = operator_new1(0xD8);
-        *(void**)(s + 0x1E0) = buf;
+        self->ParticleData = (tParticleData*)buf;
         e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
         e->fn((char*)stream + e->delta, buf, 0xD8);
         e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
-        e->fn((char*)stream + e->delta, s + 0x10, 0x40);
-        func_003705E0(s + 0x50, s + 0x10, *(int*)(s + 0x1E0));
-        func_00370AF8(s + 0x50, stream);
+        e->fn((char*)stream + e->delta, ((char*)self) + 0x10, 0x40);
+        func_003705E0(((char*)self) + 0x50, ((char*)self) + 0x10, (int)self->ParticleData);
+        func_00370AF8(((char*)self) + 0x50, stream);
     } else {
-        vu0CopyMatrix003458C0(s + 0x10, t4mat_Identity);
-        *(int*)(s + 0x1E0) = 0;
+        vu0CopyMatrix003458C0(((char*)self) + 0x10, t4mat_Identity);
+        self->ParticleData = 0;
     }
     D_004A3FF8++;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -276,7 +275,7 @@ extern int D_004A3FF8;
 extern void* cParticleModifier_vtbl[];
 void operator_delete(int*);
 extern "C" void func_00370758(int* self, int flags);
-extern "C" void cEffectModifier__cEffectModifier(void* self, int flags);
+extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags);
 
 /**
  * Destroys a particle modifier: frees its 0xD8-byte buffer (+0x1E0), decrements the live count (D_004A3FF8),
@@ -284,17 +283,16 @@ extern "C" void cEffectModifier__cEffectModifier(void* self, int flags);
  *
  * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
  */
-extern "C" void cParticleModifier__cParticleModifier(void* self, int flags)
+extern "C" void cParticleModifier__cParticleModifier(cParticleModifier* self, int flags)
 {
-    char* s = (char*)self;
-    *(void***)(s + 0x8) = cParticleModifier_vtbl;
-    int* buf = *(int**)(s + 0x1E0);
+    self->mVtbl = cParticleModifier_vtbl;
+    int* buf = (int*)self->ParticleData;
     if (buf != 0) {
         operator_delete(buf);
     }
     D_004A3FF8--;
-    func_00370758((int*)(s + 0x50), 2);
-    cEffectModifier__cEffectModifier(self, flags);
+    func_00370758((int*)(((char*)self) + 0x50), 2);
+    cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
 #endif
 
@@ -309,17 +307,16 @@ extern "C" void cStaticEmitter_update(void* self, float dt);
  * An emitter whose life (+0x50) starts negative runs forever; otherwise the effect is marked finished
  * (+0x1E4) once the life has run down to 0.
  */
-extern "C" void cParticleModifier_update(void* self)
+extern "C" void cParticleModifier_update(cParticleModifier* self)
 {
-    char* selfBytes = (char*)self;
-    if (*(int*)(selfBytes + 0x1E4) == 0) {
-        void* emitter = selfBytes + 0x50;
-        if (*(float*)(selfBytes + 0x50) < 0.0f) {
+    if (self->Complete == 0) {
+        void* emitter = ((char*)self) + 0x50;
+        if (self->Emitter.Duration < 0.0f) {
             cStaticEmitter_update(emitter, 0.01666666753590107f);
         } else {
             cStaticEmitter_update(emitter, 0.01666666753590107f);
-            if (*(float*)(selfBytes + 0x50) <= 0.0f) {
-                *(int*)(selfBytes + 0x1E4) = 1;
+            if (self->Emitter.Duration <= 0.0f) {
+                self->Complete = 1;
             }
         }
     }
@@ -337,9 +334,9 @@ extern "C" void cStaticEmitter_render1(void*);
  * Calls cStaticEmitter_render1() on the emitter embedded at offset 0x50 while the finished flag (offset 0x1E4,
  * set by cParticleModifier_update when the emitter's time runs out) is clear.
  */
-extern "C" void cParticleModifier_render(void* self)
+extern "C" void cParticleModifier_render(cParticleModifier* self)
 {
-    if (*(int*)((char*)self + 0x1E4) == 0) {
+    if (self->Complete == 0) {
         cStaticEmitter_render1((char*)self + 0x50);
     }
 }
@@ -364,14 +361,14 @@ extern "C" void cStaticEmitter_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cParticleModifier_writeToReplayFrame(void* self, void* stream)
+extern "C" void cParticleModifier_writeToReplayFrame(cParticleModifier* self, void* stream)
 {
-    cEffectModifier_writeToReplayFrame(self, stream);
+    cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
     sEffectLinkVEntry5BF0* writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x1E4, 4);
-    if (*(int*)((char*)self + 0x1E4) == 0) {
+    if (self->Complete == 0) {
         writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-        writeEntry->fn((char*)stream + writeEntry->delta, *(void**)((char*)self + 0x1E0), 0xD8);
+        writeEntry->fn((char*)stream + writeEntry->delta, self->ParticleData, 0xD8);
         writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
         writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 0x40);
         cStaticEmitter_writeToReplayFrame((char*)self + 0x50, stream);
@@ -382,11 +379,11 @@ extern "C" void cParticleModifier_writeToReplayFrame(void* self, void* stream)
 //100%
 INCLUDE_ASM("object/effectlink", func_00345C90);
 #ifdef SKIP_ASM
-extern "C" void* func_00345798(void* self, int a1);
+extern "C" void* func_00345798(cEffectModifier* self, int a1);
 extern "C" void* func_00370B60(void* self);
 extern "C" void func_00370DC8(void* self, void* target, float t);
 struct sEffectLink5EF8;
-extern "C" void func_00345EF8(sEffectLink5EF8* self);
+extern "C" void func_00345EF8(cDynamicParticleModifier* self);
 extern int D_004A3FFC;
 extern void* cDynamicParticleModifier_vtbl[];
 extern void* cDynamicEmitter_vtbl[];
@@ -422,25 +419,25 @@ struct sEff00345C90 {
     sTarget00345C90* target;
 };
 
-extern "C" sEff00345C90* func_00345C90(sEff00345C90* self, sTarget00345C90* t, int owner, int bone, sVec4_00345C90* pos)
+extern "C" sEff00345C90* func_00345C90(cDynamicParticleModifier* self, sTarget00345C90* t, int owner, int bone, sVec4_00345C90* pos)
 {
-    func_00345798(self, owner);
-    self->vt = cDynamicParticleModifier_vtbl;
-    func_00370B60(self->sub60);
-    self->subVt = cDynamicEmitter_vtbl;
-    self->target = t;
-    self->bone = bone;
-    self->localA = *pos;
-    self->localB = sVec4_00345C90(t->x, t->y, t->z, 0.0f);
-    self->f14 = 0;
+    func_00345798((cEffectModifier*)self, owner);
+    self->mVtbl = cDynamicParticleModifier_vtbl;
+    func_00370B60(((char*)&self->Emitter));
+    self->Emitter.mVtbl = cDynamicEmitter_vtbl;
+    self->ParticleData = (tParticleData*)t;
+    self->Mesh = bone;
+    (*(sVec4_00345C90*)&self->Offset) = *pos;
+    (*(sVec4_00345C90*)&self->InitVel) = sVec4_00345C90(t->x, t->y, t->z, 0.0f);
+    self->Fade = 0;
     t->x = 0.0f;
     t->y = 0.0f;
     t->z = 0.0f;
-    func_00370DC8(self->sub60, self->target, -1.0f);
-    func_00345EF8((sEffectLink5EF8*)self);
+    func_00370DC8(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
+    func_00345EF8(self);
     D_004A3FFC++;
-    self->f18 = 0;
-    return self;
+    self->Complete = 0;
+    return ((sEff00345C90*)self);
 }
 #endif
 
@@ -458,28 +455,28 @@ struct sEffectLinkVEntry_345D80 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" sEff00345C90* func_00345D80(sEff00345C90* self, void* stream)
+extern "C" sEff00345C90* func_00345D80(cDynamicParticleModifier* self, void* stream)
 {
-    func_003457C8(self, stream);
-    self->vt = cDynamicParticleModifier_vtbl;
-    void* data = &self->bone;
-    func_00370B60(self->sub60);
-    self->subVt = cDynamicEmitter_vtbl;
+    func_003457C8((cEffectModifier*)self, stream);
+    self->mVtbl = cDynamicParticleModifier_vtbl;
+    void* data = &self->Mesh;
+    func_00370B60(((char*)&self->Emitter));
+    self->Emitter.mVtbl = cDynamicEmitter_vtbl;
     sEffectLinkVEntry_345D80* vt = *(sEffectLinkVEntry_345D80**)stream;
     vt[2].fn((char*)stream + vt[2].delta, data, 0x50);
-    if (self->f18 == 0) {
+    if (self->Complete == 0) {
         void* t = operator_new1(0xD8);
-        self->target = (sTarget00345C90*)t;
+        self->ParticleData = (tParticleData*)((sTarget00345C90*)t);
         sEffectLinkVEntry_345D80* vt2 = *(sEffectLinkVEntry_345D80**)stream;
         vt2[2].fn((char*)stream + vt2[2].delta, t, 0xD8);
-        func_00370DC8(self->sub60, self->target, -1.0f);
-        func_00371318(self->sub60, (cStream00371318*)stream);
-        func_003710D0(self->sub60, &self->worldA, &self->worldB, 1, 0.01666666753590107f);
+        func_00370DC8(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
+        func_00371318(((char*)&self->Emitter), (cStream00371318*)stream);
+        func_003710D0(((char*)&self->Emitter), &(*(sVec4_00345C90*)&self->Pos), &(*(sVec4_00345C90*)&self->Vel), 1, 0.01666666753590107f);
     } else {
-        self->target = 0;
+        self->ParticleData = 0;
     }
     D_004A3FFC++;
-    return self;
+    return ((sEff00345C90*)self);
 }
 #endif
 
@@ -490,7 +487,7 @@ extern int D_004A3FFC;
 extern void* cDynamicParticleModifier_vtbl[];
 void operator_delete(int*);
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags);
-extern "C" void cEffectModifier__cEffectModifier(void* self, int flags);
+extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags);
 
 /**
  * Destroys a dynamic particle modifier: frees its 0xD8-byte buffer (+0x260), decrements the live count
@@ -498,17 +495,16 @@ extern "C" void cEffectModifier__cEffectModifier(void* self, int flags);
  *
  * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
  */
-extern "C" void cDynamicParticleModifier__cDynamicParticleModifier(void* self, int flags)
+extern "C" void cDynamicParticleModifier__cDynamicParticleModifier(cDynamicParticleModifier* self, int flags)
 {
-    char* s = (char*)self;
-    *(void***)(s + 0x8) = cDynamicParticleModifier_vtbl;
-    int* buf = *(int**)(s + 0x260);
+    self->mVtbl = cDynamicParticleModifier_vtbl;
+    int* buf = (int*)self->ParticleData;
     if (buf != 0) {
         operator_delete(buf);
     }
     D_004A3FFC--;
-    cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(s + 0x60, 2);
-    cEffectModifier__cEffectModifier(self, flags);
+    cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(((char*)self) + 0x60, 2);
+    cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
 #endif
 
@@ -561,12 +557,12 @@ struct sEffectLink5EF8 {
     sEffVec4_5EF8 localB;   // 0x50
 };
 
-extern "C" void func_00345EF8(sEffectLink5EF8* self)
+extern "C" void func_00345EF8(cDynamicParticleModifier* self)
 {
     sEffMtx_5EF8 m;
-    func_0034FED8(self->model, self->bone, (sEffMtx_62A0*)&m);
-    self->worldA = effMtxApply5EF8(&m, &self->localA);
-    self->worldB = effMtxApply5EF8(&m, &self->localB);
+    func_0034FED8(self->Instance, self->Mesh, (sEffMtx_62A0*)&m);
+    (*(sEffVec4_5EF8*)&self->Pos) = effMtxApply5EF8(&m, &(*(sEffVec4_5EF8*)&self->Offset));
+    (*(sEffVec4_5EF8*)&self->Vel) = effMtxApply5EF8(&m, &(*(sEffVec4_5EF8*)&self->InitVel));
 }
 #endif
 
@@ -574,7 +570,7 @@ extern "C" void func_00345EF8(sEffectLink5EF8* self)
 INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_update);
 #ifdef SKIP_ASM
 struct sEffectLink5EF8;
-extern "C" void func_00345EF8(sEffectLink5EF8* self);
+extern "C" void func_00345EF8(cDynamicParticleModifier* self);
 extern "C" void func_003710D0(void* sub, void* a, void* b, int flag, float dt);
 
 /**
@@ -585,31 +581,30 @@ extern "C" void func_003710D0(void* sub, void* a, void* b, int flag, float dt);
  * otherwise it keeps emitting and finishes when a non-negative life (+0x60) runs out. Does nothing once
  * finished (+0x18).
  */
-extern "C" void cDynamicParticleModifier_update(void* self)
+extern "C" void cDynamicParticleModifier_update(cDynamicParticleModifier* self)
 {
-    char* selfBytes = (char*)self;
-    if (*(int*)(selfBytes + 0x18) != 0) {
+    if (self->Complete != 0) {
         return;
     }
-    func_00345EF8((sEffectLink5EF8*)self);
-    if (*(int*)(selfBytes + 0x14) > 0) {
-        float* sub = (float*)(selfBytes + 0x60);
-        if (*(int*)(selfBytes + 0x240) > 0) {
-            func_003710D0(sub, selfBytes + 0x30, selfBytes + 0x40, 0, 0.01666666753590107f);
+    func_00345EF8(self);
+    if (self->Fade > 0) {
+        float* sub = (float*)(((char*)self) + 0x60);
+        if (self->Emitter.m_enabledCount > 0) {
+            func_003710D0(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 0, 0.01666666753590107f);
             return;
         }
     } else {
-        float* sub = (float*)(selfBytes + 0x60);
-        if (*(float*)(selfBytes + 0x60) < 0.0f) {
-            func_003710D0(sub, selfBytes + 0x30, selfBytes + 0x40, 1, 0.01666666753590107f);
+        float* sub = (float*)(((char*)self) + 0x60);
+        if (self->Emitter.Duration < 0.0f) {
+            func_003710D0(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 1, 0.01666666753590107f);
             return;
         }
-        func_003710D0(sub, selfBytes + 0x30, selfBytes + 0x40, 1, 0.01666666753590107f);
-        if (!(*(float*)(selfBytes + 0x60) <= 0.0f)) {
+        func_003710D0(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 1, 0.01666666753590107f);
+        if (!(self->Emitter.Duration <= 0.0f)) {
             return;
         }
     }
-    *(int*)(selfBytes + 0x18) = 1;
+    self->Complete = 1;
 }
 #endif
 
@@ -639,9 +634,9 @@ extern "C" void cDynamicEmitter_render(void*, int);
  * Calls cDynamicEmitter_render() with 7 on the emitter embedded at offset 0x60 while the finished flag
  * (offset 0x18) is clear.
  */
-extern "C" void cDynamicParticleModifier_render(void* self)
+extern "C" void cDynamicParticleModifier_render(cDynamicParticleModifier* self)
 {
-    if (*(int*)((char*)self + 0x18) == 0) {
+    if (self->Complete == 0) {
         cDynamicEmitter_render((char*)self + 0x60, 7);
     }
 }
@@ -666,14 +661,14 @@ extern "C" void func_003712B8(void* self, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cDynamicParticleModifier_writeToReplayFrame(void* self, void* stream)
+extern "C" void cDynamicParticleModifier_writeToReplayFrame(cDynamicParticleModifier* self, void* stream)
 {
-    cEffectModifier_writeToReplayFrame(self, stream);
+    cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
     sEffectLinkVEntry60A0* writeEntry = &(*(sEffectLinkVEntry60A0**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 0x50);
-    if (*(int*)((char*)self + 0x18) == 0) {
+    if (self->Complete == 0) {
         writeEntry = &(*(sEffectLinkVEntry60A0**)stream)[1];
-        writeEntry->fn((char*)stream + writeEntry->delta, *(void**)((char*)self + 0x260), 0xD8);
+        writeEntry->fn((char*)stream + writeEntry->delta, self->ParticleData, 0xD8);
         func_003712B8((char*)self + 0x60, stream);
     }
 }
@@ -684,7 +679,7 @@ INCLUDE_ASM("object/effectlink", func_00346120);
 #ifdef SKIP_ASM
 extern int D_004A4000;
 extern void* cHaloModifier_vtbl[];
-extern "C" void* func_00345798(void* self, int a1);
+extern "C" void* func_00345798(cEffectModifier* self, int a1);
 
 struct sEffQuat_6120 {
     float x, y, z, w;
@@ -717,7 +712,7 @@ struct sEffSrc_6120 {
 
 extern "C" void* func_00346120(sEffObj_6120* self, sEffSrc_6120* src, int a2)
 {
-    func_00345798(self, a2);
+    func_00345798((cEffectModifier*)self, a2);
     self->vt = cHaloModifier_vtbl;
     self->f24 = src->f4;
     self->f28 = src->f8;
@@ -735,7 +730,7 @@ INCLUDE_ASM("object/effectlink", func_003461C0);
 #ifdef SKIP_ASM
 extern int D_004A4000;
 extern void* cHaloModifier_vtbl[];
-extern "C" void* func_003457C8(void* p, void* obj);
+extern "C" void* func_003457C8(cEffectModifier* p, void* obj);
 
 struct sEffVEntry61C0 {
     short delta;
@@ -745,7 +740,7 @@ struct sEffVEntry61C0 {
 
 extern "C" void* func_003461C0(void* self, void* stream)
 {
-    func_003457C8(self, stream);
+    func_003457C8((cEffectModifier*)self, stream);
     *(void***)((char*)self + 0x8) = cHaloModifier_vtbl;
     sEffVEntry61C0* vt = *(sEffVEntry61C0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 0x30);
@@ -759,7 +754,7 @@ INCLUDE_ASM("object/effectlink", cHaloModifier__cHaloModifier);
 #ifdef SKIP_ASM
 extern int D_004A4000;
 extern void* cHaloModifier_vtbl[];
-extern "C" void cEffectModifier__cEffectModifier(void* self, int flags);
+extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags);
 
 struct sEffectLinkObj_6228 {
     sEffectLinkView link;  // 0x0
@@ -775,7 +770,7 @@ extern "C" void cHaloModifier__cHaloModifier(void* self, int flags)
 {
     ((sEffectLinkObj_6228*)self)->vt = cHaloModifier_vtbl;
     D_004A4000--;
-    cEffectModifier__cEffectModifier(self, flags);
+    cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
 #endif
 
@@ -836,7 +831,7 @@ struct sEffectLinkVEntry {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void cEffectModifier_writeToReplayFrame(void* self, void* stream);
+extern "C" void cEffectModifier_writeToReplayFrame(cEffectModifier* self, void* stream);
 
 /**
  * Writes a halo modifier's state to a replay frame.
@@ -848,7 +843,7 @@ extern "C" void cEffectModifier_writeToReplayFrame(void* self, void* stream);
  */
 extern "C" void cHaloModifier_writeToReplayFrame(void* self, void* stream)
 {
-    cEffectModifier_writeToReplayFrame(self, stream);
+    cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
     sEffectLinkVEntry* vt = *(sEffectLinkVEntry**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x10, 0x30);
 }

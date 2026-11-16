@@ -1,4 +1,6 @@
 #include "common.h"
+#include "object/particlenode.h"
+#include "object/multiparticle.h"
 #include "object/positionmodifier.h"
 #include "object/parentmodifier.h"
 #include "object/magnetmodifier.h"
@@ -2669,13 +2671,13 @@ extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
 extern "C" void cMoveNode_transferFromOld(cMoveNode* self, void* a1);
 extern void* cParticleNode_vtbl[];
 
-extern "C" void* func_003578A8(cMoveNode* self, void* a1, void* a2, void* particle, void* a4)
+extern "C" void* func_003578A8(cParticleNode* self, void* a1, void* a2, void* particle, void* a4)
 {
-    func_00355280(self, a1, 0xD, a2);
-    *(void***)((char*)self + 0xC) = cParticleNode_vtbl;
-    cMoveNode_transferFromOld(self, a4);
-    cMoveNode_addParticle(self, particle);
-    return self;
+    func_00355280(((cMoveNode*)self), a1, 0xD, a2);
+    self->mVtbl = cParticleNode_vtbl;
+    cMoveNode_transferFromOld(((cMoveNode*)self), a4);
+    cMoveNode_addParticle(((cMoveNode*)self), particle);
+    return ((cMoveNode*)self);
 }
 #endif
 
@@ -2693,11 +2695,11 @@ extern void* cParticleNode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cParticleNode_cParticleNode(void* self)
+extern "C" void* cParticleNode_cParticleNode(cParticleNode* self)
 {
     cMoveNode_cMoveNode(self);
-    *(void***)((char*)self + 0xC) = cParticleNode_vtbl;
-    return self;
+    self->mVtbl = cParticleNode_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2718,15 +2720,15 @@ extern "C" void cMoveNode_update(cMoveNode* self);
  * After cMoveNode_update(), returns when the modifier block's word at +0x10 is set (probably the head of its
  * effect link list, so an effect is still attached); otherwise calls the virtual destructor with flags 3.
  */
-extern "C" void cParticleNode_update(void* self)
+extern "C" void cParticleNode_update(cParticleNode* self)
 {
     cMoveNode_update((cMoveNode*)self);
-    void* mb = *(void**)((char*)self + 0x1C);
+    void* mb = self->ModifierBlock;
     if (mb != 0 && *(int*)((char*)mb + 0x10) != 0) {
         return;
     }
-    if (self != 0) {
-        sMnDtorVEntry7950* vt = *(sMnDtorVEntry7950**)((char*)self + 0xC);
+    if (((void*)self) != 0) {
+        sMnDtorVEntry7950* vt = (sMnDtorVEntry7950*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
 }
@@ -2751,14 +2753,14 @@ INCLUDE_ASM("object/movenode", func_003579C8);
 #ifdef SKIP_ASM
 extern void* D_004A4028;
 
-extern "C" void* func_003579C8(void* self)
+extern "C" void* func_003579C8(cMultiParticleMan* self)
 {
     int i;
-    D_004A4028 = self;
+    D_004A4028 = ((void*)self);
     for (i = 0; i < 4; i++) {
         ((void**)self)[i] = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2766,16 +2768,16 @@ extern "C" void* func_003579C8(void* self)
 INCLUDE_ASM("object/movenode", func_00357A00);
 #ifdef SKIP_ASM
 extern void* D_004A4028;
-extern "C" void func_00357FA0(void* p, int flags);
+extern "C" void func_00357FA0(cMultiParticle* p, int flags);
 void operator_delete(int* ptr);
 
-extern "C" void func_00357A00(void* self, int flags)
+extern "C" void func_00357A00(cMultiParticleMan* self, int flags)
 {
     int i;
     for (i = 0; i < 4; i++) {
         void* p = ((void**)self)[i];
         if (p != 0) {
-            func_00357FA0(p, 3);
+            func_00357FA0((cMultiParticle*)p, 3);
         }
     }
     D_004A4028 = 0;
@@ -2789,13 +2791,13 @@ extern "C" void func_00357A00(void* self, int flags)
 INCLUDE_ASM("object/movenode", func_00357A78);
 #ifdef SKIP_ASM
 extern char D_0048EA00[];
-extern "C" void* func_00357DD8(void* mem, void* a1, void* a2);
+extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2);
 
-extern "C" void func_00357A78(void* self, int i, void* a2, void* a3)
+extern "C" void func_00357A78(cMultiParticleMan* self, int i, void* a2, void* a3)
 {
     void** slot = (void**)((char*)self + (i << 2));
     if (*slot == 0) {
-        *slot = func_00357DD8(cMemMan_alloc(0x50, D_0048EA00, 0x20000000, 0), a2, a3);
+        *slot = func_00357DD8((cMultiParticle*)cMemMan_alloc(0x50, D_0048EA00, 0x20000000, 0), a2, a3);
     }
 }
 #endif
@@ -2825,14 +2827,14 @@ void* func_00357B10(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("object/movenode", func_00357B38);
 #ifdef SKIP_ASM
-extern "C" void func_00357FA0(void* p, int flags);
+extern "C" void func_00357FA0(cMultiParticle* p, int flags);
 
 extern "C" void func_00357B38(void** self)
 {
     int i;
     for (i = 0; i < 4; i++) {
         if (self[i] != 0) {
-            func_00357FA0(self[i], 3);
+            func_00357FA0((cMultiParticle*)self[i], 3);
         }
         self[i] = 0;
     }
@@ -2929,7 +2931,7 @@ struct sMnVEntrySer7D28 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void* func_00357E80(void* mem, void* stream);
+extern "C" void* func_00357E80(cMultiParticle* mem, void* stream);
 
 extern "C" void func_00357D28(void** self, void* stream)
 {
@@ -2940,7 +2942,7 @@ extern "C" void func_00357D28(void** self, void* stream)
         sMnVEntrySer7D28* e = &(*(sMnVEntrySer7D28**)stream)[2];
         e->fn((char*)stream + e->delta, &has, 4);
         if (has) {
-            self[i] = func_00357E80(cMemMan_alloc(0x50, D_0048EA00, 0x20000000, 0), stream);
+            self[i] = func_00357E80((cMultiParticle*)cMemMan_alloc(0x50, D_0048EA00, 0x20000000, 0), stream);
         } else {
             self[i] = 0;
         }
@@ -2988,7 +2990,7 @@ extern char D_0048EA10[];
 extern "C" void MEM_copy(void* dst, const void* src, int n);
 extern "C" void cMultiParticle_setupMultiParticle(void* self);
 
-extern "C" void* func_00357DD8(void* mem, void* a1, void* a2)
+extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2)
 {
     sMultiPart_7DD8* self = (sMultiPart_7DD8*)mem;
     self->owner = a2;
@@ -3022,7 +3024,7 @@ static inline void read_357E80(void* stream, void* dst, int n)
     vt[2].fn((char*)stream + vt[2].delta, dst, n);
 }
 
-extern "C" void* func_00357E80(void* mem, void* stream)
+extern "C" void* func_00357E80(cMultiParticle* mem, void* stream)
 {
     sMultiPart_7DD8* self = (sMultiPart_7DD8*)mem;
     sQuad_7DD8* ab = &self->a;
@@ -3054,14 +3056,14 @@ struct sMnDtorVEntry7FA0 {
 void operator_delete(int* ptr);
 void cMemMan_free(void*);
 
-extern "C" void func_00357FA0(void* self, int flags)
+extern "C" void func_00357FA0(cMultiParticle* self, int flags)
 {
-    operator_delete(*(int**)((char*)self + 0x8));
-    void* buf = *(void**)((char*)self + 0xC);
+    operator_delete((int*)self->Particle);
+    void* buf = self->InstIds;
     if (buf != 0) {
         cMemMan_free(buf);
     }
-    void* obj = *(void**)((char*)self + 0x10);
+    void* obj = self->Emitter;
     if (obj != 0) {
         sMnDtorVEntry7FA0* vt = *(sMnDtorVEntry7FA0**)((char*)obj + 0x18C);
         vt[1].fn((char*)obj + vt[1].delta, 3);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/multiparticle.h"
 #include "object/splinemodifier.h"
 #include "object/physicsmodifier.h"
 
@@ -59,9 +60,9 @@ extern "C" void cStaticEmitter_update(void* self, float dt);
  *
  * Calls cStaticEmitter_update() on the emitter that offset 0x10 points to.
  */
-extern "C" void cMultiParticle_update(void* self)
+extern "C" void cMultiParticle_update(cMultiParticle* self)
 {
-    cStaticEmitter_update(*(void**)((char*)self + 0x10), 0.01666666753590107f);
+    cStaticEmitter_update(self->Emitter, 0.01666666753590107f);
 }
 #endif
 
@@ -289,22 +290,22 @@ extern "C" void cStaticEmitter_writeToReplayFrame(void* desc, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cMultiParticle_writeToReplayFrame(sMultiPart_58380* self, void* stream)
+extern "C" void cMultiParticle_writeToReplayFrame(cMultiParticle* self, void* stream)
 {
     sSerVEntry_58380* writeEntry = &(*(sSerVEntry_58380**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, self, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, ((sMultiPart_58380*)self), 4);
     writeEntry = &(*(sSerVEntry_58380**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, &self->count, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, &self->NumInst, 4);
     writeEntry = &(*(sSerVEntry_58380**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, self->data, 0xD8);
-    cStaticEmitter_writeToReplayFrame(self->desc, stream);
+    writeEntry->fn((char*)stream + writeEntry->delta, self->Particle, 0xD8);
+    cStaticEmitter_writeToReplayFrame(self->Emitter, stream);
     writeEntry = &(*(sSerVEntry_58380**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x40, 0x10);
     writeEntry = &(*(sSerVEntry_58380**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x20, 0x20);
-    if (self->count > 0) {
+    if (self->NumInst > 0) {
         writeEntry = &(*(sSerVEntry_58380**)stream)[1];
-        writeEntry->fn((char*)stream + writeEntry->delta, self->items, self->count << 2);
+        writeEntry->fn((char*)stream + writeEntry->delta, (int*)self->InstIds, self->NumInst << 2);
     }
 }
 #endif

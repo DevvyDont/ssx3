@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/fog.h"
 #include "ai/riderhandler.h"
 #include "be/beintnetwork.h"
 #include "main/ssxapp.h"
@@ -2392,9 +2393,9 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7F30);
 extern void* D_00488308[];
 void operator_delete(int*);
 
-extern "C" void func_002F7F30(void* self, int flags)
+extern "C" void func_002F7F30(cFogParticleMan* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_00488308;
+    self->mVtbl = D_00488308;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -2407,9 +2408,9 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7F60);
 extern void* D_00488308[];
 void operator_delete(int*);
 
-extern "C" void func_002F7F60(void* self, int flags)
+extern "C" void func_002F7F60(cPS2FogParticleMan* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_00488308;
+    self->mVtbl = D_00488308;
     if (flags & 1) {
         operator_delete((int*)self);
     }

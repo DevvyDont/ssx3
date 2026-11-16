@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/particle.h"
 #include "render/ps2bezierman.h"
 #include "render/ps2graphicsman.h"
 
@@ -27,13 +28,12 @@ struct sEmitState_0C60 {
  * The count is the word at +0x178; positions go to +0x1A0 ("DynEmitterData Positions") and velocities to
  * +0x1A4 ("DynEmitterData Velocities").
  */
-extern "C" void cBaseClass_DynamicEmitter_Allocate(void* self)
+extern "C" void cBaseClass_DynamicEmitter_Allocate(cBaseClass_DynamicEmitter* self)
 {
-    char* emitter = (char*)self;
-    sEmitParticle_0C60** pp = (sEmitParticle_0C60**)(emitter + 0x1A0);
-    *pp = new (D_00492650, 0, 0) sEmitParticle_0C60[*(int*)(emitter + 0x178)];
-    sEmitState_0C60** ps = (sEmitState_0C60**)(emitter + 0x1A4);
-    *ps = new (D_00492670, 0, 0) sEmitState_0C60[*(int*)(emitter + 0x178)];
+    sEmitParticle_0C60** pp = (sEmitParticle_0C60**)(((char*)self) + 0x1A0);
+    *pp = new (D_00492650, 0, 0) sEmitParticle_0C60[self->m_numSubEmitters];
+    sEmitState_0C60** ps = (sEmitState_0C60**)(((char*)self) + 0x1A4);
+    *ps = new (D_00492670, 0, 0) sEmitState_0C60[self->m_numSubEmitters];
 }
 #endif
 
@@ -42,19 +42,19 @@ INCLUDE_ASM("render/particle", func_00370CF8);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
-extern "C" void func_00370CF8(void* self, int reset)
+extern "C" void func_00370CF8(cBaseClass_DynamicEmitter* self, int reset)
 {
-    if (*(void**)((char*)self + 0x1A0) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x1A0));
-        *(void**)((char*)self + 0x1A0) = 0;
+    if (self->m_positions != 0) {
+        cMemMan_free(self->m_positions);
+        self->m_positions = 0;
     }
-    if (*(void**)((char*)self + 0x1A4) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x1A4));
-        *(void**)((char*)self + 0x1A4) = 0;
+    if (self->m_velocities != 0) {
+        cMemMan_free(self->m_velocities);
+        self->m_velocities = 0;
     }
     if (reset) {
-        *(int*)((char*)self + 0x170) = 0;
-        *(int*)((char*)self + 0x178) = -1;
+        self->m_initialized = 0;
+        self->m_numSubEmitters = -1;
     }
 }
 #endif
@@ -74,15 +74,15 @@ extern sVec4A t4vect_Zero;
  * For each of the +0x178 entries, the vectors at +0x1A0 and +0x1A4 are set to zero; the words at +0x17C and
  * +0x1E0 are cleared.
  */
-extern "C" void cBaseClass_DynamicEmitter_reset(void* self)
+extern "C" void cBaseClass_DynamicEmitter_reset(cBaseClass_DynamicEmitter* self)
 {
     int i;
-    *(int*)((char*)self + 0x17C) = 0;
-    for (i = 0; i < *(int*)((char*)self + 0x178); i++) {
-        (*(sVec4A**)((char*)self + 0x1A0))[i] = t4vect_Zero;
-        (*(sVec4A**)((char*)self + 0x1A4))[i] = t4vect_Zero;
-        *(int*)((char*)self + 0x17C) = 0;
-        *(int*)((char*)self + 0x1E0) = 0;
+    self->m_subEmitterId = 0;
+    for (i = 0; i < self->m_numSubEmitters; i++) {
+        ((sVec4A*)self->m_positions)[i] = t4vect_Zero;
+        ((sVec4A*)self->m_velocities)[i] = t4vect_Zero;
+        self->m_subEmitterId = 0;
+        self->m_enabledCount = 0;
     }
 }
 #endif
@@ -294,14 +294,14 @@ INCLUDE_ASM("render/particle", func_00371268);
 #ifdef SKIP_ASM
 extern "C" void func_0036D3D8(void* p, float v);
 
-extern "C" void func_00371268(char* self, float v)
+extern "C" void func_00371268(cBaseClass_DynamicEmitter* self, float v)
 {
     if (v == 0.0f) {
-        func_0036D3D8(self + 0x20, 0.0f);
+        func_0036D3D8(((char*)self) + 0x20, 0.0f);
         return;
     }
     *(float*)self = v;
-    func_0036D3D8(self + 0x20, v);
+    func_0036D3D8(((char*)self) + 0x20, v);
 }
 #endif
 
@@ -314,7 +314,7 @@ public:
     virtual void v01(void* buf, int size);
 };
 
-extern "C" void func_003712B8(void* self, cStream003712B8* stream)
+extern "C" void func_003712B8(cBaseClass_DynamicEmitter* self, cStream003712B8* stream)
 {
     struct {
         float a;
@@ -323,11 +323,11 @@ extern "C" void func_003712B8(void* self, cStream003712B8* stream)
         int d;
         int e;
     } buf;
-    buf.a = *(float*)((char*)self + 0x0);
-    buf.b = *(float*)((char*)self + 0x28);
-    buf.d = *(int*)((char*)self + 0x170);
-    buf.c = *(int*)((char*)self + 0x174);
-    buf.e = *(int*)((char*)self + 0x17C);
+    buf.a = self->Duration;
+    buf.b = self->m_emitter.EndTime;
+    buf.d = self->m_initialized;
+    buf.c = self->m_enabled;
+    buf.e = self->m_subEmitterId;
     stream->v01(&buf, 0x14);
 }
 #endif
@@ -342,7 +342,7 @@ public:
     virtual void v02(void* buf, int size);
 };
 
-extern "C" void func_00371318(void* self, cStream00371318* stream)
+extern "C" void func_00371318(cBaseClass_DynamicEmitter* self, cStream00371318* stream)
 {
     struct {
         float a;
@@ -352,11 +352,11 @@ extern "C" void func_00371318(void* self, cStream00371318* stream)
         int e;
     } buf;
     stream->v02(&buf, 0x14);
-    *(float*)((char*)self + 0x0) = buf.a;
-    *(float*)((char*)self + 0x28) = buf.b;
-    *(int*)((char*)self + 0x170) = buf.d;
-    *(int*)((char*)self + 0x174) = buf.c;
-    *(int*)((char*)self + 0x17C) = buf.e;
+    self->Duration = buf.a;
+    self->m_emitter.EndTime = buf.b;
+    self->m_initialized = buf.d;
+    self->m_enabled = buf.c;
+    self->m_subEmitterId = buf.e;
 }
 #endif
 
@@ -415,27 +415,27 @@ struct sPtObj1380 {
  *
  * @param blend  value for bits 5-9 of the draw state's word 2 (On Tour: drawLayer, an eGMDrawLayer)
  */
-extern "C" void cDynamicEmitter_render(sPtObj1380* self, int blend)
+extern "C" void cDynamicEmitter_render(cDynamicEmitter* self, int blend)
 {
-    if (self->field_0x174 == 0) {
+    if (self->m_enabled == 0) {
         return;
     }
     sPtCtx1380* ctx = D_004A5B80_ctx;
-    if (self->field_0x1E0 == 0) {
+    if (self->m_enabledCount == 0) {
         return;
     }
-    int tex = ctx->texIds[self->base + (int)self->frame];
+    int tex = ctx->texIds[self->TextureId + (int)self->mCurrentFlipTexture];
     if (tex < 0) {
         return;
     }
-    self->rs.flagsA = (self->rs.flagsA & ~0x7C) | ((D_0044B420[self->kind] << 2) & 0x7C);
-    self->rs.flagsB = (self->rs.flagsB & ~0x3E0) | ((blend << 5) & 0x3E0);
-    self->rs.tex = tex;
+    self->mDrawState.unk_00[1] = (unsigned int)(((int)self->mDrawState.unk_00[1] & ~0x7C) | ((D_0044B420[self->BlendMode] << 2) & 0x7C));
+    self->mDrawState.unk_00[2] = (unsigned int)(((int)self->mDrawState.unk_00[2] & ~0x3E0) | ((blend << 5) & 0x3E0));
+    self->mDrawState.m_textureState.m_texid[0] = tex;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
-    *ctx->top = self->rs;
+    *ctx->top = (*(sPtRS1380*)&self->mDrawState);
     sPtVEntry1380* vt = ctx->vtable;
-    vt[83].fn((char*)ctx + vt[83].delta, self);
+    vt[83].fn((char*)ctx + vt[83].delta, ((sPtObj1380*)self));
     ctx->top--;
 }
 #endif
@@ -446,13 +446,13 @@ INCLUDE_ASM("render/particle", func_003714B8);
 extern "C" void* func_00370B60(void* self);
 extern void* cDynamicColourEmitter_vtbl[];
 
-extern "C" void* func_003714B8(void* self)
+extern "C" void* func_003714B8(cDynamicColourEmitter* self)
 {
     func_00370B60(self);
-    *(void***)((char*)self + 0x1F8) = cDynamicColourEmitter_vtbl;
-    *(int*)((char*)self + 0x200) = 0;
-    *(int*)((char*)self + 0x204) = 0;
-    return self;
+    self->mVtbl = cDynamicColourEmitter_vtbl;
+    self->m_IsAvalanche = 0;
+    self->m_colours = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -460,7 +460,7 @@ extern "C" void* func_003714B8(void* self)
 INCLUDE_ASM("render/particle", cDynamicColourEmitter__cDynamicColourEmitter);
 #ifdef SKIP_ASM
 extern void* cDynamicColourEmitter_vtbl[];
-extern "C" void cDynamicColourEmitter_purge(void* self, int a1);
+extern "C" void cDynamicColourEmitter_purge(cDynamicColourEmitter* self, int a1);
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags);
 
 /**
@@ -470,9 +470,9 @@ extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self,
  *
  * @param flags  g++ destructor flags, passed to cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter()
  */
-extern "C" void cDynamicColourEmitter__cDynamicColourEmitter(void* self, int flags)
+extern "C" void cDynamicColourEmitter__cDynamicColourEmitter(cDynamicColourEmitter* self, int flags)
 {
-    *(void***)((char*)self + 0x1F8) = cDynamicColourEmitter_vtbl;
+    self->mVtbl = cDynamicColourEmitter_vtbl;
     cDynamicColourEmitter_purge(self, 0);
     cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(self, flags);
 }
@@ -494,12 +494,11 @@ struct sEmitColour_1548 {
  *
  * The colours (4 bytes per sub-emitter, count at +0x178) go to +0x204, tagged "DynEmitterData Colours".
  */
-extern "C" void cDynamicColourEmitter_Allocate(void* self)
+extern "C" void cDynamicColourEmitter_Allocate(cDynamicColourEmitter* self)
 {
-    char* emitter = (char*)self;
-    sEmitColour_1548** pc = (sEmitColour_1548**)(emitter + 0x204);
-    cBaseClass_DynamicEmitter_Allocate(self);
-    *pc = new (D_00492690, 0, 0) sEmitColour_1548[*(int*)(emitter + 0x178)];
+    sEmitColour_1548** pc = (sEmitColour_1548**)(((char*)self) + 0x204);
+    cBaseClass_DynamicEmitter_Allocate((cBaseClass_DynamicEmitter*)self);
+    *pc = new (D_00492690, 0, 0) sEmitColour_1548[self->m_numSubEmitters];
 }
 #endif
 
@@ -507,7 +506,7 @@ extern "C" void cDynamicColourEmitter_Allocate(void* self)
 INCLUDE_ASM("render/particle", cDynamicColourEmitter_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
-extern "C" void func_00370CF8(void* self, int a1);
+extern "C" void func_00370CF8(cBaseClass_DynamicEmitter* self, int a1);
 
 /**
  * Frees a colour emitter's colour array, then its base arrays.
@@ -517,14 +516,14 @@ extern "C" void func_00370CF8(void* self, int a1);
  *
  * @param resetEmitter  nonzero to also reset the emitter's count and state word
  */
-extern "C" void cDynamicColourEmitter_purge(void* self, int resetEmitter)
+extern "C" void cDynamicColourEmitter_purge(cDynamicColourEmitter* self, int resetEmitter)
 {
-    void* colours = *(void**)((char*)self + 0x204);
+    void* colours = self->m_colours;
     if (colours != 0) {
         cMemMan_free(colours);
-        *(void**)((char*)self + 0x204) = 0;
+        self->m_colours = 0;
     }
-    func_00370CF8(self, resetEmitter);
+    func_00370CF8((cBaseClass_DynamicEmitter*)self, resetEmitter);
 }
 #endif
 
@@ -548,11 +547,11 @@ extern int D_004A599C;
  *
  * The (0, 0, 0, 0) colour is a function-local static, constructed on first use.
  */
-extern "C" void cDynamicColourEmitter_reset(void* self)
+extern "C" void cDynamicColourEmitter_reset(cDynamicColourEmitter* self)
 {
     int i;
-    cBaseClass_DynamicEmitter_reset(self);
-    for (i = 0; i < *(int*)((char*)self + 0x178); i++) {
+    cBaseClass_DynamicEmitter_reset((cBaseClass_DynamicEmitter*)self);
+    for (i = 0; i < self->m_numSubEmitters; i++) {
         if (D_004A599C == 0) {
             D_004A5998 = 0;
             D_004A5999 = 0;
@@ -560,7 +559,7 @@ extern "C" void cDynamicColourEmitter_reset(void* self)
             D_004A599B = 0;
             D_004A599C = 1;
         }
-        (*(sRGBA_1600**)((char*)self + 0x204))[i] = *(sRGBA_1600*)&D_004A5998;
+        ((sRGBA_1600*)self->m_colours)[i] = *(sRGBA_1600*)&D_004A5998;
     }
 }
 #endif
@@ -609,27 +608,27 @@ struct sPtObj1688 {
     sPtRS1688 rs;           // 0x1E4
 };
 
-extern "C" void func_00371688(sPtObj1688* self, int blend)
+extern "C" void func_00371688(cDynamicColourEmitter* self, int blend)
 {
-    if (self->field_0x174 == 0) {
+    if (self->m_enabled == 0) {
         return;
     }
     sPtCtx1688* ctx = D_004A5B80_ctx1688;
-    if (self->field_0x1E0 == 0) {
+    if (self->m_enabledCount == 0) {
         return;
     }
-    int tex = ctx->texIds[self->base + (int)self->frame];
+    int tex = ctx->texIds[self->TextureId + (int)self->mCurrentFlipTexture];
     if (tex < 0) {
         return;
     }
-    self->rs.flagsA = (self->rs.flagsA & ~0x7C) | ((D_0044B420[self->kind] << 2) & 0x7C);
-    self->rs.flagsB = (self->rs.flagsB & ~0x3E0) | ((blend << 5) & 0x3E0);
-    self->rs.tex = tex;
+    self->mDrawState.unk_00[1] = (unsigned int)(((int)self->mDrawState.unk_00[1] & ~0x7C) | ((D_0044B420[self->BlendMode] << 2) & 0x7C));
+    self->mDrawState.unk_00[2] = (unsigned int)(((int)self->mDrawState.unk_00[2] & ~0x3E0) | ((blend << 5) & 0x3E0));
+    self->mDrawState.m_textureState.m_texid[0] = tex;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
-    *ctx->top = self->rs;
+    *ctx->top = (*(sPtRS1688*)&self->mDrawState);
     sPtVEntry1688* vt = ctx->vtable;
-    vt[84].fn((char*)ctx + vt[84].delta, self);
+    vt[84].fn((char*)ctx + vt[84].delta, ((sPtObj1688*)self));
     ctx->top--;
 }
 #endif

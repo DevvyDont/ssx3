@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/particle.h"
 #include "render/ps2graphicsman.h"
 
 // R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
@@ -1330,22 +1331,22 @@ static inline sGfxVec4 vu0DivGM(const sGfxVec4& v, float s)
     return r;
 }
 
-extern "C" void func_0036CBF8(char* self, int w, int h, float x, float y, float s, sGfxVec4* v)
+extern "C" void func_0036CBF8(tParticleEmitter* self, int w, int h, float x, float y, float s, sGfxVec4* v)
 {
-    *(int*)(self + 0x0) = w;
-    *(int*)(self + 0x4) = h;
-    *(float*)(self + 0xC) = x * s / (float)w;
-    *(sGfxVec4*)(self + 0x60) = vu0DivGM(vu0DivGM(*v, s), s);
-    *(float*)(self + 0x4C) = s;
-    *(float*)(self + 0x30) = 1.0f / (float)*(int*)(self + 0x4);
-    *(float*)(self + 0x34) = y * s;
+    self->NumParticles = w;
+    self->NumBlur = h;
+    self->TimeStep = x * s / (float)w;
+    *(sGfxVec4*)&self->Force = vu0DivGM(vu0DivGM(*v, s), s);
+    self->Damp = s;
+    self->BlurAlpha = 1.0f / (float)self->NumBlur;
+    self->BlurStep = y * s;
     sGfxVec4 one;
     one.x = 1.0f;
     one.y = 1.0f;
     one.z = 0.0f;
     one.w = 0.0f;
-    *(cQuad128*)(self + 0x130) = t4vect_Zero;
-    *(sGfxVec4*)(self + 0x140) = one;
+    *(cQuad128*)&self->UpperUV = t4vect_Zero;
+    *(sGfxVec4*)&self->LowerUV = one;
 }
 #endif
 
@@ -1361,61 +1362,61 @@ static inline float randf_0036CCB8(float a, float b)
     return a + (b - a) * (u.f - 1.0f);
 }
 
-extern "C" void func_0036CCB8(char* self)
+extern "C" void func_0036CCB8(tParticleEmitter* self)
 {
-    *(float*)(self + 0x38) = randf_0036CCB8(1.0f, 2.0f);
-    *(float*)(self + 0x3C) = randf_0036CCB8(1.0f, 2.0f);
-    *(float*)(self + 0x40) = randf_0036CCB8(1.0f, 2.0f);
-    *(float*)(self + 0x44) = randf_0036CCB8(1.0f, 2.0f);
-    *(float*)(self + 0x48) = randf_0036CCB8(1.0f, 2.0f);
-    *(float*)(self + 0x50) = randf_0036CCB8(1.0f, 2.0f);
-    *(float*)(self + 0x54) = randf_0036CCB8(1.0f, 2.0f);
-    *(float*)(self + 0x58) = randf_0036CCB8(1.0f, 2.0f);
-    *(float*)(self + 0x5C) = randf_0036CCB8(1.0f, 2.0f);
+    self->SeedX0 = randf_0036CCB8(1.0f, 2.0f);
+    self->SeedX1 = randf_0036CCB8(1.0f, 2.0f);
+    self->SeedV0 = randf_0036CCB8(1.0f, 2.0f);
+    self->SeedV1 = randf_0036CCB8(1.0f, 2.0f);
+    self->SeedV2 = randf_0036CCB8(1.0f, 2.0f);
+    self->SeedC0 = randf_0036CCB8(1.0f, 2.0f);
+    self->SeedC1 = randf_0036CCB8(1.0f, 2.0f);
+    self->SeedSize = randf_0036CCB8(1.0f, 2.0f);
+    self->SeedLife = randf_0036CCB8(1.0f, 2.0f);
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CE00);
 #ifdef SKIP_ASM
-extern "C" void func_0036CE00(void* self, float a, float b, float c)
+extern "C" void func_0036CE00(tParticleEmitter* self, float a, float b, float c)
 {
-    *(float*)((char*)self + 0x10) = c;
-    *(float*)((char*)self + 0x20) = b - a;
-    *(float*)((char*)self + 0x18) = a - c * 1.5f;
+    self->SizeR = c;
+    self->SizeFinalDelta = b - a;
+    self->Size0 = a - c * 1.5f;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CE28);
 #ifdef SKIP_ASM
-extern "C" void func_0036CE28(void* self, float a, float b)
+extern "C" void func_0036CE28(tParticleEmitter* self, float a, float b)
 {
     float d = b - a;
-    float s = *(float*)((char*)self + 0x4c);
+    float s = self->Damp;
     a = a * s;
     d = d * s;
-    *(float*)((char*)self + 0x14) = d;
-    *(float*)((char*)self + 0x1c) = a - d;
+    self->LifeR = d;
+    self->Life0 = a - d;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CE48);
 #ifdef SKIP_ASM
-extern "C" void func_0036CE48(void *arg0) {
-    (*(int *)((char*)(arg0) + (0x14))) = 0;
-    (*(float *)((char*)(arg0) + (0x1C))) = 1e20f;
+extern "C" void func_0036CE48(tParticleEmitter* arg0) {
+    (*(int*)&arg0->LifeR) = 0;
+    (arg0->Life0) = 1e20f;
 }
 #endif
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CE58);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_0036CE58(void *arg0, long long *arg1) {
-    (*(long long *)((char*)(arg0) + (0xB0))) = (long long) *arg1;
-    (*(long long *)((char*)(arg0) + (0xC0))) = (long long) t4vect_Zero;
-    (*(long long *)((char*)(arg0) + (0xD0))) = (long long) t4vect_Zero;
+extern "C" void func_0036CE58(tParticleEmitter* arg0, long long *arg1) {
+    (*(long long*)&arg0->X0) = (long long) *arg1;
+    (*(long long*)&arg0->Xr0) = (long long) t4vect_Zero;
+    (*(long long*)&arg0->Xr1) = (long long) t4vect_Zero;
 }
 #endif
 //100%
@@ -1453,11 +1454,11 @@ static inline sGfxVec4 vu0Scale_CE80(const sGfxVec4& v, float s)
     return r;
 }
 
-extern "C" void func_0036CE80(char* self, sGfxVec4* a, sGfxVec4* b)
+extern "C" void func_0036CE80(tParticleEmitter* self, sGfxVec4* a, sGfxVec4* b)
 {
-    *(sGfxVec4*)(self + 0xB0) = vu0Sub_CE80(vu0Scale_CE80(*a, 2.0f), *b);
-    *(sGfxVec4*)(self + 0xC0) = vu0Sub_CE80(*b, *a);
-    *(cQuad128*)(self + 0xD0) = t4vect_Zero;
+    *(sGfxVec4*)&self->X0 = vu0Sub_CE80(vu0Scale_CE80(*a, 2.0f), *b);
+    *(sGfxVec4*)&self->Xr0 = vu0Sub_CE80(*b, *a);
+    *(cQuad128*)&self->Xr1 = t4vect_Zero;
 }
 #endif
 
@@ -1511,11 +1512,11 @@ static inline sGfxVec4 vu0ScaleGM(const sGfxVec4& v, float s)
     return r;
 }
 
-extern "C" void func_0036CEF8(char* self, sGfxVec4* a, sGfxVec4* b, sGfxVec4* c)
+extern "C" void func_0036CEF8(tParticleEmitter* self, sGfxVec4* a, sGfxVec4* b, sGfxVec4* c)
 {
-    *(sGfxVec4*)(self + 0xB0) = vu0SubGM(*a, vu0ScaleGM(vu0AddGM(*b, *c), 3.0f));
-    *(sGfxVec4*)(self + 0xC0) = vu0ScaleGM(*b, 2.0f);
-    *(sGfxVec4*)(self + 0xD0) = vu0ScaleGM(*c, 2.0f);
+    *(sGfxVec4*)&self->X0 = vu0SubGM(*a, vu0ScaleGM(vu0AddGM(*b, *c), 3.0f));
+    *(sGfxVec4*)&self->Xr0 = vu0ScaleGM(*b, 2.0f);
+    *(sGfxVec4*)&self->Xr1 = vu0ScaleGM(*c, 2.0f);
 }
 #endif
 
@@ -1524,18 +1525,18 @@ extern cQuad128 t4vect_Zero;
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CFA8);
 #ifdef SKIP_ASM
-extern "C" void func_0036CFA8(char* self, sGfxVec4* v, float s)
+extern "C" void func_0036CFA8(tParticleEmitter* self, sGfxVec4* v, float s)
 {
-    *(sGfxVec4*)(self + 0xE0) = vu0DivGM(vu0ScaleGM(*v, *(float*)(self + 0xC)), s * *(float*)(self + 0x4C));
+    *(sGfxVec4*)&self->Xi = vu0DivGM(vu0ScaleGM(*v, self->TimeStep), s * self->Damp);
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036D008);
 #ifdef SKIP_ASM
-extern "C" void func_0036D008(void* self)
+extern "C" void func_0036D008(tParticleEmitter* self)
 {
-    *(cQuad128*)((char*)self + 0xe0) = t4vect_Zero;
+    *(cQuad128*)&self->Xi = t4vect_Zero;
 }
 #endif
 
@@ -1690,16 +1691,16 @@ static inline sGmVec4_D020 gmNormalizeD020(const sGmVec4_D020& v)
     return r;
 }
 
-extern "C" void func_0036D020(sGmFrustum_D020* self, const sGmVec4_D020* dir, float s)
+extern "C" void func_0036D020(tParticleEmitter* self, const sGmVec4_D020* dir, float s)
 {
-    self->v70 = gmDivD020(*dir, self->scale);
-    float len = gmLengthD020(self->v70);
+    (*(sGmVec4_D020*)&self->V0) = gmDivD020(*dir, self->Damp);
+    float len = gmLengthD020((*(sGmVec4_D020*)&self->V0));
     const sGmVec4_D020* axis = (dir->x != 0.0f) ? &t4vect_YAxis : &D_004FF140;
     sGmVec4_D020 norm = gmNormalizeD020(gmCrossD020(*dir, *axis));
-    self->v80 = gmScaleD020(gmScaleD020(norm, s), len);
-    self->v90 = gmScaleD020(gmCrossD020(self->v70, norm), s);
-    *(cQuad128*)&self->vA0 = t4vect_Zero;
-    gmSubFromD020(self->v70, gmScaleD020(gmAddD020(gmAddD020(self->v80, self->v90), self->vA0), 1.5f));
+    (*(sGmVec4_D020*)&self->Vr0) = gmScaleD020(gmScaleD020(norm, s), len);
+    (*(sGmVec4_D020*)&self->Vr1) = gmScaleD020(gmCrossD020((*(sGmVec4_D020*)&self->V0), norm), s);
+    *(cQuad128*)&(*(sGmVec4_D020*)&self->Vr2) = t4vect_Zero;
+    gmSubFromD020((*(sGmVec4_D020*)&self->V0), gmScaleD020(gmAddD020(gmAddD020((*(sGmVec4_D020*)&self->Vr0), (*(sGmVec4_D020*)&self->Vr1)), (*(sGmVec4_D020*)&self->Vr2)), 1.5f));
 }
 #endif
 
@@ -1783,13 +1784,13 @@ static inline sGmVec4 gmScaleD1F0(const sGmVec4& v, float s)
     return r;
 }
 
-extern "C" void func_0036D1F0(sGmFrustum* self, const sGmVec4* a, const sGmVec4* b,
+extern "C" void func_0036D1F0(tParticleEmitter* self, const sGmVec4* a, const sGmVec4* b,
                               const sGmVec4* c, const sGmVec4* d)
 {
-    self->v80 = gmDivD1F0(*b, self->scale);
-    self->v90 = gmDivD1F0(*c, self->scale);
-    self->vA0 = gmDivD1F0(*d, self->scale);
-    self->v70 = gmSubD1F0(gmDivD1F0(*a, self->scale), gmScaleD1F0(gmAddD1F0(gmAddD1F0(self->v80, self->v90), self->vA0), 1.5f));
+    (*(sGmVec4*)&self->Vr0) = gmDivD1F0(*b, self->Damp);
+    (*(sGmVec4*)&self->Vr1) = gmDivD1F0(*c, self->Damp);
+    (*(sGmVec4*)&self->Vr2) = gmDivD1F0(*d, self->Damp);
+    (*(sGmVec4*)&self->V0) = gmSubD1F0(gmDivD1F0(*a, self->Damp), gmScaleD1F0(gmAddD1F0(gmAddD1F0((*(sGmVec4*)&self->Vr0), (*(sGmVec4*)&self->Vr1)), (*(sGmVec4*)&self->Vr2)), 1.5f));
 }
 #endif
 
@@ -1800,30 +1801,30 @@ INCLUDE_ASM("render/graphicsman", func_0036D318);
 // PORT: PS2-only VU0 inline asm (vector subtract).
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-extern "C" void func_0036D318(char* self, sGfxVec4* a, sGfxVec4* b, sGfxVec4* c, sGfxVec4* d, float t)
+extern "C" void func_0036D318(tParticleEmitter* self, sGfxVec4* a, sGfxVec4* b, sGfxVec4* c, sGfxVec4* d, float t)
 {
-    *(sGfxVec4*)(self + 0xF0) = vu0SubGM(*a, vu0ScaleGM(vu0AddGM(*c, *d), 1.5f));
-    *(sGfxVec4*)(self + 0x120) = vu0DivGM(vu0SubGM(*b, *a), t * *(float*)(self + 0x4C));
-    *(sGfxVec4*)(self + 0x100) = *c;
-    *(sGfxVec4*)(self + 0x110) = *d;
+    *(sGfxVec4*)&self->C0 = vu0SubGM(*a, vu0ScaleGM(vu0AddGM(*c, *d), 1.5f));
+    *(sGfxVec4*)&self->Ct = vu0DivGM(vu0SubGM(*b, *a), t * self->Damp);
+    *(sGfxVec4*)&self->Cr0 = *c;
+    *(sGfxVec4*)&self->Cr1 = *d;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036D3D8);
 #ifdef SKIP_ASM
-extern "C" void func_0036D3D8(void* self, float val)
+extern "C" void func_0036D3D8(tParticleEmitter* self, float val)
 {
-    *(float*)((char*)self + 0x8) = val * *(float*)((char*)self + 0x4c);
+    self->EndTime = val * self->Damp;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036D3E8);
 #ifdef SKIP_ASM
-extern "C" void func_0036D3E8(void* self, float val)
+extern "C" void func_0036D3E8(tParticleEmitter* self, float val)
 {
-    *(float*)((char*)self + 0x8) += val * *(float*)((char*)self + 0x4c);
+    self->EndTime += val * self->Damp;
 }
 #endif
 
@@ -1865,7 +1866,7 @@ struct sGmAnim_D428 {
     sGmVec4_D428 vel;       // 0xE0
 };
 
-extern "C" void func_0036D3E8(void* self, float val);
+extern "C" void func_0036D3E8(tParticleEmitter* self, float val);
 // PORT: func_0036D400 returns the new seed in $f0 (float); the unit defines it as void, so the
 // float-returning view binds to the same symbol through an asm label. The unused call_value result
 // is what keeps $f0 busy at the loop-exit test (product in $f1), so jump2 does not cross-jump the
@@ -1891,7 +1892,7 @@ static inline void gmVecAddEq_D428(sGmVec4_D428& a, const sGmVec4_D428& b)
 extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt) __asm__("func_0036D428");
 extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt)
 {
-    func_0036D3E8(self, dt);
+    func_0036D3E8((tParticleEmitter*)self, dt);
     for (;;) {
         float step = self->step;
         float time = self->time;
@@ -2053,23 +2054,23 @@ INCLUDE_ASM("render/graphicsman", func_00370018);
 extern char D_00493160[];
 void func_002F7A68(void*);
 
-extern "C" void* func_00370018(void* self)
+extern "C" void* func_00370018(cStaticEmitter* self)
 {
-    *(void**)((char*)self + 0x18C) = D_00493160;
+    self->mVtbl = (void**)D_00493160;
     func_002F7A68((char*)self + 0x10);
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x184) = 0;
-    return self;
+    self->m_initialized = 0;
+    *(int*)&self->mCurrentFlipTexture = 0;
+    return ((void*)self);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", func_00370058);
 #ifdef SKIP_ASM
-extern "C" void func_0036CE00(void* self, float a, float b, float c);
-extern "C" void func_0036CE28(void* self, float a, float b);
-extern "C" void func_0036CCB8(char* self);
-extern "C" void func_0036D008(void* self);
+extern "C" void func_0036CE00(tParticleEmitter* self, float a, float b, float c);
+extern "C" void func_0036CE28(tParticleEmitter* self, float a, float b);
+extern "C" void func_0036CCB8(tParticleEmitter* self);
+extern "C" void func_0036D008(tParticleEmitter* self);
 extern "C" void func_0036D500(void* a, void* b);
 struct sGmV4_0058 {
     float x, y, z, w;
@@ -2173,26 +2174,26 @@ static inline void vu0SubInGM_0058(sGmV4_0058& d, const sGmV4_0058& b)
 }
 
 // Sets up the view from the camera parameters p (frustum planes transformed by m).
-extern "C" void func_00370058(void* self, void* m, void* p, void* a3, float t)
+extern "C" void func_00370058(tParticleEmitter* self, void* m, void* p, void* a3, float t)
 {
     func_0036CE00(self, *(float*)((char*)p + 0x10), *(float*)((char*)p + 0xCC), *(float*)((char*)p + 0x18));
     float h = *(float*)((char*)p + 0x1C) * 0.5f;
     func_0036CE28(self, *(float*)((char*)p + 0x14) - h, *(float*)((char*)p + 0x14) + h);
     if (t < 0.0f) {
-        func_0036CCB8((char*)self);
+        func_0036CCB8(self);
     } else {
-        *(float*)((char*)self + 0x38) = t;
+        self->SeedX0 = t;
     }
     func_0036D008(self);
-    *(sGmV4_0058*)((char*)self + 0xB0) = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x24), *(float*)((char*)p + 0x28), *(float*)((char*)p + 0x2C), 1.0f));
-    *(sGmV4_0058*)((char*)self + 0xC0) = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x30), *(float*)((char*)p + 0x34), *(float*)((char*)p + 0x38), 0.0f));
-    *(sGmV4_0058*)((char*)self + 0xD0) = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x3C), *(float*)((char*)p + 0x40), *(float*)((char*)p + 0x44), 0.0f));
-    vu0SubInGM_0058(*(sGmV4_0058*)((char*)self + 0xB0), vu0Scale_0058(vu0Add_0058(*(sGmV4_0058*)((char*)self + 0xC0), *(sGmV4_0058*)((char*)self + 0xD0)), 1.5f));
-    *(sGmV4_0058*)((char*)self + 0x70) = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x48), *(float*)((char*)p + 0x4C), *(float*)((char*)p + 0x50), 0.0f)), *(float*)((char*)p + 0xC));
-    *(sGmV4_0058*)((char*)self + 0x80) = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x54), *(float*)((char*)p + 0x58), *(float*)((char*)p + 0x5C), 0.0f)), *(float*)((char*)p + 0xC));
-    *(sGmV4_0058*)((char*)self + 0x90) = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x60), *(float*)((char*)p + 0x64), *(float*)((char*)p + 0x68), 0.0f)), *(float*)((char*)p + 0xC));
-    *(sGmV4_0058*)((char*)self + 0xA0) = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x6C), *(float*)((char*)p + 0x70), *(float*)((char*)p + 0x74), 0.0f)), *(float*)((char*)p + 0xC));
-    vu0SubInGM_0058(*(sGmV4_0058*)((char*)self + 0x70), vu0Scale_0058(vu0Add_0058(vu0Add_0058(*(sGmV4_0058*)((char*)self + 0x80), *(sGmV4_0058*)((char*)self + 0x90)), *(sGmV4_0058*)((char*)self + 0xA0)), 1.5f));
+    *(sGmV4_0058*)&self->X0 = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x24), *(float*)((char*)p + 0x28), *(float*)((char*)p + 0x2C), 1.0f));
+    *(sGmV4_0058*)&self->Xr0 = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x30), *(float*)((char*)p + 0x34), *(float*)((char*)p + 0x38), 0.0f));
+    *(sGmV4_0058*)&self->Xr1 = vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x3C), *(float*)((char*)p + 0x40), *(float*)((char*)p + 0x44), 0.0f));
+    vu0SubInGM_0058(*(sGmV4_0058*)&self->X0, vu0Scale_0058(vu0Add_0058(*(sGmV4_0058*)&self->Xr0, *(sGmV4_0058*)&self->Xr1), 1.5f));
+    *(sGmV4_0058*)&self->V0 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x48), *(float*)((char*)p + 0x4C), *(float*)((char*)p + 0x50), 0.0f)), *(float*)((char*)p + 0xC));
+    *(sGmV4_0058*)&self->Vr0 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x54), *(float*)((char*)p + 0x58), *(float*)((char*)p + 0x5C), 0.0f)), *(float*)((char*)p + 0xC));
+    *(sGmV4_0058*)&self->Vr1 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x60), *(float*)((char*)p + 0x64), *(float*)((char*)p + 0x68), 0.0f)), *(float*)((char*)p + 0xC));
+    *(sGmV4_0058*)&self->Vr2 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)m, sGmV4_0058(*(float*)((char*)p + 0x6C), *(float*)((char*)p + 0x70), *(float*)((char*)p + 0x74), 0.0f)), *(float*)((char*)p + 0xC));
+    vu0SubInGM_0058(*(sGmV4_0058*)&self->V0, vu0Scale_0058(vu0Add_0058(vu0Add_0058(*(sGmV4_0058*)&self->Vr0, *(sGmV4_0058*)&self->Vr1), *(sGmV4_0058*)&self->Vr2), 1.5f));
     func_0036D318_0058(self,
                        vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0x88), *(float*)((char*)p + 0x8C), *(float*)((char*)p + 0x90), *(float*)((char*)p + 0x84)), 128.0f),
                        vu0Scale_0058(sGmV4_0058(*(float*)((char*)p + 0x98), *(float*)((char*)p + 0x9C), *(float*)((char*)p + 0xA0), *(float*)((char*)p + 0x94)), 128.0f),
@@ -2207,14 +2208,14 @@ extern "C" void func_00370058(void* self, void* m, void* p, void* a3, float t)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", func_003705E0);
 #ifdef SKIP_ASM
-extern "C" void func_00370058(void* gfx, void* a1, void* desc, void* out, float f);
+extern "C" void func_00370058(tParticleEmitter* gfx, void* a1, void* desc, void* out, float f);
 
-extern "C" void func_003705E0(char* self, void* a1, char* d)
+extern "C" void func_003705E0(cStaticEmitter* self, void* a1, char* d)
 {
-    *(int*)(self + 0x180) = *(int*)(d + 0xD0);
-    *(float*)(self + 0x188) = *(float*)(d + 0xD4);
-    *(int*)(self + 0x4) = *(int*)(d + 0xC4);
-    *(int*)(self + 0x8) = *(int*)(d + 0xC8);
+    self->mNumFlipTextures = *(int*)(d + 0xD0);
+    self->mFlipTextureRate = *(float*)(d + 0xD4);
+    self->TextureId = *(int*)(d + 0xC4);
+    self->BlendMode = *(int*)(d + 0xC8);
     float t = *(float*)(d + 0x8);
     float r;
     if (t < 0.0f) {
@@ -2222,31 +2223,31 @@ extern "C" void func_003705E0(char* self, void* a1, char* d)
     } else {
         r = t + *(float*)(d + 0x14) + *(float*)(d + 0x1C) * 0.5f;
     }
-    *(float*)(self + 0x0) = r;
+    self->Duration = r;
     float x = *(float*)(d + 0x8) >= 0.0f ? *(float*)(d + 0x8) : *(float*)(d + 0x14) + *(float*)(d + 0x1C) * 0.5f;
     sGfxVec4 v;
     v.x = *(float*)(d + 0x78);
     v.y = *(float*)(d + 0x7C);
     v.z = *(float*)(d + 0x80);
     v.w = 0.0f;
-    func_0036CBF8(self + 0x10, *(int*)(d + 0x0), *(int*)(d + 0x4), x, *(float*)(d + 0x20), *(float*)(d + 0xC), &v);
-    func_00370058(self + 0x10, a1, d, self + 0x160, -1.0f);
+    func_0036CBF8((tParticleEmitter*)(((char*)self) + 0x10), *(int*)(d + 0x0), *(int*)(d + 0x4), x, *(float*)(d + 0x20), *(float*)(d + 0xC), &v);
+    func_00370058((tParticleEmitter*)(((char*)self) + 0x10), a1, d, ((char*)self) + 0x160, -1.0f);
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/graphicsman", func_00370708);
 #ifdef SKIP_ASM
-extern "C" void func_0036D3D8(void *, float);
+extern "C" void func_0036D3D8(tParticleEmitter*, float);
 
 extern "C" void func_00370708(float *self, float f)
 {
     if (f == 0.0f) {
-        func_0036D3D8((char *)self + 0x10, 0.0f);
+        func_0036D3D8((tParticleEmitter*)((char *)self + 0x10), 0.0f);
         return;
     }
     *self = f;
-    func_0036D3D8((char *)self + 0x10, f);
+    func_0036D3D8((tParticleEmitter*)((char *)self + 0x10), f);
 }
 #endif
 
@@ -2281,27 +2282,27 @@ extern "C" void func_0036D428(void* self, float val);
  *
  * @param dt  time step in seconds
  */
-extern "C" void cStaticEmitter_update(char* self, float dt)
+extern "C" void cStaticEmitter_update(cStaticEmitter* self, float dt)
 {
-    float timer = *(float*)(self + 0x0);
+    float timer = self->Duration;
     if (timer == 0.0f) {
         return;
     }
     if (timer < 0.0f) {
-        func_0036D428(self + 0x10, 1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+        func_0036D428(((char*)self) + 0x10, 1.0f / (float)*(int*)(D_004A5B64 + 0x10));
     } else {
-        func_0036D3E8(self + 0x10, 1.0f / (float)*(int*)(D_004A5B64 + 0x10));
-        *(float*)(self + 0x0) -= 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
-        if (*(float*)(self + 0x0) < 0.0f) {
-            *(float*)(self + 0x0) = 0.0f;
+        func_0036D3E8((tParticleEmitter*)(((char*)self) + 0x10), 1.0f / (float)*(int*)(D_004A5B64 + 0x10));
+        self->Duration -= 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+        if (self->Duration < 0.0f) {
+            self->Duration = 0.0f;
         }
     }
-    float animFrame = *(float*)(self + 0x184) + *(float*)(self + 0x188) * dt;
-    *(float*)(self + 0x184) = animFrame;
-    if ((int)animFrame >= *(int*)(self + 0x180)) {
-        *(float*)(self + 0x184) = 0.0f;
+    float animFrame = self->mCurrentFlipTexture + self->mFlipTextureRate * dt;
+    self->mCurrentFlipTexture = animFrame;
+    if ((int)animFrame >= self->mNumFlipTextures) {
+        self->mCurrentFlipTexture = 0.0f;
     }
-    *(int*)(self + 0xC) = 1;
+    self->m_initialized = 1;
 }
 #endif
 
@@ -2317,7 +2318,7 @@ struct sGmQuad2 {
     sGmQuad b;
 };
 
-extern "C" void cStaticEmitter_render1(void* self);
+extern "C" void cStaticEmitter_render1(cStaticEmitter* self);
 
 /**
  * Stores the emitter's bounding box and position, then renders it.
@@ -2325,10 +2326,10 @@ extern "C" void cStaticEmitter_render1(void* self);
  * @param bbox  bounding box to cull against (On Tour const tBoundBox&)
  * @param pos  emitter position (On Tour const t4Vector&)
  */
-extern "C" void cStaticEmitter_render(void* self, const sGmQuad2* bbox, const sGmQuad* pos)
+extern "C" void cStaticEmitter_render(cStaticEmitter* self, const sGmQuad2* bbox, const sGmQuad* pos)
 {
-    *(sGmQuad2*)((char*)self + 0x160) = *bbox;
-    *(sGmQuad*)((char*)self + 0xC0) = *pos;
+    *(sGmQuad2*)&self->BoundBox = *bbox;
+    *(sGmQuad*)&self->Emitter.X0 = *pos;
     cStaticEmitter_render1(self);
 }
 #endif
@@ -2392,19 +2393,18 @@ static inline int GetTexId_708C0(int i)
  *
  * @param selfp  the emitter
  */
-extern "C" void cStaticEmitter_render1(void* selfp)
+extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
 {
-    char* self = (char*)selfp;
     sGfxCtx_708C0* gfx = D_004A5B80_708C0;
     sGfxVEntry_708C0* vt = gfx->vtable;
-    if (((tCull_708C0)vt[93].fn)((char*)gfx + vt[93].delta, self + 0x160, self + 0x170,
+    if (((tCull_708C0)vt[93].fn)((char*)gfx + vt[93].delta, ((char*)selfp) + 0x160, ((char*)selfp) + 0x170,
                                  ((tGetMat_708C0)vt[43].fn)((char*)gfx + vt[43].delta)) == 1) {
         return;
     }
-    if (((sGfxObj_708C0*)self)->visible == 0) {
+    if (((sGfxObj_708C0*)selfp)->visible == 0) {
         return;
     }
-    int layer = D_0044B420[((sGfxObj_708C0*)self)->kind];
+    int layer = D_0044B420[((sGfxObj_708C0*)selfp)->kind];
     gfx->top[1] = gfx->top[0];
     sGfxRS_708C0* prev = gfx->top;
     gfx->top = prev + 1;
@@ -2414,9 +2414,9 @@ extern "C" void cStaticEmitter_render1(void* selfp)
     gfx->top->flagsA = gfx->top->flagsA & 0xFFCFFFFF;
     gfx->top->flagsA = (gfx->top->flagsA & 0xFFF00FFF) | 0x14000;
     gfx->top->flagsA = (gfx->top->flagsA & ~0x7C) | ((layer << 2) & 0x7C);
-    gfx->top->tex = GetTexId_708C0(((sGfxObj_708C0*)self)->base + (int)*(float*)(self + 0x184));
+    gfx->top->tex = GetTexId_708C0(((sGfxObj_708C0*)selfp)->base + (int)selfp->mCurrentFlipTexture);
     sGfxVEntry_708C0* vt2 = gfx->vtable;
-    ((tDraw_708C0)vt2[82].fn)((char*)gfx + vt2[82].delta, self + 0x10);
+    ((tDraw_708C0)vt2[82].fn)((char*)gfx + vt2[82].delta, ((char*)selfp) + 0x10);
     gfx->top--;
 }
 #endif
@@ -2448,12 +2448,12 @@ struct sGmSer12 {
  *
  * @param out  replay stream to write to
  */
-extern "C" void cStaticEmitter_writeToReplayFrame(void* self, sGmSerObj* out)
+extern "C" void cStaticEmitter_writeToReplayFrame(cStaticEmitter* self, sGmSerObj* out)
 {
     sGmSer12 buf;
-    buf.a = *(float*)((char*)self + 0x0);
-    buf.b = *(float*)((char*)self + 0x18);
-    buf.c = *(int*)((char*)self + 0xC);
+    buf.a = self->Duration;
+    buf.b = self->Emitter.EndTime;
+    buf.c = self->m_initialized;
     out->vt[1].fn((char*)out + out->vt[1].delta, &buf, 12);
 }
 #endif
@@ -2470,7 +2470,7 @@ public:
 
 extern "C" void func_0036D500(void* a, void* b);
 
-extern "C" void func_00370AF8(void* self, cStream00370AF8* stream)
+extern "C" void func_00370AF8(cStaticEmitter* self, cStream00370AF8* stream)
 {
     struct {
         float a;
@@ -2478,10 +2478,10 @@ extern "C" void func_00370AF8(void* self, cStream00370AF8* stream)
         int c;
     } buf;
     stream->v02(&buf, 0xC);
-    *(float*)((char*)self + 0x0) = buf.a;
-    *(float*)((char*)self + 0x18) = buf.b;
+    self->Duration = buf.a;
+    self->Emitter.EndTime = buf.b;
     func_0036D500((char*)self + 0x10, (char*)self + 0x160);
-    *(int*)((char*)self + 0xC) = buf.c;
+    self->m_initialized = buf.c;
 }
 #endif
 
@@ -2512,26 +2512,26 @@ struct sGmView_0B60 {
     void** vtable;          // 0x1F8
 };
 
-extern "C" sGmView_0B60* func_00370B60(sGmView_0B60* self)
+extern "C" sGmView_0B60* func_00370B60(cBaseClass_DynamicEmitter* self)
 {
-    self->field_0xc = 0;
-    self->field_0x10 = 0;
-    self->field_0x14 = 0;
-    self->vtable = cBaseClass_DynamicEmitter_vtbl;
+    self->mNumFlipTextures = 0;
+    *(int*)&self->mCurrentFlipTexture = 0;
+    *(int*)&self->mFlipTextureRate = 0;
+    self->mVtbl = cBaseClass_DynamicEmitter_vtbl;
     func_002F7A68((char*)self + 0x20);
-    self->field_0x170 = 0;
-    self->field_0x174 = 1;
-    self->field_0x178 = -1;
-    self->field_0x17c = 0;
-    self->field_0x1a0 = 0;
-    self->field_0x1a4 = 0;
-    self->field_0x1e0 = 0;
-    char* blk = self->block;
+    self->m_initialized = 0;
+    self->m_enabled = 1;
+    self->m_numSubEmitters = -1;
+    self->m_subEmitterId = 0;
+    self->m_positions = 0;
+    self->m_velocities = 0;
+    self->m_enabledCount = 0;
+    char* blk = ((char*)&self->mDrawState);
     for (unsigned int i = 0; i < 2; i++) {
-        self->ids[i] = -1;
+        ((short*)&self->mDrawState.m_textureState)[i] = -1;
     }
     func_00416210(blk, 0, 0x10);
-    return self;
+    return ((sGmView_0B60*)self);
 }
 #endif
 
@@ -2549,9 +2549,9 @@ extern void* cBaseClass_DynamicEmitter_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags)
+extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(cBaseClass_DynamicEmitter* self, int flags)
 {
-    *(void***)((char*)self + 0x1F8) = cBaseClass_DynamicEmitter_vtbl;
+    self->mVtbl = cBaseClass_DynamicEmitter_vtbl;
     func_00370CF8(self, 1);
     if (flags & 1) {
         operator_delete((int*)self);
