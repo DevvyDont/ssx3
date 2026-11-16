@@ -1,9 +1,6 @@
 #include "common.h"
+#include "ui/uithing.h"
 
-struct cUIThing {
-    char pad_0x00[0x3C];
-    unsigned short* mEvents; // 0x3C
-};
 
 //100%
 INCLUDE_ASM("ui/uithing", cUIThing_getKeyframerEvent__FP8cUIThingi);
@@ -17,8 +14,8 @@ INCLUDE_ASM("ui/uithing", cUIThing_getKeyframerEvent__FP8cUIThingi);
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x)
 {
     signed char idx = (signed char)x;
-    if (self->mEvents != 0) {
-        return self->mEvents[idx];
+    if (self->mpEvents != 0) {
+        return self->mpEvents[idx];
     }
     return 0xFFFF;
 }
@@ -32,10 +29,10 @@ extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 // Plays keyframer event idx on the owning screen (0x5C); 0xFFFF = no event.
 extern "C" int func_0039FFA0(cUIThing* self, signed char idx)
 {
-    if (self->mEvents != 0 && self->mEvents[idx] != 0xFFFF) {
-        void* scr = *(void**)((char*)self + 0x5C);
+    if (self->mpEvents != 0 && self->mpEvents[idx] != 0xFFFF) {
+        void* scr = self->mpScreen;
         if (scr != 0) {
-            cUIScreen_playFrame(scr, self->mEvents[idx], 1);
+            cUIScreen_playFrame(scr, self->mpEvents[idx], 1);
             return 1;
         }
     }
@@ -49,12 +46,12 @@ INCLUDE_ASM("ui/uithing", cUIThing_update);
 extern "C" void cUIAnimation_updateThing(void*, void*, unsigned char, unsigned short);
 extern "C" void cUIAnimation_updateFrame(void*, unsigned char);
 
-extern "C" void cUIThing_update(void* self, unsigned short ev)
+extern "C" void cUIThing_update(cUIThing* self, unsigned short ev)
 {
-    void* a = *(void**)((char*)self + 0xC);
+    void* a = self->mpAnim;
     if (a != 0) {
-        cUIAnimation_updateThing(a, self, *(unsigned char*)((char*)self + 0x10), ev);
-        cUIAnimation_updateFrame(*(void**)((char*)self + 0xC), *(unsigned char*)((char*)self + 0x10));
+        cUIAnimation_updateThing(a, self, self->mAnimPlaybackStatus, ev);
+        cUIAnimation_updateFrame(self->mpAnim, self->mAnimPlaybackStatus);
     }
 }
 #endif
@@ -88,50 +85,50 @@ struct sUIThing0048 {
 };
 
 // Sets one animatable property (position, rotation, scale, colour, frame...) from a keyframe value.
-extern "C" void cUIThing_setChannelData(sUIThing0048* self, unsigned short key, float v)
+extern "C" void cUIThing_setChannelData(cUIThing* self, unsigned short key, float v)
 {
     switch (key) {
     case 0:
-        self->x = v;
+        self->mPosition.x = v;
         break;
     case 1:
-        self->y = v;
+        self->mPosition.y = v;
         break;
     case 9:
-        self->scaleX = v * 0.01f;
+        self->mScale.x = v * 0.01f;
         break;
     case 10:
-        self->scaleY = v * 0.01f;
+        self->mScale.y = v * 0.01f;
         break;
     case 3:
-        self->rotX = v * 0.017444444820284843f;
+        self->mAngle.x = v * 0.017444444820284843f;
         break;
     case 4:
-        self->rotY = v * 0.017444444820284843f;
+        self->mAngle.y = v * 0.017444444820284843f;
         break;
     case 5:
-        self->rotZ = v * 0.017444444820284843f;
+        self->mAngle.z = v * 0.017444444820284843f;
         break;
     case 12:
-        self->frame = (int)v;
+        ((sUIThing0048*)self)->frame = (int)v;
         break;
     case 13:
-        self->r = v * 0.003921568859368563f;
+        self->mColour.A = v * 0.003921568859368563f;
         break;
     case 14:
-        self->g = v * 0.003921568859368563f;
+        self->mColour.R = v * 0.003921568859368563f;
         break;
     case 15:
-        self->b = v * 0.003921568859368563f;
+        self->mColour.G = v * 0.003921568859368563f;
         break;
     case 16:
-        self->a = v * 0.003921568859368563f;
+        self->mColour.B = v * 0.003921568859368563f;
         break;
     case 6:
-        self->f60 = v;
+        self->mSize.x = v;
         break;
     case 7:
-        self->f64 = v;
+        self->mSize.y = v;
         break;
     }
 }
@@ -140,9 +137,8 @@ extern "C" void cUIThing_setChannelData(sUIThing0048* self, unsigned short key, 
 //100%
 INCLUDE_ASM("ui/uithing", cUIThing_setChannelDataKCP);
 #ifdef SKIP_ASM
-extern "C" void cUIThing_setChannelDataKCP(void *vself, unsigned int count, short *p)
+extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, short *p)
 {
-    char *self = (char *)vself;
     unsigned int i = 0;
 
     if (count != 0) {
@@ -151,46 +147,46 @@ extern "C" void cUIThing_setChannelDataKCP(void *vself, unsigned int count, shor
             short id = p[0];
             switch (id) {
             case 0:
-                *(float *)(self + 0x44) = v;
+                vself->mPosition.x = v;
                 break;
             case 1:
-                *(float *)(self + 0x48) = v;
+                vself->mPosition.y = v;
                 break;
             case 9:
-                *(float *)(self + 0x50) = v * 0.01f;
+                vself->mScale.x = v * 0.01f;
                 break;
             case 10:
-                *(float *)(self + 0x54) = v * 0.01f;
+                vself->mScale.y = v * 0.01f;
                 break;
             case 3:
-                *(float *)(self + 0x2C) = v * 0.017444445f;
+                vself->mAngle.x = v * 0.017444445f;
                 break;
             case 4:
-                *(float *)(self + 0x30) = v * 0.017444445f;
+                vself->mAngle.y = v * 0.017444445f;
                 break;
             case 5:
-                *(float *)(self + 0x34) = v * 0.017444445f;
+                vself->mAngle.z = v * 0.017444445f;
                 break;
             case 12:
-                *(int *)(self + 0x14) = (*(int *)(self + 0x14) & 0xFFF81FFF) | (((int)v & 0x3F) << 13);
+                vself->mAttr = (vself->mAttr & 0xFFF81FFF) | (((int)v & 0x3F) << 13);
                 break;
             case 13:
-                *(float *)(self + 0x1C) = v * 0.003921569f;
+                vself->mColour.A = v * 0.003921569f;
                 break;
             case 14:
-                *(float *)(self + 0x20) = v * 0.003921569f;
+                vself->mColour.R = v * 0.003921569f;
                 break;
             case 15:
-                *(float *)(self + 0x24) = v * 0.003921569f;
+                vself->mColour.G = v * 0.003921569f;
                 break;
             case 16:
-                *(float *)(self + 0x28) = v * 0.003921569f;
+                vself->mColour.B = v * 0.003921569f;
                 break;
             case 6:
-                *(float *)(self + 0x60) = v;
+                vself->mSize.x = v;
                 break;
             case 7:
-                *(float *)(self + 0x64) = v;
+                vself->mSize.y = v;
                 break;
             }
             i++;

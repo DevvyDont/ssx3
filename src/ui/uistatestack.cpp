@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 
 //100%
 INCLUDE_ASM("ui/uistatestack", cUIStateStack_pushExplicit);
@@ -641,14 +642,14 @@ public:
     virtual void v01(int);
 };
 
-extern "C" void cUIThing__cUIThing(void* self, int flags)
+extern "C" void cUIThing__cUIThing(cUIThing* self, int flags)
 {
-    *(void**)((char*)self + 0x8) = D_00494BD8;
-    cUIThing__cUIThing_cVirt* o = *(cUIThing__cUIThing_cVirt**)((char*)self + 0xC);
+    self->mVtbl = (void**)D_00494BD8;
+    cUIThing__cUIThing_cVirt* o = (cUIThing__cUIThing_cVirt*)self->mpAnim;
     if (o != 0) {
         o->v01(3);
     }
-    *(void***)((char*)self + 0x8) = D_00494CC0;
+    self->mVtbl = D_00494CC0;
     func_003A4868(self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -659,17 +660,17 @@ extern "C" void cUIThing__cUIThing(void* self, int flags)
 //100%
 INCLUDE_ASM("ui/uistatestack", cUIThing_playAnimation);
 #ifdef SKIP_ASM
-extern "C" void cUIThing_deleteAnimation(void* self);
+extern "C" void cUIThing_deleteAnimation(cUIThing* self);
 extern "C" void cUIAnimation_start(void* self, int mode, unsigned short v);
 
-extern "C" void cUIThing_playAnimation(void* self, void* anim, unsigned char mode, unsigned short v)
+extern "C" void cUIThing_playAnimation(cUIThing* self, void* anim, unsigned char mode, unsigned short v)
 {
-    if (*(void**)((char*)self + 0xC) != anim) {
+    if ((void*)self->mpAnim != anim) {
         cUIThing_deleteAnimation(self);
     }
-    *(unsigned char*)((char*)self + 0x10) = mode;
-    *(void**)((char*)self + 0xC) = anim;
-    cUIAnimation_start(anim, *(unsigned char*)((char*)self + 0x10), v);
+    self->mAnimPlaybackStatus = mode;
+    self->mpAnim = (cUIAnimation*)anim;
+    cUIAnimation_start(anim, self->mAnimPlaybackStatus, v);
 }
 #endif
 
@@ -682,13 +683,13 @@ struct sVEntry39FD38 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cUIThing_deleteAnimation(void* self)
+extern "C" void cUIThing_deleteAnimation(cUIThing* self)
 {
-    void* obj = *(void**)((char*)self + 0xC);
+    void* obj = self->mpAnim;
     if (obj != 0) {
         sVEntry39FD38* vt = *(sVEntry39FD38**)((char*)obj + 0x10);
         vt[1].fn((char*)obj + vt[1].delta, 3);
-        *(void**)((char*)self + 0xC) = 0;
+        self->mpAnim = (cUIAnimation*)0;
     }
 }
 #endif
@@ -821,9 +822,9 @@ int func_0039FF50(void* self)
 //100%
 INCLUDE_ASM("ui/uistatestack", cUIThing_getObjectByHashName);
 #ifdef SKIP_ASM
-extern "C" void* cUIThing_getObjectByHashName(void* self, int a1)
+extern "C" void* cUIThing_getObjectByHashName(cUIThing* self, int a1)
 {
-    return *(int*)((char*)self + 0x38) == a1 ? self : 0;
+    return self->mHashName == a1 ? ((void*)self) : 0;
 }
 #endif
 

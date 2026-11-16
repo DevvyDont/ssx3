@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 
 // Flag words at cUIVector + 0x14 and + 0x74. The setters take an int and store it into a
 // bool bitfield: that int->bool conversion is the `sltu` in their asm.
@@ -836,7 +837,7 @@ extern "C" int func_003A49D8(void *arg0) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setActive);
 #ifdef SKIP_ASM
-extern "C" void cUIThing_setActive(void* self, int enable)
+extern "C" void cUIThing_setActive(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit1 = enable;
 }
@@ -845,7 +846,7 @@ extern "C" void cUIThing_setActive(void* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setCached);
 #ifdef SKIP_ASM
-extern "C" void cUIThing_setCached(void* self, int enable)
+extern "C" void cUIThing_setCached(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit2 = enable;
 }
@@ -854,7 +855,7 @@ extern "C" void cUIThing_setCached(void* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setEnabled);
 #ifdef SKIP_ASM
-extern "C" void cUIThing_setEnabled(void* self, int enable)
+extern "C" void cUIThing_setEnabled(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit3 = enable;
 }
@@ -863,7 +864,7 @@ extern "C" void cUIThing_setEnabled(void* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setFocus);
 #ifdef SKIP_ASM
-extern "C" void cUIThing_setFocus(void* self, int enable)
+extern "C" void cUIThing_setFocus(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit4 = enable;
 }
@@ -872,7 +873,7 @@ extern "C" void cUIThing_setFocus(void* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setStatic);
 #ifdef SKIP_ASM
-extern "C" void cUIThing_setStatic(void* self, int enable)
+extern "C" void cUIThing_setStatic(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit5 = enable;
 }
@@ -881,7 +882,7 @@ extern "C" void cUIThing_setStatic(void* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setVisible);
 #ifdef SKIP_ASM
-extern "C" void cUIThing_setVisible(void* self, int enable)
+extern "C" void cUIThing_setVisible(cUIThing* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x14))->bit6 = enable;
 }
@@ -938,9 +939,9 @@ struct sVec4 {
     float w;
 };
 
-extern "C" void cUIThing_setColour(void* self, sVec4* in)
+extern "C" void cUIThing_setColour(cUIThing* self, sVec4* in)
 {
-    *(sVec4*)((char*)self + 0x1C) = *in;
+    *(sVec4*)&self->mColour = *in;
 }
 #endif
 
@@ -1131,18 +1132,18 @@ struct sVec3 {
     float z;
 };
 
-extern "C" void cUIThing_getSize(void* self, sVec3* out)
+extern "C" void cUIThing_getSize(cUIThing* self, sVec3* out)
 {
-    *out = *(sVec3*)((char*)self + 0x60);
+    *out = *(sVec3*)&self->mSize;
 }
 #endif
 
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setSize);
 #ifdef SKIP_ASM
-extern "C" void cUIThing_setSize(void* self, sVec3* in)
+extern "C" void cUIThing_setSize(cUIThing* self, sVec3* in)
 {
-    *(sVec3*)((char*)self + 0x60) = *in;
+    *(sVec3*)&self->mSize = *in;
 }
 #endif
 
