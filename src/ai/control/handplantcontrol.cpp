@@ -7137,7 +7137,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRiderHandler__cRiderHandler);
 /**
  * Destroys a rider handler; the source body is empty, so all the work is compiler-generated.
  *
- * The generated code restores cRiderHandler's vtable (D_00458710 at +0xDE8), destroys the FX parts with their
+ * The generated code restores cRiderHandler's vtable (cRiderHandler_vtbl at +0xDE8), destroys the FX parts with their
  * own destructors (cCheatFX__cCheatFX back to cBoardWakeFX__cBoardWakeFX), runs the inlined motion and
  * control part destructors (their cRider vtable fix-ups) and cWipeoutMotion__cWipeoutMotion(), destroys the
  * virtual cRider base with cRider__cRider() when bit 1 of the destructor flags is set, and frees the object
@@ -7151,7 +7151,7 @@ cVbDtor00142A50::~cVbDtor00142A50()
 __asm__(".globl cRiderHandler__cRiderHandler\n.type cRiderHandler__cRiderHandler,@function\ncRiderHandler__cRiderHandler = _$_15cVbDtor00142A50\n.size cRiderHandler__cRiderHandler,0x15A0\n");
 
 // PORT: the retail names of the vtables and dtors g++ references here.
-__asm__("_vt$15cVbDtor00142A50 = D_00458710\n"
+__asm__("_vt$15cVbDtor00142A50 = cRiderHandler_vtbl\n"
         "_vt$15cVbDtor00142A50$13cRiderVbC_hpc = D_00458738\n"
         "_vt$15cVbDtor00142A50$12cRiderVb_hpc = D_00458780\n"
         "_vt$14cRiderVbB0_hpc = D_00459B90\n"

@@ -347,3 +347,7 @@ ps2_addr	name	previous	source	evidence
 004A3778	gMonitor	D_004A3778	ontour	On Tour static cMonitor* gMonitor (all_in_one_sound.cpp); retail cMonitor_cMonitor stores this, func_002ADAC8 clears
 004A3028	LobbyMan_mLobbyMan	D_004A3028	preview	preview assert "!mLobbyMan"; func_0025B650 stores cMemMan_alloc(0x300, "LobbyMan")
 004A3328	BuddyMan_mBuddyMan	D_004A3328	preview	preview assert "!mBuddyMan"; func_00260F80 stores new(0xF0, "BuddyMan")
+00458710	cRiderHandler_vtbl	D_00458710	retail vtable (tools/vtables.py)	[M] own method(s) cRiderHandler_readFromReplayFrame, cRiderHandler_writeToReplayFrame; g++ 2.95 symbol _vt$13cRiderHandler
+0045CCC8	cSPOKEChaseAlgorithm_vtbl	D_0045CCC8	retail vtable (tools/vtables.py)	[M] own method(s) cSPOKEChaseAlgorithm_snap; g++ 2.95 symbol _vt$20cSPOKEChaseAlgorithm
+0046D810	cFECustom_vtbl	D_0046D810	retail vtable (tools/vtables.py)	[C] stored by cFECustom_cFECustom; g++ 2.95 symbol _vt$9cFECustom
+00483AD8	cBankManager_vtbl	D_00483AD8	retail vtable (tools/vtables.py)	[C] stored by cBankManager_cBankManager; g++ 2.95 symbol _vt$12cBankManager

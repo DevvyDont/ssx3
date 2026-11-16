@@ -283,7 +283,7 @@ class cVbDtor00142A50
 public:
     char pad[0xB8];
     virtual ~cVbDtor00142A50();
-    // Own vtable D_00458710: a pure slot, then cRiderHandler_writeToReplayFrame and cRiderHandler_readFromReplayFrame.
+    // Own vtable cRiderHandler_vtbl: a pure slot, then cRiderHandler_writeToReplayFrame and cRiderHandler_readFromReplayFrame.
     virtual void vf00() = 0;
     virtual void vf01(char* s);
     virtual void vf02(char* s);

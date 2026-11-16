@@ -2431,7 +2431,7 @@ __asm__("__12cRiderVb_cmp = cRider_cRider\n"
 
 // PORT: vtables this TU does not emit (their key functions are elsewhere), under their retail names.
 __asm__("_vt$14cRiderVbB0_cmp = D_00459B90\n"
-        "_vt$9cComp_cmp = D_00458710\n"
+        "_vt$9cComp_cmp = cRiderHandler_vtbl\n"
         "_vt$9cComp_cmp$12cRiderVb_cmp = D_00458780\n"
         "_vt$9cComp_cmp$13cRiderVbC_cmp = D_00458738\n");
 

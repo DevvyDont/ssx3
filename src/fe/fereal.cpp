@@ -18,13 +18,13 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_0039E2A0(void* self, void* owner);
 extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
 extern char D_00460B90[];
-extern void* D_0046D810[];
+extern void* cFECustom_vtbl[];
 extern sVE0720 cFEStateTransition_vtbl[];
 
 /**
  * Constructs the front end's custom interface and pushes its transition state on the UI engine's stack.
  *
- * Stores the engine at +0x0 and the vtable D_0046D810, allocates a "cFEStateTransition" state (cUIState on
+ * Stores the engine at +0x0 and the vtable cFECustom_vtbl, allocates a "cFEStateTransition" state (cUIState on
  * the same engine, +0x48 and +0x4C zeroed), keeps it at +0x10, runs its slot 4 (onCreateScreen) and pushes it
  * with cUIStateStack_pushExplicit().
  *
@@ -35,7 +35,7 @@ extern "C" void* cFECustom_cFECustom(void* self, void* owner)
 {
     *(void**)((char*)self + 0x0) = owner;
     *(void**)((char*)self + 0x10) = 0;
-    *(void***)((char*)self + 0x4) = D_0046D810;
+    *(void***)((char*)self + 0x4) = cFECustom_vtbl;
     char* o = (char*)cMemMan_alloc(0x50, D_00460B90, 0, 0);
     func_0039E2A0(o, *(void**)((char*)self + 0x0));
     *(int*)(o + 0x48) = 0;

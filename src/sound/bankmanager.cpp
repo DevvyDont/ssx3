@@ -302,7 +302,7 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
 extern char* gpBankManager;
 extern const char D_004829B8[];
 extern void* cBankMonitor_vtbl[];
-extern void* D_00483AD8[];
+extern void* cBankManager_vtbl[];
 
 struct sBmVEntry {
     short delta;
@@ -363,7 +363,7 @@ extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embed
     }
     self->count = count;
     self->vtbl2 = cBankMonitor_vtbl;
-    self->vtbl = D_00483AD8;
+    self->vtbl = cBankManager_vtbl;
     sBmBank** slot = &self->banks;
     *slot = new (D_004829B8, 0, 0) sBmBank[count];
     gpBankManager = (char*)self;
@@ -382,7 +382,7 @@ extern "C" void cBankMonitor__cBankMonitor(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern char* gpBankManager;
 extern void* cBankMonitor_vtbl[];
-extern void* D_00483AD8[];
+extern void* cBankManager_vtbl[];
 
 struct sBmVEntryBB10 {
     short delta;
@@ -412,7 +412,7 @@ struct sBankManagerBB10 {
 extern "C" void func_0028BB10(sBankManagerBB10* self, int flags)
 {
     self->vtbl2 = cBankMonitor_vtbl;
-    self->vtbl = D_00483AD8;
+    self->vtbl = cBankManager_vtbl;
     *(const sBmVtblBB10**)(self->monitor + 4) = &D_00483AB8_BB10;
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.

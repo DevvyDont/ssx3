@@ -658,12 +658,12 @@ struct cRiderHandler {
                                             //       ctor = MS_Num; [O] eMotionState
     int ControlState;                       // 0xDE4 [P] _getControlState (preview 0xDA4); [R] cRiderHandler__getControlState;
                                             //       ctor = CS_Num; [O] eControlState
-    void** mVtbl;                           // 0xDE8 [R] _vt$13cRiderHandler D_00458710 (cPlayer and cComputer
+    void** mVtbl;                           // 0xDE8 [R] _vt$13cRiderHandler cRiderHandler_vtbl (cPlayer and cComputer
                                             //       store their own here: D_00458338, D_004585F0)
     char pad_DEC[0x4];                      // 0xDEC cRiderHandler is 16-byte aligned
 };
 
-// Virtual slots of _vt$13cRiderHandler (D_00458710; [O] cRiderHandler's virtual order).
+// Virtual slots of _vt$13cRiderHandler (cRiderHandler_vtbl; [O] cRiderHandler's virtual order).
 enum {
     kRiderHandlerVt_getControlCmd = 1,      // pure (func_00411530); cPlayer func_00127998, cComputer cComputer_getControlCmd
     kRiderHandlerVt_writeToReplayFrame = 2, // cRiderHandler_writeToReplayFrame (calls every part's writeToReplayFrame)

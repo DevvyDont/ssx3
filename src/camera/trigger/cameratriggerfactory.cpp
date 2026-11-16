@@ -4164,18 +4164,18 @@ void* func_00177E30(void* self)
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177E50);
 #ifdef SKIP_ASM
 extern "C" void* func_00162318(void* self);
-extern void* D_0045CCC8[];
+extern void* cSPOKEChaseAlgorithm_vtbl[];
 
 extern "C" void* func_00177E50(void* self)
 {
     func_00162318(self);
     *(int*)((char*)self + 0xC) = 0x42;
-    *(void***)((char*)self + 0x10) = D_0045CCC8;
+    *(void***)((char*)self + 0x10) = cSPOKEChaseAlgorithm_vtbl;
     return self;
 }
 #endif
 
-extern void* D_0045CCC8[];
+extern void* cSPOKEChaseAlgorithm_vtbl[];
 extern "C" void* func_00162458(void*);
 
 //100%
@@ -4183,7 +4183,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00177E90__FPv);
 #ifdef SKIP_ASM
 void* func_00177E90(void* self)
 {
-    *(int*)((char*)self + 0x10) = (int)(void*)D_0045CCC8;
+    *(int*)((char*)self + 0x10) = (int)(void*)cSPOKEChaseAlgorithm_vtbl;
     return func_00162458(self);
 }
 #endif

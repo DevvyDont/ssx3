@@ -290,7 +290,7 @@ struct cSSXAudio {
     void** mSoundSysVtbl;               // 0x6C94 [R] cSoundSys vptr; the ctors in the chain point it at their stack-patched copies
     // --- virtual base cBankManager (0xAD0; ctor cBankManager_cBankManager(this + 0x6C98)): cAsyncSys at 0, cBankMonitor at 0x1D8
     char mAsyncSys[468];                // 0x6C98 cAsyncSys data (On Tour 0x1D4: mHandle .. mBufferSize; ctor func_0028A058)
-    void** mBankManagerVtbl;            // 0x6E6C [R] cBankManager ctor stores D_00483AD8 (cAsyncSys's vptr slot, cBankManager+0x1D4)
+    void** mBankManagerVtbl;            // 0x6E6C [R] cBankManager ctor stores cBankManager_vtbl (cAsyncSys's vptr slot, cBankManager+0x1D4)
     cBankMonitor BankMonitor;           // 0x6E70 cBankManager's cBankMonitor (sound/bankmonitor.h; non-virtual part 0x8F0)
     int mMaxBanks;                      // 0x7760 [O] cBankManager::mMaxBanks; [R] cBankManager ctor stores its count argument
     void* mBankManagerBank;             // 0x7764 [O] cBankManager::mBank (renamed: cBankSys::mBank at 0x4); [R] operator new[](count x 0x60)

@@ -3587,3 +3587,9 @@ LobbyMan_mLobbyMan = 0x004A3028;
 BuddyMan_mBuddyMan = 0x004A3328;
 gMonitor = 0x004A3778;
 gMusicSys = 0x004A37EC;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_vtables_round2 (docs/ontour_globals.tsv)
+cRiderHandler_vtbl = 0x00458710;
+cSPOKEChaseAlgorithm_vtbl = 0x0045CCC8;
+cFECustom_vtbl = 0x0046D810;
+cBankManager_vtbl = 0x00483AD8;

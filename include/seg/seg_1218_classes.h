@@ -194,7 +194,7 @@ public:
     // PORT: cRiderHandler_cRiderHandler constructs this part (fields up to 0xDE8 and the vptr at 0xDE8)
     cComp_s12();
     ~cComp_s12() {}
-    // Own vtable (D_00458710): a pure slot, then cRiderHandler_writeToReplayFrame and cRiderHandler_readFromReplayFrame.
+    // Own vtable (cRiderHandler_vtbl): a pure slot, then cRiderHandler_writeToReplayFrame and cRiderHandler_readFromReplayFrame.
     virtual void v01() = 0;
     virtual void v02();
     virtual void v03();

@@ -1336,7 +1336,7 @@ extern "C" int func_001DCC58(void) {
 INCLUDE_ASM("main/all_in_one_main", func_001DCC60);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_0046D810_CC60[] __asm__("D_0046D810");
+extern void* D_0046D810_CC60[] __asm__("cFECustom_vtbl");
 
 extern "C" void *func_001DCC60(void *arg0) {
     (*(int *)((char*)(arg0) + (0))) = 0;
