@@ -157,10 +157,18 @@ extern "C" void func_001174E8(void* self, void* obj)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_setInitialPointsTotal);
 #ifdef SKIP_ASM
-extern "C" void cRiderMetrix_setInitialPointsTotal(void* self, int a1)
+/**
+ * Sets the score a rider starts the run with, adjusting the current total by the difference.
+ *
+ * The starting total (+0x1C8, On Tour mPointsTotalInitial) becomes @p pointsTotal and Totals.TotalPoints (+0x198) moves by @p pointsTotal
+ * minus the old starting total.
+ *
+ * @param pointsTotal  the new starting score (On Tour pointsTotal)
+ */
+extern "C" void cRiderMetrix_setInitialPointsTotal(void* self, int pointsTotal)
 {
-    int delta = a1 - *(int*)((char*)self + 0x1c8);
-    *(int*)((char*)self + 0x1c8) = a1;
+    int delta = pointsTotal - *(int*)((char*)self + 0x1c8);
+    *(int*)((char*)self + 0x1c8) = pointsTotal;
     *(int*)((char*)self + 0x198) += delta;
 }
 #endif
@@ -280,6 +288,11 @@ extern "C" void func_00117638(void* self, int points)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_cancelComboChainReset);
 #ifdef SKIP_ASM
+/**
+ * Stops the combo-chain timer so the current combo cannot run out while a trick is held.
+ *
+ * Sets the combo reset delay (+0xA4) to -1.
+ */
 extern "C" void cRiderMetrix_cancelComboChainReset(void* self)
 {
     *(float*)((char*)self + 0xa4) = -1.0f;
@@ -289,6 +302,13 @@ extern "C" void cRiderMetrix_cancelComboChainReset(void* self)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_delayComboChainReset);
 #ifdef SKIP_ASM
+/**
+ * Gives the combo chain at least @p seconds before it resets.
+ *
+ * Combo reset delay (+0xA4) = max(itself, @p seconds), using g++'s >? operator.
+ *
+ * @param seconds  the minimum time left before the combo resets (On Tour delaySec)
+ */
 // PORT: g++ >? (max) operator, removed in GCC 4.3.
 extern "C" void cRiderMetrix_delayComboChainReset(void* self, float seconds)
 {
@@ -314,6 +334,21 @@ struct sRaceSettings_117718 {
 };
 extern sRaceSettings_117718 D_00535BC8_117718 __asm__("cBENewRaceInterface_newRace");
 
+/**
+ * Cashes in the current combo chain: adds its points to the run totals and shows it, then resets the chain.
+ *
+ * With at least 2 combo links (+0x9C, On Tour NumCombos) and positive combo points (+0xA0): Totals.TotalPoints +=
+ * points, NumComboChainLinks += links, BestComboPoints and LongestCombo are raised. When cBENewRaceInterface_newRace
+ * has +0x48 == 4 and +0x49 == 0 (the free-ride case cRiderMetrix_earnNameAndPoints also checks; +0x49 is the game path cBENewRaceInterface_setGamePath
+ * sets, which this C names online) the combo pays cash instead (cRiderMetrix_evAddCash(2, min(points / 500, 20)));
+ * otherwise HUD effects 0x26 (points and links, 1.5 s) and 0x18 (0.7 s) show it. Always ends with
+ * cRiderMetrix_resetComboChain.
+ *
+ * Retail cRiderMetrix fields sit 8 bytes after On Tour's cRiderMetrixState ones up to the combo fields; the run totals
+ * (On Tour tRiderStats) start at +0xFC.
+ *
+ * @param self_  the score object (this)
+ */
 // Records a trick combo (count at 0x9C, score at 0xA0) in the rider metrics and awards it.
 extern "C" void cRiderMetrix_earnComboChain(void* self_)
 {
@@ -414,6 +449,13 @@ float func_00117900(void* self)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_getCurTrickStyleSubPoints);
 #ifdef SKIP_ASM
+/**
+ * Returns the style points of the trick in progress.
+ *
+ * (int)(style power (+0x1C) * 10000 + 5), rounded down to a multiple of 10; no points multiplier.
+ *
+ * @return the style points, a multiple of 10
+ */
 extern "C" int cRiderMetrix_getCurTrickStyleSubPoints(void* self)
 {
     int v = (int)(*(float*)((char*)self + 0x1C) * 10000.0f + 5.0f);
@@ -424,6 +466,13 @@ extern "C" int cRiderMetrix_getCurTrickStyleSubPoints(void* self)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_getCurTrickPoints);
 #ifdef SKIP_ASM
+/**
+ * Returns the points of the trick in progress, before the trick multiplier.
+ *
+ * (int)(mPointsMultiplier (+0x1C4) * trick power (+0x14) * 10000 + 5), rounded down to a multiple of 10.
+ *
+ * @return the trick points, a multiple of 10
+ */
 extern "C" int cRiderMetrix_getCurTrickPoints(void* self)
 {
     int v = (int)(*(float*)((char*)self + 0x1C4) * *(float*)((char*)self + 0x14) * 10000.0f + 5.0f);
@@ -434,6 +483,14 @@ extern "C" int cRiderMetrix_getCurTrickPoints(void* self)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_getCurTrickPointsWithMult);
 #ifdef SKIP_ASM
+/**
+ * Returns the points of the trick in progress including its pickup multiplier.
+ *
+ * (int)(mPointsMultiplier (+0x1C4) * point multiplier (+0x18) * trick power (+0x14) * 10000 + 5), rounded down to a
+ * multiple of 10.
+ *
+ * @return the multiplied trick points, a multiple of 10
+ */
 extern "C" int cRiderMetrix_getCurTrickPointsWithMult(void* self)
 {
     int v = (int)(*(float*)((char*)self + 0x1C4) * *(float*)((char*)self + 0x18) * *(float*)((char*)self + 0x14) * 10000.0f + 5.0f);
@@ -712,6 +769,17 @@ static inline float len17C28(const sVec17C28& v)
     return r;
 }
 
+/**
+ * Per-frame update of a rider's scoring: combo timer, hold and air bonuses, speed statistics and HUD effects.
+ *
+ * Counts the combo reset delay down and cashes the combo in (cRiderMetrix_earnComboChain) when it runs out, advances the big-air and
+ * long grab/press/plant/rail bonus levels through cRiderMetrix_updateBonusLevelAndCalcPoints with their bonus tables, accumulates the speed totals
+ * (max, average), updates the HUD (cRiderMetrix_updateStaticHUD) and each HUD effect slot (cHUDFX_update), and passes the trick power
+ * to cSSXAudio_SetCurTrickPower.
+ *
+ * Retail cRiderMetrix fields sit 8 bytes after On Tour's cRiderMetrixState ones up to the combo fields; the run totals
+ * (On Tour tRiderStats) start at +0xFC.
+ */
 extern "C" void cRiderMetrix_update(sMetrix17C28* self)
 {
     float dt = self->rider->timeScale * 0.016666668f;
@@ -903,6 +971,19 @@ static inline float trunc_117FE0(float x)
     return r;
 }
 
+/**
+ * Refreshes the rider's on-screen trick HUD: current trick points, recovery meter and the spin/flip direction
+ * indicators.
+ *
+ * Skipped for a rider with no HUD bank. Shows the current trick points (cRiderMetrix_getCurTrickPoints) at their level (cRiderMetrix_calcTrickLevel)
+ * and plays the points sound; in control state 8 shows the wipeout-recovery meter (effect 11). In the prewind (2) or
+ * spin (5) control states it places the input dial (effect 13, eased toward the stick angle) and lights one of eight
+ * direction effects (0x10-0x17) from the flip/spin angle with its neighbours weighted by cSpinControl_getInvertScale /
+ * getOffAxisScale, then labels the trick STALLED, OFF_AXIS and so on from the difference between input and actual
+ * angle; other states clear those effects.
+ *
+ * @param vself  the score object (this), viewed as self
+ */
 extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
 {
     sMetrix_117FE0* self = (sMetrix_117FE0*)vself;
@@ -1210,6 +1291,15 @@ extern "C" void cRiderMetrix_addHUDfx(void* self, int a, const char* b, float c,
 extern "C" void cWScriptMan_eventTrick(void* self, void* d);
 extern void* cWScriptMan_TheWScriptMan;
 
+/**
+ * Announces a landed trick: shows its generated name on the HUD and tells the world scripts.
+ *
+ * gGenTrickName into a 256-byte buffer, cRiderMetrix_addHUDfx(0, name, 3.0f, @p repeat), then cWScriptMan_eventTrick (On Tour
+ * cWScriptMan::eventTrick) on cWScriptMan_TheWScriptMan.
+ *
+ * @param id  the trick (On Tour tTrickNameDef *td)
+ * @param repeat  On Tour isRepeat: the trick repeats a recent one
+ */
 extern "C" void cRiderMetrix_addTrick(void* self, sTrickId* id, int repeat)
 {
     char buf[0x100];
@@ -1323,6 +1413,19 @@ struct sGradeStep_119210
     float mult;
 };
 
+/**
+ * Steps a hold/air bonus up a level when its measure passes the next threshold, and returns the bonus points earned.
+ *
+ * Looks at entry *@p idx of @p tbl ({threshold, points}); a negative threshold ends the table. When @p x reaches it:
+ * points = (int)(entry points * mPointsMultiplier (+0x1C4) + 0.5), the level advances, HUD effects 0x1C-0x20 are
+ * removed and effect @p type shows the points and threshold for 1.5 s.
+ *
+ * @param idx  the bonus level to test and advance (On Tour curBonusLevel)
+ * @param tbl  the bonus table (On Tour tHoldBonusDB): {threshold, points} pairs ending with a negative threshold
+ * @param type  the HUD effect to show on advancing (On Tour hfxAdvance)
+ * @param x  the current measure, e.g. air or hold seconds (On Tour curMeasure)
+ * @return the bonus points earned, or 0
+ */
 extern "C" int cRiderMetrix_updateBonusLevelAndCalcPoints(void* self, int* idx, sGradeStep_119210* tbl, int type, float x)
 {
     // PORT: pointer arithmetic through int.
@@ -1349,6 +1452,14 @@ extern "C" int cRiderMetrix_updateBonusLevelAndCalcPoints(void* self, int* idx, 
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_calcTrickLevel);
 #ifdef SKIP_ASM
+/**
+ * Rates a trick's points on a 0-5 level scale.
+ *
+ * Thresholds: < 1000 -> 0, < 2500 -> 1, < 4000 -> 2, < 7500 -> 3, < 11500 -> 4, else 5.
+ *
+ * @param points  the trick's points (On Tour trickPoints)
+ * @return the level, 0 to 5
+ */
 extern "C" int cRiderMetrix_calcTrickLevel(void* self, int points)
 {
     if (points < 1000)
@@ -1380,13 +1491,22 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evReset);
 #ifdef SKIP_ASM
 extern "C" int cRiderMetrix_losePoints(void* self);
 
-extern "C" float cRiderMetrix_evReset(void* self, int a1)
+/**
+ * Scores a reset: the trick in progress is lost, the combo ends and a boost penalty is returned.
+ *
+ * Adds cRiderMetrix_losePoints (losePoints) to Totals.TotalPointsLostToResets (+0x1A4), resets the current trick and combo chain
+ * and increments Totals.NumResets (+0x120).
+ *
+ * @param isUserReset  On Tour isUserReset: the player asked for the reset
+ * @return the boost change: -0.7 x the rider's unk_2F8 for a user reset, else -0.1 x it
+ */
+extern "C" float cRiderMetrix_evReset(void* self, int isUserReset)
 {
     *(int*)((char*)self + 0x1A4) += cRiderMetrix_losePoints(self);
     cRiderMetrix_resetCurTrick(self);
     cRiderMetrix_resetComboChain(self);
     *(int*)((char*)self + 0x120) += 1;
-    if (!a1)
+    if (!isUserReset)
         return *(float*)(*(char**)((char*)self + 0x1AC) + 0x2F8) * -0.10000000149011612f;
     return *(float*)(*(char**)((char*)self + 0x1AC) + 0x2F8) * -0.699999988079071f;
 }
@@ -1398,6 +1518,11 @@ extern "C" void cRiderMetrix_earnComboChain(void*);
 // callee sits at a different .text offset in our object than in the target
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evFinishRace);
 #ifdef SKIP_ASM
+/**
+ * Scores crossing the finish line: banks the current combo.
+ *
+ * @return 0.0 (no boost change)
+ */
 extern "C" float cRiderMetrix_evFinishRace(void* self)
 {
     cRiderMetrix_earnComboChain(self);
@@ -1410,6 +1535,13 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evFrag);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 
+/**
+ * Scores knocking another rider down: counts the frag, shows it and earns a boost.
+ *
+ * Totals.NumFrags (+0x128) += 1 and HUD effect 0x2C for 1.5 s.
+ *
+ * @return 1.0, the boost the frag earns
+ */
 extern "C" float cRiderMetrix_evFrag(char* self)
 {
     *(int*)(self + 0x128) += 1;
@@ -1454,7 +1586,17 @@ static inline bool rmRiderFlags_1194C0(char* r)
     return *(int*)(r + 0x874) != 0 && *(int*)(r + 0x87C) != 0;
 }
 
-extern "C" float cRiderMetrix_evCheckpoint(char* self, int a1)
+/**
+ * Scores passing a checkpoint: a human rider gets the checkpoint's time bonus shown.
+ *
+ * Only for a human rider (cBeing vtable slot 8): cGameModeMan_riderCheckpointHit (On Tour cGameModeMan::riderCheckpointHit) with the
+ * rider's id (slot 7) and @p timeBonusSec; when accepted, HUD effect 0x29 shows @p timeBonusSec for 2.5 s and, when the rider's +0x874 and
+ * +0x87C are both set, func_002A3CE8 plays the checkpoint sound.
+ *
+ * @param timeBonusSec  the checkpoint's time bonus in seconds (On Tour sec)
+ * @return 0.0 (no boost change)
+ */
+extern "C" float cRiderMetrix_evCheckpoint(char* self, int timeBonusSec)
 {
     char* sub = *(char**)(self + 0x1AC) + 0x6C0;
     sVEntry001194C0* vt = *(sVEntry001194C0**)sub;
@@ -1463,9 +1605,9 @@ extern "C" float cRiderMetrix_evCheckpoint(char* self, int a1)
         void* mgr = SSXApp->GameModeMan;
         char* sub2 = *(char**)(self + 0x1AC) + 0x6C0;
         sVEntry001194C0* vt2 = *(sVEntry001194C0**)sub2;
-        if (cGameModeMan_riderCheckpointHit(mgr, vt2[7].fn(sub2 + vt2[7].delta), a1) != 0)
+        if (cGameModeMan_riderCheckpointHit(mgr, vt2[7].fn(sub2 + vt2[7].delta), timeBonusSec) != 0)
         {
-            cRiderMetrix_addHUDfx1(self, 0x29, a1, 0, 2.5f);
+            cRiderMetrix_addHUDfx1(self, 0x29, timeBonusSec, 0, 2.5f);
             if (rmRiderFlags_1194C0(*(char**)(self + 0x1AC)))
             {
                 func_002A3CE8(func_0028B180(), *(void**)(self + 0x1AC), 1);
@@ -1550,6 +1692,17 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEBAGTInterface_getGrabPoints(void* iface, int id);
 int cBEBAGTInterface_getGrabPointsPerSec(void* iface, int id);
 
+/**
+ * Scores the start of a grab: its base points, its hold rate and the uber flag.
+ *
+ * From the BAGT interface (BE interface 6): trick power (+0x14, CurTrickPower) += getGrabPoints(@p id) / 10000 and the
+ * grab power per tick (+0x3C) = getGrabPointsPerSec(@p id) / 600000. The hold timer (+0x40) starts at 0 if idle, grab
+ * ids >= 0x23 (ubers) set CurTrickIsUber (+0x5C), and the combo timer is suspended (cRiderMetrix_cancelComboChainReset). Field names are On
+ * Tour's cRiderMetrixState ones, which sit 8 bytes lower there.
+ *
+ * @param id  the grab (On Tour eTrickNameGrab grabID); ids from 0x23 are uber tricks
+ * @return 0.0 (no boost change)
+ */
 extern "C" float cRiderMetrix_evGrabHold(char* self, int id)
 {
     float zero = 0.0f;
@@ -1576,18 +1729,30 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evReleaseGrab);
 #ifdef SKIP_ASM
 extern "C" void func_00119068(void* self_, int value);
 
+/**
+ * Scores the end of a grab: records it in the trick and banks its hold time.
+ *
+ * func_00119068 (On Tour addGrab) adds @p grabID to the grab list. Ids >= 0x23 count as ubers (+0x54), and as super ubers
+ * (+0x58) while the rider's mUberLevel >= 6; ids >= 0x13 as tweaks (+0x50); others as grabs (+0x4C). The hold time
+ * (+0x40) raises the longest hold (+0x48) and adds to the total (+0x44); the uber flag clears and the timer goes back
+ * to -1. Field names are On Tour's cRiderMetrixState ones, which sit 8 bytes lower there.
+ *
+ * @param riderMetrix  the score object (this)
+ * @param grabID  the grab released (On Tour eTrickNameGrab grabID)
+ * @return 0.0 (no boost change)
+ */
 // PORT: g++ >? (max) operator.
-extern "C" float cRiderMetrix_evReleaseGrab(void* p, int v)
+extern "C" float cRiderMetrix_evReleaseGrab(void* riderMetrix, int grabID)
 {
-    char* self = (char*)p;
-    func_00119068(self, v);
-    if (v >= 0x23)
+    char* self = (char*)riderMetrix;
+    func_00119068(self, grabID);
+    if (grabID >= 0x23)
     {
         (*(int*)(self + 0x54))++;
         if (*(int*)(*(char**)(self + 0x1AC) + 0x2F4) >= 6)
             (*(int*)(self + 0x58))++;
     }
-    else if (v >= 0x13)
+    else if (grabID >= 0x13)
     {
         (*(int*)(self + 0x50))++;
     }
@@ -1619,6 +1784,16 @@ static inline float metrixAbs_00119898(float x)
 // `void* cRiderMetrix_evSpin(void*)` for an existing caller, but the body takes a float in $f12.
 float cRiderMetrix_evSpin_impl(void* self, float x) __asm__("cRiderMetrix_evSpin");
 
+/**
+ * Scores the trick's spin: the spin angle so far is worth 0.1 trick power per full turn.
+ *
+ * Trick power (+0x14) loses |old spin angle (+0x34)| / (20 pi) and gains |@p x| / (20 pi), floored at 0; the spin angle
+ * becomes @p x. The C definition is cRiderMetrix_evSpin (the unit also declares cRiderMetrix_evSpin with another prototype).
+ * Field names are On Tour's cRiderMetrixState ones, which sit 8 bytes lower there.
+ *
+ * @param x  the trick's total spin so far, in radians (On Tour rad)
+ * @return 0.0 (no boost change)
+ */
 float cRiderMetrix_evSpin_impl(void* self, float x)
 {
     *(float*)((char*)self + 0x14) -= metrixAbs_00119898(*(float*)((char*)self + 0x34)) * 0.015915492549538612f;
@@ -1640,6 +1815,15 @@ static inline float metrixAbs_001198D8(float x)
     return r;
 }
 
+/**
+ * Scores the trick's flip: the flip angle so far is worth 0.18 trick power per full flip.
+ *
+ * Trick power (+0x14) loses |old flip angle (+0x38)| * 0.18 / (2 pi) and gains |@p x| * 0.18 / (2 pi), floored at 0;
+ * the flip angle becomes @p x.
+ *
+ * @param x  the trick's total flip so far, in radians (On Tour rad)
+ * @return 0.0 (no boost change)
+ */
 // PORT: g++ `>?` (max) operator.
 extern "C" float cRiderMetrix_evFlip(void* self, float x)
 {
@@ -1656,9 +1840,18 @@ extern "C" void* cRiderMetrix_evSpin(void*);
 //99.29%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evRailSpin__FPvi);
 #ifdef SKIP_ASM
-void* cRiderMetrix_evRailSpin(void* self, int a1)
+/**
+ * Scores a spin onto or off a rail: records the rail-slide mode, then scores the spin angle.
+ *
+ * Stores @p rsm as the current rail-slide mode (+0x20) and tail-calls cRiderMetrix_evSpin (evSpin); the angle passes through
+ * untouched in $f12, which the C prototype does not show.
+ *
+ * @param rsm  the rail-slide mode (On Tour rsm)
+ * @return evSpin's result (0.0)
+ */
+void* cRiderMetrix_evRailSpin(void* self, int rsm)
 {
-    *(int*)((char*)self + 0x20) = a1;
+    *(int*)((char*)self + 0x20) = rsm;
     return cRiderMetrix_evSpin(self);
 }
 #endif
@@ -1666,12 +1859,22 @@ void* cRiderMetrix_evRailSpin(void* self, int a1)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evUberGrindStart__FPvii);
 #ifdef SKIP_ASM
-float cRiderMetrix_evUberGrindStart(void* self, int a1, int a2)
+/**
+ * Scores the start of an uber grind: records which grind and the rail mode, and marks the trick as uber.
+ *
+ * Zeroes the grind hold time (+0x6C), stores @p rsm as the initial and current rail-slide mode (+0xC, +0x20), @p grindID as
+ * the uber grind (+0x70) and sets CurTrickIsUber (+0x5C).
+ *
+ * @param grindID  the uber grind (On Tour eTrickNameUberGrind grindID)
+ * @param rsm  the rail-slide mode (On Tour rsm)
+ * @return 0.0, read back from the hold time just zeroed
+ */
+float cRiderMetrix_evUberGrindStart(void* self, int grindID, int rsm)
 {
     *(float*)((char*)self + 0x6c) = 0.0f;
-    *(int*)((char*)self + 0xc) = a2;
-    *(int*)((char*)self + 0x20) = a2;
-    *(int*)((char*)self + 0x70) = a1;
+    *(int*)((char*)self + 0xc) = rsm;
+    *(int*)((char*)self + 0x20) = rsm;
+    *(int*)((char*)self + 0x70) = grindID;
     *(int*)((char*)self + 0x5c) = 1;
     return *(float*)((char*)self + 0x6c);
 }
@@ -1682,7 +1885,17 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evUberGrindEnd);
 #ifdef SKIP_ASM
 extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alternate, int style, int flag, int takeoff);
 
-extern "C" float cRiderMetrix_evUberGrindEnd(void* self, int v)
+/**
+ * Scores the end of an uber grind: earns the trick and starts a new one on the same rail.
+ *
+ * Increments the uber (+0x54) and uber-grind (+0x74) counts, calls cRiderMetrix_earnNameAndPoints (earnNameAndPoints) with no flags,
+ * resets the current trick and restores the rail distance (+0x24) and air time (+0x30) with @p rsm as the initial and
+ * current rail-slide mode.
+ *
+ * @param rsm  the rail-slide mode to continue with (On Tour rsm)
+ * @return the boost earnNameAndPoints returns
+ */
+extern "C" float cRiderMetrix_evUberGrindEnd(void* self, int rsm)
 {
     float s24 = *(float*)((char*)self + 0x24);
     float s30 = *(float*)((char*)self + 0x30);
@@ -1690,8 +1903,8 @@ extern "C" float cRiderMetrix_evUberGrindEnd(void* self, int v)
     (*(int*)((char*)self + 0x74))++;
     float r = cRiderMetrix_earnNameAndPoints(self, 0, 0, 0, 0, 0);
     cRiderMetrix_resetCurTrick(self);
-    *(int*)((char*)self + 0xC) = v;
-    *(int*)((char*)self + 0x20) = v;
+    *(int*)((char*)self + 0xC) = rsm;
+    *(int*)((char*)self + 0x20) = rsm;
     *(float*)((char*)self + 0x24) = s24;
     *(float*)((char*)self + 0x30) = s30;
     return r;
@@ -1701,11 +1914,20 @@ extern "C" float cRiderMetrix_evUberGrindEnd(void* self, int v)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evPressStart);
 #ifdef SKIP_ASM
+/**
+ * Scores the start of a board press: records the press and keeps the combo alive.
+ *
+ * Stores @p pressMode as the initial (+0x10) and current (+0x28) press mode, starts the press timer (+0x2C) at 0 if idle and
+ * suspends the combo timer (cRiderMetrix_cancelComboChainReset).
+ *
+ * @param pressMode  the press (On Tour pressMode)
+ * @return 0.0 (no boost change)
+ */
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
-extern "C" float cRiderMetrix_evPressStart(char* self, int v)
+extern "C" float cRiderMetrix_evPressStart(char* self, int pressMode)
 {
-    *(int*)(self + 0x10) = v;
-    *(int*)(self + 0x28) = v;
+    *(int*)(self + 0x10) = pressMode;
+    *(int*)(self + 0x28) = pressMode;
     *(float*)(self + 0x2C) = *(float*)(self + 0x2C) >? 0.0f;
     cRiderMetrix_cancelComboChainReset(self);
     return 0.0f;
@@ -1717,6 +1939,15 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evPressEnd);
 #ifdef SKIP_ASM
 extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alternate, int style, int flag, int takeoff);
 
+/**
+ * Scores the end of a board press: earns the trick and starts a new one.
+ *
+ * Calls cRiderMetrix_earnNameAndPoints (earnNameAndPoints) with the current rail-slide mode (+0x20) and an in-the-air flag (air time
+ * +0x30 >= 0), then resets the current trick, restoring the rail mode (initial and current), rail distance (+0x24) and
+ * air time.
+ *
+ * @return the boost earnNameAndPoints returns
+ */
 extern "C" float cRiderMetrix_evPressEnd(void* self)
 {
     float s24 = *(float*)((char*)self + 0x24);
@@ -1738,9 +1969,17 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evPressPivot);
 // PORT: prototype mismatch (see cRiderMetrix_evSpin).
 float cRiderMetrix_evSpin_impl(void* self, float x) __asm__("cRiderMetrix_evSpin");
 
-extern "C" float cRiderMetrix_evPressPivot(void* self, int a1)
+/**
+ * Scores a pivot during a board press: half a turn of extra spin.
+ *
+ * Stores @p pressMode as the current press mode (+0x28) and calls cRiderMetrix_evSpin (evSpin) with the spin angle (+0x34) + pi.
+ *
+ * @param pressMode  the press mode after the pivot (On Tour pressMode)
+ * @return evSpin's result (0.0)
+ */
+extern "C" float cRiderMetrix_evPressPivot(void* self, int pressMode)
 {
-    *(int*)((char*)self + 0x28) = a1;
+    *(int*)((char*)self + 0x28) = pressMode;
     return cRiderMetrix_evSpin_impl(self, *(float*)((char*)self + 0x34) + 3.1415927410125732f);
 }
 #endif
@@ -1751,6 +1990,16 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evWipeout);
 extern "C" int cRiderMetrix_losePoints(void* self);
 extern "C" int cRiderMetrix_getCurTrickPoints(void* self);
 
+/**
+ * Scores a wipeout: counts it, loses the trick in progress and ends the combo.
+ *
+ * With @p flag (knocked down by another rider) Totals.NumDeaths (+0x12C) grows and HUD effect 0x2D shows; otherwise
+ * Totals.NumWipeouts (+0x124) grows. cRiderMetrix_losePoints (losePoints) is added to Totals.TotalPointsLostToWipeouts (+0x1A0);
+ * then the trick and combo are reset.
+ *
+ * @param flag  On Tour isFrag: the wipeout came from another rider's attack
+ * @return -0.25 when a trick with points was lost, else 0.0
+ */
 extern "C" float cRiderMetrix_evWipeout(void* self, int flag)
 {
     if (flag)
@@ -1792,9 +2041,18 @@ extern "C" float func_00119BB0(void* self, int a1)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evHandplantStart);
 #ifdef SKIP_ASM
-extern "C" float cRiderMetrix_evHandplantStart(void* self, int a1)
+/**
+ * Scores the start of a handplant: records which one and adds its base power.
+ *
+ * Stores @p plant as the handplant (+0x7C), sets the air time (+0x30) to -1, zeroes the handplant hold time (+0x78), adds
+ * 0.05 to the trick power (+0x14) and suspends the combo timer (cRiderMetrix_cancelComboChainReset).
+ *
+ * @param plant  the handplant (On Tour eTrickNameHandplant plant)
+ * @return 0.0 (no boost change)
+ */
+extern "C" float cRiderMetrix_evHandplantStart(void* self, int plant)
 {
-    *(int*)((char*)self + 0x7C) = a1;
+    *(int*)((char*)self + 0x7C) = plant;
     *(float*)((char*)self + 0x30) = -1.0f;
     *(int*)((char*)self + 0x78) = 0;
     *(float*)((char*)self + 0x14) += 0.04999999701976776f;
@@ -1809,6 +2067,14 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evHandplantEnd);
 extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alternate, int style, int flag, int takeoff);
 extern "C" void cRiderMetrix_resetCurTrick(void* self);
 
+/**
+ * Scores the end of a handplant: earns the trick and starts a new one.
+ *
+ * Increments the handplant count (+0x80), calls cRiderMetrix_earnNameAndPoints (earnNameAndPoints) with only the last flag set, resets
+ * the current trick and zeroes the air time (+0x30).
+ *
+ * @return the boost earnNameAndPoints returns
+ */
 extern "C" float cRiderMetrix_evHandplantEnd(void* self)
 {
     *(int*)((char*)self + 0x80) += 1;
@@ -1824,13 +2090,24 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evLateSpin);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_earnName(void* self, int a, int b, int c, int d);
 
-extern "C" float cRiderMetrix_evLateSpin(void* self, int v)
+/**
+ * Scores a late spin: names the trick so far and restarts scoring as a late-spin trick.
+ *
+ * Calls cRiderMetrix_earnName (earnName) with no flags. If the trick had power (+0x14 > 0): the starting stance (+0x0) becomes
+ * @p isFakieInit, spin (+0x34) and flip (+0x38) angles and the pipe, rail and press starts are cleared, the hold timer (+0x40) is
+ * set to -1, the late-spin flag (+0x8) set and the 3 grab slots (+0x60) zeroed. The combo timer is suspended either
+ * way.
+ *
+ * @param isFakieInit  On Tour isFakieInit: the late spin starts fakie
+ * @return 0.0 (no boost change)
+ */
+extern "C" float cRiderMetrix_evLateSpin(void* self, int isFakieInit)
 {
     cRiderMetrix_earnName(self, 0, 0, 0, 0);
     float r = 0.0f;
     if (*(float*)((char*)self + 0x14) > r)
     {
-        *(int*)((char*)self + 0x0) = v;
+        *(int*)((char*)self + 0x0) = isFakieInit;
         *(float*)((char*)self + 0x34) = r;
         *(float*)((char*)self + 0x38) = r;
         *(int*)((char*)self + 0x4) = 0;
@@ -1851,6 +2128,20 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evLand);
 extern "C" void cRiderMetrix_resetCurTrick(void* self);
 extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alternate, int style, int flag, int takeoff);
 
+/**
+ * Scores a landing: earns the trick and starts the next one from the landing state.
+ *
+ * Landing on a rail with trick power adds 0.13 power first. Calls cRiderMetrix_earnNameAndPoints (earnNameAndPoints) with the landing
+ * arguments, resets the trick and seeds the new one: stance (+0x0), pipe (+0x4), rail mode (+0xC, and +0x20 with rail
+ * distance +0x24 = 0 when on a rail), press (+0x10, and +0x28 with press time +0x2C = 0 when pressing). An uber grind
+ * in progress (+0x70) survives with the uber flag set and its hold time zeroed.
+ *
+ * @param stance  On Tour isFakieLand: landed fakie
+ * @param alternate  On Tour isPipeLand: landed in a pipe
+ * @param style  the rail-slide mode landed in (On Tour rsmLand), 0 = not on a rail
+ * @param flag  the press landed in (On Tour pressLand), 0 = none
+ * @return the boost earnNameAndPoints returns
+ */
 extern "C" float cRiderMetrix_evLand(void* self, int stance, int alternate, int style, int flag)
 {
     if (style != 0 && *(float*)((char*)self + 0x14) > 0.0f)
@@ -1889,7 +2180,18 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evTakeoff);
 #ifdef SKIP_ASM
 extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alternate, int style, int flag, int takeoff);
 
-extern "C" float cRiderMetrix_evTakeoff(void* self, int a, int b)
+/**
+ * Scores a takeoff: earns the ground trick and starts the air trick.
+ *
+ * During an uber grind (+0x70 set) only the spin angle, rail distance (-1) and rail mode are cleared; otherwise
+ * cRiderMetrix_earnNameAndPoints (earnNameAndPoints, last flag set) and cRiderMetrix_resetCurTrick run. The new trick starts from the
+ * rail mode and press it left (+0xC, +0x10), the stance @p isFakieTakeoff (+0x0) and pipe flag @p isPipeTakeoff (+0x4), with air time (+0x30) 0.
+ *
+ * @param isFakieTakeoff  On Tour isFakieTakeoff: took off fakie
+ * @param isPipeTakeoff  On Tour isPipeTakeoff: took off from a pipe
+ * @return the boost earnNameAndPoints returns, or 0.0 during an uber grind
+ */
+extern "C" float cRiderMetrix_evTakeoff(void* self, int isFakieTakeoff, int isPipeTakeoff)
 {
     float r = 0.0f;
     int v20 = *(int*)((char*)self + 0x20);
@@ -1907,8 +2209,8 @@ extern "C" float cRiderMetrix_evTakeoff(void* self, int a, int b)
     }
     *(int*)((char*)self + 0xC) = v20;
     *(int*)((char*)self + 0x10) = v28;
-    *(int*)((char*)self + 0x4) = b;
-    *(int*)((char*)self + 0x0) = a;
+    *(int*)((char*)self + 0x4) = isPipeTakeoff;
+    *(int*)((char*)self + 0x0) = isFakieTakeoff;
     *(int*)((char*)self + 0x30) = 0;
     return r;
 }
@@ -2039,6 +2341,14 @@ extern "C" float func_0011A0E0(void* self)
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evMissionSuccess);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_evAddCash(void* self, int kind, int amount);
+/**
+ * Scores a passed mission: shows the reward and adds it as cash.
+ *
+ * HUD effect 0x1B with @p amount for 1.5 s, then cRiderMetrix_evAddCash(4, @p amount) (On Tour cash source 4).
+ *
+ * @param amount  the cash reward (On Tour money)
+ * @return 0.0 (no boost change)
+ */
 extern "C" float cRiderMetrix_evMissionSuccess(void* self, int amount)
 {
     cRiderMetrix_addHUDfx1(self, 0x1B, amount, 0, 1.5f);
@@ -2065,6 +2375,18 @@ struct sTrickIdA168 {
     int w1;
 };
 
+/**
+ * Names the trick so far without banking its points, paying any monster-trick bonus into the trick power.
+ *
+ * When cRiderMetrix_buildTrickName (buildTrickName) gives a name: a monster-trick bonus from cRiderMetrix_checkForMonsterTrick adds bonus / 10000 to the
+ * trick power (+0x14), shows HUD effect 0x32 and plays the monster-combo sound; then cRiderMetrix_addTrick (addTrick) announces
+ * it, as a repeat when func_001190F0 finds it in the trick history.
+ *
+ * @param stance  On Tour isFakieLand: landed fakie
+ * @param alternate  On Tour isPipeLand: landed in a pipe
+ * @param style  the rail-slide mode landed in (On Tour rsmLand)
+ * @param flag  the press landed in (On Tour pressLand)
+ */
 extern "C" void cRiderMetrix_earnName(void* self, int stance, int alternate, int style, int flag)
 {
     sTrickIdA168 idv;
@@ -2145,6 +2467,25 @@ static inline int func_roundDegrees(int deg)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_earnNameAndPoints);
 #ifdef SKIP_ASM
+/**
+ * Ends the trick in progress: names it, banks its points and statistics into the run totals and shows the result.
+ *
+ * Clears the live trick HUD effects and does nothing more once the race is over (cAI_isRaceFinished). With trick
+ * points: names the trick (cRiderMetrix_buildTrickName), adds any monster bonus, announces it (cRiderMetrix_addTrick) and divides points and
+ * boost by 1 + its repeats in the trick history (func_001190F0). The result goes into Totals: TotalPoints (+0x198),
+ * TotalStylePoints (+0x19C), NumTricksLanded (+0x110), the trick-level counts, best trick (+0x18C, with its name at
+ * +0x190), spin and flip degrees, grab time, ubers and the air/grab/rail/plant records; the combo chain grows
+ * (func_00117638). It then shows HUD effects 0x23 (0x24 for a repeat) and 0x18, or in free ride
+ * (cBENewRaceInterface_newRace +0x48 == 4, +0x49 == 0) pays cash via cRiderMetrix_evAddCash(0, min(total / 500, 20)).
+ * Unless a rail or press continues the line, the combo gets at least 1.5 s more (cRiderMetrix_delayComboChainReset).
+ *
+ * @param stance  On Tour isFakieLand: landed fakie
+ * @param alternate  On Tour isPipeLand: landed in a pipe
+ * @param style  the rail-slide mode landed in (On Tour rsmLand)
+ * @param flag  the press landed in (On Tour pressLand)
+ * @param takeoff  On Tour isTakeoff: called from a takeoff rather than a landing
+ * @return the boost the trick earns (func_00117900 divided by 1 + repeats), 0.0 without points
+ */
 extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alternate, int style, int flag, int takeoff)
 {
     sTrickId id;
@@ -2272,6 +2613,15 @@ extern "C" int cRiderMetrix_getCurTrickPoints(void* self);
 extern "C" void cRiderMetrix_removeHUDfx(void* self, int type);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 
+/**
+ * Shows the points a wipeout or reset throws away and returns the lost trick points.
+ *
+ * Trick points (cRiderMetrix_getCurTrickPoints) replace effect 1 with 'lost' effect 0x25; combo points (+0xA0) replace effect 3 with
+ * 0x27; pending bonus (+0x84) plus style points (cRiderMetrix_getCurTrickStyleSubPoints) clear effects 2 and 0x1C-0x20 and show 0x28. Effect 4
+ * is removed. Nothing is subtracted from the totals here.
+ *
+ * @return the trick points lost (cRiderMetrix_getCurTrickPoints)
+ */
 extern "C" int cRiderMetrix_losePoints(void* self)
 {
     int n = cRiderMetrix_getCurTrickPoints(self);
@@ -2353,6 +2703,21 @@ struct sTrickState_A8C8 {
     char* rider;     // 0x1AC
 };
 
+/**
+ * Builds the name record of the trick in progress from its spins, flips, grabs and landing.
+ *
+ * Zeroes the 8-byte name (On Tour tTrickNameDef) and packs its bit fields from the trick state: uber grind and rail
+ * mode, takeoff and landing stance and pipe flags, spin and flip counts rounded from the angles (+0x34, +0x38), up to 3
+ * grabs (+0x60), handplant (+0x7C) and press, using the tables D_0043D388 / D_0043D4C8.
+ *
+ * @param vself  the score object (this)
+ * @param vid  receives the trick name (On Tour tTrickNameDef &tn)
+ * @param stance  On Tour isFakieLand: landed fakie
+ * @param alternate  On Tour isPipeLand: landed in a pipe
+ * @param style  the rail-slide mode landed in (On Tour rsmLand)
+ * @param flag  the press landed in (On Tour pressLand)
+ * @return nonzero when the trick has a name
+ */
 extern "C" int cRiderMetrix_buildTrickName(void* vself, sTrickId* vid, int stance, int alternate, int style, int flag)
 {
     sTrickState_A8C8* self = (sTrickState_A8C8*)vself;
@@ -2578,6 +2943,15 @@ struct sTrickBits_11B1A8
     unsigned int grade : 5; // bits 27-31
 };
 
+/**
+ * Checks whether the trick is one of the named monster tricks and, if so, renames it and returns its bonus.
+ *
+ * Compares 7 bit fields of @p id with each of the 24 gMonsterComboTable entries; the first match clears the name and
+ * keeps only that entry's grade, which names the monster trick.
+ *
+ * @param id  the trick name (On Tour tTrickNameDef &tn); replaced on a match
+ * @return the monster trick's bonus points, or 0
+ */
 extern "C" int cRiderMetrix_checkForMonsterTrick(void* self, sTrickId* id)
 {
     sTrickBits_11B1A8* t = (sTrickBits_11B1A8*)id;
@@ -2604,6 +2978,13 @@ INCLUDE_ASM("ai/ridermetrix", InitTerminalVelocityTable);
 #ifdef SKIP_ASM
 extern float kTerminalVelocityTable[2][3][4][2];
 
+/**
+ * Fills the terminal-velocity table used by cRider_updateTerminalVelocity.
+ *
+ * Each kTerminalVelocityTable[a][b][c][d] entry is 120 minus penalties: 5 when a == 0, 20/11/0 for b = 0/1/2,
+ * 20/15/10/0 for c = 0..3 and 5 when d == 0 (cRider_updateTerminalVelocity indexes it as [speed attribute][surface][boost
+ * level][tuck]).
+ */
 extern "C" void InitTerminalVelocityTable(void)
 {
     for (int a = 0; a < 2; a++) {
@@ -2629,6 +3010,14 @@ extern "C" float func_001494C0(void* iface, int a1, int a2);
 int func_0011FE98(void* self);
 extern float kTerminalVelocityTable[2][3][4][2];
 
+/**
+ * Recomputes the rider's top speed from snow type, tuck, boost level and the rider's speed stat.
+ *
+ * Interpolates kTerminalVelocityTable (filled by InitTerminalVelocityTable) by surface property and tuck amount for each
+ * speed-attribute row, mixes the rows by the rider's speed attribute (func_001494C0 on the stat interface), scales by
+ * 27.78 and smooths it into the old value (+0x2E4) with 0.9 (0.97 when slowing), losing 2% when off natural stance
+ * without boost. In motion state 1 the limit is 3333.33. At uber level 11+ while boosting it never drops below +0x30C.
+ */
 // cRider::updateTerminalVelocity (On Tour name; pairing unverified, structure fits the retail asm)
 extern "C" void cRider_updateTerminalVelocity(char* self)
 {

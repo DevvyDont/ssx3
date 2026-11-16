@@ -800,10 +800,20 @@ extern "C" void cCommChannel__cCommChannel_66E8(void *, int) __asm__("cCommChann
 extern "C" void cDSockChannel_disconnect(void *);
 extern char cDSockChannel_vtbl[];
 
-extern "C" void cDSockChannel__cDSockChannel(cDSockChannel* dSockChannel, int arg1) {
+/**
+ * Destroys a DirtySock comm channel: closes its link, then destroys the cCommChannel base.
+ *
+ * Stores cDSockChannel_vtbl in mVtbl (+0x08), calls cDSockChannel_disconnect (disconnect: closes the channel and destroys its
+ * NetGameLink and NetGameUtil), then cCommChannel__cCommChannel, which frees the object when bit 0 of @p flags is set.
+ * It is the destructor slot (kCommChannelVt_dtor) of the channel's vtable.
+ *
+ * @param dSockChannel  the channel (this)
+ * @param flags          g++ destructor flags; bit 0 set frees the object's memory
+ */
+extern "C" void cDSockChannel__cDSockChannel(cDSockChannel* dSockChannel, int flags) {
     ((char*)dSockChannel->mVtbl) = cDSockChannel_vtbl;
     cDSockChannel_disconnect(dSockChannel);
-    cCommChannel__cCommChannel_66E8(dSockChannel, arg1);
+    cCommChannel__cCommChannel_66E8(dSockChannel, flags);
 }
 #endif
 
@@ -957,23 +967,33 @@ extern "C" void cCommChannel_channelClose();
 extern "C" void NetGameLinkDestroy(int);
 extern "C" void NetGameUtilDestroy(int);
 
-extern "C" void cDSockChannel_disconnect(void *arg0) {
+/**
+ * Disconnects a DirtySock comm channel: closes it and destroys its game link and game util.
+ *
+ * Does nothing unless mState (+0x0C) is non-zero (connecting, connected or failed). Then cCommChannel_channelClose
+ * clears mChannelOpen, mGameLink (+0x1C) is destroyed with NetGameLinkDestroy (NetGameLinkDestroy) and mGameUtil (+0x18)
+ * with NetGameUtilDestroy (NetGameUtilDestroy), each set to 0 if present, and mState returns to 0 (closed). The disconnect
+ * slot (kCommChannelVt_disconnect) of the channel's vtable.
+ *
+ * @param channel  the channel (this, a cDSockChannel)
+ */
+extern "C" void cDSockChannel_disconnect(void *channel) {
     int temp_4;
     int temp_4_2;
 
-    if ((*(int *)((char*)(arg0) + (0xC))) != 0) {
+    if ((*(int *)((char*)(channel) + (0xC))) != 0) {
         cCommChannel_channelClose();
-        temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+        temp_4 = (*(int *)((char*)(channel) + (0x1C)));
         if (temp_4 != 0) {
             NetGameLinkDestroy(temp_4);
-            (*(int *)((char*)(arg0) + (0x1C))) = 0;
+            (*(int *)((char*)(channel) + (0x1C))) = 0;
         }
-        temp_4_2 = (*(int *)((char*)(arg0) + (0x18)));
+        temp_4_2 = (*(int *)((char*)(channel) + (0x18)));
         if (temp_4_2 != 0) {
             NetGameUtilDestroy(temp_4_2);
-            (*(int *)((char*)(arg0) + (0x18))) = 0;
+            (*(int *)((char*)(channel) + (0x18))) = 0;
         }
-        (*(int *)((char*)(arg0) + (0xC))) = 0;
+        (*(int *)((char*)(channel) + (0xC))) = 0;
     }
 }
 #endif
@@ -1079,6 +1099,15 @@ extern "C" void cDSockChannel_updateConnected(cDSockChannel* dSockChannel)
 //100%
 INCLUDE_ASM("seg/seg_156860", cDSockChannel_getLatency);
 #ifdef SKIP_ASM
+/**
+ * Returns the channel's smoothed link latency.
+ *
+ * Reads mLatency (+0x10), which cDSockChannel_updateConnected averages from the link's ping ((4 * old + new) / 5,
+ * capped at 1 s; 0.1 after construction). The getLatency slot (kCommChannelVt_getLatency) of the channel's vtable.
+ *
+ * @param dSockChannel  the channel (this)
+ * @return the latency in seconds
+ */
 extern "C" float cDSockChannel_getLatency(cDSockChannel* dSockChannel) {
     return (dSockChannel->mLatency);
 }
@@ -1257,14 +1286,32 @@ struct sGcGlobals_6C78 {
 };
 extern sGcGlobals_6C78* D_004A28A8_6C78 __asm__("SSXApp");
 
+/**
+ * Constructs the online game link: the handshake state, timers, counters and empty packet queues.
+ *
+ * Stores the cCommSystem channel index in unk_06C and @p isServer in mServer, sets mState to kGameComm_Init through
+ * cGameComm_setState, and sizes mBEBufferSize with cBENetworkInterface_getSyncDataSize__FPv (cBENetworkInterface::getSyncDataSize) on BE interface
+ * 7. Then: mConnected 1, mSyncInput 1, unk_060 30, unk_09C 1, mLoading 1, mOverlayTimeout/mPauseTimeout -1, mNumSamples
+ * 3, both mNetLatency entries and mLatency to the default frame time (SSXApp +0x14), unk_034 to the current time
+ * (SSXApp +0x18 / +0x10), and the other flags, counters and ping state to 0. The five 32-slot packet queues (+0x144)
+ * and the two 0xF0-byte message buffers (+0x410, +0x500) are cleared with MEM_fill, and unk_140 gets a DirtySock handle
+ * from func_003E7340 (the ping server's socket).
+ *
+ * Retail's arguments are (channel, server), not On Tour's (playerID, numPlayers): this build links two machines.
+ *
+ * @param vself  the object to construct (this)
+ * @param port   the cCommSystem channel index the link uses
+ * @param isServer      non-zero on the machine that hosts the race (stored in mServer)
+ * @return @p vself
+ */
 // cGameComm setup (called by cGameComm_construct on a fresh 0x5F0-byte block): clears the session state,
 // the five packet queues and the two message buffers, and returns self.
 // PORT: the unit declares this as (int, int, int) returning int.
-extern "C" int cGameComm_cGameComm(int vself, int port, int b)
+extern "C" int cGameComm_cGameComm(int vself, int port, int isServer)
 {
     sGameComm_6C78* self = (sGameComm_6C78*)vself;
     self->unk_6C = port;
-    self->unk_44 = b;
+    self->unk_44 = isServer;
     cGameComm_setState_6C78(self, 0);
     self->bufSize = cBENetworkInterface_getSyncDataSize(cBE_getInterface_6C78(D_004A28A8_6C78->be, 7));
     self->unk_60 = 30;
@@ -1462,6 +1509,25 @@ extern "C" int func_003E7500_70D8(int sock, char* buf, int* len, int* info) __as
 extern "C" int func_00416B18_70D8(const char* a, const char* b, int n) __asm__("func_00416B18");
 extern char str_SSXPingServer[];
 
+/**
+ * Runs one frame of the online game link: ping replies, timers, the packet queues and the pre-race handshake.
+ *
+ * While the ping server is active (unk_138 > 0) it counts it down, reads replies from unk_140 (func_003E7500) and stops
+ * when one matches a sent ping id (unk_0C4), else sends up to 4 "SSXPingServer" pings (func_003E7450), one every 5
+ * frames. Then mStallTimer drops by 0.15 (not below 0), mUnPauseTimer counts down, and it runs
+ * cGameComm_updateMessageDisplay, func_00257750 (timeouts) and func_002577C8 (checkErrors; an error returns),
+ * func_00257CD8 (updateReadQueue), cGameComm_updateWriteQueue, func_002581F8 / func_002582A0 (async read / write
+ * updates) and func_00257F98 (updateCmdQueue), and checks errors again.
+ *
+ * Last comes the handshake on mState: the server sends its settings (mServerSettings, 0x2C bytes), receives the
+ * client's (+0x100, 0x14 bytes), sends then receives the BE sync data (mBEBuffer, getSyncData/setSyncData on BE
+ * interface 7) and exchanges latencies (mNetLatency, measured with func_00255D88), moving through states 1..13 to
+ * kGameComm_GameActive (14), where func_00257A80 runs each frame. The client walks the same states with every send and
+ * receive swapped. Sends use func_00258290 / func_00258280 (asyncWrite / complete), receives func_002581E8 /
+ * func_002581D8.
+ *
+ * @param vs  the game link (this)
+ */
 // PORT: the unit declares cGameComm_update as (void*)
 extern "C" void cGameComm_update(cGameComm* vs)
 {
@@ -1672,8 +1738,18 @@ extern "C" void cGameComm_update(cGameComm* vs)
 INCLUDE_ASM("seg/seg_156860", cGameComm_localDisconnected);
 #ifdef SKIP_ASM
 
-extern "C" void cGameComm_localDisconnected(cGameComm* gameComm, int arg1) {
-    if (((arg1 != 0) || (((gameComm->mError) == 0) && ((gameComm->mState) < 0xF))) && ((gameComm->unk_038) == 0)) {
+/**
+ * Marks this machine as disconnected from the online game.
+ *
+ * If @p force is set, or there is no error (mError) and the race is not over (mState < kGameComm_GameOver), and this
+ * machine's end time (unk_038) is not stamped yet, it stores the current time (SSXApp +0x18 / +0x10). Then clears
+ * mConnected, mRaceInProgress and mPauseMenu[1] (the peer's pause) and sets mLocalDisconnected (reported as "DIDQUIT").
+ *
+ * @param gameComm  the game link (this)
+ * @param force      non-zero to stamp the end time even after an error or the end of the race
+ */
+extern "C" void cGameComm_localDisconnected(cGameComm* gameComm, int force) {
+    if (((force != 0) || (((gameComm->mError) == 0) && ((gameComm->mState) < 0xF))) && ((gameComm->unk_038) == 0)) {
         (gameComm->unk_038) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));
     }
     (gameComm->mConnected) = 0;
@@ -2615,6 +2691,14 @@ extern "C" void func_00258950(cGameComm* gameComm) {
 //100%
 INCLUDE_ASM("seg/seg_156860", cGameComm_gameStartGate);
 #ifdef SKIP_ASM
+/**
+ * Notes that the race's start gate is up: arms the start-gate flag while the game is still running.
+ *
+ * Only while mState is below kGameComm_GameOver (15): clears the link timeout unk_094 and sets mGameStartGate. Called
+ * by cGFGateState_gainFocus. On Tour also clears mRaceInProgress and runs heatInit here.
+ *
+ * @param gameComm  the game link (this)
+ */
 extern "C" void cGameComm_gameStartGate(cGameComm* gameComm) {
     if ((gameComm->mState) < 0xF) {
         (gameComm->unk_094) = 0;
@@ -2668,6 +2752,15 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_gameEnded);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cGameComm_setState_8A48(void *, int) __asm__("cGameComm_setState");
 
+/**
+ * Ends the online race: stops input sync, enters the game-over state and stamps both end times.
+ *
+ * Clears mRaceInProgress and mSyncInput, calls cGameComm_setState(kGameComm_GameOver) unless mState is already there,
+ * and stamps this machine's (unk_038) and the peer's (unk_03C) end times with the current time (SSXApp +0x18 / +0x10)
+ * if they are still 0. Called by cGameComm_gameExit and func_00113E18 (ai).
+ *
+ * @param gameComm  the game link (this)
+ */
 extern "C" void cGameComm_gameEnded(cGameComm* gameComm) {
     (gameComm->mRaceInProgress) = 0;
     (gameComm->mSyncInput) = 0;

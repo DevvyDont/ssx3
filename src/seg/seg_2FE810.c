@@ -9855,7 +9855,7 @@ static const double zero_DB58   =  0.0;
 
 	double func_0040DB58(double x)
 {
-	double hfsq,f,s,z,R,w,t1,t2,dk;
+	double hfsq,frac,ratio,z,poly,w,evenTerms,oddTerms,dk;
 	int k,hx,i,j;
 	unsigned int lx;
 
@@ -9875,31 +9875,31 @@ static const double zero_DB58   =  0.0;
 	i = (hx+0x95f64)&0x100000;
 	SET_HIGH_WORD_DB58(x,hx|(i^0x3ff00000));	/* normalize x or x/2 */
 	k += (i>>20);
-	f = x-1.0;
+	frac = x-1.0;
 	if((0x000fffff&(2+hx))<3) {	/* |f| < 2**-20 */
-          if(f==zero_DB58) { if(k==0) return zero_DB58;  else {dk=(double)k;
+          if(frac==zero_DB58) { if(k==0) return zero_DB58;  else {dk=(double)k;
                                return dk*ln2_hi_DB58+dk*ln2_lo_DB58;}}
-	    R = f*f*(0.5-0.33333333333333333*f);
-	    if(k==0) return f-R; else {dk=(double)k;
-	    	     return dk*ln2_hi_DB58-((R-dk*ln2_lo_DB58)-f);}
+	    poly = frac*frac*(0.5-0.33333333333333333*frac);
+	    if(k==0) return frac-poly; else {dk=(double)k;
+	    	     return dk*ln2_hi_DB58-((poly-dk*ln2_lo_DB58)-frac);}
 	}
- 	s = f/(2.0+f);
+ 	ratio = frac/(2.0+frac);
 	dk = (double)k;
-	z = s*s;
+	z = ratio*ratio;
 	i = hx-0x6147a;
 	w = z*z;
 	j = 0x6b851-hx;
-	t1= w*(Lg2_DB58+w*(Lg4_DB58+w*Lg6_DB58));
-	t2= z*(Lg1_DB58+w*(Lg3_DB58+w*(Lg5_DB58+w*Lg7_DB58)));
+	evenTerms= w*(Lg2_DB58+w*(Lg4_DB58+w*Lg6_DB58));
+	oddTerms= z*(Lg1_DB58+w*(Lg3_DB58+w*(Lg5_DB58+w*Lg7_DB58)));
 	i |= j;
-	R = t2+t1;
+	poly = oddTerms+evenTerms;
 	if(i>0) {
-	    hfsq=0.5*f*f;
-	    if(k==0) return f-(hfsq-s*(hfsq+R)); else
-		     return dk*ln2_hi_DB58-((hfsq-(s*(hfsq+R)+dk*ln2_lo_DB58))-f);
+	    hfsq=0.5*frac*frac;
+	    if(k==0) return frac-(hfsq-ratio*(hfsq+poly)); else
+		     return dk*ln2_hi_DB58-((hfsq-(ratio*(hfsq+poly)+dk*ln2_lo_DB58))-frac);
 	} else {
-	    if(k==0) return f-s*(f-R); else
-		     return dk*ln2_hi_DB58-((s*(f-R)-dk*ln2_lo_DB58)-f);
+	    if(k==0) return frac-ratio*(frac-poly); else
+		     return dk*ln2_hi_DB58-((ratio*(frac-poly)-dk*ln2_lo_DB58)-frac);
 	}
 }
 #endif
@@ -10151,7 +10151,7 @@ static const float zero_E550   =  0.0;
 
 	float func_0040E550(float x)
 {
-	float hfsq,f,s,z,R,w,t1,t2,dk;
+	float hfsq,frac,ratio,z,poly,w,evenTerms,oddTerms,dk;
 	int k,ix,i,j;
 
 	GET_FLOAT_WORD_E550(ix,x);
@@ -10170,31 +10170,31 @@ static const float zero_E550   =  0.0;
 	i = (ix+(0x95f64<<3))&0x800000;
 	SET_FLOAT_WORD_E550(x,ix|(i^0x3f800000));	/* normalize x or x/2 */
 	k += (i>>23);
-	f = x-(float)1.0;
+	frac = x-(float)1.0;
 	if((0x007fffff&(15+ix))<16) {	/* |f| < 2**-20 */
-           if(f==zero_E550) { if(k==0) return zero_E550;  else {dk=(float)k;
+           if(frac==zero_E550) { if(k==0) return zero_E550;  else {dk=(float)k;
                                 return dk*ln2_hi_E550+dk*ln2_lo_E550;}}
-	    R = f*f*((float)0.5-(float)0.33333333333333333*f);
-	    if(k==0) return f-R; else {dk=(float)k;
-	    	     return dk*ln2_hi_E550-((R-dk*ln2_lo_E550)-f);}
+	    poly = frac*frac*((float)0.5-(float)0.33333333333333333*frac);
+	    if(k==0) return frac-poly; else {dk=(float)k;
+	    	     return dk*ln2_hi_E550-((poly-dk*ln2_lo_E550)-frac);}
 	}
- 	s = f/((float)2.0+f);
+ 	ratio = frac/((float)2.0+frac);
 	dk = (float)k;
-	z = s*s;
+	z = ratio*ratio;
 	i = ix-(0x6147a<<3);
 	w = z*z;
 	j = (0x6b851<<3)-ix;
-	t1= w*(Lg2_E550+w*(Lg4_E550+w*Lg6_E550));
-	t2= z*(Lg1_E550+w*(Lg3_E550+w*(Lg5_E550+w*Lg7_E550)));
+	evenTerms= w*(Lg2_E550+w*(Lg4_E550+w*Lg6_E550));
+	oddTerms= z*(Lg1_E550+w*(Lg3_E550+w*(Lg5_E550+w*Lg7_E550)));
 	i |= j;
-	R = t2+t1;
+	poly = oddTerms+evenTerms;
 	if(i>0) {
-	    hfsq=(float)0.5*f*f;
-	    if(k==0) return f-(hfsq-s*(hfsq+R)); else
-		     return dk*ln2_hi_E550-((hfsq-(s*(hfsq+R)+dk*ln2_lo_E550))-f);
+	    hfsq=(float)0.5*frac*frac;
+	    if(k==0) return frac-(hfsq-ratio*(hfsq+poly)); else
+		     return dk*ln2_hi_E550-((hfsq-(ratio*(hfsq+poly)+dk*ln2_lo_E550))-frac);
 	} else {
-	    if(k==0) return f-s*(f-R); else
-		     return dk*ln2_hi_E550-((s*(f-R)-dk*ln2_lo_E550)-f);
+	    if(k==0) return frac-ratio*(frac-poly); else
+		     return dk*ln2_hi_E550-((ratio*(frac-poly)-dk*ln2_lo_E550)-frac);
 	}
 }
 #endif
@@ -10635,9 +10635,9 @@ int func_0040F840(double x) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040F878);
 #ifdef SKIP_ASM
 extern void dpcmp(long, long);
-int func_0040F878(long *p) {
-    long v = p[1];
-    dpcmp(v, v);
+int func_0040F878(long *errInfo) {
+    long firstArg = errInfo[1];
+    dpcmp(firstArg, firstArg);
     return 0;
 }
 #endif
@@ -10696,27 +10696,27 @@ static const float huge_F8E8 = 1.0e30;
 
 	float func_0040F8E8(float x)
 {
-	int i0,j0;
+	int i0,exponent;
 	unsigned int i;
 	GET_FLOAT_WORD(i0,x);
-	j0 = ((i0>>23)&0xff)-0x7f;
-	if(j0<23) {
-	    if(j0<0) { 	/* raise inexact if x != 0 */
+	exponent = ((i0>>23)&0xff)-0x7f;
+	if(exponent<23) {
+	    if(exponent<0) { 	/* raise inexact if x != 0 */
 		if(huge_F8E8+x>(float)0.0) {/* return 0*sign(x) if |x|<1 */
 		    if(i0>=0) {i0=0;}
 		    else if((i0&0x7fffffff)!=0)
 			{ i0=0xbf800000;}
 		}
 	    } else {
-		i = (0x007fffff)>>j0;
+		i = (0x007fffff)>>exponent;
 		if((i0&i)==0) return x; /* x is integral */
 		if(huge_F8E8+x>(float)0.0) {	/* raise inexact flag */
-		    if(i0<0) i0 += (0x00800000)>>j0;
+		    if(i0<0) i0 += (0x00800000)>>exponent;
 		    i0 &= (~i);
 		}
 	    }
 	} else {
-	    if(j0==0x80) return x+x;	/* inf or NaN */
+	    if(exponent==0x80) return x+x;	/* inf or NaN */
 	    else return x;		/* x is integral */
 	}
 	SET_FLOAT_WORD_F8E8(x,i0);
@@ -11195,24 +11195,24 @@ DItype __divdi3 (DItype u, DItype v) __asm__("func_0040FCB0");
 UDItype __udivmoddi4 ();
 
 DItype
-__divdi3 (DItype u, DItype v)
+__divdi3 (DItype dividend, DItype divisor)
 {
-  word_type c = 0;
+  word_type negate = 0;
   DIunion uu, vv;
   DItype w;
 
-  uu.ll = u;
-  vv.ll = v;
+  uu.ll = dividend;
+  vv.ll = divisor;
 
   if (uu.s.high < 0)
-    c = ~c,
+    negate = ~negate,
     uu.ll = __negdi2 (uu.ll);
   if (vv.s.high < 0)
-    c = ~c,
+    negate = ~negate,
     vv.ll = __negdi2 (vv.ll);
 
   w = __udivmoddi4 (uu.ll, vv.ll, (UDItype *) 0);
-  if (c)
+  if (negate)
     w = __negdi2 (w);
 
   return w;

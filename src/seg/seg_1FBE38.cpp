@@ -958,7 +958,21 @@ extern int D_004A55EC;
 extern const int D_00445FB0[];
 extern "C" void* MEM_copy_C7D0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C7D0 { int idx; int val; int pad; int type; };
-extern "C" V3_C7D0 MakeDebounceFunc(int n, Ent_C7D0 *e) {
+/**
+ * Script command MakeDebounce: turns an instance into a debounce node.
+ *
+ * Copies the static defaults (D_004FB528, set once under D_004A55EC: instance -1, 1.0, 1, -1) and applies each keyword
+ * argument by index, converting an int to float where the keyword table D_00445FB0 says float (2). The instance ID -1
+ * means cWScriptMan_TheWScriptMan's current instance (+0x290); otherwise it is looked up in cWorld_m_pTheWorld's world
+ * cache (section = low byte, entry = the rest). Nothing happens if there is no instance, or if it has an active node
+ * (+0xC) and checkActiveNode(node, 0, data) says it is already one; otherwise func_00342C08 constructs a cDebounceNode
+ * (bucket 1) in cMemMan_alloc(0x34, "Debounce").
+ *
+ * @param n  the number of keyword arguments
+ * @param params  the keyword arguments (index, value, type)
+ * @return luno_gLunoNil (no value)
+ */
+extern "C" V3_C7D0 MakeDebounceFunc(int n, Ent_C7D0 *params) {
     if (D_004A55EC == 0) {
         D_C7D0[0] = 0xFFFFFFFF;
         *(float*)&D_C7D0[1] = 1.0f;
@@ -972,7 +986,7 @@ extern "C" V3_C7D0 MakeDebounceFunc(int n, Ent_C7D0 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_C7D0(buf, D_C7D0, 20);
-    Ent_C7D0 *x = e;
+    Ent_C7D0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445FB0[idx];
@@ -1273,7 +1287,20 @@ extern int D_004A55FC;
 extern const int D_00446060[];
 extern "C" void* MEM_copy_CFF0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_CFF0 { int idx; int val; int pad; int type; };
-extern "C" V3_CFF0 MakeMeshAnimFunc(int n, Ent_CFF0 *e) {
+/**
+ * Script command MakeMeshAnim: turns an instance into an animated-mesh node.
+ *
+ * Copies the static 0x40-byte defaults (D_004FB5E8, set once under D_004A55FC: instance -1, 0, 0.1, 1.0, 2.0, 600, 600,
+ * 300, 0, 0, 0, 360, -1, -1, -1) and applies the keyword arguments (types from D_00446060; an int becomes a float where
+ * the type is 2). The instance is resolved as in MakeDebounceFunc (-1 = the script's current instance). Unless it is
+ * missing or checkActiveNode(node, 11, data) finds it already animated, func_00351B40 constructs a cMeshAnimNode
+ * (bucket 1, with cWScriptMan_TheWScriptMan +0x294) in cMemMan_alloc(0x6C0, "MeshAnim").
+ *
+ * @param n  the number of keyword arguments
+ * @param params  the keyword arguments (index, value, type)
+ * @return luno_gLunoNil (no value)
+ */
+extern "C" V3_CFF0 MakeMeshAnimFunc(int n, Ent_CFF0 *params) {
     if (D_004A55FC == 0) {
         D_CFF0[0] = 0xFFFFFFFF;
         ((int*)D_CFF0)[1] = 0;
@@ -1300,7 +1327,7 @@ extern "C" V3_CFF0 MakeMeshAnimFunc(int n, Ent_CFF0 *e) {
     buf64[0] = 0xFFFFFFFF;
     buf64[13] = 0xFFFFFFFF;
     MEM_copy_CFF0(buf, D_CFF0, 64);
-    Ent_CFF0 *x = e;
+    Ent_CFF0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446060[idx];
@@ -3747,7 +3774,21 @@ static inline bool isIdle_1120(int slot) {
     }
     return false;
 }
-extern "C" void* CollectFunc(void* self, int n, Ent_1120* e) {
+/**
+ * Script command Collect: makes the script's rider collect an item; returns whether it did.
+ *
+ * Only acts when the script's rider slot (*cWScriptMan_TheWScriptMan) is set and that rider (the game's rider table
+ * +0x28) is not busy (its virtual slot 9 returns false). The defaults (D_004FBBD0, under D_004A56B4: -1, -1) take the
+ * keyword arguments (types from D_004A3C68). With an item set, an instance of -1 becomes the current instance's
+ * resource ID (TheWScriptMan +0x290, +0x78) and cWScriptMan_collect(slot, item, instance) runs; the result is the int
+ * 1, otherwise the int 0 (type at +0x8, value through func_00226610).
+ *
+ * @param self  the cLunoVar result to fill (g++'s hidden struct-return pointer)
+ * @param n     the number of keyword arguments
+ * @param params     the keyword arguments (index, value, type)
+ * @return @p self
+ */
+extern "C" void* CollectFunc(void* self, int n, Ent_1120* params) {
     int slot = *(int*)D_004A3DD8_1120;
     if (isIdle_1120(slot)) {
         if (D_004A56B4_1120 == 0) {
@@ -3761,7 +3802,7 @@ extern "C" void* CollectFunc(void* self, int n, Ent_1120* e) {
         unsigned* vp = v;
         v[1] = 0xFFFFFFFF;
         MEM_copy(vp, &D_004FBBD0_1120, 12);
-        Ent_1120* p = e;
+        Ent_1120* p = params;
         for (int i = 0; i < n; i++, p++) {
             int k = p->idx;
             unsigned* d = (unsigned*)((k << 2) + (int)vp);
@@ -4397,7 +4438,19 @@ extern int D_004A572C;
 extern int D_004A3CC0;
 extern "C" void* MEM_copy_2048(void*, void*, int) __asm__("MEM_copy");
 struct Ent_2048 { int idx; int val; int pad; int type; };
-extern "C" V3_2048 SetGameModeFunc(int n, Ent_2048 *e) {
+/**
+ * Script command SetGameMode: switches the section manager to a game mode, failing the running mission first.
+ *
+ * Defaults (D_004FBC10, under D_004A572C: -1, -1) take the keyword arguments (types from D_004A3CC0). Only when the
+ * script's rider is set and not busy (virtual slot 9): the mode index (< 8) selects the eSectionManMode in D_00445E40;
+ * if the second value is 0, cWScriptMan_failActiveLocalMission (failActiveLocalMission) runs unless that mode is 1, then
+ * cSectionMan_eventbegin(SSXApp->Game->SectionMan, mode).
+ *
+ * @param n  the number of keyword arguments
+ * @param params  the keyword arguments (index, value, type)
+ * @return luno_gLunoNil (no value)
+ */
+extern "C" V3_2048 SetGameModeFunc(int n, Ent_2048 *params) {
     if (D_004A572C == 0) {
         ((int*)D_2048)[0] = -1;
         ((int*)D_2048)[1] = -1;
@@ -4407,7 +4460,7 @@ extern "C" V3_2048 SetGameModeFunc(int n, Ent_2048 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     MEM_copy_2048(buf, D_2048, 12);
-    Ent_2048 *x = e;
+    Ent_2048 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = (&D_004A3CC0)[idx];
@@ -4481,7 +4534,23 @@ public:
     virtual bool isBusy();
 };
 
-extern "C" V3_2210 SectionFunc(int n, Ent_2210* e)
+/**
+ * Script command Section: loads or activates a location's world sections, or switches the game state.
+ *
+ * Defaults (D_004FBC20, under D_004A5730: -1, -1, -1) take the keyword arguments (types from D_004465C8). Only when the
+ * script's rider is set and not busy: the location comes from the script ID through func_00144CE0 (BE interface 0) and
+ * the mode from D_00445E40 (index < 8). The action: 0 cSectionMan_load (load), 2 cSectionMan_activate, 3
+ * cGame_setState(game, 0xE, 2, 0) and func_002A49E8(func_0028B180()), 4 cGame_setState(game, 0xE, 0, 0), 5 sets
+ * SectionMan +0x1A4; 1 does nothing (load and activate act on SSXApp->Game->SectionMan).
+ *
+ * The view types D_00445E40 as strings (name) and the location as a hash, but the table is the eSectionManMode one that
+ * SetGameModeFunc reads as ints, and the value is the location ID.
+ *
+ * @param n  the number of keyword arguments
+ * @param params  the keyword arguments (index, value, type)
+ * @return luno_gLunoNil (no value)
+ */
+extern "C" V3_2210 SectionFunc(int n, Ent_2210* params)
 {
     if (D_004A5730_2210 == 0) {
         D_004FBC20_2210.v[0] = -1;
@@ -4494,7 +4563,7 @@ extern "C" V3_2210 SectionFunc(int n, Ent_2210* e)
     int v[4] __attribute__((aligned(16)));
     int* vp = v;
     MEM_copy_2210(vp, &D_004FBC20_2210, 0x10);
-    Ent_2210* p = e;
+    Ent_2210* p = params;
     for (int i = 0; i < n; i++, p++) {
         int k = p->idx;
         int* d = (int*)((k << 2) + (int)vp);
@@ -7461,7 +7530,18 @@ extern "C" void* MEM_copy_6A90(void*, void*, int) __asm__("MEM_copy");
 extern int D_004A4028_6A90 __asm__("cMultiParticleMan_TheMultiParticleMan");
 extern "C" void cMultiParticleMan_addParticle_6A90(int, int, Rec_6A90*, int) __asm__("cMultiParticleMan_addParticle");
 struct Ent_6A90 { int idx; int val; int pad; int type; };
-extern "C" V3_6A90 MultiParticleFunc(int n, Ent_6A90 *e) {
+/**
+ * Script command MultiParticle: adds a particle system to the multi-particle manager.
+ *
+ * Copies the static tParticleData defaults (D_004FBF68, set once under D_004A58B4: identity colour/vectors, 16, 20.0,
+ * 0x80, ...) into a local, applies the keyword arguments (types from D_00446890; int to float where the type is 2), and
+ * calls cMultiParticleMan_addParticle(TheMultiParticleMan, data +0xD8, data, data +0xDC).
+ *
+ * @param n  the number of keyword arguments
+ * @param params  the keyword arguments (index, value, type)
+ * @return luno_gLunoNil (no value)
+ */
+extern "C" V3_6A90 MultiParticleFunc(int n, Ent_6A90 *params) {
     if (D_58B4_6A90 == 0) {
         Rec_6A90 &r = D_4FBF68_6A90;
         float zero = 0.0f;
@@ -7529,7 +7609,7 @@ extern "C" V3_6A90 MultiParticleFunc(int n, Ent_6A90 *e) {
     Rec_6A90 rec;
     Rec_6A90 *buf = &rec;
     MEM_copy_6A90(buf, &D_4FBF68_6A90, 0xE4);
-    Ent_6A90 *x = e;
+    Ent_6A90 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446890_6A90[idx];
@@ -7803,6 +7883,12 @@ extern "C" void cWScriptMission_processComplete(P_7240* self) {
 INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_missionRestart);
 #ifdef SKIP_ASM
 struct P_72B0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); };
+/**
+ * Restarts a mission script: ends it if it is running, then starts it again.
+ *
+ * When the state (+0x00) is 2 (running) it calls the process's virtual processEnd (vtable +0x30, cWScriptProcess_processEnd), then
+ * processStart (vtable +0x20, cWScriptMission_processStart).
+ */
 extern "C" void cWScriptMission_missionRestart(P_72B0* self) {
     if (self->state == 2)
         self->v06();
@@ -7839,6 +7925,20 @@ struct sGame_7308 {
     void* riders[8];        // 0x28
 };
 
+/**
+ * Handles a passed mission: records it and pays the reward, unlocks the next mission and runs the pass script.
+ *
+ * On BE interface 0xA (missions), for the mission ID (+0x20): if not yet completed, func_00154160 marks it completed
+ * and the reward is func_001511B0 (econ interface 0xB) of its func_00153FA0 level. cRider_flagEventMissionSuccess flags the success on
+ * the script's rider with the BE interface 0 value from func_00144C98 and the money. If there is a next mission
+ * (cBEMissionInterface_getNextMissionID != -1) this one's icon is hidden (func_001541D0), the pass script (+0x6C) runs
+ * through cWScriptMan_runScriptCode, and a locked next mission is unlocked, made ready and shown (func_00154010,
+ * func_00154080, func_001541D0); with no next mission only the pass script runs. Ends with cWScriptMan_updateWorld (updateWorld)
+ * and cWScriptMan_processPass (processPass) on the script manager (+0x10), then cReplay_reset and cReplay_startRace on
+ * SSXApp->Game->Replay.
+ *
+ * On Tour also awards leaderboard points and a medal and triggers an overlay; retail has none of that.
+ */
 // Mission completed: pays the reward the first time, unlocks the follow-up mission and resets the script.
 extern "C" void cWScriptMission_missionPass(char* self)
 {
@@ -7884,6 +7984,13 @@ extern "C" void func_001540F0_74C0(int, int, int) __asm__("func_001540F0");
 extern "C" void cWScriptProcess_end_74C0(void*) __asm__("cWScriptProcess_end");
 extern "C" void cWScriptMan_runScriptCode(int, void *, int);
 struct P_74C0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); };
+/**
+ * Handles a failed mission: makes it available again, runs the fail script and ends the process.
+ *
+ * If the mission (+0x20) is not available on BE interface 0xA, func_001540F0 sets it available. The fail script (+0x70)
+ * runs through cWScriptMan_runScriptCode if there is one; otherwise the virtual at vtable +0xA0 (cWScriptMission_missionUpdateWorld,
+ * missionUpdateWorld) runs. A running process (state 2) is then ended with cWScriptProcess_end.
+ */
 extern "C" void cWScriptMission_missionFail(P_74C0* self) {
     int iface = cBE_getInterface_Fv_74C0(cBE_getBE_74C0(), 10);
     if (!cBEMissionInterface_isMissionAvailable_74C0(iface, *(int*)((char*)self + 0x20)))
@@ -7903,12 +8010,20 @@ INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_missionUpdateWorld);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(int, void *, int);
 
-extern "C" void cWScriptMission_missionUpdateWorld(void *arg0) {
+/**
+ * Runs the mission's update-world script, if it has one.
+ *
+ * Calls cWScriptMan_runScriptCode(script manager +0x10, this, code) with the fourth script entry point (+0x74).
+ * cWScriptMission_missionFail calls it through the vtable when the mission has no fail script.
+ *
+ * @param mission  the mission (this)
+ */
+extern "C" void cWScriptMission_missionUpdateWorld(void *mission) {
     int temp_6;
 
-    temp_6 = (*(int *)((char*)(arg0) + (0x74)));
+    temp_6 = (*(int *)((char*)(mission) + (0x74)));
     if (temp_6 != 0) {
-        cWScriptMan_runScriptCode((*(int *)((char*)(arg0) + (0x10))), arg0, temp_6);
+        cWScriptMan_runScriptCode((*(int *)((char*)(mission) + (0x10))), mission, temp_6);
     }
 }
 #endif

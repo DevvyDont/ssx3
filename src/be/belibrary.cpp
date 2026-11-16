@@ -185,28 +185,38 @@ extern sBlkF88_14A5E0 D_004B07F8[];
 extern sBlk9B50_14A5E0 D_004BA348;
 extern sBlk20_14A5E0 D_005308B8;
 
-extern "C" void cBELibrary_readFromData(char* p)
+/**
+ * Restores the career data from a loaded save buffer.
+ *
+ * Reads, in order: the 0x4C-byte race DB (then cBENewRaceInterface's virtual slot 2), the 0xA8-byte player DB (then
+ * cBENewPlayerInterface's), player 0's character profile into cBELibrary_profileLib, player 1's into the next profile
+ * slot when player 1 has a character, a 0x9B50-byte profile slot into D_004BA348 and 0x20 bytes into D_005308B8, then
+ * calls slot 2 of the BAGT, mission, score and stat interfaces.
+ *
+ * @param data  the save buffer (On Tour data)
+ */
+extern "C" void cBELibrary_readFromData(char* data)
 {
     cBEIface_14A5E0* o;
     int idx;
 
-    *(sBlk4C_14A5E0*)cBELibrary_raceDB = *(sBlk4C_14A5E0*)p;
+    *(sBlk4C_14A5E0*)cBELibrary_raceDB = *(sBlk4C_14A5E0*)data;
     cBENewRaceInterface_getThis()->onLoad();
-    p += 0x4C;
-    *(sBlkA8_14A5E0*)cBELibrary_playerDB = *(sBlkA8_14A5E0*)p;
+    data += 0x4C;
+    *(sBlkA8_14A5E0*)cBELibrary_playerDB = *(sBlkA8_14A5E0*)data;
     cBENewPlayerInterface_getThis()->onLoad();
-    p += 0xA8;
+    data += 0xA8;
     idx = cBELibrary_playerDB[0].mCharID;
-    D_004A6CA8_14A5E0[idx] = *(sBlkF88_14A5E0*)p;
-    p += 0xF88;
+    D_004A6CA8_14A5E0[idx] = *(sBlkF88_14A5E0*)data;
+    data += 0xF88;
     idx = cBELibrary_playerDB[1].mCharID;
     if (idx >= 0) {
-        D_004B07F8[idx] = *(sBlkF88_14A5E0*)p;
-        p += 0xF88;
+        D_004B07F8[idx] = *(sBlkF88_14A5E0*)data;
+        data += 0xF88;
     }
-    D_004BA348 = *(sBlk9B50_14A5E0*)p;
-    p += 0x9B50;
-    D_005308B8 = *(sBlk20_14A5E0*)p;
+    D_004BA348 = *(sBlk9B50_14A5E0*)data;
+    data += 0x9B50;
+    D_005308B8 = *(sBlk20_14A5E0*)data;
     o = cBEBAGTInterface_getThis();
     o->onLoad();
     o = cBEMissionInterface_getThis();

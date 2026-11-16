@@ -515,6 +515,12 @@ void* func_0026E5A8(void* self)
 //100%
 INCLUDE_ASM("replay/replay", cReplayFrameList_reset__FPv);
 #ifdef SKIP_ASM
+/**
+ * Empties a replay frame list.
+ *
+ * Clears the head (+0x0), tail (+0x4) and count (+0x8) without touching the frames. cReplay_reset and cReplay_purge
+ * reset FrameList and FreeFrameList with it, cReplay_load FrameList.
+ */
 void cReplayFrameList_reset(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
@@ -538,6 +544,15 @@ struct sReplayList {
     int count;
 };
 
+/**
+ * Appends a frame at the tail of a replay frame list.
+ *
+ * Links @p node after the current tail (its prev +0x18 = tail, next +0x14 = 0), makes it the tail (and the head of an
+ * empty list) and increments the count.
+ *
+ * @param list  the frame list (this)
+ * @param node  the frame to append
+ */
 extern "C" void cReplayFrameList_addFrame(sReplayList* list, sReplayNode* node)
 {
     node->prev = list->tail;

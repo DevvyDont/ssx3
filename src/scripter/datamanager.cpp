@@ -86,7 +86,22 @@ struct sDmNode5920 {
     int refs;               // 0x10
 };
 
-extern "C" sDmNode5920* cDataManager_AttachData(void* self, int a1, void* data, int size)
+/**
+ * Registers a block of data with the data manager and returns its instance record.
+ *
+ * Takes a free instance (func_00275CF8, On Tour GetEmptyInstance) and stores the data (+0x8), its size (+0xC) and a
+ * reference count of 1 (+0x10). BIG_sizeofheader() then tells whether the data is a BIG archive (REALabortflag is
+ * cleared around the call so a non-BIG block does not abort). A BIG file calls virtual slot 4 of the manager's vtable
+ * (+0xC) and attaches its members with cDataManager_AttachDataFromBigfile; any other block calls slot 2. Both callbacks get the name, data,
+ * size, the record and the record's +0x4 word. cSSXScriptEngine_SyncLoadScriptBank and
+ * cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete attach the script banks with it.
+ *
+ * @param pName  the data's name, passed to the callbacks
+ * @param data  the data block
+ * @param size  its size in bytes
+ * @return the instance record (the data handle)
+ */
+extern "C" sDmNode5920* cDataManager_AttachData(void* self, int pName, void* data, int size)
 {
     sDmNode5920* n = (sDmNode5920*)func_00275CF8(self);
     int saved = REALabortflag[0];
@@ -98,11 +113,11 @@ extern "C" sDmNode5920* cDataManager_AttachData(void* self, int a1, void* data, 
     REALabortflag[0] = saved;
     if (big != 0) {
         sDmVEntry5920* vt = *(sDmVEntry5920**)((char*)self + 0xC);
-        vt[4].fn((char*)self + vt[4].delta, a1, data, size, n, &n->field_0x4);
+        vt[4].fn((char*)self + vt[4].delta, pName, data, size, n, &n->field_0x4);
         cDataManager_AttachDataFromBigfile(self, (char*)data, (sDmNode5B98*)n);
     } else {
         sDmVEntry5920* vt = *(sDmVEntry5920**)((char*)self + 0xC);
-        vt[2].fn((char*)self + vt[2].delta, a1, data, size, n, &n->field_0x4);
+        vt[2].fn((char*)self + vt[2].delta, pName, data, size, n, &n->field_0x4);
     }
     return n;
 }
@@ -240,6 +255,22 @@ struct sDmNode5B98 {
     sDmNode5B98* next;      // 0x14
 };
 
+/**
+ * Attaches every member of a BIG archive to the data manager as a chain of instance records, recursing into nested
+ * archives.
+ *
+ * Walks the entries with BIG_locateentryz() (entry 0, then 1, 2, ... until it returns 0). A member that is itself a BIG
+ * file (BIG_sizeofheader() with REALabortflag cleared) is attached recursively; any other member gets a free instance
+ * (func_00275CF8) holding its address (+0x8) and size (+0xC), is linked after the previous record through +0x14 and is
+ * announced through virtual slot 2 of the manager's vtable (+0xC) with its name, data, size, record and record+0x4.
+ *
+ * Likely bug (also in On Tour): only the first BIG_locateentryz() call passes a size pointer; the later calls pass 0,
+ * so every member after the first is recorded with the first member's size.
+ *
+ * @param big  the BIG archive in memory
+ * @param prev  the record to chain the new records after
+ * @return the last record of the chain
+ */
 extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(void* self, char* big, sDmNode5B98* prev)
 {
     int ent[2];
@@ -685,6 +716,30 @@ struct sDmItem_6388 {
 // The unit declares tNISList_Play as void; it returns the state at 0xA4.
 int tNISList_Play_impl(char* self, int fade, int notify) __asm__("tNISList_Play");
 
+/**
+ * Starts the NIS list's head script (or video) once it is ready, with its transition in, and returns the list state.
+ *
+ * Polls a loading list first (state 1: func_00277778, On Tour CheckOnLoading) and does nothing unless the state (+0xA4)
+ * is 2 (ready). It sets the state to 3 (playing) and calls virtual slot 24 of the "hud" UI state
+ * (cUIStateStack_findState) with (0, 0) when that state is up.
+ *
+ * A script entry (func_00277DD8, On Tour IsVideo, returns 0) is started with cSSXScriptEngine_PlayRequestScript (the
+ * last flag is bit 3 of the entry's flags, +0x8). On the cut-scene list (+0x4) the running transition is ended
+ * (func_002E4578), and the script header's in/hold/out frame counts (func_0027C070 of the request's player; 1/60 s
+ * each) build the transition in: type 7 is a screen grab (cTransitionMan_StartTransitionScreenGrab), any other type a full transition
+ * (cTransitionMan_StartTransition with two cSSXScriptEngine_MakeTransitionObject objects). When in+hold frames remain (+0xB8) the
+ * request is paused (func_002826D8, On Tour PauseScript), +0xAC and +0xB0 (On Tour mIsStartTransition,
+ * mInScriptTransition) are set and the forced update is skipped; then the cut scene starts (cCutSceneTransitionMan_StartCutScene, On Tour
+ * cCutSceneTransitionMan::StartCutScene, over the transition-in time or 0.5 s). With the forced update the engine's
+ * virtual slot 6 (On Tour ForcePlayUpdate) runs the request once.
+ *
+ * A video entry forces cut-scene mode on the cut-scene list (cCutSceneTransitionMan_ForceToCutSceneMode), starts the video engine (cVidEngine_PlayVideo on
+ * engine+0x500) and, with the forced update, updates it once (cVidEngine_UpdateVideo).
+ *
+ * @param fade  start with the transition in (On Tour startWithTransitionIn); 0 drops its in and hold frames
+ * @param notify  force an immediate update of the started script or video (On Tour forceUpdate)
+ * @return the list state after the call (+0xA4)
+ */
 int tNISList_Play_impl(char* self, int fade, int notify)
 {
     sDm_6388* dm = (sDm_6388*)self;
@@ -1015,6 +1070,14 @@ INCLUDE_ASM("scripter/datamanager", tNISList_GetState);
 #ifdef SKIP_ASM
 extern "C" void func_00277778(void* self);
 
+/**
+ * Returns the NIS list's state, first polling the load while it is still loading.
+ *
+ * In state 1 (loading) it calls func_00277778 (On Tour CheckOnLoading), which may advance the state. The state word is
+ * +0xA4 (On Tour mState; tNISList_Play treats 2 as ready and 3 as playing).
+ *
+ * @return the list state (+0xA4)
+ */
 extern "C" int tNISList_GetState(void* self)
 {
     if (*(int*)((char*)self + 0xA4) == 1) {
@@ -1030,6 +1093,17 @@ INCLUDE_ASM("scripter/datamanager", tNISList_GetPlayState);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00282838(void* self, int a1);
 
+/**
+ * Classifies a NIS list's playback for the script engine (On Tour eNISListStatePlay).
+ *
+ * Returns 0 unless the list is playing (+0xA4 == 3) and 3 while it is paused (+0xC4, On Tour mNumPause). Unless a skip
+ * is in progress (+0xC8, On Tour mDoSkip), a head entry with flag bit 3 (+0x8) returns 2 while a script transition is
+ * running (+0xB0) with more than one wait frame left (+0xB8), and any other head entry returns 1 while func_00282838
+ * (On Tour IsRequestPlaybackEnding) returns 0 for its request (+0xC). Otherwise it returns 4, or 5 when no next script
+ * is pending (+0xBC < 0, On Tour mNextPendingScriptIndex).
+ *
+ * @return the play state, 0..5
+ */
 extern "C" int tNISList_GetPlayState(void* self)
 {
     if (*(int*)((char*)self + 0xA4) != 3) return 0;
@@ -1209,6 +1283,15 @@ INCLUDE_ASM("scripter/datamanager", tNISList_IsSkipAllowed);
 #ifdef SKIP_ASM
 extern "C" void* func_00283D70(void* list, int i);
 
+/**
+ * Says whether the playing NIS list may be skipped now.
+ *
+ * True only while playing (+0xA4 == 3) when the head entry's flag bit 0 (+0x8) is set and the list is not paused
+ * waiting for its next script (+0xA8, On Tour mPausedOnNextScriptLoading). cSSXScriptEngine_Update checks it before
+ * honouring the skip input, and cSSXScriptEngine_IsActiveNISSkippable reports it.
+ *
+ * @return 1 if the list may be skipped, else 0
+ */
 extern "C" int tNISList_IsSkipAllowed(void* self)
 {
     if (*(int*)((char*)self + 0xA4) != 3) {
@@ -1306,6 +1389,14 @@ extern "C" int func_00277248(char* self)
 //100%
 INCLUDE_ASM("scripter/datamanager", tNISList_IsPausedPendingNextScript);
 #ifdef SKIP_ASM
+/**
+ * Says whether the playing NIS list is waiting for its next script to finish loading.
+ *
+ * True while playing (+0xA4 == 3) with the paused-on-loading flag (+0xA8, On Tour mPausedOnNextScriptLoading) set.
+ * cSSXScriptEngine_Update shows the load indicator (cBXLoadIndicator_Show) while it is, if the "hud" UI state is up.
+ *
+ * @return 1 if paused pending the next script, else 0
+ */
 extern "C" int tNISList_IsPausedPendingNextScript(void* self)
 {
     int r = 0;
@@ -1368,7 +1459,18 @@ char* func_0027C070(void* obj);
 extern "C" int cScriptPlayerMain_GetNumUpdatesToEndLeft(void* obj);
 extern "C" void tNISList_DoTransitionToNext(void* self);
 
-extern "C" void tNISList_OnScriptUpdate(void* self, int a1, void* obj)
+/**
+ * Per-frame script callback: starts the transition to the next NIS once the playing script nears its end.
+ *
+ * Only for the list's own script player (func_002771C8, On Tour IsPlayingScriptOwner) on the cut-scene list (+0x4) and
+ * while the player's +0x1C word is 0: when the updates left (cScriptPlayerMain_GetNumUpdatesToEndLeft() + 1) drop to
+ * the script header's next-transition in-frame count (short at +0x12 of func_0027C070's header), calls tNISList_DoTransitionToNext
+ * (On Tour DoTransitionToNext). The current frame and frame delta that On Tour passes are not declared (unused).
+ *
+ * @param requestHandle  the request handle (unused)
+ * @param obj  the cScriptPlayerMain being updated
+ */
+extern "C" void tNISList_OnScriptUpdate(void* self, int requestHandle, void* obj)
 {
     if (func_002771C8(self, obj) != 0 && *(int*)((char*)self + 0x4) != 0 &&
         *(int*)((char*)obj + 0x1C) == 0) {
@@ -1405,7 +1507,17 @@ extern "C" int func_002771C8(void* self, void* obj);
 char* func_0027C070(void* obj);
 extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
 
-extern "C" void tNISList_OnScriptStop(void* self, int a1, void* obj)
+/**
+ * Script stop callback: drops the custom irradiance the list's script had set.
+ *
+ * For the list's own script player (func_002771C8, On Tour IsPlayingScriptOwner), when the script header
+ * (func_0027C070) starts with a non-empty name, calls cRenderStateMan_setCustomIrradiance(0) (On Tour cRenderStateMan::setCustomIrradiance)
+ * to clear it.
+ *
+ * @param requestHandle  the request handle (unused)
+ * @param obj  the cScriptPlayerMain that stopped
+ */
+extern "C" void tNISList_OnScriptStop(void* self, int requestHandle, void* obj)
 {
     if (func_002771C8(self, obj) != 0) {
         if (*func_0027C070(obj) != 0) {
@@ -1714,6 +1826,21 @@ struct sDmEnt_7980 {
 // The unit declares tNISList_DoTransitionToNext as void; it returns whether it handled the update.
 int tNISList_DoTransitionToNext_impl(char* self) __asm__("tNISList_DoTransitionToNext");
 
+/**
+ * Starts the transition from the current NIS entry into the next, or reports one already running.
+ *
+ * With a script transition running (+0xB0, On Tour mInScriptTransition) it returns 1, unless the start flag (+0xAC,
+ * mIsStartTransition) is set: then it ends the transition (func_002E4578 on the game's transition manager,
+ * func_00230698(Game, 0)) and returns 0. Otherwise it ends any transition and builds the next one. For a script head
+ * entry it reads the next-transition record of the script header (func_0027C070 of the request's player: type +0x10,
+ * colour +0x11, in/hold/out frame shorts +0x12..+0x16, 1/60 s each): type 7 is a screen grab (cTransitionMan_StartTransitionScreenGrab) with no
+ * wait, any other type a full transition (cTransitionMan_StartTransition with two cSSXScriptEngine_MakeTransitionObject objects; returns
+ * 0 if none can be made) whose in+hold frames go to +0xB8 (mTransitionWaitFrames). A video entry uses its video record
+ * (func_00277DE8, On Tour GetVideoDBRecord) for a transition out (cTransitionMan_StartTransitionOut) or a screen grab. A positive wait sets
+ * +0xB0 and clears +0xAC.
+ *
+ * @return +0xB0: 1 while a script transition is running
+ */
 int tNISList_DoTransitionToNext_impl(char* self)
 {
     if (*(int*)(self + 0xB0) != 0) {

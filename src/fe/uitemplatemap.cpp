@@ -275,6 +275,16 @@ struct sMapEvent_0B50 { int track; int f4; int kind; int rest[0x6C / 4 - 3]; };
 // (the callee copies it), so this definition binds the by-value form to the symbol. Each kind returns through its
 // own call; g++ merges the two identical tails.
 extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, sMapEvent_0B50 ev, int peak) __asm__("cUITemplate_MAP_isMapEventCompleted");
+/**
+ * Tells whether the map location's event has been completed by the current character.
+ *
+ * Track 0x17 never is. Rival events (kind 4, or 5) map the peak to game events 6-8 (or 9-11) and count as done
+ * when cBENewPlayerInterface_isEventLocked reports them unlocked; any other event is done when cBERewardInterface_getTrackMedal returns
+ * a medal (not -1) for its kind and track.
+ *
+ * @param ev    the map location (event kind and track)
+ * @param peak  the peak (On Tour eBEPeakID)
+ */
 extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, sMapEvent_0B50 ev, int peak)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -311,6 +321,16 @@ int cBELibrary_getCharacterID(int);
 extern "C" int func_001464D0(void* iface, int player, int charID, int x, int flag);
 extern "C" int cBENewPlayerInterface_isEventLocked(void* iface, int player, int charID, int x);
 
+/**
+ * Tells whether a map event is still locked for the current character.
+ *
+ * Nothing is locked when cUITemplate_MAP_mMapStyle is below 2. Kind 4 and 5 ask func_001464D0 (On Tour
+ * isRivalEventLocked) for the peak with 1 or 0; kinds 6 to 11 ask cBENewPlayerInterface_isEventLocked (isEventLocked); others are
+ * unlocked.
+ *
+ * @param kind  the game event
+ * @param x     the peak (On Tour eBEPeakID)
+ */
 extern "C" int cUITemplate_MAP_isMapEventLocked(void* self, int kind, int x)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2870,6 +2890,15 @@ struct sVEntry_cUITemplate_MAP_setWidgetHiliteColor {
 extern char kMAPCOLOR_HIGHLIGHTED[];
 extern char kMAPCOLOR_HIGHLIGHTED_LOCKED[];
 
+/**
+ * Colours a highlighted map entry: the normal highlight when unlocked, the locked highlight otherwise.
+ *
+ * Does nothing for a null widget; otherwise calls its virtual slot 11 (set colour) with kMAPCOLOR_HIGHLIGHTED
+ * when @p on is nonzero, else kMAPCOLOR_HIGHLIGHTED_LOCKED.
+ *
+ * @param obj  the text widget
+ * @param on   nonzero when the entry is unlocked
+ */
 extern "C" void cUITemplate_MAP_setWidgetHiliteColor(void* self, void* obj, int on)
 {
     if (obj != 0) {

@@ -615,6 +615,15 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_isMissionLocked);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Tells whether a mission is still locked for the player.
+ *
+ * Index from func_00154240 (On Tour getMissionIdx); the flag word is at +0x118 + index * 4 of the profile of rider 0's
+ * character in cBELibrary_profileLib (profile 0).
+ *
+ * @param id  the mission id (On Tour uiMissionId)
+ * @return 1 when locked, 0 when open
+ */
 extern "C" int cBEMissionInterface_isMissionLocked(void* self, int id)
 {
     int i = func_00154240(self, id);
@@ -1064,9 +1073,17 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionID);
 extern "C" int cBEMissionInterface_getMissionIDOnTrack(void* self, int a, int group);
 extern int D_005305F0[];
 
-extern "C" int cBEMissionInterface_getMissionID(void* self, int a)
+/**
+ * Returns the id of the n-th mission at the current location.
+ *
+ * cBEMissionInterface_getMissionIDOnTrack (getMissionIDOnTrack) with the current location id from D_005305F0.
+ *
+ * @param iIdx  the mission's index at this location (On Tour iIdx)
+ * @return the mission id, 0 when there are not that many
+ */
+extern "C" int cBEMissionInterface_getMissionID(void* self, int iIdx)
 {
-    return cBEMissionInterface_getMissionIDOnTrack(self, a, D_005305F0[0]);
+    return cBEMissionInterface_getMissionIDOnTrack(self, iIdx, D_005305F0[0]);
 }
 #endif
 
@@ -1075,6 +1092,16 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionIDOnTrack);
 #ifdef SKIP_ASM
 extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
 
+/**
+ * Returns the id of the n-th mission at a given location.
+ *
+ * Counts entries of cBELibrary_missionInfo (88) whose location (group) is @p group; release returns 0 where On Tour
+ * asserts 'Mission index invalid'.
+ *
+ * @param index  the mission's index at that location (On Tour iIdx)
+ * @param group  the location (On Tour eBELocationID locID)
+ * @return the mission id, or 0
+ */
 extern "C" int cBEMissionInterface_getMissionIDOnTrack(void* self, int index, int group)
 {
     int n = 0;
@@ -1124,6 +1151,15 @@ extern "C" int cBEMissionInterface_getNumberSessionsOnTrack(void* self, int id)
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_isSessionPoint);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a location has a session point with at least the given index.
+ *
+ * True when any of the 22 cBELibrary_pictureDB records has id @p id and value >= @p value.
+ *
+ * @param value  the session point index (On Tour iIdx)
+ * @param id  the location (On Tour eBELocationID locID)
+ * @return 1 when such a session point exists
+ */
 extern "C" int cBEMissionInterface_isSessionPoint(void* self, int value, int id)
 {
     for (int i = 0; i < 22; i++) {
@@ -1138,6 +1174,14 @@ extern "C" int cBEMissionInterface_isSessionPoint(void* self, int value, int id)
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getPictureDBRecord);
 #ifdef SKIP_ASM
+/**
+ * Returns a copy of a location's picture database record.
+ *
+ * First of the 22 cBELibrary_pictureDB records with id @p id; record 0 when none matches.
+ *
+ * @param id  the location (On Tour eBELocationID locID)
+ * @return the record (by value)
+ */
 extern "C" sMissionEntry cBEMissionInterface_getPictureDBRecord(void* self, int id)
 {
     for (int i = 0; i < 22; i++)

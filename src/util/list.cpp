@@ -59,9 +59,18 @@ public:
     virtual int v02(void*);
 };
 
-extern "C" int cListNode_traverseFlat(void* a, cListNode_traverseFlat_cVirt* obj)
+/**
+ * Applies a list operator to this single node.
+ *
+ * A plain node has no children, so it just calls virtual slot 2 of @p obj (On Tour cListOperator::onListNode) with this
+ * node and returns the result.
+ *
+ * @param obj  the operator to apply (On Tour pOperator)
+ * @return the operator's result
+ */
+extern "C" int cListNode_traverseFlat(void* self, cListNode_traverseFlat_cVirt* obj)
 {
-    return obj->v02(a);
+    return obj->v02(self);
 }
 #endif
 
@@ -75,9 +84,18 @@ public:
     virtual int v02(void*);
 };
 
-extern "C" int cListNode_traverseRecurse(void* a, cListNode_traverseRecurse_cVirt* obj)
+/**
+ * Applies a list operator to this node and its children; a plain node has none.
+ *
+ * Calls virtual slot 2 of @p obj (On Tour cListOperator::onListNode) with this node and returns the result, exactly
+ * like cListNode_traverseFlat.
+ *
+ * @param obj  the operator to apply (On Tour pOperator)
+ * @return the operator's result
+ */
+extern "C" int cListNode_traverseRecurse(void* self, cListNode_traverseRecurse_cVirt* obj)
 {
-    return obj->v02(a);
+    return obj->v02(self);
 }
 #endif
 
@@ -88,6 +106,14 @@ void cList_clear(void*);
 extern void* cList_vtbl[];
 extern void* cListNode_vtbl[];
 
+/**
+ * Constructs an empty intrusive list.
+ *
+ * Points the list's own node links at itself, sets cList_vtbl at +0x18 and cListNode_vtbl at +0x8 and +0x14, links the
+ * sentinel node at +0xC to itself and calls cList_clear__FPv to empty the list.
+ *
+ * @return this
+ */
 extern "C" void* cList_cList(void* self)
 {
     char* s = (char*)self;
@@ -122,10 +148,10 @@ cListNode* cList_first(cList* list)
 //100%
 INCLUDE_ASM("util/list", func_00397858);
 #ifdef SKIP_ASM
-extern "C" int *func_00397858(void *arg0) {
+extern "C" int *func_00397858(void *list) {
     int *temp_2;
 
-    temp_2 = (*(int **)((char*)(arg0) + (0xC)));
+    temp_2 = (*(int **)((char*)(list) + (0xC)));
     return ((*temp_2 ^ (int) temp_2) == 0) ? 0 : temp_2;
 }
 #endif
@@ -133,6 +159,15 @@ extern "C" int *func_00397858(void *arg0) {
 //100%
 INCLUDE_ASM("util/list", cList_getByIndex);
 #ifdef SKIP_ASM
+/**
+ * Returns the list node at a given position.
+ *
+ * Starts at cList_first and follows the next links @p count times, stopping early at a null node or the sentinel.
+ * Returns the node reached, or 0 if it is null or the sentinel.
+ *
+ * @param count  zero-based position (On Tour index)
+ * @return the node, or 0 when the list is shorter
+ */
 extern "C" cListNode* cList_getByIndex(cList* list, int count)
 {
     cListNode* n = cList_first(list);
@@ -207,6 +242,12 @@ void cList_addToEnd(cList* list, cListNode* newNode)
 //100%
 INCLUDE_ASM("util/list", cList_clear__FPv);
 #ifdef SKIP_ASM
+/**
+ * Resets a list to empty without destroying its nodes.
+ *
+ * Points the list head (+0x0) at itself and the tail (+0x4) at the sentinel node (+0xC), whose next/prev (+0xC, +0x10)
+ * point back at the head and itself.
+ */
 void cList_clear(void* self)
 {
     void* t0 = (char*)self + 0xc;

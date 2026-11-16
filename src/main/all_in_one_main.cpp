@@ -1318,9 +1318,18 @@ extern "C" void func_001DCC38(void *arg0, signed char arg1) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", tAttrLocale_tAttrLocale);
 #ifdef SKIP_ASM
-extern "C" unsigned char *tAttrLocale_tAttrLocale(unsigned char *arg0) {
-    *arg0 &= 0xE0;
-    return arg0;
+/**
+ * Constructs a locale attribute byte: all five locale flags off.
+ *
+ * Clears the low five bits of the byte (On Tour's mLocaleTest, mObjPivot, mTextBox, mTextNumChar and
+ * mTextRefresh flags), keeping the top three.
+ *
+ * @param attr  the attribute byte (this)
+ * @return @p attr
+ */
+extern "C" unsigned char *tAttrLocale_tAttrLocale(unsigned char *attr) {
+    *attr &= 0xE0;
+    return attr;
 }
 #endif
 
@@ -1419,8 +1428,16 @@ extern "C" int func_001DCCE8(int realFe) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cUIInput_setKey);
 #ifdef SKIP_ASM
-extern "C" void cUIInput_setKey(int *arg0, int arg1) {
-    *arg0 = arg1;
+/**
+ * Sets the key code this UI input reports.
+ *
+ * Stores @p key at +0x0 (On Tour cUIInput::mKey).
+ *
+ * @param input  the input (this)
+ * @param key  the key code
+ */
+extern "C" void cUIInput_setKey(int *input, int key) {
+    *input = key;
 }
 #endif
 
@@ -1774,24 +1791,45 @@ extern "C" void cFEInput__cFEInput(void *self, int flags) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEInput_getKeyReady);
 #ifdef SKIP_ASM
-extern "C" int cFEInput_getKeyReady(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xC)));
+/**
+ * Tells whether a typed key is waiting.
+ *
+ * Returns the key-ready flag (+0xC, On Tour mbKeyReady).
+ *
+ * @param input  the input (this)
+ */
+extern "C" int cFEInput_getKeyReady(void *input) {
+    return (*(int *)((char*)(input) + (0xC)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEInput_getVKey);
 #ifdef SKIP_ASM
-extern "C" int cFEInput_getVKey(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x10)));
+/**
+ * Returns the virtual key code of the last typed key.
+ *
+ * Reads +0x10 (On Tour miVKey).
+ *
+ * @param input  the input (this)
+ */
+extern "C" int cFEInput_getVKey(void *input) {
+    return (*(int *)((char*)(input) + (0x10)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEInput_getAsciiKey);
 #ifdef SKIP_ASM
-extern "C" int cFEInput_getAsciiKey(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x14)));
+/**
+ * Returns the character code of the last typed key.
+ *
+ * Reads +0x14 (On Tour miAsciiKey).
+ *
+ * @param input  the input (this)
+ */
+extern "C" int cFEInput_getAsciiKey(void *input) {
+    return (*(int *)((char*)(input) + (0x14)));
 }
 #endif
 

@@ -67,6 +67,17 @@ struct sCharStat_cBEStatInterface_getStrikingAttrib
 extern sPlayerStatRow_cBEStatInterface_getStrikingAttrib D_00535538_cBEStatInterface_getStrikingAttrib[] __asm__("D_00535538");
 extern sCharStat_cBEStatInterface_getStrikingAttrib D_005308D8_cBEStatInterface_getStrikingAttrib[] __asm__("D_005308D8");
 
+/**
+ * Returns how hard a rider hits, as a fraction of the character's best.
+ *
+ * A mission man (cBENewPlayerInterface_isMissionMan) gets 0.5. Otherwise the level is @p value when positive, else
+ * attribute 5 of the rider's profile/character stats (D_00535538) / 5, divided by the character's entry 0xD in
+ * D_005308D8.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
+ * @return the striking attribute, usually 0 to 1
+ */
 extern "C" float cBEStatInterface_getStrikingAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -101,6 +112,16 @@ struct sCharStat_cBEStatInterface_getLandingAttrib
 extern sPlayerStatRow_cBEStatInterface_getLandingAttrib D_00535538_cBEStatInterface_getLandingAttrib[] __asm__("D_00535538");
 extern sCharStat_cBEStatInterface_getLandingAttrib D_005308D8_cBEStatInterface_getLandingAttrib[] __asm__("D_005308D8");
 
+/**
+ * Returns how well a rider lands, as a fraction of the character's best.
+ *
+ * A mission man gets 0.5. Otherwise the level is @p value when positive, else attribute 6 of the rider's
+ * profile/character stats (D_00535538) / 5, divided by the character's entry 0xE in D_005308D8.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
+ * @return the landing attribute, usually 0 to 1
+ */
 extern "C" float cBEStatInterface_getLandingAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -255,6 +276,16 @@ struct sCharStat_cBEStatInterface_getSpinAttrib
 extern sPlayerStatRow_cBEStatInterface_getSpinAttrib D_00535538_cBEStatInterface_getSpinAttrib[] __asm__("D_00535538");
 extern sCharStat_cBEStatInterface_getSpinAttrib D_005308D8_cBEStatInterface_getSpinAttrib[] __asm__("D_005308D8");
 
+/**
+ * Returns how fast a rider spins, as a fraction of the character's best.
+ *
+ * A mission man gets 0.5. Otherwise the level is @p value when positive, else attribute 4 of the rider's
+ * profile/character stats (D_00535538) / 5, divided by the character's entry 0xC in D_005308D8.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
+ * @return the spin attribute, usually 0 to 1
+ */
 extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -289,6 +320,16 @@ struct sCharStat_cBEStatInterface_getTrickAttrib
 extern sPlayerStatRow_cBEStatInterface_getTrickAttrib D_00535538_cBEStatInterface_getTrickAttrib[] __asm__("D_00535538");
 extern sCharStat_cBEStatInterface_getTrickAttrib D_005308D8_cBEStatInterface_getTrickAttrib[] __asm__("D_005308D8");
 
+/**
+ * Returns a rider's trick skill, as a fraction of the character's best.
+ *
+ * A mission man gets 0.5. Otherwise the level is @p value when positive, else attribute 2 of the rider's
+ * profile/character stats (D_00535538) / 5, divided by the character's entry 0xA in D_005308D8.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
+ * @return the trick attribute, usually 0 to 1
+ */
 extern "C" float cBEStatInterface_getTrickAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -318,6 +359,16 @@ struct sLevelTable_00149778
 };
 extern const sLevelTable_00149778 D_0045A2B0;
 
+/**
+ * Decides whether a trick scored enough, for this rider's level, to deserve a celebration.
+ *
+ * Mission men never celebrate. The threshold is D_0045A2B0[clamp(func_00148950 level - 1, 0, 10)] (On Tour getStatLevel
+ * and bracket).
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  the trick's points (On Tour iPoints)
+ * @return 1 when the points reach the threshold
+ */
 extern "C" int cBEStatInterface_shouldCelebrateTrick(void* self, int rider, int value)
 {
     if (cBENewPlayerInterface_isMissionMan(rider))
@@ -561,6 +612,15 @@ extern char D_00535898[];
 
 extern int cBELibrary_grabPointsDB[0x2A8 / 4];
 
+/**
+ * Sets up the career databases at boot: rewards, race and player setup, character data, profiles and grab points.
+ *
+ * func_0014C6A0 and cBERewardDB_init first; the race DB gets riders 0-5 in order and the 6 player entries are cleared
+ * (character slot flag set, byte +0x11 = 4). The character file is copied into D_00530970 (0x550 bytes) and freed;
+ * D_005308D8 gets each character's id, its 7 base stats from D_00440F00 plus 5, and 11 for the maxima. D_00535898 is
+ * cleared, the profiles of the 3 profile slots are initialised (cBEProfileLib_init with reload), and cBELibrary_grabPointsDB
+ * is filled with the {points, points per second} pairs.
+ */
 extern "C" void cBELibrary_loadData(void)
 {
     int i;

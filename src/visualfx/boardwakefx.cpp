@@ -1081,17 +1081,17 @@ static inline void wakeAddE398(sWakeVecE398& a, const sWakeVecE398& b)
 
 extern "C" void func_002DE398(char* self, sWakeVecE398* out)
 {
-    float s = *(float*)(self + 0x12C);
-    float a = (1.0f - wakeAbsE398(s)) * 55.0f;
-    float lo = -a;
-    sWakeVecE398 t;
-    sWakeVecE398 tmp;
-    wakeScaleE398(tmp, *(sWakeVecE398*)(self + 0x50), s * 55.0f + (lo + (a - lo) * wakeRandE398()));
-    t = tmp;
-    wakeAddE398(*out, t);
-    wakeScaleE398(tmp, *(sWakeVecE398*)(self + 0x40), wakeRandE398() * 20.0f + -10.0f);
-    t = tmp;
-    wakeAddE398(*out, t);
+    float bias = *(float*)(self + 0x12C);
+    float spread = (1.0f - wakeAbsE398(bias)) * 55.0f;
+    float lo = -spread;
+    sWakeVecE398 offset;
+    sWakeVecE398 scaled;
+    wakeScaleE398(scaled, *(sWakeVecE398*)(self + 0x50), bias * 55.0f + (lo + (spread - lo) * wakeRandE398()));
+    offset = scaled;
+    wakeAddE398(*out, offset);
+    wakeScaleE398(scaled, *(sWakeVecE398*)(self + 0x40), wakeRandE398() * 20.0f + -10.0f);
+    offset = scaled;
+    wakeAddE398(*out, offset);
 }
 #endif
 
@@ -1877,14 +1877,14 @@ extern "C" void func_002E2550(void* self);
 
 extern "C" void func_002DF3B0(cDynamicSprayFX* self)
 {
-    sVec4 c;
-    c.x = 1.0f;
-    c.y = 1.0f;
-    c.z = 1.0f;
-    c.w = 1.0f;
+    sVec4 white;
+    white.x = 1.0f;
+    white.y = 1.0f;
+    white.z = 1.0f;
+    white.w = 1.0f;
     *(float*)((char*)self + 0x120) = 0.5f;
     *(int*)((char*)self + 0x10) = 0;
-    *(sVec4*)((char*)self + 0x90) = c;
+    *(sVec4*)((char*)self + 0x90) = white;
     *(int*)((char*)self + 0x74) = 0;
     *(int*)((char*)self + 0x4) = 0;
     *(int*)((char*)self + 0x1C) = 0;
@@ -3430,10 +3430,10 @@ extern "C" void func_002E2550(void* self)
         S28(0xDD4) = 1;
         S28(0x174) = 1;
         {
-            int v = 0;
+            int enabled = 0;
             if (*(int*)((char*)self + 0x124) != 0 || *(int*)((char*)*(void**)self + 0xAC4) != 0)
-                v = 1;
-            S28(0x9B4) = v;
+                enabled = 1;
+            S28(0x9B4) = enabled;
         }
         S28(0x384) = *(int*)((char*)self + 0x124);
         S28(0x594) = *(int*)((char*)self + 0x124);
@@ -3999,7 +3999,7 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E2FF8);
 #ifdef SKIP_ASM
 extern "C" void func_002E2FA8(sWakeFx* self, int v, int i);
 
-extern "C" void func_002E2FF8(sWakeFx* self, int* vals, int count, int unused, int i)
+extern "C" void func_002E2FF8(sWakeFx* self, int* vals, int count, int ignored, int i)
 {
     int n;
     for (n = 0; n < count; n++) {
@@ -4310,6 +4310,12 @@ static inline void setB10_3578(sWakeRCtx* c, int v) { c->top->b10 = v; }
 static inline void setA2_3578(sWakeRCtx* c, int v) { c->top->a2 = v; }
 static inline void setB5_3578(sWakeRCtx* c, int v) { c->top->b5 = v; }
 
+/**
+ * Sets up the graphics state for drawing the lens flare effects.
+ *
+ * Pushes the graphics manager's draw-state stack, resets the new top to sDrawState_s_defaultDrawState and changes a few
+ * of its blend, depth and test bit fields.
+ */
 extern "C" void cLensFxMan_beginDrawFrame(void)
 {
     sWakeRCtx* ctx = (sWakeRCtx*)cGraphicsMan_TheGraphicsMan_boardwakefx;
@@ -4329,6 +4335,11 @@ INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_endDrawFrame);
 #ifdef SKIP_ASM
 extern char* GrMan_boardwakefx __asm__("GrMan");
 
+/**
+ * Restores the graphics state after the lens flare effects are drawn.
+ *
+ * Pops one 0x14-byte entry off the draw-state stack (top pointer at GrMan+0xE84).
+ */
 extern "C" void cLensFxMan_endDrawFrame(void)
 {
     *(char**)(GrMan_boardwakefx + 0xE84) -= 0x14;
@@ -4867,11 +4878,22 @@ extern "C" void cTransitionObj_InitializeBuffers(void);
 extern void* D_00488100[];
 extern void* cTransitionMan_vtbl[];
 
-extern "C" void* cTransitionMan_cTransitionMan(void* self, void* a1, int a2)
+/**
+ * Constructs the screen transition manager for one view.
+ *
+ * Runs cObjNode_cObjNode1 with the bucket and the script-object constructor (func_00282CD0) on +0x10, stores the view
+ * index at +0x74, zeroes the transition fields, sets the vtables (D_00488100 at +0x1C, cTransitionMan_vtbl at +0xC) and
+ * the screen-grab handle at +0x6C to -1, then calls cTransitionObj_InitializeBuffers and cScriptObject_InitScriptObject on the script object.
+ *
+ * @param bucket  object bucket for the node (On Tour bucket)
+ * @param viewIndex  the view it serves (On Tour viewIndex)
+ * @return this
+ */
+extern "C" void* cTransitionMan_cTransitionMan(void* self, void* bucket, int viewIndex)
 {
-    cObjNode_cObjNode1(self, a1);
+    cObjNode_cObjNode1(self, bucket);
     func_00282CD0((char*)self + 0x10);
-    *(int*)((char*)self + 0x74) = a2;
+    *(int*)((char*)self + 0x74) = viewIndex;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x44) = 0;
     *(int*)((char*)self + 0x4C) = 0;
@@ -4955,14 +4977,33 @@ extern "C" void func_002E4578(void* self);
 // PORT: later callers declare this as void (and an int alias); the body returns int.
 extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, void* o2, float f0, float f1, float f2, int a4, int a5) __asm__("cTransitionMan_StartTransition");
 
-extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, void* o2, float f0, float f1, float f2, int a4, int a5)
+/**
+ * Starts a screen transition made of an in part, a hold and an out part.
+ *
+ * If a transition is active (+0x44) it is ended first (func_002E4578). The initiator goes to +0x78 and the external
+ * time pointer to +0x70. With a screen grab, a 0x100 x 0x100 grab texture is requested through the graphics manager's
+ * virtual slot 59 if the handle at +0x6C is unset; if it stays unset, both transition objects get their virtual slot 1
+ * with 3 and the call fails. Otherwise the objects (+0x4C, +0x50) and times (+0x54..+0x5C) are stored and the
+ * transition is marked active from time 0.
+ *
+ * @param initiator  who started it (On Tour initiator)
+ * @param transitionIn  transition object for the in part, or 0 (On Tour transitionIn)
+ * @param transitionOut  transition object for the out part, or 0 (On Tour transitionOut)
+ * @param inTime  length of the in part (On Tour inTime)
+ * @param holdTime  length of the hold (On Tour holdTime)
+ * @param outTime  length of the out part (On Tour outTime)
+ * @param useScreenGrab  nonzero to grab the screen as the transition's texture (On Tour useScreenGrab)
+ * @param externalTimePercentage  optional float that drives the progress from outside (On Tour externalTimePercentage)
+ * @return 1 when the transition started, 0 when the screen grab could not be set up
+ */
+extern "C" int cTransitionMan_StartTransition_def(void* self, int initiator, void* transitionIn, void* transitionOut, float inTime, float holdTime, float outTime, int useScreenGrab, int externalTimePercentage)
 {
     if (*(int*)((char*)self + 0x44) != 0) {
         func_002E4578(self);
     }
-    *(int*)((char*)self + 0x78) = a1;
-    *(int*)((char*)self + 0x70) = a5;
-    if (a4 != 0) {
+    *(int*)((char*)self + 0x78) = initiator;
+    *(int*)((char*)self + 0x70) = externalTimePercentage;
+    if (useScreenGrab != 0) {
         if (*(int*)((char*)self + 0x7C) != 0) {
             *(int*)((char*)self + 0x7C) = 0;
         }
@@ -4972,27 +5013,27 @@ extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, 
             sBWVEntry4370* e = &(*(sBWVEntry4370**)(obj + 0x10D8))[59];
             e->fn(obj + e->delta, ref, 0x100, 0x100);
             if (~*(int*)((char*)self + 0x6C) == 0) {
-                if (o1 != 0) {
-                    sBWVEntryI4370* vt = *(sBWVEntryI4370**)o1;
-                    vt[1].fn((char*)o1 + vt[1].delta, 3);
+                if (transitionIn != 0) {
+                    sBWVEntryI4370* vt = *(sBWVEntryI4370**)transitionIn;
+                    vt[1].fn((char*)transitionIn + vt[1].delta, 3);
                 }
-                if (o2 != 0) {
-                    sBWVEntryI4370* vt = *(sBWVEntryI4370**)o2;
-                    vt[1].fn((char*)o2 + vt[1].delta, 3);
+                if (transitionOut != 0) {
+                    sBWVEntryI4370* vt = *(sBWVEntryI4370**)transitionOut;
+                    vt[1].fn((char*)transitionOut + vt[1].delta, 3);
                 }
                 return 0;
             }
         }
     }
-    *(void**)((char*)self + 0x4C) = o1;
-    *(void**)((char*)self + 0x50) = o2;
-    *(float*)((char*)self + 0x54) = f0;
-    *(float*)((char*)self + 0x58) = f1;
-    *(float*)((char*)self + 0x5C) = f2;
+    *(void**)((char*)self + 0x4C) = transitionIn;
+    *(void**)((char*)self + 0x50) = transitionOut;
+    *(float*)((char*)self + 0x54) = inTime;
+    *(float*)((char*)self + 0x58) = holdTime;
+    *(float*)((char*)self + 0x5C) = outTime;
     *(int*)((char*)self + 0x44) = 1;
     *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x60) = a4;
-    if (a4 != 0) {
+    *(int*)((char*)self + 0x60) = useScreenGrab;
+    if (useScreenGrab != 0) {
         *(int*)((char*)self + 0x64) = 1;
     }
     return 1;
@@ -5016,13 +5057,24 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_StartTransitionOut);
 // PORT: the unit declares cTransitionMan_StartTransition as void; this caller returns its int result.
 extern "C" int cTransitionMan_StartTransition_i(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2) __asm__("cTransitionMan_StartTransition");
 
-extern "C" int cTransitionMan_StartTransitionOut(void* self, int a1, int a2, float f)
+/**
+ * Starts the out part of a screen transition, or adds it to the transition already running.
+ *
+ * When no transition is active it calls cTransitionMan_StartTransition with only an out object and @p outTime as the out time. Otherwise it
+ * stores @p transition as the out object (+0x50) and @p outTime as the out time (+0x5C) and returns 1.
+ *
+ * @param initiator  who started it (On Tour initiator)
+ * @param transition  transition object for the out part (On Tour transition)
+ * @param outTime  length of the out part (On Tour outTime)
+ * @return cTransitionMan_StartTransition's result, or 1 when added to a running transition
+ */
+extern "C" int cTransitionMan_StartTransitionOut(void* self, int initiator, int transition, float outTime)
 {
     if (*(int*)((char*)self + 0x44) == 0) {
-        return cTransitionMan_StartTransition_i(self, a1, 0, a2, 0.0f, 0.0f, 0, 0, f);
+        return cTransitionMan_StartTransition_i(self, initiator, 0, transition, 0.0f, 0.0f, 0, 0, outTime);
     }
-    *(int*)((char*)self + 0x50) = a2;
-    *(float*)((char*)self + 0x5C) = f;
+    *(int*)((char*)self + 0x50) = transition;
+    *(float*)((char*)self + 0x5C) = outTime;
     return 1;
 }
 #endif
@@ -5032,9 +5084,20 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_StartTransitionScreenGrab);
 #ifdef SKIP_ASM
 extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
 
-extern "C" void cTransitionMan_StartTransitionScreenGrab(void* self, int a1, int a3, int a5, float f2)
+/**
+ * Starts a transition that plays out over a grab of the current screen.
+ *
+ * Calls cTransitionMan_StartTransition with no in object, @p transition as the out object, zero in and hold times, @p transitionTime as the out time, the
+ * screen grab on and @p externalTimePercentage as the external time pointer.
+ *
+ * @param initiator  who started it (On Tour initiator)
+ * @param transition  transition object to play (On Tour transition)
+ * @param externalTimePercentage  optional float that drives the progress from outside (On Tour externalTimePercentage)
+ * @param transitionTime  length of the transition (On Tour transitionTime)
+ */
+extern "C" void cTransitionMan_StartTransitionScreenGrab(void* self, int initiator, int transition, int externalTimePercentage, float transitionTime)
 {
-    cTransitionMan_StartTransition(self, a1, 0, a3, 0.0f, 0.0f, 1, a5, f2);
+    cTransitionMan_StartTransition(self, initiator, 0, transition, 0.0f, 0.0f, 1, externalTimePercentage, transitionTime);
 }
 #endif
 
@@ -5060,24 +5123,24 @@ extern "C" void func_002E4578(void* self)
     if (*(int*)((char*)self + 0x44) != 0) {
         *(int*)((char*)self + 0x44) = 0;
         *(int*)((char*)self + 0x40) = 0;
-        char* o = *(char**)((char*)self + 0x4C);
-        if (o != 0) {
-            sBWVEntryI_4578* e = &(*(sBWVEntryI_4578**)o)[1];
-            e->fn(o + e->delta, 3);
+        char* object = *(char**)((char*)self + 0x4C);
+        if (object != 0) {
+            sBWVEntryI_4578* entry = &(*(sBWVEntryI_4578**)object)[1];
+            entry->fn(object + entry->delta, 3);
         }
         *(char**)((char*)self + 0x4C) = 0;
-        o = *(char**)((char*)self + 0x50);
-        if (o != 0) {
-            sBWVEntryI_4578* e = &(*(sBWVEntryI_4578**)o)[1];
-            e->fn(o + e->delta, 3);
+        object = *(char**)((char*)self + 0x50);
+        if (object != 0) {
+            sBWVEntryI_4578* entry = &(*(sBWVEntryI_4578**)object)[1];
+            entry->fn(object + entry->delta, 3);
         }
         *(char**)((char*)self + 0x50) = 0;
         *(int*)((char*)self + 0x70) = 0;
         if (~*(int*)((char*)self + 0x6C) != 0) {
             char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
             *(int*)((char*)self + 0x7C) = 1;
-            sBWVEntryR_4578* e = &(*(sBWVEntryR_4578**)(obj + 0x10D8))[0x72];
-            *(int*)((char*)self + 0x80) = e->fn(obj + e->delta);
+            sBWVEntryR_4578* entry = &(*(sBWVEntryR_4578**)(obj + 0x10D8))[0x72];
+            *(int*)((char*)self + 0x80) = entry->fn(obj + entry->delta);
             *(int*)((char*)self + 0x64) = 0;
             *(int*)((char*)self + 0x60) = 0;
         }
@@ -5113,12 +5176,12 @@ extern "C" float func_002E4678(void* self)
     if (*(int*)((char*)self + 0x44) == 0) {
         return 0.0f;
     }
-    float v = *(float*)((char*)self + 0x54) + *(float*)((char*)self + 0x58)
+    float remaining = *(float*)((char*)self + 0x54) + *(float*)((char*)self + 0x58)
             + *(float*)((char*)self + 0x5C) - *(float*)((char*)self + 0x48);
-    if (v < 0.0f) {
+    if (remaining < 0.0f) {
         return 0.0f;
     }
-    return v;
+    return remaining;
 }
 #endif
 
@@ -5340,6 +5403,14 @@ extern "C" int cSSXScriptEngine_MakeTransitionObject(void* tbl, int mode, int id
 extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
 extern "C" void cTransitionMan_StartTransitionScreenGrab(void* self, int a1, int a3, int a5, float f2);
 
+/**
+ * Starts the transition a script object describes when a player starts using it.
+ *
+ * Calls the cScriptObject hook cScriptObject_OnStartObjectUse__FPv on the script object at +0x10. For a transition type (+0x28) other than 7
+ * it makes an in and an out object with cSSXScriptEngine_MakeTransitionObject and starts a transition (initiator 2)
+ * with in, hold and out times from +0x34, +0x30 and +0x2C. Type 7 starts a screen-grab transition with one object and
+ * the time at +0x34. The level at +0x3C is then copied to +0x48.
+ */
 extern "C" void cTransitionMan_OnStartObjectUse(void* self)
 {
     sWakeParams_4B98* p = (sWakeParams_4B98*)((char*)self + 0x28);
@@ -5373,11 +5444,11 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E4C90);
 #ifdef SKIP_ASM
 extern "C" int func_002E4C90(void* self)
 {
-    int r = 0;
+    int result = 0;
     if (*(int*)((char*)self + 0x60) != 0) {
-        r = *(int*)((char*)self + 0x64) != 0;
+        result = *(int*)((char*)self + 0x64) != 0;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -5386,6 +5457,11 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionObj_InitializeBuffers);
 #ifdef SKIP_ASM
 extern int D_00538850[];
 
+/**
+ * Marks every transition object buffer as free.
+ *
+ * Clears the four in-use flags at D_00538850.
+ */
 extern "C" void cTransitionObj_InitializeBuffers(void)
 {
     int i;
@@ -5408,6 +5484,14 @@ extern int D_00538850[];
 extern sWakePoolEntry D_wakePool[] __asm__("D_005382C0");
 extern sWakePoolEntry* D_004A3B1C;
 
+/**
+ * Allocates a transition object from the fixed pool of four buffers.
+ *
+ * Returns the first buffer of D_005382C0 whose in-use flag in D_00538850 is clear, marking it used, or the pointer in
+ * D_004A3B1C when all four are taken.
+ *
+ * @return the buffer for the new object
+ */
 extern "C" sWakePoolEntry* cTransitionObj_operator_new(void)
 {
     for (int i = 0; i < 4; i++) {
@@ -5430,14 +5514,22 @@ struct sWakeSlot {
 extern sWakeSlot D_005382C0[];
 extern int D_00538850[];
 
-extern "C" void cTransitionObj_operator_delete(void* p)
+/**
+ * Returns a transition object's buffer to the fixed pool.
+ *
+ * Ignores null. Otherwise finds which of the four D_005382C0 buffers @p memory is and clears its in-use flag; any other
+ * pointer is ignored.
+ *
+ * @param memory  the object's memory (On Tour memory)
+ */
+extern "C" void cTransitionObj_operator_delete(void* memory)
 {
     int i;
-    if (p == 0) {
+    if (memory == 0) {
         return;
     }
     for (i = 0; i < 4; i++) {
-        if (&D_005382C0[i] == p) {
+        if (&D_005382C0[i] == memory) {
             D_00538850[i] = 0;
             return;
         }
@@ -5510,7 +5602,22 @@ static inline void wakeScaleMatD88(sMatD88* dst, const sMatD88* src, const sVec4
         : "memory");
 }
 
-extern "C" void* cSnowBox_cSnowBox(char* self, int a1, int a2, float f0, float f1, float f2, float f3)
+/**
+ * Constructs one snowfall box for a view.
+ *
+ * Zeroes the state fields, sets the wind scale (+0xA4..+0xAC) to 1 and the reset flag (+0xB0), stores the view at +0x0,
+ * the type at +0x4 and the four floats at +0xC, +0x14, +0x18 and +0x1C, takes three BXrand values for +0x98..+0xA0, and
+ * sets the matrix at +0x50 to the identity scaled by @p boxScale, with the position at +0x20 at the origin.
+ *
+ * @param viewNum  the view this box belongs to (On Tour viewNum)
+ * @param snowBoxType  kind of snow box (On Tour eSnowBoxType snowBoxType)
+ * @param boxScale  size of the box (On Tour boxScale)
+ * @param flakeSize  flake size (On Tour flakeSize)
+ * @param opacity  flake opacity (On Tour opacity)
+ * @param gravity  fall speed (On Tour gravity)
+ * @return this
+ */
+extern "C" void* cSnowBox_cSnowBox(char* self, int viewNum, int snowBoxType, float boxScale, float flakeSize, float opacity, float gravity)
 {
     *(int*)(self + 0x8) = 0;
     *(int*)(self + 0x10) = 0;
@@ -5531,12 +5638,12 @@ extern "C" void* cSnowBox_cSnowBox(char* self, int a1, int a2, float f0, float f
     *(float*)(self + 0xA4) = 1.0f;
     *(float*)(self + 0xA8) = 1.0f;
     *(float*)(self + 0xAC) = 1.0f;
-    *(int*)(self + 0x0) = a1;
-    *(int*)(self + 0x4) = a2;
-    *(float*)(self + 0xC) = f0;
-    *(float*)(self + 0x14) = f1;
-    *(float*)(self + 0x18) = f2;
-    *(float*)(self + 0x1C) = f3;
+    *(int*)(self + 0x0) = viewNum;
+    *(int*)(self + 0x4) = snowBoxType;
+    *(float*)(self + 0xC) = boxScale;
+    *(float*)(self + 0x14) = flakeSize;
+    *(float*)(self + 0x18) = opacity;
+    *(float*)(self + 0x1C) = gravity;
     *(int*)(self + 0xB0) = 1;
     *(int*)(self + 0x98) = BXrand();
     *(int*)(self + 0x9C) = BXrand();
@@ -5569,6 +5676,11 @@ extern "C" void* cSnowBox_cSnowBox(char* self, int a1, int a2, float f0, float f
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_resetWind__FPv);
 #ifdef SKIP_ASM
+/**
+ * Resets a snow box's wind so it is recomputed.
+ *
+ * Zeroes +0x90 and +0x94 and sets +0xB0 to 1.
+ */
 void cSnowBox_resetWind(void* self)
 {
     *(int*)((char*)self + 0x94) = 0;
@@ -5582,6 +5694,13 @@ INCLUDE_ASM("visualfx/boardwakefx", cSnowBox__cSnowBox);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
+/**
+ * Destroys a snow box.
+ *
+ * Has nothing to release; frees the object with operator delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ in-charge flags; bit 0 deletes the object
+ */
 extern "C" void cSnowBox__cSnowBox(int* self, int flags)
 {
     if (flags & 1) {
@@ -5772,9 +5891,9 @@ static inline void wakeWrap5430(float& r, float v, float s)
     }
 }
 
-extern "C" void func_002E5430(sWakeGrid5430* self, sWakeVec5430* d)
+extern "C" void func_002E5430(sWakeGrid5430* self, sWakeVec5430* delta)
 {
-    wakeSub5430(self->pos, *d);
+    wakeSub5430(self->pos, *delta);
     float x = self->pos.x;
     float y = self->pos.y;
     float z = self->pos.z;

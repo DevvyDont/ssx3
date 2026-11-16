@@ -142,6 +142,13 @@ __asm__(
 //100%
 INCLUDE_ASM("seg/seg_316FB8", strcat);
 #ifdef SKIP_ASM
+/**
+ * Appends a string to another (C library strcat).
+ *
+ * Newlib's routine, kept as the binary's own instructions: finds the end of the destination (16 or 8 bytes at a time
+ * with the 0x0101... / 0x8080... zero-byte test when aligned, else byte by byte), calls strcpy to copy the source
+ * there, and returns the destination.
+ */
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
@@ -1097,26 +1104,26 @@ extern void func_00417A98();
 extern long func_00417008(char *, int, int);
 char *func_00416EB0_(int ptr, char *file, char *mode) __asm__("func_00416EB0");
 char *func_00416EB0_(int ptr, char *file, char *mode) {
-    char *fp;
-    int f, flags, oflags;
+    char *stream;
+    int fileDesc, flags, oflags;
     if ((flags = func_00420180(ptr, mode, &oflags)) == 0)
         return 0;
-    if ((fp = func_00420010(ptr)) == 0)
+    if ((stream = func_00420010(ptr)) == 0)
         return 0;
-    if ((f = func_0041FCB0(*(int **)(fp + 0x54), (int)file, oflags, 0x1B6)) < 0) {
-        *(short *)(fp + 0xC) = 0;
+    if ((fileDesc = func_0041FCB0(*(int **)(stream + 0x54), (int)file, oflags, 0x1B6)) < 0) {
+        *(short *)(stream + 0xC) = 0;
         return 0;
     }
-    *(short *)(fp + 0xE) = f;
-    *(short *)(fp + 0xC) = flags;
-    *(char **)(fp + 0x1C) = fp;
-    *(void **)(fp + 0x20) = func_00417948;
-    *(void **)(fp + 0x24) = func_004179B0;
-    *(void **)(fp + 0x28) = func_00417A30;
-    *(void **)(fp + 0x2C) = func_00417A98;
+    *(short *)(stream + 0xE) = fileDesc;
+    *(short *)(stream + 0xC) = flags;
+    *(char **)(stream + 0x1C) = stream;
+    *(void **)(stream + 0x20) = func_00417948;
+    *(void **)(stream + 0x24) = func_004179B0;
+    *(void **)(stream + 0x28) = func_00417A30;
+    *(void **)(stream + 0x2C) = func_00417A98;
     if (flags & 0x100)
-        func_00417008(fp, 0, 2);
-    return fp;
+        func_00417008(stream, 0, 2);
+    return stream;
 }
 #endif
 
@@ -1135,8 +1142,8 @@ INCLUDE_ASM("seg/seg_316FB8", func_00416FC0);
 #ifdef SKIP_ASM
 extern void func_0041FE30(void);
 extern int func_00417418(int, void (*)(void));
-void func_00416FC0(int a) {
-    func_00417418(a, func_0041FE30);
+void func_00416FC0(int reent) {
+    func_00417418(reent, func_0041FE30);
 }
 #endif
 
@@ -1188,40 +1195,40 @@ extern long g17008_sseek(int, long, int) __asm__("func_00417A30");
 extern void g17008_smakebuf(struct F17008 *) __asm__("func_004174B0");
 extern int g17008_srefill(struct F17008 *) __asm__("func_00417648");
 int func_00417008_(struct F17008 *fp, long offset, int whence) __asm__("func_00417008");
-int func_00417008_(struct F17008 *fp, long offset, int whence) {
+int func_00417008_(struct F17008 *stream, long offset, int whence) {
     long (*seekfn)(int, long, int);
     long target, curoff;
     unsigned n;
     int st[0x68 / 4];
     int havepos;
     struct R17008 *ptr;
-    if (fp->data == 0)
-        fp->data = g17008_impure;
-    if (fp->data->didinit == 0)
-        g17008_init(fp->data);
-    ptr = fp->data;
-    if ((*(int *)&fp->flags & 0x108) == 0x108)
-        g17008_fflush(fp);
-    if ((seekfn = fp->seek) == 0) {
+    if (stream->data == 0)
+        stream->data = g17008_impure;
+    if (stream->data->didinit == 0)
+        g17008_init(stream->data);
+    ptr = stream->data;
+    if ((*(int *)&stream->flags & 0x108) == 0x108)
+        g17008_fflush(stream);
+    if ((seekfn = stream->seek) == 0) {
         ptr->err = 0x1D;
         return -1;
     }
     switch (whence) {
     case 1:
-        g17008_fflush(fp);
-        if (fp->flags & 0x1000)
-            curoff = fp->offset;
+        g17008_fflush(stream);
+        if (stream->flags & 0x1000)
+            curoff = stream->offset;
         else {
-            curoff = (*seekfn)(fp->cookie, 0, 1);
+            curoff = (*seekfn)(stream->cookie, 0, 1);
             if (curoff == -1)
                 return -1;
         }
-        if (fp->flags & 4) {
-            curoff -= fp->r;
-            if (fp->ubbase)
-                curoff -= fp->ur;
-        } else if (fp->flags & 8 && fp->p != 0)
-            curoff += fp->p - fp->base;
+        if (stream->flags & 4) {
+            curoff -= stream->r;
+            if (stream->ubbase)
+                curoff -= stream->ur;
+        } else if (stream->flags & 8 && stream->p != 0)
+            curoff += stream->p - stream->base;
         offset += curoff;
         whence = 0;
         havepos = 1;
@@ -1234,74 +1241,74 @@ int func_00417008_(struct F17008 *fp, long offset, int whence) {
         ptr->err = 0x16;
         return -1;
     }
-    if (fp->base == 0)
-        g17008_smakebuf(fp);
-    if (fp->flags & 0x81A)
+    if (stream->base == 0)
+        g17008_smakebuf(stream);
+    if (stream->flags & 0x81A)
         goto dumb;
-    if ((fp->flags & 0x400) == 0) {
-        if (seekfn != g17008_sseek || fp->file < 0 || g17008_fstat(ptr, fp->file, st) ||
+    if ((stream->flags & 0x400) == 0) {
+        if (seekfn != g17008_sseek || stream->file < 0 || g17008_fstat(ptr, stream->file, st) ||
             (st[1] & 0xF000) != 0x8000) {
-            fp->flags |= 0x800;
+            stream->flags |= 0x800;
             goto dumb;
         }
-        fp->blksize = 0x400;
-        fp->flags |= 0x400;
+        stream->blksize = 0x400;
+        stream->flags |= 0x400;
     }
     if (whence == 0)
         target = offset;
     else {
-        if (g17008_fstat(ptr, fp->file, st))
+        if (g17008_fstat(ptr, stream->file, st))
             goto dumb;
         target = *(long *)&st[4] + offset;
     }
     if (!havepos) {
-        if (fp->flags & 0x1000)
-            curoff = fp->offset;
+        if (stream->flags & 0x1000)
+            curoff = stream->offset;
         else {
-            curoff = (*seekfn)(fp->cookie, 0, 1);
+            curoff = (*seekfn)(stream->cookie, 0, 1);
             if (curoff == -1)
                 goto dumb;
         }
-        curoff -= fp->r;
-        if (fp->ubbase)
-            curoff -= fp->ur;
+        curoff -= stream->r;
+        if (stream->ubbase)
+            curoff -= stream->ur;
     }
-    if (fp->ubbase) {
-        curoff += fp->r;
-        n = fp->up - fp->base;
+    if (stream->ubbase) {
+        curoff += stream->r;
+        n = stream->up - stream->base;
         curoff -= n;
-        n += fp->ur;
+        n += stream->ur;
     } else {
-        n = fp->p - fp->base;
+        n = stream->p - stream->base;
         curoff -= n;
-        n += fp->r;
+        n += stream->r;
     }
-    if ((fp->flags & 0x2000) == 0 && target >= curoff && target < curoff + n) {
-        int o = target - curoff;
-        fp->p = fp->base + o;
-        fp->r = n - o;
-        fp->flags &= ~0x20;
+    if ((stream->flags & 0x2000) == 0 && target >= curoff && target < curoff + n) {
+        int bufOffset = target - curoff;
+        stream->p = stream->base + bufOffset;
+        stream->r = n - bufOffset;
+        stream->flags &= ~0x20;
         return 0;
     }
-    curoff = target & -fp->blksize;
-    if ((*seekfn)(fp->cookie, curoff, 0) == -1)
+    curoff = target & -stream->blksize;
+    if ((*seekfn)(stream->cookie, curoff, 0) == -1)
         goto dumb;
-    fp->r = 0;
-    fp->flags &= ~0x20;
+    stream->r = 0;
+    stream->flags &= ~0x20;
     n = target - curoff;
     if (n) {
-        if (g17008_srefill(fp) || fp->r < n)
+        if (g17008_srefill(stream) || stream->r < n)
             goto dumb;
-        fp->p += n;
-        fp->r -= n;
+        stream->p += n;
+        stream->r -= n;
     }
     return 0;
 dumb:
-    if (g17008_fflush(fp) || (*seekfn)(fp->cookie, offset, whence) == -1)
+    if (g17008_fflush(stream) || (*seekfn)(stream->cookie, offset, whence) == -1)
         return -1;
-    fp->p = fp->base;
-    fp->r = 0;
-    fp->flags &= ~0x20;
+    stream->p = stream->base;
+    stream->r = 0;
+    stream->flags &= ~0x20;
     return 0;
 }
 #endif
@@ -1315,17 +1322,17 @@ struct G17418 {
     char *files;
 };
 int func_00417418(int r_, void (*fn_)(void)) {
-    char *r = (char *)r_;
+    char *reent = (char *)r_;
     int (*fn)(char *) = (int (*)(char *))fn_;
-    struct G17418 *g;
-    char *fp;
+    struct G17418 *glue;
+    char *stream;
     int n;
     int ret = 0;
-    for (g = (struct G17418 *)(r + 0x1D8); g; g = g->next) {
-        fp = g->files;
-        for (n = g->n; --n >= 0; fp += 0x58)
-            if (*(short *)(fp + 0xC))
-                ret |= fn(fp);
+    for (glue = (struct G17418 *)(reent + 0x1D8); glue; glue = glue->next) {
+        stream = glue->files;
+        for (n = glue->n; --n >= 0; stream += 0x58)
+            if (*(short *)(stream + 0xC))
+                ret |= fn(stream);
     }
     return ret;
 }
@@ -1352,26 +1359,26 @@ struct F174B0 {
 };
 extern long func_00417A30();
 extern int func_0041FBF0(int *, int, int);
-void func_004174B0(struct F174B0 *f) {
+void func_004174B0(struct F174B0 *stream) {
     int st[0x68 / 4];
-    if (f->flags & 2) {
-        f->p = f->nbuf;
-        f->base = f->nbuf;
-        f->size = 1;
+    if (stream->flags & 2) {
+        stream->p = stream->nbuf;
+        stream->base = stream->nbuf;
+        stream->size = 1;
         return;
     }
-    if (f->file < 0 || func_0041FBF0((int *)f->data, f->file, (int)st) < 0) {
-        f->flags |= 0x800;
-    } else if ((st[1] & 0xF000) == 0x8000 && f->seek == (void *)func_00417A30) {
-        f->blksize = 0x400;
-        f->flags |= 0x400;
+    if (stream->file < 0 || func_0041FBF0((int *)stream->data, stream->file, (int)st) < 0) {
+        stream->flags |= 0x800;
+    } else if ((st[1] & 0xF000) == 0x8000 && stream->seek == (void *)func_00417A30) {
+        stream->blksize = 0x400;
+        stream->flags |= 0x400;
     } else {
-        f->flags |= 0x800;
+        stream->flags |= 0x800;
     }
-    f->flags |= 2;
-    f->size = 1;
-    f->p = f->nbuf;
-    f->base = f->nbuf;
+    stream->flags |= 2;
+    stream->size = 1;
+    stream->p = stream->nbuf;
+    stream->base = stream->nbuf;
 }
 #endif
 
@@ -1382,10 +1389,10 @@ INCLUDE_ASM("seg/seg_316FB8", func_00417578);
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 extern void func_0041B728(int *, int, int, char *);
-void func_00417578(int *p, int fmt, ...) {
+void func_00417578(int *reent, int fmt, ...) {
     char *ap;
     func_00417578_va_start(ap);
-    func_0041B728(p, p[2], fmt, ap);
+    func_0041B728(reent, reent[2], fmt, ap);
 }
 #endif
 
@@ -1524,16 +1531,16 @@ struct F177B0 {
 };
 void func_004177B0(int reent, char *buf, int fmt, ...) {
     char *ap;
-    struct F177B0 f;
+    struct F177B0 strStream;
     func_004177B0_va_start(ap);
-    f.p = buf;
-    f.w = 0x7FFFFFFF;
-    f.flags = 0x208;
-    f.base = buf;
-    f.size = 0x7FFFFFFF;
-    f.ent = reent;
-    func_0041B658((int)&f, fmt, ap);
-    *f.p = 0;
+    strStream.p = buf;
+    strStream.w = 0x7FFFFFFF;
+    strStream.flags = 0x208;
+    strStream.base = buf;
+    strStream.size = 0x7FFFFFFF;
+    strStream.ent = reent;
+    func_0041B658((int)&strStream, fmt, ap);
+    *strStream.p = 0;
 }
 #endif
 
@@ -1634,14 +1641,14 @@ int func_004178B0(char *str, int fmt, ...) {
 INCLUDE_ASM("seg/seg_316FB8", func_00417948);
 #ifdef SKIP_ASM
 extern long func_0041FD10(int *, int, int, int);
-long func_00417948(int *f, int a, int b) {
-    int r = func_0041FD10((int *)f[0x54 / 4], ((short *)f)[7], a, b);
-    if (r >= 0) {
-        f[0x50 / 4] += r;
+long func_00417948(int *stream, int buf, int count) {
+    int bytesRead = func_0041FD10((int *)stream[0x54 / 4], ((short *)stream)[7], buf, count);
+    if (bytesRead >= 0) {
+        stream[0x50 / 4] += bytesRead;
     } else {
-        ((unsigned short *)f)[6] &= 0xEFFF;
+        ((unsigned short *)stream)[6] &= 0xEFFF;
     }
-    return r;
+    return bytesRead;
 }
 #endif
 
@@ -1650,11 +1657,11 @@ INCLUDE_ASM("seg/seg_316FB8", func_004179B0);
 #ifdef SKIP_ASM
 extern long func_0041FDD0(int *, int, int, int);
 int func_004179B0_(int *f, int a, int b) __asm__("func_004179B0");
-int func_004179B0_(int *f, int a, int b) {
-    if (((unsigned short *)f)[6] & 0x100)
-        func_0041FC50((int *)f[0x54 / 4], ((short *)f)[7], 0, 2);
-    ((unsigned short *)f)[6] &= 0xEFFF;
-    return func_0041FDD0((int *)f[0x54 / 4], ((short *)f)[7], a, b);
+int func_004179B0_(int *stream, int buf, int count) {
+    if (((unsigned short *)stream)[6] & 0x100)
+        func_0041FC50((int *)stream[0x54 / 4], ((short *)stream)[7], 0, 2);
+    ((unsigned short *)stream)[6] &= 0xEFFF;
+    return func_0041FDD0((int *)stream[0x54 / 4], ((short *)stream)[7], buf, count);
 }
 #endif
 
@@ -1662,16 +1669,16 @@ int func_004179B0_(int *f, int a, int b) {
 INCLUDE_ASM("seg/seg_316FB8", func_00417A30);
 #ifdef SKIP_ASM
 extern long func_0041FC50(int *, int, int, int);
-long func_00417A30(int *f, int a, int b) {
-    long r = func_0041FC50((int *)f[0x54 / 4], ((short *)f)[7], a, b);
-    unsigned short *p = (unsigned short *)f + 6;
-    if (r == -1) {
-        *p &= 0xEFFF;
+long func_00417A30(int *stream, int offset, int whence) {
+    long newOffset = func_0041FC50((int *)stream[0x54 / 4], ((short *)stream)[7], offset, whence);
+    unsigned short *flagsPtr = (unsigned short *)stream + 6;
+    if (newOffset == -1) {
+        *flagsPtr &= 0xEFFF;
     } else {
-        f[0x50 / 4] = r;
-        *p |= 0x1000;
+        stream[0x50 / 4] = newOffset;
+        *flagsPtr |= 0x1000;
     }
-    return r;
+    return newOffset;
 }
 #endif
 
@@ -1679,8 +1686,8 @@ long func_00417A30(int *f, int a, int b) {
 INCLUDE_ASM("seg/seg_316FB8", func_00417A98);
 #ifdef SKIP_ASM
 extern int func_0041FB98(int, int);
-void func_00417A98(int *p) {
-    func_0041FB98(p[0x54 / 4], ((short *)p)[7]);
+void func_00417A98(int *stream) {
+    func_0041FB98(stream[0x54 / 4], ((short *)stream)[7]);
 }
 #endif
 
@@ -2398,20 +2405,20 @@ match_failure:
 INCLUDE_ASM("seg/seg_316FB8", func_004185D0);
 #ifdef SKIP_ASM
 char *func_004185D0(char *tab, char *fmt) {
-    int c, n, v;
-    c = *fmt++;
-    if (c == '^') {
-        v = 1;
-        c = *fmt++;
+    int curChar, n, mark;
+    curChar = *fmt++;
+    if (curChar == '^') {
+        mark = 1;
+        curChar = *fmt++;
     } else
-        v = 0;
+        mark = 0;
     for (n = 0; n < 256; n++)
-        tab[n] = v;
-    if (c == 0)
+        tab[n] = mark;
+    if (curChar == 0)
         return fmt - 1;
-    v = 1 - v;
+    mark = 1 - mark;
     for (;;) {
-        tab[c] = v;
+        tab[curChar] = mark;
     doswitch:
         n = *fmt++;
         switch (n) {
@@ -2419,20 +2426,20 @@ char *func_004185D0(char *tab, char *fmt) {
             return fmt - 1;
         case '-':
             n = *fmt;
-            if (n == ']' || n < c) {
-                c = '-';
+            if (n == ']' || n < curChar) {
+                curChar = '-';
                 break;
             }
             fmt++;
             do {
-                tab[++c] = v;
-            } while (c < n);
+                tab[++curChar] = mark;
+            } while (curChar < n);
             goto doswitch;
             break;
         case ']':
             return fmt;
         default:
-            c = n;
+            curChar = n;
             break;
         }
     }
@@ -2510,8 +2517,8 @@ void func_00418790(void) {
 INCLUDE_ASM("seg/seg_316FB8", func_004187A0);
 #ifdef SKIP_ASM
 extern void func_0041A7E8(int, int);
-void func_004187A0(int a) {
-    func_0041A7E8(a, 0);
+void func_004187A0(int str) {
+    func_0041A7E8(str, 0);
 }
 #endif
 
@@ -2519,8 +2526,8 @@ void func_004187A0(int a) {
 INCLUDE_ASM("seg/seg_316FB8", func_004187C0);
 #ifdef SKIP_ASM
 extern long func_0041E9E0(int, int, int);
-int func_004187C0(int a) {
-    return func_0041E9E0(a, 0, 10);
+int func_004187C0(int str) {
+    return func_0041E9E0(str, 0, 10);
 }
 #endif
 
@@ -2529,20 +2536,20 @@ INCLUDE_ASM("seg/seg_316FB8", func_004187E8);
 #ifdef SKIP_ASM
 void *func_004187E8(void *key, char *base, unsigned nmemb, unsigned size, int (*compar)(void *, void *)) {
     unsigned lo = 0, hi = nmemb, mid;
-    char *p;
-    int c;
+    char *elem;
+    int cmpResult;
     if (nmemb == 0 || size == 0)
         return 0;
     while (lo < hi) {
         mid = (lo + hi) >> 1;
-        p = base + mid * size;
-        c = compar(key, p);
-        if (c < 0)
+        elem = base + mid * size;
+        cmpResult = compar(key, elem);
+        if (cmpResult < 0)
             hi = mid;
-        else if (c > 0)
+        else if (cmpResult > 0)
             lo = mid + 1;
         else
-            return p;
+            return elem;
     }
     return 0;
 }
@@ -2613,59 +2620,59 @@ extern unsigned int strlen_8958(const char *) __asm__("strlen");
 extern int strcmp_8958(const char *, const char *) __asm__("func_004165A8");
 
 int
-func_00418958 (struct _reent_8958 *r, wchar_t_8958 *pwc, const char *s, unsigned int n, int *state)
+func_00418958 (struct _reent_8958 *reent, wchar_t_8958 *pwc, const char *src, unsigned int n, int *state)
 {
-  wchar_t_8958 dummy;
-  unsigned char *t = (unsigned char *)s;
+  wchar_t_8958 scratchWc;
+  unsigned char *srcBytes = (unsigned char *)src;
 
   if (pwc == 0)
-    pwc = &dummy;
+    pwc = &scratchWc;
 
-  if (s != 0 && n == 0)
+  if (src != 0 && n == 0)
     return -1;
 
-  if (r->_current_locale == 0 ||
-      (strlen_8958 (r->_current_locale) <= 1))
+  if (reent->_current_locale == 0 ||
+      (strlen_8958 (reent->_current_locale) <= 1))
     { /* fall-through */ }
-  else if (!strcmp_8958 (r->_current_locale, "C-SJIS"))
+  else if (!strcmp_8958 (reent->_current_locale, "C-SJIS"))
     {
-      int char1 = *t;
-      if (s == 0)
+      int char1 = *srcBytes;
+      if (src == 0)
         return 0;  /* not state-dependent */
       if (_issjis1_8958 (char1))
         {
-          int char2 = t[1];
+          int char2 = srcBytes[1];
           if (n <= 1)
             return -1;
           if (_issjis2_8958 (char2))
             {
-              *pwc = (((wchar_t_8958)*t) << 8) + (wchar_t_8958)(*(t+1));
+              *pwc = (((wchar_t_8958)*srcBytes) << 8) + (wchar_t_8958)(*(srcBytes+1));
               return 2;
             }
           else
             return -1;
         }
     }
-  else if (!strcmp_8958 (r->_current_locale, "C-EUCJP"))
+  else if (!strcmp_8958 (reent->_current_locale, "C-EUCJP"))
     {
-      int char1 = *t;
-      if (s == 0)
+      int char1 = *srcBytes;
+      if (src == 0)
         return 0;  /* not state-dependent */
       if (_iseucjp_8958 (char1))
         {
-          int char2 = t[1];
+          int char2 = srcBytes[1];
           if (n <= 1)
             return -1;
           if (_iseucjp_8958 (char2))
             {
-              *pwc = (((wchar_t_8958)*t) << 8) + (wchar_t_8958)(*(t+1));
+              *pwc = (((wchar_t_8958)*srcBytes) << 8) + (wchar_t_8958)(*(srcBytes+1));
               return 2;
             }
           else
             return -1;
         }
     }
-  else if (!strcmp_8958 (r->_current_locale, "C-JIS"))
+  else if (!strcmp_8958 (reent->_current_locale, "C-JIS"))
     {
       JIS_STATE_8958 curr_state;
       JIS_ACTION_8958 action;
@@ -2673,18 +2680,18 @@ func_00418958 (struct _reent_8958 *r, wchar_t_8958 *pwc, const char *s, unsigned
       unsigned char *ptr;
       int i, curr_ch;
 
-      if (s == 0)
+      if (src == 0)
         {
           *state = 0;
           return 1;  /* state-dependent */
         }
 
       curr_state = (*state == 0 ? ASCII : JIS);
-      ptr = t;
+      ptr = srcBytes;
 
       for (i = 0; i < n; ++i)
         {
-          curr_ch = t[i];
+          curr_ch = srcBytes[i];
           switch (curr_ch)
             {
 	    case ESC_CHAR_8958:
@@ -2737,10 +2744,10 @@ func_00418958 (struct _reent_8958 *r, wchar_t_8958 *pwc, const char *s, unsigned
             case COPY_J2:
               *state = 1;
               *pwc = (((wchar_t_8958)*ptr) << 8) + (wchar_t_8958)(*(ptr+1));
-              return (ptr - t) + 2;
+              return (ptr - srcBytes) + 2;
             case MAKE_A:
             case MAKE_J:
-              ptr = (char *)(t + i + 1);
+              ptr = (char *)(srcBytes + i + 1);
               break;
             case ERROR:
             default:
@@ -2753,12 +2760,12 @@ func_00418958 (struct _reent_8958 *r, wchar_t_8958 *pwc, const char *s, unsigned
     }
 
   /* otherwise this must be the "C" locale or unknown locale */
-  if (s == 0)
+  if (src == 0)
     return 0;  /* not state-dependent */
 
-  *pwc = (wchar_t_8958)*t;
+  *pwc = (wchar_t_8958)*srcBytes;
 
-  if (*t == '\0')
+  if (*srcBytes == '\0')
     return 0;
 
   return 1;
@@ -2804,8 +2811,8 @@ void func_00418D08(int unused) {
 INCLUDE_ASM("seg/seg_316FB8", func_00418D48);
 #ifdef SKIP_ASM
 extern void func_004218D8(int, int, int, int, int);
-void func_00418D48(int a, int b, int c, int d) {
-    func_004218D8(a, b, c, d, 0);
+void func_00418D48(int value, int numDigits, int decptOut, int signOut) {
+    func_004218D8(value, numDigits, decptOut, signOut, 0);
 }
 #endif
 
@@ -2814,8 +2821,8 @@ INCLUDE_ASM("seg/seg_316FB8", func_00418D68);
 #ifdef SKIP_ASM
 extern int fptodp(void);
 extern void func_00418D48(int, int, int, int);
-void func_00418D68(int a, int b, int c) {
-    func_00418D48(fptodp(), a, b, c);
+void func_00418D68(int numDigits, int decptOut, int signOut) {
+    func_00418D48(fptodp(), numDigits, decptOut, signOut);
 }
 #endif
 
@@ -2824,8 +2831,8 @@ INCLUDE_ASM("seg/seg_316FB8", func_00418DB8);
 #ifdef SKIP_ASM
 extern int fptodp(void);
 extern int func_00418E68(int, int, int);
-void func_00418DB8(int a, int b) {
-    func_00418E68(fptodp(), a, b);
+void func_00418DB8(int numDigits, int buf) {
+    func_00418E68(fptodp(), numDigits, buf);
 }
 #endif
 
@@ -2833,8 +2840,8 @@ void func_00418DB8(int a, int b) {
 INCLUDE_ASM("seg/seg_316FB8", func_00418DF8);
 #ifdef SKIP_ASM
 extern void func_00421A50(int, int, int, int, int);
-void func_00418DF8(int a, int b, int c, int d) {
-    func_00421A50(a, b, c, d, 0);
+void func_00418DF8(int value, int numDigits, int decptOut, int signOut) {
+    func_00421A50(value, numDigits, decptOut, signOut, 0);
 }
 #endif
 
@@ -2843,8 +2850,8 @@ INCLUDE_ASM("seg/seg_316FB8", func_00418E18);
 #ifdef SKIP_ASM
 extern int fptodp(void);
 extern void func_00418DF8(int, int, int, int);
-void func_00418E18(int a, int b, int c) {
-    func_00418DF8(fptodp(), a, b, c);
+void func_00418E18(int numDigits, int decptOut, int signOut) {
+    func_00418DF8(fptodp(), numDigits, decptOut, signOut);
 }
 #endif
 
@@ -2951,7 +2958,7 @@ void
 func_00418EF8(void *a, unsigned int n, unsigned int es, int (*cmp)())
 {
 	char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
-	int d, r, swaptype, swap_cnt;
+	int stride, r, swaptype, swap_cnt;
 
 loop:	SWAPINIT_00418EF8(a, es);
 	swap_cnt = 0;
@@ -2967,10 +2974,10 @@ loop:	SWAPINIT_00418EF8(a, es);
 		pl = a;
 		pn = (char *) a + (n - 1) * es;
 		if (n > 40) {
-			d = (n / 8) * es;
-			pl = med3_00418EF8(pl, pl + d, pl + 2 * d, cmp);
-			pm = med3_00418EF8(pm - d, pm, pm + d, cmp);
-			pn = med3_00418EF8(pn - 2 * d, pn - d, pn, cmp);
+			stride = (n / 8) * es;
+			pl = med3_00418EF8(pl, pl + stride, pl + 2 * stride, cmp);
+			pm = med3_00418EF8(pm - stride, pm, pm + stride, cmp);
+			pn = med3_00418EF8(pn - 2 * stride, pn - stride, pn, cmp);
 		}
 		pm = med3_00418EF8(pl, pm, pn, cmp);
 	}
@@ -3113,12 +3120,12 @@ extern double g98D8_ratio(_Bigint_004198D8 *, _Bigint_004198D8 *) __asm__("func_
 
 /* the unit declares this as void func_004198D8(int, int, int) (strtod, func_0041A7E8) */
 double func_004198D8_(struct _reent_004198D8 *, const char *, char **) __asm__("func_004198D8");
-double func_004198D8_(struct _reent_004198D8 *ptr, const char *s00, char **se)
+double func_004198D8_(struct _reent_004198D8 *ptr, const char *input, char **se)
 {
-  int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, dsign, e1, esign, i, j,
+  int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, curChar, dsign, scaleExp, esign, i, j,
     k, nd, nd0, nf, nz, nz0, sign;
   long e;
-  const char *s, *s0, *s1;
+  const char *cursor, *digitStart, *expStart;
   double aadj, aadj1, adj;
   long L;
   unsigned long z;
@@ -3128,18 +3135,18 @@ double func_004198D8_(struct _reent_004198D8 *ptr, const char *s00, char **se)
   _Bigint_004198D8 *bb, *bb1, *bd, *bd0, *bs, *delta;
   sign = nz0 = nz = 0;
   rv.d = 0.;
-  for (s = s00;; s++)
-    switch (*s)
+  for (cursor = input;; cursor++)
+    switch (*cursor)
       {
       case '-':
 	sign = 1;
 	/* no break */
       case '+':
-	if (*++s)
+	if (*++cursor)
 	  goto break2;
 	/* no break */
       case 0:
-	s = s00;
+	cursor = input;
 	goto ret;
       case '\t':
       case '\n':
@@ -3152,42 +3159,42 @@ double func_004198D8_(struct _reent_004198D8 *ptr, const char *s00, char **se)
 	goto break2;
       }
 break2:
-  if (*s == '0')
+  if (*cursor == '0')
     {
       nz0 = 1;
-      while (*++s == '0');
-      if (!*s)
+      while (*++cursor == '0');
+      if (!*cursor)
 	goto ret;
     }
-  s0 = s;
+  digitStart = cursor;
   y = z = 0;
-  for (nd = nf = 0; (c = *s) >= '0' && c <= '9'; nd++, s++)
+  for (nd = nf = 0; (curChar = *cursor) >= '0' && curChar <= '9'; nd++, cursor++)
     if (nd < 9)
-      y = 10 * y + c - '0';
+      y = 10 * y + curChar - '0';
     else if (nd < 16)
-      z = 10 * z + c - '0';
+      z = 10 * z + curChar - '0';
   nd0 = nd;
-  if (c == '.')
+  if (curChar == '.')
     {
-      c = *++s;
+      curChar = *++cursor;
       if (!nd)
 	{
-	  for (; c == '0'; c = *++s)
+	  for (; curChar == '0'; curChar = *++cursor)
 	    nz++;
-	  if (c > '0' && c <= '9')
+	  if (curChar > '0' && curChar <= '9')
 	    {
-	      s0 = s;
+	      digitStart = cursor;
 	      nf += nz;
 	      nz = 0;
 	      goto have_dig;
 	    }
 	  goto dig_done;
 	}
-      for (; c >= '0' && c <= '9'; c = *++s)
+      for (; curChar >= '0' && curChar <= '9'; curChar = *++cursor)
 	{
 	have_dig:
 	  nz++;
-	  if (c -= '0')
+	  if (curChar -= '0')
 	    {
 	      nf += nz;
 	      for (i = 1; i < nz; i++)
@@ -3196,42 +3203,42 @@ break2:
 		else if (nd <= DBL_DIG_004198D8 + 1)
 		  z *= 10;
 	      if (nd++ < 9)
-		y = 10 * y + c;
+		y = 10 * y + curChar;
 	      else if (nd <= DBL_DIG_004198D8 + 1)
-		z = 10 * z + c;
+		z = 10 * z + curChar;
 	      nz = 0;
 	    }
 	}
     }
 dig_done:
   e = 0;
-  if (c == 'e' || c == 'E')
+  if (curChar == 'e' || curChar == 'E')
     {
       if (!nd && !nz && !nz0)
 	{
-	  s = s00;
+	  cursor = input;
 	  goto ret;
 	}
-      s00 = s;
+      input = cursor;
       esign = 0;
-      switch (c = *++s)
+      switch (curChar = *++cursor)
 	{
 	case '-':
 	  esign = 1;
 	case '+':
-	  c = *++s;
+	  curChar = *++cursor;
 	}
-      if (c >= '0' && c <= '9')
+      if (curChar >= '0' && curChar <= '9')
 	{
-	  while (c == '0')
-	    c = *++s;
-	  if (c > '0' && c <= '9')
+	  while (curChar == '0')
+	    curChar = *++cursor;
+	  if (curChar > '0' && curChar <= '9')
 	    {
-	      e = c - '0';
-	      s1 = s;
-	      while ((c = *++s) >= '0' && c <= '9')
-		e = 10 * e + c - '0';
-	      if (s - s1 > 8)
+	      e = curChar - '0';
+	      expStart = cursor;
+	      while ((curChar = *++cursor) >= '0' && curChar <= '9')
+		e = 10 * e + curChar - '0';
+	      if (cursor - expStart > 8)
 		/* Avoid confusion from exponents
 		 * so large that e might overflow.
 		 */
@@ -3243,15 +3250,15 @@ dig_done:
 	    e = 0;
 	}
       else
-	s = s00;
+	cursor = input;
     }
   if (!nd)
     {
       if (!nz && !nz0)
-	s = s00;
+	cursor = input;
       goto ret;
     }
-  e1 = e -= nf;
+  scaleExp = e -= nf;
 
   /* Now we have nd0 digits, starting at s0, followed by a
    * decimal point, followed by nd-nd0 digits.  The number we're
@@ -3296,17 +3303,17 @@ dig_done:
 	  goto ret;
 	}
     }
-  e1 += nd - k;
+  scaleExp += nd - k;
 
   /* Get starting approximation = rv.d * 10**e1 */
 
-  if (e1 > 0)
+  if (scaleExp > 0)
     {
-      if ((i = e1 & 15) != 0)
+      if ((i = scaleExp & 15) != 0)
 	rv.d *= tens_004198D8[i];
-      if (e1 &= ~15)
+      if (scaleExp &= ~15)
 	{
-	  if (e1 > DBL_MAX_10_EXP_004198D8)
+	  if (scaleExp > DBL_MAX_10_EXP_004198D8)
 	    {
 	    ovfl:
 	      ptr->_errno = ERANGE_004198D8;
@@ -3315,10 +3322,10 @@ dig_done:
 		goto retfree;
 	      goto ret;
 	    }
-	  if (e1 >>= 4)
+	  if (scaleExp >>= 4)
 	    {
-	      for (j = 0; e1 > 1; j++, e1 >>= 1)
-		if (e1 & 1)
+	      for (j = 0; scaleExp > 1; j++, scaleExp >>= 1)
+		if (scaleExp & 1)
 		  rv.d *= bigtens_004198D8[j];
 	      /* The last multiplication could overflow. */
 	      word0_004198D8 (rv) -= P_004198D8 * Exp_msk1_004198D8;
@@ -3339,18 +3346,18 @@ dig_done:
 
 	}
     }
-  else if (e1 < 0)
+  else if (scaleExp < 0)
     {
-      e1 = -e1;
-      if ((i = e1 & 15) != 0)
+      scaleExp = -scaleExp;
+      if ((i = scaleExp & 15) != 0)
 	rv.d /= tens_004198D8[i];
-      if (e1 &= ~15)
+      if (scaleExp &= ~15)
 	{
-	  e1 >>= 4;
-	  if (e1 >= 1 << n_bigtens_004198D8)
+	  scaleExp >>= 4;
+	  if (scaleExp >= 1 << n_bigtens_004198D8)
             goto undfl;
-	  for (j = 0; e1 > 1; j++, e1 >>= 1)
-	    if (e1 & 1)
+	  for (j = 0; scaleExp > 1; j++, scaleExp >>= 1)
+	    if (scaleExp & 1)
 	      rv.d *= tinytens_004198D8[j];
 	  /* The last multiplication could underflow. */
 	  rv0.d = rv.d;
@@ -3381,7 +3388,7 @@ dig_done:
 
   /* Put digits into bd: true value = bd * 10^e */
 
-  bd0 = g98D8_s2b (ptr, s0, nd0, nd, y);
+  bd0 = g98D8_s2b (ptr, digitStart, nd0, nd, y);
 
   for (;;)
     {
@@ -3588,7 +3595,7 @@ retfree:
   g98D8_Bfree (ptr, delta);
 ret:
   if (se)
-    *se = (char *) s;
+    *se = (char *) cursor;
   return sign ? -rv.d : rv.d;
 }
 #endif
@@ -3683,30 +3690,40 @@ void func_0041AA50(int a, int b, int c) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", strcasecmp);
 #ifdef SKIP_ASM
-int strcasecmp(char *a, char *b) {
-    while (*a && func_0041EA18(*a) == func_0041EA18(*b)) {
-        a++;
-        b++;
+/**
+ * Compares two strings ignoring case (C library strcasecmp).
+ *
+ * Steps both strings while the first has characters and their lowercase forms (func_0041EA18, tolower) agree, and
+ * returns the difference of the lowercase forms where they stop.
+ *
+ * @param str1  the first string
+ * @param str2  the second string
+ * @return less than, equal to or greater than 0 as @p str1 sorts before, equal to or after @p str2
+ */
+int strcasecmp(char *str1, char *str2) {
+    while (*str1 && func_0041EA18(*str1) == func_0041EA18(*str2)) {
+        str1++;
+        str2++;
     }
-    return func_0041EA18((unsigned char)*a) - func_0041EA18((unsigned char)*b);
+    return func_0041EA18((unsigned char)*str1) - func_0041EA18((unsigned char)*str2);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041AB08);
 #ifdef SKIP_ASM
-int func_0041AB08(char *s1, char *s2) {
-    char *s = s1;
-    char *c;
-    while (*s1) {
-        for (c = s2; *c; c++)
-            if (*s1 == *c)
+int func_0041AB08(char *str, char *reject) {
+    char *start = str;
+    char *rejectPos;
+    while (*str) {
+        for (rejectPos = reject; *rejectPos; rejectPos++)
+            if (*str == *rejectPos)
                 break;
-        if (*c)
+        if (*rejectPos)
             break;
-        s1++;
+        str++;
     }
-    return s1 - s;
+    return str - start;
 }
 #endif
 
@@ -3714,64 +3731,75 @@ int func_0041AB08(char *s1, char *s2) {
 INCLUDE_ASM("seg/seg_316FB8", strncasecmp);
 #ifdef SKIP_ASM
 extern int func_0041EA18(int);
-int strncasecmp(char *s1, char *s2, unsigned n) {
+/**
+ * Compares at most n characters of two strings ignoring case (C library strncasecmp).
+ *
+ * Returns 0 for a zero count; otherwise steps while the lowercase forms (func_0041EA18, tolower) agree, stopping at the
+ * count or the end of either string, and returns the difference of the lowercase forms there.
+ *
+ * @param str1  the first string
+ * @param str2  the second string
+ * @param n   the most characters to compare
+ * @return less than, equal to or greater than 0 as the prefix of @p str1 sorts before, equal to or after @p str2's
+ */
+int strncasecmp(char *str1, char *str2, unsigned n) {
     if (n == 0)
         return 0;
-    while (n-- != 0 && func_0041EA18(*s1) == func_0041EA18(*s2)) {
-        if (n == 0 || *s1 == '\0' || *s2 == '\0')
+    while (n-- != 0 && func_0041EA18(*str1) == func_0041EA18(*str2)) {
+        if (n == 0 || *str1 == '\0' || *str2 == '\0')
             break;
-        s1++;
-        s2++;
+        str1++;
+        str2++;
     }
-    return func_0041EA18(*(unsigned char *)s1) - func_0041EA18(*(unsigned char *)s2);
+    return func_0041EA18(*(unsigned char *)str1) - func_0041EA18(*(unsigned char *)str2);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041AC40);
 #ifdef SKIP_ASM
-char *func_0041AC40(char *s, char *accept) {
-    char *p;
-    if (*s == 0)
+char *func_0041AC40(char *str, char *accept) {
+    char *acceptPos;
+    if (*str == 0)
         return 0;
-    for (; *s; s++) {
-        for (p = accept; *p && *s != *p; p++)
+    for (; *str; str++) {
+        for (acceptPos = accept; *acceptPos && *str != *acceptPos; acceptPos++)
             ;
-        if (*p)
+        if (*acceptPos)
             break;
     }
-    return *p ? s : 0;
+    return *acceptPos ? str : 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041ACC0);
 #ifdef SKIP_ASM
-char *func_0041ACC0(char *s, char c) {
-    char *r = 0;
-    while (*s) {
-        if (*s == c) r = s;
-        s++;
+char *func_0041ACC0(char *str, char target) {
+    char *last = 0;
+    while (*str) {
+        if (*str == target) last = str;
+        str++;
     }
-    return *s == c ? s : r;
+    return *str == target ? str : last;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041AD10);
 #ifdef SKIP_ASM
-int func_0041AD10(char *s1, char *s2) {
-    char *s = s1;
-    char *c;
-    while (*s1) {
-        for (c = s2; *c; c++)
-            if (*s1 == *c)
+int func_0041AD10(char *str, char *accept) {
+    char *start = str;
+    char *acceptPos;
+    while (*str) {
+        for (acceptPos = accept; *acceptPos; acceptPos++)
+            if (*str == *acceptPos)
                 break;
-        if (*c == 0)
+        if (*acceptPos == 0)
             break;
-        s1++;
+        str++;
     }
-    return s1 - s;
+    return str - start;
 }
 #endif
 
@@ -3821,17 +3849,17 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041AE00);
 #ifdef SKIP_ASM
 /* Sony's libc float-to-string helper (not in newlib 1.9.0; called by func_0041AF88): round the n-digit decimal
    string s at its last digit, propagating the carry. Returns 0 when the carry runs out of the first digit. */
-int func_0041AE00(char *s, int n)
+int func_0041AE00(char *digits, int n)
 {
     if (n > 0) {
         n--;
-        if (s[n] >= '5') {
+        if (digits[n] >= '5') {
             do
-                s[n] = '0';
-            while (--n > 0 && s[n] == '9');
-            if (s[n] == '9')
+                digits[n] = '0';
+            while (--n > 0 && digits[n] == '9');
+            if (digits[n] == '9')
                 return 0;
-            s[n]++;
+            digits[n]++;
         }
     }
     return 1;
@@ -3841,19 +3869,19 @@ int func_0041AE00(char *s, int n)
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_0041AE70);
 #ifdef SKIP_ASM
-char *func_0041AE70(char *s) {
+char *func_0041AE70(char *str) {
     int i, j;
-    char t;
+    char swapChar;
     j = 0;
-    while (s[j])
+    while (str[j])
         j++;
     j--;
     for (i = 0; i < j; i++, j--) {
-        t = s[i];
-        s[i] = s[j];
-        s[j] = t;
+        swapChar = str[i];
+        str[i] = str[j];
+        str[j] = swapChar;
     }
-    return s;
+    return str;
 }
 #endif
 
@@ -3892,8 +3920,8 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041AF88);
 INCLUDE_ASM("seg/seg_316FB8", func_0041B528);
 #ifdef SKIP_ASM
 extern void func_0041B550(int, int, int, int);
-void func_0041B528(short *p) {
-    func_0041B550(p[7], 0, 0, 2);
+void func_0041B528(short *stream) {
+    func_0041B550(stream[7], 0, 0, 2);
 }
 #endif
 
@@ -3935,26 +3963,26 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041B658);
 #ifdef SKIP_ASM
 extern int func_0041B728_f(int, int, char *, char *) __asm__("func_0041B728");
 extern int func_0041CA70_i(int, int, char *, char *) __asm__("func_0041CA70");
-int func_0041B658(int fp, int fmt, char *ap) {
-    char *p = (char *)fmt;
-    while (*p) {
-        if (*p == '%' && p[1]) {
-            p++;
-            while (*p < 'A' && p[1])
-                p++;
-            switch (*p) {
+int func_0041B658(int stream, int fmt, char *ap) {
+    char *cursor = (char *)fmt;
+    while (*cursor) {
+        if (*cursor == '%' && cursor[1]) {
+            cursor++;
+            while (*cursor < 'A' && cursor[1])
+                cursor++;
+            switch (*cursor) {
             case 'E':
             case 'G':
             case 'L':
             case 'e':
             case 'f':
             case 'g':
-                return func_0041B728_f(*(int *)(fp + 0x54), fp, (char *)fmt, ap);
+                return func_0041B728_f(*(int *)(stream + 0x54), stream, (char *)fmt, ap);
             }
         }
-        p++;
+        cursor++;
     }
-    return func_0041CA70_i(*(int *)(fp + 0x54), fp, (char *)fmt, ap);
+    return func_0041CA70_i(*(int *)(stream + 0x54), stream, (char *)fmt, ap);
 }
 #endif
 
@@ -3971,16 +3999,16 @@ char *func_0041C788_impl(char *dest, char *start, char *end, int *outlen) {
     char *w = buf + len - 1;
     int cnt = 0;
     int st[2];
-    char *p;
+    char *cursor;
     if (dest == 0 || start == 0 || end == 0) return 0;
     st[0] = 0;
     st[1] = (int)end;
-    p = start;
-    if (!(end < p)) {
+    cursor = start;
+    if (!(end < cursor)) {
         do {
-            switch (*p) {
+            switch (*cursor) {
             case '.':
-                st[1] = (int)p;
+                st[1] = (int)cursor;
                 if (st[0] == 0) st[0] = 1;
                 break;
             case 'E':
@@ -3988,16 +4016,16 @@ char *func_0041C788_impl(char *dest, char *start, char *end, int *outlen) {
                 st[0] = 2;
                 break;
             }
-            p++;
-        } while (!(end < p) && st[0] != 2);
+            cursor++;
+        } while (!(end < cursor) && st[0] != 2);
     }
     if (st[0] == 2) return start;
-    p = end;
-    if (start < p) {
+    cursor = end;
+    if (start < cursor) {
         do {
-            *w = *p;
+            *w = *cursor;
             w--;
-            if (!((char *)st[1] < p)) {
+            if (!((char *)st[1] < cursor)) {
                 if (cnt % 3 == 0 && cnt != 0) {
                     *w = ',';
                     len++;
@@ -4005,10 +4033,10 @@ char *func_0041C788_impl(char *dest, char *start, char *end, int *outlen) {
                 }
                 cnt++;
             }
-            p--;
-        } while (start < p);
+            cursor--;
+        } while (start < cursor);
     }
-    *w = *p;
+    *w = *cursor;
     len -= 10;
     g_c788_memcpy(dest, w, len);
     *outlen = len;
@@ -4052,8 +4080,8 @@ int func_0041C938_(int fd, char *buf, unsigned n, int mode) {
 INCLUDE_ASM("seg/seg_316FB8", func_0041CA40);
 #ifdef SKIP_ASM
 extern void func_0041CA70(int, int *, int, int);
-void func_0041CA40(int *p, int b, int c) {
-    func_0041CA70(p[21], p, b, c);
+void func_0041CA40(int *stream, int fmt, int args) {
+    func_0041CA70(stream[21], stream, fmt, args);
 }
 #endif
 
@@ -4941,36 +4969,36 @@ static const double huge_ED60 = 1.0e300;
 
 double func_0041ED60(double x)
 {
-	int i0,i1,j0;
+	int i0,i1,exponent;
 	unsigned int i,j;
 	EXTRACT_WORDS_ED60(i0,i1,x);
-	j0 = ((i0>>20)&0x7ff)-0x3ff;
-	if(j0<20) {
-	    if(j0<0) { 	/* raise inexact if x != 0 */
+	exponent = ((i0>>20)&0x7ff)-0x3ff;
+	if(exponent<20) {
+	    if(exponent<0) { 	/* raise inexact if x != 0 */
 		if(huge_ED60+x>0.0) {/* return 0*sign(x) if |x|<1 */
 		    if(i0>=0) {i0=i1=0;}
 		    else if(((i0&0x7fffffff)|i1)!=0)
 			{ i0=0xbff00000;i1=0;}
 		}
 	    } else {
-		i = (0x000fffff)>>j0;
+		i = (0x000fffff)>>exponent;
 		if(((i0&i)|i1)==0) return x; /* x is integral */
 		if(huge_ED60+x>0.0) {	/* raise inexact flag */
-		    if(i0<0) i0 += (0x00100000)>>j0;
+		    if(i0<0) i0 += (0x00100000)>>exponent;
 		    i0 &= (~i); i1=0;
 		}
 	    }
-	} else if (j0>51) {
-	    if(j0==0x400) return x+x;	/* inf or NaN */
+	} else if (exponent>51) {
+	    if(exponent==0x400) return x+x;	/* inf or NaN */
 	    else return x;		/* x is integral */
 	} else {
-	    i = ((unsigned int)(0xffffffff))>>(j0-20);
+	    i = ((unsigned int)(0xffffffff))>>(exponent-20);
 	    if((i1&i)==0) return x;	/* x is integral */
 	    if(huge_ED60+x>0.0) { 		/* raise inexact flag */
 		if(i0<0) {
-		    if(j0==20) i0+=1;
+		    if(exponent==20) i0+=1;
 		    else {
-			j = i1+(1<<(52-j0));
+			j = i1+(1<<(52-exponent));
 			if(j<i1) i0 +=1 ; 	/* got a carry */
 			i1=j;
 		    }
@@ -5193,7 +5221,7 @@ static const double zero_0041F3A8   =  0.0;
 
 double func_0041F3A8(double x)
 {
-	double hfsq,f,s,z,R,w,t1,t2,dk;
+	double hfsq,frac,ratio,z,poly,w,evenTerms,oddTerms,dk;
 	int k,hx,i,j;
 	unsigned int lx;
 
@@ -5213,31 +5241,31 @@ double func_0041F3A8(double x)
 	i = (hx+0x95f64)&0x100000;
 	SET_HIGH_WORD_0041F3A8(x,hx|(i^0x3ff00000));	/* normalize x or x/2 */
 	k += (i>>20);
-	f = x-1.0;
+	frac = x-1.0;
 	if((0x000fffff&(2+hx))<3) {	/* |f| < 2**-20 */
-          if(f==zero_0041F3A8) { if(k==0) return zero_0041F3A8;  else {dk=(double)k;
+          if(frac==zero_0041F3A8) { if(k==0) return zero_0041F3A8;  else {dk=(double)k;
                                return dk*ln2_hi_0041F3A8+dk*ln2_lo_0041F3A8;}}
-	    R = f*f*(0.5-0.33333333333333333*f);
-	    if(k==0) return f-R; else {dk=(double)k;
-	    	     return dk*ln2_hi_0041F3A8-((R-dk*ln2_lo_0041F3A8)-f);}
+	    poly = frac*frac*(0.5-0.33333333333333333*frac);
+	    if(k==0) return frac-poly; else {dk=(double)k;
+	    	     return dk*ln2_hi_0041F3A8-((poly-dk*ln2_lo_0041F3A8)-frac);}
 	}
- 	s = f/(2.0+f); 
+ 	ratio = frac/(2.0+frac); 
 	dk = (double)k;
-	z = s*s;
+	z = ratio*ratio;
 	i = hx-0x6147a;
 	w = z*z;
 	j = 0x6b851-hx;
-	t1= w*(Lg2_0041F3A8+w*(Lg4_0041F3A8+w*Lg6_0041F3A8)); 
-	t2= z*(Lg1_0041F3A8+w*(Lg3_0041F3A8+w*(Lg5_0041F3A8+w*Lg7_0041F3A8))); 
+	evenTerms= w*(Lg2_0041F3A8+w*(Lg4_0041F3A8+w*Lg6_0041F3A8)); 
+	oddTerms= z*(Lg1_0041F3A8+w*(Lg3_0041F3A8+w*(Lg5_0041F3A8+w*Lg7_0041F3A8))); 
 	i |= j;
-	R = t2+t1;
+	poly = oddTerms+evenTerms;
 	if(i>0) {
-	    hfsq=0.5*f*f;
-	    if(k==0) return f-(hfsq-s*(hfsq+R)); else
-		     return dk*ln2_hi_0041F3A8-((hfsq-(s*(hfsq+R)+dk*ln2_lo_0041F3A8))-f);
+	    hfsq=0.5*frac*frac;
+	    if(k==0) return frac-(hfsq-ratio*(hfsq+poly)); else
+		     return dk*ln2_hi_0041F3A8-((hfsq-(ratio*(hfsq+poly)+dk*ln2_lo_0041F3A8))-frac);
 	} else {
-	    if(k==0) return f-s*(f-R); else
-		     return dk*ln2_hi_0041F3A8-((s*(f-R)-dk*ln2_lo_0041F3A8)-f);
+	    if(k==0) return frac-ratio*(frac-poly); else
+		     return dk*ln2_hi_0041F3A8-((ratio*(frac-poly)-dk*ln2_lo_0041F3A8)-frac);
 	}
 }
 #endif
@@ -5508,7 +5536,7 @@ int fflush_FE30(struct __sFILE_FE30 *fp) __asm__("func_0041FE30");
 int
 fflush_FE30 (register struct __sFILE_FE30 * fp)
 {
-  register unsigned char *p;
+  register unsigned char *cursor;
   register int n, t;
 
   if (fp == 0)
@@ -5517,27 +5545,27 @@ fflush_FE30 (register struct __sFILE_FE30 * fp)
   CHECK_INIT_FE30 (fp);
 
   t = fp->_flags;
-  if ((t & __SWR_FE30) == 0 || (p = fp->_bf._base) == 0)
+  if ((t & __SWR_FE30) == 0 || (cursor = fp->_bf._base) == 0)
     return 0;
-  n = fp->_p - p;		/* write this much */
+  n = fp->_p - cursor;		/* write this much */
 
   /*
    * Set these immediately to avoid problems with longjmp
    * and to allow exchange buffering (via setvbuf) in user
    * write function.
    */
-  fp->_p = p;
+  fp->_p = cursor;
   fp->_w = t & (__SLBF_FE30 | __SNBF_FE30) ? 0 : fp->_bf._size;
 
   while (n > 0)
     {
-      t = (*fp->_write) (fp->_cookie, (char *) p, n);
+      t = (*fp->_write) (fp->_cookie, (char *) cursor, n);
       if (t <= 0)
 	{
 	  fp->_flags |= __SERR_FE30;
 	  return -1;
 	}
-      p += t;
+      cursor += t;
       n -= t;
     }
   return 0;
@@ -5557,20 +5585,20 @@ struct F41FF40 {
     int ent;
 };
 extern long func_00417948(), func_004179B0(), func_00417A30();
-void func_0041FF40(struct F41FF40 *f, short flags, short file, int ent) {
-    f->p = 0;
-    f->r = 0;
-    f->w = 0;
-    f->flags = flags;
-    f->file = file;
-    f->base = 0;
-    f->lbf = 0;
-    f->cookie = (int)f;
-    f->rd = func_00417948;
-    f->wr = func_004179B0;
-    f->sk = func_00417A30;
-    f->cl = (void *)func_00417A98;
-    f->ent = ent;
+void func_0041FF40(struct F41FF40 *stream, short flags, short file, int ent) {
+    stream->p = 0;
+    stream->r = 0;
+    stream->w = 0;
+    stream->flags = flags;
+    stream->file = file;
+    stream->base = 0;
+    stream->lbf = 0;
+    stream->cookie = (int)stream;
+    stream->rd = func_00417948;
+    stream->wr = func_004179B0;
+    stream->sk = func_00417A30;
+    stream->cl = (void *)func_00417A98;
+    stream->ent = ent;
 }
 #endif
 
@@ -5578,16 +5606,16 @@ void func_0041FF40(struct F41FF40 *f, short flags, short file, int ent) {
 INCLUDE_ASM("seg/seg_316FB8", func_0041FF98);
 #ifdef SKIP_ASM
 extern void *func_00416210(void *, int, int);
-int *func_0041FF98(int a, int cnt) {
+int *func_0041FF98(int reent, int cnt) {
     int sz = cnt * 0x58;
-    int *p = (int *)func_0041DBF8(a, sz + 0xC);
-    if (!p)
+    int *glue = (int *)func_0041DBF8(reent, sz + 0xC);
+    if (!glue)
         return 0;
-    p[1] = cnt;
-    p[0] = 0;
-    p[2] = (int)(p + 3);
-    func_00416210(p + 3, 0, sz);
-    return p;
+    glue[1] = cnt;
+    glue[0] = 0;
+    glue[2] = (int)(glue + 3);
+    func_00416210(glue + 3, 0, sz);
+    return glue;
 }
 #endif
 
@@ -5663,58 +5691,58 @@ extern struct _glue_0010 *__sfmoreglue_0010(struct _reent_0010 *, int) __asm__("
 /* the unit declares func_00420010(int) for its caller func_00416EB0 */
 struct __sFILE_0010 *__sfp_0010(struct _reent_0010 *d) __asm__("func_00420010");
 struct __sFILE_0010 *
-__sfp_0010 (struct _reent_0010 *d)
+__sfp_0010 (struct _reent_0010 *reent)
 {
-  struct __sFILE_0010 *fp;
+  struct __sFILE_0010 *stream;
   int n;
-  struct _glue_0010 *g;
+  struct _glue_0010 *glue;
 
-  if (!d->__sdidinit)
-    __sinit_0010 (d);
-  for (g = &d->__sglue;; g = g->_next)
+  if (!reent->__sdidinit)
+    __sinit_0010 (reent);
+  for (glue = &reent->__sglue;; glue = glue->_next)
     {
-      for (fp = g->_iobs, n = g->_niobs; --n >= 0; fp++)
-	if (fp->_flags == 0)
+      for (stream = glue->_iobs, n = glue->_niobs; --n >= 0; stream++)
+	if (stream->_flags == 0)
 	  goto found;
-      if (g->_next == 0 &&
-	  (g->_next = __sfmoreglue_0010 (d, NDYNAMIC_0010)) == 0)
+      if (glue->_next == 0 &&
+	  (glue->_next = __sfmoreglue_0010 (reent, NDYNAMIC_0010)) == 0)
 	break;
     }
-  d->_errno = ENOMEM_0010;
+  reent->_errno = ENOMEM_0010;
   return 0;
 
 found:
-  fp->_flags = 1;		/* reserve this slot; caller sets real flags */
-  fp->_p = 0;		/* no current pointer */
-  fp->_w = 0;			/* nothing to read or write */
-  fp->_r = 0;
-  fp->_bf._base = 0;		/* no buffer */
-  fp->_bf._size = 0;
-  fp->_lbfsize = 0;		/* not line buffered */
-  fp->_file = -1;		/* no file */
+  stream->_flags = 1;		/* reserve this slot; caller sets real flags */
+  stream->_p = 0;		/* no current pointer */
+  stream->_w = 0;			/* nothing to read or write */
+  stream->_r = 0;
+  stream->_bf._base = 0;		/* no buffer */
+  stream->_bf._size = 0;
+  stream->_lbfsize = 0;		/* not line buffered */
+  stream->_file = -1;		/* no file */
   /* fp->_cookie = <any>; */	/* caller sets cookie, _read/_write etc */
-  fp->_ub._base = 0;		/* no ungetc buffer */
-  fp->_ub._size = 0;
-  fp->_lb._base = 0;		/* no line buffer */
-  fp->_lb._size = 0;
-  fp->_data = d;
-  return fp;
+  stream->_ub._base = 0;		/* no ungetc buffer */
+  stream->_ub._size = 0;
+  stream->_lb._base = 0;		/* no line buffer */
+  stream->_lb._size = 0;
+  stream->_data = reent;
+  return stream;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_004200F0);
 #ifdef SKIP_ASM
-void func_004200F0(char *r) {
-    char *f0 = r + 0x1E4;
-    *(void **)(r + 0x3C) = (void *)func_00416FC0;
-    *(int *)(r + 0x38) = 1;
-    func_0041FF40((void *)f0, 4, 0, (int)r);
-    func_0041FF40((void *)(r + 0x23C), 9, 1, (int)r);
-    func_0041FF40((void *)(r + 0x294), 0xA, 2, (int)r);
-    *(char **)(r + 0x1E0) = f0;
-    *(int *)(r + 0x1DC) = 3;
-    *(int *)(r + 0x1D8) = 0;
+void func_004200F0(char *reent) {
+    char *stdinStream = reent + 0x1E4;
+    *(void **)(reent + 0x3C) = (void *)func_00416FC0;
+    *(int *)(reent + 0x38) = 1;
+    func_0041FF40((void *)stdinStream, 4, 0, (int)reent);
+    func_0041FF40((void *)(reent + 0x23C), 9, 1, (int)reent);
+    func_0041FF40((void *)(reent + 0x294), 0xA, 2, (int)reent);
+    *(char **)(reent + 0x1E0) = stdinStream;
+    *(int *)(reent + 0x1DC) = 3;
+    *(int *)(reent + 0x1D8) = 0;
 }
 #endif
 
@@ -5762,29 +5790,29 @@ int __sflags_0180(struct _reent_0180 *ptr, register char *mode, int *optr) __asm
 int
 __sflags_0180 (struct _reent_0180 *ptr, register char *mode, int *optr)
 {
-  register int r FM_REG("$3");
+  register int openFlags FM_REG("$3");
   register int ret FM_REG("$9");
-  register int m FM_REG("$7");
-  register int o FM_REG("$8");
+  register int accessMode FM_REG("$7");
+  register int extraFlags FM_REG("$8");
 
   switch (mode[0])
     {
     case 'r':			/* open for reading */
       ret = __SRD_0180;
-      m = O_RDONLY_0180;
-      o = 0;
+      accessMode = O_RDONLY_0180;
+      extraFlags = 0;
       break;
 
     case 'w':			/* open for writing */
       ret = __SWR_0180;
-      m = O_WRONLY_0180;
-      o = O_CREAT_0180 | O_TRUNC_0180;
+      accessMode = O_WRONLY_0180;
+      extraFlags = O_CREAT_0180 | O_TRUNC_0180;
       break;
 
     case 'a':			/* open for appending */
       ret = __SWR_0180 | __SAPP_0180;
-      m = O_WRONLY_0180;
-      o = O_CREAT_0180 | O_APPEND_0180;
+      accessMode = O_WRONLY_0180;
+      extraFlags = O_CREAT_0180 | O_APPEND_0180;
       break;
     default:			/* illegal mode */
       ptr->_errno = EINVAL_0180;
@@ -5793,10 +5821,10 @@ __sflags_0180 (struct _reent_0180 *ptr, register char *mode, int *optr)
   if (mode[1] == '+' || mode[2] == '+')
     {
       ret = __SRW_0180;
-      m = O_RDWR_0180;
+      accessMode = O_RDWR_0180;
     }
-  r = m | o;
-  *optr = r;
+  openFlags = accessMode | extraFlags;
+  *optr = openFlags;
   return ret;
 }
 #endif
@@ -5804,9 +5832,9 @@ __sflags_0180 (struct _reent_0180 *ptr, register char *mode, int *optr)
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00420228);
 #ifdef SKIP_ASM
-void func_00420228(char *d, char *s, unsigned n) {
+void func_00420228(char *dst, char *src, unsigned n) {
     while (n--)
-        *d++ = *s++;
+        *dst++ = *src++;
 }
 #endif
 
@@ -5815,26 +5843,26 @@ INCLUDE_ASM("seg/seg_316FB8", func_00420260);
 #ifdef SKIP_ASM
 extern void func_00420228(char *, char *, unsigned);
 extern int func_00417648(int *);
-unsigned func_00420260(char *buf, unsigned size, unsigned count, int *fp) {
-    unsigned resid, total, r;
-    char *p;
+unsigned func_00420260(char *buf, unsigned size, unsigned count, int *stream) {
+    unsigned resid, total, avail;
+    char *dst;
     if ((resid = count * size) == 0)
         return 0;
-    if (fp[1] < 0)
-        fp[1] = 0;
+    if (stream[1] < 0)
+        stream[1] = 0;
     total = resid;
-    p = buf;
-    while (resid > (r = fp[1])) {
-        func_00420228(p, (char *)fp[0], r);
-        p += r;
-        fp[0] = fp[0] + r;
-        resid -= r;
-        if (func_00417648(fp))
+    dst = buf;
+    while (resid > (avail = stream[1])) {
+        func_00420228(dst, (char *)stream[0], avail);
+        dst += avail;
+        stream[0] = stream[0] + avail;
+        resid -= avail;
+        if (func_00417648(stream))
             return (total - resid) / size;
     }
-    func_00420228(p, (char *)fp[0], resid);
-    fp[1] -= resid;
-    fp[0] += resid;
+    func_00420228(dst, (char *)stream[0], resid);
+    stream[1] -= resid;
+    stream[0] += resid;
     return count;
 }
 #endif
@@ -6042,11 +6070,11 @@ int *func_00420510(int ep_, int k) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_004205B8);
 #ifdef SKIP_ASM
-void func_004205B8(int *self, int *p) {
-    if (p) {
-        int i = p[1];
-        p[0] = ((int *)self[0x4C / 4])[i];
-        ((int **)self[0x4C / 4])[i] = p;
+void func_004205B8(int *self, int *bigint) {
+    if (bigint) {
+        int i = bigint[1];
+        bigint[0] = ((int *)self[0x4C / 4])[i];
+        ((int **)self[0x4C / 4])[i] = bigint;
     }
 }
 #endif
@@ -6062,32 +6090,32 @@ struct Bigint {
 extern int *func_00420510(int, int);
 extern void func_004205B8(int *, int *);
 extern void *func_0041605C(void *, void *, int);
-struct Bigint *func_004205F0(int ptr, struct Bigint *b, int m, int a) {
+struct Bigint *func_004205F0(int ptr, struct Bigint *bigint, int multiplier, int addend) {
     int i, wds;
     unsigned *x, y, xi, z, carry;
-    struct Bigint *b1;
-    wds = b->wds;
-    x = b->x;
+    struct Bigint *larger;
+    wds = bigint->wds;
+    x = bigint->x;
     i = 0;
-    carry = a;
+    carry = addend;
     do {
         xi = *x;
-        y = (xi & 0xffff) * m + carry;
-        z = (xi >> 16) * m + (y >> 16);
+        y = (xi & 0xffff) * multiplier + carry;
+        z = (xi >> 16) * multiplier + (y >> 16);
         carry = z >> 16;
         *x++ = (z << 16) + (y & 0xffff);
     } while (++i < wds);
     if (carry) {
-        if (wds >= b->maxwds) {
-            b1 = (struct Bigint *)func_00420510(ptr, b->k + 1);
-            func_0041605C(&b1->sign, &b->sign, b->wds * 4 + 8);
-            func_004205B8((int *)ptr, (int *)b);
-            b = b1;
+        if (wds >= bigint->maxwds) {
+            larger = (struct Bigint *)func_00420510(ptr, bigint->k + 1);
+            func_0041605C(&larger->sign, &bigint->sign, bigint->wds * 4 + 8);
+            func_004205B8((int *)ptr, (int *)bigint);
+            bigint = larger;
         }
-        b->x[wds++] = carry;
-        b->wds = wds;
+        bigint->x[wds++] = carry;
+        bigint->wds = wds;
     }
-    return b;
+    return bigint;
 }
 #endif
 
@@ -6095,28 +6123,28 @@ struct Bigint *func_004205F0(int ptr, struct Bigint *b, int m, int a) {
 INCLUDE_ASM("seg/seg_316FB8", func_004206F8);
 #ifdef SKIP_ASM
 extern struct Bigint *func_004205F0(int, struct Bigint *, int, int);
-struct Bigint *func_004206F8(int ptr, char *s, int nd0, int nd, int y9) {
-    struct Bigint *b;
+struct Bigint *func_004206F8(int ptr, char *digits, int nd0, int nd, int y9) {
+    struct Bigint *bigint;
     int i, k;
     int x, y;
     x = (nd + 8) / 9;
     for (k = 0, y = 1; x > y; y <<= 1, k++)
         ;
-    b = (struct Bigint *)func_00420510(ptr, k);
-    b->x[0] = y9;
-    b->wds = 1;
+    bigint = (struct Bigint *)func_00420510(ptr, k);
+    bigint->x[0] = y9;
+    bigint->wds = 1;
     i = 9;
     if (9 < nd0) {
-        s += 9;
+        digits += 9;
         do
-            b = func_004205F0(ptr, b, 10, *s++ - '0');
+            bigint = func_004205F0(ptr, bigint, 10, *digits++ - '0');
         while (++i < nd0);
-        s++;
+        digits++;
     } else
-        s += 10;
+        digits += 10;
     for (; i < nd; i++)
-        b = func_004205F0(ptr, b, 10, *s++ - '0');
-    return b;
+        bigint = func_004205F0(ptr, bigint, 10, *digits++ - '0');
+    return bigint;
 }
 #endif
 
@@ -6198,11 +6226,11 @@ int func_004208B8(unsigned *y) {
 INCLUDE_ASM("seg/seg_316FB8", func_00420978);
 #ifdef SKIP_ASM
 extern int *func_00420510(int, int);
-int *func_00420978(int a, int b) {
-    int *p = func_00420510(a, 1);
-    p[5] = b;
-    p[4] = 1;
-    return p;
+int *func_00420978(int reent, int value) {
+    int *bigint = func_00420510(reent, 1);
+    bigint[5] = value;
+    bigint[4] = 1;
+    return bigint;
 }
 #endif
 
@@ -6210,30 +6238,30 @@ int *func_00420978(int a, int b) {
 INCLUDE_ASM("seg/seg_316FB8", func_004209B0);
 #ifdef SKIP_ASM
 extern int *func_00420510(int, int);
-struct Bigint *func_004209B0(int ptr, struct Bigint *a, struct Bigint *b) {
-    struct Bigint *c;
+struct Bigint *func_004209B0(int ptr, struct Bigint *lhs, struct Bigint *rhs) {
+    struct Bigint *product;
     int i, k, wa, wb, wc;
     unsigned *x, *xa, *xae, *xb, *xbe, *xc, *xc0;
     unsigned y, carry, z, z2;
-    if (a->wds < b->wds) {
-        c = a;
-        a = b;
-        b = c;
+    if (lhs->wds < rhs->wds) {
+        product = lhs;
+        lhs = rhs;
+        rhs = product;
     }
-    k = a->k;
-    wa = a->wds;
-    wb = b->wds;
+    k = lhs->k;
+    wa = lhs->wds;
+    wb = rhs->wds;
     wc = wa + wb;
-    if (wc > a->maxwds)
+    if (wc > lhs->maxwds)
         k++;
-    c = (struct Bigint *)func_00420510(ptr, k);
-    for (x = c->x, xa = x + wc; x < xa; x++)
+    product = (struct Bigint *)func_00420510(ptr, k);
+    for (x = product->x, xa = x + wc; x < xa; x++)
         *x = 0;
-    xa = a->x;
+    xa = lhs->x;
     xae = xa + wa;
-    xb = b->x;
+    xb = rhs->x;
     xbe = xb + wb;
-    xc0 = c->x;
+    xc0 = product->x;
     for (; xb < xbe; xb++, xc0++) {
         if ((y = *xb & 0xffff)) {
             x = xa;
@@ -6267,10 +6295,10 @@ struct Bigint *func_004209B0(int ptr, struct Bigint *a, struct Bigint *b) {
             *xc = z2;
         }
     }
-    for (xc0 = c->x, xc = xc0 + wc; wc > 0 && !*--xc; --wc)
+    for (xc0 = product->x, xc = xc0 + wc; wc > 0 && !*--xc; --wc)
         ;
-    c->wds = wc;
-    return c;
+    product->wds = wc;
+    return product;
 }
 #endif
 
@@ -6316,21 +6344,21 @@ INCLUDE_ASM("seg/seg_316FB8", func_00420CC8);
 #ifdef SKIP_ASM
 extern int *func_00420510(int, int);
 extern void func_004205B8(int *, int *);
-struct Bigint *func_00420CC8(int ptr, struct Bigint *b, int k) {
-    int i, k1, n, n1;
-    struct Bigint *b1;
+struct Bigint *func_00420CC8(int ptr, struct Bigint *bigint, int k) {
+    int i, k1, n, newWords;
+    struct Bigint *shifted;
     unsigned *x, *x1, *xe, z;
     n = k >> 5;
-    k1 = b->k;
-    n1 = n + b->wds + 1;
-    for (i = b->maxwds; n1 > i; i <<= 1)
+    k1 = bigint->k;
+    newWords = n + bigint->wds + 1;
+    for (i = bigint->maxwds; newWords > i; i <<= 1)
         k1++;
-    b1 = (struct Bigint *)func_00420510(ptr, k1);
-    x1 = b1->x;
+    shifted = (struct Bigint *)func_00420510(ptr, k1);
+    x1 = shifted->x;
     for (i = 0; i < n; i++)
         *x1++ = 0;
-    x = b->x;
-    xe = x + b->wds;
+    x = bigint->x;
+    xe = x + bigint->wds;
     if (k &= 0x1f) {
         k1 = 32 - k;
         z = 0;
@@ -6339,14 +6367,14 @@ struct Bigint *func_00420CC8(int ptr, struct Bigint *b, int k) {
             z = *x++ >> k1;
         } while (x < xe);
         if ((*x1 = z))
-            ++n1;
+            ++newWords;
     } else
         do
             *x1++ = *x++;
         while (x < xe);
-    b1->wds = n1 - 1;
-    func_004205B8((int *)ptr, (int *)b);
-    return b1;
+    shifted->wds = newWords - 1;
+    func_004205B8((int *)ptr, (int *)bigint);
+    return shifted;
 }
 #endif
 
@@ -6358,16 +6386,16 @@ struct Bigint28 {
     int k, maxwds, sign, wds;
     unsigned x[1];
 };
-int func_00420E28(struct Bigint28 *a, struct Bigint28 *b) {
+int func_00420E28(struct Bigint28 *lhs, struct Bigint28 *rhs) {
     unsigned *xa, *xa0, *xb, *xb0;
     int i, j;
-    i = a->wds;
-    j = b->wds;
+    i = lhs->wds;
+    j = rhs->wds;
     if (i -= j)
         return i;
-    xa0 = a->x;
+    xa0 = lhs->x;
     xa = xa0 + j;
-    xb0 = b->x;
+    xb0 = rhs->x;
     xb = xb0 + j;
     for (;;) {
         if (*--xa != *--xb)
@@ -6383,34 +6411,34 @@ int func_00420E28(struct Bigint28 *a, struct Bigint28 *b) {
 INCLUDE_ASM("seg/seg_316FB8", func_00420E90);
 #ifdef SKIP_ASM
 extern int *func_00420510(int, int);
-struct Bigint *func_00420E90(int ptr, struct Bigint *a, struct Bigint *b) {
-    struct Bigint *c;
+struct Bigint *func_00420E90(int ptr, struct Bigint *lhs, struct Bigint *rhs) {
+    struct Bigint *difference;
     int i, wa, wb;
     int borrow, y, z;
     unsigned *xa, *xae, *xb, *xbe, *xc;
-    i = func_00420E28((struct Bigint28 *)a, (struct Bigint28 *)b);
+    i = func_00420E28((struct Bigint28 *)lhs, (struct Bigint28 *)rhs);
     if (!i) {
-        c = (struct Bigint *)func_00420510(ptr, 0);
-        c->wds = 1;
-        c->x[0] = 0;
-        return c;
+        difference = (struct Bigint *)func_00420510(ptr, 0);
+        difference->wds = 1;
+        difference->x[0] = 0;
+        return difference;
     }
     if (i < 0) {
-        c = a;
-        a = b;
-        b = c;
+        difference = lhs;
+        lhs = rhs;
+        rhs = difference;
         i = 1;
     } else
         i = 0;
-    c = (struct Bigint *)func_00420510(ptr, a->k);
-    c->sign = i;
-    wa = a->wds;
-    xa = a->x;
+    difference = (struct Bigint *)func_00420510(ptr, lhs->k);
+    difference->sign = i;
+    wa = lhs->wds;
+    xa = lhs->x;
     xae = xa + wa;
-    wb = b->wds;
-    xb = b->x;
+    wb = rhs->wds;
+    xb = rhs->x;
     xbe = xb + wb;
-    xc = c->x;
+    xc = difference->x;
     borrow = 0;
     do {
         y = (*xa & 0xffff) - (*xb & 0xffff) + borrow;
@@ -6432,8 +6460,8 @@ struct Bigint *func_00420E90(int ptr, struct Bigint *a, struct Bigint *b) {
     }
     while (!*--xc)
         wa--;
-    c->wds = wa;
-    return c;
+    difference->wds = wa;
+    return difference;
 }
 #endif
 
@@ -6452,21 +6480,21 @@ union double_union {
 #define word1(x) x.w.lo
 double func_00421020(double _x) {
     union double_union x, a;
-    int L;
+    int ulpExp;
     x.d = _x;
-    L = (word0(x) & 0x7ff00000) - 52 * 0x100000;
-    if (L > 0) {
-        word0(a) = L;
+    ulpExp = (word0(x) & 0x7ff00000) - 52 * 0x100000;
+    if (ulpExp > 0) {
+        word0(a) = ulpExp;
         word1(a) = 0;
     } else {
-        L = -L >> 20;
-        if (L < 20) {
-            word0(a) = 0x80000 >> L;
+        ulpExp = -ulpExp >> 20;
+        if (ulpExp < 20) {
+            word0(a) = 0x80000 >> ulpExp;
             word1(a) = 0;
         } else {
             word0(a) = 0;
-            L -= 20;
-            word1(a) = L >= 31 ? 1 : 1 << (31 - L);
+            ulpExp -= 20;
+            word1(a) = ulpExp >= 31 ? 1 : 1 << (31 - ulpExp);
         }
     }
     return a.d;
@@ -6477,32 +6505,32 @@ double func_00421020(double _x) {
 INCLUDE_ASM("seg/seg_316FB8", func_004210E8);
 #ifdef SKIP_ASM
 extern int func_00420830(unsigned);
-double func_004210E8(struct Bigint *a, int *e) {
+double func_004210E8(struct Bigint *bigint, int *expOut) {
     unsigned *xa, *xa0, w, y, z;
     int k;
-    union double_union d;
-    xa0 = a->x;
-    xa = xa0 + a->wds;
+    union double_union result;
+    xa0 = bigint->x;
+    xa = xa0 + bigint->wds;
     y = *--xa;
     k = func_00420830(y);
-    *e = 32 - k;
+    *expOut = 32 - k;
     if (k < 11) {
-        d.w.hi = 0x3ff00000 | y >> (11 - k);
+        result.w.hi = 0x3ff00000 | y >> (11 - k);
         w = xa > xa0 ? *--xa : 0;
-        d.w.lo = y << (21 + k) | w >> (11 - k);
+        result.w.lo = y << (21 + k) | w >> (11 - k);
         goto ret_d;
     }
     z = xa > xa0 ? *--xa : 0;
     if (k -= 11) {
-        d.w.hi = 0x3ff00000 | y << k | z >> (32 - k);
+        result.w.hi = 0x3ff00000 | y << k | z >> (32 - k);
         y = xa > xa0 ? *--xa : 0;
-        d.w.lo = z << k | y >> (32 - k);
+        result.w.lo = z << k | y >> (32 - k);
     } else {
-        d.w.hi = 0x3ff00000 | y;
-        d.w.lo = z;
+        result.w.hi = 0x3ff00000 | y;
+        result.w.lo = z;
     }
 ret_d:
-    return d.d;
+    return result.d;
 }
 #endif
 
@@ -6512,39 +6540,39 @@ INCLUDE_ASM("seg/seg_316FB8", func_00421280);
 extern int *func_00420510(int, int);
 extern int func_004208B8(unsigned *);
 extern int func_00420830(unsigned);
-struct Bigint *func_00421280(int ptr, double _d, int *e, int *bits) {
-    struct Bigint *b;
+struct Bigint *func_00421280(int ptr, double _d, int *expOut, int *bits) {
+    struct Bigint *bigint;
     int de, i, k;
     unsigned *x, y, z;
-    union double_union d;
-    d.d = _d;
-    b = (struct Bigint *)func_00420510(ptr, 1);
-    x = b->x;
-    z = d.w.hi & 0xfffff;
-    d.w.hi &= 0x7fffffff;
-    if ((de = (int)(d.w.hi >> 20)))
+    union double_union value;
+    value.d = _d;
+    bigint = (struct Bigint *)func_00420510(ptr, 1);
+    x = bigint->x;
+    z = value.w.hi & 0xfffff;
+    value.w.hi &= 0x7fffffff;
+    if ((de = (int)(value.w.hi >> 20)))
         z |= 0x100000;
-    if ((y = d.w.lo)) {
+    if ((y = value.w.lo)) {
         if ((k = func_004208B8(&y))) {
             x[0] = y | z << (32 - k);
             z >>= k;
         } else
             x[0] = y;
-        i = b->wds = (x[1] = z) ? 2 : 1;
+        i = bigint->wds = (x[1] = z) ? 2 : 1;
     } else {
         k = func_004208B8(&z);
         x[0] = z;
-        i = b->wds = 1;
+        i = bigint->wds = 1;
         k += 32;
     }
     if (de) {
-        *e = de - 1023 - 52 + k;
+        *expOut = de - 1023 - 52 + k;
         *bits = 53 - k;
     } else {
-        *e = de - 1023 - 52 + 1 + k;
+        *expOut = de - 1023 - 52 + 1 + k;
         *bits = 32 * i - func_00420830(x[i - 1]);
     }
-    return b;
+    return bigint;
 }
 #endif
 
@@ -6572,14 +6600,14 @@ INCLUDE_ASM("seg/seg_316FB8", func_00421400);
    dpdiv (as in seg_325220's dpdiv(x, 10.0)); on PC this is just da.d / db.d */
 extern double dpdiv_1400(double, double) __asm__("dpdiv");
 
-double func_00421400(struct Bigint *a, struct Bigint *b)
+double func_00421400(struct Bigint *numerator, struct Bigint *denominator)
 {
   union double_union da, db;
   int k, ka, kb;
 
-  da.d = func_004210E8 (a, &ka);
-  db.d = func_004210E8 (b, &kb);
-  k = ka - kb + 32 * (a->wds - b->wds);
+  da.d = func_004210E8 (numerator, &ka);
+  db.d = func_004210E8 (denominator, &kb);
+  k = ka - kb + 32 * (numerator->wds - denominator->wds);
   if (k > 0)
     word0 (da) += k * Exp_msk1_1400;
   else
@@ -6619,25 +6647,25 @@ void func_00421530_(struct R21530 *ptr, char *buf, double invalue, int ndigit, i
 void func_00421530_(struct R21530 *ptr, char *buf, double invalue, int ndigit, int type, int dot, int mode) {
     int decpt;
     int sign;
-    char *p, *start, *end;
-    start = p = g21530_dtoa(ptr, invalue, mode, ndigit, &decpt, &sign, &end);
+    char *digits, *start, *end;
+    start = digits = g21530_dtoa(ptr, invalue, mode, ndigit, &decpt, &sign, &end);
     if (decpt == 9999) {
-        g21530_strcpy(buf, p);
+        g21530_strcpy(buf, digits);
         return;
     }
-    while (*p != '\0' && decpt > 0) {
-        *buf++ = *p++;
+    while (*digits != '\0' && decpt > 0) {
+        *buf++ = *digits++;
         decpt--;
     }
     while (decpt > 0) {
         *buf++ = '0';
         decpt--;
     }
-    if (dot == 0 && *p == '\0') {
+    if (dot == 0 && *digits == '\0') {
         *buf = '\0';
         return;
     }
-    if (p == start)
+    if (digits == start)
         *buf++ = '0';
     *buf++ = '.';
     while (decpt < 0 && ndigit > 0) {
@@ -6645,8 +6673,8 @@ void func_00421530_(struct R21530 *ptr, char *buf, double invalue, int ndigit, i
         decpt++;
         ndigit--;
     }
-    while (*p && ndigit > 0) {
-        *buf++ = *p++;
+    while (*digits && ndigit > 0) {
+        *buf++ = *digits++;
         ndigit--;
     }
     while (ndigit > 0) {
@@ -6668,17 +6696,17 @@ void func_004216E8_(struct R216E8 *ptr, char *buf, double invalue, int ndigit, c
     int decpt;
     int i = ndigit;
     int sign;
-    char *p, *end;
-    p = g216E8_dtoa(ptr, invalue, 2, i + 1, &decpt, &sign, &end);
+    char *digits, *end;
+    digits = g216E8_dtoa(ptr, invalue, 2, i + 1, &decpt, &sign, &end);
     if (decpt == 9999) {
-        g216E8_strcpy(buf, p);
+        g216E8_strcpy(buf, digits);
         return;
     }
-    *buf++ = *p++;
+    *buf++ = *digits++;
     if (dot || i != 0)
         *buf++ = '.';
-    while (*p && i > 0) {
-        *buf++ = *p++;
+    while (*digits && i > 0) {
+        *buf++ = *digits++;
         i--;
     }
     if (type == 'g')
@@ -6727,7 +6755,7 @@ extern char *g218D8_realloc(struct R218D8 *, char *, int) __asm__("func_00421F20
 extern char *g218D8_dtoa(struct R218D8 *, double, int, int, int *, int *, char **) __asm__("func_00422780");
 char *func_004218D8_(double invalue, int ndigit, int *decpt, int *sign, char *buf) __asm__("func_004218D8");
 char *func_004218D8_(double invalue, int ndigit, int *decpt, int *sign, char *buf) {
-    char *save, *p, *end;
+    char *save, *digits, *end;
     int done = 0;
     int newlen;
     if (buf == 0) {
@@ -6743,11 +6771,11 @@ char *func_004218D8_(double invalue, int ndigit, int *decpt, int *sign, char *bu
     }
     save = buf;
     if (invalue < 1.0 && invalue > -1.0)
-        p = g218D8_dtoa(REENT218D8, invalue, 2, ndigit, decpt, sign, &end);
+        digits = g218D8_dtoa(REENT218D8, invalue, 2, ndigit, decpt, sign, &end);
     else
-        p = g218D8_dtoa(REENT218D8, invalue, 3, ndigit, decpt, sign, &end);
-    while (p < end) {
-        *buf++ = *p++;
+        digits = g218D8_dtoa(REENT218D8, invalue, 3, ndigit, decpt, sign, &end);
+    while (digits < end) {
+        *buf++ = *digits++;
         done++;
     }
     if (done < ndigit) {
@@ -6857,26 +6885,26 @@ func_00421B98_ (struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, 
       int decpt;
       int sign;
       char *end;
-      char *p;
+      char *digitStr;
 
       if (invalue < 1.0)
 	{
 	  /* what we want is ndigits after the point */
-	  p = _dtoa_r_1B98 (ptr, invalue, 3, ndigit, &decpt, &sign, &end);
+	  digitStr = _dtoa_r_1B98 (ptr, invalue, 3, ndigit, &decpt, &sign, &end);
 	}
       else
 	{
-	  p = _dtoa_r_1B98 (ptr, invalue, 2, ndigit, &decpt, &sign, &end);
+	  digitStr = _dtoa_r_1B98 (ptr, invalue, 2, ndigit, &decpt, &sign, &end);
 	}
 
       if (decpt == 9999)
 	{
-	  strcpy_1B98 (buf, p);
+	  strcpy_1B98 (buf, digitStr);
 	  return save;
 	}
-      while (*p && decpt > 0)
+      while (*digitStr && decpt > 0)
 	{
-	  *buf++ = *p++;
+	  *buf++ = *digitStr++;
 	  decpt--;
 	  ndigit--;
 	}
@@ -6888,7 +6916,7 @@ func_00421B98_ (struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, 
 	  ndigit--;
 	}
 
-      if (dot || *p)
+      if (dot || *digitStr)
 	{
 	  if (buf == save)
 	    *buf++ = '0';
@@ -6901,9 +6929,9 @@ func_00421B98_ (struct _reent_1B98 *ptr, double invalue, int ndigit, char *buf, 
 	    }
 
 	  /* Print rest of stuff */
-	  while (*p && ndigit > 0)
+	  while (*digitStr && ndigit > 0)
 	    {
-	      *buf++ = *p++;
+	      *buf++ = *digitStr++;
 	      ndigit--;
 	    }
 	  /* And trailing zeros */
@@ -6929,19 +6957,19 @@ INCLUDE_ASM("seg/seg_316FB8", func_00421E60);
 extern void func_00421530_f(int, char *, long, int, int, int, int) __asm__("func_00421530");
 extern void func_00421B98_g(int, long, int, char *, int, int) __asm__("func_00421B98");
 extern void func_004216E8_e(int, char *, long, int, int, int) __asm__("func_004216E8");
-char *func_00421E60(int ep, char *buf, long val, int nd, int unused, char fmt, int pad) {
+char *func_00421E60(int ep, char *buf, long val, int nd, int width, char fmt, int forceDot) {
     switch (fmt) {
     case 'f':
     case 'F':
-        func_00421530_f(ep, buf, val, nd, fmt, nd ? 1 : pad, 3);
+        func_00421530_f(ep, buf, val, nd, fmt, nd ? 1 : forceDot, 3);
         break;
     case 'g':
     case 'G':
-        func_00421B98_g(ep, val, nd ? nd : 1, buf, fmt, pad);
+        func_00421B98_g(ep, val, nd ? nd : 1, buf, fmt, forceDot);
         break;
     case 'e':
     case 'E':
-        func_004216E8_e(ep, buf, val, nd, fmt, pad);
+        func_004216E8_e(ep, buf, val, nd, fmt, forceDot);
         break;
     }
     return buf;
@@ -7085,28 +7113,28 @@ void *func_004224A0_(int ptr, int n, int elem_size) {
 INCLUDE_ASM("seg/seg_316FB8", func_00422560);
 #ifdef SKIP_ASM
 extern int func_00420E28_cmp(struct Bigint *, struct Bigint *) __asm__("func_00420E28");
-int func_00422560(struct Bigint *b, struct Bigint *S) {
+int func_00422560(struct Bigint *dividend, struct Bigint *divisor) {
     int n;
     int borrow, y;
-    unsigned carry, q, ys;
+    unsigned carry, quotient, ys;
     unsigned *bx, *bxe, *sx, *sxe;
     int z;
     unsigned si, zs;
-    n = S->wds;
-    if (b->wds < n)
+    n = divisor->wds;
+    if (dividend->wds < n)
         return 0;
-    sx = S->x;
+    sx = divisor->x;
     sxe = sx + --n;
-    bx = b->x;
+    bx = dividend->x;
     bxe = bx + n;
-    q = *bxe / (*sxe + 1);
-    if (q) {
+    quotient = *bxe / (*sxe + 1);
+    if (quotient) {
         borrow = 0;
         carry = 0;
         do {
             si = *sx++;
-            ys = (si & 0xffff) * q + carry;
-            zs = (si >> 16) * q + (ys >> 16);
+            ys = (si & 0xffff) * quotient + carry;
+            zs = (si >> 16) * quotient + (ys >> 16);
             carry = zs >> 16;
             y = (*bx & 0xffff) - (ys & 0xffff) + borrow;
             borrow = y >> 16;
@@ -7117,18 +7145,18 @@ int func_00422560(struct Bigint *b, struct Bigint *S) {
             bx++;
         } while (sx <= sxe);
         if (!*bxe) {
-            bx = b->x;
+            bx = dividend->x;
             while (--bxe > bx && !*bxe)
                 --n;
-            b->wds = n;
+            dividend->wds = n;
         }
     }
-    if (func_00420E28_cmp(b, S) >= 0) {
-        q++;
+    if (func_00420E28_cmp(dividend, divisor) >= 0) {
+        quotient++;
         borrow = 0;
         carry = 0;
-        bx = b->x;
-        sx = S->x;
+        bx = dividend->x;
+        sx = divisor->x;
         do {
             si = *sx++;
             ys = (si & 0xffff) + carry;
@@ -7142,15 +7170,15 @@ int func_00422560(struct Bigint *b, struct Bigint *S) {
             ((unsigned short *)bx)[0] = (unsigned short)y;
             bx++;
         } while (sx <= sxe);
-        bx = b->x;
+        bx = dividend->x;
         bxe = bx + n;
         if (!*bxe) {
             while (--bxe > bx && !*bxe)
                 --n;
-            b->wds = n;
+            dividend->wds = n;
         }
     }
-    return q;
+    return quotient;
 }
 #endif
 
@@ -7222,15 +7250,15 @@ char *func_00422780_(struct _reent_00422780 *, double, int, int, int *, int *, c
 char *
 func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, int *decpt, int *sign, char **rve)
 {
-  int bbits, b2, b5, be, dig, i, ieps, ilim, ilim0, ilim1, j, j1, k, k0,
-    k_check, leftright, m2, m5, s2, s5, spec_case, try_quick;
+  int bbits, bPow2, bPow5, be, dig, i, ieps, ilim, ilim0, ilim1, j, j1, k, savedK,
+    k_check, leftright, mPow2, mPow5, sPow2, sPow5, spec_case, try_quick;
   union double_union_00422780 d, d2, eps;
-  int L;
+  int digitVal;
   int denorm;
   unsigned long x;
-  struct Bigint *b, *b1, *delta, *mlo, *mhi, *S;
+  struct Bigint *mantissa, *product, *delta, *mlo, *mhi, *bigDivisor;
   double ds;
-  char *s, *s0;
+  char *cursor, *bufStart;
 
   d.d = _d;
 
@@ -7255,25 +7283,25 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
     {
       /* Infinity or NaN */
       *decpt = 9999;
-      s =
+      cursor =
 	!word1_00422780 (d) && !(word0_00422780 (d) & 0xfffff) ? "Infinity" :
 	"NaN";
       if (rve)
 	*rve =
-	  s[3] ? s + 8 :
-	  s + 3;
-      return s;
+	  cursor[3] ? cursor + 8 :
+	  cursor + 3;
+      return cursor;
     }
   if (!d.d)
     {
       *decpt = 1;
-      s = "0";
+      cursor = "0";
       if (rve)
-	*rve = s + 1;
-      return s;
+	*rve = cursor + 1;
+      return cursor;
     }
 
-  b = g2780_d2b (ptr, d.d, &be, &bbits);
+  mantissa = g2780_d2b (ptr, d.d, &be, &bbits);
   if ((i = (int) (word0_00422780 (d) >> Exp_shift1_00422780 & (Exp_mask_00422780 >> Exp_shift1_00422780))) != 0)
     {
       d2.d = d.d;
@@ -7331,25 +7359,25 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
   j = bbits - i - 1;
   if (j >= 0)
     {
-      b2 = 0;
-      s2 = j;
+      bPow2 = 0;
+      sPow2 = j;
     }
   else
     {
-      b2 = -j;
-      s2 = 0;
+      bPow2 = -j;
+      sPow2 = 0;
     }
   if (k >= 0)
     {
-      b5 = 0;
-      s5 = k;
-      s2 += k;
+      bPow5 = 0;
+      sPow5 = k;
+      sPow2 += k;
     }
   else
     {
-      b2 -= k;
-      b5 = -k;
-      s5 = 0;
+      bPow2 -= k;
+      bPow5 = -k;
+      sPow5 = 0;
     }
   if (mode < 0 || mode > 9)
     mode = 0;
@@ -7391,7 +7419,7 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
        j <<= 1)
     ptr->_result_k++;
   ptr->_result = g2780_Balloc (ptr, ptr->_result_k);
-  s = s0 = (char *) ptr->_result;
+  cursor = bufStart = (char *) ptr->_result;
 
   if (ilim >= 0 && ilim <= Quick_max_00422780 && try_quick)
     {
@@ -7399,7 +7427,7 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
 
       i = 0;
       d2.d = d.d;
-      k0 = k;
+      savedK = k;
       ilim0 = ilim;
       ieps = 2;			/* conservative */
       if (k > 0)
@@ -7444,7 +7472,7 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
       word0_00422780 (eps) -= (P_00422780 - 1) * Exp_msk1_00422780;
       if (ilim == 0)
 	{
-	  S = mhi = 0;
+	  bigDivisor = mhi = 0;
 	  d.d -= 5.;
 	  if (d.d > eps.d)
 	    goto one_digit;
@@ -7460,9 +7488,9 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
 	  eps.d = 0.5 / tens_00422780[ilim - 1] - eps.d;
 	  for (i = 0;;)
 	    {
-	      L = d.d;
-	      d.d -= L;
-	      *s++ = '0' + (int) L;
+	      digitVal = d.d;
+	      d.d -= digitVal;
+	      *cursor++ = '0' + (int) digitVal;
 	      if (d.d < eps.d)
 		goto ret1;
 	      if (1. - d.d < eps.d)
@@ -7479,17 +7507,17 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
 	  eps.d *= tens_00422780[ilim - 1];
 	  for (i = 1;; i++, d.d *= 10.)
 	    {
-	      L = d.d;
-	      d.d -= L;
-	      *s++ = '0' + (int) L;
+	      digitVal = d.d;
+	      d.d -= digitVal;
+	      *cursor++ = '0' + (int) digitVal;
 	      if (i == ilim)
 		{
 		  if (d.d > 0.5 + eps.d)
 		    goto bump_up;
 		  else if (d.d < 0.5 - eps.d)
 		    {
-		      while (*--s == '0');
-		      s++;
+		      while (*--cursor == '0');
+		      cursor++;
 		      goto ret1;
 		    }
 		  break;
@@ -7497,9 +7525,9 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
 	    }
 	}
     fast_failed:
-      s = s0;
+      cursor = bufStart;
       d.d = d2.d;
-      k = k0;
+      k = savedK;
       ilim = ilim0;
     }
 
@@ -7511,30 +7539,30 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
       ds = tens_00422780[k];
       if (ndigits < 0 && ilim <= 0)
 	{
-	  S = mhi = 0;
+	  bigDivisor = mhi = 0;
 	  if (ilim < 0 || d.d <= 5 * ds)
 	    goto no_digits;
 	  goto one_digit;
 	}
       for (i = 1;; i++)
 	{
-	  L = d.d / ds;
-	  d.d -= L * ds;
-	  *s++ = '0' + (int) L;
+	  digitVal = d.d / ds;
+	  d.d -= digitVal * ds;
+	  *cursor++ = '0' + (int) digitVal;
 	  if (i == ilim)
 	    {
 	      d.d += d.d;
-             if ((d.d > ds) || ((d.d == ds) && (L & 1)))
+             if ((d.d > ds) || ((d.d == ds) && (digitVal & 1)))
 		{
 		bump_up:
-		  while (*--s == '9')
-		    if (s == s0)
+		  while (*--cursor == '9')
+		    if (cursor == bufStart)
 		      {
 			k++;
-			*s = '0';
+			*cursor = '0';
 			break;
 		      }
-		  ++*s++;
+		  ++*cursor++;
 		}
 	      break;
 	    }
@@ -7544,8 +7572,8 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
       goto ret1;
     }
 
-  m2 = b2;
-  m5 = b5;
+  mPow2 = bPow2;
+  mPow5 = bPow5;
   mhi = mlo = 0;
   if (leftright)
     {
@@ -7558,51 +7586,51 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
       else
 	{
 	  j = ilim - 1;
-	  if (m5 >= j)
-	    m5 -= j;
+	  if (mPow5 >= j)
+	    mPow5 -= j;
 	  else
 	    {
-	      s5 += j -= m5;
-	      b5 += j;
-	      m5 = 0;
+	      sPow5 += j -= mPow5;
+	      bPow5 += j;
+	      mPow5 = 0;
 	    }
 	  if ((i = ilim) < 0)
 	    {
-	      m2 -= i;
+	      mPow2 -= i;
 	      i = 0;
 	    }
 	}
-      b2 += i;
-      s2 += i;
+      bPow2 += i;
+      sPow2 += i;
       mhi = g2780_i2b (ptr, 1);
     }
-  if (m2 > 0 && s2 > 0)
+  if (mPow2 > 0 && sPow2 > 0)
     {
-      i = m2 < s2 ? m2 : s2;
-      b2 -= i;
-      m2 -= i;
-      s2 -= i;
+      i = mPow2 < sPow2 ? mPow2 : sPow2;
+      bPow2 -= i;
+      mPow2 -= i;
+      sPow2 -= i;
     }
-  if (b5 > 0)
+  if (bPow5 > 0)
     {
       if (leftright)
 	{
-	  if (m5 > 0)
+	  if (mPow5 > 0)
 	    {
-	      mhi = g2780_pow5mult (ptr, mhi, m5);
-	      b1 = g2780_mult (ptr, mhi, b);
-	      g2780_Bfree (ptr, b);
-	      b = b1;
+	      mhi = g2780_pow5mult (ptr, mhi, mPow5);
+	      product = g2780_mult (ptr, mhi, mantissa);
+	      g2780_Bfree (ptr, mantissa);
+	      mantissa = product;
 	    }
-         if ((j = b5 - m5) != 0)
-	    b = g2780_pow5mult (ptr, b, j);
+         if ((j = bPow5 - mPow5) != 0)
+	    mantissa = g2780_pow5mult (ptr, mantissa, j);
 	}
       else
-	b = g2780_pow5mult (ptr, b, b5);
+	mantissa = g2780_pow5mult (ptr, mantissa, bPow5);
     }
-  S = g2780_i2b (ptr, 1);
-  if (s5 > 0)
-    S = g2780_pow5mult (ptr, S, s5);
+  bigDivisor = g2780_i2b (ptr, 1);
+  if (sPow5 > 0)
+    bigDivisor = g2780_pow5mult (ptr, bigDivisor, sPow5);
 
   /* Check for special case that d is a normalized power of 2. */
 
@@ -7613,8 +7641,8 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
 	)
 	{
 	  /* The special case */
-	  b2 += Log2P_00422780;
-	  s2 += Log2P_00422780;
+	  bPow2 += Log2P_00422780;
+	  sPow2 += Log2P_00422780;
 	  spec_case = 1;
 	}
       else
@@ -7629,32 +7657,32 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
    * can do shifts and ors to compute the numerator for q.
    */
 
-  if ((i = ((s5 ? 32 - g2780_hi0bits (S->x[S->wds - 1]) : 1) + s2) & 0x1f) != 0)
+  if ((i = ((sPow5 ? 32 - g2780_hi0bits (bigDivisor->x[bigDivisor->wds - 1]) : 1) + sPow2) & 0x1f) != 0)
     i = 32 - i;
   if (i > 4)
     {
       i -= 4;
-      b2 += i;
-      m2 += i;
-      s2 += i;
+      bPow2 += i;
+      mPow2 += i;
+      sPow2 += i;
     }
   else if (i < 4)
     {
       i += 28;
-      b2 += i;
-      m2 += i;
-      s2 += i;
+      bPow2 += i;
+      mPow2 += i;
+      sPow2 += i;
     }
-  if (b2 > 0)
-    b = g2780_lshift (ptr, b, b2);
-  if (s2 > 0)
-    S = g2780_lshift (ptr, S, s2);
+  if (bPow2 > 0)
+    mantissa = g2780_lshift (ptr, mantissa, bPow2);
+  if (sPow2 > 0)
+    bigDivisor = g2780_lshift (ptr, bigDivisor, sPow2);
   if (k_check)
     {
-      if (g2780_cmp (b, S) < 0)
+      if (g2780_cmp (mantissa, bigDivisor) < 0)
 	{
 	  k--;
-	  b = g2780_multadd (ptr, b, 10, 0);	/* we botched the k estimate */
+	  mantissa = g2780_multadd (ptr, mantissa, 10, 0);	/* we botched the k estimate */
 	  if (leftright)
 	    mhi = g2780_multadd (ptr, mhi, 10, 0);
 	  ilim = ilim1;
@@ -7662,7 +7690,7 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
     }
   if (ilim <= 0 && mode > 2)
     {
-      if (ilim < 0 || g2780_cmp (b, S = g2780_multadd (ptr, S, 5, 0)) <= 0)
+      if (ilim < 0 || g2780_cmp (mantissa, bigDivisor = g2780_multadd (ptr, bigDivisor, 5, 0)) <= 0)
 	{
 	  /* no digits, fcvt style */
 	no_digits:
@@ -7670,14 +7698,14 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
 	  goto ret;
 	}
     one_digit:
-      *s++ = '1';
+      *cursor++ = '1';
       k++;
       goto ret;
     }
   if (leftright)
     {
-      if (m2 > 0)
-	mhi = g2780_lshift (ptr, mhi, m2);
+      if (mPow2 > 0)
+	mhi = g2780_lshift (ptr, mhi, mPow2);
 
       /* Compute mlo -- check for special case
        * that d is a normalized power of 2.
@@ -7693,13 +7721,13 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
 
       for (i = 1;; i++)
 	{
-	  dig = func_00422560 (b, S) + '0';
+	  dig = func_00422560 (mantissa, bigDivisor) + '0';
 	  /* Do we yet have the shortest decimal string
 	   * that will round to d?
 	   */
-	  j = g2780_cmp (b, mlo);
-	  delta = g2780_diff (ptr, S, mhi);
-	  j1 = delta->sign ? 1 : g2780_cmp (b, delta);
+	  j = g2780_cmp (mantissa, mlo);
+	  delta = g2780_diff (ptr, bigDivisor, mhi);
+	  j1 = delta->sign ? 1 : g2780_cmp (mantissa, delta);
 	  g2780_Bfree (ptr, delta);
 	  if (j1 == 0 && !mode && !(word1_00422780 (d) & 1))
 	    {
@@ -7707,7 +7735,7 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
 		goto round_9_up;
 	      if (j > 0)
 		dig++;
-	      *s++ = dig;
+	      *cursor++ = dig;
 	      goto ret;
 	    }
          if ((j < 0) || ((j == 0) && !mode
@@ -7716,13 +7744,13 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
 	    {
 	      if (j1 > 0)
 		{
-		  b = g2780_lshift (ptr, b, 1);
-		  j1 = g2780_cmp (b, S);
+		  mantissa = g2780_lshift (ptr, mantissa, 1);
+		  j1 = g2780_cmp (mantissa, bigDivisor);
                  if (((j1 > 0) || ((j1 == 0) && (dig & 1)))
 		      && dig++ == '9')
 		    goto round_9_up;
 		}
-	      *s++ = dig;
+	      *cursor++ = dig;
 	      goto ret;
 	    }
 	  if (j1 > 0)
@@ -7730,16 +7758,16 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
 	      if (dig == '9')
 		{		/* possible if i == 1 */
 		round_9_up:
-		  *s++ = '9';
+		  *cursor++ = '9';
 		  goto roundoff;
 		}
-	      *s++ = dig + 1;
+	      *cursor++ = dig + 1;
 	      goto ret;
 	    }
-	  *s++ = dig;
+	  *cursor++ = dig;
 	  if (i == ilim)
 	    break;
-	  b = g2780_multadd (ptr, b, 10, 0);
+	  mantissa = g2780_multadd (ptr, mantissa, 10, 0);
 	  if (mlo == mhi)
 	    mlo = mhi = g2780_multadd (ptr, mhi, 10, 0);
 	  else
@@ -7752,35 +7780,35 @@ func_00422780_(struct _reent_00422780 *ptr, double _d, int mode, int ndigits, in
   else
     for (i = 1;; i++)
       {
-	*s++ = dig = func_00422560 (b, S) + '0';
+	*cursor++ = dig = func_00422560 (mantissa, bigDivisor) + '0';
 	if (i >= ilim)
 	  break;
-	b = g2780_multadd (ptr, b, 10, 0);
+	mantissa = g2780_multadd (ptr, mantissa, 10, 0);
       }
 
   /* Round off last digit */
 
-  b = g2780_lshift (ptr, b, 1);
-  j = g2780_cmp (b, S);
+  mantissa = g2780_lshift (ptr, mantissa, 1);
+  j = g2780_cmp (mantissa, bigDivisor);
   if ((j > 0) || ((j == 0) && (dig & 1)))
     {
     roundoff:
-      while (*--s == '9')
-	if (s == s0)
+      while (*--cursor == '9')
+	if (cursor == bufStart)
 	  {
 	    k++;
-	    *s++ = '1';
+	    *cursor++ = '1';
 	    goto ret;
 	  }
-      ++*s++;
+      ++*cursor++;
     }
   else
     {
-      while (*--s == '0');
-      s++;
+      while (*--cursor == '0');
+      cursor++;
     }
 ret:
-  g2780_Bfree (ptr, S);
+  g2780_Bfree (ptr, bigDivisor);
   if (mhi)
     {
       if (mlo && mlo != mhi)
@@ -7788,12 +7816,12 @@ ret:
       g2780_Bfree (ptr, mhi);
     }
 ret1:
-  g2780_Bfree (ptr, b);
-  *s = 0;
+  g2780_Bfree (ptr, mantissa);
+  *cursor = 0;
   *decpt = k + 1;
   if (rve)
-    *rve = s;
-  return s0;
+    *rve = cursor;
+  return bufStart;
 }
 #endif
 

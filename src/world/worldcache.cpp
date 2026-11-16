@@ -77,9 +77,9 @@ struct func_003A76C0_sCache {
     func_003A76C0_sEntry* entries;
 };
 
-extern "C" void func_003A76C0(void* p, int flags)
+extern "C" void func_003A76C0(void* cache, int flags)
 {
-    func_003A76C0_sCache* self = (func_003A76C0_sCache*)p;
+    func_003A76C0_sCache* self = (func_003A76C0_sCache*)cache;
     for (unsigned int i = 0; i < self->count; i++) {
         if (self->entries[i].data != 0) {
             cMemMan_free(self->entries[i].data);
@@ -124,12 +124,12 @@ INCLUDE_ASM("world/worldcache", func_003A77B0__FPvii);
 #ifdef SKIP_ASM
 void* func_003A77B0(void* self, int a1, int a2)
 {
-    int t0 = 0;
+    int zero = 0;
     *(int*)((char*)self + 0x4) = a2;
     *(int*)self = a1;
-    *(int*)((char*)self + 0x8) = t0;
-    *(int*)((char*)self + 0xc) = t0;
-    *(int*)((char*)self + 0x10) = t0;
+    *(int*)((char*)self + 0x8) = zero;
+    *(int*)((char*)self + 0xc) = zero;
+    *(int*)((char*)self + 0x10) = zero;
     return self;
 }
 #endif
@@ -210,16 +210,16 @@ extern "C" char* func_003A7878(sWCPool_7878* self, int size, unsigned int flags)
     int align = 4 << ((flags >> 24) & 0xF);
     int pos = first->pos;
     int rem = pos % align;
-    int pad = 0;
+    int alignPad = 0;
     if (rem)
-        pad = align - rem;
-    if (pos + pad + size < first->size)
+        alignPad = align - rem;
+    if (pos + alignPad + size < first->size)
     {
-        first->pos = pos + (pad + size);
-        char* p = first->data + pos;
-        p += pad;
-        self->cur->pad += pad;
-        return p;
+        first->pos = pos + (alignPad + size);
+        char* allocPtr = first->data + pos;
+        allocPtr += alignPad;
+        self->cur->pad += alignPad;
+        return allocPtr;
     }
     if (self->count >= 2)
     {
@@ -228,21 +228,21 @@ extern "C" char* func_003A7878(sWCPool_7878* self, int size, unsigned int flags)
         {
             do
             {
-                sWCBlock_7878* b = self->cur;
-                if (b != first)
+                sWCBlock_7878* block = self->cur;
+                if (block != first)
                 {
-                    int bpos = b->pos;
+                    int bpos = block->pos;
                     rem = bpos % align;
-                    pad = 0;
+                    alignPad = 0;
                     if (rem)
-                        pad = align - rem;
-                    if (bpos + pad + size < b->size)
+                        alignPad = align - rem;
+                    if (bpos + alignPad + size < block->size)
                     {
-                        b->pos = bpos + (pad + size);
-                        char* p = b->data + bpos;
-                        p += pad;
-                        self->cur->pad += pad;
-                        return p;
+                        block->pos = bpos + (alignPad + size);
+                        char* allocPtr = block->data + bpos;
+                        allocPtr += alignPad;
+                        self->cur->pad += alignPad;
+                        return allocPtr;
                     }
                 }
                 self->cur = self->cur->next;
@@ -295,6 +295,14 @@ struct cWorldMemoryMan__cWorldMemoryMan_sElem {
     char pad[0x14];
 };
 
+/**
+ * Destroys the world memory manager and its memory pools.
+ *
+ * Unless this is null, runs func_003A76C0 (with flag 0) on the three 0x14-byte entries from the last to the first, then
+ * calls operator delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ in-charge flags; bit 0 deletes the object
+ */
 extern "C" void cWorldMemoryMan__cWorldMemoryMan(cWorldMemoryMan__cWorldMemoryMan_sElem* self, int flags)
 {
     if (self != 0) {
@@ -347,11 +355,11 @@ extern "C" void func_003A77D0(void* self, int flags);
 extern "C" void func_003A7B98(void* self, int i)
 {
     char* base = (char*)self + 0x3C;
-    void** p = (void**)(base + (i << 2));
-    if (*p != 0) {
-        func_003A77D0(*p, 3);
+    void** slot = (void**)(base + (i << 2));
+    if (*slot != 0) {
+        func_003A77D0(*slot, 3);
     }
-    *p = 0;
+    *slot = 0;
 }
 #endif
 
@@ -1407,7 +1415,7 @@ struct sWorldCache8CD0 {
 extern int cStreamMan_NULLCHUNK;
 
 // PORT: a4 is a pointer carried in an int (compared against &cStreamMan_NULLCHUNK, then shifted).
-extern "C" void func_003A8CD0(sWorldCache8CD0* self, int group, int id, unsigned int key, int a4)
+extern "C" void func_003A8CD0(sWorldCache8CD0* self, int group, int id, unsigned int key, int chunk)
 {
     sWCSlot8CD0* tbl;
     sWCList8CD0* list;
@@ -1422,16 +1430,16 @@ extern "C" void func_003A8CD0(sWorldCache8CD0* self, int group, int id, unsigned
     list->entries[list->count].lo = key;
     list->entries[list->count].hi = key >> 8;
     list->count++;
-    if (a4 == (int)&cStreamMan_NULLCHUNK) {
-        sWCObj8CD0* o = self->obj;
-        o->vt[3].fn((char*)o + o->vt[3].delta, id, key, 0);
+    if (chunk == (int)&cStreamMan_NULLCHUNK) {
+        sWCObj8CD0* callbackObj = self->obj;
+        callbackObj->vt[3].fn((char*)callbackObj + callbackObj->vt[3].delta, id, key, 0);
     } else {
-        sWCObj8CD0* o = self->obj;
-        a4 = o->vt[3].fn((char*)o + o->vt[3].delta, id, key, a4);
+        sWCObj8CD0* callbackObj = self->obj;
+        chunk = callbackObj->vt[3].fn((char*)callbackObj + callbackObj->vt[3].delta, id, key, chunk);
     }
     {
-        sWCSlot8CD0* e = &tbl[id];
-        e->bits[hi] = (unsigned char)e->bits[hi] | ((a4 >> 2) << 8);
+        sWCSlot8CD0* slot = &tbl[id];
+        slot->bits[hi] = (unsigned char)slot->bits[hi] | ((chunk >> 2) << 8);
     }
 }
 #endif
@@ -1478,22 +1486,22 @@ extern "C" void rel_8E20(sWorldCache_8E20* self, int cell, int type, unsigned in
 {
     int bank = key & 0xFF;
     unsigned int id = key >> 8;
-    sBxBank_8AA8* b;
+    sBxBank_8AA8* bankData;
     if (bank == 0xFF)
-        b = self->global;
+        bankData = self->global;
     else
-        b = self->banks[bank];
-    char* p = release_8E20(&b->types[type].refs[id]);
-    if (p != 0) {
-        if (p == (char*)&cStreamMan_NULLCHUNK) {
-            sWCObj_8E20* o = self->obj;
-            p = (char*)o->vt[4].fn((char*)o + o->vt[4].delta, type, key, 0);
+        bankData = self->banks[bank];
+    char* chunk = release_8E20(&bankData->types[type].refs[id]);
+    if (chunk != 0) {
+        if (chunk == (char*)&cStreamMan_NULLCHUNK) {
+            sWCObj_8E20* callbackObj = self->obj;
+            chunk = (char*)callbackObj->vt[4].fn((char*)callbackObj + callbackObj->vt[4].delta, type, key, 0);
         } else {
-            sWCObj_8E20* o = self->obj;
-            p = (char*)o->vt[4].fn((char*)o + o->vt[4].delta, type, key, p);
+            sWCObj_8E20* callbackObj = self->obj;
+            chunk = (char*)callbackObj->vt[4].fn((char*)callbackObj + callbackObj->vt[4].delta, type, key, chunk);
         }
-        if (p != 0 && bank == 0xFF)
-            cMemMan_free(p);
+        if (chunk != 0 && bank == 0xFF)
+            cMemMan_free(chunk);
     }
 }
 #endif
@@ -1509,8 +1517,8 @@ extern "C" void func_003A8F10(char** self, int idx)
     int n = *(short*)(*(char**)(self[0] + 0x14) + idx * 0x58 + 0x22);
     char* list = ((char**)self[2])[idx];
     for (unsigned i = 0; i < n; i++) {
-        char* o = conv_8F10(((unsigned*)*(char**)(list + 0xC))[i] >> 8);
-        *(unsigned short*)(o + 0xA) |= 0x40;
+        char* object = conv_8F10(((unsigned*)*(char**)(list + 0xC))[i] >> 8);
+        *(unsigned short*)(object + 0xA) |= 0x40;
     }
 }
 #endif
@@ -1716,6 +1724,12 @@ struct cWorldView_reset_sCache {
     int f2E4;
 };
 
+/**
+ * Resets a world view to an empty state focused on the origin.
+ *
+ * Clears +0x0 to +0x10, sets the vectors at +0x220 and +0x230 to t4vect_Origin, zeroes the 64 pairs, clears each of the
+ * two focus slots and calls cWorldView_setFocus(self, slot, origin, 0.0f) for it, and clears +0x2E0 and +0x2E4.
+ */
 extern "C" void cWorldView_reset(cWorldView_reset_sCache* self)
 {
     unsigned int i;
@@ -1897,8 +1911,8 @@ extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int a1);
 extern "C" void func_003A95C0(void** self, void* node, int* ok)
 {
     if (*ok != 0) {
-        void* d = *(void**)((char*)node + 0x58);
-        if (d != 0 && cWorldCache_isPageEmpty((cWorldCache*)(*self), *(unsigned short*)((char*)d + 2)) == 0) {
+        void* pageRef = *(void**)((char*)node + 0x58);
+        if (pageRef != 0 && cWorldCache_isPageEmpty((cWorldCache*)(*self), *(unsigned short*)((char*)pageRef + 2)) == 0) {
             *ok = 0;
             return;
         }
@@ -1971,6 +1985,16 @@ struct cWorldView_9658 {
 
 // cWorldView::setFocus
 extern "C" void cWorldView_setFocus_impl(cWorldView_9658* self, int id, const sWCVec4& pos, float fRadius) __asm__("cWorldView_setFocus");
+/**
+ * Points one of the world view's streaming foci at a position.
+ *
+ * For focus @p id: stores @p pos as the load position and max(@p fRadius, 0) as the load radius, sets the focus box to
+ * pos +/- fRadius, marks the focus active and clears its safe radii and update flag.
+ *
+ * @param id  which stream focus to set (On Tour eStreamFocusID)
+ * @param pos  the position to stream around
+ * @param fRadius  how far around it to load
+ */
 extern "C" void cWorldView_setFocus_impl(cWorldView_9658* self, int id, const sWCVec4& pos, float fRadius)
 {
     self->m_StreamFocus[id].m_v4LoadPos = pos;

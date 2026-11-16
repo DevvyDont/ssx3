@@ -144,6 +144,20 @@ static inline sV3_DC70 Normalize_DC70(float x, float y, float z)
     return sV3_DC70(x, y, z);
 }
 
+/**
+ * Creates the light instances for a block of light records (directional, spot, point or ambient).
+ *
+ * For each record i, fetches light @p base + i through vtable slot 2 (func_00394C88), stores the record pointer in its
+ * first word and builds an ARGB colour (alpha 1.0, rgb from +0x20). The record type (+0x10) picks the cLightInst
+ * creator: 0 directional (func_0038DC58, normalised direction +0x2C), 2 point (func_0038DC60, position +0x38, decay
+ * byte +0x64), 1 spot (func_0038DC68, cone angle pi/2 - func_0031C128(+0x5C), decay and dropoff bytes +0x64/+0x65), 3
+ * ambient (func_0038DC50); intensity is +0x14. On the PS2 the four cLightInst creators are empty stubs, so only the
+ * record pointer sticks. Vtable slot 5 of vt_00493650.
+ *
+ * @param lights  the light records (0x70 bytes each)
+ * @param n       how many records to create
+ * @param base    index of the first light to fill (On Tour: index)
+ */
 extern "C" void cPS2LightMan_CreateLights(cPS2LightMan* self, sLight_DC70* lights, int n, int base)
 {
     int i;
@@ -192,9 +206,20 @@ public:
 // passes (void*, int, float); bind the 3-arg call by asm label.
 void func_0038DC50_3(void* p, int b, float f) __asm__("func_0038DC50__FPv");
 
-extern "C" void cPS2LightMan_CreateAmbient(cPS2LightMan* obj, int a, int b, float f)
+/**
+ * Makes one light an ambient light of the given colour and intensity.
+ *
+ * Fetches light @p light through vtable slot 2 (func_00394C88: entry @p light of the light array at +0x4) and passes the rest
+ * to the cLightInst creator func_0038DC50, an empty stub on the PS2. Vtable slot 9 of vt_00493650.
+ *
+ * @param obj  the light manager (this)
+ * @param light    index of the light to set up
+ * @param colour    the colour (const tARGB&, passed by address)
+ * @param intensity    the intensity
+ */
+extern "C" void cPS2LightMan_CreateAmbient(cPS2LightMan* obj, int light, int colour, float intensity)
 {
-    func_0038DC50_3(((cObj0038DEE8*)obj)->v02(a), b, f);
+    func_0038DC50_3(((cObj0038DEE8*)obj)->v02(light), colour, intensity);
 }
 #endif
 
@@ -212,9 +237,21 @@ public:
 // passes (void*, int, int, float); bind the 4-arg call by asm label.
 void func_0038DC58_4(void* p, int b, int c, float f) __asm__("func_0038DC58__FPv");
 
-extern "C" void cPS2LightMan_CreateDirectional(cPS2LightMan* obj, int a, int b, int c, float f)
+/**
+ * Makes one light a directional light of the given colour, direction and intensity.
+ *
+ * Fetches light @p light through vtable slot 2 (func_00394C88: entry @p light of the light array at +0x4) and passes the rest
+ * to the cLightInst creator func_0038DC58, an empty stub on the PS2. Vtable slot 10 of vt_00493650.
+ *
+ * @param obj  the light manager (this)
+ * @param light    index of the light to set up
+ * @param colour    the colour (const tARGB&, passed by address)
+ * @param dir    the direction (const t3vect&)
+ * @param intensity    the intensity
+ */
+extern "C" void cPS2LightMan_CreateDirectional(cPS2LightMan* obj, int light, int colour, int dir, float intensity)
 {
-    func_0038DC58_4(((cObj0038DF38*)obj)->v02(a), b, c, f);
+    func_0038DC58_4(((cObj0038DF38*)obj)->v02(light), colour, dir, intensity);
 }
 #endif
 
@@ -232,9 +269,22 @@ public:
 // passes (void*, int, int, float, int); bind the 5-arg call by asm label.
 void func_0038DC60_5(void* p, int b, int c, float f, int d) __asm__("func_0038DC60__FPv");
 
-extern "C" void cPS2LightMan_CreatePoint(cPS2LightMan* obj, int a, int b, int c, float f, int d)
+/**
+ * Makes one light a point light of the given colour, position, intensity and decay.
+ *
+ * Fetches light @p light through vtable slot 2 (func_00394C88: entry @p light of the light array at +0x4) and passes the rest
+ * to the cLightInst creator func_0038DC60, an empty stub on the PS2. Vtable slot 11 of vt_00493650.
+ *
+ * @param obj  the light manager (this)
+ * @param light    index of the light to set up
+ * @param colour    the colour (const tARGB&, passed by address)
+ * @param pos    the position (const t3vect&)
+ * @param intensity    the intensity
+ * @param decay    the decay type
+ */
+extern "C" void cPS2LightMan_CreatePoint(cPS2LightMan* obj, int light, int colour, int pos, float intensity, int decay)
 {
-    func_0038DC60_5(((cObj0038DF98*)obj)->v02(a), b, c, f, d);
+    func_0038DC60_5(((cObj0038DF98*)obj)->v02(light), colour, pos, intensity, decay);
 }
 #endif
 
@@ -252,9 +302,25 @@ public:
 // passes (void*, int, int, int, float, float, int, float); bind the call by asm label.
 void func_0038DC68_8(void* p, int b, int c, int d, float x, float y, int e, float z) __asm__("func_0038DC68__FPv");
 
-extern "C" void cPS2LightMan_CreateSpot(cPS2LightMan* obj, int a, int b, int c, int d, float x, float y, int e, float z)
+/**
+ * Makes one light a spot light of the given colour, position, direction, angle, intensity, decay and dropoff.
+ *
+ * Fetches light @p light through vtable slot 2 (func_00394C88: entry @p light of the light array at +0x4) and passes the rest
+ * to the cLightInst creator func_0038DC68, an empty stub on the PS2. Vtable slot 12 of vt_00493650.
+ *
+ * @param obj  the light manager (this)
+ * @param light    index of the light to set up
+ * @param colour    the colour (const tARGB&, passed by address)
+ * @param pos    the position (const t3vect&)
+ * @param dir    the direction (const t3vect&)
+ * @param x    the cone angle (On Tour Ang)
+ * @param y    the intensity
+ * @param decay    the decay type
+ * @param z    the dropoff
+ */
+extern "C" void cPS2LightMan_CreateSpot(cPS2LightMan* obj, int light, int colour, int pos, int dir, float x, float y, int decay, float z)
 {
-    func_0038DC68_8(((cObj0038E008*)obj)->v02(a), b, c, d, x, y, e, z);
+    func_0038DC68_8(((cObj0038E008*)obj)->v02(light), colour, pos, dir, x, y, decay, z);
 }
 #endif
 
@@ -1100,6 +1166,11 @@ extern "C" void func_0038F7B0(void)
 //100%
 INCLUDE_ASM("render/lightman", cVisualEffectsTest_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Per-frame update of the debug visual-effects test object: does nothing.
+ *
+ * Slot 2 of vt_00492FD0 (cVisualEffect's update slot); On Tour's update is empty too.
+ */
 void cVisualEffectsTest_update(void* self)
 {
 }
@@ -1110,6 +1181,13 @@ extern "C" void* cWorldPainterManRender(void* self);
 //100%
 INCLUDE_ASM("render/lightman", cVisualEffectsTest_render__FPv);
 #ifdef SKIP_ASM
+/**
+ * Render pass of the debug visual-effects test object: renders the world painter.
+ *
+ * Only calls cWorldPainterManRender (On Tour cWorldPainterManRender). Slot 3 of vt_00492FD0 (cVisualEffect's render slot).
+ *
+ * @return cWorldPainterManRender's result as this unit declares it (On Tour's render returns nothing)
+ */
 void* cVisualEffectsTest_render(void* self)
 {
     return cWorldPainterManRender(self);

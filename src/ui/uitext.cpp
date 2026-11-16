@@ -698,9 +698,9 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_getFont);
  */
 extern "C" int cUITextScroll_getFont(cUITextScroll* self)
 {
-    void* p = *(void**)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
-    if (p != 0) {
-        return *(int*)((char*)*(void**)((char*)p + 0x8) + ((*(unsigned int*)&self->mAttrTextScroll >> 1) & 3) * 12 + 0xC);
+    void* engine = *(void**)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
+    if (engine != 0) {
+        return *(int*)((char*)*(void**)((char*)engine + 0x8) + ((*(unsigned int*)&self->mAttrTextScroll >> 1) & 3) * 12 + 0xC);
     }
     return 0;
 }

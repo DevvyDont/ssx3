@@ -85,11 +85,11 @@ extern "C" void func_002B4BE0(int* self, int flags)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4C08);
 #ifdef SKIP_ASM
-extern "C" int func_002B4C08(void* self, int a1, int a2, int a3)
+extern "C" int func_002B4C08(void* self, int objectRef, int volNum, int viewPort)
 {
-    if (a1 == *(int*)((char*)self + 0x4)
-        && a2 == *(int*)((char*)self + 0x8)
-        && a3 == *(int*)((char*)self + 0x3c)) {
+    if (objectRef == *(int*)((char*)self + 0x4)
+        && volNum == *(int*)((char*)self + 0x8)
+        && viewPort == *(int*)((char*)self + 0x3c)) {
         return 1;
     }
     return 0;
@@ -345,9 +345,17 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* self, int idx, int a2,
 extern unsigned char D_004A35A8[];
 struct sWorldTrigger70;
 
-extern "C" void cWorldTriggerInstance_Stop(sWorldTrigger70* t)
+/**
+ * Stops a world audio trigger instance's sound and resets the instance.
+ *
+ * If the handle at +0x30 is live (not -9999) it is stopped with a 0.25 s fade: through func_002A72D8 on the audio
+ * interface (func_0028B180) when the flag at +0x38 is set, else through cBankMonitor_BANKMONITOR_StopHandle on the bank
+ * monitor. Then the handle becomes -1, the name at +0x40 is emptied (On Tour strcpy(name, "")), +0x68 is set to -1.0f
+ * and +0x60, +0x64, +0x6C are zeroed.
+ */
+extern "C" void cWorldTriggerInstance_Stop(sWorldTrigger70* instance)
 {
-    char* self = (char*)t;
+    char* self = (char*)instance;
     if (*(int*)((char*)self + 0x38) != 0) {
         if (*(int*)((char*)self + 0x30) != -9999) {
             func_002A72D8(func_0028B180(), *(int*)((char*)self + 0x30), 0.25f);
@@ -369,9 +377,9 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5818);
 #ifdef SKIP_ASM
 extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int c, int d);
 
-extern "C" int func_002B5818(void* self, int idx, int* type, int* a, int* b, int c, int d)
+extern "C" int func_002B5818(void* self, int idx, int* type, int* patch, int* noAudio, int viewPort, int check)
 {
-    return func_002B63D0(gWorldTriggerManager, idx, type, a, b, c, d);
+    return func_002B63D0(gWorldTriggerManager, idx, type, patch, noAudio, viewPort, check);
 }
 #endif
 
@@ -383,9 +391,9 @@ extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int
 extern "C" int func_002B5838(void* self, int idx)
 {
     int type;
-    int a;
-    int b;
-    func_002B63D0(gWorldTriggerManager, idx, &type, &a, &b, 0, 1);
+    int patch;
+    int noAudio;
+    func_002B63D0(gWorldTriggerManager, idx, &type, &patch, &noAudio, 0, 1);
     return type == 5;
 }
 #endif
@@ -554,19 +562,19 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5B40);
 extern "C" void cMemMan_free__FPv(int);
 extern "C" void MEM_free(int);
 
-extern "C" void func_002B5B40(void *arg0) {
+extern "C" void func_002B5B40(void *manager) {
     int temp_4;
     int temp_4_2;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0x338)));
+    temp_4 = (*(int *)((char*)(manager) + (0x338)));
     if (temp_4 != 0) {
         MEM_free(temp_4);
-        temp_4_2 = (*(int *)((char*)(arg0) + (0x33C)));
-        (*(int *)((char*)(arg0) + (0x338))) = 0;
+        temp_4_2 = (*(int *)((char*)(manager) + (0x33C)));
+        (*(int *)((char*)(manager) + (0x338))) = 0;
         if (temp_4_2 != 0) {
             cMemMan_free__FPv(temp_4_2);
         }
-        (*(int *)((char*)(arg0) + (0x340))) = 0;
+        (*(int *)((char*)(manager) + (0x340))) = 0;
     }
 }
 #endif
@@ -597,10 +605,10 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5BC0);
 #ifdef SKIP_ASM
 extern "C" int func_002B4C08(void* self, int a1, int a2, int a3);
 
-extern "C" sWorldTrigger70* func_002B5BC0(sWorldTrigger70** self, int a, int b, int c)
+extern "C" sWorldTrigger70* func_002B5BC0(sWorldTrigger70** self, int objectRef, int volNum, int viewPort)
 {
     for (int i = 0; i < 40; i++) {
-        if ((*self)[i].active != 0 && func_002B4C08(&(*self)[i], a, b, c)) {
+        if ((*self)[i].active != 0 && func_002B4C08(&(*self)[i], objectRef, volNum, viewPort)) {
             return &(*self)[i];
         }
     }
@@ -618,27 +626,27 @@ struct sWtVec4 {
     sWtVec4(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-extern "C" void func_002B5C68(sWorldTrigger70** self, int a, int b, int c, int d, int e, float f, const sWtVec3& pos)
+extern "C" void func_002B5C68(sWorldTrigger70** self, int objectRef, int volNum, int viewPort, int audioTrigger, int positional, float volume, const sWtVec3& pos)
 {
-    sWtVec3 p = pos;
+    sWtVec3 localPos = pos;
     if (*(int*)((char*)self + 0x334) != 0) {
-        char* t = (char*)func_002B5BC0(self, a, b, c);
-        if (t == 0) {
-            sWtVec4 q;
-            q = sWtVec4(p.x, p.y, p.z, 1.0f);
-            t = (char*)func_002B5B90(self);
-            *(int*)(t + 0x0) = 1;
-            *(int*)(t + 0x4) = a;
-            *(int*)(t + 0x8) = b;
-            *(int*)(t + 0x3C) = c;
-            *(int*)(t + 0xC) = d;
-            *(float*)(t + 0x10) = f;
-            *(int*)(t + 0x14) = e;
-            *(sWtVec4*)(t + 0x20) = q;
+        char* triggerInst = (char*)func_002B5BC0(self, objectRef, volNum, viewPort);
+        if (triggerInst == 0) {
+            sWtVec4 pos4;
+            pos4 = sWtVec4(localPos.x, localPos.y, localPos.z, 1.0f);
+            triggerInst = (char*)func_002B5B90(self);
+            *(int*)(triggerInst + 0x0) = 1;
+            *(int*)(triggerInst + 0x4) = objectRef;
+            *(int*)(triggerInst + 0x8) = volNum;
+            *(int*)(triggerInst + 0x3C) = viewPort;
+            *(int*)(triggerInst + 0xC) = audioTrigger;
+            *(float*)(triggerInst + 0x10) = volume;
+            *(int*)(triggerInst + 0x14) = positional;
+            *(sWtVec4*)(triggerInst + 0x20) = pos4;
         } else {
-            *(float*)(t + 0x10) = f;
+            *(float*)(triggerInst + 0x10) = volume;
         }
-        *(int*)(t + 0x34) = 1;
+        *(int*)(triggerInst + 0x34) = 1;
     }
 }
 #endif
@@ -680,6 +688,12 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_StopAllTri
 #ifdef SKIP_ASM
 extern "C" void cWorldTriggerInstance_Stop(sWorldTrigger70* t);
 
+/**
+ * Stops every active world audio trigger instance.
+ *
+ * Walks the 40 instances in the array at this+0; each whose active flag is 1 is marked inactive and stopped with
+ * cWorldTriggerInstance_Stop.
+ */
 extern "C" void cWorldTriggerManager_StopAllTriggers(void* self)
 {
     for (int i = 0; i < 40; i++) {
@@ -911,17 +925,17 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6550);
 extern "C" void* func_0028B180();
 extern "C" int func_002A34D0(void* mgr, int a1, int a2, int a3);
 
-extern "C" int func_002B6550(void* self, int type, int* a, int* b, int* c, int arg)
+extern "C" int func_002B6550(void* self, int type, int* bank, int* patch, int* noAudio, int viewPort)
 {
-    int r = 0;
-    *a = 0;
-    *b = 0;
-    *c = 0;
+    int found = 0;
+    *bank = 0;
+    *patch = 0;
+    *noAudio = 0;
     if (type == 0x4D) {
-        *c = 1;
-        r = func_002A34D0(func_0028B180(), 0, 1, arg);
+        *noAudio = 1;
+        found = func_002A34D0(func_0028B180(), 0, 1, viewPort);
     }
-    return r;
+    return found;
 }
 #endif
 
@@ -985,13 +999,13 @@ extern "C" int func_002B6630(sWorldTrigger70** self, int id)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B66E8);
 #ifdef SKIP_ASM
-extern "C" int func_002B66E8(sWorldTrigger70** self, int a1, int a2, sWorldTrigger70* except)
+extern "C" int func_002B66E8(sWorldTrigger70** self, int objectRef, int volNum, sWorldTrigger70* except)
 {
     for (int i = 0; i < 40; i++) {
-        sWorldTrigger70* t = &(*self)[i];
-        if (t->active == 1 && t != except
-            && *(int*)((char*)t + 0x4) == a1
-            && *(int*)((char*)t + 0x8) == a2) {
+        sWorldTrigger70* triggerInst = &(*self)[i];
+        if (triggerInst->active == 1 && triggerInst != except
+            && *(int*)((char*)triggerInst + 0x4) == objectRef
+            && *(int*)((char*)triggerInst + 0x8) == volNum) {
             return 1;
         }
     }
@@ -1092,6 +1106,11 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_Reset);
 extern "C" void cWorldTriggerManager_StopAllTriggers(void* self);
 void cWorldTriggerManager_ResetStates(void* self);
 
+/**
+ * Stops all world audio triggers and clears the manager's trigger state.
+ *
+ * Calls cWorldTriggerManager_StopAllTriggers then cWorldTriggerManager_ResetStates__FPv.
+ */
 extern "C" void cWorldTriggerManager_Reset(void* self)
 {
     cWorldTriggerManager_StopAllTriggers(self);
@@ -1102,6 +1121,11 @@ extern "C" void cWorldTriggerManager_Reset(void* self)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_ResetStates__FPv);
 #ifdef SKIP_ASM
+/**
+ * Clears the world trigger manager's tracking state.
+ *
+ * Sets +0x324 and +0x330 to 0 and +0x328 and +0x32C to -1.
+ */
 void cWorldTriggerManager_ResetStates(void* self)
 {
     *(int*)((char*)self + 0x330) = 0;
@@ -1119,9 +1143,9 @@ extern "C" int func_002B63D0(void* self, int idx, int* type, int* a, int* b, int
 extern "C" int func_002B6918(void* self, int idx)
 {
     int type;
-    int a;
-    int b;
-    func_002B63D0(self, idx, &type, &a, &b, 0, 2);
+    int patch;
+    int noAudio;
+    func_002B63D0(self, idx, &type, &patch, &noAudio, 0, 2);
     return type == 3;
 }
 #endif
@@ -1130,10 +1154,10 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6950);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_DelayMonitorTriggers(void* self);
 
-extern "C" void func_002B6950(char* self, int a1, int a2)
+extern "C" void func_002B6950(char* self, int enable, int delay)
 {
-    if (a1 == 0 || a2 == 0) {
-        *(int*)(self + 0x334) = a1;
+    if (enable == 0 || delay == 0) {
+        *(int*)(self + 0x334) = enable;
         return;
     }
     cSSXAudio_DelayMonitorTriggers(func_0028B180());
@@ -1172,10 +1196,10 @@ extern "C" int func_002B69B8(void* self, void* src, void* state)
     sWtmVEntryF* vt = *(sWtmVEntryF**)((char*)obj + 0xC);
     float cur = vt[30].fn((char*)obj + vt[30].delta);
     int below = cur < prev;
-    int r = *(int*)((char*)state + 0x6C) != 0 && !below;
+    int triggered = *(int*)((char*)state + 0x6C) != 0 && !below;
     *(float*)((char*)state + 0x68) = cur;
     *(int*)((char*)state + 0x6C) = below;
-    return r;
+    return triggered;
 }
 #endif
 
@@ -1302,9 +1326,9 @@ int func_002B6C20_impl(void* self, sWtmEntList* list)
     int n = list->count;
     sWtmEnt18* entries = list->entries;
     for (int i = 0; i < n; i++) {
-        sWtmEnt18* e = &entries[i];
-        if (e->active != 0) {
-            func_002B7410(self, e);
+        sWtmEnt18* entry = &entries[i];
+        if (entry->active != 0) {
+            func_002B7410(self, entry);
         }
     }
     return 1;
@@ -1349,39 +1373,39 @@ struct sVec3_2B6CF8 {
 
 extern "C" void func_002B6F40(void* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi);
 
-extern "C" void func_002B6CF8(void* self, sWtmEnt18* e, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi)
+extern "C" void func_002B6CF8(void* self, sWtmEnt18* entry, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi)
 {
     *lo = sVec3_2B6CF8(10000.0f, 10000.0f, 10000.0f);
     *hi = sVec3_2B6CF8(-10000.0f, -10000.0f, -10000.0f);
-    int* info = *(int**)((char*)e + 0x10);
+    int* info = *(int**)((char*)entry + 0x10);
     char* base = (char*)(info + 2);
-    char* p = base + info[0] * 4;
+    char* cursor = base + info[0] * 4;
     for (int i = 0; i < info[1]; i++) {
-        sVec3_2B6CF8 a;
-        sVec3_2B6CF8 b;
-        func_002B6F40(self, (int*)p, &a, &b);
-        if (a.x < lo->x) lo->x = a.x;
-        if (a.y < lo->y) lo->y = a.y;
-        if (a.z < lo->z) lo->z = a.z;
-        if (b.x > hi->x) hi->x = b.x;
-        if (b.y > hi->y) hi->y = b.y;
-        if (b.z > hi->z) hi->z = b.z;
-        switch (*(int*)p) {
+        sVec3_2B6CF8 recMin;
+        sVec3_2B6CF8 recMax;
+        func_002B6F40(self, (int*)cursor, &recMin, &recMax);
+        if (recMin.x < lo->x) lo->x = recMin.x;
+        if (recMin.y < lo->y) lo->y = recMin.y;
+        if (recMin.z < lo->z) lo->z = recMin.z;
+        if (recMax.x > hi->x) hi->x = recMax.x;
+        if (recMax.y > hi->y) hi->y = recMax.y;
+        if (recMax.z > hi->z) hi->z = recMax.z;
+        switch (*(int*)cursor) {
         case 0:
-            p += 0x1C;
+            cursor += 0x1C;
             break;
         case 1:
-            p += 0x30;
+            cursor += 0x30;
             break;
         case 2:
-            p += 0x30;
+            cursor += 0x30;
             break;
         case 3:
-            p += 0x18;
+            cursor += 0x18;
             break;
         }
     }
-    char* obj = *(char**)((char*)e + 0xC);
+    char* obj = *(char**)((char*)entry + 0xC);
     lo->x += *(float*)(obj + 0x40);
     lo->y += *(float*)(obj + 0x44);
     lo->z += *(float*)(obj + 0x48);
@@ -1525,9 +1549,9 @@ static inline void insert_7318(char* w, void* item, const sWtBox_7318* box)
 }
 
 // Registers an active sound trigger in the world's spatial tree using its bounds.
-extern "C" void func_002B7318(void* self, sTriggerEntry18* e)
+extern "C" void func_002B7318(void* self, sTriggerEntry18* entry)
 {
-    char* trig = (char*)e;
+    char* trig = (char*)entry;
     if (trig == 0 || *(int*)(trig + 0xC) == 0 || *(int*)(*(char**)(trig + 0x10) + 4) == 0) {
         return;
     }
@@ -1694,11 +1718,11 @@ extern "C" void func_002B75D0(sWtm_75D0* self, const sV4_75D0* pos)
     if (self->last.w == 0.0f || Length_75D0(Sub_75D0(*pos, self->last)) > 10.0f) {
         self->count = 0;
         sOctRoot_75D0* root = *(sOctRoot_75D0**)((char*)cAudioInterface_getGame() + 0x20);
-        sWtm_75D0* l[1];
-        l[0] = self;
-        const sV4_75D0* p = pos;
-        sWtm_75D0** pl = l;
-        const sV4_75D0** pp = &p;
+        sWtm_75D0* selfList[1];
+        selfList[0] = self;
+        const sV4_75D0* posPtr = pos;
+        sWtm_75D0** pl = selfList;
+        const sV4_75D0** pp = &posPtr;
         sQH_75D0 h0, h1, h2, h3, h4, h5, h6, h7;
         sOctRoot_75D0* k;
         if (root[0].node) wtq_75D0(&h0, pl, pl, pp, root[0].node, &root[0]);
@@ -1756,6 +1780,15 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldSound_TriggerWorldAudio);
 #ifdef SKIP_ASM
 extern "C" void func_002B7908(void* self, const sV4_75D0* pos, int k, int id);
 
+/**
+ * Fires the world audio triggers around a position for one viewport.
+ *
+ * Refreshes the viewport's overlap list (slot @p k, 0x120 bytes each) for @p pos with func_002B75D0, then calls
+ * func_002B7908 for every non-zero trigger id in it.
+ *
+ * @param pos  world position to trigger around (On Tour wpos)
+ * @param k  viewport index (On Tour ViewPort)
+ */
 // Refresh slot k's trigger list for pos, then fire every live trigger id in it.
 extern "C" void cWorldSound_TriggerWorldAudio(sTriggerIdSlot120* self, const sV4_75D0* pos, int k)
 {
@@ -1942,70 +1975,70 @@ extern "C" void wtEval_7908(void* self, const sV4_75D0* listener, int c, sWtTrig
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B8190);
 #ifdef SKIP_ASM
-extern "C" void func_002B8190(void* self, void* obj, int* o0, int* o1, int* o2, int* o3)
+extern "C" void func_002B8190(void* self, void* obj, int* id0, int* id1, int* id2, int* id3)
 {
     int* hdr = *(int**)(*(char**)((char*)obj + 0x8C) + 0x10);
     char* base = (char*)hdr + 8;
-    char* p = base + (hdr[0] << 2);
+    char* cursor = base + (hdr[0] << 2);
     int n = hdr[1];
     int* recs[4];
     int i;
     int j;
 
     for (i = 0; i < n; i++) {
-        recs[i] = (int*)p;
-        switch (*(int*)p) {
+        recs[i] = (int*)cursor;
+        switch (*(int*)cursor) {
         case 0:
-            p += 0x1C;
+            cursor += 0x1C;
             break;
         case 1:
-            p += 0x30;
+            cursor += 0x30;
             break;
         case 2:
-            p += 0x30;
+            cursor += 0x30;
             break;
         case 3:
-            p += 0x18;
+            cursor += 0x18;
             break;
         }
     }
 
-    *o0 = 0;
-    *o1 = 0;
-    *o2 = 0;
-    *o3 = 0;
+    *id0 = 0;
+    *id1 = 0;
+    *id2 = 0;
+    *id3 = 0;
 
     for (j = 0; j < n; j++) {
-        int v;
+        int recId;
         switch (*recs[0]) {
         case 0:
-            v = recs[j][1];
+            recId = recs[j][1];
             break;
         case 1:
-            v = recs[j][1];
+            recId = recs[j][1];
             break;
         case 2:
-            v = recs[j][1];
+            recId = recs[j][1];
             break;
         case 3:
-            v = recs[j][1];
+            recId = recs[j][1];
             break;
         default:
-            v = recs[j][1];
+            recId = recs[j][1];
             break;
         }
         switch (j) {
         case 0:
-            *o0 = v;
+            *id0 = recId;
             break;
         case 1:
-            *o1 = v;
+            *id1 = recId;
             break;
         case 2:
-            *o2 = v;
+            *id2 = recId;
             break;
         case 3:
-            *o3 = v;
+            *id3 = recId;
             break;
         }
     }
@@ -2017,41 +2050,41 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B82B8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Evaluates one of the trigger fade curves (selected by curve) at t.
-extern "C" float func_002B82B8(float curve, float t)
+extern "C" float func_002B82B8(float curve, float ratio)
 {
     switch ((int)curve) {
     case 0:
-        t = t * t;
-        t = 1.0f - t;
+        ratio = ratio * ratio;
+        ratio = 1.0f - ratio;
         break;
     case 1:
-        t = t / (1.5f - t * 0.5f);
-        t = 1.0f - t;
+        ratio = ratio / (1.5f - ratio * 0.5f);
+        ratio = 1.0f - ratio;
         break;
     case 2:
-        t = 1.0f - t;
+        ratio = 1.0f - ratio;
         break;
     case 3:
-        t = 1.0f - t;
-        t = t / (1.5f - t * 0.5f);
+        ratio = 1.0f - ratio;
+        ratio = ratio / (1.5f - ratio * 0.5f);
         break;
     case 4:
-        t = 1.0f - t;
-        t = t * t;
+        ratio = 1.0f - ratio;
+        ratio = ratio * ratio;
         break;
     case 5:
-        if (t <= 0.7f) {
-            t = 1.0f;
+        if (ratio <= 0.7f) {
+            ratio = 1.0f;
         } else {
-            t = 1.0f - t;
-            t = t * 3.3333332538604736f;
+            ratio = 1.0f - ratio;
+            ratio = ratio * 3.3333332538604736f;
         }
         break;
     default:
-        t = 0.0f;
+        ratio = 0.0f;
         break;
     }
-    return t;
+    return ratio;
 }
 #endif
 
@@ -2121,15 +2154,15 @@ static inline int Classify83F8(const float* v, const sOctKey83F8* key)
 extern "C" void func_002B83F8(void* self, sOctList83F8** partial, sOctList83F8** inside, float** pos,
                               sOctNode83F8* node, sOctKey83F8* key)
 {
-    int r = Classify83F8(*pos, key);
-    if (r == 0)
+    int overlap = Classify83F8(*pos, key);
+    if (overlap == 0)
     {
-        for (sOctItem83F8* p = node->items; p != 0; p = p->next)
+        for (sOctItem83F8* item = node->items; item != 0; item = item->next)
         {
-            if (p->type == 5)
+            if (item->type == 5)
             {
-                sOctList83F8* l = *inside;
-                l->items[l->count++] = p;
+                sOctList83F8* list = *inside;
+                list->items[list->count++] = item;
             }
         }
         if (node->child[0]) func_002BADD0(node->child[0], inside);
@@ -2141,14 +2174,14 @@ extern "C" void func_002B83F8(void* self, sOctList83F8** partial, sOctList83F8**
         if (node->child[6]) func_002BADD0(node->child[6], inside);
         if (node->child[7]) func_002BADD0(node->child[7], inside);
     }
-    else if (r == 2)
+    else if (overlap == 2)
     {
-        for (sOctItem83F8* p = node->items; p != 0; p = p->next)
+        for (sOctItem83F8* item = node->items; item != 0; item = item->next)
         {
-            if (p->type == 5)
+            if (item->type == 5)
             {
-                sOctList83F8* l = *partial;
-                l->items[l->count++] = p;
+                sOctList83F8* list = *partial;
+                list->items[list->count++] = item;
             }
         }
         if (key->lvl == 11)

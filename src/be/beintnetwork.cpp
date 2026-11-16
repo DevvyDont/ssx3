@@ -53,6 +53,13 @@ extern "C" void func_0014E1F8(void)
 //100%
 INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_getSyncDataSize__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the size of the career data block exchanged between consoles in an online game.
+ *
+ * Always 0xC44 (3140) bytes.
+ *
+ * @return 0xC44
+ */
 int cBENetworkInterface_getSyncDataSize(void* self)
 {
     return 0xC44;

@@ -443,11 +443,11 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D5598);
 #ifdef SKIP_ASM
-extern "C" void func_002D5598(unsigned char* rgb, float r, float g, float b)
+extern "C" void func_002D5598(unsigned char* rgb, float red, float green, float blue)
 {
-    rgb[0] = (int)r;
-    rgb[1] = (int)g;
-    rgb[2] = (int)b;
+    rgb[0] = (int)red;
+    rgb[1] = (int)green;
+    rgb[2] = (int)blue;
 }
 #endif
 
@@ -477,12 +477,12 @@ extern "C" void func_002D55C0(unsigned char* p, float r, float g, float b)
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D5658);
 #ifdef SKIP_ASM
-extern "C" void func_002D5658(unsigned char* p, float r, float g, float b, float a)
+extern "C" void func_002D5658(unsigned char* dest, float red, float green, float blue, float alpha)
 {
-    p[6] = (int)(r * 127.0f);
-    p[7] = (int)(g * 127.0f);
-    p[8] = (int)(b * 127.0f);
-    p[9] = (int)(a * 255.0f);
+    dest[6] = (int)(red * 127.0f);
+    dest[7] = (int)(green * 127.0f);
+    dest[8] = (int)(blue * 127.0f);
+    dest[9] = (int)(alpha * 255.0f);
 }
 #endif
 
@@ -515,10 +515,10 @@ extern "C" void tActiveAvalancheNode__tActiveAvalancheNode(int* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D5718);
 #ifdef SKIP_ASM
-extern "C" int func_002D5718(const void* a, const void* b)
+extern "C" int func_002D5718(const void* lhs, const void* rhs)
 {
-    float x = *(const float*)a;
-    float y = *(const float*)b;
+    float x = *(const float*)lhs;
+    float y = *(const float*)rhs;
     if (x < y) {
         return -1;
     }
@@ -532,10 +532,10 @@ extern "C" int func_002D5718(const void* a, const void* b)
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D5750);
 #ifdef SKIP_ASM
-extern "C" int func_002D5750(const void* a, const void* b)
+extern "C" int func_002D5750(const void* lhs, const void* rhs)
 {
-    unsigned short x = *(const unsigned short*)a;
-    unsigned short y = *(const unsigned short*)b;
+    unsigned short x = *(const unsigned short*)lhs;
+    unsigned short y = *(const unsigned short*)rhs;
     if (x < y) {
         return -1;
     }

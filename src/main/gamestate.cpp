@@ -80,13 +80,21 @@ extern "C" int cWScriptMan_isFunc(void* mgr, int id, int a);
 extern "C" void cWScriptMan_runFunc(void* mgr, int id, int a);
 extern void* cWScriptMan_TheWScriptMan;
 
-extern "C" void cGFGateState_runScript(void* self, int a1)
+/**
+ * Runs a world script of the race's location by hash, if the location has it.
+ *
+ * Gets the world section of the current race location, asks cWScriptMan_TheWScriptMan whether that section has the
+ * script (cWScriptMan_isFunc) and runs it (cWScriptMan_runFunc).
+ *
+ * @param hashID  the script's hash (On Tour HashID)
+ */
+extern "C" void cGFGateState_runScript(void* self, int hashID)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* world = SSXApp->Game->SectionMan;
     int id = cSectionMan_getWorldSectionIDFromBELocationID(world, *cBENewRaceInterface_getLocation(iface));
-    if (cWScriptMan_isFunc(cWScriptMan_TheWScriptMan, id, a1) != 0) {
-        cWScriptMan_runFunc(cWScriptMan_TheWScriptMan, id, a1);
+    if (cWScriptMan_isFunc(cWScriptMan_TheWScriptMan, id, hashID) != 0) {
+        cWScriptMan_runFunc(cWScriptMan_TheWScriptMan, id, hashID);
     }
 }
 #endif
@@ -169,6 +177,11 @@ extern "C" void* cGameState_writeToReplayFrame(void* self);
 //100%
 INCLUDE_ASM("main/gamestate", cGFGateState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gate state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFGateState_writeToReplayFrame(void* self)
 {
     return cGameState_writeToReplayFrame(self);
@@ -180,6 +193,11 @@ extern "C" void* cGameState_readFromReplayFrame(void* self);
 //100%
 INCLUDE_ASM("main/gamestate", cGFGateState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gate state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFGateState_readFromReplayFrame(void* self)
 {
     return cGameState_readFromReplayFrame(self);
@@ -220,6 +238,11 @@ extern "C" void func_00234E20(void)
 //100%
 INCLUDE_ASM("main/gamestate", cGFRidingState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Riding state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFRidingState_writeToReplayFrame(void* self)
 {
     return cGameState_writeToReplayFrame(self);
@@ -229,6 +252,11 @@ void* cGFRidingState_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFRidingState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Riding state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFRidingState_readFromReplayFrame(void* self)
 {
     return cGameState_readFromReplayFrame(self);
@@ -808,6 +836,14 @@ struct sVEntry_cGFTrackStartState_writeToReplayFrame {
 // PORT: cGameState_writeToReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
 
+/**
+ * Track-start state: saves its replay data.
+ *
+ * Writes the base game-state part (cGameState_writeToReplayFrame), then the words at +0x10, +0x14 and +0x18 through the stream's
+ * virtual slot 1 (write).
+ *
+ * @param stream  the replay frame stream (On Tour cReplayFramePtr)
+ */
 extern "C" void cGFTrackStartState_writeToReplayFrame(void* self, void* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
@@ -832,6 +868,14 @@ struct sVEntry_cGFTrackStartState_readFromReplayFrame {
 // PORT: cGameState_readFromReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
 
+/**
+ * Track-start state: restores its replay data.
+ *
+ * Reads the base game-state part (cGameState_readFromReplayFrame), then the words at +0x10, +0x14 and +0x18 through the stream's
+ * virtual slot 2 (read).
+ *
+ * @param stream  the replay frame stream (On Tour cReplayFramePtr)
+ */
 extern "C" void cGFTrackStartState_readFromReplayFrame(void* self, void* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
@@ -1083,6 +1127,14 @@ struct sVEntry_cGFNextHeatState_writeToReplayFrame {
 // PORT: cGameState_writeToReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
 
+/**
+ * Next-heat state: saves its replay data.
+ *
+ * Writes the base game-state part (cGameState_writeToReplayFrame), then the words at +0x10, +0x14 and +0x18 through the stream's
+ * virtual slot 1 (write).
+ *
+ * @param stream  the replay frame stream (On Tour cReplayFramePtr)
+ */
 extern "C" void cGFNextHeatState_writeToReplayFrame(void* self, void* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
@@ -1107,6 +1159,14 @@ struct sVEntry_cGFNextHeatState_readFromReplayFrame {
 // PORT: cGameState_readFromReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
 
+/**
+ * Next-heat state: restores its replay data.
+ *
+ * Reads the base game-state part (cGameState_readFromReplayFrame), then the words at +0x10, +0x14 and +0x18 through the stream's
+ * virtual slot 2 (read).
+ *
+ * @param stream  the replay frame stream (On Tour cReplayFramePtr)
+ */
 extern "C" void cGFNextHeatState_readFromReplayFrame(void* self, void* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
@@ -1186,6 +1246,11 @@ extern "C" void cGFSessionTeleportState_update(void)
 //100%
 INCLUDE_ASM("main/gamestate", cGFSessionTeleportState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Session-teleport state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFSessionTeleportState_writeToReplayFrame(void* self)
 {
     return cGameState_writeToReplayFrame(self);
@@ -1195,6 +1260,11 @@ void* cGFSessionTeleportState_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFSessionTeleportState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Session-teleport state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFSessionTeleportState_readFromReplayFrame(void* self)
 {
     return cGameState_readFromReplayFrame(self);
@@ -1465,6 +1535,14 @@ struct sVEntry_cGFUserSelectState_writeToReplayFrame {
 // PORT: cGameState_writeToReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
 
+/**
+ * User-select state: saves its replay data.
+ *
+ * Writes the base game-state part (cGameState_writeToReplayFrame), then the words at +0x10, +0x14, +0x8 and +0x18 through the stream's
+ * virtual slot 1 (write).
+ *
+ * @param stream  the replay frame stream (On Tour cReplayFramePtr)
+ */
 extern "C" void cGFUserSelectState_writeToReplayFrame(void* self, void* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
@@ -1491,6 +1569,14 @@ struct sVEntry_cGFUserSelectState_readFromReplayFrame {
 // PORT: cGameState_readFromReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
 
+/**
+ * User-select state: restores its replay data.
+ *
+ * Reads the base game-state part (cGameState_readFromReplayFrame), then the words at +0x10, +0x14, +0x8 and +0x18 through the stream's
+ * virtual slot 2 (read).
+ *
+ * @param stream  the replay frame stream (On Tour cReplayFramePtr)
+ */
 extern "C" void cGFUserSelectState_readFromReplayFrame(void* self, void* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
@@ -1646,6 +1732,11 @@ void func_00236AF0(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFSectionLoadState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Section-load state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFSectionLoadState_writeToReplayFrame(void* self)
 {
     return cGameState_writeToReplayFrame(self);
@@ -1655,6 +1746,11 @@ void* cGFSectionLoadState_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFSectionLoadState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Section-load state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFSectionLoadState_readFromReplayFrame(void* self)
 {
     return cGameState_readFromReplayFrame(self);
@@ -1684,6 +1780,11 @@ extern "C" void func_00236B38(void)
 //100%
 INCLUDE_ASM("main/gamestate", cGFTransportWaitState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Transport-wait state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFTransportWaitState_writeToReplayFrame(void* self)
 {
     return cGameState_writeToReplayFrame(self);
@@ -1693,6 +1794,11 @@ void* cGFTransportWaitState_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFTransportWaitState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Transport-wait state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFTransportWaitState_readFromReplayFrame(void* self)
 {
     return cGameState_readFromReplayFrame(self);
@@ -1814,6 +1920,11 @@ extern "C" void func_00236CD8(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFPreEventState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Pre-event state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFPreEventState_writeToReplayFrame(void* self)
 {
     return cGameState_writeToReplayFrame(self);
@@ -1823,6 +1934,11 @@ void* cGFPreEventState_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFPreEventState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Pre-event state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFPreEventState_readFromReplayFrame(void* self)
 {
     return cGameState_readFromReplayFrame(self);
@@ -1890,6 +2006,11 @@ extern "C" void func_00236EA0(void)
 //100%
 INCLUDE_ASM("main/gamestate", cGFPostEventState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Post-event state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFPostEventState_writeToReplayFrame(void* self)
 {
     return cGameState_writeToReplayFrame(self);
@@ -1899,6 +2020,11 @@ void* cGFPostEventState_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFPostEventState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Post-event state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFPostEventState_readFromReplayFrame(void* self)
 {
     return cGameState_readFromReplayFrame(self);
@@ -1961,6 +2087,11 @@ extern "C" void cGFPodiumState_loseFocus(void)
 //100%
 INCLUDE_ASM("main/gamestate", cGFPodiumState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Podium state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFPodiumState_writeToReplayFrame(void* self)
 {
     return cGameState_writeToReplayFrame(self);
@@ -1970,6 +2101,11 @@ void* cGFPodiumState_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFPodiumState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Podium state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFPodiumState_readFromReplayFrame(void* self)
 {
     return cGameState_readFromReplayFrame(self);
@@ -2120,7 +2256,17 @@ static inline void* initObj_237140(void* o, int a, int b)
     return o;
 }
 
-extern "C" void* cInputSync_createlocalinput(sOwner_237140* self, int* a1)
+/**
+ * Wraps a local player's input in a network-synchronised input and returns the wrapper.
+ *
+ * Takes the next synced pad entry, allocates and clears its sample ring ("InputSamples", 100 bytes per sample,
+ * each marked 0x18), records the frame (+0x0) and the real input's pad (@p realinput[0]), allocates the "SyncedPad"
+ * buffer and builds a "SyncedInput" on it with the real input's map (@p realinput[1]).
+ *
+ * @param realinput  the real input (On Tour realinput)
+ * @return the synced input that replaces it
+ */
+extern "C" void* cInputSync_createlocalinput(sOwner_237140* self, int* realinput)
 {
     sEntry_237140* e = &self->entries[self->n++];
     e->recs = (sRec_237140*)operator_new_tag(self->count * 100, str_InputSamples, 0, 0);
@@ -2130,10 +2276,10 @@ extern "C" void* cInputSync_createlocalinput(sOwner_237140* self, int* a1)
     }
     e->f4 = 0;
     e->f8 = self->f0;
-    e->fC = a1[0];
+    e->fC = realinput[0];
     e->f10 = (int*)cMemMan_alloc(0x2A4, str_SyncedPad, 0, 0);
     *e->f10 = 0;
-    void* o = initObj_237140(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)e->f10, a1[1]);
+    void* o = initObj_237140(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)e->f10, realinput[1]);
     e->f14 = o;
     return o;
 }
@@ -2182,7 +2328,16 @@ static inline void* initObj_237280(void* o, int a, int b)
     return o;
 }
 
-extern "C" void* cInputSync_createremoteinput(sOwner_237280* self, int a1)
+/**
+ * Creates a network-synchronised input for a remote player, fed only from received samples.
+ *
+ * Like cInputSync_createlocalinput, but the entry has no local pad (+0xC = 0) and the "SyncedInput" is built on @p realinputmap, the input
+ * map to use.
+ *
+ * @param realinputmap  the input map (On Tour realinputmap)
+ * @return the synced input
+ */
+extern "C" void* cInputSync_createremoteinput(sOwner_237280* self, int realinputmap)
 {
     sEntry_237280* e = &self->entries[self->n++];
     e->recs = (sRec_237280*)operator_new_tag(self->count * 100, str_InputSamples, 0, 0);
@@ -2195,7 +2350,7 @@ extern "C" void* cInputSync_createremoteinput(sOwner_237280* self, int a1)
     e->fC = 0;
     e->f10 = (int*)cMemMan_alloc(0x2A4, str_SyncedPad, 0, 0);
     *e->f10 = 0;
-    void* o = initObj_237280(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)e->f10, a1);
+    void* o = initObj_237280(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)e->f10, realinputmap);
     e->f14 = o;
     return o;
 }
@@ -2327,6 +2482,9 @@ extern "C" void func_002373B8(cInputSync_2373B8* self)
 //100%
 INCLUDE_ASM("main/gamestate", cInputSync_postupdate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Input sync step after the game update: does nothing in this build.
+ */
 void cInputSync_postupdate(void* self)
 {
 }
@@ -2394,6 +2552,14 @@ struct sPlayer002379C8 {
     sTrack002379C8 tracks[1];
 };
 
+/**
+ * Feeds the synced pads their next received input sample, once every player's input for the frame is there.
+ *
+ * Returns 0 while cGameComm_mGameComm's state is below 14 or func_00237950 says inputs are not ready; otherwise,
+ * for each synced pad, passes the current sample (cursor modulo the ring size) to cInputPad_update and advances it.
+ *
+ * @return 1 when the pads were updated
+ */
 extern "C" int cInputSync_aiupdate(sPlayer002379C8* self)
 {
     if (cGameComm_mGameComm->mState < 14) {
@@ -2498,6 +2664,11 @@ INCLUDE_ASM("main/gamestate", GMsrand);
 extern "C" void cBxPseudoRng_Seed(uint* state, uint seed);
 extern uint GMrandom[];
 
+/**
+ * Seeds the shared game random generator GMrandom (kept in step between networked players).
+ *
+ * @param seed  the seed
+ */
 extern "C" void GMsrand(uint seed)
 {
     cBxPseudoRng_Seed(GMrandom, seed);
@@ -2510,6 +2681,9 @@ INCLUDE_ASM("main/gamestate", GMrand);
 extern "C" uint cBxPseudoRng_NextInt(uint* state);
 extern uint GMrandom[];
 
+/**
+ * Returns the next number from the shared game random generator GMrandom.
+ */
 extern "C" uint GMrand(void)
 {
     return cBxPseudoRng_NextInt(GMrandom);

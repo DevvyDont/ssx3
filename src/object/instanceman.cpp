@@ -181,6 +181,15 @@ extern "C" void* func_00351480(void* self, float* src, float time)
 //100%
 INCLUDE_ASM("object/instanceman", cAnimFrame_getStartTime);
 #ifdef SKIP_ASM
+/**
+ * Returns the time an animation frame's animation starts: the start of its first channel's first segment.
+ *
+ * Follows AnimRecord (+0x40) to its channel list (+0x20); the first channel's segment array (+0x4) gives the start
+ * (+0x10) of segment 0. Returns 0.0 when the channel or its segments are missing. Likely bug (kept for matching): the
+ * first channel pointer is read before the list pointer is tested for null.
+ *
+ * @return the start time in frames, or 0.0
+ */
 // PORT: the original reads *a before checking a for null.
 extern "C" float cAnimFrame_getStartTime(void* self)
 {
@@ -283,7 +292,19 @@ static inline bool inRange_351660(sImSeg_351660* e, float x)
     return e->lo <= x && x < e->hi;
 }
 
-extern "C" void cAnimFrame_getDeriv(char* self, sImV4_351660* vel, sImV4_351660* rotVel, float t)
+/**
+ * Evaluates an animation frame's rate of change at a time: translation and rotation per frame.
+ *
+ * For each of the 16 channels (bit i of the record's mask at AnimRecord +0x18) it uses the channel's current segment
+ * (index array at +0x0), stepping to the right one with cAnimChannel_nextSegment when the time is outside it, and evaluates the
+ * cubic's derivative 3a t^2 + 2b t + c; channels not in the mask give 0. Channels 0-2 are the translation rates,
+ * 3-5 the angle rates (negated).
+ *
+ * @param vel     receives the translation rate (w = 0) (On Tour dTrans)
+ * @param rotVel  receives the negated angle rates (w = 0) (On Tour dAng)
+ * @param time       the animation time
+ */
+extern "C" void cAnimFrame_getDeriv(char* self, sImV4_351660* vel, sImV4_351660* rotVel, float time)
 {
     float out[16];
     sImCurve_351660** curves = *(sImCurve_351660***)(*(char**)(self + 0x40) + 0x20);
@@ -294,12 +315,12 @@ extern "C" void cAnimFrame_getDeriv(char* self, sImV4_351660* vel, sImV4_351660*
         sImCurve_351660* c = *curves;
         if (*(int*)(*(char**)(self + 0x40) + 0x18) & mask) {
             sImSeg_351660* e = &c->segs[*cur];
-            if (!inRange_351660(e, t)) {
-                e = (sImSeg_351660*)cAnimChannel_nextSegment((sImRangeTable*)c, cur, t);
+            if (!inRange_351660(e, time)) {
+                e = (sImSeg_351660*)cAnimChannel_nextSegment((sImRangeTable*)c, cur, time);
             }
             curves++;
             cur++;
-            *o = e->a * (t * 3.0f) * t + 2.0f * e->b * t + e->c;
+            *o = e->a * (time * 3.0f) * time + 2.0f * e->b * time + e->c;
         } else {
             *o = 0.0f;
         }
@@ -430,12 +451,19 @@ static inline void vu0CopyMatIM(sImMat44* d, const sImMat44* s)
         : "memory");
 }
 
-extern "C" void cMeshAnimFrame_transform(void* self, sImMat44* m)
+/**
+ * Transforms a mesh animation frame's matrix by another matrix.
+ *
+ * Multiplies FrameMatrix (+0x90) by @p xform on VU0 and copies the product back into FrameMatrix.
+ *
+ * @param xform  the transform to apply (On Tour xform)
+ */
+extern "C" void cMeshAnimFrame_transform(void* self, sImMat44* xform)
 {
     sImMat44* dst = (sImMat44*)((char*)self + 0x90);
     sImMat44 t2;
     sImMat44 t;
-    vu0MulMatIM(&t, m, dst);
+    vu0MulMatIM(&t, xform, dst);
     vu0CopyMatIM(&t2, &t);
     vu0CopyMatIM(dst, &t2);
 }
@@ -492,18 +520,29 @@ static inline bool sImRange_below(sImRange* self, float x)
     return x < self->hi;
 }
 
-extern "C" sImRange* cAnimChannel_nextSegment(sImRangeTable* t, int* cur, float x)
+/**
+ * Finds the segment of an animation channel that holds a time, starting with the one after the current one.
+ *
+ * Increments @p cur; if that segment exists and lo <= @p x < hi (+0x10, +0x14) it is returned. Otherwise the search
+ * restarts at segment 0 and returns the first segment whose end is past @p x, or the last one.
+ *
+ * @param channel    the channel: segment count +0x0, segment array +0x4 (0x18 bytes each)
+ * @param cur  the current segment index; updated to the returned segment
+ * @param x    the time
+ * @return the segment that holds the time (the last one when none does)
+ */
+extern "C" sImRange* cAnimChannel_nextSegment(sImRangeTable* channel, int* cur, float x)
 {
     sImRange* e;
     int i = ++*cur;
-    if (i < t->count) {
-        e = &t->entries[i];
+    if (i < channel->count) {
+        e = &channel->entries[i];
         if (sImRange_contains(e, x)) {
             return e;
         }
     }
-    e = t->entries;
-    for (*cur = 0; *cur < t->count - 1; ++*cur, e++) {
+    e = channel->entries;
+    for (*cur = 0; *cur < channel->count - 1; ++*cur, e++) {
         if (sImRange_below(e, x)) {
             return e;
         }

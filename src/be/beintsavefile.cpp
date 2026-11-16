@@ -46,6 +46,14 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern const char str_save_file_buffer[];
 extern char* cBESaveInterface_replayBuffer;
 
+/**
+ * Returns the replay/save buffer, allocating it on first use.
+ *
+ * Sets cBESaveInterface_bDoReplay and allocates cBESaveInterface_replayBuffer (0x80000 bytes, 'save file buffer') if it
+ * does not exist yet.
+ *
+ * @return cBESaveInterface_replayBuffer
+ */
 extern "C" char* cBESaveInterface_getReplayBuffer(void)
 {
     cBESaveInterface_bDoReplay = 1;
@@ -62,6 +70,13 @@ extern "C" void* cBE_getBE();
 extern "C" int cBE_getDataSize(void* be);
 extern char* cBESaveInterface_replayBuffer;
 
+/**
+ * Returns the replay part of the save buffer, which follows the career data.
+ *
+ * cBESaveInterface_replayBuffer + cBE_getDataSize (cBE::getDataSize, 0xBB78); no null check.
+ *
+ * @return the replay data
+ */
 extern "C" char* cBESaveInterface_getGameReplayBuffer(void)
 {
     return cBESaveInterface_replayBuffer + cBE_getDataSize(cBE_getBE());
@@ -74,6 +89,11 @@ INCLUDE_ASM("be/beintsavefile", cBESaveInterface_releaseBuffer);
 void cMemMan_free(void*);
 extern void* cBESaveInterface_buffer;
 
+/**
+ * Frees the save-profile buffer.
+ *
+ * Deletes cBESaveInterface_buffer if set and sets it to null.
+ */
 extern "C" void cBESaveInterface_releaseBuffer(void)
 {
     if (cBESaveInterface_buffer)
@@ -88,6 +108,11 @@ INCLUDE_ASM("be/beintsavefile", cBESaveInterface_releaseReplayBuffer);
 void cMemMan_free(void*);
 extern char* cBESaveInterface_replayBuffer;
 
+/**
+ * Frees the replay buffer and turns replay mode off.
+ *
+ * Deletes cBESaveInterface_replayBuffer if set, then clears it and cBESaveInterface_bDoReplay.
+ */
 extern "C" void cBESaveInterface_releaseReplayBuffer(void)
 {
     if (cBESaveInterface_replayBuffer)
@@ -140,6 +165,13 @@ extern "C" void* func_00152758(void* self)
 //100%
 INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getSaveGameSize__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the size of the settings save file.
+ *
+ * Always 0xCCC (3276) bytes.
+ *
+ * @return 0xCCC
+ */
 int cBESaveInterface_getSaveGameSize(void* self)
 {
     return 0xCCC;
@@ -181,6 +213,17 @@ struct sCharFlag_2950 { unsigned char f; char pad[0x1B]; };
 extern sCharFlag_2950 D_00535B31_2950[] __asm__("D_00535B31");
 
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
+/**
+ * Builds the memory-card save block for a profile and returns it.
+ *
+ * Frees the old buffer (cBESaveInterface_releaseBuffer) and allocates cBESaveInterface_getSaveProfileSize bytes ('save file buffer'). It holds the 12-byte
+ * player name from cBELibrary_playerDB[@p idx], the whole profile from cBELibrary_profileLib[@p idx] (10 characters x
+ * 0xF88), the profile's flag byte from D_00535B31, then lets the player, BAGT, mission, score and stat interfaces write
+ * their parts (virtual slot 2 of each getThis()), and ends with a CRC of the rest (func_003E62D0, seed 0xFBEA).
+ *
+ * @param idx  the profile to save (On Tour iProfile)
+ * @return the new buffer (cBESaveInterface_buffer)
+ */
 // Builds the save block of rider profile 'idx': name, profile, character flag, CRC.
 extern "C" void* cBESaveInterface_generateSaveProfile(void* self, int idx)
 {
@@ -213,6 +256,13 @@ extern "C" void* cBESaveInterface_generateSaveProfile(void* self, int idx)
 //100%
 INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getSaveProfileSize);
 #ifdef SKIP_ASM
+/**
+ * Returns the size of a profile's memory-card save block.
+ *
+ * 0x9B61 bytes: the 12-byte name, the 0x9B50-byte profile, one flag byte and the 4-byte checksum (see cBESaveInterface_generateSaveProfile).
+ *
+ * @return 0x9B61
+ */
 extern "C" int cBESaveInterface_getSaveProfileSize()
 {
     return 0x9B61;
@@ -320,6 +370,11 @@ void operator_delete(int* ptr);
 void cMemMan_free(void*);
 extern void* cBESaveInterface_buffer;
 
+/**
+ * Destroys the save interface and frees its save buffer.
+ *
+ * Deletes cBESaveInterface_instance and clears it, then frees cBESaveInterface_buffer if set and clears it.
+ */
 extern "C" void cBESaveInterface_purgeInterface(void)
 {
     operator_delete((int*)cBESaveInterface_instance);

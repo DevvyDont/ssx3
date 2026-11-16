@@ -4904,6 +4904,15 @@ void operator_delete(int* ptr);
 
 extern char D_00488680[];
 
+/**
+ * Destroys the visual-effects test object: restores the base vtable and frees it if asked.
+ *
+ * Stores the cVisualEffect base vtable (D_00488680; the derived vtable store is dead and dropped) and calls
+ * operator_delete on @p flags bit 0. Slot 1 of vt_00492FD0, the cVisualEffectsTest vtable whose slots 2/3 are
+ * cVisualEffectsTest_update and cVisualEffectsTest_render.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cVisualEffectsTest__cVisualEffectsTest(int* self, int flags)
 {
     *(void**)self = D_00488680;
@@ -5691,6 +5700,14 @@ void* func_00397118(void* self)
 //100%
 INCLUDE_ASM("render/font", cUIAnimationBank_setData__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Points an animation bank at its loaded animation block.
+ *
+ * Stores @p val in the bank's first word (On Tour mpAnimationBlock). cUIEngine_loadFile calls it for the engine's bank
+ * at +0x50 with the file's animation block (file + *(file + 8)).
+ *
+ * @param val  the animation block's address (On Tour: char* pData)
+ */
 void cUIAnimationBank_setData(void* self, int val)
 {
     *(int*)((char*)self + 0x0) = val;

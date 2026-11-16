@@ -102,10 +102,10 @@ INCLUDE_ASM("seg/seg_313800_exception", func_004128A8);
 #ifdef SKIP_ASM
 extern int *func_00410490(void);
 int *func_004128A8(void) {
-    int *p = (int *)*func_00410490();
-    p[5] = 1;
-    *(long *)(p + 8) += 1;
-    return p;
+    int *ehInfo = (int *)*func_00410490();
+    ehInfo[5] = 1;
+    *(long *)(ehInfo + 8) += 1;
+    return ehInfo;
 }
 #endif
 
@@ -133,16 +133,16 @@ int func_00412908(void) {
 INCLUDE_ASM("seg/seg_313800_exception", func_00412928);
 #ifdef SKIP_ASM
 extern int func_00415260(int, int, int);
-int func_00412928(int *a, int (*fn)(void), short *c) {
-    int r;
-    if (c != 0 && c[2] != 4)
+int func_00412928(int *info, int (*fn)(void), short *exceptionTable) {
+    int matchedValue;
+    if (exceptionTable != 0 && exceptionTable[2] != 4)
         return 0;
     if (fn == (int (*)(void))-1)
-        return a[2];
-    r = func_00415260(fn(), a[3], a[10]);
-    if (r)
-        a[2] = r;
-    return r;
+        return info[2];
+    matchedValue = func_00415260(fn(), info[3], info[10]);
+    if (matchedValue)
+        info[2] = matchedValue;
+    return matchedValue;
 }
 #endif
 
@@ -151,21 +151,21 @@ INCLUDE_ASM("seg/seg_313800_exception", func_00412998);
 #ifdef SKIP_ASM
 extern int *func_004128E0_a(int) __asm__("func_004128E0");
 extern int *func_00410490_l(void) __asm__("func_00410490");
-void func_00412998(int a, int b, int c) {
-    int *p = func_004128E0_a(0x30);
-    int *l;
-    p[3] = b;
-    p[4] = c;
-    p[2] = a;
-    p[10] = a;
-    *(long long *)(p + 8) = 0;
-    p[5] = 0;
-    p[0] = (int)func_00412928;
-    ((short *)p)[2] = 4;
-    ((short *)p)[3] = 1;
-    l = func_00410490_l();
-    p[6] = *l;
-    *l = (int)p;
+void func_00412998(int value, int type, int cleanup) {
+    int *ehInfo = func_004128E0_a(0x30);
+    int *infoChain;
+    ehInfo[3] = type;
+    ehInfo[4] = cleanup;
+    ehInfo[2] = value;
+    ehInfo[10] = value;
+    *(long long *)(ehInfo + 8) = 0;
+    ehInfo[5] = 0;
+    ehInfo[0] = (int)func_00412928;
+    ((short *)ehInfo)[2] = 4;
+    ((short *)ehInfo)[3] = 1;
+    infoChain = func_00410490_l();
+    ehInfo[6] = *infoChain;
+    *infoChain = (int)ehInfo;
 }
 #endif
 
@@ -177,22 +177,22 @@ extern sCpEh **eh_get_a28(void) __asm__("func_00410490");
 extern int ptr_type_a28(int) __asm__("func_00415728");
 extern void eh_free_a28(void *) __asm__("func_00412908");
 extern int term_a28(void) __asm__("func_00412800") __attribute__((noreturn));
-void func_00412A28(sCpEh *p) {
-    sCpEh **q = eh_get_a28();
-    if (--p->handlers != 0)
+void func_00412A28(sCpEh *ehInfo) {
+    sCpEh **chainLink = eh_get_a28();
+    if (--ehInfo->handlers != 0)
         return;
-    if (p == *q && !p->caught)
+    if (ehInfo == *chainLink && !ehInfo->caught)
         return;
-    for (; *q && *q != p; q = &(*q)->next)
+    for (; *chainLink && *chainLink != ehInfo; chainLink = &(*chainLink)->next)
         ;
-    if (!*q)
+    if (!*chainLink)
         term_a28();
-    *q = p->next;
-    if (p->cleanup)
-        p->cleanup(p->value, 2);
-    if (!ptr_type_a28(p->type))
-        eh_free_a28((void *)p->orig);
-    eh_free_a28(p);
+    *chainLink = ehInfo->next;
+    if (ehInfo->cleanup)
+        ehInfo->cleanup(ehInfo->value, 2);
+    if (!ptr_type_a28(ehInfo->type))
+        eh_free_a28((void *)ehInfo->orig);
+    eh_free_a28(ehInfo);
 }
 #endif
 
@@ -202,11 +202,11 @@ INCLUDE_ASM("seg/seg_313800_exception", func_00412AF0);
 extern int *func_00410490(void);
 extern int func_00412800(void) __attribute__((noreturn));
 void func_00412AF0(void) {
-    int *p = (int *)*func_00410490();
-    if (p == 0) {
+    int *ehInfo = (int *)*func_00410490();
+    if (ehInfo == 0) {
         func_00412800();
     }
-    p[5] = 0;
+    ehInfo[5] = 0;
 }
 #endif
 
@@ -406,17 +406,17 @@ extern sCpEhInfoDD8** func_00410490_dd8(void) __asm__("func_00410490");
 bool uncaught_exception_dd8(void) __asm__("func_00412DD8");
 bool uncaught_exception_dd8(void)
 {
-    sCpEhInfoDD8* p = *func_00410490_dd8();
-    return p && !p->caught;
+    sCpEhInfoDD8* ehInfo = *func_00410490_dd8();
+    return ehInfo && !ehInfo->caught;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", func_00412E10);
 #ifdef SKIP_ASM
-int func_00412E10(int *p) {
-    int *(**vt)(int *) = *(int *(***)(int *))p;
-    return *vt[1](p);
+int func_00412E10(int *excObject) {
+    int *(**vt)(int *) = *(int *(***)(int *))excObject;
+    return *vt[1](excObject);
 }
 #endif
 

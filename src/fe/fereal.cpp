@@ -1545,6 +1545,13 @@ INCLUDE_ASM("fe/fereal", cOVSound_cOVSound);
 void* func_0039E288(void* self);
 extern void* D_00469318[];
 
+/**
+ * Constructs the overlay sound interface.
+ *
+ * Runs func_0039E288 (the UI sound interface base), installs D_00469318 at +0x0 and clears +0x4.
+ *
+ * @return @p self
+ */
 extern "C" void* cOVSound_cOVSound(void* self)
 {
     func_0039E288(self);

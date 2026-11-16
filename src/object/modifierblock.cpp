@@ -647,6 +647,12 @@ struct sModBlockLink {
     sModBlockDtorVEntry* vt;      // 0x8
 };
 
+/**
+ * Removes and deletes all of a modifier block's effect modifiers.
+ *
+ * Walks the Effect list (head at +0x10), reading each link's next first, and deletes each one through virtual slot 1
+ * (the destructor, flags 3); each destructor unlinks itself (On Tour asserts the list is empty afterwards).
+ */
 extern "C" void tModifierBlock_remEffectModifier(void* self)
 {
     sModBlockLink* head = *(sModBlockLink**)((char*)self + 0x10);
@@ -742,6 +748,14 @@ struct sModBlockLink3300 {
     unsigned int id;                       // 0x30
 };
 
+/**
+ * Removes and deletes one rail modifier of a modifier block, or all of them.
+ *
+ * With @p id -1 (an invalid tResourceID) every link of the Rail list (head at +0x1C) is deleted through virtual slot
+ * 1 (the destructor, flags 3). Otherwise only the first link whose spline id (+0x30) equals @p id is deleted.
+ *
+ * @param id  the rail's spline resource id (On Tour splineId), or -1 for all
+ */
 extern "C" void tModifierBlock_remRailModifier(void* self, unsigned int id)
 {
     sModBlockLink3300* head = *(sModBlockLink3300**)((char*)self + 0x1C);
@@ -779,6 +793,14 @@ struct sMbVEntryV3398 {
 
 extern "C" void cEffectLink_append(void* pool, void* item);
 
+/**
+ * Takes over the effect modifiers of another effect list (another node's modifier block).
+ *
+ * For each effect of @p list (read next first) it calls the effect's virtual slot 3, then appends it to this block's
+ * Effect list (+0x10) with cEffectLink_append; finally the source list's Next and Prev are cleared.
+ *
+ * @param list  the effect list head to empty (On Tour link): another modifier block's +0x10
+ */
 extern "C" void tModifierBlock_transferEffectModifier(void* self, void* list)
 {
     void* p = *(void**)list;
@@ -1061,6 +1083,14 @@ extern void* cSkyBox_vtbl[];
 //100%
 INCLUDE_ASM("object/modifierblock", cSkyBox_cSkyBox__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs the sky box: no section and no sky instance yet.
+ *
+ * Stores cSkyBox_vtbl (+0xC), clears the list links (+0x4, +0x8), sets the section id (+0x10) to -1 and the sky
+ * instance (+0x14) to 0. cGame_load allocates it (0x18 bytes, "SkyBox").
+ *
+ * @return the constructed sky box (self)
+ */
 void* cSkyBox_cSkyBox(void* self)
 {
     *(void***)((char*)self + 0xc) = cSkyBox_vtbl;
@@ -1337,18 +1367,28 @@ struct sSpring_3E08 {
     float seg;      // 0x20
 };
 
-extern "C" void cSpring_setupSpring(void* self, sSpringDesc_3E08* d, float len)
+/**
+ * Sets a spring up from its data and length: copies the parameters and lays the nodes out evenly.
+ *
+ * Copies the node count (data +0x1C, On Tour Width) to +0x0 and the parameters at data +0x0..+0x18 to +0x4..+0x1C;
+ * the one at data +0x14 is stored scaled by 1e-6. The spacing (+0x20) is @p len / (count - 1); then
+ * cSpring_setupNodes() builds the nodes. On Tour asserts Width <= kMaxSpringNodes; retail does not.
+ *
+ * @param sdata    the spring data (On Tour tSpringData* sdata)
+ * @param len  the spring's length (On Tour length)
+ */
+extern "C" void cSpring_setupSpring(void* self, sSpringDesc_3E08* sdata, float len)
 {
     sSpring_3E08* s = (sSpring_3E08*)self;
-    int n = d->count;
+    int n = sdata->count;
     s->count = n;
-    s->f4 = d->f0;
-    s->f8 = d->f4;
-    s->fC = d->f8;
-    s->f10 = d->fC;
-    s->f14 = d->f10;
-    s->f18 = d->f14 * 9.999999974752427e-07f;
-    s->f1C = d->f18;
+    s->f4 = sdata->f0;
+    s->f8 = sdata->f4;
+    s->fC = sdata->f8;
+    s->f10 = sdata->fC;
+    s->f14 = sdata->f10;
+    s->f18 = sdata->f14 * 9.999999974752427e-07f;
+    s->f1C = sdata->f18;
     s->seg = len / (float)(n - 1);
     cSpring_setupNodes(self);
 }

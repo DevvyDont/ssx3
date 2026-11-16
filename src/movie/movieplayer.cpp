@@ -45,6 +45,11 @@ struct sMovieObj_23C860 {
     virtual ~sMovieObj_23C860();
 };
 
+/**
+ * Destroys the memory card overlay manager singleton.
+ *
+ * Deletes cMCOverlayManager_instance and sets it to null.
+ */
 extern "C" void cMCOverlayManager_purge()
 {
     delete (sMovieObj_23C860*)cMCOverlayManager_instance;
@@ -55,6 +60,9 @@ extern "C" void cMCOverlayManager_purge()
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_isManagerDone);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the memory card manager has finished its operation (state +0x130 is 1).
+ */
 extern "C" int cMCOverlayManager_isManagerDone(void* self)
 {
     return *(int*)((char*)self + 0x130) == 1;
@@ -88,6 +96,9 @@ extern "C" int func_0023C8C0(void) {
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_hasCardStatusCriticalError);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the card status (+0x43C) has an error bit other than the non-critical ones (0x4 and 0x1E0).
+ */
 extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* self)
 {
     // masks applied as separate statements; folding them into one
@@ -169,12 +180,21 @@ struct sMovieVEntryCA28 {
     void (*fn)(void*, int, int, int);
 };
 
-extern "C" void cMCOverlayManager_readFile(void* self, int a, int b, int c)
+/**
+ * Starts reading a save file from the memory card.
+ *
+ * Calls virtual slot 29 of the memory card object (+0x434) with the three arguments and stores @p size at +0xE8.
+ *
+ * @param file  which file
+ * @param data  destination buffer
+ * @param size  bytes to read
+ */
+extern "C" void cMCOverlayManager_readFile(void* self, int file, int data, int size)
 {
     void* obj = *(void**)((char*)self + 0x434);
     sMovieVEntryCA28* vt = *(sMovieVEntryCA28**)obj;
-    vt[29].fn((char*)obj + vt[29].delta, a, b, c);
-    *(int*)((char*)self + 0xE8) = c;
+    vt[29].fn((char*)obj + vt[29].delta, file, data, size);
+    *(int*)((char*)self + 0xE8) = size;
 }
 #endif
 
@@ -476,6 +496,11 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_ManagerLoseState);
 #ifdef SKIP_ASM
 extern "C" void cMemCard_DeleteInstance(void*);
 
+/**
+ * Releases the memory card object when the memory card screen goes away.
+ *
+ * Deletes +0x434 with cMemCard_DeleteInstance (On Tour cMemCard::DeleteInstance) and clears it.
+ */
 extern "C" void cMCOverlayManager_ManagerLoseState(void* self)
 {
     cMemCard_DeleteInstance(*(void**)((char*)self + 0x434));
@@ -2385,6 +2410,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_setSelectedDevice);
 #ifdef SKIP_ASM
 extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int v);
 
+/**
+ * Makes the highlighted memory card device the selected one and checks it.
+ *
+ * When the device index (+0x428) differs from the last selected one (+0x444), stores it there and clears the
+ * card status words (+0x43C, +0x440); then calls cMCOverlayManager_checkDevice for it.
+ */
 extern "C" void cMCOverlayManager_setSelectedDevice(void* self)
 {
     int cur = *(int*)((char*)self + 0x428);
@@ -3743,6 +3774,9 @@ extern "C" void func_00241050(void* self, int a, int data, int size)
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_cleanUp);
 #ifdef SKIP_ASM
+/**
+ * Tells the memory card object (+0x434) to clean up, through its virtual slot 12.
+ */
 extern "C" void cMCOverlayManager_cleanUp(void* self)
 {
     void* obj = *(void**)((char*)self + 0x434);
@@ -3849,12 +3883,20 @@ struct sMovieVEntry3 {
     void (*fn)(void*, int, int);
 };
 
-extern "C" void cMCOverlayManager_ReadData(void* self, int a, int n)
+/**
+ * Reads the next chunk of the file being loaded.
+ *
+ * Adds @p n to the running byte count (+0xE8) and calls virtual slot 30 of the memory card object (+0x434).
+ *
+ * @param data  destination buffer
+ * @param n  bytes to read
+ */
+extern "C" void cMCOverlayManager_ReadData(void* self, int data, int n)
 {
     *(int*)((char*)self + 0xE8) += n;
     void* obj = *(void**)((char*)self + 0x434);
     sMovieVEntry3* vt = *(sMovieVEntry3**)obj;
-    vt[30].fn((char*)obj + vt[30].delta, a, n);
+    vt[30].fn((char*)obj + vt[30].delta, data, n);
 }
 #endif
 
@@ -4023,6 +4065,15 @@ static inline int nextChapter_241400(char* self, int i)
     return i;
 }
 
+/**
+ * Moves the memory card device highlight to the next device that has a card.
+ *
+ * Does nothing when no device count is known (+0x424 == -1). Steps from the current device (+0x428) to the next
+ * one the memory card object (+0x434) reports present, stopping at the last device unless wrapping is allowed
+ * (+0x100); falls back to the current device or device 0. A new device is selected with func_0023FB18 and
+ * cMCOverlayManager_setSelectedDevice; +0xE0 is cleared. (The C's helper type names, cMovieDecoder_241400/hasChapter, are leftovers:
+ * this is the memory card device list.)
+ */
 extern "C" void cMCOverlayManager_OnHighlightNextDevice(char* self)
 {
     int i = *(int*)(self + 0x428);
@@ -4640,6 +4691,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getDeviceNumberString);
 extern "C" void sprintf1(void* dst, void* src, int n);
 extern char str_pct_d_g[];
 
+/**
+ * Writes a device's number for display ("1", "2", ...) as a wide string.
+ *
+ * @param dst  the destination wide-string buffer
+ * @param n    the zero-based device index; the text shows @p n + 1
+ */
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* self, void* dst, int n)
 {
     unsigned short buf[256];
@@ -4682,6 +4739,15 @@ static inline void SetText_00241E18(void* out, char* key, void* arg)
     sprintf1_v(out, (void*)str, arg);
 }
 
+/**
+ * Fills a wide-string buffer with the status message for the memory card manager's current state.
+ *
+ * Starts from an empty string, gets the device number text (cMCOverlayManager_getDeviceNumberString) and, by state (+0x130), formats
+ * kT_MEMFECheckingCardPS2, kT_MEMOVNotDetectedPS2, kT_MEMFormattingPS2, kT_MEMOVSaveSavingPS2NGC or
+ * kT_MEMOVLoadingPS2NGC with it, or copies kT_MEMDeletingPS2; state 55 and others leave it empty.
+ *
+ * @param out  the destination wide-string buffer
+ */
 extern "C" void cMCOverlayManager_GetMessage(char* self, void* out)
 {
     unsigned short num[256];

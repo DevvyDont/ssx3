@@ -205,16 +205,16 @@ INCLUDE_ASM("seg/seg_325220", func_00424230);
 extern int func_0042C078_r(void) __asm__("func_0042C078");
 extern void func_0042C0C0(void);
 void func_00424230(void) {
-    int s;
-    s = func_0042C078_r();
+    int intrEnabled;
+    intrEnabled = func_0042C078_r();
     *(volatile int *)0x1000F000 = 4;
     SYNC_4248();
-    if (s) func_0042C0C0();
+    if (intrEnabled) func_0042C0C0();
     while (!(*(volatile int *)0x1000F000 & 4));
-    s = func_0042C078_r();
+    intrEnabled = func_0042C078_r();
     *(volatile int *)0x1000F000 = 4;
     SYNC_4248();
-    if (s) func_0042C0C0();
+    if (intrEnabled) func_0042C0C0();
 }
 #endif
 
@@ -225,20 +225,20 @@ extern void func_0042C0C0(void);
 extern void func_00424110_vs(volatile int *, volatile unsigned long *) __asm__("func_00424110");
 unsigned long func_004242C0(void) {
     volatile int flag;
-    volatile unsigned long t;
-    int s;
+    volatile unsigned long gsCsr;
+    int intrEnabled;
     flag = 0;
-    func_00424110_vs(&flag, &t);
-    s = func_0042C078_r();
+    func_00424110_vs(&flag, &gsCsr);
+    intrEnabled = func_0042C078_r();
     *(volatile int *)0x1000F000 = 4;
     SYNC_4248();
-    if (s) func_0042C0C0();
+    if (intrEnabled) func_0042C0C0();
     while (!(*(volatile int *)0x1000F000 & 4) && flag == 0);
-    s = func_0042C078_r();
+    intrEnabled = func_0042C078_r();
     *(volatile int *)0x1000F000 = 4;
     SYNC_4248();
-    if (s) func_0042C0C0();
-    return t;
+    if (intrEnabled) func_0042C0C0();
+    return gsCsr;
 }
 #endif
 
@@ -358,9 +358,9 @@ int func_00424550(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00424558);
 #ifdef SKIP_ASM
-long func_00424558(int a0, char *a1) {
-    *(int *)(a1 + 4) = 0x2000;
-    *(long *)(a1 + 0x48) = 0;
+long func_00424558(int fileDesc, char *statBuf) {
+    *(int *)(statBuf + 4) = 0x2000;
+    *(long *)(statBuf + 0x48) = 0;
     return 0;
 }
 #endif
@@ -377,9 +377,9 @@ int func_00424570(void) {
 INCLUDE_ASM("seg/seg_325220", func_00424578);
 #ifdef SKIP_ASM
 extern void func_0042C6E8(int a0);
-int func_00424578(int a0, int a1) {
-    if (a0 == 1) {
-        func_0042C6E8(a1);
+int func_00424578(int pid, int sigNum) {
+    if (pid == 1) {
+        func_0042C6E8(sigNum);
     }
     return 0;
 }
@@ -434,12 +434,12 @@ INCLUDE_ASM("seg/seg_325220", func_00424698);
 #ifdef SKIP_ASM
 extern void func_0042C078(void);
 extern void func_004245F0(unsigned, unsigned);
-void func_00424698(unsigned a, unsigned b) {
+void func_00424698(unsigned startAddr, unsigned endAddr) {
     int s;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
     if (s) func_0042C078();
-    func_004245F0(a & ~63, b & ~63);
+    func_004245F0(startAddr & ~63, endAddr & ~63);
     if (s) func_0042C0C0();
 }
 #endif
@@ -448,8 +448,8 @@ void func_00424698(unsigned a, unsigned b) {
 INCLUDE_ASM("seg/seg_325220", func_00424718);
 #ifdef SKIP_ASM
 extern void func_004245F0(unsigned, unsigned);
-void func_00424718(unsigned a, unsigned b) {
-    func_004245F0(a & ~63, b & ~63);
+void func_00424718(unsigned startAddr, unsigned endAddr) {
+    func_004245F0(startAddr & ~63, endAddr & ~63);
 }
 #endif
 
@@ -478,12 +478,12 @@ INCLUDE_ASM("seg/seg_325220", func_004247D8);
 #ifdef SKIP_ASM
 extern void func_0042C078(void);
 extern void func_00424730(unsigned, unsigned);
-void func_004247D8(unsigned a, unsigned b) {
+void func_004247D8(unsigned startAddr, unsigned endAddr) {
     int s;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
     if (s) func_0042C078();
-    func_00424730(a & ~63, b & ~63);
+    func_00424730(startAddr & ~63, endAddr & ~63);
     if (s) func_0042C0C0();
 }
 #endif
@@ -492,8 +492,8 @@ void func_004247D8(unsigned a, unsigned b) {
 INCLUDE_ASM("seg/seg_325220", func_00424858);
 #ifdef SKIP_ASM
 extern void func_00424730(unsigned, unsigned);
-void func_00424858(unsigned a, unsigned b) {
-    func_00424730(a & ~63, b & ~63);
+void func_00424858(unsigned startAddr, unsigned endAddr) {
+    func_00424730(startAddr & ~63, endAddr & ~63);
 }
 #endif
 
@@ -512,15 +512,15 @@ INCLUDE_ASM("seg/seg_325220", func_00424880);
 #ifdef SKIP_ASM
 extern void func_0042C078(void);
 extern int func_00423AF0(int);
-int func_00424880(int a) {
-    int s, r;
+int func_00424880(int cause) {
+    int s, result;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
     if (s) func_0042C078();
-    r = func_00423AF0(a);
+    result = func_00423AF0(cause);
     SYNC_4248();
     if (s) func_0042C0C0();
-    return r;
+    return result;
 }
 #endif
 
@@ -529,15 +529,15 @@ INCLUDE_ASM("seg/seg_325220", func_004248E8);
 #ifdef SKIP_ASM
 extern void func_0042C078(void);
 extern int func_00423AE0(int);
-int func_004248E8(int a) {
-    int s, r;
+int func_004248E8(int cause) {
+    int s, result;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
     if (s) func_0042C078();
-    r = func_00423AE0(a);
+    result = func_00423AE0(cause);
     SYNC_4248();
     if (s) func_0042C0C0();
-    return r;
+    return result;
 }
 #endif
 
@@ -546,15 +546,15 @@ INCLUDE_ASM("seg/seg_325220", func_00424950);
 #ifdef SKIP_ASM
 extern void func_0042C078(void);
 extern int func_00423B10(int);
-int func_00424950(int a) {
-    int s, r;
+int func_00424950(int channel) {
+    int s, result;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
     if (s) func_0042C078();
-    r = func_00423B10(a);
+    result = func_00423B10(channel);
     SYNC_4248();
     if (s) func_0042C0C0();
-    return r;
+    return result;
 }
 #endif
 
@@ -563,15 +563,15 @@ INCLUDE_ASM("seg/seg_325220", func_004249B8);
 #ifdef SKIP_ASM
 extern void func_0042C078(void);
 extern int func_00423B00(int);
-int func_004249B8(int a) {
-    int s, r;
+int func_004249B8(int channel) {
+    int s, result;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
     if (s) func_0042C078();
-    r = func_00423B00(a);
+    result = func_00423B00(channel);
     SYNC_4248();
     if (s) func_0042C0C0();
-    return r;
+    return result;
 }
 #endif
 
@@ -770,11 +770,11 @@ sRing *func_00424E00(int a0) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00424E28);
 #ifdef SKIP_ASM
-void func_00424E28(sRing *r) {
-    r->count++;
-    r->wr++;
-    if (r->wr == (char *)r + (r->size + 16)) {
-        r->wr = r->data;
+void func_00424E28(sRing *ring) {
+    ring->count++;
+    ring->wr++;
+    if (ring->wr == (char *)ring + (ring->size + 16)) {
+        ring->wr = ring->data;
     }
 }
 #endif
@@ -782,11 +782,11 @@ void func_00424E28(sRing *r) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00424E68);
 #ifdef SKIP_ASM
-void func_00424E68(sRing *r) {
-    r->count--;
-    r->rd++;
-    if (r->rd == (char *)r + (r->size + 16)) {
-        r->rd = r->data;
+void func_00424E68(sRing *ring) {
+    ring->count--;
+    ring->rd++;
+    if (ring->rd == (char *)ring + (ring->size + 16)) {
+        ring->rd = ring->data;
     }
 }
 #endif
@@ -945,11 +945,11 @@ int func_00425260(void) {
 INCLUDE_ASM("seg/seg_325220", func_00425320);
 #ifdef SKIP_ASM
 int func_00425320_i(int a0) __asm__("func_00425320");
-int func_00425320_i(int a0) {
+int func_00425320_i(int outChar) {
     while (*(volatile int *)0x1000F130 & 0x8000)
         ;
-    *(volatile char *)0x1000F180 = a0;
-    return a0;
+    *(volatile char *)0x1000F180 = outChar;
+    return outChar;
 }
 #endif
 
@@ -983,12 +983,12 @@ void func_00425358(int c) {
 INCLUDE_ASM("seg/seg_325220", func_00425408);
 #ifdef SKIP_ASM
 extern void func_00425320(int c);
-void func_00425408(int c) {
-    if (c == 10) {
+void func_00425408(int outChar) {
+    if (outChar == 10) {
         func_00425320(13);
         func_00425320(10);
     } else {
-        func_00425320(c);
+        func_00425320(outChar);
     }
 }
 #endif
@@ -997,30 +997,30 @@ void func_00425408(int c) {
 INCLUDE_ASM("seg/seg_325220", func_00425440);
 #ifdef SKIP_ASM
 int f5440(long a0) __asm__("func_00425440");
-int f5440(long a0) {
-    unsigned long m = a0;
-    long e = m << 1 >> 53;
-    e -= 0x433;
-    if (e < -0x35) {
+int f5440(long bits) {
+    unsigned long mantissa = bits;
+    long exponent = mantissa << 1 >> 53;
+    exponent -= 0x433;
+    if (exponent < -0x35) {
         return 0;
     }
-    if (e >= 0xD) {
+    if (exponent >= 0xD) {
         return 0x270F;
     }
-    m = m << 12 >> 12;
-    m = m | 0x10000000000000UL;
-    if (e < 0) {
-        e = -e;
-        m >>= (int)(e - 2);
-        if ((m & 3) == 3) {
-            m = (m >> 2) + 1;
+    mantissa = mantissa << 12 >> 12;
+    mantissa = mantissa | 0x10000000000000UL;
+    if (exponent < 0) {
+        exponent = -exponent;
+        mantissa >>= (int)(exponent - 2);
+        if ((mantissa & 3) == 3) {
+            mantissa = (mantissa >> 2) + 1;
         } else {
-            m >>= 2;
+            mantissa >>= 2;
         }
     } else {
-        m <<= (int)e;
+        mantissa <<= (int)exponent;
     }
-    return (int)m;
+    return (int)mantissa;
 }
 #endif
 
@@ -1306,16 +1306,16 @@ void func_00425C60(int a0, ...) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00425CC0);
 #ifdef SKIP_ASM
-void func_00425CC0(int *a0, int *a1) {
-    ((int *)a1[7])[a0[4]] = a0[5];
+void func_00425CC0(int *packet, int *cmdData) {
+    ((int *)cmdData[7])[packet[4]] = packet[5];
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00425CE0);
 #ifdef SKIP_ASM
-void func_00425CE0(int *a0, int *a1) {
-    a1[2] = a0[4];
+void func_00425CE0(int *packet, int *cmdData) {
+    cmdData[2] = packet[4];
 }
 #endif
 
@@ -1540,8 +1540,8 @@ int func_00426078_d(int a0, int a1, int *a2, unsigned a3, int a4, int a5, int a6
 INCLUDE_ASM("seg/seg_325220", func_004261B0);
 #ifdef SKIP_ASM
 extern int func_00426078(int a0, int a1, int a2, int a3, int a4, int a5, int a6);
-int func_004261B0(int a0, int a1, int a2, int a3, int a4, int a5) {
-    return func_00426078(a0, 0, a1, a2, a3, a4, a5);
+int func_004261B0(int cmdId, int packet, int packetSize, int extraSrc, int extraDest, int extraSize) {
+    return func_00426078(cmdId, 0, packet, packetSize, extraSrc, extraDest, extraSize);
 }
 #endif
 
@@ -1549,8 +1549,8 @@ int func_004261B0(int a0, int a1, int a2, int a3, int a4, int a5) {
 INCLUDE_ASM("seg/seg_325220", func_004261F0);
 #ifdef SKIP_ASM
 extern int func_00426078(int a0, int a1, int a2, int a3, int a4, int a5, int a6);
-int func_004261F0(int a0, int a1, int a2, int a3, int a4, int a5) {
-    return func_00426078(a0, 1, a1, a2, a3, a4, a5);
+int func_004261F0(int cmdId, int packet, int packetSize, int extraSrc, int extraDest, int extraSize) {
+    return func_00426078(cmdId, 1, packet, packetSize, extraSrc, extraDest, extraSize);
 }
 #endif
 
@@ -1688,9 +1688,9 @@ sSifRpcPkt *f65D0(sSifRpcState *s) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00426678);
 #ifdef SKIP_ASM
-void func_00426678(unsigned int *a0) {
-    a0[6] = 0;
-    a0[4] &= 0xFFFFFFFE;
+void func_00426678(unsigned int *packet) {
+    packet[6] = 0;
+    packet[4] &= 0xFFFFFFFE;
 }
 #endif
 
@@ -1698,11 +1698,11 @@ void func_00426678(unsigned int *a0) {
 INCLUDE_ASM("seg/seg_325220", func_00426698);
 #ifdef SKIP_ASM
 char *f6698(sSifRpcState *a0) __asm__("func_00426698");
-char *f6698(sSifRpcState *a0) {
-    int r = a0->rbuf_idx % a0->rbuf_len;
-    char *p = a0->rbuf + r * 64;
-    a0->rbuf_idx = r + 1;
-    return p;
+char *f6698(sSifRpcState *rpcState) {
+    int slot = rpcState->rbuf_idx % rpcState->rbuf_len;
+    char *buf = rpcState->rbuf + slot * 64;
+    rpcState->rbuf_idx = slot + 1;
+    return buf;
 }
 #endif
 
@@ -1710,11 +1710,11 @@ char *f6698(sSifRpcState *a0) {
 INCLUDE_ASM("seg/seg_325220", func_004266C8);
 #ifdef SKIP_ASM
 extern int func_00426698(sSifRpcState *a0);
-int func_004266C8(sSifRpcState *a0, int a1) {
-    if (a1 < 0 || a1 >= a0->rdata_len) {
-        return func_00426698(a0);
+int func_004266C8(sSifRpcState *rpcState, int slot) {
+    if (slot < 0 || slot >= rpcState->rdata_len) {
+        return func_00426698(rpcState);
     }
-    return a0->rdata + (a1 << 6);
+    return rpcState->rdata + (slot << 6);
 }
 #endif
 
@@ -1758,9 +1758,9 @@ INCLUDE_ASM("seg/seg_325220", func_004267C0);
 #ifdef SKIP_ASM
 extern int func_004261F0(int a0, int a1, int a2, int a3, int a4, int a5);
 extern void func_00423B80(int a0, int (*a1)(int, int, int *), int *a2);
-int func_004267C0(int a0, int a1, int *p) {
-    if (func_004261F0(0x80000008, (int)p, 0x40, p[9], p[10], p[11]) == 0) {
-        func_00423B80(10, func_004267C0, p);
+int func_004267C0(int alarmId, int alarmTime, int *packet) {
+    if (func_004261F0(0x80000008, (int)packet, 0x40, packet[9], packet[10], packet[11]) == 0) {
+        func_00423B80(10, func_004267C0, packet);
     }
 }
 #endif
@@ -1774,26 +1774,26 @@ extern int func_004261F0(int a0, int a1, int a2, int a3, int a4, int a5);
 extern void func_00423B80(int a0, int (*a1)(int, int, int *), int *a2);
 extern int func_004267C0(int a0, int a1, int *p);
 extern int func_004266C8_u(sSifRpcState *, unsigned) __asm__("func_004266C8");
-void func_00426820(int *a0, sSifRpcState *a1) {
-    int *p;
-    unsigned fl = a0[4];
-    int t1;
-    int t2;
+void func_00426820(int *request, sSifRpcState *rpcState) {
+    int *reply;
+    unsigned fl = request[4];
+    int pktAddr;
+    int client;
     if (fl & 4) {
-        p = (int *)func_004266C8_u(a1, fl >> 16);
+        reply = (int *)func_004266C8_u(rpcState, fl >> 16);
     } else {
-        p = (int *)func_00426698(a1);
+        reply = (int *)func_00426698(rpcState);
     }
-    t1 = a0[5];
-    t2 = a0[7];
-    p[5] = t1;
-    p[7] = t2;
-    p[8] = 0x8000000C;
-    p[9] = a0[8];
-    p[10] = a0[9];
-    p[11] = a0[10];
-    if (func_004261F0(0x80000008, (int)p, 0x40, a0[8], a0[9], a0[10]) == 0) {
-        func_00423B80(10, func_004267C0, p);
+    pktAddr = request[5];
+    client = request[7];
+    reply[5] = pktAddr;
+    reply[7] = client;
+    reply[8] = 0x8000000C;
+    reply[9] = request[8];
+    reply[10] = request[9];
+    reply[11] = request[10];
+    if (func_004261F0(0x80000008, (int)reply, 0x40, request[8], request[9], request[10]) == 0) {
+        func_00423B80(10, func_004267C0, reply);
     }
 }
 #endif
@@ -1851,12 +1851,12 @@ int func_004268F0_d(struct S68F0 *a0, int a1, int a2, int a3, int a4) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00426A48);
 #ifdef SKIP_ASM
-sSifServer *func_00426A48(int a0, sSifRpcState *a1) {
-    sSifQueue *o;
+sSifServer *func_00426A48(int serverId, sSifRpcState *rpcState) {
+    sSifQueue *queue;
     sSifServer *n;
-    for (o = a1->queues; o != 0; o = o->next) {
-        for (n = o->servers; n != 0; n = n->next) {
-            if (n->key == a0) {
+    for (queue = rpcState->queues; queue != 0; queue = queue->next) {
+        for (n = queue->servers; n != 0; n = n->next) {
+            if (n->key == serverId) {
                 return n;
             }
         }
@@ -1871,25 +1871,25 @@ INCLUDE_ASM("seg/seg_325220", func_00426A98);
 extern int func_00426698(sSifRpcState *a0);
 extern int *func_00426A48_p(int, sSifRpcState *) __asm__("func_00426A48");
 extern void func_004261F0_v(int, int *, int, int, int, int) __asm__("func_004261F0");
-void func_00426A98(int *a0, sSifRpcState *a1) {
-    int *q = (int *)func_00426698(a1);
+void func_00426A98(int *request, sSifRpcState *rpcState) {
+    int *reply = (int *)func_00426698(rpcState);
     int *n;
-    int t1 = a0[5];
-    int t2 = a0[7];
-    q[7] = t2;
-    q[5] = t1;
-    q[8] = 0x80000009;
-    n = func_00426A48_p(a0[8], a1);
+    int pktAddr = request[5];
+    int client = request[7];
+    reply[7] = client;
+    reply[5] = pktAddr;
+    reply[8] = 0x80000009;
+    n = func_00426A48_p(request[8], rpcState);
     if (n == 0) {
-        q[9] = 0;
-        q[10] = 0;
-        q[11] = 0;
+        reply[9] = 0;
+        reply[10] = 0;
+        reply[11] = 0;
     } else {
-        q[9] = (int)n;
-        q[10] = n[2];
-        q[11] = n[5];
+        reply[9] = (int)n;
+        reply[10] = n[2];
+        reply[11] = n[5];
     }
-    func_004261F0_v(0x80000008, q, 0x40, 0, 0, 0);
+    func_004261F0_v(0x80000008, reply, 0x40, 0, 0, 0);
 }
 #endif
 
@@ -2116,9 +2116,9 @@ int func_00426D18(sSifClient *client, int fno, int mode, void *send, int ssize, 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00426F08);
 #ifdef SKIP_ASM
-int func_00426F08(int *a0) {
-    int *p = (int *)a0[0];
-    if (p == 0 || a0[1] != p[6] || !(p[4] & 1)) {
+int func_00426F08(int *client) {
+    int *packet = (int *)client[0];
+    if (packet == 0 || client[1] != packet[6] || !(packet[4] & 1)) {
         return 0;
     }
     return 1;
@@ -2192,23 +2192,23 @@ struct N70B0 { char pad[0x38]; struct N70B0 *next; };
 struct S70B0 { int f0; int f4; struct N70B0 *head; };
 extern int func_0042C078_r(void) __asm__("func_0042C078");
 extern void func_0042C0C0(void);
-struct N70B0 *func_004270B0(struct N70B0 *x, struct S70B0 *s) {
-    struct N70B0 *p;
+struct N70B0 *func_004270B0(struct N70B0 *x, struct S70B0 *list) {
+    struct N70B0 *cursor;
     func_0042C078_r();
-    p = s->head;
-    if (p == x) {
-        s->head = p->next;
+    cursor = list->head;
+    if (cursor == x) {
+        list->head = cursor->next;
     } else {
-        while (p != 0) {
-            if (p->next == x) {
-                p->next = x->next;
+        while (cursor != 0) {
+            if (cursor->next == x) {
+                cursor->next = x->next;
                 break;
             }
-            p = p->next;
+            cursor = cursor->next;
         }
     }
     func_0042C0C0();
-    return p;
+    return cursor;
 }
 #endif
 
@@ -2353,11 +2353,11 @@ INCLUDE_ASM("seg/seg_325220", func_004273F8);
 extern int func_004271D8(int a0);
 extern void func_00427230(int a0);
 extern void func_00423CC0(void);
-int func_004273F8(int a0) {
-    int r;
+int func_004273F8(int queue) {
+    int server;
     while (1) {
-        while ((r = func_004271D8(a0)) != 0) {
-            func_00427230(r);
+        while ((server = func_004271D8(queue)) != 0) {
+            func_00427230(server);
         }
         func_00423CC0();
     }
@@ -2578,9 +2578,9 @@ void (*func_004279C8(void (*a0)(int), int a1))(int) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00427A60);
 #ifdef SKIP_ASM
-void func_00427A60(int a, sFioCb *p) {
-    if (p->fn)
-        p->fn(p->arg);
+void func_00427A60(int cause, sFioCb *callback) {
+    if (callback->fn)
+        callback->fn(callback->arg);
     SYNC_4248();
     EI_4248();
 }
@@ -3312,8 +3312,8 @@ int func_00428E18_d(char *s, int a1) {
 INCLUDE_ASM("seg/seg_325220", func_00428FC0);
 #ifdef SKIP_ASM
 extern int func_00428E18(int a0, int a1);
-int func_00428FC0(int a0) {
-    return func_00428E18(a0, 6);
+int func_00428FC0(int path) {
+    return func_00428E18(path, 6);
 }
 #endif
 
@@ -3378,8 +3378,8 @@ int func_00428FE0_d(char *s, int a1) {
 INCLUDE_ASM("seg/seg_325220", func_00429190);
 #ifdef SKIP_ASM
 extern int func_00428E18(int a0, int a1);
-int func_00429190(int a0) {
-    return func_00428E18(a0, 8);
+int func_00429190(int path) {
+    return func_00428E18(path, 8);
 }
 #endif
 
@@ -3511,8 +3511,8 @@ int func_00429420(int a0) {
 INCLUDE_ASM("seg/seg_325220", func_00429540);
 #ifdef SKIP_ASM
 extern int func_00428E18(int a0, int a1);
-int func_00429540(int a0) {
-    return func_00428E18(a0, 0x10);
+int func_00429540(int path) {
+    return func_00428E18(path, 0x10);
 }
 #endif
 
@@ -3853,8 +3853,8 @@ int func_00429CC8_d(char *s, char *t) {
 INCLUDE_ASM("seg/seg_325220", func_00429EB8);
 #ifdef SKIP_ASM
 extern int func_00428E18(int a0, int a1);
-int func_00429EB8(int a0) {
-    return func_00428E18(a0, 0x12);
+int func_00429EB8(int path) {
+    return func_00428E18(path, 0x12);
 }
 #endif
 
@@ -3997,8 +3997,8 @@ int func_0042A070_d(char *s, char *t, int a2, char *data, int len) {
 INCLUDE_ASM("seg/seg_325220", func_0042A2E0);
 #ifdef SKIP_ASM
 extern int func_00428E18(int a0, int a1);
-int func_0042A2E0(int a0) {
-    return func_00428E18(a0, 0x15);
+int func_0042A2E0(int path) {
+    return func_00428E18(path, 0x15);
 }
 #endif
 
@@ -4662,9 +4662,9 @@ int func_0042B770(int a0) {
 INCLUDE_ASM("seg/seg_325220", func_0042B800);
 #ifdef SKIP_ASM
 extern int func_0042B230(int a0, int a1, int a2, int *a3);
-int func_0042B800(int a0, int a1, int a2) {
+int func_0042B800(int modBuf, int argLen, int args) {
     int sp;
-    return func_0042B230(a0, a1, a2, &sp);
+    return func_0042B230(modBuf, argLen, args, &sp);
 }
 #endif
 
@@ -4672,8 +4672,8 @@ int func_0042B800(int a0, int a1, int a2) {
 INCLUDE_ASM("seg/seg_325220", func_0042B820);
 #ifdef SKIP_ASM
 extern int func_0042B230(int a0, int a1, int a2, int *a3);
-int func_0042B820(int a0, int a1, int a2, int *a3) {
-    return func_0042B230(a0, a1, a2, a3);
+int func_0042B820(int modBuf, int argLen, int args, int *modResult) {
+    return func_0042B230(modBuf, argLen, args, modResult);
 }
 #endif
 
@@ -4720,9 +4720,9 @@ int func_0042B840_i(char *a0, int a1, sLfData *a2, int *a3, int a4) {
 INCLUDE_ASM("seg/seg_325220", func_0042BA68);
 #ifdef SKIP_ASM
 extern int func_0042B840(int a0, int a1, int a2, int *a3, int a4);
-int func_0042BA68(int a0, int a1, int a2) {
+int func_0042BA68(int path, int argLen, int args) {
     int sp;
-    return func_0042B840(a0, a1, a2, &sp, 0);
+    return func_0042B840(path, argLen, args, &sp, 0);
 }
 #endif
 
@@ -4730,8 +4730,8 @@ int func_0042BA68(int a0, int a1, int a2) {
 INCLUDE_ASM("seg/seg_325220", func_0042BA88);
 #ifdef SKIP_ASM
 extern int func_0042B840(int a0, int a1, int a2, int *a3, int a4);
-int func_0042BA88(int a0, int a1, int a2, int *a3) {
-    return func_0042B840(a0, a1, a2, a3, 0);
+int func_0042BA88(int path, int argLen, int args, int *modResult) {
+    return func_0042B840(path, argLen, args, modResult, 0);
 }
 #endif
 
@@ -4769,8 +4769,8 @@ int func_0042BAA8_i(char *a0, char *a1, int *a2, int a3) {
 INCLUDE_ASM("seg/seg_325220", func_0042BBB0);
 #ifdef SKIP_ASM
 extern int func_0042BAA8(int a0, char *a1, int a2, int a3);
-int func_0042BBB0(int a0, char *a1, int a2) {
-    return func_0042BAA8(a0, a1, a2, 1);
+int func_0042BBB0(int path, char *secName, int execData) {
+    return func_0042BAA8(path, secName, execData, 1);
 }
 #endif
 
@@ -4891,7 +4891,7 @@ int func_0042BDC8(char *s, int mode) {
 INCLUDE_ASM("seg/seg_325220", func_0042BF08);
 #ifdef SKIP_ASM
 extern int func_004241B0(int a0);
-int func_0042BF08(void) { int r = func_004241B0(4) & 0x10000; return r != 0; }
+int func_0042BF08(void) { int bootEndFlag = func_004241B0(4) & 0x10000; return bootEndFlag != 0; }
 #endif
 
 //100%
@@ -4915,28 +4915,28 @@ INCLUDE_ASM("seg/seg_325220", func_0042BF68);
 extern void func_00425C60_s(const char *fmt, ...) __asm__("func_00425C60");
 int func_0042BF68(const char *img) {
     char buf[80];
-    const char *s = "rom0:UDNL ";
-    char *d;
-    const char *p = img;
+    const char *prefix = "rom0:UDNL ";
+    char *dst;
+    const char *imgEnd = img;
     __SIZE_TYPE__ t;
-    while (*p)
-        p++;
+    while (*imgEnd)
+        imgEnd++;
     /* PORT: integer pointer arithmetic (__SIZE_TYPE__ is pointer-width). */
     /* NOTE: the length test is retail's p - (img - 11) > 80 (strlen + 11 > 80); the separate statement keeps fold from
        reassociating it into (p - img) + 11. Integer arithmetic, so no out-of-bounds pointer. */
     t = (__SIZE_TYPE__)img - 11;
-    if ((__SIZE_TYPE__)p - t > 80) {
+    if ((__SIZE_TYPE__)imgEnd - t > 80) {
         func_00425C60_s("too long parameter '%s'\n", img);
         return 0;
     }
     func_00426408_z(0);
     func_004265A8();
-    d = buf;
-    while (*s)
-        *d++ = *s++;
+    dst = buf;
+    while (*prefix)
+        *dst++ = *prefix++;
     while (*img)
-        *d++ = *img++;
-    *d = 0;
+        *dst++ = *img++;
+    *dst = 0;
     return func_0042BDC8(buf, 0);
 }
 #endif
@@ -5001,11 +5001,11 @@ SYSCALL_STUB(func_0042C120, 0x5A)
 INCLUDE_ASM("seg/seg_325220", func_0042C130);
 #ifdef SKIP_ASM
 // The bnez delay slot stays an unfilled nop with the addiu before it: ee-gcc 2.9 + cc_native's fill pass.
-int func_0042C130(int *a0, int *a1, unsigned int a2) {
-    unsigned int n = a2 >> 2;
+int func_0042C130(int *dst, int *src, unsigned int size) {
+    unsigned int n = size >> 2;
     unsigned int i;
     for (i = 0; i < n; i++) {
-        *a0++ = *a1++;
+        *dst++ = *src++;
     }
     return 0;
 }
@@ -5014,9 +5014,9 @@ int func_0042C130(int *a0, int *a1, unsigned int a2) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042C168);
 #ifdef SKIP_ASM
-int *func_0042C168(int *a0, int *a1, int a2) {
-    while (*a0 != a2 && a0 < a1) a0++;
-    return a0 < a1 ? a0 : 0;
+int *func_0042C168(int *cursor, int *end, int value) {
+    while (*cursor != value && cursor < end) cursor++;
+    return cursor < end ? cursor : 0;
 }
 #endif
 
@@ -5108,11 +5108,11 @@ SYSCALL_STUB(func_0042C350, 0x5A)
 INCLUDE_ASM("seg/seg_325220", func_0042C360);
 #ifdef SKIP_ASM
 // The bnez delay slot stays an unfilled nop with the addiu before it: ee-gcc 2.9 + cc_native's fill pass.
-int func_0042C360(int *a0, int *a1, unsigned int a2) {
-    unsigned int n = a2 >> 2;
+int func_0042C360(int *dst, int *src, unsigned int size) {
+    unsigned int n = size >> 2;
     unsigned int i;
     for (i = 0; i < n; i++) {
-        *a0++ = *a1++;
+        *dst++ = *src++;
     }
     return 0;
 }
@@ -5130,13 +5130,13 @@ INCLUDE_ASM("seg/seg_325220", func_0042C3A8);
 extern void func_00423E50(unsigned *p);
 extern void func_00423E40(unsigned *p);
 int func_0042C3A8(void) {
-    unsigned a[2];
-    func_00423E50(&a[0]);
-    a[1] = (a[0] & 0xFFFF1FFF) | 0x2000;
-    func_00423E40(&a[1]);
-    func_00423E50(&a[1]);
-    func_00423E40(&a[0]);
-    return ((a[1] >> 13) & 7) == 0;
+    unsigned osdConfig[2];
+    func_00423E50(&osdConfig[0]);
+    osdConfig[1] = (osdConfig[0] & 0xFFFF1FFF) | 0x2000;
+    func_00423E40(&osdConfig[1]);
+    func_00423E50(&osdConfig[1]);
+    func_00423E40(&osdConfig[0]);
+    return ((osdConfig[1] >> 13) & 7) == 0;
 }
 #endif
 
@@ -5176,10 +5176,10 @@ SYSCALL_STUB(func_0042C4C0, 0x5A)
 INCLUDE_ASM("seg/seg_325220", func_0042C4D0);
 #ifdef SKIP_ASM
 // The bnez delay slot stays an unfilled nop with the addiu before it: ee-gcc 2.9 + cc_native's fill pass.
-int func_0042C4D0(unsigned char *a0, unsigned char *a1, unsigned int a2) {
+int func_0042C4D0(unsigned char *dst, unsigned char *src, unsigned int size) {
     unsigned int i;
-    for (i = 0; i < a2; i++) {
-        *a0++ = *a1++;
+    for (i = 0; i < size; i++) {
+        *dst++ = *src++;
     }
     return 0;
 }
@@ -5271,9 +5271,9 @@ void func_0042C6A0(int a0, int a1) {
 INCLUDE_ASM("seg/seg_325220", func_0042C6E8);
 #ifdef SKIP_ASM
 extern void func_004239C0(int);
-void func_0042C6E8(int a) {
+void func_0042C6E8(int status) {
     func_0042C628();
-    func_004239C0(a);
+    func_004239C0(status);
 }
 #endif
 
@@ -5306,11 +5306,11 @@ SYSCALL_STUB(func_0042C770, 0x5A)
 INCLUDE_ASM("seg/seg_325220", func_0042C780);
 #ifdef SKIP_ASM
 // The bnez delay slot stays an unfilled nop with the addiu before it: ee-gcc 2.9 + cc_native's fill pass.
-int func_0042C780(int *a0, int *a1, unsigned int a2) {
-    unsigned int n = a2 >> 2;
+int func_0042C780(int *dst, int *src, unsigned int size) {
+    unsigned int n = size >> 2;
     unsigned int i;
     for (i = 0; i < n; i++) {
-        *a0++ = *a1++;
+        *dst++ = *src++;
     }
     return 0;
 }
@@ -5371,8 +5371,8 @@ int f8A0(unsigned short a0, int a1, int a2) {
 INCLUDE_ASM("seg/seg_325220", func_0042C8E8);
 #ifdef SKIP_ASM
 extern int func_004241D0(int a0, int *a1);
-int func_0042C8E8(int a0) {
-    return func_004241D0(2, &a0);
+int func_0042C8E8(int socketId) {
+    return func_004241D0(2, &socketId);
 }
 #endif
 
@@ -5380,10 +5380,10 @@ int func_0042C8E8(int a0) {
 INCLUDE_ASM("seg/seg_325220", func_0042C910);
 #ifdef SKIP_ASM
 extern int func_004241D0(int a0, int *a1);
-void func_0042C910(int a0, char a1) {
+void func_0042C910(int socketId, char dest) {
     int buf[2];
-    buf[0] = a0;
-    buf[1] = a1;
+    buf[0] = socketId;
+    buf[1] = dest;
     func_004241D0(3, buf);
 }
 #endif
@@ -5392,8 +5392,8 @@ void func_0042C910(int a0, char a1) {
 INCLUDE_ASM("seg/seg_325220", func_0042C940);
 #ifdef SKIP_ASM
 extern int func_004241D0(int a0, int *a1);
-int func_0042C940(int a0) {
-    return func_004241D0(4, &a0);
+int func_0042C940(int socketId) {
+    return func_004241D0(4, &socketId);
 }
 #endif
 
@@ -5401,11 +5401,11 @@ int func_0042C940(int a0) {
 INCLUDE_ASM("seg/seg_325220", func_0042C968);
 #ifdef SKIP_ASM
 extern int func_004241D0(int a0, int *a1);
-void func_0042C968(int a0, int a1, unsigned short a2) {
+void func_0042C968(int socketId, int dataBuf, unsigned short len) {
     int buf[3];
-    buf[0] = a0;
-    buf[1] = a1;
-    buf[2] = a2;
+    buf[0] = socketId;
+    buf[1] = dataBuf;
+    buf[2] = len;
     func_004241D0(-5, buf);
 }
 #endif
@@ -5414,11 +5414,11 @@ void func_0042C968(int a0, int a1, unsigned short a2) {
 INCLUDE_ASM("seg/seg_325220", func_0042C9A0);
 #ifdef SKIP_ASM
 extern int func_004241D0(int a0, int *a1);
-void func_0042C9A0(int a0, int a1, unsigned short a2) {
+void func_0042C9A0(int socketId, int dataBuf, unsigned short len) {
     int buf[3];
-    buf[0] = a0;
-    buf[1] = a1;
-    buf[2] = a2;
+    buf[0] = socketId;
+    buf[1] = dataBuf;
+    buf[2] = len;
     func_004241D0(-6, buf);
 }
 #endif
@@ -5427,10 +5427,10 @@ void func_0042C9A0(int a0, int a1, unsigned short a2) {
 INCLUDE_ASM("seg/seg_325220", func_0042C9D8);
 #ifdef SKIP_ASM
 extern int func_004241D0(int a0, int *a1);
-void func_0042C9D8(int a0, char a1) {
+void func_0042C9D8(int socketId, char dest) {
     int buf[2];
-    buf[0] = a0;
-    buf[1] = a1;
+    buf[0] = socketId;
+    buf[1] = dest;
     func_004241D0(-7, buf);
 }
 #endif
@@ -5439,8 +5439,8 @@ void func_0042C9D8(int a0, char a1) {
 INCLUDE_ASM("seg/seg_325220", func_0042CA08);
 #ifdef SKIP_ASM
 extern int func_004241D0(int a0, int *a1);
-int func_0042CA08(int a0) {
-    return func_004241D0(-8, &a0);
+int func_0042CA08(int socketId) {
+    return func_004241D0(-8, &socketId);
 }
 #endif
 
@@ -5448,8 +5448,8 @@ int func_0042CA08(int a0) {
 INCLUDE_ASM("seg/seg_325220", func_0042CA30);
 #ifdef SKIP_ASM
 extern int func_004241D0(int a0, int *a1);
-int func_0042CA30(int a0) {
-    return func_004241D0(-9, &a0);
+int func_0042CA30(int socketId) {
+    return func_004241D0(-9, &socketId);
 }
 #endif
 
@@ -5457,8 +5457,8 @@ int func_0042CA30(int a0) {
 INCLUDE_ASM("seg/seg_325220", func_0042CA58);
 #ifdef SKIP_ASM
 extern int func_004241D0(int a0, int *a1);
-int func_0042CA58(int a0) {
-    return func_004241D0(0x10, &a0);
+int func_0042CA58(int str) {
+    return func_004241D0(0x10, &str);
 }
 #endif
 
@@ -5510,11 +5510,11 @@ SYSCALL_STUB(func_0042CB68, 0x5A)
 INCLUDE_ASM("seg/seg_325220", func_0042CB78);
 #ifdef SKIP_ASM
 // The bnez delay slot stays an unfilled nop with the addiu before it: ee-gcc 2.9 + cc_native's fill pass.
-int func_0042CB78(int *a0, int *a1, unsigned int a2) {
-    unsigned int n = a2 >> 2;
+int func_0042CB78(int *dst, int *src, unsigned int size) {
+    unsigned int n = size >> 2;
     unsigned int i;
     for (i = 0; i < n; i++) {
-        *a0++ = *a1++;
+        *dst++ = *src++;
     }
     return 0;
 }
@@ -5581,10 +5581,10 @@ SYSCALL_STUB(func_0042CCB8, 0x56)
 INCLUDE_ASM("seg/seg_325220", func_0042CCC8);
 #ifdef SKIP_ASM
 extern int func_0042CCB8(int a0);
-int func_0042CCC8(int a0) {
-    if ((unsigned int)(a0 - 13) >= 0x23)
+int func_0042CCC8(int tlbIndex) {
+    if ((unsigned int)(tlbIndex - 13) >= 0x23)
         return -1;
-    return func_0042CCB8(a0);
+    return func_0042CCB8(tlbIndex);
 }
 #endif
 
@@ -5958,17 +5958,17 @@ long __fixdfdi(double value) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_0042D380);
 #ifdef SKIP_ASM
-long func_0042D380(double a) {
+long func_0042D380(double value) {
     unsigned long hi;
-    if (a < 0.0) {
+    if (value < 0.0) {
         return 0;
     }
-    hi = (unsigned long)(unsigned)(a * 2.3283064365386963e-10) << 32;
-    a = a - (double)hi;
-    if (a < 0.0) {
-        hi -= (unsigned)(0.0 - a);
+    hi = (unsigned long)(unsigned)(value * 2.3283064365386963e-10) << 32;
+    value = value - (double)hi;
+    if (value < 0.0) {
+        hi -= (unsigned)(0.0 - value);
     } else {
-        hi += (unsigned)a;
+        hi += (unsigned)value;
     }
     return hi;
 }
@@ -6319,23 +6319,23 @@ DItype __moddi3 (DItype u, DItype v) __asm__("func_0042D470");
 
 UDItype __udivmoddi4 ();
 DItype
-__moddi3 (DItype u, DItype v)
+__moddi3 (DItype dividend, DItype divisor)
 {
-  word_type c = 0;
+  word_type negate = 0;
   DIunion uu, vv;
   DItype w;
 
-  uu.ll = u;
-  vv.ll = v;
+  uu.ll = dividend;
+  vv.ll = divisor;
 
   if (uu.s.high < 0)
-    c = ~c,
+    negate = ~negate,
     uu.ll = __negdi2 (uu.ll);
   if (vv.s.high < 0)
     vv.ll = __negdi2 (vv.ll);
 
   (void) __udivmoddi4 (uu.ll, vv.ll, &w);
-  if (c)
+  if (negate)
     w = __negdi2 (w);
 
   return w;
@@ -6546,11 +6546,11 @@ UDItype __umoddi3 (UDItype u, UDItype v) __asm__("func_0042DAD8");
 
 UDItype __udivmoddi4 ();
 UDItype
-__umoddi3 (UDItype u, UDItype v)
+__umoddi3 (UDItype dividend, UDItype divisor)
 {
   UDItype w;
 
-  (void) __udivmoddi4 (u, v, &w);
+  (void) __udivmoddi4 (dividend, divisor, &w);
 
   return w;
 }

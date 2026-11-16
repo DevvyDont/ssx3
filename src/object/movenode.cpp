@@ -2846,6 +2846,13 @@ INCLUDE_ASM("object/movenode", cMultiParticleMan_reset);
 #ifdef SKIP_ASM
 extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* p, int flags);
 
+/**
+ * Deletes all of the multi-particle manager's particle systems.
+ *
+ * For each of the 4 slots (Particles, +0x0..+0xC) a non-null system is destroyed and freed with
+ * cMultiParticle__cMultiParticle(p, 3), and the slot is cleared. Called on a partial restart (cGame_partialRestart)
+ * and before a replay frame is restored.
+ */
 extern "C" void cMultiParticleMan_reset(void** self)
 {
     int i;
@@ -2879,6 +2886,12 @@ INCLUDE_ASM("object/movenode", cMultiParticleMan_update);
 #ifdef SKIP_ASM
 extern "C" void cMultiParticle_update(void* p);
 
+/**
+ * Updates every multi-particle system the manager holds.
+ *
+ * Calls cMultiParticle_update() on each non-null slot of Particles (+0x0..+0xC, 4 slots). Run every game frame by
+ * cGame_update.
+ */
 extern "C" void cMultiParticleMan_update(void** self)
 {
     int i;
@@ -2950,6 +2963,15 @@ struct sMnVEntrySer7D28 {
 
 extern "C" void* func_00357E80(cMultiParticle* mem, void* stream);
 
+/**
+ * Restores the multi-particle systems from a replay frame.
+ *
+ * Deletes the current systems (cMultiParticleMan_reset), then for each of the 4 slots reads a 4-byte used flag through the
+ * frame's virtual read (slot 2); a used slot gets a new cMultiParticle (0x50 bytes, "MultiParticle") built from the
+ * frame by func_00357E80, an unused one is left null. The counterpart of cMultiParticleMan_writeToReplayFrame.
+ *
+ * @param stream  the replay frame to read from (On Tour data)
+ */
 extern "C" void cMultiParticleMan_readFromReplayFrame(void** self, void* stream)
 {
     int i;

@@ -1764,6 +1764,11 @@ extern void* cBELibrary_userAwards[];
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getUserAwards__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the table of awards the players have earned.
+ *
+ * @return cBELibrary_userAwards
+ */
 void* cBERewardInterface_getUserAwards(void* self)
 {
     return (void*)cBELibrary_userAwards;
@@ -1775,6 +1780,14 @@ extern "C" void* cBEUserAwards_getTotalNumAwards(void*);
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumUserAwards__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns how many awards the players have earned in total.
+ *
+ * cBEUserAwards_getTotalNumAwards (cBEUserAwards::getTotalNumAwards) on cBELibrary_userAwards. The C declares the result as void *; it is
+ * the int count.
+ *
+ * @return the award count
+ */
 void* cBERewardInterface_getTotalNumUserAwards(void* self)
 {
     return cBEUserAwards_getTotalNumAwards((void*)cBELibrary_userAwards);
@@ -2222,6 +2235,19 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, i
 extern int gNextBigChallengesLimit[];
 extern int D_0045B018_2d[][4] __asm__("D_0045B018");
 
+/**
+ * Checks a peak's completed big challenges after a mission and hands out the trophy and awards they earn.
+ *
+ * Does nothing until the missions completed on peak @p k (cBEMissionInterface_getNumberCompletedMissionsOnPeak) reach
+ * the positive limit gNextBigChallengesLimit[@p k]. Then the limit moves on
+ * (cBERewardInterface_calculateNextBigChallengesLevel) and, if the trophy-2 check passed before and the count equals
+ * D_0045B018[@p k][3], awards trophy 2 for the peak; a conquered mountain (cBERewardInterface_isMountainConquered) also
+ * grants award 0 if not yet received (cBERewardInterface_isAwardReceived). Note that the trophy is given when isTrophyOwned was already true
+ * before the update, the opposite of func_00159818's 'newly owned' test; likely a bug or an inverted name.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param k  the peak (On Tour peakID)
+ */
 extern "C" void cBERewardInterface_awardUserBigChallenge(void* self, int rider, int k)
 {
     int cur = cBEMissionInterface_getNumberCompletedMissionsOnPeak(cBE_getInterface_Fv(cBE_getBE(), 0xA), k);
@@ -2444,9 +2470,19 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_isAwardReceived);
 extern int cBELibrary_profileLib[];
 extern "C" int func_0015A320(void* self, int bit, unsigned char* bits);
 
-extern "C" int cBERewardInterface_isAwardReceived(void* self, int a1, int a2, int bit)
+/**
+ * Tells whether a character profile has already received an award.
+ *
+ * func_0015A320 (On Tour isBitSet) on bit @p bit of the bytes at +0xF28 of cBELibrary_profileLib[@p iProfileIndex][@p iCharacterID].
+ *
+ * @param iProfileIndex  the profile (On Tour iProfileIndex)
+ * @param iCharacterID  the character (On Tour iCharacterID)
+ * @param bit  the award (On Tour awardCategory)
+ * @return nonzero when received
+ */
+extern "C" int cBERewardInterface_isAwardReceived(void* self, int iProfileIndex, int iCharacterID, int bit)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 0xf88;
+    char* p = (char*)cBELibrary_profileLib + iProfileIndex * 0x9b50 + iCharacterID * 0xf88;
     return func_0015A320(self, bit, (unsigned char*)(p + 0xF28));
 }
 #endif
@@ -2524,6 +2560,11 @@ extern void* cBELibrary_rewardDB[];
 
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getDB);
 #ifdef SKIP_ASM
+/**
+ * Returns the reward database (posters, toys, cards, videos and so on).
+ *
+ * @return cBELibrary_rewardDB
+ */
 void* cBERewardInterface_getDB(void* self)
 {
     return (void*)cBELibrary_rewardDB;
@@ -2680,6 +2721,14 @@ struct sRewardGrid_0015A6F0
 // The lander should change that declaration to int instead.
 int cBEUserAwards_getTotalNumAwards_impl(sRewardGrid_0015A6F0* self) __asm__("cBEUserAwards_getTotalNumAwards");
 
+/**
+ * Counts all awards recorded in a user-awards table.
+ *
+ * Sums the 32 x 10 signed bytes starting at +0x6. The C definition is cBEUserAwards_getTotalNumAwards (bound to the symbol by asm
+ * label) because the unit declares cBEUserAwards_getTotalNumAwards as returning void *.
+ *
+ * @return the total award count
+ */
 int cBEUserAwards_getTotalNumAwards_impl(sRewardGrid_0015A6F0* self)
 {
     int sum = 0;

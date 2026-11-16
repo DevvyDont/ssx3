@@ -550,10 +550,18 @@ struct sBucketEntry {
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_setsortflag);
 #ifdef SKIP_ASM
-extern "C" void cBucketMan_setsortflag(void* self, int a1)
+/**
+ * Sets one bucket's sort flag: bit 0 of its header's flags.
+ *
+ * The bucket headers are the array at +0x4 (On Tour Buckets); cGame_load sets the flag on bucket 1 right after
+ * cBucketMan_init(). On Tour asserts the index is in range; retail does not check it.
+ *
+ * @param bucket  the bucket index
+ */
+extern "C" void cBucketMan_setsortflag(void* self, int bucket)
 {
     sBucketEntry* p = *(sBucketEntry**)((char*)self + 0x4);
-    p[a1].flags |= 1;
+    p[bucket].flags |= 1;
 }
 #endif
 

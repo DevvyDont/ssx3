@@ -693,12 +693,24 @@ static inline void vu0CopyMatrixCA8(sAvMatrixCA8* dst, sAvMatrixCA8* src)
         : "memory");
 }
 
-extern "C" int tActiveAvalancheNode_update(sAvNodeCA8* self, float t)
+/**
+ * Advances one avalanche chunk to a given time.
+ *
+ * Returns 0 when the node has no data. The time @p currTime is multiplied by the data's speed (+0x10C) and
+ * tActiveAvalancheNode_getFrameData gives that frame's position, velocity and rotation. While t * 30 is below the
+ * data's frame count (+0x100) they are copied into the node and, unless the type is 2 or emission is off, the emitter
+ * at +0xD0 is updated (cDynamicColourEmitter_update) for a 1/60 s step. Past the end, type-2 nodes stay alive; others are ended with
+ * tActiveAvalancheNode_end(node, 0).
+ *
+ * @param currTime  time since the avalanche started, in seconds (On Tour currTime)
+ * @return 1 while the node is still active, else 0
+ */
+extern "C" int tActiveAvalancheNode_update(sAvNodeCA8* self, float currTime)
 {
     if (self->data == 0) return 0;
-    t *= self->data->speed;
-    sAvFrameCA8 fd = self->getFrameData(t);
-    if (t * 30.0f < self->data->duration) {
+    currTime *= self->data->speed;
+    sAvFrameCA8 fd = self->getFrameData(currTime);
+    if (currTime * 30.0f < self->data->duration) {
         sAvVec4CA8* pos = &self->pos;
         self->pos = fd.pos;
         vu0CopyMatrixCA8(&self->rot, &fd.rot);
@@ -709,7 +721,7 @@ extern "C" int tActiveAvalancheNode_update(sAvNodeCA8* self, float t)
             void* org = &D_004FF120_7CA8;
             void* em = self->emitter;
             self->f1FC = self->fB4;
-            int alive = t < d->duration;
+            int alive = currTime < d->duration;
             cDynamicColourEmitter_update(em, pos, org, vel, alive, 0.01666666753590107f);
         }
         return 1;
@@ -897,6 +909,14 @@ static inline sAvV4_7EF8 pos_7EF8(const sAvObj_7EF8* o)
 }
 
 extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self) __asm__("tActiveAvalanche_update");
+/**
+ * Runs one update step of an active avalanche.
+ *
+ * Adds cAvalanche_m_UpdateTimeStep to the clock and updates each node in the list (tActiveAvalancheNode_update), forgetting the
+ * object of each node that finished. Events whose time has come spawn their object as a new 0x6C-byte "AnimObject" node
+ * if it has none, and play a ground-hit sound at its position. Sound cues whose frame has been reached play at their
+ * object's sound position. When no node is active any more the avalanche ends (tActiveAvalanche_end).
+ */
 extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self)
 {
     if (self->data == 0) {
@@ -944,6 +964,13 @@ void cMemMan_free(void*);
 extern "C" void* func_0028B180();
 extern "C" void func_0029DEF0(void* self, int a1);
 
+/**
+ * Stops an active avalanche and releases what it holds.
+ *
+ * Frees the array at +0x8. If the avalanche is running (+0x0), every node in the list from +0x4 is ended with
+ * tActiveAvalancheNode_end(node, 1), the running flag is cleared, the audio interface's avalanche sound is switched off
+ * (func_0029DEF0 with 0) and the counter at +0x708 of the AI's +0xA8 object is decremented if non-zero.
+ */
 extern "C" void tActiveAvalanche_end(void* self)
 {
     if (*(void**)((char*)self + 0x8) != 0) {
@@ -1003,12 +1030,12 @@ extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride
         FILESYS_writesync(a, b, src, stride * rows, 100);
     } else {
         char* buf = (char*)operator_new_tag(stride * rows, str_buffer, 0, 0);
-        char* d = buf;
+        char* dstCursor = buf;
         for (int i = 0; i < rows; i++) {
             char* end = src + stride;
-            char* p = end;
-            while (src != p) {
-                *d++ = *--p;
+            char* srcCursor = end;
+            while (src != srcCursor) {
+                *dstCursor++ = *--srcCursor;
             }
             src = end;
         }
@@ -1939,8 +1966,8 @@ extern void* cAvalanche_m_avalancheList;
 
 extern "C" void func_002D9538(int id, sAvParams9538* params)
 {
-    for (sAvGroup9538* g = (sAvGroup9538*)cAvalanche_m_avalancheList; g != 0; g = g->next) {
-        for (sAvNode9538* n = g->nodes; n != 0; n = n->next) {
+    for (sAvGroup9538* group = (sAvGroup9538*)cAvalanche_m_avalancheList; group != 0; group = group->next) {
+        for (sAvNode9538* n = group->nodes; n != 0; n = n->next) {
             if (n->id == id) {
                 if (n->type == 2) return;
                 n->emit = 1;
@@ -2027,10 +2054,10 @@ extern "C" void func_002D9738(sAv_9738* self, int a, sAvNode_9738* stop)
 {
     if (self->count < 64) {
         int depth = 0;
-        sAvNode_9738* p = self->head;
-        while (p != 0 && p != stop) {
+        sAvNode_9738* node = self->head;
+        while (node != 0 && node != stop) {
             depth++;
-            p = p->next;
+            node = node->next;
         }
         self->ents[self->count].a = a;
         self->ents[self->count].depth = depth;
@@ -2530,6 +2557,15 @@ extern void* cAvalanche_m_filedata;
 extern int cAvalanche_m_fileDataDeleteable;
 extern int cAvalanche_m_badCookie;
 
+/**
+ * Installs a loaded avalanche data chunk as the current avalanche file.
+ *
+ * Calls cAvalanche_reset, frees cAvalanche_m_filedata if it is deletable, then stores @p data as the (non-deletable)
+ * file. A file whose first word is not 0x2BEEF00 is dropped and cAvalanche_m_badCookie is set; otherwise the flag is
+ * cleared and cAvalanche_resolveDataPointers fixes up the file.
+ *
+ * @param data  the loaded avalanche chunk
+ */
 extern "C" void cAvalanche_resolve(void* data)
 {
     cAvalanche_reset(data);

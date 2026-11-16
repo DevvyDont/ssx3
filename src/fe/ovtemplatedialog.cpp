@@ -72,12 +72,21 @@ extern "C" void cPDATemplate_onCreateScreen(char* self)
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_getResultsOverlay);
 #ifdef SKIP_ASM
-extern "C" int cOVStateManager_getResultsOverlay(int a0, int a1)
+/**
+ * Picks which results overlay to show for a game event and heat.
+ *
+ * Events 6 to 11 give 0x16; events 0, 4 and 5, or heat 3, give 0xB; anything else gives 0xA.
+ *
+ * @param currentGameEvent  the current game event
+ * @param currentHeat  the current heat
+ * @return the overlay id (On Tour tOVStateEnum)
+ */
+extern "C" int cOVStateManager_getResultsOverlay(int currentGameEvent, int currentHeat)
 {
-    if ((unsigned int)(a0 - 6) < 6) {
+    if ((unsigned int)(currentGameEvent - 6) < 6) {
         return 0x16;
     }
-    if ((unsigned int)(a0 - 4) < 2 || a0 == 0 || a1 == 3) {
+    if ((unsigned int)(currentGameEvent - 4) < 2 || currentGameEvent == 0 || currentHeat == 3) {
         return 0xb;
     }
     return 0xa;
@@ -104,6 +113,17 @@ static inline bool isKind_A8F8(int k, int v)
     return k == v;
 }
 
+/**
+ * Opens the overlay that belongs to a game-flow state: the pre-event screen or the post-race results.
+ *
+ * Does nothing while a replay (other than state 10+) is playing. For state 2 (pre-event) picks the replay (0x11),
+ * event intro (8), team (0x15), rival (0x14) or normal (9) overlay; for state 7 (post-event) picks a network,
+ * results (cOVStateManager_getResultsOverlay), reward (0x10) or 0xF overlay, starts the auto replay for non-rival events and, online,
+ * sets cGameComm_mGameComm's overlay timeout to 0x8CA0. With no overlay chosen, sets
+ * cOVStateManager_mStatus to 2 instead of calling cOVStateManager_triggerOverlay.
+ *
+ * @param mode  the game-flow state (On Tour eGFState)
+ */
 extern "C" void cOVStateManager_gotoOverlay(int mode)
 {
     int v = *(int*)SSXApp->Game->Replay;
@@ -1358,6 +1378,14 @@ extern int D_004A2708;
 
 
 
+/**
+ * Moves on from the overlay that just closed to the next one (or back to the game).
+ *
+ * Clears cOVStateManager_mStatus and switches on the current UI state's overlay id (+0x98): after results
+ * (10, 11, 22) acts on cOVStateManager_mMiscData (open the map with style 1, restart via cGame_setState, show a
+ * replay, leave an online game with cGameComm_localDisconnected and cGame_exit...); after 15 and 16 shows rewards or the
+ * results overlay (cOVStateManager_getResultsOverlay); after 8, 9, 20 and 21 sets mStatus to 2 so the next update resumes play.
+ */
 // Continues after a result dialog closes, depending on the current overlay state and the pending dialog.
 extern "C" void cOVStateManager_gotoNextOverlay(void)
 {
@@ -1468,6 +1496,13 @@ struct sFlag_CFD0 {
 
 
 
+/**
+ * Per-frame overlay manager step: carries out the pending overlay action in cOVStateManager_mStatus.
+ *
+ * 1 goes to the next overlay (cOVStateManager_gotoNextOverlay); 2 stops the auto replay, flags the current game state to continue
+ * and, in an online race's pre-event state, purges the UI states (cUIStateStack_purgeNormalStates); 3 removes the PDA template and
+ * purges the UI states; 4 sets game state 0xE via cGame_setState. Each case clears mStatus first.
+ */
 extern "C" void cOVStateManager_update(void)
 {
     char *mgr = ((char*)((SSXApp)->Game)->UI);

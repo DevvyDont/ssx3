@@ -647,6 +647,20 @@ void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionStat
 
 
 void cRider_initAlways_impl(cRider* self) __asm__("cRider_initAlways");
+/**
+ * Resets a loaded rider for a new run: stance, path, start position, timers and per-race state.
+ *
+ * Does nothing until the rider is loaded (mLoadStep == 7). Sets the handler's motion/control state words (+0xDE0 = 3,
+ * +0xDE4 = 13), clears the rubber-band values, resets the metrix and anim base, sets mNaturalStance from cBECharacterInterface_getIsGoofyFoot
+ * (On Tour getIsGoofyFoot) and calls cRider_initPath (initPath(true)).
+ *
+ * Placement: a rider flagged by func_00145C38 on location 14 with no game path, in game mode 4, is put at the
+ * back-country drop-off (cRider_putAtDropOffBC, motion 1, control 4, takeoff scored); in modes 4-6 it goes to a start
+ * point chosen by the location (17-21: start 0 of type 2; 14-16: its own start of type 1; else start 1 of type 2) and
+ * cRider_cleanupAfterPutAt; otherwise motion state 3 and control state 6. With a game path set the boost is
+ * initialised. Finally the finish/uber/boost timers, start tick (= AITick), penalty and overlap counts, rival fields
+ * and transitions are cleared and the vibration reset (vtable slot 16) and rider FX reset run.
+ */
 void cRider_initAlways_impl(cRider* self)
 {
     if (self->mLoadStep == 7)
@@ -1061,6 +1075,25 @@ static inline void InitChannel_D660(cRider* self, int i, float v, float z)
 // PORT: the unit declares cRider_putAt(void*, sVec4_0011DE60*, ..., int, float) later; bind the cRider* view by asm label.
 // drop is declared before anim: the order of the parameter copies follows it (ABI-identical: f12 and a3 either way).
 extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float* dir, float drop, int anim) __asm__("cRider_putAt");
+/**
+ * Places the rider at a position facing a direction, optionally on the ground below, and resets its motion and
+ * animation.
+ *
+ * Clears the line/wall hints, faces the rider along atan2(@p dir) and, when @p drop >= 0, casts a terrain ray from 200
+ * above to 7000 below @p pos (func_0032E100/func_00336850) and stands the rider @p drop above the hit, tilted to the
+ * hit normal. Then resets the ground frame, velocity, impulse, the 19 smoothed channels (channel 9 to 1), spin/flip
+ * rates, boost, rail/press state, attack and HUD message, sets the stance from mNaturalStance (anim heading turned half
+ * a turn when switched), plays @p anim, sets up and runs the animation and skeleton (cRiderAnimBase_setupAnimation,
+ * cRider_updateAnimation, cRider_updateSkeleton, cAnimModel_buildSkelMatrices), updates the bounds, overlap list and lights,
+ * func_002105B0(mAIIndex), resets vibration, and resets the camera of a rider with a view (mViewIndex < 2).
+ *
+ * The C definition is cRider_putAt with an asm label.
+ *
+ * @param pos  where to put the rider
+ * @param dir  the direction to face (On Tour desFront; only x and y are used)
+ * @param drop  On Tour height: when >= 0, drop onto the ground below and stand this far above it
+ * @param anim  the AI animation to start (On Tour tAIAnimID initAnim)
+ */
 extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float* dir, float drop, int anim)
 {
     ClearCache_D660((char*)self->mLineHint);
@@ -1957,6 +1990,20 @@ static inline sXf_EB98 Combine_EB98(const sXf_EB98& a, const sXf_EB98& b)
 }
 
 extern "C" void cRider_updateSkeleton_impl(cRider* self) __asm__("cRider_updateSkeleton");
+/**
+ * Poses the rider's skeleton from its position and rotation plus spin, flip, lean, board tilt and leg adjustments.
+ *
+ * The root pose is mPosition/mRotation; in control state 5 (func_0011FEE8) the spin control (handler +0x230) adds the
+ * flip/spin rotation (cSpinControl_applyFlipSpinAngle), then cRider_doLeanPoseAdjust leans it. Unless wiping out (state 13) channel 18
+ * raises the body along its up axis. With mUseRootPoseOverride the board bones are reset and the board root takes the
+ * override pose. cAnimModel_transform poses the bones from the body and board roots.
+ *
+ * Channel 17 then tilts the board-root bone toward the axis at +0x390 (and lifts it along mGroundNormal by unk_31C),
+ * re-deriving the board child bone; unless wiping out, unk_318 drives func_0011F3D8 (per-leg adjustment) for the two
+ * leg records at +0x8E0/+0x910. Finally the rider matrix (+0x160) is rebuilt from the pose and cRider_updateCollideInfo runs.
+ *
+ * The C definition is cRider_updateSkeleton with an asm label.
+ */
 extern "C" void cRider_updateSkeleton_impl(cRider* self)
 {
     sXf_EB98 xf;
@@ -2379,6 +2426,15 @@ extern "C" void func_0011FEA8(void *rider) {
 //100%
 INCLUDE_ASM("ai/rider", cRider_setControlState__FPv);
 #ifdef SKIP_ASM
+/**
+ * Switches the rider's control state (cruise, air, wipeout, ...) through its rider handler.
+ *
+ * A thin wrapper: cRiderHandler__setControlState(mRiderHandler, state). The C prototype has only the rider; the new
+ * state rides through in $a1 (callers declare it as (rider, int)).
+ *
+ * @param vself  the rider (this); the new control state follows in the second argument register
+ * @return whatever cRiderHandler__setControlState returns (nothing meaningful; On Tour's is void)
+ */
 void* cRider_setControlState(void* vself)
 {
     cRider* self = (cRider*)vself;
@@ -3257,6 +3313,14 @@ extern "C" void* cAnimModel_buildSkelMatrices(void* obj);
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateSplit9__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ninth slice of the rider's per-frame update: builds the skeleton matrices.
+ *
+ * cAnimModel_buildSkelMatrices(mAnimModel). cAI_update runs each updateSplitN over all riders in turn.
+ *
+ * @param vself  the rider (this), viewed as cRider* self
+ * @return cAnimModel_buildSkelMatrices's value (On Tour's updateSplit9 returns void)
+ */
 void* cRider_updateSplit9(void* vself)
 {
     cRider* self = (cRider*)vself;
@@ -4395,6 +4459,16 @@ INCLUDE_ASM("ai/rider", cRider_getEventStartPos);
 extern "C" void* cPathSys_getStartpoint(void*, int, int);
 extern char gPaths[];
 
+/**
+ * Returns the rider's start position for the event.
+ *
+ * Looks up start point mAIIndex of type 1 in gPaths (cPathSys_getStartpoint, On Tour cPathSys::getStartpoint) and copies its
+ * position (words 2-4) with w = 1.
+ *
+ * @param out  receives the position (the by-value return)
+ * @param rider  the rider (this)
+ * @return @p out
+ */
 extern "C" float* cRider_getEventStartPos(float* out, cRider* rider)
 {
     float* p = (float*)cPathSys_getStartpoint(gPaths, 1, rider->mAIIndex);
@@ -6096,6 +6170,28 @@ struct sAnimEvent_124788 {
 
 // The unit declares cRider_DoInSeqAnimUpdate(void*, void*, float, float, int); bind the typed definition by asm label.
 extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* pFrameInfo, float currFrame, float frameDelta, int eventBits) __asm__("cRider_DoInSeqAnimUpdate");
+/**
+ * Drives the rider from an in-game scripted sequence (NIS) frame: starts its animation and follows the scripted
+ * position and angles.
+ *
+ * On a key event (@p eventBits bit 0) whose main anim starts at @p currFrame: maps the script anim to a game anim
+ * (func_00280520), re-bases the rider so the anim's root starts at the hips (custom flag root), applies the start-gate
+ * knee/horizontal offsets (drift), flips the heading offset when the anim's heading flag changes, and plays it from its
+ * start frame at its speed (cRiderAnimBase_playFromAnimID, sequence 2). On bit 1 with no active anim it plays anim 5.
+ *
+ * Every call: moves the rider by the change of the script position (+0xAE0, through the script matrix) and turns it by
+ * the change of the script Euler angles (+0xAF0..+0xAF8, degrees to radians), runs cRider_updateAnimation(@p
+ * frameDelta) and cRider_updateSkeleton (skeleton), sets the velocity from the movement (or the board root's movement with
+ * unk_AFC) per frame, toggles anim-model channel 0xB from the sequence's flags, and refreshes the bound box around the
+ * hips and cRider_updateCollideInfo.
+ *
+ * The C definition is cRider_DoInSeqAnimUpdate with an asm label.
+ *
+ * @param pFrameInfo  the script actor's frame data (On Tour tSSXFrameActor)
+ * @param currFrame  the sequence's current frame
+ * @param frameDelta  frames advanced this update
+ * @param eventBits  bit 0: key event on this frame; bit 1: the sequence ended
+ */
 extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* pFrameInfo, float currFrame, float frameDelta, int eventBits)
 {
     if (eventBits & 1) {
@@ -6498,7 +6594,23 @@ struct sSfxEnt_5448 {
 #define MIN_5448(a, b) ((a) < (b) ? (a) : (b))
 #define MAX_5448(a, b) ((a) < (b) ? (b) : (a))
 
-extern "C" void cRider_DoInSeqSoundUpdate(void* vself, void* vobj, float when, float b, int flags)
+/**
+ * Plays and stops the rider's sounds for an in-game scripted sequence (NIS) frame.
+ *
+ * First forgets any of the rider's 4 sequence sound handles (+0xB08) the bank monitor no longer has. On a key event
+ * (bit 0 of @p flags) it walks the frame's sound list (+0xC of @p vobj) while each entry's frame equals @p when, maps
+ * the script sound id (func_00280548), fills a new sound-play slot in the audio system with defaults, the entry's
+ * volume (clamped 0..127), the volume control (func_00287968) and the rider's position and closest camera
+ * (func_00288A20), starts it (cBankSys_SFX_End) and keeps the handle in the entry's slot. At the end of the sequence
+ * (bit 1) every slot no longer in the list is stopped.
+ *
+ * @param vself  the rider (this)
+ * @param vobj  the script actor's frame data (On Tour tSSXFrameActor *pFrameInfo); its sound list is at +0xC
+ * @param when  the sequence's current frame (On Tour currFrame)
+ * @param frameDelta  frames advanced (On Tour frameDelta); unused
+ * @param flags  On Tour eventBits: bit 0 key event, bit 1 sequence ended
+ */
+extern "C" void cRider_DoInSeqSoundUpdate(void* vself, void* vobj, float when, float frameDelta, int flags)
 {
     cRider* self = (cRider*)vself;
     char* obj = (char*)vobj;
@@ -6699,6 +6811,9 @@ extern "C" void cRider_updateWind(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateTestSurface__FPv);
 #ifdef SKIP_ASM
+/**
+ * Debug hook for testing surface types; compiled out, does nothing.
+ */
 void cRider_updateTestSurface(void* self)
 {
 }
@@ -6875,6 +6990,15 @@ INCLUDE_ASM("ai/rider", cPlayer__cPlayer);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/rider_classes.h"
 
+/**
+ * Destroys a player rider: its replay cache, its effect and wipeout-motion members, then the cRider base.
+ *
+ * Written as the destructor of cRider_125EB8 (the player layout in ai/rider_classes.h) and exported under the address
+ * name by an asm alias: cReplay_removeCache(game replay, mDF8), then g++ destroys the members (cCheatFX, cPunchFX,
+ * cDynamicSprayFX, cPlayerIndicatorFX, cAngerFX, cAirStreamerFX, cTrickBoostFX, cSpeedBoostFX, cBoardTrailFX,
+ * cBoardSparkFX, cBoardWakeFX, cWipeoutMotion) and the virtual base (cRider__cRider), and frees the object when the
+ * in-charge flag asks.
+ */
 cRider_125EB8::~cRider_125EB8()
 {
     cReplay_removeCache(SSXApp->Game->Replay, mDF8);

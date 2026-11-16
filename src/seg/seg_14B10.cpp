@@ -183,8 +183,17 @@ extern "C" void func_00113D30(void) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", cCountdownHandler_OnGainState);
 #ifdef SKIP_ASM
-extern "C" void cCountdownHandler_OnGainState(void *arg0, void *arg1) {
-    (*(int *)((char*)(arg1) + (0x1C))) = 0xB4;
+/**
+ * Starts the race countdown: three seconds of AI ticks.
+ *
+ * Sets the AI's CountdownTicksLeft (+0x1C) to 180 (3 s at 60 Hz, On Tour kUpdateHz). Slot 1 of the countdown handler's
+ * vtable (D_00458578), run by cAI_AIStateUpdate when the AI enters the countdown state.
+ *
+ * @param handler  the handler (this; unused)
+ * @param aiManager  the AI (cAI)
+ */
+extern "C" void cCountdownHandler_OnGainState(void *handler, void *aiManager) {
+    (*(int *)((char*)(aiManager) + (0x1C))) = 0xB4;
 }
 #endif
 
@@ -193,23 +202,41 @@ INCLUDE_ASM("seg/seg_14B10", cCountdownHandler_OnUpdate);
 #ifdef SKIP_ASM
 extern "C" void cAI_setAIState(cAI*, int);
 
-extern "C" void cCountdownHandler_OnUpdate(void *arg0, void *arg1) {
+/**
+ * Ticks the race countdown and starts the race when it runs out.
+ *
+ * Decrements the AI's CountdownTicksLeft (+0x1C) while it is positive; at 0 it calls cAI_setAIState(ai, 5), the race
+ * state. Slot 3 of the countdown handler's vtable (D_00458578), run by cAI_AIStateUpdate every AI tick.
+ *
+ * @param handler  the handler (this; unused)
+ * @param aiManager  the AI (cAI)
+ */
+extern "C" void cCountdownHandler_OnUpdate(void *handler, void *aiManager) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(arg1) + (0x1C)));
+    temp_2 = (*(int *)((char*)(aiManager) + (0x1C)));
     if (temp_2 <= 0) {
-        cAI_setAIState((cAI*)arg1, 5);
+        cAI_setAIState((cAI*)aiManager, 5);
         return;
     }
-    (*(int *)((char*)(arg1) + (0x1C))) = (int) (temp_2 - 1);
+    (*(int *)((char*)(aiManager) + (0x1C))) = (int) (temp_2 - 1);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_14B10", cCountdownHandler_OnLoseState);
 #ifdef SKIP_ASM
-extern "C" void cCountdownHandler_OnLoseState(void *arg0, void *arg1) {
-    (*(int *)((char*)(arg1) + (0x1C))) = 0;
+/**
+ * Ends the race countdown state by clearing the countdown.
+ *
+ * Sets the AI's CountdownTicksLeft (+0x1C) to 0. Slot 2 of the countdown handler's vtable (D_00458578), run by
+ * cAI_AIStateUpdate when the AI leaves the countdown state.
+ *
+ * @param handler  the handler (this; unused)
+ * @param aiManager  the AI (cAI)
+ */
+extern "C" void cCountdownHandler_OnLoseState(void *handler, void *aiManager) {
+    (*(int *)((char*)(aiManager) + (0x1C))) = 0;
 }
 #endif
 
@@ -218,6 +245,13 @@ INCLUDE_ASM("seg/seg_14B10", cRaceHandler_OnGainState);
 #ifdef SKIP_ASM
 extern "C" void cGameComm_gameStartRace(int);
 
+/**
+ * Tells the online game layer that the race has started.
+ *
+ * Calls cGameComm_gameStartRace on cGameComm_mGameComm when an online game comm exists. Slot 1 of cRaceHandler's vtable
+ * (cAIStateHandler_vtbl, the extern named cAIStateHandler_vtbl), run by cAI_AIStateUpdate when the AI enters the race state; it
+ * is called with the handler and the AI but uses neither, so the C view takes no parameters.
+ */
 extern "C" void cRaceHandler_OnGainState(void) {
     if (cGameComm_mGameComm != 0) {
         cGameComm_gameStartRace((int)cGameComm_mGameComm);
@@ -232,10 +266,20 @@ extern "C" void cAI_setAIState(cAI*, int);
 extern "C" int cAI_isRaceFinished(void *);
 extern "C" void cGame_setState(int, int, int, int);
 
-extern "C" void cRaceHandler_OnUpdate(void *arg0, void *arg1) {
-    (*(int *)((char*)(arg1) + (0xC))) = (int) ((*(int *)((char*)(arg1) + (0xC))) + 1);
-    if (cAI_isRaceFinished(arg1) == 1) {
-        cAI_setAIState((cAI*)arg1, 6);
+/**
+ * Advances the race clock and ends the race once it is finished.
+ *
+ * Increments the AI's EventTimerTick (+0xC). When cAI_isRaceFinished returns 1 it sets AI state 6 (end race) and the
+ * game state to 5 (cGame_setState(SSXApp->Game, 5, 0, 0), On Tour cGame::setState). Slot 3 of cRaceHandler's vtable
+ * (cAIStateHandler_vtbl); cRaceHandler keeps the base cAIStateHandler_OnLoseState.
+ *
+ * @param handler  the handler (this; unused)
+ * @param aiManager  the AI (cAI)
+ */
+extern "C" void cRaceHandler_OnUpdate(void *handler, void *aiManager) {
+    (*(int *)((char*)(aiManager) + (0xC))) = (int) ((*(int *)((char*)(aiManager) + (0xC))) + 1);
+    if (cAI_isRaceFinished(aiManager) == 1) {
+        cAI_setAIState((cAI*)aiManager, 6);
         cGame_setState(((int)SSXApp->Game), 5, 0, 0);
     }
 }
@@ -325,16 +369,26 @@ static inline float Clamp_3E80(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 
-extern "C" void cRider_setupLean(char *self, float arg1) {
+/**
+ * Sets the target lean and how fast the lean channel slews toward it.
+ *
+ * Below 694.5 speed (|mVelocity|) the lean is scaled by speed / 694.5. The slew rate is |lean - current| x 12.0 clamped
+ * to 0.1 .. 14.0, x 0.756 on surface types 2, 3 and 0xD (mSurfaceType; On Tour kLeanRatePowderDamp), x 1/60. Writes
+ * lean channel mSlewed[0]: target (+0x1F8) and rate (+0x1F4). Called by the rider controls (cCruiseControl_update,
+ * cBumpControl_update, cPrewindControl_update, ...).
+ *
+ * @param desLean  the desired lean (the steering input)
+ */
+extern "C" void cRider_setupLean(char *self, float desLean) {
     float r = Len_3E80(*(sV4_3E80 *)(self + 0x1E0)) / 694.538818359375f;
     if (r < 1.0f)
-        arg1 = arg1 * r;
-    float d = Abs_3E80(arg1 - *(float *)(self + 0x1F0)) * 12.002403259277344f;
+        desLean = desLean * r;
+    float d = Abs_3E80(desLean - *(float *)(self + 0x1F0)) * 12.002403259277344f;
     float m = Clamp_3E80(d, 0.10000000149011612f, 14.001209259033203f);
     int st = *(int *)(self + 0x438);
     if (st == 2 || st == 3 || st == 0xD)
         m = m * 0.7561339735984802f;
-    *(float *)(self + 0x1F8) = arg1;
+    *(float *)(self + 0x1F8) = desLean;
     *(float *)(self + 0x1F4) = m * 0.01666666753590107f;
 }
 #endif
@@ -356,10 +410,19 @@ static inline float Clamp_3F38(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 
-extern "C" void cRider_setupRailBalance(void *self, float arg1) {
-    float d = Abs_3F38(arg1 - *(float *)((char*)self + 0x22C)) * 7.0f;
+/**
+ * Sets the target rail balance and how fast it slews toward it.
+ *
+ * The slew rate is |balance - current| x 7 clamped to 0.1 .. 8, x 1/60. Writes mSlewed[5] (+0x22C): target (+0x234) and
+ * rate (+0x230). Called by cRailslideControl_update, cUberGrindControl_update and the board-press, prewind and bump
+ * controls.
+ *
+ * @param desBal  the desired balance (the stick input)
+ */
+extern "C" void cRider_setupRailBalance(void *self, float desBal) {
+    float d = Abs_3F38(desBal - *(float *)((char*)self + 0x22C)) * 7.0f;
     float m = Clamp_3F38(d, 0.1f, 8.0f);
-    *(float *)((char*)self + 0x234) = arg1;
+    *(float *)((char*)self + 0x234) = desBal;
     *(float *)((char*)self + 0x230) = m * 0.01666666753590107f;
 }
 #endif
@@ -416,34 +479,46 @@ static inline float flipBackwards_3F88(float b, char *self, float th)
     return b;
 }
 
-extern "C" void cRider_setupCrouchBrake(char *self, float a, float b) {
-    if (0.0f < a && *(float *)(self + 0x214) != 0.0f) {
+/**
+ * Sets the crouch and brake channel targets, releasing one before the other engages.
+ *
+ * The brake is mSlewed[3] (+0x214: current, rate, target) and the crouch mSlewed[4] (+0x220). A crouch request while
+ * still braking first releases the brake (target 0 at 2.5/60), and a brake request while still crouched first releases
+ * the crouch (6/60). Otherwise the crouch target is @p desCrouch at rate |delta| x 6/60 (0.6/60 below a 0.1 delta); the brake
+ * request is dropped while crouched or moving backward (mVelocity . mGroundForward < 0), its sign follows the board
+ * direction (current brake and lean values), and its rate is clamp(|delta|, 0.1, 1) x 2.5/60.
+ *
+ * @param desCrouch  the desired crouch, 0..1
+ * @param desBrake  the desired brake, 0..1
+ */
+extern "C" void cRider_setupCrouchBrake(char *self, float desCrouch, float desBrake) {
+    if (0.0f < desCrouch && *(float *)(self + 0x214) != 0.0f) {
         *(float *)(self + 0x21C) = 0.0f;
         *(float *)(self + 0x218) = 0.04166241362690926f;
         return;
     }
-    if (0.0f < b && *(float *)(self + 0x220) != 0.0f) {
+    if (0.0f < desBrake && *(float *)(self + 0x220) != 0.0f) {
         *(float *)(self + 0x228) = 0.0f;
         *(float *)(self + 0x224) = 0.10000182688236237f;
         return;
     }
-    if (0.0f < a && *(float *)(self + 0x214) != 0.0f) {
-        a = 0.0f;
+    if (0.0f < desCrouch && *(float *)(self + 0x214) != 0.0f) {
+        desCrouch = 0.0f;
     }
-    float d = Abs_3F88(a - *(float *)(self + 0x220));
+    float d = Abs_3F88(desCrouch - *(float *)(self + 0x220));
     float v = (0.1f <= d) ? d * 0.10000182688236237f : 0.010000183247029781f;
-    *(float *)(self + 0x228) = a;
+    *(float *)(self + 0x228) = desCrouch;
     *(float *)(self + 0x224) = v;
-    if (0.0f < b) {
+    if (0.0f < desBrake) {
         if (0.0f < *(float *)(self + 0x220)) {
-            b = 0.0f;
+            desBrake = 0.0f;
         } else if (vu0Dot_3F88(*(sVec4_3F88 *)(self + 0x1E0), *(sVec4_3F88 *)(self + 0x3A0)) < 0.0f) {
-            b = 0.0f;
+            desBrake = 0.0f;
         }
     }
-    b = flipBackwards_3F88(b, self, 0.1f);
-    float e = Clamp_3F88(Abs_3F88(b - *(float *)(self + 0x214)), 0.1f, 1.0f);
-    *(float *)(self + 0x21C) = b;
+    desBrake = flipBackwards_3F88(desBrake, self, 0.1f);
+    float e = Clamp_3F88(Abs_3F88(desBrake - *(float *)(self + 0x214)), 0.1f, 1.0f);
+    *(float *)(self + 0x21C) = desBrake;
     *(float *)(self + 0x218) = e * 0.04166241362690926f;
 }
 #endif
@@ -457,27 +532,41 @@ extern "C" void func_00298D90(int mgr, char* rider, int b);
 extern "C" void cSSXAudio_TurboDeny(int mgr, char* rider);
 extern "C" void func_002992D8(int mgr, char* rider);
 
-extern "C" void cRider_setupBoostWarp(char* s, int a, int b)
+/**
+ * Handles the boost button: starts, sustains or denies a boost and burns the boost bar.
+ *
+ * A press sends cheat input 0 (cCheatFX_setCheatInput on the handler's +0xD20). While held with boost in the bar
+ * (+0x2F8 > 0): with no boost active (mBoostStrength == 0) it sets the strength from the bar (> 2/3: 1.0, > 1/3: 0.625,
+ * else 0.25) and starts the turbo sound (func_00298D90, On Tour TurboOn); the bar burns 0.0015068 per tick unless
+ * mPowerUpBoostTimer is running, mBoostMode is 0 or mUberLevel >= 10. A press with an empty bar plays
+ * cSSXAudio_TurboDeny. In every other case an active boost is stopped (func_002992D8, On Tour TurboOff) and
+ * mBoostStrength cleared.
+ *
+ * @param rider  the rider (this)
+ * @param isHeld  nonzero while the boost button is held
+ * @param isPressed  nonzero on the frame the boost button is pressed
+ */
+extern "C" void cRider_setupBoostWarp(char* rider, int isHeld, int isPressed)
 {
-    if (b) cCheatFX_setCheatInput(*(char**)(s + 0x77C) + 0xD20, 0);
-    if (a) {
-        if (*(float*)(s + 0x2F8) > 0.0f) {
-            if (*(float*)(s + 0x2FC) == 0.0f) {
-                float x = *(float*)(s + 0x2F8);
-                if (x > 0.6666666865348816f) *(float*)(s + 0x2FC) = 1.0f;
-                else if (x > 0.3333333432674408f) *(float*)(s + 0x2FC) = 0.625f;
-                else *(float*)(s + 0x2FC) = 0.25f;
-                func_00298D90(func_0028B180(), s, b);
+    if (isPressed) cCheatFX_setCheatInput(*(char**)(rider + 0x77C) + 0xD20, 0);
+    if (isHeld) {
+        if (*(float*)(rider + 0x2F8) > 0.0f) {
+            if (*(float*)(rider + 0x2FC) == 0.0f) {
+                float x = *(float*)(rider + 0x2F8);
+                if (x > 0.6666666865348816f) *(float*)(rider + 0x2FC) = 1.0f;
+                else if (x > 0.3333333432674408f) *(float*)(rider + 0x2FC) = 0.625f;
+                else *(float*)(rider + 0x2FC) = 0.25f;
+                func_00298D90(func_0028B180(), rider, isPressed);
             }
-            if (*(float*)(s + 0x2E8) == 0.0f && *(int*)(s + 0x304) != 0 && *(int*)(s + 0x2F4) < 10) {
-                *(float*)(s + 0x2F8) -= 0.00150679936632514f;
+            if (*(float*)(rider + 0x2E8) == 0.0f && *(int*)(rider + 0x304) != 0 && *(int*)(rider + 0x2F4) < 10) {
+                *(float*)(rider + 0x2F8) -= 0.00150679936632514f;
             }
             return;
         }
-        if (b) cSSXAudio_TurboDeny(func_0028B180(), s);
+        if (isPressed) cSSXAudio_TurboDeny(func_0028B180(), rider);
     }
-    if (*(float*)(s + 0x2FC) > 0.0f) func_002992D8(func_0028B180(), s);
-    *(float*)(s + 0x2FC) = 0.0f;
+    if (*(float*)(rider + 0x2FC) > 0.0f) func_002992D8(func_0028B180(), rider);
+    *(float*)(rider + 0x2FC) = 0.0f;
 }
 #endif
 
@@ -891,19 +980,29 @@ static inline Q_4CC0 QuatMul_4CC0(const Q_4CC0& a, const Q_4CC0& b)
 
 extern "C" int cRider_isChangeFakieGround_i(char* s) __asm__("cRider_isChangeFakieGround");
 
-extern "C" int cRider_isChangeFakieGround_i(char* s)
+/**
+ * Switches the rider to fakie (or back) when it slides backward on the ground.
+ *
+ * Only while not braking (brake channel mSlewed[3] current == 0) and moving backward faster than 111.1 along
+ * mGroundForward (+0x3A0): it turns mRotation 180 degrees about the up axis (mMatrix row 2 as a pure quaternion), re-
+ * derives the orientation (cRider_updateOrientationImplicit) and flips the stance (cRider_doChangeFakie, doChangeFakie).
+ *
+ * @param rider  the rider (this)
+ * @return 1 when the rider switched, else 0
+ */
+extern "C" int cRider_isChangeFakieGround_i(char* rider)
 {
     float k = 111.11111450195312f;
-    if (*(float*)(s + 0x214) != 0.0f) {
+    if (*(float*)(rider + 0x214) != 0.0f) {
         return 0;
     }
-    float d = Dot_4CC0(*(Q_4CC0*)(s + 0x1E0), *(Q_4CC0*)(s + 0x3A0));
+    float d = Dot_4CC0(*(Q_4CC0*)(rider + 0x1E0), *(Q_4CC0*)(rider + 0x3A0));
     if (-k < d) {
         return 0;
     }
-    *(Q_4CC0*)(s + 0x120) = QuatMul_4CC0(Make_4CC0(Vec3Of_4CC0(*(Q_4CC0*)(s + 0x1C0))), *(Q_4CC0*)(s + 0x120));
-    cRider_updateOrientationImplicit_4CC0(s);
-    cRider_doChangeFakie_4CC0(s);
+    *(Q_4CC0*)(rider + 0x120) = QuatMul_4CC0(Make_4CC0(Vec3Of_4CC0(*(Q_4CC0*)(rider + 0x1C0))), *(Q_4CC0*)(rider + 0x120));
+    cRider_updateOrientationImplicit_4CC0(rider);
+    cRider_doChangeFakie_4CC0(rider);
     return 1;
 }
 #endif
@@ -1050,6 +1149,20 @@ struct sV4_4DB8 : t4Vector {
     sV4_4DB8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
+/**
+ * Switches the rider's stance on landing when it comes down backward.
+ *
+ * Only while the air predictor's state (+0xAC) is 1 or 3. The landing normal and velocity come from the predictor
+ * (+0x20, +0x10), or are unk_180 and mVelocity when the landing surface (SSXApp game SurfPropCache entry, 0xB0 bytes)
+ * is type 0x12 or has +0x44 set. The landing must face up along unk_180, the forward speed (unk_170 . mVelocity) must
+ * be <= 277.8 and unk_170 . normal <= 0.9, and the rider's forward direction projected on the landing plane must point
+ * against the velocity (<= D_004A0EA8[0]). Then mPosition moves by twice the hip bone's horizontal offset (rotated by
+ * mRotation), the orientation is re-derived (cRider_updateOrientationImplicit), the stance flips (cRider_doChangeFakie) and
+ * the air predictor relaunches (cAirPredictor_startLaunchIntoAir, 3333.3).
+ *
+ * @param rider  the rider (this)
+ * @return 1 when the rider switched, else 0
+ */
 // FAKEMATCH: variable reuse: one `char* s` holds rider->mAirPredictor and then its state word (s = (char*)*(int*)(s + 0xAC);
 // compared with (char*)1 / (char*)3), so the pointer and the state share one pseudo; plain form 98.94%. Byte-identical and
 // behaves like the plain form; landed marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only);
@@ -1156,28 +1269,39 @@ static inline Q_5168 Scale_5168(const Q_5168& v, float s)
     return r;
 }
 
-extern "C" void cRider_doChangeFakie(char* s)
+/**
+ * Flips the rider between regular and fakie.
+ *
+ * Toggles the fakie flag at +0x320 (unk_320; On Tour IsRidingFakie), turns the animation heading by pi
+ * (cRiderAnimBase_changeHeadingOffset on mRiderAnim) and resets its heading pose (+0x30 = t4vect_Origin, +0x40 = a pi
+ * turn about t4vect_ZAxis when fakie, none otherwise), copies the flag to mRiderAnim +0x18, negates mGroundForward
+ * (+0x3A0) and mGroundSide (+0x3B0), and negates the current and target values of slewed channels 0 (lean), 1, 2, 3
+ * (brake) and 12 (+0x280).
+ *
+ * @param rider  the rider (this)
+ */
+extern "C" void cRider_doChangeFakie(char* rider)
 {
-    *(int*)(s + 0x320) ^= 1;
-    cRiderAnimBase_changeHeadingOffset(*(void**)(s + 0x784), 3.1415927410125732f);
-    if (*(int*)(s + 0x320)) {
-        SetHeading_5168(*(char**)(s + 0x784), 3.1415927410125732f);
+    *(int*)(rider + 0x320) ^= 1;
+    cRiderAnimBase_changeHeadingOffset(*(void**)(rider + 0x784), 3.1415927410125732f);
+    if (*(int*)(rider + 0x320)) {
+        SetHeading_5168(*(char**)(rider + 0x784), 3.1415927410125732f);
     } else {
-        SetHeading_5168(*(char**)(s + 0x784), 0.0f);
+        SetHeading_5168(*(char**)(rider + 0x784), 0.0f);
     }
-    *(int*)(*(char**)(s + 0x784) + 0x18) = *(int*)(s + 0x320);
-    *(Q_5168*)(s + 0x3A0) = Scale_5168(*(Q_5168*)(s + 0x3A0), -1.0f);
-    *(Q_5168*)(s + 0x3B0) = Scale_5168(*(Q_5168*)(s + 0x3B0), -1.0f);
-    *(float*)(s + 0x1F0) = -*(float*)(s + 0x1F0);
-    *(float*)(s + 0x1F8) = -*(float*)(s + 0x1F8);
-    *(float*)(s + 0x214) = -*(float*)(s + 0x214);
-    *(float*)(s + 0x21C) = -*(float*)(s + 0x21C);
-    *(float*)(s + 0x208) = -*(float*)(s + 0x208);
-    *(float*)(s + 0x210) = -*(float*)(s + 0x210);
-    *(float*)(s + 0x1FC) = -*(float*)(s + 0x1FC);
-    *(float*)(s + 0x204) = -*(float*)(s + 0x204);
-    *(float*)(s + 0x280) = -*(float*)(s + 0x280);
-    *(float*)(s + 0x288) = -*(float*)(s + 0x288);
+    *(int*)(*(char**)(rider + 0x784) + 0x18) = *(int*)(rider + 0x320);
+    *(Q_5168*)(rider + 0x3A0) = Scale_5168(*(Q_5168*)(rider + 0x3A0), -1.0f);
+    *(Q_5168*)(rider + 0x3B0) = Scale_5168(*(Q_5168*)(rider + 0x3B0), -1.0f);
+    *(float*)(rider + 0x1F0) = -*(float*)(rider + 0x1F0);
+    *(float*)(rider + 0x1F8) = -*(float*)(rider + 0x1F8);
+    *(float*)(rider + 0x214) = -*(float*)(rider + 0x214);
+    *(float*)(rider + 0x21C) = -*(float*)(rider + 0x21C);
+    *(float*)(rider + 0x208) = -*(float*)(rider + 0x208);
+    *(float*)(rider + 0x210) = -*(float*)(rider + 0x210);
+    *(float*)(rider + 0x1FC) = -*(float*)(rider + 0x1FC);
+    *(float*)(rider + 0x204) = -*(float*)(rider + 0x204);
+    *(float*)(rider + 0x280) = -*(float*)(rider + 0x280);
+    *(float*)(rider + 0x288) = -*(float*)(rider + 0x288);
 }
 #endif
 
@@ -1299,6 +1423,15 @@ static inline void SetHeading_5640(char* a, float angle)
     *(Q_5640*)(a + 0x40) = AxisAngle_5640(D_004FF160_5640, -angle);
 }
 
+/**
+ * Undoes the sideways rail-slide orientation when the rider leaves a rail.
+ *
+ * Nothing to do while the rail-slide mode (mRailStyle, +0x328; On Tour RailslideMode) is 0. In the air (motion state 1)
+ * modes 3 and 4 reset the animation heading, and it plays 0x11A (mode 3), 0x115 (mode 4) or 0x10C (other modes). On the
+ * ground (motion state 0) modes 3 and 4 turn the rider back by +-90 degrees about the up axis (cRider_rotateOrientation
+ * and cRiderAnimBase_changeHeadingOffset) and reset the heading, then it plays 5. Finally the mode is cleared and
+ * func_00116930 runs (an empty stub: On Tour verifyRailslideModeDEBUG).
+ */
 // Finishes a pending turn-around request (state 3 = left, 4 = right) of the rider.
 extern "C" void cRider_undoRailslideModeOrientation(char* self)
 {
@@ -1379,6 +1512,19 @@ static inline float Clamp_58B8(float v, float lo, float hi)
     return v >= lo ? v <? hi : lo;
 }
 
+/**
+ * Snaps a two-axis stick input to the nearest multiple of an angle step, keeping its length.
+ *
+ * Components within @p eps of 0 are zeroed first, and a zero vector is left alone. Otherwise the angle atan2(y, x) is
+ * rounded to the nearest multiple of @p step and the vector rebuilt from it with the same length (func_0031BE50
+ * sin/cos), each component clamped to -1 .. 1 and zeroed below 0.001. cPrewindControl_update and cSpinControl_update
+ * call it with a pi/4 step.
+ *
+ * @param y  in/out: the vertical axis value
+ * @param x  in/out: the horizontal axis value
+ * @param step  the angle increment in radians (On Tour rad)
+ * @param eps  the dead zone (On Tour deadZone)
+ */
 extern "C" void cRider_snapAxisIncrement(void* self, float* y, float* x, float step, float eps)
 {
     float px, py, len, ang, t, r;
@@ -1449,6 +1595,16 @@ static inline float vAbs_115B58(float x)
     return r;
 }
 
+/**
+ * Plays a queued reaction animation (cheer or sulk) and clears the reaction.
+ *
+ * The pending reaction is the type at +0x358 (header mHudMsgId; On Tour ReactionEventType: 1 Pos, 2 UberPos, 3
+ * EarnComboPos, 4 Neg, 5 UberOn, 6 UberOff) flagged at the AI tick at +0x354 (header mHudMsgExpire; On Tour
+ * ReactionEventTick). Nothing happens while channel 2's animation category is 5 or 10 or channel 1 plays anything.
+ * Within 180 ticks of the flag it plays 0x13B for types 1 .. 3 (with the animation filter at +0x8C8 for that play;
+ * types 1 and 2 also cue func_0029FF80), 0x13A for type 4, and 0x13E for types 5 and 6 when |mSlewed[1].cur| < 0.75 and
+ * the control state is 0. The reaction is then cleared (type 0, tick -1), also when it is older than 180 ticks.
+ */
 extern "C" void cRider_checkForReaction(char* self)
 {
     if (*(int*)(self + 0x358) == 0) {
@@ -1680,22 +1836,34 @@ int func_0011FE98(void* self);
 // PORT: cRider_setControlState__FPv takes a second argument; bound by asm label
 void cRider_setControlState_61D0(void* self, int on) __asm__("cRider_setControlState__FPv");
 
-extern "C" int cRider_checkForBoardPress(char* s, float dir)
+/**
+ * Starts a board press from the press input.
+ *
+ * Nothing happens when @p dir is 0, while rail-sliding sideways (mRailStyle 3 or 4), or on the ground (motion state 0)
+ * while moving backward (mVelocity . mGroundForward < 0). A positive input plays 0x18 and sets the press mode
+ * (mPressType, +0x330; On Tour PressMode) to 1, a negative one plays 0x20 and sets 2; then control state 1
+ * (cRider_setControlState__FPv).
+ *
+ * @param rider  the rider (this)
+ * @param dir  the press input (On Tour boardPress): its sign picks the press
+ * @return 1 when a press started, else 0
+ */
+extern "C" int cRider_checkForBoardPress(char* rider, float dir)
 {
     int st;
     if (dir == 0.0f) return 0;
-    if (*(int*)(s + 0x328) == 3 || *(int*)(s + 0x328) == 4) return 0;
-    if (!func_0011FE98(s)) {
-        if (Dot4_61D0(*(V4_61D0*)(s + 0x1E0), *(V4_61D0*)(s + 0x3A0)) < 0.0f) return 0;
+    if (*(int*)(rider + 0x328) == 3 || *(int*)(rider + 0x328) == 4) return 0;
+    if (!func_0011FE98(rider)) {
+        if (Dot4_61D0(*(V4_61D0*)(rider + 0x1E0), *(V4_61D0*)(rider + 0x3A0)) < 0.0f) return 0;
     }
     if (dir > 0.0f) {
-        cRiderAnimBase_play_61D0(*(void**)(s + 0x784), 0x18, 0, -1.0f);
-        *(int*)(s + 0x330) = 1;
+        cRiderAnimBase_play_61D0(*(void**)(rider + 0x784), 0x18, 0, -1.0f);
+        *(int*)(rider + 0x330) = 1;
     } else {
-        cRiderAnimBase_play_61D0(*(void**)(s + 0x784), 0x20, 0, -1.0f);
-        *(int*)(s + 0x330) = 2;
+        cRiderAnimBase_play_61D0(*(void**)(rider + 0x784), 0x20, 0, -1.0f);
+        *(int*)(rider + 0x330) = 2;
     }
-    cRider_setControlState_61D0(s, 1);
+    cRider_setControlState_61D0(rider, 1);
     return 1;
 }
 #endif
@@ -1709,10 +1877,21 @@ extern "C" int func_0011FEE8_62C8(void *) __asm__("func_0011FEE8__FPv");
 extern "C" void cBoardPressControl_forceExit(char *);
 extern "C" void cCheatFX_setCheatInput(char *, int);
 
-extern "C" int cRider_checkForPrewind(char *self, int arg1, int arg2) {
-    if (arg2 != 0)
+/**
+ * Starts a prewind (the jump wind-up) from the jump button.
+ *
+ * A press sends cheat input 1 (cCheatFX_setCheatInput on the handler's +0xD20). On a press, or while the jump is held
+ * and the timer at +0x360 (On Tour JumpHeldSec) is 0, it ends a board press (cBoardPressControl_forceExit on the
+ * handler's +0x1D0, in control state 1) and sets control state 2. Otherwise it sets the timer to 1.0.
+ *
+ * @param isJumpHeld  nonzero while the jump button is held
+ * @param isJumpPressed  nonzero on the frame the jump button is pressed
+ * @return 1 when the prewind started, else 0
+ */
+extern "C" int cRider_checkForPrewind(char *self, int isJumpHeld, int isJumpPressed) {
+    if (isJumpPressed != 0)
         cCheatFX_setCheatInput(*(char **)(self + 0x77C) + 0xD20, 1);
-    if ((*(float *)(self + 0x360) == 0.0f && arg1 != 0) || arg2 != 0) {
+    if ((*(float *)(self + 0x360) == 0.0f && isJumpHeld != 0) || isJumpPressed != 0) {
         if (func_0011FEE8_62C8(self) == 1)
             cBoardPressControl_forceExit(*(char **)(self + 0x77C) + 0x1D0);
         cRider_setControlState_62C8(self, 2);
@@ -2077,6 +2256,13 @@ extern "C" int* func_00116FA8(int *arg0) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", cHUDFX_update);
 #ifdef SKIP_ASM
+/**
+ * Ages a HUD effect slot and clears it when its display time runs out.
+ *
+ * An empty slot (ID +0x0 == 0x34) or one with no time limit (MaxDecay +0x4 == -1) is left alone. Otherwise CurDecay
+ * (+0x8) grows by 1/60 and the slot becomes empty (ID 0x34) once it reaches MaxDecay. Called for each slot by
+ * cRiderMetrix_update (the rider metrics update).
+ */
 extern "C" void cHUDFX_update(void *self) {
     if (*(int *)((char*)self + 0) != 0x34) {
         float lim = *(float *)((char*)self + 4);
@@ -2229,15 +2415,24 @@ INCLUDE_ASM("seg/seg_14B10", cRiderMetrix__cRiderMetrix);
 extern "C" void cMemMan_free__FPv(int);
 extern "C" void operator_delete__FPi(void *);
 
-extern "C" void cRiderMetrix__cRiderMetrix(void *arg0, int arg1) {
+/**
+ * Destroys a rider's metrics object: frees its HUD effect slots and, if asked, itself.
+ *
+ * Frees the HUDfx array (+0x1B0) with cMemMan_free when it was allocated, then the object with operator_delete when bit
+ * 0 of @p flags is set. Called by cRider__cRider with 3.
+ *
+ * @param metrix  the metrics object (this)
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
+extern "C" void cRiderMetrix__cRiderMetrix(void *metrix, int flags) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0x1B0)));
+    temp_4 = (*(int *)((char*)(metrix) + (0x1B0)));
     if (temp_4 != 0) {
         cMemMan_free__FPv(temp_4);
     }
-    if (arg1 & 1) {
-        operator_delete__FPi(arg0);
+    if (flags & 1) {
+        operator_delete__FPi(metrix);
     }
 }
 #endif

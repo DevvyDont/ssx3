@@ -259,6 +259,13 @@ extern "C" void cBE_readFromReplayFrame(void* self, cBEReplayStream* data)
 //100%
 INCLUDE_ASM("be/be", cBE_getDataSize);
 #ifdef SKIP_ASM
+/**
+ * Returns the size of the career save data the game keeps for a memory card or replay.
+ *
+ * Always 0xBB78 (47,992) bytes.
+ *
+ * @return 0xBB78
+ */
 extern "C" int cBE_getDataSize()
 {
     return 0xBB78;
@@ -288,9 +295,17 @@ extern "C" void* cBELibrary_readFromData(int);
 //100%
 INCLUDE_ASM("be/be", cBE_readFromData__FPvi);
 #ifdef SKIP_ASM
-void* cBE_readFromData(void* self, int a1)
+/**
+ * Loads the career data from a save buffer read off the memory card.
+ *
+ * Tail-calls cBELibrary_readFromData (On Tour cBELibrary::readFromData) with @p data.
+ *
+ * @param data  the save buffer (On Tour data)
+ * @return cBELibrary_readFromData's result (On Tour returns nothing)
+ */
+void* cBE_readFromData(void* self, int data)
 {
-    return cBELibrary_readFromData(a1);
+    return cBELibrary_readFromData(data);
 }
 #endif
 

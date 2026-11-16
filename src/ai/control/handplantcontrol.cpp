@@ -5108,6 +5108,20 @@ extern float D_004A62B0[8];
 extern float D_004A62D0[8];
 extern float D_004A62F0[8];
 void sti_0013FB20(int init, int prio) __asm__("__sti__all_in_one_ai_cpp");
+/**
+ * Static initializer of the AI unit (all_in_one_ai.cpp): sets its constant tables and builds the terminal-velocity
+ * table.
+ *
+ * Runs only when @p init is set and @p prio is 0xFFFF. It writes dozens of 4-float colour/curve constants (D_004A5E60
+ * ... D_004A61E0), the packed anim-id words D_004A4C08 (-1) and D_004A4C18 ... D_004A4C80 (0 ... 13), D_004A4C84 =
+ * 2222.22 (80 kph in cm/s), nFinishLineControl_kFinishStopThreshCPS = 277.78 (10 kph), angle limits in radians (45, 5,
+ * 100, 20 and 360 degrees) and seven 4-key (x, y) curves, and calls InitTerminalVelocityTable (On Tour InitTerminalVelocityTable).
+ *
+ * The C definition is sti_0013FB20 with an asm label.
+ *
+ * @param init  nonzero when constructing (g++ passes 0 for the matching destructor pass)
+ * @param prio  the init priority; only 0xFFFF does anything
+ */
 void sti_0013FB20(int init, int prio)
 {
     if (prio == 0xFFFF && init) {
@@ -5756,6 +5770,11 @@ extern "C" long long *func_00140900(long long *outRotation, void *rider) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRider_getVelocity__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's velocity vector.
+ *
+ * @return a pointer to mVelocity (+0x1E0)
+ */
 void* cRider_getVelocity(void* self)
 {
     return (char*)self + 0x1E0;
@@ -7778,6 +7797,14 @@ extern "C" int func_001446E0(cPlayer* player) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cPlayer_scorePath__FPv);
 #ifdef SKIP_ASM
+/**
+ * Scores an AI path for a human player; humans do not choose paths, so every path scores 0.
+ *
+ * The cPlayer override of the path-scoring virtual (cRider vtable slot 20) that cRider_checkAIPathSwitch (checkAIPathSwitch)
+ * calls; cComputer_scorePath is the real one. The path argument is not read and is left out of the C signature.
+ *
+ * @return always 0.0
+ */
 float cPlayer_scorePath(void* self)
 {
     return 0.0f;

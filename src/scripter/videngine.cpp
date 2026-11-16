@@ -75,6 +75,18 @@ struct sVidOwner { char pad0[0x64]; sVidObj* obj; };
 struct sVidPlayer { void* p; int active; int f8; int fC; int f10; int f14; };
 struct sVtEnt { short delta; short index; void* fn; };
 
+/**
+ * Starts the readied video: pauses the game for it, saves part of the render state and pauses the sound effects.
+ *
+ * Returns 0 without a movie player (+0x0, On Tour mpPlayer) and 1 when already playing (+0x4, mIsPlaying). Otherwise
+ * starts the player with func_00253860 (On Tour cMoviePlayer::asyncPlay), marks it playing and pushes pause state 10:
+ * D_005366E8[++D_004A2A54] = 10 and cPauseState_Flags = D_00442918 (the flags table's entry 10). On Tour asserts the
+ * pause stack has room; retail does not. It then records in +0x14 whether the state (+0x10) of the game's +0x64 object
+ * is neither 0 nor 2, calls cCutSceneTransitionMan_ForceToRegularMode on that object, saves GrMan's virtual slot 42 result in +0x10, calls GrMan's
+ * slot 40 with 0, and pauses the sound effects (cSSXAudio_PauseSFX on func_0028B180()).
+ *
+ * @return 1 if the video is (now) playing, 0 without a movie player
+ */
 extern "C" int cVidEngine_PlayVideo(sVidPlayer* self)
 {
     void* p = self->p;
@@ -111,6 +123,13 @@ INCLUDE_ASM("scripter/videngine", cVidEngine_UpdateVideo);
 #ifdef SKIP_ASM
 extern "C" void cMoviePlayer_asyncUpdate(void* self);
 
+/**
+ * Advances the playing video by one step unless it is paused.
+ *
+ * With a movie player (+0x0) that is playing (+0x4) and no pause count (+0xC, On Tour mNumPause) it calls cMoviePlayer_asyncUpdate
+ * (On Tour cMoviePlayer::asyncUpdate) and sets the frame-updated flag (+0x8, On Tour mFrameUpdated).
+ * cSSXScriptEngine_Update calls it every frame on the engine's video engine (+0x500).
+ */
 extern "C" void cVidEngine_UpdateVideo(void* self)
 {
     void* p = *(void**)self;

@@ -356,55 +356,67 @@ extern "C" void HUFF_writebits_8A78(HuffState_8A78* s, HuffOut_8A78* out, unsign
 
 // PORT: the unit declares this with other parameter types; defined under an asm label
 extern "C" void HUFF_writenum_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigned int v) __asm__("HUFF_writenum");
-extern "C" void HUFF_writenum_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigned int v)
+/**
+ * Writes a number to the Huffman bit stream as a size prefix followed by the offset within that size class.
+ *
+ * For values below 0xFC the bit count and base come from the context's tables (+0xD44 and +0x1134, one entry per
+ * value); larger values fall into fixed classes: 6 bits from 0xFC, 7 from 0x1FC, ... 16 from 0x3FFFC, 17 from 0x80000
+ * and 18 from 0x100000. It then calls HUFF_writebits twice: the value 1 in bits + 1 bits (the prefix) and @p num minus
+ * the base in bits + 2 bits. Called by HUFF_pack and by HUFF_writeexp (writeexp).
+ *
+ * @param encodeContext    the encoder context (On Tour HuffEncodeContext)
+ * @param out  the output stream (HUFFMemStruct)
+ * @param num    the number to write
+ */
+extern "C" void HUFF_writenum_impl(HuffState_8A78* encodeContext, HuffOut_8A78* out, unsigned int num)
 {
     unsigned int base;
     unsigned int bits;
-    if (v < 0xFC) {
-        bits = s->len[v];
-        base = s->base[v];
-    } else if (v < 0x1FC) {
+    if (num < 0xFC) {
+        bits = encodeContext->len[num];
+        base = encodeContext->base[num];
+    } else if (num < 0x1FC) {
         bits = 6;
         base = 0xFC;
-    } else if (v < 0x3FC) {
+    } else if (num < 0x3FC) {
         bits = 7;
         base = 0x1FC;
-    } else if (v < 0x7FC) {
+    } else if (num < 0x7FC) {
         bits = 8;
         base = 0x3FC;
-    } else if (v < 0xFFC) {
+    } else if (num < 0xFFC) {
         bits = 9;
         base = 0x7FC;
-    } else if (v < 0x1FFC) {
+    } else if (num < 0x1FFC) {
         bits = 10;
         base = 0xFFC;
-    } else if (v < 0x3FFC) {
+    } else if (num < 0x3FFC) {
         bits = 11;
         base = 0x1FFC;
-    } else if (v < 0x7FFC) {
+    } else if (num < 0x7FFC) {
         bits = 12;
         base = 0x3FFC;
-    } else if (v < 0xFFFC) {
+    } else if (num < 0xFFFC) {
         bits = 13;
         base = 0x7FFC;
-    } else if (v < 0x1FFFC) {
+    } else if (num < 0x1FFFC) {
         bits = 14;
         base = 0xFFFC;
-    } else if (v < 0x3FFFC) {
+    } else if (num < 0x3FFFC) {
         bits = 15;
         base = 0x1FFFC;
-    } else if (v < 0x80000) {
+    } else if (num < 0x80000) {
         bits = 16;
         base = 0x3FFFC;
-    } else if (v < 0x100000) {
+    } else if (num < 0x100000) {
         bits = 17;
         base = 0x80000;
     } else {
         bits = 18;
         base = 0x100000;
     }
-    HUFF_writebits_8A78(s, out, 1, bits + 1);
-    HUFF_writebits_8A78(s, out, v - base, bits + 2);
+    HUFF_writebits_8A78(encodeContext, out, 1, bits + 1);
+    HUFF_writebits_8A78(encodeContext, out, num - base, bits + 2);
 }
 #endif
 
@@ -417,6 +429,16 @@ extern void HUFF_writebits_8C30(HS_8C30 *, int, int, int) __asm__("HUFF_writebit
 extern "C" void HUFF_writenum(HS_8C30 *, int, int);
 
 extern "C" void HUFF_writeexp_impl(HS_8C30 *self, int x, int y) __asm__("HUFF_writeexp");
+/**
+ * Writes an escaped symbol: the escape code, a zero count, then the symbol itself as a raw 9-bit value.
+ *
+ * The escape symbol is the context's +0x2DCC entry; its bit pattern comes from the code table (+0x2964) and its length
+ * from the length table (+0x2564), written with HUFF_writebits. Then HUFF_writenum (writenum) writes 0 and
+ * HUFF_writebits writes @p y in 9 bits.
+ *
+ * @param x  the output stream (HUFFMemStruct)
+ * @param y  the symbol to write
+ */
 extern "C" void HUFF_writeexp_impl(HS_8C30 *self, int x, int y) {
     HUFF_writebits_8C30(self, x, self->b[self->cur], self->a[self->cur]);
     HUFF_writenum(self, x, 0);
@@ -431,6 +453,15 @@ struct HS_8CA8 { char pad[0x2564]; int a[256]; int b[0x11A]; int cur; };
 extern "C" void HUFF_writebits(HS_8CA8 *, int, int, int);
 extern "C" void HUFF_writeexp(HS_8CA8 *, int, int);
 
+/**
+ * Writes one symbol's Huffman code to the bit stream.
+ *
+ * If @p idx is the escape symbol (+0x2DCC) it goes through HUFF_writeexp (writeexp); otherwise HUFF_writebits writes
+ * its bit pattern (code table +0x2964) with its length (length table +0x2564).
+ *
+ * @param x    the output stream (HUFFMemStruct)
+ * @param idx  the symbol to write
+ */
 extern "C" void HUFF_writecode(HS_8CA8 *self, int x, int idx) {
     if (idx == self->cur) {
         HUFF_writeexp(self, x, idx);

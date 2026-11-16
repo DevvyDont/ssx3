@@ -116,6 +116,18 @@ struct sVEntry_E600b {
     void (*fn)(void*, int, sMat_E600*);
 };
 
+/**
+ * Finds the world position of one animated mesh of an instance: the translation row of its animation matrix.
+ *
+ * The node's cMoveNode part starts at +0x14 (cAnimNodeState comes first), so its Instance is +0x2C and its vtable
+ * +0x20. When @p id is the node's own instance, the position is row 3 of the matrix returned by virtual slot 29
+ * (getAnimMat(@p idx)); otherwise slot 33 (makeAnimMats) builds 24 matrices on the stack from the record's root
+ * transform (record +0x10) and row 3 of matrix @p idx is used.
+ *
+ * @param id   the instance record (On Tour tInstanceRecord* inst) whose mesh is wanted
+ * @param idx  the mesh index (On Tour mesh)
+ * @param out  receives the position (x, y, z, w)
+ */
 extern "C" void cAnimNode_calcPosition(void* self, int id, int idx, sVec4_E600* out)
 {
     void* obj = (char*)self + 0x14;
@@ -222,6 +234,17 @@ static inline void vu0AddEq_E698(sVec4_E698& a, const sVec4_E698& b)
         : "memory");
 }
 
+/**
+ * Adds the motion of the animated mesh that was hit to an intersection's velocity and angular velocity.
+ *
+ * Calls cMoveNode_updateIntersectInfo() on the cMoveNode part (+0x14) first. If the hit names a mesh (@p body +0x5C
+ * >= 0), it refreshes the per-mesh velocities with cAnimNode_updateMeshVelocity when MeshVelocityDirty (+0x10) is set, gets the
+ * mesh's position with cAnimNode_calcPosition (instance at @p body +0x50), and with that mesh's MeshVelocity entry (+0x4C,
+ * 0x20 bytes: linear, angular) does vel += linear + (hit point - mesh position) x angular and angVel += angular.
+ *
+ * @param body  the intersection info (On Tour tIntersectInfo& intInfo): hit point +0x00, velocity +0x20, angular
+ *              velocity +0x30, instance +0x50, mesh index +0x5C
+ */
 // Applies the attached bone's motion delta to the body: vel += delta.pos + (body.pos - bonePos) x delta.rot; angVel += delta.rot.
 extern "C" void cAnimNode_updateIntersectInfo(char* self, sBody_E698* body)
 {
@@ -386,6 +409,18 @@ static inline sVec4_E798 boneE798Pos(char* self, int i)
     return *(sVec4_E798*)&(*(sMat_E798**)(self + 0x44))[i].r[3];
 }
 
+/**
+ * Recomputes the per-mesh linear and angular velocities (MeshVelocity) of an animated instance.
+ *
+ * If the cMoveNode part's RootTransformDirty flag (+0x26 bit 0) is set, virtual slot 51 refreshes the root first.
+ * For each mesh of the model's hierarchy (Instance's model +0x80: count +0x4, 0x10-byte entries +0x8) the
+ * MeshVelocity entry (+0x4C) is zeroed; meshes with an animation (entry +0x8) take the next AnimFrames entry (+0x48,
+ * 0xD0 bytes each) and cAnimFrame_getDeriv gives its position/rotation derivatives at CacheTime (+0x4). Both are scaled by
+ * the animation speed (virtual slot 53) times the frame rate (cAppMan_TheAppMan +0x10), the rotation also by
+ * degrees-to-radians and an Euler matrix built from the frame's negated angles (+0x50..+0x58), then transformed by the
+ * mesh's AnimMats (+0x44) matrix. A mesh with a parent adds the parent's velocity plus (offset x parent angular
+ * velocity) and the parent's angular velocity. Clears MeshVelocityDirty (+0x10) at the end.
+ */
 extern "C" void cAnimNode_updateMeshVelocity(char* self)
 {
     char* obj = self + 0x14;

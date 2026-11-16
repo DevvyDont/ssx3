@@ -99,9 +99,17 @@ struct sScore_001549E8 {
     sScoreSlot_001549E8 slots[2]; // 0x20
 };
 
-extern "C" void cBEScoreInterface_discard(void* p)
+/**
+ * Clears all of the score interface's recorded results.
+ *
+ * +0x10 and +0x14 become 0, +0x18 and +0x1C -1; the two 0xB0-byte slots at +0x20 are zeroed and each slot's +0xAC set
+ * to -1.
+ *
+ * @param scoreIface  the score interface (this)
+ */
+extern "C" void cBEScoreInterface_discard(void* scoreIface)
 {
-    sScore_001549E8* self = (sScore_001549E8*)p;
+    sScore_001549E8* self = (sScore_001549E8*)scoreIface;
     self->a = 0;
     self->b = 0;
     self->c = -1;

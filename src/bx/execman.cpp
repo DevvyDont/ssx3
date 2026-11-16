@@ -255,6 +255,15 @@ void* func_00320B48(void* self)
 //100%
 INCLUDE_ASM("bx/execman", memlog2);
 #ifdef SKIP_ASM
+/**
+ * Returns the base-2 logarithm of a number, rounded up.
+ *
+ * Counts leading zeros by halving the search window (16, 8, 4, 2 bits) and adds one when @p x is not a power of two;
+ * the result is ceil(log2(@p x)) for positive @p x.
+ *
+ * @param x  the value, > 0 (On Tour val)
+ * @return ceil(log2(x))
+ */
 // Branchless ceil(log2(x)): count leading zeros by halving the search
 // window (16/8/4/2 bits), then subtract one more if x isn't a power of two.
 extern "C" int memlog2(int x)

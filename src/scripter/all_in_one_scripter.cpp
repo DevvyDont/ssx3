@@ -428,6 +428,14 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera__cScriptObjCamera);
 #ifdef SKIP_ASM
 extern "C" void cScriptObject__cScriptObject();
 
+/**
+ * Destroys a script camera object by handing it straight to the cScriptObject destructor.
+ *
+ * Slot 1 of cScriptObjCamera_vtbl. The body is one call to cScriptObject__cScriptObject() with the incoming registers
+ * untouched, so the object and the g++ destructor flags pass through and the base destructor unregisters the object and
+ * frees it when bit 0 is set. The C declares no parameters for that reason; cScriptObjTransition__cScriptObjTransition
+ * is the same code.
+ */
 extern "C" void cScriptObjCamera__cScriptObjCamera(void) {
     cScriptObject__cScriptObject();
 }
@@ -500,6 +508,14 @@ extern "C" int func_00284A80(void *arg0) {
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetNumScriptEntities);
 #ifdef SKIP_ASM
+/**
+ * Reports that a script camera object owns no script entities.
+ *
+ * Slot 6 of cScriptObjCamera_vtbl (cScriptObject's GetNumScriptEntities); the object pointer is not read, so the C
+ * declares no parameters. Same code as cScriptObjTransition_GetNumScriptEntities.
+ *
+ * @return 0
+ */
 extern "C" int cScriptObjCamera_GetNumScriptEntities(void) {
     return 0;
 }
@@ -508,6 +524,14 @@ extern "C" int cScriptObjCamera_GetNumScriptEntities(void) {
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetScriptEntity);
 #ifdef SKIP_ASM
+/**
+ * Returns no script entity: a script camera object owns none.
+ *
+ * Slot 7 of cScriptObjCamera_vtbl (cScriptObject's GetScriptEntity(index)); neither the object nor the index is read,
+ * so the C declares no parameters. Same code as cScriptObjTransition_GetScriptEntity.
+ *
+ * @return 0 (no entity)
+ */
 extern "C" int cScriptObjCamera_GetScriptEntity(void) {
     return 0;
 }

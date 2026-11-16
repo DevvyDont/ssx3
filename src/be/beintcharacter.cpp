@@ -41,6 +41,15 @@ struct sCharWeightEntryView {
 };
 extern sCharWeightEntryView D_00530970_view[] __asm__("D_00530970");
 
+/**
+ * Tells whether a rider's character rides goofy (right foot forward).
+ *
+ * Looks up the character of @p riderIndex (cBELibrary_getCharacterID) in the 0x88-byte entries of D_00530970 and tests
+ * the word at +0x44 (field_0x44 in the C view).
+ *
+ * @param riderIndex  the rider (On Tour iRiderID)
+ * @return true for a goofy-footed character
+ */
 extern "C" bool cBECharacterInterface_getIsGoofyFoot(void* self, int riderIndex)
 {
     int charID = cBELibrary_getCharacterID(riderIndex);
@@ -67,6 +76,16 @@ struct sCharScaleEntry_EFA8 {
 };
 extern sCharScaleEntry_EFA8 D_00530970_EFA8[] __asm__("D_00530970");
 
+/**
+ * Returns the size a rider's model is drawn at.
+ *
+ * A cheat character (cBELibrary_getCheatCharacterID, used for rider 0 only when D_00535C11 is set) gets a fixed scale
+ * from 0.7 to 2.0 by id (default 0.9); a mission man (cBENewPlayerInterface_isMissionMan) 0.8; otherwise the character
+ * entry's +0x48 percentage / 100 from D_00530970.
+ *
+ * @param riderIndex  the rider (On Tour iRiderID)
+ * @return the scale factor, 1.0 = normal size
+ */
 // Model scale for a rider: fixed values for the cheat characters,
 // 0.8 for mission men, otherwise the character table's percentage.
 extern "C" float cBECharacterInterface_getScale(void* self, int riderIndex)

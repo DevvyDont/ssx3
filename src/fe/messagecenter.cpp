@@ -1370,6 +1370,11 @@ extern "C" void* func_00198AB8(void* self, int i)
 //100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongCost__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the price of a request-line song: always 5000 points.
+ *
+ * The song index the callers pass is not declared or used.
+ */
 int cFEStateRequestLine_getSongCost(void* self)
 {
     return 0x1388;

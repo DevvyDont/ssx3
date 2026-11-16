@@ -187,7 +187,23 @@ static inline float start_00370DC8(char* def)
     return t + *(float*)(def + 0x14) + *(float*)(def + 0x1C) * 0.5f;
 }
 
-extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, char* def, float f)
+/**
+ * Configures a dynamic emitter from particle data: sub-emitter count, timing, ring size, the particle system and its
+ * draw state.
+ *
+ * Copies the flip-texture count (+0xD0 of the data, to +0xC, On Tour mNumFlipTextures) and rate (+0xD4, to +0x14); with
+ * two or more flip textures the current one (+0x10) starts at count * a BXrand fraction, else 0. +0x4/+0x8 take the
+ * data's +0xC4/+0xC8 (On Tour TextureId, BlendMode). Duration (+0x0) and the emission life come from the data's +0x8,
+ * +0x14 and +0x1C. The sub-emitter count (+0x178, On Tour m_numSubEmitters) is ceil(life * 60); when it changes the
+ * emitter rebuilds its buffers through vtable slots 1 (with 0), 5 and 2 (On Tour: rebuild). Zeroes the three vectors
+ * +0x1B0..+0x1D0, then tParticleEmitter_init on the embedded system (+0x20) with data[0] particles per sub-emitter and
+ * tParticleEmitter_setupEmitter with t4mat_Identity and the box at +0x180. Marks it active (+0x170) and copies
+ * sDrawState_s_defaultDrawState to +0x1E4 with four bitfields overridden.
+ *
+ * @param def  the particle data (const tParticleData*)
+ * @param seed    the random seed passed on to tParticleEmitter_setupEmitter (-1.0 from the effect modifiers)
+ */
+extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, char* def, float seed)
 {
     int n = *(int*)(def + 0xD0);
     self->fC = n;
@@ -218,7 +234,7 @@ extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, 
     v.w = 0.0f;
     tParticleEmitter_init(self->sys, *(int*)(def + 0x0) * self->count, *(int*)(def + 0x4), &v, l,
                   *(float*)(def + 0x20), *(float*)(def + 0xC));
-    tParticleEmitter_setupEmitter(self->sys, t4mat_Identity, def, self->f180, f);
+    tParticleEmitter_setupEmitter(self->sys, t4mat_Identity, def, self->f180, seed);
     if (changed) {
         self->v01(0);
         self->v05();
@@ -645,7 +661,21 @@ static inline float clamp17C0(float v, float lo, float hi)
     return lo;
 }
 
-extern "C" void cDynamicColourEmitter_update(sPtObj17C0* self, int a1, int a2, sPtCol17C0* col, int a4)
+/**
+ * Feeds a dynamic colour emitter one frame: records the colour for the current sub-emitter, then updates position and
+ * velocity.
+ *
+ * When @p col is given it becomes the emitter's current colour (+0x1D0), otherwise the stored one is used; its
+ * components times 255, clamped to 0..255, are written as RGBA bytes to m_colours (+0x204) at the current sub-emitter
+ * index (+0x17C). Then func_003710D0 (On Tour updateBASE) gets (self, @p position, @p velocity, @p enable) with the frame time still in
+ * $f12: the C declaration omits On Tour's float dt, which every caller passes (1/60 or dt).
+ *
+ * @param position   the emitter position (const t4Vector*)
+ * @param velocity   the emitter velocity (const t4Vector*, may be 0)
+ * @param col  the colour (r, g, b, a floats) or 0 to keep the previous one
+ * @param enable   nonzero to emit this frame (On Tour: bool enable)
+ */
+extern "C" void cDynamicColourEmitter_update(sPtObj17C0* self, int position, int velocity, sPtCol17C0* col, int enable)
 {
     if (col != 0) {
         self->col = *col;
@@ -656,7 +686,7 @@ extern "C" void cDynamicColourEmitter_update(sPtObj17C0* self, int a1, int a2, s
     self->colors[self->idx].r = (int)clamp17C0(col->r * 255.0f, 0.0f, 255.0f);
     self->colors[self->idx].g = (int)clamp17C0(col->g * 255.0f, 0.0f, 255.0f);
     self->colors[self->idx].b = (int)clamp17C0(col->b * 255.0f, 0.0f, 255.0f);
-    func_003710D0(self, a1, a2, a4);
+    func_003710D0(self, position, velocity, enable);
 }
 #endif
 
@@ -2487,14 +2517,26 @@ extern "C" void func_00374CA8(cPSPBezierMan* self, int flags)
 //100%
 INCLUDE_ASM("render/particle", cPlayerShadow_InitBones);
 #ifdef SKIP_ASM
-extern "C" void cPlayerShadow_InitBones(void* self, int a1, int a2, int a3, int a4, int a5, int a6)
+/**
+ * Sets the six bones the rider's shadow is projected from.
+ *
+ * Stores the bone indices into ShadowBone[0..5] (+0x17C..+0x190), right after mShadowTexHeight.
+ *
+ * @param head  the head bone
+ * @param lHand  the left hand bone
+ * @param rHand  the right hand bone
+ * @param lFoot  the left foot bone
+ * @param rFoot  the right foot bone
+ * @param hips  the hips bone
+ */
+extern "C" void cPlayerShadow_InitBones(void* self, int head, int lHand, int rHand, int lFoot, int rFoot, int hips)
 {
-    *(int*)((char*)self + 0x17c) = a1;
-    *(int*)((char*)self + 0x180) = a2;
-    *(int*)((char*)self + 0x184) = a3;
-    *(int*)((char*)self + 0x188) = a4;
-    *(int*)((char*)self + 0x18c) = a5;
-    *(int*)((char*)self + 0x190) = a6;
+    *(int*)((char*)self + 0x17c) = head;
+    *(int*)((char*)self + 0x180) = lHand;
+    *(int*)((char*)self + 0x184) = rHand;
+    *(int*)((char*)self + 0x188) = lFoot;
+    *(int*)((char*)self + 0x18c) = rFoot;
+    *(int*)((char*)self + 0x190) = hips;
 }
 #endif
 
@@ -2593,6 +2635,15 @@ extern "C" void func_00375890(void* self)
 //100%
 INCLUDE_ASM("render/particle", cPlayerShadow_cPlayerShadow__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a rider's shadow: no locked texture yet and a 128 x 128 shadow texture size.
+ *
+ * Sets mLockTexture (+0x170) to -1 and mShadowTexWidth/mShadowTexHeight (+0x174/+0x178) to 0x80, the values On Tour's
+ * constructor stores at the same offsets. cRider_cRider_impl builds its mShadow with it on a 0x1A0-byte "BoaderShadow"
+ * block.
+ *
+ * @return the constructed shadow (self)
+ */
 void* cPlayerShadow_cPlayerShadow(void* self)
 {
     *(int*)((char*)self + 0x170) = -1;
@@ -2615,6 +2666,15 @@ struct sPtVEntry_5918 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Destroys a rider's shadow: releases its locked texture and frees it if asked.
+ *
+ * When mLockTexture (+0x170) is a valid id, frees it in cGraphicsMan_TheGraphicsMan's texture manager (+0x18F4,
+ * func_00367B60), removes it through the graphics manager's vtable slot 50 (cPS2GraphicsMan_RemoveTexture) and resets
+ * it to -1. Then operator_delete on @p flags bit 0 (cRider__cRider passes 3).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cPlayerShadow__cPlayerShadow(void* self, int flags)
 {
     char* s = (char*)self;
@@ -10946,16 +11006,36 @@ struct sMdl_66F0 {
     short nmats;
 };
 
-extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0* m, char* base, int* tbl, int* count, sSlot_66F0* slots, int x)
+/**
+ * Fixes up a loaded character model: turns its offsets into pointers, resolves bone textures and shares the blended
+ * matrices.
+ *
+ * Relocates the model's blend table (+0x34), reference table (+0x30), material block (+0x18) and bones (+0x20) against
+ * @p base, with every bone's animation tracks and keys, and stores @p x at +0x40. Each bone reads its 32-byte name
+ * record: an alpha, flag 0x8000 for names starting with str_alph (4 chars) or "ea", an environment-map number from an
+ * "envN" second name (+0x10), and the name itself is replaced by cGraphicsMan_GetTextureID's result. Material matrix
+ * indices and blend indices are rebased by @p tbl; each blended matrix is registered (cGraphicsMan_AddBlendedMatrix)
+ * and matched against the caller's list (func_00369A78) or appended to it, and the reference table is remapped to the
+ * shared indices. cPS2GraphicsMan vtable slot 109.
+ *
+ * @param gfx    the graphics manager (this)
+ * @param inModel      the model header (tMdfModelHeader*)
+ * @param base   the model data the offsets are relative to
+ * @param tbl    per-part bone offsets (On Tour partBoneOffset)
+ * @param count  in/out: number of entries in @p slots (On Tour numBlendedMats)
+ * @param slots  the shared blended-matrix list (On Tour blendedMats)
+ * @param x      stored in the model at +0x40 (On Tour: float* morphWeights)
+ */
+extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0* inModel, char* base, int* tbl, int* count, sSlot_66F0* slots, int x)
 {
-    m->blends = (sBlend_66F0*)(base + m->o34);
-    m->refs = (sRef_66F0*)(base + m->o30);
-    char* mats = base + m->o18;
-    sBone_66F0* bones = (sBone_66F0*)(base + m->o20);
-    m->x40 = x;
-    for (int i = 0; i < m->nrefs; i++)
-        m->refs[i].idx = (int*)(base + (int)m->refs[i].idx);
-    for (int i = 0; i < m->nbones; i++) {
+    inModel->blends = (sBlend_66F0*)(base + inModel->o34);
+    inModel->refs = (sRef_66F0*)(base + inModel->o30);
+    char* mats = base + inModel->o18;
+    sBone_66F0* bones = (sBone_66F0*)(base + inModel->o20);
+    inModel->x40 = x;
+    for (int i = 0; i < inModel->nrefs; i++)
+        inModel->refs[i].idx = (int*)(base + (int)inModel->refs[i].idx);
+    for (int i = 0; i < inModel->nbones; i++) {
         bones[i].tracks = (sTrack_66F0*)(base + (int)bones[i].tracks);
         for (int j = 0; j < bones[i].ntracks; j++) {
             bones[i].tracks[j].keys = (sKey_66F0*)(base + (int)bones[i].tracks[j].keys);
@@ -10983,13 +11063,13 @@ extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0
         bones[i].name = cGraphicsMan_GetTextureID(gfx, s);
         bones[i].env = env;
     }
-    for (int i = 0; i < m->nmats; i++) {
+    for (int i = 0; i < inModel->nmats; i++) {
         short* mt = (short*)(mats + i * 0x50);
         if (mt[9] >= 0)
             mt[9] = tbl[mt[8]] + mt[9];
     }
-    for (int i = 0; i < m->nblends; i++) {
-        sBlend_66F0* b = &m->blends[i];
+    for (int i = 0; i < inModel->nblends; i++) {
+        sBlend_66F0* b = &inModel->blends[i];
         b->w = (unsigned char*)(base + (int)b->w);
         for (int j = 0; j < b->n; j++)
             b->w[j * 4 + 2] += tbl[b->w[j * 4 + 3]];
@@ -11010,10 +11090,10 @@ extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0
         }
     next:;
     }
-    for (int i = 0; i < m->nrefs; i++) {
-        sRef_66F0* r = &m->refs[i];
+    for (int i = 0; i < inModel->nrefs; i++) {
+        sRef_66F0* r = &inModel->refs[i];
         for (int j = 0; j < r->n; j++)
-            r->idx[j] = m->blends[r->idx[j]].idx;
+            r->idx[j] = inModel->blends[r->idx[j]].idx;
     }
 }
 #endif
@@ -12926,6 +13006,16 @@ INCLUDE_ASM("render/particle", cIrradianceDataBase_GetIDByName);
 #ifdef SKIP_ASM
 extern "C" int func_004165A8(const void* a, const void* b);
 
+/**
+ * Looks up an irradiance entry by name.
+ *
+ * Compares @p name with func_004165A8 (strcmp) against each 8-byte name entry of the table at +0xC, for the count at
+ * +0x4. Returns 0 (the first entry) when nothing matches, as On Tour does. cSectionMan_setSky uses it for the sky
+ * irradiance sets ("APBR1".."EPBR1").
+ *
+ * @param name  the irradiance name
+ * @return the entry's index, or 0 when the name is unknown
+ */
 extern "C" int cIrradianceDataBase_GetIDByName(void* self, const char* name)
 {
     int i;

@@ -109,6 +109,11 @@ struct cWorldLightMan_purgeLightCache_sMan {
     cWorldLightMan_purgeLightCache_sSlot slots[8];
 };
 
+/**
+ * Frees the world light manager's light cache.
+ *
+ * Calls operator delete on the buffer pointer at the start of each of the eight 0x40-byte slots from +0x40.
+ */
 extern "C" void cWorldLightMan_purgeLightCache(cWorldLightMan_purgeLightCache_sMan* self)
 {
     unsigned int i;
@@ -440,9 +445,9 @@ extern "C" sWorldLightNode* func_002F59D0(sWorldLightMan* self, int priority)
     int min = priority + 1;
     unsigned int i;
     for (i = 0; i < 32; i++) {
-        int p = *(int*)((char*)&self->nodes[i] + 4);
-        if (p < min) {
-            min = p;
+        int nodePriority = *(int*)((char*)&self->nodes[i] + 4);
+        if (nodePriority < min) {
+            min = nodePriority;
             best = &self->nodes[i];
         }
     }
@@ -518,14 +523,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F5AF0);
 extern "C" void func_002F5B68(void* self, void* a1, void* a2, void** out, int count);
 extern "C" void func_0038A6A8(void* a, void* b, void* c);
 
-extern "C" void func_002F5AF0(void* self, void* a1, void* a2, void* a3, int count)
+extern "C" void func_002F5AF0(void* self, void* pos, void* a2, void* particleSys, int count)
 {
     void* buf[32];
     int i;
-    func_002F5B68(self, a1, a2, buf, count);
+    func_002F5B68(self, pos, a2, buf, count);
     for (i = 0; i < count; i++) {
         if (buf[i] != 0) {
-            func_0038A6A8(a3, a1, buf[i]);
+            func_0038A6A8(particleSys, pos, buf[i]);
         }
     }
 }
@@ -672,37 +677,37 @@ static inline float Pow_5D30(float x, int n)
     }
 }
 
-extern "C" float func_002F5D30(void* a, void* b, void* lp)
+extern "C" float func_002F5D30(void* a, void* point, void* lp)
 {
-    sLight_5D30* l = (sLight_5D30*)lp;
+    sLight_5D30* light = (sLight_5D30*)lp;
     float dist;
     float inv;
     float dot;
     float att;
-    float v;
-    switch (l->type) {
+    float amount;
+    switch (light->type) {
     case 0:
-        return l->scale;
+        return light->scale;
     case 1:
-        if (func_002F6168(a, (func_002F6168_sVec3*)b, (func_002F6168_sLight*)l, &dist, &inv, &dot)) {
-            if (dot >= l->outer) {
-                att = Atten_5D30(l, dist);
-                v = Fall_5D30(l, inv) * l->intensity * att;
-                if (l->inner <= dot) {
-                    v *= Pow_5D30(dot, l->conePow);
+        if (func_002F6168(a, (func_002F6168_sVec3*)point, (func_002F6168_sLight*)light, &dist, &inv, &dot)) {
+            if (dot >= light->outer) {
+                att = Atten_5D30(light, dist);
+                amount = Fall_5D30(light, inv) * light->intensity * att;
+                if (light->inner <= dot) {
+                    amount *= Pow_5D30(dot, light->conePow);
                 } else {
-                    v *= Pow_5D30(l->inner, l->conePow);
-                    v *= (dot - l->outer) / (l->inner - l->outer);
+                    amount *= Pow_5D30(light->inner, light->conePow);
+                    amount *= (dot - light->outer) / (light->inner - light->outer);
                 }
-                return l->scale * v;
+                return light->scale * amount;
             }
         }
         break;
     case 2:
-        if (func_002F6168(a, (func_002F6168_sVec3*)b, (func_002F6168_sLight*)l, &dist, &inv, 0)) {
-            att = Atten_5D30(l, dist);
-            v = Fall_5D30(l, inv) * l->intensity * att;
-            return l->scale * v;
+        if (func_002F6168(a, (func_002F6168_sVec3*)point, (func_002F6168_sLight*)light, &dist, &inv, 0)) {
+            att = Atten_5D30(light, dist);
+            amount = Fall_5D30(light, inv) * light->intensity * att;
+            return light->scale * amount;
         }
         break;
     case 3:
@@ -729,21 +734,21 @@ struct func_002F6168_sLight {
     func_002F6168_sVec3 pos;    // 0x38
 };
 
-extern "C" int func_002F6168(void* self, func_002F6168_sVec3* p, func_002F6168_sLight* light,
+extern "C" int func_002F6168(void* self, func_002F6168_sVec3* point, func_002F6168_sLight* light,
                              float* outDist, float* outInvDist, float* outDot)
 {
-    float dx = light->pos.x - p->x;
-    float dy = light->pos.y - p->y;
-    float dz = light->pos.z - p->z;
-    float d2 = dx * dx + dy * dy + dz * dz;
+    float dx = light->pos.x - point->x;
+    float dy = light->pos.y - point->y;
+    float dz = light->pos.z - point->z;
+    float distSq = dx * dx + dy * dy + dz * dz;
     float dist;
     float inv;
-    if (light->radius * light->radius < d2) {
+    if (light->radius * light->radius < distSq) {
         return 0;
     }
-    if (d2 != 0.0f) {
+    if (distSq != 0.0f) {
         // PORT: sqrt.s (sqrtf without errno check)
-        __asm__("sqrt.s %0, %1" : "=f"(dist) : "f"(d2));
+        __asm__("sqrt.s %0, %1" : "=f"(dist) : "f"(distSq));
         inv = 1.0f / dist;
     } else {
         inv = 1.0f;
@@ -1242,8 +1247,8 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F6B28);
 #ifdef SKIP_ASM
 extern "C" void func_002F6B28(void* self)
 {
-    unsigned char* p = (unsigned char*)((char*)self + 0x7);
-    *p &= 0x8f;
+    unsigned char* flagByte = (unsigned char*)((char*)self + 0x7);
+    *flagByte &= 0x8f;
 }
 #endif
 
@@ -1807,9 +1812,9 @@ extern "C" int func_002F7A70(void *arg0) {
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A80);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *func_002F7A80(long long *arg0, void *arg1) {
-    *arg0 = (*(long long *)((char*)((((*(int *)((char*)(arg1) + (0xB4))) * 0x10) + (((*(int *)((char*)(arg1) + (8))) * 0x70) + (*(int *)((char*)(arg1) + (0xC)))))) + (-0x10)));
-    return arg0;
+extern "C" long long *func_002F7A80(long long *out, void *arg1) {
+    *out = (*(long long *)((char*)((((*(int *)((char*)(arg1) + (0xB4))) * 0x10) + (((*(int *)((char*)(arg1) + (8))) * 0x70) + (*(int *)((char*)(arg1) + (0xC)))))) + (-0x10)));
+    return out;
 }
 #endif
 //100%
@@ -2498,6 +2503,14 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionObj__cTransitionObj);
 extern void* D_004880E0[];
 extern "C" void cTransitionObj_operator_delete(void* p);
 
+/**
+ * Destroys a screen transition object and returns its buffer to the pool.
+ *
+ * Sets the vtable at +0x0 to D_004880E0 and, when bit 0 of @p flags is set, gives the memory back with cTransitionObj_operator_delete
+ * instead of the global operator delete.
+ *
+ * @param flags  g++ in-charge flags; bit 0 frees the object
+ */
 extern "C" void cTransitionObj__cTransitionObj(void* self, int flags)
 {
     *(void***)self = D_004880E0;

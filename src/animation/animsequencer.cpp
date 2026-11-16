@@ -29,11 +29,19 @@ void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target)
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequence_fadeOutAndExpire);
 #ifdef SKIP_ASM
-extern "C" void cAnimSequence_fadeOutAndExpire(void* self, float v)
+/**
+ * Starts fading the sequence out and marks it to be removed when the fade ends.
+ *
+ * The fade-out time (+0x9C) becomes @p time unless a fade-out is already running (fade-in +0x98 is 0, +0x9C nonzero) and
+ * is shorter; then the fade-in (+0x98) is cleared and the expire flag (+0xA0) set.
+ *
+ * @param time  the fade-out time in seconds (On Tour time)
+ */
+extern "C" void cAnimSequence_fadeOutAndExpire(void* self, float time)
 {
-    if (*(float*)((char*)self + 0x98) != 0.0f || *(float*)((char*)self + 0x9C) == 0.0f || v < *(float*)((char*)self + 0x9C))
+    if (*(float*)((char*)self + 0x98) != 0.0f || *(float*)((char*)self + 0x9C) == 0.0f || time < *(float*)((char*)self + 0x9C))
     {
-        *(float*)((char*)self + 0x9C) = v;
+        *(float*)((char*)self + 0x9C) = time;
     }
     *(float*)((char*)self + 0x98) = 0.0f;
     *(int*)((char*)self + 0xA0) = 1;
@@ -54,6 +62,14 @@ struct sSeqNode313A70
     sSeqNode313A70* next;
 };
 
+/**
+ * Adds a timed trigger to the sequence: an event to fire when playback reaches a time.
+ *
+ * Pushes a 16-byte node (tag 'AnimTrigger') on the list at +0xAC: {@p key, 0 = timed trigger, @p weight, next}.
+ *
+ * @param key  the trigger's event id (On Tour id)
+ * @param weight  the time it fires at (On Tour time); the current name is misleading
+ */
 extern "C" void cAnimSequence_addTrigger(void* self, int key, float weight)
 {
     sSeqNode313A70* n = (sSeqNode313A70*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
@@ -80,6 +96,13 @@ struct sSeqNode313AD8
     sSeqNode313AD8* next;
 };
 
+/**
+ * Adds a trigger that fires when the sequence ends.
+ *
+ * Pushes a 16-byte node (tag 'AnimTrigger') on the list at +0xAC: {@p key, 1 = end trigger, 0, next}.
+ *
+ * @param key  the trigger's event id (On Tour id)
+ */
 extern "C" void cAnimSequence_addEndTrigger(void* self, int key)
 {
     sSeqNode313AD8* n = (sSeqNode313AD8*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
@@ -128,6 +151,13 @@ struct sSeqNode313BA8
     sSeqNode313BA8* next;
 };
 
+/**
+ * Removes the sequence's first end trigger with the given id.
+ *
+ * Walks the trigger list (+0xAC); timed triggers with the same id are skipped.
+ *
+ * @param key  the trigger's event id (On Tour id)
+ */
 extern "C" void cAnimSequence_removeEndTrigger(void* self, int key)
 {
     sSeqNode313BA8** pp;
@@ -152,6 +182,11 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_removeAllTriggers);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Frees all of the sequence's triggers.
+ *
+ * Pops and deletes nodes from the list at +0xAC until it is empty.
+ */
 extern "C" void cAnimSequence_removeAllTriggers(char* self)
 {
     while (*(char**)(self + 0xAC) != 0)
@@ -187,6 +222,16 @@ struct sSeq_00313C50
     int dirty;
 };
 
+/**
+ * Puts an animation into one of the sequence's sub-animation slots.
+ *
+ * Slot @p i (0x1C bytes from +0x4) gets @p anim and its length, (frame count - 1) / 30 s, read from the bank (@p anim &
+ * 0xFF) of cAnimDataBase_TheAnimDataBase, clip (@p anim >> 8). An inactive slot is also reset: time 0, weight 1, speed
+ * 1, active, and the sequence marked dirty (+0xC4).
+ *
+ * @param i  the sub-animation slot (On Tour sub)
+ * @param anim  the animation: bank in the low byte, clip above it (On Tour tAnimID)
+ */
 extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim)
 {
     sSeq_00313C50* s = (sSeq_00313C50*)self;
@@ -435,10 +480,20 @@ struct sSequencer_003142F8 {
 
 extern "C" void* func_00313508(void* mem, int arg);
 
-extern "C" void* cAnimSequencer_newSequence(void* seq, int arg)
+/**
+ * Creates a new animation sequence and adds it to the sequencer.
+ *
+ * Allocates 0xD0 bytes tagged 'AnimSequence', constructs it with func_00313508(@p sequenceID), links it at the head of the
+ * list (+0x4, next at +0xC8) and increments the count (+0x0).
+ *
+ * @param seq  the sequencer (this)
+ * @param sequenceID  the new sequence's id (On Tour sequenceID)
+ * @return the new sequence
+ */
+extern "C" void* cAnimSequencer_newSequence(void* seq, int sequenceID)
 {
     sSequencer_003142F8* self = (sSequencer_003142F8*)seq;
-    sSeqNode_003142F8* node = (sSeqNode_003142F8*)func_00313508(cMemMan_alloc(0xD0, str_AnimSequence, 0x20000000, 0), arg);
+    sSeqNode_003142F8* node = (sSeqNode_003142F8*)func_00313508(cMemMan_alloc(0xD0, str_AnimSequence, 0x20000000, 0), sequenceID);
     node->next = self->mFirstSequence;
     self->mFirstSequence = node;
     self->mCount++;
@@ -560,6 +615,16 @@ struct sSeqState_314418
     char pad44[0xC];
 };
 
+/**
+ * Collects the weighted animation frames of all playing sequences for blending.
+ *
+ * For each sequence (list at +0x4) and each of its 3 sub-animations with the active flag, writes a 0x50-byte frame to
+ * @p out: anim id, time, the two orientation vectors (+0x60, +0x70), +0x80, +0x84, +0x88 and the net weight from
+ * func_00313D70. Unlike On Tour there is no bound check on @p out.
+ *
+ * @param out  receives the frames (On Tour tAnimBlendFrame *frames); must be large enough
+ * @return the number of frames written
+ */
 // PORT: `long` field is 64-bit (ld/sd).
 extern "C" int cAnimSequencer_getAnimBlendFrames(void* self, sSeqState_314418* out)
 {
@@ -595,9 +660,20 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_playAndHold);
 extern "C" void* cAnimSequencer_newSequence(void* seq, int arg);
 extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim);
 
-extern "C" void* cAnimSequencer_playAndHold(void* self, int arg, int anim, float val)
+/**
+ * Starts a new sequence that plays an animation once and holds its last frame.
+ *
+ * cAnimSequencer_newSequence (newSequence), then sub-animation 0 gets @p anim (cAnimSequence_setSubAnim), time @p val (func_00313CF0) and type
+ * 0, hold (func_00313D40).
+ *
+ * @param sequenceID  the sequence id (On Tour sequenceID)
+ * @param anim  the animation to play (On Tour tAnimID)
+ * @param val  the start time in seconds (On Tour starttime)
+ * @return the new sequence
+ */
+extern "C" void* cAnimSequencer_playAndHold(void* self, int sequenceID, int anim, float val)
 {
-    void* node = cAnimSequencer_newSequence(self, arg);
+    void* node = cAnimSequencer_newSequence(self, sequenceID);
     cAnimSequence_setSubAnim(node, 0, anim);
     func_00313CF0(node, 0, val);
     func_00313D40(node, 0, 0);
@@ -611,9 +687,20 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_playAndLoop);
 extern "C" void* cAnimSequencer_newSequence(void* seq, int arg);
 extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim);
 
-extern "C" void* cAnimSequencer_playAndLoop(void* self, int arg, int anim, float val)
+/**
+ * Starts a new sequence that loops an animation.
+ *
+ * cAnimSequencer_newSequence (newSequence), then sub-animation 0 gets @p anim (cAnimSequence_setSubAnim), time @p val (func_00313CF0) and type
+ * 1, loop (func_00313D40).
+ *
+ * @param sequenceID  the sequence id (On Tour sequenceID)
+ * @param anim  the animation to loop (On Tour tAnimID)
+ * @param val  the start time in seconds (On Tour starttime)
+ * @return the new sequence
+ */
+extern "C" void* cAnimSequencer_playAndLoop(void* self, int sequenceID, int anim, float val)
 {
-    void* node = cAnimSequencer_newSequence(self, arg);
+    void* node = cAnimSequencer_newSequence(self, sequenceID);
     cAnimSequence_setSubAnim(node, 0, anim);
     func_00313CF0(node, 0, val);
     func_00313D40(node, 0, 1);
@@ -634,6 +721,14 @@ struct sSequencer_003145F8 {
     sSeqNode_003145F8* mFirstSequence; // 0x4
 };
 
+/**
+ * Removes a sequence from the sequencer and deletes it.
+ *
+ * Finds @p node in the list (+0x4, next at +0xC8), unlinks it, frees its triggers (cAnimSequence_removeAllTriggers), deletes it and
+ * decrements the count. A sequence not in the list is left alone (On Tour asserts).
+ *
+ * @param node  the sequence to remove (On Tour seq)
+ */
 extern "C" void cAnimSequencer_expire(sSequencer_003145F8* self, sSeqNode_003145F8* node)
 {
     sSeqNode_003145F8** pp;
@@ -693,11 +788,18 @@ extern "C" void cAnimSequencer_expireAll(sSequencer_00314668* self)
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_fadeOutAndExpireAll);
 #ifdef SKIP_ASM
-extern "C" void cAnimSequencer_fadeOutAndExpireAll(void* self, float v)
+/**
+ * Fades out every sequence of the sequencer and marks them all to expire.
+ *
+ * cAnimSequence_fadeOutAndExpire (fadeOutAndExpire) on each sequence of the list at +0x4.
+ *
+ * @param time  the fade-out time in seconds (On Tour time)
+ */
+extern "C" void cAnimSequencer_fadeOutAndExpireAll(void* self, float time)
 {
     for (char* node = *(char**)((char*)self + 0x4); node != 0; node = *(char**)(node + 0xC8))
     {
-        cAnimSequence_fadeOutAndExpire(node, v);
+        cAnimSequence_fadeOutAndExpire(node, time);
     }
 }
 #endif
@@ -707,11 +809,18 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_removeAllEndTriggers);
 #ifdef SKIP_ASM
 extern "C" void cAnimSequence_removeEndTrigger(void* self, int v);
 
-extern "C" void cAnimSequencer_removeAllEndTriggers(void* self, int v)
+/**
+ * Removes the given end trigger from every sequence of the sequencer.
+ *
+ * cAnimSequence_removeEndTrigger (removeEndTrigger) on each sequence of the list at +0x4.
+ *
+ * @param trig  the end trigger's event id (On Tour trig)
+ */
+extern "C" void cAnimSequencer_removeAllEndTriggers(void* self, int trig)
 {
     for (char* node = *(char**)((char*)self + 0x4); node != 0; node = *(char**)(node + 0xC8))
     {
-        cAnimSequence_removeEndTrigger(node, v);
+        cAnimSequence_removeEndTrigger(node, trig);
     }
 }
 #endif

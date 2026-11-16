@@ -496,6 +496,12 @@ extern "C" void func_001A0708(void* self, int a1, int a2);
 // NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
 extern sFlowState_865A8 D_004A4E80;
 
+/**
+ * Front-end state losing focus: remembers which menu entry was selected, so it can be restored later.
+ *
+ * Finds the "Menu" object on the state's first screen and calls func_001A0708 (On Tour cFEFlowState::setValue)
+ * on the flow state D_004A4E80 with this state's id (+0xC) and the menu's selected index (+0x95).
+ */
 extern "C" void cFEState_onLoseFocus(void* self)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));

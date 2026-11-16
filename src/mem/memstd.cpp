@@ -471,6 +471,14 @@ typedef char* DEBUG_trace_va_list;
 extern "C" int func_004186C8(char* dst, const char* fmt, char* ap);
 extern "C" void PRINT_string(int, char*);
 
+/**
+ * Prints a printf-style debug message on print channel 2.
+ *
+ * Formats @p fmt into a 512-byte stack buffer with func_004186C8 (vsprintf) and passes it to PRINT_string.
+ * MEM_printclass uses it as the line printer for MEM_printclassf.
+ *
+ * @param fmt  printf-style format, followed by its arguments
+ */
 extern "C" void DEBUG_trace(const char* fmt, ...)
 {
     char buf[0x200];
@@ -1048,10 +1056,25 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 // 6-argument form below by asm label (the 6th argument is unused).
 void* MEM_allocaligna_6(void*, int, int, int, int, int) __asm__("MEM_allocaligna");
 
-void* MEM_allocaligna_6(void* tag, int size, int align, int d, int flags, int unused)
+/**
+ * Allocates a named block with a given alignment from the EA memory manager.
+ *
+ * Converts @p align to a power-of-two level with memlog2 (memlog2), minus 2 and at least 0, and calls
+ * operator_new_tag with @p size, the name, @p flags | level << 24 | 0x10000000 and the header size @p hdrsize. The abort
+ * flag is not used.
+ *
+ * @param tag     the block's name (On Tour name)
+ * @param size    bytes to allocate
+ * @param align   required alignment in bytes
+ * @param hdrsize       header size (On Tour hdrsize)
+ * @param flags   memory type flags (On Tour memtype)
+ * @param abortflag  On Tour abortflag (not read)
+ * @return the new block
+ */
+void* MEM_allocaligna_6(void* tag, int size, int align, int hdrsize, int flags, int abortflag)
 {
     int lvl = memlog2(align) - 2 < 0 ? 0 : memlog2(align) - 2;
-    return operator_new_tag(size, (const char*)tag, flags | (lvl << 24) | 0x10000000, d);
+    return operator_new_tag(size, (const char*)tag, flags | (lvl << 24) | 0x10000000, hdrsize);
 }
 #endif
 
@@ -1298,9 +1321,19 @@ INCLUDE_ASM("mem/memstd", MEM_alloc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* MEM_allocaligna_6(void*, int, int, int, int, int) __asm__("MEM_allocaligna");
 
-extern "C" void* MEM_alloc(void* a0, int a1, int a2)
+/**
+ * Allocates a named block with the default 128-byte alignment.
+ *
+ * Calls MEM_allocaligna (MEM_allocaligna) with alignment 0x80, no header and the abort flag set.
+ *
+ * @param name  the block's name
+ * @param size  bytes to allocate
+ * @param memtype  memory type flags
+ * @return the new block
+ */
+extern "C" void* MEM_alloc(void* name, int size, int memtype)
 {
-    return MEM_allocaligna_6(a0, a1, 0x80, 0, a2, 1);
+    return MEM_allocaligna_6(name, size, 0x80, 0, memtype, 1);
 }
 #endif
 
@@ -1859,6 +1892,14 @@ public:
     virtual void v06();
 };
 
+/**
+ * Movie player step: decodes the next frame when it is due and notices when the movie has finished.
+ *
+ * If no frame is waiting (+0x40) and func_003AE780 says the decoder (+0x38) is due, calls virtual slot 6 of +0x3C,
+ * gets a frame for the decoder's time (+0x48) with func_003AE6C8 into +0xC and marks it waiting; otherwise sets
+ * +0x4. When there is no frame and the movie is not finished (+0x0), clears the waiting flag and stores
+ * func_003AE860's answer (audio finished) in +0x0.
+ */
 extern "C" void cMoviePlayer_asyncUpdate(void* self)
 {
     if (*(int*)((char*)self + 0x40) == 0 && func_003AE780(*(void**)((char*)self + 0x38)) != 0) {

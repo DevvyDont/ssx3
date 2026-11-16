@@ -227,6 +227,14 @@ struct sList0022E730 {
 };
 void operator_delete(int* p);
 
+/**
+ * Destroys the game view manager and every view it holds.
+ *
+ * Deletes each non-null view through its virtual destructor (slot 1, flags 3), clears +0x10 and frees this
+ * object when bit 0 of @p flags is set.
+ *
+ * @param flags  bit 0: free the object's memory
+ */
 extern "C" void cGameViewMan__cGameViewMan(sList0022E730* self, int flags)
 {
     unsigned int i;

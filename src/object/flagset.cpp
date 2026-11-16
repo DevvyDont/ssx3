@@ -1536,9 +1536,20 @@ struct sFlagSet_D1E8 {
     void* obj108;           // 0x108
 };
 
-extern "C" void cFenceNode_setupFence(void* p)
+/**
+ * Builds a fence's flexible grid mesh from its instance's quad: 8 columns of top and bottom vertices.
+ *
+ * Clears the neighbour instances (+0x104, +0x108) and marks the instance record (+0x18, flags +0x8: clear bit 1, set
+ * bit 2). The graphics manager (cGraphicsMan_TheGraphicsMan, vtable +0x10D8) creates an 8x2 grid mesh (slot 76, flags
+ * 0x60000000) into +0x40 and returns mesh 0's quad (slot 97: 4 corners, UVs, colours). The 8 top (+0x44) and bottom
+ * (+0xA4) vertices, 16 UVs and 16 colours (alpha 1.0) are interpolated in sevenths between the quad's corners, handed
+ * to the grid mesh (its slot 6), and func_0034CF98 updates the grid.
+ *
+ * @param fenceNode  the fence node
+ */
+extern "C" void cFenceNode_setupFence(void* fenceNode)
 {
-    sFlagSet_D1E8* self = (sFlagSet_D1E8*)p;
+    sFlagSet_D1E8* self = (sFlagSet_D1E8*)fenceNode;
     self->obj104 = 0;
     self->obj108 = 0;
     self->node->flags = (self->node->flags & ~2u) | 4;
@@ -1888,6 +1899,14 @@ struct sFlagSetVEntry_DC90c {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Rebuilds the animation matrices after the node's root transform changed.
+ *
+ * Calls virtual slot 52 (cAnimNode_cacheFrame, cache the frame) first, then makeAnimMats (slot 33,
+ * cAnimNode_makeAnimMats) on the root transform from slot 24 (cMoveNode_getRootTransform) into AnimMats (+0x44),
+ * and clears RootTransformDirty (bit 0 of the cMoveNode part's Flags, +0x26). Overrides
+ * cMoveNode_updateRootTransform (vtable slot 51).
+ */
 extern "C" void cAnimNode_updateRootTransform(void* self)
 {
     sFlagSetVEntry_DC90a* vt = *(sFlagSetVEntry_DC90a**)((char*)self + 0x20);
@@ -2103,6 +2122,13 @@ struct sFlagOwner_E348 {
     sFlagItem_E348* items;      // 0x48
 };
 
+/**
+ * Brings every animated mesh's frame to the node's cache time and marks the mesh velocities stale.
+ *
+ * For each of NumAnimMeshes (+0x40) entries of AnimFrames (+0x48, 0xD0 bytes each) it calls the frame's virtual slot
+ * 2 with CacheTime (+0x4); then sets MeshVelocityDirty (+0x10) so cAnimNode_updateMeshVelocity recomputes the velocities on demand.
+ * Slot 52 of cAnimNode's vtable.
+ */
 extern "C" void cAnimNode_cacheFrame(sFlagOwner_E348* self)
 {
     int i;

@@ -89,13 +89,13 @@ struct func_00397B70_sSelf {
 
 extern "C" void func_00397B70(void* self, int flags)
 {
-    func_00397B70_sSelf* s = (func_00397B70_sSelf*)self;
-    delete s->a;
-    if (s->buf) {
-        cMemMan_free(s->buf);
+    func_00397B70_sSelf* fields = (func_00397B70_sSelf*)self;
+    delete fields->a;
+    if (fields->buf) {
+        cMemMan_free(fields->buf);
     }
-    delete s->b;
-    delete s->c;
+    delete fields->b;
+    delete fields->c;
     func_00398078((char*)self + 0x58, 2);
     func_0039E9D8((char*)self + 0x18, 2);
     if (flags & 1) {
@@ -514,6 +514,14 @@ struct s398380Item {
     int id;
 };
 
+/**
+ * Looks up a texture element by its hashed name.
+ *
+ * Scans the @p id field of each 0x20-byte element in the array at +0xC (count at +0x10) and returns the first whose
+ * hash matches, or 0.
+ *
+ * @param id  hashed element name (On Tour hashname)
+ */
 extern "C" s398380Item* cUITextureBank_getElementByHashname(void* self, int id)
 {
     int i;
@@ -540,9 +548,9 @@ extern "C" int func_003983B8(char* self, int key)
 {
     int count = *(int*)(self + 0x10);
     for (int i = 0; i < count; i++) {
-        sUiEntry_83B8* e = &(*(sUiEntry_83B8**)(self + 0xC))[i];
-        if (e->key == key) {
-            return e->value;
+        sUiEntry_83B8* entry = &(*(sUiEntry_83B8**)(self + 0xC))[i];
+        if (entry->key == key) {
+            return entry->value;
         }
     }
     return 0;
@@ -568,9 +576,9 @@ extern "C" int func_003983F0(s3983F0* self, int key)
 {
     signed char i;
     for (i = 0; i < self->count; i++) {
-        s3983F0Entry* e = &self->entries[i];
-        if (e->key == key) {
-            return e->value;
+        s3983F0Entry* entry = &self->entries[i];
+        if (entry->key == key) {
+            return entry->value;
         }
     }
     return 0;
@@ -980,11 +988,11 @@ extern "C" void cUIIcon_setUIData(cUIIcon* self, sUIData8998* data)
 //100%
 INCLUDE_ASM("ui/uiengine", func_00398A60__FPvT0);
 #ifdef SKIP_ASM
-void func_00398A60(void* a, void* b)
+void func_00398A60(void* first, void* second)
 {
-    float t = *(float*)a;
-    *(float*)a = *(float*)b;
-    *(float*)b = t;
+    float saved = *(float*)first;
+    *(float*)first = *(float*)second;
+    *(float*)second = saved;
 }
 #endif
 
@@ -1398,10 +1406,10 @@ struct cUIListBox_getFont_sEntry {
  */
 extern "C" int cUIListBox_getFont(cUIListBox* self)
 {
-    void* o = cUIThing_getEngine(self);
-    if (o != 0) {
-        cUIListBox_getFont_sEntry* t = *(cUIListBox_getFont_sEntry**)((char*)o + 0x8);
-        return t[(*(unsigned char*)&self->mAttrListBox & 3) + 1].a;
+    void* engine = cUIThing_getEngine(self);
+    if (engine != 0) {
+        cUIListBox_getFont_sEntry* fonts = *(cUIListBox_getFont_sEntry**)((char*)engine + 0x8);
+        return fonts[(*(unsigned char*)&self->mAttrListBox & 3) + 1].a;
     }
     return 0;
 }
@@ -1588,18 +1596,18 @@ struct cUIListBox_setUnicodePrivate_sEntry {
  */
 extern "C" void cUIListBox_setUnicodePrivate(cUIListBox* self, unsigned char idx, unsigned short* str)
 {
-    void* a = self->mpScreen;
-    void* b = *(void**)((char*)a + 0xD0);
-    void* c = *(void**)((char*)b + 0x10);
-    if (*(void**)((char*)c + 0x10) != 0) {
+    void* screen = self->mpScreen;
+    void* state = *(void**)((char*)screen + 0xD0);
+    void* engine = *(void**)((char*)state + 0x10);
+    if (*(void**)((char*)engine + 0x10) != 0) {
         cUIListBox_setUnicodePrivate_sEntry* tbl = (cUIListBox_setUnicodePrivate_sEntry*)((char*)self + 0x9C);
-        cUIListBox_setUnicodePrivate_sEntry* e = &tbl[idx];
-        if (e->str) {
-            cMemMan_free(e->str);
+        cUIListBox_setUnicodePrivate_sEntry* entry = &tbl[idx];
+        if (entry->str) {
+            cMemMan_free(entry->str);
         }
-        unsigned short* s = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILISTBOXSTR, 0x100, 0);
-        USTR_copy(s, str);
-        e->str = s;
+        unsigned short* tempString = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILISTBOXSTR, 0x100, 0);
+        USTR_copy(tempString, str);
+        entry->str = tempString;
     }
 }
 #endif

@@ -884,6 +884,14 @@ void cRailModifier_render(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRigidBody_cRigidBody__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a rigid body: nothing to initialise, so it only returns the object.
+ *
+ * Run on a roller modifier's body (+0x30) by cRollerModifier_cRollerModifier and the replay constructor
+ * func_0035DF70.
+ *
+ * @return the body (self)
+ */
 void* cRigidBody_cRigidBody(void* self)
 {
     return self;
@@ -1016,6 +1024,13 @@ static inline sRmVec4 xformRM(sRmBody* b)
     return r;
 }
 
+/**
+ * Recomputes a rigid body's velocities from its momenta.
+ *
+ * V (+0x80) = linear momentum (+0x20) times the inverse mass (+0x40); W (+0x90) = the world inverse inertia matrix
+ * (InvMOI, 3x3 at +0x50) applied to the angular momentum (+0x30), keeping its w. Called after the inertia changes
+ * (cRollerModifier_updateMOI) and after each simulation step.
+ */
 extern "C" void cRigidBody_updateImplicit(sRmBody* self)
 {
     self->outDir = vu0ScaleRM(self->dir, self->scale);
@@ -1352,6 +1367,14 @@ public:
     virtual void v02(void* buf, int size);
 };
 
+/**
+ * Restores a rigid body's state from a replay frame.
+ *
+ * Reads 0x50 bytes (the momenta, pose and mass fields) straight into the body through the frame's virtual read
+ * (slot 2). The counterpart of cRigidBody_writeToReplayFrame.
+ *
+ * @param obj  the replay frame to read from (On Tour data)
+ */
 extern "C" void cRigidBody_readFromReplayFrame(void* self, cRigidBody_readFromReplayFrame_cObj* obj)
 {
     obj->v02(self, 0x50);
@@ -1958,6 +1981,12 @@ static inline sRmMat33 MulI_E248(const sRmMat33& a, const sRmInertiaOwner_E248* 
     return r;
 }
 
+/**
+ * Rotates the roller's body-space inverse inertia into world space for its rigid body.
+ *
+ * Turns the body's orientation quaternion (+0x40) into a rotation R and stores R * InvBodyMOI * R^T (InvBodyMOI at
+ * +0x280) as the rigid body's InvMOI (+0x80), ready for cRigidBody_updateImplicit.
+ */
 // World-space inertia: rotT * inertia * rot, with rot from the body quaternion (self + 0x40).
 extern "C" void cRollerModifier_updateMOI(void* self)
 {
@@ -2027,6 +2056,15 @@ static inline void vu0AddToRM(sRmVec4& dst, const sRmVec4& b)
         : "m"(dst), "m"(b));
 }
 
+/**
+ * Returns the pose of the roller's model: the rigid body's pose shifted back by the centre-of-mass offset.
+ *
+ * Copies the body's pose (+0x30: position, orientation quaternion at +0x40), rotates the centre-of-mass offset
+ * (+0x2B0) by the orientation, negates it, rotates that by the pose's orientation again and adds it to the
+ * position. On Tour does the same two rotations.
+ *
+ * @return the pose (position and orientation quaternion)
+ */
 extern "C" sRmXform cRollerModifier_getBodyPose(void* self)
 {
     sRmXform r = *(sRmXform*)((char*)self + 0x30);
@@ -2079,10 +2117,18 @@ static inline void vu0AddED90(sRmVec4& dst, const sRmVec4& b)
         : "m"(dst), "m"(b));
 }
 
-extern "C" void cRollerModifier_translateMe(sRmBody* self, const sRmVec4* b)
+/**
+ * Moves the roller by an offset: its rigid body's position and its collision sphere tree.
+ *
+ * Adds @p off to the body position (+0x30) and shifts the sphere tree (+0xE0) by the same amount with
+ * SphereTree_MoveOffset. cRollerModifier_collide uses it to push the roller out of what it hit.
+ *
+ * @param off  the offset (On Tour off)
+ */
+extern "C" void cRollerModifier_translateMe(sRmBody* self, const sRmVec4* off)
 {
-    vu0AddED90(self->pos, *b);
-    SphereTree_MoveOffset((char*)self + 0xE0, b);
+    vu0AddED90(self->pos, *off);
+    SphereTree_MoveOffset((char*)self + 0xE0, off);
 }
 #endif
 
@@ -2403,6 +2449,18 @@ struct sRailSelF218 {
 extern void sel_F218(sRailSelF218* self, int i) __asm__("cTexFlipModifier_setTexIndex");
 extern void ms_F218(void* p, int v, int n) __asm__("MEM_fill");
 
+/**
+ * Sets a texture-flip modifier up from its instance's materials.
+ *
+ * NumMaterials (+0x1C) comes from the material list of the Instance (+0x18; list at +0x94); the texture count (+0x20)
+ * from
+ * the first material that has a flip table (+0x10). Selects the current texture with cTexFlipModifier_setTexIndex(TexIndex +0x14),
+ * clears the material block (+0x24, 0xC4 bytes) and fills it: count, then per material a pointer (+0x28) to its own
+ * record (+0x48, 0x14 bytes) holding the flip frame's value, or to the material itself when it does not flip.
+ * Likely bug (kept for matching): the -1 fill of slots 1..3 always writes record 0, not the current one.
+ *
+ * @param selfv  the texture-flip modifier
+ */
 extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* selfv)
 {
     sRailSelF218* self = (sRailSelF218*)selfv;
@@ -2444,6 +2502,14 @@ INCLUDE_ASM("object/railmodifier", cTexFlipModifier_setTexIndex);
 struct sRailModSelect;
 extern "C" void func_0035F3A8(sRailModSelect* self);
 
+/**
+ * Selects which texture a texture-flip modifier shows.
+ *
+ * Clamps @p i to the last texture (count at +0x20 minus 1; no lower bound), stores it in TexIndex (+0x14) and
+ * updates every flipping material's record with func_0035F3A8.
+ *
+ * @param i  the texture index (On Tour texindex)
+ */
 extern "C" void cTexFlipModifier_setTexIndex(sRailModSelect* self, int i)
 {
     int n = *(int*)((char*)self + 0x20);

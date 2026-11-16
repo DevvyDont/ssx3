@@ -198,9 +198,20 @@ extern "C" void* cObjectInterface_runCollideScript(int, int, int);
 //100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_runCollideScript__FPviii);
 #ifdef SKIP_ASM
-void* cInstanceNode_runCollideScript(void* self, int a1, int a2, int a3)
+/**
+ * Runs the world script attached to a collision with this instance.
+ *
+ * Forwards the collision, intersection and being to cObjectInterface_runCollideScript (On Tour cObjectInterface::runCollideScript);
+ * the node itself is not used.
+ *
+ * @param collideInfo  the collision info (On Tour const tCollideInfo* tc)
+ * @param intersectInfo  the intersection info (On Tour const tIntersectInfo* ti)
+ * @param pBeing  the being that collided (On Tour cBeing* pBeing)
+ * @return cObjectInterface_runCollideScript's result (On Tour's version returns nothing)
+ */
+void* cInstanceNode_runCollideScript(void* self, int collideInfo, int intersectInfo, int pBeing)
 {
-    return cObjectInterface_runCollideScript(a1, a2, a3);
+    return cObjectInterface_runCollideScript(collideInfo, intersectInfo, pBeing);
 }
 #endif
 
@@ -402,6 +413,19 @@ static inline void mulScaled_FED8(sInMat_FED8* dst, const sInMat_FED8* local, co
     mul_FED8(dst, &l, m);
 }
 
+/**
+ * Builds the world matrix of one mesh of a placed instance, walking up the model's mesh hierarchy.
+ *
+ * If the instance has a node (+0xC) whose virtual slot 26 says it has animation matrices, mesh @p mesh's matrix
+ * comes straight from its slot 29 (getAnimMat). Otherwise the base is the node's root transform (slot 24) or the
+ * record's own matrix (+0x10). For mesh >= 0 the mesh's local matrix (model +0x80: parts +0x8, matrix +0xC) is
+ * multiplied by each parent's (parent index +0x0, until -1), every translation row scaled by the instance scale
+ * (+0x84), and finally by the base; mesh -1 gives the base itself.
+ *
+ * @param self  the instance record (static: On Tour inst)
+ * @param mesh  the mesh index, or -1 for the instance's root
+ * @param out   receives the matrix (On Tour mat)
+ */
 // Builds the world matrix of mesh `mesh` by walking its parent chain.
 extern "C" void cInstanceNode_buildMeshMat(sInInst_FED8* self, int mesh, sInMat_FED8* out)
 {
@@ -707,9 +731,19 @@ INCLUDE_ASM("object/instancenode", cDeadNode_cDeadNode);
 extern "C" void* func_0034FB00(void* self, int a1, int type, int a3);
 extern char cDeadNode_vtbl[];
 
-extern "C" void* cDeadNode_cDeadNode(void* self, int v)
+/**
+ * Constructs a dead node: the placeholder that keeps an expired or collected instance out of the world.
+ *
+ * Runs the cInstanceNode constructor (func_0034FB00) for bucket 8 with node type 6 and the record, stores
+ * cDeadNode_vtbl, then edits the record's flags (+0x8): clears bits 5-6, clears bit 1 and sets bit 2. Allocated as
+ * 0x1C bytes ("DeadNode") by cInstanceNode_makeThisDead, the debounce node and the world scripts.
+ *
+ * @param pInst  the instance record (On Tour pInst)
+ * @return the constructed node (self)
+ */
+extern "C" void* cDeadNode_cDeadNode(void* self, int pInst)
 {
-    func_0034FB00(self, 8, 6, v);
+    func_0034FB00(self, 8, 6, pInst);
     *(void**)((char*)self + 0xC) = cDeadNode_vtbl;
     unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
     *f &= 0xFFFFFF9F;

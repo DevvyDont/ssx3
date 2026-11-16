@@ -150,12 +150,12 @@ INCLUDE_ASM("sound/bankmanager", func_0028B788);
 extern "C" void func_0028B7E0(void*);
 extern "C" int func_003B6098(void* sema, int a1);
 
-extern "C" void func_0028B788(void* self, int a1, int a2)
+extern "C" void func_0028B788(void* self, int mainMemData, int mainMemSize)
 {
     func_0028B7E0(self);
-    *(int*)((char*)self + 0x10) = a1;
-    *(int*)((char*)self + 0x14) = a2;
-    func_003B6098((char*)self + 0x4, a1);
+    *(int*)((char*)self + 0x10) = mainMemData;
+    *(int*)((char*)self + 0x14) = mainMemSize;
+    func_003B6098((char*)self + 0x4, mainMemData);
     *(int*)self = 1;
 }
 #endif
@@ -184,14 +184,14 @@ extern "C" int func_004165A8(void*, void*);
 
 extern "C" int func_0028B830(void* self, void* name)
 {
-    int s = *(int*)self;
-    if (s != 1) {
+    int status = *(int*)self;
+    if (status != 1) {
         return 0;
     }
     if (func_004165A8(name, (char*)self + 0x20) != 0) {
-        s = 0;
+        status = 0;
     }
-    return s;
+    return status;
 }
 #endif
 
@@ -212,6 +212,14 @@ public:
     virtual void v6(int id);
 };
 
+/**
+ * Prepares a bank slot for an asynchronous load: unloads whatever it holds and marks it loading.
+ *
+ * Calls func_0028B528 and func_0028B2D0 (On Tour Unload and SharedUnload), sets the status (+0x0, mBankStatus) to 2
+ * (loading) and, for a bank held in sound memory (mAllocLocation +0x8 == 2), passes its sound memory handle (+0xC) to
+ * virtual slot 6 of the bank manager's sound system (the cSoundSys virtual base reached through gpBankManager +0x1D8).
+ * On Tour asserts the bank was not already loading and that the handle is valid; retail checks neither.
+ */
 extern "C" void cBankInstance_OnBeginAsyncLoad(void* self)
 {
     func_0028B528(self);
@@ -253,6 +261,11 @@ void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags)
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_OnAsyncMainMemSize__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the size of the main-memory buffer reserved for a bank's asynchronous load.
+ *
+ * @return the bank's main-memory data size (+0x14, On Tour mMainMemDataSize)
+ */
 int cBankInstance_OnAsyncMainMemSize(void* self)
 {
     return *(int*)((char*)self + 0x14);
@@ -276,8 +289,23 @@ public:
     virtual void v7();
 };
 
+/**
+ * Finishes a bank's asynchronous load: records the sound handle, the outcome and the file name.
+ *
+ * Calls virtual slot 7 of the bank manager's sound system (gpBankManager +0x1D8), stores the sound handle as the bank
+ * handle (+0x4), sets the status (+0x0) to 1 (loaded) when the end state is 0 and to 0 otherwise, and copies the file
+ * name into the bank's name buffer (+0x20, 64 bytes in On Tour). On Tour also checks the buffer against the reserved
+ * one and the size against it and logs "WARNING: Asynchronous bank loading operation failed." on failure; retail drops
+ * those, so the last two arguments are unused. The name is copied even when the load failed.
+ *
+ * @param id  the sound handle the loader returned
+ * @param flag  the end state (On Tour eAsyncSysEndState); 0 means success
+ * @param name  the loaded file's name (a char*, declared int to match the caller)
+ * @param pBuffer  the load buffer (unused)
+ * @param dataSize  the number of bytes loaded (unused)
+ */
 // PORT: name is passed as int (matches the unit's 6-int caller declaration); d, e unused.
-extern "C" void cBankInstance_OnEndAsyncLoad(void* self, int id, int flag, int name, int d, int e)
+extern "C" void cBankInstance_OnEndAsyncLoad(void* self, int id, int flag, int name, int pBuffer, int dataSize)
 {
     (**(cSndStream_B930***)(gpBankManager + 0x1D8))->v7();
     *(int*)((char*)self + 0x4) = id;
@@ -409,6 +437,18 @@ struct sBankManagerBB10 {
     sBmBankBB10* banks;         // 0xACC
 };
 
+/**
+ * Destroys the bank manager: frees its bank instances, tears down its monitor and async-loader parts and clears
+ * gpBankManager.
+ *
+ * Restores the cBankManager and cBankMonitor vtables and the virtual base's vtable (D_00483AB8; with flags 0 the g++
+ * 2.95 virtual-base this-adjust fix-up runs on a stack copy), clears gpBankManager, destroys the cBankInstance array at
+ * +0xACC last-first with func_0028B278 (its count is the word 0x10 bytes before it) and frees it, then runs
+ * cBankMonitor__cBankMonitor on +0x1D8 and cAsyncSys__cAsyncSys (On Tour ~cAsyncSys) on the object. cSoundSys__cSoundSys
+ * destroys the virtual base only when flags bit 1 is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object's memory, bit 1 destroys the cSoundSys virtual base
+ */
 extern "C" void cBankManager__cBankManager(sBankManagerBB10* self, int flags)
 {
     self->vtbl2 = cBankMonitor_vtbl;
@@ -448,12 +488,12 @@ INCLUDE_ASM("sound/bankmanager", func_0028BC58);
 extern "C" void func_0028A728(void* self, int i);
 extern "C" void func_0028B320(void* bank, void* id, int a3);
 
-extern "C" void func_0028BC58(void* self, int i, void* id, int a3)
+extern "C" void func_0028BC58(void* self, int i, void* id, int mainMemFlag)
 {
     int off = i * 0x60;
     if (func_0028B830((char*)*(void**)((char*)self + 0xACC) + off, id) == 0) {
         func_0028A728(self, i);
-        func_0028B320((char*)*(void**)((char*)self + 0xACC) + off, id, a3);
+        func_0028B320((char*)*(void**)((char*)self + 0xACC) + off, id, mainMemFlag);
     }
 }
 #endif
@@ -491,9 +531,9 @@ INCLUDE_ASM("sound/bankmanager", func_0028BDA8);
 #ifdef SKIP_ASM
 extern "C" void* cBankInstance_AllocMem(void* inst, int a, int b, int c);
 
-extern "C" void* func_0028BDA8(void* self, int i, int a, int b, int c)
+extern "C" void* func_0028BDA8(void* self, int i, int mainMemSize, int soundMemSize, int memFlags)
 {
-    return cBankInstance_AllocMem((char*)*(void**)((char*)self + 0xACC) + i * 0x60, a, b, c);
+    return cBankInstance_AllocMem((char*)*(void**)((char*)self + 0xACC) + i * 0x60, mainMemSize, soundMemSize, memFlags);
 }
 #endif
 
@@ -532,9 +572,9 @@ INCLUDE_ASM("sound/bankmanager", func_0028BE60);
 #ifdef SKIP_ASM
 extern "C" void func_0028B788(void* inst, int a, int b);
 
-extern "C" void func_0028BE60(void* self, int i, int a, int b)
+extern "C" void func_0028BE60(void* self, int i, int mainMemData, int mainMemSize)
 {
-    func_0028B788((char*)*(void**)((char*)self + 0xACC) + i * 0x60, a, b);
+    func_0028B788((char*)*(void**)((char*)self + 0xACC) + i * 0x60, mainMemData, mainMemSize);
 }
 #endif
 
@@ -554,6 +594,14 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_ASYNCSYS_OnBeginAsyncLoad);
 #ifdef SKIP_ASM
 extern "C" void cBankInstance_OnBeginAsyncLoad(void*);
 
+/**
+ * Async-loader callback for the start of a bank load: forwards it to that bank's instance.
+ *
+ * Calls cBankInstance_OnBeginAsyncLoad (On Tour cBankInstance::OnBeginAsyncLoad) on mBank[handle] (array at +0xACC, 0x60-byte records).
+ * Slot 2 of the cAsyncSys interface vtable D_00483728.
+ *
+ * @param i  the user handle given to the loader: the bank number
+ */
 extern "C" void cBankManager_ASYNCSYS_OnBeginAsyncLoad(void* self, int i)
 {
     cBankInstance_OnBeginAsyncLoad((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
@@ -565,9 +613,20 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_ASYNCSYS_OnAsyncMainMemAlloc);
 #ifdef SKIP_ASM
 extern "C" void cBankInstance_OnAsyncMainMemAlloc(void* inst, int a, int b);
 
-extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemAlloc(void* self, int i, int a, int b)
+/**
+ * Async-loader callback that allocates a bank's main-memory buffer: forwards it to that bank's instance.
+ *
+ * Calls cBankInstance_OnAsyncMainMemAlloc on mBank[handle] (+0xACC, 0x60-byte records) with the size and memory flags.
+ * On Tour returns the buffer; the C is declared void, so the pointer only passes back in $v0. Slot 3 of the cAsyncSys
+ * interface vtable D_00483728.
+ *
+ * @param i  the user handle given to the loader: the bank number
+ * @param size  the buffer size in bytes
+ * @param memflags  the allocation flags
+ */
+extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemAlloc(void* self, int i, int size, int memflags)
 {
-    cBankInstance_OnAsyncMainMemAlloc((char*)*(void**)((char*)self + 0xACC) + i * 0x60, a, b);
+    cBankInstance_OnAsyncMainMemAlloc((char*)*(void**)((char*)self + 0xACC) + i * 0x60, size, memflags);
 }
 #endif
 
@@ -576,6 +635,14 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_ASYNCSYS_OnAsyncMainMemSize);
 #ifdef SKIP_ASM
 int cBankInstance_OnAsyncMainMemSize(void*);
 
+/**
+ * Async-loader callback asking for the size of a bank's main-memory buffer: forwards it to that bank's instance.
+ *
+ * Calls cBankInstance_OnAsyncMainMemSize__FPv (On Tour cBankInstance::OnAsyncMainMemSize) on mBank[handle] (+0xACC, 0x60-byte records); the C
+ * is declared void, so the size only passes back in $v0. Slot 4 of the cAsyncSys interface vtable D_00483728.
+ *
+ * @param i  the user handle given to the loader: the bank number
+ */
 extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemSize(void* self, int i)
 {
     cBankInstance_OnAsyncMainMemSize((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
@@ -587,9 +654,22 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_ASYNCSYS_OnEndAsyncLoad);
 #ifdef SKIP_ASM
 extern "C" void cBankInstance_OnEndAsyncLoad(void* inst, int a, int b, int c, int d, int e);
 
-extern "C" void cBankManager_ASYNCSYS_OnEndAsyncLoad(void* self, int i, int a, int b, int c, int d, int e)
+/**
+ * Async-loader callback for the end of a bank load: forwards the outcome to that bank's instance.
+ *
+ * Calls cBankInstance_OnEndAsyncLoad (On Tour cBankInstance::OnEndAsyncLoad) on mBank[handle] (+0xACC, 0x60-byte records) with the
+ * other five arguments unchanged. Slot 5 of the cAsyncSys interface vtable D_00483728.
+ *
+ * @param i  the user handle given to the loader: the bank number
+ * @param soundHandle  the sound handle the load produced
+ * @param endState  the end state (On Tour eAsyncSysEndState; 0 = success)
+ * @param pFilename  the file name (a char*, passed as int)
+ * @param pBuffer  the load buffer
+ * @param dataSize  the number of bytes loaded
+ */
+extern "C" void cBankManager_ASYNCSYS_OnEndAsyncLoad(void* self, int i, int soundHandle, int endState, int pFilename, int pBuffer, int dataSize)
 {
-    cBankInstance_OnEndAsyncLoad((char*)*(void**)((char*)self + 0xACC) + i * 0x60, a, b, c, d, e);
+    cBankInstance_OnEndAsyncLoad((char*)*(void**)((char*)self + 0xACC) + i * 0x60, soundHandle, endState, pFilename, pBuffer, dataSize);
 }
 #endif
 
@@ -1244,11 +1324,11 @@ extern "C" void func_0028D488(void* vself)
     int i;
     for (i = 0; i < n; i++)
         func_002B42B8(self + 0x118, 1, func_0028D8A0(self));
-    char* q = self + 0x118;
+    char* monitor = self + 0x118;
     if (prev == *(int*)(self + 0x508)) {
-        func_002B42B8(q, 1, func_0028D8A0(self));
+        func_002B42B8(monitor, 1, func_0028D8A0(self));
         if (prev == *(int*)(self + 0x508))
-            func_002B42B8(q, 0, 0);
+            func_002B42B8(monitor, 0, 0);
     }
 }
 #endif
@@ -1301,15 +1381,15 @@ extern "C" void func_0028D630(void* self, int id, void* obj)
     if (*(int*)((char*)self + 0x62A0) == -1) {
         // PORT: cSSXAudio_GetFocusRider returns an object pointer as int
         if ((int)obj == cSSXAudio_GetFocusRider(self, -1)) {
-            char* o = (char*)obj + 0x6C0;
-            sBmVt630* e = &(*(sBmVt630**)o)[7];
+            char* subObj = (char*)obj + 0x6C0;
+            sBmVt630* vtEntry = &(*(sBmVt630**)subObj)[7];
             ok = 1;
-            *(int*)((char*)self + 0x62A0) = e->fn(o + e->delta);
+            *(int*)((char*)self + 0x62A0) = vtEntry->fn(subObj + vtEntry->delta);
         }
     } else {
-        char* o = (char*)obj + 0x6C0;
-        sBmVt630* e = &(*(sBmVt630**)o)[7];
-        ok = e->fn(o + e->delta) == *(int*)((char*)self + 0x62A0);
+        char* subObj = (char*)obj + 0x6C0;
+        sBmVt630* vtEntry = &(*(sBmVt630**)subObj)[7];
+        ok = vtEntry->fn(subObj + vtEntry->delta) == *(int*)((char*)self + 0x62A0);
     }
     if (ok) {
         int n = *(int*)((char*)self + 0x623C);
@@ -1343,9 +1423,9 @@ extern "C" void func_0028D740(void* self, int id, void* obj)
     }
     ok = 0;
     if (*(int*)((char*)self + 0x62A0) != -1) {
-        char* o = (char*)obj + 0x6C0;
-        sVtEnt* e = &(*(sVtEnt**)o)[7];
-        ok = e->fn(o + e->delta) == *(int*)((char*)self + 0x62A0);
+        char* subObj = (char*)obj + 0x6C0;
+        sVtEnt* vtEntry = &(*(sVtEnt**)subObj)[7];
+        ok = vtEntry->fn(subObj + vtEntry->delta) == *(int*)((char*)self + 0x62A0);
     }
     if (ok) {
         if (*(int*)((char*)self + 0x623C) == id) {
@@ -1378,9 +1458,9 @@ int func_0028D7D8_impl(void* self, void* obj)
     } else {
         int none = -1;
         if (*(int*)((char*)self + 0x62A0) != none) {
-            char* o = (char*)obj + 0x6C0;
-            sVtEnt* e = &(*(sVtEnt**)o)[7];
-            if (e->fn(o + e->delta) == *(int*)((char*)self + 0x62A0)) {
+            char* subObj = (char*)obj + 0x6C0;
+            sVtEnt* vtEntry = &(*(sVtEnt**)subObj)[7];
+            if (vtEntry->fn(subObj + vtEntry->delta) == *(int*)((char*)self + 0x62A0)) {
                 *(int*)((char*)self + 0x62A0) = none;
                 ok = 1;
             }
@@ -1426,23 +1506,23 @@ extern "C" int func_002A4238(void* self, int id);
 extern "C" int func_0028D8A0(void* self)
 {
     int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
-    int r;
+    int result;
     if (func_002A4318(self)) {
-        r = 0;
+        result = 0;
     } else if (func_002A4368(self)) {
-        r = 1;
+        result = 1;
     } else if (func_002A40E0(self, id)) {
-        r = 0;
+        result = 0;
     } else if (func_002A4158(self, id)) {
-        r = 1;
+        result = 1;
     } else if (func_002A41C8(self, id)) {
-        r = 2;
+        result = 2;
     } else if (func_002A4238(self, id)) {
-        r = 3;
+        result = 3;
     } else {
-        r = 4;
+        result = 4;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -1451,8 +1531,8 @@ INCLUDE_ASM("sound/bankmanager", func_0028D960);
 #ifdef SKIP_ASM
 extern "C" int func_0028D960(void* self)
 {
-    unsigned int s = *(unsigned int*)((char*)self + 0x608c);
-    if (s < 2 || s == 3) {
+    unsigned int state = *(unsigned int*)((char*)self + 0x608c);
+    if (state < 2 || state == 3) {
         return 1;
     }
     return 0;
@@ -1464,11 +1544,11 @@ INCLUDE_ASM("sound/bankmanager", func_0028D988);
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028DEF0);
 #ifdef SKIP_ASM
-extern "C" int func_0028DEF0(void* self, int a1)
+extern "C" int func_0028DEF0(void* self, int newValue)
 {
     int old = *(int*)((char*)self + 0x629c);
-    *(int*)((char*)self + 0x629c) = a1;
-    return old != a1;
+    *(int*)((char*)self + 0x629c) = newValue;
+    return old != newValue;
 }
 #endif
 
@@ -1543,20 +1623,20 @@ INCLUDE_ASM("sound/bankmanager", func_0028E088);
 #ifdef SKIP_ASM
 extern "C" int func_002B2550(int);
 
-extern "C" int func_0028E088(char *self, char *arg) {
+extern "C" int func_0028E088(char *self, char *event) {
     int obj;
-    int t;
+    int eventValue;
 
     obj = *(int *)(self + 0x520);
     if (obj == 0 || func_002B2550(obj) == -1) {
         *(int *)(self + 0x6274) = 1;
-        *(int *)(self + 0x6278) = *(int *)(arg + 0x1C);
+        *(int *)(self + 0x6278) = *(int *)(event + 0x1C);
         return 1;
     }
-    t = *(int *)(arg + 0x20);
-    if (t == 1) {
-        *(int *)(self + 0x6274) = t;
-        *(int *)(self + 0x6278) = *(int *)(arg + 0x1C);
+    eventValue = *(int *)(event + 0x20);
+    if (eventValue == 1) {
+        *(int *)(self + 0x6274) = eventValue;
+        *(int *)(self + 0x6278) = *(int *)(event + 0x1C);
         return 1;
     }
     return 0;
@@ -1622,15 +1702,15 @@ extern "C" void func_0028E100(char* self)
     int id;
     if (st == 0) {
         if (func_0028D960(self)) {
-            int t;
+            int locGroup;
             id = *(int*)(self + 0x6284);
             if (id == 0x17) {
-                t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                locGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
             } else {
-                t = func_002A1E20(self, id);
+                locGroup = func_002A1E20(self, id);
                 *(int*)(self + 0x6284) = 0x17;
             }
-            bmLoadBank_E100(self, t);
+            bmLoadBank_E100(self, locGroup);
         }
     } else if (st == 2) {
         if (func_0028D960(self)) {
@@ -1705,9 +1785,9 @@ extern "C" int func_0028E548(char* self, char* ev)
         func_002B1758(mon, 0);
         if (func_002A42C8(self) == 0) {
             *(int*)(self + 0x576C) = 1;
-            int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
-            if (t == 1) {
-                *(int*)(self + 0x577C) = t;
+            int locGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            if (locGroup == 1) {
+                *(int*)(self + 0x577C) = locGroup;
                 *(int*)(self + 0x5780) = 2;
                 *(int*)(self + 0x57D4) = 0;
             }
@@ -1733,10 +1813,10 @@ extern "C" int func_0028E548(char* self, char* ev)
         }
         if (func_002A42C8(self) == 0 && cBENewPlayerInterface_isPeakLocked1(cBE_getInterface_Fv(cBE_getBE(), 1), 0, 1) != 0) {
             int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0));
-            int t = func_002A1E20(self, id);
-            if (t == 1) {
+            int locGroup = func_002A1E20(self, id);
+            if (locGroup == 1) {
                 int lock = ((sLocks_E548*)(self + 0x579C))->v[id];
-                if (lock == t) {
+                if (lock == locGroup) {
                     if (func_002A40E0(self, id) != 0 || func_002A4158(self, id) != 0)
                         *(int*)(self + 0x5770) = lock;
                     ((sLocks_E548*)(self + 0x579C))->v[id] = 0;
@@ -1993,22 +2073,22 @@ extern "C" void func_0028F000(void* self)
         *(int*)((char*)self + 0x628C) = 0;
     }
     int max = 800;
-    int r = func_00289C18(self, cSSXAudio_GetFocusRider(self, -1));
-    if (r == 1) {
+    int tier = func_00289C18(self, cSSXAudio_GetFocusRider(self, -1));
+    if (tier == 1) {
         max = 1000;
-    } else if (r == 2) {
+    } else if (tier == 2) {
         max = 1200;
     }
     int cur = *(int*)((char*)self + 0x628C);
-    float t = (float)cur / (float)max;
+    float ratio = (float)cur / (float)max;
     if (cur < max) {
         *(int*)((char*)self + 0x628C) = cur + 1;
     } else {
         *(int*)((char*)self + 0x628C) = max;
     }
-    t = t <? 1.0f;
-    t = t >? 0.0f;
-    func_002B3C28((char*)self + 0x118, (int)(t * 127.0f));
+    ratio = ratio <? 1.0f;
+    ratio = ratio >? 0.0f;
+    func_002B3C28((char*)self + 0x118, (int)(ratio * 127.0f));
 }
 #endif
 
@@ -2437,11 +2517,11 @@ INCLUDE_ASM("sound/bankmanager", func_0028FA98);
 #ifdef SKIP_ASM
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
-extern "C" void func_0028FA98(void* self, float v)
+extern "C" void func_0028FA98(void* self, float fadeTime)
 {
     int idx = *(int*)((char*)self + 0x62A8);
     if (idx >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)self + 0x118) + 0x1D8, idx, 1, v);
+        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)self + 0x118) + 0x1D8, idx, 1, fadeTime);
         *(int*)((char*)self + 0x62A8) = -1;
     }
 }

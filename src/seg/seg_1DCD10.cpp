@@ -72,12 +72,27 @@ extern char str_data_textures_particle_ssh[];
 extern char str_data_textures_effects_ssh[];
 struct sFXShape_BD10 { char name[8]; int tex; };
 extern sFXShape_BD10 gFXShape_BD10[] __asm__("D_004891B0");
-extern "C" int cFXLoader_cFXLoader(int a0, long a1) {
+/**
+ * Constructs the effects loader: loads the effect texture shapes and registers each effect's texture.
+ *
+ * Loads "data/textures/particle.ssh" and, unless @p particlesOnly is set, "data/textures/effects.ssh" with FILE_load (0x100). For
+ * each of the 0x51 effect shapes in D_004891B0 (an 8-byte name and a texture argument) it searches the loaded files
+ * with SHAPE_locatez, registers the first hit through a cGraphicsMan virtual (slot 46: shape, name, texture argument,
+ * 1, -1) and stores the texture ID, or -1, in cGraphicsMan_TheGraphicsMan's effect texture map (+0xF50). The files are
+ * freed with MEM_free, and effect IDs 0x47..0x50 are copied to TheGraphicsMan +0x10B0.
+ *
+ * The object itself gets no members: everything goes into the graphics manager.
+ *
+ * @param loader  the object to construct (this)
+ * @param particlesOnly  non-zero to load only the particle shapes (On Tour ParticlesOnly)
+ * @return @p loader
+ */
+extern "C" int cFXLoader_cFXLoader(int loader, long particlesOnly) {
     int files[2];
     int v;
     long r;
     int n = 2;
-    if (a1)
+    if (particlesOnly)
         n = 1;
     for (int i = 0; i < n; i++) {
         switch (i) {
@@ -106,7 +121,7 @@ extern "C" int cFXLoader_cFXLoader(int a0, long a1) {
         MEM_free(files[i]);
     for (int i = 0; i < 10; i++)
         m->dst[i] = m->GetEffectTexMap(0x47 + i);
-    return a0;
+    return loader;
 }
 #endif
 
@@ -169,6 +184,15 @@ public:
 };
 extern Mgr_BEE0 *cGraphicsMan_TheGraphicsMan_seg_1DCD10 __asm__("cGraphicsMan_TheGraphicsMan");
 void operator_delete(int *);
+/**
+ * Destroys the effects loader: removes each effect texture it registered.
+ *
+ * Walks cGraphicsMan_TheGraphicsMan's 0x51-entry effect texture map (+0xF50): every ID that is not -1 is removed
+ * through a cGraphicsMan virtual (slot 50; On Tour RemoveTexture) and reset to -1. Frees the object when bit 0 of @p
+ * flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cFXLoader__cFXLoader(int *self, int flags) {
     Mgr_BEE0 *m = cGraphicsMan_TheGraphicsMan_seg_1DCD10;
     int i;

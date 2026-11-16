@@ -724,6 +724,17 @@ static inline bool IsSection(const int& id)
     return id != 0x31;
 }
 
+/**
+ * Loads a location: unloads the world sections it does not use and loads the ones it does.
+ *
+ * Unloads each of the 0x32 sections that is not in the location's list (D_00442488) and not one of the kept
+ * sections 0x2B-0x30, stores the location at +0x1BC (clearing +0x1C0), loads the location's sections, its sky
+ * section (default 0x31; +0x1A4 cleared first) and its extra section, then the mode with cSectionMan_loadMode.
+ * Mode 7 means the location's default mode from D_00442820.
+ *
+ * @param idx   the location (On Tour eBELocationID)
+ * @param mode  the section manager mode, or 7 for the location's default
+ */
 extern "C" void cSectionMan_load_impl(void* self, int idx, int mode)
 {
     int v;
@@ -867,6 +878,15 @@ extern "C" int cSectionMan_isSectionLoaded(cSectionMan* self, int id);
 // PORT: the unit declares cSectionMan_isLoaded(void*) for its callers; the body reads a1, bound by asm label
 int cSectionMan_isLoaded_impl(void* self, int idx) __asm__("cSectionMan_isLoaded");
 
+/**
+ * Tells whether all of a location's world sections are loaded.
+ *
+ * Checks each section in the location's list (D_00442488) and its two optional extra sections (when they exist in
+ * cSectionMan_mSectionMap) with cSectionMan_isSectionLoaded.
+ *
+ * @param idx  the location (On Tour eBELocationID)
+ * @return 1 when everything is loaded, else 0
+ */
 int cSectionMan_isLoaded_impl(void* self, int idx)
 {
     int ok = 1;
@@ -1470,6 +1490,9 @@ extern "C" void* cGame_isPreloadedStateReady(int);
 //100%
 INCLUDE_ASM("main/game", cSectionMan_isPreLoadModeDone__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the preloaded game state is ready (cGame_isPreloadedStateReady on the game at +0x1B0).
+ */
 void* cSectionMan_isPreLoadModeDone(void* self)
 {
     return cGame_isPreloadedStateReady(*(int*)((char*)self + 0x1b0));

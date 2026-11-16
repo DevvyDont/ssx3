@@ -272,6 +272,16 @@ extern "C" unsigned char* func_003E12E0(void* cache);
 extern "C" void func_003E13E8(void* cache, void* p);
 extern "C" int func_003E1530(void* cache);
 
+/**
+ * Feeds newly streamed world data from the disc stream into the world cache.
+ *
+ * Does nothing while inactive (+0x90). A chunk left half processed (+0xAC) is retried first. When throttled (+0xD4),
+ * the countdown at +0xE0 drops by the app ticks passed and nothing more happens while it is positive. Then each chunk
+ * func_003E12E0 returns resets the countdown, is decompressed (func_003A7218) into the buffer at +0x8C, released
+ * (func_003E13E8) and handed to cStreamMan_processChunk; if that cannot finish, the chunk is marked pending. Only one chunk is
+ * taken per call while throttled. Once func_003E1530 reports the end of the stream, the world cache is told page +0x94
+ * is loaded, the manager goes inactive and the page becomes -1.
+ */
 extern "C" void cStreamMan_update(sStreamMan7098* self)
 {
     unsigned char* p;
@@ -359,6 +369,20 @@ struct sStreamMan7238 {
 };
 
 
+/**
+ * Hands a buffer of streamed world data, block by block, to the world cache.
+ *
+ * While data remains, a new block's 8-byte header (id byte, 24-bit size, key word; a header split across buffers is
+ * completed from the carry buffer at +0xA4) is read and cWorldCache_addBxStreamDataTest asked for a destination: -1
+ * means no room yet (the test is retried next call and 0 is returned), 0 means the block is skipped (an empty one is
+ * submitted as cStreamMan_NULLCHUNK). Block data is copied with MEM_copy and each completed block is submitted with
+ * func_003A8CD0, counting down the blocks left in the page (+0x98). Leftover bytes shorter than a header are kept for
+ * the next call.
+ *
+ * @param pcount_  bytes left in the buffer; updated as data is consumed (On Tour iSize)
+ * @param pdata_  read position in the buffer; advanced as data is consumed (On Tour pData)
+ * @return 1 when the buffer was used up, 0 when the cache had no room and the call must be repeated
+ */
 // PORT: header fields are packed in a 64-bit long; data pointers pass through int parameters.
 extern "C" int cStreamMan_processChunk(void* self_, void* pcount_, void* pdata_)
 {

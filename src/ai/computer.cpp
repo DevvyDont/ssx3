@@ -1279,7 +1279,17 @@ INCLUDE_ASM("ai/computer", cRider_flagEventReaction);
 #ifdef SKIP_ASM
 extern "C" int AITick();
 
-extern "C" void cRider_flagEventReaction(void* self, int mode, float t)
+/**
+ * Flags a rider reaction (positive, uber, negative...) to show for a while, or clears it.
+ *
+ * With @p mode 0 (On Tour kREACT_None) mHudMsgId (+0x358) is cleared and mHudMsgExpire (+0x354) set to -1. Otherwise
+ * mHudMsgId = @p mode and mHudMsgExpire = AITick (AITick) + (int)(@p forceDelaySec * 60), so the reaction lasts @p forceDelaySec seconds
+ * of 60 Hz ticks. On Tour's eReactionType: 1 Pos, 2 UberPos, 3 EarnComboPos, 4 Neg, 5 UberOn, 6 UberOff.
+ *
+ * @param mode  the reaction (On Tour eReactionType react); 0 clears it
+ * @param forceDelaySec  how long it lasts, in seconds (On Tour forceDelaySec)
+ */
+extern "C" void cRider_flagEventReaction(void* self, int mode, float forceDelaySec)
 {
     int v;
     if (mode == 0)
@@ -1289,7 +1299,7 @@ extern "C" void cRider_flagEventReaction(void* self, int mode, float t)
     }
     else
     {
-        int frames = (int)(t * 60.0f);
+        int frames = (int)(forceDelaySec * 60.0f);
         v = AITick() + frames;
         *(int*)((char*)self + 0x358) = mode;
     }
@@ -1377,15 +1387,26 @@ extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, int c);
 
-extern "C" void cRider_flagEventBump(void* a, void* b)
+/**
+ * Reacts to a light bump from another rider: collision sound and a mild aggression event.
+ *
+ * Plays the rider-collision sound (func_00298488, On Tour cSSXAudio::RiderCollision) and func_002A0A30(audio, attacker,
+ * self, 1, 0), then reports aggression behaviour 0 (kAGG_MILDCONTACT) from @p attacker against @p self to cBEAggressionInterface_applyAggression (On Tour
+ * cBEAggressionInterface::applyAggression). Each rider's id comes from its cBeing vtable (+0x6C0) slot 7 (On Tour
+ * cBeing::getAIIndex).
+ *
+ * @param self  the rider that was bumped (this)
+ * @param attacker  the rider that did the bumping (On Tour attacker)
+ */
+extern "C" void cRider_flagEventBump(void* self, void* attacker)
 {
-    func_00298488(func_0028B180(), a, b);
-    func_002A0A30(func_0028B180(), b, a, 1, 0);
+    func_00298488(func_0028B180(), self, attacker);
+    func_002A0A30(func_0028B180(), attacker, self, 1, 0);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)b + 0x6C0;
+    char* ob = (char*)attacker + 0x6C0;
     sVEntry0010E228* eb = &(*(sVEntry0010E228**)ob)[7];
     int rb = eb->fn(ob + eb->delta);
-    char* oa = (char*)a + 0x6C0;
+    char* oa = (char*)self + 0x6C0;
     sVEntry0010E228* ea = &(*(sVEntry0010E228**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(oa + ea->delta), 0);
 }
@@ -1406,15 +1427,24 @@ extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, int c);
 
-extern "C" void cRider_flagEventBumpKnockdown(void* a, void* b)
+/**
+ * Reacts to a bump from another rider that knocked this one down: collision sound and a moderate aggression event.
+ *
+ * As cRider_flagEventBump, but func_002A0A30 gets (attacker, self, 1, 1) and the aggression behaviour passed to
+ * cBEAggressionInterface_applyAggression (On Tour cBEAggressionInterface::applyAggression) is 1 (kAGG_MODCONTACT).
+ *
+ * @param self  the rider that was knocked down (this)
+ * @param attacker  the rider that did the bumping (On Tour attacker)
+ */
+extern "C" void cRider_flagEventBumpKnockdown(void* self, void* attacker)
 {
-    func_00298488(func_0028B180(), a, b);
-    func_002A0A30(func_0028B180(), b, a, 1, 1);
+    func_00298488(func_0028B180(), self, attacker);
+    func_002A0A30(func_0028B180(), attacker, self, 1, 1);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)b + 0x6C0;
+    char* ob = (char*)attacker + 0x6C0;
     sVEntry0010E2E8* eb = &(*(sVEntry0010E2E8**)ob)[7];
     int rb = eb->fn(ob + eb->delta);
-    char* oa = (char*)a + 0x6C0;
+    char* oa = (char*)self + 0x6C0;
     sVEntry0010E2E8* ea = &(*(sVEntry0010E2E8**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(oa + ea->delta), 1);
 }
@@ -1435,15 +1465,25 @@ extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, int c);
 
-extern "C" void cRider_flagEventPunch(void* a, void* b)
+/**
+ * Reacts to a punch from another rider: punch sound and a hard-contact aggression event.
+ *
+ * Plays cSSXAudio_Punch(audio, attacker, self) and func_002A0A30(audio, attacker, self, 0, 0), then reports aggression
+ * behaviour 2 (kAGG_HARDCONTACT) from @p attacker against @p self to cBEAggressionInterface_applyAggression (On Tour
+ * cBEAggressionInterface::applyAggression), the ids from each rider's cBeing vtable slot 7.
+ *
+ * @param self  the rider that was punched (this)
+ * @param attacker  the rider that threw the punch (On Tour attacker)
+ */
+extern "C" void cRider_flagEventPunch(void* self, void* attacker)
 {
-    cSSXAudio_Punch(func_0028B180(), b, a);
-    func_002A0A30(func_0028B180(), b, a, 0, 0);
+    cSSXAudio_Punch(func_0028B180(), attacker, self);
+    func_002A0A30(func_0028B180(), attacker, self, 0, 0);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)b + 0x6C0;
+    char* ob = (char*)attacker + 0x6C0;
     sVEntry0010E3A8* eb = &(*(sVEntry0010E3A8**)ob)[7];
     int rb = eb->fn(ob + eb->delta);
-    char* oa = (char*)a + 0x6C0;
+    char* oa = (char*)self + 0x6C0;
     sVEntry0010E3A8* ea = &(*(sVEntry0010E3A8**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(oa + ea->delta), 2);
 }
@@ -1467,19 +1507,32 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
 extern "C" float cRiderMetrix_evFrag(char* self);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 
-extern "C" void cRider_flagEventPunchKnockdown(void* a, void* b)
+/**
+ * Reacts to a punch that knocked this rider down: sounds, the harshest aggression event and a frag reward for the
+ * attacker.
+ *
+ * Plays cSSXAudio_Punch(attacker, self), func_002A0A30(audio, attacker, self, 0, 1) and cSSXAudio_KnockdownSFX for the
+ * attacker, reports aggression behaviour 3 (kAGG_BERTUZZI) to cBEAggressionInterface_applyAggression, then gives the attacker
+ * cRider_flagEventBoostPowerUp(attacker, 2, ...) with the boost from its metrix's cRiderMetrix_evFrag (On Tour
+ * cRiderMetrix::evFrag). The prototype here declares flagEventBoostPowerUp as (rider, int, float): the float goes in
+ * $f12, so the call is the same as On Tour's (float powerUp, int powerSourceFlags).
+ *
+ * @param self  the rider that was knocked down (this)
+ * @param attacker  the rider that threw the punch (On Tour attacker); it earns the frag
+ */
+extern "C" void cRider_flagEventPunchKnockdown(void* self, void* attacker)
 {
-    cSSXAudio_Punch(func_0028B180(), b, a);
-    func_002A0A30(func_0028B180(), b, a, 0, 1);
-    cSSXAudio_KnockdownSFX(func_0028B180(), b);
+    cSSXAudio_Punch(func_0028B180(), attacker, self);
+    func_002A0A30(func_0028B180(), attacker, self, 0, 1);
+    cSSXAudio_KnockdownSFX(func_0028B180(), attacker);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)b + 0x6C0;
+    char* ob = (char*)attacker + 0x6C0;
     sVEntry0010E468* eb = &(*(sVEntry0010E468**)ob)[7];
     int rb = eb->fn(ob + eb->delta);
-    char* oa = (char*)a + 0x6C0;
+    char* oa = (char*)self + 0x6C0;
     sVEntry0010E468* ea = &(*(sVEntry0010E468**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(oa + ea->delta), 3);
-    cRider_flagEventBoostPowerUp(b, 2, cRiderMetrix_evFrag(*(char**)((char*)b + 0x790)));
+    cRider_flagEventBoostPowerUp(attacker, 2, cRiderMetrix_evFrag(*(char**)((char*)attacker + 0x790)));
 }
 #endif
 
@@ -1493,7 +1546,17 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRiderMetrix_evCheckpoint(void*, int);
 
-extern "C" void cRider_flagEventPathCheckpoint(void* self, int* arg)
+/**
+ * Handles the rider passing a path checkpoint: scores it in checkpoint events.
+ *
+ * Copies +0xEC into +0xE8 first. Then, unless the rules word D_005308D0 has bit 9 set (On Tour
+ * cBERules::getNoCheckPoints) and only while the new-race game event (D_00535C12, cGameEvent) is 1, calls cRiderMetrix_evCheckpoint
+ * (On Tour cRiderMetrix::evCheckpoint) on the rider's metrix (+0x790) with the checkpoint's first word (On Tour
+ * tPathCheckpoint::TimeBonusSec).
+ *
+ * @param checkpoint  the checkpoint passed (On Tour tPathCheckpoint *cp): time bonus in seconds, then distance left
+ */
+extern "C" void cRider_flagEventPathCheckpoint(void* self, int* checkpoint)
 {
     *(int*)((char*)self + 0xE8) = *(int*)((char*)self + 0xEC);
     if (((D_005308D0[0] >> 9) & 1) == 0)
@@ -1501,7 +1564,7 @@ extern "C" void cRider_flagEventPathCheckpoint(void* self, int* arg)
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (D_00535C12[0] == 1)
         {
-            cRiderMetrix_evCheckpoint(*(void**)((char*)self + 0x790), *arg);
+            cRiderMetrix_evCheckpoint(*(void**)((char*)self + 0x790), *checkpoint);
         }
     }
 }
@@ -1521,7 +1584,21 @@ static inline int state_0010E5D8() { return cBENewRaceInterface_newRace.cGameMod
 
 struct sVEntry0010E5D8 { short delta; short index; int (*fn)(void*); };
 
-extern "C" void cRider_flagEventPathEvent(void* self, int* arg, int a2, int a3)
+/**
+ * Handles a track-path event the rider reached: the finish line ends its race, a chapter marker tags the replay.
+ *
+ * A finish event (type 1) counts when the game mode (cBENewRaceInterface_newRace.cGameMode) is 0-3, or 5/6 with the
+ * game-mode manager's +0x98 set (On Tour isLastHeat), or the location is 1 or 5-13, or a game path is set; then a rider
+ * not yet past the line (mFinishTime < 0) gets cRider_doFinishEvent. A chapter event (type 11) calls
+ * cReplay_eventChapter on the game's replay with the rider's id (cBeing vtable slot 7) and the event's second word.
+ *
+ * @p isPrev and @p isCur (On Tour isPrev/isCur) are not read.
+ *
+ * @param pathEvent  the path event node (On Tour tPathEventNode *ev): type, then a value
+ * @param isPrev  On Tour isPrev; unused
+ * @param isCur  On Tour isCur; unused
+ */
+extern "C" void cRider_flagEventPathEvent(void* self, int* pathEvent, int isPrev, int isCur)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     char* s = (char*)SSXApp->GameModeMan;
@@ -1534,18 +1611,18 @@ extern "C" void cRider_flagEventPathEvent(void* self, int* arg, int a2, int a3)
         || mode == 10 || mode == 11 || mode == 12 || mode == 13 || mode == 1
         || cBENewRaceInterface_newRace.cGamePath != 0)
         v = 1;
-    if (*arg == 1 && v != 0)
+    if (*pathEvent == 1 && v != 0)
     {
         int ok = *(float*)((char*)self + 0x470) >= 0.0f;
         if (!ok)
             cRider_doFinishEvent(self);
     }
-    if (*arg == 11)
+    if (*pathEvent == 11)
     {
         char* o = (char*)self + 0x6C0;
         sVEntry0010E5D8* e = &(*(sVEntry0010E5D8**)o)[7];
         void* tgt = SSXApp->Game->Replay;
-        cReplay_eventChapter(tgt, e->fn(o + e->delta), arg[1]);
+        cReplay_eventChapter(tgt, e->fn(o + e->delta), pathEvent[1]);
     }
 }
 #endif
@@ -1557,6 +1634,15 @@ extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" void func_002A3B18(void*, void*, int);
 
+/**
+ * Adds time to the rider's speed power-up boost and plays the boost icon sound.
+ *
+ * mPowerUpBoostTimer (+0x2E8) += @p amount, then cSSXAudio_PlayIconSound(audio, 0, self, 1.0f) (On Tour icon type 0;
+ * flagEventTrickBoost uses 1) and func_002A3B18(audio, self, 1), which On Tour's version lacks. Virtual (cRider vtable
+ * entry 13 in the kRiderVt_* numbering, after initForMission); no direct callers.
+ *
+ * @param amount  seconds of boost to add (On Tour sec)
+ */
 extern "C" void cRider_flagEventSpeedBoost(void* self, float amount)
 {
     *(float*)((char*)self + 0x2E8) += amount;
@@ -1631,13 +1717,34 @@ extern "C" void cSSXAudio_Land(void* mgr, void* rider, float v);
 struct sVE_0010E910 { short delta; short index; int (*fn)(void*); };
 struct sVEf_0010E910 { short delta; short index; void (*fn)(void*, float); };
 
-extern "C" void cRider_flagEventLand(char* self, int a1, int a2, int a3, char* evt, float t)
+/**
+ * Handles the rider landing: scores the trick, updates the uber meter, reacts, boosts and plays the landing sound.
+ *
+ * Takes the metrix totals before and after cRiderMetrix_evLand (On Tour cRiderMetrix::evLand(riding switch = unk_320 !=
+ * mNaturalStance, @p isPipe, @p rsm, @p pressMode)), whose result is the boost earned, and logs the landing to the replay
+ * (cReplay_eventLand with mAIIndex and the metrix stats at +0xFC). Uber tricks landed (Totals.NumUberTricks, metrix
+ * +0x114, grew) raise mUberLevel by that many, capped at 10; reaching 10 sets mUberTimer to 60.
+ *
+ * func_00111AA0 (rider-handler landing effect) gets the intersection's position/normal, its surface (+0x4C) and @p speed. A
+ * local rider (cBeing vtable slot 8, isHuman) gets a reaction through cRider_flagEventReaction: 3 (EarnComboPos) when the
+ * combo-link count (+0x134) grew, 2 (UberPos) when an uber trick landed, else 1 (Pos) when cBEStatInterface_shouldCelebrateTrick (On Tour
+ * cBEStatInterface::shouldCelebrateTrick) agrees for the points gained (Totals.TotalPoints, +0x198). Then
+ * cRider_flagEventBoostPowerUp(boost, 1), a positive boost clears mPowerUpTrickTimer, vtable slot 17 (vibrationBump)
+ * rumbles with @p speed / 2, and cSSXAudio_Land (On Tour cSSXAudio::Land) plays the landing.
+ *
+ * @param isPipe  On Tour isPipe: landing in a half-pipe
+ * @param rsm  On Tour eRailslideMode rsm: the rail-slide mode landed in
+ * @param pressMode  On Tour ePressMode: the board press held on landing
+ * @param evt  the ground intersection landed on (On Tour tIntersectInfo): position, normal, surface at +0x4C
+ * @param speed  the landing speed (On Tour speed)
+ */
+extern "C" void cRider_flagEventLand(char* self, int isPipe, int rsm, int pressMode, char* evt, float speed)
 {
     char* m = *(char**)(self + 0x790);
     int c0 = *(int*)(m + 0x114);
     int b0 = *(int*)(m + 0x134);
     int d0 = *(int*)(m + 0x198);
-    float r = cRiderMetrix_evLand(m, *(int*)(self + 0x320) != *(int*)(self + 0x324), a1, a2, a3);
+    float r = cRiderMetrix_evLand(m, *(int*)(self + 0x320) != *(int*)(self + 0x324), isPipe, rsm, pressMode);
     char* m1 = *(char**)(self + 0x790);
     int c1 = *(int*)(m1 + 0x114);
     int b1 = *(int*)(m1 + 0x134);
@@ -1656,7 +1763,7 @@ extern "C" void cRider_flagEventLand(char* self, int a1, int a2, int a3, char* e
                 *(float*)(self + 0x2F0) = 60.0f;
         }
     }
-    func_00111AA0_impl(*(void**)(self + 0x77C), evt, evt + 0x10, *(int*)(evt + 0x4C), t);
+    func_00111AA0_impl(*(void**)(self + 0x77C), evt, evt + 0x10, *(int*)(evt + 0x4C), speed);
     char* o = self + 0x6C0;
     sVE_0010E910* ve = &(*(sVE_0010E910**)o)[8];
     if (ve->fn(o + ve->delta))
@@ -1672,7 +1779,7 @@ extern "C" void cRider_flagEventLand(char* self, int a1, int a2, int a3, char* e
     if (0.0f < r)
         *(float*)(self + 0x2EC) = 0.0f;
     sVEf_0010E910* vf = &(*(sVEf_0010E910**)(self + 0x6C0))[17];
-    vf->fn(self + vf->delta, t * 0.5f);
+    vf->fn(self + vf->delta, speed * 0.5f);
     cSSXAudio_Land(gSSXAudio, self, r);
 }
 #endif
@@ -1857,16 +1964,35 @@ static inline sXf_EB30 Combine_EB30(const sXf_EB30& a, const sXf_EB30& b)
 }
 
 
-extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int a2, int a3, char* evt)
+/**
+ * Puts the rider into a wipeout: rumble, scoring, sounds, impact effect, then the wipeout animation and states.
+ *
+ * Rumbles (cBeing vtable slot 17, vibrationBump) with the hit strength (+0x30 of @p evt) * 5, takes the boost from
+ * cRiderMetrix_evWipeout (On Tour cRiderMetrix::evWipeout(@p isPunch)) and passes it to cRider_flagEventBoostPowerUp(1), plays the
+ * hit (func_00296310), a grunt and the wipeout sound (func_002961F0), and spawns the impact effect (func_00111AA0) with
+ * surface @p surf. Control state 13 is set first; a rider sliding sideways on a rail (mRailStyle 3 or 4) is turned +/-90
+ * degrees about its up axis and its anim heading offset follows.
+ *
+ * It then clears mRailStyle, channels 0, 2 and 8 and mPressType, poses the first frame of @p anim
+ * (cRiderAnimBase_getAIAnimFrame, func_0030ECD8), moves the rider so that pose's hip bone (mBoneHips) stays where it
+ * is, stores the inverse as the anim orientation offset, plays @p anim and sets control state 8 and motion state 2.
+ *
+ * @param rider  the rider wiping out (this)
+ * @param anim  the wipeout animation (On Tour tAIAnimID wipeoutAnim)
+ * @param isPunch  On Tour isPunch: the wipeout came from a punch
+ * @param surf  the surface hit (On Tour eSurfaceType surf), for the impact effect
+ * @param evt  the collision (On Tour tCollideInfo): contact point/normal at +0x0/+0x20, strength at +0x30
+ */
+extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, int surf, char* evt)
 {
     sVE_EB30* vt = *(sVE_EB30**)&rider->mVtbl;
     vt[kRiderVt_vibrationBump].fn((char*)rider + vt[kRiderVt_vibrationBump].delta, *(float*)(evt + 0x30) * 5.0f);
-    float amt = cRiderMetrix_evWipeout(rider->mMetrix, a2);
+    float amt = cRiderMetrix_evWipeout(rider->mMetrix, isPunch);
     cRider_flagEventBoostPowerUp(rider, 1, amt);
     func_00296310(func_0028B180(), rider);
     cSSXAudio_PlayGrunt(func_0028B180(), rider, 0, 0);
     func_002961F0(func_0028B180(), rider, amt);
-    func_00111AA0_impl(rider->mRiderHandler, evt, evt + 0x20, a3, *(float*)(evt + 0x30));
+    func_00111AA0_impl(rider->mRiderHandler, evt, evt + 0x20, surf, *(float*)(evt + 0x30));
     cRider_setControlState_EB30(rider, 0xD);
     if (rider->mRailStyle == 3) {
         float ang = 1.5707963705062866f;
@@ -1992,10 +2118,20 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRiderMetrix_evMissionSuccess(int, int);
 extern "C" void cBERewardInterface_awardUserBigChallenge(void*, int, int);
 
-extern "C" void cRider_flagEventMissionSuccess(void* self, int a, int b)
+/**
+ * Rewards the rider for passing a mission: shows and adds the cash, and records the challenge award.
+ *
+ * Calls cRiderMetrix_evMissionSuccess (On Tour cRiderMetrix::evMissionSuccess) on the metrix (+0x790) with @p money, then cBERewardInterface_awardUserBigChallenge (On
+ * Tour cBERewardInterface::awardUserBigChallenge) on BE interface 0xD with mAIIndex and @p peakID. On Tour adds a third
+ * argument (ML) that retail does not have.
+ *
+ * @param peakID  the peak the mission belongs to (On Tour peakID)
+ * @param money  the cash reward (On Tour money)
+ */
+extern "C" void cRider_flagEventMissionSuccess(void* self, int peakID, int money)
 {
-    cRiderMetrix_evMissionSuccess(*(int*)((char*)self + 0x790), b);
-    cBERewardInterface_awardUserBigChallenge(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(int*)((char*)self + 0x86C), a);
+    cRiderMetrix_evMissionSuccess(*(int*)((char*)self + 0x790), money);
+    cBERewardInterface_awardUserBigChallenge(cBE_getInterface_Fv(cBE_getBE(), 0xD), *(int*)((char*)self + 0x86C), peakID);
 }
 #endif
 
@@ -2195,6 +2331,17 @@ static inline float wrap_0010F560(float x)
     return x - ffloor_0010F560(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
 }
 
+/**
+ * Updates every rider's view of its opponents every sixth tick: distance, bearing and whether they are aggressive.
+ *
+ * Runs when AITick % 6 == 0. Calls func_0010F998 (On Tour cAI::UpdateRankingPlacement) first, then works on the first
+ * NumberOfRidersAllocated - NumberOfActorsAllocated riders (at least 2): each rider's range pair at +0xDC/+0xE0 is
+ * reset to -50000/50000, and for each valid pair (i, j) (rider i's opponent record j, 0x24 bytes from +0x0, field 0
+ * set) it stores the planar distance in both records, the bearing from j to i in j's record and the opposite bearing
+ * (wrapped to -pi..pi) in i's, and marks the pair aggressive when func_00155B50 (On Tour getAggression) is at least 2.
+ *
+ * Ends with cAI_UpdateAggression (On Tour cAI::UpdateAggression).
+ */
 extern "C" void cAI_UpdateGroupAI(sComputer_0010F560* self)
 {
     if (self->frame % 6 != 0) {
@@ -2250,6 +2397,14 @@ struct sComputer_0010F878
     int f80;            // 0x80
 };
 
+/**
+ * Refreshes each rider's aggression toward the others and picks a chase target.
+ *
+ * Skipped when NumberOfComputersAllocated (+0x80) is 0. For each rider i of NumberOfRidersAllocated: clears its chase
+ * flag (+0xF0) and target (+0xF8 = -1), then for every other rider j stores func_00155B50 (On Tour
+ * cBEAggressionInterface::getAggression(i, j)) in +0xFC and, at level 4 (kAGG_CHASE), sets the chase flag and target j.
+ * Only the last j's level survives in +0xFC (likely an oversight).
+ */
 extern "C" void cAI_UpdateAggression(sComputer_0010F878* self)
 {
     if (self->f80 <= 0) return;
@@ -3402,6 +3557,20 @@ static inline void vu0AddEq_112180(sVec4_00112180& dst, sVec4_00112180 b)
         : "m"(dst), "m"(b));
 }
 
+/**
+ * Attaches the rider to its start point's track and AI paths, optionally placing it at the start gate first.
+ *
+ * Gets start point mAIIndex of type 1 from gPaths (cPathSys_getStartpoint, On Tour cPathSys::getStartpoint). With @p flag the
+ * rider is put at the start position moved along the start direction by func_00115B08 (On Tour
+ * getStartGateHorizOffset), facing that direction, with AI anim 5 (cRider_putAt, putAt).
+ *
+ * Then the path hints (mAIPathHint, mTrackPathHint) are reset (+0x14 = -1), the start point's track and AI paths are
+ * stored at +0xAB4/+0xAB8, the distance to the finish (mDistToFinish and +0x4D4) is the track length (+0x38) minus the
+ * rider's position on the track path (0 if past the end), the AI path position goes to +0x4C0/+0x4C4, and the aim point
+ * +0x4A0 is the AI path point 796 units ahead.
+ *
+ * @param flag  On Tour resetPosition: also move the rider to the start gate
+ */
 extern "C" void cRider_initPath(char* self, int flag)
 {
     float* p = (float*)cPathSys_getStartpoint(gPaths, 1, *(int*)(self + 0x86C));
@@ -3457,6 +3626,18 @@ extern "C" void cRider_checkTrackPathSwitch(void* self, int a);
 extern "C" float cPath_getLength(void* self);
 extern "C" void cRider_flagEventPathEvent(void* self, int* arg, int a2, int a3);
 
+/**
+ * Tracks the rider along its track path: switches path when needed and raises the path events it enters and leaves.
+ *
+ * Copies the rider's current event list (count at +0x50C, 16-byte entries from +0x4DC) to D_004A5D60, then
+ * cRider_checkTrackPathEvents (On Tour checkTrackPathEvents) gives the distance from the path, the path position and point. While the
+ * rider has distance left (+0x4D4 > 0) it calls cRider_checkTrackPathSwitch (On Tour checkTrackPathSwitch) with 0 when more than 500
+ * off the path (only every 60th AITick), with 1 within 200 of the path's end, or with 0 when the path's vtable slot 2
+ * says to; a path change resets mTrackPathHint and re-measures.
+ *
+ * Each event in the new list is reported with cRider_flagEventPathEvent (flagEventPathEvent) as current, flagged as previous too
+ * when it was in the old list; old events no longer present are reported as previous only.
+ */
 extern "C" void cRider_updateTrackPath(char* self)
 {
     sComp_00112338* s = (sComp_00112338*)self;
@@ -3511,10 +3692,16 @@ extern "C" void cRider_updateTrackPath(char* self)
 //100%
 INCLUDE_ASM("ai/computer", cRider_calculateAheadDist);
 #ifdef SKIP_ASM
-extern "C" float cRider_calculateAheadDist(void* self, int arg1)
+/**
+ * Returns how far ahead along the path the rider aims: the normal look-ahead or a short one.
+ *
+ * @param useNormalDistance  On Tour UseNormalDistance: use the normal look-ahead distance
+ * @return 796.0 when @p useNormalDistance is set, else 200.0
+ */
+extern "C" float cRider_calculateAheadDist(void* self, int useNormalDistance)
 {
     float v = 796.0f;
-    if (arg1 == 0) {
+    if (useNormalDistance == 0) {
         v = 200.0f;
     }
     return v;
@@ -3528,6 +3715,14 @@ typedef int cQuad128 __attribute__((mode(TI)));
 //100%
 INCLUDE_ASM("ai/computer", cRider_setAimTarget);
 #ifdef SKIP_ASM
+/**
+ * Makes the path look-ahead point the rider's aim target.
+ *
+ * Copies the 16-byte vector at +0x4A0 (the look-ahead point cRider_initPath and the path updates set) to +0x4B0. On
+ * Tour's version takes a UseNormalDistance bool it never reads; retail's has no argument.
+ *
+ * @return the copied vector (an artefact of the C; the caller ignores it)
+ */
 extern "C" cQuad128 cRider_setAimTarget(void* self)
 {
     cQuad128 v = *(cQuad128*)((char*)self + 0x4A0);
@@ -3539,6 +3734,11 @@ extern "C" cQuad128 cRider_setAimTarget(void* self)
 //100%
 INCLUDE_ASM("ai/computer", cRider_isPipeJump__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the rider is doing a pipe jump; a stub that always says no.
+ *
+ * @return always 0
+ */
 int cRider_isPipeJump(void* self)
 {
     return 0;
@@ -3587,6 +3787,19 @@ static inline float atan2_001125C0(float y, float x)
     return a;
 }
 
+/**
+ * Follows the rider along its AI path: position on it, look-ahead aim point, path switching and the heading to aim for.
+ *
+ * Keeps the previous path position (+0x4C0 = +0x4C4), then intersects the rider's position (+0x110) with the AI path
+ * (+0xAB8): func_0026A638 with mAIPathHint normally, or the hint-less func_0026A428 for a pipe jump (cRider_isPipeJump__FPv,
+ * which always says no). The closest point goes to +0x490 and the distance off the path to +0x4C8. The aim point +0x4A0
+ * is the path point cRider_calculateAheadDist (calculateAheadDist) further on, and cRider_setAimTarget (setAimTarget) copies it to the
+ * aim target.
+ *
+ * While the rider still has distance left (+0x4D4 > 0) it calls cRider_checkAIPathSwitch (checkAIPathSwitch) with 0 when more than
+ * 500 off the path (only every 60th AITick), with 1 within 200 of the path's end, or with 0 when the path's vtable slot
+ * 2 says so. Finally +0x4CC = atan2 of the aim point minus the closest point (x/y).
+ */
 extern "C" void cRider_updateAIPath(char* self)
 {
     *(float*)(self + 0x4C0) = *(float*)(self + 0x4C4);
@@ -3715,6 +3928,21 @@ static inline float vu0Dot_1127F0(const sVec4_1127F0& a, const sVec4_1127F0& b)
     return r;
 }
 
+/**
+ * Picks the best track path near the rider, optionally ignoring the current one.
+ *
+ * The probe point is the rider's position (+0x110) moved along its velocity (mVelocity) by the normal look-ahead
+ * (cRider_calculateAheadDist(self, 1)), or the position itself when standing still. Up to 3 nearby track paths come from
+ * func_0026B178 (On Tour cPathSys::getNearTrackPaths). Each (except the current one when @p skipCur) is scored by the
+ * squared distance from the rider to its nearest point plus that from the probe to the point 796 further along; the
+ * lowest wins and becomes the track path (+0xAB4).
+ *
+ * For the current path, a position more than 1592 away from the expected distance-to-finish (+0x4D0) resets
+ * mTrackPathHint.
+ *
+ * @param vself  the rider (this)
+ * @param skipCur  On Tour mustSwitch: never keep the current track path
+ */
 extern "C" void cRider_checkTrackPathSwitch(void* vself, int skipCur)
 {
     char* self = (char*)vself;
@@ -3857,6 +4085,21 @@ static inline float vu0Dot_112A50(const sVec4_112A50& a, const sVec4_112A50& b)
 struct sVEi_112A50 { short delta; short index; int (*fn)(void*); };
 struct sVEf_112A50 { short delta; short index; float (*fn)(void*, void*); };
 
+/**
+ * Picks a better AI path near the rider and moves the rider onto it.
+ *
+ * The probe point is the rider's position moved 796 along its velocity (or the position when still). Up to 6 nearby AI
+ * paths come from cPathSys_getNearAIPaths (On Tour cPathSys::getNearAIPaths); a path is skipped when it is the current one and @p
+ * keep is set, or when the rider is within 200 of its end. A rider whose vtable slot 9 (isComputer) returns 1 picks the
+ * path with the highest slot-20 score (cComputer_scorePath; cPlayer_scorePath returns 0), others the one whose near and
+ * look-ahead points are closest. A winner equal to the current path counts as no change.
+ *
+ * On a change: the AI path (+0xAB8) is replaced, mAIPathHint reset, and the path position (+0x4C4 and +0x4C0), closest
+ * point (+0x490), distance off the path (+0x4C8) and aim point (+0x4A0, 796 ahead) are recomputed.
+ *
+ * @param vself  the rider (this)
+ * @param keep  On Tour mustSwitch: do not consider the current AI path
+ */
 extern "C" void cRider_checkAIPathSwitch(void* vself, int keep)
 {
     char* self = (char*)vself;
@@ -3968,6 +4211,18 @@ static inline float vu0Dot_112D58(const sVec4_112D58& a, const sVec4_112D58& b)
     return r;
 }
 
+/**
+ * Moves the rider onto the nearest reset path, ready to be put back on the course.
+ *
+ * Up to 6 reset paths near the rider (+0x110) come from cPathSys_getNearResetPaths__FPv (On Tour cPathSys::getNearResetPaths). For a
+ * non-human rider (cBeing vtable slot 8) a path within 200 of its end is skipped; each candidate is scored by the
+ * squared distance to its nearest point plus that to its reset position 796 further on (cAIPath_getResetPos), and the lowest
+ * that differs from the current AI path wins.
+ *
+ * With no AI path at all it returns; otherwise the winner (if any) becomes the AI path, mAIPathHint is reset, the path
+ * position (+0x4C4, +0x4C0) re-measured, and the closest point (+0x490) and aim point (+0x4A0, 796 on) are taken from
+ * the path's reset positions.
+ */
 extern "C" void cRider_switchToResetPath(char* self)
 {
     void* paths[6];
@@ -4025,6 +4280,20 @@ struct sVEntry_112FB0 { short delta; short index; int (*fn)(void*, float, float,
 struct tPathCheckpoint_112FB0 { int TimeBonusSec; float DistanceLeft; };
 struct sPathSys_112FB0 { char pad0[0x18]; tPathCheckpoint_112FB0 Checkpoints[6]; };
 
+/**
+ * Measures the rider's progress on its track path, fires the checkpoints it passed and gathers the events in range.
+ *
+ * Intersects the rider with the track path (+0xAB4, mTrackPathHint) and sets mDistToFinish = path length (+0x38) - path
+ * position. When the rider moved forward (below the previous distance at +0x4D4), every one of gPaths' 6 checkpoints
+ * between the old and new distance (the list ends at a zero entry) goes to cRider_flagEventPathCheckpoint (flagEventPathCheckpoint), the
+ * path's vtable slot 1 collects up to 12 events in the covered range into +0x4DC (count in mOverlapCount), and +0x4D4
+ * advances. Otherwise the same query runs on the empty range at the old distance.
+ *
+ * @param vself  the rider (this)
+ * @param pathDistXY  receives the rider's distance from the path
+ * @param pathParam  receives the rider's position along the path
+ * @param pathPos  receives the nearest point on the path
+ */
 // cRider::checkTrackPathEvents(float& pathDistXY, float& pathParam, t4Vector& pathPos) (On Tour name)
 extern "C" void cRider_checkTrackPathEvents(void* vself, float* pathDistXY, float* pathParam, sVec4_00112338* pathPos)
 {
@@ -4063,6 +4332,11 @@ extern "C" void cRider_checkTrackPathEvents(void* vself, float* pathDistXY, floa
 //100%
 INCLUDE_ASM("ai/computer", cRider_getDistanceLeft__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the distance the rider still has to go along the track path.
+ *
+ * @return mDistToFinish (+0x4D0)
+ */
 float cRider_getDistanceLeft(void* self)
 {
     return *(float*)((char*)self + 0x4D0);
@@ -4083,6 +4357,13 @@ INCLUDE_ASM("ai/computer", cAirPredictor_cAirPredictor);
 #ifdef SKIP_ASM
 extern "C" void cAirPredictor_reset(char* self);
 
+/**
+ * Constructs an air predictor: marks it unused and resets its flight state.
+ *
+ * Stores -1 at +0x30, then cAirPredictor_reset.
+ *
+ * @return this
+ */
 extern "C" void* cAirPredictor_cAirPredictor(void* self)
 {
     *(unsigned int*)((char*)self + 0x30) = 0xFFFFFFFF;
@@ -4096,6 +4377,11 @@ INCLUDE_ASM("ai/computer", cAirPredictor__cAirPredictor);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Destroys an air predictor; it owns nothing, so this only frees the object when asked.
+ *
+ * @param flags  g++ in-charge flags: bit 0 set means delete the object (operator_delete)
+ */
 extern "C" void cAirPredictor__cAirPredictor(void* self, int flags)
 {
     if (flags & 1)

@@ -1438,6 +1438,11 @@ extern "C" void func_001D8BE0(void* self)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_exitSave__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaves the memory card save flow after a successful save.
+ *
+ * Clears the flags at +0x1A8 and +0x1DC and sets +0x1C0 to 1.
+ */
 void cFEMemCard_exitSave(void* self)
 {
     *(int*)((char*)self + 0x1A8) = 0;
@@ -1710,6 +1715,13 @@ extern char str_onmenu[];
 extern "C" unsigned char cUIMenu_findFirstHighlightable(void* menu, unsigned char start);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 
+/**
+ * Highlights a valid entry of the memory card screen's menu.
+ *
+ * Finds the "onmenu" menu on the screen (+0x40). When it has no current item or the current one is disabled
+ * (flag bit 5), picks the first highlightable item; selects that index with cUIMenu_setSelectedByIndex (index 0
+ * when none is highlightable) and stores it at +0x1C4.
+ */
 extern "C" void cFEMemCard_setMenuHighlight(void* self)
 {
     void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_onmenu));
@@ -1741,6 +1753,14 @@ struct sVEntry001D9308 {
 
 extern "C" void* cSSXApp_getMCManager(void* app);
 
+/**
+ * Records whether a load was requested, and remembers the last loaded file's name when it was.
+ *
+ * Stores @p on at +0x1F4. When set, calls virtual slot 14 of the memory card manager's object (+0x434) with its
+ * +0xF8 and this screen's name buffer (+0x9C); otherwise clears the buffer's first character.
+ *
+ * @param on  nonzero when load was pressed
+ */
 extern "C" void cFEMemCard_SetLoadPressed(void* self, int on)
 {
     *(int*)((char*)self + 0x1F4) = on;

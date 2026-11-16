@@ -2068,6 +2068,18 @@ static inline void boxInit_D500(sGmBox_D500& b, const sGfxVec4& p)
 
 // Bounding box of every particle the emitter can produce over its lifetime.
 extern "C" void tParticleEmitter_calcBoundBox_D500(sGmEmit_D500* e, sGmBox_D500* out) __asm__("tParticleEmitter_calcBoundBox");
+/**
+ * Computes a bounding box for every particle the emitter can produce over its lifetime.
+ *
+ * life is the larger of +0x1C + +0x14 and +0x1C + 2 * +0x14. The box starts as the spawn-position box (vB0 + vC0 * r1 +
+ * vD0 * r2 (+ vE0 * count), r in [1, 2]); a second box bounds the velocities (v70 + v80 * r1 + v90 * r2 + vA0 * r3).
+ * Each trajectory corner is then added at time life (drag time clamped to 2.7) and at the six per-axis turning times
+ * where the drag curve t * (0.113 * t - 0.73) stops the motion (On Tour's tcx0..tcz1), when positive. Callers:
+ * tParticleEmitter_setupEmitter and cStaticEmitter_readFromReplayFrame (box at +0x160 of the static emitter).
+ *
+ * @param e    the particle emitter (this)
+ * @param out  receives the bounding box (min at +0x00, max at +0x10)
+ */
 extern "C" void tParticleEmitter_calcBoundBox_D500(sGmEmit_D500* e, sGmBox_D500* out)
 {
     float lifeA = e->f1C + e->f14;
@@ -2381,6 +2393,15 @@ void operator_delete(int* ptr);
 
 extern char D_00493160[];
 
+/**
+ * Destroys a static particle emitter: restores its vtable and frees it if asked.
+ *
+ * Stores vt_00493160 (the vtable cStaticEmitter_cStaticEmitter installs) at +0x18C, after the tParticleEmitter data,
+ * and calls operator_delete on @p flags bit 0. cParticleModifier__cParticleModifier destroys its embedded emitter
+ * (+0x50, On Tour cParticleModifier::Emitter) with flags 2.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cStaticEmitter__cStaticEmitter(int* self, int flags)
 {
     *(void**)((char*)self + 0x18C) = D_00493160;

@@ -1635,6 +1635,14 @@ void* func_00269EA0(void* self)
 //100%
 INCLUDE_ASM("bx/bxstringctor", cAIPath_populateDataWithDefaults__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives an AI path its default attributes before the path file's data is read.
+ *
+ * Path attributes (+0x38) = 0x2E and the reset-path flag (+0x3C) = 1 (On Tour PathAttributes, IsResetPath);
+ * cAIPath_populateData overwrites them from the file. The C returns the 0x2E it stores.
+ *
+ * @return 0x2E (the C's view; On Tour returns nothing)
+ */
 int cAIPath_populateDataWithDefaults(void* self)
 {
     int t0 = 0x2e;
@@ -1649,7 +1657,17 @@ INCLUDE_ASM("bx/bxstringctor", cAIPath_populateData);
 #ifdef SKIP_ASM
 extern "C" void pathREAD_tInt32(void* p);
 
-extern "C" void cAIPath_populateData(void* self, int a1, int id)
+/**
+ * Reads one attribute of an AI path from the path file's data.
+ *
+ * Id 0x64 reads the path attributes (+0x38) and id 0x65 the reset-path flag (+0x3C) with pathREAD_tInt32
+ * (pathREAD_tInt32); other ids are ignored. The C prototype of pathREAD_tInt32 leaves out the source pointer, which still
+ * reaches it in $a1 from @p data.
+ *
+ * @param data  the field's data in the path file (On Tour p)
+ * @param id  the field id: 0x64 or 0x65
+ */
+extern "C" void cAIPath_populateData(void* self, int data, int id)
 {
     if (id == 0x64) {
         pathREAD_tInt32((char*)self + 0x38);
@@ -1681,18 +1699,30 @@ struct sBXRangeListK2 {
     sBXRangeK2* entries;  // 0x4
 };
 
+/**
+ * Finds where on an AI path a rider should be reset to, near a path position, and returns that point.
+ *
+ * Starting from *@p pathParam + 50 for both bounds, every range of the path's list that contains *@p pathParam adjusts them: type 16
+ * raises the upper bound to its end, type 12 lowers the lower bound to its start, type 14 raises the lower bound to its
+ * end. *@p pathParam becomes the lower bound unless that equals *@p pathParam, then the upper one, and cPath_getPathPos (getPathPos) gives
+ * the position.
+ *
+ * @param path  the AI path (this); starts with its range list
+ * @param pathParam  in: the rider's path position; out: the reset position (On Tour param)
+ * @return the reset point on the path
+ */
 // PORT: >? and <? (g++ min/max operators).
-extern "C" sBXVec4K2 cAIPath_getResetPos(sBXPath* path, float* t)
+extern "C" sBXVec4K2 cAIPath_getResetPos(sBXPath* path, float* pathParam)
 {
     sBXRangeListK2* list = (sBXRangeListK2*)path;
-    float hi = *t + 50.0f;
+    float hi = *pathParam + 50.0f;
     float lo = hi;
     int i;
     for (i = 0; i < list->count; i++) {
         sBXRangeK2* e = &list->entries[i];
-        if (*t < e->lo)
+        if (*pathParam < e->lo)
             continue;
-        if (e->hi < *t)
+        if (e->hi < *pathParam)
             continue;
         if (e->type == 16)
             hi = e->hi >? hi;
@@ -1701,11 +1731,11 @@ extern "C" sBXVec4K2 cAIPath_getResetPos(sBXPath* path, float* t)
         else if (e->type == 14)
             lo = e->hi >? lo;
     }
-    if (lo != *t)
-        *t = lo;
+    if (lo != *pathParam)
+        *pathParam = lo;
     else
-        *t = hi;
-    return cPath_getPathPos_K2(path, 0, *t);
+        *pathParam = hi;
+    return cPath_getPathPos_K2(path, 0, *pathParam);
 }
 #endif
 
@@ -1737,6 +1767,11 @@ extern "C" int func_0026A000(sTable_0026A000* table, float x) {
 //100%
 INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateDataWithDefaults__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives a track path its default attribute before the path file's data is read.
+ *
+ * +0x38 = 0 (On Tour stores the float 0.0).
+ */
 void cTrackPath_populateDataWithDefaults(void* self)
 {
     *(int*)((char*)self + 0x38) = 0;
@@ -1748,9 +1783,18 @@ extern "C" void func_0026BA88(void*);
 //100%
 INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateData);
 #ifdef SKIP_ASM
-extern "C" void cTrackPath_populateData(void* self, int a1, int a2)
+/**
+ * Reads a track path's attribute from the path file's data.
+ *
+ * Only field id 0 is used: func_0026BA88 (On Tour pathREAD_float) reads the base distance left (+0x38). As in
+ * cAIPath_populateData, the source pointer reaches the reader in $a1 though the C prototype leaves it out.
+ *
+ * @param data  the field's data in the path file (On Tour p)
+ * @param fieldId  the field id; only 0 is read
+ */
+extern "C" void cTrackPath_populateData(void* self, int data, int fieldId)
 {
-    if (a2 == 0) {
+    if (fieldId == 0) {
         func_0026BA88((char*)self + 0x38);
     }
 }
@@ -1775,10 +1819,22 @@ struct sBXRangeList {
 
 extern "C" int cPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int maxOut, float lo, float hi);
 
-extern "C" int cTrackPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int maxOut, float a, float b)
+/**
+ * Collects the track path's events between two distances from the finish.
+ *
+ * Calls cPath_getEventsInRange (cPath::getEventsInRange) with base - @p ldist and base - @p hdist, where base is the path's distance
+ * left at its start (+0x38).
+ *
+ * @param out  receives the events (On Tour events)
+ * @param maxOut  the most events to return (On Tour maxEvents)
+ * @param ldist  the first distance from the finish (On Tour ldist)
+ * @param hdist  the second distance from the finish (On Tour hdist)
+ * @return the number of events written
+ */
+extern "C" int cTrackPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int maxOut, float ldist, float hdist)
 {
     float base = self->field_0x38;
-    return cPath_getEventsInRange(self, out, maxOut, base - a, base - b);
+    return cPath_getEventsInRange(self, out, maxOut, base - ldist, base - hdist);
 }
 #endif
 
@@ -1788,18 +1844,28 @@ INCLUDE_ASM("bx/bxstringctor", cTrackPath_isForkInPath);
 extern "C" float cPath_getLength(void* self);
 extern "C" int cPath_isForkInPath(sBXRangeList* self, float lo, float hi);
 
-extern "C" int cTrackPath_isForkInPath(sBXRangeList* self, float a, float b)
+/**
+ * Tells whether the track path forks between two distances from the finish.
+ *
+ * Low = base (+0x38) - @p ldist, or 0 when @p ldist is negative; high = base - @p hdist, or cPath_getLength (the path length) when @p
+ * b is negative; then cPath_isForkInPath (cPath::isForkInPath).
+ *
+ * @param ldist  the first distance from the finish; negative for the path start (On Tour ldist)
+ * @param hdist  the second distance from the finish; negative for the path end (On Tour hdist)
+ * @return nonzero when there is a fork in that stretch
+ */
+extern "C" int cTrackPath_isForkInPath(sBXRangeList* self, float ldist, float hdist)
 {
     float lo;
     float hi;
-    if (a >= 0.0f)
-        lo = self->field_0x38 - a;
+    if (ldist >= 0.0f)
+        lo = self->field_0x38 - ldist;
     else
         lo = 0.0f;
-    if (b < 0.0f)
+    if (hdist < 0.0f)
         hi = cPath_getLength(self);
     else
-        hi = self->field_0x38 - b;
+        hi = self->field_0x38 - hdist;
     return cPath_isForkInPath(self, lo, hi);
 }
 #endif
@@ -2301,19 +2367,29 @@ struct sBXSeg16 {
     float fC;
 };
 
-extern "C" sBXSeg16* cPath_getPathHeading(sBXSeg16* out, void* self, float t)
+/**
+ * Returns the direction of the path at a given position along it.
+ *
+ * Subtracts segment lengths (+0xC of each 16-byte segment at +0x18) until @p pathParam falls inside one, or the last segment is
+ * reached, and returns that segment's direction (x, y, z, 0).
+ *
+ * @param out  receives the direction (the hidden return value)
+ * @param pathParam  the position along the path (On Tour param)
+ * @return @p out
+ */
+extern "C" sBXSeg16* cPath_getPathHeading(sBXSeg16* out, void* self, float pathParam)
 {
     int i = 0;
     for (;;) {
         sBXSeg16* e = &(*(sBXSeg16**)((char*)self + 0x18))[i];
-        if (i == *(int*)((char*)self + 0x8) - 1 || t <= e->fC) {
+        if (i == *(int*)((char*)self + 0x8) - 1 || pathParam <= e->fC) {
             out->f0 = e->f0;
             out->f4 = e->f4;
             out->f8 = e->f8;
             *(int*)&out->fC = 0;
             goto done;
         }
-        t -= e->fC;
+        pathParam -= e->fC;
         i++;
     }
 done:
@@ -2419,6 +2495,18 @@ extern "C" float func_0026A9B0(sBXBox* self, float* point)
 //100%
 INCLUDE_ASM("bx/bxstringctor", cPath_getEventsInRange);
 #ifdef SKIP_ASM
+/**
+ * Collects the path events whose ranges overlap a stretch of the path.
+ *
+ * Returns 0 when @p hi < @p lo; otherwise copies each 16-byte event whose [min, max] overlaps [@p lo, @p hi] from the
+ * list (count +0x0, entries +0x4), stopping at @p maxOut.
+ *
+ * @param out  receives the events (On Tour events)
+ * @param maxOut  the most events to return (On Tour maxEvents)
+ * @param lo  the start of the stretch (On Tour l)
+ * @param hi  the end of the stretch (On Tour h)
+ * @return the number of events written
+ */
 extern "C" int cPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int maxOut, float lo, float hi)
 {
     int n;
@@ -2508,7 +2596,18 @@ static inline sBXVec4 bxVu0Add(const sBXVec4& a, sBXVec4 b)
     return r;
 }
 
-extern "C" sBXVec4 cPath_getPathPos(sBXPath* self, int* inRange, float t)
+/**
+ * Returns the point at a given distance along the path.
+ *
+ * From the start point (+0xC, w = 1) adds each segment's direction times its length until @p pathParam falls inside a segment,
+ * then returns start + direction * remainder. Past the last segment it returns the end point and clears *@p inRange. A
+ * negative @p pathParam extrapolates backwards from the start and still reports on-path.
+ *
+ * @param inRange  optional; set to 1 when the position is on the path, 0 past its end (On Tour isOnPath)
+ * @param pathParam  the distance along the path (On Tour param)
+ * @return the position (w = 1)
+ */
+extern "C" sBXVec4 cPath_getPathPos(sBXPath* self, int* inRange, float pathParam)
 {
     sBXVec4 pos;
     pos.x = self->x;
@@ -2527,10 +2626,10 @@ extern "C" sBXVec4 cPath_getPathPos(sBXPath* self, int* inRange, float t)
             return pos;
         }
         float len = seg->len;
-        if (t < len) {
-            return bxVu0Add(pos, bxVu0ScaleDir(*seg, t));
+        if (pathParam < len) {
+            return bxVu0Add(pos, bxVu0ScaleDir(*seg, pathParam));
         }
-        t -= len;
+        pathParam -= len;
         i++;
         bxVu0AddEq(pos, bxVu0ScaleDir(*seg, len));
     }
@@ -2547,6 +2646,13 @@ struct sBXElem16 {
     float fC;
 };
 
+/**
+ * Returns the total length of the path.
+ *
+ * Sum of the length (+0xC) of each of the +0x8 segments at +0x18.
+ *
+ * @return the path length
+ */
 extern "C" float cPath_getLength(void* self)
 {
     int n = *(int*)((char*)self + 0x8);
@@ -2562,6 +2668,16 @@ extern "C" float cPath_getLength(void* self)
 //100%
 INCLUDE_ASM("bx/bxstringctor", cPath_isForkInPath);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a fork event lies within a stretch of the path.
+ *
+ * Scans the event list (count +0x0, entries +0x4) for an entry of type 0x12 or 0x14 whose [min, max] overlaps [@p lo,
+ * @p hi].
+ *
+ * @param lo  the start of the stretch (On Tour l)
+ * @param hi  the end of the stretch (On Tour h)
+ * @return 1 when a fork is found
+ */
 extern "C" int cPath_isForkInPath(sBXRangeList* self, float lo, float hi)
 {
     int i;
@@ -2703,6 +2819,12 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_purgePaths);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
+/**
+ * Frees the loaded path data of the path system.
+ *
+ * Deletes the arrays at +0xC and +0x14 if present and the one at +0x48 if present and owned (+0x4C), then nulls them
+ * and clears +0x4C.
+ */
 extern "C" void cPathSys_purgePaths(void* self)
 {
     if (*(void**)((char*)self + 0xC) != 0)
@@ -2747,6 +2869,17 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_getNearResetPaths__FPv);
 int cPathSys_getNearAIPaths_impl(void* self, void* a1, void** out, int maxOut, int flag) __asm__("cPathSys_getNearAIPaths");
 int cPathSys_getNearResetPaths_impl(void* self, void* a1, void** out, int maxOut) __asm__("cPathSys_getNearResetPaths__FPv");
 
+/**
+ * Lists the reset paths nearest to a position.
+ *
+ * cPathSys_getNearAIPaths with the last argument 1. The C definition is cPathSys_getNearResetPaths_impl, bound to the
+ * symbol cPathSys_getNearResetPaths__FPv by asm label because the mangled name says (void *).
+ *
+ * @param a1  the position (On Tour pos)
+ * @param out  receives the paths (On Tour pathList)
+ * @param maxOut  the most paths to return (On Tour maxListLen)
+ * @return the number of paths written
+ */
 int cPathSys_getNearResetPaths_impl(void* self, void* a1, void** out, int maxOut)
 {
     return cPathSys_getNearAIPaths_impl(self, a1, out, maxOut, 1);
@@ -2774,6 +2907,22 @@ struct cPathSys_AFB8 {
     cAIPath_AFB8* AIPaths;     // 0xC
 };
 
+/**
+ * Lists the AI paths nearest to a position, those containing it first.
+ *
+ * Proximity of each path comes from func_0026A9B0; with @p onlyResetPaths a path whose +0x3C flag is clear gets 1e37.
+ * Paths at proximity 0 (containing @p pos) are listed first; the list is then filled with the remaining nearest paths.
+ * Likely bugs: the fill loop does not skip the 1e37 entries, so it can return non-reset paths and repeat paths already
+ * listed when fewer suitable paths exist than requested; the proximity buffer is a fixed 200 floats with no check
+ * against the path count.
+ *
+ * @param vself  the path system (this)
+ * @param pos  the position
+ * @param pathList  receives the paths
+ * @param maxListLen  the most paths to return; clamped to the path count
+ * @param onlyResetPaths  nonzero to consider only reset paths
+ * @return the number of paths written
+ */
 // cPathSys::getNearAIPaths (On Tour name): up to maxListLen AI paths nearest to pos
 // (paths containing it first), nearest first; returns how many.
 int cPathSys_getNearAIPaths_impl(void* vself, float* pos, void** pathList, int maxListLen, int onlyResetPaths)

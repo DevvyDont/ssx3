@@ -1001,6 +1001,14 @@ struct sMpQuad {
 extern sMpQuad t4vect_Zero;
 extern "C" void cMoveNode_updateIntersectInfo(void* self, void* out);
 
+/**
+ * Fills an intersection with a combo node: the plain cMoveNode result with no velocity.
+ *
+ * Calls cMoveNode_updateIntersectInfo() on the cMoveNode part (+0x48), then sets the info's velocity (+0x20) and
+ * angular velocity (+0x30) to t4vect_Zero: unlike cAnimNode's version, the animation's motion is not passed on.
+ *
+ * @param out  the intersection info (On Tour tIntersectInfo& intInfo)
+ */
 extern "C" void cAnimComboNode_updateIntersectInfo(void* self, void* out)
 {
     cMoveNode_updateIntersectInfo((char*)self + 0x48, out);
@@ -1200,6 +1208,13 @@ struct sMp_9140 {
 extern "C" void cAnimNode_cacheFrame(void* self);
 extern "C" void cMeshAnimFrame_transform(sMpItem_9140* item, sMpMtx_9140* mtx);
 
+/**
+ * Caches a combo node's animation frame and applies its combo transforms to every animated mesh.
+ *
+ * Runs cAnimNode_cacheFrame on the cAnimNode part (+0x34) first. If there are frames (+0x7C) and the node is in combo mode
+ * (+0x14 set, or both +0x17 and +0x15 set), each mesh of the instance's model (+0x60, model +0x80) that has an
+ * animation (part info +0x1C) gets its frame transformed by the next ComboXform matrix (+0x84) with cMeshAnimFrame_transform.
+ */
 extern "C" void cAnimComboNode_cacheFrame(sMp_9140* self)
 {
     cAnimNode_cacheFrame((char*)self + 0x34);

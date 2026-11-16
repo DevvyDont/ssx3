@@ -82,10 +82,24 @@ static inline int tex_1D10(sRCtx_1D10* c, int i)
 
 extern sDrawState sDrawState_s_defaultDrawState;
 
+/**
+ * Draws a light halo sprite at a world position.
+ *
+ * Returns early when the graphics manager's virtual slot 91 says the position is hidden. Otherwise pushes a copy of the
+ * default draw state with additive-style blend bits, binds texture @p kind + 0x25 and draws a @p size square sprite in
+ * the colour @p src: rotated by @p angle degrees through virtual slot 79 (a second, counter-rotated sprite for kinds 1
+ * and 4) or unrotated through slot 78. The draw state is popped at the end.
+ *
+ * @param obj  the halo's world position (On Tour P)
+ * @param src  the colour as r, g, b, a floats (On Tour color)
+ * @param kind  halo type; selects the texture (On Tour type)
+ * @param size  sprite width and height (On Tour Radius)
+ * @param angle  rotation in degrees, 0 for none (On Tour Angle)
+ */
 extern "C" void cObjectInterface_renderSimpleLightHalo(void* obj, float* src, int kind, float size, float angle)
 {
-    cPS2GraphicsMan* g = GrMan;
-    if (((IsHiddenFn_1D10)((sVE_1D10*)g->mVtbl)[91].fn)((char*)g + ((sVE_1D10*)g->mVtbl)[91].delta, obj) != 0) {
+    cPS2GraphicsMan* ps2GraphicsMan = GrMan;
+    if (((IsHiddenFn_1D10)((sVE_1D10*)ps2GraphicsMan->mVtbl)[91].fn)((char*)ps2GraphicsMan + ((sVE_1D10*)ps2GraphicsMan->mVtbl)[91].delta, obj) != 0) {
         return;
     }
     sCol_1D10 col;
@@ -127,15 +141,15 @@ extern char D_828[];
 struct sQ128 { float v[4]; } __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version.
-extern "C" int func_002D2058(sQ128* v)
+extern "C" int func_002D2058(sQ128* box)
 {
     char* inst = (char*)(void*)SSXApp->Game->OcclusionMan;
     int mask = *(int*)(inst + 0x110);
     for (int i = 0; i < *(int*)(inst + 0x10C); i++) {
         int bit = 1 << i;
         if (mask & bit) {
-            sQ128* m = (sQ128*)(*(char**)(inst + 8 + i * 8) + 0x50);
-            int r;
+            sQ128* occluder = (sQ128*)(*(char**)(inst + 8 + i * 8) + 0x50);
+            int result;
             __asm__ __volatile__(
                 ".set push\n"
                 ".set noreorder\n"
@@ -151,10 +165,10 @@ extern "C" int func_002D2058(sQ128* v)
                 "vcallmsr  $vi27\n"
                 "cfc2.i    %0, $vi1\n"
                 ".set pop\n"
-                : "=&r"(r)
-                : "m"(m[0]), "m"(m[1]), "m"(m[2]), "m"(m[3]), "m"(m[4]), "m"(*v), "r"((int)D_828 >> 3)
+                : "=&r"(result)
+                : "m"(occluder[0]), "m"(occluder[1]), "m"(occluder[2]), "m"(occluder[3]), "m"(occluder[4]), "m"(*box), "r"((int)D_828 >> 3)
                 : "memory");
-            int ok = r == 1;
+            int ok = result == 1;
             if (ok) return 1;
         }
     }
@@ -205,9 +219,9 @@ INCLUDE_ASM("util/objectinterface", func_002D2148);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern long long t4vect_Zero;
 
-extern "C" long long *func_002D2148(long long *arg0) {
-    *arg0 = t4vect_Zero;
-    return arg0;
+extern "C" long long *func_002D2148(long long *vec) {
+    *vec = t4vect_Zero;
+    return vec;
 }
 #endif
 //100%
@@ -216,9 +230,9 @@ INCLUDE_ASM("util/objectinterface", func_002D2160);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern long long t4vect_Zero;
 
-extern "C" long long *func_002D2160(long long *arg0) {
-    *arg0 = t4vect_Zero;
-    return arg0;
+extern "C" long long *func_002D2160(long long *vec) {
+    *vec = t4vect_Zero;
+    return vec;
 }
 #endif
 //100%
@@ -227,9 +241,9 @@ INCLUDE_ASM("util/objectinterface", func_002D2178);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern long long t4vect_Zero;
 
-extern "C" long long *func_002D2178(long long *arg0) {
-    *arg0 = t4vect_Zero;
-    return arg0;
+extern "C" long long *func_002D2178(long long *vec) {
+    *vec = t4vect_Zero;
+    return vec;
 }
 #endif
 //100%
@@ -250,6 +264,9 @@ extern "C" float func_002D21A0(void) {
 //100%
 INCLUDE_ASM("util/objectinterface", cSSXStatsMan_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Per-frame update of the stats manager; does nothing in this build.
+ */
 void cSSXStatsMan_update(void* self)
 {
 }
@@ -258,6 +275,9 @@ void cSSXStatsMan_update(void* self)
 //100%
 INCLUDE_ASM("util/objectinterface", cSSXStatsMan_render__FPv);
 #ifdef SKIP_ASM
+/**
+ * Renders the stats manager; does nothing in this build.
+ */
 void cSSXStatsMan_render(void* self)
 {
 }
@@ -287,16 +307,16 @@ union uFloatBits_002D21D0 {
     unsigned int u;
 };
 
-int func_002D21D0_impl(signed char **stream, float v)
+int func_002D21D0_impl(signed char **stream, float value)
 {
-    uFloatBits_002D21D0 b;
-    b.f = v;
-    unsigned int bits = b.u;
-    signed char *p = *stream;
-    p[0] = bits;
-    p[1] = bits >> 8;
-    p[2] = bits >> 16;
-    p[3] = bits >> 24;
+    uFloatBits_002D21D0 floatBits;
+    floatBits.f = value;
+    unsigned int bits = floatBits.u;
+    signed char *cursor = *stream;
+    cursor[0] = bits;
+    cursor[1] = bits >> 8;
+    cursor[2] = bits >> 16;
+    cursor[3] = bits >> 24;
     *stream += 4;
     return 4;
 }
@@ -304,13 +324,13 @@ int func_002D21D0_impl(signed char **stream, float v)
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D2210);
 #ifdef SKIP_ASM
-extern "C" int func_002D2210(signed char **stream, unsigned int v)
+extern "C" int func_002D2210(signed char **stream, unsigned int value)
 {
-    signed char *p = *stream;
-    p[0] = v;
-    p[1] = v >> 8;
-    p[2] = v >> 16;
-    p[3] = v >> 24;
+    signed char *cursor = *stream;
+    cursor[0] = value;
+    cursor[1] = value >> 8;
+    cursor[2] = value >> 16;
+    cursor[3] = value >> 24;
     *stream += 4;
     return 4;
 }
@@ -320,11 +340,11 @@ INCLUDE_ASM("util/objectinterface", func_002D2248);
 #ifdef SKIP_ASM
 extern "C" void func_002D21D0(void* self, float v);
 
-extern "C" int func_002D2248(void* self, float* v)
+extern "C" int func_002D2248(void* self, float* vec3)
 {
     int i;
     for (i = 0; i < 3; i++) {
-        func_002D21D0(self, v[i]);
+        func_002D21D0(self, vec3[i]);
     }
     return 0xC;
 }
@@ -334,11 +354,11 @@ INCLUDE_ASM("util/objectinterface", func_002D22A8);
 #ifdef SKIP_ASM
 extern "C" void func_002D21D0(void* self, float v);
 
-extern "C" int func_002D22A8(void* self, float* v)
+extern "C" int func_002D22A8(void* self, float* vec4)
 {
     int i;
     for (i = 0; i < 4; i++) {
-        func_002D21D0(self, v[i]);
+        func_002D21D0(self, vec4[i]);
     }
     return 0x10;
 }
@@ -348,11 +368,11 @@ INCLUDE_ASM("util/objectinterface", func_002D2308);
 #ifdef SKIP_ASM
 extern "C" void func_002D21D0(void* self, float v);
 
-extern "C" int func_002D2308(void* self, float* v)
+extern "C" int func_002D2308(void* self, float* matrix)
 {
     int i;
     for (i = 0; i < 16; i++) {
-        func_002D21D0(self, v[i]);
+        func_002D21D0(self, matrix[i]);
     }
     return 0x40;
 }
@@ -362,21 +382,21 @@ INCLUDE_ASM("util/objectinterface", func_002D2368);
 #ifdef SKIP_ASM
 extern "C" void func_002D21D0(void* self, float v);
 
-extern "C" int func_002D2368(void* self, float* q)
+extern "C" int func_002D2368(void* self, float* quat)
 {
-    func_002D21D0(self, q[3]);
-    func_002D21D0(self, q[0]);
-    func_002D21D0(self, q[1]);
-    func_002D21D0(self, q[2]);
+    func_002D21D0(self, quat[3]);
+    func_002D21D0(self, quat[0]);
+    func_002D21D0(self, quat[1]);
+    func_002D21D0(self, quat[2]);
     return 0x10;
 }
 #endif
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D23C8);
 #ifdef SKIP_ASM
-extern "C" int func_002D23C8(signed char **arg0, signed char arg1) {
-    **arg0 = arg1;
-    *arg0 += 1;
+extern "C" int func_002D23C8(signed char **stream, signed char value) {
+    **stream = value;
+    *stream += 1;
     return 1;
 }
 #endif
@@ -386,12 +406,12 @@ INCLUDE_ASM("util/objectinterface", func_002D23E8);
 extern "C" int func_002D23C8(signed char **arg0, signed char arg1);
 extern "C" unsigned int strlen(const char* s);
 
-extern "C" int func_002D23E8(signed char** out, const char* s)
+extern "C" int func_002D23E8(signed char** out, const char* str)
 {
     unsigned int i;
     int n = 0;
-    for (i = 0; i < strlen(s); i++) {
-        n += func_002D23C8(out, s[i]);
+    for (i = 0; i < strlen(str); i++) {
+        n += func_002D23C8(out, str[i]);
     }
     func_002D23C8(out, 0);
     return n + 1;

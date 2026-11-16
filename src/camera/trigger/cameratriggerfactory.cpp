@@ -6170,6 +6170,15 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
 
+/**
+ * Tells whether a location can be a World Championship backcountry (WC BAM) start location.
+ *
+ * True when cBENewRaceInterface_getLocationType (On Tour cBENewRaceInterface::getLocationType) on the new-race interface
+ * (cBE_getInterface 0) returns 1 for @p id, or when @p id is 14, 15 or 16.
+ *
+ * @param id  the location (On Tour eBELocationID)
+ * @return 1 for a WC BAM start location, otherwise 0
+ */
 extern "C" int cTrackFileMan_testWCBAMStartLocation(void* self, int id)
 {
     if (cBENewRaceInterface_getLocationType(cBE_getInterface_Fv(cBE_getBE(), 0), id) == 1) {
@@ -6196,6 +6205,16 @@ struct cTrackFileMan_getNextWCBAMStartLocation_sMgr {
     cTrackFileMan_getNextWCBAMStartLocation_sEntry entries[1];
 };
 
+/**
+ * Finds the next location after @p i that is a WC BAM start location, wrapping around.
+ *
+ * Returns -1 when the manager has no such locations (+0x8C08, On Tour NumWCBAMStartLocations); otherwise steps
+ * forward modulo NumLocations (+0x0) until an entry's WC-BAM-start flag (entry +0x88) is set. Loops forever if the
+ * count is nonzero but no flag is set.
+ *
+ * @param i  the current location index
+ * @return the next WC BAM start location index, or -1
+ */
 extern "C" int cTrackFileMan_getNextWCBAMStartLocation(cTrackFileMan_getNextWCBAMStartLocation_sMgr* self, int i)
 {
     if (*(int*)((char*)self + 0x8C08) == 0) {
@@ -6212,6 +6231,15 @@ extern "C" int cTrackFileMan_getNextWCBAMStartLocation(cTrackFileMan_getNextWCBA
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getPrevWCBAMStartLocation);
 #ifdef SKIP_ASM
+/**
+ * Finds the previous location before @p i that is a WC BAM start location, wrapping around.
+ *
+ * Returns -1 when the manager has no such locations (+0x8C08); otherwise steps backward modulo NumLocations until
+ * an entry's WC-BAM-start flag (entry +0x88) is set.
+ *
+ * @param i  the current location index
+ * @return the previous WC BAM start location index, or -1
+ */
 extern "C" int cTrackFileMan_getPrevWCBAMStartLocation(cTrackFileMan_getNextWCBAMStartLocation_sMgr* self, int i)
 {
     if (*(int*)((char*)self + 0x8C08) == 0) {
@@ -6235,6 +6263,18 @@ extern "C" int cBENewRaceInterface_getLocationType(void* iface, int id);
 
 // PORT: the unit also declares this with a pointer third argument; defined under an asm label with its real type
 extern "C" int cTrackFileMan_legalTrackMode_impl(int* list, int idx, int kind) __asm__("cTrackFileMan_legalTrackMode");
+/**
+ * Tells whether a location may be raced in a game mode (debug menu track picker).
+ *
+ * Out-of-range @p idx gives 0. Otherwise the entry's location id (entry +0x80) must fall in the mode's peak range:
+ * mode 0 ids 0..4, 1 ids 5..7, 2 ids 8..10, 3 ids 11..13, 5 and 6 ids 14..16; mode 4 accepts any location for
+ * which cBENewRaceInterface_getLocationType (On Tour cBENewRaceInterface::getLocationType) returns 0. Other modes give 0.
+ *
+ * @param list  the track file manager (this)
+ * @param idx   the location index
+ * @param kind  the game mode (On Tour eBEGameMode)
+ * @return 1 when the location is legal for the mode, otherwise 0
+ */
 extern "C" int cTrackFileMan_legalTrackMode_impl(int* list, int idx, int kind)
 {
     if (idx >= 0 && idx < list[0]) {
@@ -6270,6 +6310,15 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getNextLocation
 #ifdef SKIP_ASM
 extern "C" int cTrackFileMan_legalTrackMode(int* self, int i, void* key);
 
+/**
+ * Finds the next location after @p start that is legal for a game mode, wrapping around.
+ *
+ * Tries each index once, starting at (@p start + 1) mod NumLocations, with cTrackFileMan_legalTrackMode.
+ *
+ * @param start  the current location index
+ * @param key    the game mode (On Tour eBEGameMode)
+ * @return the next legal location index, or -1 when none is legal
+ */
 // Circular search: first index after `start` for which cTrackFileMan_legalTrackMode matches.
 extern "C" int cTrackFileMan_getNextLocation(int* self, int start, void* key)
 {
@@ -6289,6 +6338,15 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_getPrevLocation
 #ifdef SKIP_ASM
 extern "C" int cTrackFileMan_legalTrackMode(int* self, int i, void* key);
 
+/**
+ * Finds the previous location before @p start that is legal for a game mode, wrapping around.
+ *
+ * Tries each index once, starting at (@p start + NumLocations - 1) mod NumLocations, with cTrackFileMan_legalTrackMode.
+ *
+ * @param start  the current location index
+ * @param key    the game mode (On Tour eBEGameMode)
+ * @return the previous legal location index, or -1 when none is legal
+ */
 // Circular search backwards: first index before `start` for which cTrackFileMan_legalTrackMode matches.
 extern "C" int cTrackFileMan_getPrevLocation(int* self, int start, void* key)
 {
@@ -6443,6 +6501,14 @@ extern "C" int cTrackFileMan_testWCBAMStartLocation_A638(void* self, int id) __a
 extern "C" char* strcpy(char* d, const char* s);
 extern char* str_BAM_b[];
 
+/**
+ * Builds the debug menu's location table from the race locations present on disc.
+ *
+ * Zeroes NumLocations (+0x0), the BAM and WC-BAM-start counts and the 256-entry table (0x8C bytes each), asks
+ * func_0017A978 (On Tour checkLocation) which of the 0x16 location files (cBENewRaceInterface_getLocationFile)
+ * exist, and for each one found copies its file name, records its location id, marks it a BAM location and,
+ * when cTrackFileMan_testWCBAMStartLocation says so, a WC BAM start. On Tour's second pass for separate "%sBAM" files is not here.
+ */
 extern "C" void cTrackFileMan_scanLocations(sCamMgr* self)
 {
     sCamName names[0x18];
@@ -6662,6 +6728,13 @@ extern "C" int func_0017A978(void* selfp, int n, void* namesp, char* tag)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBackgroundMan_cBackgroundMan__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs an empty background-image manager.
+ *
+ * Zeroes the texture id array (+0x0) and image count (+0x4) and sets the active image (+0x8) to -1 (none).
+ *
+ * @return @p self
+ */
 void* cBackgroundMan_cBackgroundMan(void* self)
 {
     int t0 = 0;
@@ -6689,6 +6762,14 @@ struct sIdList_0017ABE0 {
     int count;
 };
 
+/**
+ * Destroys a background-image manager: releases its textures and the id array.
+ *
+ * For each of the count (+0x4) texture ids (+0x0) that is not negative, calls GrMan's virtual slot 50 (On Tour
+ * RemoveTexture) with it, then frees the array with cMemMan_free and the object itself when @p flags bit 0 is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cBackgroundMan__cBackgroundMan(sIdList_0017ABE0* self, int flags)
 {
     if (self->ids != 0)

@@ -555,6 +555,14 @@ static inline void SetColor_C66E8(char* o, sQuad_58E8* c)
 }
 
 extern "C" void cScreenPopup_setupBackgroundType_impl(char* self) __asm__("cScreenPopup_setupBackgroundType");
+/**
+ * Shows the widgets of the popup's background style and hides the others.
+ *
+ * Switches on the background type (meBackgroundType, +0x31C, which cScreenPopup_initScreenPopup sets just before
+ * the call): each style shows its frame pieces with cScreenPopup_showWidgetSafe, hides the rest with cScreenPopup_hideWidgetSafe, colours the
+ * frame widgets (+0x74..+0x80) through virtual slot 11 and sets the popup's text and back colours (+0x32C, +0x33C)
+ * from gPopupWhite/gPopupBlack.
+ */
 extern "C" void cScreenPopup_setupBackgroundType_impl(char* self)
 {
     switch (*(int*)(self + 0x31C)) {
@@ -1142,6 +1150,14 @@ extern "C" float dptofp(double d);
 // PORT: SN soft-float helpers called by name (fptodp / dpmul / dptofp); on PC: (float)((double)(...) * 1.05)
 extern "C" double dpmul(double a, double b);
 
+/**
+ * Works out how much to stretch the popup background to fit content of a given size.
+ *
+ * For the current background type (+0x31C), divides the content size plus that style's margin by the style's
+ * base size and stores the x and y scales at +0x278 and +0x27C (one style also widens x by 5%).
+ *
+ * @param pos  the content size (On Tour vSize)
+ */
 // Converts a screen position into the popup's normalised scroll position for the current layout.
 extern "C" void cScreenPopup_determineAndSetScaling(void* self, t3Vector pos)
 {
@@ -1248,7 +1264,17 @@ extern "C" double fptodp(float f);
 extern "C" double dpsub(double a, double b);
 extern "C" float dptofp(double d);
 
-extern "C" void cScreenPopup_resizeBackground(void* self, sVec3_78C0 v, float a, float b)
+/**
+ * Moves the background frame pieces to wrap content of a given size at an offset.
+ *
+ * For the current background type (+0x31C), places each existing frame widget (+0x48, +0x4C, ...) from its base
+ * position (+0x188...) shifted by @p fXOffset and positioned vertically from @p fYOffset and half the content height.
+ *
+ * @param vSize  the content size (On Tour vSize)
+ * @param fXOffset  horizontal offset
+ * @param fYOffset  vertical offset
+ */
+extern "C" void cScreenPopup_resizeBackground(void* self, sVec3_78C0 vSize, float fXOffset, float fYOffset)
 {
     char* s = (char*)self;
     float y = 0.0f;
@@ -1256,48 +1282,48 @@ extern "C" void cScreenPopup_resizeBackground(void* self, sVec3_78C0 v, float a,
     case 0:
         if (*(char**)(s + 0x48) != 0) {
             sVec3_78C0 p = *(sVec3_78C0*)(s + 0x188);
-            y = *(float*)(s + 0x1BC) + b + v.y * 0.5f - 5.0f;
-            p.x += a;
+            y = *(float*)(s + 0x1BC) + fYOffset + vSize.y * 0.5f - 5.0f;
+            p.x += fXOffset;
             p.y = y;
             *(sVec3_78C0*)(*(char**)(s + 0x48) + 0x44) = p;
         }
         if (*(char**)(s + 0x4C) != 0) {
             sVec3_78C0 p = *(sVec3_78C0*)(s + 0x194);
             p.y = y;
-            p.x += a;
+            p.x += fXOffset;
             *(sVec3_78C0*)(*(char**)(s + 0x4C) + 0x44) = p;
         }
         break;
     case 1:
         if (*(char**)(s + 0x58) != 0) {
             sVec3_78C0 p = *(sVec3_78C0*)(s + 0x23C);
-            y = dptofp(dpsub(fptodp(*(float*)(s + 0x1BC) + b + v.y * 0.5f), 7.5));
-            p.x += a;
+            y = dptofp(dpsub(fptodp(*(float*)(s + 0x1BC) + fYOffset + vSize.y * 0.5f), 7.5));
+            p.x += fXOffset;
             p.y = y;
             *(sVec3_78C0*)(*(char**)(s + 0x58) + 0x44) = p;
         }
         if (*(char**)(s + 0x5C) != 0) {
             sVec3_78C0 p = *(sVec3_78C0*)(s + 0x248);
             p.y = y;
-            p.x += a;
+            p.x += fXOffset;
             *(sVec3_78C0*)(*(char**)(s + 0x5C) + 0x44) = p;
         }
         if (*(char**)(s + 0x50) != 0) {
             sVec3_78C0 p = *(sVec3_78C0*)(s + 0x224);
             p.y = y;
-            p.x += a;
+            p.x += fXOffset;
             *(sVec3_78C0*)(*(char**)(s + 0x50) + 0x44) = p;
         }
         if (*(char**)(s + 0x54) != 0) {
             sVec3_78C0 p = *(sVec3_78C0*)(s + 0x230);
             p.y = y;
-            p.x += a;
+            p.x += fXOffset;
             *(sVec3_78C0*)(*(char**)(s + 0x54) + 0x44) = p;
         }
         if (*(char**)(s + 0x60) != 0) {
             sVec3_78C0 p = *(sVec3_78C0*)(s + 0x254);
             p.y = y;
-            p.x += a;
+            p.x += fXOffset;
             *(sVec3_78C0*)(*(char**)(s + 0x60) + 0x44) = p;
         }
         break;
@@ -1334,6 +1360,13 @@ extern "C" float cScreenPopup_centerOffset(cScreenPopup* self);
 void cScreenPopup_determineAndSetScaling_7C20(void* self, sVec3_7C20 v) __asm__("cScreenPopup_determineAndSetScaling");
 void cScreenPopup_resizeBackground_7C20(void* self, sVec3_7C20 v, float a, float b) __asm__("cScreenPopup_resizeBackground");
 
+/**
+ * Lays the popup out centred on screen.
+ *
+ * Takes the horizontal offset from cScreenPopup_centerOffset plus +0x26C and the vertical one from +0x270,
+ * scales (cScreenPopup_determineAndSetScaling) and places (cScreenPopup_resizeBackground) the background for the content size (+0x260), then moves
+ * the title, message, option and button widgets by the same offsets.
+ */
 extern "C" void cScreenPopup_centerPopup(void* self)
 {
     char* s = (char*)self;
@@ -1835,7 +1868,17 @@ struct sVEntryK8930 {
     void (*fn)(void*, sVec2K8930*);
 };
 
-extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char state, float t)
+/**
+ * Changes a text widget's pivot (anchor) while keeping it visually in place.
+ *
+ * Does nothing when the pivot bits at +0x14 already equal @p state. Otherwise stores the new pivot and shifts the
+ * position (+0x44) by @p fOffset (half the text width when 0) according to the old and new anchors.
+ *
+ * @param obj    the text widget
+ * @param state  the new pivot (On Tour ucPivot)
+ * @param fOffset      the horizontal offset to apply, or 0 for half the text width
+ */
+extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char state, float fOffset)
 {
     sObjBitsK8930* b = (sObjBitsK8930*)((char*)obj + 0x14);
     if (b->state == state)
@@ -1845,16 +1888,16 @@ extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char st
     vt[20].fn((char*)obj + vt[20].delta, &size);
     sVec3K8930 pos = *(sVec3K8930*)((char*)obj + 0x44);
     b->state = state;
-    if (t == 0.0f)
-        t = size.x * 0.5f;
+    if (fOffset == 0.0f)
+        fOffset = size.x * 0.5f;
     switch (state) {
     case 17:
     case 18:
-        pos.x += t;
+        pos.x += fOffset;
         break;
     case 9:
     case 10:
-        pos.x -= t;
+        pos.x -= fOffset;
         break;
     }
     *(sVec3K8930*)((char*)obj + 0x44) = pos;
@@ -2485,6 +2528,15 @@ extern "C" void func_001C9B28(void* self, cUIText* text, const char* str, int si
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_increaseBoxSize);
 #ifdef SKIP_ASM
+/**
+ * Grows a box so a line of text fits: as wide as the widest line, as tall as all lines together.
+ *
+ * Sets @p size x to the rectangle's width (+0x8) when that is larger, and adds the rectangle's height (+0xC) to
+ * @p size y.
+ *
+ * @param size  the box size being accumulated (On Tour vBox)
+ * @param item  the line's rectangle (On Tour rectString)
+ */
 extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item)
 {
     float w = item[2];
@@ -2558,6 +2610,14 @@ struct sUIObj_C9CD0 {
     void setLayer(int l) { flags = (flags & ~0x1F00) | ((l & 0x1F) << 8); }
 };
 
+/**
+ * Moves every widget of the popup up or down by a number of draw layers.
+ *
+ * Adds @p v to the layer of each popup widget pointer (+0x48 onwards) that is set, and of the "ngca", "xba" and
+ * "ps2x" button objects on the screen.
+ *
+ * @param v  the layer offset
+ */
 extern "C" void cScreenPopup_adjustLayer(void* self, int v)
 {
     char* s = (char*)self;
@@ -2818,6 +2878,13 @@ struct sVEntry_cScreenPopup_hideWidgetSafe {
     void (*fn)(void*, int);
 };
 
+/**
+ * Hides a widget if there is one.
+ *
+ * Calls virtual slot 9 (set visible) with 0 when @p obj is not null.
+ *
+ * @param obj  the widget, or null
+ */
 extern "C" void cScreenPopup_hideWidgetSafe(void* self, void* obj)
 {
     if (obj != 0) {
@@ -2836,6 +2903,13 @@ struct sVEntry_cScreenPopup_showWidgetSafe {
     void (*fn)(void*, int);
 };
 
+/**
+ * Shows a widget if there is one.
+ *
+ * Calls virtual slot 9 (set visible) with 1 when @p obj is not null.
+ *
+ * @param obj  the widget, or null
+ */
 extern "C" void cScreenPopup_showWidgetSafe(void* self, void* obj)
 {
     if (obj != 0) {

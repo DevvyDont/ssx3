@@ -49,18 +49,18 @@ INCLUDE_ASM("util/statemachine", func_002C7038);
 extern char str_pct_04d_pct_02d_pct_02d[];
 extern char str_pct_02d_pct_02d_pct_04d[];
 
-extern "C" void func_002C7038(void* self, char* dst, int size, int a, int b, int c, int mode)
+extern "C" void func_002C7038(void* self, char* dst, int size, int day, int month, int year, int mode)
 {
     char buf[0x40];
     switch (mode) {
     case 0:
-        sprintf2(buf, str_pct_04d_pct_02d_pct_02d, c, b, a);
+        sprintf2(buf, str_pct_04d_pct_02d_pct_02d, year, month, day);
         break;
     case 1:
-        sprintf2(buf, str_pct_02d_pct_02d_pct_04d, b, a, c);
+        sprintf2(buf, str_pct_02d_pct_02d_pct_04d, month, day, year);
         break;
     case 2:
-        sprintf2(buf, str_pct_02d_pct_02d_pct_04d, a, b, c);
+        sprintf2(buf, str_pct_02d_pct_02d_pct_04d, day, month, year);
         break;
     }
     func_002C25B8(dst, buf, size);
@@ -71,11 +71,11 @@ INCLUDE_ASM("util/statemachine", func_002C7100);
 #ifdef SKIP_ASM
 extern "C" void func_002C73C0(void*);
 
-extern "C" void func_002C7100(void *self, int *a, int *b, int *c) {
+extern "C" void func_002C7100(void *self, int *hour, int *minute, int *second) {
     func_002C73C0(self);
-    *a = (*(int *)((char*)(self) + (8)));
-    *b = (*(int *)((char*)(self) + (0xC)));
-    *c = (*(int *)((char*)(self) + (0x10)));
+    *hour = (*(int *)((char*)(self) + (8)));
+    *minute = (*(int *)((char*)(self) + (0xC)));
+    *second = (*(int *)((char*)(self) + (0x10)));
 }
 #endif
 //100%
@@ -83,11 +83,11 @@ INCLUDE_ASM("util/statemachine", func_002C7160);
 #ifdef SKIP_ASM
 extern "C" void func_002C73C0(void*);
 
-extern "C" void func_002C7160(void *self, int *a, int *b, int *c) {
+extern "C" void func_002C7160(void *self, int *day, int *month, int *year) {
     func_002C73C0(self);
-    *a = (*(int *)((char*)(self) + (0x1C)));
-    *b = (*(int *)((char*)(self) + (0x18)));
-    *c = (*(int *)((char*)(self) + (0x14)));
+    *day = (*(int *)((char*)(self) + (0x1C)));
+    *month = (*(int *)((char*)(self) + (0x18)));
+    *year = (*(int *)((char*)(self) + (0x14)));
 }
 #endif
 //100%
@@ -162,15 +162,15 @@ INCLUDE_ASM("util/statemachine", func_002C7328);
 extern "C" int func_002C7328(void* self, int* sec, int* min, int* hour, int add) {
     int total;
     int rem;
-    int q;
+    int days;
 
     total = *hour * 0xE10 + *min * 0x3C + *sec + add;
-    q = total / 86400;
+    days = total / 86400;
     rem = total % 86400;
     *hour = (rem / 3600) % 24;
     *min = (rem / 60) % 60;
     *sec = rem % 60;
-    return q;
+    return days;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -233,6 +233,17 @@ extern "C" void func_0040BFE0(unsigned char* clock);
 extern char D_00486798[];
 extern void* D_004A28A8_7478 __asm__("SSXApp");
 
+/**
+ * Constructs the PS2 console configuration object from the system settings and clock.
+ *
+ * Clears +0x24 and points +0x34 at D_00486798. Stores 1 at +0x28 when func_0040BAA8 returns 0 (else 0), 1 at +0x2C, the
+ * language from func_0040B9E8 (0 to 7, otherwise 1) at +0x30, func_0040BB38's 0 to 2 at +0x0 and func_0040BC08's 0 or 1
+ * at +0x4. When func_00402520 reads the clock, func_0040BFE0 converts it and the BCD bytes give the hour, minute and
+ * second (+0x8 to +0x10) and the year (+ 2000), month and day (+0x14 to +0x1C); otherwise the date defaults to
+ * 2003-10-14 at 00:00:00. +0x20 takes the word at SSXApp+0x18.
+ *
+ * @return this
+ */
 extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
 {
     int* self = (int*)self_;

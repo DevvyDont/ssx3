@@ -198,6 +198,12 @@ void func_00278710(void* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_DeInit__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaves the script engine's per-game state: clears the NIS no-skip countdown.
+ *
+ * Stores 0 in mNumFramesNoSkip (+0x554), exactly what func_00278710 (On Tour Init, called from cGame_gainFocus) does
+ * too. cGame_loseFocus calls it on ScriptEngine.
+ */
 void cSSXScriptEngine_DeInit(void* self)
 {
     *(int*)((char*)self + 0x554) = 0;
@@ -1701,6 +1707,15 @@ extern "C" void* func_00275718(void*);
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetAnimationBankInfo__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the animation bank info of a script data bank.
+ *
+ * Forwards to func_00275718 (On Tour cScriptAnimBankManager::GetBankInfo) on mAnimationBankManager (+0xA28). The C
+ * declares only the engine: the bank number arrives in $a1 and passes through (cScriptObjRider_OnStartObjectUse binds a two-argument
+ * alias). On Tour asserts the bank number is in range; retail does not.
+ *
+ * @return the bank's tScriptAnimBankInfo record, or 0 if none is linked
+ */
 void* cSSXScriptEngine_GetAnimationBankInfo(void* self)
 {
     return func_00275718((char*)self + 0xa28);
@@ -1712,6 +1727,14 @@ extern "C" void* func_002836D8(void*);
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetSoundBankInfo__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the sound bank info of a script data bank.
+ *
+ * Forwards to func_002836D8 (On Tour cScriptSoundBankManager::GetBankInfo) on mSoundBankManager (+0xA38). The C
+ * declares only the engine: the bank number arrives in $a1 and passes through (callers bind a two-argument alias).
+ *
+ * @return the bank's tScriptSoundBankInfo record
+ */
 void* cSSXScriptEngine_GetSoundBankInfo(void* self)
 {
     return func_002836D8((char*)self + 0xa38);
@@ -3799,6 +3822,16 @@ cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
 // Same symbol as the unit's cScriptPlayerEntity_GetChannel (cScriptObj002742C8*), viewed with a float getter.
 cScriptObjC9B0* cScriptPlayerEntity_GetChannel_C9B0(void* self, int a1) __asm__("cScriptPlayerEntity_GetChannel__FPvi");
 
+/**
+ * Samples an actor script entity's channels into an actor frame.
+ *
+ * For channels 0..2 (cScriptPlayerEntity_GetChannel__FPvi, On Tour cScriptPlayerEntity::GetChannel) it stores the first word of the channel's
+ * virtual slot-4 value and the slot-5 result (out[0..5]); channels 3..8 each give one float through slot 4
+ * (out[6..11]). cRider_OnStartObjectUse, cRider_OnInSeqUpdate and cRider_OnInSeqKeyEvent read the rider's scripted pose
+ * this way. The first parameter is the cScriptPlayerEntity (On Tour pPlayer), not an object of this function's own.
+ *
+ * @param out  the tSSXFrameActor to fill (12 words)
+ */
 extern "C" void GetSSXActorFrame(void* self, void* out)
 {
     ((int*)out)[0] = *cScriptPlayerEntity_GetChannel(self, 0)->v04();
@@ -3896,6 +3929,15 @@ void operator_delete(int*);
 extern char D_00482528[];
 extern void* D_004A34DC;
 
+/**
+ * Destroys the script database: removes every registered object and clears the global database pointer.
+ *
+ * Restores the cScriptDatabaseObject vtable (D_00482528) at +0x2A8, calls cScriptDatabaseObject_RemoveObjectAll() and
+ * zeroes D_004A34DC (On Tour cScriptDatabaseObject::mpDatabaseObject, the object func_0027D2E8 returns), then frees the
+ * object when asked. cBXScriptEngine__cBXScriptEngine chains to it.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cScriptDatabaseObject__cScriptDatabaseObject(void* self, int flags)
 {
     *(void**)((char*)self + 0x2A8) = D_00482528;
@@ -4351,9 +4393,20 @@ void* cScriptObject_cScriptObject(void*, int);
 extern char cScriptObjCamera_vtbl[];
 extern char t4mat_Identity[];
 
+/**
+ * Constructs a script camera object for one view.
+ *
+ * Builds the cScriptObject base with object type 1 (cScriptObject_cScriptObject), installs cScriptObjCamera_vtbl
+ * (+0xC), clears the camera manager, camera entity and weight words (+0x10..+0x18), sets the player ID (+0x20) to -1,
+ * copies t4mat_Identity into the base transform (+0x30, VU0 quad copy), zeroes the base rotations (+0x70..+0x78) and
+ * stores the view index (+0x7C).
+ *
+ * @param viewIndex  the view (viewport) index
+ * @return the object (self)
+ */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
-extern "C" void* cScriptObjCamera_cScriptObjCamera(void* self, int a1)
+extern "C" void* cScriptObjCamera_cScriptObjCamera(void* self, int viewIndex)
 {
     cScriptObject_cScriptObject(self, 1);
     *(void**)((char*)self + 0xC) = cScriptObjCamera_vtbl;
@@ -4375,7 +4428,7 @@ extern "C" void* cScriptObjCamera_cScriptObjCamera(void* self, int a1)
         :
         : "r"((char*)self + 0x30), "r"(t4mat_Identity)
         : "memory");
-    *(int*)((char*)self + 0x7C) = a1;
+    *(int*)((char*)self + 0x7C) = viewIndex;
     *(int*)((char*)self + 0x70) = 0;
     *(int*)((char*)self + 0x74) = 0;
     *(int*)((char*)self + 0x78) = 0;
@@ -4873,6 +4926,16 @@ extern char D_00481FD8[];
 extern char D_00482018[];
 extern char t4mat_Identity[];
 
+/**
+ * Constructs a rider's script object: a script entity plus a cScriptObject of type 3 with an identity base transform.
+ *
+ * Builds the cScriptEntity part (cScriptEntity_cScriptEntity) at +0x0 and the cScriptObject part at +0xC with type 3,
+ * installs the vtables D_00481FD8 (+0x0) and D_00482018 (+0x18), clears the animation and sound bank infos (+0x1C,
+ * +0x20), copies t4mat_Identity into the base transform (+0x30) and zeroes the base rotations (+0x70..+0x78).
+ * cRider_cRider builds the rider's embedded one with it.
+ *
+ * @return the object (self)
+ */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
 extern "C" void* cScriptObjRider_cScriptObjRider(void* self)
@@ -5109,6 +5172,19 @@ static inline void Translate_F9F8(void* mat, const sVec_F9F8& v)
         : "memory");
 }
 
+/**
+ * Takes the rider's script object into use: builds its base transform from the actor header and the script's anchor and
+ * binds the script's animation and sound banks.
+ *
+ * Calls cScriptObject_OnStartObjectUse__FPv on the cScriptObject part (+0xC). The actor header (func_0027C958 of the bound player entity,
+ * +0x8) gives the base rotations in degrees (+0x1C/+0x18/+0x14, stored as radians in +0x70/+0x74/+0x78) and an offset
+ * (+0x8..+0x10) that form a local matrix (translate, then Rz(-z), Ry, Rx). func_0027A0D8 (On Tour
+ * cSSXScriptEngine::GetAnchorOrientation) gives the anchor position and angles for the header's anchor type (+0x1); the
+ * base transform (+0x30) becomes the anchor's translate and rotations times the local matrix, and the anchor angles are
+ * added to the base rotations. Finally it binds mpAnimBankInfo (+0x1C) and mpSoundBankInfo (+0x20) to the script's bank
+ * (+0x1C of the func_0027C070 header) with cSSXScriptEngine_GetAnimationBankInfo__FPv and cSSXScriptEngine_GetSoundBankInfo__FPv. The player ID argument is not declared
+ * (unused).
+ */
 extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
 {
     cScriptObject_OnStartObjectUse(self + 0xC);
@@ -5152,6 +5228,13 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_OnEndObjectUse);
 void func_00283440(void*);
 extern char t4mat_Identity[];
 
+/**
+ * Releases the rider's script object: drops one use and resets its base transform and bank bindings.
+ *
+ * Calls func_00283440 (On Tour cScriptObject::OnEndObjectUse) on the cScriptObject part (+0xC), copies t4mat_Identity
+ * into the base transform (+0x30), zeroes the base rotations (+0x70..+0x78) and clears mpAnimBankInfo (+0x1C) and
+ * mpSoundBankInfo (+0x20). The player ID argument is not declared (unused).
+ */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
 extern "C" void cScriptObjRider_OnEndObjectUse(void* self)
@@ -5312,6 +5395,17 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, f
 extern "C" int cBankMonitor_BANKMONITOR_GetHandle(void* bank, int id, int a);
 extern "C" int func_002B0E28(void* p, int i);
 
+/**
+ * Per-frame update of the script event object: stops or forgets its event sounds and handles a pending stop on speech
+ * end.
+ *
+ * For each of the 4 sound slots (+0xBC; ID, count, target; On Tour mSounds) holding a sound ID (>= 0): a slot whose
+ * count word is non-zero is stopped (cBankMonitor_BANKMONITOR_StopHandle on the audio system's bank monitor,
+ * func_0028B180() +0x118 then +0x1D8) and cleared; any other slot is cleared once cBankMonitor_BANKMONITOR_GetHandle no
+ * longer finds the sound. If the flag at +0xF4 (On Tour mCheckForStopOnSpeechEnd) is set it is cleared, and when
+ * func_002B0E28(audio + 0x5560, 0) returns non-zero the playing NIS list's scripts are skipped
+ * (cSSXScriptEngine_SkipNISListScripts).
+ */
 extern "C" void cScriptObjEvent_Update(sScrObj05B8* self)
 {
     char* snd = (char*)func_0028B180();
@@ -5352,6 +5446,14 @@ struct sScrTrig_0730 {
     int c;  // 0x8
 };
 
+/**
+ * Takes the script event object into use: resets its event state and binds the script's sound bank.
+ *
+ * Calls cScriptObject_OnStartObjectUse__FPv on the cScriptObject part (+0xC), clears +0xEC, +0xF0 and +0xF4 (On Tour mNumAbortWorldScripts,
+ * mHasTriggeredSpeechEvents, mCheckForStopOnSpeechEnd), binds the sound bank info (+0xF8, On Tour mpSoundBankInfo) with
+ * cSSXScriptEngine_GetSoundBankInfo__FPv for the bank of the playing script (+0x1C of the func_0027C070 header) and empties the 4 sound slots at
+ * +0xBC (ID -1, count 0, target -1). The player ID argument is not declared (unused).
+ */
 extern "C" void cScriptObjEvent_OnStartObjectUse(void* self)
 {
     int i;
@@ -5742,6 +5844,14 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_cScriptObjCamera
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "scripter/ssxscriptengine_classes.h"
 
+/**
+ * Constructs a script camera manager: a cScriptObject of type 0 plus a script entity with nine entity slots.
+ *
+ * Builds the cScriptObject base (type 0) and the cScriptEntity base (+0x10), constructs nine 0x14-byte slots at +0x1C
+ * (func_00283088) and points each one's owner word (+0x10) at the manager, clears the two camera object pointers
+ * (+0xD0) and the transition object (+0xD8), sets the view index (+0xF8) to -1 and resets the script state with
+ * cScriptObjCameraManager_ResetScriptManagementVars (On Tour ResetScriptManagementVars). The C++ view class here is named cScriptEngine_1018.
+ */
 cScriptEngine_1018::cScriptEngine_1018() : cScriptObject_1018(0)
 {
     for (int i = 1; i >= 0; i--) {
@@ -5769,6 +5879,13 @@ struct sVec4_1100 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
+/**
+ * Per-frame update of a script camera manager in use: follows its view's camera and sets its cameras up once.
+ *
+ * Only while in use (+0x8 > 0, On Tour mInUse): copies the position (+0x20) of the camera of view +0xF8
+ * (SSXApp->Game->ViewMan, array at +0x4) into the focus box position (+0x100) and, while +0x18 is still 0, calls
+ * func_00281AC8(self, 0, 0) (On Tour SetupCameraObject). cSSXScriptEngine_Update runs it on both managers every frame.
+ */
 extern "C" void cScriptObjCameraManager_Update(void* self)
 {
     if (*(int*)((char*)self + 0x8) > 0) {
@@ -5913,6 +6030,18 @@ extern "C" void cFocusMan_addbox(void* self, void* pos);
 void* cBXScriptEngine_GetRequestPlayerByPlayerID_2(void* self, int idx) __asm__("cBXScriptEngine_GetRequestPlayerByPlayerID__FPv");
 void cScriptObject_OnStartObjectUse_2(void* self, int val) __asm__("cScriptObject_OnStartObjectUse__FPv");
 
+/**
+ * Takes a script camera manager into use for a player: reserves it, resets its state and adds its focus box when that
+ * player is playing the NIS.
+ *
+ * Marks the object reserved for the player in the script database (func_0027D0C0 on func_0027D2E8(), On Tour
+ * MarkObjectAsReserved) and resets the management state (cScriptObjCameraManager_ResetScriptManagementVars). When cSSXScriptEngine_IsPlayingNISListPlayer
+ * accepts the player's script player (cBXScriptEngine_GetRequestPlayerByPlayerID__FPv) it adds the focus box (+0x100) to the AI's focus manager
+ * (cFocusMan_addbox, On Tour cFocusMan::addbox, on AI +0xA4) and sets the focus-box flag (+0x110). Ends with cScriptObject_OnStartObjectUse__FPv
+ * (one more use).
+ *
+ * @param val  the player ID
+ */
 extern "C" void cScriptObjCameraManager_OnStartObjectUse(void* self, int val)
 {
     func_0027D0C0(func_0027D2E8(), *(int*)((char*)self + 0x4), val);
@@ -5952,7 +6081,19 @@ struct sSeEng1400 {
     int pending;            // 0x110
 };
 
-extern "C" void cScriptObjCameraManager_OnEndObjectUse(sSeEng1400* self, int a1)
+/**
+ * Releases a script camera manager: unreserves it, detaches its cameras and transition and removes its focus box.
+ *
+ * Unreserves the object in the script database (func_0027D170 on func_0027D2E8(), On Tour MarkObjectAsUnreserved),
+ * clears the camera entity (func_0027D688, On Tour cScriptObjCamera::SetCameraEntity) of each attached camera (indices
+ * at +0xDC into the camera pointers at +0xD0) and sets its index to -1, resets the transition object (+0xD8) with
+ * func_00282DB0(-1, 9, 0.0, 0.0, 0.0, 0.0) (On Tour cScriptObjTransition::SetTransition), removes the focus box
+ * (+0x100) from the AI's focus manager when it was added (+0x110; cFocusMan_removebox, On Tour cFocusMan::removebox), resets
+ * the state (cScriptObjCameraManager_ResetScriptManagementVars) and drops one use (func_00283440).
+ *
+ * @param playerID  the player ID
+ */
+extern "C" void cScriptObjCameraManager_OnEndObjectUse(sSeEng1400* self, int playerID)
 {
     func_0027D170(func_0027D2E8(), self->id);
     for (int i = 0; i < 2; i++) {
@@ -5971,7 +6112,7 @@ extern "C" void cScriptObjCameraManager_OnEndObjectUse(sSeEng1400* self, int a1)
         self->pending = 0;
     }
     cScriptObjCameraManager_ResetScriptManagementVars(self);
-    func_00283440_2(self, a1);
+    func_00283440_2(self, playerID);
 }
 #endif
 
@@ -6184,6 +6325,13 @@ struct sVec4_1A50 {
     }
 } __attribute__((aligned(16)));
 
+/**
+ * Resets a script camera manager's per-script state: no attached cameras, no transition or beat, no focus box.
+ *
+ * Sets both attached camera indices (+0xDC, On Tour mAttachedCameraObject) to -1, +0xF0 to 1, the last beat time
+ * (+0xF4, On Tour mLastBeatTimeLeft) to 1e9, the focus box position (+0x100) to (0, 0, 0, 1) and clears +0xE4, +0xE8,
+ * +0xEC (On Tour mInTransition, mCutOnBeat, mBeatOccurred) and the focus-box flag (+0x110, On Tour mUseFocusBox).
+ */
 extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self)
 {
     int i;

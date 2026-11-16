@@ -126,11 +126,19 @@ SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_cluttype);
 #ifdef SKIP_ASM
-int SHAPE_cluttype(int arg0) {
+/**
+ * Maps a palette's bits per pixel to the shape library's CLUT type code.
+ *
+ * 15 and 16 bpp give 0x20, 32 bpp gives 0x21, and 18, 24 and anything else give 0.
+ *
+ * @param bpp  the palette's bits per pixel
+ * @return the CLUT type code
+ */
+int SHAPE_cluttype(int bpp) {
     int var_5;
 
     var_5 = 0;
-    switch (arg0) {
+    switch (bpp) {
     case 15:
     case 16:
         var_5 = 0x20;
@@ -937,6 +945,17 @@ INCLUDE_ASM("ealib/seg_2B4578", unpackz);
 int REF_decode(unsigned char *dst, unsigned char *src, int *used);
 int f_4740(unsigned char *src, unsigned char *dst) __asm__("unpackz");
 
+/**
+ * Unpacks compressed data when it is in a known format; returns the unpacked size.
+ *
+ * Only RefPack data (second byte 0xFB) of type 0x10 or 0x90 (the flag 0x01 ignored) is decoded, with
+ * REF_decode(dst, src, 0); the other recognised type codes (0x18..0x1E, 0x30..0x46 and their 0x80 forms) are
+ * accepted but not decoded in this build, and give 0 like unknown data.
+ *
+ * @param src  the packed data
+ * @param dst  where to write the unpacked bytes
+ * @return the number of bytes written, or 0
+ */
 int f_4740(unsigned char *src, unsigned char *dst) {
     int len = 0;
     if (src[1] == 0xFB) {
@@ -961,6 +980,12 @@ INCLUDE_ASM("ealib/seg_2B4578", unpack);
 #ifdef SKIP_ASM
 extern void unpackz();
 
+/**
+ * Unpacks compressed data (the public entry point); forwards to unpackz.
+ *
+ * Declared without parameters: the source and destination pointers pass through in $4 and $5 untouched, and
+ * unpackz's unpacked size is returned.
+ */
 void unpack(void) {
     unpackz();
 }
@@ -973,17 +998,26 @@ INCLUDE_ASM("ealib/seg_2B4578", unpacksizez);
 int f_4818(unsigned char *p) __asm__("unpacksizez");
 static __inline__ int get24_4818(unsigned char *q) { return (q[0] << 16) | (q[1] << 8) | q[2]; }
 static __inline__ int get32_4818(unsigned char *q) { return (q[0] << 24) | (q[1] << 16) | (q[2] << 8) | q[3]; }
-int f_4818(unsigned char *p) {
+/**
+ * Reads the unpacked size of compressed data from its header.
+ *
+ * For RefPack data (second byte 0xFB) the size follows the two type bytes: 24 bits big-endian for types
+ * 0x10..0x46, 32 bits for their 0x80 forms (0x90..0xC6); type 0xC0 and unknown data give 0.
+ *
+ * @param src  the packed data
+ * @return the unpacked size in bytes, or 0
+ */
+int f_4818(unsigned char *src) {
     int v = 0;
-    if (p[1] == 0xFB) {
-        switch (p[0] & 0xFE) {
+    if (src[1] == 0xFB) {
+        switch (src[0] & 0xFE) {
         case 0x10: case 0x18: case 0x1A: case 0x1E:
         case 0x30: case 0x32: case 0x34: case 0x46:
-            v = get24_4818(p + 2);
+            v = get24_4818(src + 2);
             break;
         case 0x90: case 0x98: case 0x9A: case 0x9E:
         case 0xB0: case 0xB2: case 0xB4: case 0xC6:
-            v = get32_4818(p + 2);
+            v = get32_4818(src + 2);
             break;
         case 0xC0:
             break;
@@ -1006,6 +1040,17 @@ void func_003B49B0(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", REF_decode);
 #ifdef SKIP_ASM
+/**
+ * Decodes RefPack-compressed data (EA's LZ77 variant).
+ *
+ * Reads the two-byte header (0x8000: 32-bit sizes, 0x100: a compressed-size field to skip), the unpacked length,
+ * then executes the literal and back-reference commands until the end code, writing to @p dst.
+ *
+ * @param dst   where to write the unpacked bytes
+ * @param src   the compressed data
+ * @param used  when not null, receives the number of compressed bytes read
+ * @return the unpacked length, or 0 for a null @p src
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int REF_decode(unsigned char *dst, unsigned char *src, int *used) {
     unsigned char *s = src;

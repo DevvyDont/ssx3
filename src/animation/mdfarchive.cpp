@@ -55,9 +55,19 @@ INCLUDE_ASM("animation/mdfarchive", gameanimcmp);
 #ifdef SKIP_ASM
 extern unsigned int* gameanimcmphack;
 
-extern "C" int gameanimcmp(int* a, int* b)
+/**
+ * qsort comparator that orders animation indices by their key in gameanimcmphack.
+ *
+ * Returns -1 when gameanimcmphack[*@p lhs] < gameanimcmphack[*@p rhs], else 1 (never 0, so equal keys are not reported as
+ * equal).
+ *
+ * @param lhs  the first animation index (On Tour p0)
+ * @param rhs  the second animation index (On Tour p1)
+ * @return -1 or 1
+ */
+extern "C" int gameanimcmp(int* lhs, int* rhs)
 {
-    return gameanimcmphack[*a] < gameanimcmphack[*b] ? -1 : 1;
+    return gameanimcmphack[*lhs] < gameanimcmphack[*rhs] ? -1 : 1;
 }
 #endif
 

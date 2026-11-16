@@ -52,10 +52,10 @@ extern char str_UILISTBOXSTR[];
  */
 extern "C" unsigned char cUIListBox_addEntryByUnicodeString(cUIListBox* self, unsigned short* str, int data)
 {
-    unsigned short* u = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILISTBOXSTR, 0x100, 0);
-    USTR_copy(u, str);
+    unsigned short* tempString = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILISTBOXSTR, 0x100, 0);
+    USTR_copy(tempString, str);
     *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = 0;
-    *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = u;
+    *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = tempString;
     *(int*)((char*)self + self->mNumEntries * 0x14 + 0xA4) = data;
     return (self->mNumEntries)++;
 }
@@ -196,9 +196,9 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_setCurrentEntryByIndex);
  */
 extern "C" void cUIListBox_setCurrentEntryByIndex(cUIListBox* self, int Index)
 {
-    unsigned char v = (unsigned char)Index;
-    if (v < self->mNumEntries) {
-        *(char*)&self->mCurrentEntry = v;
+    unsigned char entryIndex = (unsigned char)Index;
+    if (entryIndex < self->mNumEntries) {
+        *(char*)&self->mCurrentEntry = entryIndex;
     }
 }
 #endif
@@ -214,9 +214,9 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_setEntryDataByIndex);
  */
 extern "C" void cUIListBox_setEntryDataByIndex(cUIListBox* self, int Index, int value)
 {
-    unsigned char v = (unsigned char)Index;
-    if (v < self->mNumEntries) {
-        *(int*)((char*)self + v * 0x14 + 0xA4) = value;
+    unsigned char entryIndex = (unsigned char)Index;
+    if (entryIndex < self->mNumEntries) {
+        *(int*)((char*)self + entryIndex * 0x14 + 0xA4) = value;
     }
 }
 #endif

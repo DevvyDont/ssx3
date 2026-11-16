@@ -33,6 +33,14 @@ extern void* cLightMan_TheLightMan;
 extern void* D_004936D8[];
 void operator_delete(int* ptr);
 
+/**
+ * Destroys the light manager base: unregisters the global light manager and frees it if asked.
+ *
+ * Stores the abstract cLightMan vtable D_004936D8, clears cLightMan_TheLightMan (On Tour first asserts TheLightMan ==
+ * this) and calls operator_delete on @p flags bit 0. cPS2LightMan__cPS2LightMan chains to it.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cLightMan__cLightMan(cPS2LightMan* self, int flags)
 {
     *(void***)self = D_004936D8;

@@ -337,6 +337,12 @@ struct sObj00208BB8 {
     sVEntry00208BB8* vt;
 };
 
+/**
+ * Starts leaving the map overlay: flags the exit and hides its two pop-up widgets.
+ *
+ * Sets +0xDC to 1 and +0xC8 to 0, then calls virtual slot 9 with 0 on the widgets at +0xD0 and +0xE0 when they
+ * exist.
+ */
 extern "C" void cOVState_MAP_setupScreenExit(void* self)
 {
     sObj00208BB8* o;
@@ -823,6 +829,15 @@ struct sVEntry_cOVState_MAP_setWidgetHiliteColor {
 extern char kMAPCOLOR_HIGHLIGHTED[];
 extern char kMAPCOLOR_HIGHLIGHTED_LOCKED[];
 
+/**
+ * Colours a highlighted map entry: the normal highlight when unlocked, the locked highlight otherwise.
+ *
+ * Calls the text's virtual slot 11 (set colour) with kMAPCOLOR_HIGHLIGHTED when @p on is nonzero, else with
+ * kMAPCOLOR_HIGHLIGHTED_LOCKED.
+ *
+ * @param obj  the text widget
+ * @param on   nonzero when the entry is unlocked
+ */
 extern "C" void cOVState_MAP_setWidgetHiliteColor(void* self, void* obj, int on)
 {
     if (on != 0) {
@@ -1242,6 +1257,12 @@ struct sMap_A088 {
     cUIObj_A088* b[8];      // 0x104
 };
 
+/**
+ * Removes the map's rider indicators: hides and deletes every indicator widget.
+ *
+ * For the cursor and each of the two eight-entry indicator arrays, hides the widget, deletes it and clears the
+ * pointer.
+ */
 extern "C" void cOVState_MAP_cleanupIndicators(void* p)
 {
     sMap_A088* self = (sMap_A088*)p;

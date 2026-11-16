@@ -2030,6 +2030,14 @@ extern "C" void cRailLink_append(sSplineLink* link, sSplineLink* other)
 //100%
 INCLUDE_ASM("object/splinemodifier", cRailLink_unlink);
 #ifdef SKIP_ASM
+/**
+ * Removes a link from its rail list.
+ *
+ * Points the next link's prev at this link's prev and the previous link's next at this link's next (each only when
+ * present), then clears both of this link's pointers. The twin of cEffectLink_unlink for effect links.
+ *
+ * @param link  the link to remove
+ */
 extern "C" void cRailLink_unlink(sSplineLink* link)
 {
     if (link->next != 0) {

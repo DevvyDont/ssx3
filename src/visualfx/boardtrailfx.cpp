@@ -1059,6 +1059,15 @@ struct cCutSceneTransitionMan_StartCutScene_sFade {
     float dur;
 };
 
+/**
+ * Starts the transition into cut-scene mode over a given time.
+ *
+ * From state 0 it reads the TV parameters (cCutSceneTransitionMan_FindTVParameters) and starts from 0. In state 1
+ * (already in cut-scene mode) it does nothing. A transition back out (state 2) is reversed and one already going in
+ * (state 3) keeps its progress, both rescaled to @p dur. The state becomes 3.
+ *
+ * @param dur  transition length (On Tour time)
+ */
 extern "C" void cCutSceneTransitionMan_StartCutScene(cCutSceneTransitionMan_StartCutScene_sFade* self, float dur)
 {
     switch (self->state) {
@@ -1096,22 +1105,22 @@ struct sTrailFade {
     float time;
 };
 
-extern "C" void func_002EA780(sTrailFade* self, float t)
+extern "C" void func_002EA780(sTrailFade* self, float fadeTime)
 {
     switch (self->state) {
     case 0:
         return;
     case 1:
-        self->time = t;
+        self->time = fadeTime;
         self->value = 0.0f;
         break;
     case 2:
-        self->value = (self->value / self->time) * t;
-        self->time = t;
+        self->value = (self->value / self->time) * fadeTime;
+        self->time = fadeTime;
         break;
     case 3:
-        self->value = (1.0f - self->value / self->time) * t;
-        self->time = t;
+        self->value = (1.0f - self->value / self->time) * fadeTime;
+        self->time = fadeTime;
         break;
     }
     self->state = 2;
@@ -1128,6 +1137,12 @@ struct sBTVEntry {
 };
 
 
+/**
+ * Switches the screen straight back to regular (non cut-scene) mode.
+ *
+ * When the mode flag at +0x10 is set, clears it and passes the regular parameters at +0x20 to the graphics manager's
+ * virtual slot 41.
+ */
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* self)
 {
     if (*(int*)((char*)self + 0x10) != 0) {
@@ -1143,6 +1158,12 @@ extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* self)
 INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_ForceToCutSceneMode);
 #ifdef SKIP_ASM
 
+/**
+ * Switches the screen straight into cut-scene mode.
+ *
+ * Reads the TV parameters first if the mode flag at +0x10 is clear, sets the flag and passes the cut-scene parameters
+ * at +0x34 to the graphics manager's virtual slot 41.
+ */
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* self)
 {
     if (*(int*)((char*)self + 0x10) == 0) {
@@ -1160,8 +1181,8 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EA8B8);
 #ifdef SKIP_ASM
 extern "C" void func_002EA8B8(void* self, int up)
 {
-    int s = *(int*)((char*)self + 0x10);
-    if (s == 2 || s == 3) {
+    int state = *(int*)((char*)self + 0x10);
+    if (state == 2 || state == 3) {
         *(int*)((char*)self + 0x1C) = 0;
         return;
     }
@@ -1730,10 +1751,10 @@ struct func_002EBBA8_sObj {
 
 extern "C" func_002EBBA8_sObj* func_002EBBA8(func_002EBBA8_sObj* self, const func_002EBBA8_sVec4& v, int a, int b)
 {
-    func_002EBBA8_sVec4 t = v;
+    func_002EBBA8_sVec4 vecCopy = v;
     func_002E4D70(self);
     self->vtable = cWipe_TObj_vtbl;
-    self->v = t;
+    self->v = vecCopy;
     self->a = a;
     self->b = b;
     return self;
@@ -1811,13 +1832,13 @@ struct sTrailVec_002EBD88 { float x, y, z, w; };
 
 extern void* cCircle_TObj_vtbl[];
 
-extern "C" void* func_002EBD88(void* self, sTrailVec_002EBD88 v, float a, float b)
+extern "C" void* func_002EBD88(void* self, sTrailVec_002EBD88 rect, float posX, float posY)
 {
     func_002E4D70(self);
     *(void***)self = cCircle_TObj_vtbl;
-    *(sTrailVec_002EBD88*)((char*)self + 4) = v;
-    *(float*)((char*)self + 0x14) = a;
-    *(float*)((char*)self + 0x18) = b;
+    *(sTrailVec_002EBD88*)((char*)self + 4) = rect;
+    *(float*)((char*)self + 0x14) = posX;
+    *(float*)((char*)self + 0x18) = posY;
     return self;
 }
 #endif
@@ -1838,12 +1859,12 @@ extern "C" void* func_002EBE20(void* self, sBtRectBE20 rect)
     func_002E4D70_r(self);
     *(void***)self = cCircle_TObj_vtbl;
     *(sBtRectBE20*)((char*)self + 0x4) = rect;
-    unsigned int r1 = BXrand() % 1000;
-    float* p = (float*)((char*)self + 0x14);
-    *p = (float)r1 * 0.64000004529953f;
-    unsigned int r2 = BXrand() % 1000;
-    float* q = (float*)((char*)self + 0x18);
-    *q = (float)r2 * 0.48000001907348633f;
+    unsigned int randX = BXrand() % 1000;
+    float* outX = (float*)((char*)self + 0x14);
+    *outX = (float)randX * 0.64000004529953f;
+    unsigned int randY = BXrand() % 1000;
+    float* outY = (float*)((char*)self + 0x18);
+    *outY = (float)randY * 0.48000001907348633f;
     return self;
 }
 #endif
@@ -1862,28 +1883,40 @@ struct sBTVtx_BF48 {
     sBTQuad_BF48 st;
 };
 
-extern "C" void InitVertex(sBTVtx_BF48* o, float* c, float x, float y)
+/**
+ * Fills a screen-space vertex for the transition effects from a 2D position and a colour.
+ *
+ * Colour channels come from @p colour as (a, r, g, b) floats, scaled by 128 when the current draw state has a texture (its
+ * +0x10 is not -1) and by 255 otherwise (alpha always by 128). z is 1, the texture coordinates are (x, y, 0, 1) and the
+ * position maps @p x over 640 and @p y over 480 into the screen rectangle at D_004A3B30..D_004A3B44.
+ *
+ * @param vertex  the vertex to fill (On Tour v)
+ * @param colour  the colour, as a, r, g, b floats (On Tour colour)
+ * @param x  horizontal position on a 640-wide screen
+ * @param y  vertical position on a 480-high screen
+ */
+extern "C" void InitVertex(sBTVtx_BF48* vertex, float* colour, float x, float y)
 {
     if (*(short*)((char*)cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState + 0x10) != -1) {
-        o->r = (int)(c[1] * 128.0f);
-        o->g = (int)(c[2] * 128.0f);
-        o->b = (int)(c[3] * 128.0f);
-        o->a = (int)(c[0] * 128.0f);
+        vertex->r = (int)(colour[1] * 128.0f);
+        vertex->g = (int)(colour[2] * 128.0f);
+        vertex->b = (int)(colour[3] * 128.0f);
+        vertex->a = (int)(colour[0] * 128.0f);
     } else {
-        o->r = (int)(c[1] * 255.0f);
-        o->g = (int)(c[2] * 255.0f);
-        o->b = (int)(c[3] * 255.0f);
-        o->a = (int)(c[0] * 128.0f);
+        vertex->r = (int)(colour[1] * 255.0f);
+        vertex->g = (int)(colour[2] * 255.0f);
+        vertex->b = (int)(colour[3] * 255.0f);
+        vertex->a = (int)(colour[0] * 128.0f);
     }
-    o->z = 1.0f;
+    vertex->z = 1.0f;
     sBTQuad_BF48 q;
     q.w = 1.0f;
     q.x = x;
     q.y = y;
     q.z = 0.0f;
-    o->st = q;
-    o->x = D_004A3B30 + D_004A3B38 * 0.0015625f * x;
-    o->y = D_004A3B3C + D_004A3B44 * 0.0020833334f * y;
+    vertex->st = q;
+    vertex->x = D_004A3B30 + D_004A3B38 * 0.0015625f * x;
+    vertex->y = D_004A3B3C + D_004A3B44 * 0.0020833334f * y;
 }
 #endif
 

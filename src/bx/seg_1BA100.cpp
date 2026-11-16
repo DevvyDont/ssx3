@@ -1810,6 +1810,11 @@ INCLUDE_ASM("bx/seg_1BA100", cWorldPainterManRender);
 #ifdef SKIP_ASM
 extern "C" void func_002BB6E0(int, void *);
 
+/**
+ * Draws the world painter debug overlay of the current world.
+ *
+ * Calls func_002BB6E0 (cWorldPainterMan::render) on the painter manager stored at +0x8 of SSXApp->Game->World.
+ */
 extern "C" void cWorldPainterManRender(void) {
     void *temp_5;
 

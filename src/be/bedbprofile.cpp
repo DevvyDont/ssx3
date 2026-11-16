@@ -57,6 +57,14 @@ extern "C" int func_001523E8(void* self, int kind)
 //100%
 INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_setLocationVisited);
 #ifdef SKIP_ASM
+/**
+ * Marks a location as visited or not visited in a character profile.
+ *
+ * Sets or clears bit @p bit of the visited mask at +0xACC; the release build does not range-check it.
+ *
+ * @param bit  the location (On Tour eBELocationID locID)
+ * @param on  On Tour visited: nonzero marks it visited
+ */
 extern "C" void cBECharProfileDB_setLocationVisited(void* self, int bit, int on)
 {
     int mask = 1 << bit;

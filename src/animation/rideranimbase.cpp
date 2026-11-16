@@ -148,6 +148,17 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimCategory);
 #ifdef SKIP_ASM
 extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
 
+/**
+ * Returns the animation category of what a rider sequencer is currently playing.
+ *
+ * Reads the current AI anim of sequencer @p i (+@p i * 4); 0x1B6 (no anim) gives 0, otherwise word 0 of its attribute
+ * record. cAIAnimEventMap_getBlendInTime returns the anim's whole attribute record (On Tour release:
+ * cAIAnimEventMap::getAnimPlayAttr): word 0 is the category, 1 the update rule, 3 the sequencer and 4 the default
+ * blend-in time (On Tour debug: getCategory, getUpdateRule, getSequencerID, getBlendInTime).
+ *
+ * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
+ * @return the anim category, 0 when the sequencer plays nothing
+ */
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* self, int i)
 {
     int anim = *(int*)((char*)self + (i << 2));
@@ -170,6 +181,14 @@ struct cAnimSequencer {
 
 cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index);
 
+/**
+ * Returns the newest sequence playing on one of the rider's sequencers.
+ *
+ * cAnimSequencer_getSequence(&sequencers[@p i], 0), with the sequencer array at +0x50.
+ *
+ * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
+ * @return the sequence, or null
+ */
 extern "C" cAnimSequenceNode* cRiderAnimBase_getCurrentAnimSequence(void* self, int i)
 {
     cAnimSequencer* seqs = *(cAnimSequencer**)((char*)self + 0x50);
@@ -373,10 +392,19 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_blendOutAll);
 extern "C" void cAnimSequencer_removeAllEndTriggers(void* self, int v);
 extern "C" void cAnimSequencer_fadeOutAndExpireAll(void* self, float v);
 
-extern "C" void cRiderAnimBase_blendOutAll(char* self, int i, float v)
+/**
+ * Fades out everything one of the rider's sequencers is playing.
+ *
+ * On sequencer @p i: cAnimSequencer_removeAllEndTriggers (removeAllEndTriggers, id 0x3F), cAnimSequencer_fadeOutAndExpireAll (fadeOutAndExpireAll, @p blendOut), then its
+ * current AI anim becomes 0x1B6 (none).
+ *
+ * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
+ * @param blendOut  the fade-out time in seconds (On Tour blendOut)
+ */
+extern "C" void cRiderAnimBase_blendOutAll(char* self, int i, float blendOut)
 {
     cAnimSequencer_removeAllEndTriggers(*(char**)(self + 0x50) + (i << 3), 0x3F);
-    cAnimSequencer_fadeOutAndExpireAll(*(char**)(self + 0x50) + (i << 3), v);
+    cAnimSequencer_fadeOutAndExpireAll(*(char**)(self + 0x50) + (i << 3), blendOut);
     *(int*)(self + (i << 2)) = 0x1B6;
 }
 #endif
@@ -440,9 +468,32 @@ static inline bool rabXformEq_1F00(const sRabXform_00311B48& a, const sRabXform_
     return rabVecEq_1F00(a.rot, b.rot) && rabVecEq_1F00(a.pos, b.pos);
 }
 
+/**
+ * Starts an AI animation on a sequencer, blending it in over the sequences already playing.
+ *
+ * A zero @p blend expires everything first. Update rule 2 loops (cAnimSequencer_playAndLoop), others hold (cAnimSequencer_playAndHold), with an
+ * end trigger 0x3F for rule 0 or when attribute word 2 is set. The new sequence copies the rider's offset transform and
+ * its +0x18, +0x1C and +0x20 state, attribute word 6 (+0xA4) and priority @p priority, and gets a timed trigger
+ * (cAnimSequence_addTrigger) per key frame of clip @p animid. Alone it fades in over attribute word 5 when that is nonzero; otherwise
+ * all older sequences fade out over @p blend, and one already playing the same anim with the same transform hands its
+ * sub-anims, times, speeds and weight to the new one unless @p isDupSeqAllowed allows a duplicate.
+ *
+ * cAIAnimEventMap_getBlendInTime returns the anim's whole attribute record (On Tour release:
+ * cAIAnimEventMap::getAnimPlayAttr): word 0 is the category, 1 the update rule, 3 the sequencer and 4 the default
+ * blend-in time (On Tour debug: getCategory, getUpdateRule, getSequencerID, getBlendInTime).
+ *
+ * @param vself  the rider anim (this)
+ * @param vseq  the sequencer to play on (On Tour pSeqr)
+ * @param anim  the AI anim (On Tour tAIAnimID anid)
+ * @param animid  the animation clip: bank in the low byte, clip above it (On Tour tAnimID animid)
+ * @param isDupSeqAllowed  On Tour isDupSeqAllowed: never take over a matching sequence
+ * @param priority  the sequence priority (On Tour priority)
+ * @param blend  the blend-in time in seconds; 0 cuts (On Tour blendIn)
+ * @return @p anim
+ */
 // Starts anim (packed clip id h) on sequencer vseq, blending over `blend` seconds. A sequence already
 // playing the same thing (same anim, flags and offset transform) hands over its tracks and weight.
-extern "C" int cRiderAnimBase_onInput(void* vself, void* vseq, int anim, int a3, int a4, int a5, float blend)
+extern "C" int cRiderAnimBase_onInput(void* vself, void* vseq, int anim, int animid, int isDupSeqAllowed, int priority, float blend)
 {
     sRiderAnimBase* self = (sRiderAnimBase*)vself;
     cAnimSequencer* seq = (cAnimSequencer*)vseq;
@@ -451,11 +502,11 @@ extern "C" int cRiderAnimBase_onInput(void* vself, void* vseq, int anim, int a3,
         cAnimSequencer_expireAll(seq);
     if (cAIAnimEventMap_getBlendInTime(anim)[1] == 2)
     {
-        node = cAnimSequencer_playAndLoop(seq, anim, a3, 0.0f);
+        node = cAnimSequencer_playAndLoop(seq, anim, animid, 0.0f);
     }
     else
     {
-        node = cAnimSequencer_playAndHold(seq, anim, a3, 0.0f);
+        node = cAnimSequencer_playAndHold(seq, anim, animid, 0.0f);
         if (cAIAnimEventMap_getBlendInTime(anim)[1] == 0 || cAIAnimEventMap_getBlendInTime(anim)[2] != 0)
             cAnimSequence_addEndTrigger(node, 0x3F);
     }
@@ -466,13 +517,13 @@ extern "C" int cRiderAnimBase_onInput(void* vself, void* vseq, int anim, int a3,
     nd->m90 = self->m1C;
     nd->weight = nd->targetWeight = 1.0f;
     nd->blendIn = ((float*)cAIAnimEventMap_getBlendInTime(anim))[6];
-    nd->m84 = a5;
+    nd->m84 = priority;
     // PORT: (int) address arithmetic for the clip header (index-first addu).
-    int n = *(unsigned short*)((char*)(((unsigned int)a3 >> 8) * 0x14 + *(int*)(*(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)a3 & 0xFF) << 2)) + 0x8)) + 0x12);
+    int n = *(unsigned short*)((char*)(((unsigned int)animid >> 8) * 0x14 + *(int*)(*(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)animid & 0xFF) << 2)) + 0x8)) + 0x12);
     for (int i = 0; i < n; i++)
     {
-        char* bank = *(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)a3 & 0xFF) << 2));
-        char* clip = (char*)(((unsigned int)a3 >> 8) * 0x14 + *(int*)(bank + 0x8));
+        char* bank = *(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)animid & 0xFF) << 2));
+        char* clip = (char*)(((unsigned int)animid >> 8) * 0x14 + *(int*)(bank + 0x8));
         unsigned short* keys = *(unsigned short**)(bank + 0x10);
         cAnimSequence_addTrigger(node, i, keys[(*(unsigned short*)(clip + 0x10) + i) * 2] * 0.03333333507180214f);
     }
@@ -502,7 +553,7 @@ extern "C" int cRiderAnimBase_onInput(void* vself, void* vseq, int anim, int a3,
                     match = other;
             }
         }
-        if (match != 0 && a4 == 0)
+        if (match != 0 && isDupSeqAllowed == 0)
         {
             for (int k = 0; k < 3; k++)
             {
@@ -540,7 +591,17 @@ struct sVEntry003123C0 {
 
 extern "C" void cRiderAnimBase_setupAnimation(void* self, int a1);
 
-extern "C" void cRiderAnimBase_updateAnimation(char* self, int a1, float t)
+/**
+ * Advances every playing animation sequence by a time step and re-blends the rider's pose.
+ *
+ * For each of the 6 sequencers (array at +0x50), calls vtable slot 2 (vtable at +0x58) with the sequencer, the sequence
+ * and @p timescale; the next pointer (+0xC8) is read first so the call may expire the sequence. Then cRiderAnimBase_setupAnimation
+ * (setupAnimation) with @p animMinParts.
+ *
+ * @param animMinParts  On Tour animMinParts: blend only the minimum parts
+ * @param timescale  the time step (On Tour timescale)
+ */
+extern "C" void cRiderAnimBase_updateAnimation(char* self, int animMinParts, float timescale)
 {
     for (int i = 0; i < 6; i++)
     {
@@ -549,11 +610,11 @@ extern "C" void cRiderAnimBase_updateAnimation(char* self, int a1, float t)
         {
             cAnimSequenceNode* next = *(cAnimSequenceNode**)((char*)node + 0xC8);
             sVEntry003123C0* vt = *(sVEntry003123C0**)(self + 0x58);
-            vt[2].fn(self + vt[2].delta, &(*(cAnimSequencer**)(self + 0x50))[i], node, t);
+            vt[2].fn(self + vt[2].delta, &(*(cAnimSequencer**)(self + 0x50))[i], node, timescale);
             node = next;
         }
     }
-    cRiderAnimBase_setupAnimation(self, a1);
+    cRiderAnimBase_setupAnimation(self, animMinParts);
 }
 #endif
 
@@ -573,6 +634,13 @@ struct sSeqRef_00312490 {
     cAnimSequencer* seq;
 };
 
+/**
+ * Expires every sequence that has reached its end trigger.
+ *
+ * Collects up to 32 (sequence, sequencer) pairs whose event 0x3F is set (func_001446A0 on the sequence's +0xB0 flags),
+ * then calls vtable slot 3 (vtable at +0x58) on each. The release build drops On Tour's bound check on the 32-entry
+ * list.
+ */
 extern "C" void cRiderAnimBase_expireAnimation(char* self)
 {
     sSeqRef_00312490 list[32];
@@ -611,16 +679,25 @@ struct sAnimState_00312598
 extern "C" int cAnimSequencer_getAnimBlendFrames(void* seq, sAnimState_00312598* out, int max);
 extern "C" void func_0030F2B0(void* model, int count, sAnimState_00312598* states, int a3);
 
-extern "C" void cRiderAnimBase_setupAnimation(void* p, int a1)
+/**
+ * Blends the rider's model pose from the frames of all playing sequences.
+ *
+ * Fills a 64-entry frame array from each of the 6 sequencers (cAnimSequencer_getAnimBlendFrames, getAnimBlendFrames) and hands it to
+ * func_0030F2B0 (On Tour cAnimModel::blend) on the model at +0x54.
+ *
+ * @param riderAnim  the rider anim (this)
+ * @param animMinParts  On Tour animMinParts: blend only the minimum parts
+ */
+extern "C" void cRiderAnimBase_setupAnimation(void* riderAnim, int animMinParts)
 {
-    char* self = (char*)p;
+    char* self = (char*)riderAnim;
     int n = 0;
     sAnimState_00312598 states[0x40];
     for (int i = 0; i < 6; i++)
     {
         n += cAnimSequencer_getAnimBlendFrames(*(char**)(self + 0x50) + (i << 3), &states[n], 0x40 - n);
     }
-    func_0030F2B0(*(void**)(self + 0x54), n, states, a1);
+    func_0030F2B0(*(void**)(self + 0x54), n, states, animMinParts);
 }
 #endif
 
@@ -690,10 +767,20 @@ struct sVEntry00312790 {
 extern char* cGameAnimMap_TheGameAnimMap;
 extern char** cAnimDataBase_TheAnimDataBase;
 
-extern "C" float cRiderAnimBase_getAIAnimDuration(char* self, int a1)
+/**
+ * Returns how long the clip behind an AI animation lasts, in seconds.
+ *
+ * Vtable slot 4 (vtable at +0x58) gives the game anim for @p aid; 0x207 (none) returns 0. Otherwise the clip id comes
+ * from cGameAnimMap_TheGameAnimMap (+0x1030 table) and its length is (frame count - 1) / 30 from
+ * cAnimDataBase_TheAnimDataBase.
+ *
+ * @param aid  the AI animation (On Tour aid)
+ * @return the clip length in seconds, 0 when the anim has no clip
+ */
+extern "C" float cRiderAnimBase_getAIAnimDuration(char* self, int aid)
 {
     sVEntry00312790* vt = *(sVEntry00312790**)(self + 0x58);
-    int id = vt[4].fn(self + vt[4].delta, a1);
+    int id = vt[4].fn(self + vt[4].delta, aid);
     if (id == 0x207)
         return 0.0f;
     unsigned int h = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
@@ -795,20 +882,41 @@ extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
 extern "C" int cRiderAnimBase_onInput(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
 extern int D_0048D808[];
 
-extern "C" void cRiderAnimBase_playFromAnimID(char* self, int anim, int a2, float blend)
+/**
+ * Plays a specific animation clip under an AI animation id, on that animation's sequencer.
+ *
+ * The sequencer is attribute word 3; a negative @p blend takes attribute word 4. Calls cRiderAnimBase_onInput (onInput) with
+ * duplicates allowed and the sequencer's priority from D_0048D808, and stores the result as the sequencer's current AI
+ * anim (+slot * 4). cAIAnimEventMap_getBlendInTime returns the anim's whole attribute record (On Tour release:
+ * cAIAnimEventMap::getAnimPlayAttr): word 0 is the category, 1 the update rule, 3 the sequencer and 4 the default
+ * blend-in time (On Tour debug: getCategory, getUpdateRule, getSequencerID, getBlendInTime).
+ *
+ * @param anim  the AI animation (On Tour anid)
+ * @param animid  the clip to play: bank in the low byte, clip above it (On Tour tAnimID animid)
+ * @param blend  the blend-in time in seconds; negative uses the anim's default (On Tour blendIn)
+ */
+extern "C" void cRiderAnimBase_playFromAnimID(char* self, int anim, int animid, float blend)
 {
     int slot = cAIAnimEventMap_getBlendInTime(anim)[3];
     if (blend < 0.0f)
     {
         blend = *(float*)&cAIAnimEventMap_getBlendInTime(anim)[4];
     }
-    *(int*)(self + (slot << 2)) = cRiderAnimBase_onInput(self, *(char**)(self + 0x50) + (slot << 3), anim, a2, 1, D_0048D808[slot], blend);
+    *(int*)(self + (slot << 2)) = cRiderAnimBase_onInput(self, *(char**)(self + 0x50) + (slot << 3), anim, animid, 1, D_0048D808[slot], blend);
 }
 #endif
 
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimID__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI animation a rider sequencer is currently playing.
+ *
+ * The current AI anim array starts at +0x0, one int per sequencer; 0x1B6 means none.
+ *
+ * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
+ * @return the current AI anim id
+ */
 int cRiderAnimBase_getCurrentAnimID(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2));
@@ -829,6 +937,15 @@ extern "C" float func_00312AB0(void* self, int i)
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_isCurrentAnimEndFlag);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the animation a rider sequencer is playing has reached its end.
+ *
+ * Reads +0xC0 of cAnimSequencer_getSequence(&sequencers[@p i], 0) without a null check (the release build drops On
+ * Tour's assert).
+ *
+ * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
+ * @return nonzero once the end event has fired
+ */
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i)
 {
     cAnimSequencer* seqs = *(cAnimSequencer**)((char*)self + 0x50);

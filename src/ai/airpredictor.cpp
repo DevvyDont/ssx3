@@ -385,7 +385,24 @@ static inline sVec4_3648 vu0Add_3648(const sVec4_3648& a, const sVec4_3648& b)
     return r;
 }
 
-extern "C" void cAirPredictor_updateFlightPath(char* self, sQuad* a, sQuad* b, float dt)
+/**
+ * Advances the predicted flight by @p dt and returns the rider's position and velocity along it.
+ *
+ * Past 60 s of simulated time (+0x98) it gives up: in state 2 (+0xAC) it switches to state 3 with a fixed frame
+ * (t4vect_Origin, t4vect_XAxis, t4vect_ZAxis) and +0x90 = 13, otherwise it re-launches from @p airPos / @p airVel
+ * (cAirPredictor_initLaunch) in state 2. Otherwise, in state 1 a sim more than 0.2 s behind the clock (+0xA0) is
+ * re-launched, and in states 0 and 2 func_00113200 (On Tour simStep) runs until the sim passes the clock + dt or the
+ * state changes.
+ *
+ * Then the air position/velocity (+0x70/+0x80) are stepped in fixed 1/60 s ticks with func_001139A0 (On Tour
+ * simOneTick), +0xA4 counting the time done. A remainder over 0.01 s is blended linearly between this tick and a
+ * predicted next one (position w = 1), else the current values are copied out. The clock +0xA0 then advances by @p dt.
+ *
+ * @param airPos  receives the predicted air position (On Tour airPos); also the launch position on a re-launch
+ * @param airVel  receives the predicted air velocity (On Tour airVel); also the launch velocity on a re-launch
+ * @param dt  seconds to advance
+ */
+extern "C" void cAirPredictor_updateFlightPath(char* self, sQuad* airPos, sQuad* airVel, float dt)
 {
     if (*(float*)(self + 0x98) > 60.0f) {
         if (*(int*)(self + 0xAC) == 2) {
@@ -395,12 +412,12 @@ extern "C" void cAirPredictor_updateFlightPath(char* self, sQuad* a, sQuad* b, f
             *(sQuadR*)(self + 0x20) = t4vect_ZAxis;
             *(int*)(self + 0x90) = 0xD;
         } else {
-            cAirPredictor_initLaunch(self, a, b);
+            cAirPredictor_initLaunch(self, airPos, airVel);
             *(int*)(self + 0xAC) = 2;
         }
     } else {
         if (*(int*)(self + 0xAC) == 1 && *(float*)(self + 0x98) - *(float*)(self + 0xA0) < -0.2f) {
-            cAirPredictor_initLaunch(self, a, b);
+            cAirPredictor_initLaunch(self, airPos, airVel);
         }
         int st = *(int*)(self + 0xAC);
         if (st == 0) {
@@ -426,12 +443,12 @@ extern "C" void cAirPredictor_updateFlightPath(char* self, sQuad* a, sQuad* b, f
         sVec4_3648 v;
         func_001139A0_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), &p, &v);
         float k = t * 59.999996185302734f;
-        *(sVec4_3648*)a = vu0Add_3648(vu0Scale_3648(p, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x70), 1.0f - k));
-        *(sVec4_3648*)b = vu0Add_3648(vu0Scale_3648(v, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x80), 1.0f - k));
-        ((float*)a)[3] = 1.0f;
+        *(sVec4_3648*)airPos = vu0Add_3648(vu0Scale_3648(p, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x70), 1.0f - k));
+        *(sVec4_3648*)airVel = vu0Add_3648(vu0Scale_3648(v, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x80), 1.0f - k));
+        ((float*)airPos)[3] = 1.0f;
     } else {
-        *(sQuad*)a = *(sQuad*)(self + 0x70);
-        *(sQuad*)b = *(sQuad*)(self + 0x80);
+        *(sQuad*)airPos = *(sQuad*)(self + 0x70);
+        *(sQuad*)airVel = *(sQuad*)(self + 0x80);
     }
     *(float*)(self + 0xA0) += dt;
 }

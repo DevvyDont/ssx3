@@ -1266,6 +1266,14 @@ extern "C" void* func_00311250(char** self, void* src)
 //100%
 INCLUDE_ASM("animation/animmodel", cAdfDataSource_populateFromData);
 #ifdef SKIP_ASM
+/**
+ * Points an animation data source at the sections of a loaded animation archive.
+ *
+ * Stores @p data (+0x4) and its section pointers: data + 0x10 (+0x8), and data plus the offsets in header words +0x4,
+ * +0x8 and +0xC (+0xC, +0x10, +0x14). The release build drops On Tour's cookie and header checks.
+ *
+ * @param data  the loaded animation archive
+ */
 extern "C" void cAdfDataSource_populateFromData(void* self, char* data)
 {
     *(char**)((char*)self + 0x4) = data;

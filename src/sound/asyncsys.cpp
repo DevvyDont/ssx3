@@ -770,24 +770,24 @@ struct sAsync_0028B0F0 {
     char pad1ec[0];
 };
 
-extern "C" void func_0028B0F0(sAsync_0028B0F0* self, int arg)
+extern "C" void func_0028B0F0(sAsync_0028B0F0* self, int size)
 {
-    sVE_0028B0F0* e = &(*(sVE_0028B0F0**)((char*)self + 0x1D4))[3];
-    void (**pf)(void*, int, int, int) = &e->fn;
-    char* thisp = (char*)self + e->delta;
-    sRing_0028B0F0* q1 = &self->q1;
-    int a;
-    int b;
+    sVE_0028B0F0* vtEntry = &(*(sVE_0028B0F0**)((char*)self + 0x1D4))[3];
+    void (**pf)(void*, int, int, int) = &vtEntry->fn;
+    char* thisp = (char*)self + vtEntry->delta;
+    sRing_0028B0F0* handleQueue = &self->q1;
+    int userHandle;
+    int memFlags;
     if (self->q1.tail == self->q1.head)
-        a = -1;
+        userHandle = -1;
     else
-        a = q1->data[q1->head];
-    sRing_0028B0F0* q2 = &self->q2;
+        userHandle = handleQueue->data[handleQueue->head];
+    sRing_0028B0F0* flagsQueue = &self->q2;
     if (self->q2.tail == self->q2.head)
-        b = -1;
+        memFlags = -1;
     else
-        b = q2->data[q2->head];
-    (*pf)(thisp, a, arg, b);
+        memFlags = flagsQueue->data[flagsQueue->head];
+    (*pf)(thisp, userHandle, size, memFlags);
 }
 #endif
 
@@ -820,6 +820,14 @@ extern "C" int func_0028B188(void) {
 INCLUDE_ASM("sound/asyncsys", cAudioInterface_isInGame);
 #ifdef SKIP_ASM
 
+/**
+ * Says whether a game is running: SSXApp has a cGame.
+ *
+ * One of the audio code's static accessors (On Tour cAudioInterface): tests SSXApp->Game (+0x84). The sound code
+ * (func_00288A20, func_0029EEE0, func_0028BF78, bmRestartC2D0, ...) uses it to skip in-game work in the front end.
+ *
+ * @return 1 if SSXApp->Game is set, else 0
+ */
 extern "C" int cAudioInterface_isInGame()
 {
     return (void*)SSXApp->Game != 0;
@@ -840,6 +848,14 @@ extern "C" void* func_0028B1C0()
 INCLUDE_ASM("sound/asyncsys", cAudioInterface_getGame);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the running cGame (SSXApp->Game).
+ *
+ * Static accessor of the audio code (On Tour cAudioInterface). Callers such as cSSXAudio_HandleGlide read game fields
+ * (+0x28, +0x214) through it.
+ *
+ * @return SSXApp->Game (0 outside a game)
+ */
 extern "C" void* cAudioInterface_getGame()
 {
     return SSXApp->Game;
@@ -850,6 +866,14 @@ extern "C" void* cAudioInterface_getGame()
 INCLUDE_ASM("sound/asyncsys", cAudioInterface_getAI);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the game's AI manager (SSXApp->Game->AI).
+ *
+ * Static accessor of the audio code (On Tour cAudioInterface); dereferences SSXApp->Game without a null check, so it is
+ * only valid in a game. func_00286EA0 passes it to cAI_isRaceFinished.
+ *
+ * @return SSXApp->Game->AI
+ */
 extern "C" void* cAudioInterface_getAI()
 {
     return SSXApp->Game->AI;
@@ -949,8 +973,8 @@ extern "C" void func_0028B528(void* self);
 extern "C" void func_0028B2D0(void* self)
 {
     if (*(void**)((char*)self + 0x18) != 0) {
-        for (void* p = *(void**)((char*)self + 0x18); p != self; p = *(void**)((char*)p + 0x18)) {
-            func_0028B528(p);
+        for (void* node = *(void**)((char*)self + 0x18); node != self; node = *(void**)((char*)node + 0x18)) {
+            func_0028B528(node);
         }
     }
 }

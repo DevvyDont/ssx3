@@ -92,22 +92,22 @@ extern "C" void func_00195AA0(void* self, signed char lang)
         int flags = *(signed char*)((char*)self + 0x3);
         if ((flags & 1) == 0) {
             func_00195948(self);
-            int l = -1;
+            int langIndex = -1;
             switch (lang) {
             case 0:
-                l = 0;
+                langIndex = 0;
                 break;
             case 1:
-                l = 1;
+                langIndex = 1;
                 break;
             case 2:
-                l = 2;
+                langIndex = 2;
                 break;
             case 3:
-                l = 3;
+                langIndex = 3;
                 break;
             }
-            cFELocale_addFile(self, l);
+            cFELocale_addFile(self, langIndex);
             if (*(signed char*)((char*)self + 0x58) == 1) {
                 func_00195BE0(self);
             } else {
@@ -123,6 +123,12 @@ INCLUDE_ASM("util/locale", cFELocale_loadCommon);
 #ifdef SKIP_ASM
 extern "C" void cFELocale_addFile(void* self, int lang);
 
+/**
+ * Loads the string file shared by every front-end screen for the current language.
+ *
+ * Maps the language at +0x1 (0 to 3) to the matching file entry, or -1 for any other value, and passes it to
+ * cFELocale_addFile.
+ */
 extern "C" void cFELocale_loadCommon(void* self)
 {
     int lang = -1;
@@ -149,9 +155,9 @@ INCLUDE_ASM("util/locale", func_00195BE0);
 #ifdef SKIP_ASM
 extern "C" void cFELocale_addFile(void* self, int lang);
 
-extern "C" void func_00195BE0(void* p)
+extern "C" void func_00195BE0(void* locale)
 {
-    char* self = (char*)p;
+    char* self = (char*)locale;
     int id = -1;
     *(char*)(self + 0x58) = 1;
     switch (*(signed char*)(self + 1)) {
@@ -318,9 +324,9 @@ extern "C" void* func_00195F70(void* self, void* arg)
     signed char i;
     for (i = 0; i < 20; i++) {
         if (arr->items[i] != 0) {
-            void* r = func_002C6DC0_2(arr->items[i], arg);
-            if (r != 0) {
-                return r;
+            void* found = func_002C6DC0_2(arr->items[i], arg);
+            if (found != 0) {
+                return found;
             }
         }
     }

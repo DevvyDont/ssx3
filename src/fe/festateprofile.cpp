@@ -109,12 +109,25 @@ extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
 extern void* cFEStateProfileLoad_vtbl[];
 extern int cFEStateProfileLoad_mScreenAction;
 
-extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* self, int a1, int a2, unsigned char flags)
+/**
+ * Constructs the profile load screen for the controller that asked for it.
+ *
+ * Runs cFEMemCard_cFEMemCard (the memory card screen base, with 0), sets the state id (+0xC) to 0x23 and the vtable,
+ * stores @p iType in cFEStateProfileLoad_mScreenAction, clears the work fields, turns the lowest set bit of
+ * @p flags (of the first three) into a controller index (+0x22C) and finds which player (one, or two in a
+ * two-player race) uses that controller (cBENewPlayerInterface_getPlayerCtrlID), storing it at +0x1CC and +0x44.
+ *
+ * @param pEngine     the UI engine
+ * @param iType     what the screen is for (On Tour iType, kept in mScreenAction)
+ * @param flags  bit mask of the controller that is active
+ * @return @p self
+ */
+extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* self, int pEngine, int iType, unsigned char flags)
 {
-    cFEMemCard_cFEMemCard(self, a1, 0);
+    cFEMemCard_cFEMemCard(self, pEngine, 0);
     *(int*)((char*)self + 0xC) = 0x23;
     *(void***)((char*)self + 0x8) = cFEStateProfileLoad_vtbl;
-    cFEStateProfileLoad_mScreenAction = a2;
+    cFEStateProfileLoad_mScreenAction = iType;
     *(int*)((char*)self + 0x1CC) = 0;
     *(int*)((char*)self + 0x230) = 0;
     *(int*)((char*)self + 0x234) = 0;

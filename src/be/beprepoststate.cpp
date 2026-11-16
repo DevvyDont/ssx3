@@ -366,11 +366,18 @@ INCLUDE_ASM("be/beprepoststate", cBEProfileLib_init);
 #ifdef SKIP_ASM
 extern "C" void cBECharProfileDB_init(void* p, int i, int arg);
 
-extern "C" void cBEProfileLib_init(void* self, int arg)
+/**
+ * Resets all ten character profiles of a player profile.
+ *
+ * Calls cBECharProfileDB_init (cBECharProfileDB::init) for characters 0-9 with the character index and @p reload.
+ *
+ * @param reload  nonzero to reload each character's item data first
+ */
+extern "C" void cBEProfileLib_init(void* self, int reload)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        cBECharProfileDB_init((char*)self + i * 0xF88, i, arg);
+        cBECharProfileDB_init((char*)self + i * 0xF88, i, reload);
     }
 }
 #endif

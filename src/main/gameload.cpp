@@ -993,6 +993,12 @@ extern "C" void cGame_restart(cGame* self)
 //100%
 INCLUDE_ASM("main/gameload", cGame_sectionLoaded);
 #ifdef SKIP_ASM
+/**
+ * Called when a world section finishes loading: invalidates a cached value of the AI's focus manager.
+ *
+ * When the AI (+0xC) and its focus manager (+0xA4, On Tour FocusMan) exist, sets the manager's +0xD0 to -1. The
+ * loaded section's id, passed by cSectionMan_update, is not used.
+ */
 extern "C" void cGame_sectionLoaded(void* self)
 {
     void* a = *(void**)((char*)self + 0xC);
@@ -1168,6 +1174,13 @@ extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
 
+/**
+ * Ends replay playback and returns to the pause menu state that was active before it.
+ *
+ * Stops the replay (+0x28), calls func_002CC0B8 (On Tour cMenuSys::activate) with 1 and func_002CC460
+ * (cMenuSys::popMenu) on the menu system (+0xA4), then pops the pause stack (D_004A2A54 index into D_005366E8)
+ * and restores cPauseState_Flags from D_004428F0. The stack index is not checked (On Tour asserts it is > 0).
+ */
 extern "C" void cGame_stopReplay(void* self)
 {
     cReplay_stopReplay(*(void**)((char*)self + 0x28));
@@ -1690,6 +1703,15 @@ struct sGameLoad_0F40 {
     int hold;                       // 0x224
 };
 
+/**
+ * Runs the game-flow state machine: updates the current state and switches to a requested one.
+ *
+ * Returns early when a local game is held or the pause flags have bit 0x20. Ticks the current state, enters a
+ * pending preload state and updates it; when a next state id is set, exits the current state, remembers it as the
+ * previous one and makes the matching member state (+0xB0 ... +0x1EC, ids 1-16) current, then refreshes the views
+ * with func_0022E550. (The C's "Game load state machine" comment and sGameLoad_0F40 name come from the unit name;
+ * this is the game-flow state switch.)
+ */
 // Game load state machine: runs the current state and switches to the requested one.
 extern "C" void cGame_updateState(void* self_)
 {
@@ -1850,10 +1872,19 @@ INCLUDE_ASM("main/gameload", cGame_setState);
 #ifdef SKIP_ASM
 extern "C" void cGame_updateState(void* self);
 
-extern "C" void cGame_setState(void* self, int a, int b, int refresh)
+/**
+ * Requests a change of game-flow state, optionally switching at once.
+ *
+ * Stores @p iNextState at +0x210 and @p startupFlag at +0x21C, and runs cGame_updateState straight away when @p refresh is nonzero.
+ *
+ * @param iNextState        the next state id
+ * @param startupFlag        the state's startup flag
+ * @param refresh  nonzero to switch now (On Tour bForce)
+ */
+extern "C" void cGame_setState(void* self, int iNextState, int startupFlag, int refresh)
 {
-    *(int*)((char*)self + 0x210) = a;
-    *(int*)((char*)self + 0x21C) = b;
+    *(int*)((char*)self + 0x210) = iNextState;
+    *(int*)((char*)self + 0x21C) = startupFlag;
     if (refresh != 0) {
         cGame_updateState(self);
     }
@@ -1898,6 +1929,12 @@ struct sVEntry_002312D8 {
     int (*fn)(void*);
 };
 
+/**
+ * Tells whether the state being preloaded is ready to run.
+ *
+ * Returns 0 while a preload request is pending (+0x208), 1 when there is no preloaded state (+0x204), else that
+ * state's answer from its virtual slot 8.
+ */
 extern "C" int cGame_isPreloadedStateReady(void* self)
 {
     if (*(int*)((char*)self + 0x208) != 0) {
@@ -2232,6 +2269,17 @@ static inline char* At_1840(char* self, int i)
     return *(char**)(*(char**)(self + 0xC) + (i << 2) + 0x40);
 }
 
+/**
+ * Decides whether the pause menu should open this frame, and for which player.
+ *
+ * Returns 0 while a network error is shown. Looks at the replay's player in replay mode, else at each human
+ * rider's controller (cBENewPlayerInterface_getRiderCtrlID): unplugged controllers set bits in a mask, and the first with pause pressed
+ * (input 0x3C) becomes the owner. The mask is stored at +0x224 (On Tour ControllerUnplugged); an unplugged
+ * controller always pauses, owned by the presser or the first ready player. Otherwise a press pauses when online
+ * or when cGame_canUserActivatePauseMenu allows it. The owner goes to +0x228 (PauseOwner).
+ *
+ * @return 1 when the pause menu should open
+ */
 extern "C" int cGame_activatePauseMenu(char* self)
 {
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mDisplayError > 0) {
@@ -2303,6 +2351,12 @@ INCLUDE_ASM("main/gameload", cGame_canUserActivatePauseMenu);
 #ifdef SKIP_ASM
 extern "C" int cSSXScriptEngine_IsPauseMenuAllowed(void* a);
 
+/**
+ * Tells whether the player may open the pause menu now.
+ *
+ * Not while the pending state (+0x210) or the current state (+0x214) is 1, 5, 10 or 14, and only when the
+ * script engine allows it (cSSXScriptEngine_IsPauseMenuAllowed).
+ */
 extern "C" int cGame_canUserActivatePauseMenu(void* self)
 {
     int mode = *(int*)((char*)self + 0x210);
@@ -2424,6 +2478,12 @@ extern "C" int cFadeScreen_loseFocus(void* self)
 //100%
 INCLUDE_ASM("main/gameload", cFadeScreen_update);
 #ifdef SKIP_ASM
+/**
+ * Advances a screen fade by one frame.
+ *
+ * When fading in (+0x8 set) adds 1/60 to the level (+0x4), otherwise subtracts it and clamps at 0. The fade-in
+ * side is not clamped at 1 here (also so in On Tour).
+ */
 // PORT: the unit declares this void*-returning; the body returns nothing meaningful.
 extern "C" void* cFadeScreen_update(void* self)
 {
@@ -2563,10 +2623,13 @@ static inline float floorf_231F80(float x)
     return f;
 }
 
-extern "C" void cLoadIndicator_update(float* t)
+/**
+ * Advances a load indicator's animation phase (its first field) by one frame, wrapping it to [0, 1).
+ */
+extern "C" void cLoadIndicator_update(float* self)
 {
-    *t += 0.01666666753590107f;
-    *t -= floorf_231F80(*t);
+    *self += 0.01666666753590107f;
+    *self -= floorf_231F80(*self);
 }
 #endif
 
@@ -2708,6 +2771,11 @@ extern void* D_0047D938[];
 //100%
 INCLUDE_ASM("main/gameload", cPreStartScreen_cPreStartScreen__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs the pre-start screen app module: installs its vtable (D_0047D938) and clears +0x4 and +0x8.
+ *
+ * @return @p self
+ */
 void* cPreStartScreen_cPreStartScreen(void* self)
 {
     int t0 = 0;

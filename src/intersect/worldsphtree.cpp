@@ -1453,7 +1453,20 @@ static inline void wsAddEq_334680(sWsVec4& a, const sWsVec4& b)
         : "memory");
 }
 
-extern "C" int cOverlapList_splineIntersect(char* self, sWsVec4* pos, int a2, int mask, float r)
+/**
+ * Finds the rails (splines) near a point among the objects in this overlap list.
+ *
+ * Builds a box of half-size @p testRadius around @p pos and, for each listed object (+0x210 count, +0x214 array), tests
+ * rails with cRailModifier_splineIntersect, flex rails with func_00348290 and instances whose filter flags match
+ * @p mask with func_00335128, collecting hits into @p intInfo.
+ *
+ * @param pos   the point to test
+ * @param intInfo    out: the hit list (On Tour intInfo)
+ * @param mask  which spline types to accept
+ * @param testRadius     the test radius
+ * @return the number of hits
+ */
+extern "C" int cOverlapList_splineIntersect(char* self, sWsVec4* pos, int intInfo, int mask, float testRadius)
 {
     sBox_00334680 box;
     sWsVec4 ext;
@@ -1464,9 +1477,9 @@ extern "C" int cOverlapList_splineIntersect(char* self, sWsVec4* pos, int a2, in
     dist = zero;
     box.min = *pos;
     box.max = *pos;
-    ext.x = r;
-    ext.y = r;
-    ext.z = r;
+    ext.x = testRadius;
+    ext.y = testRadius;
+    ext.z = testRadius;
     ext.w = zero;
     wsSubEq_334680(box.min, ext);
     wsAddEq_334680(box.max, ext);
@@ -1474,12 +1487,12 @@ extern "C" int cOverlapList_splineIntersect(char* self, sWsVec4* pos, int a2, in
         char* o = ((char**)(self + 0x214))[i];
         int type = *(int*)(o + 8);
         if (type == 2) {
-            cRailModifier_splineIntersect(*(void**)(o + 0xC), &box, &box, pos, mask, &cnt, &dist, a2);
+            cRailModifier_splineIntersect(*(void**)(o + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
         } else if (type == 3) {
-            func_00348290(*(void**)(o + 0xC), &box, &box, pos, mask, &cnt, &dist, a2);
+            func_00348290(*(void**)(o + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
         } else if (type == 1) {
             if (*(int*)(*(char**)(o + 0x68) + 0x1C) & mask) {
-                func_00335128(o, &box, pos, &cnt, &dist, a2);
+                func_00335128(o, &box, pos, &cnt, &dist, intInfo);
             }
         }
     }
@@ -1514,6 +1527,9 @@ INCLUDE_ASM("intersect/worldsphtree", cBXNash_purgeTheAIFwdDiffCache);
 #ifdef SKIP_ASM
 extern "C" void func_00327828(void* p, int flags);
 
+/**
+ * Deletes the AI forward-difference cache (+0xA4) built by cBXNash_initTheAIFwdDiffCache, then clears the pointer.
+ */
 extern "C" void cBXNash_purgeTheAIFwdDiffCache(void* self)
 {
     void* p = *(void**)((char*)self + 0xA4);
@@ -1800,13 +1816,27 @@ static inline sWsPart_4888* GetPart_4888(sWsInstDef_4888* def, int i)
 // Collects the triangle hits of instance `node` against query q into buf (mode 1: unnamed parts only, mode 2: named
 // parts only); bone matrices come from the instance's animated object or are built here from the skeleton.
 extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf, int cap, int mode) __asm__("intersect_instanceIntersect");
-extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf, int cap, int mode)
+/**
+ * Intersects a world query with one instance, writing up to @p cap hits.
+ *
+ * If the instance has a node object whose virtual slot 38 says it handles intersection, its slot 39 does the
+ * work. Otherwise, for model types 1-3, transforms the query into the instance's space and tests its sphere tree
+ * or polygon meshes (cWorldIntersectType_IsMeshInt), filling the hits with this instance's data.
+ *
+ * @param intersectType     the world intersection query (On Tour cWorldIntersectType)
+ * @param node  the instance record
+ * @param buf   out: the hit array
+ * @param cap   room left in @p buf
+ * @param mode  intersection flags
+ * @return the number of hits written
+ */
+extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHit_4888* buf, int cap, int mode)
 {
     if (node->obj != 0) {
         sWsVtSlot* vt = node->obj->vt;
         if (((Test_4888)vt[38].fn)((char*)node->obj + vt[38].delta)) {
             sWsVtSlot* vt2 = node->obj->vt;
-            return ((Query_4888)vt2[39].fn)((char*)node->obj + vt2[39].delta, q, buf, cap, mode);
+            return ((Query_4888)vt2[39].fn)((char*)node->obj + vt2[39].delta, intersectType, buf, cap, mode);
         }
     }
     int type = node->def->type;
@@ -1911,22 +1941,22 @@ extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf,
         InvertOrtho_4888(inv);
         int inum = 0;
         void* tri = 0;
-        ((SetXf_4888)q->vt[1].fn)((char*)q + q->vt[1].delta, 1.0f / node->scale, &inv);
+        ((SetXf_4888)intersectType->vt[1].fn)((char*)intersectType + intersectType->vt[1].delta, 1.0f / node->scale, &inv);
         if (type == 2) {
-            inum = ((Tris_4888)q->vt[7].fn)((char*)q + q->vt[7].delta, bone->mesh, bone->mesh + 0xC, ii, 64);
+            inum = ((Tris_4888)intersectType->vt[7].fn)((char*)intersectType + intersectType->vt[7].delta, bone->mesh, bone->mesh + 0xC, ii, 64);
         } else {
-            if (((Hit_4888)q->vt[9].fn)((char*)q + q->vt[9].delta, bone->mesh, bone->mesh + 0xC)) {
+            if (((Hit_4888)intersectType->vt[9].fn)((char*)intersectType + intersectType->vt[9].delta, bone->mesh, bone->mesh + 0xC)) {
                 if (type == 3) {
                     tri = tSphTreeList_getMeshTree(func_003A6CD8_4888(cWorld_m_pTheWorld, node), k);
-                    inum = ((Mesh_4888)q->vt[6].fn)((char*)q + q->vt[6].delta, tri, ii, 64);
+                    inum = ((Mesh_4888)intersectType->vt[6].fn)((char*)intersectType + intersectType->vt[6].delta, tri, ii, 64);
                 } else {
-                    inum = cWorldIntersectType_IsMeshInt_cap(q, tPolyModelList_getMeshPolyModel_4888(func_003A6CC8_4888(cWorld_m_pTheWorld, node), k),
+                    inum = cWorldIntersectType_IsMeshInt_cap(intersectType, tPolyModelList_getMeshPolyModel_4888(func_003A6CC8_4888(cWorld_m_pTheWorld, node), k),
                                              *(int*)(bone->mesh + 0x18) & 1, ii, 64);
                 }
             }
             k++;
         }
-        ((Reset_4888)q->vt[2].fn)((char*)q + q->vt[2].delta);
+        ((Reset_4888)intersectType->vt[2].fn)((char*)intersectType + intersectType->vt[2].delta);
         for (int j = 0; j < inum; j++) {
             ii[j].nrm = vu0MtxMul_4888(m, ii[j].nrm);
             buf[n] = ii[j];

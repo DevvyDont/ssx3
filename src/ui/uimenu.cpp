@@ -396,8 +396,8 @@ extern "C" void cUIMenu_setScrollableMenu(cUIMenu* self, char NumItems)
 //100%
 INCLUDE_ASM("ui/uimenu", func_0039B7A8);
 #ifdef SKIP_ASM
-extern "C" void func_0039B7A8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x9C))) = arg1;
+extern "C" void func_0039B7A8(void *menu, int scrollBar) {
+    (*(int *)((char*)(menu) + (0x9C))) = scrollBar;
 }
 #endif
 

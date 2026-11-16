@@ -78,13 +78,21 @@ extern "C" void cSplashManager_CameraSnapped(void* p);
 // second argument (callers pass it in $5); the real body is bound by asm label.
 void cCameraController_snap_impl(void* self, int a) __asm__("cCameraController_snap");
 
-void cCameraController_snap_impl(void* self, int a)
+/**
+ * Snaps every camera algorithm in the controller's list to a subject, then snaps the camera's result algorithm.
+ *
+ * Calls each algorithm's snap virtual (slot 3) with @p subjectID, walking AlgorithmList (+0x8), then cCamera_snapResultAlgorithm__FPv
+ * (On Tour cCamera::snapResultAlgorithm) and cSplashManager_CameraSnapped (On Tour cSplashManager::CameraSnapped) on Camera (+0x10).
+ *
+ * @param subjectID  the subject (rider index) to snap to
+ */
+void cCameraController_snap_impl(void* self, int subjectID)
 {
     for (sCamCtrlNode* n = **(sCamCtrlNode***)((char*)self + 0x8); n != 0; n = n->next)
     {
         void* obj = n->obj;
         sCamCtrlVE* vt = *(sCamCtrlVE**)((char*)obj + 0x10);
-        vt[3].fn((char*)obj + vt[3].delta, a);
+        vt[3].fn((char*)obj + vt[3].delta, subjectID);
     }
     cCamera_snapResultAlgorithm(*(void**)((char*)self + 0x10));
     cSplashManager_CameraSnapped(*(void**)((char*)self + 0x10));
@@ -109,6 +117,12 @@ struct sCamCtrlVE0 {
 void* cCamera_snapResultAlgorithm(void* self);
 extern "C" void cSplashManager_CameraSnapped(void* p);
 
+/**
+ * Snaps every camera algorithm in the controller's list to its current subject, then snaps the result algorithm.
+ *
+ * Calls each algorithm's snapCurrent virtual (slot 4), walking AlgorithmList (+0x8), then cCamera_snapResultAlgorithm__FPv
+ * (On Tour cCamera::snapResultAlgorithm) and cSplashManager_CameraSnapped (On Tour cSplashManager::CameraSnapped) on Camera (+0x10).
+ */
 extern "C" void cCameraController_snapCurrent(void* self)
 {
     for (sCamCtrlNodeB* n = **(sCamCtrlNodeB***)((char*)self + 0x8); n != 0; n = n->next)
@@ -127,6 +141,11 @@ extern "C" void* cCameraAlgoList_removeAll(int);
 //100%
 INCLUDE_ASM("camera/cameracontroller", cCameraController_clearAlgorithms__FPv);
 #ifdef SKIP_ASM
+/**
+ * Removes (and deletes the owned) algorithms from the controller's algorithm list.
+ *
+ * Calls cCameraAlgoList_removeAll on AlgorithmList (+0x8) and returns what it returns.
+ */
 void* cCameraController_clearAlgorithms(void* self)
 {
     return cCameraAlgoList_removeAll(*(int*)((char*)self + 0x8));
@@ -267,10 +286,18 @@ INCLUDE_ASM("camera/cameracontroller", cManualCameraController_addAlgorithm);
 #ifdef SKIP_ASM
 extern "C" void cCameraAlgoList_insert(void* list, int a, int b, float w);
 
-extern "C" void cManualCameraController_addAlgorithm(void* self, int a, int b)
+/**
+ * Makes an algorithm the manual controller's only one: clears the list, then inserts it with a full blend.
+ *
+ * Calls cCameraController_clearAlgorithms__FPv to empty AlgorithmList, then cCameraAlgoList_insert(AlgorithmList (+0x8), @p algo, @p deleteAlgorithmOnDestruction, 1.0f).
+ *
+ * @param algo  the camera algorithm to use
+ * @param deleteAlgorithmOnDestruction  nonzero when the list should delete the algorithm when it removes it
+ */
+extern "C" void cManualCameraController_addAlgorithm(void* self, int algo, int deleteAlgorithmOnDestruction)
 {
     cCameraController_clearAlgorithms(self);
-    cCameraAlgoList_insert(*(void**)((char*)self + 0x8), a, b, 1.0f);
+    cCameraAlgoList_insert(*(void**)((char*)self + 0x8), algo, deleteAlgorithmOnDestruction, 1.0f);
 }
 #endif
 
@@ -343,9 +370,17 @@ INCLUDE_ASM("camera/cameracontroller", cChaseCameraController_createChaseAlgorit
 #ifdef SKIP_ASM
 extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, int, float);
 
-extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void* self, int a1, int a2)
+/**
+ * Switches the chase camera to an algorithm type with an immediate cut (no blend).
+ *
+ * Calls cChaseCameraController_createChaseAlgorithmBlend(self, @p type, @p action, 1.0f) and returns its result.
+ *
+ * @param type  the camera algorithm type (On Tour eCamAlgoType)
+ * @param action  the camera-trigger action that asked for the switch, if any (On Tour cCTAction*)
+ */
+extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void* self, int type, int action)
 {
-    return cChaseCameraController_createChaseAlgorithmBlend(self, a1, a2, 1.0f);
+    return cChaseCameraController_createChaseAlgorithmBlend(self, type, action, 1.0f);
 }
 #endif
 

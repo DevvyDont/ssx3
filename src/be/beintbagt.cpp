@@ -457,9 +457,17 @@ extern void* cBELibrary_grabPointsDB[];
 //100%
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabPoints__FPvi);
 #ifdef SKIP_ASM
-int cBEBAGTInterface_getGrabPoints(void* self, int a1)
+/**
+ * Returns the base points a grab is worth.
+ *
+ * cBELibrary_grabPointsDB is an array of {points, pointsPerSec} pairs indexed by grab.
+ *
+ * @param grabEnum  the grab (On Tour grabEnum)
+ * @return the grab's base points
+ */
+int cBEBAGTInterface_getGrabPoints(void* self, int grabEnum)
 {
-    return *(int*)((char*)(void*)cBELibrary_grabPointsDB + a1 * 8);
+    return *(int*)((char*)(void*)cBELibrary_grabPointsDB + grabEnum * 8);
 }
 #endif
 
@@ -475,9 +483,17 @@ struct sBAGTTable {
     sBAGTEntry entries[1];
 };
 
-int cBEBAGTInterface_getGrabPointsPerSec(void* self, int a1)
+/**
+ * Returns the points per second a held grab earns.
+ *
+ * Second word of the grab's {points, pointsPerSec} pair in cBELibrary_grabPointsDB.
+ *
+ * @param grabEnum  the grab (On Tour grabEnum)
+ * @return the grab's points per second of hold
+ */
+int cBEBAGTInterface_getGrabPointsPerSec(void* self, int grabEnum)
 {
-    return ((sBAGTTable*)cBELibrary_grabPointsDB)->entries[a1].value;
+    return ((sBAGTTable*)cBELibrary_grabPointsDB)->entries[grabEnum].value;
 }
 #endif
 

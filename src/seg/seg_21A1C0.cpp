@@ -470,6 +470,14 @@ extern void* cMemMan_m_mutex[16];
 extern char TheDynamicMemMan[];
 extern unsigned int cMemMan_m_heapSize;
 
+/**
+ * Returns the free bytes in the dynamic heap.
+ *
+ * Locks cMemMan_m_mutex, takes func_0031FC20's mallinfo of TheDynamicMemMan and returns cMemMan_m_heapSize minus its
+ * uordblks (the bytes handed out), then unlocks. On Tour calls cDynamicMemMan::totalUsed, which retail inlines.
+ *
+ * @return the unused heap bytes
+ */
 // Free heap bytes: heap size minus the bytes dlmalloc has handed out.
 extern "C" int cMemMan_totalUnused(void)
 {

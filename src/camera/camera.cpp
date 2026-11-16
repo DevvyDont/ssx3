@@ -298,6 +298,13 @@ extern "C" void* cLookAtChaseAlgorithm_snapCurrent(cLookAtChaseAlgorithm*);
 //100%
 INCLUDE_ASM("camera/camera", cCamera_snapResultAlgorithm__FPv);
 #ifdef SKIP_ASM
+/**
+ * Snaps the camera's blended result straight to where it should be, skipping the transition.
+ *
+ * cLookAtChaseAlgorithm_snapCurrent on the result algorithm embedded at +0xC0.
+ *
+ * @return cLookAtChaseAlgorithm_snapCurrent's result
+ */
 void* cCamera_snapResultAlgorithm(void* self)
 {
     return cLookAtChaseAlgorithm_snapCurrent((cLookAtChaseAlgorithm*)((char*)self + 0xc0));
@@ -1386,9 +1393,17 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getPosition);
 #ifdef SKIP_ASM
 extern "C" void* cRider_getHipPosition(void* dst, void* self);
 
-extern "C" void* cRiderCameraTarget_getPosition(void* self, void* a1)
+/**
+ * Returns the camera target's position: the rider's hips.
+ *
+ * cRider_getHipPosition of the rider at +0x4 of the target.
+ *
+ * @param target  the camera target (this); @p self is the hidden result buffer
+ * @return @p self, holding the position
+ */
+extern "C" void* cRiderCameraTarget_getPosition(void* self, void* target)
 {
-    cRider_getHipPosition(self, *(void**)((char*)a1 + 0x4));
+    cRider_getHipPosition(self, *(void**)((char*)target + 0x4));
     return self;
 }
 #endif
@@ -1396,9 +1411,17 @@ extern "C" void* cRiderCameraTarget_getPosition(void* self, void* a1)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getRotation);
 #ifdef SKIP_ASM
-extern "C" void* cRiderCameraTarget_getRotation(void* self, void* a1)
+/**
+ * Returns the rider's orientation as a quaternion.
+ *
+ * Copies the 16 bytes at +0x120 of the rider (+0x4 of the target).
+ *
+ * @param target  the camera target (this); @p self is the hidden result buffer
+ * @return @p self, holding the rotation
+ */
+extern "C" void* cRiderCameraTarget_getRotation(void* self, void* target)
 {
-    void* p = *(void**)((char*)a1 + 0x4);
+    void* p = *(void**)((char*)target + 0x4);
     *(cQuad128*)self = *(cQuad128*)((char*)p + 0x120);
     return self;
 }
@@ -1418,9 +1441,17 @@ public:
     virtual sQuad_0015F5B0* v02();
 };
 
-extern "C" void* cRiderCameraTarget_getVelocity(void* self, void* a1)
+/**
+ * Returns the rider's velocity.
+ *
+ * Calls virtual slot 2 (getVelocity) of the rider's cBeing part (+0x6C0) and copies the result.
+ *
+ * @param target  the camera target (this); @p self is the hidden result buffer
+ * @return @p self, holding the velocity
+ */
+extern "C" void* cRiderCameraTarget_getVelocity(void* self, void* target)
 {
-    char* p = *(char**)((char*)a1 + 0x4);
+    char* p = *(char**)((char*)target + 0x4);
     *(sQuad_0015F5B0*)self = *((cCamVObj_0015F5B0*)(p + 0x6C0))->v02();
     return self;
 }
@@ -1429,9 +1460,17 @@ extern "C" void* cRiderCameraTarget_getVelocity(void* self, void* a1)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getFront);
 #ifdef SKIP_ASM
-extern "C" void* cRiderCameraTarget_getFront(void* self, void* a1)
+/**
+ * Returns the direction the rider faces.
+ *
+ * Copies the 16 bytes at +0x1B0 of the rider, the front row of its orientation matrix (side +0x1A0, up +0x1C0).
+ *
+ * @param target  the camera target (this); @p self is the hidden result buffer
+ * @return @p self, holding the front vector
+ */
+extern "C" void* cRiderCameraTarget_getFront(void* self, void* target)
 {
-    void* p = *(void**)((char*)a1 + 0x4);
+    void* p = *(void**)((char*)target + 0x4);
     *(cQuad128*)self = *(cQuad128*)((char*)p + 0x1b0);
     return self;
 }
@@ -1440,9 +1479,17 @@ extern "C" void* cRiderCameraTarget_getFront(void* self, void* a1)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getSide);
 #ifdef SKIP_ASM
-extern "C" void* cRiderCameraTarget_getSide(void* self, void* a1)
+/**
+ * Returns the rider's sideways axis.
+ *
+ * Copies the 16 bytes at +0x1A0 of the rider.
+ *
+ * @param target  the camera target (this); @p self is the hidden result buffer
+ * @return @p self, holding the side vector
+ */
+extern "C" void* cRiderCameraTarget_getSide(void* self, void* target)
 {
-    void* p = *(void**)((char*)a1 + 0x4);
+    void* p = *(void**)((char*)target + 0x4);
     *(cQuad128*)self = *(cQuad128*)((char*)p + 0x1a0);
     return self;
 }
@@ -1451,9 +1498,17 @@ extern "C" void* cRiderCameraTarget_getSide(void* self, void* a1)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getUp);
 #ifdef SKIP_ASM
-extern "C" void* cRiderCameraTarget_getUp(void* self, void* a1)
+/**
+ * Returns the rider's up axis.
+ *
+ * Copies the 16 bytes at +0x1C0 of the rider.
+ *
+ * @param target  the camera target (this); @p self is the hidden result buffer
+ * @return @p self, holding the up vector
+ */
+extern "C" void* cRiderCameraTarget_getUp(void* self, void* target)
 {
-    void* p = *(void**)((char*)a1 + 0x4);
+    void* p = *(void**)((char*)target + 0x4);
     *(cQuad128*)self = *(cQuad128*)((char*)p + 0x1c0);
     return self;
 }
@@ -1462,6 +1517,13 @@ extern "C" void* cRiderCameraTarget_getUp(void* self, void* a1)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLean__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns how far the rider leans.
+ *
+ * The float at +0x1F0 of the rider (+0x4 of the target).
+ *
+ * @return the lean value
+ */
 float cRiderCameraTarget_getLean(void* self)
 {
     return *(float*)((char*)*(void**)((char*)self + 0x4) + 0x1f0);
@@ -1471,9 +1533,17 @@ float cRiderCameraTarget_getLean(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getNormal);
 #ifdef SKIP_ASM
-extern "C" void* cRiderCameraTarget_getNormal(void* self, void* a1)
+/**
+ * Returns the normal of the ground under the rider.
+ *
+ * Copies the 16 bytes at +0x370 of the rider; the last ground normal follows at +0x380.
+ *
+ * @param target  the camera target (this); @p self is the hidden result buffer
+ * @return @p self, holding the normal
+ */
+extern "C" void* cRiderCameraTarget_getNormal(void* self, void* target)
 {
-    void* p = *(void**)((char*)a1 + 0x4);
+    void* p = *(void**)((char*)target + 0x4);
     *(cQuad128*)self = *(cQuad128*)((char*)p + 0x370);
     return self;
 }
@@ -1482,9 +1552,17 @@ extern "C" void* cRiderCameraTarget_getNormal(void* self, void* a1)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLastGroundNormal);
 #ifdef SKIP_ASM
-extern "C" void* cRiderCameraTarget_getLastGroundNormal(void* self, void* a1)
+/**
+ * Returns the ground normal from the last time the rider touched the ground.
+ *
+ * Copies the 16 bytes at +0x380 of the rider.
+ *
+ * @param target  the camera target (this); @p self is the hidden result buffer
+ * @return @p self, holding the normal
+ */
+extern "C" void* cRiderCameraTarget_getLastGroundNormal(void* self, void* target)
 {
-    void* p = *(void**)((char*)a1 + 0x4);
+    void* p = *(void**)((char*)target + 0x4);
     *(cQuad128*)self = *(cQuad128*)((char*)p + 0x380);
     return self;
 }
@@ -1493,6 +1571,13 @@ extern "C" void* cRiderCameraTarget_getLastGroundNormal(void* self, void* a1)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getHandplantSplineTangent__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the direction of the handplant motion's path.
+ *
+ * Address of +0x130 in the rider's handler (cRider mRiderHandler, +0x77C); the handplant target follows at +0x140.
+ *
+ * @return a pointer to the tangent
+ */
 void* cRiderCameraTarget_getHandplantSplineTangent(void* self)
 {
     return (char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x77c) + 0x130;
@@ -1502,6 +1587,13 @@ void* cRiderCameraTarget_getHandplantSplineTangent(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getHandplantTarget__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the point the rider plants a hand on.
+ *
+ * Address of +0x140 in the rider's handler (+0x77C).
+ *
+ * @return a pointer to the target point
+ */
 void* cRiderCameraTarget_getHandplantTarget(void* self)
 {
     return (char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x77c) + 0x140;
@@ -1511,6 +1603,13 @@ void* cRiderCameraTarget_getHandplantTarget(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getTotalAirTime__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the predicted total time of the rider's current jump.
+ *
+ * The float at +0x98 of the air predictor at +0x788 of the rider.
+ *
+ * @return the total air time in seconds
+ */
 float cRiderCameraTarget_getTotalAirTime(void* self)
 {
     return *(float*)((char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x788) + 0x98);
@@ -1558,6 +1657,13 @@ extern "C" float cRiderCameraTarget_getApexTime(cRiderCameraTarget* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getApexPos__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the predicted highest point of the rider's jump.
+ *
+ * Address of +0x40 in the air predictor at +0x788 of the rider.
+ *
+ * @return a pointer to the apex position
+ */
 void* cRiderCameraTarget_getApexPos(void* self)
 {
     return (char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x788) + 0x40;
@@ -1567,6 +1673,13 @@ void* cRiderCameraTarget_getApexPos(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getHalfPipeNormal__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the normal of the half-pipe wall the rider is using.
+ *
+ * Address of +0x3C0 in the rider.
+ *
+ * @return a pointer to the normal
+ */
 void* cRiderCameraTarget_getHalfPipeNormal(void* self)
 {
     return (char*)*(void**)((char*)self + 0x4) + 0x3c0;
@@ -1576,6 +1689,13 @@ void* cRiderCameraTarget_getHalfPipeNormal(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getBoostWarp__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns how strongly the rider is boosting, for the camera's speed effect.
+ *
+ * The float at +0x2FC of the rider.
+ *
+ * @return the boost amount
+ */
 float cRiderCameraTarget_getBoostWarp(void* self)
 {
     return *(float*)((char*)*(void**)((char*)self + 0x4) + 0x2fc);
@@ -1585,6 +1705,13 @@ float cRiderCameraTarget_getBoostWarp(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getCrouch__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns how far the rider is crouched.
+ *
+ * The float at +0x220 of the rider.
+ *
+ * @return the crouch amount
+ */
 float cRiderCameraTarget_getCrouch(void* self)
 {
     return *(float*)((char*)*(void**)((char*)self + 0x4) + 0x220);
@@ -1615,6 +1742,13 @@ extern "C" int cRiderCameraTarget_isAirPredictorDone(cRiderCameraTarget* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getSurfaceType__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the type of surface the rider is on.
+ *
+ * The int at +0x438 of the rider.
+ *
+ * @return the surface type (On Tour eSurfaceType)
+ */
 int cRiderCameraTarget_getSurfaceType(void* self)
 {
     return *(int*)((char*)*(void**)((char*)self + 0x4) + 0x438);
@@ -1624,6 +1758,13 @@ int cRiderCameraTarget_getSurfaceType(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getVerticalJump__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's vertical jump value.
+ *
+ * The float at +0x5A4 of the rider.
+ *
+ * @return the vertical jump value
+ */
 float cRiderCameraTarget_getVerticalJump(void* self)
 {
     return *(float*)((char*)*(void**)((char*)self + 0x4) + 0x5a4);
@@ -1633,6 +1774,13 @@ float cRiderCameraTarget_getVerticalJump(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_didPop__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the rider popped (jumped actively) on takeoff.
+ *
+ * The int at +0x5A8 of the rider.
+ *
+ * @return nonzero when the rider popped
+ */
 int cRiderCameraTarget_didPop(void* self)
 {
     return *(int*)((char*)*(void**)((char*)self + 0x4) + 0x5a8);
@@ -1731,6 +1879,13 @@ extern "C" float cRiderCameraTarget_getLandingAngle(cRiderCameraTarget* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_isRidingFlexRail__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the rider is on a flexible rail.
+ *
+ * The int at +0x5AC of the rider.
+ *
+ * @return nonzero on a flex rail
+ */
 int cRiderCameraTarget_isRidingFlexRail(void* self)
 {
     return *(int*)((char*)*(void**)((char*)self + 0x4) + 0x5ac);
@@ -1740,6 +1895,13 @@ int cRiderCameraTarget_isRidingFlexRail(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLandingNormal__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the predicted ground normal where the rider will land.
+ *
+ * Address of +0x20 in the air predictor at +0x788 of the rider.
+ *
+ * @return a pointer to the landing normal
+ */
 void* cRiderCameraTarget_getLandingNormal(void* self)
 {
     return (char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x788) + 0x20;
@@ -1749,6 +1911,13 @@ void* cRiderCameraTarget_getLandingNormal(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLandingVelocity__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider's predicted velocity on landing.
+ *
+ * Address of +0x10 in the air predictor at +0x788 of the rider.
+ *
+ * @return a pointer to the landing velocity
+ */
 void* cRiderCameraTarget_getLandingVelocity(void* self)
 {
     return (char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x788) + 0x10;
@@ -4408,6 +4577,13 @@ extern "C" void* cChaseAlgorithm_cChaseAlgorithm(cChaseAlgorithm* self)
 //100%
 INCLUDE_ASM("camera/camera", cChaseAlgorithm_setTarget__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider a chase camera algorithm follows.
+ *
+ * Stores @p val at +0x30.
+ *
+ * @param val  the camera target (On Tour cRiderCameraTarget *camTarget)
+ */
 void cChaseAlgorithm_setTarget(void* self, int val)
 {
     *(int*)((char*)self + 0x30) = val;
@@ -8699,10 +8875,18 @@ extern "C" void func_00166F90_impl(char* self)
 //100%
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_getPose);
 #ifdef SKIP_ASM
-extern "C" void* cLookAtChaseAlgorithm_getPose(void* self, void* a1)
+/**
+ * Returns the camera pose (position and rotation) the algorithm computed.
+ *
+ * Copies the two 16-byte halves at +0x60 and +0x70 of the algorithm.
+ *
+ * @param algorithm  the algorithm (this); @p self is the hidden result buffer
+ * @return @p self, holding the pose
+ */
+extern "C" void* cLookAtChaseAlgorithm_getPose(void* self, void* algorithm)
 {
-    *(cQuad128*)self = *(cQuad128*)((char*)a1 + 0x60);
-    *(cQuad128*)((char*)self + 0x10) = *(cQuad128*)((char*)a1 + 0x70);
+    *(cQuad128*)self = *(cQuad128*)((char*)algorithm + 0x60);
+    *(cQuad128*)((char*)self + 0x10) = *(cQuad128*)((char*)algorithm + 0x70);
     return self;
 }
 #endif
@@ -9084,6 +9268,11 @@ extern "C" void cCameraAlgorithm_updateAlgorithm(cCameraAlgorithm* self)
 //100%
 INCLUDE_ASM("camera/camera", cCameraAlgorithm_notifyMoveZ__FPv);
 #ifdef SKIP_ASM
+/**
+ * Default handler for the camera having moved vertically: does nothing.
+ *
+ * Empty base-class virtual; the On Tour flag argument (didMoveZ) is unused, so the C omits it.
+ */
 void cCameraAlgorithm_notifyMoveZ(void* self)
 {
 }

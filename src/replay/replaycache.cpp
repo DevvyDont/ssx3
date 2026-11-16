@@ -573,6 +573,16 @@ static inline sRcWorld_0730* world_0730()
     return (sRcWorld_0730*)SSXApp->Game->AI;
 }
 
+/**
+ * Finds the AI rider slot that belongs to a given player id.
+ *
+ * Walks SSXApp->Game->AI's riders (+0x40, count +0x7C) and asks each rider's player object (+0x18, then +0x6C0) for its
+ * id through vtable slot 7. The cReplay event recorders (cReplay_eventJump, _eventLand, _eventWipeout, _eventReset,
+ * _eventWScript, _eventChapter) use it to file events per rider.
+ *
+ * @param id  the player id to look for
+ * @return the rider index, or -1 when no rider has that id
+ */
 extern "C" int findPlayerId(int id)
 {
     int i;
@@ -1036,6 +1046,13 @@ extern "C" void* cReplay_reset(void* self);
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_initLoad__FPv);
 #ifdef SKIP_ASM
+/**
+ * Prepares the replay system for loading a saved replay: resets it.
+ *
+ * Tail call to cReplay_reset. cGame_load calls it, then cReplay_purgeLoad.
+ *
+ * @return cReplay_reset's result as this unit declares it
+ */
 void* cReplay_initLoad(void* self)
 {
     return cReplay_reset(self);
@@ -1045,6 +1062,11 @@ void* cReplay_initLoad(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_purgeLoad__FPv);
 #ifdef SKIP_ASM
+/**
+ * Releases replay-load resources: a no-op in this build.
+ *
+ * An empty stub, as in On Tour. cGame_load calls it right after cReplay_initLoad.
+ */
 void cReplay_purgeLoad(void* self)
 {
 }
@@ -1892,13 +1914,23 @@ void* func_002722C0(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptHeap_cScriptHeap__FPvN20);
 #ifdef SKIP_ASM
-void* cScriptHeap_cScriptHeap(void* self, void* a1, void* a2)
+/**
+ * Constructs a script heap over a caller-supplied buffer: the whole buffer becomes one free block.
+ *
+ * Stores @p pHeap in mpHeap (+0x0) and mpTopFreeBlock (+0x8), @p heapSize in mHeapSize (+0x4), and writes the first free block's
+ * header: size @p heapSize - 8, no next block. cInSeq_cInSeq builds its heap with it.
+ *
+ * @param pHeap  the heap buffer
+ * @param heapSize  the buffer size in bytes
+ * @return the constructed heap (self)
+ */
+void* cScriptHeap_cScriptHeap(void* self, void* pHeap, void* heapSize)
 {
-    *(int*)((char*)self + 0x8) = (int)a1;
-    *(int*)self = (int)a1;
-    *(int*)((char*)self + 0x4) = (int)a2;
-    *(int*)((char*)a1 + 0x4) = 0;
-    *(int*)*(void**)((char*)self + 0x8) = (int)((char*)a2 - 0x8);
+    *(int*)((char*)self + 0x8) = (int)pHeap;
+    *(int*)self = (int)pHeap;
+    *(int*)((char*)self + 0x4) = (int)heapSize;
+    *(int*)((char*)pHeap + 0x4) = 0;
+    *(int*)*(void**)((char*)self + 0x8) = (int)((char*)heapSize - 0x8);
     return self;
 }
 #endif
@@ -1919,11 +1951,23 @@ struct sHeap_2308 {
 // First-fit allocation from the heap's free list (8-byte block headers); splits a block that has room to spare.
 // PORT: the unit declares it as void*(void*, int); defined under its own name bound to the symbol.
 extern "C" void* cScriptHeap_AllocMem_impl(sHeap_2308* h, unsigned int size) __asm__("cScriptHeap_AllocMem");
-extern "C" void* cScriptHeap_AllocMem_impl(sHeap_2308* h, unsigned int size)
+/**
+ * Allocates a block from the script heap (first fit).
+ *
+ * Rounds @p size up to 4 bytes and walks the address-ordered free list (mpTopFreeBlock) for the first block big enough;
+ * a block more than 16 bytes larger is split, the remainder staying free. The block is unlinked and gets an 8-byte
+ * header (size, next = 0). Likely bug, shared with On Tour: when nothing fits it returns 8 (a null block plus the
+ * header size), not 0.
+ *
+ * @param heap     the script heap (this)
+ * @param size  the number of bytes wanted
+ * @return the usable memory, just past the block header
+ */
+extern "C" void* cScriptHeap_AllocMem_impl(sHeap_2308* heap, unsigned int size)
 {
     size = (size + 3) & ~3;
     sBlk_2308* prev = 0;
-    sBlk_2308* b = h->free;
+    sBlk_2308* b = heap->free;
     sBlk_2308* r = 0;
     unsigned int split = size + 16;
     if (b != 0) {
@@ -1938,7 +1982,7 @@ extern "C" void* cScriptHeap_AllocMem_impl(sHeap_2308* h, unsigned int size)
                 }
                 r = b;
                 if (prev == 0)
-                    h->free = r->next;
+                    heap->free = r->next;
                 else
                     prev->next = r->next;
                 b->next = 0;
@@ -1966,10 +2010,21 @@ struct sRcHeap {
     sRcBlock* freeList;
 };
 
-extern "C" void cScriptHeap_FreeMem(cScriptHeap* scriptHeap, void* p)
+/**
+ * Returns a block to the script heap, merging it with free neighbours.
+ *
+ * Does nothing for a null pointer. The block header sits 8 bytes before @p pMem. The block is inserted into the
+ * address-ordered free list (mpTopFreeBlock); a free block directly before it absorbs it, and it absorbs a free block
+ * directly after it. cScriptMemOp's operator delete (func_002724E8) and the script channel and entity Stop methods free
+ * through it.
+ *
+ * @param scriptHeap  the script heap (this)
+ * @param pMem           memory returned by cScriptHeap_AllocMem
+ */
+extern "C" void cScriptHeap_FreeMem(cScriptHeap* scriptHeap, void* pMem)
 {
-    if (p) {
-        sRcBlock* b = (sRcBlock*)((char*)p - 8);
+    if (pMem) {
+        sRcBlock* b = (sRcBlock*)((char*)pMem - 8);
         if (!(sRcBlock*)scriptHeap->mpTopFreeBlock) {
             scriptHeap->mpTopFreeBlock = (tFreeBlock*)b;
             return;
@@ -2093,17 +2148,28 @@ extern "C" void func_00272550(void *arg0) {
 //100%
 INCLUDE_ASM("replay/replaycache", GetCubicSplineValue);
 #ifdef SKIP_ASM
+/**
+ * Evaluates a cubic spline segment at a parameter value.
+ *
+ * Returns p[0] * t^3 + p[1] * t^2 + p[2] * t + p[3] by Horner's rule (just p[3] when @p paramValue is 0). The script spline
+ * channel (cScriptPlayerChannelSpline_Play, cScriptPlayerChannelSpline_Update) uses it with the frames elapsed since
+ * the current key.
+ *
+ * @param pCoefficientArray  the four coefficients, highest power first
+ * @param paramValue  the parameter value
+ * @return the spline value
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" float GetCubicSplineValue(float* p, float t)
+extern "C" float GetCubicSplineValue(float* pCoefficientArray, float paramValue)
 {
     float r;
-    if (t != 0.0f) {
-        r = p[0];
-        r = r * t + p[1];
-        r = r * t + p[2];
-        r = r * t + p[3];
+    if (paramValue != 0.0f) {
+        r = pCoefficientArray[0];
+        r = r * paramValue + pCoefficientArray[1];
+        r = r * paramValue + pCoefficientArray[2];
+        r = r * paramValue + pCoefficientArray[3];
     } else {
-        r = p[3];
+        r = pCoefficientArray[3];
     }
     return r;
 }
@@ -3693,6 +3759,19 @@ struct sRcCache_273AA8 {
     int started;            // 0x38
 };
 
+/**
+ * Creates and starts the channel players of one script entity.
+ *
+ * Clears mSetupScriptHasKeysLeft (+0x30) and the event bits (+0x34). For an entity with channels it allocates
+ * mpChannelPlayers (+0x24) from the cInSeq heap (mpOwner->mpManager + 8, cScriptHeap_AllocMem) and, per channel record
+ * (type +0x0, size +0x2), creates a spline (0x28 bytes), object (0x28), block (0x2C) or event (0x28) channel with
+ * cScriptMemOp's operator new (func_00272488), then starts it through its vtable slot 1 (Play), ORing in whether keys
+ * are left and its event bits. Sets mIsPlaying (+0x28), asks the comm interface
+ * (cScriptPlayerMain_GetInSeqCommInterface, slot 6) for the entity's comm object (mpEntityComm, +0x2C) and notifies it
+ * (slot 1), and sets +0x38.
+ *
+ * @return mIsPlaying (1)
+ */
 extern "C" int cScriptPlayerEntity_SetupPlay(sRcCache_273AA8* self)
 {
     self->done = 0;
@@ -3957,6 +4036,21 @@ public:
 
 
 
+/**
+ * Advances one script entity's channels to a new frame.
+ *
+ * Returns 1 at once when the entity is not playing (mIsPlaying). Without @p jump, a single
+ * cScriptPlayerEntity_DoFrameUpdate(@p time, @p speed). With @p jump it walks from @p prev to @p time in steps that
+ * stop at every channel key in between (each channel's next key time, vtable slot 6) and updates at each, stopping
+ * early when an update returns 0.
+ *
+ * @param self_  the script entity (this)
+ * @param prev   the previous frame number
+ * @param time   the new frame number
+ * @param speed  the frame delta
+ * @param jump   nonzero to visit every key between @p prev and @p time
+ * @return the last cScriptPlayerEntity_DoFrameUpdate result (1 when not playing)
+ */
 // Plays the track from prev to time; when jumping, stops at every channel event in between.
 extern "C" int cScriptPlayerEntity_Update(cScriptPlayerEntity* self_, float prev, float time, float speed, int jump)
 {
@@ -4035,9 +4129,17 @@ extern "C" cRcListener4240* cScriptPlayerEntity_SetEntityComm(cScriptPlayerEntit
 //100%
 INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_GetChannel__FPvi);
 #ifdef SKIP_ASM
-int cScriptPlayerEntity_GetChannel(void* self, int a1)
+/**
+ * Returns one of the entity's channel players.
+ *
+ * Reads mpChannelPlayers[@p channelIndex] (+0x24, the table cScriptPlayerEntity_SetupPlay fills); no bounds check.
+ *
+ * @param channelIndex  the channel index
+ * @return the channel player (cScriptPlayerChannel*)
+ */
+int cScriptPlayerEntity_GetChannel(void* self, int channelIndex)
 {
-    return *(int*)((char*)*(void**)((char*)self + 0x24) + a1 * 4);
+    return *(int*)((char*)*(void**)((char*)self + 0x24) + channelIndex * 4);
 }
 #endif
 
@@ -4289,9 +4391,23 @@ struct sRcStream45C0 {
 // PORT: cScriptPlayerEntity_Init's third argument receives the owning stream pointer as an int.
 // PORT: the unit declares cScriptPlayerMain_Init as returning void*; it returns the header word.
 extern "C" int cScriptPlayerMain_Init_impl(sRcStream45C0* self, sRcHdr45C0* data, char* owner, int a3) __asm__("cScriptPlayerMain_Init");
-extern "C" int cScriptPlayerMain_Init_impl(sRcStream45C0* self, sRcHdr45C0* data, char* owner, int a3)
+/**
+ * Binds a script player to its script data and creates one entity player per script entity.
+ *
+ * Stores @p playerId in mID, @p owner in mpManager and @p data in mpData and mpSystemHeader; mJumpFrame = -1, mNumSteps = 0,
+ * mLoopScript = 0; mpDataHeader = @p data + 0xC when the header is at least 0xD bytes. With entities it allocates
+ * numEntities 0x3C-byte cScriptPlayerEntity objects from the manager's heap (owner + 8, cScriptMemOp's operator new[]
+ * func_002724C8), constructs them, and calls cScriptPlayerEntity_Init on each with the data that follows the header,
+ * each consuming its block. cInSeq_ReadyPlayer calls it.
+ *
+ * @param data   the script data (On Tour pScriptData)
+ * @param owner  the owning cInSeq manager (On Tour pManager)
+ * @param playerId     the player id
+ * @return the script header's size word (+0x8)
+ */
+extern "C" int cScriptPlayerMain_Init_impl(sRcStream45C0* self, sRcHdr45C0* data, char* owner, int playerId)
 {
-    self->field_0x0 = a3;
+    self->field_0x0 = playerId;
     self->owner = owner;
     self->data = data;
     self->hdr = data;
@@ -4548,6 +4664,17 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame(void* self);
 extern "C" void cScriptPlayerMain_Pause(cScriptPlayerMain* self);
 
 
+/**
+ * Advances a script player by one frame, honouring a pending jump or single-step request.
+ *
+ * A pending mJumpFrame (wrapped by the script length when looping) is played up to with mNumPaused cleared: back to the
+ * start (Stop, Play, update) when the target is earlier, then a partial step to the next whole frame and whole-frame
+ * updates until mCurrFrame reaches it. A pending mNumSteps runs that many updates and then pauses
+ * (cScriptPlayerMain_Pause) unless already paused. Otherwise it runs one cScriptPlayerMain_DoUpdateFrame.
+ * cInSeq_UpdateFrame calls it for each player.
+ *
+ * @param scriptPlayerMain  the script player (this)
+ */
 extern "C" void cScriptPlayerMain_UpdateFrame(cScriptPlayerMain* scriptPlayerMain)
 {
     cScriptPlayerMain* self = scriptPlayerMain;
@@ -4815,6 +4942,17 @@ struct sRcPlayHdr_4DE0 {
 };
 
 extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self) __asm__("cScriptPlayerMain_DoUpdateFrame");
+/**
+ * Runs one playback step of a script player: starts the entities on the first step, then advances them, handling the
+ * end of the script.
+ *
+ * Skipped while stopped or paused (mNumPaused > 0). State 1 becomes 2 and the comm interface hears about it (slot 1).
+ * In states 3/4 it advances by mPlaySpeed through cScriptPlayerMain_DoUpdate, clamped to the script length; otherwise
+ * it sets up and executes every entity (cScriptPlayerEntity_SetupPlay, _ExecutePlay), enters state 3 and notifies the
+ * interface (slot 2). A pending stop request (mDoStopInEntityUpdate, +0x40) or state 4 stops the player. At the end of
+ * the script a looping player restarts its entities (cScriptPlayerEntity_Restart) and replays the overshoot; otherwise
+ * the comm interface (slot 5) is consulted before stopping.
+ */
 extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self)
 {
     if (*(int*)(self + 0x20) == 0 || *(int*)(self + 0x2C) > 0) {
@@ -4942,6 +5080,18 @@ struct sRcAnim51A0 {
     float time;             // 0x28
 };
 
+/**
+ * Updates every entity of a script player to a new frame.
+ *
+ * Stores @p time in mCurrFrame and treats the step as a jump when @p speed is above 1 or the step crosses an integer
+ * frame, then calls cScriptPlayerEntity_Update on each entity (0x3C bytes apiece) and tells the comm interface
+ * (cScriptPlayerMain_GetInSeqCommInterface, slot 2) the new time and speed.
+ *
+ * @param time   the new frame number
+ * @param prev   the previous frame number
+ * @param speed  the frame delta
+ * @return nonzero when any entity reported a change
+ */
 extern "C" int cScriptPlayerMain_DoUpdate(sRcAnim51A0* self, float time, float prev, float speed)
 {
     int changed = 0;

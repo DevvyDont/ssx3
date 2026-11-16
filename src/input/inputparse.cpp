@@ -2577,8 +2577,19 @@ INCLUDE_ASM("input/inputparse", cInputPreProcessor_skipCComment);
 void func_00326A20_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("func_00326A20__FPv");
 extern char str_unexpected_EOF_in_comment[];
 
+/**
+ * Skips a block comment, keeping its line breaks so line numbers stay right.
+ *
+ * Reads characters until the closing star-slash; each newline inside is counted on @p s and written out, and a
+ * comment without newlines is replaced by one space. Reports "unexpected EOF in comment" through func_00326A20
+ * when the input ends first.
+ *
+ * @param s   the input source (On Tour tInputSource)
+ * @param a2  the file path, for the error message
+ * @param a3  the file name, for the error message
+ */
 // Skips a /* */ comment; newlines inside it are kept, otherwise it becomes one space.
-extern "C" void cInputPreProcessor_skipCComment(void* self, sParseStream* s, int a2, int a3)
+extern "C" void cInputPreProcessor_skipCComment(void* self, sParseStream* isrc, int path, int fileName)
 {
     int single = 1;
     int run = 1;
@@ -2586,13 +2597,13 @@ extern "C" void cInputPreProcessor_skipCComment(void* self, sParseStream* s, int
         int ch = *(int*)((char*)self + 0xC);
         if (ch == '\n') {
             single = 0;
-            *(int*)((char*)s + 0xC) += 1;
+            *(int*)((char*)isrc + 0xC) += 1;
             cInputPreProcessor_writeChar(self, (char)*(int*)((char*)self + 0xC));
         } else if (ch == '*') {
-            cInputPreProcessor_readChar(self, s);
+            cInputPreProcessor_readChar(self, isrc);
             if (*(int*)((char*)self + 0xC) != '/')
                 continue;
-            cInputPreProcessor_readChar(self, s);
+            cInputPreProcessor_readChar(self, isrc);
             if (single) {
                 cInputPreProcessor_writeChar(self, ' ');
             }
@@ -2600,10 +2611,10 @@ extern "C" void cInputPreProcessor_skipCComment(void* self, sParseStream* s, int
         } else if (ch < 0) {
             goto error;
         }
-        cInputPreProcessor_readChar(self, s);
+        cInputPreProcessor_readChar(self, isrc);
     }
 error:
-    func_00326A20_5(self, s, a2, a3, str_unexpected_EOF_in_comment);
+    func_00326A20_5(self, isrc, path, fileName, str_unexpected_EOF_in_comment);
 }
 #endif
 
@@ -2616,23 +2627,33 @@ extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s);
 void func_00326A20_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("func_00326A20__FPv");
 extern char str_unexpected_EOF_in_comment[];
 
-extern "C" void cInputPreProcessor_skipCppComment(void* self, sParseStream* s, int a2, int a3)
+/**
+ * Skips a line comment up to the end of the line.
+ *
+ * Reads characters until a newline, which is counted on @p isrc, written out and consumed; reports "unexpected EOF in
+ * comment" through func_00326A20 when the input ends first.
+ *
+ * @param isrc   the input source (On Tour tInputSource)
+ * @param path  the file path, for the error message
+ * @param fileName  the file name, for the error message
+ */
+extern "C" void cInputPreProcessor_skipCppComment(void* self, sParseStream* isrc, int path, int fileName)
 {
     for (;;) {
         int ch = *(int*)((char*)self + 0xC);
         if (ch == '\n') {
-            *(int*)((char*)s + 0xC) += 1;
+            *(int*)((char*)isrc + 0xC) += 1;
             cInputPreProcessor_writeChar(self, (char)*(int*)((char*)self + 0xC));
-            cInputPreProcessor_readChar(self, s);
+            cInputPreProcessor_readChar(self, isrc);
             return;
         }
         if (ch < 0) {
             goto error;
         }
-        cInputPreProcessor_readChar(self, s);
+        cInputPreProcessor_readChar(self, isrc);
     }
 error:
-    func_00326A20_5(self, s, a2, a3, str_unexpected_EOF_in_comment);
+    func_00326A20_5(self, isrc, path, fileName, str_unexpected_EOF_in_comment);
 }
 #endif
 

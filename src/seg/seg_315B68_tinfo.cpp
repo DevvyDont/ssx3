@@ -30,11 +30,11 @@ int func_00414B68(int *p, int flag) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414B98);
 #ifdef SKIP_ASM
 extern int func_004165A8(int, int);
-int func_00414B98(int *a, int *b) {
-    int r = 0;
-    if (b == a || func_004165A8(*a, *b) == 0)
-        r = 1;
-    return r;
+int func_00414B98(int *lhs, int *rhs) {
+    int equal = 0;
+    if (rhs == lhs || func_004165A8(*lhs, *rhs) == 0)
+        equal = 1;
+    return equal;
 }
 #endif
 
@@ -80,23 +80,23 @@ void func_00414C20(int *p, int a) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414C40);
 #ifdef SKIP_ASM
-int func_00414C40(int *a, int *b, int c, int d) {
-    if (func_00414B98(a, b) == 0) d = 0;
-    return d;
+int func_00414C40(int *thisType, int *desired, int isPublic, int objPtr) {
+    if (func_00414B98(thisType, desired) == 0) objPtr = 0;
+    return objPtr;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414C70);
 #ifdef SKIP_ASM
-int func_00414C70(int *p, int a, int b, int c, int d, int e) {
-    int *o;
+int func_00414C70(int *thisType, int desired, int isPublic, int objPtr, int subType, int subPtr) {
+    int *baseType;
     short *vt;
-    if (func_00414B98(p, (int *)a) != 0)
-        return c;
-    o = (int *)p[2];
-    vt = (short *)o[1];
-    return ((int (*)(int *, int, int, int, int, int))((int *)vt)[5])((int *)((char *)o + vt[8]), a, b, c, d, e);
+    if (func_00414B98(thisType, (int *)desired) != 0)
+        return objPtr;
+    baseType = (int *)thisType[2];
+    vt = (short *)baseType[1];
+    return ((int (*)(int *, int, int, int, int, int))((int *)vt)[5])((int *)((char *)baseType + vt[8]), desired, isPublic, objPtr, subType, subPtr);
 }
 #endif
 
@@ -133,26 +133,26 @@ dcast (const type_info& desired, int is_public, void *objptr,
       if (is_public && base_list[i].access != PUBLIC)
 	continue;
 
-      void *p = (char *)objptr + base_list[i].offset;
+      void *candidate = (char *)objptr + base_list[i].offset;
       if (base_list[i].is_virtual)
-	p = *(void **)p;
-      p = base_list[i].base->dcast (desired, is_public, p, sub, subptr);
-      if (p)
+	candidate = *(void **)candidate;
+      candidate = base_list[i].base->dcast (desired, is_public, candidate, sub, subptr);
+      if (candidate)
 	{
 	  if (match_found == 0)
-	    match_found = p;
-	  else if (match_found != p)
+	    match_found = candidate;
+	  else if (match_found != candidate)
 	    {
 	      if (sub)
 		{
 		  // Perhaps we're downcasting from *sub to desired; see if
 		  // subptr is a subobject of exactly one of {match_found,p}.
 
-		  const __user_type_info &d =
+		  const __user_type_info &desiredUser =
 		    static_cast <const __user_type_info &> (desired);
 
-		  void *os = d.dcast (*sub, 1, match_found);
-		  void *ns = d.dcast (*sub, 1, p);
+		  void *os = desiredUser.dcast (*sub, 1, match_found);
+		  void *ns = desiredUser.dcast (*sub, 1, candidate);
 
 		  if (os == ns)
 		    /* ambiguous -- subptr is a virtual base */;
@@ -160,7 +160,7 @@ dcast (const type_info& desired, int is_public, void *objptr,
 		    continue;
 		  else if (ns == subptr)
 		    {
-		      match_found = p;
+		      match_found = candidate;
 		      continue;
 		    }
 		}
@@ -368,16 +368,16 @@ int *func_00415168(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_004151B8);
 #ifdef SKIP_ASM
-int func_004151B8(int *a, int *b) {
-    return func_00414B98(a, b) ^ 1;
+int func_004151B8(int *lhs, int *rhs) {
+    return func_00414B98(lhs, rhs) ^ 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_004151D8);
 #ifdef SKIP_ASM
-int func_004151D8(int *p) {
-    return *p;
+int func_004151D8(int *typeInfo) {
+    return *typeInfo;
 }
 #endif
 
@@ -409,8 +409,8 @@ int *func_004151F8(void) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415238);
 #ifdef SKIP_ASM
 extern int func_004165A8(int, int);
-int func_00415238(int *a, int *b) {
-    return (unsigned)func_004165A8(*a, *b) >> 31;
+int func_00415238(int *lhs, int *rhs) {
+    return (unsigned)func_004165A8(*lhs, *rhs) >> 31;
 }
 #endif
 
@@ -438,11 +438,11 @@ __throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
 
   void *new_objptr = 0;
 
-  if (const __user_type_info *p
+  if (const __user_type_info *userType
       = dynamic_cast <const __user_type_info *> (&throw_type))
     {
       /* The 1 skips conversions to private bases. */
-      new_objptr = p->dcast (catch_type, 1, objptr);
+      new_objptr = userType->dcast (catch_type, 1, objptr);
     }
   else if (const __pointer_type_info *fr =
 	   dynamic_cast <const __pointer_type_info *> (&throw_type))
@@ -456,20 +456,20 @@ __throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
       const type_info *subfr = &fr->type, *subto = &to->type;
       __attr_type_info::cv cvfrom, cvto;
 
-      if (const __attr_type_info *at
+      if (const __attr_type_info *attrType
 	  = dynamic_cast <const __attr_type_info *> (subfr))
 	{
-	  cvfrom = at->attr;
-	  subfr = &at->type;
+	  cvfrom = attrType->attr;
+	  subfr = &attrType->type;
 	}
       else
 	cvfrom = __attr_type_info::NONE;
       
-      if (const __attr_type_info *at
+      if (const __attr_type_info *attrType
 	  = dynamic_cast <const __attr_type_info *> (subto))
 	{
-	  cvto = at->attr;
-	  subto = &at->type;
+	  cvto = attrType->attr;
+	  subto = &attrType->type;
 	}
       else
 	cvto = __attr_type_info::NONE;
@@ -485,11 +485,11 @@ __throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
       else if (*subto == typeid (void)
 	       && dynamic_cast <const __func_type_info *> (subfr) == 0)
 	new_objptr = objptr;
-      else if (const __user_type_info *p
+      else if (const __user_type_info *userType
 	       = dynamic_cast <const __user_type_info *> (subfr))
 	{
 	  /* The 1 skips conversions to private bases. */
-	  new_objptr = p->dcast (*subto, 1, objptr);
+	  new_objptr = userType->dcast (*subto, 1, objptr);
 	}
       else if (const __pointer_type_info *pfr
 	       = dynamic_cast <const __pointer_type_info *> (subfr))
@@ -506,20 +506,20 @@ __throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
 	  for (subto = &pto->type, subfr = &pfr->type; ;
 	       subto = &pto->type, subfr = &pfr->type)
 	    {
-	      if (const __attr_type_info *at
+	      if (const __attr_type_info *attrType
 		  = dynamic_cast <const __attr_type_info *> (subfr))
 		{
-		  cvfrom = at->attr;
-		  subfr = &at->type;
+		  cvfrom = attrType->attr;
+		  subfr = &attrType->type;
 		}
 	      else
 		cvfrom = __attr_type_info::NONE;
       
-	      if (const __attr_type_info *at
+	      if (const __attr_type_info *attrType
 		  = dynamic_cast <const __attr_type_info *> (subto))
 		{
-		  cvto = at->attr;
-		  subto = &at->type;
+		  cvto = attrType->attr;
+		  subto = &attrType->type;
 		}
 	      else
 		cvto = __attr_type_info::NONE;
@@ -566,13 +566,13 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415728);
 extern int *func_004151F8(void);
 extern int *func_00415F48(void);
 extern int func_00415840(int, char *, int, char *, char *, void *);
-int func_00415728(int *p) {
-    int r = 0;
-    if (p) {
-        short *vt = (short *)p[1];
-        r = func_00415840(((int *)vt)[1], (char *)func_00415F48, 1, (char *)p + vt[0], (char *)func_004151F8, p);
+int func_00415728(int *typePtr) {
+    int pointerType = 0;
+    if (typePtr) {
+        short *vt = (short *)typePtr[1];
+        pointerType = func_00415840(((int *)vt)[1], (char *)func_00415F48, 1, (char *)typePtr + vt[0], (char *)func_004151F8, typePtr);
     }
-    return r != 0;
+    return pointerType != 0;
 }
 #endif
 
@@ -654,16 +654,16 @@ void func_00415820(int *p, int a) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415840);
 #ifdef SKIP_ASM
-int func_00415840(int f0, char *f1, int a, char *b, char *f4, void *c) {
-    char *o = ((char *(*)(void))f0)();
-    int *vt = *(int **)(o + 4);
-    char *th = o + *(short *)((char *)vt + 0x10);
-    int r1;
-    int r4;
+int func_00415840(int fromFn, char *toFn, int requirePublic, char *address, char *subFn, void *subPtr) {
+    char *fromType = ((char *(*)(void))fromFn)();
+    int *vt = *(int **)(fromType + 4);
+    char *th = fromType + *(short *)((char *)vt + 0x10);
+    int toType;
+    int subType;
     vt = (int *)((char *)vt + 0x10);
-    r1 = ((int (*)(void))f1)();
-    r4 = ((int (*)(void))f4)();
-    return ((int (*)(char *, int, int, char *, int, void *))vt[1])(th, r1, a, b, r4, c);
+    toType = ((int (*)(void))toFn)();
+    subType = ((int (*)(void))subFn)();
+    return ((int (*)(char *, int, int, char *, int, void *))vt[1])(th, toType, requirePublic, address, subType, subPtr);
 }
 #endif
 

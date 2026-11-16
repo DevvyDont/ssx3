@@ -198,14 +198,14 @@ extern "C" void func_002A97C0(char* self, int flags)
 //100%
 INCLUDE_ASM("sound/ps2soundman", func_002A9988);
 #ifdef SKIP_ASM
-extern "C" void func_002A9988(void* self, float a, float b)
+extern "C" void func_002A9988(void* self, float dist, float vanish)
 {
-    (*(float**)((char*)self + 0x6C))[*(int*)((char*)self + 0x1C)] = a;
-    if (b < 0.0f) {
-        (*(float**)((char*)self + 0x68))[*(int*)((char*)self + 0x1C)] = a;
+    (*(float**)((char*)self + 0x6C))[*(int*)((char*)self + 0x1C)] = dist;
+    if (vanish < 0.0f) {
+        (*(float**)((char*)self + 0x68))[*(int*)((char*)self + 0x1C)] = dist;
         return;
     }
-    (*(float**)((char*)self + 0x68))[*(int*)((char*)self + 0x1C)] = b;
+    (*(float**)((char*)self + 0x68))[*(int*)((char*)self + 0x1C)] = vanish;
 }
 #endif
 

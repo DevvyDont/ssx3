@@ -32,11 +32,11 @@ void func_004103B0(void) {
 INCLUDE_ASM("seg/seg_3113A0_eh", func_004103D8);
 #ifdef SKIP_ASM
 extern int func_004165A8(int, int);
-int func_004103D8(int a, int b, int c) {
-    if (func_004165A8(a, b)) {
-        c = 0;
+int func_004103D8(int catchType, int throwType, int obj) {
+    if (func_004165A8(catchType, throwType)) {
+        obj = 0;
     }
-    return c;
+    return obj;
 }
 #endif
 
@@ -50,12 +50,12 @@ extern int *func_00410410_alloc(int) __asm__("func_004188C0");
 extern void func_004103B0(void);
 extern void func_00416210(int *, int, int);
 int *func_00410410(void) {
-    int *p = func_00410410_alloc(0x18);
-    if (!p)
+    int *fullContext = func_00410410_alloc(0x18);
+    if (!fullContext)
         func_004103B0();
-    func_00416210(p, 0, 0x18);
-    p[1] = (int)(p + 4);
-    return p;
+    func_00416210(fullContext, 0, 0x18);
+    fullContext[1] = (int)(fullContext + 4);
+    return fullContext;
 }
 #endif
 
@@ -202,28 +202,28 @@ __asm__(".globl D_00410790\n\t.type D_00410790,@function\n\tD_00410790 = func_00
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", func_00410800);
 #ifdef SKIP_ASM
-int func_00410800(int a) {
-    int *o = *(int **)func_00410490();
-    int (*fn)(int *, int, int) = (int (*)(int *, int, int))o[0];
+int func_00410800(int rtime) {
+    int *info = *(int **)func_00410490();
+    int (*fn)(int *, int, int) = (int (*)(int *, int, int))info[0];
     if (fn == 0)
         return 0;
-    return fn(o, a, 0) != 0;
+    return fn(info, rtime, 0) != 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", func_00410848);
 #ifdef SKIP_ASM
-int func_00410848(short *p) {
-    return p[3];
+int func_00410848(short *table) {
+    return table[3];
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", func_00410850);
 #ifdef SKIP_ASM
-int func_00410850(short *p) {
-    return p[2];
+int func_00410850(short *table) {
+    return table[2];
 }
 #endif
 
@@ -255,7 +255,7 @@ INCLUDE_ASM("seg/seg_3113A0_eh", func_00410930);
 struct E410930 { unsigned start; unsigned end; int val; int cb; };
 struct C410930 { int (*match)(struct C410930 *, int, int); };
 int func_00410930(unsigned pc, int obj, struct C410930 *ctx, int flag, int *out) {
-    int r = 0;
+    int retval = 0;
     *out = 1;
     if (obj != 0) {
         int idx = 0;
@@ -273,19 +273,19 @@ int func_00410930(unsigned pc, int obj, struct C410930 *ctx, int flag, int *out)
                 if (tbl[idx].cb) {
                     if (ctx->match) {
                         if (ctx->match(ctx, tbl[idx].cb, obj)) {
-                            if (r == 0)
-                                r = tbl[idx].val;
+                            if (retval == 0)
+                                retval = tbl[idx].val;
                             *out = 0;
                             break;
                         }
                     }
-                } else if (r == 0) {
-                    r = tbl[idx].val;
+                } else if (retval == 0) {
+                    retval = tbl[idx].val;
                 }
             }
         }
     }
-    return r;
+    return retval;
 }
 #endif
 
@@ -294,14 +294,14 @@ INCLUDE_ASM("seg/seg_3113A0_eh", func_00410A78);
 #ifdef SKIP_ASM
 struct S410A78 { int base; char pad[0x14]; long e[0x50]; unsigned short n; short pad2; signed char kind[1]; };
 extern int func_00418790(void);
-int func_00410A78(int idx, struct S410A78 *s, int z) {
-    if (s->kind[idx] == 2) {
+int func_00410A78(int idx, struct S410A78 *udata, int z) {
+    if (udata->kind[idx] == 2) {
         do {
-            idx = (int)s->e[idx];
-        } while (s->kind[idx] == 2);
+            idx = (int)udata->e[idx];
+        } while (udata->kind[idx] == 2);
     }
-    if (s->kind[idx] == 1)
-        return s->base + (int)s->e[idx];
+    if (udata->kind[idx] == 1)
+        return udata->base + (int)udata->e[idx];
     return func_00418790();
 }
 #endif
@@ -311,11 +311,11 @@ INCLUDE_ASM("seg/seg_3113A0_eh", func_00410B00);
 #ifdef SKIP_ASM
 extern int func_00410A78();
 extern int func_0041605C(int, int, int);
-int func_00410B00(int a, int b, int c) {
-    int x = func_00410A78(a, b, 0);
-    int y = func_00410A78(a, c, 0);
+int func_00410B00(int reg, int udata, int targetUdata) {
+    int x = func_00410A78(reg, udata, 0);
+    int y = func_00410A78(reg, targetUdata, 0);
     int k;
-    k = a < 31 ? 16 : (a <= 63 ? 4 : 8);
+    k = reg < 31 ? 16 : (reg <= 63 ? 4 : 8);
     return func_0041605C(y, x, k);
 }
 #endif
@@ -325,21 +325,21 @@ INCLUDE_ASM("seg/seg_3113A0_eh", func_00410B80);
 #ifdef SKIP_ASM
 extern int *func_00414818();
 extern long long *func_00410B80_idx() __asm__("func_00410A78");
-int *func_00410B80(int a, int *b, int c) {
-    int *q = func_00414818(a, c);
+int *func_00410B80(int framePc, int *udata, int callerBuf) {
+    int *callerUdata = func_00414818(framePc, callerBuf);
     unsigned short i;
-    if (q == 0)
+    if (callerUdata == 0)
         return 0;
-    i = *(unsigned short *)((char *)q + 0x298);
-    if (*((char *)b + i + 0x29C) != 0)
+    i = *(unsigned short *)((char *)callerUdata + 0x298);
+    if (*((char *)udata + i + 0x29C) != 0)
         {
-            long long v = *func_00410B80_idx(i, b, 0);
-            q[0] = (int)v;
+            long long cfaValue = *func_00410B80_idx(i, udata, 0);
+            callerUdata[0] = (int)cfaValue;
         }
     else
-        q[0] = b[0];
-    q[0] = q[0] + q[2];
-    return q;
+        callerUdata[0] = udata[0];
+    callerUdata[0] = callerUdata[0] + callerUdata[2];
+    return callerUdata;
 }
 #endif
 
@@ -368,7 +368,7 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
     struct S410C18 first;
     struct S410C18 save;
     struct F410C18 *cur;
-    struct F410C18 *t;
+    struct F410C18 *calleeFrame;
     struct S410C18 *prev;
     int flag;
     int pc0, sres, spc, have2, have;
@@ -382,22 +382,22 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
     cur = *pout;
     prev = &first;
     for (;;) {
-        t = cur;
-        cur = f_b80_410C18(pc, t, prev);
-        prev = (struct S410C18 *)t;
+        calleeFrame = cur;
+        cur = f_b80_410C18(pc, calleeFrame, prev);
+        prev = (struct S410C18 *)calleeFrame;
         if (cur == 0)
             break;
         {
-            int m;
+            int newEhModel;
             if (cur->p == 0)
-                m = 0;
+                newEhModel = 0;
             else
-                m = *cur->p == 0xFFFFFFFE;
+                newEhModel = *cur->p == 0xFFFFFFFE;
             if (fl3) {
                 fl3 = 0;
                 result = f_930_410C18(info[3], (int)cur->p, regs, 1, &flag);
                 info[3] = 0;
-            } else if (m) {
+            } else if (newEhModel) {
                 result = f_930_410C18(pc, (int)cur->p, regs, 0, &flag);
             } else {
                 result = f_858_410C18(pc, (int)cur->p);
@@ -418,8 +418,8 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
             }
         }
         {
-            long long v = *f_a78_410C18(cur->idx, cur, (struct S410C18 *)t);
-            pc = (int)v - 1;
+            long long returnAddr = *f_a78_410C18(cur->idx, cur, (struct S410C18 *)calleeFrame);
+            pc = (int)returnAddr - 1;
         }
     }
     if (have) {
@@ -442,9 +442,9 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
             pc = pc0;
             *cur = *(struct F410C18 *)buf;
             while (pc != stop) {
-                t = cur;
-                cur = f_b80_410C18(pc, t, (struct S410C18 *)prev);
-                prev = (struct S410C18 *)t;
+                calleeFrame = cur;
+                cur = f_b80_410C18(pc, calleeFrame, (struct S410C18 *)prev);
+                prev = (struct S410C18 *)calleeFrame;
                 for (i = 0; i < 0x4F; i++) {
                     if (i != cur->idx && cur->kind[i] != 0) {
                         if (in_reg_window_410C18(i, cur) && cur->kind[cur->idx] == 2 && cur->reg_or_offset[cur->idx] == i)
@@ -453,8 +453,8 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
                     }
                 }
                 {
-                    long long v = *f_a78_410C18(cur->idx, cur, (struct S410C18 *)t);
-                    pc = (int)v - 1;
+                    long long returnAddr = *f_a78_410C18(cur->idx, cur, (struct S410C18 *)calleeFrame);
+                    pc = (int)returnAddr - 1;
                 }
             }
             /* update the return address register saved in a register (REG_SAVED_REG) by the last frame unwound */

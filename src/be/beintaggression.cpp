@@ -109,11 +109,24 @@ int cBELibrary_getCharacterID(int);
 extern "C" void func_001E2A08(int charID, int level);
 extern signed char D_005305F9[];
 
-extern "C" void cBEAggressionInterface_applyAggression(void* self, int a, int b, int event)
+/**
+ * Raises one rider's aggression toward another after a bump or punch.
+ *
+ * The record is cBELibrary_profileLib[profile of @p iRider1][character of @p iRider1].aggression[character of @p iRider2]: {state, level,
+ * ticks}. @p event adds 1, 2, 4 or 6 ticks and the level becomes ticks / 5. When the level rises, rider 0 notifies
+ * func_001E2A08(other character, ticks) unless D_005305F9 is set, and the state clamps it: state 0 caps at level 2,
+ * state 1 drops back to level 2 and moves to state 3 on reaching 4, state 2 stays within 1-3 and state 3 within 1-4
+ * (ticks reset to 5 x level). The lower-bound checks can only fire for a negative old level.
+ *
+ * @param iRider1  the rider who is angered (On Tour iRider1)
+ * @param iRider2  the rider they are angry at (On Tour iRider2)
+ * @param event  the contact (On Tour eBEAggBehaviors): 0 mild, 1 moderate, 2 hard, 3 Bertuzzi
+ */
+extern "C" void cBEAggressionInterface_applyAggression(void* self, int iRider1, int iRider2, int event)
 {
-    int profile = cBELibrary_getProfileIndex(a);
-    int ca = cBELibrary_getCharacterID(a);
-    int cb = cBELibrary_getCharacterID(b);
+    int profile = cBELibrary_getProfileIndex(iRider1);
+    int ca = cBELibrary_getCharacterID(iRider1);
+    int cb = cBELibrary_getCharacterID(iRider2);
     int add = 0;
     int oldLvl = cBELibrary_profileLib[profile][ca].aggression[cb].v[1];
     int pts = cBELibrary_profileLib[profile][ca].aggression[cb].v[2];
@@ -136,7 +149,7 @@ extern "C" void cBEAggressionInterface_applyAggression(void* self, int a, int b,
     int lv = pts / 5;
     int lvl = lv;
     if (oldLvl < lvl) {
-        if (a == 0 && D_005305F9[0] == 0) {
+        if (iRider1 == 0 && D_005305F9[0] == 0) {
             func_001E2A08(cb, pts);
         }
         switch (st) {

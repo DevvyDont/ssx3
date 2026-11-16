@@ -31,6 +31,15 @@ void cEffectLink_add(cEffectLink* link, cEffectLink* other)
 //100%
 INCLUDE_ASM("object/effectlink", cEffectLink_append);
 #ifdef SKIP_ASM
+/**
+ * Appends a link at the end of an effect list.
+ *
+ * Walks Next from @p link to the last link, then sets @p other's Next to 0 and its Prev to that last link and makes
+ * it the last link's Next. Callers pass a tModifierBlock's effect list head (+0x10).
+ *
+ * @param link   the list (any link in it; normally the head)
+ * @param other  the link to append (On Tour effect)
+ */
 extern "C" void cEffectLink_append(cEffectLink* link, cEffectLink* other)
 {
     while (link->Next != 0) {
@@ -45,6 +54,14 @@ extern "C" void cEffectLink_append(cEffectLink* link, cEffectLink* other)
 //100%
 INCLUDE_ASM("object/effectlink", cEffectLink_unlink);
 #ifdef SKIP_ASM
+/**
+ * Removes a link from its effect list.
+ *
+ * Points the next link's Prev at this link's Prev and the previous link's Next at this link's Next (each only when
+ * present), then clears this link's Next and Prev.
+ *
+ * @param link  the link to remove
+ */
 extern "C" void cEffectLink_unlink(cEffectLink* link)
 {
     if (link->Next != 0) {

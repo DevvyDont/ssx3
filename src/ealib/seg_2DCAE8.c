@@ -196,16 +196,24 @@ void USTR_ncopy_impl(unsigned short *d, unsigned short *s, int n) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", USTR_copycstr);
 #ifdef SKIP_ASM
-void USTR_copycstr(short *arg0, signed char *arg1) {
+/**
+ * Copies an 8-bit C string into a 16-bit (UCS-2) string.
+ *
+ * Each byte is zero-extended into one character of @p dst, and the result is 0-terminated.
+ *
+ * @param dst  the 16-bit destination
+ * @param csrc  the 8-bit source string
+ */
+void USTR_copycstr(short *dst, signed char *csrc) {
     short *var_3;
     int var_6;
     signed char *var_5;
     unsigned char temp_2;
 
-    var_5 = arg1;
+    var_5 = csrc;
     var_6 = 0;
     if (*var_5 != 0) {
-        var_3 = arg0;
+        var_3 = dst;
         do {
             temp_2 = *var_5;
             var_6 += 1;
@@ -214,7 +222,7 @@ void USTR_copycstr(short *arg0, signed char *arg1) {
             var_3 += 1;
         } while (*var_5 != 0);
     }
-    arg0[var_6] = 0;
+    dst[var_6] = 0;
 }
 #endif
 
@@ -654,6 +662,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", USTR_sprintf);
 #ifdef SKIP_ASM
 extern void USTR_vsprintf(char *, const char *, char *);
 
+/**
+ * Formats a 16-bit string printf-style.
+ *
+ * Collects the variable arguments and passes them to USTR_vsprintf.
+ *
+ * @param dst  the 16-bit destination
+ * @param fmt  the format string
+ */
 // PORT: SN-specific va_start
 void USTR_sprintf(char *dst, const char *fmt, ...) {
     char *ap;
@@ -775,25 +791,39 @@ extern int FILESYS_overhead_CC88(int, int, int) __asm__("FILESYS_overhead");
 extern void MEM_fill_CC88(int, int, int) __asm__("MEM_fill");
 extern int func_003E4040_CC88(int, int) __asm__("func_003E4040");
 extern void func_003E3020_CC88(int, int) __asm__("func_003E3020");
-int FILESYS_initadr(int a, int b, int c, int d) {
+/**
+ * Initialises the file system in caller-supplied memory; returns 0 when it was already initialised.
+ *
+ * Zero arguments take the defaults (16 open files, 1000 directory entries, 32 file operations). Creates the mutex,
+ * clears FILESYS_overhead's worth of @p mem, places the 0x30-byte operation table and the 0x110-byte handle table in
+ * it, then calls func_003E3020(@p maxopenfiles, v), v being func_003E4040's result for the directory entries when
+ * D_00450C60 is set and 0 otherwise.
+ *
+ * @param maxopenfiles  maximum open files (0: 16)
+ * @param maxdirfiles  maximum directory entries (0: 1000)
+ * @param maxfileops  maximum pending file operations (0: 32)
+ * @param mem  the memory to use, at least FILESYS_overhead(a, b, c) bytes
+ * @return 1 when initialised now, 0 when already initialised
+ */
+int FILESYS_initadr(int maxopenfiles, int maxdirfiles, int maxfileops, int mem) {
     int v;
-    if (a == 0) a = 0x10;
-    if (b == 0) b = 1000;
-    if (c == 0) c = 0x20;
+    if (maxopenfiles == 0) maxopenfiles = 0x10;
+    if (maxdirfiles == 0) maxdirfiles = 1000;
+    if (maxfileops == 0) maxfileops = 0x20;
     if (D_00519AB0_CC88[0] == 0) {
         D_00519AB0_CC88[2] = 0xFF;
-        D_00519AB0_CC88[0] = c;
-        D_00519AB0_CC88[1] = a;
+        D_00519AB0_CC88[0] = maxfileops;
+        D_00519AB0_CC88[1] = maxopenfiles;
         MUTEX_create_CC88(&D_00519AB0_CC88[5]);
-        D_00519AB0_CC88[10] = d;
-        MEM_fill_CC88(D_00519AB0_CC88[10], 0, FILESYS_overhead_CC88(a, b, c));
+        D_00519AB0_CC88[10] = mem;
+        MEM_fill_CC88(D_00519AB0_CC88[10], 0, FILESYS_overhead_CC88(maxopenfiles, maxdirfiles, maxfileops));
         D_00519AB0_CC88[11] = D_00519AB0_CC88[10] + D_00519AB0_CC88[0] * 0x30;
         if (D_00450C60_CC88 != 0) {
-            v = func_003E4040_CC88(b, D_00519AB0_CC88[1] * 0x110 + D_00519AB0_CC88[11]);
+            v = func_003E4040_CC88(maxdirfiles, D_00519AB0_CC88[1] * 0x110 + D_00519AB0_CC88[11]);
         } else {
             v = 0;
         }
-        func_003E3020_CC88(a, v);
+        func_003E3020_CC88(maxopenfiles, v);
         return 1;
     }
     return 0;
@@ -806,10 +836,21 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_overhead);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450C5C_CD98[] __asm__("D_00450C5C");
 
-int FILESYS_overhead(int a, int b, int c) {
-    int x = a ? a : 0x10;
-    int y = b ? b : 0x3E8;
-    int z = c ? c : 0x20;
+/**
+ * Returns how many bytes of memory the file system needs for the given limits.
+ *
+ * Zero arguments take the defaults (16, 1000, 32). The size is @p maxfileops * 0x30 (operations) + @p maxopenfiles * 0x110 (handles)
+ * + @p maxdirfiles * (D_00450C5C + 0xC) (directory entries) + 0x40.
+ *
+ * @param maxopenfiles  maximum open files
+ * @param maxdirfiles  maximum directory entries
+ * @param maxfileops  maximum pending file operations
+ * @return the size in bytes
+ */
+int FILESYS_overhead(int maxopenfiles, int maxdirfiles, int maxfileops) {
+    int x = maxopenfiles ? maxopenfiles : 0x10;
+    int y = maxdirfiles ? maxdirfiles : 0x3E8;
+    int z = maxfileops ? maxfileops : 0x20;
     int sz = D_00450C5C_CD98[0] + 0xC;
     return z * 0x30 + x * 0x110 + y * sz + 0x40;
 }
@@ -901,11 +942,20 @@ struct E_CF70 { int f0; int f4; volatile int f8; int fC; int f10; int f14; char 
 extern struct E_CF70 *D_00519AD8_CF70 __asm__("D_00519AD8");
 
 void FILESYS_callbackop_impl(int h, Fn_CF70 fn) __asm__("FILESYS_callbackop");
-void FILESYS_callbackop_impl(int h, Fn_CF70 fn) {
-    struct E_CF70 *e = &D_00519AD8_CF70[((unsigned char *)&h)[3]];
+/**
+ * Sets the completion callback of a pending file operation.
+ *
+ * The operation slot is the handle's low byte. When the operation has already finished (its result word is set),
+ * @p fn is called immediately with the handle, the result and the user data.
+ *
+ * @param ophandle   the operation handle
+ * @param fn  the completion callback
+ */
+void FILESYS_callbackop_impl(int ophandle, Fn_CF70 fn) {
+    struct E_CF70 *e = &D_00519AD8_CF70[((unsigned char *)&ophandle)[3]];
     e->fn = fn;
     if (e->f8 != 0) {
-        fn(h, e->f8, e->f14);
+        fn(ophandle, e->f8, e->f14);
     }
 }
 #endif
@@ -978,9 +1028,17 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_cancelop);
 struct H_D148 { unsigned int v; };
 extern char *D_00519AD8_D148[] __asm__("D_00519AD8");
 
-void FILESYS_cancelop(struct H_D148 h) {
+/**
+ * Asks the file system to cancel a pending operation.
+ *
+ * The handle must still match its slot (low 20 bits of the slot's id word); operations of type 3 and 0xA (bits
+ * 20..23) cannot be cancelled, the others get their cancel flag (+0x4) set.
+ *
+ * @param ophandle  the operation handle
+ */
+void FILESYS_cancelop(struct H_D148 ophandle) {
     struct H_D148 c;
-    unsigned int u = h.v;
+    unsigned int u = ophandle.v;
     int t;
     int ok = 0;
     c.v = u;
@@ -990,7 +1048,7 @@ void FILESYS_cancelop(struct H_D148 h) {
     if (ok != 0) {
         t = (u >> 20) & 0xF;
         if (t != 3 && t != 0xA) {
-            *(int *)(((unsigned char *)&h)[3] * 0x30 + D_00519AD8_D148[0] + 4) = 1;
+            *(int *)(((unsigned char *)&ophandle)[3] * 0x30 + D_00519AD8_D148[0] + 4) = 1;
         }
     }
 }
@@ -1079,9 +1137,18 @@ static inline int hValid_D1D8(int h) {
     return h != 0 && ((h & 0xFFFFF) == (D_00519AB0.f28[((unsigned char *)&h)[3]].f00.w & 0xFFFFF));
 }
 
-int FILESYS_waitop(int h) {
-    struct sFsCmd *e = &D_00519AB0.f28[((unsigned char *)&h)[3]];
-    if (!hValid_D1D8(h)) {
+/**
+ * Blocks until a file operation completes and returns its result.
+ *
+ * While the operation's result (+0x8) is 0, runs SYNCTASK_run when func_003E5440 allows it, else sleeps with
+ * func_003E5398(1). Returns -3 as soon as the handle stops being valid.
+ *
+ * @param ophandle  the operation handle
+ * @return the operation's result, or -3 for an invalid handle
+ */
+int FILESYS_waitop(int ophandle) {
+    struct sFsCmd *e = &D_00519AB0.f28[((unsigned char *)&ophandle)[3]];
+    if (!hValid_D1D8(ophandle)) {
         return -3;
     }
     while (e->f08 == 0) {
@@ -1090,7 +1157,7 @@ int FILESYS_waitop(int h) {
         } else {
             func_003E5398(1);
         }
-        if (!hValid_D1D8(h)) {
+        if (!hValid_D1D8(ophandle)) {
             return -3;
         }
     }
@@ -1128,9 +1195,18 @@ struct sSlot_D310 {
 extern struct sSlot_D310 *D_00519AD8;
 
 int FILESYS_completeop_a(struct sHandle_D310 h) __asm__("FILESYS_completeop");
-int FILESYS_completeop_a(struct sHandle_D310 h) {
+/**
+ * Finishes a completed file operation: returns its result and releases its resources.
+ *
+ * Picks the result by operation type (a size, a handle, a byte count...), frees a handle the operation owned with
+ * freehandle and the operation slot with freeop.
+ *
+ * @param ophandle  the operation handle
+ * @return the operation's result
+ */
+int FILESYS_completeop_a(struct sHandle_D310 ophandle) {
     int ret = 0;
-    struct sSlot_D310 *slot = (struct sSlot_D310 *)((char *)D_00519AD8 + h.idx * 0x30);
+    struct sSlot_D310 *slot = (struct sSlot_D310 *)((char *)D_00519AD8 + ophandle.idx * 0x30);
     int sum;
     int *t;
 
@@ -1213,12 +1289,25 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_open);
 extern int func_003DE800();
 extern void func_003DE668();
 
-int FILESYS_open(char *arg0, int arg1, int arg2, int arg3) {
+/**
+ * Queues an asynchronous file open and returns the operation handle.
+ *
+ * Reserves an operation slot and a file handle (failing the operation with error 2 when none is free), records
+ * the open flags, priority and user data, copies the name into the handle and hands the command to
+ * iFILESYS_ExecCommand.
+ *
+ * @param name  the file name
+ * @param modeflags  open mode flags
+ * @param priority  queue priority
+ * @param userdata  user data passed to the completion callback
+ * @return the operation handle
+ */
+int FILESYS_open(char *name, int modeflags, int priority, int userdata) {
     char *p = (char *)func_003DE670();
     int r;
-    *(int *)(p + 0x14) = arg3;
-    *(int *)(p + 0x18) = arg1;
-    *(int *)(p + 0x10) = arg2;
+    *(int *)(p + 0x14) = userdata;
+    *(int *)(p + 0x18) = modeflags;
+    *(int *)(p + 0x10) = priority;
     *(int *)p = (*(int *)p & 0xFF0FFFFF) | 0x200000;
     r = func_003DE800();
     *(int *)(p + 0x24) = r;
@@ -1226,7 +1315,7 @@ int FILESYS_open(char *arg0, int arg1, int arg2, int arg3) {
         *(int *)(p + 0xC) = 2;
         func_003DE668(p);
     }
-    strncpy(*(char **)(p + 0x24) + 0x10, arg0, 0x100);
+    strncpy(*(char **)(p + 0x24) + 0x10, name, 0x100);
     iFILESYS_ExecCommand(p);
     return *(int *)p;
 }
@@ -1243,18 +1332,29 @@ extern void func_003DE668_D5A0(C_D5A0 *) __asm__("func_003DE668");
 extern void iFILESYS_ExecCommand_D5A0(C_D5A0 *) __asm__("iFILESYS_ExecCommand");
 
 int FILESYS_close_impl(int arg0, int arg1, int arg2) __asm__("FILESYS_close");
-int FILESYS_close_impl(int arg0, int arg1, int arg2) {
+/**
+ * Queues an asynchronous file close and returns the operation handle.
+ *
+ * Reserves an operation slot (type 3), records @p filehandle, the priority and the user data; when the handle is found
+ * in the D_00519AE4 list the operation is failed with error 3 instead. The command goes to iFILESYS_ExecCommand.
+ *
+ * @param filehandle  the file handle
+ * @param priority  queue priority
+ * @param userdata  user data passed to the completion callback
+ * @return the operation handle
+ */
+int FILESYS_close_impl(int filehandle, int priority, int userdata) {
     C_D5A0 *c;
     struct sFsNode *n;
 
     c = func_003DE670_D5A0();
     n = D_00519AE4;
     c->f = 3;
-    *(int*)((char*)c + 0x10) = arg1;
-    *(int*)((char*)c + 0x14) = arg2;
-    *(int*)((char*)c + 0x24) = arg0;
+    *(int*)((char*)c + 0x10) = priority;
+    *(int*)((char*)c + 0x14) = userdata;
+    *(int*)((char*)c + 0x24) = filehandle;
     for (; n != 0; n = n->f14) {
-        if ((int)n->f0C == arg0) {
+        if ((int)n->f0C == filehandle) {
             *(int*)((char*)c + 0xC) = 3;
             func_003DE668_D5A0(c);
             break;
@@ -1275,24 +1375,39 @@ extern void func_003DE668_D648(C_D648 *) __asm__("func_003DE668");
 extern void iFILESYS_ExecCommand_D648(C_D648 *) __asm__("iFILESYS_ExecCommand");
 
 int FILESYS_read_impl(int *arg0, int arg1, int arg2, int arg3, int arg4, int arg5) __asm__("FILESYS_read");
-int FILESYS_read_impl(int *arg0, int arg1, int arg2, int arg3, int arg4, int arg5) {
+/**
+ * Queues an asynchronous read and returns the operation handle.
+ *
+ * Reserves an operation slot (type 4), records the handle, offset, buffer, priority and user data, clamps the
+ * byte count so the read stops at the end of the file (handle +0x4) and hands the command to
+ * iFILESYS_ExecCommand. A null handle fails the operation with error 6.
+ *
+ * @param filehandle  the file handle
+ * @param offset  the file offset
+ * @param buffer  the destination buffer
+ * @param bytes  the number of bytes to read
+ * @param priority  queue priority
+ * @param userdata  user data passed to the completion callback
+ * @return the operation handle
+ */
+int FILESYS_read_impl(int *filehandle, int offset, int buffer, int bytes, int priority, int userdata) {
     C_D648 *c;
     int n;
 
     c = func_003DE670_D648();
-    *(int*)((char*)c + 0x14) = arg5;
-    *(int*)((char*)c + 0x10) = arg4;
+    *(int*)((char*)c + 0x14) = userdata;
+    *(int*)((char*)c + 0x10) = priority;
     c->f = 4;
-    if (arg0 == 0) {
+    if (filehandle == 0) {
         *(int*)((char*)c + 0xC) = 6;
         func_003DE668_D648(c);
     }
-    *(int**)((char*)c + 0x24) = arg0;
-    n = arg0[1];
-    *(int*)((char*)c + 0x20) = arg2;
-    if (n < arg1 + arg3) arg3 = n - arg1;
-    *(int*)((char*)c + 0x18) = arg1;
-    *(int*)((char*)c + 0x1C) = arg3;
+    *(int**)((char*)c + 0x24) = filehandle;
+    n = filehandle[1];
+    *(int*)((char*)c + 0x20) = buffer;
+    if (n < offset + bytes) bytes = n - offset;
+    *(int*)((char*)c + 0x18) = offset;
+    *(int*)((char*)c + 0x1C) = bytes;
     iFILESYS_ExecCommand_D648(c);
     return *(int*)c;
 }
@@ -1993,9 +2108,16 @@ INCLUDE_ASM("ealib/seg_2DCAE8", freeop);
 extern int D_00519AC4_9AC4[] __asm__("D_00519AC4");
 extern void MUTEX_unlock(int *);
 
-void freeop(int a0) {
+/**
+ * Releases a file operation slot.
+ *
+ * Clears its 0x30 bytes with MEM_fill while holding the file-system mutex.
+ *
+ * @param fop  the operation
+ */
+void freeop(int fop) {
     MUTEX_lock(D_00519AC4_9AC4);
-    MEM_fill(a0, 0, 0x30);
+    MEM_fill(fop, 0, 0x30);
     MUTEX_unlock(D_00519AC4_9AC4);
 }
 #endif
@@ -2036,9 +2158,16 @@ INCLUDE_ASM("ealib/seg_2DCAE8", freehandle);
 extern int D_00519AC4_9AC4[] __asm__("D_00519AC4");
 extern void MUTEX_unlock(int *);
 
-void freehandle(int a0) {
+/**
+ * Releases a file handle slot.
+ *
+ * Clears its 0x110 bytes with MEM_fill while holding the file-system mutex.
+ *
+ * @param handle  the handle
+ */
+void freehandle(int handle) {
     MUTEX_lock(D_00519AC4_9AC4);
-    MEM_fill(a0, 0, 0x110);
+    MEM_fill(handle, 0, 0x110);
     MUTEX_unlock(D_00519AC4_9AC4);
 }
 #endif
@@ -2155,20 +2284,34 @@ extern void FILESYS_callbackop_EB50(int, void (*)(void)) __asm__("FILESYS_callba
 extern int FILESYS_waitop(int);
 extern void func_003DEA48_EB50(void) __asm__("func_003DEA48");
 
-int syncblockio(int a, int b, int c, int d, int e, int (*fn)(int, int, int, int, int, void *)) {
+/**
+ * Performs a synchronous read or write in blocks of at most 0x8000 bytes.
+ *
+ * Starts each block with @p fn (FILESYS_read or a write), chains the next block from the completion callback
+ * func_003DEA48 and waits for the operation with FILESYS_waitop.
+ *
+ * @param filehandle   the file handle
+ * @param offset   the file offset
+ * @param buffer   the buffer
+ * @param bytes   the total number of bytes
+ * @param priority   queue priority
+ * @param fn  the asynchronous transfer function to use
+ * @return the number of bytes transferred
+ */
+int syncblockio(int filehandle, int offset, int buffer, int bytes, int priority, int (*fn)(int, int, int, int, int, void *)) {
     struct S_EA48 s;
-    s.e = e;
-    s.a = a;
-    s.b = b;
-    s.d = d;
+    s.e = priority;
+    s.a = filehandle;
+    s.b = offset;
+    s.d = bytes;
     s.r = 0;
-    s.n = d;
-    s.c = c;
+    s.n = bytes;
+    s.c = buffer;
     s.fn = fn;
     if (s.n > 0x8000) {
         s.n = 0x8000;
     }
-    s.h = fn(a, b, s.c, s.n, e, &s);
+    s.h = fn(filehandle, offset, s.c, s.n, priority, &s);
     if (s.h) {
         FILESYS_callbackop_EB50(s.h, func_003DEA48_EB50);
         do {
@@ -2210,8 +2353,19 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_readsync);
 extern void FILESYS_read_EC60(void) __asm__("FILESYS_read");
 extern void syncblockio_EC60(int, int, int, int, int, void (*)(void)) __asm__("syncblockio");
 
-void FILESYS_readsync(int a, int b, int c, int d, int e) {
-    syncblockio_EC60(a, b, c, d, e, FILESYS_read_EC60);
+/**
+ * Reads from a file synchronously.
+ *
+ * Calls syncblockio with FILESYS_read as the transfer function.
+ *
+ * @param filehandle  the file handle
+ * @param offset  the file offset
+ * @param buffer  the destination buffer
+ * @param bytes  the number of bytes
+ * @param priority  queue priority
+ */
+void FILESYS_readsync(int filehandle, int offset, int buffer, int bytes, int priority) {
+    syncblockio_EC60(filehandle, offset, buffer, bytes, priority, FILESYS_read_EC60);
 }
 #endif
 
@@ -2222,8 +2376,19 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_writesync);
 extern void func_003DD720_EC80(void) __asm__("func_003DD720");
 extern void syncblockio_EC60(int, int, int, int, int, void (*)(void)) __asm__("syncblockio");
 
-void FILESYS_writesync(int a, int b, int c, int d, int e) {
-    syncblockio_EC60(a, b, c, d, e, func_003DD720_EC80);
+/**
+ * Writes to a file synchronously.
+ *
+ * Calls syncblockio with func_003DD720 as the transfer function.
+ *
+ * @param filehandle  the file handle
+ * @param offset  the file offset
+ * @param buffer  the source buffer
+ * @param bytes  the number of bytes
+ * @param priority  queue priority
+ */
+void FILESYS_writesync(int filehandle, int offset, int buffer, int bytes, int priority) {
+    syncblockio_EC60(filehandle, offset, buffer, bytes, priority, func_003DD720_EC80);
 }
 #endif
 
@@ -2235,11 +2400,21 @@ void FILESYS_waitop_ECA0(int) __asm__("FILESYS_waitop");
 int FILESYS_completeop_ECA0(int) __asm__("FILESYS_completeop");
 int FILESYS_close_ECA0(int, int, int) __asm__("FILESYS_close");
 
-int FILESYS_closesync(int a, int b) {
+/**
+ * Closes a file synchronously.
+ *
+ * Queues the close with FILESYS_close, waits for it with FILESYS_waitop and collects the result with
+ * FILESYS_completeop.
+ *
+ * @param filehandle  the file handle
+ * @param priority  queue priority
+ * @return 1 when the close succeeded, otherwise 0
+ */
+int FILESYS_closesync(int filehandle, int priority) {
     int temp_2;
     int var_2 = 0;
 
-    temp_2 = FILESYS_close_ECA0(a, b, 0);
+    temp_2 = FILESYS_close_ECA0(filehandle, priority, 0);
     if (temp_2 != 0) {
         FILESYS_waitop_ECA0(temp_2);
         var_2 = FILESYS_completeop_ECA0(temp_2) != 0;
@@ -2367,16 +2542,24 @@ INCLUDE_ASM("ealib/seg_2DCAE8", queuefetch);
 extern void MUTEX_unlock_EED8(void *) __asm__("MUTEX_unlock");
 extern char D_00519C08_9C08[] __asm__("hlafile_mutex");
 
-void *queuefetch(void **arg0) {
+/**
+ * Takes the first request off a request queue, or returns null when it is empty.
+ *
+ * The head (+0x0) advances to the request's next link (+0x4) under hlafile_mutex.
+ *
+ * @param queue  the queue
+ * @return the request, or null
+ */
+void *queuefetch(void **queue) {
     void *temp_2;
     void *var_16;
 
     MUTEX_lock(D_00519C08_9C08);
-    temp_2 = *arg0;
+    temp_2 = *queue;
     var_16 = 0;
     if (temp_2 != 0) {
         var_16 = temp_2;
-        *arg0 = *(void **)((char *)var_16 + 4);
+        *queue = *(void **)((char *)var_16 + 4);
     }
     MUTEX_unlock_EED8(D_00519C08_9C08);
     return var_16;
@@ -2389,7 +2572,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", newrequestid);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00519C00_EF40[] __asm__("hlafile_requestidcounter");
 
-void newrequestid(unsigned char *arg0) {
+/**
+ * Gives an async-file request a fresh id.
+ *
+ * hlafile_requestidcounter advances by 0x100 (wrapping to 0x100, never 0) and is ORed above the slot index in
+ * the request's first byte.
+ *
+ * @param req  the request
+ */
+void newrequestid(unsigned char *req) {
     int temp_2;
 
     temp_2 = D_00519C00_EF40[0] + 0x100;
@@ -2397,7 +2588,7 @@ void newrequestid(unsigned char *arg0) {
     if (temp_2 == 0) {
         D_00519C00_EF40[0] = 0x100;
     }
-    *(int *)arg0 = (int) (*arg0 | D_00519C00_EF40[0]);
+    *(int *)req = (int) (*req | D_00519C00_EF40[0]);
 }
 #endif
 
@@ -2408,16 +2599,25 @@ INCLUDE_ASM("ealib/seg_2DCAE8", locaterequest);
 extern int D_00450C34_0C34[] __asm__("hlafile_request");
 extern int D_00519BF0_9BF0[] __asm__("numrequests");
 
-int *locaterequest(int arg0) {
+/**
+ * Finds the async-file request with an id, or null when the id is stale or invalid.
+ *
+ * Ids below 0x100 or with a slot (low byte) at or past numrequests are rejected; otherwise the slot in
+ * hlafile_request (0x30 bytes each) is returned when its id word equals @p requestId.
+ *
+ * @param requestId  the request id
+ * @return the request, or null
+ */
+int *locaterequest(int requestId) {
     int *temp_2;
     int temp_6;
 
-    temp_6 = arg0 & 0xFF;
-    if ((arg0 < 0x100) || (temp_6 >= D_00519BF0_9BF0[0])) {
+    temp_6 = requestId & 0xFF;
+    if ((requestId < 0x100) || (temp_6 >= D_00519BF0_9BF0[0])) {
         return 0;
     }
     temp_2 = (int*)((char*)D_00450C34_0C34[0] + (temp_6 * 0x30));
-    return ((*temp_2 ^ arg0) != 0) ? 0 : temp_2;
+    return ((*temp_2 ^ requestId) != 0) ? 0 : temp_2;
 }
 #endif
 
@@ -2460,23 +2660,31 @@ extern void MUTEX_lock_F028(void *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_F028(void *) __asm__("MUTEX_unlock");
 extern void releaserequest_F028(void *) __asm__("releaserequest");
 
-void finishrequest(void *arg0) {
+/**
+ * Completes an async-file request: notifies its owner or frees it if it was cancelled.
+ *
+ * Clears the busy flag (+0x1C) under hlafile_mutex. A cancelled request (+0x10) that is not being waited on
+ * (+0xC) is freed with releaserequest; otherwise the callback (+0x18) is called with the request id.
+ *
+ * @param req  the request
+ */
+void finishrequest(void *req) {
     int (*temp_19)(int);
     int temp_16;
     int temp_18;
 
     MUTEX_lock_F028(D_00519C08_F028);
-    (*(volatile int *)((char*)(arg0) + (0x1C))) = 0;
-    temp_16 = (*(int *)((char*)(arg0) + (0x10)));
-    temp_19 = (*(int (**)(int))((char*)(arg0) + (0x18)));
-    temp_18 = (*(int *)((char*)(arg0) + (0xC)));
+    (*(volatile int *)((char*)(req) + (0x1C))) = 0;
+    temp_16 = (*(int *)((char*)(req) + (0x10)));
+    temp_19 = (*(int (**)(int))((char*)(req) + (0x18)));
+    temp_18 = (*(int *)((char*)(req) + (0xC)));
     MUTEX_unlock_F028(D_00519C08_F028);
     if (temp_16 != 0) {
         if (temp_18 == 0) {
-            releaserequest_F028(arg0);
+            releaserequest_F028(req);
         }
     } else if (temp_19 != 0) {
-        temp_19((*(int *)((char*)(arg0) + (0))));
+        temp_19((*(int *)((char*)(req) + (0))));
     }
 }
 #endif
@@ -2712,6 +2920,12 @@ extern void func_003E5398(int);
 extern int SYNCTASK_run(int);
 extern void func_003E56E0_F570(char *) __asm__("func_003E56E0");
 
+/**
+ * Shuts the async-file layer down: cancels all requests, waits for them, frees the request table.
+ *
+ * Does nothing when hlafile_request is null. Otherwise cancels each of numrequests requests, pumps SYNCTASK_run
+ * until none is busy, frees the table with gFileSysOpts' free function and destroys hlafile_mutex.
+ */
 void ASYNCFILE_restore(void) {
     if (hlafile_request != 0) {
         int i;
@@ -2746,11 +2960,21 @@ extern void f_CF70_F690(int, void *) __asm__("FILESYS_callbackop");
 extern char f_F2C0_F690[] __asm__("func_003DF2C0");
 struct O_F690 { int w0, w4, w8, wC, w10, w14, w18; volatile int w1C; int w20, w24, w28, w2C; };
 
-int ASYNCFILE_load(int arg0, int arg1) {
+/**
+ * Starts loading a whole file into newly allocated memory; returns the request id (0 on failure).
+ *
+ * Takes a request from freequeue, gives it an id, records the memory type, opens the file with FILESYS_open and
+ * chains the size/read/close steps from the callback func_003DF2C0. A failed open puts the request back.
+ *
+ * @param name  the file name
+ * @param memtype  allocation flags for the buffer (On Tour memtype)
+ * @return the request id, or 0
+ */
+int ASYNCFILE_load(int name, int memtype) {
     struct O_F690 *t = (struct O_F690 *)f_EED8_F690(D_00519BF8_F690);
     if (t != 0) {
         f_EF40_F690(t);
-        t->w28 = arg1;
+        t->w28 = memtype;
         t->w8 = 0;
         t->wC = 0;
         t->w10 = 0;
@@ -2758,7 +2982,7 @@ int ASYNCFILE_load(int arg0, int arg1) {
         t->w24 = 0;
         t->w2C = 0;
         t->w14 = 1;
-        t->w1C = f_D4E8_F690(arg0, 1, 0x64, t);
+        t->w1C = f_D4E8_F690(name, 1, 0x64, t);
         if (t->w1C != 0) {
             f_CF70_F690(t->w1C, f_F2C0_F690);
             return t->w0;
@@ -2985,18 +3209,28 @@ INCLUDE_ASM("ealib/seg_2DCAE8", validatehandle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int validatehandle_impl(int **arg0, int **arg1, int ***arg2) __asm__("validatehandle");
-int validatehandle_impl(int **arg0, int **arg1, int ***arg2) {
+/**
+ * Checks a stream tap handle and resolves its stream header.
+ *
+ * @p handle points at the tap, whose first word points at the stream header; the header must start with 'STRM'.
+ *
+ * @param handle  the tap handle
+ * @param strmptr  receives the stream header
+ * @param tapptr  receives the tap
+ * @return 0 when valid, 1 otherwise
+ */
+int validatehandle_impl(int **handle, int **strmptr, int ***tapptr) {
     int *temp_7;
 
-    if (arg0 == 0) {
+    if (handle == 0) {
         return 1;
     }
-    temp_7 = *arg0;
+    temp_7 = *handle;
     if (*temp_7 != 0x4D525453) {
         return 1;
     }
-    *arg2 = arg0;
-    *arg1 = temp_7;
+    *tapptr = handle;
+    *strmptr = temp_7;
     return 0;
 }
 #endif
@@ -3056,22 +3290,31 @@ INCLUDE_ASM("ealib/seg_2DCAE8", getfreerequest);
 extern int D_00519C18_FCD8[] __asm__("stream_requestidcounter");
 extern void *getfreerequest_impl(char *arg0) __asm__("getfreerequest");
 
-void *getfreerequest_impl(char *arg0) {
+/**
+ * Takes a free request from a stream and gives it a new id; null when none is free.
+ *
+ * Pops the free list (+0x68) under the stream's mutex (+0x4) and ORs a fresh stream_requestidcounter value (step
+ * 0x100, never 0) above the request's slot byte.
+ *
+ * @param strm  the stream header
+ * @return the request, or null
+ */
+void *getfreerequest_impl(char *strm) {
     char *r;
     int t;
-    MUTEX_lock(arg0 + 4);
+    MUTEX_lock(strm + 4);
     r = 0;
-    if (*(char **)(arg0 + 0x68) != 0) {
-        r = *(char **)(arg0 + 0x68);
+    if (*(char **)(strm + 0x68) != 0) {
+        r = *(char **)(strm + 0x68);
         t = D_00519C18_FCD8[0] + 0x100;
-        *(char **)(arg0 + 0x68) = *(char **)(r + 0xC);
+        *(char **)(strm + 0x68) = *(char **)(r + 0xC);
         D_00519C18_FCD8[0] = t;
         if (t == 0) {
             D_00519C18_FCD8[0] = 0x100;
         }
         *(int *)r = *(unsigned char *)r | D_00519C18_FCD8[0];
     }
-    MUTEX_unlock((int *)(arg0 + 4));
+    MUTEX_unlock((int *)(strm + 4));
     return r;
 }
 #endif
@@ -3083,24 +3326,33 @@ INCLUDE_ASM("ealib/seg_2DCAE8", queuerequest);
 extern void MUTEX_lock_FD58(void *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_FD58(void *) __asm__("MUTEX_unlock");
 
-void queuerequest(char *arg0, char *arg1) {
+/**
+ * Appends a request to a stream's queue.
+ *
+ * Marks the request pending (+0x4 = 1, no next link) and links it after the tail (+0x64), or makes it head,
+ * current and tail (+0x5C, +0x60, +0x64) of an empty queue, under the stream's mutex.
+ *
+ * @param strm  the stream header
+ * @param req  the request
+ */
+void queuerequest(char *strm, char *req) {
     char *temp_2;
 
-    (*(int *)((char*)(arg1) + (0xC))) = 0;
-    (*(int *)((char*)(arg1) + (4))) = 1;
-    MUTEX_lock_FD58(arg0 + 4);
-    temp_2 = (*(char **)((char*)(arg0) + (0x64)));
+    (*(int *)((char*)(req) + (0xC))) = 0;
+    (*(int *)((char*)(req) + (4))) = 1;
+    MUTEX_lock_FD58(strm + 4);
+    temp_2 = (*(char **)((char*)(strm) + (0x64)));
     if (temp_2 == 0) {
-        (*(char **)((char*)(arg1) + (8))) = 0;
-        (*(char **)((char*)(arg0) + (0x5C))) = arg1;
-        (*(char **)((char*)(arg0) + (0x60))) = arg1;
-        (*(char **)((char*)(arg0) + (0x64))) = arg1;
+        (*(char **)((char*)(req) + (8))) = 0;
+        (*(char **)((char*)(strm) + (0x5C))) = req;
+        (*(char **)((char*)(strm) + (0x60))) = req;
+        (*(char **)((char*)(strm) + (0x64))) = req;
     } else {
-        (*(char **)((char*)(arg1) + (8))) = temp_2;
-        (*(char **)((char*)((*(char **)((char*)(arg0) + (0x64)))) + (0xC))) = arg1;
-        (*(char **)((char*)(arg0) + (0x64))) = arg1;
+        (*(char **)((char*)(req) + (8))) = temp_2;
+        (*(char **)((char*)((*(char **)((char*)(strm) + (0x64)))) + (0xC))) = req;
+        (*(char **)((char*)(strm) + (0x64))) = req;
     }
-    MUTEX_unlock_FD58(arg0 + 4);
+    MUTEX_unlock_FD58(strm + 4);
 }
 #endif
 
@@ -3343,7 +3595,16 @@ extern void cb_00D8_0270(void) __asm__("func_003E00D8");
 extern void cb_0118_0270(void) __asm__("func_003E0118");
 extern void func_003E03D0_0270(char *, int) __asm__("func_003E03D0");
 
-void startnextrequest(char *self, int arg1) {
+/**
+ * Moves a stream on to its next queued file request.
+ *
+ * Picks the next request under the stream mutex; if it names the file already open, reading restarts with
+ * func_003E03D0, otherwise the current file is closed (FILESYS_close) and the new one opened (FILESYS_open)
+ * with a completion callback.
+ *
+ * @param priority  queue priority for the file operations
+ */
+void startnextrequest(char *self, int priority) {
     char *job;
     int none;
     int tk;
@@ -3382,13 +3643,13 @@ void startnextrequest(char *self, int arg1) {
             if (func_004165A8_0270(job + 0x14, nm) != 0) {
                 strcpy_0270(nm, job + 0x14);
                 if (*(int *)(self + 0x16C) == 0) {
-                    h = FILESYS_open_0270(nm, 1, arg1, self);
+                    h = FILESYS_open_0270(nm, 1, priority, self);
                     *(int *)(self + 0x174) = h;
                     if (h != 0) {
                         FILESYS_callbackop(h, cb_00D8_0270);
                     }
                 } else {
-                    h = FILESYS_close(*(int *)(self + 0x16C), arg1, self);
+                    h = FILESYS_close(*(int *)(self + 0x16C), priority, self);
                     *(int *)(self + 0x174) = h;
                     if (h != 0) {
                         FILESYS_callbackop(h, cb_0118_0270);
@@ -3397,7 +3658,7 @@ void startnextrequest(char *self, int arg1) {
                 return;
             }
         }
-        func_003E03D0_0270(self, arg1);
+        func_003E03D0_0270(self, priority);
     }
 }
 #endif
@@ -3532,9 +3793,19 @@ fill:
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_overhead);
 #ifdef SKIP_ASM
-int STREAM_overhead(int a, int b, int c) {
-    int t = b * 0xC + 0x180;
-    return a * 0x124 + t + c * 0x10 + 0x40;
+/**
+ * Returns the bookkeeping memory a stream needs for its request, filter and tap counts.
+ *
+ * @p requests * 0x124 + @p filters * 0xC + @p taps * 0x10 + 0x1C0 bytes.
+ *
+ * @param requests  the number of requests
+ * @param filters  the number of filters
+ * @param taps  the number of taps
+ * @return the size in bytes
+ */
+int STREAM_overhead(int requests, int filters, int taps) {
+    int t = filters * 0xC + 0x180;
+    return requests * 0x124 + t + taps * 0x10 + 0x40;
 }
 #endif
 
@@ -3544,6 +3815,20 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_create);
 extern void MUTEX_create_06D8(void *) __asm__("MUTEX_create");
 extern void MEM_clear_06D8(void *, int) __asm__("MEM_clear");
 
+/**
+ * Creates a stream in a caller-supplied buffer; returns its handle (0 on failure).
+ *
+ * The space left after STREAM_overhead's bookkeeping must hold at least 0x1800 bytes of data, and the slot count
+ * must be 2..0x100. Lays out the header ('STRM'), request slots, filter and tap tables, creates the mutex and
+ * clears the tables with MEM_clear.
+ *
+ * @param nslots  the number of requests
+ * @param nq      the number of filters
+ * @param nreq    the number of taps
+ * @param mem     the buffer
+ * @param size    the buffer size
+ * @return the stream handle, or 0
+ */
 void *STREAM_create(int nslots, int nq, int nreq, char *mem, int size) {
     int avail;
     char *slots;
@@ -3675,11 +3960,20 @@ extern void f_56E0_0A28(void *) __asm__("func_003E56E0");
 extern void f_ECA0_0A28(int, int) __asm__("FILESYS_closesync");
 struct S_0A28 { int w0; char pad[0x34]; volatile int w38; char pad2[0x130]; int w16C; };
 
-void STREAM_destroy(int arg0) {
+/**
+ * Destroys a stream: stops it, waits for its I/O, closes its file.
+ *
+ * For a valid handle (validatehandle), kills the stream with func_003E1110, pumps SYNCTASK_run while a read is
+ * pending (+0x38 == 1), clears the header's tag, destroys the mutex and closes the open file (+0x16C) with
+ * FILESYS_closesync at priority 0x64.
+ *
+ * @param handle  the stream handle
+ */
+void STREAM_destroy(int handle) {
     struct S_0A28 *sp0;
     int sp4;
-    if (f_FBD0_0A28(arg0, &sp0, &sp4) == 0) {
-        f_1110_0A28(arg0);
+    if (f_FBD0_0A28(handle, &sp0, &sp4) == 0) {
+        f_1110_0A28(handle);
         while (sp0->w38 == 1) {
             if (f_5440_0A28(0) != 0)
                 f_SYNC_0A28(0);
@@ -3798,11 +4092,23 @@ extern void startnextrequest_0C88(char *, int) __asm__("startnextrequest");
 extern void MUTEX_lock_0C88(char *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_0C88(char *) __asm__("MUTEX_unlock");
 
-int STREAM_queuefile(int a0, char *name, int x, int y) {
+/**
+ * Queues a file (from an offset up to an end chunk id) for streaming; returns the request id (0 on failure).
+ *
+ * Validates the handle, takes a free request, records the name, offset and end id, appends it to the queue and,
+ * when the stream is idle, starts it with startnextrequest.
+ *
+ * @param handle    the stream handle
+ * @param name  the file name
+ * @param x     the offset to start at
+ * @param y     the chunk id to stop at
+ * @return the request id, or 0
+ */
+int STREAM_queuefile(int handle, char *name, int x, int y) {
     struct L_0C88 l;
     char *node;
     int old;
-    if (validatehandle_0C88(a0, &l.p, &l.q) != 0) {
+    if (validatehandle_0C88(handle, &l.p, &l.q) != 0) {
         return 0;
     }
     node = getfreerequest_0C88(l.p);
@@ -4516,11 +4822,21 @@ extern int D_00450C38_0C38[] __asm__("sync_priority");
 extern void FILESYS_atomic(int *, int, int, void *);
 extern int func_003E1AD0[];
 
-void FILE_loadat(int a0, int a1, int a2) {
+/**
+ * Loads a file into memory at a given address, synchronously.
+ *
+ * Runs func_003E1AD0 through FILESYS_atomic at sync_priority with the block {name, address, maxsize, 1, 0}; the
+ * 1 is what distinguishes it from FILE_loadatz.
+ *
+ * @param name  the file name
+ * @param address  where to load it
+ * @param maxsize  the maximum number of bytes
+ */
+void FILE_loadat(int name, int address, int maxsize) {
     int s[5];
-    s[0] = a0;
-    s[1] = a1;
-    s[2] = a2;
+    s[0] = name;
+    s[1] = address;
+    s[2] = maxsize;
     s[3] = 1;
     s[4] = 0;
     FILESYS_atomic(func_003E1AD0, 0, D_00450C38_0C38[0], s);
@@ -4536,11 +4852,20 @@ extern int D_00450C38_1BB8[] __asm__("sync_priority");
 extern void f_1BB8_cb(void) __asm__("func_003E1AD0");
 extern int FILESYS_atomic_1BB8(void (*)(void), int, int, void *) __asm__("FILESYS_atomic");
 
-void FILE_loadatz(int a, int b, int c) {
+/**
+ * Loads a file into memory at a given address, synchronously (the "z" variant).
+ *
+ * Runs func_003E1AD0 through FILESYS_atomic at sync_priority with the block {name, address, maxsize, 0, 0}.
+ *
+ * @param name  the file name
+ * @param address  where to load it
+ * @param maxsize  the maximum number of bytes
+ */
+void FILE_loadatz(int name, int address, int maxsize) {
     S_1BB8 s;
-    s.a = a;
-    s.b = b;
-    s.c = c;
+    s.a = name;
+    s.b = address;
+    s.c = maxsize;
     s.d = 0;
     s.e = 0;
     FILESYS_atomic_1BB8(f_1BB8_cb, 0, D_00450C38_1BB8[0], &s);
@@ -4847,21 +5172,32 @@ extern void func_003E6574_2190(int, int, int) __asm__("MEM_copy");
     "nop\n\t" \
     ".set pop" : : : "$8", "$9", "memory")
 int FILE_loadpackz_impl(int a, int size) __asm__("FILE_loadpackz");
-int FILE_loadpackz_impl(int a, int size) {
+/**
+ * Loads a file and unpacks it if it is compressed; returns the (unpacked) data.
+ *
+ * Loads with FILE_loadsizez; data that unpacksizez does not recognise is returned as is. Otherwise the packed
+ * bytes are copied to a temporary buffer, the load buffer is freed, a buffer of the unpacked size is allocated
+ * with @p size's flags and filled by unpackz, and the temporary buffer is freed.
+ *
+ * @param name     the file name
+ * @param size  allocation flags (On Tour flags)
+ * @return the data, or null on failure
+ */
+int FILE_loadpackz_impl(int name, int size) {
     int sz;
     int h, buf, tmp;
-    h = FILE_loadsizez(a, &sz, size ^ 0x100);
+    h = FILE_loadsizez(name, &sz, size ^ 0x100);
     if (h == 0) return 0;
     buf = unpacksizez_2190(h);
     if (sz == 0 || buf == 0) return h;
-    tmp = (int)gFileSysOpts.f04((char *)a, sz, size ^ 0x100);
+    tmp = (int)gFileSysOpts.f04((char *)name, sz, size ^ 0x100);
     if (tmp == 0) {
         gFileSysOpts.f08((void *)h);
         return 0;
     }
     func_003E6574_2190(tmp, h, sz);
     gFileSysOpts.f08((void *)h);
-    h = (int)gFileSysOpts.f04((char *)a, buf, size);
+    h = (int)gFileSysOpts.f04((char *)name, buf, size);
     if (h != 0) {
         if (unpackz_2190(tmp, h) == 0) {
             gFileSysOpts.f08((void *)h);
@@ -4879,6 +5215,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILE_loadpack);
 #ifdef SKIP_ASM
 extern void FILE_loadpackz();
 
+/**
+ * Loads a file and unpacks it if compressed (the public entry point); forwards to FILE_loadpackz.
+ *
+ * Declared without parameters: the name and flags pass through in $4 and $5.
+ */
 void FILE_loadpack(void) {
     FILE_loadpackz();
 }
@@ -7321,11 +7662,19 @@ INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_movedevice);
 #ifdef SKIP_ASM
 extern char PRINTdevicelist[];
 
-void PRINT_movedevice(int arg0, int arg1) {
+/**
+ * Switches a debug print device on or off.
+ *
+ * Copies bit 0 of @p enable into bit 0 of the device's flags (PRINTdevicelist entry +0x8).
+ *
+ * @param device  the device index
+ * @param enable  nonzero to enable
+ */
+void PRINT_movedevice(int device, int enable) {
     char *temp_4;
 
-    temp_4 = PRINTdevicelist + arg0 * 0xC;
-    (*(int *)((char*)(temp_4) + (8))) = (int) (((*(int *)((char*)(temp_4) + (8))) & ~1) | (arg1 & 1));
+    temp_4 = PRINTdevicelist + device * 0xC;
+    (*(int *)((char*)(temp_4) + (8))) = (int) (((*(int *)((char*)(temp_4) + (8))) & ~1) | (enable & 1));
 }
 #endif
 
@@ -7336,6 +7685,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_movechannel);
 struct E_5AA8 { int a; unsigned int b0 : 1; unsigned int b1 : 1; unsigned int rest : 30; };
 extern struct E_5AA8 D_00450E08_5AA8[] __asm__("PRINTchannellist");
 
+/**
+ * Switches a debug print channel (or a group of them) on or off.
+ *
+ * @p idx 0 sets all 64 channels, 1 the channels whose group flag is set, any other value that one channel.
+ *
+ * @param idx  the channel (0: all, 1: flagged group)
+ * @param val  nonzero to enable
+ */
 void PRINT_movechannel(int idx, int val) {
     int i;
     if (idx == 0) {
@@ -7377,6 +7734,13 @@ extern struct sDbgOut D_00451250_5B60[] __asm__("PRINTdevicelist");
 extern void PRINT_setchannelstate(int, int);
 extern void PRINT_setdevicestate(int, int);
 
+/**
+ * Initialises the debug print devices and channels once.
+ *
+ * When PRINTinitialized is 0: sets it, switches the 8 devices and 64 channels off, clears the entries of devices
+ * 4..7 and channels 14..63, then enables channel 2 and device 2 with PRINT_setchannelstate(2, 1) and
+ * PRINT_setdevicestate(2, 1).
+ */
 void PRINT_init(void) {
     int i;
     if (PRINTinitialized == 0) {
@@ -7509,12 +7873,20 @@ extern void PRINT_init(void);
 extern int D_00451008_5DC8[] __asm__("PRINTinitialized");
 extern struct S_5DC8 D_00451250_5DC8[] __asm__("PRINTdevicelist");
 
-void PRINT_setdevicestate(int a0, int a1) {
-    if (D_00451250_5DC8[a0].b != 0) {
+/**
+ * Enables or disables a debug print device, initialising printing first if needed.
+ *
+ * Only acts on a device that is present in PRINTdevicelist.
+ *
+ * @param device  the device index
+ * @param enable  nonzero to enable
+ */
+void PRINT_setdevicestate(int device, int enable) {
+    if (D_00451250_5DC8[device].b != 0) {
         if (D_00451008_5DC8[0] == 0) {
             PRINT_init();
         }
-        PRINT_movedevice(a0, a1);
+        PRINT_movedevice(device, enable);
     }
 }
 #endif
@@ -7563,11 +7935,17 @@ extern void PRINT_movechannel(int, int);
 extern void PRINT_init(void);
 extern int D_00451008_1008[] __asm__("PRINTinitialized");
 
-void PRINT_setchannelstate(int a0, int a1) {
+/**
+ * Enables or disables a debug print channel, initialising printing first if needed.
+ *
+ * @param channel  the channel (0: all, 1: flagged group)
+ * @param enable  nonzero to enable
+ */
+void PRINT_setchannelstate(int channel, int enable) {
     if (D_00451008_1008[0] == 0) {
         PRINT_init();
     }
-    PRINT_movechannel(a0, a1);
+    PRINT_movechannel(channel, enable);
 }
 #endif
 
@@ -7739,8 +8117,16 @@ INCLUDE_ASM("ealib/seg_2DCAE8", MEM_clear);
 #ifdef SKIP_ASM
 extern void MEM_fill(int, int, int);
 
-void MEM_clear(int a, int b) {
-    MEM_fill(a, 0, b);
+/**
+ * Zeroes a block of memory.
+ *
+ * Calls MEM_fill(@p dest, 0, @p count).
+ *
+ * @param dest  the memory
+ * @param count  the number of bytes
+ */
+void MEM_clear(int dest, int count) {
+    MEM_fill(dest, 0, count);
 }
 #endif
 
@@ -8106,10 +8492,18 @@ extern void func_00256BD8(int *);
 extern void func_003F4C68(int *, int, int, int, int, int, int, int, int, int);
 extern void func_003F4C98(int *, int, int);
 
-void NetGameLinkDestroy(int *arg0) {
+/**
+ * Destroys a DirtySock game link (EE-side stub of the IOP call).
+ *
+ * Builds the 'gmlk'/'dest' request in D_0051EE98 with func_003F4C98, sends it with func_003F4C68 carrying the
+ * link's IOP reference (*@p linkRef), then releases the EE-side ref with func_00256BD8.
+ *
+ * @param linkRef  the game link ref
+ */
+void NetGameLinkDestroy(int *linkRef) {
     func_003F4C98(D_0051EE98_67F8, 0x676D6C6B, 0x64657374);
-    func_003F4C68(D_0051EE98_67F8, 0, *arg0, 0, 0, 0, 0, 0, 1, 0);
-    func_00256BD8(arg0);
+    func_003F4C68(D_0051EE98_67F8, 0, *linkRef, 0, 0, 0, 0, 0, 1, 0);
+    func_00256BD8(linkRef);
 }
 #endif
 
@@ -8312,11 +8706,19 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilDestroy);
 extern void func_003F4C68_6E70(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
 extern int func_003F4C98_6E70(int *, int, int) __asm__("func_003F4C98");
 
-void NetGameUtilDestroy(int arg0) {
+/**
+ * Destroys a DirtySock game-util (connection setup) object (EE-side stub of the IOP call).
+ *
+ * Builds the 'gmut'/'dest' request with func_003F4C98 and sends it with func_003F4C68 with @p utilRef as the IOP
+ * reference.
+ *
+ * @param utilRef  the game util ref
+ */
+void NetGameUtilDestroy(int utilRef) {
     int sp10[4];
 
     func_003F4C98_6E70(sp10, 0x676D7574, 0x64657374);
-    func_003F4C68_6E70(sp10, 1, arg0, 0, 0, 0, 0, 0, 1, 0);
+    func_003F4C68_6E70(sp10, 1, utilRef, 0, 0, 0, 0, 0, 1, 0);
 }
 #endif
 

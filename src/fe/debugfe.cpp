@@ -255,6 +255,15 @@ struct sDbgFE17D008 {
 extern "C" void cBENewRaceInterface_setGamePath(void* iface, int idx);
 extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 
+/**
+ * Debug menu: switches the new race to another game path, keeping a remembered game mode per path.
+ *
+ * Saves cBENewRaceInterface_newRace's current mode in the screen's mode table at the current path's index, sets
+ * the new path with cBENewRaceInterface_setGamePath, selects the mode remembered for it with cBENewRaceInterface_setGameMode and
+ * calls the interface's virtual slot 1 (apply).
+ *
+ * @param idx  the game path to switch to (On Tour eBEGamePath)
+ */
 extern "C" void cDebugMenuScreen_setGamePath(void* self, int idx)
 {
     cBENewRaceIfaceK17D008* iface = (cBENewRaceIfaceK17D008*)cBE_getInterface_Fv(SSXApp->BE, 0);
@@ -326,11 +335,21 @@ extern "C" void func_0017D0A8(void)
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_getMaxAIRiders);
 #ifdef SKIP_ASM
+/**
+ * Debug menu: the most AI riders a race may have for a game path and mode.
+ *
+ * Five by default (a six-rider race), four for game path 2; modes 0, 4, 5 and 6 allow none and modes 1, 2 and 3
+ * allow one.
+ *
+ * @param path  the game path (On Tour eBEGamePath)
+ * @param mode  the game mode (On Tour eBEGameMode)
+ * @return the maximum number of AI riders
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int cDebugMenuScreen_getMaxAIRiders(void* self, int a, int b)
+extern "C" int cDebugMenuScreen_getMaxAIRiders(void* self, int path, int mode)
 {
-    int r = (a == 2) ? 4 : 5;
-    switch (b) {
+    int r = (path == 2) ? 4 : 5;
+    switch (mode) {
     case 0: case 4: case 5: case 6:
         r = 0;
         break;
@@ -1635,9 +1654,18 @@ static inline float wrap_17F2D0(float x)
     return x - ffloor_17F2D0(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
 }
 
-extern "C" void cHeartBeat_update(void* p)
+/**
+ * Advances the debug front end's heartbeat doodle: a point wandering on sine curves, leaving a trail.
+ *
+ * Runs two steps: each adds (sin(phase) + 1.9) * 0.032 to the position, advances the phases by (0.005, 0.009),
+ * wraps phases and position with the unit's wrap helper, and stores (sin(pos) * 20 + (550, 420)) as the next of
+ * 64 trail points (head index mod 64).
+ *
+ * @param heartBeat  the heartbeat (this)
+ */
+extern "C" void cHeartBeat_update(void* heartBeat)
 {
-    sFirefly_17F2D0* self = (sFirefly_17F2D0*)p;
+    sFirefly_17F2D0* self = (sFirefly_17F2D0*)heartBeat;
     for (int i = 0; i < 2; i++) {
         sVec2_17F2D0 v(func_0031BF60(self->phase.x), func_0031BF60(self->phase.y));
         v += 1.899999976158142f;
@@ -2635,6 +2663,13 @@ void* cFEInput_getCamRotate(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_keyPressed);
 #ifdef SKIP_ASM
+/**
+ * Tells whether any front-end button is down on this input's pad.
+ *
+ * Checks cInput_getState on the pad input (+0x18) for states 0x71..0x7D and 0x90..0x92.
+ *
+ * @return 1 when one of them is active, otherwise 0
+ */
 extern "C" int cFEInput_keyPressed(void* self)
 {
     int r = 0;
@@ -2655,6 +2690,13 @@ extern "C" int cFEInput_keyPressed(void* self)
 INCLUDE_ASM("fe/debugfe", cFEInput_setPadNum);
 #ifdef SKIP_ASM
 
+/**
+ * Binds this front-end input to a controller pad.
+ *
+ * Stores @p idx (+0x4) and SSXApp's cInput for that pad (SSXApp +0xB0 + 4 * idx) in the input pointer (+0x18).
+ *
+ * @param idx  the pad number
+ */
 extern "C" void cFEInput_setPadNum(void* self, unsigned char idx)
 {
     int v = *(int*)((char*)SSXApp + (idx << 2) + 0xB0);

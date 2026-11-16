@@ -953,6 +953,24 @@ static inline bool isHuman_137860(cRider* rider)
 
 #define RIDER (*(cRider**)(self + 0x40))
 
+/**
+ * Resolves a wiping-out rider in the air against the world: lands it on usable ground, otherwise pushes it out and
+ * relaunches it.
+ *
+ * Builds a world query from the rider's sphere tree (cWorldRider_cWorldRider; terrain only for a computer rider) and intersects
+ * it with the rider's overlap list (func_003342D0, mWallHint). On a hit, func_00138960 (On Tour intersectGround) checks
+ * the ground below; if that is solid enough (>= 0.4), the rider is not moving away from it and is within 10 of it, the
+ * rider lands: func_00113998 (On Tour cAirPredictor::land), the impact effect (func_00111AA0), the handler's landed
+ * flag and velocity (+0x314/+0x320), the ground normal, surface, contact point and height, the velocity loses its
+ * into-ground part (passed to a hit object's vtable slot 43 scaled by the frame rate), any penetration is pushed out
+ * (func_00106538) and the wipeout state (+0x0) becomes 0 (ground).
+ *
+ * Otherwise the rider is pushed out by 1.1 x the depth along the hit normal, loses its into-wall velocity when the wall
+ * is not ground-like (normals differ by more than ~25 degrees), and cAirPredictor_startLaunchIntoAir relaunches it with
+ * gravity 3333.33. Always ends with the bound box, object and opponent collision checks.
+ *
+ * @param vself  the wipeout motion (this); its rider is reached through the motion's rider pointer
+ */
 extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
 {
     char* self = (char*)vself;
@@ -1513,6 +1531,20 @@ static inline float clamp_138640(float v, float lo, float hi)
 
 #define RIDER (*(cRider**)(self + 0x40))
 
+/**
+ * Resolves a wiping-out rider sliding on the ground against walls and objects.
+ *
+ * Intersects the rider's sphere tree with its overlap list, rejecting along mGroundNormal. A hit that is not straight
+ * into the ground (normal dot > -0.9999) has its normal flattened against the ground when facing down, notifies the hit
+ * object (vtable slot 42), pushes the rider out by 1.1 x the depth (func_00106538) and, when moving into the wall
+ * relative to the object's own velocity, bounces it back by that speed plus half of it clamped to 27.8..555.6 (1..20
+ * kph).
+ *
+ * After the bound box, object and opponent collision checks, a pending flag (+0x4) switches the motion to state 1
+ * (air), and a speed under 50 stops the rider.
+ *
+ * @param vself  the wipeout motion (this)
+ */
 extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
 {
     char* self = (char*)vself;

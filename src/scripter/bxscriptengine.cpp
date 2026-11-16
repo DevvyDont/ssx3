@@ -343,9 +343,19 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ForcePlayUpdate);
 extern "C" void* func_00282CB0(void* self, int a1);
 extern "C" void cScriptPlayerMain_UpdateFrame(void* p);
 
-extern "C" int cBXScriptEngine_ForcePlayUpdate(void* self, int a1)
+/**
+ * Forces an immediate frame update of a playing script request.
+ *
+ * Finds the request record with func_00282CB0 (On Tour GetRequest). When it exists and its state (+0x4) is 3 or 4 (play
+ * pending or playing; cBXScriptEngine_OnInSeqPlay moves 3 to 4), runs cScriptPlayerMain_UpdateFrame (On Tour cScriptPlayerMain::UpdateFrame) on the
+ * request's player (+0x0). cSSXScriptEngine_ForcePlayUpdate calls it before updating its camera managers.
+ *
+ * @param requestHandle  the request handle
+ * @return 1 if the player was updated, 0 for an unknown or idle request
+ */
+extern "C" int cBXScriptEngine_ForcePlayUpdate(void* self, int requestHandle)
 {
-    void* t = func_00282CB0(self, a1);
+    void* t = func_00282CB0(self, requestHandle);
     if (t == 0) {
         return 0;
     }
@@ -721,11 +731,20 @@ struct sBxsVEntry10 {
     void (*fn)(void*, void*, int, int);
 };
 
-extern "C" void cBXScriptEngine_OnInSeqPlay(void* self, void* a1)
+/**
+ * Sequencer callback for a script player that starts: notifies the owner and marks its request playing.
+ *
+ * The player's request record is at player+0xC. Calls virtual slot 10 of the engine's vtable at +0x2A8 with the player
+ * and the request's +0x8 and +0xC words, then sets the request state (+0x4) to 4 (playing). On Tour asserts the
+ * sequencer exists and the request was play-pending (3); retail does not. cSSXScriptEngine_OnInSeqPlay forwards here.
+ *
+ * @param pPlayer  the cScriptPlayerMain that started
+ */
+extern "C" void cBXScriptEngine_OnInSeqPlay(void* self, void* pPlayer)
 {
-    char* t = *(char**)((char*)a1 + 0xC);
+    char* t = *(char**)((char*)pPlayer + 0xC);
     sBxsVEntry10* vt = *(sBxsVEntry10**)((char*)self + 0x2A8);
-    vt[10].fn((char*)self + vt[10].delta, a1, *(int*)(t + 0x8), *(int*)(t + 0xC));
+    vt[10].fn((char*)self + vt[10].delta, pPlayer, *(int*)(t + 0x8), *(int*)(t + 0xC));
     *(int*)(t + 0x4) = 4;
 }
 #endif
@@ -741,6 +760,17 @@ struct sVEntry282A18 {
 
 extern "C" void func_00282540(void* self, int id);
 
+/**
+ * Sequencer callback for a script player that stops: notifies the owner, marks the request stopped and recycles it if
+ * asked.
+ *
+ * Calls virtual slot 11 of the engine's vtable at +0x2A8 with the player and its request's +0x8 / +0xC words, sets the
+ * request state (+0x4) to 2 and, when the request's short at +0x10 is set (probably PlayScript's autoRecycle), releases
+ * the request by its handle (+0x1C) with func_00282540 (On Tour ReleaseRequest). cSSXScriptEngine_OnInSeqStop forwards
+ * here.
+ *
+ * @param msg  the cScriptPlayerMain that stopped
+ */
 extern "C" void cBXScriptEngine_OnInSeqStop(void* self, void* msg)
 {
     char* s = *(char**)((char*)msg + 0xC);
@@ -852,9 +882,18 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestPlayerByReqHand
 #ifdef SKIP_ASM
 extern "C" void* func_00282CB0(void* self, int a1);
 
-extern "C" int cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1)
+/**
+ * Returns the script player of a request handle.
+ *
+ * func_00282CB0 (On Tour GetRequest) finds the request record; its first word is the cScriptPlayerMain. The tNISList
+ * code and cSSXScriptEngine_ForcePlayUpdate use it to reach a request's script header.
+ *
+ * @param requestHandle  the request handle
+ * @return the request's player (an int in this view), or 0 for an unknown handle
+ */
+extern "C" int cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int requestHandle)
 {
-    int* p = (int*)func_00282CB0(self, a1);
+    int* p = (int*)func_00282CB0(self, requestHandle);
     if (p == 0) {
         return 0;
     }
@@ -867,6 +906,15 @@ extern "C" void* cInSeq_GetPlayer(int);
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestPlayerByPlayerID__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the sequencer's script player for a player ID.
+ *
+ * Calls cInSeq_GetPlayer on the engine's sequencer (+0x2B8, On Tour mpInSeq). The C declares only the engine: the
+ * player ID arrives in $a1 and passes through to cInSeq_GetPlayer untouched (cScriptObjCameraManager_OnStartObjectUse binds a two-argument alias
+ * to call it).
+ *
+ * @return the cScriptPlayerMain cInSeq_GetPlayer returns
+ */
 void* cBXScriptEngine_GetRequestPlayerByPlayerID(void* self)
 {
     return cInSeq_GetPlayer(*(int*)((char*)self + 0x2b8));
@@ -1326,6 +1374,15 @@ struct sBxsVEntryA {
     int (*fn)(void*, void*);
 };
 
+/**
+ * Registers a script object with the script database and stores the handle it gets.
+ *
+ * Calls virtual slot 2 of the database object returned by func_0027D2E8 (On Tour
+ * cScriptDatabaseObject::GetDatabaseObject) through its vtable at +0x2A8, passing the object, and stores the result in
+ * the object's database handle (+0x4, On Tour mObjID); cScriptObject_DeInitScriptObject undoes it with slot 3. On Tour
+ * asserts the handle is >= 0 afterwards; retail does not. cSSXScriptEngine_Load registers its script objects with it,
+ * and cRider_cRider the rider's.
+ */
 extern "C" void cScriptObject_InitScriptObject(void* self)
 {
     char* mgr = (char*)func_0027D2E8();
@@ -1377,6 +1434,14 @@ public:
     virtual void* v07(int i);
 };
 
+/**
+ * Pauses the scripts of every script entity the object owns.
+ *
+ * Loops over the object's virtual GetNumScriptEntities() (slot 6) and calls func_00283038 (On Tour
+ * cScriptEntity::PauseEntityScript) on each virtual GetScriptEntity(i) (slot 7). It is the base implementation that
+ * classes without their own PauseObjScript inherit (cScriptObjRider's vtable D_00482018). On Tour asserts each entity
+ * is non-null; retail does not.
+ */
 extern "C" void cScriptObject_PauseObjScript(cScriptOwner3320* self)
 {
     int i = 0;
@@ -1405,6 +1470,13 @@ public:
     virtual void* v07(int i);
 };
 
+/**
+ * Resumes the scripts of every script entity the object owns.
+ *
+ * Loops over the object's virtual GetNumScriptEntities() (slot 6) and calls func_00283060 (On Tour
+ * cScriptEntity::ResumeEntityScript) on each virtual GetScriptEntity(i) (slot 7); the base implementation that
+ * cScriptObjRider (vtable D_00482018) inherits. The counterpart of cScriptObject_PauseObjScript.
+ */
 extern "C" void cScriptObject_ResumeObjScript(cScriptOwner33A8* self)
 {
     int i = 0;
@@ -1418,6 +1490,15 @@ extern "C" void cScriptObject_ResumeObjScript(cScriptOwner33A8* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_OnStartObjectUse__FPv);
 #ifdef SKIP_ASM
+/**
+ * Marks a script object as taken by one more user: increments its use count.
+ *
+ * Adds 1 to the in-use count at +0x8 (On Tour mInUse). The player ID argument is ignored, so the C declares only the
+ * object. The subclass overrides (cScriptObjCamera_OnStartObjectUse, cScriptObjRider_OnStartObjectUse, cScriptObjEvent_OnStartObjectUse, cScriptObjCameraManager_OnStartObjectUse) call
+ * it on their cScriptObject part.
+ *
+ * @return the new use count (left in $v0 by the code; On Tour's method is void)
+ */
 void* cScriptObject_OnStartObjectUse(void* self)
 {
     void* t0 = (char*)*(void**)((char*)self + 0x8) + 0x1;

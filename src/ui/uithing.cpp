@@ -246,11 +246,11 @@ struct sUIThingPos {
 extern "C" void func_003A0290(sUIThingPos* self, sUIVec3* out)
 {
     *out = self->pos;
-    for (sUIThingPos* p = self->parent; p != 0; p = p->parent) {
-        sUIVec3 v = p->pos;
-        out->x += v.x;
-        out->y += v.y;
-        out->z += v.z;
+    for (sUIThingPos* ancestor = self->parent; ancestor != 0; ancestor = ancestor->parent) {
+        sUIVec3 ancestorPos = ancestor->pos;
+        out->x += ancestorPos.x;
+        out->y += ancestorPos.y;
+        out->z += ancestorPos.z;
     }
 }
 #endif
@@ -258,9 +258,9 @@ extern "C" void func_003A0290(sUIThingPos* self, sUIVec3* out)
 //100%
 INCLUDE_ASM("ui/uithing", func_003A0318);
 #ifdef SKIP_ASM
-extern "C" int func_003A0318(void* self, int a1)
+extern "C" int func_003A0318(void* self, int soundIndex)
 {
-    self = (char*)self + ((signed char)a1 << 2);
+    self = (char*)self + ((signed char)soundIndex << 2);
     return *(int*)((char*)self + 0x6c);
 }
 #endif
@@ -268,10 +268,10 @@ extern "C" int func_003A0318(void* self, int a1)
 //100%
 INCLUDE_ASM("ui/uithing", func_003A0330);
 #ifdef SKIP_ASM
-extern "C" void func_003A0330(void* self, int a1, int a2)
+extern "C" void func_003A0330(void* self, int soundIndex, int sound)
 {
-    self = (char*)self + ((signed char)a1 << 2);
-    *(int*)((char*)self + 0x6c) = a2;
+    self = (char*)self + ((signed char)soundIndex << 2);
+    *(int*)((char*)self + 0x6c) = sound;
 }
 #endif
 

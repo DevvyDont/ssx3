@@ -928,6 +928,15 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(void* self, int o
 extern char str_Text_CancelGame[];
 extern char str_Text_ContinueGame[];
 
+/**
+ * Online pause error overlay: handles its Continue/Cancel widgets.
+ *
+ * Ignores a null widget. Event 5 (select) runs cOVState_PAUSE_ONLINE_ERROR_doContinueCancel; event 1 (focus) highlights the widget gaining focus
+ * (Text_CancelGame or Text_ContinueGame) and unhighlights the other with cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight/cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight.
+ *
+ * @param item  the widget
+ * @param msg   the event
+ */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {
@@ -1040,6 +1049,16 @@ extern int D_004A2A54;
 extern int D_005366E8[];
 extern int D_004428F0[];
 
+/**
+ * Online pause error overlay: continues the race without the lost player, or quits it.
+ *
+ * Pops the overlay off the UI stack and sets this state's transition bits; widget id 4 (Continue) finishes the
+ * remote player with cAI_finishRemotePlayer and restores the previous pause flags from the pause stack, any
+ * other widget exits the game with cGame_exit(0).
+ *
+ * @param item  the widget that was selected
+ * @param msg   the event (not read)
+ */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(void* self, void* item, int msg)
 {
     func_0039F190_r(*(char**)((char*)self + 0x10) + 0x18, 1);
@@ -1134,6 +1153,14 @@ public:
     virtual int setColor(const sColor_FB458& c);
 };
 
+/**
+ * Highlights or unhighlights the Continue option of the online pause error overlay.
+ *
+ * Colours Text_ContinueGame white when @p on, else (1, 0, 0, 0), and shows the Continueps2X button and
+ * ContinueButtonBack only when highlighted.
+ *
+ * @param on  nonzero to highlight
+ */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(void* self, int on)
 {
     cUIObj_FB458* t = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_ContinueGame));
@@ -1179,6 +1206,14 @@ public:
     virtual int setColor(const sColor_FB588& c);
 };
 
+/**
+ * Highlights or unhighlights the Cancel option of the online pause error overlay.
+ *
+ * Colours Text_CancelGame white when @p on, else (1, 0, 0, 0), and shows the Cancelps2X button and
+ * CancelButtonBack only when highlighted.
+ *
+ * @param on  nonzero to highlight
+ */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(void* self, int on)
 {
     cUIObj_FB588* t = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_CancelGame));

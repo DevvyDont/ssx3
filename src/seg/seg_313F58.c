@@ -486,30 +486,30 @@ struct FB {
     unsigned e : 8;
     unsigned s : 1;
 };
-void func_00413068(float *f, int *o) {
-    struct FB *b = (struct FB *)f;
-    unsigned m = b->m;
-    int e = b->e;
-    o[1] = b->s;
-    if (e == 0) {
-        o[0] = 2;
+void func_00413068(float *src, int *dst) {
+    struct FB *bits = (struct FB *)src;
+    unsigned fraction = bits->m;
+    int exponent = bits->e;
+    dst[1] = bits->s;
+    if (exponent == 0) {
+        dst[0] = 2;
         return;
     }
-    if (e == 0xFF) {
-        if (m == 0) {
-            o[0] = 4;
+    if (exponent == 0xFF) {
+        if (fraction == 0) {
+            dst[0] = 4;
             return;
         }
-        if (m & 0x100000)
-            o[0] = 1;
+        if (fraction & 0x100000)
+            dst[0] = 1;
         else
-            o[0] = 0;
-        o[3] = m;
+            dst[0] = 0;
+        dst[3] = fraction;
         return;
     }
-    o[2] = e - 0x7F;
-    o[0] = 3;
-    o[3] = (m << 7) | 0x40000000;
+    dst[2] = exponent - 0x7F;
+    dst[0] = 3;
+    dst[3] = (fraction << 7) | 0x40000000;
 }
 #endif
 
@@ -523,8 +523,8 @@ _fpadd_parts (fp_number_type * a,
 	      fp_number_type * tmp) __asm__("func_004130F8");
 
 static fp_number_type *
-_fpadd_parts (fp_number_type * a,
-	      fp_number_type * b,
+_fpadd_parts (fp_number_type * lhs,
+	      fp_number_type * rhs,
 	      fp_number_type * tmp)
 {
   intfrac tfraction;
@@ -535,38 +535,38 @@ _fpadd_parts (fp_number_type * a,
   fractype a_fraction;
   fractype b_fraction;
 
-  if (isnan (a))
+  if (isnan (lhs))
     {
-      return a;
+      return lhs;
     }
-  if (isnan (b))
+  if (isnan (rhs))
     {
-      return b;
+      return rhs;
     }
-  if (isinf (a))
+  if (isinf (lhs))
     {
       /* Adding infinities with opposite signs yields a NaN.  */
-      if (isinf (b) && a->sign != b->sign)
+      if (isinf (rhs) && lhs->sign != rhs->sign)
 	return nan ();
-      return a;
+      return lhs;
     }
-  if (isinf (b))
+  if (isinf (rhs))
     {
-      return b;
+      return rhs;
     }
-  if (iszero (b))
+  if (iszero (rhs))
     {
-      if (iszero (a))
+      if (iszero (lhs))
 	{
-	  *tmp = *a;
-	  tmp->sign = a->sign & b->sign;
+	  *tmp = *lhs;
+	  tmp->sign = lhs->sign & rhs->sign;
 	  return tmp;
 	}
-      return a;
+      return lhs;
     }
-  if (iszero (a))
+  if (iszero (lhs))
     {
-      return b;
+      return rhs;
     }
 
   /* Got two numbers. shift the smaller and increment the exponent till
@@ -574,10 +574,10 @@ _fpadd_parts (fp_number_type * a,
   {
     int diff;
 
-    a_normal_exp = a->normal_exp;
-    b_normal_exp = b->normal_exp;
-    a_fraction = a->fraction.ll;
-    b_fraction = b->fraction.ll;
+    a_normal_exp = lhs->normal_exp;
+    b_normal_exp = rhs->normal_exp;
+    a_fraction = lhs->fraction.ll;
+    b_fraction = rhs->fraction.ll;
 
     diff = a_normal_exp - b_normal_exp;
 
@@ -613,9 +613,9 @@ _fpadd_parts (fp_number_type * a,
       }
   }
 
-  if (a->sign != b->sign)
+  if (lhs->sign != rhs->sign)
     {
-      if (a->sign)
+      if (lhs->sign)
 	{
 	  tfraction = -a_fraction + b_fraction;
 	}
@@ -645,7 +645,7 @@ _fpadd_parts (fp_number_type * a,
     }
   else
     {
-      tmp->sign = a->sign;
+      tmp->sign = lhs->sign;
       tmp->normal_exp = a_normal_exp;
       tmp->fraction.ll = a_fraction + b_fraction;
     }
@@ -671,14 +671,14 @@ extern int *func_004130F8(int *, int *, int *);
 extern int func_00412F58(int *);
 
 int func_00413330(float x, float y) {
-    int a[4];
-    int b[4];
-    int c[4];
+    int unpackedX[4];
+    int unpackedY[4];
+    int sum[4];
     float fx = x;
     float fy = y;
-    func_00413068(&fx, a);
-    func_00413068(&fy, b);
-    return func_00412F58(func_004130F8(a, b, c));
+    func_00413068(&fx, unpackedX);
+    func_00413068(&fy, unpackedY);
+    return func_00412F58(func_004130F8(unpackedX, unpackedY, sum));
 }
 #endif
 
@@ -690,15 +690,15 @@ extern int *func_004130F8(int *, int *, int *);
 extern int func_00412F58(int *);
 
 int func_00413388(float x, float y) {
-    int a[4];
-    int b[4];
-    int c[4];
+    int unpackedX[4];
+    int unpackedY[4];
+    int difference[4];
     float fx = x;
     float fy = y;
-    func_00413068(&fx, a);
-    func_00413068(&fy, b);
-    b[1] ^= 1;
-    return func_00412F58(func_004130F8(a, b, c));
+    func_00413068(&fx, unpackedX);
+    func_00413068(&fy, unpackedY);
+    unpackedY[1] ^= 1;
+    return func_00412F58(func_004130F8(unpackedX, unpackedY, difference));
 }
 #endif
 
@@ -814,15 +814,15 @@ multiply (FLO_type arg_a, FLO_type arg_b) __asm__("func_004133F0");
 FLO_type
 multiply (FLO_type arg_a, FLO_type arg_b)
 {
-  fp_number_type a;
-  fp_number_type b;
-  fp_number_type tmp;
+  fp_number_type lhs;
+  fp_number_type rhs;
+  fp_number_type product;
   fp_number_type *res;
 
-  unpack_d ((FLO_union_type *) & arg_a, &a);
-  unpack_d ((FLO_union_type *) & arg_b, &b);
+  unpack_d ((FLO_union_type *) & arg_a, &lhs);
+  unpack_d ((FLO_union_type *) & arg_b, &rhs);
 
-  res = _fpmul_parts (&a, &b, &tmp);
+  res = _fpmul_parts (&lhs, &rhs, &product);
 
   return pack_d (res);
 }
@@ -904,13 +904,13 @@ INCLUDE_ASM("seg/seg_313F58", func_00413748);
  */
 
 int
-__fpcmp_parts (fp_number_type * a, fp_number_type * b)
+__fpcmp_parts (fp_number_type * lhs, fp_number_type * rhs)
 {
-  if (isnan (a) || isnan (b))
+  if (isnan (lhs) || isnan (rhs))
     {
       return 1;			/* how to indicate unordered compare? */
     }
-  if (isinf (a) && isinf (b))
+  if (isinf (lhs) && isinf (rhs))
     {
       /* +inf > -inf, but +inf != +inf */
       /* b    \a| +inf(0)| -inf(1)
@@ -921,52 +921,52 @@ __fpcmp_parts (fp_number_type * a, fp_number_type * b)
        -------+--------+--------
        So since unordered must be non zero, just line up the columns...
        */
-      return b->sign - a->sign;
+      return rhs->sign - lhs->sign;
     }
   /* but not both... */
-  if (isinf (a))
+  if (isinf (lhs))
     {
-      return a->sign ? -1 : 1;
+      return lhs->sign ? -1 : 1;
     }
-  if (isinf (b))
+  if (isinf (rhs))
     {
-      return b->sign ? 1 : -1;
+      return rhs->sign ? 1 : -1;
     }
-  if (iszero (a) && iszero (b))
+  if (iszero (lhs) && iszero (rhs))
     {
       return 0;
     }
-  if (iszero (a))
+  if (iszero (lhs))
     {
-      return b->sign ? 1 : -1;
+      return rhs->sign ? 1 : -1;
     }
-  if (iszero (b))
+  if (iszero (rhs))
     {
-      return a->sign ? -1 : 1;
+      return lhs->sign ? -1 : 1;
     }
   /* now both are "normal". */
-  if (a->sign != b->sign)
+  if (lhs->sign != rhs->sign)
     {
       /* opposite signs */
-      return a->sign ? -1 : 1;
+      return lhs->sign ? -1 : 1;
     }
   /* same sign; exponents? */
-  if (a->normal_exp > b->normal_exp)
+  if (lhs->normal_exp > rhs->normal_exp)
     {
-      return a->sign ? -1 : 1;
+      return lhs->sign ? -1 : 1;
     }
-  if (a->normal_exp < b->normal_exp)
+  if (lhs->normal_exp < rhs->normal_exp)
     {
-      return a->sign ? 1 : -1;
+      return lhs->sign ? 1 : -1;
     }
   /* same exponents; check size. */
-  if (a->fraction.ll > b->fraction.ll)
+  if (lhs->fraction.ll > rhs->fraction.ll)
     {
-      return a->sign ? -1 : 1;
+      return lhs->sign ? -1 : 1;
     }
-  if (a->fraction.ll < b->fraction.ll)
+  if (lhs->fraction.ll < rhs->fraction.ll)
     {
-      return a->sign ? 1 : -1;
+      return lhs->sign ? 1 : -1;
     }
   /* after all that, they're equal. */
   return 0;
@@ -980,13 +980,13 @@ extern void func_00413068(float *, int *);
 extern int func_00413748(int *, int *);
 
 int func_00413860(float x, float y) {
-    int a[4];
-    int b[4];
+    int unpackedX[4];
+    int unpackedY[4];
     float fx = x;
     float fy = y;
-    func_00413068(&fx, a);
-    func_00413068(&fy, b);
-    return func_00413748(a, b);
+    func_00413068(&fx, unpackedX);
+    func_00413068(&fy, unpackedY);
+    return func_00413748(unpackedX, unpackedY);
 }
 #endif
 
@@ -996,35 +996,35 @@ INCLUDE_ASM("seg/seg_313F58", func_004138B0);
 extern float func_00412F58_f(int *) __asm__("func_00412F58");
 
 float func_004138B0(int x) {
-    int o[4];
-    unsigned m, t;
-    int e;
-    o[0] = 3;
-    o[1] = (unsigned)x >> 31;
+    int unpacked[4];
+    unsigned fraction, shifted;
+    int exponent;
+    unpacked[0] = 3;
+    unpacked[1] = (unsigned)x >> 31;
     if (x == 0) {
-        o[0] = 2;
+        unpacked[0] = 2;
     } else {
-        o[2] = 0x1E;
-        if (o[1]) {
+        unpacked[2] = 0x1E;
+        if (unpacked[1]) {
             if (x == 0x80000000)
                 return -2147483648.0f;
-            o[3] = -x;
+            unpacked[3] = -x;
         } else {
-            o[3] = x;
+            unpacked[3] = x;
         }
-        m = o[3];
-        if (m <= 0x3FFFFFFF) {
-            e = o[2];
+        fraction = unpacked[3];
+        if (fraction <= 0x3FFFFFFF) {
+            exponent = unpacked[2];
             do {
-                t = m << 1;
-                e--;
-                m = t;
-            } while (t <= 0x3FFFFFFF);
-            o[2] = e;
-            o[3] = t;
+                shifted = fraction << 1;
+                exponent--;
+                fraction = shifted;
+            } while (shifted <= 0x3FFFFFFF);
+            unpacked[2] = exponent;
+            unpacked[3] = shifted;
         }
     }
-    return func_00412F58_f(o);
+    return func_00412F58_f(unpacked);
 }
 #endif
 
@@ -1032,26 +1032,26 @@ float func_004138B0(int x) {
 INCLUDE_ASM("seg/seg_313F58", func_00413968);
 #ifdef SKIP_ASM
 int func_00413968(float x) {
-    int o[4];
-    float f = x;
-    unsigned c;
-    unsigned r;
-    func_00413068(&f, o);
-    c = o[0];
-    if ((c ^ 2) == 0)
+    int unpacked[4];
+    float value = x;
+    unsigned fpClass;
+    unsigned magnitude;
+    func_00413068(&value, unpacked);
+    fpClass = unpacked[0];
+    if ((fpClass ^ 2) == 0)
         return 0;
-    if (c < 2)
+    if (fpClass < 2)
         return 0;
-    if ((c ^ 4) == 0)
+    if ((fpClass ^ 4) == 0)
         goto sat;
-    if (o[2] < 0)
+    if (unpacked[2] < 0)
         return 0;
-    if (o[2] >= 0x1F) {
+    if (unpacked[2] >= 0x1F) {
 sat:
-        return o[1] ? 0x80000000 : 0x7FFFFFFF;
+        return unpacked[1] ? 0x80000000 : 0x7FFFFFFF;
     }
-    r = (unsigned)o[3] >> (0x1E - o[2]);
-    return o[1] ? -r : r;
+    magnitude = (unsigned)unpacked[3] >> (0x1E - unpacked[2]);
+    return unpacked[1] ? -magnitude : magnitude;
 }
 #endif
 
@@ -1059,28 +1059,28 @@ sat:
 INCLUDE_ASM("seg/seg_313F58", func_004139F8);
 #ifdef SKIP_ASM
 unsigned func_004139F8(float x) {
-    int o[4];
-    float f = x;
-    unsigned c;
-    func_00413068(&f, o);
-    c = o[0];
-    if ((c ^ 2) == 0)
+    int unpacked[4];
+    float value = x;
+    unsigned fpClass;
+    func_00413068(&value, unpacked);
+    fpClass = unpacked[0];
+    if ((fpClass ^ 2) == 0)
         return 0;
-    if (c < 2)
+    if (fpClass < 2)
         return 0;
-    if (o[1])
+    if (unpacked[1])
         return 0;
-    if ((c ^ 4) == 0)
+    if ((fpClass ^ 4) == 0)
         goto sat;
-    if (o[2] < 0)
+    if (unpacked[2] < 0)
         return 0;
-    if (o[2] >= 0x20) {
+    if (unpacked[2] >= 0x20) {
 sat:
         return 0xFFFFFFFF;
     }
-    if (o[2] >= 0x1F)
-        return (unsigned)o[3] << (o[2] - 0x1E);
-    return (unsigned)o[3] >> (0x1E - o[2]);
+    if (unpacked[2] >= 0x1F)
+        return (unsigned)unpacked[3] << (unpacked[2] - 0x1E);
+    return (unsigned)unpacked[3] >> (0x1E - unpacked[2]);
 }
 #endif
 
@@ -1091,8 +1091,8 @@ extern void func_00413068(float *, int *);
 extern int func_00412F58(int *);
 int func_00413A90(float x) {
     int obj[2];
-    float f = x;
-    func_00413068(&f, obj);
+    float value = x;
+    func_00413068(&value, obj);
     obj[1] = obj[1] == 0;
     return func_00412F58(obj);
 }
@@ -1101,13 +1101,13 @@ int func_00413A90(float x) {
 //100%
 INCLUDE_ASM("seg/seg_313F58", func_00413AC8);
 #ifdef SKIP_ASM
-void func_00413AC8(int a, int b, int c, int d) {
-    int v[4];
-    v[0] = a;
-    v[1] = b;
-    v[2] = c;
-    v[3] = d;
-    func_00412F58(v);
+void func_00413AC8(int fpClass, int sign, int exponent, int fraction) {
+    int parts[4];
+    parts[0] = fpClass;
+    parts[1] = sign;
+    parts[2] = exponent;
+    parts[3] = fraction;
+    func_00412F58(parts);
 }
 #endif
 
@@ -1136,38 +1136,38 @@ int fptodp(float x) {
 //100%
 INCLUDE_ASM("seg/seg_313F58", func_00413B38);
 #ifdef SKIP_ASM
-unsigned char *func_00413B38(unsigned char *p, unsigned *out) {
-    unsigned b = *p++;
-    unsigned r = b & 0x7F;
+unsigned char *func_00413B38(unsigned char *buf, unsigned *out) {
+    unsigned curByte = *buf++;
+    unsigned value = curByte & 0x7F;
     int shift = 0;
-    if (b & 0x80) {
+    if (curByte & 0x80) {
         do {
-            b = *p++;
+            curByte = *buf++;
             shift += 7;
-            r |= (b & 0x7F) << shift;
-        } while (b & 0x80);
+            value |= (curByte & 0x7F) << shift;
+        } while (curByte & 0x80);
     }
-    *out = r;
-    return p;
+    *out = value;
+    return buf;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313F58", func_00413B80);
 #ifdef SKIP_ASM
-unsigned char *func_00413B80(unsigned char *p, int *out) {
+unsigned char *func_00413B80(unsigned char *buf, int *out) {
     unsigned shift = 0;
-    int r = 0;
-    unsigned b;
+    int value = 0;
+    unsigned curByte;
     do {
-        b = *p++;
-        r |= (b & 0x7F) << shift;
+        curByte = *buf++;
+        value |= (curByte & 0x7F) << shift;
         shift += 7;
-    } while (b & 0x80);
-    if (shift < 32 && (b & 0x40))
-        r |= -1 << shift;
-    *out = r;
-    return p;
+    } while (curByte & 0x80);
+    if (shift < 32 && (curByte & 0x40))
+        value |= -1 << shift;
+    *out = value;
+    return buf;
 }
 #endif
 
@@ -1176,26 +1176,26 @@ INCLUDE_ASM("seg/seg_313F58", func_00413BD0);
 #ifdef SKIP_ASM
 struct K13BD0 { int f0; int f4; int key; };
 struct L13BD0 { struct K13BD0 **items; unsigned n; };
-void func_00413BD0(struct L13BD0 *a, struct L13BD0 *b) {
-    unsigned m = b->n;
+void func_00413BD0(struct L13BD0 *dstVec, struct L13BD0 *srcVec) {
+    unsigned srcCount = srcVec->n;
     unsigned n;
     unsigned j;
-    j = m;
-    if (m != 0) {
-        n = a->n;
+    j = srcCount;
+    if (srcCount != 0) {
+        n = dstVec->n;
         do {
             struct K13BD0 *x;
             j--;
-            x = b->items[j];
-            if (n != 0 && a->items[n - 1]->key - x->key > 0) {
+            x = srcVec->items[j];
+            if (n != 0 && dstVec->items[n - 1]->key - x->key > 0) {
                 do {
-                    a->items[n + j] = a->items[n - 1];
+                    dstVec->items[n + j] = dstVec->items[n - 1];
                     n--;
-                } while (n != 0 && a->items[n - 1]->key - x->key > 0);
+                } while (n != 0 && dstVec->items[n - 1]->key - x->key > 0);
             }
-            a->items[n + j] = x;
+            dstVec->items[n + j] = x;
         } while (j != 0);
-        a->n = a->n + m;
+        dstVec->n = dstVec->n + srcCount;
     }
 }
 #endif
@@ -1317,13 +1317,13 @@ struct L13F80 {
     struct N13F80 **arr;
     int cnt;
 };
-void func_00413F80(struct N13F80 *n, struct L13F80 *l, unsigned *lo, unsigned *hi) {
+void func_00413F80(struct N13F80 *n, struct L13F80 *accumulator, unsigned *lo, unsigned *hi) {
     unsigned mn = *lo;
     unsigned mx = *hi;
     if (n->off != 0) {
         do {
             if (n->a != 0 && n->addr != 0) {
-                l->arr[l->cnt++] = n;
+                accumulator->arr[accumulator->cnt++] = n;
                 if (n->addr < mn)
                     mn = n->addr;
                 if (mx < n->addr + n->size)
@@ -1358,7 +1358,7 @@ extern struct N13F80 **func_00413CD0(struct LL14008 *, int);
 void func_00414008(struct N14008 *n) {
     struct N13F80 **pp;
     int cnt, bytes;
-    struct LL14008 l;
+    struct LL14008 accumulator;
     unsigned lo, hi;
     if (n->roots != 0) {
         pp = n->roots;
@@ -1372,22 +1372,22 @@ void func_00414008(struct N14008 *n) {
     }
     bytes = cnt * 4;
     n->cnt = cnt;
-    l.a = func_004188C0(bytes);
-    l.b = func_004188C0(bytes);
-    l.na = 0;
-    l.nb = 0;
+    accumulator.a = func_004188C0(bytes);
+    accumulator.b = func_004188C0(bytes);
+    accumulator.na = 0;
+    accumulator.nb = 0;
     lo = 0xFFFFFFFF;
     hi = 0;
     if (n->roots != 0) {
         pp = n->roots;
         while (*pp != 0) {
-            func_00413F80(*pp, (struct L13F80 *)&l, &lo, &hi);
+            func_00413F80(*pp, (struct L13F80 *)&accumulator, &lo, &hi);
             pp++;
         }
     } else {
-        func_00413F80(n->root, (struct L13F80 *)&l, &lo, &hi);
+        func_00413F80(n->root, (struct L13F80 *)&accumulator, &lo, &hi);
     }
-    n->roots = func_00413CD0(&l, cnt);
+    n->roots = func_00413CD0(&accumulator, cnt);
     n->lo = lo;
     n->hi = hi;
 }
@@ -1424,14 +1424,14 @@ find_fde (void *pc)
   for (lo = 0, hi = ob->count; lo < hi; )
     {
       size_t i = (lo + hi) / 2;
-      fde *f = ob->fde_array[i];
+      fde *entry = ob->fde_array[i];
 
-      if (pc < f->pc_begin)
+      if (pc < entry->pc_begin)
 	hi = i;
-      else if (pc >= f->pc_begin + f->pc_range)
+      else if (pc >= entry->pc_begin + entry->pc_range)
 	lo = i + 1;
       else
-	return f;
+	return entry;
     }
 
   return 0;
@@ -1490,10 +1490,10 @@ INCLUDE_ASM("seg/seg_313F58", func_00414338);
    pointer to the next instruction.  */
 
 static void *
-execute_cfa_insn (void *p, struct frame_state_internal *state,
+execute_cfa_insn (void *insnPtr, struct frame_state_internal *state,
 		  struct cie_info *info, void **pc)
 {
-  unsigned insn = *(unsigned char *)p++;
+  unsigned insn = *(unsigned char *)insnPtr++;
   unsigned reg;
   int offset;
 
@@ -1502,7 +1502,7 @@ execute_cfa_insn (void *p, struct frame_state_internal *state,
   else if (insn & DW_CFA_offset)
     {
       reg = (insn & 0x3f);
-      p = decode_uleb128 (p, &offset);
+      insnPtr = decode_uleb128 (insnPtr, &offset);
       offset *= info->data_align;
       state->s.saved[reg] = REG_SAVED_OFFSET;
       state->s.reg_or_offset[reg] = offset;
@@ -1515,31 +1515,31 @@ execute_cfa_insn (void *p, struct frame_state_internal *state,
   else switch (insn)
     {
     case DW_CFA_set_loc:
-      *pc = read_pointer (p);
-      p += sizeof (void *);
+      *pc = read_pointer (insnPtr);
+      insnPtr += sizeof (void *);
       break;
     case DW_CFA_advance_loc1:
-      *pc += read_1byte (p);
-      p += 1;
+      *pc += read_1byte (insnPtr);
+      insnPtr += 1;
       break;
     case DW_CFA_advance_loc2:
-      *pc += read_2byte (p);
-      p += 2;
+      *pc += read_2byte (insnPtr);
+      insnPtr += 2;
       break;
     case DW_CFA_advance_loc4:
-      *pc += read_4byte (p);
-      p += 4;
+      *pc += read_4byte (insnPtr);
+      insnPtr += 4;
       break;
 
     case DW_CFA_offset_extended:
-      p = decode_uleb128 (p, &reg);
-      p = decode_uleb128 (p, &offset);
+      insnPtr = decode_uleb128 (insnPtr, &reg);
+      insnPtr = decode_uleb128 (insnPtr, &offset);
       offset *= info->data_align;
       state->s.saved[reg] = REG_SAVED_OFFSET;
       state->s.reg_or_offset[reg] = offset;
       break;
     case DW_CFA_restore_extended:
-      p = decode_uleb128 (p, &reg);
+      insnPtr = decode_uleb128 (insnPtr, &reg);
       state->s.saved[reg] = REG_UNSAVED;
       break;
 
@@ -1551,25 +1551,25 @@ execute_cfa_insn (void *p, struct frame_state_internal *state,
     case DW_CFA_register:
       {
 	unsigned reg2;
-	p = decode_uleb128 (p, &reg);
-	p = decode_uleb128 (p, &reg2);
+	insnPtr = decode_uleb128 (insnPtr, &reg);
+	insnPtr = decode_uleb128 (insnPtr, &reg2);
 	state->s.saved[reg] = REG_SAVED_REG;
 	state->s.reg_or_offset[reg] = reg2;
       }
       break;
 
     case DW_CFA_def_cfa:
-      p = decode_uleb128 (p, &reg);
-      p = decode_uleb128 (p, &offset);
+      insnPtr = decode_uleb128 (insnPtr, &reg);
+      insnPtr = decode_uleb128 (insnPtr, &offset);
       state->s.cfa_reg = reg;
       state->s.cfa_offset = offset;
       break;
     case DW_CFA_def_cfa_register:
-      p = decode_uleb128 (p, &reg);
+      insnPtr = decode_uleb128 (insnPtr, &reg);
       state->s.cfa_reg = reg;
       break;
     case DW_CFA_def_cfa_offset:
-      p = decode_uleb128 (p, &offset);
+      insnPtr = decode_uleb128 (insnPtr, &offset);
       state->s.cfa_offset = offset;
       break;
       
@@ -1600,14 +1600,14 @@ execute_cfa_insn (void *p, struct frame_state_internal *state,
       break;
 
     case DW_CFA_GNU_args_size:
-      p = decode_uleb128 (p, &offset);
+      insnPtr = decode_uleb128 (insnPtr, &offset);
       state->s.args_size = offset;
       break;
 
     default:
       abort ();
     }
-  return p;
+  return insnPtr;
 }
 #endif
 
@@ -1631,8 +1631,8 @@ INCLUDE_ASM("seg/seg_313F58", func_004146F8);
 #ifdef SKIP_ASM
 extern void func_004146D0(int, int *);
 extern int *func_004188C0(int);
-void func_004146F8(int a) {
-    func_004146D0(a, func_004188C0(0x18));
+void func_004146F8(int begin) {
+    func_004146D0(begin, func_004188C0(0x18));
 }
 #endif
 
@@ -1656,8 +1656,8 @@ INCLUDE_ASM("seg/seg_313F58", func_00414750);
 #ifdef SKIP_ASM
 extern void func_00414728(int, int *);
 extern int *func_004188C0(int);
-void func_00414750(int a) {
-    func_00414728(a, func_004188C0(0x18));
+void func_00414750(int begin) {
+    func_00414728(begin, func_004188C0(0x18));
 }
 #endif
 
@@ -1710,16 +1710,16 @@ extern struct frame_state *__frame_state_for (void *, struct frame_state *) __as
 struct frame_state *
 __frame_state_for (void *pc_target, struct frame_state *state_in)
 {
-  fde *f;
+  fde *entry;
   void *insn, *end, *pc;
   struct cie_info info;
   struct frame_state_internal state;
 
-  f = find_fde (pc_target);
-  if (f == 0)
+  entry = find_fde (pc_target);
+  if (entry == 0)
     return 0;
 
-  insn = extract_cie_info (f, &info);
+  insn = extract_cie_info (entry, &info);
   if (insn == 0)
     return 0;
 
@@ -1728,11 +1728,11 @@ __frame_state_for (void *pc_target, struct frame_state *state_in)
   state.s.eh_ptr = info.eh_ptr;
 
   /* First decode all the insns in the CIE.  */
-  end = next_fde ((fde*) get_cie (f));
+  end = next_fde ((fde*) get_cie (entry));
   while (insn < end)
     insn = execute_cfa_insn (insn, &state, &info, 0);
 
-  insn = ((fde *)f) + 1;
+  insn = ((fde *)entry) + 1;
 
   if (info.augmentation[0] == 'z')
     {
@@ -1742,8 +1742,8 @@ __frame_state_for (void *pc_target, struct frame_state *state_in)
     }
 
   /* Then the insns in the FDE up to our target PC.  */
-  end = next_fde (f);
-  pc = f->pc_begin;
+  end = next_fde (entry);
+  pc = entry->pc_begin;
   while (insn < end && pc <= pc_target)
     insn = execute_cfa_insn (insn, &state, &info, &pc);
 
@@ -1758,30 +1758,30 @@ INCLUDE_ASM("seg/seg_313F58", func_004149F0);
 struct K { int f0; int f4; int key; };
 struct L { struct K **items; unsigned n; };
 struct M { struct K **arr; int n; };
-void func_004149F0(struct L *a, struct M *out) {
-    unsigned n = a->n;
+void func_004149F0(struct L *linear, struct M *out) {
+    unsigned n = linear->n;
     unsigned link[n];
     unsigned top = -1;
     unsigned i;
-    unsigned p;
+    unsigned pos;
     for (i = 0; i < n; i++) {
-        p = top;
-        if (p != -1 && a->items[i]->key - a->items[p]->key < 0) {
+        pos = top;
+        if (pos != -1 && linear->items[i]->key - linear->items[pos]->key < 0) {
             do {
-                out->arr[out->n++] = a->items[p];
-                a->items[p] = 0;
-                p = link[p];
-                if (p == -1) break;
-            } while (a->items[i]->key - a->items[p]->key < 0);
+                out->arr[out->n++] = linear->items[pos];
+                linear->items[pos] = 0;
+                pos = link[pos];
+                if (pos == -1) break;
+            } while (linear->items[i]->key - linear->items[pos]->key < 0);
         }
         top = i;
-        link[i] = p;
+        link[i] = pos;
     }
-    p = 0;
+    pos = 0;
     for (i = 0; i < n; i++) {
-        struct K *k = a->items[i];
-        if (k) a->items[p++] = k;
+        struct K *k = linear->items[i];
+        if (k) linear->items[pos++] = k;
     }
-    a->n = p;
+    linear->n = pos;
 }
 #endif

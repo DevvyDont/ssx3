@@ -802,10 +802,10 @@ extern "C" void cMonitorInstance_Reset(cMonitorInstance* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AD970__FPvi);
 #ifdef SKIP_ASM
-void func_002AD970(void* self, int a1)
+void func_002AD970(void* self, int periodMs)
 {
-    *(int*)((char*)self + 0x4) = a1;
-    *(int*)((char*)self + 0x8) = a1;
+    *(int*)((char*)self + 0x4) = periodMs;
+    *(int*)((char*)self + 0x8) = periodMs;
 }
 #endif
 
@@ -991,6 +991,12 @@ extern "C" void* func_003B5910(void*);
 //98.75%
 INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_BeginMonitoring__FPv);
 #ifdef SKIP_ASM
+/**
+ * Starts the bank monitor's periodic update by registering func_002AD998 as a sound-system client.
+ *
+ * func_002AD998 forwards to gMonitor's first virtual method; func_003B5910 (On Tour SNDSYS_add100hzclient) adds it to
+ * the sound library's 100 Hz client list. The object pointer is not used.
+ */
 void* cMonitor_MONITOR_BeginMonitoring(void* self)
 {
     return func_003B5910((void*)func_002AD998);
@@ -1043,12 +1049,12 @@ extern "C" int cMonitor_MONITOR_GetFreeInstance(cMonitor* self, int n);
 void cMonitorInstance_Create_cb(void* self, int a1, sSndCallback cb, int b, int c, int d, int e, int f) __asm__("cMonitorInstance_Create");
 
 extern "C" int func_002ADCA0_pl(sSndPlayer* self, int a1, sSndCallback cb, int b, int c, int d, int e, int f) __asm__("func_002ADCA0");
-extern "C" int func_002ADCA0_pl(sSndPlayer* self, int a1, sSndCallback cb, int b, int c, int d, int e, int f)
+extern "C" int func_002ADCA0_pl(sSndPlayer* self, int freq, sSndCallback cb, int userPtr, int data1, int data2, int data3, int data4)
 {
     self->busy = self->busy + 1;
     int idx = cMonitor_MONITOR_GetFreeInstance((cMonitor*)self, self->busy);
     if (idx >= 0) {
-        cMonitorInstance_Create_cb((char*)self + 0x98 + idx * 0x2C, a1, cb, b, c, d, e, f);
+        cMonitorInstance_Create_cb((char*)self + 0x98 + idx * 0x2C, freq, cb, userPtr, data1, data2, data3, data4);
     }
     self->busy = self->busy - 1;
     return idx;
@@ -1077,11 +1083,11 @@ extern "C" void cMonitorInstance_Reset(cMonitorInstance*);
 
 extern "C" void func_002ADDA0(cMonitor* self)
 {
-    char* p = (char*)self + 0x98;
+    char* instance = (char*)self + 0x98;
     int i;
     for (i = 47; i >= 0; i--) {
-        cMonitorInstance_Reset((cMonitorInstance*)p);
-        p += 0x2C;
+        cMonitorInstance_Reset((cMonitorInstance*)instance);
+        instance += 0x2C;
     }
 }
 #endif
@@ -1227,9 +1233,18 @@ struct cSoundSys_SetMode_sHolder {
     cSoundSys_SetMode_cObj* obj;
 };
 
-extern "C" int cSoundSys_SetMode(cSoundSys_SetMode_sHolder* self, int a)
+/**
+ * Passes a sound-mode change on to the sound manager this object wraps.
+ *
+ * Calls virtual slot 2 of the object stored at offset 0 with @p mode and returns its result. Every cSoundSys subclass
+ * vtable keeps this as slot 2 (none overrides it).
+ *
+ * @param mode  the new sound mode (On Tour eSOUNDDEF_MODE mode)
+ * @return the manager's result (On Tour eSOUNDMANAGER_SETMODE)
+ */
+extern "C" int cSoundSys_SetMode(cSoundSys_SetMode_sHolder* self, int mode)
 {
-    return self->obj->v02(a);
+    return self->obj->v02(mode);
 }
 #endif
 
@@ -2464,11 +2479,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF8E0__FPv);
 #ifdef SKIP_ASM
 void* func_002AF8E0(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0x48) = t0;
+    int zero = 0;
+    *(int*)((char*)self + 0x48) = zero;
     *(int*)self = -1;
-    *(int*)((char*)self + 0x44) = t0;
-    *(signed char*)((char*)self + 0x4) = (signed char)t0;
+    *(int*)((char*)self + 0x44) = zero;
+    *(signed char*)((char*)self + 0x4) = (signed char)zero;
     return self;
 }
 #endif
@@ -2523,11 +2538,11 @@ void* func_002AF960_impl(const char* name, int unused, void* data)
     *(void**)(obj + 0x44) = data;
     *(int*)obj = func_003D69F0(data);
     strcpy(obj + 4, name);
-    char* p = func_0041ACC0(obj + 4, '\\');
-    if (p == 0) {
+    char* lastSlash = func_0041ACC0(obj + 4, '\\');
+    if (lastSlash == 0) {
         *(char**)(obj + 0x40) = obj + 4;
     } else {
-        *(char**)(obj + 0x40) = p + 1;
+        *(char**)(obj + 0x40) = lastSlash + 1;
     }
     return obj;
 }
@@ -2536,9 +2551,9 @@ void* func_002AF960_impl(const char* name, int unused, void* data)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AFA58);
 #ifdef SKIP_ASM
-extern "C" int func_002AFA58(cSpeechBank* self, int a1)
+extern "C" int func_002AFA58(cSpeechBank* self, int bankId)
 {
-    return a1 == *(int*)self;
+    return bankId == *(int*)self;
 }
 #endif
 
@@ -2697,13 +2712,13 @@ extern "C" void* func_003D7EC8(void* p);
 // PORT: real arity is (self, p); the unit later declares func_002AFD10(int)
 void* func_002AFD10_impl(void* self, void* p) __asm__("func_002AFD10");
 
-void* func_002AFD10_impl(void* self, void* p)
+void* func_002AFD10_impl(void* self, void* channel)
 {
-    void* r = func_003D7EC8(p);
-    if (r != 0) {
+    void* result = func_003D7EC8(channel);
+    if (result != 0) {
         *(int*)((char*)self + 0x900) = 0;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -2757,40 +2772,40 @@ char* BIG_locateentryz_2AFD40(void* big, char* name, int index, int* offset, int
 extern char str_pct_seventdat_events_evt[];
 extern "C" void func_002B0348_l(sBankList* self, int a, int b, int c) __asm__("func_002B0348");
 
-extern "C" int func_002AFD40(cSpeechInstance* selfp, int a, char* name, int b, int c)
+extern "C" int func_002AFD40(cSpeechInstance* selfp, int isHeaders, char* name, int instIndex, int section)
 {
     sBankList* self = (sBankList*)selfp;
     char buf[0x60];
     char path[0x60];
     int off;
     int sel = 0;
-    if (!a)
+    if (!isHeaders)
         sel++;
     self->pairs[self->voiceCount].p[sel] = FILE_loadz(name, 0);
     if (self->pairs[self->voiceCount].p[sel] != 0) {
         buf[0] = 0;
-        if (a != 0) {
+        if (isHeaders != 0) {
             sprintf(name, str_pct_seventdat_events_evt, (char*)self + 0x6C);
-            char* p = name;
+            char* entryName = name;
             int len = strlen(name);
             int i;
             for (i = 0; i < len; i++) {
                 if (name[i] == 0x7C) {
                     int n = i + 1;
-                    p = name + n;
+                    entryName = name + n;
                     strncpy(buf, name, n);
                     buf[n] = 0;
                     break;
                 }
             }
-            self->voices[self->voiceCount].handle = func_003E2DF0(self->pairs[self->voiceCount].p[sel], p);
+            self->voices[self->voiceCount].handle = func_003E2DF0(self->pairs[self->voiceCount].p[sel], entryName);
             self->voices[self->voiceCount].active = 0;
             if (self->voices[self->voiceCount].handle == 0) {
                 MEM_free(self->pairs[self->voiceCount].p[sel]);
                 self->pairs[self->voiceCount].p[sel] = 0;
                 return 0;
             }
-            func_003D66C0(self->voices[self->voiceCount].handle, b);
+            func_003D66C0(self->voices[self->voiceCount].handle, instIndex);
         } else {
             buf[1] = 0;
             buf[0] = 0x7C;
@@ -2798,15 +2813,15 @@ extern "C" int func_002AFD40(cSpeechInstance* selfp, int a, char* name, int b, i
         int n = func_003E2EE0(self->pairs[self->voiceCount].p[sel]);
         for (int i = 0; i < n; i++) {
             char* nm = BIG_locateentryz_2AFD40(self->pairs[self->voiceCount].p[sel], 0, i, &off, 0);
-            char* e = (char*)self->pairs[self->voiceCount].p[sel] + off;
-            if (e != self->voices[self->voiceCount].handle) {
+            char* entryData = (char*)self->pairs[self->voiceCount].p[sel] + off;
+            if (entryData != self->voices[self->voiceCount].handle) {
                 sprintf(path, str_pct_spct_s_c, buf, nm);
                 int len = strlen(path);
                 path[len - 4] = 0;
                 int j = len - 4;
                 while (path[j] != 0x5C && j >= 0)
                     j--;
-                func_002B0348_l((sBankList*)self, (int)path, (int)(path + j + 1), (int)e);
+                func_002B0348_l((sBankList*)self, (int)path, (int)(path + j + 1), (int)entryData);
             }
         }
     } else {
@@ -2815,7 +2830,7 @@ extern "C" int func_002AFD40(cSpeechInstance* selfp, int a, char* name, int b, i
         if (self->voices[self->voiceCount].handle == 0)
             return 0;
         self->voices[self->voiceCount].active = 1;
-        func_003D66C0(self->voices[self->voiceCount].handle, b);
+        func_003D66C0(self->voices[self->voiceCount].handle, instIndex);
     }
     return 1;
 }
@@ -3234,9 +3249,9 @@ extern "C" void func_002B1720(cSpeechSys*);
 extern "C" void func_002B0C78(cSpeechSys* self)
 {
     for (int i = 0; i < 2; i++) {
-        void* p = (self->mSpeechInstance)[i];
-        if (p != 0) {
-            func_002AFC88((cSpeechInstance*)p, i);
+        void* instance = (self->mSpeechInstance)[i];
+        if (instance != 0) {
+            func_002AFC88((cSpeechInstance*)instance, i);
         }
     }
     func_002B1720(self);
@@ -3309,9 +3324,9 @@ extern "C" int func_002B0290(cSpeechInstance* p);
 
 extern "C" int func_002B0E28(cSpeechSys* self, int i)
 {
-    void* p = (self->mSpeechInstance)[i];
-    if (p != 0) {
-        return func_002B0290((cSpeechInstance*)p);
+    void* instance = (self->mSpeechInstance)[i];
+    if (instance != 0) {
+        return func_002B0290((cSpeechInstance*)instance);
     }
     return 0;
 }
@@ -3324,22 +3339,22 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_002AFA68(cSpeechInstance* mem, int i, int a, int b, int c, int d, int e);
 extern const char str_SpeechInstance[];
 
-extern "C" void func_002B0E60(cSpeechSys* self, int i, int a, int b, int c, int d, int e)
+extern "C" void func_002B0E60(cSpeechSys* self, int i, int streamId, int section, int memType, int loadLangHead, int e)
 {
     // PORT: pointer arithmetic through int
     void** slot = (void**)(i * 4 + (int)self->mSpeechInstance);
-    *slot = func_002AFA68((cSpeechInstance*)cMemMan_alloc(0x904, str_SpeechInstance, 0, 0), i, a, b, c, d, e);
+    *slot = func_002AFA68((cSpeechInstance*)cMemMan_alloc(0x904, str_SpeechInstance, 0, 0), i, streamId, section, memType, loadLangHead, e);
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B0F10);
 #ifdef SKIP_ASM
-extern "C" void func_002B0F10(cSpeechSys* self, int i, int a)
+extern "C" void func_002B0F10(cSpeechSys* self, int i, int section)
 {
-    void* p = (self->mSpeechInstance)[i];
-    if (p != 0) {
-        func_002B0088((cSpeechInstance*)p, i, a, 0);
+    void* instance = (self->mSpeechInstance)[i];
+    if (instance != 0) {
+        func_002B0088((cSpeechInstance*)instance, i, section, 0);
     }
 }
 #endif
@@ -3349,17 +3364,17 @@ INCLUDE_ASM("sound/bankmonitor", func_002B0F48);
 #ifdef SKIP_ASM
 extern "C" int func_002B04D8(void* p, int a1);
 
-extern "C" int func_002B0F48(cSpeechSys* self, int a1)
+extern "C" int func_002B0F48(cSpeechSys* self, int playArgs)
 {
     for (int i = 0; i < 2; i++) {
-        void* p = (self->mSpeechInstance)[i];
-        if (p != 0) {
-            int r = func_002B04D8(p, a1);
-            if (r >= 0) {
+        void* instance = (self->mSpeechInstance)[i];
+        if (instance != 0) {
+            int handle = func_002B04D8(instance, playArgs);
+            if (handle >= 0) {
                 if (self->mCallbackInstance == i) {
-                    (self->mCallback)(r);
+                    (self->mCallback)(handle);
                 }
-                return r;
+                return handle;
             }
         }
     }
@@ -3374,9 +3389,9 @@ extern "C" void func_002B07E8(cSpeechInstance* p, int a);
 
 extern "C" void func_002B0FE8(cSpeechSys* self, int i, int a)
 {
-    void* p = (self->mSpeechInstance)[i];
-    if (p != 0) {
-        func_002B07E8((cSpeechInstance*)p, a);
+    void* instance = (self->mSpeechInstance)[i];
+    if (instance != 0) {
+        func_002B07E8((cSpeechInstance*)instance, a);
     }
 }
 #endif
@@ -3387,16 +3402,16 @@ extern "C" void func_002B07F0(cSpeechInstance* p, int a);
 
 extern "C" void func_002B1020(cSpeechSys* self, int i, int a)
 {
-    void* p = (self->mSpeechInstance)[i];
-    if (p != 0) {
-        func_002B07F0((cSpeechInstance*)p, a);
+    void* instance = (self->mSpeechInstance)[i];
+    if (instance != 0) {
+        func_002B07F0((cSpeechInstance*)instance, a);
     }
 }
 #endif
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1058);
 #ifdef SKIP_ASM
-extern "C" void func_002B1058(cSpeechSys* self, int idx, int a2, int a3, int a4, float v)
+extern "C" void func_002B1058(cSpeechSys* self, int idx, int a2, int callback, int a4, float v)
 {
     int** chans = (int**)self->mSpeechInstance;
     if (chans[idx] != 0) {
@@ -3405,8 +3420,8 @@ extern "C" void func_002B1058(cSpeechSys* self, int idx, int a2, int a3, int a4,
             *(float*)((char*)((int**)self->mSpeechInstance)[idx] + 0x8F4) = v;
         }
         *(int*)((char*)((int**)self->mSpeechInstance)[idx] + 0x8D0) = a4;
-        if (a3 != 0) {
-            self->mCallback = (void (*)(int))a3;
+        if (callback != 0) {
+            self->mCallback = (void (*)(int))callback;
             self->mCallbackInstance = idx;
         }
         func_003D8040((void*)idx);
@@ -3445,9 +3460,9 @@ extern "C" void func_002B0320(cSpeechInstance* p);
 
 extern "C" void func_002B11B0(cSpeechSys* self, int i)
 {
-    void* p = (self->mSpeechInstance)[i];
-    if (p != 0) {
-        func_002B0320((cSpeechInstance*)p);
+    void* instance = (self->mSpeechInstance)[i];
+    if (instance != 0) {
+        func_002B0320((cSpeechInstance*)instance);
     }
 }
 #endif
@@ -3460,9 +3475,9 @@ extern int func_002B07C0_11E8(void* self) __asm__("func_002B07C0");
 
 extern "C" int func_002B11E8(cSpeechSys* self, int i)
 {
-    void* p = (self->mSpeechInstance)[i];
-    if (p != 0) {
-        return func_002B07C0_11E8(p);
+    void* instance = (self->mSpeechInstance)[i];
+    if (instance != 0) {
+        return func_002B07C0_11E8(instance);
     }
     return 0;
 }
@@ -3473,9 +3488,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B1220);
 #ifdef SKIP_ASM
 extern "C" int func_002B1220(cSpeechSys* self, int i)
 {
-    void* e = (self->mSpeechInstance)[i];
-    if (e != 0) {
-        return *(int*)((char*)e + 0x4);
+    void* instance = (self->mSpeechInstance)[i];
+    if (instance != 0) {
+        return *(int*)((char*)instance + 0x4);
     }
     return -1;
 }
@@ -3582,13 +3597,13 @@ struct sBankEntries {
     sBankEntry20 entries[10];
 };
 
-extern "C" int func_002B1458(sBankEntries* self, int a, int b, int c, int d, int e, int refresh, float f)
+extern "C" int func_002B1458(sBankEntries* self, int instIndex, int requestId, int object, int identity, int callback, int refresh, float f)
 {
     int freeIdx = -1;
     int i;
     for (i = 0; i < 10; i++) {
         if (self->entries[i].used != 0) {
-            if (self->entries[i].a == a && self->entries[i].b == b) {
+            if (self->entries[i].a == instIndex && self->entries[i].b == requestId) {
                 if (refresh == 0) {
                     return 0;
                 }
@@ -3606,12 +3621,12 @@ extern "C" int func_002B1458(sBankEntries* self, int a, int b, int c, int d, int
     }
     self->entries[freeIdx].used = 1;
     self->entries[freeIdx].timer = 180;
-    self->entries[freeIdx].a = a;
-    self->entries[freeIdx].b = b;
-    self->entries[freeIdx].c = c;
-    self->entries[freeIdx].d = d;
+    self->entries[freeIdx].a = instIndex;
+    self->entries[freeIdx].b = requestId;
+    self->entries[freeIdx].c = object;
+    self->entries[freeIdx].d = identity;
     self->entries[freeIdx].f = f;
-    self->entries[freeIdx].e = e;
+    self->entries[freeIdx].e = callback;
     return 1;
 }
 #endif
@@ -3740,10 +3755,10 @@ extern "C" void* func_002AFD10(int);
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1758__FPvi);
 #ifdef SKIP_ASM
-void* func_002B1758(void* self, int a1)
+void* func_002B1758(void* self, int channel)
 {
     // a1 also stays in $5 as func_002AFD10's second argument
-    return func_002AFD10_impl((void*)(*(int**)((char*)self + 0x4))[a1], (void*)a1);
+    return func_002AFD10_impl((void*)(*(int**)((char*)self + 0x4))[channel], (void*)channel);
 }
 #endif
 
@@ -3900,9 +3915,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_002B1C50(void* mem, int a0, int a1, int a2, int a3, char a4, int a5, int a6, int a7);
 extern const char str_SongInstance[];
 
-extern "C" void* func_002B1B98(int a0, int a1, int a2, int a3, char a4, int a5, int a6, int a7)
+extern "C" void* func_002B1B98(int songName, int a1, int config, int playOpts, char baseVol, int volControl, int bankIndex, int syncLoad)
 {
-    return func_002B1C50(cMemMan_alloc(0xC4, str_SongInstance, 0, 0), a0, a1, a2, a3, a4, a5, a6, a7);
+    return func_002B1C50(cMemMan_alloc(0xC4, str_SongInstance, 0, 0), songName, a1, config, playOpts, baseVol, volControl, bankIndex, syncLoad);
 }
 #endif
 
@@ -4053,9 +4068,9 @@ extern "C" void func_003D1038(int cmd, int v);
 extern "C" void func_002B2018(cSongInstance* self)
 {
     func_003B58A0();
-    int h = func_002B2488(self);
-    if (h >= 0) {
-        func_003B7FB8(h, 0);
+    int handle = func_002B2488(self);
+    if (handle >= 0) {
+        func_003B7FB8(handle, 0);
     }
     func_003B58D8();
     func_003D1038(0x11000002, 1);
@@ -4074,9 +4089,9 @@ extern "C" void func_003D1038(int cmd, int v);
 extern "C" void func_002B2070(cSongInstance* self)
 {
     func_003B58A0();
-    int h = func_002B2488(self);
-    if (h >= 0) {
-        func_003B7FB8(h, 0x1000);
+    int handle = func_002B2488(self);
+    if (handle >= 0) {
+        func_003B7FB8(handle, 0x1000);
     }
     func_003B58D8();
     func_003D1038(0x11000002, 0);
@@ -4281,10 +4296,10 @@ INCLUDE_ASM("sound/bankmonitor", func_002B2500);
 #ifdef SKIP_ASM
 extern "C" int func_002B2500(cSongInstance* self)
 {
-    char* p;
-    unsigned int r = func_002ADF60_p(SoundSys);
-    p = *(char**)self;
-    return (r % (unsigned int)(*(int*)(p + 0x6C) - 1)) * *(int*)(p + 0x74);
+    char* config;
+    unsigned int randVal = func_002ADF60_p(SoundSys);
+    config = *(char**)self;
+    return (randVal % (unsigned int)(*(int*)(config + 0x6C) - 1)) * *(int*)(config + 0x74);
 }
 #endif
 //100%
@@ -4391,8 +4406,8 @@ INCLUDE_ASM("sound/bankmonitor", func_002B2690);
 #ifdef SKIP_ASM
 extern "C" float func_002B2690(cSongInstance* self)
 {
-    void* p = *(void**)self;
-    return (60.0f / *(float*)((char*)p + 0x90)) * 1000.0f;
+    void* config = *(void**)self;
+    return (60.0f / *(float*)((char*)config + 0x90)) * 1000.0f;
 }
 #endif
 
@@ -4401,9 +4416,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B26B8);
 #ifdef SKIP_ASM
 extern "C" float func_002B26B8(cSongInstance* self)
 {
-    float a = func_002B2690(self);
-    char* p = *(char**)self;
-    return a * (float)*(int*)(p + 0x64) * (float)*(int*)(p + 0x68);
+    float beatMs = func_002B2690(self);
+    char* config = *(char**)self;
+    return beatMs * (float)*(int*)(config + 0x64) * (float)*(int*)(config + 0x68);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -5040,9 +5055,9 @@ extern "C" void func_002B2018(cSongInstance*);
 
 extern "C" void func_002B3A70(void* self)
 {
-    void* p = *(void**)((char*)self + 0x408);
-    if (p != 0) {
-        func_002B2018((cSongInstance*)p);
+    void* curSong = *(void**)((char*)self + 0x408);
+    if (curSong != 0) {
+        func_002B2018((cSongInstance*)curSong);
     }
 }
 #endif
@@ -5054,9 +5069,9 @@ extern "C" void func_002B2070(cSongInstance*);
 
 extern "C" void func_002B3A98(void* self)
 {
-    void* p = *(void**)((char*)self + 0x408);
-    if (p != 0) {
-        func_002B2070((cSongInstance*)p);
+    void* curSong = *(void**)((char*)self + 0x408);
+    if (curSong != 0) {
+        func_002B2070((cSongInstance*)curSong);
     }
 }
 #endif
@@ -5105,9 +5120,9 @@ extern "C" void func_002B20C8(cSongInstance* mon, int a1, int a2);
 extern "C" void func_002B3B88(void* self, int a1)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
-        void* m = *(void**)((char*)self + 0x408);
-        if (m != 0) {
-            func_002B20C8((cSongInstance*)m, a1, 0);
+        void* curSong = *(void**)((char*)self + 0x408);
+        if (curSong != 0) {
+            func_002B20C8((cSongInstance*)curSong, a1, 0);
         }
     }
 }
@@ -5124,14 +5139,14 @@ struct sBankMonVEntry {
 
 extern "C" int func_002B3BC0(void* self, int v)
 {
-    int r = 0;
+    int changed = 0;
     if (*(int*)((char*)self + 0x418) != 0 && v != *(int*)((char*)self + 0x41C)) {
         sBankMonVEntry* vt = *(sBankMonVEntry**)((char*)self + 0x5440);
         vt[3].fn((char*)self + vt[3].delta);
         *(int*)((char*)self + 0x41C) = v;
-        r = 1;
+        changed = 1;
     }
-    return r;
+    return changed;
 }
 #endif
 
@@ -5144,9 +5159,9 @@ void func_002B2120_m(void* mon) __asm__("func_002B2120");
 extern "C" void func_002B3C28(void* self)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
-        void* m = *(void**)((char*)self + 0x408);
-        if (m != 0) {
-            func_002B2120_m(m);
+        void* curSong = *(void**)((char*)self + 0x408);
+        if (curSong != 0) {
+            func_002B2120_m(curSong);
         }
     }
 }
@@ -5158,11 +5173,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3C60);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_002B2140_3C60(int) __asm__("func_002B2140");
 
-extern "C" void func_002B3C60(void *arg0) {
+extern "C" void func_002B3C60(void *musicSys) {
     int temp_4;
 
-    if ((*(int *)((char*)(arg0) + (0x418))) != 0) {
-        temp_4 = (*(int *)((char*)(arg0) + (0x408)));
+    if ((*(int *)((char*)(musicSys) + (0x418))) != 0) {
+        temp_4 = (*(int *)((char*)(musicSys) + (0x408)));
         if (temp_4 != 0) {
             func_002B2140_3C60(temp_4);
         }
@@ -5173,12 +5188,12 @@ extern "C" void func_002B3C60(void *arg0) {
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3C98);
 #ifdef SKIP_ASM
-extern "C" void func_002B3C98(void* self, signed char a1)
+extern "C" void func_002B3C98(void* self, signed char baseVol)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
-        void* p = *(void**)((char*)self + 0x408);
-        if (p != 0) {
-            *(signed char*)((char*)p + 0x40) = a1;
+        void* curSong = *(void**)((char*)self + 0x408);
+        if (curSong != 0) {
+            *(signed char*)((char*)curSong + 0x40) = baseVol;
         }
     }
 }
@@ -5189,9 +5204,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3CC0);
 #ifdef SKIP_ASM
 extern "C" void func_002B3CC0(void* self, int a1)
 {
-    void* p = *(void**)((char*)self + 0x408);
-    if (p != 0) {
-        *(int*)((char*)p + 0x54) = a1;
+    void* curSong = *(void**)((char*)self + 0x408);
+    if (curSong != 0) {
+        *(int*)((char*)curSong + 0x54) = a1;
     }
 }
 #endif
@@ -5199,12 +5214,12 @@ extern "C" void func_002B3CC0(void* self, int a1)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3CD8);
 #ifdef SKIP_ASM
-extern "C" void func_002B3CD8(void* self, int v)
+extern "C" void func_002B3CD8(void* self, int cutoff)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
-        void* p = *(void**)((char*)self + 0x408);
-        if (p != 0) {
-            func_002B2160((cSongInstance*)p, v);
+        void* curSong = *(void**)((char*)self + 0x408);
+        if (curSong != 0) {
+            func_002B2160((cSongInstance*)curSong, cutoff);
         }
     }
 }
@@ -5218,9 +5233,9 @@ extern "C" void func_002B23E8(cSongInstance* self, signed char v);
 extern "C" void func_002B3D10(void* self, signed char v)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
-        void* m = *(void**)((char*)self + 0x408);
-        if (m != 0) {
-            func_002B23E8((cSongInstance*)m, v);
+        void* curSong = *(void**)((char*)self + 0x408);
+        if (curSong != 0) {
+            func_002B23E8((cSongInstance*)curSong, v);
         }
     }
 }
@@ -5231,12 +5246,12 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3D48);
 #ifdef SKIP_ASM
 extern "C" void func_002B2418(cSongInstance* mon, float v);
 
-extern "C" void func_002B3D48(void* self, float v)
+extern "C" void func_002B3D48(void* self, float fadeTime)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
-        void* m = *(void**)((char*)self + 0x408);
-        if (m != 0) {
-            func_002B2418((cSongInstance*)m, v);
+        void* curSong = *(void**)((char*)self + 0x408);
+        if (curSong != 0) {
+            func_002B2418((cSongInstance*)curSong, fadeTime);
         }
     }
 }
@@ -5277,8 +5292,8 @@ extern "C" int func_002B3E20(void* self)
         *(signed char*)((char*)*(void**)((char*)self + 0x408) + 0x40) = (signed char)(int)*(float*)((char*)self + 0x410);
         return 0;
     }
-    signed char t = *(int*)((char*)self + 0x414);
-    *(signed char*)((char*)*(void**)((char*)self + 0x408) + 0x40) = t;
+    signed char targetVol = *(int*)((char*)self + 0x414);
+    *(signed char*)((char*)*(void**)((char*)self + 0x408) + 0x40) = targetVol;
     return 1;
 }
 #endif
@@ -5548,9 +5563,9 @@ extern "C" void func_002B4620(void*);
 
 extern "C" void func_002B4388(void* self)
 {
-    void* p = *(void**)((char*)self + 0x408);
-    if (p != 0) {
-        func_002B21E0((cSongInstance*)p, 0);
+    void* curSong = *(void**)((char*)self + 0x408);
+    if (curSong != 0) {
+        func_002B21E0((cSongInstance*)curSong, 0);
         if (*(int*)((char*)*(void**)((char*)self + 0x408) + 0x50) != 0) {
             func_002B4620(self);
         }
@@ -5684,21 +5699,21 @@ int func_002B4620_impl(void* self)
     int one = 1;
     if (*(char**)((char*)self + 0x408) == 0) return 0;
     *(int*)(*(char**)((char*)self + 0x408) + 0x4C) = one;
-    int r = 0;
-    char* m = *(char**)((char*)self + 0x408);
-    int st = *(int*)(m + 0x38);
+    int ready = 0;
+    char* curSong = *(char**)((char*)self + 0x408);
+    int st = *(int*)(curSong + 0x38);
     if (st == one) {
         // PORT: pointer arithmetic through int
-        sBmStream4620* e = (sBmStream4620*)(*(int*)(m + 0x34) * 0x60 + *(int*)(**(char***)self + 0xACC));
-        if (func_002B4620_ready(e)) {
-            func_003D2DF8(0x11000002, 0, e->handle);
+        sBmStream4620* bankInst = (sBmStream4620*)(*(int*)(curSong + 0x34) * 0x60 + *(int*)(**(char***)self + 0xACC));
+        if (func_002B4620_ready(bankInst)) {
+            func_003D2DF8(0x11000002, 0, bankInst->handle);
             *(int*)(*(char**)((char*)self + 0x408) + 0x38) = 2;
-            r = 1;
+            ready = 1;
         }
     } else if (st == 2) {
-        r = one;
+        ready = one;
     }
-    return r;
+    return ready;
 }
 #endif
 
@@ -5707,9 +5722,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B46D0);
 #ifdef SKIP_ASM
 extern "C" void func_002B46D0(void* self)
 {
-    void* p = *(void**)((char*)self + 0x408);
-    if (p != 0) {
-        *(int*)((char*)p + 0x50) = 1;
+    void* curSong = *(void**)((char*)self + 0x408);
+    if (curSong != 0) {
+        *(int*)((char*)curSong + 0x50) = 1;
     }
 }
 #endif
@@ -5732,9 +5747,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4708);
 #ifdef SKIP_ASM
 extern "C" void func_002B4708(void* self)
 {
-    void* p = *(void**)((char*)self + 0x408);
-    if (p != 0) {
-        *(int*)((char*)p + 0x4c) = 0;
+    void* curSong = *(void**)((char*)self + 0x408);
+    if (curSong != 0) {
+        *(int*)((char*)curSong + 0x4c) = 0;
     }
 }
 #endif
@@ -5744,11 +5759,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4720);
 #ifdef SKIP_ASM
 extern "C" int func_002B4720(void* self)
 {
-    char* p = *(char**)((char*)self + 0x408);
-    if (p == 0) {
+    char* curSong = *(char**)((char*)self + 0x408);
+    if (curSong == 0) {
         return 0;
     }
-    return *(signed char*)(p + 0x40);
+    return *(signed char*)(curSong + 0x40);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -5814,9 +5829,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4878);
 extern "C" int func_002B4878(void* self)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
-        void* m = *(void**)((char*)self + 0x408);
-        if (m != 0) {
-            return func_002B4868(m);
+        void* curSong = *(void**)((char*)self + 0x408);
+        if (curSong != 0) {
+            return func_002B4868(curSong);
         }
     }
     return 1;
@@ -5826,8 +5841,8 @@ extern "C" int func_002B4878(void* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B48B8);
 #ifdef SKIP_ASM
-extern "C" int func_002B48B8(void **arg0) {
-    return (*(int *)((char*)(*arg0) + (0x98)));
+extern "C" int func_002B48B8(void **song) {
+    return (*(int *)((char*)(*song) + (0x98)));
 }
 #endif
 //100%
@@ -5836,9 +5851,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B48C8);
 extern "C" int func_002B48C8(void* self)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
-        void** p = *(void***)((char*)self + 0x408);
-        if (p != 0) {
-            return func_002B48B8(p);
+        void** curSong = *(void***)((char*)self + 0x408);
+        if (curSong != 0) {
+            return func_002B48B8(curSong);
         }
     }
     return -1;
@@ -5850,8 +5865,8 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4908__FPv);
 #ifdef SKIP_ASM
 int func_002B4908(void* self)
 {
-    void* p = *(void**)((char*)self + (*(int*)((char*)self + 0x3f0) << 2) + 0x4);
-    return *(int*)((char*)p + 0x98);
+    void* config = *(void**)((char*)self + (*(int*)((char*)self + 0x3f0) << 2) + 0x4);
+    return *(int*)((char*)config + 0x98);
 }
 #endif
 
@@ -5902,9 +5917,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B49C0);
 extern "C" void func_002B49C0(void* self, int a1)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
-        void* p = *(void**)((char*)self + 0x408);
-        if (p != 0) {
-            *(int*)((char*)p + 0x58) = a1;
+        void* curSong = *(void**)((char*)self + 0x408);
+        if (curSong != 0) {
+            *(int*)((char*)curSong + 0x58) = a1;
         }
     }
 }
@@ -5916,9 +5931,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B49E0);
 extern "C" int func_002B49E0(void* self)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
-        void* p = *(void**)((char*)self + 0x408);
-        if (p != 0) {
-            return *(int*)((char*)p + 0x58);
+        void* curSong = *(void**)((char*)self + 0x408);
+        if (curSong != 0) {
+            return *(int*)((char*)curSong + 0x58);
         }
     }
     return -1;
@@ -5930,9 +5945,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4A08);
 #ifdef SKIP_ASM
 extern "C" void func_002B4A08(void* self, int a1)
 {
-    void* p = *(void**)((char*)self + 0x408);
-    if (p != 0) {
-        *(int*)((char*)p + 0x5c) = a1;
+    void* curSong = *(void**)((char*)self + 0x408);
+    if (curSong != 0) {
+        *(int*)((char*)curSong + 0x5c) = a1;
     }
 }
 #endif
@@ -5966,12 +5981,12 @@ extern "C" int ASYNCFILE_getstatus(void*);
 
 extern "C" int func_002B4AA0(void* self, int force)
 {
-    void* p;
+    void* asyncFile;
     if (force != 0) {
         return 1;
     }
-    p = *(void**)((char*)self + 0x5438);
-    if (p != 0 && ASYNCFILE_getstatus(p) == 1) {
+    asyncFile = *(void**)((char*)self + 0x5438);
+    if (asyncFile != 0 && ASYNCFILE_getstatus(asyncFile) == 1) {
         return 1;
     }
     return 0;

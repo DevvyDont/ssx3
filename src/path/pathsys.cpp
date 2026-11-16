@@ -157,12 +157,22 @@ extern "C" int func_0026B550(sPathSys* self, sPathEntry40* entry)
 //100%
 INCLUDE_ASM("path/pathsys", cPathSys_isStartpoint);
 #ifdef SKIP_ASM
-extern "C" int cPathSys_isStartpoint(sPathSys* self, int a, int b)
+/**
+ * Reports whether the path data has a startpoint of a given type and id.
+ *
+ * Scans the startpoints (count and 0x28-byte entries) for one whose type (+0x4) equals @p type and id (+0x0) equals
+ * @p startpointId. The map screen uses it with type 2 to list the track's sessions.
+ *
+ * @param type  the startpoint type (On Tour tPathStartType)
+ * @param startpointId  the startpoint id (a session or rider index)
+ * @return 1 if such a startpoint exists, else 0
+ */
+extern "C" int cPathSys_isStartpoint(sPathSys* self, int type, int startpointId)
 {
     int i;
     int count = self->count28;
     for (i = 0; i < count; i++) {
-        if (self->entries28[i].field_0x4 == a && self->entries28[i].field_0x0 == b) {
+        if (self->entries28[i].field_0x4 == type && self->entries28[i].field_0x0 == startpointId) {
             return 1;
         }
     }
@@ -184,6 +194,18 @@ struct sPathEntryList {
     sPathEntry* entries;    // 0x4
 };
 
+/**
+ * Finds a startpoint by type and id, falling back to the first startpoint.
+ *
+ * Returns the first 0x28-byte entry whose type (+0x4) and id (+0x0) match; when none matches it returns entry 0, or
+ * null if there are no startpoints at all, so callers always get a position when any exists. Used to place riders
+ * (cRider_putAtStartpoint, cRider_GetNISEndPosition) and by the map screen.
+ *
+ * @param list  the path system (the startpoint count +0x0 and array +0x4 come first)
+ * @param type  the startpoint type (On Tour tPathStartType: 1 and 2 are used)
+ * @param id    the startpoint id
+ * @return the matching startpoint, else the first one, else null
+ */
 extern "C" sPathEntry* cPathSys_getStartpoint(sPathEntryList* list, int type, int id)
 {
     int i;
@@ -257,6 +279,17 @@ static inline float pathLen(const sPathVec3& v)
     return pathSqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
+/**
+ * Finds the session startpoint nearest a position, for the map screen's initial selection.
+ *
+ * Among the startpoints of type 2 with a non-zero id, keeps those that the mission interface (BE interface 10,
+ * cBEMissionInterface_isSessionPoint) accepts for the current location (the section manager's +0x1BC) and returns the id of the
+ * closest one; the search starts at a distance of 1e7. Returns -1 when none qualifies.
+ *
+ * @param list  the path system (the startpoint count +0x0 and array +0x4 come first)
+ * @param pos   the position to measure from (the rider's)
+ * @return the nearest session point's id, or -1
+ */
 extern "C" int cPathSys_getNearestSessionPoint(sPathNearList* list, sPathVec3* pos)
 {
     int i;
@@ -390,6 +423,15 @@ extern "C" void func_0026BA48(void* dst, void* src)
 //100%
 INCLUDE_ASM("path/pathsys", pathREAD_tInt32);
 #ifdef SKIP_ASM
+/**
+ * Reads one 32-bit integer from (possibly unaligned) path data.
+ *
+ * Copies 4 bytes from @p src to @p dst with MEM_copy, skipping the copy when they are the same address. The path
+ * loaders use it for counts and ids.
+ *
+ * @param dst  where to store the integer (On Tour dest)
+ * @param src  the serialized data
+ */
 extern "C" void pathREAD_tInt32(void* dst, void* src)
 {
     if (dst != src) {

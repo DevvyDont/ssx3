@@ -468,10 +468,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
 
 extern "C" float func_002EF038(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = **(sRSMObj***)((char*)e + 0x18);
-    sRSMVEntry* vt = o->vt;
-    return *vt[36].fn((char*)o + vt[36].delta) * (1.0f - *(float*)((char*)e + 0x24));
+    sRSMEntry* entry = &cRenderStateMan_m_state[i];
+    sRSMObj* object = **(sRSMObj***)((char*)entry + 0x18);
+    sRSMVEntry* vt = object->vt;
+    return *vt[36].fn((char*)object + vt[36].delta) * (1.0f - *(float*)((char*)entry + 0x24));
 }
 #endif
 
@@ -642,6 +642,14 @@ public:
     virtual void v64(void* frame);
 };
 
+/**
+ * Records the render-state manager's per-viewer state into a replay frame.
+ *
+ * For rows 0 to 5 of cRenderStateMan_m_state it calls virtual slot 64 of the object behind the row's +0x20 pointer with
+ * @p frame, twice for the same object (On Tour does the same).
+ *
+ * @param frame  the replay frame being written (On Tour data)
+ */
 extern "C" void cRenderStateMan_writeToReplayFrame(void* frame)
 {
     int i;
@@ -752,10 +760,17 @@ INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_setInNIS);
 extern void* cRenderStateMan_m_inNIS;
 extern int cPlants_m_Enable;
 
-extern "C" void cRenderStateMan_setInNIS(void* p)
+/**
+ * Tells the render-state manager whether an in-game cut scene (NIS) is playing.
+ *
+ * Stores @p innis in cRenderStateMan_m_inNIS and sets cPlants_m_Enable when it is non-zero.
+ *
+ * @param innis  nonzero while a cut scene plays (On Tour innis)
+ */
+extern "C" void cRenderStateMan_setInNIS(void* innis)
 {
-    cRenderStateMan_m_inNIS = p;
-    cPlants_m_Enable = p != 0;
+    cRenderStateMan_m_inNIS = innis;
+    cPlants_m_Enable = innis != 0;
 }
 #endif
 
@@ -766,6 +781,13 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern int D_004A3B64;
 extern int D_004A55B0;
 
+/**
+ * Selects a named custom irradiance for cut scenes, or turns it off.
+ *
+ * A null @p name clears the flag D_004A3B64; otherwise the name is copied to D_004A55B0 and the flag is set.
+ *
+ * @param name  irradiance name (under 8 characters), or 0 for none (On Tour pName)
+ */
 extern "C" void cRenderStateMan_setCustomIrradiance(const char* name)
 {
     if (name == 0) {
@@ -1413,6 +1435,17 @@ struct sRsCtx_F00A0 {
 };
 extern sRsCtx_F00A0* D_ctx_F00A0 __asm__("cGraphicsMan_TheGraphicsMan");
 
+/**
+ * Pulls one camera's visual-effect settings from the render-state manager into the effect systems.
+ *
+ * Unless cDepthFog_m_OverrideWP is set, the fog density, near and far planes and colour come from the matching queries;
+ * unless cScreenTint_m_OverrideWP is set, the tint scale and fill colours and the lightning chance do too (lightning is
+ * enabled when the app's +0x84 state is 1 or func_002F7BE0 says so); unless cLightGlow_m_OverrideWP is set, the
+ * light-glow intensities and scales do. The in-NIS flag and the remaining per-camera values are stored per @p i in the
+ * graphics context.
+ *
+ * @param i  which camera's render state to use (On Tour cameraId)
+ */
 extern "C" void cVisualEffectsMan_commonUpdate(void* self, int i)
 {
     sRsCtx_F00A0* ctx = D_ctx_F00A0;
@@ -1484,6 +1517,13 @@ INCLUDE_ASM("visualfx/renderstateman", cAIVisualEffectsMan_cAIVisualEffectsMan);
 extern void* D_00487D78[];
 extern void* D_004A3B80;
 
+/**
+ * Constructs the base AI visual effects manager and makes it the current one.
+ *
+ * Clears +0x0, sets the vtable D_00487D78 at +0x4 and stores this in D_004A3B80.
+ *
+ * @return this
+ */
 extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(void* self)
 {
     *(int*)self = 0;
@@ -1508,6 +1548,13 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(void* self);
 extern char str_PS2AIVisualEffectsMan[];
 
+/**
+ * Creates the platform's AI visual effects manager.
+ *
+ * Allocates 8 bytes named "PS2AIVisualEffectsMan" and runs cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan on them.
+ *
+ * @return the new manager
+ */
 extern "C" void* cAIVisualEffectsMan_construct(void)
 {
     return cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(cMemMan_alloc(8, str_PS2AIVisualEffectsMan, 0, 0));
@@ -1524,6 +1571,14 @@ extern char str_Avalanche[];
 extern void* D_00487D50[];
 extern void* cAvalanche_vtbl[];
 
+/**
+ * Constructs the PS2 AI visual effects manager with its avalanche effect.
+ *
+ * Runs cAIVisualEffectsMan_cAIVisualEffectsMan, sets the vtable D_00487D50 at +0x4, allocates the avalanche object ("Avalanche", 4 bytes), gives
+ * it cAvalanche_vtbl, runs cAvalanche_init on it and keeps it at +0x0.
+ *
+ * @return this
+ */
 extern "C" void* cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(void* self)
 {
     cAIVisualEffectsMan_cAIVisualEffectsMan(self);
@@ -1549,6 +1604,14 @@ public:
     virtual void v01(int);
 };
 
+/**
+ * Destroys the PS2 AI visual effects manager and its avalanche effect.
+ *
+ * Restores D_00487D50, destroys the object at +0x0 (if any) through its virtual slot 1 with flag 3, switches to the
+ * base vtable D_00487D78 and calls operator delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ in-charge flags; bit 0 deletes the object
+ */
 extern "C" void cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = D_00487D50;
@@ -1574,6 +1637,11 @@ public:
     virtual void v03();
 };
 
+/**
+ * Updates the AI-driven visual effects (the avalanche) for this frame.
+ *
+ * Calls virtual slot 2 of the object at +0x0.
+ */
 extern "C" void cPS2AIVisualEffectsMan_update(cPS2AIVisualEffectsMan_update_cObj** self)
 {
     (*self)->v02();
@@ -1583,6 +1651,11 @@ extern "C" void cPS2AIVisualEffectsMan_update(cPS2AIVisualEffectsMan_update_cObj
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cPS2AIVisualEffectsMan_render);
 #ifdef SKIP_ASM
+/**
+ * Draws the AI-driven visual effects (the avalanche).
+ *
+ * Calls virtual slot 3 of the object at +0x0.
+ */
 extern "C" void cPS2AIVisualEffectsMan_render(cPS2AIVisualEffectsMan_update_cObj** self)
 {
     (*self)->v03();

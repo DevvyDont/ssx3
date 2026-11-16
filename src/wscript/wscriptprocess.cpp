@@ -284,6 +284,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnCollide);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
+/**
+ * Runs the world script process's on-collide script.
+ *
+ * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x34, unless that is
+ * null.
+ */
 extern "C" void cWScriptProcess_eventOnCollide(void* self)
 {
     void* script = *(void**)((char*)self + 0x34);
@@ -298,6 +304,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnJump);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
+/**
+ * Runs the world script process's on-jump script.
+ *
+ * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x38, unless that is
+ * null.
+ */
 extern "C" void cWScriptProcess_eventOnJump(void* self)
 {
     void* script = *(void**)((char*)self + 0x38);
@@ -312,6 +324,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnLand);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
+/**
+ * Runs the world script process's on-land script.
+ *
+ * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x3C, unless that is
+ * null.
+ */
 extern "C" void cWScriptProcess_eventOnLand(void* self)
 {
     void* script = *(void**)((char*)self + 0x3c);
@@ -326,6 +344,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnTrick);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
+/**
+ * Runs the world script process's on-trick script.
+ *
+ * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x40, unless that is
+ * null.
+ */
 extern "C" void cWScriptProcess_eventOnTrick(void* self)
 {
     void* script = *(void**)((char*)self + 0x40);
@@ -340,6 +364,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnWipeout);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
+/**
+ * Runs the world script process's on-wipeout script.
+ *
+ * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x44, unless that is
+ * null.
+ */
 extern "C" void cWScriptProcess_eventOnWipeout(void* self)
 {
     void* script = *(void**)((char*)self + 0x44);
@@ -354,6 +384,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnReset);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
+/**
+ * Runs the world script process's on-reset script.
+ *
+ * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x48, unless that is
+ * null.
+ */
 extern "C" void cWScriptProcess_eventOnReset(void* self)
 {
     void* script = *(void**)((char*)self + 0x48);
@@ -368,6 +404,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnCollect);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
+/**
+ * Runs the world script process's on-collect script.
+ *
+ * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x4C, unless that is
+ * null.
+ */
 extern "C" void cWScriptProcess_eventOnCollect(void* self)
 {
     void* script = *(void**)((char*)self + 0x4c);
@@ -382,6 +424,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnEvent1);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
+/**
+ * Runs the world script process's on-event 1 script.
+ *
+ * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x50, unless that is
+ * null.
+ */
 extern "C" void cWScriptProcess_eventOnEvent1(void* self)
 {
     void* script = *(void**)((char*)self + 0x50);
@@ -396,6 +444,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnEvent2);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
+/**
+ * Runs the world script process's on-event 2 script.
+ *
+ * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x54, unless that is
+ * null.
+ */
 extern "C" void cWScriptProcess_eventOnEvent2(void* self)
 {
     void* script = *(void**)((char*)self + 0x54);
@@ -410,6 +464,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_eventOnEvent3);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
+/**
+ * Runs the world script process's on-event 3 script.
+ *
+ * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x58, unless that is
+ * null.
+ */
 extern "C" void cWScriptProcess_eventOnEvent3(void* self)
 {
     void* script = *(void**)((char*)self + 0x58);
@@ -484,6 +544,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_processUpdate);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 
+/**
+ * Runs the world script process's per-frame update script.
+ *
+ * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x2C, unless that is
+ * null.
+ */
 extern "C" void cWScriptProcess_processUpdate(void* self)
 {
     void* script = *(void**)((char*)self + 0x2c);
@@ -499,6 +565,12 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_processEnd);
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
 extern "C" void cWScriptProcess_end(void* self);
 
+/**
+ * Runs the world script process's end script and ends the process.
+ *
+ * Sets the state (+0x0) to 3, runs the script code at +0x30 through cWScriptMan_runScriptCode when there is one and
+ * calls cWScriptProcess_end.
+ */
 extern "C" void cWScriptProcess_processEnd(void* self)
 {
     *(int*)self = 3;
@@ -590,6 +662,13 @@ public:
     virtual void v02();
 };
 
+/**
+ * Ends the process's current task and moves on to the next.
+ *
+ * Does nothing once the process has ended (state 3). Otherwise calls virtual slot 6 of the current task (index +0x8
+ * into the 0x44-byte tasks at +0x14); if another task follows (count at +0x4) it becomes current and gets its virtual
+ * slot 4, else the process's own virtual slot 2 runs.
+ */
 extern "C" void cWScriptProcess_endTask(cWScriptProcess_endTask_cProc* self)
 {
     if (self->state == 3) {
@@ -693,6 +772,14 @@ extern "C" void* cWScriptMan_getScriptCode(int);
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_getScriptCode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the script code for a resource id.
+ *
+ * Forwards to cWScriptMan_getScriptCode with the process's manager (+0x10); the id in the second argument is passed
+ * through untouched. The declaration here takes only the process; callers use the cWScriptProcess_getScriptCode__FPv alias.
+ *
+ * @return the code, or 0 when the id is invalid
+ */
 void* cWScriptProcess_getScriptCode(void* self)
 {
     return cWScriptMan_getScriptCode(*(int*)((char*)self + 0x10));
@@ -1220,6 +1307,16 @@ extern char D_00489C00[];
 // cWScriptMan_TheWScriptMan is declared `int` later in the unit; it holds the current process.
 extern void* cWScriptMan_cWScriptMan_current __asm__("cWScriptMan_TheWScriptMan");
 
+/**
+ * Constructs the world script manager.
+ *
+ * Sets +0x2C to -1, constructs the mission menu queue at +0x1C4, sets the vtable D_00489C00 at +0x494, constructs the
+ * idle (+0x2B4), active (+0x2B8) and pending (+0x2BC) process lists and the collect pool at +0x2C0, stores this in
+ * cWScriptMan_TheWScriptMan, takes cWorld_m_pTheWorld as its world (+0x28C), zeroes the 50 section table pointers at
+ * +0x3CC and runs cWScriptMan_init.
+ *
+ * @return this
+ */
 extern "C" void* cWScriptMan_cWScriptMan(void* self)
 {
     *(unsigned int*)((char*)self + 0x2C) = 0xFFFFFFFF;
@@ -1257,6 +1354,14 @@ void operator_delete(int* p);
 extern char D_00489C00[];
 extern int cWScriptMan_TheWScriptMan;
 
+/**
+ * Destroys the world script manager.
+ *
+ * Restores the vtable D_00489C00, runs cWScriptMan_purgeGlobalTables, clears cWScriptMan_TheWScriptMan, destroys the pending, active
+ * and idle process lists (cProcessList__cProcessList, flag 2) and calls operator delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ in-charge flags; bit 0 deletes the object
+ */
 extern "C" void cWScriptMan__cWScriptMan(void* self, int flags)
 {
     *(void**)((char*)self + 0x494) = D_00489C00;
@@ -1287,6 +1392,13 @@ extern "C" void cWScriptMan_rebuildGlobalTables(void* self);
 #define WSP308988_I(off) (*(int*)((char*)self + (off)))
 #define WSP308988_U(off) (*(unsigned int*)((char*)self + (off)))
 
+/**
+ * Resets the world script manager to its starting state.
+ *
+ * Clears the current being, instance, infos, process and task and the mission state, sets the mission ids (+0x2A0,
+ * +0x2B0) and several counters to -1, empties the menu queue (tMissionMenuQueue_init) and the event list at +0x44, and runs
+ * cWScriptMan_rebuildGlobalTables.
+ */
 extern "C" void cWScriptMan_init(void* self)
 {
     WSP308988_I(0x290) = 0;
@@ -1328,6 +1440,11 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_purgeGlobalTables);
 #ifdef SKIP_ASM
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 
+/**
+ * Destroys every world section's global script table.
+ *
+ * Destroys and clears each non-null table pointer among the 50 at +0x3CC.
+ */
 extern "C" void cWScriptMan_purgeGlobalTables(void* self)
 {
     void** objs = (void**)((char*)self + 0x3CC);
@@ -1357,6 +1474,12 @@ struct cWScriptMan_rebuildGlobalTables_sSection {
     int f8;
 };
 
+/**
+ * Recreates the global script tables for the loaded world sections.
+ *
+ * Runs cWScriptMan_purgeGlobalTables, then for every section of the world view whose script cache entry has reached state 2 and has
+ * data, calls func_00308B78 with the section index.
+ */
 extern "C" void cWScriptMan_rebuildGlobalTables(void* self)
 {
     int i = 0;
@@ -1523,6 +1646,13 @@ extern "C" void* func_002224A8(void* self);
 extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 
+/**
+ * Applies every mission's world-update script to the world.
+ *
+ * For each world section and each of its mission scripts whose id differs from the local mission (+0x2A0), creates an
+ * 8-slot local table, runs the code for the mission's +0x4C script id in it if there is any, and destroys the table.
+ * Then clears the current instance, infos, process and task.
+ */
 extern "C" void cWScriptMan_updateWorld(void* self)
 {
     int i = 0;
@@ -1565,6 +1695,11 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_purgeMissions);
 #ifdef SKIP_ASM
 extern "C" void cProcessList_deleteAll(void*);
 
+/**
+ * Deletes every world script process.
+ *
+ * Runs cProcessList_deleteAll on the active (+0x2B8), pending (+0x2BC) and idle (+0x2B4) process lists.
+ */
 extern "C" void cWScriptMan_purgeMissions(void* self)
 {
     cProcessList_deleteAll((char*)self + 0x2B8);
@@ -1688,6 +1823,16 @@ extern "C" void cSSXAudio_BigChallengeFailed(void* snd, int a1);
 extern "C" void cReplay_startRace(void* p);
 extern "C" void cPlaybackMan_startPreview(void* p);
 
+/**
+ * Carries out the local mission request queued by the menus.
+ *
+ * Switches on the request at +0x2AC (2, 3 and 4 are set by cWScriptMan_restartLocalMission,
+ * cWScriptMan_cancelLocalMission and cWScriptMan_quitLocalMission) for the mission saved in +0x2B0: 1 updates the
+ * world, sends mission command 1, plays the big-challenge start audio (func_0029D6E0) and restarts the race; 2 sends
+ * command 3; 3 and 4 send commands 18 and 5, update the world and play the failure audio (cSSXAudio_BigChallengeFailed); 5 starts the
+ * playback preview (cPlaybackMan_startPreview), sends command 1 for rider 1 and updates the world; 6 sends 18 and updates the
+ * world. The request is then cleared (0, id -1).
+ */
 // Runs the pending gate action (replay, sounds, camera) and clears it.
 extern "C" void cWScriptMan_processLocalMissionCmd(void* vself)
 {
@@ -1780,6 +1925,15 @@ static inline void* lookup_309270(sRefWorld_309270* w, unsigned int id)
     return toObj_309270(set->refs[id >> 8] >> 8);
 }
 
+/**
+ * Runs the world script manager for one frame.
+ *
+ * Runs cWScriptMan_processLocalMissionCmd and clears the per-frame counters. Each process in the pending list (+0x2BC) is moved to the idle
+ * list and started. The event list at +0x40 is taken and emptied, and each event (with the instance for its id looked
+ * up when its low 16 flag bits are 0) is passed to every active process: func_003078C0 for process events (0x20000) and
+ * func_00307A10 for task events (0x10000). Finally every active process is updated with func_003077F8, each made
+ * current in turn.
+ */
 extern "C" void cWScriptMan_update(void* self)
 {
     cWScriptMan_processLocalMissionCmd(self);

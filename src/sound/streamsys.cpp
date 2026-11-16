@@ -87,12 +87,12 @@ extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D
 //100%
 INCLUDE_ASM("sound/streamsys", func_002A9DD8);
 #ifdef SKIP_ASM
-extern "C" void *func_002A9DD8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (8))) = arg1;
-    (*(int *)((char*)(arg0) + (0))) = 0;
-    (*(int *)((char*)(arg0) + (0x74))) = 0;
-    (*(int *)((char*)(arg0) + (0x78))) = 0;
-    return arg0;
+extern "C" void *func_002A9DD8(void *stream, int handle) {
+    (*(int *)((char*)(stream) + (8))) = handle;
+    (*(int *)((char*)(stream) + (0))) = 0;
+    (*(int *)((char*)(stream) + (0x74))) = 0;
+    (*(int *)((char*)(stream) + (0x78))) = 0;
+    return stream;
 }
 #endif
 
@@ -155,6 +155,13 @@ extern "C" void func_002A9ED8(void* self, int a, int b)
 //100%
 INCLUDE_ASM("sound/streamsys", cStreamInstance_SetBaseVolume__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets a stream instance's base volume.
+ *
+ * Stores the low byte of @p val at +0xC.
+ *
+ * @param val  the volume, 0..127 (On Tour Vol)
+ */
 void cStreamInstance_SetBaseVolume(void* self, int val)
 {
     *(char*)((char*)self + 0xC) = (char)val;
@@ -168,10 +175,10 @@ extern "C" void func_003B58A0();
 extern "C" void func_003B58D8();
 extern "C" void func_003B7FB8(int h, int v);
 
-extern "C" void func_002A9F38(void* self, int v)
+extern "C" void func_002A9F38(void* self, int pitch)
 {
     func_003B58A0();
-    func_003B7FB8(*(int*)((char*)self + 0x8), v);
+    func_003B7FB8(*(int*)((char*)self + 0x8), pitch);
     func_003B58D8();
 }
 #endif
@@ -192,17 +199,17 @@ extern "C" void func_002A9F80(void* self)
         *(int*)((char*)self + 0x80) = 0;
         return;
     }
-    float* p = *(float**)((char*)self + 0x10);
-    if (p != 0) {
-        int v = (int)((float)*(signed char*)((char*)self + 0xC) * *p);
-        if (v > 0x7F) {
-            v = 0x7F;
+    float* volumeScale = *(float**)((char*)self + 0x10);
+    if (volumeScale != 0) {
+        int volume = (int)((float)*(signed char*)((char*)self + 0xC) * *volumeScale);
+        if (volume > 0x7F) {
+            volume = 0x7F;
         }
-        if (v < 0) {
-            v = 0;
+        if (volume < 0) {
+            volume = 0;
         }
         func_003B58A0();
-        func_003B7E70(*(int*)((char*)self + 0x8), v);
+        func_003B7E70(*(int*)((char*)self + 0x8), volume);
         func_003B58D8();
     }
 }
@@ -220,11 +227,11 @@ int func_002AA020_impl(void* self, void* out) __asm__("func_002AA020");
 
 int func_002AA020_impl(void* self, void* out)
 {
-    int r;
+    int result;
     func_003B58A0();
-    r = func_003B7B48(*(int*)((char*)self + 0x8), out);
+    result = func_003B7B48(*(int*)((char*)self + 0x8), out);
     func_003B58D8();
-    return r;
+    return result;
 }
 #endif
 
@@ -242,13 +249,13 @@ int func_002AA068_impl(void* self, int a1, int* out) __asm__("func_002AA068");
 int func_002AA068_impl(void* self, int a1, int* out)
 {
     int buf[4];
-    int* p = out ? out : buf;
-    int r;
-    func_002AA020(self, p);
+    int* status = out ? out : buf;
+    int result;
+    func_002AA020(self, status);
     func_003B58A0();
-    r = func_003B7C40(p[1], a1);
+    result = func_003B7C40(status[1], a1);
     func_003B58D8();
-    return r;
+    return result;
 }
 #endif
 
@@ -393,9 +400,9 @@ INCLUDE_ASM("sound/streamsys", func_002AA240);
 #ifdef SKIP_ASM
 extern "C" void func_003B7D80(int, int);
 
-extern "C" void func_002AA240(void* self, int arg1)
+extern "C" void func_002AA240(void* self, int requestHandle)
 {
-    func_003B7D80(arg1, 0);
+    func_003B7D80(requestHandle, 0);
 }
 #endif
 //100%
@@ -424,18 +431,18 @@ extern "C" float func_002AA260(void* self)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA2B0);
 #ifdef SKIP_ASM
-extern "C" void func_002AA2B0(void *arg0) {
+extern "C" void func_002AA2B0(void *stream) {
     func_003B58A0();
-    func_003B7FB8((*(int *)((char*)(arg0) + (8))), 0);
+    func_003B7FB8((*(int *)((char*)(stream) + (8))), 0);
     func_003B58D8();
 }
 #endif
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA2E8);
 #ifdef SKIP_ASM
-extern "C" void func_002AA2E8(void *arg0) {
+extern "C" void func_002AA2E8(void *stream) {
     func_003B58A0();
-    func_003B7FB8((*(int *)((char*)(arg0) + (8))), 0x1000);
+    func_003B7FB8((*(int *)((char*)(stream) + (8))), 0x1000);
     func_003B58D8();
 }
 #endif
@@ -447,14 +454,14 @@ extern "C" int func_003B78D8(int h, int a, int buf, int off);
 extern "C" void func_003E2CE0(void* dec, int src, int a, int* out, int b);
 
 // PORT: buf is a pointer carried in an int (the unit's caller declares this function with int params).
-extern "C" int func_002AA320(void* self, int a, int buf, int off)
+extern "C" int func_002AA320(void* self, int holdTime, int buf, int off)
 {
     if (*(void**)((char*)self + 0x74) != 0) {
         int n;
         func_003E2CE0(*(void**)((char*)self + 0x74), buf, 0, &n, 0);
-        return func_003B78D8(*(int*)((char*)self + 0x8), a, (int)((char*)self + 0x14), off + n);
+        return func_003B78D8(*(int*)((char*)self + 0x8), holdTime, (int)((char*)self + 0x14), off + n);
     }
-    return func_003B78D8(*(int*)((char*)self + 0x8), a, buf, off);
+    return func_003B78D8(*(int*)((char*)self + 0x8), holdTime, buf, off);
 }
 #endif
 
@@ -463,13 +470,13 @@ extern "C" void* func_003B78F8(int);
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA398);
 #ifdef SKIP_ASM
-extern "C" int func_002AA398(void* self, int a, int b, int off)
+extern "C" int func_002AA398(void* self, int holdTime, int b, int off)
 {
     void* dec = *(void**)((char*)self + 0x74);
     if (dec != 0) {
         int n;
         func_003E2CE0(dec, 0, b, &n, 0);
-        return func_003B78D8(*(int*)((char*)self + 0x8), a, (int)((char*)self + 0x14), off + n);
+        return func_003B78D8(*(int*)((char*)self + 0x8), holdTime, (int)((char*)self + 0x14), off + n);
     }
     return 0;
 }
@@ -478,6 +485,11 @@ extern "C" int func_002AA398(void* self, int a, int b, int off)
 //100%
 INCLUDE_ASM("sound/streamsys", cStreamInstance_Purge__FPv);
 #ifdef SKIP_ASM
+/**
+ * Purges (stops and releases) a stream instance's stream.
+ *
+ * Calls func_003B78F8 (On Tour SNDSTRM_purge) on the stream handle at +0x8 and returns its result.
+ */
 void* cStreamInstance_Purge(void* self)
 {
     return func_003B78F8(*(int*)((char*)self + 0x8));
@@ -503,13 +515,13 @@ INCLUDE_ASM("sound/streamsys", func_002AA448);
 #ifdef SKIP_ASM
 extern "C" int func_003B80E0(int, int);
 
-extern "C" int func_002AA448(void *arg0, int arg1) {
-    int temp_16;
+extern "C" int func_002AA448(void *stream, int arg1) {
+    int result;
 
     func_003B58A0();
-    temp_16 = func_003B80E0((*(int *)((char*)(arg0) + (8))), arg1);
+    result = func_003B80E0((*(int *)((char*)(stream) + (8))), arg1);
     func_003B58D8();
-    return temp_16;
+    return result;
 }
 #endif
 
@@ -760,9 +772,9 @@ extern "C" void func_002A9E78(void*, int);
 
 extern "C" void func_002AAB98(void* self, int i, int val)
 {
-    void* e = (*(void***)((char*)self + 0x8))[i];
-    if (e != 0) {
-        func_002A9E78(e, val);
+    void* stream = (*(void***)((char*)self + 0x8))[i];
+    if (stream != 0) {
+        func_002A9E78(stream, val);
     }
 }
 #endif
@@ -774,9 +786,9 @@ extern "C" void func_002A9DF0(void* e, int a1);
 
 extern "C" void func_002AABD0(void* self, int i)
 {
-    void* e = (*(void***)((char*)self + 0x8))[i];
-    if (e != 0) {
-        func_002A9DF0(e, 3);
+    void* stream = (*(void***)((char*)self + 0x8))[i];
+    if (stream != 0) {
+        func_002A9DF0(stream, 3);
     }
     (*(void***)((char*)self + 0x8))[i] = 0;
 }
@@ -790,9 +802,9 @@ extern "C" void func_002A9F80(void* e);
 extern "C" void func_002AAC28(void* self)
 {
     for (int i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        void* e = (*(void***)((char*)self + 0x8))[i];
-        if (e != 0) {
-            func_002A9F80(e);
+        void* stream = (*(void***)((char*)self + 0x8))[i];
+        if (stream != 0) {
+            func_002A9F80(stream);
         }
     }
 }
@@ -807,9 +819,9 @@ extern "C" void func_002AAC98(void* self)
 {
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        void* p = *(void**)((char*)*(void**)((char*)self + 0x8) + i * 4);
-        if (p != 0) {
-            func_002AA2B0(p);
+        void* stream = *(void**)((char*)*(void**)((char*)self + 0x8) + i * 4);
+        if (stream != 0) {
+            func_002AA2B0(stream);
         }
     }
 }
@@ -823,9 +835,9 @@ extern "C" void func_002AAD08(void* self)
 {
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        void* p = *(void**)((char*)*(void**)((char*)self + 0x8) + i * 4);
-        if (p != 0) {
-            func_002AA2E8(p);
+        void* stream = *(void**)((char*)*(void**)((char*)self + 0x8) + i * 4);
+        if (stream != 0) {
+            func_002AA2E8(stream);
         }
     }
 }
@@ -836,11 +848,11 @@ INCLUDE_ASM("sound/streamsys", func_002AAD78);
 #ifdef SKIP_ASM
 extern "C" int func_002AA320(void* e, int a, int b, int c);
 
-extern "C" int func_002AAD78(void* self, int i, int a, int b, int c)
+extern "C" int func_002AAD78(void* self, int i, int holdTime, int buf, int offset)
 {
-    void* e = (*(void***)((char*)self + 0x8))[i];
-    if (e != 0) {
-        return func_002AA320(e, a, b, c);
+    void* stream = (*(void***)((char*)self + 0x8))[i];
+    if (stream != 0) {
+        return func_002AA320(stream, holdTime, buf, offset);
     }
     return -1;
 }
@@ -851,11 +863,11 @@ INCLUDE_ASM("sound/streamsys", func_002AADC0);
 #ifdef SKIP_ASM
 extern "C" int func_002AA398(void*, int, int, int);
 
-extern "C" int func_002AADC0(void* self, int idx, int arg2, int arg3, int arg4)
+extern "C" int func_002AADC0(void* self, int idx, int holdTime, int arg3, int offset)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
     if (stream != 0) {
-        return func_002AA398(stream, arg2, arg3, arg4);
+        return func_002AA398(stream, holdTime, arg3, offset);
     }
     return -1;
 }
@@ -868,9 +880,9 @@ extern "C" int func_002AA428(void*);
 
 extern "C" int func_002AAE08(void* self, int i)
 {
-    void* e = (*(void***)((char*)self + 0x8))[i];
-    if (e != 0) {
-        return func_002AA428(e);
+    void* stream = (*(void***)((char*)self + 0x8))[i];
+    if (stream != 0) {
+        return func_002AA428(stream);
     }
     return 0;
 }
@@ -881,9 +893,9 @@ INCLUDE_ASM("sound/streamsys", func_002AAE40);
 #ifdef SKIP_ASM
 extern "C" void func_002AAE40(void* self, int i)
 {
-    void* e = (*(void***)((char*)self + 0x8))[i];
-    if (e != 0) {
-        cStreamInstance_Purge(e);
+    void* stream = (*(void***)((char*)self + 0x8))[i];
+    if (stream != 0) {
+        cStreamInstance_Purge(stream);
     }
 }
 #endif
@@ -895,11 +907,11 @@ extern "C" float func_002AA108(void* self);
 
 extern "C" float func_002AAE78(void* self, int i)
 {
-    void* e;
-    if (i < 0 || (e = (*(void***)((char*)self + 0x8))[i]) == 0) {
+    void* stream;
+    if (i < 0 || (stream = (*(void***)((char*)self + 0x8))[i]) == 0) {
         return 0.0f;
     }
-    return func_002AA108(e);
+    return func_002AA108(stream);
 }
 #endif
 
@@ -922,10 +934,10 @@ INCLUDE_ASM("sound/streamsys", func_002AAF08);
 #ifdef SKIP_ASM
 extern "C" int func_002AA150(void*, int);
 
-extern "C" int func_002AAF08(void* self, int idx, int arg2)
+extern "C" int func_002AAF08(void* self, int idx, int minVal)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
-    return stream != 0 ? func_002AA150(stream, arg2) : 0;
+    return stream != 0 ? func_002AA150(stream, minVal) : 0;
 }
 #endif
 //100%
@@ -945,14 +957,14 @@ INCLUDE_ASM("sound/streamsys", func_002AAF78);
 // PORT: the unit declares func_003B7C40(int, int); this call passes an out buffer
 int func_003B7C40_pbuf(int h, int* out) __asm__("func_003B7C40");
 
-extern "C" int func_002AAF78(void* self, int h)
+extern "C" int func_002AAF78(void* self, int handle)
 {
     int st[4];
-    int r;
+    int result;
     func_003B58A0();
-    r = func_003B7C40_pbuf(h, st);
+    result = func_003B7C40_pbuf(handle, st);
     func_003B58D8();
-    return st[0] == 3 || r < 0;
+    return st[0] == 3 || result < 0;
 }
 #endif
 //100%
@@ -961,14 +973,14 @@ INCLUDE_ASM("sound/streamsys", func_002AAFD0);
 // PORT: the unit declares func_003B7C40(int, int); this call passes an out buffer
 int func_003B7C40_pbuf(int h, int* out) __asm__("func_003B7C40");
 
-extern "C" int func_002AAFD0(void* self, int h)
+extern "C" int func_002AAFD0(void* self, int handle)
 {
     int st[4];
-    int r;
+    int result;
     func_003B58A0();
-    r = func_003B7C40_pbuf(h, st);
+    result = func_003B7C40_pbuf(handle, st);
     func_003B58D8();
-    return st[0] == 2 && !(r < 0);
+    return st[0] == 2 && !(result < 0);
 }
 #endif
 
@@ -979,9 +991,9 @@ extern "C" int func_002AA1B8(void*);
 
 extern "C" int func_002AB028(void* self, int i)
 {
-    void* e = (*(void***)((char*)self + 0x8))[i];
-    if (e != 0) {
-        return func_002AA1B8(e);
+    void* stream = (*(void***)((char*)self + 0x8))[i];
+    if (stream != 0) {
+        return func_002AA1B8(stream);
     }
     return 0;
 }
@@ -1005,11 +1017,11 @@ INCLUDE_ASM("sound/streamsys", func_002AB098);
 #ifdef SKIP_ASM
 extern "C" void func_002AA240(void*, int);
 
-extern "C" void func_002AB098(void* self, int idx, int arg2)
+extern "C" void func_002AB098(void* self, int idx, int requestHandle)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
     if (stream != 0) {
-        func_002AA240(stream, arg2);
+        func_002AA240(stream, requestHandle);
     }
 }
 #endif
@@ -1019,9 +1031,9 @@ INCLUDE_ASM("sound/streamsys", func_002AB0D0);
 #ifdef SKIP_ASM
 extern "C" void func_002AB0D0(void* self, int i, int val)
 {
-    void* e = (*(void***)((char*)self + 0x8))[i];
-    if (e != 0) {
-        *(int*)((char*)e + 0x10) = val;
+    void* stream = (*(void***)((char*)self + 0x8))[i];
+    if (stream != 0) {
+        *(int*)((char*)stream + 0x10) = val;
     }
 }
 #endif
@@ -1042,9 +1054,9 @@ INCLUDE_ASM("sound/streamsys", func_002AB128);
 #ifdef SKIP_ASM
 extern "C" int func_002AB128(void* self, int idx)
 {
-    void* p = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
-    if (p != 0) {
-        return *(int*)((char*)p + 0x8);
+    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    if (stream != 0) {
+        return *(int*)((char*)stream + 0x8);
     }
     return -1;
 }
@@ -1057,9 +1069,9 @@ extern "C" int func_002AA210(void*);
 
 extern "C" int func_002AB150(void* self, int i)
 {
-    void* e = (*(void***)((char*)self + 0x8))[i];
-    if (e != 0) {
-        return func_002AA210(e);
+    void* stream = (*(void***)((char*)self + 0x8))[i];
+    if (stream != 0) {
+        return func_002AA210(stream);
     }
     return -1;
 }
@@ -1068,9 +1080,9 @@ extern "C" int func_002AB150(void* self, int i)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AB188__FPvi);
 #ifdef SKIP_ASM
-int func_002AB188(void* self, int a1)
+int func_002AB188(void* self, int index)
 {
-    return *(int*)((char*)*(void**)((char*)self + 0x8) + a1 * 4);
+    return *(int*)((char*)*(void**)((char*)self + 0x8) + index * 4);
 }
 #endif
 
@@ -1202,6 +1214,16 @@ extern const sSsVtblAB478 D_004837D8;
 extern const sSsVtblBB478 D_00483760;
 extern const sSsVtblCB478 D_004837A0;
 
+/**
+ * Destroys the sound controller and its bank, stream and monitor sub-systems.
+ *
+ * Hand-written g++ 2.95 virtual-base destruction: installs the cController vtables at +0x5558, +0x571C and +0xC and in
+ * the shared sound object (+0x118), then runs the sub-object destructors (func_002B0AE8, func_002B3398, func_002A6B50,
+ * func_002AA648, cBankManager__cBankManager, cSoundSys__cSoundSys) with this-adjusted temporary vtables, and deletes the object when
+ * bit 0 of @p flags is set.
+ *
+ * @param flags  g++ 2.95 in-charge flags; bit 0 deletes the object
+ */
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
 extern "C" void cController__cController(char* self, int flags)
 {
@@ -1259,12 +1281,22 @@ struct sStrmVoiceCb {
     void (cStrmCbOwner::*cb)(void* voice, float v);
 };
 
-extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float v)
+/**
+ * Updates one bank-monitor instance for a frame.
+ *
+ * Only when the instance is not free (cBankMonitorInstance_IsFree) and @p time is positive: calls the member-function callback at +0xA8
+ * on the controller (if set), then cBankMonitorInstance_Update3D with the controller's bank monitor (its sound object +0x1D8). Note the
+ * parameter named self is the controller, not this.
+ *
+ * @param self  the controller (On Tour cController* Monitor)
+ * @param time  elapsed time (On Tour Time)
+ */
+extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float time)
 {
-    if (cBankMonitorInstance_IsFree(voice) == 0 && v > 0.0f) {
+    if (cBankMonitorInstance_IsFree(voice) == 0 && time > 0.0f) {
         sStrmVoiceCb* sv = (sStrmVoiceCb*)voice;
         if (sv->cb) {
-            (((cStrmCbOwner*)self)->*(sv->cb))(voice, v);
+            (((cStrmCbOwner*)self)->*(sv->cb))(voice, time);
         }
         char* bm = 0;
         if (self) {
@@ -1274,7 +1306,7 @@ extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float v)
                 bm += 0x1D8;
             }
         }
-        cBankMonitorInstance_Update3D(voice, bm, v);
+        cBankMonitorInstance_Update3D(voice, bm, time);
     }
 }
 #endif
@@ -1284,13 +1316,21 @@ INCLUDE_ASM("sound/streamsys", cController_BANKMONITOR_Update);
 #ifdef SKIP_ASM
 extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float v);
 
-extern "C" void cController_BANKMONITOR_Update(void* self, float v)
+/**
+ * Updates all 64 bank-monitor instances.
+ *
+ * Uses a time of 0 when the bank monitor's pause flag (+0xAC0 of the sound object) is set, then calls cBankMonitorInstance_Update for
+ * each instance in the array at +0xAC4.
+ *
+ * @param time  elapsed time (On Tour Time)
+ */
+extern "C" void cController_BANKMONITOR_Update(void* self, float time)
 {
     if (*(int*)(**(char***)((char*)self + 0x118) + 0xAC0) != 0) {
-        v = 0.0f;
+        time = 0.0f;
     }
     for (int i = 0; i < 64; i++) {
-        cBankMonitorInstance_Update(*(char**)(**(char***)((char*)self + 0x118) + 0xAC4) + i * 0xC0, self, v);
+        cBankMonitorInstance_Update(*(char**)(**(char***)((char*)self + 0x118) + 0xAC4) + i * 0xC0, self, time);
     }
 }
 #endif
@@ -1312,15 +1352,15 @@ struct sStrmTick {
     int (cStrmTickOwner::*cb)(sStrmTick* e);
 };
 
-extern "C" void func_002AB828(void* e, void* self)
+extern "C" void func_002AB828(void* entry, void* self)
 {
-    sStrmTick* t = (sStrmTick*)e;
-    if (t->active) {
-        if ((t->count -= 10) < 5) {
-            if ((((cStrmTickOwner*)self)->*(t->cb))(t)) {
-                cMonitorInstance_Reset(t);
+    sStrmTick* tick = (sStrmTick*)entry;
+    if (tick->active) {
+        if ((tick->count -= 10) < 5) {
+            if ((((cStrmTickOwner*)self)->*(tick->cb))(tick)) {
+                cMonitorInstance_Reset(tick);
             } else {
-                t->count += t->period;
+                tick->count += tick->period;
             }
         }
     }
@@ -1362,10 +1402,10 @@ extern "C" void func_002AB958(void* self, float v)
     char** sys = (char**)((char*)self + 0x118);
     func_0028AAF8(*(void**)*sys);
     func_002A6D18(self);
-    char* b = *(char**)*sys;
-    char* o = b + 0x1D8;
-    sStrmVtEntF* e = &(*(sStrmVtEntF**)(b + 0xAB0))[5];
-    e->fn(o + e->delta, v);
+    char* bankMan = *(char**)*sys;
+    char* bankMon = bankMan + 0x1D8;
+    sStrmVtEntF* entry = &(*(sStrmVtEntF**)(bankMan + 0xAB0))[5];
+    entry->fn(bankMon + entry->delta, v);
     func_002B4388(sys);
     func_002B0C78((char*)self + 0x5560);
     func_002AAC28(*sys);
@@ -1409,6 +1449,15 @@ extern "C" int func_003B9FC8(int h);
 // PORT: the unit declares func_003B7C40(int, int); its second argument is a status buffer here.
 int func_003B7C40_st(int h, int* st) __asm__("func_003B7C40");
 
+/**
+ * Returns whether the instance's sound has finished playing.
+ *
+ * By the type at +0: 1 (sample) asks func_003B8AB8 under the sound critical section; 2 (sequence) checks func_003B9FC8
+ * for status 2 or an error; 3 (stream) reads the request status (func_003B7C40) and reports done when it is 3 or cannot
+ * be read. Any other type counts as done.
+ *
+ * @return nonzero when done
+ */
 extern "C" int cBankMonitorInstance_DonePlaying(void* self)
 {
     int type = *(int*)self;
@@ -1445,6 +1494,12 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Reset);
 #ifdef SKIP_ASM
 extern "C" void cBankMonitorInstance_StopSound(void*);
 
+/**
+ * Stops an instance's sound and returns it to the free state.
+ *
+ * Calls cBankMonitorInstance_StopSound, then sets the cached pitch (+0xB0) to 0x8000, the cached volume (+0xB4) to -1, the cached
+ * position (+0xB8) to 0xFFFF and clears the type (+0), the stopping flag (+0x54) and +0x58.
+ */
 extern "C" void cBankMonitorInstance_Reset(void* self)
 {
     cBankMonitorInstance_StopSound(self);
@@ -1463,6 +1518,14 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_IsFree);
 extern "C" int cBankMonitorInstance_DonePlaying(void* self);
 extern "C" void cBankMonitorInstance_Reset(void* self);
 
+/**
+ * Returns whether an instance is free, releasing it if its sound has finished.
+ *
+ * An instance with no type (+0) is free. One without the auto-release flag (+0x9C) is never free. Otherwise it is free
+ * once cBankMonitorInstance_DonePlaying says the sound is done, after cBankMonitorInstance_Reset resets it.
+ *
+ * @return nonzero when free
+ */
 extern "C" int cBankMonitorInstance_IsFree(void* self)
 {
     if (*(int*)self == 0) {
@@ -1482,11 +1545,11 @@ extern "C" int cBankMonitorInstance_IsFree(void* self)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002ABBD8);
 #ifdef SKIP_ASM
-extern "C" float func_002ABBD8(void* self, float* a, float* b)
+extern "C" float func_002ABBD8(void* self, float* posA, float* posB)
 {
-    float dx = a[0] - b[0];
-    float dy = a[1] - b[1];
-    float dz = a[2] - b[2];
+    float dx = posA[0] - posB[0];
+    float dy = posA[1] - posB[1];
+    float dz = posA[2] - posB[2];
     return dx * dx + dy * dy + dz * dz;
 }
 #endif
@@ -1497,6 +1560,17 @@ INCLUDE_ASM("sound/streamsys", ExpScale);
 // PORT: the unit declares ExpScale as void*(int); the body takes (int, float, float).
 int ExpScale_impl(int vol, float dist, float range) __asm__("ExpScale");
 
+/**
+ * Attenuates a volume by distance with a squared fall-off.
+ *
+ * The distance is reduced by 0.5 (not below 0); within @p range the result is vol * ((range - dist) / range)^2, beyond
+ * it (or for a non-positive range) 0.
+ *
+ * @param vol  the full volume (On Tour Vol)
+ * @param dist  the distance (On Tour Dist)
+ * @param range  the distance at which the sound vanishes (On Tour Vanish)
+ * @return the attenuated volume
+ */
 int ExpScale_impl(int vol, float dist, float range)
 {
     dist = dist - 0.5f;
@@ -1517,18 +1591,36 @@ extern "C" void* ExpScale(int);
 //99.29%
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Dist2Vol__FPvi);
 #ifdef SKIP_ASM
-void* cBankMonitorInstance_Dist2Vol(void* self, int a1)
+/**
+ * Converts a distance to a volume for this instance (forwards to ExpScale).
+ *
+ * The C declaration shows only the volume; the distance and vanish range pass through in $f12/$f13.
+ *
+ * @param vol  the full volume (On Tour Vol)
+ * @return the attenuated volume
+ */
+void* cBankMonitorInstance_Dist2Vol(void* self, int vol)
 {
-    return ExpScale(a1);
+    return ExpScale(vol);
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Doppler);
 #ifdef SKIP_ASM
-extern "C" float cBankMonitorInstance_Doppler(float a, float b)
+/**
+ * Returns the Doppler pitch factor for a change in distance over a time step.
+ *
+ * The speed @p delta / @p time is clamped to +-894.08 and mapped to (speed + 8000) / 8000. The object pointer is not used, so
+ * the C definition omits it.
+ *
+ * @param delta  change in distance (On Tour Delta)
+ * @param time  time step (On Tour Time)
+ * @return the pitch factor (1.0 for no motion)
+ */
+extern "C" float cBankMonitorInstance_Doppler(float delta, float time)
 {
-    float f = a / b;
+    float f = delta / time;
     if (f < -894.0799560546875f) {
         f = -894.0799560546875f;
     } else if (894.0799560546875f < f) {
@@ -1606,7 +1698,16 @@ extern "C" void func_003B58D8();
 extern "C" void func_003B8C00(int h, int pos, int a2);
 extern "C" void func_003B9C20(int h, int pos);
 
-extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int a2)
+/**
+ * Updates the 3D position (azimuth, elevation) of an instance's sound.
+ *
+ * Does nothing when the azimuth differs from the cached one (+0xB8) by less than 0x200; otherwise caches it and, by
+ * type, calls func_003B8C00 (sample), func_003B9C20 (sequence) or func_002A9ED8 (stream at +0xC).
+ *
+ * @param pos  the azimuth (On Tour Azimuth)
+ * @param elevation  the elevation (On Tour Elevation)
+ */
+extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int elevation)
 {
     int d = pos - *(int*)((char*)self + 0xB8);
     if (d >= -0x1FF && d <= 0x1FF) {
@@ -1616,7 +1717,7 @@ extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int a2)
     switch (*(int*)self) {
     case 1:
         func_003B58A0();
-        func_003B8C00(*(int*)((char*)self + 0x4), pos, a2);
+        func_003B8C00(*(int*)((char*)self + 0x4), pos, elevation);
         func_003B58D8();
         break;
     case 2:
@@ -1625,7 +1726,7 @@ extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int a2)
         func_003B58D8();
         break;
     case 3:
-        func_002A9ED8(*(void**)((char*)self + 0xC), pos, a2);
+        func_002A9ED8(*(void**)((char*)self + 0xC), pos, elevation);
         break;
     }
 }
@@ -1640,6 +1741,15 @@ extern "C" void func_003B58D8();
 extern "C" void func_003B8790(int h, int vol);
 extern "C" void func_003B9B68(int h, int vol);
 
+/**
+ * Sets the pitch multiplier of an instance's sound.
+ *
+ * The value is clamped to 0..0x3FFF (0x1000 = normal pitch) and ignored when within 0xFF of the cached pitch at +0xB0;
+ * otherwise it is cached and applied by type: func_003B8790 (sample), func_003B9B68 (sequence) or func_002A9F38 (stream
+ * at +0xC). Note the parameter is named vol but is a pitch.
+ *
+ * @param vol  the pitch multiplier, 4.12 fixed point (On Tour Pitch)
+ */
 extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int vol)
 {
     if (vol > 0x3FFF) {
@@ -1683,6 +1793,15 @@ extern "C" void func_003B89E0(int h);
 extern "C" void func_003B9920(int h);
 extern "C" void func_003B9E48(int h, int a);
 
+/**
+ * Sets the volume of an instance's sound, or stops it for -1.
+ *
+ * The volume is scaled by the factor at +0x90 when that is non-negative, clamped to 0..127 and ignored when within 4 of
+ * the cached volume at +0xB4. A requested -1 stops the sound instead: func_003B89E0 (sample), func_003B9920 (sequence)
+ * or cStreamInstance_Purge__FPv (stream); other values go to func_003B85F0, func_003B9E48 or cStreamInstance_SetBaseVolume__FPvi.
+ *
+ * @param vol  the volume 0..127, or -1 to stop (On Tour Vol)
+ */
 extern "C" void cBankMonitorInstance_VolUpdate(void* self, int vol)
 {
     int orig = vol;
@@ -1763,6 +1882,12 @@ extern "C" void func_003B58D8();
 extern "C" void func_003B8530(int h, int a, int b);
 extern "C" void func_003B9F38(int h, int a, int b);
 
+/**
+ * Starts fading an instance's sound out.
+ *
+ * Does nothing when already stopping (+0x54). Otherwise clears +0x8, sets +0x54 and starts an automatic volume ramp
+ * (0x19, -1) on the sample (func_003B8530) or sequence (func_003B9F38).
+ */
 extern "C" void cBankMonitorInstance_StopSound(void* self)
 {
     if (*(int*)((char*)self + 0x54) != 0) {
@@ -1907,20 +2032,29 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_CheckActive);
 extern "C" void cBankMonitorInstance_StopSound(void*);
 extern "C" void func_002AC220(void*);
 
-extern "C" int cBankMonitorInstance_CheckActive(void* self, float t)
+/**
+ * Starts or stops an instance's sound as it crosses its audible distance.
+ *
+ * With no limit (+0x8C == 0) the sound is always active. A playing sound (+0x8 set) farther than the limit is stopped
+ * (cBankMonitorInstance_StopSound, returns 0); a silent one within it is restarted (func_002AC220, returns 1).
+ *
+ * @param radius  the current distance (On Tour Radius)
+ * @return nonzero while the sound should play
+ */
+extern "C" int cBankMonitorInstance_CheckActive(void* self, float radius)
 {
     float th = *(float*)((char*)self + 0x8C);
     if (th == 0.0f) {
         return 1;
     }
     if (*(int*)((char*)self + 0x8) != 0) {
-        if (th < t) {
+        if (th < radius) {
             cBankMonitorInstance_StopSound(self);
             return 0;
         }
         return 1;
     }
-    if (t < th) {
+    if (radius < th) {
         func_002AC220(self);
         return 1;
     }
@@ -1970,7 +2104,21 @@ static inline float Sqrt_C868(float x)
     return r;
 }
 
-extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float v)
+/**
+ * Updates the 3D audio of an instance: Doppler pitch, position and distance volume.
+ *
+ * Streams whose request has not started are skipped. For a positioned instance (+0x68) when the monitor has 3D enabled
+ * (+0x8E4), the distance is the square root of the monitor's virtual slot 6; the sound is started/stopped by
+ * cBankMonitorInstance_CheckActive, and while active the Doppler factor (cBankMonitorInstance_Doppler, from the previous distance at +0x5C, when +0x8E0
+ * enables it), azimuth/elevation (cBankMonitorInstance_PosUpdate), pitch (cBankMonitorInstance_PitchUpdate, factor * 4096) and volume (cBankMonitorInstance_Dist2Vol__FPvi over
+ * the range at +0x88, default 30, rescaled by 127 / the maximum at +0x98) are applied. Otherwise the fixed volume at
+ * +0x64 is used. The volume is multiplied by the optional factor at +0x60 and set with cBankMonitorInstance_VolUpdate; a stopping
+ * instance whose sound is done (cBankMonitorInstance_DonePlaying) is cleared instead.
+ *
+ * @param bm  the bank monitor (On Tour Monitor)
+ * @param time  elapsed time (On Tour Time)
+ */
+extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float time)
 {
     char* s = (char*)voice;
     char* b = (char*)bm;
@@ -1993,12 +2141,12 @@ extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float v)
         if (*(int*)(s + 0x94) != 0 || cBankMonitorInstance_CheckActive_3(voice, bm, d) != 0) {
             float f = *(float*)(s + 0x5C);
             if (f != -1.0f && *(int*)(b + 0x8E0) != 0) {
-                v = cBankMonitorInstance_Doppler_3(voice, f - d, v);
+                time = cBankMonitorInstance_Doppler_3(voice, f - d, time);
             } else {
-                v = 1.0f;
+                time = 1.0f;
             }
             cBankMonitorInstance_PosUpdate(voice, pos.pos, pos.pos2);
-            cBankMonitorInstance_PitchUpdate(voice, (int)(v * 4096.0f));
+            cBankMonitorInstance_PitchUpdate(voice, (int)(time * 4096.0f));
             if (*(int*)(s + 0x94) != 0) {
                 vol = *(int*)(s + 0x64);
             } else {
@@ -2054,6 +2202,12 @@ extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
 extern "C" void cBankMonitorInstance_VolUpdate(void* self, int a1);
 extern "C" void func_003B9D00(int h);
 
+/**
+ * Pauses an instance's sound.
+ *
+ * For a non-free instance that is not stopping: sets pitch and volume to 0 and, for a sequence (type 2), pauses it with
+ * func_003B9D00.
+ */
 extern "C" void cBankMonitorInstance_Pause(void* self)
 {
     if (cBankMonitorInstance_IsFree(self) == 0 && *(int*)((char*)self + 0x54) == 0) {
@@ -2096,9 +2250,21 @@ extern "C" void func_003B9F38(int h, int a, int b);
 void* cStreamInstance_Purge(void* self);
 void cStreamInstance_SetBaseVolume(void* self, int val);
 
-extern "C" void cBankMonitorInstance_Fade(void* self, int n, int a2, float t)
+/**
+ * Fades an instance's sound to a volume level over a duration, or out and stopped for level -1.
+ *
+ * When @p resetMonitor is set the instance is flagged for release (+0x58, +0x9C). A stopping instance is left alone. Level -1
+ * marks it stopping; other levels are clamped to 0..127. Samples and sequences ramp over duration * 100 ticks
+ * (func_003B8530, func_003B9F38) or jump at once when the duration is 0 (func_003B85F0, func_003B9E48); streams are
+ * purged when stopping or get the level as base volume.
+ *
+ * @param n  the target volume 0..127, or -1 to stop (On Tour Level)
+ * @param resetMonitor  nonzero to release the instance afterwards (On Tour ResetMonitor)
+ * @param duration  the fade time in seconds (On Tour Duration)
+ */
+extern "C" void cBankMonitorInstance_Fade(void* self, int n, int resetMonitor, float duration)
 {
-    if (a2) {
+    if (resetMonitor) {
         *(int*)((char*)self + 0x58) = 1;
         *(int*)((char*)self + 0x9C) = 1;
     }
@@ -2118,8 +2284,8 @@ extern "C" void cBankMonitorInstance_Fade(void* self, int n, int a2, float t)
     switch (*(int*)self) {
     case 1:
         func_003B58A0();
-        if (t != 0.0f) {
-            func_003B8530(*(int*)((char*)self + 0x4), (int)(t * 100.0f), n);
+        if (duration != 0.0f) {
+            func_003B8530(*(int*)((char*)self + 0x4), (int)(duration * 100.0f), n);
         } else {
             func_003B85F0(*(int*)((char*)self + 0x4), n);
         }
@@ -2127,8 +2293,8 @@ extern "C" void cBankMonitorInstance_Fade(void* self, int n, int a2, float t)
         break;
     case 2:
         func_003B58A0();
-        if (t != 0.0f) {
-            func_003B9F38(*(int*)((char*)self + 0x4), (int)(t * 100.0f), n);
+        if (duration != 0.0f) {
+            func_003B9F38(*(int*)((char*)self + 0x4), (int)(duration * 100.0f), n);
         } else {
             func_003B9E48(*(int*)((char*)self + 0x4), n);
         }

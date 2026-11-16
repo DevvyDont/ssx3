@@ -91,6 +91,16 @@ INCLUDE_ASM("world/worldview", cWorldView_loadSection);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sViewEnt_3A98C8 { int state; float value; };
 struct sView_3A98C8 { int f0; char* info; char pad8[0xC]; sViewEnt_3A98C8 ents[1]; };
+/**
+ * Asks the world view to stream in a world section.
+ *
+ * If the view has section info and @p idx is below its section count, stores @p value as the section's priority and
+ * moves its state 0 (unloaded) to 1 (load requested) and 3 to 5; in state 4 the request is refused.
+ *
+ * @param idx  section id (On Tour id)
+ * @param value  load priority (On Tour fPriority)
+ * @return 0 when the section is in state 4, else 1
+ */
 extern "C" int cWorldView_loadSection(sView_3A98C8* self, unsigned int idx, float value)
 {
     if (self->info != 0 && idx < *(unsigned int*)(self->info + 8)) {
@@ -657,6 +667,15 @@ extern void* cChunkResolve_vtbl[];
 // PORT: the unit declares this `void`, but the body returns self ($2); bound via asm label.
 cChunkResolve_cChunkResolve_sView* cChunkResolve_cChunkResolve_impl(cChunkResolve_cChunkResolve_sView* self) __asm__("cChunkResolve_cChunkResolve");
 
+/**
+ * Constructs the stream chunk resolver and resets its shared state.
+ *
+ * Sets cChunkResolve_vtbl, clears +0x0, initializes the static state D_00508F50 on first use, points the resolver at it
+ * and zeroes it with MEM_fill, then sets its ids to -1, each of its 24 entries to (1000.0, 0.5, 0, -1) and its flag
+ * bits.
+ *
+ * @return this
+ */
 cChunkResolve_cChunkResolve_sView* cChunkResolve_cChunkResolve_impl(cChunkResolve_cChunkResolve_sView* self)
 {
     self->vt = cChunkResolve_vtbl;
@@ -744,25 +763,35 @@ struct cChunkResolve_resolveModelHeirarchy_sEnt {
 
 extern char t4mat_Identity[];
 
+/**
+ * Fixes up the pointers of a model's mesh hierarchy after it is loaded.
+ *
+ * For each of the @p pModel +0x4 entries in the array at +0x8: a mesh offset is made absolute and passed to virtual slot 7
+ * with the model, a matrix offset of -1 becomes t4mat_Identity (otherwise made absolute), and an animation offset is
+ * made absolute and passed to virtual slot 11 with the model as base.
+ *
+ * @param pModel  the loaded model record (On Tour pModel)
+ * @return 1
+ */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve_resolveModelHeirarchy_cObj* self, void* a1)
+extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve_resolveModelHeirarchy_cObj* self, void* pModel)
 {
-    int n = *(int*)((char*)a1 + 0x4);
-    cChunkResolve_resolveModelHeirarchy_sEnt* e = *(cChunkResolve_resolveModelHeirarchy_sEnt**)((char*)a1 + 0x8);
+    int n = *(int*)((char*)pModel + 0x4);
+    cChunkResolve_resolveModelHeirarchy_sEnt* e = *(cChunkResolve_resolveModelHeirarchy_sEnt**)((char*)pModel + 0x8);
     int i;
     for (i = 0; i < n; i++, e++) {
         if (e->f4 != 0) {
-            e->f4 += (int)a1;
-            self->v07((void*)e->f4, a1);
+            e->f4 += (int)pModel;
+            self->v07((void*)e->f4, pModel);
         }
         if (e->fC == 0xFFFFFFFF) {
             e->fC = (unsigned int)t4mat_Identity;
         } else {
-            e->fC += (int)a1;
+            e->fC += (int)pModel;
         }
         if (e->f8 != 0) {
-            e->f8 += (int)a1;
-            self->v11((void*)e->f8, a1);
+            e->f8 += (int)pModel;
+            self->v11((void*)e->f8, pModel);
         }
     }
     return 1;
@@ -786,12 +815,22 @@ public:
     virtual int v08(void* p, int base);
 };
 
+/**
+ * Fixes up a mesh's context pointers after its model is loaded.
+ *
+ * Adds @p base to the table pointer at @p pMesh +0x20 and to each of its @p pMesh +0x1C entries, passing every entry to
+ * virtual slot 8 with @p base.
+ *
+ * @param pMesh  the mesh record (On Tour pMesh)
+ * @param base  the model record its offsets are relative to (On Tour pModel)
+ * @return 1
+ */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveMesh(cChunkResolve_resolveMesh_cObj* self, void* a1, int base)
+extern "C" int cChunkResolve_resolveMesh(cChunkResolve_resolveMesh_cObj* self, void* pMesh, int base)
 {
     int i = 0;
-    int* p = (int*)(*(int*)((char*)a1 + 0x20) += base);
-    for (; i < *(int*)((char*)a1 + 0x1C); i++) {
+    int* p = (int*)(*(int*)((char*)pMesh + 0x20) += base);
+    for (; i < *(int*)((char*)pMesh + 0x1C); i++) {
         *p += base;
         self->v08((void*)*p++, base);
     }
@@ -823,11 +862,19 @@ public:
     virtual int v15(void* a1);
 };
 
+/**
+ * Fixes up a particle model's pointers after it is loaded.
+ *
+ * Adds the record's address to the offset at +0x8 and calls virtual slot 15 with the record.
+ *
+ * @param pModel  the particle model record (On Tour pModel)
+ * @return 1
+ */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveParticleModel(cChunkResolve_resolveParticleModel_cObj* self, void* a1)
+extern "C" int cChunkResolve_resolveParticleModel(cChunkResolve_resolveParticleModel_cObj* self, void* pModel)
 {
-    *(int*)((char*)a1 + 0x8) += (int)a1;
-    self->v15(a1);
+    *(int*)((char*)pModel + 0x8) += (int)pModel;
+    self->v15(pModel);
     return 1;
 }
 #endif
@@ -866,24 +913,34 @@ struct cChunkResolve_resolveParticleModelHeirarchy_sEnt {
 
 extern char t4mat_Identity[];
 
+/**
+ * Fixes up the pointers of a particle model's mesh hierarchy.
+ *
+ * For each of the @p pModel +0x4 entries in the array at +0x8: a mesh offset is made absolute and passed to virtual slot
+ * 16, a matrix offset of -1 becomes t4mat_Identity (otherwise made absolute), and an animation offset is made absolute
+ * and passed to virtual slot 11 with a base of 0 (cChunkResolve_resolveModelHeirarchy passes the model).
+ *
+ * @param pModel  the particle model record (On Tour pModel)
+ * @return 1
+ */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve_resolveParticleModelHeirarchy_cObj* self, void* a1)
+extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve_resolveParticleModelHeirarchy_cObj* self, void* pModel)
 {
-    int n = *(int*)((char*)a1 + 0x4);
-    cChunkResolve_resolveParticleModelHeirarchy_sEnt* e = *(cChunkResolve_resolveParticleModelHeirarchy_sEnt**)((char*)a1 + 0x8);
+    int n = *(int*)((char*)pModel + 0x4);
+    cChunkResolve_resolveParticleModelHeirarchy_sEnt* e = *(cChunkResolve_resolveParticleModelHeirarchy_sEnt**)((char*)pModel + 0x8);
     int i;
     for (i = 0; i < n; i++, e++) {
         if (e->f4 != 0) {
-            e->f4 += (int)a1;
+            e->f4 += (int)pModel;
             self->v16((void*)e->f4);
         }
         if (e->fC == 0xFFFFFFFF) {
             e->fC = (unsigned int)t4mat_Identity;
         } else {
-            e->fC += (int)a1;
+            e->fC += (int)pModel;
         }
         if (e->f8 != 0) {
-            e->f8 += (int)a1;
+            e->f8 += (int)pModel;
             self->v11((void*)e->f8, 0);
         }
     }
@@ -894,9 +951,17 @@ extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve_resolve
 //100%
 INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleMesh);
 #ifdef SKIP_ASM
-extern "C" int cChunkResolve_resolveParticleMesh(void* self, void* a1)
+/**
+ * Fixes up a particle mesh's data pointer.
+ *
+ * Adds the record's address to the offset at +0x20.
+ *
+ * @param pMesh  the particle mesh record (On Tour pMesh)
+ * @return 1
+ */
+extern "C" int cChunkResolve_resolveParticleMesh(void* self, void* pMesh)
 {
-    *(int*)((char*)a1 + 0x20) += (int)a1;
+    *(int*)((char*)pMesh + 0x20) += (int)pMesh;
     return 1;
 }
 #endif
@@ -904,10 +969,19 @@ extern "C" int cChunkResolve_resolveParticleMesh(void* self, void* a1)
 //100%
 INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleInstance);
 #ifdef SKIP_ASM
+/**
+ * Resolves a particle instance's model reference after its section is loaded.
+ *
+ * The id at @p pInstance +0x64 selects a section (low byte) and an entry (upper bits) of the cache table; the entry's address
+ * (its value >> 8, times 4) replaces the id, or 0 when the section is not loaded or the entry is empty.
+ *
+ * @param pInstance  the particle instance record (On Tour pInstance)
+ * @return 1
+ */
 // PORT: decodes an int handle into a pointer ((void*)(i << 2)); not 64-bit safe.
-extern "C" int cChunkResolve_resolveParticleInstance(void* self, void* a1)
+extern "C" int cChunkResolve_resolveParticleInstance(void* self, void* pInstance)
 {
-    unsigned int h = *(unsigned int*)((char*)a1 + 0x64);
+    unsigned int h = *(unsigned int*)((char*)pInstance + 0x64);
     char* sec = (*(char***)(**(char***)self + 8))[h & 0xFF];
     void* res;
     unsigned int i;
@@ -916,8 +990,8 @@ extern "C" int cChunkResolve_resolveParticleInstance(void* self, void* a1)
     } else {
         res = (void*)(i << 2);
     }
-    *(void**)((char*)a1 + 0x64) = res;
-    *(int*)((char*)a1 + 0x84) = 0;
+    *(void**)((char*)pInstance + 0x64) = res;
+    *(int*)((char*)pInstance + 0x84) = 0;
     return 1;
 }
 #endif
@@ -925,13 +999,21 @@ extern "C" int cChunkResolve_resolveParticleInstance(void* self, void* a1)
 //100%
 INCLUDE_ASM("world/worldview", cChunkResolve_resolveMaterial);
 #ifdef SKIP_ASM
+/**
+ * Fixes up a material record's data pointer.
+ *
+ * Sets @p pMaterial +0x10 to 0 when it holds -1, otherwise to the address of the data that follows at +0x14.
+ *
+ * @param pMaterial  the material record (On Tour pMaterial)
+ * @return 1
+ */
 // PORT: stores a pointer in an int field (int typing needed to match); not 64-bit safe.
-extern "C" int cChunkResolve_resolveMaterial(void* self, void* a1)
+extern "C" int cChunkResolve_resolveMaterial(void* self, void* pMaterial)
 {
-    if (*(int*)((char*)a1 + 0x10) == -1) {
-        *(int*)((char*)a1 + 0x10) = 0;
+    if (*(int*)((char*)pMaterial + 0x10) == -1) {
+        *(int*)((char*)pMaterial + 0x10) = 0;
     } else {
-        *(int*)((char*)a1 + 0x10) = (int)((char*)a1 + 0x14);
+        *(int*)((char*)pMaterial + 0x10) = (int)((char*)pMaterial + 0x14);
     }
     return 1;
 }
@@ -940,6 +1022,17 @@ extern "C" int cChunkResolve_resolveMaterial(void* self, void* a1)
 //100%
 INCLUDE_ASM("world/worldview", cChunkResolve_resolveMaterialBlocks);
 #ifdef SKIP_ASM
+/**
+ * Resolves the material references of a list of material blocks.
+ *
+ * Each of the @p n blocks starts with a count followed by that many ids; every id (section in the low byte, entry in
+ * the upper bits) is replaced by the cached material's address, or 0 when its section is not loaded or the entry is
+ * empty. The next block follows the last id.
+ *
+ * @param n  number of blocks (On Tour iNumBlocks)
+ * @param data  the first block (On Tour pMaterialBlocks)
+ * @return 1
+ */
 // PORT: decodes int handles into pointers ((void*)(i << 2)); not 64-bit safe.
 extern "C" int cChunkResolve_resolveMaterialBlocks(void* self, int n, int* data)
 {
@@ -986,12 +1079,22 @@ public:
     virtual int v12(void* p, int base);
 };
 
+/**
+ * Fixes up an animation's channel pointers.
+ *
+ * Adds @p base to the table pointer at @p pAnimation +0x20 and to each of its @p pAnimation +0x1C entries, passing every channel to
+ * virtual slot 12 with @p base.
+ *
+ * @param pAnimation  the animation record (On Tour pAnimation)
+ * @param base  address its offsets are relative to (On Tour pBase)
+ * @return 1
+ */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveAnimation(cChunkResolve_resolveAnimation_cObj* self, void* a1, int base)
+extern "C" int cChunkResolve_resolveAnimation(cChunkResolve_resolveAnimation_cObj* self, void* pAnimation, int base)
 {
     int i = 0;
-    int* p = (int*)(*(int*)((char*)a1 + 0x20) += base);
-    for (; i < *(int*)((char*)a1 + 0x1C); i++) {
+    int* p = (int*)(*(int*)((char*)pAnimation + 0x20) += base);
+    for (; i < *(int*)((char*)pAnimation + 0x1C); i++) {
         *p += base;
         self->v12((void*)*p++, base);
     }
@@ -1002,9 +1105,18 @@ extern "C" int cChunkResolve_resolveAnimation(cChunkResolve_resolveAnimation_cOb
 //100%
 INCLUDE_ASM("world/worldview", cChunkResolve_resolveChannel);
 #ifdef SKIP_ASM
-extern "C" int cChunkResolve_resolveChannel(void* self, void* a1, int a2)
+/**
+ * Fixes up an animation channel's data pointer.
+ *
+ * Adds @p pBase to the offset at @p pChannel +0x4.
+ *
+ * @param pChannel  the channel record (On Tour pChannel)
+ * @param pBase  address the offset is relative to (On Tour pBase)
+ * @return 1
+ */
+extern "C" int cChunkResolve_resolveChannel(void* self, void* pChannel, int pBase)
 {
-    *(int*)((char*)a1 + 0x4) += a2;
+    *(int*)((char*)pChannel + 0x4) += pBase;
     return 1;
 }
 #endif
@@ -1056,6 +1168,16 @@ struct cChunkResolve_resolveSpline_sNode {
     char pad6C[0x90 - 0x6C];
 };
 
+/**
+ * Links a loaded spline's segments together.
+ *
+ * Points +0x24 at the segment array at +0x30. For each of the +0x20 segments (0x90 bytes each), a previous or next
+ * index that is not -1 becomes a pointer to the neighbouring segment (wrapping around the ends), -1 becomes 0, and
+ * +0x68 is set to the spline.
+ *
+ * @param list  the spline record (On Tour pSpline)
+ * @return 1
+ */
 // PORT: stores pointers in int fields (int typing needed to match); not 64-bit safe.
 extern "C" int cChunkResolve_resolveSpline(void* self, void* list)
 {
@@ -1118,43 +1240,55 @@ struct sChunk_3AAA08 {
     char* items;            // 0xC
 };
 
-extern "C" int cChunkResolve_resolveCollideModel(void* self, void* ctx, sChunk_3AAA08* c)
+/**
+ * Builds a collision model's runtime data after it is loaded.
+ *
+ * Offsets of -1 at +0x4 (data), +0x8 (list) and +0xC (items) become 0, others become pointers into the record. For type
+ * 3 the list gets the record's mesh count and item array; every 0x140-byte item is initialized with SphereTree_init and
+ * then loaded from consecutive data with bxSphereTree_Load. For type 1 each mesh's four offsets are made absolute and
+ * stored in the item array.
+ *
+ * @param ctx  resource id of the model, passed on to bxSphereTree_Load (On Tour RID)
+ * @param pCollideModel  the collision model record (On Tour pCollideModel)
+ * @return 1
+ */
+extern "C" int cChunkResolve_resolveCollideModel(void* self, void* ctx, sChunk_3AAA08* pCollideModel)
 {
-    if ((int)c->data == -1) {
-        c->data = 0;
+    if ((int)pCollideModel->data == -1) {
+        pCollideModel->data = 0;
     } else {
-        c->data = (char*)c + (int)c->data;
+        pCollideModel->data = (char*)pCollideModel + (int)pCollideModel->data;
     }
-    if ((int)c->list == -1) {
-        c->list = 0;
+    if ((int)pCollideModel->list == -1) {
+        pCollideModel->list = 0;
     } else {
-        c->list = (sList_3AAA08*)((char*)c + (int)c->list);
+        pCollideModel->list = (sList_3AAA08*)((char*)pCollideModel + (int)pCollideModel->list);
     }
-    if ((int)c->items == -1) {
-        c->items = 0;
+    if ((int)pCollideModel->items == -1) {
+        pCollideModel->items = 0;
     } else {
-        c->items = (char*)c + (int)c->items;
+        pCollideModel->items = (char*)pCollideModel + (int)pCollideModel->items;
     }
-    if (c->type == 3) {
-        sList_3AAA08* l = c->list;
+    if (pCollideModel->type == 3) {
+        sList_3AAA08* l = pCollideModel->list;
         l->count = 0;
         l->items = 0;
-        l->count = c->n;
-        l->items = c->items;
+        l->count = pCollideModel->n;
+        l->items = pCollideModel->items;
         for (int i = 0; i < l->count; i++) {
             SphereTree_init(l->items + i * 0x140);
         }
-        char* data = c->data;
+        char* data = pCollideModel->data;
         for (int i = 0; i < l->count; i++) {
             data += bxSphereTree_Load(l->items + i * 0x140, data, ctx);
         }
-    } else if (c->type == 1) {
-        sList_3AAA08* l = c->list;
+    } else if (pCollideModel->type == 1) {
+        sList_3AAA08* l = pCollideModel->list;
         l->count = 0;
         l->items = 0;
-        l->count = c->n;
-        l->items = c->items;
-        sNode_3AAA08* node = (sNode_3AAA08*)c->data;
+        l->count = pCollideModel->n;
+        l->items = pCollideModel->items;
+        sNode_3AAA08* node = (sNode_3AAA08*)pCollideModel->data;
         for (int i = 0; i < l->count; i++) {
             ((sNode_3AAA08**)l->items)[i] = node;
             node->p4 = (char*)node + (int)node->p4;
@@ -1185,6 +1319,15 @@ struct cChunkResolve_resolveHalo_sObj {
     int field_0x44;
 };
 
+/**
+ * Sets up a light halo's bounds after it is loaded.
+ *
+ * Gets the radius for the halo type (flags & 0x70) from func_003AD230, clears +0x40 and +0x44 and sets the box
+ * +0x28..+0x3C to the position at +0x1C plus or minus that radius.
+ *
+ * @param obj  the halo record (On Tour pLightHalo)
+ * @return 1
+ */
 extern "C" int cChunkResolve_resolveHalo(void* self, cChunkResolve_resolveHalo_sObj* obj)
 {
     float r = func_003AD230_f(obj->flags & 0x70);
@@ -1203,6 +1346,15 @@ extern "C" int cChunkResolve_resolveHalo(void* self, cChunkResolve_resolveHalo_s
 //100%
 INCLUDE_ASM("world/worldview", cChunkResolve_resolveLight);
 #ifdef SKIP_ASM
+/**
+ * Accepts a loaded real-time light, limiting its range.
+ *
+ * Returns 0 for a light with flag 0x100 or a type (+0x10) other than 1 or 2; otherwise caps the range at +0x1C to 5000
+ * and returns 1.
+ *
+ * @param obj  the light record (On Tour pRTLight)
+ * @return 1 when the light is used, else 0
+ */
 extern "C" int cChunkResolve_resolveLight(void* self, void* obj)
 {
     if (*(int*)((char*)obj + 0xC) & 0x100) {
@@ -1224,12 +1376,18 @@ extern "C" int cChunkResolve_resolveLight(void* self, void* obj)
 //100%
 INCLUDE_ASM("world/worldview", cChunkResolve_unresolveLight);
 #ifdef SKIP_ASM
-extern "C" int cChunkResolve_unresolveLight(void* self, void* a1)
+/**
+ * Tells whether a real-time light being unloaded was one the resolver accepted.
+ *
+ * @param pRTLight  the light record (On Tour pRTLight)
+ * @return 1 for a light of type 1 or 2 without flag 0x100, else 0
+ */
+extern "C" int cChunkResolve_unresolveLight(void* self, void* pRTLight)
 {
-    if (*(int*)((char*)a1 + 0xC) & 0x100) {
+    if (*(int*)((char*)pRTLight + 0xC) & 0x100) {
         return 0;
     }
-    switch (*(int*)((char*)a1 + 0x10)) {
+    switch (*(int*)((char*)pRTLight + 0x10)) {
     case 1:
     case 2:
         return 1;
@@ -1244,24 +1402,24 @@ INCLUDE_ASM("world/worldview", func_003AACE0);
 extern "C" float func_0040D758(float);
 extern "C" float func_0040DA10(float);
 
-extern "C" float func_003AACE0(void* self, void* p, float arg)
+extern "C" float func_003AACE0(void* self, void* p, float divisor)
 {
     float prod = *(float*)((char*)p + 0x14) * *(float*)((char*)p + 0x18);
-    float v = prod / arg;
+    float ratio = prod / divisor;
     switch (*(char*)((char*)p + 0x64)) {
     case 1:
-        return v * 100.0f;
+        return ratio * 100.0f;
     case 2: {
-        float r;
+        float root;
         // PORT: sqrt.s (sqrtf without errno check)
-        __asm__("sqrt.s %0, %1" : "=f"(r) : "f"(v));
-        return r * 100.0f;
+        __asm__("sqrt.s %0, %1" : "=f"(root) : "f"(ratio));
+        return root * 100.0f;
     }
     case 3:
     {
         float third = 0.33333334f;
-        float l = func_0040DA10(v);
-        return func_0040D758(l * third) * 100.0f;
+        float logRatio = func_0040DA10(ratio);
+        return func_0040D758(logRatio * third) * 100.0f;
     }
     default:
         return 1e7f;
@@ -1335,6 +1493,9 @@ extern "C" void func_003AAE40(void* self, int a1)
 //100%
 INCLUDE_ASM("world/worldview", cPS2ChunkResolve_purge__FPv);
 #ifdef SKIP_ASM
+/**
+ * Releases the PS2 chunk resolver's platform data; does nothing in this build.
+ */
 void cPS2ChunkResolve_purge(void* self)
 {
 }
@@ -1634,7 +1795,21 @@ static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* 
     }
 }
 
-extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsigned int param, char* data)
+/**
+ * Undoes the resolve of a stream data chunk that is about to be unloaded.
+ *
+ * Dispatches on @p msg: spatial types take their nodes out of the world's spatial hash (nash_Nash_findkey, nash_Cell_remnode)
+ * and free them; type 13 purges a world audio file (func_002B6B30), 15 unloads a world-painter section (func_002BB5A8),
+ * 18 detaches a script anchor table, 20 unattaches an audio bank, 19 removes mission stream data through BE interface
+ * 10, 11 removes an occlusion curtain (func_00242570), 14 drops an AI file (func_0012A490) and 22 resets the avalanche;
+ * types 17 and 21 go to func_0016CF18 and func_00210608. Other types need nothing.
+ *
+ * @param msg  stream data type of the chunk (On Tour eBxStreamDataType type)
+ * @param resourceId  resource id of the chunk (On Tour RID)
+ * @param data  the chunk's data (On Tour pData)
+ * @return @p data, or 0 for type 14
+ */
+extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsigned int resourceId, char* data)
 {
     switch (msg) {
     case 0:
@@ -1648,13 +1823,13 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
     case 9: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         sWVEntry_B498* vt = (sWVEntry_B498*)ps2GraphicsMan->mVtbl;
-        ((void (*)(void*, unsigned int))vt[50].fn)((char*)ps2GraphicsMan + vt[50].delta, param >> 8);
+        ((void (*)(void*, unsigned int))vt[50].fn)((char*)ps2GraphicsMan + vt[50].delta, resourceId >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         sWVEntry_B498* vt = (sWVEntry_B498*)ps2GraphicsMan->mVtbl;
-        ((void (*)(void*, unsigned int))vt[50].fn)((char*)ps2GraphicsMan + vt[50].delta, (param >> 8) + *(int*)(self + 0x10));
+        ((void (*)(void*, unsigned int))vt[50].fn)((char*)ps2GraphicsMan + vt[50].delta, (resourceId >> 8) + *(int*)(self + 0x10));
         break;
     }
     case 3: {
@@ -1704,24 +1879,24 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         break;
     }
     case 13:
-        func_002B6B30(*(void**)((char*)cAudioInterface_getGame() + 0x4C), data, param);
+        func_002B6B30(*(void**)((char*)cAudioInterface_getGame() + 0x4C), data, resourceId);
         break;
     case 17:
-        func_0016CF18(param);
+        func_0016CF18(resourceId);
         break;
     case 15:
         if (cWorld_m_pTheWorld != 0) {
-            func_002BB5A8(((char**)(char**)cWorld_m_pTheWorld->m_pWorldPainterMan)[1] + (unsigned char)param * 12);
+            func_002BB5A8(((char**)(char**)cWorld_m_pTheWorld->m_pWorldPainterMan)[1] + (unsigned char)resourceId * 12);
         }
         break;
     case 18:
-        cSSXScriptEngine_DetachAnchorDataTable(ScriptEngine, param);
+        cSSXScriptEngine_DetachAnchorDataTable(ScriptEngine, resourceId);
         break;
     case 20:
-        cSSXAudio_UnAttachAudioBank(func_0028B180(), param, data);
+        cSSXAudio_UnAttachAudioBank(func_0028B180(), resourceId, data);
         break;
     case 19:
-        func_001547E0_2(cBE_getInterface_Fv(cBE_getBE(), 10), param);
+        func_001547E0_2(cBE_getInterface_Fv(cBE_getBE(), 10), resourceId);
         break;
     case 21:
         func_00210608(data);
@@ -1731,7 +1906,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         break;
     case 14:
         data = 0;
-        func_0012A490(SSXApp->Game->AI, param);
+        func_0012A490(SSXApp->Game->AI, resourceId);
         break;
     case 22:
         cAvalanche_reset();
@@ -1815,10 +1990,10 @@ INCLUDE_ASM("world/worldview", func_003ABF20);
 extern "C" void func_003ABF50(void* self, void* a1);
 
 // PORT: adds a pointer to an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003ABF20(void* self, void* a1)
+extern "C" int func_003ABF20(void* self, void* list)
 {
-    *(int*)((char*)a1 + 0x24) += (int)a1;
-    func_003ABF50(self, a1);
+    *(int*)((char*)list + 0x24) += (int)list;
+    func_003ABF50(self, list);
     return 1;
 }
 #endif
@@ -1848,11 +2023,11 @@ int func_003ABF50_impl(void* self, func_003ABF50_sList* list) __asm__("func_003A
 int func_003ABF50_impl(void* self, func_003ABF50_sList* list)
 {
     int n = list->count;
-    func_003ABF50_sEntry* e = list->entries;
+    func_003ABF50_sEntry* entry = list->entries;
     int i;
-    for (i = 0; i < n; i++, e++) {
-        if (e->item != 0) {
-            func_003ABFC0(self, e->item, list);
+    for (i = 0; i < n; i++, entry++) {
+        if (entry->item != 0) {
+            func_003ABFC0(self, entry->item, list);
         }
     }
     return 1;
@@ -1870,10 +2045,10 @@ int func_003ABFC0_impl(void* self, void* item, void* list) __asm__("func_003ABFC
 
 int func_003ABFC0_impl(void* self, void* item, void* list)
 {
-    void** p = *(void***)((char*)item + 0x20);
+    void** childPtr = *(void***)((char*)item + 0x20);
     int i;
-    for (i = 0; i < *(int*)((char*)item + 0x1C); i++, p++) {
-        func_003AC048(self, *p, list, i);
+    for (i = 0; i < *(int*)((char*)item + 0x1C); i++, childPtr++) {
+        func_003AC048(self, *childPtr, list, i);
     }
     return 1;
 }
@@ -2070,12 +2245,12 @@ extern "C" int func_003AC358(void* self, void* a1)
     list = *(func_003AC358_sList**)((char*)a1 + 0x80);
     cur = *(void**)((char*)a1 + 0x98);
     int n = list->count;
-    func_003AC358_sEnt* e = list->entries;
-    for (i = 0; i < n; i++, e++) {
-        func_003AC358_sObj* o = e->obj;
-        if (o != 0) {
+    func_003AC358_sEnt* entry = list->entries;
+    for (i = 0; i < n; i++, entry++) {
+        func_003AC358_sObj* object = entry->obj;
+        if (object != 0) {
             int j;
-            for (j = 0; j < o->count; j++) {
+            for (j = 0; j < object->count; j++) {
                 cur = func_003AC508(self, a1, list, cur);
             }
         }
@@ -2091,39 +2266,39 @@ INCLUDE_ASM("world/worldview", func_003AC438);
 extern char D_2320[];
 extern char D_2358[];
 
-extern "C" char* func_003AC438(int a0, int a1, char* ctx, char* p)
+extern "C" char* func_003AC438(int a0, int a1, char* ctx, char* tagPtr)
 {
     int done = 0;
     int first = 1;
     long tag;
     do {
-        tag = *(long*)p;
+        tag = *(long*)tagPtr;
         switch (((int)((tag << 4) >> 32)) & 7) {
         case 3: {
-            *(int*)(p + 4) = *(int*)(ctx + 0x24) + *(int*)(p + 4);
-            p += 0x10;
-            tag = *(long*)p;
-            int* ap = (int*)(p + 4);
+            *(int*)(tagPtr + 4) = *(int*)(ctx + 0x24) + *(int*)(tagPtr + 4);
+            tagPtr += 0x10;
+            tag = *(long*)tagPtr;
+            int* ap = (int*)(tagPtr + 4);
             *ap = *(int*)(ctx + 0x24) + *ap;
             int qwc = ((int)tag) & 0xFFFF;
-            p += 0x10;
-            char* e = *(char**)ap;
-            e += (qwc - 1) * 0x10;
+            tagPtr += 0x10;
+            char* tail = *(char**)ap;
+            tail += (qwc - 1) * 0x10;
             if (first) {
-                *(int*)(e + 8) = ((unsigned int)D_2320 >> 3) | 0x14000000;
+                *(int*)(tail + 8) = ((unsigned int)D_2320 >> 3) | 0x14000000;
                 first = 0;
             } else {
-                *(int*)(e + 8) = ((unsigned int)D_2358 >> 3) | 0x14000000;
+                *(int*)(tail + 8) = ((unsigned int)D_2358 >> 3) | 0x14000000;
             }
             break;
         }
         case 6:
-            p += 0x10;
+            tagPtr += 0x10;
             done = 1;
             break;
         }
     } while (done == 0);
-    return p;
+    return tagPtr;
 }
 #endif
 

@@ -43,6 +43,12 @@ extern "C" void func_0016CA08(void) {
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_loadTriggersIfNotStreaming__FPv);
 #ifdef SKIP_ASM
+/**
+ * Would load the camera triggers from a file when the track is not streamed; empty in this build.
+ *
+ * cGame_loadTrack calls it on gCamTriggerMan with the track's ".cam" file name as a second argument, which the
+ * declaration leaves out. The triggers arrive through the stream instead (cCameraTriggerMan_resolve, cCameraTriggerMan_streamIn).
+ */
 void cCameraTriggerMan_loadTriggersIfNotStreaming(void* self)
 {
 }
@@ -339,9 +345,17 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", gCamTriggerMan_resolve__FPvi);
 #ifdef SKIP_ASM
 // PORT: the unit declares cCameraTriggerMan_resolve as returning void*; this caller treats it as void.
 void cCameraTriggerMan_resolve_CEC8(void*, void*, int) __asm__("cCameraTriggerMan_resolve");
-void gCamTriggerMan_resolve(void* self, int a1)
+/**
+ * Stream-resolve hook for camera trigger chunks: hands a loaded buffer to the global camera trigger manager.
+ *
+ * Calls cCameraTriggerMan_resolve(gCamTriggerMan, @p self, @p pFileBuffer). Despite its name, @p self is not an object: it is the
+ * chunk's resource id (On Tour rid).
+ *
+ * @param pFileBuffer  the loaded chunk data
+ */
+void gCamTriggerMan_resolve(void* self, int pFileBuffer)
 {
-    cCameraTriggerMan_resolve_CEC8((void*)gCamTriggerMan, self, a1);
+    cCameraTriggerMan_resolve_CEC8((void*)gCamTriggerMan, self, pFileBuffer);
 }
 #endif
 
@@ -352,7 +366,15 @@ extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream);
 
 // PORT: the unit declares cCameraTriggerMan_resolve as returning void*, but the body returns nothing.
 void cCameraTriggerMan_resolve_impl(void* self, void* unused, void* stream) __asm__("cCameraTriggerMan_resolve");
-void cCameraTriggerMan_resolve_impl(void* self, void* unused, void* stream)
+/**
+ * Resolves a streamed camera trigger chunk: reads the triggers out of the buffer.
+ *
+ * Calls cCameraTriggerMan_streamIn with @p stream when it is not null; the resource id is ignored.
+ *
+ * @param rid  the chunk's resource id (On Tour rid), not used
+ * @param stream  the loaded chunk data
+ */
+void cCameraTriggerMan_resolve_impl(void* self, void* rid, void* stream)
 {
     if (stream != 0) {
         cCameraTriggerMan_streamIn(self, stream);
@@ -477,6 +499,16 @@ static inline void insert_CF48(char* w, void* item, const sCtBox_CF48* box)
 // PORT: the unit declares cCameraTriggerMan_setTriggers as returning void*; it returns nothing.
 extern "C" void cCameraTriggerMan_setTriggers_impl(void* vself, int mask) __asm__("cCameraTriggerMan_setTriggers");
 
+/**
+ * Activates the camera triggers that belong to a game mode and deactivates the rest.
+ *
+ * For each trigger whose mode mask shares a bit with @p mask and is not yet registered, registers it and adds its
+ * node to SSXApp->Game's BXNash grid using its volume's bounding box; a registered trigger outside the mask is
+ * removed from the grid and unregistered.
+ *
+ * @param vself  the trigger manager (this)
+ * @param mask   the game-mode bits to enable (On Tour eCTGameMode: 1 replay, otherwise in-game)
+ */
 extern "C" void cCameraTriggerMan_setTriggers_impl(void* vself, int mask)
 {
     sCtMan_CF48* self = (sCtMan_CF48*)vself;
@@ -519,6 +551,11 @@ void cCameraTriggerMan_setInGameTriggers(void* self)
 //99.29%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_setReplayTriggers__FPv);
 #ifdef SKIP_ASM
+/**
+ * Switches the camera triggers to the replay set.
+ *
+ * Calls cCameraTriggerMan_setTriggers with game mode 1 and returns its result.
+ */
 void* cCameraTriggerMan_setReplayTriggers(void* self)
 {
     return cCameraTriggerMan_setTriggers(self, 1);

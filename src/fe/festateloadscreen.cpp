@@ -415,6 +415,14 @@ struct sVEntry_cGameState_writeToReplayFrame {
 // Bound by asm label.
 void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
 
+/**
+ * Saves the base game-state data into a replay frame: the state's first word.
+ *
+ * Writes 4 bytes from @p self through the stream's virtual slot 1 (write). Every game-flow state's own
+ * writeToReplayFrame calls this first (cGFEndState_writeToReplayFrame__FPv, cGFEventStartState_writeToReplayFrame...).
+ *
+ * @param obj  the replay frame stream (On Tour cReplayFramePtr)
+ */
 void* cGameState_writeToReplayFrame_2(void* self, void* obj)
 {
     sVEntry_cGameState_writeToReplayFrame* vt = *(sVEntry_cGameState_writeToReplayFrame**)obj;
@@ -435,6 +443,13 @@ struct sVEntry_cGameState_readFromReplayFrame {
 // Bound by asm label.
 void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
 
+/**
+ * Restores the base game-state data from a replay frame: the state's first word.
+ *
+ * Reads 4 bytes into @p self through the stream's virtual slot 2 (read); the mirror of cGameState_writeToReplayFrame.
+ *
+ * @param obj  the replay frame stream (On Tour cReplayFramePtr)
+ */
 void* cGameState_readFromReplayFrame_2(void* self, void* obj)
 {
     sVEntry_cGameState_readFromReplayFrame* vt = *(sVEntry_cGameState_readFromReplayFrame**)obj;
@@ -467,6 +482,11 @@ extern "C" void* cGameState_writeToReplayFrame(void* self);
 //99.29%
 INCLUDE_ASM("fe/festateloadscreen", cGFEndState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * End state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFEndState_writeToReplayFrame(void* self)
 {
     return cGameState_writeToReplayFrame(self);
@@ -478,6 +498,11 @@ extern "C" void* cGameState_readFromReplayFrame(void* self);
 //99.29%
 INCLUDE_ASM("fe/festateloadscreen", cGFEndState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * End state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFEndState_readFromReplayFrame(void* self)
 {
     return cGameState_readFromReplayFrame(self);
@@ -487,6 +512,11 @@ void* cGFEndState_readFromReplayFrame(void* self)
 //99.29%
 INCLUDE_ASM("fe/festateloadscreen", cGFEndWaitState_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * End-wait state: saves its replay data, which is only the base game-state part (cGameState_writeToReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFEndWaitState_writeToReplayFrame(void* self)
 {
     return cGameState_writeToReplayFrame(self);
@@ -496,6 +526,11 @@ void* cGFEndWaitState_writeToReplayFrame(void* self)
 //99.29%
 INCLUDE_ASM("fe/festateloadscreen", cGFEndWaitState_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * End-wait state: restores its replay data, which is only the base game-state part (cGameState_readFromReplayFrame).
+ *
+ * The replay stream is passed through in the second argument register, which this declaration does not name.
+ */
 void* cGFEndWaitState_readFromReplayFrame(void* self)
 {
     return cGameState_readFromReplayFrame(self);
@@ -769,6 +804,14 @@ struct sVEntry_cGFFinishlineState_writeToReplayFrame {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Finish-line state: saves its replay data.
+ *
+ * Writes the base game-state part (cGameState_writeToReplayFrame), then the words at +0x10 and +0x14 through the stream's
+ * virtual slot 1 (write).
+ *
+ * @param stream  the replay frame stream (On Tour cReplayFramePtr)
+ */
 extern "C" void cGFFinishlineState_writeToReplayFrame(void* self, void* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
@@ -788,6 +831,14 @@ struct sVEntry_cGFFinishlineState_readFromReplayFrame {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Finish-line state: restores its replay data.
+ *
+ * Reads the base game-state part (cGameState_readFromReplayFrame), then the words at +0x10 and +0x14 through the stream's
+ * virtual slot 2 (read).
+ *
+ * @param stream  the replay frame stream (On Tour cReplayFramePtr)
+ */
 extern "C" void cGFFinishlineState_readFromReplayFrame(void* self, void* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
@@ -1215,6 +1266,14 @@ struct sVEntry_cGFEventStartState_writeToReplayFrame {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Event-start state: saves its replay data.
+ *
+ * Writes the base game-state part (cGameState_writeToReplayFrame), then the words at +0x10, +0x14, +0x1C and +0x8 through the
+ * stream's virtual slot 1 (write).
+ *
+ * @param stream  the replay frame stream (On Tour cReplayFramePtr)
+ */
 extern "C" void cGFEventStartState_writeToReplayFrame(void* self, void* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
@@ -1241,6 +1300,14 @@ struct sVEntry_cGFEventStartState_readFromReplayFrame {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Event-start state: restores its replay data.
+ *
+ * Reads the base game-state part (cGameState_readFromReplayFrame), then the words at +0x10, +0x14, +0x1C and +0x8 through the
+ * stream's virtual slot 2 (read).
+ *
+ * @param stream  the replay frame stream (On Tour cReplayFramePtr)
+ */
 extern "C" void cGFEventStartState_readFromReplayFrame(void* self, void* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);

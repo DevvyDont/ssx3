@@ -20,10 +20,10 @@ INCLUDE_ASM("seg/seg_312310", func_00411310);
 extern void func_0040FB88(int);
 extern void func_00416FE0(void);
 extern void func_001001C8(int);
-void func_00411310(int a) {
-    func_0040FB88(a);
+void func_00411310(int status) {
+    func_0040FB88(status);
     func_00416FE0();
-    func_001001C8(a);
+    func_001001C8(status);
 }
 #endif
 
@@ -229,13 +229,13 @@ typedef union
 DItype __muldi3 (DItype u, DItype v) __asm__("func_004114D0");
 
 DItype
-__muldi3 (DItype u, DItype v)
+__muldi3 (DItype lhs, DItype rhs)
 {
   DIunion w;
   DIunion uu, vv;
 
-  uu.ll = u,
-  vv.ll = v;
+  uu.ll = lhs,
+  vv.ll = rhs;
 
   w.ll = __umulsidi3 (uu.s.low, vv.s.low);
   w.s.high += ((USItype) uu.s.low * (USItype) vv.s.high
@@ -448,9 +448,9 @@ UDItype __udivdi3 (UDItype n, UDItype d) __asm__("func_00411538");
 
 UDItype __udivmoddi4 ();
 UDItype
-__udivdi3 (UDItype n, UDItype d)
+__udivdi3 (UDItype n, UDItype divisor)
 {
-  return __udivmoddi4 (n, d, (UDItype *) 0);
+  return __udivmoddi4 (n, divisor, (UDItype *) 0);
 }
 #endif
 
@@ -807,8 +807,8 @@ INCLUDE_ASM("seg/seg_312310", func_00411CD8);
 static fp_number_type *_fpadd_parts (fp_number_type *, fp_number_type *, fp_number_type *) __asm__("func_00411CD8");
 
 static fp_number_type *
-_fpadd_parts (fp_number_type * a,
-	      fp_number_type * b,
+_fpadd_parts (fp_number_type * lhs,
+	      fp_number_type * rhs,
 	      fp_number_type * tmp)
 {
   intfrac tfraction;
@@ -819,38 +819,38 @@ _fpadd_parts (fp_number_type * a,
   fractype a_fraction;
   fractype b_fraction;
 
-  if (isnan (a))
+  if (isnan (lhs))
     {
-      return a;
+      return lhs;
     }
-  if (isnan (b))
+  if (isnan (rhs))
     {
-      return b;
+      return rhs;
     }
-  if (isinf (a))
+  if (isinf (lhs))
     {
       /* Adding infinities with opposite signs yields a NaN.  */
-      if (isinf (b) && a->sign != b->sign)
+      if (isinf (rhs) && lhs->sign != rhs->sign)
 	return nan ();
-      return a;
+      return lhs;
     }
-  if (isinf (b))
+  if (isinf (rhs))
     {
-      return b;
+      return rhs;
     }
-  if (iszero (b))
+  if (iszero (rhs))
     {
-      if (iszero (a))
+      if (iszero (lhs))
 	{
-	  *tmp = *a;
-	  tmp->sign = a->sign & b->sign;
+	  *tmp = *lhs;
+	  tmp->sign = lhs->sign & rhs->sign;
 	  return tmp;
 	}
-      return a;
+      return lhs;
     }
-  if (iszero (a))
+  if (iszero (lhs))
     {
-      return b;
+      return rhs;
     }
 
   /* Got two numbers. shift the smaller and increment the exponent till
@@ -858,10 +858,10 @@ _fpadd_parts (fp_number_type * a,
   {
     int diff;
 
-    a_normal_exp = a->normal_exp;
-    b_normal_exp = b->normal_exp;
-    a_fraction = a->fraction.ll;
-    b_fraction = b->fraction.ll;
+    a_normal_exp = lhs->normal_exp;
+    b_normal_exp = rhs->normal_exp;
+    a_fraction = lhs->fraction.ll;
+    b_fraction = rhs->fraction.ll;
 
     diff = a_normal_exp - b_normal_exp;
 
@@ -897,9 +897,9 @@ _fpadd_parts (fp_number_type * a,
       }
   }
 
-  if (a->sign != b->sign)
+  if (lhs->sign != rhs->sign)
     {
-      if (a->sign)
+      if (lhs->sign)
 	{
 	  tfraction = -a_fraction + b_fraction;
 	}
@@ -929,7 +929,7 @@ _fpadd_parts (fp_number_type * a,
     }
   else
     {
-      tmp->sign = a->sign;
+      tmp->sign = lhs->sign;
       tmp->normal_exp = a_normal_exp;
       tmp->fraction.ll = a_fraction + b_fraction;
     }
@@ -1234,15 +1234,15 @@ int __fpcmp_parts (fp_number_type * a, fp_number_type *b);
  */
 
 int
-__fpcmp_parts (fp_number_type * a, fp_number_type * b)
+__fpcmp_parts (fp_number_type * lhs, fp_number_type * rhs)
 {
   /* (the source's `#if 0` both-nan block is omitted) */
 
-  if (isnan (a) || isnan (b))
+  if (isnan (lhs) || isnan (rhs))
     {
       return 1;			/* how to indicate unordered compare? */
     }
-  if (isinf (a) && isinf (b))
+  if (isinf (lhs) && isinf (rhs))
     {
       /* +inf > -inf, but +inf != +inf */
       /* b    \a| +inf(0)| -inf(1)
@@ -1253,52 +1253,52 @@ __fpcmp_parts (fp_number_type * a, fp_number_type * b)
        -------+--------+--------
        So since unordered must be non zero, just line up the columns...
        */
-      return b->sign - a->sign;
+      return rhs->sign - lhs->sign;
     }
   /* but not both... */
-  if (isinf (a))
+  if (isinf (lhs))
     {
-      return a->sign ? -1 : 1;
+      return lhs->sign ? -1 : 1;
     }
-  if (isinf (b))
+  if (isinf (rhs))
     {
-      return b->sign ? 1 : -1;
+      return rhs->sign ? 1 : -1;
     }
-  if (iszero (a) && iszero (b))
+  if (iszero (lhs) && iszero (rhs))
     {
       return 0;
     }
-  if (iszero (a))
+  if (iszero (lhs))
     {
-      return b->sign ? 1 : -1;
+      return rhs->sign ? 1 : -1;
     }
-  if (iszero (b))
+  if (iszero (rhs))
     {
-      return a->sign ? -1 : 1;
+      return lhs->sign ? -1 : 1;
     }
   /* now both are "normal". */
-  if (a->sign != b->sign)
+  if (lhs->sign != rhs->sign)
     {
       /* opposite signs */
-      return a->sign ? -1 : 1;
+      return lhs->sign ? -1 : 1;
     }
   /* same sign; exponents? */
-  if (a->normal_exp > b->normal_exp)
+  if (lhs->normal_exp > rhs->normal_exp)
     {
-      return a->sign ? -1 : 1;
+      return lhs->sign ? -1 : 1;
     }
-  if (a->normal_exp < b->normal_exp)
+  if (lhs->normal_exp < rhs->normal_exp)
     {
-      return a->sign ? 1 : -1;
+      return lhs->sign ? 1 : -1;
     }
   /* same exponents; check size. */
-  if (a->fraction.ll > b->fraction.ll)
+  if (lhs->fraction.ll > rhs->fraction.ll)
     {
-      return a->sign ? -1 : 1;
+      return lhs->sign ? -1 : 1;
     }
-  if (a->fraction.ll < b->fraction.ll)
+  if (lhs->fraction.ll < rhs->fraction.ll)
     {
-      return a->sign ? 1 : -1;
+      return lhs->sign ? 1 : -1;
     }
   /* after all that, they're equal. */
   return 0;
@@ -1445,9 +1445,9 @@ sat:
 INCLUDE_ASM("seg/seg_312310", func_00412740);
 #ifdef SKIP_ASM
 extern void func_00411C38(long *, int *);
-void func_00412740(long a) {
+void func_00412740(long value) {
     int buf[8];
-    func_00411C38(&a, buf);
+    func_00411C38(&value, buf);
     buf[1] = buf[1] == 0;
     func_00411B08((struct S412778 *)buf);
 }
@@ -1458,13 +1458,13 @@ INCLUDE_ASM("seg/seg_312310", func_00412778);
 #ifdef SKIP_ASM
 struct S412778 { int a, b, c; long d; };
 extern void func_00411B08(struct S412778 *);
-void func_00412778(int a, int b, int c, long d) {
-    struct S412778 s;
-    s.a = a;
-    s.b = b;
-    s.c = c;
-    s.d = d;
-    func_00411B08(&s);
+void func_00412778(int fpClass, int sign, int exponent, long fraction) {
+    struct S412778 parts;
+    parts.a = fpClass;
+    parts.b = sign;
+    parts.c = exponent;
+    parts.d = fraction;
+    func_00411B08(&parts);
 }
 #endif
 

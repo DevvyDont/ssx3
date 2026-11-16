@@ -289,12 +289,24 @@ INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_Load);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int n);
 
-extern "C" int bxSphereTree_Load(sFwdDiff_27CC8* self, char* buf, int a2)
+/**
+ * Sets up a sphere tree from its packed data in a loaded collision resource.
+ *
+ * Returns 0 for a null @p buf. Otherwise stores the tree id, points the tree's info pointer at its own info block,
+ * copies the header fields (lengths, level count, centre, extents) out of the buffer with MEM_copy, points the
+ * level table (+0x20) and the packed bit tree (+0x24, or +0x28 when not compressed) into the buffer and caches
+ * the centre with w = 1.
+ *
+ * @param buf  the packed tree data (On Tour staticBuf)
+ * @param aTreeID   the tree's id (On Tour aTreeID)
+ * @return the number of bytes of @p buf the tree uses
+ */
+extern "C" int bxSphereTree_Load(sFwdDiff_27CC8* self, char* buf, int aTreeID)
 {
     if (buf == 0) {
         return 0;
     }
-    self->blk.d[0] = a2;
+    self->blk.d[0] = aTreeID;
     self->blk.d[1] = 0;
     self->blkp = &self->blk;
     self->blk.d[4] = 1;
@@ -432,11 +444,26 @@ static inline sVec4_28030 vu0Scale_28030(const sVec4_28030& v, float s)
     return r;
 }
 
-extern "C" int bxSphereTree_Is2SidedTriCollision(void* self, sVec4_28030* p, void* a2, void* a3, sVec4_28030* dir, void* a5, void* a6)
+/**
+ * Tests the sphere tree against a triangle from either side.
+ *
+ * Returns 0 when the tree's centre (+0x80) is farther from the triangle's plane than its radius
+ * (func_0032C590). Otherwise flips the normal to face the tree when needed and runs SphereTree_IsTriCollision (the one-sided
+ * test), which fills the push-out vector and contact point.
+ *
+ * @param point1    first triangle corner
+ * @param point2   second triangle corner
+ * @param point3   third triangle corner
+ * @param dir  the triangle's unit normal
+ * @param overlap   out: how far to push the tree out (On Tour overlap)
+ * @param loc   out: the contact point (On Tour loc)
+ * @return 1 on contact
+ */
+extern "C" int bxSphereTree_Is2SidedTriCollision(void* self, sVec4_28030* point1, void* point2, void* point3, sVec4_28030* dir, void* overlap, void* loc)
 {
     float dot;
     {
-        sVec4_28030 d = vu0Sub_28030(*(sVec4_28030*)((char*)self + 0x80), *p);
+        sVec4_28030 d = vu0Sub_28030(*(sVec4_28030*)((char*)self + 0x80), *point1);
         dot = vu0Dot_28030(*dir, d);
     }
     if (func_0032C590(self) < __builtin_fabsf(dot)) {
@@ -444,9 +471,9 @@ extern "C" int bxSphereTree_Is2SidedTriCollision(void* self, sVec4_28030* p, voi
     }
     if (dot < 0.0f) {
         sVec4_28030 nd = vu0Scale_28030(*dir, -1.0f);
-        return SphereTree_IsTriCollision(self, p, a2, a3, &nd, a5, a6);
+        return SphereTree_IsTriCollision(self, point1, point2, point3, &nd, overlap, loc);
     }
-    return SphereTree_IsTriCollision(self, p, a2, a3, dir, a5, a6);
+    return SphereTree_IsTriCollision(self, point1, point2, point3, dir, overlap, loc);
 }
 #endif
 
@@ -662,6 +689,17 @@ struct sCell_003284B8 {
     int x, y, z;
 };
 
+/**
+ * Removes a node from the spatial hash cell that holds it, freeing cells that become empty.
+ *
+ * When this cell is at the key's level, unlinks @p item from the list for its type. Otherwise picks the child
+ * octant from the key's coordinate bits, recurses into it and deletes the child when it no longer holds anything.
+ *
+ * @param idx     the node type (On Tour NodeType)
+ * @param item    the node to remove
+ * @param target  the node's cell key
+ * @param cur     this cell's key
+ */
 extern "C" void nash_Cell_remnode(sNode_003284B8* node, int idx, sItem_003284B8* item, const sCell_003284B8* target,
                               const sCell_003284B8* cur)
 {
@@ -721,9 +759,20 @@ struct sCell_00328660 {
     int x, y, z;
 };
 
-extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, sItem_00328660* item, sCell_00328660* target, const sCell_00328660* at)
+/**
+ * Adds a node to the spatial hash below this cell, creating the cells on the way.
+ *
+ * Steps from @p mykey down to the target key's level, choosing the child octant from the key bits and allocating
+ * (str_Cell, cleared with MEM_fill) any child that does not exist, then pushes @p item on the list for its type.
+ *
+ * @param idx     the node type (On Tour NodeType)
+ * @param item    the node to add
+ * @param target  the cell key the node belongs in
+ * @param mykey      this cell's key
+ */
+extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, sItem_00328660* item, sCell_00328660* target, const sCell_00328660* mykey)
 {
-    sCell_00328660 cur = *at;
+    sCell_00328660 cur = *mykey;
     while (cur.level != target->level) {
         int sh = cur.level - target->level - 1;
         cur.level--;
@@ -746,6 +795,20 @@ extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, sItem_00328660*
 //100%
 INCLUDE_ASM("intersect/aifwddiff", nash_Cell_movenode);
 #ifdef SKIP_ASM
+/**
+ * Moves a node from one spatial hash cell to another, touching only the part of the octree that changes.
+ *
+ * When the new key is at this cell's level, removes the node from the old place (nash_Cell_remnode) and links it
+ * here; when the old key is at this level, unlinks it here and adds it below (nash_Cell_addnode); while both keys
+ * lead into the same child, recurses into it (creating it if needed), else removes and adds separately. Empty
+ * children are deleted.
+ *
+ * @param type    the node type (On Tour NodeType)
+ * @param item    the node to move
+ * @param oldkey  the cell key it was in
+ * @param newkey  the cell key it moves to
+ * @param mykey   this cell's key
+ */
 extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, sItem_00328660* item, sCell_00328660* oldkey,
                               sCell_00328660* newkey, sCell_00328660* mykey)
 {
@@ -845,6 +908,17 @@ static inline sCell_00328660 Parent_8C20(const sCell_00328660& c)
     return r;
 }
 
+/**
+ * Adds a node to one octant of the spatial hash, growing the octant's root cell as needed.
+ *
+ * With no root yet, the root becomes a new cell at the key (str_Cell) holding the node. Otherwise, while the
+ * root does not contain the key, wraps it in a new parent cell one level up; then adds the node below it with
+ * nash_Cell_addnode.
+ *
+ * @param idx   the node type (On Tour NodeType)
+ * @param item  the node to add
+ * @param cell  the node's cell key
+ */
 extern "C" void nash_Octant_addnode(sRoot_8C20* root, int idx, sItem_00328660* item, sCell_00328660* cell)
 {
     sNode_8C20** pn = &root->node;
@@ -949,10 +1023,19 @@ static inline sCell_8F28 Parent_8F28(const sCell_8F28& c)
     return r;
 }
 
-extern "C" void nash_Nash_findkey(sCell_8F28* c, sBox_8F28* b)
+/**
+ * Works out which spatial hash cell a bounding box belongs in.
+ *
+ * Takes the box's size and centre, chooses the cell level from the largest of the x, y and z extents and stores
+ * the level and the centre's cell coordinates at that level in @p key.
+ *
+ * @param key  out: the cell key
+ * @param box  the bounding box
+ */
+extern "C" void nash_Nash_findkey(sCell_8F28* key, sBox_8F28* box)
 {
-    sVec4_8F28 size = vu0Sub_8F28(b->max, b->min);
-    sVec4_8F28 center = vu0Add_8F28(b->min, vu0Scale_8F28(size, 0.5f));
+    sVec4_8F28 size = vu0Sub_8F28(box->max, box->min);
+    sVec4_8F28 center = vu0Add_8F28(box->min, vu0Scale_8F28(size, 0.5f));
     float m = size.x;
     if (m < size.y) {
         m = size.y;
@@ -965,31 +1048,31 @@ extern "C" void nash_Nash_findkey(sCell_8F28* c, sBox_8F28* b)
         int i;
     } u;
     u.f = m * 0.7142857313156128f;
-    c->level = ((u.i >> 23) & 0xFF) - 0x7F;
-    if (c->level < 11) {
-        c->level = 11;
+    key->level = ((u.i >> 23) & 0xFF) - 0x7F;
+    if (key->level < 11) {
+        key->level = 11;
     }
     union {
         int i;
         float f;
     } s;
-    s.i = (c->level + 0x7F) << 23;
+    s.i = (key->level + 0x7F) << 23;
     float scale = s.f;
-    c->x = Floor_8F28(center.x / scale);
-    c->y = Floor_8F28(center.y / scale);
-    c->z = Floor_8F28(center.z / scale);
+    key->x = Floor_8F28(center.x / scale);
+    key->y = Floor_8F28(center.y / scale);
+    key->z = Floor_8F28(center.z / scale);
     for (;;) {
-        s.i = (c->level + 0x7F) << 23;
+        s.i = (key->level + 0x7F) << 23;
         scale = s.f;
         int ok = 0;
-        if (((float)c->x - 0.2f) * scale <= b->min.x && ((float)c->y - 0.2f) * scale <= b->min.y && ((float)c->z - 0.2f) * scale <= b->min.z
-            && b->max.x <= ((float)(c->x + 1) + 0.2f) * scale && b->max.y <= ((float)(c->y + 1) + 0.2f) * scale && b->max.z <= ((float)(c->z + 1) + 0.2f) * scale) {
+        if (((float)key->x - 0.2f) * scale <= box->min.x && ((float)key->y - 0.2f) * scale <= box->min.y && ((float)key->z - 0.2f) * scale <= box->min.z
+            && box->max.x <= ((float)(key->x + 1) + 0.2f) * scale && box->max.y <= ((float)(key->y + 1) + 0.2f) * scale && box->max.z <= ((float)(key->z + 1) + 0.2f) * scale) {
             ok = 1;
         }
         if (ok) {
             break;
         }
-        *c = Parent_8F28(*c);
+        *key = Parent_8F28(*key);
     }
 }
 #endif

@@ -27,8 +27,8 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E0B8);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E0B8(int a0, long a1) {
-    return a1;
+long func_0042E0B8(int a0, long value) {
+    return value;
 }
 #endif
 
@@ -40,8 +40,8 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E0C8);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E0C8(int a0, long a1) {
-    return a1;
+long func_0042E0C8(int a0, long value) {
+    return value;
 }
 #endif
 
@@ -183,8 +183,8 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E310);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E310(int a0, long a1) {
-    return a1;
+long func_0042E310(int a0, long value) {
+    return value;
 }
 #endif
 
@@ -196,8 +196,8 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E320);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E320(int a0, long a1) {
-    return a1;
+long func_0042E320(int a0, long value) {
+    return value;
 }
 #endif
 
@@ -314,13 +314,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E508);
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef struct { unsigned last; unsigned pad; unsigned long acc; unsigned rate; } sClk;
 extern unsigned func_003E4E98(void);
-void func_0042E508(sClk *c) {
+void func_0042E508(sClk *clock) {
     unsigned now = func_003E4E98();
-    if (c->rate == 0x1000) {
-        c->acc += now - c->last;
+    if (clock->rate == 0x1000) {
+        clock->acc += now - clock->last;
     } else {
-        c->acc += ((unsigned long)c->rate * (unsigned long)(now - c->last)) >> 12;
+        clock->acc += ((unsigned long)clock->rate * (unsigned long)(now - clock->last)) >> 12;
     }
-    c->last = now;
+    clock->last = now;
 }
 #endif

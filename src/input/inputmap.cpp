@@ -290,6 +290,16 @@ struct sBtnSet_00321298 {
     sBtn_00321298 b[1];
 };
 
+/**
+ * Updates one controller's button states from this frame's analogue values.
+ *
+ * Grows the button count to @p n (new entries cleared with MEM_fill), stores each value and, once a button has
+ * settled for 3 updates, sets pressed/released on a change of the held state (value > 0). Held buttons repeat
+ * after 0x18 updates and then every 0xC.
+ *
+ * @param n     the number of buttons (On Tour numbuttons)
+ * @param vals  one value per button
+ */
 extern "C" void cInputPad_update(sBtnSet_00321298* self, int n, float* vals)
 {
     if (self->count < n) {

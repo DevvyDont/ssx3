@@ -43,6 +43,19 @@ extern char TheDynamicMemMan[];
 void* func_00320058_K2(void* heap, unsigned int align, unsigned int size) __asm__("func_00320058__FPv");
 void* func_00320078_K2(void* heap, unsigned int align, unsigned int size) __asm__("func_00320078__FPv");
 
+/**
+ * Allocates memory from the fixed-size block pools or the dynamic heap.
+ *
+ * A request of 1-0x200 bytes with @p top clear uses cMemBlockMan_alloc (cMemBlockMan::alloc). Otherwise the alignment is
+ * raised to at least 16 and TheDynamicMemMan allocates from the top (func_00320078) or bottom (func_00320058) of the
+ * heap. A negative @p flags fills the new block with MEM_clear.
+ *
+ * @param size  bytes wanted
+ * @param align  the alignment; at least 16 is used for heap blocks
+ * @param flags  allocation flags; negative asks for the block to be filled
+ * @param top  nonzero to allocate from the top of the heap
+ * @return the block, or null
+ */
 extern "C" void* cMemMan_internalAlloc(unsigned int size, unsigned int align, int flags, int top)
 {
     void* p;
@@ -71,17 +84,25 @@ extern char TheDynamicMemMan[];
 // PORT: cDynamicMemMan_free__FPv is called with (list, item) here; bind the 2-arg form to that symbol.
 int cDynamicMemMan_free_2(void* list, void* item) __asm__("cDynamicMemMan_free__FPv");
 
-extern "C" void cMemMan_internalFree(void* p)
+/**
+ * Frees memory from either the block pools or the dynamic heap.
+ *
+ * Null is ignored. A block-pool address (cMemBlockMan_isMemBlock) goes to cMemBlockMan_free, anything else to cDynamicMemMan_free__FPv on
+ * TheDynamicMemMan.
+ *
+ * @param block  the block to free, or null
+ */
+extern "C" void cMemMan_internalFree(void* block)
 {
-    if (p != 0)
+    if (block != 0)
     {
-        if (cMemBlockMan_isMemBlock(p) != 0)
+        if (cMemBlockMan_isMemBlock(block) != 0)
         {
-            cMemBlockMan_free(p);
+            cMemBlockMan_free(block);
         }
         else
         {
-            cDynamicMemMan_free_2(TheDynamicMemMan, p);
+            cDynamicMemMan_free_2(TheDynamicMemMan, block);
         }
     }
 }
@@ -158,6 +179,11 @@ extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void cMemBlockMan_validate(void);
 extern void* cMemMan_m_mutex[16];
 
+/**
+ * Checks the memory manager's pools for corruption.
+ *
+ * Locks cMemMan_m_mutex around cMemBlockMan_validate (cMemBlockMan::validate), whose per-pool checks are empty in this build.
+ */
 extern "C" void cMemMan_validate(void)
 {
     MUTEX_lock(cMemMan_m_mutex);
@@ -259,6 +285,18 @@ extern int cMemBlockMan_m_initialized;
 
 // PORT: binds the real 2-arg body; the unit declares a 1-arg prototype used by callers
 extern "C" void* cMemBlockMan_alloc_impl(unsigned int size, unsigned int align) __asm__("cMemBlockMan_alloc");
+/**
+ * Allocates a small block from the fixed-size block pools, or from the heap when they cannot serve it.
+ *
+ * The size becomes max(@p size, @p align) rounded up to 4; once the pools exist (cMemBlockMan_m_initialized) the first
+ * pool of 8, 16, 32, 64, 128, 256 or 512 bytes that fits serves it (cMemBlockMan_m_container8 ...). Larger requests, or
+ * any before initialisation (as size 0x201), go to cMemMan_internalAlloc (cMemMan::internalAlloc) with at least 8-byte
+ * alignment.
+ *
+ * @param size  bytes wanted
+ * @param align  the alignment
+ * @return the block
+ */
 extern "C" void* cMemBlockMan_alloc_impl(unsigned int size, unsigned int align)
 {
     size = size > align ? size : align;
@@ -308,22 +346,30 @@ inline bool inPool_319F68(void* pool, void* p)
     return (unsigned int)((char*)p - (char*)pool) < N;
 }
 
-extern "C" void cMemBlockMan_free(void* p)
+/**
+ * Returns a block to the fixed-size pool it came from.
+ *
+ * Tests the address against each pool's range (8-byte pool 0x800 bytes, 16: 0x2000, 32: 0x6000, 64: 0x32000, 128:
+ * 0x25800, 256 and 512: 0x20000) and calls that pool's free; an address in no pool is ignored.
+ *
+ * @param block  the block
+ */
+extern "C" void cMemBlockMan_free(void* block)
 {
-    if (inPool_319F68<0x800>(cMemBlockMan_m_container8, p))
-        func_00320488(cMemBlockMan_m_container8, (void**)p);
-    else if (inPool_319F68<0x2000>(cMemBlockMan_m_container16, p))
-        func_00320498(cMemBlockMan_m_container16, (void**)p);
-    else if (inPool_319F68<0x6000>(cMemBlockMan_m_container32, p))
-        func_003204A8(cMemBlockMan_m_container32, (void**)p);
-    else if (inPool_319F68<0x32000>(cMemBlockMan_m_container64, p))
-        func_003204B8(cMemBlockMan_m_container64, (void**)p);
-    else if (inPool_319F68<0x25800>(cMemBlockMan_m_container128, p))
-        func_003204D0(cMemBlockMan_m_container128, (void**)p);
-    else if (inPool_319F68<0x20000>(cMemBlockMan_m_container256, p))
-        func_003204E8(cMemBlockMan_m_container256, (void**)p);
-    else if (inPool_319F68<0x20000>(cMemBlockMan_m_container512, p))
-        func_00320500(cMemBlockMan_m_container512, (void**)p);
+    if (inPool_319F68<0x800>(cMemBlockMan_m_container8, block))
+        func_00320488(cMemBlockMan_m_container8, (void**)block);
+    else if (inPool_319F68<0x2000>(cMemBlockMan_m_container16, block))
+        func_00320498(cMemBlockMan_m_container16, (void**)block);
+    else if (inPool_319F68<0x6000>(cMemBlockMan_m_container32, block))
+        func_003204A8(cMemBlockMan_m_container32, (void**)block);
+    else if (inPool_319F68<0x32000>(cMemBlockMan_m_container64, block))
+        func_003204B8(cMemBlockMan_m_container64, (void**)block);
+    else if (inPool_319F68<0x25800>(cMemBlockMan_m_container128, block))
+        func_003204D0(cMemBlockMan_m_container128, (void**)block);
+    else if (inPool_319F68<0x20000>(cMemBlockMan_m_container256, block))
+        func_003204E8(cMemBlockMan_m_container256, (void**)block);
+    else if (inPool_319F68<0x20000>(cMemBlockMan_m_container512, block))
+        func_00320500(cMemBlockMan_m_container512, (void**)block);
 }
 #endif
 
@@ -343,21 +389,30 @@ static inline int cMemBlockMan_isMemBlock_in(void* p, void* base, unsigned int s
     return (unsigned int)((char*)p - (char*)base) <= size - 1;
 }
 
-extern "C" int cMemBlockMan_isMemBlock(void* p)
+/**
+ * Tells whether an address belongs to one of the fixed-size block pools.
+ *
+ * Same ranges as cMemBlockMan_free: 8-byte pool 0x800 bytes, 16: 0x2000, 32: 0x6000, 64: 0x32000, 128: 0x25800, 256 and
+ * 512: 0x20000.
+ *
+ * @param block  the address
+ * @return 1 when it is inside a pool
+ */
+extern "C" int cMemBlockMan_isMemBlock(void* block)
 {
-    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container8, 0x800))
+    if (cMemBlockMan_isMemBlock_in(block, cMemBlockMan_m_container8, 0x800))
         return 1;
-    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container16, 0x2000))
+    if (cMemBlockMan_isMemBlock_in(block, cMemBlockMan_m_container16, 0x2000))
         return 1;
-    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container32, 0x6000))
+    if (cMemBlockMan_isMemBlock_in(block, cMemBlockMan_m_container32, 0x6000))
         return 1;
-    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container64, 0x32000))
+    if (cMemBlockMan_isMemBlock_in(block, cMemBlockMan_m_container64, 0x32000))
         return 1;
-    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container128, 0x25800))
+    if (cMemBlockMan_isMemBlock_in(block, cMemBlockMan_m_container128, 0x25800))
         return 1;
-    if (cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container256, 0x20000))
+    if (cMemBlockMan_isMemBlock_in(block, cMemBlockMan_m_container256, 0x20000))
         return 1;
-    return cMemBlockMan_isMemBlock_in(p, cMemBlockMan_m_container512, 0x20000);
+    return cMemBlockMan_isMemBlock_in(block, cMemBlockMan_m_container512, 0x20000);
 }
 #endif
 
@@ -417,6 +472,12 @@ void func_00320538_1(void*) __asm__("func_00320538__Fv");
 void func_00320540_1(void*) __asm__("func_00320540__Fv");
 void func_00320548_1(void*) __asm__("func_00320548__Fv");
 
+/**
+ * Checks all fixed-size block pools for corruption.
+ *
+ * When cMemBlockMan_m_initialized is set, calls the per-pool validate functions func_00320518 ... func_00320548 on the
+ * 8- to 512-byte pools; they are empty in this build.
+ */
 extern "C" void cMemBlockMan_validate(void)
 {
     if (cMemBlockMan_m_initialized != 0) {

@@ -175,6 +175,15 @@ extern "C" void cCameraTriggerMan_purge(void* self);
 extern "C" void cActiveTriggerList__cActiveTriggerList(void* self, int flags);
 extern "C" void func_0016BEF8(void* self, int flags);
 
+/**
+ * Destroys the camera trigger manager: purges it and destroys its member lists.
+ *
+ * Calls cCameraTriggerMan_purge, runs cActiveTriggerList__cActiveTriggerList on the two active lists (+0x14,
+ * +0x18) from last to first, destroys the embedded trigger list with func_0016BEF8(self, 2) and frees the object
+ * when @p flags bit 0 is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cCameraTriggerMan__cCameraTriggerMan(void* self, int flags)
 {
     cCameraTriggerMan_purge(self);
@@ -201,6 +210,12 @@ void cCameraTriggerList_init(cCameraTriggerList* self);
 void cCameraTriggerStack_init(cCameraTriggerStack* self);
 extern "C" void cCamera_resetChaseControllerSwitches(void);
 
+/**
+ * Initialises the camera trigger manager for a new track.
+ *
+ * Initialises the trigger list (cCameraTriggerList_init), purges both active trigger lists (+0x14, +0x18), resets
+ * both trigger stacks (+0x1C, +0x3C) with cCameraTriggerStack_init and calls cCamera_resetChaseControllerSwitches.
+ */
 extern "C" void cCameraTriggerMan_init(void* self)
 {
     cCameraTriggerList_init((cCameraTriggerList*)self);
@@ -219,6 +234,12 @@ struct cCameraTriggerStack;
 void cCameraTriggerStack_init(cCameraTriggerStack* self);
 extern "C" void cCamera_resetChaseControllerSwitches(void);
 
+/**
+ * Resets the camera trigger state for a restart, keeping the loaded triggers.
+ *
+ * Purges both active trigger lists (+0x14, +0x18), resets both trigger stacks (+0x1C, +0x3C) and calls
+ * cCamera_resetChaseControllerSwitches.
+ */
 extern "C" void cCameraTriggerMan_initOnRestart(void* self)
 {
     cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x14));

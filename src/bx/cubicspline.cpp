@@ -850,6 +850,16 @@ extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av);
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
 extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
 
+/**
+ * Releases a heap block back to the dynamic memory manager (dlmalloc's free).
+ *
+ * Small chunks go to their fast bin; others are merged with free neighbours and put in the unsorted bin, or merged into
+ * the top chunk, which may then be trimmed (func_0031E6D8) after consolidating the fast bins (func_0031EEE8). The C
+ * definition is cDynamicMemMan_dlfree, bound by asm label because the unit declares cDynamicMemMan_dlfree with one argument.
+ *
+ * @param ms  the memory manager (this); holds the malloc state pointer
+ * @param mem  the block to free, or null
+ */
 extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem)
 {
     sMState_31ED60* av = ms->av;
@@ -1744,6 +1754,15 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_init);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 
+/**
+ * Sets up a dynamic heap in a block of memory.
+ *
+ * The start is @p base rounded up to 16 (stored at +0x0); the first 0x380 bytes hold the zeroed malloc state, so the
+ * free area starts at +0x4 = start + 0x380 (also +0x8) with size +0xC = the aligned remaining size minus 0x380.
+ *
+ * @param base  the memory to manage (On Tour heap)
+ * @param size  its size in bytes
+ */
 extern "C" void cDynamicMemMan_init(void* self, unsigned int base, unsigned int size)
 {
     unsigned int start = (base + 0xF) & 0xFFFFFFF0;
@@ -1825,6 +1844,14 @@ extern "C" int func_00320098(char* self, unsigned int addr)
 //100%
 INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_free__FPv);
 #ifdef SKIP_ASM
+/**
+ * Frees a block of the dynamic heap.
+ *
+ * Tail-calls cDynamicMemMan_dlfree (dlfree). The block pointer passes through in $a1, which the one-argument C prototype does
+ * not show.
+ *
+ * @return nothing useful (the C declares int)
+ */
 int cDynamicMemMan_free(void* self)
 {
     return cDynamicMemMan_dlfree(self);
@@ -2309,6 +2336,16 @@ extern char t3vect_Zero[], D_004FF0E8[], D_004FF0F8[], D_004FF108[];
 extern char t4vect_Zero[], t4vect_Origin[], t4vect_XAxis[], t4vect_YAxis[], t4vect_ZAxis[];
 extern char t3mat_Identity[], t4mat_Identity[], D_004FF1E0[], D_004FF220[], tPose_Identity[], TheDynamicMemMan[];
 
+/**
+ * Static initialisation and destruction of the bx library's globals.
+ *
+ * Only for priority 0xFFFF. With @p init: func_00316A00 on D_004FF000, func_00317930 (cRandom constructor) on BXrandom
+ * and AIrandom, then the colour/vector/matrix constants and tPose_Identity, and func_0031FF20 constructs
+ * TheDynamicMemMan. Without: func_0031FF38 destroys TheDynamicMemMan.
+ *
+ * @param init  nonzero to construct, zero to destroy
+ * @param prio  the init priority; only 0xFFFF does anything
+ */
 extern "C" void __sti__all_in_one_bx_cpp(int init, int prio)
 {
     if (prio == 0xFFFF) {

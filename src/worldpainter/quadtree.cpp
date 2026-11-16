@@ -348,6 +348,13 @@ public:
     virtual ~cMemCard_DeleteInstance_cObj();
 };
 
+/**
+ * Destroys a memory card object.
+ *
+ * Calls the object's virtual deleting destructor; a null pointer is ignored.
+ *
+ * @param self  the memory card object to delete (On Tour pMemCard)
+ */
 extern "C" void cMemCard_DeleteInstance(cMemCard_DeleteInstance_cObj* self)
 {
     delete self;
@@ -597,6 +604,16 @@ INCLUDE_ASM("worldpainter/quadtree", usprintf);
 #ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 
+/**
+ * Formats a wide (16-bit) string from an 8-bit format string, like sprintf.
+ *
+ * Copies @p fmt character by character into a 1024-entry wide buffer, then formats it into @p dst with the variable
+ * arguments through USTR_vsprintf.
+ *
+ * @param dst  the wide string to write (On Tour s)
+ * @param fmt  printf-style format, 8-bit characters
+ * @return USTR_vsprintf's result
+ */
 // PORT: hand-rolled EE EABI va_start (sprintf1_va_start, defined above); use <stdarg.h> off-PS2.
 extern "C" int usprintf(unsigned short* dst, const char* fmt, ...)
 {
@@ -652,13 +669,13 @@ extern "C" int sprintf2(unsigned short* dst, const char* fmt, ...)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2868);
 #ifdef SKIP_ASM
-extern "C" void func_002C2868(char* s)
+extern "C" void func_002C2868(char* str)
 {
-    while (*s != 0) {
-        if (*s >= 'A' && *s <= 'Z') {
-            *s += 'a' - 'A';
+    while (*str != 0) {
+        if (*str >= 'A' && *str <= 'Z') {
+            *str += 'a' - 'A';
         }
-        s++;
+        str++;
     }
 }
 #endif
@@ -679,7 +696,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C28C0);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_GAMELINK_data[];
 
-extern "C" int func_002C28C0(int unused, int size, int zeroFlag)
+extern "C" int func_002C28C0(int name, int size, int zeroFlag)
 {
     return (int)new (str_GAMELINK_data, zeroFlag ? 0x100 : 0, 0) char[size];
 }
@@ -693,9 +710,9 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C28F8);
 extern "C" int MEM_free_ret(void* p) __asm__("MEM_free");
 extern "C" int func_002C28F8_impl(void* p) __asm__("func_002C28F8");
 
-extern "C" int func_002C28F8_impl(void* p)
+extern "C" int func_002C28F8_impl(void* block)
 {
-    return MEM_free_ret(p) != 0;
+    return MEM_free_ret(block) != 0;
 }
 #endif
 //100%
@@ -703,9 +720,9 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2918);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy();
 
-extern "C" int func_002C2918(int arg0) {
+extern "C" int func_002C2918(int dst) {
     MEM_copy();
-    return arg0;
+    return dst;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -719,19 +736,19 @@ extern "C" int func_002C28C0(int, int, int);
 extern "C" void func_002C28F8(int);
 extern char cMemMan_m_mutex[];
 
-extern "C" int func_002C2940(int block, int a, int size, int c) {
+extern "C" int func_002C2940(int block, int name, int size, int zeroFlag) {
     if (block == 0) {
-        return func_002C28C0(a, size, c);
+        return func_002C28C0(name, size, zeroFlag);
     }
     if (size == 0) {
         func_002C28F8(block);
         return 0;
     } else {
-        int r;
+        int result;
         MUTEX_lock_p(cMemMan_m_mutex);
-        r = cMemMan_internalResizeBlock(block, size);
+        result = cMemMan_internalResizeBlock(block, size);
         MUTEX_unlock_p(cMemMan_m_mutex);
-        return r;
+        return result;
     }
 }
 #endif
@@ -755,23 +772,23 @@ int* func_002C29D0_impl(int a0, int a1, int size) __asm__("func_002C29D0");
 
 int* func_002C29D0_impl(int a0, int a1, int size)
 {
-    int* p = (int*)func_002C28C0_29D0(0, 0xC, 0);
-    p[0] = 0;
-    p[0] = func_002C28C0_29D0((int)str_threadstack, size, 0);
-    if (p[0] != 0) {
-        if (func_003E50C8(p + 1, a0, a1, p[0], size, 0x63) == 0) {
-            func_002C28F8_29D0(p[0]);
-            p[0] = 0;
+    int* thread = (int*)func_002C28C0_29D0(0, 0xC, 0);
+    thread[0] = 0;
+    thread[0] = func_002C28C0_29D0((int)str_threadstack, size, 0);
+    if (thread[0] != 0) {
+        if (func_003E50C8(thread + 1, a0, a1, thread[0], size, 0x63) == 0) {
+            func_002C28F8_29D0(thread[0]);
+            thread[0] = 0;
         }
     }
-    if (func_002C29D0_valid(p[0])) {
-        return p;
+    if (func_002C29D0_valid(thread[0])) {
+        return thread;
     }
-    if (p != 0) {
-        if (p[0] != 0) {
-            func_002C28F8_29D0(p[0]);
+    if (thread != 0) {
+        if (thread[0] != 0) {
+            func_002C28F8_29D0(thread[0]);
         }
-        func_002C28F8_29D0((int)p);
+        func_002C28F8_29D0((int)thread);
     }
     return 0;
 }
@@ -816,9 +833,9 @@ extern "C" int func_002C2B28_impl(void) __asm__("func_002C2B28");
 
 extern "C" int func_002C2B28_impl(void)
 {
-    int p = func_002C28C0((int)str_mutex, 0x10, 0);
-    MUTEX_create(p);
-    return p;
+    int mutex = func_002C28C0((int)str_mutex, 0x10, 0);
+    MUTEX_create(mutex);
+    return mutex;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -902,7 +919,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2D30);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_ISTR_data[];
 
-extern "C" int func_002C2D30(int unused, int size, int zeroFlag)
+extern "C" int func_002C2D30(int name, int size, int zeroFlag)
 {
     return (int)new (str_ISTR_data, zeroFlag ? 0x100 : 0, 0) char[size];
 }
@@ -916,9 +933,9 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2D68);
 extern "C" int MEM_free_ret(void* p) __asm__("MEM_free");
 extern "C" int func_002C2D68_impl(void* p) __asm__("func_002C2D68");
 
-extern "C" int func_002C2D68_impl(void* p)
+extern "C" int func_002C2D68_impl(void* block)
 {
-    return MEM_free_ret(p) != 0;
+    return MEM_free_ret(block) != 0;
 }
 #endif
 //100%
@@ -926,9 +943,9 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2D88);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy();
 
-extern "C" int func_002C2D88(int arg0) {
+extern "C" int func_002C2D88(int dst) {
     MEM_copy();
-    return arg0;
+    return dst;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -942,19 +959,19 @@ extern "C" int func_002C2D30(int, int, int);
 extern "C" void func_002C2D68(int);
 extern char cMemMan_m_mutex[];
 
-extern "C" int func_002C2DB0(int block, int a, int size, int c) {
+extern "C" int func_002C2DB0(int block, int name, int size, int zeroFlag) {
     if (block == 0) {
-        return func_002C2D30(a, size, c);
+        return func_002C2D30(name, size, zeroFlag);
     }
     if (size == 0) {
         func_002C2D68(block);
         return 0;
     } else {
-        int r;
+        int result;
         MUTEX_lock_p(cMemMan_m_mutex);
-        r = cMemMan_internalResizeBlock(block, size);
+        result = cMemMan_internalResizeBlock(block, size);
         MUTEX_unlock_p(cMemMan_m_mutex);
-        return r;
+        return result;
     }
 }
 #endif
@@ -965,10 +982,10 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2E40);
 // The unit declares func_002C2E40 later as void(); keep the real signature under an asm label.
 extern "C" int func_002C2E40_impl(unsigned short* s) __asm__("func_002C2E40");
 
-extern "C" int func_002C2E40_impl(unsigned short* s)
+extern "C" int func_002C2E40_impl(unsigned short* str)
 {
     int n = 0;
-    while (*s++) {
+    while (*str++) {
         n++;
     }
     return n;
@@ -1011,6 +1028,9 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C2F18);
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cSurfPropCache_purge__FPv);
 #ifdef SKIP_ASM
+/**
+ * Releases the surface property cache; does nothing in this build.
+ */
 void cSurfPropCache_purge(void* self)
 {
 }
@@ -1239,9 +1259,9 @@ extern "C" void* func_002C48C0(cPS2MemCard*, int);
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4290__FPvi);
 #ifdef SKIP_ASM
-void* func_002C4290(void* self, int a1)
+void* func_002C4290(void* self, int fileSlot)
 {
-    *(int*)((char*)self + 0x1c) = a1;
+    *(int*)((char*)self + 0x1c) = fileSlot;
     return func_002C48C0((cPS2MemCard*)self, 0x22);
 }
 #endif
@@ -1302,9 +1322,9 @@ extern "C" void func_002C4388(cPS2MemCard* self)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C43E0__FPvi);
 #ifdef SKIP_ASM
-void* func_002C43E0(void* self, int a1)
+void* func_002C43E0(void* self, int fileSlot)
 {
-    *(int*)((char*)self + 0x1c) = a1;
+    *(int*)((char*)self + 0x1c) = fileSlot;
     return func_002C48C0((cPS2MemCard*)self, 0x13);
 }
 #endif
@@ -1395,9 +1415,9 @@ extern char str_pct_s_d[];
 
 extern "C" void func_002C4520(cPS2MemCard* self, const char* name)
 {
-    char* p = (char*)self + 0xB9;
-    strcpy(p, name);
-    sprintf((char*)self + 0xF9, str_pct_s_d, p);
+    char* fileName = (char*)self + 0xB9;
+    strcpy(fileName, name);
+    sprintf((char*)self + 0xF9, str_pct_s_d, fileName);
     func_002C48C0(self, 0x14);
 }
 #endif
@@ -1412,9 +1432,9 @@ char* strcpy2_impl(char* dst, unsigned short* src) __asm__("strcpy2");
 
 extern "C" void func_002C4578(cPS2MemCard* self, unsigned short* name)
 {
-    char* p = (char*)self + 0xB9;
-    strcpy2_impl(p, name);
-    sprintf((char*)self + 0xF9, str_pct_s_d, p);
+    char* fileName = (char*)self + 0xB9;
+    strcpy2_impl(fileName, name);
+    sprintf((char*)self + 0xF9, str_pct_s_d, fileName);
     func_002C48C0(self, 0x14);
 }
 #endif
@@ -1515,10 +1535,10 @@ extern "C" void func_002C46C0(cPS2MemCard* self, int a1, int a2, int a3)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4720__FPvii);
 #ifdef SKIP_ASM
-void* func_002C4720(void* self, int a1, int a2)
+void* func_002C4720(void* self, int buffer, int transferSize)
 {
-    *(int*)((char*)self + 0x2c) = a1;
-    *(int*)((char*)self + 0x20) = a2;
+    *(int*)((char*)self + 0x2c) = buffer;
+    *(int*)((char*)self + 0x20) = transferSize;
     return func_002C48C0((cPS2MemCard*)self, 0x17);
 }
 #endif
@@ -1575,21 +1595,21 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4800);
 extern "C" void func_002C54D0(cPS2MemCard* self, int a1, char* dst);
 extern "C" void func_002C4788(cPS2MemCard* self, char* name, int a2, int a3);
 
-extern "C" void func_002C4800(cPS2MemCard* self, int a1, int a2, int a3)
+extern "C" void func_002C4800(cPS2MemCard* self, int fileSlot, int buffer, int transferSize)
 {
     char name[64];
-    func_002C54D0(self, a1, name);
-    func_002C4788(self, name, a2, a3);
+    func_002C54D0(self, fileSlot, name);
+    func_002C4788(self, name, buffer, transferSize);
 }
 #endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C4858__FPvii);
 #ifdef SKIP_ASM
-void* func_002C4858(void* self, int a1, int a2)
+void* func_002C4858(void* self, int buffer, int transferSize)
 {
-    *(int*)((char*)self + 0x2c) = a1;
-    *(int*)((char*)self + 0x20) = a2;
+    *(int*)((char*)self + 0x2c) = buffer;
+    *(int*)((char*)self + 0x20) = transferSize;
     return func_002C48C0((cPS2MemCard*)self, 0x1d);
 }
 #endif
@@ -2147,19 +2167,19 @@ extern "C" void func_002C52D8(cPS2MemCard* self)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C5300);
 #ifdef SKIP_ASM
-extern "C" int func_002C5300(cPS2MemCard* self, int a1)
+extern "C" int func_002C5300(cPS2MemCard* self, int device)
 {
-    char* p = (char*)self + a1 * 0x14;
-    return *(int*)(p + 0x184) == -0x2712;
+    char* devicePtr = (char*)self + device * 0x14;
+    return *(int*)(devicePtr + 0x184) == -0x2712;
 }
 #endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C5320);
 #ifdef SKIP_ASM
-extern "C" void* func_002C5320(cPS2MemCard* self, int a1)
+extern "C" void* func_002C5320(cPS2MemCard* self, int device)
 {
-    return *(void**)((char*)self + a1 * 0x14 + 0x180);
+    return *(void**)((char*)self + device * 0x14 + 0x180);
 }
 #endif
 
@@ -2195,20 +2215,20 @@ extern "C" int func_002C5358(cPS2MemCard* self, int i)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C53B0);
 #ifdef SKIP_ASM
-extern "C" int func_002C53B0(cPS2MemCard* self, int a1)
+extern "C" int func_002C53B0(cPS2MemCard* self, int device)
 {
-    char* p = (char*)self + a1 * 0x14;
-    return *(int*)(p + 0x188) != 0;
+    char* devicePtr = (char*)self + device * 0x14;
+    return *(int*)(devicePtr + 0x188) != 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C53C8);
 #ifdef SKIP_ASM
-extern "C" int func_002C53C8(cPS2MemCard* self, int a1)
+extern "C" int func_002C53C8(cPS2MemCard* self, int device)
 {
-    char* p = (char*)self + a1 * 0x14;
-    return *(int*)(p + 0x18c) != 0;
+    char* devicePtr = (char*)self + device * 0x14;
+    return *(int*)(devicePtr + 0x18c) != 0;
 }
 #endif
 
@@ -2273,10 +2293,10 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C54D0);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 
-extern "C" void func_002C54D0(cPS2MemCard* self, int a1, char* dst)
+extern "C" void func_002C54D0(cPS2MemCard* self, int fileSlot, char* dst)
 {
-    char* p = (char*)self + a1 * 0x78;
-    strcpy(dst, p + 0x1b0);
+    char* filePtr = (char*)self + fileSlot * 0x78;
+    strcpy(dst, filePtr + 0x1b0);
 }
 #endif
 
@@ -2304,30 +2324,30 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C5528);
 #ifdef SKIP_ASM
 extern "C" int strlen(const char* s);
 
-extern "C" bool func_002C5528(cPS2MemCard* self, int a1)
+extern "C" bool func_002C5528(cPS2MemCard* self, int fileSlot)
 {
-    char* p = (char*)self + a1 * 0x78;
-    return strlen(p + 0x1b0) != 0;
+    char* filePtr = (char*)self + fileSlot * 0x78;
+    return strlen(filePtr + 0x1b0) != 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C5558);
 #ifdef SKIP_ASM
-extern "C" void func_002C5558(cPS2MemCard* self, int a1)
+extern "C" void func_002C5558(cPS2MemCard* self, int fileSlot)
 {
-    char* p = (char*)self + a1 * 0x78;
-    *(int*)(p + 0x1a4) = 1;
+    char* filePtr = (char*)self + fileSlot * 0x78;
+    *(int*)(filePtr + 0x1a4) = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C5570);
 #ifdef SKIP_ASM
-extern "C" void func_002C5570(cPS2MemCard* self, int a1)
+extern "C" void func_002C5570(cPS2MemCard* self, int fileSlot)
 {
-    char* p = (char*)self + a1 * 0x78;
-    *(int*)(p + 0x1a8) = 1;
+    char* filePtr = (char*)self + fileSlot * 0x78;
+    *(int*)(filePtr + 0x1a8) = 1;
 }
 #endif
 
@@ -2357,10 +2377,10 @@ extern "C" int func_002C5588(sQTSlots* self, int i)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C55C0);
 #ifdef SKIP_ASM
-extern "C" int func_002C55C0(cPS2MemCard* self, int a1)
+extern "C" int func_002C55C0(cPS2MemCard* self, int fileSlot)
 {
-    char* p = (char*)self + a1 * 0x78;
-    return *(int*)(p + 0x1ac) != 0;
+    char* filePtr = (char*)self + fileSlot * 0x78;
+    return *(int*)(filePtr + 0x1ac) != 0;
 }
 #endif
 
@@ -3024,9 +3044,9 @@ extern "C" void func_002C6360(cPS2MemCard* pS2MemCard)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C63E8);
 #ifdef SKIP_ASM
-extern "C" int func_002C63E8(cPS2MemCard* self, unsigned int a1)
+extern "C" int func_002C63E8(cPS2MemCard* self, unsigned int status)
 {
-    return a1 + 0x270f < 0x2706;
+    return status + 0x270f < 0x2706;
 }
 #endif
 
@@ -3233,8 +3253,8 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C66D8);
 #ifdef SKIP_ASM
 extern "C" int func_002C66D8(cPS2MemCard* self)
 {
-    char* p = (char*)self + self->mDevice * 0x14;
-    return *(int*)(p + 0x184) == -0xb;
+    char* devicePtr = (char*)self + self->mDevice * 0x14;
+    return *(int*)(devicePtr + 0x184) == -0xb;
 }
 #endif
 
@@ -3315,9 +3335,9 @@ int func_002C6750(void* self)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6758);
 #ifdef SKIP_ASM
-extern "C" int func_002C6758(cPS2MemCard* self, int a1)
+extern "C" int func_002C6758(cPS2MemCard* self, int byteSize)
 {
-    return (a1 + 0x3ff) / 0x400 + 0x4d;
+    return (byteSize + 0x3ff) / 0x400 + 0x4d;
 }
 #endif
 
@@ -3366,10 +3386,10 @@ int func_002C67E0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C67E8__FPvi);
 #ifdef SKIP_ASM
-void* func_002C67E8(void* self, int a1)
+void* func_002C67E8(void* self, int device)
 {
-    *(int*)((char*)self + 0xc) = a1;
-    *(int*)((char*)self + 0x10) = a1;
+    *(int*)((char*)self + 0xc) = device;
+    *(int*)((char*)self + 0x10) = device;
     return func_002C48C0((cPS2MemCard*)self, 3);
 }
 #endif
@@ -3505,10 +3525,10 @@ extern "C" void func_002C6A28(cPS2MemCard* self)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6A60__FPvii);
 #ifdef SKIP_ASM
-void* func_002C6A60(void* self, int a1, int a2)
+void* func_002C6A60(void* self, int seekOffset, int seekOrigin)
 {
-    *(int*)((char*)self + 0x14e4) = a1;
-    *(int*)((char*)self + 0x14e8) = a2;
+    *(int*)((char*)self + 0x14e4) = seekOffset;
+    *(int*)((char*)self + 0x14e8) = seekOrigin;
     return func_002C48C0((cPS2MemCard*)self, 0x41);
 }
 #endif
@@ -3561,10 +3581,10 @@ extern "C" void func_002C6B00(cPS2MemCard* self)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6B50__FPvii);
 #ifdef SKIP_ASM
-void* func_002C6B50(void* self, int a1, int a2)
+void* func_002C6B50(void* self, int buffer, int ioSize)
 {
-    *(int*)((char*)self + 0x2c) = a1;
-    *(int*)((char*)self + 0x24) = a2;
+    *(int*)((char*)self + 0x2c) = buffer;
+    *(int*)((char*)self + 0x24) = ioSize;
     return func_002C48C0((cPS2MemCard*)self, 0x43);
 }
 #endif
@@ -3590,10 +3610,10 @@ extern "C" void func_002C6B78(cPS2MemCard* self)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C6BD0__FPvii);
 #ifdef SKIP_ASM
-void* func_002C6BD0(void* self, int a1, int a2)
+void* func_002C6BD0(void* self, int buffer, int ioSize)
 {
-    *(int*)((char*)self + 0x2c) = a1;
-    *(int*)((char*)self + 0x24) = a2;
+    *(int*)((char*)self + 0x2c) = buffer;
+    *(int*)((char*)self + 0x24) = ioSize;
     return func_002C48C0((cPS2MemCard*)self, 0x45);
 }
 #endif
@@ -3681,9 +3701,9 @@ extern "C" void MEM_free(void* p);
 
 extern "C" void func_002C6D70(void* self, int flags)
 {
-    void* p = *(void**)((char*)self + 0x4);
-    if (p != 0) {
-        MEM_free(p);
+    void* buffer = *(void**)((char*)self + 0x4);
+    if (buffer != 0) {
+        MEM_free(buffer);
     }
     if (flags & 1) {
         operator_delete((int*)self);

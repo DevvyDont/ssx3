@@ -758,6 +758,19 @@ extern "C" void func_00150558(int kind, void* dst);
 extern sEconDef_1600 D_0043EE10_v1600[] __asm__("cBELibrary_missionInfo");
 extern sEconColRec_1600 D_005308D9[];
 
+/**
+ * Resets one character's career profile to its starting state.
+ *
+ * With @p reload, func_00151A88 first reloads the item data for character @p k. Then: the unlock bits at +0x278 get
+ * their defaults, money (+0xAC4, +0xAC8) and the visited-locations mask (+0xACC) are zeroed, the 26 slots are blanked,
+ * the 23 entries cleared, the 0x58 mission flags (+0x118) take their initial lock state from cBELibrary_missionInfo, the outfit
+ * colours come from D_005308D9[@p k], func_001519E0 and func_00150558 set the character kind's defaults, and the
+ * remaining records are cleared; +0x27C ends as 0x11. Unlike On Tour's init(void) the retail version takes the
+ * character and a reload flag.
+ *
+ * @param k  the character the profile belongs to
+ * @param reload  nonzero to reload the character's item data first (func_00151A88)
+ */
 extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
 {
     if (reload) {

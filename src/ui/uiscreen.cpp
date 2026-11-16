@@ -121,6 +121,14 @@ extern "C" void cUIScreen_setData(cUIScreen* self, char* data)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByIndex);
 #ifdef SKIP_ASM
+/**
+ * Finds a screen's keyframe header by frame number.
+ *
+ * The frame table at +0x34 starts with a count; each header follows the previous one by the size stored at its +0x4.
+ * Returns the header whose 16-bit number at +0x8 equals @p frame, or 0.
+ *
+ * @param frame  the frame number to find (On Tour index)
+ */
 extern "C" void* cUIScreen_getFrameByIndex(void* self, unsigned short frame)
 {
     int* list = *(int**)((char*)self + 0x34);
@@ -419,9 +427,18 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframePause);
 #ifdef SKIP_ASM
-extern "C" void cUIScreen_parseKeyframePause(void* p0, void* p1, void* p2, void* p3)
+/**
+ * Handles a keyframe pause command by stopping the playing thread.
+ *
+ * Clears bit 24 of the flags at +0x10 of the thread @p pThread; the frame and command are unused.
+ *
+ * @param pFrame  the frame header holding the command (On Tour pFrame)
+ * @param pKCP  the command (On Tour pKCP)
+ * @param pThread  the animation thread being played (On Tour pThread)
+ */
+extern "C" void cUIScreen_parseKeyframePause(void* self, void* pFrame, void* pKCP, void* pThread)
 {
-    *(unsigned int*)((char*)p3 + 0x10) &= 0xFEFFFFFFU;
+    *(unsigned int*)((char*)pThread + 0x10) &= 0xFEFFFFFFU;
 }
 #endif
 
@@ -480,7 +497,16 @@ extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
 // PORT: callers pass a 5th arg (0) that cUIThing_playAnimation never reads
 extern "C" void cUIThing_playAnimation(void* self, void* anim, unsigned char mode, unsigned short v, int x);
 
-extern "C" void cUIScreen_parseObjectAnim(void* self, void* p1, void* msg)
+/**
+ * Handles a keyframe command that starts an animation on one of the screen's objects.
+ *
+ * The command holds the object hash (+0x8), the animation hash (+0x4) and the playback mode (+0xC). When both are found
+ * the animation plays on the object from the frame number at @p pFrame +0x8, not expiring.
+ *
+ * @param pFrame  the frame header holding the command (On Tour pFrame)
+ * @param msg  the command (On Tour pKCP)
+ */
+extern "C" void cUIScreen_parseObjectAnim(void* self, void* pFrame, void* msg)
 {
     void* obj = cUIScreen_getObjectByHashName((cUIScreen*)self, *(int*)((char*)msg + 8));
     if (obj != 0) {
@@ -488,7 +514,7 @@ extern "C" void cUIScreen_parseObjectAnim(void* self, void* p1, void* msg)
             (char*)*(void**)((char*)*(void**)((char*)self + 0xD0) + 0x10) + 0x50,
             *(int*)((char*)msg + 4));
         if (anim != 0) {
-            cUIThing_playAnimation(obj, anim, *(unsigned char*)((char*)msg + 0xC), *(unsigned short*)((char*)p1 + 8), 0);
+            cUIThing_playAnimation(obj, anim, *(unsigned char*)((char*)msg + 0xC), *(unsigned short*)((char*)pFrame + 8), 0);
         }
     }
 }
@@ -519,7 +545,16 @@ public:
     virtual void v13(int, void*);
 };
 
-extern "C" void cUIScreen_parseObjectSetPos(void* self, int a1, int* msg)
+/**
+ * Handles a keyframe command that sets one of the screen's objects' channel values directly.
+ *
+ * Finds the object named by the hash in @p msg [1], removes any running animation from it and passes the channel count
+ * @p msg [2] and the values from @p msg [3] on to its virtual slot 13 (On Tour setChannelDataKCP).
+ *
+ * @param pFrame  the frame header holding the command (On Tour pFrame)
+ * @param msg  the command words (On Tour pKCP)
+ */
+extern "C" void cUIScreen_parseObjectSetPos(void* self, int pFrame, int* msg)
 {
     cUIScreen_parseObjectSetPos_cVirt* obj = (cUIScreen_parseObjectSetPos_cVirt*)cUIScreen_getObjectByHashName((cUIScreen*)self, msg[1]);
     if (obj != 0) {
@@ -532,6 +567,9 @@ extern "C" void cUIScreen_parseObjectSetPos(void* self, int a1, int* msg)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_parseObjectVisible__FPv);
 #ifdef SKIP_ASM
+/**
+ * Handles a keyframe visibility command; does nothing in this build.
+ */
 void cUIScreen_parseObjectVisible(void* self)
 {
 }
@@ -579,7 +617,17 @@ public:
     virtual int v03(void*, int);
 };
 
-extern "C" void cUIScreen_parseEventTrigger(void* self, void* p1, int* msg)
+/**
+ * Handles a keyframe event command by raising a screen event.
+ *
+ * The owning state at +0xD0 gets the event hash @p msg [1] through its virtual slot 16 (cUIState onScreenEvent); if
+ * that returns 0, the object pointed to by the engine's first word (state+0xD0 -> +0x10) gets it through its virtual
+ * slot 3.
+ *
+ * @param pFrame  the frame header holding the command (On Tour pFrame)
+ * @param msg  the command words; word 1 is the event hash (On Tour pKCP)
+ */
+extern "C" void cUIScreen_parseEventTrigger(void* self, void* pFrame, int* msg)
 {
     cUIScreen_parseEventTrigger_cVirtA* a = *(cUIScreen_parseEventTrigger_cVirtA**)((char*)self + 0xD0);
     if (a->v16(self, msg[1]) == 0) {
@@ -599,6 +647,11 @@ struct sUIFlags1C {
     unsigned int mode : 6;
 };
 
+/**
+ * Handles a keyframe command that marks the owning state as having gained focus.
+ *
+ * If the screen has an owning state (+0xD0), sets the mode bits of its flags at +0x1C to 3.
+ */
 extern "C" void cUIScreen_parseScreenFocusGain(void* self)
 {
     void* p = *(void**)((char*)self + 0xd0);
@@ -629,6 +682,9 @@ extern "C" void cUIScreen_parseScreenFocusLose(cUIScreen* self)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_parseScreenStart__FPv);
 #ifdef SKIP_ASM
+/**
+ * Handles a keyframe screen-start command; does nothing in this build.
+ */
 void cUIScreen_parseScreenStart(void* self)
 {
 }
@@ -637,9 +693,19 @@ void cUIScreen_parseScreenStart(void* self)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_parseScreenEnd);
 #ifdef SKIP_ASM
-extern "C" void cUIScreen_parseScreenEnd(void* self, void* p1, void* p2, void* p3)
+/**
+ * Handles a keyframe screen-end command: stops the thread and marks the owning state as finished.
+ *
+ * Clears bit 24 of the thread's flags at +0x10, then, if the screen has an owning state (+0xD0), sets the mode bits of
+ * its flags at +0x1C to 7.
+ *
+ * @param pFrame  the frame header holding the command (On Tour pFrame)
+ * @param pKCP  the command (On Tour pKCP)
+ * @param pThread  the animation thread being played (On Tour pThread)
+ */
+extern "C" void cUIScreen_parseScreenEnd(void* self, void* pFrame, void* pKCP, void* pThread)
 {
-    *(unsigned int*)((char*)p3 + 0x10) &= 0xFEFFFFFFU;
+    *(unsigned int*)((char*)pThread + 0x10) &= 0xFEFFFFFFU;
     void* p = *(void**)((char*)self + 0xd0);
     if (p != 0) {
         ((sUIFlags1C*)((char*)p + 0x1c))->mode = 7;
@@ -708,15 +774,15 @@ struct sObjRec_0039D008 {
 
 extern "C" void* func_0039D008(void* self, int key)
 {
-    sObjRec_0039D008* e = (sObjRec_0039D008*)(*(char**)((char*)self + 0x38) + 4);
+    sObjRec_0039D008* record = (sObjRec_0039D008*)(*(char**)((char*)self + 0x38) + 4);
     unsigned int i;
     for (i = 0; i < *(*(unsigned int**)((char*)self + 0x38)); i++) {
-        if (e->key == key) {
-            char* obj = cUIScreen_createObjectByStruct((cUIScreen*)self, (char*)e);
+        if (record->key == key) {
+            char* obj = cUIScreen_createObjectByStruct((cUIScreen*)self, (char*)record);
             *(int*)(obj + 0x38) = key;
             return obj;
         }
-        e = (sObjRec_0039D008*)((char*)e + e->size);
+        record = (sObjRec_0039D008*)((char*)record + record->size);
     }
     return 0;
 }
@@ -1230,6 +1296,19 @@ static inline void wSet_DA20(sWidget_DA20* w, sV4_DA20* in)
     ((tGet_DA20)w->vt[21].fn)((char*)w + w->vt[21].delta, in);
 }
 
+/**
+ * Updates a scroll bar's position, visible count and total, and resizes its knob to match.
+ *
+ * When the position goes up (or down) and an up (down) label name is set, the screen plays the frame with that label.
+ * With a non-zero total and the vertical flag, the knob is placed at track y + track height * pos / total and sized
+ * track height * visible / total (capped at the track). The up and down arrows are hidden at either end. When the knob
+ * fills the track, the mode at self->mode hides the whole bar (0), the arrows and knob (1) or only the knob (2);
+ * otherwise the knob, track and extra widget are shown. The knob's size is set through its virtual slot 21.
+ *
+ * @param pos  first visible item (On Tour pos)
+ * @param visible  number of items visible at once (On Tour page)
+ * @param total  total number of items (On Tour range)
+ */
 extern "C" void cUIScrollBar_setValues(sScroll_DA20* self, int pos, int visible, int total)
 {
     char* name = self->upLabel;
@@ -1645,12 +1724,12 @@ extern "C" void* cList_destroyList(void*);
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039E438);
 #ifdef SKIP_ASM
-extern "C" void func_0039E438(void *arg0, signed char arg1) {
-    if (arg1 < 0) {
+extern "C" void func_0039E438(void *arg0, signed char bit) {
+    if (bit < 0) {
         (*(unsigned char *)((char*)(arg0) + (0x15))) = 0xFFU;
         return;
     }
-    (*(unsigned char *)((char*)(arg0) + (0x15))) = (unsigned char) ((*(unsigned char *)((char*)(arg0) + (0x15))) | ((int) (0x01000000 << arg1) >> 0x18));
+    (*(unsigned char *)((char*)(arg0) + (0x15))) = (unsigned char) ((*(unsigned char *)((char*)(arg0) + (0x15))) | ((int) (0x01000000 << bit) >> 0x18));
 }
 #endif
 //100%
@@ -1750,6 +1829,15 @@ static inline int cUIState_onUpdate_padTest(char* pad, int slot)
     return vt[slot].fn(pad + vt[slot].delta);
 }
 
+/**
+ * Base per-frame update of a UI state: routes controller input to the state and its screens.
+ *
+ * For controller index 0 and 1 (stored at +0x14 while running, -1 after) it refreshes the input object through its
+ * virtual slot 44 and, when button 45 is down and either button 41 or button 40 with the controller enabled in the mask
+ * at +0x15 is down, offers the input to virtual slot 8; if that does not consume it, each screen in the list at +0x24
+ * with its enabled bit set gets it through its virtual slot 4 until one returns non-zero. Virtual slot 9
+ * (cUIState_onInputAlways) is then called and the loop stops.
+ */
 extern "C" void cUIState_onUpdate(char* self)
 {
     int mask = *(signed char*)(self + 0x15);
@@ -1800,6 +1888,13 @@ public:
     virtual void v07(int);
 };
 
+/**
+ * Default handling when a state's menu group gains focus: gives the group focus.
+ *
+ * Calls virtual slot 7 of @p obj with 1.
+ *
+ * @param obj  the menu group gaining focus (On Tour pRootGroup)
+ */
 extern "C" void cUIState_onMenuGainFocus(void* self, cUIState_onMenuGainFocus_cVirt* obj)
 {
     obj->v07(1);
@@ -1825,6 +1920,12 @@ struct sVEntry39E6B8b {
     void (*fn)(void*, float, float);
 };
 
+/**
+ * Base 2D render of a UI state: draws each of its visible screens.
+ *
+ * If the screen list at +0x24 is not empty, calls virtual slot 14 (cUIState_onPreRender2D) and then each screen whose
+ * visible bit (bit 6 of +0x54) is set is drawn through the virtual slot 17 of its object at +0x40 with (0.0f, 0.0f).
+ */
 extern "C" void cUIState_onRender2D(void* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));

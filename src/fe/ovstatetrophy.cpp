@@ -1767,20 +1767,36 @@ struct sOVTrophy_1088 {
     char pad_0x234[0x278 - 0x234];
     int f278;               // 0x278
 };
-extern "C" sOVTrophy_1088* cOVState_PROFILE_cOVState_PROFILE(sOVTrophy_1088* self, int a, unsigned char b, int c)
+/**
+ * Constructs the in-game profile (load/save) overlay for the controller that opened it.
+ *
+ * Runs cFEMemCard_cFEMemCard (the memory card screen base, type 0), sets the state id (+0xC) to 0x24, installs
+ * cOVState_PROFILE_vtbl, stores @p parentOverlay (the overlay to return to) at +0x278 and clears +0x1CC, +0x22C and +0x230.
+ * Then turns @p ucActiveControl into a controller index and stores at +0x1CC which player (one, or two in a two-player race)
+ * uses that controller (cBENewPlayerInterface_getPlayerCtrlID).
+ *
+ * Likely bug (also in On Tour): the loop shifts @p ucActiveControl right by the loop counter each pass (1, then 2 more, ...)
+ * instead of by 1, so bits 0 and 1 give controllers 0 and 1 but bit 2 gives 1 and bit 3 gives 2.
+ *
+ * @param pEngine  the UI engine
+ * @param ucActiveControl  bit mask of the active controller (On Tour ucActiveControl)
+ * @param parentOverlay  the overlay to return to (On Tour ov, kept in mParentOV)
+ * @return @p self
+ */
+extern "C" sOVTrophy_1088* cOVState_PROFILE_cOVState_PROFILE(sOVTrophy_1088* self, int pEngine, unsigned char ucActiveControl, int parentOverlay)
 {
     int idx = 0;
-    cFEMemCard_cFEMemCard(self, a, 0);
+    cFEMemCard_cFEMemCard(self, pEngine, 0);
     self->f0C = 0x24;
     self->vtable = cOVState_PROFILE_vtbl;
-    self->f278 = c;
+    self->f278 = parentOverlay;
     self->f1CC = 0;
     self->f22C = 0;
     self->f230 = 0;
     int i;
     for (i = 1; i < 9; i++) {
-        b >>= i;
-        if (b == 0) {
+        ucActiveControl >>= i;
+        if (ucActiveControl == 0) {
             idx = i - 1;
             break;
         }

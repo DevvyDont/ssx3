@@ -240,6 +240,14 @@ extern "C" void* cAI_commonInit(cAI*, int);
 //100%
 INCLUDE_ASM("ai/ai", cAI_resolveRace__FPv);
 #ifdef SKIP_ASM
+/**
+ * Re-runs the AI's shared race initialisation when an event or the next heat restarts.
+ *
+ * Just cAI_commonInit(self, 0): the computer and mission riders are reset, the human riders and EventTimerTick are
+ * kept. On Tour's resolveRace first waits for isAILoadedAndReady(); retail has no such wait.
+ *
+ * @return cAI_commonInit's value, which has no meaning (On Tour's resolveRace returns void; the callers ignore it)
+ */
 void* cAI_resolveRace(void* self)
 {
     return cAI_commonInit((cAI*)self, 0);
@@ -457,6 +465,13 @@ extern "C" void cRider_updateAnimation(void* self, float value);
 extern "C" void cRider_updateSkeleton(void* self);
 extern "C" void cAnimModel_buildSkelMatrices(void*);
 
+/**
+ * Advances every rider's animation by one frame and rebuilds their skeletons.
+ *
+ * For each of the NumberOfRidersAllocated riders (Riders[]): cRider_updateAnimation(rider, 1.0f), cRider_updateSkeleton (On
+ * Tour cRider::updateSkeleton) and cAnimModel_buildSkelMatrices on the rider's anim model (+0x780). Used when an event
+ * start loses focus, so the riders are posed before the first rendered frame.
+ */
 extern "C" void cAI_updateAnimation(sAiObj128A48* self)
 {
     for (int i = 0; i < self->mCount; i++)
@@ -729,6 +744,13 @@ extern "C" void* cAI_commonInit(cAI* aiManager, int flag)
 INCLUDE_ASM("ai/ai", AITick);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the AI's frame counter, the game-wide tick the riders time their events with.
+ *
+ * Reads SSXApp->Game->AI->AITick (cAI +0x08), which cAI_commonInit zeroes at the start of every run.
+ *
+ * @return the current AITick
+ */
 extern "C" int AITick()
 {
     return SSXApp->Game->AI->AITick;
@@ -1682,6 +1704,14 @@ struct sAiObj12AB20
 struct sVEntry0012AB20 { short delta; short index; int (*fn)(void*); };
 
 
+/**
+ * Stops drawing the computer riders so they can be purged once the renderer no longer uses them.
+ *
+ * Clears ComputerRidersActive (+0x14). For each of the NumberOfComputersAllocated computers (Computers[] at +0x48)
+ * whose rider (+0x18) still has its render flag (+0x884) set, it clears the flag and stores a safe-render tick (+0x888)
+ * of the graphics manager's current frame count (GrMan vtable slot 114) + 4; cAI_isReadyToPurgeComputerRiders then
+ * waits for that frame.
+ */
 extern "C" void cAI_prepareToPurgeComputerRiders(sAiObj12AB20* self)
 {
     self->m14 = 0;
@@ -1750,6 +1780,13 @@ struct sAiObj12AC48
 struct sVEntry0012AC48 { short delta; short index; int (*fn)(void*); };
 
 
+/**
+ * Stops drawing the computer actors so they can be purged once the renderer no longer uses them.
+ *
+ * Clears ComputerActorsActive (+0x8C). For each of the NumberOfActorsAllocated actors (Actors[] at +0x5C) whose rider
+ * (+0x18) still has its render flag (+0x884) set, it clears the flag and stores a safe-render tick (+0x888) of the
+ * graphics manager's current frame count (GrMan vtable slot 114) + 4, which cAI_isReadyToPurgeComputerActors waits for.
+ */
 extern "C" void cAI_prepareToPurgeComputerActors(sAiObj12AC48* self)
 {
     self->m8C = 0;
@@ -2552,6 +2589,20 @@ static inline bool riderOk_12BB20(char* rider)
     return *(float*)(*(char**)(rider + 0x18) + 0x470) >= 0.0f;
 }
 
+/**
+ * Keeps an online race in step: checksums the AI, ends the race on a timer and sends the periodic sync packet.
+ *
+ * Does nothing unless cBENetworkInterface_networkOpt.bIsNetworkGame. Every 60 AITicks it takes cAI_syncCheckSum. In the
+ * race state (5), or state 3 while the game is in state 3, and only for game event 0 or 4 (D_00535C12,
+ * cBENewRaceInterface::cGameEvent): while EndOfRaceTimer (+0x18) is positive it counts down, and at 0 every player
+ * whose rider has not passed the finish line (rider +0x470 < 0) is marked did-not-finish (+0x480 = 1) and finished with
+ * cRider_doFinishEvent, the replay is ended and the timer goes back to -1.
+ *
+ * With no timer running, once a player has finished (and the game is neither ended remotely nor alone) before tick
+ * 0xD32B, the timer starts at min(0xD3A4 - AITick, 7200); past tick 0xD3A3 the unfinished players are force-finished at
+ * once (0xD3A4 ticks is about 15 minutes at 60 Hz). Finally, unless a replay is playing, every 60 ticks func_00258F20
+ * (On Tour cGameComm::updateSyncPacket) sends the tick and checksum.
+ */
 extern "C" void cAI_onlineAICheck(sAi_12BB20* self)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -7805,17 +7856,29 @@ struct sState_29B0 {
     sRider_29B0* rider; // 0x14
 };
 
-extern "C" void cHandplantControl_init(sState_29B0* s, sOwner_29B0* o, int flag, float t)
+/**
+ * Sets up a handplant from the intersection that started it: entry time, toeside, speed and a surface flag.
+ *
+ * Stores @p enterSec (+0x0) and @p flag as a 0/1 bool (+0x10), sets +0x8 when the rider's velocity (+0x1E0) is longer than
+ * 2222.2222 (80 kph in cm/s), and sets +0xC from bit 0 of the flags word (+0x1C) of the object at +0x58 of the
+ * intersect info, or 0 when there is none.
+ *
+ * @param self  the handplant control (this)
+ * @param intersectInfo  the intersect info the handplant started from (On Tour tIntersectInfo)
+ * @param flag  On Tour's isToeside: the hand goes down on the toe side
+ * @param enterSec  On Tour's enterSec: the handplant's entry time
+ */
+extern "C" void cHandplantControl_init(sState_29B0* self, sOwner_29B0* intersectInfo, int flag, float enterSec)
 {
     int on = 1;
-    s->t = t;
-    s->flag = flag ? on : 0;
-    s->fast = Length_29B0(s->rider->vel) > 2222.2222f;
+    self->t = enterSec;
+    self->flag = flag ? on : 0;
+    self->fast = Length_29B0(self->rider->vel) > 2222.2222f;
     bool c = false;
-    sFlags_29B0* f = o->ctl;
+    sFlags_29B0* f = intersectInfo->ctl;
     if (f != 0)
         c = (f->flags & 1) ? on : 0;
-    s->ctl = c;
+    self->ctl = c;
 }
 #endif
 
@@ -9223,6 +9286,19 @@ static inline sVec4 operator*=(sVec4& a, const sVec4& b)
 }
 
 extern "C" void cSpinControl_applyFlipSpinAngle_x(void* self, sXf* xf) __asm__("cSpinControl_applyFlipSpinAngle");
+/**
+ * Rotates the rider's root pose by the current spin and flip angles, pivoting about a body bone.
+ *
+ * The pivot is the rider's bone offset (anim model bone table +0x24, indexed by rider +0x89C) scaled by the model's
+ * scale (+0x140). The pose is moved to the pivot, turned by -(+0x20 + +0x28) about t4vect_ZAxis (spin), then by +0x24 +
+ * +0x2C about an axis between t4vect_YAxis and t4vect_XAxis (flip), and moved back. The axis weight (+0x40) follows
+ * cSpinControl_calcFlipAxisWeight, moving by at most |difference| / 30 per call.
+ *
+ * The C definition is cSpinControl_applyFlipSpinAngle with an asm label; the local operator*= declares a by-value result it never
+ * returns (matching quirk, noted in the body).
+ *
+ * @param xf  the root pose to rotate (On Tour tPose &root): position, then rotation quaternion
+ */
 extern "C" void cSpinControl_applyFlipSpinAngle_x(void* self, sXf* xf)
 {
     char* rd = *(char**)((char*)self + 0x58);
@@ -9556,6 +9632,15 @@ static inline float aiWrap_135BE0(float x)
     return x - aiFloor_135BE0(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
 }
 
+/**
+ * Switches the spin state to fakie when the rider changes stance in the air.
+ *
+ * If cRider_isChangeFakieAir (On Tour cRider::isChangeFakieAir) says the rider (+0x58) switched, the angle at +0x20 gets half a
+ * turn added (wrapped to -pi..pi), the values at +0x24, +0x2C, +0x18 and +0x10 are negated, and the rider's animation
+ * base plays AI anim 0x120 with blend -1.
+ *
+ * @return 1 when the rider changed to fakie, else 0
+ */
 extern "C" int cSpinControl_checkChangeFakieAir(void* self)
 {
     char* s = (char*)self;

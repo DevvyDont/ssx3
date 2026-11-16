@@ -101,7 +101,16 @@ struct sMgr_0820 {
     char* vptr;
 };
 
-extern "C" void cPSPVisualEffectsMan__cPSPVisualEffectsMan(sMgr_0820* self, int arg1)
+/**
+ * Destroys the visual effects manager: deletes its 17 effect components, then the base part.
+ *
+ * Stores its vtable D_00487D28 (+0x44), deletes each of the 17 component pointers (+0x00..+0x40; On Tour
+ * m_RenderToggles .. m_PathArrow) through their virtual destructors (null ones skipped), stores cVisualEffectsMan_vtbl
+ * and frees the object when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
+extern "C" void cPSPVisualEffectsMan__cPSPVisualEffectsMan(sMgr_0820* self, int flags)
 {
     self->vptr = D_00487D28;
     delete self->objs[0];
@@ -122,7 +131,7 @@ extern "C" void cPSPVisualEffectsMan__cPSPVisualEffectsMan(sMgr_0820* self, int 
     delete self->objs[15];
     delete self->objs[16];
     self->vptr = cVisualEffectsMan_vtbl;
-    if (arg1 & 1) {
+    if (flags & 1) {
         operator_delete((int*)self);
     }
 }
@@ -264,6 +273,14 @@ struct sMgr_0A98 {
 extern int D_004A3BA8;
 extern "C" void cVisualEffectsMan_commonUpdate(void*, int);
 
+/**
+ * Updates the visual effects: each effect component, then the per-view common update.
+ *
+ * Calls each of the 17 components' vtable slot +0x10 (their update; the view names it Reset). Then, for each view
+ * (SSXApp->Game->ViewMan +0x10), runs cVisualEffectsMan_commonUpdate (On Tour's commonUpdate) with that view's render-state query ID
+ * from D_004A3BA8 and a virtual of GrMan (the cPS2GraphicsMan) with the view index. On Tour passes the query ID as view
+ * + 6.
+ */
 extern "C" void cPSPVisualEffectsMan_update(sMgr_0A98* self)
 {
     self->objs[0]->Reset();
@@ -304,6 +321,12 @@ struct sMgr_0CD0 {
     cObj_0CD0* objs[17];
 };
 
+/**
+ * Renders the visual effects: calls each effect component's render.
+ *
+ * Calls vtable slot +0x18 of each of the 17 components in member order (+0x00..+0x40); per On Tour that slot is the
+ * component's render (the retail view names it Update).
+ */
 extern "C" void cPSPVisualEffectsMan_render(sMgr_0CD0* self)
 {
     self->objs[0]->Update();
@@ -2195,12 +2218,21 @@ extern "C" void func_002F3810(char* self)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_reset);
 #ifdef SKIP_ASM
-extern "C" void cSplashManager_reset(void *arg0) {
-    *(int *)((char*)arg0 + 0x100C) = 0;
-    *(int *)((char*)arg0 + 0x1024) = 0;
-    *(int *)((char*)arg0 + 0x14) = 0;
-    *(int *)((char*)arg0 + 0x18) = 0;
-    *(int *)((char*)arg0 + 0x1028) = 0;
+/**
+ * Resets the screen splash effect: no active drops or crystals and no remembered camera or snowfall.
+ *
+ * Clears the last-camera-position-valid flag (+0x100C), the splashes still to add (+0x1024), the active drop and
+ * crystal counts (+0x14, +0x18) and the last snowfall intensity (+0x1028); the floats are cleared with integer zero
+ * stores. Virtual (cSplashManager_vtbl +0x70); called by the constructor and, when a camera snaps, by cSplashManager_CameraSnapped.
+ *
+ * @param splashManager  the splash manager (this)
+ */
+extern "C" void cSplashManager_reset(void *splashManager) {
+    *(int *)((char*)splashManager + 0x100C) = 0;
+    *(int *)((char*)splashManager + 0x1024) = 0;
+    *(int *)((char*)splashManager + 0x14) = 0;
+    *(int *)((char*)splashManager + 0x18) = 0;
+    *(int *)((char*)splashManager + 0x1028) = 0;
 }
 #endif
 
@@ -2551,12 +2583,22 @@ struct Obj41A8 : Base41A8 {
 Obj41A8 *func_002306A8_41A8(void *, int) __asm__("func_002306A8__FPvi");
 #define F84(p) (*(char **)((char*)(p) + 0x84))
 
-extern "C" void cSplashManager_CameraSnapped(int arg0) {
+/**
+ * Tells the splash effects that a camera snapped: resets the splash manager of each view using that camera.
+ *
+ * Loops over the game's views (SSXApp->Game->ViewMan: count at +0x10, camera pointers from +0x4); where view i's camera
+ * is @p camera and func_002306A8__FPvi(game, i) returns a splash manager, it calls that manager's virtual at +0x70,
+ * cSplashManager_reset (reset), so no splashes carry over a camera cut. Called by cCameraController_snap and cCameraController_snapCurrent
+ * (cameracontroller).
+ *
+ * @param camera  the camera that snapped (a cCamera*)
+ */
+extern "C" void cSplashManager_CameraSnapped(int camera) {
     unsigned int i = 0;
     if (*(unsigned int *)(F84(F84(SSXApp)) + 0x10) != 0) {
         do {
             char *t5 = F84(SSXApp);
-            if (arg0 == *(int *)(F84(t5) + (i << 2) + 4)) {
+            if (camera == *(int *)(F84(t5) + (i << 2) + 4)) {
                 if (func_002306A8_41A8(t5, i) != 0) {
                     Obj41A8 *o = func_002306A8_41A8(F84(SSXApp), i);
                     o->v13();
@@ -2650,14 +2692,24 @@ extern "C" void cSunHalo_InitLens(void *);
 inline void* operator new[](unsigned int, void* p) { return p; }
 struct Elem4380 { Elem4380() {} };
 
-extern "C" void *cSunHalo_cSunHalo(void *arg0) {
-    func_002E2860(arg0);
-    new ((char*)arg0 + 0x40) Elem4380[16];
-    *(int *)((char*)arg0 + 0x204) = 0;
-    *(short *)((char*)arg0 + 0x2E) = 0;
-    *(short *)((char*)arg0 + 0x2C) = 0;
-    cSunHalo_InitLens(arg0);
-    return arg0;
+/**
+ * Constructs the sun halo: the halo base, its lens-flare table and the default lens set.
+ *
+ * Runs func_002E2860 (the cHalo base constructor), constructs the 16 lens entries (trivial), clears the occlusion
+ * factor (+0x204; On Tour mfOcclude) and the halo's mbOnScreen/mbRequestZSample shorts (+0x2C, +0x2E), then calls
+ * cSunHalo_InitLens (InitLens) for the default flare.
+ *
+ * @param sunHalo  the object to construct (this)
+ * @return @p sunHalo
+ */
+extern "C" void *cSunHalo_cSunHalo(void *sunHalo) {
+    func_002E2860(sunHalo);
+    new ((char*)sunHalo + 0x40) Elem4380[16];
+    *(int *)((char*)sunHalo + 0x204) = 0;
+    *(short *)((char*)sunHalo + 0x2E) = 0;
+    *(short *)((char*)sunHalo + 0x2C) = 0;
+    cSunHalo_InitLens(sunHalo);
+    return sunHalo;
 }
 #endif
 
@@ -2694,6 +2746,13 @@ struct sLightSet_43E0 {
 };
 
 extern "C" void cSunHalo_InitLens_43E0(sLightSet_43E0* self) __asm__("cSunHalo_InitLens");
+/**
+ * Sets up the sun's default lens flare: nine lens elements with type, position, scale and colour.
+ *
+ * Clears the lens count (+0x200; On Tour mNumLens), then fills lens entries 0..8 (0x1C bytes each from +0x30: type,
+ * position along the flare axis, scale, colour from D_004FAB80..D_004FAC80, On Tour's kLensNColour) and counts each
+ * one. Types 1, 3, 0, 2, 0, 0, 1, 3, 1; positions run from 1.3 down to -1.0.
+ */
 extern "C" void cSunHalo_InitLens_43E0(sLightSet_43E0* self)
 {
     self->count = 0;
@@ -3247,13 +3306,22 @@ struct Base5230 { int pad; };
 struct Inner5230 : Base5230 { virtual ~Inner5230(); };
 struct Outer5230 { int pad; Inner5230 *p; };
 
-extern "C" void cWorldLightMan__cWorldLightMan(Outer5230 *arg0, int arg1) {
-    if (arg0->p != 0) {
-        delete arg0->p;
+/**
+ * Destroys the world light manager: its world-painter query, its light cache, then itself.
+ *
+ * Deletes the object at +0x4 (On Tour m_pWPQuery) through its virtual destructor if set, calls cWorldLightMan_purgeLightCache
+ * (purgeLightCache) and frees the manager when bit 0 of @p flags is set.
+ *
+ * @param lightMan  the light manager (this)
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
+extern "C" void cWorldLightMan__cWorldLightMan(Outer5230 *lightMan, int flags) {
+    if (lightMan->p != 0) {
+        delete lightMan->p;
     }
-    cWorldLightMan_purgeLightCache(arg0);
-    if (arg1 & 1) {
-        operator_delete((int *)arg0);
+    cWorldLightMan_purgeLightCache(lightMan);
+    if (flags & 1) {
+        operator_delete((int *)lightMan);
     }
 }
 #endif

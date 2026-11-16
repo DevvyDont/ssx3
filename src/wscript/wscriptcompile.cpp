@@ -68,6 +68,13 @@ INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan__cInstanceMan);
 void operator_delete(int* ptr);
 void cMemMan_free(void* p);
 
+/**
+ * Destroys the world instance manager.
+ *
+ * Frees the array at +0xC with cMemMan_free if there is one, then calls operator delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ in-charge flags; bit 0 deletes the object
+ */
 extern "C" void cInstanceMan__cInstanceMan(void* self, int flags)
 {
     void* p = *(void**)((char*)self + 0xC);
@@ -102,14 +109,14 @@ struct sWSPool {
 
 extern "C" sWSNode* func_00351170(sWSPool* self)
 {
-    sWSNode* p = self->free;
-    if (p != 0) {
-        self->free = p->next;
+    sWSNode* node = self->free;
+    if (node != 0) {
+        self->free = node->next;
     }
-    p->type = self->type;
-    p->index = p - self->base;
-    p->flags |= 0x2000;
-    return p;
+    node->type = self->type;
+    node->index = node - self->base;
+    node->flags |= 0x2000;
+    return node;
 }
 #endif
 
@@ -148,12 +155,12 @@ extern "C" sWSNode* cInstanceMan_allocInstance(sWSPool* self, unsigned int id)
 //100%
 INCLUDE_ASM("wscript/wscriptcompile", func_00351260__FPvT0);
 #ifdef SKIP_ASM
-int func_00351260(void* self, void* a1)
+int func_00351260(void* self, void* node)
 {
-    int t0 = *(int*)((char*)self + 0x8);
-    *(int*)a1 = t0;
-    *(int*)((char*)self + 0x8) = (int)a1;
-    return t0;
+    int oldHead = *(int*)((char*)self + 0x8);
+    *(int*)node = oldHead;
+    *(int*)((char*)self + 0x8) = (int)node;
+    return oldHead;
 }
 #endif
 

@@ -156,6 +156,15 @@ static inline void sAlgoNode_delete(sAlgoNode* n)
     }
 }
 
+/**
+ * Empties an algorithm list: deletes every node and the algorithms the list owns.
+ *
+ * For each node (next at +0x14), deletes its algorithm (+0x0) through the destructor virtual (slot 1, flags 3)
+ * when the node's owned flag (+0x18) is set, clears both fields and frees the node with operator_delete. Finally
+ * zeroes the count (+0x4) and head (+0x0).
+ *
+ * @param list  the algorithm list (this)
+ */
 extern "C" void cCameraAlgoList_removeAll(sAlgoList* list)
 {
     sAlgoNode* n = list->head;

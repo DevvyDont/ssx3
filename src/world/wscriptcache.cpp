@@ -57,6 +57,15 @@ void operator_delete(int*);
 extern "C" void func_003ACA70(int* self, int flags);
 extern int cWScriptCache_mpWScriptCache;
 
+/**
+ * Destroys the world script cache and its per-section entries.
+ *
+ * If the entry array at +0x4 exists, runs func_003ACA70 (flag 0) on each 0xC-byte entry from the last to the first (the
+ * count is the cookie at array - 0x10) and frees the block with cMemMan_free. Then clears cWScriptCache_mpWScriptCache
+ * and calls operator delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ in-charge flags; bit 0 deletes the object
+ */
 // PORT: array cookie arithmetic through int (pointer in int).
 extern "C" void cWScriptCache__cWScriptCache(int* self, int flags)
 {
@@ -94,8 +103,8 @@ INCLUDE_ASM("world/wscriptcache", func_003AC9E0);
 #ifdef SKIP_ASM
 extern "C" void func_003ACBB8(int, int);
 
-extern "C" void func_003AC9E0(void *arg0, int arg1, int arg2) {
-    func_003ACBB8((*(int *)((char*)(arg0) + (4))) + (arg1 * 0xC), arg2);
+extern "C" void func_003AC9E0(void *cache, int index, int fileNum) {
+    func_003ACBB8((*(int *)((char*)(cache) + (4))) + (index * 0xC), fileNum);
 }
 #endif
 
@@ -110,8 +119,8 @@ extern "C" void func_003ACC50(sWScriptCacheItem* e, int index, int value);
 
 extern "C" void func_003ACA10(void* self, int index, int value)
 {
-    sWScriptCacheItem* p = *(sWScriptCacheItem**)((char*)self + 0x4);
-    func_003ACC50(&p[index], index, value);
+    sWScriptCacheItem* items = *(sWScriptCacheItem**)((char*)self + 0x4);
+    func_003ACC50(&items[index], index, value);
 }
 #endif
 
@@ -136,11 +145,11 @@ INCLUDE_ASM("world/wscriptcache", func_003ACA50__FPv);
 #ifdef SKIP_ASM
 void* func_003ACA50(void* self)
 {
-    int t0 = 0;
-    *(short*)self = (short)t0;
+    int zero = 0;
+    *(short*)self = (short)zero;
     *(int*)((char*)self + 0x4) = -1;
-    *(int*)((char*)self + 0x8) = t0;
-    *(short*)((char*)self + 0x2) = (short)t0;
+    *(int*)((char*)self + 0x8) = zero;
+    *(short*)((char*)self + 0x2) = (short)zero;
     return self;
 }
 #endif
@@ -179,22 +188,22 @@ extern "C" void func_003ACAD0_impl(void *self_) {
     char *self = (char*)self_;
     short st = *(short*)self;
     if (st == 1 && ASYNCFILE_getstatus_CAD0(*(int*)(self + 4)) == st) {
-        int sp0 = 0;
-        int sp4 = 0;
-        ASYNCFILE_release_CAD0(*(int*)(self + 4), &sp0, &sp4);
-        if (sp0 != 0) {
-            if (sp4 > 0) {
-                int t = unpacksizez_CAD0(sp0);
-                if (t > 0) {
-                    int r = operator_new_CAD0(t, str_WScriptFile, 0x20000000, 0);
-                    *(int*)(self + 8) = r;
-                    unpack_CAD0(sp0, r);
+        int data = 0;
+        int size = 0;
+        ASYNCFILE_release_CAD0(*(int*)(self + 4), &data, &size);
+        if (data != 0) {
+            if (size > 0) {
+                int unpackedSize = unpacksizez_CAD0(data);
+                if (unpackedSize > 0) {
+                    int buffer = operator_new_CAD0(unpackedSize, str_WScriptFile, 0x20000000, 0);
+                    *(int*)(self + 8) = buffer;
+                    unpack_CAD0(data, buffer);
                 } else {
-                    int r = operator_new_CAD0(sp4, str_WScriptFile, 0x20000000, 0);
-                    *(int*)(self + 8) = r;
-                    MEM_copy_CAD0(r, sp0, sp4);
+                    int buffer = operator_new_CAD0(size, str_WScriptFile, 0x20000000, 0);
+                    *(int*)(self + 8) = buffer;
+                    MEM_copy_CAD0(buffer, data, size);
                 }
-                MEM_free_CAD0(sp0);
+                MEM_free_CAD0(data);
             }
         }
         *(short*)self = 2;
@@ -239,13 +248,13 @@ struct sWSCItemFields {
 
 extern "C" void func_003ACCD8(sWScriptCacheItem* e, void* world, int index);
 
-extern "C" void func_003ACC50(sWScriptCacheItem* e, int index, int value)
+extern "C" void func_003ACC50(sWScriptCacheItem* item, int index, int value)
 {
-    sWSCItemFields* f = (sWSCItemFields*)e;
-    f->value = value;
-    f->owned = 1;
-    f->type = 2;
-    func_003ACCD8(e, cWorld_m_pTheWorld, index);
+    sWSCItemFields* fields = (sWSCItemFields*)item;
+    fields->value = value;
+    fields->owned = 1;
+    fields->type = 2;
+    func_003ACCD8(item, cWorld_m_pTheWorld, index);
 }
 #endif
 
@@ -914,6 +923,11 @@ extern "C" int func_003ADCB0(void* self)
 //100%
 INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumProcessScripts);
 #ifdef SKIP_ASM
+/**
+ * Returns how many process scripts a loaded world script section has.
+ *
+ * @return the count at +0x28 of the entry's data when the entry is loaded (state 3) and has data, else 0
+ */
 extern "C" int cWScriptCacheEntry_getNumProcessScripts(void* self)
 {
     if (*(short*)self == 3) {
@@ -929,6 +943,11 @@ extern "C" int cWScriptCacheEntry_getNumProcessScripts(void* self)
 //100%
 INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getProcessScripts);
 #ifdef SKIP_ASM
+/**
+ * Returns the process-script table of a loaded world script section.
+ *
+ * @return the pointer at +0x2C of the entry's data when the entry is loaded (state 3) and has data, else 0
+ */
 extern "C" int cWScriptCacheEntry_getProcessScripts(void* self)
 {
     if (*(short*)self == 3) {

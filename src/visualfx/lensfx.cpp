@@ -32,6 +32,13 @@ extern void* D_00487F00[];
 // PORT: asm label because the unit's forward declaration above has C++ linkage;
 // fix that declaration to extern "C" and this can be a plain extern "C" definition.
 void* cPS2LensFxMan_cPS2LensFxMan_impl(void* self) __asm__("cPS2LensFxMan_cPS2LensFxMan");
+/**
+ * Constructs the PS2 lens flare effects manager.
+ *
+ * Runs cLensFxMan_cLensFxMan and stores the PS2 vtable D_00487F00 at +0x649C.
+ *
+ * @return this
+ */
 void* cPS2LensFxMan_cPS2LensFxMan_impl(void* self)
 {
     cLensFxMan_cLensFxMan(self);
@@ -46,6 +53,14 @@ extern "C" void* cLensFxMan__cLensFxMan(void*);
 //100%
 INCLUDE_ASM("visualfx/lensfx", cPS2LensFxMan__cPS2LensFxMan__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the PS2 lens flare effects manager.
+ *
+ * Stores D_00487F00 at +0x649C again and tail-calls cLensFxMan__cLensFxMan, which also frees the object when the
+ * in-charge flag asks for it.
+ *
+ * @return cLensFxMan__cLensFxMan's result
+ */
 void* cPS2LensFxMan__cPS2LensFxMan(void* self)
 {
     *(int*)((char*)self + 0x649c) = (int)(void*)D_00487F00;
@@ -175,15 +190,15 @@ struct func_002ECBC0_sMgr {
 
 extern "C" int func_002ECC28(void* self, int a1, int a2);
 
-extern "C" int func_002ECBC0(func_002ECBC0_sMgr* self, int a1, int a2)
+extern "C" int func_002ECBC0(func_002ECBC0_sMgr* self, int kind, int itemId)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        if (self->entries[i].id != -1 && self->entries[i].b == a2 && self->entries[i].c == a1) {
+        if (self->entries[i].id != -1 && self->entries[i].b == itemId && self->entries[i].c == kind) {
             return i;
         }
     }
-    return func_002ECC28(self, a1, a2);
+    return func_002ECC28(self, kind, itemId);
 }
 #endif
 
@@ -192,9 +207,9 @@ INCLUDE_ASM("visualfx/lensfx", func_002ECC28);
 #ifdef SKIP_ASM
 extern "C" int func_002F2130(int a, int x, int y);
 
-extern "C" int func_002ECC28(void* p, int x, int y)
+extern "C" int func_002ECC28(void* lensMgr, int x, int y)
 {
-    sLensFx* self = (sLensFx*)p;
+    sLensFx* self = (sLensFx*)lensMgr;
     int i;
     for (i = 0; i < 15; i++) {
         if (self->entries[i].id == -1) {
@@ -258,9 +273,9 @@ extern "C" void func_002ECCB8(void* vself)
     int id = -1;
     char* rider = self->rider;
     if (rider != 0) {
-        char* o = rider + 0x6C0;
-        sVEi_CCB8* vt = *(sVEi_CCB8**)o;
-        tbl = (char*)func_0014AD50(lib, vt[7].fn(o + vt[7].delta));
+        char* being = rider + 0x6C0;
+        sVEi_CCB8* vt = *(sVEi_CCB8**)being;
+        tbl = (char*)func_0014AD50(lib, vt[7].fn(being + vt[7].delta));
         id = cRider_getCheatIdentity(self->rider);
         if (id < 10) {
             id = cRider_getIdentity(self->rider);
@@ -274,39 +289,39 @@ extern "C" void func_002ECCB8(void* vself)
     int n;
     sLensEntry* ents = self->entries;
     n = func_0014D988(lib2, id);
-    sLensItem_CCB8* e = (sLensItem_CCB8*)func_0014D998(lib2, id);
-    for (int i = 0; i < n; i++, e++) {
-        int k = e->kind;
+    sLensItem_CCB8* item = (sLensItem_CCB8*)func_0014D998(lib2, id);
+    for (int i = 0; i < n; i++, item++) {
+        int k = item->kind;
         if (k == -1) {
             continue;
         }
-        short s = (*(short**)(tbl + 0x288))[e->slot];
-        char* q;
-        if (s >= 0) {
-            q = tbl + (s * 4 + 0x290);
+        short tableIndex = (*(short**)(tbl + 0x288))[item->slot];
+        char* tableEntry;
+        if (tableIndex >= 0) {
+            tableEntry = tbl + (tableIndex * 4 + 0x290);
         } else {
-            q = 0;
+            tableEntry = 0;
         }
-        if (id < 10 && (*(unsigned short*)(q + 2) & 0x10) == 0) {
+        if (id < 10 && (*(unsigned short*)(tableEntry + 2) & 0x10) == 0) {
             continue;
         }
         for (int j = 0; j < 2; j++) {
-            int v = e->ids[j];
-            if (v == -1) {
+            int itemId = item->ids[j];
+            if (itemId == -1) {
                 continue;
             }
             if (k >= 50) {
-                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k - 50, v)] = 1;
-                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k - 49, v)] = 1;
+                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k - 50, itemId)] = 1;
+                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k - 49, itemId)] = 1;
             } else {
-                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k, v)] = 1;
+                used[func_002ECBC0((func_002ECBC0_sMgr*)self, k, itemId)] = 1;
             }
         }
     }
-    for (int r = 0; r < 15; r++) {
-        if (ents[r].id != -1 && used[r] == 0) {
-            func_002F2218(self->fxSys, ents[r].id);
-            ents[r].id = -1;
+    for (int entryIdx = 0; entryIdx < 15; entryIdx++) {
+        if (ents[entryIdx].id != -1 && used[entryIdx] == 0) {
+            func_002F2218(self->fxSys, ents[entryIdx].id);
+            ents[entryIdx].id = -1;
         }
     }
     self->active = 0;
@@ -345,6 +360,13 @@ struct sLensVE_CFA0 {
 extern sLensRow_CFA0 D_lensRows_CFA0[] __asm__("cRenderStateMan_m_state");
 extern int cRenderStateMan_m_initialized;
 
+/**
+ * Releases the render-state manager's world-painter queries.
+ *
+ * When cRenderStateMan_m_initialized is set, every non-null query object in the 9 slots of each of the 8 rows of
+ * cRenderStateMan_m_state is destroyed through its virtual slot 1 (deleting destructor, flag 3). The flag is then
+ * cleared.
+ */
 extern "C" void cRenderStateMan_purge(void)
 {
     if (cRenderStateMan_m_initialized != 0) {
@@ -406,6 +428,13 @@ static inline void lensVecOneED048(sLensVec_ED048* v)
     v->w = 1.0f;
 }
 
+/**
+ * Sets up the render-state manager's world-painter queries for a newly loaded track.
+ *
+ * Takes the world painter manager from the game's world (+0x8) and, for each of the 8 rows of cRenderStateMan_m_state,
+ * stores cWorldPainterMan_getQuery's result for the nine region types D_004A5560..D_004A55A0 (kWPR_Lighting among
+ * them), clears +0x24 and sets both colours at +0x28 and +0x38 to one. Then sets cRenderStateMan_m_initialized.
+ */
 extern "C" void cRenderStateMan_init(void)
 {
     void* pm = *(void**)((char*)SSXApp->Game->World + 0x8);
@@ -462,16 +491,16 @@ struct sLensLerp_D1D0 {
     sLerpV4_D1D0 b;
 };
 
-extern "C" void func_002ED1D0(sLensLerp_D1D0* self, const sLerpV4_D1D0* a, const sLerpV4_D1D0* b, int full)
+extern "C" void func_002ED1D0(sLensLerp_D1D0* self, const sLerpV4_D1D0* targetA, const sLerpV4_D1D0* targetB, int full)
 {
-    float t = 0.8999999761581421f;
-    float s;
+    float weight = 0.8999999761581421f;
+    float keep;
     if (full) {
-        t = 1.0f;
+        weight = 1.0f;
     }
-    s = 1.0f - t;
-    self->a = sLerpV4_D1D0(self->a.x * s, self->a.y * s, self->a.z * s, self->a.w * s) + *a * t;
-    self->b = sLerpV4_D1D0(self->b.x * s, self->b.y * s, self->b.z * s, self->b.w * s) + *b * t;
+    keep = 1.0f - weight;
+    self->a = sLerpV4_D1D0(self->a.x * keep, self->a.y * keep, self->a.z * keep, self->a.w * keep) + *targetA * weight;
+    self->b = sLerpV4_D1D0(self->b.x * keep, self->b.y * keep, self->b.z * keep, self->b.w * keep) + *targetB * weight;
 }
 #endif
 
@@ -500,11 +529,11 @@ struct sLensLerp {
     sLerpV4 b;
 };
 
-extern "C" void func_002ED338(sLensLerp* self, const sLerpV4* a, const sLerpV4* b, float t)
+extern "C" void func_002ED338(sLensLerp* self, const sLerpV4* targetA, const sLerpV4* targetB, float weight)
 {
-    float s = 1.0f - t;
-    self->a = sLerpV4(self->a.x * s, self->a.y * s, self->a.z * s, self->a.w * s) + *a * t;
-    self->b = sLerpV4(self->b.x * s, self->b.y * s, self->b.z * s, self->b.w * s) + *b * t;
+    float keep = 1.0f - weight;
+    self->a = sLerpV4(self->a.x * keep, self->a.y * keep, self->a.z * keep, self->a.w * keep) + *targetA * weight;
+    self->b = sLerpV4(self->b.x * keep, self->b.y * keep, self->b.z * keep, self->b.w * keep) + *targetB * weight;
 }
 #endif
 
@@ -649,8 +678,8 @@ extern "C" float func_002EDF00(void* self)
         return 1.0f;
     }
     float k = 0.600117564201355f;
-    float t = (lum - 0.10000000149011612f) / absf_DF00(0.3499999940395355f);
-    return clamp_DF00(func_0040D758(func_0040DA10(t) * k), 0.0f, 1.0f);
+    float norm = (lum - 0.10000000149011612f) / absf_DF00(0.3499999940395355f);
+    return clamp_DF00(func_0040D758(func_0040DA10(norm) * k), 0.0f, 1.0f);
 }
 #endif
 
@@ -660,9 +689,9 @@ extern char D_lensTable_DFB8[] __asm__("cRenderStateMan_m_state");
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EDFB8);
 #ifdef SKIP_ASM
-extern "C" void* func_002EDFB8(int a0)
+extern "C" void* func_002EDFB8(int index)
 {
-    return D_lensTable_DFB8 + 0x50 + a0 * 0xf0;
+    return D_lensTable_DFB8 + 0x50 + index * 0xf0;
 }
 #endif
 

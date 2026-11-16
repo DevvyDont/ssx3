@@ -378,6 +378,12 @@ extern "C" void func_0026ED28(sFpSerObj* out, void* obj)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_putFrameBlock__FPv);
 #ifdef SKIP_ASM
+/**
+ * Hands a frame's data block back to storage: a no-op on the PS2.
+ *
+ * An empty stub, as in On Tour. cReplayFrame_loadFrame (cReplayFrame_loadFrame) calls it with (frame, 1) after
+ * cReplayFramePtr_loadBlock; the wait flag in $a1 is ignored.
+ */
 void cReplayFramePtr_putFrameBlock(void* self)
 {
 }
@@ -580,6 +586,16 @@ struct sFpKeyF088 {
     ~sFpKeyF088() {}
 };
 
+/**
+ * Destroys the replay system: stops any playback, purges it, destroys its frames and frees it if asked.
+ *
+ * Calls cReplay_stopReplay when State is 1..9, then cReplay_frameSync (cReplay_frameSync__FPv) and cReplay_purge. Highlight[2]
+ * (+0x494, 0xB4 each) have trivial destructors; Frames[16] (+0x2C, 0x38 each) are destroyed last to first through their
+ * vtable slot 7 (the cReplayFrame destructor) with flags 0. Then operator_delete on @p flags bit 0 (cGame_purge passes
+ * 3).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cReplay__cReplay(int* self, int flags)
 {
     char* s = (char*)self;
@@ -787,6 +803,11 @@ extern "C" void cReplay_purge(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_frameSync__FPv);
 #ifdef SKIP_ASM
+/**
+ * Waits for pending frame transfers: a no-op on the PS2.
+ *
+ * An empty stub, as in On Tour. cReplay_reset and the destructor cReplay__cReplay call it before touching the frames.
+ */
 void cReplay_frameSync(void* self)
 {
 }
@@ -1177,6 +1198,13 @@ static inline bool isStateFA78(int* self, int s)
     return *self == s;
 }
 
+/**
+ * Lets the replay viewer change the camera while a replay plays.
+ *
+ * Only in state 3. Reads the replay pad (SSXApp's input at +0xB0 + PadNum * 4): input state 0x6C refreshes every game
+ * view (cGameViewMan_updateAll). When the current replay camera's algorithm (D_00445438[CurrentReplayCamIndex], On Tour
+ * camSubset) is 0xB, any movement on axes 0x30..0x33 (cInput_getValue) refreshes the views too.
+ */
 extern "C" void cReplay_updateCameraSelect(int* self)
 {
     if (!isStateFA78(self, 3)) {
@@ -1242,7 +1270,21 @@ static inline bool isIdleNoCamFB88(char* s)
 // void earlier, so the definition goes through an asm label.
 extern "C" int cReplay_updateInput_FB88(void* self, int a1) __asm__("cReplay_updateInput");
 extern "C" int cReplay_updateInput_impl(void* self, int a1) __asm__("cReplay_updateInput");
-extern "C" int cReplay_updateInput_impl(void* self, int a1)
+/**
+ * Reads the replay menu buttons into the next replay command.
+ *
+ * Does nothing while a command is pending (Cmd, +0x618). Outside auto and instant replays (+0x61C/+0x620): input 0x6A
+ * (SkipFrameTicks = 10, SkipFrame = 0) and 0x6B (counts SkipFrameTicks down and toggles SkipFrame, acting once both are
+ * 0) give command 5, 0x67 command 6, 0x68 command 4 and 0x69 command 3; each gives 7 outside state 3 and none when the
+ * playback cursor is already at the end (0x69: at the start). 0x66 stops the replay through cGame (cGame_stopReplay, Cmd
+ * 8) when @p debug is set, else queues 7 outside state 3, and returns 0; 0x6C cycles the camera algorithm
+ * (cReplay_cycleReplayCameraAlgorithm). Menu sounds go through the front end's sound interface (gUISoundNull when there
+ * is none), vtable slot 2. Stores the command in Cmd.
+ *
+ * @param debug  nonzero to stop the replay at once on input 0x66 (On Tour: bool debug)
+ * @return nonzero when a command was queued
+ */
+extern "C" int cReplay_updateInput_impl(void* self, int debug)
 {
     char* s = (char*)self;
     char* g = (char*)SSXApp;
@@ -1269,7 +1311,7 @@ extern "C" int cReplay_updateInput_impl(void* self, int a1)
             if (!isStateFB88(s, 3)) r = 7;
             else r = isIdleFB88(s) ? 0 : 6;
         } else if (cInput_getState(pad, 0x66)) {
-            if (a1) {
+            if (debug) {
                 cGame_stopReplay(SSXApp->Game);
                 *(int*)(s + 0x618) = 8;
             } else if (!isStateFB88(s, 3)) {

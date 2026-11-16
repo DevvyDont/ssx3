@@ -144,6 +144,14 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setDebugLocationFile);
 extern "C" char* strcpy(char*, const char*);
 extern char str_dbg[];
 
+/**
+ * Debug menu hook that points the current location at a different track file.
+ *
+ * For the location index in cBENewRaceInterface_newRace +0x40, strcpy's @p name into the three strings of its 0x64-byte
+ * cBELibrary location record (D_0043D984, +0x10 and -0x30 from it) and into str_dbg.
+ *
+ * @param name  the track file name (On Tour fileName)
+ */
 extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char* name)
 {
     char* base = (char*)&D_0043D984;
@@ -269,9 +277,17 @@ extern "C" int func_00144C98()
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationType);
 #ifdef SKIP_ASM
-extern "C" int cBENewRaceInterface_getLocationType(void* self, int a1)
+/**
+ * Returns the type of a location (race course, freestyle park, and so on).
+ *
+ * cBELibrary_locationDB[@p iLocation].field_0x58.
+ *
+ * @param iLocation  the location index (On Tour iLocation)
+ * @return the location type (On Tour eBELocationType)
+ */
+extern "C" int cBENewRaceInterface_getLocationType(void* self, int iLocation)
 {
-    return cBELibrary_locationDB[a1].field_0x58;
+    return cBELibrary_locationDB[iLocation].field_0x58;
 }
 #endif
 
@@ -309,18 +325,34 @@ extern "C" int func_00144D18(void* self, int a1)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getSectionFile);
 #ifdef SKIP_ASM
-extern "C" void* cBENewRaceInterface_getSectionFile(void* self, int a1)
+/**
+ * Returns the file name of a world section.
+ *
+ * D_0043E254 + @p iSection * 0x18: the name in the section table, whose records start 4 bytes earlier at D_0043E250.
+ *
+ * @param iSection  the section index (On Tour iSection)
+ * @return the section's file name
+ */
+extern "C" void* cBENewRaceInterface_getSectionFile(void* self, int iSection)
 {
-    return (char*)&D_0043E254 + a1 * 0x18;
+    return (char*)&D_0043E254 + iSection * 0x18;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getSectionType);
 #ifdef SKIP_ASM
-extern "C" int cBENewRaceInterface_getSectionType(void* self, int a1)
+/**
+ * Returns the type of a world section.
+ *
+ * D_0043E250[@p iSection].field_0x14.
+ *
+ * @param iSection  the section index (On Tour iSection)
+ * @return the section type (On Tour eBESectionType)
+ */
+extern "C" int cBENewRaceInterface_getSectionType(void* self, int iSection)
 {
-    return D_0043E250[a1].field_0x14;
+    return D_0043E250[iSection].field_0x14;
 }
 #endif
 
@@ -468,6 +500,14 @@ extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGamePath);
 #ifdef SKIP_ASM
+/**
+ * Chooses the game path and sets the number of human and AI riders to match.
+ *
+ * Path 0: 1 human, no AI. Path 1: 1 human, AI count kept but clamped to 0-5. Path 2: 2 humans, no AI. Other values are
+ * only stored.
+ *
+ * @param mode  the game path (On Tour eBEGamePath)
+ */
 extern "C" void cBENewRaceInterface_setGamePath(void* self, int mode)
 {
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));

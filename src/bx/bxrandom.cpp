@@ -90,6 +90,13 @@ extern "C" void* MEM_copy(void*, void*, int);
 //100%
 INCLUDE_ASM("bx/bxrandom", AIgetseed__FPv);
 #ifdef SKIP_ASM
+/**
+ * Saves the AI random generator's state, so replays and online games can reproduce the AI's choices.
+ *
+ * MEM_copy of the 0x18-byte AIrandom state into @p self (here the destination buffer, not an object).
+ *
+ * @return MEM_copy's result
+ */
 void* AIgetseed(void* self)
 {
     return MEM_copy(self, (void*)AIrandom, 0x18);
@@ -99,6 +106,13 @@ void* AIgetseed(void* self)
 //100%
 INCLUDE_ASM("bx/bxrandom", AIsetseed__FPv);
 #ifdef SKIP_ASM
+/**
+ * Restores the AI random generator's state saved by AIgetseed__FPv.
+ *
+ * MEM_copy of 0x18 bytes from @p self (the saved state, not an object) into AIrandom.
+ *
+ * @return MEM_copy's result
+ */
 void* AIsetseed(void* self)
 {
     return MEM_copy((void*)AIrandom, self, 0x18);

@@ -97,6 +97,16 @@ void operator_delete(int* ptr);
 extern "C" void cPlaybackMan_purgeLocation(void* self);
 extern void* cReplayFramePtr_vtbl[];
 
+/**
+ * Destroys the playback manager: frees its big file, input pads and location data, then itself if asked.
+ *
+ * Destroys BigFile (+0x0) with cBigFile__cBigFile(bf, 3), deletes the playback input objects at +0x6C and +0x68 (+0x68
+ * is the pad cPlaybackMan_isPauseAI feeds), purges the location (cPlaybackMan_purgeLocation), restores
+ * cReplayFramePtr's vtable on the saved frame (+0x14, the inlined frame destructor) and calls operator_delete on @p
+ * flags bit 0 (cGame_purge passes 3).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cPlaybackMan__cPlaybackMan(void* self, int flags)
 {
     cBigFile* bf = *(cBigFile**)self;
@@ -272,9 +282,18 @@ struct cPlaybackManC898 {
     int handle;             // 0x78
 };
 
-extern "C" void cPlaybackMan_purgeLocation(void* p)
+/**
+ * Releases everything the current playback location loaded.
+ *
+ * Cancels the pending async read (+0x78, ASYNCFILE_cancel) and resets the handle to -1; frees each playback file's data
+ * and clears its state (table +0x58, count +0x50), then the table; frees the frame buffer (+0x4C); clears +0x10 and
+ * deletes the input stream (+0x4); clears +0x70. Called by the destructor and by cWScriptMan_setupMissions.
+ *
+ * @param playbackMan  the playback manager (this)
+ */
+extern "C" void cPlaybackMan_purgeLocation(void* playbackMan)
 {
-    cPlaybackManC898* self = (cPlaybackManC898*)p;
+    cPlaybackManC898* self = (cPlaybackManC898*)playbackMan;
     if (self->handle != -1) {
         ASYNCFILE_cancel(self->handle);
         self->handle = -1;
@@ -430,6 +449,12 @@ extern "C" int func_0026CAF8(void* self, int a1)
 //100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_reset__FPv);
 #ifdef SKIP_ASM
+/**
+ * Forgets the saved replay frame.
+ *
+ * Clears the saved-frame flag (+0x10) that cPlaybackMan_saveFrame sets and cPlaybackMan_restoreFrame tests. The mission
+ * scripts call it after cPlaybackMan_stop when a local mission is cancelled or quit.
+ */
 void cPlaybackMan_reset(void* self)
 {
     *(int*)((char*)self + 0x10) = 0;
@@ -448,6 +473,12 @@ struct sFrameDesc26CBB8 {
     char b;
 };
 
+/**
+ * Saves the replay's current state into the playback manager's frame, once.
+ *
+ * Unless the saved-frame flag (+0x10) is already set, calls func_0026D7D0 (On Tour cReplay::saveFrame(frame, type)) on
+ * Game->Replay (+0x5C, +0x28) with the frame at +0x14 and a type-1 descriptor, then sets the flag.
+ */
 extern "C" void cPlaybackMan_saveFrame(void* self)
 {
     if (*(int*)((char*)self + 0x10) == 0) {
@@ -470,6 +501,14 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_restoreFrame);
 // second one ($5) through to cReplay_restoreFrame; bind the 2-arg form to the symbol.
 extern "C" void cReplay_restoreFrame1_2(void* replay, void* frame) __asm__("cReplay_restoreFrame1");
 
+/**
+ * Restores the replay from the playback manager's saved frame, if one was saved.
+ *
+ * When the saved-frame flag (+0x10) is set, calls cReplay_restoreFrame1 on Game->Replay with the frame at +0x14. The
+ * flag stays set (cPlaybackMan_reset clears it).
+ *
+ * @return nothing meaningful: declared void* in this unit, the body returns no value
+ */
 extern "C" void* cPlaybackMan_restoreFrame(void* self)
 {
     if (*(int*)((char*)self + 0x10)) {
@@ -488,6 +527,15 @@ void cReplay_setReplayState(void* self, int val);
 extern "C" void cPlaybackMan_saveFrame(void* self);
 void AIsetseed(void* self);
 
+/**
+ * Starts previewing a recorded run: resets the mission riders, saves the replay state and plays the recording.
+ *
+ * Only in mode 0 (+0x70) with recorded input (input buffer +0x4, end +0xC > 0): purges and reinits the AI's (+0x60)
+ * mission riders, saves the replay State into SaveState and sets state 14, saves the frame (cPlaybackMan_saveFrame),
+ * rewinds the input buffer (+0x8 = 0), reseeds the AI random generator from the recording (AIsetseed__FPv on buffer +
+ * 0x1C214; AI + 0x8 = the word at buffer + 0x1C210), sets mode 1 and switches the chase camera's target
+ * (cCamera_switchChaseControllerTargetRider) to the AI's mission rider (+0x70).
+ */
 extern "C" void cPlaybackMan_startPreview(void* self)
 {
     if (*(int*)((char*)self + 0x70) == 0 && *(int*)(*(char**)((char*)self + 0x4) + 0xC) > 0) {
@@ -516,6 +564,13 @@ extern "C" void cAI_reinitMissionRiders(void* self);
 extern "C" void cCamera_switchChaseControllerTargetRider(void* self, int value);
 void cReplay_setReplayState(void* self, int val);
 
+/**
+ * Ends a preview: resets the mission riders, restores the replay state and frame, and refocuses the camera.
+ *
+ * Only in mode 1 (+0x70): purges and reinits the AI's mission riders, restores the replay state from SaveState,
+ * restores the frame (cPlaybackMan_restoreFrame), sets mode 0 and switches the chase camera back to the first rider (AI
+ * + 0x28).
+ */
 extern "C" void cPlaybackMan_stopPreview(void* self)
 {
     if (*(int*)((char*)self + 0x70) == 1) {
@@ -547,6 +602,11 @@ extern "C" void func_0026CD98(void *self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_stopPerform__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ends a performance: restores the saved replay frame and clears the playback mode.
+ *
+ * Calls cPlaybackMan_restoreFrame, then sets the mode (+0x70) to 0. cPlaybackMan_stop uses it for mode 2.
+ */
 void cPlaybackMan_stopPerform(void* self)
 {
     cPlaybackMan_restoreFrame(self);
@@ -560,6 +620,12 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_stop);
 extern "C" void cPlaybackMan_stopPreview(void* self);
 void cPlaybackMan_stopPerform(void* self);
 
+/**
+ * Stops whatever the playback manager is doing.
+ *
+ * Mode (+0x70) 1 calls cPlaybackMan_stopPreview, mode 2 cPlaybackMan_stopPerform; other modes do nothing. Called by
+ * cPlaybackMan_restart and the mission scripts.
+ */
 extern "C" void cPlaybackMan_stop(void* self)
 {
     switch (*(int*)((char*)self + 0x70)) {
@@ -600,6 +666,16 @@ struct sPbAxes_26CE50 {
     sPbAxisItem_26CE50 items[1];    // 0x4, stride 0x1C
 };
 
+/**
+ * Steps the recorded pad input by one frame and says whether the AI should pause.
+ *
+ * Mode 1 (playback): reads one packed frame from the input buffer (+0x4: a count byte, then one byte per value, scaled
+ * by 1/255) and feeds it to the playback pad (+0x68) with cInputPad_update (On Tour cInputPad::update). Mode 3 (record):
+ * packs the live pad's values (+0x64, count then 0x1C-byte entries) into the buffer the same way and feeds the
+ * quantised values to the playback pad. cGame_update pauses the AI while it returns nonzero.
+ *
+ * @return 1 when the buffer is exhausted (mode 1) or full (mode 3), else 0
+ */
 // Replay channel step: mode 1 plays back one packed frame of axis values, mode 3 records one.
 // Returns 1 when the buffer is exhausted (or full), 0 otherwise.
 extern "C" int cPlaybackMan_isPauseAI(void* self)
@@ -943,6 +1019,16 @@ struct sPlaybackStream {
     sPlaybackChunk* chunks;
 };
 
+/**
+ * Positions a replay input cache at a tick.
+ *
+ * Walks the cache's command chunks (+0xC; the low 12 bits of each chunk's first word are its tick count) until the
+ * running total passes @p pos, then stores that chunk's index (+0x4) and the ticks left in it (+0x8). cReplay_rewind,
+ * cReplay_rewindFrame, cReplay_lastFrame and cReplay_stepFrame call it for each InputCache with PlaybackTick.
+ *
+ * @param pos  the tick to move to
+ * @return 1 on success, 0 when the tick lies past the recorded input
+ */
 extern "C" int cReplayCache_moveTo(sPlaybackStream* self, unsigned int pos)
 {
     int i = 0;
@@ -969,6 +1055,16 @@ INCLUDE_ASM("replay/playbackman", cReplayCache_load);
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" int func_002C85A0(void* src, int a, int dst);
 
+/**
+ * Loads a replay input cache from saved replay data.
+ *
+ * Reads the 8-byte save header from *@p pp (its second word goes to +0x0), then a 4-byte size, and decodes the
+ * compressed commands into the cache buffer (+0xC) with func_002C85A0 (On Tour HUFF_decode); advances *@p pp past all
+ * of it. On Tour asserts the save type and size; retail does not check. Called by cReplay_load.
+ *
+ * @param pp  in/out: the read cursor in the save data
+ * @return 1 (always)
+ */
 extern "C" int cReplayCache_load(void* self, char** pp)
 {
     struct {
@@ -994,6 +1090,15 @@ void* cReplayFramePtr_cReplayFramePtr(void* self);
 extern "C" void cReplayFrame_clearFrame(void* self);
 extern void* D_00481850[];
 
+/**
+ * Constructs an empty replay frame.
+ *
+ * Runs the cReplayFramePtr base constructor, installs the cReplayFrame vtable D_00481850 and clears the frame
+ * (cReplayFrame_clearFrame). cReplay_cReplay builds its 16 Frames and cPlaybackMan_cPlaybackMan its saved frame (+0x14)
+ * with it.
+ *
+ * @return the constructed frame (self)
+ */
 extern "C" void* cReplayFrame_cReplayFrame(void* self)
 {
     cReplayFramePtr_cReplayFramePtr(self);
@@ -1077,6 +1182,17 @@ extern "C" int cReplayFramePtr_loadBlock(void* self, char** pp, void* src);
 // argument; bind the 2-arg form to the symbol.
 void cReplayFramePtr_putFrameBlock_2(void* self, int a) __asm__("cReplayFramePtr_putFrameBlock__FPv");
 
+/**
+ * Loads a replay frame from saved replay data.
+ *
+ * Copies the 0x28-byte frame header from *@p pp and advances past it; restores +0x10, the tick (+0x30, written by
+ * func_0026D7D0 from RecordTick), +0x34, the 4-byte frame type descriptor (+0x1C, named colour in this unit), and the
+ * four words +0x20..+0x2C (likely the rider rankings: func_0026D730 stores word i there). Then loads the data block
+ * (cReplayFramePtr_loadBlock, header + 0x24) and calls cReplayFramePtr_putFrameBlock(self, 1).
+ *
+ * @param pp  in/out: the read cursor in the save data
+ * @return 1 (always; On Tour asserts the save type)
+ */
 extern "C" int cReplayFrame_loadFrame(sPbFrame_D678* self, char** pp)
 {
     sPbHeader_D678 h;
@@ -1111,6 +1227,14 @@ extern "C" void* cReplayFrameList_addFrame(void*);
 //100%
 INCLUDE_ASM("replay/playbackman", cReplay_addReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Appends a frame to the replay's recorded frame list.
+ *
+ * Tail call to cReplayFrameList_addFrame (cReplayFrameList_addFrame) on FrameList (+0x3B0); the frame is passed through untouched
+ * in $a1 (the C declaration omits it).
+ *
+ * @return cReplayFrameList_addFrame's result as this unit declares it (addFrame returns nothing)
+ */
 void* cReplay_addReplayFrame(void* self)
 {
     return cReplayFrameList_addFrame((char*)self + 0x3b0);

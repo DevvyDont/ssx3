@@ -759,6 +759,13 @@ extern "C" int cGame_canUserActivatePauseMenu(void* game);
 extern int D_004781C0[];
 extern int D_004A2868[2];
 
+/**
+ * Online pause overlay: fills in its menu items before the pause menu screen is built.
+ *
+ * Uses the three items of D_004781C0 (On Tour gOnlinePauseMenu), or the two of D_004A2868 (gSystemInitiatedPauseMenu)
+ * when cGame_canUserActivatePauseMenu (On Tour cGame::canUserActivatePauseMenu) returns 0; copies them to +0x9C with the count at
+ * +0xBC, sets +0x110 to 6 and runs cOVTemplate_PauseMenu_onCreateScreen.
+ */
 extern "C" void cOVState_PAUSE_ONLINE_onCreateScreen(void* self)
 {
     int* items = D_004781C0;

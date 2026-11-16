@@ -226,6 +226,16 @@ static inline int cUIStateStack_pushCheck_stateId(cUIStateStack_pushCheck_sState
 // allocation of the pinned-state loop the way the target has it.
 #define ASSERT_F4C0(cond) do { } while (0)
 
+/**
+ * Pushes a state onto the UI state stack, deciding from the states below whether it covers them.
+ *
+ * Popup states at the top (bit 0 set) are walked first: each whose mode is below 6 becomes 7 (pending removal) with bit
+ * 7 set, and bit 14 is set on each. If any were skipped, or the first normal state has bit 5 set, and that state is not
+ * explicit (bit 6) and still active (mode below 6), it is marked mode 6 with bit 7 and the new state @p st gets mode 1
+ * with bit 5 clear; otherwise @p st gets mode 2 with bit 5 set. @p st is then added at the list front.
+ *
+ * @param st  the state to push (On Tour pPushState)
+ */
 // Pushes a state, first marking every pinned state on top as covered (id 7) and suspended.
 extern "C" void cUIStateStack_pushCheck(cList* self, cUIStateStack_pushCheck_sState* st)
 {
@@ -411,19 +421,19 @@ static inline void Set39F7B8(sUIState39F7B8* s, int on)
 }
 
 // Sets the active flag on every state in a chain (and the last one if requested), skipping types >= 6.
-extern "C" void func_0039F7B8(void* self, sUIState39F7B8* s, int on, int last)
+extern "C" void func_0039F7B8(void* self, sUIState39F7B8* state, int on, int last)
 {
-    if (s == 0) {
+    if (state == 0) {
         return;
     }
-    sUIState39F7B8* cur = s;
+    sUIState39F7B8* cur = state;
     while (cur->child != 0) {
         Set39F7B8(cur, on);
         cur = cur->next;
     }
-    s = cur;
+    state = cur;
     if (last != 0) {
-        Set39F7B8(s, on);
+        Set39F7B8(state, on);
     }
 }
 #endif
@@ -452,6 +462,11 @@ static inline void cUIStateStack_purgeNormalStates_setId(cUIStateStack_purgeNorm
 static inline void cUIStateStack_purgeNormalStates_setB7(cUIStateStack_purgeNormalStates_node* n, int v) { n->b7 = v; }
 static inline void cUIStateStack_purgeNormalStates_setB5(cUIStateStack_purgeNormalStates_node* n, int v) { n->b5 = v; }
 
+/**
+ * Marks every state on the UI state stack for removal.
+ *
+ * Walks the list from cList_first to the sentinel and sets each state's mode to 7 and its bits 7 and 5.
+ */
 extern "C" void cUIStateStack_purgeNormalStates(cList* list)
 {
     cUIStateStack_purgeNormalStates_node* n = (cUIStateStack_purgeNormalStates_node*)cList_first(list);
@@ -584,11 +599,11 @@ extern "C" void* func_0039FAE8(void* self)
 INCLUDE_ASM("ui/uistatestack", func_0039FB08);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_0039FB08(void *arg0, void *arg1) {
-    (*(long long *)((char*)(arg0) + (0))) = (long long) (*(long long *)((char*)(arg1) + (0)));
-    (*(long long *)((char*)(arg0) + (0x10))) = (long long) (*(long long *)((char*)(arg1) + (0x10)));
-    (*(long long *)((char*)(arg0) + (0x20))) = (long long) (*(long long *)((char*)(arg1) + (0x20)));
-    (*(long long *)((char*)(arg0) + (0x30))) = (long long) (*(long long *)((char*)(arg1) + (0x30)));
+extern "C" void func_0039FB08(void *dst, void *src) {
+    (*(long long *)((char*)(dst) + (0))) = (long long) (*(long long *)((char*)(src) + (0)));
+    (*(long long *)((char*)(dst) + (0x10))) = (long long) (*(long long *)((char*)(src) + (0x10)));
+    (*(long long *)((char*)(dst) + (0x20))) = (long long) (*(long long *)((char*)(src) + (0x20)));
+    (*(long long *)((char*)(dst) + (0x30))) = (long long) (*(long long *)((char*)(src) + (0x30)));
 }
 #endif
 
@@ -638,7 +653,18 @@ struct cUIThing_cUIThing_sUIObj {
     int unk70;
 };
 
-extern "C" cUIThing_cUIThing_sUIObj* cUIThing_cUIThing(cUIThing_cUIThing_sUIObj* self, int a1, int a2)
+/**
+ * Constructs the base UI widget object.
+ *
+ * Installs cUIThing_vtbl, sets the enabled/visible flags (bits 0, 1, 3, 6) and clears the rest, sets the alignment to
+ * 9, makes the list node point at itself, clears +0xC, +0x10, +0x18, +0x38 and +0x3C, sets the colour to (1, 1, 1, 1),
+ * the position, rotation and offset to zero and the scale to 1, and stores 4 and 6 at +0x6C and +0x70.
+ *
+ * @param pScreen  the screen that owns the widget (On Tour pScreen)
+ * @param pParent  the parent widget, or 0 (On Tour pParent)
+ * @return this
+ */
+extern "C" cUIThing_cUIThing_sUIObj* cUIThing_cUIThing(cUIThing_cUIThing_sUIObj* self, int pScreen, int pParent)
 {
     self->vtbl = cUIThing_vtbl;
     self->flags.b0 = 1;
@@ -661,14 +687,14 @@ extern "C" cUIThing_cUIThing_sUIObj* cUIThing_cUIThing(cUIThing_cUIThing_sUIObj*
     self->color[2] = 1.0f;
     self->color[3] = 1.0f;
     self->pos = t3vect_Zero;
-    self->unk40 = a2;
+    self->unk40 = pParent;
     self->unk38 = 0;
     self->unk3C = 0;
     self->rot = t3vect_Zero;
     self->scale.x = 1.0f;
     self->scale.y = 1.0f;
     self->scale.z = 1.0f;
-    self->unk5C = a1;
+    self->unk5C = pScreen;
     self->offs = t3vect_Zero;
     self->unk6C = 4;
     self->unk70 = 6;
@@ -770,12 +796,12 @@ INCLUDE_ASM("ui/uistatestack", func_0039FD80);
 #ifdef SKIP_ASM
 extern "C" int func_00397458(void* obj);
 
-extern "C" void func_0039FD80(void* self, float f)
+extern "C" void func_0039FD80(void* self, float fraction)
 {
     void* obj = *(void**)((char*)self + 0xC);
     if (obj != 0) {
-        float v = (float)func_00397458(obj) * f;
-        *(short*)((char*)*(void**)((char*)self + 0xC) + 0xA) = (short)v;
+        float frame = (float)func_00397458(obj) * fraction;
+        *(short*)((char*)*(void**)((char*)self + 0xC) + 0xA) = (short)frame;
     }
 }
 #endif
@@ -784,11 +810,11 @@ INCLUDE_ASM("ui/uistatestack", func_0039FDD8);
 #ifdef SKIP_ASM
 extern "C" int func_00397440(int);
 
-extern "C" int func_0039FDD8(void *arg0) {
+extern "C" int func_0039FDD8(void *uiThing) {
     int temp_4;
     int var_2;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0xC)));
+    temp_4 = (*(int *)((char*)(uiThing) + (0xC)));
     var_2 = 0;
     if (temp_4 != 0) {
         var_2 = func_00397440(temp_4);
@@ -869,6 +895,15 @@ static inline unsigned int getUIAlign(void* self)
     return ((sUIAlignFlags14*)((char*)self + 0x14))->align;
 }
 
+/**
+ * Moves a widget's draw position so that its alignment pivot lands on the given position.
+ *
+ * Unless alignment bit 0 (top) is set, y moves up by the full height (bit 2, bottom) or half of it (centre). Unless bit
+ * 3 (left) is set, x moves left by the full width (bit 5, right) or half of it.
+ *
+ * @param pos  the position to adjust in place (On Tour pNewPosition)
+ * @param size  the widget's size
+ */
 extern "C" void cUIThing_applyPivot(void* self, sUIVec2* pos, sUIVec2* size)
 {
     unsigned int align = getUIAlign(self);
@@ -893,6 +928,11 @@ extern "C" void cUIThing_applyPivot(void* self, sUIVec2* pos, sUIVec2* size)
 //100%
 INCLUDE_ASM("ui/uistatestack", cUIThing_getEngine__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI engine a widget belongs to.
+ *
+ * Follows the widget's screen (+0x5C) to its owning state (+0xD0) and returns that state's engine (+0x10).
+ */
 int cUIThing_getEngine(void* self)
 {
     return *(int*)((char*)*(void**)((char*)*(void**)((char*)self + 0x5c) + 0xd0) + 0x10);

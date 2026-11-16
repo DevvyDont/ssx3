@@ -1883,18 +1883,28 @@ extern "C" void func_001032C0(S_32C0 *focusMan, void *instance) {
 INCLUDE_ASM("seg/seg_1218", cFocusMan_purgesection);
 #ifdef SKIP_ASM
 struct S_3308 { char pad[0xD8]; int cnt; void *arr[8]; };
-extern "C" void cFocusMan_purgesection(S_3308 *arg0, int arg1) {
+/**
+ * Drops every focus instance that belongs to a world section being unloaded.
+ *
+ * Compacts FocusInstances (the instance-record pointers at +0xDC; NumFocusInstances at +0xD8) in place, keeping only
+ * the records whose section byte (+0x78) differs from @p sectionId, and stores the new count. Called by
+ * cGame_sectionUnloading.
+ *
+ * @param focusMan  the focus manager (this; cAI's FocusMan, +0xA4)
+ * @param sectionId  the id of the section being unloaded, compared with each record's byte at +0x78
+ */
+extern "C" void cFocusMan_purgesection(S_3308 *focusMan, int sectionId) {
     int n = 0;
     int i;
 
-    for (i = 0; i < arg0->cnt; i++) {
-        void *e = arg0->arr[i];
-        if (*(unsigned char *)((char*)e + 0x78) != arg1) {
-            arg0->arr[n] = e;
+    for (i = 0; i < focusMan->cnt; i++) {
+        void *e = focusMan->arr[i];
+        if (*(unsigned char *)((char*)e + 0x78) != sectionId) {
+            focusMan->arr[n] = e;
             n++;
         }
     }
-    arg0->cnt = n;
+    focusMan->cnt = n;
 }
 #endif
 
@@ -1923,14 +1933,25 @@ INCLUDE_ASM("seg/seg_1218", cFocusMan_addbox);
 #ifdef SKIP_ASM
 struct V_33B0 { int x, y, z, w; } __attribute__((aligned(16)));
 
-extern "C" void cFocusMan_addbox(void *arg0, V_33B0 *arg1) {
+/**
+ * Registers a focus box with the focus manager.
+ *
+ * Appends a record to Boxes (+0x10, 0x20 bytes each): the box pointer at +0x0 and a copy of the box's first 16 bytes at
+ * +0x10, then NumBoxes (+0x0)++. LastUpdateTick (+0xD0) is reset to -1 so the next update recomputes the focus. There
+ * is no capacity check here (On Tour asserts NumBoxes < MaxBoxes, 6 records). Callers: cRider_addFocusBox and
+ * cScriptObjCameraManager_OnStartObjectUse.
+ *
+ * @param focusMan  the focus manager (this; cAI's FocusMan, +0xA4)
+ * @param focusBox  the cFocusBox to add
+ */
+extern "C" void cFocusMan_addbox(void *focusMan, V_33B0 *focusBox) {
     V_33B0 sp0;
 
-    (*(int *)((char*)(arg0) + (0xD0))) = -1;
-    (*(V_33B0 **)((char*)(arg0) + ((*(int *)((char*)(arg0) + (0))) << 5) + (0x10))) = arg1;
-    sp0 = *arg1;
-    (*(V_33B0 *)((char*)((((*(int *)((char*)(arg0) + (0))) << 5) + (int)arg0)) + (0x20))) = sp0;
-    (*(int *)((char*)(arg0) + (0))) = (int) ((*(int *)((char*)(arg0) + (0))) + 1);
+    (*(int *)((char*)(focusMan) + (0xD0))) = -1;
+    (*(V_33B0 **)((char*)(focusMan) + ((*(int *)((char*)(focusMan) + (0))) << 5) + (0x10))) = focusBox;
+    sp0 = *focusBox;
+    (*(V_33B0 *)((char*)((((*(int *)((char*)(focusMan) + (0))) << 5) + (int)focusMan)) + (0x20))) = sp0;
+    (*(int *)((char*)(focusMan) + (0))) = (int) ((*(int *)((char*)(focusMan) + (0))) + 1);
 }
 #endif
 
@@ -1949,6 +1970,15 @@ struct sList1033F8 {
     int fD0;                    // 0xD0
 };
 
+/**
+ * Unregisters a focus box, closing the gap in the box records.
+ *
+ * Resets LastUpdateTick (+0xD0) to -1, finds the record (Boxes, +0x10, 0x20 bytes each) whose box pointer equals @p id,
+ * moves the later records down one and decrements NumBoxes (+0x0); a box that is not registered changes nothing else.
+ * Callers: cRider__cRider and cScriptObjCameraManager_OnEndObjectUse.
+ *
+ * @param id  the cFocusBox to remove, compared with each record's box pointer
+ */
 // Removes the entry with the given id from the list, shifting the rest down.
 extern "C" void cFocusMan_removebox(sList1033F8* self, int id)
 {
@@ -1993,14 +2023,24 @@ struct sObj_3480 {
     int vals[1];
 };
 
-extern "C" void cFocusMan_writeToReplayFrame(sObj_3480* self, cStream_3480* s)
+/**
+ * Saves the focus manager's state into a replay frame.
+ *
+ * Through the frame's virtual block write it stores LastUpdateTick (+0xD0, 4 bytes) and the 16-byte box copy of each
+ * registered record (Boxes +0x10, copy at +0x10 of each 0x20-byte record), then NumFocusInstances (+0xD8); each focus
+ * instance record (+0xDC) goes through the frame's virtual pointer write (its fifth method). Called by
+ * cReplay_saveFrame; cFocusMan_readFromReplayFrame reads it back.
+ *
+ * @param data  the replay frame (cReplayFramePtr) written to
+ */
+extern "C" void cFocusMan_writeToReplayFrame(sObj_3480* self, cStream_3480* data)
 {
-    s->Write(&self->fD0, 4);
+    data->Write(&self->fD0, 4);
     for (int i = 0; i < self->n; i++)
-        s->Write(&self->ents[i], 0x10);
-    s->Write(&self->m, 4);
+        data->Write(&self->ents[i], 0x10);
+    data->Write(&self->m, 4);
     for (int j = 0; j < self->m; j++)
-        s->WriteInt(self->vals[j]);
+        data->WriteInt(self->vals[j]);
 }
 #endif
 
@@ -2035,15 +2075,25 @@ struct sObj_3578 {
     sItem_3578* items[1];
 };
 
-extern "C" void cFocusMan_readFromReplayFrame(sObj_3578* self, cStream_3578* s)
+/**
+ * Restores the focus manager's state from a replay frame.
+ *
+ * Reads back what cFocusMan_writeToReplayFrame stored: LastUpdateTick (+0xD0), the 16-byte copy of each registered box
+ * record, NumFocusInstances (+0xD8) and the instance records (the frame's virtual pointer read, its third method). It
+ * sets IsEven (+0xD4) to 1 and marks every restored record as in focus: flags word +0x8 gets 0x100 set and 0x200
+ * cleared. Called by cReplay_restoreFrame.
+ *
+ * @param data  the replay frame (cReplayFramePtr) read from
+ */
+extern "C" void cFocusMan_readFromReplayFrame(sObj_3578* self, cStream_3578* data)
 {
-    s->Read(&self->fD0, 4);
+    data->Read(&self->fD0, 4);
     for (int i = 0; i < self->n; i++)
-        s->Read(&self->ents[i], 0x10);
+        data->Read(&self->ents[i], 0x10);
     self->fD4 = 1;
-    s->Read(&self->m, 4);
+    data->Read(&self->m, 4);
     for (int j = 0; j < self->m; j++) {
-        sItem_3578* it = s->ReadPtr();
+        sItem_3578* it = data->ReadPtr();
         it->flags = (it->flags | 0x100) & 0xFFFFFDFF;
         self->items[j] = it;
     }
@@ -2074,6 +2124,19 @@ extern "C" int f_00104728_36A0(void* self, void* x, void* anim, float dt) __asm_
 extern "C" int f_001046B0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001046B0");
 extern "C" void func_00103AA0_36A0(void* self, void* anim) __asm__("func_00103AA0");
 
+/**
+ * Runs the per-frame update rule of the animation playing in one of the rider's sequencers.
+ *
+ * Looks up the animation's play attributes (cAIAnimEventMap_getBlendInTime(*anim): a 0x1C-byte record of D_00446990; On
+ * Tour calls this lookup getAnimPlayAttr) and dispatches on its update rule (+0x4) to one of 16 handlers, func_001048C0
+ * .. func_001046B0 (On Tour onUpdateFWD .. onUpdateASYNC_BP_BAL). When the handler returns 0 and Rider (+0x60) is a
+ * human (mIsHuman) local (mIsLocal) rider, it then runs func_00103AA0 (On Tour checkForSoundEvents). Virtual: slot 2 of
+ * cRiderAnim_vtbl.
+ *
+ * @param x  the animation sequencer (cAnimSequencer) being updated
+ * @param anim  the sequence (cAnimSequence); its first word is the tAIAnimID
+ * @param dt  the time step in seconds
+ */
 extern "C" void cRiderAnim_updateRule(char* self, void* x, int* anim, float dt)
 {
     int done = 0;
@@ -2167,6 +2230,18 @@ struct sEventOwner3918 {
     sEvent3918* events;     // 0x50
 };
 
+/**
+ * Runs the expire rule of the animation that finished in a sequencer and records the animation to play next.
+ *
+ * The sequencer index is @p ev's position in the 8-byte sequencer array at +0x50. It looks up the play attributes of
+ * the sequence's animation (cAIAnimEventMap_getBlendInTime(*data); On Tour getAnimPlayAttr) and dispatches on the
+ * expire rule (+0x8) to one of 11 handlers, func_00104CA0 .. func_00104C80 (On Tour onExpireNOP, onExpireINTO_AIR, ...;
+ * On Tour adds SK_ skier variants). The handler's result, the next tAIAnimID, goes into the word at +index*4; a rule
+ * outside 0..10 stores nothing. Virtual: slot 3 of cRiderAnim_vtbl.
+ *
+ * @param ev  the sequencer whose animation expired (an element of the array at +0x50)
+ * @param data  the expiring sequence; its first word is the tAIAnimID
+ */
 // Runs the handler for an animation event's type and stores its result in the per-event slot.
 extern "C" void cRiderAnim_expireRule(sEventOwner3918* self, sEvent3918* ev, int* data)
 {
@@ -2987,32 +3062,52 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_mapAIDToGAD);
 extern "C" void func_00311710_4CF8(int, int, int) __asm__("func_00311710");
 extern int cRiderAnimBase_AIAnimEventMap;
 
-extern "C" void cRiderAnim_mapAIDToGAD(void *arg0, int a1) {
+/**
+ * Maps an AI animation id to the game animation data id for this rider's animation set.
+ *
+ * The animation filter comes from FERider (+0x64, word +0xCD8) when linked to a front-end rider, else from Rider
+ * (+0x60, word +0x364), else 0. The result is func_00311710(cRiderAnimBase_AIAnimEventMap, aid, filter) (On Tour
+ * cAIAnimEventMap::mapAIDToGAD); the C view is void and the id passes through in v0. Virtual: slot 4 of
+ * cRiderAnim_vtbl.
+ *
+ * @param riderAnim  the rider animation object (this)
+ * @param aid  the AI animation id (tAIAnimID)
+ */
+extern "C" void cRiderAnim_mapAIDToGAD(void *riderAnim, int aid) {
     int var_6;
     void *temp_2;
     void *temp_4;
 
-    temp_2 = (*(void **)((char*)(arg0) + (0x64)));
+    temp_2 = (*(void **)((char*)(riderAnim) + (0x64)));
     var_6 = 0;
     if (temp_2 != 0) {
         var_6 = (*(int *)((char*)(temp_2) + (0xCD8)));
     } else {
-        temp_4 = (*(void **)((char*)(arg0) + (0x60)));
+        temp_4 = (*(void **)((char*)(riderAnim) + (0x60)));
         if (temp_4 != 0) {
             var_6 = (*(int *)((char*)(temp_4) + (0x364)));
         }
     }
-    func_00311710_4CF8(cRiderAnimBase_AIAnimEventMap, a1, var_6);
+    func_00311710_4CF8(cRiderAnimBase_AIAnimEventMap, aid, var_6);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1218", cRiderAnim_linkToRider);
 #ifdef SKIP_ASM
-extern "C" void cRiderAnim_linkToRider(void *arg0, void *arg1) {
-    (*(int *)((char*)(arg0) + (0x64))) = 0;
-    (*(void **)((char*)(arg0) + (0x60))) = arg1;
-    (*(int *)((char*)(arg0) + (0x54))) = (int) (*(int *)((char*)(arg1) + (0x780)));
+/**
+ * Attaches the rider animation object to an in-game rider.
+ *
+ * Sets Rider (+0x60) to @p rider, clears FERider (+0x64) and copies the rider's mAnimModel (+0x780) into +0x54 (On Tour
+ * cRiderAnimBase::AnimModel). Called once by cRider_loadRider right after it constructs the object.
+ *
+ * @param riderAnim  the rider animation object (this)
+ * @param rider  the rider (cRider) to drive
+ */
+extern "C" void cRiderAnim_linkToRider(void *riderAnim, void *rider) {
+    (*(int *)((char*)(riderAnim) + (0x64))) = 0;
+    (*(void **)((char*)(riderAnim) + (0x60))) = rider;
+    (*(int *)((char*)(riderAnim) + (0x54))) = (int) (*(int *)((char*)(rider) + (0x780)));
 }
 #endif
 
@@ -3545,6 +3640,19 @@ static inline unsigned short TriFlags_5398(sSurf_5398* s, int i)
     return ((sTri_5398*)(i * sizeof(sTri_5398) + (int)s->mat->tris))->flags; // PORT: pointer in int
 }
 
+/**
+ * Tests the rider against world objects and resolves the deepest contact.
+ *
+ * Skipped in control state 9. Runs cRider_checkRailBodyCollisions (rail body collisions) first, then queries a cWorldRider
+ * (cWorldRider_cWorldRider) built on mSphereTree (+0xAA0) for the deepest hit (func_00104E70, On Tour objectIntersect). With a
+ * hit, the contact normal is flattened against mGroundNormal (when cRider_isGroundNormalValid) or @p norm, or in motion
+ * state 4 snapped to the handler's up vector (+0xB0); the impact speed is the closing speed along it. A triangle with
+ * flag 2 on an object without flag 0x2000 caches the contact at +0x9E0 and +0xA60; flag 1 runs cRider_doObjectCollision
+ * (doObjectCollision); objects without 0x2000 play cSSXAudio_CollisionSound. Always ends with the camera trigger check
+ * (func_0016D320 on gCamTriggerMan) and cWorldRider__cWorldRider.
+ *
+ * @param norm  a ground normal to project the contact normal onto, or 0 (cAirMotion_resolve passes one)
+ */
 extern "C" void cRider_checkObjectCollisions(char* self, sV4_5398* norm)
 {
     sContact_5398 c;
@@ -3774,6 +3882,27 @@ static inline float Sqrt_57B8(float x)
     return r;
 }
 
+/**
+ * Responds to the rider hitting a world object: pushes it out, rebounds it and picks a reaction.
+ *
+ * Skipped in control state 9. The hit surface's bounce and grip come from the object's surface table (+0x88, 12 bytes
+ * per surface); with no bounce it only bumps (cRider_doBump). A solid object (no handler at +0xC, or one whose virtual
+ * slot 14 is nonzero) moves the rider out by 1.1 x @p depth (func_00106538), rebounds by the closing speed plus
+ * clamp(grip x speed, 55.6, 1388.9) and, on the ground, turns the rider along it (func_001065B0,
+ * cRider_updateOrientationImplicit); other objects get a softer rebound. Airborne below 833.3 the hit adds to
+ * mImpactAccum2.
+ *
+ * In the air with channel 2 in animation category 1, 2, 9 or 0xB and unk_180 facing the surface (> 0.3), the hit
+ * becomes a takeoff: mVelocity is rebuilt along the surface, then cRider_flagEventLand (flagEventLand), cRiderMetrix_evTakeoff
+ * (evTakeoff), control states 0xD and 5, animation 0x10C and cAirPredictor_startLaunchIntoAir. Otherwise the rebound is
+ * added to mVelocity and cRider_reactToCollision (reactToCollision) picks the reaction.
+ *
+ * @param rider  the rider (this)
+ * @param obj  the hit object's instance record (tInstanceRecord)
+ * @param info  the collide info (tCollideInfo) passed on to the bump or reaction
+ * @param hit  the intersection (tIntersectInfo): normal, surface velocity, surface and material
+ * @param depth  the penetration depth (On Tour overlap)
+ */
 extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, sHit_57B8* hit, float depth)
 {
     if (func_0011FEE8_57B8(rider) == 9)
@@ -3963,6 +4092,22 @@ static inline t4Vector Get_5D98(char* p) { return *(t4Vector*)p; }
 // The unit declares this earlier as (void*, void*, int); bind the typed body by asm label.
 extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int id) __asm__("cRider_reactToCollision");
 
+/**
+ * Chooses the rider's reaction to a collision: a reset on a fatal surface, a wipeout animation, or a bump.
+ *
+ * Skipped in control state 9. Adds 1 - max(0, contact . mImpulse) to mImpactAccum and stores the contact direction in
+ * mImpulse. If the surface material's record (SSXApp's material list at +0x84, flag +0x44) is fatal it resets the rider
+ * (cRider_checkForReset(self, 0, 1)). Otherwise it sends the vibrationBump virtual; in motion state 2 it may relaunch
+ * the air predictor, flags the handler (+0x314 = 1, +0x320 = mVelocity) and stops; in the air it relaunches the air
+ * predictor.
+ *
+ * It then compares the contact direction with the rider's axes (+0x160, +0x170, +0x180) and, from the dominant axis,
+ * the normal speed and channel 2's animation category, picks a wipeout animation (0x148 .. 0x169, random variants by
+ * AIrand) for cRider_flagEventWipeout (flagEventWipeout); when none applies it bumps (cRider_doBump).
+ *
+ * @param info  the collide info: contact position, direction, normal (+0x20) and normal speed (+0x30)
+ * @param id  the surface material id, or -1
+ */
 extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int id)
 {
     if (func_0011FEE8_5D98(self) == 9)
@@ -4296,8 +4441,17 @@ INCLUDE_ASM("seg/seg_1218", cRider_updateCollideInfo);
 #ifdef SKIP_ASM
 extern "C" void func_00329AE0(int);
 
-extern "C" void cRider_updateCollideInfo(void *arg0) {
-    func_00329AE0((*(int *)((char*)(arg0) + (0xAA0))));
+/**
+ * Refreshes the rider's collision sphere tree.
+ *
+ * Calls func_00329AE0 on mSphereTree (+0xAA0), the sphere tree the object collision queries use (On Tour:
+ * cRiderSphereTree::Update). Callers: cRider_updateSkeleton (updateSkeleton), cRiderHandler_readFromReplayFrame and
+ * cRider_DoInSeqAnimUpdate.
+ *
+ * @param rider  the rider (this)
+ */
+extern "C" void cRider_updateCollideInfo(void *rider) {
+    func_00329AE0((*(int *)((char*)(rider) + (0xAA0))));
 }
 #endif
 
@@ -4869,6 +5023,21 @@ static inline sV4_6F78 Front_6F78(const sAnimModelBone* animModelBone)
 // Snaps the rider onto the rail found ahead of its current bone; returns 1 when it lands on it.
 // PORT: the unit declares cRider_checkRailBodyCollisions as void(void*); it returns 0/1.
 extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self) __asm__("cRider_checkRailBodyCollisions");
+/**
+ * Pushes the rider's body off a rail it runs into without landing on it.
+ *
+ * Not in motion state 4. Looks for a rail spline within 300 of the hip bone (cOverlapList_splineIntersect on mOverlapList); rails
+ * behind the motion, more than 50 off the hips' forward line, or that the board can land on (cRider_isRailLandSuccess,
+ * isRailLandSuccess) are ignored. For a body hit it notifies the rail's handler (virtual 42), moves the rider out to 50
+ * from the rail (func_00106538), pushes mVelocity away along the contact normal by the closing speed + 55.6, reports
+ * the impulse (virtual 43), on the ground turns the rider (func_001065B0, cRider_updateOrientationImplicit) and runs
+ * cRider_reactToCollision (reactToCollision).
+ *
+ * The // note above the definition says it snaps the rider onto the rail, but a landable rail returns 0 here; landing
+ * is cRider_checkRailBoardCollisions's job.
+ *
+ * @return 1 when the body was pushed off a rail, else 0
+ */
 extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
 {
     if (func_0011FE98(self) == 4) {
@@ -5127,6 +5296,20 @@ static inline sVec4 Front_7578(char* self) { return *(sVec4*)(self + 0x1B0); }
 
 // Speeds are written in km/h and converted to game units (m/s).
 static inline float Kph_7578(float kph) { return kph / 3.6f; }
+/**
+ * Starts a handplant when the rider reaches a near-vertical rail surface ahead.
+ *
+ * Sends cheat input 2 (cCheatFX_setCheatInput on the handler's +0xD20). In the air (motion state 1) it gives up when
+ * falling faster than 2000 km/h, upside down, or in channel 2 animation categories 0x12 .. 0x14. It probes 300 ahead
+ * along the velocity (the front axis below 100 km/h) for a spline (cOverlapList_splineIntersect, type 2); the hit must be within 300,
+ * steep (|normal.z| <= 0.9) and ahead of the motion. Then control state 0xD, cHandplantMotion_init and cHandplantControl_init
+ * (cHandplantControl init) with clamp(5000 km/h / max(speed, 1000 km/h), 0.5, 1.5) / 2, control state 0xB and
+ * cRider_setMotionState(5).
+ *
+ * Callers pass a second bool (On Tour isTransThrough); this version takes and reads only the rider.
+ *
+ * @return 1 when a handplant started
+ */
 extern "C" int cRider_checkHandplantCollisions(char* self)
 {
     cCheatFX_setCheatInput(*(char**)(self + 0x77C) + 0xD20, 2);
@@ -5613,6 +5796,24 @@ static inline float Clamp_7E70(float v, float lo, float hi)
 
 static inline sV4_7E70 Get_7E70(char* p) { return *(sV4_7E70*)p; }
 
+/**
+ * Applies a rider-vs-rider shove or punch to this rider and picks a bump or a knockdown.
+ *
+ * Ignored in control state 10. Adds @p n x clamp(@p speed, +-555.6) to mVelocity (flattened onto mGroundNormal when it
+ * is valid); in the air it relaunches the air predictor and ignores a push along the up axis. No reaction follows in
+ * motion state 2, control state 9 or below 40 speed.
+ *
+ * Above 599.97 it picks a knockdown animation from the push direction against the rider's axes for cRider_flagEventWipeout
+ * (flagEventWipeout) and flags cRider_flagEventPunchKnockdown (punch knockdown) or cRider_flagEventBumpKnockdown (bump knockdown); otherwise it bumps
+ * (cRider_doBump) and flags cRider_flagEventPunch (punch) or cRider_flagEventBump (bump). Rules bit 5 (D_005308D0) sets the speed to
+ * exactly 599.97 and the test is strict, so that rule turns every knockdown into a bump. Called by
+ * cRider_checkOpponentCollisions.
+ *
+ * @param other  the other rider
+ * @param n  the unit push direction
+ * @param flag  nonzero for a punch (On Tour isPunch), 0 for a collision
+ * @param speed  the signed impulse along @p n (On Tour impulse)
+ */
 extern "C" void cRider_doOpponentCollision(char* self, char* other, sV4_7E70* n, int flag, float speed)
 {
     if (func_0011FEE8_7E70(self) == 10)
@@ -5763,6 +5964,19 @@ static inline float Abs_8388(float x)
 
 static inline sV4_8388 Get_8388(char* p) { return *(sV4_8388*)p; }
 
+/**
+ * Plays a stumble (bump) animation for a glancing collision.
+ *
+ * Only on the ground or in motion state 4, and only in control states 0, 1 (a board press, ended by
+ * cBoardPressControl_forceExit on the handler's +0x1D0), 2 or 7. A contact normal (info +0x20) along the front axis
+ * (+0x1B0) plays 0x37 (front) or 0x38 (back). Sideways (side axis +0x1A0, mirrored when riding fakie, +0x320) a slow
+ * contact (normal speed < 1111.1) at over 1388.9 speed off motion state 4 adds a random number of half turns to
+ * mSpinRate and plays 0x3A/0x3C; otherwise 0x39/0x3B. With @p flag it plays the bump sound (func_002A0E70). Ends in
+ * control state 3.
+ *
+ * @param info  the collide info (contact normal at +0x20, normal speed at +0x30)
+ * @param flag  nonzero to play the bump sound (On Tour isObject)
+ */
 extern "C" void cRider_doBump(char* self, char* info, int flag)
 {
     if (func_0011FE98(self) != 0 && func_0011FE98(self) != 4)
@@ -6083,6 +6297,18 @@ extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int func_001446A0(void*, int);
 extern "C" int func_001086B8(void*, sVec4_8A48*, sVec4_8A48*);
 
+/**
+ * Tests whether the rider's board can land on a nearby rail.
+ *
+ * Only on the ground or in the air (motion states 0 and 1). It probes for a rail (cOverlapList_splineIntersect, type 1, radius 300)
+ * from the board root bone (mAnimModel bone mBoneBoardRoot + mModelOffset) and rejects rails behind the motion. In
+ * channel 2 animation categories 0x12 .. 0x14 the current sequence's flags (func_001446A0 on cRiderAnimBase_getCurrentAnimSequence + 0xB0) must
+ * allow it. The answer is func_001086B8 (On Tour isRailBoardIntersect) on the hit. Callers:
+ * cRider_checkRailBoardCollisions and cRider_checkRailBodyCollisions.
+ *
+ * @param tgt  receives the rail intersection (tIntersectInfo)
+ * @return nonzero when the board lands on the rail
+ */
 extern "C" int cRider_isRailLandSuccess(char* self, sVec4_8A48* tgt)
 {
     if (func_0011FE98(self) != 0 && func_0011FE98(self) != 1)
@@ -6238,6 +6464,15 @@ extern "C" void* MEM_fill_8E88(void* dst, int value, int size) __asm__("MEM_fill
 // PORT: the unit later declares cComputer_Init without parameters; it takes the rider.
 void cComputer_Init_self(char* self) __asm__("cComputer_Init");
 
+/**
+ * Resets a computer rider's AI state.
+ *
+ * Clears its counters and flags (+0xDF0, +0xE10 .. +0xE3C, +0xE40, +0xE74, +0xE78, +0xF30, +0xF34; +0xE0C and later
+ * +0xE70 = -1), zeroes the vectors at +0xE50 and +0xE60, runs cComputer_initRiderDifficulty, sets +0xDF4 = 1.0,
+ * installs the cruise logic member-function pointer (+0xF44 = D_0043CF20[1]; On Tour cComputer::mCruiseLogic) with
+ * +0xF38 = 1, clears the three 0x3C-byte tables at +0xE7C, +0xEB8 and +0xEF4 (MEM_fill) and runs
+ * cComputer_resetCounters. Called at the end of cComputer_cComputer and by func_00108F88.
+ */
 void cComputer_Init_self(char* self)
 {
     *(int*)(self + 0xE0C) = -1;

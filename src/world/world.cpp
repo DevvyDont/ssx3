@@ -195,6 +195,13 @@ extern "C" void* cWorldCache_update(int);
 //100%
 INCLUDE_ASM("world/world", cWorld_update__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the world's per-frame streaming update.
+ *
+ * Calls cWorldCache_update on the cache at +0x0 and returns its result.
+ *
+ * @return cWorldCache_update's result
+ */
 void* cWorld_update(void* self)
 {
     return cWorldCache_update(*(int*)self);
@@ -490,18 +497,30 @@ int func_003A6CD8(void* self, void* a1)
 //100%
 INCLUDE_ASM("world/world", tSphTreeList_getMeshTree);
 #ifdef SKIP_ASM
-extern "C" void* tSphTreeList_getMeshTree(void* self, int a1)
+/**
+ * Returns the collision sphere tree of one mesh of a model.
+ *
+ * @param meshNum  mesh index (On Tour meshNum)
+ * @return the tree at index @p meshNum of the array at +0x0 (0x140 bytes each)
+ */
+extern "C" void* tSphTreeList_getMeshTree(void* self, int meshNum)
 {
-    return (char*)(*(void**)self) + a1 * 0x140;
+    return (char*)(*(void**)self) + meshNum * 0x140;
 }
 #endif
 
 //100%
 INCLUDE_ASM("world/world", tPolyModelList_getMeshPolyModel__FPvi);
 #ifdef SKIP_ASM
-int tPolyModelList_getMeshPolyModel(void* self, int a1)
+/**
+ * Returns the collision poly model of one mesh of a model.
+ *
+ * @param meshNum  mesh index (On Tour meshNum)
+ * @return entry @p meshNum of the pointer array at +0x0
+ */
+int tPolyModelList_getMeshPolyModel(void* self, int meshNum)
 {
-    return *(int*)((char*)*(void**)self + a1 * 4);
+    return *(int*)((char*)*(void**)self + meshNum * 4);
 }
 #endif
 

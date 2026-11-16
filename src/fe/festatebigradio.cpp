@@ -1020,6 +1020,14 @@ struct sVEntry00194498b {
     void (*fn)(void*, sColor4_4498*);
 };
 
+/**
+ * Greys out a text widget.
+ *
+ * Calls the widget's virtual slot 8 with 1, then caps the first component of its colour (+0x1C) at 0.5 and
+ * applies it with virtual slot 11 when it was brighter.
+ *
+ * @param self  the widget (not a method: a free function)
+ */
 extern "C" void DisableTextWidget(void* self)
 {
     sVEntry00194498a* vt = *(sVEntry00194498a**)((char*)self + 8);

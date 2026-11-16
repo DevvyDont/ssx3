@@ -82,6 +82,11 @@ INCLUDE_ASM("util/menu", cMenuItem_canHaveFocus);
 extern "C" int cMenuItem_isActive(void* self);
 extern "C" int cMenuItem_isLocked(void* self);
 
+/**
+ * Tells whether a menu item can take the focus.
+ *
+ * @return 1 when the item is active (cMenuItem_isActive) and not locked (cMenuItem_isLocked), else 0
+ */
 extern "C" int cMenuItem_canHaveFocus(void* self)
 {
     int r = 0;
@@ -288,20 +293,20 @@ extern "C" sRect_2CA4C8 func_002CA4C8_impl(char* item, const char* left, const c
 
 extern "C" sRect_2CA4C8 func_002CA4C8_impl(char* item, const char* left, const char* center, const char* right)
 {
-    sRect_2CA4C8 r;
+    sRect_2CA4C8 rect;
     sVec2_2CA4C8 sc;
     float zero = 0.0f;
-    r.y = zero;
-    r.x = zero;
-    char* f = font_2CA4C8(item);
-    float h = (float)*(int*)(f + 0x14) * *(float*)(f + 0x34);
-    float sx = *(float*)(f + 0x38) / *(float*)(f + 0x30);
-    float sy = *(float*)(f + 0x3C) / *(float*)(f + 0x34);
+    rect.y = zero;
+    rect.x = zero;
+    char* font = font_2CA4C8(item);
+    float lineHeight = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
+    float sx = *(float*)(font + 0x38) / *(float*)(font + 0x30);
+    float sy = *(float*)(font + 0x3C) / *(float*)(font + 0x34);
     sc.x = sx;
     sc.y = sy;
-    r.h = h * sy;
+    rect.h = lineHeight * sy;
     if (left && center && right) {
-        r.w = width_2CA4C8(item, center) + MAXF_2CA4C8(width_2CA4C8(item, left), width_2CA4C8(item, right)) * 2.0f + 32.0f;
+        rect.w = width_2CA4C8(item, center) + MAXF_2CA4C8(width_2CA4C8(item, left), width_2CA4C8(item, right)) * 2.0f + 32.0f;
     } else {
         float w = widthOr0_2CA4C8(item, left);
         if (center) {
@@ -310,14 +315,14 @@ extern "C" sRect_2CA4C8 func_002CA4C8_impl(char* item, const char* left, const c
         if (right) {
             w += width_2CA4C8(item, right);
         }
-        r.w = w;
+        rect.w = w;
         if ((left && (center || right)) || (center && right)) {
-            r.w += 16.0f;
+            rect.w += 16.0f;
         }
     }
-    r.h += 12.0f;
-    r.w = (r.w >? 100.0f) + 32.0f;
-    return r;
+    rect.h += 12.0f;
+    rect.w = (rect.w >? 100.0f) + 32.0f;
+    return rect;
 }
 #endif
 
@@ -351,20 +356,20 @@ extern "C" void func_002CA768_impl(char* item, sRect_2CA768* rect, const char* l
     sVEnt_2CA768* vt = *(sVEnt_2CA768**)(menu + 0x12C);
     vt[8].fn(menu + vt[8].delta, rect, style);
     *(sColor_2CA768*)(font_2CA768(item) + 0x40) = *color;
-    char* f0 = font_2CA768(item);
+    char* font = font_2CA768(item);
     sVec2_2CA768 sc(2.0f, 2.0f);
-    *(sVec2_2CA768*)(f0 + 0x28) = sc;
+    *(sVec2_2CA768*)(font + 0x28) = sc;
     if (left) {
         cFont_text(font_2CA768(item), rect->x + 16.0f, rect->y + 6.0f - 1.0f, left);
     }
     if (center) {
-        char* f = font_2CA768(item);
-        float w = cFont_textExtent(f, center, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+        char* measureFont = font_2CA768(item);
+        float w = cFont_textExtent(measureFont, center, 0, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
         cFont_text(font_2CA768(item), rect->x + (rect->w - w) * 0.5f, rect->y + 6.0f - 1.0f, center);
     }
     if (right) {
-        char* f = font_2CA768(item);
-        float w = cFont_textExtent(f, right, 0, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+        char* measureFont = font_2CA768(item);
+        float w = cFont_textExtent(measureFont, right, 0, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
         cFont_text(font_2CA768(item), rect->x + (rect->w - w) - 16.0f, rect->y + 6.0f - 1.0f, right);
     }
     *(sVec2_2CA768*)(font_2CA768(item) + 0x28) = sVec2_2CA768(0.0f, 0.0f);
@@ -594,6 +599,14 @@ public:
 
 extern "C" void cMenu_prevFocus(cMenu* self);
 
+/**
+ * Runs one frame of menu input.
+ *
+ * Calls cMenu_checkFocus, then the focus item's input (virtual slot 2 of the item at Items[FocusItem]). Result 3 moves
+ * the focus down (cMenu_nextFocus) and 4 up (cMenu_prevFocus), both returning 0; any other result is returned.
+ *
+ * @return the focus item's input result, or 0 when the focus moved
+ */
 extern "C" int cMenu_input(void* self)
 {
     cMenu_checkFocus((cMenu*)self);
@@ -628,6 +641,9 @@ int cMenu_onCommand(void* self)
 //100%
 INCLUDE_ASM("util/menu", cMenu_onChange__FPv);
 #ifdef SKIP_ASM
+/**
+ * Default notification that a menu item's value changed; does nothing.
+ */
 void cMenu_onChange(void* self)
 {
 }
@@ -680,6 +696,12 @@ void func_002CB2F8_s(void* self) __asm__("func_002CB2F8");
 void func_002CB8C8_r(void* self, const sRect_2CAD58& r) __asm__("func_002CB8C8");
 void func_002CBAC8_r(void* self, const sRect_2CAD58& r) __asm__("func_002CBAC8");
 
+/**
+ * Draws a menu: its background, scroll arrows and visible items.
+ *
+ * Asks each active item for its rect, fits as many as the display height (480 minus the menu system's offset) allows
+ * from the top item, then renders them, with the up and down arrows when items are hidden above or below.
+ */
 // cMenu::render(void) (On Tour name)
 extern "C" void cMenu_render(sMenu_2CAD58* self)
 {
@@ -1660,6 +1682,13 @@ INCLUDE_ASM("util/menu", cMenuSys_cMenuSys);
 #ifdef SKIP_ASM
 void cMenuSys_init(void* self);
 
+/**
+ * Constructs the debug menu system.
+ *
+ * Clears the first word and calls cMenuSys_init__FPv to reset the rest.
+ *
+ * @return this
+ */
 extern "C" void* cMenuSys_cMenuSys(void* self)
 {
     *(int*)self = 0;
@@ -1673,6 +1702,13 @@ INCLUDE_ASM("util/menu", cMenuSys__cMenuSys);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Destroys the debug menu system.
+ *
+ * Has no members to release; frees the object with operator delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ in-charge flags; bit 0 deletes the object
+ */
 extern "C" void cMenuSys__cMenuSys(int* self, int flags)
 {
     if (flags & 1) {
@@ -1684,6 +1720,11 @@ extern "C" void cMenuSys__cMenuSys(int* self, int flags)
 //100%
 INCLUDE_ASM("util/menu", cMenuSys_init__FPv);
 #ifdef SKIP_ASM
+/**
+ * Resets the debug menu system's state.
+ *
+ * Zeroes +0x0, +0x54, +0x58 and +0x64, sets +0x48 to 11 and +0x4C and +0x50 to -1.
+ */
 void cMenuSys_init(void* self)
 {
     *(int*)((char*)self + 0x58) = 0;
@@ -1699,6 +1740,11 @@ void cMenuSys_init(void* self)
 //100%
 INCLUDE_ASM("util/menu", cMenuSys_isActive);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the debug menu system is open.
+ *
+ * @return 1 when +0x0 and +0x54 are both non-zero, else 0
+ */
 extern "C" int cMenuSys_isActive(void* self)
 {
     int r = 0;
@@ -2054,14 +2100,14 @@ struct sMenuRectC648 { float x, y, z, w; };
 extern "C" sMenuRectC648* func_002CC648(sMenuRectC648* ret, char* item)
 {
     if (*(void**)(item + 0x18) != 0 && *(void**)(item + 0x1C) != 0) {
-        sMenuRectC648 a;
-        sMenuRectC648 b;
-        sMenuRectC648 tmp;
-        func_002CA4C8(&tmp, item, *(int*)(item + 0x14), 0, *(void**)(item + 0x18));
-        a = tmp;
-        func_002CA4C8(&tmp, item, *(int*)(item + 0x14), 0, *(void**)(item + 0x1C));
-        b = tmp;
-        *ret = (a.z > b.z) ? a : b;
+        sMenuRectC648 trueRect;
+        sMenuRectC648 falseRect;
+        sMenuRectC648 measured;
+        func_002CA4C8(&measured, item, *(int*)(item + 0x14), 0, *(void**)(item + 0x18));
+        trueRect = measured;
+        func_002CA4C8(&measured, item, *(int*)(item + 0x14), 0, *(void**)(item + 0x1C));
+        falseRect = measured;
+        *ret = (trueRect.z > falseRect.z) ? trueRect : falseRect;
     } else {
         func_002CA4C8(ret, item, 0, *(int*)(item + 0x14), 0);
     }
@@ -2075,14 +2121,14 @@ INCLUDE_ASM("util/menu", func_002CC758);
 // PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
-extern "C" void func_002CC758(void* self, int a1)
+extern "C" void func_002CC758(void* self, int rect)
 {
-    void* a = *(void**)((char*)self + 0x18);
-    void* b;
-    if (a != 0 && (b = *(void**)((char*)self + 0x1C)) != 0) {
-        func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, **(int**)((char*)self + 0x20) ? a : b);
+    void* trueText = *(void**)((char*)self + 0x18);
+    void* falseText;
+    if (trueText != 0 && (falseText = *(void**)((char*)self + 0x1C)) != 0) {
+        func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, **(int**)((char*)self + 0x20) ? trueText : falseText);
     } else {
-        func_002CA988_5(self, a1, 0, *(int*)((char*)self + 0x14), 0);
+        func_002CA988_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
     }
 }
 #endif
@@ -2186,16 +2232,16 @@ static inline void notify_2CC8F0(sList_2CC8F0* self)
 extern "C" int func_002CC8F0(void* vself)
 {
     sList_2CC8F0* self = (sList_2CC8F0*)vself;
-    int r = func_002CA2B0(self);
+    int result = func_002CA2B0(self);
     if (cMenuItem_isLocked(self) != 0) {
-        return r;
+        return result;
     }
-    if (r != 0) {
-        return r;
+    if (result != 0) {
+        return result;
     }
     if (func_002CA3E8((void**)self) == 6) {
         sVEnt_2CC8F0* vt = *(sVEnt_2CC8F0**)(self->menu + 0x12C);
-        r = ((Pick_2CC8F0)vt[3].fn)(self->menu + vt[3].delta, self, 0);
+        result = ((Pick_2CC8F0)vt[3].fn)(self->menu + vt[3].delta, self, 0);
     } else {
     int n = self->count;
     int i = 0;
@@ -2223,9 +2269,9 @@ extern "C" int func_002CC8F0(void* vself)
         i++;
     }
 done:
-    return r;
+    return result;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -2241,13 +2287,13 @@ struct sMenuEntCB18 { void* name; int data; };
 extern "C" sMenuRectCB18* func_002CCB18(sMenuRectCB18* ret, char* item)
 {
     sMenuRectCB18 best;
-    sMenuRectCB18 tmp;
-    func_002CA4C8(&tmp, item, *(int*)(item + 0x14), 0, str_Invalid_b);
-    best = tmp;
+    sMenuRectCB18 measured;
+    func_002CA4C8(&measured, item, *(int*)(item + 0x14), 0, str_Invalid_b);
+    best = measured;
     for (int i = 0; i < *(int*)(item + 0x18); i++) {
-        func_002CA4C8(&tmp, item, *(int*)(item + 0x14), 0, (*(sMenuEntCB18**)(item + 0x1C))[i].name);
-        if (tmp.z > best.z) {
-            best = tmp;
+        func_002CA4C8(&measured, item, *(int*)(item + 0x14), 0, (*(sMenuEntCB18**)(item + 0x1C))[i].name);
+        if (measured.z > best.z) {
+            best = measured;
         }
     }
     *ret = best;
@@ -2265,18 +2311,18 @@ struct func_002CCC38_sEntry {
     int value;   // 0x4
 };
 
-extern "C" void func_002CCC38(void* self, int a1)
+extern "C" void func_002CCC38(void* self, int rect)
 {
     int i = 0;
     for (;;) {
         if (i == *(int*)((char*)self + 0x18)) {
-            func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, str_Invalid_b);
+            func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, str_Invalid_b);
             break;
         }
         // PORT: pointer held in int (index-first address arithmetic)
-        func_002CCC38_sEntry* e = (func_002CCC38_sEntry*)((i << 3) + *(int*)((char*)self + 0x1C));
-        if (**(int**)((char*)self + 0x20) == e->value) {
-            func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, e->name);
+        func_002CCC38_sEntry* entry = (func_002CCC38_sEntry*)((i << 3) + *(int*)((char*)self + 0x1C));
+        if (**(int**)((char*)self + 0x20) == entry->value) {
+            func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, entry->name);
             return;
         }
         i++;
@@ -2425,11 +2471,11 @@ extern "C" void func_002CC460(void* stack);
 
 extern "C" int func_002CCE38(void* self)
 {
-    int r = func_002CA2B0(self);
-    if (cMenuItem_isLocked(self) == 0 && r == 0 && func_002CA3E8((void**)self) == 6) {
+    int result = func_002CA2B0(self);
+    if (cMenuItem_isLocked(self) == 0 && result == 0 && func_002CA3E8((void**)self) == 6) {
         func_002CC460(*(void**)((char*)*(void**)self + 0x124));
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -2438,9 +2484,9 @@ INCLUDE_ASM("util/menu", func_002CCEA8);
 #ifdef SKIP_ASM
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 
-extern "C" void* func_002CCEA8(void* self, void* a1)
+extern "C" void* func_002CCEA8(void* self, void* item)
 {
-    func_002CA4C8(self, a1, 0, *(int*)((char*)a1 + 0x14), 0);
+    func_002CA4C8(self, item, 0, *(int*)((char*)item + 0x14), 0);
     return self;
 }
 #endif
@@ -2452,9 +2498,9 @@ INCLUDE_ASM("util/menu", func_002CCEE0__FPvi);
 // The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
-void* func_002CCEE0(void* self, int a1)
+void* func_002CCEE0(void* self, int rect)
 {
-    return func_002CA988_5(self, a1, 0, *(int*)((char*)self + 0x14), 0);
+    return func_002CA988_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
 }
 #endif
 
@@ -2533,10 +2579,10 @@ extern "C" func_002CCF98_sItem* func_002CCF98(func_002CCF98_sItem* self, void* t
 //100%
 INCLUDE_ASM("util/menu", func_002CCFF8);
 #ifdef SKIP_ASM
-extern "C" void func_002CCFF8(void *arg0, int arg1, int arg2) {
-    (*(int *)((char*)(arg0) + (0x14))) = arg1;
-    (*(int *)((char*)(arg0) + (0x1C))) = arg2;
-    (*(int *)((char*)(arg0) + (0x18))) = 0;
+extern "C" void func_002CCFF8(void *item, int label, int arg2) {
+    (*(int *)((char*)(item) + (0x14))) = label;
+    (*(int *)((char*)(item) + (0x1C))) = arg2;
+    (*(int *)((char*)(item) + (0x18))) = 0;
 }
 #endif
 
@@ -2570,13 +2616,13 @@ INCLUDE_ASM("util/menu", func_002CD090);
 #ifdef SKIP_ASM
 extern "C" void func_002CA4C8(void*, void*, int, int, void*);
 
-extern "C" void* func_002CD090(void* self, void* a1)
+extern "C" void* func_002CD090(void* self, void* item)
 {
-    void* p = *(void**)((char*)a1 + 0x18);
-    if (p != 0) {
-        func_002CA4C8(self, a1, *(int*)((char*)a1 + 0x14), 0, p);
+    void* rightText = *(void**)((char*)item + 0x18);
+    if (rightText != 0) {
+        func_002CA4C8(self, item, *(int*)((char*)item + 0x14), 0, rightText);
     } else {
-        func_002CA4C8(self, a1, 0, *(int*)((char*)a1 + 0x14), 0);
+        func_002CA4C8(self, item, 0, *(int*)((char*)item + 0x14), 0);
     }
     return self;
 }
@@ -2588,13 +2634,13 @@ INCLUDE_ASM("util/menu", func_002CD0E8);
 // PORT: The unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
-extern "C" void func_002CD0E8(void* self, int a1)
+extern "C" void func_002CD0E8(void* self, int rect)
 {
-    void* p = *(void**)((char*)self + 0x18);
-    if (p != 0) {
-        func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, p);
+    void* rightText = *(void**)((char*)self + 0x18);
+    if (rightText != 0) {
+        func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, rightText);
     } else {
-        func_002CA988_5(self, a1, 0, *(int*)((char*)self + 0x14), 0);
+        func_002CA988_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
     }
 }
 #endif
@@ -2633,9 +2679,9 @@ extern "C" void* func_002CD168(void* self, void* text, int a2, int a3)
 //100%
 INCLUDE_ASM("util/menu", func_002CD1C0);
 #ifdef SKIP_ASM
-extern "C" void func_002CD1C0(void *self, int a, int b) {
-    *(int *)((char *)self + 0x14) = a;
-    *(int *)((char *)self + 0x18) = b;
+extern "C" void func_002CD1C0(void *self, int label, int callback) {
+    *(int *)((char *)self + 0x14) = label;
+    *(int *)((char *)self + 0x18) = callback;
 }
 #endif
 
@@ -2647,11 +2693,11 @@ extern "C" int func_002CA3E8(void** self);
 
 extern "C" int func_002CD1D0(void* self)
 {
-    int r = func_002CA2B0(self);
-    if (cMenuItem_isLocked(self) == 0 && r == 0 && func_002CA3E8((void**)self) == 6) {
+    int result = func_002CA2B0(self);
+    if (cMenuItem_isLocked(self) == 0 && result == 0 && func_002CA3E8((void**)self) == 6) {
         (*(void (**)())((char*)self + 0x18))();
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -2911,16 +2957,16 @@ INCLUDE_ASM("util/menu", func_002CD528);
 #ifdef SKIP_ASM
 extern "C" void func_002CD528(void* self, int lo, int hi)
 {
-    char* s = (char*)self;
-    signed char* p = *(signed char**)(s + 0x18);
-    *(signed char*)(s + 0x1D) = hi;
-    *(signed char*)(s + 0x1C) = lo;
-    if (p != 0) {
-        if (*p < *(signed char*)(s + 0x1C))
-            *p = lo;
-        signed char* q = *(signed char**)(s + 0x18);
-        if (*(signed char*)(s + 0x1D) < *q)
-            *q = *(signed char*)(s + 0x1D);
+    char* item = (char*)self;
+    signed char* valuePtr = *(signed char**)(item + 0x18);
+    *(signed char*)(item + 0x1D) = hi;
+    *(signed char*)(item + 0x1C) = lo;
+    if (valuePtr != 0) {
+        if (*valuePtr < *(signed char*)(item + 0x1C))
+            *valuePtr = lo;
+        signed char* valuePtrAgain = *(signed char**)(item + 0x18);
+        if (*(signed char*)(item + 0x1D) < *valuePtrAgain)
+            *valuePtrAgain = *(signed char*)(item + 0x1D);
     }
 }
 #endif
@@ -2964,35 +3010,35 @@ static inline float ffloor_002CD5A0(float x)
 
 extern "C" int func_002CD5A0(void* self)
 {
-    char* s = (char*)self;
-    int r = func_002CA2B0(self);
+    char* item = (char*)self;
+    int result = func_002CA2B0(self);
     if (cMenuItem_isLocked(self) != 0) {
-        return r;
+        return result;
     }
-    if (r != 0) {
-        return r;
+    if (result != 0) {
+        return result;
     }
-    float d = func_002CA428_f(self) - func_002CA408_f(self);
+    float step = func_002CA428_f(self) - func_002CA408_f(self);
     int dir;
-    if (d <= -0.1f || d >= 0.1f) {
+    if (step <= -0.1f || step >= 0.1f) {
         dir = 1;
-        if (d < 0.0f) {
+        if (step < 0.0f) {
             dir = -1;
         }
     } else {
         dir = 0;
     }
-    if (dir == *(int*)(s + 0x24)) {
-        *(int*)(s + 0x20) += 1;
+    if (dir == *(int*)(item + 0x24)) {
+        *(int*)(item + 0x20) += 1;
     } else {
-        *(int*)(s + 0x20) = 0;
-        *(int*)(s + 0x24) = dir;
-        *(float*)(s + 0x28) = (float)dir;
+        *(int*)(item + 0x20) = 0;
+        *(int*)(item + 0x24) = dir;
+        *(float*)(item + 0x28) = (float)dir;
     }
     if (dir != 0) {
-        int n = *(int*)(s + 0x20);
-        d *= 0.1f;
-        d *= (float)(n * n / 0x120);
+        int n = *(int*)(item + 0x20);
+        step *= 0.1f;
+        step *= (float)(n * n / 0x120);
         float div = 1.0f;
         if (func_002CA488(self) != 0 && func_002CA4A8(self) != 0) {
             div = 50.0f;
@@ -3001,27 +3047,27 @@ extern "C" int func_002CD5A0(void* self)
         } else if (func_002CA4A8(self) != 0) {
             div = 5.0f;
         }
-        d = d / div;
-        *(float*)(s + 0x28) += d;
-        d = *(float*)(s + 0x28);
-        signed char* p = *(signed char**)(s + 0x18);
-        int cur = *p;
-        int v = (int)ffloor_002CD5A0((float)cur + d);
-        int lo = *(signed char*)(s + 0x1C);
-        int hi = *(signed char*)(s + 0x1D);
-        if (v < lo) {
-            v = lo;
+        step = step / div;
+        *(float*)(item + 0x28) += step;
+        step = *(float*)(item + 0x28);
+        signed char* valuePtr = *(signed char**)(item + 0x18);
+        int cur = *valuePtr;
+        int newValue = (int)ffloor_002CD5A0((float)cur + step);
+        int lo = *(signed char*)(item + 0x1C);
+        int hi = *(signed char*)(item + 0x1D);
+        if (newValue < lo) {
+            newValue = lo;
         }
-        if (hi < v) {
-            v = hi;
+        if (hi < newValue) {
+            newValue = hi;
         }
-        *(float*)(s + 0x28) = d + (float)(cur - v);
-        *p = v;
-        char* menu = *(char**)s;
-        sVEntry002CD5A0* e = &(*(sVEntry002CD5A0**)(menu + 0x12C))[4];
-        e->fn(menu + e->delta, self);
+        *(float*)(item + 0x28) = step + (float)(cur - newValue);
+        *valuePtr = newValue;
+        char* menu = *(char**)item;
+        sVEntry002CD5A0* entry = &(*(sVEntry002CD5A0**)(menu + 0x12C))[4];
+        entry->fn(menu + entry->delta, self);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3046,11 +3092,11 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 extern char str_pct_d_i[];
 
-extern "C" void func_002CD7F0(void* self, int a1)
+extern "C" void func_002CD7F0(void* self, int rect)
 {
     char buf[0x70];
     sprintf(buf, str_pct_d_i, **(signed char**)((char*)self + 0x18));
-    func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, buf);
+    func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, buf);
 }
 #endif
 
@@ -3144,20 +3190,20 @@ extern "C" cIntMenuItem_sItem* cIntMenuItem_cIntMenuItem(cIntMenuItem_sItem* sel
 //100%
 INCLUDE_ASM("util/menu", func_002CD978);
 #ifdef SKIP_ASM
-extern "C" void func_002CD978(void *arg0, int arg1, int arg2) {
+extern "C" void func_002CD978(void *item, int minValue, int maxValue) {
     int *temp_3;
     int *temp_3_2;
     int temp_4;
 
-    temp_3 = (*(int **)((char*)(arg0) + (0x18)));
-    (*(int *)((char*)(arg0) + (0x20))) = arg2;
-    (*(int *)((char*)(arg0) + (0x1C))) = arg1;
+    temp_3 = (*(int **)((char*)(item) + (0x18)));
+    (*(int *)((char*)(item) + (0x20))) = maxValue;
+    (*(int *)((char*)(item) + (0x1C))) = minValue;
     if (temp_3 != 0) {
-        if (*temp_3 < arg1) {
-            *temp_3 = arg1;
+        if (*temp_3 < minValue) {
+            *temp_3 = minValue;
         }
-        temp_3_2 = (*(int **)((char*)(arg0) + (0x18)));
-        temp_4 = (*(int *)((char*)(arg0) + (0x20)));
+        temp_3_2 = (*(int **)((char*)(item) + (0x18)));
+        temp_4 = (*(int *)((char*)(item) + (0x20)));
         if (temp_4 < *temp_3_2) {
             *temp_3_2 = temp_4;
         }
@@ -3170,12 +3216,12 @@ INCLUDE_ASM("util/menu", func_002CD9B8);
 #ifdef SKIP_ASM
 extern "C" void func_002CD9B8(void* self)
 {
-    int* p = *(int**)((char*)self + 0x18);
-    int v = *(int*)((char*)self + 0x1c);
-    if (v <= 0) {
-        *p = 0;
+    int* valuePtr = *(int**)((char*)self + 0x18);
+    int minValue = *(int*)((char*)self + 0x1c);
+    if (minValue <= 0) {
+        *valuePtr = 0;
     } else {
-        *p = v;
+        *valuePtr = minValue;
     }
 }
 #endif
@@ -3498,12 +3544,12 @@ INCLUDE_ASM("util/menu", func_002CDF78);
 #ifdef SKIP_ASM
 extern "C" void func_002CDF78(void* self)
 {
-    float* p = *(float**)((char*)self + 0x18);
-    float v = *(float*)((char*)self + 0x1c);
-    if (v <= 0.0f) {
-        *p = 0.0f;
+    float* valuePtr = *(float**)((char*)self + 0x18);
+    float minValue = *(float*)((char*)self + 0x1c);
+    if (minValue <= 0.0f) {
+        *valuePtr = 0.0f;
     } else {
-        *p = v;
+        *valuePtr = minValue;
     }
 }
 #endif
@@ -3813,8 +3859,8 @@ static inline int validChar_E488(char c)
 
 extern "C" int func_002CE488(sTextItem_E488* self)
 {
-    int r = func_002CA2B0(self);
-    if (r == 0) {
+    int result = func_002CA2B0(self);
+    if (result == 0) {
     int len = strlen(self->name);
     int mod = len + 1;
     if (mod >= 16) {
@@ -3827,18 +3873,18 @@ extern "C" int func_002CE488(sTextItem_E488* self)
         self->cursor = (self->cursor + 1) % mod;
     } else if (key == 4) {
         // PORT: pointer in int (index-first address).
-        char* c = (char*)(self->cursor + (int)self);
-        c += 0x18;
+        char* cursorChar = (char*)(self->cursor + (int)self);
+        cursorChar += 0x18;
         do {
-            (*c)--;
-        } while (!validChar_E488(*c));
+            (*cursorChar)--;
+        } while (!validChar_E488(*cursorChar));
     } else if (key == 5) {
         // PORT: pointer in int (index-first address).
-        char* c = (char*)(self->cursor + (int)self);
-        c += 0x18;
+        char* cursorChar = (char*)(self->cursor + (int)self);
+        cursorChar += 0x18;
         do {
-            (*c)++;
-        } while (!validChar_E488(*c));
+            (*cursorChar)++;
+        } while (!validChar_E488(*cursorChar));
     } else if (key == 9) {
         if (len < 14) {
             for (int i = self->cursor; i < len; i++) {
@@ -3854,7 +3900,7 @@ extern "C" int func_002CE488(sTextItem_E488* self)
             self->name[len - 1] = 0;
         }
     } else if (key == 6) {
-        r = 3;
+        result = 3;
     } else {
         int code = func_002CC250(*(void**)(self->menu + 0x124));
         int ch = func_002CC258(*(void**)(self->menu + 0x124));
@@ -3876,7 +3922,7 @@ extern "C" int func_002CE488(sTextItem_E488* self)
         }
     }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -4611,14 +4657,14 @@ struct sMenuSlot_F7E8 {
 
 extern "C" void* func_002CF7E8(void* self)
 {
-    char* s = (char*)self;
+    char* expandItem = (char*)self;
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    *(void**)(s + 0x14) = 0;
-    *(void***)(s + 0x10) = cExpandMenuItem_vtbl;
-    cMenu_cMenu(s + 0x18);
-    *(void***)(s + 0x144) = cExpandMenuItemMenu_vtbl;
-    new (s + 0x24) sMenuSlot_F7E8[70];
-    *(void**)(s + 0x148) = self;
+    *(void**)(expandItem + 0x14) = 0;
+    *(void***)(expandItem + 0x10) = cExpandMenuItem_vtbl;
+    cMenu_cMenu(expandItem + 0x18);
+    *(void***)(expandItem + 0x144) = cExpandMenuItemMenu_vtbl;
+    new (expandItem + 0x24) sMenuSlot_F7E8[70];
+    *(void**)(expandItem + 0x148) = self;
     return self;
 }
 #endif
@@ -4686,6 +4732,11 @@ public:
 
 extern "C" void* cMenu_getFocusItem(cMenu* self);
 
+/**
+ * Resets the value of the item that has the focus inside an expandable menu item.
+ *
+ * Gets the focus item of the menu embedded at +0x18 (cMenu_getFocusItem) and calls its virtual slot 8.
+ */
 extern "C" void cExpandMenuItem_zeroValue(void* self)
 {
     ((cExpandMenuItem_zeroValue_cItem*)cMenu_getFocusItem((cMenu*)((char*)self + 0x18)))->v08();
@@ -4716,8 +4767,8 @@ INCLUDE_ASM("util/menu", func_002CF928);
 #ifdef SKIP_ASM
 extern "C" void func_002CBD50(int);
 
-extern "C" void func_002CF928(int arg0) {
-    func_002CBD50(arg0 + 0x18);
+extern "C" void func_002CF928(int expandItem) {
+    func_002CBD50(expandItem + 0x18);
 }
 #endif
 //100%
@@ -4725,9 +4776,9 @@ INCLUDE_ASM("util/menu", func_002CF948);
 #ifdef SKIP_ASM
 extern "C" void func_002CF948(void* self)
 {
-    char* s = (char*)self;
-    func_002CBE10(s + 0x18);
-    void* item = *(void**)(s + 0x14);
+    char* expandItem = (char*)self;
+    func_002CBE10(expandItem + 0x18);
+    void* item = *(void**)(expandItem + 0x14);
     if (item != 0) {
         cExpandMenuItem_addItem3(self, item, -1);
     }
@@ -4742,14 +4793,14 @@ void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpan
 
 extern "C" void func_002CF988(void* self, void* item)
 {
-    char* s = (char*)self;
-    for (int i = 0; i < ((cMenuList*)(s + 0x18))->count; i++) {
-        if (((cMenuList*)(s + 0x18))->items[i] == *(void**)(s + 0x14)) {
-            func_002CBD50_pi(s + 0x18, i);
+    char* expandItem = (char*)self;
+    for (int i = 0; i < ((cMenuList*)(expandItem + 0x18))->count; i++) {
+        if (((cMenuList*)(expandItem + 0x18))->items[i] == *(void**)(expandItem + 0x14)) {
+            func_002CBD50_pi(expandItem + 0x18, i);
             break;
         }
     }
-    *(void**)(s + 0x14) = item;
+    *(void**)(expandItem + 0x14) = item;
     cExpandMenuItem_addItem3(self, item, 0);
 }
 #endif
@@ -4827,9 +4878,18 @@ public:
     virtual int v03(int a, int b);
 };
 
-extern "C" int cExpandMenuItem_onCommand(cExpandMenuItem_onCommand_cMenu** self, int a, int b)
+/**
+ * Passes a command from an item inside an expandable menu item on to the menu that owns it.
+ *
+ * Calls virtual slot 3 (cMenu onCommand) of the parent menu stored at +0x0 with @p item and @p b and returns its result.
+ *
+ * @param item  the item that issued the command (On Tour item)
+ * @param b  the command argument (On Tour arg)
+ * @return the parent menu's result
+ */
+extern "C" int cExpandMenuItem_onCommand(cExpandMenuItem_onCommand_cMenu** self, int item, int b)
 {
-    return (*self)->v03(a, b);
+    return (*self)->v03(item, b);
 }
 #endif
 
@@ -4846,6 +4906,11 @@ public:
     virtual void v04(void*);
 };
 
+/**
+ * Tells the parent menu that this expandable menu item's value changed.
+ *
+ * Calls virtual slot 4 (cMenu onChange) of the parent menu stored at +0x0 with this item.
+ */
 extern "C" void cExpandMenuItem_onChange(cExpandMenuItem_onChange_cMenu** self)
 {
     (*self)->v04(self);
@@ -4879,6 +4944,16 @@ struct sMenu_2CFB58 {
     sMenuRect_2CFB58 rects[1];
 };
 
+/**
+ * Measures an expandable menu item, including its sub-items when it is expanded.
+ *
+ * Copies the menu system from the parent menu, then for each active sub-item stores the rect its virtual slot 4
+ * returns. Heights are summed while the item has the focus (or for the title item), widths take the widest item, plus
+ * 20 for indented sub-items. The total is returned through @p ret.
+ *
+ * @param ret  where the total rect is returned (hidden struct-return pointer)
+ * @return @p ret
+ */
 extern "C" sMenuRect_2CFB58* cExpandMenuItem_preRender(sMenuRect_2CFB58* ret, sMenu_2CFB58* self)
 {
     sMenuRect_2CFB58 r;
@@ -4950,9 +5025,18 @@ struct cExpandMenuItem_render_sOwner {
     cExpandMenuItem_render_sRect rects[70];      // 0x14C
 };
 
-extern "C" void cExpandMenuItem_render(cExpandMenuItem_render_sOwner* self, cExpandMenuItem_render_sRect* r)
+/**
+ * Draws an expandable menu item: its title and, while it has the focus, its sub-items.
+ *
+ * Starting from @p irect, each active item that is the title, or every active item while this item has its parent menu's
+ * focus, gets a rect indented by 20 (none for the title), is drawn through its virtual slot 5 and moves the next
+ * position down by its height.
+ *
+ * @param irect  the area to draw in (On Tour irect)
+ */
+extern "C" void cExpandMenuItem_render(cExpandMenuItem_render_sOwner* self, cExpandMenuItem_render_sRect* irect)
 {
-    cExpandMenuItem_render_sRect pos = *r;
+    cExpandMenuItem_render_sRect pos = *irect;
     for (int i = 0; i < self->count; i++) {
         if (cMenuItem_isActive(self->items[i]) == 0) {
             continue;
@@ -4976,6 +5060,14 @@ INCLUDE_ASM("util/menu", cExpandMenuItem_gainFocus);
 void cMenuItem_gainFocus_2(void* self, int a1) __asm__("cMenuItem_gainFocus__FPv");
 extern "C" void cMenu_setFocus_v(void* self, int index) __asm__("cMenu_setFocus");
 
+/**
+ * Gives an expandable menu item the focus and selects the sub-item matching the direction it was entered from.
+ *
+ * Calls cMenuItem_gainFocus, then sets the embedded menu (+0x18) focus to the first item for @p mode 0 or the last (-1)
+ * for 1, and calls cMenu_onGainFocus with the parent menu's menu system.
+ *
+ * @param mode  how the focus arrived (On Tour tMIGainFocus whence)
+ */
 extern "C" void cExpandMenuItem_gainFocus(void* self, int mode)
 {
     cMenuItem_gainFocus_2(self, mode);
@@ -4996,6 +5088,11 @@ INCLUDE_ASM("util/menu", cExpandMenuItem_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void cMenu_onLoseFocus(cMenu* p);
 
+/**
+ * Takes the focus away from an expandable menu item and its sub-menu.
+ *
+ * Calls func_002CA370 (base cMenuItem loseFocus) and cMenu_onLoseFocus on the menu embedded at +0x18.
+ */
 extern "C" void cExpandMenuItem_loseFocus(void* self)
 {
     func_002CA370(self);
@@ -5373,7 +5470,7 @@ extern char str_pct_2f_pct_2f_pct_2f[];
 // PORT: the unit's 4-arg declaration of func_002CA988 is wrong: the callee reads $8 (5th arg).
 void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 
-extern "C" void func_002D0500(void* self, int a1)
+extern "C" void func_002D0500(void* self, int rect)
 {
     char buf[0x80];
     const char* fmt = str_pct_2f_pct_2f_pct_2f;
@@ -5381,7 +5478,7 @@ extern "C" void func_002D0500(void* self, int a1)
     int y = fptodp((*(float**)((char*)self + 0x14))[1]);
     int z = fptodp((*(float**)((char*)self + 0x14))[2]);
     sprintf(buf, fmt, x, y, z);
-    func_002CA988_5(self, a1, *(int*)((char*)self + 0x18), 0, buf);
+    func_002CA988_5(self, rect, *(int*)((char*)self + 0x18), 0, buf);
 }
 #endif
 
@@ -5397,16 +5494,31 @@ extern char D_004A39D8[];
 extern char D_004A39E0[];
 extern char D_004A39E8[];
 
-extern "C" void* cVectorMenuItem_cVectorMenuItem(void* self, void* name, float* values, int a3, float f1, float f2)
+/**
+ * Constructs a debug menu item that edits the three components of a vector.
+ *
+ * Builds the cExpandMenuItem base with the title item at +0x654, keeps the vector at +0x5AC, installs
+ * cVectorMenuItem_vtbl and makes three cFloatMenuItem children (ids 0 to 2, labels D_004A39D8..D_004A39E8) bound to x,
+ * y and z with the given range. The title item is built from the caption and the vector (func_002D03F0), the three
+ * children are added at the end and +0x670 is cleared.
+ *
+ * @param name  the menu item id (On Tour id; passed on as the cExpandMenuItem id, not a name)
+ * @param values  the vector to edit, as three floats (On Tour v)
+ * @param caption  the title caption (On Tour caption)
+ * @param minValue  smallest value each component may take
+ * @param maxValue  largest value each component may take
+ * @return this
+ */
+extern "C" void* cVectorMenuItem_cVectorMenuItem(void* self, void* name, float* values, int caption, float minValue, float maxValue)
 {
     char* s = (char*)self;
     cExpandMenuItem_cExpandMenuItem(self, name, s + 0x654);
     *(float**)(s + 0x5AC) = values;
     *(void***)(s + 0x10) = cVectorMenuItem_vtbl;
-    cFloatMenuItem_ptr(s + 0x5B8, 0, values, D_004A39D8, f1, f2);
-    cFloatMenuItem_ptr(s + 0x5EC, 1, values + 1, D_004A39E0, f1, f2);
-    cFloatMenuItem_ptr(s + 0x620, 2, values + 2, D_004A39E8, f1, f2);
-    func_002D03F0(s + 0x654, a3, (int)values);
+    cFloatMenuItem_ptr(s + 0x5B8, 0, values, D_004A39D8, minValue, maxValue);
+    cFloatMenuItem_ptr(s + 0x5EC, 1, values + 1, D_004A39E0, minValue, maxValue);
+    cFloatMenuItem_ptr(s + 0x620, 2, values + 2, D_004A39E8, minValue, maxValue);
+    func_002D03F0(s + 0x654, caption, (int)values);
     cExpandMenuItem_addItem3(self, s + 0x5B8, -1);
     cExpandMenuItem_addItem3(self, s + 0x5EC, -1);
     cExpandMenuItem_addItem3(self, s + 0x620, -1);
@@ -5568,7 +5680,7 @@ struct sCurveItem_D0908 {
 
 extern "C" int func_002D0908(sCurveItem_D0908* self)
 {
-    int r = 0;
+    int result = 0;
     if (cMenuItem_isLocked(self) == 0) {
     int changed = 0;
     if (func_002CA3E8((void**)self) == 6) {
@@ -5639,17 +5751,17 @@ extern "C" int func_002D0908(sCurveItem_D0908* self)
                 }
             }
         } else {
-            r = func_002CA2B0(self);
+            result = func_002CA2B0(self);
         }
     } else {
-        r = func_002CA2B0(self);
+        result = func_002CA2B0(self);
     }
     if (changed) {
         sVE_D0908* vt = *(sVE_D0908**)(self->menu + 0x12C);
         vt[4].fn(self->menu + vt[4].delta, self);
     }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -5674,32 +5786,32 @@ extern "C" sMenuRect_2D0D48* func_002D0D48(sMenuRect_2D0D48* ret, char* item)
     if (item == cMenu_getFocusItem((cMenu*)(*(void**)item))) {
         focused = *(int*)(item + 0x40) != 0;
     }
-    int pad = focused ? 0x50 : 0x14;
+    int minHeight = focused ? 0x50 : 0x14;
     char* font = font_2D0D48(item);
     float lh = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
     float w = cFont_textExtent(font, *(char**)(item + 0x14), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
     char* font2 = font_2D0D48(item);
     float w2 = cFont_textExtent(font2, str_9_999_9_999, 0, 0, *(float*)(font2 + 0x38), *(float*)(font2 + 0x3C));
     if (w < w2) w = w2;
-    sMenuRect_2D0D48 r;
+    sMenuRect_2D0D48 rect;
     float zero = 0.0f;
-    r.y = zero;
-    r.x = zero;
+    rect.y = zero;
+    rect.x = zero;
     if (focused) {
-        float h = lh + lh + 6.0f;
-        float p = (float)pad;
-        if (h < p) {
-            h = p + 24.0f;
+        float height = lh + lh + 6.0f;
+        float minHeightF = (float)minHeight;
+        if (height < minHeightF) {
+            height = minHeightF + 24.0f;
         } else {
-            h = h + 24.0f;
+            height = height + 24.0f;
         }
-        r.w = h;
+        rect.w = height;
     } else {
         char* font3 = font_2D0D48(item);
-        r.w = (float)*(int*)(font3 + 0x14) * *(float*)(font3 + 0x34) + 12.0f;
+        rect.w = (float)*(int*)(font3 + 0x14) * *(float*)(font3 + 0x34) + 12.0f;
     }
-    r.z = (float)margin + w + 64.0f;
-    *ret = r;
+    rect.z = (float)margin + w + 64.0f;
+    *ret = rect;
     return ret;
 }
 #endif
@@ -6118,17 +6230,17 @@ extern "C" float func_002D1928(int n, float x)
 {
     float sum = 0.0f;
     float amp = 1.0f;
-    float v = 0.0f;
+    float octave = 0.0f;
     float freq = 1.0f;
     int i;
     for (i = 0; i < n; i++) {
-        float t = x * freq;
+        float scaledX = x * freq;
         freq = freq * 2.0f;
-        v = func_002D18B0(t) * amp;
+        octave = func_002D18B0(scaledX) * amp;
         amp = amp * 0.5f;
-        sum = sum + v;
+        sum = sum + octave;
     }
-    return sum + v;
+    return sum + octave;
 }
 #endif
 
@@ -6138,9 +6250,19 @@ INCLUDE_ASM("util/menu", cObjectInterface_runCollideScript);
 extern "C" int cWScriptMan_doOnCollideScript(void* self, int a, int b, int c);
 extern void* cWScriptMan_TheWScriptMan;
 
-extern "C" int cObjectInterface_runCollideScript(int a, int b, int c)
+/**
+ * Runs a world object's collision script through the world script manager.
+ *
+ * Calls cWScriptMan_doOnCollideScript on cWScriptMan_TheWScriptMan with the three arguments and returns its result.
+ *
+ * @param collideInfo  collision info (On Tour tc)
+ * @param intersectInfo  intersection info (On Tour ti)
+ * @param pBeing  the being that collided (On Tour pBeing)
+ * @return cWScriptMan_doOnCollideScript's result
+ */
+extern "C" int cObjectInterface_runCollideScript(int collideInfo, int intersectInfo, int pBeing)
 {
-    return cWScriptMan_doOnCollideScript(cWScriptMan_TheWScriptMan, a, b, c);
+    return cWScriptMan_doOnCollideScript(cWScriptMan_TheWScriptMan, collideInfo, intersectInfo, pBeing);
 }
 #endif
 
@@ -6192,8 +6314,8 @@ INCLUDE_ASM("util/menu", func_002D1A78);
 #ifdef SKIP_ASM
 extern "C" void func_0030A610(int, int);
 
-extern "C" void func_002D1A78(int arg0) {
-    func_0030A610((*(int*)&cWScriptMan_TheWScriptMan), arg0);
+extern "C" void func_002D1A78(int inst) {
+    func_0030A610((*(int*)&cWScriptMan_TheWScriptMan), inst);
 }
 #endif
 //100%
@@ -6201,8 +6323,8 @@ INCLUDE_ASM("util/menu", func_002D1AA0);
 #ifdef SKIP_ASM
 extern "C" void func_00309D20(int, int, int);
 
-extern "C" void func_002D1AA0(int arg0, int arg1) {
-    func_00309D20((*(int*)&cWScriptMan_TheWScriptMan), arg0, arg1);
+extern "C" void func_002D1AA0(int scriptId, int inst) {
+    func_00309D20((*(int*)&cWScriptMan_TheWScriptMan), scriptId, inst);
 }
 #endif
 
@@ -6309,6 +6431,11 @@ extern "C" int func_002D1BA0()
 INCLUDE_ASM("util/menu", cObjectInterface_getWorld);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the current world, for world objects that only see the object interface.
+ *
+ * @return cWorld_m_pTheWorld
+ */
 extern "C" void* cObjectInterface_getWorld()
 {
     return cWorld_m_pTheWorld;
@@ -6374,6 +6501,11 @@ extern "C" void* func_002D1C58()
 INCLUDE_ASM("util/menu", cObjectInterface_getUpdateTime);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the length of the current update step, for world objects.
+ *
+ * @return the float at SSXApp+0x14
+ */
 extern "C" float cObjectInterface_getUpdateTime()
 {
     return *(float*)((char*)SSXApp + 0x14);

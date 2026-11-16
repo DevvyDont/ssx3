@@ -100,6 +100,12 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_purge);
 extern "C" void cCameraTriggerList_reset(void*);
 void cMemMan_free(void*);
 
+/**
+ * Empties a camera trigger list and releases its trigger array.
+ *
+ * Calls cCameraTriggerList_reset, then frees the trigger pointer array (+0x0) with cMemMan_free when it is set and
+ * clears the pointer.
+ */
 extern "C" void cCameraTriggerList_purge(void** self)
 {
     cCameraTriggerList_reset(self);

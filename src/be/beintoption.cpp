@@ -74,6 +74,12 @@ extern "C" void func_0014F600(void* self);
 extern "C" void func_0014F4F8(void* self);
 extern "C" void func_0014F458(void* self);
 
+/**
+ * Resets all game options to their defaults.
+ *
+ * Calls func_0014F648, func_0014F600, func_0014F4F8 and func_0014F458 (On Tour defaultCtrl, defaultHUD, defaultGame,
+ * defaultSound).
+ */
 extern "C" void cBEOptionInterface_revert(void* self)
 {
     func_0014F648(self);

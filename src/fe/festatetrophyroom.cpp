@@ -945,7 +945,18 @@ extern void* D_00474E08[];
 extern void* D_0046C980[];
 extern unsigned short D_004A1390[];
 
-extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2)
+/**
+ * Constructs the memory card screen base used by the profile, autosave and save screens.
+ *
+ * Runs the cUIState constructor, installs the cOVState vtable (D_00474E08) and then this class's (D_0046C980),
+ * clears +0x48, +0x4C, +0x54 and +0x98, copies the empty string D_004A1390 into +0x58, and runs func_001D5488
+ * (On Tour initFEMemCard) with @p iType. The engine argument is not used.
+ *
+ * @param pEngine  the UI engine (unused)
+ * @param iType  what the screen is for (On Tour iType)
+ * @return @p self
+ */
+extern "C" void* cFEMemCard_cFEMemCard(void* self, int pEngine, int iType)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0x98) = 0;
@@ -955,7 +966,7 @@ extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2)
     *(int*)((char*)self + 0x54) = 0;
     *(unsigned short*)((char*)self + 0x58) = D_004A1390[0];
     *(void***)((char*)self + 0x8) = D_0046C980;
-    func_001D5488(self, a2);
+    func_001D5488(self, iType);
     return self;
 }
 #endif
@@ -1187,6 +1198,14 @@ extern "C" void cMCOverlayManager_purge(void* self);
 extern "C" void cMCOverlayManager_ManagerLoseState(void* self);
 extern "C" void cMCOverlayManager_cleanUp(void* self);
 
+/**
+ * Memory card screen teardown: releases the save buffers and shuts the memory card manager down.
+ *
+ * In replay mode (+0x1BC == 1) with an external replay buffer (+0x228 == 2) that was not kept (+0x1B4 == 0),
+ * releases the save interface's replay buffer (cBESaveInterface_releaseReplayBuffer) and forgets it; always releases its general buffer
+ * (cBESaveInterface_releaseBuffer). If the memory card manager is active (+0x434), cleans it up (cMCOverlayManager_cleanUp, cMCOverlayManager_ManagerLoseState,
+ * cMCOverlayManager_purge). A buffer this screen allocated (+0x228 == 1) is freed. Ends with cOVState_onDestroyScreen.
+ */
 extern "C" void cFEMemCard_onDestroyScreen(void* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
@@ -1247,6 +1266,15 @@ struct sVE_59A0 {
     void (*fn)(void*, char*, int, int, int, int, int);
 };
 
+/**
+ * Memory card callback: starts writing the current save (settings, replay or profile).
+ *
+ * Mode 2 (cFEMemCard_mInstance +0x1BC) writes settings (func_002412A0). Mode 1 saves the replay: cReplay_initSave,
+ * a read buffer of the back end's data size filled by func_0014E050, then func_00241000 under a title built from
+ * the file name and "%s %s%04d". Mode 0 saves the profile from the save interface (cBESaveInterface_generateSaveProfile,
+ * cBESaveInterface_getSaveProfileSize). The first time (+0x210 and +0x208 clear), also shows the manager's current message through
+ * virtual slot 36 and sets +0x210.
+ */
 // Memory-card "save" step: builds the save-file title for the current mode and starts the save; on first entry shows the saving dialog.
 extern "C" void cFEMemCard_writeStart(void)
 {
@@ -1326,6 +1354,17 @@ struct sTrophyRoom_001D5C28 {
 // PORT: cFEMemCard_mInstance holds the trophy room state pointer.
 extern sTrophyRoom_001D5C28* D_004A2028_tr __asm__("cFEMemCard_mInstance");
 
+/**
+ * Memory card read progress callback: checks and loads a replay as it arrives.
+ *
+ * Only replay reads (mode 1) are handled; others return 1. On the first call after the read started, CRCs the
+ * data (seed 0xFBEA) and compares it with the 4 bytes after it: on a mismatch releases the replay buffer, clears
+ * the buffer state and returns 0; otherwise sets gWeHaveToClearTheBackEnd and loads the back end from it
+ * (cBE_readFromData__FPvi). Then asks the manager for the next chunk of up to 0x4000 bytes (cMCOverlayManager_ReadData).
+ *
+ * @param size  bytes to read next
+ * @return 0 when the replay failed its CRC check, else 1
+ */
 extern "C" int cFEMemCard_callbackReadUpdate(int size)
 {
     sTrophyRoom_001D5C28* g = D_004A2028_tr;
@@ -1430,6 +1469,14 @@ extern sTrophyRoom_001D5DF0* D_004A2028_tr5 __asm__("cFEMemCard_mInstance");
 extern "C" int cBESaveInterface_getReplayBuffer(void* iface);
 extern "C" void cFEMemCard_createReadBuffer(sTrophyRoom_001D5DF0* self, int size);
 
+/**
+ * Memory card callback: starts reading a save (settings, replay or profile) into a buffer.
+ *
+ * Marks the read as started (+0x1B0 = 1, +0x1B4 = 0) and gives the manager the slot (+0x1D8). Mode 2 reads a
+ * save game of cBESaveInterface_getSaveGameSize__FPv's size into a new read buffer; mode 1 reads a replay straight into the save
+ * interface's replay buffer (cBESaveInterface_getReplayBuffer) and flags it for the CRC check in cFEMemCard_callbackReadUpdate; mode 0 reads a
+ * profile of cBESaveInterface_getSaveProfileSize's size. Each read starts with cMCOverlayManager_readFile.
+ */
 extern "C" void cFEMemCard_readStart()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);

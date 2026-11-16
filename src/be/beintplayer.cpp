@@ -226,6 +226,17 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Tells whether a rider has never been to a location before.
+ *
+ * Uses the profile of @p index (cBELibrary_getProfileIndex) and the character of its player
+ * (cBENewPlayerInterface_tempPlayers[getPlayerID].mCharID) to find the cBELibrary_profileLib record, then tests bit @p
+ * bit of the visited mask at +0xACC.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param bit  the location (On Tour eBELocationID locTrack)
+ * @return true when the location has not been visited
+ */
 extern "C" int cBENewPlayerInterface_isFirstTimeOnTrack(void* self, int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -250,6 +261,16 @@ struct sProfileSlot_00145DD0 {
     char data[0xF88];
 };
 
+/**
+ * Marks a location as new or already visited for a rider's character.
+ *
+ * Finds the rider's character profile as cBENewPlayerInterface_isFirstTimeOnTrack does and calls cBECharProfileDB_setLocationVisited
+ * (cBECharProfileDB::setLocationVisited) with !@p flag.
+ *
+ * @param flag  On Tour value: true marks the location as not yet visited
+ * @param index  the rider (On Tour iRider)
+ * @param bit  the location (On Tour eBELocationID locTrack)
+ */
 extern "C" void cBENewPlayerInterface_setFirstTimeOnTrack(void* self, bool flag, int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -669,39 +690,50 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isEventLocked);
 int cBELibrary_getProfileIndex(int);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Tells whether an event is still locked for a character.
+ *
+ * Reads the 64-bit flag word at +0x278 of cBELibrary_profileLib[profile of @p index][@p character]: events 6-11 map to bits
+ * 14-19; other events return 0 (unlocked).
+ *
+ * @param index  the rider whose profile is used (On Tour iRider)
+ * @param character  the character (On Tour eBECharacters character)
+ * @param kind  the event (On Tour eBEGameEvent event)
+ * @return 1 when locked
+ */
 // Returns one of the character's unlock flags (kinds 6-11, bits 14-19 of the 64-bit flag word).
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
-extern "C" int cBENewPlayerInterface_isEventLocked(void* self, int index, int c, int kind)
+extern "C" int cBENewPlayerInterface_isEventLocked(void* self, int index, int character, int kind)
 {
     int profile = cBELibrary_getProfileIndex(index);
     switch (kind) {
     case 6: {
-        int off = c * 0xF88 + profile * 0x9B50;
+        int off = character * 0xF88 + profile * 0x9B50;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 14) & 1;
     }
     case 7: {
-        int off = c * 0xF88 + profile * 0x9B50;
+        int off = character * 0xF88 + profile * 0x9B50;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 15) & 1;
     }
     case 8: {
-        int off = c * 0xF88 + profile * 0x9B50;
+        int off = character * 0xF88 + profile * 0x9B50;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 16) & 1;
     }
     case 9: {
-        int off = c * 0xF88 + profile * 0x9B50;
+        int off = character * 0xF88 + profile * 0x9B50;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 17) & 1;
     }
     case 10: {
-        int off = c * 0xF88 + profile * 0x9B50;
+        int off = character * 0xF88 + profile * 0x9B50;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 18) & 1;
     }
     case 11: {
-        int off = c * 0xF88 + profile * 0x9B50;
+        int off = character * 0xF88 + profile * 0x9B50;
         char* p = (char*)cBELibrary_profileLib + off;
         return (int)(*(long*)(p + 0x278) >> 19) & 1;
     }
@@ -782,6 +814,14 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Remembers the hub a rider's character was last at.
+ *
+ * Writes @p value to +0x27C of the rider's character profile record in cBELibrary_profileLib.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param value  the hub location (On Tour locHub)
+ */
 extern "C" void cBENewPlayerInterface_setLastHub(void* self, int index, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -980,6 +1020,15 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderCtrlID);
 #ifdef SKIP_ASM
 int cBENewPlayerInterface_getPlayerID(int index);
 
+/**
+ * Returns which controller drives a rider.
+ *
+ * cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)].field_0xc; negative means no controller (an AI rider), see
+ * cBENewPlayerInterface_setPlayerCtrlID.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @return the controller id
+ */
 extern "C" int cBENewPlayerInterface_getRiderCtrlID(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -997,13 +1046,23 @@ struct sPlayerCharFlags_001472C8 {
     unsigned int rest : 29;
 };
 
-extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int a1, int a2)
+/**
+ * Assigns a controller to a player slot.
+ *
+ * cBENewPlayerInterface_tempPlayers[@p iPlayer].field_0xc = @p ctrlID; with a controller (@p ctrlID >= 0), flag bit 0 of the
+ * record's +0x10 word takes the low bit of @p iPlayer and bit 2 is cleared. Storing the slot's low bit in a 1-bit flag looks
+ * like it should have been a constant.
+ *
+ * @param iPlayer  the player slot (On Tour iPlayer)
+ * @param ctrlID  the controller id, negative for none
+ */
+extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int iPlayer, int ctrlID)
 {
-    cBENewPlayerInterface_tempPlayers[a1].field_0xc = a2;
-    if (a2 >= 0) {
-        char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + a1 * 0x1c;
+    cBENewPlayerInterface_tempPlayers[iPlayer].field_0xc = ctrlID;
+    if (ctrlID >= 0) {
+        char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + iPlayer * 0x1c;
         sPlayerCharFlags_001472C8* f = (sPlayerCharFlags_001472C8*)(p + 0x10);
-        f->bit0 = a1;
+        f->bit0 = iPlayer;
         f->bit2 = 0;
     }
 }
@@ -1012,9 +1071,17 @@ extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int a1, int a2
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCtrlID);
 #ifdef SKIP_ASM
-extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* self, int a1)
+/**
+ * Returns which controller is assigned to a player slot.
+ *
+ * cBENewPlayerInterface_tempPlayers[@p iPlayer].field_0xc, the field cBENewPlayerInterface_setPlayerCtrlID (setPlayerCtrlID) writes.
+ *
+ * @param iPlayer  the player slot (On Tour iPlayer)
+ * @return the controller id, negative for none
+ */
+extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* self, int iPlayer)
 {
-    return cBENewPlayerInterface_tempPlayers[a1].field_0xc;
+    return cBENewPlayerInterface_tempPlayers[iPlayer].field_0xc;
 }
 #endif
 
@@ -1072,6 +1139,15 @@ signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex)
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRiderCheatCharID);
 #ifdef SKIP_ASM
+/**
+ * Sets the cheat character a rider appears as.
+ *
+ * cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)].field_0x12 = @p value (read back by
+ * cBELibrary_getCheatCharacterID).
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param value  the cheat character id, 0 for none
+ */
 extern "C" void cBENewPlayerInterface_setRiderCheatCharID(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1104,9 +1180,18 @@ static inline int cBENewPlayerInterface_setPlayerCharID_getBit2(char* p)
     return ((sPlayerCharFlags_00147448*)(p + 0x10))->bit2;
 }
 
-extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int charID)
+/**
+ * Chooses the character a player slot rides as.
+ *
+ * Writes @p charID to byte +0x11 (mCharID) of cBENewPlayerInterface_tempPlayers[@p iPlayer]; when the slot's flag bit 2
+ * (mission man, set by cBENewPlayerInterface_setToMissionMan) is set, player 0's character is stored instead.
+ *
+ * @param iPlayer  the player slot (On Tour iPlayer)
+ * @param charID  the character to ride as
+ */
+extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int iPlayer, int charID)
 {
-    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + a1 * 0x1c;
+    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + iPlayer * 0x1c;
     if (cBENewPlayerInterface_setPlayerCharID_getBit2(p) == 1) {
         *(signed char*)(p + 0x11) = cBENewPlayerInterface_tempPlayers[0].mCharID;
     } else {
@@ -1222,6 +1307,14 @@ extern "C" void func_001475C0(void* self, int index, int value)
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getControllerMapping);
 #ifdef SKIP_ASM
+/**
+ * Returns the button layout a rider's player has chosen.
+ *
+ * Signed byte +0x13 (pad_0x13[0] in the C view) of cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)].
+ *
+ * @param index  the rider (On Tour iRider)
+ * @return the controller mapping id
+ */
 extern "C" signed char cBENewPlayerInterface_getControllerMapping(void* self, int index)
 {
     return cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].pad_0x13[0];
@@ -1366,6 +1459,14 @@ int cBENewPlayerInterface_isMissionMan(int index)
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setToMissionMan);
 #ifdef SKIP_ASM
+/**
+ * Turns a rider into a 'mission man': a copy of player 0's character used in missions.
+ *
+ * The rider's player record (cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)]) takes player 0's mCharID and
+ * gets flag bit 2 at +0x10.
+ *
+ * @param index  the rider (On Tour iRider)
+ */
 extern "C" void cBENewPlayerInterface_setToMissionMan(int index)
 {
     cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].mCharID = cBENewPlayerInterface_tempPlayers[0].mCharID;
@@ -2141,6 +2242,16 @@ extern "C" int func_00148950(void* self, int rider)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintplayer", cBEStatInterface_setStatLevel);
 #ifdef SKIP_ASM
+/**
+ * Sets every attribute of a rider to the same stat level.
+ *
+ * Each of func_00148470, func_00148610, func_001483A0, func_001486E0, func_001487B0, func_00148880 and func_00148540
+ * (On Tour setAccel, setEdging, setSpeed, setSpin, setToughness, setStability, setTrick) gets @p value * 5. The release
+ * build drops On Tour's range and read-back asserts.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  the level (On Tour iLevel), 1 to the number of levels
+ */
 extern "C" void cBEStatInterface_setStatLevel(void* self, int rider, int value)
 {
     int v = value * 5;

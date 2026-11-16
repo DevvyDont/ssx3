@@ -282,6 +282,14 @@ struct sSpringVEntry45D8 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Saves a spring into a replay frame: its parameters, then its nodes.
+ *
+ * Writes the first 0x24 bytes of the spring (count and parameters, On Tour cSpringState) and then the node array
+ * (Nodes +0x24, count * 0x50 bytes) through the frame's virtual write (slot 1). func_00353E80 reads them back.
+ *
+ * @param stream  the replay frame to write to (On Tour data)
+ */
 extern "C" void cSpring_writeToReplayFrame(void* self, void* stream)
 {
     sSpringVEntry45D8* e = &(*(sSpringVEntry45D8**)stream)[1];

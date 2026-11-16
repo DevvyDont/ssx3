@@ -2084,12 +2084,25 @@ struct sDebCurve {
     float t0;        // 0x84
 };
 
+/**
+ * Evaluates one spline segment at a distance along the spline: position, direction and the direction's change.
+ *
+ * The distance is made relative to the segment's start (+0x84) and mapped to the curve parameter u by the cubic at
+ * +0x50 (u = ((c0 d + c1) d + c2) d + c3; du is its derivative). With the 4x4 basis matrix at +0x10 (B):
+ * @p pos = B (u^3, u^2, u, 1), @p vel = B (3u^2, 2u, 1, 0) and @p acc = B (6u, 2, 0, 0) * du. On Tour asserts the
+ * distance lies within the segment and the position within +-5e6; retail does not.
+ *
+ * @param dist    the distance along the spline (On Tour dist)
+ * @param pos  receives the position
+ * @param vel  receives the direction (the derivative with respect to u, not normalised)
+ * @param acc  receives the direction's derivative with respect to the distance (On Tour dDir)
+ */
 // Evaluate the curve at time t: position, velocity and acceleration.
-extern "C" void cSplineSegment_getPos(sDebCurve* self, float t, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
+extern "C" void cSplineSegment_getPos(sDebCurve* self, float dist, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
 {
-    t -= self->t0;
-    float u = ((self->coef[0] * t + self->coef[1]) * t + self->coef[2]) * t + self->coef[3];
-    float du = (self->coef[0] * (t * 3.0f) + self->coef[1] * 2.0f) * t + self->coef[2];
+    dist -= self->t0;
+    float u = ((self->coef[0] * dist + self->coef[1]) * dist + self->coef[2]) * dist + self->coef[3];
+    float du = (self->coef[0] * (dist * 3.0f) + self->coef[1] * 2.0f) * dist + self->coef[2];
     sDebVec4 a;
     a.x = u * 6.0f;
     a.y = 2.0f;
@@ -2211,24 +2224,37 @@ static inline float ftrunc_00345248(float x)
     return t;
 }
 
-extern "C" void cSpline_getPos(sDebTrack5248* self, float t, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
+/**
+ * Evaluates the spline at a distance: position, direction and the direction's change, wrapping around its length.
+ *
+ * The distance is wrapped into [0, Length) (Length +0xC; the floor uses an FPU truncate, then one step down for
+ * negatives). The current segment (Seg +0x8, its index +0x4) is stepped back through prev (+0x60) while the distance
+ * is before its start (+0x84), then forward through next (+0x64) while the next one starts at or before it; the
+ * found segment stays current for the next call. The result comes from cSplineSegment_getPos on that segment.
+ *
+ * @param distance    the distance along the spline (On Tour distance)
+ * @param pos  receives the position
+ * @param vel  receives the direction
+ * @param acc  receives the direction's derivative (On Tour dDir)
+ */
+extern "C" void cSpline_getPos(sDebTrack5248* self, float distance, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
 {
     float len = self->length;
-    float q = t / len;
+    float q = distance / len;
     float f = ftrunc_00345248(q);
     if (q < f) {
         f -= 1.0f;
     }
-    t -= f * len;
-    while (t < self->key->t0 && self->key->prev != 0) {
+    distance -= f * len;
+    while (distance < self->key->t0 && self->key->prev != 0) {
         self->back();
     }
     sDebKey5248* next = self->key->next;
-    while (next != 0 && next->t0 <= t) {
+    while (next != 0 && next->t0 <= distance) {
         self->forward();
         next = self->key->next;
     }
-    cSplineSegment_getPos((sDebCurve*)self->key, t, pos, vel, acc);
+    cSplineSegment_getPos((sDebCurve*)self->key, distance, pos, vel, acc);
 }
 #endif
 

@@ -525,11 +525,21 @@ struct sElem_9A30 {
     sElem_9A30() { func_0020EAA0(sub); }
 };
 
+/**
+ * Constructs the one-player HUD overlay state.
+ *
+ * Runs the cUIState constructor, installs cOVStateHUD1P_vtbl, constructs the two HUD elements at +0x48
+ * (func_0020EAA0), sets +0x474 to -1, clears +0x3D4/+0x3D8/+0x480/+0x484 and sets the four scales
+ * (+0x478, +0x47C, +0x488, +0x48C) to 1.0.
+ *
+ * @param pEngine  the UI engine
+ * @return @p arg0
+ */
 // HUD overlay state constructor: base state, vtable, the two sub-panels and default scales.
-extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* arg0, int a1)
+extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* arg0, int pEngine)
 {
     char* self = (char*)arg0;
-    func_0039E2A0_9A30(self, a1);
+    func_0039E2A0_9A30(self, pEngine);
     *(char**)(self + 8) = cOVStateHUD1P_vtbl;
     new (self + 0x48) sElem_9A30[2];
     *(int*)(self + 0x474) = -1;
@@ -2277,6 +2287,11 @@ extern "C" void func_001F30D8(void* vself)
 //100%
 INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_DeInit__FPv);
 #ifdef SKIP_ASM
+/**
+ * Releases the loading indicator's resources: forgets its text and font and clears its state.
+ *
+ * Zeroes the text (+0x0), the indicator mask (+0x4), the animation frame (+0x8) and the font (+0xC).
+ */
 void cBXLoadIndicator_DeInit(void* self)
 {
     cOVStateHUDElem* e = (cOVStateHUDElem*)self;
@@ -2291,6 +2306,12 @@ void cBXLoadIndicator_DeInit(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Update);
 #ifdef SKIP_ASM
+/**
+ * Advances the loading indicator's animation while it is shown.
+ *
+ * When the indicator mask (+0x4) is nonzero, adds 1/60 to the animation frame (+0x8) and subtracts 2.0 until it
+ * is at most 2.0.
+ */
 extern "C" void cBXLoadIndicator_Update(void* self)
 {
     if (*(int*)((char*)self + 4) != 0) {
@@ -2475,6 +2496,13 @@ extern "C" void func_001F31E0(sHudTimer_001F31E0* self)
 //100%
 INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Show);
 #ifdef SKIP_ASM
+/**
+ * Shows the loading indicator for one more reason.
+ *
+ * Sets bit @p bit in the indicator mask (+0x4, On Tour mLoadIndicators); cBXLoadIndicator_Hide clears it.
+ *
+ * @param bit  the reason (On Tour eLoadIndicator)
+ */
 extern "C" void cBXLoadIndicator_Show(void* self, int bit)
 {
     *(int*)((char*)self + 0x4) |= (1 << bit);

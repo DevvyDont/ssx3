@@ -1444,6 +1444,20 @@ struct sGfx_96C8 {
     int count;                  // 0xE80
 };
 
+/**
+ * Returns the texture id for a short texture name, loading and caching the texture on first use.
+ *
+ * Uses up to the first 4 characters of @p name. Searches the texture-ref cache (On Tour mTexRefs: 256 entries of {id,
+ * name[8]} at +0x280, count +0xE80) with func_004165A8 (strcmp). On a miss it copies the name into the next entry and
+ * asks each loaded texture file (+0x27C, count +0x278) for the shape (SHAPE_locatez); the first hit is added through
+ * vtable slot 46 (func_0037C8C0) as a "charshp" texture. A name no file has is cached with id -1. There is no check
+ * against the 256-entry limit (On Tour asserts mNumTexRefs < arraysize(mTexRefs)): a 257th distinct name would
+ * overwrite the count.
+ *
+ * @param self_  the graphics manager (this)
+ * @param name   the texture name
+ * @return the texture id, or -1 when no texture file has the shape
+ */
 // Look up (or load and cache) a texture by its 4-character name.
 extern "C" int cGraphicsMan_GetTextureID(cPS2GraphicsMan* self_, const char* name)
 {

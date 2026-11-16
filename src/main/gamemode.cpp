@@ -153,6 +153,11 @@ public:
 void operator_delete(int*);
 extern void* D_00536668[];
 
+/**
+ * Destroys the game mode manager: deletes the ten mode handlers and the singleton.
+ *
+ * Deletes each handler in D_00536668 (On Tour aHandler), frees cGameModeMan_instance and sets it to null.
+ */
 extern "C" void cGameModeMan_purgeGM(void)
 {
     int i;
@@ -369,11 +374,19 @@ struct sVEntry_00238510 {
 
 extern void* D_00536668[];
 
-extern "C" void cGameModeMan_riderCheckpointHit(void* self, int a, int b)
+/**
+ * Tells the current game mode that a rider passed a checkpoint.
+ *
+ * Calls virtual slot 6 of the current handler (D_00536668[+0x4]) with both arguments.
+ *
+ * @param iRider  the rider
+ * @param iSecsAdded  the seconds the checkpoint adds
+ */
+extern "C" void cGameModeMan_riderCheckpointHit(void* self, int iRider, int iSecsAdded)
 {
     void* obj = D_00536668[*(int*)((char*)self + 0x4)];
     sVEntry_00238510* vt = *(sVEntry_00238510**)obj;
-    vt[6].fn((char*)obj + vt[6].delta, a, b);
+    vt[6].fn((char*)obj + vt[6].delta, iRider, iSecsAdded);
 }
 #endif
 

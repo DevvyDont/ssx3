@@ -206,6 +206,14 @@ struct cSimpleCamera_cSimpleCamera_sVec4 { float x, y, z, w; } __attribute__((al
 extern void* cSimpleCamera_vtbl[];
 extern cSimpleCamera_cSimpleCamera_sVec4 t4vect_XAxis;
 
+/**
+ * Constructs the simple camera base: an identity-ish pose looking down the X axis.
+ *
+ * Installs cSimpleCamera_vtbl at +0x90, zeroes the pose position (+0x20), sets the pose's second vector (+0x30) to
+ * (0, 1, 0, 1) and copies t4vect_XAxis into the direction (+0x80). View, near/far and the matrix are left to init.
+ *
+ * @return @p self
+ */
 extern "C" void* cSimpleCamera_cSimpleCamera(void* self)
 {
     cSimpleCamera_cSimpleCamera_sVec4 v;
@@ -489,6 +497,12 @@ extern "C" void func_0015D928_impl(void* self)
 INCLUDE_ASM("camera/cameraalgorithms", cCamera_invalidateSafePosition);
 #ifdef SKIP_ASM
 
+/**
+ * Marks the first view camera's last safe position as invalid, so it is not used again until re-established.
+ *
+ * Follows SSXApp->Game's view manager (+0x84) to the first view's camera (+0x4) and sets its +0x4A4 flag (On Tour
+ * cCamera::LastSafePositionInvalid) to 1. Only the first view is touched, as in On Tour.
+ */
 extern "C" void cCamera_invalidateSafePosition(void)
 {
     void* cam = SSXApp->Game;
@@ -533,6 +547,14 @@ struct sCamVE_0015DB58 {
     void (*fn)(void*);
 };
 
+/**
+ * Resets the cameras after a restart: re-arms the camera triggers and restarts each view's chase camera.
+ *
+ * Calls cCameraTriggerMan_initOnRestart and cCameraTriggerMan_setInGameTriggers on gCamTriggerMan, then for the first view (and the
+ * second when the view manager holds two or more): cChaseCameraController_switchCamera_Restart on its chase
+ * controller (+0xA8), the controller's snapCurrent virtual (slot 4) and clears +0x460. Only the first view's
+ * safe-position-invalid flag (+0x4A4) is set.
+ */
 extern "C" void cCamera_onRestart(void)
 {
     cCameraTriggerMan_initOnRestart(gCamTriggerMan);

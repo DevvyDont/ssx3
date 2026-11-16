@@ -32,24 +32,24 @@ void* cWorldPainterMan_getQuery(void* self, cWorldPainterManArg* x)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AA0);
 #ifdef SKIP_ASM
-extern "C" void func_002C0AA0(tWPInGameData* self, int* dst, int* src, float t)
+extern "C" void func_002C0AA0(tWPInGameData* self, int* dst, int* src, float blend)
 {
-    if (t == 1.0f) {
+    if (blend == 1.0f) {
         *dst = *src;
     } else {
-        *dst = (int)((float)*dst * (1.0f - t) + (float)*src * t);
+        *dst = (int)((float)*dst * (1.0f - blend) + (float)*src * blend);
     }
 }
 #endif
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AF0);
 #ifdef SKIP_ASM
-extern "C" void func_002C0AF0(tWPInGameData* self, float* dst, float* src, float t)
+extern "C" void func_002C0AF0(tWPInGameData* self, float* dst, float* src, float blend)
 {
-    if (t == 1.0f) {
+    if (blend == 1.0f) {
         *dst = *src;
     } else {
-        *dst = *dst * (1.0f - t) + *src * t;
+        *dst = *dst * (1.0f - blend) + *src * blend;
     }
 }
 #endif
@@ -850,31 +850,31 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C16A8);
 // with an int expression; retype it to (void*, int, int) and drop the alias if the lander prefers.
 extern "C" void func_002C16A8_impl(void* self, int a, int b) __asm__("func_002C16A8");
 
-extern "C" void func_002C16A8_impl(void* self, int a, int b)
+extern "C" void func_002C16A8_impl(void* self, int key, int data)
 {
-    *(int*)((char*)self + 0x4) = a;
-    *(int*)((char*)self + 0x0) = b;
+    *(int*)((char*)self + 0x4) = key;
+    *(int*)((char*)self + 0x0) = data;
 }
 #endif
 
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C16B8);
 #ifdef SKIP_ASM
-extern "C" void func_002C16B8(unsigned short* p, unsigned short a, unsigned short b, unsigned short c, unsigned short d)
+extern "C" void func_002C16B8(unsigned short* node, unsigned short subA, unsigned short subB, unsigned short subC, unsigned short subD)
 {
-    p[0] = (a << 1) | 1;
-    p[1] = (b << 1) | (p[1] & 1);
-    p[2] = (c << 1) | (p[2] & 1);
-    p[3] = (d << 1) | (p[3] & 1);
+    node[0] = (subA << 1) | 1;
+    node[1] = (subB << 1) | (node[1] & 1);
+    node[2] = (subC << 1) | (node[2] & 1);
+    node[3] = (subD << 1) | (node[3] & 1);
 }
 #endif
 
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1718);
 #ifdef SKIP_ASM
-extern "C" void func_002C1718(void *arg0) {
-    (*(int *)((char*)(arg0) + (0))) = 0;
-    (*(int *)((char*)(arg0) + (4))) = 0;
+extern "C" void func_002C1718(void *node) {
+    (*(int *)((char*)(node) + (0))) = 0;
+    (*(int *)((char*)(node) + (4))) = 0;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -883,20 +883,20 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1728);
 extern "C" unsigned short cQuadTree_getFreeNode();
 extern "C" void func_002C16A8(int, int, int);
 
-extern "C" void *func_002C1728(void *arg0, int arg1, int arg2, float fparg0, float fparg1, float fparg2) {
-    (*(int *)((char*)(arg0) + (0x24))) = 0;
-    (*(int *)((char*)(arg0) + (0x20))) = 0;
-    (*(int *)((char*)(arg0) + (0x10))) = 0;
-    (*(int *)((char*)(arg0) + (0xC))) = 0;
-    (*(float *)((char*)(arg0) + (4))) = fparg0;
-    (*(float *)((char*)(arg0) + (8))) = fparg1;
-    (*(float *)((char*)(arg0) + (0))) = (float) (32768.0f / fparg2);
-    (*(unsigned short *)((char*)(arg0) + (0x14))) = cQuadTree_getFreeNode();
-    (*(short *)((char*)(arg0) + (0x16))) = 0;
-    func_002C16A8((*(int *)((char*)(arg0) + (0x20))) + ((*(unsigned short *)((char*)(arg0) + (0x14))) * 8), arg1, arg2);
-    (*(int *)((char*)(arg0) + (0x1C))) = arg1;
-    (*(int *)((char*)(arg0) + (0x18))) = arg2;
-    return arg0;
+extern "C" void *func_002C1728(void *quadTree, int defaultKey, int defaultData, float fparg0, float fparg1, float fparg2) {
+    (*(int *)((char*)(quadTree) + (0x24))) = 0;
+    (*(int *)((char*)(quadTree) + (0x20))) = 0;
+    (*(int *)((char*)(quadTree) + (0x10))) = 0;
+    (*(int *)((char*)(quadTree) + (0xC))) = 0;
+    (*(float *)((char*)(quadTree) + (4))) = fparg0;
+    (*(float *)((char*)(quadTree) + (8))) = fparg1;
+    (*(float *)((char*)(quadTree) + (0))) = (float) (32768.0f / fparg2);
+    (*(unsigned short *)((char*)(quadTree) + (0x14))) = cQuadTree_getFreeNode();
+    (*(short *)((char*)(quadTree) + (0x16))) = 0;
+    func_002C16A8((*(int *)((char*)(quadTree) + (0x20))) + ((*(unsigned short *)((char*)(quadTree) + (0x14))) * 8), defaultKey, defaultData);
+    (*(int *)((char*)(quadTree) + (0x1C))) = defaultKey;
+    (*(int *)((char*)(quadTree) + (0x18))) = defaultData;
+    return quadTree;
 }
 #endif
 
@@ -905,9 +905,9 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C17C0__FPv);
 #ifdef SKIP_ASM
 void func_002C17C0(void* self)
 {
-    void* t0 = (char*)self + 0x28;
-    *(void**)((char*)self + 0x20) = t0;
-    *(void**)((char*)self + 0x24) = t0;
+    void* nodes = (char*)self + 0x28;
+    *(void**)((char*)self + 0x20) = nodes;
+    *(void**)((char*)self + 0x24) = nodes;
 }
 #endif
 
