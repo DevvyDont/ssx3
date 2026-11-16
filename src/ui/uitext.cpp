@@ -592,14 +592,14 @@ extern "C" int func_003A10F0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1148);
+INCLUDE_ASM("ui/uitext", cUITextScroll_cUITextScroll);
 #ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self, int a1, int a2);
 extern "C" void* func_003977E8(void* self);
 extern "C" void func_003A1310(cUITextScroll* self, char a1);
 extern void* D_00494278[];
 
-extern "C" void* func_003A1148(cUITextScroll* self, int a1, int a2)
+extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int a1, int a2)
 {
     func_0039FB30(self, a1, a2);
     self->mVtbl = D_00494278;

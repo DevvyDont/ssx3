@@ -7,7 +7,7 @@
 // rec+0x24 (mpObjBackground) and rec+0x28 (mpObjKnob). Default ctors func_003A6190 / func_003A61D0 (ui/uivector).
 // Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source: ../source/ui/uislider.h
 // (preview assert path); retail keeps its methods in ui/uiscreen (0x39DF28-0x39E288).
-// Methods: vtable D_00494348 slots 0 ~cUISlider (func_0039DF28), 9 setUIData (func_0039DFB0), 14 onInput
+// Methods: vtable D_00494348 slots 0 ~cUISlider (cUISlider__cUISlider), 9 setUIData (func_0039DFB0), 14 onInput
 // (func_0039DFE8), 16 render2D (func_0039E130), 21 getType (func_003A6220); accessors func_003A6228..func_003A6248.
 // Class name: the preview's cUISlider::getType (builds/x/v2/name_map_v2.tsv, func_003A6220) and On Tour.
 //
@@ -20,7 +20,7 @@ struct cUISlider {
     // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] D_00494348 (createObjectByStruct, func_003A6190, func_003A61D0, the dtor func_0039DF28)
+    void** mVtbl;                    // 0x008 [R] D_00494348 (createObjectByStruct, func_003A6190, func_003A61D0, the dtor cUISlider__cUISlider)
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on
@@ -53,7 +53,7 @@ struct cUISlider {
     int mBackWidth;                  // 0x080 [O]; [R] = 0; [U] setUIData func_0039DFB0 (sw)
     cUIThing* mSliderObj;            // 0x084 [O] (not stored by the retail ctors; no retail access found)
     cUIThing* mpObjBackground;       // 0x088 [O]; [R] = 0, then the record's child (hash rec+0x24); [U] func_003A6240
-                                     //       setBackground (sw); the dtor func_0039DF28 deletes it; render2D
+                                     //       setBackground (sw); the dtor cUISlider__cUISlider deletes it; render2D
     cUIThing* mpObjKnob;             // 0x08C [O]; [R] = 0, then the child named at rec+0x28; [U] func_003A6248 setKnob;
                                      //       the dtor deletes it; render2D moves it
 };

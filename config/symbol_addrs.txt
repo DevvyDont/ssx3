@@ -3135,6 +3135,23 @@ cFEStateAuthDNASError_onLoseTransition__FPv = 0x001E0C78; //type:func
 cFEStateNetNews_onLoseTransition__FPv = 0x001E0EF0; //type:func
 cFEStateReadMessagePopup_onLoseTransition__FPv = 0x001E1040; //type:func
 
+// fn_cfu_ctors: names by evidence (docs/function_names.tsv)
+cChaseAlgorithm_cChaseAlgorithm = 0x001622B0; //type:func
+cLookAtChaseAlgorithm_cLookAtChaseAlgorithm = 0x00162318; //type:func
+cLookAtChaseAlgorithm__cLookAtChaseAlgorithm = 0x00162458; //type:func
+cBasicCameraAlgorithm__cBasicCameraAlgorithm = 0x00167EA0; //type:func
+cManualCameraAlgorithm__cManualCameraAlgorithm = 0x00167F10; //type:func
+cEditorCameraAlgorithm__cEditorCameraAlgorithm = 0x00167F40; //type:func
+cChaseAlgorithm__cChaseAlgorithm = 0x00167F70; //type:func
+cUIListBox_cUIListBox = 0x00399768; //type:func
+cUIScrollBar__cUIScrollBar = 0x0039D8C0; //type:func
+cUISlider__cUISlider = 0x0039DF28; //type:func
+cUITextScroll_cUITextScroll = 0x003A1148; //type:func
+cListNode_cListNode = 0x003A47D8; //type:func
+cListNode__cListNode = 0x003A47F8; //type:func
+cUIListBox__cUIListBox = 0x003A5658; //type:func
+cUITextScroll__cUITextScroll = 0x003A62A0; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

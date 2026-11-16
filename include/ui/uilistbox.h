@@ -3,12 +3,12 @@
 
 // cUIListBox: a list of up to 32 text entries (ASCII, Unicode or string-table id, each with a user data pointer), one of
 // them current (record type 0x12). Size 0x31C: cUIScreen_createObjectByStruct does operator new(0x31C, "UIListBox"...)
-// + the ctor func_00399768 (cUIThing ctor func_0039FB30, vtable D_00494798, clears the entries, mNumEntries,
+// + the ctor cUIListBox_cUIListBox (cUIThing ctor func_0039FB30, vtable D_00494798, clears the entries, mNumEntries,
 // mCurrentEntry, mStaticColour = D_004C66C8); default ctor func_003A55D8 (ui/uivector). Base: cUIThing (ui/uithing.h,
 // 0x74) <- cListNode, written out flat below. EA source: d:/ssx/code/source/ui/uilistbox.cpp (preview assert path);
 // retail keeps its methods in ui/uiengine (0x399768-0x3993F8), ui/uilistbox (0x39A3F8-0x39A928) and its inline
 // accessors in ui/uivector (0x3A5658-0x3A57B8).
-// Methods: vtable D_00494798 slots 0 ~cUIListBox (func_003A5658), 9 setUIData (func_00399820), 14 onInput
+// Methods: vtable D_00494798 slots 0 ~cUIListBox (cUIListBox__cUIListBox), 9 setUIData (func_00399820), 14 onInput
 // (func_00399970), 15 updateLocale (func_00399E28), 16 render2D (func_00399F00), 21 getType (func_003A56A0),
 // 22 setShadow (func_003A56D8), 23 setUseStaticColour (func_003A5708); cUIListBox_addEntryByAsciiString,
 // func_0039A4B0 (addEntryByUnicodeString), cUIListBox_addEntryByStringID, func_0039A670 (clear; the dtor calls it),
@@ -25,7 +25,7 @@
 #include "ui/uithing.h"
 
 // EA's tAttrListBox (On Tour: 1 byte). Retail's accessors read and write it as a word (lw/sw 0x74); only the ctor
-// func_00399768 touches it as a byte (lbu/sb 0x74).
+// cUIListBox_cUIListBox touches it as a byte (lbu/sb 0x74).
 struct tAttrListBox {
     unsigned int mFont : 2;          // bits 0-1 [O]; [U] func_003A56A8 setFont
     unsigned int mShadow : 1;        // bit 2 [O]; [R] ctor sets it; [U] func_003A56C8 hasShadow, func_003A56D8 setShadow
@@ -58,7 +58,7 @@ struct cUIListBox {
     // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] D_00494798 (the ctor func_00399768, func_003A55D8, the dtor func_003A5658)
+    void** mVtbl;                    // 0x008 [R] D_00494798 (the ctor cUIListBox_cUIListBox, func_003A55D8, the dtor cUIListBox__cUIListBox)
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on
@@ -83,7 +83,7 @@ struct cUIListBox {
                                      //       [U] channels 6-7; cUIText wraps at mSize.x
     int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] func_003A0318/func_003A0330 get/set by index
     // --- cUIListBox
-    tAttrListBox mAttrListBox;       // 0x074 [O] tAttrListBox; [R] the ctor func_00399768 sets mShadow, clears mUnicode /
+    tAttrListBox mAttrListBox;       // 0x074 [O] tAttrListBox; [R] the ctor cUIListBox_cUIListBox sets mShadow, clears mUnicode /
                                      //       mCallback (lbu/sb 0x74), func_003A55D8 calls its ctor func_003A65A0; [U] setUIData
                                      //       func_00399820 (lw/sw), accessors func_003A56A8..func_003A5708 (lw/sw)
     tARGB mShadowColour;             // 0x078 [O]; [U] setUIData func_00399820 copies it from the record; func_003A5758

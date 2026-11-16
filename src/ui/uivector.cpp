@@ -699,11 +699,11 @@ extern "C" void cListOperator__cListOperator(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A47D8);
+INCLUDE_ASM("ui/uivector", cListNode_cListNode);
 #ifdef SKIP_ASM
 extern void* D_00494CC0[];
 
-extern "C" void *func_003A47D8(cListNode* arg0) {
+extern "C" void *cListNode_cListNode(cListNode* arg0) {
     ((void*)arg0->mpNext) = ((void*)arg0);
     ((int*)arg0->mVtbl) = &(*(int*)&D_00494CC0);
     ((void*)arg0->mpPrev) = ((void*)arg0);
@@ -712,14 +712,14 @@ extern "C" void *func_003A47D8(cListNode* arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A47F8);
+INCLUDE_ASM("ui/uivector", cListNode__cListNode);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void func_003A4868(cListNode* self);
 
 extern void* D_00494CC0[];
 
-extern "C" void func_003A47F8(int* self, int flags)
+extern "C" void cListNode__cListNode(int* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_00494CC0;
     func_003A4868((cListNode*)self);
@@ -2101,7 +2101,7 @@ extern "C" void* func_003A55D8(cUIListBox* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A5658);
+INCLUDE_ASM("ui/uivector", cUIListBox__cUIListBox);
 #ifdef SKIP_ASM
 extern void* D_00494798[];
 extern "C" void func_0039A670(void* self);
@@ -2109,7 +2109,7 @@ extern "C" void func_0039A670(void* self);
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
 extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
 
-extern "C" void func_003A5658(cUIListBox* self, int flags)
+extern "C" void cUIListBox__cUIListBox(cUIListBox* self, int flags)
 {
     self->mVtbl = D_00494798;
     func_0039A670(self);
@@ -3281,7 +3281,7 @@ extern "C" void* func_003A6250(cUITextScroll* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", func_003A62A0);
+INCLUDE_ASM("ui/uivector", cUITextScroll__cUITextScroll);
 #ifdef SKIP_ASM
 extern void* D_00494278[];
 extern void* cList_vtbl[];
@@ -3294,7 +3294,7 @@ extern "C" void cList_destroyList_v(void* self) __asm__("cList_destroyList");
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
 extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
 
-extern "C" void func_003A62A0(cUITextScroll* self, int flags)
+extern "C" void cUITextScroll__cUITextScroll(cUITextScroll* self, int flags)
 {
     self->mVtbl = D_00494278;
     func_003A18C0(self);

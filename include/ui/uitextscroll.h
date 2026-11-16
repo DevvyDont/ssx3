@@ -3,12 +3,12 @@
 
 // cUITextScroll: a scrolling multi-line text box (record type 0x20), word-wrapped into lines and optionally driven by
 // a cUIScrollBar. Size 0xD0: cUIScreen_createObjectByStruct does operator new(0xD0, D_00493F50) + the ctor
-// func_003A1148 (cUIThing ctor func_0039FB30, vtable D_00494278, mList ctor func_003977E8, zeroes 0xB8..0xCC,
+// cUITextScroll_cUITextScroll (cUIThing ctor func_0039FB30, vtable D_00494278, mList ctor func_003977E8, zeroes 0xB8..0xCC,
 // func_003A1310 fills mInputMap), then moves the record's children into mList. Default ctor func_003A6250
 // (ui/uivector). Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source:
 // d:/ssx/code/source/ui/uitextscroll.cpp (preview assert path); retail keeps its methods in ui/uitext
 // (0x3A1148-0x3A2068) and its inline accessors in ui/uivector (0x3A6250-0x3A64F8).
-// Methods: vtable D_00494278 slots 0 ~cUITextScroll (func_003A62A0), 9 setUIData (func_003A11B8), 14 onInput
+// Methods: vtable D_00494278 slots 0 ~cUITextScroll (cUITextScroll__cUITextScroll), 9 setUIData (func_003A11B8), 14 onInput
 // (func_003A13E0), 15 updateLocale (func_003A1360), 16 render2D (func_003A1588), 21 getType (func_003A6330); line
 // buffer helpers func_003A12D0, func_003A18C0 (free lines), cUITextScroll_allocLine, func_003A1F90; text setters
 // func_003A19F8 / func_003A1C80 (ASCII), cUITextScroll_addUnicodeString, func_003A1CF0 / func_003A1D30 (Unicode),
@@ -23,7 +23,7 @@
 #include "util/list.h"
 
 // EA's tAttrTextScroll (On Tour: 1 byte). Retail's accessors read and write it as a word (lw/sw 0x74); the ctor
-// func_003A1148 clears bits 0/3/4/5 as a byte (lbu, andi 0xC6, sb).
+// cUITextScroll_cUITextScroll clears bits 0/3/4/5 as a byte (lbu, andi 0xC6, sb).
 struct tAttrTextScroll {
     unsigned int mMode : 1;          // bit 0 [O]; [U] func_003A6480 (set), func_003A6490 (get)
     unsigned int mFont : 2;          // bits 1-2 [O]; [U] func_003A6338 setFont
@@ -38,7 +38,7 @@ struct cUITextScroll {
     // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] D_00494278 (the ctor func_003A1148, func_003A6250, the dtor func_003A62A0)
+    void** mVtbl;                    // 0x008 [R] D_00494278 (the ctor cUITextScroll_cUITextScroll, func_003A6250, the dtor cUITextScroll__cUITextScroll)
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on
@@ -63,14 +63,14 @@ struct cUITextScroll {
                                      //       [U] channels 6-7; cUIText wraps at mSize.x
     int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] func_003A0318/func_003A0330 get/set by index
     // --- cUITextScroll
-    tAttrTextScroll mAttrTextScroll; // 0x074 [O]; [R] ctor func_003A1148 clears mMode/mShadow/mUnicode/mStaticColour
+    tAttrTextScroll mAttrTextScroll; // 0x074 [O]; [R] ctor cUITextScroll_cUITextScroll clears mMode/mShadow/mUnicode/mStaticColour
                                      //       (lbu/andi 0xC6/sb 0x74), func_003A6250 calls its ctor func_003A6600; [U] setUIData
                                      //       func_003A11B8 (lw/sw), accessors func_003A6338..func_003A6398, func_003A6480/90
     tARGB mShadowColour;             // 0x078 [O]; [U] setUIData func_003A11B8 copies it (ldl/ldr); func_003A63B8 (set)
     char mInputMap[4];               // 0x088 [O]; [R] func_003A1310 (called by the ctor) fills the four bytes; [U] onInput
                                      //       func_003A13E0 (lb 0x88 / 0x89)
     cList mList;                     // 0x08C [O] the text lines' child objects (util/list.h); [R] ctor func_003977E8 on
-                                     //       this + 0x8C, dtor func_003A62A0 (cList_destroyList, vptrs 0xA4 / 0xA0 / 0x94);
+                                     //       this + 0x8C, dtor cUITextScroll__cUITextScroll (cList_destroyList, vptrs 0xA4 / 0xA0 / 0x94);
                                      //       createObjectByStruct adds the record's children (cList_addToEnd on o + 0x8C);
                                      //       [U] func_003A63E0..func_003A6460 (first/last/getByIndex/addToFront/addToEnd)
     tARGB mSelectedColour;           // 0x0A8 [O]; [U] func_003A64A0 (set, ldl/ldr), render2D func_003A1588

@@ -15,12 +15,12 @@
 //                                           (0x3A0), SUPERPIPE/POST_RACE_1 (0x3B0), Relative (0x3C0), Spline (0x3D0).
 //                                           cCamera embeds a cDEFAULT_3ChaseAlgorithm (0x390) at 0xC0.
 // Retail vtables: cCameraAlgorithm D_0045BDE0, cBasicCameraAlgorithm D_0045BD78, cChaseAlgorithm D_0045BC38,
-// cLookAtChaseAlgorithm D_0045BBC0 (stored by its ctor func_00162318 and dtor func_00162458).
+// cLookAtChaseAlgorithm D_0045BBC0 (stored by its ctor cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and dtor cLookAtChaseAlgorithm__cLookAtChaseAlgorithm).
 //
 // FLAT layouts, like main/game.h: every field at its retail offset, bases written out inline, no C++ inheritance.
 // Evidence tags:
 //   [R] retail constructors: cCameraAlgorithm's inline part (in cBasicCameraAlgorithm_cBasicCameraAlgorithm and
-//       func_001622B0 = cChaseAlgorithm::cChaseAlgorithm), func_00162318 (cLookAtChaseAlgorithm ctor), the
+//       cChaseAlgorithm_cChaseAlgorithm = cChaseAlgorithm::cChaseAlgorithm), cLookAtChaseAlgorithm_cLookAtChaseAlgorithm (cLookAtChaseAlgorithm ctor), the
 //       allocation sizes above;
 //   [P] the preview's inline accessors via tools/layout_xlate.py (shouldSnapOnUpdate lw preview 0x300 -> retail 0x2F0);
 //   [U] how retail code (camera/camera.cpp, 0x1622B0-0x168F60) uses the field;
@@ -106,7 +106,7 @@ CHECK_SIZE(cBasicCameraAlgorithm, 0x40);
 // cChaseAlgorithm (On Tour: 0x40): an algorithm that follows a rider.
 struct cChaseAlgorithm {
     // --- cCameraAlgorithm
-    float View;                 // 0x00 [O]; [R] func_001622B0
+    float View;                 // 0x00 [O]; [R] cChaseAlgorithm_cChaseAlgorithm
     float Near;                 // 0x04 [O]; [R]
     float Far;                  // 0x08 [O]; [R]
     int AlgorithmType;          // 0x0C [O]; [R] 0x53

@@ -1276,18 +1276,18 @@ extern "C" void func_00399730(cUIIcon* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00399768);
+INCLUDE_ASM("ui/uiengine", cUIListBox_cUIListBox);
 #ifdef SKIP_ASM
 extern "C" void* func_0039FB30(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* D_00494798[];
 
-struct func_00399768_sQuad {
+struct cUIListBox_cUIListBox_sQuad {
     int a, b, c, d;
 };
-extern func_00399768_sQuad D_004C66C8;
+extern cUIListBox_cUIListBox_sQuad D_004C66C8;
 
-struct func_00399768_sEntry {
+struct cUIListBox_cUIListBox_sEntry {
     int a;
     int b;
     int c;
@@ -1295,22 +1295,22 @@ struct func_00399768_sEntry {
     char e;
 };
 
-struct func_00399768_sObj {
+struct cUIListBox_cUIListBox_sObj {
     char base[0x74];
     unsigned char flags;
     char pad75[0x88 - 0x75];
-    func_00399768_sQuad quad;
-    func_00399768_sEntry entries[32];
+    cUIListBox_cUIListBox_sQuad quad;
+    cUIListBox_cUIListBox_sEntry entries[32];
     char c318;
     char c319;
 };
 
-extern "C" func_00399768_sObj* func_00399768(cUIListBox* self)
+extern "C" cUIListBox_cUIListBox_sObj* cUIListBox_cUIListBox(cUIListBox* self)
 {
-    func_0039FB30(((func_00399768_sObj*)self));
+    func_0039FB30(((cUIListBox_cUIListBox_sObj*)self));
     self->mVtbl = D_00494798;
     *(unsigned char*)&self->mAttrListBox = (*(unsigned char*)&self->mAttrListBox | 4) & 0xC4;
-    func_00399768_sEntry* p = ((func_00399768_sEntry*)&self->mpEntries[0]);
+    cUIListBox_cUIListBox_sEntry* p = ((cUIListBox_cUIListBox_sEntry*)&self->mpEntries[0]);
     for (int i = 31; i != -1; i--, p++) {
         p->a = 0;
         p->b = 0;
@@ -1320,9 +1320,9 @@ extern "C" func_00399768_sObj* func_00399768(cUIListBox* self)
     }
     *(char*)&self->mNumEntries = 0;
     *(char*)&self->mCurrentEntry = 0;
-    func_00416210(((func_00399768_sEntry*)&self->mpEntries[0]), 0, 0x280);
-    (*(func_00399768_sQuad*)&self->mStaticColour) = D_004C66C8;
-    return ((func_00399768_sObj*)self);
+    func_00416210(((cUIListBox_cUIListBox_sEntry*)&self->mpEntries[0]), 0, 0x280);
+    (*(cUIListBox_cUIListBox_sQuad*)&self->mStaticColour) = D_004C66C8;
+    return ((cUIListBox_cUIListBox_sObj*)self);
 }
 #endif
 

@@ -733,9 +733,9 @@ extern "C" void* func_0021CCC8(void* self);
 extern "C" void* func_003977E8(void* self);
 extern "C" void* func_003A5338(void* self);
 extern "C" void* func_003A5508(void* self);
-extern "C" void* func_00399768(void* mem, void* screen, int a2);
+extern "C" void* cUIListBox_cUIListBox(void* mem, void* screen, int a2);
 extern "C" void* func_003A0348(void* mem, void* screen, int a2);
-extern "C" void* func_003A1148(void* mem, void* screen, int a2);
+extern "C" void* cUITextScroll_cUITextScroll(void* mem, void* screen, int a2);
 extern "C" void* cUIVector_cUIVector(void* mem, void* screen, int a2);
 extern char D_004A4788[];
 extern char D_004A4790[];
@@ -819,7 +819,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         return o;
     }
     case 0x12: {
-        char* o = (char*)func_00399768(alloc_D078(0x31C, D_00493F10), self, 0);
+        char* o = (char*)cUIListBox_cUIListBox(alloc_D078(0x31C, D_00493F10), self, 0);
         initFromRec_D078(o, rec);
         return o;
     }
@@ -977,7 +977,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         return o;
     }
     case 0x20: {
-        char* o = (char*)func_003A1148(alloc_D078(0xD0, D_00493F50), self, 0);
+        char* o = (char*)cUITextScroll_cUITextScroll(alloc_D078(0xD0, D_00493F50), self, 0);
         int* h = (int*)(rec + 0x2C);
         for (unsigned int i = 0; i < *(unsigned char*)(rec + 0x22); i++, h++) {
             char* c = (char*)cUIScreen_getObjectByHashName(self, *h);
@@ -1088,12 +1088,12 @@ extern "C" void* cUIScreen_getObjectByHashName(cUIScreen* self, int hash)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039D8C0);
+INCLUDE_ASM("ui/uiscreen", cUIScrollBar__cUIScrollBar);
 #ifdef SKIP_ASM
 extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern void* D_004944C8[];
 
-extern "C" void func_0039D8C0(cUIScrollBar* self, int flags)
+extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
 {
     self->mVtbl = D_004944C8;
     void* a = self->mpObjBackground;
@@ -1346,12 +1346,12 @@ extern "C" void func_0039DE68(cUIScrollBar* self, int a)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039DF28);
+INCLUDE_ASM("ui/uiscreen", cUISlider__cUISlider);
 #ifdef SKIP_ASM
 extern "C" void cUIThing__cUIThing(void* self, int flags);
 extern void* D_00494348[];
 
-extern "C" void func_0039DF28(cUISlider* self, int flags)
+extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
 {
     self->mVtbl = D_00494348;
     void* a = self->mpObjBackground;

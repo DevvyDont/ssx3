@@ -8,7 +8,7 @@
 // Default ctors func_003A5F60 / func_003A5FA0 (ui/uivector). Base: cUIThing (ui/uithing.h, 0x74) <- cListNode,
 // written out flat below. Class name: SSX On Tour's DWARF (class cUIScrollBar 0xE0, the only On Tour widget with these
 // members); the preview keeps no name for it. EA's source file is not known; ui/uiscrollbar.h is our name.
-// Methods: vtable D_004944C8 slots 0 ~cUIScrollBar (func_0039D8C0), 9 setUIData (func_0039D948), 16 render2D
+// Methods: vtable D_004944C8 slots 0 ~cUIScrollBar (cUIScrollBar__cUIScrollBar), 9 setUIData (func_0039D948), 16 render2D
 // (func_0039D968), 21 getType (func_003A6000); func_0039DA20 (update position: pos, visible, total), func_0039DE68
 // (show/hide arrows); accessors func_003A6008..func_003A60D8 (ui/uivector). Retail methods: ui/uiscreen 0x39D8C0-0x39DF28.
 //
@@ -22,7 +22,7 @@ struct cUIScrollBar {
     // --- cListNode / cUIThing (ui/uithing.h, 0x74), copied field for field
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] D_004944C8 (createObjectByStruct, func_003A5F60, func_003A5FA0, the dtor func_0039D8C0)
+    void** mVtbl;                    // 0x008 [R] D_004944C8 (createObjectByStruct, func_003A5F60, func_003A5FA0, the dtor cUIScrollBar__cUIScrollBar)
     cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on
@@ -48,7 +48,7 @@ struct cUIScrollBar {
     int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] func_003A0318/func_003A0330 get/set by index
     // --- cUIScrollBar
     cUIThing* mpObjBackground;       // 0x074 [O]; [R] = 0, then the record's child (hash rec+0x20); [U] func_003A6008 (sw);
-                                     //       the dtor func_0039D8C0 deletes it; render2D func_0039D968; func_0039DA20
+                                     //       the dtor cUIScrollBar__cUIScrollBar deletes it; render2D func_0039D968; func_0039DA20
     cUIThing* mpObjKnob;             // 0x078 [O]; [R] = 0, then the child named at rec+0x24; [U] func_003A6010; the dtor
                                      //       deletes it; func_0039DA20 / func_0039DE68 move it
     cUIThing* mpUpArrow;             // 0x07C [O]; [R] = 0; [U] func_003A6018 (sw); func_0039DE68
