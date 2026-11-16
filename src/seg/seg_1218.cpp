@@ -3427,7 +3427,7 @@ extern "C" int cRider_isGroundNormalValid(void*);
 extern "C" void func_001057B8_5398(char*, sSurf_5398*, sInfo_5398*, sContact_5398*, float) __asm__("func_001057B8");
 extern "C" void cSSXAudio_CollisionSound_5398(void*, char*, sSurf_5398*, int) __asm__("cSSXAudio_CollisionSound");
 extern "C" void func_0016D320(void*, void*);
-extern "C" void func_0032F708(void* self, int flags);
+extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern char* D_004A3500_5398 __asm__("gSSXAudio");
 extern char D_004C5830_5398[] __asm__("D_004C5830");
 
@@ -3590,7 +3590,7 @@ extern "C" void func_00105398(char* self, sV4_5398* norm)
             cSSXAudio_CollisionSound_5398(D_004A3500_5398, self, c.surf, c.idx);
     }
     func_0016D320(D_004C5830_5398, self);
-    func_0032F708(&sc, 2);
+    cWorldRider__cWorldRider(&sc, 2);
 }
 #endif
 

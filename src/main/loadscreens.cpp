@@ -415,7 +415,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens", func_0017B4E0);
+INCLUDE_ASM("main/loadscreens", cDebugMenuScreen_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -545,7 +545,7 @@ static inline int bgCount_B4E0(sBgMan_17ACC8* bg)
     return bg->count;
 }
 
-extern "C" void func_0017B4E0(sLS_B1B0* self)
+extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
 {
     if (cInput_getState(D_004A28A8_b4->input, 0x65)) {
         func_0017D0A8(self);

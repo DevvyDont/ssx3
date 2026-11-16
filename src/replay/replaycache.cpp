@@ -1911,7 +1911,7 @@ extern "C" void* func_002725B8(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_002725F0);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_Play);
 #ifdef SKIP_ASM
 extern "C" float func_00272570(float* coef, float t);
 
@@ -1927,7 +1927,7 @@ struct sRcTrack25F0 {
     char* next;             // 0x24
 };
 
-extern "C" int func_002725F0(sRcTrack25F0* self, unsigned int* data, int key)
+extern "C" int cScriptPlayerChannelSpline_Play(sRcTrack25F0* self, unsigned int* data, int key)
 {
     char* body = (char*)data + 4;
     self->data = data;
@@ -1952,9 +1952,9 @@ extern "C" int func_002725F0(sRcTrack25F0* self, unsigned int* data, int key)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272680__FPv);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_Stop__FPv);
 #ifdef SKIP_ASM
-void func_00272680(void* self)
+void cScriptPlayerChannelSpline_Stop(void* self)
 {
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0xc) = 0;
@@ -1968,9 +1968,9 @@ void func_00272680(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_002726A8);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_Update);
 #ifdef SKIP_ASM
-extern "C" int func_002726A8(sRcTrack25F0* self, float t)
+extern "C" int cScriptPlayerChannelSpline_Update(sRcTrack25F0* self, float t)
 {
     char* n = self->next;
     if (n == 0) return 0;
@@ -2354,16 +2354,16 @@ extern "C" void* func_00272D68(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_00272DA0);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock__cScriptPlayerChannelBlock);
 #ifdef SKIP_ASM
-extern "C" void func_00272EC0(void* self);
+extern "C" void cScriptPlayerChannelBlock_Stop(void* self);
 extern "C" void* func_002724E8(void* self);
 extern void* cScriptPlayerChannelBlock_vtbl[];
 
-extern "C" void func_00272DA0(void* self, int flags)
+extern "C" void cScriptPlayerChannelBlock__cScriptPlayerChannelBlock(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = cScriptPlayerChannelBlock_vtbl;
-    func_00272EC0(self);
+    cScriptPlayerChannelBlock_Stop(self);
     if (flags & 1) {
         func_002724E8(self);
     }
@@ -2371,7 +2371,7 @@ extern "C" void func_00272DA0(void* self, int flags)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_00272DF0);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_Play);
 #ifdef SKIP_ASM
 struct sCacheRecord;
 struct sCacheEntry;
@@ -2379,7 +2379,7 @@ extern "C" void* func_00272308(void* heap, int size);
 extern "C" sCacheEntry* func_002730C0(void* self, sCacheRecord* rec);
 extern "C" void func_00273140(void* self);
 
-extern "C" int func_00272DF0(void* self, unsigned short* data, void* owner, int* flags)
+extern "C" int cScriptPlayerChannelBlock_Play(void* self, unsigned short* data, void* owner, int* flags)
 {
     *(unsigned short**)((char*)self + 0x8) = data;
     *(void**)((char*)self + 0xC) = owner;
@@ -2402,9 +2402,9 @@ extern "C" int func_00272DF0(void* self, unsigned short* data, void* owner, int*
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_00272EC0);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_Stop);
 #ifdef SKIP_ASM
-extern "C" void func_00272EC0(void* self)
+extern "C" void cScriptPlayerChannelBlock_Stop(void* self)
 {
     char* owner = *(char**)((char*)self + 0xC);
     if (owner != 0) {
@@ -2425,7 +2425,7 @@ extern "C" void func_00272EC0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272F28);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_Update);
 #ifdef SKIP_ASM
 struct sCacheEvent_2F28 {
     char pad0[0xC];
@@ -2448,7 +2448,7 @@ struct sCacheTrack_2F28 {
 };
 
 // Drops finished events and plays every record whose start time has been reached.
-extern "C" int func_00272F28(sCacheTrack_2F28* self, int* flags, float t)
+extern "C" int cScriptPlayerChannelBlock_Update(sCacheTrack_2F28* self, int* flags, float t)
 {
     float zero;
     sCacheEvent_2F28* prev = 0;
@@ -2485,7 +2485,7 @@ loop:
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00273040);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetNextKeyFrame);
 #ifdef SKIP_ASM
 struct sCacheTimeNode {
     char pad[0xC];
@@ -2494,7 +2494,7 @@ struct sCacheTimeNode {
     sCacheTimeNode* next;
 };
 
-extern "C" int func_00273040(void* self)
+extern "C" int cScriptPlayerChannelBlock_GetNextKeyFrame(void* self)
 {
     if (*(int*)((char*)self + 0x8) == 0) {
         return -1;
@@ -2599,16 +2599,16 @@ extern "C" void* func_00273180(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_002731B8);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent__cScriptPlayerChannelEvent);
 #ifdef SKIP_ASM
-extern "C" void func_002732C8(void* self);
+extern "C" void cScriptPlayerChannelEvent_Stop(void* self);
 extern "C" void* func_002724E8(void* self);
 extern void* cScriptPlayerChannelEvent_vtbl[];
 
-extern "C" void func_002731B8(void* self, int flags)
+extern "C" void cScriptPlayerChannelEvent__cScriptPlayerChannelEvent(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = cScriptPlayerChannelEvent_vtbl;
-    func_002732C8(self);
+    cScriptPlayerChannelEvent_Stop(self);
     if (flags & 1) {
         func_002724E8(self);
     }
@@ -2616,7 +2616,7 @@ extern "C" void func_002731B8(void* self, int flags)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_00273208);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_Play);
 #ifdef SKIP_ASM
 struct sCacheRec;
 struct sCacheRef;
@@ -2624,7 +2624,7 @@ extern "C" void* func_00272308(void* heap, int size);
 extern "C" sCacheRef* func_00273418(void* self, sCacheRec* rec);
 extern "C" void func_00273468(void* self);
 
-extern "C" int func_00273208(void* self, unsigned short* data, void* owner, int* flags)
+extern "C" int cScriptPlayerChannelEvent_Play(void* self, unsigned short* data, void* owner, int* flags)
 {
     *(unsigned short**)((char*)self + 0x8) = data;
     *(void**)((char*)self + 0xC) = owner;
@@ -2648,9 +2648,9 @@ extern "C" int func_00273208(void* self, unsigned short* data, void* owner, int*
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_002732C8);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_Stop);
 #ifdef SKIP_ASM
-extern "C" void func_002732C8(void* self)
+extern "C" void cScriptPlayerChannelEvent_Stop(void* self)
 {
     char* owner = *(char**)((char*)self + 0xC);
     if (owner != 0) {
@@ -2671,14 +2671,14 @@ extern "C" void func_002732C8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00273330);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_Update);
 #ifdef SKIP_ASM
 struct sCacheRec;
 struct sCacheRef;
 extern "C" sCacheRef* func_00273418(void* self, sCacheRec* rec);
 extern "C" void func_00273468(void* self);
 
-extern "C" int func_00273330(void* self, int* flags, float t)
+extern "C" int cScriptPlayerChannelEvent_Update(void* self, int* flags, float t)
 {
     if (*(float*)((char*)self + 0x24) != t) {
         *(int*)((char*)self + 0x20) = 0;
@@ -2696,9 +2696,9 @@ extern "C" int func_00273330(void* self, int* flags, float t)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002733E0);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetNextKeyFrame);
 #ifdef SKIP_ASM
-extern "C" int func_002733E0(void* self)
+extern "C" int cScriptPlayerChannelEvent_GetNextKeyFrame(void* self)
 {
     if (*(int*)((char*)self + 0x8) == 0) {
         return -1;
@@ -2779,16 +2779,16 @@ extern "C" void* func_002734A8(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_002734E0);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject__cScriptPlayerChannelObject);
 #ifdef SKIP_ASM
-extern "C" void func_00273630(void* self);
+extern "C" void cScriptPlayerChannelObject_Stop(void* self);
 extern "C" void* func_002724E8(void* self);
 extern void* cScriptPlayerChannelObject_vtbl[];
 
-extern "C" void func_002734E0(void* self, int flags)
+extern "C" void cScriptPlayerChannelObject__cScriptPlayerChannelObject(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = cScriptPlayerChannelObject_vtbl;
-    func_00273630(self);
+    cScriptPlayerChannelObject_Stop(self);
     if (flags & 1) {
         func_002724E8(self);
     }
@@ -2796,7 +2796,7 @@ extern "C" void func_002734E0(void* self, int flags)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_00273530);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_Play);
 #ifdef SKIP_ASM
 extern "C" void* func_00272308(void* heap, int size);
 struct sCacheRecord2;
@@ -2804,7 +2804,7 @@ struct sCacheEntry2;
 extern "C" sCacheEntry2* func_00273860(void* self, sCacheRecord2* rec);
 extern "C" void func_002738F8(void* self);
 
-extern "C" int func_00273530(void* self, unsigned short* data, void* owner, int* flags)
+extern "C" int cScriptPlayerChannelObject_Play(void* self, unsigned short* data, void* owner, int* flags)
 {
     *(unsigned short**)((char*)self + 0x8) = data;
     *(void**)((char*)self + 0xC) = owner;
@@ -2829,9 +2829,9 @@ extern "C" int func_00273530(void* self, unsigned short* data, void* owner, int*
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replaycache", func_00273630);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_Stop);
 #ifdef SKIP_ASM
-extern "C" void func_00273630(void* self)
+extern "C" void cScriptPlayerChannelObject_Stop(void* self)
 {
     char* owner = *(char**)((char*)self + 0xC);
     if (owner != 0) {
@@ -2852,7 +2852,7 @@ extern "C" void func_00273630(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00273698);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_Update);
 #ifdef SKIP_ASM
 struct sCacheEvent_3698 {
     char pad0[0x8];
@@ -2878,7 +2878,7 @@ struct sCacheTrack_3698 {
 };
 
 // Advances running events by dt, drops finished ones and starts every record that is due.
-extern "C" int func_00273698(sCacheTrack_3698* self, int* flags, float t, float dt)
+extern "C" int cScriptPlayerChannelObject_Update(sCacheTrack_3698* self, int* flags, float t, float dt)
 {
     float zero;
     sCacheEvent_3698* prev = 0;
@@ -2920,7 +2920,7 @@ loop:
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002737E0);
+INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetNextKeyFrame);
 #ifdef SKIP_ASM
 struct sCacheTimeNode2 {
     char pad[0x8];
@@ -2929,7 +2929,7 @@ struct sCacheTimeNode2 {
     sCacheTimeNode2* next;
 };
 
-extern "C" int func_002737E0(void* self)
+extern "C" int cScriptPlayerChannelObject_GetNextKeyFrame(void* self)
 {
     if (*(int*)((char*)self + 0x8) == 0) {
         return -1;

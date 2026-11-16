@@ -85,7 +85,7 @@ struct cBENetworkInterface {
     int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged; no retail access seen
     int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [U] setNetworkActive
                                      //       (func_0015C3C8, static: instance->bIsActive = arg); set 0/1 with every BE
-                                     //       interface (func_001564B0/func_00156510/func_001566E8/func_00156750)
+                                     //       interface (cBEPostRaceState_onExit/cBEPostRaceState_onEnter/cBEPreRaceState_onExit/cBEPreRaceState_onEnter)
     void** mVtbl;                    // 0x00C [R] D_0045AD98 (getThis, ctor func_0015C660); [P] the preview ctor
                                      //       __19cBENetworkInterface stores _vt$19cBENetworkInterface at 0xC;
                                      //       [U] func_00259098 calls slot 1 (submit) through it

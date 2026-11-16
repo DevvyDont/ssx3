@@ -3007,11 +3007,11 @@ extern "C" sRiderCapsule_E100* func_0032E100(sRiderCapsule_E100* self, sSphereVe
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032E288);
+INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsInBoxTransformed);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
 // segment self->p0 .. p0+dir overlaps the box [mn, mx]?
-extern "C" int func_0032E288(sRiderCapsule_E100* self, sSphereVec4* mn, sSphereVec4* mx)
+extern "C" int cWorldLine_IsInBoxTransformed(sRiderCapsule_E100* self, sSphereVec4* mn, sSphereVec4* mx)
 {
     sSphereVec4 e = sphereCapsuleAdd(&self->p0, &self->dir);
     if ((self->p0.x < mn->x && e.x < mn->x) || (mx->x < self->p0.x && mx->x < e.x) ||
@@ -3024,7 +3024,7 @@ extern "C" int func_0032E288(sRiderCapsule_E100* self, sSphereVec4* mn, sSphereV
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032E398);
+INCLUDE_ASM("intersect/riderspheretree", cWorldLine_Transform);
 #ifdef SKIP_ASM
 // Componentwise product a * b; the base ctor takes the four products as arguments.
 struct sSphereProd_E398 : sSphereV4_E100 {
@@ -3035,7 +3035,7 @@ struct sSphereProd_E398 : sSphereV4_E100 {
 };
 
 // Transforms the capsule's base segment (p0b, dirb) by a matrix and a uniform scale (w kept at 1).
-extern "C" void func_0032E398(sRiderCapsule_E100* self, sSphereVec4* m, float scale)
+extern "C" void cWorldLine_Transform(sRiderCapsule_E100* self, sSphereVec4* m, float scale)
 {
     sSphereV4_E100 sc(scale, scale, scale, 1.0f);
     self->p0 = sSphereProd_E398(mtxMulVec_9B90(m, &self->p0b), sc);
@@ -3045,9 +3045,9 @@ extern "C" void func_0032E398(sRiderCapsule_E100* self, sSphereVec4* m, float sc
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032E4B8);
+INCLUDE_ASM("intersect/riderspheretree", cWorldLine_UnTransform);
 #ifdef SKIP_ASM
-extern "C" void func_0032E4B8(void* self)
+extern "C" void cWorldLine_UnTransform(void* self)
 {
     cQuad128 a = *(cQuad128*)((char*)self + 0x80);
     cQuad128 b = *(cQuad128*)((char*)self + 0x90);
@@ -3058,7 +3058,7 @@ extern "C" void func_0032E4B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032E4D0);
+INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsTriInt);
 #ifdef SKIP_ASM
 // PORT: this caller passes a tolerance in $f12 that the unit's 4-arg func_0032B6A8 never reads;
 // bind the 5-arg form to the same symbol.
@@ -3129,7 +3129,7 @@ static inline sSphereVec4 vu0Scale_E4D0(const sSphereVec4& v, float s)
 }
 
 // segment origin(0x60)+t*dir(0x70) against the plane through *p with normal *n
-extern "C" int func_0032E4D0(void* self, sSphereVec4* p, sSphereVec4* b, sSphereVec4* c, sSphereVec4* n,
+extern "C" int cWorldLine_IsTriInt(void* self, sSphereVec4* p, sSphereVec4* b, sSphereVec4* c, sSphereVec4* n,
                              sSphereVec4* hit, sSphereVec4* outN, float* outT)
 {
     sSphereVec4* origin = (sSphereVec4*)((char*)self + 0x60);
@@ -3154,7 +3154,7 @@ extern "C" int func_0032E4D0(void* self, sSphereVec4* p, sSphereVec4* b, sSphere
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032E5E8);
+INCLUDE_ASM("intersect/riderspheretree", cWorldLine_Is2SidedTriInt);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sVE_E5E8 {
@@ -3170,7 +3170,7 @@ struct sCapsuleV_E5E8 {
     sSphereVec4 dir; // 0x70
 };
 
-extern "C" int func_0032E5E8(sCapsuleV_E5E8* self, void* a, void* b, void* c, sSphereVec4* v, void* d, void* e, void* f)
+extern "C" int cWorldLine_Is2SidedTriInt(sCapsuleV_E5E8* self, void* a, void* b, void* c, sSphereVec4* v, void* d, void* e, void* f)
 {
     float dp = vu0Dot_E4D0(self->dir, *v);
     sVE_E5E8* vt;
@@ -3186,16 +3186,16 @@ extern "C" int func_0032E5E8(sCapsuleV_E5E8* self, void* a, void* b, void* c, sS
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032E688__FPv);
+INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsSphTreeInt__FPv);
 #ifdef SKIP_ASM
-int func_0032E688(void* self)
+int cWorldLine_IsSphTreeInt(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032E690);
+INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsBoxInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A5978;
@@ -3246,7 +3246,7 @@ struct sRay_E690 {
     sSphereVec4 dir;        // 0x70
 };
 
-extern "C" int func_0032E690(sRay_E690* self, float* bmin, float* bmax, sHit_E690* hits)
+extern "C" int cWorldLine_IsBoxInt(sRay_E690* self, float* bmin, float* bmax, sHit_E690* hits)
 {
     float tmin = -1.0f;
     float tmax = 2.0f;
@@ -3331,7 +3331,7 @@ extern "C" int func_0032E690(sRay_E690* self, float* bmin, float* bmax, sHit_E69
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032E9A0);
+INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IntersectSubPatch);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sLine_E9A0 {
@@ -3467,7 +3467,7 @@ static inline sSphereVec4 vu0Normalize_E9A0(const sSphereVec4& v)
 
 // Intersect the line with a bicubic patch: four Newton steps from (u, v). Writes the hit point and the
 // surface normal only if (u, v) stays inside the unit square.
-extern "C" void func_0032E9A0(sLine_E9A0* line, sPatch_E9A0* patch, float& u, float& v, sSphereVec4* outPos,
+extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patch, float& u, float& v, sSphereVec4* outPos,
                               sSphereVec4* outNrm)
 {
     sSphereVec4* m0 = patch->m[0];
@@ -3647,13 +3647,13 @@ extern "C" sRiderSphere_2F650* func_0032F650(sRiderSphere_2F650* self, void* tre
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("intersect/riderspheretree", func_0032F708);
+INCLUDE_ASM("intersect/riderspheretree", cWorldRider__cWorldRider);
 #ifdef SKIP_ASM
 extern "C" void cRiderSphereTree__cRiderSphereTree(void* p, int flags);
 void operator_delete(int* ptr);
 extern void* cWorldRider_vtbl[];
 
-extern "C" void func_0032F708(void* self, int flags)
+extern "C" void cWorldRider__cWorldRider(void* self, int flags)
 {
     *(void***)((char*)self + 0x50) = cWorldRider_vtbl;
     cRiderSphereTree__cRiderSphereTree((char*)self + 0x70, 2);
@@ -3664,7 +3664,7 @@ extern "C" void func_0032F708(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032F760);
+INCLUDE_ASM("intersect/riderspheretree", cWorldRider_IsInBoxTransformed);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float subs).
 static inline sSphereVec4 sphereVecSub(sSphereVec4* a, sSphereVec4* b)
@@ -3703,7 +3703,7 @@ static inline sSphereVec4 sphereVecAddR(sSphereVec4* a, sSphereVec4* b)
 }
 
 // sphere (self+0x60) overlaps the box [mn, mx]?
-extern "C" int func_0032F760(void* self, sSphereVec4* mn, sSphereVec4* mx)
+extern "C" int cWorldRider_IsInBoxTransformed(void* self, sSphereVec4* mn, sSphereVec4* mx)
 {
     sSphereVec4 rv;
     int r = 0;
@@ -3723,14 +3723,14 @@ extern "C" int func_0032F760(void* self, sSphereVec4* mn, sSphereVec4* mx)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("intersect/riderspheretree", func_0032F840);
+INCLUDE_ASM("intersect/riderspheretree", cWorldRider_Transform);
 #ifdef SKIP_ASM
 struct sSphereNode_9A28;
 struct sSphereMtx;
 extern "C" sSphereNode_9A28* func_00329A28(sSphereNode_9A28* self, sSphereNode_9A28* src);
 extern "C" void cRiderSphereTree_ApplyTransform(sSphereTreeNode* s, sSphereMtx* m, float scale);
 
-extern "C" void func_0032F840(void* self, sSphereMtx* m, float scale)
+extern "C" void cWorldRider_Transform(void* self, sSphereMtx* m, float scale)
 {
     sSphereTreeNode* node = (sSphereTreeNode*)((char*)self + 0x70);
     func_00329A28((sSphereNode_9A28*)node, *(sSphereNode_9A28**)((char*)self + 0x60));
@@ -3741,9 +3741,9 @@ extern "C" void func_0032F840(void* self, sSphereMtx* m, float scale)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032F8B0__FPv);
+INCLUDE_ASM("intersect/riderspheretree", cWorldRider_UnTransform__FPv);
 #ifdef SKIP_ASM
-int func_0032F8B0(void* self)
+int cWorldRider_UnTransform(void* self)
 {
     int t0 = *(int*)((char*)self + 0x64);
     *(int*)((char*)self + 0x4) = 0;
@@ -3774,7 +3774,7 @@ extern "C" float cWorldRider_GetIdealParam(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("intersect/riderspheretree", func_0032F8F0);
+INCLUDE_ASM("intersect/riderspheretree", cWorldRider_IsTriInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float sphereLength_32F8F0(const sSphereVec4& v)
@@ -3797,7 +3797,7 @@ static inline float sphereLength_32F8F0(const sSphereVec4& v)
 
 extern "C" int func_0032A1C0(void* tree, int a1, int a2, int a3, int a4, sSphereVec4* out, int a6);
 
-extern "C" int func_0032F8F0(void* self, int a1, int a2, int a3, int a4, int a5, sSphereVec4* outDir, float* outLen)
+extern "C" int cWorldRider_IsTriInt(void* self, int a1, int a2, int a3, int a4, int a5, sSphereVec4* outDir, float* outLen)
 {
     sSphereVec4 v;
     int r = func_0032A1C0(*(void**)((char*)self + 0x60), a1, a2, a3, a4, &v, a5);
@@ -3811,7 +3811,7 @@ extern "C" int func_0032F8F0(void* self, int a1, int a2, int a3, int a4, int a5,
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("intersect/riderspheretree", func_0032F990);
+INCLUDE_ASM("intersect/riderspheretree", cWorldRider_Is2SidedTriInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float sphereLength_32F990(const sSphereVec4& v)
@@ -3834,7 +3834,7 @@ static inline float sphereLength_32F990(const sSphereVec4& v)
 
 extern "C" int func_0032AA28(void* tree, int a1, int a2, int a3, int a4, sSphereVec4* out, int a6);
 
-extern "C" int func_0032F990(void* self, int a1, int a2, int a3, int a4, int a5, sSphereVec4* outDir, float* outLen)
+extern "C" int cWorldRider_Is2SidedTriInt(void* self, int a1, int a2, int a3, int a4, int a5, sSphereVec4* outDir, float* outLen)
 {
     sSphereVec4 v;
     int r = func_0032AA28(*(void**)((char*)self + 0x60), a1, a2, a3, a4, &v, a5);
@@ -3848,7 +3848,7 @@ extern "C" int func_0032F990(void* self, int a1, int a2, int a3, int a4, int a5,
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032FA30);
+INCLUDE_ASM("intersect/riderspheretree", cWorldRider_IsSphTreeInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float sphereLength_32FA30(const sSphereVec4& v)
@@ -3897,7 +3897,7 @@ struct sSphereHit_32FA30 {
 
 extern "C" int func_00327F18(void* a, void* tree, sSphereVec4* dir, sSphereHit_32FA30* hit);
 
-extern "C" int func_0032FA30(void* self, void* a1, sSphereHit_32FA30* hit)
+extern "C" int cWorldRider_IsSphTreeInt(void* self, void* a1, sSphereHit_32FA30* hit)
 {
     if (func_00327F18(a1, *(void**)((char*)self + 0x60), &hit->dir, hit) != 0) {
         float len = sphereLength_32FA30(hit->dir);
@@ -3910,7 +3910,7 @@ extern "C" int func_0032FA30(void* self, void* a1, sSphereHit_32FA30* hit)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("intersect/riderspheretree", func_0032FAC0);
+INCLUDE_ASM("intersect/riderspheretree", cWorldRider_IsBoxInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float sphereLength_32FAC0(const sSphereVec4& v)
@@ -3959,7 +3959,7 @@ struct sSphereHit_32FAC0 {
 
 extern "C" int func_0032B2B8(void* tree, void* a1, void* a2, sSphereVec4* dir, sSphereHit_32FAC0* hit);
 
-extern "C" int func_0032FAC0(void* self, void* a1, void* a2, sSphereHit_32FAC0* hit)
+extern "C" int cWorldRider_IsBoxInt(void* self, void* a1, void* a2, sSphereHit_32FAC0* hit)
 {
     if (func_0032B2B8(*(void**)((char*)self + 0x60), a1, a2, &hit->dir, hit) != 0) {
         float len = sphereLength_32FAC0(hit->dir);
@@ -4023,12 +4023,12 @@ extern "C" sRiderSphere_FB48* func_0032FB48(sRiderSphere_FB48* self, sSphereVec4
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032FC08);
+INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_IsInBoxTransformed);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float subs).
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
 // sphere (pos 0x60, radius 0x70) overlaps the box [mn, mx]?
-extern "C" int func_0032FC08(void* self, sSphereVec4* mn, sSphereVec4* mx)
+extern "C" int cWorldSphere_IsInBoxTransformed(void* self, sSphereVec4* mn, sSphereVec4* mx)
 {
     sSphereVec4 rv;
     float rad = *(float*)((char*)self + 0x70);
@@ -4048,7 +4048,7 @@ extern "C" int func_0032FC08(void* self, sSphereVec4* mn, sSphereVec4* mx)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032FD40);
+INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_Transform);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
 static inline sSphereVec4 sphereMtxMulVec(sSphereVec4* m, sSphereVec4* v)
@@ -4074,7 +4074,7 @@ static inline sSphereVec4 sphereMtxMulVec(sSphereVec4* m, sSphereVec4* v)
     return r;
 }
 
-extern "C" void func_0032FD40(void* self, sSphereVec4* m, float scale)
+extern "C" void cWorldSphere_Transform(void* self, sSphereVec4* m, float scale)
 {
     sSphereVec4 p = sphereMtxMulVec(m, (sSphereVec4*)((char*)self + 0x80));
     *(int*)((char*)self + 0x4) = 1;
@@ -4084,9 +4084,9 @@ extern "C" void func_0032FD40(void* self, sSphereVec4* m, float scale)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032FD98);
+INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_UnTransform);
 #ifdef SKIP_ASM
-extern "C" void func_0032FD98(void* self)
+extern "C" void cWorldSphere_UnTransform(void* self)
 {
     cQuad128 a = *(cQuad128*)((char*)self + 0x80);
     float f = *(float*)((char*)self + 0x90);
@@ -4097,7 +4097,7 @@ extern "C" void func_0032FD98(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("intersect/riderspheretree", func_0032FDB0);
+INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_IsSphTreeInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float sphereLength_32FDB0(const sSphereVec4& v)
@@ -4146,7 +4146,7 @@ struct sSphereHit_32FDB0 {
 
 extern "C" int func_0032C898(void* self, void* a1, float f, void* a2, void* a3);
 
-extern "C" int func_0032FDB0(void* self, void* a1, sSphereHit_32FDB0* hit)
+extern "C" int cWorldSphere_IsSphTreeInt(void* self, void* a1, sSphereHit_32FDB0* hit)
 {
     if (func_0032C898(a1, (char*)self + 0x60, *(float*)((char*)self + 0x70), &hit->dir, hit) != 0) {
         float len = sphereLength_32FDB0(hit->dir);
@@ -4159,11 +4159,11 @@ extern "C" int func_0032FDB0(void* self, void* a1, sSphereHit_32FDB0* hit)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032FE40);
+INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_IsBoxInt);
 #ifdef SKIP_ASM
 extern "C" int func_00329590(void* a, void* b, void* center, void* box, void* boxMin, void* boxMax, float radius);
 
-extern "C" int func_0032FE40(void* self, void* a, void* b, void* box)
+extern "C" int cWorldSphere_IsBoxInt(void* self, void* a, void* b, void* box)
 {
     return func_00329590(a, b, (char*)self + 0x60, box, (char*)box + 0x10, (char*)box + 0x40,
                          *(float*)((char*)self + 0x70)) != 0;
@@ -4171,7 +4171,7 @@ extern "C" int func_0032FE40(void* self, void* a, void* b, void* box)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032FE78);
+INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_IsTriInt);
 #ifdef SKIP_ASM
 extern "C" int func_00330360(void* self, sSphereVec4* plane, sSphereVec4* p, float* out);
 extern "C" int func_00330250(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c);
@@ -4206,9 +4206,9 @@ static inline sSphereVec4 sphereSub_32FE78(const sSphereVec4& a, const sSphereVe
     return r;
 }
 
-// Like func_0032FFA0 without the plane-side flip. The success tail is written out twice (jump2 merges the
+// Like cWorldSphere_Is2SidedTriInt without the plane-side flip. The success tail is written out twice (jump2 merges the
 // copies); the extra self reference keeps the target's register order for self and a.
-extern "C" int func_0032FE78(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* plane,
+extern "C" int cWorldSphere_IsTriInt(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* plane,
                              sSphereVec4* outPos, sSphereVec4* outDir, float* outDist)
 {
     float t;
@@ -4231,7 +4231,7 @@ extern "C" int func_0032FE78(void* self, sSphereVec4* a, sSphereVec4* b, sSphere
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032FFA0);
+INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_Is2SidedTriInt);
 #ifdef SKIP_ASM
 extern "C" int func_00330360(void* self, sSphereVec4* plane, sSphereVec4* p, float* out);
 extern "C" int func_00330250(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c);
@@ -4280,7 +4280,7 @@ static inline sSphereVec4 sphereSub_32FFA0(const sSphereVec4& a, const sSphereVe
     return r;
 }
 
-extern "C" int func_0032FFA0(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* plane,
+extern "C" int cWorldSphere_Is2SidedTriInt(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* plane,
                              sSphereVec4* outPos, sSphereVec4* outDir, float* outDist)
 {
     sSphereVec4 d = *plane;

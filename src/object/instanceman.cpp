@@ -75,7 +75,7 @@ INCLUDE_ASM("object/instanceman", func_00351330);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void func_003513D0(void* self);
 extern "C" void func_00351398(void* self, float* src);
-void func_00351538_impl(char* self, float t) __asm__("func_00351538");
+void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
 extern char cAnimFrame_vtbl[];
 
 extern "C" void* func_00351330_impl(char* self, float* src, float f) __asm__("func_00351330");
@@ -84,7 +84,7 @@ extern "C" void* func_00351330_impl(char* self, float* src, float f)
     *(void**)(self + 0x84) = cAnimFrame_vtbl;
     func_003513D0(self);
     func_00351398(self, src);
-    func_00351538_impl(self, f);
+    cAnimFrame_update_impl(self, f);
     return self;
 }
 #endif
@@ -164,8 +164,8 @@ static inline void vu0CopyMat_351480(sImMat44_351480* d, const sImMat44_351480* 
 extern void* cMeshAnimFrame_vtbl[];
 extern sImMat44_351480 t4mat_Identity;
 extern "C" void* func_00351330(void* self, float* src, float f);
-// PORT: func_00351800 is defined later in the unit with a typed self; bound by asm label.
-void func_00351800_vf(void* self, float f) __asm__("func_00351800");
+// PORT: cMeshAnimFrame_update is defined later in the unit with a typed self; bound by asm label.
+void cMeshAnimFrame_update_vf(void* self, float f) __asm__("cMeshAnimFrame_update");
 
 extern "C" void* func_00351480(void* self, float* src, float f)
 {
@@ -173,7 +173,7 @@ extern "C" void* func_00351480(void* self, float* src, float f)
     *(void***)((char*)self + 0x84) = cMeshAnimFrame_vtbl;
     vu0CopyMat_351480((sImMat44_351480*)((char*)self + 0x90), &t4mat_Identity);
     *(float**)((char*)self + 0x40) = src;
-    func_00351800_vf(self, f);
+    cMeshAnimFrame_update_vf(self, f);
     return self;
 }
 #endif
@@ -198,7 +198,7 @@ extern "C" float func_00351508(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351538);
+INCLUDE_ASM("object/instanceman", cAnimFrame_update);
 #ifdef SKIP_ASM
 struct sImRange;
 struct sImRangeTable;
@@ -220,10 +220,10 @@ static inline bool inRange_351538(sImSeg_351538* e, float x)
     return e->lo <= x && x < e->hi;
 }
 
-// PORT: the unit declares func_00351538(void*) for its caller; the body also reads t from $f12
-void func_00351538_impl(char* self, float t) __asm__("func_00351538");
+// PORT: the unit declares cAnimFrame_update(void*) for its caller; the body also reads t from $f12
+void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
 
-void func_00351538_impl(char* self, float t)
+void cAnimFrame_update_impl(char* self, float t)
 {
     sImCurve_351538** curves = *(sImCurve_351538***)(*(char**)(self + 0x40) + 0x20);
     int* cur = (int*)self;
@@ -300,10 +300,10 @@ extern "C" void func_00351660(char* self, sImV4_351660* vel, sImV4_351660* rotVe
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351800);
+INCLUDE_ASM("object/instanceman", cMeshAnimFrame_update);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern "C" void* func_00351538(void* self);
+extern "C" void* cAnimFrame_update(void* self);
 
 struct sImInst_351800 {
     char pad_0x0[0x44];
@@ -313,9 +313,9 @@ struct sImInst_351800 {
     float m[4][4];      // 0x90
 };
 
-extern "C" void func_00351800(sImInst_351800* self)
+extern "C" void cMeshAnimFrame_update(sImInst_351800* self)
 {
-    func_00351538(self);
+    cAnimFrame_update(self);
     float r[3];
     float sc[3][2];
     r[0] = -self->rot[0] * 0.01745329424738884f;
@@ -424,7 +424,7 @@ extern "C" void func_00351948(void* self, sImMat44* m)
 }
 #endif
 
-extern "C" void* func_00351538(void* self);
+extern "C" void* cAnimFrame_update(void* self);
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/instanceman", func_00351A10);
@@ -447,7 +447,7 @@ INCLUDE_ASM("object/instanceman", func_00351A60__FPv);
 #ifdef SKIP_ASM
 void* func_00351A60(void* self)
 {
-    return func_00351538(self);
+    return cAnimFrame_update(self);
 }
 #endif
 

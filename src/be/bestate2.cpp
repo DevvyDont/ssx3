@@ -2,19 +2,19 @@
 
 INCLUDE_ASM("be/bestate2", cBEPostRaceState_getState);
 
-INCLUDE_ASM("be/bestate2", func_00156390);
+INCLUDE_ASM("be/bestate2", cBEPostRaceState_getInterface);
 
-INCLUDE_ASM("be/bestate2", func_001564B0);
+INCLUDE_ASM("be/bestate2", cBEPostRaceState_onExit);
 
-INCLUDE_ASM("be/bestate2", func_00156510);
+INCLUDE_ASM("be/bestate2", cBEPostRaceState_onEnter);
 
 INCLUDE_ASM("be/bestate2", cBEPreRaceState_getState);
 
-INCLUDE_ASM("be/bestate2", func_001565C8);
+INCLUDE_ASM("be/bestate2", cBEPreRaceState_getInterface);
 
-INCLUDE_ASM("be/bestate2", func_001566E8);
+INCLUDE_ASM("be/bestate2", cBEPreRaceState_onExit);
 
-INCLUDE_ASM("be/bestate2", func_00156750);
+INCLUDE_ASM("be/bestate2", cBEPreRaceState_onEnter);
 
 INCLUDE_ASM("be/bestate2", func_001567B8);
 

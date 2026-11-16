@@ -4,7 +4,7 @@ INCLUDE_ASM("main/game2", cGame_load);
 
 INCLUDE_ASM("main/game2", cGame_loadTrack);
 
-INCLUDE_ASM("main/game2", func_0022FA98);
+INCLUDE_ASM("main/game2", cGame_purge);
 
 INCLUDE_ASM("main/game2", cGame_gainFocus);
 
@@ -46,7 +46,7 @@ INCLUDE_ASM("main/game2", func_00231320);
 
 INCLUDE_ASM("main/game2", cGame_writeToReplayFrame);
 
-INCLUDE_ASM("main/game2", func_002314D0);
+INCLUDE_ASM("main/game2", cGame_readFromReplayFrame);
 
 INCLUDE_ASM("main/game2", func_00231840);
 

@@ -53,14 +53,14 @@ extern "C" cScriptSoundBankManager3450* cScriptSoundBankManager_cScriptSoundBank
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scsndmgr", func_00283518);
+INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager__cScriptSoundBankManager);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void cScriptSoundBankManager_UnlinkBanksAll(void* self);
 extern char cScriptSoundBankManager_vtbl[];
 
-extern "C" void func_00283518(void* self, int flags)
+extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cScriptSoundBankManager_vtbl;
     cScriptSoundBankManager_UnlinkBanksAll(self);
@@ -157,7 +157,7 @@ struct sDmTable283658 {
 /**
  * Unlinks every bank slot in use from the script sound bank manager.
  *
- * Calls the manager's virtual slot 2 (func_00283720) on each used slot of the bank table (On Tour mpBankInfo);
+ * Calls the manager's virtual slot 2 (cScriptSoundBankManager_UnlinkBank) on each used slot of the bank table (On Tour mpBankInfo);
  * it releases the bank from the audio object's sound system and resets the slot's ID to -1.
  *
  * @param self_  the script sound bank manager (this)
@@ -201,12 +201,12 @@ extern "C" sSndEntry* func_002836D8(sSndList* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scsndmgr", func_00283720);
+INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_UnlinkBank);
 #ifdef SKIP_ASM
 extern "C" void* func_0028B180();
 extern "C" void func_0028BE90(void* bank, int handle);
 
-extern "C" void func_00283720(sSndList* self, sSndEntry* e)
+extern "C" void cScriptSoundBankManager_UnlinkBank(sSndList* self, sSndEntry* e)
 {
     func_0028BE90(**(void***)((char*)func_0028B180() + 0x118), e->unk4);
     e->id = -1;
@@ -252,13 +252,13 @@ extern "C" void* cVidEngine_cVidEngine(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scsndmgr", func_002837C8);
+INCLUDE_ASM("scripter/scsndmgr", cVidEngine__cVidEngine);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void cVidEngine_ResetVideoEngine(void* self);
 extern char cVidEngine_vtbl[];
 
-extern "C" void func_002837C8(void* self, int flags)
+extern "C" void cVidEngine__cVidEngine(void* self, int flags)
 {
     *(void**)((char*)self + 0x18) = cVidEngine_vtbl;
     cVidEngine_ResetVideoEngine(self);

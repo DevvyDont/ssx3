@@ -13,7 +13,7 @@
 //   cTransformModifier (0x000: vptr only) + cRollerNodeState (0x004-0x02C) + cRigidBody (0x030-0x0D0, see
 //   object/rigidbody.h, itself cRigidBodyState 0x00-0x50 + cRigidBody), then cRollerModifier's own fields.
 // On Tour's DWARF lists only cRollerModifier's own members (from 0xD0); its writeToReplayFrame writes cRigidBody at
-// +0x30 and then 0x28 bytes from +0x4, as retail's func_0035E1E0 does, so the 0x28-byte block at +0x4 is the
+// +0x30 and then 0x28 bytes from +0x4, as retail's cRollerModifier_writeToReplayFrame does, so the 0x28-byte block at +0x4 is the
 // cRollerNodeState (On Tour: 0x28 bytes, the 10 floats below in this order).
 // Evidence tags:
 //   [R] retail constructors cRollerModifier_cRollerModifier / func_0035DF70, the destructor, the 0x2D0 allocation;
@@ -63,7 +63,7 @@ struct cRollerModifier {
     // --- cTransformModifier (On Tour 0x4: the vptr)
     void** mVtbl;                 // 0x000 [R] ctors store D_004913F8 (cTransformModifier) then cRollerModifier_vtbl;
                                   //       the destructor stores D_004913F8 back
-    // --- cRollerNodeState (On Tour 0x28; [R] func_0035E1E0 writes these 0x28 bytes to the replay frame)
+    // --- cRollerNodeState (On Tour 0x28; [R] cRollerModifier_writeToReplayFrame writes these 0x28 bytes to the replay frame)
     float mKineticEnergy;         // 0x004 [O]; [U] cRollerModifier_Collision stores V.P + W.L; update reads/writes it
     float mMass;                  // 0x008 [O]; [R] ctor: rdata + 0x4, InvM = 1 / mMass; [U] Collision: 5000 / mMass
     float mElast;                 // 0x00C [O]; [R] ctor: rdata + 0x8

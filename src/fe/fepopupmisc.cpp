@@ -3146,369 +3146,369 @@ extern "C" void cUIInput__cUIInput(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1138__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_getState__FPv);
 #ifdef SKIP_ASM
-int func_001E1138(void* self)
+int cUIInput_getState(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1140__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isStart__FPv);
 #ifdef SKIP_ASM
-int func_001E1140(void* self)
+int cUIInput_isStart(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1148__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isSelect__FPv);
 #ifdef SKIP_ASM
-int func_001E1148(void* self)
+int cUIInput_isSelect(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1150__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isNext__FPv);
 #ifdef SKIP_ASM
-int func_001E1150(void* self)
+int cUIInput_isNext(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1158__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isPrevious__FPv);
 #ifdef SKIP_ASM
-int func_001E1158(void* self)
+int cUIInput_isPrevious(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1160__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isOption__FPv);
 #ifdef SKIP_ASM
-int func_001E1160(void* self)
+int cUIInput_isOption(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1168__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isMisc__FPv);
 #ifdef SKIP_ASM
-int func_001E1168(void* self)
+int cUIInput_isMisc(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1170__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isNextHeld__FPv);
 #ifdef SKIP_ASM
-int func_001E1170(void* self)
+int cUIInput_isNextHeld(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1178__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isPreviousHeld__FPv);
 #ifdef SKIP_ASM
-int func_001E1178(void* self)
+int cUIInput_isPreviousHeld(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1180__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isOptionHeld__FPv);
 #ifdef SKIP_ASM
-int func_001E1180(void* self)
+int cUIInput_isOptionHeld(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1188__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isMiscHeld__FPv);
 #ifdef SKIP_ASM
-int func_001E1188(void* self)
+int cUIInput_isMiscHeld(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1190__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isNextReleased__FPv);
 #ifdef SKIP_ASM
-int func_001E1190(void* self)
+int cUIInput_isNextReleased(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1198__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isPreviousReleased__FPv);
 #ifdef SKIP_ASM
-int func_001E1198(void* self)
+int cUIInput_isPreviousReleased(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11A0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isOptionReleased__FPv);
 #ifdef SKIP_ASM
-int func_001E11A0(void* self)
+int cUIInput_isOptionReleased(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11A8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isMiscReleased__FPv);
 #ifdef SKIP_ASM
-int func_001E11A8(void* self)
+int cUIInput_isMiscReleased(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11B0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isUp__FPv);
 #ifdef SKIP_ASM
-int func_001E11B0(void* self)
+int cUIInput_isUp(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11B8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isDown__FPv);
 #ifdef SKIP_ASM
-int func_001E11B8(void* self)
+int cUIInput_isDown(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11C0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLeft__FPv);
 #ifdef SKIP_ASM
-int func_001E11C0(void* self)
+int cUIInput_isLeft(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11C8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRight__FPv);
 #ifdef SKIP_ASM
-int func_001E11C8(void* self)
+int cUIInput_isRight(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11D0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isUpHeld__FPv);
 #ifdef SKIP_ASM
-int func_001E11D0(void* self)
+int cUIInput_isUpHeld(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11D8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isDownHeld__FPv);
 #ifdef SKIP_ASM
-int func_001E11D8(void* self)
+int cUIInput_isDownHeld(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11E0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLeftHeld__FPv);
 #ifdef SKIP_ASM
-int func_001E11E0(void* self)
+int cUIInput_isLeftHeld(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11E8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRightHeld__FPv);
 #ifdef SKIP_ASM
-int func_001E11E8(void* self)
+int cUIInput_isRightHeld(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11F0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRShift1__FPv);
 #ifdef SKIP_ASM
-int func_001E11F0(void* self)
+int cUIInput_isRShift1(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E11F8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRShift2__FPv);
 #ifdef SKIP_ASM
-int func_001E11F8(void* self)
+int cUIInput_isRShift2(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1200__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLShift1__FPv);
 #ifdef SKIP_ASM
-int func_001E1200(void* self)
+int cUIInput_isLShift1(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1208__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLShift2__FPv);
 #ifdef SKIP_ASM
-int func_001E1208(void* self)
+int cUIInput_isLShift2(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1210__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRShift1Held__FPv);
 #ifdef SKIP_ASM
-int func_001E1210(void* self)
+int cUIInput_isRShift1Held(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1218__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isRShift2Held__FPv);
 #ifdef SKIP_ASM
-int func_001E1218(void* self)
+int cUIInput_isRShift2Held(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1220__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLShift1Held__FPv);
 #ifdef SKIP_ASM
-int func_001E1220(void* self)
+int cUIInput_isLShift1Held(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1228__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isLShift2Held__FPv);
 #ifdef SKIP_ASM
-int func_001E1228(void* self)
+int cUIInput_isLShift2Held(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1230__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isCamZoom__FPv);
 #ifdef SKIP_ASM
-int func_001E1230(void* self)
+int cUIInput_isCamZoom(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1238__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isCamPan__FPv);
 #ifdef SKIP_ASM
-int func_001E1238(void* self)
+int cUIInput_isCamPan(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1240__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isCamRotate__FPv);
 #ifdef SKIP_ASM
-int func_001E1240(void* self)
+int cUIInput_isCamRotate(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1248__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_getCamZoom__FPv);
 #ifdef SKIP_ASM
-float func_001E1248(void* self)
+float cUIInput_getCamZoom(void* self)
 {
     return 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1258__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_getCamPan__FPv);
 #ifdef SKIP_ASM
-float func_001E1258(void* self)
+float cUIInput_getCamPan(void* self)
 {
     return 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1268__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_getCamRotate__FPv);
 #ifdef SKIP_ASM
-float func_001E1268(void* self)
+float cUIInput_getCamRotate(void* self)
 {
     return 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1278__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_keyPressed__FPv);
 #ifdef SKIP_ASM
-int func_001E1278(void* self)
+int cUIInput_keyPressed(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1280__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_getKeyReady__FPv);
 #ifdef SKIP_ASM
-int func_001E1280(void* self)
+int cUIInput_getKeyReady(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1288__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_getVKey__FPv);
 #ifdef SKIP_ASM
-int func_001E1288(void* self)
+int cUIInput_getVKey(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1290__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_getAsciiKey__FPv);
 #ifdef SKIP_ASM
-int func_001E1290(void* self)
+int cUIInput_getAsciiKey(void* self)
 {
     return 0;
 }
@@ -3529,18 +3529,18 @@ void cUIInput_setPadNum(void* self, int val)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E12A0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_isActive__FPv);
 #ifdef SKIP_ASM
-int func_001E12A0(void* self)
+int cUIInput_isActive(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E12A8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUIInput_update__FPv);
 #ifdef SKIP_ASM
-void func_001E12A8(void* self)
+void cUIInput_update(void* self)
 {
 }
 #endif

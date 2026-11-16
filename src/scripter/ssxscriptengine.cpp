@@ -4468,7 +4468,7 @@ extern "C" int func_0027D790(void* self, int val)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D7F0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_PauseObjScript);
 #ifdef SKIP_ASM
 class cSsxScriptVirt {
 public:
@@ -4480,16 +4480,16 @@ public:
     virtual void v03();
 };
 
-extern "C" void func_0027D7F0(void* self)
+extern "C" void cScriptObjCamera_PauseObjScript(void* self)
 {
     (*(cSsxScriptVirt**)((char*)self + 0x10))->v02();
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D820);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_ResumeObjScript);
 #ifdef SKIP_ASM
-extern "C" void func_0027D820(void* self)
+extern "C" void cScriptObjCamera_ResumeObjScript(void* self)
 {
     (*(cSsxScriptVirt**)((char*)self + 0x10))->v03();
 }
@@ -4528,7 +4528,7 @@ extern "C" void cScriptObjCamera_OnStartObjectUse(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D8D8);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_OnEndObjectUse);
 #ifdef SKIP_ASM
 void func_00283440(void*);
 extern "C" void func_001692D8(void* self, void* algo);
@@ -4544,7 +4544,7 @@ public:
     virtual void v4();
 };
 
-extern "C" void func_0027D8D8(void* self)
+extern "C" void cScriptObjCamera_OnEndObjectUse(void* self)
 {
     func_00283440(self);
     char* g = (char*)SSXApp;

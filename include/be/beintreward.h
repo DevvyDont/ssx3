@@ -40,8 +40,8 @@ struct cBERewardInterface {
     int bCanSubmit;                  // 0x000 [O] cBEInterface::bCanSubmit (On Tour: a bool at 0x0); no retail access seen
     int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged (On Tour: a bool at 0x1); no retail access seen
     int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive (On Tour: a bool at 0x2); [R] getThis sets 0;
-                                     //       [U] set 0/1 on every BE interface together (func_00153200/func_00153258,
-                                     //       func_001564B0/func_00156510/func_001566E8/func_00156750)
+                                     //       [U] set 0/1 on every BE interface together (cBERaceState_onExit/cBERaceState_onEnter,
+                                     //       cBEPostRaceState_onExit/cBEPostRaceState_onEnter/cBEPreRaceState_onExit/cBEPreRaceState_onEnter)
     void** mVtbl;                    // 0x00C [R] getThis stores D_0045AE88 (cBEInterface's vtable, shared with BEBoltInt)
     // cBERewardInterface
     unsigned int mLastEventCashReward; // 0x010 [O] (On Tour 0x008, first own member); [U] func_001591E8 stores the cash

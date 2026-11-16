@@ -168,13 +168,13 @@ extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_003973A8);
+INCLUDE_ASM("ui/uianimation", cUIAnimation__cUIAnimation);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern void* cUIAnimation_vtbl[];
 
-extern "C" void func_003973A8(void* self, int flags)
+extern "C" void cUIAnimation__cUIAnimation(void* self, int flags)
 {
     *(void***)((char*)self + 0x10) = cUIAnimation_vtbl;
     char* base = *(char**)((char*)self + 0x4);

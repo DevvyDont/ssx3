@@ -15,7 +15,7 @@
 //   tWorldPainterRegionType 0x4, tWPNameField 0x8, tWPData 0x4 + tWPData_<X> (the file's region data),
 //   tWPInGameData 0x8 + 14 tWPInGameData_<X> (vptr at 0x4, after tWPInGameData's one data member), tWorldPainterQuery
 //   0x8 (m_data + vptr; vtable D_00485D30 {dtor, pure queryPosition}), cWorldPainterQuery 0x18 (derives from
-//   tWorldPainterQuery; vtable cWorldPainterQuery_vtbl = D_00483E00 {dtor cWorldPainterQuery__cWorldPainterQuery, queryPosition func_002C0778}).
+//   tWorldPainterQuery; vtable cWorldPainterQuery_vtbl = D_00483E00 {dtor cWorldPainterQuery__cWorldPainterQuery, queryPosition cWorldPainterQuery_queryPosition}).
 // tWPInGameData's vtable (base D_00485D50, 69 slots): 1-63 the getters in On Tour's order (Type, Value, MixPreset,
 // BankID, SpeechID, DrawDistance, FogDensity ... PointRate; each subclass overrides its own and they return
 // this + offset), 64 writeToReplayFrame, 65 readFromReplayFrame (64/65 order from On Tour's declaration order,
@@ -40,7 +40,7 @@
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [R] retail's constructors (cWorldPainterQuery_cWorldPainterQuery, func_002BC6F8 ... func_002BCBD0 for the
 //       tWPInGameData_<X>), destructors (cWorldPainterQuery__cWorldPainterQuery, tWorldPainterQuery__tWorldPainterQuery) and allocations;
-//   [U] how retail code uses the field (getters, blend/isEqual, queryPosition func_002C0778);
+//   [U] how retail code uses the field (getters, blend/isEqual, queryPosition cWorldPainterQuery_queryPosition);
 //   [O] SSX On Tour's DWARF (all of these types): member names, order and, here, the same offsets (no bools or
 //       vectors in these classes).
 

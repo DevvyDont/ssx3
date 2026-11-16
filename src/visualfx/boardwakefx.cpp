@@ -4009,7 +4009,7 @@ extern "C" void func_002E2FF8(sWakeFx* self, int* vals, int count, int unused, i
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3060);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan__cLensFxMan);
 #ifdef SKIP_ASM
 struct sBWVEntry2 {
     short delta;
@@ -4022,7 +4022,7 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
 extern int D_004A3B18;
 void operator_delete(int* p);
 
-extern "C" void func_002E3060(void* self, int flags)
+extern "C" void cLensFxMan__cLensFxMan(void* self, int flags)
 {
     char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
     *(void***)((char*)self + 0x649C) = cLensFxMan_vtbl;

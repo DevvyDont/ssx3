@@ -10,7 +10,7 @@
 // the region's m_iRegionType is compared with tWorldPainterRegionType::m_id and its data (a tWPData_*,
 // worldpainter/worldpainterquery.h) is blended into the query's tWPInGameData (cWorldPainterQuery::queryPosition).
 //
-// Sizes [R]/[O]: tWPHeader 0x8 (layer slots start at header + 8: func_002BB5F0, func_002C0778), cWorldPainterLayer
+// Sizes [R]/[O]: tWPHeader 0x8 (layer slots start at header + 8: func_002BB5F0, cWorldPainterQuery_queryPosition), cWorldPainterLayer
 // 0xC (On Tour: cWorldPainterLayer and tWPLayer both 0xC), tWPRegion 0x8 (8-byte stride in func_002BAF08 and
 // func_002C0A10), tWPLayerPtr 0x4. No vtables, no bases. EA's source: d:/ssx/code/source/worldpainter/
 // worldpainterlayer.h / worldpainterlayer.cpp (preview asserts "m_iQuadTreeOffset >= 0", "m_iRegionOffset >= 0",
@@ -21,7 +21,7 @@
 //       (cWorldPainterSection::resolve);
 //   [P] the July 2003 preview's assert strings (worldpainterlayer.h/.cpp, worldpainterman.cpp);
 //   [U] how retail code uses the field (getQuadTreeContents func_002BAF90, lookupRegion func_002C0A10,
-//       queryPosition func_002C0778, cWorldPainterMan::render func_002BB6E0);
+//       queryPosition cWorldPainterQuery_queryPosition, cWorldPainterMan::render func_002BB6E0);
 //   [O] SSX On Tour's DWARF (tWPHeader, tWPLayer, tWPLayerPtr, tWPRegion): same members and offsets; its
 //       unions are anonymous, so the union member names below that are not in an assert are ours.
 

@@ -848,9 +848,9 @@ extern "C" void func_0035C698(cRailModifier* self, void* box, void* box2, const 
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035CFE0__FPv);
+INCLUDE_ASM("object/railmodifier", cRailModifier_render__FPv);
 #ifdef SKIP_ASM
-void func_0035CFE0(void* self)
+void cRailModifier_render(void* self)
 {
 }
 #endif
@@ -1794,9 +1794,9 @@ extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/railmodifier", func_0035E1E0);
+INCLUDE_ASM("object/railmodifier", cRollerModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-class func_0035E1E0_cObj {
+class cRollerModifier_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
@@ -1806,7 +1806,7 @@ public:
     virtual void v05(void* ptr);
 };
 
-extern "C" void func_0035E1E0(void* self, func_0035E1E0_cObj* obj)
+extern "C" void cRollerModifier_writeToReplayFrame(void* self, cRollerModifier_writeToReplayFrame_cObj* obj)
 {
     cRigidBody_writeToReplayFrame((cRigidBody*)((char*)self + 0x30), (cRigidBody_writeToReplayFrame_cObj*)obj);
     obj->v01((char*)self + 0x4, 0x28);
@@ -2055,7 +2055,7 @@ extern "C" void func_0035ED90(sRmBody* self, const sRmVec4* b)
 INCLUDE_ASM("object/railmodifier", cRollerModifier_collide);
 #ifdef SKIP_ASM
 extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* a1, int a2);
-extern "C" void func_003304E8(void* self, int flags);
+extern "C" void cWorldSphTree__cWorldSphTree(void* self, int flags);
 extern "C" void* cObjectInterface_getNash();
 extern "C" float func_0032C5A8(void* self);
 extern void func_0035D4A0_EDC8(void* self, void* hit, void* normal, float a, float b) __asm__("func_0035D4A0");
@@ -2261,7 +2261,7 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
                 self->Life = 10.0f;
         }
     }
-    func_003304E8(tree, 2);
+    cWorldSphTree__cWorldSphTree(tree, 2);
 }
 #endif
 

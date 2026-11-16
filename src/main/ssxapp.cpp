@@ -3404,7 +3404,7 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3,
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/ssxapp", func_0022B008);
+INCLUDE_ASM("main/ssxapp", cGame_render);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_0022E8B8(void* views);
@@ -3729,7 +3729,7 @@ static inline int IsReady_22B008(sGame_22B008* self)
     return 1;
 }
 
-extern "C" int func_0022B008(sGame_22B008* self)
+extern "C" int cGame_render(sGame_22B008* self)
 {
     if (((cGfx_22B008*)GrMan)->v17() == 0) {
         return 0;

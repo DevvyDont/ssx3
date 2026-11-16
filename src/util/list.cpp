@@ -283,22 +283,22 @@ extern "C" int cList_size(cList* list)
 #endif
 
 //100%
-INCLUDE_ASM("util/list", func_003979F8);
+INCLUDE_ASM("util/list", cList_traverseFlat);
 #ifdef SKIP_ASM
-class func_003979F8_cVirt {
+class cList_traverseFlat_cVirt {
 public:
     void* next;                  // 0x0
-    func_003979F8_cVirt* prev;   // 0x4
+    cList_traverseFlat_cVirt* prev;   // 0x4
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01();
     virtual int v02(void*);
 };
 
-extern "C" int func_003979F8(void* self, void* arg)
+extern "C" int cList_traverseFlat(void* self, void* arg)
 {
-    func_003979F8_cVirt* n = *(func_003979F8_cVirt**)((char*)self + 0x4);
+    cList_traverseFlat_cVirt* n = *(cList_traverseFlat_cVirt**)((char*)self + 0x4);
     while (n->prev != n) {
-        func_003979F8_cVirt* p = n->prev;
+        cList_traverseFlat_cVirt* p = n->prev;
         int r = n->v02(arg);
         if (r != 0) {
             return r;
@@ -310,23 +310,23 @@ extern "C" int func_003979F8(void* self, void* arg)
 #endif
 
 //100%
-INCLUDE_ASM("util/list", func_00397A68);
+INCLUDE_ASM("util/list", cList_traverseRecurse);
 #ifdef SKIP_ASM
-class func_00397A68_cVirt {
+class cList_traverseRecurse_cVirt {
 public:
     void* next;                  // 0x0
-    func_00397A68_cVirt* prev;   // 0x4
+    cList_traverseRecurse_cVirt* prev;   // 0x4
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
     virtual int v03(void*);
 };
 
-extern "C" int func_00397A68(void* self, void* arg)
+extern "C" int cList_traverseRecurse(void* self, void* arg)
 {
-    func_00397A68_cVirt* n = *(func_00397A68_cVirt**)((char*)self + 0x4);
+    cList_traverseRecurse_cVirt* n = *(cList_traverseRecurse_cVirt**)((char*)self + 0x4);
     while (n->prev != n) {
-        func_00397A68_cVirt* p = n->prev;
+        cList_traverseRecurse_cVirt* p = n->prev;
         int r = n->v03(arg);
         if (r != 0) {
             return r;

@@ -565,7 +565,7 @@ extern "C" void cGame_loadTrack(cGame* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_0022FA98);
+INCLUDE_ASM("main/gameload", cGame_purge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cBE_setState(int state);
@@ -679,7 +679,7 @@ struct sObj20_FA98 {
     sElem14_FA98 e[8];
 };
 
-extern "C" void func_0022FA98(char* self)
+extern "C" void cGame_purge(char* self)
 {
     cBE_setState(0);
     char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -1983,7 +1983,7 @@ extern "C" void cGame_writeToReplayFrame(cGame* self, cStream_00231348* stream)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_002314D0);
+INCLUDE_ASM("main/gameload", cGame_readFromReplayFrame);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: these state loaders are declared with one parameter in their units; this caller also passes the stream.
@@ -2031,7 +2031,7 @@ public:
 
 
 // Game load state machine: restores the state ids and every state from a save stream.
-extern "C" void func_002314D0(cGame* self_, cStream_14D0* stream)
+extern "C" void cGame_readFromReplayFrame(cGame* self_, cStream_14D0* stream)
 {
     cGame* self = self_;
     ((cLoadable_14D0*)self->FlagManager)->load(stream);

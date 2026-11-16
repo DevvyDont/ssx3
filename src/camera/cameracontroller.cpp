@@ -169,7 +169,7 @@ extern "C" void* cManualCameraController_cManualCameraController(void* self, int
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameracontroller", func_0015CE10);
+INCLUDE_ASM("camera/cameracontroller", cManualCameraController__cManualCameraController);
 #ifdef SKIP_ASM
 extern void* cManualCameraController_vtbl[];
 extern "C" void cCameraController__cCameraController(void* self, int flags);
@@ -180,7 +180,7 @@ struct sCamCtrlVEDtor {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_0015CE10(void* self, int flags)
+extern "C" void cManualCameraController__cManualCameraController(void* self, int flags)
 {
     *(void***)((char*)self + 0x14) = cManualCameraController_vtbl;
     char* a = *(char**)((char*)self + 0x18);
@@ -198,7 +198,7 @@ extern "C" void func_0015CE10(void* self, int flags)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/cameracontroller", func_0015CE98);
+INCLUDE_ASM("camera/cameracontroller", cManualCameraController_snap);
 #ifdef SKIP_ASM
 class cCamCtrlVObj_0015CE98 {
 public:
@@ -211,7 +211,7 @@ public:
 
 extern "C" void func_0015CC70(void* self);
 
-extern "C" void func_0015CE98(void* self, int a)
+extern "C" void cManualCameraController_snap(void* self, int a)
 {
     func_0015CC70(self);
     (*(cCamCtrlVObj_0015CE98**)((char*)self + 0x18))->v03(a);
@@ -219,7 +219,7 @@ extern "C" void func_0015CE98(void* self, int a)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/cameracontroller", func_0015CEE8);
+INCLUDE_ASM("camera/cameracontroller", cManualCameraController_snapCurrent);
 #ifdef SKIP_ASM
 class cCamCtrlVObj {
 public:
@@ -234,7 +234,7 @@ public:
 
 extern "C" void func_0015CCF0(void* self);
 
-extern "C" void func_0015CEE8(void* self)
+extern "C" void cManualCameraController_snapCurrent(void* self)
 {
     func_0015CCF0(self);
     (*(cCamCtrlVObj**)((char*)self + 0x18))->v04();
@@ -288,9 +288,9 @@ extern "C" int func_0015CFD0(void *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameracontroller", func_0015CFE8);
+INCLUDE_ASM("camera/cameracontroller", cManualCameraController_update);
 #ifdef SKIP_ASM
-extern "C" void func_0015CFE8(void* self)
+extern "C" void cManualCameraController_update(void* self)
 {
     void** p = *(void***)((char*)self + 0x8);
     cCamCtrlVObj* obj = *(cCamCtrlVObj**)*p;

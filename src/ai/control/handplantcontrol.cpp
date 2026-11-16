@@ -1609,7 +1609,7 @@ extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, void* v);
 extern "C" void func_00105D98(void* rider, void* info, int id);
 extern "C" void* func_0032F650(void* self, void* tree, int flag);
-extern "C" void func_0032F708(void* self, int flags);
+extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 
 struct sHit_AA48 {
     t4Vector pos;            // 0x00
@@ -1737,7 +1737,7 @@ static inline t4Vector riderVec_AA48(char* r, int off)
  * up vector (+0x180) against the overlap list with the wall hint (mWallHint). On a hit the rider moves out by
  * 1.1 times the depth; if it is moving into the surface, the inward velocity is removed plus a bounce of
  * max(5% of it, 27.78) and the impact goes to func_00105D98() (rumble, possible crash or reset). The query is
- * destroyed with func_0032F708().
+ * destroyed with cWorldRider__cWorldRider().
  *
  * @param outp  receives the surface normal when the function returns 1
  * @return 1 when the rider hit terrain while moving into it, otherwise 0 (also 0 when it was only pushed out)
@@ -1754,13 +1754,13 @@ extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* outp)
     sph.f8 = 1;
     float d = func_003342D0(*(void**)(RIDER_AA48 + 0x860), &sph, &hit, *(int*)(RIDER_AA48 + 0x868));
     if (d < 0.0f)
-        { func_0032F708(&sph, 2); return 0; }
+        { cWorldRider__cWorldRider(&sph, 2); return 0; }
     {
         t4Vector push = vu0Scale_AA48(vu0Scale_AA48(hit.normal, 1.100000023841858f), d);
         func_00106538(RIDER_AA48, &push);
         float dot2 = vu0Dot_AA48(vu0Scale_AA48(hit.normal, -1.0f), RV_AA48(0x1E0));
         if (dot2 < 0.0f)
-            { func_0032F708(&sph, 2); return 0; }
+            { cWorldRider__cWorldRider(&sph, 2); return 0; }
         t4Vector n = vu0Normalize_AA48(RV_AA48(0x1E0));
         float k = dot2 * 0.05000000074505806f < 27.77777862548828f ? 27.77777862548828f : dot2 * 0.05000000074505806f;
         vu0AddEq_AA48(RV_AA48(0x1E0), vu0Scale_AA48(hit.normal, dot2 + k));
@@ -1773,7 +1773,7 @@ extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* outp)
         func_00105D98(RIDER_AA48, &info, hit.m4C);
         *(t4Vector*)outp = hit.normal;
     }
-    func_0032F708(&sph, 2);
+    cWorldRider__cWorldRider(&sph, 2);
     return 1;
 }
 #endif
@@ -2685,7 +2685,7 @@ extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, void* v);
 extern "C" void func_00105D98(void* rider, void* info, int id);
 extern "C" void* func_0032F650(void* self, void* tree, int flag);
-extern "C" void func_0032F708(void* self, int flags);
+extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 
 struct sHit_13C140 {
     sVec4HP pos;            // 0x00
@@ -2859,10 +2859,10 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
     char* r = RIDER;
     func_0032F650(&sph, *(void**)(r + 0xAA0), !riderFlag_13C140(r));
     float d = func_003342D0(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
-    if (d < 0.0f) { func_0032F708(&sph, 2); return; }
+    if (d < 0.0f) { cWorldRider__cWorldRider(&sph, 2); return; }
     {
         float dot = vu0Dot_13C140(RV(0x370), hit.normal);
-        if (dot < -0.9998999834060669f) { func_0032F708(&sph, 2); return; }
+        if (dot < -0.9998999834060669f) { cWorldRider__cWorldRider(&sph, 2); return; }
         if (dot < 0.0f)
             hit.normal = vu0Normalize_13C140(vu0Sub_13C140(hit.normal, vu0Scale_13C140(RV(0x370), dot)));
     }
@@ -2890,7 +2890,7 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
             }
         }
         float dot2 = vu0Dot_13C140(vu0Scale_13C140(hit.normal, -1.0f), RV(0x1E0));
-        if (dot2 < 0.0f) { func_0032F708(&sph, 2); return; }
+        if (dot2 < 0.0f) { cWorldRider__cWorldRider(&sph, 2); return; }
         sVec4HP n = vu0Normalize_13C140(RV(0x1E0));
         float c = dot2 * 0.5f < 27.77777862548828f ? 27.77777862548828f : dot2 * 0.5f;
         vu0AddEq_13C140(RV(0x1E0), vu0Scale_13C140(hit.normal, dot2 + c));
@@ -2901,7 +2901,7 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
         info.depth = c;
         func_00105D98(RIDER, &info, hit.m4C);
     }
-    func_0032F708(&sph, 2);
+    cWorldRider__cWorldRider(&sph, 2);
 }
 #undef SV
 #undef RV
@@ -4670,7 +4670,7 @@ extern "C" void func_00105D98(void* rider, void* info, int id);
 extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_WallCollision(void* snd, void* rider);
 extern "C" void* func_0032F650(void* self, void* tree, int flag);
-extern "C" void func_0032F708(void* self, int flags);
+extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 
 struct sHit_13F488 {
     sVec4HP pos;            // 0x00
@@ -4837,7 +4837,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
     sph.dir = RV(0x370);
     float d = func_003342D0(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
     if (d < 0.0f)
-        { func_0032F708(&sph, 2); return; }
+        { cWorldRider__cWorldRider(&sph, 2); return; }
     if (hit.obj != 0) {
         char* h = *(char**)(hit.obj + 0xC);
         if (h) {
@@ -4848,7 +4848,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
     {
         float dot = vu0Dot_13F488(RV(0x370), hit.normal);
         if (dot < -0.9998999834060669f)
-            { func_0032F708(&sph, 2); return; }
+            { cWorldRider__cWorldRider(&sph, 2); return; }
         if (dot < 0.0f)
             hit.normal = vu0Normalize_13F488(vu0Sub_13F488(hit.normal, vu0Scale_13F488(RV(0x370), dot)));
     }
@@ -4858,7 +4858,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
         sVec4HP a = vu0Sub_13F488(RV(0x1E0), hit.v20);
         float dot2 = vu0Dot_13F488(vu0Scale_13F488(hit.normal, -1.0f), a);
         if (dot2 < 0.0f)
-            { func_0032F708(&sph, 2); return; }
+            { cWorldRider__cWorldRider(&sph, 2); return; }
         sVec4HP n = vu0Normalize_13F488(a);
         float k = dot2 * 0.05000000074505806f;
         if (k < 27.77777862548828f)
@@ -4874,7 +4874,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
         func_00105D98(RIDER, &info, hit.m4C);
         cSSXAudio_WallCollision(func_0028B180(), RIDER);
     }
-    func_0032F708(&sph, 2);
+    cWorldRider__cWorldRider(&sph, 2);
 }
 #undef RV
 #undef RIDER

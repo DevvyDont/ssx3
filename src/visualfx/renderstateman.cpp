@@ -1519,7 +1519,7 @@ INCLUDE_ASM("visualfx/renderstateman", func_002F03C8);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002F0368(void* self);
-extern "C" void func_002D6410(void* self);
+extern "C" void cAvalanche_init(void* self);
 extern char D_00487568[];
 extern void* D_00487D50[];
 extern void* cAvalanche_vtbl[];
@@ -1530,7 +1530,7 @@ extern "C" void* func_002F03C8(void* self)
     *(void***)((char*)self + 0x4) = D_00487D50;
     void** p = (void**)cMemMan_alloc(4, D_00487568, 0, 0);
     *p = cAvalanche_vtbl;
-    func_002D6410(p);
+    cAvalanche_init(p);
     *(void***)self = p;
     return self;
 }

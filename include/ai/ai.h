@@ -23,7 +23,7 @@
 //       getNumMissionRiders 0x84, getComputerActorsActive 0x88, getFocusMan 0xA0, getDangerMan 0xA4).
 //       Retail = preview + 4 from 0x18 on (retail adds EndOfRaceTimer at 0x18); the array sizes are the same;
 //   [R] retail's constructor cAI_cAI (vtables, "FocusMan" 0x8E0 and "DangerMan" 0xB60 allocations, 0x74 = 0) and
-//       cAI::init (func_00128818, clears the counts, the arrays and the state);
+//       cAI::init (cAI_init, clears the counts, the arrays and the state);
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order alone, where the fields on both sides of it are placed by [P] or [R].
 // On Tour has 4 riders / 4 players / 3 computers / 3 actors and byte bools; retail has 6 / 2 / 5 / 5 and word bools.
@@ -102,9 +102,9 @@ struct cAI {
 // Virtual slots of _vt$3cAI (D_00458488), as `vt[k].fn(this + vt[k].delta)`. Names from On Tour (merged.tsv).
 enum {
     kAIVt_delete = 1,               // cAI__cAI ~cAI
-    kAIVt_init = 2,                 // func_00128818
+    kAIVt_init = 2,                 // cAI_init
     kAIVt_update = 3,               // cAI_update
-    kAIVt_render = 4,               // func_001291E0
+    kAIVt_render = 4,               // cAI_render
     kAIVt_restart = 5,              // cAI_restart (tAIState)
     kAIVt_InitPlayers = 6,          // cAI_InitPlayers
     kAIVt_writeToReplayFrame = 7,   // cAI_writeToReplayFrame

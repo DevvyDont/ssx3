@@ -1672,7 +1672,7 @@ extern "C" void func_002EB8F0(void)
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EB938);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBB10);
+INCLUDE_ASM("visualfx/boardtrailfx", cFade_TObj_Draw);
 #ifdef SKIP_ASM
 struct sBTRect4 {
     float x, y, z, w;
@@ -1685,7 +1685,7 @@ extern float D_004A3B44;
 
 extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
 
-extern "C" void func_002EBB10(void* self, float s)
+extern "C" void cFade_TObj_Draw(void* self, float s)
 {
     sBTRect4 color = *(sBTRect4*)((char*)self + 4);
     color.x = ((sBTRect4*)((char*)self + 4))->x * s;
@@ -1733,7 +1733,7 @@ extern "C" func_002EBBA8_sObj* func_002EBBA8(func_002EBBA8_sObj* self, const fun
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBC40);
+INCLUDE_ASM("visualfx/boardtrailfx", cWipe_TObj_Draw);
 #ifdef SKIP_ASM
 extern float D_004A3B30;
 extern float D_004A3B34;
@@ -1743,7 +1743,7 @@ extern float D_004A3B40;
 extern float D_004A3B44;
 extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
 
-extern "C" void func_002EBC40(char* self, float t)
+extern "C" void cWipe_TObj_Draw(char* self, float t)
 {
     float k = 1.0f - t;
     float dx = (float)*(int*)(self + 0x14) * k * 640.0f;
@@ -1872,7 +1872,7 @@ extern "C" void func_002EBF48(sBTVtx_BF48* o, float* c, float x, float y)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EC060);
+INCLUDE_ASM("visualfx/boardtrailfx", cCircle_TObj_Draw);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -1928,7 +1928,7 @@ static inline void BuildArc_C060(float* ys, float* xs, const float& cx, float r,
     }
 }
 
-extern "C" void func_002EC060(char* self, float t)
+extern "C" void cCircle_TObj_Draw(char* self, float t)
 {
     float r = (1.0f - t) * 800.0f;
     float x1 = *(float*)(self + 0x14) + r;

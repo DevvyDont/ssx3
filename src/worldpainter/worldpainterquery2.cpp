@@ -4,7 +4,7 @@ INCLUDE_ASM("worldpainter/worldpainterquery2", cWorldPainterQuery_cWorldPainterQ
 
 INCLUDE_ASM("worldpainter/worldpainterquery2", cWorldPainterQuery__cWorldPainterQuery);
 
-INCLUDE_ASM("worldpainter/worldpainterquery2", func_002C0778);
+INCLUDE_ASM("worldpainter/worldpainterquery2", cWorldPainterQuery_queryPosition);
 
 INCLUDE_ASM("worldpainter/worldpainterquery2", func_002C0A10);
 

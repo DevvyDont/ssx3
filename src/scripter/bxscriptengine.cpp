@@ -1060,7 +1060,7 @@ extern "C" int func_00282EF0(void* self, int a1)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00282F00);
+INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_PauseObjScript);
 #ifdef SKIP_ASM
 class cBxScriptVirt {
 public:
@@ -1072,16 +1072,16 @@ public:
     virtual void v03();
 };
 
-extern "C" void func_00282F00(void* self)
+extern "C" void cScriptObjTransition_PauseObjScript(void* self)
 {
     (*(cBxScriptVirt**)((char*)self + 0x10))->v02();
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", func_00282F30);
+INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_ResumeObjScript);
 #ifdef SKIP_ASM
-extern "C" void func_00282F30(void* self)
+extern "C" void cScriptObjTransition_ResumeObjScript(void* self)
 {
     (*(cBxScriptVirt**)((char*)self + 0x10))->v03();
 }

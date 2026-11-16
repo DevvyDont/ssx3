@@ -105,7 +105,7 @@ extern "C" void cAI__cAI(cAI* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_00128818);
+INCLUDE_ASM("ai/ai", cAI_init);
 #ifdef SKIP_ASM
 extern "C" void cFocusMan_reset(void*);
 extern "C" void cDangerMan_Reset(void*);
@@ -147,7 +147,7 @@ struct sAiObj128818
     sVEntry128818* vt;  // 0xCC
 };
 
-extern "C" void func_00128818(sAiObj128818* self)
+extern "C" void cAI_init(sAiObj128818* self)
 {
     int i;
     cFocusMan_reset(self->fA4);
@@ -460,7 +460,7 @@ extern "C" void func_00129160(sAiObj128A48* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_001291E0);
+INCLUDE_ASM("ai/ai", cAI_render);
 #ifdef SKIP_ASM
 extern "C" int cRider_renderClip(void*);
 extern "C" void cRider_renderBody(void*);
@@ -508,7 +508,7 @@ struct sAI_91E0 {
     int f8C;
 };
 
-extern "C" void func_001291E0(sAI_91E0* self)
+extern "C" void cAI_render(sAI_91E0* self)
 {
     char* riders[8];
     char* sub[8];

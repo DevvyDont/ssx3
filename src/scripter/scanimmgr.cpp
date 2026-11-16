@@ -56,14 +56,14 @@ extern "C" cScriptAnimBankManager53B8* cScriptAnimBankManager_cScriptAnimBankMan
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_00275498);
+INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager__cScriptAnimBankManager);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void cScriptAnimBankManager_UnlinkBanksAll(void* self);
 extern char cScriptAnimBankManager_vtbl[];
 
-extern "C" void func_00275498(void* self, int flags)
+extern "C" void cScriptAnimBankManager__cScriptAnimBankManager(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cScriptAnimBankManager_vtbl;
     cScriptAnimBankManager_UnlinkBanksAll(self);

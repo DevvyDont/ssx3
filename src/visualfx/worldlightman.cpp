@@ -2000,12 +2000,12 @@ void cVisualEffect_deferredRender(void* self)
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C38);
 #ifdef SKIP_ASM
 extern void* cAvalanche_vtbl[];
-extern "C" void* func_002D6410(void* self);
+extern "C" void* cAvalanche_init(void* self);
 
 extern "C" void* func_002F7C38(void* self)
 {
     *(void***)self = cAvalanche_vtbl;
-    func_002D6410(self);
+    cAvalanche_init(self);
     return self;
 }
 #endif

@@ -406,19 +406,19 @@ extern "C" sVec4_6290 func_002D6290(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D6378);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche__cAvalanche);
 #ifdef SKIP_ASM
 extern void* cAvalanche_vtbl[];
 extern void* D_00488680[];
-struct func_002D6378_sElem {
+struct cAvalanche__cAvalanche_sElem {
     char pad[0x2F0];
 };
-extern func_002D6378_sElem D_004EE840[];
+extern cAvalanche__cAvalanche_sElem D_004EE840[];
 extern "C" void cAvalanche_reset(void* self);
 extern "C" void cDynamicColourEmitter_purge(void* p, int flags);
 void operator_delete(int* ptr);
 
-extern "C" void func_002D6378(int* self, int flags)
+extern "C" void cAvalanche__cAvalanche(int* self, int flags)
 {
     *(void***)self = cAvalanche_vtbl;
     cAvalanche_reset(self);
@@ -434,9 +434,9 @@ extern "C" void func_002D6378(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D6410);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_init);
 #ifdef SKIP_ASM
-struct func_002D6410_sElem {
+struct cAvalanche_init_sElem {
     float x;
     float y;
     float z;
@@ -447,18 +447,18 @@ struct func_002D6410_sElem {
     int a;
     char pad[0x10];
 };
-extern func_002D6410_sElem D_004D5B70[];
-extern func_002D6410_sElem D_004EDB70[];
+extern cAvalanche_init_sElem D_004D5B70[];
+extern cAvalanche_init_sElem D_004EDB70[];
 extern char D_00538450[];
 extern int D_004A3AC0;
 extern "C" void func_00416210(void* dst, int c, int n);
 
-extern "C" void func_002D6410(void)
+extern "C" void cAvalanche_init(void)
 {
     int i;
     for (i = 0; i < 0x800; i++) {
         int c = (i & 1) ? 0xFF : 0;
-        func_002D6410_sElem* e = &D_004D5B70[i];
+        cAvalanche_init_sElem* e = &D_004D5B70[i];
         e->a = 0xFF;
         e->r = c;
         e->g = c;
@@ -469,7 +469,7 @@ extern "C" void func_002D6410(void)
         e->y = 0.0f;
     }
     for (i = 0; i < 0x20; i++) {
-        func_002D6410_sElem* e = &D_004EDB70[i];
+        cAvalanche_init_sElem* e = &D_004EDB70[i];
         e->a = 0xFF;
         e->r = 0xFF;
         e->g = 0xFF;

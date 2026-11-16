@@ -424,7 +424,7 @@ extern "C" void cMCOverlayManager_setTitleString(cMCOverlayManager* self, int n)
 }
 #endif
 
-INCLUDE_ASM("movie/movieplayer", func_0023CF38);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_SetState);
 
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_SetAction);
@@ -1226,7 +1226,7 @@ struct sMovieVEntryE4F8 {
  * Waits out the memory-card check display delay, then moves on with state code 3.
  *
  * Decrements mDisplayWaitTicks (SetAction(1) sets it to 60); once it was already 0 or less, passes code 3 to
- * the manager's virtual state handler (vtable slot 1, func_0023CF38).
+ * the manager's virtual state handler (vtable slot 1, cMCOverlayManager_SetState).
  */
 extern "C" void cMCOverlayManager_UpdateCheckCardsWait(cMCOverlayManager* self)
 {

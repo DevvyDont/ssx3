@@ -19,7 +19,7 @@ struct sSphV4 { float x, y, z, w; } __attribute__((aligned(16)));
  * Stores cWorldSphTree's vtable at +0x50, clears +0x4 and +0x8, sets +0x0 to 1 unless @p isLow and keeps @p
  * ast at +0x60 and +0x64. Copies the tree's transCenter to +0x40 and stores centre + r and centre - r (w = 1)
  * at +0x20 and +0x30, r being func_0032C590()'s radius. Also allocates a fresh 0x140-byte "SphereTree"
- * (func_0032C508) at +0x68, which the destructor func_003304E8 frees.
+ * (func_0032C508) at +0x68, which the destructor cWorldSphTree__cWorldSphTree frees.
  *
  * @param ast    the bxSphereTree to wrap
  * @param isLow  nonzero for a low-detail wrapper: +0x0 is then 0 and cWorldSphTree_GetIdealParam() returns -1
@@ -59,12 +59,12 @@ extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* ast, int isLow)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_003304E8);
+INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree__cWorldSphTree);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* cWorldSphTree_vtbl[];
 
-extern "C" void func_003304E8(void* self, int flags)
+extern "C" void cWorldSphTree__cWorldSphTree(void* self, int flags)
 {
     *(void***)((char*)self + 0x50) = cWorldSphTree_vtbl;
     operator_delete(*(int**)((char*)self + 0x68));
@@ -75,7 +75,7 @@ extern "C" void func_003304E8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00330540);
+INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_IsInBoxTransformed);
 #ifdef SKIP_ASM
 struct sV4_330540 {
     float x, y, z, w;
@@ -113,7 +113,7 @@ static inline sV4_330540 sub_330540(const sV4_330540& a, const sV4_330540& b)
 
 extern "C" float func_0032C590(void* self);
 
-extern "C" int func_00330540(void* self, float* lo, float* hi)
+extern "C" int cWorldSphTree_IsInBoxTransformed(void* self, float* lo, float* hi)
 {
     sV4_330540 ext;
     float rx = func_0032C590(*(void**)((char*)self + 0x60));
@@ -166,12 +166,12 @@ extern "C" float cWorldSphTree_GetIdealParam(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00330710);
+INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_Transform);
 #ifdef SKIP_ASM
 extern "C" void* func_00327CC8(void* self, void* src);
 extern "C" void SphereTree_TransformRel(void* p, void* a, float f);
 
-extern "C" void func_00330710(void* self, void* a1, float f)
+extern "C" void cWorldSphTree_Transform(void* self, void* a1, float f)
 {
     func_00327CC8(*(void**)((char*)self + 0x68), *(void**)((char*)self + 0x60));
     *(void**)((char*)self + 0x60) = *(void**)((char*)self + 0x68);
@@ -181,9 +181,9 @@ extern "C" void func_00330710(void* self, void* a1, float f)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00330778__FPv);
+INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_UnTransform__FPv);
 #ifdef SKIP_ASM
-int func_00330778(void* self)
+int cWorldSphTree_UnTransform(void* self)
 {
     int t0 = *(int*)((char*)self + 0x64);
     *(int*)((char*)self + 0x4) = 0;
@@ -193,7 +193,7 @@ int func_00330778(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00330788);
+INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_IsTriInt);
 #ifdef SKIP_ASM
 struct sWsVec4 {
     float x, y, z, w;
@@ -242,7 +242,7 @@ static inline sWsVec4 wsDiv_330788(const sWsVec4& v, float s)
 
 extern "C" int func_0032CA78(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
 
-extern "C" int func_00330788(void* self, int a1, int a2, int a3, int a4, int a5, sWsVec4* outDir, float* outLen)
+extern "C" int cWorldSphTree_IsTriInt(void* self, int a1, int a2, int a3, int a4, int a5, sWsVec4* outDir, float* outLen)
 {
     sWsVec4 v;
     int r = func_0032CA78(*(void**)((char*)self + 0x60), a1, a2, a3, a4, &v, a5);
@@ -256,7 +256,7 @@ extern "C" int func_00330788(void* self, int a1, int a2, int a3, int a4, int a5,
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00330828);
+INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_Is2SidedTriInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float wsLength_330828(const sWsVec4& v)
@@ -301,7 +301,7 @@ static inline sWsVec4 wsDiv_330828(const sWsVec4& v, float s)
 
 extern "C" int func_00328030(void* tree, int a1, int a2, int a3, int a4, sWsVec4* out, int a6);
 
-extern "C" int func_00330828(void* self, int a1, int a2, int a3, int a4, int a5, sWsVec4* outDir, float* outLen)
+extern "C" int cWorldSphTree_Is2SidedTriInt(void* self, int a1, int a2, int a3, int a4, int a5, sWsVec4* outDir, float* outLen)
 {
     sWsVec4 v;
     int r = func_00328030(*(void**)((char*)self + 0x60), a1, a2, a3, a4, &v, a5);
@@ -315,7 +315,7 @@ extern "C" int func_00330828(void* self, int a1, int a2, int a3, int a4, int a5,
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_003308C8);
+INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_IsSphTreeInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float wsLength_3308C8(const sWsVec4& v)
@@ -364,7 +364,7 @@ struct sWsHit_3308C8 {
 
 extern "C" int func_0032CB58(void* self, void* other, void* a2, void* a3);
 
-extern "C" int func_003308C8(void* self, void* a1, sWsHit_3308C8* hit)
+extern "C" int cWorldSphTree_IsSphTreeInt(void* self, void* a1, sWsHit_3308C8* hit)
 {
     if (func_0032CB58(*(void**)((char*)self + 0x60), a1, &hit->dir, hit) != 0) {
         float len = wsLength_3308C8(hit->dir);
@@ -377,7 +377,7 @@ extern "C" int func_003308C8(void* self, void* a1, sWsHit_3308C8* hit)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_00330950);
+INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_IsBoxInt);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float wsLength_330950(const sWsVec4& v)
@@ -426,7 +426,7 @@ struct sWsHit_330950 {
 
 extern "C" int func_0032C928(void* self, void* a1, void* a2, void* a3, void* a4);
 
-extern "C" int func_00330950(void* self, void* a1, void* a2, sWsHit_330950* hit)
+extern "C" int cWorldSphTree_IsBoxInt(void* self, void* a1, void* a2, sWsHit_330950* hit)
 {
     if (func_0032C928(*(void**)((char*)self + 0x60), a1, a2, &hit->dir, hit) != 0) {
         float len = wsLength_330950(hit->dir);

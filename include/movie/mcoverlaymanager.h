@@ -145,7 +145,7 @@ struct cMCOverlayManager {
     int mShowCardChangeNotify;  // 0x128 [O] (bool); [U] with mCardChanged -> state 0x38 (UpdateSave, UpdateCheckCards)
     int mRetryToInit;           // 0x12C [O] (bool); [U] RetryCardOp
     int mState;                 // 0x130 [O] tMCOverlayManagerState; [U] the state handler (vtable slot 1,
-                                //       func_0023CF38) stores it; ManagerLoadSaveUpdate / fe code read it
+                                //       cMCOverlayManager_SetState) stores it; ManagerLoadSaveUpdate / fe code read it
     // --- 16-bit strings (func_002C2540 widens, strcpy1 / sprintf1 work on unsigned short)
     unsigned short mFileName[64];          // 0x134 [O]; [U] the create-file state sprintf1s "%s-%s%04d" (type, name,
                                            //       cursor + 1) into it and hands it to the card's write call
@@ -180,7 +180,7 @@ struct cMCOverlayManager {
     int mLastMountedDevice;     // 0x444 [O]; [R] ctor -1; [U] func_0023FAE0 compares it with mSelectedDevice, then copies
     char unk_448[0x300];        // 0x448 no access in retail; On Tour's mFileListCache[32][6] (ushort, 0x180) sits here,
                                 //       retail's region is twice that
-    void** mVtbl;               // 0x748 [R] _vt$17cMCOverlayManager cMCOverlayManager_vtbl (slot 1 func_0023CF38 the state
+    void** mVtbl;               // 0x748 [R] _vt$17cMCOverlayManager cMCOverlayManager_vtbl (slot 1 cMCOverlayManager_SetState the state
                                 //       handler, slot 2 the dtor cMCOverlayManager__cMCOverlayManager); preview 0x638
 };
 

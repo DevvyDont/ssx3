@@ -270,93 +270,93 @@ INCLUDE_ASM("fe/fepopup3", func_001E1100);
 
 INCLUDE_ASM("fe/fepopup3", cUIInput__cUIInput);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1138);
+INCLUDE_ASM("fe/fepopup3", cUIInput_getState);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1140);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isStart);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1148);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isSelect);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1150);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isNext);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1158);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isPrevious);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1160);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isOption);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1168);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isMisc);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1170);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isNextHeld);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1178);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isPreviousHeld);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1180);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isOptionHeld);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1188);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isMiscHeld);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1190);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isNextReleased);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1198);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isPreviousReleased);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11A0);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isOptionReleased);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11A8);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isMiscReleased);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11B0);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isUp);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11B8);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isDown);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11C0);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isLeft);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11C8);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isRight);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11D0);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isUpHeld);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11D8);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isDownHeld);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11E0);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isLeftHeld);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11E8);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isRightHeld);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11F0);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isRShift1);
 
-INCLUDE_ASM("fe/fepopup3", func_001E11F8);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isRShift2);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1200);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isLShift1);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1208);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isLShift2);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1210);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isRShift1Held);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1218);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isRShift2Held);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1220);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isLShift1Held);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1228);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isLShift2Held);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1230);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isCamZoom);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1238);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isCamPan);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1240);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isCamRotate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1248);
+INCLUDE_ASM("fe/fepopup3", cUIInput_getCamZoom);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1258);
+INCLUDE_ASM("fe/fepopup3", cUIInput_getCamPan);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1268);
+INCLUDE_ASM("fe/fepopup3", cUIInput_getCamRotate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1278);
+INCLUDE_ASM("fe/fepopup3", cUIInput_keyPressed);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1280);
+INCLUDE_ASM("fe/fepopup3", cUIInput_getKeyReady);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1288);
+INCLUDE_ASM("fe/fepopup3", cUIInput_getVKey);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1290);
+INCLUDE_ASM("fe/fepopup3", cUIInput_getAsciiKey);
 
 INCLUDE_ASM("fe/fepopup3", cUIInput_setPadNum);
 
-INCLUDE_ASM("fe/fepopup3", func_001E12A0);
+INCLUDE_ASM("fe/fepopup3", cUIInput_isActive);
 
-INCLUDE_ASM("fe/fepopup3", func_001E12A8);
+INCLUDE_ASM("fe/fepopup3", cUIInput_update);
 
 INCLUDE_ASM("fe/fepopup3", func_001E12B0);
 

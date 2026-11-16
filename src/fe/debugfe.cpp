@@ -1761,12 +1761,12 @@ extern "C" void* func_0017F7B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017F838);
+INCLUDE_ASM("fe/debugfe", cDebugFE__cDebugFE);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern char D_0046D970[];
 
-extern "C" void func_0017F838(void* self, int flags)
+extern "C" void cDebugFE__cDebugFE(void* self, int flags)
 {
     *(void**)self = D_0046D970;
     if (flags & 1) {
@@ -1858,7 +1858,7 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FA60);
+INCLUDE_ASM("fe/debugfe", cDebugFE_gainFocus);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void func_00369FF8(void* p);
@@ -1869,7 +1869,7 @@ struct sVec3K17FA60 {
 };
 typedef void (*tFn_17FA60)(void*, const sVec3K17FA60&);
 
-extern "C" void func_0017FA60(void* self)
+extern "C" void cDebugFE_gainFocus(void* self)
 {
     char* m;
     char* vt;
@@ -1884,16 +1884,16 @@ extern "C" void func_0017FA60(void* self)
 extern "C" void* cFadeScreen_loseFocus(void* self);
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FAB0__FPv);
+INCLUDE_ASM("fe/debugfe", cDebugFE_loseFocus__FPv);
 #ifdef SKIP_ASM
-int func_0017FAB0(void* self)
+int cDebugFE_loseFocus(void* self)
 {
     return (cFadeScreen_loseFocus(self) != 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FAD0);
+INCLUDE_ASM("fe/debugfe", cDebugFE_purge);
 #ifdef SKIP_ASM
 extern "C" void func_003916C0(void* p, int flags);
 
@@ -1912,7 +1912,7 @@ struct sDebugFE_0017FAD0 {
     int snd20;          // 0x20
 };
 
-extern "C" void func_0017FAD0(sDebugFE_0017FAD0* self)
+extern "C" void cDebugFE_purge(sDebugFE_0017FAD0* self)
 {
     for (int i = 0; i < 2; i++)
     {
@@ -1944,7 +1944,7 @@ extern "C" void func_0017FAD0(sDebugFE_0017FAD0* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/debugfe", func_0017FB98);
+INCLUDE_ASM("fe/debugfe", cDebugFE_update);
 #ifdef SKIP_ASM
 class cFEObjK17FB98 {
 public:
@@ -1954,7 +1954,7 @@ public:
 extern "C" void func_00231D18(void* self);
 extern "C" void func_0017F2D0(void* p);
 
-extern "C" void func_0017FB98(void* self)
+extern "C" void cDebugFE_update(void* self)
 {
     func_00231D18(self);
     if (*(int*)((char*)SSXApp + 4) == 0)
@@ -1964,7 +1964,7 @@ extern "C" void func_0017FB98(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/debugfe", func_0017FBF0);
+INCLUDE_ASM("fe/debugfe", cDebugFE_render);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 extern "C" int func_00231D60(void* self);
@@ -2005,7 +2005,7 @@ static inline void setB2_17FBF0(sRS_17FBF0* r, int v) { r->b2 = v; }
 static inline void setB22_17FBF0(sRS_17FBF0* r, int v) { r->b22 = v; }
 static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
 
-extern "C" int func_0017FBF0(char* self)
+extern "C" int cDebugFE_render(char* self)
 {
     cPS2GraphicsMan* m = GrMan;
     sVEnt_17FBF0* vt = (sVEnt_17FBF0*)m->mVtbl;
@@ -2077,54 +2077,54 @@ extern "C" void func_0017FDF0(void* self, signed char k)
 void* cInput_getState(int, int) __asm__("cInput_getState__FPvi");
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FE80__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isStart__FPv);
 #ifdef SKIP_ASM
-void* func_0017FE80(void* self)
+void* cFEInput_isStart(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x70);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FEA0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isSelect__FPv);
 #ifdef SKIP_ASM
-void* func_0017FEA0(void* self)
+void* cFEInput_isSelect(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x71);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FEC0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isNext__FPv);
 #ifdef SKIP_ASM
-void* func_0017FEC0(void* self)
+void* cFEInput_isNext(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7a);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FEE0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isPrevious__FPv);
 #ifdef SKIP_ASM
-void* func_0017FEE0(void* self)
+void* cFEInput_isPrevious(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7b);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FF00__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isOption__FPv);
 #ifdef SKIP_ASM
-void* func_0017FF00(void* self)
+void* cFEInput_isOption(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7c);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017FF20__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isMisc__FPv);
 #ifdef SKIP_ASM
-void* func_0017FF20(void* self)
+void* cFEInput_isMisc(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7d);
 }
@@ -2203,27 +2203,27 @@ void* func_00180020(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180040__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isUp__FPv);
 #ifdef SKIP_ASM
-void* func_00180040(void* self)
+void* cFEInput_isUp(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x72);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180060__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isDown__FPv);
 #ifdef SKIP_ASM
-void* func_00180060(void* self)
+void* cFEInput_isDown(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x73);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180080__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isLeft__FPv);
 #ifdef SKIP_ASM
-void* func_00180080(void* self)
+void* cFEInput_isLeft(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x74);
 }
@@ -2275,63 +2275,63 @@ void* func_00180120(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180140__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isRShift1__FPv);
 #ifdef SKIP_ASM
-void* func_00180140(void* self)
+void* cFEInput_isRShift1(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7e);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180160__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isRShift2__FPv);
 #ifdef SKIP_ASM
-void* func_00180160(void* self)
+void* cFEInput_isRShift2(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x7f);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180180__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isLShift1__FPv);
 #ifdef SKIP_ASM
-void* func_00180180(void* self)
+void* cFEInput_isLShift1(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x80);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001801A0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2__FPv);
 #ifdef SKIP_ASM
-void* func_001801A0(void* self)
+void* cFEInput_isLShift2(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x81);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001801C0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isRShift1Held__FPv);
 #ifdef SKIP_ASM
-void* func_001801C0(void* self)
+void* cFEInput_isRShift1Held(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x82);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001801E0__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isRShift2Held__FPv);
 #ifdef SKIP_ASM
-void* func_001801E0(void* self)
+void* cFEInput_isRShift2Held(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x83);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180200__FPv);
+INCLUDE_ASM("fe/debugfe", cFEInput_isLShift1Held__FPv);
 #ifdef SKIP_ASM
-void* func_00180200(void* self)
+void* cFEInput_isLShift1Held(void* self)
 {
     return cInput_getState(*(int*)((char*)self + 0x18), 0x84);
 }

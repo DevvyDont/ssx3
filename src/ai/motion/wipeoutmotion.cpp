@@ -521,7 +521,7 @@ struct sSeg_137138 {
 
 
 extern "C" void* func_0032F650(void* self, void* tree, int flag);
-extern "C" void func_0032F708(void* self, int flags);
+extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00137550(cWipeoutMotion* self);
 extern "C" float func_00336850_137138(void* self, void* q, void* out, int a3) __asm__("func_00336850");
@@ -632,7 +632,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
     (*(sSeg_137138*)&self->BoardIntersectBox) = seg;
     float d = func_00336850_137138(SSXApp->Game->BXNash, &sph, &hit, 0);
     if (d < 0.0f) {
-        func_0032F708(&sph, 2);
+        cWorldRider__cWorldRider(&sph, 2);
         return;
     }
     t4Vector push = vu0Scale_137138(vu0Scale_137138(hit.normal, 1.100000023841858f), d);
@@ -680,7 +680,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
         self->BoardVelocity = D_004FF120_137138;
         self->BoardAngVelocity = D_004FF120_137138;
     }
-    func_0032F708(&sph, 2);
+    cWorldRider__cWorldRider(&sph, 2);
 }
 #endif
 
@@ -856,7 +856,7 @@ struct sVEntR_137860 { short delta; short index; bool (*fn)(void*); };
 struct sVEntH_137860 { short delta; short index; void (*fn)(void*, void*, const t4Vector&); };
 
 extern "C" void* func_0032F650(void* self, void* tree, int flag);
-extern "C" void func_0032F708(void* self, int flags);
+extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" float func_00138960(void* self, char* hit, sVec4WG* dir);
 // PORT: the project names these __FPv (one void* param); this caller passes more.
@@ -1021,7 +1021,7 @@ extern "C" void func_00137860(void* vself)
     cRider_updateBoundBox(RIDER, 0);
     func_00105398(RIDER, 0);
     cRider_checkOpponentCollisions(RIDER);
-    func_0032F708(&sph, 2);
+    cWorldRider__cWorldRider(&sph, 2);
 }
 
 #undef RIDER
@@ -1391,7 +1391,7 @@ struct sSphere_138640 {
 struct sVEntH_138640 { short delta; short index; void (*fn)(void*, void*); };
 
 extern "C" void* func_0032F650(void* self, void* tree, int flag);
-extern "C" void func_0032F708(void* self, int flags);
+extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, const t4Vector& v);
 extern "C" void func_00105398(void* rider, int a1);
@@ -1552,7 +1552,7 @@ extern "C" void func_00138640(void* vself)
     }
     if (vu0Length_138640(RIDER->mVelocity) < 50.0f)
         RIDER->mVelocity = D_004FF120_138640;
-    func_0032F708(&sph, 2);
+    cWorldRider__cWorldRider(&sph, 2);
 }
 
 #undef RIDER

@@ -489,17 +489,17 @@ extern "C" int func_00155328(void* self, int a)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155380__FPv);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
-void func_00155380(void* self)
+void cBEScoreInterface_writeToReplayFrame(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155388__FPv);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
-void func_00155388(void* self)
+void cBEScoreInterface_readFromReplayFrame(void* self)
 {
 }
 #endif

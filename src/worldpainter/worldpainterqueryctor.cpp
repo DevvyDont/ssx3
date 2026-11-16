@@ -164,7 +164,7 @@ extern "C" void cWorldPainterQuery__cWorldPainterQuery(cWorldPainterQuery* self,
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/worldpainterqueryctor", func_002C0778);
+INCLUDE_ASM("worldpainter/worldpainterqueryctor", cWorldPainterQuery_queryPosition);
 #ifdef SKIP_ASM
 extern int D_004A3860;
 
@@ -235,7 +235,7 @@ static inline void set_0778(sOut_0778* o, float* d, float v)
     ((tSet_0778)o->vt[66].fn)((char*)o + o->vt[66].delta, d, v);
 }
 
-extern "C" sOut_0778* func_002C0778(sQuery_0778* self, float x, float z, float h)
+extern "C" sOut_0778* cWorldPainterQuery_queryPosition(sQuery_0778* self, float x, float z, float h)
 {
     int first = 1;
     char* map = *(char**)((char*)SSXApp->Game->World + 0x8);

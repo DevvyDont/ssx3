@@ -9,7 +9,7 @@
 // Constructors cRailModifier_cRailModifier (tAddRailData, tInstanceRecord*) and cRailModifier_cRailModifier1 (replay
 // frame), destructor cRailModifier__cRailModifier (all in src/object/splinemodifier.cpp); vtable cRailModifier_vtbl (0x004911D0,
 // 4 slots in this order: ~cRailModifier cRailModifier__cRailModifier, writeToReplayFrame cRailModifier_writeToReplayFrame, update cRailModifier_update,
-// render func_0035CFE0); base vtable cRailLink_vtbl (0x00491200: ~cRailLink, writeToReplayFrame).
+// render cRailModifier_render); base vtable cRailLink_vtbl (0x00491200: ~cRailLink, writeToReplayFrame).
 // The bases are staged as their own headers: object/raillink.h (cRailLink) and object/railspacenode.h (the Node).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. The real bases are

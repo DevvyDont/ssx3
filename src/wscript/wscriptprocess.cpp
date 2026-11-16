@@ -832,9 +832,9 @@ extern "C" void cWScriptTask_initTask(cWScriptTask_initTask_sObj* self, void* ow
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308328);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_update);
 #ifdef SKIP_ASM
-class func_00308328_cProcess {
+class cWScriptTask_update_cProcess {
 public:
     int state;                   // 0x0
     char pad_0x04[0x40 - 0x4];
@@ -846,7 +846,7 @@ public:
     virtual void v05();
 };
 
-extern "C" void func_00308328(func_00308328_cProcess* self)
+extern "C" void cWScriptTask_update(cWScriptTask_update_cProcess* self)
 {
     switch (self->state) {
     case 0:
@@ -863,7 +863,7 @@ extern "C" void func_00308328(func_00308328_cProcess* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_003083A0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_dispatchTaskEvent);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sVE_003083A0 {
@@ -879,7 +879,7 @@ static inline void VCall_003083A0(char* self, int slot)
 }
 
 // Same event dispatch as func_003078C0 for a running (state 2) sub-process.
-extern "C" void func_003083A0(void* vself, void* vmsg)
+extern "C" void cWScriptTask_dispatchTaskEvent(void* vself, void* vmsg)
 {
     char* self = (char*)vself;
     unsigned short* msg = (unsigned short*)vmsg;
@@ -924,11 +924,11 @@ extern "C" void func_003083A0(void* vself, void* vmsg)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_003084D0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnCollide);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_003084D0(void* self)
+extern "C" void cWScriptTask_eventOnCollide(void* self)
 {
     void* script = *(void**)((char*)self + 0x14);
     if (script != 0) {
@@ -938,11 +938,11 @@ extern "C" void func_003084D0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308500);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnJump);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_00308500(void* self)
+extern "C" void cWScriptTask_eventOnJump(void* self)
 {
     void* script = *(void**)((char*)self + 0x18);
     if (script != 0) {
@@ -952,11 +952,11 @@ extern "C" void func_00308500(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308530);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnLand);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_00308530(void* self)
+extern "C" void cWScriptTask_eventOnLand(void* self)
 {
     void* script = *(void**)((char*)self + 0x1c);
     if (script != 0) {
@@ -966,11 +966,11 @@ extern "C" void func_00308530(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308560);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnTrick);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_00308560(void* self)
+extern "C" void cWScriptTask_eventOnTrick(void* self)
 {
     void* script = *(void**)((char*)self + 0x20);
     if (script != 0) {
@@ -980,11 +980,11 @@ extern "C" void func_00308560(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308590);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnWipeout);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_00308590(void* self)
+extern "C" void cWScriptTask_eventOnWipeout(void* self)
 {
     void* script = *(void**)((char*)self + 0x24);
     if (script != 0) {
@@ -994,11 +994,11 @@ extern "C" void func_00308590(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_003085C0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnReset);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_003085C0(void* self)
+extern "C" void cWScriptTask_eventOnReset(void* self)
 {
     void* script = *(void**)((char*)self + 0x28);
     if (script != 0) {
@@ -1008,11 +1008,11 @@ extern "C" void func_003085C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_003085F0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnCollect);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_003085F0(void* self)
+extern "C" void cWScriptTask_eventOnCollect(void* self)
 {
     void* script = *(void**)((char*)self + 0x2c);
     if (script != 0) {
@@ -1022,11 +1022,11 @@ extern "C" void func_003085F0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308620);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnEvent1);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_00308620(void* self)
+extern "C" void cWScriptTask_eventOnEvent1(void* self)
 {
     void* script = *(void**)((char*)self + 0x30);
     if (script != 0) {
@@ -1036,11 +1036,11 @@ extern "C" void func_00308620(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308650);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnEvent2);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_00308650(void* self)
+extern "C" void cWScriptTask_eventOnEvent2(void* self)
 {
     void* script = *(void**)((char*)self + 0x34);
     if (script != 0) {
@@ -1050,11 +1050,11 @@ extern "C" void func_00308650(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308680);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_eventOnEvent3);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_00308680(void* self)
+extern "C" void cWScriptTask_eventOnEvent3(void* self)
 {
     void* script = *(void**)((char*)self + 0x38);
     if (script != 0) {
@@ -1064,11 +1064,11 @@ extern "C" void func_00308680(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_003086B0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_taskStart);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_003086B0(void* self)
+extern "C" void cWScriptTask_taskStart(void* self)
 {
     if (*(int*)self != 1) {
         *(int*)self = 1;
@@ -1081,11 +1081,11 @@ extern "C" void func_003086B0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_003086F0);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_taskUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_003086F0(void* self)
+extern "C" void cWScriptTask_taskUpdate(void* self)
 {
     void* script = *(void**)((char*)self + 0xc);
     if (script != 0) {
@@ -1095,11 +1095,11 @@ extern "C" void func_003086F0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptprocess", func_00308720);
+INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_taskEnd);
 #ifdef SKIP_ASM
 extern "C" void func_0030ADA8(void* man, void* proc, void* script);
 
-extern "C" void func_00308720(void* self)
+extern "C" void cWScriptTask_taskEnd(void* self)
 {
     if (*(int*)self != 3) {
         *(int*)self = 3;

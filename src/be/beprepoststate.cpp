@@ -38,7 +38,7 @@ void* cBEPostRaceState_getState(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beprepoststate", func_00156390);
+INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_getInterface);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* cBENewRaceInterface_getThis();
@@ -56,7 +56,7 @@ void* cBEMissionInterface_getThis();
 void* cBEAggressionInterface_getThis();
 void* cBERewardInterface_getThis();
 // Returns the backend interface singleton for the given kind.
-extern "C" void* func_00156390(void* self, int kind)
+extern "C" void* cBEPostRaceState_getInterface(void* self, int kind)
 {
     switch (kind) {
     case 0:
@@ -93,7 +93,7 @@ extern "C" void* func_00156390(void* self, int kind)
 #endif
 
 //100%
-INCLUDE_ASM("be/beprepoststate", func_001564B0);
+INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onExit);
 #ifdef SKIP_ASM
 extern void* D_004A11C0;
 extern void* D_004A1208;
@@ -111,7 +111,7 @@ struct sBEIface_001564B0
     int active;
 };
 
-extern "C" void func_001564B0(void)
+extern "C" void cBEPostRaceState_onExit(void)
 {
     ((sBEIface_001564B0*)D_004A11C0)->active = 0;
     ((sBEIface_001564B0*)D_004A1208)->active = 0;
@@ -128,7 +128,7 @@ extern "C" void func_001564B0(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beprepoststate", func_00156510);
+INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onEnter);
 #ifdef SKIP_ASM
 extern void* D_004A11C0;
 extern void* D_004A1208;
@@ -146,7 +146,7 @@ struct sBEIface_00156510
     int active;
 };
 
-extern "C" void func_00156510(void)
+extern "C" void cBEPostRaceState_onEnter(void)
 {
     ((sBEIface_00156510*)D_004A11C0)->active = 1;
     ((sBEIface_00156510*)D_004A1208)->active = 1;
@@ -189,7 +189,7 @@ void* cBEPreRaceState_getState(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beprepoststate", func_001565C8);
+INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_getInterface);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* cBENewRaceInterface_getThis();
@@ -207,7 +207,7 @@ void* cBEMissionInterface_getThis();
 void* cBEAggressionInterface_getThis();
 void* cBERewardInterface_getThis();
 // Returns the backend interface singleton for the given kind.
-extern "C" void* func_001565C8(void* self, int kind)
+extern "C" void* cBEPreRaceState_getInterface(void* self, int kind)
 {
     switch (kind) {
     case 0:
@@ -244,7 +244,7 @@ extern "C" void* func_001565C8(void* self, int kind)
 #endif
 
 //100%
-INCLUDE_ASM("be/beprepoststate", func_001566E8);
+INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onExit);
 #ifdef SKIP_ASM
 extern void* D_004A11B4;
 extern void* D_004A11C0;
@@ -263,7 +263,7 @@ struct sBEIface_001566E8
     int active;
 };
 
-extern "C" void func_001566E8(void)
+extern "C" void cBEPreRaceState_onExit(void)
 {
     ((sBEIface_001566E8*)D_004A11B4)->active = 0;
     ((sBEIface_001566E8*)D_004A11C0)->active = 0;
@@ -281,7 +281,7 @@ extern "C" void func_001566E8(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beprepoststate", func_00156750);
+INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onEnter);
 #ifdef SKIP_ASM
 extern void* D_004A11B4;
 extern void* D_004A11C0;
@@ -300,7 +300,7 @@ struct sBEIface_00156750
     int active;
 };
 
-extern "C" void func_00156750(void)
+extern "C" void cBEPreRaceState_onEnter(void)
 {
     ((sBEIface_00156750*)D_004A11B4)->active = 1;
     ((sBEIface_00156750*)D_004A11C0)->active = 1;

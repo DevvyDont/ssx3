@@ -36,7 +36,7 @@ void* cBERaceState_getState(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/bestate", func_001530E0);
+INCLUDE_ASM("be/bestate", cBERaceState_getInterface);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 void* cBENewRaceInterface_getThis();
@@ -55,7 +55,7 @@ void* cBERewardInterface_getThis();
 void* cBESaveInterface_getThis();
 
 // Returns the backend interface singleton for the given kind.
-extern "C" void* func_001530E0(void* self, int kind)
+extern "C" void* cBERaceState_getInterface(void* self, int kind)
 {
     switch (kind) {
     case 0:
@@ -92,7 +92,7 @@ extern "C" void* func_001530E0(void* self, int kind)
 #endif
 
 //100%
-INCLUDE_ASM("be/bestate", func_00153200);
+INCLUDE_ASM("be/bestate", cBERaceState_onExit);
 #ifdef SKIP_ASM
 struct sStateObj153200 {
     int f0;
@@ -109,7 +109,7 @@ extern sStateObj153200* D_004A1238;
 extern sStateObj153200* D_004A1248;
 extern sStateObj153200* D_004A124C;
 
-extern "C" void func_00153200(void) {
+extern "C" void cBERaceState_onExit(void) {
     D_004A120C->f8 = 0;
     D_004A1248->f8 = 0;
     D_004A11C8->f8 = 0;
@@ -124,7 +124,7 @@ extern "C" void func_00153200(void) {
 #endif
 
 //100%
-INCLUDE_ASM("be/bestate", func_00153258);
+INCLUDE_ASM("be/bestate", cBERaceState_onEnter);
 #ifdef SKIP_ASM
 extern sStateObj153200* D_004A11C8;
 extern sStateObj153200* D_004A120C;
@@ -134,7 +134,7 @@ extern sStateObj153200* D_004A1238;
 extern sStateObj153200* D_004A1248;
 extern sStateObj153200* D_004A124C;
 
-extern "C" void func_00153258(void) {
+extern "C" void cBERaceState_onEnter(void) {
     D_004A120C->f8 = 1;
     D_004A1248->f8 = 1;
     D_004A11C8->f8 = 1;

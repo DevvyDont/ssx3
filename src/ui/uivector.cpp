@@ -1726,13 +1726,13 @@ public:
     virtual int v02(void*);
 };
 
-extern "C" void* func_00397A68(void* list, cUIGroup_traverseRecurse_cFunctor* fn);
+extern "C" void* cList_traverseRecurse(void* list, cUIGroup_traverseRecurse_cFunctor* fn);
 
 /**
  * Runs a list operator on a UI group and then, recursively, on its children.
  *
  * Stops at the group itself when the operator's callback (slot 2) returns nonzero; otherwise traverses the
- * child list (+0x74) with func_00397A68().
+ * child list (+0x74) with cList_traverseRecurse().
  *
  * @param fn  the list operator (On Tour cListOperator*)
  * @return the node the operator stopped at, or 0 if none
@@ -1742,7 +1742,7 @@ extern "C" void* cUIGroup_traverseRecurse(void* self, cUIGroup_traverseRecurse_c
     if (fn->v02(self) != 0) {
         return self;
     }
-    return func_00397A68((char*)self + 0x74, fn);
+    return cList_traverseRecurse((char*)self + 0x74, fn);
 }
 #endif
 

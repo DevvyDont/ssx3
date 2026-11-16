@@ -346,7 +346,7 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, sMat_F120* mat, 
     rot[0] = tilt->pos2;
     rot[1] = tilt->pos3;
     rot[2] = 0.0f;
-    // Rotation from the tilt angles (same construction as func_00351800), translated by pos.
+    // Rotation from the tilt angles (same construction as cMeshAnimFrame_update), translated by pos.
     float sx, cx, sy, cy, sz, cz;
     func_0031BE50(&sx, &cx, rot[0]);
     func_0031BE50(&sy, &cy, rot[1]);

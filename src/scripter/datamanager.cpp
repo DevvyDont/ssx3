@@ -2042,11 +2042,11 @@ extern void* D_00482298[];
 extern void* cScriptObjGS_vtbl[];
 extern void* D_00482318[];
 extern "C" void cSSXScriptEngine_DeInitOnce(cSSXScriptEngine* self);
-extern "C" void func_00283518(void* self, int flags);
-extern "C" void func_00275498(void* self, int flags);
+extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(void* self, int flags);
+extern "C" void cScriptAnimBankManager__cScriptAnimBankManager(void* self, int flags);
 extern "C" void cScriptObject__cScriptObject(void* self, int flags);
 extern "C" void func_002758C0(void* self, int flags);
-extern "C" void func_002837C8(void* self, int flags);
+extern "C" void cVidEngine__cVidEngine(void* self, int flags);
 extern "C" void cBXScriptEngine__cBXScriptEngine(void* self, int flags);
 
 struct sVE_780B8 {
@@ -2078,8 +2078,8 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
         cSSXScriptEngine_DeInitOnce(self);
     }
     D_004A34B0 = 0;
-    func_00283518(((char*)self) + 0xA38, 2);
-    func_00275498(((char*)self) + 0xA28, 2);
+    cScriptSoundBankManager__cScriptSoundBankManager(((char*)self) + 0xA38, 2);
+    cScriptAnimBankManager__cScriptAnimBankManager(((char*)self) + 0xA28, 2);
     *(void***)(((char*)self) + 0x944) = D_00482298;
     *(void***)(((char*)self) + 0x92C) = cScriptObjEvent_vtbl;
     cScriptObject__cScriptObject(((char*)self) + 0x938, 0);
@@ -2097,7 +2097,7 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
         } while (0);
     }
     func_002758C0(((char*)self) + 0x51C, 0);
-    func_002837C8(((char*)self) + 0x500, 0);
+    cVidEngine__cVidEngine(((char*)self) + 0x500, 0);
     cBXScriptEngine__cBXScriptEngine(((char*)self), flags);
 }
 #endif

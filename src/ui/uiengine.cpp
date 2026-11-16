@@ -700,8 +700,8 @@ struct cUIGroup_setFocus_sFlags {
     unsigned int on : 1;
 };
 
-// PORT: functor object passed to func_003979F8 (declared later in the unit with its own functor struct).
-int func_003979F8_f(void* list, cUIGroup_setFocus_sFunctor* fn) __asm__("func_003979F8");
+// PORT: functor object passed to cList_traverseFlat (declared later in the unit with its own functor struct).
+int cList_traverseFlat_f(void* list, cUIGroup_setFocus_sFunctor* fn) __asm__("cList_traverseFlat");
 
 /**
  * Gives or removes focus on a widget group and all of its children.
@@ -714,7 +714,7 @@ extern "C" void cUIGroup_setFocus(void* self, int on)
     f.vt = cListOperator_vtbl;
     f.vt = cListOpSetFocus_vtbl;
     f.arg = on;
-    func_003979F8_f((char*)self + 0x74, &f);
+    cList_traverseFlat_f((char*)self + 0x74, &f);
     f.vt = cListOperator_vtbl;
     ((cUIGroup_setFocus_sFlags*)((char*)self + 0x14))->on = (on != 0);
 }
@@ -805,7 +805,7 @@ struct cUIGroup_onInput_sFunctor {
     int arg;
 };
 
-extern "C" int func_003979F8(void* list, cUIGroup_onInput_sFunctor* fn);
+extern "C" int cList_traverseFlat(void* list, cUIGroup_onInput_sFunctor* fn);
 
 /**
  * Offers an input to a group's children until one of them uses it; a disabled group (bit 5 of its flags)
@@ -823,7 +823,7 @@ extern "C" int cUIGroup_onInput(void* self, int pInput)
     f.vt = cListOperator_vtbl;
     f.vt = cListOpOnInput_vtbl;
     f.arg = pInput;
-    int r = func_003979F8((char*)self + 0x74, &f);
+    int r = cList_traverseFlat((char*)self + 0x74, &f);
     f.vt = cListOperator_vtbl;
     return r != 0;
 }

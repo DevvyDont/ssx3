@@ -66,7 +66,7 @@ struct cScriptPlayerChannelSpline {
                                    //       *(*(owner + 8) + 8) + 8
     // --- cScriptPlayerChannelSpline
     tInSeqSplineChannelHeader* mpHeader; // 0x010 [O]; [U] Play stores the data; header[0] (a word) = key count
-    tInSeqSplineChannelKey* mpCurrKey; // 0x014 [O]; [U] Play: data + 4; Update (func_002726A8) advances it to
+    tInSeqSplineChannelKey* mpCurrKey; // 0x014 [O]; [U] Play: data + 4; Update (cScriptPlayerChannelSpline_Update) advances it to
                                    //       mpNextKey
     unsigned int mCurrKeyIndex;    // 0x018 [O]; [U] Play 0; Update ++ it, compares it with header[0] - 1
     float mCurrKeyValue;           // 0x01C [O]; [U] Play/Update store the evaluated cubic (func_00272570) with swc1;
@@ -78,7 +78,7 @@ struct cScriptPlayerChannelSpline {
 };
 
 // cScriptPlayerChannelObject: size 0x28 [R] (func_00273AA8 allocates 0x28); GetType() = 1;
-// vtable cScriptPlayerChannelObject_vtbl (0x004818F0), constructor func_002734A8, destructor func_002734E0.
+// vtable cScriptPlayerChannelObject_vtbl (0x004818F0), constructor func_002734A8, destructor cScriptPlayerChannelObject__cScriptPlayerChannelObject.
 struct cScriptPlayerChannelObject {
     // --- cScriptPlayerChannel (see above)
     int unk_00;                    // 0x000 retail-only base word; no retail access seen
@@ -96,12 +96,12 @@ struct cScriptPlayerChannelObject {
     tObjectEntry* mpObjectArray;   // 0x01C [O]; [U] Play allocates header[1] x 0x24 (tObjectEntry); Stop frees it;
                                    //       func_00273860 indexes it
     tObjectEntry* mpActiveObjectList; // 0x020 [O]; [U] func_00273860 (AddActiveKey) pushes onto it; Update
-                                   //       (func_00273698) unlinks ended entries; GetCustom returns it
+                                   //       (cScriptPlayerChannelObject_Update) unlinks ended entries; GetCustom returns it
     int mNumActiveObjects;         // 0x024 [O]; [U] ++ by AddActiveKey, -- by Update; GetValue returns its address
 };
 
 // cScriptPlayerChannelBlock: size 0x2C [R] (func_00273AA8 allocates 0x2C); GetType() = 2;
-// vtable cScriptPlayerChannelBlock_vtbl (0x004819B0), constructor func_00272D68, destructor func_00272DA0.
+// vtable cScriptPlayerChannelBlock_vtbl (0x004819B0), constructor func_00272D68, destructor cScriptPlayerChannelBlock__cScriptPlayerChannelBlock.
 struct cScriptPlayerChannelBlock {
     // --- cScriptPlayerChannel (see above)
     int unk_00;                    // 0x000 retail-only base word; no retail access seen
@@ -122,12 +122,12 @@ struct cScriptPlayerChannelBlock {
     tBlockEntry* mpBlockArray;     // 0x020 [O]; [U] Play allocates header[1] x 0x1C (tBlockEntry) from the owner's
                                    //       heap; Stop frees it; func_002730C0 indexes it
     tBlockEntry* mpActiveBlockList; // 0x024 [O]; [U] func_002730C0 (AddActiveKey) pushes onto it; Update
-                                   //       (func_00272F28) unlinks ended entries; GetCustom returns it
+                                   //       (cScriptPlayerChannelBlock_Update) unlinks ended entries; GetCustom returns it
     int mNumActiveBlocks;          // 0x028 [O]; [U] ++ by AddActiveKey, -- by Update; GetValue returns its address
 };
 
 // cScriptPlayerChannelEvent: size 0x28 [R] (func_00273AA8 allocates 0x28); GetType() = 3;
-// vtable cScriptPlayerChannelEvent_vtbl (0x00481950), constructor func_00273180, destructor func_002731B8.
+// vtable cScriptPlayerChannelEvent_vtbl (0x00481950), constructor func_00273180, destructor cScriptPlayerChannelEvent__cScriptPlayerChannelEvent.
 struct cScriptPlayerChannelEvent {
     // --- cScriptPlayerChannel (see above)
     int unk_00;                    // 0x000 retail-only base word; no retail access seen
@@ -144,7 +144,7 @@ struct cScriptPlayerChannelEvent {
     int mNextKeyIndex;             // 0x018 [O]; [U] func_00273468 counts it
     tEventEntry* mpEventArray;     // 0x01C [O]; [U] Play allocates header[1] x 8 (tEventEntry); Stop frees it;
                                    //       func_00273418 fills entry [mNumActiveEvents]; GetCustom returns it
-    int mNumActiveEvents;          // 0x020 [O]; [U] func_00273418 ++; Update (func_00273330) resets it to 0 on a new
+    int mNumActiveEvents;          // 0x020 [O]; [U] func_00273418 ++; Update (cScriptPlayerChannelEvent_Update) resets it to 0 on a new
                                    //       frame; GetValue returns its address
     float mEventFrame;             // 0x024 [O]; [U] Update compares/stores it as a float (lwc1/swc1); Play and Stop
                                    //       store 0 with sw $zero
