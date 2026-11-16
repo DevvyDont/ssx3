@@ -64,7 +64,7 @@ segments:
     bss_size: 0x099EDB # I think?
     align: 4
     subsegments:
-      - [0x1000, asm, sce/crt0]
+      - [0x1000, c, sce/crt0]
         
       - [0x1218, c, seg/ctor_1218]   # one static constructor (last .ctors entry), C built -O0
 
