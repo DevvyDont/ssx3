@@ -100,7 +100,7 @@ struct cExecutionManMainK {
     void* field_0x8; // vtable
 };
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-cExecutionMan* cExecutionMan_halt(cExecutionMan* self);
+cExecutionMan* cExecutionMan_cExecutionMan(cExecutionMan* self);
 extern "C" void func_0040FC90(void); // __main
 extern "C" void systemInit(void);
 extern "C" int cAppMan_run(void* self, cExecutionMan* exec, int argc, char** argv);
@@ -116,7 +116,7 @@ int main_impl(int argc, char** argv) __asm__("main");
  * Program entry point: initialises the system, creates the PS2 execution manager and runs the application.
  *
  * Calls __main (func_0040FC90) and systemInit(), allocates the 0x142C0-byte "PS2ExecutionMan", initialises it
- * with cExecutionMan_halt() and gives it the PS2 vtable (D_0048DB68), then hands it to cAppMan_run() on the
+ * with cExecutionMan_cExecutionMan() and gives it the PS2 vtable (D_0048DB68), then hands it to cAppMan_run() on the
  * application object (cAppMan_TheAppMan).
  *
  * @param argc  the argument count, passed to cAppMan_run()
@@ -128,7 +128,7 @@ int main_impl(int argc, char** argv)
     func_0040FC90();
     systemInit();
     cExecutionManMainK* exec = (cExecutionManMainK*)cMemMan_alloc(0x142C0, str_PS2ExecutionMan, 0, 0);
-    cExecutionMan_halt((cExecutionMan*)exec);
+    cExecutionMan_cExecutionMan((cExecutionMan*)exec);
     exec->field_0x8 = D_0048DB68;
     return cAppMan_run(cAppMan_TheAppMan, (cExecutionMan*)exec, argc, argv);
 }

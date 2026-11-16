@@ -36,7 +36,7 @@ struct cRiderCameraTarget;
 
 // cMatrixChaseAlgorithm (0x3A0; On Tour 0x390). Ctor cMatrixChaseAlgorithm_cMatrixChaseAlgorithm (stores vtable cMatrixChaseAlgorithm_vtbl, AlgorithmType),
 // dtor cMatrixChaseAlgorithm__cMatrixChaseAlgorithm, snap cMatrixChaseAlgorithm_snap, update cMatrixChaseAlgorithm_update, getRaceCamFinalPhaseData cMatrixChaseAlgorithm_getRaceCamFinalPhaseData,
-// getRestDrop func_001607C8.
+// getRestDrop cMatrixChaseAlgorithm_getRestDrop.
 struct cMatrixChaseAlgorithm {
     // --- cLookAtChaseAlgorithm (camera/cameraalgorithms.h, 0x390; its own bases cChaseAlgorithm <- cCameraAlgorithm
     //     inline), copied field for field
@@ -298,7 +298,7 @@ CHECK_SIZE(cMatrixChaseAlgorithm, 0x3A0);
 
 // cRelativeChaseAlgorithm (0x3C0; On Tour 0x3B0). Ctor cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(this, angle) (vtable cRelativeChaseAlgorithm_vtbl; the factory
 // then stores the camera type into AlgorithmType), dtor cRelativeChaseAlgorithm__cRelativeChaseAlgorithm, snap cRelativeChaseAlgorithm_snap, update cRelativeChaseAlgorithm_update,
-// getRaceCamFinalPhaseData cRelativeChaseAlgorithm_getRaceCamFinalPhaseData, getRestDrop func_00160BE0.
+// getRaceCamFinalPhaseData cRelativeChaseAlgorithm_getRaceCamFinalPhaseData, getRestDrop cRelativeChaseAlgorithm_getRestDrop.
 struct cRelativeChaseAlgorithm {
     // --- cLookAtChaseAlgorithm (camera/cameraalgorithms.h, 0x390; its own bases cChaseAlgorithm <- cCameraAlgorithm
     //     inline), copied field for field

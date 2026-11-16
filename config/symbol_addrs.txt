@@ -121,7 +121,7 @@ cList_first__FP5cList = 0x00397840; //type:func
 cUIScreen_getFrameByLabel__FP9cUIScreeni = 0x0039C778; //type:func
 cReplay_stopAutoReplay__FPv = 0x002706F0; //type:func
 md5_init__FP7md5_ctx = 0x0031D368; //type:func
-cExecutionMan_halt__FP13cExecutionMan = 0x00317458; //type:func
+cExecutionMan_cExecutionMan__FP13cExecutionMan = 0x00317458; //type:func
 cAppMan_checkHalt__FP7cAppMan = 0x00317328; //type:func
 cAppMan_setNextModule__FP7cAppManUi = 0x00316EF8; //type:func
 cBigFile_cBigFile__FP8cBigFile = 0x00316898; //type:func
@@ -4588,6 +4588,38 @@ cFEStateLogin_onWidgetEvent = 0x001BF758; //type:func
 cOVSound__cOVSound = 0x001E0780; //type:func
 cOVSound_soundInitialize__FPv = 0x001E07B0; //type:func
 cOVSound_soundShutdown__FPv = 0x001E07B8; //type:func
+
+// fn_cls_a: names by evidence (docs/function_names.tsv)
+cRider_doLegIK = 0x0011F3D8; //type:func
+cRider_SetNISGroundVectors = 0x001242B0; //type:func
+cPlayer_getControlCmd = 0x00127998; //type:func
+cPlayer_writeToReplayFrame__FPv = 0x00128660; //type:func
+cPlayer_readFromReplayFrame__FPv = 0x00128680; //type:func
+cBeing_getVelocity__FPv = 0x001406B0; //type:func
+cBeing_isIntersecting__FPv = 0x001406C0; //type:func
+cBeing_getPosition__FPv = 0x001406D0; //type:func
+cBeing_getTransform__FPv = 0x001406E0; //type:func
+cBeing_getAIIndex__FPv = 0x001406F0; //type:func
+cBeing_isHuman__FPv = 0x001406F8; //type:func
+cBeing_isComputer__FPv = 0x00140700; //type:func
+cBEScoreInterface_submit__FPv = 0x001549E0; //type:func
+cMatrixChaseAlgorithm_getRestDrop__FPv = 0x001607C8; //type:func
+cRelativeChaseAlgorithm_getRestDrop__FPv = 0x00160BE0; //type:func
+cCameraTriggerList_findTrigger = 0x0016C0D8; //type:func
+cFEInput_update = 0x001804B8; //type:func
+cFEStateNetMessenger_cFEStateNetMessenger = 0x001A3DC8; //type:func
+cFEStateNetMessenger__cFEStateNetMessenger = 0x001A3EA0; //type:func
+cFEStateNetMessenger_onCreateScreen = 0x001A3F68; //type:func
+cFEStateNetMessenger_onUpdate = 0x001A3FE0; //type:func
+cFEStateNetMessenger_onInputBegin = 0x001A4170; //type:func
+cFEStateNetMessenger_onWidgetCreate = 0x001A41C0; //type:func
+cFEStateNetMessenger_onWidgetMenu = 0x001A4300; //type:func
+cFEStateNetMessenger_onWidgetEvent = 0x001A4330; //type:func
+cFEStateNetMessenger_onPopupEvent = 0x001A4C58; //type:func
+cFEStateNet_onUpdate = 0x001A8770; //type:func
+cFEStateNet_onGainFocus = 0x001A87D0; //type:func
+cFEStateNet_onWidgetEvent = 0x001A8918; //type:func
+cExecutionMan_halt = 0x00317478; //type:func
 
 // Spreadsheet Auto Generation
 

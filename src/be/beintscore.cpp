@@ -73,9 +73,15 @@ void* cBEScoreInterface_cBEScoreInterface_impl(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001549E0__FPv);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_submit__FPv);
 #ifdef SKIP_ASM
-void func_001549E0(void* self)
+/**
+ * Submits the score interface's pending changes: nothing to do in this build.
+ *
+ * The first virtual of the back-end interfaces (submit, discard, writeToReplayFrame, readFromReplayFrame). On Tour's
+ * version only asserts that the score interface is active (instance->bIsActive); without asserts the body is empty.
+ */
+void cBEScoreInterface_submit(void* self)
 {
 }
 #endif

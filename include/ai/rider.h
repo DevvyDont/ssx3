@@ -101,7 +101,7 @@ struct cRider {
     /* 0x1A0 */ t4Matrix mMatrix; // [P] rows getSide/getFront/getUp (unshifted) + position; built from mRotation/mPosition
     /* 0x1E0 */ t4Vector mVelocity; // [R] getVelocity (cRider_getVelocity); [P] setVelocity
     /* 0x1F0 */ sRiderChannel mSlewed[19]; // [X] [U] 19 channels, init by cRider_OnStartObjectUse; .cur of [0],[2],[3],[8] read as lean input
-    /* 0x2D4 */ unsigned short unk_2D4; // = hit object +0xA (func_001242B0)
+    /* 0x2D4 */ unsigned short unk_2D4; // = hit object +0xA (cRider_SetNISGroundVectors)
     /* 0x2D6 */ char unk_2D6[0x2];
     /* 0x2D8 */ int unk_2D8; // = 0x320 on reset (cRider_OnStartObjectUse)
     /* 0x2DC */ float mSpinRate; // [X] cleared on transport (cRider_putAt)
@@ -134,12 +134,12 @@ struct cRider {
     /* 0x35C */ float unk_35C; // cleared on transport (cRider_putAt); += 1/60 per frame, compared < 1.0f (cRider_checkForProximityAction)
     /* 0x360 */ char unk_360[0x10];
     /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in cRider_updateSplit12
-    /* 0x380 */ t4Vector unk_380; // copy of mGroundNormal taken before the ground probe (func_001242B0)
+    /* 0x380 */ t4Vector unk_380; // copy of mGroundNormal taken before the ground probe (cRider_SetNISGroundVectors)
     /* 0x390 */ t4Vector unk_390; // reference axis for lean rotation: Cross/Dot with the bone side vector (cRider_updateSkeleton)
-    /* 0x3A0 */ t4Vector mGroundForward; // [X] Normalize(front minus its mGroundNormal component) (func_001242B0)
-    /* 0x3B0 */ t4Vector mGroundSide; // [X] Cross(mGroundNormal, unk_3A0); scaled by lean (doLeanPoseAdjust, func_001242B0)
+    /* 0x3A0 */ t4Vector mGroundForward; // [X] Normalize(front minus its mGroundNormal component) (cRider_SetNISGroundVectors)
+    /* 0x3B0 */ t4Vector mGroundSide; // [X] Cross(mGroundNormal, unk_3A0); scaled by lean (doLeanPoseAdjust, cRider_SetNISGroundVectors)
     /* 0x3C0 */ char unk_3C0[0x10];
-    /* 0x3D0 */ t4Vector unk_3D0; // hit.v20, or t4vect_Zero on a miss (func_001242B0)
+    /* 0x3D0 */ t4Vector unk_3D0; // hit.v20, or t4vect_Zero on a miss (cRider_SetNISGroundVectors)
     /* 0x3E0 */ t4Vector mImpulse; // [X] damped by 0.98 per frame (cRider_updateSplit3)
     /* 0x3F0 */ float mImpactAccum; // [X]
     /* 0x3F4 */ float mImpactAccum2; // [X]
@@ -148,14 +148,14 @@ struct cRider {
     /* 0x400 */ t4Vector mBoundsMin; // [X] with 0x410: box tested against the view (cRider_renderClip)
     /* 0x410 */ t4Vector mBoundsMax; // [X]
     /* 0x420 */ t4Vector mBoundSphere; // [X] tested by the VU0 frustum program
-    /* 0x430 */ unsigned int mGroundPolyId; // [X] built as 0xFFFFFFFF with lui/ori (unsigned) in the ctor and func_001242B0
+    /* 0x430 */ unsigned int mGroundPolyId; // [X] built as 0xFFFFFFFF with lui/ori (unsigned) in the ctor and cRider_SetNISGroundVectors
     /* 0x434 */ int mGroundMaterial; // [X]
-    /* 0x438 */ int mSurfaceType; // [X] ground material from the hit, -1 mapped to 0 (func_001242B0)
+    /* 0x438 */ int mSurfaceType; // [X] ground material from the hit, -1 mapped to 0 (cRider_SetNISGroundVectors)
     /* 0x43C */ char unk_43C[0x14];
     /* 0x450 */ int unk_450; // = -1 (ctor)
-    /* 0x454 */ float unk_454; // Dot(probe - hit.pos, normal): height above ground (func_001242B0)
+    /* 0x454 */ float unk_454; // Dot(probe - hit.pos, normal): height above ground (cRider_SetNISGroundVectors)
     /* 0x458 */ char unk_458[0x8];
-    /* 0x460 */ t4Vector mGroundContactPoint; // [X] [U] ground hit position (func_001242B0)
+    /* 0x460 */ t4Vector mGroundContactPoint; // [X] [U] ground hit position (cRider_SetNISGroundVectors)
     /* 0x470 */ float mFinishTime; // [P] preview 0x440 (+0x30): <0 racing, >=0 seconds past the line (isPastFinishLine)
     /* 0x474 */ int mStartTick; // [P] getStartTick, preview 0x444 (+0x30)
     /* 0x478 */ int mFinishTick; // [P] getFinishTick, preview 0x448 (+0x30); = now + mPenaltyTicks (cRider_doFinishEvent)
@@ -187,7 +187,7 @@ struct cRider {
     /* 0x744 */ float unk_744; // start-angle offset added to unk_AF4 (cRider_OnStartObjectUse)
     /* 0x748 */ float unk_748; // start-angle offset added to unk_AF8 (cRider_OnStartObjectUse)
     /* 0x74C */ char unk_74C[0x4];
-    /* 0x750 */ float mAudioBraking; // [P] getAudioBraking_0_to_1 (bracketed +0x40); func_001242B0 also writes it as int 0
+    /* 0x750 */ float mAudioBraking; // [P] getAudioBraking_0_to_1 (bracketed +0x40); cRider_SetNISGroundVectors also writes it as int 0
     /* 0x754 */ float mAudioEdging; // [P] getAudioEdging_0_to_1
     /* 0x758 */ float mAudioPressure; // [P] getAudioPressure_0_to_1
     /* 0x75C */ float mAudioSpeed; // [P] getAudioSpeed_0_to_1
@@ -243,8 +243,8 @@ struct cRider {
     /* 0xAA0 */ void* mSphereTree; // [P] getSphereTree (seen)
     /* 0xAA4 */ int unk_AA4; // shadow drawn this frame (cRider_RenderShadow)
     /* 0xAA8 */ void* mShadow; // [P] getShadow (seen); drawn by cRider_RenderShadow
-    /* 0xAAC */ float unk_AAC; // hit f6C (func_001242B0); the ctor copies 8 bytes here from D_004A5960
-    /* 0xAB0 */ float unk_AB0; // hit f70 (func_001242B0)
+    /* 0xAAC */ float unk_AAC; // hit f6C (cRider_SetNISGroundVectors); the ctor copies 8 bytes here from D_004A5960
+    /* 0xAB0 */ float unk_AB0; // hit f70 (cRider_SetNISGroundVectors)
     /* 0xAB4 */ char unk_AB4[0x8];
     /* 0xABC */ int* mAIPathHint; // [X]
     /* 0xAC0 */ int* mTrackPathHint; // [X]
@@ -259,7 +259,7 @@ struct cRider {
     /* 0xAF8 */ float unk_AF8; // start angle, degrees * pi/180 (cRider_OnStartObjectUse)
     /* 0xAFC */ int unk_AFC;
     /* 0xB00 */ int unk_B00;
-    /* 0xB04 */ float unk_B04; // speed (func_001242B0), 0.0f (cRider_OnStartObjectUse)
+    /* 0xB04 */ float unk_B04; // speed (cRider_SetNISGroundVectors), 0.0f (cRider_OnStartObjectUse)
     /* 0xB08 */ int unk_B08[4]; // sound ids, -1 = none (cRider_OnEndObjectUse)
     /* 0xB18 */ int mIsOnScreen; // [P] IsRiderOnScreen, preview 0x9F8 (+0x120 assumed); [U] frustum test result (cRider_renderClip)
     /* 0xB1C */ int unk_B1C;

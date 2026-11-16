@@ -122,9 +122,18 @@ struct cCameraTriggerList2 {
 };
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C0D8);
+INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_findTrigger);
 #ifdef SKIP_ASM
-extern "C" int* func_0016C0D8(cCameraTriggerList2* self, int key)
+/**
+ * Finds the camera trigger with a given ID.
+ *
+ * Walks the list's count trigger pointers (arr) and returns the first trigger whose first word (On Tour
+ * tCameraTrigger::TriggerID) equals @p key. Nothing in the retail code calls it.
+ *
+ * @param key  the trigger ID to look for
+ * @return the matching trigger, or 0
+ */
+extern "C" int* cCameraTriggerList_findTrigger(cCameraTriggerList2* self, int key)
 {
     for (int i = 0; i < self->count; i++) {
         int* entry = (int*)self->arr[i];

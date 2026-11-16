@@ -6,15 +6,15 @@
 // d:/ssx/code/source/fe/festatenetmessenger.cpp (an assert string of the July 2003 preview).
 //
 // Size 0x6FC: the cFEStateNet method func_001A9B58 allocates it with cMemMan_alloc(0x6FC, "cFEStateNetMessenger")
-// and constructs it with func_001A3DC8(mem, mpEngine, self); the constructor stores up to 0x6F8.
-// Constructor func_001A3DC8 (cFEStateNet ctor func_001A8500, then vtable D_00467F28, mHashName 0x46 and its members),
-// destructor func_001A3EA0. Methods: fe/feasyncfile 0x1A3DC8-0x1A7390 (43 functions) and the slots of D_00467F28.
+// and constructs it with cFEStateNetMessenger_cFEStateNetMessenger(mem, mpEngine, self); the constructor stores up to 0x6F8.
+// Constructor cFEStateNetMessenger_cFEStateNetMessenger (cFEStateNet ctor func_001A8500, then vtable D_00467F28, mHashName 0x46 and its members),
+// destructor cFEStateNetMessenger__cFEStateNetMessenger. Methods: fe/feasyncfile 0x1A3DC8-0x1A7390 (43 functions) and the slots of D_00467F28.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
 // cFEStateNet are written out inline (copied from fe/festatenet.h; keep the two in step). No EA member names exist
 // for this class (no On Tour DWARF, no preview accessors): the own fields are named from their retail use.
 // Evidence tags:
-//   [R] retail's constructor func_001A3DC8 / destructor func_001A3EA0 (and cFEStateNet's, see fe/festatenet.h);
+//   [R] retail's constructor cFEStateNetMessenger_cFEStateNetMessenger / destructor cFEStateNetMessenger__cFEStateNetMessenger (and cFEStateNet's, see fe/festatenet.h);
 //   [P] the July 2003 preview (see fe/festatenet.h);
 //   [U] how retail code uses the field;
 //   [O] SSX On Tour's DWARF for the cListNode/cUIState base only.
@@ -44,10 +44,10 @@ struct cFEStateNetMessenger {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00467F28 (vtables.tsv; 35 slots), stored by func_001A3DC8 after the
-                                    //       cFEStateNet ctor and by the destructor func_001A3EA0
+    void** mVtbl;                   // 0x008 [R] D_00467F28 (vtables.tsv; 35 slots), stored by cFEStateNetMessenger_cFEStateNetMessenger after the
+                                    //       cFEStateNet ctor and by the destructor cFEStateNetMessenger__cFEStateNetMessenger
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
-    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] func_001A3DC8 stores 0x46
+    int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetMessenger_cFEStateNetMessenger stores 0x46
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor
                                     //       (cMemMan_alloc(..) + ctor(mem, mpEngine)); mpEngine + 0x18 = the state stack
     signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
@@ -64,7 +64,7 @@ struct cFEStateNetMessenger {
     signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then func_001A8500 stores 0 (sb)
     char unk_045[0x3];              // 0x045 padding
     // --- cFEStateNet (fe/festatenet.h)
-    int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override func_001A87D0 sets 1; func_001DE8A8 (own
+    int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; func_001DE8A8 (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
                                     //       isProcessingEvents tested only the screen)
     unsigned int mLastPollFrame;    // 0x04C [R] 0; [U] func_001AAB68 (slot 26) polls the session for new messages /
@@ -116,7 +116,7 @@ struct cFEStateNetMessenger {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateNetMessenger
-    char* mszFoundName;             // 0x6D0 [R] cBXString: func_001A3DC8 stores the empty-string rep cBXString_EmptyString, the dtor
+    char* mszFoundName;             // 0x6D0 [R] cBXString: cFEStateNetMessenger_cFEStateNetMessenger stores the empty-string rep cBXString_EmptyString, the dtor
                                     //       destroys it; [U] func_001A4CE8 copies a find result's name (result + 0x8) into
                                     //       it and shows "kT_POPUP279UserFound" with it as option 0; func_001A4928 (that
                                     //       XX
@@ -124,19 +124,19 @@ struct cFEStateNetMessenger {
                                     //       keyboard and submits the find ("kT_POPUP231SubmittingFind",
                                     //       func_0025E6D0); func_001A4E28 prints it into "kT_POPUP279InvalidName"
     int unk_6D8;                    // 0x6D8 [U] func_001A4CE8 copies the find result's word at + 0x10; no read seen
-    int mLastRefreshFrame;          // 0x6DC [R] 0; [U] onUpdate override func_001A3FE0: when 1..59 frames have not
+    int mLastRefreshFrame;          // 0x6DC [R] 0; [U] onUpdate override cFEStateNetMessenger_onUpdate: when 1..59 frames have not
                                     //       passed since it (frame counter cAppMan_TheAppMan + 0x18) it only updates, else it
                                     //       stores the frame and rebuilds the list (func_001A6978)
     char* unk_6E0;                  // 0x6E0 [R] cBXString (as above); no other access seen
-    tFEStringPtrVector mNames;      // 0x6E4 [R] zeroed by func_001A3DC8, freed by func_001A3EA0 after func_001A5450
+    tFEStringPtrVector mNames;      // 0x6E4 [R] zeroed by cFEStateNetMessenger_cFEStateNetMessenger, freed by cFEStateNetMessenger__cFEStateNetMessenger after func_001A5450
                                     //       destroys every element; [U] func_001A54D8 / func_001A5898 push_back
                                     //       cMemMan_alloc(4, "cBXString") copies of the session's buddy names,
                                     //       func_001A56D0/func_001A5768/func_001A5800 search it by name
-    int miScrollOffset;             // 0x6F4 [R] 0; [U] func_001A4300 (onWidgetMenu override) stores the list's new top
-                                    //       row (event 4), func_001A4740 returns it + row, func_001A4330 adds it to
+    int miScrollOffset;             // 0x6F4 [R] 0; [U] cFEStateNetMessenger_onWidgetMenu (onWidgetMenu override) stores the list's new top
+                                    //       row (event 4), func_001A4740 returns it + row, cFEStateNetMessenger_onWidgetEvent adds it to
                                     //       the selected row
     int miSelectedIndex;            // 0x6F8 [R] -1; [U] func_001A52B0 stores the index of the session's first pending
-                                    //       name (func_001A5800) or -1; func_001A4170 passes it to func_001A6C40
+                                    //       name (func_001A5800) or -1; cFEStateNetMessenger_onInputBegin passes it to func_001A6C40
 };
 
 CHECK_OFFSET(cFEStateNetMessenger, mpPrev, 0x000);

@@ -27,7 +27,7 @@
 // mHashName
 // 0x45) and the default func_001E0C30 (fe/fepopupmisc); destructor cFEStateAuthDNASError__cFEStateAuthDNASError (slot 1). Retail vtable cFEStateAuthDNASError_vtbl
 // (32 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateAuthDNASError_onCreateScreen, 7 cFEStateAuthDNASError_onGainTransition, 10 cFEStateAuthDNASError_onLoseTransition, 12 onUpdate
-// cFEStateNet's func_001A8770, 18 onWidgetCreate cFEStateAuthDNASError_onWidgetCreate, 19 onWidgetEvent cFEStateAuthDNASError_onWidgetEvent, 20 cFEStateAuthDNASError_onWidgetMenu, 24
+// cFEStateNet's cFEStateNet_onUpdate, 18 onWidgetCreate cFEStateAuthDNASError_onWidgetCreate, 19 onWidgetEvent cFEStateAuthDNASError_onWidgetEvent, 20 cFEStateAuthDNASError_onWidgetMenu, 24
 // handleEvent cFEStateAuthDNASError_handleEvent, 29 func_001E0C88, 32 func_001E0C80). Methods: fe/feasyncfile 0x1B6AB8-0x1B6EA8.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
@@ -72,7 +72,7 @@ struct cFEStateAuthDNAS {
     signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then func_001A8500 stores 0 (sb)
     char unk_045[0x3];              // 0x045 padding
     // --- cFEStateNet (fe/festatenet.h)
-    int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override func_001A87D0 sets 1; func_001DE8A8 (own
+    int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; func_001DE8A8 (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
                                     //       isProcessingEvents tested only the screen)
     unsigned int mLastPollFrame;    // 0x04C [R] 0; [U] func_001AAB68 (slot 26) polls the session for new messages /
@@ -222,7 +222,7 @@ struct cFEStateAuthDNASError {
     signed char mUserNum;           // 0x044 [O]; [R] cUIState ctor -1, then func_001A8500 stores 0 (sb)
     char unk_045[0x3];              // 0x045 padding
     // --- cFEStateNet (fe/festatenet.h)
-    int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override func_001A87D0 sets 1; func_001DE8A8 (own
+    int unk_048;                    // 0x048 [R] 0; [U] the onGainFocus override cFEStateNet_onGainFocus sets 1; func_001DE8A8 (own
                                     //       virtual, slot 29) returns mpScreen != 0 && unk_048 != 0 (the preview's
                                     //       isProcessingEvents tested only the screen)
     unsigned int mLastPollFrame;    // 0x04C [R] 0; [U] func_001AAB68 (slot 26) polls the session for new messages /

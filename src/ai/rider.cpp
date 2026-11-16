@@ -1690,7 +1690,7 @@ extern t4Vector D_004FF220;
 extern "C" void cSpinControl_applyFlipSpinAngle(void* self, void* xf);
 extern "C" void cRider_doLeanPoseAdjust(void* self, void* xf);
 extern "C" void cAnimModel_transform(cAnimModel* self, void* roots);
-extern "C" void func_0011F3D8(void* self, void* obj, void* xf, float t);
+extern "C" void cRider_doLegIK(void* self, void* obj, void* xf, float t);
 extern "C" void cRider_updateCollideInfo(void* self);
 extern "C" float func_0031C128(float x);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
@@ -1999,7 +1999,7 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self) __asm__("cRider_updateS
  * override pose. cAnimModel_transform poses the bones from the body and board roots.
  *
  * Channel 17 then tilts the board-root bone toward the axis at +0x390 (and lifts it along mGroundNormal by unk_31C),
- * re-deriving the board child bone; unless wiping out, unk_318 drives func_0011F3D8 (per-leg adjustment) for the two
+ * re-deriving the board child bone; unless wiping out, unk_318 drives cRider_doLegIK (per-leg adjustment) for the two
  * leg records at +0x8E0/+0x910. Finally the rider matrix (+0x160) is rebuilt from the pose and cRider_updateCollideInfo runs.
  *
  * The C definition is cRider_updateSkeleton with an asm label.
@@ -2069,11 +2069,11 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
         sXf_EB98* bb = (sXf_EB98*)(self->mAnimModel->bones + self->mBoneBoardChild);
         {
             sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)((char*)self + 0x8F0));
-            func_0011F3D8(self, (char*)self + 0x8E0, &xx, self->unk_318);
+            cRider_doLegIK(self, (char*)self + 0x8E0, &xx, self->unk_318);
         }
         {
             sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)((char*)self + 0x920));
-            func_0011F3D8(self, (char*)self + 0x910, &xx, self->unk_318);
+            cRider_doLegIK(self, (char*)self + 0x910, &xx, self->unk_318);
         }
     }
     QuatToMat_EB98((char*)self + 0x160, &xf.rot, &xf.pos);
@@ -2082,7 +2082,7 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_0011F3D8);
+INCLUDE_ASM("ai/rider", cRider_doLegIK);
 #ifdef SKIP_ASM
 // Two-bone IK: moves bone chain[2] (end effector) toward target (blended by blend), then bends the
 // chain[1] joint and swings the chain[0] root so the end reaches it. Uses the unit's sVec4W / sXf_EB98
@@ -2122,8 +2122,26 @@ static inline sVec4W XformPoint_F3D8(const sXf_EB98& x, const sVec4& v)
     return Add_EB98(Rot_EB98(x.rot, Sub_EB98(*(const sVec4W*)&v, t4vect_Origin)), x.pos);
 }
 
-extern "C" void func_0011F3D8_impl(cRider* self, int* chain, sXf_EB98* target, float blend) __asm__("func_0011F3D8");
-extern "C" void func_0011F3D8_impl(cRider* self, int* chain, sXf_EB98* target, float blend)
+extern "C" void cRider_doLegIK_impl(cRider* self, int* chain, sXf_EB98* target, float blend) __asm__("cRider_doLegIK");
+/**
+ * Bends one of the rider's legs so its foot reaches a target transform (two-bone IK).
+ *
+ * @p chain holds the leg's three bone indices (On Tour tLegInfo): [0] the root (hip), [1] the middle joint (knee), [2]
+ * the end (foot). The end bone is set to @p target when @p blend is 1.0f, otherwise moved toward it: position lerp,
+ * rotation through func_0031BCB0 (a quaternion slerp). The two segment lengths are the x of the middle and end bones'
+ * local offsets scaled by the model's unk_140 (its length scale).
+ *
+ * The knee angle follows from the law of cosines (func_0031C128 is an arcsine; its argument is clamped to [-1, 1]); the
+ * middle bone's local transform is the upper length along x with a rotation about Z. The root is then turned about the
+ * cross product of the bent leg's direction and the root-to-target direction, by the arcsine of that cross product's
+ * length (skipped below 1e-5), and the middle bone is rebuilt from the turned root. cRider_updateSkeleton calls it for
+ * the legs at +0x8E0 and +0x910 with blend unk_318.
+ *
+ * @param chain  the leg's bone indices: root, middle joint, end
+ * @param target  the transform (position, rotation) the end bone should take
+ * @param blend  how far to move the end bone to @p target; 1.0f snaps it
+ */
+extern "C" void cRider_doLegIK_impl(cRider* self, int* chain, sXf_EB98* target, float blend)
 {
     sXf_EB98* end = (sXf_EB98*)&self->mAnimModel->bones[chain[2]];
     if (blend == 1.0f) {
@@ -3023,7 +3041,7 @@ extern "C" int AITick();
 extern "C" int func_001448A8(void* obj);
 extern "C" void func_00332DB8(void*, void*);
 extern "C" void cRider_updateActiveLights(cRider*);
-extern "C" void func_001242B0(void* self, void* p);
+extern "C" void cRider_SetNISGroundVectors(void* self, void* p);
 extern "C" void cRider_updateTerminalVelocity(void* self);
 
 struct sQuad_120F20
@@ -3046,7 +3064,7 @@ static inline int IsState1_120F20(void* obj)
  * grid's word +0xA0 while the playback manager's state (+0x70) is neither 1 nor 3.
  *
  * In an NIS the ground under mPosition (or the board root bone when unk_AFC is set) is probed with
- * func_001242B0. Then mModelOffset and unk_A30 are zeroed, mVisitedIds set to 0xFFFFFFFF, cRider_updateTerminalVelocity
+ * cRider_SetNISGroundVectors. Then mModelOffset and unk_A30 are zeroed, mVisitedIds set to 0xFFFFFFFF, cRider_updateTerminalVelocity
  * called (probably On Tour's updateTerminalVelocity) and, once the rider has finished, mFinishTime advanced
  * by 1/60.
  */
@@ -3076,7 +3094,7 @@ skip:
         char* refPos = (char*)&self->mPosition;
         if (self->unk_AFC)
             refPos = (char*)self->mAnimModel->bones + (self->mBoneBoardRoot << 5);
-        func_001242B0(self, refPos);
+        cRider_SetNISGroundVectors(self, refPos);
     }
     *(sQuad_120F20*)&self->mModelOffset = D_004FF120_q120F20;
     self->unk_A30 = 0;
@@ -5684,7 +5702,7 @@ extern "C" void cRider_EulerToQuat(cRider* self, sQuat_001241C0* out, float rx, 
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_001242B0);
+INCLUDE_ASM("ai/rider", cRider_SetNISGroundVectors);
 #ifdef SKIP_ASM
 struct sV_42B0 {
     float x, y, z, w;
@@ -5861,15 +5879,35 @@ static inline sV_42B0 SubV_42B0(sVecP_42B0 a, const sV_42B0& b)
     return Sub_42B0(*(sV_42B0*)&a, b);
 }
 
-// PORT: the unit declares func_001242B0(void*, void*); this definition binds the cRider* view by asm label.
-extern "C" void func_001242B0_impl(cRider* self, void* p) __asm__("func_001242B0");
-extern "C" void func_001242B0_impl(cRider* self, void* p)
+// PORT: the unit declares cRider_SetNISGroundVectors(void*, void*); this definition binds the cRider* view by asm label.
+extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("cRider_SetNISGroundVectors");
+/**
+ * Probes the ground under a position during an NIS (in-game cutscene) and sets the rider's ground vectors.
+ *
+ * The probe base is @p pRiderPos moved along mGroundSide by mAnimModel->unk_140.x * mSlewed[0].cur * 45; a line from 100 below
+ * to 200 above it (along mGroundNormal) is built with func_0032E100 and intersected with the terrain through
+ * mOverlapList (func_003342D0). The speed is the length of the virtual getVelocity, and unk_380 keeps the previous
+ * mGroundNormal. A hit object sets mGroundPolyId (object +0x150), unk_AAC / unk_AB0 (the hit's +0x6C / +0x70) and
+ * unk_2D4 (the object's half-word +0xA); otherwise mGroundPolyId becomes -1.
+ *
+ * On a miss (negative distance): unk_B00 = 0, mGroundNormal = the Z axis, unk_3D0 = zero, mSurfaceType and the four
+ * audio values 0. On a hit: the first contact (unk_AFC set, unk_B00 clear) is reported to the rider handler
+ * (func_00111AA0 with the hit point, its normal, material and the length of its third vector); then unk_B00 = 1,
+ * mSurfaceType = the material (0 for -1), mGroundNormal, mGroundContactPoint and unk_3D0 come from the hit, unk_454 =
+ * the probe base's height above the hit, mAudioSpeed = speed * 0.00072 (at most 1), mAudioPressure 0.3, mAudioEdging 0,
+ * and mAudioBraking = (speed - unk_B04) * 0.0036 (at most 1) when the speed rose since the last call, else 0: the sign
+ * looks inverted, but On Tour computes it the same way. Both cases rebuild mGroundForward (row 1 of mMatrix projected
+ * onto the ground plane, normalised) and mGroundSide (normal x forward), and store the speed in unk_B04.
+ *
+ * @param pRiderPos  the position to probe under (mPosition, or the board root bone; see cRider_updateSplit1)
+ */
+extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
 {
     char* o = (char*)&self->mVtbl;
     sVE_42B0* ve = &(*(sVE_42B0**)o)[kRiderVt_getVelocity];
     float speed = Length_42B0(*ve->fn(o + ve->delta));
     float s = self->mAnimModel->unk_140.x * (self->mSlewed[0].cur * 45.0f);
-    sV_42B0 b = Add_42B0(*(sV_42B0*)p, Scale_42B0(*(sV_42B0*)&self->mGroundSide, s));
+    sV_42B0 b = Add_42B0(*(sV_42B0*)pRiderPos, Scale_42B0(*(sV_42B0*)&self->mGroundSide, s));
     sV_42B0 lo = Add_42B0(b, Scale_42B0(*(sV_42B0*)&self->mGroundNormal, -100.0f));
     sV_42B0 hi = Add_42B0(b, Scale_42B0(*(sV_42B0*)&self->mGroundNormal, 200.0f));
     sHit_42B0 hit;
@@ -7191,7 +7229,7 @@ extern "C" void func_001278E8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/rider", func_00127998);
+INCLUDE_ASM("ai/rider", cPlayer_getControlCmd);
 #ifdef SKIP_ASM
 int func_0011FEE8(void*);
 extern "C" float cInput_getValue(void* pad, int axis);
@@ -7256,111 +7294,124 @@ union sRiderInput_127998 {
 
 #define PAD_127998 (*(void**)(self + 0xDF0))
 
+/**
+ * Fills this frame's control command from the player's pad, packed for the rider's current control state, and records
+ * it for replays.
+ *
+ * Zeroes the 8-byte command, then switches on the control state of the rider at +0x18 (func_0011FEE8, On Tour
+ * getControlState). Each state packs its own layout (the low 12 bits stay zero): buttons (cInput_getState on the pad at
+ * +0xDF0, 1 bit each) and analog values (cInput_getValue * 31, 6 bits each). States 4 and 5 also pack func_001276F0's
+ * value and states 7 and 12 func_00127848's (8 bits each); state 5 adds a three-way value from axis 3 (-1 below -0.5, 1
+ * above 0.5, else 0); state 11 packs two buttons and an analog value, state 8 two buttons, states 6 and 10 one analog
+ * value and state 13 nothing. When a replay recorder is attached (+0xDF8) the command is passed to func_0026D178.
+ *
+ * @param cmd  receives the packed command (On Tour tControlCmd)
+ */
 // Reads the pad into the input record for the rider's state, and records it for replays.
-extern "C" void func_00127998(char* self, sRiderInput_127998* in)
+extern "C" void cPlayer_getControlCmd(char* self, sRiderInput_127998* cmd)
 {
-    MEM_fill(in, 0, 8);
+    MEM_fill(cmd, 0, 8);
     switch (func_0011FEE8(*(void**)(self + 0x18))) {
     case 0: {
         float k = 31.0f;
-        in->s0.b12 = cInput_getState(PAD_127998, 46);
-        in->s0.b13 = cInput_getState(PAD_127998, 25);
-        in->s0.b14 = cInput_getState(PAD_127998, 17);
-        in->s0.b15 = cInput_getState(PAD_127998, 18);
-        in->s0.b16 = cInput_getState(PAD_127998, 19);
-        in->s0.b17 = cInput_getState(PAD_127998, 20);
-        in->s0.b18 = cInput_getState(PAD_127998, 5);
-        in->s0.b19 = cInput_getState(PAD_127998, 6);
-        in->s0.a20 = (int)(cInput_getValue(PAD_127998, 0) * k);
-        in->s0.a26 = (int)(cInput_getValue(PAD_127998, 1) * k);
-        in->s0.w0 = (int)(cInput_getValue(PAD_127998, 2) * k);
-        in->s0.w6 = (int)(cInput_getValue(PAD_127998, 3) * k);
+        cmd->s0.b12 = cInput_getState(PAD_127998, 46);
+        cmd->s0.b13 = cInput_getState(PAD_127998, 25);
+        cmd->s0.b14 = cInput_getState(PAD_127998, 17);
+        cmd->s0.b15 = cInput_getState(PAD_127998, 18);
+        cmd->s0.b16 = cInput_getState(PAD_127998, 19);
+        cmd->s0.b17 = cInput_getState(PAD_127998, 20);
+        cmd->s0.b18 = cInput_getState(PAD_127998, 5);
+        cmd->s0.b19 = cInput_getState(PAD_127998, 6);
+        cmd->s0.a20 = (int)(cInput_getValue(PAD_127998, 0) * k);
+        cmd->s0.a26 = (int)(cInput_getValue(PAD_127998, 1) * k);
+        cmd->s0.w0 = (int)(cInput_getValue(PAD_127998, 2) * k);
+        cmd->s0.w6 = (int)(cInput_getValue(PAD_127998, 3) * k);
         break;
     }
     case 11:
-        in->s11.b12 = cInput_getState(PAD_127998, 46);
-        in->s11.b13 = cInput_getState(PAD_127998, 25);
-        in->s11.a14 = (int)(cInput_getValue(PAD_127998, 0x18) * 31.0f);
+        cmd->s11.b12 = cInput_getState(PAD_127998, 46);
+        cmd->s11.b13 = cInput_getState(PAD_127998, 25);
+        cmd->s11.a14 = (int)(cInput_getValue(PAD_127998, 0x18) * 31.0f);
         break;
     case 1: {
         float k = 31.0f;
-        in->s1.b12 = cInput_getState(PAD_127998, 46);
-        in->s1.b13 = cInput_getState(PAD_127998, 19);
-        in->s1.b14 = cInput_getState(PAD_127998, 20);
-        in->s1.b16 = cInput_getState(PAD_127998, 17);
-        in->s1.b15 = cInput_getState(PAD_127998, 18);
-        in->s1.b17 = cInput_getState(PAD_127998, 22);
-        in->s1.a24 = (int)(cInput_getValue(PAD_127998, 23) * k);
-        in->s1.a18 = (int)(cInput_getValue(PAD_127998, 0) * k);
-        in->s1.w0 = (int)(cInput_getValue(PAD_127998, 3) * k);
-        in->s1.w6 = (int)(cInput_getValue(PAD_127998, 4) * k);
+        cmd->s1.b12 = cInput_getState(PAD_127998, 46);
+        cmd->s1.b13 = cInput_getState(PAD_127998, 19);
+        cmd->s1.b14 = cInput_getState(PAD_127998, 20);
+        cmd->s1.b16 = cInput_getState(PAD_127998, 17);
+        cmd->s1.b15 = cInput_getState(PAD_127998, 18);
+        cmd->s1.b17 = cInput_getState(PAD_127998, 22);
+        cmd->s1.a24 = (int)(cInput_getValue(PAD_127998, 23) * k);
+        cmd->s1.a18 = (int)(cInput_getValue(PAD_127998, 0) * k);
+        cmd->s1.w0 = (int)(cInput_getValue(PAD_127998, 3) * k);
+        cmd->s1.w6 = (int)(cInput_getValue(PAD_127998, 4) * k);
         break;
     }
     case 6:
-        in->s6.a12 = (int)(cInput_getValue(PAD_127998, 26) * 31.0f);
+        cmd->s6.a12 = (int)(cInput_getValue(PAD_127998, 26) * 31.0f);
         break;
     case 7: {
         float k = 31.0f;
-        in->s7.b12 = cInput_getState(PAD_127998, 46);
-        in->s7.b13 = cInput_getState(PAD_127998, 17);
-        in->s7.b14 = cInput_getState(PAD_127998, 18);
-        in->s7.b15 = cInput_getState(PAD_127998, 19);
-        in->s7.b16 = cInput_getState(PAD_127998, 20);
-        in->s7.v17 = func_00127848(self);
-        in->s7.a25 = (int)(cInput_getValue(PAD_127998, 23) * k);
-        in->s7.w0 = (int)(cInput_getValue(PAD_127998, 13) * k);
-        in->s7.w6 = (int)(cInput_getValue(PAD_127998, 3) * k);
+        cmd->s7.b12 = cInput_getState(PAD_127998, 46);
+        cmd->s7.b13 = cInput_getState(PAD_127998, 17);
+        cmd->s7.b14 = cInput_getState(PAD_127998, 18);
+        cmd->s7.b15 = cInput_getState(PAD_127998, 19);
+        cmd->s7.b16 = cInput_getState(PAD_127998, 20);
+        cmd->s7.v17 = func_00127848(self);
+        cmd->s7.a25 = (int)(cInput_getValue(PAD_127998, 23) * k);
+        cmd->s7.w0 = (int)(cInput_getValue(PAD_127998, 13) * k);
+        cmd->s7.w6 = (int)(cInput_getValue(PAD_127998, 3) * k);
         break;
     }
     case 12:
-        in->s12.b12 = cInput_getState(PAD_127998, 46);
-        in->s12.b13 = cInput_getState(PAD_127998, 19);
-        in->s12.b14 = cInput_getState(PAD_127998, 20);
-        in->s12.v15 = func_00127848(self);
-        in->s12.a23 = (int)(cInput_getValue(PAD_127998, 23) * 31.0f);
+        cmd->s12.b12 = cInput_getState(PAD_127998, 46);
+        cmd->s12.b13 = cInput_getState(PAD_127998, 19);
+        cmd->s12.b14 = cInput_getState(PAD_127998, 20);
+        cmd->s12.v15 = func_00127848(self);
+        cmd->s12.a23 = (int)(cInput_getValue(PAD_127998, 23) * 31.0f);
         break;
     case 2: {
         float k = 31.0f;
-        in->s2.b12 = cInput_getState(PAD_127998, 46);
-        in->s2.b13 = cInput_getState(PAD_127998, 18);
-        in->s2.b14 = cInput_getState(PAD_127998, 20);
-        in->s2.a15 = (int)(cInput_getValue(PAD_127998, 8) * k);
-        in->s2.a21 = (int)(cInput_getValue(PAD_127998, 9) * k);
-        in->s2.w0 = (int)(cInput_getValue(PAD_127998, 7) * k);
-        in->s2.w6 = (int)(cInput_getValue(PAD_127998, 23) * k);
+        cmd->s2.b12 = cInput_getState(PAD_127998, 46);
+        cmd->s2.b13 = cInput_getState(PAD_127998, 18);
+        cmd->s2.b14 = cInput_getState(PAD_127998, 20);
+        cmd->s2.a15 = (int)(cInput_getValue(PAD_127998, 8) * k);
+        cmd->s2.a21 = (int)(cInput_getValue(PAD_127998, 9) * k);
+        cmd->s2.w0 = (int)(cInput_getValue(PAD_127998, 7) * k);
+        cmd->s2.w6 = (int)(cInput_getValue(PAD_127998, 23) * k);
         break;
     }
     case 3: {
         float k = 31.0f;
-        in->s2.b12 = cInput_getState(PAD_127998, 46);
-        in->s2.b13 = cInput_getState(PAD_127998, 19);
-        in->s2.b14 = cInput_getState(PAD_127998, 20);
-        in->s2.a15 = (int)(cInput_getValue(PAD_127998, 0) * k);
-        in->s2.a21 = (int)(cInput_getValue(PAD_127998, 23) * k);
+        cmd->s2.b12 = cInput_getState(PAD_127998, 46);
+        cmd->s2.b13 = cInput_getState(PAD_127998, 19);
+        cmd->s2.b14 = cInput_getState(PAD_127998, 20);
+        cmd->s2.a15 = (int)(cInput_getValue(PAD_127998, 0) * k);
+        cmd->s2.a21 = (int)(cInput_getValue(PAD_127998, 23) * k);
         break;
     }
     case 4: {
         float k = 31.0f;
-        in->s4.b12 = cInput_getState(PAD_127998, 46);
-        in->s4.b13 = cInput_getState(PAD_127998, 25);
-        in->s4.b14 = cInput_getState(PAD_127998, 5);
-        in->s4.b15 = cInput_getState(PAD_127998, 6);
-        in->s4.v16 = func_001276F0(self);
-        in->s4.a24 = (int)(cInput_getValue(PAD_127998, 0) * k);
-        in->s4.w0 = (int)(cInput_getValue(PAD_127998, 1) * k);
+        cmd->s4.b12 = cInput_getState(PAD_127998, 46);
+        cmd->s4.b13 = cInput_getState(PAD_127998, 25);
+        cmd->s4.b14 = cInput_getState(PAD_127998, 5);
+        cmd->s4.b15 = cInput_getState(PAD_127998, 6);
+        cmd->s4.v16 = func_001276F0(self);
+        cmd->s4.a24 = (int)(cInput_getValue(PAD_127998, 0) * k);
+        cmd->s4.w0 = (int)(cInput_getValue(PAD_127998, 1) * k);
         break;
     }
     case 5: {
         float k = 31.0f;
-        in->s4.b12 = cInput_getState(PAD_127998, 46);
-        in->s4.b13 = cInput_getState(PAD_127998, 25);
-        in->s4.b14 = cInput_getState(PAD_127998, 21);
-        in->s4.b15 = cInput_getState(PAD_127998, 0xC);
-        in->s4.v16 = func_001276F0(self);
-        in->s4.a24 = (int)(cInput_getValue(PAD_127998, 0xE) * k);
-        in->s4.w0 = (int)(cInput_getValue(PAD_127998, 0xF) * k);
-        in->s4.w12 = (int)(cInput_getValue(PAD_127998, 11) * k);
-        in->s4.w6 = (int)(cInput_getValue(PAD_127998, 10) * k);
+        cmd->s4.b12 = cInput_getState(PAD_127998, 46);
+        cmd->s4.b13 = cInput_getState(PAD_127998, 25);
+        cmd->s4.b14 = cInput_getState(PAD_127998, 21);
+        cmd->s4.b15 = cInput_getState(PAD_127998, 0xC);
+        cmd->s4.v16 = func_001276F0(self);
+        cmd->s4.a24 = (int)(cInput_getValue(PAD_127998, 0xE) * k);
+        cmd->s4.w0 = (int)(cInput_getValue(PAD_127998, 0xF) * k);
+        cmd->s4.w12 = (int)(cInput_getValue(PAD_127998, 11) * k);
+        cmd->s4.w6 = (int)(cInput_getValue(PAD_127998, 10) * k);
         float v = cInput_getValue(PAD_127998, 3);
         int t;
         if (-0.5f <= v) {
@@ -7368,21 +7419,21 @@ extern "C" void func_00127998(char* self, sRiderInput_127998* in)
         } else {
             t = -1;
         }
-        in->s4.t18 = t;
+        cmd->s4.t18 = t;
         break;
     }
     case 8:
-        in->s11.b12 = cInput_getState(PAD_127998, 46);
-        in->s11.b13 = cInput_getState(PAD_127998, 0x10);
+        cmd->s11.b12 = cInput_getState(PAD_127998, 46);
+        cmd->s11.b13 = cInput_getState(PAD_127998, 0x10);
         break;
     case 10:
-        in->s6.a12 = (int)(cInput_getValue(PAD_127998, 0) * 31.0f);
+        cmd->s6.a12 = (int)(cInput_getValue(PAD_127998, 0) * 31.0f);
         break;
     case 13:
         break;
     }
     if (*(void**)(self + 0xDF8)) {
-        func_0026D178(*(void**)(self + 0xDF8), in);
+        func_0026D178(*(void**)(self + 0xDF8), cmd);
     }
 }
 #endif
@@ -7390,9 +7441,15 @@ extern "C" void func_00127998(char* self, sRiderInput_127998* in)
 extern "C" void* cRiderHandler_writeToReplayFrame(void* self);
 
 //100%
-INCLUDE_ASM("ai/rider", func_00128660__FPv);
+INCLUDE_ASM("ai/rider", cPlayer_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
-void* func_00128660(void* self)
+/**
+ * Writes the player controller's state into a replay frame: only its cRiderHandler part.
+ *
+ * Calls cRiderHandler_writeToReplayFrame on the same object with the frame pointer (the second argument, which the C
+ * declaration leaves out) passed through; cPlayer records nothing of its own.
+ */
+void* cPlayer_writeToReplayFrame(void* self)
 {
     return cRiderHandler_writeToReplayFrame(self);
 }
@@ -7401,9 +7458,15 @@ void* func_00128660(void* self)
 extern "C" void* cRiderHandler_readFromReplayFrame(void* self);
 
 //100%
-INCLUDE_ASM("ai/rider", func_00128680__FPv);
+INCLUDE_ASM("ai/rider", cPlayer_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
-void* func_00128680(void* self)
+/**
+ * Restores the player controller's state from a replay frame: only its cRiderHandler part.
+ *
+ * Calls cRiderHandler_readFromReplayFrame on the same object with the frame pointer (the second argument, which the C
+ * declaration leaves out) passed through; cPlayer reads nothing of its own.
+ */
+void* cPlayer_readFromReplayFrame(void* self)
 {
     return cRiderHandler_readFromReplayFrame(self);
 }

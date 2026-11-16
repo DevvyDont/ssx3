@@ -115,7 +115,7 @@ struct sOwner89B8 {
     char str[4];      // 0xEC
 };
 
-// Destructor: string member, then the two pointer vectors (same vector-free shape as feasyncfile func_001A3EA0).
+// Destructor: string member, then the two pointer vectors (same vector-free shape as feasyncfile cFEStateNetMessenger__cFEStateNetMessenger).
 extern "C" void func_002689B8(sOwner89B8* self, int flags)
 {
     cBXString__cBXString(self->str, 2);

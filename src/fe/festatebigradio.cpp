@@ -356,7 +356,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern char str_wait_1[];
 extern char str_wait_2[];
 extern int D_004A1A70;
-extern "C" void func_001A87D0(void* self, int a1);
+extern "C" void cFEStateNet_onGainFocus(void* self, int a1);
 extern "C" void func_001927B0(void* p);
 // cUIState_onGainFocus returns nothing (ends in a void vcall).
 void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
@@ -371,7 +371,7 @@ static inline int get6F8_3568(void* p) { return *(int*)((char*)p + 0x6F8); }
 /**
  * Gives the bragging-rights screen the focus: plays a "wait" label and recolours the panels.
  *
- * Online it runs the online states' handler (func_001A87D0) instead. Otherwise cUIState's handler runs, "wait
+ * Online it runs the online states' handler (cFEStateNet_onGainFocus) instead. Otherwise cUIState's handler runs, "wait
  * 1" or "wait 2" plays when exactly one panel is locked (+0x6F8, +0x72C), and both panels are recoloured
  * (func_001927B0).
  *
@@ -380,7 +380,7 @@ static inline int get6F8_3568(void* p) { return *(int*)((char*)p + 0x6F8); }
 extern "C" void cFEStateBraggingRights_onGainFocus(void* self, int pPrevState)
 {
     if (isOn00193568()) {
-        func_001A87D0(self, pPrevState);
+        cFEStateNet_onGainFocus(self, pPrevState);
         return;
     }
     cUIState_onGainFocus_v(self);
@@ -527,7 +527,7 @@ extern "C" void cUIStateStack_push(void* list, void* obj);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
-extern "C" void func_001A8918(void* self, void* widget);
+extern "C" void cFEStateNet_onWidgetEvent(void* self, void* widget);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_kT_POPUPCMNCancelChallenge[];
 extern char str_kT_CMNYes[];
@@ -627,7 +627,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
         break;
     case 7:
         if (isOn_38F8())
-            func_001A8918(self, w);
+            cFEStateNet_onWidgetEvent(self, w);
         break;
     case 9:
         if (isOn_38F8()) {

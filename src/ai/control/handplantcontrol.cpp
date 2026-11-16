@@ -5415,18 +5415,33 @@ extern "C" void cBeing__cBeing(int* self, int flags)
 extern void* t4vect_Zero[];
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406B0__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getVelocity__FPv);
 #ifdef SKIP_ASM
-void* func_001406B0(void* self)
+/**
+ * Returns a cBeing's velocity: the base class has none, so this is the zero vector.
+ *
+ * cBeing's default for the virtual getVelocity; the rider classes override it.
+ *
+ * @return t4vect_Zero
+ */
+void* cBeing_getVelocity(void* self)
 {
     return (void*)t4vect_Zero;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406C0__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_isIntersecting__FPv);
 #ifdef SKIP_ASM
-int func_001406C0(void* self)
+/**
+ * Tells whether the being intersects an instance: a plain cBeing never does.
+ *
+ * cBeing's default for the virtual isIntersecting. On Tour's version takes the tInstanceRecord to test as a second
+ * argument; this body ignores it.
+ *
+ * @return 0
+ */
+int cBeing_isIntersecting(void* self)
 {
     return 0;
 }
@@ -5444,9 +5459,16 @@ void cBeing_applyBoost(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406D0__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getPosition__FPv);
 #ifdef SKIP_ASM
-void* func_001406D0(void* self)
+/**
+ * Returns a cBeing's position: the base class has none, so this is the zero vector.
+ *
+ * cBeing's default for the virtual getPosition; the rider classes override it.
+ *
+ * @return t4vect_Zero
+ */
+void* cBeing_getPosition(void* self)
 {
     return (void*)t4vect_Zero;
 }
@@ -5455,36 +5477,61 @@ void* func_001406D0(void* self)
 extern void* t4mat_Identity[];
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406E0__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getTransform__FPv);
 #ifdef SKIP_ASM
-void* func_001406E0(void* self)
+/**
+ * Returns a cBeing's transform: the identity matrix for the base class.
+ *
+ * cBeing's default for the virtual getTransform. Derived classes that do not override it (several rider and effect
+ * vtables) reuse this function.
+ *
+ * @return t4mat_Identity
+ */
+void* cBeing_getTransform(void* self)
 {
     return (void*)t4mat_Identity;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406F0__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_getAIIndex__FPv);
 #ifdef SKIP_ASM
-int func_001406F0(void* self)
+/**
+ * Returns the being's AI index: 0 for a plain cBeing.
+ *
+ * cBeing's default for the virtual getAIIndex; riders return their slot in the race.
+ *
+ * @return 0
+ */
+int cBeing_getAIIndex(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001406F8__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_isHuman__FPv);
 #ifdef SKIP_ASM
-int func_001406F8(void* self)
+/**
+ * Tells whether the being is a human-controlled rider: never, for a plain cBeing.
+ *
+ * @return 0
+ */
+int cBeing_isHuman(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140700__FPv);
+INCLUDE_ASM("ai/control/handplantcontrol", cBeing_isComputer__FPv);
 #ifdef SKIP_ASM
-int func_00140700(void* self)
+/**
+ * Tells whether the being is a computer-controlled rider: never, for a plain cBeing.
+ *
+ * @return 0
+ */
+int cBeing_isComputer(void* self)
 {
     return 0;
 }

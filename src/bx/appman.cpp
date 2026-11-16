@@ -284,10 +284,10 @@ int cExecutionMan_checkHalt(void* self, int flag);
 //100%
 INCLUDE_ASM("bx/appman", func_00317308);
 #ifdef SKIP_ASM
-extern "C" void func_00317478(int);
+extern "C" void cExecutionMan_halt(int);
 
 extern "C" void func_00317308(void *appMan) {
-    func_00317478((*(int *)((char*)(appMan) + (8))));
+    cExecutionMan_halt((*(int *)((char*)(appMan) + (8))));
 }
 #endif
 
@@ -392,17 +392,17 @@ struct cExecutionMan {
 extern void* cExecutionMan_vtbl[16];
 
 //100%
-INCLUDE_ASM("bx/appman", cExecutionMan_halt__FP13cExecutionMan);
+INCLUDE_ASM("bx/appman", cExecutionMan_cExecutionMan__FP13cExecutionMan);
 #ifdef SKIP_ASM
 /**
- * Initialises an execution manager; despite the name, it acts as the base constructor.
+ * Constructs the base execution manager.
  *
  * Clears the halt callback (+0x0) and its argument (+0x4) and stores the base cExecutionMan vtable (+0x8).
  * main() calls it on the "PS2ExecutionMan" object before storing the PS2 vtable.
  *
  * @return @p self
  */
-cExecutionMan* cExecutionMan_halt(cExecutionMan* self)
+cExecutionMan* cExecutionMan_cExecutionMan(cExecutionMan* self)
 {
     self->field_0x0 = 0;
     self->field_0x8 = cExecutionMan_vtbl;
@@ -412,10 +412,10 @@ cExecutionMan* cExecutionMan_halt(cExecutionMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/appman", func_00317478);
+INCLUDE_ASM("bx/appman", cExecutionMan_halt);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// LANDING: the unit declares `extern "C" void func_00317478(int);` (line ~245, used by func_00317308);
+// LANDING: the unit declares `extern "C" void cExecutionMan_halt(int);` (line ~245, used by func_00317308);
 // retype it to (cExecutionMan*, int, int) or keep the alias below.
 struct sVEntry00317478 {
     short delta;
@@ -423,13 +423,21 @@ struct sVEntry00317478 {
     void (*fn)(void*);
 };
 
-extern "C" void func_00317478_impl(cExecutionMan* self, int a1, int a2) __asm__("func_00317478");
+extern "C" void cExecutionMan_halt_impl(cExecutionMan* self, int a1, int a2) __asm__("cExecutionMan_halt");
 
-extern "C" void func_00317478_impl(cExecutionMan* self, int a1, int a2)
+/**
+ * Installs a halt callback and its data, then calls the execution manager's virtual slot 13 (vtable +0x68).
+ *
+ * The callback (+0x0) and its data (+0x4) are what cExecutionMan_checkHalt() later runs; the constructor clears both.
+ *
+ * @param callback  the halt callback
+ * @param data  the data passed to it
+ */
+extern "C" void cExecutionMan_halt_impl(cExecutionMan* self, int callback, int data)
 {
-    self->field_0x4 = a2;
+    self->field_0x4 = data;
     sVEntry00317478* vt = (sVEntry00317478*)self->field_0x8;
-    self->field_0x0 = a1;
+    self->field_0x0 = callback;
     vt[13].fn((char*)self + vt[13].delta);
 }
 #endif

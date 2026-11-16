@@ -46,7 +46,7 @@ struct cPlayer {
                                //       0x9C0, 0xAD0, 0xAF0, 0xB00, 0xB40, 0xC70, 0xD20 (cPlayer_cPlayer)
     int MotionState;           // 0xDE0 [P] cRiderHandler::_getMotionState (preview 0xDA0); [R] cRiderHandler__getMotionState; [O]
     int ControlState;          // 0xDE4 [P] _getControlState (preview 0xDA4); [R] cRiderHandler__getControlState; [O]
-    void** mVtbl;              // 0xDE8 [R] _vt$7cPlayer (D_00458338, 3 slots: func_00127998, func_00128660)
+    void** mVtbl;              // 0xDE8 [R] _vt$7cPlayer (D_00458338, 3 slots: cPlayer_getControlCmd, cPlayer_writeToReplayFrame)
     char pad_DEC[0x4];         // 0xDEC cRiderHandler is 16-byte aligned (the parts hold t4Vectors)
     // ---- cPlayer ----
     cInput* Input;             // 0xDF0 [P] getInput/setInput; [R] func_001446E0, cPlayer_setInput; [O]
@@ -63,8 +63,8 @@ struct cPlayer {
 
 // Virtual slots of _vt$7cPlayer (D_00458338); names from the preview vtable where known.
 enum {
-    kPlayerVt_getControlCmd = 1,    // func_00127998 (reads Input; [O] cPlayer::getControlCmd)
-    kPlayerVt_slot2 = 2             // func_00128660 (tail-calls cRiderHandler_writeToReplayFrame)
+    kPlayerVt_getControlCmd = 1,    // cPlayer_getControlCmd (reads Input; [O] cPlayer::getControlCmd)
+    kPlayerVt_slot2 = 2             // cPlayer_writeToReplayFrame (tail-calls cRiderHandler_writeToReplayFrame)
 };
 
 CHECK_OFFSET(cPlayer, unk_000, 0x000);

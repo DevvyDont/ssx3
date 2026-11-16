@@ -457,19 +457,31 @@ extern "C" void cFEAsyncManager_LoadDataFile(cFEAsyncManager* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A3DC8);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_cFEStateNetMessenger);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern void* D_00467F28[];
 extern void* D_004A3E90_v __asm__("cBXString_EmptyString");
 
-// Constructor for the memory-card screen: base init, vtable and empty-string fields.
-extern "C" void* func_001A3DC8(cFEStateNetMessenger* self, void* a1, void* a2)
+/**
+ * Constructs the online messenger (buddy list) screen state.
+ *
+ * Runs the cFEStateNet constructor func_001A8500 with @p pEngine and @p pParentState, then stores the messenger vtable D_00467F28 and
+ * sets mHashName to 70 (0x46). The cBXString members mszFoundName, mszSearchName and unk_6E0 start as the shared empty
+ * string (cBXString_EmptyString), miSelectedIndex is -1, and mLastRefreshFrame, the mNames vector's three pointers and
+ * miScrollOffset are zeroed. Its only caller, func_001A9B58, allocates the object with cMemMan_alloc(0x6FC,
+ * "cFEStateNetMessenger").
+ *
+ * @param pEngine  the UI engine (stored in mpEngine by the base constructor)
+ * @param pParentState  the parent state (mpParentState)
+ * @return @p self
+ */
+extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger(cFEStateNetMessenger* self, void* pEngine, void* pParentState)
 {
     // An unused 16-byte local is needed to reproduce the 0x30-byte frame.
     int unused[4];
-    func_001A8500_3(self, (int)a1, (int)a2);
+    func_001A8500_3(self, (int)pEngine, (int)pParentState);
     void* empty = D_004A3E90_v;
     self->mVtbl = D_00467F28;
     self->mszFoundName = (char*)empty;
@@ -511,7 +523,7 @@ extern "C" void func_001A3E30()
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A3EA0);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger__cFEStateNetMessenger);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -541,8 +553,18 @@ static inline void Dealloc1A3EA0(void** p, int n)
 
 
 
-// Destructor for the memory-card screen.
-extern "C" void func_001A3EA0(cFEStateNetMessenger* self, int flags)
+/**
+ * Destroys the online messenger screen state and its buddy-name list.
+ *
+ * Restores the messenger vtable, calls the parent state's virtual at vtable entry 32 (for a cFEStateNet parent
+ * func_001A8830, which sets the player's buddy presence through func_00262768), destroys every name in mNames
+ * (func_001A5450) and frees the vector's storage (operator_delete when its capacity is one pointer, cMemMan_free
+ * otherwise), destroys the cBXStrings unk_6E0, mszSearchName and mszFoundName, and ends in the cFEStateNet destructor
+ * func_001A85D0 with @p flags.
+ *
+ * @param flags  g++ destructor flags, passed to the base destructor (bit 0 set frees the object)
+ */
+extern "C" void cFEStateNetMessenger__cFEStateNetMessenger(cFEStateNetMessenger* self, int flags)
 {
     self->mVtbl = (void**)D_00467F28;
     char* child = (char*)self->mpParentState;
@@ -559,7 +581,7 @@ extern "C" void func_001A3EA0(cFEStateNetMessenger* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A3F68);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -568,7 +590,14 @@ extern "C" void func_001A5898(cFEStateNetMessenger* self);
 extern "C" void func_001A6978(cFEStateNetMessenger* self);
 extern char str_279EAMessenger[];
 
-extern "C" void func_001A3F68(cFEStateNetMessenger* self)
+/**
+ * Creates the messenger's UI screen and fills it.
+ *
+ * Adds the screen "279EAMessenger" (GetHashValue32 of str_279EAMessenger) through cUIEngine_addScreenByHashName with
+ * this state as owner and stores it in mpScreen. When it exists, plays frame 0, loads the buddy names (func_001A5898)
+ * and draws the list (func_001A6978).
+ */
+extern "C" void cFEStateNetMessenger_onCreateScreen(cFEStateNetMessenger* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, ((cFEStateNet*)self), GetHashValue32(str_279EAMessenger), 0);
@@ -582,22 +611,29 @@ extern "C" void func_001A3F68(cFEStateNetMessenger* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A3FE0);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_onUpdate);
 #ifdef SKIP_ASM
 extern void* cAppMan_TheAppMan;
 extern "C" void func_001A6978(cFEStateNetMessenger* self);
-extern "C" void* func_001A8770(cFEStateNet* self);
+extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
 
-extern "C" void func_001A3FE0(cFEStateNetMessenger* self)
+/**
+ * Per-frame update of the messenger screen; redraws the buddy list about once a second.
+ *
+ * Reads the frame counter (cAppMan_TheAppMan + 0x18). When 1 to 59 frames have passed since mLastRefreshFrame it only
+ * runs cFEStateNet's update (cFEStateNet_onUpdate); otherwise it stores the frame in mLastRefreshFrame, redraws the list
+ * (func_001A6978) and then runs cFEStateNet_onUpdate.
+ */
+extern "C" void cFEStateNetMessenger_onUpdate(cFEStateNetMessenger* self)
 {
     int now = *(int*)((char*)cAppMan_TheAppMan + 0x18);
     int elapsed = now - self->mLastRefreshFrame;
     if (elapsed >= 1 && elapsed <= 59) {
-        func_001A8770((cFEStateNet*)self);
+        cFEStateNet_onUpdate((cFEStateNet*)self);
     } else {
         self->mLastRefreshFrame = now;
         func_001A6978(self);
-        func_001A8770((cFEStateNet*)self);
+        cFEStateNet_onUpdate((cFEStateNet*)self);
     }
 }
 #endif
@@ -635,7 +671,7 @@ extern "C" void func_001A4040(cFEStateNetMessenger* self, void* menu)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4170);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_onInputBegin);
 #ifdef SKIP_ASM
 struct sVE1A4170 {
     short delta;
@@ -645,7 +681,17 @@ struct sVE1A4170 {
 
 extern "C" void func_001A6C40(cFEStateNetMessenger* self, int a1);
 
-extern "C" int func_001A4170(cFEStateNetMessenger* self, void* obj)
+/**
+ * Handles the start of an input on the messenger screen: L1 jumps to the buddy with something pending.
+ *
+ * Calls @p obj's virtual at vtable entry 27 (cFEInput_isLShift1 for a cFEInput). When it is set, selects entry
+ * miSelectedIndex (set by func_001A52B0 to the buddy whose challenge or message waits first) in the "playerMenu" menu
+ * (func_001A6C40) and reports the input handled.
+ *
+ * @param obj  the input (On Tour: cUIInput* pInput)
+ * @return 1 when L1 was pressed, otherwise 0
+ */
+extern "C" int cFEStateNetMessenger_onInputBegin(cFEStateNetMessenger* self, void* obj)
 {
     int handled;
     sVE1A4170* vt = *(sVE1A4170**)((char*)obj + 0x8);
@@ -660,7 +706,7 @@ extern "C" int func_001A4170(cFEStateNetMessenger* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A41C0);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
@@ -692,7 +738,16 @@ public:
 
 static inline int IsHash1A41C0(int id, char* name) { return id == GetHashValue32(name); }
 
-extern "C" void func_001A41C0(cFEStateNetMessenger* self, cUIText* text)
+/**
+ * Sets up the messenger screen's widgets as the screen creates them.
+ *
+ * By the widget's hash name (+0x38): "TextTitle" gets the string kT_BTNEAMessenger and is shown (virtual setVisible,
+ * entry 9); "TextFindUser" gets kT_231FindPlayer and is shown; "TextBuddyLocation" is shown and gets flag 0x80 in its
+ * word +0x14; "TextEqGoToNext" is hidden and gets kT_279GoToNext; "playerMenu" gets flag 1 in +0x14.
+ *
+ * @param text  the widget being created (On Tour: cUIThing* pWidget)
+ */
+extern "C" void cFEStateNetMessenger_onWidgetCreate(cFEStateNetMessenger* self, cUIText* text)
 {
     cFEVObj_001A41C0* obj = (cFEVObj_001A41C0*)text;
     if (IsHash1A41C0(*(int*)((char*)text + 0x38), str_TextTitle)) {
@@ -714,11 +769,22 @@ extern "C" void func_001A41C0(cFEStateNetMessenger* self, cUIText* text)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4300);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_onWidgetMenu);
 #ifdef SKIP_ASM
 extern "C" void func_001A6978(cFEStateNetMessenger* self);
 
-extern "C" int func_001A4300(cFEStateNetMessenger* self, int a1, int event, int value)
+/**
+ * Tracks the buddy list's scrolling: a menu scroll event stores the new top row and redraws the list.
+ *
+ * On @p event 4, stores @p value in miScrollOffset, redraws the list (func_001A6978) and returns 0. Any other event
+ * returns 257 (0x101) and changes nothing.
+ *
+ * @param pMenu  the menu widget (unused)
+ * @param event  the menu event
+ * @param value  the event's value: the new first visible row for event 4
+ * @return 0 for event 4, otherwise 257
+ */
+extern "C" int cFEStateNetMessenger_onWidgetMenu(cFEStateNetMessenger* self, int pMenu, int event, int value)
 {
     if (event == 4) {
         self->miScrollOffset = value;
@@ -730,12 +796,12 @@ extern "C" int func_001A4300(cFEStateNetMessenger* self, int a1, int event, int 
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4330);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 int GetHashValue32(char* str);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_00260F80();
@@ -782,8 +848,27 @@ struct sObj_4330 {
     sVE_4330* vt;
 };
 
-// Message handler for the slot-list screen: picks a slot by its button hash, or highlights it.
-extern "C" void func_001A4330(cFEStateNetMessenger* self, sObj_4330* w, int msg)
+/**
+ * Handles the messenger screen's widget events: the buddy rows, the find-user keyboard and going back.
+ *
+ * By @p msg:
+ * - 1 (focus): for the row "persona%02d" i (0..14) that @p pWidget is, selects buddy i + miScrollOffset (func_001A6070,
+ *   func_001A5FB8, func_001A5128) and highlights the row (func_001A66A8(.., i, 1)), then runs cFEStateNet's handler
+ *   cFEStateNet_onWidgetEvent.
+ * - 2 (focus lost): hides that row's "ps2X%02d" icon, sets @p pWidget's colour (virtual setColour) to (1, 0, 0, 0) and
+ *   recolours the row by the buddy's state (func_001A66A8(.., i, 0)), then cFEStateNet_onWidgetEvent.
+ * - 5 (a row picked): takes the buddy at index @p pWidget +0x18 from the BuddyMan session (created and connected on demand),
+ *   makes that name the current user (func_001A9890) and opens the user popup (func_001AB370).
+ * - 6: reports event 20 to the parent state (its onPopupEvent, vtable entry 17).
+ * - 8: opens the keyboard popup (func_001A9150: title kT_231FindPlayer, popup id 1, at most 16 characters), sets its
+ *   words +0x438 and +0x58 to 1 and changes two keys (cKeyboardPopup_setIncludeKey 75 on, 53 off).
+ * - 13 (the keyboard finished): func_001A4750 (find the typed user, or send to the current one).
+ * - anything else: cFEStateNet_onWidgetEvent.
+ *
+ * @param pWidget  the widget (On Tour: cUIThing* pWidget)
+ * @param msg  the widget event
+ */
+extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, sObj_4330* pWidget, int msg)
 {
     char buf[0x20];
     switch (msg) {
@@ -800,7 +885,7 @@ extern "C" void func_001A4330(cFEStateNetMessenger* self, sObj_4330* w, int msg)
         cKeyboardPopup_setIncludeKey(self->mpKeyboard, 53, 0, 2);
         break;
     case 5: {
-        int idx = *(int*)((char*)w + 0x18);
+        int idx = *(int*)((char*)pWidget + 0x18);
         if (idx < 0) {
             break;
         }
@@ -827,7 +912,7 @@ extern "C" void func_001A4330(cFEStateNetMessenger* self, sObj_4330* w, int msg)
     case 1:
         for (int i = 0; i < 15; i++) {
             sprintf(buf, str_personapct_02d, i);
-            int id = *(int*)((char*)w + 0x38);
+            int id = *(int*)((char*)pWidget + 0x38);
             if (id == GetHashValue32(buf)) {
                 func_001A6070_4330(((char*)self), i + self->miScrollOffset);
                 func_001A5FB8_4330(((char*)self), i);
@@ -836,28 +921,28 @@ extern "C" void func_001A4330(cFEStateNetMessenger* self, sObj_4330* w, int msg)
                 break;
             }
         }
-        func_001A8918((cFEStateNet*)self, (int)w, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)pWidget, msg);
         break;
     case 2: {
         for (int i = 0; i < 15; i++) {
             sprintf(buf, str_personapct_02d, i);
-            int id = *(int*)((char*)w + 0x38);
+            int id = *(int*)((char*)pWidget + 0x38);
             if (id == GetHashValue32(buf)) {
                 sprintf(buf, str_ps2Xpct_02d, i);
                 sObj_4330* o = (sObj_4330*)cUIScreen_getObjectByHashName_4330(self->mpScreen, GetHashValue32(buf));
                 if (o != 0) {
                     o->vt[9].fn((char*)o + o->vt[9].delta, 0);
                 }
-                ((cObjV_4330*)w)->set(cVec_4330(1.0f, 0.0f, 0.0f, 0.0f));
+                ((cObjV_4330*)pWidget)->set(cVec_4330(1.0f, 0.0f, 0.0f, 0.0f));
                 func_001A66A8_4330(((char*)self), i, 0);
                 break;
             }
         }
-        func_001A8918((cFEStateNet*)self, (int)w, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)pWidget, msg);
         break;
     }
     default:
-        func_001A8918((cFEStateNet*)self, (int)w, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)pWidget, msg);
         break;
     }
 }
@@ -1112,7 +1197,7 @@ extern "C" void func_001A4B20(cFEStateNetMessenger* self, void* popup, unsigned 
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A4C58);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_onPopupEvent);
 #ifdef SKIP_ASM
 class cFEVObj_001A4C58 {
 public:
@@ -1157,20 +1242,30 @@ public:
 
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 
-extern "C" void func_001A4C58(cFEStateNetMessenger* self, void* a1, int a2)
+/**
+ * Routes an event from one of the messenger's popups to the handler for that popup.
+ *
+ * Switches on the popup's miMiscData (@p pPopup +0x18, the id its creator gave it): 2057 goes to the messenger's own
+ * virtual at vtable entry 33 (func_001A4928), 2059 to entry 34 (func_001A49A0) and 2060 to entry 35 (func_001A4B20),
+ * each with (@p pPopup, @p popupEvent); any other popup goes to cFEStateNet's handler func_001A97B8.
+ *
+ * @param pPopup  the popup (On Tour: cUIState* pPopup)
+ * @param popupEvent  the popup event
+ */
+extern "C" void cFEStateNetMessenger_onPopupEvent(cFEStateNetMessenger* self, void* pPopup, int popupEvent)
 {
-    switch (*(unsigned int*)((char*)a1 + 0x18)) {
+    switch (*(unsigned int*)((char*)pPopup + 0x18)) {
     case 2057:
-        ((cFEVObj_001A4C58*)self)->v33(a1, a2);
+        ((cFEVObj_001A4C58*)self)->v33(pPopup, popupEvent);
         break;
     case 2059:
-        ((cFEVObj_001A4C58*)self)->v34(a1, a2);
+        ((cFEVObj_001A4C58*)self)->v34(pPopup, popupEvent);
         break;
     case 2060:
-        ((cFEVObj_001A4C58*)self)->v35(a1, a2);
+        ((cFEVObj_001A4C58*)self)->v35(pPopup, popupEvent);
         break;
     default:
-        func_001A97B8(((cFEVObj_001A4C58*)self), a1, a2);
+        func_001A97B8(((cFEVObj_001A4C58*)self), pPopup, popupEvent);
         break;
     }
 }
@@ -2812,19 +2907,19 @@ extern "C" void cFEStateReadMessagePopup_onCreateScreen(cFEStateReadMessagePopup
 }
 #endif
 
-extern "C" void* func_001A8770(cFEStateNet* self);
+extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
 
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateReadMessagePopup_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the private-message popup: just the cFEStateNet update (func_001A8770).
+ * Updates the private-message popup: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEStateReadMessagePopup_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -2874,7 +2969,7 @@ extern "C" void func_00262690(void* self, int a1, void* a2);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_001CE468(void* self, int v);
 extern "C" void func_001A81F0(cFEStateReadMessagePopup* self);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A7ED8(cFEStateReadMessagePopup* self, const char* name);
 extern "C" void func_001A9090(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern char D_004A1408[];
@@ -2909,7 +3004,7 @@ struct cFEObj_001A7BB8 {
  * key 0x4B included and mbReferEventsToParent set. Event 13 (the keyboard finished) adds the typed text to the
  * conversation (func_001A7ED8), makes sure BuddyMan exists and is connected, sends the text to mszSender
  * (func_00262690) and refreshes the list (func_001A81F0). Event 7 is ignored; the rest go to the cFEStateNet handler
- * (func_001A8918).
+ * (cFEStateNet_onWidgetEvent).
  *
  * @param pWidget  the widget (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
@@ -2944,7 +3039,7 @@ extern "C" void cFEStateReadMessagePopup_onWidgetEvent(cFEStateReadMessagePopup*
         func_001A81F0(self);
         break;
     default:
-        func_001A8918((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
         break;
     }
 }
@@ -3501,7 +3596,7 @@ void func_001A8768(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A8770);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNet_onUpdate);
 #ifdef SKIP_ASM
 class cFEAsync1A8770 {
 public:
@@ -3540,7 +3635,17 @@ public:
 extern "C" void cUIState_onUpdate(void*);
 extern "C" void* func_001A8B88(void* self, int size, int a2);
 
-extern "C" void* func_001A8770(cFEStateNet* self)
+/**
+ * Per-frame update shared by the online front-end states: polls the buddy session, blinks the hint icons, updates the
+ * screens and delivers pending net events.
+ *
+ * Calls the state's own virtuals at vtable entries 27 (func_001AAB68: polls the session for new messages and challenges
+ * at most once per 60 frames) and 28 (func_001AA9B0: blinks "IconMessageHint" / "TextMessageCount" /
+ * "IconChallengeHint"), then cUIState_onUpdate, and returns handleEvent func_001A8B88(self, 276, 0).
+ *
+ * @return func_001A8B88's result
+ */
+extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self)
 {
     ((cFEAsync1A8770*)self)->v27();
     ((cFEAsync1A8770*)self)->v28();
@@ -3550,7 +3655,7 @@ extern "C" void* func_001A8770(cFEStateNet* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A87D0);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNet_onGainFocus);
 #ifdef SKIP_ASM
 struct sVE1A87D0 {
     short delta;
@@ -3560,11 +3665,20 @@ struct sVE1A87D0 {
 
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 
-extern "C" void func_001A87D0(cFEStateNet* self, int a1)
+/**
+ * Runs when an online front-end state gets the focus: refreshes the buddy presence and enables event processing.
+ *
+ * Calls the state's own virtual at vtable entry 32 (cFEStateNet's func_001A8830 unless overridden, which sets the
+ * player's buddy presence through func_00262768), then cUIState_onGainFocus with @p pPrevState, and sets unk_048 to 1
+ * (func_001DE8A8 reports the state as processing events only while it is set).
+ *
+ * @param pPrevState  the state that had the focus (On Tour: cUIState* pPrevState)
+ */
+extern "C" void cFEStateNet_onGainFocus(cFEStateNet* self, int pPrevState)
 {
     sVE1A87D0* vt = (sVE1A87D0*)self->mVtbl;
     vt[32].fn((char*)self + vt[32].delta);
-    cUIState_onGainFocus(self, a1);
+    cUIState_onGainFocus(self, pPrevState);
     self->unk_048 = 1;
 }
 #endif
@@ -3647,7 +3761,7 @@ extern "C" void func_001A8830(cFEStateNet* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001A8918);
+INCLUDE_ASM("fe/feasyncfile", cFEStateNet_onWidgetEvent);
 #ifdef SKIP_ASM
 class cFEVObj_001A8918 {
 public:
@@ -3684,9 +3798,21 @@ extern "C" void* func_001D9D48(void* mem, void* a1, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char str_cFEStateNetHelpPopup[];
 
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg)
+/**
+ * Default widget-event handling for the online front-end states: event 7 opens the help popup.
+ *
+ * When @p pWidget is set and @p msg is 7, allocates a cFEStateNetHelpPopup (cMemMan_alloc(320, "cFEStateNetHelpPopup"),
+ * constructed by func_001D9D48 with mpEngine and this state as parent), sets its word +0x50 to 1 (On Tour has
+ * mbReferEventsToParent there), lets the state fill it through its own virtual at vtable entry 25 (the messenger's is
+ * func_001A4040) and pushes it on the engine's state stack (cUIStateStack_pushPopup on mpEngine + 0x18). Other events
+ * are ignored.
+ *
+ * @param pWidget  the widget (On Tour: cUIThing* pWidget)
+ * @param msg  the widget event
+ */
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int pWidget, int msg)
 {
-    if (a1 != 0 && msg == 7) {
+    if (pWidget != 0 && msg == 7) {
         void* p = func_001D9D48(cMemMan_alloc(320, str_cFEStateNetHelpPopup, 0x100, 0), self->mpEngine, self);
         *(int*)((char*)p + 0x50) = 1;
         ((cFEVObj_001A8918*)self)->v25(p);
@@ -4711,13 +4837,13 @@ extern "C" void func_001A9AB8(cFEStateNet* self, cUIListBox_001A9AB8* box, int v
 INCLUDE_ASM("fe/feasyncfile", func_001A9B58);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001A3DC8(cFEStateNetMessenger* mem, void* engine, void* owner);
+extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger(cFEStateNetMessenger* mem, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern const char str_cFEStateNetMessenger[];
 
 extern "C" void func_001A9B58(cFEStateNet* self)
 {
-    void* messenger = func_001A3DC8((cFEStateNetMessenger*)cMemMan_alloc(1788, str_cFEStateNetMessenger, 0x100, 0), self->mpEngine, self);
+    void* messenger = cFEStateNetMessenger_cFEStateNetMessenger((cFEStateNetMessenger*)cMemMan_alloc(1788, str_cFEStateNetMessenger, 0x100, 0), self->mpEngine, self);
     *(int*)((char*)messenger + 0x18) = 2099;
     cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, messenger);
 }
@@ -6187,13 +6313,13 @@ extern "C" void cFEUseExistingAccount_onCreateScreen(cFEUseExistingAccount* self
 INCLUDE_ASM("fe/feasyncfile", cFEUseExistingAccount_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the "use existing account" state: just the cFEStateNet update (func_001A8770).
+ * Updates the "use existing account" state: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEUseExistingAccount_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -6424,7 +6550,7 @@ extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, int a1, void* owner, int a3, int a4, int a5);
@@ -6545,7 +6671,7 @@ extern "C" void cFEUseExistingAccount_onWidgetEvent(cFEUseExistingAccount* self,
         func_001ACDD0_C5C0(((char*)self));
         break;
     default:
-        func_001A8918((cFEStateNet*)self, (int)pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)pWidget, msg);
         break;
     }
 }
@@ -6936,13 +7062,13 @@ extern "C" void cFEStateSelectPersona_onCreateScreen(cFEStateSelectPersona* self
 INCLUDE_ASM("fe/feasyncfile", cFEStateSelectPersona_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the persona-select state: just the cFEStateNet update (func_001A8770).
+ * Updates the persona-select state: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEStateSelectPersona_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -7198,7 +7324,7 @@ extern "C" void cFEStateSelectPersona_onWidgetEvent(cFEStateSelectPersona* selfp
     case 14:
         break;
     default:
-        func_001A8918((cFEStateNet*)selfp, (int)pWidget, Event);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)selfp, (int)pWidget, Event);
         break;
     }
 }
@@ -7655,7 +7781,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_onGainFocus);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_001A87D0(cFEStateNet* self, int a1);
+extern "C" void cFEStateNet_onGainFocus(cFEStateNet* self, int a1);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern "C" void func_001AF098(cFEStateChallengePopup* self, int a1);
 extern "C" void func_001AEC60(cFEStateChallengePopup* self, int a1);
@@ -7670,7 +7796,7 @@ extern char D_004412B8[];
 /**
  * Refreshes the challenge options when the popup regains focus.
  *
- * Runs the cFEStateNet onGainFocus (func_001A87D0), shows the network interface's bIsRankedGame in
+ * Runs the cFEStateNet onGainFocus (cFEStateNet_onGainFocus), shows the network interface's bIsRankedGame in
  * "ListBoxRankedGame" (row ranked ^ 1), picks the event's allowed-options table for mpEventOptions by the event kind
  * D_00535C12 (1 D_00441278, 2 D_00441298, 3 D_00441288, 4 D_004412B8, 5 D_004412A8, else D_00441268), then updates
  * the option widgets for ranked play (func_001AF098) and locks them while mbChallengeSent (func_001AEC60). The
@@ -7681,7 +7807,7 @@ extern char D_004412B8[];
 // Refreshes the race-options screen and picks the mode title for the current game mode.
 extern "C" void cFEStateChallengePopup_onGainFocus(cFEStateChallengePopup* self, int pPrevState)
 {
-    func_001A87D0((cFEStateNet*)self, pPrevState);
+    cFEStateNet_onGainFocus((cFEStateNet*)self, pPrevState);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     cUIListBox_setCurrentEntryByIndex(self->mpLBRankedGame, cBENetworkInterface_networkOpt.bIsRankedGame ^ 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -7715,13 +7841,13 @@ extern "C" void cFEStateChallengePopup_onGainFocus(cFEStateChallengePopup* self,
 INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the challenge popup: just the cFEStateNet update (func_001A8770).
+ * Updates the challenge popup: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEStateChallengePopup_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -8110,7 +8236,7 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
     case 7:
         break;
     default:
-        func_001A8918((cFEStateNet*)self, (int)pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)pWidget, msg);
         break;
     }
 }
@@ -9028,13 +9154,13 @@ extern "C" void func_001B00B8(cFEStateChallengeReceivedPopup* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the challenge-received popup: just the cFEStateNet update (func_001A8770).
+ * Updates the challenge-received popup: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEStateChallengeReceivedPopup_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -9187,7 +9313,7 @@ extern "C" void cFEStateChallengeReceivedPopup_onWidgetCreate(cFEStateChallengeR
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_onWidgetEvent);
 #ifdef SKIP_ASM
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001B0C08(cFEStateChallengeReceivedPopup* self);
 extern "C" void func_001B0E10(cFEStateChallengeReceivedPopup* self);
 extern "C" void func_0025FB58(void* self, int a1, int a2);
@@ -9224,8 +9350,8 @@ extern "C" void cFEStateChallengeReceivedPopup_onWidgetEvent(cFEStateChallengeRe
     case 7:
         break;
     default:
-        // PORT: the unit declares func_001A8918 with an int a1; obj is passed through as int
-        func_001A8918((cFEStateNet*)self, (int)obj, msg);
+        // PORT: the unit declares cFEStateNet_onWidgetEvent with an int a1; obj is passed through as int
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)obj, msg);
         break;
     }
 }
@@ -9784,13 +9910,13 @@ extern "C" void cFEStateOnlineCharacterSelect_onCreateScreen(cFEStateOnlineChara
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineCharacterSelect_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the online rider-select state: just the cFEStateNet update (func_001A8770).
+ * Updates the online rider-select state: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEStateOnlineCharacterSelect_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -9925,7 +10051,7 @@ int GetHashValue32(char* str);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001474A8(void* iface, int a1, int a2);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001B1A08(cFEStateOnlineCharacterSelect* self, int on, int a2);
@@ -10033,7 +10159,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
             func_001B1B10(self, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect), 0);
         }
     default:
-        func_001A8918((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
         break;
     }
 }
@@ -10725,19 +10851,19 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom_onUpdate);
 #ifdef SKIP_ASM
 extern void* cAppMan_TheAppMan;
 extern "C" void func_001B3BF0(cFEStateChatRoom* self);
-extern "C" void* func_001A8770(cFEStateNet* self);
+extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
 
 /**
  * Updates the chat room: refreshes the players' connection-quality icons (func_001B3BF0) every 10000th frame.
  *
- * The frame counter is cAppMan_TheAppMan's word at +0x18; then the cFEStateNet update (func_001A8770) runs.
+ * The frame counter is cAppMan_TheAppMan's word at +0x18; then the cFEStateNet update (cFEStateNet_onUpdate) runs.
  */
 extern "C" void cFEStateChatRoom_onUpdate(cFEStateChatRoom* self)
 {
     if (*(int*)((char*)cAppMan_TheAppMan + 0x18) % 10000 == 0) {
         func_001B3BF0(self);
     }
-    func_001A8770((cFEStateNet*)self);
+    cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -11304,7 +11430,7 @@ extern "C" void cFEStateChatRoom_onWidgetEvent(cFEStateChatRoom* self, char* msg
                 return;
             }
         }
-        func_001A8918((cFEStateNet*)self, (int)msg, ev);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)msg, ev);
         return;
     case 2:
         for (i = 0; i < 6; i++) {
@@ -11315,7 +11441,7 @@ extern "C" void cFEStateChatRoom_onWidgetEvent(cFEStateChatRoom* self, char* msg
                 return;
             }
         }
-        func_001A8918((cFEStateNet*)self, (int)msg, ev);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)msg, ev);
         return;
     case 6: {
         self->mbExiting = 1;
@@ -11339,7 +11465,7 @@ extern "C" void cFEStateChatRoom_onWidgetEvent(cFEStateChatRoom* self, char* msg
         func_001B33D8(self);
         return;
     }
-    func_001A8918((cFEStateNet*)self, (int)msg, ev);
+    cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)msg, ev);
 }
 #endif
 
@@ -11439,17 +11565,17 @@ extern "C" int cFEStateChatRoom_onGainTransition(cFEStateChatRoom* self, int bFi
 INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void func_001B3BF0(cFEStateChatRoom* self);
-extern "C" void func_001A87D0(cFEStateNet* self, int a1);
+extern "C" void cFEStateNet_onGainFocus(cFEStateNet* self, int a1);
 
 /**
- * Refreshes the connection-quality icons (func_001B3BF0), then runs the cFEStateNet onGainFocus (func_001A87D0).
+ * Refreshes the connection-quality icons (func_001B3BF0), then runs the cFEStateNet onGainFocus (cFEStateNet_onGainFocus).
  *
  * @param pPrevState  the state that had focus before (On Tour pPrevState)
  */
 extern "C" void cFEStateChatRoom_onGainFocus(cFEStateChatRoom* self, int pPrevState)
 {
     func_001B3BF0(self);
-    func_001A87D0((cFEStateNet*)self, pPrevState);
+    cFEStateNet_onGainFocus((cFEStateNet*)self, pPrevState);
 }
 #endif
 
@@ -12098,7 +12224,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onUpdate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_001A8770(cFEStateNet* self);
+extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
 extern "C" void func_001B4888(cFEStateNetConfig* self, int a1, int a2, int a3);
 extern "C" void func_001B5068(cFEStateNetConfig* self, int a1);
 extern "C" void func_001B43A8(cFEStateNetConfig* self);
@@ -12137,7 +12263,7 @@ static inline int VCall1B41A8(int slot)
  * error popup 0x842 (slot 53 returns 0: func_001B5068(self, -1), func_001B4888(self, 0x842, 0x18, D_004A1B80)) or
  * pops the state stack (func_0039F698 on mpEngine + 0x18), then returns to 0; while still waiting it falls through
  * to state 0, which (idle) calls the object's slot 5 with D_004A1B80. States 6 -> 7, 7 (idle) func_002C67E8, -> 8,
- * 8 (idle) func_001B45E8 (connect with the chosen setting). Ends with the cFEStateNet update (func_001A8770).
+ * 8 (idle) func_001B45E8 (connect with the chosen setting). Ends with the cFEStateNet update (cFEStateNet_onUpdate).
  */
 // Per-frame update for the online-login screen: steps the login state machine on the network object.
 extern "C" void cFEStateNetConfig_onUpdate(cFEStateNetConfig* self)
@@ -12198,7 +12324,7 @@ extern "C" void cFEStateNetConfig_onUpdate(cFEStateNetConfig* self)
         }
         break;
     }
-    func_001A8770((cFEStateNet*)self);
+    cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -13579,7 +13705,7 @@ int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_00194A60(void* mem, int a1);
 extern "C" void func_001A86E8(int on);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
@@ -13617,7 +13743,7 @@ static inline int IsHash1B60A8(int id, char* name) { return id == GetHashValue32
  * miState 6); 1 ("TextCreateConfig") opens a Yes/No popup "kT_POPUP200CreateEdit" (id 0x844, default option 1).
  * Event 9 on "LBSettings" stores its row (+0x319) in miSelectedSetting and selects it in mpLBAdapters; event 8
  * calls func_001B5268 (menu row 0); event 6 sets the FE path offline (func_001A86E8(0)) and switches to a new
- * cFEStateMainMenu (func_00194A60). Others go to the cFEStateNet handler (func_001A8918). A null widget is ignored.
+ * cFEStateMainMenu (func_00194A60). Others go to the cFEStateNet handler (cFEStateNet_onWidgetEvent). A null widget is ignored.
  *
  * @param pWidget  the widget, as an int (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
@@ -13667,7 +13793,7 @@ extern "C" void cFEStateNetConfig_onWidgetEvent(cFEStateNetConfig* self, int pWi
         func_001A8A40(self, func_00194A60(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), (int)self->mpEngine));
         break;
     default:
-        func_001A8918((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
         break;
     }
 }
@@ -14003,7 +14129,7 @@ extern "C" int cFEStateAuthDNAS_handleEvent(cFEStateAuthDNAS* self, int msg, int
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNAS_onWidgetEvent);
 #ifdef SKIP_ASM
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 
 /**
  * Passes the DNAS screen's widget events to the cFEStateNet handler, except event 13, which is ignored.
@@ -14014,7 +14140,7 @@ extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
 extern "C" void cFEStateAuthDNAS_onWidgetEvent(cFEStateAuthDNAS* self, int pWidget, int msg)
 {
     if (msg != 13) {
-        func_001A8918((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
     }
 }
 #endif
@@ -14029,7 +14155,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void USTR_copy(void* dst, void* src);
 extern "C" int USTR_length(void* s);
 void cMemMan_free(void* p);
-extern "C" void* func_001A8770(cFEStateNet* self);
+extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
 extern "C" void func_002562D0(void* self);
 extern "C" void func_002563F8(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d)
@@ -14134,7 +14260,7 @@ extern "C" void cFEStateAuthDNAS_onUpdate(cFEStateAuthDNAS* self)
         break;
     }
     func_002563F8(self->mpAuth);
-    func_001A8770((cFEStateNet*)self);
+    cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -14435,12 +14561,12 @@ public:
     virtual void v17(void* sender, int msg);
 };
 
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 
 /**
  * Closes the DNAS error popup on select or back: tells the parent state (slot 17, onPopupEvent) event 0xF.
  *
- * Events 7 and 8 are ignored; the rest go to the cFEStateNet handler (func_001A8918).
+ * Events 7 and 8 are ignored; the rest go to the cFEStateNet handler (cFEStateNet_onWidgetEvent).
  *
  * @param pWidget  the widget, as an int (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
@@ -14456,7 +14582,7 @@ extern "C" void cFEStateAuthDNASError_onWidgetEvent(cFEStateAuthDNASError* self,
     case 8:
         break;
     default:
-        func_001A8918(((cFEStateNet*)self), pWidget, msg);
+        cFEStateNet_onWidgetEvent(((cFEStateNet*)self), pWidget, msg);
         break;
     }
 }
@@ -15875,13 +16001,13 @@ extern "C" void cFEStateCreateStep1_onCreateScreen(cFEStateCreateStep1* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs one frame of account creation step 1: only the cFEStateNet update (func_001A8770).
+ * Runs one frame of account creation step 1: only the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (the pending-event handler's value)
+ * @return cFEStateNet_onUpdate()'s result (the pending-event handler's value)
  */
 void* cFEStateCreateStep1_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -16028,7 +16154,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1);
@@ -16170,7 +16296,7 @@ extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, cha
     case 14:
         break;
     default:
-        func_001A8918((cFEStateNet*)self, (int)w, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)w, msg);
         break;
     }
 }
@@ -17065,13 +17191,13 @@ extern "C" void cFEStateCreateStep2_onCreateScreen(cFEStateCreateStep2* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs one frame of account creation step 2: only the cFEStateNet update (func_001A8770).
+ * Runs one frame of account creation step 2: only the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (the pending-event handler's value)
+ * @return cFEStateNet_onUpdate()'s result (the pending-event handler's value)
  */
 void* cFEStateCreateStep2_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -17126,7 +17252,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cBXString_Reset(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIListBox_setEntryByAsciiString(void* box, int index, const char* str, int a3);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* self, int a1, int a2);
 extern "C" void func_001BA9F8(cFEStateCreateStep2* self, int a1);
@@ -17214,7 +17340,7 @@ extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, int
         break;
     }
     default:
-        func_001A8918((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
         break;
     }
 }
@@ -18135,13 +18261,13 @@ extern "C" void cFEStateCreateDuplicate_onCreateScreen(cFEStateCreateDuplicate* 
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateDuplicate_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the duplicate-name state: just the cFEStateNet update (func_001A8770).
+ * Updates the duplicate-name state: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEStateCreateDuplicate_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -18201,7 +18327,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, int a1);
@@ -18297,7 +18423,7 @@ extern "C" void cFEStateCreateDuplicate_onWidgetEvent(cFEStateCreateDuplicate* s
         }
         break;
     default:
-        func_001A8918((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
         break;
     }
 }
@@ -18911,13 +19037,13 @@ extern "C" int cFEStateLobbyMenu_onGainTransition(cFEStateLobbyMenu* self, int r
 INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs one frame of the lobby screen: only the cFEStateNet update (func_001A8770).
+ * Runs one frame of the lobby screen: only the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (the pending-event handler's value)
+ * @return cFEStateNet_onUpdate()'s result (the pending-event handler's value)
  */
 void* cFEStateLobbyMenu_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -19189,7 +19315,7 @@ extern "C" void cFEStateLobbyMenu_onWidgetEvent(cState_D1B8* self, char* pWidget
         if (n < 4) {
             self->selVal = (unsigned char)self->items[n][0x319];
         }
-        func_001A8918((cFEStateNet*)self, (int)pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)pWidget, msg);
         break;
     }
     case 8:
@@ -19201,7 +19327,7 @@ extern "C" void cFEStateLobbyMenu_onWidgetEvent(cState_D1B8* self, char* pWidget
         func_001BD428_D1B8(self);
         break;
     default:
-        func_001A8918((cFEStateNet*)self, (int)pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)pWidget, msg);
         break;
     }
 }
@@ -20233,13 +20359,13 @@ extern "C" void* cFEStateNetCreateRoomPopup_onCreateScreen(cFEStateNet* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetCreateRoomPopup_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the create-room popup: just the cFEStateNet update (func_001A8770).
+ * Updates the create-room popup: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEStateNetCreateRoomPopup_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -20323,7 +20449,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" int func_001BEC78(cFEStateNetCreateRoomPopup* self);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
@@ -20428,7 +20554,7 @@ extern "C" void cFEStateNetCreateRoomPopup_onWidgetEvent(cFEStateNetCreateRoomPo
         }
     }
     default:
-        func_001A8918((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
         break;
     }
 }
@@ -20608,7 +20734,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001BEF40__FPv);
 #ifdef SKIP_ASM
 void* func_001BEF40(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -21043,7 +21169,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void cMemMan_free(void* p);
 // PORT: operator_new__FUi really takes (size, tag, flags, d)
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
@@ -21089,7 +21215,7 @@ static inline int Loc1BF758(char* name)
  * cFEStateNetAccountMem popup (mode 3, miMiscData 0x82C). Event 6 (back) frees mpustrDisconnect and rebuilds it as
  * "kT_POPUPCMNDisconnecting" + "kT_POPUPCMNDisconnect" ("%s%s"), then asks it with yes / no (id 0x848, default
  * no); when the allocation fails the popup shows "kT_POPUPCMNDisconnect" by id instead. Event 8 switches to a new
- * cFEStateOnlineAgreement (miMiscData 18); the rest go to the cFEStateNet handler func_001A8918. The subclass vtable
+ * cFEStateOnlineAgreement (miMiscData 18); the rest go to the cFEStateNet handler cFEStateNet_onWidgetEvent. The subclass vtable
  * D_00468050 uses this handler too.
  *
  * @param popup  the widget (On Tour pWidget; not a popup despite the name); null is ignored
@@ -21158,7 +21284,7 @@ extern "C" void cFEStateLogin_onWidgetEvent(cFEStateLogin* self, void* popup, un
         break;
     }
     default:
-        func_001A8918((cFEStateNet*)self, (int)popup, kind);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)popup, kind);
         break;
     }
 }
@@ -21252,13 +21378,13 @@ extern "C" void cFEStateOnlineMainMenu_onCreateScreen(cFEStateNet* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineMainMenu_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the online main menu: just the cFEStateNet update (func_001A8770).
+ * Updates the online main menu: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEStateOnlineMainMenu_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -21429,7 +21555,7 @@ extern "C" void cFEStateOnlineMainMenu_onWidgetEvent(cFEStateNet* self, void* pW
         }
         break;
     default:
-        func_001A8918(self, (int)pWidget, Event);
+        cFEStateNet_onWidgetEvent(self, (int)pWidget, Event);
         break;
     }
 }
@@ -21805,7 +21931,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement_onUpdate);
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-extern "C" void* func_001A8770(cFEStateNet* self);
+extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
 extern "C" void cUITextScroll_addUnicodeStringByID(cUIText* text, int a1);
 extern char str_AgTextScroll[];
 
@@ -21822,7 +21948,7 @@ extern "C" void cFEStateOnlineAgreement_onUpdate(cFEStateOnlineAgreement* self)
             cUITextScroll_addUnicodeStringByID(text, (self->mpTOSLines)[(self->miNextTOSLine)++]);
         }
     }
-    func_001A8770((cFEStateNet*)self);
+    cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -21969,7 +22095,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement_onWidgetEvent);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* mem, int a1);
 extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* self, int a1, int a2);
 extern "C" void* cFEStateCreateStep2_cFEStateCreateStep2(cFEStateCreateStep2* self, int a1);
@@ -22020,7 +22146,7 @@ extern "C" void cFEStateOnlineAgreement_onWidgetEvent(cFEStateOnlineAgreement* s
         func_001A8A40(((cFEStateNet*)self), obj);
         break;
     default:
-        func_001A8918(((cFEStateNet*)self), pWidget, msg);
+        cFEStateNet_onWidgetEvent(((cFEStateNet*)self), pWidget, msg);
         break;
     }
 }
@@ -22129,11 +22255,11 @@ extern "C" void cFEStateNetQuickPlayPopup_onCreateScreen(cFEStateNetQuickPlayPop
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickPlayPopup_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void* func_001A8770(cFEStateNet* self);
+extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
 /**
  * Updates the quick-match popup: while searching, counts miBlinkFrames down, reloading 30 after it reaches 0.
  *
- * @return the cFEStateNet update's result (func_001A8770; declared void* here)
+ * @return the cFEStateNet update's result (cFEStateNet_onUpdate; declared void* here)
  */
 extern "C" void* cFEStateNetQuickPlayPopup_onUpdate(cFEStateNetQuickPlayPopup* self)
 {
@@ -22143,7 +22269,7 @@ extern "C" void* cFEStateNetQuickPlayPopup_onUpdate(cFEStateNetQuickPlayPopup* s
             self->miBlinkFrames = 30;
         }
     }
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -22341,7 +22467,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001C13E0(cFEStateNetQuickPlayPopup* self, int show);
 extern "C" void func_001C17F8(cFEStateNetQuickPlayPopup* self, int a1);
 extern "C" void func_0025EE20(void* self, void* ids, int a2);
@@ -22400,7 +22526,7 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
     switch (msg) {
     case 7:
         if (self->mbSearching == 0) {
-            func_001A8918((cFEStateNet*)self, pWidget, 7);
+            cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, 7);
         }
         break;
     case 5:
@@ -22445,7 +22571,7 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
         }
         break;
     default:
-        func_001A8918((cFEStateNet*)self, pWidget, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
         break;
     }
 }
@@ -22719,13 +22845,13 @@ extern "C" void cFEStateNetSSXWorld_onCreateScreen(cFEStateNet* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetSSXWorld_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the SSX World hub: just the cFEStateNet update (func_001A8770).
+ * Updates the SSX World hub: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEStateNetSSXWorld_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -22883,7 +23009,7 @@ extern "C" void cFEStateNetSSXWorld_onWidgetEvent(cFEStateNet* self, char* msg, 
         }
         break;
     default:
-        func_001A8918(self, (int)msg, ev);
+        cFEStateNet_onWidgetEvent(self, (int)msg, ev);
         break;
     }
 }
@@ -22938,13 +23064,13 @@ extern "C" void cFEStateNetQuickMessages_onCreateScreen(cFEStateNetQuickMessages
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickMessages_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the quick-messages editor: just the cFEStateNet update (func_001A8770).
+ * Updates the quick-messages editor: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEStateNetQuickMessages_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -23268,7 +23394,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBEOptionInterface_getDefaultQuickKeyMessageHashValue(void* self, int i);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" char* func_0014F6A8(void* self, int i);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" void func_001A9B58(cFEStateNet* self);
@@ -23368,7 +23494,7 @@ extern "C" void cFEStateNetQuickMessages_onWidgetEvent(cFEStateNetQuickMessages*
         break;
     }
     default:
-        func_001A8918((cFEStateNet*)self, (int)w, msg);
+        cFEStateNet_onWidgetEvent((cFEStateNet*)self, (int)w, msg);
         break;
     }
 }
@@ -23624,13 +23750,13 @@ extern "C" void func_001C2E70()
 INCLUDE_ASM("fe/feasyncfile", cFEStateStats_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs one frame of the stats screen: only the cFEStateNet update (func_001A8770).
+ * Runs one frame of the stats screen: only the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (the pending-event handler's value)
+ * @return cFEStateNet_onUpdate()'s result (the pending-event handler's value)
  */
 void* cFEStateStats_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -23938,7 +24064,7 @@ int GetHashValue32(char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cUIScreen_getObjectByHashName_3668(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
-extern "C" void func_001A8918_3668(void* self, void* w, int msg) __asm__("func_001A8918");
+extern "C" void cFEStateNet_onWidgetEvent_3668(void* self, void* w, int msg) __asm__("cFEStateNet_onWidgetEvent");
 extern "C" void func_001A8A40_3668(void* self, void* obj) __asm__("func_001A8A40");
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_3668(void* mem, void* a1) __asm__("cFEStateOnlineMainMenu_cFEStateOnlineMainMenu");
 extern "C" void func_001C49C8_3668(void* self) __asm__("func_001C49C8");
@@ -24025,7 +24151,7 @@ static inline int isButton_3668(cObj_3668* w, char* name)
  * "rankhl" next to the row (x - 40, y - height + 14), shows it and shows result i + miFirstResult (func_001C3D68).
  * Event 2 restores white on the current mode's heading and, on the lists, sets colour (1, 0, 0, 0) and hides the
  * arrows and highlight. Event 8 calls func_001A9B58 unless mAttrState bits 1-2 are set; event 5 is ignored. Events
- * 9, 1, 2 and any other also go to the cFEStateNet handler (func_001A8918).
+ * 9, 1, 2 and any other also go to the cFEStateNet handler (cFEStateNet_onWidgetEvent).
  *
  * @param w  the widget (On Tour pWidget); null is ignored
  * @param msg  the widget event (On Tour Event)
@@ -24139,10 +24265,10 @@ extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, i
     default:
         goto other;
     }
-    func_001A8918_3668(((char*)self), w, msg);
+    cFEStateNet_onWidgetEvent_3668(((char*)self), w, msg);
     return;
 other:
-    func_001A8918_3668(((char*)self), w, msg);
+    cFEStateNet_onWidgetEvent_3668(((char*)self), w, msg);
 }
 #endif
 
@@ -24893,13 +25019,13 @@ extern "C" void func_001C5108()
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetNews_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates the server-news state: just the cFEStateNet update (func_001A8770).
+ * Updates the server-news state: just the cFEStateNet update (cFEStateNet_onUpdate).
  *
- * @return func_001A8770()'s result (declared void* here)
+ * @return cFEStateNet_onUpdate()'s result (declared void* here)
  */
 void* cFEStateNetNews_onUpdate(void* self)
 {
-    return func_001A8770((cFEStateNet*)self);
+    return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
 #endif
 
@@ -25013,7 +25139,7 @@ extern "C" void cFEStateNetNews_onWidgetCreate(cFEStateNet* self, cFEVObj_001C53
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetNews_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_001A8918(cFEStateNet* self, int a1, int msg);
+extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001A9B58(cFEStateNet* self);
 extern "C" void* cFEStateNetSSXWorld_cFEStateNetSSXWorld(cFEStateNet* self, int a1);
@@ -25043,7 +25169,7 @@ extern "C" void cFEStateNetNews_onWidgetEvent(cFEStateNet* self, int pWidget, un
         case 5:
             break;
         default:
-            func_001A8918(self, pWidget, msg);
+            cFEStateNet_onWidgetEvent(self, pWidget, msg);
             break;
         }
     }

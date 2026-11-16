@@ -2724,7 +2724,7 @@ extern "C" int cFEInput_isActive(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001804B8);
+INCLUDE_ASM("fe/debugfe", cFEInput_update);
 #ifdef SKIP_ASM
 extern void* D_004A33F0;
 extern "C" int func_00266BA8(void* mgr, int a1, int* out0, int* out1);
@@ -2736,7 +2736,15 @@ struct sDebugFE1804B8 {
     int b;     // 0x14
 };
 
-extern "C" void func_001804B8(sDebugFE1804B8* self)
+/**
+ * Polls the USB keyboard for the front-end input, once per update.
+ *
+ * Clears the key-ready word (+0xC, On Tour mbKeyReady). When a keyboard is connected (D_004A33F0), zeroes the virtual
+ * key (+0x10, miVKey) and the ASCII key (+0x14, miAsciiKey) and asks func_00266BA8(keyboard, 0, &vkey, &ascii) for a
+ * key press; when it returns one, key-ready becomes 1. cFEInput_getKeyReady, cFEInput_getVKey and cFEInput_getAsciiKey
+ * return the results. The last virtual of cFEInput; On Tour's PSP version is empty.
+ */
+extern "C" void cFEInput_update(sDebugFE1804B8* self)
 {
     self->found = 0;
     if (D_004A33F0 != 0) {

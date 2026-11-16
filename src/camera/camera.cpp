@@ -2862,9 +2862,16 @@ void* cMatrixChaseAlgorithm__cMatrixChaseAlgorithm(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001607C8__FPv);
+INCLUDE_ASM("camera/camera", cMatrixChaseAlgorithm_getRestDrop__FPv);
 #ifdef SKIP_ASM
-float func_001607C8(void* self)
+/**
+ * Returns the matrix chase camera's rest drop: always 0.
+ *
+ * The last virtual of the chase algorithms (after cChaseAlgorithm_setTarget); each algorithm supplies its own value.
+ *
+ * @return 0.0f
+ */
+float cMatrixChaseAlgorithm_getRestDrop(void* self)
 {
     return 0.0f;
 }
@@ -3140,9 +3147,16 @@ void* cRelativeChaseAlgorithm__cRelativeChaseAlgorithm(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00160BE0__FPv);
+INCLUDE_ASM("camera/camera", cRelativeChaseAlgorithm_getRestDrop__FPv);
 #ifdef SKIP_ASM
-float func_00160BE0(void* self)
+/**
+ * Returns the relative chase camera's rest drop: always 0.
+ *
+ * The last virtual of the chase algorithms (after cChaseAlgorithm_setTarget); each algorithm supplies its own value.
+ *
+ * @return 0.0f
+ */
+float cRelativeChaseAlgorithm_getRestDrop(void* self)
 {
     return 0.0f;
 }
