@@ -610,6 +610,16 @@ extern "C" void func_00318BF8(void **arg0) {
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString_FindLastOf__FP9cBXStringci);
 #ifdef SKIP_ASM
+/**
+ * Finds a character in the string, searching from a start offset.
+ *
+ * Despite the name (the symbol EA shipped), this is a forward search: it calls strchr() on the text from
+ * @p len onwards, so it returns the first occurrence at or after that offset.
+ *
+ * @param ch   character to look for
+ * @param len  offset into the string to start searching at
+ * @return the offset of the match from the start of the string, or -1 if there is none
+ */
 int cBXString_FindLastOf(cBXString* self, char ch, int len)
 {
     char* result = strchr(self->str + len, ch);

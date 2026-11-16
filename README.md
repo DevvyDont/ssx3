@@ -57,6 +57,20 @@ $ . venv/bin/activate
 
 Every function is in one of four states: **green** matches the original byte-for-byte (objdiff scores it 100%), **yellow** has an attempt at 90-99%, **red** has an attempt below 90%, and **gray** hasn't been attempted yet. The top bar counts functions; the bottom bar weighs them by code size, so large functions count for more. The image is regenerated as functions are matched.
 
+### Readability
+
+![Readability: every function scored 0 to 5](docs/readability.svg)
+
+Matching proves the C is *correct*; this bar tracks whether a person can *read* it. Every function earns one point per criterion it meets:
+
+1. **Documented:** a doc comment that says what the function does, describes each parameter and says what it returns.
+2. **Named variables:** parameters, locals, struct fields and globals have real names (not `arg0`, `tmp`, `unk_1C` or `D_004A28A8`).
+3. **Named function:** a name that says what it does, not `func_0011D660`.
+4. **Real types:** fields are reached through real structs and classes, not pointer arithmetic like `*(int*)((char*)self + 0x86C)` or one-off struct views.
+5. **Natural constants:** numbers are written the way a person would: `30`, not `0x1E`; `1.0f`, not `0x3F800000`. Masks, flags and addresses stay in hex.
+
+Darker blue is more readable (brighter in dark mode); gray is 0, which includes every function that doesn't match yet. Like the progress bars, the image is regenerated as the code improves.
+
 Non-matching functions live under `asm/nonmatchings/`; anything not in that
 directory has already been decompiled and matches the original binary
 byte-for-byte. Progress is tracked with [objdiff](tools/objdiff), which
