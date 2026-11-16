@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/uistatebuypopup.h"
 #include "fe/festatenet.h"
 
 //100%
@@ -2578,11 +2579,11 @@ extern "C" void *func_0039E318_DC48(void *, int, int) __asm__("func_0039E318");
 extern "C" void func_001CA8A0_DC48(void *) __asm__("func_001CA8A0");
 extern int cUIStateBuyPopup_vtbl[];
 
-extern "C" void *func_001DDC48(void *self) {
+extern "C" void *func_001DDC48(cUIStateBuyPopup* self) {
     func_0039E318_DC48(self, 0, 0);
-    *(int **)((char *)self + 8) = cUIStateBuyPopup_vtbl;
+    self->mVtbl = (void**)cUIStateBuyPopup_vtbl;
     func_001CA8A0_DC48((char *)self + 0x48);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2593,8 +2594,8 @@ INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup__cUIStateBuyPopup);
 extern "C" void* func_0039E390_DDC90(void*) __asm__("func_0039E390");
 extern void* D_0046D0D0[];
 
-extern "C" void cUIStateBuyPopup__cUIStateBuyPopup(void *self) {
-    *(void***)((char*)self + 8) = D_0046D0D0;
+extern "C" void cUIStateBuyPopup__cUIStateBuyPopup(cUIStateBuyPopup* self) {
+    self->mVtbl = D_0046D0D0;
     func_0039E390_DDC90(self);
 }
 #endif
@@ -2610,8 +2611,8 @@ extern "C" int func_001DDCB8(int arg0) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", func_001DDCC0);
 #ifdef SKIP_ASM
-extern "C" int func_001DDCC0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x6C)));
+extern "C" int func_001DDCC0(cUIStateBuyPopup* arg0) {
+    return (arg0->mbAccept);
 }
 #endif
 

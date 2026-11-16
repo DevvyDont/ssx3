@@ -1,4 +1,7 @@
 #include "common.h"
+#include "fe/festatenetlobby.h"
+#include "fe/festatenetcreate.h"
+#include "fe/festatenetconfig.h"
 #include "fe/messagecenter.h"
 #include "fe/festatenetmessenger.h"
 #include "render/ps2graphicsman.h"
@@ -654,14 +657,14 @@ extern "C" void* func_001A8500(void*, int, int);
 extern void* D_0046A7F8[];
 extern int D_004A3E90;
 
-extern "C" void* func_001DF780(void* self)
+extern "C" void* func_001DF780(cFEStateLobbyMenu* self)
 {
     func_001A8500(self, 0, 0);
     int g = D_004A3E90;
-    *(void***)((char*)self + 0x8) = D_0046A7F8;
-    *(int*)((char*)self + 0x76C) = g;
-    *(int*)((char*)self + 0xB80) = g;
-    return self;
+    self->mVtbl = D_0046A7F8;
+    self->mszChannelName = (char*)g;
+    self->mszRoomName = (char*)g;
+    return ((void*)self);
 }
 #endif
 
@@ -673,9 +676,9 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
-extern "C" void func_001DF7C8(void* self, int flags)
+extern "C" void func_001DF7C8(cFEStateLobbyMenu* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_0046A7F8;
+    self->mVtbl = D_0046A7F8;
     cBXString__cBXString((char*)self + 0xB80, 2);
     cBXString__cBXString((char*)self + 0x76C, 2);
     func_001A85D0_dtor(self, flags);
@@ -2373,26 +2376,26 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0B28);
 extern "C" void* func_001A8500(void*, int, int);
 extern void* D_00468B00[];
 
-extern "C" void* func_001E0B28(void* self)
+extern "C" void* func_001E0B28(cFEStateNetConfig* self)
 {
     func_001A8500(self, 0, 0);
-    *(int*)((char*)self + 0x6D0) = 0;
-    *(void***)((char*)self + 0x8) = D_00468B00;
-    *(int*)((char*)self + 0x6D4) = 0;
-    *(int*)((char*)self + 0x6D8) = 0;
-    *(int*)((char*)self + 0x6DC) = 0;
-    *(int*)((char*)self + 0x6E4) = 0;
-    *(int*)((char*)self + 0x6E8) = 0;
-    *(int*)((char*)self + 0x6F0) = 0;
-    *(int*)((char*)self + 0x6F4) = 0;
-    *(int*)((char*)self + 0x6F8) = 0;
-    *(int*)((char*)self + 0x6FC) = 0;
-    *(int*)((char*)self + 0x700) = 0;
-    *(int*)((char*)self + 0x704) = 0;
-    *(int*)((char*)self + 0x710) = 0;
-    *(int*)((char*)self + 0x714) = 0;
-    *(int*)((char*)self + 0x718) = 0;
-    return self;
+    self->miSelectedSetting = 0;
+    self->mVtbl = D_00468B00;
+    self->miNumSettings = 0;
+    self->unk_6D8 = 0;
+    self->unk_6DC = 0;
+    self->mpLBAdapters = 0;
+    self->mpLBSettings = 0;
+    self->unk_6F0 = 0;
+    self->mpMenuConfig = 0;
+    self->mpConfigRectangle = 0;
+    self->mpNoConfiguration = 0;
+    self->unk_700 = 0;
+    self->mpustrPopupText = 0;
+    self->mpustrAuthError[0] = 0;
+    self->mpustrAuthError[1] = 0;
+    self->mpustrAuthError[2] = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2536,17 +2539,17 @@ extern "C" void* func_001A8500(void*, int, int);
 extern void* D_004686C0[];
 extern int D_004A3E90;
 
-extern "C" void* func_001E0CA0(void* self)
+extern "C" void* func_001E0CA0(cFEStateCreateStep1* self)
 {
     func_001A8500(self, 0, 0);
     int v = D_004A3E90;
-    *(void***)((char*)self + 0x8) = D_004686C0;
-    *(int*)((char*)self + 0x6D4) = v;
-    *(int*)((char*)self + 0x6D8) = v;
-    *(int*)((char*)self + 0x6DC) = v;
-    *(int*)((char*)self + 0x6EC) = 1;
-    *(int*)((char*)self + 0x6F0) = 0;
-    return self;
+    self->mVtbl = D_004686C0;
+    self->mszSavedPassword = (char*)v;
+    self->mszSavedConfirm = (char*)v;
+    self->mszSavedMail = (char*)v;
+    self->mbEditAccount = 1;
+    self->mpStaticContinue = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2558,9 +2561,9 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares func_001A85D0 with one arg; the body takes (self, flags)
 extern "C" void func_001A85D0_dtor(void* self, int flags) __asm__("func_001A85D0");
 
-extern "C" void func_001E0CF8(void* self, int flags)
+extern "C" void func_001E0CF8(cFEStateCreateStep1* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_004686C0;
+    self->mVtbl = D_004686C0;
     cBXString__cBXString((char*)self + 0x6DC, 2);
     cBXString__cBXString((char*)self + 0x6D8, 2);
     cBXString__cBXString((char*)self + 0x6D4, 2);
@@ -2585,10 +2588,10 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0D68);
 #ifdef SKIP_ASM
 extern "C" void* func_001A8500(void*, int, int);
 
-extern "C" void *func_001E0D68(void *self) {
+extern "C" void *func_001E0D68(cFEStateCreateStep2* self) {
     func_001A8500(self, 0, 0);
-    (*(void ***)((char*)(self) + (8))) = D_004685B0;
-    return self;
+    (self->mVtbl) = D_004685B0;
+    return ((void*)self);
 }
 #endif
 
