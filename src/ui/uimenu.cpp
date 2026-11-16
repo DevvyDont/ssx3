@@ -630,7 +630,7 @@ public:
  * Returns the operator's onListNode (vtable slot 2 of the operator, whose vtable pointer is its first word) for
  * the pair, the same as cListNode's own traverseFlat.
  *
- * @param a    the pair
+ * @param self    the pair
  * @param obj  the list operator (On Tour: pOperator)
  * @return the operator's onListNode result
  */

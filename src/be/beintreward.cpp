@@ -703,8 +703,8 @@ extern "C" int cBERewardInterface_isPeakConquered(cBERewardInterface* self, int 
  * Needs all three peaks conquered (cBERewardInterface_isPeakConquered()) and the score interface's current
  * highlight levels over the 8 highlight categories to add up to at least 24 (every tier of every highlight).
  *
- * @param a  profile index (On Tour: iProfileIndex)
- * @param b  character id (On Tour: iCharacterID)
+ * @param iProfileIndex  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
  * @return 1 when conquered, else 0
  */
 extern "C" int cBERewardInterface_isMountainConquered(cBERewardInterface* self, int iProfileIndex, int iCharacterID)
@@ -732,8 +732,8 @@ extern "C" int cBERewardInterface_isPeakCompleted(cBERewardInterface* self, int 
 /**
  * Tells whether a character has completed the whole mountain, that is all three peaks.
  *
- * @param a  profile index (On Tour: iProfileIndex)
- * @param b  character id (On Tour: iCharacterID)
+ * @param iProfileIndex  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
  * @return 1 when cBERewardInterface_isPeakCompleted() holds for peaks 0-2, else 0
  */
 extern "C" int cBERewardInterface_isMountainCompleted(cBERewardInterface* self, int iProfileIndex, int iCharacterID)
@@ -770,8 +770,8 @@ extern sRewardReq_157920 D_0045AAD8_v157920[][4][5] __asm__("D_0045AAD8");
  * 4-11 need any medal, other events medal 0 or 1; trophy 2 needs the best medal (0) for both collectibles and
  * big challenges.
  *
- * @param a  profile index (On Tour: iProfileIndex)
- * @param b  character id (On Tour: iCharacterID)
+ * @param iProfileIndex  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
  * @param k  peak id
  * @return 1 when conquered, else 0
  */
@@ -819,9 +819,9 @@ extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int a,
 /**
  * Tells whether a character has completed a peak, that is owns all four of its trophies.
  *
- * @param a  profile index (On Tour: iProfileIndex)
- * @param b  character id (On Tour: iCharacterID)
- * @param c  peak id
+ * @param iProfileIndex  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
+ * @param peakID  peak id
  * @return 1 when cBERewardInterface_isTrophyOwned() holds for trophies 0-3, else 0
  */
 extern "C" int cBERewardInterface_isPeakCompleted(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int peakID)
@@ -901,8 +901,8 @@ extern sRewardReq_157BF0 D_0045AAD8_v157BF0[][4][5] __asm__("D_0045AAD8");
  * medal and a big-challenges medal; trophy 3 needs the peak's earnings target reached (any medal from
  * cBERewardInterface_getEarningsMedal()).
  *
- * @param a  profile index (On Tour: iProfileIndex)
- * @param b  character id (On Tour: iCharacterID)
+ * @param iProfileIndex  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
  * @param k  peak id
  * @param i  trophy id, 0-3
  * @return 1 when the trophy is owned, 0 otherwise or for a trophy id outside 0-3
@@ -1578,8 +1578,8 @@ int cBERewardInterface_isBetterMedal(void* self, int a, int b);
  * Checks the per-peak earnings targets D_0045B048 (100,000, 250,000 and 1,000,000) in order against the econ
  * interface's total money earned.
  *
- * @param a  profile index (On Tour: iProfileIndex)
- * @param b  character id (On Tour: iCharacterID)
+ * @param iProfileIndex  profile index (On Tour: iProfileIndex)
+ * @param iCharacterID  character id (On Tour: iCharacterID)
  * @return the first unreached target (as a pointer-typed value), or 0 when all three are reached
  */
 extern "C" void* cBERewardInterface_calculateNextEarningsLevel(cBERewardInterface* self, int iProfileIndex, int iCharacterID)
@@ -1606,8 +1606,8 @@ extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
  * Takes the smallest target in the peak's row of D_0045AFE8 among the medals better than the current
  * collectibles medal.
  *
- * @param a     profile index (On Tour: iProfileIndex)
- * @param b     character id (On Tour: iCharacterID)
+ * @param iProfileIndex     profile index (On Tour: iProfileIndex)
+ * @param iCharacterID     character id (On Tour: iCharacterID)
  * @param kind  peak id
  * @return the next target, or 0 when the best medal is already held
  */
@@ -1640,8 +1640,8 @@ extern int D_0045B018_2d[][4] __asm__("D_0045B018");
  * Takes the smallest target in the peak's row of D_0045B018 among the medals better than the current
  * big-challenges medal.
  *
- * @param a     profile index (On Tour: iProfileIndex)
- * @param b     character id (On Tour: iCharacterID)
+ * @param iProfileIndex     profile index (On Tour: iProfileIndex)
+ * @param iCharacterID     character id (On Tour: iCharacterID)
  * @param kind  peak id
  * @return the next target, or 0 when the best medal is already held
  */
@@ -1764,8 +1764,8 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getAwardTrophyCategory);
  * The category is 5 + 3 * @p tier + @p kind, so 5-16 for peaks 0-2 and trophies 0-3. The profile and character
  * arguments are not used.
  *
- * @param a1    profile index (unused)
- * @param a2    character id (unused)
+ * @param iProfileIndex    profile index (unused)
+ * @param iCharacterID    character id (unused)
  * @param kind  peak id, 0-2
  * @param tier  trophy id, 0-3
  * @return the award category, or -1 for a peak or trophy id out of range
@@ -1825,8 +1825,8 @@ extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, i
  * cBERewardInterface_awardUser() only when func_0015A2E0() finds that category's bit clear in the character's
  * award bits.
  *
- * @param a1    profile index (On Tour: iProfileIndex)
- * @param a2    character id (On Tour: iCharacterID)
+ * @param iProfileIndex    profile index (On Tour: iProfileIndex)
+ * @param iCharacterID    character id (On Tour: iCharacterID)
  * @param kind  peak id
  * @param tier  trophy id
  */

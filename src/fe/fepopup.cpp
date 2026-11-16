@@ -2616,8 +2616,8 @@ public:
  *
  * Calls handleEvent (vtable slot 24) on mpParentState with both arguments unchanged.
  *
- * @param a1  event message (On Tour: msg)
- * @param a2  event parameter (On Tour: pParam)
+ * @param msg  event message (On Tour: msg)
+ * @param pParam  event parameter (On Tour: pParam)
  * @return the parent state's handleEvent result
  */
 extern "C" int cScreenPopup_handleEvent(cScreenPopup* self, int msg, int pParam)
@@ -2841,9 +2841,9 @@ extern char D_004661E0[];
  * cBuyPopupInfo_initBuySongByCredit() sets), the song title as an ASCII element, and the text ids "kT_OVRSong"
  * and "kT_16BuyMusicTrack" as two ID elements.
  *
- * @param a1  song title (an ASCII string pointer)
- * @param a2  price of the song
- * @param a3  cash the player has (cFEStateRequestLine_showBuyPopup() passes its cash total)
+ * @param songName  song title (an ASCII string pointer)
+ * @param cost  price of the song
+ * @param money  cash the player has (cFEStateRequestLine_showBuyPopup() passes its cash total)
  */
 extern "C" void cBuyPopupInfo_initBuySong(int* self, int songName, int cost, int money)
 {
@@ -2927,9 +2927,9 @@ extern char D_004661F8[];
  * Same layout as cBuyPopupInfo_initBuySong(): the price, the cash and -1 (no credits), the item's name as an
  * ASCII element, and the text ids "kT_CMNItemColon" and "kT_OVRCMNBuyItem" as two ID elements.
  *
- * @param a1  item name (an ASCII string pointer; the equipment-detail state passes the item's word at 0x14)
- * @param a2  price (the caller passes the item's price times 10)
- * @param a3  cash the player has
+ * @param boltName  item name (an ASCII string pointer; the equipment-detail state passes the item's word at 0x14)
+ * @param cost  price (the caller passes the item's price times 10)
+ * @param money  cash the player has
  */
 extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int boltName, int cost, int money)
 {
@@ -4737,7 +4737,7 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
  * Steps miCursorPos back by one when it sits at miMaxCharacters, redraws the cursor with
  * cKeyboardPopup_updateCursor(), then runs the base cUIState_onGainFocus().
  *
- * @param a1  the state that had focus before (On Tour: pPrevState), passed on to cUIState_onGainFocus()
+ * @param pPrevState  the state that had focus before (On Tour: pPrevState), passed on to cUIState_onGainFocus()
  */
 extern "C" void cKeyboardPopup_onGainFocus(cKeyboardPopup* self, int pPrevState)
 {

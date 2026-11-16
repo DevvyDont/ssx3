@@ -867,8 +867,8 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_getObjectByHashName);
 /**
  * Returns this UI thing when its hash name matches; the base version does not search any children.
  *
- * @param a1  the hash name to look for
- * @return this object when its mHashName equals @p a1, otherwise 0
+ * @param hashname  the hash name to look for
+ * @return this object when its mHashName equals @p hashname, otherwise 0
  */
 extern "C" void* cUIThing_getObjectByHashName(cUIThing* self, int hashname)
 {

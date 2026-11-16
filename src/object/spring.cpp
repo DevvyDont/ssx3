@@ -298,7 +298,7 @@ struct cObjNode {
  * Stores cObjNode's vtable and calls cBucketMan_add(&gBucketMan, self, param2), which appends the node to one
  * of that bucket's two lists depending on the bucket's flags.
  *
- * @param param2  bucket index (callers pass 3, 4, 6 and others)
+ * @param bucket  bucket index (callers pass 3, 4, 6 and others)
  * @return @p self
  */
 extern "C" cObjNode* cObjNode_cObjNode1(cObjNode* self, void* bucket)

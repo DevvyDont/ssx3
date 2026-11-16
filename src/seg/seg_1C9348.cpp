@@ -419,7 +419,7 @@ struct HuffState_8CF8 {
  * Values are grouped in runs of 4, 8, 16, 32, 64 and 128: each run gets the extra-bit count 0 to 5 in len[] and
  * its first value (0, 4, 12, 28, 60, 124) in base[].
  *
- * @param s  the encoder state (On Tour HuffEncodeContext*)
+ * @param EC  the encoder state (On Tour HuffEncodeContext*)
  */
 extern "C" void HUFF_init(HuffState_8CF8* EC)
 {

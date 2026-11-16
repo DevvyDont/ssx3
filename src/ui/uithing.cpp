@@ -152,7 +152,7 @@ INCLUDE_ASM("ui/uithing", cUIThing_setChannelDataKCP);
  *
  * @param vself  the UI thing (this)
  * @param count  the number of pairs
- * @param p      the pairs, as shorts: channel ID, then value
+ * @param pPtr      the pairs, as shorts: channel ID, then value
  */
 extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, short *pPtr)
 {

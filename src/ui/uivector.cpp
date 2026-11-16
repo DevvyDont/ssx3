@@ -1633,7 +1633,7 @@ public:
  * Returns the operator's onListNode (vtable slot 2 of the operator, whose vtable pointer is its first word) for
  * the group, the same as cListNode's own traverseFlat.
  *
- * @param a    the group
+ * @param self    the group
  * @param obj  the list operator (On Tour: pOperator)
  * @return the operator's onListNode result
  */

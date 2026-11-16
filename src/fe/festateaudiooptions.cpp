@@ -541,9 +541,9 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
 /**
  * Refreshes the request line's list arrows, button texts and help text when its gain transition starts.
  *
- * Does the refresh only when @p a1 is nonzero, and returns 0 like the base cUIState_onGainTransition().
+ * Does the refresh only when @p bFirstTime is nonzero, and returns 0 like the base cUIState_onGainTransition().
  *
- * @param a1  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
+ * @param bFirstTime  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
  * @return always 0
  */
 extern "C" int cFEStateRequestLine_onGainTransition(void* self, int bFirstTime)

@@ -14,11 +14,11 @@ extern "C" void cAI_forceAIState(void *);
  * Changes the AI state when the requested one differs from the current one.
  *
  * Saves CurrentAIState and CurrentAIStateHandler as the previous state and handler, then calls
- * cAI_forceAIState(), which receives @p arg1 unchanged in its second argument register and installs the new
+ * cAI_forceAIState(), which receives @p state unchanged in its second argument register and installs the new
  * state's id, handler and name. Asking for the current state does nothing.
  *
- * @param arg0  the AI
- * @param arg1  the new AI state (tAIState)
+ * @param self  the AI
+ * @param state  the new AI state (tAIState)
  */
 extern "C" void cAI_setAIState(cAI* self, int state) {
     int old = self->CurrentAIState;
@@ -257,8 +257,8 @@ extern "C" void cAI_shutdown(int);
  *
  * Calls cAI_shutdown() on the AI the state machine passes in.
  *
- * @param arg0  the shutdown state handler (unused)
- * @param arg1  the AI that gains the state
+ * @param self  the shutdown state handler (unused)
+ * @param ai  the AI that gains the state
  */
 extern "C" void cShutdownHandler_OnGainState(int self, int ai) {
     cAI_shutdown(ai);

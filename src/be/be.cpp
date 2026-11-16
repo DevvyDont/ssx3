@@ -236,7 +236,7 @@ cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterfac
  * The state index is read directly, with no leave or enter call. Each of the 14 interfaces that exists reads
  * its data through its virtual readFromReplayFrame.
  *
- * @param s  the replay stream to read from
+ * @param data  the replay stream to read from
  */
 extern "C" void cBE_readFromReplayFrame(void* self, cBEReplayStream* data)
 {

@@ -38,10 +38,10 @@ struct sFE3PeakPicFiles {
 /**
  * Requests the whole-mountain map picture ("|map_mtn.ssh") into an async file slot.
  *
- * Writes the name into the slot, stores @p param with it and sets the slot's status to 1.
+ * Writes the name into the slot, stores @p useAsync with it and sets the slot's status to 1.
  *
  * @param slot   index of the async file slot
- * @param param  value stored with the request (On Tour's LoadLocationPic calls it useAsync)
+ * @param useAsync  value stored with the request (On Tour's LoadLocationPic calls it useAsync)
  */
 extern "C" void cFEAsyncManager_Load3PeakPic(cFEAsyncManager* self, int slot, int useAsync)
 {
@@ -75,11 +75,11 @@ struct sFEPeakPicFiles {
 /**
  * Requests one peak's map picture ("|map_peakA.ssh", B or C) into an async file slot.
  *
- * Writes the name into the slot, stores @p param with it and sets the slot's status to 1.
+ * Writes the name into the slot, stores @p useAsync with it and sets the slot's status to 1.
  *
  * @param pic    the peak, 0 to 2
  * @param slot   index of the async file slot
- * @param param  value stored with the request (On Tour's LoadLocationPic calls it useAsync)
+ * @param useAsync  value stored with the request (On Tour's LoadLocationPic calls it useAsync)
  */
 extern "C" void cFEAsyncManager_Load1PeakPic(cFEAsyncManager* self, int pic, int slot, int useAsync)
 {
@@ -107,7 +107,7 @@ extern "C" void* cBEMissionInterface_getPictureFileName(void* self, int id);
  *
  * @param id     the location ID (On Tour eBELocationID locID)
  * @param slot   index of the async file slot (On Tour pos)
- * @param param  value stored with the request (On Tour useAsync)
+ * @param useAsync  value stored with the request (On Tour useAsync)
  */
 extern "C" void cFEAsyncManager_LoadLocationPic(cFEAsyncManager* self, int id, int slot, int useAsync)
 {
@@ -468,7 +468,7 @@ void cMemMan_free(void* p);
 void operator_delete(int* ptr);
 extern void* D_00467F28[];
 struct sOwner1A5450;
-extern "C" void func_001A5450(sOwner1A5450* self);
+extern "C" void func_001A5450(cFEStateNetMessenger* self);
 extern "C" void func_001A85D0_dtor3EA0(void* self, int flags) __asm__("func_001A85D0");
 
 struct sVE1A3EA0 {
@@ -497,7 +497,7 @@ extern "C" void func_001A3EA0(cFEStateNetMessenger* self, int flags)
     char* child = (char*)self->mpParentState;
     sVE1A3EA0* vt = *(sVE1A3EA0**)(child + 0x8);
     vt[32].fn(child + vt[32].delta);
-    func_001A5450((sOwner1A5450*)self);
+    func_001A5450(self);
     tFEStringPtrVector* v = &(*(&self->mNames));
     Dealloc1A3EA0(((void**)v->mpStart), (void**)self->mNames.mpEndOfStorage - (void**)self->mNames.mpStart);
     cBXString__cBXString(((char*)&self->unk_6E0), 2);
@@ -1450,26 +1450,22 @@ struct sPtrVec1A5450 {
     void** mEnd;
 };
 
-struct sOwner1A5450 {
-    char pad[0x6E8];
-    sPtrVec1A5450 mVec;
-};
 
-extern "C" void func_001A5450(sOwner1A5450* self)
+extern "C" void func_001A5450(cFEStateNetMessenger* self)
 {
     for (;;) {
-        if (self->mVec.mBegin == self->mVec.mEnd) break;
-        void* p = self->mVec.mEnd[-1];
-        self->mVec.mEnd--;
+        if ((*(sPtrVec1A5450*)&self->mNames.mpStart).mBegin == (*(sPtrVec1A5450*)&self->mNames.mpStart).mEnd) break;
+        void* p = (*(sPtrVec1A5450*)&self->mNames.mpStart).mEnd[-1];
+        (*(sPtrVec1A5450*)&self->mNames.mpStart).mEnd--;
         if (p) {
             cBXString__cBXString(p, 3);
         }
     }
-    void** first = self->mVec.mBegin;
-    void** last = self->mVec.mEnd;
+    void** first = (*(sPtrVec1A5450*)&self->mNames.mpStart).mBegin;
+    void** last = (*(sPtrVec1A5450*)&self->mNames.mpStart).mEnd;
     void** finish = last;
     func_0041610C(first, last, (char*)finish - (char*)last);
-    self->mVec.mEnd -= last - first;
+    (*(sPtrVec1A5450*)&self->mNames.mpStart).mEnd -= last - first;
 }
 #endif
 
@@ -1512,22 +1508,16 @@ struct sElem1A54D8 {
 
 static inline void Construct1A54D8(sElem1A54D8* p, void* const& x) { new (p) sElem1A54D8(x); }
 
-struct sPtrVec1A54D8 {
-    int f0;
-    sElem1A54D8* mBegin;
-    sElem1A54D8* mEnd;
-    sElem1A54D8* mCap;
-};
 
 
 static inline void PushBack1A54D8(cFEStateNetMessenger* feStateNetMessenger, void* x)
 {
-    sPtrVec1A54D8* v = &(*(sPtrVec1A54D8*)&feStateNetMessenger->mNames);
-    if ((*(sPtrVec1A54D8*)&feStateNetMessenger->mNames).mEnd != (*(sPtrVec1A54D8*)&feStateNetMessenger->mNames).mCap) {
-        Construct1A54D8(v->mEnd, x);
-        ++(*(sPtrVec1A54D8*)&feStateNetMessenger->mNames).mEnd;
+    tFEStringPtrVector* v = &(*(&feStateNetMessenger->mNames));
+    if (((sElem1A54D8*)(*(&feStateNetMessenger->mNames)).mpFinish) != ((sElem1A54D8*)(*(&feStateNetMessenger->mNames)).mpEndOfStorage)) {
+        Construct1A54D8(((sElem1A54D8*)v->mpFinish), x);
+        ++(*(sElem1A54D8**)&(*(&feStateNetMessenger->mNames)).mpFinish);
     } else {
-        func_001DB778(v, (void**)(*(sPtrVec1A54D8*)&feStateNetMessenger->mNames).mEnd, &x);
+        func_001DB778(v, (void**)((sElem1A54D8*)(*(&feStateNetMessenger->mNames)).mpFinish), &x);
     }
 }
 
@@ -1624,7 +1614,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 struct sOwner1A5450;
-extern "C" void func_001A5450(sOwner1A5450* self);
+extern "C" void func_001A5450(cFEStateNetMessenger* self);
 extern "C" void func_001DB778(void* vec, void** pos, void* const* val);
 extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern char D_00461798[];
@@ -1662,23 +1652,17 @@ struct sElem1A5898 {
 
 static inline void Construct1A5898(sElem1A5898* p, void* const& x) { new (p) sElem1A5898(x); }
 
-struct sPtrVec1A5898 {
-    int f0;
-    sElem1A5898* mBegin;
-    sElem1A5898* mEnd;
-    sElem1A5898* mCap;
-};
 
 
 static inline void PushBack1A5898(cFEStateNetMessenger* feStateNetMessenger, void* x)
 {
-    sPtrVec1A5898* v = &(*(sPtrVec1A5898*)&feStateNetMessenger->mNames);
+    tFEStringPtrVector* v = &(*(&feStateNetMessenger->mNames));
     void* const* px = &x;
-    if ((*(sPtrVec1A5898*)&feStateNetMessenger->mNames).mEnd != (*(sPtrVec1A5898*)&feStateNetMessenger->mNames).mCap) {
-        Construct1A5898(v->mEnd, x);
-        ++(*(sPtrVec1A5898*)&feStateNetMessenger->mNames).mEnd;
+    if (((sElem1A5898*)(*(&feStateNetMessenger->mNames)).mpFinish) != ((sElem1A5898*)(*(&feStateNetMessenger->mNames)).mpEndOfStorage)) {
+        Construct1A5898(((sElem1A5898*)v->mpFinish), x);
+        ++(*(sElem1A5898**)&(*(&feStateNetMessenger->mNames)).mpFinish);
     } else {
-        func_001DB778(v, (void**)(*(sPtrVec1A5898*)&feStateNetMessenger->mNames).mEnd, px);
+        func_001DB778(v, (void**)((sElem1A5898*)(*(&feStateNetMessenger->mNames)).mpFinish), px);
     }
 }
 
@@ -1688,7 +1672,7 @@ extern "C" void func_001A5898(cFEStateNetMessenger* vself)
     if (((sSession1A5898*)GetSession_001A5898())->mEnabled == 0) {
         return;
     }
-    func_001A5450((sOwner1A5450*)self);
+    func_001A5450(self);
     int count = func_00262598(GetSession_001A5898());
     if (count == 0) {
         return;
@@ -1723,7 +1707,7 @@ extern "C" void func_001A5898(cFEStateNetMessenger* vself)
     }
     if (((void*)self->mpScreen) != 0) {
         char* list = (char*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(D_00461590));
-        int n = (*(sPtrVec1A5898*)&self->mNames).mEnd - (*(sPtrVec1A5898*)&self->mNames).mBegin;
+        int n = ((sElem1A5898*)(*(&self->mNames)).mpFinish) - ((sElem1A5898*)(*(&self->mNames)).mpStart);
         if (*(unsigned char*)(list + 0x96) != n) {
             cUIMenu_setScrollableMenu(list, n);
         }
@@ -2051,7 +2035,7 @@ extern "C" int func_001A6070(cFEStateNetMessenger* self, int sel);
 extern "C" void func_001A66A8(cFEStateNetMessenger* self, unsigned int index, int flag);
 extern "C" void func_001A6CA0(cFEStateNetMessenger* self);
 struct sOwner1A6E70;
-extern "C" void func_001A6E70(sOwner1A6E70* self);
+extern "C" void func_001A6E70(cFEStateNetMessenger* self);
 extern "C" void func_001A71B0(cFEStateNetMessenger* self, unsigned int index, const char* name, int a3);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
@@ -2076,14 +2060,9 @@ static inline void* GetSession_001A6978()
     return BuddyMan_mBuddyMan;
 }
 
-struct sIntVec_001A6978 {
-    int f0;
-    int* mBegin;
-    int* mEnd;
-};
 
 
-static inline unsigned int Size_001A6978(cFEStateNetMessenger* feStateNetMessenger) { return (*(sIntVec_001A6978*)&feStateNetMessenger->mNames).mEnd - (*(sIntVec_001A6978*)&feStateNetMessenger->mNames).mBegin; }
+static inline unsigned int Size_001A6978(cFEStateNetMessenger* feStateNetMessenger) { return ((int*)(*(&feStateNetMessenger->mNames)).mpFinish) - ((int*)(*(&feStateNetMessenger->mNames)).mpStart); }
 
 extern "C" void func_001A6978(cFEStateNetMessenger* vself)
 {
@@ -2091,7 +2070,7 @@ extern "C" void func_001A6978(cFEStateNetMessenger* vself)
     if (((void*)self->mpScreen) == 0) {
         return;
     }
-    func_001A6E70((sOwner1A6E70*)self);
+    func_001A6E70(self);
     func_001A6CA0((cFEStateNetMessenger*)self);
     unsigned int n = Size_001A6978(self);
     unsigned int first = ((unsigned int)self->miScrollOffset);
@@ -2104,7 +2083,7 @@ extern "C" void func_001A6978(cFEStateNetMessenger* vself)
     int count = 0;
     int row = 0;
     while (row < 15 && first < Size_001A6978(self)) {
-        int id = *(int*)((char*)(*(sIntVec_001A6978*)&self->mNames).mBegin + (first << 2));
+        int id = *(int*)((char*)((int*)(*(&self->mNames)).mpStart) + (first << 2));
         int idx = func_002624F8(GetSession_001A6978(), id);
         if (idx < 0) {
             func_001A71B0((cFEStateNetMessenger*)self, row, 0, -1);
@@ -2279,24 +2258,20 @@ static inline int* Copy1A6E70(int* first, int* last, int* result)
     return result + (last - first);
 }
 
-struct sOwner1A6E70 {
-    char pad[0x6E4];
-    sIntVec1A6E70 mVec;
-};
 
-extern "C" void func_001A6E70(sOwner1A6E70* self)
+extern "C" void func_001A6E70(cFEStateNetMessenger* self)
 {
     int i;
-    for (i = (self->mVec.mEnd - self->mVec.mBegin) - 1; i >= 0; i--) {
-        sIntVec1A6E70* v = &self->mVec;
-        int id = *(int*)((char*)self->mVec.mBegin + (i << 2));
+    for (i = ((*(sIntVec1A6E70*)&self->mNames).mEnd - (*(sIntVec1A6E70*)&self->mNames).mBegin) - 1; i >= 0; i--) {
+        sIntVec1A6E70* v = &(*(sIntVec1A6E70*)&self->mNames);
+        int id = *(int*)((char*)(*(sIntVec1A6E70*)&self->mNames).mBegin + (i << 2));
         if (func_002624F8(GetSession_001A6E70(), id) < 0) {
             // PORT: pointer arithmetic through int
-            int* pos = (int*)(i * 4 + (int)self->mVec.mBegin);
-            if (pos + 1 != self->mVec.mEnd) {
+            int* pos = (int*)(i * 4 + (int)(*(sIntVec1A6E70*)&self->mNames).mBegin);
+            if (pos + 1 != (*(sIntVec1A6E70*)&self->mNames).mEnd) {
                 Copy1A6E70(pos + 1, v->mEnd, pos);
             }
-            self->mVec.mEnd--;
+            (*(sIntVec1A6E70*)&self->mNames).mEnd--;
         }
     }
 }
@@ -12334,27 +12309,17 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void func_0039A670(void* self);
 extern "C" void func_001B47C0(cFEStateNetConfig* self, int a1);
 
-struct sFEObj_001B5268 {
-    char pad[0x6E4];
-    void* f6E4;    // 0x6E4
-    void* f6E8;    // 0x6E8
-    char pad6EC[0x6F4 - 0x6EC];
-    void* f6F4;    // 0x6F4
-    char pad6F8[0x708 - 0x6F8];
-    int f708;      // 0x708
-    int f70C;      // 0x70C
-};
 
 extern "C" void func_001B5268(cFEStateNetConfig* obj, int a1)
 {
-    sFEObj_001B5268* self = (sFEObj_001B5268*)obj;
-    cUIMenu_setSelectedByIndex(self->f6F4, 0);
+    cFEStateNetConfig* self = obj;
+    cUIMenu_setSelectedByIndex(((void*)self->mpMenuConfig), 0);
     D_004A1B80 = 0;
-    self->f70C = 1;
-    func_0039A670(self->f6E4);
-    func_0039A670(self->f6E8);
+    self->miResult = 1;
+    func_0039A670(((void*)self->mpLBAdapters));
+    func_0039A670(((void*)self->mpLBSettings));
     func_001B47C0(obj, 1);
-    self->f708 = 1;
+    self->miState = 1;
 }
 #endif
 
@@ -16177,24 +16142,13 @@ extern "C" void func_001BB440(cFEStateCreateStep2* self);
 extern "C" void func_001BB4B0(cFEStateCreateStep2* self);
 extern char D_004649F8[];
 
-struct sFEObj_001BA428 {
-    char pad0[0x10];
-    void* engine;       // 0x10
-    char pad14[0x40 - 0x14];
-    void* screen;       // 0x40
-    char pad44[0x6D0 - 0x44];
-    char* f6D0;         // 0x6D0
-    int f6D4;           // 0x6D4
-    int pad6D8;
-    int f6DC;           // 0x6DC
-};
 
 extern "C" void func_001BA428(cFEStateCreateStep2* self)
 {
     self->mbScreenReady = 0;
     self->mpAccount = (tLobbyAccount*)((char*)LobbyMan_mLobbyMan + 0x260);
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, ((sFEObj_001BA428*)self), GetHashValue32(D_004649F8), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, (self), GetHashValue32(D_004649F8), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -16206,7 +16160,7 @@ extern "C" void func_001BA428(cFEStateCreateStep2* self)
     func_001BB3B0(self);
     func_001BB440(self);
     func_001BB4B0(self);
-    func_001A8768(((sFEObj_001BA428*)self));
+    func_001A8768((self));
     self->mbScreenReady = 1;
 }
 #endif
@@ -18286,12 +18240,6 @@ extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void func_0025D860(void* self, const char* name, const char* str);
 extern char D_00464FA8[];
 
-struct sFEObj_001BD540 {
-    char pad0[0x770];
-    int f770;           // 0x770
-    char pad774[0xB80 - 0x774];
-    char fB80[4];       // 0xB80 (string object)
-};
 
 extern "C" void func_001BD540(cFEStateLobbyMenu* self, int a1, void* a2)
 {
@@ -18303,14 +18251,14 @@ extern "C" void func_001BD540(cFEStateLobbyMenu* self, int a1, void* a2)
     *(int*)((char*)p + 0x150) = 0x829;
     func_001A9BC0((cFEStateNet*)self, p);
     if (a2 == 0 || strlen((const char*)a2) == 0) {
-        ((sFEObj_001BD540*)self)->f770 = 0;
+        (self)->mbRoomHasPassword = 0;
         func_0025D860(LobbyMan_mLobbyMan, (const char*)a1, 0);
     } else {
-        ((sFEObj_001BD540*)self)->f770 = 1;
+        (self)->mbRoomHasPassword = 1;
         func_0025D860(LobbyMan_mLobbyMan, (const char*)a1, (const char*)a2);
     }
     // PORT: the unit declares a1 as int; it is the name string
-    cBXString_cBXString4(((sFEObj_001BD540*)self)->fB80, (const char*)a1);
+    cBXString_cBXString4(((char*)&(self)->mszRoomName), (const char*)a1);
 }
 #endif
 
@@ -22175,13 +22123,6 @@ extern void* D_00468278[];
 // PORT: func_001A8500 takes (self, a1, a2); the unit declares it with one arg
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 
-struct sFEState1C2D18 {
-    char pad[0x6D0];
-    int slots[4];       // 0x6D0
-    int a;              // 0x6E0
-    int b;              // 0x6E4
-    int c;              // 0x6E8
-};
 
 extern "C" void* func_001C2D18(cFEStateStats* self, int a1)
 {
@@ -22189,12 +22130,12 @@ extern "C" void* func_001C2D18(cFEStateStats* self, int a1)
     self->mVtbl = D_00468278;
     self->mbShowTime = 1;
     self->mHashName = 0x42;
-    sFEState1C2D18* s = (sFEState1C2D18*)self;
-    s->a = 0;
-    s->b = 0;
-    s->c = 0;
+    cFEStateStats* s = self;
+    s->miMode = 0;
+    s->miFocusMenu = 0;
+    s->miFirstResult = 0;
     for (int i = 3; i >= 0; i--) {
-        s->slots[i] = 0;
+        ((int*)&s->mpMenus[0])[i] = 0;
     }
     return ((void*)self);
 }

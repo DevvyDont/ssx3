@@ -2998,7 +2998,7 @@ extern "C" int SHAPE_bpctobpp_bits(int fmt) __asm__("SHAPE_bpctobpp");
  * aligned.
  *
  * @param w         width in pixels, 1 to 65536
- * @param h         height in pixels, 1 to 65536
+ * @param height         height in pixels, 1 to 65536
  * @param fmt       pixel format code (On Tour: bpc)
  * @param maxLevel  last mipmap level to include (0 for none)
  * @return the size in bytes, or 0 for an invalid size or a format SHAPE_type() rejects
@@ -3033,7 +3033,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", GetNumberOfColours);
 /**
  * Returns the palette size for a palettised bit depth.
  *
- * @param v  bits per pixel
+ * @param bpp  bits per pixel
  * @return 256 for 8, 16 for 4, otherwise 0
  */
 extern "C" int GetNumberOfColours(int bpp)
@@ -3064,7 +3064,7 @@ extern "C" int SHAPE_imagesize(int w, int h, int fmt, int maxLevel);
  * size, a metal bin 16 bytes plus its size.
  *
  * @param w         width in pixels
- * @param h         height in pixels
+ * @param height         height in pixels
  * @param fmt       pixel format code (On Tour: bpc)
  * @param clut      palette entry depth in bits (On Tour: clutbpp), 0 for none
  * @param maxLevel  last mipmap level to include
@@ -3202,7 +3202,7 @@ extern char D_004956B0[];
  * name "SHP<w>x<h>x<fmt>", then lays it out with SHAPE_createat().
  *
  * @param w         width in pixels
- * @param h         height in pixels
+ * @param height         height in pixels
  * @param fmt       pixel format code (On Tour: bpp)
  * @param clut      palette entry depth in bits, 0 for none
  * @param maxLevel  last mipmap level to include
@@ -3448,7 +3448,7 @@ extern "C" void decodeAlpha(char* src, int pitch, char* dst, int fmt);
  * @param out  the compressed data (On Tour: compressed); despite the name it is the input
  * @param src  the destination pixels (On Tour: uncompressed); despite the name it is the output
  * @param w    width in pixels
- * @param h    height in pixels
+ * @param height    height in pixels
  * @param fmt  DXT type (On Tour: dxttype)
  */
 // Compress a w x h image into 4x4 blocks.

@@ -3395,7 +3395,7 @@ extern "C" void cChaseCameraController_switchCamera_HardReset(cChaseCameraContro
  * takes the view's persistent camera choice (persistentPlayerChoiceType).
  *
  * @param idx  view index, used to pick persistentPlayerChoiceType[idx]
- * @param a    owning cCamera, passed as an int to the base constructor
+ * @param camera    owning cCamera, passed as an int to the base constructor
  * @return @p self
  */
 extern "C" void* cChaseCameraController_cChaseCameraController(cChaseCameraController* self, int idx, int camera)

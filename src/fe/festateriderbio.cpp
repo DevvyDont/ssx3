@@ -79,7 +79,7 @@ static inline void showObj_001833D0(void* self, char* name, int id)
  * Each of "Option_1" to "Option_5" found on the screen (+0x40) is made visible (setVisible, slot 9) and gets 5
  * to 9 in mMiscData (+0x18). Then calls cFEState_onGainFocus().
  *
- * @param a1  the state that had focus before (On Tour pPrevState), passed on to cFEState_onGainFocus()
+ * @param pPrevState  the state that had focus before (On Tour pPrevState), passed on to cFEState_onGainFocus()
  */
 extern "C" void cFEStateRiderDetail_onGainFocus(void* self, int pPrevState)
 {

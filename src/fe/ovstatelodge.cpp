@@ -196,7 +196,7 @@ extern "C" void cFEState_onGainFocus(void* self, int a1);
  * func_001D3340() shows one widget per event of the first two peaks on each of the three mountains, coloured by
  * the event's state for the room's player and character; cFEState_onGainFocus() is the base focus handling.
  *
- * @param a1  the state that had focus before (On Tour: pPrevState), passed on to cFEState_onGainFocus()
+ * @param pPrevState  the state that had focus before (On Tour: pPrevState), passed on to cFEState_onGainFocus()
  */
 extern "C" void cFEStateMountainRoom_onGainFocus(void* self, int pPrevState)
 {

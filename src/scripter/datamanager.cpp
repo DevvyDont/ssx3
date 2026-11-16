@@ -1328,7 +1328,7 @@ extern char D_004A34A8[];
  * (GetSSXScriptHeader) starts with a non-zero byte, calls func_002EF378 (On Tour
  * cRenderStateMan::setCustomIrradiance) with "TRANSP".
  *
- * @param a1   the play request handle (On Tour requestHandle); unused
+ * @param requestHandle   the play request handle (On Tour requestHandle); unused
  * @param obj  the script player (On Tour cScriptPlayerMain*)
  */
 extern "C" void tNISList_OnScriptPlay(void* self, int requestHandle, void* obj)

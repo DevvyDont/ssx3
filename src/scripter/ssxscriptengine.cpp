@@ -1078,7 +1078,7 @@ extern "C" void cSSXScriptEngine_CancelAsyncLoadScriptBank(cSSXScriptEngine* sel
  * cSSXScriptEngine_CancelAsyncLoadScriptBank(), which acts only if that bank has an async handle. A -1 (not
  * found) result is not checked.
  *
- * @param a1  the script data identifier whose load was cancelled (On Tour: scriptDataIndex)
+ * @param scriptDataIndex  the script data identifier whose load was cancelled (On Tour: scriptDataIndex)
  */
 extern "C" void cSSXScriptEngine_OnPendingDataCancelled(cSSXScriptEngine* self, int scriptDataIndex)
 {
@@ -1098,7 +1098,7 @@ extern "C" void cSSXScriptEngine_PurgeScriptBank(cSSXScriptEngine* self, int idx
  * Finds the bank with cSSXScriptEngine_GetBankNumberByDataIdentifier(), searching from bank 2, and calls
  * cSSXScriptEngine_PurgeScriptBank() only when one was found.
  *
- * @param a1  the released script data identifier (On Tour: scriptDataIndex)
+ * @param scriptDataIndex  the released script data identifier (On Tour: scriptDataIndex)
  */
 extern "C" void cSSXScriptEngine_OnScriptDataReleased(cSSXScriptEngine* self, int scriptDataIndex)
 {

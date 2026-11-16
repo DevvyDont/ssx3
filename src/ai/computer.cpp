@@ -2319,10 +2319,10 @@ extern "C" void cRiderHandler_gainMotionState(cRiderHandler*, int);
 /**
  * Switches the rider handler to a new motion state, notifying the old and new states.
  *
- * Calls cRiderHandler_loseMotionState(), stores @p v in MotionState, then calls cRiderHandler_gainMotionState()
+ * Calls cRiderHandler_loseMotionState(), stores @p mstate in MotionState, then calls cRiderHandler_gainMotionState()
  * with the previous state.
  *
- * @param v  the new motion state
+ * @param mstate  the new motion state
  */
 extern "C" void cRiderHandler__setMotionState(cRiderHandler* self, int mstate)
 {

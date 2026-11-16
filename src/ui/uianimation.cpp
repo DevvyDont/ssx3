@@ -45,10 +45,10 @@ struct cUIAnimationChannel_evalAtFrameFloat_sAnim {
  * Evaluates an animation channel at a frame by linear interpolation between its keys.
  *
  * The first key's value is the value at frame 0; every later key adds its frame delta. Interpolates inside the
- * first span that reaches @p t (a negative @p t extrapolates along the first span); past the last key it returns
+ * first span that reaches @p FrameNum (a negative @p FrameNum extrapolates along the first span); past the last key it returns
  * the last value. A channel without data, or with a single key, gives 0.
  *
- * @param t  frame number (On Tour: FrameNum)
+ * @param FrameNum  frame number (On Tour: FrameNum)
  * @return the channel's value at that frame
  */
 extern "C" float cUIAnimationChannel_evalAtFrameFloat(cUIAnimationChannel_evalAtFrameFloat_sAnim** self, int FrameNum)

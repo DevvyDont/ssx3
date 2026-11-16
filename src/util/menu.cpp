@@ -2290,8 +2290,8 @@ struct cSubMenuItem_sItem {
  * cSubMenuItem's vtable. The help popup menus (festatenethelppopup.cpp) pass another embedded cMenu and a
  * string.
  *
- * @param a1  the sub-menu the item opens, stored at +0x18
- * @param a2  the item's label text, stored at +0x14
+ * @param sub  the sub-menu the item opens, stored at +0x18
+ * @param cap  the item's label text, stored at +0x14
  * @return @p self
  */
 extern "C" cSubMenuItem_sItem* cSubMenuItem_cSubMenuItem(cSubMenuItem_sItem* self, void* sub, void* cap)
@@ -3048,10 +3048,10 @@ struct cIntMenuItem_sItem {
  * (main/debugmenu.cpp) builds its switches this way.
  *
  * @param text  the item's ID, passed to the base constructor
- * @param a2    address of the int the item edits
- * @param a3    smallest allowed value
- * @param a4    largest allowed value
- * @param a5    the item's label text
+ * @param value    address of the int the item edits
+ * @param mini    smallest allowed value
+ * @param maxi    largest allowed value
+ * @param cap    the item's label text
  * @return @p self
  */
 extern "C" cIntMenuItem_sItem* cIntMenuItem_cIntMenuItem(cIntMenuItem_sItem* self, void* text, int value, int mini, int maxi, int cap)
@@ -3273,10 +3273,10 @@ struct cFloatMenuItem_sItem {
  * (+0x28 to +0x30). cFloatMenuItem_input() edits the value as scale * value + offset.
  *
  * @param text  the item's ID, passed to the base constructor
- * @param a2    address of the float the item edits
- * @param a3    the item's label text
- * @param f1    smallest allowed value
- * @param f2    largest allowed value
+ * @param value    address of the float the item edits
+ * @param minf    the item's label text
+ * @param maxf    smallest allowed value
+ * @param cap    largest allowed value
  * @return @p self
  */
 extern "C" cFloatMenuItem_sItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem_sItem* self, void* text, int value, int minf, float maxf, float cap)
@@ -4787,7 +4787,7 @@ struct cRGBTitleMenuItem_sItem {
  * Runs the base constructor with ID -1, stores the colour at +0x14 and the title at +0x18, then
  * cRGBTitleMenuItem's vtable. cARGBMenuItem_cARGBMenuItem() builds one as its expand title.
  *
- * @param a1  the title text, stored at +0x18
+ * @param cap  the title text, stored at +0x18
  * @param a2  the colour the row shows, stored at +0x14
  * @return @p self
  */

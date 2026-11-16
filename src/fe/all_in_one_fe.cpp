@@ -60,7 +60,7 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_allowPauseMenu);
 /**
  * Tells whether an overlay state lets the pause menu open.
  *
- * @param arg0  the overlay state
+ * @param self  the overlay state
  * @return mAllowPauseMenu
  */
 extern "C" int cOVState_allowPauseMenu(cOVState* self) {

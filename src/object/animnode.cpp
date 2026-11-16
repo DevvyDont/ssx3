@@ -490,8 +490,8 @@ struct sRange_EBE0 {
  * With start < end the range is [start, end); otherwise it is [end, start). A start of 1e10 means the range is
  * unset, and the answer is then 0.
  *
- * @param t  the time to test
- * @return 1 if @p t is inside the range, otherwise 0
+ * @param frame  the time to test
+ * @return 1 if @p frame is inside the range, otherwise 0
  */
 // Is t between the two bounds: [start, end) when start < end, else [end, start).
 extern "C" int cAnimNode_frameUpdateEvent(sRange_EBE0* self, float frame)
