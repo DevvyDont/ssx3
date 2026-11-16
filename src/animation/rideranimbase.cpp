@@ -75,12 +75,12 @@ extern "C" int func_003119E8(void *riderAnim, int slot) {
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_003119F8);
 #ifdef SKIP_ASM
-extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
+extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
 extern int D_0044AF80[];
 
 extern "C" int func_003119F8(void* self, int anim)
 {
-    int i = cAIAnimEventMap_getBlendInTime(anim)[3];
+    int i = cAIAnimEventMap_getAnimPlayAttr(anim)[3];
     return D_0044AF80[i];
 }
 #endif
@@ -146,13 +146,13 @@ extern "C" void cRiderAnimBase_reset(cRiderAnimBase* riderAnimBase)
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimCategory);
 #ifdef SKIP_ASM
-extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
+extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
 
 /**
  * Returns the animation category of what a rider sequencer is currently playing.
  *
  * Reads the current AI anim of sequencer @p i (+@p i * 4); 0x1B6 (no anim) gives 0, otherwise word 0 of its attribute
- * record. cAIAnimEventMap_getBlendInTime returns the anim's whole attribute record (On Tour release:
+ * record. cAIAnimEventMap_getAnimPlayAttr returns the anim's whole attribute record (On Tour release:
  * cAIAnimEventMap::getAnimPlayAttr): word 0 is the category, 1 the update rule, 3 the sequencer and 4 the default
  * blend-in time (On Tour debug: getCategory, getUpdateRule, getSequencerID, getBlendInTime).
  *
@@ -165,7 +165,7 @@ extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* self, int i)
     if (anim == 438) {
         return 0;
     }
-    return *cAIAnimEventMap_getBlendInTime(anim);
+    return *cAIAnimEventMap_getAnimPlayAttr(anim);
 }
 #endif
 
@@ -412,7 +412,7 @@ extern "C" void cRiderAnimBase_blendOutAll(char* self, int i, float blendOut)
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_onInput);
 #ifdef SKIP_ASM
-extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
+extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
 struct cAnimSequence;
 void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target);
 extern "C" void cAnimSequencer_expire(void* seq, void* node);
@@ -478,7 +478,7 @@ static inline bool rabXformEq_1F00(const sRabXform_00311B48& a, const sRabXform_
  * all older sequences fade out over @p blend, and one already playing the same anim with the same transform hands its
  * sub-anims, times, speeds and weight to the new one unless @p isDupSeqAllowed allows a duplicate.
  *
- * cAIAnimEventMap_getBlendInTime returns the anim's whole attribute record (On Tour release:
+ * cAIAnimEventMap_getAnimPlayAttr returns the anim's whole attribute record (On Tour release:
  * cAIAnimEventMap::getAnimPlayAttr): word 0 is the category, 1 the update rule, 3 the sequencer and 4 the default
  * blend-in time (On Tour debug: getCategory, getUpdateRule, getSequencerID, getBlendInTime).
  *
@@ -500,14 +500,14 @@ extern "C" int cRiderAnimBase_onInput(void* vself, void* vseq, int anim, int ani
     char* node;
     if (blend == 0.0f)
         cAnimSequencer_expireAll(seq);
-    if (cAIAnimEventMap_getBlendInTime(anim)[1] == 2)
+    if (cAIAnimEventMap_getAnimPlayAttr(anim)[1] == 2)
     {
         node = cAnimSequencer_playAndLoop(seq, anim, animid, 0.0f);
     }
     else
     {
         node = cAnimSequencer_playAndHold(seq, anim, animid, 0.0f);
-        if (cAIAnimEventMap_getBlendInTime(anim)[1] == 0 || cAIAnimEventMap_getBlendInTime(anim)[2] != 0)
+        if (cAIAnimEventMap_getAnimPlayAttr(anim)[1] == 0 || cAIAnimEventMap_getAnimPlayAttr(anim)[2] != 0)
             cAnimSequence_addEndTrigger(node, 0x3F);
     }
     sSeqNode_1F00* nd = (sSeqNode_1F00*)node;
@@ -516,7 +516,7 @@ extern "C" int cRiderAnimBase_onInput(void* vself, void* vseq, int anim, int ani
     nd->m88 = self->m20;
     nd->m90 = self->m1C;
     nd->weight = nd->targetWeight = 1.0f;
-    nd->blendIn = ((float*)cAIAnimEventMap_getBlendInTime(anim))[6];
+    nd->blendIn = ((float*)cAIAnimEventMap_getAnimPlayAttr(anim))[6];
     nd->m84 = priority;
     // PORT: (int) address arithmetic for the clip header (index-first addu).
     int n = *(unsigned short*)((char*)(((unsigned int)animid >> 8) * 0x14 + *(int*)(*(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)animid & 0xFF) << 2)) + 0x8)) + 0x12);
@@ -529,7 +529,7 @@ extern "C" int cRiderAnimBase_onInput(void* vself, void* vseq, int anim, int ani
     }
     if (seq->mCount == 1)
     {
-        float t = ((float*)cAIAnimEventMap_getBlendInTime(anim))[5];
+        float t = ((float*)cAIAnimEventMap_getAnimPlayAttr(anim))[5];
         if (t != 0.0f)
         {
             nd->weight = nd->targetWeight = 0.0f;
@@ -544,7 +544,7 @@ extern "C" int cRiderAnimBase_onInput(void* vself, void* vseq, int anim, int ani
             sSeqNode_1F00* other = (sSeqNode_1F00*)cAnimSequencer_getSequence(seq, i);
             cAnimSequence_removeEndTrigger(other, 0x3F);
             cAnimSequence_fadeOutAndExpire(other, blend);
-            int type = cAIAnimEventMap_getBlendInTime(anim)[1];
+            int type = cAIAnimEventMap_getAnimPlayAttr(anim)[1];
             bool ok = other->tracks[0].anim == nd->tracks[0].anim || (type != 0 && type != 2 && type != 1);
             if (ok && other->tracks[0].id == nd->tracks[0].id && other->m88 == nd->m88
                 && other->m80 == nd->m80)
@@ -830,7 +830,7 @@ extern "C" float func_00312820(char* self, int anim, int frame)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_play);
 #ifdef SKIP_ASM
-extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
+extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
 extern "C" int cRiderAnimBase_onInput(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
 extern int D_0048D808[];
 extern char* cGameAnimMap_TheGameAnimMap;
@@ -849,7 +849,7 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend) __asm
  * Starts an AI animation on its sequencer slot and records it as that slot's current anim.
  *
  * Maps @p anim through vtable slot 4; the result 0x207 means it has no animation. A negative @p blend takes
- * the anim's default blend-in time from its event-map record (cAIAnimEventMap_getBlendInTime()[4]), whose [3]
+ * the anim's default blend-in time from its event-map record (cAIAnimEventMap_getAnimPlayAttr()[4]), whose [3]
  * also gives the sequencer slot; cRiderAnimBase_onInput starts the clip there with the slot's constant from D_0048D808
  * (3, 2, 1, 0, 0, 0).
  *
@@ -867,10 +867,10 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend)
         return 438;
     if (blend < 0.0f)
     {
-        blend = *(float*)&cAIAnimEventMap_getBlendInTime(anim)[4];
+        blend = *(float*)&cAIAnimEventMap_getAnimPlayAttr(anim)[4];
     }
     int animId = *(int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
-    int slot = cAIAnimEventMap_getBlendInTime(anim)[3];
+    int slot = cAIAnimEventMap_getAnimPlayAttr(anim)[3];
     return *(int*)(self + (slot << 2)) = cRiderAnimBase_onInput(self, *(char**)(self + 0x50) + (slot << 3), anim, animId, flags, D_0048D808[slot], blend);
 }
 #endif
@@ -878,7 +878,7 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_playFromAnimID);
 #ifdef SKIP_ASM
-extern "C" int* cAIAnimEventMap_getBlendInTime(int anim);
+extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
 extern "C" int cRiderAnimBase_onInput(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
 extern int D_0048D808[];
 
@@ -887,7 +887,7 @@ extern int D_0048D808[];
  *
  * The sequencer is attribute word 3; a negative @p blend takes attribute word 4. Calls cRiderAnimBase_onInput (onInput) with
  * duplicates allowed and the sequencer's priority from D_0048D808, and stores the result as the sequencer's current AI
- * anim (+slot * 4). cAIAnimEventMap_getBlendInTime returns the anim's whole attribute record (On Tour release:
+ * anim (+slot * 4). cAIAnimEventMap_getAnimPlayAttr returns the anim's whole attribute record (On Tour release:
  * cAIAnimEventMap::getAnimPlayAttr): word 0 is the category, 1 the update rule, 3 the sequencer and 4 the default
  * blend-in time (On Tour debug: getCategory, getUpdateRule, getSequencerID, getBlendInTime).
  *
@@ -897,10 +897,10 @@ extern int D_0048D808[];
  */
 extern "C" void cRiderAnimBase_playFromAnimID(char* self, int anim, int animid, float blend)
 {
-    int slot = cAIAnimEventMap_getBlendInTime(anim)[3];
+    int slot = cAIAnimEventMap_getAnimPlayAttr(anim)[3];
     if (blend < 0.0f)
     {
-        blend = *(float*)&cAIAnimEventMap_getBlendInTime(anim)[4];
+        blend = *(float*)&cAIAnimEventMap_getAnimPlayAttr(anim)[4];
     }
     *(int*)(self + (slot << 2)) = cRiderAnimBase_onInput(self, *(char**)(self + 0x50) + (slot << 3), anim, animid, 1, D_0048D808[slot], blend);
 }

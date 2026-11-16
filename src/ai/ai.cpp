@@ -2700,7 +2700,7 @@ static inline sQuat_12BE20 AxisAngle_12BE20(const sQuat_12BE20& axis, float angl
 /**
  * Enters the start-gate control: faces the rider by its stance and starts the gate rock (or sit) animation.
  *
- * Copies mNaturalStance into the rider's stance word (+0x320) and the anim's (+0x18), resets mRiderAnim with
+ * Copies IsGoofyStance into the rider's stance word (+0x320) and the anim's (+0x18), resets mRiderAnim with
  * its root at the origin, turned half a circle about Z when the stance is nonzero. GateState 2 (sit) plays
  * anim 1; anything else plays anim 0 and becomes 0 (rock). Clears GateAnticipate, HeldAtExtremeSec and both
  * thrusts.
@@ -4019,7 +4019,7 @@ struct sVEntry12D848 { short delta; short index; void (*fn)(void*, float); };
  * A new impact gives a vibration bump and the landing sound (cSSXAudio_Land, 0 boost). While the wipeout
  * motion is on the ground the rumble is 2 * (1 - clip progress). When the main clip completes, on the ground
  * it plays semantic 5 and requests CS_Cruise and MS_Ground; in the air it starts a new takeoff in the trick
- * score (cRiderMetrix_evTakeoff, flag: unk_320 differs from mNaturalStance), plays the air cycle 0x11F and requests
+ * score (cRiderMetrix_evTakeoff, flag: IsRidingFakie differs from IsGoofyStance), plays the air cycle 0x11F and requests
  * CS_Spin and MS_Air.
  */
 extern "C" void cWipeoutControl_updateRecover(cWipeoutControl* self)
@@ -5900,7 +5900,7 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_loseFocus);
 /**
  * Leaves the board-press control: clears the press mode and lets the press and board depth decay to 0.
  *
- * Sets mPressType (rider + 0x330, On Tour ePressMode) to 0, the board-depth channel (rider + 0x274) to target
+ * Sets PressMode (rider + 0x330, On Tour ePressMode) to 0, the board-depth channel (rider + 0x274) to target
  * 0 at rate 1/60 and the press-depth channel (rider + 0x268) to target 0 at rate 1/30.
  */
 extern "C" void cBoardPressControl_loseFocus(cBoardPressControl* self)
@@ -6231,7 +6231,7 @@ struct sPadIn_1304E0
  * press.
  *
  * While a release clip (0x21 or 0x19) plays and the press depth (rider + 0x268) is above 0, pushing
- * BoardPress past 0.5 the same way again re-presses: clip 0x20 (tail) or 0x18 (nose), mPressType to match,
+ * BoardPress past 0.5 the same way again re-presses: clip 0x20 (tail) or 0x18 (nose), PressMode to match,
  * depth target 1 and BP_Into. Otherwise it scores the end of a nose or tail press (cRiderMetrix_evPressEnd) and goes
  * back to the rail (rail cycle clip, CS_Railslide) in rail motion, else to CS_Cruise after restoring the
  * stance (cRider_undoRailslideModeOrientation).
@@ -6885,7 +6885,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  * Ends a board-press pivot: completes it into the other press or turns back to the press it started from.
  *
  * For pivot anims 0x25/0x26 a pivot (mSlewed[12]) of at most 0.5 scores a half turn (cRiderMetrix_evPressPivot), plays
- * press anim 0x1C and sets mPressType 1; otherwise it calls changeFakieBoardPress() (probably undoing the
+ * press anim 0x1C and sets PressMode 1; otherwise it calls changeFakieBoardPress() (probably undoing the
  * stance swap checkForPivot made) and plays 0x24. Pivots 0x1D/0x1E mirror this but complete at 0.5 or more.
  */
 extern "C" void cBoardPressControl_blendOutOfPivot(cBoardPressControl* self)
@@ -7385,7 +7385,7 @@ static inline float clamp_131D30(float v, float lo, float hi)
  * Leaves early on a reset (bit 12), in the air, on a prewind (bits 13-14) or an uber grind (grind id in bits
  * 17-24); sets boost (bits 15-16) and rail balance (bits 25-30). Word 1 bits 6-11 start a board press and
  * bits 0-5 a rail spin (chooseRailSpin; during a spin anim, type 0xE, only after its event 0). Otherwise the
- * lean mSlewed[6] follows RailOffCenter and the slide anim 0x12-0x14 matches mRailStyle.
+ * lean mSlewed[6] follows RailOffCenter and the slide anim 0x12-0x14 matches RailslideMode.
  *
  * @param in  the rail slide command (On Tour tRailslideCmd): button bits and 6-bit stick values
  */
@@ -7515,10 +7515,10 @@ static inline void flip_2060(void* self, int f)
     *(float*)(RIDER_2060 + 0x240) = -*(float*)(RIDER_2060 + 0x240);
 }
 /**
- * Turns the rider a quarter turn on the rail, switching the rail stance (mRailStyle) and playing its anim.
+ * Turns the rider a quarter turn on the rail, switching the rail stance (RailslideMode) and playing its anim.
  *
  * With @p dir set RSpinAngle drops by pi/2 and the stance goes 1->3->2->4->1, else it grows by pi/2 and goes
- * 1->4->2->3->1. Entering stance 2 sets the switch flag unk_320 and the anim mirror, leaving it clears them;
+ * 1->4->2->3->1. Entering stance 2 sets the switch flag IsRidingFakie and the anim mirror, leaving it clears them;
  * the anim heading offset follows the stance (anims 0x31-0x36). The spin is scored with cRiderMetrix_evRailSpin().
  *
  * @param dir  nonzero for one direction (On Tour isCCW), zero for the other
@@ -7777,7 +7777,7 @@ extern char D_00459FC8[];
 /**
  * Starts a handplant: resets the steering channels, plays the sound and an entry anim timed to EnterSec.
  *
- * Sets the rider's handplant mode (unk_32C) to 1 and scales the anim speed (+0x1C) so that mode's anim from
+ * Sets the rider's handplant mode (HandplantMode) to 1 and scales the anim speed (+0x1C) so that mode's anim from
  * D_00459FC8[mode][HandplantType] lasts EnterSec seconds while playHandplantAnim() starts it. Then clears
  * CurBalance and fades out anim layers 1 and 0 over 0.33 s.
  */
@@ -7933,7 +7933,7 @@ struct sAi_2A30 {
 /**
  * Runs one frame of a handplant: the entry, the balanced hold on the wall and the exit to riding or air.
  *
- * Mode 1 (unk_32C) waits for the entry anim, then holds (mode 2) if bit 13 is down and the plant was not
+ * Mode 1 (HandplantMode) waits for the entry anim, then holds (mode 2) if bit 13 is down and the plant was not
  * missed, else drops out (mode 3). Holding moves CurBalance toward the balance input (bits 14-19) and tilts
  * mSlewed[8]; on release it picks exit mode 4, 5 or 6 (rail spline). Exits switch to MS_Air and, when the
  * anim ends or reaches event 1, to CS_NaturalAir (anim 0x11F) or CS_Cruise (0x3D).
@@ -7946,19 +7946,19 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
         return;
     }
     cRider* rider = self->mRider;
-    int st = rider->unk_32C;
+    int st = rider->HandplantMode;
     if (st == 1) {
         if (cRiderAnimBase_isCurrentAnimEndFlag(rider->mRiderAnim, 2) == 0) {
             return;
         }
         if ((in->flags & 0x2000) && self->IsMissedHandplant == 0) {
-            self->mRider->unk_32C = 2;
+            self->mRider->HandplantMode = 2;
             cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evHandplantStart(self->mRider->mMetrix, 1));
         } else {
-            self->mRider->unk_32C = 3;
+            self->mRider->HandplantMode = 3;
             cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evHandplantStart(self->mRider->mMetrix, 2));
         }
-        cHandplantControl_playHandplantAnim(self, self->mRider->unk_32C, self->HandplantType);
+        cHandplantControl_playHandplantAnim(self, self->mRider->HandplantMode, self->HandplantType);
         self->EnterSec = 0.0f;
         return;
     }
@@ -7967,7 +7967,7 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
         self->EnterSec += dt;
         if ((in->flags & 0x2000) && __builtin_fabsf(rider->mSlewed[8].cur) < 1.0f) {
             float desBal = ((in->flags << 12) >> 26) * 0.032258063554763794f;
-            if (rider->unk_320 != 0) desBal = -desBal;
+            if (rider->IsRidingFakie != 0) desBal = -desBal;
             if (self->HandplantType == 1) desBal = -desBal;
             rider->mSlewed[7].target = desBal;
             rider->mSlewed[7].rate = dt * 5.0f;
@@ -8002,11 +8002,11 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
             return;
         }
         if (self->IsRailSpline != 0 && __builtin_fabsf(self->mRider->mSlewed[8].cur) < 0.25f) {
-            self->mRider->unk_32C = 6;
+            self->mRider->HandplantMode = 6;
         } else if (self->mRider->mSlewed[8].cur < -0.05000000074505806f) {
-            self->mRider->unk_32C = 4;
+            self->mRider->HandplantMode = 4;
         } else {
-            self->mRider->unk_32C = 5;
+            self->mRider->HandplantMode = 5;
         }
         cRider_doLeanPoseAdjust(self->mRider, &self->mRider->mPosition);
         cRider_updateOrientationImplicit(self->mRider);
@@ -8022,7 +8022,7 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
         rider4->mSlewed[8].target = 0.0f;
         rider4->mSlewed[8].cur = 0.0f;
         rider4->mSlewed[8].rate = 0.0f;
-        cHandplantControl_playHandplantAnim(self, self->mRider->unk_32C, self->HandplantType);
+        cHandplantControl_playHandplantAnim(self, self->mRider->HandplantMode, self->HandplantType);
         return;
     }
     if (func_0011FE98(rider) == 5) {
@@ -8070,7 +8070,7 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
 INCLUDE_ASM("ai/ai", cHandplantControl_loseFocus);
 #ifdef SKIP_ASM
 /**
- * Leaves a handplant: clears the rider's handplant mode (unk_32C) and releases the balance channel
+ * Leaves a handplant: clears the rider's handplant mode (HandplantMode) and releases the balance channel
  * mSlewed[7] (target 0, rate 0.05).
  */
 extern "C" void cHandplantControl_loseFocus(cHandplantControl* self)
@@ -8144,7 +8144,7 @@ static inline sQuat_132FB8 QuatMul_132FB8(const sQuat_132FB8& a, const sQuat_132
  * When the entry's flip word is set it rotates the rider 180 degrees about its up axis (mMatrix row 2),
  * refreshes the orientation and adds pi to the anim heading offset.
  *
- * @param mode  handplant mode (On Tour eHandplantMode; the rider's unk_32C)
+ * @param mode  handplant mode (On Tour eHandplantMode; the rider's HandplantMode)
  * @param type  handplant type (eHandplantType: HT_HS 0, HT_TS 1)
  */
 extern "C" void cHandplantControl_playHandplantAnim(cHandplantControl* self, int mode, int type)
@@ -8476,7 +8476,7 @@ static inline void aiSetChannel_133308(cRider* rider, int i, float rate, float t
  * Leaves early on a reset (bit 12), a handplant (bit 13 while not spinning) or a rail or board collision.
  * SpinState goes none -> into (new input, snapped to 45 degrees) -> cycle (holding adds half spins and full
  * flips) -> out of; AirAdjState handles air adjust and late spin (bit 15), isGrabPlaying() the grab (byte 2,
- * tweak bit 14), and word 1 bits 18-19 the landing press (mPressType).
+ * tweak bit 14), and word 1 bits 18-19 the landing press (PressMode).
  *
  * @param input  the spin command (On Tour tSpinCmd): button bits, grab id and 6-bit spin and flip values
  */
@@ -8530,7 +8530,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
     if (!busy && self->mode == 3)
         self->mode = 0;
 
-    self->rider->mPressType = 0;
+    self->rider->PressMode = 0;
     float maxFlip = D_004A4C9C;
     int dir = (input[1] << 12) >> 30;
     float flipInput;
@@ -8551,9 +8551,9 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
         flipAdj = flipInput;
         maxFlip = D_004A4CA0;
         if (self->flipVel < 0.0f || (self->flipVel == 0.0f && flipAdj < 0.0f))
-            self->rider->mPressType = 2;
+            self->rider->PressMode = 2;
         else
-            self->rider->mPressType = 1;
+            self->rider->PressMode = 1;
     }
     cRider_setupBoostWarp(self->rider, 0, 0);
 
@@ -8579,7 +8579,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
             FLIPRATE_133308(self->rider) = 2.99977445602417f;
             self->state = 0;
             cRider_flagEventBoostPowerUp(self->rider, 1,
-                          cRiderMetrix_evLateSpin(self->rider->mMetrix, self->rider->unk_320 != self->rider->mNaturalStance));
+                          cRiderMetrix_evLateSpin(self->rider->mMetrix, self->rider->IsRidingFakie != self->rider->IsGoofyStance));
         }
     }
 
@@ -8828,7 +8828,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
     self->flipAcc += self->curFlip - flip0;
 
     float stanceSpin = self->spinAcc;
-    if (self->rider->mNaturalStance)
+    if (self->rider->IsGoofyStance)
         stanceSpin = -stanceSpin;
     cRider_flagEventBoostPowerUp(self->rider, 1, cRiderMetrix_evSpin(self->rider->mMetrix, stanceSpin));
     cRider_flagEventBoostPowerUp(self->rider, 1, cRiderMetrix_evFlip(self->rider->mMetrix, self->flipAcc));
@@ -8846,7 +8846,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
             {
                 cRider* rd = self->rider;
                 float x = rd->mSlewed[14].cur;
-                if (rd->unk_320)
+                if (rd->IsRidingFakie)
                     x = -x;
                 float ang = aiAtan2_133308(rd->mSlewed[13].cur, x);
                 anim = aiDir8_133308(ang, 297, 298, 299, 300, 304, 303, 302, 301);
@@ -8855,7 +8855,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
         else if (state0 == 3 && (self->state == 0 || self->state == 1))
         {
             float ang;
-            if (self->rider->unk_320)
+            if (self->rider->IsRidingFakie)
                 ang = aiAtan2_133308(flip, -spin);
             else
                 ang = aiAtan2_133308(flip, spin);
@@ -8880,7 +8880,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
                 float y = aiSign_133308(self->desFlip, self->curFlip);
                 float x = aiSign_133308(self->desSpin, self->curSpin);
                 float ang;
-                if (self->rider->unk_320)
+                if (self->rider->IsRidingFakie)
                     ang = aiAtan2_133308(y, -x);
                 else
                     ang = aiAtan2_133308(y, x);
@@ -9962,9 +9962,9 @@ extern sAnimSet_00136268 D_0045A038[];
 /**
  * Starts an uber grind: plays the entry anim of grind CurrentGrind for the rail stance and scores the trick.
  *
- * Picks the entry anim from D_0045A038[CurrentGrind] (0x24 bytes each) by mRailStyle (4, 3, 2, other), turns
+ * Picks the entry anim from D_0045A038[CurrentGrind] (0x24 bytes each) by RailslideMode (4, 3, 2, other), turns
  * the anim heading offset a quarter turn (not from stance 3; stance 2 also clears the switch flag), reports
- * the grind (cRiderMetrix_evUberGrindStart) for boost, then sets mRailStyle 3, GrindState 0 and fades anim layers 1 and 0.
+ * the grind (cRiderMetrix_evUberGrindStart) for boost, then sets RailslideMode 3, GrindState 0 and fades anim layers 1 and 0.
  */
 extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
 {

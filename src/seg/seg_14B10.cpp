@@ -1272,7 +1272,7 @@ static inline Q_5168 Scale_5168(const Q_5168& v, float s)
 /**
  * Flips the rider between regular and fakie.
  *
- * Toggles the fakie flag at +0x320 (unk_320; On Tour IsRidingFakie), turns the animation heading by pi
+ * Toggles the fakie flag at +0x320 (IsRidingFakie; On Tour IsRidingFakie), turns the animation heading by pi
  * (cRiderAnimBase_changeHeadingOffset on mRiderAnim) and resets its heading pose (+0x30 = t4vect_Origin, +0x40 = a pi
  * turn about t4vect_ZAxis when fakie, none otherwise), copies the flag to mRiderAnim +0x18, negates mGroundForward
  * (+0x3A0) and mGroundSide (+0x3B0), and negates the current and target values of slewed channels 0 (lean), 1, 2, 3
@@ -1350,7 +1350,7 @@ static inline t4Vector QuatMul_5358(const Q_5358& a, const t4Vector& b)
 /**
  * Turns the rider to suit its rail-slide style, then refreshes its orientation.
  *
- * Styles 1 and 2 need a stance: the rider half-turns when its current stance (unk_320) disagrees. Other
+ * Styles 1 and 2 need a stance: the rider half-turns when its current stance (IsRidingFakie) disagrees. Other
  * styles
  * half-turn back when needed, then turn the rider and its animation heading a quarter turn (+90 degrees for
  * style 4, else -90).
@@ -1358,26 +1358,26 @@ static inline t4Vector QuatMul_5358(const Q_5358& a, const t4Vector& b)
 extern "C" void cRider_doRailslideModeOrientation(cRider* self)
 {
     // Half turn about the up axis (quaternion (up, 0)) whenever the landing state disagrees with the stance flag.
-    int state = self->mRailStyle;
+    int state = self->RailslideMode;
     if (state == 2) {
-        if (self->unk_320 == 0) {
+        if (self->IsRidingFakie == 0) {
             self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
             cRider_updateOrientationImplicit(self);
             cRider_doChangeFakie((char*)self);
         }
     } else if (state == 1) {
-        if (self->unk_320 != 0) {
+        if (self->IsRidingFakie != 0) {
             self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
             cRider_updateOrientationImplicit(self);
             cRider_doChangeFakie((char*)self);
         }
     } else {
-        if (self->unk_320 != 0) {
+        if (self->IsRidingFakie != 0) {
             self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
             cRider_updateOrientationImplicit(self);
             cRider_doChangeFakie((char*)self);
         }
-        if (self->mRailStyle == 4) {
+        if (self->RailslideMode == 4) {
             cRider_rotateOrientation_5358(self, *(Q_5168*)&self->mMatrix.row[2], 1.5707964f);
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, 1.5707964f);
             SetHeading_5168((char*)self->mRiderAnim, 1.5707964f);
@@ -1426,7 +1426,7 @@ static inline void SetHeading_5640(char* a, float angle)
 /**
  * Undoes the sideways rail-slide orientation when the rider leaves a rail.
  *
- * Nothing to do while the rail-slide mode (mRailStyle, +0x328; On Tour RailslideMode) is 0. In the air (motion state 1)
+ * Nothing to do while the rail-slide mode (RailslideMode, +0x328; On Tour RailslideMode) is 0. In the air (motion state 1)
  * modes 3 and 4 reset the animation heading, and it plays 0x11A (mode 3), 0x115 (mode 4) or 0x10C (other modes). On the
  * ground (motion state 0) modes 3 and 4 turn the rider back by +-90 degrees about the up axis (cRider_rotateOrientation
  * and cRiderAnimBase_changeHeadingOffset) and reset the heading, then it plays 5. Finally the mode is cleared and
@@ -1598,8 +1598,8 @@ static inline float vAbs_115B58(float x)
 /**
  * Plays a queued reaction animation (cheer or sulk) and clears the reaction.
  *
- * The pending reaction is the type at +0x358 (header mHudMsgId; On Tour ReactionEventType: 1 Pos, 2 UberPos, 3
- * EarnComboPos, 4 Neg, 5 UberOn, 6 UberOff) flagged at the AI tick at +0x354 (header mHudMsgExpire; On Tour
+ * The pending reaction is the type at +0x358 (header ReactionEventType; On Tour ReactionEventType: 1 Pos, 2 UberPos, 3
+ * EarnComboPos, 4 Neg, 5 UberOn, 6 UberOff) flagged at the AI tick at +0x354 (header ReactionEventTick; On Tour
  * ReactionEventTick). Nothing happens while channel 2's animation category is 5 or 10 or channel 1 plays anything.
  * Within 180 ticks of the flag it plays 0x13B for types 1 .. 3 (with the animation filter at +0x8C8 for that play;
  * types 1 and 2 also cue func_0029FF80), 0x13A for type 4, and 0x13E for types 5 and 6 when |mSlewed[1].cur| < 0.75 and
@@ -1727,7 +1727,7 @@ extern "C" void cRider_checkForProximityAction(cRider* self)
                                 cRiderAnimBase_play(self->mRiderAnim, 319, 0, -1.0f);
                             } else {
                                 int left = diff < 0.0f;
-                                if (left == self->unk_320)
+                                if (left == self->IsRidingFakie)
                                     cRiderAnimBase_play(self->mRiderAnim, 321, 0, -1.0f);
                                 else
                                     cRiderAnimBase_play(self->mRiderAnim, 320, 0, -1.0f);
@@ -1750,7 +1750,7 @@ extern "C" void cRider_checkForProximityAction(cRider* self)
                     if (__builtin_fabsf(diff) > wide) {
                         *(long*)((char*)self->mRiderAnim + 0x20) = self->mHeadBoneMask;
                         int left = diff < 0.0f;
-                        if (left == self->unk_320)
+                        if (left == self->IsRidingFakie)
                             cRiderAnimBase_play(self->mRiderAnim, 317, 0, -1.0f);
                         else
                             cRiderAnimBase_play(self->mRiderAnim, 316, 0, -1.0f);
@@ -1839,9 +1839,9 @@ void cRider_setControlState_61D0(void* self, int on) __asm__("cRider_setControlS
 /**
  * Starts a board press from the press input.
  *
- * Nothing happens when @p dir is 0, while rail-sliding sideways (mRailStyle 3 or 4), or on the ground (motion state 0)
+ * Nothing happens when @p dir is 0, while rail-sliding sideways (RailslideMode 3 or 4), or on the ground (motion state 0)
  * while moving backward (mVelocity . mGroundForward < 0). A positive input plays 0x18 and sets the press mode
- * (mPressType, +0x330; On Tour PressMode) to 1, a negative one plays 0x20 and sets 2; then control state 1
+ * (PressMode, +0x330; On Tour PressMode) to 1, a negative one plays 0x20 and sets 2; then control state 1
  * (cRider_setControlState__FPv).
  *
  * @param rider  the rider (this)
@@ -1994,7 +1994,7 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
     }
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13) {
         int id = cRiderAnimBase_getCurrentAnimID(self->mRiderAnim, 1);
-        int match = self->unk_320 ? id == 323 : id == 324;
+        int match = self->IsRidingFakie ? id == 323 : id == 324;
         if ((isLeft != 0 && isRight == 0 && match) || (isLeft == 0 && isRight != 0 && !match)) {
             if (seqDone_163B0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0)) {
                 *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x90) = 0.0f;
@@ -2007,20 +2007,20 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
             }
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 0) == 13) {
                 float blendStep = self->mTimeScale * 0.01111111231148243f;
-                float cur = self->mAttackBlend;
+                float cur = self->PunchStrength;
                 float newBlend = 1.0f;
                 if (blendStep + 1.0f < cur)
                     newBlend = cur - blendStep;
                 else if (cur < 1.0f - blendStep)
                     newBlend = cur + blendStep;
-                self->mAttackBlend = newBlend;
+                self->PunchStrength = newBlend;
                 char* baseSeq = (char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 0);
-                *(float*)(baseSeq + 0x94) = *(float*)(baseSeq + 0x98) = self->mAttackBlend;
+                *(float*)(baseSeq + 0x94) = *(float*)(baseSeq + 0x98) = self->PunchStrength;
             }
             if (match)
-                self->mAttackDir = Scale_163B0(GetSide_163B0(self), -1.0f);
+                self->PunchVect = Scale_163B0(GetSide_163B0(self), -1.0f);
             else
-                self->mAttackDir = GetSide_163B0(self);
+                self->PunchVect = GetSide_163B0(self);
         } else {
             *(float*)((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0x90) = 1.0f;
             cRiderAnimBase_blendOutAll(self->mRiderAnim, 0, 0.1f);
@@ -2035,7 +2035,7 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
         *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
         cRiderAnimBase_play(self->mRiderAnim, 322, 1, -1.0f);
         *(long*)((char*)self->mRiderAnim + 0x20) = -1;
-        self->mAttackBlend = 0.0f;
+        self->PunchStrength = 0.0f;
     } else if (isLeft != 0 || isRight != 0) {
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
             func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
@@ -2044,16 +2044,16 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
             return 1;
         int anim;
         if (isLeft != 0) {
-            anim = self->unk_320 ? 323 : 324;
-            self->mAttackDir = Scale_163B0(GetSide_163B0(self), -1.0f);
+            anim = self->IsRidingFakie ? 323 : 324;
+            self->PunchVect = Scale_163B0(GetSide_163B0(self), -1.0f);
         } else {
-            self->mAttackDir = GetSide_163B0(self);
-            anim = self->unk_320 ? 324 : 323;
+            self->PunchVect = GetSide_163B0(self);
+            anim = self->IsRidingFakie ? 324 : 323;
         }
         *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
         cRiderAnimBase_play(self->mRiderAnim, anim, 1, -1.0f);
         *(long*)((char*)self->mRiderAnim + 0x20) = -1;
-        self->mAttackBlend = 0.0f;
+        self->PunchStrength = 0.0f;
     }
     return cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 || cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13;
 }

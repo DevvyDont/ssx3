@@ -3,7 +3,7 @@
 
 // cPS2LightMan: the light manager (cLightMan::TheLightMan): an array of light instances, the first n static (from the
 // world's light records) followed by 50 dynamic slots handed out per frame. Size 0x14: [R] cLightMan_construct__Fv
-// (render/lightman) does cMemMan_alloc(0x14, "LightMan") + cPSPLightMan_cPSPLightMan__FP12cPSPLightMan (vtable
+// (render/lightman) does cMemMan_alloc(0x14, "LightMan") + cLightMan_cLightMan__FP12cPSPLightMan (vtable
 // cLightMan_vtbl, stores TheLightMan), then stores D_00493650. Destructors cPS2LightMan__cPS2LightMan__FPv (slot 0) ->
 // cLightMan__cLightMan (restores cLightMan_vtbl, clears TheLightMan).
 // Bases: cLightMan (On Tour 0x4: vptr only) <- cPSPLightMan (retail class name kept from On Tour, render/ps2lightman)

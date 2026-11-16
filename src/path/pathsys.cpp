@@ -3,7 +3,7 @@
 #include "main/ssxapp.h"
 
 //100%
-INCLUDE_ASM("path/pathsys", cPathSys_resolvePaths);
+INCLUDE_ASM("path/pathsys", cPathSys_loadTrackPaths);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -28,13 +28,13 @@ struct sPathSysB310 {
 };
 
 /**
- * Despite the name, loads the track paths ("TrackPaths") from the level's path data; On Tour's resolvePaths
- * takes no data.
+ * Loads the track paths ("TrackPaths") from the level's path data (On Tour's loadTrackPaths; this was once named
+ * resolvePaths, which in On Tour is a separate void(this) function).
  *
  * @param data  the serialized data: a count, then each path
  * @return number of bytes read
  */
-extern "C" int cPathSys_resolvePaths(sPathSysB310* self, char* data)
+extern "C" int cPathSys_loadTrackPaths(sPathSysB310* self, char* data)
 {
     int count;
     sPathB310** slot = &self->paths;

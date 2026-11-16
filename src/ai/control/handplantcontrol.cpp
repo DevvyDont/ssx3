@@ -4320,7 +4320,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         float spinEndAng = 0.2617994248867035f;     // deg2rad(15): kSpinOutEndAng
         t4Vector flat = vu0Sub_13D818(rel, vu0Scale_13D818(self->mRider->mGroundNormal, vu0Dot_13D818(rel, self->mRider->mGroundNormal)));
         float ang;
-        if (self->mRider->unk_320 != 0)
+        if (self->mRider->IsRidingFakie != 0)
             ang = atan2_13D818(-vu0Dot_13D818(flat, self->mRider->mGroundSide), -vu0Dot_13D818(flat, self->mRider->mGroundForward));
         else
             ang = atan2_13D818(vu0Dot_13D818(flat, self->mRider->mGroundSide), vu0Dot_13D818(flat, self->mRider->mGroundForward));

@@ -2104,7 +2104,7 @@ extern "C" void cFocusMan_readFromReplayFrame(sObj_3578* self, cStream_3578* dat
 INCLUDE_ASM("seg/seg_1218", cRiderAnim_updateRule);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" char* cAIAnimEventMap_getBlendInTime(int id);
+extern "C" char* cAIAnimEventMap_getAnimPlayAttr(int id);
 // PORT: the handlers are defined later in the unit with mixed parameter/return types; bind uniform views by asm label
 extern "C" int f_001048C0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001048C0");
 extern "C" int f_00104940_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104940");
@@ -2127,7 +2127,7 @@ extern "C" void func_00103AA0_36A0(void* self, void* anim) __asm__("func_00103AA
 /**
  * Runs the per-frame update rule of the animation playing in one of the rider's sequencers.
  *
- * Looks up the animation's play attributes (cAIAnimEventMap_getBlendInTime(*anim): a 0x1C-byte record of D_00446990; On
+ * Looks up the animation's play attributes (cAIAnimEventMap_getAnimPlayAttr(*anim): a 0x1C-byte record of D_00446990; On
  * Tour calls this lookup getAnimPlayAttr) and dispatches on its update rule (+0x4) to one of 16 handlers, func_001048C0
  * .. func_001046B0 (On Tour onUpdateFWD .. onUpdateASYNC_BP_BAL). When the handler returns 0 and Rider (+0x60) is a
  * human (mIsHuman) local (mIsLocal) rider, it then runs func_00103AA0 (On Tour checkForSoundEvents). Virtual: slot 2 of
@@ -2140,7 +2140,7 @@ extern "C" void func_00103AA0_36A0(void* self, void* anim) __asm__("func_00103AA
 extern "C" void cRiderAnim_updateRule(char* self, void* x, int* anim, float dt)
 {
     int done = 0;
-    switch (*(int*)(cAIAnimEventMap_getBlendInTime(*anim) + 4)) {
+    switch (*(int*)(cAIAnimEventMap_getAnimPlayAttr(*anim) + 4)) {
     case 0:
         done = f_001048C0_36A0(self, x, anim, dt);
         break;
@@ -2210,7 +2210,7 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_expireRule);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" char* cAIAnimEventMap_getBlendInTime(int id);
+extern "C" char* cAIAnimEventMap_getAnimPlayAttr(int id);
 extern "C" int func_00104CA0_3918(void* self, void* ev, void* data) __asm__("func_00104CA0");
 extern "C" int func_00104A40_3918(void* self, void* ev, void* data) __asm__("func_00104A40");
 extern "C" int func_00104A60_3918(void* self, void* ev, void* data) __asm__("func_00104A60");
@@ -2234,7 +2234,7 @@ struct sEventOwner3918 {
  * Runs the expire rule of the animation that finished in a sequencer and records the animation to play next.
  *
  * The sequencer index is @p ev's position in the 8-byte sequencer array at +0x50. It looks up the play attributes of
- * the sequence's animation (cAIAnimEventMap_getBlendInTime(*data); On Tour getAnimPlayAttr) and dispatches on the
+ * the sequence's animation (cAIAnimEventMap_getAnimPlayAttr(*data); On Tour getAnimPlayAttr) and dispatches on the
  * expire rule (+0x8) to one of 11 handlers, func_00104CA0 .. func_00104C80 (On Tour onExpireNOP, onExpireINTO_AIR, ...;
  * On Tour adds SK_ skier variants). The handler's result, the next tAIAnimID, goes into the word at +index*4; a rule
  * outside 0..10 stores nothing. Virtual: slot 3 of cRiderAnim_vtbl.
@@ -2246,7 +2246,7 @@ struct sEventOwner3918 {
 extern "C" void cRiderAnim_expireRule(sEventOwner3918* self, sEvent3918* ev, int* data)
 {
     int idx = ev - self->events;
-    char* info = cAIAnimEventMap_getBlendInTime(*data);
+    char* info = cAIAnimEventMap_getAnimPlayAttr(*data);
     switch (*(int*)(info + 8)) {
     case 0:
         self->results[idx] = func_00104CA0_3918(self, ev, data);
@@ -3957,7 +3957,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         if (cRiderAnimBase_getCurrentAnimID(rider->mRiderAnim, 2) != 268 || func_00312AB0(rider->mRiderAnim, 2) > 0.20000000298023224f) {
             rider->mSurfaceType = 0;
             cRider_flagEventLand(rider, 0, 0, 0, hit, speed);
-            cRiderMetrix_evTakeoff(rider->mMetrix, rider->unk_320 != rider->mNaturalStance, 0);
+            cRiderMetrix_evTakeoff(rider->mMetrix, rider->IsRidingFakie != rider->IsGoofyStance, 0);
             cRider_setControlState_57B8(rider, 13);
             cRider_setControlState_57B8(rider, 5);
             cRiderAnimBase_play(rider->mRiderAnim, 268, 1, -1.0f);
@@ -4668,15 +4668,15 @@ static inline sQuat_6848 AxisAngle_6848(const sV_6848& axis, float angle)
     return sQuat_6848(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-#define RAIL_STYLE(r) ((r)->mRailStyle)
-#define PRESS_TYPE(r) ((r)->mPressType)
+#define RAIL_STYLE(r) ((r)->RailslideMode)
+#define PRESS_TYPE(r) ((r)->PressMode)
 
 /**
  * Checks for the board touching a rail and, on contact, puts the rider into the railslide motion.
  *
  * cRider_isRailLandSuccess finds the contact. The velocity is turned along its direction at the along-rail speed, at
  * least 20 km/h and at most the old speed, with z cut to a tenth; the hit object's handler gets the opposite
- * change (virtual slot 43). mRailStyle (1-4) comes from the control state and the board root bone's angle to
+ * change (virtual slot 43). RailslideMode (1-4) comes from the control state and the board root bone's angle to
  * the rail. The trick is then awarded (cRider_flagEventLand from the air, else the score commit fed to
  * cRider_flagEventBoostPowerUp()) and motion 4 set. From cruise, natural air, spin or handplant the rider
  * starts the board-press (press landing) or railslide control; otherwise a style change away from 3 or 4
@@ -4715,7 +4715,7 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
     float angle = Atan2_6848(upDot, sideDot);
     int prev = RAIL_STYLE(self);
     if (func_0011FEE8_57B8(self) == 1) {
-        if (self->unk_320 == 0)
+        if (self->IsRidingFakie == 0)
             RAIL_STYLE(self) = 1;
         else
             RAIL_STYLE(self) = 2;
@@ -4747,7 +4747,7 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
     if (func_0011FE98(self) == 1) {
         cRider_flagEventLand(self, 0, RAIL_STYLE(self), PRESS_TYPE(self), &land, imp);
     } else {
-        cRider_flagEventBoostPowerUp(self, 1, cRiderMetrix_evLand(self->mMetrix, self->unk_320 != self->mNaturalStance, 0, RAIL_STYLE(self), PRESS_TYPE(self)));
+        cRider_flagEventBoostPowerUp(self, 1, cRiderMetrix_evLand(self->mMetrix, self->IsRidingFakie != self->IsGoofyStance, 0, RAIL_STYLE(self), PRESS_TYPE(self)));
     }
     *(int*)(D_004A3500_6848 + 0x598C) = land.mat;
     cRider_setMotionState_6848(self, 4);
@@ -5541,8 +5541,8 @@ static inline sRec_7888* Rec_7888(cRider* rider, int idx) { return &((sRec_7888*
  * Once per tick per pair, overlapping sphere trees (func_00329F98) push both riders 0.55 of the contact
  * vector apart along their ground planes and, at most every 3 ticks, exchange momentum along the contact
  * (cRider_doOpponentCollision). While this rider's channel-1 animation (class 13, probably the punch) is in its hit
- * window, a rider within 150 in front of mAttackDir that is not blocking is shoved with a strength from the
- * collision stat and mAttackBlend, at most every 3 ticks per pair. Actors (mIsActor) are skipped.
+ * window, a rider within 150 in front of PunchVect that is not blocking is shoved with a strength from the
+ * collision stat and PunchStrength, at most every 3 ticks per pair. Actors (mIsActor) are skipped.
  */
 extern "C" void cRider_checkOpponentCollisions(cRider* self)
 {
@@ -5600,11 +5600,11 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
         if (len < 0.001f)
             continue;
         t4Vector n = Div_7888(toOther, len);
-        if (!(Dot_7888(n, self->mAttackDir) > 0.0f))
+        if (!(Dot_7888(n, self->PunchVect) > 0.0f))
             continue;
         float attr = cBEStatInterface_getStrikingAttrib(cBE_getInterface_C258(cBE_getBE(), 3), self->mAIIndex, self->mStatsIndex);
         float spd = Len_7888(self->mVelocity);
-        float k = (attr * 3.0001144409179688f + 1.0f) * (self->mAttackBlend + 0.5f) * 599.9739990234375f;
+        float k = (attr * 3.0001144409179688f + 1.0f) * (self->PunchStrength + 0.5f) * 599.9739990234375f;
         if (0.001f < spd)
             n = Add_7888(Scale_7888(n, 0.5f), Scale_7888(self->mVelocity, 0.5f / spd));
         cRider_doOpponentCollision_7888(other, self, &n, 1, k);
@@ -7014,7 +7014,7 @@ static inline float clamp_AED8(float v, float lo, float hi)
  * Copies the jump event's toRail flag into mToRail (uninitialised stack data when there is no event) and
  * always sets bits 17-24. At a jump the rider has reached it sets bits 13-14 and calls setupPrewindState().
  * Otherwise the field at bits 25-30 gets twice the side vector's z (clamped, when over 0.1), the low field of
- * word 1 gets +31 for a negative mSpinAxis and -31 otherwise (not for mRailStyle 3 or 4, or channel-2
+ * word 1 gets +31 for a negative mSpinAxis and -31 otherwise (not for RailslideMode 3 or 4, or channel-2
  * animation class 14), and bit 16 is set in a reached speed zone (func_0010BB18) when 5 km/h too slow.
  *
  * @param cmd  the railslide command (On Tour tRailslideCmd)

@@ -9,16 +9,16 @@ struct cPSPLightMan {
 };
 
 //99.83%
-INCLUDE_ASM("render/ps2lightman", cPSPLightMan_cPSPLightMan__FP12cPSPLightMan);
+INCLUDE_ASM("render/ps2lightman", cLightMan_cLightMan__FP12cPSPLightMan);
 #ifdef SKIP_ASM
 /**
- * Constructs the light manager and registers it as the global one (cLightMan_TheLightMan, returned by func_00394C40()).
- *
- * Only the vtable is stored; the class keeps On Tour's PSP name.
+ * The cLightMan base constructor: stores the abstract base vtable (cLightMan_vtbl) and registers the object as the
+ * global light manager (cLightMan_TheLightMan, returned by func_00394C40()). cLightMan_construct__Fv then installs
+ * the PS2 vtable. (It was once named after On Tour's cPSPLightMan constructor; the parameter type keeps that name.)
  *
  * @return @p self
  */
-cPSPLightMan* cPSPLightMan_cPSPLightMan(cPSPLightMan* self)
+cPSPLightMan* cLightMan_cLightMan(cPSPLightMan* self)
 {
     self->vtable = cLightMan_vtbl;
     cLightMan_TheLightMan = self;

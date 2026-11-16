@@ -517,7 +517,7 @@ static inline float randRange_1150(float lo, float hi)
 /**
  * Places the punch effect's four sprites around the rider's punching hand while a punch is playing.
  *
- * Active while the rider's mAttackBlend (+0x350) is positive and a punch animation runs: 0x146 or 0x147 in
+ * Active while the rider's PunchStrength (+0x350) is positive and a punch animation runs: 0x146 or 0x147 in
  * anim slot 0, or 0x143 or 0x144 in slot 1 while its sequence's event bit 0 is set and bit 1 clear. That
  * picks the hand bone (+0x8B0 or +0x8B8, swapped when +0x320 is set). Each sprite gets a random offset of up
  * to 3 * blend around a point 8 units along the bone, a size of 15 to 15 + 15 * blend and a grey level of at

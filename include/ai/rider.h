@@ -121,16 +121,16 @@ struct cRider {
     /* 0x314 */ float mCheatSpeedLerp; // [X] = 0.015 (ctor)
     /* 0x318 */ float unk_318;
     /* 0x31C */ float unk_31C; // cleared on transport (cRider_putAt); lwc1, compared > 0.0f, scales mGroundNormal (cRider_updateSkeleton)
-    /* 0x320 */ int unk_320; // copied into unk_2D8 (cRider_OnStartObjectUse)
-    /* 0x324 */ int mNaturalStance; // [X] = cBECharacterInterface_getIsGoofyFoot(interface 2, mAIIndex) (cRider_initAlways)
-    /* 0x328 */ int mRailStyle; // [X] landing state 1..4 from the board-vs-ground angle (cRider_checkRailBoardCollisions); 3/4 rotate the rider +-90 deg about mMatrix.row[2] (cRider_flagEventWipeout)
-    /* 0x32C */ int unk_32C; // cleared on transport (cRider_putAt)
-    /* 0x330 */ int mPressType; // [X] landing kind: 0 handler path, 1 anim 0x1A, else anim 0x22 (cRider_checkRailBoardCollisions)
+    /* 0x320 */ int IsRidingFakie; // copied into unk_2D8 (cRider_OnStartObjectUse)
+    /* 0x324 */ int IsGoofyStance; // [X] = cBECharacterInterface_getIsGoofyFoot(interface 2, mAIIndex) (cRider_initAlways)
+    /* 0x328 */ int RailslideMode; // [X] landing state 1..4 from the board-vs-ground angle (cRider_checkRailBoardCollisions); 3/4 rotate the rider +-90 deg about mMatrix.row[2] (cRider_flagEventWipeout)
+    /* 0x32C */ int HandplantMode; // cleared on transport (cRider_putAt)
+    /* 0x330 */ int PressMode; // [X] landing kind: 0 handler path, 1 anim 0x1A, else anim 0x22 (cRider_checkRailBoardCollisions)
     /* 0x334 */ char unk_334[0xC];
-    /* 0x340 */ t4Vector mAttackDir; // [X] zeroed on transport; dot with the direction to another rider must be > 0 to shove (cRider_checkOpponentCollisions)
-    /* 0x350 */ float mAttackBlend; // [X] shove-strength factor (cRider_checkOpponentCollisions)
-    /* 0x354 */ int mHudMsgExpire; // [X] = -1 on transport (cRider_putAt)
-    /* 0x358 */ int mHudMsgId; // [X] cleared on transport (cRider_putAt)
+    /* 0x340 */ t4Vector PunchVect; // [X] zeroed on transport; dot with the direction to another rider must be > 0 to shove (cRider_checkOpponentCollisions)
+    /* 0x350 */ float PunchStrength; // [X] shove-strength factor (cRider_checkOpponentCollisions)
+    /* 0x354 */ int ReactionEventTick; // [X] = -1 on transport (cRider_putAt)
+    /* 0x358 */ int ReactionEventType; // [X] cleared on transport (cRider_putAt)
     /* 0x35C */ float unk_35C; // cleared on transport (cRider_putAt); += 1/60 per frame, compared < 1.0f (cRider_checkForProximityAction)
     /* 0x360 */ char unk_360[0x10];
     /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in cRider_updateSplit12
@@ -306,15 +306,15 @@ CHECK_OFFSET(cRider, mCheatSteerAlign, 0x310);
 CHECK_OFFSET(cRider, mCheatSpeedLerp, 0x314);
 CHECK_OFFSET(cRider, unk_318, 0x318);
 CHECK_OFFSET(cRider, unk_31C, 0x31C);
-CHECK_OFFSET(cRider, unk_320, 0x320);
-CHECK_OFFSET(cRider, mNaturalStance, 0x324);
-CHECK_OFFSET(cRider, mRailStyle, 0x328);
-CHECK_OFFSET(cRider, unk_32C, 0x32C);
-CHECK_OFFSET(cRider, mPressType, 0x330);
-CHECK_OFFSET(cRider, mAttackDir, 0x340);
-CHECK_OFFSET(cRider, mAttackBlend, 0x350);
-CHECK_OFFSET(cRider, mHudMsgExpire, 0x354);
-CHECK_OFFSET(cRider, mHudMsgId, 0x358);
+CHECK_OFFSET(cRider, IsRidingFakie, 0x320);
+CHECK_OFFSET(cRider, IsGoofyStance, 0x324);
+CHECK_OFFSET(cRider, RailslideMode, 0x328);
+CHECK_OFFSET(cRider, HandplantMode, 0x32C);
+CHECK_OFFSET(cRider, PressMode, 0x330);
+CHECK_OFFSET(cRider, PunchVect, 0x340);
+CHECK_OFFSET(cRider, PunchStrength, 0x350);
+CHECK_OFFSET(cRider, ReactionEventTick, 0x354);
+CHECK_OFFSET(cRider, ReactionEventType, 0x358);
 CHECK_OFFSET(cRider, unk_35C, 0x35C);
 CHECK_OFFSET(cRider, mGroundNormal, 0x370);
 CHECK_OFFSET(cRider, unk_380, 0x380);

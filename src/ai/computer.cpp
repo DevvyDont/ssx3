@@ -1282,8 +1282,8 @@ extern "C" int AITick();
 /**
  * Flags a rider reaction (positive, uber, negative...) to show for a while, or clears it.
  *
- * With @p mode 0 (On Tour kREACT_None) mHudMsgId (+0x358) is cleared and mHudMsgExpire (+0x354) set to -1. Otherwise
- * mHudMsgId = @p mode and mHudMsgExpire = AITick (AITick) + (int)(@p forceDelaySec * 60), so the reaction lasts @p forceDelaySec seconds
+ * With @p mode 0 (On Tour kREACT_None) ReactionEventType (+0x358) is cleared and ReactionEventTick (+0x354) set to -1. Otherwise
+ * ReactionEventType = @p mode and ReactionEventTick = AITick (AITick) + (int)(@p forceDelaySec * 60), so the reaction lasts @p forceDelaySec seconds
  * of 60 Hz ticks. On Tour's eReactionType: 1 Pos, 2 UberPos, 3 EarnComboPos, 4 Neg, 5 UberOn, 6 UberOff.
  *
  * @param mode  the reaction (On Tour eReactionType react); 0 clears it
@@ -1720,8 +1720,8 @@ struct sVEf_0010E910 { short delta; short index; void (*fn)(void*, float); };
 /**
  * Handles the rider landing: scores the trick, updates the uber meter, reacts, boosts and plays the landing sound.
  *
- * Takes the metrix totals before and after cRiderMetrix_evLand (On Tour cRiderMetrix::evLand(riding switch = unk_320 !=
- * mNaturalStance, @p isPipe, @p rsm, @p pressMode)), whose result is the boost earned, and logs the landing to the replay
+ * Takes the metrix totals before and after cRiderMetrix_evLand (On Tour cRiderMetrix::evLand(riding switch = IsRidingFakie !=
+ * IsGoofyStance, @p isPipe, @p rsm, @p pressMode)), whose result is the boost earned, and logs the landing to the replay
  * (cReplay_eventLand with mAIIndex and the metrix stats at +0xFC). Uber tricks landed (Totals.NumUberTricks, metrix
  * +0x114, grew) raise mUberLevel by that many, capped at 10; reaching 10 sets mUberTimer to 60.
  *
@@ -1970,10 +1970,10 @@ static inline sXf_EB30 Combine_EB30(const sXf_EB30& a, const sXf_EB30& b)
  * Rumbles (cBeing vtable slot 17, vibrationBump) with the hit strength (+0x30 of @p evt) * 5, takes the boost from
  * cRiderMetrix_evWipeout (On Tour cRiderMetrix::evWipeout(@p isPunch)) and passes it to cRider_flagEventBoostPowerUp(1), plays the
  * hit (func_00296310), a grunt and the wipeout sound (func_002961F0), and spawns the impact effect (func_00111AA0) with
- * surface @p surf. Control state 13 is set first; a rider sliding sideways on a rail (mRailStyle 3 or 4) is turned +/-90
+ * surface @p surf. Control state 13 is set first; a rider sliding sideways on a rail (RailslideMode 3 or 4) is turned +/-90
  * degrees about its up axis and its anim heading offset follows.
  *
- * It then clears mRailStyle, channels 0, 2 and 8 and mPressType, poses the first frame of @p anim
+ * It then clears RailslideMode, channels 0, 2 and 8 and PressMode, poses the first frame of @p anim
  * (cRiderAnimBase_getAIAnimFrame, func_0030ECD8), moves the rider so that pose's hip bone (mBoneHips) stays where it
  * is, stores the inverse as the anim orientation offset, plays @p anim and sets control state 8 and motion state 2.
  *
@@ -1994,18 +1994,18 @@ extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, in
     func_002961F0(func_0028B180(), rider, amt);
     func_00111AA0_impl(rider->mRiderHandler, evt, evt + 0x20, surf, *(float*)(evt + 0x30));
     cRider_setControlState_EB30(rider, 13);
-    if (rider->mRailStyle == 3) {
+    if (rider->RailslideMode == 3) {
         float ang = 1.5707963705062866f;
         cRider_rotateOrientation(rider, GetUp_EB30(rider), ang);
         cRiderAnimBase_changeHeadingOffset(rider->mRiderAnim, ang);
         ResetAnimOrientation_EB30((char*)rider->mRiderAnim, 0.0f);
-    } else if (rider->mRailStyle == 4) {
+    } else if (rider->RailslideMode == 4) {
         float ang = -1.5707963705062866f;
         cRider_rotateOrientation(rider, GetUp_EB30(rider), ang);
         cRiderAnimBase_changeHeadingOffset(rider->mRiderAnim, ang);
         ResetAnimOrientation_EB30((char*)rider->mRiderAnim, 0.0f);
     }
-    rider->mRailStyle = 0;
+    rider->RailslideMode = 0;
     func_00116930(rider);
     cRider_doLeanPoseAdjust(rider, &rider->mPosition);
     cRider_updateOrientationImplicit(rider);
@@ -2018,7 +2018,7 @@ extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, in
     rider->mSlewed[8].target = 0.0f;
     rider->mSlewed[8].cur = 0.0f;
     rider->mSlewed[8].rate = 0.0f;
-    rider->mPressType = 0;
+    rider->PressMode = 0;
     char buf[80];
     cRiderAnimBase_getAIAnimFrame(buf, rider->mRiderAnim, anim, D_004A4C08.a, rider->mSlewed[0].target);
     sXf_EB30 a;

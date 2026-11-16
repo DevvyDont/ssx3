@@ -497,7 +497,7 @@ done:
     t4Vector fwd;
     sWakeParamsD0B8 curParams;
     fwd = wakeRow34D0B8(self->rider, 0);
-    if (self->rider->unk_320 != 0) {
+    if (self->rider->IsRidingFakie != 0) {
         fwd = wakeScaleD0B8(fwd, -1.0f);
     }
     t4Vector right = wakeCrossD0B8(fwd, normal);
@@ -505,7 +505,7 @@ done:
     float speed = WAKE_MAX_D0B8(WAKE_MIN_D0B8(wakeMaxSpeedD0B8(), wakeLenD0B8(self->rider->mVelocity)), 0.0f);
     curParams.grip = surf->f48;
     float sign = 1.0f;
-    if (self->rider->unk_320 != 0) {
+    if (self->rider->IsRidingFakie != 0) {
         sign = -1.0f;
     }
     float off = wakeAbsD0B8(self->rider->mSlewed[2].cur) * 118.0f + -40.0f;
@@ -7138,7 +7138,7 @@ extern "C" void func_002E6C08(sTrailE6C08* self)
             t4Vector p3 = wakeRowE6C08(self->rider, 3);
             t4Vector p2 = wakeRowE6C08(self->rider, 2);
             t4Vector p0 = wakeRowE6C08(self->rider, 0);
-            if (self->rider->unk_320 != 0) {
+            if (self->rider->IsRidingFakie != 0) {
                 p0 = wakeScaleE6C08(p0, -1.0f);
             }
             float dist;
@@ -7156,7 +7156,7 @@ extern "C" void func_002E6C08(sTrailE6C08* self)
             t4Vector c2 = wakeSubE6C08(wakeSubE6C08(p3, wakeScaleE6C08(p0, 75.0f)), wakeScaleE6C08(p2, 17.5f));
             t4Vector c3 = wakeAddE6C08(wakeSubE6C08(p3, wakeScaleE6C08(p0, 75.0f)), wakeScaleE6C08(p2, 17.5f));
             float lean = 0.0f;
-            if (self->rider->mPressType != 0) {
+            if (self->rider->PressMode != 0) {
                 int s = cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2);
                 if ((s >= 23 && s <= 28) || s == 37 || s == 38) {
                     lean = 1.0f;

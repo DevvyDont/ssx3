@@ -651,7 +651,7 @@ void cRider_initAlways_impl(cRider* self) __asm__("cRider_initAlways");
  * Resets a loaded rider for a new run: stance, path, start position, timers and per-race state.
  *
  * Does nothing until the rider is loaded (mLoadStep == 7). Sets the handler's motion/control state words (+0xDE0 = 3,
- * +0xDE4 = 13), clears the rubber-band values, resets the metrix and anim base, sets mNaturalStance from cBECharacterInterface_getIsGoofyFoot
+ * +0xDE4 = 13), clears the rubber-band values, resets the metrix and anim base, sets IsGoofyStance from cBECharacterInterface_getIsGoofyFoot
  * (On Tour getIsGoofyFoot) and calls cRider_initPath (initPath(true)).
  *
  * Placement: a rider flagged by func_00145C38 on location 14 with no game path, in game mode 4, is put at the
@@ -672,7 +672,7 @@ void cRider_initAlways_impl(cRider* self)
         self->unk_0D8 = -1;
         cRiderMetrix_reset(self->mMetrix);
         cRiderAnimBase_reset(self->mRiderAnim);
-        self->mNaturalStance = cBECharacterInterface_getIsGoofyFoot(cBE_getInterface_11D390(cBE_getBE(), 2), self->mAIIndex);
+        self->IsGoofyStance = cBECharacterInterface_getIsGoofyFoot(cBE_getInterface_11D390(cBE_getBE(), 2), self->mAIIndex);
         cRider_initPath(self, 1);
         void* iface = cBE_getInterface_11D390(cBE_getBE(), 0);
         // PORT: the gotos reproduce the shared compare chain (mode 4, 5, 6) that two different entry conditions fall into.
@@ -1082,7 +1082,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
  * Clears the line/wall hints, faces the rider along atan2(@p dir) and, when @p drop >= 0, casts a terrain ray from 200
  * above to 7000 below @p pos (func_0032E100/func_00336850) and stands the rider @p drop above the hit, tilted to the
  * hit normal. Then resets the ground frame, velocity, impulse, the 19 smoothed channels (channel 9 to 1), spin/flip
- * rates, boost, rail/press state, attack and HUD message, sets the stance from mNaturalStance (anim heading turned half
+ * rates, boost, rail/press state, attack and HUD message, sets the stance from IsGoofyStance (anim heading turned half
  * a turn when switched), plays @p anim, sets up and runs the animation and skeleton (cRiderAnimBase_setupAnimation,
  * cRider_updateAnimation, cRider_updateSkeleton, cAnimModel_buildSkelMatrices), updates the bounds, overlap list and lights,
  * func_002105B0(mAIIndex), resets vibration, and resets the camera of a rider with a view (mViewIndex < 2).
@@ -1165,19 +1165,19 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     self->mTimeScale = 1.0f;
     self->unk_318 = 1.0f;
     self->unk_31C = 0.0f;
-    self->mRailStyle = 0;
-    self->unk_32C = 0;
-    self->mPressType = 0;
-    self->mAttackDir = D_004FF120_D660;
-    self->mAttackBlend = 0.0f;
-    self->mHudMsgExpire = -1;
-    self->mHudMsgId = 0;
+    self->RailslideMode = 0;
+    self->HandplantMode = 0;
+    self->PressMode = 0;
+    self->PunchVect = D_004FF120_D660;
+    self->PunchStrength = 0.0f;
+    self->ReactionEventTick = -1;
+    self->ReactionEventType = 0;
     self->unk_35C = 0.0f;
-    self->unk_320 = self->mNaturalStance;
+    self->IsRidingFakie = self->IsGoofyStance;
     cRiderAnimBase_reset(self->mRiderAnim);
-    *(int*)((char*)self->mRiderAnim + 0x18) = self->unk_320;
+    *(int*)((char*)self->mRiderAnim + 0x18) = self->IsRidingFakie;
     float yaw = 0.0f;
-    if (self->unk_320 != 0)
+    if (self->IsRidingFakie != 0)
         yaw = 3.1415927410125732f;
     char* ra = (char*)self->mRiderAnim;
     *(t4Vector*)(ra + 0x30) = D_004FF130_D660;
@@ -2678,8 +2678,8 @@ struct sV_120378 {
 struct sLook_120378 {
     int enabled;
     char pad04[0xC];
-    sV_120378 rest;      // 0x10 offset quaternion (unk_320 == 0)
-    sV_120378 restAlt;   // 0x20 offset quaternion (unk_320 != 0)
+    sV_120378 rest;      // 0x10 offset quaternion (IsRidingFakie == 0)
+    sV_120378 restAlt;   // 0x20 offset quaternion (IsRidingFakie != 0)
 };
 
 int func_0011FEE8(void*);
@@ -2819,7 +2819,7 @@ static inline float Clamp_120378(float v, float lo, float hi)
         if (still) {                                                                                \
             anim = (base);                                                                          \
         } else {                                                                                    \
-            if (self->unk_320) {                                                                    \
+            if (self->IsRidingFakie) {                                                                    \
                 q = QuatMul_120378(*(t4Vector*)((char*)self->mAnimModel->bones + ((bone) << 5) + 0x10), (look)->restAlt);             \
             } else {                                                                                \
                 q = QuatMul_120378(*(t4Vector*)((char*)self->mAnimModel->bones + ((bone) << 5) + 0x10), (look)->rest);                \
@@ -5140,7 +5140,7 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
     cRiderAnimBase_reset(self->mRiderAnim);
     cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
     self->mIsInNIS = 1;
-    self->unk_2D8 = self->unk_320;
+    self->unk_2D8 = self->IsRidingFakie;
     self->unk_AC8 = 0;
     int j;
     for (j = 3; j >= 0; j--)

@@ -2764,7 +2764,7 @@ INCLUDE_ASM("bx/bxstringctor", func_0026ADF0);
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_2(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern "C" int cPathSys_loadAIPaths(void* self, char* p);
-extern "C" int cPathSys_resolvePaths(void* self, char* p);
+extern "C" int cPathSys_loadTrackPaths(void* self, char* p);
 extern "C" int func_0026B7D8(void* self, char* p);
 extern "C" void func_0026B880(void* self, char* p);
 
@@ -2778,7 +2778,7 @@ extern "C" void func_0026ADF0(void* self)
     pathREAD_tInt32_2(&header, cursor);
     cursor += 4;
     cursor += cPathSys_loadAIPaths(self, cursor);
-    cursor += cPathSys_resolvePaths(self, cursor);
+    cursor += cPathSys_loadTrackPaths(self, cursor);
     cursor += func_0026B7D8(self, cursor);
     func_0026B880(self, cursor);
 }
@@ -2793,7 +2793,7 @@ extern "C" int FILE_loadpack(int, int);
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_3(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern "C" int cPathSys_loadAIPaths(void* self, char* p);
-extern "C" int cPathSys_resolvePaths(void* self, char* p);
+extern "C" int cPathSys_loadTrackPaths(void* self, char* p);
 
 extern "C" void func_0026AE70(void* self, int name)
 {
@@ -2810,7 +2810,7 @@ extern "C" void func_0026AE70(void* self, int name)
     pathREAD_tInt32_3(&header, cursor);
     cursor += 4;
     cursor += cPathSys_loadAIPaths(self, cursor);
-    cPathSys_resolvePaths(self, cursor);
+    cPathSys_loadTrackPaths(self, cursor);
 }
 #endif
 

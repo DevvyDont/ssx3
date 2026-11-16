@@ -8,7 +8,7 @@ extern const char str_LightMan[];
 extern void* D_00493650[16];
 
 struct cPSPLightMan;
-cPSPLightMan* cPSPLightMan_cPSPLightMan(cPSPLightMan* self);
+cPSPLightMan* cLightMan_cLightMan(cPSPLightMan* self);
 
 //100%
 INCLUDE_ASM("render/lightman", cLightMan_construct__Fv);
@@ -16,7 +16,7 @@ INCLUDE_ASM("render/lightman", cLightMan_construct__Fv);
 /**
  * Creates the light manager: allocates 0x14 bytes ("LightMan"), constructs it and installs the PS2 vtable.
  *
- * Runs cPSPLightMan_cPSPLightMan(), which registers the object as the global light manager (cLightMan_TheLightMan), then
+ * Runs cLightMan_cLightMan(), which registers the object as the global light manager (cLightMan_TheLightMan), then
  * overwrites the vtable with D_00493650 (cPS2LightMan's: its slot 1 is cPS2LightMan__cPS2LightMan).
  *
  * @return the new manager
@@ -24,7 +24,7 @@ INCLUDE_ASM("render/lightman", cLightMan_construct__Fv);
 void* cLightMan_construct()
 {
     void* mem = cMemMan_alloc(20, str_LightMan, 0, 0);
-    cPSPLightMan_cPSPLightMan((cPSPLightMan*)mem);
+    cLightMan_cLightMan((cPSPLightMan*)mem);
     *(void**)mem = D_00493650;
     return mem;
 }
