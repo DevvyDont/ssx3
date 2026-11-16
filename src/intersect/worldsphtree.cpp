@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/boostmodifier.h"
 #include "world/world.h"
 
 //100%
@@ -6182,25 +6183,25 @@ struct sSph_342768 {
 extern void* cBoostModifier_vtbl[];
 extern char* D_004A5B64;
 
-extern "C" void* func_00342768(sSph_342768* self, sSphDef_342768* def, int a2)
+extern "C" void* func_00342768(cBoostModifier* self, sSphDef_342768* def, int a2)
 {
-    self->refs = 1;
-    self->vt = cBoostModifier_vtbl;
-    self->a40 = a2;
+    self->Active = 1;
+    self->mVtbl = cBoostModifier_vtbl;
+    self->Instance = (tInstanceRecord*)a2;
     int type = def->type;
-    self->type = type;
+    self->Type = type;
     int t = (int)(def->time * (float)*(int*)(D_004A5B64 + 0x10));
-    self->t28 = t;
+    self->BoostTime = t;
     sVec4_342768 v;
     v.x = def->x;
     v.y = def->y;
     v.z = def->z;
     v.w = 0.0f;
-    self->pos = v;
-    self->f20 = def->f10 * 100.0f;
-    self->f24 = def->f0C;
-    self->t2C = type == 1 ? t : 0;
-    return self;
+    (*(sVec4_342768*)&self->Boost) = v;
+    self->MaxSpeed = def->f10 * 100.0f;
+    self->Drag = def->f0C;
+    self->Time = type == 1 ? t : 0;
+    return ((sSph_342768*)self);
 }
 #endif
 
@@ -6218,13 +6219,13 @@ typedef int (*ReadIntFn00342808)(void*);
 
 extern void* cBoostModifier_vtbl[];
 
-extern "C" void* func_00342808(void* self, sVEntry00342808** stream)
+extern "C" void* func_00342808(cBoostModifier* self, sVEntry00342808** stream)
 {
-    *(int*)((char*)self + 0x0) = 1;
-    *(void***)((char*)self + 0x4) = cBoostModifier_vtbl;
+    self->Active = 1;
+    self->mVtbl = cBoostModifier_vtbl;
     ((ReadFn00342808)(*stream)[2].fn)((char*)stream + (*stream)[2].delta, (char*)self + 0x10, 0x30);
-    *(int*)((char*)self + 0x40) = ((ReadIntFn00342808)(*stream)[3].fn)((char*)stream + (*stream)[3].delta);
-    return self;
+    self->Instance = (tInstanceRecord*)((ReadIntFn00342808)(*stream)[3].fn)((char*)stream + (*stream)[3].delta);
+    return ((void*)self);
 }
 #endif
 
@@ -6247,39 +6248,39 @@ typedef int (*Test_00342880)(void*, int);
  * slowed (slot 8, func_003429E0) when the factor (+0x24) is negative, else pushed (slot 7, func_00342A88).
  * boostStart (slot 9) and boostEnd (slot 10) bracket the loop.
  */
-extern "C" void cBoostModifier_update(sSph_342768* self)
+extern "C" void cBoostModifier_update(cBoostModifier* self)
 {
-    self->refs = 0;
-    if (self->type == 0) {
-        self->refs = 1;
+    self->Active = 0;
+    if (self->Type == 0) {
+        self->Active = 1;
     }
-    int t = self->t2C;
+    int t = self->Time;
     if (t > 0) {
         t--;
-        self->t2C = t;
+        self->Time = t;
         if (t > 0) {
-            self->refs = 1;
+            self->Active = 1;
         }
     }
-    sVEnt_00342880* vt = (sVEnt_00342880*)self->vt;
+    sVEnt_00342880* vt = (sVEnt_00342880*)self->mVtbl;
     ((Fn0_00342880)vt[9].fn)((char*)self + vt[9].delta);
-    if (self->type == 1 || self->t2C <= 0) {
+    if (self->Type == 1 || self->Time <= 0) {
         for (int i = 0; i < func_002D1AF0(); i++) {
             void** obj = cObjectInterface_getNumBeings(i);
             sVEnt_00342880* ovt = (sVEnt_00342880*)*obj;
-            if (((Test_00342880)ovt[3].fn)((char*)obj + ovt[3].delta, self->a40) != 0) {
-                self->refs = 1;
-                if (self->f24 < 0.0f) {
-                    sVEnt_00342880* v = (sVEnt_00342880*)self->vt;
+            if (((Test_00342880)ovt[3].fn)((char*)obj + ovt[3].delta, (int)self->Instance) != 0) {
+                self->Active = 1;
+                if (self->Drag < 0.0f) {
+                    sVEnt_00342880* v = (sVEnt_00342880*)self->mVtbl;
                     ((Fn1_00342880)v[8].fn)((char*)self + v[8].delta, obj);
                 } else {
-                    sVEnt_00342880* v = (sVEnt_00342880*)self->vt;
+                    sVEnt_00342880* v = (sVEnt_00342880*)self->mVtbl;
                     ((Fn1_00342880)v[7].fn)((char*)self + v[7].delta, obj);
                 }
             }
         }
     }
-    sVEnt_00342880* v2 = (sVEnt_00342880*)self->vt;
+    sVEnt_00342880* v2 = (sVEnt_00342880*)self->mVtbl;
     ((Fn0_00342880)v2[10].fn)((char*)self + v2[10].delta);
 }
 #endif
@@ -6318,9 +6319,9 @@ public:
 
 extern "C" float func_002D1C70();
 
-extern "C" void func_003429E0(void* self, cMover_3429E0* obj)
+extern "C" void func_003429E0(cBoostModifier* self, cMover_3429E0* obj)
 {
-    sVec4_3429E0 u = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), *(float*)((char*)self + 0x24) + 1.0f), func_002D1C70());
+    sVec4_3429E0 u = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), self->Drag + 1.0f), func_002D1C70());
     obj->setVelocity(&u);
 }
 #endif
@@ -6399,12 +6400,12 @@ struct sSelf_342A88 {
     sPlane_342A88 plane;
 };
 
-extern "C" void func_00342A88(sSelf_342A88* self, cWsMover* obj)
+extern "C" void func_00342A88(cBoostModifier* self, cWsMover* obj)
 {
-    float d = self->plane.d - vu0Dot(*obj->getVelocity(), self->plane.n);
+    float d = self->MaxSpeed - vu0Dot(*obj->getVelocity(), self->Boost);
     if (d > 0.0f) {
         // PORT: takes the address of a temporary (g++ 2.95 accepts it).
-        sPlane_342A88* pl = &self->plane;
+        sPlane_342A88* pl = &(*(sPlane_342A88*)&self->Boost);
         setVel_342A88(obj, &vu0Scale(vu0Scale(vu0Scale(pl->n, d), pl->k), func_002D1C70()));
     }
 }
@@ -6420,10 +6421,10 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_signal);
  *
  * @param signal  the signal number
  */
-extern "C" void cBoostModifier_signal(void* self, int signal)
+extern "C" void cBoostModifier_signal(cBoostModifier* self, int signal)
 {
     if (signal == 0x258) {
-        *(int*)((char*)self + 0x2c) = *(int*)((char*)self + 0x28);
+        self->Time = self->BoostTime;
     }
 }
 #endif
@@ -6443,13 +6444,13 @@ struct sVEntry1_func_00342BA0 {
     void (*fn)(void*, int);
 };
 
-extern "C" void func_00342BA0(void* self, void* stream)
+extern "C" void func_00342BA0(cBoostModifier* self, void* stream)
 {
     func_003584B8(self, stream);
     sVEntry_func_00342BA0* vt = *(sVEntry_func_00342BA0**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x10, 0x30);
     sVEntry1_func_00342BA0* vt1 = *(sVEntry1_func_00342BA0**)stream;
-    vt1[5].fn((char*)stream + vt1[5].delta, *(int*)((char*)self + 0x40));
+    vt1[5].fn((char*)stream + vt1[5].delta, (int)self->Instance);
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/bxps2memcard.h"
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", get_float);
@@ -250,8 +251,8 @@ extern "C" int func_002D37D0(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D37D8);
 #ifdef SKIP_ASM
-extern "C" int func_002D37D8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xC)));
+extern "C" int func_002D37D8(cPS2MemCard* arg0) {
+    return (arg0->mDevice);
 }
 #endif
 
@@ -259,9 +260,9 @@ extern "C" int func_002D37D8(void *arg0) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D37E0);
 #ifdef SKIP_ASM
 struct VEnt_37E0 { short delta; short idx; int (*fn)(void*, int); };
-extern "C" void func_002D37E0(void *arg0) {
+extern "C" void func_002D37E0(cPS2MemCard* arg0) {
     VEnt_37E0 *e = (VEnt_37E0*)(*(char **)arg0 + 0x180);
-    e->fn((char*)arg0 + e->delta, *(int *)((char*)arg0 + 0xC));
+    e->fn((char*)arg0 + e->delta, arg0->mDevice);
 }
 #endif
 
@@ -269,9 +270,9 @@ extern "C" void func_002D37E0(void *arg0) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D3810);
 #ifdef SKIP_ASM
 struct VEnt_3810 { short delta; short idx; int (*fn)(void*, int); };
-extern "C" void func_002D3810(void *arg0) {
+extern "C" void func_002D3810(cPS2MemCard* arg0) {
     VEnt_3810 *e = (VEnt_3810*)(*(char **)arg0 + 0x1A0);
-    e->fn((char*)arg0 + e->delta, *(int *)((char*)arg0 + 0xC));
+    e->fn((char*)arg0 + e->delta, arg0->mDevice);
 }
 #endif
 
@@ -336,10 +337,10 @@ struct Obj_3840 {
   virtual void v55();
   virtual int v56(int);
 };
-extern "C" int func_002D3840(Obj_3840 *o, int x) {
+extern "C" int func_002D3840(cPS2MemCard* o, int x) {
     int ok = 0;
-    if (!o->v48() && !o->v50(x) && o->v56(x)) {
-        ok = o->v52(x) != 0;
+    if (!((Obj_3840*)o)->v48() && !((Obj_3840*)o)->v50(x) && ((Obj_3840*)o)->v56(x)) {
+        ok = ((Obj_3840*)o)->v52(x) != 0;
     }
     return ok;
 }
@@ -349,9 +350,9 @@ extern "C" int func_002D3840(Obj_3840 *o, int x) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D38F0);
 #ifdef SKIP_ASM
 struct VEnt_38F0 { short delta; short idx; int (*fn)(void*, int); };
-extern "C" void func_002D38F0(void *arg0) {
+extern "C" void func_002D38F0(cPS2MemCard* arg0) {
     VEnt_38F0 *e = (VEnt_38F0*)(*(char **)arg0 + 0x1C0);
-    e->fn((char*)arg0 + e->delta, *(int *)((char*)arg0 + 0xC));
+    e->fn((char*)arg0 + e->delta, arg0->mDevice);
 }
 #endif
 
@@ -376,8 +377,8 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3930);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_002C53C8_3930(void*, int) __asm__("func_002C53C8");
-extern "C" void func_002D3930(void *arg0) {
-    func_002C53C8_3930(arg0, (*(int *)((char*)(arg0) + (0xC))));
+extern "C" void func_002D3930(cPS2MemCard* arg0) {
+    func_002C53C8_3930(arg0, (arg0->mDevice));
 }
 #endif
 
@@ -386,16 +387,16 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3950);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_002C53E0_3950(void*, int, int) __asm__("func_002C53E0");
-extern "C" void func_002D3950(void *arg0, int arg1) {
-    func_002C53E0_3950(arg0, (*(int *)((char*)(arg0) + (0xC))), arg1);
+extern "C" void func_002D3950(cPS2MemCard* arg0, int arg1) {
+    func_002C53E0_3950(arg0, (arg0->mDevice), arg1);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3970);
 #ifdef SKIP_ASM
-extern "C" int func_002D3970(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x14)));
+extern "C" int func_002D3970(cPS2MemCard* arg0) {
+    return (arg0->mMaxFiles);
 }
 #endif
 
@@ -411,7 +412,7 @@ extern "C" int func_002D3978(void) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D3980);
 #ifdef SKIP_ASM
 struct VEnt_3980 { short delta; short idx; void (*fn)(void*, int, int, int); };
-extern "C" void func_002D3980(void *arg0, int a1, int a2, int a3) {
+extern "C" void func_002D3980(cPS2MemCard* arg0, int a1, int a2, int a3) {
     VEnt_3980 *e = (VEnt_3980*)(*(char **)arg0 + 0x230);
     e->fn((char*)arg0 + e->delta, a1, a2, a3);
 }
@@ -428,8 +429,8 @@ extern "C" int func_002D39A8(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D39B0);
 #ifdef SKIP_ASM
-extern "C" int func_002D39B0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x3C)));
+extern "C" int func_002D39B0(cPS2MemCard* arg0) {
+    return (arg0->unk_03C);
 }
 #endif
 

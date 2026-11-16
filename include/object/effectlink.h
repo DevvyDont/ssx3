@@ -1,0 +1,25 @@
+#ifndef OBJECT_EFFECTLINK_H
+#define OBJECT_EFFECTLINK_H
+
+// cEffectLink: the intrusive list node that chains a cMoveNode's effect modifiers (base of cEffectModifier ->
+// cParticleModifier, cDynamicParticleModifier, cHaloModifier; tModifierBlock embeds one by value at +0x10 as the head).
+// Size 0xC: On Tour 0xC; tModifierBlock's next member (Rail) is at +0x1C; derived ctors store their vtable at +0x8.
+// Methods: cEffectLink_add (0x345700) and func_00345720 (src/object/effectlink.cpp), destructor cEffectLink__cEffectLink
+// (0x360C98), func_00360CE8 (slot 1), fadeEffect, writeToReplayFrame (src/object/railmodifier.cpp); vtable
+// cEffectLink_vtbl (0x00491340, 4 slots). Local definition: src/object/effectlink.cpp `struct cEffectLink {next, prev}`.
+
+#include "layout.h"
+
+struct cEffectLink {
+    cEffectLink* Next;              // 0x00 [O]; [U] cEffectLink_add, func_00345720
+    cEffectLink* Prev;              // 0x04 [O]; [U] cEffectLink_add
+    void** mVtbl;                   // 0x08 [R] cEffectLink_vtbl (0x00491340): the dtor and tModifierBlock_tModifierBlock
+                                    //      (+0x18) store it
+};
+
+CHECK_OFFSET(cEffectLink, Next, 0x00);
+CHECK_OFFSET(cEffectLink, Prev, 0x04);
+CHECK_OFFSET(cEffectLink, mVtbl, 0x08);
+CHECK_SIZE(cEffectLink, 0xC);
+
+#endif /* OBJECT_EFFECTLINK_H */

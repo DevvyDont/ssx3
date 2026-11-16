@@ -1,9 +1,10 @@
 #include "common.h"
 #include "render/ps2graphicsman.h"
+#include "object/effectlink.h"
 
-struct cEffectLink {
-    cEffectLink* next; // 0x0
-    cEffectLink* prev; // 0x4
+struct sEffectLinkView {  // this unit's view of cEffectLink (object/effectlink.h); typed members schedule differently
+    sEffectLinkView* next; // 0x0
+    sEffectLinkView* prev; // 0x4
 };
 
 //100%
@@ -17,12 +18,12 @@ INCLUDE_ASM("object/effectlink", cEffectLink_add__FP11cEffectLinkT0);
  */
 void cEffectLink_add(cEffectLink* link, cEffectLink* other)
 {
-    if (link->next != 0) {
-        link->next->prev = other;
+    if (link->Next != 0) {
+        link->Next->Prev = other;
     }
-    other->prev = link;
-    other->next = link->next;
-    link->next = other;
+    other->Prev = link;
+    other->Next = link->Next;
+    link->Next = other;
 }
 #endif
 
@@ -31,12 +32,12 @@ INCLUDE_ASM("object/effectlink", func_00345720);
 #ifdef SKIP_ASM
 extern "C" void func_00345720(cEffectLink* link, cEffectLink* other)
 {
-    while (link->next != 0) {
-        link = link->next;
+    while (link->Next != 0) {
+        link = link->Next;
     }
-    other->next = 0;
-    other->prev = link;
-    link->next = other;
+    other->Next = 0;
+    other->Prev = link;
+    link->Next = other;
 }
 #endif
 
@@ -45,14 +46,14 @@ INCLUDE_ASM("object/effectlink", func_00345760);
 #ifdef SKIP_ASM
 extern "C" void func_00345760(cEffectLink* link)
 {
-    if (link->next != 0) {
-        link->next->prev = link->prev;
+    if (link->Next != 0) {
+        link->Next->Prev = link->Prev;
     }
-    if (link->prev != 0) {
-        link->prev->next = link->next;
+    if (link->Prev != 0) {
+        link->Prev->Next = link->Next;
     }
-    link->next = 0;
-    link->prev = 0;
+    link->Next = 0;
+    link->Prev = 0;
 }
 #endif
 
@@ -63,7 +64,7 @@ extern int D_004A3FF4;
 extern void* cEffectModifier_vtbl[];
 
 struct sEffectLinkObj_5798 {
-    cEffectLink link;  // 0x0
+    sEffectLinkView link;  // 0x0
     void** vt;         // 0x8
     int value;         // 0xC
 };
@@ -87,7 +88,7 @@ extern int D_004A3FF4;
 extern void* cEffectModifier_vtbl[];
 
 struct sEffectLinkObj_57C8 {
-    cEffectLink link;  // 0x0
+    sEffectLinkView link;  // 0x0
     void** vt;         // 0x8
     int value;         // 0xC
 };
@@ -120,7 +121,7 @@ extern void* cEffectLink_vtbl[];
 void operator_delete(int*);
 
 struct sEffectLinkObj_5828 {
-    cEffectLink link;  // 0x0
+    sEffectLinkView link;  // 0x0
     void** vt;         // 0x8
     int value;         // 0xC
 };
@@ -131,7 +132,7 @@ extern "C" void cEffectModifier__cEffectModifier(void* self, int flags)
     o->vt = cEffectModifier_vtbl;
     D_004A3FF4--;
     o->vt = cEffectLink_vtbl;
-    func_00345760(&o->link);
+    func_00345760((cEffectLink*)&o->link);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -643,7 +644,7 @@ struct sEffQuat_6120 {
 } __attribute__((aligned(16)));
 
 struct sEffObj_6120 {
-    cEffectLink link;   // 0x0
+    sEffectLinkView link;   // 0x0
     void** vt;          // 0x8
     int value;          // 0xC
     sEffQuat_6120 q;    // 0x10
@@ -713,7 +714,7 @@ extern void* cHaloModifier_vtbl[];
 extern "C" void cEffectModifier__cEffectModifier(void* self, int flags);
 
 struct sEffectLinkObj_6228 {
-    cEffectLink link;  // 0x0
+    sEffectLinkView link;  // 0x0
     void** vt;         // 0x8
 };
 

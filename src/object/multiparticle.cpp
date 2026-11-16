@@ -1,4 +1,6 @@
 #include "common.h"
+#include "object/splinemodifier.h"
+#include "object/physicsmodifier.h"
 
 //100%
 INCLUDE_ASM("object/multiparticle", cMultiParticle_setupMultiParticle);
@@ -319,11 +321,11 @@ public:
 
 extern char cPhysicsModifier_vtbl[];
 
-extern "C" void* func_00358468(void* self, func_00358468_cObj* obj)
+extern "C" void* func_00358468(cPhysicsModifier* self, func_00358468_cObj* obj)
 {
-    *(char**)((char*)self + 4) = cPhysicsModifier_vtbl;
+    self->mVtbl = (void**)cPhysicsModifier_vtbl;
     obj->v02(self, 4);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -336,7 +338,7 @@ public:
     virtual void v01(void* buf, int size);
 };
 
-extern "C" void func_003584B8(void* self, func_003584B8_cObj* obj)
+extern "C" void func_003584B8(cPhysicsModifier* self, func_003584B8_cObj* obj)
 {
     obj->v01(self, 4);
 }
@@ -1383,42 +1385,42 @@ float AIrandf(float lo, float hi);
  * @param desc  the spline data (On Tour const tAddSplineData&)
  * @return @p self
  */
-extern "C" void* cSplineModifier_cSplineModifier1(char* self, char* desc)
+extern "C" void* cSplineModifier_cSplineModifier1(cSplineModifier* self, char* desc)
 {
     *(void**)self = cSplineModifier_vtbl;
-    *(unsigned int*)(self + 0xD8) = 0xFFFFFFFF;
-    *(int*)(self + 0xE0) = 0;
-    *(int*)(self + 0xDC) = 0;
-    *(int*)(self + 0xE4) = 0;
-    *(int*)(self + 0x4C) = 0;
-    *(int*)(self + 0x30) = *(int*)(desc + 0x8);
-    *(int*)(self + 0x34) = *(int*)(desc + 0xC);
-    *(float*)(self + 0x38) = *(float*)(desc + 0x14) * 0.01745329424738884f;
-    *(float*)(self + 0x40) = *(float*)(desc + 0x24) * 100.0f;
-    *(float*)(self + 0x44) = *(float*)(desc + 0x28);
-    func_003451C0(self + 0xD8, *(int*)(desc + 0x4));
-    cSplineModifier_setSpeed(self, *(float*)(desc + 0x10));
+    self->Spline.SplineId = 0xFFFFFFFF;
+    self->Spline.Seg = 0;
+    self->Spline.SegIndex = 0;
+    *(int*)&self->Spline.Length = 0;
+    *(int*)&self->Radius = 0;
+    self->SequenceType = *(int*)(desc + 0x8);
+    self->OrientType = *(int*)(desc + 0xC);
+    self->HeadTweak = *(float*)(desc + 0x14) * 0.01745329424738884f;
+    self->Force = *(float*)(desc + 0x24) * 100.0f;
+    self->ForceTime = *(float*)(desc + 0x28);
+    func_003451C0(((char*)self) + 0xD8, *(int*)(desc + 0x4));
+    cSplineModifier_setSpeed(((char*)self), *(float*)(desc + 0x10));
     if (*(float*)(desc + 0x10) >= 0.0f) {
-        *(float*)(self + 0x3C) = 0.0f;
+        self->OffsetDistance = 0.0f;
     } else {
-        *(float*)(self + 0x3C) = *(float*)(self + 0xE4);
+        self->OffsetDistance = self->Spline.Length;
     }
     float zero = 0.0f;
-    *(int*)(self + 0x54) = *(int*)(desc + 0x20) != 0;
-    *(int*)(self + 0x50) = 0;
+    self->Start = *(int*)(desc + 0x20) != 0;
+    self->Complete = 0;
     if (*(float*)(desc + 0x18) != zero) {
-        *(float*)(self + 0x3C) = *(float*)(desc + 0x18);
+        self->OffsetDistance = *(float*)(desc + 0x18);
     }
-    *(float*)(self + 0x3C) += AIrandf(-1.0f, 1.0f) * *(float*)(desc + 0x1C);
-    if (*(float*)(self + 0x3C) < zero || *(float*)(self + 0xE4) < *(float*)(self + 0x3C)) {
-        *(float*)(self + 0x3C) = zero;
+    self->OffsetDistance += AIrandf(-1.0f, 1.0f) * *(float*)(desc + 0x1C);
+    if (self->OffsetDistance < zero || self->Spline.Length < self->OffsetDistance) {
+        self->OffsetDistance = zero;
     }
-    *(sMpQuad*)(self + 0xB0) = t4vect_Zero;
-    *(sMpQuad*)(self + 0xC0) = t4vect_Zero;
-    *(int*)(self + 0x58) = 1;
-    *(int*)(self + 0xD0) = 0;
-    *(int*)(self + 0xD4) = 0;
-    return self;
+    *(sMpQuad*)&self->Dir = t4vect_Zero;
+    *(sMpQuad*)&self->DDir = t4vect_Zero;
+    self->RootTransformDirty = 1;
+    *(int*)&self->X2 = 0;
+    *(int*)&self->Y2 = 0;
+    return ((char*)self);
 }
 #endif
 

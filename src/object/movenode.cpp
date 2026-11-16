@@ -1,4 +1,9 @@
 #include "common.h"
+#include "object/positionmodifier.h"
+#include "object/parentmodifier.h"
+#include "object/magnetmodifier.h"
+#include "object/avasplinemodifier.h"
+#include "object/movenode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 
@@ -15,7 +20,7 @@ struct cMoveNode;
 void cMoveNode_addModifierBlock(cMoveNode* self);
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
 extern "C" void tModifierBlock_readFromReplayFrame(void* block, void* stream);
-extern "C" void cMoveNode_setupOverlapSystem(void* self);
+extern "C" void cMoveNode_setupOverlapSystem(cMoveNode* self);
 extern char cMoveNode_vtbl[];
 
 // PORT: the unit declares cMoveNode_cMoveNode(void*) (1 arg) for its callers; the body reads a1/a2
@@ -40,7 +45,7 @@ void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream)
         cMoveNode_addModifierBlock((cMoveNode*)self);
         tModifierBlock_readFromReplayFrame(*(void**)((char*)self + 0x1C), stream);
     }
-    cMoveNode_setupOverlapSystem(self);
+    cMoveNode_setupOverlapSystem((cMoveNode*)self);
     *(unsigned short*)((char*)self + 0x12) |= 1;
     return self;
 }
@@ -50,7 +55,7 @@ void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream)
 INCLUDE_ASM("object/movenode", cMoveNode__cMoveNode);
 #ifdef SKIP_ASM
 extern char cMoveNode_vtbl[];
-extern "C" void cMoveNode_restoreOverlapSystem(void* self);
+extern "C" void cMoveNode_restoreOverlapSystem(cMoveNode* self);
 extern "C" void tModifierBlock__tModifierBlock(void* block, int flags);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
@@ -62,11 +67,11 @@ extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cMoveNode__cMoveNode(void* self, int flags)
+extern "C" void cMoveNode__cMoveNode(cMoveNode* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cMoveNode_vtbl;
+    self->mVtbl = (void**)cMoveNode_vtbl;
     cMoveNode_restoreOverlapSystem(self);
-    void* block = *(void**)((char*)self + 0x1C);
+    void* block = self->ModifierBlock;
     if (block != 0) {
         tModifierBlock__tModifierBlock(block, 3);
     }
@@ -89,9 +94,9 @@ struct sMoveNodeVEntryI {
  * @return 1 when the node has no modifier block or no transform modifier in it, otherwise the modifier's
  *         shouldRebound() (vtable slot 8)
  */
-extern "C" int cMoveNode_shouldRebound(void* self)
+extern "C" int cMoveNode_shouldRebound(cMoveNode* self)
 {
-    void* block = *(void**)((char*)self + 0x1C);
+    void* block = self->ModifierBlock;
     if (block == 0) {
         return 1;
     }
@@ -109,10 +114,6 @@ struct tModifierBlock;
 tModifierBlock* tModifierBlock_tModifierBlock(tModifierBlock* self);
 extern const char D_0048E9D8[];
 
-struct cMoveNode {
-    char pad_0x00[0x1C];
-    void* field_0x1C;
-};
 
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_addModifierBlock__FP9cMoveNode);
@@ -120,7 +121,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addModifierBlock__FP9cMoveNode);
 void cMoveNode_addModifierBlock(cMoveNode* self)
 {
     void* mem = cMemMan_alloc(0x28, D_0048E9D8, 0x20000000, 0);
-    self->field_0x1C = tModifierBlock_tModifierBlock((tModifierBlock*)mem);
+    (*(void**)&self->ModifierBlock) = tModifierBlock_tModifierBlock((tModifierBlock*)mem);
 }
 #endif
 
@@ -137,17 +138,17 @@ extern "C" void func_003530D0(void* block);
 
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod)
 {
-    sMoveNodeVEntryV54B0* e = &(*(sMoveNodeVEntryV54B0**)((char*)self + 0xC))[49];
+    sMoveNodeVEntryV54B0* e = &((sMoveNodeVEntryV54B0*)self->mVtbl)[49];
     e->fn((char*)self + e->delta);
-    if (self->field_0x1C == 0) {
+    if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
-        func_003530D0(self->field_0x1C);
+        func_003530D0(((void*)self->ModifierBlock));
     }
-    *(void**)self->field_0x1C = mod;
-    e = &(*(sMoveNodeVEntryV54B0**)((char*)self + 0xC))[48];
+    *(void**)((void*)self->ModifierBlock) = mod;
+    e = &((sMoveNodeVEntryV54B0*)self->mVtbl)[48];
     e->fn((char*)self + e->delta);
-    unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
+    unsigned int* f = (unsigned int*)((char*)self->Instance + 8);
     *f = (*f & ~0x20u) | 0x40;
 }
 #endif
@@ -159,12 +160,12 @@ extern "C" void func_00353118(void* block);
 
 extern "C" void func_00355550(cMoveNode* self, void* v)
 {
-    if (self->field_0x1C == 0) {
+    if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
-        func_00353118(self->field_0x1C);
+        func_00353118(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)self->field_0x1C + 0x4) = v;
+    *(void**)((char*)((void*)self->ModifierBlock) + 0x4) = v;
 }
 #endif
 
@@ -175,12 +176,12 @@ extern "C" void func_00353150(void* block);
 
 extern "C" void func_003555A8(cMoveNode* self, void* v)
 {
-    if (self->field_0x1C == 0) {
+    if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
-        func_00353150(self->field_0x1C);
+        func_00353150(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)self->field_0x1C + 0x8) = v;
+    *(void**)((char*)((void*)self->ModifierBlock) + 0x8) = v;
 }
 #endif
 
@@ -191,12 +192,12 @@ extern "C" void func_00353188(void* block);
 
 extern "C" void func_00355600(cMoveNode* self, void* v)
 {
-    if (self->field_0x1C == 0) {
+    if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
-        func_00353188(self->field_0x1C);
+        func_00353188(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)self->field_0x1C + 0xC) = v;
+    *(void**)((char*)((void*)self->ModifierBlock) + 0xC) = v;
 }
 #endif
 
@@ -208,10 +209,10 @@ INCLUDE_ASM("object/movenode", cMoveNode_addEffectModifier__FP9cMoveNodePv);
 #ifdef SKIP_ASM
 void cMoveNode_addEffectModifier(cMoveNode* self, void* effect)
 {
-    if (self->field_0x1C == 0) {
+    if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     }
-    cEffectLink_add((cEffectLink*)((char*)self->field_0x1C + 0x10), (cEffectLink*)effect);
+    cEffectLink_add((cEffectLink*)((char*)((void*)self->ModifierBlock) + 0x10), (cEffectLink*)effect);
 }
 #endif
 
@@ -222,10 +223,10 @@ extern "C" void cRailLink_add(void* list, void* item);
 
 extern "C" void cMoveNode_addRailModifier(cMoveNode* self, void* item)
 {
-    if (self->field_0x1C == 0) {
+    if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     }
-    cRailLink_add((char*)self->field_0x1C + 0x1C, item);
+    cRailLink_add((char*)((void*)self->ModifierBlock) + 0x1C, item);
 }
 #endif
 
@@ -237,10 +238,10 @@ extern "C" int func_00352E50(void* block);
 
 extern "C" void cMoveNode_preUpdateModifierBlock(cMoveNode* self)
 {
-    if (self->field_0x1C != 0) {
-        func_00352C70(self->field_0x1C);
-        if (func_00352E50(self->field_0x1C) != 0) {
-            *(unsigned short*)((char*)self + 0x12) |= 1;
+    if (((void*)self->ModifierBlock) != 0) {
+        func_00352C70(((void*)self->ModifierBlock));
+        if (func_00352E50(((void*)self->ModifierBlock)) != 0) {
+            self->Flags |= 1;
         }
     }
 }
@@ -256,8 +257,8 @@ extern "C" void tModifierBlock_postUpdate(void*);
  */
 extern "C" void cMoveNode_postUpdateModifierBlock(cMoveNode* self)
 {
-    if (self->field_0x1C != 0) {
-        tModifierBlock_postUpdate(self->field_0x1C);
+    if (((void*)self->ModifierBlock) != 0) {
+        tModifierBlock_postUpdate(((void*)self->ModifierBlock));
     }
 }
 #endif
@@ -290,20 +291,20 @@ struct cMN_355770_VEnt {
 
 extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
 {
-    cMN_355770_Obj** p = (cMN_355770_Obj**)self->field_0x1C;
+    cMN_355770_Obj** p = (cMN_355770_Obj**)((void*)self->ModifierBlock);
     if (p != 0) {
         cMN_355770_Obj* obj = *p;
         if (obj != 0) {
             obj->v10(tc, ti);
-            char* o = *(char**)self->field_0x1C;
+            char* o = *(char**)((void*)self->ModifierBlock);
             cMN_355770_VEnt* vt = *(cMN_355770_VEnt**)o;
             if (vt[9].fn(o + vt[9].delta, func_002D1B30(pBeing)) == 0) {
                 return;
             }
         }
     }
-    if (*(int*)((char*)self + 0x20) <= 0) {
-        *(int*)((char*)self + 0x20) = *(int*)(D_004A5B64 + 0x10) / 2;
+    if (self->Debounce <= 0) {
+        self->Debounce = *(int*)(D_004A5B64 + 0x10) / 2;
         func_0034FE00(self, tc, ti, pBeing);
     }
 }
@@ -314,9 +315,9 @@ INCLUDE_ASM("object/movenode", cMoveNode_setDebounce);
 #ifdef SKIP_ASM
 extern char* D_004A5B64;
 
-extern "C" void cMoveNode_setDebounce(void* self, float secs)
+extern "C" void cMoveNode_setDebounce(cMoveNode* self, float secs)
 {
-    *(int*)((char*)self + 0x20) = (int)((float)*(int*)(D_004A5B64 + 0x10) * secs);
+    self->Debounce = (int)((float)*(int*)(D_004A5B64 + 0x10) * secs);
 }
 #endif
 
@@ -340,9 +341,9 @@ struct sMnVEntryF {
     void (*fn)(void*, float);
 };
 
-extern "C" void func_00355888(void* self, void* a1)
+extern "C" void func_00355888(cMoveNode* self, void* a1)
 {
-    sMnVEntryF* vt = *(sMnVEntryF**)((char*)self + 0xC);
+    sMnVEntryF* vt = (sMnVEntryF*)self->mVtbl;
     vt[41].fn((char*)self + vt[41].delta, *(float*)((char*)a1 + 0x4));
 }
 #endif
@@ -352,12 +353,12 @@ INCLUDE_ASM("object/movenode", func_003558B8);
 #ifdef SKIP_ASM
 struct sMoveQuad;
 extern char D_0048E8F0[];
-extern "C" void* func_00356EB8(void* self, sMoveQuad* pos);
+extern "C" void* func_00356EB8(cPositionModifier* self, sMoveQuad* pos);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_003558B8(cMoveNode* self, sMoveQuad* pos)
 {
-    cMoveNode_addTransformModifier(self, func_00356EB8(cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), pos));
+    cMoveNode_addTransformModifier(self, func_00356EB8((cPositionModifier*)cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), pos));
 }
 #endif
 
@@ -365,12 +366,12 @@ extern "C" void func_003558B8(cMoveNode* self, sMoveQuad* pos)
 INCLUDE_ASM("object/movenode", func_00355918);
 #ifdef SKIP_ASM
 extern char D_0048E8F0[];
-extern "C" void* func_00356F10(void* mem, void* desc);
+extern "C" void* func_00356F10(cPositionModifier* mem, void* desc);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_00355918(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTransformModifier(self, func_00356F10(cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), desc));
+    cMoveNode_addTransformModifier(self, func_00356F10((cPositionModifier*)cMemMan_alloc(0x90, D_0048E8F0, 0x20000000, 0), desc));
 }
 #endif
 
@@ -379,12 +380,12 @@ INCLUDE_ASM("object/movenode", func_00355978);
 #ifdef SKIP_ASM
 struct sMoveQuad;
 extern char D_0048E8E0[];
-extern "C" void* func_00357038(void* self, void* a1, void* a2, sMoveQuad* pos);
+extern "C" void* func_00357038(cParentModifier* self, void* a1, void* a2, sMoveQuad* pos);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_00355978(cMoveNode* self, void* a1, void* a2, sMoveQuad* pos)
 {
-    cMoveNode_addTransformModifier(self, func_00357038(cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), a1, a2, pos));
+    cMoveNode_addTransformModifier(self, func_00357038((cParentModifier*)cMemMan_alloc(0xB0, D_0048E8E0, 0x20000000, 0), a1, a2, pos));
 }
 #endif
 
@@ -392,13 +393,13 @@ extern "C" void func_00355978(cMoveNode* self, void* a1, void* a2, sMoveQuad* po
 INCLUDE_ASM("object/movenode", func_003559F8);
 #ifdef SKIP_ASM
 extern char D_0048E918[];
-extern "C" void* func_003572E0(void* self, void* owner, void* a2, float f0, float f1);
+extern "C" void* func_003572E0(cMagnetModifier* self, void* owner, void* a2, float f0, float f1);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_003559F8(cMoveNode* self, void* a1, float f0, float f1)
 {
-    cMoveNode_addTransformModifier(self, func_003572E0(cMemMan_alloc(0xB0, D_0048E918, 0x20000000, 0),
-                                      *(void**)((char*)self + 0x18), a1, f0, f1));
+    cMoveNode_addTransformModifier(self, func_003572E0((cMagnetModifier*)cMemMan_alloc(0xB0, D_0048E918, 0x20000000, 0),
+                                      self->Instance, a1, f0, f1));
 }
 #endif
 
@@ -407,13 +408,13 @@ INCLUDE_ASM("object/movenode", func_00355A78);
 #ifdef SKIP_ASM
 extern int D_004A3AC4;
 extern char D_0048E928[];
-extern "C" void* func_00357750(void* self, void* src);
+extern "C" void* func_00357750(cAvaSplineModifier* self, void* src);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 extern "C" void func_00355A78(cMoveNode* self)
 {
     if (D_004A3AC4 == 0) {
-        cMoveNode_addTransformModifier(self, func_00357750(cMemMan_alloc(0x90, D_0048E928, 0x20000000, 0), *(void**)((char*)self + 0x18)));
+        cMoveNode_addTransformModifier(self, func_00357750((cAvaSplineModifier*)cMemMan_alloc(0x90, D_0048E928, 0x20000000, 0), self->Instance));
     }
 }
 #endif
@@ -449,7 +450,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 extern "C" void cMoveNode_addSpline(cMoveNode* self, void* desc)
 {
     cMoveNode_addTransformModifier(self, cMultiSplineModifier_cMultiSplineModifier(cMemMan_alloc(0x58, D_0048E9E8, 0x20000000, 0), desc,
-                                      *(void**)((char*)self + 0x18)));
+                                      self->Instance));
 }
 #endif
 
@@ -475,7 +476,7 @@ extern "C" void func_003555A8(cMoveNode* self, void* mod);
 
 extern "C" void func_00355BF0(cMoveNode* self, void* desc)
 {
-    func_003555A8(self, func_0035F0B8(cMemMan_alloc(0xE8, D_0048E958, 0x20000000, 0), desc, *(void**)((char*)self + 0x18)));
+    func_003555A8(self, func_0035F0B8(cMemMan_alloc(0xE8, D_0048E958, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
@@ -488,7 +489,7 @@ extern "C" void func_00355600(cMoveNode* self, void* mod);
 
 extern "C" void func_00355C50(cMoveNode* self, void* desc)
 {
-    func_00355600(self, func_00342768(cMemMan_alloc(0x50, D_0048E968, 0x20000000, 0), desc, *(void**)((char*)self + 0x18)));
+    func_00355600(self, func_00342768(cMemMan_alloc(0x50, D_0048E968, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
@@ -502,7 +503,7 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
 extern "C" void cMoveNode_addParticle(cMoveNode* self, void* desc)
 {
     cMoveNode_addEffectModifier(self, func_003458C0(cMemMan_alloc(0x1F0, D_0048E978, 0x20000000, 0), desc,
-                                                    *(void**)((char*)self + 0x18)));
+                                                    self->Instance));
 }
 #endif
 
@@ -515,11 +516,11 @@ extern const char D_0048E990[];
 
 extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int index, void* offset)
 {
-    if (index < 0 || index >= *(int*)(*(char**)(*(char**)((char*)self + 0x18) + 0x80) + 4)) {
+    if (index < 0 || index >= *(int*)(*(char**)((char*)self->Instance + 0x80) + 4)) {
         operator_delete((int*)desc);
         return;
     }
-    cMoveNode_addEffectModifier(self, func_00345C90(cMemMan_alloc(0x270, D_0048E990, 0x20000000, 0), desc, *(void**)((char*)self + 0x18), index, offset));
+    cMoveNode_addEffectModifier(self, func_00345C90(cMemMan_alloc(0x270, D_0048E990, 0x20000000, 0), desc, self->Instance, index, offset));
 }
 #endif
 
@@ -546,12 +547,12 @@ extern "C" void cMoveNode_addRailModifier(cMoveNode* self, void* item);
 
 extern "C" void cMoveNode_addRail(cMoveNode* self, void* desc)
 {
-    void* block = self->field_0x1C;
+    void* block = ((void*)self->ModifierBlock);
     if (block != 0 && tModifierBlock_findRail(block, *(int*)((char*)desc + 0x4)) != 0) {
         return;
     }
     cMoveNode_addRailModifier(self, cRailModifier_cRailModifier(cMemMan_alloc(0x90, D_0048E9B8, 0x20000000, 0), desc,
-                                      *(void**)((char*)self + 0x18)));
+                                      self->Instance));
 }
 #endif
 
@@ -565,7 +566,7 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
 extern "C" void cMoveNode_addHalo(cMoveNode* self, void* desc)
 {
     cMoveNode_addEffectModifier(self, func_00346120(cMemMan_alloc(0x40, D_0048E9A8, 0x20000000, 0), desc,
-                                                    *(void**)((char*)self + 0x18)));
+                                                    self->Instance));
 }
 #endif
 
@@ -628,20 +629,20 @@ extern "C" void func_00355F10(cMoveNode* self, void* srcv)
     }
     sNodeVEntryP_355F10* vp = *(sNodeVEntryP_355F10**)(src + 0xC);
     char* m = vp[24].fn(src + vp[24].delta);
-    if (m == *(char**)((char*)self + 0x18) + 0x10) {
+    if (m == (char*)self->Instance + 0x10) {
         sNodeVEntryD_355F10* vd = *(sNodeVEntryD_355F10**)(src + 0xC);
         vd[1].fn(src + vd[1].delta, 3);
         return;
     }
     sMat44_355F10 copy;
     vu0CopyMatrix_355F10(&copy, m);
-    int keep = *(int*)(*(char**)((char*)self + 0x18) + 8);
+    int keep = *(int*)((char*)self->Instance + 8);
     sNodeVEntryD_355F10* vd = *(sNodeVEntryD_355F10**)(src + 0xC);
     vd[1].fn(src + vd[1].delta, 3);
-    *(int*)(*(char**)((char*)self + 0x18) + 8) = keep;
+    *(int*)((char*)self->Instance + 8) = keep;
     func_00355918(self, &copy);
-    *(int*)((char*)self + 0x28) = 1;
-    sNodeVEntryV_355F10* vv = *(sNodeVEntryV_355F10**)((char*)self + 0xC);
+    self->TransferHack = 1;
+    sNodeVEntryV_355F10* vv = (sNodeVEntryV_355F10*)self->mVtbl;
     vv[50].fn((char*)self + vv[50].delta);
 }
 #endif
@@ -653,11 +654,11 @@ extern "C" void func_00353398(void* block, void* other);
 
 extern "C" void func_00356020(cMoveNode* self, cMoveNode* other)
 {
-    if (other->field_0x1C != 0) {
-        if (self->field_0x1C == 0) {
+    if (((void*)other->ModifierBlock) != 0) {
+        if (((void*)self->ModifierBlock) == 0) {
             cMoveNode_addModifierBlock(self);
         }
-        func_00353398(self->field_0x1C, (char*)other->field_0x1C + 0x10);
+        func_00353398(((void*)self->ModifierBlock), (char*)((void*)other->ModifierBlock) + 0x10);
     }
 }
 #endif
@@ -676,13 +677,13 @@ static inline void* VCall18_6078(char*& o)
     sMnVEntryP_6078* vt = *(sMnVEntryP_6078**)o;
     return vt[18].fn(o + vt[18].delta);
 }
-extern "C" void* cMoveNode_getRootTransform(char* self)
+extern "C" void* cMoveNode_getRootTransform(cMoveNode* self)
 {
-    char** h = *(char***)(self + 0x1C);
+    char** h = (char**)self->ModifierBlock;
     char* o = h ? *h : 0;
     if (o != 0)
         return VCall18_6078(o);
-    return *(char**)(self + 0x18) + 0x10;
+    return (char*)self->Instance + 0x10;
 }
 #endif
 
@@ -706,16 +707,16 @@ static inline int VCall23_60C0(char*& o, int a)
     return vt[23].fn(o + vt[23].delta, a);
 }
 // Asks the modifier object (slot 23, passing a through), then falls back to the node's own slot 27.
-extern "C" int cMoveNode_getInstAnimMats(char* self, int inst)
+extern "C" int cMoveNode_getInstAnimMats(cMoveNode* self, int inst)
 {
-    char** h = *(char***)(self + 0x1C);
+    char** h = (char**)self->ModifierBlock;
     char* o = h ? *h : 0;
     if (o != 0) {
         int r = VCall23_60C0(o, inst);
         if (r != 0) return r;
     }
-    sMnVEntryI_60C0* vs = *(sMnVEntryI_60C0**)(self + 0xC);
-    return vs[27].fn(self + vs[27].delta);
+    sMnVEntryI_60C0* vs = (sMnVEntryI_60C0*)self->mVtbl;
+    return vs[27].fn(((char*)self) + vs[27].delta);
 }
 #endif
 
@@ -734,16 +735,16 @@ static inline void* VCall_6128(char*& o, int i)
     return vt[i].fn(o + vt[i].delta);
 }
 // Returns the modifier object's slot-19 value, else its slot-18 value; without one, the node's object position.
-extern "C" void* cMoveNode_getRootTransform1(char* self)
+extern "C" void* cMoveNode_getRootTransform1(cMoveNode* self)
 {
-    char** h = *(char***)(self + 0x1C);
+    char** h = (char**)self->ModifierBlock;
     char* o = h ? *h : 0;
     if (o != 0) {
         void* r = VCall_6128(o, 19);
         if (r != 0) return r;
         return VCall_6128(o, 18);
     }
-    return *(char**)(self + 0x18) + 0x10;
+    return (char*)self->Instance + 0x10;
 }
 #endif
 
@@ -770,30 +771,29 @@ struct sMnVEntryVi_356198 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cMoveNode_update(void* selfv)
+extern "C" void cMoveNode_update(cMoveNode* selfv)
 {
     cMoveNode* self = (cMoveNode*)selfv;
-    char* s = (char*)selfv;
-    if (*(int*)(s + 0x20) > 0) {
-        *(int*)(s + 0x20) -= 1;
+    if (selfv->Debounce > 0) {
+        selfv->Debounce -= 1;
     }
-    sMnVEntryI_356198* vi = *(sMnVEntryI_356198**)(s + 0xC);
-    if (vi[20].fn(s + vi[20].delta) != 0) {
-        sMnVEntryI_356198* vi2 = *(sMnVEntryI_356198**)(s + 0xC);
-        if (vi2[23].fn(s + vi2[23].delta) <= 0 && cInstanceNode_runOnLoseFocusScript(self) == 0) {
-            sMnVEntryV_356198* vv = *(sMnVEntryV_356198**)(s + 0xC);
-            vv[35].fn(s + vv[35].delta);
+    sMnVEntryI_356198* vi = (sMnVEntryI_356198*)selfv->mVtbl;
+    if (vi[20].fn(((char*)selfv) + vi[20].delta) != 0) {
+        sMnVEntryI_356198* vi2 = (sMnVEntryI_356198*)selfv->mVtbl;
+        if (vi2[23].fn(((char*)selfv) + vi2[23].delta) <= 0 && cInstanceNode_runOnLoseFocusScript(self) == 0) {
+            sMnVEntryV_356198* vv = (sMnVEntryV_356198*)selfv->mVtbl;
+            vv[35].fn(((char*)selfv) + vv[35].delta);
             return;
         }
     }
     cMoveNode_preUpdateModifierBlock(self);
-    sMnVEntryI_356198* vi3 = *(sMnVEntryI_356198**)(s + 0xC);
-    if (vi3[15].fn(s + vi3[15].delta) != 0) {
+    sMnVEntryI_356198* vi3 = (sMnVEntryI_356198*)selfv->mVtbl;
+    if (vi3[15].fn(((char*)selfv) + vi3[15].delta) != 0) {
         cMoveNode_postUpdateModifierBlock(self);
-        if (self->field_0x1C != 0 && tModifierBlock_isComplete(self->field_0x1C) != 0) {
-            tModifierBlock_clearComplete(self->field_0x1C);
-            sMnVEntryVi_356198* vw = *(sMnVEntryVi_356198**)(s + 0xC);
-            vw[34].fn(s + vw[34].delta, 1);
+        if (((void*)self->ModifierBlock) != 0 && tModifierBlock_isComplete(((void*)self->ModifierBlock)) != 0) {
+            tModifierBlock_clearComplete(((void*)self->ModifierBlock));
+            sMnVEntryVi_356198* vw = (sMnVEntryVi_356198*)selfv->mVtbl;
+            vw[34].fn(((char*)selfv) + vw[34].delta, 1);
         }
     }
 }
@@ -1016,7 +1016,7 @@ static inline int Visible_6298(sMnCam_6298* cam, sMnObj_6298* obj)
     return 0;
 }
 
-extern "C" void cMoveNode_render(cMnNode_6298* self)
+extern "C" void cMoveNode_render(cMoveNode* self)
 {
     sMnCam_6298* cam = (sMnCam_6298*)cWorld_m_pTheWorld->m_pWorldCache;
     sMnObj_6298* obj = OBJ_6298(self);
@@ -1037,13 +1037,13 @@ extern "C" void cMoveNode_render(cMnNode_6298* self)
     if (!(OBJ_6298(self)->flags & 4)) {
         return;
     }
-    if (*(int*)((char*)self + 0x28)) {
+    if (self->TransferHack) {
         return;
     }
-    void* mat = self->v44();
+    void* mat = ((cMnNode_6298*)self)->v44();
     int res;
     if (mat) {
-        sMnVec_6298* m = self->v45();
+        sMnVec_6298* m = ((cMnNode_6298*)self)->v45();
         sMnGfxVt_6298* vt = (sMnGfxVt_6298*)gfx->mVtbl;
         char* thisp = (char*)gfx + vt[93].delta;
         res = ((MnCullFn_6298)vt[93].fn)(thisp, m, m + 1, ((MnViewFn_6298)((sMnGfxVt_6298*)gfx->mVtbl)[43].fn)((char*)gfx + ((sMnGfxVt_6298*)gfx->mVtbl)[43].delta));
@@ -1076,21 +1076,21 @@ extern "C" void cMoveNode_render(cMnNode_6298* self)
     void* rot = 0;
     void* tex;
     void* xf;
-    if (self->v26()) {
-        tex = self->v27();
+    if (((cMnNode_6298*)self)->v26()) {
+        tex = ((cMnNode_6298*)self)->v27();
         xf = t4mat_Identity;
     } else {
         tex = 0;
-        xf = self->v24();
+        xf = ((cMnNode_6298*)self)->v24();
     }
     sMnMat_6298 rm;
     if (HasRot_6298(MOD_6298(self))) {
-        rot = RotOf_6298(self, &rm);
+        rot = RotOf_6298(((cMnNode_6298*)self), &rm);
         flags |= 2;
     }
-    void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(self) : OBJ_6298(self)->light;
+    void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(((cMnNode_6298*)self)) : OBJ_6298(self)->light;
     sMnGfxVt_6298* vt = (sMnGfxVt_6298*)gfx->mVtbl;
-    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, xf, tex, rot, flags, *(float*)((char*)self + 0x24));
+    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, xf, tex, rot, flags, self->Fade);
 }
 #endif
 
@@ -1108,7 +1108,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_renderModel);
  * @param flags  draw flags passed on to the graphics manager
  */
 // Draws the node with a caller-supplied texture and flags (visibility, rotation and light as in cMoveNode_render).
-extern "C" void cMoveNode_renderModel(cMnNode_6298* self, void* tex, int flags)
+extern "C" void cMoveNode_renderModel(cMoveNode* self, void* tex, int flags)
 {
     sMnCam_6298* cam = (sMnCam_6298*)cWorld_m_pTheWorld->m_pWorldCache;
     sMnObj_6298* obj = OBJ_6298(self);
@@ -1119,12 +1119,12 @@ extern "C" void cMoveNode_renderModel(cMnNode_6298* self, void* tex, int flags)
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     sMnMat_6298 rm;
     if (HasRot_6298(MOD_6298(self))) {
-        rot = RotOf_6298(self, &rm);
+        rot = RotOf_6298(((cMnNode_6298*)self), &rm);
         flags |= 2;
     }
-    void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(self) : OBJ_6298(self)->light;
+    void* light = HasLight_6298(MOD_6298(self)) ? LightOf_6298(((cMnNode_6298*)self)) : OBJ_6298(self)->light;
     sMnGfxVt_6298* vt = (sMnGfxVt_6298*)gfx->mVtbl;
-    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, t4mat_Identity, tex, rot, flags, *(float*)((char*)self + 0x24));
+    ((MnDrawFn_6298)vt[95].fn)((char*)gfx + vt[95].delta, OBJ_6298(self), light, t4mat_Identity, tex, rot, flags, self->Fade);
 }
 #endif
 
@@ -1150,10 +1150,9 @@ struct sBox_3567 {
  * @param self_  the move node
  */
 // Copies the instance's bounding box and radius into its modifier block, when it has one with data.
-extern "C" void cMoveNode_setupOverlapSystem(void* self_)
+extern "C" void cMoveNode_setupOverlapSystem(cMoveNode* self_)
 {
-    char* self = (char*)self_;
-    int* mb = *(int**)(self + 0x1C);
+    int* mb = (int*)self_->ModifierBlock;
     int n = mb != 0;
     if (n)
         n = *mb;
@@ -1162,9 +1161,9 @@ extern "C" void cMoveNode_setupOverlapSystem(void* self_)
     if (n) {
         sBox_3567 box;
         float radius;
-        cInstanceNode_getBoundBoxInfo(self, &box, &radius);
-        tModifierBlock_setBoundBox_K(*(tModifierBlock**)(self + 0x1C), &box);
-        tModifierBlock_setRadius_K(*(tModifierBlock**)(self + 0x1C), radius);
+        cInstanceNode_getBoundBoxInfo(((char*)self_), &box, &radius);
+        tModifierBlock_setBoundBox_K(self_->ModifierBlock, &box);
+        tModifierBlock_setRadius_K(self_->ModifierBlock, radius);
     }
 }
 #endif
@@ -1189,18 +1188,17 @@ extern "C" void* cObjectInterface_getNash(void);
 extern "C" void nash_Nash_movenode_67E0(void* mgr, int a, void* obj, sMnBox_67E0* box, sMnBox_67E0* old) __asm__("nash_Nash_movenode");
 
 // Sets the modifier block's bound box from the node's own extents (self->18 + 0x60) and re-files it.
-extern "C" void cMoveNode_restoreOverlapSystem(void* vself)
+extern "C" void cMoveNode_restoreOverlapSystem(cMoveNode* vself)
 {
-    char* self = (char*)vself;
-    char** h = *(char***)(self + 0x1C);
+    char** h = (char**)vself->ModifierBlock;
     char* blk = h ? *h : 0;
     // Binding a reference to the object matches the target register allocation (see cMoveNode_getRootTransform).
     char*& o = blk;
     if (o == 0)
         return;
     sMnBox_67E0 box;
-    sMnBox_67E0 old = *tModifierBlock_getBoundBox_67E0(*(void**)(self + 0x1C));
-    char* n = *(char**)(self + 0x18);
+    sMnBox_67E0 old = *tModifierBlock_getBoundBox_67E0(vself->ModifierBlock);
+    char* n = (char*)vself->Instance;
     sMnVec4_67E0 v;
     v.x = *(float*)(n + 0x60);
     v.y = *(float*)(n + 0x64);
@@ -1211,8 +1209,8 @@ extern "C" void cMoveNode_restoreOverlapSystem(void* vself)
     v.y = *(float*)(n + 0x70);
     v.z = *(float*)(n + 0x74);
     box.max = v;
-    tModifierBlock_setBoundBox_K(*(tModifierBlock**)(self + 0x1C), &box);
-    void* obj = *(void**)(self + 0x18);
+    tModifierBlock_setBoundBox_K(vself->ModifierBlock, &box);
+    void* obj = vself->Instance;
     nash_Nash_movenode_67E0(cObjectInterface_getNash(), 0, obj, &box, &old);
 }
 #endif
@@ -1289,27 +1287,27 @@ static inline void VCall24_68B0(char*& o)
 }
 
 // Refits the modifier block's bound box around the node's position (radius from the block) and re-files it.
-extern "C" void cMoveNode_updateOverlapSystem(char* self)
+extern "C" void cMoveNode_updateOverlapSystem(cMoveNode* self)
 {
-    char** h = *(char***)(self + 0x1C);
+    char** h = (char**)self->ModifierBlock;
     char* o = h ? *h : 0;
     if (o == 0)
         return;
     sMnBox_68B0 box;
-    sMnBox_68B0 old = *tModifierBlock_getBoundBox_68B0(*(void**)(self + 0x1C));
-    float r = func_00352BF8(*(void**)(self + 0x1C));
+    sMnBox_68B0 old = *tModifierBlock_getBoundBox_68B0(self->ModifierBlock);
+    float r = func_00352BF8(self->ModifierBlock);
     sMnVec4_68B0 rv;
     rv.w = 0.0f;
     rv.x = r;
     rv.y = r;
     rv.z = r;
     sMnVec4_68B0 v;
-    vu0Sub_68B0(v, pos_68B0(self), rv);
+    vu0Sub_68B0(v, pos_68B0(((char*)self)), rv);
     box.min = v;
-    vu0Add_68B0(v, pos_68B0(self), rv);
+    vu0Add_68B0(v, pos_68B0(((char*)self)), rv);
     box.max = v;
-    tModifierBlock_setBoundBox_K(*(tModifierBlock**)(self + 0x1C), &box);
-    void* obj = *(void**)(self + 0x18);
+    tModifierBlock_setBoundBox_K(self->ModifierBlock, &box);
+    void* obj = self->Instance;
     nash_Nash_movenode(cObjectInterface_getNash(), 0, obj, &box, &old);
     VCall24_68B0(o);
 }
@@ -1327,8 +1325,8 @@ extern "C" int tModifierBlock_getBoundBox(void*);
  */
 extern "C" int cMoveNode_hasBoundBox(cMoveNode* self)
 {
-    if (self->field_0x1C != 0) {
-        return tModifierBlock_getBoundBox(self->field_0x1C) != 0;
+    if (((void*)self->ModifierBlock) != 0) {
+        return tModifierBlock_getBoundBox(((void*)self->ModifierBlock)) != 0;
     }
     return 0;
 }
@@ -1346,8 +1344,8 @@ extern "C" int tModifierBlock_getBoundBox(void*);
  */
 extern "C" int cMoveNode_getBoundBox(cMoveNode* self)
 {
-    if (self->field_0x1C != 0) {
-        return tModifierBlock_getBoundBox(self->field_0x1C);
+    if (((void*)self->ModifierBlock) != 0) {
+        return tModifierBlock_getBoundBox(((void*)self->ModifierBlock));
     }
     return 0;
 }
@@ -1368,9 +1366,9 @@ struct sMoveNodeVEntryA28 {
  * @return 0 without a modifier block or transform modifier, otherwise the modifier's hasIntersect() (vtable
  *         slot 20)
  */
-extern "C" int cMoveNode_hasIntersect(void* self)
+extern "C" int cMoveNode_hasIntersect(cMoveNode* self)
 {
-    void* block = *(void**)((char*)self + 0x1C);
+    void* block = self->ModifierBlock;
     if (block == 0) {
         return 0;
     }
@@ -1392,9 +1390,9 @@ struct sMoveNodeVEntryA70 {
     int (*fn)(void*, int, int, int, int);
 };
 
-extern "C" int cMoveNode_intersect(void* self, int w, int intInfo, int num, int flags)
+extern "C" int cMoveNode_intersect(cMoveNode* self, int w, int intInfo, int num, int flags)
 {
-    void* block = *(void**)((char*)self + 0x1C);
+    void* block = self->ModifierBlock;
     if (block == 0) {
         return 0;
     }
@@ -1419,8 +1417,8 @@ extern "C" void tModifierBlock_applyForce(void*);
  */
 extern "C" void cMoveNode_applyForce(cMoveNode* self)
 {
-    if (self->field_0x1C != 0) {
-        tModifierBlock_applyForce(self->field_0x1C);
+    if (((void*)self->ModifierBlock) != 0) {
+        tModifierBlock_applyForce(((void*)self->ModifierBlock));
     }
 }
 #endif
@@ -1438,8 +1436,8 @@ extern "C" void tModifierBlock_updateIntersectInfo(void*);
  */
 extern "C" void cMoveNode_updateIntersectInfo(cMoveNode* self)
 {
-    if (self->field_0x1C != 0) {
-        tModifierBlock_updateIntersectInfo(self->field_0x1C);
+    if (((void*)self->ModifierBlock) != 0) {
+        tModifierBlock_updateIntersectInfo(((void*)self->ModifierBlock));
     }
 }
 #endif
@@ -1457,8 +1455,8 @@ extern "C" void func_00352F40(void*);
  */
 extern "C" void cMoveNode_signal(cMoveNode* self)
 {
-    if (self->field_0x1C != 0) {
-        func_00352F40(self->field_0x1C);
+    if (((void*)self->ModifierBlock) != 0) {
+        func_00352F40(((void*)self->ModifierBlock));
     }
 }
 #endif
@@ -1512,9 +1510,9 @@ static inline int VCall_6BF0(char* o, int i)
     return vt[i].fn(o + vt[i].delta);
 }
 // Does the modifier object's virtual slot 26 report state 2?
-extern "C" int cMoveNode_hasFocusCount(char* self)
+extern "C" int cMoveNode_hasFocusCount(cMoveNode* self)
 {
-    char** h = *(char***)(self + 0x1C);
+    char** h = (char**)self->ModifierBlock;
     if (h != 0) {
         char* o = *h;
         if (o != 0 && VCall_6BF0(o, 26) == 2)
@@ -1539,13 +1537,13 @@ int func_0035AAD0_2(void* self, void* a1) __asm__("func_0035AAD0__FPv");
 
 extern "C" int cMoveNode_incFocusCount(cMoveNode* self, void* pInst)
 {
-    void* block = self->field_0x1C;
+    void* block = ((void*)self->ModifierBlock);
     if (block != 0) {
         void* node = *(void**)block;
         if (node != 0) {
             sMnVEntryI6C48* vt = *(sMnVEntryI6C48**)node;
             if (vt[26].fn((char*)node + vt[26].delta) == 2) {
-                return func_0035AAD0_2(*(void**)self->field_0x1C, pInst);
+                return func_0035AAD0_2(*(void**)((void*)self->ModifierBlock), pInst);
             }
         }
         return 0;
@@ -1569,13 +1567,13 @@ int func_0035AAE0_2(void* self, void* a1) __asm__("func_0035AAE0__FPv");
 
 extern "C" int cMoveNode_decFocusCount(cMoveNode* self, void* pInst)
 {
-    void* block = self->field_0x1C;
+    void* block = ((void*)self->ModifierBlock);
     if (block != 0) {
         void* node = *(void**)block;
         if (node != 0) {
             sMnVEntryI6CC8* vt = *(sMnVEntryI6CC8**)node;
             if (vt[26].fn((char*)node + vt[26].delta) == 2) {
-                return func_0035AAE0_2(*(void**)self->field_0x1C, pInst);
+                return func_0035AAE0_2(*(void**)((void*)self->ModifierBlock), pInst);
             }
         }
         return 0;
@@ -1595,9 +1593,9 @@ INCLUDE_ASM("object/movenode", cMoveNode_getFocusCount);
  *
  * @return the modifier's count, or 0 when there is no modifier block, no modifier or another modifier type
  */
-extern "C" int cMoveNode_getFocusCount(void* self)
+extern "C" int cMoveNode_getFocusCount(cMoveNode* self)
 {
-    void* block = *(void**)((char*)self + 0x1C);
+    void* block = self->ModifierBlock;
     if (block == 0) {
         return 0;
     }
@@ -1609,7 +1607,7 @@ extern "C" int cMoveNode_getFocusCount(void* self)
     if (vt[26].fn((char*)node + vt[26].delta) != 2) {
         return 0;
     }
-    return *(int*)((char*)**(void***)((char*)self + 0x1C) + 0x34);
+    return *(int*)((char*)*(void**)self->ModifierBlock + 0x34);
 }
 #endif
 
@@ -1675,10 +1673,10 @@ struct sMoveQuad {
 extern void* D_0048F5F0[];
 extern sMoveQuad t4mat_Identity[];
 
-extern "C" void* func_00356EB8(void* self, sMoveQuad* pos)
+extern "C" void* func_00356EB8(cPositionModifier* self, sMoveQuad* pos)
 {
     *(void***)self = D_0048F5F0;
-    *(sMoveQuad*)((char*)self + 0x30) = *pos;
+    *(sMoveQuad*)&self->Offset = *pos;
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, t4mat_Identity -> self+0x50).
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -1694,9 +1692,9 @@ extern "C" void* func_00356EB8(void* self, sMoveQuad* pos)
         :
         : "r"((char*)self + 0x50), "r"(t4mat_Identity)
         : "memory");
-    *(int*)((char*)self + 0x44) = 1;
-    *(sMoveQuad*)((char*)self + 0x80) = *(sMoveQuad*)((char*)self + 0x30);
-    return self;
+    self->RootTransformDirty = 1;
+    *(sMoveQuad*)&self->Transform.row[3] = *(sMoveQuad*)&self->Offset;
+    return ((void*)self);
 }
 #endif
 
@@ -1709,11 +1707,11 @@ struct sMoveQuad2 {
 
 extern void* D_0048F5F0[];
 
-extern "C" void* func_00356F10(void* self, void* src)
+extern "C" void* func_00356F10(cPositionModifier* self, void* src)
 {
     *(void***)self = D_0048F5F0;
     sMoveQuad2 v = *(sMoveQuad2*)((char*)src + 0x30);
-    *(sMoveQuad2*)((char*)self + 0x30) = v;
+    *(sMoveQuad2*)&self->Offset = v;
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src -> self+0x50).
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -1729,8 +1727,8 @@ extern "C" void* func_00356F10(void* self, void* src)
         :
         : "r"((char*)self + 0x50), "r"(src)
         : "memory");
-    *(int*)((char*)self + 0x44) = 1;
-    return self;
+    self->RootTransformDirty = 1;
+    return ((void*)self);
 }
 #endif
 
@@ -1775,11 +1773,11 @@ typedef int cQuad128 __attribute__((mode(TI)));
 //100%
 INCLUDE_ASM("object/movenode", func_00356FF0);
 #ifdef SKIP_ASM
-extern "C" void func_00356FF0(void* self)
+extern "C" void func_00356FF0(cPositionModifier* self)
 {
-    cQuad128 v = *(cQuad128*)((char*)self + 0x30);
-    *(int*)((char*)self + 0x44) = 0;
-    *(cQuad128*)((char*)self + 0x80) = v;
+    cQuad128 v = *(cQuad128*)&self->Offset;
+    self->RootTransformDirty = 0;
+    *(cQuad128*)&self->Transform.row[3] = v;
 }
 #endif
 
@@ -1792,7 +1790,7 @@ public:
     virtual void v01(void* buf, int size);
 };
 
-extern "C" void func_00357000(void* self, func_00357000_cObj* obj)
+extern "C" void func_00357000(cPositionModifier* self, func_00357000_cObj* obj)
 {
     obj->v01((char*)self + 0x10, 0x40);
 }
@@ -1803,13 +1801,13 @@ INCLUDE_ASM("object/movenode", func_00357038);
 #ifdef SKIP_ASM
 extern char D_0048F508[];
 
-extern "C" void* func_00357038(void* self, void* a1, void* a2, sMoveQuad* pos)
+extern "C" void* func_00357038(cParentModifier* self, void* a1, void* a2, sMoveQuad* pos)
 {
-    func_00356EB8(self, pos);
-    *(void**)((char*)self + 0x0) = D_0048F508;
-    *(void**)((char*)self + 0xA0) = a1;
-    *(void**)((char*)self + 0x90) = a2;
-    return self;
+    func_00356EB8((cPositionModifier*)self, pos);
+    self->mVtbl = (void**)D_0048F508;
+    self->ParentInst = (tInstanceRecord*)a1;
+    self->Mesh = (int)a2;
+    return ((void*)self);
 }
 #endif
 
@@ -1831,15 +1829,15 @@ struct sMnVEntryRd7090 {
 extern "C" void func_00356F68(void* self, void* stream);
 extern char D_0048F508[];
 
-extern "C" void* func_00357090(void* self, void* stream)
+extern "C" void* func_00357090(cParentModifier* self, void* stream)
 {
     func_00356F68(self, stream);
-    *(void**)((char*)self + 0x0) = D_0048F508;
+    self->mVtbl = (void**)D_0048F508;
     sMnVEntrySer7090* e = &(*(sMnVEntrySer7090**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x90, 4);
     sMnVEntryRd7090* r = &(*(sMnVEntryRd7090**)stream)[3];
-    *(void**)((char*)self + 0xA0) = r->fn((char*)stream + r->delta);
-    return self;
+    self->ParentInst = (tInstanceRecord*)r->fn((char*)stream + r->delta);
+    return ((void*)self);
 }
 #endif
 
@@ -1928,20 +1926,20 @@ struct sMnVEntryM_357108 {
     sMnMtx_357108* (*fn)(void*, int);
 };
 
-extern "C" void func_00357108(char* self)
+extern "C" void func_00357108(cParentModifier* self)
 {
-    char* o = *(char**)(*(char**)(self + 0xA0) + 0xC);
+    char* o = *(char**)((char*)self->ParentInst + 0xC);
     if (o != 0) {
         sMnVEntryI_357108* vi = *(sMnVEntryI_357108**)(o + 0xC);
         if (vi[26].fn(o + vi[26].delta) != 0) {
             sMnVEntryM_357108* vm = *(sMnVEntryM_357108**)(o + 0xC);
-            vu0CopyMtx_357108(self + 0x50, vm[29].fn(o + vm[29].delta, *(int*)(self + 0x90)));
+            vu0CopyMtx_357108(((char*)self) + 0x50, vm[29].fn(o + vm[29].delta, self->Mesh));
         } else {
-            func_0034FED8(*(void**)(self + 0xA0), *(int*)(self + 0x90), (sMnMtx_357108*)(self + 0x50));
+            func_0034FED8(self->ParentInst, self->Mesh, (sMnMtx_357108*)(((char*)self) + 0x50));
         }
-        *(sMnVec4_357108*)(self + 0x80) = vu0Add_357108(vel_357108(self), vu0MtxApply_357108((sMnMtx_357108*)(self + 0x50), (sMnVec4_357108*)(self + 0x30)));
+        *(sMnVec4_357108*)&self->Transform.row[3] = vu0Add_357108(vel_357108(((char*)self)), vu0MtxApply_357108((sMnMtx_357108*)(((char*)self) + 0x50), (sMnVec4_357108*)(((char*)self) + 0x30)));
     }
-    *(int*)(self + 0x44) = 0;
+    self->RootTransformDirty = 0;
 }
 #endif
 
@@ -1954,9 +1952,9 @@ struct sMnVEntry7210 {
     void (*fn)(void*, void*);
 };
 
-extern "C" void func_00357210(void* self, void* obj)
+extern "C" void func_00357210(cParentModifier* self, void* obj)
 {
-    void* p = *(void**)((char*)self + 0xA0);
+    void* p = self->ParentInst;
     if (p == 0) {
         return;
     }
@@ -1965,7 +1963,7 @@ extern "C" void func_00357210(void* self, void* obj)
         return;
     }
     int saved = *(int*)((char*)obj + 0x5C);
-    *(int*)((char*)obj + 0x5C) = *(int*)((char*)self + 0x90);
+    *(int*)((char*)obj + 0x5C) = self->Mesh;
     sMnVEntry7210* vt = *(sMnVEntry7210**)((char*)q + 0xC);
     vt[42].fn((char*)q + vt[42].delta, obj);
     *(int*)((char*)obj + 0x5C) = saved;
@@ -1988,13 +1986,13 @@ struct sMnVEntry7278b {
 };
 
 
-extern "C" void func_00357278(void* self, void* stream)
+extern "C" void func_00357278(cParentModifier* self, void* stream)
 {
-    func_00357000(self, (func_00357000_cObj*)stream);
+    func_00357000((cPositionModifier*)self, (func_00357000_cObj*)stream);
     sMnVEntry7278a* vt1 = *(sMnVEntry7278a**)stream;
     vt1[1].fn((char*)stream + vt1[1].delta, (char*)self + 0x90, 4);
     sMnVEntry7278b* vt2 = *(sMnVEntry7278b**)stream;
-    vt2[5].fn((char*)stream + vt2[5].delta, *(void**)((char*)self + 0xA0));
+    vt2[5].fn((char*)stream + vt2[5].delta, self->ParentInst);
 }
 #endif
 
@@ -2003,16 +2001,15 @@ INCLUDE_ASM("object/movenode", func_003572E0);
 #ifdef SKIP_ASM
 extern char D_0048F420[];
 
-extern "C" void* func_003572E0(void* self, void* a1, void* mat, float f40, float speed)
+extern "C" void* func_003572E0(cMagnetModifier* self, void* a1, void* mat, float f40, float speed)
 {
-    char* s = (char*)self;
     *(void**)self = D_0048F420;
-    *(void**)(s + 0xA0) = a1;
-    *(float*)(s + 0x40) = f40;
-    *(float*)(s + 0x48) = speed * 27.77777862548828f;
-    *(int*)(s + 0x44) = -1;
-    *(int*)(s + 0x4C) = 0;
-    *(int*)(s + 0x54) = 0;
+    self->Instance = (tInstanceRecord*)a1;
+    self->Radius = f40;
+    self->Speed = speed * 27.77777862548828f;
+    self->Being = -1;
+    *(int*)&self->Time = 0;
+    self->AllowCollide = 0;
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, mat -> self+0x60).
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2026,12 +2023,12 @@ extern "C" void* func_003572E0(void* self, void* a1, void* mat, float f40, float
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(s + 0x60), "r"(mat)
+        : "r"(((char*)self) + 0x60), "r"(mat)
         : "memory");
-    *(int*)(s + 0x50) = 1;
-    sMoveQuad v = *(sMoveQuad*)(s + 0x90);
-    *(sMoveQuad*)(s + 0x10) = v;
-    return self;
+    self->RootTransformDirty = 1;
+    sMoveQuad v = *(sMoveQuad*)&self->Transform.row[3];
+    *(sMoveQuad*)&self->Offset = v;
+    return ((void*)self);
 }
 #endif
 
@@ -2052,18 +2049,18 @@ struct sMnVEntryRd7358 {
 
 extern char D_0048F420[];
 
-extern "C" void* func_00357358(void* self, void* stream)
+extern "C" void* func_00357358(cMagnetModifier* self, void* stream)
 {
     char* m = (char*)self + 0x10;
     *(void**)self = D_0048F420;
     sMnVEntryRd7358* r = &(*(sMnVEntryRd7358**)stream)[3];
-    *(void**)((char*)self + 0xA0) = r->fn((char*)stream + r->delta);
+    self->Instance = (tInstanceRecord*)r->fn((char*)stream + r->delta);
     sMnVEntrySer7358* e = &(*(sMnVEntrySer7358**)stream)[2];
     e->fn((char*)stream + e->delta, m, 0x50);
     e = &(*(sMnVEntrySer7358**)stream)[2];
     e->fn((char*)stream + e->delta, (char*)self + 0x60, 0x40);
-    *(int*)((char*)self + 0x50) = 1;
-    return self;
+    self->RootTransformDirty = 1;
+    return ((void*)self);
 }
 #endif
 
@@ -2151,36 +2148,36 @@ struct sMnMover_3573F8 {
     int arrived;
 };
 
-extern "C" void func_003573F8(sMnMover_3573F8* self)
+extern "C" void func_003573F8(cMagnetModifier* self)
 {
-    if (self->target < 0) {
+    if (self->Being < 0) {
         return;
     }
-    self->time += func_002D1C70();
-    sMnVec4_3573F8 d = vu0Sub_3573F8(*(sMnVec4_3573F8*)func_002D1B58(self->target), self->pos);
+    self->Time += func_002D1C70();
+    sMnVec4_3573F8 d = vu0Sub_3573F8(*(sMnVec4_3573F8*)func_002D1B58(self->Being), (*(sMnVec4_3573F8*)&self->Offset));
     float len = vu0Length_3573F8(d);
     if (len < 50.0f) {
-        self->arrived = 1;
+        self->AllowCollide = 1;
     } else {
-        sMnVec4_3573F8 step = vu0Scale_3573F8(d, self->speed / len * self->time);
+        sMnVec4_3573F8 step = vu0Scale_3573F8(d, self->Speed / len * self->Time);
         if (len < vu0Length_3573F8(step)) {
-            self->arrived = 1;
+            self->AllowCollide = 1;
             step = d;
         }
-        vu0AddTo_3573F8(self->pos, step);
+        vu0AddTo_3573F8((*(sMnVec4_3573F8*)&self->Offset), step);
     }
-    self->moved = 1;
+    self->RootTransformDirty = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/movenode", func_00357528);
 #ifdef SKIP_ASM
-extern "C" void func_00357528(void* self)
+extern "C" void func_00357528(cMagnetModifier* self)
 {
-    cQuad128 v = *(cQuad128*)((char*)self + 0x10);
-    *(int*)((char*)self + 0x50) = 0;
-    *(cQuad128*)((char*)self + 0x90) = v;
+    cQuad128 v = *(cQuad128*)&self->Offset;
+    self->RootTransformDirty = 0;
+    *(cQuad128*)&self->Transform.row[3] = v;
 }
 #endif
 
@@ -2197,19 +2194,19 @@ struct sMnVEntryI7660 {
 
 extern "C" void* cObjectInterface_getNumBeings(int id);
 
-extern "C" int func_00357660(void* self, int id)
+extern "C" int func_00357660(cMagnetModifier* self, int id)
 {
-    int cur = *(int*)((char*)self + 0x44);
+    int cur = self->Being;
     if (cur >= 0) {
         if (cur == id) {
-            return *(int*)((char*)self + 0x54);
+            return self->AllowCollide;
         }
         return 0;
     }
     void* obj = cObjectInterface_getNumBeings(id);
     sMnVEntryI7660* vt = *(sMnVEntryI7660**)obj;
     if (vt[8].fn((char*)obj + vt[8].delta) != 0) {
-        *(int*)((char*)self + 0x44) = id;
+        self->Being = id;
     }
     return 0;
 }
@@ -2230,10 +2227,10 @@ struct sMnVEntrySer76D0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_003576D0(void* self, void* stream)
+extern "C" void func_003576D0(cMagnetModifier* self, void* stream)
 {
     sMnVEntryPtr76D0* p = &(*(sMnVEntryPtr76D0**)stream)[5];
-    p->fn((char*)stream + p->delta, *(void**)((char*)self + 0xA0));
+    p->fn((char*)stream + p->delta, self->Instance);
     sMnVEntrySer76D0* e = &(*(sMnVEntrySer76D0**)stream)[1];
     e->fn((char*)stream + e->delta, (char*)self + 0x10, 0x50);
     e = &(*(sMnVEntrySer76D0**)stream)[1];
@@ -2248,11 +2245,11 @@ extern void* D_0048F338[];
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src+0x10 -> self+0x40); the PC
 // port needs a plain 64-byte copy.
-extern "C" void* func_00357750(void* self, void* src)
+extern "C" void* func_00357750(cAvaSplineModifier* self, void* src)
 {
     *(void***)self = D_0048F338;
-    *(void**)((char*)self + 0x80) = src;
-    *(int*)((char*)self + 0x30) = 0;
+    self->Instance = (tInstanceRecord*)src;
+    *(int*)&self->Radius = 0;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -2267,7 +2264,7 @@ extern "C" void* func_00357750(void* self, void* src)
         :
         : "r"((char*)self + 0x40), "r"((char*)src + 0x10)
         : "memory");
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2290,16 +2287,16 @@ struct sMnVEntryRd7798 {
 // pass-through wrapper and this caller passes two args (prototype mismatch).
 void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
 
-extern "C" void* func_00357798(void* self, void* stream)
+extern "C" void* func_00357798(cAvaSplineModifier* self, void* stream)
 {
     char* m = (char*)self + 0x10;
     *(void***)self = D_0048F338;
     sMnVEntryRd7798* r = &(*(sMnVEntryRd7798**)stream)[3];
-    *(void**)((char*)self + 0x80) = r->fn((char*)stream + r->delta);
+    self->Instance = (tInstanceRecord*)r->fn((char*)stream + r->delta);
     sMnVEntrySer7798* e = &(*(sMnVEntrySer7798**)stream)[2];
     e->fn((char*)stream + e->delta, m, 0x30);
-    func_002D1CF0_2(*(void**)((char*)self + 0x80), (char*)self + 0x40);
-    return self;
+    func_002D1CF0_2(self->Instance, (char*)self + 0x40);
+    return ((void*)self);
 }
 #endif
 
@@ -2310,9 +2307,9 @@ INCLUDE_ASM("object/movenode", func_00357820);
 // pass-through wrapper and this caller passes two args (prototype mismatch).
 void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
 
-extern "C" void func_00357820(void* self)
+extern "C" void func_00357820(cAvaSplineModifier* self)
 {
-    func_002D1CF0_2(*(void**)((char*)self + 0x80), (char*)self + 0x40);
+    func_002D1CF0_2(self->Instance, (char*)self + 0x40);
 }
 #endif
 
@@ -2331,10 +2328,10 @@ struct sMnVEntry7848b {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00357848(void* self, void* stream)
+extern "C" void func_00357848(cAvaSplineModifier* self, void* stream)
 {
     sMnVEntry7848a* vt1 = *(sMnVEntry7848a**)stream;
-    vt1[5].fn((char*)stream + vt1[5].delta, *(void**)((char*)self + 0x80));
+    vt1[5].fn((char*)stream + vt1[5].delta, self->Instance);
     sMnVEntry7848b* vt2 = *(sMnVEntry7848b**)stream;
     vt2[1].fn((char*)stream + vt2[1].delta, (char*)self + 0x10, 0x30);
 }
@@ -2388,7 +2385,7 @@ struct sMnDtorVEntry7950 {
     void (*fn)(void*, int);
 };
 
-extern "C" void cMoveNode_update(void* self);
+extern "C" void cMoveNode_update(cMoveNode* self);
 
 /**
  * Updates a particle node and deletes it once nothing keeps it alive.
@@ -2398,7 +2395,7 @@ extern "C" void cMoveNode_update(void* self);
  */
 extern "C" void cParticleNode_update(void* self)
 {
-    cMoveNode_update(self);
+    cMoveNode_update((cMoveNode*)self);
     void* mb = *(void**)((char*)self + 0x1C);
     if (mb != 0 && *(int*)((char*)mb + 0x10) != 0) {
         return;

@@ -8,8 +8,9 @@
 // On Tour 0x90. EA's source path: d:/ssx/code/source/object/railmodifier.cpp (preview assert).
 // Constructors cRailModifier_cRailModifier (tAddRailData, tInstanceRecord*) and cRailModifier_cRailModifier1 (replay
 // frame), destructor func_0035BD70 (all in src/object/splinemodifier.cpp); vtable cRailModifier_vtbl (0x004911D0,
-// 4 slots: ~cRailModifier, update func_0035C4E0, writeToReplayFrame func_0035C540, render func_0035CFE0); base
-// vtable cRailLink_vtbl (0x00491200).
+// 4 slots in this order: ~cRailModifier func_0035BD70, writeToReplayFrame func_0035C540, update func_0035C4E0,
+// render func_0035CFE0); base vtable cRailLink_vtbl (0x00491200: ~cRailLink, writeToReplayFrame).
+// The bases are staged as their own headers: object/raillink.h (cRailLink) and object/railspacenode.h (the Node).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. The real bases are
 //   cRailLink (0x00-0x0C: Next, Prev, vptr) + cRailModifierState (0x10-0x40), then cRailModifier's own fields.

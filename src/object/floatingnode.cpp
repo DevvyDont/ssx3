@@ -1,14 +1,11 @@
 #include "common.h"
+#include "object/floatingnode.h"
 #include "object/instancenode.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cInstanceNode_getBoundBoxInfo(void* self, void* out);
 extern const char D_0048E890[];
 
-struct cFloatingNode {
-    char pad_0x00[0x78];
-    void* field_0x78;
-};
 
 //100%
 INCLUDE_ASM("object/floatingnode", cFloatingNode_initInfo__FP13cFloatingNode);
@@ -19,7 +16,7 @@ void cInstanceNode_getBoundBoxInfo_3(void* self, void* box, void* out) __asm__("
 void cFloatingNode_initInfo(cFloatingNode* self)
 {
     void* mem = cMemMan_alloc(0x30, D_0048E890, 0x20000000, 0);
-    self->field_0x78 = mem;
+    (*(void**)&self->Info) = mem;
     cInstanceNode_getBoundBoxInfo_3(self, mem, (char*)mem + 0x20);
 }
 #endif
@@ -34,9 +31,9 @@ void operator_delete(int* ptr);
  */
 extern "C" void cFloatingNode_purgeInfo(cFloatingNode* self)
 {
-    if (self->field_0x78 != 0) {
-        operator_delete((int*)self->field_0x78);
-        self->field_0x78 = 0;
+    if (((void*)self->Info) != 0) {
+        operator_delete((int*)((void*)self->Info));
+        (*(void**)&self->Info) = 0;
     }
 }
 #endif
@@ -105,9 +102,9 @@ static inline sFlVec4_34EF40 nodePos_34EF40(char* self)
     return *(sFlVec4_34EF40*)(vt[24].fn(self + vt[24].delta) + 0x30);
 }
 
-extern "C" void cFloatingNode_updateOverlapSystem(char* self)
+extern "C" void cFloatingNode_updateOverlapSystem(cFloatingNode* self)
 {
-    sFlInfo_34EF40* info = *(sFlInfo_34EF40**)(self + 0x78);
+    sFlInfo_34EF40* info = (sFlInfo_34EF40*)self->Info;
     if (info != 0) {
         sFlBox_34EF40 nb;
         sFlBox_34EF40 old = info->box;
@@ -117,13 +114,13 @@ extern "C" void cFloatingNode_updateOverlapSystem(char* self)
         ext.y = r;
         ext.z = r;
         ext.w = 0.0f;
-        nb.min = vu0Sub_34EF40(nodePos_34EF40(self), ext);
-        nb.max = vu0Add_34EF40(nodePos_34EF40(self), ext);
-        (*(sFlInfo_34EF40**)(self + 0x78))->box = nb;
-        void* id = *(void**)(self + 0x18);
+        nb.min = vu0Sub_34EF40(nodePos_34EF40(((char*)self)), ext);
+        nb.max = vu0Add_34EF40(nodePos_34EF40(((char*)self)), ext);
+        ((sFlInfo_34EF40*)self->Info)->box = nb;
+        void* id = self->Instance;
         nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (sBox_F048*)&nb, (sBox_F048*)&old);
     } else {
-        cMoveNode_updateOverlapSystem(self);
+        cMoveNode_updateOverlapSystem(((char*)self));
     }
 }
 #endif
@@ -152,11 +149,11 @@ extern "C" void cMoveNode_restoreOverlapSystem(void* self);
 
 extern "C" void cFloatingNode_restoreOverlapSystem(cFloatingNode* self)
 {
-    sBox_F048* info = (sBox_F048*)self->field_0x78;
+    sBox_F048* info = (sBox_F048*)((void*)self->Info);
     if (info != 0) {
         sBox_F048 nb;
         sBox_F048 old = *info;
-        sInst_F048* inst = *(sInst_F048**)((char*)self + 0x18);
+        sInst_F048* inst = (sInst_F048*)self->Instance;
         sVec4_F048 t;
         t.x = inst->min[0];
         t.y = inst->min[1];
@@ -168,7 +165,7 @@ extern "C" void cFloatingNode_restoreOverlapSystem(cFloatingNode* self)
         t.z = inst->max[2];
         nb.max = t;
         *info = nb;
-        void* id = *(void**)((char*)self + 0x18);
+        void* id = self->Instance;
         nash_Nash_movenode(cObjectInterface_getNash(), 0, id, &nb, &old);
         cFloatingNode_purgeInfo(self);
     } else {
@@ -311,7 +308,7 @@ static inline void Pose_F120(sMat_F120* dst, const sMat_F120* parent, const sMat
 }
 
 // Poses a floating object's skeleton: the root bob/tilt transform, then each bone under its parent.
-extern "C" void cFloatingNode_makeAnimMats(sFloatingNode_F120* self, sMat_F120* mat, sMat_F120* out)
+extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, sMat_F120* mat, sMat_F120* out)
 {
     sMat_F120 m;
     sQuad_F120 base = mat->row[3];
@@ -319,8 +316,8 @@ extern "C" void cFloatingNode_makeAnimMats(sFloatingNode_F120* self, sMat_F120* 
     float rot[3];
     pos[0] = 0.0f;
     pos[1] = 0.0f;
-    pos[2] = self->pos1 - base.z;
-    sFloatTilt_F120* tilt = (sFloatTilt_F120*)&self->k;
+    pos[2] = self->Z - base.z;
+    sFloatTilt_F120* tilt = (sFloatTilt_F120*)&self->ZSpring;
     rot[0] = tilt->pos2;
     rot[1] = tilt->pos3;
     rot[2] = 0.0f;
@@ -348,8 +345,8 @@ extern "C" void cFloatingNode_makeAnimMats(sFloatingNode_F120* self, sMat_F120* 
     m.row[3].y = pos[1];
     m.row[3].z = pos[2];
     m.row[3].w = 1.0f;
-    sSkel_F120* skel = *(sSkel_F120**)(self->info + 0x80);
-    float sc4 = *(float*)(self->info + 0x84);
+    sSkel_F120* skel = *(sSkel_F120**)((char*)self->Instance + 0x80);
+    float sc4 = *(float*)((char*)self->Instance + 0x84);
     sBone_F120* bone = skel->bones;
     sVec4_F120 scale(sc4, sc4, sc4, 1.0f);
     int i;
@@ -367,7 +364,7 @@ extern "C" void cFloatingNode_makeAnimMats(sFloatingNode_F120* self, sMat_F120* 
             Copy_F120(&out[i], &r);
         }
     }
-    self->flags &= 0xFFFE;
+    self->Flags &= 0xFFFE;
 }
 #endif
 
@@ -477,17 +474,17 @@ struct sFloat_F600 {
     float f70;
 };
 
-extern "C" void cFloatingNode_applyForce(sFloat_F600* self, sV4_F600* intInfo, sV4_F600* force)
+extern "C" void cFloatingNode_applyForce(cFloatingNode* self, sV4_F600* intInfo, sV4_F600* force)
 {
-    sFlVE_F600* vt = self->vt;
+    sFlVE_F600* vt = (sFlVE_F600*)self->mVtbl;
     sV4_F600* m = vt[24].fn((char*)self + vt[24].delta);
     sV4_F600 d = vu0Sub_F600(intInfo[0], pos_F600(m));
     sV4_F600 u = vu0MtxMul_F600(m, &D_004FF140_F600[0]);
     sV4_F600 v = vu0MtxMul_F600(m, &D_004FF150_F600[0]);
-    self->f44 += vu0Dot_F600(*force, intInfo[1]);
+    self->Force += vu0Dot_F600(*force, intInfo[1]);
     sV4_F600 c = vu0Cross_F600(*force, d);
-    self->f60 += vu0Dot_F600(c, u);
-    self->f70 += vu0Dot_F600(c, v);
+    self->TX += vu0Dot_F600(c, u);
+    self->TY += vu0Dot_F600(c, v);
 }
 #endif
 
@@ -628,10 +625,10 @@ struct sFloat_F790 {
     sFlVE_F790* vt;     // 0x0C
 };
 
-extern "C" void cFloatingNode_updateIntersectInfo(sFloat_F790* self, sV4_F790* intInfo)
+extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790* intInfo)
 {
-    cMoveNode_updateIntersectInfo(self, intInfo);
-    sFlVE_F790* vt = self->vt;
+    cMoveNode_updateIntersectInfo(((sFloat_F790*)self), intInfo);
+    sFlVE_F790* vt = (sFlVE_F790*)self->mVtbl;
     sV4_F790* m = vt[24].fn((char*)self + vt[24].delta);
     sFlBase_F790* b = (sFlBase_F790*)((char*)self + 0x2C);
     sV4_F790 d = vu0Sub_F790(intInfo[0], pos_F790(m));
@@ -682,27 +679,27 @@ struct sFloatingNode_34F930 {
 
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // Steps the float spring (bob height plus two tilt axes) by one frame.
-extern "C" int cFloatingNode_updateNode(sFloatingNode_34F930* self)
+extern "C" int cFloatingNode_updateNode(cFloatingNode* self)
 {
     float dt = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
-    float a1 = -self->k * (self->pos1 - self->rest1) + self->gain * self->in1 + -self->damp * self->vel1;
-    float a2 = -self->k2 * self->pos2 + self->gain2 * self->in2 + -self->damp2 * self->vel2;
-    float a3 = -self->k2 * self->pos3 + self->gain2 * self->in3 + -self->damp2 * self->vel3;
-    self->pos1 += self->vel1 * dt;
-    self->vel1 += a1 * dt;
-    self->pos2 += self->vel2 * dt;
-    self->vel2 += a2 * dt;
-    self->pos3 += self->vel3 * dt;
-    self->vel3 += a3 * dt;
-    sFloatTilt_34F930* t = (sFloatTilt_34F930*)&self->k;
+    float a1 = -self->ZSpring * (self->Z - self->Zo) + self->ForceScale * self->Force + -self->ZDamp * self->Vel;
+    float a2 = -self->ASpring * self->OX + self->TorqueScale * self->TX + -self->ADamp * self->WX;
+    float a3 = -self->ASpring * self->OY + self->TorqueScale * self->TY + -self->ADamp * self->WY;
+    self->Z += self->Vel * dt;
+    self->Vel += a1 * dt;
+    self->OX += self->WX * dt;
+    self->WX += a2 * dt;
+    self->OY += self->WY * dt;
+    self->WY += a3 * dt;
+    sFloatTilt_34F930* t = (sFloatTilt_34F930*)&self->ZSpring;
     float lo = -1.3962635f;    // +-80 degrees
     float hi = 1.3962635f;
-    self->pos2 = t->pos2 >= lo ? t->pos2 <? hi : lo;
-    self->pos3 = t->pos3 >= lo ? t->pos3 <? hi : lo;
-    self->in1 = 0.0f;
-    self->in2 = 0.0f;
-    self->in3 = 0.0f;
-    self->flags |= 1;
+    self->OX = t->pos2 >= lo ? t->pos2 <? hi : lo;
+    self->OY = t->pos3 >= lo ? t->pos3 <? hi : lo;
+    self->Force = 0.0f;
+    self->TX = 0.0f;
+    self->TY = 0.0f;
+    self->Flags |= 1;
     return 1;
 }
 #endif
@@ -722,7 +719,7 @@ extern "C" void cFloatingNode_writeToReplayFrame(cFloatingNode* self, void* stre
 {
     int has;
     cMoveNode_writeToReplayFrame(self, stream);
-    has = self->field_0x78 != 0;
+    has = ((void*)self->Info) != 0;
     sFloatingVEntryFA88* e = &(*(sFloatingVEntryFA88**)stream)[1];
     e->fn((char*)stream + e->delta, &has, 4);
     e = &(*(sFloatingVEntryFA88**)stream)[1];

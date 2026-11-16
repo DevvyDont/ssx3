@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frameptr.h"
 #include "replay/replay.h"
 #include "world/world.h"
 #include "main/game.h"
@@ -28,7 +29,7 @@ static inline void cReplayFramePtr_setBlockInl(void* self, char* buf, int size)
  *
  * @param size  size of the block in bytes
  */
-extern "C" void cReplayFramePtr_initBlock(void* self, unsigned int size)
+extern "C" void cReplayFramePtr_initBlock(cReplayFramePtr* self, unsigned int size)
 {
     cReplayFramePtr_setBlockInl(self, (char*)operator_new_tag(size, D_00481730, 0, 0), 0);
 }
@@ -37,12 +38,12 @@ extern "C" void cReplayFramePtr_initBlock(void* self, unsigned int size)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026E950);
 #ifdef SKIP_ASM
-extern "C" void func_0026E950(void* self, int a1, int a2)
+extern "C" void func_0026E950(cReplayFramePtr* self, int a1, int a2)
 {
-    *(int*)((char*)self + 0x4) = a1;
-    *(int*)((char*)self + 0x8) = a1 + a2;
-    *(int*)((char*)self + 0xc) = a1;
-    *(int*)((char*)self + 0x10) = a2;
+    self->Block = (char*)a1;
+    self->WriteData = (char*)(a1 + a2);
+    self->ReadData = (char*)a1;
+    self->Size = a2;
 }
 #endif
 
@@ -51,9 +52,9 @@ INCLUDE_ASM("replay/frameptr", func_0026E968);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
-extern "C" void func_0026E968(void* self)
+extern "C" void func_0026E968(cReplayFramePtr* self)
 {
-    void* p = *(void**)((char*)self + 0x4);
+    void* p = self->Block;
     if (p != 0) {
         cMemMan_free(p);
     }
@@ -61,12 +62,6 @@ extern "C" void func_0026E968(void* self)
 }
 #endif
 
-struct cReplayFramePtr {
-    char pad_0x00[0x4];
-    int field_0x4;
-    char pad_0x08[0x4];
-    int field_0xC;
-};
 
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_readRewind__FP15cReplayFramePtr);
@@ -76,7 +71,7 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_readRewind__FP15cReplayFramePtr);
  */
 void cReplayFramePtr_readRewind(cReplayFramePtr* self)
 {
-    self->field_0xC = self->field_0x4;
+    (*(int*)&self->ReadData) = ((int)self->Block);
 }
 #endif
 
@@ -97,11 +92,11 @@ INCLUDE_ASM("replay/frameptr", func_0026E9D0);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
-extern "C" void func_0026E9D0(void* self, void* src, int n)
+extern "C" void func_0026E9D0(cReplayFramePtr* self, void* src, int n)
 {
-    MEM_copy(*(char**)((char*)self + 0x8), src, n);
-    *(char**)((char*)self + 0x8) += n;
-    *(int*)((char*)self + 0x10) += n;
+    MEM_copy(self->WriteData, src, n);
+    self->WriteData += n;
+    self->Size += n;
 }
 #endif
 
@@ -110,10 +105,10 @@ INCLUDE_ASM("replay/frameptr", func_0026EA20);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
-extern "C" void func_0026EA20(void* self, void* dst, int n)
+extern "C" void func_0026EA20(cReplayFramePtr* self, void* dst, int n)
 {
-    MEM_copy(dst, *(char**)((char*)self + 0xC), n);
-    *(char**)((char*)self + 0xC) += n;
+    MEM_copy(dst, self->ReadData, n);
+    self->ReadData += n;
 }
 #endif
 
@@ -136,15 +131,15 @@ public:
  * @return the record's object node type (On Tour tObjNodeType)
  */
 // Peek the next frame header's id without consuming it.
-extern "C" short cReplayFramePtr_peekObjNodeType(cStream26EA68* self)
+extern "C" short cReplayFramePtr_peekObjNodeType(cReplayFramePtr* self)
 {
     struct {
         short id;
         short size;
     } hdr;
-    int pos = *(int*)((char*)self + 0xC);
-    self->v02(&hdr, 4);
-    *(int*)((char*)self + 0xC) = pos;
+    int pos = (int)self->ReadData;
+    ((cStream26EA68*)self)->v02(&hdr, 4);
+    self->ReadData = (char*)pos;
     return hdr.id;
 }
 #endif
@@ -163,9 +158,9 @@ extern "C" int func_0026EAB8(cReplayFramePtr* self, char** pp, void* src)
     MEM_copy(&hdr.tag, src, 4);
     MEM_copy(&hdr.size, *pp, 4);
     *pp += 4;
-    int n = func_002C85A0(*pp, 0, self->field_0x4);
+    int n = func_002C85A0(*pp, 0, ((int)self->Block));
     *pp += hdr.size;
-    *(int*)((char*)self + 0x8) = self->field_0x4 + n;
+    self->WriteData = (char*)(((int)self->Block) + n);
     cReplayFramePtr_readRewind(self);
     return 1;
 }
@@ -218,11 +213,11 @@ struct sRefH_EB48 {
     sRefH_EB48() : id(0xFFFFFFFF) {}
 };
 
-extern "C" void* func_0026EB48(cStream_EB48* stream)
+extern "C" void* func_0026EB48(cReplayFramePtr* stream)
 {
     void* r = 0;
     sRefH_EB48 h;
-    stream->v02(&h, 4);
+    ((cStream_EB48*)stream)->v02(&h, 4);
     if (~h.id != 0) {
         r = func_003512C0(SSXApp->Game->InstanceMan, h.id);
         if (r == 0) {
@@ -287,11 +282,11 @@ static inline void* lookup_EC08(unsigned int id)
     return refToPtr_EC08(p);
 }
 
-extern "C" void* func_0026EC08(cStream_EC08* stream, void* owner)
+extern "C" void* func_0026EC08(cReplayFramePtr* stream, void* owner)
 {
     sNode_EC08* r = 0;
     sRec_EC08 rec;
-    stream->v02(&rec, 8);
+    ((cStream_EC08*)stream)->v02(&rec, 8);
     if (~rec.id != 0) {
         void* t = lookup_EC08(rec.id);
         r = (sNode_EC08*)t;
@@ -564,7 +559,7 @@ struct sReplayBlock_F180 {
 };
 
 
-extern "C" void cReplayFramePtr_initBlock(void* self, unsigned int size);
+extern "C" void cReplayFramePtr_initBlock(cReplayFramePtr* self, unsigned int size);
 extern "C" void cReplay_reset(cReplay* self);
 void cReplay_setReplayState(void* self, int state);
 
@@ -581,7 +576,7 @@ extern "C" void cReplay_init(cReplay* self)
     self->SaveFrameTicks = 0;
     int i = 0;
     do {
-        cReplayFramePtr_initBlock(&((sReplayBlock_F180*)&self->Frames[0])[i], self->FrameBlockSize);
+        cReplayFramePtr_initBlock((cReplayFramePtr*)(&((sReplayBlock_F180*)&self->Frames[0])[i]), self->FrameBlockSize);
         i++;
     } while (i < self->MaxFrames);
     cReplay_setReplayState((self), 10);
@@ -715,7 +710,7 @@ extern "C" void func_0026F428(sFpOwner26F428* self)
 {
     int i;
     for (i = 0; i < self->count; i++) {
-        func_0026E968(&self->entries[i]);
+        func_0026E968((cReplayFramePtr*)(&self->entries[i]));
     }
     func_0026E5C0((char*)self + 0x3B0);
     func_0026E5C0((char*)self + 0x3BC);

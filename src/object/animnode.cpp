@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/floatingnode.h"
 
 //100%
 INCLUDE_ASM("object/animnode", cAnimNode_setAnimMeshCache);
@@ -542,36 +543,35 @@ struct sAnimInfo_EC58 {
     float f4, f8, fC, f10, f14, f18;
 };
 
-extern "C" void* func_0034EC58(void* self, void* a1, void* a2, sAnimInfo_EC58* info)
+extern "C" void* func_0034EC58(cFloatingNode* self, void* a1, void* a2, sAnimInfo_EC58* info)
 {
-    char* s = (char*)self;
     func_00355280(self, a1, 0xE, a2);
-    *(void***)(s + 0xC) = cFloatingNode_vtbl;
-    *(float*)(s + 0x2C) = info->f4;
-    *(float*)(s + 0x30) = info->f8;
-    *(float*)(s + 0x34) = info->f14;
-    *(float*)(s + 0x38) = info->fC;
-    *(float*)(s + 0x3C) = info->f10;
-    *(float*)(s + 0x40) = info->f18 * 1e-6f;
-    sQ_EC58 p = *(sQ_EC58*)(*(char**)(s + 0x18) + 0x40);
-    *(int*)(s + 0x54) = 0;
-    *(int*)(s + 0x5C) = 0;
-    *(int*)(s + 0x60) = 0;
-    *(int*)(s + 0x64) = 0;
-    *(int*)(s + 0x6C) = 0;
-    *(int*)(s + 0x70) = 0;
-    *(int*)(s + 0x48) = 0;
-    *(int*)(s + 0x44) = 0;
-    *(int*)(s + 0x78) = 0;
-    *(float*)(s + 0x4C) = p.z;
-    *(float*)(s + 0x50) = p.z;
+    self->mVtbl = cFloatingNode_vtbl;
+    self->ZSpring = info->f4;
+    self->ZDamp = info->f8;
+    self->ForceScale = info->f14;
+    self->ASpring = info->fC;
+    self->ADamp = info->f10;
+    self->TorqueScale = info->f18 * 1e-6f;
+    sQ_EC58 p = *(sQ_EC58*)((char*)self->Instance + 0x40);
+    *(int*)&self->OX = 0;
+    *(int*)&self->WX = 0;
+    *(int*)&self->TX = 0;
+    *(int*)&self->OY = 0;
+    *(int*)&self->WY = 0;
+    *(int*)&self->TY = 0;
+    *(int*)&self->Vel = 0;
+    *(int*)&self->Force = 0;
+    self->Info = 0;
+    self->Zo = p.z;
+    self->Z = p.z;
     cFloatingNode_initInfo((cFloatingNode*)self);
-    sAnimFrame_EC58** pf = (sAnimFrame_EC58**)(s + 0x74);
-    *pf = new (D_0048E880, 0x20000000, 0) sAnimFrame_EC58[*(int*)(*(char**)(*(char**)(s + 0x18) + 0x80) + 0x4)];
-    *(unsigned short*)(s + 0x12) |= 1;
-    char* m = *(char**)(s + 0x18);
+    sAnimFrame_EC58** pf = (sAnimFrame_EC58**)(((char*)self) + 0x74);
+    *pf = new (D_0048E880, 0x20000000, 0) sAnimFrame_EC58[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
+    self->Flags |= 1;
+    char* m = (char*)self->Instance;
     *(unsigned int*)(m + 8) = (*(unsigned int*)(m + 8) & 0xFFFFFFFD) | 4;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -596,24 +596,23 @@ struct sAnimFrame_ED88 {
     sAnimFrame_ED88() {}
 };
 
-extern "C" void* func_0034ED88(void* self, void* a1, void* stream)
+extern "C" void* func_0034ED88(cFloatingNode* self, void* a1, void* stream)
 {
-    char* s = (char*)self;
     int hasInfo;
     cMoveNode_cMoveNode(self, a1, stream);
-    *(int*)(s + 0x78) = 0;
-    *(void***)(s + 0xC) = cFloatingNode_vtbl;
+    self->Info = 0;
+    self->mVtbl = cFloatingNode_vtbl;
     sStreamVE_ED88* vt = *(sStreamVE_ED88**)stream;
     vt[2].fn((char*)stream + vt[2].delta, &hasInfo, 4);
     if (hasInfo != 0) {
         cFloatingNode_initInfo((cFloatingNode*)self);
     }
     sStreamVE_ED88* vt2 = *(sStreamVE_ED88**)stream;
-    vt2[2].fn((char*)stream + vt2[2].delta, s + 0x2C, 0x48);
-    sAnimFrame_ED88** pf = (sAnimFrame_ED88**)(s + 0x74);
-    *pf = new (D_0048E880, 0x20000000, 0) sAnimFrame_ED88[*(int*)(*(char**)(*(char**)(s + 0x18) + 0x80) + 0x4)];
-    *(unsigned short*)(s + 0x12) |= 1;
-    return self;
+    vt2[2].fn((char*)stream + vt2[2].delta, ((char*)self) + 0x2C, 0x48);
+    sAnimFrame_ED88** pf = (sAnimFrame_ED88**)(((char*)self) + 0x74);
+    *pf = new (D_0048E880, 0x20000000, 0) sAnimFrame_ED88[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
+    self->Flags |= 1;
+    return ((void*)self);
 }
 #endif
 
@@ -632,11 +631,11 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags, passed to cMoveNode__cMoveNode(); bit 0 set frees the object's memory
  */
-extern "C" void cFloatingNode__cFloatingNode(void* self, int flags)
+extern "C" void cFloatingNode__cFloatingNode(cFloatingNode* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = cFloatingNode_vtbl;
+    self->mVtbl = cFloatingNode_vtbl;
     cFloatingNode_restoreOverlapSystem(self);
-    operator_delete(*(int**)((char*)self + 0x74));
+    operator_delete((int*)self->AnimMats);
     cMoveNode__cMoveNode(self, flags);
 }
 #endif

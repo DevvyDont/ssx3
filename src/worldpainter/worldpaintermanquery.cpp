@@ -1,4 +1,5 @@
 #include "common.h"
+#include "worldpainter/worldpainterquery.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cWorldPainterQuery_cWorldPainterQuery(void* self, void* arg);
@@ -31,7 +32,7 @@ void* cWorldPainterMan_getQuery(void* self, cWorldPainterManArg* x)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AA0);
 #ifdef SKIP_ASM
-extern "C" void func_002C0AA0(void* self, int* dst, int* src, float t)
+extern "C" void func_002C0AA0(tWPInGameData* self, int* dst, int* src, float t)
 {
     if (t == 1.0f) {
         *dst = *src;
@@ -43,7 +44,7 @@ extern "C" void func_002C0AA0(void* self, int* dst, int* src, float t)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AF0);
 #ifdef SKIP_ASM
-extern "C" void func_002C0AF0(void* self, float* dst, float* src, float t)
+extern "C" void func_002C0AF0(tWPInGameData* self, float* dst, float* src, float t)
 {
     if (t == 1.0f) {
         *dst = *src;

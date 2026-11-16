@@ -1,4 +1,7 @@
 #include "common.h"
+#include "object/splinemodifier.h"
+#include "object/raillink.h"
+#include "object/multisplinemodifier.h"
 #include "object/railmodifier.h"
 #include "render/ps2graphicsman.h"
 
@@ -50,22 +53,22 @@ extern "C" void cSpline_readFromReplayFrame(void* self, cStream003595D8* stream)
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" cSplineModifier_95D8* cSplineModifier_cSplineModifier(cSplineModifier_95D8* self, cStream003595D8* stream)
+extern "C" cSplineModifier_95D8* cSplineModifier_cSplineModifier(cSplineModifier* self, cStream003595D8* stream)
 {
-    self->vtable = cSplineModifier_vtbl;
-    sSmFollow_95D8* f = &self->follow;
-    self->follow.id = 0xFFFFFFFF;
-    self->follow.node = 0;
-    self->follow.count = 0;
-    self->follow.length = 0;
+    self->mVtbl = cSplineModifier_vtbl;
+    sSmFollow_95D8* f = &(*(sSmFollow_95D8*)&self->Spline);
+    self->Spline.SplineId = 0xFFFFFFFF;
+    self->Spline.Seg = 0;
+    self->Spline.SegIndex = 0;
+    self->Spline.Length = 0;
     stream->v02((char*)self + 0x10, 0x50);
     cSpline_readFromReplayFrame(f, stream);
-    self->qB0 = t4vect_Zero;
-    self->qC0 = t4vect_Zero;
-    self->field_0x58 = 1;
-    self->field_0xd0 = 0;
-    self->field_0xd4 = 0;
-    return self;
+    (*(sSmQuad_95D8*)&self->Dir) = t4vect_Zero;
+    (*(sSmQuad_95D8*)&self->DDir) = t4vect_Zero;
+    self->RootTransformDirty = 1;
+    *(int*)&self->X2 = 0;
+    *(int*)&self->Y2 = 0;
+    return ((cSplineModifier_95D8*)self);
 }
 #endif
 
@@ -121,59 +124,59 @@ struct cSplineModifier_9698 {
  * reflects the overshoot at the start (-pos), but at the far end its pos - (pos - (Length - 0.1)) comes to
  * Length - 0.1 instead of a reflection.
  */
-extern "C" void cSplineModifier_update(cSplineModifier_9698* self)
+extern "C" void cSplineModifier_update(cSplineModifier* self)
 {
     float zero = 0.0f;
-    if (zero < self->accelTime) {
-        self->accelTime -= func_002D1C70();
-        self->speed += self->accel * func_002D1C70();
+    if (zero < self->ForceTime) {
+        self->ForceTime -= func_002D1C70();
+        self->Velocity += self->Force * func_002D1C70();
     }
-    if (self->active == 0) {
+    if (self->Start == 0) {
         return;
     }
-    if (self->stopped != 0) {
+    if (self->Complete != 0) {
         return;
     }
-    float pos = self->pos + self->speed * func_002D1C70();
-    self->pos = pos;
+    float pos = self->OffsetDistance + self->Velocity * func_002D1C70();
+    self->OffsetDistance = pos;
     if (pos < zero) {
-        int mode = self->mode;
+        int mode = self->SequenceType;
         if (mode == 0) {
-            self->speed = -self->speed;
-            self->pos = zero;
-            self->stopped = 1;
-            self->active = 0;
+            self->Velocity = -self->Velocity;
+            self->OffsetDistance = zero;
+            self->Complete = 1;
+            self->Start = 0;
         } else if (mode == 2) {
-            self->speed = -self->speed;
-            self->pos = -pos;
+            self->Velocity = -self->Velocity;
+            self->OffsetDistance = -pos;
         } else if (mode == 4) {
-            self->speed = -self->speed;
-            self->pos = zero;
-            self->stopped = 1;
-            self->active = 0;
+            self->Velocity = -self->Velocity;
+            self->OffsetDistance = zero;
+            self->Complete = 1;
+            self->Start = 0;
         } else {
-            self->pos = pos + self->length;
+            self->OffsetDistance = pos + self->Spline.Length;
         }
-    } else if (self->length <= pos) {
-        int mode = self->mode;
+    } else if (self->Spline.Length <= pos) {
+        int mode = self->SequenceType;
         if (mode == 0) {
-            self->active = 0;
-            self->stopped = 1;
-            self->speed = -self->speed;
-            self->pos = self->length - 0.10000000149011612f;
+            self->Start = 0;
+            self->Complete = 1;
+            self->Velocity = -self->Velocity;
+            self->OffsetDistance = self->Spline.Length - 0.10000000149011612f;
         } else if (mode == 2) {
-            self->speed = -self->speed;
-            self->pos = pos - (pos - (self->length - 0.10000000149011612f));
+            self->Velocity = -self->Velocity;
+            self->OffsetDistance = pos - (pos - (self->Spline.Length - 0.10000000149011612f));
         } else if (mode == 4) {
-            self->active = 0;
-            self->stopped = 1;
-            self->speed = -self->speed;
-            self->pos = self->length - 0.10000000149011612f;
+            self->Start = 0;
+            self->Complete = 1;
+            self->Velocity = -self->Velocity;
+            self->OffsetDistance = self->Spline.Length - 0.10000000149011612f;
         } else {
-            self->pos = pos - self->length;
+            self->OffsetDistance = pos - self->Spline.Length;
         }
     }
-    self->dirty = 1;
+    self->RootTransformDirty = 1;
 }
 #endif
 
@@ -602,35 +605,35 @@ static inline void vu0AddTo_9CF8(sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
  *
  * @param body  the intersect info to update (On Tour tIntersectInfo&: Ipos +0x0, Ivel +0x20, Iangvel +0x30)
  */
-extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier_9CF8* self, sSmBody_9CF8* body)
+extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier* self, sSmBody_9CF8* body)
 {
     char* sub = (char*)self + 0x10;
-    if (self->active == 0) {
+    if (self->Start == 0) {
         return;
     }
-    if (self->stopped != 0) {
+    if (self->Complete != 0) {
         return;
     }
     float a = 0.0f;
     float b = a;
-    float t = self->dir.x;
+    float t = self->Dir.x;
     if (9.999999747378752e-06f < Abs_9CF8(t)) {
-        float c4 = self->fC4;
-        float c0 = self->fC0;
-        float d0 = self->fD0;
-        float sum = d0 + self->fD4;
+        float c4 = self->DDir.y;
+        float c0 = self->DDir.x;
+        float d0 = self->X2;
+        float sum = d0 + self->Y2;
         b = -d0 / sum;
-        b *= c4 / t - self->dir.y * c0 / d0;
-        a = (1.0f / Sqrt_9CF8(sum)) * (self->fC8 - self->dir.z * (c0 + c4) / sum);
+        b *= c4 / t - self->Dir.y * c0 / d0;
+        a = (1.0f / Sqrt_9CF8(sum)) * (self->DDir.z - self->Dir.z * (c0 + c4) / sum);
     }
-    sSmVec4_9CF8 vel = vu0Scale_9CF8(vu0Normalize_9CF8(self->dir), *(float*)(sub + 0x38));
+    sSmVec4_9CF8 vel = vu0Scale_9CF8(vu0Normalize_9CF8((*(sSmVec4_9CF8*)&self->Dir)), *(float*)(sub + 0x38));
     sSmVec4_9CF8 w;
     w.x = 0.0f;
-    w.z = b * self->speed;
-    w.y = a * self->speed;
+    w.z = b * self->Velocity;
+    w.y = a * self->Velocity;
     w.w = 0.0f;
-    w = vu0MulMat_9CF8(&self->mat, w);
-    sSmVec4_9CF8 d = vu0Sub_9CF8(body->pos, self->origin);
+    w = vu0MulMat_9CF8(&(*(sSmMat_9CF8*)&self->Transform), w);
+    sSmVec4_9CF8 d = vu0Sub_9CF8(body->pos, (*(sSmVec4_9CF8*)&self->Pos));
     vu0AddTo_9CF8(body->vel, vu0Add_9CF8(vel, vu0Cross_9CF8(d, w)));
     vu0AddTo_9CF8(body->rot, w);
 }
@@ -650,19 +653,19 @@ extern "C" void cSplineModifier_setSpeed(void* self);
  *
  * @param msg  signal id (On Tour signal)
  */
-extern "C" void cSplineModifier_signal(void* self, int msg)
+extern "C" void cSplineModifier_signal(cSplineModifier* self, int msg)
 {
     if (msg == 0x190) {
         cSplineModifier_setSpeed(self);
-        *(int*)((char*)self + 0x50) = 0;
-        *(int*)((char*)self + 0x54) = 1;
+        self->Complete = 0;
+        self->Start = 1;
     } else if (msg == 0x191) {
-        *(int*)((char*)self + 0x50) = 0;
-        *(int*)((char*)self + 0x54) = 1;
+        self->Complete = 0;
+        self->Start = 1;
     } else if (msg == 0x192) {
-        *(float*)((char*)self + 0x48) = -*(float*)((char*)self + 0x48);
-        *(int*)((char*)self + 0x50) = 0;
-        *(int*)((char*)self + 0x54) = 1;
+        self->Velocity = -self->Velocity;
+        self->Complete = 0;
+        self->Start = 1;
     }
 }
 #endif
@@ -683,7 +686,7 @@ extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cSplineModifier_writeToReplayFrame(void* self, cStream00359F30* stream)
+extern "C" void cSplineModifier_writeToReplayFrame(cSplineModifier* self, cStream00359F30* stream)
 {
     stream->v01((char*)self + 0x10, 0x50);
     cSpline_writeToReplayFrame((char*)self + 0xD8, stream);
@@ -700,12 +703,12 @@ struct sSmQuad4_359F88 {
 
 extern void* cMultiSplineModifier_vtbl[];
 extern "C" void func_003451C0(void* ref, int id);
-extern "C" void func_0035A550(void* self, float v);
-extern "C" void cMultiSplineModifier_allocInstances(void* self);
-extern "C" void cMultiSplineModifier_allocNodes(void* self);
-extern "C" void cMultiSplineModifier_setupNodes(void* self);
-extern "C" void cMultiSplineModifier_setupOverlapSystem(void* self);
-extern "C" void* cMultiSplineModifier_updateNodes(void* self);
+extern "C" void func_0035A550(cMultiSplineModifier* self, float v);
+extern "C" void cMultiSplineModifier_allocInstances(cMultiSplineModifier* self);
+extern "C" void cMultiSplineModifier_allocNodes(cMultiSplineModifier* self);
+extern "C" void cMultiSplineModifier_setupNodes(cMultiSplineModifier* self);
+extern "C" void cMultiSplineModifier_setupOverlapSystem(cMultiSplineModifier* self);
+extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* self);
 
 /**
  * Builds a multi-spline modifier from script data: NumModels copies of an instance spaced along a looping
@@ -722,46 +725,46 @@ extern "C" void* cMultiSplineModifier_updateNodes(void* self);
  * @param model  the instance to copy along the spline (On Tour tInstanceRecord* inst)
  * @return @p self
  */
-extern "C" void* cMultiSplineModifier_cMultiSplineModifier(char* self, char* desc, char* model)
+extern "C" void* cMultiSplineModifier_cMultiSplineModifier(cMultiSplineModifier* self, char* desc, char* model)
 {
-    *(char**)(self + 0x40) = model;
+    self->Instance = (tInstanceRecord*)model;
     *(void***)self = cMultiSplineModifier_vtbl;
-    *(unsigned int*)(self + 0x48) = 0xFFFFFFFF;
-    *(int*)(self + 0x50) = 0;
-    *(int*)(self + 0x4C) = 0;
-    *(int*)(self + 0x54) = 0;
-    *(int*)(self + 0x18) = 0;
-    *(int*)(self + 0x4) = *(int*)(desc + 0x2C);
-    *(int*)(self + 0x8) = *(int*)(desc + 0x8);
-    *(float*)(self + 0xC) = *(float*)(desc + 0x10) * 0.01745329424738884f;
-    func_003451C0(self + 0x48, *(int*)(desc + 0x4));
+    self->Spline.SplineId = 0xFFFFFFFF;
+    self->Spline.Seg = 0;
+    self->Spline.SegIndex = 0;
+    *(int*)&self->Spline.Length = 0;
+    *(int*)&self->Radius = 0;
+    self->NumModels = *(int*)(desc + 0x2C);
+    self->OrientType = *(int*)(desc + 0x8);
+    self->HeadTweak = *(float*)(desc + 0x10) * 0.01745329424738884f;
+    func_003451C0(((char*)self) + 0x48, *(int*)(desc + 0x4));
     func_0035A550(self, *(float*)(desc + 0xC));
     if (*(float*)(desc + 0xC) >= 0.0f) {
-        *(float*)(self + 0x10) = 0.0f;
+        self->OffsetDistance = 0.0f;
     } else {
-        *(float*)(self + 0x10) = *(float*)(self + 0x54);
+        self->OffsetDistance = self->Spline.Length;
     }
-    *(int*)(self + 0x1C) = *(int*)(desc + 0x28) != 0;
+    self->DrawPath = *(int*)(desc + 0x28) != 0;
     float zero = 0.0f;
-    *(sSmQuad4_359F88*)(self + 0x20) = sSmQuad4_359F88(*(float*)(desc + 0x18), *(float*)(desc + 0x1C),
+    *(sSmQuad4_359F88*)&self->Colour = sSmQuad4_359F88(*(float*)(desc + 0x18), *(float*)(desc + 0x1C),
                                                        *(float*)(desc + 0x20), *(float*)(desc + 0x24));
     if (*(float*)(desc + 0x14) != zero) {
-        *(float*)(self + 0x10) = *(float*)(desc + 0x14);
+        self->OffsetDistance = *(float*)(desc + 0x14);
     }
-    if (*(float*)(self + 0x10) < zero || *(float*)(self + 0x54) < *(float*)(self + 0x10)) {
-        *(float*)(self + 0x10) = zero;
+    if (self->OffsetDistance < zero || self->Spline.Length < self->OffsetDistance) {
+        self->OffsetDistance = zero;
     }
     cMultiSplineModifier_allocNodes(self);
     cMultiSplineModifier_allocInstances(self);
     cMultiSplineModifier_setupNodes(self);
     cMultiSplineModifier_updateNodes(self);
     cMultiSplineModifier_setupOverlapSystem(self);
-    if (*(int*)(*(char**)(self + 0x40) + 0x8) & 0x100) {
-        *(int*)(self + 0x34) = 1;
+    if (*(int*)((char*)self->Instance + 0x8) & 0x100) {
+        self->FocusCount = 1;
     } else {
-        *(int*)(self + 0x34) = 0;
+        self->FocusCount = 0;
     }
-    return self;
+    return ((char*)self);
 }
 #endif
 
@@ -797,9 +800,9 @@ struct cMultiSplineModifier_A118 {
 extern void* cMultiSplineModifier_vtbl[];
 // PORT: same symbol as the unit's cSpline_readFromReplayFrame(void*, cStream003595D8*).
 extern "C" void cSpline_readFromReplayFrame_A118(void* self, cStream0035A118* stream) __asm__("cSpline_readFromReplayFrame");
-extern "C" void cMultiSplineModifier_allocNodes(void* self);
-extern "C" void cMultiSplineModifier_setupNodes(void* self);
-extern "C" void cMultiSplineModifier_setupOverlapSystem(void* self);
+extern "C" void cMultiSplineModifier_allocNodes(cMultiSplineModifier* self);
+extern "C" void cMultiSplineModifier_setupNodes(cMultiSplineModifier* self);
+extern "C" void cMultiSplineModifier_setupOverlapSystem(cMultiSplineModifier* self);
 void* cObjectInterface_getInstanceMan();
 extern "C" void* cInstanceMan_allocInstance(void* man, unsigned int id);
 
@@ -814,27 +817,27 @@ extern "C" void* cInstanceMan_allocInstance(void* man, unsigned int id);
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" cMultiSplineModifier_A118* cMultiSplineModifier_cMultiSplineModifier1(cMultiSplineModifier_A118* self, cStream0035A118* stream)
+extern "C" cMultiSplineModifier_A118* cMultiSplineModifier_cMultiSplineModifier1(cMultiSplineModifier* self, cStream0035A118* stream)
 {
-    self->vtable = cMultiSplineModifier_vtbl;
-    sSmFollow_A118* f = &self->follow;
-    self->follow.id = 0xFFFFFFFF;
-    self->follow.node = 0;
-    self->follow.count = 0;
-    self->follow.length = 0;
+    self->mVtbl = cMultiSplineModifier_vtbl;
+    sSmFollow_A118* f = &(*(sSmFollow_A118*)&self->Spline);
+    self->Spline.SplineId = 0xFFFFFFFF;
+    self->Spline.Seg = 0;
+    self->Spline.SegIndex = 0;
+    self->Spline.Length = 0;
     stream->v02((char*)self + 0x4, 0x34);
     cSpline_readFromReplayFrame_A118(f, stream);
-    self->field_0x40 = stream->v03();
+    self->Instance = (tInstanceRecord*)stream->v03();
     cMultiSplineModifier_allocNodes(self);
     unsigned int id = 0xFFFFFFFF;
-    for (int i = 0; i < self->count; i++) {
+    for (int i = 0; i < self->NumModels; i++) {
         stream->v02(&id, 4);
-        self->insts[i] = cInstanceMan_allocInstance(cObjectInterface_getInstanceMan(), id);
+        (void**)self->NodeInst[i] = cInstanceMan_allocInstance(cObjectInterface_getInstanceMan(), id);
     }
     cMultiSplineModifier_setupNodes(self);
     cMultiSplineModifier_setupOverlapSystem(self);
-    self->field_0x30 = 1;
-    return self;
+    self->RootTransformDirty = 1;
+    return ((cMultiSplineModifier_A118*)self);
 }
 #endif
 
@@ -845,7 +848,7 @@ void cMemMan_free(void*);
 void operator_delete(int*);
 void* cObjectInterface_getInstanceMan();
 void func_00351260(void* man, void* inst);
-extern "C" void func_0035A780(void* self);
+extern "C" void func_0035A780(cMultiSplineModifier* self);
 extern void* cMultiSplineModifier_vtbl[];
 extern void* D_004913F8[];
 
@@ -869,23 +872,23 @@ struct cMultiSplineModifier_A250 {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cMultiSplineModifier__cMultiSplineModifier(cMultiSplineModifier_A250* self, int flags)
+extern "C" void cMultiSplineModifier__cMultiSplineModifier(cMultiSplineModifier* self, int flags)
 {
-    self->vtable = cMultiSplineModifier_vtbl;
+    self->mVtbl = cMultiSplineModifier_vtbl;
     func_0035A780(self);
-    if (self->nodes != 0) {
-        cMemMan_free(self->nodes);
+    if (self->AnimMats != 0) {
+        cMemMan_free(self->AnimMats);
     }
-    if (self->data != 0) {
-        cMemMan_free(self->data);
+    if (self->Nodes != 0) {
+        cMemMan_free(self->Nodes);
     }
-    for (int i = 0; i < self->count; i++) {
-        func_00351260(cObjectInterface_getInstanceMan(), self->insts[i]);
+    for (int i = 0; i < self->NumModels; i++) {
+        func_00351260(cObjectInterface_getInstanceMan(), (void**)self->NodeInst[i]);
     }
-    if (self->insts != 0) {
-        cMemMan_free(self->insts);
+    if ((void**)self->NodeInst != 0) {
+        cMemMan_free((void**)self->NodeInst);
     }
-    self->vtable = D_004913F8;
+    self->mVtbl = D_004913F8;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -932,7 +935,7 @@ struct sMultiSpline_A330 {
  *
  * @param selfv  the multi-spline modifier (this)
  */
-extern "C" void cMultiSplineModifier_allocNodes(void* selfv)
+extern "C" void cMultiSplineModifier_allocNodes(cMultiSplineModifier* selfv)
 {
     sMultiSpline_A330* self = (sMultiSpline_A330*)selfv;
     sSplineNode_A330** pn = &self->nodes;
@@ -955,11 +958,11 @@ extern "C" void* func_00351170(void* man);
  * Fills the array at +0x44 (On Tour NodeInst) with func_00351170() (On Tour cInstanceMan::allocInstance)
  * results, one for each of the +0x4 nodes.
  */
-extern "C" void cMultiSplineModifier_allocInstances(void* self)
+extern "C" void cMultiSplineModifier_allocInstances(cMultiSplineModifier* self)
 {
     int i;
-    for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        (*(void***)((char*)self + 0x44))[i] = func_00351170(cObjectInterface_getInstanceMan());
+    for (i = 0; i < self->NumModels; i++) {
+        ((void**)self->NodeInst)[i] = func_00351170(cObjectInterface_getInstanceMan());
     }
 }
 #endif
@@ -995,7 +998,7 @@ struct sMultiSplineA458 {
  *
  * @param p  the multi-spline modifier (this)
  */
-extern "C" void cMultiSplineModifier_setupNodes(void* p)
+extern "C" void cMultiSplineModifier_setupNodes(cMultiSplineModifier* p)
 {
     sMultiSplineA458* self = (sMultiSplineA458*)p;
     int i;
@@ -1013,9 +1016,9 @@ extern "C" void cMultiSplineModifier_setupNodes(void* p)
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035A550);
 #ifdef SKIP_ASM
-extern "C" void func_0035A550(void* self, float speed)
+extern "C" void func_0035A550(cMultiSplineModifier* self, float speed)
 {
-    *(float*)((char*)self + 0x14) = speed * 27.77777862548828f;
+    self->Velocity = speed * 27.77777862548828f;
 }
 #endif
 
@@ -1030,20 +1033,20 @@ extern "C" float func_002D1C70();
  * OffsetDistance (+0x10) moves by Velocity (+0x14) times the tick period and wraps into [0, Length) (+0x54);
  * RootTransformDirty (+0x30) is set.
  */
-extern "C" void cMultiSplineModifier_update(void* self)
+extern "C" void cMultiSplineModifier_update(cMultiSplineModifier* self)
 {
-    float t = *(float*)((char*)self + 0x10) + *(float*)((char*)self + 0x14) * func_002D1C70();
-    *(float*)((char*)self + 0x10) = t;
+    float t = self->OffsetDistance + self->Velocity * func_002D1C70();
+    self->OffsetDistance = t;
     if (t < 0.0f) {
-        *(float*)((char*)self + 0x10) = t + *(float*)((char*)self + 0x54);
-    } else if (t >= *(float*)((char*)self + 0x54)) {
-        *(float*)((char*)self + 0x10) = t - *(float*)((char*)self + 0x54);
+        self->OffsetDistance = t + self->Spline.Length;
+    } else if (t >= self->Spline.Length) {
+        self->OffsetDistance = t - self->Spline.Length;
     }
-    *(int*)((char*)self + 0x30) = 1;
+    self->RootTransformDirty = 1;
 }
 #endif
 
-extern "C" void* cMultiSplineModifier_updateNodes(void* self);
+extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* self);
 
 //100%
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_updateRootTransform__FPv);
@@ -1055,7 +1058,7 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_updateRootTransform__F
  */
 void* cMultiSplineModifier_updateRootTransform(void* self)
 {
-    return cMultiSplineModifier_updateNodes(self);
+    return cMultiSplineModifier_updateNodes((cMultiSplineModifier*)self);
 }
 #endif
 
@@ -1202,7 +1205,7 @@ static inline void insert_A5F8(char* w, void* item, const void* box)
  *
  * @param vself  the multi-spline modifier (this)
  */
-extern "C" void cMultiSplineModifier_setupOverlapSystem(void* vself)
+extern "C" void cMultiSplineModifier_setupOverlapSystem(cMultiSplineModifier* vself)
 {
     cMultiSpline_A5F8* self = (cMultiSpline_A5F8*)vself;
     char bound[0x20];
@@ -1270,14 +1273,13 @@ static inline int octEmpty_A780(sOctCell_A780* o)
 }
 
 // Removes every spline segment but the first from the space hash (freeing octree cells that become empty).
-extern "C" void func_0035A780(void* vself)
+extern "C" void func_0035A780(cMultiSplineModifier* vself)
 {
-    char* self = (char*)vself;
-    for (int i = 1; i < *(int*)(self + 0x4); i++) {
-        void* node = (*(void***)(self + 0x44))[i];
+    for (int i = 1; i < vself->NumModels; i++) {
+        void* node = ((void**)vself->NodeInst)[i];
         sHashCellR_A780* cell = (sHashCellR_A780*)cObjectInterface_getNash();
         // PORT: the segment array (0x60-byte entries) is indexed with 32-bit integer arithmetic.
-        char* box = (char*)(i * 0x60 + *(int*)(self + 0x3C)) + 0x30;
+        char* box = (char*)(i * 0x60 + (int)vself->Nodes) + 0x30;
         (*(int*)((char*)cell + 0xA0))++;
         sHashKey_A780 key;
         func_00328F28_A780(&key, box);
@@ -1470,13 +1472,13 @@ struct sSmVEntryP_AAF0 {
  * @param item  the instance record (On Tour tInstanceRecord*)
  * @return the transform matrix
  */
-extern "C" void* cMultiSplineModifier_getRootTransform(void* self, void* item)
+extern "C" void* cMultiSplineModifier_getRootTransform(cMultiSplineModifier* self, void* item)
 {
-    if (*(int*)((char*)self + 0x30) != 0) {
+    if (self->RootTransformDirty != 0) {
         sSmVEntryV_AAF0* vt = *(sSmVEntryV_AAF0**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
-    if (item == *(void**)((char*)self + 0x40)) {
+    if (item == (void*)self->Instance) {
         void* obj = *(void**)((char*)item + 0xC);
         sSmVEntryP_AAF0* vt2 = *(sSmVEntryP_AAF0**)((char*)obj + 0xC);
         return vt2[24].fn((char*)obj + vt2[24].delta);
@@ -1510,14 +1512,14 @@ struct sSmVEntryV_AB60 {
  * @param item  the instance record to draw (On Tour tInstanceRecord* inst)
  * @return the animation matrices, or 0 when the model instance has none
  */
-extern "C" int cMultiSplineModifier_getAnimMats(void* self, void* item)
+extern "C" int cMultiSplineModifier_getAnimMats(cMultiSplineModifier* self, void* item)
 {
-    void* cur = *(void**)((char*)self + 0x40);
+    void* cur = self->Instance;
     if (item == cur) {
         void* obj = *(void**)((char*)item + 0xC);
         sSmVEntryI_AB60* e = &(*(sSmVEntryI_AB60**)((char*)obj + 0xC))[26];
         if (e->fn((char*)obj + e->delta) != 0) {
-            obj = *(void**)(*(char**)((char*)self + 0x40) + 0xC);
+            obj = *(void**)((char*)self->Instance + 0xC);
             e = &(*(sSmVEntryI_AB60**)((char*)obj + 0xC))[27];
             return e->fn((char*)obj + e->delta);
         }
@@ -1525,8 +1527,8 @@ extern "C" int cMultiSplineModifier_getAnimMats(void* self, void* item)
     }
     void* obj = *(void**)((char*)cur + 0xC);
     sSmVEntryV_AB60* vt = *(sSmVEntryV_AB60**)((char*)obj + 0xC);
-    vt[33].fn((char*)obj + vt[33].delta, (char*)item + 0x10, *(int*)((char*)self + 0x38));
-    return *(int*)((char*)self + 0x38);
+    vt[33].fn((char*)obj + vt[33].delta, (char*)item + 0x10, (int)self->AnimMats);
+    return (int)self->AnimMats;
 }
 #endif
 
@@ -1599,9 +1601,9 @@ public:
  *
  * @return no meaningful value (the virtual returns void; On Tour's postUpdate returns nothing)
  */
-extern "C" int cMultiSplineModifier_postUpdate(void* self)
+extern "C" int cMultiSplineModifier_postUpdate(cMultiSplineModifier* self)
 {
-    cSplineVirt* o = *(cSplineVirt**)((char*)*(void**)((char*)self + 0x40) + 0xC);
+    cSplineVirt* o = *(cSplineVirt**)((char*)self->Instance + 0xC);
     return o->v51();
 }
 #endif
@@ -1837,7 +1839,7 @@ struct cMultiSplineModifier_AC20 {
  * @param p  the multi-spline modifier (this)
  * @return no meaningful value (the C body has no return statement; On Tour's updateNodes returns void)
  */
-extern "C" void* cMultiSplineModifier_updateNodes(void* p)
+extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* p)
 {
     cMultiSplineModifier_AC20* self = (cMultiSplineModifier_AC20*)p;
     float t[256];
@@ -2032,13 +2034,13 @@ extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cMultiSplineModifier_writeToReplayFrame(void* self, cStream0035B5A8* stream)
+extern "C" void cMultiSplineModifier_writeToReplayFrame(cMultiSplineModifier* self, cStream0035B5A8* stream)
 {
     stream->v01((char*)self + 0x4, 0x34);
     cSpline_writeToReplayFrame((char*)self + 0x48, (cStream00359F30*)stream);
-    stream->v05(*(void**)((char*)self + 0x40));
-    for (int i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        stream->v01((*(char***)((char*)self + 0x44))[i] + 0x78, 4);
+    stream->v05(self->Instance);
+    for (int i = 0; i < self->NumModels; i++) {
+        stream->v01(((char**)self->NodeInst)[i] + 0x78, 4);
     }
 }
 #endif
@@ -2054,13 +2056,13 @@ INCLUDE_ASM("object/splinemodifier", cRailLink_add);
  *
  * @param node  the link to insert (On Tour cRailLink* effect)
  */
-extern "C" void cRailLink_add(void* self, void* node)
+extern "C" void cRailLink_add(cRailLink* self, void* node)
 {
     void* h = *(void**)self;
     if (h != 0) {
         *(void**)((char*)h + 0x4) = node;
     }
-    *(void**)((char*)node + 0x4) = self;
+    *(void**)((char*)node + 0x4) = ((void*)self);
     *(void**)node = *(void**)self;
     *(void**)self = node;
 }
@@ -2658,12 +2660,12 @@ struct sSmRef_BD70 {
     }
 };
 
-extern "C" void func_0035BD70(char* self, int flags)
+extern "C" void func_0035BD70(cRailModifier* self, int flags)
 {
-    *(void**)(self + 0x8) = cRailModifier_vtbl;
-    remove_BD70((char*)cObjectInterface_getNash(), *(void**)(self + 0x44), (sSmBox_BD70*)(self + 0x10));
-    operator_delete(*(int**)(self + 0x44));
-    sSmTrack_BD70* t = ((sSmRef_BD70*)(self + 0x30))->get();
+    self->mVtbl = (void**)cRailModifier_vtbl;
+    remove_BD70((char*)cObjectInterface_getNash(), self->Node, (sSmBox_BD70*)(((char*)self) + 0x10));
+    operator_delete((int*)self->Node);
+    sSmTrack_BD70* t = ((sSmRef_BD70*)(((char*)self) + 0x30))->get();
     sSmSeg_BD70* seg = t->first;
     for (int i = 0; i < t->count; i++) {
         sSmBox_BD70 b;
@@ -2678,7 +2680,7 @@ extern "C" void func_0035BD70(char* self, int flags)
         insert_BD70((char*)cObjectInterface_getNash(), seg, &b);
         seg = seg->next;
     }
-    *(void**)(self + 0x8) = cRailLink_vtbl;
+    self->mVtbl = (void**)cRailLink_vtbl;
     func_0035B6D0((sSplineLink*)self);
     if (flags & 1) {
         operator_delete((int*)self);

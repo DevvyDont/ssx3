@@ -1,4 +1,5 @@
 #include "common.h"
+#include "worldpainter/worldpainterquery.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -67,60 +68,60 @@ extern sWPQuery_0410* D_004A3880_0410 __asm__("D_004A3880");
  * @return @p self
  */
 // Creates the query implementation for the requested kind and links the query into the global list.
-extern "C" sWPQuery_0410* cWorldPainterQuery_cWorldPainterQuery(sWPQuery_0410* self, unsigned int type)
+extern "C" sWPQuery_0410* cWorldPainterQuery_cWorldPainterQuery(cWorldPainterQuery* self, unsigned int type)
 {
-    self->type.flags = type;
-    self->type.kind = type >> 8;
-    self->vtbl = cWorldPainterQuery_vtbl;
-    self->minDist = 4286578688.0f;
-    self->maxDist = 4286578688.0f;
-    switch (self->type.kind) {
+    (*(sWPQueryType*)&self->m_regionType).flags = type;
+    (*(sWPQueryType*)&self->m_regionType).kind = type >> 8;
+    self->mVtbl = (void**)cWorldPainterQuery_vtbl;
+    self->m_x = 4286578688.0f;
+    self->m_y = 4286578688.0f;
+    switch ((*(sWPQueryType*)&self->m_regionType).kind) {
     case 0:
-        self->impl = func_002BC6F8(cMemMan_alloc(0x18, D_00483CB8, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC6F8(cMemMan_alloc(0x18, D_00483CB8, 0, 0));
         break;
     case 1:
-        self->impl = func_002BC728(cMemMan_alloc(0x10, D_00483CD0, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC728(cMemMan_alloc(0x10, D_00483CD0, 0, 0));
         break;
     case 2:
-        self->impl = func_002BC750(cMemMan_alloc(0x10, D_00483CE0, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC750(cMemMan_alloc(0x10, D_00483CE0, 0, 0));
         break;
     case 3:
-        self->impl = func_002BC778(cMemMan_alloc(0x10, D_00483CF0, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC778(cMemMan_alloc(0x10, D_00483CF0, 0, 0));
         break;
     case 4:
-        self->impl = func_002BC7A0(cMemMan_alloc(0x10, D_00483D00, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC7A0(cMemMan_alloc(0x10, D_00483D00, 0, 0));
         break;
     case 5:
-        self->impl = func_002BC7C8(cMemMan_alloc(0x38, D_00483D10, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC7C8(cMemMan_alloc(0x38, D_00483D10, 0, 0));
         break;
     case 6:
-        self->impl = func_002BC830(cMemMan_alloc(0x40, D_00483D20, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC830(cMemMan_alloc(0x40, D_00483D20, 0, 0));
         break;
     case 7:
-        self->impl = func_002BC890(cMemMan_alloc(0x38, D_00483D38, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC890(cMemMan_alloc(0x38, D_00483D38, 0, 0));
         break;
     case 8:
-        self->impl = func_002BC8E8(cMemMan_alloc(0x10, D_00483D50, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC8E8(cMemMan_alloc(0x10, D_00483D50, 0, 0));
         break;
     case 9:
-        self->impl = func_002BC910(cMemMan_alloc(0x50, D_00483D60, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC910(cMemMan_alloc(0x50, D_00483D60, 0, 0));
         break;
     case 10:
-        self->impl = func_002BC980(cMemMan_alloc(0x10, D_00483D70, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC980(cMemMan_alloc(0x10, D_00483D70, 0, 0));
         break;
     case 11:
-        self->impl = func_002BC9B0(cMemMan_alloc(0x58, D_00483D80, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BC9B0(cMemMan_alloc(0x58, D_00483D80, 0, 0));
         break;
     case 12:
-        self->impl = func_002BCAF8(cMemMan_alloc(0xA0, D_00483D90, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BCAF8(cMemMan_alloc(0xA0, D_00483D90, 0, 0));
         break;
     case 13:
-        self->impl = func_002BCBD0(cMemMan_alloc(0x18, D_00483DA0, 0, 0));
+        self->m_data = (tWPInGameData*)func_002BCBD0(cMemMan_alloc(0x18, D_00483DA0, 0, 0));
         break;
     }
-    self->next = D_004A3880_0410;
-    D_004A3880_0410 = self;
-    return self;
+    self->m_next = (cWorldPainterQuery*)D_004A3880_0410;
+    D_004A3880_0410 = ((sWPQuery_0410*)self);
+    return ((sWPQuery_0410*)self);
 }
 #endif
 
@@ -140,22 +141,22 @@ struct sWPQuery_06C0 {
 
 extern sWPQuery_06C0* D_004A3880;
 
-extern "C" void func_002C06C0(sWPQuery_06C0* self, int flags)
+extern "C" void func_002C06C0(cWorldPainterQuery* self, int flags)
 {
-    self->vtbl = cWorldPainterQuery_vtbl;
-    operator_delete(self->buf);
+    self->mVtbl = (void**)cWorldPainterQuery_vtbl;
+    operator_delete((int*)self->m_data);
     sWPQuery_06C0* p = D_004A3880;
-    if (p == self) {
-        D_004A3880 = self->next;
+    if (p == ((sWPQuery_06C0*)self)) {
+        D_004A3880 = (sWPQuery_06C0*)self->m_next;
     } else {
-        while (p->next != self) {
+        while (p->next != ((sWPQuery_06C0*)self)) {
             p = p->next;
         }
         if (p != 0) {
-            p->next = self->next;
+            p->next = (sWPQuery_06C0*)self->m_next;
         }
     }
-    self->vtbl = D_00485D30;
+    self->mVtbl = (void**)D_00485D30;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -308,7 +309,7 @@ struct func_002C0A10_sList {
 
 extern "C" int func_002BAF90(func_002C0A10_sList* list);
 
-extern "C" func_002C0A10_sItem* func_002C0A10(void* self, func_002C0A10_sList* list)
+extern "C" func_002C0A10_sItem* func_002C0A10(cWorldPainterQuery* self, func_002C0A10_sList* list)
 {
     int i = func_002BAF90(list);
     return (i != -1) ? &list->items[i] : 0;

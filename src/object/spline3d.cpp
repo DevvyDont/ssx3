@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/spline3d.h"
 #include "render/ps2graphicsman.h"
 
 struct sSplinePoint {
@@ -21,10 +22,6 @@ struct sSplineNode {
     sSplineHeader* header; // 0x68
 };
 
-struct cSpline {
-    char pad_0x00[0x8];
-    sSplineNode* node; // 0x8
-};
 
 //100%
 INCLUDE_ASM("object/spline3d", cSpline_calcLength__FP7cSpline);
@@ -39,7 +36,7 @@ INCLUDE_ASM("object/spline3d", cSpline_calcLength__FP7cSpline);
  */
 float cSpline_calcLength(cSpline* self)
 {
-    sSplineHeader* header = self->node->header;
+    sSplineHeader* header = ((sSplineNode*)self->Seg)->header;
     sSplinePoint* cur = header->first;
     for (int i = 1; i < header->numPoints; i++) {
         cur = cur->next;
@@ -62,7 +59,7 @@ public:
  *
  * @param obj  replay stream to write to
  */
-extern "C" void cSpline_writeToReplayFrame(void* self, cSpline_writeToReplayFrame_cObj* obj)
+extern "C" void cSpline_writeToReplayFrame(cSpline* self, cSpline_writeToReplayFrame_cObj* obj)
 {
     obj->v01(self, 8);
 }
@@ -123,14 +120,14 @@ struct sSplineFollow5570 {
     float length;           // 0xC
 };
 
-extern "C" void cSpline_readFromReplayFrame(sSplineFollow5570* self, cStream_5570* stream)
+extern "C" void cSpline_readFromReplayFrame(cSpline* self, cStream_5570* stream)
 {
-    stream->v02(self, 8);
-    self->node = self->ref.get()->node;
-    for (int i = 0; i < self->count; i++) {
-        self->node = *(sSplineNode**)((char*)self->node + 0x64);
+    stream->v02(((sSplineFollow5570*)self), 8);
+    self->Seg = (void*)(*(sTrackRef5570*)&self->SplineId).get()->node;
+    for (int i = 0; i < self->SegIndex; i++) {
+        self->Seg = (void*)(*(sSplineNode**)((char*)(sSplineNode*)self->Seg + 0x64));
     }
-    self->length = cSpline_calcLength((cSpline*)self);
+    self->Length = cSpline_calcLength((cSpline*)self);
 }
 #endif
 

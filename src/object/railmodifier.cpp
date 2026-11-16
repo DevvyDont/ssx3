@@ -1,4 +1,20 @@
 #include "common.h"
+#include "object/uvscrollmodifier.h"
+#include "object/transformmodifier.h"
+#include "object/texflipmodifier.h"
+#include "object/splinemodifier.h"
+#include "object/railmodifier.h"
+#include "object/raillink.h"
+#include "object/positionmodifier.h"
+#include "object/physicsmodifier.h"
+#include "object/parentmodifier.h"
+#include "object/multisplinemodifier.h"
+#include "object/movenode.h"
+#include "object/magnetmodifier.h"
+#include "object/floatingnode.h"
+#include "object/effectlink.h"
+#include "object/boostmodifier.h"
+#include "object/avasplinemodifier.h"
 #include "object/rigidbody.h"
 #include "object/rollermodifier.h"
 #include "render/ps2graphicsman.h"
@@ -278,12 +294,12 @@ extern "C" void cRailModifier_updateBoundBox(void* self);
 extern "C" void* cObjectInterface_getNash();
 extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox0035C4E0* box, sBox0035C4E0* old);
 
-extern "C" void func_0035C4E0(sObj0035C4E0* self)
+extern "C" void func_0035C4E0(cRailModifier* self)
 {
-    sBox0035C4E0* box = &self->box;
-    sBox0035C4E0 old = self->box;
-    cRailModifier_updateBoundBox(self);
-    nash_Nash_movenode(cObjectInterface_getNash(), 2, self->id, box, &old);
+    sBox0035C4E0* box = &(*(sBox0035C4E0*)&self->BoundBox);
+    sBox0035C4E0 old = (*(sBox0035C4E0*)&self->BoundBox);
+    cRailModifier_updateBoundBox(((sObj0035C4E0*)self));
+    nash_Nash_movenode(cObjectInterface_getNash(), 2, (int)self->Node, box, &old);
 }
 #endif
 
@@ -300,10 +316,10 @@ public:
     virtual void v05(void* p);
 };
 
-extern "C" void func_0035C540(void* self, cStream0035C540* stream)
+extern "C" void func_0035C540(cRailModifier* self, cStream0035C540* stream)
 {
     stream->v01((char*)self + 0x10, 0x30);
-    stream->v05(*(void**)((char*)self + 0x40));
+    stream->v05(self->Instance);
 }
 #endif
 
@@ -370,9 +386,9 @@ static inline void vu0CopyMatC5A0(sRmMat44C5A0* d, const sRmMat44C5A0* s)
 
 extern "C" void func_0034FED8(void* model, int bone, sRmMat44C5A0* out);
 
-extern "C" void func_0035C5A0(void* self, sRmMat44C5A0* m)
+extern "C" void func_0035C5A0(cRailModifier* self, sRmMat44C5A0* m)
 {
-    func_0034FED8(*(void**)((char*)self + 0x40), *(int*)((char*)self + 0x34), m);
+    func_0034FED8(self->Instance, self->Mesh, m);
     sRmMat44C5A0* src = (sRmMat44C5A0*)((char*)self + 0x50);
     sRmMat44C5A0 t2;
     sRmMat44C5A0 t;
@@ -723,15 +739,15 @@ static inline void resetHit_C698(sRmHit_C698* h)
     h->v = 0;
 }
 
-extern "C" void func_0035C698(sRmObj_C698* self, void* box, void* box2, const t4Vector* point, unsigned int mask,
+extern "C" void func_0035C698(cRailModifier* self, void* box, void* box2, const t4Vector* point, unsigned int mask,
                               int* found, float* bestDist, sRmHit_C698* out)
 {
-    sRmSpline_C698* spline = (sRmSpline_C698*)self->spline.get(*func_002D1BD8());
+    sRmSpline_C698* spline = (sRmSpline_C698*)(*(sRmRef_C698*)&self->SplineId).get(*func_002D1BD8());
     if ((spline->mask & mask) == 0) {
         return;
     }
     sRmMat44 mat;
-    func_0035C5A0_C698(self, &mat);
+    func_0035C5A0_C698(((sRmObj_C698*)self), &mat);
     sRmSeg_C698* seg = spline->segs;
     for (int i = 0; i < spline->numSegs; i++, seg = seg->next) {
         float a = 0.0f;
@@ -813,8 +829,8 @@ extern "C" void func_0035C698(sRmObj_C698* self, void* box, void* box2, const t4
             out->pos = pos;
             out->nrm = vu0Normal_C698(evalTan_C698(&c, t));
             out->id = spline->id;
-            out->model = self->model;
-            out->bone = self->bone;
+            out->model = (void*)self->Instance;
+            out->bone = self->Mesh;
             out->t = t;
             out->spline = spline;
             out->obj = 0;
@@ -2220,7 +2236,7 @@ INCLUDE_ASM("object/railmodifier", func_0035F0B8);
 #ifdef SKIP_ASM
 extern char* D_004A5B64;
 int BXrand();
-extern "C" void func_0035F218(void* self);
+extern "C" void func_0035F218(cTexFlipModifier* self);
 
 struct sRailTimer {
     int f0;
@@ -2242,22 +2258,22 @@ static inline float ftrunc_0035F0B8(float x)
     return t;
 }
 
-extern "C" sRailTimer* func_0035F0B8(sRailTimer* self, void* def, void* owner)
+extern "C" sRailTimer* func_0035F0B8(cTexFlipModifier* self, void* def, void* owner)
 {
     char* d = (char*)def;
     float one = 1.0f;
-    self->f18 = owner;
-    self->f14 = 0;
-    self->f1C = 0;
-    self->f20 = 0;
-    self->f0 = *(int*)(d + 0x4);
+    self->Instance = (tInstanceRecord*)owner;
+    self->TexIndex = 0;
+    self->NumMaterials = 0;
+    self->NumTexFlipMaterials = 0;
+    self->Type = *(int*)(d + 0x4);
     float rate = *(float*)(d + 0x10) * (one / (float)*(int*)(D_004A5B64 + 0x10));
-    self->f8 = rate;
-    self->f10 = *(int*)(d + 0xC);
-    self->fC = rate;
-    self->f4 = 0;
+    self->Speed = rate;
+    self->Dir = *(int*)(d + 0xC);
+    self->BaseSpeed = rate;
+    *(int*)&self->Time = 0;
     int n = *(int*)(d + 0x8);
-    if ((float)n < *(float*)&self->f4) {
+    if ((float)n < *(float*)(int*)&self->Time) {
         union { int i; float f; } u;
         u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
         float x = (u.f - one) * 8.0f;
@@ -2265,12 +2281,12 @@ extern "C" sRailTimer* func_0035F0B8(sRailTimer* self, void* def, void* owner)
         if (t < x) {
             t += one;
         }
-        self->f14 = (int)t;
+        self->TexIndex = (int)t;
     } else {
-        self->f14 = n;
+        self->TexIndex = n;
     }
     func_0035F218(self);
-    return self;
+    return ((sRailTimer*)self);
 }
 #endif
 
@@ -2285,14 +2301,14 @@ public:
     virtual void* v03();
 };
 
-extern "C" void func_0035F218(void* self);
+extern "C" void func_0035F218(cTexFlipModifier* self);
 
-extern "C" void* func_0035F1A8(void* self, func_0035F1A8_cObj* obj)
+extern "C" void* func_0035F1A8(cTexFlipModifier* self, func_0035F1A8_cObj* obj)
 {
     obj->v02(self, 0x18);
-    *(void**)((char*)self + 0x18) = obj->v03();
+    self->Instance = (tInstanceRecord*)obj->v03();
     func_0035F218(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2329,7 +2345,7 @@ struct sRailSelF218 {
 extern void sel_F218(sRailSelF218* self, int i) __asm__("func_0035F378");
 extern void ms_F218(void* p, int v, int n) __asm__("MEM_fill");
 
-extern "C" void func_0035F218(void* selfv)
+extern "C" void func_0035F218(cTexFlipModifier* selfv)
 {
     sRailSelF218* self = (sRailSelF218*)selfv;
     int i;
@@ -2417,43 +2433,43 @@ INCLUDE_ASM("object/railmodifier", func_0035F410);
 #ifdef SKIP_ASM
 // Advances the rail timer; each whole step moves to the next/previous frame (mode 0), or alternates between a
 // fixed 10-per-second step (mode 1) and a random 25..100% rate (mode 2).
-extern "C" void func_0035F410(sRailTimer* self)
+extern "C" void func_0035F410(cTexFlipModifier* self)
 {
-    if (!(0.0f < self->f8)) {
+    if (!(0.0f < self->Speed)) {
         return;
     }
     float one = 1.0f;
-    float* acc = (float*)&self->f4;
-    *acc += self->f8;
+    float* acc = (float*)(int*)&self->Time;
+    *acc += self->Speed;
     if (!(one <= *acc)) {
         return;
     }
     *acc -= one;
-    if (self->f0 == 0) {
-        if (self->f10 == 0) {
-            if (++self->f14 >= self->f20) {
-                self->f14 = 0;
+    if (self->Type == 0) {
+        if (self->Dir == 0) {
+            if (++self->TexIndex >= self->NumTexFlipMaterials) {
+                self->TexIndex = 0;
             }
-        } else if (--self->f14 < 0) {
-            self->f14 = self->f20 - 1;
+        } else if (--self->TexIndex < 0) {
+            self->TexIndex = self->NumTexFlipMaterials - 1;
         }
-    } else if (self->f0 == 1) {
-        self->f8 = 10.0f / (float)*(int*)(D_004A5B64 + 0x10);
-        self->f0 = 2;
-        if (++self->f14 >= self->f20) {
-            self->f14 = 0;
+    } else if (self->Type == 1) {
+        self->Speed = 10.0f / (float)*(int*)(D_004A5B64 + 0x10);
+        self->Type = 2;
+        if (++self->TexIndex >= self->NumTexFlipMaterials) {
+            self->TexIndex = 0;
         }
-    } else if (self->f0 == 2) {
+    } else if (self->Type == 2) {
         union { int i; float f; } u;
         float base = 0.25f;
         u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
-        self->f0 = 1;
-        self->f8 = self->fC * ((u.f - one) * 0.75f + base);
-        if (++self->f14 >= self->f20) {
-            self->f14 = 0;
+        self->Type = 1;
+        self->Speed = self->BaseSpeed * ((u.f - one) * 0.75f + base);
+        if (++self->TexIndex >= self->NumTexFlipMaterials) {
+            self->TexIndex = 0;
         }
     }
-    func_0035F378((sRailModSelect*)self, self->f14);
+    func_0035F378((sRailModSelect*)self, self->TexIndex);
 }
 #endif
 
@@ -2481,11 +2497,11 @@ static inline float fTrunc_F598(float x)
     return r;
 }
 
-extern "C" void func_0035F598(sRailModSel_F598* self, int id, float v)
+extern "C" void func_0035F598(cTexFlipModifier* self, int id, float v)
 {
     switch (id) {
     case 300:
-        self->speed = v;
+        self->Speed = v;
         break;
     case 301:
         if (v >= 0.0f && v < 9.0f) {
@@ -2494,16 +2510,16 @@ extern "C" void func_0035F598(sRailModSel_F598* self, int id, float v)
                 c += 1.0f;
             }
             int n = (int)c;
-            self->index = n;
+            self->TexIndex = n;
             func_0035F378((sRailModSelect*)self, n);
         }
         break;
     case 302:
-        self->index++;
-        if (self->index >= self->count) {
-            self->index = 1;
+        self->TexIndex++;
+        if (self->TexIndex >= self->NumTexFlipMaterials) {
+            self->TexIndex = 1;
         }
-        func_0035F378((sRailModSelect*)self, self->index);
+        func_0035F378((sRailModSelect*)self, self->TexIndex);
         break;
     }
 }
@@ -2522,10 +2538,10 @@ public:
     virtual void v05(void* p);
 };
 
-extern "C" void func_0035F688(void* self, cStream0035F688* stream)
+extern "C" void func_0035F688(cTexFlipModifier* self, cStream0035F688* stream)
 {
     stream->v01((char*)self + 0x0, 0x18);
-    stream->v05(*(void**)((char*)self + 0x18));
+    stream->v05(self->Instance);
 }
 #endif
 
@@ -2597,11 +2613,11 @@ struct sRailSerVEntry {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void* func_0035F788(void* self, void* stream)
+extern "C" void* func_0035F788(cUVScrollModifier* self, void* stream)
 {
     sRailSerVEntry* vt = *(sRailSerVEntry**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self, 0x50);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2637,72 +2653,72 @@ struct sRmState_F7D0 {
     int active;         // 0x40
 };
 
-extern "C" void func_0035F7D0(sRmState_F7D0* self)
+extern "C" void func_0035F7D0(cUVScrollModifier* self)
 {
-    if (self->dur > 0.0f || self->fC > 0.0f) {
-        self->t += 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
-        if (self->active) {
-            if (self->f14 != 0.0f) {
-                self->f10 += self->f14;
-                if (self->f14 >= 6.2831854820251465f) {
-                    self->f14 = self->f14 - 6.2831854820251465f;
-                } else if (self->f14 <= 6.2831854820251465f) {
-                    self->f14 = self->f14 + 6.2831854820251465f;
+    if (self->TimeOn > 0.0f || self->TimeOff > 0.0f) {
+        self->Time += 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
+        if (self->On) {
+            if (self->AngVel != 0.0f) {
+                self->Angle += self->AngVel;
+                if (self->AngVel >= 6.2831854820251465f) {
+                    self->AngVel = self->AngVel - 6.2831854820251465f;
+                } else if (self->AngVel <= 6.2831854820251465f) {
+                    self->AngVel = self->AngVel + 6.2831854820251465f;
                 }
             }
-            if (self->t >= self->dur) {
-                self->t = 0.0f;
-                if (self->t < self->fC) {
-                    self->active = 0;
+            if (self->Time >= self->TimeOn) {
+                self->Time = 0.0f;
+                if (self->Time < self->TimeOff) {
+                    self->On = 0;
                 }
-                if (self->f0 == 2 || self->f0 == 6) {
-                    self->vel = -self->vel;
+                if (self->Type == 2 || self->Type == 6) {
+                    (*(sV2_F7D0*)&self->UVScroll[0]) = -(*(sV2_F7D0*)&self->UVScroll[0]);
                 }
             }
-            if (self->active) {
-                if (self->f0 == 6) {
-                    if (self->vel.x < 0.0f) {
-                        float t = self->t;
-                        if (t < self->dur * 0.5f) {
-                            sV2_F7D0 m = self->vel * t * (1.0f / self->dur);
-                            self->pos.x += m.x;
-                            self->pos.y += m.y;
+            if (self->On) {
+                if (self->Type == 6) {
+                    if (self->UVScroll[0] < 0.0f) {
+                        float t = self->Time;
+                        if (t < self->TimeOn * 0.5f) {
+                            sV2_F7D0 m = (*(sV2_F7D0*)&self->UVScroll[0]) * t * (1.0f / self->TimeOn);
+                            self->UV[0] += m.x;
+                            self->UV[1] += m.y;
                         } else {
-                            sV2_F7D0 m = self->vel * (self->dur - t) * (1.0f / self->dur);
-                            self->pos.x += m.x;
-                            self->pos.y += m.y;
+                            sV2_F7D0 m = (*(sV2_F7D0*)&self->UVScroll[0]) * (self->TimeOn - t) * (1.0f / self->TimeOn);
+                            self->UV[0] += m.x;
+                            self->UV[1] += m.y;
                         }
                     } else {
-                        float u = self->dur - self->t;
-                        if (u < self->dur * 0.5f) {
-                            sV2_F7D0 m = self->vel * u * (1.0f / self->dur);
-                            self->pos.x += m.x;
-                            self->pos.y += m.y;
+                        float u = self->TimeOn - self->Time;
+                        if (u < self->TimeOn * 0.5f) {
+                            sV2_F7D0 m = (*(sV2_F7D0*)&self->UVScroll[0]) * u * (1.0f / self->TimeOn);
+                            self->UV[0] += m.x;
+                            self->UV[1] += m.y;
                         } else {
-                            sV2_F7D0 m = self->vel * (self->dur - u) * (1.0f / self->dur);
-                            self->pos.x += m.x;
-                            self->pos.y += m.y;
+                            sV2_F7D0 m = (*(sV2_F7D0*)&self->UVScroll[0]) * (self->TimeOn - u) * (1.0f / self->TimeOn);
+                            self->UV[0] += m.x;
+                            self->UV[1] += m.y;
                         }
                     }
                 } else {
-                    self->pos.x += self->vel.x;
-                    self->pos.y += self->vel.y;
+                    self->UV[0] += self->UVScroll[0];
+                    self->UV[1] += self->UVScroll[1];
                 }
-                if (self->pos.x > 1.0f) {
-                    self->pos.x = self->pos.x - 1.0f;
-                } else if (self->pos.x < -1.0f) {
-                    self->pos.x = self->pos.x + 1.0f;
+                if (self->UV[0] > 1.0f) {
+                    self->UV[0] = self->UV[0] - 1.0f;
+                } else if (self->UV[0] < -1.0f) {
+                    self->UV[0] = self->UV[0] + 1.0f;
                 }
-                if (self->pos.y > 1.0f) {
-                    self->pos.y = self->pos.y - 1.0f;
-                } else if (self->pos.y < -1.0f) {
-                    self->pos.y = self->pos.y + 1.0f;
+                if (self->UV[1] > 1.0f) {
+                    self->UV[1] = self->UV[1] - 1.0f;
+                } else if (self->UV[1] < -1.0f) {
+                    self->UV[1] = self->UV[1] + 1.0f;
                 }
             }
-        } else if (self->t >= self->fC) {
-            self->t = 0.0f;
-            if (self->dur > 0.0f) {
-                self->active = 1;
+        } else if (self->Time >= self->TimeOff) {
+            self->Time = 0.0f;
+            if (self->TimeOn > 0.0f) {
+                self->On = 1;
             }
         }
     }
@@ -2712,30 +2728,30 @@ extern "C" void func_0035F7D0(sRmState_F7D0* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035FB30);
 #ifdef SKIP_ASM
-extern "C" void func_0035FB30(void* self, int id, float v)
+extern "C" void func_0035FB30(cUVScrollModifier* self, int id, float v)
 {
     if (id == 200 || id == 201) {
         if (v >= -1.0f && v <= 1.0f) {
             if (id == 201) {
-                *(float*)((char*)self + 0x38) = v;
+                self->UVScroll[0] = v;
             } else {
-                *(float*)((char*)self + 0x3C) = v;
+                self->UVScroll[1] = v;
             }
         }
     } else if (id == 202 || id == 203) {
         if (v >= 0.0f && v <= 60.0f) {
             if (id == 202) {
-                *(float*)((char*)self + 0x8) = v;
+                self->TimeOn = v;
             } else {
-                *(float*)((char*)self + 0xC) = v;
+                self->TimeOff = v;
             }
         }
     } else if (id == 204 || id == 205) {
         if (v >= -4.0f && v <= 4.0f) {
             if (id == 204) {
-                *(float*)((char*)self + 0x30) = v;
+                self->UV[0] = v;
             } else {
-                *(float*)((char*)self + 0x34) = v;
+                self->UV[1] = v;
             }
         }
     }
@@ -2762,32 +2778,32 @@ struct sRmMtx_35FC20 {
 
 extern sRmMtx_35FC20 D_004FF1A0_35FC20[] __asm__("t4mat_Identity");
 
-extern "C" sRmMtx_35FC20* func_0035FC20(sRmAxisRot_35FC20* self, sRmMtx_35FC20* m)
+extern "C" sRmMtx_35FC20* func_0035FC20(cUVScrollModifier* self, sRmMtx_35FC20* m)
 {
     float zero = 0.0f;
-    if (self->angle != zero) {
+    if (self->Angle != zero) {
         float s;
         float c;
-        func_0031BE50(&s, &c, self->angle);
+        func_0031BE50(&s, &c, self->Angle);
         float one = 1.0f;
         float t = one - c;
-        float tx = t * self->ax;
-        float sy = s * self->ay;
-        float sz = s * self->az;
-        float sx = s * self->ax;
-        float ty = t * self->ay;
-        float tz = t * self->az;
-        m->m[0][0] = tx * self->ax + c;
-        m->m[1][0] = tx * self->ay + sz;
-        m->m[2][0] = tx * self->az - sy;
+        float tx = t * self->Axis.x;
+        float sy = s * self->Axis.y;
+        float sz = s * self->Axis.z;
+        float sx = s * self->Axis.x;
+        float ty = t * self->Axis.y;
+        float tz = t * self->Axis.z;
+        m->m[0][0] = tx * self->Axis.x + c;
+        m->m[1][0] = tx * self->Axis.y + sz;
+        m->m[2][0] = tx * self->Axis.z - sy;
         m->m[3][0] = zero;
-        m->m[0][1] = ty * self->ax - sz;
-        m->m[1][1] = ty * self->ay + c;
-        m->m[2][1] = ty * self->az + sx;
+        m->m[0][1] = ty * self->Axis.x - sz;
+        m->m[1][1] = ty * self->Axis.y + c;
+        m->m[2][1] = ty * self->Axis.z + sx;
         m->m[3][1] = zero;
-        m->m[0][2] = tz * self->ax + sy;
-        m->m[1][2] = tz * self->ay - sx;
-        m->m[2][2] = tz * self->az + c;
+        m->m[0][2] = tz * self->Axis.x + sy;
+        m->m[1][2] = tz * self->Axis.y - sx;
+        m->m[2][2] = tz * self->Axis.z + c;
         m->m[3][2] = zero;
         m->m[0][3] = zero;
         m->m[1][3] = zero;
@@ -2810,8 +2826,8 @@ extern "C" sRmMtx_35FC20* func_0035FC20(sRmAxisRot_35FC20* self, sRmMtx_35FC20* 
             : "r"(m), "r"(D_004FF1A0_35FC20)
             : "memory");
     }
-    m->m[3][0] = self->tx;
-    m->m[3][1] = self->ty;
+    m->m[3][0] = self->UV[0];
+    m->m[3][1] = self->UV[1];
     return m;
 }
 #endif
@@ -2825,7 +2841,7 @@ public:
     virtual void v01(void* buf, int size);
 };
 
-extern "C" void func_0035FD98(void* self, func_0035FD98_cObj* obj)
+extern "C" void func_0035FD98(cUVScrollModifier* self, func_0035FD98_cObj* obj)
 {
     obj->v01(self, 0x50);
 }
@@ -3980,7 +3996,7 @@ INCLUDE_ASM("object/railmodifier", func_00360B00);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
-extern "C" void func_00360B00(void* self, int flags)
+extern "C" void func_00360B00(cTransformModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {
@@ -4287,10 +4303,10 @@ INCLUDE_ASM("object/railmodifier", func_00360C08);
 #ifdef SKIP_ASM
 extern void* cPhysicsModifier_vtbl[];
 
-extern "C" void *func_00360C08(void *arg0) {
-    (*(int **)((char*)(arg0) + (4))) = &(*(int*)&cPhysicsModifier_vtbl);
-    (*(int *)((char*)(arg0) + (0))) = 1;
-    return arg0;
+extern "C" void *func_00360C08(cPhysicsModifier* arg0) {
+    ((int*)arg0->mVtbl) = &(*(int*)&cPhysicsModifier_vtbl);
+    (arg0->Active) = 1;
+    return ((void*)arg0);
 }
 #endif
 
@@ -4305,9 +4321,9 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPhysicsModifier__cPhysicsModifier(void* self, int flags)
+extern "C" void cPhysicsModifier__cPhysicsModifier(cPhysicsModifier* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = cPhysicsModifier_vtbl;
+    self->mVtbl = cPhysicsModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -4397,9 +4413,9 @@ extern void* cEffectLink_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cEffectLink__cEffectLink(void* self, int flags)
+extern "C" void cEffectLink__cEffectLink(cEffectLink* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cEffectLink_vtbl;
+    self->mVtbl = cEffectLink_vtbl;
     func_00345760(self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -4547,9 +4563,9 @@ extern void* cRailLink_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cRailLink__cRailLink(void* self, int flags)
+extern "C" void cRailLink__cRailLink(cRailLink* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cRailLink_vtbl;
+    self->mVtbl = cRailLink_vtbl;
     func_0035B6D0(self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -4582,9 +4598,9 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_apply);
 /**
  * Applies a move node by calling its virtual updateOverlapSystem() (vtable slot 50).
  */
-extern "C" void cMoveNode_apply(cRailVirt* self)
+extern "C" void cMoveNode_apply(cMoveNode* self)
 {
-    self->v50();
+    ((cRailVirt*)self)->v50();
 }
 #endif
 
@@ -4616,7 +4632,7 @@ int cMoveNode_isMoveNode(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_updateRootTransform);
 #ifdef SKIP_ASM
-extern "C" void cMoveNode_updateRootTransform(void* self)
+extern "C" void cMoveNode_updateRootTransform(cMoveNode* self)
 {
     unsigned short* p = (unsigned short*)((char*)self + 0x12);
     *p &= 0xFFFE;
@@ -4649,9 +4665,9 @@ public:
     virtual int v16();
 };
 
-extern "C" int func_00360DE8(void* self)
+extern "C" int func_00360DE8(cMoveNode* self)
 {
-    cVirt16** holder = *(cVirt16***)((char*)self + 0x1C);
+    cVirt16** holder = (cVirt16**)self->ModifierBlock;
     if (holder != 0) {
         cVirt16* obj = *holder;
         if (obj != 0) {
@@ -4664,9 +4680,9 @@ extern "C" int func_00360DE8(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360E30);
 #ifdef SKIP_ASM
-extern "C" int func_00360E30(void* self)
+extern "C" int func_00360E30(cMoveNode* self)
 {
-    int* p = *(int**)((char*)self + 0x1C);
+    int* p = (int*)self->ModifierBlock;
     if (p != 0) {
         return *p;
     }
@@ -4676,11 +4692,11 @@ extern "C" int func_00360E30(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360E50);
 #ifdef SKIP_ASM
-extern "C" int func_00360E50(void *arg0) {
+extern "C" int func_00360E50(cMoveNode* arg0) {
     int var_2;
     void *temp_3;
 
-    temp_3 = (*(void **)((char*)(arg0) + (0x1C)));
+    temp_3 = ((void*)arg0->ModifierBlock);
     var_2 = 0;
     if (temp_3 != 0) {
         var_2 = (*(int *)((char*)(temp_3) + (4))) != 0;
@@ -4691,11 +4707,11 @@ extern "C" int func_00360E50(void *arg0) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360E70);
 #ifdef SKIP_ASM
-extern "C" int func_00360E70(void *arg0) {
+extern "C" int func_00360E70(cMoveNode* arg0) {
     int var_2;
     void *temp_3;
 
-    temp_3 = (*(void **)((char*)(arg0) + (0x1C)));
+    temp_3 = ((void*)arg0->ModifierBlock);
     var_2 = 0;
     if (temp_3 != 0) {
         var_2 = (*(int *)((char*)(temp_3) + (8))) != 0;
@@ -4706,10 +4722,10 @@ extern "C" int func_00360E70(void *arg0) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360E90);
 #ifdef SKIP_ASM
-extern "C" int func_00360E90(void* self)
+extern "C" int func_00360E90(cMoveNode* self)
 {
     int cond;
-    char* p = *(char**)((char*)self + 0x1C);
+    char* p = (char*)self->ModifierBlock;
     cond = 0;
     if (p != 0) {
         cond = *(int*)(p + 8) != 0;
@@ -4721,7 +4737,7 @@ extern "C" int func_00360E90(void* self)
         }
         return 0;
     }
-    return *(int*)(*(char**)((char*)self + 0x18) + 0x94);
+    return *(int*)((char*)self->Instance + 0x94);
 }
 #endif
 //100%
@@ -4731,9 +4747,9 @@ INCLUDE_ASM("object/railmodifier", func_00360ED0);
 // the unit declares func_0035FC20 with two parameters; this caller passes one
 void* func_0035FC20_1arg(void*) __asm__("func_0035FC20");
 
-extern "C" void* func_00360ED0(void* self)
+extern "C" void* func_00360ED0(cMoveNode* self)
 {
-    char* p = *(char**)((char*)self + 0x1C);
+    char* p = (char*)self->ModifierBlock;
     int cond = 0;
     if (p != 0) {
         cond = *(int*)(p + 4) != 0;
@@ -4752,10 +4768,10 @@ INCLUDE_ASM("object/railmodifier", func_00360F20);
 #ifdef SKIP_ASM
 extern "C" void func_003530D0(int);
 
-extern "C" void func_00360F20(void *arg0) {
+extern "C" void func_00360F20(cMoveNode* arg0) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    temp_4 = ((int)arg0->ModifierBlock);
     if (temp_4 != 0) {
         func_003530D0(temp_4);
     }
@@ -4766,10 +4782,10 @@ INCLUDE_ASM("object/railmodifier", func_00360F48);
 #ifdef SKIP_ASM
 extern "C" void func_00353118(int);
 
-extern "C" void func_00360F48(void *arg0) {
+extern "C" void func_00360F48(cMoveNode* arg0) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    temp_4 = ((int)arg0->ModifierBlock);
     if (temp_4 != 0) {
         func_00353118(temp_4);
     }
@@ -4780,10 +4796,10 @@ INCLUDE_ASM("object/railmodifier", func_00360F70);
 #ifdef SKIP_ASM
 extern "C" void func_00353150(int);
 
-extern "C" void func_00360F70(void *arg0) {
+extern "C" void func_00360F70(cMoveNode* arg0) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    temp_4 = ((int)arg0->ModifierBlock);
     if (temp_4 != 0) {
         func_00353150(temp_4);
     }
@@ -4794,10 +4810,10 @@ INCLUDE_ASM("object/railmodifier", func_00360F98);
 #ifdef SKIP_ASM
 extern "C" void func_00353188(int);
 
-extern "C" void func_00360F98(void *arg0) {
+extern "C" void func_00360F98(cMoveNode* arg0) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    temp_4 = ((int)arg0->ModifierBlock);
     if (temp_4 != 0) {
         func_00353188(temp_4);
     }
@@ -4808,10 +4824,10 @@ INCLUDE_ASM("object/railmodifier", func_00360FC0);
 #ifdef SKIP_ASM
 extern "C" void func_00353278(int);
 
-extern "C" void func_00360FC0(void *arg0) {
+extern "C" void func_00360FC0(cMoveNode* arg0) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    temp_4 = ((int)arg0->ModifierBlock);
     if (temp_4 != 0) {
         func_00353278(temp_4);
     }
@@ -4822,10 +4838,10 @@ INCLUDE_ASM("object/railmodifier", func_00360FE8);
 #ifdef SKIP_ASM
 extern "C" void func_003531D0(int);
 
-extern "C" void func_00360FE8(void *arg0) {
+extern "C" void func_00360FE8(cMoveNode* arg0) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    temp_4 = ((int)arg0->ModifierBlock);
     if (temp_4 != 0) {
         func_003531D0(temp_4);
     }
@@ -4836,10 +4852,10 @@ INCLUDE_ASM("object/railmodifier", func_00361010);
 #ifdef SKIP_ASM
 extern "C" void func_00353228(int);
 
-extern "C" void func_00361010(void *arg0) {
+extern "C" void func_00361010(cMoveNode* arg0) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0x1C)));
+    temp_4 = ((int)arg0->ModifierBlock);
     if (temp_4 != 0) {
         func_00353228(temp_4);
     }
@@ -5275,9 +5291,9 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cBoostModifier__cBoostModifier(void* self, int flags)
+extern "C" void cBoostModifier__cBoostModifier(cBoostModifier* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = cPhysicsModifier_vtbl;
+    self->mVtbl = cPhysicsModifier_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -5659,13 +5675,13 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_getBoundBox);
 #ifdef SKIP_ASM
 extern "C" int tModifierBlock_getBoundBox(void* p);
 
-extern "C" int cFloatingNode_getBoundBox(void* self)
+extern "C" int cFloatingNode_getBoundBox(cFloatingNode* self)
 {
-    void* p = *(void**)((char*)self + 0x1C);
+    void* p = self->ModifierBlock;
     if (p != 0) {
         return tModifierBlock_getBoundBox(p);
     }
-    return *(int*)((char*)self + 0x78);
+    return (int)self->Info;
 }
 #endif
 
@@ -5700,13 +5716,13 @@ struct sRailVEntry17B8 {
  *
  * @return the matrix array pointer stored at +0x74
  */
-extern "C" int cFloatingNode_getAnimMats(void* self)
+extern "C" int cFloatingNode_getAnimMats(cFloatingNode* self)
 {
-    if (*(unsigned short*)((char*)self + 0x12) & 1) {
-        sRailVEntry17B8* vt = *(sRailVEntry17B8**)((char*)self + 0xC);
+    if (self->Flags & 1) {
+        sRailVEntry17B8* vt = (sRailVEntry17B8*)self->mVtbl;
         vt[51].fn((char*)self + vt[51].delta);
     }
-    return *(int*)((char*)self + 0x74);
+    return (int)self->AnimMats;
 }
 #endif
 
@@ -5732,13 +5748,13 @@ struct sElem00361800 {
  * @param i  index of the matrix in the array at +0x74 (0x40-byte matrices)
  * @return the address of matrix @p i
  */
-extern "C" sElem00361800* cFloatingNode_getAnimMat(void* self, int i)
+extern "C" sElem00361800* cFloatingNode_getAnimMat(cFloatingNode* self, int i)
 {
-    if (*(unsigned short*)((char*)self + 0x12) & 1) {
-        sVEntry00361800* vt = *(sVEntry00361800**)((char*)self + 0xC);
+    if (self->Flags & 1) {
+        sVEntry00361800* vt = (sVEntry00361800*)self->mVtbl;
         vt[51].fn((char*)self + vt[51].delta);
     }
-    return &(*(sElem00361800**)((char*)self + 0x74))[i];
+    return &((sElem00361800*)self->AnimMats)[i];
 }
 #endif
 
@@ -5764,13 +5780,13 @@ struct sRmVtbl1858 {
     sRmVEntry2_1858 set;     // slot 33 (0x108)
 };
 
-extern "C" void cFloatingNode_updateRootTransform(void* self)
+extern "C" void cFloatingNode_updateRootTransform(cFloatingNode* self)
 {
-    sRmVtbl1858* vt = *(sRmVtbl1858**)((char*)self + 0xC);
+    sRmVtbl1858* vt = (sRmVtbl1858*)self->mVtbl;
     void* obj = (char*)self + vt->set.delta;
     void* r = vt->get.fn((char*)self + vt->get.delta);
-    vt->set.fn(obj, r, *(void**)((char*)self + 0x74));
-    *(unsigned short*)((char*)self + 0x12) &= ~1;
+    vt->set.fn(obj, r, self->AnimMats);
+    self->Flags &= ~1;
 }
 #endif
 
@@ -5780,7 +5796,7 @@ INCLUDE_ASM("object/railmodifier", func_003618C8);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
-extern "C" void func_003618C8(void* self, int flags)
+extern "C" void func_003618C8(cPositionModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {
@@ -5827,10 +5843,10 @@ void* func_00361910(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361918);
 #ifdef SKIP_ASM
-extern "C" void func_00361918(void* self, void* a1)
+extern "C" void func_00361918(cPositionModifier* self, void* a1)
 {
-    *(cQuad128*)((char*)self + 0x10) = *(cQuad128*)a1;
-    *(cQuad128*)((char*)self + 0x20) = *(cQuad128*)((char*)a1 + 0x10);
+    *(cQuad128*)&self->BoundBox = *(cQuad128*)a1;
+    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)a1 + 0x10);
 }
 #endif
 
@@ -5861,9 +5877,9 @@ struct sRailVEntry1940 {
     void (*fn)(void*);
 };
 
-extern "C" void* func_00361940(void* self)
+extern "C" void* func_00361940(cPositionModifier* self)
 {
-    if (*(int*)((char*)self + 0x44) != 0) {
+    if (self->RootTransformDirty != 0) {
         sRailVEntry1940* vt = *(sRailVEntry1940**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
@@ -5877,7 +5893,7 @@ INCLUDE_ASM("object/railmodifier", func_00361988);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
-extern "C" void func_00361988(void* self, int flags)
+extern "C" void func_00361988(cParentModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {
@@ -5927,7 +5943,7 @@ INCLUDE_ASM("object/railmodifier", func_003619E0);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
-extern "C" void func_003619E0(void* self, int flags)
+extern "C" void func_003619E0(cMagnetModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {
@@ -5966,10 +5982,10 @@ void* func_00361A28(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361A30);
 #ifdef SKIP_ASM
-extern "C" void func_00361A30(void* self, void* a1)
+extern "C" void func_00361A30(cMagnetModifier* self, void* a1)
 {
-    *(cQuad128*)((char*)self + 0x20) = *(cQuad128*)a1;
-    *(cQuad128*)((char*)self + 0x30) = *(cQuad128*)((char*)a1 + 0x10);
+    *(cQuad128*)&self->BoundBox = *(cQuad128*)a1;
+    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)a1 + 0x10);
 }
 #endif
 
@@ -6008,9 +6024,9 @@ struct sRailVEntry1A60 {
     void (*fn)(void*);
 };
 
-extern "C" void* func_00361A60(void* self)
+extern "C" void* func_00361A60(cMagnetModifier* self)
 {
-    if (*(int*)((char*)self + 0x50) != 0) {
+    if (self->RootTransformDirty != 0) {
         sRailVEntry1A60* vt = *(sRailVEntry1A60**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
@@ -6024,7 +6040,7 @@ INCLUDE_ASM("object/railmodifier", func_00361AA8);
 extern void* D_004913F8[];
 void operator_delete(int*);
 
-extern "C" void func_00361AA8(void* self, int flags)
+extern "C" void func_00361AA8(cAvaSplineModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {
@@ -6045,10 +6061,10 @@ void* func_00361AD8(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361AE0);
 #ifdef SKIP_ASM
-extern "C" void func_00361AE0(void* self, void* a1)
+extern "C" void func_00361AE0(cAvaSplineModifier* self, void* a1)
 {
-    *(cQuad128*)((char*)self + 0x10) = *(cQuad128*)a1;
-    *(cQuad128*)((char*)self + 0x20) = *(cQuad128*)((char*)a1 + 0x10);
+    *(cQuad128*)&self->BoundBox = *(cQuad128*)a1;
+    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)a1 + 0x10);
 }
 #endif
 
@@ -6099,7 +6115,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cSplineModifier__cSplineModifier(void* self, int flags)
+extern "C" void cSplineModifier__cSplineModifier(cSplineModifier* self, int flags)
 {
     *(void***)self = D_004913F8;
     if (flags & 1) {
@@ -6151,10 +6167,10 @@ void* cSplineModifier_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void cSplineModifier_setBoundBox(void* self, void* boundbox)
+extern "C" void cSplineModifier_setBoundBox(cSplineModifier* self, void* boundbox)
 {
-    *(cQuad128*)((char*)self + 0x10) = *(cQuad128*)boundbox;
-    *(cQuad128*)((char*)self + 0x20) = *(cQuad128*)((char*)boundbox + 0x10);
+    *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
+    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)boundbox + 0x10);
 }
 #endif
 
@@ -6216,9 +6232,9 @@ struct sRailVEntry1B90 {
  *
  * @return the address of the root transform matrix at +0x60
  */
-extern "C" void* cSplineModifier_getRootTransform(void* self)
+extern "C" void* cSplineModifier_getRootTransform(cSplineModifier* self)
 {
-    if (*(int*)((char*)self + 0x58) != 0) {
+    if (self->RootTransformDirty != 0) {
         sRailVEntry1B90* vt = *(sRailVEntry1B90**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
@@ -6260,9 +6276,9 @@ void* cMultiSplineModifier_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_setBoundBox);
 #ifdef SKIP_ASM
-extern "C" void cMultiSplineModifier_setBoundBox(void* self, void* boundbox)
+extern "C" void cMultiSplineModifier_setBoundBox(cMultiSplineModifier* self, void* boundbox)
 {
-    void* p = *(void**)((char*)self + 0x3c);
+    void* p = self->Nodes;
     *(cQuad128*)((char*)p + 0x30) = *(cQuad128*)boundbox;
     *(cQuad128*)((char*)p + 0x40) = *(cQuad128*)((char*)boundbox + 0x10);
 }
@@ -6271,8 +6287,8 @@ extern "C" void cMultiSplineModifier_setBoundBox(void* self, void* boundbox)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361C08);
 #ifdef SKIP_ASM
-extern "C" int func_00361C08(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x34)));
+extern "C" int func_00361C08(cMultiSplineModifier* arg0) {
+    return (arg0->FocusCount);
 }
 #endif
 
@@ -6321,13 +6337,13 @@ struct sRailVEntry1C20 {
  *
  * @return the address of the first instance's root transform matrix
  */
-extern "C" void* cMultiSplineModifier_getRootTransform1(void* self)
+extern "C" void* cMultiSplineModifier_getRootTransform1(cMultiSplineModifier* self)
 {
-    if (*(int*)((char*)self + 0x30) != 0) {
+    if (self->RootTransformDirty != 0) {
         sRailVEntry1C20* vt = *(sRailVEntry1C20**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
-    return **(char***)((char*)self + 0x44) + 0x10;
+    return *(char**)self->NodeInst + 0x10;
 }
 #endif
 

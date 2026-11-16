@@ -1,0 +1,45 @@
+#ifndef OBJECT_AVASPLINEMODIFIER_H
+#define OBJECT_AVASPLINEMODIFIER_H
+
+// cAvaSplineModifier: the transform modifier that drives an avalanche prop from its instance's animation spline
+// (cMoveNode::addAvaSpline). Unnamed in retail: vtable D_0048F338 (27 slots), identified by the "AvaSplineModifier" tag
+// and On Tour's layout. Size 0x90: retail cMemMan_alloc(0x90, "AvaSplineModifier") in cMoveNode's addAvaSpline and the
+// replay loader (type 7); On Tour 0x90. Constructors func_00357750 (instance) and func_00357798 (replay frame);
+// destructor func_00361AA8. EA's source file is unknown.
+// A FLAT layout: cTransformModifier (0x0: vptr) + cAvaSplineModifierState (0x10-0x40) + own fields (On Tour offsets).
+
+#include "layout.h"
+#include "bx/math3d.h"
+#include "world/worldview.h"
+
+struct tInstanceRecord;
+
+struct cAvaSplineModifier {
+    // --- cTransformModifier (vptr only)
+    void** mVtbl;                   // 0x00 [R] ctors store D_0048F338; dtor func_00361AA8
+    char unk_04[0xc];               // 0x04 padding (the state is 16-byte aligned)
+    // --- cAvaSplineModifierState
+    tBoundBox BoundBox;             // 0x10 [O]; [U] getBoundBox func_00361AD8 returns +0x10, setBoundBox func_00361AE0
+                                    //      (sq 0x10/0x20)
+    float Radius;                   // 0x30 [O]; [R] ctor zeroes it (sw $0); [U] getRadius/setRadius
+                                    //      func_00361AF8/func_00361B00
+    char unk_34[0xc];               // 0x34 padding (Transform is 16-byte aligned)
+    // --- cAvaSplineModifier
+    t4Matrix Transform;             // 0x40 [O]; [U] getRootTransform func_00361B10 returns +0x40; update func_00357820
+                                    //      fills it from the instance
+    tInstanceRecord* Instance;      // 0x80 [O]; [R] ctor stores the instance, replay ctor reads it; [U] update,
+                                    //      writeToReplayFrame func_00357848
+    char unk_84[0xc];               // 0x84 padding to the 0x90 allocation
+};
+
+CHECK_OFFSET(cAvaSplineModifier, mVtbl, 0x00);
+CHECK_OFFSET(cAvaSplineModifier, unk_04, 0x04);
+CHECK_OFFSET(cAvaSplineModifier, BoundBox, 0x10);
+CHECK_OFFSET(cAvaSplineModifier, Radius, 0x30);
+CHECK_OFFSET(cAvaSplineModifier, unk_34, 0x34);
+CHECK_OFFSET(cAvaSplineModifier, Transform, 0x40);
+CHECK_OFFSET(cAvaSplineModifier, Instance, 0x80);
+CHECK_OFFSET(cAvaSplineModifier, unk_84, 0x84);
+CHECK_SIZE(cAvaSplineModifier, 0x90);
+
+#endif /* OBJECT_AVASPLINEMODIFIER_H */

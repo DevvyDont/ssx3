@@ -1,4 +1,7 @@
 #include "common.h"
+#include "worldpainter/worldpainterquery.h"
+#include "worldpainter/worldpainterman.h"
+#include "worldpainter/worldpainterlayer.h"
 #include "sound/speechsys.h"
 #include "sound/musicsys.h"
 #include "render/ps2graphicsman.h"
@@ -1368,17 +1371,16 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAF08);
 #ifdef SKIP_ASM
 void func_002C17C0(void *);
 struct E_AF08 { int a; int off; };
-extern "C" void func_002BAF08(void *self) {
-    char *base = (char*)self;
-    *(char**)base = base + *(int*)base;
-    func_002C17C0(*(char**)base);
-    *(char**)(base + 8) = base + *(int*)(base + 8);
-    E_AF08 *e = *(E_AF08**)(base + 8);
+extern "C" void func_002BAF08(cWorldPainterLayer* self) {
+    *(char**)self = ((char*)self) + *(int*)self;
+    func_002C17C0(*(char**)self);
+    *(char**)(((char*)self) + 8) = ((char*)self) + *(int*)(((char*)self) + 8);
+    E_AF08 *e = *(E_AF08**)(((char*)self) + 8);
     int i;
-    for (i = 0; i < *(int*)(base + 4); i++, e++) {
+    for (i = 0; i < self->m_iNumRegions; i++, e++) {
         int off = e->off;
         if (off != -1) {
-            e->off = (int)(base + off);
+            e->off = (int)(((char*)self) + off);
         } else {
             e->off = 0;
         }
@@ -1482,11 +1484,11 @@ extern "C" void func_002BB0E0(void) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB100);
 #ifdef SKIP_ASM
-extern "C" int func_002BB100(void *arg0, void *arg1) {
+extern "C" int func_002BB100(tWPNameField* arg0, void *arg1) {
     int var_6;
 
     var_6 = 0;
-    if (((*(int *)((char*)(arg0) + (0))) != (*(int *)((char*)(arg1) + (0)))) || ((*(int *)((char*)(arg0) + (4))) != (*(int *)((char*)(arg1) + (4))))) {
+    if (((arg0->m_nameId[0]) != (*(int *)((char*)(arg1) + (0)))) || ((arg0->m_nameId[1]) != (*(int *)((char*)(arg1) + (4))))) {
         var_6 = 1;
     }
     return var_6;
@@ -1512,19 +1514,19 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB140);
 #ifdef SKIP_ASM
 void cMemMan_free(void *);
 void operator_delete(int *);
-extern "C" void func_002BB390(void *, int);
+extern "C" void func_002BB390(cWorldPainterSection*, int);
 struct S12_B140 { int a, b, c; };
-extern "C" void func_002BB140(void *self, int flags) {
-    S12_B140 *arr = *(S12_B140**)((char*)self + 4);
+extern "C" void func_002BB140(cWorldPainterMan* self, int flags) {
+    S12_B140 *arr = (S12_B140*)self->m_pCache;
     if (arr != 0) {
         S12_B140 *p = arr + *(int*)((char*)arr - 0x10);
         if (arr != p) {
             do {
                 p--;
-                func_002BB390(p, 0);
-            } while (*(S12_B140**)((char*)self + 4) != p);
+                func_002BB390((cWorldPainterSection*)p, 0);
+            } while ((S12_B140*)self->m_pCache != p);
         }
-        cMemMan_free((char*)*(S12_B140**)((char*)self + 4) - 0x10);
+        cMemMan_free((char*)(S12_B140*)self->m_pCache - 0x10);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1542,19 +1544,19 @@ extern char D_00483C68[];
 struct sArr_B1D0 { int n; S12_B140 *arr; };
 
 // Reallocates the 12-byte element array (delete[] then new[] with a count cookie).
-extern "C" void func_002BB1D0(sArr_B1D0 *self, int n) {
-    if (self->arr != 0) {
-        S12_B140 *p = self->arr + *(int*)((char*)self->arr - 0x10);
-        if (self->arr != p) {
+extern "C" void func_002BB1D0(cWorldPainterMan* self, int n) {
+    if ((S12_B140*)self->m_pCache != 0) {
+        S12_B140 *p = (S12_B140*)self->m_pCache + *(int*)((char*)(S12_B140*)self->m_pCache - 0x10);
+        if ((S12_B140*)self->m_pCache != p) {
             do {
                 p--;
-                func_002BB390(p, 0);
-            } while (self->arr != p);
+                func_002BB390((cWorldPainterSection*)p, 0);
+            } while ((S12_B140*)self->m_pCache != p);
         }
-        cMemMan_free((char*)self->arr - 0x10);
+        cMemMan_free((char*)(S12_B140*)self->m_pCache - 0x10);
     }
-    self->n = n;
-    S12_B140 **dst = &self->arr;
+    self->m_uiNumSections = (unsigned int)n;
+    S12_B140 **dst = (S12_B140**)&self->m_pCache;
     int *blk = (int*)operator_new_B1D0(n * 12 + 0x10, D_00483C68, 0x20000000, 0);
     blk[0] = n;
     S12_B140 *a = (S12_B140*)(blk + 4);
@@ -1571,11 +1573,11 @@ extern "C" void func_002BB1D0(sArr_B1D0 *self, int n) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB2B8);
 #ifdef SKIP_ASM
-extern "C" void func_002BB3F0(void *);
-extern "C" void func_002BB2B8(void *self) {
+extern "C" void func_002BB3F0(cWorldPainterSection*);
+extern "C" void func_002BB2B8(cWorldPainterMan* self) {
     unsigned i;
     for (i = 0; i < *(unsigned*)self; i++) {
-        func_002BB3F0((char*)(*(void**)((char*)self + 4)) + i * 12);
+        func_002BB3F0((cWorldPainterSection*)((char*)(self->m_pCache) + i * 12));
     }
 }
 #endif
@@ -1585,8 +1587,8 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB318);
 #ifdef SKIP_ASM
 extern "C" void func_002BB4D8(int, int);
 
-extern "C" void func_002BB318(void *arg0, int arg1, int arg2) {
-    func_002BB4D8((*(int *)((char*)(arg0) + (4))) + (arg1 * 0xC), arg2);
+extern "C" void func_002BB318(cWorldPainterMan* arg0, int arg1, int arg2) {
+    func_002BB4D8(((int)arg0->m_pCache) + (arg1 * 0xC), arg2);
 }
 #endif
 
@@ -1594,8 +1596,8 @@ extern "C" void func_002BB318(void *arg0, int arg1, int arg2) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BB348);
 #ifdef SKIP_ASM
 extern "C" void func_002BB570(void*, int, int);
-extern "C" void func_002BB348(void *arg0, int arg1, int arg2) {
-    func_002BB570((char*)*(void **)((char *)arg0 + 4) + arg1 * 12, arg1, arg2);
+extern "C" void func_002BB348(cWorldPainterMan* arg0, int arg1, int arg2) {
+    func_002BB570((char*)arg0->m_pCache + arg1 * 12, arg1, arg2);
 }
 #endif
 
@@ -1616,10 +1618,10 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB390);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
-extern "C" void func_002BB390(void *self, int flags) {
-    void *p = *(void**)((char*)self + 8);
+extern "C" void func_002BB390(cWorldPainterSection* self, int flags) {
+    void *p = self->m_pWPHeader;
     if (p != 0) {
-        if (*(short*)((char*)self + 2) == 0) {
+        if (self->m_iStreamed == 0) {
             cMemMan_free(p);
         }
     }
@@ -1641,29 +1643,28 @@ extern "C" int ASYNCFILE_getstatus_B3F0(int) __asm__("ASYNCFILE_getstatus");
 extern "C" void MEM_copy_B3F0(int, int, int) __asm__("MEM_copy");
 int operator_new_B3F0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char D_004A3868[];
-extern "C" void func_002BB3F0(void *self_) {
-    char *self = (char*)self_;
-    short st = *(short*)self;
-    if (st == 1 && ASYNCFILE_getstatus_B3F0(*(int*)(self + 4)) == st) {
+extern "C" void func_002BB3F0(cWorldPainterSection* self_) {
+    short st = *(short*)self_;
+    if (st == 1 && ASYNCFILE_getstatus_B3F0(self_->m_iAsyncHandle) == st) {
         int sp0 = 0;
         int sp4 = 0;
-        ASYNCFILE_release_B3F0(*(int*)(self + 4), &sp0, &sp4);
+        ASYNCFILE_release_B3F0(self_->m_iAsyncHandle, &sp0, &sp4);
         if (sp0 != 0) {
             if (sp4 > 0) {
                 int t = func_003B4818_B3F0(sp0);
                 if (t > 0) {
                     int r = operator_new_B3F0(t, D_004A3868, 0x20000000, 0);
-                    *(int*)(self + 8) = r;
+                    self_->m_pWPHeader = (tWPHeader*)r;
                     func_003B47F8_B3F0(sp0, r);
                 } else {
                     int r = operator_new_B3F0(sp4, D_004A3868, 0x20000000, 0);
-                    *(int*)(self + 8) = r;
+                    self_->m_pWPHeader = (tWPHeader*)r;
                     MEM_copy_B3F0(r, sp0, sp4);
                 }
                 MEM_free_B3F0(sp0);
             }
         }
-        *(short*)self = 2;
+        *(short*)self_ = 2;
     }
 }
 #endif
@@ -1697,13 +1698,13 @@ extern "C" void func_002BB4D8_B4D8(void *self, int arg) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BB570);
 #ifdef SKIP_ASM
-extern "C" void func_002BB5F0(void *);
+extern "C" void func_002BB5F0(cWorldPainterSection*);
 
 extern "C" void func_002BB570(void *arg0, int arg1, int arg2) {
     (*(short *)((char*)(arg0) + (2))) = 1;
     (*(short *)((char*)(arg0) + (0))) = 2;
     (*(int *)((char*)(arg0) + (8))) = arg2;
-    func_002BB5F0(arg0);
+    func_002BB5F0((cWorldPainterSection*)arg0);
 }
 #endif
 
@@ -1746,7 +1747,7 @@ struct sRes_B5F0 {
 };
 
 // Relocates the loaded block's offset table (dropping it if it has the wrong magic) and marks it ready.
-extern "C" void func_002BB5F0(void* vself)
+extern "C" void func_002BB5F0(cWorldPainterSection* vself)
 {
     sRes_B5F0* self = (sRes_B5F0*)vself;
     if (self->data == 0) {
@@ -1946,7 +1947,7 @@ static inline sQtVec4_B928 qtDiv_B928(const sQtVec4_B928& v, float s)
 
 // Walks a quadtree: inner nodes split the rect (lo, hi) at its midpoint into four children;
 // leaves submit the rect's outline as a 5-vertex strip at the camera's height.
-extern "C" void func_002BB928(void* ctx, sQtTree_B928* tree, sQtNode_B928* node, sQtVtx_B928* v,
+extern "C" void func_002BB928(cWorldPainterMan* ctx, sQtTree_B928* tree, sQtNode_B928* node, sQtVtx_B928* v,
                               sQtVec4_B928* lo, sQtVec4_B928* hi)
 {
     if (node->child[0] & 1) {
@@ -2709,14 +2710,14 @@ extern "C" int func_002BC6F0(void) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BC6F8);
 #ifdef SKIP_ASM
 extern char D_00485AF8[];
-extern "C" void *func_002BC6F8(void *arg0) {
-    *(char **)((char *)arg0 + 4) = D_00485AF8;
-    *(float *)((char *)arg0 + 0) = -99999.0f;
-    *(int *)((char *)arg0 + 0xC) = -1;
-    *(int *)((char *)arg0 + 8) = -1;
-    *(int *)((char *)arg0 + 0x14) = -1;
-    *(int *)((char *)arg0 + 0x10) = -1;
-    return arg0;
+extern "C" void *func_002BC6F8(tWPInGameData_MusicTrigger* arg0) {
+    arg0->mVtbl = (void**)D_00485AF8;
+    arg0->m_wpTravelDistance = -99999.0f;
+    arg0->m_lastType = -1;
+    arg0->m_Type = -1;
+    arg0->m_lastValue = -1;
+    arg0->m_Value = -1;
+    return ((void*)arg0);
 }
 #endif
 
@@ -2724,12 +2725,12 @@ extern "C" void *func_002BC6F8(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BC728);
 #ifdef SKIP_ASM
 extern char D_004858C0[];
-extern "C" void *func_002BC728(void *arg0) {
-    *(char **)((char *)arg0 + 4) = D_004858C0;
-    *(float *)((char *)arg0 + 0) = -99999.0f;
-    *(int *)((char *)arg0 + 0xC) = -1;
-    *(int *)((char *)arg0 + 8) = -1;
-    return arg0;
+extern "C" void *func_002BC728(tWPInGameData_Mix* arg0) {
+    arg0->mVtbl = (void**)D_004858C0;
+    arg0->m_wpTravelDistance = -99999.0f;
+    arg0->m_lastMixPreset = -1;
+    arg0->m_MixPreset = -1;
+    return ((void*)arg0);
 }
 #endif
 
@@ -2737,12 +2738,12 @@ extern "C" void *func_002BC728(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BC750);
 #ifdef SKIP_ASM
 extern char D_00485688[];
-extern "C" void *func_002BC750(void *arg0) {
-    *(char **)((char *)arg0 + 4) = D_00485688;
-    *(float *)((char *)arg0 + 0) = -99999.0f;
-    *(int *)((char *)arg0 + 0xC) = -1;
-    *(int *)((char *)arg0 + 8) = -1;
-    return arg0;
+extern "C" void *func_002BC750(tWPInGameData_Ambience* arg0) {
+    arg0->mVtbl = (void**)D_00485688;
+    arg0->m_wpTravelDistance = -99999.0f;
+    arg0->m_lastBankID = -1;
+    arg0->m_BankID = -1;
+    return ((void*)arg0);
 }
 #endif
 
@@ -2750,12 +2751,12 @@ extern "C" void *func_002BC750(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BC778);
 #ifdef SKIP_ASM
 extern char D_00485450[];
-extern "C" void *func_002BC778(void *arg0) {
-    *(char **)((char *)arg0 + 4) = D_00485450;
-    *(float *)((char *)arg0 + 0) = -99999.0f;
-    *(int *)((char *)arg0 + 0xC) = -1;
-    *(int *)((char *)arg0 + 8) = -1;
-    return arg0;
+extern "C" void *func_002BC778(tWPInGameData_Speech* arg0) {
+    arg0->mVtbl = (void**)D_00485450;
+    arg0->m_wpTravelDistance = -99999.0f;
+    arg0->m_lastSpeechID = -1;
+    arg0->m_SpeechID = -1;
+    return ((void*)arg0);
 }
 #endif
 
@@ -2763,12 +2764,12 @@ extern "C" void *func_002BC778(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BC7A0);
 #ifdef SKIP_ASM
 extern char D_00485218[];
-extern "C" void *func_002BC7A0(void *arg0) {
-    *(char **)((char *)arg0 + 4) = D_00485218;
-    *(float *)((char *)arg0 + 0xC) = 30000.0f;
-    *(float *)((char *)arg0 + 0) = -99999.0f;
-    *(float *)((char *)arg0 + 8) = 30000.0f;
-    return arg0;
+extern "C" void *func_002BC7A0(tWPInGameData_Camera* arg0) {
+    arg0->mVtbl = (void**)D_00485218;
+    arg0->m_lastDrawDistance = 30000.0f;
+    arg0->m_wpTravelDistance = -99999.0f;
+    arg0->m_DrawDistance = 30000.0f;
+    return ((void*)arg0);
 }
 #endif
 
@@ -2776,24 +2777,24 @@ extern "C" void *func_002BC7A0(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BC7C8);
 #ifdef SKIP_ASM
 extern char D_00484FE0[];
-extern "C" void *func_002BC7C8(void *arg0) {
+extern "C" void *func_002BC7C8(tWPInGameData_Fog* arg0) {
     float zero = 0.0f;
     float a = 3000.0f, b = 30000.0f, c = 0.43f, d = 0.55f, e = 0.71f;
-    *(int **)((char*)arg0 + 4) = (int*)D_00484FE0;
-    *(float *)((char*)arg0 + 0) = -99999.0f;
-    *(float *)((char*)arg0 + 0xC) = zero;
-    *(float *)((char*)arg0 + 0x14) = a;
-    *(float *)((char*)arg0 + 0x1C) = b;
-    *(float *)((char*)arg0 + 0x24) = c;
-    *(float *)((char*)arg0 + 0x2C) = d;
-    *(float *)((char*)arg0 + 0x34) = e;
-    *(float *)((char*)arg0 + 0x8) = zero;
-    *(float *)((char*)arg0 + 0x10) = a;
-    *(float *)((char*)arg0 + 0x18) = b;
-    *(float *)((char*)arg0 + 0x20) = c;
-    *(float *)((char*)arg0 + 0x28) = d;
-    *(float *)((char*)arg0 + 0x30) = e;
-    return arg0;
+    arg0->mVtbl = (void**)((int*)D_00484FE0);
+    arg0->m_wpTravelDistance = -99999.0f;
+    arg0->m_lastFogDensity = zero;
+    arg0->m_lastFogNear = a;
+    arg0->m_lastFogFar = b;
+    arg0->m_lastFogColourR = c;
+    arg0->m_lastFogColourG = d;
+    arg0->m_lastFogColourB = e;
+    arg0->m_FogDensity = zero;
+    arg0->m_FogNear = a;
+    arg0->m_FogFar = b;
+    arg0->m_FogColourR = c;
+    arg0->m_FogColourG = d;
+    arg0->m_FogColourB = e;
+    return ((void*)arg0);
 }
 #endif
 
@@ -2801,11 +2802,11 @@ extern "C" void *func_002BC7C8(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BC830);
 #ifdef SKIP_ASM
 extern char D_00484DA8[];
-extern "C" void *func_002BC830(void *self) {
+extern "C" void *func_002BC830(tWPInGameData_LightGlow* self) {
     float one = 1.0f, zero = 0.0f;
     float *p = (float*)self;
     p[0] = -99999.0f;
-    *(void**)((char*)self + 4) = D_00484DA8;
+    self->mVtbl = (void**)D_00484DA8;
     p[3] = one;
     p[2] = one;
     p[5] = one;
@@ -2820,7 +2821,7 @@ extern "C" void *func_002BC830(void *self) {
     p[12] = zero;
     p[15] = zero;
     p[14] = zero;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2828,11 +2829,11 @@ extern "C" void *func_002BC830(void *self) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BC890);
 #ifdef SKIP_ASM
 extern char D_00484B70[];
-extern "C" void *func_002BC890(void *self) {
+extern "C" void *func_002BC890(tWPInGameData_ScreenTint* self) {
     float one = 1.0f, zero = 0.0f;
     float *p = (float*)self;
     p[0] = -99999.0f;
-    *(void**)((char*)self + 4) = D_00484B70;
+    self->mVtbl = (void**)D_00484B70;
     p[3] = one;
     p[2] = one;
     p[5] = one;
@@ -2845,7 +2846,7 @@ extern "C" void *func_002BC890(void *self) {
     p[10] = zero;
     p[13] = zero;
     p[12] = zero;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2853,13 +2854,13 @@ extern "C" void *func_002BC890(void *self) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BC8E8);
 #ifdef SKIP_ASM
 extern char D_00484938[];
-extern "C" void *func_002BC8E8(void *arg0) {
+extern "C" void *func_002BC8E8(tWPInGameData_SkyBox* arg0) {
     float zero = 0.0f;
-    *(char **)((char *)arg0 + 4) = D_00484938;
-    *(float *)((char *)arg0 + 0xC) = zero;
-    *(float *)((char *)arg0 + 0) = -99999.0f;
-    *(float *)((char *)arg0 + 8) = zero;
-    return arg0;
+    arg0->mVtbl = (void**)D_00484938;
+    arg0->m_lastSkyBoxRotation = zero;
+    arg0->m_wpTravelDistance = -99999.0f;
+    arg0->m_SkyBoxRotation = zero;
+    return ((void*)arg0);
 }
 #endif
 
@@ -2867,11 +2868,11 @@ extern "C" void *func_002BC8E8(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BC910);
 #ifdef SKIP_ASM
 extern char D_00484700[];
-extern "C" void *func_002BC910(void *self) {
+extern "C" void *func_002BC910(tWPInGameData_Sun* self) {
     float one = 1.0f, zero = 0.0f;
     float *p = (float*)self;
     p[0] = -99999.0f;
-    *(void**)((char*)self + 4) = D_00484700;
+    self->mVtbl = (void**)D_00484700;
     p[3] = zero;
     p[2] = zero;
     p[5] = zero;
@@ -2890,7 +2891,7 @@ extern "C" void *func_002BC910(void *self) {
     p[16] = one;
     p[19] = one;
     p[18] = one;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2898,13 +2899,13 @@ extern "C" void *func_002BC910(void *self) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BC980);
 #ifdef SKIP_ASM
 extern char D_004844C8[];
-extern "C" void *func_002BC980(void *arg0) {
+extern "C" void *func_002BC980(tWPInGameData_Surface* arg0) {
     float one = 1.0f;
-    *(char **)((char *)arg0 + 4) = D_004844C8;
-    *(float *)((char *)arg0 + 0xC) = one;
-    *(float *)((char *)arg0 + 0) = -99999.0f;
-    *(float *)((char *)arg0 + 8) = one;
-    return arg0;
+    arg0->mVtbl = (void**)D_004844C8;
+    arg0->m_lastSnowSparkleDensity = one;
+    arg0->m_wpTravelDistance = -99999.0f;
+    arg0->m_SnowSparkleDensity = one;
+    return ((void*)arg0);
 }
 #endif
 
@@ -2931,27 +2932,27 @@ struct sQuery_002BC9B0
     float w2;               // 0x50
     float w3;               // 0x54
 };
-extern "C" void* func_002BC9B0(sQuery_002BC9B0* o)
+extern "C" void* func_002BC9B0(tWPInGameData_Lighting* o)
 {
-    o->vtable = D_00484290;
-    o->minValue = -99999.0f;
-    o->p[0].a = o->p[0].b = 0;
-    o->p[1].a = o->p[1].b = 0;
-    o->p[2].a = o->p[2].b = 0;
-    o->p[3].a = o->p[3].b = 0;
-    o->p[4].a = o->p[4].b = 0;
-    o->p[5].a = o->p[5].b = 0;
-    o->p[6].a = o->p[6].b = 0;
-    o->p[7].a = o->p[7].b = 0;
-    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[0] = o->p[1] = t; }
-    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[2] = o->p[3] = t; }
-    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[4] = o->p[5] = t; }
-    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; o->p[6] = o->p[7] = t; }
-    o->w1 = 1.0f;
-    o->w3 = 0.75f;
-    o->w0 = 1.0f;
-    o->w2 = 0.75f;
-    return o;
+    o->mVtbl = (void**)D_00484290;
+    o->m_wpTravelDistance = -99999.0f;
+    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[0].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[0].b = 0;
+    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[1].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[1].b = 0;
+    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[2].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[2].b = 0;
+    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[3].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[3].b = 0;
+    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[4].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[4].b = 0;
+    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[5].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[5].b = 0;
+    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[6].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[6].b = 0;
+    ((sPair_002BC9B0*)&o->m_LightIrradianceName)[7].a = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[7].b = 0;
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; ((sPair_002BC9B0*)&o->m_LightIrradianceName)[0] = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[1] = t; }
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; ((sPair_002BC9B0*)&o->m_LightIrradianceName)[2] = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[3] = t; }
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; ((sPair_002BC9B0*)&o->m_LightIrradianceName)[4] = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[5] = t; }
+    { sPair_002BC9B0 t = D_004A53D0_2BC9B0; ((sPair_002BC9B0*)&o->m_LightIrradianceName)[6] = ((sPair_002BC9B0*)&o->m_LightIrradianceName)[7] = t; }
+    o->m_lastAmbientLightIntensityOffset = 1.0f;
+    o->m_lastRimLightIntensityOffset = 0.75f;
+    o->m_AmbientLightIntensityOffset = 1.0f;
+    o->m_RimLightIntensityOffset = 0.75f;
+    return ((sQuery_002BC9B0*)o);
 }
 #endif
 
@@ -2991,15 +2992,15 @@ extern "C" void* func_002BCAF8(char *self) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BCBD0);
 #ifdef SKIP_ASM
 extern char D_00483E20[];
-extern "C" void *func_002BCBD0(void *arg0) {
+extern "C" void *func_002BCBD0(tWPInGameData_Danger* arg0) {
     float zero = 0.0f;
-    *(char **)((char *)arg0 + 4) = D_00483E20;
-    *(int *)((char *)arg0 + 0xC) = 0;
-    *(int *)((char *)arg0 + 0x8) = 0;
-    *(float *)((char *)arg0 + 0) = -99999.0f;
-    *(float *)((char *)arg0 + 0x14) = zero;
-    *(float *)((char *)arg0 + 0x10) = zero;
-    return arg0;
+    arg0->mVtbl = (void**)D_00483E20;
+    arg0->m_lastLevel = 0;
+    arg0->m_Level = 0;
+    arg0->m_wpTravelDistance = -99999.0f;
+    arg0->m_lastPointRate = zero;
+    arg0->m_PointRate = zero;
+    return ((void*)arg0);
 }
 #endif
 
@@ -3007,14 +3008,14 @@ extern "C" void *func_002BCBD0(void *arg0) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BCC00);
 #ifdef SKIP_ASM
 class cCC00 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BCC00(void *self, void *p, float f) {
+extern "C" void func_002BCC00(tWPInGameData_MusicTrigger* self, void *p, float f) {
     cCC00 *o = (cCC00*)self;
     o->vt();
     f = f * f;
-    *(int*)((char*)self + 8) = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)*(int*)((char*)self + 8));
-    *(int*)((char*)self + 0xC) = *(int*)((char*)p + 4);
-    *(int*)((char*)self + 0x10) = (int)(f * (float)*(int*)((char*)p + 8) + (1.0f - f) * (float)*(int*)((char*)self + 0x10));
-    *(int*)((char*)self + 0x14) = *(int*)((char*)p + 8);
+    self->m_Type = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)self->m_Type);
+    self->m_lastType = *(int*)((char*)p + 4);
+    self->m_Value = (int)(f * (float)*(int*)((char*)p + 8) + (1.0f - f) * (float)self->m_Value);
+    self->m_lastValue = *(int*)((char*)p + 8);
     o->vt();
 }
 #endif
@@ -3023,12 +3024,12 @@ extern "C" void func_002BCC00(void *self, void *p, float f) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BCCC8);
 #ifdef SKIP_ASM
 class cCCC8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BCCC8(void *self, void *p, float f) {
+extern "C" void func_002BCCC8(tWPInGameData_Mix* self, void *p, float f) {
     cCCC8 *o = (cCCC8*)self;
     o->vt();
     f = f * f;
-    *(int*)((char*)self + 8) = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)*(int*)((char*)self + 8));
-    *(int*)((char*)self + 0xC) = *(int*)((char*)p + 4);
+    self->m_MixPreset = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)self->m_MixPreset);
+    self->m_lastMixPreset = *(int*)((char*)p + 4);
     o->vt();
 }
 #endif
@@ -3037,12 +3038,12 @@ extern "C" void func_002BCCC8(void *self, void *p, float f) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BCD68);
 #ifdef SKIP_ASM
 class cCD68 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BCD68(void *self, void *p, float f) {
+extern "C" void func_002BCD68(tWPInGameData_Ambience* self, void *p, float f) {
     cCD68 *o = (cCD68*)self;
     o->vt();
     f = f * f;
-    *(int*)((char*)self + 8) = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)*(int*)((char*)self + 8));
-    *(int*)((char*)self + 0xC) = *(int*)((char*)p + 4);
+    self->m_BankID = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)self->m_BankID);
+    self->m_lastBankID = *(int*)((char*)p + 4);
     o->vt();
 }
 #endif
@@ -3051,12 +3052,12 @@ extern "C" void func_002BCD68(void *self, void *p, float f) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BCE08);
 #ifdef SKIP_ASM
 class cCE08 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BCE08(void *self, void *p, float f) {
+extern "C" void func_002BCE08(tWPInGameData_Speech* self, void *p, float f) {
     cCE08 *o = (cCE08*)self;
     o->vt();
     f = f * f;
-    *(int*)((char*)self + 8) = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)*(int*)((char*)self + 8));
-    *(int*)((char*)self + 0xC) = *(int*)((char*)p + 4);
+    self->m_SpeechID = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)self->m_SpeechID);
+    self->m_lastSpeechID = *(int*)((char*)p + 4);
     o->vt();
 }
 #endif
@@ -3065,12 +3066,12 @@ extern "C" void func_002BCE08(void *self, void *p, float f) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BCEA8);
 #ifdef SKIP_ASM
 class cCEA8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BCEA8(void *self, void *p, float f) {
+extern "C" void func_002BCEA8(tWPInGameData_Camera* self, void *p, float f) {
     cCEA8 *o = (cCEA8*)self;
     o->vt();
     f = f * f;
-    *(float*)((char*)self + 8) = f * *(float*)((char*)p + 4) + (1.0f - f) * *(float*)((char*)self + 8);
-    *(float*)((char*)self + 0xC) = *(float*)((char*)p + 4);
+    self->m_DrawDistance = f * *(float*)((char*)p + 4) + (1.0f - f) * self->m_DrawDistance;
+    self->m_lastDrawDistance = *(float*)((char*)p + 4);
     o->vt();
 }
 #endif
@@ -3083,26 +3084,26 @@ struct Pair_CF38 { float cur; float tgt; };
 struct Obj_CF38 { int pad0; char* vt; Pair_CF38 p[6]; };
 struct Src_CF38 { int pad0; float v[6]; };
 
-extern "C" void func_002BCF38(Obj_CF38* self, Src_CF38* src, float t) {
+extern "C" void func_002BCF38(tWPInGameData_Fog* self, Src_CF38* src, float t) {
     VEnt_CF38* e;
     float inv;
-    e = (VEnt_CF38*)(self->vt + 0x218);
+    e = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
     t = t * t;
     inv = 1.0f - t;
-    self->p[0].cur = t * src->v[0] + inv * self->p[0].cur;
-    self->p[0].tgt = src->v[0];
-    self->p[1].cur = t * src->v[1] + inv * self->p[1].cur;
-    self->p[1].tgt = src->v[1];
-    self->p[2].cur = t * src->v[2] + inv * self->p[2].cur;
-    self->p[2].tgt = src->v[2];
-    self->p[3].cur = t * src->v[3] + inv * self->p[3].cur;
-    self->p[3].tgt = src->v[3];
-    self->p[4].cur = t * src->v[4] + inv * self->p[4].cur;
-    self->p[4].tgt = src->v[4];
-    self->p[5].cur = t * src->v[5] + inv * self->p[5].cur;
-    self->p[5].tgt = src->v[5];
-    e = (VEnt_CF38*)(self->vt + 0x218);
+    ((Pair_CF38*)&self->m_FogDensity)[0].cur = t * src->v[0] + inv * ((Pair_CF38*)&self->m_FogDensity)[0].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[0].tgt = src->v[0];
+    ((Pair_CF38*)&self->m_FogDensity)[1].cur = t * src->v[1] + inv * ((Pair_CF38*)&self->m_FogDensity)[1].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[1].tgt = src->v[1];
+    ((Pair_CF38*)&self->m_FogDensity)[2].cur = t * src->v[2] + inv * ((Pair_CF38*)&self->m_FogDensity)[2].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[2].tgt = src->v[2];
+    ((Pair_CF38*)&self->m_FogDensity)[3].cur = t * src->v[3] + inv * ((Pair_CF38*)&self->m_FogDensity)[3].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[3].tgt = src->v[3];
+    ((Pair_CF38*)&self->m_FogDensity)[4].cur = t * src->v[4] + inv * ((Pair_CF38*)&self->m_FogDensity)[4].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[4].tgt = src->v[4];
+    ((Pair_CF38*)&self->m_FogDensity)[5].cur = t * src->v[5] + inv * ((Pair_CF38*)&self->m_FogDensity)[5].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[5].tgt = src->v[5];
+    e = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
 }
 #endif
@@ -3116,29 +3117,29 @@ struct Pair_D068 { float cur; float tgt; };
 struct Obj_D068 { int pad0; char* vt; Pair_D068 p[7]; };
 struct Src_D068 { int pad0; float v[7]; };
 
-extern "C" void func_002BD068(Obj_D068* self, Src_D068* src, float t) {
+extern "C" void func_002BD068(tWPInGameData_LightGlow* self, Src_D068* src, float t) {
     VEnt_D068* e;
     float inv;
-    e = (VEnt_D068*)(self->vt + 0x218);
+    e = (VEnt_D068*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
     t = t * t;
     inv = 1.0f - t;
-    self->p[0].cur = t * src->v[0] + inv * self->p[0].cur;
-    self->p[0].tgt = src->v[0];
-    self->p[1].cur = t * src->v[1] + inv * self->p[1].cur;
-    self->p[1].tgt = src->v[1];
-    self->p[2].cur = t * src->v[2] + inv * self->p[2].cur;
-    self->p[2].tgt = src->v[2];
-    self->p[3].cur = t * src->v[3] + inv * self->p[3].cur;
-    self->p[3].tgt = src->v[3];
-    self->p[4].cur = t * src->v[4] + inv * self->p[4].cur;
-    self->p[4].tgt = src->v[4];
-    self->p[5].cur = t * src->v[5] + inv * self->p[5].cur;
-    self->p[5].tgt = src->v[5];
-    self->p[6].cur = t * src->v[6] + inv * self->p[6].cur;
-    self->p[6].tgt = src->v[6];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur = t * src->v[0] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[0].tgt = src->v[0];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur = t * src->v[1] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[1].tgt = src->v[1];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur = t * src->v[2] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[2].tgt = src->v[2];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur = t * src->v[3] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[3].tgt = src->v[3];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur = t * src->v[4] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[4].tgt = src->v[4];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur = t * src->v[5] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[5].tgt = src->v[5];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur = t * src->v[6] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[6].tgt = src->v[6];
     {
-        VEntV_D068* e2 = (VEntV_D068*)(self->vt + 0x218);
+        VEntV_D068* e2 = (VEntV_D068*)((char*)self->mVtbl + 0x218);
         e2->fn((char*)self + e2->delta);
     }
 }
@@ -3152,26 +3153,26 @@ struct Pair_D1B8 { float cur; float tgt; };
 struct Obj_D1B8 { int pad0; char* vt; Pair_D1B8 p[6]; };
 struct Src_D1B8 { int pad0; float v[6]; };
 
-extern "C" void func_002BD1B8(Obj_D1B8* self, Src_D1B8* src, float t) {
+extern "C" void func_002BD1B8(tWPInGameData_ScreenTint* self, Src_D1B8* src, float t) {
     VEnt_D1B8* e;
     float inv;
-    e = (VEnt_D1B8*)(self->vt + 0x218);
+    e = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
     t = t * t;
     inv = 1.0f - t;
-    self->p[0].cur = t * src->v[0] + inv * self->p[0].cur;
-    self->p[0].tgt = src->v[0];
-    self->p[1].cur = t * src->v[1] + inv * self->p[1].cur;
-    self->p[1].tgt = src->v[1];
-    self->p[2].cur = t * src->v[2] + inv * self->p[2].cur;
-    self->p[2].tgt = src->v[2];
-    self->p[3].cur = t * src->v[3] + inv * self->p[3].cur;
-    self->p[3].tgt = src->v[3];
-    self->p[4].cur = t * src->v[4] + inv * self->p[4].cur;
-    self->p[4].tgt = src->v[4];
-    self->p[5].cur = t * src->v[5] + inv * self->p[5].cur;
-    self->p[5].tgt = src->v[5];
-    e = (VEnt_D1B8*)(self->vt + 0x218);
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur = t * src->v[0] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].tgt = src->v[0];
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur = t * src->v[1] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].tgt = src->v[1];
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur = t * src->v[2] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].tgt = src->v[2];
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur = t * src->v[3] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].tgt = src->v[3];
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur = t * src->v[4] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].tgt = src->v[4];
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur = t * src->v[5] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].tgt = src->v[5];
+    e = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
 }
 #endif
@@ -3180,12 +3181,12 @@ extern "C" void func_002BD1B8(Obj_D1B8* self, Src_D1B8* src, float t) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BD2E8);
 #ifdef SKIP_ASM
 class cD2E8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BD2E8(void *self, void *p, float f) {
+extern "C" void func_002BD2E8(tWPInGameData_SkyBox* self, void *p, float f) {
     cD2E8 *o = (cD2E8*)self;
     o->vt();
     f = f * f;
-    *(float*)((char*)self + 8) = f * *(float*)((char*)p + 4) + (1.0f - f) * *(float*)((char*)self + 8);
-    *(float*)((char*)self + 0xC) = *(float*)((char*)p + 4);
+    self->m_SkyBoxRotation = f * *(float*)((char*)p + 4) + (1.0f - f) * self->m_SkyBoxRotation;
+    self->m_lastSkyBoxRotation = *(float*)((char*)p + 4);
     o->vt();
 }
 #endif
@@ -3199,32 +3200,32 @@ struct IPair_D378 { int cur; int tgt; };
 struct Obj_D378 { int pad0; char* vt; Pair_D378 p[6]; IPair_D378 i6; Pair_D378 q[2]; };
 struct Src_D378 { int pad0; float v[6]; int i6; float w[2]; };
 
-extern "C" void func_002BD378(Obj_D378* self, Src_D378* src, float t) {
+extern "C" void func_002BD378(tWPInGameData_Sun* self, Src_D378* src, float t) {
     VEnt_D378* e;
     float inv;
-    e = (VEnt_D378*)(self->vt + 0x218);
+    e = (VEnt_D378*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
     t = t * t;
     inv = 1.0f - t;
-    self->p[0].cur = t * src->v[0] + inv * self->p[0].cur;
-    self->p[0].tgt = src->v[0];
-    self->p[1].cur = t * src->v[1] + inv * self->p[1].cur;
-    self->p[1].tgt = src->v[1];
-    self->p[2].cur = t * src->v[2] + inv * self->p[2].cur;
-    self->p[2].tgt = src->v[2];
-    self->p[3].cur = t * src->v[3] + inv * self->p[3].cur;
-    self->p[3].tgt = src->v[3];
-    self->p[4].cur = t * src->v[4] + inv * self->p[4].cur;
-    self->p[4].tgt = src->v[4];
-    self->p[5].cur = t * src->v[5] + inv * self->p[5].cur;
-    self->p[5].tgt = src->v[5];
-    self->i6.cur = (int)(t * src->i6 + inv * self->i6.cur);
-    self->i6.tgt = src->i6;
-    self->q[0].cur = t * src->w[0] + inv * self->q[0].cur;
-    self->q[0].tgt = src->w[0];
-    self->q[1].cur = t * src->w[1] + inv * self->q[1].cur;
-    self->q[1].tgt = src->w[1];
-    e = (VEnt_D378*)(self->vt + 0x218);
+    ((Pair_D378*)&self->m_SunPitchOffset)[0].cur = t * src->v[0] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[0].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[0].tgt = src->v[0];
+    ((Pair_D378*)&self->m_SunPitchOffset)[1].cur = t * src->v[1] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[1].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[1].tgt = src->v[1];
+    ((Pair_D378*)&self->m_SunPitchOffset)[2].cur = t * src->v[2] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[2].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[2].tgt = src->v[2];
+    ((Pair_D378*)&self->m_SunPitchOffset)[3].cur = t * src->v[3] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[3].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[3].tgt = src->v[3];
+    ((Pair_D378*)&self->m_SunPitchOffset)[4].cur = t * src->v[4] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[4].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[4].tgt = src->v[4];
+    ((Pair_D378*)&self->m_SunPitchOffset)[5].cur = t * src->v[5] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[5].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[5].tgt = src->v[5];
+    self->m_SunType = (int)(t * src->i6 + inv * self->m_SunType);
+    self->m_lastSunType = src->i6;
+    ((Pair_D378*)&self->m_LensIntensity)[0].cur = t * src->w[0] + inv * ((Pair_D378*)&self->m_LensIntensity)[0].cur;
+    ((Pair_D378*)&self->m_LensIntensity)[0].tgt = src->w[0];
+    ((Pair_D378*)&self->m_LensIntensity)[1].cur = t * src->w[1] + inv * ((Pair_D378*)&self->m_LensIntensity)[1].cur;
+    ((Pair_D378*)&self->m_LensIntensity)[1].tgt = src->w[1];
+    e = (VEnt_D378*)((char*)self->mVtbl + 0x218);
     e->fn((char*)self + e->delta);
 }
 #endif
@@ -3233,12 +3234,12 @@ extern "C" void func_002BD378(Obj_D378* self, Src_D378* src, float t) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BD518);
 #ifdef SKIP_ASM
 class cD518 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BD518(void *self, void *p, float f) {
+extern "C" void func_002BD518(tWPInGameData_Surface* self, void *p, float f) {
     cD518 *o = (cD518*)self;
     o->vt();
     f = f * f;
-    *(float*)((char*)self + 8) = f * *(float*)((char*)p + 4) + (1.0f - f) * *(float*)((char*)self + 8);
-    *(float*)((char*)self + 0xC) = *(float*)((char*)p + 4);
+    self->m_SnowSparkleDensity = f * *(float*)((char*)p + 4) + (1.0f - f) * self->m_SnowSparkleDensity;
+    self->m_lastSnowSparkleDensity = *(float*)((char*)p + 4);
     o->vt();
 }
 #endif
@@ -3248,18 +3249,18 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BD5A8);
 #ifdef SKIP_ASM
 struct sP_D5A8 { float x, y; };
 class cD5A8 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BD5A8(void *self, void *p, float f) {
+extern "C" void func_002BD5A8(tWPInGameData_Lighting* self, void *p, float f) {
     cD5A8 *o = (cD5A8*)self;
     o->vt();
     f = f * f;
-    *(sP_D5A8*)((char*)self + 8) = *(sP_D5A8*)((char*)p + 4);
-    *(sP_D5A8*)((char*)self + 0x18) = *(sP_D5A8*)((char*)p + 0xC);
-    *(sP_D5A8*)((char*)self + 0x28) = *(sP_D5A8*)((char*)p + 0x14);
-    *(sP_D5A8*)((char*)self + 0x38) = *(sP_D5A8*)((char*)p + 0x1C);
-    *(float*)((char*)self + 0x48) = f * *(float*)((char*)p + 0x24) + (1.0f - f) * *(float*)((char*)self + 0x48);
-    *(float*)((char*)self + 0x4C) = *(float*)((char*)p + 0x24);
-    *(float*)((char*)self + 0x50) = f * *(float*)((char*)p + 0x28) + (1.0f - f) * *(float*)((char*)self + 0x50);
-    *(float*)((char*)self + 0x54) = *(float*)((char*)p + 0x28);
+    *(sP_D5A8*)&self->m_LightIrradianceName = *(sP_D5A8*)((char*)p + 4);
+    *(sP_D5A8*)&self->m_ShadowIrradianceName = *(sP_D5A8*)((char*)p + 0xC);
+    *(sP_D5A8*)&self->m_TunnelIrradianceName = *(sP_D5A8*)((char*)p + 0x14);
+    *(sP_D5A8*)&self->m_ObjectIrradianceName = *(sP_D5A8*)((char*)p + 0x1C);
+    self->m_AmbientLightIntensityOffset = f * *(float*)((char*)p + 0x24) + (1.0f - f) * self->m_AmbientLightIntensityOffset;
+    self->m_lastAmbientLightIntensityOffset = *(float*)((char*)p + 0x24);
+    self->m_RimLightIntensityOffset = f * *(float*)((char*)p + 0x28) + (1.0f - f) * self->m_RimLightIntensityOffset;
+    self->m_lastRimLightIntensityOffset = *(float*)((char*)p + 0x28);
     o->vt();
 }
 #endif
@@ -3270,48 +3271,48 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BD698);
 // Environment property blend: w^2 blend of all 19 current values toward the
 // incoming set, which is then stored as the target.
 class cD698 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BD698(void *self, void *p, float f) {
+extern "C" void func_002BD698(tWPInGameData_Weather* self, void *p, float f) {
     cD698 *o = (cD698*)self;
     o->vt();
     f = f * f;
-    *(float*)((char*)self + 0x8) = f * *(float*)((char*)p + 0x4) + (1.0f - f) * *(float*)((char*)self + 0x8);
-    *(float*)((char*)self + 0xC) = *(float*)((char*)p + 0x4);
-    *(float*)((char*)self + 0x10) = f * *(float*)((char*)p + 0x8) + (1.0f - f) * *(float*)((char*)self + 0x10);
-    *(float*)((char*)self + 0x14) = *(float*)((char*)p + 0x8);
-    *(float*)((char*)self + 0x18) = f * *(float*)((char*)p + 0xC) + (1.0f - f) * *(float*)((char*)self + 0x18);
-    *(float*)((char*)self + 0x1C) = *(float*)((char*)p + 0xC);
-    *(float*)((char*)self + 0x20) = f * *(float*)((char*)p + 0x10) + (1.0f - f) * *(float*)((char*)self + 0x20);
-    *(float*)((char*)self + 0x24) = *(float*)((char*)p + 0x10);
-    *(float*)((char*)self + 0x28) = f * *(float*)((char*)p + 0x14) + (1.0f - f) * *(float*)((char*)self + 0x28);
-    *(float*)((char*)self + 0x2C) = *(float*)((char*)p + 0x14);
-    *(float*)((char*)self + 0x30) = f * *(float*)((char*)p + 0x18) + (1.0f - f) * *(float*)((char*)self + 0x30);
-    *(float*)((char*)self + 0x34) = *(float*)((char*)p + 0x18);
-    *(float*)((char*)self + 0x38) = f * *(float*)((char*)p + 0x1C) + (1.0f - f) * *(float*)((char*)self + 0x38);
-    *(float*)((char*)self + 0x3C) = *(float*)((char*)p + 0x1C);
-    *(float*)((char*)self + 0x40) = f * *(float*)((char*)p + 0x20) + (1.0f - f) * *(float*)((char*)self + 0x40);
-    *(float*)((char*)self + 0x44) = *(float*)((char*)p + 0x20);
-    *(float*)((char*)self + 0x48) = f * *(float*)((char*)p + 0x24) + (1.0f - f) * *(float*)((char*)self + 0x48);
-    *(float*)((char*)self + 0x4C) = *(float*)((char*)p + 0x24);
-    *(float*)((char*)self + 0x50) = f * *(float*)((char*)p + 0x28) + (1.0f - f) * *(float*)((char*)self + 0x50);
-    *(float*)((char*)self + 0x54) = *(float*)((char*)p + 0x28);
-    *(float*)((char*)self + 0x58) = f * *(float*)((char*)p + 0x2C) + (1.0f - f) * *(float*)((char*)self + 0x58);
-    *(float*)((char*)self + 0x5C) = *(float*)((char*)p + 0x2C);
-    *(float*)((char*)self + 0x60) = f * *(float*)((char*)p + 0x30) + (1.0f - f) * *(float*)((char*)self + 0x60);
-    *(float*)((char*)self + 0x64) = *(float*)((char*)p + 0x30);
-    *(float*)((char*)self + 0x68) = f * *(float*)((char*)p + 0x34) + (1.0f - f) * *(float*)((char*)self + 0x68);
-    *(float*)((char*)self + 0x6C) = *(float*)((char*)p + 0x34);
-    *(float*)((char*)self + 0x70) = f * *(float*)((char*)p + 0x38) + (1.0f - f) * *(float*)((char*)self + 0x70);
-    *(float*)((char*)self + 0x74) = *(float*)((char*)p + 0x38);
-    *(float*)((char*)self + 0x78) = f * *(float*)((char*)p + 0x3C) + (1.0f - f) * *(float*)((char*)self + 0x78);
-    *(float*)((char*)self + 0x7C) = *(float*)((char*)p + 0x3C);
-    *(float*)((char*)self + 0x80) = f * *(float*)((char*)p + 0x40) + (1.0f - f) * *(float*)((char*)self + 0x80);
-    *(float*)((char*)self + 0x84) = *(float*)((char*)p + 0x40);
-    *(float*)((char*)self + 0x88) = f * *(float*)((char*)p + 0x44) + (1.0f - f) * *(float*)((char*)self + 0x88);
-    *(float*)((char*)self + 0x8C) = *(float*)((char*)p + 0x44);
-    *(float*)((char*)self + 0x90) = f * *(float*)((char*)p + 0x48) + (1.0f - f) * *(float*)((char*)self + 0x90);
-    *(float*)((char*)self + 0x94) = *(float*)((char*)p + 0x48);
-    *(float*)((char*)self + 0x98) = f * *(float*)((char*)p + 0x4C) + (1.0f - f) * *(float*)((char*)self + 0x98);
-    *(float*)((char*)self + 0x9C) = *(float*)((char*)p + 0x4C);
+    self->m_SnowIntensity = f * *(float*)((char*)p + 0x4) + (1.0f - f) * self->m_SnowIntensity;
+    self->m_lastSnowIntensity = *(float*)((char*)p + 0x4);
+    self->m_FlakeSize = f * *(float*)((char*)p + 0x8) + (1.0f - f) * self->m_FlakeSize;
+    self->m_lastFlakeSize = *(float*)((char*)p + 0x8);
+    self->m_WindIntensity = f * *(float*)((char*)p + 0xC) + (1.0f - f) * self->m_WindIntensity;
+    self->m_lastWindIntensity = *(float*)((char*)p + 0xC);
+    self->m_WindRotation = f * *(float*)((char*)p + 0x10) + (1.0f - f) * self->m_WindRotation;
+    self->m_lastWindRotation = *(float*)((char*)p + 0x10);
+    self->m_PlayerWindIntensity = f * *(float*)((char*)p + 0x14) + (1.0f - f) * self->m_PlayerWindIntensity;
+    self->m_lastPlayerWindIntensity = *(float*)((char*)p + 0x14);
+    self->m_Temperature = f * *(float*)((char*)p + 0x18) + (1.0f - f) * self->m_Temperature;
+    self->m_lastTemperature = *(float*)((char*)p + 0x18);
+    self->m_SnowFlurries = f * *(float*)((char*)p + 0x1C) + (1.0f - f) * self->m_SnowFlurries;
+    self->m_lastSnowFlurries = *(float*)((char*)p + 0x1C);
+    self->m_SnowGravityMultiplier = f * *(float*)((char*)p + 0x20) + (1.0f - f) * self->m_SnowGravityMultiplier;
+    self->m_lastSnowGravityMultiplier = *(float*)((char*)p + 0x20);
+    self->m_SnowFluffItensity = f * *(float*)((char*)p + 0x24) + (1.0f - f) * self->m_SnowFluffItensity;
+    self->m_lastSnowFluffItensity = *(float*)((char*)p + 0x24);
+    self->m_SnowFluffWindIntensity = f * *(float*)((char*)p + 0x28) + (1.0f - f) * self->m_SnowFluffWindIntensity;
+    self->m_lastSnowFluffWindIntensity = *(float*)((char*)p + 0x28);
+    self->m_LightningChance = f * *(float*)((char*)p + 0x2C) + (1.0f - f) * self->m_LightningChance;
+    self->m_lastLightningChance = *(float*)((char*)p + 0x2C);
+    self->m_SnowFlakeColourA = f * *(float*)((char*)p + 0x30) + (1.0f - f) * self->m_SnowFlakeColourA;
+    self->m_lastSnowFlakeColourA = *(float*)((char*)p + 0x30);
+    self->m_SnowFlakeColourR = f * *(float*)((char*)p + 0x34) + (1.0f - f) * self->m_SnowFlakeColourR;
+    self->m_lastSnowFlakeColourR = *(float*)((char*)p + 0x34);
+    self->m_SnowFlakeColourG = f * *(float*)((char*)p + 0x38) + (1.0f - f) * self->m_SnowFlakeColourG;
+    self->m_lastSnowFlakeColourG = *(float*)((char*)p + 0x38);
+    self->m_SnowFlakeColourB = f * *(float*)((char*)p + 0x3C) + (1.0f - f) * self->m_SnowFlakeColourB;
+    self->m_lastSnowFlakeColourB = *(float*)((char*)p + 0x3C);
+    self->m_SnowFluffColourA = f * *(float*)((char*)p + 0x40) + (1.0f - f) * self->m_SnowFluffColourA;
+    self->m_lastSnowFluffColourA = *(float*)((char*)p + 0x40);
+    self->m_SnowFluffColourR = f * *(float*)((char*)p + 0x44) + (1.0f - f) * self->m_SnowFluffColourR;
+    self->m_lastSnowFluffColourR = *(float*)((char*)p + 0x44);
+    self->m_SnowFluffColourG = f * *(float*)((char*)p + 0x48) + (1.0f - f) * self->m_SnowFluffColourG;
+    self->m_lastSnowFluffColourG = *(float*)((char*)p + 0x48);
+    self->m_SnowFluffColourB = f * *(float*)((char*)p + 0x4C) + (1.0f - f) * self->m_SnowFluffColourB;
+    self->m_lastSnowFluffColourB = *(float*)((char*)p + 0x4C);
     o->vt();
 }
 #endif
@@ -3320,14 +3321,14 @@ extern "C" void func_002BD698(void *self, void *p, float f) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BD968);
 #ifdef SKIP_ASM
 class cD968 { public: int f0; virtual void v0();virtual void v1();virtual void v2();virtual void v3();virtual void v4();virtual void v5();virtual void v6();virtual void v7();virtual void v8();virtual void v9();virtual void v10();virtual void v11();virtual void v12();virtual void v13();virtual void v14();virtual void v15();virtual void v16();virtual void v17();virtual void v18();virtual void v19();virtual void v20();virtual void v21();virtual void v22();virtual void v23();virtual void v24();virtual void v25();virtual void v26();virtual void v27();virtual void v28();virtual void v29();virtual void v30();virtual void v31();virtual void v32();virtual void v33();virtual void v34();virtual void v35();virtual void v36();virtual void v37();virtual void v38();virtual void v39();virtual void v40();virtual void v41();virtual void v42();virtual void v43();virtual void v44();virtual void v45();virtual void v46();virtual void v47();virtual void v48();virtual void v49();virtual void v50();virtual void v51();virtual void v52();virtual void v53();virtual void v54();virtual void v55();virtual void v56();virtual void v57();virtual void v58();virtual void v59();virtual void v60();virtual void v61();virtual void v62();virtual void v63();virtual void v64();virtual void v65(); virtual int vt(); };
-extern "C" void func_002BD968(void *self, void *p, float f) {
+extern "C" void func_002BD968(tWPInGameData_Danger* self, void *p, float f) {
     cD968 *o = (cD968*)self;
     o->vt();
     f = f * f;
-    *(int*)((char*)self + 8) = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)*(int*)((char*)self + 8));
-    *(int*)((char*)self + 0xC) = *(int*)((char*)p + 4);
-    *(float*)((char*)self + 0x10) = f * *(float*)((char*)p + 8) + (1.0f - f) * *(float*)((char*)self + 0x10);
-    *(float*)((char*)self + 0x14) = *(float*)((char*)p + 8);
+    self->m_Level = (int)(f * (float)*(int*)((char*)p + 4) + (1.0f - f) * (float)self->m_Level);
+    self->m_lastLevel = *(int*)((char*)p + 4);
+    self->m_PointRate = f * *(float*)((char*)p + 8) + (1.0f - f) * self->m_PointRate;
+    self->m_lastPointRate = *(float*)((char*)p + 8);
     o->vt();
 }
 #endif
@@ -3377,46 +3378,46 @@ extern "C" void func_002BDA90(void) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDA98);
 #ifdef SKIP_ASM
-extern "C" int func_002BDA98(void *arg0, void *arg1) {
-    if ((*(int *)((char*)(arg0) + (8))) != (*(int *)((char*)(arg1) + (4)))) {
+extern "C" int func_002BDA98(tWPInGameData_MusicTrigger* arg0, void *arg1) {
+    if ((arg0->m_Type) != (*(int *)((char*)(arg1) + (4)))) {
         return 0;
     }
-    return (*(int *)((char*)(arg0) + (0x10))) == (*(int *)((char*)(arg1) + (8)));
+    return (arg0->m_Value) == (*(int *)((char*)(arg1) + (8)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDAC8);
 #ifdef SKIP_ASM
-extern "C" int func_002BDAC8(void *arg0, void *arg1) {
-    return (*(int *)((char*)(arg0) + (8))) == (*(int *)((char*)(arg1) + (4)));
+extern "C" int func_002BDAC8(tWPInGameData_Mix* arg0, void *arg1) {
+    return (arg0->m_MixPreset) == (*(int *)((char*)(arg1) + (4)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDAE0);
 #ifdef SKIP_ASM
-extern "C" int func_002BDAE0(void *arg0, void *arg1) {
-    return (*(int *)((char*)(arg0) + (8))) == (*(int *)((char*)(arg1) + (4)));
+extern "C" int func_002BDAE0(tWPInGameData_Ambience* arg0, void *arg1) {
+    return (arg0->m_BankID) == (*(int *)((char*)(arg1) + (4)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDAF8);
 #ifdef SKIP_ASM
-extern "C" int func_002BDAF8(void *arg0, void *arg1) {
-    return (*(int *)((char*)(arg0) + (8))) == (*(int *)((char*)(arg1) + (4)));
+extern "C" int func_002BDAF8(tWPInGameData_Speech* arg0, void *arg1) {
+    return (arg0->m_SpeechID) == (*(int *)((char*)(arg1) + (4)));
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDB10);
 #ifdef SKIP_ASM
-extern "C" int func_002BDB10(void *arg0, void *arg1) {
+extern "C" int func_002BDB10(tWPInGameData_Camera* arg0, void *arg1) {
     int var_2;
 
     var_2 = 0;
-    if ((*(float *)((char*)(arg0) + (8))) == (*(float *)((char*)(arg1) + (4)))) {
+    if ((arg0->m_DrawDistance) == (*(float *)((char*)(arg1) + (4)))) {
         var_2 = 1;
     }
     return var_2;
@@ -3426,13 +3427,13 @@ extern "C" int func_002BDB10(void *arg0, void *arg1) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDB38);
 #ifdef SKIP_ASM
-extern "C" int func_002BDB38(void *a, void *b) {
-    if (*(float*)((char*)a + 8) != *(float*)((char*)b + 4)) return 0;
-    if (*(float*)((char*)a + 0x10) != *(float*)((char*)b + 8)) return 0;
-    if (*(float*)((char*)a + 0x18) != *(float*)((char*)b + 0xC)) return 0;
-    if (*(float*)((char*)a + 0x20) != *(float*)((char*)b + 0x10)) return 0;
-    if (*(float*)((char*)a + 0x28) != *(float*)((char*)b + 0x14)) return 0;
-    if (*(float*)((char*)a + 0x30) != *(float*)((char*)b + 0x18)) return 0;
+extern "C" int func_002BDB38(tWPInGameData_Fog* a, void *b) {
+    if (a->m_FogDensity != *(float*)((char*)b + 4)) return 0;
+    if (a->m_FogNear != *(float*)((char*)b + 8)) return 0;
+    if (a->m_FogFar != *(float*)((char*)b + 0xC)) return 0;
+    if (a->m_FogColourR != *(float*)((char*)b + 0x10)) return 0;
+    if (a->m_FogColourG != *(float*)((char*)b + 0x14)) return 0;
+    if (a->m_FogColourB != *(float*)((char*)b + 0x18)) return 0;
     return 1;
 }
 #endif
@@ -3440,14 +3441,14 @@ extern "C" int func_002BDB38(void *a, void *b) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDBD0);
 #ifdef SKIP_ASM
-extern "C" int func_002BDBD0(void *a, void *b) {
-    if (*(float*)((char*)a + 0x8) != *(float*)((char*)b + 0x4)) return 0;
-    if (*(float*)((char*)a + 0x10) != *(float*)((char*)b + 0x8)) return 0;
-    if (*(float*)((char*)a + 0x18) != *(float*)((char*)b + 0xC)) return 0;
-    if (*(float*)((char*)a + 0x20) != *(float*)((char*)b + 0x10)) return 0;
-    if (*(float*)((char*)a + 0x28) != *(float*)((char*)b + 0x14)) return 0;
-    if (*(float*)((char*)a + 0x30) != *(float*)((char*)b + 0x18)) return 0;
-    if (*(float*)((char*)a + 0x38) != *(float*)((char*)b + 0x1C)) return 0;
+extern "C" int func_002BDBD0(tWPInGameData_LightGlow* a, void *b) {
+    if (a->m_LightGlowCutoff != *(float*)((char*)b + 0x4)) return 0;
+    if (a->m_LightGlowCutoffScale != *(float*)((char*)b + 0x8)) return 0;
+    if (a->m_LightGlowCopyIntensity != *(float*)((char*)b + 0xC)) return 0;
+    if (a->m_LightGlowSourceIntensity != *(float*)((char*)b + 0x10)) return 0;
+    if (a->m_LightGlowFrameIntensity != *(float*)((char*)b + 0x14)) return 0;
+    if (a->m_LightGlowBlend2 != *(float*)((char*)b + 0x18)) return 0;
+    if (a->m_LightGlowBlend3 != *(float*)((char*)b + 0x1C)) return 0;
     return 1;
 }
 #endif
@@ -3455,13 +3456,13 @@ extern "C" int func_002BDBD0(void *a, void *b) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDC78);
 #ifdef SKIP_ASM
-extern "C" int func_002BDC78(void *a, void *b) {
-    if (*(float*)((char*)a + 8) != *(float*)((char*)b + 4)) return 0;
-    if (*(float*)((char*)a + 0x10) != *(float*)((char*)b + 8)) return 0;
-    if (*(float*)((char*)a + 0x18) != *(float*)((char*)b + 0xC)) return 0;
-    if (*(float*)((char*)a + 0x20) != *(float*)((char*)b + 0x10)) return 0;
-    if (*(float*)((char*)a + 0x28) != *(float*)((char*)b + 0x14)) return 0;
-    if (*(float*)((char*)a + 0x30) != *(float*)((char*)b + 0x18)) return 0;
+extern "C" int func_002BDC78(tWPInGameData_ScreenTint* a, void *b) {
+    if (a->m_ScreenTintScaleR != *(float*)((char*)b + 4)) return 0;
+    if (a->m_ScreenTintScaleG != *(float*)((char*)b + 8)) return 0;
+    if (a->m_ScreenTintScaleB != *(float*)((char*)b + 0xC)) return 0;
+    if (a->m_ScreenTintOffsetR != *(float*)((char*)b + 0x10)) return 0;
+    if (a->m_ScreenTintOffsetG != *(float*)((char*)b + 0x14)) return 0;
+    if (a->m_ScreenTintOffsetB != *(float*)((char*)b + 0x18)) return 0;
     return 1;
 }
 #endif
@@ -3469,11 +3470,11 @@ extern "C" int func_002BDC78(void *a, void *b) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDD10);
 #ifdef SKIP_ASM
-extern "C" int func_002BDD10(void *arg0, void *arg1) {
+extern "C" int func_002BDD10(tWPInGameData_SkyBox* arg0, void *arg1) {
     int var_2;
 
     var_2 = 0;
-    if ((*(float *)((char*)(arg0) + (8))) == (*(float *)((char*)(arg1) + (4)))) {
+    if ((arg0->m_SkyBoxRotation) == (*(float *)((char*)(arg1) + (4)))) {
         var_2 = 1;
     }
     return var_2;
@@ -3483,16 +3484,16 @@ extern "C" int func_002BDD10(void *arg0, void *arg1) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDD38);
 #ifdef SKIP_ASM
-extern "C" int func_002BDD38(void *a, void *b) {
-    if (*(float*)((char*)a + 0x8) != *(float*)((char*)b + 0x4)) return 0;
-    if (*(float*)((char*)a + 0x10) != *(float*)((char*)b + 0x8)) return 0;
-    if (*(float*)((char*)a + 0x18) != *(float*)((char*)b + 0xC)) return 0;
-    if (*(float*)((char*)a + 0x20) != *(float*)((char*)b + 0x10)) return 0;
-    if (*(float*)((char*)a + 0x28) != *(float*)((char*)b + 0x14)) return 0;
-    if (*(float*)((char*)a + 0x30) != *(float*)((char*)b + 0x18)) return 0;
-    if (*(int*)((char*)a + 0x38) != *(int*)((char*)b + 0x1C)) return 0;
-    if (*(float*)((char*)a + 0x40) != *(float*)((char*)b + 0x20)) return 0;
-    if (*(float*)((char*)a + 0x48) != *(float*)((char*)b + 0x24)) return 0;
+extern "C" int func_002BDD38(tWPInGameData_Sun* a, void *b) {
+    if (a->m_SunPitchOffset != *(float*)((char*)b + 0x4)) return 0;
+    if (a->m_SunYawOffset != *(float*)((char*)b + 0x8)) return 0;
+    if (a->m_SunColorR != *(float*)((char*)b + 0xC)) return 0;
+    if (a->m_SunColorG != *(float*)((char*)b + 0x10)) return 0;
+    if (a->m_SunColorB != *(float*)((char*)b + 0x14)) return 0;
+    if (a->m_SunIntensity != *(float*)((char*)b + 0x18)) return 0;
+    if (a->m_SunType != *(int*)((char*)b + 0x1C)) return 0;
+    if (a->m_LensIntensity != *(float*)((char*)b + 0x20)) return 0;
+    if (a->m_SunRadius != *(float*)((char*)b + 0x24)) return 0;
     return 1;
 }
 #endif
@@ -3500,11 +3501,11 @@ extern "C" int func_002BDD38(void *a, void *b) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BDE08);
 #ifdef SKIP_ASM
-extern "C" int func_002BDE08(void *arg0, void *arg1) {
+extern "C" int func_002BDE08(tWPInGameData_Surface* arg0, void *arg1) {
     int var_2;
 
     var_2 = 0;
-    if ((*(float *)((char*)(arg0) + (8))) == (*(float *)((char*)(arg1) + (4)))) {
+    if ((arg0->m_SnowSparkleDensity) == (*(float *)((char*)(arg1) + (4)))) {
         var_2 = 1;
     }
     return var_2;
@@ -3516,13 +3517,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDE30);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
-extern "C" int func_002BDE30(char *a, char *b) {
-    if (func_002BB100_DE30(a + 8, b + 4)) return 0;
-    if (func_002BB100_DE30(a + 0x18, b + 0xC)) return 0;
-    if (func_002BB100_DE30(a + 0x28, b + 0x14)) return 0;
-    if (func_002BB100_DE30(a + 0x38, b + 0x1C)) return 0;
-    if (*(float*)(a + 0x48) != *(float*)(b + 0x24)) return 0;
-    if (*(float*)(a + 0x50) != *(float*)(b + 0x28)) return 0;
+extern "C" int func_002BDE30(tWPInGameData_Lighting* a, char *b) {
+    if (func_002BB100_DE30(((char*)a) + 8, b + 4)) return 0;
+    if (func_002BB100_DE30(((char*)a) + 0x18, b + 0xC)) return 0;
+    if (func_002BB100_DE30(((char*)a) + 0x28, b + 0x14)) return 0;
+    if (func_002BB100_DE30(((char*)a) + 0x38, b + 0x1C)) return 0;
+    if (a->m_AmbientLightIntensityOffset != *(float*)(b + 0x24)) return 0;
+    if (a->m_RimLightIntensityOffset != *(float*)(b + 0x28)) return 0;
     return 1;
 }
 #endif
@@ -3531,62 +3532,62 @@ extern "C" int func_002BDE30(char *a, char *b) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BDEE0);
 #ifdef SKIP_ASM
 // Environment property compare: all 19 current values against the incoming set.
-extern "C" int func_002BDEE0(void *arg0, void *arg1) {
-    if ((*(float *)((char*)(arg0) + (0x8))) != (*(float *)((char*)(arg1) + (0x4)))) {
+extern "C" int func_002BDEE0(tWPInGameData_Weather* arg0, void *arg1) {
+    if ((arg0->m_SnowIntensity) != (*(float *)((char*)(arg1) + (0x4)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x10))) != (*(float *)((char*)(arg1) + (0x8)))) {
+    if ((arg0->m_FlakeSize) != (*(float *)((char*)(arg1) + (0x8)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x18))) != (*(float *)((char*)(arg1) + (0xC)))) {
+    if ((arg0->m_WindIntensity) != (*(float *)((char*)(arg1) + (0xC)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x20))) != (*(float *)((char*)(arg1) + (0x10)))) {
+    if ((arg0->m_WindRotation) != (*(float *)((char*)(arg1) + (0x10)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x28))) != (*(float *)((char*)(arg1) + (0x14)))) {
+    if ((arg0->m_PlayerWindIntensity) != (*(float *)((char*)(arg1) + (0x14)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x30))) != (*(float *)((char*)(arg1) + (0x18)))) {
+    if ((arg0->m_Temperature) != (*(float *)((char*)(arg1) + (0x18)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x38))) != (*(float *)((char*)(arg1) + (0x1C)))) {
+    if ((arg0->m_SnowFlurries) != (*(float *)((char*)(arg1) + (0x1C)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x40))) != (*(float *)((char*)(arg1) + (0x20)))) {
+    if ((arg0->m_SnowGravityMultiplier) != (*(float *)((char*)(arg1) + (0x20)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x48))) != (*(float *)((char*)(arg1) + (0x24)))) {
+    if ((arg0->m_SnowFluffItensity) != (*(float *)((char*)(arg1) + (0x24)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x50))) != (*(float *)((char*)(arg1) + (0x28)))) {
+    if ((arg0->m_SnowFluffWindIntensity) != (*(float *)((char*)(arg1) + (0x28)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x58))) != (*(float *)((char*)(arg1) + (0x2C)))) {
+    if ((arg0->m_LightningChance) != (*(float *)((char*)(arg1) + (0x2C)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x60))) != (*(float *)((char*)(arg1) + (0x30)))) {
+    if ((arg0->m_SnowFlakeColourA) != (*(float *)((char*)(arg1) + (0x30)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x68))) != (*(float *)((char*)(arg1) + (0x34)))) {
+    if ((arg0->m_SnowFlakeColourR) != (*(float *)((char*)(arg1) + (0x34)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x70))) != (*(float *)((char*)(arg1) + (0x38)))) {
+    if ((arg0->m_SnowFlakeColourG) != (*(float *)((char*)(arg1) + (0x38)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x78))) != (*(float *)((char*)(arg1) + (0x3C)))) {
+    if ((arg0->m_SnowFlakeColourB) != (*(float *)((char*)(arg1) + (0x3C)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x80))) != (*(float *)((char*)(arg1) + (0x40)))) {
+    if ((arg0->m_SnowFluffColourA) != (*(float *)((char*)(arg1) + (0x40)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x88))) != (*(float *)((char*)(arg1) + (0x44)))) {
+    if ((arg0->m_SnowFluffColourR) != (*(float *)((char*)(arg1) + (0x44)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x90))) != (*(float *)((char*)(arg1) + (0x48)))) {
+    if ((arg0->m_SnowFluffColourG) != (*(float *)((char*)(arg1) + (0x48)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x98))) != (*(float *)((char*)(arg1) + (0x4C)))) {
+    if ((arg0->m_SnowFluffColourB) != (*(float *)((char*)(arg1) + (0x4C)))) {
         return 0;
     }
     return 1;
@@ -3596,11 +3597,11 @@ extern "C" int func_002BDEE0(void *arg0, void *arg1) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE078);
 #ifdef SKIP_ASM
-extern "C" int func_002BE078(void *arg0, void *arg1) {
-    if ((*(int *)((char*)(arg0) + (8))) != (*(int *)((char*)(arg1) + (4)))) {
+extern "C" int func_002BE078(tWPInGameData_Danger* arg0, void *arg1) {
+    if ((arg0->m_Level) != (*(int *)((char*)(arg1) + (4)))) {
         return 0;
     }
-    if ((*(float *)((char*)(arg0) + (0x10))) != (*(float *)((char*)(arg1) + (8)))) {
+    if ((arg0->m_PointRate) != (*(float *)((char*)(arg1) + (8)))) {
         return 0;
     }
     return 1;
@@ -3610,124 +3611,124 @@ extern "C" int func_002BE078(void *arg0, void *arg1) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE0B0);
 #ifdef SKIP_ASM
-extern "C" void func_002BE0B0(void *p) {
-    *(int*)((char*)p + 0) = 0;
-    *(int*)((char*)p + 8) = -1;
-    *(int*)((char*)p + 0x10) = -1;
+extern "C" void func_002BE0B0(tWPInGameData_MusicTrigger* p) {
+    *(int*)&p->m_wpTravelDistance = 0;
+    p->m_Type = -1;
+    p->m_Value = -1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE0C8);
 #ifdef SKIP_ASM
-extern "C" void func_002BE0C8(void *arg0) {
-    (*(int *)((char*)(arg0) + (0))) = 0;
-    (*(int *)((char*)(arg0) + (8))) = -1;
+extern "C" void func_002BE0C8(tWPInGameData_Mix* arg0) {
+    (*(int*)&arg0->m_wpTravelDistance) = 0;
+    (arg0->m_MixPreset) = -1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE0D8);
 #ifdef SKIP_ASM
-extern "C" void func_002BE0D8(void *arg0) {
-    (*(int *)((char*)(arg0) + (0))) = 0;
-    (*(int *)((char*)(arg0) + (8))) = -1;
+extern "C" void func_002BE0D8(tWPInGameData_Ambience* arg0) {
+    (*(int*)&arg0->m_wpTravelDistance) = 0;
+    (arg0->m_BankID) = -1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE0E8);
 #ifdef SKIP_ASM
-extern "C" void func_002BE0E8(void *arg0) {
-    (*(int *)((char*)(arg0) + (0))) = 0;
-    (*(int *)((char*)(arg0) + (8))) = -1;
+extern "C" void func_002BE0E8(tWPInGameData_Speech* arg0) {
+    (*(int*)&arg0->m_wpTravelDistance) = 0;
+    (arg0->m_SpeechID) = -1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE0F8);
 #ifdef SKIP_ASM
-extern "C" void func_002BE0F8(void *arg0) {
-    (*(int *)((char*)(arg0) + (0))) = 0;
-    (*(float *)((char*)(arg0) + (8))) = 30000.0f;
+extern "C" void func_002BE0F8(tWPInGameData_Camera* arg0) {
+    (*(int*)&arg0->m_wpTravelDistance) = 0;
+    (arg0->m_DrawDistance) = 30000.0f;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE108);
 #ifdef SKIP_ASM
-extern "C" void func_002BE108(void *arg0) {
-    (*(float *)((char*)(arg0) + (0x10))) = 3000.0f;
-    (*(float *)((char*)(arg0) + (0x18))) = 30000.0f;
-    (*(float *)((char*)(arg0) + (0x20))) = 0.43f;
-    (*(float *)((char*)(arg0) + (0x28))) = 0.55f;
-    (*(float *)((char*)(arg0) + (0x30))) = 0.71f;
-    (*(int *)((char*)(arg0) + (8))) = 0;
-    (*(int *)((char*)(arg0) + (0))) = 0;
+extern "C" void func_002BE108(tWPInGameData_Fog* arg0) {
+    (arg0->m_FogNear) = 3000.0f;
+    (arg0->m_FogFar) = 30000.0f;
+    (arg0->m_FogColourR) = 0.43f;
+    (arg0->m_FogColourG) = 0.55f;
+    (arg0->m_FogColourB) = 0.71f;
+    (*(int*)&arg0->m_FogDensity) = 0;
+    (*(int*)&arg0->m_wpTravelDistance) = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE140);
 #ifdef SKIP_ASM
-extern "C" void func_002BE140(void *arg0) {
-    *(float *)((char *)arg0 + 0x8) = 1.0f;
-    *(float *)((char *)arg0 + 0x10) = 1.0f;
-    *(float *)((char *)arg0 + 0x18) = 1.0f;
-    *(float *)((char *)arg0 + 0x20) = 1.0f;
-    *(float *)((char *)arg0 + 0x28) = 1.0f;
-    *(int *)((char *)arg0 + 0x30) = 0;
-    *(int *)((char *)arg0 + 0x38) = 0;
-    *(int *)((char *)arg0 + 0x0) = 0;
+extern "C" void func_002BE140(tWPInGameData_LightGlow* arg0) {
+    arg0->m_LightGlowCutoff = 1.0f;
+    arg0->m_LightGlowCutoffScale = 1.0f;
+    arg0->m_LightGlowCopyIntensity = 1.0f;
+    arg0->m_LightGlowSourceIntensity = 1.0f;
+    arg0->m_LightGlowFrameIntensity = 1.0f;
+    *(int*)&arg0->m_LightGlowBlend2 = 0;
+    *(int*)&arg0->m_LightGlowBlend3 = 0;
+    *(int*)&arg0->m_wpTravelDistance = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE170);
 #ifdef SKIP_ASM
-extern "C" void func_002BE170(void *arg0) {
-    *(float *)((char *)arg0 + 0x8) = 1.0f;
-    *(float *)((char *)arg0 + 0x10) = 1.0f;
-    *(float *)((char *)arg0 + 0x18) = 1.0f;
-    *(int *)((char *)arg0 + 0x20) = 0;
-    *(int *)((char *)arg0 + 0x28) = 0;
-    *(int *)((char *)arg0 + 0x30) = 0;
-    *(int *)((char *)arg0 + 0x0) = 0;
+extern "C" void func_002BE170(tWPInGameData_ScreenTint* arg0) {
+    arg0->m_ScreenTintScaleR = 1.0f;
+    arg0->m_ScreenTintScaleG = 1.0f;
+    arg0->m_ScreenTintScaleB = 1.0f;
+    *(int*)&arg0->m_ScreenTintOffsetR = 0;
+    *(int*)&arg0->m_ScreenTintOffsetG = 0;
+    *(int*)&arg0->m_ScreenTintOffsetB = 0;
+    *(int*)&arg0->m_wpTravelDistance = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE198);
 #ifdef SKIP_ASM
-extern "C" void func_002BE198(void *p) {
-    *(int*)((char*)p + 8) = 0;
-    *(int*)((char*)p + 0) = 0;
+extern "C" void func_002BE198(tWPInGameData_SkyBox* p) {
+    *(int*)&p->m_SkyBoxRotation = 0;
+    *(int*)&p->m_wpTravelDistance = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE1A8);
 #ifdef SKIP_ASM
-extern "C" void func_002BE1A8(void *arg0) {
-    *(int *)((char *)arg0 + 0x8) = 0;
-    *(int *)((char *)arg0 + 0x10) = 0;
-    *(float *)((char *)arg0 + 0x18) = 1.0f;
-    *(float *)((char *)arg0 + 0x20) = 1.0f;
-    *(float *)((char *)arg0 + 0x28) = 1.0f;
-    *(float *)((char *)arg0 + 0x30) = 1.0f;
-    *(int *)((char *)arg0 + 0x38) = 0;
-    *(float *)((char *)arg0 + 0x40) = 1.0f;
-    *(float *)((char *)arg0 + 0x48) = 1.0f;
-    *(int *)((char *)arg0 + 0x0) = 0;
+extern "C" void func_002BE1A8(tWPInGameData_Sun* arg0) {
+    *(int*)&arg0->m_SunPitchOffset = 0;
+    *(int*)&arg0->m_SunYawOffset = 0;
+    arg0->m_SunColorR = 1.0f;
+    arg0->m_SunColorG = 1.0f;
+    arg0->m_SunColorB = 1.0f;
+    arg0->m_SunIntensity = 1.0f;
+    arg0->m_SunType = 0;
+    arg0->m_LensIntensity = 1.0f;
+    arg0->m_SunRadius = 1.0f;
+    *(int*)&arg0->m_wpTravelDistance = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE1E0);
 #ifdef SKIP_ASM
-extern "C" void func_002BE1E0(void *arg0) {
-    (*(int *)((char*)(arg0) + (0))) = 0;
-    (*(float *)((char*)(arg0) + (8))) = 1.0f;
+extern "C" void func_002BE1E0(tWPInGameData_Surface* arg0) {
+    (*(int*)&arg0->m_wpTravelDistance) = 0;
+    (arg0->m_SnowSparkleDensity) = 1.0f;
 }
 #endif
 
@@ -3759,52 +3760,52 @@ struct sPairSet_002BE1F8
     float field_0x50;       // 0x50
 };
 
-extern "C" void func_002BE1F8(sPairSet_002BE1F8* o)
+extern "C" void func_002BE1F8(tWPInGameData_Lighting* o)
 {
-    o->k0 = D_004A53D0;
-    o->k1 = D_004A53D0;
-    o->k2 = D_004A53D0;
-    o->k3 = D_004A53D0;
-    o->field_0x48 = 1.0f;
-    o->field_0x50 = 0.75f;
-    o->flags = 0;
+    (*(sPair_002BE1F8*)&o->m_LightIrradianceName) = D_004A53D0;
+    (*(sPair_002BE1F8*)&o->m_ShadowIrradianceName) = D_004A53D0;
+    (*(sPair_002BE1F8*)&o->m_TunnelIrradianceName) = D_004A53D0;
+    (*(sPair_002BE1F8*)&o->m_ObjectIrradianceName) = D_004A53D0;
+    o->m_AmbientLightIntensityOffset = 1.0f;
+    o->m_RimLightIntensityOffset = 0.75f;
+    *(int*)&o->m_wpTravelDistance = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE258);
 #ifdef SKIP_ASM
-extern "C" void func_002BE258(void *arg0) {
-    *(int *)((char *)arg0 + 0x8) = 0;
-    *(float *)((char *)arg0 + 0x10) = 6.0f;
-    *(int *)((char *)arg0 + 0x18) = 0;
-    *(int *)((char *)arg0 + 0x20) = 0;
-    *(int *)((char *)arg0 + 0x28) = 0;
-    *(float *)((char *)arg0 + 0x30) = 10.0f;
-    *(float *)((char *)arg0 + 0x38) = 1.0f;
-    *(float *)((char *)arg0 + 0x40) = 1.0f;
-    *(int *)((char *)arg0 + 0x48) = 0;
-    *(int *)((char *)arg0 + 0x50) = 0;
-    *(int *)((char *)arg0 + 0x58) = 0;
-    *(float *)((char *)arg0 + 0x60) = 1.0f;
-    *(float *)((char *)arg0 + 0x68) = 1.0f;
-    *(float *)((char *)arg0 + 0x70) = 1.0f;
-    *(float *)((char *)arg0 + 0x78) = 1.0f;
-    *(float *)((char *)arg0 + 0x80) = 0.06f;
-    *(float *)((char *)arg0 + 0x88) = 1.0f;
-    *(float *)((char *)arg0 + 0x90) = 1.0f;
-    *(float *)((char *)arg0 + 0x98) = 1.0f;
-    *(int *)((char *)arg0 + 0x0) = 0;
+extern "C" void func_002BE258(tWPInGameData_Weather* arg0) {
+    *(int*)&arg0->m_SnowIntensity = 0;
+    arg0->m_FlakeSize = 6.0f;
+    *(int*)&arg0->m_WindIntensity = 0;
+    *(int*)&arg0->m_WindRotation = 0;
+    *(int*)&arg0->m_PlayerWindIntensity = 0;
+    arg0->m_Temperature = 10.0f;
+    arg0->m_SnowFlurries = 1.0f;
+    arg0->m_SnowGravityMultiplier = 1.0f;
+    *(int*)&arg0->m_SnowFluffItensity = 0;
+    *(int*)&arg0->m_SnowFluffWindIntensity = 0;
+    *(int*)&arg0->m_LightningChance = 0;
+    arg0->m_SnowFlakeColourA = 1.0f;
+    arg0->m_SnowFlakeColourR = 1.0f;
+    arg0->m_SnowFlakeColourG = 1.0f;
+    arg0->m_SnowFlakeColourB = 1.0f;
+    arg0->m_SnowFluffColourA = 0.06f;
+    arg0->m_SnowFluffColourR = 1.0f;
+    arg0->m_SnowFluffColourG = 1.0f;
+    arg0->m_SnowFluffColourB = 1.0f;
+    *(int*)&arg0->m_wpTravelDistance = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BE2C8);
 #ifdef SKIP_ASM
-extern "C" void func_002BE2C8(void *p) {
-    *(int*)((char*)p + 8) = 0;
-    *(int*)((char*)p + 0x10) = 0;
-    *(int*)((char*)p + 0) = 0;
+extern "C" void func_002BE2C8(tWPInGameData_Danger* p) {
+    p->m_Level = 0;
+    *(int*)&p->m_PointRate = 0;
+    *(int*)&p->m_wpTravelDistance = 0;
 }
 #endif
 
@@ -3812,15 +3813,15 @@ extern "C" void func_002BE2C8(void *p) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BE2D8);
 #ifdef SKIP_ASM
 struct VE_E2D8 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void func_002BE2D8(char *self, char *s) {
+extern "C" void func_002BE2D8(tWPInGameData_MusicTrigger* self, char *s) {
     VE_E2D8 *e = &(*(VE_E2D8 **)s)[2];
-    e->fn(s + e->delta, self + 8, 4);
+    e->fn(s + e->delta, ((char*)self) + 8, 4);
     e = &(*(VE_E2D8 **)s)[2];
-    e->fn(s + e->delta, self, 4);
+    e->fn(s + e->delta, ((char*)self), 4);
     e = &(*(VE_E2D8 **)s)[2];
-    e->fn(s + e->delta, self + 0x10, 4);
+    e->fn(s + e->delta, ((char*)self) + 0x10, 4);
     e = &(*(VE_E2D8 **)s)[2];
-    e->fn(s + e->delta, self, 4);
+    e->fn(s + e->delta, ((char*)self), 4);
 }
 #endif
 
@@ -3891,19 +3892,19 @@ static inline void Wr_E518(Stream_E518* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BE518(char* self, Stream_E518* s) {
-    Wr_E518(s, self + 0x8, 4);
-    Wr_E518(s, self, 4);
-    Wr_E518(s, self + 0x10, 4);
-    Wr_E518(s, self, 4);
-    Wr_E518(s, self + 0x18, 4);
-    Wr_E518(s, self, 4);
-    Wr_E518(s, self + 0x20, 4);
-    Wr_E518(s, self, 4);
-    Wr_E518(s, self + 0x28, 4);
-    Wr_E518(s, self, 4);
-    Wr_E518(s, self + 0x30, 4);
-    Wr_E518(s, self, 4);
+extern "C" void func_002BE518(tWPInGameData_Fog* self, Stream_E518* s) {
+    Wr_E518(s, ((char*)self) + 0x8, 4);
+    Wr_E518(s, ((char*)self), 4);
+    Wr_E518(s, ((char*)self) + 0x10, 4);
+    Wr_E518(s, ((char*)self), 4);
+    Wr_E518(s, ((char*)self) + 0x18, 4);
+    Wr_E518(s, ((char*)self), 4);
+    Wr_E518(s, ((char*)self) + 0x20, 4);
+    Wr_E518(s, ((char*)self), 4);
+    Wr_E518(s, ((char*)self) + 0x28, 4);
+    Wr_E518(s, ((char*)self), 4);
+    Wr_E518(s, ((char*)self) + 0x30, 4);
+    Wr_E518(s, ((char*)self), 4);
 }
 #endif
 
@@ -3918,21 +3919,21 @@ static inline void Wr_E698(Stream_E698* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BE698(char* self, Stream_E698* s) {
-    Wr_E698(s, self + 0x8, 4);
-    Wr_E698(s, self, 4);
-    Wr_E698(s, self + 0x10, 4);
-    Wr_E698(s, self, 4);
-    Wr_E698(s, self + 0x18, 4);
-    Wr_E698(s, self, 4);
-    Wr_E698(s, self + 0x20, 4);
-    Wr_E698(s, self, 4);
-    Wr_E698(s, self + 0x28, 4);
-    Wr_E698(s, self, 4);
-    Wr_E698(s, self + 0x30, 4);
-    Wr_E698(s, self, 4);
-    Wr_E698(s, self + 0x38, 4);
-    Wr_E698(s, self, 4);
+extern "C" void func_002BE698(tWPInGameData_LightGlow* self, Stream_E698* s) {
+    Wr_E698(s, ((char*)self) + 0x8, 4);
+    Wr_E698(s, ((char*)self), 4);
+    Wr_E698(s, ((char*)self) + 0x10, 4);
+    Wr_E698(s, ((char*)self), 4);
+    Wr_E698(s, ((char*)self) + 0x18, 4);
+    Wr_E698(s, ((char*)self), 4);
+    Wr_E698(s, ((char*)self) + 0x20, 4);
+    Wr_E698(s, ((char*)self), 4);
+    Wr_E698(s, ((char*)self) + 0x28, 4);
+    Wr_E698(s, ((char*)self), 4);
+    Wr_E698(s, ((char*)self) + 0x30, 4);
+    Wr_E698(s, ((char*)self), 4);
+    Wr_E698(s, ((char*)self) + 0x38, 4);
+    Wr_E698(s, ((char*)self), 4);
 }
 #endif
 
@@ -3947,19 +3948,19 @@ static inline void Wr_E850(Stream_E850* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BE850(char* self, Stream_E850* s) {
-    Wr_E850(s, self + 0x8, 4);
-    Wr_E850(s, self, 4);
-    Wr_E850(s, self + 0x10, 4);
-    Wr_E850(s, self, 4);
-    Wr_E850(s, self + 0x18, 4);
-    Wr_E850(s, self, 4);
-    Wr_E850(s, self + 0x20, 4);
-    Wr_E850(s, self, 4);
-    Wr_E850(s, self + 0x28, 4);
-    Wr_E850(s, self, 4);
-    Wr_E850(s, self + 0x30, 4);
-    Wr_E850(s, self, 4);
+extern "C" void func_002BE850(tWPInGameData_ScreenTint* self, Stream_E850* s) {
+    Wr_E850(s, ((char*)self) + 0x8, 4);
+    Wr_E850(s, ((char*)self), 4);
+    Wr_E850(s, ((char*)self) + 0x10, 4);
+    Wr_E850(s, ((char*)self), 4);
+    Wr_E850(s, ((char*)self) + 0x18, 4);
+    Wr_E850(s, ((char*)self), 4);
+    Wr_E850(s, ((char*)self) + 0x20, 4);
+    Wr_E850(s, ((char*)self), 4);
+    Wr_E850(s, ((char*)self) + 0x28, 4);
+    Wr_E850(s, ((char*)self), 4);
+    Wr_E850(s, ((char*)self) + 0x30, 4);
+    Wr_E850(s, ((char*)self), 4);
 }
 #endif
 
@@ -3988,25 +3989,25 @@ static inline void Wr_EA38(Stream_EA38* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BEA38(char* self, Stream_EA38* s) {
-    Wr_EA38(s, self + 0x8, 4);
-    Wr_EA38(s, self, 4);
-    Wr_EA38(s, self + 0x10, 4);
-    Wr_EA38(s, self, 4);
-    Wr_EA38(s, self + 0x18, 4);
-    Wr_EA38(s, self, 4);
-    Wr_EA38(s, self + 0x20, 4);
-    Wr_EA38(s, self, 4);
-    Wr_EA38(s, self + 0x28, 4);
-    Wr_EA38(s, self, 4);
-    Wr_EA38(s, self + 0x30, 4);
-    Wr_EA38(s, self, 4);
-    Wr_EA38(s, self + 0x38, 4);
-    Wr_EA38(s, self, 4);
-    Wr_EA38(s, self + 0x40, 4);
-    Wr_EA38(s, self, 4);
-    Wr_EA38(s, self + 0x48, 4);
-    Wr_EA38(s, self, 4);
+extern "C" void func_002BEA38(tWPInGameData_Sun* self, Stream_EA38* s) {
+    Wr_EA38(s, ((char*)self) + 0x8, 4);
+    Wr_EA38(s, ((char*)self), 4);
+    Wr_EA38(s, ((char*)self) + 0x10, 4);
+    Wr_EA38(s, ((char*)self), 4);
+    Wr_EA38(s, ((char*)self) + 0x18, 4);
+    Wr_EA38(s, ((char*)self), 4);
+    Wr_EA38(s, ((char*)self) + 0x20, 4);
+    Wr_EA38(s, ((char*)self), 4);
+    Wr_EA38(s, ((char*)self) + 0x28, 4);
+    Wr_EA38(s, ((char*)self), 4);
+    Wr_EA38(s, ((char*)self) + 0x30, 4);
+    Wr_EA38(s, ((char*)self), 4);
+    Wr_EA38(s, ((char*)self) + 0x38, 4);
+    Wr_EA38(s, ((char*)self), 4);
+    Wr_EA38(s, ((char*)self) + 0x40, 4);
+    Wr_EA38(s, ((char*)self), 4);
+    Wr_EA38(s, ((char*)self) + 0x48, 4);
+    Wr_EA38(s, ((char*)self), 4);
 }
 #endif
 
@@ -4035,19 +4036,19 @@ static inline void Wr_ECC8(Stream_ECC8* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BECC8(char* self, Stream_ECC8* s) {
-    Wr_ECC8(s, self + 0x8, 8);
-    Wr_ECC8(s, self, 4);
-    Wr_ECC8(s, self + 0x18, 8);
-    Wr_ECC8(s, self, 4);
-    Wr_ECC8(s, self + 0x28, 8);
-    Wr_ECC8(s, self, 4);
-    Wr_ECC8(s, self + 0x38, 8);
-    Wr_ECC8(s, self, 4);
-    Wr_ECC8(s, self + 0x48, 4);
-    Wr_ECC8(s, self, 4);
-    Wr_ECC8(s, self + 0x50, 4);
-    Wr_ECC8(s, self, 4);
+extern "C" void func_002BECC8(tWPInGameData_Lighting* self, Stream_ECC8* s) {
+    Wr_ECC8(s, ((char*)self) + 0x8, 8);
+    Wr_ECC8(s, ((char*)self), 4);
+    Wr_ECC8(s, ((char*)self) + 0x18, 8);
+    Wr_ECC8(s, ((char*)self), 4);
+    Wr_ECC8(s, ((char*)self) + 0x28, 8);
+    Wr_ECC8(s, ((char*)self), 4);
+    Wr_ECC8(s, ((char*)self) + 0x38, 8);
+    Wr_ECC8(s, ((char*)self), 4);
+    Wr_ECC8(s, ((char*)self) + 0x48, 4);
+    Wr_ECC8(s, ((char*)self), 4);
+    Wr_ECC8(s, ((char*)self) + 0x50, 4);
+    Wr_ECC8(s, ((char*)self), 4);
 }
 #endif
 
@@ -4061,46 +4062,46 @@ public:
 };
 
 // Streams 19 words of self (at +0x8 .. +0x98), each followed by the word at +0x0.
-extern "C" void func_002BEE48(char* self, cStream_EE48* s)
+extern "C" void func_002BEE48(tWPInGameData_Weather* self, cStream_EE48* s)
 {
-    s->write(self + 0x8, 4);
-    s->write(self, 4);
-    s->write(self + 0x10, 4);
-    s->write(self, 4);
-    s->write(self + 0x18, 4);
-    s->write(self, 4);
-    s->write(self + 0x20, 4);
-    s->write(self, 4);
-    s->write(self + 0x28, 4);
-    s->write(self, 4);
-    s->write(self + 0x30, 4);
-    s->write(self, 4);
-    s->write(self + 0x38, 4);
-    s->write(self, 4);
-    s->write(self + 0x40, 4);
-    s->write(self, 4);
-    s->write(self + 0x48, 4);
-    s->write(self, 4);
-    s->write(self + 0x50, 4);
-    s->write(self, 4);
-    s->write(self + 0x58, 4);
-    s->write(self, 4);
-    s->write(self + 0x60, 4);
-    s->write(self, 4);
-    s->write(self + 0x68, 4);
-    s->write(self, 4);
-    s->write(self + 0x70, 4);
-    s->write(self, 4);
-    s->write(self + 0x78, 4);
-    s->write(self, 4);
-    s->write(self + 0x80, 4);
-    s->write(self, 4);
-    s->write(self + 0x88, 4);
-    s->write(self, 4);
-    s->write(self + 0x90, 4);
-    s->write(self, 4);
-    s->write(self + 0x98, 4);
-    s->write(self, 4);
+    s->write(((char*)self) + 0x8, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x10, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x18, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x20, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x28, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x30, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x38, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x40, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x48, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x50, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x58, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x60, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x68, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x70, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x78, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x80, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x88, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x90, 4);
+    s->write(((char*)self), 4);
+    s->write(((char*)self) + 0x98, 4);
+    s->write(((char*)self), 4);
 }
 #endif
 
@@ -4108,15 +4109,15 @@ extern "C" void func_002BEE48(char* self, cStream_EE48* s)
 INCLUDE_ASM("bx/seg_1BA100", func_002BF2A0);
 #ifdef SKIP_ASM
 struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void func_002BF2A0(char *self, char *s) {
+extern "C" void func_002BF2A0(tWPInGameData_Danger* self, char *s) {
     VE_F2A0 *e = &(*(VE_F2A0 **)s)[2];
-    e->fn(s + e->delta, self + 8, 4);
+    e->fn(s + e->delta, ((char*)self) + 8, 4);
     e = &(*(VE_F2A0 **)s)[2];
-    e->fn(s + e->delta, self, 4);
+    e->fn(s + e->delta, ((char*)self), 4);
     e = &(*(VE_F2A0 **)s)[2];
-    e->fn(s + e->delta, self + 0x10, 4);
+    e->fn(s + e->delta, ((char*)self) + 0x10, 4);
     e = &(*(VE_F2A0 **)s)[2];
-    e->fn(s + e->delta, self, 4);
+    e->fn(s + e->delta, ((char*)self), 4);
 }
 #endif
 
@@ -4124,15 +4125,15 @@ extern "C" void func_002BF2A0(char *self, char *s) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BF340);
 #ifdef SKIP_ASM
 struct VE_F340 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void func_002BF340(char *self, char *s) {
+extern "C" void func_002BF340(tWPInGameData_MusicTrigger* self, char *s) {
     VE_F340 *e = &(*(VE_F340 **)s)[1];
-    e->fn(s + e->delta, self + 8, 4);
+    e->fn(s + e->delta, ((char*)self) + 8, 4);
     e = &(*(VE_F340 **)s)[1];
-    e->fn(s + e->delta, self, 4);
+    e->fn(s + e->delta, ((char*)self), 4);
     e = &(*(VE_F340 **)s)[1];
-    e->fn(s + e->delta, self + 0x10, 4);
+    e->fn(s + e->delta, ((char*)self) + 0x10, 4);
     e = &(*(VE_F340 **)s)[1];
-    e->fn(s + e->delta, self, 4);
+    e->fn(s + e->delta, ((char*)self), 4);
 }
 #endif
 
@@ -4203,19 +4204,19 @@ static inline void Wr_F580(Stream_F580* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BF580(char* self, Stream_F580* s) {
-    Wr_F580(s, self + 0x8, 4);
-    Wr_F580(s, self, 4);
-    Wr_F580(s, self + 0x10, 4);
-    Wr_F580(s, self, 4);
-    Wr_F580(s, self + 0x18, 4);
-    Wr_F580(s, self, 4);
-    Wr_F580(s, self + 0x20, 4);
-    Wr_F580(s, self, 4);
-    Wr_F580(s, self + 0x28, 4);
-    Wr_F580(s, self, 4);
-    Wr_F580(s, self + 0x30, 4);
-    Wr_F580(s, self, 4);
+extern "C" void func_002BF580(tWPInGameData_Fog* self, Stream_F580* s) {
+    Wr_F580(s, ((char*)self) + 0x8, 4);
+    Wr_F580(s, ((char*)self), 4);
+    Wr_F580(s, ((char*)self) + 0x10, 4);
+    Wr_F580(s, ((char*)self), 4);
+    Wr_F580(s, ((char*)self) + 0x18, 4);
+    Wr_F580(s, ((char*)self), 4);
+    Wr_F580(s, ((char*)self) + 0x20, 4);
+    Wr_F580(s, ((char*)self), 4);
+    Wr_F580(s, ((char*)self) + 0x28, 4);
+    Wr_F580(s, ((char*)self), 4);
+    Wr_F580(s, ((char*)self) + 0x30, 4);
+    Wr_F580(s, ((char*)self), 4);
 }
 #endif
 
@@ -4230,21 +4231,21 @@ static inline void Wr_F700(Stream_F700* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BF700(char* self, Stream_F700* s) {
-    Wr_F700(s, self + 0x8, 4);
-    Wr_F700(s, self, 4);
-    Wr_F700(s, self + 0x10, 4);
-    Wr_F700(s, self, 4);
-    Wr_F700(s, self + 0x18, 4);
-    Wr_F700(s, self, 4);
-    Wr_F700(s, self + 0x20, 4);
-    Wr_F700(s, self, 4);
-    Wr_F700(s, self + 0x28, 4);
-    Wr_F700(s, self, 4);
-    Wr_F700(s, self + 0x30, 4);
-    Wr_F700(s, self, 4);
-    Wr_F700(s, self + 0x38, 4);
-    Wr_F700(s, self, 4);
+extern "C" void func_002BF700(tWPInGameData_LightGlow* self, Stream_F700* s) {
+    Wr_F700(s, ((char*)self) + 0x8, 4);
+    Wr_F700(s, ((char*)self), 4);
+    Wr_F700(s, ((char*)self) + 0x10, 4);
+    Wr_F700(s, ((char*)self), 4);
+    Wr_F700(s, ((char*)self) + 0x18, 4);
+    Wr_F700(s, ((char*)self), 4);
+    Wr_F700(s, ((char*)self) + 0x20, 4);
+    Wr_F700(s, ((char*)self), 4);
+    Wr_F700(s, ((char*)self) + 0x28, 4);
+    Wr_F700(s, ((char*)self), 4);
+    Wr_F700(s, ((char*)self) + 0x30, 4);
+    Wr_F700(s, ((char*)self), 4);
+    Wr_F700(s, ((char*)self) + 0x38, 4);
+    Wr_F700(s, ((char*)self), 4);
 }
 #endif
 
@@ -4259,19 +4260,19 @@ static inline void Wr_F8B8(Stream_F8B8* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BF8B8(char* self, Stream_F8B8* s) {
-    Wr_F8B8(s, self + 0x8, 4);
-    Wr_F8B8(s, self, 4);
-    Wr_F8B8(s, self + 0x10, 4);
-    Wr_F8B8(s, self, 4);
-    Wr_F8B8(s, self + 0x18, 4);
-    Wr_F8B8(s, self, 4);
-    Wr_F8B8(s, self + 0x20, 4);
-    Wr_F8B8(s, self, 4);
-    Wr_F8B8(s, self + 0x28, 4);
-    Wr_F8B8(s, self, 4);
-    Wr_F8B8(s, self + 0x30, 4);
-    Wr_F8B8(s, self, 4);
+extern "C" void func_002BF8B8(tWPInGameData_ScreenTint* self, Stream_F8B8* s) {
+    Wr_F8B8(s, ((char*)self) + 0x8, 4);
+    Wr_F8B8(s, ((char*)self), 4);
+    Wr_F8B8(s, ((char*)self) + 0x10, 4);
+    Wr_F8B8(s, ((char*)self), 4);
+    Wr_F8B8(s, ((char*)self) + 0x18, 4);
+    Wr_F8B8(s, ((char*)self), 4);
+    Wr_F8B8(s, ((char*)self) + 0x20, 4);
+    Wr_F8B8(s, ((char*)self), 4);
+    Wr_F8B8(s, ((char*)self) + 0x28, 4);
+    Wr_F8B8(s, ((char*)self), 4);
+    Wr_F8B8(s, ((char*)self) + 0x30, 4);
+    Wr_F8B8(s, ((char*)self), 4);
 }
 #endif
 
@@ -4300,25 +4301,25 @@ static inline void Wr_FAA0(Stream_FAA0* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BFAA0(char* self, Stream_FAA0* s) {
-    Wr_FAA0(s, self + 0x8, 4);
-    Wr_FAA0(s, self, 4);
-    Wr_FAA0(s, self + 0x10, 4);
-    Wr_FAA0(s, self, 4);
-    Wr_FAA0(s, self + 0x18, 4);
-    Wr_FAA0(s, self, 4);
-    Wr_FAA0(s, self + 0x20, 4);
-    Wr_FAA0(s, self, 4);
-    Wr_FAA0(s, self + 0x28, 4);
-    Wr_FAA0(s, self, 4);
-    Wr_FAA0(s, self + 0x30, 4);
-    Wr_FAA0(s, self, 4);
-    Wr_FAA0(s, self + 0x38, 4);
-    Wr_FAA0(s, self, 4);
-    Wr_FAA0(s, self + 0x40, 4);
-    Wr_FAA0(s, self, 4);
-    Wr_FAA0(s, self + 0x48, 4);
-    Wr_FAA0(s, self, 4);
+extern "C" void func_002BFAA0(tWPInGameData_Sun* self, Stream_FAA0* s) {
+    Wr_FAA0(s, ((char*)self) + 0x8, 4);
+    Wr_FAA0(s, ((char*)self), 4);
+    Wr_FAA0(s, ((char*)self) + 0x10, 4);
+    Wr_FAA0(s, ((char*)self), 4);
+    Wr_FAA0(s, ((char*)self) + 0x18, 4);
+    Wr_FAA0(s, ((char*)self), 4);
+    Wr_FAA0(s, ((char*)self) + 0x20, 4);
+    Wr_FAA0(s, ((char*)self), 4);
+    Wr_FAA0(s, ((char*)self) + 0x28, 4);
+    Wr_FAA0(s, ((char*)self), 4);
+    Wr_FAA0(s, ((char*)self) + 0x30, 4);
+    Wr_FAA0(s, ((char*)self), 4);
+    Wr_FAA0(s, ((char*)self) + 0x38, 4);
+    Wr_FAA0(s, ((char*)self), 4);
+    Wr_FAA0(s, ((char*)self) + 0x40, 4);
+    Wr_FAA0(s, ((char*)self), 4);
+    Wr_FAA0(s, ((char*)self) + 0x48, 4);
+    Wr_FAA0(s, ((char*)self), 4);
 }
 #endif
 
@@ -4347,19 +4348,19 @@ static inline void Wr_FD30(Stream_FD30* s, void* p, int n) {
     e->fn((char*)s + e->delta, p, n);
 }
 
-extern "C" void func_002BFD30(char* self, Stream_FD30* s) {
-    Wr_FD30(s, self + 0x8, 8);
-    Wr_FD30(s, self, 4);
-    Wr_FD30(s, self + 0x18, 8);
-    Wr_FD30(s, self, 4);
-    Wr_FD30(s, self + 0x28, 8);
-    Wr_FD30(s, self, 4);
-    Wr_FD30(s, self + 0x38, 8);
-    Wr_FD30(s, self, 4);
-    Wr_FD30(s, self + 0x48, 4);
-    Wr_FD30(s, self, 4);
-    Wr_FD30(s, self + 0x50, 4);
-    Wr_FD30(s, self, 4);
+extern "C" void func_002BFD30(tWPInGameData_Lighting* self, Stream_FD30* s) {
+    Wr_FD30(s, ((char*)self) + 0x8, 8);
+    Wr_FD30(s, ((char*)self), 4);
+    Wr_FD30(s, ((char*)self) + 0x18, 8);
+    Wr_FD30(s, ((char*)self), 4);
+    Wr_FD30(s, ((char*)self) + 0x28, 8);
+    Wr_FD30(s, ((char*)self), 4);
+    Wr_FD30(s, ((char*)self) + 0x38, 8);
+    Wr_FD30(s, ((char*)self), 4);
+    Wr_FD30(s, ((char*)self) + 0x48, 4);
+    Wr_FD30(s, ((char*)self), 4);
+    Wr_FD30(s, ((char*)self) + 0x50, 4);
+    Wr_FD30(s, ((char*)self), 4);
 }
 #endif
 
@@ -4374,46 +4375,46 @@ public:
 
 // Reads 19 words into self (at +0x8 .. +0x98), each followed by one into +0x0
 // (the read-side twin of func_002BEE48).
-extern "C" void func_002BFEB0(char* self, cStream_FEB0* s)
+extern "C" void func_002BFEB0(tWPInGameData_Weather* self, cStream_FEB0* s)
 {
-    s->read(self + 0x8, 4);
-    s->read(self, 4);
-    s->read(self + 0x10, 4);
-    s->read(self, 4);
-    s->read(self + 0x18, 4);
-    s->read(self, 4);
-    s->read(self + 0x20, 4);
-    s->read(self, 4);
-    s->read(self + 0x28, 4);
-    s->read(self, 4);
-    s->read(self + 0x30, 4);
-    s->read(self, 4);
-    s->read(self + 0x38, 4);
-    s->read(self, 4);
-    s->read(self + 0x40, 4);
-    s->read(self, 4);
-    s->read(self + 0x48, 4);
-    s->read(self, 4);
-    s->read(self + 0x50, 4);
-    s->read(self, 4);
-    s->read(self + 0x58, 4);
-    s->read(self, 4);
-    s->read(self + 0x60, 4);
-    s->read(self, 4);
-    s->read(self + 0x68, 4);
-    s->read(self, 4);
-    s->read(self + 0x70, 4);
-    s->read(self, 4);
-    s->read(self + 0x78, 4);
-    s->read(self, 4);
-    s->read(self + 0x80, 4);
-    s->read(self, 4);
-    s->read(self + 0x88, 4);
-    s->read(self, 4);
-    s->read(self + 0x90, 4);
-    s->read(self, 4);
-    s->read(self + 0x98, 4);
-    s->read(self, 4);
+    s->read(((char*)self) + 0x8, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x10, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x18, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x20, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x28, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x30, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x38, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x40, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x48, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x50, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x58, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x60, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x68, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x70, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x78, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x80, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x88, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x90, 4);
+    s->read(((char*)self), 4);
+    s->read(((char*)self) + 0x98, 4);
+    s->read(((char*)self), 4);
 }
 #endif
 
@@ -4421,14 +4422,14 @@ extern "C" void func_002BFEB0(char* self, cStream_FEB0* s)
 INCLUDE_ASM("bx/seg_1BA100", func_002C0308);
 #ifdef SKIP_ASM
 struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };
-extern "C" void func_002C0308(char *self, char *s) {
+extern "C" void func_002C0308(tWPInGameData_Danger* self, char *s) {
     VE_0308 *e = &(*(VE_0308 **)s)[1];
-    e->fn(s + e->delta, self + 8, 4);
+    e->fn(s + e->delta, ((char*)self) + 8, 4);
     e = &(*(VE_0308 **)s)[1];
-    e->fn(s + e->delta, self, 4);
+    e->fn(s + e->delta, ((char*)self), 4);
     e = &(*(VE_0308 **)s)[1];
-    e->fn(s + e->delta, self + 0x10, 4);
+    e->fn(s + e->delta, ((char*)self) + 0x10, 4);
     e = &(*(VE_0308 **)s)[1];
-    e->fn(s + e->delta, self, 4);
+    e->fn(s + e->delta, ((char*)self), 4);
 }
 #endif

@@ -1,4 +1,7 @@
 #include "common.h"
+#include "inseq/scriptheap.h"
+#include "replay/frameptr.h"
+#include "inseq/inseq.h"
 #include "inseq/scriptplayermain.h"
 #include "inseq/scriptplayerentity.h"
 #include "replay/replay.h"
@@ -1572,25 +1575,25 @@ extern "C" void func_002721D0(int* self, int flags)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272200);
 #ifdef SKIP_ASM
-extern "C" void func_00272200(void* self)
+extern "C" void func_00272200(cReplayFramePtr* self)
 {
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x10) = 0;
+    self->WriteData = 0;
+    self->ReadData = 0;
+    self->Size = 0;
 }
 #endif
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272210);
 #ifdef SKIP_ASM
-extern "C" int func_00272210(void *arg0) {
-    return (*(int *)((char*)(arg0) + (4)));
+extern "C" int func_00272210(cReplayFramePtr* arg0) {
+    return ((int)arg0->Block);
 }
 #endif
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272218);
 #ifdef SKIP_ASM
-extern "C" void func_00272218(void *arg0, int *arg1) {
-    *arg1 = (*(int *)((char*)(arg0) + (0xC)));
+extern "C" void func_00272218(cReplayFramePtr* arg0, int *arg1) {
+    *arg1 = ((int)arg0->ReadData);
 }
 #endif
 //100%
@@ -1603,15 +1606,15 @@ extern "C" void func_00272228(void *arg0, int *arg1) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272238);
 #ifdef SKIP_ASM
-extern "C" int func_00272238(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x10)));
+extern "C" int func_00272238(cReplayFramePtr* arg0) {
+    return (arg0->Size);
 }
 #endif
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272240);
 #ifdef SKIP_ASM
-extern "C" int func_00272240(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x10)));
+extern "C" int func_00272240(cReplayFramePtr* arg0) {
+    return (arg0->Size);
 }
 #endif
 //100%
@@ -1744,16 +1747,16 @@ struct sRcHeap {
     sRcBlock* freeList;
 };
 
-extern "C" void func_002723A8(sRcHeap* h, void* p)
+extern "C" void func_002723A8(cScriptHeap* h, void* p)
 {
     if (p) {
         sRcBlock* b = (sRcBlock*)((char*)p - 8);
-        if (!h->freeList) {
-            h->freeList = b;
+        if (!(sRcBlock*)h->mpTopFreeBlock) {
+            h->mpTopFreeBlock = (tFreeBlock*)b;
             return;
         }
         sRcBlock* prev = 0;
-        sRcBlock* cur = h->freeList;
+        sRcBlock* cur = (sRcBlock*)h->mpTopFreeBlock;
         do {
             if (b < cur) {
                 int size = b->size + 8;
@@ -1761,14 +1764,14 @@ extern "C" void func_002723A8(sRcHeap* h, void* p)
                     b->next = cur->next;
                     b->size = size + cur->size;
                     if (!prev)
-                        h->freeList = b;
+                        h->mpTopFreeBlock = (tFreeBlock*)b;
                     else
                         prev->next = b;
                     return;
                 }
                 if (!prev) {
-                    b->next = h->freeList;
-                    h->freeList = b;
+                    b->next = (sRcBlock*)h->mpTopFreeBlock;
+                    h->mpTopFreeBlock = (tFreeBlock*)b;
                 } else {
                     b->next = prev->next;
                     prev->next = b;
@@ -1782,7 +1785,7 @@ extern "C" void func_002723A8(sRcHeap* h, void* p)
                 cur = b->next;
                 b->next = 0;
                 if (!prev)
-                    h->freeList = cur;
+                    h->mpTopFreeBlock = (tFreeBlock*)cur;
                 else
                     prev->next = cur;
             } else {
@@ -1791,8 +1794,8 @@ extern "C" void func_002723A8(sRcHeap* h, void* p)
             }
         } while (cur);
         if (!prev) {
-            b->next = h->freeList;
-            h->freeList = b;
+            b->next = (sRcBlock*)h->mpTopFreeBlock;
+            h->mpTopFreeBlock = (tFreeBlock*)b;
         } else {
             b->next = prev->next;
             prev->next = b;
@@ -1838,7 +1841,7 @@ extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
 extern "C" void func_002724E8_impl(void* p)
 {
     char* h = (char*)p - D_004A3488;
-    func_002723A8(*(sRcHeap**)h, h);
+    func_002723A8((cScriptHeap*)(*(sRcHeap**)h), h);
 }
 #endif
 
@@ -2077,9 +2080,9 @@ INCLUDE_ASM("replay/replaycache", func_002728F8);
 #ifdef SKIP_ASM
 extern "C" void func_00274A30(cScriptPlayerMain* p);
 
-extern "C" void func_002728F8(void* self)
+extern "C" void func_002728F8(cInSeq* self)
 {
-    char* n = *(char**)((char*)self + 0x1C);
+    char* n = (char*)self->mpScriptUsed;
     while (n != 0) {
         func_00274A30((cScriptPlayerMain*)(n + 8));
         n = *(char**)(n + 0x50);
@@ -2127,12 +2130,12 @@ extern "C" int func_00272938(sRcList272938* self, void* src)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002729A8);
 #ifdef SKIP_ASM
-extern "C" void func_00272B58(void* self, int a1);
+extern "C" void func_00272B58(cInSeq* self, int a1);
 extern "C" void func_002746F8(cScriptPlayerMain* p);
 
 extern "C" void func_002729A8(sRcList272938* self, int i)
 {
-    func_00272B58(self, i);
+    func_00272B58((cInSeq*)self, i);
     char* base = *(char**)((char*)self + 0x14);
     sRcNode272938* n = (sRcNode272938*)(base + i * 0x58);
     func_002746F8((cScriptPlayerMain*)n->data);
@@ -2161,12 +2164,12 @@ extern "C" void func_002729A8(sRcList272938* self, int i)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272A50);
 #ifdef SKIP_ASM
-extern "C" void func_00272A50(sRcList272938* self)
+extern "C" void func_00272A50(cInSeq* self)
 {
-    sRcNode272938* n = self->usedHead;
+    sRcNode272938* n = (sRcNode272938*)self->mpScriptUsed;
     while (n != 0) {
         sRcNode272938* next = n->next;
-        func_002729A8(self, n->id);
+        func_002729A8(((sRcList272938*)self), n->id);
         n = next;
     }
 }
@@ -2174,10 +2177,10 @@ extern "C" void func_00272A50(sRcList272938* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272AA0);
 #ifdef SKIP_ASM
-extern "C" void* func_00272CC0(void* self, int a1);
+extern "C" void* func_00272CC0(cInSeq* self, int a1);
 extern "C" void cScriptPlayerMain_Preview(cScriptPlayerMain* self, int flag);
 
-extern "C" void func_00272AA0(void* self, int a1, int flag)
+extern "C" void func_00272AA0(cInSeq* self, int a1, int flag)
 {
     cScriptPlayerMain_Preview((cScriptPlayerMain*)((char*)func_00272CC0(self, a1)), flag);
 }
@@ -2187,9 +2190,9 @@ extern "C" void func_00272AA0(void* self, int a1, int flag)
 INCLUDE_ASM("replay/replaycache", func_00272AD0);
 #ifdef SKIP_ASM
 extern "C" void* func_00274830(void*, int);
-extern "C" void* func_00272CC0(void* self, int a1);
+extern "C" void* func_00272CC0(cInSeq* self, int a1);
 
-extern "C" void* func_00272AD0(void* self, int a1, int a2)
+extern "C" void* func_00272AD0(cInSeq* self, int a1, int a2)
 {
     return func_00274830(func_00272CC0(self, a1), a2);
 }
@@ -2198,10 +2201,10 @@ extern "C" void* func_00272AD0(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272B00);
 #ifdef SKIP_ASM
-extern "C" void func_00272B00(void *arg0, int arg1) {
+extern "C" void func_00272B00(cInSeq* arg0, int arg1) {
     void *var_16;
 
-    var_16 = (*(void **)((char*)(arg0) + (0x1C)));
+    var_16 = ((void*)arg0->mpScriptUsed);
     if (var_16 != 0) {
         do {
             func_00272AD0(arg0, (*(int *)((char*)(var_16) + (4))), arg1);
@@ -2214,10 +2217,10 @@ extern "C" void func_00272B00(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272B58);
 #ifdef SKIP_ASM
-extern "C" void* func_00272CC0(void* self, int a1);
+extern "C" void* func_00272CC0(cInSeq* self, int a1);
 extern "C" void cScriptPlayerMain_Stop(cScriptPlayerMain* p);
 
-extern "C" void func_00272B58(void* self, int a1)
+extern "C" void func_00272B58(cInSeq* self, int a1)
 {
     cScriptPlayerMain_Stop((cScriptPlayerMain*)func_00272CC0(self, a1));
 }
@@ -2226,10 +2229,10 @@ extern "C" void func_00272B58(void* self, int a1)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272B80);
 #ifdef SKIP_ASM
-extern "C" void func_00272B80(sRcList272938* self)
+extern "C" void func_00272B80(cInSeq* self)
 {
     sRcNode272938* n;
-    for (n = self->usedHead; n != 0; n = n->next) {
+    for (n = (sRcNode272938*)self->mpScriptUsed; n != 0; n = n->next) {
         func_00272B58(self, n->id);
     }
 }
@@ -2239,7 +2242,7 @@ INCLUDE_ASM("replay/replaycache", func_00272BD0);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerMain_Pause(cScriptPlayerMain* self);
 
-extern "C" void func_00272BD0(void* self, int a1)
+extern "C" void func_00272BD0(cInSeq* self, int a1)
 {
     cScriptPlayerMain_Pause((cScriptPlayerMain*)func_00272CC0(self, a1));
 }
@@ -2247,12 +2250,12 @@ extern "C" void func_00272BD0(void* self, int a1)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272BF8);
 #ifdef SKIP_ASM
-extern "C" void func_00272BD0(void* self, int a1);
+extern "C" void func_00272BD0(cInSeq* self, int a1);
 
-extern "C" void func_00272BF8(sRcList272938* self)
+extern "C" void func_00272BF8(cInSeq* self)
 {
     sRcNode272938* n;
-    for (n = self->usedHead; n != 0; n = n->next) {
+    for (n = (sRcNode272938*)self->mpScriptUsed; n != 0; n = n->next) {
         func_00272BD0(self, n->id);
     }
 }
@@ -2262,7 +2265,7 @@ INCLUDE_ASM("replay/replaycache", func_00272C48);
 #ifdef SKIP_ASM
 extern "C" void cScriptPlayerMain_Resume(cScriptPlayerMain* self);
 
-extern "C" void func_00272C48(void* self, int a1)
+extern "C" void func_00272C48(cInSeq* self, int a1)
 {
     cScriptPlayerMain_Resume((cScriptPlayerMain*)func_00272CC0(self, a1));
 }
@@ -2270,12 +2273,12 @@ extern "C" void func_00272C48(void* self, int a1)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272C70);
 #ifdef SKIP_ASM
-extern "C" void func_00272C48(void* self, int a1);
+extern "C" void func_00272C48(cInSeq* self, int a1);
 
-extern "C" void func_00272C70(sRcList272938* self)
+extern "C" void func_00272C70(cInSeq* self)
 {
     sRcNode272938* n;
-    for (n = self->usedHead; n != 0; n = n->next) {
+    for (n = (sRcNode272938*)self->mpScriptUsed; n != 0; n = n->next) {
         func_00272C48(self, n->id);
     }
 }
@@ -2284,9 +2287,9 @@ extern "C" void func_00272C70(sRcList272938* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272CC0);
 #ifdef SKIP_ASM
-extern "C" void* func_00272CC0(void* self, int a1)
+extern "C" void* func_00272CC0(cInSeq* self, int a1)
 {
-    char* base = *(char**)((char*)self + 0x14);
+    char* base = (char*)self->mpScriptHeap;
     char* p = base + a1 * 0x58;
     return *(int*)(p + 0xc) != 0 ? p + 0x8 : 0;
 }
@@ -2407,7 +2410,7 @@ extern "C" void func_00272EC0(void* self)
     if (owner != 0) {
         void* p = *(void**)((char*)self + 0x20);
         if (p != 0) {
-            func_002723A8((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8), p);
+            func_002723A8((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), p);
         }
         *(int*)((char*)self + 0x8) = 0;
         *(int*)((char*)self + 0xC) = 0;
@@ -2653,7 +2656,7 @@ extern "C" void func_002732C8(void* self)
     if (owner != 0) {
         void* p = *(void**)((char*)self + 0x1C);
         if (p != 0) {
-            func_002723A8((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8), p);
+            func_002723A8((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), p);
         }
         *(int*)((char*)self + 0x8) = 0;
         *(int*)((char*)self + 0xC) = 0;
@@ -2834,7 +2837,7 @@ extern "C" void func_00273630(void* self)
     if (owner != 0) {
         void* p = *(void**)((char*)self + 0x1C);
         if (p != 0) {
-            func_002723A8((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8), p);
+            func_002723A8((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), p);
         }
         *(int*)((char*)self + 0x8) = 0;
         *(int*)((char*)self + 0xC) = 0;
@@ -3319,7 +3322,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_Stop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
-extern "C" void func_002723A8(sRcHeap* h, void* p);
+extern "C" void func_002723A8(cScriptHeap* h, void* p);
 
 class cRcObj_3DC0 {
 public:
@@ -3394,7 +3397,7 @@ extern "C" void cScriptPlayerEntity_Stop(cScriptPlayerEntity* self)
             }
             }
         }
-        func_002723A8((sRcHeap*)(*(char**)((char*)self->mpOwner + 0x8) + 8), self->mpChannelPlayers);
+        func_002723A8((cScriptHeap*)((sRcHeap*)(*(char**)((char*)self->mpOwner + 0x8) + 8)), self->mpChannelPlayers);
         self->mpChannelPlayers = 0;
     }
     self->mIsPlaying = 0;
