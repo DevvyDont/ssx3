@@ -116,7 +116,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
     virtual void v10();
     virtual void v11();
@@ -133,7 +133,7 @@ public:
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual void setHighlight(int v);
+    virtual void setUseStaticColour(int v);
 };
 
 struct sVE_PO {
@@ -187,8 +187,7 @@ static inline char* riders_PO()
  * In a network game the EA Talk widgets (EATalkPair, EATalk, EATalksl) are shown and made selectable, and the
  * voice slider (0..10) is loaded from func_00266F90's level / 10, calling func_00266E88 below level 10, else
  * func_00266E30 (probably voice off / on); otherwise EATalk is hidden and made static in its static colour.
- * The calls declared setEnabled / setHighlight are vtable slots 8 / 25 (cUIThing_setStatic /
- * cUIText_setUseStaticColour).
+ * setStatic / setUseStaticColour are vtable slots 8 / 25 (cUIThing_setStatic / cUIText_setUseStaticColour).
  */
 extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
 {
@@ -293,7 +292,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
     cUIObj_PO* eaTalkPair = (cUIObj_PO*)find_PO(self, str_EATalkPair);
     if (eaTalkPair != 0) {
         eaTalkPair->setVisible(0);
-        eaTalkPair->setEnabled(1);
+        eaTalkPair->setStatic(1);
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
@@ -302,11 +301,11 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
         cUIObj_PO* talkSlider = (cUIObj_PO*)find_PO(self, str_EATalksl);
         if (talkPair != 0 && talkItem != 0 && talkSlider != 0) {
             talkPair->setVisible(1);
-            talkPair->setEnabled(0);
+            talkPair->setStatic(0);
             talkItem->setVisible(1);
-            talkItem->setEnabled(0);
+            talkItem->setStatic(0);
             talkSlider->setVisible(1);
-            talkSlider->setEnabled(0);
+            talkSlider->setStatic(0);
             ((sSlider_PO*)talkSlider)->max = 10;
             int level;
             int max;
@@ -321,9 +320,9 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
     } else {
         cUIObj_PO* eaTalk = (cUIObj_PO*)find_PO(self, str_EATalk);
         if (eaTalk != 0) {
-            eaTalk->setHighlight(1);
+            eaTalk->setUseStaticColour(1);
             *(sColor_PO*)((char*)eaTalk + 0x88) = D_004C66C8_PO;
-            eaTalk->setEnabled(1);
+            eaTalk->setStatic(1);
             eaTalk->setVisible(0);
         }
     }
@@ -355,7 +354,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 
@@ -368,7 +367,7 @@ static inline bool isField_FA100(signed char* g, int off, int v)
  * Greys out the in-game options that do not apply to the current game, every frame before the 2D render.
  *
  * Outside a local two-player game (a network game, or newRace cGamePath != 2) object "2" is made static (slot
- * 8, declared setEnabled) and "camera 2 select" / "2lb" are greyed out (DisableTextWidget: static, alpha at most
+ * 8, setStatic) and "camera 2 select" / "2lb" are greyed out (DisableTextWidget: static, alpha at most
  * 0.5). "save" is greyed out unless cGameMode is 4 (free ride in the game-flow notes).
  */
 extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(void* self)
@@ -378,7 +377,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(void* self)
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 || !isField_FA100((signed char*)cBENewRaceInterface_newRace, 73, 2)) {
         cUIObj_FA100* pair2 = (cUIObj_FA100*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A24E0));
         if (pair2 != 0) {
-            pair2->setEnabled(1);
+            pair2->setStatic(1);
         }
         void* camSelect2 = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_camera_2_select));
         if (camSelect2 != 0) {
@@ -852,7 +851,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07(int v);
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 
@@ -911,7 +910,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07(int v);
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 
@@ -919,7 +918,7 @@ extern "C" void func_001FAFF8(void* self, bool on)
 {
     cUIObj_1FAFF8* o = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_CancelGame));
     o->setVisible(on);
-    o->setEnabled(!on);
+    o->setStatic(!on);
     if (on) {
         cUIObj_1FAFF8* m = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu_b));
         m->v07(1);
@@ -1104,14 +1103,14 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 
 /**
  * Shows or hides the "continue racing" choice of the online-error screen.
  *
- * Text_ContinueGame gets kT_OVRContinueRacing, is static while hidden (slot 8, declared setEnabled), takes
+ * Text_ContinueGame gets kT_OVRContinueRacing, is static while hidden (slot 8, setStatic), takes
  * visibility @p visible and choice 4, which cOVState_PAUSE_ONLINE_ERROR_doContinueCancel answers with cAI_finishRemotePlayer. When shown,
  * "Menu" selects row 0.
  *
@@ -1122,7 +1121,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self,
     cUIObj_1FB378* continueText = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_ContinueGame));
     if (continueText != 0) {
         cUIText_setUnicodeStringByID((cUIText*)continueText, GetHashValue32(str_kT_OVRContinueRacing));
-        continueText->setEnabled(visible ^ 1);
+        continueText->setStatic(visible ^ 1);
         continueText->setVisible(visible);
         *(int*)((char*)continueText + 0x18) = 4;
     }
@@ -1157,7 +1156,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
     virtual void v10();
     virtual int setColor(const sColor_FB458& c);
@@ -1210,7 +1209,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
     virtual void v10();
     virtual int setColor(const sColor_FB588& c);

@@ -463,7 +463,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 
@@ -510,7 +510,7 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
     cUIObj_188F28* uiObj = (cUIObj_188F28*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A14F8));
     cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1500));
     uiObj->setVisible(0);
-    uiObj->setEnabled(1);
+    uiObj->setStatic(1);
     void* menu = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Menu));
     if (menu != 0)
         cUIMenu_setSelectedByIndex(menu, 1);
@@ -1013,7 +1013,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 
@@ -1044,7 +1044,7 @@ extern "C" void cFEStateOptionsSound_onCreateScreen(void* self)
     cUIObj_18A298* item7 = (cUIObj_18A298*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1528));
     if (item7 != 0) {
         item7->setVisible(on);
-        item7->setEnabled(on ^ 1);
+        item7->setStatic(on ^ 1);
     }
 }
 #endif
@@ -2188,7 +2188,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 
@@ -2657,7 +2657,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
     virtual void v10();
     virtual void v11();
@@ -2674,7 +2674,7 @@ public:
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual void setHighlight(int v);
+    virtual void setUseStaticColour(int v);
 };
 
 struct sVE_DD60 {
@@ -2755,9 +2755,9 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
         *(int*)((char*)uiObj + 0x18) = i - 1;
         cUIText_setUnicodeString(uiObj, slot);
         *(sColor_DD60*)((char*)uiObj + 0x88) = D_004C66C8;
-        uiObj->setHighlight(1);
+        uiObj->setUseStaticColour(1);
         if (*(int*)((char*)self + 0x1BC) != 1 && i >= 2) {
-            uiObj->setEnabled(1);
+            uiObj->setStatic(1);
             uiObj->setVisible(0);
             sprintf(buf, str_pct_d_b, i);
             uiObj = getObj_DD60(self, buf);
