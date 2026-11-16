@@ -411,6 +411,15 @@ INCLUDE_ASM("movie/movieplayer", func_0023CF38);
 //100%
 INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_SetAction);
 #ifdef SKIP_ASM
+/**
+ * Switches the memory-card manager to another action, starting the display timers for action 1.
+ *
+ * Stores @p mode in mAction, which cMCOverlayManager_update() switches on. Action 1 also sets mFlash to 1.0,
+ * mFlashStep to 1/60 and mDisplayWaitTicks to 60; any other value only stores mAction.
+ *
+ * @param mode  new action: 0 runs the load/save state machine, 1 the initial card and file checks
+ * @return nothing meaningful; the body has no return statement
+ */
 extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int mode)
 {
     self->mAction = mode;
@@ -462,6 +471,13 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_update);
 extern "C" void cMCOverlayManager_ManagerLoadSaveUpdate(cMCOverlayManager* self);
 extern "C" void func_0023D660(void* self);
 
+/**
+ * Runs one update of the memory-card manager for its current action.
+ *
+ * Action 0 calls cMCOverlayManager_ManagerLoadSaveUpdate(); action 1 calls func_0023D660(), which drives the
+ * initial card and file checks (UpdateInitCardsCheck, UpdateInitFileCheck, UpdateInitFileCheckDevice) and can
+ * switch back to action 0. Other actions do nothing.
+ */
 extern "C" void cMCOverlayManager_update(cMCOverlayManager* self)
 {
     switch (self->mAction) {
@@ -1706,6 +1722,12 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateFormatFailed);
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_checkDevice(cMCOverlayManager* self, int v);
 
+/**
+ * Handles the format-failed card state: once cancel is pressed, abandons the operation and rechecks the card.
+ *
+ * When callbackIsCancelPressed() returns nonzero: cMCOverlayManager_CancelCardOp(self, 0),
+ * cMCOverlayManager_checkDevice() on mSelectedDevice, and mCheckCard = 1. Otherwise it keeps waiting.
+ */
 extern "C" void cMCOverlayManager_UpdateFormatFailed(cMCOverlayManager* self)
 {
     if ((self->callbackIsCancelPressed)() != 0) {
@@ -2304,6 +2326,11 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadFileNotFound);
 #ifdef SKIP_ASM
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 
+/**
+ * Handles the load-file-not-found card state: cancels the card operation and notifies the front end.
+ *
+ * Calls cMCOverlayManager_CancelCardOp(self, 1), then the callbackFileNotFound handler.
+ */
 extern "C" void cMCOverlayManager_UpdateLoadFileNotFound(cMCOverlayManager* self)
 {
     cMCOverlayManager_CancelCardOp(self, 1);

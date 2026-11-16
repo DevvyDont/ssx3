@@ -1476,6 +1476,14 @@ INCLUDE_ASM("util/menu", cMenu_getFocus);
 #ifdef SKIP_ASM
 extern "C" void cMenu_checkFocus(cMenu* self);
 
+/**
+ * Returns the index of the menu's focused item after checking that the item can hold focus.
+ *
+ * cMenu_checkFocus() first moves focus on with cMenu_nextFocus() when the focused item's third virtual returns
+ * 0.
+ *
+ * @return FocusItem after the check
+ */
 extern "C" int cMenu_getFocus(cMenu* self)
 {
     cMenu_checkFocus(self);
@@ -2653,6 +2661,9 @@ extern "C" s2CD3A0Vec cSpaceMenuItem_preRender(void* self)
 //100%
 INCLUDE_ASM("util/menu", cSpaceMenuItem_render__FPv);
 #ifdef SKIP_ASM
+/**
+ * Draws nothing: the spacer menu item's render has an empty body.
+ */
 void cSpaceMenuItem_render(void* self)
 {
 }

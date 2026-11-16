@@ -528,6 +528,12 @@ INCLUDE_ASM("world/worldcache", cWorldCache_reset);
 #ifdef SKIP_ASM
 extern "C" void cWorldCache_purge(cWorldCache* self);
 
+/**
+ * Purges the world cache, then clears its data header, hull page count and chunk resolver pointer.
+ *
+ * cWorldCache_purge() deletes the chunk resolver and the cache tables; reset then zeroes mp_DataHeader,
+ * m_uiNumHullPage and mp_ChunkResolve.
+ */
 extern "C" void cWorldCache_reset(cWorldCache* self)
 {
     cWorldCache_purge(self);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/lobbyman.h"
 
 extern void* D_004A3E90;
 
@@ -569,7 +570,6 @@ extern "C" void func_00264CF0(void* self, int a1);
 extern const char D_00480488[];
 extern const char D_004804A8[];
 extern void* D_004812B0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269008 {
     sMsgListNode_00269008* next;
@@ -601,12 +601,12 @@ extern "C" void func_00269008(void* self, int a1, int a2)
     int kind = 0xF3;
     *(int*)self = a2;
     func_00264CF0(self, a1);
-    char* g = D_004A3028;
+    LobbyMan* g = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
-    sMsgList_00269008_insert(*(sMsgListNode_00269008**)(g + 0xF0), mp);
+    sMsgList_00269008_insert((*(sMsgListNode_00269008**)((char*)g + 0xF0)), mp);
 }
 #endif
 
@@ -621,7 +621,6 @@ extern "C" void func_00264CF0(void* self, int a1);
 extern const char D_00480488[];
 extern const char D_004804A8[];
 extern void* D_004812B0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_002690C8 {
     sMsgListNode_002690C8* next;
@@ -653,12 +652,12 @@ extern "C" void func_002690C8(void* self, int a1, int a2)
     int kind = 0xF4;
     *(int*)self = a2;
     func_00264CF0(self, a1);
-    char* g = D_004A3028;
+    LobbyMan* g = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
-    sMsgList_002690C8_insert(*(sMsgListNode_002690C8**)(g + 0xF0), mp);
+    sMsgList_002690C8_insert((*(sMsgListNode_002690C8**)((char*)g + 0xF0)), mp);
 }
 #endif
 
@@ -673,7 +672,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480488[];
 extern const char D_004804A8[];
 extern void* D_004812B0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269188 {
     sMsgListNode_00269188* next;
@@ -708,12 +706,12 @@ extern "C" void func_00269188(void* self, int a1)
 {
     int kind = 0xF7;
     ((sMsgSelf_00269188*)self)->f0 = a1;
-    char* g = D_004A3028;
+    LobbyMan* g = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
-    sMsgList_00269188_insert(*(sMsgListNode_00269188**)(g + 0xF0), mp);
+    sMsgList_00269188_insert((*(sMsgListNode_00269188**)((char*)g + 0xF0)), mp);
 }
 #endif
 
@@ -728,7 +726,6 @@ extern "C" void func_00264D80(void* self, int a1, void* a2);
 extern const char D_00480488[];
 extern const char D_004804A8[];
 extern void* D_004812B0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269240 {
     sMsgListNode_00269240* next;
@@ -760,12 +757,12 @@ extern "C" void func_00269240(void* self, int a1, int a2, void* a3)
     int kind = 0xF3;
     *(int*)self = a2;
     func_00264D80(self, a1, a3);
-    char* g = D_004A3028;
+    LobbyMan* g = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
-    sMsgList_00269240_insert(*(sMsgListNode_00269240**)(g + 0xF0), mp);
+    sMsgList_00269240_insert((*(sMsgListNode_00269240**)((char*)g + 0xF0)), mp);
 }
 #endif
 
@@ -780,7 +777,6 @@ extern "C" void func_00264D80(void* self, int a1, void* a2);
 extern const char D_00480488[];
 extern const char D_004804A8[];
 extern void* D_004812B0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269300 {
     sMsgListNode_00269300* next;
@@ -812,12 +808,12 @@ extern "C" void func_00269300(void* self, int a1, int a2)
     int kind = 0xF5;
     *(int*)self = a2;
     func_00264D80(self, a1, 0);
-    char* g = D_004A3028;
+    LobbyMan* g = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
-    sMsgList_00269300_insert(*(sMsgListNode_00269300**)(g + 0xF0), mp);
+    sMsgList_00269300_insert((*(sMsgListNode_00269300**)((char*)g + 0xF0)), mp);
 }
 #endif
 
@@ -832,7 +828,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480488[];
 extern const char D_004804A8[];
 extern void* D_004812B0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_002693C0 {
     sMsgListNode_002693C0* next;
@@ -867,12 +862,12 @@ extern "C" void func_002693C0(void* self, int a1)
 {
     int kind = 0xF7;
     ((sMsgSelf_002693C0*)self)->f0 = a1;
-    char* g = D_004A3028;
+    LobbyMan* g = LobbyMan_mLobbyMan;
     int* m = (int*)cMemMan_alloc(8, D_00480488, 0x20000000, 0);
     m[0] = kind;
     *(void***)((char*)m + 0x4) = D_004812B0;
     void* mp = m;
-    sMsgList_002693C0_insert(*(sMsgListNode_002693C0**)(g + 0xF0), mp);
+    sMsgList_002693C0_insert((*(sMsgListNode_002693C0**)((char*)g + 0xF0)), mp);
 }
 #endif
 
@@ -886,7 +881,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480F18[];
 extern const char D_004804A8[];
 extern void* D_00481150[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269478 {
     sMsgListNode_00269478* next;
@@ -928,7 +922,7 @@ extern "C" void func_00269478(void* self, int a1)
     m->f8 = 1;
     m->fC = a1;
     void* mp = m;
-    sMsgList_00269478_insert(*(sMsgListNode_00269478**)(D_004A3028 + 0xF0), mp);
+    sMsgList_00269478_insert((*(sMsgListNode_00269478**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -942,7 +936,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480F18[];
 extern const char D_004804A8[];
 extern void* D_00481130[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269538 {
     sMsgListNode_00269538* next;
@@ -986,7 +979,7 @@ extern "C" void func_00269538(void* self, int a1, int a2)
     m->fC = a1;
     m->f10 = a2;
     void* mp = m;
-    sMsgList_00269538_insert(*(sMsgListNode_00269538**)(D_004A3028 + 0xF0), mp);
+    sMsgList_00269538_insert((*(sMsgListNode_00269538**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -1001,7 +994,6 @@ extern const char D_00480F18[];
 extern "C" void func_00264E50(void* self, int event, int a2, int state);
 extern const char D_004804A8[];
 extern char D_004813E0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269608 {
     sMsgListNode_00269608* next;
@@ -1052,7 +1044,7 @@ extern "C" void func_00269608(void* self)
     m->vt = D_004813E0;
     m->f8 = 1;
     void* mp = m;
-    sMsgList_00269608_insert(*(sMsgListNode_00269608**)(D_004A3028 + 0xF0), mp);
+    sMsgList_00269608_insert((*(sMsgListNode_00269608**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -1067,7 +1059,6 @@ extern const char D_00480F18[];
 extern "C" void func_00264E50(void* self, int event, int a2, int state);
 extern const char D_004804A8[];
 extern char D_004813C0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_002696F8 {
     sMsgListNode_002696F8* next;
@@ -1110,7 +1101,7 @@ extern "C" void func_002696F8(void* self)
     m->vt = D_004813C0;
     m->f8 = 1;
     void* mp = m;
-    sMsgList_002696F8_insert(*(sMsgListNode_002696F8**)(D_004A3028 + 0xF0), mp);
+    sMsgList_002696F8_insert((*(sMsgListNode_002696F8**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -1124,7 +1115,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480F18[];
 extern const char D_004804A8[];
 extern void* D_00481150[];
-extern char* D_004A3028;
 
 struct sMsgListNode_002697D0 {
     sMsgListNode_002697D0* next;
@@ -1166,7 +1156,7 @@ extern "C" void func_002697D0(void* self, int a1)
     m->f8 = 1;
     m->fC = a1;
     void* mp = m;
-    sMsgList_002697D0_insert(*(sMsgListNode_002697D0**)(D_004A3028 + 0xF0), mp);
+    sMsgList_002697D0_insert((*(sMsgListNode_002697D0**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -1180,7 +1170,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480F18[];
 extern const char D_004804A8[];
 extern void* D_00481150[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269890 {
     sMsgListNode_00269890* next;
@@ -1222,7 +1211,7 @@ extern "C" void func_00269890(void* self, int a1)
     m->f8 = 0;
     m->fC = a1;
     void* mp = m;
-    sMsgList_00269890_insert(*(sMsgListNode_00269890**)(D_004A3028 + 0xF0), mp);
+    sMsgList_00269890_insert((*(sMsgListNode_00269890**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -1236,7 +1225,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480F18[];
 extern const char D_004804A8[];
 extern void* D_00481130[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269948 {
     sMsgListNode_00269948* next;
@@ -1280,7 +1268,7 @@ extern "C" void func_00269948(void* self, int a1, int a2)
     m->fC = a1;
     m->f10 = a2;
     void* mp = m;
-    sMsgList_00269948_insert(*(sMsgListNode_00269948**)(D_004A3028 + 0xF0), mp);
+    sMsgList_00269948_insert((*(sMsgListNode_00269948**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -1294,7 +1282,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480F18[];
 extern const char D_004804A8[];
 extern void* D_00481130[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269A18 {
     sMsgListNode_00269A18* next;
@@ -1338,7 +1325,7 @@ extern "C" void func_00269A18(void* self, int a1, int a2)
     m->fC = a1;
     m->f10 = a2;
     void* mp = m;
-    sMsgList_00269A18_insert(*(sMsgListNode_00269A18**)(D_004A3028 + 0xF0), mp);
+    sMsgList_00269A18_insert((*(sMsgListNode_00269A18**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -1352,7 +1339,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480F18[];
 extern const char D_004804A8[];
 extern char D_004813E0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269AE0 {
     sMsgListNode_00269AE0* next;
@@ -1393,7 +1379,7 @@ extern "C" void func_00269AE0(void* self, int a1)
     m->vt = D_004813E0;
     m->f8 = 1;
     void* mp = m;
-    sMsgList_00269AE0_insert(*(sMsgListNode_00269AE0**)(D_004A3028 + 0xF0), mp);
+    sMsgList_00269AE0_insert((*(sMsgListNode_00269AE0**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -1407,7 +1393,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480F18[];
 extern const char D_004804A8[];
 extern char D_004813E0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269B90 {
     sMsgListNode_00269B90* next;
@@ -1448,7 +1433,7 @@ extern "C" void func_00269B90(void* self, int a1)
     m->vt = D_004813E0;
     m->f8 = 0;
     void* mp = m;
-    sMsgList_00269B90_insert(*(sMsgListNode_00269B90**)(D_004A3028 + 0xF0), mp);
+    sMsgList_00269B90_insert((*(sMsgListNode_00269B90**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -1462,7 +1447,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480F18[];
 extern const char D_004804A8[];
 extern char D_004813C0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269C40 {
     sMsgListNode_00269C40* next;
@@ -1503,7 +1487,7 @@ extern "C" void func_00269C40(void* self, int a1)
     m->vt = D_004813C0;
     m->f8 = 1;
     void* mp = m;
-    sMsgList_00269C40_insert(*(sMsgListNode_00269C40**)(D_004A3028 + 0xF0), mp);
+    sMsgList_00269C40_insert((*(sMsgListNode_00269C40**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 
@@ -1517,7 +1501,6 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern const char D_00480F18[];
 extern const char D_004804A8[];
 extern char D_004813C0[];
-extern char* D_004A3028;
 
 struct sMsgListNode_00269CF0 {
     sMsgListNode_00269CF0* next;
@@ -1558,7 +1541,7 @@ extern "C" void func_00269CF0(void* self, int a1)
     m->vt = D_004813C0;
     m->f8 = 0;
     void* mp = m;
-    sMsgList_00269CF0_insert(*(sMsgListNode_00269CF0**)(D_004A3028 + 0xF0), mp);
+    sMsgList_00269CF0_insert((*(sMsgListNode_00269CF0**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
 

@@ -1623,6 +1623,13 @@ extern "C" void* cInstanceNode_writeToReplayFrame(void* self);
 //100%
 INCLUDE_ASM("object/flexrailnode", cFlagNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes the flag node's replay data using the base cInstanceNode_writeToReplayFrame().
+ *
+ * Only @p self is declared; the replay stream argument reaches the base function unchanged in its register.
+ *
+ * @return no meaningful value (cInstanceNode_writeToReplayFrame() returns nothing)
+ */
 void* cFlagNode_writeToReplayFrame(void* self)
 {
     return cInstanceNode_writeToReplayFrame(self);
@@ -1632,6 +1639,9 @@ void* cFlagNode_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("object/flexrailnode", cFlagNode_render__FPv);
 #ifdef SKIP_ASM
+/**
+ * Draws nothing: the flag node's render has an empty body.
+ */
 void cFlagNode_render(void* self)
 {
 }

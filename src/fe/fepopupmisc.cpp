@@ -340,6 +340,13 @@ extern "C" void cFEPopupScreenPos_onUpdate(sPopup_F050* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ends the screen-position popup's lose transition at once.
+ *
+ * The state stack update func_0039ECB0() ends a state's lose transition once this returns nonzero.
+ *
+ * @return always 1 (transition finished)
+ */
 int cFEPopupScreenPos_onLoseTransition(void* self)
 {
     return 0x1;
@@ -763,6 +770,13 @@ void* cFEStateNetHelpPopup__cFEStateNetHelpPopup(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ends the network help popup's lose transition at once.
+ *
+ * The state stack update func_0039ECB0() ends a state's lose transition once this returns nonzero.
+ *
+ * @return always 1 (transition finished)
+ */
 int cFEStateNetHelpPopup_onLoseTransition(void* self)
 {
     return 0x1;
@@ -1788,6 +1802,13 @@ signed char cFEPopupSelectMultiplayerMode_getData(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onGainTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ends the multiplayer-mode selection popup's gain transition at once.
+ *
+ * The state stack update func_0039ECB0() ends a state's gain transition once this returns nonzero.
+ *
+ * @return always 1 (transition finished)
+ */
 int cFEPopupSelectMultiplayerMode_onGainTransition(void* self)
 {
     return 0x1;
@@ -1797,6 +1818,13 @@ int cFEPopupSelectMultiplayerMode_onGainTransition(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ends the multiplayer-mode selection popup's lose transition at once.
+ *
+ * The state stack update func_0039ECB0() ends a state's lose transition once this returns nonzero.
+ *
+ * @return always 1 (transition finished)
+ */
 int cFEPopupSelectMultiplayerMode_onLoseTransition(void* self)
 {
     return 0x1;

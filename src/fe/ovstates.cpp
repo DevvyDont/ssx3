@@ -133,6 +133,9 @@ extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
 //100%
 INCLUDE_ASM("fe/ovstates", cFEStateTitle_onPopupEvent__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores popup events: the title state's onPopupEvent has an empty body.
+ */
 void cFEStateTitle_onPopupEvent(void* self)
 {
 }

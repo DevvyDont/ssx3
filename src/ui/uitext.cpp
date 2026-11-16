@@ -177,6 +177,11 @@ INCLUDE_ASM("ui/uitext", cUIText_deleteText);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
+/**
+ * Frees the text object's string and line table and resets its line count.
+ *
+ * Sets mNumLines to 0, then frees mpLineOffset and mpString when they are set and clears both pointers.
+ */
 extern "C" void cUIText_deleteText(cUIText* self)
 {
     self->mNumLines = 0;
@@ -224,6 +229,13 @@ extern "C" char cUIText_getNumTextLines_(void* self)
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_getAsciiString);
 #ifdef SKIP_ASM
+/**
+ * Returns the text's string when the text is not flagged as Unicode.
+ *
+ * Tests the mUnicode bit (bit 3) of mAttrText.
+ *
+ * @return mpString as an int when the bit is clear, otherwise 0
+ */
 extern "C" int cUIText_getAsciiString(cUIText* self)
 {
     if (((self->mAttrText >> 3) & 1) == 0) {
@@ -236,6 +248,13 @@ extern "C" int cUIText_getAsciiString(cUIText* self)
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_getUnicodeString);
 #ifdef SKIP_ASM
+/**
+ * Returns the text's string when the text is flagged as Unicode.
+ *
+ * Tests the mUnicode bit (bit 3) of mAttrText.
+ *
+ * @return mpString as an int when the bit is set, otherwise 0
+ */
 extern "C" int cUIText_getUnicodeString(cUIText* self)
 {
     if (((self->mAttrText >> 3) & 1) != 0) {
@@ -250,6 +269,14 @@ extern "C" void cUIText_setAsciiStringPrivate(cUIText* self, const char* str);
 //100%
 INCLUDE_ASM("ui/uitext", cUIText_setAsciiString__FP7cUITextPCc);
 #ifdef SKIP_ASM
+/**
+ * Replaces the text with an ASCII string, detaching it from any localised string ID.
+ *
+ * Clears mStringID, then calls cUIText_setAsciiStringPrivate(), which converts @p str to UCS-2 and stores it
+ * (strings of 511 or more characters are ignored).
+ *
+ * @param str  NUL-terminated ASCII text
+ */
 void cUIText_setAsciiString(cUIText* self, const char* str)
 {
     self->mStringID = 0;
@@ -363,6 +390,13 @@ INCLUDE_ASM("ui/uitext", cUIText_setUnicodeString);
 #ifdef SKIP_ASM
 extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self, const unsigned short* str);
 
+/**
+ * Replaces the text with a UCS-2 string, detaching it from any localised string ID.
+ *
+ * Clears mStringID, then calls cUIText_setUnicodeStringPrivate() to copy @p str and split it into lines.
+ *
+ * @param str  NUL-terminated UCS-2 text
+ */
 extern "C" void cUIText_setUnicodeString(cUIText* self, const unsigned short* str)
 {
     self->mStringID = 0;

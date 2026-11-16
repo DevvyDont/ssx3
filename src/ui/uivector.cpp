@@ -632,6 +632,14 @@ void operator_delete(int* ptr);
 
 extern void* cListOperator_vtbl[];
 
+/**
+ * Destroys a list operator: restores cListOperator's vtable pointer, then frees the object when asked to.
+ *
+ * List operators are the functor objects the UI applies to each node of a list (cUIGroup_setFocus uses a
+ * cListOpSetFocus).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cListOperator__cListOperator(int* self, int flags)
 {
     *(void***)self = cListOperator_vtbl;
@@ -933,6 +941,11 @@ struct sVec4 {
     float w;
 };
 
+/**
+ * Sets the UI thing's colour by copying a 16-byte tARGB value into mColour.
+ *
+ * @param in  colour to copy
+ */
 extern "C" void cUIThing_setColour(cUIThing* self, sVec4* in)
 {
     *(sVec4*)&self->mColour = *in;
@@ -1120,6 +1133,11 @@ extern "C" int func_003A4C88(void *arg0) {
 INCLUDE_ASM("ui/uivector", cUIThing_getSize);
 #ifdef SKIP_ASM
 
+/**
+ * Copies the UI thing's size (mSize) into a caller-supplied vector.
+ *
+ * @param out  receives the size
+ */
 extern "C" void cUIThing_getSize(cUIThing* self, t3Vector* out)
 {
     *out = *(&self->mSize);
@@ -1129,6 +1147,11 @@ extern "C" void cUIThing_getSize(cUIThing* self, t3Vector* out)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_setSize);
 #ifdef SKIP_ASM
+/**
+ * Sets the UI thing's size by copying a vector into mSize.
+ *
+ * @param in  new size
+ */
 extern "C" void cUIThing_setSize(cUIThing* self, t3Vector* in)
 {
     *(&self->mSize) = *in;
@@ -1142,6 +1165,12 @@ void operator_delete(int* ptr);
 
 extern void* cListOperator_vtbl[];
 
+/**
+ * Destroys an on-input list operator: restores the base cListOperator vtable, then frees the object when asked
+ * to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cListOpOnInput__cListOpOnInput(int* self, int flags)
 {
     *(void***)self = cListOperator_vtbl;
@@ -1177,6 +1206,12 @@ void operator_delete(int* ptr);
 
 extern void* cListOperator_vtbl[];
 
+/**
+ * Destroys a set-focus list operator: restores the base cListOperator vtable, then frees the object when asked
+ * to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cListOpSetFocus__cListOpSetFocus(int* self, int flags)
 {
     *(void***)self = cListOperator_vtbl;
@@ -2609,6 +2644,14 @@ extern "C" void cUIText_deleteText(void* self);
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
 extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
 
+/**
+ * Destroys a UI text object: frees its string and line table, then runs the cUIThing destructor.
+ *
+ * Restores cUIText's vtable, calls cUIText_deleteText(), then cUIThing__cUIThing(), which frees the object when
+ * asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cUIText__cUIText(cUIText* self, int flags)
 {
     self->mVtbl = cUIText_vtbl;

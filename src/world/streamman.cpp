@@ -42,6 +42,16 @@ void operator_delete(int* ptr);
 extern "C" void func_003A6ED8(cStreamMan* self);
 extern "C" void func_003A6F38(cStreamMan* self);
 
+/**
+ * Destroys the world streamer: frees an unfinished shared chunk, resets and purges the streamer, then frees it
+ * when asked to.
+ *
+ * m_pBxChunkMemHandle is freed only when it is set, m_uiBxChunkSizeLeft is nonzero and the low byte of
+ * m_BxChunkResourceID (the section) is 0xFF, the shared section. func_003A6ED8() (reset) and func_003A6F38()
+ * (purge: releases the stream handle and frees the stream and decompression buffers) follow.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cStreamMan__cStreamMan(cStreamMan* self, int flags)
 {
     void* buf = self->m_pBxChunkMemHandle;

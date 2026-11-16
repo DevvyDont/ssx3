@@ -3833,6 +3833,9 @@ void cDeadNode_signal(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cDeadFadeNode_signal__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores signals: cDeadFadeNode's signal has an empty body.
+ */
 void cDeadFadeNode_signal(void* self)
 {
 }
@@ -5215,6 +5218,9 @@ void* cDebounceNode__cDebounceNode(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cDebounceNode_onCollide__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores collisions: cDebounceNode's onCollide has an empty body.
+ */
 void cDebounceNode_onCollide(void* self)
 {
 }
@@ -6145,6 +6151,13 @@ int cRollerModifier_shouldRebound(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_isComplete);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the rolling object has reached the end of its life.
+ *
+ * Compares Life with 17.0; On Tour names this limit kMaxRollerDeath.
+ *
+ * @return 1 when Life >= 17.0, otherwise 0
+ */
 extern "C" int cRollerModifier_isComplete(cRollerModifier* self)
 {
     return self->Life >= 17.0f;

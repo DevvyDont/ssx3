@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/lobbyman.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "online/commsystem.h"
@@ -1189,7 +1190,6 @@ extern int D_00441250[];
 extern int D_00441254[];
 extern unsigned int D_00535610[];
 extern int D_004A29EC;
-extern void* D_004A3028;
 
 struct sVidInfo_27A0 {
     int a;
@@ -1290,8 +1290,8 @@ noh:
         if (D_004A29EC != 0) {
             func_00263828(self + 0xB5AB0);
             func_00263CF0(self + 0xB5ABC);
-            if (D_004A3028 != 0) {
-                func_0025AC50(D_004A3028);
+            if (LobbyMan_mLobbyMan != 0) {
+                func_0025AC50(LobbyMan_mLobbyMan);
             }
         }
 }
@@ -1383,7 +1383,6 @@ extern void* cFEStateBackground_vtbl[];
 extern int D_004A19C4;
 extern int D_004A19D8;
 extern void* D_004A33F4;
-extern void* D_004A3028;
 
 // PORT: cMemMan_alloc bound as a placement operator new (gcc then treats the result as unaliased)
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -1431,7 +1430,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
         func_00255CC8(cCommSystem_mCommSystem, cGameComm_mGameComm->unk_06C);
         func_00266E88(D_004A33F4);
         func_00266DF8(D_004A33F4);
-        func_0025B6D8(D_004A3028, 1);
+        func_0025B6D8(LobbyMan_mLobbyMan, 1);
         func_0014ECA0(cBE_getInterface_Fv(SSXApp->BE, 7), 0);
         func_0014DE28(cBE_getBE(), 1);
         func_0014DE28(cBE_getBE(), 2);

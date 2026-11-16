@@ -128,6 +128,12 @@ INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onUpdate);
 extern "C" void* func_0039E510(void* self);
 extern "C" void func_00182EC0(void* self);
 
+/**
+ * Updates the character-setup state: runs the base UI-state update, then poses the front-end rider model.
+ *
+ * func_0039E510() is the base UI-state update, which dispatches controller input to the state and its screens.
+ * func_00182EC0() places the loaded rider model and, when the state asks for it, restarts its animation.
+ */
 extern "C" void cFEStateCharSetup_onUpdate(void* self)
 {
     func_0039E510(self);

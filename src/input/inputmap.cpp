@@ -373,6 +373,12 @@ INCLUDE_ASM("input/inputmap", cInputMapParser_skipPastSemicolon);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(void* self);
 
+/**
+ * Skips the rest of a malformed input-map statement, up to and including its semicolon.
+ *
+ * Reads tokens until the current token is a semicolon (5) or end of file (0), then reads one more.
+ * cInputMapParser_parseStatement() calls it after each error it reports.
+ */
 extern "C" void cInputMapParser_skipPastSemicolon(cInputMapParser* self)
 {
     while (self->CurrentToken != 5 && self->CurrentToken != 0) {

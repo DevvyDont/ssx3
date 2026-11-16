@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/lobbyman.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnetwork.h"
 #include "main/game.h"
@@ -28,6 +29,11 @@ extern "C" void* cUIState_onGainFocus(void* self);
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the trophy-room state focus using the base cUIState_onGainFocus().
+ *
+ * @return no meaningful value (cUIState_onGainFocus() returns nothing)
+ */
 void* cFEStateTrophyRoom_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);
@@ -759,17 +765,16 @@ extern "C" void* func_001BFBB8(void* mem, int a1);
 extern "C" void func_0025C610(void* mgr);
 extern "C" void* func_0025CD50(void*, int);
 extern "C" void func_0025FD50(void* mgr, int a1, int a2, int a3, char* a4, char* a5);
-extern void* D_004A3028;
 extern char D_0045FF28[];
 
 extern "C" int func_001D5138(void* self, int msg)
 {
     switch (msg) {
     case 0xC9:
-        func_0025C610(D_004A3028);
+        func_0025C610(LobbyMan_mLobbyMan);
         break;
     case 0xD4:
-        func_0025CD50(D_004A3028, *(int*)((char*)D_004A3028 + 0x80));
+        func_0025CD50(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mPersona));
         break;
     case 0x101:
         func_001A8A40(self, func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)((char*)self + 0x10)));
@@ -777,7 +782,7 @@ extern "C" int func_001D5138(void* self, int msg)
     case 0x111: {
         cBE_getInterface_Fv(SSXApp->BE, 7);
         char* g = ((char*)&cBENetworkInterface_networkOpt);
-        func_0025FD50(D_004A3028, *(int*)(g + 4), *(int*)(g + 8) == 0, *(int*)(g + 8) != 0, g + 0x330, g + 0x3DC);
+        func_0025FD50(LobbyMan_mLobbyMan, *(int*)(g + 4), *(int*)(g + 8) == 0, *(int*)(g + 8) != 0, g + 0x330, g + 0x3DC);
         break;
     }
     default:

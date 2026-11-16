@@ -2083,6 +2083,12 @@ INCLUDE_ASM("scripter/datamanager", cSSXScriptEngine_DeInitOnce);
 extern "C" void cBXScriptEngine_PurgeBXEngine(void* self);
 extern "C" void* MEM_free(void* self);
 
+/**
+ * Releases what the script engine's InitOnce set up: the BX script engine and the script master tables.
+ *
+ * Purges the BX engine, frees the master table header and, when loaded, the debug table, then clears
+ * mpMasterTableHeader, mpMasterTable, mpMasterTableDebug and mNumFramesNoSkip.
+ */
 extern "C" void cSSXScriptEngine_DeInitOnce(cSSXScriptEngine* self)
 {
     cBXScriptEngine_PurgeBXEngine(self);

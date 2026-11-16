@@ -91,6 +91,14 @@ extern "C" void func_001449E8(void)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberHumans__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets the number of human riders for the new race and resets the player/rider slot mapping.
+ *
+ * Writes the static race settings cBENewRaceInterface_newRace (@p self is unused): iNumberHumans = @p humans,
+ * iNumberRiders = humans + iNumberAI + iNumberMissionRiders, and playerID[i] = riderID[i] = i for all six slots.
+ *
+ * @param humans  number of human riders
+ */
 void cBENewRaceInterface_setNumberHumans(void* self, int humans)
 {
     cBENewRaceInterface_newRace.iNumberHumans = humans;

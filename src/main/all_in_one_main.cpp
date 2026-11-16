@@ -3784,6 +3784,14 @@ extern "C" void* cFEStateLegal__cFEStateLegal(void *self) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEStateLegal_onGainTransition);
 #ifdef SKIP_ASM
+/**
+ * Ends the legal screen's gain transition at once.
+ *
+ * Declared without parameters. The state stack update func_0039ECB0() ends a state's gain transition once this
+ * returns nonzero.
+ *
+ * @return always 1 (transition finished)
+ */
 extern "C" int cFEStateLegal_onGainTransition(void) {
     return 1;
 }
@@ -3891,6 +3899,14 @@ extern "C" void* cFEPopupVideoCalibration__cFEPopupVideoCalibration(void *self) 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEPopupVideoCalibration_onGainTransition);
 #ifdef SKIP_ASM
+/**
+ * Ends the video-calibration popup's gain transition at once.
+ *
+ * Declared without parameters. The state stack update func_0039ECB0() ends a state's gain transition once this
+ * returns nonzero.
+ *
+ * @return always 1 (transition finished)
+ */
 extern "C" int cFEPopupVideoCalibration_onGainTransition(void) {
     return 1;
 }
@@ -3899,6 +3915,14 @@ extern "C" int cFEPopupVideoCalibration_onGainTransition(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEPopupVideoCalibration_onLoseTransition);
 #ifdef SKIP_ASM
+/**
+ * Ends the video-calibration popup's lose transition at once.
+ *
+ * Declared without parameters. The state stack update func_0039ECB0() ends a state's lose transition once this
+ * returns nonzero.
+ *
+ * @return always 1 (transition finished)
+ */
 extern "C" int cFEPopupVideoCalibration_onLoseTransition(void) {
     return 1;
 }

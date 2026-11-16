@@ -107,6 +107,11 @@ extern "C" void* func_0039E6B8(void* self);
 //100%
 INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onRender2D__FPv);
 #ifdef SKIP_ASM
+/**
+ * Renders the rider-detail state's 2D layer with the shared UI-state render routine func_0039E6B8().
+ *
+ * @return no meaningful value (func_0039E6B8() returns nothing)
+ */
 void* cFEStateRiderDetail_onRender2D(void* self)
 {
     return func_0039E6B8(self);
@@ -119,6 +124,13 @@ INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onUpdate);
 extern "C" void func_0039E510(void*);
 extern "C" void func_00182EC0(void*);
 
+/**
+ * Updates the rider-detail state: runs the base UI-state update, then poses the front-end rider model.
+ *
+ * func_0039E510() is the base UI-state update, which dispatches controller input to the state and its screens.
+ * func_00182EC0() (shared with the character-setup state) places the loaded rider model and, when the state asks
+ * for it, restarts its animation.
+ */
 extern "C" void cFEStateRiderDetail_onUpdate(void* self)
 {
     func_0039E510(self);

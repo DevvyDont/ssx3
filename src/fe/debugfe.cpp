@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/lobbyman.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "online/commsystem.h"
@@ -542,7 +543,6 @@ extern "C" void func_0017D3B0(char* self, int flags)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017D688);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 extern "C" void func_00255A20(void*);
 extern "C" void func_0025AC50(void*);
 extern "C" void func_002CC0C0(void* stack);
@@ -568,7 +568,7 @@ static inline void* sMenuStack17D688_top(sMenuStack17D688* s)
 extern "C" void func_0017D688(sDebugFE17D688* self)
 {
     func_00255A20(cCommSystem_mCommSystem);
-    func_0025AC50(D_004A3028);
+    func_0025AC50(LobbyMan_mLobbyMan);
     if (sMenuStack17D688_top(&self->stack) != 0)
         func_002CC0C0(&self->stack);
     func_0017DB18(self);
@@ -578,7 +578,6 @@ extern "C" void func_0017D688(sDebugFE17D688* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017D6F0);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 extern char D_004A1320[];
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
@@ -650,9 +649,9 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         break;
     case 0xC9:
         if (SSXApp->unk_74 != 0) {
-            cBXString_cBXString4((char*)D_004A3028 + 0x48, SSXApp->UserName);
-            cBXString_cBXString4((char*)D_004A3028 + 0x4C, SSXApp->Password);
-            func_0025C610(D_004A3028);
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, SSXApp->UserName);
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, SSXApp->Password);
+            func_0025C610(LobbyMan_mLobbyMan);
             self->state = 5;
         } else {
             self->state = 3;
@@ -661,16 +660,16 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         break;
     case 0xCB:
         self->state = 5;
-        cBXString_cBXString4((char*)D_004A3028 + 0x48, self->user);
-        cBXString_cBXString4((char*)D_004A3028 + 0x4C, self->pass);
-        func_0025C610(D_004A3028);
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, self->user);
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, self->pass);
+        func_0025C610(LobbyMan_mLobbyMan);
         break;
     case 0xD4:
         if (SSXApp->unk_74 != 0) {
             self->state = 7;
-            func_0025CD28(D_004A3028, 0);
+            func_0025CD28(LobbyMan_mLobbyMan, 0);
         } else {
-            func_001DB418(self->items74C, D_004A3028);
+            func_001DB418(self->items74C, LobbyMan_mLobbyMan);
             func_002CC3B8(self->menu, self->items74C);
             self->state = 6;
         }
@@ -678,9 +677,9 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
     case 0xDA:
         if (SSXApp->unk_74 != 0) {
             int i;
-            for (i = 0; i < func_0025F120(D_004A3028); i++) {
-                if (func_004165A8(func_0025F150(D_004A3028, i), D_004A1320) == 0) {
-                    func_0025D800(D_004A3028, i, 0);
+            for (i = 0; i < func_0025F120(LobbyMan_mLobbyMan); i++) {
+                if (func_004165A8(func_0025F150(LobbyMan_mLobbyMan, i), D_004A1320) == 0) {
+                    func_0025D800(LobbyMan_mLobbyMan, i, 0);
                     self->state = 0xB;
                 }
             }
@@ -691,12 +690,12 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         break;
     case 0xD6:
     case 0xD8:
-        func_001DB418(self->items74C, D_004A3028);
+        func_001DB418(self->items74C, LobbyMan_mLobbyMan);
         func_002CC3B8(self->menu, self->items74C);
         self->state = 6;
         break;
     case 0xDC:
-        if (func_0025F430(D_004A3028) != 0) {
+        if (func_0025F430(LobbyMan_mLobbyMan) != 0) {
             func_002CC3B8(self->menu, self->items1044);
             self->state = 0xC;
         } else {
@@ -730,7 +729,7 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
             self->f1A44 = self->text;
             func_002CC3B8(self->menu, self->items18C0);
         } else {
-            func_0025FC28(D_004A3028, *(int*)((char*)ev + 8));
+            func_0025FC28(LobbyMan_mLobbyMan, *(int*)((char*)ev + 8));
         }
         break;
     }
@@ -741,7 +740,6 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
 INCLUDE_ASM("fe/debugfe", func_0017DA30);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void* D_004A3028;
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void func_002CC3B8(void* menu, void* items);
 extern "C" void func_0025C610(void* net);
@@ -763,9 +761,9 @@ extern "C" void func_0017DA30(void* self, int a1)
         break;
     case 5:
         if (SSXApp->unk_74 != 0) {
-            cBXString_cBXString4((char*)D_004A3028 + 0x48, SSXApp->UserName);
-            cBXString_cBXString4((char*)D_004A3028 + 0x4C, SSXApp->Password);
-            func_0025C610(D_004A3028);
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, SSXApp->UserName);
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, SSXApp->Password);
+            func_0025C610(LobbyMan_mLobbyMan);
         } else {
             SetMode0017DA30(self, 0x15);
         }
@@ -792,7 +790,6 @@ extern "C" void func_0017DA30(void* self, int a1)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017DB18);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 extern void* D_004A33F4;
 extern char D_0045CE60[];
 struct cAppMan;
@@ -845,7 +842,7 @@ extern "C" void func_0017DB18(void* vself)
         }
         case 1:
             if (cCommSystem_mCommSystem->mNetConnState != 3 && cCommSystem_mCommSystem->mNetConnState != 4) {
-                func_0025B6D8(D_004A3028, 0);
+                func_0025B6D8(LobbyMan_mLobbyMan, 0);
                 self->state = 2;
             }
             break;
@@ -886,7 +883,7 @@ extern "C" void func_0017DB18(void* vself)
             break;
         case 22:
             if (func_002CC098(self->menu) == 0) {
-                func_001DB418(self->items74C, D_004A3028);
+                func_001DB418(self->items74C, LobbyMan_mLobbyMan);
                 func_002CC3B8(self->menu, self->items74C);
                 self->state = 6;
             }
@@ -917,15 +914,15 @@ extern "C" void func_0017DB18(void* vself)
             if (*menu == 0) {
                 func_002CC3B8(menu, items);
             }
-            func_001DB528(items, D_004A3028);
+            func_001DB528(items, LobbyMan_mLobbyMan);
             break;
         }
         case 12:
             if (self->menu[0] == 0) {
-                func_0025D800(D_004A3028, -1, 0);
+                func_0025D800(LobbyMan_mLobbyMan, -1, 0);
                 self->state = 0xB;
             } else {
-                func_001DB620(self->items1044, D_004A3028);
+                func_001DB620(self->items1044, LobbyMan_mLobbyMan);
             }
             break;
         case 3: {
@@ -946,7 +943,7 @@ extern "C" void func_0017DB18(void* vself)
         case 16:
             if (func_00255D50(cCommSystem_mCommSystem, self->channel) != 0) {
                 int info[4];
-                cGameComm_construct(self->channel, *(int*)((char*)D_004A3028 + 0xB4));
+                cGameComm_construct(self->channel, LobbyMan_mLobbyMan->mIsHost);
                 cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, D_0045CE60, 0x100, 0)));
                 func_00256038(cCommSystem_mCommSystem, info);
                 func_00266D58(D_004A33F4, info[0]);
@@ -972,7 +969,6 @@ extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int
 extern "C" void func_001472C8(void* iface, int a1, int a2);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int host);
-extern void* D_004A3028;
 extern int D_004A11B8;
 extern int D_00535C08[];
 extern char D_0045CF98[];
@@ -1013,13 +1009,13 @@ extern "C" void func_0017DE70(char* self)
     void* net = cBE_getInterface_Fv(SSXApp->BE, 7);
     sNetCfg_17DE70* cfg = &D_00534B30_cfg;
     D_00534B30_cfg.active = 1;
-    cfg->host = *(int*)((char*)D_004A3028 + 0xB4);
+    cfg->host = LobbyMan_mLobbyMan->mIsHost;
     vcall1_17DE70(net);
     unsigned int ip;
     if (cfg->host) {
-        ip = *(unsigned int*)((char*)D_004A3028 + 0xAC);
+        ip = (unsigned int)LobbyMan_mLobbyMan->mOppoAddr;
     } else {
-        ip = *(unsigned int*)((char*)D_004A3028 + 0xA8);
+        ip = (unsigned int)LobbyMan_mLobbyMan->mHostAddr;
     }
     char buf[256];
     sprintf(buf, D_0045CF98, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
@@ -1031,7 +1027,6 @@ extern "C" void func_0017DE70(char* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E030);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 extern "C" void func_002CC460(void* list);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void func_0025B9C8(void* mgr, void* req);
@@ -1067,25 +1062,24 @@ extern "C" void func_0017E030(sDebugFEState17E030* self, const char* a, const ch
     cBXString_cBXString4((char*)self + 0x1C04, a);
     cBXString_cBXString4((char*)self + 0x1C08, b);
     self->state = 0x4;
-    sDsReq17E030* g = (sDsReq17E030*)D_004A3028;
-    cBXString_cBXString4(&g->user, a);
-    cBXString_cBXString4(&g->pass, b);
-    cBXString_cBXString4(&g->pass2, b);
-    cBXString_cBXString4(&g->host, D_0045D248);
-    g->port = 0x79E;
-    g->f294 = 1;
-    g->f288 = 1;
-    g->f29C = 0;
-    g->f298 = 0;
-    g->f28C = 1;
-    func_0025B9C8(D_004A3028, &g->user);
+    LobbyMan* g = LobbyMan_mLobbyMan;
+    cBXString_cBXString4(&g->mNewAccount.mName, a);
+    cBXString_cBXString4(&g->mNewAccount.mPassword, b);
+    cBXString_cBXString4(&g->mNewAccount.unk_08, b);
+    cBXString_cBXString4(&g->mNewAccount.mMail, D_0045D248);
+    g->mNewAccount.mBornYear = 0x79E;
+    g->mNewAccount.mGender = 1;
+    g->mNewAccount.mBornMonth = 1;
+    g->mNewAccount.mSpam[1] = 0;
+    g->mNewAccount.mSpam[0] = 0;
+    g->mNewAccount.mBornDay = 1;
+    func_0025B9C8(LobbyMan_mLobbyMan, &g->mNewAccount.mName);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E118);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 extern "C" void func_002CC460(void* list);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void func_0025C610(void* mgr);
@@ -1108,16 +1102,15 @@ extern "C" void func_0017E118(sDebugFEState17E118* self, const char* a, const ch
     cBXString_cBXString4(&self->user, a);
     cBXString_cBXString4(&self->pass, b);
     self->state = 0x5;
-    cBXString_cBXString4((char*)D_004A3028 + 0x48, self->user);
-    cBXString_cBXString4((char*)D_004A3028 + 0x4C, self->pass);
-    func_0025C610(D_004A3028);
+    cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, self->user);
+    cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, self->pass);
+    func_0025C610(LobbyMan_mLobbyMan);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E1C0);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 struct sDebugFEState17E1C0 {
     int f0;
     int state; // 0x4
@@ -1133,14 +1126,13 @@ extern "C" void func_0017E1C0(sDebugFEState17E1C0* self, int arg)
         func_002CC460(list);
     }
     self->state = 0x8;
-    func_0025D1B8(D_004A3028, arg);
+    func_0025D1B8(LobbyMan_mLobbyMan, arg);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E228);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 struct sDebugFEState17E228 {
     int f0;
     int state; // 0x4
@@ -1156,14 +1148,13 @@ extern "C" void func_0017E228(sDebugFEState17E228* self, int arg)
         func_002CC460(list);
     }
     self->state = 0x9;
-    func_0025D428(D_004A3028, arg);
+    func_0025D428(LobbyMan_mLobbyMan, arg);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E290);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 struct sDebugFEState17E290 {
     int f0;
     int state; // 0x4
@@ -1179,14 +1170,13 @@ extern "C" void func_0017E290(sDebugFEState17E290* self, int arg)
         func_002CC460(list);
     }
     self->state = 0x7;
-    func_0025CD28(D_004A3028, arg);
+    func_0025CD28(LobbyMan_mLobbyMan, arg);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E2F8);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 struct sDebugFEState17E2F8 {
     int f0;
     int state; // 0x4
@@ -1202,7 +1192,7 @@ extern "C" void func_0017E2F8(sDebugFEState17E2F8* self, int arg)
         func_002CC460(list);
     }
     self->state = 0xB;
-    func_0025D800(D_004A3028, arg, 0);
+    func_0025D800(LobbyMan_mLobbyMan, arg, 0);
 }
 #endif
 
@@ -1241,7 +1231,6 @@ extern "C" void func_0017E3B8(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E418);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 struct sDebugFEState17E418 {
     int f0;
     int state; // 0x4
@@ -1259,14 +1248,13 @@ extern "C" void func_0017E418(sDebugFEState17E418* self, int arg)
     }
     func_002CC3B8((char*)self + 0x8, (char*)self + 0x1044);
     self->state = 0xC;
-    func_0025AAE0(D_004A3028, arg);
+    func_0025AAE0(LobbyMan_mLobbyMan, arg);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E490);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 struct sDebugFEState17E490 {
     int f0;
     int state; // 0x4
@@ -1282,14 +1270,13 @@ extern "C" void func_0017E490(sDebugFEState17E490* self)
         func_002CC460(list);
     }
     self->state = 0xD;
-    func_0025FB58(D_004A3028, *(int*)((char*)self + 0x1C0C), 0);
+    func_0025FB58(LobbyMan_mLobbyMan, *(int*)((char*)self + 0x1C0C), 0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E4F0);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 struct sDebugFEState17E4F0 {
     int f0;
     int state; // 0x4
@@ -1307,14 +1294,13 @@ extern "C" void func_0017E4F0(sDebugFEState17E4F0* self)
     }
     func_002CC3B8((char*)self + 0x8, (char*)self + 0x1044);
     self->state = 0xC;
-    func_0025FC28(D_004A3028, *(int*)((char*)self + 0x1C0C));
+    func_0025FC28(LobbyMan_mLobbyMan, *(int*)((char*)self + 0x1C0C));
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E558);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 struct sDebugFEState17E558 {
     int f0;
     int state; // 0x4
@@ -1332,7 +1318,7 @@ extern "C" void func_0017E558(sDebugFEState17E558* self)
     }
     func_002CC3B8((char*)self + 0x8, (char*)self + 0x1044);
     self->state = 0xC;
-    func_0025F628(D_004A3028, 1, 0);
+    func_0025F628(LobbyMan_mLobbyMan, 1, 0);
 }
 #endif
 
@@ -1341,7 +1327,6 @@ INCLUDE_ASM("fe/debugfe", func_0017E5C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern void* D_004A3028;
 extern char D_0045D258[];
 extern char D_0045D270[];
 extern char D_0045D288[];
@@ -1491,7 +1476,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         func_00392908(font, 320.0f, 100.0f, D_0045D340);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 19: {
@@ -1500,7 +1485,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         func_00392908(font, 320.0f, 100.0f, D_0045D358);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 20: {
@@ -1509,7 +1494,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         func_00392908(font, 320.0f, 100.0f, D_0045D378);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 22: {
@@ -1518,7 +1503,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         func_00392908(font, 320.0f, 100.0f, D_0045D390);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 21: {
@@ -1527,7 +1512,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         func_00392908(font, 320.0f, 100.0f, D_0045D3A0);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 23: {
@@ -1536,7 +1521,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         func_00392908(font, 320.0f, 100.0f, D_0045D3C0);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 24: {
@@ -1545,7 +1530,7 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         func_00392908(font, 320.0f, 100.0f, D_0045D3D8);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(D_004A3028, self->tag).p);
+        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 16: {
@@ -1556,24 +1541,24 @@ extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.6f);
         float y = 200.0f;
         func_00391CB0(font, 110.0f, y, D_004A1328);
-        func_00392A60(font, *(char**)((char*)D_004A3028 + 0x88), 530.0f, y);
+        func_00392A60(font, LobbyMan_mLobbyMan->mGameName, 530.0f, y);
         y += 20.0f;
         func_00391CB0(font, 110.0f, y, D_0045D408);
-        func_00392A60(font, *(char**)((char*)D_004A3028 + 0x98), 530.0f, y);
+        func_00392A60(font, LobbyMan_mLobbyMan->mOpponent, 530.0f, y);
         y += 20.0f;
         func_00391CB0(font, 110.0f, y, D_0045D418);
-        onOff17E5C8(font, *(int*)((char*)D_004A3028 + 0xB4), 530.0f, y);
+        onOff17E5C8(font, LobbyMan_mLobbyMan->mIsHost, 530.0f, y);
         y += 20.0f;
         func_00391CB0(font, 110.0f, y, D_0045D428);
-        unsigned int ip = *(unsigned int*)((char*)D_004A3028 + 0xA8);
+        unsigned int ip = (unsigned int)LobbyMan_mLobbyMan->mHostAddr;
         func_001DCA80(font, 530.0f, y, D_0045CF98, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
         y += 20.0f;
         func_00391CB0(font, 110.0f, y, D_0045D438);
-        unsigned int ip2 = *(unsigned int*)((char*)D_004A3028 + 0xAC);
+        unsigned int ip2 = (unsigned int)LobbyMan_mLobbyMan->mOppoAddr;
         func_001DCA80(font, 530.0f, y, D_0045CF98, ip2 >> 24, (ip2 >> 16) & 0xFF, (ip2 >> 8) & 0xFF, ip2 & 0xFF);
         y += 20.0f;
         func_00391CB0(font, 110.0f, y, D_004A1338);
-        func_001DCA80(font, 530.0f, y, D_004A12C0, *(int*)((char*)D_004A3028 + 0xB0));
+        func_001DCA80(font, 530.0f, y, D_004A12C0, LobbyMan_mLobbyMan->mSeed);
         break;
     }
     }

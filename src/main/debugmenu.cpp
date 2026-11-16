@@ -1884,6 +1884,14 @@ extern "C" void* cMenu_onGainFocus(void* self);
 //100%
 INCLUDE_ASM("main/debugmenu", cVisualEffectsMainMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Visual Effects Main Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * Only @p self is declared; the cMenuSys pointer the caller passes second reaches cMenu_onGainFocus() unchanged
+ * in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cVisualEffectsMainMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -1895,6 +1903,11 @@ extern "C" void* cMenu_onLoseFocus(void* self);
 //100%
 INCLUDE_ASM("main/debugmenu", cVisualEffectsMainMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Visual Effects Main Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cVisualEffectsMainMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -2725,6 +2738,14 @@ extern "C" void cVisualEffectsMainMenu__cVisualEffectsMainMenu(void* self, int f
 //100%
 INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Render Toggles Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Render Toggles". Only @p self is declared; the cMenuSys
+ * pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cRenderTogglesMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -2734,6 +2755,11 @@ void* cRenderTogglesMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Render Toggles Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cRenderTogglesMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -2743,6 +2769,14 @@ void* cRenderTogglesMenu_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cVisualEffectsTestMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Visual Effects Test Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Visual Effects Test". Only @p self is declared; the
+ * cMenuSys pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cVisualEffectsTestMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -2752,6 +2786,11 @@ void* cVisualEffectsTestMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cVisualEffectsTestMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Visual Effects Test Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cVisualEffectsTestMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -2787,6 +2826,14 @@ extern "C" void cPlantsMenu__cPlantsMenu(void* self, int flags)
 //100%
 INCLUDE_ASM("main/debugmenu", cPlantsMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Plants Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Plants". Only @p self is declared; the cMenuSys pointer
+ * the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cPlantsMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -2796,6 +2843,11 @@ void* cPlantsMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cPlantsMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Plants Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cPlantsMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -2805,6 +2857,14 @@ void* cPlantsMenu_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cLightGlowMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Light Glow Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Light Glow". Only @p self is declared; the cMenuSys
+ * pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cLightGlowMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -2814,6 +2874,11 @@ void* cLightGlowMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cLightGlowMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Light Glow Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cLightGlowMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -2823,6 +2888,14 @@ void* cLightGlowMenu_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cDepthFogMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Depth Fog Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Depth Fog". Only @p self is declared; the cMenuSys
+ * pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cDepthFogMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -2832,6 +2905,11 @@ void* cDepthFogMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cDepthFogMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Depth Fog Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cDepthFogMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -2858,6 +2936,14 @@ extern "C" void cHeightFogMenu__cHeightFogMenu(void* self, int flags)
 //100%
 INCLUDE_ASM("main/debugmenu", cHeightFogMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Height Fog Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Height Fog". Only @p self is declared; the cMenuSys
+ * pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cHeightFogMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -2867,6 +2953,11 @@ void* cHeightFogMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cHeightFogMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Height Fog Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cHeightFogMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -2900,6 +2991,14 @@ extern "C" void cDetailSystemMenu__cDetailSystemMenu(void* self, int flags)
 //100%
 INCLUDE_ASM("main/debugmenu", cDetailSystemMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Detail System Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Detail System". Only @p self is declared; the cMenuSys
+ * pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cDetailSystemMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -2909,6 +3008,11 @@ void* cDetailSystemMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cDetailSystemMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Detail System Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cDetailSystemMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -2941,6 +3045,14 @@ extern "C" void cShellRendererMenu__cShellRendererMenu(void* self, int flags)
 //100%
 INCLUDE_ASM("main/debugmenu", cShellRendererMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Shell Renderer Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * Only @p self is declared; the cMenuSys pointer the caller passes second reaches cMenu_onGainFocus() unchanged
+ * in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cShellRendererMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -2950,6 +3062,11 @@ void* cShellRendererMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cShellRendererMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Shell Renderer Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cShellRendererMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -2959,6 +3076,14 @@ void* cShellRendererMenu_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cScreenTintMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Screen Tint Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Screen Tint". Only @p self is declared; the cMenuSys
+ * pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cScreenTintMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -2968,6 +3093,11 @@ void* cScreenTintMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cScreenTintMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Screen Tint Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cScreenTintMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -3000,6 +3130,14 @@ extern "C" void cShadowMenu__cShadowMenu(void* self, int flags)
 //100%
 INCLUDE_ASM("main/debugmenu", cShadowMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Shadow Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Shadow". Only @p self is declared; the cMenuSys pointer
+ * the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cShadowMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -3009,6 +3147,11 @@ void* cShadowMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cShadowMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Shadow Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cShadowMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -3039,6 +3182,14 @@ extern "C" void cSnowSurfaceMenu__cSnowSurfaceMenu(void* self, int flags)
 //100%
 INCLUDE_ASM("main/debugmenu", cSnowSurfaceMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Snow Surface Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Snow Surface". Only @p self is declared; the cMenuSys
+ * pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cSnowSurfaceMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -3048,6 +3199,11 @@ void* cSnowSurfaceMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cSnowSurfaceMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Snow Surface Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cSnowSurfaceMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -3057,6 +3213,14 @@ void* cSnowSurfaceMenu_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cBoardTrailMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Board Trail Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Board Trail". Only @p self is declared; the cMenuSys
+ * pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cBoardTrailMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -3066,6 +3230,11 @@ void* cBoardTrailMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cBoardTrailMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Board Trail Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cBoardTrailMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -3091,6 +3260,14 @@ extern "C" void cFlagsMenu__cFlagsMenu(void* self, int flags)
 //100%
 INCLUDE_ASM("main/debugmenu", cFlagsMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Flags Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Flags". Only @p self is declared; the cMenuSys pointer
+ * the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cFlagsMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -3100,6 +3277,11 @@ void* cFlagsMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cFlagsMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Flags Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cFlagsMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -3109,6 +3291,14 @@ void* cFlagsMenu_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cPowerUpFXTogglesMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "PowerUpFXToggles Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Power Up Effects Toggles". Only @p self is declared;
+ * the cMenuSys pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cPowerUpFXTogglesMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -3118,6 +3308,11 @@ void* cPowerUpFXTogglesMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cPowerUpFXTogglesMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "PowerUpFXToggles Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cPowerUpFXTogglesMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -3127,6 +3322,14 @@ void* cPowerUpFXTogglesMenu_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cSnowfallTogglesMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Snowfall Toggles" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Snowfall Test Effects". Only @p self is declared; the
+ * cMenuSys pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cSnowfallTogglesMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -3136,6 +3339,11 @@ void* cSnowfallTogglesMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cSnowfallTogglesMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Snowfall Toggles" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cSnowfallTogglesMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -3148,7 +3356,7 @@ INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_onGainFocus__FPv);
 /**
  * Gives the splash toggles menu focus using the base cMenu_onGainFocus().
  *
- * @return the result of cMenu_onGainFocus()
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
  */
 void* cSplashTogglesMenu_onGainFocus(void* self)
 {
@@ -3162,7 +3370,7 @@ INCLUDE_ASM("main/debugmenu", cSplashTogglesMenu_onLoseFocus__FPv);
 /**
  * Removes focus from the splash toggles menu using the base cMenu_onLoseFocus().
  *
- * @return the result of cMenu_onLoseFocus()
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
  */
 void* cSplashTogglesMenu_onLoseFocus(void* self)
 {
@@ -3190,6 +3398,14 @@ extern "C" void cTubeMenu__cTubeMenu(void* self, int flags)
 //100%
 INCLUDE_ASM("main/debugmenu", cTubeMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Tube Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Tube Effects". Only @p self is declared; the cMenuSys
+ * pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cTubeMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -3199,6 +3415,11 @@ void* cTubeMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cTubeMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Tube Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cTubeMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -3208,6 +3429,14 @@ void* cTubeMenu_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cPathArrowMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "PathArrow Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "Visual Effects Main Menu" debug menu lists it as "Path Arrow Effects". Only @p self is declared; the
+ * cMenuSys pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cPathArrowMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -3217,6 +3446,11 @@ void* cPathArrowMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cPathArrowMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "PathArrow Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cPathArrowMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -3430,6 +3664,14 @@ extern "C" void* cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cAIVisualEffectsMainMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "AIVisual Effects Main Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * Only @p self is declared; the cMenuSys pointer the caller passes second reaches cMenu_onGainFocus() unchanged
+ * in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cAIVisualEffectsMainMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -3439,6 +3681,11 @@ void* cAIVisualEffectsMainMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cAIVisualEffectsMainMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "AIVisual Effects Main Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cAIVisualEffectsMainMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);
@@ -3615,6 +3862,14 @@ extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio)
 //100%
 INCLUDE_ASM("main/debugmenu", cAvalancheMenu_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the "Avalanche Menu" debug menu focus through the base cMenu_onGainFocus().
+ *
+ * The "AIVisual Effects Main Menu" debug menu lists it as "Avalanche Effects". Only @p self is declared; the
+ * cMenuSys pointer the caller passes second reaches cMenu_onGainFocus() unchanged in its register.
+ *
+ * @return no meaningful value (cMenu_onGainFocus() returns nothing)
+ */
 void* cAvalancheMenu_onGainFocus(void* self)
 {
     return cMenu_onGainFocus(self);
@@ -3624,6 +3879,11 @@ void* cAvalancheMenu_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("main/debugmenu", cAvalancheMenu_onLoseFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes focus away from the "Avalanche Menu" debug menu through the base cMenu_onLoseFocus().
+ *
+ * @return no meaningful value (cMenu_onLoseFocus() returns nothing)
+ */
 void* cAvalancheMenu_onLoseFocus(void* self)
 {
     return cMenu_onLoseFocus(self);

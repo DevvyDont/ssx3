@@ -29,6 +29,9 @@
 
 #include "layout.h"
 #include "bx/math3d.h"
+#include "sound/musicsys.h"
+#include "sound/speechsys.h"
+#include "sound/bankmonitor.h"
 
 struct cBankManager;
 struct cStreamSys;
@@ -116,19 +119,9 @@ struct cSSXAudio {
     void* mCrowdInstances;              // 0x018 [R] cCrowdSys ctor 0; func_002A6D78: operator new[](n, "CrowdInstances"); [U] func_002A72D8..func_002A77C8
     tCrowdData mCrowdData[3];           // 0x01C [R] ctor constructs 3 (func_002A4BA8 x3 each); [P] CROWD_GetData(eCrowdIntensity) returns this + 0x1C + i * 0x54
     // --- cMusicSys (preview: func_002B3398 = cMusicSys's dtor; ctor func_002B28C0(this + 0x118); non-virtual part 0x5448, its methods in sound/bankmonitor.cpp take this + 0x118)
-    cStreamSys* mpMusicVStreamSys;      // 0x118 [R] cMusicSys's virtual-base pointer to the shared cStreamSys (= this + 0x7768); [U] 78 cSSXAudio methods reach cBankManager as **(this + 0x118)
-    char unk_11C[0x3F4];                // 0x11C cMusicSys data (cMusicSys+0x4..0x3F8; its methods lay it out: sound/bankmonitor.cpp sSpeechMon view)
-    unsigned long mActiveMap;           // 0x510 PORT: 64-bit long on the EE; [P] cMusicSys::MUSIC_StoreDefaultActiveMap (retail 0x2BACC8: ld 0x3F8 -> sd 0x400 of the cMusicSys); [U] func_00289520 ld
-    unsigned long mDefaultActiveMap;    // 0x518 [P] MUSIC_GetDefaultActiveMap (retail 0x2BACD8 ld 0x400); [U] func_00289520 sd
-    char unk_520[0x10];                 // 0x520 cMusicSys data (+0x408 MUSIC_Current's song pointer, +0x410 ..)
-    int unk_530;                        // 0x530 cMusicSys + 0x418; [P] retail accessor 0x2BACB8 (lw) is IsSongPlaying by name_map (conf C), 0x2BACC0 zeroes it; [U] func_002867E8/func_002872A8/func_0029C420/func_002A19D8
-    char unk_534[0x5024];               // 0x534 cMusicSys data (+0x41C..0x5440)
-    void** mMusicSysVtbl;               // 0x5558 [R] cMusicSys vptr (cMusicSys+0x5440): D_00483688 (cSSXAudio), D_004838F8 (cController/cMusicSys); [U] virtual calls through it (func_00285FB0, func_002861D0, func_002899F8, func_0029C7B0, func_0029D6E0, func_0029D8E0)
-    char unk_555C[0x4];                 // 0x555C padding (cMusicSys is 8-aligned: unsigned long members)
+    cMusicSys MusicSys;                 // 0x118 cMusicSys base (sound/musicsys.h; non-virtual part 0x5448)
     // --- cSpeechSys (preview: func_002B0AE8 = cSpeechSys's dtor; ctor func_002B07F8(this + 0x5560) stores the instance in D_004A37B4; non-virtual part 0x1C0)
-    cStreamSys* mpSpeechVStreamSys;     // 0x5560 [R] cSpeechSys's virtual-base pointer (= this + 0x7768); [U] 46 methods pass this + 0x5560 (the cSpeechSys) to SPCH_ functions
-    char unk_5564[0x1B8];               // 0x5564 cSpeechSys data (+0x4..0x1BC; SPCH_ functions in sound/bankmonitor.cpp)
-    void** mSpeechSysVtbl;              // 0x571C [R] cSpeechSys vptr (cSpeechSys+0x1BC): D_004836D8 (cSSXAudio), D_00483870 (cController/cSpeechSys)
+    cSpeechSys SpeechSys;               // 0x5560 cSpeechSys base (sound/speechsys.h; non-virtual part 0x1C0)
     // --- cController (preview: func_002AB478 = cController's virtual slot 1; ctor func_002AB200 = cCrowdSys + cMusicSys + cSpeechSys)
     int unk_5720;                       // 0x5720 [R] cController ctor 0
     char unk_5724[0x4];                 // 0x5724 padding (cController's non-virtual part ends 8-aligned)
@@ -298,14 +291,7 @@ struct cSSXAudio {
     // --- virtual base cBankManager (0xAD0; ctor cBankManager_cBankManager(this + 0x6C98)): cAsyncSys at 0, cBankMonitor at 0x1D8
     char mAsyncSys[468];                // 0x6C98 cAsyncSys data (On Tour 0x1D4: mHandle .. mBufferSize; ctor func_0028A058)
     void** mBankManagerVtbl;            // 0x6E6C [R] cBankManager ctor stores D_00483AD8 (cAsyncSys's vptr slot, cBankManager+0x1D4)
-    cSoundSys* mpBankMonitorVSoundSys;  // 0x6E70 [R] cBankMonitor's virtual-base pointer (= this + 0x6C90); cSSXAudio ctor stores it
-    char mMonitor[2260];                // 0x6E74 cMonitor data (cBankMonitor+0x4..0x8D8: cSndPlayOpts at +0x4, counters at +0x88..+0x94, 48 x 0x2C instances at +0x98)
-    void** mBankMonitorVtbl;            // 0x7748 [R] cBankMonitor_vtbl (cBankManager+0xAB0 = cBankMonitor+0x8D8, shared with cMonitor's vptr)
-    int mReEntry;                       // 0x774C [O] cBankMonitor::mReEntry (volatile); [R] cBankMonitor ctor 0
-    int mDopplerEnable;                 // 0x7750 [O] (On Tour bool); [R] cBankMonitor ctor 1
-    int mPositionalEnable;              // 0x7754 [O] (On Tour bool); [R] cBankMonitor ctor 1
-    int mBankMonitorPaused;             // 0x7758 [O] cBankMonitor::mPaused (renamed: cMonitor has an mPaused too)
-    void* mBankMonitorInstance;         // 0x775C [O]; [R] operator new[](64 x 0xC0, "mBankMonitorInstance")
+    cBankMonitor BankMonitor;           // 0x6E70 cBankManager's cBankMonitor (sound/bankmonitor.h; non-virtual part 0x8F0)
     int mMaxBanks;                      // 0x7760 [O] cBankManager::mMaxBanks; [R] cBankManager ctor stores its count argument
     void* mBankManagerBank;             // 0x7764 [O] cBankManager::mBank (renamed: cBankSys::mBank at 0x4); [R] operator new[](count x 0x60)
     // --- virtual base cStreamSys (0xC; ctor cStreamSys_cStreamSys(this + 0x7768))
@@ -323,18 +309,8 @@ CHECK_OFFSET(cSSXAudio, mMidiBanks, 0x10);
 CHECK_OFFSET(cSSXAudio, mNumCrowdInstances, 0x14);
 CHECK_OFFSET(cSSXAudio, mCrowdInstances, 0x18);
 CHECK_OFFSET(cSSXAudio, mCrowdData, 0x1C);
-CHECK_OFFSET(cSSXAudio, mpMusicVStreamSys, 0x118);
-CHECK_OFFSET(cSSXAudio, unk_11C, 0x11C);
-CHECK_OFFSET(cSSXAudio, mActiveMap, 0x510);
-CHECK_OFFSET(cSSXAudio, mDefaultActiveMap, 0x518);
-CHECK_OFFSET(cSSXAudio, unk_520, 0x520);
-CHECK_OFFSET(cSSXAudio, unk_530, 0x530);
-CHECK_OFFSET(cSSXAudio, unk_534, 0x534);
-CHECK_OFFSET(cSSXAudio, mMusicSysVtbl, 0x5558);
-CHECK_OFFSET(cSSXAudio, unk_555C, 0x555C);
-CHECK_OFFSET(cSSXAudio, mpSpeechVStreamSys, 0x5560);
-CHECK_OFFSET(cSSXAudio, unk_5564, 0x5564);
-CHECK_OFFSET(cSSXAudio, mSpeechSysVtbl, 0x571C);
+CHECK_OFFSET(cSSXAudio, MusicSys, 0x118);
+CHECK_OFFSET(cSSXAudio, SpeechSys, 0x5560);
 CHECK_OFFSET(cSSXAudio, unk_5720, 0x5720);
 CHECK_OFFSET(cSSXAudio, unk_5724, 0x5724);
 CHECK_OFFSET(cSSXAudio, unk_5728, 0x5728);
@@ -500,14 +476,7 @@ CHECK_OFFSET(cSSXAudio, pManager, 0x6C90);
 CHECK_OFFSET(cSSXAudio, mSoundSysVtbl, 0x6C94);
 CHECK_OFFSET(cSSXAudio, mAsyncSys, 0x6C98);
 CHECK_OFFSET(cSSXAudio, mBankManagerVtbl, 0x6E6C);
-CHECK_OFFSET(cSSXAudio, mpBankMonitorVSoundSys, 0x6E70);
-CHECK_OFFSET(cSSXAudio, mMonitor, 0x6E74);
-CHECK_OFFSET(cSSXAudio, mBankMonitorVtbl, 0x7748);
-CHECK_OFFSET(cSSXAudio, mReEntry, 0x774C);
-CHECK_OFFSET(cSSXAudio, mDopplerEnable, 0x7750);
-CHECK_OFFSET(cSSXAudio, mPositionalEnable, 0x7754);
-CHECK_OFFSET(cSSXAudio, mBankMonitorPaused, 0x7758);
-CHECK_OFFSET(cSSXAudio, mBankMonitorInstance, 0x775C);
+CHECK_OFFSET(cSSXAudio, BankMonitor, 0x6E70);
 CHECK_OFFSET(cSSXAudio, mMaxBanks, 0x7760);
 CHECK_OFFSET(cSSXAudio, mBankManagerBank, 0x7764);
 CHECK_OFFSET(cSSXAudio, mpStreamVBankManager, 0x7768);

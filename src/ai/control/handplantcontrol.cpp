@@ -5047,6 +5047,11 @@ void operator_delete(int* ptr);
 
 extern void* cBeing_vtbl[];
 
+/**
+ * Destroys a cBeing: restores cBeing's vtable pointer, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cBeing__cBeing(int* self, int flags)
 {
     *(void***)self = cBeing_vtbl;

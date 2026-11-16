@@ -3398,6 +3398,14 @@ extern void* cChaseCameraController_vtbl[];
 void operator_delete(int* ptr);
 extern "C" void cCameraController__cCameraController(void* self, int flags);
 
+/**
+ * Destroys the chase camera controller: frees its rider camera target, then runs the base controller destructor.
+ *
+ * Target is released with operator delete (no destructor runs). cCameraController__cCameraController() then
+ * deletes the algorithm list and frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cChaseCameraController__cChaseCameraController(cChaseCameraController* self, int flags)
 {
     self->mVtbl = cChaseCameraController_vtbl;

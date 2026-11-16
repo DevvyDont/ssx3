@@ -1,4 +1,6 @@
 #include "common.h"
+#include "online/buddyman.h"
+#include "online/lobbyman.h"
 #include "be/beintnetwork.h"
 #include "online/commsystem.h"
 #include "online/gamecomm.h"
@@ -2430,23 +2432,21 @@ extern "C" int func_00261460_8988(int) __asm__("func_00261460");
 extern "C" void func_002613C8_8988(int) __asm__("func_002613C8");
 extern "C" void func_0025B800_8988(void *) __asm__("func_0025B800");
 extern "C" void func_00262768_8988(int, int, int, int, int, int) __asm__("func_00262768");
-extern char *D_004A3028;
-extern int D_004A3328;
 
 extern "C" void func_00258988(cGameComm* self) {
     if (self->mState < 0xF) {
-        if (D_004A3328 == 0) {
+        if (BuddyMan_mBuddyMan == 0) {
             func_00260F80_8988();
         }
-        if (func_00261460_8988(D_004A3328) == 0) {
-            func_002613C8_8988(D_004A3328);
+        if (func_00261460_8988((int)BuddyMan_mBuddyMan) == 0) {
+            func_002613C8_8988((int)BuddyMan_mBuddyMan);
         }
-        if (D_004A3328 == 0) {
-            func_0025B800_8988(D_004A3028);
+        if (BuddyMan_mBuddyMan == 0) {
+            func_0025B800_8988((char*)LobbyMan_mLobbyMan);
         }
-        int t4 = D_004A3328;
+        BuddyMan* t4 = BuddyMan_mBuddyMan;
         if (t4 != 0) {
-            func_00262768_8988(t4, 1, 9, *(int *)(D_004A3028 + 0x98), 0, 0);
+            func_00262768_8988((int)t4, 1, 9, ((int)LobbyMan_mLobbyMan->mOpponent), 0, 0);
         }
         self->unk_034 = *(int *)((char*)SSXApp + 0x18) / *(int *)((char*)SSXApp + 0x10);
         self->mRaceInProgress = 1;
@@ -2491,22 +2491,20 @@ extern "C" void func_00258BC8(cGameComm*);
 extern "C" void func_00258A48(cGameComm*);
 extern "C" void func_0014E9C0(void *, int, int);
 extern "C" void* cBE_getBE();
-extern int D_004A3328;
-extern int D_004A3028_8AE0 __asm__("D_004A3028");
 extern int D_00534B38[];
 extern "C" void func_00258AE0(cGameComm* self) {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460((int)BuddyMan_mBuddyMan) == 0) {
+        func_002613C8((int)BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028_8AE0);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800((int)LobbyMan_mLobbyMan);
     }
-    int t = D_004A3328;
+    BuddyMan* t = BuddyMan_mBuddyMan;
     if (t != 0) {
-        func_00262768(t, 1, 0, 0, 0, 0);
+        func_00262768((int)t, 1, 0, 0, 0, 0);
     }
     func_00258BC8(self);
     func_00258A48(self);
@@ -2744,7 +2742,6 @@ int cBENewPlayerInterface_getPlayerCharID(void*, int);
 extern "C" void func_0014EBB8(void* iface, int v);
 extern "C" void func_0014EBD8(void* iface, int v);
 extern "C" void func_002639E0(int a, int b, int c, int d, int e);
-extern char* D_004A3028;
 extern int D_00534E58[];
 
 struct VEnt_9098 {
@@ -2755,20 +2752,20 @@ struct VEnt_9098 {
 
 extern "C" void func_00259098(int a0, int a1, int a2)
 {
-    char* g = D_004A3028;
+    LobbyMan* g = LobbyMan_mLobbyMan;
     int v;
-    if (*(int*)(g + 0xB4)) v = *(int*)(g + 0xAC);
-    else v = *(int*)(g + 0xA8);
+    if (g->mIsHost) v = g->mOppoAddr;
+    else v = g->mHostAddr;
     void* pi = cBE_getInterface_9098(cBE_getBE(), 1);
     char* ri = (char*)cBE_getInterface_9098(SSXApp->BE, 7);
     D_00534E58[0] = cBENewPlayerInterface_getPlayerCharID(pi, 0);
-    func_0014EBB8(ri, *(int*)(D_004A3028 + 0x98));
-    func_0014EBD8(ri, *(int*)(D_004A3028 + 0x80));
+    func_0014EBB8(ri, ((int)LobbyMan_mLobbyMan->mOpponent));
+    func_0014EBD8(ri, ((int)LobbyMan_mLobbyMan->mPersona));
     {
         VEnt_9098* vt = *(VEnt_9098**)(ri + 0xC);
         vt[1].fn(ri + vt[1].delta);
     }
-    func_002639E0(a0, v, *(int*)(g + 0xB4), a1, a2);
+    func_002639E0(a0, v, g->mIsHost, a1, a2);
 }
 #endif
 

@@ -89,6 +89,14 @@ extern "C" void* cMoveNode_signal(void* self);
 //100%
 INCLUDE_ASM("object/debouncenode", cDebounceNode_signal__FPv);
 #ifdef SKIP_ASM
+/**
+ * Passes a signal to the base cMoveNode_signal(), which forwards it to the node's modifier block if it has one.
+ *
+ * Only @p self is declared; the signal's further arguments reach cMoveNode_signal() unchanged in their
+ * registers.
+ *
+ * @return no meaningful value (cMoveNode_signal() returns nothing)
+ */
 void* cDebounceNode_signal(void* self)
 {
     return cMoveNode_signal(self);

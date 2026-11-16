@@ -423,6 +423,13 @@ extern "C" void* cInstanceNode_writeToReplayFrame(void* self);
 //100%
 INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes the dead-fade node's replay data using the base cInstanceNode_writeToReplayFrame().
+ *
+ * Only @p self is declared; the replay stream argument reaches the base function unchanged in its register.
+ *
+ * @return no meaningful value (cInstanceNode_writeToReplayFrame() returns nothing)
+ */
 void* cDeadFadeNode_writeToReplayFrame(void* self)
 {
     return cInstanceNode_writeToReplayFrame(self);

@@ -74,6 +74,15 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* self);
 
+/**
+ * Refreshes the experience display when the buy-attribute state's gain transition starts.
+ *
+ * Calls cFEStateBuyAttrib_updateExperienceDisplay() only when @p on is nonzero, and returns 0 like the base
+ * cUIState_onGainTransition().
+ *
+ * @param on  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
+ * @return always 0
+ */
 extern "C" int cFEStateBuyAttrib_onGainTransition(void* self, int on)
 {
     if (on != 0) {
@@ -635,6 +644,15 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void cFEStateCareerStats_setupHighlightsList(void* self);
 
+/**
+ * Builds the highlights list when the career-stats state's gain transition starts.
+ *
+ * Calls cFEStateCareerStats_setupHighlightsList() only when @p on is nonzero, and returns 0 like the base
+ * cUIState_onGainTransition().
+ *
+ * @param on  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
+ * @return always 0
+ */
 extern "C" int cFEStateCareerStats_onGainTransition(void* self, int on)
 {
     if (on != 0) {

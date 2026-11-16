@@ -97,6 +97,15 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_lookupIdentifierName);
 #ifdef SKIP_ASM
 extern "C" int func_0041AA88(const char* a, const char* b);
 
+/**
+ * Finds an identifier already defined by the input-map script.
+ *
+ * Scans the first NumIdentifiers entries of Identifiers and compares names case-insensitively (func_0041AA88
+ * lowercases both characters before comparing).
+ *
+ * @param name  identifier name to look for
+ * @return the matching identifier, or 0 if none has that name
+ */
 extern "C" tIdentifier* cInputMapParser_lookupIdentifierName(cInputMapParser* self, const char* name)
 {
     int i;
@@ -529,6 +538,9 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_parseFile);
 extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void cInputMapParser_parseStatement(cInputMapParser* self);
 
+/**
+ * Parses the whole input-map script: reads the first token, then parses statements until end of file.
+ */
 extern "C" void cInputMapParser_parseFile(cInputMapParser* self)
 {
     cInputMapParser_readToken(self);
@@ -3081,6 +3093,11 @@ INCLUDE_ASM("input/inputparse", cPadDevice__cPadDevice);
 void operator_delete(int* ptr);
 extern char cPadDevice_vtbl[];
 
+/**
+ * Destroys a pad device: restores cPadDevice's vtable pointer, then frees the object when asked to.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void cPadDevice__cPadDevice(void* self, int flags)
 {
     *(void**)self = cPadDevice_vtbl;

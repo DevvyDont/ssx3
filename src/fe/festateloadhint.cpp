@@ -89,6 +89,9 @@ extern "C" int cFELoadHintState_onGainTransition(void* self)
 //100%
 INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the load-hint state's onWidgetCreate has an empty body.
+ */
 void cFELoadHintState_onWidgetCreate(void* self)
 {
 }
@@ -220,6 +223,9 @@ extern "C" void cFELoadStateInLodge_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the in-lodge loading state's onWidgetCreate has an empty body.
+ */
 void cFELoadStateInLodge_onWidgetCreate(void* self)
 {
 }

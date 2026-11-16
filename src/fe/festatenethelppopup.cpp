@@ -68,6 +68,14 @@ extern "C" void cFEStateNetHelpPopup_onUpdate(void* self)
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onInputBegin__FPv);
 #ifdef SKIP_ASM
+/**
+ * Consumes all controller input for the network help popup before its screens see it.
+ *
+ * The base UI update func_0039E510() skips the state's screens when this returns nonzero; onInputAlways still
+ * runs.
+ *
+ * @return always 1 (input consumed)
+ */
 int cFEStateNetHelpPopup_onInputBegin(void* self)
 {
     return 0x1;

@@ -161,6 +161,13 @@ INCLUDE_ASM("ai/ai", cAI_initAIRiders);
 extern "C" void cAI_purgeMissionRiders(cAI*);
 extern "C" void cAI_initComputerRiders(cAI*);
 
+/**
+ * Rebuilds the AI rider set: clears the required actor count, purges loaded mission riders and creates the
+ * computer riders.
+ *
+ * Sets NumberOfActorsRequired to 0, calls cAI_purgeMissionRiders() only when NumberOfMissionRidersLoaded is
+ * positive, then cAI_initComputerRiders(), which also sets IsAIReadyToRace.
+ */
 extern "C" void cAI_initAIRiders(cAI* self)
 {
     self->NumberOfActorsRequired = 0;
@@ -1750,6 +1757,11 @@ INCLUDE_ASM("ai/ai", cAI_cleanupAfterRace);
 extern "C" void cAI_purgeComputerRiders(cAI*);
 extern "C" void cAI_RefreshGroupAI(void*);
 
+/**
+ * Removes the computer riders after a race and marks the AI as not ready to race.
+ *
+ * Calls cAI_purgeComputerRiders() and cAI_RefreshGroupAI(), then clears IsAIReadyToRace.
+ */
 extern "C" void cAI_cleanupAfterRace(cAI* self)
 {
     cAI_purgeComputerRiders(self);

@@ -513,6 +513,11 @@ extern "C" void* cUIState_onGainFocus(void* self);
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the game-options state focus using the base cUIState_onGainFocus().
+ *
+ * @return no meaningful value (cUIState_onGainFocus() returns nothing)
+ */
 void* cFEStateOptionsGame_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);
@@ -1037,6 +1042,11 @@ extern "C" void func_0018A3D8(void* self, char* popup, int event)
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the sound-options state focus using the base cUIState_onGainFocus().
+ *
+ * @return no meaningful value (cUIState_onGainFocus() returns nothing)
+ */
 void* cFEStateOptionsSound_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);
@@ -1777,6 +1787,15 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onDestroyScreen);
 extern "C" void func_0018D108(void* self, int idx, float x, float y);
 void* cUIState_onDestroyScreen(void* self);
 
+/**
+ * Sets both controllers' output channels to zero, then destroys the controller-options state's screens.
+ *
+ * Calls func_0018D108(self, pad, 0, 0) for pads 0 and 1; for a pad whose device reports state 2 that sets both
+ * of its output channels to 0, which probably stops any vibration. cUIState_onDestroyScreen() then destroys the
+ * state's screen list.
+ *
+ * @return no meaningful value (cUIState_onDestroyScreen() returns nothing)
+ */
 extern "C" void* cFEStateOptionsController_onDestroyScreen(void* self)
 {
     func_0018D108(self, 0, 0.0f, 0.0f);

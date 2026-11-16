@@ -3862,6 +3862,13 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_skipRowToTop);
 #ifdef SKIP_ASM
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup*, int, int);
 
+/**
+ * Moves the on-screen keyboard cursor four rows up, then down a row at a time to the first selectable key.
+ *
+ * The keyboard is 6 rows of 14 keys: the search starts at miCurrentKey - 56 and adds 14 until
+ * cKeyboardPopup_allowSelection() accepts the key, with no bound check. The move-down handlers call it when
+ * moving down from the two bottom rows, so it probably wraps the cursor back to the top.
+ */
 extern "C" void cKeyboardPopup_skipRowToTop(cKeyboardPopup* self)
 {
     int i = self->miCurrentKey - 0x38;
@@ -3912,6 +3919,11 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_moveDownRows);
 #ifdef SKIP_ASM
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup*, int, int);
 
+/**
+ * Moves the on-screen keyboard cursor down to the next selectable key in the same column.
+ *
+ * Adds 14 (one row) to miCurrentKey until cKeyboardPopup_allowSelection() accepts the key, with no bound check.
+ */
 extern "C" void cKeyboardPopup_moveDownRows(cKeyboardPopup* self)
 {
     int i = self->miCurrentKey + 0xE;
@@ -5300,6 +5312,12 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_checkAndFixConflict);
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup*, int, int);
 extern "C" void cKeyboardPopup_kbMoveDown(cKeyboardPopup*, int);
 
+/**
+ * Moves the keyboard cursor off its key when that key cannot be selected in the current caps/shift state.
+ *
+ * When cKeyboardPopup_allowSelection() rejects miCurrentKey, calls cKeyboardPopup_kbMoveDown(self, 0).
+ * cKeyboardPopup_redrawScreen() calls it while redrawing the keys.
+ */
 extern "C" void cKeyboardPopup_checkAndFixConflict(cKeyboardPopup* self)
 {
     if (cKeyboardPopup_allowSelection(self, self->miCurrentKey, 0) == 0) {

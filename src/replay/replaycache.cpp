@@ -1,4 +1,6 @@
 #include "common.h"
+#include "inseq/scriptplayermain.h"
+#include "inseq/scriptplayerentity.h"
 #include "replay/replay.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -1974,7 +1976,7 @@ extern "C" int func_002726A8(sRcTrack25F0* self, float t)
 //100%
 INCLUDE_ASM("replay/replaycache", cInSeq_cInSeq);
 #ifdef SKIP_ASM
-extern "C" void* func_00274518(void* self);
+extern "C" void* func_00274518(cScriptPlayerMain* self);
 // PORT: array new[] with a heap argument; same symbol as the unit's func_002724C8(void*).
 void* operator new[](unsigned int size, void* heap) __asm__("func_002724C8__FPv");
 
@@ -1984,7 +1986,7 @@ struct sRcItem2788 {
     char body[0x48];            // 0x8
     sRcItem2788* next;          // 0x50
     sRcItem2788* prev;          // 0x54
-    sRcItem2788() { func_00274518(body); }
+    sRcItem2788() { func_00274518((cScriptPlayerMain*)body); }
     void operator delete[](void* p, unsigned int size);
 };
 
@@ -2041,13 +2043,13 @@ extern "C" void cInSeq__cInSeq(int* self, int flags)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002728F8);
 #ifdef SKIP_ASM
-extern "C" void func_00274A30(void* p);
+extern "C" void func_00274A30(cScriptPlayerMain* p);
 
 extern "C" void func_002728F8(void* self)
 {
     char* n = *(char**)((char*)self + 0x1C);
     while (n != 0) {
-        func_00274A30(n + 8);
+        func_00274A30((cScriptPlayerMain*)(n + 8));
         n = *(char**)(n + 0x50);
     }
 }
@@ -2094,14 +2096,14 @@ extern "C" int func_00272938(sRcList272938* self, void* src)
 INCLUDE_ASM("replay/replaycache", func_002729A8);
 #ifdef SKIP_ASM
 extern "C" void func_00272B58(void* self, int a1);
-extern "C" void func_002746F8(void* p);
+extern "C" void func_002746F8(cScriptPlayerMain* p);
 
 extern "C" void func_002729A8(sRcList272938* self, int i)
 {
     func_00272B58(self, i);
     char* base = *(char**)((char*)self + 0x14);
     sRcNode272938* n = (sRcNode272938*)(base + i * 0x58);
-    func_002746F8(n->data);
+    func_002746F8((cScriptPlayerMain*)n->data);
     if (n->prev == 0) {
         self->usedHead = n->next;
         n->next = 0;
@@ -2141,11 +2143,11 @@ extern "C" void func_00272A50(sRcList272938* self)
 INCLUDE_ASM("replay/replaycache", func_00272AA0);
 #ifdef SKIP_ASM
 extern "C" void* func_00272CC0(void* self, int a1);
-extern "C" void func_00274868(char* self, int flag);
+extern "C" void func_00274868(cScriptPlayerMain* self, int flag);
 
 extern "C" void func_00272AA0(void* self, int a1, int flag)
 {
-    func_00274868((char*)func_00272CC0(self, a1), flag);
+    func_00274868((cScriptPlayerMain*)((char*)func_00272CC0(self, a1)), flag);
 }
 #endif
 
@@ -2181,11 +2183,11 @@ extern "C" void func_00272B00(void *arg0, int arg1) {
 INCLUDE_ASM("replay/replaycache", func_00272B58);
 #ifdef SKIP_ASM
 extern "C" void* func_00272CC0(void* self, int a1);
-extern "C" void func_00274918(void* p);
+extern "C" void func_00274918(cScriptPlayerMain* p);
 
 extern "C" void func_00272B58(void* self, int a1)
 {
-    func_00274918(func_00272CC0(self, a1));
+    func_00274918((cScriptPlayerMain*)func_00272CC0(self, a1));
 }
 #endif
 
@@ -2203,11 +2205,11 @@ extern "C" void func_00272B80(sRcList272938* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272BD0);
 #ifdef SKIP_ASM
-extern "C" void func_002749E8(void* self);
+extern "C" void func_002749E8(cScriptPlayerMain* self);
 
 extern "C" void func_00272BD0(void* self, int a1)
 {
-    func_002749E8(func_00272CC0(self, a1));
+    func_002749E8((cScriptPlayerMain*)func_00272CC0(self, a1));
 }
 #endif
 //100%
@@ -2226,11 +2228,11 @@ extern "C" void func_00272BF8(sRcList272938* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272C48);
 #ifdef SKIP_ASM
-extern "C" void func_00274A08(void* self);
+extern "C" void func_00274A08(cScriptPlayerMain* self);
 
 extern "C" void func_00272C48(void* self, int a1)
 {
-    func_00274A08(func_00272CC0(self, a1));
+    func_00274A08((cScriptPlayerMain*)func_00272CC0(self, a1));
 }
 #endif
 //100%
@@ -2985,29 +2987,29 @@ extern "C" void func_002738F8(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00273938);
 #ifdef SKIP_ASM
-extern "C" void* func_00273938(void* self)
+extern "C" void* func_00273938(cScriptPlayerEntity* self)
 {
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xc) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x18) = 0;
-    *(int*)((char*)self + 0x1c) = 0;
-    *(int*)((char*)self + 0x20) = 0;
-    *(int*)((char*)self + 0x24) = 0;
-    *(int*)((char*)self + 0x28) = 0;
-    *(int*)((char*)self + 0x2c) = 0;
-    return self;
+    self->mpData = 0;
+    self->mpOwner = 0;
+    self->mpUserData = 0;
+    self->mpBlockHeader = 0;
+    self->mpVariationTable = 0;
+    self->mCurrVariation = 0;
+    self->mpSystemHeader = 0;
+    self->mpHeader = 0;
+    self->mpChannelPlayers = 0;
+    self->mIsPlaying = 0;
+    self->mpEntityComm = 0;
+    return ((void*)self);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00273970);
 #ifdef SKIP_ASM
-extern "C" void func_00273A00(void* self);
+extern "C" void func_00273A00(cScriptPlayerEntity* self);
 
-extern "C" void func_00273970(void* self, int flags)
+extern "C" void func_00273970(cScriptPlayerEntity* self, int flags)
 {
     func_00273A00(self);
     if (flags & 1) {
@@ -3019,44 +3021,44 @@ extern "C" void func_00273970(void* self, int flags)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002739B8);
 #ifdef SKIP_ASM
-extern "C" int func_002739B8(void* self, char* data, int size)
+extern "C" int func_002739B8(cScriptPlayerEntity* self, char* data, int size)
 {
-    *(char**)((char*)self + 0x4) = data;
-    *(char**)((char*)self + 0x10) = data;
-    *(int*)((char*)self + 0x8) = size;
-    *(char**)((char*)self + 0x14) = data + 8;
-    *(int*)((char*)self + 0x18) = 0;
+    self->mpData = (const char*)data;
+    self->mpBlockHeader = (tInSeqScriptEntityBlockHeader*)data;
+    self->mpOwner = (cScriptPlayerMain*)size;
+    self->mpVariationTable = (unsigned int*)(data + 8);
+    self->mCurrVariation = 0;
     char* rec = data + *(int*)(data + 8);
-    *(char**)((char*)self + 0x1c) = rec;
+    self->mpSystemHeader = (tInSeqEntityHeader*)rec;
     if (*(unsigned short*)rec > 8) {
-        *(char**)((char*)self + 0x20) = rec + 8;
+        self->mpHeader = (const char*)(rec + 8);
     } else {
-        *(char**)((char*)self + 0x20) = 0;
+        self->mpHeader = 0;
     }
-    return **(int**)((char*)self + 0x10);
+    return *(int*)self->mpBlockHeader;
 }
 #endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00273A00);
 #ifdef SKIP_ASM
-extern "C" void func_00273DC0(void* self);
+extern "C" void func_00273DC0(cScriptPlayerEntity* self);
 
-extern "C" void func_00273A00(void* self)
+extern "C" void func_00273A00(cScriptPlayerEntity* self)
 {
-    if (*(int*)((char*)self + 0x4) != 0) {
+    if ((int)self->mpData != 0) {
         func_00273DC0(self);
-        *(int*)((char*)self + 0x4) = 0;
-        *(int*)((char*)self + 0x8) = 0;
-        *(int*)((char*)self + 0xC) = 0;
-        *(int*)((char*)self + 0x10) = 0;
-        *(int*)((char*)self + 0x14) = 0;
-        *(int*)((char*)self + 0x18) = 0;
-        *(int*)((char*)self + 0x1C) = 0;
-        *(int*)((char*)self + 0x20) = 0;
-        *(int*)((char*)self + 0x30) = 0;
-        *(int*)((char*)self + 0x34) = 0;
-        *(int*)((char*)self + 0x38) = 0;
+        self->mpData = 0;
+        self->mpOwner = 0;
+        self->mpUserData = 0;
+        self->mpBlockHeader = 0;
+        self->mpVariationTable = 0;
+        self->mCurrVariation = 0;
+        self->mpSystemHeader = 0;
+        self->mpHeader = 0;
+        self->mSetupScriptHasKeysLeft = 0;
+        self->mSetupScriptInitialEventBits = 0;
+        self->mWaitingPlayExec = 0;
     }
 }
 #endif
@@ -3064,15 +3066,15 @@ extern "C" void func_00273A00(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00273A60);
 #ifdef SKIP_ASM
-extern "C" void func_00273A60(void* self, int idx)
+extern "C" void func_00273A60(cScriptPlayerEntity* self, int idx)
 {
-    *(int*)((char*)self + 0x18) = idx;
-    char* rec = *(char**)((char*)self + 0x4) + (*(int**)((char*)self + 0x14))[idx];
-    *(char**)((char*)self + 0x1c) = rec;
+    self->mCurrVariation = idx;
+    char* rec = (char*)self->mpData + ((int*)self->mpVariationTable)[idx];
+    self->mpSystemHeader = (tInSeqEntityHeader*)rec;
     if (*(unsigned short*)rec > 8) {
-        *(char**)((char*)self + 0x20) = rec + 8;
+        self->mpHeader = (const char*)(rec + 8);
     } else {
-        *(char**)((char*)self + 0x20) = 0;
+        self->mpHeader = 0;
     }
 }
 #endif
@@ -3087,7 +3089,7 @@ extern "C" void* func_002725B8(void* self);
 extern "C" void* func_00272D68(void* self);
 extern "C" void* func_00273180(void* self);
 extern "C" void* func_002734A8(void* self);
-extern "C" int func_00274D70(void* self);
+extern "C" int func_00274D70(cScriptPlayerMain* self);
 
 struct sRcVE_273AA8 {
     short delta;
@@ -3182,7 +3184,7 @@ extern "C" int func_00273AA8(sRcCache_273AA8* self)
         }
     }
     self->ready = 1;
-    char* x = (char*)func_00274D70(self->owner);
+    char* x = (char*)func_00274D70((cScriptPlayerMain*)self->owner);
     if (x) {
         sRcVE2_273AA8* vt = *(sRcVE2_273AA8**)x;
         self->player = (char*)vt[6].fn(x + vt[6].delta, self, self->hdr->kind);
@@ -3209,22 +3211,22 @@ public:
     virtual void v04(void* src, int id, int h, float t0, float t1);
 };
 
-extern "C" int func_00273D20(void* self)
+extern "C" int func_00273D20(cScriptPlayerEntity* self)
 {
-    cRcListener3D20* obj = *(cRcListener3D20**)((char*)self + 0x2C);
-    int ret = *(int*)((char*)self + 0x30);
+    cRcListener3D20* obj = (cRcListener3D20*)self->mpEntityComm;
+    int ret = self->mSetupScriptHasKeysLeft;
     if (obj != 0) {
-        int h = *(int*)((char*)self + 0x34);
+        int h = self->mSetupScriptInitialEventBits;
         if (h != 0) {
-            obj->v03(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3), h, 0.0f);
+            obj->v03(self, *(unsigned char*)((char*)self->mpSystemHeader + 3), h, 0.0f);
         }
-        (*(cRcListener3D20**)((char*)self + 0x2C))->v04(self,
-            *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3),
-            *(int*)((char*)self + 0x34), 0.0f, 0.0f);
+        ((cRcListener3D20*)self->mpEntityComm)->v04(self,
+            *(unsigned char*)((char*)self->mpSystemHeader + 3),
+            self->mSetupScriptInitialEventBits, 0.0f, 0.0f);
     }
-    *(int*)((char*)self + 0x30) = 0;
-    *(int*)((char*)self + 0x34) = 0;
-    *(int*)((char*)self + 0x38) = 0;
+    self->mSetupScriptHasKeysLeft = 0;
+    self->mSetupScriptInitialEventBits = 0;
+    self->mWaitingPlayExec = 0;
     return ret;
 }
 #endif
@@ -3259,52 +3261,52 @@ public:
     virtual void v02(void* src, int id);
 };
 
-extern "C" void func_00273DC0(void* self)
+extern "C" void func_00273DC0(cScriptPlayerEntity* self)
 {
-    if (*(int*)((char*)self + 0x28) == 0)
+    if (self->mIsPlaying == 0)
         return;
-    cRcListener_3DC0* l = *(cRcListener_3DC0**)((char*)self + 0x2C);
+    cRcListener_3DC0* l = (cRcListener_3DC0*)self->mpEntityComm;
     if (l != 0)
-        l->v02(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3));
-    *(void**)((char*)self + 0x2C) = 0;
-    if (*(unsigned char*)(*(char**)((char*)self + 0x1C) + 2) != 0)
+        l->v02(self, *(unsigned char*)((char*)self->mpSystemHeader + 3));
+    self->mpEntityComm = 0;
+    if (*(unsigned char*)((char*)self->mpSystemHeader + 2) != 0)
     {
-        for (int i = 0; i < *(unsigned char*)(*(char**)((char*)self + 0x1C) + 2); i++)
+        for (int i = 0; i < *(unsigned char*)((char*)self->mpSystemHeader + 2); i++)
         {
-            cRcObj_3DC0** objs = *(cRcObj_3DC0***)((char*)self + 0x24);
+            cRcObj_3DC0** objs = (cRcObj_3DC0**)self->mpChannelPlayers;
             objs[i]->v02();
-            switch ((*(cRcObj_3DC0***)((char*)self + 0x24))[i]->v07())
+            switch (((cRcObj_3DC0**)self->mpChannelPlayers)[i]->v07())
             {
             case 0:
-                func_002724E8_impl((*(cRcObj_3DC0***)((char*)self + 0x24))[i]);
+                func_002724E8_impl(((cRcObj_3DC0**)self->mpChannelPlayers)[i]);
                 break;
             case 1:
             {
-                cRcObj_3DC0* o = (*(cRcObj_3DC0***)((char*)self + 0x24))[i];
+                cRcObj_3DC0* o = ((cRcObj_3DC0**)self->mpChannelPlayers)[i];
                 if (o)
                     o->v10(3);
                 break;
             }
             case 2:
             {
-                cRcObj_3DC0* o = (*(cRcObj_3DC0***)((char*)self + 0x24))[i];
+                cRcObj_3DC0* o = ((cRcObj_3DC0**)self->mpChannelPlayers)[i];
                 if (o)
                     o->v10(3);
                 break;
             }
             case 3:
             {
-                cRcObj_3DC0* o = (*(cRcObj_3DC0***)((char*)self + 0x24))[i];
+                cRcObj_3DC0* o = ((cRcObj_3DC0**)self->mpChannelPlayers)[i];
                 if (o)
                     o->v10(3);
                 break;
             }
             }
         }
-        func_002723A8((sRcHeap*)(*(char**)(*(char**)((char*)self + 0x8) + 0x8) + 8), *(void**)((char*)self + 0x24));
-        *(void**)((char*)self + 0x24) = 0;
+        func_002723A8((sRcHeap*)(*(char**)((char*)self->mpOwner + 0x8) + 8), self->mpChannelPlayers);
+        self->mpChannelPlayers = 0;
     }
-    *(int*)((char*)self + 0x28) = 0;
+    self->mIsPlaying = 0;
 }
 #endif
 
@@ -3319,11 +3321,11 @@ public:
     virtual void v02();
 };
 
-extern "C" int func_00273F68(void* self)
+extern "C" int func_00273F68(cScriptPlayerEntity* self)
 {
-    if (*(int*)((char*)self + 0x28) == 0)
+    if (self->mIsPlaying == 0)
         return 0;
-    unsigned char* hdr = *(unsigned char**)((char*)self + 0x1C);
+    unsigned char* hdr = (unsigned char*)self->mpSystemHeader;
     int mask = 0;
     int i = 0;
     int changed = 0;
@@ -3335,22 +3337,22 @@ extern "C" int func_00273F68(void* self)
             unsigned char* rec = p;
             int ch = 0;
             p += 4;
-            (*(cRcObj_3F68***)((char*)self + 0x24))[i]->v02();
+            ((cRcObj_3F68**)self->mpChannelPlayers)[i]->v02();
             int m = 0;
-            if ((*(cRcObj_3F68***)((char*)self + 0x24))[i]->v01(p, self, &m) != 0 || changed)
+            if (((cRcObj_3F68**)self->mpChannelPlayers)[i]->v01(p, self, &m) != 0 || changed)
                 ch = 1;
             i++;
             p += *(unsigned short*)(rec + 2);
             changed = ch;
             mask |= m;
-        } while (i < (*(unsigned char**)((char*)self + 0x1C))[2]);
+        } while (i < ((unsigned char*)self->mpSystemHeader)[2]);
     }
-    cRcListener3D20* l = *(cRcListener3D20**)((char*)self + 0x2C);
+    cRcListener3D20* l = (cRcListener3D20*)self->mpEntityComm;
     if (l == 0)
         return changed;
     if (mask)
-        l->v03(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3), mask, 0.0f);
-    (*(cRcListener3D20**)((char*)self + 0x2C))->v04(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3), mask, 0.0f, 0.0f);
+        l->v03(self, *(unsigned char*)((char*)self->mpSystemHeader + 3), mask, 0.0f);
+    ((cRcListener3D20*)self->mpEntityComm)->v04(self, *(unsigned char*)((char*)self->mpSystemHeader + 3), mask, 0.0f, 0.0f);
     return changed;
 }
 #endif
@@ -3358,7 +3360,7 @@ extern "C" int func_00273F68(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274100);
 #ifdef SKIP_ASM
-extern "C" int func_002743E8(void* self, float t, float dt);
+extern "C" int func_002743E8(cScriptPlayerEntity* self, float t, float dt);
 
 class cChan_274100 {
 public:
@@ -3386,7 +3388,7 @@ struct sTrack_274100 {
 };
 
 // Plays the track from prev to time; when jumping, stops at every channel event in between.
-extern "C" int func_00274100(void* self_, float prev, float time, float speed, int jump)
+extern "C" int func_00274100(cScriptPlayerEntity* self_, float prev, float time, float speed, int jump)
 {
     sTrack_274100* self = (sTrack_274100*)self_;
     if (self->active == 0) {
@@ -3402,16 +3404,16 @@ extern "C" int func_00274100(void* self_, float prev, float time, float speed, i
                 }
             }
             if (next == time) {
-                return func_002743E8(self, time, time - prev);
+                return func_002743E8((cScriptPlayerEntity*)self, time, time - prev);
             }
             float d = next - prev;
             prev = next;
-            if (!func_002743E8(self, prev, d)) {
+            if (!func_002743E8((cScriptPlayerEntity*)self, prev, d)) {
                 return 0;
             }
         }
     }
-    return func_002743E8(self, time, speed);
+    return func_002743E8((cScriptPlayerEntity*)self, time, speed);
 }
 #endif
 
@@ -3437,15 +3439,15 @@ public:
     virtual void v02(void* src, int id);
 };
 
-extern "C" cRcListener4240* func_00274240(void* self, cRcListener4240* l)
+extern "C" cRcListener4240* func_00274240(cScriptPlayerEntity* self, cRcListener4240* l)
 {
-    cRcListener4240* old = *(cRcListener4240**)((char*)self + 0x2C);
+    cRcListener4240* old = (cRcListener4240*)self->mpEntityComm;
     if (old != 0) {
-        old->v02(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3));
+        old->v02(self, *(unsigned char*)((char*)self->mpSystemHeader + 3));
     }
-    *(cRcListener4240**)((char*)self + 0x2C) = l;
+    self->mpEntityComm = (cInSeqCommEntity*)l;
     if (l != 0) {
-        l->v01(self, *(unsigned char*)(*(char**)((char*)self + 0x1C) + 3));
+        l->v01(self, *(unsigned char*)((char*)self->mpSystemHeader + 3));
     }
     return old;
 }
@@ -3463,10 +3465,10 @@ int func_002742C8(void* self, int a1)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002742E0);
 #ifdef SKIP_ASM
-extern "C" void* func_002742E0(void* self, int i)
+extern "C" void* func_002742E0(cScriptPlayerEntity* self, int i)
 {
-    int* table = *(int**)((char*)self + 0x14);
-    char* p = *(char**)((char*)self + 0x4) + table[i];
+    int* table = (int*)self->mpVariationTable;
+    char* p = (char*)self->mpData + table[i];
     if (*(unsigned short*)p > 8) {
         return p + 8;
     }
@@ -3498,19 +3500,19 @@ int func_00274348(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274358);
 #ifdef SKIP_ASM
-extern "C" int func_00274358(void* self)
+extern "C" int func_00274358(cScriptPlayerEntity* self)
 {
-    char* base = *(char**)((char*)self + 0x4);
-    int* tab = *(int**)((char*)self + 0x14);
-    int i = *(int*)((char*)self + 0x18);
+    char* base = (char*)self->mpData;
+    int* tab = (int*)self->mpVariationTable;
+    int i = self->mCurrVariation;
     return *(int*)(base + tab[i] + 4);
 }
 #endif
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274380);
 #ifdef SKIP_ASM
-extern "C" int func_00274380(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18)));
+extern "C" int func_00274380(cScriptPlayerEntity* arg0) {
+    return (arg0->mCurrVariation);
 }
 #endif
 
@@ -3535,15 +3537,15 @@ extern "C" int func_00274398_impl(void *arg0) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_002743A0);
 #ifdef SKIP_ASM
-extern "C" int func_002743A0(void *arg0) {
-    return (*(int *)((char*)((*(void **)((char*)((*(void **)((char*)(arg0) + (8)))) + (0x10)))) + (4)));
+extern "C" int func_002743A0(cScriptPlayerEntity* arg0) {
+    return (*(int *)((char*)((*(void **)((char*)((arg0->mpOwner)) + (0x10)))) + (4)));
 }
 #endif
 //100%
 INCLUDE_ASM("replay/replaycache", func_002743B0);
 #ifdef SKIP_ASM
-extern "C" int func_002743B0(void *arg0) {
-    return *(*(int **)((char*)(arg0) + (0x10)));
+extern "C" int func_002743B0(cScriptPlayerEntity* arg0) {
+    return *((int*)arg0->mpBlockHeader);
 }
 #endif
 //100%
@@ -3604,7 +3606,7 @@ struct sSelf2743E8 {
     cB2743E8* sink;
 };
 
-extern "C" int func_002743E8(void* p, float t, float dt)
+extern "C" int func_002743E8(cScriptPlayerEntity* p, float t, float dt)
 {
     sSelf2743E8* self = (sSelf2743E8*)p;
     int flags = 0;
@@ -3628,27 +3630,27 @@ extern "C" int func_002743E8(void* p, float t, float dt)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274518);
 #ifdef SKIP_ASM
-extern "C" void* func_00274518(void* self)
+extern "C" void* func_00274518(cScriptPlayerMain* self)
 {
-    *(int*)((char*)self + 0x0) = -1;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x18) = 0;
-    *(int*)((char*)self + 0x1C) = 0;
-    *(int*)((char*)self + 0x20) = 0;
-    *(float*)((char*)self + 0x24) = 1.0f;
-    *(int*)((char*)self + 0x28) = 0;
-    *(int*)((char*)self + 0x2C) = 0;
-    *(int*)((char*)self + 0x30) = -1;
-    *(int*)((char*)self + 0x34) = -1;
-    *(int*)((char*)self + 0x38) = 0;
-    *(int*)((char*)self + 0x3C) = 0;
-    *(int*)((char*)self + 0x40) = 0;
-    *(int*)((char*)self + 0x44) = 0;
-    return self;
+    self->mID = -1;
+    self->mpData = 0;
+    self->mpManager = 0;
+    self->mpUserData = 0;
+    self->mpSystemHeader = 0;
+    self->mpDataHeader = 0;
+    self->mpEntityPlayers = 0;
+    self->mLoopScript = 0;
+    self->mPlayState = 0;
+    self->mPlaySpeed = 1.0f;
+    *(int*)&self->mCurrFrame = 0;
+    self->mNumPaused = 0;
+    self->mScriptLength = -1;
+    self->mJumpFrame = -1;
+    self->mNumSteps = 0;
+    self->mEntityUpdateInProgress = 0;
+    self->mDoStopInEntityUpdate = 0;
+    self->mpPreviewCommInterface = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -3657,7 +3659,7 @@ INCLUDE_ASM("replay/replaycache", func_00274578);
 #ifdef SKIP_ASM
 extern "C" void func_00274578(int* self, int flags)
 {
-    func_002746F8(self);
+    func_002746F8((cScriptPlayerMain*)self);
     if (flags & 1) {
         operator_delete(self);
     }
@@ -3672,7 +3674,7 @@ void* operator new[](unsigned int size, void* heap) __asm__("func_002724C8__FPv"
 
 struct sRcElem45C0 {
     char pad_0x0[0x3C];
-    sRcElem45C0() { func_00273938(this); }
+    sRcElem45C0() { func_00273938((cScriptPlayerEntity*)(this)); }
     void operator delete[](void* p, unsigned int size);
 };
 
@@ -3718,7 +3720,7 @@ extern "C" int func_002745C0_impl(sRcStream45C0* self, sRcHdr45C0* data, char* o
         sRcElem45C0** slot = &self->elems;
         *slot = new (owner + 8) sRcElem45C0[self->hdr->count];
         for (int i = 0; i < self->hdr->count; i++) {
-            p += func_002739B8(&self->elems[i], p, (int)self);
+            p += func_002739B8((cScriptPlayerEntity*)(&self->elems[i]), p, (int)self);
         }
     }
     return self->hdr->result;
@@ -3728,7 +3730,7 @@ extern "C" int func_002745C0_impl(sRcStream45C0* self, sRcHdr45C0* data, char* o
 //100%
 INCLUDE_ASM("replay/replaycache", func_002746F8);
 #ifdef SKIP_ASM
-extern "C" void func_00273970(void* self, int flags);
+extern "C" void func_00273970(cScriptPlayerEntity* self, int flags);
 void* func_00272510(void* self);
 
 struct sRcElem46F8 {
@@ -3758,15 +3760,15 @@ struct sRcStream46F8 {
     int field_0x38;         // 0x38
 };
 
-extern "C" void func_002746F8(void* p)
+extern "C" void func_002746F8(cScriptPlayerMain* p)
 {
     sRcStream46F8* self = (sRcStream46F8*)p;
     if (self->data == 0) {
         return;
     }
-    func_00274918(self);
+    func_00274918((cScriptPlayerMain*)self);
     for (int i = 0; i < self->hdr->count; i++) {
-        func_00273A00(&self->elems[i]);
+        func_00273A00((cScriptPlayerEntity*)(&self->elems[i]));
     }
     // delete[] self->elems (element count in the 16-byte array cookie)
     sRcElem46F8* e = self->elems;
@@ -3774,7 +3776,7 @@ extern "C" void func_002746F8(void* p)
         sRcElem46F8* q = e + *(int*)((char*)e - 0x10);
         while (self->elems != q) {
             q--;
-            func_00273970(q, 0);
+            func_00273970((cScriptPlayerEntity*)q, 0);
         }
         func_00272510((char*)self->elems - 0x10);
     }
@@ -3840,8 +3842,8 @@ void func_00274830_impl(void* self, int a1)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274860);
 #ifdef SKIP_ASM
-extern "C" void func_00274860(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x1C))) = arg1;
+extern "C" void func_00274860(cScriptPlayerMain* arg0, int arg1) {
+    (arg0->mLoopScript) = arg1;
 }
 #endif
 //100%
@@ -3849,45 +3851,45 @@ INCLUDE_ASM("replay/replaycache", func_00274868);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00274830_v(void*, int) __asm__("func_00274830");
-extern "C" void func_00274A30(void* p);
+extern "C" void func_00274A30(cScriptPlayerMain* p);
 
-extern "C" void func_00274868(char* self, int flag)
+extern "C" void func_00274868(cScriptPlayerMain* self, int flag)
 {
-    float savedScale = *(float*)(self + 0x24);
-    *(int*)(self + 0x44) = flag;
-    *(float*)(self + 0x24) = 1.0f;
-    int savedIdx = *(int*)(self + 0x1C);
-    func_00274830_v(self, 0);
-    while (*(int*)(self + 0x20) != 0) {
-        *(float*)(self + 0x24) = 1.0f;
+    float savedScale = self->mPlaySpeed;
+    self->mpPreviewCommInterface = (cInSeqComm*)flag;
+    self->mPlaySpeed = 1.0f;
+    int savedIdx = self->mLoopScript;
+    func_00274830_v(((char*)self), 0);
+    while (self->mPlayState != 0) {
+        self->mPlaySpeed = 1.0f;
         func_00274A30(self);
     }
-    *(float*)(self + 0x24) = savedScale;
-    *(int*)(self + 0x1C) = savedIdx;
-    *(int*)(self + 0x44) = 0;
+    self->mPlaySpeed = savedScale;
+    self->mLoopScript = savedIdx;
+    self->mpPreviewCommInterface = 0;
 }
 #endif
 //100%
 INCLUDE_ASM("replay/replaycache", func_002748F8);
 #ifdef SKIP_ASM
-extern "C" void func_002748F8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x34))) = arg1;
-    (*(int *)((char*)(arg0) + (0x38))) = 0;
+extern "C" void func_002748F8(cScriptPlayerMain* arg0, int arg1) {
+    (arg0->mJumpFrame) = arg1;
+    (arg0->mNumSteps) = 0;
 }
 #endif
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274908);
 #ifdef SKIP_ASM
-extern "C" void func_00274908(void *arg0) {
-    (*(int *)((char*)(arg0) + (0x38))) = (int) ((*(int *)((char*)(arg0) + (0x38))) + 1);
+extern "C" void func_00274908(cScriptPlayerMain* arg0) {
+    (arg0->mNumSteps) = (int) ((arg0->mNumSteps) + 1);
 }
 #endif
 
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274918);
 #ifdef SKIP_ASM
-extern "C" void func_00273DC0(void* self);
-extern "C" int func_00274D70(void* self);
+extern "C" void func_00273DC0(cScriptPlayerEntity* self);
+extern "C" int func_00274D70(cScriptPlayerMain* self);
 
 class cRcListener4918 {
 public:
@@ -3897,22 +3899,22 @@ public:
     virtual void v04(void* src);
 };
 
-extern "C" void func_00274918(void* self)
+extern "C" void func_00274918(cScriptPlayerMain* self)
 {
-    if (*(int*)((char*)self + 0x20) == 0) return;
-    if (*(int*)((char*)self + 0x3C) != 0) {
-        *(int*)((char*)self + 0x40) = 1;
+    if (self->mPlayState == 0) return;
+    if (self->mEntityUpdateInProgress != 0) {
+        self->mDoStopInEntityUpdate = 1;
         return;
     }
-    for (int i = 0; i < *(unsigned char*)(*(char**)((char*)self + 0x10) + 1); i++) {
-        func_00273DC0(*(char**)((char*)self + 0x18) + i * 0x3C);
+    for (int i = 0; i < *(unsigned char*)((char*)self->mpSystemHeader + 1); i++) {
+        func_00273DC0((cScriptPlayerEntity*)((char*)self->mpEntityPlayers + i * 0x3C));
     }
-    *(int*)((char*)self + 0x20) = 0;
-    *(int*)((char*)self + 0x28) = 0;
-    *(int*)((char*)self + 0x2C) = 0;
-    *(int*)((char*)self + 0x38) = 0;
-    *(int*)((char*)self + 0x30) = -1;
-    *(int*)((char*)self + 0x34) = -1;
+    self->mPlayState = 0;
+    *(int*)&self->mCurrFrame = 0;
+    self->mNumPaused = 0;
+    self->mNumSteps = 0;
+    self->mScriptLength = -1;
+    self->mJumpFrame = -1;
     cRcListener4918* l = (cRcListener4918*)func_00274D70(self);
     if (l != 0) {
         l->v04(self);
@@ -3923,10 +3925,10 @@ extern "C" void func_00274918(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002749E8);
 #ifdef SKIP_ASM
-extern "C" void func_002749E8(void* self)
+extern "C" void func_002749E8(cScriptPlayerMain* self)
 {
-    if (*(int*)((char*)self + 0x20) != 0) {
-        *(int*)((char*)self + 0x2c) += 1;
+    if (self->mPlayState != 0) {
+        self->mNumPaused += 1;
     }
 }
 #endif
@@ -3934,13 +3936,13 @@ extern "C" void func_002749E8(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274A08);
 #ifdef SKIP_ASM
-extern "C" void func_00274A08(void* self)
+extern "C" void func_00274A08(cScriptPlayerMain* self)
 {
-    if (*(int*)((char*)self + 0x20) != 0) {
-        int v = *(int*)((char*)self + 0x2c) - 1;
-        *(int*)((char*)self + 0x2c) = v;
+    if (self->mPlayState != 0) {
+        int v = self->mNumPaused - 1;
+        self->mNumPaused = v;
         if (v < 0) {
-            *(int*)((char*)self + 0x2c) = 0;
+            self->mNumPaused = 0;
         }
     }
 }
@@ -3949,11 +3951,11 @@ extern "C" void func_00274A08(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_00274A30);
 #ifdef SKIP_ASM
-extern "C" int func_00274C70(void* self);
-extern "C" void func_00274918(void* p);
+extern "C" int func_00274C70(cScriptPlayerMain* self);
+extern "C" void func_00274918(cScriptPlayerMain* p);
 void* func_00274810(void* self);
 extern "C" void func_00274DE0(void* self);
-extern "C" void func_002749E8(void* self);
+extern "C" void func_002749E8(cScriptPlayerMain* self);
 
 struct sRcPlay_4A30 {
     char pad0[0x1C];
@@ -3967,7 +3969,7 @@ struct sRcPlay_4A30 {
     int steps;      // 0x38
 };
 
-extern "C" void func_00274A30(void* p)
+extern "C" void func_00274A30(cScriptPlayerMain* p)
 {
     sRcPlay_4A30* self = (sRcPlay_4A30*)p;
     int need = 1;
@@ -3975,7 +3977,7 @@ extern "C" void func_00274A30(void* p)
     {
         int target = self->seekTo;
         self->seekTo = -1;
-        int len = func_00274C70(self);
+        int len = func_00274C70((cScriptPlayerMain*)self);
         int saved = self->f2C;
         self->f2C = 0;
         if (self->loop != 0)
@@ -3987,7 +3989,7 @@ extern "C" void func_00274A30(void* p)
         {
             if (ft < self->pos)
             {
-                func_00274918(self);
+                func_00274918((cScriptPlayerMain*)self);
                 func_00274810(self);
                 func_00274DE0(self);
             }
@@ -4028,7 +4030,7 @@ extern "C" void func_00274A30(void* p)
         }
     skip:
         if (self->f2C <= 0)
-            func_002749E8(self);
+            func_002749E8((cScriptPlayerMain*)self);
         need = 0;
     }
     if (need)
@@ -4050,9 +4052,9 @@ int func_00274C10(void* self, int a1)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274C20);
 #ifdef SKIP_ASM
-extern "C" void* func_00274C20(void* self, int a1)
+extern "C" void* func_00274C20(cScriptPlayerMain* self, int a1)
 {
-    return *(char**)((char*)self + 0x18) + a1 * 0x3c;
+    return (char*)self->mpEntityPlayers + a1 * 0x3c;
 }
 #endif
 
@@ -4103,20 +4105,20 @@ struct sRcTrack4C70 {
     char pad[0x3C];
 };
 
-extern "C" int func_00274C70(void* self)
+extern "C" int func_00274C70(cScriptPlayerMain* self)
 {
-    int r = *(int*)((char*)self + 0x30);
+    int r = self->mScriptLength;
     if (r < 0) {
         int best = 0;
         int i;
-        for (i = 0; i < *(unsigned char*)(*(char**)((char*)self + 0x10) + 1); i++) {
-            int v = func_00274348(&(*(sRcTrack4C70**)((char*)self + 0x18))[i]);
+        for (i = 0; i < *(unsigned char*)((char*)self->mpSystemHeader + 1); i++) {
+            int v = func_00274348(&((sRcTrack4C70*)self->mpEntityPlayers)[i]);
             if (best < v) {
                 best = v;
             }
         }
-        if (*(int*)((char*)self + 0x20) != 0) {
-            *(int*)((char*)self + 0x30) = best;
+        if (self->mPlayState != 0) {
+            self->mScriptLength = best;
         }
         r = best;
     }
@@ -4127,7 +4129,7 @@ extern "C" int func_00274C70(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274D08);
 #ifdef SKIP_ASM
-extern "C" int func_00274C70(void* self);
+extern "C" int func_00274C70(cScriptPlayerMain* self);
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 static inline float ftrunc_00274D08(float x)
@@ -4137,9 +4139,9 @@ static inline float ftrunc_00274D08(float x)
     return t;
 }
 
-extern "C" int func_00274D08(void* self)
+extern "C" int func_00274D08(cScriptPlayerMain* self)
 {
-    float x = ((float)func_00274C70(self) - *(float*)((char*)self + 0x28)) / *(float*)((char*)self + 0x24);
+    float x = ((float)func_00274C70(self) - self->mCurrFrame) / self->mPlaySpeed;
     float c = ftrunc_00274D08(x);
     if (c < x) {
         c += 1.0f;
@@ -4151,13 +4153,13 @@ extern "C" int func_00274D08(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274D70);
 #ifdef SKIP_ASM
-extern "C" int func_00274D70(void* self)
+extern "C" int func_00274D70(cScriptPlayerMain* self)
 {
-    int v = *(int*)((char*)self + 0x44);
+    int v = (int)self->mpPreviewCommInterface;
     if (v != 0) {
         return v;
     }
-    return **(int**)((char*)self + 0x8);
+    return *(int*)self->mpManager;
 }
 #endif
 
@@ -4318,8 +4320,8 @@ extern "C" void func_00274DE0_impl(char* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", func_002751A0);
 #ifdef SKIP_ASM
-extern "C" int func_00274100(void* track, float prev, float time, float speed, int jump);
-extern "C" int func_00274D70(void* self);
+extern "C" int func_00274100(cScriptPlayerEntity* track, float prev, float time, float speed, int jump);
+extern "C" int func_00274D70(cScriptPlayerMain* self);
 
 class cRcListener51A0 {
 public:
@@ -4352,12 +4354,12 @@ extern "C" int func_002751A0(sRcAnim51A0* self, float time, float prev, float sp
     }
     for (int i = 0; i < self->hdr[1]; i++) {
         int c = 0;
-        if (func_00274100(self->tracks + i * 0x3C, prev, self->time, speed, jump) != 0 || changed != 0) {
+        if (func_00274100((cScriptPlayerEntity*)(self->tracks + i * 0x3C), prev, self->time, speed, jump) != 0 || changed != 0) {
             c = 1;
         }
         changed = c;
     }
-    cRcListener51A0* l = (cRcListener51A0*)func_00274D70(self);
+    cRcListener51A0* l = (cRcListener51A0*)func_00274D70((cScriptPlayerMain*)self);
     if (l != 0) {
         l->v02(self, self->time, speed);
     }

@@ -126,6 +126,11 @@ extern "C" void* func_0039E6B8(void* self);
 //100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onRender2D__FPv);
 #ifdef SKIP_ASM
+/**
+ * Renders the character-select state's 2D layer with the shared UI-state render routine func_0039E6B8().
+ *
+ * @return no meaningful value (func_0039E6B8() returns nothing)
+ */
 void* cFEStateCharSelect_onRender2D(void* self)
 {
     return func_0039E6B8(self);
@@ -138,6 +143,13 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onUpdate);
 extern "C" void func_00181EF0(void* self);
 extern "C" void* func_0039E510(void* self);
 
+/**
+ * Updates the character-select state: poses the front-end rider model, then runs the base UI-state update.
+ *
+ * func_00181EF0() places and turns the rider model once it is loaded and restarts its animation when the state
+ * asks for it. func_0039E510() is the base UI-state update, which dispatches controller input to the state and
+ * its screens.
+ */
 extern "C" void cFEStateCharSelect_onUpdate(void* self)
 {
     func_00181EF0(self);

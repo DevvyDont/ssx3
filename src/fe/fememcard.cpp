@@ -903,6 +903,13 @@ extern "C" void func_00187A38(void* p)
 //100%
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_onInputBegin__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaves controller input to the memory-card state's screens.
+ *
+ * The base UI update func_0039E510() hands the input on to the state's screens when this returns 0.
+ *
+ * @return always 0 (input not consumed)
+ */
 int cFEStateMemCard_onInputBegin(void* self)
 {
     return 0;

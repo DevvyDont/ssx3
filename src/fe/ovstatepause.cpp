@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/lobbyman.h"
 #include "main/gamemode.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
@@ -605,7 +606,6 @@ extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void func_001FAFF8(void* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible);
 extern "C" void func_002583A8(void* self, int a1, int a2);
-extern void* D_004A3028;
 extern void* D_004A5B64;
 extern char D_0046F9D0[];
 extern char D_0046F9E0[];
@@ -721,7 +721,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
         cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(self, 0);
     }
     if (cGameComm_mGameComm != 0) {
-        func_002583A8(cGameComm_mGameComm, *(int*)((char*)D_004A3028 + 4), 3);
+        func_002583A8(cGameComm_mGameComm, LobbyMan_mLobbyMan->mServerAddr, 3);
         *(int*)(s + 0x9C) = *(int*)((char*)D_004A5B64 + 0x18);
         func_001FAFF8(self, 0);
         cUIText* t2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(s + 0x40), GetHashValue32(D_0046FB18));
@@ -737,6 +737,13 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_onGainTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ends the online-error pause overlay's gain transition at once.
+ *
+ * The state stack update func_0039ECB0() ends a state's gain transition once this returns nonzero.
+ *
+ * @return always 1 (transition finished)
+ */
 int cOVState_PAUSE_ONLINE_ERROR_onGainTransition(void* self)
 {
     return 0x1;

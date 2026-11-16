@@ -67,6 +67,11 @@ extern "C" void* cUIState_onGainFocus(void* self);
 //100%
 INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the bonus-material state focus using the base cUIState_onGainFocus().
+ *
+ * @return no meaningful value (cUIState_onGainFocus() returns nothing)
+ */
 void* cFEStateBonusMaterial_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);

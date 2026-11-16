@@ -980,6 +980,13 @@ extern "C" void func_00212208(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onInputBegin__FPv);
 #ifdef SKIP_ASM
+/**
+ * Leaves controller input to the autosave overlay's screens.
+ *
+ * The base UI update func_0039E510() hands the input on to the state's screens when this returns 0.
+ *
+ * @return always 0 (input not consumed)
+ */
 int cOVState_AUTOSAVE_onInputBegin(void* self)
 {
     return 0;

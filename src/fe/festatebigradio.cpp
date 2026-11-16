@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/lobbyman.h"
 
 //100%
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onCreateScreen);
@@ -212,6 +213,13 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
 //100%
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onGainTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does no gain-transition work for the bragging-rights state.
+ *
+ * Returns 0, as the base cUIState_onGainTransition() does.
+ *
+ * @return always 0
+ */
 int cFEStateBraggingRights_onGainTransition(void* self)
 {
     return 0;
@@ -223,6 +231,11 @@ extern "C" void* func_0039E6B8(void* self);
 //100%
 INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onRender2D__FPv);
 #ifdef SKIP_ASM
+/**
+ * Renders the bragging-rights state's 2D layer with the shared UI-state render routine func_0039E6B8().
+ *
+ * @return no meaningful value (func_0039E6B8() returns nothing)
+ */
 void* cFEStateBraggingRights_onRender2D(void* self)
 {
     return func_0039E6B8(self);
@@ -831,7 +844,6 @@ extern "C" void* func_001BFBB8_41B0(void* mem, int a1) __asm__("func_001BFBB8");
 extern "C" void func_001A8A40_41B0(void* self, void* obj) __asm__("func_001A8A40");
 extern "C" int func_001A8E40_41B0(void* self, int msg, void* data) __asm__("func_001A8E40");
 extern "C" void* cMemMan_alloc_41B0(int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern void* D_004A3028;
 extern char D_0045FF10[];
 extern char D_0045FF28[];
 extern char D_004A1788[];
@@ -880,7 +892,7 @@ extern "C" int func_001941B0(char* self, int msg, sRadioMsg_41B0* data)
         func_001AB288_41B0(self);
         break;
     case 268:
-        if (func_0025DA90_41B0(D_004A3028)) {
+        if (func_0025DA90_41B0(LobbyMan_mLobbyMan)) {
             func_001A8A40_41B0(self, func_001B1F88_41B0(cMemMan_alloc_41B0(0x73C, D_0045FF10, 0, 0), *(int*)(self + 0x10)));
         } else {
             func_001A8A40_41B0(self, func_001BFBB8_41B0(cMemMan_alloc_41B0(0x6D0, D_0045FF28, 0, 0), *(int*)(self + 0x10)));

@@ -605,6 +605,12 @@ INCLUDE_ASM("seg/seg_1D3510", cSubMenuItem__cSubMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a sub-menu item (a menu entry that opens another menu) through the base cMenuItem destructor.
+ *
+ * Declared without parameters: the object and the destructor flags reach cMenuItem__cMenuItem() unchanged in
+ * their registers. It restores cMenuItem's vtable and frees the object when bit 0 of the flags is set.
+ */
 extern "C" void cSubMenuItem__cSubMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -787,6 +793,12 @@ INCLUDE_ASM("seg/seg_1D3510", cIntMenuItem__cIntMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys an integer menu item through the base cMenuItem destructor.
+ *
+ * Declared without parameters: the object and the destructor flags reach cMenuItem__cMenuItem() unchanged in
+ * their registers. It restores cMenuItem's vtable and frees the object when bit 0 of the flags is set.
+ */
 extern "C" void cIntMenuItem__cIntMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -813,6 +825,12 @@ INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem__cFloatMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a float menu item through the base cMenuItem destructor.
+ *
+ * Declared without parameters: the object and the destructor flags reach cMenuItem__cMenuItem() unchanged in
+ * their registers. It restores cMenuItem's vtable and frees the object when bit 0 of the flags is set.
+ */
 extern "C" void cFloatMenuItem__cFloatMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -873,6 +891,12 @@ INCLUDE_ASM("seg/seg_1D3510", cAngleMenuItem__cAngleMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys an angle menu item through the base cMenuItem destructor.
+ *
+ * Declared without parameters: the object and the destructor flags reach cMenuItem__cMenuItem() unchanged in
+ * their registers. It restores cMenuItem's vtable and frees the object when bit 0 of the flags is set.
+ */
 extern "C" void cAngleMenuItem__cAngleMenuItem(void) {
     cMenuItem__cMenuItem();
 }

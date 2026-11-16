@@ -469,6 +469,13 @@ extern "C" int ASYNCFILE_release(void* file, int a, int b);
 extern "C" void* MEM_free(void* self);
 extern "C" void cSSXScriptEngine_PurgeScriptBank(cSSXScriptEngine* self, int idx);
 
+/**
+ * Unloads the current track's scripts: script bank 1 and the category filter table.
+ *
+ * Cancels and releases a pending filter-table load (decrementing mNumAsyncs), purges script bank 1 (the bank
+ * cSSXScriptEngine_AsyncLoadTrack loads into), frees mpFilterTableHeader and clears mFilterTableAsyncHandle,
+ * mpFilterTableHeader and mpCategoryFilterTable.
+ */
 extern "C" void cSSXScriptEngine_PurgeTrack(cSSXScriptEngine* self)
 {
     if (self->mFilterTableAsyncHandle != 0) {
@@ -2778,6 +2785,13 @@ extern "C" void* func_0028B180();
 extern "C" void func_0028E888(void*);
 extern "C" void func_002EF368(int);
 
+/**
+ * Marks no NIS list as playing, if one was.
+ *
+ * When mPlayingNISList is not 2 (none): sets it to 2, clears mNumFramesNoSkip, calls func_0028E888() on the game
+ * audio object and func_002EF368(0), which clears a render-state pointer and its enabled flag. Does nothing
+ * otherwise.
+ */
 extern "C" void cSSXScriptEngine_ClearNISPlayListState(cSSXScriptEngine* self)
 {
     if (self->mPlayingNISList != 2) {

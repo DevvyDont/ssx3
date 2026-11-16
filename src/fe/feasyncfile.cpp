@@ -1,4 +1,6 @@
 #include "common.h"
+#include "online/buddyman.h"
+#include "online/lobbyman.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnetwork.h"
 #include "online/commsystem.h"
@@ -408,21 +410,19 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 extern "C" void func_001A3E30()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    func_00262768(D_004A3328, 1, 10, 0, 0, 0);
+    func_00262768(BuddyMan_mBuddyMan, 1, 10, 0, 0, 0);
 }
 #endif
 
@@ -676,8 +676,6 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void* cUIScreen_getObjectByHashName_4330(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_004A1408[];
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* func_002625C8_4330(void* session, int idx) __asm__("func_002625C8");
@@ -739,16 +737,16 @@ extern "C" void func_001A4330(char* self, sObj_4330* w, int msg)
         if (idx < 0) {
             break;
         }
-        if (D_004A3328 == 0) {
+        if (BuddyMan_mBuddyMan == 0) {
             func_00260F80();
         }
-        if (func_00261460(D_004A3328) == 0) {
-            func_002613C8(D_004A3328);
+        if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+            func_002613C8(BuddyMan_mBuddyMan);
         }
-        if (D_004A3328 == 0) {
-            func_0025B800(D_004A3028);
+        if (BuddyMan_mBuddyMan == 0) {
+            func_0025B800(LobbyMan_mLobbyMan);
         }
-        void* e = func_002625C8_4330(D_004A3328, idx);
+        void* e = func_002625C8_4330(BuddyMan_mBuddyMan, idx);
         if (e == 0) {
             break;
         }
@@ -807,21 +805,19 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_00262400(void* self, int a1);
 extern "C" int func_00263338(void* self, int a1);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001A4670()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" int func_001A4670(void* self, int idx)
@@ -855,21 +851,19 @@ extern "C" void func_0025B800(void* self);
 extern "C" void func_001A4810(void* self, void* a1);
 extern "C" void func_00262690(void* self, int a1, void* a2);
 int func_001A98B0(void* self);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001A4750()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001A4750(void* self)
@@ -896,7 +890,6 @@ extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025E6D0(void* self, const char* str);
-extern void* D_004A3028;
 extern char D_004615F8[];
 extern char D_00461618[];
 extern char D_00461628[];
@@ -925,7 +918,7 @@ extern "C" void func_001A4810(void* self, void* a1)
         *(int*)((char*)p + 0x164) = 0;
         func_001A9BC0(self, p);
         cBXString_cBXString4((char*)self + 0x6D4, name);
-        func_0025E6D0(D_004A3028, name);
+        func_0025E6D0(LobbyMan_mLobbyMan, name);
     }
 }
 #endif
@@ -933,7 +926,6 @@ extern "C" void func_001A4810(void* self, void* a1)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A4928);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern "C" void func_001A9890(void* self, const char* str);
 int func_001A98B0(void* self);
@@ -943,7 +935,7 @@ extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" void func_001A4928(void* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
-        if (func_0041AA88(*(const char**)((char*)D_004A3028 + 0x80), *(const char**)((char*)self + 0x6D0)) != 0) {
+        if (func_0041AA88(((const char*)LobbyMan_mLobbyMan->mPersona), *(const char**)((char*)self + 0x6D0)) != 0) {
             func_001A9890(self, *(const char**)((char*)self + 0x6D0));
             func_001AB370(self, func_001A98B0(self), 0);
         }
@@ -1387,8 +1379,6 @@ extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 struct sOwner1A5800;
 extern "C" int func_001A5800(sOwner1A5800* self, char** name);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 struct sSession1A52B0 {
     char pad[0xBC];
@@ -1400,16 +1390,16 @@ static inline int Count1A52B0(sSession1A52B0* s) { return s->mEnd - s->mBegin; }
 
 static inline void* GetSession_001A52B0()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 struct sBXString1A52B0 {
@@ -1482,22 +1472,20 @@ extern "C" void* cBXString_cBXString2(void* self, const char* str);
 struct sOwner1A56D0;
 extern "C" int func_001A56D0(sOwner1A56D0* self, const char* name);
 extern "C" void func_001DB778(void* vec, void** pos, void* const* val);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_00461798[];
 
 static inline void* GetSession_001A54D8()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 struct sElem1A54D8 {
@@ -1643,23 +1631,21 @@ struct sOwner1A5450;
 extern "C" void func_001A5450(sOwner1A5450* self);
 extern "C" void func_001DB778(void* vec, void** pos, void* const* val);
 extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_00461798[];
 extern char D_00461590[];
 
 static inline void* GetSession_001A5898()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 struct sSession1A5898 {
@@ -1805,8 +1791,6 @@ extern "C" const char* func_002625C8(void* self, int idx);
 extern "C" int func_00263338(void* self, int a1);
 extern "C" int func_002633F8(void* self, int a1);
 extern "C" void func_001A7390(void* self, const char* str, int a2);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_004A1390[];
 extern char D_00461558[];
 extern char D_004617A8[];
@@ -1816,16 +1800,16 @@ extern char D_004617E0[];
 
 static inline void* GetSession_001A6070()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 class cFEVObj_001A6070 {
@@ -1990,23 +1974,21 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_002624F8(void* self, int id);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_004615A0[];
 extern char D_00461830[];
 
 static inline void* GetSession_001A66A8()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 struct sCol_001A66A8 {
@@ -2088,22 +2070,20 @@ extern "C" void func_0025B800(void* self);
 extern "C" int func_002624F8(void* self, int id);
 extern "C" const char* func_002625C8(void* self, int idx);
 extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_00461590[];
 
 static inline void* GetSession_001A6978()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 struct sIntVec_001A6978 {
@@ -2207,8 +2187,6 @@ extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_004A1A20[];
 extern char D_00461570[];
 extern char D_00461840[];
@@ -2224,16 +2202,16 @@ static inline int Count1A6CA0(sSession1A6CA0* s) { return s->mEnd - s->mBegin; }
 
 static inline void* GetSession_001A6CA0()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 class cFEVObj_001A6CA0 {
@@ -2292,21 +2270,19 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_002624F8(void* self, int id);
 extern "C" void* func_0041610C(void* dst, void* src, int n);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001A6E70()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 struct sIntVec1A6E70 {
@@ -2358,21 +2334,19 @@ extern "C" int func_00263128(void* self, const char* name);
 // PORT: the unit declares func_00262A38 with an int name parameter; this caller passes a string
 extern "C" int func_00262A38(void* self, int a1);
 extern "C" void func_00261EF8(void* self, int a1, int a2, int a3);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001A6F70()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 // For every save slot that is in use, starts an operation (2) on the files that are neither busy nor present.
@@ -2406,22 +2380,20 @@ extern "C" int func_00262A38(void* self, int a1);
 extern "C" void func_001A63C8(void* self, unsigned int index, int state);
 extern "C" void func_001A6618(void* self, unsigned int index, const char* str, int a3);
 extern "C" void func_001A66A8(void* self, unsigned int index, int flag);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_004A1390[];
 
 static inline void* GetSession_001A71B0()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001A71B0(void* self, unsigned int index, const char* name, int a3)
@@ -2827,21 +2799,19 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 extern "C" void func_001A7B40()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    func_00262768(D_004A3328, 1, 10, 0, 0, 0);
+    func_00262768(BuddyMan_mBuddyMan, 1, 10, 0, 0, 0);
 }
 #endif
 
@@ -2867,8 +2837,6 @@ extern "C" void func_001A81F0(void* self);
 extern "C" void func_001A8918(void* self, int a1, int msg);
 extern "C" void func_001A7ED8(void* self, const char* name);
 extern "C" void func_001A9090(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_004A1408[];
 
 struct cFEObj_001A7BB8 {
@@ -2910,16 +2878,16 @@ extern "C" void func_001A7BB8(void* self, int a1, unsigned int msg)
         break;
     case 13:
         func_001A7ED8(self, *(char**)((char*)self + 0x69C) + 0x74);
-        if (D_004A3328 == 0) {
+        if (BuddyMan_mBuddyMan == 0) {
             func_00260F80();
         }
-        if (func_00261460(D_004A3328) == 0) {
-            func_002613C8(D_004A3328);
+        if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+            func_002613C8(BuddyMan_mBuddyMan);
         }
-        if (D_004A3328 == 0) {
-            func_0025B800(D_004A3028);
+        if (BuddyMan_mBuddyMan == 0) {
+            func_0025B800(LobbyMan_mLobbyMan);
         }
-        func_00262690(D_004A3328, *(int*)((char*)self + 0x6D0), *(char**)((char*)self + 0x69C) + 0x74);
+        func_00262690(BuddyMan_mBuddyMan, *(int*)((char*)self + 0x6D0), *(char**)((char*)self + 0x69C) + 0x74);
         func_001A81F0(self);
         break;
     default:
@@ -3088,7 +3056,6 @@ extern "C" void func_001A7DD8(void* self, void* item);
 extern char D_00461A08[];
 extern void* D_0046D8C0[];
 extern char D_004A1408[];
-extern void* D_004A3028;
 
 static inline void* Init_001A7ED8(char* p, const char* a, const char* b, const char* c)
 {
@@ -3102,7 +3069,7 @@ static inline void* Init_001A7ED8(char* p, const char* a, const char* b, const c
 extern "C" void func_001A7ED8(void* self, const char* name)
 {
     func_001A7DD8(self, Init_001A7ED8((char*)cMemMan_alloc(0x10, D_00461A08, 0x20000000, 0),
-                                      *(const char**)((char*)D_004A3028 + 0x80), name, D_004A1408));
+                                      ((const char*)LobbyMan_mLobbyMan->mPersona), name, D_004A1408));
 }
 #endif
 
@@ -3124,21 +3091,19 @@ extern "C" int func_0041AA88(const char* a, const char* b);
 extern char D_00461A08[];
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern void* D_0046D8C0[];
-extern void* D_004A3028;
-extern void* D_004A3328;
 
 static inline void* GetSession_001A7F78()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 static inline void* Init_001A7F78(char* p, char* src)
@@ -3451,24 +3416,22 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00261408(void* self);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern int D_004A1A70;
 
 extern "C" void func_001A86E8(int on)
 {
     D_004A1A70 = on;
-    if (on == 0 && D_004A3328 != 0 && func_00261460(D_004A3328) != 0) {
-        if (D_004A3328 == 0) {
+    if (on == 0 && BuddyMan_mBuddyMan != 0 && func_00261460(BuddyMan_mBuddyMan) != 0) {
+        if (BuddyMan_mBuddyMan == 0) {
             func_00260F80();
         }
-        if (func_00261460(D_004A3328) == 0) {
-            func_002613C8(D_004A3328);
+        if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+            func_002613C8(BuddyMan_mBuddyMan);
         }
-        if (D_004A3328 == 0) {
-            func_0025B800(D_004A3028);
+        if (BuddyMan_mBuddyMan == 0) {
+            func_0025B800(LobbyMan_mLobbyMan);
         }
-        func_00261408(D_004A3328);
+        func_00261408(BuddyMan_mBuddyMan);
     }
 }
 #endif
@@ -3567,8 +3530,6 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 class cFEVObj_001A8830 {
 public:
@@ -3607,16 +3568,16 @@ public:
 
 static inline void* GetSession_001A8830()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001A8830(cFEVObj_001A8830* self)
@@ -3688,14 +3649,13 @@ public:
     virtual ~cFEMsg_001A89B0();
 };
 
-extern void* D_004A3028;
 extern "C" void func_001A9930(void* self);
 
 extern "C" void* func_001A89B0(void* self, cFEMsg_001A89B0* msg)
 {
     int kind = *(int*)((char*)msg + 0xC);
     if (*(int*)((char*)self + 0x6A8) != 0 && kind != 0x31 && kind != 0x33 && kind != 0x4D && kind != 0x4E
-        && *(int*)D_004A3028 == 0) {
+        && LobbyMan_mLobbyMan->mState == 0) {
         delete msg;
         func_001A9930(self);
         return 0;
@@ -3821,7 +3781,6 @@ extern "C" void func_001A8AE8(void* self, cFEVObj_001A8AE8* obj)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A8B88);
 #ifdef SKIP_ASM
-extern void* D_004A3328;
 void func_00261058(void* self);
 extern "C" void func_00261408(void* self);
 extern "C" void* func_0028B180();
@@ -3909,9 +3868,9 @@ extern "C" int func_001A8B88_impl(cFEState1A8B88* st, int msg, int* data)
 {
     if ((unsigned int)(msg - 0xC8) < 0x4F) {
         if ((unsigned int)(msg - 0x115) < 2 || *(int*)((char*)st + 0x6B4) != 0) {
-            if (msg == 0x115 && D_004A3328 != 0) {
-                func_00261058(D_004A3328);
-                func_00261408(D_004A3328);
+            if (msg == 0x115 && BuddyMan_mBuddyMan != 0) {
+                func_00261058(BuddyMan_mBuddyMan);
+                func_00261408(BuddyMan_mBuddyMan);
             }
             if (st->v30() != 0) {
                 if ((unsigned int)(msg - 0x115) < 2) {
@@ -3986,7 +3945,6 @@ extern "C" void func_001A8F98(void* self);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9CC0(void* self, void** popup, void* owner, void* data);
 extern "C" void func_001A9BC0(void* self, void* popup);
-extern void* D_004A3028;
 extern char D_00461B30[];
 extern const char D_0045FF28[];
 
@@ -4009,7 +3967,7 @@ extern "C" int func_001A8E40_impl(void* self, int msg, void* data)
         func_001A9930(self);
         break;
     case 0xDC:
-        if (func_0025DA90(D_004A3028) == 0) {
+        if (func_0025DA90(LobbyMan_mLobbyMan) == 0) {
             func_001A8A40(self, func_001BCB58_v(cMemMan_alloc(0xB84, D_00461B30, 0, 0), *(int*)(s + 0x10)));
         }
         break;
@@ -4055,23 +4013,21 @@ extern "C" void func_0025B800(void* self);
 extern "C" void func_00261408(void* self);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_00461618[];
 extern char D_00461C40[];
 
 static inline void* GetSession_001A8F98()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001A8F98(void* self)
@@ -4086,7 +4042,7 @@ extern "C" void func_001A8F98(void* self)
     *(int*)((char*)p + 0x14C) = 6;
     func_001A9BC0(self, p);
     func_00261408(GetSession_001A8F98());
-    func_0025B800(D_004A3028);
+    func_0025B800(LobbyMan_mLobbyMan);
     func_002636F0(func_002591B8(), 0);
 }
 #endif
@@ -4393,7 +4349,6 @@ extern "C" sFEObj_001B1F88* func_001B1F88(sFEObj_001B1F88* mem, int a1);
 extern "C" void* func_001BFBB8(void* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_0025DA90(void* self);
-extern void* D_004A3028;
 extern int D_004A4E88;
 extern const char D_0045FF10[];
 extern const char D_0045FF28[];
@@ -4403,7 +4358,7 @@ extern "C" void func_001A9578(void* self, int a1, int a2)
     if (a2 == 0xF || a2 == 0x14) {
         func_001A93D0_3(self, a1, a2);
         void* obj;
-        if (func_0025DA90(D_004A3028) != 0 && D_004A4E88 == 0) {
+        if (func_0025DA90(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
             obj = func_001B1F88((sFEObj_001B1F88*)cMemMan_alloc(0x73C, D_0045FF10, 0, 0), *(int*)((char*)self + 0x10));
         } else {
             obj = func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)((char*)self + 0x10));
@@ -4785,8 +4740,6 @@ extern "C" void func_00261408(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_00461618[];
 extern char D_00461C40[];
 extern char D_00461D68[];
@@ -4903,16 +4856,16 @@ static inline void SetText_1A9CC0(char* popup, char* id)
 
 static inline void* GetSession_1A9CC0()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 // Builds the popup for an online error reply (four-character code at data+8).
@@ -5239,7 +5192,7 @@ extern "C" void func_001A9CC0(void* self, void** popup, void* owner, void* data)
         *(int*)(sub + 0x94) = 0x83E;
     }
     func_00261408(GetSession_1A9CC0());
-    func_0025B800(D_004A3028);
+    func_0025B800(LobbyMan_mLobbyMan);
     func_002636F0(func_002591B8(), 0);
 }
 #endif
@@ -5313,8 +5266,6 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_00262938(void* self);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern void* D_004A5B64;
 extern char D_00462650[];
 extern char D_004A12C0[];
@@ -5330,16 +5281,16 @@ static inline int Count1AAB68(sSession1AAB68* s) { return s->mEnd - s->mBegin; }
 
 static inline void* GetSession_001AAB68()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 class cFEVObj_001AAB68 {
@@ -5747,8 +5698,6 @@ extern "C" void func_001C5838(void* self, int a1, int a2, int a3);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void sprintf1(void* str, int a1, char* buf);
 extern "C" void func_001A9BC0(void* self, void* popup);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_00462938[];
 extern char D_00462958[];
 extern char D_00462970[];
@@ -5771,16 +5720,16 @@ struct sVEntry_001AB478 {
 
 static inline void* GetSession_001AB478()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 static inline int Text_001AB478(char* name)
@@ -5803,10 +5752,10 @@ extern "C" void func_001AB478(void* self, void* popup, int a1, int a2, int a3)
     int stateB = func_002633C8(GetSession_001AB478(), name);
     int n = 0;
     char* sub = p + 0xBC;
-    char* g = (char*)D_004A3028;
+    LobbyMan* g = LobbyMan_mLobbyMan;
     char s[4];
     cBXString_cBXString2(s, name);
-    cBXString_operatorE(g + 0x98, s);
+    cBXString_operatorE((char*)g + 0x98, s);
     cBXString__cBXString(s, 2);
     *(int*)(p + 0xC8) = 2;
     *(int*)(p + 0x14C) = 3;
@@ -5890,8 +5839,6 @@ extern "C" void* func_001A77A0(void* mem, int a1, void* owner, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void func_001CE468(void* self, int v);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_004A1408[];
 extern char D_00462AA8[];
 
@@ -5911,16 +5858,16 @@ extern "C" void func_001ABB30(void* p, int a1, void* a2, int a3)
 {
     sFEObj_001ABB30* self = (sFEObj_001ABB30*)p;
     self->f6C4 = 0;
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    if (func_00262A38(D_004A3328, a1) != 0) {
+    if (func_00262A38(BuddyMan_mBuddyMan, a1) != 0) {
         void* obj = func_001A77A0(cMemMan_alloc(0x6FC, D_00462AA8, 0x100, 0), self->f10, self, a1);
         cUIStateStack_pushPopup(*(char**)(*(char**)(self->f40 + 0xD0) + 0x10) + 0x18, obj);
     } else {
@@ -5941,8 +5888,6 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00261EF8(void* self, int a1, int a2, int a3);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 struct sFEObj_001ABC50 {
     char pad[0x6C4];
@@ -5952,16 +5897,16 @@ struct sFEObj_001ABC50 {
 extern "C" void func_001ABC50(sFEObj_001ABC50* self, int a1, int a2)
 {
     self->f6C4 = 0;
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    func_00261EF8(D_004A3328, a1, 1, a2);
+    func_00261EF8(BuddyMan_mBuddyMan, a1, 1, a2);
 }
 #endif
 
@@ -5983,8 +5928,6 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern int D_004A4E88_v[2] __asm__("D_004A4E88");
 extern char D_005308B8[];
 extern char D_00462AC8[];
@@ -5994,16 +5937,16 @@ extern "C" void func_001ABCD0(void* self, int a1, void* a2, int a3, int a4)
 {
     *(int*)((char*)self + 0x6C4) = 0;
     func_001A97B8_v(self, a2, a3);
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    if (func_00263128(D_004A3328, (const char*)a1)) {
+    if (func_00263128(BuddyMan_mBuddyMan, (const char*)a1)) {
         void* p = func_001AFE08(cMemMan_alloc(0x6D8, D_00462AC8, 0x100, 0), *(int*)((char*)self + 0x10), (int)self, (const char*)a1);
         if (a4) {
             *(int*)((char*)p + 0x18) = 0x834;
@@ -6013,11 +5956,11 @@ extern "C" void func_001ABCD0(void* self, int a1, void* a2, int a3, int a4)
         cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
     } else {
         MEM_fill(D_005308B8, 0, 0x20);
-        char* g = (char*)D_004A3028;
+        LobbyMan* g = LobbyMan_mLobbyMan;
         D_004A4E88_v[1] = 4;
         char s[4];
         cBXString_cBXString2(s, (const char*)a1);
-        cBXString_operatorE(g + 0x98, s);
+        cBXString_operatorE((char*)g + 0x98, s);
         cBXString__cBXString(s, 2);
         void* p = func_001ADDD0_BCD0(cMemMan_alloc(0x6F0, D_00462AE8, 0x100, 0), *(int*)((char*)self + 0x10), (int)self);
         if (a4) {
@@ -6038,8 +5981,6 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00261EF8(void* self, int a1, int a2, int a3);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 struct sFEObj_001ABE58 {
     char pad[0x6C4];
@@ -6049,16 +5990,16 @@ struct sFEObj_001ABE58 {
 extern "C" void func_001ABE58(sFEObj_001ABE58* self, int a1, int a2)
 {
     self->f6C4 = 0;
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    func_00261EF8(D_004A3328, a1, 0, a2);
+    func_00261EF8(BuddyMan_mBuddyMan, a1, 0, a2);
 }
 #endif
 
@@ -6170,7 +6111,6 @@ extern "C" void* cBXString_cBXString4(void* self, const char* str);
 void func_001A8768(void* self);
 extern char D_00462B20[];
 extern char D_004A1408[];
-extern void* D_004A3028;
 
 extern "C" void func_001AC0B8(void* self)
 {
@@ -6180,8 +6120,8 @@ extern "C" void func_001AC0B8(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cBXString_cBXString4((char*)D_004A3028 + 0x48, D_004A1408);
-    cBXString_cBXString4((char*)D_004A3028 + 0x4C, D_004A1408);
+    cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, D_004A1408);
+    cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, D_004A1408);
     func_001A8768(self);
 }
 #endif
@@ -6271,13 +6211,12 @@ extern "C" int strlen(const char* s);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
-extern void* D_004A3028;
 extern char D_00462BB0[];
 extern char D_00461618[];
 
 extern "C" int func_001AC2B8(void* self)
 {
-    if (strlen(*(const char**)((char*)D_004A3028 + 0x4C)) == 0) {
+    if (strlen(((const char*)LobbyMan_mLobbyMan->mPassword)) == 0) {
     void* p = func_001A9C50(self);
     char* sub = (char*)p + 0xBC;
     *(int*)((char*)p + 0xBC) = 1;
@@ -6300,13 +6239,12 @@ extern "C" int strlen(const char* s);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
-extern void* D_004A3028;
 extern char D_00462BD0[];
 extern char D_00461618[];
 
 extern "C" int func_001AC360(void* self)
 {
-    if (strlen(*(const char**)((char*)D_004A3028 + 0x48)) == 0) {
+    if (strlen(((const char*)LobbyMan_mLobbyMan->mUserName)) == 0) {
     void* p = func_001A9C50(self);
     char* sub = (char*)p + 0xBC;
     *(int*)((char*)p + 0xBC) = 1;
@@ -6412,7 +6350,6 @@ extern "C" void func_001A8918(void* self, int a1, int msg);
 extern "C" void func_001A9150(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
-extern void* D_004A3028;
 extern char D_00461618[];
 extern char D_00462C88[];
 extern char D_00462D10[];
@@ -6454,7 +6391,7 @@ extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
             *(int*)((char*)p + 0x150) = 0x80E;
             func_001A9BC0(self, p);
             ((sState_C5C0*)self)->mode = 4;
-            func_0025B6D8_C5C0(D_004A3028, 0);
+            func_0025B6D8_C5C0(LobbyMan_mLobbyMan, 0);
             break;
         }
         case 2: {
@@ -6469,7 +6406,7 @@ extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
             *(int*)((char*)p + 0x150) = 0x812;
             func_001A9BC0(self, p);
             ((sState_C5C0*)self)->mode = 2;
-            func_0025B6D8_C5C0(D_004A3028, 0);
+            func_0025B6D8_C5C0(LobbyMan_mLobbyMan, 0);
             break;
         }
         case 3: {
@@ -6491,7 +6428,7 @@ extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
             if (obj == 0) {
                 break;
             }
-            int v = *(int*)((char*)D_004A3028 + 0x48);
+            int v = (int)LobbyMan_mLobbyMan->mUserName;
             func_001A9150(self, (int)obj, GetHashValue32(D_00462CE8), v, 0, 6, 0x10);
             *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
             cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x4B, 1, 2);
@@ -6503,7 +6440,7 @@ extern "C" void func_001AC5C0(char* self, void* a1, unsigned int msg)
             if (obj == 0) {
                 break;
             }
-            int v = *(int*)((char*)D_004A3028 + 0x4C);
+            int v = (int)LobbyMan_mLobbyMan->mPassword;
             func_001A9150(self, (int)obj, GetHashValue32(D_00462D00), v, 1, 7, 0x10);
             cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
             break;
@@ -6567,7 +6504,6 @@ extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" int func_001AC448(void* self);
 extern "C" void func_0025B6D8(void* self, int a1);
-extern void* D_004A3028;
 extern char D_00462D48[];
 
 extern "C" void func_001AC9C0(void* self, void* a1, int a2)
@@ -6585,7 +6521,7 @@ extern "C" void func_001AC9C0(void* self, void* a1, int a2)
         func_001A9BC0(self, p);
         if (func_001AC448(self) != 0) {
             *(int*)((char*)self + 0x6D8) = three;
-            func_0025B6D8(D_004A3028, 0);
+            func_0025B6D8(LobbyMan_mLobbyMan, 0);
         }
     } else {
         func_001A97B8(self, a1, a2);
@@ -6602,28 +6538,26 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00261408(void* self);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001ACA88()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001ACA88(void* self, void* a1, int a2)
 {
     if (a2 == 0xF || a2 == 0x14) {
         func_00261408(GetSession_001ACA88());
-        func_0025B800(D_004A3028);
+        func_0025B800(LobbyMan_mLobbyMan);
         func_001A97B8(self, a1, a2);
     } else {
         func_001A97B8(self, a1, a2);
@@ -6691,7 +6625,6 @@ extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void* func_001AD130(void* self, int a1);
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern void* D_004A3028;
 extern char D_00462D10[];
 extern const char D_00462D68[];
 
@@ -6701,7 +6634,7 @@ extern "C" void func_001ACCD0(void* self, void* a1, int kind)
     case 15: {
         func_001A97B8(self, a1, 15);
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 1,
-                                *(int*)((char*)D_004A3028 + 0x48), *(int*)((char*)D_004A3028 + 0x4C));
+                                ((int)LobbyMan_mLobbyMan->mUserName), ((int)LobbyMan_mLobbyMan->mPassword));
         *(int*)((char*)p + 0x18) = 0x82C;
         cUIStateStack_pushPopup(*(char**)(*(char**)(*(char**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
         break;
@@ -6727,7 +6660,6 @@ extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void func_001A98B8(void* self, const char* str);
-extern void* D_004A3028;
 extern char D_00462B88[];
 extern char D_00462BA0[];
 
@@ -6758,7 +6690,7 @@ extern "C" void func_001ACDD0(void* self)
         } else {
             Show1ACDD0(*(char**)((char*)self + 0x6E0), 1);
         }
-        cBXString_cBXString4((char*)D_004A3028 + 0x48, name);
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, name);
         break;
     }
     case 7: {
@@ -6767,7 +6699,7 @@ extern "C" void func_001ACDD0(void* self)
             func_001A98B8(self, name);
             cUIText_setAsciiString(*(cUIText**)((char*)self + 0x6A4), (char*)self + 0x5C);
         }
-        cBXString_cBXString4((char*)D_004A3028 + 0x4C, name);
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, name);
         break;
     }
     }
@@ -6786,7 +6718,6 @@ extern "C" void func_0025C1E0(void* self, int a1);
 extern "C" void func_0025C3F8(void* self, int a1);
 extern "C" void func_0025C610(void* self);
 extern "C" int func_001A8E40_3i(void* self, int a1, int a2) __asm__("func_001A8E40");
-extern void* D_004A3028;
 extern char D_00462D98[];
 extern char D_00462DB0[];
 extern char D_00462D80[];
@@ -6800,13 +6731,13 @@ extern "C" int func_001ACEF8(void* self, int id, int a2)
     case 0xC9:
         switch (*(int*)((char*)self + 0x6D8)) {
         case 2:
-            func_0025C3F8(D_004A3028, *(int*)((char*)D_004A3028 + 0x48));
+            func_0025C3F8(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mUserName));
             break;
         case 3:
-            func_0025C1E0(D_004A3028, *(int*)((char*)self + 0x6DC));
+            func_0025C1E0(LobbyMan_mLobbyMan, *(int*)((char*)self + 0x6DC));
             break;
         case 4:
-            func_0025C610(D_004A3028);
+            func_0025C610(LobbyMan_mLobbyMan);
             break;
         }
         break;
@@ -6909,7 +6840,6 @@ extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025D1B8(void* self, const char* str);
-extern void* D_004A3028;
 extern char D_004615F8[];
 extern char D_00461618[];
 extern char D_00462DE0[];
@@ -6933,7 +6863,7 @@ extern "C" void func_001AD208(void* self, const char* name)
         *(int*)((char*)p + 0x150) = 0x815;
         *(int*)((char*)p + 0x164) = 0;
         func_001A9BC0(self, p);
-        func_0025D1B8(D_004A3028, name);
+        func_0025D1B8(LobbyMan_mLobbyMan, name);
     }
 }
 #endif
@@ -6946,7 +6876,6 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void func_001AD3E8(void* self, cUIText* text);
-extern void* D_004A3028;
 extern char D_00462E00[];
 extern char D_00462E10[];
 extern char D_00462E20[];
@@ -6957,13 +6886,13 @@ static inline int IsHash1AD308(int id, char* name) { return id == GetHashValue32
 
 extern "C" void func_001AD308(void* self, cUIText* text)
 {
-    void* g = D_004A3028;
+    LobbyMan* g = LobbyMan_mLobbyMan;
     if (IsHash1AD308(*(int*)((char*)text + 0x38), D_00462E00)) {
         func_001AD3E8(self, text);
     } else if (IsHash1AD308(*(int*)((char*)text + 0x38), D_00462E10)) {
         *(int*)((char*)text + 0x18) = -1;
     } else if (IsHash1AD308(*(int*)((char*)text + 0x38), D_00462E20)) {
-        cUIText_setAsciiString(text, *(const char**)((char*)g + 0x48));
+        cUIText_setAsciiString(text, ((const char*)g->mUserName));
     } else if (IsHash1AD308(*(int*)((char*)text + 0x38), D_00462E30)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(D_00462E40));
     }
@@ -6978,7 +6907,6 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" cUIText* func_00397870(void* list, int i);
-extern void* D_004A3028;
 extern char D_00462E58[];
 
 class cFEVObj_001AD3E8 {
@@ -7005,12 +6933,12 @@ struct sFEGlobals1AD3E8 {
 
 extern "C" void func_001AD3E8(void* self, cUIText* text)
 {
-    sFEGlobals1AD3E8* g = (sFEGlobals1AD3E8*)D_004A3028;
+    LobbyMan* g = LobbyMan_mLobbyMan;
     int i = 0;
-    for (; i < g->count; i++) {
+    for (; i < g->mNumPersonas; i++) {
         cUIText* item = func_00397870((char*)text + 0x74, i);
         *(int*)((char*)item + 0x18) = i;
-        cUIText_setAsciiString(item, g->names[i]);
+        cUIText_setAsciiString(item, ((const char**)&g->mPersonas[0])[i]);
         ((cFEVObj_001AD3E8*)item)->v09(1);
     }
     for (; i < 4; i++) {
@@ -7077,30 +7005,30 @@ extern "C" void func_001AD5E8(void* selfp, void* a1, int a2)
             func_001A8A40(self, func_001B88F0_D5E8(cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), *(int*)(self + 0x10), 0));
             break;
         }
-        if (idx >= *(int*)((char*)D_004A3028 + 0x6C)) {
+        if (idx >= LobbyMan_mLobbyMan->mNumPersonas) {
             func_001A9150(self, (int)a1, GetHashValue32(D_00462E58), (int)D_004A1408, 0, -1, 0xC);
             *(int*)(*(char**)(self + 0x69C) + 0x58) = 1;
             cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x4B, 1, 2);
             cKeyboardPopup_setIncludeKey(*(void**)(self + 0x69C), 0x35, 0, 2);
             *(int*)(self + 0x6D0) = 0;
         } else {
-            func_0025CD28(D_004A3028, idx);
+            func_0025CD28(LobbyMan_mLobbyMan, idx);
             *(int*)(self + 0x6D0) = 1;
         }
         break;
     }
     case 6: {
-        if (D_004A3328 == 0) {
+        if (BuddyMan_mBuddyMan == 0) {
             func_00260F80();
         }
-        if (func_00261460(D_004A3328) == 0) {
-            func_002613C8(D_004A3328);
+        if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+            func_002613C8(BuddyMan_mBuddyMan);
         }
-        if (D_004A3328 == 0) {
-            func_0025B800(D_004A3028);
+        if (BuddyMan_mBuddyMan == 0) {
+            func_0025B800(LobbyMan_mLobbyMan);
         }
-        func_00261408(D_004A3328);
-        func_0025B800(D_004A3028);
+        func_00261408(BuddyMan_mBuddyMan);
+        func_0025B800(LobbyMan_mLobbyMan);
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)(self + 0x10), self, 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
         cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)(self + 0x40) + 0xD0) + 0x10) + 0x18, p);
@@ -7111,7 +7039,7 @@ extern "C" void func_001AD5E8(void* selfp, void* a1, int a2)
         if (idx < 0) {
             break;
         }
-        if (idx < *(int*)((char*)D_004A3028 + 0x6C)) {
+        if (idx < LobbyMan_mLobbyMan->mNumPersonas) {
             *(int*)(self + 0x6D4) = idx;
             void* p = func_001A9C50(self);
             char* sub = (char*)p + 0xBC;
@@ -7225,14 +7153,13 @@ extern "C" void func_001AD930(void* self, void* a1, int a2)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001AD9C8);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 extern "C" void func_0025D428(void* self, void* a1);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 
 extern "C" void func_001AD9C8(void* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
-        func_0025D428(D_004A3028, *(void**)((char*)self + 0x6D4));
+        func_0025D428(LobbyMan_mLobbyMan, *(void**)((char*)self + 0x6D4));
         func_001A97B8(self, a1, 0xF);
     } else {
         func_001A97B8(self, a1, a2);
@@ -7262,8 +7189,6 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00261408(void* self);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern const char D_0045FF28[];
 extern char D_00461618[];
 extern char D_00462E00[];
@@ -7291,17 +7216,17 @@ extern "C" int func_001ADA30(void* self, int a1, int a2)
         break;
     }
     case 0x104: {
-        if (D_004A3328 == 0) {
+        if (BuddyMan_mBuddyMan == 0) {
             func_00260F80();
         }
-        if (func_00261460(D_004A3328) == 0) {
-            func_002613C8(D_004A3328);
+        if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+            func_002613C8(BuddyMan_mBuddyMan);
         }
-        if (D_004A3328 == 0) {
-            func_0025B800(D_004A3028);
+        if (BuddyMan_mBuddyMan == 0) {
+            func_0025B800(LobbyMan_mLobbyMan);
         }
-        func_00261408(D_004A3328);
-        func_0025B800(D_004A3028);
+        func_00261408(BuddyMan_mBuddyMan);
+        func_0025B800(LobbyMan_mLobbyMan);
         void* p = func_001A9C50(self);
         char* sub = (char*)p + 0xBC;
         *(int*)((char*)p + 0xBC) = 1;
@@ -7459,7 +7384,6 @@ extern "C" void func_001AF688(void* self);
 extern "C" void func_001AF930(void* screen);
 extern "C" void func_0025E6D0(void* self, const char* str);
 extern "C" void func_001A9930(void* self);
-extern void* D_004A3028;
 // D_004A4E88 is 8 bytes (config/symbol_addrs.txt); its second word was the separate symbol D_004A4E8C.
 extern int D_004A4E88_w[2] __asm__("D_004A4E88");
 extern char D_004630C8[];
@@ -7492,7 +7416,7 @@ extern "C" void func_001ADE88(void* self)
         ivt[1].fn(iface + ivt[1].delta);
         func_001AF728(self, iface, *(void**)((char*)self + 0x40));
         func_001AF688(self);
-        func_0025E6D0(D_004A3028, *(const char**)((char*)D_004A3028 + 0x98));
+        func_0025E6D0(LobbyMan_mLobbyMan, ((const char*)LobbyMan_mLobbyMan->mOpponent));
         func_001AF930(*(void**)((char*)self + 0x40));
         if (*(int*)((char*)self + 0x6D4) == 0) {
             cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004630E0)), 6);
@@ -7500,7 +7424,7 @@ extern "C" void func_001ADE88(void* self)
             *(int*)((char*)self + 0x6D4) = 0;
         }
     }
-    if (*(int*)D_004A3028 == 0) {
+    if (LobbyMan_mLobbyMan->mState == 0) {
         func_001A9930(self);
     }
 }
@@ -7643,7 +7567,6 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
 extern "C" void func_0039A7A8(void* self, int a1);
-extern void* D_004A3028;
 extern unsigned char D_004A4E88_E128[8] __asm__("D_004A4E88");
 extern char D_00461520[];
 extern char D_00463108[];
@@ -7713,7 +7636,7 @@ extern "C" void func_001AE128(void* self, cUIText* item)
     if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00461520)) {
         obj->v09(1);
     } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463108)) {
-        cUIText_setAsciiString(item, *(const char**)((char*)D_004A3028 + 0x98));
+        cUIText_setAsciiString(item, ((const char*)LobbyMan_mLobbyMan->mOpponent));
         obj->v09(1);
     } else if (IsHash1AE128(*(int*)((char*)item + 0x38), D_00463118)) {
         obj->v09(1);
@@ -7935,19 +7858,19 @@ extern "C" void func_001AE7A0(cState_E7A0* self, void* a1, int msg)
                 cBENewRaceInterface_setNumberAI_E7A0(race, func_0039A738_E7A0(self->numAI));
                 commit_E7A0(race);
             }
-            func_0025F4C0_E7A0(D_004A3028, *(int*)((char*)D_004A3028 + 0x98), self->f14);
+            func_0025F4C0_E7A0(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mOpponent), self->f14);
             break;
         }
         case 10:
             if (self->f6D0) {
-                func_0025F628_E7A0(D_004A3028, 0, 1);
+                func_0025F628_E7A0(LobbyMan_mLobbyMan, 0, 1);
             }
             func_0039F600_E7A0(self->engine + 0x18);
             break;
         }
         break;
     case 6:
-        func_0025F628_E7A0(D_004A3028, 0, self->f6D0);
+        func_0025F628_E7A0(LobbyMan_mLobbyMan, 0, self->f6D0);
         func_0039F600_E7A0(self->engine + 0x18);
         break;
     case 9:
@@ -7993,21 +7916,19 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 extern "C" void func_001AEBF0()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    func_00262768(D_004A3328, 1, 7, *(int*)((char*)D_004A3028 + 0x98), 0, 0);
+    func_00262768(BuddyMan_mBuddyMan, 1, 7, ((int)LobbyMan_mLobbyMan->mOpponent), 0, 0);
 }
 #endif
 
@@ -8383,7 +8304,6 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void func_001AEC60(void* self, int a1);
 extern "C" void sprintf1(void* str, int a1, char* buf);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
-extern void* D_004A3028;
 extern char D_00463468[];
 extern char D_00463480[];
 extern char D_004631C8[];
@@ -8407,7 +8327,7 @@ extern "C" void func_001AF568(void* self)
     *(int*)((char*)self + 0x6D0) = 1;
     cUIText* text = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463468));
     if (text != 0) {
-        char* name = *(char**)((char*)D_004A3028 + 0x98);
+        char* name = LobbyMan_mLobbyMan->mOpponent;
         char* o = (char*)SSXApp->FELocale;
         sVE_001AF568* vt = *(sVE_001AF568**)(o + 4);
         char* obj = o + vt[4].delta;
@@ -8600,7 +8520,6 @@ extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 // PORT: SN soft-float float->double helper called by name
 extern "C" double fptodp(float f);
 extern "C" void func_0025DD08(void* self, const char* str, int a2);
-extern void* D_004A3028;
 extern char D_00463108[];
 extern char D_004634E8[];
 extern char D_004634F8[];
@@ -8645,9 +8564,9 @@ extern "C" void func_001AFA60(void* screen, char* msg)
     sBXString1AFA60 s;
     char buf[0x100];
     sStats1AFA60* st = (sStats1AFA60*)(msg + 0x18);
-    cBXString_cBXString1(&s, (char*)D_004A3028 + 0x98);
-    *(sStats1AFA60*)((char*)D_004A3028 + 0xCC) = *(sStats1AFA60*)(msg + 0x18);
-    func_0025DD08(D_004A3028, s.str, *(int*)(msg + 0x14));
+    cBXString_cBXString1(&s, (char*)LobbyMan_mLobbyMan + 0x98);
+    (*(sStats1AFA60*)&LobbyMan_mLobbyMan->mOpponentStats) = *(sStats1AFA60*)(msg + 0x18);
+    func_0025DD08(LobbyMan_mLobbyMan, s.str, *(int*)(msg + 0x14));
     cUIText* t = cUIScreen_getObjectByHashName(screen, GetHashValue32(D_00463108));
     if (t != 0) {
         cUIText_setAsciiString(t, s.str);
@@ -8753,8 +8672,6 @@ extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" void func_001B0850(void* self, void* iface, void* screen);
 extern "C" void func_0025E6D0(void* self, const char* str);
 extern "C" void func_001AF930(void* screen);
-extern void* D_004A3328;
-extern char* D_004A3028_FE68 __asm__("D_004A3028");
 extern int D_004A11B8;
 extern int D_00535C08[];
 extern int D_00534B34[];
@@ -8812,19 +8729,19 @@ extern "C" void func_001AFE68(char* self)
     if (screen == 0)
         return;
     cUIScreen_playFrame(screen, 0, 0);
-    if (D_004A3328 == 0)
+    if (BuddyMan_mBuddyMan == 0)
         func_00260F80();
-    if (func_00261460(D_004A3328) == 0)
-        func_002613C8(D_004A3328);
-    if (D_004A3328 == 0)
-        func_0025B800(D_004A3028_FE68);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0)
+        func_002613C8(BuddyMan_mBuddyMan);
+    if (BuddyMan_mBuddyMan == 0)
+        func_0025B800((char*)LobbyMan_mLobbyMan);
     char* name = self + 0x6D0;
-    sRaceSetup_FE68* r = (sRaceSetup_FE68*)func_00263270(D_004A3328, *(int*)name);
-    cBXString_operatorE(D_004A3028_FE68 + 0x98, name);
-    *(sInfo_FE68*)(D_004A3028_FE68 + 0xCC) = *(sInfo_FE68*)r->info;
+    sRaceSetup_FE68* r = (sRaceSetup_FE68*)func_00263270(BuddyMan_mBuddyMan, *(int*)name);
+    cBXString_operatorE((char*)LobbyMan_mLobbyMan + 0x98, name);
+    (*(sInfo_FE68*)&LobbyMan_mLobbyMan->mOpponentStats) = *(sInfo_FE68*)r->info;
     if (r == 0)
         return;
-    cBXString_cBXString4(D_004A3028_FE68 + 0x8C, r->name);
+    cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x8C, r->name);
     MEM_fill(&D_005308B8_FE68, 0, 0x20);
     D_005308B8_FE68.b6 = r->f18;
     D_005308B8_FE68.b7 = r->f24;
@@ -8840,7 +8757,7 @@ extern "C" void func_001AFE68(char* self)
     D_00534B34[0] = r->f14;
     vcall_FE68(net);
     func_001B0850(self, be, *(void**)(self + 0x40));
-    func_0025E6D0(D_004A3028_FE68, *(char**)(D_004A3028_FE68 + 0x98));
+    func_0025E6D0((char*)LobbyMan_mLobbyMan, LobbyMan_mLobbyMan->mOpponent);
     func_001AF930(*(void**)(self + 0x40));
 }
 #endif
@@ -8853,21 +8770,19 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 extern "C" void func_001B00B8(void* self)
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    func_00262768(D_004A3328, 1, 8, *(int*)((char*)self + 0x6D0), 0, 0);
+    func_00262768(BuddyMan_mBuddyMan, 1, 8, *(int*)((char*)self + 0x6D0), 0, 0);
 }
 #endif
 
@@ -8891,7 +8806,6 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern void* D_004A3028;
 extern int D_00535C04[];
 extern int D_005308D0[];
 extern char D_004A12C0[];
@@ -8953,7 +8867,7 @@ extern "C" void func_001B0150(void* self, cFEVObj_001B0150* obj)
         *(int*)(o + 0x18) = 0xC;
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463108)) {
-        cUIText_setAsciiString(t, *(const char**)((char*)D_004A3028 + 0x98));
+        cUIText_setAsciiString(t, ((const char*)LobbyMan_mLobbyMan->mOpponent));
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463118)) {
         *(int*)(o + 0x18) = 7;
@@ -9022,7 +8936,6 @@ extern "C" void func_001A8918(void* self, int a1, int msg);
 extern "C" void func_001B0C08(void* self);
 extern "C" void func_001B0E10(void* self);
 extern "C" void func_0025FB58(void* self, int a1, int a2);
-extern void* D_004A3028;
 
 extern "C" void func_001B0538(void* self, void* obj, int msg)
 {
@@ -9035,7 +8948,7 @@ extern "C" void func_001B0538(void* self, void* obj, int msg)
         case 0xB:
             if (*(int*)((char*)self + 0x6D4) == 0) {
                 func_001B0C08(self);
-                func_0025FB58(D_004A3028, *(int*)((char*)D_004A3028 + 0x98), *(signed char*)((char*)self + 0x14));
+                func_0025FB58(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mOpponent), *(signed char*)((char*)self + 0x14));
             }
             break;
         case 0xC:
@@ -9215,8 +9128,6 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00263018(void* self, void* a1);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern const char D_00461C60[];
 
 // Message handler: starts the memory-card task, shows error popups, or forwards to the base handler.
@@ -9224,16 +9135,16 @@ extern "C" void* func_001B0708(void* self, int a1, int a2)
 {
     switch (a1) {
     case 0xEF:
-        if (D_004A3328 == 0) {
+        if (BuddyMan_mBuddyMan == 0) {
             func_00260F80();
         }
-        if (func_00261460(D_004A3328) == 0) {
-            func_002613C8(D_004A3328);
+        if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+            func_002613C8(BuddyMan_mBuddyMan);
         }
-        if (D_004A3328 == 0) {
-            func_0025B800(D_004A3028);
+        if (BuddyMan_mBuddyMan == 0) {
+            func_0025B800(LobbyMan_mLobbyMan);
         }
-        func_00263018(D_004A3328, *(void**)((char*)self + 0x6D0));
+        func_00263018(BuddyMan_mBuddyMan, *(void**)((char*)self + 0x6D0));
         break;
     case 0x110:
         func_001AB108(self);
@@ -9470,21 +9381,19 @@ extern "C" void func_0025F740(void* self, int a1);
 extern "C" void func_00263018(void* self, void* a1);
 extern "C" void* func_002591D0();
 extern "C" void func_00263BA8(void* p, int a1);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001B0E10()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 struct sVE1B0E10 {
@@ -9497,11 +9406,11 @@ extern "C" void func_001B0E10(void* self)
 {
     func_001B0C08(self);
     if (*(int*)((char*)self + 0x6D4) != 0) {
-        func_0025F740(D_004A3028, 0);
-        func_00263018(GetSession_001B0E10(), *(void**)((char*)D_004A3028 + 0x98));
+        func_0025F740(LobbyMan_mLobbyMan, 0);
+        func_00263018(GetSession_001B0E10(), LobbyMan_mLobbyMan->mOpponent);
         func_00263BA8(func_002591D0(), 2);
     } else {
-        func_00263018(GetSession_001B0E10(), *(void**)((char*)D_004A3028 + 0x98));
+        func_00263018(GetSession_001B0E10(), LobbyMan_mLobbyMan->mOpponent);
     }
     char* obj = *(char**)((char*)self + 0x20);
     sVE1B0E10* vt = *(sVE1B0E10**)(obj + 0x8);
@@ -9857,7 +9766,6 @@ extern "C" void func_001B1760(void* self, int index);
 extern "C" void func_001B1B10(void* self, int sel, int flag);
 extern "C" void func_001B1A08(void* self, int on, int a2);
 extern "C" void func_001AB288(void* self, int err);
-extern void* D_004A3028;
 extern int D_004A4E88;
 extern const char D_0045FF10[];
 extern const char D_0045FF28[];
@@ -9888,7 +9796,7 @@ extern "C" void* func_001B15D8(void* self, int a1, int a2)
         func_001A8A40(self, func_00192D00(cMemMan_alloc(0x73C, D_00460CC8, 0, 0), *(int*)((char*)self + 0x10)));
         break;
     case 0x10C:
-        if (func_0025DA90(D_004A3028) != 0 && D_004A4E88 == 0) {
+        if (func_0025DA90(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
             obj = func_001B1F88((sFEObj_001B1F88*)cMemMan_alloc(0x73C, D_0045FF10, 0, 0), *(int*)((char*)self + 0x10));
         } else {
             obj = func_001BFBB8(cMemMan_alloc(0x6D0, D_0045FF28, 0, 0), *(int*)((char*)self + 0x10));
@@ -9952,7 +9860,6 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 // PORT: func_002C2718 is a varargs formatter (buf, fmt, ...); the unit declares a 3-arg view
 extern "C" void func_002C2718_1B1808(char* buf, const char* fmt, ...) __asm__("func_002C2718");
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
-extern void* D_004A3028;
 extern char D_00463108[];
 extern char D_004639A0[];
 extern char D_004634E8[];
@@ -9996,27 +9903,27 @@ extern "C" void func_001B1808(void* self)
     }
     cFEVObj_001B1808* o = (cFEVObj_001B1808*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00463108));
     if (o != 0) {
-        cUIText_setAsciiString((cUIText*)o, *(const char**)((char*)D_004A3028 + 0x80));
+        cUIText_setAsciiString((cUIText*)o, ((const char*)LobbyMan_mLobbyMan->mPersona));
         o->v09(1);
     }
     o = (cFEVObj_001B1808*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004639A0));
     if (o != 0) {
-        cUIText_setAsciiString((cUIText*)o, *(const char**)((char*)D_004A3028 + 0x98));
+        cUIText_setAsciiString((cUIText*)o, ((const char*)LobbyMan_mLobbyMan->mOpponent));
         o->v09(1);
     }
     o = (cFEVObj_001B1808*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004634E8));
     if (o != 0) {
-        void* mgr = D_004A3028;
+        LobbyMan* mgr = LobbyMan_mLobbyMan;
         int name = Loc1B1808(D_00463550);
-        func_002C2718_1B1808(buf, D_004A1A88, name, *(int*)((char*)mgr + 0xB8));
+        func_002C2718_1B1808(buf, D_004A1A88, name, mgr->mStats.mRank);
         cUIText_setUnicodeString((cUIText*)o, buf);
         o->v09(1);
     }
     o = (cFEVObj_001B1808*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004639B8));
     if (o != 0) {
-        void* mgr = D_004A3028;
+        LobbyMan* mgr = LobbyMan_mLobbyMan;
         int name = Loc1B1808(D_00463550);
-        func_002C2718_1B1808(buf, D_004A1A88, name, *(int*)((char*)mgr + 0xCC));
+        func_002C2718_1B1808(buf, D_004A1A88, name, mgr->mOpponentStats.mRank);
         cUIText_setUnicodeString((cUIText*)o, buf);
         o->v09(1);
     }
@@ -10267,7 +10174,6 @@ INCLUDE_ASM("fe/feasyncfile", func_001B1F88);
 void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" char* strcpy(char* dst, const char* src);
 extern void* D_0046AE58[];
-extern void* D_004A3028;
 
 struct sCol_001B1F88 {
     float r, g, b, a;
@@ -10307,7 +10213,7 @@ extern "C" sFEObj_001B1F88* func_001B1F88(sFEObj_001B1F88* self, int a1)
     c.b = 1.0f;
     c.a = 1.0f;
     self->color = c;
-    strcpy(self->name, *(const char**)((char*)D_004A3028 + 0x80));
+    strcpy(self->name, ((const char*)LobbyMan_mLobbyMan->mPersona));
     return self;
 }
 #endif
@@ -10338,7 +10244,6 @@ extern "C" void func_001B3978(void* self, void* a1);
 extern "C" void func_003A1310(void* self, int a1);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
-extern void* D_004A3028;
 extern char D_00463A08[];
 extern char D_004619C8[];
 extern char D_004619D8[];
@@ -10363,7 +10268,7 @@ extern "C" void func_001B2070(void* self)
     }
     cUIScreen_playFrame(screen, 0, 0);
     func_001B2378(self, 1);
-    func_001B3978(self, *(void**)((char*)D_004A3028 + 0x80));
+    func_001B3978(self, LobbyMan_mLobbyMan->mPersona);
     *(int*)(*(char**)((char*)self + 0x6F0) + 0x74) |= 1;
     func_003A1310(*(void**)((char*)self + 0x6F0), 1);
     *(sBlk1B2070*)(*(char**)((char*)self + 0x6F0) + 0xA8) = *(sBlk1B2070*)((char*)self + 0x72C);
@@ -10411,26 +10316,24 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_0025DA90(void* self);
 extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001B22A0()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001B22A0()
 {
-    func_00262768(GetSession_001B22A0(), 1, 3, func_0025DA90(D_004A3028), 0, 0);
+    func_00262768(GetSession_001B22A0(), 1, 3, func_0025DA90(LobbyMan_mLobbyMan), 0, 0);
 }
 #endif
 
@@ -10475,7 +10378,6 @@ extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 struct sFEObj_001BCB58;
 extern "C" sFEObj_001BCB58* func_001BCB58(sFEObj_001BCB58* self, int a1);
-extern void* D_004A3028;
 extern char* D_004A3E90_p __asm__("D_004A3E90");
 extern char D_00463A38[];
 extern char D_00463A60[];
@@ -10518,7 +10420,7 @@ extern "C" void func_001B2378(void* vself, int a1)
     if (*(void**)(self + 0x40) == 0) {
         return;
     }
-    int n = func_0025F1B0(D_004A3028);
+    int n = func_0025F1B0(LobbyMan_mLobbyMan);
     func_001B3D20(self, -1, 0);
     cUIText* menu = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463A38));
     if (*(unsigned char*)((char*)menu + 0x96) != n) {
@@ -10536,11 +10438,11 @@ extern "C" void func_001B2378(void* vself, int a1)
         cFEVObj_001B2378* t = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name.c));
         t->v11(sCol_001B2378(1.0f, 0.0f, 0.0f, 0.0f));
         if (idx < n) {
-            cBXString_cBXString4(&s, func_0025F1E0_p(D_004A3028, idx, &flag));
+            cBXString_cBXString4(&s, func_0025F1E0_p(LobbyMan_mLobbyMan, idx, &flag));
             if (flag != 0) {
                 char buf[256];
-                func_001B25E0(func_0025DA90_s(D_004A3028), buf);
-                if (func_0025DA90(D_004A3028) == 0) {
+                func_001B25E0(func_0025DA90_s(LobbyMan_mLobbyMan), buf);
+                if (func_0025DA90(LobbyMan_mLobbyMan) == 0) {
                     func_001A8A40(self, func_001BCB58((sFEObj_001BCB58*)cMemMan_alloc(0xB84, D_00461B30, 0, 0), *(int*)(self + 0x10)));
                 }
                 cUIText_setUnicodeString(*(cUIText**)(self + 0x6E8), buf);
@@ -10643,7 +10545,6 @@ extern "C" int sprintf2_v(char* buf, const char* fmt, ...) __asm__("sprintf2");
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 // PORT: SN soft-float float->double helper called by name
 extern "C" double fptodp(float f);
-extern void* D_004A3028;
 extern const char* D_004A1B30;
 extern const char* D_004A1B34;
 extern const char* D_004A1B38;
@@ -10686,15 +10587,15 @@ extern "C" void func_001B27B0(void* vself, int idx)
     char buf[0x400];
     sInfo_1B27B0 info;
     int flag = 0;
-    cBXString_cBXString2(&s, func_0025F1E0_p(D_004A3028, idx, &flag));
+    cBXString_cBXString2(&s, func_0025F1E0_p(LobbyMan_mLobbyMan, idx, &flag));
     strcpy(self + 0x70C, s.str);
     if (*(void**)(self + 0x40) == 0) {
         cBXString__cBXString(&s, 2);
         return;
     }
     int valid = 0;
-    if (func_0025F1B0(D_004A3028) > 0) {
-        valid = idx < func_0025F1B0(D_004A3028);
+    if (func_0025F1B0(LobbyMan_mLobbyMan) > 0) {
+        valid = idx < func_0025F1B0(LobbyMan_mLobbyMan);
     }
     cUIText* title = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463108));
     if (title != 0) {
@@ -10715,7 +10616,7 @@ extern "C" void func_001B27B0(void* vself, int idx)
             cUIText_setAsciiString(title, D_004A1390);
         }
     }
-    func_0025F288(D_004A3028, idx, &info);
+    func_0025F288(LobbyMan_mLobbyMan, idx, &info);
     cUIText* t = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00463AE8));
     if (t != 0) {
         if (valid) {
@@ -10865,7 +10766,6 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_0025F1B0(void* self);
 extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
-extern void* D_004A3028;
 extern char D_004A1408[];
 extern char D_00463108[];
 extern char D_00463A38[];
@@ -10923,7 +10823,7 @@ extern "C" void func_001B2EB8(void* self, cFEVObj_001B2EB8* obj)
     } else if (id == GetHashValue32(D_00463A38)) {
         *(int*)(o + 0x14) |= 0x80;
         obj->v07(1);
-        int n = func_0025F1B0(D_004A3028);
+        int n = func_0025F1B0(LobbyMan_mLobbyMan);
         if (n <= 0) {
             cUIMenu_setScrollableMenu(obj, 6);
         } else {
@@ -10979,10 +10879,10 @@ extern "C" void func_001B31A0(char* self, char* msg, int ev)
     switch (ev) {
     case 5: {
         int id = *(int*)(msg + 0x18);
-        if (func_0025F248(D_004A3028, id) != 0) {
+        if (func_0025F248(LobbyMan_mLobbyMan, id) != 0) {
             return;
         }
-        func_001A9890(self, func_0025F1E0_p(D_004A3028, id, 0));
+        func_001A9890(self, func_0025F1E0_p(LobbyMan_mLobbyMan, id, 0));
         func_001AB370(self, func_001A98B0(self), 1);
         return;
     }
@@ -11018,7 +10918,7 @@ extern "C" void func_001B31A0(char* self, char* msg, int ev)
         *(int*)(p + 0xC0) = 3;
         *(int*)(p + 0x150) = 0x802;
         func_001A9BC0(self, p);
-        func_0025D800(D_004A3028, -1, 0);
+        func_0025D800(LobbyMan_mLobbyMan, -1, 0);
         return;
     }
     case 8:
@@ -11044,21 +10944,19 @@ extern "C" void func_0025B800(void* self);
 extern "C" void func_0025AAE0(void* self, void* a1);
 extern "C" void func_00262690(void* self, int a1, void* a2);
 int func_001A98B0(void* self);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001B33D8()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001B33D8(void* self)
@@ -11066,7 +10964,7 @@ extern "C" void func_001B33D8(void* self)
     char* p = *(char**)((char*)self + 0x69C);
     switch (*(int*)(p + 0x18)) {
     case 4:
-        func_0025AAE0(D_004A3028, p + 0x74);
+        func_0025AAE0(LobbyMan_mLobbyMan, p + 0x74);
         break;
     case 2:
         func_00262690(GetSession_001B33D8(), func_001A98B0(self), *(char**)((char*)self + 0x69C) + 0x74);
@@ -11100,7 +10998,6 @@ struct sFEObj_001B3490 {
     cFEVObj_001B3490* items[2];    // 0x6FC
 };
 
-extern void* D_004A3028;
 extern "C" void func_0039DE68(void* a, int b);
 extern "C" void func_001B3978(void* self, void* a1);
 
@@ -11115,7 +11012,7 @@ extern "C" int func_001B3490(sFEObj_001B3490* self, int a1)
                 self->items[i]->v07(1);
             }
         }
-        func_001B3978(self, *(void**)((char*)D_004A3028 + 0x80));
+        func_001B3978(self, LobbyMan_mLobbyMan->mPersona);
     }
     return 0;
 }
@@ -11171,7 +11068,6 @@ extern "C" void func_001ABCD0(void* self, int a1, void* a2, int a3, int a4);
 extern "C" void func_0025DF00(void* self, int a1);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
-extern void* D_004A3028;
 extern char D_00463D78[];
 
 // Memory-card result handler: runs the follow-up for each result; on 19 shows the failure popup.
@@ -11205,7 +11101,7 @@ extern "C" void func_001B35B0(void* self, void* a1, int kind)
         break;
     case 19: {
         *(int*)((char*)self + 0x6C4) = 0;
-        void* mc = D_004A3028;
+        LobbyMan* mc = LobbyMan_mLobbyMan;
         func_0025DF00(mc, func_001A98B0(self));
         void* p = func_001A9C50(self);
         *(int*)((char*)p + 0xBC) = 0;
@@ -11327,7 +11223,6 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" int func_0025F1B0(void* self);
 extern "C" const char* func_0025F1E0(void* self, int idx, int a2);
 extern "C" int func_004165A8(const char* a, const char* b);
-extern void* D_004A3028;
 extern char D_00463A38[];
 
 extern "C" void func_001B3978(void* self, void* name)
@@ -11335,9 +11230,9 @@ extern "C" void func_001B3978(void* self, void* name)
     if (*(void**)((char*)self + 0x40) != 0) {
         int sel = -1;
         int i = 0;
-        int n = func_0025F1B0(D_004A3028);
+        int n = func_0025F1B0(LobbyMan_mLobbyMan);
         for (; i < n; i++) {
-            if (func_004165A8(func_0025F1E0(D_004A3028, i, 0), (const char*)name) == 0) {
+            if (func_004165A8(func_0025F1E0(LobbyMan_mLobbyMan, i, 0), (const char*)name) == 0) {
                 sel = i;
                 break;
             }
@@ -11370,7 +11265,6 @@ extern "C" void func_001AB3D0(void* self, int a1, int a2);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
-extern void* D_004A3028;
 extern char D_00461B30[];
 extern char D_00463DC8[];
 extern char D_00461618[];
@@ -11387,7 +11281,7 @@ extern "C" void* func_001B3A30(void* self, int a1, int a2)
         break;
     }
     case 0xDC:
-        if (func_0025DA90(D_004A3028) == 0) {
+        if (func_0025DA90(LobbyMan_mLobbyMan) == 0) {
             func_001A8A40(self, func_001BCB58((sFEObj_001BCB58*)cMemMan_alloc(0xB84, D_00461B30, 0, 0), *(int*)((char*)self + 0x10)));
             break;
         }
@@ -11432,7 +11326,6 @@ extern "C" void func_001AAD50(void* self, int a1, int a2);
 extern "C" int func_0025F1B0(void* self);
 extern "C" int func_0025F248(void* self, int idx);
 extern "C" void func_0025F288(void* self, int idx, void* info);
-extern void* D_004A3028;
 extern char D_00463A60[];
 
 class cFEVObj_001B3BF0 {
@@ -11474,18 +11367,18 @@ extern "C" void func_001B3BF0(void* p)
     sOwner1B3BF0* self = (sOwner1B3BF0*)p;
     char buf[32];
     sInfo1B3BF0 info;
-    int n = func_0025F1B0(D_004A3028);
+    int n = func_0025F1B0(LobbyMan_mLobbyMan);
     int i;
     for (i = 0; i < 6; i++) {
         int idx = self->first + i;
         sprintf(buf, D_00463A60, i);
         if (idx < n) {
-            int r = func_0025F248(D_004A3028, idx);
+            int r = func_0025F248(LobbyMan_mLobbyMan, idx);
             self->items[i]->v09(1);
             if (r != 0) {
                 self->items[i]->v09(0);
             } else {
-                func_0025F288(D_004A3028, idx, &info);
+                func_0025F288(LobbyMan_mLobbyMan, idx, &info);
                 func_001AAD50(self->screen, i, info.f10);
             }
         } else {
@@ -11506,7 +11399,6 @@ extern "C" void func_001B27B0(void* self, int a1);
 extern "C" int func_0025F1B0(void* self);
 extern "C" void func_0039DA20(void* a0, void* a1, int a2, int a3);
 extern "C" void func_003A0290(void* text, void* out);
-extern void* D_004A3028;
 extern char D_00463A60[];
 extern char D_00463EA0[];
 extern char D_004A17E0[];
@@ -11551,7 +11443,7 @@ extern "C" void func_001B3D20(void* self, int idx, int on)
     }
     sprintf(name, D_00463A60, idx);
     cFEVObj_001B3D20* sel = Get1B3D20(self, name);
-    func_0039DA20(*(void**)((char*)self + 0x6EC), *(void**)((char*)self + 0x704), 6, func_0025F1B0(D_004A3028));
+    func_0039DA20(*(void**)((char*)self + 0x6EC), *(void**)((char*)self + 0x704), 6, func_0025F1B0(LobbyMan_mLobbyMan));
     if (sel == 0) {
         if (idx >= 0) {
             if (idx < 6) {
@@ -12638,8 +12530,6 @@ extern "C" void func_002636F0(void* p, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 struct sFEObj_001B6288;
 extern "C" sFEObj_001B6288* func_001B6288(sFEObj_001B6288* self, int a1, int a2);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_00464080[];
 
 class cFEVObj_001B55B0 {
@@ -12658,16 +12548,16 @@ public:
 
 static inline void* GetSession_001B55B0()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001B55B0(void* self, void* a1, unsigned int kind)
@@ -12679,7 +12569,7 @@ extern "C" void func_001B55B0(void* self, void* a1, unsigned int kind)
         *(int*)((char*)self + 0x6D8) = 1;
         o->v08(0);
         func_00261408(GetSession_001B55B0());
-        func_0025B800(D_004A3028);
+        func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
         func_001A97B8(self, a1, kind);
         break;
@@ -12711,8 +12601,6 @@ extern "C" void func_00261408(void* self);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 class cFEVObj_001B5740 {
 public:
@@ -12730,23 +12618,23 @@ public:
 
 static inline void* GetSession_001B5740()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001B5740(void* self, void* a1, int a2)
 {
     if (a2 == 0xF || a2 == 0x14) {
         func_00261408(GetSession_001B5740());
-        func_0025B800(D_004A3028);
+        func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
         (*(cFEVObj_001B5740**)((char*)self + 0x6EC))->v08(0);
         func_001A97B8(self, a1, a2);
@@ -12773,23 +12661,21 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00261408(void* self);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern char D_00464098[];
 extern char D_00462D10[];
 
 static inline void* GetSession_001B5830()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 class cFEVObj_001B5830 {
@@ -12819,7 +12705,7 @@ extern "C" void func_001B5830(void* self, void* a1, unsigned int kind)
         break;
     case 20:
         func_00261408(GetSession_001B5830());
-        func_0025B800(D_004A3028);
+        func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
         *(int*)((char*)self + 0x6D8) = 1;
         (*(cFEVObj_001B5830**)((char*)self + 0x6EC))->v08(0);
@@ -12863,8 +12749,6 @@ extern "C" void func_0025B800(void* self);
 extern "C" void func_00261408(void* self);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern const char D_00461CD8[];
 
 struct sVE1B5A58 {
@@ -12887,17 +12771,17 @@ extern "C" void func_001B5A58(void* self, void* a1, int a2)
         break;
     case 0x10: case 0x14: {
         func_001A97B8_v(self, a1, a2);
-        if (D_004A3328 == 0) {
+        if (BuddyMan_mBuddyMan == 0) {
             func_00260F80();
         }
-        if (func_00261460(D_004A3328) == 0) {
-            func_002613C8(D_004A3328);
+        if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+            func_002613C8(BuddyMan_mBuddyMan);
         }
-        if (D_004A3328 == 0) {
-            func_0025B800(D_004A3028);
+        if (BuddyMan_mBuddyMan == 0) {
+            func_0025B800(LobbyMan_mLobbyMan);
         }
-        func_00261408(D_004A3328);
-        func_0025B800(D_004A3028);
+        func_00261408(BuddyMan_mBuddyMan);
+        func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
         char* obj = *(char**)((char*)self + 0x6EC);
         sVE1B5A58* vt = *(sVE1B5A58**)(obj + 8);
@@ -15218,14 +15102,13 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void func_001A8768(void* self);
 extern char D_00464740[];
-extern void* D_004A3028;
 
 extern "C" void func_001B8960(void* self)
 {
     if (*(int*)((char*)self + 0x6EC) != 0) {
-        *(char**)((char*)self + 0x6D0) = (char*)D_004A3028 + 0x260;
+        *(char**)((char*)self + 0x6D0) = (char*)LobbyMan_mLobbyMan + 0x260;
     } else {
-        *(char**)((char*)self + 0x6D0) = (char*)D_004A3028 + 0x2B0;
+        *(char**)((char*)self + 0x6D0) = (char*)LobbyMan_mLobbyMan + 0x2B0;
     }
     void* engine = *(void**)((char*)self + 0x10);
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00464740), 0);
@@ -16263,7 +16146,6 @@ extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void* func_001AD130(void* self, int a1);
 extern "C" void func_001BA358(void* self);
 extern "C" void func_0025BF18(void* self, void* a1);
-extern void* D_004A3028;
 extern const char D_00462D68[];
 extern char D_004649D8[];
 
@@ -16281,7 +16163,7 @@ extern "C" void func_001BA280(void* self)
         *(int*)((char*)pp + 0x150) = 0x81D;
         *(int*)((char*)pp + 0x164) = 0;
         func_001A9BC0(self, pp);
-        func_0025BF18(D_004A3028, *(void**)((char*)self + 0x6D0));
+        func_0025BF18(LobbyMan_mLobbyMan, *(void**)((char*)self + 0x6D0));
     }
 }
 #endif
@@ -16335,7 +16217,6 @@ extern "C" void func_001BB340(void* self);
 extern "C" void func_001BB3B0(void* self);
 extern "C" void func_001BB440(void* self);
 extern "C" void func_001BB4B0(void* self);
-extern void* D_004A3028;
 extern char D_004649F8[];
 
 struct sFEObj_001BA428 {
@@ -16353,7 +16234,7 @@ struct sFEObj_001BA428 {
 extern "C" void func_001BA428(sFEObj_001BA428* self)
 {
     self->f6D4 = 0;
-    self->f6D0 = (char*)D_004A3028 + 0x260;
+    self->f6D0 = (char*)LobbyMan_mLobbyMan + 0x260;
     void* engine = self->engine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_004649F8), 0);
     self->screen = screen;
@@ -16548,7 +16429,6 @@ extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void func_0025B6D8(void* self, int a1);
 extern "C" void func_0025B9C8(void* self, void* a1);
 extern char D_00464A38[];
-extern void* D_004A3028;
 
 extern "C" void func_001BA9F8(void* self, int a1)
 {
@@ -16560,9 +16440,9 @@ extern "C" void func_001BA9F8(void* self, int a1)
     *(int*)((char*)p + 0x150) = 0x820;
     func_001A9BC0(self, p);
     if (a1 != 0) {
-        func_0025B6D8(D_004A3028, 0);
+        func_0025B6D8(LobbyMan_mLobbyMan, 0);
     } else {
-        func_0025B9C8(D_004A3028, (char*)D_004A3028 + 0x260);
+        func_0025B9C8(LobbyMan_mLobbyMan, (char*)LobbyMan_mLobbyMan + 0x260);
     }
 }
 #endif
@@ -16617,7 +16497,6 @@ extern "C" void func_0025B9C8(void* self, void* a1);
 extern "C" void func_00260F10(void* self);
 extern "C" void func_001BAC90(void* self, void* msg);
 extern "C" int func_001A8E40_3i(void* self, int a1, int a2) __asm__("func_001A8E40");
-extern void* D_004A3028;
 extern const char D_00462D68[];
 extern char D_00464AD0[];
 extern char D_0045DCC8[];
@@ -16627,7 +16506,7 @@ extern "C" int func_001BAB28(void* self, int id, int a2)
 {
     switch (id) {
     case 0xC9:
-        func_0025B9C8(D_004A3028, (char*)D_004A3028 + 0x260);
+        func_0025B9C8(LobbyMan_mLobbyMan, (char*)LobbyMan_mLobbyMan + 0x260);
         break;
     case 0xCB: {
         void* p = func_001A9C50(self);
@@ -16643,7 +16522,7 @@ extern "C" int func_001BAB28(void* self, int id, int a2)
         break;
     }
     case 0xD4:
-        func_00260F10(D_004A3028);
+        func_00260F10(LobbyMan_mLobbyMan);
         func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), *(int*)((char*)self + 0x10)));
         break;
     case 0x102:
@@ -16719,21 +16598,19 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001BADE8()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001BADE8(void* self, void* a1, int a2)
@@ -16741,7 +16618,7 @@ extern "C" void func_001BADE8(void* self, void* a1, int a2)
     if (a2 == 0xF || a2 == 0x14) {
         func_001A97B8_v(self, a1, a2);
         func_00261408(GetSession_001BADE8());
-        func_0025B800(D_004A3028);
+        func_0025B800(LobbyMan_mLobbyMan);
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
         cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
@@ -16763,7 +16640,6 @@ extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void func_0025C610(void* net);
-extern void* D_004A3028;
 extern char D_00462D80[];
 extern char D_0045DCC8[];
 extern char D_0045FCD8[];
@@ -16804,9 +16680,9 @@ extern "C" void func_001BAED8(void* self, void* a1, int a2)
             func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
             *(int*)((char*)p + 0x150) = 0x80E;
             func_001A9BC0(self, p);
-            cBXString_cBXString4((char*)D_004A3028 + 0x48, **(char***)((char*)self + 0x6D0));
-            cBXString_cBXString4((char*)D_004A3028 + 0x4C, (*(char***)((char*)self + 0x6D0))[1]);
-            func_0025C610(D_004A3028);
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, **(char***)((char*)self + 0x6D0));
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, (*(char***)((char*)self + 0x6D0))[1]);
+            func_0025C610(LobbyMan_mLobbyMan);
         }
         *(int*)((char*)self + 0x6D8) = 0;
         break;
@@ -16865,7 +16741,6 @@ extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, i
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025C610(void* self);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern void* D_004A3028;
 extern char D_00462D10[];
 extern char D_00462C70[];
 extern char D_00462C88[];
@@ -16892,9 +16767,9 @@ extern "C" void func_001BB158(void* self, void* a1, unsigned int kind)
         func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
         *(int*)((char*)p + 0x150) = 0x80E;
         func_001A9BC0(self, p);
-        cBXString_cBXString4((char*)D_004A3028 + 0x48, **(const char***)((char*)self + 0x6D0));
-        cBXString_cBXString4((char*)D_004A3028 + 0x4C, *(const char**)(*(char**)((char*)self + 0x6D0) + 4));
-        func_0025C610(D_004A3028);
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, **(const char***)((char*)self + 0x6D0));
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, *(const char**)(*(char**)((char*)self + 0x6D0) + 4));
+        func_0025C610(LobbyMan_mLobbyMan);
         break;
     }
     default:
@@ -17382,11 +17257,10 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 void func_001A8768(void* self);
 extern "C" void func_001BC400(void* self);
 extern char D_00464C50[];
-extern void* D_004A3028;
 
 extern "C" void func_001BBD60(void* self)
 {
-    *(char**)((char*)self + 0x6D8) = (char*)D_004A3028 + 0x260;
+    *(char**)((char*)self + 0x6D8) = (char*)LobbyMan_mLobbyMan + 0x260;
     void* engine = *(void**)((char*)self + 0x10);
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(D_00464C50), 0);
     *(void**)((char*)self + 0x40) = screen;
@@ -17468,8 +17342,6 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_00261408(void* self);
 extern "C" int func_00261460(void* self);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern void* D_004A3028;
-extern void* D_004A3328;
 extern char D_004A1408[];
 extern char D_00462D10[];
 extern const char D_00462D68[];
@@ -17483,16 +17355,16 @@ struct sStrs_001BBF18 {
 
 static inline void* GetSession_001BBF18()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 // PORT: obj is a pointer passed as int (the unit's handler signature)
@@ -17526,7 +17398,7 @@ extern "C" void func_001BBF18(void* self, int a1, unsigned int msg)
     case 6:
         if (*(int*)((char*)self + 0x6D0) != 0) {
             func_00261408(GetSession_001BBF18());
-            func_0025B800(D_004A3028);
+            func_0025B800(LobbyMan_mLobbyMan);
             void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 0, 0, 0);
             *(int*)((char*)p + 0x18) = 0x832;
             cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
@@ -17588,7 +17460,6 @@ extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void func_0025B9C8(void* self, void* a1);
 extern char D_00464A38[];
-extern void* D_004A3028;
 
 extern "C" void func_001BC290(void* self)
 {
@@ -17599,7 +17470,7 @@ extern "C" void func_001BC290(void* self)
     *(int*)((char*)p + 0x150) = 0x820;
     *(int*)((char*)p + 0x164) = 0;
     func_001A9BC0(self, p);
-    func_0025B9C8(D_004A3028, (char*)D_004A3028 + 0x260);
+    func_0025B9C8(LobbyMan_mLobbyMan, (char*)LobbyMan_mLobbyMan + 0x260);
 }
 #endif
 
@@ -17612,7 +17483,6 @@ extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025D1B8(void* self, const char* str);
-extern void* D_004A3028;
 extern char D_004615F8[];
 extern char D_00461618[];
 extern char D_00462DE0[];
@@ -17636,7 +17506,7 @@ extern "C" void func_001BC300(void* self, const char* name)
         *(int*)((char*)p + 0x150) = 0x815;
         *(int*)((char*)p + 0x164) = 0;
         func_001A9BC0(self, p);
-        func_0025D1B8(D_004A3028, name);
+        func_0025D1B8(LobbyMan_mLobbyMan, name);
     }
 }
 #endif
@@ -17706,7 +17576,6 @@ void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_00260F10(void* self);
 extern "C" void func_0039F190(void* self, int a1);
 extern "C" int func_001A8E40_3i(void* self, int a1, int a2) __asm__("func_001A8E40");
-extern void* D_004A3028;
 extern const char D_00462D68[];
 extern char D_00464AD0[];
 extern char D_0045DCC8[];
@@ -17730,7 +17599,7 @@ extern "C" int func_001BC4F0(void* self, int id, int a2)
         break;
     }
     case 0xD4:
-        func_00260F10(D_004A3028);
+        func_00260F10(LobbyMan_mLobbyMan);
     case 0xD6:
         func_001A8A40(self, func_001AD130(cMemMan_alloc(0x6D8, D_00462D68, 0, 0), *(int*)((char*)self + 0x10)));
         break;
@@ -17797,21 +17666,19 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001BC728()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001BC728(void* self, void* a1, int a2)
@@ -17819,7 +17686,7 @@ extern "C" void func_001BC728(void* self, void* a1, int a2)
     if (a2 == 0xF || a2 == 0x14) {
         func_001A97B8_v(self, a1, a2);
         func_00261408(GetSession_001BC728());
-        func_0025B800(D_004A3028);
+        func_0025B800(LobbyMan_mLobbyMan);
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
         cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
@@ -17841,7 +17708,6 @@ extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, i
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025C610(void* self);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern void* D_004A3028;
 extern char D_00462D10[];
 extern char D_00462C70[];
 extern char D_00462C88[];
@@ -17868,9 +17734,9 @@ extern "C" void func_001BC818(void* self, void* a1, int kind)
         func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
         *(int*)((char*)p + 0x150) = 0x80E;
         func_001A9BC0(self, p);
-        cBXString_cBXString4((char*)D_004A3028 + 0x48, **(const char***)((char*)self + 0x6D8));
-        cBXString_cBXString4((char*)D_004A3028 + 0x4C, *(const char**)(*(char**)((char*)self + 0x6D8) + 4));
-        func_0025C610(D_004A3028);
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, **(const char***)((char*)self + 0x6D8));
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, *(const char**)(*(char**)((char*)self + 0x6D8) + 4));
+        func_0025C610(LobbyMan_mLobbyMan);
         break;
     }
     default:
@@ -17892,7 +17758,6 @@ extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void func_0025C610(void* net);
-extern void* D_004A3028;
 extern char D_00462D80[];
 extern char D_0045DCC8[];
 extern char D_0045FCD8[];
@@ -17934,9 +17799,9 @@ extern "C" void func_001BC990(void* self, void* a1, int a2)
             func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
             *(int*)((char*)p + 0x150) = 0x80E;
             func_001A9BC0(self, p);
-            cBXString_cBXString4((char*)D_004A3028 + 0x48, **(char***)((char*)self + 0x6D8));
-            cBXString_cBXString4((char*)D_004A3028 + 0x4C, (*(char***)((char*)self + 0x6D8))[1]);
-            func_0025C610(D_004A3028);
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, **(char***)((char*)self + 0x6D8));
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, (*(char***)((char*)self + 0x6D8))[1]);
+            func_0025C610(LobbyMan_mLobbyMan);
         }
         *(int*)((char*)self + 0x6D4) = 0;
         break;
@@ -18068,21 +17933,19 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 extern "C" void func_001BCCA8()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    func_00262768(D_004A3328, 1, 2, 0, 0, 0);
+    func_00262768(BuddyMan_mBuddyMan, 1, 2, 0, 0, 0);
 }
 #endif
 
@@ -18344,10 +18207,10 @@ extern "C" void func_001BD1B8(cState_D1B8* self, char* a1, int msg)
                 self->busy = 0;
                 int id = func_0039A738_D1B8(a1);
                 self->curId = id;
-                int r = func_0025F180_D1B8(D_004A3028, id);
+                int r = func_0025F180_D1B8(LobbyMan_mLobbyMan, id);
                 sObj_D1B8* t = self->texts[i];
                 t->vt[9].fn((char*)t + t->vt[9].delta, r);
-                func_0025D770_D1B8(D_004A3028, self->curId);
+                func_0025D770_D1B8(LobbyMan_mLobbyMan, self->curId);
                 return;
             }
         }
@@ -18426,7 +18289,6 @@ extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void func_0025D800(void* self, int a1, const char* a2);
 extern "C" const char* func_0025F150(void* self, int a1);
-extern void* D_004A3028;
 extern char D_00464FA8[];
 
 struct sFEObj_001BD460 {
@@ -18447,13 +18309,13 @@ extern "C" void func_001BD460(sFEObj_001BD460* self, int a1, const char* str)
     func_001A9BC0(self, p);
     if (str == 0 || strlen(str) == 0) {
         self->f770 = 0;
-        func_0025D800(D_004A3028, a1, 0);
+        func_0025D800(LobbyMan_mLobbyMan, a1, 0);
     } else {
         self->f770 = 1;
-        func_0025D800(D_004A3028, a1, str);
+        func_0025D800(LobbyMan_mLobbyMan, a1, str);
     }
     char* s = self->fB80;
-    cBXString_cBXString4(s, func_0025F150(D_004A3028, a1));
+    cBXString_cBXString4(s, func_0025F150(LobbyMan_mLobbyMan, a1));
 }
 #endif
 
@@ -18466,7 +18328,6 @@ extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 extern "C" void func_0025D860(void* self, const char* name, const char* str);
-extern void* D_004A3028;
 extern char D_00464FA8[];
 
 struct sFEObj_001BD540 {
@@ -18487,10 +18348,10 @@ extern "C" void func_001BD540(void* self, int a1, void* a2)
     func_001A9BC0(self, p);
     if (a2 == 0 || strlen((const char*)a2) == 0) {
         ((sFEObj_001BD540*)self)->f770 = 0;
-        func_0025D860(D_004A3028, (const char*)a1, 0);
+        func_0025D860(LobbyMan_mLobbyMan, (const char*)a1, 0);
     } else {
         ((sFEObj_001BD540*)self)->f770 = 1;
-        func_0025D860(D_004A3028, (const char*)a1, (const char*)a2);
+        func_0025D860(LobbyMan_mLobbyMan, (const char*)a1, (const char*)a2);
     }
     // PORT: the unit declares a1 as int; it is the name string
     cBXString_cBXString4(((sFEObj_001BD540*)self)->fB80, (const char*)a1);
@@ -18506,7 +18367,6 @@ extern "C" void* func_001A9C50(void* self);
 extern "C" void func_001A9BC0(void* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025DAC0(void* self, int a1, const char* a2, const char* a3);
-extern void* D_004A3028;
 extern char D_00464FC0[];
 extern char D_00461618[];
 extern char D_00464FD8[];
@@ -18533,7 +18393,7 @@ extern "C" void func_001BD610(void* self, int a1, int a2, int a3)
         *(int*)((char*)p + 0x150) = 0x828;
         *(int*)((char*)p + 0x164) = 0;
         func_001A9BC0(self, p);
-        void* g = D_004A3028;
+        LobbyMan* g = LobbyMan_mLobbyMan;
         func_0025DAC0(g, a2, name, strlen(extra) != 0 ? extra : 0);
     }
 }
@@ -19028,7 +18888,6 @@ extern "C" int func_0025F180(void* self, int idx);
 extern "C" void func_00319028(void* ret, void* src, int n);
 extern "C" void func_0039A670(void* self);
 extern "C" int func_004165A8(const char* a, const char* b);
-extern void* D_004A3028;
 extern char* D_004A3E90_p __asm__("D_004A3E90");
 extern const char* D_004A1A60;
 extern const char* D_004A1A64;
@@ -19065,7 +18924,7 @@ public:
 extern "C" void func_001BE0A8(void* self)
 {
     char* s = (char*)self;
-    void* mgr = D_004A3028;
+    LobbyMan* mgr = LobbyMan_mLobbyMan;
     cFEVObj_001BE0A8** lists = (cFEVObj_001BE0A8**)(s + 0x708);
     int n = func_0025F120(mgr);
     sBXStr_001BE0A8 name;
@@ -19113,7 +18972,7 @@ extern "C" void func_001BE0A8(void* self)
             continue;
         }
         if (counts[type] == 0) {
-            int on = func_0025F180(D_004A3028, i);
+            int on = func_0025F180(LobbyMan_mLobbyMan, i);
             (*(cFEVObj_001BE0A8**)(s + (type << 2) + 0x740))->v09(on);
         }
         cUIListBox_addEntryByAsciiString(list, ext.p, i);
@@ -19144,7 +19003,6 @@ extern "C" void func_0025D770(void* self, int idx);
 void func_001BE510_2(void* self, int a1) __asm__("func_001BE510");
 extern "C" void sprintf1(void* str, int a1, char* buf);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
-extern void* D_004A3028;
 extern char D_004651C8[];
 
 class cFEVObj_001BE3A8 {
@@ -19190,7 +19048,7 @@ extern "C" void func_001BE3A8(void* p, int id)
             void* box = self->boxes[i];
             if (*((unsigned char*)box + 0x318) != 0) {
                 sel = func_0039A738(box);
-                int on = func_0025F180(D_004A3028, sel);
+                int on = func_0025F180(LobbyMan_mLobbyMan, sel);
                 self->objs[i]->v09(on);
             }
         } else {
@@ -19201,7 +19059,7 @@ extern "C" void func_001BE3A8(void* p, int id)
         self->sel = sel;
         self->f778 = 0;
         func_001BE510_2(self, sel);
-        func_0025D770(D_004A3028, sel);
+        func_0025D770(LobbyMan_mLobbyMan, sel);
     } else {
         char buf[0x50];
         char* o = (char*)SSXApp->FELocale;
@@ -19210,7 +19068,7 @@ extern "C" void func_001BE3A8(void* p, int id)
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(D_004651C8)), 0);
         cUIText_setUnicodeString(self->text, buf);
         func_001BE510_2(self, -1);
-        func_0025D770(D_004A3028, -1);
+        func_0025D770(LobbyMan_mLobbyMan, -1);
     }
 }
 #endif
@@ -19238,7 +19096,6 @@ extern "C" int func_0025F1B0(void* self);
 extern "C" const char* func_0025F1E0(void* self, int idx, int a2);
 extern "C" void sprintf1(void* str, int a1, char* buf);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
-extern void* D_004A3028;
 extern char D_004651C8[];
 
 struct sVEntry_001BE540 {
@@ -19288,7 +19145,7 @@ extern "C" void func_001BE540_2(void* self, int page)
 {
     int i;
     if (page != -1) {
-        void* mgr = D_004A3028;
+        LobbyMan* mgr = LobbyMan_mLobbyMan;
         ((sSelf1BE540*)self)->count = func_0025F1B0(mgr);
         char buf[0x50];
         sprintf1(buf, Loc1BE540(D_004651C8), (char*)((sSelf1BE540*)self)->count);
@@ -19858,7 +19715,6 @@ extern "C" void* func_001AD130(void* self, int a1);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025C610(void* self);
 extern "C" int func_001A8E40_3i(void* self, int a1, int a2) __asm__("func_001A8E40");
-extern void* D_004A3028;
 extern const char D_00462D68[];
 extern char D_00462C70[];
 extern char D_00462C88[];
@@ -19880,9 +19736,9 @@ extern "C" int func_001BF228(void* self, int id, int a2)
     }
     case 0xC9: {
         char* names = D_00536760;
-        cBXString_cBXString4((char*)D_004A3028 + 0x48, names);
-        cBXString_cBXString4((char*)D_004A3028 + 0x4C, names + 0x11);
-        func_0025C610(D_004A3028);
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, names);
+        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, names + 0x11);
+        func_0025C610(LobbyMan_mLobbyMan);
         break;
     }
     case 0xD4:
@@ -19904,28 +19760,26 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00261408(void* self);
 extern "C" int func_001A97B8(void* self, void* a1, int a2);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001BF378()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001BF378(void* self, void* a1, int a2)
 {
     if (a2 == 0xF || a2 == 0x14) {
         func_00261408(GetSession_001BF378());
-        func_0025B800(D_004A3028);
+        func_0025B800(LobbyMan_mLobbyMan);
         func_001A97B8(self, a1, a2);
     } else {
         func_001A97B8(self, a1, a2);
@@ -20025,22 +19879,20 @@ extern "C" void func_0025B800(void* self);
 extern "C" void func_00261408(void* self);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
-extern void* D_004A3328;
-extern void* D_004A3028;
 extern const char D_00460BF0[];
 
 static inline void* GetSession_001BF5A8()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001BF5A8(void* self, void* a1, int kind)
@@ -20050,7 +19902,7 @@ extern "C" void func_001BF5A8(void* self, void* a1, int kind)
         *(int*)((char*)self + 0x6B0) = 1;
         if (func_001A8A40_r(self, func_001B3F78(cMemMan_alloc(0x91C, D_00460BF0, 0, 0), *(int*)((char*)self + 0x10))) != 0) {
             func_00261408(GetSession_001BF5A8());
-            func_0025B800(D_004A3028);
+            func_0025B800(LobbyMan_mLobbyMan);
             func_002636F0(func_002591B8(), 0);
         }
         break;
@@ -20153,7 +20005,6 @@ void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_0025B6D8(void* self, int a1);
 extern "C" void sprintf2(void* dst, const char* fmt, int a, int b);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern void* D_004A3028;
 extern char D_00465348[];
 extern char D_00462ED0[];
 extern char D_00462D10[];
@@ -20187,9 +20038,9 @@ extern "C" void func_001BF758(void* self, void* a1, unsigned int kind)
     case 5:
         switch (*(int*)((char*)a1 + 0x18)) {
         case 0:
-            cBXString_cBXString4((char*)D_004A3028 + 0x48, (const char*)SSXApp->UserName);
-            cBXString_cBXString4((char*)D_004A3028 + 0x4C, (const char*)SSXApp->Password);
-            func_0025B6D8(D_004A3028, 0);
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, (const char*)SSXApp->UserName);
+            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, (const char*)SSXApp->Password);
+            func_0025B6D8(LobbyMan_mLobbyMan, 0);
             break;
         case 2:
             func_001A8A40(self, func_001B88F0(cMemMan_alloc(0x6F4, D_00462ED0, 0, 0), *(int*)((char*)self + 0x10), 1));
@@ -20299,7 +20150,6 @@ extern "C" void func_001A9930(void* self);
 extern "C" void func_00256C50();
 extern "C" void* func_0028B180();
 extern "C" void func_0028F140(void* p, int a1);
-extern void* D_004A3028;
 extern char D_004653F0[];
 
 extern "C" void func_001BFBF8(void* self)
@@ -20310,7 +20160,7 @@ extern "C" void func_001BFBF8(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    if (*(int*)D_004A3028 == 0) {
+    if (LobbyMan_mLobbyMan->mState == 0) {
         func_001A9930(self);
     }
     if (cGameComm_mGameComm != 0) {
@@ -20499,21 +20349,19 @@ extern "C" void* func_00194A60(void* mem, int a1);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
 extern const char D_00460BA8[];
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 static inline void* GetSession_001C0138()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    return D_004A3328;
+    return BuddyMan_mBuddyMan;
 }
 
 extern "C" void func_001C0138(void* self, void* a1, int a2)
@@ -20523,7 +20371,7 @@ extern "C" void func_001C0138(void* self, void* a1, int a2)
         *(int*)((char*)self + 0x6B0) = 1;
         if (func_001A8A40_r(self, func_00194A60(cMemMan_alloc(0x58, D_00460BA8, 0, 0), *(int*)((char*)self + 0x10))) != 0) {
             func_00261408(GetSession_001C0138());
-            func_0025B800(D_004A3028);
+            func_0025B800(LobbyMan_mLobbyMan);
             func_002636F0(func_002591B8(), 0);
         }
     } else {
@@ -20559,17 +20407,15 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_001B6ED0(void* mem, int a1, void* owner, int a3, int a4, int a5);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char D_00462D10[];
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 extern "C" void func_001C0240(void* self, void* a1, int a2)
 {
     if (a2 == 0xF) {
         func_001A97B8_v(self, a1, 0xF);
-        func_00261408(D_004A3328);
-        func_00261070(D_004A3328);
-        func_00261058(D_004A3328);
-        func_0025B800(D_004A3028);
+        func_00261408(BuddyMan_mBuddyMan);
+        func_00261070(BuddyMan_mBuddyMan);
+        func_00261058(BuddyMan_mBuddyMan);
+        func_0025B800(LobbyMan_mLobbyMan);
         void* p = func_001B6ED0(cMemMan_alloc(0xB10, D_00462D10, 0, 0), *(int*)((char*)self + 0x10), self, 0, 0, 0);
         *(int*)((char*)p + 0x18) = 0x832;
         cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)*(void**)((char*)self + 0x40) + 0xD0) + 0x10) + 0x18, p);
@@ -21308,7 +21154,6 @@ extern "C" void func_001C17F8(void* self, int a1);
 extern "C" void func_0025EE20(void* self, void* ids, int a2);
 extern "C" void func_0025EED8(void* self);
 extern "C" int func_0039A738(void* a);
-extern void* D_004A3028;
 // D_00534B34 is a splat label inside cBENetworkInterface_networkOpt
 extern int D_00534B34[];
 extern char D_00465938[];
@@ -21363,7 +21208,7 @@ extern "C" void func_001C1560(void* self, int a1, unsigned int msg)
                 cUIText_setUnicodeStringByID(*(cUIText**)(s + 0x6E4), GetHashValue32(D_00465938));
                 (*(cFEVObj_001C1560**)(s + 0x6F4))->v08(1);
                 func_001C13E0(self, *(int*)(s + 0x6EC) ^ 1);
-                func_0025EED8(D_004A3028);
+                func_0025EED8(LobbyMan_mLobbyMan);
             } else {
                 *(int*)(s + 0x6F0) = 0;
                 *(int*)(s + 0x6EC) = 1;
@@ -21380,7 +21225,7 @@ extern "C" void func_001C1560(void* self, int a1, unsigned int msg)
                 o->ids[2] = func_0039A738(*(void**)(s + 0x714));
                 o->ids[3] = func_0039A738(*(void**)(s + 0x718));
                 o->ids[4] = func_0039A738(*(void**)(s + 0x71C));
-                func_0025EE20(D_004A3028, ids, *(signed char*)(s + 0x14));
+                func_0025EE20(LobbyMan_mLobbyMan, ids, *(signed char*)(s + 0x14));
                 (*(cFEVObj_001C1560**)(s + 0x6E4))->v09(1);
                 cUIText_setUnicodeStringByID(*(cUIText**)(s + 0x6F4), GetHashValue32(D_00462C88));
                 *(int*)(s + 0x6E8) = 0x1E;
@@ -21393,7 +21238,7 @@ extern "C" void func_001C1560(void* self, int a1, unsigned int msg)
         if (*(int*)(s + 0x6EC) != 0) {
             cUIText_setUnicodeStringByID(*(cUIText**)(s + 0x6E4), GetHashValue32(D_00465938));
             (*(cFEVObj_001C1560**)(s + 0x6F4))->v08(1);
-            func_0025EED8(D_004A3028);
+            func_0025EED8(LobbyMan_mLobbyMan);
         } else {
             (*(cFEVObj_001C1560**)(s + 0x20))->v17(self, 0x14);
         }
@@ -21624,7 +21469,6 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_001A9930(void* self);
 extern char D_00465A38[];
-extern void* D_004A3028;
 
 extern "C" void func_001C1C90(void* self)
 {
@@ -21634,7 +21478,7 @@ extern "C" void func_001C1C90(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    if (*(int*)D_004A3028 == 0) {
+    if (LobbyMan_mLobbyMan->mState == 0) {
         func_001A9930(self);
     }
 }
@@ -22449,21 +22293,19 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 extern "C" void func_001C2E70()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    func_00262768(D_004A3328, 1, 5, 0, 0, 0);
+    func_00262768(BuddyMan_mBuddyMan, 1, 5, 0, 0, 0);
 }
 #endif
 
@@ -22671,7 +22513,7 @@ extern "C" void func_001C3310(void* self_)
     int v0;
     int v1;
     if (*(void**)(self + 0x40) != 0) {
-        int n = func_0025F338(D_004A3028);
+        int n = func_0025F338(LobbyMan_mLobbyMan);
         char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_00465D50));
         if (obj != 0) {
             if (*(unsigned char*)(obj + 0x96) != n) {
@@ -22699,7 +22541,7 @@ extern "C" void func_001C3310(void* self_)
             cUIText* t1 = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
             sprintf(name, D_00465DB0, i);
             cUIText* t2 = cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
-            char* e = func_0025F388(D_004A3028, idx, pa, pb);
+            char* e = func_0025F388(LobbyMan_mLobbyMan, idx, pa, pb);
             if (e != 0 && n > 0) {
                 if (t2 != 0) {
                     if (*(int*)(self + 0x6EC) != 0) {
@@ -22775,7 +22617,6 @@ extern "C" void func_001A9B58_3668(void* self) __asm__("func_001A9B58");
 extern "C" void func_003A0290_3668(void* w, void* pos) __asm__("func_003A0290");
 extern "C" int func_0025F338_3668(void* p) __asm__("func_0025F338");
 extern "C" void func_001C3D68_3668(void* self, int idx, int count) __asm__("func_001C3D68");
-extern void* D_004A3028;
 extern const char D_0045FF28[];
 extern char D_00465C78[];
 extern char D_00465C88[];
@@ -22900,7 +22741,7 @@ extern "C" void func_001C3668(char* self, cObj_3668* w, int msg)
                     pos.x = pos.x + -40.0f;
                     *(cPos_3668*)((char*)t + 0x44) = pos;
                     t->setVisible(1);
-                    func_001C3D68_3668(self, i + *(int*)(self + 0x6E8), func_0025F338_3668(D_004A3028));
+                    func_001C3D68_3668(self, i + *(int*)(self + 0x6E8), func_0025F338_3668(LobbyMan_mLobbyMan));
                     break;
                 }
             }
@@ -23399,13 +23240,12 @@ extern "C" void func_001C49C8(void* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001C4B78);
 #ifdef SKIP_ASM
-extern void* D_004A3028;
 extern "C" void func_0025E348(void* self, int slot);
 
 extern "C" void func_001C4B78(void* self, int slot)
 {
     *(int*)((char*)self + 0x6E8) = 0;
-    func_0025E348(D_004A3028, slot);
+    func_0025E348(LobbyMan_mLobbyMan, slot);
 }
 #endif
 
@@ -23634,7 +23474,6 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_0025E0C8(void* self, int a1);
 extern char D_004A1C30[];
-extern void* D_004A3028;
 
 extern "C" void func_001C5098(void* self)
 {
@@ -23643,7 +23482,7 @@ extern "C" void func_001C5098(void* self)
     *(void**)((char*)self + 0x40) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        func_0025E0C8(D_004A3028, 1);
+        func_0025E0C8(LobbyMan_mLobbyMan, 1);
     }
 }
 #endif
@@ -23656,21 +23495,19 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262768(void* self, int a1, int a2, int a3, int a4, int a5);
-extern void* D_004A3328;
-extern void* D_004A3028;
 
 extern "C" void func_001C5108()
 {
-    if (D_004A3328 == 0) {
+    if (BuddyMan_mBuddyMan == 0) {
         func_00260F80();
     }
-    if (func_00261460(D_004A3328) == 0) {
-        func_002613C8(D_004A3328);
+    if (func_00261460(BuddyMan_mBuddyMan) == 0) {
+        func_002613C8(BuddyMan_mBuddyMan);
     }
-    if (D_004A3328 == 0) {
-        func_0025B800(D_004A3028);
+    if (BuddyMan_mBuddyMan == 0) {
+        func_0025B800(LobbyMan_mLobbyMan);
     }
-    func_00262768(D_004A3328, 1, 4, 0, 0, 0);
+    func_00262768(BuddyMan_mBuddyMan, 1, 4, 0, 0, 0);
 }
 #endif
 

@@ -16,7 +16,7 @@ extern "C" void SSXAUDIO_Init(int a)
     if (gSSXAudio == 0) {
         gSSXAudio = (cSSXAudio*)(cSSXAudio_cSSXAudio(cMemMan_alloc(0x7780, D_004828B0, 0x80000400, 0), 1, 0x1C, 3, a));
     }
-    func_002ADBF0(*((char**)gSSXAudio->mpMusicVStreamSys) + 0x1D8);
+    func_002ADBF0(*((char**)gSSXAudio->MusicSys.mpVStreamSys) + 0x1D8);
 }
 #endif
 
@@ -33,7 +33,7 @@ public:
 extern "C" void SSXAUDIO_DeInit()
 {
     if (gSSXAudio != 0) {
-        (*((SSXAUDIO_DeInit_cObj**)gSSXAudio->mpMusicVStreamSys))->v01(3);
+        (*((SSXAUDIO_DeInit_cObj**)gSSXAudio->MusicSys.mpVStreamSys))->v01(3);
     }
     gSSXAudio = 0;
 }
@@ -426,11 +426,11 @@ extern "C" int func_002854F8(cSSXAudio* vself, int a1, const char* a2, int a3, i
 {
     cSSXAudio* self = vself;
     // PORT: a2 (a name pointer) is passed through func_002AAD78 as an int
-    int r = func_002AAD78(((sSnd54F8Mgr**)self->mpMusicVStreamSys), a1, a5, (int)a2, a3);
+    int r = func_002AAD78(((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys), a1, a5, (int)a2, a3);
     if (r < 0) {
         return r;
     }
-    sSnd54F8Mgr* m = *((sSnd54F8Mgr**)self->mpMusicVStreamSys);
+    sSnd54F8Mgr* m = *((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys);
     sSnd54F8Sub* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
@@ -454,29 +454,29 @@ extern "C" int func_002854F8(cSSXAudio* vself, int a1, const char* a2, int a3, i
     s->p7C[m->sub.cur] = 1;
     if (f <= 0.0f) {
         if (a7 != 0) {
-            func_002A9988(&(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub, 29.997713088989258f, -1.0f);
+            func_002A9988(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, 29.997713088989258f, -1.0f);
         } else {
-            func_002A9988(&(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub, 100.0f, -1.0f);
+            func_002A9988(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, 100.0f, -1.0f);
         }
     } else {
-        func_002A9988(&(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub, f, -1.0f);
+        func_002A9988(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, f, -1.0f);
     }
-    (*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.p60[(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.cur] = a6;
+    (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p60[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = a6;
     if (a4 != 0) {
-        (*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.tgt[(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.cur] = a4;
-        sSnd54F8Mgr** pp = ((sSnd54F8Mgr**)self->mpMusicVStreamSys);
+        (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.tgt[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = a4;
+        sSnd54F8Mgr** pp = ((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys);
         int v = func_00288940(self, a4);
         (*pp)->sub.p64[(*pp)->sub.cur] = v;
     }
     if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && D_00535C11[0] == 2 && a7 != 0 && func_00288AE0(self) == 0) {
-        (*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.p80[(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.cur] = 1;
-        (*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.p84[(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.cur] = a8;
+        (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p80[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = 1;
+        (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p84[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = a8;
     }
-    void* bm = cBankMonitor_BANKMONITOR_Create(&(*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub, r, 0x7F, 3);
+    void* bm = cBankMonitor_BANKMONITOR_Create(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, r, 0x7F, 3);
     if (bm != 0) {
-        func_002ABCF8(bm, func_002AB188(((sSnd54F8Mgr**)self->mpMusicVStreamSys), a1), a2, a3);
+        func_002ABCF8(bm, func_002AB188(((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys), a1), a2, a3);
     }
-    (*((sSnd54F8Mgr**)self->mpMusicVStreamSys))->sub.cur--;
+    (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur--;
     return r;
 }
 #endif
@@ -748,7 +748,7 @@ extern "C" void func_002AD3C0(void*);
 extern "C" void func_00285F48(cSSXAudio* self)
 {
     func_002A7718(self);
-    void* inner = *(void**)self->mpMusicVStreamSys;
+    void* inner = *(void**)self->MusicSys.mpVStreamSys;
     func_002AD3C0((char*)inner + 0x1D8);
 }
 #endif
@@ -766,7 +766,7 @@ extern "C" void func_002AD410(void* obj, ...);
 
 extern "C" void func_00285F80(cSSXAudio* self, func_00285F80_sPair p)
 {
-    void* inner = *(void**)self->mpMusicVStreamSys;
+    void* inner = *(void**)self->MusicSys.mpVStreamSys;
     func_002AD410((char*)inner + 0x1D8, p);
 }
 #endif
@@ -882,12 +882,12 @@ extern "C" void func_00286200(cSSXAudio* self)
         func_002B3D48((char*)self + 0x118, 1.0f);
     }
     func_00285BE0(self, 0);
-    func_002ADDA0(*(char**)self->mpMusicVStreamSys + 0x1D8);
-    char* in = *(char**)self->mpMusicVStreamSys;
+    func_002ADDA0(*(char**)self->MusicSys.mpVStreamSys + 0x1D8);
+    char* in = *(char**)self->MusicSys.mpVStreamSys;
     char* obj = in + 0x1D8;
     func_00286200_vte* vt = *(func_00286200_vte**)(in + 0xAB0);
     vt[2].fn(obj + vt[2].delta);
-    func_0028BCE8(*(void**)self->mpMusicVStreamSys, 0);
+    func_0028BCE8(*(void**)self->MusicSys.mpVStreamSys, 0);
 }
 #endif
 
@@ -1147,8 +1147,8 @@ extern "C" void func_00286A80(cSSXAudio* self)
     saDeleteObj((void**)((char*)self + 0x6C84));
     func_002980B0(self);
     func_002883B0(self, 0);
-    func_002ADDA0(*(char**)self->mpMusicVStreamSys + 0x1D8);
-    char* in = *(char**)self->mpMusicVStreamSys;
+    func_002ADDA0(*(char**)self->MusicSys.mpVStreamSys + 0x1D8);
+    char* in = *(char**)self->MusicSys.mpVStreamSys;
     char* obj = in + 0x1D8;
     func_00286200_vte* vt = *(func_00286200_vte**)(in + 0xAB0);
     vt[2].fn(obj + vt[2].delta);
@@ -1170,15 +1170,15 @@ extern "C" void func_00286C00(cSSXAudio* self)
 {
     int i;
     func_002A6F38(self);
-    func_00289DF0(*(void**)self->mpMusicVStreamSys, 1);
+    func_00289DF0(*(void**)self->MusicSys.mpVStreamSys, 1);
     for (i = 0; i < 17; i++) {
         if (i != 13) {
-            func_0028BCE8(*(void**)self->mpMusicVStreamSys, i);
+            func_0028BCE8(*(void**)self->MusicSys.mpVStreamSys, i);
         }
     }
-    func_0028BDE0(*(void**)self->mpMusicVStreamSys, 3);
-    func_0028BDE0(*(void**)self->mpMusicVStreamSys, 12);
-    func_0028A230(*(void**)self->mpMusicVStreamSys);
+    func_0028BDE0(*(void**)self->MusicSys.mpVStreamSys, 3);
+    func_0028BDE0(*(void**)self->MusicSys.mpVStreamSys, 12);
+    func_0028A230(*(void**)self->MusicSys.mpVStreamSys);
     func_0029F5E0(self);
 }
 #endif
@@ -1218,7 +1218,7 @@ extern "C" void func_00286D18(cSSXAudio* self, unsigned int handle)
     unsigned int slot = handle >> 8;
     if (*(unsigned int*)((char*)self + (slot << 2) + 0x6C78) != (handle & 0xFF)) return;
     if (slot == 0) {
-        char* mgr = *(char**)self->mpMusicVStreamSys;
+        char* mgr = *(char**)self->MusicSys.mpVStreamSys;
         char* cfg = *(char**)(mgr + 0xACC);
         char* bm = mgr + 0x1D8;
         int id = saIsOn(cfg, 0x300);
@@ -1226,7 +1226,7 @@ extern "C" void func_00286D18(cSSXAudio* self, unsigned int handle)
         func_002AD650(bm, id, 0.0f);
     } else {
         func_0029D678(self, 0.0f);
-        char* mgr = *(char**)self->mpMusicVStreamSys;
+        char* mgr = *(char**)self->MusicSys.mpVStreamSys;
         char* cfg = *(char**)(mgr + 0xACC);
         char* bm = mgr + 0x1D8;
         int id = saIsOn(cfg, 0x360);
@@ -1237,7 +1237,7 @@ extern "C" void func_00286D18(cSSXAudio* self, unsigned int handle)
     char* tbl = (char*)self + 0x6C70;
     int* p = (int*)(tbl + off);
     if (*p != 0) {
-        func_0028BE90(*(void**)self->mpMusicVStreamSys, slot + 8);
+        func_0028BE90(*(void**)self->MusicSys.mpVStreamSys, slot + 8);
         *p = 0;
         *(int*)((char*)self + (slot << 2) + 0x6C78) = -1;
     }
@@ -2793,7 +2793,7 @@ extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
 // PORT: 64-bit long sound key
 extern "C" void func_00289400(cSSXAudio* self)
 {
-    func_002ADCA0(*(char**)self->mpMusicVStreamSys + 0x1D8, 0xFA, D_004A3600->v, 0, 0, 0, 0, 0);
+    func_002ADCA0(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, 0xFA, D_004A3600->v, 0, 0, 0, 0, 0);
 }
 #endif
 //100%
@@ -2882,7 +2882,7 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
         }
     }
     func_002B4060((char*)self + 0x118);
-    *(long*)((char*)self + 0x518) = (long)self->mActiveMap;
+    *(long*)((char*)self + 0x518) = (long)self->MusicSys.mActiveMap;
     func_002A7890(parser, 2);
 }
 #endif

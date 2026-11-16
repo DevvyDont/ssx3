@@ -31,6 +31,9 @@ extern "C" void cFEStateMPCircuit_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the multiplayer-circuit state's onWidgetCreate has an empty body.
+ */
 void cFEStateMPCircuit_onWidgetCreate(void* self)
 {
 }

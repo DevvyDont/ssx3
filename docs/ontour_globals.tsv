@@ -343,3 +343,7 @@ ps2_addr	name	previous	source	evidence
 00535BC8	cBENewRaceInterface_newRace	D_00535BC8	On Tour cBENewRaceInterface::newRace (cBERaceDB)	[R] func_00144928/func_001449E8 save and restore it whole (0x4C); 424 accesses fit be/beintnewrace.h
 004A289C	GrMan	D_004A289C	On Tour global GrMan (cGraphicsMan*)	[R] cSSXApp_init stores func_00375A08's result (cGraphicsMan::construct: cMemMan_alloc(0x75E0, "PS2GraphicsMan")) and calls slot 2 on it, as On Tour's cSSXApp::init does with GrMan; cSSXApp_purge clears it
 004A5B80	cGraphicsMan_TheGraphicsMan	D_004A5B80	On Tour cGraphicsMan::TheGraphicsMan	[R] the cGraphicsMan constructor func_003691F8 stores this and the destructor func_003695D8 clears it
+004A37EC	gMusicSys	D_004A37EC	preview	preview assert "gMusicSys->GetMPFFile() != NULL"; cMusicSys ctor func_002B28C0 stores this, dtor clears
+004A3778	gMonitor	D_004A3778	ontour	On Tour static cMonitor* gMonitor (all_in_one_sound.cpp); retail cMonitor_cMonitor stores this, func_002ADAC8 clears
+004A3028	LobbyMan_mLobbyMan	D_004A3028	preview	preview assert "!mLobbyMan"; func_0025B650 stores cMemMan_alloc(0x300, "LobbyMan")
+004A3328	BuddyMan_mBuddyMan	D_004A3328	preview	preview assert "!mBuddyMan"; func_00260F80 stores new(0xF0, "BuddyMan")

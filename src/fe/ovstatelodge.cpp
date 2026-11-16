@@ -985,6 +985,11 @@ extern "C" void* cUIState_onGainFocus(void* self);
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onGainFocus__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the peak-room state focus using the base cUIState_onGainFocus().
+ *
+ * @return no meaningful value (cUIState_onGainFocus() returns nothing)
+ */
 void* cFEStatePeakRoom_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);
