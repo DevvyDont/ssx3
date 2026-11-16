@@ -33,7 +33,7 @@ extern "C" void func_00357D28(void* self, void* stream);
 extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cStreamRB* stream);
 extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream);
 extern "C" void func_00103578(void* self, void* stream);
-extern "C" void func_0026DE58(void* self, int a);
+extern "C" void func_0026DE58(cReplay* self, int a);
 extern "C" void cAI_updateOverlapList(void* self);
 extern "C" void cGameViewMan_updateAll(void* self);
 extern char gBucketMan;
@@ -144,7 +144,7 @@ struct sBucketVEntryDE58 {
 };
 
 // Calls virtual slot 3 on every object in the given bucket of the global bucket manager.
-extern "C" void func_0026DE58(void* self, int a)
+extern "C" void func_0026DE58(cReplay* self, int a)
 {
     void* node = cBucketMan_first((cBucketMan*)&gBucketMan, a);
     cBucketMan* bm = (cBucketMan*)&gBucketMan;
@@ -380,7 +380,7 @@ void* func_0026E448(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", func_0026E468);
 #ifdef SKIP_ASM
-extern "C" void* func_0026E468(void* self)
+extern "C" void* func_0026E468(cReplay* self)
 {
     void* p = func_0026E448(self);
     void* q = *(void**)((char*)p + 0x14);
@@ -394,7 +394,7 @@ extern "C" void* func_0026E468(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", func_0026E490);
 #ifdef SKIP_ASM
-extern "C" void* func_0026E490(void* self)
+extern "C" void* func_0026E490(cReplay* self)
 {
     void* p = func_0026E448(self);
     void* q = *(void**)((char*)p + 0x18);
@@ -420,7 +420,7 @@ struct sReplay0026E4B8 {
     void* streams[2];
 };
 
-extern "C" void func_0026E4B8(void* self_)
+extern "C" void func_0026E4B8(cReplay* self_)
 {
     sReplay0026E4B8* self = (sReplay0026E4B8*)self_;
     int i;
@@ -440,13 +440,13 @@ INCLUDE_ASM("replay/replay", func_0026E528);
 #ifdef SKIP_ASM
 // PORT: func_0026E468 really takes (self, index); the unit declares it with 1 arg
 void* func_0026E468_2(void* self, int idx) __asm__("func_0026E468");
-extern "C" void func_0026E4B8(void* self);
+extern "C" void func_0026E4B8(cReplay* self);
 
-extern "C" void func_0026E528(void* self)
+extern "C" void func_0026E528(cReplay* self)
 {
-    void* p = func_0026E468_2(self, *(int*)((char*)self + 0x484));
-    *(void**)((char*)self + 0x488) = p;
-    *(int*)((char*)self + 0x484) = *(int*)((char*)p + 0x30);
+    void* p = func_0026E468_2(self, self->PlaybackTick);
+    self->PlaybackFrame = (cReplayFrame*)p;
+    self->PlaybackTick = *(int*)((char*)p + 0x30);
     func_0026E4B8(self);
 }
 #endif
@@ -456,13 +456,13 @@ INCLUDE_ASM("replay/replay", func_0026E568);
 #ifdef SKIP_ASM
 // PORT: func_0026E490 really takes (self, index); the unit declares it with 1 arg
 void* func_0026E490_2(void* self, int idx) __asm__("func_0026E490");
-extern "C" void func_0026E4B8(void* self);
+extern "C" void func_0026E4B8(cReplay* self);
 
-extern "C" void func_0026E568(void* self)
+extern "C" void func_0026E568(cReplay* self)
 {
-    void* p = func_0026E490_2(self, *(int*)((char*)self + 0x484));
-    *(void**)((char*)self + 0x488) = p;
-    *(int*)((char*)self + 0x484) = *(int*)((char*)p + 0x30);
+    void* p = func_0026E490_2(self, self->PlaybackTick);
+    self->PlaybackFrame = (cReplayFrame*)p;
+    self->PlaybackTick = *(int*)((char*)p + 0x30);
     func_0026E4B8(self);
 }
 #endif

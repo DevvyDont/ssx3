@@ -440,7 +440,7 @@ void func_0026CBB0(void* self)
 INCLUDE_ASM("replay/playbackman", func_0026CBB8);
 #ifdef SKIP_ASM
 struct sPbBytes4;
-extern "C" void func_0026D7D0(void* self, void* out, sPbBytes4* src);
+extern "C" void func_0026D7D0(cReplay* self, void* out, sPbBytes4* src);
 
 struct sFrameDesc26CBB8 {
     short type;
@@ -456,7 +456,7 @@ extern "C" void func_0026CBB8(void* self)
         desc.type = one;
         desc.a = 0;
         desc.b = 0;
-        func_0026D7D0(*(void**)(*(char**)((char*)self + 0x5C) + 0x28), (char*)self + 0x14,
+        func_0026D7D0((cReplay*)(*(void**)(*(char**)((char*)self + 0x5C) + 0x28)), (char*)self + 0x14,
                       (sPbBytes4*)&desc);
         *(int*)((char*)self + 0x10) = one;
     }
@@ -1130,12 +1130,12 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* out);
 // argument; bind the 2-arg form to the symbol.
 void func_0026ED88_2(void* self, int a) __asm__("func_0026ED88__FPv");
 
-extern "C" void* func_0026D760(void* self, sPbBytes4D760* src)
+extern "C" void* func_0026D760(cReplay* self, sPbBytes4D760* src)
 {
     void* out = func_00270130(self);
     *(sPbBytes4D760*)((char*)out + 0x1C) = *src;
     cReplay_saveFrame((cReplay*)self, out);
-    *(int*)((char*)out + 0x30) = *(int*)((char*)self + 0x3C8);
+    *(int*)((char*)out + 0x30) = self->RecordTick;
     func_0026ED88_2(out, 0);
     return out;
 }
@@ -1150,11 +1150,11 @@ struct sPbBytes4 {
 
 extern "C" void cReplay_saveFrame(cReplay* self, void* out);
 
-extern "C" void func_0026D7D0(void* self, void* out, sPbBytes4* src)
+extern "C" void func_0026D7D0(cReplay* self, void* out, sPbBytes4* src)
 {
     *(sPbBytes4*)((char*)out + 0x1C) = *src;
     cReplay_saveFrame((cReplay*)self, out);
-    *(int*)((char*)out + 0x30) = *(int*)((char*)self + 0x3C8);
+    *(int*)((char*)out + 0x30) = self->RecordTick;
 }
 #endif
 
@@ -1209,8 +1209,8 @@ extern "C" void func_0030BB10(void* self, cPbStream* s);
 extern "C" void func_00229E20(void* self, cPbStream* s);
 extern "C" void func_003441A8(void* self, cPbStream* s);
 extern "C" void cMultiParticleMan_writeToReplayFrame(void* self, cPbStream* s);
-extern "C" void func_0026D988(void* self, cPbStream* s, int a);
-extern "C" void func_0026DA88(void* self, cPbStream* s);
+extern "C" void func_0026D988(cReplay* self, cPbStream* s, int a);
+extern "C" void func_0026DA88(cReplay* self, cPbStream* s);
 extern "C" void func_00103480(void* self, cPbStream* s);
 
 extern int D_004A5B78;
@@ -1293,7 +1293,7 @@ public:
 };
 
 // Writes the bucket's node count (8-byte header) and then each node's serialised form to the stream.
-extern "C" void func_0026D988(void* self, cPbStream* s, int bucket)
+extern "C" void func_0026D988(cReplay* self, cPbStream* s, int bucket)
 {
     int hdr[2];
     void* node;
@@ -1326,7 +1326,7 @@ struct sVEntryDA88 {
     void (*fn)(void* self, ...);
 };
 static inline cBucketMan* bucketMan_DA88() { return (cBucketMan*)&gBucketMan; }
-extern "C" void func_0026DA88(void* self, cPbStream* s)
+extern "C" void func_0026DA88(cReplay* self, cPbStream* s)
 {
     int hdr[2];
     void* node;
@@ -1359,7 +1359,7 @@ INCLUDE_ASM("replay/playbackman", func_0026DB88);
 void cReplayFramePtr_getFrameBlock_2(void* frame, int n) __asm__("cReplayFramePtr_getFrameBlock__Fv");
 extern "C" void cReplay_restoreFrame1_2(void* replay, void* frame) __asm__("cReplay_restoreFrame1");
 
-extern "C" void func_0026DB88(void* self, void* frame)
+extern "C" void func_0026DB88(cReplay* self, void* frame)
 {
     cReplayFramePtr_getFrameBlock_2(frame, 1);
     cReplay_restoreFrame1_2(self, frame);
