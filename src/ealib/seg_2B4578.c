@@ -7294,7 +7294,86 @@ top:
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF4C0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// NOTE: retail pads this function's object with two nops up to the next 16-byte boundary; that padding is a pad
+// segment in the yaml (seg_2B4578 split), not code, so nothing here emits it.
+typedef struct { int w[4]; } __attribute__((aligned(16))) V4_F4C0;
+
+// PORT: hand-written VU0 + MMI loop: each pass computes out_j = sum_t b[t] * a[j + 2t] (t < 4, j < 4; b rows at
+// stride 0x100, a rows at stride 0x80) in ACC (vmula/vmadda), moves the four sums to $7..$10, transposes them with
+// pextlw/pextuw/pcpyld/pcpyud (no gcc 2.95 pattern) and stores them with sq. The counter and pointer steps are
+// hand-scheduled between the sq stores; a C loop gets there only by carrying $9/$11/$12 across separate asm
+// statements behind gcc's back, so the loop stays one block. A port replaces it with a C multiply-accumulate
+// loop and a 4x4 transpose.
+void func_003BF4C0(V4_F4C0 *a, V4_F4C0 *b, V4_F4C0 *out) {
+    int i = 16; /* 16 passes, four outputs each */
+    __asm__ volatile(
+        ".set noreorder\n"
+        "1:\n"
+        "lqc2       $vf1, 0x0(%2)\n"
+        "lqc2       $vf2, 0x100(%2)\n"
+        "lqc2       $vf3, 0x200(%2)\n"
+        "lqc2       $vf4, 0x300(%2)\n"
+        "lqc2       $vf5, 0x0(%1)\n"
+        "lqc2       $vf6, 0x80(%1)\n"
+        "lqc2       $vf7, 0x100(%1)\n"
+        "lqc2       $vf8, 0x180(%1)\n"
+        "lqc2       $vf9, 0x200(%1)\n"
+        "lqc2       $vf10, 0x280(%1)\n"
+        "lqc2       $vf11, 0x300(%1)\n"
+        "lqc2       $vf12, 0x380(%1)\n"
+        "lqc2       $vf13, 0x400(%1)\n"
+        "lqc2       $vf14, 0x480(%1)\n"
+        "vmula.xyzw ACC, $vf1, $vf5\n"
+        "vmadda.xyzw ACC, $vf2, $vf7\n"
+        "vmadda.xyzw ACC, $vf3, $vf9\n"
+        "vmadd.xyzw $vf5, $vf4, $vf11\n"
+        "vmula.xyzw ACC, $vf1, $vf6\n"
+        "vmadda.xyzw ACC, $vf2, $vf8\n"
+        "vmadda.xyzw ACC, $vf3, $vf10\n"
+        "vmadd.xyzw $vf6, $vf4, $vf12\n"
+        "vmula.xyzw ACC, $vf1, $vf7\n"
+        "vmadda.xyzw ACC, $vf2, $vf9\n"
+        "vmadda.xyzw ACC, $vf3, $vf11\n"
+        "vmadd.xyzw $vf7, $vf4, $vf13\n"
+        "vmula.xyzw ACC, $vf1, $vf8\n"
+        "vmadda.xyzw ACC, $vf2, $vf10\n"
+        "vmadda.xyzw ACC, $vf3, $vf12\n"
+        "vmadd.xyzw $vf8, $vf4, $vf14\n"
+        "qmfc2.ni   $7, $vf5\n"
+        "qmfc2.ni   $8, $vf6\n"
+        "qmfc2.ni   $9, $vf7\n"
+        "qmfc2.ni   $10, $vf8\n"
+        "pextlw     $11, $8, $7\n"
+        "pextuw     $8, $8, $7\n"
+        "pextlw     $12, $10, $9\n"
+        "pextuw     $10, $10, $9\n"
+        "pcpyld     $7, $12, $11\n"
+        "pcpyud     $9, $11, $12\n"
+        "pcpyld     $11, $10, $8\n"
+        "pcpyud     $12, $8, $10\n"
+        "sq         $7, 0x0(%3)\n"
+        "addiu      %0, %0, -0x1\n"
+        "sq         $9, 0x10(%3)\n"
+        "addiu      %1, %1, 0x10\n"
+        "sq         $11, 0x20(%3)\n"
+        "addiu      %2, %2, 0x10\n"
+        "sq         $12, 0x30(%3)\n"
+        "bnez       %0, 1b\n"
+        "addiu      %3, %3, 0x40\n"
+        ".set reorder\n"
+        : "+r"(i), "+r"(a), "+r"(b), "+r"(out)
+        :
+        : "$7", "$8", "$9", "$10", "$11", "$12", "memory");
+}
+
+// Original file boundary: the next object file's .text starts 16-byte aligned, which leaves two nops after this
+// function in retail. The directive restores them when this body replaces the asm (no-op where the asm is used).
+__asm__(".align 4");
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF5A0);
@@ -7385,7 +7464,114 @@ void func_003BF5A0(V4_F5A0 *a, V4_F5A0 *b, V4_F5A0 *out) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF6B0);
+#ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+// NOTE: retail pads this function's object with two nops up to the next 16-byte boundary; that padding is a pad
+// segment in the yaml (seg_2B4578 split), not code, so nothing here emits it.
+typedef struct { int w[4]; } __attribute__((aligned(16))) V4_F6B0;
+
+// PORT: hand-written VU0 + MMI loop: each pass computes out_j = sum_t b[t] * a[j + 2t] (t < 8, j < 4; b rows at
+// stride 0x100, a rows at stride 0x80) in ACC (vmula/vmadda), moves the four sums to $7..$10, transposes them with
+// pextlw/pextuw/pcpyld/pcpyud (no gcc 2.95 pattern) and stores them with sq. The counter and pointer steps are
+// hand-scheduled between the sq stores; a C loop gets there only by carrying $9/$11/$12 across separate asm
+// statements behind gcc's back, so the loop stays one block. A port replaces it with a C multiply-accumulate
+// loop and a 4x4 transpose.
+void func_003BF6B0(V4_F6B0 *a, V4_F6B0 *b, V4_F6B0 *out) {
+    int i = 16; /* 16 passes, four outputs each */
+    __asm__ volatile(
+        ".set noreorder\n"
+        "1:\n"
+        "lqc2       $vf1, 0x0(%2)\n"
+        "lqc2       $vf2, 0x100(%2)\n"
+        "lqc2       $vf3, 0x200(%2)\n"
+        "lqc2       $vf4, 0x300(%2)\n"
+        "lqc2       $vf5, 0x400(%2)\n"
+        "lqc2       $vf6, 0x500(%2)\n"
+        "lqc2       $vf7, 0x600(%2)\n"
+        "lqc2       $vf8, 0x700(%2)\n"
+        "lqc2       $vf9, 0x0(%1)\n"
+        "lqc2       $vf10, 0x80(%1)\n"
+        "lqc2       $vf11, 0x100(%1)\n"
+        "lqc2       $vf12, 0x180(%1)\n"
+        "lqc2       $vf13, 0x200(%1)\n"
+        "lqc2       $vf14, 0x280(%1)\n"
+        "lqc2       $vf15, 0x300(%1)\n"
+        "lqc2       $vf16, 0x380(%1)\n"
+        "lqc2       $vf17, 0x400(%1)\n"
+        "lqc2       $vf18, 0x480(%1)\n"
+        "lqc2       $vf19, 0x500(%1)\n"
+        "lqc2       $vf20, 0x580(%1)\n"
+        "lqc2       $vf21, 0x600(%1)\n"
+        "lqc2       $vf22, 0x680(%1)\n"
+        "lqc2       $vf23, 0x700(%1)\n"
+        "lqc2       $vf24, 0x780(%1)\n"
+        "lqc2       $vf25, 0x800(%1)\n"
+        "lqc2       $vf26, 0x880(%1)\n"
+        "vmula.xyzw ACC, $vf1, $vf9\n"
+        "vmadda.xyzw ACC, $vf2, $vf11\n"
+        "vmadda.xyzw ACC, $vf3, $vf13\n"
+        "vmadda.xyzw ACC, $vf4, $vf15\n"
+        "vmadda.xyzw ACC, $vf5, $vf17\n"
+        "vmadda.xyzw ACC, $vf6, $vf19\n"
+        "vmadda.xyzw ACC, $vf7, $vf21\n"
+        "vmadd.xyzw $vf9, $vf8, $vf23\n"
+        "vmula.xyzw ACC, $vf1, $vf10\n"
+        "vmadda.xyzw ACC, $vf2, $vf12\n"
+        "vmadda.xyzw ACC, $vf3, $vf14\n"
+        "vmadda.xyzw ACC, $vf4, $vf16\n"
+        "vmadda.xyzw ACC, $vf5, $vf18\n"
+        "vmadda.xyzw ACC, $vf6, $vf20\n"
+        "vmadda.xyzw ACC, $vf7, $vf22\n"
+        "vmadd.xyzw $vf10, $vf8, $vf24\n"
+        "vmula.xyzw ACC, $vf1, $vf11\n"
+        "vmadda.xyzw ACC, $vf2, $vf13\n"
+        "vmadda.xyzw ACC, $vf3, $vf15\n"
+        "vmadda.xyzw ACC, $vf4, $vf17\n"
+        "vmadda.xyzw ACC, $vf5, $vf19\n"
+        "vmadda.xyzw ACC, $vf6, $vf21\n"
+        "vmadda.xyzw ACC, $vf7, $vf23\n"
+        "vmadd.xyzw $vf11, $vf8, $vf25\n"
+        "vmula.xyzw ACC, $vf1, $vf12\n"
+        "vmadda.xyzw ACC, $vf2, $vf14\n"
+        "vmadda.xyzw ACC, $vf3, $vf16\n"
+        "vmadda.xyzw ACC, $vf4, $vf18\n"
+        "vmadda.xyzw ACC, $vf5, $vf20\n"
+        "vmadda.xyzw ACC, $vf6, $vf22\n"
+        "vmadda.xyzw ACC, $vf7, $vf24\n"
+        "vmadd.xyzw $vf12, $vf8, $vf26\n"
+        "qmfc2.ni   $7, $vf9\n"
+        "qmfc2.ni   $8, $vf10\n"
+        "qmfc2.ni   $9, $vf11\n"
+        "qmfc2.ni   $10, $vf12\n"
+        "pextlw     $11, $8, $7\n"
+        "pextuw     $8, $8, $7\n"
+        "pextlw     $12, $10, $9\n"
+        "pextuw     $10, $10, $9\n"
+        "pcpyld     $7, $12, $11\n"
+        "pcpyud     $9, $11, $12\n"
+        "pcpyld     $11, $10, $8\n"
+        "pcpyud     $12, $8, $10\n"
+        "sq         $7, 0x0(%3)\n"
+        "addiu      %0, %0, -0x1\n"
+        "sq         $9, 0x10(%3)\n"
+        "addiu      %1, %1, 0x10\n"
+        "sq         $11, 0x20(%3)\n"
+        "addiu      %2, %2, 0x10\n"
+        "sq         $12, 0x30(%3)\n"
+        "bnez       %0, 1b\n"
+        "addiu      %3, %3, 0x40\n"
+        ".set reorder\n"
+        : "+r"(i), "+r"(a), "+r"(b), "+r"(out)
+        :
+        : "$7", "$8", "$9", "$10", "$11", "$12", "memory");
+}
+
+// Original file boundary: the next object file's .text starts 16-byte aligned, which leaves two nops after this
+// function in retail. The directive restores them when this body replaces the asm (no-op where the asm is used).
+__asm__(".align 4");
+#endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003BF800);
