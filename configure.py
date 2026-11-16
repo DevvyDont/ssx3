@@ -310,6 +310,47 @@ def fix_short_loop_branches():
     print(f"short-loop fix: {len(done)} loop branches written as raw words")
 
 
+def fix_text_word_relocs():
+    """Write each pointer word listed in config/text_word_relocs.txt as `.word SYMBOL`.
+
+    spimdisasm disassembles a text function as instructions, so a table of addresses inside one (func_003FD810) comes
+    out as raw words or junk instructions without relocations, and C that spells the table with symbols can't score
+    against it. Each row gives the vram, the symbol and the expected word; a row whose word doesn't match the split
+    .s is reported and left alone. The full-ELF checksum then checks that every symbol resolves to the same address.
+    """
+    import re
+
+    path = Path("config/text_word_relocs.txt")
+    if not path.exists():
+        return
+    rows = {int(v, 16): (s, int(w, 16)) for v, s, w in
+            re.findall(r"^\s*0x([0-9A-Fa-f]+)\s+(\w+)\s+0x([0-9A-Fa-f]+)", path.read_text(), re.M)}
+    line = re.compile(r"^(\s*/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/)\s+(\S+).*$", re.M)
+    done, mismatch = set(), set()
+    for f in Path("asm/nonmatchings").rglob("*.s"):
+        text = f.read_text()
+        if not any(f"{a:08X}" in text for a in rows):
+            continue
+
+        def sub(m):
+            vram = int(m.group(2), 16)
+            if vram not in rows:
+                return m.group(0)
+            sym, want = rows[vram]
+            if int.from_bytes(bytes.fromhex(m.group(3)), "little") != want:
+                mismatch.add(vram)
+                return m.group(0)
+            done.add(vram)
+            return f"{m.group(1)}  .word {sym} /* pointer, see config/text_word_relocs.txt */"
+
+        f.write_text(line.sub(sub, text))
+    bad = (set(rows) - done)
+    if bad:
+        print("text word relocs: not applied: " + ", ".join(f"0x{a:08X}" for a in sorted(bad))
+              + (" (word mismatch)" if mismatch else ""))
+    print(f"text word relocs: {len(done)} pointer words written with symbols")
+
+
 def build_stuff(linker_entries: List[LinkerEntry], skip_checksum=False, objects_only=False, dual_objects=False):
     """
     Build the objects and the final ELF file.
@@ -720,6 +761,7 @@ def main():
 
     split.main([YAML_FILE], modes="all", verbose=False)
     fix_short_loop_branches()
+    fix_text_word_relocs()
 
     linker_entries = split.linker_writer.entries
 
