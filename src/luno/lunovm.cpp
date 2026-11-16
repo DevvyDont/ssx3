@@ -1193,8 +1193,8 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
     if (key->type == 0) {
         return;
     }
-    cLunoTable* t = self->table;
-    cLunoNode_set* n = (cLunoNode_set*)t->nodes + (unsigned int)key->word0 % (unsigned int)t->modulus;
+    cLunoTable* lunoTable = self->table;
+    cLunoNode_set* n = (cLunoNode_set*)lunoTable->nodes + (unsigned int)key->word0 % (unsigned int)lunoTable->modulus;
     if (n->value.type == 0) {
         LUNO_ASSIGN_SET(n->key, key)
         LUNO_ASSIGN_SET(n->value, val)
@@ -1338,10 +1338,10 @@ struct cLunoNode_9A8 {
 extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry00224C00** stream, int base)
 {
     if (self->table->nodes != 0) {
-        cLunoTableEntry* p = self->table->nodes + *(int*)((char*)self->table->nodes - 0x10);
-        while (self->table->nodes != p) {
-            p--;
-            p->vtable[1].func((char*)p + p->vtable[1].delta, 0);
+        cLunoTableEntry* node = self->table->nodes + *(int*)((char*)self->table->nodes - 0x10);
+        while (self->table->nodes != node) {
+            node--;
+            node->vtable[1].func((char*)node + node->vtable[1].delta, 0);
         }
         cMemMan_free((char*)self->table->nodes - 0x10);
     }

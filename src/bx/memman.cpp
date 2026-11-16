@@ -76,9 +76,9 @@ extern "C" void* cMemMan_alloc(int size, const char* name, unsigned int type, in
     align &= alignmask;
     align |= (4 << alignbits) & ~alignmask;
     MUTEX_lock(cMemMan_m_mutex);
-    void* p = func_00319A90(size, align, type, headersize);
+    void* block = func_00319A90(size, align, type, headersize);
     MUTEX_unlock(cMemMan_m_mutex);
-    return p;
+    return block;
 }
 #endif
 

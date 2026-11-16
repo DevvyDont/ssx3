@@ -59,9 +59,9 @@ extern "C" void cFEStateNetHelpPopup_onUpdate(void* self)
     int i;
     int found = 0;
     for (i = 0; i < 2; i++) {
-        int** p = *(int***)((char*)SSXApp + (i << 2) + 0xB0);
-        int ok = *p != 0 && **p != 0;
-        if (ok && cInput_getValue(p, 0x99) != 0.0f) {
+        int** input = *(int***)((char*)SSXApp + (i << 2) + 0xB0);
+        int ok = *input != 0 && **input != 0;
+        if (ok && cInput_getValue(input, 0x99) != 0.0f) {
             found = 1;
         }
     }
@@ -141,14 +141,14 @@ static inline int IsHash_1D9F38(int id, char* s) { return id == GetHashValue32(s
  */
 extern "C" void cFEStateNetHelpPopup_onWidgetCreate(sNetHelp_1D9F38* self, sWidget_1D9F38* w)
 {
-    int h = w->hash;
-    if (h == GetHashValue32(D_004679B0)) {
+    int hashName = w->hash;
+    if (hashName == GetHashValue32(D_004679B0)) {
         self->wA8 = w;
         w->flags |= 0x80;
-    } else if (h == GetHashValue32(D_004A2040)) {
+    } else if (hashName == GetHashValue32(D_004A2040)) {
         self->wAC = w;
         w->flags |= 0x80;
-    } else if (h == GetHashValue32(D_004679C0)) {
+    } else if (hashName == GetHashValue32(D_004679C0)) {
         self->wB0 = w;
         w->flags |= 0x80;
     } else if (IsHash_1D9F38(w->hash, D_004A2048)) {
@@ -173,7 +173,7 @@ extern "C" void cFEStateNetHelpPopup_onWidgetCreate(sNetHelp_1D9F38* self, sWidg
         char buf[16];
         for (int i = 0; i < 7; i++) {
             sprintf(buf, D_00467A10, i);
-            if (h == GetHashValue32(buf)) {
+            if (hashName == GetHashValue32(buf)) {
                 self->rows[i] = w;
                 break;
             }
@@ -315,9 +315,9 @@ extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int 
             if (i < self->state) {
                 show_1DA238(self->rows[i], 1);
                 show_1DA238(self->icons[self->b[i]], 1);
-                sVec3_1DA238 p = self->icons[self->b[i]]->pos;
-                p.y += (float)i * 22.0f;
-                self->icons[self->b[i]]->pos = p;
+                sVec3_1DA238 objectPos = self->icons[self->b[i]]->pos;
+                objectPos.y += (float)i * 22.0f;
+                self->icons[self->b[i]]->pos = objectPos;
                 if (self->a[i]) {
                     cUIText_setUnicodeStringByID((cUIText*)self->rows[i], self->a[i]);
                 } else {

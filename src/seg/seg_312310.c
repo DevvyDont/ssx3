@@ -42,28 +42,28 @@ extern double sub_411340(double, double) __asm__("dpsub");
  *
  * Widens the value with fptodp, takes the high word from value / 2^32, then adds or subtracts the remainder.
  *
- * @param a  the value to convert
+ * @param originalA  the value to convert
  * @return the unsigned 64-bit result; 0 for a negative value
  */
-unsigned long __fixunssfdi(double a) {
+unsigned long __fixunssfdi(double originalA) {
     unsigned long hi;
-    double v;
-    double d;
-    v = a_411340(a);
-    if (cmp_411340(v, 0.0) < 0)
+    double value;
+    double highPart;
+    value = a_411340(originalA);
+    if (cmp_411340(value, 0.0) < 0)
         return 0;
-    hi = (unsigned long)dtou_411340(mul_411340(v, 2.3283064365386963e-10)) << 32;
+    hi = (unsigned long)dtou_411340(mul_411340(value, 2.3283064365386963e-10)) << 32;
     if ((long)hi >= 0) {
-        d = ltod_411340(hi);
+        highPart = ltod_411340(hi);
     } else {
-        d = ltod_411340((hi & 1) | (hi >> 1));
-        d = add_411340(d, d);
+        highPart = ltod_411340((hi & 1) | (hi >> 1));
+        highPart = add_411340(highPart, highPart);
     }
-    v = sub_411340(v, d);
-    if (cmp_411340(v, 0.0) < 0)
-        hi -= (unsigned long)dtou_411340(sub_411340(0.0, v));
+    value = sub_411340(value, highPart);
+    if (cmp_411340(value, 0.0) < 0)
+        hi -= (unsigned long)dtou_411340(sub_411340(0.0, value));
     else
-        hi += (unsigned long)dtou_411340(v);
+        hi += (unsigned long)dtou_411340(value);
     return hi;
 }
 #endif
@@ -79,16 +79,16 @@ extern double dadd_411438(double, double) __asm__("dpadd");
  *
  * Computes high word * 65536 * 65536 plus the low word, read as unsigned.
  *
- * @param a  the value to convert
+ * @param value  the value to convert
  * @return the value as a double
  */
-double __floatdidf(long a) {
-    double hi = itod_411438((int)(a >> 32));
+double __floatdidf(long value) {
+    double hi = itod_411438((int)(value >> 32));
     double lo;
     hi = dmul_411438(hi, 65536.0);
     hi = dmul_411438(hi, 65536.0);
-    lo = itod_411438((int)(a & 0xFFFFFFFF));
-    if ((int)(a & 0xFFFFFFFF) < 0)
+    lo = itod_411438((int)(value & 0xFFFFFFFF));
+    if ((int)(value & 0xFFFFFFFF) < 0)
         lo = dadd_411438(lo, 4294967296.0);
     return dadd_411438(hi, lo);
 }
@@ -960,15 +960,15 @@ extern void func_00411B08(struct S412778 *);
  * Unpacks both operands (func_00411C38), adds the parts (func_00411CD8) and packs the result (func_00411B08);
  * the packed sum is left in the return registers although the C declaration returns void.
  *
- * @param a  first operand, as the raw 64-bit pattern of a double
- * @param b  second operand, as the raw 64-bit pattern of a double
+ * @param lhs  first operand, as the raw 64-bit pattern of a double
+ * @param rhs  second operand, as the raw 64-bit pattern of a double
  */
-void dpadd(long a, long b) {
+void dpadd(long lhs, long rhs) {
     int x[8];
     int y[8];
     int z[8];
-    func_00411C38(&a, x);
-    func_00411C38(&b, y);
+    func_00411C38(&lhs, x);
+    func_00411C38(&rhs, y);
     func_00411B08(func_00411CD8(x, y, z));
 }
 #endif
@@ -981,19 +981,19 @@ extern void func_00411C38(long *, int *);
 extern struct S412778 *func_00411CD8(int *, int *, int *);
 extern void func_00411B08(struct S412778 *);
 /**
- * Subtracts two doubles in software (fp-bit.c's GOFAST dpsub): flips the sign of @p b and adds.
+ * Subtracts two doubles in software (fp-bit.c's GOFAST dpsub): flips the sign of @p rhs and adds.
  *
  * Like dpadd(), the packed result is left in the return registers although the C declaration returns void.
  *
- * @param a  the minuend, as the raw 64-bit pattern of a double
- * @param b  the subtrahend, as the raw 64-bit pattern of a double
+ * @param lhs  the minuend, as the raw 64-bit pattern of a double
+ * @param rhs  the subtrahend, as the raw 64-bit pattern of a double
  */
-void dpsub(long a, long b) {
+void dpsub(long lhs, long rhs) {
     int x[8];
     int y[8];
     int z[8];
-    func_00411C38(&a, x);
-    func_00411C38(&b, y);
+    func_00411C38(&lhs, x);
+    func_00411C38(&rhs, y);
     y[1] ^= 1;
     func_00411B08(func_00411CD8(x, y, z));
 }
@@ -1134,15 +1134,15 @@ _fpmul_parts ( fp_number_type *  a,
 FLO_type
 multiply (FLO_type arg_a, FLO_type arg_b)
 {
-  fp_number_type a;
-  fp_number_type b;
-  fp_number_type tmp;
+  fp_number_type unpackedA;
+  fp_number_type unpackedB;
+  fp_number_type product;
   fp_number_type *res;
 
-  unpack_d ((FLO_union_type *) & arg_a, &a);
-  unpack_d ((FLO_union_type *) & arg_b, &b);
+  unpack_d ((FLO_union_type *) & arg_a, &unpackedA);
+  unpack_d ((FLO_union_type *) & arg_b, &unpackedB);
 
-  res = _fpmul_parts (&a, &b, &tmp);
+  res = _fpmul_parts (&unpackedA, &unpackedB, &product);
 
   return pack_d (res);
 }
@@ -1166,58 +1166,58 @@ extern struct S412280 D_0052ADC0;
  * @param y  divisor, as the raw 64-bit pattern of a double
  */
 void dpdiv(long x, long y) {
-    struct S412280 a;
-    struct S412280 b;
-    struct S412280 *r;
-    struct S412280 *p;
-    unsigned long n, d, q, bit;
-    unp_80(&x, &a);
-    unp_80(&y, &b);
-    p = &a;
-    if (a.cls < 2) {
-        r = &a;
-    } else if (b.cls < 2) {
-        r = &b;
+    struct S412280 numer;
+    struct S412280 denom;
+    struct S412280 *result;
+    struct S412280 *out;
+    unsigned long n, divisor, quot, bit;
+    unp_80(&x, &numer);
+    unp_80(&y, &denom);
+    out = &numer;
+    if (numer.cls < 2) {
+        result = &numer;
+    } else if (denom.cls < 2) {
+        result = &denom;
     } else {
-        a.sign ^= b.sign;
-        if ((a.cls ^ 4) == 0 || (a.cls ^ 2) == 0) {
-            r = &a;
-            if (a.cls == b.cls)
-                r = &D_0052ADC0;
-        } else if ((b.cls ^ 4) == 0) {
-            a.frac = 0;
-            a.exp = 0;
-            r = &a;
-        } else if ((b.cls ^ 2) == 0) {
-            a.cls = 4;
-            r = &a;
+        numer.sign ^= denom.sign;
+        if ((numer.cls ^ 4) == 0 || (numer.cls ^ 2) == 0) {
+            result = &numer;
+            if (numer.cls == denom.cls)
+                result = &D_0052ADC0;
+        } else if ((denom.cls ^ 4) == 0) {
+            numer.frac = 0;
+            numer.exp = 0;
+            result = &numer;
+        } else if ((denom.cls ^ 2) == 0) {
+            numer.cls = 4;
+            result = &numer;
         } else {
-            a.exp = a.exp - b.exp;
-            n = a.frac;
-            d = b.frac;
-            if (n < d) {
-                a.exp--;
+            numer.exp = numer.exp - denom.exp;
+            n = numer.frac;
+            divisor = denom.frac;
+            if (n < divisor) {
+                numer.exp--;
                 n <<= 1;
             }
-            q = 0;
+            quot = 0;
             for (bit = 0x1000000000000000UL; bit != 0; bit >>= 1) {
-                if (n >= d) {
-                    q |= bit;
-                    n -= d;
+                if (n >= divisor) {
+                    quot |= bit;
+                    n -= divisor;
                 }
                 n <<= 1;
             }
-            if ((q & 0xFF) == 0x80) {
-                if (q & 0x100)
-                    q += 0x80;
+            if ((quot & 0xFF) == 0x80) {
+                if (quot & 0x100)
+                    quot += 0x80;
                 else if (n != 0)
-                    q += 0x80;
+                    quot += 0x80;
             }
-            p->frac = q;
-            r = p;
+            out->frac = quot;
+            result = out;
         }
     }
-    pk_80(r);
+    pk_80(result);
 }
 #endif
 
@@ -1316,14 +1316,14 @@ extern void func_004123E8(int *, int *);
  * The comparison result (negative, zero or positive) is left in the return register although the C declaration
  * returns void.
  *
- * @param a  first operand, as the raw 64-bit pattern of a double
- * @param b  second operand, as the raw 64-bit pattern of a double
+ * @param lhs  first operand, as the raw 64-bit pattern of a double
+ * @param rhs  second operand, as the raw 64-bit pattern of a double
  */
-void dpcmp(long a, long b) {
+void dpcmp(long lhs, long rhs) {
     int x[8];
     int y[8];
-    func_00411C38(&a, x);
-    func_00411C38(&b, y);
+    func_00411C38(&lhs, x);
+    func_00411C38(&rhs, y);
     func_004123E8(x, y);
 }
 #endif
@@ -1343,26 +1343,26 @@ extern void pk_412550(struct S412550 *) __asm__("func_00411B08");
  * @return the value as a double
  */
 double litodp(int x) {
-    struct S412550 s;
-    s.cls = 3;
-    s.sign = (unsigned)x >> 31;
+    struct S412550 unpacked;
+    unpacked.cls = 3;
+    unpacked.sign = (unsigned)x >> 31;
     if (x == 0) {
-        s.cls = 2;
+        unpacked.cls = 2;
     } else {
-        s.exp = 60;
-        if (s.sign) {
+        unpacked.exp = 60;
+        if (unpacked.sign) {
             if (x == (-2147483647 - 1))
                 return -2147483648.0;
-            s.frac = -x;
+            unpacked.frac = -x;
         } else {
-            s.frac = x;
+            unpacked.frac = x;
         }
-        while (s.frac <= (~0UL >> 4)) {
-            s.frac <<= 1;
-            s.exp--;
+        while (unpacked.frac <= (~0UL >> 4)) {
+            unpacked.frac <<= 1;
+            unpacked.exp--;
         }
     }
-    pk_412550(&s);
+    pk_412550(&unpacked);
 }
 #endif
 
@@ -1382,23 +1382,23 @@ struct S412608 { unsigned cls; int sign; int exp; int pad; unsigned long frac; }
  * @return the truncated integer
  */
 int dptoli(long value) {
-    struct S412608 s;
-    int r;
-    func_00411C38(&value, (int *)&s);
-    if ((s.cls ^ 2) == 0)
+    struct S412608 unpacked;
+    int magnitude;
+    func_00411C38(&value, (int *)&unpacked);
+    if ((unpacked.cls ^ 2) == 0)
         return 0;
-    if (s.cls < 2)
+    if (unpacked.cls < 2)
         return 0;
-    if ((s.cls ^ 4) == 0)
+    if ((unpacked.cls ^ 4) == 0)
         goto sat;
-    if (s.exp < 0)
+    if (unpacked.exp < 0)
         return 0;
-    if (s.exp >= 31) {
+    if (unpacked.exp >= 31) {
 sat:
-        return s.sign ? 0x80000000 : 0x7FFFFFFF;
+        return unpacked.sign ? 0x80000000 : 0x7FFFFFFF;
     }
-    r = (int)(s.frac >> (60 - s.exp));
-    return s.sign ? -r : r;
+    magnitude = (int)(unpacked.frac >> (60 - unpacked.exp));
+    return unpacked.sign ? -magnitude : magnitude;
 }
 #endif
 
@@ -1418,26 +1418,26 @@ struct S4126A0 { unsigned cls; int sign; int exp; int pad; unsigned long frac; }
  * @return the truncated unsigned integer
  */
 unsigned dptoul(long value) {
-    struct S4126A0 s;
-    func_00411C38(&value, (int *)&s);
-    if ((s.cls ^ 2) == 0)
+    struct S4126A0 unpacked;
+    func_00411C38(&value, (int *)&unpacked);
+    if ((unpacked.cls ^ 2) == 0)
         return 0;
-    if (s.cls < 2)
+    if (unpacked.cls < 2)
         return 0;
-    if (s.sign != 0)
+    if (unpacked.sign != 0)
         return 0;
-    if ((s.cls ^ 4) == 0)
+    if ((unpacked.cls ^ 4) == 0)
         goto sat;
-    if (s.exp < 0)
+    if (unpacked.exp < 0)
         return 0;
-    if (s.exp >= 32) {
+    if (unpacked.exp >= 32) {
 sat:
         return 0xFFFFFFFF;
     }
-    if (s.exp >= 61)
-        return s.frac << (s.exp - 60);
+    if (unpacked.exp >= 61)
+        return unpacked.frac << (unpacked.exp - 60);
     else
-        return s.frac >> (60 - s.exp);
+        return unpacked.frac >> (60 - unpacked.exp);
 }
 #endif
 

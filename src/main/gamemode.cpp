@@ -338,20 +338,20 @@ extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int pRiderS
         int ok = n != 0 && n < 10;
         if (!ok) {
             void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
-            unsigned int v = D_00536640[idx];
-            func_00154AB8(score, idx, pRiderStats, v);
+            unsigned int riderScore = D_00536640[idx];
+            func_00154AB8(score, idx, pRiderStats, riderScore);
             if (idx == 0) {
                 int prof = cBELibrary_getProfileIndex(0);
                 int ch = cBELibrary_getCharacterID(0);
-                void* p = cBE_getInterface_Fv(cBE_getBE(), 0xD);
-                if (cBERewardInterface_isMountainConquered(p, prof, ch)) {
-                    if (func_0015A2E0(p, prof, prof, 0) == 0) {
-                        cBERewardInterface_awardUser(p, prof, ch, 0);
+                void* rewardInt = cBE_getInterface_Fv(cBE_getBE(), 0xD);
+                if (cBERewardInterface_isMountainConquered(rewardInt, prof, ch)) {
+                    if (func_0015A2E0(rewardInt, prof, prof, 0) == 0) {
+                        cBERewardInterface_awardUser(rewardInt, prof, ch, 0);
                     }
                 }
             }
             if (self->bAreResultsLocked) {
-                func_00154EE8(score, idx, D_00536730[idx], v);
+                func_00154EE8(score, idx, D_00536730[idx], riderScore);
             }
         }
     }

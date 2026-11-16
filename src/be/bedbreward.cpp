@@ -1463,9 +1463,9 @@ INCLUDE_ASM("be/bedbreward", cCameraAlgoList_cCameraAlgoList__FPv);
  */
 void* cCameraAlgoList_cCameraAlgoList(void* self)
 {
-    int t0 = 0;
-    *(int*)self = t0;
-    *(int*)((char*)self + 0x4) = t0;
+    int initValue = 0;
+    *(int*)self = initValue;
+    *(int*)((char*)self + 0x4) = initValue;
     return self;
 }
 #endif

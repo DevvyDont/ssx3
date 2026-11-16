@@ -3019,13 +3019,13 @@ extern "C" int SHAPE_bpctobpp_bits(int fmt) __asm__("SHAPE_bpctobpp");
 extern "C" int SHAPE_imagesize(int w, int height, int fmt, int maxLevel)
 {
     int total = 0;
-    int c = SHAPE_bpctobpp_bits(fmt);
+    int bppBits = SHAPE_bpctobpp_bits(fmt);
     int bpp = 0x10;
-    if (c != 0xF) bpp = c;
+    if (bppBits != 0xF) bpp = bppBits;
     if (w < 1 || w > 0x10000 || height < 1) return 0;
     if (height > 0x10000) return 0;
     if (w * height > 1000000000) return 0;
-    if (SHAPE_type(c) == 0) return 0;
+    if (SHAPE_type(bppBits) == 0) return 0;
     int i;
     for (i = 0; i <= maxLevel; i++) {
         int lw = w >> i;
@@ -3087,22 +3087,22 @@ extern "C" int SHAPE_imagesize(int w, int h, int fmt, int maxLevel);
  */
 extern "C" int SHAPE_createsize(int w, int height, int fmt, int clut, int maxLevel, int extra1, int extra2)
 {
-    int c = SHAPE_bpctobpp_bits(fmt);
+    int bppBits = SHAPE_bpctobpp_bits(fmt);
     int size = SHAPE_imagesize(w, height, fmt, maxLevel);
     size += 0x10;
-    if (c < 9 && clut != 0) {
+    if (bppBits < 9 && clut != 0) {
         if (clut == 0xF) clut = 0x10;
         if (size != 0) size = (size + 0xF) & ~0xF;
-        int n = GetNumberOfColours(c) * clut / 8 + 0x10;
+        int n = GetNumberOfColours(bppBits) * clut / 8 + 0x10;
         size = ((size + 0xF) & ~0xF) + n;
     }
     if (extra1 != 0) {
-        int t = size + 8;
-        size = t + extra1;
+        int withHeader = size + 8;
+        size = withHeader + extra1;
     }
     if (extra2 != 0) {
-        int t = size + 0x10;
-        size = t + extra2;
+        int withHeader = size + 0x10;
+        size = withHeader + extra2;
     }
     return size;
 }
@@ -3159,31 +3159,31 @@ static inline unsigned char* texData_27C8(sTexHdr_27C8* t)
  */
 extern "C" void SHAPE_createat(void* tex, int w, int h, int fmt, int clut, int levels, int extra1, int extra2)
 {
-    sTexHdr_27C8* t = (sTexHdr_27C8*)tex;
+    sTexHdr_27C8* texHeader = (sTexHdr_27C8*)tex;
     int bpp = 0x20;
     if (fmt != 0) bpp = fmt;
-    char c = SHAPE_type(bpp);
-    MEM_fill(t, 0, 0x10);
-    t->type = c;
-    t->w = w;
-    t->h = h;
-    t->levels = levels;
-    sTexHdr_27C8* hdr = t;
-    unsigned char* p = (unsigned char*)hdr + (SHAPE_imagesize(w, h, bpp, levels) + 0x10);
+    char shapeType = SHAPE_type(bpp);
+    MEM_fill(texHeader, 0, 0x10);
+    texHeader->type = shapeType;
+    texHeader->w = w;
+    texHeader->h = h;
+    texHeader->levels = levels;
+    sTexHdr_27C8* hdr = texHeader;
+    unsigned char* cursor = (unsigned char*)hdr + (SHAPE_imagesize(w, h, bpp, levels) + 0x10);
     if (bpp < 9 && clut != 0) {
         int n = GetNumberOfColours(bpp);
         unsigned char cfmt = func_003B38B8(clut);
-        int off = ((p - (unsigned char*)hdr) + 0xF) & ~0xF;
-        p = (unsigned char*)hdr + off;
+        int off = ((cursor - (unsigned char*)hdr) + 0xF) & ~0xF;
+        cursor = (unsigned char*)hdr + off;
         int cbits = 0x10;
         if (clut != 0xF) cbits = clut;
         hdr->next = off;
-        MEM_fill(p, 0, 0x10);
-        ((sTexHdr_27C8*)p)->type = cfmt;
-        ((sTexHdr_27C8*)p)->h = 1;
-        ((sTexHdr_27C8*)p)->w = n;
+        MEM_fill(cursor, 0, 0x10);
+        ((sTexHdr_27C8*)cursor)->type = cfmt;
+        ((sTexHdr_27C8*)cursor)->h = 1;
+        ((sTexHdr_27C8*)cursor)->w = n;
         if (clut >= 0x20) {
-            sRGBA_27C8* pal = (sRGBA_27C8*)texData_27C8((sTexHdr_27C8*)p);
+            sRGBA_27C8* pal = (sRGBA_27C8*)texData_27C8((sTexHdr_27C8*)cursor);
             for (int i = 0; i < n; i++) {
                 pal[i].b = i;
                 pal[i].g = i;
@@ -3191,25 +3191,25 @@ extern "C" void SHAPE_createat(void* tex, int w, int h, int fmt, int clut, int l
                 pal[i].a = 0xFF;
             }
         } else {
-            MEM_fill_u(texData_27C8((sTexHdr_27C8*)p), 0xFFFFFFFF, n * cbits / 8);
+            MEM_fill_u(texData_27C8((sTexHdr_27C8*)cursor), 0xFFFFFFFF, n * cbits / 8);
         }
-        hdr = (sTexHdr_27C8*)p;
-        p += n * cbits / 8 + 0x10;
+        hdr = (sTexHdr_27C8*)cursor;
+        cursor += n * cbits / 8 + 0x10;
     }
     if (extra1 != 0) {
-        hdr->next = p - (unsigned char*)hdr;
-        hdr = (sTexHdr_27C8*)p;
-        MEM_fill(p, 0, extra1 + 8);
-        *(int*)(p + 4) = extra1;
-        p[0] = 0x6F;
-        p += extra1 + 8;
+        hdr->next = cursor - (unsigned char*)hdr;
+        hdr = (sTexHdr_27C8*)cursor;
+        MEM_fill(cursor, 0, extra1 + 8);
+        *(int*)(cursor + 4) = extra1;
+        cursor[0] = 0x6F;
+        cursor += extra1 + 8;
     }
     if (extra2 != 0) {
-        hdr->next = p - (unsigned char*)hdr;
-        MEM_fill(p, 0, extra2 + 0x10);
-        p[0] = 0x69;
-        *(short*)(p + 6) = 0x10;
-        *(int*)(p + 0x10) = 0x455355;
+        hdr->next = cursor - (unsigned char*)hdr;
+        MEM_fill(cursor, 0, extra2 + 0x10);
+        cursor[0] = 0x69;
+        *(short*)(cursor + 6) = 0x10;
+        *(int*)(cursor + 0x10) = 0x455355;
     }
 }
 #endif
@@ -3381,28 +3381,28 @@ static inline unsigned short dxtTo1555_2E78(unsigned short c)
 extern "C" void decodeRGB(char* src, int pitch, char* dst)
 {
     ulong pal[4];
-    ulong c = *(ulong*)dst;
-    ulong c0 = ((c & 0x1F) << 3) | ((c & 0x7E0) << 5) | ((c & 0xF800) << 8);
-    ulong c1 = ((c >> 13) & 0xF8) | ((c >> 11) & 0xFC00) | ((c & 0xF8000000) >> 8);
-    pal[0] = c0 | 0x40204;
-    pal[1] = c1 | 0x40204;
-    if (c0 >= c1) {
-        int b0 = c0 & 0xFF0000;
-        int b1 = c1 & 0xFF0000;
-        int g0 = c0 & 0xFF00;
-        int g1 = c1 & 0xFF00;
-        int r0 = c0 & 0xFF;
-        int r1 = c1 & 0xFF;
-        pal[2] = ((((b0 * 5 + b1 * 3) >> 3) & 0xFF0000) | (((g0 * 5 + g1 * 3) >> 3) & 0xFF00)) | (((r0 * 5 + r1 * 3) >> 3) & 0xFF);
-        pal[3] = (((((b0 * 3 + b1 * 5) >> 3) & 0xFF0000) | (((g0 * 3 + g1 * 5) >> 3) & 0xFF00)) | (((r0 * 3 + r1 * 5) >> 3) & 0xFF)) | 0xFF000000UL;
+    ulong endpoints = *(ulong*)dst;
+    ulong color0 = ((endpoints & 0x1F) << 3) | ((endpoints & 0x7E0) << 5) | ((endpoints & 0xF800) << 8);
+    ulong color1 = ((endpoints >> 13) & 0xF8) | ((endpoints >> 11) & 0xFC00) | ((endpoints & 0xF8000000) >> 8);
+    pal[0] = color0 | 0x40204;
+    pal[1] = color1 | 0x40204;
+    if (color0 >= color1) {
+        int blue0 = color0 & 0xFF0000;
+        int blue1 = color1 & 0xFF0000;
+        int green0 = color0 & 0xFF00;
+        int g1 = color1 & 0xFF00;
+        int r0 = color0 & 0xFF;
+        int r1 = color1 & 0xFF;
+        pal[2] = ((((blue0 * 5 + blue1 * 3) >> 3) & 0xFF0000) | (((green0 * 5 + g1 * 3) >> 3) & 0xFF00)) | (((r0 * 5 + r1 * 3) >> 3) & 0xFF);
+        pal[3] = (((((blue0 * 3 + blue1 * 5) >> 3) & 0xFF0000) | (((green0 * 3 + g1 * 5) >> 3) & 0xFF00)) | (((r0 * 3 + r1 * 5) >> 3) & 0xFF)) | 0xFF000000UL;
     } else {
-        int b0 = c0 & 0xFF0000;
-        int b1 = c1 & 0xFF0000;
-        int g0 = c0 & 0xFF00;
-        int g1 = c1 & 0xFF00;
-        int r0 = c0 & 0xFF;
-        int r1 = c1 & 0xFF;
-        pal[2] = ((ulong)((r0 + r1) | ((g0 + g1) | (b0 + b1))) >> 1) | 0xFF000000UL;
+        int blue0 = color0 & 0xFF0000;
+        int blue1 = color1 & 0xFF0000;
+        int green0 = color0 & 0xFF00;
+        int g1 = color1 & 0xFF00;
+        int r0 = color0 & 0xFF;
+        int r1 = color1 & 0xFF;
+        pal[2] = ((ulong)((r0 + r1) | ((green0 + g1) | (blue0 + blue1))) >> 1) | 0xFF000000UL;
         pal[3] = 0;
     }
     pal[0] |= 0xFF000000;
@@ -3457,28 +3457,28 @@ INCLUDE_ASM("ealib/seg_2AEDC0", hasAlpha);
 extern "C" int hasAlpha(void* buf, int size, int type)
 {
     if (type == 3) {
-        unsigned long* p = (unsigned long*)buf;
+        unsigned long* pixel32 = (unsigned long*)buf;
         int n = size / 16;
         int i;
         for (i = 0; i < n; i++) {
-            unsigned long v = *p++;
-            if (v != 0xFFFFFFFF) {
+            unsigned long first = *pixel32++;
+            if (first != 0xFFFFFFFF) {
                 return 1;
             }
-            if (*p != v) {
+            if (*pixel32 != first) {
                 return 1;
             }
-            p += 3;
+            pixel32 += 3;
         }
     } else {
-        unsigned short* q = (unsigned short*)buf;
+        unsigned short* pixel16 = (unsigned short*)buf;
         int n = size / 16;
         int i;
         for (i = 0; i < n; i++) {
-            if (*q != 0xFFFF) {
+            if (*pixel16 != 0xFFFF) {
                 return 1;
             }
-            q += 16;
+            pixel16 += 16;
         }
     }
     return 0;

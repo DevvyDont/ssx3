@@ -144,20 +144,20 @@ extern "C" void cBENetworkInterface_getSyncData(cBENetworkInterface* self, int p
         out->chars[i] = D_00535B20_E2C8[i];
     }
     out->me = D_00535B20_E2C8[player];
-    signed char c = D_00535B20_E2C8[player].charID;
-    out->charID = c;
+    signed char characterId = D_00535B20_E2C8[player].charID;
+    out->charID = characterId;
     out->pair = *(sNetPair_E2C8*)D_005308D0;
     out->t0 = *(sNetTrip_E2C8*)(D_005308D0 - 0x18);
     out->t1 = *(sNetTrip_E2C8*)(D_005308D0 - 0xC);
     for (int k = 0; k < 0x20D; k++) {
-        out->blob[k] = ((sNetHW_E2C8*)(D_004A6F38 + (c * 0xF88 + player * 0x9B50)))[k];
+        out->blob[k] = ((sNetHW_E2C8*)(D_004A6F38 + (characterId * 0xF88 + player * 0x9B50)))[k];
     }
     for (int k = 0; k < 0x1A; k++) {
-        out->moves[k] = ((sNetDW_E2C8*)(D_004A7778 + (c * 0xF88 + player * 0x9B50)))[k];
+        out->moves[k] = ((sNetDW_E2C8*)(D_004A7778 + (characterId * 0xF88 + player * 0x9B50)))[k];
     }
-    out->tag = *(sNetTag_E2C8*)(D_004A7887 + (c * 0xF88 + player * 0x9B50));
+    out->tag = *(sNetTag_E2C8*)(D_004A7887 + (characterId * 0xF88 + player * 0x9B50));
     for (int k = 0; k < 0x55; k++) {
-        out->keys[k] = ((sNetKey_E2C8*)(D_004A7887 + 7 + (c * 0xF88 + player * 0x9B50)))[k];
+        out->keys[k] = ((sNetKey_E2C8*)(D_004A7887 + 7 + (characterId * 0xF88 + player * 0x9B50)))[k];
     }
 }
 #endif
@@ -209,19 +209,19 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
     }
     D_00535B20_E2C8[player] = in->me;
     ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 1))->v02();
-    signed char c = in->charID;
+    signed char characterId = in->charID;
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
         *(sNetPair_E2C8*)D_005308D0 = in->pair;
     D_005308B8_E5C8[player] = (&in->t0)[player];
-    func_00151600(&D_004A6CA8_E5C8[player][c], c, 1);
+    func_00151600(&D_004A6CA8_E5C8[player][characterId], characterId, 1);
     func_00156810(D_004A6CA8_E5C8[player]);
     for (int k = 0; k < 0x20D; k++)
-        ((sNetHW_E2C8*)((char*)D_004A6CA8_E5C8 + 0x290 + (c * 0xF88 + player * 0x9B50)))[k] = in->blob[k];
+        ((sNetHW_E2C8*)((char*)D_004A6CA8_E5C8 + 0x290 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->blob[k];
     for (int k = 0; k < 0x1A; k++)
-        ((sNetDW_E2C8*)(D_004A7778 + (c * 0xF88 + player * 0x9B50)))[k] = in->moves[k];
-    *(sNetTag_E2C8*)(D_004A7887 + (c * 0xF88 + player * 0x9B50)) = in->tag;
+        ((sNetDW_E2C8*)(D_004A7778 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->moves[k];
+    *(sNetTag_E2C8*)(D_004A7887 + (characterId * 0xF88 + player * 0x9B50)) = in->tag;
     for (int k = 0; k < 0x55; k++)
-        ((sNetKey_E2C8*)(D_004A7887 + 7 + (c * 0xF88 + player * 0x9B50)))[k] = in->keys[k];
+        ((sNetKey_E2C8*)(D_004A7887 + 7 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->keys[k];
     ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 6))->v02();
 }
 #endif
@@ -279,8 +279,8 @@ extern "C" void cBENetworkInterface_preInitBE(cBENetworkInterface* self)
     func_001567B8(D_004BA348, 0);
     if (D_00534B38[0] == 0)
     {
-        sRiderEntry_0014E9F8* e = &D_00535B3C;
-        e[0] = e[-1];
+        sRiderEntry_0014E9F8* riderEntry = &D_00535B3C;
+        riderEntry[0] = riderEntry[-1];
         cBENetworkInterface_copyProfile(self, 0, 1);
     }
     func_0014EB08_self(self);
@@ -315,10 +315,10 @@ void func_0014EB08_self(void* self) __asm__("func_0014EB08");
  */
 extern "C" void cBENetworkInterface_postInitBE(cBENetworkInterface* self)
 {
-    sBEIface0014EA90* a = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 3);
-    a->vtable[2].fn((char*)a + a->vtable[2].delta);
-    sBEIface0014EA90* b = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 0xC);
-    b->vtable[2].fn((char*)b + b->vtable[2].delta);
+    sBEIface0014EA90* statInterface = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 3);
+    statInterface->vtable[2].fn((char*)statInterface + statInterface->vtable[2].delta);
+    sBEIface0014EA90* aggressionInterface = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 0xC);
+    aggressionInterface->vtable[2].fn((char*)aggressionInterface + aggressionInterface->vtable[2].delta);
     func_0014EB08_self(self);
 }
 #endif
@@ -433,10 +433,10 @@ extern "C" void cBENetworkInterface_restoreCharProfile(cBENetworkInterface* self
     {
         cBELibrary_playerDB[i] = D_00534A88[i];
     }
-    sBEIface0014EA90* a = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    a->vtable[2].fn((char*)a + a->vtable[2].delta);
-    sBEIface0014EA90* b = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 6);
-    b->vtable[2].fn((char*)b + b->vtable[2].delta);
+    sBEIface0014EA90* playerInterface = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    playerInterface->vtable[2].fn((char*)playerInterface + playerInterface->vtable[2].delta);
+    sBEIface0014EA90* grabTable = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 6);
+    grabTable->vtable[2].fn((char*)grabTable + grabTable->vtable[2].delta);
 }
 #endif
 
@@ -524,12 +524,12 @@ extern sNetEntry88_0014EE58 D_00530990_0014EE58[] __asm__("D_00530990");
  */
 extern "C" void* cBECharacterInterface_getShortName(void* self, int rider)
 {
-    int c = cBELibrary_getCharacterID(rider);
+    int characterId = cBELibrary_getCharacterID(rider);
     int index = cBELibrary_getCheatCharacterID(rider);
     if (index >= 10 && index < 30) {
         return &D_0043FA38_0014EE58[index];
     }
-    return &D_00530990_0014EE58[c];
+    return &D_00530990_0014EE58[characterId];
 }
 #endif
 

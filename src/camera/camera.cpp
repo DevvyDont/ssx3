@@ -219,12 +219,12 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int idx, float nearPlane, flo
     self->manual->viewport = ((sApp_15DE60*)SSXApp)->viewports[0];
     cManualCameraController_setCurrentAlgorithmType(self->manual, 0x51);
     self->chase->viewport = ((sApp_15DE60*)SSXApp)->viewports[idx];
-    sRiderRef_15DE60* p = (sRiderRef_15DE60*)operator new(8, D_0045B790, 0, 0);
-    p->vt = D_0045B7A8;
-    p->rider = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (idx << 2) + 0x28);
-    cChaseCameraController_setTarget((cChaseCameraController*)self->chase, (int*)p);
+    sRiderRef_15DE60* riderRef = (sRiderRef_15DE60*)operator new(8, D_0045B790, 0, 0);
+    riderRef->vt = D_0045B7A8;
+    riderRef->rider = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (idx << 2) + 0x28);
+    cChaseCameraController_setTarget((cChaseCameraController*)self->chase, (int*)riderRef);
     cChaseCameraController_switchCamera_Volume((cChaseCameraController*)((sCam162060*)self->chase), 0x4C, 0, 1.0f);
-    func_00162310((char*)self + 0xC0, (int)p);
+    func_00162310((char*)self + 0xC0, (int)riderRef);
     func_0015E030(self);
     self->f454 = 0;
     self->f458 = 0;
@@ -578,10 +578,10 @@ extern "C" void cCamera_shakeCamera(cCamera* self, int type, float amount, float
     } else {
         scale = 1.0f;
     }
-    float v = amount * scale * D_004C53E0_E360[type].weight;
-    if (self->MaxShakeVariance < v) {
+    float variance = amount * scale * D_004C53E0_E360[type].weight;
+    if (self->MaxShakeVariance < variance) {
         self->DominantCamShakeType = type;
-        self->MaxShakeVariance = v;
+        self->MaxShakeVariance = variance;
     }
     self->DoingCamShake = 1;
 }
@@ -651,12 +651,12 @@ extern "C" void cCamera_applyCameraShake(cCamera* self)
     float spd = vf[0x11].fn(tgt + vf[0x11].delta);
     if (((D_004A2A50 & 1) ^ 1) != 0 && spd > 0.10000000149011612f) {
         sVEntry<t4Vector(void*)>* vv = *(sVEntry<t4Vector(void*)>**)tgt;
-        t4Vector v = vv[3].fn(tgt + vv[3].delta);
-        float a = Length_15E460(v) * 0.035999998450279236f;
+        t4Vector velocity = vv[3].fn(tgt + vv[3].delta);
+        float speedKmh = Length_15E460(velocity) * 0.035999998450279236f;
         float k;
-        if (60.0f <= a) {
-            if (a <= 120.0f)
-                k = (a - 60.0f) / 60.0f;
+        if (60.0f <= speedKmh) {
+            if (speedKmh <= 120.0f)
+                k = (speedKmh - 60.0f) / 60.0f;
             else
                 k = 1.0f;
         } else {
@@ -670,14 +670,14 @@ extern "C" void cCamera_applyCameraShake(cCamera* self)
             cCamera_shakeCamera_E460(((char*)self), 1, k, 0.0f);
     }
     int idx = self->DominantCamShakeType;
-    float f21 = D_004C53E0_E460[idx].base;
+    float shakeBase = D_004C53E0_E460[idx].base;
     float f22 = D_004C53E0_E460[idx].spread;
     int sel = D_004C5430[idx];
     char* p = ((char*)self) + 0xC0;
     float t = self->MaxShakeVariance;
     if (self->DoingCamShake != 0 && self->DoingCamShakeLastFrame == 0)
-        cLookAtChaseAlgorithm_setupCameraShake_E460(p, f21, f22, t);
-    cLookAtChaseAlgorithm_updateCameraShake((cLookAtChaseAlgorithm*)p, self->DoingCamShake, sel, f21, f22, t);
+        cLookAtChaseAlgorithm_setupCameraShake_E460(p, shakeBase, f22, t);
+    cLookAtChaseAlgorithm_updateCameraShake((cLookAtChaseAlgorithm*)p, self->DoingCamShake, sel, shakeBase, f22, t);
     self->DoingCamShakeLastFrame = self->DoingCamShake;
     self->DoingCamShake = 0;
     *(int*)&self->MaxShakeVariance = 0;
@@ -1061,21 +1061,21 @@ static inline float clamp_15EC98(float v, float lo, float hi)
  */
 extern "C" void cCamera_updateStreamFocus(cCamera* self)
 {
-    float r;
+    float viewDist;
     if (*(int*)((char*)SSXApp->Game->ViewMan + 0x10) == 1)
-        r = self->Far;
+        viewDist = self->Far;
     else
-        r = clamp_15EC98(self->Far, 0.0f, 15000.0f);
-    float r15 = r * 1.5f;
-    float far = clamp_15EC98(r * 0.6666666865348816f, 15000.0f, 30000.0f);
+        viewDist = clamp_15EC98(self->Far, 0.0f, 15000.0f);
+    float streamRadius = viewDist * 1.5f;
+    float far = clamp_15EC98(viewDist * 0.6666666865348816f, 15000.0f, 30000.0f);
     cWorld* sys = cWorld_m_pTheWorld;
     ((sWorld_15EC98*)(char*)sys->m_pWorldCache)->slots[self->StreamFocusID].active = 1;
-    func_003A9658((char*)sys->m_pWorldCache + 0x10, self->StreamFocusID, (sVec4_15EC98*)(((char*)self) + 0x20), r15);
+    func_003A9658((char*)sys->m_pWorldCache + 0x10, self->StreamFocusID, (sVec4_15EC98*)(((char*)self) + 0x20), streamRadius);
     self->bStreamIsReady = 0;
     sVec4_15EC98 pos;
-    float t;
-    if (cWorldView_getFocus((char*)sys->m_pWorldCache + 0x10, self->StreamFocusID, &pos, &t)) {
-        if (far <= t || r <= t)
+    float focusDist;
+    if (cWorldView_getFocus((char*)sys->m_pWorldCache + 0x10, self->StreamFocusID, &pos, &focusDist)) {
+        if (far <= focusDist || viewDist <= focusDist)
             self->bStreamIsReady = 1;
     }
 }
@@ -1530,9 +1530,9 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getRemainingAirTime);
  */
 extern "C" float cRiderCameraTarget_getRemainingAirTime(cRiderCameraTarget* self)
 {
-    void* p = self->Rider;
-    void* p2 = *(void**)((char*)p + 0x788);
-    return *(float*)((char*)p2 + 0x98) - *(float*)((char*)p2 + 0xa0);
+    void* rider = self->Rider;
+    void* airPredictor = *(void**)((char*)rider + 0x788);
+    return *(float*)((char*)airPredictor + 0x98) - *(float*)((char*)airPredictor + 0xa0);
 }
 #endif
 
@@ -1549,9 +1549,9 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getApexTime);
  */
 extern "C" float cRiderCameraTarget_getApexTime(cRiderCameraTarget* self)
 {
-    void* p = self->Rider;
-    void* p2 = *(void**)((char*)p + 0x788);
-    return *(float*)((char*)p2 + 0x9c) - *(float*)((char*)p2 + 0xa0);
+    void* rider = self->Rider;
+    void* airPredictor = *(void**)((char*)rider + 0x788);
+    return *(float*)((char*)airPredictor + 0x9c) - *(float*)((char*)airPredictor + 0xa0);
 }
 #endif
 
@@ -1601,14 +1601,14 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_isAirPredictorDone);
  */
 extern "C" int cRiderCameraTarget_isAirPredictorDone(cRiderCameraTarget* self)
 {
-    void* a = self->Rider;
-    void* b = *(void**)((char*)a + 0x788);
-    int s = *(int*)((char*)b + 0xAC);
-    int r = 0;
-    if (s == 1 || s == 3) {
-        r = 1;
+    void* rider = self->Rider;
+    void* airPredictor = *(void**)((char*)rider + 0x788);
+    int simState = *(int*)((char*)airPredictor + 0xAC);
+    int done = 0;
+    if (simState == 1 || simState == 3) {
+        done = 1;
     }
-    return r;
+    return done;
 }
 #endif
 
@@ -1703,26 +1703,26 @@ static inline float Sqrt_15F780(float x)
  */
 extern "C" float cRiderCameraTarget_getLandingAngle(cRiderCameraTarget* self)
 {
-    char* o = *(char**)((char*)self->Rider + 0x788);
-    t4Vector a = *(t4Vector*)(o + 0x20);
-    t4Vector b = *(t4Vector*)(o + 0x10);
+    char* airPredictor = *(char**)((char*)self->Rider + 0x788);
+    t4Vector landNormal = *(t4Vector*)(airPredictor + 0x20);
+    t4Vector landVelocity = *(t4Vector*)(airPredictor + 0x10);
     int ok = 0;
-    if (Dot_15F780(a, a) > 0.0f) {
-        if (Dot_15F780(b, b) > 0.0f)
+    if (Dot_15F780(landNormal, landNormal) > 0.0f) {
+        if (Dot_15F780(landVelocity, landVelocity) > 0.0f)
             ok = 1;
     }
     if (ok) {
-        t4Vector n = Scale_15F780(b, -1.0f);
-        float l = Sqrt_15F780(Dot_15F780(a, a) * Dot_15F780(n, n));
-        if (l < 0.0010000000474974513f)
+        t4Vector n = Scale_15F780(landVelocity, -1.0f);
+        float lengthProduct = Sqrt_15F780(Dot_15F780(landNormal, landNormal) * Dot_15F780(n, n));
+        if (lengthProduct < 0.0010000000474974513f)
             return 0.0f;
-        float q = Dot_15F780(a, n) / l;
-        float c;
-        if (q >= -1.0f)
-            c = q <? 1.0f;
+        float cosAngle = Dot_15F780(landNormal, n) / lengthProduct;
+        float clampedCos;
+        if (cosAngle >= -1.0f)
+            clampedCos = cosAngle <? 1.0f;
         else
-            c = -1.0f;
-        return 1.5707963705062866f - func_0031C128(c);
+            clampedCos = -1.0f;
+        return 1.5707963705062866f - func_0031C128(clampedCos);
     }
     return 0.0f;
 }
@@ -1781,9 +1781,9 @@ extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(cBasicCameraAlgorit
     self->mVtbl = cBasicCameraAlgorithm_vtbl;
     *(int*)&self->Pitch = 0;
     *(int*)&self->Heading = 0;
-    cQuad128 v = D_004FF130;
+    cQuad128 initPos = D_004FF130;
     self->AlgorithmType = 0x4F;
-    *(cQuad128*)&self->Position = v;
+    *(cQuad128*)&self->Position = initPos;
     return ((void*)self);
 }
 #endif
@@ -3200,16 +3200,16 @@ extern "C" void cSplineCamAlgorithm_update(cSplineCamAlgorithm* self)
     char* sx = ((char*)self) + 0x390;
     char* sy = ((char*)self) + 0x39C;
     char* sz = ((char*)self) + 0x3A8;
-    float t = (self->LastEvaluatedTime + 0.01666666753590107f) <? self->TotalTime;
+    float nextTime = (self->LastEvaluatedTime + 0.01666666753590107f) <? self->TotalTime;
     float speed = self->Speed * 0.01666666753590107f;
     {
         sVec4R prev = *(sVec4R*)&self->Position;
-        sVec4R cur(func_0031DEE0(sx, t), func_0031DEE0(sy, t), func_0031DEE0(sz, t), 1.0f);
-        sVec4R d = Sub_13F0(cur, prev);
-        float len = Length_13F0(d);
+        sVec4R cur(func_0031DEE0(sx, nextTime), func_0031DEE0(sy, nextTime), func_0031DEE0(sz, nextTime), 1.0f);
+        sVec4R step = Sub_13F0(cur, prev);
+        float len = Length_13F0(step);
         if (0.0f < len) {
-            float t0 = self->LastEvaluatedTime;
-            float nt = (t0 + (t - t0) / (len / speed)) <? self->TotalTime;
+            float lastTime = self->LastEvaluatedTime;
+            float nt = (lastTime + (nextTime - lastTime) / (len / speed)) <? self->TotalTime;
             self->LastEvaluatedTime = nt;
             *(sVec4R*)&self->Position = sVec4R(func_0031DEE0(sx, nt), func_0031DEE0(sy, nt), func_0031DEE0(sz, nt), 1.0f);
         }
@@ -4090,8 +4090,8 @@ extern "C" void cChaseCameraController_switchCamera_Slow(cChaseCameraController*
 {
     ((sCam162138*)self)->b2 = 1;
     if (!((sCam162138*)self)->b0 && !((sCam162138*)self)->b1) {
-        float t = func_0011FE98(*(void**)((char*)self->Target + 4)) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
-        cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), 0x42, 0, t * 0.01666666753590107f);
+        float blendTime = func_0011FE98(*(void**)((char*)self->Target + 4)) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
+        cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), 0x42, 0, blendTime * 0.01666666753590107f);
     }
 }
 #endif
@@ -7925,9 +7925,9 @@ struct sVE166F28b {
 extern "C" void* cLookAtChaseAlgorithm_snapCurrent(cLookAtChaseAlgorithm* self)
 {
     sVE166F28b* vt = (sVE166F28b*)self->mVtbl;
-    char* o = *(char**)((char*)self->Target + 0x4) + 0x6C0;
-    sVE166F28a* vt2 = *(sVE166F28a**)o;
-    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(o + vt2[7].delta));
+    char* targetMgr = *(char**)((char*)self->Target + 0x4) + 0x6C0;
+    sVE166F28a* vt2 = *(sVE166F28a**)targetMgr;
+    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(targetMgr + vt2[7].delta));
 }
 #endif
 

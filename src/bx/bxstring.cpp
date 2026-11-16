@@ -21,11 +21,11 @@ extern "C" cBXString* cBXString_cBXString4(cBXString* self, const char* str);
 // PORT: pointer held in int to get the target's negative header offsets.
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other)
 {
-    int s = (int)other->Str;
-    if (*(int*)(s - 0xC) >= 0)
+    int buffer = (int)other->Str;
+    if (*(int*)(buffer - 0xC) >= 0)
     {
-        *(int*)self = s;
-        *(int*)(s - 0xC) = *(int*)(s - 0xC) + 1;
+        *(int*)self = buffer;
+        *(int*)(buffer - 0xC) = *(int*)(buffer - 0xC) + 1;
     }
     else
     {
@@ -61,10 +61,10 @@ extern "C" void cBXString_Realloc(cBXString* self, int size)
         return;
     }
     int* hdr = (int*)operator new(size + 0xD, D_0048D850, 0x20000000, 0);
-    char* s = (char*)(hdr + 3);
+    char* buffer = (char*)(hdr + 3);
     hdr[0] = 1;
-    self->Str = s;
-    s[size] = 0;
+    self->Str = buffer;
+    buffer[size] = 0;
     hdr[1] = size;
     hdr[2] = size;
 }
@@ -86,16 +86,16 @@ void cMemMan_free(void*);
 // PORT: pointer held in int to get the target's negative header offsets.
 extern "C" void cBXString_Reset(cBXString* self)
 {
-    int s = (int)self->Str;
-    if ((char*)s != D_0048DCD4)
+    int buffer = (int)self->Str;
+    if ((char*)buffer != D_0048DCD4)
     {
-        int rc = *(int*)(s - 0xC) - 1;
-        *(int*)(s - 0xC) = rc;
+        int rc = *(int*)(buffer - 0xC) - 1;
+        *(int*)(buffer - 0xC) = rc;
         if (rc == 0)
         {
-            void* h = (void*)((int)self->Str - 0xC);
-            if (h != 0)
-                cMemMan_free(h);
+            void* header = (void*)((int)self->Str - 0xC);
+            if (header != 0)
+                cMemMan_free(header);
         }
         self->Str = D_004A3E90;
     }
@@ -145,8 +145,8 @@ extern "C" void cBXString_Realloc(cBXString* self, int size);
 // PORT: pointer held in int to get the target's negative load offsets.
 extern "C" void cBXString_Resize(cBXString* self, int size)
 {
-    int s = (int)self->Str;
-    if (*(int*)(s - 0xC) >= 2 || *(int*)(s - 4) < size)
+    int buffer = (int)self->Str;
+    if (*(int*)(buffer - 0xC) >= 2 || *(int*)(buffer - 4) < size)
     {
         cBXString_Reset(self);
         cBXString_Realloc(self, size);
@@ -533,20 +533,20 @@ struct cBXStringHdrK2 {
 // PORT: pointer held in int to get the target's negative header offsets.
 extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str)
 {
-    int s = (int)self->Str;
-    cBXStringHdrK2* h = (cBXStringHdrK2*)(s - 0xC);
-    if (*(int*)(s - 0xC) >= 2 || *(int*)(s - 4) < *(int*)(s - 8) + len)
+    int buffer = (int)self->Str;
+    cBXStringHdrK2* header = (cBXStringHdrK2*)(buffer - 0xC);
+    if (*(int*)(buffer - 0xC) >= 2 || *(int*)(buffer - 4) < *(int*)(buffer - 8) + len)
     {
-        char* tmp;
-        cBXString_cBXString1((cBXString*)&tmp, self);
+        char* copy;
+        cBXString_cBXString1((cBXString*)&copy, self);
         int old = (int)self->Str;
         cBXString_Reset(self);
         cBXString_concatCopy(self, *(int*)(old - 8), (char*)old, len, str);
-        cBXString__cBXString((cBXString*)&tmp, 2);
+        cBXString__cBXString((cBXString*)&copy, 2);
     }
     else
     {
-        func_0041605C((char*)s + h->len, str, len);
+        func_0041605C((char*)buffer + header->len, str, len);
         *(int*)((int)self->Str - 8) += len;
         (self->Str)[*(int*)((int)self->Str - 8)] = 0;
     }
@@ -620,18 +620,18 @@ extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 // PORT: pointer held in int to get the target's negative header offsets.
 extern "C" char* cBXString_getBuffer(cBXString* self, int size)
 {
-    int s = (int)self->Str;
-    if (*(int*)(s - 0xC) >= 2 || *(int*)(s - 4) < size)
+    int buffer = (int)self->Str;
+    if (*(int*)(buffer - 0xC) >= 2 || *(int*)(buffer - 4) < size)
     {
-        char* tmp;
-        cBXString_cBXString1((cBXString*)&tmp, self);
-        int len = *(int*)((int)tmp - 8);
+        char* copy;
+        cBXString_cBXString1((cBXString*)&copy, self);
+        int len = *(int*)((int)copy - 8);
         cBXString_Reset(self);
         cBXString_Realloc(self, len < size ? size : len);
-        func_0041605C(self->Str, tmp, len);
+        func_0041605C(self->Str, copy, len);
         *(int*)((int)self->Str - 8) = len;
         (self->Str)[len] = 0;
-        cBXString__cBXString((cBXString*)&tmp, 2);
+        cBXString__cBXString((cBXString*)&copy, 2);
     }
     return self->Str;
 }
@@ -700,15 +700,15 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
 // PORT: pointer held in int for the negative header offsets.
 extern "C" void cBXString_freeExtra(cBXString* self)
 {
-    int s = (int)self->Str;
-    if (*(int*)(s - 8) != *(int*)(s - 4)) {
-        cBXString tmp;
-        cBXString_cBXString1(&tmp, self);
-        int len = *(int*)(*(int*)&tmp - 8);
+    int buffer = (int)self->Str;
+    if (*(int*)(buffer - 8) != *(int*)(buffer - 4)) {
+        cBXString copy;
+        cBXString_cBXString1(&copy, self);
+        int len = *(int*)(*(int*)&copy - 8);
         cBXString_Reset(self);
         cBXString_Realloc(self, len);
-        func_0041605C(self->Str, tmp.Str, len);
-        cBXString__cBXString(&tmp, 2);
+        func_0041605C(self->Str, copy.Str, len);
+        cBXString__cBXString(&copy, 2);
     }
 }
 #endif
@@ -722,9 +722,9 @@ INCLUDE_ASM("bx/bxstring", cBXString_lockBuffer);
  */
 extern "C" char* cBXString_lockBuffer(cBXString* self)
 {
-    char* r = cBXString_getBuffer(self, 0);
+    char* str = cBXString_getBuffer(self, 0);
     *(int*)((int)self->Str - 0xC) = -1;
-    return r;
+    return str;
 }
 #endif
 //100%
@@ -834,12 +834,12 @@ static inline int to_upper(int c) { if (D_00499C81[c] & 2) return c - 0x20; retu
 extern "C" void cBXString_makeUpper(cBXString* self)
 {
     cBXString_copyBeforeWrite(self);
-    char* p = self->Str;
-    int i = *(int*)((int)p - 8);
+    char* cursor = self->Str;
+    int i = *(int*)((int)cursor - 8);
     while (--i >= 0)
     {
-        *p = to_upper(*p);
-        p++;
+        *cursor = to_upper(*cursor);
+        cursor++;
     }
 }
 #endif
@@ -857,12 +857,12 @@ static inline int to_lower(int c) { if (D_00499C81[c] & 1) return c + 0x20; retu
 extern "C" void cBXString_makeLower(cBXString* self)
 {
     cBXString_copyBeforeWrite(self);
-    char* p = self->Str;
-    int i = *(int*)((int)p - 8);
+    char* cursor = self->Str;
+    int i = *(int*)((int)cursor - 8);
     while (--i >= 0)
     {
-        *p = to_lower(*p);
-        p++;
+        *cursor = to_lower(*cursor);
+        cursor++;
     }
 }
 #endif
@@ -880,13 +880,13 @@ INCLUDE_ASM("bx/bxstring", cBXString_substitute);
 extern "C" void cBXString_substitute(cBXString* self, char from, char to)
 {
     cBXString_copyBeforeWrite(self);
-    char* p = self->Str;
-    int i = *(int*)((int)p - 8);
+    char* cursor = self->Str;
+    int i = *(int*)((int)cursor - 8);
     while (--i >= 0)
     {
-        if (*p == from)
-            *p = to;
-        p++;
+        if (*cursor == from)
+            *cursor = to;
+        cursor++;
     }
 }
 #endif
@@ -1001,10 +1001,10 @@ extern "C" cBXString* cBXString_right(cBXString* self, cBXString* other, int n)
         if (len < n)
             n = len;
     }
-    char* tmp = D_004A3E90;
-    func_003181E8(other, (cBXString*)&tmp, n, *(int*)((int)other->Str - 8) - n, 0);
-    cBXString_cBXString1(self, (cBXString*)&tmp);
-    cBXString__cBXString((cBXString*)&tmp, 2);
+    char* dest = D_004A3E90;
+    func_003181E8(other, (cBXString*)&dest, n, *(int*)((int)other->Str - 8) - n, 0);
+    cBXString_cBXString1(self, (cBXString*)&dest);
+    cBXString__cBXString((cBXString*)&dest, 2);
     return self;
 }
 #endif
@@ -1040,10 +1040,10 @@ extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, in
         if (len < n)
             n = len;
     }
-    char* tmp = D_004A3E90;
-    func_003181E8(other, (cBXString*)&tmp, n, 0, 0);
-    cBXString_cBXString1(self, (cBXString*)&tmp);
-    cBXString__cBXString((cBXString*)&tmp, 2);
+    char* dest = D_004A3E90;
+    func_003181E8(other, (cBXString*)&dest, n, 0, 0);
+    cBXString_cBXString1(self, (cBXString*)&dest);
+    cBXString__cBXString((cBXString*)&dest, 2);
     return self;
 }
 #endif

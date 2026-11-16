@@ -104,14 +104,14 @@ extern "C" void cFELoadScreen_load(void* self)
     (*(sEngine_233438**)((char*)self + 0xC))->f8 = (int)SSXApp->Fonts;
     (*(sEngine_233438**)((char*)self + 0xC))->f10 = (int)SSXApp->FELocale;
     {
-        sObj_233438* o = new (D_0047BFC0, 0x100, 0) sObj_233438;
-        o->f4 = 0;
-        o->vt = cFEInput_vtbl;
-        o->f18 = 0;
-        o->fC = 0;
-        o->f10 = 0;
-        o->f14 = 0;
-        (*(sEngine_233438**)((char*)self + 0xC))->fC = o;
+        sObj_233438* feInput = new (D_0047BFC0, 0x100, 0) sObj_233438;
+        feInput->f4 = 0;
+        feInput->vt = cFEInput_vtbl;
+        feInput->f18 = 0;
+        feInput->fC = 0;
+        feInput->f10 = 0;
+        feInput->f14 = 0;
+        (*(sEngine_233438**)((char*)self + 0xC))->fC = feInput;
     }
     char* gm = (char*)SSXApp->GameModeMan;
     cBE_getInterface_3438(cBE_getBE(), 0);
@@ -385,9 +385,9 @@ extern "C" void func_00231250(void* self, int a, int b, int refresh);
  */
 extern "C" void cGameState_gotoNextState(void* self)
 {
-    int a = *(int*)self;
-    if (a != 0) {
-        func_00231250(cGameState_mpGame, a, *(int*)((char*)self + 4), 0);
+    int nextState = *(int*)self;
+    if (nextState != 0) {
+        func_00231250(cGameState_mpGame, nextState, *(int*)((char*)self + 4), 0);
     }
 }
 #endif
@@ -1018,12 +1018,12 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
             self->pending = 1;
         } else if (skip == 0) {
             cAI_initAIRiders(MGR_43B0->obj);
-            sLoadObj_43B0* o = MGR_43B0->obj;
-            if (o->f80 == 0) {
+            sLoadObj_43B0* aiObj = MGR_43B0->obj;
+            if (aiObj->f80 == 0) {
                 if (mode == 0)
-                    cAI_initAIActors(o, 0);
+                    cAI_initAIActors(aiObj, 0);
                 else
-                    cAI_initAIActors(o, 2);
+                    cAI_initAIActors(aiObj, 2);
             }
             MGR_43B0->obj->f8C = 0;
         }
@@ -1052,9 +1052,9 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
             cSSXScriptEngine_PlayNISList(ScriptEngine, 0, self->f14 == 0, 1);
             break;
         }
-        int r1 = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0);
+        int nisState = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 0);
         int r2 = cSSXScriptEngine_GetNISListScriptCategory(ScriptEngine, 0, 0);
-        int busy = r1 && r2 != 5;
+        int busy = nisState && r2 != 5;
         if (busy)
             break;
         cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1149,9 +1149,9 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
         cReplay_startRace(*(void**)((char*)cGameState_mpGame + 0x28));
     }
     if (mode != 4) {
-        char* o = *(char**)((char*)cGameState_mpGame + 0xC);
-        sVE_234750* vt = *(sVE_234750**)(o + 0xCC);
-        vt[5].fn(o + vt[5].delta, 3);
+        char* aiMan = *(char**)((char*)cGameState_mpGame + 0xC);
+        sVE_234750* vt = *(sVE_234750**)(aiMan + 0xCC);
+        vt[5].fn(aiMan + vt[5].delta, 3);
         *(int*)(*(char**)((char*)cGameState_mpGame + 0xC) + 0x14) = 1;
     }
     cAI_setRaceRankType(*(void**)((char*)cGameState_mpGame + 0xC), 0);
@@ -1165,15 +1165,15 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
     cAI_setAIState(*(void**)((char*)cGameState_mpGame + 0xC), 3);
     cBE_setState(1);
     func_00129160(*(void**)((char*)cGameState_mpGame + 0xC));
-    cBERaceDB* r2 = &(*(&cBENewRaceInterface_newRace));
-    if (r2->cGamePath != 0)
+    cBERaceDB* raceDB = &(*(&cBENewRaceInterface_newRace));
+    if (raceDB->cGamePath != 0)
         func_00155E58(cBEAggressionInterface_getThis());
     *(int*)((char*)self + 0x14) = 0;
-    char* g = (char*)SSXApp->Game;
-    char* x = *(char**)(g + 0x84);
+    char* game = (char*)SSXApp->Game;
+    char* x = *(char**)(game + 0x84);
     if (*(int*)(x + 0x10) == 1) {
-        sTbl_234750* t = **(sTbl_234750***)(g + 0x10);
-        t->slot[otherSide_234750(*(char**)(x + 4))].f0 = 0;
+        sTbl_234750* slotTable = **(sTbl_234750***)(game + 0x10);
+        slotTable->slot[otherSide_234750(*(char**)(x + 4))].f0 = 0;
     }
 }
 #endif

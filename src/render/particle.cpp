@@ -29,11 +29,11 @@ struct sEmitState_0C60 {
  */
 extern "C" void cBaseClass_DynamicEmitter_Allocate(void* self)
 {
-    char* s = (char*)self;
-    sEmitParticle_0C60** pp = (sEmitParticle_0C60**)(s + 0x1A0);
-    *pp = new (D_00492650, 0, 0) sEmitParticle_0C60[*(int*)(s + 0x178)];
-    sEmitState_0C60** ps = (sEmitState_0C60**)(s + 0x1A4);
-    *ps = new (D_00492670, 0, 0) sEmitState_0C60[*(int*)(s + 0x178)];
+    char* emitter = (char*)self;
+    sEmitParticle_0C60** pp = (sEmitParticle_0C60**)(emitter + 0x1A0);
+    *pp = new (D_00492650, 0, 0) sEmitParticle_0C60[*(int*)(emitter + 0x178)];
+    sEmitState_0C60** ps = (sEmitState_0C60**)(emitter + 0x1A4);
+    *ps = new (D_00492670, 0, 0) sEmitState_0C60[*(int*)(emitter + 0x178)];
 }
 #endif
 
@@ -496,10 +496,10 @@ struct sEmitColour_1548 {
  */
 extern "C" void cDynamicColourEmitter_Allocate(void* self)
 {
-    char* s = (char*)self;
-    sEmitColour_1548** pc = (sEmitColour_1548**)(s + 0x204);
+    char* emitter = (char*)self;
+    sEmitColour_1548** pc = (sEmitColour_1548**)(emitter + 0x204);
     cBaseClass_DynamicEmitter_Allocate(self);
-    *pc = new (D_00492690, 0, 0) sEmitColour_1548[*(int*)(s + 0x178)];
+    *pc = new (D_00492690, 0, 0) sEmitColour_1548[*(int*)(emitter + 0x178)];
 }
 #endif
 
@@ -519,9 +519,9 @@ extern "C" void func_00370CF8(void* self, int a1);
  */
 extern "C" void cDynamicColourEmitter_purge(void* self, int resetEmitter)
 {
-    void* p = *(void**)((char*)self + 0x204);
-    if (p != 0) {
-        cMemMan_free(p);
+    void* colours = *(void**)((char*)self + 0x204);
+    if (colours != 0) {
+        cMemMan_free(colours);
         *(void**)((char*)self + 0x204) = 0;
     }
     func_00370CF8(self, resetEmitter);

@@ -22,10 +22,10 @@ extern char D_00493DD0[];
  */
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(cUIListBox* self, const char* text, int data)
 {
-    unsigned short* u = (unsigned short*)operator_new_tag((strlen(text) + 1) * 2, D_00493DD0, 0x100, 0);
-    UIAsciiToUnicode(u, text);
+    unsigned short* wide = (unsigned short*)operator_new_tag((strlen(text) + 1) * 2, D_00493DD0, 0x100, 0);
+    UIAsciiToUnicode(wide, text);
     *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = text;
-    *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = u;
+    *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = wide;
     *(int*)((char*)self + self->mNumEntries * 0x14 + 0xA4) = data;
     return (self->mNumEntries)++;
 }
@@ -78,10 +78,10 @@ extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id,
         sUIStrVtA568* vt = *(sUIStrVtA568**)(tbl + 4);
         unsigned short* str = vt[4].fn(tbl + vt[4].delta, id);
         if (str != 0) {
-            unsigned short* u = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_00493DE0, 0x100, 0);
-            USTR_copy(u, str);
+            unsigned short* wide = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_00493DE0, 0x100, 0);
+            USTR_copy(wide, str);
             *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = 0;
-            *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = u;
+            *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = wide;
             *(int*)((char*)self + self->mNumEntries * 0x14 + 0xA4) = data;
             *(int*)((char*)self + self->mNumEntries * 0x14 + 0x98) = id;
         }
@@ -221,18 +221,18 @@ struct cUIListBox_sObj {
 extern "C" void cUIListBox_setEntryByAsciiString(cUIListBox_sObj* self, unsigned char idx, const char* text, int data)
 {
     int len = strlen(text) + 1;
-    unsigned short* u = self->entries[idx].str;
-    if (u != 0) {
+    unsigned short* wide = self->entries[idx].str;
+    if (wide != 0) {
         if (len < self->entries[idx].cap) {
-            cMemMan_free(u);
-            u = 0;
+            cMemMan_free(wide);
+            wide = 0;
         }
     }
-    if (u == 0) {
-        u = (unsigned short*)operator_new_tag(len * 2, D_00493DF0, 0x100, 0);
+    if (wide == 0) {
+        wide = (unsigned short*)operator_new_tag(len * 2, D_00493DF0, 0x100, 0);
     }
-    UIAsciiToUnicode(u, text);
-    self->entries[idx].str = u;
+    UIAsciiToUnicode(wide, text);
+    self->entries[idx].str = wide;
     self->entries[idx].text = text;
     self->entries[idx].data = data;
 }
@@ -314,12 +314,12 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
                     cUIScreen_playFrame(scr, ev, 1);
                 }
             }
-            char* c = (char*)self->mpSelected;
-            sVEntry39A928a* va = *(sVEntry39A928a**)(c + 8);
-            va[7].fn(c + va[7].delta, 1);
-            char* o = *(char**)((char*)self->mpScreen + 0xD0);
-            sVEntry39A928b* vb = *(sVEntry39A928b**)(o + 8);
-            vb[19].fn(o + vb[19].delta, self->mpSelected, 1);
+            char* selected = (char*)self->mpSelected;
+            sVEntry39A928a* va = *(sVEntry39A928a**)(selected + 8);
+            va[7].fn(selected + va[7].delta, 1);
+            char* owner = *(char**)((char*)self->mpScreen + 0xD0);
+            sVEntry39A928b* vb = *(sVEntry39A928b**)(owner + 8);
+            vb[19].fn(owner + vb[19].delta, self->mpSelected, 1);
         }
     } else {
         char* cur = (char*)self->mpSelected;
@@ -331,12 +331,12 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
                     cUIScreen_playFrame(scr, ev, 1);
                 }
             }
-            char* c = (char*)self->mpSelected;
-            sVEntry39A928a* va = *(sVEntry39A928a**)(c + 8);
-            va[7].fn(c + va[7].delta, 0);
-            char* o = *(char**)((char*)self->mpScreen + 0xD0);
-            sVEntry39A928b* vb = *(sVEntry39A928b**)(o + 8);
-            vb[19].fn(o + vb[19].delta, self->mpSelected, 2);
+            char* selected = (char*)self->mpSelected;
+            sVEntry39A928a* va = *(sVEntry39A928a**)(selected + 8);
+            va[7].fn(selected + va[7].delta, 0);
+            char* owner = *(char**)((char*)self->mpScreen + 0xD0);
+            sVEntry39A928b* vb = *(sVEntry39A928b**)(owner + 8);
+            vb[19].fn(owner + vb[19].delta, self->mpSelected, 2);
         }
     }
 }
@@ -357,9 +357,9 @@ extern "C" void cUIMenu_setInputMap(cUIMenu* self, char a1);
 extern "C" void cUIMenu_setUIData(cUIMenu* self)
 {
     cUIThing_setUIData(self);
-    char v = cList_size((char*)self + 0x74);
-    *(char*)&self->mScrollItemNumVisible = v;
-    *(char*)&self->mScrollItemNum = v;
+    char count = cList_size((char*)self + 0x74);
+    *(char*)&self->mScrollItemNumVisible = count;
+    *(char*)&self->mScrollItemNum = count;
     cUIMenu_setInputMap(self, 0);
 }
 #endif
@@ -410,18 +410,18 @@ extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
     do {
         if (i < self->mScrollItemNum) {
             if (*(int*)&self->mAttrMenu & 4) {
-                char* o = *(char**)((char*)self->mpScreen + 0xD0);
-                sUIVtAB50* vt = *(sUIVtAB50**)(o + 8);
-                if (vt[20].fn(o + vt[20].delta, self, 1, i) != 0) return i;
+                char* owner = *(char**)((char*)self->mpScreen + 0xD0);
+                sUIVtAB50* vt = *(sUIVtAB50**)(owner + 8);
+                if (vt[20].fn(owner + vt[20].delta, self, 1, i) != 0) return i;
             } else {
-                char* e = (char*)func_00397870((char*)self + 0x74, i);
-                int f = *(int*)(e + 0x14) >> 5;
-                if ((f & 1) == 0) return i;
+                char* item = (char*)func_00397870((char*)self + 0x74, i);
+                int bits = *(int*)(item + 0x14) >> 5;
+                if ((bits & 1) == 0) return i;
             }
             i = i + 1;
         } else {
-            int f = self->mAttr >> 7;
-            if ((f & 1) == 0) return self->mScrollItemCurrent;
+            int bits = self->mAttr >> 7;
+            if ((bits & 1) == 0) return self->mScrollItemCurrent;
             i = 0;
         }
     } while (n-- != 0);
@@ -463,15 +463,15 @@ extern "C" unsigned char cUIMenu_getPrev(cUIMenu* self)
                 }
             } else {
                 void* item = func_00397870((char*)self + 0x74, i);
-                int f = *(int*)((char*)item + 0x14);
-                if (((f >> 5) & 1) == 0) {
+                int bits = *(int*)((char*)item + 0x14);
+                if (((bits >> 5) & 1) == 0) {
                     return i;
                 }
             }
             i--;
         } else {
-            int f = self->mAttr >> 7;
-            if ((f & 1) == 0) {
+            int bits = self->mAttr >> 7;
+            if ((bits & 1) == 0) {
                 return self->mScrollItemCurrent;
             }
             i = self->mScrollItemNum - 1;

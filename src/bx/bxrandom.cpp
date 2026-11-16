@@ -68,9 +68,9 @@ float AIrandf(float low, float high)
     union {
         unsigned int i;
         float f;
-    } r;
-    r.i = (AIrand() & 0x7FFFFF) | 0x3F800000; // float in [1.0, 2.0)
-    return low + (high - low) * (r.f - 1.0f);
+    } floatBits;
+    floatBits.i = (AIrand() & 0x7FFFFF) | 0x3F800000; // float in [1.0, 2.0)
+    return low + (high - low) * (floatBits.f - 1.0f);
 }
 #endif
 
@@ -156,25 +156,25 @@ INCLUDE_ASM("bx/bxrandom", cBxPseudoRng_NextInt);
  */
 extern "C" uint cBxPseudoRng_NextInt(uint* state)
 {
-    uint a = state[5];
-    uint b = state[4];
-    uint t = a + b;
-    uint c = 0;
+    uint word5 = state[5];
+    uint word4 = state[4];
+    uint sum = word5 + word4;
+    uint carry = 0;
 
-    if (t < a || t < b)
-        c = 1;
-    state[4] = t;
-    t = t + state[3] + c; c = t < state[3]; state[3] = t;
-    t = t + state[2] + c; c = t < state[2]; state[2] = t;
-    t = t + state[1] + c; c = t < state[1]; state[1] = t;
-    t = t + state[0] + c; state[0] = t;
+    if (sum < word5 || sum < word4)
+        carry = 1;
+    state[4] = sum;
+    sum = sum + state[3] + carry; carry = sum < state[3]; state[3] = sum;
+    sum = sum + state[2] + carry; carry = sum < state[2]; state[2] = sum;
+    sum = sum + state[1] + carry; carry = sum < state[1]; state[1] = sum;
+    sum = sum + state[0] + carry; state[0] = sum;
 
     if (++state[5] == 0 && ++state[4] == 0 && ++state[3] == 0 &&
         ++state[2] == 0 && ++state[1] == 0)
     {
-        state[0] = t + 1;
-        t = state[0];
+        state[0] = sum + 1;
+        sum = state[0];
     }
-    return t;
+    return sum;
 }
 #endif

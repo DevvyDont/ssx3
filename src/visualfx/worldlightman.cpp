@@ -67,16 +67,16 @@ extern "C" void cWorldLightMan_initLightCache(sWLCMan* self)
 {
     unsigned int i;
     for (i = 0; i < 8; i++) {
-        sWLCLightHdr* l = &self->hdr[i];
-        l->id = 0xFFFFFFFF;
-        l->f14 = 0;
+        sWLCLightHdr* light = &self->hdr[i];
+        light->id = 0xFFFFFFFF;
+        light->f14 = 0;
         sWLCBuf* buf = (sWLCBuf*)operator new(0xA14, D_00487CD8, 0x20000000, 0);
         buf->owner = self->f00;
         buf->count = 0;
         buf->lists[0].head = 0xFFFFFFFF;
         buf->lists[1].head = 0xFFFFFFFF;
         buf->lists[2].head = 0xFFFFFFFF;
-        *(sWLCBuf**)((char*)l + 0x40) = buf;
+        *(sWLCBuf**)((char*)light + 0x40) = buf;
     }
     for (i = 0; i < 32; i++) {
         self->nodes[i].priority = 0;
@@ -796,8 +796,8 @@ void* cCheatFX_resetStates(void* self);
 // (cRider at +0x10): vtable copies with delta fixups when not in charge.
 extern "C" void* cCheatFX_cCheatFX(cCheatFX* self, int inChrg)
 {
-    sVt9_6238 t1;
-    sVt22_6238 t2;
+    sVt9_6238 ctorVtbl9;
+    sVt22_6238 ctorVtbl22;
     if (inChrg) {
         *(void**)self = (char*)self + 0x10;
         cRider_cRider((char*)self + 0x10);
@@ -807,16 +807,16 @@ extern "C" void* cCheatFX_cCheatFX(cCheatFX* self, int inChrg)
     *(void**)(*(char**)self + 0x6C0) = (void*)&D_00488728;
     if (inChrg == 0) {
         int vc;
-        t1 = D_004886E0;
-        *(void**)(*(char**)self + 0x6E8) = &t1;
+        ctorVtbl9 = D_004886E0;
+        *(void**)(*(char**)self + 0x6E8) = &ctorVtbl9;
         {
             char* vbo = *(char**)self - 0x10;
             vc = (char*)self - vbo;
         }
-        t1.e[1].delta = D_004886E0.e[1].delta + vc;
-        t2 = D_00488728;
-        *(void**)(*(char**)self + 0x6C0) = &t2;
-        t2.e[1].delta = D_00488728.e[1].delta + vc;
+        ctorVtbl9.e[1].delta = D_004886E0.e[1].delta + vc;
+        ctorVtbl22 = D_00488728;
+        *(void**)(*(char**)self + 0x6C0) = &ctorVtbl22;
+        ctorVtbl22.e[1].delta = D_00488728.e[1].delta + vc;
     }
     cCheatFX_resetStates(self);
     return ((void*)self);

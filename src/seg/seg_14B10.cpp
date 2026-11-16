@@ -1799,13 +1799,13 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
                 *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
                 cRiderAnimBase_play(self->mRiderAnim, 0x145, 0, -1.0f);
                 float w = *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x94);
-                float f = *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x98);
-                float t = *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x9C);
-                char* q = (char*)func_00311B20(self->mRiderAnim, 0);
-                *(float*)(q + 0x98) = w;
-                *(float*)(q + 0x94) = w;
-                if (t != 0.0f)
-                    cAnimSequence_fadeWeight((cAnimSequence*)func_00311B20(self->mRiderAnim, 0), f, t);
+                float targWeight = *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x98);
+                float weightTimer = *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x9C);
+                char* baseSeq = (char*)func_00311B20(self->mRiderAnim, 0);
+                *(float*)(baseSeq + 0x98) = w;
+                *(float*)(baseSeq + 0x94) = w;
+                if (weightTimer != 0.0f)
+                    cAnimSequence_fadeWeight((cAnimSequence*)func_00311B20(self->mRiderAnim, 0), targWeight, weightTimer);
                 *(long*)((char*)self->mRiderAnim + 0x20) = -1;
             }
         } else {
@@ -1827,16 +1827,16 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
                 *(long*)((char*)self->mRiderAnim + 0x20) = -1;
             }
             if (func_00311AE8(self->mRiderAnim, 0) == 0xD) {
-                float d = self->mTimeScale * 0.01111111231148243f;
+                float blendStep = self->mTimeScale * 0.01111111231148243f;
                 float cur = self->mAttackBlend;
-                float v = 1.0f;
-                if (d + 1.0f < cur)
-                    v = cur - d;
-                else if (cur < 1.0f - d)
-                    v = cur + d;
-                self->mAttackBlend = v;
-                char* q = (char*)func_00311B20(self->mRiderAnim, 0);
-                *(float*)(q + 0x94) = *(float*)(q + 0x98) = self->mAttackBlend;
+                float newBlend = 1.0f;
+                if (blendStep + 1.0f < cur)
+                    newBlend = cur - blendStep;
+                else if (cur < 1.0f - blendStep)
+                    newBlend = cur + blendStep;
+                self->mAttackBlend = newBlend;
+                char* baseSeq = (char*)func_00311B20(self->mRiderAnim, 0);
+                *(float*)(baseSeq + 0x94) = *(float*)(baseSeq + 0x98) = self->mAttackBlend;
             }
             if (match)
                 self->mAttackDir = Scale_163B0(GetSide_163B0(self), -1.0f);
@@ -2042,18 +2042,18 @@ extern sMonsterReq_6E10 D_0043D608[];
 // Name of the monster trick required for `trick` (empty when it is not one).
 extern "C" void gGenMonsterTrickReqName(char* buf, int trick, int size)
 {
-    sMonsterReq_6E10* r = D_0043D608;
-    for (int i = 0; i < 0x18; i++, r++) {
-        if (r->trick == trick) {
+    sMonsterReq_6E10* req = D_0043D608;
+    for (int i = 0; i < 0x18; i++, req++) {
+        if (req->trick == trick) {
             sTrickId_6E10 id;
             MEM_fill(&id, 0, 8);
-            id.b.kind = r->kind;
-            id.b.dir = r->dir;
-            id.b.spin = r->spin;
-            id.b.flip = r->flip;
-            id.b.grab = r->grab;
-            id.b.mod = r->mod;
-            id.b.extra = r->extra;
+            id.b.kind = req->kind;
+            id.b.dir = req->dir;
+            id.b.spin = req->spin;
+            id.b.flip = req->flip;
+            id.b.grab = req->grab;
+            id.b.mod = req->mod;
+            id.b.extra = req->extra;
             if (id.w[1] & 0x3F800) {  // extra != 0
                 id.b.hasExtra = 1;
             }
@@ -2099,16 +2099,16 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_copyDispStr);
  * @param str  the string, or 0 (On Tour s)
  */
 extern "C" void cHUDFX_copyDispStr(char *self, signed char *str) {
-    signed char *s = str;
-    unsigned char *d = (unsigned char*)(self + 0x18);
-    if (s != 0) {
-        while (*s != 0) {
-            *d = *s;
-            s++;
-            d++;
+    signed char *src = str;
+    unsigned char *dst = (unsigned char*)(self + 0x18);
+    if (src != 0) {
+        while (*src != 0) {
+            *dst = *src;
+            src++;
+            dst++;
         }
     }
-    *d = 0;
+    *dst = 0;
 }
 #endif
 

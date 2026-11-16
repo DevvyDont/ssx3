@@ -81,23 +81,23 @@ extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
     {
         self->BoardSphereTree = (cRiderSphereTree*)cRiderSphereTree_cRiderSphereTree((cRiderSphereTree*)cMemMan_alloc(0x2B0, D_00458210, 0, 0));
     }
-    char* r = (char*)self->mRider;
-    sVec4WG* pos = (sVec4WG*)(r + 0x110);
+    char* rider = (char*)self->mRider;
+    sVec4WG* pos = (sVec4WG*)(rider + 0x110);
     *(sVec4WG*)&self->BoardIntersectBox = *pos;
     *(sVec4WG*)&self->BoardIntersectBox.MaxPoint = *pos;
     if (prev == 0)
     {
-        sVec4WG* n = (sVec4WG*)(r + 0x370);
-        float d = vu0DotWG(*(sVec4WG*)(r + 0x1E0), *n);
-        sVec4WG t = vu0ScaleMemWG(*n, d);
-        sVec4WG* p = (sVec4WG*)((char*)self->mRider + 0x1E0);
-        vu0SubWG(*p, *p, t);
+        sVec4WG* n = (sVec4WG*)(rider + 0x370);
+        float normalSpeed = vu0DotWG(*(sVec4WG*)(rider + 0x1E0), *n);
+        sVec4WG normalPart = vu0ScaleMemWG(*n, normalSpeed);
+        sVec4WG* velocity = (sVec4WG*)((char*)self->mRider + 0x1E0);
+        vu0SubWG(*velocity, *velocity, normalPart);
         *(int*)self = 0;
     }
     else
     {
         *(int*)self = 1;
-        cAirPredictor_startLaunchIntoAir(*(void**)(r + 0x788), pos, r + 0x1E0, 3333.33349609375f);
+        cAirPredictor_startLaunchIntoAir(*(void**)(rider + 0x788), pos, rider + 0x1E0, 3333.33349609375f);
     }
     self->ForceNaturalAir = 0;
     *(int*)((char*)self->mRider + 0x2DC) = 0;
@@ -183,9 +183,9 @@ extern "C" void cWipeoutMotion_throwItem(cWipeoutMotion* self, sVec4WM* initVel,
     if (*(int*)self == 0)
     {
         sVec4WM* n = (sVec4WM*)((char*)self->mRider + 0x370);
-        float d = vu0DotWM(*n, *initVel);
-        sVec4WM t = vu0ScaleWM(*n, d);
-        vu0SubWM(*(sVec4WM*)&self->BoardVelocity, *(sVec4WM*)&self->BoardVelocity, t);
+        float normalSpeed = vu0DotWM(*n, *initVel);
+        sVec4WM normalPart = vu0ScaleWM(*n, normalSpeed);
+        vu0SubWM(*(sVec4WM*)&self->BoardVelocity, *(sVec4WM*)&self->BoardVelocity, normalPart);
     }
 }
 #endif
@@ -229,15 +229,15 @@ extern "C" void cWipeoutMotion_throwRider(cWipeoutMotion* self, sVec4WM* initVel
     if (*(int*)self == 0)
     {
         sVec4WM* n = (sVec4WM*)((char*)self->mRider + 0x370);
-        float d = vu0DotWM(*n, *initVel);
-        sVec4WM t = vu0ScaleMemWM_136DE0(*n, d);
-        sVec4WM* p = (sVec4WM*)((char*)self->mRider + 0x1E0);
-        vu0SubWM(*p, *p, t);
+        float normalSpeed = vu0DotWM(*n, *initVel);
+        sVec4WM normalPart = vu0ScaleMemWM_136DE0(*n, normalSpeed);
+        sVec4WM* velocity = (sVec4WM*)((char*)self->mRider + 0x1E0);
+        vu0SubWM(*velocity, *velocity, normalPart);
     }
     else
     {
-        char* r = (char*)self->mRider;
-        cAirPredictor_startLaunchIntoAir(*(void**)(r + 0x788), r + 0x110, r + 0x1E0, 3333.33349609375f);
+        char* rider = (char*)self->mRider;
+        cAirPredictor_startLaunchIntoAir(*(void**)(rider + 0x788), rider + 0x110, rider + 0x1E0, 3333.33349609375f);
     }
     self->ForceNaturalAir = 0;
 }
@@ -778,12 +778,12 @@ extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
     char* r = (char*)self->mRider;
     char* model = *(char**)(r + 0x780);
     sBone_7550* bone = &(*(sBone_7550**)(model + 0x2C))[*(int*)(r + 0x8A4)];
-    float s = *(float*)(model + 0x140);
-    sVec4_7550 d = vu0Scale_7550(xAxis_7550(bone), s);
-    pts[0] = vu0Add_7550(bone->pos, vu0Scale_7550(d, 70.0f));
-    pts[1] = vu0Add_7550(bone->pos, vu0Scale_7550(d, 30.0f));
-    pts[2] = vu0Sub_7550(bone->pos, vu0Scale_7550(d, 30.0f));
-    pts[3] = vu0Sub_7550(bone->pos, vu0Scale_7550(d, 70.0f));
+    float modelScale = *(float*)(model + 0x140);
+    sVec4_7550 boardAxis = vu0Scale_7550(xAxis_7550(bone), modelScale);
+    pts[0] = vu0Add_7550(bone->pos, vu0Scale_7550(boardAxis, 70.0f));
+    pts[1] = vu0Add_7550(bone->pos, vu0Scale_7550(boardAxis, 30.0f));
+    pts[2] = vu0Sub_7550(bone->pos, vu0Scale_7550(boardAxis, 30.0f));
+    pts[3] = vu0Sub_7550(bone->pos, vu0Scale_7550(boardAxis, 70.0f));
     func_00329A90(self->BoardSphereTree, 4, pts, radii.r, &bone->pos,
                   *(float*)(*(char**)((char*)self->mRider + 0x780) + 0x140) * 90.0f);
 }

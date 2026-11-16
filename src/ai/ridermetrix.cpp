@@ -533,10 +533,10 @@ extern "C" int cRiderMetrix_allocHUDfx(void* self_, int type)
         {
             return i;
         }
-        float r = self->slots[i].value / self->slots[i].total;
-        if (r < best)
+        float ratio = self->slots[i].value / self->slots[i].total;
+        if (ratio < best)
         {
-            best = r;
+            best = ratio;
             bestIdx = i;
         }
     }

@@ -153,8 +153,8 @@ extern "C" void cPlaybackMan_update(cPlaybackMan_C5F8* self)
         ASYNCFILE_release(self->handle, &data, &size);
         if (data != 0 && size > 0) {
             // PORT: pointer held in int for the entry address (index-first addu); not 64-bit safe.
-            sPlaybackEntry_C5F8* e = (sPlaybackEntry_C5F8*)(self->cur * 12 + (int)self->entries);
-            e->buf = operator_new_tag(size, D_00481560, 0x20000000, 0);
+            sPlaybackEntry_C5F8* curEntry = (sPlaybackEntry_C5F8*)(self->cur * 12 + (int)self->entries);
+            curEntry->buf = operator_new_tag(size, D_00481560, 0x20000000, 0);
             self->entries[self->cur].size = size;
             MEM_copy(self->entries[self->cur].buf, data, size);
             MEM_free(data);
@@ -1249,11 +1249,11 @@ static inline cPbWorld* pbWorld(cPbObjSys* o)
 extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
 {
     cPbStream* out = (cPbStream*)stream;
-    sPbTime t;
+    sPbTime timeStamp;
     int id;
     func_0026E9C0(out);
-    func_003178E0(&t);
-    out->write(&t, 0x18);
+    func_003178E0(&timeStamp);
+    out->write(&timeStamp, 0x18);
     id = D_004A5B78;
     out->write(&id, 4);
     id = D_004A5B7C;

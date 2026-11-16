@@ -172,11 +172,11 @@ struct sCtrlEntry00145BD8 {
 extern "C" void cBENewPlayerInterface_defaultCtrl(void* self)
 {
     int i;
-    sCtrlEntry00145BD8* e = (sCtrlEntry00145BD8*)&cBELibrary_playerDB;
+    sCtrlEntry00145BD8* entry = (sCtrlEntry00145BD8*)&cBELibrary_playerDB;
     for (i = 0; i < 6; i++)
     {
-        ((char*)&e[i])[0x13] = 0;
-        e[i].flag1 = 1;
+        ((char*)&entry[i])[0x13] = 0;
+        entry[i].flag1 = 1;
     }
     sVEntry00145BD8* vt = *(sVEntry00145BD8**)((char*)self + 0xC);
     vt[2].fn((char*)self + vt[2].delta);
@@ -327,16 +327,16 @@ extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int iProfileIndex,
             int bOff = iCharacterID * 0xF88;
             int aOff = iProfileIndex * 0x9B50;
             int off = bOff + aOff;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(ulong*)(p + 0x278) >> 12) & 1;
+            char* charProfile = (char*)cBELibrary_profileLib + off;
+            return (int)(*(ulong*)(charProfile + 0x278) >> 12) & 1;
         }
         else
         {
             int bOff = iCharacterID * 0xF88;
             int aOff = iProfileIndex * 0x9B50;
             int off = bOff + aOff;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(ulong*)(p + 0x278) >> 13) & 1;
+            char* charProfile = (char*)cBELibrary_profileLib + off;
+            return (int)(*(ulong*)(charProfile + 0x278) >> 13) & 1;
         }
     }
     return 0;
@@ -768,10 +768,10 @@ extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = D_00534FE0[id].mCharID;
-    int off = c * 0xF88 + profile * 0x9B50;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return *(int*)(p + 0x27C);
+    int charID = D_00534FE0[id].mCharID;
+    int off = charID * 0xF88 + profile * 0x9B50;
+    char* charProfile = (char*)cBELibrary_profileLib + off;
+    return *(int*)(charProfile + 0x27C);
 }
 #endif
 
@@ -967,10 +967,10 @@ extern "C" void cBENewPlayerInterface_setRiderCtrlID(void* self, int index, int 
     int id = cBENewPlayerInterface_getPlayerID(index);
     D_00534FE0[id].field_0xc = ctrl;
     if (ctrl >= 0) {
-        char* p = (char*)&D_00534FE0[0] + id * 0x1c;
-        sPlayerCharFlags_00147220* f = (sPlayerCharFlags_00147220*)(p + 0x10);
-        f->bit0 = id;
-        f->bit2 = 0;
+        char* entry = (char*)&D_00534FE0[0] + id * 0x1c;
+        sPlayerCharFlags_00147220* flags = (sPlayerCharFlags_00147220*)(entry + 0x10);
+        flags->bit0 = id;
+        flags->bit2 = 0;
     }
 }
 #endif
@@ -1038,14 +1038,14 @@ static inline int func_00147338_isLocked(sPlayerCharEntry* e)
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* self, int index, int charID)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    sPlayerCharEntry* e = &D_00534FE0[id];
-    if (func_00147338_isLocked(e) == 1)
+    sPlayerCharEntry* entry = &D_00534FE0[id];
+    if (func_00147338_isLocked(entry) == 1)
     {
-        e->mCharID = D_00534FE0[0].mCharID;
+        entry->mCharID = D_00534FE0[0].mCharID;
     }
     else
     {
-        e->mCharID = charID;
+        entry->mCharID = charID;
     }
 }
 #endif
@@ -1385,8 +1385,8 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_resetFromMissionMan);
 extern "C" void cBENewPlayerInterface_resetFromMissionMan(void* self, int index)
 {
     D_00534FE0[cBENewPlayerInterface_getPlayerID(index)].mCharID = 0;
-    sPlayerCharEntry* e = &D_00534FE0[cBENewPlayerInterface_getPlayerID(index)];
-    ((sPlayerCharFlags_0x10*)((char*)e + 0x10))->bit2 = 0;
+    sPlayerCharEntry* entry = &D_00534FE0[cBENewPlayerInterface_getPlayerID(index)];
+    ((sPlayerCharFlags_0x10*)((char*)entry + 0x10))->bit2 = 0;
 }
 #endif
 
@@ -1697,11 +1697,11 @@ extern "C" void* cBEStatInterface_getThis(void)
         cBEIface_00147F78* mem = (cBEIface_00147F78*)cMemMan_alloc(0x10, D_0045A280, 0, 0);
         D_004A11C4 = mem;
         sVTablePlayer_00147F78* vt = &cBEStatInterface_vtbl;
-        short d = vt->delta;
+        short thisAdjust = vt->delta;
         void (*fn)(void*) = vt->fn;
         mem->vtable = vt;
         mem->field_0x8 = 0;
-        fn((char*)mem + d);
+        fn((char*)mem + thisAdjust);
     }
     return D_004A11C4;
 }

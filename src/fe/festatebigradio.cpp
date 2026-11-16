@@ -110,11 +110,11 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
     self->screen = screen;
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
-    sRadioPanel_2DB0* a = &self->panels[0];
-    sRadioPanel_2DB0* b = &self->panels[1];
+    sRadioPanel_2DB0* firstPanel = &self->panels[0];
+    sRadioPanel_2DB0* secondPanel = &self->panels[1];
     if ((self->flags >> 4) & 1) {
-        func_00192740_2DB0(a, 0);
-        func_00192740_2DB0(b, 0);
+        func_00192740_2DB0(firstPanel, 0);
+        func_00192740_2DB0(secondPanel, 0);
     }
     int n = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -147,10 +147,10 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
     }
     for (int i = 0; i < n; i++)
         mask |= 1 << i;
-    func_00192968(a, mask);
-    func_00192968(b, mask);
-    func_00192970_2DB0(a, self->screen);
-    func_00192970_2DB0(b, self->screen);
+    func_00192968(firstPanel, mask);
+    func_00192968(secondPanel, mask);
+    func_00192970_2DB0(firstPanel, self->screen);
+    func_00192970_2DB0(secondPanel, self->screen);
     sStr2_2DB0 name = *(sStr2_2DB0*)D_004A14F8;
     for (int row = 0; row < n; row++) {
         name.c[0] = row + '1';
@@ -307,33 +307,33 @@ extern "C" void cFEStateBraggingRights_onUpdate(sBragging_2DB0* self)
     void* obj = *(void**)((char*)self->engine + 0xC);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     for (i = 0; i < n; i++) {
-        int p;
+        int panelIdx;
         char id;
         if (isNet_2DB0()) {
             id = func_00147318(iface, 0);
-            p = 0;
+            panelIdx = 0;
         } else {
             id = func_00147318(iface, i);
-            p = i;
+            panelIdx = i;
         }
         sVESet_3338* vt = *(sVESet_3338**)((char*)obj + 8);
         vt[44].fn((char*)obj + vt[44].delta, id);
         sVEGet_3338* vt2 = *(sVEGet_3338**)((char*)obj + 8);
-        if (vt2[40].fn((char*)obj + vt2[40].delta) != 0 && get6F8_3338((char*)self + p * 0x34) == 0) {
-            void* m = *(void**)((char*)self + p * 0x34 + 0x6D0);
-            sVEPtr_3338* vt3 = *(sVEPtr_3338**)((char*)m + 8);
-            vt3[15].fn((char*)m + vt3[15].delta, obj);
+        if (vt2[40].fn((char*)obj + vt2[40].delta) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) == 0) {
+            void* menu = *(void**)((char*)self + panelIdx * 0x34 + 0x6D0);
+            sVEPtr_3338* vt3 = *(sVEPtr_3338**)((char*)menu + 8);
+            vt3[15].fn((char*)menu + vt3[15].delta, obj);
         } else {
             sVEGet_3338* vt4 = *(sVEGet_3338**)((char*)obj + 8);
-            if (vt4[6].fn((char*)obj + vt4[6].delta) != 0 && get6F8_3338((char*)self + p * 0x34) != 0) {
+            if (vt4[6].fn((char*)obj + vt4[6].delta) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) != 0) {
                 char label[5];  // "11", "21" for the second panel
                 *(struct sStr3_3338*)label = *(struct sStr3_3338*)D_004A1788;
                 func_00416210_3338(label + 3, 0, 2);
-                func_00192740(&self->panels[p], 0);
-                func_00192970_2DB0(&self->panels[p], self->screen);
-                if (p != 0)
+                func_00192740(&self->panels[panelIdx], 0);
+                func_00192970_2DB0(&self->panels[panelIdx], self->screen);
+                if (panelIdx != 0)
                     label[0] = '2';
-                cUIMenu_setSelectedByIndex_3338(*(void**)((char*)self + p * 0x34 + 0x6D0), 0);
+                cUIMenu_setSelectedByIndex_3338(*(void**)((char*)self + panelIdx * 0x34 + 0x6D0), 0);
                 int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(label));
                 if (frame != 0xFFFF)
                     cUIScreen_playFrame(self->screen, frame, 1);
@@ -476,13 +476,13 @@ extern "C" void cFEStateBraggingRights_onWidgetCreate(char* self, cUIObj_193650*
         *(int*)(wp + 0x14) |= 1;
         *(int*)(wp + 0x90) |= 1;
     } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD38) || Is_193650(*(int*)(wp + 0x38), D_0045FD48)) {
-        void* p1 = cBE_getInterface_Fv(cBE_getBE(), 1);
+        void* newPlayer = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* p2 = cBE_getInterface_Fv(cBE_getBE(), 2);
-        cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(p2, cBENewPlayerInterface_getHumanRider(p1, 0)));
+        cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(p2, cBENewPlayerInterface_getHumanRider(newPlayer, 0)));
     } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD58) || Is_193650(*(int*)(wp + 0x38), D_0045FD68)) {
-        void* p1 = cBE_getInterface_Fv(cBE_getBE(), 1);
+        void* newPlayer = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* p2 = cBE_getInterface_Fv(cBE_getBE(), 2);
-        cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(p2, cBENewPlayerInterface_getHumanRider(p1, 1)));
+        cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(p2, cBENewPlayerInterface_getHumanRider(newPlayer, 1)));
     } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD78)) {
         *(void**)(self + 0x6D4) = w;
     } else if (Is_193650(*(int*)(wp + 0x38), D_0045FD88)) {
@@ -596,27 +596,27 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
             break;
         if (*(int*)(self + 0x72C) == 0)
             break;
-        void* r = vcall_38F8(self, 4, w);
-        if (r != 0)
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+        void* nextState = vcall_38F8(self, 4, w);
+        if (nextState != 0)
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
         break;
     }
     case 6:
         if (isOn_38F8()) {
-            char* p = (char*)func_001A9C50(self);
-            char* sub = p + 0xBC;
-            *(int*)(p + 0xBC) = 2;
-            *(int*)(p + 0xC4) = GetHashValue32(D_0045FD98);
-            *(int*)(p + 0xC0) = 3;
+            char* popup = (char*)func_001A9C50(self);
+            char* sub = popup + 0xBC;
+            *(int*)(popup + 0xBC) = 2;
+            *(int*)(popup + 0xC4) = GetHashValue32(D_0045FD98);
+            *(int*)(popup + 0xC0) = 3;
             func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
             func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
-            *(int*)(p + 0x150) = 0x838;
-            *(int*)(p + 0x168) = 1;
-            func_001A9BC0(self, p);
+            *(int*)(popup + 0x150) = 0x838;
+            *(int*)(popup + 0x168) = 1;
+            func_001A9BC0(self, popup);
         } else {
-            void* r = vcall_38F8(self, 5, w);
-            if (r != 0)
-                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+            void* nextState = vcall_38F8(self, 5, w);
+            if (nextState != 0)
+                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
             MEM_fill(D_005308B8, 0, 0x20);
         }
         break;
@@ -701,9 +701,9 @@ extern "C" int cFEStateBraggingRights_onWidgetMenu(void* self, void* ctrl, int m
 {
     int found = 0;
     void** item;
-    void** p = (void**)((char*)self + 0x6D0);
-    if (*p == ctrl) {
-        item = p;
+    void** menuSlot = (void**)((char*)self + 0x6D0);
+    if (*menuSlot == ctrl) {
+        item = menuSlot;
         found = 1;
     } else {
         item = (void**)((char*)self + 0x704);

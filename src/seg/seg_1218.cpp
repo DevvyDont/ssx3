@@ -549,21 +549,21 @@ static inline float vAbs_09E0(float x)
  */
 extern "C" void cComputer_jumpSetupCruise(cComputer* self, sPad_09E0* cmd)
 {
-    int below, o3, o4, o5, o6;
-    if (!cComputer_checkForJumpEvent(self, (float*)(((char*)self) + 0xDF0), &below, &o3, &o4, &o5, &o6)) {
+    int below, toPipe, toRail, isSpin, isFlip;
+    if (!cComputer_checkForJumpEvent(self, (float*)(((char*)self) + 0xDF0), &below, &toPipe, &toRail, &isSpin, &isFlip)) {
         *(Fn_8E88*)&self->cruiseLogic = D_0043CF20[1];
         self->mCruiseLogicID = 1;
         func_00100680(((char*)self), cmd);
         return;
     }
-    sVec4_09E0 v;
-    func_00100610_09E0(&v, ((char*)self));
-    float f = func_00100348_09E0(((char*)self), &v);
+    sVec4_09E0 targetPos;
+    func_00100610_09E0(&targetPos, ((char*)self));
+    float f = func_00100348_09E0(((char*)self), &targetPos);
     cmd->b20 = (int)(f * 31.0f);
     char* rider = (char*)self->mRider;
     float len = vLen_09E0(*(sVec4_09E0*)(rider + 0x1E0));
     if (below && *(float*)(rider + 0x4C8) < 10000.0f && vAbs_09E0(f) < 1.0f) {
-        cComputer_setupPrewindState_09E0(((char*)self), o5, o6, o4, o3);
+        cComputer_setupPrewindState_09E0(((char*)self), isSpin, isFlip, toRail, toPipe);
         cmd->b14 = 3;
         return;
     }
@@ -766,7 +766,7 @@ static inline sRec_0B90* Rec_0B90(char* self) { return &((sRec_0B90*)*(char**)(s
  */
 extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* cmd)
 {
-    int below, o3, o4, o5, o6;
+    int below, toPipe, toRail, isSpin, isFlip;
     int z;
     sRec_0B90* rec = Rec_0B90(((char*)self));
     sRiders_0B90* list = D_004A28A8_0B90->game->list;
@@ -806,7 +806,7 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* cmd)
     cmd->b20 = (int)(steer * 31.0f);
     z = 1;
     ctl = (sCtl_0B90*)(((char*)self) + 0xDF0);
-    if (cComputer_checkForJumpEvent_0B90(((char*)self), &ctl->speed, &below, &o3, &o4, &o5, &o6)) {
+    if (cComputer_checkForJumpEvent_0B90(((char*)self), &ctl->speed, &below, &toPipe, &toRail, &isSpin, &isFlip)) {
         self->mTargetID = -1;
         *(Fn_0B90*)&self->cruiseLogic = D_0043CF20_0B90[0];
         self->mCruiseLogicID = 0;
@@ -959,8 +959,8 @@ static inline sRec_0F88* Rec_0F88(char* self) { return &((sRec_0F88*)*(char**)(s
  */
 extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
 {
-    sV4_0F88 v;
-    int below, o3, o4, o5, o6;
+    sV4_0F88 targetPos;
+    int below, toPipe, toRail, isSpin, isFlip;
     int z;
     sCtl_0F88* ctl = (sCtl_0F88*)(((char*)self) + 0xDF0);
     sRec_0F88* rec = Rec_0F88(((char*)self));
@@ -971,8 +971,8 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
     float hisSpd = Len_0F88(*tgt->GetVel());
     float steer = 0.0f;
     if (Abs_0F88(ang) > 1.5707964897155762f) {
-        func_00100610_0F88(&v, ((char*)self));
-        steer = func_00100348_0F88(((char*)self), &v);
+        func_00100610_0F88(&targetPos, ((char*)self));
+        steer = func_00100348_0F88(((char*)self), &targetPos);
         if (mySpd < hisSpd)
             cComputer_setupRecklessCrouch_0F88(((char*)self), cmd);
         else
@@ -988,20 +988,20 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
                 lim += 3.1415927410125732f;
         }
         if (Abs_0F88(ang) > lim || mySpd <= hisSpd) {
-            func_00100610_0F88(&v, ((char*)self));
-            steer = func_00100348_0F88(((char*)self), &v);
+            func_00100610_0F88(&targetPos, ((char*)self));
+            steer = func_00100348_0F88(((char*)self), &targetPos);
             cComputer_setupCrouch_0F88(((char*)self), cmd);
         } else if (tgt->Ready()) {
             if (*(int*)((char*)tgt + 0xAB8) == *(int*)((char*)self->mRider + 0xAB8))
                 func_00112A50((char*)self->mRider, 0);
-            func_00100610_0F88(&v, ((char*)self));
-            steer = func_00100348_0F88(((char*)self), &v);
+            func_00100610_0F88(&targetPos, ((char*)self));
+            steer = func_00100348_0F88(((char*)self), &targetPos);
             cComputer_setupCrouch_0F88(((char*)self), cmd);
         }
     }
     cmd->b20 = (int)(steer * 31.0f);
     z = 0;
-    if (cComputer_checkForJumpEvent_0F88(((char*)self), (float*)(((char*)self) + 0xDF0), &below, &o3, &o4, &o5, &o6)) {
+    if (cComputer_checkForJumpEvent_0F88(((char*)self), (float*)(((char*)self) + 0xDF0), &below, &toPipe, &toRail, &isSpin, &isFlip)) {
         self->mTargetID = -1;
         *(Fn_0F88*)&self->cruiseLogic = D_0043CF20_0F88[0];
         self->mCruiseLogicID = 0;
@@ -4547,18 +4547,18 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
     self->mVelocity.z = self->mVelocity.z * 0.10000000149011612f;
     dv = Sub_6848(self->mVelocity, dv);
     if (land.obj != 0) {
-        char* h = *(char**)(land.obj + 0xC);
-        if (h != 0) {
-            sVEH_6848* vt = *(sVEH_6848**)(h + 0xC);
-            vt[43].fn(h + vt[43].delta, &land, Scale_6848(dv, -1.0f));
+        char* landInst = *(char**)(land.obj + 0xC);
+        if (landInst != 0) {
+            sVEH_6848* vt = *(sVEH_6848**)(landInst + 0xC);
+            vt[43].fn(landInst + vt[43].delta, &land, Scale_6848(dv, -1.0f));
         }
     }
     sAnimModelBone* bone = &self->mAnimModel->bones[self->mBoneBoardRoot];
     sV_6848 side = Side_6848(bone);
     sV_6848 up = Up_6848(bone);
-    float a = Dot_6848(*(t4Vector*)&side, land.n);
-    float b = Dot_6848(*(t4Vector*)&up, land.n);
-    float angle = Atan2_6848(b, a);
+    float sideDot = Dot_6848(*(t4Vector*)&side, land.n);
+    float upDot = Dot_6848(*(t4Vector*)&up, land.n);
+    float angle = Atan2_6848(upDot, sideDot);
     int prev = RAIL_STYLE(self);
     if (func_0011FEE8_57B8(self) == 1) {
         if (self->unk_320 == 0)
@@ -4575,7 +4575,7 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
     } else {
         sV_6848 front = Front_6848(bone);
         if (front.z < 0.0f) {
-            if (b < 0.0f)
+            if (upDot < 0.0f)
                 RAIL_STYLE(self) = 4;
             else
                 RAIL_STYLE(self) = 3;
@@ -4620,16 +4620,16 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
             cRider_rotateOrientation(self, GetUp_6848(self), 1.5707963705062866f);
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, 1.5707963705062866f);
             float yaw = 0.0f;
-            char* ra = (char*)self->mRiderAnim;
-            *(t4Vector*)(ra + 0x30) = D_004FF130_6848;
-            *(sQuat_6848*)(ra + 0x40) = AxisAngle_6848(D_004FF160_6848, -yaw);
+            char* riderAnim = (char*)self->mRiderAnim;
+            *(t4Vector*)(riderAnim + 0x30) = D_004FF130_6848;
+            *(sQuat_6848*)(riderAnim + 0x40) = AxisAngle_6848(D_004FF160_6848, -yaw);
         } else if (prev == 4) {
             cRider_rotateOrientation(self, GetUp_6848(self), -1.5707963705062866f);
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, -1.5707963705062866f);
             float yaw = 0.0f;
-            char* ra = (char*)self->mRiderAnim;
-            *(t4Vector*)(ra + 0x30) = D_004FF130_6848;
-            *(sQuat_6848*)(ra + 0x40) = AxisAngle_6848(D_004FF160_6848, -yaw);
+            char* riderAnim = (char*)self->mRiderAnim;
+            *(t4Vector*)(riderAnim + 0x30) = D_004FF130_6848;
+            *(sQuat_6848*)(riderAnim + 0x40) = AxisAngle_6848(D_004FF160_6848, -yaw);
         }
         cRider_doRailslideModeOrientation(self);
     }
@@ -5384,19 +5384,19 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
             t4Vector pos;
             if (func_00329F98(self->mSphereTree, other->mSphereTree, &dir, &pos)) {
                 float omass = cRider_getMass(other);
-                t4Vector a = dir * -0.550000011920929f;
-                t4Vector b = dir * 0.550000011920929f;
+                t4Vector selfPush = dir * -0.550000011920929f;
+                t4Vector otherPush = dir * 0.550000011920929f;
                 if (cRider_isGroundNormalValid(self))
-                    SubEq_7888(a, Scale_7888(self->mGroundNormal, Dot_7888(a, self->mGroundNormal)));
+                    SubEq_7888(selfPush, Scale_7888(self->mGroundNormal, Dot_7888(selfPush, self->mGroundNormal)));
                 if (cRider_isGroundNormalValid(other))
-                    SubEq_7888(b, Scale_7888(other->mGroundNormal, Dot_7888(b, other->mGroundNormal)));
-                func_00106538_m2537(self, a);
-                func_00106538_m2537(other, b);
+                    SubEq_7888(otherPush, Scale_7888(other->mGroundNormal, Dot_7888(otherPush, other->mGroundNormal)));
+                func_00106538_m2537(self, selfPush);
+                func_00106538_m2537(other, otherPush);
                 if (srec->lastExchange < func_001298C8() - 3) {
                     t4Vector n = Norm_7888(dir);
-                    float t = (Dot_7888(other->mVelocity, n) - Dot_7888(self->mVelocity, n)) / (mass + omass);
-                    func_00107E70_7888(self, other, &n, 0, omass * t);
-                    func_00107E70_7888(other, self, &n, 0, -mass * t);
+                    float impulse = (Dot_7888(other->mVelocity, n) - Dot_7888(self->mVelocity, n)) / (mass + omass);
+                    func_00107E70_7888(self, other, &n, 0, omass * impulse);
+                    func_00107E70_7888(other, self, &n, 0, -mass * impulse);
                     srec->lastExchange = func_001298C8();
                     orec->lastExchange = func_001298C8();
                 }
@@ -5410,13 +5410,13 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
             func_001446A0(func_00311B20(other->mRiderAnim, 1) + 0xB0, 0) &&
             !func_001446A0(func_00311B20(other->mRiderAnim, 1) + 0xB0, 1))
             continue;
-        t4Vector d = Sub_7888(other->mPosition, self->mPosition);
-        float len = Len_7888(d);
+        t4Vector toOther = Sub_7888(other->mPosition, self->mPosition);
+        float len = Len_7888(toOther);
         if (len > 150.0f)
             continue;
         if (len < 0.001f)
             continue;
-        t4Vector n = Div_7888(d, len);
+        t4Vector n = Div_7888(toOther, len);
         if (!(Dot_7888(n, self->mAttackDir) > 0.0f))
             continue;
         float attr = func_00149038(cBE_getInterface_C258(cBE_getBE(), 3), self->mAIIndex, self->mStatsIndex);
@@ -6203,15 +6203,15 @@ extern "C" char* cComputer_cComputer(cComputer* self, int inChrg, int actor)
     (self->mRider)->mVtbl = (void*)&D_00458660;
     if (!inChrg)
     {
-        sVtbl9_108C80 t1 = D_00458618;
-        (self->mRider)->mScriptObjectVtbl = &t1;
+        sVtbl9_108C80 ctorVtbl9 = D_00458618;
+        (self->mRider)->mScriptObjectVtbl = &ctorVtbl9;
         char* base = (char*)self->mRider - 0xF50;
-        int d = ((char*)self) - base;
-        t1.e[1].delta = D_00458618.e[1].delta + d;
-        sVtbl22_108C80 t2 = D_00458660;
-        (self->mRider)->mVtbl = &t2;
-        t2.e[1].delta = D_00458660.e[1].delta + d;
-        t2.e[20].delta = D_00458660.e[20].delta + d;
+        int vbOffset = ((char*)self) - base;
+        ctorVtbl9.e[1].delta = D_00458618.e[1].delta + vbOffset;
+        sVtbl22_108C80 ctorVtbl22 = D_00458660;
+        (self->mRider)->mVtbl = &ctorVtbl22;
+        ctorVtbl22.e[1].delta = D_00458660.e[1].delta + vbOffset;
+        ctorVtbl22.e[20].delta = D_00458660.e[20].delta + vbOffset;
     }
     self->mVtbl = (void**)cComputer_vtbl;
     if (actor)
@@ -6624,9 +6624,9 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
     if (Len_AA70(*(sV4_AA70*)((char*)self->mRider + 0x1E0)) < self->mDesiredSpeed - 138.88890075683594f)
         cmd->b14 = 1;
     if (self->mToPipe) {
-        sV4_AA70 a = Sub_AA70(*(sV4_AA70*)&self->mEndJumpPos, *(sV4_AA70*)&self->mStartJumpPos);
+        sV4_AA70 jumpSpan = Sub_AA70(*(sV4_AA70*)&self->mEndJumpPos, *(sV4_AA70*)&self->mStartJumpPos);
         sV4_AA70 b = Sub_AA70(*(sV4_AA70*)((char*)self->mRider + 0x110), *(sV4_AA70*)&self->mStartJumpPos);
-        if (Len_AA70(b) < Len_AA70(a) - 50.0f)
+        if (Len_AA70(b) < Len_AA70(jumpSpan) - 50.0f)
             cmd->b13 = 1;
         return;
     }
@@ -6639,12 +6639,12 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
     }
     float* ctl = (float*)(((char*)self) + 0xDF0);
     if (sel != -1) {
-        char* r = (char*)self->mRider;
-        sV4_AA70 half = Sub_AA70(*(sV4_AA70*)(r + 0x490), *(sV4_AA70*)(r + 0x110));
+        char* riderBytes = (char*)self->mRider;
+        sV4_AA70 half = Sub_AA70(*(sV4_AA70*)(riderBytes + 0x490), *(sV4_AA70*)(riderBytes + 0x110));
         half = Scale_AA70(half, 0.5f);
         sV4_AA70 pos = func_0026AB20_AA70(trk, 0, buf[sel].b);
-        sV4_AA70 d = Sub_AA70(pos, half);
-        cmd->w0 = (int)(func_00100348_AA70(((char*)self), &d) * 31.0f);
+        sV4_AA70 toTarget = Sub_AA70(pos, half);
+        cmd->w0 = (int)(func_00100348_AA70(((char*)self), &toTarget) * 31.0f);
     }
     cmd->b15 = (int)(ctl[0x12] * 31.0f);
     cmd->b21 = (int)(ctl[0x13] * 31.0f);
@@ -6698,18 +6698,18 @@ extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* cmd)
 {
     int flag;
     int r = func_0010BBF8(self, &flag);
-    float s = 1.0f;
+    float pressDir = 1.0f;
     if (flag)
-        s = -1.0f;
+        pressDir = -1.0f;
     {
-        sVec4_AD78 v;
-        func_00100610(&v, ((char*)self));
-        cmd->b18 = (int)(func_00100348(((char*)self), &v) * 31.0f);
+        sVec4_AD78 targetPos;
+        func_00100610(&targetPos, ((char*)self));
+        cmd->b18 = (int)(func_00100348(((char*)self), &targetPos) * 31.0f);
     }
     if (r) {
-        cmd->w0 = (int)(s * 31.0f);
-        sVec4_AD78 p = *(sVec4_AD78*)((char*)self->mRider + 0x1A0);
-        float z = p.z + p.z;
+        cmd->w0 = (int)(pressDir * 31.0f);
+        sVec4_AD78 sideAxis = *(sVec4_AD78*)((char*)self->mRider + 0x1A0);
+        float z = sideAxis.z + sideAxis.z;
         float y = clamp_AD78(z, -1.0f, 1.0f);
         if (vAbs_AD78(y) > 0.1f)
             cmd->b24 = (int)(y * 31.0f);
@@ -6786,17 +6786,17 @@ static inline float clamp_AED8(float v, float lo, float hi)
  */
 extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* cmd)
 {
-    int below, o3, o4, o5, o6, ok;
-    int r = cComputer_checkForJumpEvent(self, (float*)(((char*)self) + 0xDF0), &below, &o3, &o4, &o5, &o6);
-    self->mToRail = o4;
+    int below, toPipe, toRail, isSpin, isFlip, ok;
+    int jumpEvent = cComputer_checkForJumpEvent(self, (float*)(((char*)self) + 0xDF0), &below, &toPipe, &toRail, &isSpin, &isFlip);
+    self->mToRail = toRail;
     *(unsigned int*)cmd |= 0x1FE0000;
-    if (r && below) {
+    if (jumpEvent && below) {
         *(unsigned int*)cmd |= 0x6000;
-        cComputer_setupPrewindState_AED8(((char*)self), o5, o6, o4, o3);
+        cComputer_setupPrewindState_AED8(((char*)self), isSpin, isFlip, toRail, toPipe);
         return;
     }
-    sVec4_AED8 p = *(sVec4_AED8*)((char*)self->mRider + 0x1A0);
-    float z = p.z + p.z;
+    sVec4_AED8 sideAxis = *(sVec4_AED8*)((char*)self->mRider + 0x1A0);
+    float z = sideAxis.z + sideAxis.z;
     float y = clamp_AED8(z, -1.0f, 1.0f);
     if (vAbs_AED8(y) > 0.1f)
         cmd->b25 = (int)(y * 31.0f);
@@ -6831,9 +6831,9 @@ extern "C" void cSpinControl_predictFlipSec(void*, float*, float*);
  */
 extern "C" void cComputer_setupEndSpin(cComputer* self, float airTime)
 {
-    float a, b, c, d;
-    cSpinControl_predictSpinSec(*(char**)((char*)self->mRider + 0x77C) + 0x230, &a, &b);
-    cSpinControl_predictFlipSec(*(char**)((char*)self->mRider + 0x77C) + 0x230, &c, &d);
+    float spinCur, spinNext, flipCur, flipNext;
+    cSpinControl_predictSpinSec(*(char**)((char*)self->mRider + 0x77C) + 0x230, &spinCur, &spinNext);
+    cSpinControl_predictFlipSec(*(char**)((char*)self->mRider + 0x77C) + 0x230, &flipCur, &flipNext);
     int stop = 0;
     if (self->mToRail && airTime < 1.0f)
         stop = 1;
@@ -6846,17 +6846,17 @@ extern "C" void cComputer_setupEndSpin(cComputer* self, float airTime)
         return;
     if (self->mSpinAxis != 0.0f) {
         float lim = airTime + 0.1f;
-        if (lim < a)
+        if (lim < spinCur)
             self->mSpinAxis = 0.0f;
-        else if (lim < b && a - 0.4f < 0.0f)
+        else if (lim < spinNext && spinCur - 0.4f < 0.0f)
             self->mSpinAxis = 0.0f;
     }
     if (self->mFlipAxis != 0.0f) {
         float lim = airTime + 0.1f;
-        if (lim < c) {
+        if (lim < flipCur) {
             self->mFlipAxis = 0.0f;
             self->mSpinAxis = 0.0f;
-        } else if (lim < d && c - 0.4f < 0.0f) {
+        } else if (lim < flipNext && flipCur - 0.4f < 0.0f) {
             self->mFlipAxis = 0.0f;
             self->mSpinAxis = 0.0f;
         }
@@ -6911,9 +6911,9 @@ extern "C" int cComputer_chooseGrabMain(char*, float);
 extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
 {
     char* obj = *(char**)((char*)self->mRider + 0x788);
-    int t = *(int*)(obj + 0xAC);
+    int simState = *(int*)(obj + 0xAC);
     int ok = 0;
-    if (t == 1 || t == 3)
+    if (simState == 1 || simState == 3)
         ok = 1;
     float gap;
     if (ok) {
@@ -7013,22 +7013,22 @@ extern "C" float func_00100348_B590(void*, sVec4_B590*) __asm__("func_00100348")
  */
 extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
 {
-    char* o = *(char**)((char*)self->mRider + 0x788);
-    int st = *(int*)(o + 0xAC);
+    char* airPredictor = *(char**)((char*)self->mRider + 0x788);
+    int st = *(int*)(airPredictor + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3)
         ok = 1;
-    float d;
+    float airTimeLeft;
     if (ok)
-        d = *(float*)(o + 0x98) - *(float*)(o + 0xA0);
+        airTimeLeft = *(float*)(airPredictor + 0x98) - *(float*)(airPredictor + 0xA0);
     else
-        d = 0.0f;
+        airTimeLeft = 0.0f;
     self->mIsSpinTrick = 0;
     self->mIsGonnaMessUp = 0;
     self->mIsNaturalAir = 1;
     self->mToRail = 0;
     self->mGrabID = -1;
-    if (d > 1.0f) {
+    if (airTimeLeft > 1.0f) {
         self->mIsSpinTrick = 1;
         self->mSpinAxis = 1.0f;
         if (AIrand() & 1)
@@ -7036,7 +7036,7 @@ extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
     } else {
         self->mSpinAxis = 0.0f;
     }
-    if (d > 3.0f) {
+    if (airTimeLeft > 3.0f) {
         self->mIsSpinTrick = 1;
         self->mFlipAxis = 1.0f;
         if (AIrand() & 1)
@@ -7044,10 +7044,10 @@ extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
     } else {
         self->mFlipAxis = 0.0f;
     }
-    if (d < 0.5f && self->mFlipAxis == 0.0f && self->mSpinAxis == 0.0f) {
-        sVec4_B590 v;
-        func_00100610_B590(&v, ((char*)self));
-        ((sPadBits_B590*)cmd)->b24 = (int)(-func_00100348_B590(((char*)self), &v) * 31.0f);
+    if (airTimeLeft < 0.5f && self->mFlipAxis == 0.0f && self->mSpinAxis == 0.0f) {
+        sVec4_B590 targetPos;
+        func_00100610_B590(&targetPos, ((char*)self));
+        ((sPadBits_B590*)cmd)->b24 = (int)(-func_00100348_B590(((char*)self), &targetPos) * 31.0f);
         self->mGrabID = -1;
     }
     cmd->b2 = self->mGrabID;
@@ -7097,21 +7097,21 @@ extern "C" int func_001298C8();
  */
 extern "C" void cComputer_getGateCmd(cComputer* self, sPad_B790* cmd)
 {
-    float t = 180.0f - (float)func_001298C8();
+    float framesLeft = 180.0f - (float)func_001298C8();
     float th = 33.0f;
     th -= (float)((((cLvl_B790*)((char*)self->mRider + 0x6C0))->Level() - 1) * 10);
-    if (t < th && ((cLvl_B790*)((char*)self->mRider + 0x6C0))->Level() < 4) {
+    if (framesLeft < th && ((cLvl_B790*)((char*)self->mRider + 0x6C0))->Level() < 4) {
         cmd->b12 = 0x1F;
         return;
     }
-    if (t < 72.0f && ((cLvl_B790*)((char*)self->mRider + 0x6C0))->Level() < 3) {
+    if (framesLeft < 72.0f && ((cLvl_B790*)((char*)self->mRider + 0x6C0))->Level() < 3) {
         cmd->b12 = -0x1F;
         return;
     }
     if (func_001298C8() % 20 == 0) {
-        unsigned int r = AIrand();
-        float* p = (float*)(((char*)self) + 0xDF0);
-        *p = (float)r * 0.009999999776482582f;
+        unsigned int randVal = AIrand();
+        float* ctlSpeed = (float*)(((char*)self) + 0xDF0);
+        *ctlSpeed = (float)randVal * 0.009999999776482582f;
         if ((AIrand() & 1) == 0)
             self->mDesiredSpeed = -self->mDesiredSpeed;
     }
@@ -7352,11 +7352,11 @@ extern "C" int cComputer_checkForTargets(cComputer* self, int* isAttack)
                 continue;
             shouldAttack = cComputer_checkForAttack(((char*)self), i);
             float del = ((sRiderT_BD10*)self->mRider)->targets[i].angle - Atan2_BD10(Fwd_BD10((sRiderT_BD10*)self->mRider).y, Fwd_BD10((sRiderT_BD10*)self->mRider).x);
-            float c = func_0031C040(del - Floor_BD10(del * 0.15915493667125702f + 0.5f) * 6.2831854820251465f);
+            float cosDelta = func_0031C040(del - Floor_BD10(del * 0.15915493667125702f + 0.5f) * 6.2831854820251465f);
             if (shouldAttack)
-                aScore *= Abs_BD10(c) + 1.0f;
+                aScore *= Abs_BD10(cosDelta) + 1.0f;
             else
-                aScore *= 1.0f - c;
+                aScore *= 1.0f - cosDelta;
             if (aScore <= bestScore) {
                 self->mTargetID = i;
                 bestScore = aScore;
@@ -7402,8 +7402,8 @@ struct sObj_BFA8 {
 extern "C" void cComputer_setupPrewindState(cComputer* self, int isSpin, int isFlip, int toRail, int toPipe)
 {
     self->mGrabID = -1;
-    int* p = &self->mIsSpinTrick;
-    *p = (isSpin || isFlip);
+    int* trickFlags = &self->mIsSpinTrick;
+    *trickFlags = (isSpin || isFlip);
     self->mIsGonnaMessUp = cComputer_shouldRiderWipeout(self);
     self->mToRail = toRail;
     self->mToPipe = toPipe;
@@ -7461,14 +7461,14 @@ static inline float vLen_C0A8(const sVec4_C0A8& v)
  */
 extern "C" void cComputer_setupCrouch(cComputer* self, void* cmd)
 {
-    sPad_C0A8* pad = (sPad_C0A8*)cmd;
+    sPad_C0A8* crouchCmd = (sPad_C0A8*)cmd;
     float len = vLen_C0A8(*(sVec4_C0A8*)((char*)self->mRider + 0x1E0));
-    float s = 0.97f;
+    float pressAmount = 0.97f;
     if (len < 833.3334350585938f)
-        s = 1.0f;
+        pressAmount = 1.0f;
     if (self->mRiderDifficulty < 20.0f)
-        s = 0.0f;
-    pad->w0 = (int)(s * 31.0f);
+        pressAmount = 0.0f;
+    crouchCmd->w0 = (int)(pressAmount * 31.0f);
 }
 #endif
 
@@ -7512,14 +7512,14 @@ static inline float vLen_C140(const sVec4_C140& v)
  */
 extern "C" void cComputer_setupRecklessCrouch(cComputer* self, void* cmd)
 {
-    sPad_C140* pad = (sPad_C140*)cmd;
+    sPad_C140* crouchCmd = (sPad_C140*)cmd;
     float len = vLen_C140(*(sVec4_C140*)((char*)self->mRider + 0x1E0));
-    float s = 0.97f;
+    float pressAmount = 0.97f;
     if (len < 833.3334350585938f)
-        s = 1.0f;
-    pad->w0 = (int)(s * 31.0f);
-    pad->b16 = 1;
-    pad->b17 = 1;
+        pressAmount = 1.0f;
+    crouchCmd->w0 = (int)(pressAmount * 31.0f);
+    crouchCmd->b16 = 1;
+    crouchCmd->b17 = 1;
 }
 #endif
 
@@ -7532,9 +7532,9 @@ INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderWipeout);
  * @return 1 when AIrand() % 100 is at least mTrickDifficulty * 100 (a 1 - mTrickDifficulty chance), else 0
  */
 extern "C" int cComputer_shouldRiderWipeout(cComputer* self) {
-    unsigned int r = AIrand();
+    unsigned int roll = AIrand();
     float thr = self->mTrickDifficulty * 100.0f;
-    return thr <= (float)(r % 100U);
+    return thr <= (float)(roll % 100U);
 }
 #endif
 
@@ -7555,9 +7555,9 @@ extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" int cComputer_shouldRiderUber(cComputer* self) {
     if (*(unsigned int*)((char*)self->mRider + 0xB2C) & 1) {
         if (cBENewRaceInterface_getLocationID(cBE_getInterface_C258(cBE_getBE(), 0)) != 0xE) {
-            unsigned int r = AIrand();
+            unsigned int roll = AIrand();
             float thr = self->mTrickDifficulty * 100.0f;
-            return (float)(r % 100U) < thr;
+            return (float)(roll % 100U) < thr;
         }
     }
     return 0;
@@ -7573,9 +7573,9 @@ INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderTweak);
  * @return 1 when AIrand() % 100 is under 30 + 70 * mTrickDifficulty, otherwise 0
  */
 extern "C" int cComputer_shouldRiderTweak(cComputer* self) {
-    unsigned int r = AIrand();
+    unsigned int roll = AIrand();
     float thr = self->mTrickDifficulty * 70.0f + 30.0f;
-    return (float)(r % 100U) < thr;
+    return (float)(roll % 100U) < thr;
 }
 #endif
 
@@ -7588,9 +7588,9 @@ INCLUDE_ASM("seg/seg_1218", cComputer_shouldRiderGrab);
  * @return 1 when AIrand() % 100 is under 60 + 40 * mTrickDifficulty, otherwise 0
  */
 extern "C" int cComputer_shouldRiderGrab(cComputer* self) {
-    unsigned int r = AIrand();
+    unsigned int roll = AIrand();
     float thr = self->mTrickDifficulty * 40.0f + 60.0f;
-    return (float)(r % 100U) < thr;
+    return (float)(roll % 100U) < thr;
 }
 #endif
 

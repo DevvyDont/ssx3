@@ -53,8 +53,8 @@ extern "C" int cBEEconInterface_getMoney(void* self, int iHuman, int charType)
     int bOff = charType * 0xF88;
     int aOff = iHuman * 0x9B50;
     int off = bOff + aOff;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return *(int*)(p + 0xAC4);
+    char* profile = (char*)cBELibrary_profileLib + off;
+    return *(int*)(profile + 0xAC4);
 }
 #endif
 
@@ -96,8 +96,8 @@ int cBEEconInterface_getTotalMoneyEarned(void* self, int iHuman, int charType)
     int bOff = charType * 0xF88;
     int aOff = iHuman * 0x9B50;
     int off = bOff + aOff;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return *(int*)(p + 0xAC8);
+    char* profile = (char*)cBELibrary_profileLib + off;
+    return *(int*)(profile + 0xAC8);
 }
 #endif
 
@@ -115,13 +115,13 @@ int cBELibrary_getCharacterID(int);
  */
 extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int b = cBELibrary_getCharacterID(rider);
-    int bOff = b * 0xF88;
-    int aOff = a * 0x9B50;
+    int profileIndex = cBELibrary_getProfileIndex(rider);
+    int characterId = cBELibrary_getCharacterID(rider);
+    int bOff = characterId * 0xF88;
+    int aOff = profileIndex * 0x9B50;
     int off = bOff + aOff;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return *(int*)(p + 0xAC8);
+    char* profile = (char*)cBELibrary_profileLib + off;
+    return *(int*)(profile + 0xAC8);
 }
 #endif
 

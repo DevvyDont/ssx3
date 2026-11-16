@@ -249,12 +249,12 @@ struct sMultiPart58260 {
 extern "C" void cMultiParticle_render(sMultiPart58260* self)
 {
     for (int i = 0; i < self->count; i++) {
-        sMPModel* m = (sMPModel*)self->refs[i].get(*func_002D1BD8());
-        if (m != 0) {
-            sMPBox b = self->box;
-            vu0AddTo58260(b.min, m->pos);
-            vu0AddTo58260(b.max, m->pos);
-            cStaticEmitter_render(self->desc, &b, vu0Add58260(m->getPos(), self->center));
+        sMPModel* model = (sMPModel*)self->refs[i].get(*func_002D1BD8());
+        if (model != 0) {
+            sMPBox bounds = self->box;
+            vu0AddTo58260(bounds.min, model->pos);
+            vu0AddTo58260(bounds.max, model->pos);
+            cStaticEmitter_render(self->desc, &bounds, vu0Add58260(model->getPos(), self->center));
         }
     }
 }
@@ -291,20 +291,20 @@ extern "C" void cStaticEmitter_writeToReplayFrame(void* desc, void* stream);
  */
 extern "C" void cMultiParticle_writeToReplayFrame(sMultiPart_58380* self, void* stream)
 {
-    sSerVEntry_58380* e = &(*(sSerVEntry_58380**)stream)[1];
-    e->fn((char*)stream + e->delta, self, 4);
-    e = &(*(sSerVEntry_58380**)stream)[1];
-    e->fn((char*)stream + e->delta, &self->count, 4);
-    e = &(*(sSerVEntry_58380**)stream)[1];
-    e->fn((char*)stream + e->delta, self->data, 0xD8);
+    sSerVEntry_58380* writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, self, 4);
+    writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, &self->count, 4);
+    writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, self->data, 0xD8);
     cStaticEmitter_writeToReplayFrame(self->desc, stream);
-    e = &(*(sSerVEntry_58380**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x40, 0x10);
-    e = &(*(sSerVEntry_58380**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x20, 0x20);
+    writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x40, 0x10);
+    writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x20, 0x20);
     if (self->count > 0) {
-        e = &(*(sSerVEntry_58380**)stream)[1];
-        e->fn((char*)stream + e->delta, self->items, self->count << 2);
+        writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+        writeEntry->fn((char*)stream + writeEntry->delta, self->items, self->count << 2);
     }
 }
 #endif
@@ -402,19 +402,19 @@ public:
  */
 extern "C" void* cRailManNode_cRailManNode(void* self, void* bucket, cRailManNode_cRailManNode_cStream* stream)
 {
-    char* s = (char*)self;
+    char* selfBytes = (char*)self;
     int i;
     int j;
     cSortObjNode_cSortObjNode(self, bucket, stream);
-    *(void***)(s + 0xC) = cRailManNode_vtbl;
-    unsigned int* p = (unsigned int*)(s + 0x18);
-    for (j = 0x7F; j != -1; j--, p++) {
-        *p = 0xFFFFFFFF;
+    *(void***)(selfBytes + 0xC) = cRailManNode_vtbl;
+    unsigned int* slot = (unsigned int*)(selfBytes + 0x18);
+    for (j = 0x7F; j != -1; j--, slot++) {
+        *slot = 0xFFFFFFFF;
     }
     D_004A4040 = self;
-    stream->v02(s + 0x18, 0x200);
+    stream->v02(selfBytes + 0x18, 0x200);
     for (i = 0; i < 0x80; i++) {
-        if (((unsigned int*)(s + 0x18))[i] != 0xFFFFFFFF) {
+        if (((unsigned int*)(selfBytes + 0x18))[i] != 0xFFFFFFFF) {
             func_00358780(self, i);
         }
     }
@@ -917,13 +917,13 @@ struct sParticle_8DB0 {
  */
 extern "C" void* cAnimComboNode_cAnimComboNode(void* self, void* bucket, void* stream)
 {
-    char* s = (char*)self;
-    sParticle_8DB0** pp = (sParticle_8DB0**)(s + 0x84);
-    cAnimObjectNode_cAnimObjectNode(s + 0x18, bucket, stream);
-    *(void**)(s + 0x54) = D_0048EC28;
+    char* selfBytes = (char*)self;
+    sParticle_8DB0** pp = (sParticle_8DB0**)(selfBytes + 0x84);
+    cAnimObjectNode_cAnimObjectNode(selfBytes + 0x18, bucket, stream);
+    *(void**)(selfBytes + 0x54) = D_0048EC28;
     sStreamVE_8DB0* vt = *(sStreamVE_8DB0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self, 0x18);
-    *pp = new (D_0048EA20, 0x20000000, 0) sParticle_8DB0[*(int*)(s + 0x74)];
+    *pp = new (D_0048EA20, 0x20000000, 0) sParticle_8DB0[*(int*)(selfBytes + 0x74)];
     func_00359030(self);
     return self;
 }
@@ -1410,15 +1410,15 @@ extern "C" void* cSplineModifier_cSplineModifier1(cSplineModifier* self, char* d
     } else {
         self->OffsetDistance = self->Spline.Length;
     }
-    float zero = 0.0f;
+    float zeroF = 0.0f;
     self->Start = *(int*)(desc + 0x20) != 0;
     self->Complete = 0;
-    if (*(float*)(desc + 0x18) != zero) {
+    if (*(float*)(desc + 0x18) != zeroF) {
         self->OffsetDistance = *(float*)(desc + 0x18);
     }
     self->OffsetDistance += AIrandf(-1.0f, 1.0f) * *(float*)(desc + 0x1C);
-    if (self->OffsetDistance < zero || self->Spline.Length < self->OffsetDistance) {
-        self->OffsetDistance = zero;
+    if (self->OffsetDistance < zeroF || self->Spline.Length < self->OffsetDistance) {
+        self->OffsetDistance = zeroF;
     }
     *(sMpQuad*)&self->Dir = t4vect_Zero;
     *(sMpQuad*)&self->DDir = t4vect_Zero;

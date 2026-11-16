@@ -34,13 +34,13 @@ void* cBEScoreInterface_getThis()
 {
     if (D_004A1248 == 0) {
         void* mem = cMemMan_alloc(0x230, D_0045A858, 0, 0);
-        cBEScoreInterface* s = (cBEScoreInterface*)cBEScoreInterface_cBEScoreInterface_impl(mem);
-        D_004A1248 = s;
-        s->field_0x8 = 0;
-        s->field_0x10 = 0;
-        s->field_0x14 = 0;
-        s->field_0x18 = -1;
-        s->field_0x1C = -1;
+        cBEScoreInterface* scoreIface = (cBEScoreInterface*)cBEScoreInterface_cBEScoreInterface_impl(mem);
+        D_004A1248 = scoreIface;
+        scoreIface->field_0x8 = 0;
+        scoreIface->field_0x10 = 0;
+        scoreIface->field_0x14 = 0;
+        scoreIface->field_0x18 = -1;
+        scoreIface->field_0x1C = -1;
     }
     return D_004A1248;
 }
@@ -451,8 +451,8 @@ struct sHL { char pad[0xBB8]; signed char lv[1]; };
 signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int riderIndex)
 {
     int charID = cBELibrary_getCharacterID(0);
-    int s = riderIndex + charID * 0xF88;
-    return ((sHL*)cBELibrary_profileLib)->lv[s];
+    int offset = riderIndex + charID * 0xF88;
+    return ((sHL*)cBELibrary_profileLib)->lv[offset];
 }
 #endif
 

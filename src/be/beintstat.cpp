@@ -36,15 +36,15 @@ extern sCharStat_getCollisionAttrib D_005308D8_getCollisionAttrib[] __asm__("D_0
 extern "C" float cBEStatInterface_getCollisionAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int charID = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
     int v;
     if (value > 0)
         v = value;
     else
-        v = D_00535538_getCollisionAttrib[profile].e[c][5] / 5;
-    return (float)v / (float)D_005308D8_getCollisionAttrib[c].v[0xD];
+        v = D_00535538_getCollisionAttrib[profile].e[charID][5] / 5;
+    return (float)v / (float)D_005308D8_getCollisionAttrib[charID].v[0xD];
 }
 #endif
 

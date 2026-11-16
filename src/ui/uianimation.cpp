@@ -26,12 +26,12 @@ struct sUIAnimEntry {
  */
 extern "C" void* cUIAnimationBank_getAnimationByHashName(unsigned int** self, int hash)
 {
-    sUIAnimEntry* e = (sUIAnimEntry*)(*self + 1);
+    sUIAnimEntry* entry = (sUIAnimEntry*)(*self + 1);
     for (unsigned int i = 0; i < **self; i++) {
-        if (e->hash == hash) {
-            return cUIAnimation_cUIAnimation(cMemMan_alloc(0x14, D_004A4768, 0x100, 0), e);
+        if (entry->hash == hash) {
+            return cUIAnimation_cUIAnimation(cMemMan_alloc(0x14, D_004A4768, 0x100, 0), entry);
         }
-        e = (sUIAnimEntry*)((char*)e + e->size);
+        entry = (sUIAnimEntry*)((char*)entry + entry->size);
     }
     return 0;
 }
@@ -63,27 +63,27 @@ struct cUIAnimationChannel_evalAtFrameFloat_sAnim {
  */
 extern "C" float cUIAnimationChannel_evalAtFrameFloat(cUIAnimationChannel_evalAtFrameFloat_sAnim** self, int FrameNum)
 {
-    cUIAnimationChannel_evalAtFrameFloat_sAnim* a = *self;
-    if (a == 0) {
+    cUIAnimationChannel_evalAtFrameFloat_sAnim* anim = *self;
+    if (anim == 0) {
         return 0.0f;
     }
     unsigned int i;
     int prevT = 0;
-    float prevV = a->keys[0].value;
+    float prevV = anim->keys[0].value;
     int accT = 0;
-    float v = 0.0f;
-    cUIAnimationChannel_evalAtFrameFloat_sKey* k = &a->keys[1];
-    for (i = 1; i < a->count; i++, k++) {
+    float keyValue = 0.0f;
+    cUIAnimationChannel_evalAtFrameFloat_sKey* k = &anim->keys[1];
+    for (i = 1; i < anim->count; i++, k++) {
         int dt = k->dt;
         accT += dt;
-        v = k->value;
+        keyValue = k->value;
         if (accT >= FrameNum) {
-            return (float)(FrameNum - prevT) / (float)dt * (v - prevV) + prevV;
+            return (float)(FrameNum - prevT) / (float)dt * (keyValue - prevV) + prevV;
         }
         prevT = accT;
-        prevV = v;
+        prevV = keyValue;
     }
-    return v;
+    return keyValue;
 }
 #endif
 
@@ -100,9 +100,9 @@ INCLUDE_ASM("ui/uianimation", cUIAnimationChannel_getAnimChanType);
  */
 extern "C" unsigned short cUIAnimationChannel_getAnimChanType(void* self)
 {
-    void* p = *(void**)self;
-    if (p != 0) {
-        return *(unsigned short*)((char*)p + 0x2);
+    void* anim = *(void**)self;
+    if (anim != 0) {
+        return *(unsigned short*)((char*)anim + 0x2);
     }
     return 0;
 }
@@ -148,19 +148,19 @@ extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data)
     int** slot = (int**)((char*)self + 0x4);
     unsigned int n = *(unsigned int*)((char*)data + 4);
     if (n != 0) {
-        int* p = (int*)operator_new_tag(n * 4 + 0x10, D_00493D60, 0x100, 0);
-        p[0] = n;
-        int* arr = p + 4;
-        int* e = arr;
-        for (int i = n - 1; i != -1; i--, e++) {
-            *e = 0;
+        int* block = (int*)operator_new_tag(n * 4 + 0x10, D_00493D60, 0x100, 0);
+        block[0] = n;
+        int* arr = block + 4;
+        int* elem = arr;
+        for (int i = n - 1; i != -1; i--, elem++) {
+            *elem = 0;
         }
         *slot = arr;
-        char* q = *(char**)self + 0x10;
+        char* chanData = *(char**)self + 0x10;
         for (unsigned int i = 0; i < *(unsigned int*)(*(char**)self + 4); i++) {
             // PORT: the entry pointer is passed as int
-            func_00397298(*(char**)((char*)self + 0x4) + (i << 2), (int)q);
-            q += *(unsigned short*)(q + 4);
+            func_00397298(*(char**)((char*)self + 0x4) + (i << 2), (int)chanData);
+            chanData += *(unsigned short*)(chanData + 4);
         }
     }
     return self;
@@ -359,9 +359,9 @@ extern "C" void cUIAnimation_updateThing(sUIAnim75E0* self, char* obj, int mode,
     if (self->cur == frame) return;
     if (frame < self->hdr->nframes) {
         for (unsigned int i = 0; i < self->hdr->ntracks; i++) {
-            float v = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)(self->tracks + (i << 2)), frame);
+            float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)(self->tracks + (i << 2)), frame);
             sUIAnimVt75E0* vt = *(sUIAnimVt75E0**)(obj + 8);
-            vt[12].fn(obj + vt[12].delta, cUIAnimationChannel_getAnimChanType(self->tracks + (i << 2)), v);
+            vt[12].fn(obj + vt[12].delta, cUIAnimationChannel_getAnimChanType(self->tracks + (i << 2)), chanValue);
         }
     }
     self->cur = frame;

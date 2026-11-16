@@ -117,11 +117,11 @@ extern "C" void cFloatingNode_updateOverlapSystem(cFloatingNode* self)
     if (info != 0) {
         sFlBox_34EF40 nb;
         sFlBox_34EF40 old = info->box;
-        float r = info->radius;
+        float extent = info->radius;
         sFlVec4_34EF40 ext;
-        ext.x = r;
-        ext.y = r;
-        ext.z = r;
+        ext.x = extent;
+        ext.y = extent;
+        ext.z = extent;
         ext.w = 0.0f;
         nb.min = vu0Sub_34EF40(nodePos_34EF40(((char*)self)), ext);
         nb.max = vu0Add_34EF40(nodePos_34EF40(((char*)self)), ext);
@@ -169,16 +169,16 @@ extern "C" void cFloatingNode_restoreOverlapSystem(cFloatingNode* self)
         sBox_F048 nb;
         sBox_F048 old = *info;
         sInst_F048* inst = (sInst_F048*)self->Instance;
-        sVec4_F048 t;
-        t.x = inst->min[0];
-        t.y = inst->min[1];
-        t.z = inst->min[2];
-        t.w = 1.0f;
-        nb.min = t;
-        t.x = inst->max[0];
-        t.y = inst->max[1];
-        t.z = inst->max[2];
-        nb.max = t;
+        sVec4_F048 corner;
+        corner.x = inst->min[0];
+        corner.y = inst->min[1];
+        corner.z = inst->min[2];
+        corner.w = 1.0f;
+        nb.min = corner;
+        corner.x = inst->max[0];
+        corner.y = inst->max[1];
+        corner.z = inst->max[2];
+        nb.max = corner;
         *info = nb;
         void* id = self->Instance;
         nash_Nash_movenode(cObjectInterface_getNash(), 0, id, &nb, &old);
@@ -335,7 +335,7 @@ static inline void Pose_F120(sMat_F120* dst, const sMat_F120* parent, const sMat
 // Poses a floating object's skeleton: the root bob/tilt transform, then each bone under its parent.
 extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, sMat_F120* mat, sMat_F120* out)
 {
-    sMat_F120 m;
+    sMat_F120 tiltMat;
     sQuad_F120 base = mat->row[3];
     float pos[3];
     float rot[3];
@@ -354,39 +354,39 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, sMat_F120* mat, 
     float sxsy = sx * sy;
     float cxsy = cx * sy;
     float cxsz = cx * sz;
-    m.row[0].x = cy * cz;
-    m.row[0].y = -cy * sz;
-    m.row[0].z = sy;
-    m.row[0].w = 0.0f;
-    m.row[1].x = sxsy * cz + cxsz;
-    m.row[1].y = cx * cz - sxsy * sz;
-    m.row[1].z = -sx * cy;
-    m.row[1].w = 0.0f;
-    m.row[2].x = sx * sz - cxsy * cz;
-    m.row[2].y = cxsz * sy + sx * cz;
-    m.row[2].z = cx * cy;
-    m.row[2].w = 0.0f;
-    m.row[3].x = pos[0];
-    m.row[3].y = pos[1];
-    m.row[3].z = pos[2];
-    m.row[3].w = 1.0f;
+    tiltMat.row[0].x = cy * cz;
+    tiltMat.row[0].y = -cy * sz;
+    tiltMat.row[0].z = sy;
+    tiltMat.row[0].w = 0.0f;
+    tiltMat.row[1].x = sxsy * cz + cxsz;
+    tiltMat.row[1].y = cx * cz - sxsy * sz;
+    tiltMat.row[1].z = -sx * cy;
+    tiltMat.row[1].w = 0.0f;
+    tiltMat.row[2].x = sx * sz - cxsy * cz;
+    tiltMat.row[2].y = cxsz * sy + sx * cz;
+    tiltMat.row[2].z = cx * cy;
+    tiltMat.row[2].w = 0.0f;
+    tiltMat.row[3].x = pos[0];
+    tiltMat.row[3].y = pos[1];
+    tiltMat.row[3].z = pos[2];
+    tiltMat.row[3].w = 1.0f;
     sSkel_F120* skel = *(sSkel_F120**)((char*)self->Instance + 0x80);
     float sc4 = *(float*)((char*)self->Instance + 0x84);
     sBone_F120* bone = skel->bones;
     sVec4_F120 scale(sc4, sc4, sc4, 1.0f);
     int i;
     for (i = 0; i < skel->count; i++, bone++) {
-        sMat_F120 r;
+        sMat_F120 boneMat;
         if (bone->parent != -1) {
-            Pose_F120(&r, &out[bone->parent], bone->local, scale);
-            Copy_F120(&out[i], &r);
+            Pose_F120(&boneMat, &out[bone->parent], bone->local, scale);
+            Copy_F120(&out[i], &boneMat);
         } else {
             sMat_F120 w;
-            sMat_F120 t;
-            Mul_F120(&t, mat, &m);
-            Copy_F120(&w, &t);
-            Pose_F120(&r, &w, bone->local, scale);
-            Copy_F120(&out[i], &r);
+            sMat_F120 rootMat;
+            Mul_F120(&rootMat, mat, &tiltMat);
+            Copy_F120(&w, &rootMat);
+            Pose_F120(&boneMat, &w, bone->local, scale);
+            Copy_F120(&out[i], &boneMat);
         }
     }
     self->Flags &= 0xFFFE;
@@ -511,14 +511,14 @@ struct sFloat_F600 {
 extern "C" void cFloatingNode_applyForce(cFloatingNode* self, sV4_F600* intInfo, sV4_F600* force)
 {
     sFlVE_F600* vt = (sFlVE_F600*)self->mVtbl;
-    sV4_F600* m = vt[24].fn((char*)self + vt[24].delta);
-    sV4_F600 d = vu0Sub_F600(intInfo[0], pos_F600(m));
-    sV4_F600 u = vu0MtxMul_F600(m, &D_004FF140_F600[0]);
-    sV4_F600 v = vu0MtxMul_F600(m, &D_004FF150_F600[0]);
+    sV4_F600* transform = vt[24].fn((char*)self + vt[24].delta);
+    sV4_F600 arm = vu0Sub_F600(intInfo[0], pos_F600(transform));
+    sV4_F600 axisX = vu0MtxMul_F600(transform, &D_004FF140_F600[0]);
+    sV4_F600 axisY = vu0MtxMul_F600(transform, &D_004FF150_F600[0]);
     self->Force += vu0Dot_F600(*force, intInfo[1]);
-    sV4_F600 c = vu0Cross_F600(*force, d);
-    self->TX += vu0Dot_F600(c, u);
-    self->TY += vu0Dot_F600(c, v);
+    sV4_F600 c = vu0Cross_F600(*force, arm);
+    self->TX += vu0Dot_F600(c, axisX);
+    self->TY += vu0Dot_F600(c, axisY);
 }
 #endif
 
@@ -671,13 +671,13 @@ extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790*
 {
     cMoveNode_updateIntersectInfo(((sFloat_F790*)self), intInfo);
     sFlVE_F790* vt = (sFlVE_F790*)self->mVtbl;
-    sV4_F790* m = vt[24].fn((char*)self + vt[24].delta);
-    sFlBase_F790* b = (sFlBase_F790*)((char*)self + 0x2C);
-    sV4_F790 d = vu0Sub_F790(intInfo[0], pos_F790(m));
-    sV4_F790 u = vu0MtxMul_F790(m, &D_004FF140_F790[0]);
-    sV4_F790 v = vu0MtxMul_F790(m, &D_004FF150_F790[0]);
-    sV4_F790 s = vu0Add_F790(vu0Scale_F790(u, b->f30), vu0Scale_F790(v, b->f40));
-    vu0AddEq_F790(intInfo[2], vu0Add_F790(sV4_F790(0.0f, 0.0f, b->f1C, 0.0f), vu0Cross_F790(d, s)));
+    sV4_F790* transform = vt[24].fn((char*)self + vt[24].delta);
+    sFlBase_F790* base = (sFlBase_F790*)((char*)self + 0x2C);
+    sV4_F790 arm = vu0Sub_F790(intInfo[0], pos_F790(transform));
+    sV4_F790 axisX = vu0MtxMul_F790(transform, &D_004FF140_F790[0]);
+    sV4_F790 axisY = vu0MtxMul_F790(transform, &D_004FF150_F790[0]);
+    sV4_F790 s = vu0Add_F790(vu0Scale_F790(axisX, base->f30), vu0Scale_F790(axisY, base->f40));
+    vu0AddEq_F790(intInfo[2], vu0Add_F790(sV4_F790(0.0f, 0.0f, base->f1C, 0.0f), vu0Cross_F790(arm, s)));
     vu0AddEq_F790(intInfo[3], s);
 }
 #endif
@@ -733,20 +733,20 @@ struct sFloatingNode_34F930 {
 extern "C" int cFloatingNode_updateNode(cFloatingNode* self)
 {
     float dt = 1.0f / (float)*(int*)(D_004A5B64 + 0x10);
-    float a1 = -self->ZSpring * (self->Z - self->Zo) + self->ForceScale * self->Force + -self->ZDamp * self->Vel;
-    float a2 = -self->ASpring * self->OX + self->TorqueScale * self->TX + -self->ADamp * self->WX;
-    float a3 = -self->ASpring * self->OY + self->TorqueScale * self->TY + -self->ADamp * self->WY;
+    float accelZ = -self->ZSpring * (self->Z - self->Zo) + self->ForceScale * self->Force + -self->ZDamp * self->Vel;
+    float accelX = -self->ASpring * self->OX + self->TorqueScale * self->TX + -self->ADamp * self->WX;
+    float accelY = -self->ASpring * self->OY + self->TorqueScale * self->TY + -self->ADamp * self->WY;
     self->Z += self->Vel * dt;
-    self->Vel += a1 * dt;
+    self->Vel += accelZ * dt;
     self->OX += self->WX * dt;
-    self->WX += a2 * dt;
+    self->WX += accelX * dt;
     self->OY += self->WY * dt;
-    self->WY += a3 * dt;
-    sFloatTilt_34F930* t = (sFloatTilt_34F930*)&self->ZSpring;
+    self->WY += accelY * dt;
+    sFloatTilt_34F930* tilt = (sFloatTilt_34F930*)&self->ZSpring;
     float lo = -1.3962635f;    // +-80 degrees
     float hi = 1.3962635f;
-    self->OX = t->pos2 >= lo ? t->pos2 <? hi : lo;
-    self->OY = t->pos3 >= lo ? t->pos3 <? hi : lo;
+    self->OX = tilt->pos2 >= lo ? tilt->pos2 <? hi : lo;
+    self->OY = tilt->pos3 >= lo ? tilt->pos3 <? hi : lo;
     self->Force = 0.0f;
     self->TX = 0.0f;
     self->TY = 0.0f;
@@ -777,10 +777,10 @@ extern "C" void cFloatingNode_writeToReplayFrame(cFloatingNode* self, void* stre
     int has;
     cMoveNode_writeToReplayFrame(self, stream);
     has = ((void*)self->Info) != 0;
-    sFloatingVEntryFA88* e = &(*(sFloatingVEntryFA88**)stream)[1];
-    e->fn((char*)stream + e->delta, &has, 4);
-    e = &(*(sFloatingVEntryFA88**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x2C, 0x48);
+    sFloatingVEntryFA88* vtEntry = &(*(sFloatingVEntryFA88**)stream)[1];
+    vtEntry->fn((char*)stream + vtEntry->delta, &has, 4);
+    vtEntry = &(*(sFloatingVEntryFA88**)stream)[1];
+    vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x2C, 0x48);
 }
 #endif
 

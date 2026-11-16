@@ -104,12 +104,12 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cOVStateHiScoreList_onWidgetEvent(void* self, void* item, int Event)
 {
     if (item != 0 && Event == 5) {
-        void* r = 0;
+        void* nextState = 0;
         if (*(int*)((char*)item + 0x18) == 1) {
-            sObj001E9130* o = **(sObj001E9130***)((char*)self + 0x10);
-            r = o->vt[4].fn((char*)o + o->vt[4].delta, self, 1);
+            sObj001E9130* factory = **(sObj001E9130***)((char*)self + 0x10);
+            nextState = factory->vt[4].fn((char*)factory + factory->vt[4].delta, self, 1);
         }
-        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
     }
 }
 #endif
@@ -843,13 +843,13 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
 {
     sHUD1P* self = (sHUD1P*)vself;
     self->hash = GetHashValue32(D_004A20D0);
-    sTok_9AD0* t = D_004C8980_9AD0;
-    while (t->hash != 0) {
-        sUIItem_9AD0* it = (sUIItem_9AD0*)func_00398380(self->engine + 0x58, t->name);
-        t->tex = it->handle;
-        t->uv0 = t2Vector(it->getX0(), it->getY0());
-        t->uv1 = t2Vector(it->getX1(), it->getY1());
-        t++;
+    sTok_9AD0* entry = D_004C8980_9AD0;
+    while (entry->hash != 0) {
+        sUIItem_9AD0* it = (sUIItem_9AD0*)func_00398380(self->engine + 0x58, entry->name);
+        entry->tex = it->handle;
+        entry->uv0 = t2Vector(it->getX0(), it->getY0());
+        entry->uv1 = t2Vector(it->getX1(), it->getY1());
+        entry++;
     }
     self->f3C4 = 0x50;
     self->f3B4 = 0xF0000000;
@@ -2229,12 +2229,12 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_cBXLoadIndicator__FPv);
  */
 void* cBXLoadIndicator_cBXLoadIndicator(void* self)
 {
-    cOVStateHUDElem* e = (cOVStateHUDElem*)self;
-    int t0 = 0;
-    e->field_0x0 = t0;
-    *(int*)&e->rangeMax = t0;
-    e->field_0x4 = t0;
-    *(int*)&e->rangeMin = t0;
+    cOVStateHUDElem* elem = (cOVStateHUDElem*)self;
+    int initValue = 0;
+    elem->field_0x0 = initValue;
+    *(int*)&elem->rangeMax = initValue;
+    elem->field_0x4 = initValue;
+    *(int*)&elem->rangeMin = initValue;
     return self;
 }
 #endif

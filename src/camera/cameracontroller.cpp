@@ -316,8 +316,8 @@ INCLUDE_ASM("camera/cameracontroller", cManualCameraController_update);
  */
 extern "C" void cManualCameraController_update(void* self)
 {
-    void** p = *(void***)((char*)self + 0x8);
-    cCamCtrlVObj* obj = *(cCamCtrlVObj**)*p;
+    void** algoList = *(void***)((char*)self + 0x8);
+    cCamCtrlVObj* obj = *(cCamCtrlVObj**)*algoList;
     obj->v05();
 }
 #endif

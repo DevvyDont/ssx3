@@ -1456,24 +1456,24 @@ extern "C" int tNISList_SetupNextScript(void* vself, int index, int skipFlagged)
     int count = func_00283D28_count(self + 0xC);
     int i = index;
     for (; i < count; i++) {
-        sDmEnt7450* e = (sDmEnt7450*)func_00283D70(self + 0xC, i);
-        if (skipFlagged && (e->flags & 2))
+        sDmEnt7450* currEntry = (sDmEnt7450*)func_00283D70(self + 0xC, i);
+        if (skipFlagged && (currEntry->flags & 2))
             continue;
-        if (e->id >= 0)
+        if (currEntry->id >= 0)
             return i;
-        if (func_00277DD8(self, e) == 0) {
+        if (func_00277DD8(self, currEntry) == 0) {
             void* eng = *(void**)self;
-            if (e->f4 >= 0)
-                e->id = cSSXScriptEngine_RequestScriptByIndex(eng, e->f4, e->a, e->b, e->c);
+            if (currEntry->f4 >= 0)
+                currEntry->id = cSSXScriptEngine_RequestScriptByIndex(eng, currEntry->f4, currEntry->a, currEntry->b, currEntry->c);
             else
-                e->id = cSSXScriptEngine_RequestScriptByCategory(*(void**)self, e->f0, e->a, e->b, e->c);
-            if (e->id >= 0)
+                currEntry->id = cSSXScriptEngine_RequestScriptByCategory(*(void**)self, currEntry->f0, currEntry->a, currEntry->b, currEntry->c);
+            if (currEntry->id >= 0)
                 return i;
         } else {
             if (*(int*)(*(char**)self + 0x500) == 0) {
-                int* v = func_00277DE8_p(self, e);
-                if (cVidEngine_ReadyVideo((void**)(*(char**)self + 0x500), *v) != 0)
-                    e->id = 0;
+                int* videoEntry = func_00277DE8_p(self, currEntry);
+                if (cVidEngine_ReadyVideo((void**)(*(char**)self + 0x500), *videoEntry) != 0)
+                    currEntry->id = 0;
             }
             return i;
         }

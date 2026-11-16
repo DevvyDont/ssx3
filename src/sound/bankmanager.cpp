@@ -358,8 +358,8 @@ extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embed
         sBmVtbl vt = D_00483AB8;
         *(sBmVtbl**)(self->monitor + 4) = &vt;
         char* base = self->monitor - 0xAD0;
-        int d = (char*)self - base;
-        vt.e[1].delta = D_00483AB8.e[1].delta + d;
+        int thisDelta = (char*)self - base;
+        vt.e[1].delta = D_00483AB8.e[1].delta + thisDelta;
     }
     self->count = count;
     self->vtbl2 = cBankMonitor_vtbl;

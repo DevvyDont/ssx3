@@ -70,27 +70,27 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
     func_0039E2A0_Room(self, (int)ui);
     *(int*)((char*)self + 0xC) = 0x2B;
     *(void***)((char*)self + 0x8) = cFEStateMountainRoom_vtbl;
-    sMountainRoomK2678* s = (sMountainRoomK2678*)self;
-    s->player = pl;
+    sMountainRoomK2678* room = (sMountainRoomK2678*)self;
+    room->player = pl;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), pl);
-    s->f48 = 0;
-    s->f50 = 0;
-    s->f54 = 0;
+    room->f48 = 0;
+    room->f50 = 0;
+    room->f54 = 0;
     for (int i = 4; i >= 0; i--) {
-        s->a[i] = 0;
+        room->a[i] = 0;
     }
-    int* r1 = s->b[1];
-    int* r2 = s->b[2];
-    int* r3 = s->b[3];
-    int* r4 = s->b[4];
+    int* row1 = room->b[1];
+    int* row2 = room->b[2];
+    int* r3 = room->b[3];
+    int* r4 = room->b[4];
     for (int i = 2; i >= 0; i--) {
-        s->b[0][i] = 0;
-    }
-    for (int i = 2; i >= 0; i--) {
-        r1[i] = 0;
+        room->b[0][i] = 0;
     }
     for (int i = 2; i >= 0; i--) {
-        r2[i] = 0;
+        row1[i] = 0;
+    }
+    for (int i = 2; i >= 0; i--) {
+        row2[i] = 0;
     }
     for (int i = 2; i >= 0; i--) {
         r3[i] = 0;
@@ -98,24 +98,24 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
     for (int i = 2; i >= 0; i--) {
         r4[i] = 0;
     }
-    s->fA8 = 0;
-    s->fAC = 0;
+    room->fA8 = 0;
+    room->fAC = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-    s->charID = cBENewPlayerInterface_getPlayerCharID(iface, s->player);
+    room->charID = cBENewPlayerInterface_getPlayerCharID(iface, room->player);
     for (int i = 0; i < 3; i++) {
-        if (cBENewPlayerInterface_isPeakLocked(iface, s->player, s->charID, i) == 0) {
-            s->fB4 = i;
+        if (cBENewPlayerInterface_isPeakLocked(iface, room->player, room->charID, i) == 0) {
+            room->fB4 = i;
         }
     }
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
-    s->fB8 = func_00148950(iface3, cBELibrary_getRiderIndex(s->player));
+    room->fB8 = func_00148950(iface3, cBELibrary_getRiderIndex(room->player));
     void* iface13 = cBE_getInterface_Fv(cBE_getBE(), 0xD);
-    char* item = func_00156B28(iface13, s->fB4, s->charID);
-    s->fBC = -1;
-    s->fC4 = -1;
-    s->fC0 = item;
-    s->fAC = func_00398380((char*)ui + 0x58, GetHashValue32(D_00467208));
-    s->fA8 = func_00398380((char*)ui + 0x58, GetHashValue32(D_00467218));
+    char* item = func_00156B28(iface13, room->fB4, room->charID);
+    room->fBC = -1;
+    room->fC4 = -1;
+    room->fC0 = item;
+    room->fAC = func_00398380((char*)ui + 0x58, GetHashValue32(D_00467208));
+    room->fA8 = func_00398380((char*)ui + 0x58, GetHashValue32(D_00467218));
     func_001D3160_Room(self);
     return self;
 }
@@ -191,13 +191,13 @@ extern "C" void cFEStateMountainRoom_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIText* a = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F08));
-    if (a != 0) {
-        cUIText_setAsciiString(a, D_004A14F8);
+    cUIText* textObj1 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F08));
+    if (textObj1 != 0) {
+        cUIText_setAsciiString(textObj1, D_004A14F8);
     }
-    cUIText* b = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F10));
-    if (b != 0) {
-        cUIText_setAsciiString(b, D_004A1500);
+    cUIText* textObj2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F10));
+    if (textObj2 != 0) {
+        cUIText_setAsciiString(textObj2, D_004A1500);
     }
     cUIText* c = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F18));
     if (c != 0) {
@@ -311,134 +311,134 @@ static inline void setW_2AD0(char* s, int off, sWidget_2AD0* w)
  */
 extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
 {
-    char* s = (char*)self;
-    int h = w->hash;
-    if (h == GetHashValue32(D_00466E60)) {
+    char* state = (char*)self;
+    int widgetHash = w->hash;
+    if (widgetHash == GetHashValue32(D_00466E60)) {
         cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467238));
         return;
     }
-    if (h == GetHashValue32(D_00467250)) {
-        setW_2AD0(s, 0x48, w);
+    if (widgetHash == GetHashValue32(D_00467250)) {
+        setW_2AD0(state, 0x48, w);
         return;
     }
-    if (h == GetHashValue32(D_004A1F20)) {
-        setW_2AD0(s, 0x4C, w);
+    if (widgetHash == GetHashValue32(D_004A1F20)) {
+        setW_2AD0(state, 0x4C, w);
         return;
     }
-    if (h == GetHashValue32(D_00467260)) {
-        *(sWidget_2AD0**)(s + 0x50) = w;
+    if (widgetHash == GetHashValue32(D_00467260)) {
+        *(sWidget_2AD0**)(state + 0x50) = w;
         return;
     }
-    if (h == GetHashValue32(D_00467270) || h == GetHashValue32(D_00467280)) {
+    if (widgetHash == GetHashValue32(D_00467270) || widgetHash == GetHashValue32(D_00467280)) {
         char buf[20];
         *(sName5_2AD0*)buf = D_00467298[0];
         func_00416210(buf + 5, 0, 15);
-        char* eng = *(char**)(s + 0x10);
-        buf[2] = *(unsigned char*)(s + 0xB8) + '0';
+        char* eng = *(char**)(state + 0x10);
+        buf[2] = *(unsigned char*)(state + 0xB8) + '0';
         int hash = GetHashValue32(buf);
         int r = func_00398380(eng + 0x58, hash);
         w->f78 = -1;
         w->f7C = r;
         return;
     }
-    if (h == GetHashValue32(D_004672A0)) {
-        setW_2AD0(s, 0x58, w);
+    if (widgetHash == GetHashValue32(D_004672A0)) {
+        setW_2AD0(state, 0x58, w);
         return;
     }
-    if (h == GetHashValue32(D_004672B0)) {
-        setW_2AD0(s, 0x5C, w);
+    if (widgetHash == GetHashValue32(D_004672B0)) {
+        setW_2AD0(state, 0x5C, w);
         return;
     }
-    if (h == GetHashValue32(D_004672C0)) {
-        setW_2AD0(s, 0x60, w);
+    if (widgetHash == GetHashValue32(D_004672C0)) {
+        setW_2AD0(state, 0x60, w);
         return;
     }
-    if (h == GetHashValue32(D_004672D0)) {
-        setW_2AD0(s, 0x64, w);
+    if (widgetHash == GetHashValue32(D_004672D0)) {
+        setW_2AD0(state, 0x64, w);
         return;
     }
-    if (h == GetHashValue32(D_004672E0)) {
-        setW_2AD0(s, 0x68, w);
+    if (widgetHash == GetHashValue32(D_004672E0)) {
+        setW_2AD0(state, 0x68, w);
         return;
     }
-    if (h == GetHashValue32(D_004672F0)) {
-        setW_2AD0(s, 0x6C, w);
+    if (widgetHash == GetHashValue32(D_004672F0)) {
+        setW_2AD0(state, 0x6C, w);
         return;
     }
-    if (h == GetHashValue32(D_00467308)) {
-        setW_2AD0(s, 0x70, w);
+    if (widgetHash == GetHashValue32(D_00467308)) {
+        setW_2AD0(state, 0x70, w);
         return;
     }
-    if (h == GetHashValue32(D_00467320)) {
-        setW_2AD0(s, 0x74, w);
+    if (widgetHash == GetHashValue32(D_00467320)) {
+        setW_2AD0(state, 0x74, w);
         return;
     }
-    if (h == GetHashValue32(D_00467338)) {
-        setW_2AD0(s, 0x90, w);
+    if (widgetHash == GetHashValue32(D_00467338)) {
+        setW_2AD0(state, 0x90, w);
         return;
     }
-    if (h == GetHashValue32(D_00467348)) {
-        setW_2AD0(s, 0x94, w);
+    if (widgetHash == GetHashValue32(D_00467348)) {
+        setW_2AD0(state, 0x94, w);
         return;
     }
-    if (h == GetHashValue32(D_00467358)) {
-        setW_2AD0(s, 0x98, w);
+    if (widgetHash == GetHashValue32(D_00467358)) {
+        setW_2AD0(state, 0x98, w);
         return;
     }
-    if (h == GetHashValue32(D_00467368)) {
-        setW_2AD0(s, 0x78, w);
+    if (widgetHash == GetHashValue32(D_00467368)) {
+        setW_2AD0(state, 0x78, w);
         return;
     }
-    if (h == GetHashValue32(D_00467380)) {
-        setW_2AD0(s, 0x7C, w);
+    if (widgetHash == GetHashValue32(D_00467380)) {
+        setW_2AD0(state, 0x7C, w);
         return;
     }
-    if (h == GetHashValue32(D_00467398)) {
-        setW_2AD0(s, 0x80, w);
+    if (widgetHash == GetHashValue32(D_00467398)) {
+        setW_2AD0(state, 0x80, w);
         return;
     }
-    if (h == GetHashValue32(D_004673B0)) {
-        setW_2AD0(s, 0x84, w);
+    if (widgetHash == GetHashValue32(D_004673B0)) {
+        setW_2AD0(state, 0x84, w);
         return;
     }
-    if (h == GetHashValue32(D_004673D0)) {
-        setW_2AD0(s, 0x88, w);
+    if (widgetHash == GetHashValue32(D_004673D0)) {
+        setW_2AD0(state, 0x88, w);
         return;
     }
-    if (h == GetHashValue32(D_004673F0)) {
-        setW_2AD0(s, 0x8C, w);
+    if (widgetHash == GetHashValue32(D_004673F0)) {
+        setW_2AD0(state, 0x8C, w);
         return;
     }
-    if (h == GetHashValue32(D_00467410)) {
-        setW_2AD0(s, 0x9C, w);
+    if (widgetHash == GetHashValue32(D_00467410)) {
+        setW_2AD0(state, 0x9C, w);
         return;
     }
-    if (h == GetHashValue32(D_00467420)) {
-        setW_2AD0(s, 0xA0, w);
+    if (widgetHash == GetHashValue32(D_00467420)) {
+        setW_2AD0(state, 0xA0, w);
         return;
     }
-    if (h == GetHashValue32(D_00467430)) {
-        setW_2AD0(s, 0xA4, w);
+    if (widgetHash == GetHashValue32(D_00467430)) {
+        setW_2AD0(state, 0xA4, w);
         return;
     }
-    if (h == GetHashValue32(D_00467440)) {
+    if (widgetHash == GetHashValue32(D_00467440)) {
         w->index = 0;
         return;
     }
-    if (h == GetHashValue32(D_004A1F28)) {
+    if (widgetHash == GetHashValue32(D_004A1F28)) {
         w->index = 1;
         return;
     }
-    if (h == GetHashValue32(D_004A1F30)) {
+    if (widgetHash == GetHashValue32(D_004A1F30)) {
         w->index = 2;
         return;
     }
-    if (h == GetHashValue32(D_004A1F38)) {
+    if (widgetHash == GetHashValue32(D_004A1F38)) {
         w->index = 3;
         return;
     }
-    if (h == GetHashValue32(D_00460488)) {
-        setW_2AD0(s, 0x54, w);
+    if (widgetHash == GetHashValue32(D_00460488)) {
+        setW_2AD0(state, 0x54, w);
         return;
     }
 }
@@ -499,15 +499,15 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateMountainRoom_onWidgetMenu(void* self, int menu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 8) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -570,50 +570,50 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
             func_001D32E0_MR(self);
             break;
         }
-        sFactory_MR* f = **(sFactory_MR***)(self + 0x10);
-        void* s = f->vt[4].fn((char*)f + f->vt[4].delta, self, idx - 1);
-        cUIStateStack_push_MR(*(char**)(self + 0x10) + 0x18, s);
+        sFactory_MR* factory = **(sFactory_MR***)(self + 0x10);
+        void* nextState = factory->vt[4].fn((char*)factory + factory->vt[4].delta, self, idx - 1);
+        cUIStateStack_push_MR(*(char**)(self + 0x10) + 0x18, nextState);
         break;
     }
     case 6: {
-        sFactory_MR* f = **(sFactory_MR***)(self + 0x10);
-        void* s = f->vt[5].fn((char*)f + f->vt[5].delta, self, *(int*)(w + 0x18));
-        if (s == 0) {
+        sFactory_MR* factory = **(sFactory_MR***)(self + 0x10);
+        void* nextState = factory->vt[5].fn((char*)factory + factory->vt[5].delta, self, *(int*)(w + 0x18));
+        if (nextState == 0) {
             break;
         }
-        cUIStateStack_push_MR(*(char**)(self + 0x10) + 0x18, s);
+        cUIStateStack_push_MR(*(char**)(self + 0x10) + 0x18, nextState);
         break;
     }
     case 1: {
         if (*(void**)(self + 0x54) == 0) {
             break;
         }
-        int h = 0;
+        int stringId = 0;
         switch (*(int*)(w + 0x18)) {
         case 0:
-            h = GetHashValue32(D_00467450);
+            stringId = GetHashValue32(D_00467450);
             break;
         case 1:
-            h = GetHashValue32(D_00467460);
+            stringId = GetHashValue32(D_00467460);
             break;
         case 2:
             if (*(int*)(self + 0xB4) > 0) {
-                h = GetHashValue32(D_00467460);
+                stringId = GetHashValue32(D_00467460);
             } else {
-                h = GetHashValue32(D_00467478);
+                stringId = GetHashValue32(D_00467478);
             }
             break;
         case 3:
             if (*(int*)(self + 0xB4) >= 2) {
-                h = GetHashValue32(D_00467460);
+                stringId = GetHashValue32(D_00467460);
             } else {
-                h = GetHashValue32(D_00467490);
+                stringId = GetHashValue32(D_00467490);
             }
             break;
         }
         sText_MR* t = *(sText_MR**)(self + 0x54);
         t->vt[9].fn((char*)t + t->vt[9].delta, 1);
-        cUIText_setUnicodeStringByID(*(cUIText**)(self + 0x54), h);
+        cUIText_setUnicodeStringByID(*(cUIText**)(self + 0x54), stringId);
         break;
     }
     }
@@ -978,32 +978,32 @@ static inline void wShow_38F8(sWidget_38F8* w, int on)
  */
 extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* w)
 {
-    int h = w->hash;
-    if (h == GetHashValue32(D_00466E60)) {
-        int m = self->mode;
-        if (m == 2)
+    int widgetHash = w->hash;
+    if (widgetHash == GetHashValue32(D_00466E60)) {
+        int roomMode = self->mode;
+        if (roomMode == 2)
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467658));
-        else if (m == 1)
+        else if (roomMode == 1)
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467668));
         else
             cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(D_00467678));
     }
-    if (h == GetHashValue32(D_004A1FA8)) {
+    if (widgetHash == GetHashValue32(D_004A1FA8)) {
         self->fD4 = w->f7C;
         return;
     }
-    if (h == GetHashValue32(D_004A1FB0)) {
+    if (widgetHash == GetHashValue32(D_004A1FB0)) {
         self->fD8 = w->f7C;
         return;
     }
-    if (h == GetHashValue32(D_00460488)) {
+    if (widgetHash == GetHashValue32(D_00460488)) {
         self->fD0 = w;
         wShow_38F8(w, 0);
         return;
     }
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
     for (int i = 0; i < 4; i++) {
-        if (h == GetHashValue32(D_004415F0[i])) {
+        if (widgetHash == GetHashValue32(D_004415F0[i])) {
             self->slots[i] = w;
             if (cBERewardInterface_isTrophyOwned(iface, self->player, self->charID, self->mode, i)) {
                 char* info = func_00156A90(iface, self->mode, i);
@@ -1018,43 +1018,43 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
             }
             return;
         }
-        if (h == GetHashValue32(D_004415E0[i])) {
+        if (widgetHash == GetHashValue32(D_004415E0[i])) {
             w->index = i;
             return;
         }
     }
     for (int j = 0; j < 5; j++) {
-        if (h == GetHashValue32(D_00441588[j])) {
+        if (widgetHash == GetHashValue32(D_00441588[j])) {
             self->grid[1][j] = w;
             wShow_38F8(w, 0);
             w->index = j;
             return;
         }
-        if (h == GetHashValue32(D_00441570[j])) {
+        if (widgetHash == GetHashValue32(D_00441570[j])) {
             self->grid[0][j] = w;
             wShow_38F8(w, 0);
             w->index = j;
             return;
         }
-        if (h == GetHashValue32(D_00441540[j])) {
+        if (widgetHash == GetHashValue32(D_00441540[j])) {
             self->grid[2][j] = w;
             wShow_38F8(w, 0);
             w->index = j;
             return;
         }
-        if (h == GetHashValue32(D_00441558[j])) {
+        if (widgetHash == GetHashValue32(D_00441558[j])) {
             self->grid[3][j] = w;
             wShow_38F8(w, 0);
             w->index = j;
             return;
         }
-        if (h == GetHashValue32(D_004415A0[j])) {
+        if (widgetHash == GetHashValue32(D_004415A0[j])) {
             self->grid[4][j] = w;
             wShow_38F8(w, 0);
             w->index = j;
             return;
         }
-        if (h == GetHashValue32(D_004415B8[j])) {
+        if (widgetHash == GetHashValue32(D_004415B8[j])) {
             self->grid[5][j] = w;
             wShow_38F8(w, 0);
             w->index = j;
@@ -1117,23 +1117,23 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(void* self, void* item, unsigned 
                           *(int*)((char*)self + 0xDC), *(int*)((char*)self + 0xE0), *(int*)((char*)item + 0x18)) != 0) {
             void* obj = **(void***)((char*)self + 0x10);
             sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
-            void* r = vt[4].fn((char*)obj + vt[4].delta, self, (*(int*)((char*)self + 0xE0) << 16) | *(int*)((char*)item + 0x18));
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+            void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, (*(int*)((char*)self + 0xE0) << 16) | *(int*)((char*)item + 0x18));
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
         break;
     case 6: {
         int id = (*(int*)((char*)self + 0xE0) << 16) | *(int*)((char*)item + 0x18);
         for (int i = 0; i < 4; i++) {
-            sItem_001D3C80* o = ((sItem_001D3C80**)((char*)self + 0x48))[i];
-            if (o != 0) {
-                o->vt[9].fn((char*)o + o->vt[9].delta, 0);
+            sItem_001D3C80* listItem = ((sItem_001D3C80**)((char*)self + 0x48))[i];
+            if (listItem != 0) {
+                listItem->vt[9].fn((char*)listItem + listItem->vt[9].delta, 0);
             }
         }
         void* obj = **(void***)((char*)self + 0x10);
         sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
-        void* r = vt[5].fn((char*)obj + vt[5].delta, self, id);
-        if (r != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, id);
+        if (nextState != 0) {
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
         break;
     }
@@ -1172,9 +1172,9 @@ extern "C" int cFEStatePeakRoom_onWidgetMenu(void* self, void* item, unsigned in
         return 0x100;
     case 6: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 0xD);
-        void* e = func_00397870((char*)item + 0x74, id);
+        void* entry = func_00397870((char*)item + 0x74, id);
         if (cBERewardInterface_isTrophyOwned(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xDC),
-                          *(int*)((char*)self + 0xE0), *(int*)((char*)e + 0x18)) == 0) {
+                          *(int*)((char*)self + 0xE0), *(int*)((char*)entry + 0x18)) == 0) {
             return 0x10;
         }
         break;

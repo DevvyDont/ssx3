@@ -1126,10 +1126,10 @@ extern int func_00412778(int, int, int, unsigned long long);
  * @return the packed double, left by func_00412778() in the return registers (the C declaration says int)
  */
 int fptodp(float x) {
-    int o[4];
-    float f = x;
-    func_00413068(&f, o);
-    return func_00412778(o[0], o[1], o[2], ((unsigned long long)(long long)o[3] << 32) >> 2);
+    int unpacked[4];
+    float value = x;
+    func_00413068(&value, unpacked);
+    return func_00412778(unpacked[0], unpacked[1], unpacked[2], ((unsigned long long)(long long)unpacked[3] << 32) >> 2);
 }
 #endif
 

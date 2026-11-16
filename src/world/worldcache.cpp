@@ -558,9 +558,9 @@ extern "C" void cWorldCache_purge(cWorldCache* p)
 {
     cWorldCache* self = p;
     cWorldCache_resetPageMap((cWorldCache*)self);
-    cWorldCache_purge_sObj* o = ((cWorldCache_purge_sObj*)self->mp_ChunkResolve);
-    if (o != 0) {
-        o->vt[1].fn((char*)o + o->vt[1].delta, 3);
+    cWorldCache_purge_sObj* chunkResolve = ((cWorldCache_purge_sObj*)self->mp_ChunkResolve);
+    if (chunkResolve != 0) {
+        chunkResolve->vt[1].fn((char*)chunkResolve + chunkResolve->vt[1].delta, 3);
     }
     if (((int*)self->m_pSharedCacheTable) != 0) {
         func_003A7D80(((int*)self->m_pSharedCacheTable), 3);
@@ -673,11 +673,11 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
     vt[2].fn(x + vt[2].delta, pNash);
     if (cStreamMan_init((char*)self + 0x300, name, self) == 0)
         return 0;
-    int r = cWorldView_init_p((char*)self + 0x10, self->mp_DataHeader, self);
-    if (r == 0)
+    int viewOk = cWorldView_init_p((char*)self + 0x10, self->mp_DataHeader, self);
+    if (viewOk == 0)
         return 0;
     cWorldCache_initPageMap((cWorldCache_initPageMap_sCache*)self);
-    return r;
+    return viewOk;
 }
 #endif
 
@@ -718,9 +718,9 @@ extern "C" void func_003A7D80(int* self, int flags);
 extern "C" void cWorldCache_deactivateSectionMem(cWorldCache* self, int i)
 {
     func_003A7B98(self->m_pWorldMemMan, i);
-    int* e = ((int**)self->m_pSectionCacheTable)[i];
-    if (e != 0) {
-        func_003A7D80(e, 3);
+    int* sectionTable = ((int**)self->m_pSectionCacheTable)[i];
+    if (sectionTable != 0) {
+        func_003A7D80(sectionTable, 3);
     }
     ((int**)self->m_pSectionCacheTable)[i] = 0;
 }
@@ -959,12 +959,12 @@ extern "C" void cWorldCache_purgePage(cWorldCache* vself, int cell)
 {
     sCache_8528* self = (sCache_8528*)vself;
     sRefList_8528* list = self->cells[cell].list;
-    sHandle_8528 h;
-    *(unsigned int*)&h = 0xFFFFFFFF;  // starts as the invalid handle
+    sHandle_8528 resHandle;
+    *(unsigned int*)&resHandle = 0xFFFFFFFF;  // starts as the invalid handle
     for (int i = list->count - 1; i >= 0; i--) {
-        h.type = list->refs[i].type;
-        h.index = list->refs[i].index;
-        func_003A8E20(self, cell, list->refs[i].kind, h);
+        resHandle.type = list->refs[i].type;
+        resHandle.index = list->refs[i].index;
+        func_003A8E20(self, cell, list->refs[i].kind, resHandle);
     }
     if (self->cells[cell].list != 0)
         func_003A7C30((int*)self->cells[cell].list, 3);
@@ -984,8 +984,8 @@ INCLUDE_ASM("world/worldcache", cWorldCache_isPageLoaded);
  */
 extern "C" int cWorldCache_isPageLoaded(cWorldCache* self, int uiHullPage)
 {
-    char* p = (char*)self + uiHullPage * 0x18;
-    return *(int*)(p + 0x3f0) == 3;
+    char* pageEntry = (char*)self + uiHullPage * 0x18;
+    return *(int*)(pageEntry + 0x3f0) == 3;
 }
 #endif
 
@@ -1000,8 +1000,8 @@ INCLUDE_ASM("world/worldcache", cWorldCache_isPageEmpty);
  */
 extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int uiHullPage)
 {
-    char* p = (char*)self + uiHullPage * 0x18;
-    return *(int*)(p + 0x3f0) == 0;
+    char* pageEntry = (char*)self + uiHullPage * 0x18;
+    return *(int*)(pageEntry + 0x3f0) == 0;
 }
 #endif
 
@@ -1015,8 +1015,8 @@ INCLUDE_ASM("world/worldcache", cWorldCache_signalPageLoadComplete);
  */
 extern "C" void cWorldCache_signalPageLoadComplete(cWorldCache* self, int uiHullPage)
 {
-    char* p = (char*)self + uiHullPage * 0x18;
-    *(int*)(p + 0x3f0) = 3;
+    char* pageEntry = (char*)self + uiHullPage * 0x18;
+    *(int*)(pageEntry + 0x3f0) = 3;
 }
 #endif
 
@@ -1314,44 +1314,44 @@ extern "C" unsigned int cWorldCache_addBxStreamDataTest(sWorldCache_8AA8* self, 
 {
     int bank = key & 0xFF;
     unsigned int id = key >> 8;
-    sBxBank_8AA8* b;
+    sBxBank_8AA8* bankData;
     if (bank == 0xFF)
-        b = self->global;
+        bankData = self->global;
     else
-        b = self->banks[bank];
-    if (addRef_8AA8(&b->types[type].refs[id])) {
-        sBxList_8AA8* l = self->slots[slot].list;
-        l->items[l->count].type = type;
-        l->items[l->count].bank = key;
-        l->items[l->count].id = key >> 8;
-        l->count++;
+        bankData = self->banks[bank];
+    if (addRef_8AA8(&bankData->types[type].refs[id])) {
+        sBxList_8AA8* slotList = self->slots[slot].list;
+        slotList->items[slotList->count].type = type;
+        slotList->items[slotList->count].bank = key;
+        slotList->items[slotList->count].id = key >> 8;
+        slotList->count++;
         return 0;
     }
     if (size == 0)
         return 0;
-    void* p;
+    void* data;
     switch (type) {
     case 9:
     case 10:
-        p = bxAlloc_8AA8(self->pools, bank, size, 0x45000000);
+        data = bxAlloc_8AA8(self->pools, bank, size, 0x45000000);
         break;
     case 1:
     case 2:
     case 3:
     case 11:
     case 12:
-        p = bxAlloc_8AA8(self->pools, bank, size, 0x22000000);
+        data = bxAlloc_8AA8(self->pools, bank, size, 0x22000000);
         break;
     case 14:
-        p = operator_new_bx(size, D_00494E98, 0, 0);
+        data = operator_new_bx(size, D_00494E98, 0, 0);
         break;
     default:
-        p = bxAlloc_8AA8(self->pools, bank, size, 0);
+        data = bxAlloc_8AA8(self->pools, bank, size, 0);
         break;
     }
-    if (p != 0)
-        return (unsigned int)p;
-    release_8AA8(&b->types[type].refs[id]);
+    if (data != 0)
+        return (unsigned int)data;
+    release_8AA8(&bankData->types[type].refs[id]);
     return 0xFFFFFFFF;
 }
 #endif
@@ -1631,14 +1631,14 @@ extern "C" int cWorldView_init(sWorldCacheMap* self, sWCHdr* hdr, int id)
 {
     unsigned int i;
 
-    char* p;
+    char* data;
     self->id = id;
     self->hdr = hdr;
     self->sects = (sWCSect*)((char*)hdr + 0x50);
-    p = (char*)self->sects + hdr->numSects * 0x58;
-    p = (char*)(((unsigned int)p + 0xF) & 0xFFFFFFF0);
-    self->nodes = (sWCNode*)p;
-    self->leaves = (sWCLeaf*)(p + hdr->numNodes * 0x60);
+    data = (char*)self->sects + hdr->numSects * 0x58;
+    data = (char*)(((unsigned int)data + 0xF) & 0xFFFFFFF0);
+    self->nodes = (sWCNode*)data;
+    self->leaves = (sWCLeaf*)(data + hdr->numNodes * 0x60);
 
     for (i = 0; i < self->hdr->numSects; i++) {
         self->sects[i].node = (int)&self->nodes[self->sects[i].node];
@@ -2007,19 +2007,19 @@ extern "C" void func_003A9D60(void* self, int i);
  */
 extern "C" int cWorldView_getFocus(cWorldView* self, int i, sWCQuad* outPos, float* outT)
 {
-    char* e = (char*)self + i * 0x50;
-    if (*(int*)(e + 0x240) == 0) {
+    char* focusEntry = (char*)self + i * 0x50;
+    if (*(int*)(focusEntry + 0x240) == 0) {
         return 0;
     }
     func_003A9D60(self, i);
-    int r = 1;
-    *outPos = *(sWCQuad*)(e + 0x250);
-    float t = *(float*)(e + 0x284) - 0.5f;
-    *outT = t;
-    if (!(t > 0.0f)) {
-        r = 0;
+    int valid = 1;
+    *outPos = *(sWCQuad*)(focusEntry + 0x250);
+    float safeRadius = *(float*)(focusEntry + 0x284) - 0.5f;
+    *outT = safeRadius;
+    if (!(safeRadius > 0.0f)) {
+        valid = 0;
     }
-    return r;
+    return valid;
 }
 #endif
 
@@ -2038,19 +2038,19 @@ extern "C" void func_003A9D60(void* self, int i);
  */
 extern "C" int cWorldView_getTestFocus(cWorldView* self, int i, sWCQuad* outPos, float* outT)
 {
-    char* e = (char*)self + i * 0x50;
-    if (*(int*)(e + 0x240) == 0) {
+    char* focusEntry = (char*)self + i * 0x50;
+    if (*(int*)(focusEntry + 0x240) == 0) {
         return 0;
     }
     func_003A9D60(self, i);
-    int r = 1;
-    *outPos = *(sWCQuad*)(e + 0x250);
-    float t = *(float*)(e + 0x288) - 0.5f;
-    *outT = t;
-    if (!(t > 0.0f)) {
-        r = 0;
+    int valid = 1;
+    *outPos = *(sWCQuad*)(focusEntry + 0x250);
+    float safeRadius = *(float*)(focusEntry + 0x288) - 0.5f;
+    *outT = safeRadius;
+    if (!(safeRadius > 0.0f)) {
+        valid = 0;
     }
-    return r;
+    return valid;
 }
 #endif
 

@@ -33,20 +33,20 @@ extern "C" void cFEStateCredits_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DB90));
-    if (o != 0)
-        *(int*)(o + 0x90) |= 8;
-    char* t = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBA0));
-    *(void**)((char*)self + 0x58) = t;
-    if (t != 0) {
-        sVEntryK185A98* vt = *(sVEntryK185A98**)(t + 8);
-        vt[9].fn(t + vt[9].delta, 0);
+    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DB90));
+    if (menu != 0)
+        *(int*)(menu + 0x90) |= 8;
+    char* bitmap = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBA0));
+    *(void**)((char*)self + 0x58) = bitmap;
+    if (bitmap != 0) {
+        sVEntryK185A98* vt = *(sVEntryK185A98**)(bitmap + 8);
+        vt[9].fn(bitmap + vt[9].delta, 0);
     }
-    t = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBB0));
-    *(void**)((char*)self + 0x58) = t;
-    if (t != 0) {
-        sVEntryK185A98* vt = *(sVEntryK185A98**)(t + 8);
-        vt[9].fn(t + vt[9].delta, 0);
+    bitmap = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBB0));
+    *(void**)((char*)self + 0x58) = bitmap;
+    if (bitmap != 0) {
+        sVEntryK185A98* vt = *(sVEntryK185A98**)(bitmap + 8);
+        vt[9].fn(bitmap + vt[9].delta, 0);
     }
 }
 #endif
@@ -106,14 +106,14 @@ public:
  */
 extern "C" void cFEStateCredits_onGainFocus(void* self, void* pPrevState)
 {
-    cUIObjK185BA0* t = (cUIObjK185BA0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBC0));
-    *(cUIObjK185BA0**)((char*)self + 0x5C) = t;
-    if (t != 0)
+    cUIObjK185BA0* textScroll = (cUIObjK185BA0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DBC0));
+    *(cUIObjK185BA0**)((char*)self + 0x5C) = textScroll;
+    if (textScroll != 0)
     {
         float pos[4];
         char buf[0x20];
         int i;
-        t->v20(pos);
+        textScroll->v20(pos);
         pos[0] = 600.0f;
         (*(cUIObjK185BA0**)((char*)self + 0x5C))->v21(pos);
         (*(cUIObjK185BA0**)((char*)self + 0x5C))->v09(0);
@@ -242,13 +242,13 @@ static inline void DrawText_185F40(char* font, unsigned short* s, float x, float
  */
 extern "C" void cFEStateCredits_onRender2D(char* self)
 {
-    char* o = *(char**)(self + 0x5C);
-    if (o != 0)
+    char* textScroll = *(char**)(self + 0x5C);
+    if (textScroll != 0)
     {
-        sV3_185F40 pos = *(sV3_185F40*)(o + 0x44);
-        sV3_185F40 size = *(sV3_185F40*)(o + 0x50);
+        sV3_185F40 pos = *(sV3_185F40*)(textScroll + 0x44);
+        sV3_185F40 size = *(sV3_185F40*)(textScroll + 0x50);
         sV4_185F40 box;
-        ((cUIObj185F40*)o)->v20(&box);
+        ((cUIObj185F40*)textScroll)->v20(&box);
         char* font = cUITextScroll_getFont(*(void**)(self + 0x5C));
         if (font != 0)
         {
@@ -259,11 +259,11 @@ extern "C" void cFEStateCredits_onRender2D(char* self)
             white.y = 1.0f;
             white.z = 1.0f;
             white.w = 1.0f;
-            float h = size.y * lineH;
+            float scaledHeight = size.y * lineH;
             float bh = box.y;
             sV4_185F40 save = *(sV4_185F40*)(*(char**)(self + 0x5C) + 0x1C);
             ((sRS_185F40*)GrMan->m_pCurrentDrawState)->mode = 21;
-            signed char rows = (int)h + 3;
+            signed char rows = (int)scaledHeight + 3;
             int scroll = *(int*)(self + 0x60);
             int first = scroll / rows;
             int rem = scroll % rows;
@@ -279,18 +279,18 @@ extern "C" void cFEStateCredits_onRender2D(char* self)
                     float frem = (float)rem;
                     while (*line == ' ')
                         line++;
-                    sV3_185F40 p = pos;
+                    sV3_185F40 newPos = pos;
                     if (*(int*)(self + 0x60) > 0)
-                        p.y -= frem;
+                        newPos.y -= frem;
                     else
-                        p.y += frem;
+                        newPos.y += frem;
                     if (*line == '~' && *(void**)(self + 0x58) != 0)
                     {
-                        sV4_185F40 b;
+                        sV4_185F40 iconSize;
                         any = 1;
-                        (*(cUIObj185F40**)(self + 0x58))->v20(&b);
-                        p.x = (640.0f - b.x) * 0.5f;
-                        *(sV3_185F40*)(*(char**)(self + 0x58) + 0x44) = p;
+                        (*(cUIObj185F40**)(self + 0x58))->v20(&iconSize);
+                        newPos.x = (640.0f - iconSize.x) * 0.5f;
+                        *(sV3_185F40*)(*(char**)(self + 0x58) + 0x44) = newPos;
                         (*(cUIObj185F40**)(self + 0x58))->v09(1);
                     }
                     else
@@ -311,8 +311,8 @@ extern "C" void cFEStateCredits_onRender2D(char* self)
                         }
                         sRect_185F40 r;
                         func_003921F0(font, line, &r, 0, sz.x, sz.y);
-                        p.x = (640.0f - r.x1) * 0.5f;
-                        DrawText_185F40(font, line, p.x, p.y, sz);
+                        newPos.x = (640.0f - r.x1) * 0.5f;
+                        DrawText_185F40(font, line, newPos.x, newPos.y, sz);
                     }
                 }
                 pos.y += frows;
@@ -372,15 +372,15 @@ struct sVEntry001863E8 {
  */
 extern "C" int cFEStateCredits_onInputBegin(void* self, void* pInput)
 {
-    sVEntry001863E8* e = &(*(sVEntry001863E8**)((char*)pInput + 8))[17];
-    if (e->fn((char*)pInput + e->delta)) {
+    sVEntry001863E8* vtEntry = &(*(sVEntry001863E8**)((char*)pInput + 8))[17];
+    if (vtEntry->fn((char*)pInput + vtEntry->delta)) {
         if (*(int*)((char*)self + 0x64) >= -7) {
             *(int*)((char*)self + 0x64) -= 1;
         }
         return 1;
     }
-    e = &(*(sVEntry001863E8**)((char*)pInput + 8))[18];
-    if (e->fn((char*)pInput + e->delta)) {
+    vtEntry = &(*(sVEntry001863E8**)((char*)pInput + 8))[18];
+    if (vtEntry->fn((char*)pInput + vtEntry->delta)) {
         if (*(int*)((char*)self + 0x64) < 8) {
             *(int*)((char*)self + 0x64) += 1;
         }
@@ -437,9 +437,9 @@ extern "C" void cFEStateCredits_onWidgetEvent(void* self, void* item, int msg)
     if (item != 0 && msg == 6) {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry001864B0* vt = *(sVEntry001864B0**)((char*)obj + 4);
-        void* r = vt[5].fn((char*)obj + vt[5].delta, self, 0x24);
-        if (r != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, 0x24);
+        if (nextState != 0) {
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
     }
 }

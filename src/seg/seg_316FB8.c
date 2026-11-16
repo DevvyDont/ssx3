@@ -1567,16 +1567,16 @@ extern int D_00454944;
  */
 void sprintf(char *buf, int fmt, ...) {
     char *ap;
-    struct Fsprintf f;
+    struct Fsprintf strFile;
     sprintf_va_start(ap);
-    f.p = buf;
-    f.w = 0x7FFFFFFF;
-    f.flags = 0x208;
-    f.base = buf;
-    f.size = 0x7FFFFFFF;
-    f.ent = D_00454944;
-    func_0041B658((int)&f, fmt, ap);
-    *f.p = 0;
+    strFile.p = buf;
+    strFile.w = 0x7FFFFFFF;
+    strFile.flags = 0x208;
+    strFile.base = buf;
+    strFile.size = 0x7FFFFFFF;
+    strFile.ent = D_00454944;
+    func_0041B658((int)&strFile, fmt, ap);
+    *strFile.p = 0;
 }
 #endif
 

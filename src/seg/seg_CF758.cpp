@@ -184,19 +184,19 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
     } else if (kind == 2) {
         void* iface = cBE_getInterface_CE758(cBE_getBE(), 0xA);
         if (idx == 0) {
-            int t = cBEMissionInterface_getTotalCollectForPeak(iface, peak);
-            int v = func_00153688(iface, profileIndex, characterID, peak);
+            int total = cBEMissionInterface_getTotalCollectForPeak(iface, peak);
+            int current = func_00153688(iface, profileIndex, characterID, peak);
             int fmt = Loc_CE758(D_00466CF8);
             if (fmt != 0) {
-                sprintf1_CE758(buf, (void*)fmt, v, t);
+                sprintf1_CE758(buf, (void*)fmt, current, total);
                 cUIText_setUnicodeString(text, buf);
             }
         } else {
-            int t = cBEMissionInterface_getNumberMissionsOnPeak(iface, peak);
-            int v = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(iface, profileIndex, characterID, peak);
+            int total = cBEMissionInterface_getNumberMissionsOnPeak(iface, peak);
+            int current = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(iface, profileIndex, characterID, peak);
             int fmt = Loc_CE758(D_00466D10);
             if (fmt != 0) {
-                sprintf1_CE758(buf, (void*)fmt, v, t);
+                sprintf1_CE758(buf, (void*)fmt, current, total);
                 cUIText_setUnicodeString(text, buf);
             }
         }
@@ -215,10 +215,10 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
     } else if (kind == 1) {
         int track = D_0045AAD8_CE758[peak][kind][idx].track;
         int type = D_0045AAD8_CE758[peak][kind][idx].type;
-        int v = func_00158960(reward, profileIndex, characterID, type, track);
+        int current = func_00158960(reward, profileIndex, characterID, type, track);
         int fmt = Loc_CE758(D_00466D50);
         if (fmt != 0) {
-            sprintf1_CE758(buf, (void*)fmt, v);
+            sprintf1_CE758(buf, (void*)fmt, current);
             cUIText_setUnicodeString(text, buf);
         }
     }

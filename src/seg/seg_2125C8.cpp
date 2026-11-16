@@ -14,11 +14,11 @@ extern sEntry_15C8 D_00446990[];
  * Despite the name it returns the whole 0x1C-byte entry of D_00446990; the blend-in time is the float at
  * offset 0x18, and callers also read the entry's first four words.
  *
- * @param arg0  animation index
+ * @param animIndex  animation index
  * @return pointer to the entry
  */
-extern "C" void *cAIAnimEventMap_getBlendInTime(int arg0) {
-    return &D_00446990[arg0];
+extern "C" void *cAIAnimEventMap_getBlendInTime(int animIndex) {
+    return &D_00446990[animIndex];
 }
 #endif
 

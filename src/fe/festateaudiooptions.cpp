@@ -254,16 +254,16 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
         if (online_AOWE()) {
             func_0039F190(self->owner + 0x18, 1);
         } else {
-            void* r = vcall_AOWE(self, 5, w);
-            if (r != 0)
-                cUIStateStack_push(self->owner + 0x18, r);
+            void* nextState = vcall_AOWE(self, 5, w);
+            if (nextState != 0)
+                cUIStateStack_push(self->owner + 0x18, nextState);
         }
         break;
     case 1: {
         cUIText* text = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00460488));
         if (text == 0)
             return;
-        bool a = false;
+        bool isOnline = false;
         bool c = false;
         bool b = false;
         switch (w->idx) {
@@ -299,7 +299,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             break;
         case 4:
             if (self->f74 == 0 && self->f7C == 0) {
-                a = online_AOWE();
+                isOnline = online_AOWE();
                 if (online_AOWE())
                     setText_AOWE(text, D_004604C0);
                 else
@@ -309,7 +309,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             break;
         }
         if (online_AOWE()) {
-            setEnabled_AOWE(self->toggles[0], a);
+            setEnabled_AOWE(self->toggles[0], isOnline);
             setEnabled_AOWE(self->toggles[1], b);
             setEnabled_AOWE(self->toggles[2], c);
         }
@@ -539,8 +539,8 @@ extern "C" void cFEStateRequestLine_onDestroyScreen(void* self)
     if ((int)SSXApp->Game != 0) {
         void* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(D_004A18A8));
         if (obj != 0) {
-            sVEntry00196E80* e = &(*(sVEntry00196E80**)((char*)obj + 8))[24];
-            e->fn((char*)obj + e->delta, 4, 0);
+            sVEntry00196E80* vtEntry = &(*(sVEntry00196E80**)((char*)obj + 8))[24];
+            vtEntry->fn((char*)obj + vtEntry->delta, 4, 0);
         }
     }
     cUIState_onDestroyScreen(self);

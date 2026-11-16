@@ -151,15 +151,15 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateBuyAttrib_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 8) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -260,12 +260,12 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(char* self, char* obj, int msg)
         } else {
             char* mgr = **(char***)(self + 0x10);
             sVEr_4A90* vt = *(sVEr_4A90**)(mgr + 4);
-            void* r = vt[5].fn(mgr + vt[5].delta, self, *(void**)(obj + 0x18));
-            if (r != 0) {
+            void* nextState = vt[5].fn(mgr + vt[5].delta, self, *(void**)(obj + 0x18));
+            if (nextState != 0) {
                 int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x48), GetHashValue32(D_0046E050));
                 if (frame != 0xFFFF)
                     cUIScreen_playFrame(*(void**)(self + 0x48), frame, 1);
-                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
             }
         }
         break;
@@ -420,10 +420,10 @@ extern "C" void cFEStateBuyAttrib_updateLevels(void* p)
             self->lvl[i] = lvl;
         int rem = self->pts[i] - lvl * 5;
         sprintf(name, D_004A2338, i);
-        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
-        if (t != 0) {
+        cUIText* levelText = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (levelText != 0) {
             sprintf(text, D_004A2340, lvl, rem * 2);
-            cUIText_setAsciiString(t, text);
+            cUIText_setAsciiString(levelText, text);
         }
     }
 }
@@ -518,28 +518,28 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* p)
     int i;
     for (i = 0; i < 7; i++) {
         sprintf(name, D_0046F080, i);
-        char* o = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
-        if (o != 0) {
-            sVec3K1F50B0 v;
-            v.y = 12.0f;
-            v.x = (float)self->pts[i] * 3.3636362552642822f;
-            v.z = 0.0f;
-            sVEK1F50B0a* vt = *(sVEK1F50B0a**)(o + 8);
-            vt[21].fn(o + vt[21].delta, &v);
-            sVEK1F50B0b* vt2 = *(sVEK1F50B0b**)(o + 8);
-            vt2[9].fn(o + vt2[9].delta, 1);
+        char* bar = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (bar != 0) {
+            sVec3K1F50B0 barSize;
+            barSize.y = 12.0f;
+            barSize.x = (float)self->pts[i] * 3.3636362552642822f;
+            barSize.z = 0.0f;
+            sVEK1F50B0a* vt = *(sVEK1F50B0a**)(bar + 8);
+            vt[21].fn(bar + vt[21].delta, &barSize);
+            sVEK1F50B0b* vt2 = *(sVEK1F50B0b**)(bar + 8);
+            vt2[9].fn(bar + vt2[9].delta, 1);
         }
         sprintf(name, D_004A2350, i);
-        o = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
-        if (o != 0) {
-            sVec3K1F50B0 v;
-            v.x = (float)(self->add[i] + self->pts[i]) * 3.3636362552642822f;
-            v.y = 12.0f;
-            v.z = 0.0f;
-            sVEK1F50B0a* vt = *(sVEK1F50B0a**)(o + 8);
-            vt[21].fn(o + vt[21].delta, &v);
-            sVEK1F50B0b* vt2 = *(sVEK1F50B0b**)(o + 8);
-            vt2[9].fn(o + vt2[9].delta, 1);
+        bar = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (bar != 0) {
+            sVec3K1F50B0 barSize;
+            barSize.x = (float)(self->add[i] + self->pts[i]) * 3.3636362552642822f;
+            barSize.y = 12.0f;
+            barSize.z = 0.0f;
+            sVEK1F50B0a* vt = *(sVEK1F50B0a**)(bar + 8);
+            vt[21].fn(bar + vt[21].delta, &barSize);
+            sVEK1F50B0b* vt2 = *(sVEK1F50B0b**)(bar + 8);
+            vt2[9].fn(bar + vt2[9].delta, 1);
         }
     }
 }
@@ -840,9 +840,9 @@ extern "C" void cFEStateCareerStats_onWidgetEvent(void* self, void* item, int ms
     case 6: {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry001F5650* vt = *(sVEntry001F5650**)((char*)obj + 4);
-        void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
-        if (r != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
         break;
     }
@@ -1108,29 +1108,29 @@ extern "C" void cFEStateCareerStats_setupMenuFocus(void* self_, int menu)
 {
     char* self = (char*)self_;
     *(int*)(self + 0x48) = menu;
-    char* a = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F210));
-    if (a != 0)
-        setFocus_5BA8(a, 0);
-    char* b = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F220));
-    if (b != 0)
-        setFocus_5BA8(b, 0);
-    char* c = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F238));
-    if (c != 0)
-        setFocus_5BA8(c, 0);
+    char* menuTab0 = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F210));
+    if (menuTab0 != 0)
+        setFocus_5BA8(menuTab0, 0);
+    char* menuTab1 = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F220));
+    if (menuTab1 != 0)
+        setFocus_5BA8(menuTab1, 0);
+    char* menuTab2 = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F238));
+    if (menuTab2 != 0)
+        setFocus_5BA8(menuTab2, 0);
     char* d = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0046F250));
     if (d != 0)
         setFocus_5BA8(d, 0);
     switch (*(int*)(self + 0x48)) {
     case 0:
-        setFocus_5BA8(a, 1);
+        setFocus_5BA8(menuTab0, 1);
         cFEStateCareerStats_setupHighlightsList(self);
         break;
     case 1:
-        setFocus_5BA8(b, 1);
+        setFocus_5BA8(menuTab1, 1);
         func_001F60E0(self);
         break;
     case 2:
-        setFocus_5BA8(c, 1);
+        setFocus_5BA8(menuTab2, 1);
         func_001F6490(self);
         break;
     case 3:
@@ -1216,7 +1216,7 @@ extern "C" void cFEStateCareerStats_setupHighlightsList(void* vself)
         cUIState_hideObjSafe(self, D_0046F278);
     }
     char name[32];
-    uTrickBuf5DA0 tmp;
+    uTrickBuf5DA0 trickBuf;
     char onName[32];
     char offName[32];
     char trick[112];
@@ -1227,10 +1227,10 @@ extern "C" void cFEStateCareerStats_setupHighlightsList(void* vself)
         int sub = idx % 3;
         sprintf(name, D_004A2380, i + 1);
         int done = 0;
-        cUIText* o = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
-        if (o != 0) {
-            sprintf(tmp.str, D_004A2388, D_00441BA0[level], sub + 1);
-            cUIText_setUnicodeStringByID(o, GetHashValue32(tmp.str));
+        cUIText* textObj = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (textObj != 0) {
+            sprintf(trickBuf.str, D_004A2388, D_00441BA0[level], sub + 1);
+            cUIText_setUnicodeStringByID(textObj, GetHashValue32(trickBuf.str));
             sprintf(onName, D_0046F288, i + 1);
             sprintf(offName, D_0046F298, i + 1);
             if (sub < cBEScoreInterface_getCurrentHighlightLevel(score, level)) {
@@ -1243,22 +1243,22 @@ extern "C" void cFEStateCareerStats_setupHighlightsList(void* vself)
             }
         }
         sprintf(name, D_004A2390, i + 1);
-        o = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
-        if (o != 0) {
-            MEM_fill(&tmp, 0, 8);
-            tmp.id.type = D_00441B40[idx];
-            gGenTrickName(trick, (sTrickId*)&tmp.id, 100);
+        textObj = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (textObj != 0) {
+            MEM_fill(&trickBuf, 0, 8);
+            trickBuf.id.type = D_00441B40[idx];
+            gGenTrickName(trick, (sTrickId*)&trickBuf.id, 100);
             sprintf(text, D_0046F2A8, trick);
-            cUIText_setAsciiString(o, text);
+            cUIText_setAsciiString(textObj, text);
         }
         sprintf(name, D_0046F2C0, i + 1);
-        o = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
-        if (o != 0) {
+        textObj = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (textObj != 0) {
             if (done) {
-                gGenMonsterTrickReqName(tmp.str, D_00441B40[idx], 100);
-                cUIText_setAsciiString(o, tmp.str);
+                gGenMonsterTrickReqName(trickBuf.str, D_00441B40[idx], 100);
+                cUIText_setAsciiString(textObj, trickBuf.str);
             } else {
-                cUIText_setUnicodeStringByID(o, GetHashValue32(D_0046F2D0));
+                cUIText_setUnicodeStringByID(textObj, GetHashValue32(D_0046F2D0));
             }
         }
     }

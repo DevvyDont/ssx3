@@ -243,12 +243,12 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
     if (self->field_0x8 != 0) {
         cTexFlipModifier_update(self->field_0x8);
     }
-    sMbChild2C70* c = (sMbChild2C70*)self->field_0xC;
-    if (c != 0) {
-        c->vt[2].fn((char*)c + c->vt[2].delta);
-        c = (sMbChild2C70*)self->field_0xC;
-        sMbVEntryI2C70* vt2 = (sMbVEntryI2C70*)c->vt;
-        if (vt2[4].fn((char*)c + vt2[4].delta) == 0) {
+    sMbChild2C70* physicsModifier = (sMbChild2C70*)self->field_0xC;
+    if (physicsModifier != 0) {
+        physicsModifier->vt[2].fn((char*)physicsModifier + physicsModifier->vt[2].delta);
+        physicsModifier = (sMbChild2C70*)self->field_0xC;
+        sMbVEntryI2C70* vt2 = (sMbVEntryI2C70*)physicsModifier->vt;
+        if (vt2[4].fn((char*)physicsModifier + vt2[4].delta) == 0) {
             tModifierBlock_remPhysicsModifier(self);
         }
     }
@@ -279,23 +279,23 @@ struct sMbLink2D20 {
  */
 extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
 {
-    sMbLink2D20* h = *(sMbLink2D20**)&self->field_0x10;
-    if (h != 0) {
-        sMbLink2D20* p = h;
+    sMbLink2D20* head = *(sMbLink2D20**)&self->field_0x10;
+    if (head != 0) {
+        sMbLink2D20* link = head;
         do {
-            sMbLink2D20* next = p->next;
-            p->vt[5].fn((char*)p + p->vt[5].delta);
-            p = next;
-        } while (p != 0);
+            sMbLink2D20* next = link->next;
+            link->vt[5].fn((char*)link + link->vt[5].delta);
+            link = next;
+        } while (link != 0);
     }
-    h = *(sMbLink2D20**)&self->field_0x1C;
-    if (h != 0) {
-        sMbLink2D20* p = h;
+    head = *(sMbLink2D20**)&self->field_0x1C;
+    if (head != 0) {
+        sMbLink2D20* link = head;
         do {
-            sMbLink2D20* next = p->next;
-            p->vt[3].fn((char*)p + p->vt[3].delta);
-            p = next;
-        } while (p != 0);
+            sMbLink2D20* next = link->next;
+            link->vt[3].fn((char*)link + link->vt[3].delta);
+            link = next;
+        } while (link != 0);
     }
     sBoundBoxNode* node = self->node;
     if (node != 0) {
@@ -321,14 +321,14 @@ struct sMbVEntryV2DD0 {
 extern "C" void tModifierBlock_render(tModifierBlock* self)
 {
     if (self->field_0x10 != 0) {
-        void* p = (void*)self->field_0x10;
+        void* effect = (void*)self->field_0x10;
         void* next;
         do {
-            next = *(void**)p;
-            sMbVEntryV2DD0* vt = *(sMbVEntryV2DD0**)((char*)p + 0x8);
-            vt[6].fn((char*)p + vt[6].delta);
-            p = next;
-        } while (p != 0);
+            next = *(void**)effect;
+            sMbVEntryV2DD0* vt = *(sMbVEntryV2DD0**)((char*)effect + 0x8);
+            vt[6].fn((char*)effect + vt[6].delta);
+            effect = next;
+        } while (effect != 0);
     }
     sBoundBoxNode* node = self->node;
     if (node != 0) {
@@ -471,13 +471,13 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
     if (self->field_0x8 != 0) {
         cTexFlipModifier_signal((void*)self->field_0x8, id, value);
     }
-    sMbChild2F40* c = (sMbChild2F40*)self->field_0xC;
-    if (c != 0) {
-        c->vt[3].fn((char*)c + c->vt[3].delta, id, value);
+    sMbChild2F40* physicsModifier = (sMbChild2F40*)self->field_0xC;
+    if (physicsModifier != 0) {
+        physicsModifier->vt[3].fn((char*)physicsModifier + physicsModifier->vt[3].delta, id, value);
     }
-    sMbLink2F40* h = *(sMbLink2F40**)&self->field_0x10;
-    if (h != 0) {
-        sMbLink2F40* p = h;
+    sMbLink2F40* firstEffect = *(sMbLink2F40**)&self->field_0x10;
+    if (firstEffect != 0) {
+        sMbLink2F40* p = firstEffect;
         do {
             sMbLink2F40* next = p->next;
             p->vt[7].fn((char*)p + p->vt[7].delta, id, value);
@@ -582,10 +582,10 @@ void operator_delete(int* ptr);
  */
 extern "C" void tModifierBlock_remUVScrollModifier(tModifierBlock* self)
 {
-    int** p = (int**)((char*)self + 0x4);
-    if (*p != 0) {
-        operator_delete(*p);
-        *p = 0;
+    int** uvScrollSlot = (int**)((char*)self + 0x4);
+    if (*uvScrollSlot != 0) {
+        operator_delete(*uvScrollSlot);
+        *uvScrollSlot = 0;
     }
 }
 #endif
@@ -600,10 +600,10 @@ void operator_delete(int* ptr);
  */
 extern "C" void tModifierBlock_remTexFlipModifier(tModifierBlock* self)
 {
-    int** p = (int**)((char*)self + 0x8);
-    if (*p != 0) {
-        operator_delete(*p);
-        *p = 0;
+    int** texFlipSlot = (int**)((char*)self + 0x8);
+    if (*texFlipSlot != 0) {
+        operator_delete(*texFlipSlot);
+        *texFlipSlot = 0;
     }
 }
 #endif
@@ -813,12 +813,12 @@ struct sModifierLink {
  */
 extern "C" int tModifierBlock_findRail(void* self, int id)
 {
-    sModifierLink* p = *(sModifierLink**)((char*)self + 0x1c);
-    while (p != 0) {
-        if (p->id == id) {
+    sModifierLink* rail = *(sModifierLink**)((char*)self + 0x1c);
+    while (rail != 0) {
+        if (rail->id == id) {
             return 1;
         }
-        p = p->next;
+        rail = rail->next;
     }
     return 0;
 }
@@ -868,46 +868,46 @@ static inline void VCall1_353448(char* o, int voff, int slot, void* arg)
  */
 extern "C" void tModifierBlock_writeToReplayFrame(char* self, char* stream)
 {
-    sHdr_353448 h;
-    h.flags = 0;
-    h.b = 0;
-    h.a = 0;
-    h.count1 = 0;
-    h.count2 = 0;
+    sHdr_353448 info;
+    info.flags = 0;
+    info.b = 0;
+    info.a = 0;
+    info.count1 = 0;
+    info.count2 = 0;
     for (int i = 0; i < 32; i++) {
-        h.ids[i] = 0;
+        info.ids[i] = 0;
     }
-    char* o0 = *(char**)(self + 0x0);
-    if (o0 != 0) {
-        h.flags |= 1;
-        h.a = VCall0_353448(o0, 0, 26);
+    char* transformModifier = *(char**)(self + 0x0);
+    if (transformModifier != 0) {
+        info.flags |= 1;
+        info.a = VCall0_353448(transformModifier, 0, 26);
     }
     if (*(void**)(self + 0x4) != 0) {
-        h.flags |= 2;
+        info.flags |= 2;
     }
     if (*(void**)(self + 0x8) != 0) {
-        h.flags |= 4;
+        info.flags |= 4;
     }
     char* oC = *(char**)(self + 0xC);
     if (oC != 0) {
-        h.flags |= 8;
-        h.b = VCall0_353448(oC, 4, 5);
+        info.flags |= 8;
+        info.b = VCall0_353448(oC, 4, 5);
     }
-    for (char* p = *(char**)(self + 0x10); p; p = *(char**)p) {
-        h.ids[h.count1++] = VCall0_353448(p, 8, 2);
+    for (char* link = *(char**)(self + 0x10); link; link = *(char**)link) {
+        info.ids[info.count1++] = VCall0_353448(link, 8, 2);
     }
-    if (h.count1 > 0) {
-        h.flags |= 0x10;
+    if (info.count1 > 0) {
+        info.flags |= 0x10;
     }
-    for (char* p = *(char**)(self + 0x1C); p; p = *(char**)p) {
-        h.count2++;
+    for (char* link = *(char**)(self + 0x1C); link; link = *(char**)link) {
+        info.count2++;
     }
-    if (h.count2 > 0) {
-        h.flags |= 0x20;
+    if (info.count2 > 0) {
+        info.flags |= 0x20;
     }
     {
-        sVEw_353448* e = &(*(sVEw_353448**)stream)[1];
-        e->fn(stream + e->delta, &h, 0x34);
+        sVEw_353448* writeEntry = &(*(sVEw_353448**)stream)[1];
+        writeEntry->fn(stream + writeEntry->delta, &info, 0x34);
     }
     char* w0 = *(char**)(self + 0x0);
     if (w0 != 0) {
@@ -923,14 +923,14 @@ extern "C" void tModifierBlock_writeToReplayFrame(char* self, char* stream)
     if (wC != 0) {
         VCall1_353448(wC, 4, 6, stream);
     }
-    if (h.count1 > 0) {
-        for (char* p = *(char**)(self + 0x10); p; p = *(char**)p) {
-            VCall1_353448(p, 8, 4, stream);
+    if (info.count1 > 0) {
+        for (char* link = *(char**)(self + 0x10); link; link = *(char**)link) {
+            VCall1_353448(link, 8, 4, stream);
         }
     }
-    if (h.count2 > 0) {
-        for (char* p = *(char**)(self + 0x1C); p; p = *(char**)p) {
-            VCall1_353448(p, 8, 2, stream);
+    if (info.count2 > 0) {
+        for (char* link = *(char**)(self + 0x1C); link; link = *(char**)link) {
+            VCall1_353448(link, 8, 2, stream);
         }
     }
 }
@@ -1178,23 +1178,23 @@ extern "C" void cSkyBox_render(void* self)
     sVec4_53B10 pos = *(sVec4_53B10*)func_002D1C20(func_002D1C58_i());
     *(sVec4_53B10*)&m.m[12] = pos;
     ((sRS_53B10*)ctx->m_pCurrentDrawState)[1] = ((sRS_53B10*)ctx->m_pCurrentDrawState)[0];
-    sRS_53B10* t = (sRS_53B10*)ctx->m_pCurrentDrawState;
-    *(sRS_53B10**)&ctx->m_pCurrentDrawState = t + 1;
-    int f8 = t[1].f8;
-    t[1].f8 = f8 & ~0x3E0;
+    sRS_53B10* drawState = (sRS_53B10*)ctx->m_pCurrentDrawState;
+    *(sRS_53B10**)&ctx->m_pCurrentDrawState = drawState + 1;
+    int f8 = drawState[1].f8;
+    drawState[1].f8 = f8 & ~0x3E0;
     int old = (unsigned int)(f8 & 0x3E0) >> 5;
     ((sRS_53B10*)ctx->m_pCurrentDrawState)->f0b = 3;
     SetZOn_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 1);
     SetBlendM_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 2);
     SetZMode_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 0);
     SetAlpha_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 0x14);
-    char* o = *(char**)((char*)self + 0x14);
-    if (o != 0)
+    char* skyInstance = *(char**)((char*)self + 0x14);
+    if (skyInstance != 0)
     {
-        *(unsigned int*)(o + 8) = (*(unsigned int*)(o + 8) & ~2u) | 4;
-        char* o2 = *(char**)((char*)self + 0x14);
+        *(unsigned int*)(skyInstance + 8) = (*(unsigned int*)(skyInstance + 8) & ~2u) | 4;
+        char* instToDraw = *(char**)((char*)self + 0x14);
         sVE_53B10* vt = (sVE_53B10*)ctx->mVtbl;
-        vt[95].fn((char*)ctx + vt[95].delta, o2, 1.0f, *(void**)(*(char**)(o2 + 0x80) + 0xC), &m, 0, 0, 0x5420);
+        vt[95].fn((char*)ctx + vt[95].delta, instToDraw, 1.0f, *(void**)(*(char**)(instToDraw + 0x80) + 0xC), &m, 0, 0, 0x5420);
     }
     sRS_53B10* t2 = (sRS_53B10*)ctx->m_pCurrentDrawState;
     *(sRS_53B10**)&ctx->m_pCurrentDrawState = t2 - 1;

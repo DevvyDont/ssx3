@@ -407,18 +407,18 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(char* self, sMsg_1C68* msg, uns
     switch (type) {
     case 5:
         if (msg->info[6] == 0) {
-            char* o = **(char***)(self + 0x10);
-            sVE_1C68* vt = *(sVE_1C68**)(o + 0x4);
-            void* st = vt[4].fn(o + vt[4].delta, self, msg->id);
+            char* custom = **(char***)(self + 0x10);
+            sVE_1C68* vt = *(sVE_1C68**)(custom + 0x4);
+            void* st = vt[4].fn(custom + vt[4].delta, self, msg->id);
             if (st) {
                 cUIStateStack_push(*(char**)(self + 0x10) + 0x18, st);
             }
         }
         break;
     case 6: {
-        char* o = **(char***)(self + 0x10);
-        sVE_1C68* vt = *(sVE_1C68**)(o + 0x4);
-        void* st = vt[5].fn(o + vt[5].delta, self, msg->id);
+        char* custom = **(char***)(self + 0x10);
+        sVE_1C68* vt = *(sVE_1C68**)(custom + 0x4);
+        void* st = vt[5].fn(custom + vt[5].delta, self, msg->id);
         if (st) {
             cUIStateStack_push(*(char**)(self + 0x10) + 0x18, st);
         }
@@ -512,24 +512,24 @@ extern "C" int cFEStateRuleSelect_onWidgetMenu(char* self, void* pMenu, unsigned
     case 1: {
         int sel = (*(signed char**)(self + 0x48))[idx];
         int play = 0;
-        char* a = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045E270));
-        char* b = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045E280));
+        char* arrowLeft = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045E270));
+        char* arrowRight = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045E280));
         int locked = *(signed char*)(self + sel + 0x51) < 1;
-        cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045FB20));
-        if (locked && t) {
-            cUIText_setUnicodeStringByID(t, GetHashValue32(D_00441058[sel]));
+        cUIText* textHelp = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_0045FB20));
+        if (locked && textHelp) {
+            cUIText_setUnicodeStringByID(textHelp, GetHashValue32(D_00441058[sel]));
         }
         char label[32];
         if (sel) {
             if (locked) {
-                if (a) SetVisible_1E48(a, 1);
-                if (b) SetVisible_1E48(b, 1);
+                if (arrowLeft) SetVisible_1E48(arrowLeft, 1);
+                if (arrowRight) SetVisible_1E48(arrowRight, 1);
                 play = 1;
                 __builtin_memcpy(label, D_0045FAD8, 10);
             }
         } else {
-            if (a) SetVisible_1E48(a, 0);
-            if (b) SetVisible_1E48(b, 0);
+            if (arrowLeft) SetVisible_1E48(arrowLeft, 0);
+            if (arrowRight) SetVisible_1E48(arrowRight, 0);
             play = 1;
             __builtin_memcpy(label, D_004A1708, 7);
         }
@@ -739,21 +739,21 @@ extern "C" void cFEStateRuleSelect_updateMenuColor(void* selfp)
     __builtin_memcpy(name1, D_004A16B0, 3);
     signed char n = *(signed char*)(self + 0x50) < 12 ? *(signed char*)(self + 0x50) : 11;
     for (signed char i = 0; i < n; i++) {
-        sObj_2488* a = (sObj_2488*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name0));
-        sObj_2488* b = (sObj_2488*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name1));
-        if (a && b) {
-            if (*(signed char*)(self + a->idx + 0x51) > 0) {
-                b->vt[25].fn((char*)b + b->vt[25].delta, 1);
-                b->q88 = D_004C66C8;
-                b->vt[8].fn((char*)b + b->vt[8].delta, 1);
-                a->vt[24].fn((char*)a + a->vt[24].delta, 1);
-                a->q88 = D_004C66C8;
-                a->vt[8].fn((char*)a + a->vt[8].delta, 1);
+        sObj_2488* listBox = (sObj_2488*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name0));
+        sObj_2488* textBox = (sObj_2488*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name1));
+        if (listBox && textBox) {
+            if (*(signed char*)(self + listBox->idx + 0x51) > 0) {
+                textBox->vt[25].fn((char*)textBox + textBox->vt[25].delta, 1);
+                textBox->q88 = D_004C66C8;
+                textBox->vt[8].fn((char*)textBox + textBox->vt[8].delta, 1);
+                listBox->vt[24].fn((char*)listBox + listBox->vt[24].delta, 1);
+                listBox->q88 = D_004C66C8;
+                listBox->vt[8].fn((char*)listBox + listBox->vt[8].delta, 1);
             } else {
-                b->vt[25].fn((char*)b + b->vt[25].delta, 0);
-                b->vt[8].fn((char*)b + b->vt[8].delta, 0);
-                a->vt[24].fn((char*)a + a->vt[24].delta, 0);
-                a->vt[8].fn((char*)a + a->vt[8].delta, 0);
+                textBox->vt[25].fn((char*)textBox + textBox->vt[25].delta, 0);
+                textBox->vt[8].fn((char*)textBox + textBox->vt[8].delta, 0);
+                listBox->vt[24].fn((char*)listBox + listBox->vt[24].delta, 0);
+                listBox->vt[8].fn((char*)listBox + listBox->vt[8].delta, 0);
             }
         }
         if (i < 9) {

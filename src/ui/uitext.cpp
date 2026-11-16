@@ -129,9 +129,9 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
     if (font == 0) {
         return;
     }
-    sV2_05E8 s(self->sx, self->sy);
-    font->cur.x = font->scale.x * s.x;
-    font->cur.y = font->scale.y * s.y;
+    sV2_05E8 textScale(self->sx, self->sy);
+    font->cur.x = font->scale.x * textScale.x;
+    font->cur.y = font->scale.y * textScale.y;
     if (((self->flags14 >> 5) & 1) && ((self->flags >> 4) & 1)) {
         font->color = self->hiColor;
     } else if (((self->flags14 >> 3) & 1) == 0 && ((self->flags >> 5) & 1)) {
@@ -140,15 +140,15 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
         font->color = self->color;
     }
     if ((self->flags >> 2) & 1) {
-        sCol_05E8 c = self->shadowColor;
-        c.r = self->color.r;
-        font->shadowColor = c;
+        sCol_05E8 shadowCol = self->shadowColor;
+        shadowCol.r = self->color.r;
+        font->shadowColor = shadowCol;
         font->shadowOfs = D_004A5A60;
     } else {
         font->shadowOfs = sV2_05E8(0.0f, 0.0f);
     }
-    int* d = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
-    *d = (*d & ~0x3E0) | (((((sLayerBits_05E8*)&self->flags14)->layer + 9) << 5) & 0x3E0);
+    int* drawFlags = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
+    *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_05E8*)&self->flags14)->layer + 9) << 5) & 0x3E0);
     sV3_05E8 pos(self->x + x, self->y + y, 0.0f);
     int i = 0;
     if (self->numLines > 0) do {
@@ -165,11 +165,11 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
             unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(str) + 5) * 2, D_00494078, 0x100, 0);
             func_002C2718(buf, D_004A47B0, str);
             sRect_05E8 r;
-            func_003921F0_s(font, buf, &r, 0, s.x, s.y);
+            func_003921F0_s(font, buf, &r, 0, textScale.x, textScale.y);
             sV3_05E8 size(r.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
             sV3_05E8 p = pos;
             func_0039FEB8(self, &p, &size);
-            pos.y += (float)font->height * font->scale.y * s.y + 3.0f;
+            pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
             func_00391E30_s(font, p.x, p.y, buf);
             if (buf != 0) {
                 cMemMan_free(buf);
@@ -177,12 +177,12 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
             return;
         }
         sRect_05E8 r;
-        func_003921F0_s(font, str, &r, 0, s.x, s.y);
+        func_003921F0_s(font, str, &r, 0, textScale.x, textScale.y);
         i++;
         sV3_05E8 size(r.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
         sV3_05E8 p = pos;
         func_0039FEB8(self, &p, &size);
-        pos.y += (float)font->height * font->scale.y * s.y + 3.0f;
+        pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
         func_00391E30_s(font, p.x, p.y, str);
     } while (i < self->numLines);
 }
@@ -488,20 +488,20 @@ extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self_, const unsigned s
             *(short*)&self_->mLineSize = *(unsigned short*)&self_->mNumLines;
             lines[0] = text;
             int k = 1;
-            unsigned short* p = text;
-            while (*p != 0) {
-                unsigned short c = *p;
-                unsigned short next = p[1];
-                if (c == gUSTRBackSlash && next == c) {
-                    *p = 0;
-                    p += 2;
-                    lines[k++] = p;
-                } else if (c == 0xD) {
-                    *p = 0;
-                    p++;
-                    lines[k++] = p;
+            unsigned short* cursor = text;
+            while (*cursor != 0) {
+                unsigned short curChar = *cursor;
+                unsigned short next = cursor[1];
+                if (curChar == gUSTRBackSlash && next == curChar) {
+                    *cursor = 0;
+                    cursor += 2;
+                    lines[k++] = cursor;
+                } else if (curChar == 0xD) {
+                    *cursor = 0;
+                    cursor++;
+                    lines[k++] = cursor;
                 } else {
-                    p++;
+                    cursor++;
                 }
             }
         }
@@ -679,8 +679,8 @@ extern "C" void cUITextScroll_setUIData(sUIText11B8* self, sUIData11B8* data)
         cUITextScroll_clearBuffer_1(self);
         cUITextScroll_addUnicodeStringByID((cUITextScroll*)self, data->textId);
     }
-    int f = *(int*)((char*)self + 0x74) >> 3;
-    if (f & 1) {
+    int bits = *(int*)((char*)self + 0x74) >> 3;
+    if (bits & 1) {
         self->color = sUIColor11B8(data->r * 0.003921568859368563f, data->g * 0.003921568859368563f,
                                    data->b * 0.003921568859368563f, data->a * 0.003921568859368563f);
     }
@@ -754,11 +754,11 @@ extern "C" void cUITextScroll_updateLocale(cUITextScroll* self)
 {
     int id = (int)self->mStringID;
     if (id != 0) {
-        cUITextScroll_updateLocale_cVirtA* a = *(cUITextScroll_updateLocale_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
-        if (a != 0) {
-            void* r = a->v04(id);
-            if (r != 0) {
-                cUITextScroll_setUnicodeStringWrap(self, r);
+        cUITextScroll_updateLocale_cVirtA* strings = *(cUITextScroll_updateLocale_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
+        if (strings != 0) {
+            void* wideStr = strings->v04(id);
+            if (wideStr != 0) {
+                cUITextScroll_setUnicodeStringWrap(self, wideStr);
             }
             ((cUITextScroll_updateLocale_cVirtB*)self)->v05(1);
         }
@@ -835,10 +835,10 @@ extern "C" int cUITextScroll_onInput(sUIText13E0* self, char* input)
             }
             return 1;
         }
-        short d = self->cur - self->top;
-        if (d < 0) {
+        short rowOffset = self->cur - self->top;
+        if (rowOffset < 0) {
             self->top = self->cur;
-        } else if (d >= rows) {
+        } else if (rowOffset >= rows) {
             self->top = self->cur - rows + 1;
         }
     } else {
@@ -958,19 +958,19 @@ extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
     if (font == 0) {
         return;
     }
-    sV2_1588 s(self->sx, self->sy);
-    font->cur.x = font->scale.x * s.x;
-    font->cur.y = font->scale.y * s.y;
+    sV2_1588 textScale(self->sx, self->sy);
+    font->cur.x = font->scale.x * textScale.x;
+    font->cur.y = font->scale.y * textScale.y;
     if ((self->flags >> 3) & 1) {
-        sCol_1588 c = self->shadowColor;
-        c.r = self->color.r;
-        font->shadowColor = c;
+        sCol_1588 shadowCol = self->shadowColor;
+        shadowCol.r = self->color.r;
+        font->shadowColor = shadowCol;
         font->shadowOfs = sV2_1588(2.0f, 2.0f);
     } else {
         font->shadowOfs = sV2_1588(0.0f, 0.0f);
     }
-    int* d = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
-    *d = (*d & ~0x3E0) | (((((sLayerBits_1588*)&self->flags14)->layer + 9) << 5) & 0x3E0);
+    int* drawFlags = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
+    *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_1588*)&self->flags14)->layer + 9) << 5) & 0x3E0);
     sV3_1588 pos(self->x + x, self->y + y, 0.0f);
     float lineH = self->sy * ((float)font->height * font->scale.y) + 3.0f;
     signed char rows = (int)(self->height / lineH);
@@ -990,10 +990,10 @@ extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
         sRect_1588 r;
         func_003921F0(font, str, &r, 0, self->sx, self->sy);
         sV3_1588 size(r.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
-        sV3_1588 p = pos;
-        func_0039FEB8(self, &p, &size);
+        sV3_1588 drawPos = pos;
+        func_0039FEB8(self, &drawPos, &size);
         pos.y += lineH;
-        func_00391E30(font, p.x, p.y + self->yofs, str);
+        func_00391E30(font, drawPos.x, drawPos.y + self->yofs, str);
     } while (i < rows);
     if (self->scroll != 0) {
         func_0039DA20(self->scroll, self->top, rows, self->count);
@@ -1933,18 +1933,18 @@ INCLUDE_ASM("ui/uitext", cUIVector_setColour);
  */
 extern "C" void cUIVector_setColour(cUIVector* self, tARGB* colour)
 {
-    tARGB tmp = *colour;
+    tARGB scaled = *colour;
     unsigned int i;
     *(&self->mColour) = *colour;
     if (self->mpVertexColour == 0) {
         return;
     }
-    tmp.A = (int)(colour->A * 255.0f);
-    tmp.R = (int)(colour->R * 255.0f);
-    tmp.G = (int)(colour->G * 255.0f);
-    tmp.B = (int)(colour->B * 255.0f);
+    scaled.A = (int)(colour->A * 255.0f);
+    scaled.R = (int)(colour->R * 255.0f);
+    scaled.G = (int)(colour->G * 255.0f);
+    scaled.B = (int)(colour->B * 255.0f);
     for (i = 0; i < *(unsigned int*)&self->mAttrVector >> 17; i++) {
-        (self->mpVertexColour)[i] = tmp;
+        (self->mpVertexColour)[i] = scaled;
     }
 }
 #endif

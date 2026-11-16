@@ -276,8 +276,8 @@ extern "C" sOut_0778* cWorldPainterQuery_queryPosition(sQuery_0778* self, float 
     self->x = x;
     self->z = z;
     while (valid_0778(&(*(sEntry_0778**)(map + 4))[idx])) {
-        sEntry_0778* e = (sEntry_0778*)(*(char**)(map + 4) + idx * (int)sizeof(sEntry_0778));
-        void* cell = e->layer->cells[*(unsigned char*)&self->id];
+        sEntry_0778* entry = (sEntry_0778*)(*(char**)(map + 4) + idx * (int)sizeof(sEntry_0778));
+        void* cell = entry->layer->cells[*(unsigned char*)&self->id];
         if (cell == 0) {
             if (first) {
                 end_0778(self->out);
@@ -301,8 +301,8 @@ extern "C" sOut_0778* cWorldPainterQuery_queryPosition(sQuery_0778* self, float 
         }
         if (blend == -99999.0f) {
             blend = 0.0f;
-            float v = *hit->data;
-            if (blend <= v && v <= self->out->value) {
+            float layerValue = *hit->data;
+            if (blend <= layerValue && layerValue <= self->out->value) {
                 set_0778(self->out, hit->data, 1.0f);
                 self->out->value = blend;
             } else {

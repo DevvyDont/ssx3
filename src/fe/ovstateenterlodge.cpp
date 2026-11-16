@@ -88,15 +88,15 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cOVState_ENTERLODGE_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 8) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -570,9 +570,9 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
     cOVState_onCreateScreen(self);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 8);
-    signed char* g = (signed char*)((char*)&cBENewRaceInterface_newRace);
-    int ev = g[0x4A];
-    int mode = g[0x48];
+    signed char* raceDB = (signed char*)((char*)&cBENewRaceInterface_newRace);
+    int ev = raceDB[0x4A];
+    int mode = raceDB[0x48];
     switch (ev) {
     case 6 ... 11:
         strcpy1(wtext, func_001FD190());

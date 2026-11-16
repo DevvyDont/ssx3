@@ -143,10 +143,10 @@ static inline void cMemMan_freeBlockK2(void* p)
  */
 extern "C" void* cMemMan_internalResizeBlock(void* old, unsigned int size)
 {
-    void* p = operator_new_K2(size, D_0048DA08, 0x100, 0);
-    func_0041605C(p, old, size < cMemMan_blockSizeK2(old) ? size : cMemMan_blockSizeK2(old));
+    void* newBlock = operator_new_K2(size, D_0048DA08, 0x100, 0);
+    func_0041605C(newBlock, old, size < cMemMan_blockSizeK2(old) ? size : cMemMan_blockSizeK2(old));
     cMemMan_freeBlockK2(old);
-    return p;
+    return newBlock;
 }
 #endif
 

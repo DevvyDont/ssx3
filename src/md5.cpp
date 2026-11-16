@@ -190,7 +190,7 @@ struct md5_state_append {
 extern "C" void md5_append(md5_ctx* ctx, const unsigned char* data, int nbytes)
 {
     md5_state_append* pms = (md5_state_append*)ctx;
-    const unsigned char* p = data;
+    const unsigned char* dataPtr = data;
     int left = nbytes;
     int offset = (pms->count[0] >> 3) & 63;
     unsigned int nbits = (unsigned int)(nbytes << 3);
@@ -209,21 +209,21 @@ extern "C" void md5_append(md5_ctx* ctx, const unsigned char* data, int nbytes)
         int copy = (offset + nbytes > 64 ? 64 - offset : nbytes);
 
         // PORT: pointer-in-int; the target adds offset to the state pointer before the buf offset (pms->buf + offset)
-        func_0041605C((unsigned char*)(offset + (int)pms) + 0x18, p, copy);
+        func_0041605C((unsigned char*)(offset + (int)pms) + 0x18, dataPtr, copy);
         if (offset + copy < 64) {
             return;
         }
-        p += copy;
+        dataPtr += copy;
         left -= copy;
         md5_process(ctx, pms->buf);
     }
 
-    for (; left >= 64; p += 64, left -= 64) {
-        md5_process(ctx, p);
+    for (; left >= 64; dataPtr += 64, left -= 64) {
+        md5_process(ctx, dataPtr);
     }
 
     if (left) {
-        func_0041605C(pms->buf, p, left);
+        func_0041605C(pms->buf, dataPtr, left);
     }
 }
 #endif

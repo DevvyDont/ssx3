@@ -168,21 +168,21 @@ extern "C" char* cSSXAudio_cSSXAudio(void* self, int inchrg, int maxBanks, int m
     *(const sSaVtbl8_4C68**)(BM_4C68 + 0xAB0) = &D_00483648_4C68;
     *(const sSaVtbl7_4C68**)(BM_4C68 + 0x1D4) = &D_00483728_4C68;
     if (inchrg == 0) {
-        sSaVtbl4_4C68 v1 = D_00483708_4C68;
-        *(sSaVtbl4_4C68**)(*(char**)(BM_4C68 + 0x1D8) + 4) = &v1;
+        sSaVtbl4_4C68 vtbl1 = D_00483708_4C68;
+        *(sSaVtbl4_4C68**)(*(char**)(BM_4C68 + 0x1D8) + 4) = &vtbl1;
         char* base1 = *(char**)(BM_4C68 + 0x1D8) - 0x6C90;
-        int d1 = S_4C68 - base1;
-        v1.e[1].delta = D_00483708_4C68.e[1].delta + d1;
-        v1.e[2].delta = D_00483708_4C68.e[2].delta + d1;
-        sSaVtbl8_4C68 v2 = D_00483648_4C68;
-        *(sSaVtbl8_4C68**)(BM_4C68 + 0xAB0) = &v2;
+        int delta1 = S_4C68 - base1;
+        vtbl1.e[1].delta = D_00483708_4C68.e[1].delta + delta1;
+        vtbl1.e[2].delta = D_00483708_4C68.e[2].delta + delta1;
+        sSaVtbl8_4C68 vtbl2 = D_00483648_4C68;
+        *(sSaVtbl8_4C68**)(BM_4C68 + 0xAB0) = &vtbl2;
         char* base2 = BM_4C68 - 0x6C98;
         int d2 = S_4C68 - base2;
-        v2.e[1].delta = D_00483648_4C68.e[1].delta + d2;
-        v2.e[2].delta = D_00483648_4C68.e[2].delta + d2;
-        v2.e[3].delta = D_00483648_4C68.e[3].delta + d2;
-        v2.e[5].delta = D_00483648_4C68.e[5].delta + d2;
-        v2.e[6].delta = D_00483648_4C68.e[6].delta + d2;
+        vtbl2.e[1].delta = D_00483648_4C68.e[1].delta + d2;
+        vtbl2.e[2].delta = D_00483648_4C68.e[2].delta + d2;
+        vtbl2.e[3].delta = D_00483648_4C68.e[3].delta + d2;
+        vtbl2.e[5].delta = D_00483648_4C68.e[5].delta + d2;
+        vtbl2.e[6].delta = D_00483648_4C68.e[6].delta + d2;
         sSaVtbl7_4C68 v3 = D_00483728_4C68;
         *(sSaVtbl7_4C68**)(BM_4C68 + 0x1D4) = &v3;
         v3.e[1].delta = D_00483728_4C68.e[1].delta + d2;
@@ -409,12 +409,12 @@ extern "C" int func_002ADF80_2(void* bank, int a1) __asm__("func_002ADF80");
  */
 extern "C" int cSSXAudio_SetMode(void* self, int value)
 {
-    char* s = (char*)self;
-    int r = func_002ADF80_2(*(void**)(**(char***)(s + 0x118) + 0x1D8), value);
-    if (r == 2) {
-        *(int*)(s + 0x62B0) = value;
+    char* audio = (char*)self;
+    int retVal = func_002ADF80_2(*(void**)(**(char***)(audio + 0x118) + 0x1D8), value);
+    if (retVal == 2) {
+        *(int*)(audio + 0x62B0) = value;
     }
-    return r;
+    return retVal;
 }
 #endif
 
@@ -648,9 +648,9 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SetAudioUpdateState);
  */
 extern "C" void cSSXAudio_SetAudioUpdateState(cSSXAudio* self, int State)
 {
-    int* p = (int*)((char*)self + 0x6474);
-    if (*p != State) {
-        *p = State;
+    int* updateState = (int*)((char*)self + 0x6474);
+    if (*updateState != State) {
+        *updateState = State;
     }
 }
 #endif
@@ -1331,10 +1331,10 @@ extern "C" void cSSXAudio_UnAttachAudioBank(cSSXAudio* self, unsigned int handle
     }
     int off = slot << 2;
     char* tbl = (char*)self + 0x6C70;
-    int* p = (int*)(tbl + off);
-    if (*p != 0) {
+    int* bankEntry = (int*)(tbl + off);
+    if (*bankEntry != 0) {
         func_0028BE90(*(void**)self->MusicSys.mpVStreamSys, slot + 8);
-        *p = 0;
+        *bankEntry = 0;
         *(int*)((char*)self + (slot << 2) + 0x6C78) = -1;
     }
 }
@@ -1985,18 +1985,18 @@ extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self_, int mask, float finalLeve
             sSaMix7A10_set(self, 5, finalLevel);
         if (mask & 4) {
             sSaMix7A10_set(self, 4, finalLevel);
-            float m = self->chan[4].out;
-            sSaMixOut7A10* o = (sSaMixOut7A10*)self;
-            o->mix[0] = m * D_004A352C;
-            o->mix[1] = m * D_004A3530;
-            o->mix[2] = m * D_004A3534;
-            o->mix[3] = m * D_004A3538;
-            o->mix[4] = m * D_004A353C;
-            o->mix[5] = m * D_004A3540;
-            o->mix[6] = m * D_004A3544;
-            o->mix[7] = m * D_004A3548;
-            o->mix[8] = m * D_004A354C;
-            o->mix[9] = m * D_004A3550;
+            float level = self->chan[4].out;
+            sSaMixOut7A10* mixOut = (sSaMixOut7A10*)self;
+            mixOut->mix[0] = level * D_004A352C;
+            mixOut->mix[1] = level * D_004A3530;
+            mixOut->mix[2] = level * D_004A3534;
+            mixOut->mix[3] = level * D_004A3538;
+            mixOut->mix[4] = level * D_004A353C;
+            mixOut->mix[5] = level * D_004A3540;
+            mixOut->mix[6] = level * D_004A3544;
+            mixOut->mix[7] = level * D_004A3548;
+            mixOut->mix[8] = level * D_004A354C;
+            mixOut->mix[9] = level * D_004A3550;
         }
         if (mask & 8)
             sSaMix7A10_set(self, 2, finalLevel);
@@ -2096,18 +2096,18 @@ extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self_)
             sSaMix7C48_set(self, 5, self->fadeCur);
         if (self->fadeMask & 4) {
             sSaMix7C48_set(self, 4, self->fadeCur);
-            float m = self->chan[4].out;
-            sSaMixOut7C48* o = (sSaMixOut7C48*)self;
-            o->mix[0] = m * D_004A352C;
-            o->mix[1] = m * D_004A3530;
-            o->mix[2] = m * D_004A3534;
-            o->mix[3] = m * D_004A3538;
-            o->mix[4] = m * D_004A353C;
-            o->mix[5] = m * D_004A3540;
-            o->mix[6] = m * D_004A3544;
-            o->mix[7] = m * D_004A3548;
-            o->mix[8] = m * D_004A354C;
-            o->mix[9] = m * D_004A3550;
+            float level = self->chan[4].out;
+            sSaMixOut7C48* mixOut = (sSaMixOut7C48*)self;
+            mixOut->mix[0] = level * D_004A352C;
+            mixOut->mix[1] = level * D_004A3530;
+            mixOut->mix[2] = level * D_004A3534;
+            mixOut->mix[3] = level * D_004A3538;
+            mixOut->mix[4] = level * D_004A353C;
+            mixOut->mix[5] = level * D_004A3540;
+            mixOut->mix[6] = level * D_004A3544;
+            mixOut->mix[7] = level * D_004A3548;
+            mixOut->mix[8] = level * D_004A354C;
+            mixOut->mix[9] = level * D_004A3550;
         }
         if (self->fadeMask & 8)
             sSaMix7C48_set(self, 2, self->fadeCur);
@@ -2357,9 +2357,9 @@ extern "C" void cSSXAudio_MixVolume(cSSXAudio* vself, int id)
         return;
     }
     self->preset = id;
-    float v1 = func_00288370(self, 1, self->entries[id].f0);
-    float v2 = func_00288370(self, 2, self->entries[id].f4);
-    float v3 = func_00288370(self, 3, self->entries[id].f8);
+    float musicVol = func_00288370(self, 1, self->entries[id].f0);
+    float djVol = func_00288370(self, 2, self->entries[id].f4);
+    float paVol = func_00288370(self, 3, self->entries[id].f8);
     float v4 = func_00288370(self, 4, self->entries[id].fC);
     float v6 = func_00288370(self, 6, self->entries[id].f10);
     float v7 = func_00288370(self, 7, self->entries[id].f14);
@@ -2368,9 +2368,9 @@ extern "C" void cSSXAudio_MixVolume(cSSXAudio* vself, int id)
     float v10 = func_00288370(self, 10, self->entries[id].f20);
     float t = self->entries[id].f24;
     if (t == 0.0f) {
-        self->cur[1] = v1;
-        self->cur[2] = v2;
-        self->cur[3] = v3;
+        self->cur[1] = musicVol;
+        self->cur[2] = djVol;
+        self->cur[3] = paVol;
         self->cur[4] = v4;
         self->cur[6] = v6;
         self->cur[7] = v7;
@@ -2394,9 +2394,9 @@ extern "C" void cSSXAudio_MixVolume(cSSXAudio* vself, int id)
         o->mix[9] = m * D_004A3550;
     } else {
         sAudioFade_87A8* f = (sAudioFade_87A8*)self;
-        func_002887A8(f, 1, self->entries[id].f0 != -1, v1, t);
-        func_002887A8(f, 2, self->entries[id].f4 != -1, v2, t);
-        func_002887A8(f, 3, self->entries[id].f8 != -1, v3, t);
+        func_002887A8(f, 1, self->entries[id].f0 != -1, musicVol, t);
+        func_002887A8(f, 2, self->entries[id].f4 != -1, djVol, t);
+        func_002887A8(f, 3, self->entries[id].f8 != -1, paVol, t);
         func_002887A8(f, 4, self->entries[id].fC != -1, v4, t);
         func_002887A8(f, 6, self->entries[id].f10 != -1, v6, t);
         func_002887A8(f, 7, self->entries[id].f14 != -1, v7, t);
@@ -3104,14 +3104,14 @@ struct sAud9688 {
  */
 extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
 {
-    sAud9688* s = (sAud9688*)self_;
-    if (s->f6C58 != 0) {
-        int frame = s->f6864;
+    sAud9688* audio = (sAud9688*)self_;
+    if (audio->f6C58 != 0) {
+        int frame = audio->f6864;
         if (frame == (frame / 2) * 2) {
-            s->f6C60 = 0;
-            s->f6C68 = s->f6C6C;
-            int idx = (int)((float)(frame * s->f6C54) / *(float*)((char*)D_004A5B64 + 0x2C));
-            if (idx < s->f6C50) {
+            audio->f6C60 = 0;
+            audio->f6C68 = audio->f6C6C;
+            int idx = (int)((float)(frame * audio->f6C54) / *(float*)((char*)D_004A5B64 + 0x2C));
+            if (idx < audio->f6C50) {
                 int val = *(signed char*)(((char*)self_) + idx + 0x6868);
                 if (val > 0) {
                     int t0, t1, t2;
@@ -3140,33 +3140,33 @@ extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
                         break;
                     }
                     if (val < t0)
-                        s->f6C6C = 1.0f;
+                        audio->f6C6C = 1.0f;
                     else if (val < t1)
-                        s->f6C6C = vb;
+                        audio->f6C6C = vb;
                     else if (val < t2)
-                        s->f6C6C = vb;
+                        audio->f6C6C = vb;
                     else
-                        s->f6C6C = va;
+                        audio->f6C6C = va;
                 } else {
-                    s->f6C6C = 1.0f;
+                    audio->f6C6C = 1.0f;
                 }
             } else {
-                s->f6C58 = 0;
-                s->f6C6C = 1.0f;
+                audio->f6C58 = 0;
+                audio->f6C6C = 1.0f;
             }
-            s->f6C64 = s->f6C6C - s->f6C68;
+            audio->f6C64 = audio->f6C6C - audio->f6C68;
         }
-        (s->f6864)++;
+        (audio->f6864)++;
     }
-    int c = s->f6C60;
+    int c = audio->f6C60;
     if (c <= 0) {
         if (c == 0) {
-            func_00289830(((char*)self_), s->f6C6C);
-            (s->f6C60)++;
+            func_00289830(((char*)self_), audio->f6C6C);
+            (audio->f6C60)++;
         } else {
-            s->f6C68 = s->f6C68 + s->f6C64;
-            func_00289830(((char*)self_), s->f6C68);
-            (s->f6C60)++;
+            audio->f6C68 = audio->f6C68 + audio->f6C64;
+            func_00289830(((char*)self_), audio->f6C68);
+            (audio->f6C60)++;
         }
     }
 }

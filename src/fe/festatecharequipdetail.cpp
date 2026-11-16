@@ -321,12 +321,12 @@ extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* r = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
-    *(int*)(r + 0xC2C) = 0x11;
-    *(int*)(r + 0xCCC) = 0;
-    int ok = *(unsigned int*)r < 10 && *(int*)(r + 0xCB8) != 0 && *(int*)(r + 0xCB4) != 0;
+    char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
+    *(int*)(feRider + 0xC2C) = 0x11;
+    *(int*)(feRider + 0xCCC) = 0;
+    int ok = *(unsigned int*)feRider < 10 && *(int*)(feRider + 0xCB8) != 0 && *(int*)(feRider + 0xCB4) != 0;
     if (ok) {
-        void* anim = *(void**)(r + 0xC);
+        void* anim = *(void**)(feRider + 0xC);
         if (anim != 0) {
             cRiderAnimBase_reset(anim);
             cRiderAnimBase_play(anim, 0x1B2, 0, -1.0f);
@@ -355,8 +355,8 @@ extern "C" void cFEStateCharEquip_onDestroyScreen(void* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
-        char* r = (char*)func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
-        *(unsigned int*)(r + 0xC2C) = 0xFFFFFFFF;
+        char* feRider = (char*)func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
+        *(unsigned int*)(feRider + 0xC2C) = 0xFFFFFFFF;
     }
     cUIState_onDestroyScreen(self);
 }
@@ -704,14 +704,14 @@ extern "C" void cFEStateCharEquip_onUpdate(void* self)
     void* screen = cList_first((cList*)((char*)self + 0x24));
     char* obj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(D_004608A0));
     if (obj != 0) {
-        char* r = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
+        char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
         int on = 0;
         int mode1 = *(int*)((char*)self + 0xC8) == 1;
         if (mode1) {
             if (*(int*)((char*)self + 0xA6C) >= 0 || *(int*)((char*)self + 0x95C) > 0)
                 on = 1;
         } else {
-            on = *(int*)(r + 0xCC8);
+            on = *(int*)(feRider + 0xCC8);
             on ^= 1;
         }
         sVEntryK199938* vt = *(sVEntryK199938**)(obj + 8);
@@ -792,30 +792,30 @@ static inline float clamp_9A38(float v, float lo, float hi)
  */
 extern "C" int cFEStateCharEquip_onInputBegin(void* self, cPad_9A38* in)
 {
-    int r = 0;
+    int handled = 0;
     if (!isMode1_9A38(self)) {
-    int m = *(int*)((char*)self + 0xAE0);
-    if (m == 1 || m == 4) {
+    int mode = *(int*)((char*)self + 0xAE0);
+    if (mode == 1 || mode == 4) {
     if (in->v35()) {
         *(float*)((char*)self + 0xAAC) += in->v38() * 3.0f;
         while (*(float*)((char*)self + 0xAAC) >= 360.0f)
             *(float*)((char*)self + 0xAAC) -= 360.0f;
         while (*(float*)((char*)self + 0xAAC) < 0.0f)
             *(float*)((char*)self + 0xAAC) += 360.0f;
-        r = 1;
+        handled = 1;
     }
     if (in->v33()) {
         // PORT: <? (GNU min operator)
         *(float*)((char*)self + 0xAA4) = clamp_9A38(*(float*)((char*)self + 0xAA4) + in->v36() * -0.10000000149011612f, 0.0f, 1.0f);
-        r = 1;
+        handled = 1;
     }
     if (in->v34()) {
         *(float*)((char*)self + 0xAA8) = clamp_9A38(*(float*)((char*)self + 0xAA8) + in->v37() * -0.10000000149011612f, -1.0f, 1.0f);
-        r = 1;
+        handled = 1;
     }
     }
     }
-    return r;
+    return handled;
 }
 #endif
 
@@ -962,9 +962,9 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, char* w, unsigned i
             func_0019B180(self, *(int*)((char*)stack + ((self->depth - 1) << 2)));
             func_0019B618(self, 1, 1);
         } else {
-            char* r = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, self->team);
-            *(int*)(r + 0xC20) = 0;
-            *(int*)(r + 0xC1C) = 1;
+            char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, self->team);
+            *(int*)(feRider + 0xC20) = 0;
+            *(int*)(feRider + 0xC1C) = 1;
             char* obj = *(char**)self->menu;
             sVE_9C28* vt = *(sVE_9C28**)(obj + 4);
             void* x = vt[5].fn(obj + vt[5].delta, self, 0);
@@ -1052,11 +1052,11 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu
         if (idx == 0 || self->count == 0 || idx < self->count) return 1;
         return 0;
     case 6: {
-        char* p = self->sel;
-        int v = *(unsigned char*)(p + 0x95);
-        if (v < 0) return 0x110;
-        if (v < self->count) {
-            sEquipItem_9F20* item = self->items[v];
+        char* selected = self->sel;
+        int selIndex = *(unsigned char*)(selected + 0x95);
+        if (selIndex < 0) return 0x110;
+        if (selIndex < self->count) {
+            sEquipItem_9F20* item = self->items[selIndex];
             if (item->flags & 0x20) return 0x101;
             if (isMode_9F20(self->fC8, 1)) {
                 int cost = item->cost;
@@ -1064,7 +1064,7 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu
                 if (cost >= self->fC0) break;
                 return 0x101;
             } else {
-                if (D_004A18D8 >= self->prices[v - *(unsigned char*)(p + 0x98)] + self->fC4) break;
+                if (D_004A18D8 >= self->prices[selIndex - *(unsigned char*)(selected + 0x98)] + self->fC4) break;
             }
         }
         return 0x110;
@@ -2428,8 +2428,8 @@ extern "C" void cFEStateCharEquip_updateHeading(void* self, int id)
         if (id == D_004A11D0) {
             cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x58), GetHashValue32(D_004609B0));
         } else {
-            sBEEntry38K19BBE0* e = findEntryK19BBE0((sBETableK19BBE0*)func_0014BDB8_noarg(), *(int*)((char*)self + 0xBC), id);
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x58), GetHashValue32(e->name));
+            sBEEntry38K19BBE0* entry = findEntryK19BBE0((sBETableK19BBE0*)func_0014BDB8_noarg(), *(int*)((char*)self + 0xBC), id);
+            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x58), GetHashValue32(entry->name));
         }
     }
 }

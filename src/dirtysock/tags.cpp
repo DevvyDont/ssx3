@@ -314,31 +314,31 @@ extern "C" unsigned char* cDirtysock_tag_TagFieldFind(char* record, char* name);
  */
 extern "C" int cDirtysock_tag_TagFieldDelete(unsigned char* record, char* name)
 {
-    unsigned char* p = cDirtysock_tag_TagFieldFind((char*)record, name);
+    unsigned char* field = cDirtysock_tag_TagFieldFind((char*)record, name);
     unsigned char* dst;
     unsigned char* src;
-    if (p == 0) {
+    if (field == 0) {
         return -1;
     }
-    dst = p;
+    dst = field;
     while (dst != record && dst[-1] > ' ') {
         dst--;
     }
-    src = p;
+    src = field;
     while (*src >= ' ') {
         src++;
     }
     while ((unsigned int)(*src - 1) < 0x1FU) {
         src++;
     }
-    int c = *src;
-    if (c != 0) {
+    int curChar = *src;
+    if (curChar != 0) {
         do {
-            *dst = c;
+            *dst = curChar;
             src++;
-            c = *src;
+            curChar = *src;
             dst++;
-        } while (c != 0);
+        } while (curChar != 0);
     }
     *dst = 0;
     return 0;
@@ -557,9 +557,9 @@ extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* te
  */
 extern "C" int cDirtysock_tag_TagFieldSetNumber(char* record, int len, char* name, int value)
 {
-    char temp[256 + 32];
+    char fieldBuf[256 + 32];
     unsigned char* num;
-    char* data = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+    char* data = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
 
     if (value < 0) {
         *data++ = '-';
@@ -577,7 +577,7 @@ extern "C" int cDirtysock_tag_TagFieldSetNumber(char* record, int len, char* nam
         *data++ = *num++;
     } while (*num != 0);
     *data = 0;
-    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, fieldBuf);
 }
 #endif
 
@@ -601,8 +601,8 @@ extern char D_004965C0[];
  */
 extern "C" int cDirtysock_tag_TagFieldSetFlags(char* record, int len, char* name, int value)
 {
-    char temp[256 + 32];
-    char* data = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+    char fieldBuf[256 + 32];
+    char* data = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
     const char* flags = D_004965C0;
     for (; (value != 0) && (*flags != 0); value >>= 1, flags++) {
         if (value & 1) {
@@ -610,7 +610,7 @@ extern "C" int cDirtysock_tag_TagFieldSetFlags(char* record, int len, char* name
         }
     }
     *data = 0;
-    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, fieldBuf);
 }
 #endif
 
@@ -632,8 +632,8 @@ extern "C" int cDirtysock_tag_TagFieldSetAddress(char* record, int len, char* na
 {
     int i;
     unsigned char bytes[4];
-    char temp[256 + 32];
-    char* data = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+    char fieldBuf[256 + 32];
+    char* data = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
 
     bytes[3] = (unsigned char)addr;
     addr >>= 8;
@@ -643,21 +643,21 @@ extern "C" int cDirtysock_tag_TagFieldSetAddress(char* record, int len, char* na
     addr >>= 8;
     bytes[0] = (unsigned char)addr;
     for (i = 0; i < 4; i++) {
-        unsigned char c = bytes[i];
+        unsigned char octet = bytes[i];
         if (i > 0)
             *data++ = '.';
-        if (c >= 10) {
-            if (c >= 100) {
-                *data++ = '0' + c / 100;
-                c %= 100;
+        if (octet >= 10) {
+            if (octet >= 100) {
+                *data++ = '0' + octet / 100;
+                octet %= 100;
             }
-            *data++ = '0' + c / 10;
-            c %= 10;
+            *data++ = '0' + octet / 10;
+            octet %= 10;
         }
-        *data++ = '0' + c;
+        *data++ = '0' + octet;
     }
     *data = 0;
-    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, fieldBuf);
 }
 #endif
 
@@ -680,15 +680,15 @@ extern "C" int cDirtysock_tag__TagFieldSetupTerm(char* record, int len, char* te
  */
 extern "C" int cDirtysock_tag_TagFieldSetFourCC(char* record, int len, char* name, int value)
 {
-    char temp[256 + 32];
-    char* data = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+    char fieldBuf[256 + 32];
+    char* data = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
     for (; value != 0; value <<= 8) {
         if (value > 0x20FFFFFF) {
             *data++ = (char)(value >> 24);
         }
     }
     *data = 0;
-    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, fieldBuf);
 }
 #endif
 
@@ -781,15 +781,15 @@ extern unsigned char D_004960C0[];
 extern "C" int cDirtysock_tag_TagFieldSetBinary(char* record, int len, char* name, const void* value, int size)
 {
     const unsigned char* src = (const unsigned char*)value;
-    char temp[4096 + 256];
-    char* data = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+    char fieldBuf[4096 + 256];
+    char* data = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
     *data++ = '$';
     for (; size > 0; --size) {
         *data++ = D_00495FC0[*src];
         *data++ = D_004960C0[*src++];
     }
     *data = 0;
-    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, fieldBuf);
 }
 #endif
 
@@ -823,7 +823,7 @@ extern const unsigned char kSafe[] __asm__("D_004964C0");
  */
 extern "C" int cDirtysock_tag_TagFieldSetStructure(char* record, int len, char* name, const char* buffer, int size, const char* tmpl)
 {
-    char temp[2560];
+    char fieldBuf[2560];
     const char* buf = buffer;
     const char* limit;
     char* out;
@@ -838,9 +838,9 @@ extern "C" int cDirtysock_tag_TagFieldSetStructure(char* record, int len, char* 
     } else {
         limit = buf + size;
     }
-    out = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
+    out = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
     while (*tmpl != 0) {
-        char t;
+        char typeChar;
         if (*tmpl == '#') {
             for (++tmpl; (*tmpl != 0) && (*tmpl++ != '='); ) {
             }
@@ -859,23 +859,23 @@ extern "C" int cDirtysock_tag_TagFieldSetStructure(char* record, int len, char* 
                 buf += 1;
             }
         }
-        t = (char)*(unsigned char*)tmpl;
-        if (t == 'b') {
+        typeChar = (char)*(unsigned char*)tmpl;
+        if (typeChar == 'b') {
             val = *(const unsigned char*)buf;
             c = 2;
             buf += 1;
         }
-        if (t == 'w') {
+        if (typeChar == 'w') {
             val = *(const unsigned short*)buf;
             c = 4;
             buf += 2;
         }
-        if (t == 'l') {
+        if (typeChar == 'l') {
             val = *(const unsigned int*)buf;
             c = 8;
             buf += 4;
         }
-        if (t == 's') {
+        if (typeChar == 's') {
             str = (const unsigned char*)buf;
             buf += count;
         }
@@ -883,23 +883,23 @@ extern "C" int cDirtysock_tag_TagFieldSetStructure(char* record, int len, char* 
             break;
         }
         if (c > 0) {
-            char* p;
-            char* q;
+            char* digitsEnd;
+            char* digitPtr;
             if (val > 0xFFFF0000U) {
                 val = -val;
                 *out++ = '-';
             }
-            p = out + c;
-            q = p;
-            *p = 0;
+            digitsEnd = out + c;
+            digitPtr = digitsEnd;
+            *digitsEnd = 0;
             for (; val != 0; val >>= 4) {
-                *--q = kHexLo[val & 15];
+                *--digitPtr = kHexLo[val & 15];
             }
-            if (!(out != q)) {
-                out = p;
+            if (!(out != digitPtr)) {
+                out = digitsEnd;
             } else {
-                while (*q != 0) {
-                    *out++ = *q++;
+                while (*digitPtr != 0) {
+                    *out++ = *digitPtr++;
                 }
                 *out++ = ',';
             }
@@ -930,7 +930,7 @@ extern "C" int cDirtysock_tag_TagFieldSetStructure(char* record, int len, char* 
     } else {
         *out = 0;
     }
-    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, fieldBuf);
 }
 #endif
 
@@ -960,35 +960,35 @@ extern char D_004A4A88[];
 // Same key handling as the matched TagFieldGetCrypt: a working copy kbase of the key, defaulted when empty.
 extern "C" int cDirtysock_tag_TagFieldSetCrypt(char* record, int len, char* name, const unsigned char* key, const unsigned char* data)
 {
-    char temp[4096 + 256];
+    char fieldBuf[4096 + 256];
     const unsigned char* kbase = key;
-    const unsigned char* p = data;
+    const unsigned char* cursor = data;
     const unsigned char* k;
-    unsigned int h;
-    unsigned int c;
+    unsigned int cipherByte;
+    unsigned int plainByte;
     char* out;
     if (kbase == 0 || *kbase == 0) {
         kbase = (const unsigned char*)D_004A4A88;
     }
-    out = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
-    h = 0;
+    out = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
+    cipherByte = 0;
     *out++ = '$';
     k = kbase;
-    c = *data;
-    while (c != 0) {
-        unsigned int x = c ^ h;
+    plainByte = *data;
+    while (plainByte != 0) {
+        unsigned int x = plainByte ^ cipherByte;
         unsigned int kc = *k++;
-        p++;
+        cursor++;
         if (*k == 0) {
             k = kbase;
         }
-        h = (kc ^ ((x << 3) | (x >> 5))) & 0xFF;
-        *out++ = kHexHi[h];
-        *out++ = kHexLo[h];
-        c = *p;
+        cipherByte = (kc ^ ((x << 3) | (x >> 5))) & 0xFF;
+        *out++ = kHexHi[cipherByte];
+        *out++ = kHexLo[cipherByte];
+        plainByte = *cursor;
     }
     *out = 0;
-    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, fieldBuf);
 }
 #endif
 
@@ -1028,18 +1028,18 @@ extern "C" sDsTmK2* func_003EAEB8(sDsTmK2* tm, unsigned long secs);
 extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name, unsigned int epoch)
 {
     sDsTmK2 tm;
-    char temp[256 + 32];
-    sDsTmK2* t;
+    char fieldBuf[256 + 32];
+    sDsTmK2* timeParts;
     unsigned long secs = epoch;
 
     if (secs == 0)
         secs = func_003EF088();
-    t = func_003EAEB8(&tm, secs);
-    if (t == 0)
+    timeParts = func_003EAEB8(&tm, secs);
+    if (timeParts == 0)
         return -1;
-    char* data = cDirtysock_tag__TagFieldSetupAppend(record, temp, name);
-    sprintf(data, D_00496A40, t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
-    return cDirtysock_tag__TagFieldSetupTerm(record, len, temp);
+    char* data = cDirtysock_tag__TagFieldSetupAppend(record, fieldBuf, name);
+    sprintf(data, D_00496A40, timeParts->tm_year + 1900, timeParts->tm_mon + 1, timeParts->tm_mday, timeParts->tm_hour, timeParts->tm_min, timeParts->tm_sec);
+    return cDirtysock_tag__TagFieldSetupTerm(record, len, fieldBuf);
 }
 #endif
 
@@ -1302,9 +1302,9 @@ extern "C" int cDirtysock_tag_TagFieldGetFlags(const char* data, int defval)
 {
     if (data != 0) {
         int flags = 0;
-        int f;
-        while ((f = D_004965E0[*data]) != 0) {
-            flags |= f;
+        int flagBit;
+        while ((flagBit = D_004965E0[*data]) != 0) {
+            flags |= flagBit;
             data++;
         }
         defval = flags;
@@ -1476,7 +1476,7 @@ extern "C" int cDirtysock_tag_TagFieldGetString(const char* pData, char* pBuffer
 {
     int iSize;
     unsigned char cQuote;
-    const unsigned char* p;
+    const unsigned char* cursor;
 
     if (pData == 0) {
         if (pDefval == 0) {
@@ -1497,31 +1497,31 @@ extern "C" int cDirtysock_tag_TagFieldGetString(const char* pData, char* pBuffer
         cQuote = 0;
     }
     if (pBuffer == 0) {
-        p = (const unsigned char*)pData;
-        for (iSize = 0; (*p != cQuote) && (*p >= ' '); ++iSize) {
-            if ((p[0] == '%') && (p[1] >= ' ') && (p[2] >= ' ')) {
-                p += 2;
+        cursor = (const unsigned char*)pData;
+        for (iSize = 0; (*cursor != cQuote) && (*cursor >= ' '); ++iSize) {
+            if ((cursor[0] == '%') && (cursor[1] >= ' ') && (cursor[2] >= ' ')) {
+                cursor += 2;
             }
-            ++p;
+            ++cursor;
         }
         return iSize;
     }
     if (iLength <= 0) {
         return -1;
     }
-    p = (const unsigned char*)pData;
-    for (iSize = 1; (iSize < iLength) && (*p != cQuote) && (*p >= ' ');) {
-        if ((p[0] == '%') && (p[1] == '%')) {
+    cursor = (const unsigned char*)pData;
+    for (iSize = 1; (iSize < iLength) && (*cursor != cQuote) && (*cursor >= ' ');) {
+        if ((cursor[0] == '%') && (cursor[1] == '%')) {
             *pBuffer++ = '%';
-            p += 2;
+            cursor += 2;
             ++iSize;
-        } else if ((p[0] == '%') && (p[1] >= ' ') && (p[2] >= ' ')) {
+        } else if ((cursor[0] == '%') && (cursor[1] >= ' ') && (cursor[2] >= ' ')) {
             ++iSize;
-            *pBuffer++ = D_004961C0[p[1]] | D_004962C0[p[2]];
-            p += 3;
+            *pBuffer++ = D_004961C0[cursor[1]] | D_004962C0[cursor[2]];
+            cursor += 3;
         } else {
             ++iSize;
-            *pBuffer++ = *p++;
+            *pBuffer++ = *cursor++;
         }
     }
     *pBuffer = 0;
@@ -1549,25 +1549,25 @@ extern unsigned char D_004962C0[];
 extern "C" int cDirtysock_tag_TagFieldGetBinary(const char* data, void* buffer, int len)
 {
     int count;
-    const char* p;
+    const char* cursor;
     char* buf = (char*)buffer;
 
     if ((data == 0) || (*data != '$')) {
         return -1;
     }
     if (buf == 0) {
-        for (count = 0, p = data + 1; ((unsigned char)p[0] >= '0') && ((unsigned char)p[1] >= '0'); count++) {
-            p += 2;
+        for (count = 0, cursor = data + 1; ((unsigned char)cursor[0] >= '0') && ((unsigned char)cursor[1] >= '0'); count++) {
+            cursor += 2;
         }
         return count;
     }
-    p = data + 1;
+    cursor = data + 1;
     if (len <= 0) {
         return -1;
     }
-    for (count = 0; (count < len) && ((unsigned char)p[0] >= '0') && ((unsigned char)p[1] >= '0'); count++) {
-        *buf++ = D_004961C0[(unsigned char)p[0]] | D_004962C0[(unsigned char)p[1]];
-        p += 2;
+    for (count = 0; (count < len) && ((unsigned char)cursor[0] >= '0') && ((unsigned char)cursor[1] >= '0'); count++) {
+        *buf++ = D_004961C0[(unsigned char)cursor[0]] | D_004962C0[(unsigned char)cursor[1]];
+        cursor += 2;
     }
     return count;
 }
@@ -1600,7 +1600,7 @@ extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* data, void* buffe
     unsigned int value;
     char* buf = (char*)buffer;
     char* limit;
-    char temp[1024];
+    char scratchBuf[1024];
 
     if (len < 0) {
         limit = buf + 65535;
@@ -1611,7 +1611,7 @@ extern "C" int cDirtysock_tag_TagFieldGetStructure(const char* data, void* buffe
         data = D_004A4A90;
     }
     if (buf == 0) {
-        buf = (char*)(buffer = temp);
+        buf = (char*)(buffer = scratchBuf);
     }
     while (*tmpl != 0) {
         if (*tmpl == '#') {
@@ -1718,7 +1718,7 @@ extern "C" int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int
 extern "C" int cDirtysock_tag_TagFieldGetCrypt(const char* data, char* buf, int len, const unsigned char* key, const char* defval)
 {
     int count;
-    const char* p;
+    const char* cursor;
     const unsigned char* kbase = key;
     const unsigned char* k;
     int prev;
@@ -1732,8 +1732,8 @@ extern "C" int cDirtysock_tag_TagFieldGetCrypt(const char* data, char* buf, int 
         kbase = (const unsigned char*)D_004A4A88;
     }
     if (buf == 0) {
-        for (count = 0, p = data + 1; (unsigned char)p[0] >= '0' && (unsigned char)p[1] >= '0'; count++) {
-            p += 2;
+        for (count = 0, cursor = data + 1; (unsigned char)cursor[0] >= '0' && (unsigned char)cursor[1] >= '0'; count++) {
+            cursor += 2;
         }
         return count;
     }
@@ -1741,19 +1741,19 @@ extern "C" int cDirtysock_tag_TagFieldGetCrypt(const char* data, char* buf, int 
     if (len <= 0) {
         return -1;
     }
-    p = data + 1;
+    cursor = data + 1;
     k = kbase;
     prev = 0;
-    for (; count < len && (unsigned char)p[0] >= '0' && (unsigned char)p[1] >= '0'; count++) {
-        unsigned int c = *k ^ (D_004961C0[(unsigned char)p[0]] | D_004962C0[(unsigned char)p[1]]);
+    for (; count < len && (unsigned char)cursor[0] >= '0' && (unsigned char)cursor[1] >= '0'; count++) {
+        unsigned int decoded = *k ^ (D_004961C0[(unsigned char)cursor[0]] | D_004962C0[(unsigned char)cursor[1]]);
         if (*++k == 0) {
             k = kbase;
         }
-        *buf++ = ((c << 5) | (c >> 3)) ^ prev;
-        int hi = D_004961C0[(unsigned char)p[0]];
-        int lo = D_004962C0[(unsigned char)p[1]];
+        *buf++ = ((decoded << 5) | (decoded >> 3)) ^ prev;
+        int hi = D_004961C0[(unsigned char)cursor[0]];
+        int lo = D_004962C0[(unsigned char)cursor[1]];
         prev = lo | hi;
-        p += 2;
+        cursor += 2;
     }
     *buf = 0;
     return count - 1;
@@ -1792,8 +1792,8 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
                 result = (result << 4) | D_004962C0[*data];
             }
         } else if ((*data >= '0') && (*data <= '9')) {
-            const char* p = func_003EAE68(data, &value);
-            if (*p <= ' ') {
+            const char* parseEnd = func_003EAE68(data, &value);
+            if (*parseEnd <= ' ') {
                 result = value;
             } else if ((*data >= '0') && (*data <= '9')) {
                 func_00416210(&tm, 0, sizeof(tm));

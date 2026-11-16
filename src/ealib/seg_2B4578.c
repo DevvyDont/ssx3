@@ -47,11 +47,11 @@ SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
     int w;
     int h;
     int w2;
-    int h2;
+    int mipHeight;
     short rw;
     short rh;
     int i;
-    char *a;
+    char *srcPixels;
 
     old = shape;
     clonelen = 0;
@@ -100,14 +100,14 @@ SHAPE_3578 *SHAPE_unpack(SHAPE_3578 *shape) {
             TYPE_3578(shape) = 5;
             shape->w = w;
             shape->h = h;
-            for (i = 0, w2 = w, h2 = h; i < (int)(shape->wC >> 28) + 1; i++) {
-                a = f_4010_3578(old, 0, 0, i);
-                f_33B0_3578(a, f_4010_3578(shape, 0, 0, i), w2, h2, fmt);
+            for (i = 0, w2 = w, mipHeight = h; i < (int)(shape->wC >> 28) + 1; i++) {
+                srcPixels = f_4010_3578(old, 0, 0, i);
+                f_33B0_3578(srcPixels, f_4010_3578(shape, 0, 0, i), w2, mipHeight, fmt);
                 if (w2 >= 2) {
                     w2 >>= 1;
                 }
-                if (h2 >= 2) {
-                    h2 >>= 1;
+                if (mipHeight >= 2) {
+                    mipHeight >>= 1;
                 }
             }
         } else {
@@ -342,13 +342,13 @@ extern int strlen_3BB0(char *) __asm__("strlen");
  * @return the size, or 0 when it cannot be worked out
  */
 int SHAPE_size(char *shp) {
-    int sp0;
-    int r = 0;
+    int metalBinSize;
+    int shapeSize = 0;
     int w;
     unsigned int u;
-    char *q;
-    unsigned int t = *(unsigned char *)shp;
-    switch (t) {
+    char *metalData;
+    unsigned int shapeType = *(unsigned char *)shp;
+    switch (shapeType) {
     case 0x70:
         return strlen_3BB0(shp + 4) + 5;
     case 0x6F:
@@ -364,20 +364,20 @@ int SHAPE_size(char *shp) {
         return 0x10;
     default:
         if (*(unsigned char *)shp & 0x80) {
-            sp0 = 0;
+            metalBinSize = 0;
             if (*(int *)(shp + 0xC) & 0x1000) {
-                q = shp + *(int *)(shp + 0x10);
+                metalData = shp + *(int *)(shp + 0x10);
             } else {
-                q = shp + 0x10;
+                metalData = shp + 0x10;
             }
-            if (func_003B4D00_3BB0(q, &sp0) != 0) {
-                r = sp0 + 0x10;
+            if (func_003B4D00_3BB0(metalData, &metalBinSize) != 0) {
+                shapeSize = metalBinSize + 0x10;
             }
         } else {
             w = *(int *)(shp + 0xC);
-            r = func_003B3A50_3BB0(*(unsigned char *)shp, *(short *)(shp + 4), *(short *)(shp + 6), (unsigned int)w >> 28, (w >> 13) & 1);
+            shapeSize = func_003B3A50_3BB0(*(unsigned char *)shp, *(short *)(shp + 4), *(short *)(shp + 6), (unsigned int)w >> 28, (w >> 13) & 1);
         }
-        return r;
+        return shapeSize;
     }
 }
 #endif
@@ -510,14 +510,14 @@ INCLUDE_ASM("ealib/seg_2B4578", SHAPE_type);
  * @return 1 for 4 bpp, 2 for 8 bpp, 3 for 15/16-bit formats, 5 for 32-bit formats, otherwise 0
  */
 int SHAPE_type(int bpp) {
-    int r = 0;
+    int type = 0;
     switch (bpp) {
-    case 4: r = 1; break;
-    case 8: r = 2; break;
-    case 0xF: case 0x10: case 0x22B: case 0x613: r = 3; break;
-    case 0x20: case 0x22B8: r = 5; break;
+    case 4: type = 1; break;
+    case 8: type = 2; break;
+    case 0xF: case 0x10: case 0x22B: case 0x613: type = 3; break;
+    case 0x20: case 0x22B8: type = 5; break;
     }
-    return r;
+    return type;
 }
 #endif
 
@@ -780,7 +780,7 @@ extern int SHAPE_isclut_4478(int) __asm__("SHAPE_isclut");
  */
 int SHAPE_clonesize(unsigned char *shp) {
     int size = 0;
-    int pad = (((int)shp + 15) & ~15) - (int)shp;
+    int align = (((int)shp + 15) & ~15) - (int)shp;
 
     if (shp) {
         do {
@@ -788,15 +788,15 @@ int SHAPE_clonesize(unsigned char *shp) {
             int off;
             if (size) {
                 if (SHAPE_isclut_4478(*shp)) {
-                    int a = (size - pad + 0x1F) & ~0xF;
-                    int t = pad - 0x10;
-                    size = a + t;
+                    int alignedSize = (size - align + 0x1F) & ~0xF;
+                    int clutAlign = align - 0x10;
+                    size = alignedSize + clutAlign;
                 } else {
-                    size = ((size - pad + 0xF) & ~0xF) + pad;
+                    size = ((size - align + 0xF) & ~0xF) + align;
                 }
             }
             off = *(int *)shp >> 8;
-            { unsigned char *q = shp + off; shp = off ? q : 0; }
+            { unsigned char *nextShape = shp + off; shp = off ? nextShape : 0; }
             size += n;
         } while (shp);
     }
@@ -824,45 +824,45 @@ extern char D_004957B8_neat[] __asm__("D_004957B8");
  * @param src  the first block of the source chain, or 0
  */
 void SHAPE_cloneat(char *dst, char *src) {
-    char *p = src;
+    char *curShape = src;
     int off = 0;
     char *prev = 0;
-    char *q;
+    char *lastClone;
     char *np;
-    int align = (((int)p + 0xF) & -16) - (int)p;
-    int a22;
+    int align = (((int)curShape + 0xF) & -16) - (int)curShape;
+    int clutAlign;
     int mask;
     int size, n;
-    if (p != 0) {
+    if (curShape != 0) {
         mask = -16;
-        a22 = align - 0x10;
+        clutAlign = align - 0x10;
         do {
-            size = SHAPE_size_neat(p);
+            size = SHAPE_size_neat(curShape);
             if (off != 0) {
-                if (SHAPE_isclut_neat(*(unsigned char *)p) != 0) {
-                    off = (((off - align) + 0x1F) & mask) + a22;
+                if (SHAPE_isclut_neat(*(unsigned char *)curShape) != 0) {
+                    off = (((off - align) + 0x1F) & mask) + clutAlign;
                 } else {
                     off = (((off - align) + 0xF) & mask) + align;
                 }
             }
-            q = prev;
+            lastClone = prev;
             prev = dst + off;
-            if (q != 0) {
-                *(int *)q = *(unsigned char *)q | ((prev - q) << 8);
+            if (lastClone != 0) {
+                *(int *)lastClone = *(unsigned char *)lastClone | ((prev - lastClone) << 8);
             }
             *(int *)prev = *(unsigned char *)prev;
             if (size != 0) {
-                MEM_move_neat(prev, p, size);
+                MEM_move_neat(prev, curShape, size);
                 if (*(unsigned char *)prev == 0x69 && size >= 0x15) {
                     sprintf_neat(prev + 0x10, D_004957B8_neat, *(short *)(prev + 4));
                 }
             }
-            n = *(int *)p >> 8;
+            n = *(int *)curShape >> 8;
             np = 0;
-            if (n != 0) np = p + n;
-            p = np;
+            if (n != 0) np = curShape + n;
+            curShape = np;
             off += size;
-        } while (p != 0);
+        } while (curShape != 0);
     }
 }
 #endif
@@ -888,10 +888,10 @@ extern void *(*D_0044C454_4690)(void *, int, int, int, int) __asm__("SHAPE_memal
  */
 void *SHAPE_clone(int shp) {
     int sz = SHAPE_clonesize_4690(shp);
-    void *r = D_0044C454_4690(SHAPE_longname_4690(shp), sz, 0, 0x10, 0x400);
+    void *newShape = D_0044C454_4690(SHAPE_longname_4690(shp), sz, 0, 0x10, 0x400);
 
-    SHAPE_cloneat_4690(r, shp);
-    return r;
+    SHAPE_cloneat_4690(newShape, shp);
+    return newShape;
 }
 #endif
 
@@ -20863,7 +20863,7 @@ extern void func_0041605C_2068(unsigned int, void *, int) __asm__("func_0041605C
  */
 unsigned int PATHI_copyevent(void *event) {
     int temp_9;
-    unsigned int *p;
+    unsigned int *eventSlot;
     unsigned int temp_3;
     unsigned int temp_6;
     unsigned int cur;
@@ -20871,10 +20871,10 @@ unsigned int PATHI_copyevent(void *event) {
 
     temp_6 = D_0044F420_2068[0] + 0x91C;
     cur = D_0044F420_2068[0] + 0x11C;
-    p = (unsigned int*)(D_0044F420_2068[0] + 0xDC);
+    eventSlot = (unsigned int*)(D_0044F420_2068[0] + 0xDC);
     temp_9 = (((*(unsigned short*)((char*)event + 0xE)) & 0x3F) * 0x10) + 0x10;
-    for (i = 0; i < 0x10; i++, p++) {
-        temp_3 = *p;
+    for (i = 0; i < 0x10; i++, eventSlot++) {
+        temp_3 = *eventSlot;
         if (temp_3 >= cur) {
             if (temp_3 < temp_6) {
                 int sz = (((*(unsigned short*)((char*)temp_3 + 0xE)) & 0x3F) * 0x10) + 0x10;

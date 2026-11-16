@@ -294,9 +294,9 @@ struct sScriptEngine282390 {
 extern "C" void cBXScriptEngine_StopScriptAll(sScriptEngine282390* self)
 {
     for (int i = 0; i < 16; i++) {
-        sScriptSlot282390* s = &self->slots[i];
-        if (s->active != 0) {
-            func_00282338(self, s->id);
+        sScriptSlot282390* slot = &self->slots[i];
+        if (slot->active != 0) {
+            func_00282338(self, slot->id);
         }
     }
 }
@@ -329,9 +329,9 @@ struct sScriptEngine2823F0 {
 extern "C" void cBXScriptEngine_ReleaseRequestAll(sScriptEngine2823F0* self)
 {
     for (int i = 0; i < 16; i++) {
-        sScriptSlot2823F0* s = &self->slots[i];
-        if (s->state != 0) {
-            func_00282540(self, s->id);
+        sScriptSlot2823F0* slot = &self->slots[i];
+        if (slot->state != 0) {
+            func_00282540(self, slot->id);
         }
     }
 }

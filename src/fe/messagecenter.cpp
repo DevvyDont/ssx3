@@ -347,9 +347,9 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* p, void* item, unsigned 
         if ((int)SSXApp->Game != 0) {
             func_0039F190(self->engine + 0x18, 1);
         } else {
-            void* r = cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, D_00460650, 0, 0), self->engine, self->player, self->f16C);
-            if (r != 0) {
-                cUIStateStack_push(self->engine + 0x18, r);
+            void* nextState = cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, D_00460650, 0, 0), self->engine, self->player, self->f16C);
+            if (nextState != 0) {
+                cUIStateStack_push(self->engine + 0x18, nextState);
             }
         }
         break;
@@ -597,16 +597,16 @@ struct sMsgCenter_97BC8 {
  */
 extern "C" void cFEStateRequestLine_updatePlayListSongTitles(void* self)
 {
-    sMsgCenter_97BC8* s = (sMsgCenter_97BC8*)self;
+    sMsgCenter_97BC8* requestLine = (sMsgCenter_97BC8*)self;
     int i;
     for (i = 0; i < 8; i++) {
-        int idx = s->top + i;
-        if (idx < s->count) {
-            int id = s->list[idx];
-            s->texts[i]->show(1);
-            cUIText_setAsciiString((cUIText*)s->texts[i], (const char*)cFEStateRequestLine_getSongTitle(self, id));
+        int idx = requestLine->top + i;
+        if (idx < requestLine->count) {
+            int id = requestLine->list[idx];
+            requestLine->texts[i]->show(1);
+            cUIText_setAsciiString((cUIText*)requestLine->texts[i], (const char*)cFEStateRequestLine_getSongTitle(self, id));
         } else {
-            s->texts[i]->show(0);
+            requestLine->texts[i]->show(0);
         }
     }
 }
@@ -674,20 +674,20 @@ static inline void setVisible_97CA0(cMsgWidget_97CA0* w, int v)
  */
 extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(void* self)
 {
-    sMsgCenter_97CA0* s = (sMsgCenter_97CA0*)self;
+    sMsgCenter_97CA0* requestLine = (sMsgCenter_97CA0*)self;
     int i;
     for (i = 0; i < 8; i++) {
-        setVisible_97CA0(s->icons[i], 0);
-        int idx = s->top + i;
-        if (idx < s->count) {
-            int id = s->list[idx];
-            setVisible_97CA0(s->icons[i], 1);
-            if (isNew_97CA0(s, id)) {
-                setColors_97CA0(s->icons[i], -1, s->colNew);
-            } else if (isRead_97CA0(s, id)) {
-                setColors_97CA0(s->icons[i], -1, s->colRead);
+        setVisible_97CA0(requestLine->icons[i], 0);
+        int idx = requestLine->top + i;
+        if (idx < requestLine->count) {
+            int id = requestLine->list[idx];
+            setVisible_97CA0(requestLine->icons[i], 1);
+            if (isNew_97CA0(requestLine, id)) {
+                setColors_97CA0(requestLine->icons[i], -1, requestLine->colNew);
+            } else if (isRead_97CA0(requestLine, id)) {
+                setColors_97CA0(requestLine->icons[i], -1, requestLine->colRead);
             } else {
-                setColors_97CA0(s->icons[i], -1, s->colOther);
+                setColors_97CA0(requestLine->icons[i], -1, requestLine->colOther);
             }
         }
     }
@@ -1123,19 +1123,19 @@ struct sMsgCenter_985F0 {
  */
 extern "C" void cFEStateRequestLine_updateFreeSongMarkers(void* self)
 {
-    sMsgCenter_985F0* s = (sMsgCenter_985F0*)self;
+    sMsgCenter_985F0* requestLine = (sMsgCenter_985F0*)self;
     int n = 0;
     int i;
     int j;
     for (j = 0; j < 64; j++) {
-        n += (int)((s->mask >> j) & 1);
+        n += (int)((requestLine->mask >> j) & 1);
     }
     for (i = 0; i < 6; i++) {
-        if (s->icons[i] != 0) {
-            if (s->enabled != 0 && n < 6 - i) {
-                s->icons[i]->show(1);
+        if (requestLine->icons[i] != 0) {
+            if (requestLine->enabled != 0 && n < 6 - i) {
+                requestLine->icons[i]->show(1);
             } else {
-                s->icons[i]->show(0);
+                requestLine->icons[i]->show(0);
             }
         }
     }
@@ -1440,12 +1440,12 @@ extern "C" const char* getDollarString(void* amount_)
         D_004C6310[n++] = '-';
         amount = -amount;
     }
-    char tmp[32];
-    sprintf(tmp, D_004A12C0, amount);
-    char len = strlen(tmp);
+    char valueStr[32];
+    sprintf(valueStr, D_004A12C0, amount);
+    char len = strlen(valueStr);
     char i;
     for (i = 0; i != len; i++) {
-        D_004C6310[n++] = tmp[i];
+        D_004C6310[n++] = valueStr[i];
         char left = len - i - 1;
         if (left != 0 && left % 3 == 0)
             D_004C6310[n++] = sep;

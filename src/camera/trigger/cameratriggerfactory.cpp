@@ -120,32 +120,32 @@ extern "C" int get_camaction(void* reader, void** out)
     int n = get_uint(reader, &type);
     switch (type) {
     case 0: {
-        sCTActSwitchA* o = new (D_0045C0B0, 0, 0) sCTActSwitchA;
-        int r = get_cCTActionSwitchCam(reader, o);
-        *out = o;
-        n += r;
+        sCTActSwitchA* action = new (D_0045C0B0, 0, 0) sCTActSwitchA;
+        int bytesRead = get_cCTActionSwitchCam(reader, action);
+        *out = action;
+        n += bytesRead;
         break;
     }
     case 1: {
-        sCTActBoundedA* o = new (D_0045C0C8, 0, 0) sCTActBoundedA;
-        int r = get_cCTActionBoundedCam(reader, (char*)o);
-        *out = o;
-        n += r;
+        sCTActBoundedA* action = new (D_0045C0C8, 0, 0) sCTActBoundedA;
+        int bytesRead = get_cCTActionBoundedCam(reader, (char*)action);
+        *out = action;
+        n += bytesRead;
         break;
     }
     case 2: {
-        sCTActSplineA* o = new (D_0045C0E0, 0, 0) sCTActSplineA;
-        int r = get_cCTActionSpline(reader, o);
-        *out = o;
-        n += r;
+        sCTActSplineA* action = new (D_0045C0E0, 0, 0) sCTActSplineA;
+        int bytesRead = get_cCTActionSpline(reader, action);
+        *out = action;
+        n += bytesRead;
         break;
     }
     case 3: {
-        sCTActNoneA* o = new (D_0045C0F8, 0, 0) sCTActNoneA;
+        sCTActNoneA* action = new (D_0045C0F8, 0, 0) sCTActNoneA;
         // PORT: get_cCTActionNone returns the byte count as void*.
-        int r = (int)get_cCTActionNone(reader, (int*)o);
-        *out = o;
-        n += r;
+        int bytesRead = (int)get_cCTActionNone(reader, (int*)action);
+        *out = action;
+        n += bytesRead;
         break;
     }
     }
@@ -243,11 +243,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_cCTActionNone__FPvPi);
  *
  * Sets the action type to 3 and reads nothing.
  *
- * @param unused   the stream's read cursor, not touched
+ * @param reader   the stream's read cursor, not touched
  * @param outType  the action's type field, set to 3
  * @return 0, the number of bytes read (typed as a pointer)
  */
-void* get_cCTActionNone(void* unused, int* outType)
+void* get_cCTActionNone(void* reader, int* outType)
 {
     *outType = 3;
     return 0;
@@ -351,32 +351,32 @@ extern "C" int get_camboundobj(void* reader, void** out)
     int n = get_uint(reader, &type);
     switch (type) {
     case 0: {
-        sCTBoundEllG* o = new (D_0045C110, 0, 0) sCTBoundEllG;
-        int r = get_cCTBoundObjEllipse(reader, (cCTBoundObjEllK2*)o);
-        *out = o;
-        n += r;
+        sCTBoundEllG* boundObj = new (D_0045C110, 0, 0) sCTBoundEllG;
+        int bytesRead = get_cCTBoundObjEllipse(reader, (cCTBoundObjEllK2*)boundObj);
+        *out = boundObj;
+        n += bytesRead;
         break;
     }
     case 1: {
-        sCTBoundBoxG* o = new (D_0045C128, 0, 0) sCTBoundBoxG;
-        int r = get_cCTBoundObjBox(reader, (cCTBoundObjBoxK2*)o);
-        *out = o;
-        n += r;
+        sCTBoundBoxG* boundObj = new (D_0045C128, 0, 0) sCTBoundBoxG;
+        int bytesRead = get_cCTBoundObjBox(reader, (cCTBoundObjBoxK2*)boundObj);
+        *out = boundObj;
+        n += bytesRead;
         break;
     }
     case 2: {
-        sCTBoundLineG* o = new (D_0045C140, 0, 0) sCTBoundLineG;
-        int r = get_cCTBoundObjLine(reader, (cCTBoundObjLineK2*)o);
-        *out = o;
-        n += r;
+        sCTBoundLineG* boundObj = new (D_0045C140, 0, 0) sCTBoundLineG;
+        int bytesRead = get_cCTBoundObjLine(reader, (cCTBoundObjLineK2*)boundObj);
+        *out = boundObj;
+        n += bytesRead;
         break;
     }
     case 3: {
-        sCTBoundPointG* o = new (D_0045C158, 0, 0) sCTBoundPointG;
+        sCTBoundPointG* boundObj = new (D_0045C158, 0, 0) sCTBoundPointG;
         // PORT: get_cCTBoundObjPoint returns the byte count as void*.
-        int r = (int)get_cCTBoundObjPoint(reader, (sBoundObjPoint*)o);
-        *out = o;
-        n += r;
+        int bytesRead = (int)get_cCTBoundObjPoint(reader, (sBoundObjPoint*)boundObj);
+        *out = boundObj;
+        n += bytesRead;
         break;
     }
     }
@@ -1366,17 +1366,17 @@ extern "C" int get_camvolume(void* reader, void** out)
     int n = get_uint(reader, &type);
     switch (type) {
     case 0: {
-        sCTVolEllG* o = new (D_0045C188, 0, 0) sCTVolEllG;
-        int r = get_cCTVolumeEllipse(reader, (cCTVolumeEllK2*)o);
-        *out = o;
-        n += r;
+        sCTVolEllG* volume = new (D_0045C188, 0, 0) sCTVolEllG;
+        int bytesRead = get_cCTVolumeEllipse(reader, (cCTVolumeEllK2*)volume);
+        *out = volume;
+        n += bytesRead;
         break;
     }
     case 1: {
-        sCTVolBoxG* o = new (D_0045C1A0, 0, 0) sCTVolBoxG;
-        int r = get_cCTVolumeBox(reader, (cCTVolumeBoxK2*)o);
-        *out = o;
-        n += r;
+        sCTVolBoxG* volume = new (D_0045C1A0, 0, 0) sCTVolBoxG;
+        int bytesRead = get_cCTVolumeBox(reader, (cCTVolumeBoxK2*)volume);
+        *out = volume;
+        n += bytesRead;
         break;
     }
     default:
@@ -3399,12 +3399,12 @@ struct sVec4A16 {
  */
 extern "C" void cCTBoundObjPoint_limitPoint(float* self, sVec4A16* out)
 {
-    sVec4A16 t;
-    t.x = self[0];
-    t.y = self[1];
-    t.z = self[2];
-    t.w = 1.0f;
-    *out = t;
+    sVec4A16 worldPoint;
+    worldPoint.x = self[0];
+    worldPoint.y = self[1];
+    worldPoint.z = self[2];
+    worldPoint.w = 1.0f;
+    *out = worldPoint;
 }
 #endif
 
@@ -4715,12 +4715,12 @@ extern "C" void cSPOKEChaseAlgorithm_snap(cCameraAlgorithm* self, long id)
 {
     char* rider = *(char**)(*(char**)((char*)self + 0x30) + 4);
     if (id == ((cBeing*)(rider + 0x6C0))->getAIIndex()) {
-        char* o = *(char**)((char*)self + 0x30);
-        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[4];
-        *(t4Vector*)((char*)self + 0x390) = vEntry->fn(o + vEntry->delta);
-        o = *(char**)((char*)self + 0x30);
-        vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[3];
-        *(t4Vector*)((char*)self + 0x40) = f_177FC0_1783E0(self, vEntry->fn(o + vEntry->delta));
+        char* subject = *(char**)((char*)self + 0x30);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)subject)[4];
+        *(t4Vector*)((char*)self + 0x390) = vEntry->fn(subject + vEntry->delta);
+        subject = *(char**)((char*)self + 0x30);
+        vEntry = &(*(sVEntry<t4Vector(void*)>**)subject)[3];
+        *(t4Vector*)((char*)self + 0x40) = f_177FC0_1783E0(self, vEntry->fn(subject + vEntry->delta));
         *(t4Vector*)((char*)self + 0x20) = Add_1783E0(f_177EF8_1783E0(self), ScaleP_1783E0(&D_004FF160_83E0, 37.0f));
         f_166C60_1783E0(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir(self, 559.7440185546875f, 300.0f);
@@ -4736,13 +4736,13 @@ struct cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4 { float x, y, z, 
 extern void* D_0045CC50[];
 extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
 
-extern "C" void* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(void* self, cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4* a, cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4* b)
+extern "C" void* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(void* self, cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4* point1, cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4* point2)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(self);
     *(int*)((char*)self + 0xC) = 0x43;
     *(void***)((char*)self + 0x10) = D_0045CC50;
-    *(cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4*)((char*)self + 0x390) = *a;
-    *(cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4*)((char*)self + 0x3A0) = *b;
+    *(cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4*)((char*)self + 0x390) = *point1;
+    *(cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm_sVec4*)((char*)self + 0x3A0) = *point2;
     return self;
 }
 #endif

@@ -1289,9 +1289,9 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
         func_002C2540(text, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BED8)) {
-        char* o = (char*)SSXApp->FELocale;
-        sVEnt_7AB0* vt = *(sVEnt_7AB0**)(o + 4);
-        strcpy1(fmtw, vt[4].fn(o + vt[4].delta, GetHashValue32(D_0047BC80)));
+        char* locale = (char*)SSXApp->FELocale;
+        sVEnt_7AB0* vt = *(sVEnt_7AB0**)(locale + 4);
+        strcpy1(fmtw, vt[4].fn(locale + vt[4].delta, GetHashValue32(D_0047BC80)));
         sprintf1(text, fmtw, func_00148950(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(D_0047BEE8)) {

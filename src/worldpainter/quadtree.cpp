@@ -188,31 +188,31 @@ extern "C" void cQuadTree_exportTree(cQuadTree* self, char** out, int* size, voi
         map[i] = -1;
     *out = new (D_00485FC8, 0, 0) char[*size];
     func_00416210(*out, 0xDEADBEEF, *size);
-    sQTHeader_1DA8* o = (sQTHeader_1DA8*)*out;
-    *o = *((sQTHeader_1DA8*)self);
+    sQTHeader_1DA8* header = (sQTHeader_1DA8*)*out;
+    *header = *((sQTHeader_1DA8*)self);
     int cnt = 0;
-    unsigned short* p = (unsigned short*)(o + 1);
-    cQuadTree_exportNode(self, (cQuadTree_exportNode_sOut*)p, &cnt, map, (cQuadTree_exportNode_sNode*)((char*)self->m_nodes + self->m_root * 8));
-    for (i = 0; i < cnt; i++, p += 4) {
-        if (p[0] & 1) {
-            func_002C16B8(p, map[p[0] >> 1], map[p[1] >> 1], map[p[2] >> 1], map[p[3] >> 1]);
-            p[0] = fixShort(p[0], ctx);
-            p[1] = fixShort(p[1], ctx);
-            p[2] = fixShort(p[2], ctx);
-            p[3] = fixShort(p[3], ctx);
+    unsigned short* nodeData = (unsigned short*)(header + 1);
+    cQuadTree_exportNode(self, (cQuadTree_exportNode_sOut*)nodeData, &cnt, map, (cQuadTree_exportNode_sNode*)((char*)self->m_nodes + self->m_root * 8));
+    for (i = 0; i < cnt; i++, nodeData += 4) {
+        if (nodeData[0] & 1) {
+            func_002C16B8(nodeData, map[nodeData[0] >> 1], map[nodeData[1] >> 1], map[nodeData[2] >> 1], map[nodeData[3] >> 1]);
+            nodeData[0] = fixShort(nodeData[0], ctx);
+            nodeData[1] = fixShort(nodeData[1], ctx);
+            nodeData[2] = fixShort(nodeData[2], ctx);
+            nodeData[3] = fixShort(nodeData[3], ctx);
         } else {
-            ((int*)p)[0] = fixInt(((int*)p)[0], ctx);
-            ((int*)p)[1] = fixInt(((int*)p)[1], ctx);
+            ((int*)nodeData)[0] = fixInt(((int*)nodeData)[0], ctx);
+            ((int*)nodeData)[1] = fixInt(((int*)nodeData)[1], ctx);
         }
     }
-    o->f10 = 0;
-    o->f24 = 0;
-    o->f1C = fixInt((int)self->m_defaultNode.m_key, ctx);
-    o->f18 = fixInt(*(int*)&self->m_defaultNode, ctx);
-    o->f0 = fixFloat(ctx, o->f0);
-    o->f4 = fixFloat(ctx, o->f4);
-    o->f8 = fixFloat(ctx, o->f8);
-    o->fC = fixInt(o->fC, ctx);
+    header->f10 = 0;
+    header->f24 = 0;
+    header->f1C = fixInt((int)self->m_defaultNode.m_key, ctx);
+    header->f18 = fixInt(*(int*)&self->m_defaultNode, ctx);
+    header->f0 = fixFloat(ctx, header->f0);
+    header->f4 = fixFloat(ctx, header->f4);
+    header->f8 = fixFloat(ctx, header->f8);
+    header->fC = fixInt(header->fC, ctx);
 }
 #endif
 
@@ -243,14 +243,14 @@ struct cQuadTree_exportNode_sOut {
 extern "C" void cQuadTree_exportNode(cQuadTree* self, cQuadTree_exportNode_sOut* out, int* count, int* map, cQuadTree_exportNode_sNode* node)
 {
     int i;
-    unsigned short* p;
+    unsigned short* childPtr;
     out[*count].f4 = *(int*)((char*)node + 4);
     out[*count].f0 = *(int*)((char*)node + 0);
     map[(unsigned short)(((unsigned int)node - (unsigned int)self->m_nodes) >> 3)] = (*count)++;
     if (node->child[0] & 1) {
-        p = node->child;
+        childPtr = node->child;
         for (i = 0; i < 4; i++) {
-            cQuadTree_exportNode(self, out, count, map, (cQuadTree_exportNode_sNode*)self->m_nodes + (*p++ >> 1));
+            cQuadTree_exportNode(self, out, count, map, (cQuadTree_exportNode_sNode*)self->m_nodes + (*childPtr++ >> 1));
         }
     }
 }
@@ -271,13 +271,13 @@ extern "C" int cQuadTree_calcUsedNodes(cQuadTree* self, unsigned short *node) {
     int count = 1;
     if (node != 0) {
         if (*node & 1) {
-            unsigned short *p = node;
+            unsigned short *childPtr = node;
             int i = 3;
             do {
-                unsigned short v = *p;
-                p += 1;
+                unsigned short childRef = *childPtr;
+                childPtr += 1;
                 i -= 1;
-                count += cQuadTree_calcUsedNodes(self, (unsigned short *)((char*)self->m_nodes + ((v >> 1) * 8)));
+                count += cQuadTree_calcUsedNodes(self, (unsigned short *)((char*)self->m_nodes + ((childRef >> 1) * 8)));
             } while (i >= 0);
         }
     }
@@ -435,13 +435,13 @@ INCLUDE_ASM("worldpainter/quadtree", strlen1);
 /**
  * Returns the length of a 16-bit character string (On Tour: strlen for unsigned short strings).
  *
- * @param s  the NUL-terminated 16-bit string
+ * @param str  the NUL-terminated 16-bit string
  * @return the number of characters before the terminator
  */
-extern "C" int strlen1(unsigned short* s)
+extern "C" int strlen1(unsigned short* str)
 {
     int n = 0;
-    while (*s++ != 0) {
+    while (*str++ != 0) {
         n++;
     }
     return n;
@@ -635,15 +635,15 @@ extern "C" int sprintf2(unsigned short* dst, const char* fmt, ...)
 {
     sprintf1_va_list ap;
     unsigned short buf[0x400];
-    unsigned short* p;
+    unsigned short* bufPos;
     int n;
     int i;
-    p = buf;
+    bufPos = buf;
     n = strlen(fmt);
     for (i = 0; i < n; i++) {
-        *p++ = *fmt++;
+        *bufPos++ = *fmt++;
     }
-    *p = 0;
+    *bufPos = 0;
     sprintf1_va_start(ap);
     return USTR_vsprintf(dst, buf, ap);
 }

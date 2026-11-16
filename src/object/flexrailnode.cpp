@@ -43,10 +43,10 @@ extern "C" void cFlexRailNode_addSpaceHash(void* self)
     sHashNode_8B90* node = *(sHashNode_8B90**)((char*)self + 0x54);
     sHashKey_8B90 key;
     func_00328F28(&key, (char*)self + 0x30);
-    sHashCell_8B90* c1 = key.x < 0 ? cell + 4 : cell;
-    sHashCell_8B90* c2 = key.y < 0 ? c1 + 2 : c1;
-    sHashCell_8B90* c3 = key.z < 0 ? c2 + 1 : c2;
-    func_00328C20(c3, 2, node, &key);
+    sHashCell_8B90* cellX = key.x < 0 ? cell + 4 : cell;
+    sHashCell_8B90* cellXY = key.y < 0 ? cellX + 2 : cellX;
+    sHashCell_8B90* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
+    func_00328C20(cellXYZ, 2, node, &key);
 }
 #endif
 

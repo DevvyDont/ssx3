@@ -158,10 +158,10 @@ extern "C" int cWorldView_activateSection(cWorldView* self, unsigned int i)
     if (list != 0 && i < (unsigned int)list->m_uiNumSections) {
         int off = i << 3;
         char* base = (char*)self + 0x14;
-        cWorldView_activateSection_sEntry* e = (cWorldView_activateSection_sEntry*)(base + off);
-        int st = e->state;
+        cWorldView_activateSection_sEntry* entry = (cWorldView_activateSection_sEntry*)(base + off);
+        int st = entry->state;
         if (st == 5) {
-            e->state = 6;
+            entry->state = 6;
             func_003A8F10(self->mp_WorldCache, i);
             return 1;
         } else if (st == 6) {
@@ -1027,18 +1027,18 @@ static inline char *conv_A8F0(unsigned i) { if (i == 0) return 0; return refToPt
 extern "C" int cChunkResolve_resolveInstance(char** self, char* node)
 {
     unsigned id = *(unsigned*)(node + 0x80);
-    char *s = (*(char***)(**(char***)self + 8))[id & 0xFF];
+    char *section = (*(char***)(**(char***)self + 8))[id & 0xFF];
     unsigned i;
-    char *r;
-    if (!s)
-        r = 0;
+    char *resolved;
+    if (!section)
+        resolved = 0;
     else {
-        i = ((unsigned*)*(char**)(s + 0x14))[id >> 8] >> 8;
-        char *t = conv_A8F0(i);
-        r = t;
+        i = ((unsigned*)*(char**)(section + 0x14))[id >> 8] >> 8;
+        char *converted = conv_A8F0(i);
+        resolved = converted;
     }
-    *(char**)(node + 0x80) = r;
-    int v = *(int*)(r + 0xC);
+    *(char**)(node + 0x80) = resolved;
+    int v = *(int*)(resolved + 0xC);
     *(int*)(node + 0x8C) = 0;
     *(int*)(node + 0x94) = v;
     return 1;
@@ -1285,10 +1285,10 @@ extern void* cPS2ChunkResolve_vtbl[];
  */
 extern "C" void* cChunkResolve_construct()
 {
-    void* p = cMemMan_alloc(0x14, D_00494F70, 0, 0);
-    func_003AA2F0(p);
-    *(void***)((char*)p + 0x8) = cPS2ChunkResolve_vtbl;
-    return p;
+    void* chunkResolve = cMemMan_alloc(0x14, D_00494F70, 0, 0);
+    func_003AA2F0(chunkResolve);
+    *(void***)((char*)chunkResolve + 0x8) = cPS2ChunkResolve_vtbl;
+    return chunkResolve;
 }
 #endif
 
@@ -1442,14 +1442,14 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         break;
     case 9: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        sVEntry_AE68* e = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
-        ((tMsgS_AE68)e->fn)((char*)w + e->delta, obj, D_00494F88, 0, 0, RID >> 8);
+        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
+        ((tMsgS_AE68)vtEntry->fn)((char*)w + vtEntry->delta, obj, D_00494F88, 0, 0, RID >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        sVEntry_AE68* e = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
-        ((tMsgS_AE68)e->fn)((char*)w + e->delta, obj, D_00494F98, 0, 0, (RID >> 8) + *(int*)((char*)self + 0x10));
+        sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
+        ((tMsgS_AE68)vtEntry->fn)((char*)w + vtEntry->delta, obj, D_00494F98, 0, 0, (RID >> 8) + *(int*)((char*)self + 0x10));
         break;
     }
     case 3:
@@ -1475,11 +1475,11 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         break;
     case 8: {
         CALL1_AE68(self, 0x90, obj);
-        char* p = *(char**)(obj + 0x24);
+        char* child = *(char**)(obj + 0x24);
         for (int i = 0; i < *(int*)(obj + 0x20); i++) {
-            *(int*)(p + 8) = 1;
-            insert_AE68(self, 2, p, 0x6C);
-            p = *(char**)(p + 0x64);
+            *(int*)(child + 8) = 1;
+            insert_AE68(self, 2, child, 0x6C);
+            child = *(char**)(child + 0x64);
         }
         break;
     }
@@ -1507,9 +1507,9 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         break;
     case 16:
         if (cWorld_m_pTheWorld) {
-            int a = RID & 0xFF;
-            func_003ACA10((char**)cWorld_m_pTheWorld->m_pWScriptCache, a, obj);
-            func_00230430(func_003AD188(), a);
+            int sectionIdx = RID & 0xFF;
+            func_003ACA10((char**)cWorld_m_pTheWorld->m_pWScriptCache, sectionIdx, obj);
+            func_00230430(func_003AD188(), sectionIdx);
         }
         break;
     case 18:
@@ -1799,9 +1799,9 @@ extern "C" int cPS2ChunkResolve_resolveModel(cPS2ChunkResolve_resolveModel_cObj*
     *(int*)((char*)pModel + 0x8) += (int)pModel;
     *(int*)((char*)pModel + 0xC) += (int)pModel;
     int* tbl = *(int**)((char*)pModel + 0xC);
-    unsigned int* p = (unsigned int*)(tbl + 1);
-    for (; i < *tbl; i++, p++) {
-        *p = cPS2ChunkResolve_resolveModel_lookup(self, *p);
+    unsigned int* entry = (unsigned int*)(tbl + 1);
+    for (; i < *tbl; i++, entry++) {
+        *entry = cPS2ChunkResolve_resolveModel_lookup(self, *entry);
     }
     self->v06(pModel);
     func_003ABF20(self, pModel);
@@ -2027,9 +2027,9 @@ static inline cPS2ChunkResolve_resolveInstance_sRes* cPS2ChunkResolve_resolveIns
 // PORT: stores pointers in int fields; not 64-bit safe.
 extern "C" int cPS2ChunkResolve_resolveInstance(cPS2ChunkResolve_resolveInstance_cObj* self, void* pInstance)
 {
-    cPS2ChunkResolve_resolveInstance_sRes* r = cPS2ChunkResolve_resolveInstance_lookup(self, *(unsigned int*)((char*)pInstance + 0x80));
-    *(cPS2ChunkResolve_resolveInstance_sRes**)((char*)pInstance + 0x80) = r;
-    *(int*)((char*)pInstance + 0x94) = r->fC;
+    cPS2ChunkResolve_resolveInstance_sRes* resolved = cPS2ChunkResolve_resolveInstance_lookup(self, *(unsigned int*)((char*)pInstance + 0x80));
+    *(cPS2ChunkResolve_resolveInstance_sRes**)((char*)pInstance + 0x80) = resolved;
+    *(int*)((char*)pInstance + 0x94) = resolved->fC;
     *(int*)((char*)pInstance + 0x8C) = 0;
     *(cPS2ChunkResolve_resolveInstance_sView**)((char*)pInstance + 0x88) = self->f4;
     int x = self->f4->f4 & 0xFFFF0000;

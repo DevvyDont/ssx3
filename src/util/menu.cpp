@@ -427,12 +427,12 @@ INCLUDE_ASM("util/menu", cMenu_cMenu__FPv);
  */
 void* cMenu_cMenu(void* self)
 {
-    int t0 = 0;
-    *(int*)self = t0;
+    int zeroValue = 0;
+    *(int*)self = zeroValue;
     *(int*)((char*)self + 0x12c) = (int)(void*)cMenu_vtbl;
-    *(int*)((char*)self + 0x4) = t0;
-    *(int*)((char*)self + 0x8) = t0;
-    *(int*)((char*)self + 0x124) = t0;
+    *(int*)((char*)self + 0x4) = zeroValue;
+    *(int*)((char*)self + 0x8) = zeroValue;
+    *(int*)((char*)self + 0x124) = zeroValue;
     return self;
 }
 #endif
@@ -2339,11 +2339,11 @@ extern "C" void func_002CC3B8(void* stack, void* item);
  */
 extern "C" int cSubMenuItem_input(void* self)
 {
-    int r = func_002CA2B0(self);
-    if (cMenuItem_isLocked(self) == 0 && r == 0 && func_002CA3E8((void**)self) == 6) {
+    int result = func_002CA2B0(self);
+    if (cMenuItem_isLocked(self) == 0 && result == 0 && func_002CA3E8((void**)self) == 6) {
         func_002CC3B8(*(void**)((char*)*(void**)self + 0x124), *(void**)((char*)self + 0x18));
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -2829,10 +2829,10 @@ struct s2CD3A0Vec {
  */
 extern "C" s2CD3A0Vec cSpaceMenuItem_preRender(void* self)
 {
-    s2CD3A0Vec v;
-    v.x = v.y = v.z = 0.0f;
-    v.w = (float)*(int*)((char*)self + 0x14);
-    return v;
+    s2CD3A0Vec rect;
+    rect.x = rect.y = rect.z = 0.0f;
+    rect.w = (float)*(int*)((char*)self + 0x14);
+    return rect;
 }
 #endif
 
@@ -3220,35 +3220,35 @@ static inline float ffloor_002CD9D8(float x)
  */
 extern "C" int cIntMenuItem_input(void* self)
 {
-    char* s = (char*)self;
-    int r = func_002CA2B0(self);
+    char* menuItem = (char*)self;
+    int result = func_002CA2B0(self);
     if (cMenuItem_isLocked(self) != 0) {
-        return r;
+        return result;
     }
-    if (r != 0) {
-        return r;
+    if (result != 0) {
+        return result;
     }
-    float d = func_002CA428_f(self) - func_002CA408_f(self);
+    float side = func_002CA428_f(self) - func_002CA408_f(self);
     int dir;
-    if (d <= -0.1f || d >= 0.1f) {
+    if (side <= -0.1f || side >= 0.1f) {
         dir = 1;
-        if (d < 0.0f) {
+        if (side < 0.0f) {
             dir = -1;
         }
     } else {
         dir = 0;
     }
-    if (dir == *(int*)(s + 0x28)) {
-        *(int*)(s + 0x24) += 1;
+    if (dir == *(int*)(menuItem + 0x28)) {
+        *(int*)(menuItem + 0x24) += 1;
     } else {
-        *(int*)(s + 0x24) = 0;
-        *(int*)(s + 0x28) = dir;
-        *(float*)(s + 0x2C) = (float)dir;
+        *(int*)(menuItem + 0x24) = 0;
+        *(int*)(menuItem + 0x28) = dir;
+        *(float*)(menuItem + 0x2C) = (float)dir;
     }
     if (dir != 0) {
-        int n = *(int*)(s + 0x24);
-        d *= 0.1f;
-        d *= (float)(n * n / 0x120);
+        int n = *(int*)(menuItem + 0x24);
+        side *= 0.1f;
+        side *= (float)(n * n / 0x120);
         float div = 1.0f;
         if (func_002CA488(self) != 0 && func_002CA4A8(self) != 0) {
             div = 50.0f;
@@ -3257,27 +3257,27 @@ extern "C" int cIntMenuItem_input(void* self)
         } else if (func_002CA4A8(self) != 0) {
             div = 5.0f;
         }
-        d = d / div;
-        *(float*)(s + 0x2C) += d;
-        d = *(float*)(s + 0x2C);
-        int* p = *(int**)(s + 0x18);
-        int cur = *p;
-        int v = (int)ffloor_002CD9D8((float)cur + d);
-        int lo = *(int*)(s + 0x1C);
-        int hi = *(int*)(s + 0x20);
-        if (v < lo) {
-            v = lo;
+        side = side / div;
+        *(float*)(menuItem + 0x2C) += side;
+        side = *(float*)(menuItem + 0x2C);
+        int* valuePtr = *(int**)(menuItem + 0x18);
+        int cur = *valuePtr;
+        int newValue = (int)ffloor_002CD9D8((float)cur + side);
+        int lo = *(int*)(menuItem + 0x1C);
+        int hi = *(int*)(menuItem + 0x20);
+        if (newValue < lo) {
+            newValue = lo;
         }
-        if (hi < v) {
-            v = hi;
+        if (hi < newValue) {
+            newValue = hi;
         }
-        *(float*)(s + 0x2C) = d + (float)(cur - v);
-        *p = v;
-        char* menu = *(char**)s;
-        sVEntry002CD9D8* e = &(*(sVEntry002CD9D8**)(menu + 0x12C))[4];
-        e->fn(menu + e->delta, self);
+        *(float*)(menuItem + 0x2C) = side + (float)(cur - newValue);
+        *valuePtr = newValue;
+        char* menu = *(char**)menuItem;
+        sVEntry002CD9D8* vtEntry = &(*(sVEntry002CD9D8**)(menu + 0x12C))[4];
+        vtEntry->fn(menu + vtEntry->delta, self);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3434,29 +3434,29 @@ void* func_002CA4A8_DD78(void* self) __asm__("func_002CA4A8__FPv");
 // PORT: uses g++'s >? (max) operator.
 extern "C" int cFloatMenuItem_input(void* self)
 {
-    char* s = (char*)self;
-    int r = func_002CA2B0(self);
+    char* menuItem = (char*)self;
+    int result = func_002CA2B0(self);
     if (cMenuItem_isLocked(self) != 0) {
-        return r;
+        return result;
     }
-    if (r != 0) {
-        return r;
+    if (result != 0) {
+        return result;
     }
-    float d = func_002CA428_f(self) - func_002CA408_f(self);
+    float side = func_002CA428_f(self) - func_002CA408_f(self);
     int dir;
-    if (d <= -0.1f || d >= 0.1f) {
+    if (side <= -0.1f || side >= 0.1f) {
         dir = 1;
-        if (d < 0.0f) {
+        if (side < 0.0f) {
             dir = -1;
         }
     } else {
         dir = 0;
     }
-    if (dir == *(int*)(s + 0x30)) {
-        *(int*)(s + 0x2C) += 1;
+    if (dir == *(int*)(menuItem + 0x30)) {
+        *(int*)(menuItem + 0x2C) += 1;
     } else {
-        *(int*)(s + 0x2C) = 0;
-        *(int*)(s + 0x30) = dir;
+        *(int*)(menuItem + 0x2C) = 0;
+        *(int*)(menuItem + 0x30) = dir;
     }
     if (dir != 0) {
         float div = 1.0f;
@@ -3467,7 +3467,7 @@ extern "C" int cFloatMenuItem_input(void* self)
         } else if (func_002CA4A8_DD78(self) != 0) {
             div = 5.0f;
         }
-        int n = *(int*)(s + 0x2C);
+        int n = *(int*)(menuItem + 0x2C);
         float k = (float)(n * n) * 50.0f;
         k /= div;
         k *= 6.944444612599909e-05f;
@@ -3475,21 +3475,21 @@ extern "C" int cFloatMenuItem_input(void* self)
         float step = 4.999999873689376e-05f;
         step = k * step;
         step /= div;
-        float* p = *(float**)(s + 0x18);
-        float v = *(float*)(s + 0x24) * *p + *(float*)(s + 0x28);
-        v += d * step * (*(float*)(s + 0x20) - *(float*)(s + 0x1C));
-        if (v < *(float*)(s + 0x1C)) {
-            v = *(float*)(s + 0x1C);
+        float* valuePtr = *(float**)(menuItem + 0x18);
+        float value = *(float*)(menuItem + 0x24) * *valuePtr + *(float*)(menuItem + 0x28);
+        value += side * step * (*(float*)(menuItem + 0x20) - *(float*)(menuItem + 0x1C));
+        if (value < *(float*)(menuItem + 0x1C)) {
+            value = *(float*)(menuItem + 0x1C);
         }
-        if (*(float*)(s + 0x20) < v) {
-            v = *(float*)(s + 0x20);
+        if (*(float*)(menuItem + 0x20) < value) {
+            value = *(float*)(menuItem + 0x20);
         }
-        **(float**)(s + 0x18) = (v - *(float*)(s + 0x28)) / *(float*)(s + 0x24);
-        char* menu = *(char**)s;
+        **(float**)(menuItem + 0x18) = (value - *(float*)(menuItem + 0x28)) / *(float*)(menuItem + 0x24);
+        char* menu = *(char**)menuItem;
         sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(menu + 0x12C);
         vt[4].fn(menu + vt[4].delta, self);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3619,10 +3619,10 @@ extern "C" void prettyFloat(cFloatMenuItem_render_sString* out, float v);
  */
 extern "C" void cFloatMenuItem_render(void* self, int rect)
 {
-    cFloatMenuItem_render_sString s;
-    prettyFloat(&s, **(float**)((char*)self + 0x18) * *(float*)((char*)self + 0x24) + *(float*)((char*)self + 0x28));
-    func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, s.str);
-    cBXString__cBXString(&s, 2);
+    cFloatMenuItem_render_sString pretty;
+    prettyFloat(&pretty, **(float**)((char*)self + 0x18) * *(float*)((char*)self + 0x24) + *(float*)((char*)self + 0x28));
+    func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, pretty.str);
+    cBXString__cBXString(&pretty, 2);
 }
 #endif
 
@@ -3667,49 +3667,49 @@ extern "C" int cMenuItem_isLocked(void* self);
 // PORT: uses g++'s >? (max) operator.
 extern "C" int cAngleMenuItem_input(void* self)
 {
-    char* s = (char*)self;
-    int r = func_002CA2B0(self);
+    char* menuItem = (char*)self;
+    int result = func_002CA2B0(self);
     if (cMenuItem_isLocked(self) != 0) {
-        return r;
+        return result;
     }
-    if (r != 0) {
-        return r;
+    if (result != 0) {
+        return result;
     }
-    float d = func_002CA428_f(self) - func_002CA408_f(self);
+    float side = func_002CA428_f(self) - func_002CA408_f(self);
     int dir;
-    if (d <= -0.1f || d >= 0.1f) {
+    if (side <= -0.1f || side >= 0.1f) {
         dir = 1;
-        if (d < 0.0f) {
+        if (side < 0.0f) {
             dir = -1;
         }
     } else {
         dir = 0;
     }
-    if (dir == *(int*)(s + 0x28)) {
-        *(int*)(s + 0x24) += 1;
+    if (dir == *(int*)(menuItem + 0x28)) {
+        *(int*)(menuItem + 0x24) += 1;
     } else {
-        *(int*)(s + 0x24) = 0;
-        *(int*)(s + 0x28) = dir;
+        *(int*)(menuItem + 0x24) = 0;
+        *(int*)(menuItem + 0x28) = dir;
     }
     if (dir != 0) {
-        int n = *(int*)(s + 0x24);
+        int n = *(int*)(menuItem + 0x24);
         float k = (float)(n * n) * 0.0034722222480922937f;
         k = k >? 1.0f;
         float step = 4.999999873689376e-05f;
         step = k * step;
-        float* p = *(float**)(s + 0x18);
-        *p = *p + d * step * (*(float*)(s + 0x20) - *(float*)(s + 0x1C));
-        if (**(float**)(s + 0x18) < *(float*)(s + 0x1C)) {
-            **(float**)(s + 0x18) = *(float*)(s + 0x1C);
+        float* valuePtr = *(float**)(menuItem + 0x18);
+        *valuePtr = *valuePtr + side * step * (*(float*)(menuItem + 0x20) - *(float*)(menuItem + 0x1C));
+        if (**(float**)(menuItem + 0x18) < *(float*)(menuItem + 0x1C)) {
+            **(float**)(menuItem + 0x18) = *(float*)(menuItem + 0x1C);
         }
-        if (*(float*)(s + 0x20) < **(float**)(s + 0x18)) {
-            **(float**)(s + 0x18) = *(float*)(s + 0x20);
+        if (*(float*)(menuItem + 0x20) < **(float**)(menuItem + 0x18)) {
+            **(float**)(menuItem + 0x18) = *(float*)(menuItem + 0x20);
         }
-        char* menu = *(char**)s;
+        char* menu = *(char**)menuItem;
         sVEntry002CD9D8* vt = *(sVEntry002CD9D8**)(menu + 0x12C);
         vt[4].fn(menu + vt[4].delta, self);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -4160,50 +4160,50 @@ extern "C" int cMenuItem_isLocked(void* self);
 // PORT: uses g++'s >? (max) operator.
 extern "C" int cColorMenuItem_input(void* self)
 {
-    char* s = (char*)self;
-    int r = func_002CA2B0(self);
+    char* menuItem = (char*)self;
+    int result = func_002CA2B0(self);
     if (cMenuItem_isLocked(self) != 0) {
-        return r;
+        return result;
     }
-    if (r != 0) {
-        return r;
+    if (result != 0) {
+        return result;
     }
-    float d = func_002CA428_f(self) - func_002CA408_f(self);
+    float side = func_002CA428_f(self) - func_002CA408_f(self);
     int dir;
-    if (d <= -0.1f || d >= 0.1f) {
+    if (side <= -0.1f || side >= 0.1f) {
         dir = 1;
-        if (d < 0.0f) {
+        if (side < 0.0f) {
             dir = -1;
         }
     } else {
         dir = 0;
     }
-    if (dir == *(int*)(s + 0x20)) {
-        *(int*)(s + 0x1C) += 1;
+    if (dir == *(int*)(menuItem + 0x20)) {
+        *(int*)(menuItem + 0x1C) += 1;
     } else {
-        *(int*)(s + 0x1C) = 0;
-        *(int*)(s + 0x20) = dir;
+        *(int*)(menuItem + 0x1C) = 0;
+        *(int*)(menuItem + 0x20) = dir;
     }
     if (dir != 0) {
-        int n = *(int*)(s + 0x1C);
-        int m = (n * n / 0x120) >? 1;
-        float* p = (float*)(*(char**)(s + 0x14) + (*(int*)(s + 0x18) << 2));
+        int n = *(int*)(menuItem + 0x1C);
+        int accel = (n * n / 0x120) >? 1;
+        float* chanPtr = (float*)(*(char**)(menuItem + 0x14) + (*(int*)(menuItem + 0x18) << 2));
         float step = 0.0003906250058207661f;
-        step = (float)m * step;
-        float v = *p;
-        v += d * step;
-        if (v < 0.0f) {
-            v = 0.0f;
+        step = (float)accel * step;
+        float value = *chanPtr;
+        value += side * step;
+        if (value < 0.0f) {
+            value = 0.0f;
         }
-        if (1.0f < v) {
-            v = 1.0f;
+        if (1.0f < value) {
+            value = 1.0f;
         }
-        *p = v;
-        char* menu = *(char**)s;
+        *chanPtr = value;
+        char* menu = *(char**)menuItem;
         sVEntry002CD9D8* vt = *(sVEntry002CD9D8**)(menu + 0x12C);
         vt[4].fn(menu + vt[4].delta, self);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -4263,18 +4263,18 @@ static inline float textWidth_2CEEE8(sMenuValueItem_2CEEE8* item, const char* st
 // Returns the rect of a value menu item: sized for the widest of the three option labels plus the formatted value.
 extern "C" sRect_2CEEE8* cColorMenuItem_preRender(sRect_2CEEE8* ret, sMenuValueItem_2CEEE8* item)
 {
-    sRect_2CEEE8 r;
+    sRect_2CEEE8 rect;
     char buf[64];
     sprintf(buf, D_00486700, fptodp(*(float*)((char*)item->values + (item->index << 2))));
     float z = 0.0f;
-    r.y = z;
-    r.x = z;
+    rect.y = z;
+    rect.x = z;
     sFont_2CEEE8* font = font_2CEEE8(item);
-    r.h = (float)font->lineHeight * font->scaleY + 12.0f;
-    r.w = MAX_2CEEE8(MAX_2CEEE8(textWidth_2CEEE8(item, D_00487470[0]), textWidth_2CEEE8(item, D_00487470[1])),
+    rect.h = (float)font->lineHeight * font->scaleY + 12.0f;
+    rect.w = MAX_2CEEE8(MAX_2CEEE8(textWidth_2CEEE8(item, D_00487470[0]), textWidth_2CEEE8(item, D_00487470[1])),
                      textWidth_2CEEE8(item, D_00487470[2]));
-    r.w = r.w + textWidth_2CEEE8(item, buf) + 144.0f;
-    *ret = r;
+    rect.w = rect.w + textWidth_2CEEE8(item, buf) + 144.0f;
+    *ret = rect;
     return ret;
 }
 #endif
@@ -4429,12 +4429,12 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
     float barX = rect[0] + rect[2] - 16.0f - 80.0f;
     float textX = barX - 16.0f;
     func_002CA988_sVec3* col = self == cMenu_getFocusItem((cMenu*)(*(void**)self)) ? &D_004D53A0 : &D_004D53B0;
-    func_002CA988_sColor c;
-    c.a = 1.0f;
-    c.r = col->x;
-    c.g = col->y;
-    c.b = col->z;
-    *(func_002CA988_sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = c;
+    func_002CA988_sColor textClr;
+    textClr.a = 1.0f;
+    textClr.r = col->x;
+    textClr.g = col->y;
+    textClr.b = col->z;
+    *(func_002CA988_sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = textClr;
     *(sVec2_2CF1C8*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CF1C8(2.0f, 2.0f);
     cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f,
                   D_00487470[*(int*)((char*)self + 0x18)]);
@@ -4446,9 +4446,9 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
     float w = cFont_textExtent(font, buf, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
     cFont_text(font, textX - w, rect[1] + 6.0f - 1.0f, buf);
 
-    func_002CA988_sColor c1 = **(func_002CA988_sColor**)((char*)self + 0x14);
+    func_002CA988_sColor rampStart = **(func_002CA988_sColor**)((char*)self + 0x14);
     func_002CA988_sColor c2 = **(func_002CA988_sColor**)((char*)self + 0x14);
-    *(float*)((char*)&c1 + (*(int*)((char*)self + 0x18) << 2)) = 0.0f;
+    *(float*)((char*)&rampStart + (*(int*)((char*)self + 0x18) << 2)) = 0.0f;
     *(float*)((char*)&c2 + (*(int*)((char*)self + 0x18) << 2)) = 1.0f;
     sRect_2CF1C8 r;
     r.x = barX;
@@ -4459,18 +4459,18 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
     float zero = 0.0f;
     float one = 1.0f;
     sVec4_2CF1C8 p;
-    v[0].r = (int)(c1.r * 128.0f);
-    v[0].g = (int)(c1.g * 128.0f);
-    v[0].b = (int)(c1.b * 128.0f);
+    v[0].r = (int)(rampStart.r * 128.0f);
+    v[0].g = (int)(rampStart.g * 128.0f);
+    v[0].b = (int)(rampStart.b * 128.0f);
     v[0].a = 0x80;
     v[0].v = zero;
     v[0].u = zero;
     v[0].q = one;
     p.Set(r.x, r.y, zero, one);
     v[0].pos = p;
-    v[1].r = (int)(c1.r * 128.0f);
-    v[1].g = (int)(c1.g * 128.0f);
-    v[1].b = (int)(c1.b * 128.0f);
+    v[1].r = (int)(rampStart.r * 128.0f);
+    v[1].g = (int)(rampStart.g * 128.0f);
+    v[1].b = (int)(rampStart.b * 128.0f);
     v[1].a = 0x80;
     v[1].v = zero;
     v[1].u = zero;
@@ -4504,19 +4504,19 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
     ((cCtx_2CF1C8*)GrMan)->v71(4, v, 0);
 
     float mx = r.x + r.w * *(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2));
-    v[0].r = (int)(c.r * 128.0f);
-    v[0].g = (int)(c.g * 128.0f);
-    v[0].b = (int)(c.b * 128.0f);
+    v[0].r = (int)(textClr.r * 128.0f);
+    v[0].g = (int)(textClr.g * 128.0f);
+    v[0].b = (int)(textClr.b * 128.0f);
     p.x = mx - 5.0f; p.y = r.y - 7.0f; p.z = 0.0f; p.w = 1.0f;
     v[0].pos = p;
-    v[1].r = (int)(c.r * 128.0f);
-    v[1].g = (int)(c.g * 128.0f);
-    v[1].b = (int)(c.b * 128.0f);
+    v[1].r = (int)(textClr.r * 128.0f);
+    v[1].g = (int)(textClr.g * 128.0f);
+    v[1].b = (int)(textClr.b * 128.0f);
     p.x = mx; p.y = r.y - 2.0f; p.z = 0.0f; p.w = 1.0f;
     v[1].pos = p;
-    v[2].r = (int)(c.r * 128.0f);
-    v[2].g = (int)(c.g * 128.0f);
-    v[2].b = (int)(c.b * 128.0f);
+    v[2].r = (int)(textClr.r * 128.0f);
+    v[2].g = (int)(textClr.g * 128.0f);
+    v[2].b = (int)(textClr.b * 128.0f);
     p.x = mx + 5.0f; p.y = r.y - 7.0f; p.z = 0.0f; p.w = 1.0f;
     v[2].pos = p;
     ((cCtx_2CF1C8*)GrMan)->v71(3, v, 0);
@@ -4652,16 +4652,16 @@ struct sMenuSlot_F860 {
  */
 extern "C" void* cExpandMenuItem_cExpandMenuItem(void* self, void* name, void* parent)
 {
-    char* s = (char*)self;
+    char* menuItem = (char*)self;
     cMenuItem_cMenuItem((cMenuItem*)self, name);
-    *(void**)(s + 0x14) = parent;
-    *(void***)(s + 0x10) = cExpandMenuItem_vtbl;
-    cMenu_cMenu(s + 0x18);
-    *(void***)(s + 0x144) = cExpandMenuItemMenu_vtbl;
-    new (s + 0x24) sMenuSlot_F860[70];
-    *(void**)(s + 0x148) = self;
-    if (*(void**)(s + 0x14) != 0) {
-        cExpandMenuItem_addItem3(self, *(void**)(s + 0x14), -1);
+    *(void**)(menuItem + 0x14) = parent;
+    *(void***)(menuItem + 0x10) = cExpandMenuItem_vtbl;
+    cMenu_cMenu(menuItem + 0x18);
+    *(void***)(menuItem + 0x144) = cExpandMenuItemMenu_vtbl;
+    new (menuItem + 0x24) sMenuSlot_F860[70];
+    *(void**)(menuItem + 0x148) = self;
+    if (*(void**)(menuItem + 0x14) != 0) {
+        cExpandMenuItem_addItem3(self, *(void**)(menuItem + 0x14), -1);
     }
     return self;
 }
@@ -5070,11 +5070,11 @@ struct cRGBTitleMenuItem_preRender_sRect {
 // PORT: `>?` (g++ max operator); returns the rect through the hidden result pointer.
 extern "C" cRGBTitleMenuItem_preRender_sRect* cRGBTitleMenuItem_preRender(cRGBTitleMenuItem_preRender_sRect* out, void* item)
 {
-    cRGBTitleMenuItem_preRender_sRect r;
-    func_002CA4C8(&r, item, *(int*)((char*)item + 0x18), 0, 0);
-    r.w += 36.0f;
-    r.h = r.h >? 29.0f;
-    *out = r;
+    cRGBTitleMenuItem_preRender_sRect rect;
+    func_002CA4C8(&rect, item, *(int*)((char*)item + 0x18), 0, 0);
+    rect.w += 36.0f;
+    rect.h = rect.h >? 29.0f;
+    *out = rect;
     return out;
 }
 #endif
@@ -5212,42 +5212,42 @@ extern "C" void cRGBTitleMenuItem_render(char* self, float* rect)
     rc.y = rect[1] + 6.0f + 2.0f;
     float x2 = rc.x + rc.w;
     float y2 = rc.y + rc.h;
-    sCol_2D0008* c = *(sCol_2D0008**)(self + 0x14);
-    float zero = 0.0f;
+    sCol_2D0008* colour = *(sCol_2D0008**)(self + 0x14);
+    float zeroF = 0.0f;
     float one = 1.0f;
-    v[0].r = (int)(c->r * 128.0f);
-    v[0].g = (int)(c->g * 128.0f);
-    v[0].b = (int)(c->b * 128.0f);
-    v[0].a = (int)(c->a * 128.0f);
-    v[0].v = zero;
-    v[0].u = zero;
+    v[0].r = (int)(colour->r * 128.0f);
+    v[0].g = (int)(colour->g * 128.0f);
+    v[0].b = (int)(colour->b * 128.0f);
+    v[0].a = (int)(colour->a * 128.0f);
+    v[0].v = zeroF;
+    v[0].u = zeroF;
     v[0].q = one;
-    *(sVec4_2D0008*)v[0].pos = sVec4_2D0008(rc.x, rc.y, zero, one);
-    v[1].r = (int)(c->r * 128.0f);
-    v[1].g = (int)(c->g * 128.0f);
-    v[1].b = (int)(c->b * 128.0f);
-    v[1].a = (int)(c->a * 128.0f);
-    v[1].v = zero;
-    v[1].u = zero;
+    *(sVec4_2D0008*)v[0].pos = sVec4_2D0008(rc.x, rc.y, zeroF, one);
+    v[1].r = (int)(colour->r * 128.0f);
+    v[1].g = (int)(colour->g * 128.0f);
+    v[1].b = (int)(colour->b * 128.0f);
+    v[1].a = (int)(colour->a * 128.0f);
+    v[1].v = zeroF;
+    v[1].u = zeroF;
     v[1].q = one;
-    *(sVec4_2D0008*)v[1].pos = sVec4_2D0008(rc.x, y2, zero, one);
-    v[2].r = (int)(c->r * 128.0f);
-    v[2].g = (int)(c->g * 128.0f);
-    v[2].b = (int)(c->b * 128.0f);
-    v[2].a = (int)(c->a * 128.0f);
-    v[2].v = zero;
-    v[2].u = zero;
+    *(sVec4_2D0008*)v[1].pos = sVec4_2D0008(rc.x, y2, zeroF, one);
+    v[2].r = (int)(colour->r * 128.0f);
+    v[2].g = (int)(colour->g * 128.0f);
+    v[2].b = (int)(colour->b * 128.0f);
+    v[2].a = (int)(colour->a * 128.0f);
+    v[2].v = zeroF;
+    v[2].u = zeroF;
     v[2].q = one;
-    *(sVec4_2D0008*)v[2].pos = sVec4_2D0008(x2, rc.y, zero, one);
-    v[3].r = (int)(c->r * 128.0f);
-    v[3].g = (int)(c->g * 128.0f);
-    v[3].b = (int)(c->b * 128.0f);
-    v[3].a = (int)(c->a * 128.0f);
-    v[3].v = zero;
-    v[3].u = zero;
+    *(sVec4_2D0008*)v[2].pos = sVec4_2D0008(x2, rc.y, zeroF, one);
+    v[3].r = (int)(colour->r * 128.0f);
+    v[3].g = (int)(colour->g * 128.0f);
+    v[3].b = (int)(colour->b * 128.0f);
+    v[3].a = (int)(colour->a * 128.0f);
+    v[3].v = zeroF;
+    v[3].u = zeroF;
     v[3].q = one;
-    *(sVec4_2D0008*)v[3].pos = sVec4_2D0008(x2, y2, zero, one);
-    if (c->a != 1.0f) {
+    *(sVec4_2D0008*)v[3].pos = sVec4_2D0008(x2, y2, zeroF, one);
+    if (colour->a != 1.0f) {
         ((cCtx_2D0008*)GrMan)->top->f4_2 = 5;
     } else {
         ((cCtx_2D0008*)GrMan)->top->f4_2 = 1;
@@ -5283,20 +5283,20 @@ extern void* cARGBMenuItem_vtbl[];
  */
 extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, void* name, void* title, void* color)
 {
-    char* s = (char*)self;
-    cExpandMenuItem_cExpandMenuItem(self, name, s + 0x640);
-    *(void**)(s + 0x5AC) = color;
-    *(void***)(s + 0x10) = cARGBMenuItem_vtbl;
+    char* menuItem = (char*)self;
+    cExpandMenuItem_cExpandMenuItem(self, name, menuItem + 0x640);
+    *(void**)(menuItem + 0x5AC) = color;
+    *(void***)(menuItem + 0x10) = cARGBMenuItem_vtbl;
     // PORT: the channel index is passed in the unit's void* parameter
-    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(s + 0x5B0), color, (void*)0);
-    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(s + 0x5D4), color, (void*)1);
-    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(s + 0x5F8), color, (void*)2);
-    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(s + 0x61C), color, (void*)3);
-    cRGBTitleMenuItem_cRGBTitleMenuItem((cRGBTitleMenuItem_sItem*)(s + 0x640), title, color);
-    cExpandMenuItem_addItem3(self, s + 0x5B0, -1);
-    cExpandMenuItem_addItem3(self, s + 0x5D4, -1);
-    cExpandMenuItem_addItem3(self, s + 0x5F8, -1);
-    cExpandMenuItem_addItem3(self, s + 0x61C, -1);
+    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(menuItem + 0x5B0), color, (void*)0);
+    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(menuItem + 0x5D4), color, (void*)1);
+    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(menuItem + 0x5F8), color, (void*)2);
+    cColorMenuItem__cColorMenuItem((cColorMenuItem__cColorMenuItem_sItem*)(menuItem + 0x61C), color, (void*)3);
+    cRGBTitleMenuItem_cRGBTitleMenuItem((cRGBTitleMenuItem_sItem*)(menuItem + 0x640), title, color);
+    cExpandMenuItem_addItem3(self, menuItem + 0x5B0, -1);
+    cExpandMenuItem_addItem3(self, menuItem + 0x5D4, -1);
+    cExpandMenuItem_addItem3(self, menuItem + 0x5F8, -1);
+    cExpandMenuItem_addItem3(self, menuItem + 0x61C, -1);
     return self;
 }
 #endif
@@ -5473,10 +5473,10 @@ extern "C" void* cVectorMenuItem_input(sMenuColD6E8* self)
     void* ret = cExpandMenuItem_input(self);
     if (self->linked != 0) {
         sMenuVecD6E8 n;
-        sMenuVecD6E8 v(self->ch[0].scale * self->ch[0].get() + self->ch[0].offset,
+        sMenuVecD6E8 vec(self->ch[0].scale * self->ch[0].get() + self->ch[0].offset,
                        self->ch[1].scale * self->ch[1].get() + self->ch[1].offset,
                        self->ch[2].scale * self->ch[2].get() + self->ch[2].offset);
-        menuNormalizeD6E8(n, v);
+        menuNormalizeD6E8(n, vec);
         self->ch[0].set(n.x);
         self->ch[1].set(n.y);
         self->ch[2].set(n.z);
@@ -6245,8 +6245,8 @@ INCLUDE_ASM("util/menu", cObjectInterface_getNumBeings);
 extern "C" void* cObjectInterface_getNumBeings(int i)
 {
     char* base = (char*)SSXApp->Game->AI;
-    char* p = *(char**)(base + (i << 2) + 0x28);
-    return p ? p + 0x6C0 : 0;
+    char* rider = *(char**)(base + (i << 2) + 0x28);
+    return rider ? rider + 0x6C0 : 0;
 }
 #endif
 

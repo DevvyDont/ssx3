@@ -29,16 +29,16 @@ extern "C" int cDirtysock_tag_TagFieldSetString(char* buf, int size, const char*
 // PORT: the unit declares value as int (callers pass a string pointer in it).
 extern "C" int cDirtysock_tag_TagFieldSetUnk(char* buf, int size, const char* key, int value)
 {
-    char temp[256];
-    int r;
+    char escaped[256];
+    int result;
     if (*(const char*)value == '\'') {
-        temp[0] = '`';
-        strcpy(temp + 1, (const char*)value);
-        r = cDirtysock_tag_TagFieldSetString(buf, size, key, temp);
+        escaped[0] = '`';
+        strcpy(escaped + 1, (const char*)value);
+        result = cDirtysock_tag_TagFieldSetString(buf, size, key, escaped);
     } else {
-        r = cDirtysock_tag_TagFieldSetString(buf, size, key, (const char*)value);
+        result = cDirtysock_tag_TagFieldSetString(buf, size, key, (const char*)value);
     }
-    return r;
+    return result;
 }
 #endif
 

@@ -1129,15 +1129,15 @@ extern "C" void dcmpInitFrameAccessor(sRabChannelSet* self, unsigned char* data,
         }
         ch++;
     } while (ch != end);
-    int a = frames * self->count6;
-    int b = ((frames - 2) / 2 + 2) * self->count7;
+    int sizeQB = frames * self->count6;
+    int sizeQB2 = ((frames - 2) / 2 + 2) * self->count7;
     int c = frames * self->count8 * 2;
-    int ofs = (p - data) + a + b;
+    int ofs = (p - data) + sizeQB + sizeQB2;
     self->data4 = p;
-    self->data8 = p + a;
+    self->data8 = p + sizeQB;
     int pad = ofs & 1;
-    self->dataC = p + a + b + pad;
-    self->data10 = p + a + b + c + ((ofs + c + pad) & 3);
+    self->dataC = p + sizeQB + sizeQB2 + pad;
+    self->data10 = p + sizeQB + sizeQB2 + c + ((ofs + c + pad) & 3);
 }
 #endif
 

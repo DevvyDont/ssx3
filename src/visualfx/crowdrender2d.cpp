@@ -178,16 +178,16 @@ extern char* D_004A5B64;
  */
 void* cCrowdAnim2D_cCrowdAnim2D(void* memory, void* param_1)
 {
-    sCrowdAnim2D* a = (sCrowdAnim2D*)memory;
-    a->f1C = param_1;
-    a->f8 = 4;
-    a->f4 = 0;
-    a->fC = 0;
-    a->f10 = D_00445D38_ctor.frames[0];
-    a->f0 = 0;
-    a->f18 = *(int*)(D_004A5B64 + 0x1C);
-    a->f14 = 3;
-    return a;
+    sCrowdAnim2D* anim = (sCrowdAnim2D*)memory;
+    anim->f1C = param_1;
+    anim->f8 = 4;
+    anim->f4 = 0;
+    anim->fC = 0;
+    anim->f10 = D_00445D38_ctor.frames[0];
+    anim->f0 = 0;
+    anim->f18 = *(int*)(D_004A5B64 + 0x1C);
+    anim->f14 = 3;
+    return anim;
 }
 #endif
 

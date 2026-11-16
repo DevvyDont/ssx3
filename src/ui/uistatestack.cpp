@@ -176,8 +176,8 @@ extern "C" void cUIStateStack_push(cList* self, cUIStateStack_push_sState* st)
     int covered = 0;
     cUIStateStack_push_sState* top = (cUIStateStack_push_sState*)cList_first(self);
     if (top != 0) {
-        int f = *(int*)((char*)top + 0x1C);
-        if (((f >> 5) & 1) && ((f >> 6) & 1) == 0 && cUIStateStack_push_stateId(top) < 6) {
+        int attrBits = *(int*)((char*)top + 0x1C);
+        if (((attrBits >> 5) & 1) && ((attrBits >> 6) & 1) == 0 && cUIStateStack_push_stateId(top) < 6) {
             covered = 1;
             top->id = 6;
             top->b7 = 1;
@@ -727,16 +727,16 @@ extern "C" void cUIAnimation_start(void* self, int mode, unsigned short v);
  *
  * @param anim  the animation to play (On Tour cUIAnimation* pAnim)
  * @param mode  playback mode (On Tour playback)
- * @param v     frame to start from (On Tour FrameNum)
+ * @param frameNum     frame to start from (On Tour FrameNum)
  */
-extern "C" void cUIThing_playAnimation(cUIThing* self, void* anim, unsigned char mode, unsigned short v)
+extern "C" void cUIThing_playAnimation(cUIThing* self, void* anim, unsigned char mode, unsigned short frameNum)
 {
     if ((void*)self->mpAnim != anim) {
         cUIThing_deleteAnimation(self);
     }
     self->mAnimPlaybackStatus = mode;
     self->mpAnim = (cUIAnimation*)anim;
-    cUIAnimation_start(anim, self->mAnimPlaybackStatus, v);
+    cUIAnimation_start(anim, self->mAnimPlaybackStatus, frameNum);
 }
 #endif
 

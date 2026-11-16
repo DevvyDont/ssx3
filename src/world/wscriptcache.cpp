@@ -27,10 +27,10 @@ extern "C" void cWScriptCache_init(void* self, int count)
 {
     char* old = *(char**)((char*)self + 0x4);
     if (old != 0) {
-        char* p = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
-        while (*(char**)((char*)self + 0x4) != p) {
-            p -= 0xC;
-            func_003ACA70((int*)p, 0);
+        char* oldEntry = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
+        while (*(char**)((char*)self + 0x4) != oldEntry) {
+            oldEntry -= 0xC;
+            func_003ACA70((int*)oldEntry, 0);
         }
         cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
     }
@@ -39,10 +39,10 @@ extern "C" void cWScriptCache_init(void* self, int count)
     char* mem = (char*)operator_new_tag(count * 0xC + 0x10, D_00495070, 0x20000000, 0);
     char* arr = mem + 0x10;
     *(int*)mem = count;
-    char* q = arr;
+    char* newEntry = arr;
     int i;
-    for (i = count - 1; i != -1; i--, q += 0xC) {
-        func_003ACA50(q);
+    for (i = count - 1; i != -1; i--, newEntry += 0xC) {
+        func_003ACA50(newEntry);
     }
     *slot = arr;
     *(int*)((char*)self + 0xC) = 0;

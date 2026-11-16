@@ -173,16 +173,16 @@ extern "C" void cWorld_resetMap(cWorld* selfp)
     for (i = 0; i < (unsigned int)cWorldView_getNumSections((cWorldView*)(*self)->view); i++) {
         if (cWorldView_isSectionLoaded((cWorldView*)(*self)->view, i)) {
             int n = (*self)->map->sections[i].count;
-            unsigned int s = i & 0xFF;
+            unsigned int slotIndex = i & 0xFF;
             ref = (int)ref & ~0xFF;
-            ref |= s;
+            ref |= slotIndex;
             int j;
             for (j = 0; j < n; j++) {
                 ref = (ref & 0xFF) | (j << 8);
-                sWRMObj* o = sWRM_get(*self, ref);
-                if (o) {
-                    int v = o->f8 & 0xFFFF0000;
-                    o->f8 = v | (v >> 16) | 2;
+                sWRMObj* mapObj = sWRM_get(*self, ref);
+                if (mapObj) {
+                    int highBits = mapObj->f8 & 0xFFFF0000;
+                    mapObj->f8 = highBits | (highBits >> 16) | 2;
                 }
             }
         }
@@ -314,13 +314,13 @@ struct cWorld_load_sBXString {
  */
 extern "C" void cWorld_load(void** self, const char* name, int nash)
 {
-    cWorld_load_sBXString s;
-    cBXString_cBXString2(&s, name);
+    cWorld_load_sBXString nameStr;
+    cBXString_cBXString2(&nameStr, name);
     cWorldCache_reset(self[0]);
     cWorldCache_init(self[0], name, nash);
     cWScriptCache_init(self[1], cWorldView_getNumSections((cWorldView*)((char*)self[0] + 0x10)));
     cWorldPainterMan_init(self[2], cWorldView_getNumSections((cWorldView*)((char*)self[0] + 0x10)));
-    cBXString__cBXString(&s, 2);
+    cBXString__cBXString(&nameStr, 2);
 }
 #endif
 
@@ -518,8 +518,8 @@ extern "C" int func_003ADC50(cWorld_getNumGlobalScripts_sEntry* e, unsigned int 
  */
 extern "C" int cWorld_getWScriptScript(cWorld* self, unsigned int* handle)
 {
-    unsigned int h = *handle;
-    return func_003ADC50(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[h & 0xFF], h >> 8);
+    unsigned int packed = *handle;
+    return func_003ADC50(&((cWorld_getNumGlobalScripts_sTable*)self->m_pWScriptCache)->entries[packed & 0xFF], packed >> 8);
 }
 #endif
 

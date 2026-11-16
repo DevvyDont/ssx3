@@ -67,9 +67,9 @@ extern "C" void cGame_renderModels(cGame* self, void* world)
     for (int i = 0; i < n; i++) {
         ((sRVEntry_C078*)GrMan->mVtbl)[0x60].fn((char*)GrMan + ((sRVEntry_C078*)GrMan->mVtbl)[0x60].delta, items[i], 0, 0, flag);
     }
-    int n2 = *(int*)((char*)world + 0x40A0);
+    int secondCount = *(int*)((char*)world + 0x40A0);
     items = (int*)((char*)world + 0x40A4);
-    for (int i = 0; i < n2; i++) {
+    for (int i = 0; i < secondCount; i++) {
         ((sRVEntry_C078*)GrMan->mVtbl)[0x60].fn((char*)GrMan + ((sRVEntry_C078*)GrMan->mVtbl)[0x60].delta, items[i], 0, 0, flag | 0x20);
     }
 }
@@ -355,16 +355,16 @@ extern "C" void cGame_renderFogVolumes(cGame* self, void* world)
     void* fog = (char*)world + 0x78B8;
     int n = *(int*)((char*)world + 0x78B4);
     if (n != 0) {
-        void* r = self->FogMan;
-        sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)r + 0x4);
-        vt[2].fn((char*)r + vt[2].delta, fog, n, 0);
+        void* fogMan = self->FogMan;
+        sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)fogMan + 0x4);
+        vt[2].fn((char*)fogMan + vt[2].delta, fog, n, 0);
     }
     fog = (char*)world + 0x7AC0;
     n = *(int*)((char*)world + 0x7ABC);
     if (n != 0) {
-        void* r = self->FogMan;
-        sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)r + 0x4);
-        vt[2].fn((char*)r + vt[2].delta, fog, n, 2);
+        void* fogMan = self->FogMan;
+        sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)fogMan + 0x4);
+        vt[2].fn((char*)fogMan + vt[2].delta, fog, n, 2);
     }
     func_002DBF98(self->FogMan);
 }
@@ -388,15 +388,15 @@ extern "C" void cGame_renderLightHalos(cGame* self, void* world, int ViewID)
 {
     *(int*)((char*)self->LensFxMan + 0x6494) = 1;
     func_002E2F98(self->LensFxMan, ViewID);
-    void* p = (char*)world + 0x7BC4;
+    void* halos = (char*)world + 0x7BC4;
     int n = *(int*)((char*)world + 0x7BC0);
     if (n != 0) {
-        func_002E2FF8(self->LensFxMan, p, n, 0, ViewID);
+        func_002E2FF8(self->LensFxMan, halos, n, 0, ViewID);
     }
-    p = (char*)world + 0x7FC8;
+    halos = (char*)world + 0x7FC8;
     n = *(int*)((char*)world + 0x7FC4);
     if (n != 0) {
-        func_002E2FF8(self->LensFxMan, p, n, 2, ViewID);
+        func_002E2FF8(self->LensFxMan, halos, n, 2, ViewID);
     }
     func_002E30D0(self->LensFxMan, ViewID);
     *(int*)((char*)self->LensFxMan + 0x6494) = 0;
@@ -806,11 +806,11 @@ extern "C" void cSectionMan_setSky(void* self, int sky);
  */
 extern "C" void cSectionMan_activate(cSectionMan* self, int idx, int mode)
 {
-    int v;
+    int sectionMode;
     if (mode == 7) {
-        v = D_00442820_D088[idx].f4;
+        sectionMode = D_00442820_D088[idx].f4;
     } else {
-        v = mode;
+        sectionMode = mode;
     }
     int extra = 0x31;
     if (D_00442488_D088[idx].a >= 0) {
@@ -847,7 +847,7 @@ extern "C" void cSectionMan_activate(cSectionMan* self, int idx, int mode)
     if (b >= 0) {
         cSectionMan_activateSection_D088(self, b);
     }
-    cSectionMan_activateMode_D088(self, v);
+    cSectionMan_activateMode_D088(self, sectionMode);
 }
 #endif
 
@@ -907,11 +907,11 @@ extern "C" int func_0022D278(void* self);
  */
 extern "C" int cSectionMan_isActive(cSectionMan* self)
 {
-    int r = 0;
+    int active = 0;
     if (func_0022D278(self) != 0) {
-        r = self->mbLocationIsActivated != 0;
+        active = self->mbLocationIsActivated != 0;
     }
-    return r;
+    return active;
 }
 #endif
 
@@ -1136,9 +1136,9 @@ extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
         return;
     }
     cAI_resetRidersStatTotals(SSXApp->Game->AI);
-    char* g = (char*)SSXApp;
-    *(int*)(*(char**)(*(char**)(g + 0x84) + 0xC) + 0xC) = 0;
-    if ((unsigned int)(*(int*)(*(char**)(*(char**)(g + 0x84) + 0x78) + 0x1BC) - 14) < 3) {
+    char* app = (char*)SSXApp;
+    *(int*)(*(char**)(*(char**)(app + 0x84) + 0xC) + 0xC) = 0;
+    if ((unsigned int)(*(int*)(*(char**)(*(char**)(app + 0x84) + 0x78) + 0x1BC) - 14) < 3) {
         cBENewRaceInterface_setGameMode(race, 4);
         cBENewRaceInterface_setGameEvent(race, 12);
     } else {
@@ -1423,9 +1423,9 @@ extern "C" void cSectionMan_skySwap(cSectionMan* self)
         }
     }
     int id = D_00442168[self->m_iNextSkySectionID].field_0x4;
-    void* o = *(void**)((char*)self->mpGame + 0x14);
-    if (*(int*)((char*)o + 0x10) != id) {
-        func_00353D98(o);
+    void* skyBox = *(void**)((char*)self->mpGame + 0x14);
+    if (*(int*)((char*)skyBox + 0x10) != id) {
+        func_00353D98(skyBox);
         func_00353CF0(*(void**)((char*)self->mpGame + 0x14), id);
     }
     self->m_bTriggerSkySwap = 0;
@@ -1521,8 +1521,8 @@ INCLUDE_ASM("main/game", cSectionMan_isSectionLoaded);
  */
 extern "C" int cSectionMan_isSectionLoaded(cSectionMan* self, int SectionID)
 {
-    int v = D_00442168[SectionID].field_0x8;
-    return (unsigned int)(v - 1) < 2;
+    int loadState = D_00442168[SectionID].field_0x8;
+    return (unsigned int)(loadState - 1) < 2;
 }
 #endif
 

@@ -74,15 +74,15 @@ extern "C" void cCameraTriggerList_reset(void* self_)
         }
         if (self->arr[i]->fC)
         {
-            sTrigPart_16BF40* p = self->arr[i]->fC;
-            p->vt[1].fn((char*)p + p->vt[1].delta);
+            sTrigPart_16BF40* part = self->arr[i]->fC;
+            part->vt[1].fn((char*)part + part->vt[1].delta);
             operator_delete((int*)self->arr[i]->fC);
             self->arr[i]->fC = 0;
         }
         if (self->arr[i]->f10)
         {
-            sTrigPart_16BF40* p = self->arr[i]->f10;
-            p->vt[1].fn((char*)p + p->vt[1].delta);
+            sTrigPart_16BF40* part = self->arr[i]->f10;
+            part->vt[1].fn((char*)part + part->vt[1].delta);
             operator_delete((int*)self->arr[i]->f10);
             self->arr[i]->f10 = 0;
         }
@@ -190,9 +190,9 @@ extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* name)
     void* buf = operator_new_K2(size, D_0045BF30, 0x100, 0);
     FILE_loadpackat(name, buf, size);
     if (buf != 0) {
-        int r = cCameraTriggerList_loadFromBuffer(self, buf);
+        int status = cCameraTriggerList_loadFromBuffer(self, buf);
         cMemMan_free(buf);
-        return r;
+        return status;
     }
     return 2;
 }
@@ -246,19 +246,19 @@ extern "C" int cCameraTriggerList_loadFromBuffer(void* self_, void* buf)
         self->field_0xC = 7;
         return 3;
     }
-    int r = cCameraTriggerList_readHeader_K3(self, &cur, 7);
-    if (r != 0)
-        return r;
+    int status = cCameraTriggerList_readHeader_K3(self, &cur, 7);
+    if (status != 0)
+        return status;
     self->field_0x0 = (int)operator_new_K3(self->field_0x4 * 4, D_0045BF40, 0, 0);
     for (int i = 0; i < self->field_0x4; i++) {
-        tCameraTrigger_K3* t = new (D_0045BF58, 0, 0) tCameraTrigger_K3;
-        r = readTrigger(&cur, &t, self->field_0xC);
-        if (r != 0) {
-            if (t != 0)
-                tCameraTrigger__tCameraTrigger(t, 3);
-            return r;
+        tCameraTrigger_K3* newTrig = new (D_0045BF58, 0, 0) tCameraTrigger_K3;
+        status = readTrigger(&cur, &newTrig, self->field_0xC);
+        if (status != 0) {
+            if (newTrig != 0)
+                tCameraTrigger__tCameraTrigger(newTrig, 3);
+            return status;
         }
-        cCameraTriggerList_insert((cCameraTriggerList2*)self, t, i);
+        cCameraTriggerList_insert((cCameraTriggerList2*)self, newTrig, i);
     }
     self->field_0xC = 7;
     return 0;

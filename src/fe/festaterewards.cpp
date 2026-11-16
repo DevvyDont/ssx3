@@ -979,7 +979,7 @@ struct sVE_03F8 {
  */
 extern "C" void cFEStateRewardGalleryBase_showReward(void* self)
 {
-    void* p = 0;
+    void* nextState = 0;
     sVE_03F8* vt = *(sVE_03F8**)((char*)self + 8);
     void* data = vt[34].fn((char*)self + vt[34].delta);
     switch (*(int*)((char*)self + 0x4C)) {
@@ -987,18 +987,18 @@ extern "C" void cFEStateRewardGalleryBase_showReward(void* self)
     case 4:
     case 5:
     case 7:
-        p = func_001D1AA0(cMemMan_alloc(0x78, D_00466F78, 0, 0), *(void**)((char*)self + 0x10), self,
+        nextState = func_001D1AA0(cMemMan_alloc(0x78, D_00466F78, 0, 0), *(void**)((char*)self + 0x10), self,
                           *(signed char*)((char*)self + 0x44));
-        func_001D20D8(p, *(int*)((char*)self + 0x4C), data);
+        func_001D20D8(nextState, *(int*)((char*)self + 0x4C), data);
         break;
     case 6:
-        p = func_001D22F0(cMemMan_alloc(0x280, D_004601D8, 0, 0), *(void**)((char*)self + 0x10), self,
+        nextState = func_001D22F0(cMemMan_alloc(0x280, D_004601D8, 0, 0), *(void**)((char*)self + 0x10), self,
                           *(signed char*)((char*)self + 0x44));
-        func_001D2598(p, *(const char**)((char*)data + 4), 0);
+        func_001D2598(nextState, *(const char**)((char*)data + 4), 0);
         break;
     }
-    if (p != 0) {
-        cUIStateStack_pushPopup((char*)*(void**)((char*)self + 0x10) + 0x18, p);
+    if (nextState != 0) {
+        cUIStateStack_pushPopup((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
     }
 }
 #endif
@@ -1127,9 +1127,9 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(char* self, int idx)
         } else if (state < 0) {
             setHelp_0648(self, *(char**)(item + 8));
         } else {
-            int m = *(int*)(self + 0x8F0);
-            if (m >= 0) {
-                if (state != m) {
+            int selected = *(int*)(self + 0x8F0);
+            if (selected >= 0) {
+                if (state != selected) {
                     if (state == 1)
                         setHelp_0648(self, D_00466FB0);
                     else if (state == 2)
@@ -1137,8 +1137,8 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(char* self, int idx)
                     else
                         setHelp_0648(self, D_00466FE0);
                 } else {
-                    sVE_0648i* v2 = *(sVE_0648i**)(self + 8);
-                    if (*(int*)(self + 0x54) < v2[35].fn(self + v2[35].delta, (int)item))
+                    sVE_0648i* vtbl = *(sVE_0648i**)(self + 8);
+                    if (*(int*)(self + 0x54) < vtbl[35].fn(self + vtbl[35].delta, (int)item))
                         setHelp_0648(self, D_00460958);
                     else
                         setHelp_0648(self, D_00466FF8);
@@ -1152,9 +1152,9 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(char* self, int idx)
         if (vt[38].fn(self + vt[38].delta, idx)) {
             setHelp_0648(self, D_00467028);
         } else {
-            int m = *(int*)(self + 0x8F0);
-            if (m >= 0) {
-                if (state != m) {
+            int selected = *(int*)(self + 0x8F0);
+            if (selected >= 0) {
+                if (state != selected) {
                     if (state == 1)
                         setHelp_0648(self, D_00466FB0);
                     else if (state == 2)
@@ -1162,8 +1162,8 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(char* self, int idx)
                     else
                         setHelp_0648(self, D_00466FE0);
                 } else {
-                    sVE_0648i* v2 = *(sVE_0648i**)(self + 8);
-                    if (*(int*)(self + 0x54) < v2[35].fn(self + v2[35].delta, (int)item))
+                    sVE_0648i* vtbl = *(sVE_0648i**)(self + 8);
+                    if (*(int*)(self + 0x54) < vtbl[35].fn(self + vtbl[35].delta, (int)item))
                         setHelp_0648(self, D_00460958);
                     else
                         setHelp_0648(self, D_00466FF8);
@@ -1248,33 +1248,33 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(sGallery_08A0* self, int row
             show_08A0(self->cells[row][col], 1);
             show_08A0(self->frames[row][col], 1);
             if (self->vt[38].fn((char*)self + self->vt[38].delta, idx) != 0) {
-                int a = self->vt[26].fn((char*)self + self->vt[26].delta, idx);
-                if (a >= 0) {
+                int rewardIndex = self->vt[26].fn((char*)self + self->vt[26].delta, idx);
+                if (rewardIndex >= 0) {
                     sGalCell_08A0* cell = self->cells[row][col];
-                    cell->reward = a;
+                    cell->reward = rewardIndex;
                     cell->tex = 0;
                 } else {
-                    int b = self->vt[27].fn((char*)self + self->vt[27].delta, idx);
-                    if (b != 0) {
+                    int texture = self->vt[27].fn((char*)self + self->vt[27].delta, idx);
+                    if (texture != 0) {
                         sGalCell_08A0* cell = self->cells[row][col];
-                        cell->tex = (void*)b;
+                        cell->tex = (void*)texture;
                         cell->reward = -1;
                     }
                 }
             } else {
-                int c = self->vt[34].fn((char*)self + self->vt[34].delta, idx);
-                void* t;
-                if (self->selected >= 0 && self->vt[36].fn((char*)self + self->vt[36].delta, c) == self->selected) {
+                int rewardItem = self->vt[34].fn((char*)self + self->vt[34].delta, idx);
+                void* icon;
+                if (self->selected >= 0 && self->vt[36].fn((char*)self + self->vt[36].delta, rewardItem) == self->selected) {
                     char* ui = self->ui;
-                    int h = GetHashValue32(D_00467040);
-                    t = func_00398380(ui + 0x58, h);
+                    int iconHash = GetHashValue32(D_00467040);
+                    icon = func_00398380(ui + 0x58, iconHash);
                 } else {
                     char* ui = self->ui;
-                    int h = GetHashValue32(D_00467050);
-                    t = func_00398380(ui + 0x58, h);
+                    int iconHash = GetHashValue32(D_00467050);
+                    icon = func_00398380(ui + 0x58, iconHash);
                 }
                 sGalCell_08A0* cell = self->cells[row][col];
-                cell->tex = t;
+                cell->tex = icon;
                 cell->reward = -1;
             }
             sGalCell_08A0* cell = self->cells[row][col];
@@ -1367,15 +1367,15 @@ extern "C" void cFEStateRewardGalleryBase_updatePageNumber(void* self)
             int pages = (*(int*)((char*)self + 0x60) + per - 1) / per;
             sprintf1(buf, fmt, (*(int*)((char*)self + 0x64) + per - 1) / per + 1, pages);
             cUIText_setUnicodeString(*(void**)((char*)self + 0x904), buf);
-            char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1EF8));
-            if (o != 0) {
-                sVEK1D0BC8b* vt2 = *(sVEK1D0BC8b**)(o + 8);
-                vt2[9].fn(o + vt2[9].delta, pages > 1);
+            char* buttonPrompt = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1EF8));
+            if (buttonPrompt != 0) {
+                sVEK1D0BC8b* vt2 = *(sVEK1D0BC8b**)(buttonPrompt + 8);
+                vt2[9].fn(buttonPrompt + vt2[9].delta, pages > 1);
             }
-            o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F00));
-            if (o != 0) {
-                sVEK1D0BC8b* vt2 = *(sVEK1D0BC8b**)(o + 8);
-                vt2[9].fn(o + vt2[9].delta, pages > 1);
+            buttonPrompt = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1F00));
+            if (buttonPrompt != 0) {
+                sVEK1D0BC8b* vt2 = *(sVEK1D0BC8b**)(buttonPrompt + 8);
+                vt2[9].fn(buttonPrompt + vt2[9].delta, pages > 1);
             }
             return;
         }
@@ -2268,32 +2268,32 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         case 3:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(D_00466E08);
-                w->f7C = func_00398380(ui + 0x58, h);
+                int iconHash = GetHashValue32(D_00466E08);
+                w->f7C = func_00398380(ui + 0x58, iconHash);
             }
             w->f78 = -1;
             break;
         case 4:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(D_00466E18);
-                w->f7C = func_00398380(ui + 0x58, h);
+                int iconHash = GetHashValue32(D_00466E18);
+                w->f7C = func_00398380(ui + 0x58, iconHash);
             }
             w->f78 = -1;
             break;
         case 5:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(D_00466E30);
-                w->f7C = func_00398380(ui + 0x58, h);
+                int iconHash = GetHashValue32(D_00466E30);
+                w->f7C = func_00398380(ui + 0x58, iconHash);
             }
             w->f78 = -1;
             break;
         case 7:
             {
                 char* ui = self->ui;
-                int h = GetHashValue32(D_00466E50);
-                w->f7C = func_00398380(ui + 0x58, h);
+                int iconHash = GetHashValue32(D_00466E50);
+                w->f7C = func_00398380(ui + 0x58, iconHash);
             }
             w->f78 = -1;
             break;
@@ -2438,19 +2438,19 @@ extern "C" int cFEStatePreviewReward_onInputBegin(void* self, void* obj)
 {
     sVE_1FF0a* vt = *(sVE_1FF0a**)((char*)obj + 8);
     if (vt[6].fn((char*)obj + vt[6].delta) != 0) {
-    sDefObj_1FF0* p = *(sDefObj_1FF0**)(*(char**)((char*)self + 0x10) + 0x14);
-    if (p == 0) {
-        p = &D_004A5A58;
+    sDefObj_1FF0* sound = *(sDefObj_1FF0**)(*(char**)((char*)self + 0x10) + 0x14);
+    if (sound == 0) {
+        sound = &D_004A5A58;
     }
-    if (p != 0) {
-        p->vt[2].fn((char*)p + p->vt[2].delta, 3);
+    if (sound != 0) {
+        sound->vt[2].fn((char*)sound + sound->vt[2].delta, 3);
     }
     int i;
     for (i = 0; i < 3; i++) {
-        char* o = ((char**)((char*)self + 0x48))[i];
-        if (o != 0) {
-            sVE_1FF0b* vt2 = *(sVE_1FF0b**)(o + 8);
-            vt2[9].fn(o + vt2[9].delta, 0);
+        char* bitmap = ((char**)((char*)self + 0x48))[i];
+        if (bitmap != 0) {
+            sVE_1FF0b* vt2 = *(sVE_1FF0b**)(bitmap + 8);
+            vt2[9].fn(bitmap + vt2[9].delta, 0);
         }
     }
     cUIScreen_playFrame(*(void**)((char*)self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(D_0045DC60)), 1);

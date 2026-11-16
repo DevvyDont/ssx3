@@ -75,13 +75,13 @@ INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onWidgetMenu);
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 extern "C" int cOVState_REPLAY_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
-    register int r FM_REG("$2") = 0;
+    register int result FM_REG("$2") = 0;
     if (*(int*)((char*)self + 0x9c) != 0) {
         if (key - 2 <= 3) {
-            r = 0x101;
+            result = 0x101;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -357,9 +357,9 @@ extern "C" void cOVState_REPLAY_onUpdate(void* vself)
         cUIState_hideObjSafe(self, D_00471BB0);
     }
     char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A2728));
-    sVec3_0020E530 v = *(sVec3_0020E530*)(obj + 0x44);
-    v.y = (float)self->pos;
-    *(sVec3_0020E530*)(obj + 0x44) = v;
+    sVec3_0020E530 bottomPos = *(sVec3_0020E530*)(obj + 0x44);
+    bottomPos.y = (float)self->pos;
+    *(sVec3_0020E530*)(obj + 0x44) = bottomPos;
     if (self->paused != 0) {
         cUIState_showObjSafe(self, D_00471BA0);
     } else {

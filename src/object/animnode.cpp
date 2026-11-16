@@ -67,11 +67,11 @@ struct sAnimNode_E448 {
 extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self)
 {
     sAnimDef_E448* def = *(sAnimDef_E448**)(self->res + 0x80);
-    sAnimEntry_E448* e = def->entries;
+    sAnimEntry_E448* entry = def->entries;
     int i;
     self->numMeshes = 0;
-    for (i = 0; i < def->count; i++, e++) {
-        if (e->src != 0)
+    for (i = 0; i < def->count; i++, entry++) {
+        if (entry->src != 0)
             self->numMeshes++;
     }
     if (self->numMeshes != 0) {
@@ -82,11 +82,11 @@ extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self)
     }
     sMeshRef_E448*& refs = self->refs;
     refs = new (D_0048E870, 0x20000000, 0) sMeshRef_E448[def->count];
-    e = def->entries;
+    entry = def->entries;
     int k = 0;
-    for (i = 0; i < def->count; i++, e++) {
-        if (e->src != 0) {
-            func_00351398(&self->meshes[k++], e->src);
+    for (i = 0; i < def->count; i++, entry++) {
+        if (entry->src != 0) {
+            func_00351398(&self->meshes[k++], entry->src);
         }
     }
 }
@@ -506,16 +506,16 @@ struct sRange_EBE0 {
 // Is t between the two bounds: [start, end) when start < end, else [end, start).
 extern "C" int cAnimNode_frameUpdateEvent(sRange_EBE0* self, float frame)
 {
-    int r = 0;
+    int inRange = 0;
     if (self->start != 1e10f) {
         if (self->start < self->end) {
-            if (self->start <= frame && frame < self->end) r = 1;
+            if (self->start <= frame && frame < self->end) inRange = 1;
         } else {
             if (!(self->end <= frame)) return 0;
-            r = frame < self->start;
+            inRange = frame < self->start;
         }
     }
-    return r;
+    return inRange;
 }
 #endif
 

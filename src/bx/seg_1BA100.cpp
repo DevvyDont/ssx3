@@ -1384,14 +1384,14 @@ extern "C" void cWorldPainterLayer_resolve(cWorldPainterLayer* self) {
     *(char**)self = ((char*)self) + *(int*)self;
     func_002C17C0(*(char**)self);
     *(char**)(((char*)self) + 8) = ((char*)self) + *(int*)(((char*)self) + 8);
-    E_AF08 *e = *(E_AF08**)(((char*)self) + 8);
+    E_AF08 *region = *(E_AF08**)(((char*)self) + 8);
     int i;
-    for (i = 0; i < self->m_iNumRegions; i++, e++) {
-        int off = e->off;
+    for (i = 0; i < self->m_iNumRegions; i++, region++) {
+        int off = region->off;
         if (off != -1) {
-            e->off = (int)(((char*)self) + off);
+            region->off = (int)(((char*)self) + off);
         } else {
-            e->off = 0;
+            region->off = 0;
         }
     }
 }
@@ -1572,12 +1572,12 @@ struct sArr_B1D0 { int n; S12_B140 *arr; };
 // Reallocates the 12-byte element array (delete[] then new[] with a count cookie).
 extern "C" void cWorldPainterMan_init(cWorldPainterMan* self, int n) {
     if ((S12_B140*)self->m_pCache != 0) {
-        S12_B140 *p = (S12_B140*)self->m_pCache + *(int*)((char*)(S12_B140*)self->m_pCache - 0x10);
-        if ((S12_B140*)self->m_pCache != p) {
+        S12_B140 *oldSection = (S12_B140*)self->m_pCache + *(int*)((char*)(S12_B140*)self->m_pCache - 0x10);
+        if ((S12_B140*)self->m_pCache != oldSection) {
             do {
-                p--;
-                cWorldPainterSection__cWorldPainterSection((cWorldPainterSection*)p, 0);
-            } while ((S12_B140*)self->m_pCache != p);
+                oldSection--;
+                cWorldPainterSection__cWorldPainterSection((cWorldPainterSection*)oldSection, 0);
+            } while ((S12_B140*)self->m_pCache != oldSection);
         }
         cMemMan_free((char*)(S12_B140*)self->m_pCache - 0x10);
     }
@@ -1585,14 +1585,14 @@ extern "C" void cWorldPainterMan_init(cWorldPainterMan* self, int n) {
     S12_B140 **dst = (S12_B140**)&self->m_pCache;
     int *blk = (int*)operator_new_B1D0(n * 12 + 0x10, D_00483C68, 0x20000000, 0);
     blk[0] = n;
-    S12_B140 *a = (S12_B140*)(blk + 4);
-    S12_B140 *q = a;
+    S12_B140 *sections = (S12_B140*)(blk + 4);
+    S12_B140 *newSection = sections;
     int i;
     for (i = n - 1; i != -1; i--) {
-        func_002BB370(q);
-        q++;
+        func_002BB370(newSection);
+        newSection++;
     }
-    *dst = a;
+    *dst = sections;
 }
 #endif
 
@@ -2845,24 +2845,24 @@ extern char D_00484DA8[];
  * @return @p self
  */
 extern "C" void *tWPInGameData_LightGlow_tWPInGameData_LightGlow(tWPInGameData_LightGlow* self) {
-    float one = 1.0f, zero = 0.0f;
-    float *p = (float*)self;
-    p[0] = -99999.0f;
+    float one = 1.0f, zeroF = 0.0f;
+    float *floats = (float*)self;
+    floats[0] = -99999.0f;
     self->mVtbl = (void**)D_00484DA8;
-    p[3] = one;
-    p[2] = one;
-    p[5] = one;
-    p[4] = one;
-    p[7] = one;
-    p[6] = one;
-    p[9] = one;
-    p[8] = one;
-    p[11] = one;
-    p[10] = one;
-    p[13] = zero;
-    p[12] = zero;
-    p[15] = zero;
-    p[14] = zero;
+    floats[3] = one;
+    floats[2] = one;
+    floats[5] = one;
+    floats[4] = one;
+    floats[7] = one;
+    floats[6] = one;
+    floats[9] = one;
+    floats[8] = one;
+    floats[11] = one;
+    floats[10] = one;
+    floats[13] = zeroF;
+    floats[12] = zeroF;
+    floats[15] = zeroF;
+    floats[14] = zeroF;
     return ((void*)self);
 }
 #endif
@@ -2879,22 +2879,22 @@ extern char D_00484B70[];
  * @return @p self
  */
 extern "C" void *tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(tWPInGameData_ScreenTint* self) {
-    float one = 1.0f, zero = 0.0f;
-    float *p = (float*)self;
-    p[0] = -99999.0f;
+    float one = 1.0f, zeroF = 0.0f;
+    float *floats = (float*)self;
+    floats[0] = -99999.0f;
     self->mVtbl = (void**)D_00484B70;
-    p[3] = one;
-    p[2] = one;
-    p[5] = one;
-    p[4] = one;
-    p[7] = one;
-    p[6] = one;
-    p[9] = zero;
-    p[8] = zero;
-    p[11] = zero;
-    p[10] = zero;
-    p[13] = zero;
-    p[12] = zero;
+    floats[3] = one;
+    floats[2] = one;
+    floats[5] = one;
+    floats[4] = one;
+    floats[7] = one;
+    floats[6] = one;
+    floats[9] = zeroF;
+    floats[8] = zeroF;
+    floats[11] = zeroF;
+    floats[10] = zeroF;
+    floats[13] = zeroF;
+    floats[12] = zeroF;
     return ((void*)self);
 }
 #endif
@@ -2926,28 +2926,28 @@ extern char D_00484700[];
  * @return @p self
  */
 extern "C" void *tWPInGameData_Sun_tWPInGameData_Sun(tWPInGameData_Sun* self) {
-    float one = 1.0f, zero = 0.0f;
-    float *p = (float*)self;
-    p[0] = -99999.0f;
+    float one = 1.0f, zeroF = 0.0f;
+    float *floats = (float*)self;
+    floats[0] = -99999.0f;
     self->mVtbl = (void**)D_00484700;
-    p[3] = zero;
-    p[2] = zero;
-    p[5] = zero;
-    p[4] = zero;
-    p[7] = one;
-    p[6] = one;
-    p[9] = one;
-    p[8] = one;
-    p[11] = one;
-    p[10] = one;
-    p[13] = one;
-    p[12] = one;
-    ((int*)p)[15] = 0;
-    ((int*)p)[14] = 0;
-    p[17] = one;
-    p[16] = one;
-    p[19] = one;
-    p[18] = one;
+    floats[3] = zeroF;
+    floats[2] = zeroF;
+    floats[5] = zeroF;
+    floats[4] = zeroF;
+    floats[7] = one;
+    floats[6] = one;
+    floats[9] = one;
+    floats[8] = one;
+    floats[11] = one;
+    floats[10] = one;
+    floats[13] = one;
+    floats[12] = one;
+    ((int*)floats)[15] = 0;
+    ((int*)floats)[14] = 0;
+    floats[17] = one;
+    floats[16] = one;
+    floats[19] = one;
+    floats[18] = one;
     return ((void*)self);
 }
 #endif
@@ -3076,14 +3076,14 @@ class cCC00 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_MusicTrigger_blend(tWPInGameData_MusicTrigger* self, void *rhs, float blendFactor) {
-    cCC00 *o = (cCC00*)self;
-    o->vt();
+    cCC00 *selfView = (cCC00*)self;
+    selfView->vt();
     blendFactor = blendFactor * blendFactor;
     self->m_Type = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_Type);
     self->m_lastType = *(int*)((char*)rhs + 4);
     self->m_Value = (int)(blendFactor * (float)*(int*)((char*)rhs + 8) + (1.0f - blendFactor) * (float)self->m_Value);
     self->m_lastValue = *(int*)((char*)rhs + 8);
-    o->vt();
+    selfView->vt();
 }
 #endif
 
@@ -3102,12 +3102,12 @@ class cCCC8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Mix_blend(tWPInGameData_Mix* self, void *rhs, float blendFactor) {
-    cCCC8 *o = (cCCC8*)self;
-    o->vt();
+    cCCC8 *selfView = (cCCC8*)self;
+    selfView->vt();
     blendFactor = blendFactor * blendFactor;
     self->m_MixPreset = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_MixPreset);
     self->m_lastMixPreset = *(int*)((char*)rhs + 4);
-    o->vt();
+    selfView->vt();
 }
 #endif
 
@@ -3125,12 +3125,12 @@ class cCD68 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Ambience_blend(tWPInGameData_Ambience* self, void *rhs, float blendFactor) {
-    cCD68 *o = (cCD68*)self;
-    o->vt();
+    cCD68 *selfView = (cCD68*)self;
+    selfView->vt();
     blendFactor = blendFactor * blendFactor;
     self->m_BankID = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_BankID);
     self->m_lastBankID = *(int*)((char*)rhs + 4);
-    o->vt();
+    selfView->vt();
 }
 #endif
 
@@ -3148,12 +3148,12 @@ class cCE08 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Speech_blend(tWPInGameData_Speech* self, void *rhs, float blendFactor) {
-    cCE08 *o = (cCE08*)self;
-    o->vt();
+    cCE08 *selfView = (cCE08*)self;
+    selfView->vt();
     blendFactor = blendFactor * blendFactor;
     self->m_SpeechID = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_SpeechID);
     self->m_lastSpeechID = *(int*)((char*)rhs + 4);
-    o->vt();
+    selfView->vt();
 }
 #endif
 
@@ -3170,12 +3170,12 @@ class cCEA8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Camera_blend(tWPInGameData_Camera* self, void *rhs, float blendFactor) {
-    cCEA8 *o = (cCEA8*)self;
-    o->vt();
+    cCEA8 *selfView = (cCEA8*)self;
+    selfView->vt();
     blendFactor = blendFactor * blendFactor;
     self->m_DrawDistance = blendFactor * *(float*)((char*)rhs + 4) + (1.0f - blendFactor) * self->m_DrawDistance;
     self->m_lastDrawDistance = *(float*)((char*)rhs + 4);
-    o->vt();
+    selfView->vt();
 }
 #endif
 
@@ -3197,10 +3197,10 @@ struct Src_CF38 { int pad0; float v[6]; };
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, Src_CF38* src, float blendFactor) {
-    VEnt_CF38* e;
+    VEnt_CF38* vtEntry;
     float inv;
-    e = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
-    e->fn((char*)self + e->delta);
+    vtEntry = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
+    vtEntry->fn((char*)self + vtEntry->delta);
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_CF38*)&self->m_FogDensity)[0].cur = blendFactor * src->v[0] + inv * ((Pair_CF38*)&self->m_FogDensity)[0].cur;
@@ -3215,8 +3215,8 @@ extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, Src_CF38* src, 
     ((Pair_CF38*)&self->m_FogDensity)[4].tgt = src->v[4];
     ((Pair_CF38*)&self->m_FogDensity)[5].cur = blendFactor * src->v[5] + inv * ((Pair_CF38*)&self->m_FogDensity)[5].cur;
     ((Pair_CF38*)&self->m_FogDensity)[5].tgt = src->v[5];
-    e = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
-    e->fn((char*)self + e->delta);
+    vtEntry = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
+    vtEntry->fn((char*)self + vtEntry->delta);
 }
 #endif
 
@@ -3240,10 +3240,10 @@ struct Src_D068 { int pad0; float v[7]; };
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, Src_D068* src, float blendFactor) {
-    VEnt_D068* e;
+    VEnt_D068* vtEntry;
     float inv;
-    e = (VEnt_D068*)((char*)self->mVtbl + 0x218);
-    e->fn((char*)self + e->delta);
+    vtEntry = (VEnt_D068*)((char*)self->mVtbl + 0x218);
+    vtEntry->fn((char*)self + vtEntry->delta);
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur = blendFactor * src->v[0] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur;
@@ -3261,8 +3261,8 @@ extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, Src
     ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur = blendFactor * src->v[6] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur;
     ((Pair_D068*)&self->m_LightGlowCutoff)[6].tgt = src->v[6];
     {
-        VEntV_D068* e2 = (VEntV_D068*)((char*)self->mVtbl + 0x218);
-        e2->fn((char*)self + e2->delta);
+        VEntV_D068* vtEntryV = (VEntV_D068*)((char*)self->mVtbl + 0x218);
+        vtEntryV->fn((char*)self + vtEntryV->delta);
     }
 }
 #endif
@@ -3285,10 +3285,10 @@ struct Src_D1B8 { int pad0; float v[6]; };
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, Src_D1B8* src, float blendFactor) {
-    VEnt_D1B8* e;
+    VEnt_D1B8* vtEntry;
     float inv;
-    e = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
-    e->fn((char*)self + e->delta);
+    vtEntry = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
+    vtEntry->fn((char*)self + vtEntry->delta);
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur = blendFactor * src->v[0] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur;
@@ -3303,8 +3303,8 @@ extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, S
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].tgt = src->v[4];
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur = blendFactor * src->v[5] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].tgt = src->v[5];
-    e = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
-    e->fn((char*)self + e->delta);
+    vtEntry = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
+    vtEntry->fn((char*)self + vtEntry->delta);
 }
 #endif
 
@@ -3321,12 +3321,12 @@ class cD2E8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_SkyBox_blend(tWPInGameData_SkyBox* self, void *rhs, float blendFactor) {
-    cD2E8 *o = (cD2E8*)self;
-    o->vt();
+    cD2E8 *selfView = (cD2E8*)self;
+    selfView->vt();
     blendFactor = blendFactor * blendFactor;
     self->m_SkyBoxRotation = blendFactor * *(float*)((char*)rhs + 4) + (1.0f - blendFactor) * self->m_SkyBoxRotation;
     self->m_lastSkyBoxRotation = *(float*)((char*)rhs + 4);
-    o->vt();
+    selfView->vt();
 }
 #endif
 
@@ -3350,10 +3350,10 @@ struct Src_D378 { int pad0; float v[6]; int i6; float w[2]; };
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, Src_D378* src, float blendFactor) {
-    VEnt_D378* e;
+    VEnt_D378* vtEntry;
     float inv;
-    e = (VEnt_D378*)((char*)self->mVtbl + 0x218);
-    e->fn((char*)self + e->delta);
+    vtEntry = (VEnt_D378*)((char*)self->mVtbl + 0x218);
+    vtEntry->fn((char*)self + vtEntry->delta);
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_D378*)&self->m_SunPitchOffset)[0].cur = blendFactor * src->v[0] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[0].cur;
@@ -3374,8 +3374,8 @@ extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, Src_D378* src, 
     ((Pair_D378*)&self->m_LensIntensity)[0].tgt = src->w[0];
     ((Pair_D378*)&self->m_LensIntensity)[1].cur = blendFactor * src->w[1] + inv * ((Pair_D378*)&self->m_LensIntensity)[1].cur;
     ((Pair_D378*)&self->m_LensIntensity)[1].tgt = src->w[1];
-    e = (VEnt_D378*)((char*)self->mVtbl + 0x218);
-    e->fn((char*)self + e->delta);
+    vtEntry = (VEnt_D378*)((char*)self->mVtbl + 0x218);
+    vtEntry->fn((char*)self + vtEntry->delta);
 }
 #endif
 
@@ -3392,12 +3392,12 @@ class cD518 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Surface_blend(tWPInGameData_Surface* self, void *rhs, float blendFactor) {
-    cD518 *o = (cD518*)self;
-    o->vt();
+    cD518 *selfView = (cD518*)self;
+    selfView->vt();
     blendFactor = blendFactor * blendFactor;
     self->m_SnowSparkleDensity = blendFactor * *(float*)((char*)rhs + 4) + (1.0f - blendFactor) * self->m_SnowSparkleDensity;
     self->m_lastSnowSparkleDensity = *(float*)((char*)rhs + 4);
-    o->vt();
+    selfView->vt();
 }
 #endif
 
@@ -3418,8 +3418,8 @@ class cD5A8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Lighting_blend(tWPInGameData_Lighting* self, void *rhs, float blendFactor) {
-    cD5A8 *o = (cD5A8*)self;
-    o->vt();
+    cD5A8 *selfView = (cD5A8*)self;
+    selfView->vt();
     blendFactor = blendFactor * blendFactor;
     *(sP_D5A8*)&self->m_LightIrradianceName = *(sP_D5A8*)((char*)rhs + 4);
     *(sP_D5A8*)&self->m_ShadowIrradianceName = *(sP_D5A8*)((char*)rhs + 0xC);
@@ -3429,7 +3429,7 @@ extern "C" void tWPInGameData_Lighting_blend(tWPInGameData_Lighting* self, void 
     self->m_lastAmbientLightIntensityOffset = *(float*)((char*)rhs + 0x24);
     self->m_RimLightIntensityOffset = blendFactor * *(float*)((char*)rhs + 0x28) + (1.0f - blendFactor) * self->m_RimLightIntensityOffset;
     self->m_lastRimLightIntensityOffset = *(float*)((char*)rhs + 0x28);
-    o->vt();
+    selfView->vt();
 }
 #endif
 
@@ -3451,8 +3451,8 @@ class cD698 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Weather_blend(tWPInGameData_Weather* self, void *rhs, float blendFactor) {
-    cD698 *o = (cD698*)self;
-    o->vt();
+    cD698 *selfView = (cD698*)self;
+    selfView->vt();
     blendFactor = blendFactor * blendFactor;
     self->m_SnowIntensity = blendFactor * *(float*)((char*)rhs + 0x4) + (1.0f - blendFactor) * self->m_SnowIntensity;
     self->m_lastSnowIntensity = *(float*)((char*)rhs + 0x4);
@@ -3492,7 +3492,7 @@ extern "C" void tWPInGameData_Weather_blend(tWPInGameData_Weather* self, void *r
     self->m_lastSnowFluffColourG = *(float*)((char*)rhs + 0x48);
     self->m_SnowFluffColourB = blendFactor * *(float*)((char*)rhs + 0x4C) + (1.0f - blendFactor) * self->m_SnowFluffColourB;
     self->m_lastSnowFluffColourB = *(float*)((char*)rhs + 0x4C);
-    o->vt();
+    selfView->vt();
 }
 #endif
 
@@ -3511,14 +3511,14 @@ class cD968 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
 extern "C" void tWPInGameData_Danger_blend(tWPInGameData_Danger* self, void *rhs, float blendFactor) {
-    cD968 *o = (cD968*)self;
-    o->vt();
+    cD968 *selfView = (cD968*)self;
+    selfView->vt();
     blendFactor = blendFactor * blendFactor;
     self->m_Level = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_Level);
     self->m_lastLevel = *(int*)((char*)rhs + 4);
     self->m_PointRate = blendFactor * *(float*)((char*)rhs + 8) + (1.0f - blendFactor) * self->m_PointRate;
     self->m_lastPointRate = *(float*)((char*)rhs + 8);
-    o->vt();
+    selfView->vt();
 }
 #endif
 
@@ -4012,14 +4012,14 @@ struct VE_E2D8 { short delta; short idx; int (*fn)(void *, void *, int); };
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_MusicTrigger* self, char *frame) {
-    VE_E2D8 *e = &(*(VE_E2D8 **)frame)[2];
-    e->fn(frame + e->delta, ((char*)self) + 8, 4);
-    e = &(*(VE_E2D8 **)frame)[2];
-    e->fn(frame + e->delta, ((char*)self), 4);
-    e = &(*(VE_E2D8 **)frame)[2];
-    e->fn(frame + e->delta, ((char*)self) + 0x10, 4);
-    e = &(*(VE_E2D8 **)frame)[2];
-    e->fn(frame + e->delta, ((char*)self), 4);
+    VE_E2D8 *readEntry = &(*(VE_E2D8 **)frame)[2];
+    readEntry->fn(frame + readEntry->delta, ((char*)self) + 8, 4);
+    readEntry = &(*(VE_E2D8 **)frame)[2];
+    readEntry->fn(frame + readEntry->delta, ((char*)self), 4);
+    readEntry = &(*(VE_E2D8 **)frame)[2];
+    readEntry->fn(frame + readEntry->delta, ((char*)self) + 0x10, 4);
+    readEntry = &(*(VE_E2D8 **)frame)[2];
+    readEntry->fn(frame + readEntry->delta, ((char*)self), 4);
 }
 #endif
 
@@ -4365,14 +4365,14 @@ struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* self, char *frame) {
-    VE_F2A0 *e = &(*(VE_F2A0 **)frame)[2];
-    e->fn(frame + e->delta, ((char*)self) + 8, 4);
-    e = &(*(VE_F2A0 **)frame)[2];
-    e->fn(frame + e->delta, ((char*)self), 4);
-    e = &(*(VE_F2A0 **)frame)[2];
-    e->fn(frame + e->delta, ((char*)self) + 0x10, 4);
-    e = &(*(VE_F2A0 **)frame)[2];
-    e->fn(frame + e->delta, ((char*)self), 4);
+    VE_F2A0 *readEntry = &(*(VE_F2A0 **)frame)[2];
+    readEntry->fn(frame + readEntry->delta, ((char*)self) + 8, 4);
+    readEntry = &(*(VE_F2A0 **)frame)[2];
+    readEntry->fn(frame + readEntry->delta, ((char*)self), 4);
+    readEntry = &(*(VE_F2A0 **)frame)[2];
+    readEntry->fn(frame + readEntry->delta, ((char*)self) + 0x10, 4);
+    readEntry = &(*(VE_F2A0 **)frame)[2];
+    readEntry->fn(frame + readEntry->delta, ((char*)self), 4);
 }
 #endif
 
@@ -4389,14 +4389,14 @@ struct VE_F340 { short delta; short idx; int (*fn)(void *, void *, int); };
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_MusicTrigger* self, char *frame) {
-    VE_F340 *e = &(*(VE_F340 **)frame)[1];
-    e->fn(frame + e->delta, ((char*)self) + 8, 4);
-    e = &(*(VE_F340 **)frame)[1];
-    e->fn(frame + e->delta, ((char*)self), 4);
-    e = &(*(VE_F340 **)frame)[1];
-    e->fn(frame + e->delta, ((char*)self) + 0x10, 4);
-    e = &(*(VE_F340 **)frame)[1];
-    e->fn(frame + e->delta, ((char*)self), 4);
+    VE_F340 *writeEntry = &(*(VE_F340 **)frame)[1];
+    writeEntry->fn(frame + writeEntry->delta, ((char*)self) + 8, 4);
+    writeEntry = &(*(VE_F340 **)frame)[1];
+    writeEntry->fn(frame + writeEntry->delta, ((char*)self), 4);
+    writeEntry = &(*(VE_F340 **)frame)[1];
+    writeEntry->fn(frame + writeEntry->delta, ((char*)self) + 0x10, 4);
+    writeEntry = &(*(VE_F340 **)frame)[1];
+    writeEntry->fn(frame + writeEntry->delta, ((char*)self), 4);
 }
 #endif
 
@@ -4744,13 +4744,13 @@ struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_Danger_writeToReplayFrame(tWPInGameData_Danger* self, char *frame) {
-    VE_0308 *e = &(*(VE_0308 **)frame)[1];
-    e->fn(frame + e->delta, ((char*)self) + 8, 4);
-    e = &(*(VE_0308 **)frame)[1];
-    e->fn(frame + e->delta, ((char*)self), 4);
-    e = &(*(VE_0308 **)frame)[1];
-    e->fn(frame + e->delta, ((char*)self) + 0x10, 4);
-    e = &(*(VE_0308 **)frame)[1];
-    e->fn(frame + e->delta, ((char*)self), 4);
+    VE_0308 *writeEntry = &(*(VE_0308 **)frame)[1];
+    writeEntry->fn(frame + writeEntry->delta, ((char*)self) + 8, 4);
+    writeEntry = &(*(VE_0308 **)frame)[1];
+    writeEntry->fn(frame + writeEntry->delta, ((char*)self), 4);
+    writeEntry = &(*(VE_0308 **)frame)[1];
+    writeEntry->fn(frame + writeEntry->delta, ((char*)self) + 0x10, 4);
+    writeEntry = &(*(VE_0308 **)frame)[1];
+    writeEntry->fn(frame + writeEntry->delta, ((char*)self), 4);
 }
 #endif

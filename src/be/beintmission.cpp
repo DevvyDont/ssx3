@@ -312,13 +312,13 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* self, in
         {
             if (D_0043D9A4_v153708[j].owner == owner)
             {
-                char* p = D_004A6CAC + (i * 12 + (j * 12 + off));
-                char* q = p + 4;
+                char* collectEntry = D_004A6CAC + (i * 12 + (j * 12 + off));
+                char* collectBits = collectEntry + 4;
                 int n = 0;
-                for (int b = 0; b < 64; b++)
+                for (int bitIndex = 0; bitIndex < 64; bitIndex++)
                 {
-                    unsigned int w = *(unsigned int*)(q + ((b / 32) << 2));
-                    if (w & (1 << (b % 32)))
+                    unsigned int w = *(unsigned int*)(collectBits + ((bitIndex / 32) << 2));
+                    if (w & (1 << (bitIndex % 32)))
                         n++;
                 }
                 sum += n;
@@ -586,10 +586,10 @@ extern "C" int func_00154240(void* self, int id);
 extern "C" int cBEMissionInterface_isMissionCompleted(void* self, int id)
 {
     int i = func_00154240(self, id);
-    int c = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + c * 0xF88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return (*(unsigned int*)(p + 0x118) >> 3) & 1;
+    int characterId = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + characterId * 0xF88;
+    char* profile = (char*)cBELibrary_profileLib + off;
+    return (*(unsigned int*)(profile + 0x118) >> 3) & 1;
 }
 #endif
 
@@ -641,10 +641,10 @@ extern "C" int func_00154240(void* self, int id);
 extern "C" int cBEMissionInterface_isMissionAvailable(void* self, int id)
 {
     int i = func_00154240(self, id);
-    int c = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + c * 0xF88;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return (*(unsigned int*)(p + 0x118) >> 2) & 1;
+    int characterId = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + characterId * 0xF88;
+    char* profile = (char*)cBELibrary_profileLib + off;
+    return (*(unsigned int*)(profile + 0x118) >> 2) & 1;
 }
 #endif
 

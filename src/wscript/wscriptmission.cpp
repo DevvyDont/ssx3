@@ -103,28 +103,28 @@ extern "C" void cWScriptMan_checkGate(void* vself)
     for (int i = 0; i < 9; i++) {
         char name[0x10];
         sprintf(name, D_0045D940, i);
-        char* o = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
+        char* uiObj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         char** lp = &labels[i];
-        if (o != 0) {
-            *lp = o;
-            uiCall_3DE0(o, 8, 1);
-            uiCall_3DE0(o, 9, 0);
-            *(int*)(o + 0x18) = -1;
+        if (uiObj != 0) {
+            *lp = uiObj;
+            uiCall_3DE0(uiObj, 8, 1);
+            uiCall_3DE0(uiObj, 9, 0);
+            *(int*)(uiObj + 0x18) = -1;
         } else {
             *lp = 0;
         }
         sprintf(name, D_004A1418, i);
-        o = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
+        uiObj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         char** mp = &marks[i];
-        if (o != 0) {
-            *mp = o;
-            uiCall_3DE0(o, 9, 0);
-            *(int*)(o + 0x18) = -1;
+        if (uiObj != 0) {
+            *mp = uiObj;
+            uiCall_3DE0(uiObj, 9, 0);
+            *(int*)(uiObj + 0x18) = -1;
         } else {
             *mp = 0;
         }
     }
-    sGateVec_3DE0 s0, s1, s2, s3, o0, o1, o2, p0, p1, p2, e0, e1, e2;
+    sGateVec_3DE0 textSize0, textSize1, textSize2, s3, o0, o1, o2, p0, p1, p2, e0, e1, e2;
     int count;
     int cur;
     int slot = 1;
@@ -137,22 +137,22 @@ extern "C" void cWScriptMan_checkGate(void* vself)
     cur = func_0014FEA8(iface, *(signed char*)(self + 0x44), slot, 1);
     for (int j = 0; j < count; j++) {
         if (func_00150048(iface, *(signed char*)(self + 0x44), slot, j)) {
-            char* o = labels[shown];
-            if (o != 0) {
-                cUIText_setAsciiString((cUIText*)o, func_00116938(tbl[j].name));
-                uiCall_3DE0(o, 9, 1);
-                uiCall_3DE0(o, 8, 0);
-                *(int*)(o + 0x18) = j;
+            char* uiObj = labels[shown];
+            if (uiObj != 0) {
+                cUIText_setAsciiString((cUIText*)uiObj, func_00116938(tbl[j].name));
+                uiCall_3DE0(uiObj, 9, 1);
+                uiCall_3DE0(uiObj, 8, 0);
+                *(int*)(uiObj + 0x18) = j;
             }
-            o = marks[shown];
-            if (o != 0) {
-                uiCall_3DE0(o, 9, 1);
+            uiObj = marks[shown];
+            if (uiObj != 0) {
+                uiCall_3DE0(uiObj, 9, 1);
                 if (func_0014FFB8(iface, *(signed char*)(self + 0x44), slot, j))
-                    setHighlight_3DE0(o, *(int*)(self + 0x5C));
+                    setHighlight_3DE0(uiObj, *(int*)(self + 0x5C));
                 else if (cur == j)
-                    setHighlight_3DE0(o, *(int*)(self + 0x54));
+                    setHighlight_3DE0(uiObj, *(int*)(self + 0x54));
                 else
-                    setHighlight_3DE0(o, *(int*)(self + 0x58));
+                    setHighlight_3DE0(uiObj, *(int*)(self + 0x58));
             }
             shown++;
         }
@@ -196,11 +196,11 @@ extern "C" void cWScriptMan_checkGate(void* vself)
     char* w0 = getObj_3DE0(screen, D_004A1440);
     char* w1 = getObj_3DE0(screen, D_004A1448);
     char* w2 = getObj_3DE0(screen, D_004A1450);
-    func_003A1030(w0, &s0);
-    s0.x += gap;
-    func_003A1030(w1, &s1);
-    func_003A1030(w2, &s2);
-    s2.x += gap;
+    func_003A1030(w0, &textSize0);
+    textSize0.x += gap;
+    func_003A1030(w1, &textSize1);
+    func_003A1030(w2, &textSize2);
+    textSize2.x += gap;
     func_003A0290(w0, &o0);
     func_003A0290(w2, &o2);
     p0 = *(sGateVec_3DE0*)(t0 + 0x44);
@@ -212,7 +212,7 @@ extern "C" void cWScriptMan_checkGate(void* vself)
     vt1[20].fn(t1 + vt1[20].delta, &e1);
     sUIVtP_3DE0* vt2 = *(sUIVtP_3DE0**)(t2 + 8);
     vt2[20].fn(t2 + vt2[20].delta, &e2);
-    float x = o0.x + s0.x;
+    float x = o0.x + textSize0.x;
     p0.x = x;
     p1.x = x;
     if (*(int*)(t1 + 0x7C) != 0) {
@@ -221,13 +221,13 @@ extern "C" void cWScriptMan_checkGate(void* vself)
     } else {
         e1 = t3vect_Zero;
     }
-    p2.x = o2.x + s2.x;
+    p2.x = o2.x + textSize2.x;
     *(sGateVec_3DE0*)(t0 + 0x44) = p0;
     *(sGateVec_3DE0*)(t1 + 0x44) = p1;
     *(sGateVec_3DE0*)(t2 + 0x44) = p2;
     o0 = *(sGateVec_3DE0*)(w0 + 0x44);
     o1 = *(sGateVec_3DE0*)(w1 + 0x44);
-    o1.x = o0.x + s0.x + 10.0f + e0.x + e1.x;
+    o1.x = o0.x + textSize0.x + 10.0f + e0.x + e1.x;
     *(sGateVec_3DE0*)(w1 + 0x44) = o1;
 }
 #endif

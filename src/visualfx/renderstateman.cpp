@@ -40,10 +40,10 @@ extern sRSMEntry D_004FA370[];
  */
 extern "C" float cRenderStateMan_SnowFlakeColourR(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
-    sRSMObj* o = *e->p20;
-    sRSMVEntry* vt = o->vt;
-    return *vt[55].fn((char*)o + vt[55].delta);
+    sRSMEntry* entry = &D_004FA370[i];
+    sRSMObj* stateObj = *entry->p20;
+    sRSMVEntry* vt = stateObj->vt;
+    return *vt[55].fn((char*)stateObj + vt[55].delta);
 }
 #endif
 
@@ -63,10 +63,10 @@ extern sRSMEntry D_004FA370[];
  */
 extern "C" float cRenderStateMan_SnowFlakeColourG(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
-    sRSMObj* o = *e->p20;
-    sRSMVEntry* vt = o->vt;
-    return *vt[56].fn((char*)o + vt[56].delta);
+    sRSMEntry* entry = &D_004FA370[i];
+    sRSMObj* stateObj = *entry->p20;
+    sRSMVEntry* vt = stateObj->vt;
+    return *vt[56].fn((char*)stateObj + vt[56].delta);
 }
 #endif
 
@@ -86,10 +86,10 @@ extern sRSMEntry D_004FA370[];
  */
 extern "C" float cRenderStateMan_SnowFlakeColourB(int i)
 {
-    sRSMEntry* e = &D_004FA370[i];
-    sRSMObj* o = *e->p20;
-    sRSMVEntry* vt = o->vt;
-    return *vt[57].fn((char*)o + vt[57].delta);
+    sRSMEntry* entry = &D_004FA370[i];
+    sRSMObj* stateObj = *entry->p20;
+    sRSMVEntry* vt = stateObj->vt;
+    return *vt[57].fn((char*)stateObj + vt[57].delta);
 }
 #endif
 
@@ -739,9 +739,9 @@ extern "C" void cRenderStateMan_readFromReplayFrame(void* frame)
 {
     int i;
     for (i = 0; i < 6; i++) {
-        sRSMEntry* e = &D_004FA370[i];
-        ((cRSMObjRF*)*e->p20)->v65(frame);
-        ((cRSMObjRF*)*e->p20)->v65(frame);
+        sRSMEntry* entry = &D_004FA370[i];
+        ((cRSMObjRF*)*entry->p20)->v65(frame);
+        ((cRSMObjRF*)*entry->p20)->v65(frame);
     }
 }
 #endif
@@ -962,13 +962,13 @@ static inline int Approach_EF6D0(int n, int step)
 extern "C" void cAirStreamerFX_update(sTrail_EF6D0* self)
 {
     if (func_0011FE98(self->rider) == 1) {
-        char* r = self->rider;
-        sRsVec4_EF6D0 a = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(r + 0x780) + 0x30) + (*(int*)(r + 0x89C) << 6) + 0x30);
-        sRsVec4_EF6D0 b = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(r + 0x780) + 0x30) + (*(int*)(r + 0x8A4) << 6) + 0x30);
-        sRsVec4_EF6D0 c = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(r + 0x780) + 0x34) + (*(int*)(r + 0x8A4) << 6));
-        sRsVec4_EF6D0 d = Sub_EF6D0(b, Scale_EF6D0(a, 0.699999988079071f));
-        self->ring[self->head].p0 = Add_EF6D0(d, Scale_EF6D0(c, 90.0f));
-        self->ring[self->head].p1 = Sub_EF6D0(d, Scale_EF6D0(c, 90.0f));
+        char* riderPtr = self->rider;
+        sRsVec4_EF6D0 bodyOff = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x89C) << 6) + 0x30);
+        sRsVec4_EF6D0 boardOff = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6) + 0x30);
+        sRsVec4_EF6D0 boardDir = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x34) + (*(int*)(riderPtr + 0x8A4) << 6));
+        sRsVec4_EF6D0 streamBase = Sub_EF6D0(boardOff, Scale_EF6D0(bodyOff, 0.699999988079071f));
+        self->ring[self->head].p0 = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
+        self->ring[self->head].p1 = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
         if ((func_001298C8() & 1) == 0) {
             int old = self->head;
             self->head = old + 1;
@@ -1178,9 +1178,9 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
         GrMan_renderstateman->top->f0 &= ~0xC;
         start = self->start;
     } else {
-        sRsCtx_EF950* c = GrMan_renderstateman;
-        c->top->f0 |= 0xC;
-        *(short*)((char*)c->top + 0x10) = rsTex104C_EF950(c);
+        sRsCtx_EF950* renderCtx = GrMan_renderstateman;
+        renderCtx->top->f0 |= 0xC;
+        *(short*)((char*)renderCtx->top + 0x10) = rsTex104C_EF950(renderCtx);
     }
     sRsCtx_EF950* ctx = GrMan_renderstateman;
     rsSetA_EF950(ctx, 0x400000, 22, 1);
@@ -1191,14 +1191,14 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
     rsSetB_EF950(ctx, 0x1FFFFC00, 10, 0);
     rsSetB_EF950(ctx, 0x3E0, 5, 8);
     rsSetA_EF950(ctx, 0x7C, 2, 7);
-    sRsVert_EF950 v1[52];
-    sRsVert_EF950 v2[52];
+    sRsVert_EF950 vertsL[52];
+    sRsVert_EF950 vertsR[52];
     char* rider = self->rider;
     float uvy = start;
     float invSq = 1.0f / (float)((self->len - 1) * (self->len - 1));
     sRsVec4_EF950 off = rsScale_EF950(rsRow_EF950(*(char**)(*(char**)(rider + 0x780) + 0x30), *(int*)(rider + 0x89C), 0x30), 0.7f);
     float dv = 1.0f / (float)self->count;
-    float t = 0.0f;
+    float falloffT = 0.0f;
     int nverts = 0;
     sRsColor_EF950 color;
     color.x = 1.0f;
@@ -1222,27 +1222,27 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
         if (j < 0) {
             j = 24;
         }
-        color.x = alpha * (1.0f - t * t * invSq);
+        color.x = alpha * (1.0f - falloffT * falloffT * invSq);
         if (color.x < 0.0f) {
             color.x = 0.0f;
         }
         A = rsAdd_EF950(self->ring[j].p0, off);
         B = rsAdd_EF950(self->ring[j].p1, off);
-        rsVert_EF950(&v1[k], 0.0f, uvy, color, rsSub_EF950(A, half));
-        rsVert_EF950(&v2[k], 0.0f, uvy, color, rsSub_EF950(B, half));
+        rsVert_EF950(&vertsL[k], 0.0f, uvy, color, rsSub_EF950(A, half));
+        rsVert_EF950(&vertsR[k], 0.0f, uvy, color, rsSub_EF950(B, half));
         k++;
-        rsVert_EF950(&v1[k], 1.0f, uvy, color, rsAdd_EF950(A, half));
-        rsVert_EF950(&v2[k], 1.0f, uvy, color, rsAdd_EF950(B, half));
+        rsVert_EF950(&vertsL[k], 1.0f, uvy, color, rsAdd_EF950(A, half));
+        rsVert_EF950(&vertsR[k], 1.0f, uvy, color, rsAdd_EF950(B, half));
         k++;
         uvy += dv;
         nverts += 2;
         j--;
-        t += 1.0f;
+        falloffT += 1.0f;
     }
     sRsCtx_EF950* o = GrMan_renderstateman;
-    o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, v1, 0);
+    o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, vertsL, 0);
     o = GrMan_renderstateman;
-    o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, v2, 0);
+    o->vtable[71].fn((char*)o + o->vtable[71].delta, nverts, vertsR, 0);
     rsPop_EF950(GrMan_renderstateman);
 }
 #endif
@@ -1312,26 +1312,26 @@ extern "C" void* cVisualEffectsMan_cVisualEffectsMan(sRSMan_002EFF98* self)
     D_004A45D4.texIndex = 0x37;
     D_004A443C = 0x30;
     D_004A3B78 = self;
-    sRSEntry_002EFF98* e = cGraphicsMan_TheGraphicsMan_renderstateman;
-    e[1].f4 = 0x2E;
-    e[2].f4 = 0x31;
-    e[4].f4 = 0x2F;
-    e[3].f4 = 0x44;
-    e[5].f4 = 0; e[5].f8 = 0;
-    e[6].f4 = 0; e[6].f8 = 0;
-    e[7].f4 = 0; e[7].f8 = 0;
-    e[8].f4 = 0; e[8].f8 = 0;
-    e[9].f4 = 0; e[9].f8 = 0;
-    e[10].f4 = 0; e[10].f8 = 0;
-    e[11].f4 = 0; e[11].f8 = 0;
-    e[12].f4 = 0; e[12].f8 = 0;
-    e[13].f4 = 0; e[13].f8 = 0;
-    e[14].f4 = 0; e[14].f8 = 0;
-    e[15].f4 = 0; e[15].f8 = 0;
-    e[16].f4 = 0; e[16].f8 = 0;
-    e[17].f4 = 0; e[17].f8 = 0;
-    e[18].f4 = 0; e[18].f8 = 0;
-    e[19].f4 = 0; e[19].f8 = 0;
+    sRSEntry_002EFF98* rsEntries = cGraphicsMan_TheGraphicsMan_renderstateman;
+    rsEntries[1].f4 = 0x2E;
+    rsEntries[2].f4 = 0x31;
+    rsEntries[4].f4 = 0x2F;
+    rsEntries[3].f4 = 0x44;
+    rsEntries[5].f4 = 0; rsEntries[5].f8 = 0;
+    rsEntries[6].f4 = 0; rsEntries[6].f8 = 0;
+    rsEntries[7].f4 = 0; rsEntries[7].f8 = 0;
+    rsEntries[8].f4 = 0; rsEntries[8].f8 = 0;
+    rsEntries[9].f4 = 0; rsEntries[9].f8 = 0;
+    rsEntries[10].f4 = 0; rsEntries[10].f8 = 0;
+    rsEntries[11].f4 = 0; rsEntries[11].f8 = 0;
+    rsEntries[12].f4 = 0; rsEntries[12].f8 = 0;
+    rsEntries[13].f4 = 0; rsEntries[13].f8 = 0;
+    rsEntries[14].f4 = 0; rsEntries[14].f8 = 0;
+    rsEntries[15].f4 = 0; rsEntries[15].f8 = 0;
+    rsEntries[16].f4 = 0; rsEntries[16].f8 = 0;
+    rsEntries[17].f4 = 0; rsEntries[17].f8 = 0;
+    rsEntries[18].f4 = 0; rsEntries[18].f8 = 0;
+    rsEntries[19].f4 = 0; rsEntries[19].f8 = 0;
     return self;
 }
 #endif

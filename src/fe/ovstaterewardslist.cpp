@@ -73,21 +73,21 @@ extern "C" void cOVStateRewardsList_onWidgetEvent(void* self, cUIObj_200288* ite
     switch (msg) {
     case 5: {
         item->setColor(sColor_200288(1.0f, 1.0f, 0.0f, 0.0f));
-        void* r = 0;
+        void* nextState = 0;
         if (*(int*)((char*)item + 0x18) == 1) {
             void* obj = **(void***)((char*)self + 0x10);
             sVEntry_200288* vt = *(sVEntry_200288**)((char*)obj + 4);
-            r = vt[4].fn((char*)obj + vt[4].delta, self, 1);
+            nextState = vt[4].fn((char*)obj + vt[4].delta, self, 1);
         }
-        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         break;
     }
     case 6: {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry_200288* vt = *(sVEntry_200288**)((char*)obj + 4);
-        void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
-        if (r != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
         break;
     }

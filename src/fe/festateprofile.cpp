@@ -71,19 +71,19 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(void* self, char* menu, unsi
     switch (msg) {
     case 5: {
         ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 1.0f, 0.0f, 0.0f));
-        char* g = **(char***)((char*)self + 0x10);
-        sVEK18EB40b* vt = *(sVEK18EB40b**)(g + 4);
-        void* r = vt[4].fn(g + vt[4].delta, self, *(int*)(menu + 0x18));
-        if (r != 0)
-            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, r);
+        char* custom = **(char***)((char*)self + 0x10);
+        sVEK18EB40b* vt = *(sVEK18EB40b**)(custom + 4);
+        void* nextState = vt[4].fn(custom + vt[4].delta, self, *(int*)(menu + 0x18));
+        if (nextState != 0)
+            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
         break;
     }
     case 6: {
-        char* g = **(char***)((char*)self + 0x10);
-        sVEK18EB40b* vt = *(sVEK18EB40b**)(g + 4);
-        void* r = vt[5].fn(g + vt[5].delta, self, *(int*)(menu + 0x18));
-        if (r != 0)
-            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, r);
+        char* custom = **(char***)((char*)self + 0x10);
+        sVEK18EB40b* vt = *(sVEK18EB40b**)(custom + 4);
+        void* nextState = vt[5].fn(custom + vt[5].delta, self, *(int*)(menu + 0x18));
+        if (nextState != 0)
+            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
         break;
     }
     case 1: {
@@ -527,61 +527,61 @@ extern "C" void cFEStateProfileLoad_displayOn(void* vself)
         cUIText_setUnicodeStringWrap(getObj_F2B8(self, D_0045E1E8), buf);
         *(int*)((char*)self + 0x21C) = *(int*)(mp + 0x428);
         self->v43();
-        cUIObj_F2B8* o = getObj_F2B8(self, D_0045E1D8);
-        o->v09(0);
+        cUIObj_F2B8* widget = getObj_F2B8(self, D_0045E1D8);
+        widget->v09(0);
         for (int i = 1; i < 7; i++) {
             sprintf(name, D_0045E260, i);
-            o = getObj_F2B8(self, name);
-            *(sColor_F2B8*)((char*)o + 0x88) = D_004C66C8;
+            widget = getObj_F2B8(self, name);
+            *(sColor_F2B8*)((char*)widget + 0x88) = D_004C66C8;
             if (!(*(cMCSub_F2B8**)(mp + 0x434))->v67(i - 1) && !(*(cMCSub_F2B8**)(mp + 0x434))->v66(i - 1)
                 && (*(cMCSub_F2B8**)(mp + 0x434))->v55()) {
                 (*(cMCSub_F2B8**)(mp + 0x434))->v14(i - 1, (char*)self + 0x238);
-                cUIText_setUnicodeString(o, (unsigned short*)((char*)self + 0x238));
+                cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
                 if (D_004A15E8 != 2 && sel == 0) {
                     sel = 1;
-                    o->v08(0);
-                    o->v25(0);
+                    widget->v08(0);
+                    widget->v25(0);
                 } else {
-                    o->v25(1);
-                    o->v08(1);
+                    widget->v25(1);
+                    widget->v08(1);
                 }
                 sprintf(name, D_004A15F0, i);
-                o = getObj_F2B8(self, name);
-                o->v09(0);
+                widget = getObj_F2B8(self, name);
+                widget->v09(0);
                 sprintf(name, D_004A15F8, i);
-                o = getObj_F2B8(self, name);
-                o->v09(0);
+                widget = getObj_F2B8(self, name);
+                widget->v09(0);
             } else if ((*(cMCSub_F2B8**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
                 (*(cMCSub_F2B8**)(mp + 0x434))->v14(i - 1, (char*)self + 0x238);
-                cUIText_setUnicodeString(o, (unsigned short*)((char*)self + 0x238));
+                cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
                 if ((*(cMCSub_F2B8**)(mp + 0x434))->v66(i - 1)) {
-                    o->v08(1);
-                    o->v25(1);
+                    widget->v08(1);
+                    widget->v25(1);
                 } else {
-                    o->v08(0);
-                    o->v25(0);
+                    widget->v08(0);
+                    widget->v25(0);
                 }
                 sprintf(name, D_004A15F0, i);
-                o = getObj_F2B8(self, name);
+                widget = getObj_F2B8(self, name);
                 (*(cMCSub_F2B8**)(mp + 0x434))->v15(i - 1, buf);
-                cUIText_setUnicodeString(o, buf);
-                o->v09(1);
+                cUIText_setUnicodeString(widget, buf);
+                widget->v09(1);
                 sprintf(name, D_004A15F8, i);
-                o = getObj_F2B8(self, name);
+                widget = getObj_F2B8(self, name);
                 (*(cMCSub_F2B8**)(mp + 0x434))->v16(i - 1, buf);
-                cUIText_setUnicodeString(o, buf);
-                o->v09(1);
+                cUIText_setUnicodeString(widget, buf);
+                widget->v09(1);
             } else {
                 (*(cMCSub_F2B8**)(mp + 0x434))->v14(i - 1, (char*)self + 0x238);
-                cUIText_setUnicodeString(o, (unsigned short*)((char*)self + 0x238));
-                o->v25(1);
-                o->v08(1);
+                cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
+                widget->v25(1);
+                widget->v08(1);
                 sprintf(name, D_004A15F0, i);
-                o = getObj_F2B8(self, name);
-                o->v09(0);
+                widget = getObj_F2B8(self, name);
+                widget->v09(0);
                 sprintf(name, D_004A15F8, i);
-                o = getObj_F2B8(self, name);
-                o->v09(0);
+                widget = getObj_F2B8(self, name);
+                widget->v09(0);
             }
         }
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
@@ -1160,29 +1160,29 @@ static inline cUIObj_02C0* getObj_02C0(char* self, char* name)
 extern "C" void cFEStateProfileLoad_initGeneral(void* selfp)
 {
     char* self = (char*)selfp;
-    cUIObj_02C0* o;
-    o = getObj_02C0(self, D_0045E318);
-    o->setVisible(0);
-    o = getObj_02C0(self, D_0045E330);
-    o->setVisible(0);
-    o = getObj_02C0(self, D_0045E348);
-    o->setVisible(0);
-    o = getObj_02C0(self, D_0045E358);
-    o->setVisible(0);
-    o = getObj_02C0(self, D_004A15D0);
-    o->setVisible(0);
-    o = getObj_02C0(self, D_004A15D8);
-    o->setVisible(0);
-    o = getObj_02C0(self, D_004A1458);
-    o->setVisible(0);
+    cUIObj_02C0* widget;
+    widget = getObj_02C0(self, D_0045E318);
+    widget->setVisible(0);
+    widget = getObj_02C0(self, D_0045E330);
+    widget->setVisible(0);
+    widget = getObj_02C0(self, D_0045E348);
+    widget->setVisible(0);
+    widget = getObj_02C0(self, D_0045E358);
+    widget->setVisible(0);
+    widget = getObj_02C0(self, D_004A15D0);
+    widget->setVisible(0);
+    widget = getObj_02C0(self, D_004A15D8);
+    widget->setVisible(0);
+    widget = getObj_02C0(self, D_004A1458);
+    widget->setVisible(0);
     char buf[0x10];
     for (int i = 1; i < 7; i++) {
         sprintf(buf, D_004A12C0, i);
-        o = getObj_02C0(self, buf);
-        cUIText_setAsciiString((cUIText*)o, buf);
+        widget = getObj_02C0(self, buf);
+        cUIText_setAsciiString((cUIText*)widget, buf);
         sprintf(buf, D_0045E260, i);
-        o = getObj_02C0(self, buf);
-        *(int*)((char*)o + 0x18) = i - 1;
+        widget = getObj_02C0(self, buf);
+        *(int*)((char*)widget + 0x18) = i - 1;
     }
     getObj_02C0(self, D_004A1600)->setEnabled(0);
     getObj_02C0(self, D_004A1608)->setEnabled(1);
@@ -1225,12 +1225,12 @@ struct cUIObj_0540 {
  */
 extern "C" void cFEStateProfileLoad_initCreateScreen(void* self)
 {
-    cUIObj_0540* t = (cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E318));
-    t->setActive(1);
-    cUIText_setUnicodeStringByID((cUIText*)t, GetHashValue32(D_0045E368));
-    cUIObj_0540* u = (cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E348));
-    u->setActive(1);
-    cUIText_setUnicodeStringByID((cUIText*)u, GetHashValue32(D_0045E378));
+    cUIObj_0540* titleText = (cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E318));
+    titleText->setActive(1);
+    cUIText_setUnicodeStringByID((cUIText*)titleText, GetHashValue32(D_0045E368));
+    cUIObj_0540* helpText = (cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045E348));
+    helpText->setActive(1);
+    cUIText_setUnicodeStringByID((cUIText*)helpText, GetHashValue32(D_0045E378));
     ((cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15D0)))->setActive(1);
     ((cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1458)))->setActive(1);
     *(int*)((char*)self + 0x220) = 1;

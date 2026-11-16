@@ -65,13 +65,13 @@ public:
 extern "C" int cFEStateTitle_onGainTransition(void* self)
 {
     if (D_004A17C0 == 0 || --D_004A17C0 == 0) {
-        cUIObj_1947F8* o = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DB90));
-        if (o != 0) {
-            o->v07(1);
+        cUIObj_1947F8* uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_0045DB90));
+        if (uiObj != 0) {
+            uiObj->v07(1);
         }
-        o = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A17D0));
-        if (o != 0) {
-            o->setVisible(1);
+        uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A17D0));
+        if (uiObj != 0) {
+            uiObj->setVisible(1);
         }
         return 1;
     }
@@ -131,12 +131,12 @@ extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
     int found = 0;
     int i;
     for (i = 0; i < 2; i++) {
-        sList_1948A8* l = *((sApp_1948A8*)SSXApp)->lists[i];
-        int n = l->count;
+        sList_1948A8* list = *((sApp_1948A8*)SSXApp)->lists[i];
+        int n = list->count;
         if (n != 0) {
             int j;
             for (j = 0; j < n; j++) {
-                if (isActive_1948A8(l, j)) {
+                if (isActive_1948A8(list, j)) {
                     found = 1;
                     break;
                 }
@@ -206,9 +206,9 @@ extern "C" void cFEStateTitle_onWidgetEvent(void* self, void* msg, int type)
     if (type == 5) {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry_cFEStateTitle_onWidgetEvent* vt = *(sVEntry_cFEStateTitle_onWidgetEvent**)((char*)obj + 0x4);
-        void* r = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)msg + 0x18));
-        if (r != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)msg + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
     }
 }
@@ -367,15 +367,15 @@ extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
         } else if ((*(unsigned char*)((char*)self + 0x1D) & 0x3F) == 5) {
             obj->setSelected(0);
             obj->setEnabled(0);
-            sColor_194BF0 c = *(sColor_194BF0*)((char*)obj + 0x1C);
-            c.r = 1.0f;
-            obj->setColor(c);
+            sColor_194BF0 color = *(sColor_194BF0*)((char*)obj + 0x1C);
+            color.r = 1.0f;
+            obj->setColor(color);
         }
     }
     if (D_004A29EC == 0) {
-        void* o = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A17D8));
-        if (o != 0) {
-            func_00194498(o);
+        void* uiObj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A17D8));
+        if (uiObj != 0) {
+            func_00194498(uiObj);
         }
     }
 }
@@ -648,16 +648,16 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
             return;
         }
         sObj_194EB0* obj = **(sObj_194EB0***)(self + 0x10);
-        void* r = ((void* (*)(void*, void*, int))obj->vt[4].fn)((char*)obj + obj->vt[4].delta, self, *(int*)(item + 0x18));
-        if (r != 0)
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+        void* nextState = ((void* (*)(void*, void*, int))obj->vt[4].fn)((char*)obj + obj->vt[4].delta, self, *(int*)(item + 0x18));
+        if (nextState != 0)
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
         break;
     }
     case 6: {
         sObj_194EB0* obj = **(sObj_194EB0***)(self + 0x10);
-        void* r = ((void* (*)(void*, void*, int))obj->vt[5].fn)((char*)obj + obj->vt[5].delta, self, *(int*)(item + 0x18));
-        if (r != 0)
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+        void* nextState = ((void* (*)(void*, void*, int))obj->vt[5].fn)((char*)obj + obj->vt[5].delta, self, *(int*)(item + 0x18));
+        if (nextState != 0)
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
         break;
     }
     case 7: {

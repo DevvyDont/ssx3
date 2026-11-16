@@ -51,10 +51,10 @@ extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
     cFont* self = vself;
     char* data = (char*)vdata;
     sGlyph_1788* src = (sGlyph_1788*)(data + *(int*)(data + 0x14));
-    sPad_1788 p;
-    p.x = (float)data[0x10];
-    p.y = (float)data[0x11];
-    (*(sPad_1788*)&self->Offset[0]) = p;
+    sPad_1788 offset;
+    offset.x = (float)data[0x10];
+    offset.y = (float)data[0x11];
+    (*(sPad_1788*)&self->Offset[0]) = offset;
     self->NumGlyphs = *(short*)(data + 0xA);
     (*(sGlyph_1788**)&self->Glyphs) = (sGlyph_1788*)operator_new_tag(self->NumGlyphs * 12, D_004A46F8, flags, 0);
     int space = 0;
@@ -230,17 +230,17 @@ struct sFontUV {
 extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    int p2 = 1;
+    int newHeight = 1;
     do {
-        p2 <<= 1;
-    } while (p2 <= img->h);
+        newHeight <<= 1;
+    } while (newHeight <= img->h);
     sFontUV uv;
-    uv.v = 1.0f / p2;
+    uv.v = 1.0f / newHeight;
     uv.u = 1.0f / img->w;
     *(sFontUV*)&self->UVScale[0] = uv;
-    unsigned char* pix = (unsigned char*)operator_new_tag((img->w * p2) >> 1, D_00492F40, 0x100, 0);
+    unsigned char* pix = (unsigned char*)operator_new_tag((img->w * newHeight) >> 1, D_00492F40, 0x100, 0);
     unsigned char* pal = (unsigned char*)operator_new_tag(0x40, D_00492F50, 0x100, 0);
-    MEM_fill(pix, 0, (img->w * p2) >> 1);
+    MEM_fill(pix, 0, (img->w * newHeight) >> 1);
     MEM_fill(pal, 0, 0x40);
     char* src;
     if (img->flags & 0x1000)
@@ -249,16 +249,16 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
         src = (char*)img + 0x10;
     MEM_copy(pix, src, (img->w * img->h) >> 1);
     int i;
-    signed char* p;
-    for (i = 0, p = (signed char*)pal; i < 16; i++) {
-        p[0] = -0x80;
-        p[1] = -0x80;
-        p[2] = -0x80;
-        p[3] = (i << 7) / 15;
-        p += 4;
+    signed char* palEntry;
+    for (i = 0, palEntry = (signed char*)pal; i < 16; i++) {
+        palEntry[0] = -0x80;
+        palEntry[1] = -0x80;
+        palEntry[2] = -0x80;
+        palEntry[3] = (i << 7) / 15;
+        palEntry += 4;
     }
     sFontVEntryDL* vt = (sFontVEntryDL*)ps2GraphicsMan->mVtbl;
-    self->TextureID = vt[47].fn((char*)ps2GraphicsMan + vt[47].delta, pix, ((char*)self) + 0x64, img->w, p2, 0, 0xB, 1, pal, 0, 1, -1);
+    self->TextureID = vt[47].fn((char*)ps2GraphicsMan + vt[47].delta, pix, ((char*)self) + 0x64, img->w, newHeight, 0, 0xB, 1, pal, 0, 1, -1);
     if (pix != 0)
         cMemMan_free(pix);
     if (pal != 0)
@@ -343,9 +343,9 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
         sDrawState* top = ps2GraphicsMan->m_pCurrentDrawState;
         int saved = (unsigned)(((int)top->unk_00[2]) & 0x3E0) >> 5;
-        int a = saved - 1;
-        if (a < 0) a = 0;
-        top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((a << 5) & 0x3E0);
+        int shadowLayer = saved - 1;
+        if (shadowLayer < 0) shadowLayer = 0;
+        top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
         sFontVEntry1CB0* vt = (sFontVEntry1CB0*)ps2GraphicsMan->mVtbl;
         vt[80].fn((char*)ps2GraphicsMan + vt[80].delta, self, str, ((char*)self) + 0x50,
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
@@ -458,9 +458,9 @@ static inline tGlyph* sFontRes1FB0_find(cFont* font, int c)
 extern "C" float cFont_textExtent(cFont* f_, const char* str, void* r_, int mono, float sx, float sy)
 {
     cFont* font = f_;
-    sRect1FB0* r = (sRect1FB0*)r_;
-    sRect1FB0 tmp;
-    sRect1FB0* rc = r ? r : &tmp;
+    sRect1FB0* rect = (sRect1FB0*)r_;
+    sRect1FB0 localRect;
+    sRect1FB0* rc = rect ? rect : &localRect;
     rc->x0 = 0.0f;
     rc->y0 = 0.0f;
     rc->x1 = 0.0f;
@@ -811,11 +811,11 @@ struct sBXStr_29F8 {
  */
 extern "C" void cFont_vcentertextf(cFont* self, const char* fmt, void* ap, float x, float y)
 {
-    sBXStr_29F8 s;
-    s.p = (char*)D_004A3E90;
-    func_003191C0(&s, fmt, ap);
-    func_00392908(self, x, y, s.p);
-    cBXString__cBXString(&s, 2);
+    sBXStr_29F8 txt;
+    txt.p = (char*)D_004A3E90;
+    func_003191C0(&txt, fmt, ap);
+    func_00392908(self, x, y, txt.p);
+    cBXString__cBXString(&txt, 2);
 }
 #endif
 
@@ -862,11 +862,11 @@ struct sBXStr_2B40 {
  */
 extern "C" void cFont_vrighttextf(cFont* self, const char* fmt, void* ap, float x, float y)
 {
-    sBXStr_2B40 s;
-    s.p = (char*)D_004A3E90;
-    func_003191C0(&s, fmt, ap);
-    func_00392A60(self, s.p, x, y);
-    cBXString__cBXString(&s, 2);
+    sBXStr_2B40 txt;
+    txt.p = (char*)D_004A3E90;
+    func_003191C0(&txt, fmt, ap);
+    func_00392A60(self, txt.p, x, y);
+    cBXString__cBXString(&txt, 2);
 }
 #endif
 
@@ -931,12 +931,12 @@ struct sFontQuad {
  */
 extern "C" void cPlayerLights_Clear(cPlayerLights* self)
 {
-    tRGB t;
-    t.R = 0.0f;
-    t.G = 0.0f;
-    t.B = 0.0f;
+    tRGB ambient;
+    ambient.R = 0.0f;
+    ambient.G = 0.0f;
+    ambient.B = 0.0f;
     self->mNumDirectionalLights = 0;
-    (*(&self->mExtraAmbientLight)) = t;
+    (*(&self->mExtraAmbientLight)) = ambient;
     self->mPlayerIsAdditive = 0;
     self->mBoardIsAdditive = 0;
 }
@@ -1104,10 +1104,10 @@ int func_00393FB0(void* self)
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_SetScreenOffset);
 #ifdef SKIP_ASM
-extern "C" void cGraphicsMan_SetScreenOffset(cPS2GraphicsMan* self, int a1, int a2)
+extern "C" void cGraphicsMan_SetScreenOffset(cPS2GraphicsMan* self, int xoffset, int yoffset)
 {
-    self->m_screenOffset[0] = (float)a1;
-    self->m_screenOffset[1] = (float)a2;
+    self->m_screenOffset[0] = (float)xoffset;
+    self->m_screenOffset[1] = (float)yoffset;
 }
 #endif
 
@@ -1564,10 +1564,10 @@ struct sFontV4 {
     float x, y, z, w;
 };
 
-extern "C" void cGraphicsMan_SetConstantColour(cPS2GraphicsMan* self, sFontV4 v, int idx)
+extern "C" void cGraphicsMan_SetConstantColour(cPS2GraphicsMan* self, sFontV4 colour, int idx)
 {
     // PORT: pointer arithmetic via int (index-first addu)
-    *(sFontV4*)((char*)((idx << 4) + (int)self) + 0xF04) = v;
+    *(sFontV4*)((char*)((idx << 4) + (int)self) + 0xF04) = colour;
 }
 #endif
 //100%
@@ -1927,13 +1927,13 @@ void func_003946E8(void* self)
 //100%
 INCLUDE_ASM("render/font", cGraphicsMan_SetPixelTest);
 #ifdef SKIP_ASM
-extern "C" void cGraphicsMan_SetPixelTest(cPS2GraphicsMan* self, int a, int b, int c)
+extern "C" void cGraphicsMan_SetPixelTest(cPS2GraphicsMan* self, int depthtestmode, int atestmode, int aref)
 {
-    int sa = (a << 23) & 0x01800000;
+    int sa = (depthtestmode << 23) & 0x01800000;
     *(int*)((char*)self->m_pCurrentDrawState + 4) = (*(int*)((char*)self->m_pCurrentDrawState + 4) & ~0x01800000) | sa;
-    int sb = (b << 20) & 0x00300000;
+    int sb = (atestmode << 20) & 0x00300000;
     *(int*)((char*)self->m_pCurrentDrawState + 4) = (*(int*)((char*)self->m_pCurrentDrawState + 4) & ~0x00300000) | sb;
-    int sc = (c << 12) & 0x000FF000;
+    int sc = (aref << 12) & 0x000FF000;
     *(int*)((char*)self->m_pCurrentDrawState + 4) = (*(int*)((char*)self->m_pCurrentDrawState + 4) & ~0x000FF000) | sc;
 }
 #endif
@@ -2415,9 +2415,9 @@ void cMemMan_free(void*);
  */
 extern "C" void cPS2LightMan_Purge(cPS2LightMan* self)
 {
-    void* p = self->m_pLights;
-    if (p != 0) {
-        cMemMan_free(p);
+    void* lights = self->m_pLights;
+    if (lights != 0) {
+        cMemMan_free(lights);
     }
 }
 #endif

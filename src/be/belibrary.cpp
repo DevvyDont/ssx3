@@ -253,25 +253,25 @@ extern sScoreTypeMap D_0045A2F8[][2];
  * gives the index: kind 0 to 3 at locations 0 to 13 gives 12 to 25, kinds 4 and 5 at locations 14 to 16 give 6
  * to 11. Callers use it to pick a score stats record in the character profile and in D_00535C18.
  *
- * @param a  the location (On Tour eBELocationID); above 16 gives 26
- * @param b  the event or stat kind
+ * @param locationId  the location (On Tour eBELocationID); above 16 gives 26
+ * @param gameEvent  the event or stat kind
  * @return the score type index, or 26 when the pair has none
  */
-extern "C" int cBELibrary_getScoreType(int a, int b)
+extern "C" int cBELibrary_getScoreType(int locationId, int gameEvent)
 {
     int i;
-    if (a > 16) {
+    if (locationId > 16) {
         return 26;
     }
-    if ((unsigned)(b - 6) < 3) {
-        return b - 6;
+    if ((unsigned)(gameEvent - 6) < 3) {
+        return gameEvent - 6;
     }
-    if ((unsigned)(b - 9) < 3) {
-        return b - 6;
+    if ((unsigned)(gameEvent - 9) < 3) {
+        return gameEvent - 6;
     }
-    sScoreTypeMap* row = D_0045A2F8[a];
+    sScoreTypeMap* row = D_0045A2F8[locationId];
     for (i = 0; i < 2; i++) {
-        if (row[i].key == b) {
+        if (row[i].key == gameEvent) {
             return row[i].type;
         }
     }

@@ -247,11 +247,11 @@ extern "C" void cCameraTriggerMan_purge(void* vself)
 {
     sCtMan_P* self = (sCtMan_P*)vself;
     for (int i = 0; i < self->count; i++) {
-        sCtTrig_P* t = self->trigs[i];
-        if (t->reg != 0) {
+        sCtTrig_P* trigger = self->trigs[i];
+        if (trigger->reg != 0) {
             char* w = (char*)SSXApp->Game->BXNash;
-            sCtBox_P box = t->shape->bounds();
-            remove_P(w, t->item, &box);
+            sCtBox_P box = trigger->shape->bounds();
+            remove_P(w, trigger->item, &box);
         }
     }
     cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x1C));
@@ -314,9 +314,9 @@ extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream)
 {
     cCameraTriggerMan_cleanupOnExit(self);
     cCameraTriggerList_loadFromBuffer(self, stream);
-    sCamTrigManB* m = (sCamTrigManB*)self;
-    for (int i = 0; i < m->count; i++)
-        *(int*)(m->triggers[i] + 0x20) = 0;
+    sCamTrigManB* manager = (sCamTrigManB*)self;
+    for (int i = 0; i < manager->count; i++)
+        *(int*)(manager->triggers[i] + 0x20) = 0;
     cCameraTriggerMan_setInGameTriggers(self);
 }
 #endif

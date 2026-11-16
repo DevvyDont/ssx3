@@ -35,12 +35,12 @@ extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
     pos.y = 200.0f;
     pos.z = 0.0f;
     pos.w = 1.0f;
-    sVec4_181148 at;
-    at.x = 0.0f;
-    at.y = 0.0f;
-    at.z = 0.0f;
-    at.w = 1.0f;
-    func_0015E050((char*)cam + 0x10, &pos, &at);
+    sVec4_181148 lookAt;
+    lookAt.x = 0.0f;
+    lookAt.y = 0.0f;
+    lookAt.z = 0.0f;
+    lookAt.w = 1.0f;
+    func_0015E050((char*)cam + 0x10, &pos, &lookAt);
     cam->fov = 0.4363323450088501f;
     func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     *(int*)((char*)self + 0x80) = 1;
@@ -145,8 +145,8 @@ extern "C" void cFEStateCharSelect_onGainFocus(void* self, int pPrevState)
         }
     }
     func_001A0508((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), D_00440F68[0], 0);
-    char* r = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
-    *(int*)(r + 0xCCC) = 0;
+    char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
+    *(int*)(feRider + 0xCCC) = 0;
     func_00181EF0(self);
     cUIState_onGainFocus(self, pPrevState);
 }
@@ -242,21 +242,21 @@ extern "C" int cFEStateCharSelect_onInputBegin(char* self, char* pInput)
     if (padBtn_1450(pInput, 35)) {
         *(float*)(self + 0x60) += padAxis_1450(pInput, 38) * 3.0f;
         if (*(float*)(self + 0x60) >= 360.0f) {
-            float a = *(float*)(self + 0x60);
+            float angle = *(float*)(self + 0x60);
             do
-                a -= 360.0f;
-            while (a >= 360.0f);
-            *(float*)(self + 0x60) = a;
+                angle -= 360.0f;
+            while (angle >= 360.0f);
+            *(float*)(self + 0x60) = angle;
         }
-        float a = *(float*)(self + 0x60);
-        float zero = 0.0f;
-        if (a < zero) {
-            float b;
+        float angle = *(float*)(self + 0x60);
+        float minAngle = 0.0f;
+        if (angle < minAngle) {
+            float wrapped;
             do {
-                b = a + 360.0f;
-                a = b;
-            } while (b < zero);
-            *(float*)(self + 0x60) = b;
+                wrapped = angle + 360.0f;
+                angle = wrapped;
+            } while (wrapped < minAngle);
+            *(float*)(self + 0x60) = wrapped;
         }
         changed = 1;
     }
@@ -325,18 +325,18 @@ static inline void refresh_1620(sWidget_1620* w)
  */
 extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
 {
-    int h = w->hash;
-    if (h == GetHashValue32(D_0045D610)) {
+    int hashName = w->hash;
+    if (hashName == GetHashValue32(D_0045D610)) {
         w->b0 = 0;
         w->b7 = 1;
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (h == GetHashValue32(D_0045D620) && D_00535C11[0] == 2) {
+    if (hashName == GetHashValue32(D_0045D620) && D_00535C11[0] == 2) {
         refresh_1620(w);
         return;
     }
-    if (h == GetHashValue32(D_0045D638)) {
+    if (hashName == GetHashValue32(D_0045D638)) {
         if (D_00535C11[0] == 2) {
             switch (*(signed char*)(self + 0x44)) {
             case 0:
@@ -354,7 +354,7 @@ extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
     sCharKey_1620 key = D_004A13A0[0];
     for (int i = 0; i < 10; i++) {
         key.c[0] = '0' + i;
-        if (h == GetHashValue32(key.c)) {
+        if (hashName == GetHashValue32(key.c)) {
             cUIText_setAsciiString((cUIText*)w, (const char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), D_00440F68[i], 0));
             w->id18 = i;
             refresh_1620(w);
@@ -467,9 +467,9 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
     switch (event) {
     case 5: {
         int on = 1;
-        char* r = riderSlot_17E8(self);
-        *(int*)(r + 0xC20) = on;
-        *(int*)(r + 0xC1C) = 0;
+        char* feRider = riderSlot_17E8(self);
+        *(int*)(feRider + 0xC20) = on;
+        *(int*)(feRider + 0xC1C) = 0;
         int rider = self->rider;
         int player = self->player;
         int ch = D_00440F68[widget->id];
@@ -905,25 +905,25 @@ static inline void vcall_2460(sCW_2460* w, int k, int v)
  */
 extern "C" void cFEStateCheatCharSelect_onWidgetCreate(sCheat_2460* self, sCW_2460* w)
 {
-    int h = w->hash;
-    if (h == GetHashValue32(D_004A1400)) {
+    int hashName = w->hash;
+    if (hashName == GetHashValue32(D_004A1400)) {
         self->f6C = w;
         w->id18 = 0;
         self->f6C->b0 = 0;
         if (self->count >= 6) cUIMenu_setScrollableMenu(self->f6C, self->count);
         return;
     }
-    if (h == GetHashValue32(D_0045D790)) {
+    if (hashName == GetHashValue32(D_0045D790)) {
         self->f48 = w;
         vcall_2460(w, 9, self->count >= 7);
         return;
     }
-    if (h == GetHashValue32(D_0045D7A0)) {
+    if (hashName == GetHashValue32(D_0045D7A0)) {
         self->f4C = w;
         vcall_2460(w, 9, self->count >= 7);
         return;
     }
-    if (h == GetHashValue32(D_0045D7B0)) {
+    if (hashName == GetHashValue32(D_0045D7B0)) {
         self->f50 = w;
         cUIText_setAsciiString((cUIText*)w, D_004A1408);
         return;
@@ -932,7 +932,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetCreate(sCheat_2460* self, sCW_24
     char** tb = D_00440FA0;
     sCW_2460** sp = self->slots;
     for (; i < 6; sp++, tb++, i++) {
-        if (h == GetHashValue32(*tb)) {
+        if (hashName == GetHashValue32(*tb)) {
             *sp = w;
             w->id18 = i;
             if (i == 0) {

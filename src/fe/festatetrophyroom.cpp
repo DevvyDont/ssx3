@@ -103,18 +103,18 @@ static inline void vcall_43F0(void* o, int slot, int arg)
  */
 extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
 {
-    int h = *(int*)((char*)w + 0x38);
-    if (h == GetHashValue32(D_004A1FE8)) {
+    int hashName = *(int*)((char*)w + 0x38);
+    if (hashName == GetHashValue32(D_004A1FE8)) {
         self->f48 = w;
         func_001D47A0(self, self->f9C);
         return;
     }
-    if (h == GetHashValue32(D_004A1FF0)) {
+    if (hashName == GetHashValue32(D_004A1FF0)) {
         self->f4C = w;
         vcall_43F0(w, 9, 0);
         return;
     }
-    if (h == GetHashValue32(D_00466E60)) {
+    if (hashName == GetHashValue32(D_00466E60)) {
         int id = 0;
         switch (self->f58) {
         case 3:
@@ -134,7 +134,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
         return;
     }
     for (int i = 0; i < 6; i++) {
-        if (h == GetHashValue32(D_00441600[i])) {
+        if (hashName == GetHashValue32(D_00441600[i])) {
             int n = func_001CE6F0(self->f54, self->f58);
             *(int*)((char*)w + 0x18) = i;
             if (n < i) {
@@ -145,7 +145,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
             } else {
                 setChallengeName(w, self->f54, self->f58, i - 1);
             }
-        } else if (h == GetHashValue32(D_00441618[i])) {
+        } else if (hashName == GetHashValue32(D_00441618[i])) {
             if (func_001CE6F0(self->f54, self->f58) < i) {
                 vcall_43F0(w, 9, 0);
                 vcall_43F0(w, 8, 1);
@@ -230,9 +230,9 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(void* self, void* item, int msg
         }
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry001D4698* vt = *(sVEntry001D4698**)((char*)obj + 4);
-        void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)self + 0x54));
-        if (r != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)self + 0x54));
+        if (nextState != 0) {
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
         break;
     }
@@ -705,16 +705,16 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(void* self, void* item, unsign
     case 5: {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
-        void* r = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
-        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
+        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         break;
     }
     case 6: {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
-        void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
-        if (r != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
         break;
     }
@@ -739,15 +739,15 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateRewardsRoom_onWidgetMenu(void* self, int pMenu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 8) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 

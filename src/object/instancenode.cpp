@@ -151,9 +151,9 @@ extern "C" void cInstanceNode_expire(cInstanceNode* self, int runscript)
     }
     *(int*)((char*)self->Instance + 8) &= 0xFFFF0300;
     {
-        char* o = (char*)self->Instance;
-        int v = *(int*)(o + 8);
-        *(int*)(o + 8) = v | (v >> 16);
+        char* instance = (char*)self->Instance;
+        int instFlags = *(int*)(instance + 8);
+        *(int*)(instance + 8) = instFlags | (instFlags >> 16);
     }
     *(int*)((char*)self->Instance + 8) |= 2;
     if (((void*)self) != 0) {
@@ -180,12 +180,12 @@ struct sInstNodeVEntryFD90 {
  */
 extern "C" void cInstanceNode_loseFocus(cInstanceNode* self)
 {
-    int* f = (int*)((char*)self->Instance + 0x8);
-    *f &= 0xFFFF0000;
-    f = (int*)((char*)self->Instance + 0x8);
-    *f |= *f >> 16;
-    f = (int*)((char*)self->Instance + 0x8);
-    *f |= 2;
+    int* flagsPtr = (int*)((char*)self->Instance + 0x8);
+    *flagsPtr &= 0xFFFF0000;
+    flagsPtr = (int*)((char*)self->Instance + 0x8);
+    *flagsPtr |= *flagsPtr >> 16;
+    flagsPtr = (int*)((char*)self->Instance + 0x8);
+    *flagsPtr |= 2;
     if (((void*)self) != 0) {
         sInstNodeVEntryFD90* vt = (sInstNodeVEntryFD90*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
@@ -226,12 +226,12 @@ extern "C" void* func_003506D8(void* mem, int v);
  */
 extern "C" void cInstanceNode_makeThisDead(cInstanceNode* self)
 {
-    int v = (int)self->Instance;
+    int instance = (int)self->Instance;
     if (((void*)self) != 0) {
         sInstNodeDtorVEntry* vt = (sInstNodeDtorVEntry*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
-    func_003506D8(cMemMan_alloc(0x1C, D_0048E738, 0x20000000, 0), v);
+    func_003506D8(cMemMan_alloc(0x1C, D_0048E738, 0x20000000, 0), instance);
 }
 #endif
 
@@ -555,23 +555,23 @@ static inline void buildBone_0288(sInMat44_0288* d, const sInMat44_0288* parent,
  */
 extern "C" void cInstanceNode_makeAnimMats(cInstanceNode* self, sInMat44_0288* parent, sInMat44_0288* out)
 {
-    char* o = (char*)self->Instance;
-    sInSkel_0288* sk = *(sInSkel_0288**)(o + 0x80);
-    float s = *(float*)(o + 0x84);
-    sInBone_0288* b = sk->bones;
+    char* instance = (char*)self->Instance;
+    sInSkel_0288* sk = *(sInSkel_0288**)(instance + 0x80);
+    float uniformScale = *(float*)(instance + 0x84);
+    sInBone_0288* bone = sk->bones;
     sInVec4_0288 scale;
-    scale.x = s;
-    scale.y = s;
-    scale.z = s;
+    scale.x = uniformScale;
+    scale.y = uniformScale;
+    scale.z = uniformScale;
     scale.w = 1.0f;
-    for (int i = 0; i < sk->count; i++, b++) {
-        sInMat44_0288 t2;
-        if (b->parent != -1) {
-            buildBone_0288(&t2, &out[b->parent], b->mat, scale);
-            vu0CopyMat_0288(&out[i], &t2);
+    for (int i = 0; i < sk->count; i++, bone++) {
+        sInMat44_0288 boneMat;
+        if (bone->parent != -1) {
+            buildBone_0288(&boneMat, &out[bone->parent], bone->mat, scale);
+            vu0CopyMat_0288(&out[i], &boneMat);
         } else {
-            buildBone_0288(&t2, parent, b->mat, scale);
-            vu0CopyMat_0288(&out[i], &t2);
+            buildBone_0288(&boneMat, parent, bone->mat, scale);
+            vu0CopyMat_0288(&out[i], &boneMat);
         }
     }
 }
@@ -639,32 +639,32 @@ static inline float IbSqrt(float v)
 // Writes the model's bounding box (min, max) and the radius of the sphere around its centre that holds every corner.
 extern "C" void cInstanceNode_getBoundBoxInfo(cInstanceNode* self, sIbVec4* box, float* radius)
 {
-    sIbVec4 t;
-    t.x = *(float*)((char*)self->Instance + 0x60);
-    t.y = *(float*)((char*)self->Instance + 0x64);
-    t.z = *(float*)((char*)self->Instance + 0x68);
-    t.w = 1.0f;
-    box[0] = t;
-    t.x = *(float*)((char*)self->Instance + 0x6C);
-    t.y = *(float*)((char*)self->Instance + 0x70);
-    t.z = *(float*)((char*)self->Instance + 0x74);
-    box[1] = t;
-    t = *(sIbVec4*)((char*)self->Instance + 0x40);
+    sIbVec4 point;
+    point.x = *(float*)((char*)self->Instance + 0x60);
+    point.y = *(float*)((char*)self->Instance + 0x64);
+    point.z = *(float*)((char*)self->Instance + 0x68);
+    point.w = 1.0f;
+    box[0] = point;
+    point.x = *(float*)((char*)self->Instance + 0x6C);
+    point.y = *(float*)((char*)self->Instance + 0x70);
+    point.z = *(float*)((char*)self->Instance + 0x74);
+    box[1] = point;
+    point = *(sIbVec4*)((char*)self->Instance + 0x40);
     sIbVec4* mx = &box[1];
-    sIbVec4* ctr = &t;
+    sIbVec4* ctr = &point;
     float best = 0.0f;
     for (int i = 0; i < 8; i++) {
         float x = (i & 1) ? box[0].x : mx->x;
         float y = (i & 2) ? box[0].y : mx->y;
         float z = (i & 4) ? box[0].z : mx->z;
-        sIbVec4 c;
-        c.x = x;
-        c.y = y;
-        c.z = z;
-        c.w = 1.0f;
-        sIbVec4 d = IbSub(c, *ctr);
-        float l = IbDot(d, d);
-        if (best < l) best = l;
+        sIbVec4 corner;
+        corner.x = x;
+        corner.y = y;
+        corner.z = z;
+        corner.w = 1.0f;
+        sIbVec4 delta = IbSub(corner, *ctr);
+        float distSq = IbDot(delta, delta);
+        if (best < distSq) best = distSq;
     }
     *radius = IbSqrt(best);
 }

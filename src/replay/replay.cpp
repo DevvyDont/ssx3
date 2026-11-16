@@ -66,19 +66,19 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     char buf[0x18];
     stream->v02(buf, 0x18);
     func_00317908(buf);
-    int v;
-    stream->v02(&v, 4);
-    D_004A5B78 = v;
-    stream->v02(&v, 4);
-    D_004A5B7C = v;
+    int savedValue;
+    stream->v02(&savedValue, 4);
+    D_004A5B78 = savedValue;
+    stream->v02(&savedValue, 4);
+    D_004A5B7C = savedValue;
     cWorldPainterMan_reset_0();
     cBE_readFromReplayFrame(cBE_getBE(), stream);
-    char* o = (char*)SSXApp->Game;
-    sVtS_DBF0* vt = *(sVtS_DBF0**)o;
-    vt[9].fn(o + vt[9].delta, stream);
-    char* o2 = (char*)SSXApp->Game->AI;
-    sVtS_DBF0* vt2 = *(sVtS_DBF0**)(o2 + 0xCC);
-    vt2[8].fn(o2 + vt2[8].delta, stream);
+    char* game = (char*)SSXApp->Game;
+    sVtS_DBF0* vt = *(sVtS_DBF0**)game;
+    vt[9].fn(game + vt[9].delta, stream);
+    char* aiObj = (char*)SSXApp->Game->AI;
+    sVtS_DBF0* vt2 = *(sVtS_DBF0**)(aiObj + 0xCC);
+    vt2[8].fn(aiObj + vt2[8].delta, stream);
     cAvalanche_readFromReplayFrame((char*)stream);
     func_0030BD20(D_004A3DD8, stream);
     func_00229E58(D_004A2A00, stream);
@@ -675,12 +675,12 @@ INCLUDE_ASM("replay/replay", cReplayFramePtr_cReplayFramePtr__FPv);
  */
 void* cReplayFramePtr_cReplayFramePtr(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0x4) = t0;
+    int zeroValue = 0;
+    *(int*)((char*)self + 0x4) = zeroValue;
     *(int*)self = (int)(void*)cReplayFramePtr_vtbl;
-    *(int*)((char*)self + 0x8) = t0;
-    *(int*)((char*)self + 0xc) = t0;
-    *(int*)((char*)self + 0x10) = t0;
+    *(int*)((char*)self + 0x8) = zeroValue;
+    *(int*)((char*)self + 0xc) = zeroValue;
+    *(int*)((char*)self + 0x10) = zeroValue;
     return self;
 }
 #endif

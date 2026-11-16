@@ -111,18 +111,18 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(void* self, void* item, unsigned
     case 5: {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
-        void* r = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
-        if (r != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
         break;
     }
     case 6: {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
-        void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
-        if (r != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
         break;
     }
@@ -261,9 +261,9 @@ extern "C" void cFEAsyncManager_Init(sMissionSlot* self)
 {
     int i;
     for (i = 0; i < 5; i++) {
-        unsigned char c = D_004A1408[0];
+        unsigned char nulChar = D_004A1408[0];
         self[i].f100 = 0;
-        self[i].name[0] = c;
+        self[i].name[0] = nulChar;
         self[i].f104 = -1;
         self[i].f108 = 1;
         self[i].f10C = 0;

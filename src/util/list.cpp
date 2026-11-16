@@ -239,11 +239,11 @@ extern "C" void cList_destroyList(void* self)
 {
     cList_destroyList_cVirt* n = *(cList_destroyList_cVirt**)((char*)self + 0x4);
     while (n->mpNext != n) {
-        cList_destroyList_cVirt* p = n->mpNext;
+        cList_destroyList_cVirt* nextNode = n->mpNext;
         if (n != 0) {
             n->v01(3);
         }
-        n = p;
+        n = nextNode;
     }
     func_00397930(self);
 }
@@ -297,12 +297,12 @@ extern "C" int cList_traverseFlat(void* self, void* pOperator)
 {
     cList_traverseFlat_cVirt* n = *(cList_traverseFlat_cVirt**)((char*)self + 0x4);
     while (n->mpNext != n) {
-        cList_traverseFlat_cVirt* p = n->mpNext;
-        int r = n->v02(pOperator);
-        if (r != 0) {
-            return r;
+        cList_traverseFlat_cVirt* nextNode = n->mpNext;
+        int result = n->v02(pOperator);
+        if (result != 0) {
+            return result;
         }
-        n = p;
+        n = nextNode;
     }
     return 0;
 }
@@ -333,12 +333,12 @@ extern "C" int cList_traverseRecurse(void* self, void* pOperator)
 {
     cList_traverseRecurse_cVirt* n = *(cList_traverseRecurse_cVirt**)((char*)self + 0x4);
     while (n->mpNext != n) {
-        cList_traverseRecurse_cVirt* p = n->mpNext;
-        int r = n->v03(pOperator);
-        if (r != 0) {
-            return r;
+        cList_traverseRecurse_cVirt* nextNode = n->mpNext;
+        int result = n->v03(pOperator);
+        if (result != 0) {
+            return result;
         }
-        n = p;
+        n = nextNode;
     }
     return 0;
 }

@@ -69,8 +69,8 @@ extern "C" sBankMonitorCD08* cBankMonitor_cBankMonitor(sBankMonitorCD08* self, i
         sBmVtblCD08 vt = D_00483B88;
         *(sBmVtblCD08**)(self->vbase + 4) = &vt;
         char* base = self->vbase - 0x8F0;
-        int d = (char*)self - base;
-        vt.e[1].delta = D_00483B88.e[1].delta + d;
+        int thisAdjust = (char*)self - base;
+        vt.e[1].delta = D_00483B88.e[1].delta + thisAdjust;
     }
     self->vtbl = cBankMonitor_vtbl;
     self->f8DC = 0;
@@ -345,37 +345,37 @@ static inline void setCallback_Create(sBmVoice* v, sSndCallback k)
  */
 extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(sBankMonitorView* self, int id, int vol, int kind)
 {
-    sBmVoice* v = 0;
+    sBmVoice* instance = 0;
     self->busy++;
     int idx = cBankMonitor_FindFreeInstance((cBankMonitor*)self, self->busy);
     if (idx >= 0) {
-        v = &self->voices[idx];
-        func_002ABB38(v);
-        v->kind = kind;
-        v->id = id;
-        v->f60 = self->p3C[self->cur];
-        v->vol = vol;
-        v->tgt = self->tgt[self->cur];
-        setCallback_Create(v, OPTS_GetCallback_Create(self));
-        v->f80 = self->p60[self->cur];
-        v->f84 = self->p64[self->cur];
+        instance = &self->voices[idx];
+        func_002ABB38(instance);
+        instance->kind = kind;
+        instance->id = id;
+        instance->f60 = self->p3C[self->cur];
+        instance->vol = vol;
+        instance->tgt = self->tgt[self->cur];
+        setCallback_Create(instance, OPTS_GetCallback_Create(self));
+        instance->f80 = self->p60[self->cur];
+        instance->f84 = self->p64[self->cur];
         if (self->p34[self->cur] != 0) {
-            v->tgtCopy = *v->tgt;
-            v->tgt = &v->tgtCopy;
+            instance->tgtCopy = *instance->tgt;
+            instance->tgt = &instance->tgtCopy;
         }
-        v->f88 = self->p68[self->cur];
-        v->f8C = self->p6C[self->cur];
-        v->f94 = self->p74[self->cur];
-        v->f98 = self->p78[self->cur];
+        instance->f88 = self->p68[self->cur];
+        instance->f8C = self->p6C[self->cur];
+        instance->f94 = self->p74[self->cur];
+        instance->f98 = self->p78[self->cur];
         int f9C = self->p7C[self->cur];
-        if (v->f58 == 0)
-            v->f9C = f9C;
-        v->f90 = -1.0f;
-        v->fA0 = self->p80[self->cur];
-        v->fA4 = self->p84[self->cur];
+        if (instance->f58 == 0)
+            instance->f9C = f9C;
+        instance->f90 = -1.0f;
+        instance->fA0 = self->p80[self->cur];
+        instance->fA4 = self->p84[self->cur];
         if (self->tgt[self->cur] != 0)
-            func_002ABD48(v, self);
-        v->valid = id >= 0;
+            func_002ABD48(instance, self);
+        instance->valid = id >= 0;
     } else {
         bxLogPrint(D_00483250);
         switch (kind) {
@@ -388,7 +388,7 @@ extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(sBankMonitorView* self, int
         }
     }
     self->busy--;
-    return v;
+    return instance;
 }
 #endif
 
@@ -615,12 +615,12 @@ extern "C" void cBankMonitor_BANKMONITOR_StopBank(cBankMonitor* self, int id, fl
     for (int i = 0; i < 64; i++) {
         if (func_002ABB80((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
             // PORT: pointer arithmetic through int
-            sVoiceD650* e = (sVoiceD650*)(i * 0xC0 + (int)self->mBankMonitorInstance);
-            if (e->state == 1 && e->id == id) {
+            sVoiceD650* instance = (sVoiceD650*)(i * 0xC0 + (int)self->mBankMonitorInstance);
+            if (instance->state == 1 && instance->id == id) {
                 if (FadeTime != 0.0f) {
-                    func_002ACB80_f(e, FadeTime, -1, 1);
+                    func_002ACB80_f(instance, FadeTime, -1, 1);
                 } else {
-                    func_002ABB38(e);
+                    func_002ABB38(instance);
                 }
             }
         }
@@ -650,8 +650,8 @@ extern "C" int cBankMonitor_BANKMONITOR_Active(cBankMonitor* self)
     for (int i = 0; i < 64; i++) {
         if (func_002ABB80((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
             // PORT: pointer arithmetic through int
-            sVoiceAD730* e = (sVoiceAD730*)(i * 0xC0 + (int)self->mBankMonitorInstance);
-            if (e->active != 0) {
+            sVoiceAD730* instance = (sVoiceAD730*)(i * 0xC0 + (int)self->mBankMonitorInstance);
+            if (instance->active != 0) {
                 count++;
             }
         }
@@ -901,16 +901,16 @@ extern "C" sSndPlayerD9C8* cMonitor_cMonitor(sSndPlayerD9C8* self, int inchrg, i
         sBmVtblD9C8 vt = D_00483BC0;
         *(sBmVtblD9C8**)(self->vbase + 4) = &vt;
         char* base = self->vbase - 0x8DC;
-        int d = (char*)self - base;
-        vt.e[1].delta = D_00483BC0.e[1].delta + d;
+        int thisAdjust = (char*)self - base;
+        vt.e[1].delta = D_00483BC0.e[1].delta + thisAdjust;
     }
     self->f88 = 0;
     self->f8C = 0;
     self->vtbl = cMonitor_vtbl;
     self->f90 = 0;
     {
-        sBmSlotD9C8* p = self->slots;
-        for (int i = 47; i != -1; i--, p++) func_002AD848(p);
+        sBmSlotD9C8* slot = self->slots;
+        for (int i = 47; i != -1; i--, slot++) func_002AD848(slot);
     }
     gMonitor = (cMonitor*)((func_002AD998_cObj*)self);
     return self;
@@ -3274,9 +3274,9 @@ extern "C" void SPCH_Init(cSpeechSys* self)
     bxLogPrint(D_00483390, seed);
     func_003D6840((void*)func_002AF8A8, seed, buf);
     int n = func_003D6C58(500);
-    void* p = func_00252FA0(D_004833A8, n, 0);
-    self->unk_008 = p;
-    func_003D6C60(500, p);
+    void* workMem = func_00252FA0(D_004833A8, n, 0);
+    self->unk_008 = workMem;
+    func_003D6C60(500, workMem);
     *(void**)((char*)func_003D6768() + 0x8) = (void*)func_003E4E98;
 }
 #endif

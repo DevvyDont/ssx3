@@ -20,9 +20,9 @@ extern "C" void cFEFlowState_setNumStates(void* self, int NumStates)
     signed char n = NumStates;
     func_001A06B0(self);
     *(signed char*)self = n;
-    void* p = operator_new_tag(n, D_00460B80, 0x100, 0);
-    *(void**)((char*)self + 0x4) = p;
-    func_00416210(p, 0, n);
+    void* states = operator_new_tag(n, D_00460B80, 0x100, 0);
+    *(void**)((char*)self + 0x4) = states;
+    func_00416210(states, 0, n);
 }
 #endif
 

@@ -41,23 +41,23 @@ extern "C" int checkActiveNode(void *node, int type, void *buf) {
         n->v37();
         return 1;
     }
-    char *o = *(char**)((char*)n + 0x18);
+    char *inst = *(char**)((char*)n + 0x18);
     switch (type) {
     case 13:
-        *(int*)(o + 0xC) = 0;
-        func_003578A8_AE38(cMemMan_alloc(0x2C, D_00489618_AE38, 0x20000000, 0), 1, o, buf, n);
+        *(int*)(inst + 0xC) = 0;
+        func_003578A8_AE38(cMemMan_alloc(0x2C, D_00489618_AE38, 0x20000000, 0), 1, inst, buf, n);
         return -1;
     case 11:
-        *(int*)(o + 0xC) = 0;
-        func_00351B40_AE38(cMemMan_alloc(0x6C0, D_00489628_AE38, 0x20000000, 0), 1, o, buf, *(int*)(D_004A3DD8_AE38 + 0x294), n);
+        *(int*)(inst + 0xC) = 0;
+        func_00351B40_AE38(cMemMan_alloc(0x6C0, D_00489628_AE38, 0x20000000, 0), 1, inst, buf, *(int*)(D_004A3DD8_AE38 + 0x294), n);
         return -1;
     case 0:
-        *(int*)(o + 0xC) = 0;
-        func_00342C08_AE38(cMemMan_alloc(0x34, D_00489638_AE38, 0x20000000, 0), 1, o, buf, n);
+        *(int*)(inst + 0xC) = 0;
+        func_00342C08_AE38(cMemMan_alloc(0x34, D_00489638_AE38, 0x20000000, 0), 1, inst, buf, n);
         return -1;
     case 22:
-        *(int*)(o + 0xC) = 0;
-        cDeadFadeNode_cDeadFadeNode_AE38(cMemMan_alloc(0x3C, D_00489648_AE38, 0x20000000, 0), 1, o, buf, n);
+        *(int*)(inst + 0xC) = 0;
+        cDeadFadeNode_cDeadFadeNode_AE38(cMemMan_alloc(0x3C, D_00489648_AE38, 0x20000000, 0), 1, inst, buf, n);
         return -1;
     }
     delete n;
@@ -906,24 +906,24 @@ extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445FA0[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_C5D8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
-        if (!s)
+        if (!section)
             r = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_C5D8(i);
             r = t;
         }
@@ -1221,24 +1221,24 @@ extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446038[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[8];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_CDC8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
-        if (!s)
+        if (!section)
             r = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_CDC8(i);
             r = t;
         }
@@ -1382,20 +1382,20 @@ extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *params) {
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004460A0[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_D250 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
@@ -1887,24 +1887,24 @@ extern "C" V3_DED0 AddSplineFunc(int n, Ent_DED0 *params) {
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004461D8[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_DED0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
-        if (!s)
+        if (!section)
             r = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_DED0(i);
             r = t;
         }
@@ -1978,24 +1978,24 @@ extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *params) {
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446208[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_E0C0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
-        if (!s)
+        if (!section)
             r = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_E0C0(i);
             r = t;
         }
@@ -2370,11 +2370,11 @@ extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *params) {
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004462A0[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     if (*(float*)&buf[7] > *(float*)&buf[5])
         *(float*)&buf[7] = *(float*)&buf[5];
@@ -2587,21 +2587,21 @@ extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *params) {
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446470[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_F1C8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             r = 0;
         else
             r = (char*)(i << 2);

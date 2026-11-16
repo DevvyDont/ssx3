@@ -118,8 +118,8 @@ extern "C" void cFlagSet_CreateMesh(void* p, void* item)
     }
     self->colScale = (float)(self->cols - 1);
     self->rowScale = (float)(self->rows - 1);
-    sFsVE_CM* e = &(*(sFsVE_CM**)(mgr + 0x10D8))[76];
-    self->mesh = (sFsMesh_CM*)e->fn(mgr + e->delta, self->cols, self->rows, 0x60000000u);
+    sFsVE_CM* vtEntry = &(*(sFsVE_CM**)(mgr + 0x10D8))[76];
+    self->mesh = (sFsMesh_CM*)vtEntry->fn(mgr + vtEntry->delta, self->cols, self->rows, 0x60000000u);
     if (self->mesh == 0) {
         return;
     }
@@ -130,8 +130,8 @@ extern "C" void cFlagSet_CreateMesh(void* p, void* item)
     sFsCol_CM col[50];
     int idx = 0;
     for (int r = 0; r < self->rows; r++) {
-        for (int c = 0; c < self->cols; c++) {
-            float fc = (float)c / self->colScale;
+        for (int column = 0; column < self->cols; column++) {
+            float fc = (float)column / self->colScale;
             float fr = (float)r / self->rowScale;
             self->verts[idx] = (pos[0] * (1.0f - fc) + pos[1] * fc) * (1.0f - fr) + (pos[2] * (1.0f - fc) + pos[3] * fc) * fr;
             uv[idx] = (quv[0] * (1.0f - fc) + quv[1] * fc) * (1.0f - fr) + (quv[2] * (1.0f - fc) + quv[3] * fc) * fr;
@@ -144,8 +144,8 @@ extern "C" void cFlagSet_CreateMesh(void* p, void* item)
     }
     sFsV3_CM verts[50];
     func_0034BCA0(self, verts);
-    sFsMesh_CM* m = self->mesh;
-    m->vt[6].fn((char*)m + m->vt[6].delta, verts, col, uv);
+    sFsMesh_CM* flagMesh = self->mesh;
+    flagMesh->vt[6].fn((char*)flagMesh + flagMesh->vt[6].delta, verts, col, uv);
 }
 #endif
 
@@ -638,11 +638,11 @@ struct sFlagSet_C428 {
 extern "C" sFlagSet_C428* cFlagManager_cFlagManager(sFlagSet_C428* self, void* bucket)
 {
     int i;
-    sFlagSetElem_C428* p = self->elems;
+    sFlagSetElem_C428* elem = self->elems;
     cObjNode_cObjNode1(self, bucket);
     self->vtable = cFlagManager_vtbl;
-    for (i = 14; i != -1; i--, p++) {
-        func_0034AF38(p);
+    for (i = 14; i != -1; i--, elem++) {
+        func_0034AF38(elem);
     }
     self->field_0x14 = 0.5f;
     self->field_0x18 = 0.25f;
@@ -830,9 +830,9 @@ extern "C" void cFlagManager_update(sFlagSet_C668* self)
     self->level = self->base + self->delta * self->t;
     int i;
     for (i = 0; i < 15; i++) {
-        sFlagSetElem_C668* e = &self->elems[i];
-        if (e->active != 0) {
-            func_0034B818(e);
+        sFlagSetElem_C668* entry = &self->elems[i];
+        if (entry->active != 0) {
+            func_0034B818(entry);
         }
     }
 }
@@ -863,9 +863,9 @@ extern "C" void cFlagManager_render(sFlagSetOwner* self)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        sFlagSetEntry* e = &self->entries[i];
-        if (e->active != 0) {
-            func_0034B9B0(e);
+        sFlagSetEntry* entry = &self->entries[i];
+        if (entry->active != 0) {
+            func_0034B9B0(entry);
         }
     }
 }
@@ -1183,8 +1183,8 @@ extern "C" void* cFenceNode_cFenceNode(void* self, void* bucket, void* stream)
     *(unsigned int*)((char*)self + 0x1C) = 0xFFFFFFFF;
     *(void***)((char*)self + 0xC) = cFenceNode_vtbl;
     new ((char*)self + 0x40) sFlagElem_CBE8[16];
-    sFlagSetVEntry_CBE8* e = &(*(sFlagSetVEntry_CBE8**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x1C, 0x24);
+    sFlagSetVEntry_CBE8* vtEntry = &(*(sFlagSetVEntry_CBE8**)stream)[2];
+    vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x1C, 0x24);
     func_0034D1E8(self);
     return self;
 }
@@ -1340,20 +1340,20 @@ extern "C" void cFenceNode_update(char* self)
     }
     if (0.0f <= *(float*)(self + 0x34)) {
         if (*(float*)(self + 0x2C) >= *(float*)(self + 0x30)) {
-            float a = *(float*)(self + 0x30);
-            *(float*)(self + 0x2C) = a;
-            float h = a * 0.5f;
-            *(float*)(self + 0x30) = h;
-            *(float*)(self + 0x34) = -h * 0.1f;
+            float amplitude = *(float*)(self + 0x30);
+            *(float*)(self + 0x2C) = amplitude;
+            float halfAmp = amplitude * 0.5f;
+            *(float*)(self + 0x30) = halfAmp;
+            *(float*)(self + 0x34) = -halfAmp * 0.1f;
         }
     } else {
-        float a = *(float*)(self + 0x30);
-        float na = -a;
+        float amplitude = *(float*)(self + 0x30);
+        float na = -amplitude;
         if (*(float*)(self + 0x2C) <= na) {
             *(float*)(self + 0x2C) = na;
-            float h = a * 0.5f;
-            *(float*)(self + 0x30) = h;
-            *(float*)(self + 0x34) = h * 0.1f;
+            float halfAmp = amplitude * 0.5f;
+            *(float*)(self + 0x30) = halfAmp;
+            *(float*)(self + 0x34) = halfAmp * 0.1f;
         }
     }
     func_0034CF98(self);
@@ -1612,13 +1612,13 @@ static inline float fsDot_D650(const sFsVec4_D650& a, const sFsVec4_D650& b)
  */
 extern "C" void cFenceNode_onCollide(void* self, void* obj)
 {
-    char* s = (char*)self;
-    char* o = (char*)obj;
-    if (*(float*)(s + 0x30) >= 1.0f) return;
-    float d = fsDot_D650(*(sFsVec4_D650*)(o + 0x20), *(sFsVec4_D650*)(o + 0x10));
-    func_0034D6F0(self, d * 0.0010000000474974513f * *(float*)(o + 0x30));
-    if (*(int*)(s + 0x38) == 0) *(int*)(s + 0x38) = 4;
-    if (*(int*)(s + 0x3C) == 0) *(int*)(s + 0x3C) = 4;
+    char* node = (char*)self;
+    char* hitInfo = (char*)obj;
+    if (*(float*)(node + 0x30) >= 1.0f) return;
+    float dot = fsDot_D650(*(sFsVec4_D650*)(hitInfo + 0x20), *(sFsVec4_D650*)(hitInfo + 0x10));
+    func_0034D6F0(self, dot * 0.0010000000474974513f * *(float*)(hitInfo + 0x30));
+    if (*(int*)(node + 0x38) == 0) *(int*)(node + 0x38) = 4;
+    if (*(int*)(node + 0x3C) == 0) *(int*)(node + 0x3C) = 4;
 }
 #endif
 
@@ -1677,31 +1677,31 @@ extern "C" void cFenceNode_render(char* self)
     char* ctx = cGraphicsMan_TheGraphicsMan;
     float one = 1.0f;
     {
-        sModel_34B9B0* m = *(sModel_34B9B0**)(self + 0x18);
+        sModel_34B9B0* model = *(sModel_34B9B0**)(self + 0x18);
         sVE93_34B9B0* vt = *(sVE93_34B9B0**)(ctx + 0x10D8);
         char* thisp = ctx + vt[93].delta;
-        sVec4_34B9B0 a(*(float*)((char*)m + 0x60), *(float*)((char*)m + 0x64), *(float*)((char*)m + 0x68), one);
-        sVec4_34B9B0 b(*(float*)((char*)m + 0x6C), *(float*)((char*)m + 0x70), *(float*)((char*)m + 0x74), one);
-        sVec4_34B9B0* pb = &b;
+        sVec4_34B9B0 boxMin(*(float*)((char*)model + 0x60), *(float*)((char*)model + 0x64), *(float*)((char*)model + 0x68), one);
+        sVec4_34B9B0 boxMax(*(float*)((char*)model + 0x6C), *(float*)((char*)model + 0x70), *(float*)((char*)model + 0x74), one);
+        sVec4_34B9B0* pb = &boxMax;
         sVE43_34B9B0* vt43 = *(sVE43_34B9B0**)(ctx + 0x10D8);
-        sPair_34B9B0 c = vt43[43].fn(ctx + vt43[43].delta);
-        if (vt[93].fn(thisp, &a, pb, &c) == 1) {
+        sPair_34B9B0 cullInfo = vt43[43].fn(ctx + vt43[43].delta);
+        if (vt[93].fn(thisp, &boxMin, pb, &cullInfo) == 1) {
             return;
         }
     }
     TOP_34B9B0(ctx)[1] = TOP_34B9B0(ctx)[0];
-    sRS_34B9B0* t = TOP_34B9B0(ctx);
-    TOP_34B9B0(ctx) = t + 1;
-    ((int*)t)[6] = (((int*)t)[6] & ~0x7C) | 0x14;
-    sModel_34B9B0* m = *(sModel_34B9B0**)(self + 0x18);
-    char* pos = (char*)m + 0x10;
-    char* h = *(char**)(self + 0x40);
-    if (h != 0) {
-        sVE7_34B9B0* hv = *(sVE7_34B9B0**)(h + 4);
-        hv[7].fn(h + hv[7].delta, pos, *(void**)((char*)m + 0x94), 0);
+    sRS_34B9B0* renderState = TOP_34B9B0(ctx);
+    TOP_34B9B0(ctx) = renderState + 1;
+    ((int*)renderState)[6] = (((int*)renderState)[6] & ~0x7C) | 0x14;
+    sModel_34B9B0* model = *(sModel_34B9B0**)(self + 0x18);
+    char* pos = (char*)model + 0x10;
+    char* gridMesh = *(char**)(self + 0x40);
+    if (gridMesh != 0) {
+        sVE7_34B9B0* hv = *(sVE7_34B9B0**)(gridMesh + 4);
+        hv[7].fn(gridMesh + hv[7].delta, pos, *(void**)((char*)model + 0x94), 0);
     } else {
         sVE96_34B9B0* v96 = *(sVE96_34B9B0**)(ctx + 0x10D8);
-        v96[96].fn(ctx + v96[96].delta, m, 0, 0, 0);
+        v96[96].fn(ctx + v96[96].delta, model, 0, 0, 0);
     }
     TOP_34B9B0(ctx)--;
 }
@@ -2041,22 +2041,22 @@ extern "C" void cAnimNode_makeAnimMats(void* self, void* vroot, sFsMtx_DD18* out
     sFsMtx_DD18* root = (sFsMtx_DD18*)vroot;
     sFsModel_DD18* model = *(sFsModel_DD18**)((char*)self + 0x2C);
     sFsSkel_DD18* skel = model->skel;
-    float s = model->scale;
-    sFsBone_DD18* b = skel->bones;
-    sFsV4_DD18 scale(s, s, s, 1.0f);
+    float modelScale = model->scale;
+    sFsBone_DD18* bone = skel->bones;
+    sFsV4_DD18 scale(modelScale, modelScale, modelScale, 1.0f);
     int k = 0;
-    for (int i = 0; i < skel->count; i++, b++) {
-        if (b->animated) {
-            if (b->parent != -1) {
-                out[i] = mulScaledFS(out[b->parent], *(sFsMtx_DD18*)func_0034E320(self, k++), scale);
+    for (int i = 0; i < skel->count; i++, bone++) {
+        if (bone->animated) {
+            if (bone->parent != -1) {
+                out[i] = mulScaledFS(out[bone->parent], *(sFsMtx_DD18*)func_0034E320(self, k++), scale);
             } else {
                 out[i] = mulScaledFS(*root, *(sFsMtx_DD18*)func_0034E320(self, k++), scale);
             }
         } else {
-            if (b->parent != -1) {
-                out[i] = mulScaledFS(out[b->parent], *b->mtx, scale);
+            if (bone->parent != -1) {
+                out[i] = mulScaledFS(out[bone->parent], *bone->mtx, scale);
             } else {
-                out[i] = mulScaledFS(*root, *b->mtx, scale);
+                out[i] = mulScaledFS(*root, *bone->mtx, scale);
             }
         }
     }

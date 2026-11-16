@@ -35,10 +35,10 @@ void* cBEBAGTInterface_getThis()
         cBEBAGTInterface* mem = (cBEBAGTInterface*)cMemMan_alloc(0x10, D_0045A6D8, 0, 0);
         D_004A1210 = mem;
         sVTableBAGT* vt = &D_0045ACD8;
-        short d = vt->field_0x10;
+        short delta = vt->field_0x10;
         void (*fn)(void*) = vt->fn;
         mem->vtable = vt;
-        fn((char*)mem + d);
+        fn((char*)mem + delta);
         ((cBEBAGTInterface*)D_004A1210)->field_0x8 = 0;
     }
     return D_004A1210;

@@ -195,10 +195,10 @@ extern "C" void cFEStateRiderDetail_onPopupEvent(void* self, void* item, int msg
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (msg == 0x16) {
         if (Is_001835F8(*(int*)((char*)item + 0xC), D_0045D780)) {
-            int v = *(int*)((char*)item + 0x70);
+            int cheatCharId = *(int*)((char*)item + 0x70);
             if (*(int*)((char*)item + 0x74) != 0) {
                 void* pi2 = cBE_getInterface_Fv(cBE_getBE(), 1);
-                func_001474A8(pi2, *(signed char*)((char*)self + 0x44), v);
+                func_001474A8(pi2, *(signed char*)((char*)self + 0x44), cheatCharId);
                 sVE_35F8* vt = *(sVE_35F8**)((char*)pi2 + 0xC);
                 vt[1].fn((char*)pi2 + vt[1].delta);
             }
@@ -299,9 +299,9 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
         } else {
             char* obj = **(char***)(self + 0x10);
             sVE_3710* vt = *(sVE_3710**)(obj + 4);
-            void* r = vt[4].fn(obj + vt[4].delta, self, sub);
-            if (r != 0) {
-                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+            void* nextState = vt[4].fn(obj + vt[4].delta, self, sub);
+            if (nextState != 0) {
+                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
             }
         }
         func_001831D0(self, 0);
@@ -310,9 +310,9 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
     case 6: {
         char* obj = **(char***)(self + 0x10);
         sVE_3710* vt = *(sVE_3710**)(obj + 4);
-        void* r = vt[5].fn(obj + vt[5].delta, self, *(int*)(item + 0x18));
-        if (r != 0) {
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+        void* nextState = vt[5].fn(obj + vt[5].delta, self, *(int*)(item + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
             func_001831D0(self, 0);
         }
         break;

@@ -24,8 +24,8 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", cWorldPainterMan_getQuery__FPvP
 void* cWorldPainterMan_getQuery(void* self, cWorldPainterManArg* x)
 {
     void* mem = cMemMan_alloc(0x18, D_00483DE8, 0, 0);
-    void* arg = x->field_0x0;
-    return cWorldPainterQuery_cWorldPainterQuery(mem, arg);
+    void* queryArg = x->field_0x0;
+    return cWorldPainterQuery_cWorldPainterQuery(mem, queryArg);
 }
 #endif
 

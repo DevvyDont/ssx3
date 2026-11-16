@@ -5712,25 +5712,25 @@ extern int func_00405FB8(int *);
  * @return 0 on success, 1 if a decode error was flagged, 2 for a bad slice start code
  */
 int _sliceA0(int *self, int mbCount, int *mbAddress, int *mbIncrement, int *predictors) {
-    int v;
-    int a;
-    int b;
+    int startCode;
+    int rowExtension;
+    int mbAddrInc;
     self[0x11C / 4] = 0;
     func_00407438();
-    v = func_004070F0((int)self, 32);
-    if ((unsigned)(v - 0x101) >= 0xAF) {
-        func_00403470_k(self, D_00497F28, v);
+    startCode = func_004070F0((int)self, 32);
+    if ((unsigned)(startCode - 0x101) >= 0xAF) {
+        func_00403470_k(self, D_00497F28, startCode);
         return 2;
     }
     func_004071F8((int)self, 32);
-    a = func_004074B8(self);
-    b = func_00405FB8(self);
-    *mbIncrement = b;
+    rowExtension = func_004074B8(self);
+    mbAddrInc = func_00405FB8(self);
+    *mbIncrement = mbAddrInc;
     if (self[0x11C / 4] != 0) {
         func_004034A8(self, (int)D_00497F50);
         return 1;
     }
-    *mbAddress = ((((a << 7) + (v & 0xFF)) - 1) * self[0x12C / 4] + b) - 1;
+    *mbAddress = ((((rowExtension << 7) + (startCode & 0xFF)) - 1) * self[0x12C / 4] + mbAddrInc) - 1;
     *mbIncrement = 1;
     self[0x1B0 / 4] = 1;
     predictors[5] = 0;
@@ -8900,13 +8900,13 @@ extern void func_00425C60(char *, int);
  * @return 0 when the request was sent, -1 if the library is not bound, -2 if sceSifCallRpc failed
  */
 int sceUsbKbGetInfo(void *info) {
-    int r;
+    int result;
     if (D_00453438 == -1)
         return -1;
     func_00423DE0(D_00453438);
-    r = func_00426D18(&D_005290A0, 1, 1, D_00529100, 16, D_00529140, 0x90, func_0040C8B0, 0);
-    if (r != 0) {
-        func_00425C60(D_004982D0, r);
+    result = func_00426D18(&D_005290A0, 1, 1, D_00529100, 16, D_00529140, 0x90, func_0040C8B0, 0);
+    if (result != 0) {
+        func_00425C60(D_004982D0, result);
         return -2;
     }
     D_00529000.cmd = 1;
@@ -8940,9 +8940,9 @@ int sceUsbKbRead(unsigned kbdNo, void *data) {
     D_00529100[0] = kbdNo;
     func_00423DE0(D_00453438);
     {
-        int r = func_00426D18(&D_005290A0, 2, 1, D_00529100, 16, D_00529140, 0x50, func_0040C8B0, 0);
-        if (r != 0) {
-            func_00425C60(D_004982F8, r);
+        int result = func_00426D18(&D_005290A0, 2, 1, D_00529100, 16, D_00529140, 0x50, func_0040C8B0, 0);
+        if (result != 0) {
+            func_00425C60(D_004982F8, result);
             return -2;
         }
     }
@@ -8963,31 +8963,31 @@ extern void func_00425C60(char *, int);
 /**
  * Starts a request for the USB port location of a keyboard (Sony libusbkb).
  *
- * Takes the keyboard RPC semaphore and sends RPC 3 to the IOP asynchronously; the reply is copied to @p b when
+ * Takes the keyboard RPC semaphore and sends RPC 3 to the IOP asynchronously; the reply is copied to @p location when
  * the pending command is collected later.
  *
- * @param a  keyboard number
- * @param b  receives the location
+ * @param kbdNo  keyboard number
+ * @param location  receives the location
  * @return 0 when the request was sent, -1 if the library is not initialised, -11 for a bad keyboard number,
  *         -2 if the RPC call failed
  */
-int sceUsbKbGetLocation(int a, void *b) {
+int sceUsbKbGetLocation(int kbdNo, void *location) {
     if (D_00453438 == -1)
         return -1;
-    if (a >= D_00529000.n)
+    if (kbdNo >= D_00529000.n)
         return -11;
-    D_00529100[0] = a;
+    D_00529100[0] = kbdNo;
     func_00423DE0(D_00453438);
     {
-        int r = func_00426D18(&D_005290A0, 3, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
-        if (r != 0) {
-            func_00425C60(D_00498320, r);
+        int result = func_00426D18(&D_005290A0, 3, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
+        if (result != 0) {
+            func_00425C60(D_00498320, result);
             return -2;
         }
     }
     D_00529000.cmd = 3;
-    D_00529000.arg = a;
-    D_00529000.out = b;
+    D_00529000.arg = kbdNo;
+    D_00529000.out = location;
     return 0;
 }
 #endif
@@ -9002,31 +9002,31 @@ extern void func_00425C60(char *, int);
 /**
  * Starts a request to set a keyboard's LED state (Sony libusbkb).
  *
- * Takes the keyboard RPC semaphore and sends RPC 4 with the keyboard number and @p b to the IOP asynchronously.
+ * Takes the keyboard RPC semaphore and sends RPC 4 with the keyboard number and @p ledStatus to the IOP asynchronously.
  *
- * @param a  keyboard number
- * @param b  LED state bits
+ * @param kbdNo  keyboard number
+ * @param ledStatus  LED state bits
  * @return 0 when the request was sent, -1 if the library is not initialised, -11 for a bad keyboard number,
  *         -2 if the RPC call failed
  */
-int sceUsbKbSetLEDStatus(int a, unsigned char b) {
+int sceUsbKbSetLEDStatus(int kbdNo, unsigned char ledStatus) {
     if (D_00453438 == -1)
         return -1;
-    if (a >= D_00529000.n)
+    if (kbdNo >= D_00529000.n)
         return -11;
-    D_00529100[0] = a;
-    D_00529100[1] = b;
+    D_00529100[0] = kbdNo;
+    D_00529100[1] = ledStatus;
     func_00423DE0(D_00453438);
     {
-        int r = func_00426D18(&D_005290A0, 4, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
-        if (r != 0) {
-            func_00425C60(D_00498350, r);
+        int result = func_00426D18(&D_005290A0, 4, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
+        if (result != 0) {
+            func_00425C60(D_00498350, result);
             return -2;
         }
     }
     D_00529000.cmd = 4;
     D_00529000.out = 0;
-    D_00529000.arg = a;
+    D_00529000.arg = kbdNo;
     return 0;
 }
 
@@ -9044,23 +9044,23 @@ extern void func_00425C60(char *, int);
  *
  * Records the mode in the keyboard's state, takes the keyboard RPC semaphore and sends RPC 5 asynchronously.
  *
- * @param a  keyboard number
- * @param b  LED mode, 0 to 2
+ * @param kbdNo  keyboard number
+ * @param mode  LED mode, 0 to 2
  * @return 0 when the request was sent, -1 if the library is not initialised, -11 for a bad keyboard number,
  *         -12 for a mode above 2, -2 if the RPC call failed
  */
-int sceUsbKbSetLEDMode(int a, unsigned b) {
-    int h = D_00453438;
-    if (h == -1)
+int sceUsbKbSetLEDMode(int kbdNo, unsigned mode) {
+    int semaId = D_00453438;
+    if (semaId == -1)
         return -1;
-    if (a >= D_00529000.n)
+    if (kbdNo >= D_00529000.n)
         return -11;
-    if (b > 2)
+    if (mode > 2)
         return -12;
-    D_00529000.port[a].ledMode = b;
-    D_00529100[0] = a;
-    D_00529100[1] = b;
-    func_00423DE0(h);
+    D_00529000.port[kbdNo].ledMode = mode;
+    D_00529100[0] = kbdNo;
+    D_00529100[1] = mode;
+    func_00423DE0(semaId);
     {
         int r = func_00426D18(&D_005290A0, 5, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
         if (r != 0) {
@@ -9070,7 +9070,7 @@ int sceUsbKbSetLEDMode(int a, unsigned b) {
     }
     D_00529000.cmd = 5;
     D_00529000.out = 0;
-    D_00529000.arg = a;
+    D_00529000.arg = kbdNo;
     return 0;
 }
 #endif

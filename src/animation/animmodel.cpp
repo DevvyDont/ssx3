@@ -92,12 +92,12 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_setScale);
  */
 extern "C" void cAnimModel_setScale(cAnimModel* self, float lengthScale, float widthScale)
 {
-    t4Vector v;
-    v.x = lengthScale;
-    v.y = widthScale;
-    v.z = widthScale;
-    v.w = 1.0f;
-    self->unk_140 = v;
+    t4Vector scale;
+    scale.x = lengthScale;
+    scale.y = widthScale;
+    scale.z = widthScale;
+    scale.w = 1.0f;
+    self->unk_140 = scale;
 }
 #endif
 
@@ -496,12 +496,12 @@ extern "C" void cAnimModel_transform(cAnimModel* self, sAnimModelBone* roots)
         {
             int k = j + ((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)self->parts))->firstBone;
             sAnimModelBone* parent;
-            sAmBoneInfo_0200* e = &info[j];
-            short p = e->parent;
-            if (p < 0)
+            sAmBoneInfo_0200* boneInfo = &info[j];
+            short parentIndex = boneInfo->parent;
+            if (parentIndex < 0)
                 parent = roots++;
             else
-                parent = &self->bones[p];
+                parent = &self->bones[parentIndex];
             t4Vector* lp = (t4Vector*)((k << 4) + (int)self->localPos);
             sAmXform_0200 local;
             local.pos = sAmQuat_0200(lp->x * self->unk_140.x, lp->y * self->unk_140.y, lp->z * self->unk_140.z, lp->w * self->unk_140.w);
@@ -634,12 +634,12 @@ extern "C" void cAnimModel_applyOffset(cAnimModel* self, t4Vector* offset)
             int k = j + self->parts[i].firstBone;
             amVecAddEq(&self->bones[k].pos, offset);
             {
-                t4Vector t = amVecAdd(self->unk_030[k].row[3], offset);
-                self->unk_030[k].row[3] = t;
+                t4Vector shiftedPos = amVecAdd(self->unk_030[k].row[3], offset);
+                self->unk_030[k].row[3] = shiftedPos;
             }
             {
-                t4Vector t = amVecAdd(self->unk_034[k].row[3], offset);
-                self->unk_034[k].row[3] = t;
+                t4Vector shiftedPos = amVecAdd(self->unk_034[k].row[3], offset);
+                self->unk_034[k].row[3] = shiftedPos;
             }
         }
     }
@@ -1000,31 +1000,31 @@ extern "C" ulong cAnimModel_getGraftMask(cAnimModel* self, int idx, char* names)
     int* tbl = self->partIndex;
     if (tbl == 0 || tbl[idx] < 0)
         return 0;
-    char* p = names;
+    char* token = names;
     ulong mask = 0;
     sAnimModelPart* part = &self->parts[tbl[idx]];
-    while (*p) {
-        char* q = p;
-        if (*q != 0 && *q != ',') {
+    while (*token) {
+        char* tokenEnd = token;
+        if (*tokenEnd != 0 && *tokenEnd != ',') {
             do
-                q++;
-            while (*q != 0 && *q != ',');
+                tokenEnd++;
+            while (*tokenEnd != 0 && *tokenEnd != ',');
         }
-        int len = q - p;
-        if (part->unk_0C >= 0 && func_00416B18(p, D_004A3DF0, len) == 0) {
+        int len = tokenEnd - token;
+        if (part->unk_0C >= 0 && func_00416B18(token, D_004A3DF0, len) == 0) {
             mask |= (ulong)1 << (part->unk_0C + self->numBones);
         } else {
             char* list = part->boneNames;
             int j = 0;
             ulong one = 1;
             for (; j < part->numBones; j++) {
-                if (func_00416B18(list + j * 0x50, p, len) == 0 && *(list + len + j * 0x50) == 0) {
+                if (func_00416B18(list + j * 0x50, token, len) == 0 && *(list + len + j * 0x50) == 0) {
                     mask |= one << (part->firstBone + j);
                     break;
                 }
             }
         }
-        p = q + (*q == ',');
+        token = tokenEnd + (*tokenEnd == ',');
     }
     return mask;
 }

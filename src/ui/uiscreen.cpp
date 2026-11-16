@@ -159,13 +159,13 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByLabel__FP9cUIScreeni);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label)
 {
     sFrameList* list = (sFrameList*)self->mpKeyframeBlock;
-    sFrameEntry* e = (sFrameEntry*)((char*)list + 4);
+    sFrameEntry* entry = (sFrameEntry*)((char*)list + 4);
     unsigned int i;
     for (i = 0; i < (unsigned int)list->count; i++) {
-        if (e->label == label) {
-            return e->field_0x8;
+        if (entry->label == label) {
+            return entry->field_0x8;
         }
-        e = (sFrameEntry*)((char*)e + e->stride);
+        entry = (sFrameEntry*)((char*)entry + entry->stride);
     }
     return 0xFFFF;
 }
@@ -345,24 +345,24 @@ struct sCmdList_C978 {
 // the frame it was on.
 extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
 {
-    cUIThread_C870 *s = (cUIThread_C870 *)thread;
+    cUIThread_C870 *uiThread = (cUIThread_C870 *)thread;
     sCmdList_C978 *list;
     sCmd_C978 *cmd;
     unsigned int i;
-    unsigned short CurrentFrame = s->getCurrentFrameNumber();
-    s->setLastFrameNumber(s->getCurrentFrameNumber());
-    if (s->mStopFrameNumber != 0xFFFF) {
-        if (s->getFrameIncrement() > 0) {
-            if (s->mLastFrameNumber < s->mStopFrameNumber) {
-                s->mCurrentFrameNumber = s->getCurrentFrameNumber() + s->getFrameIncrement();
+    unsigned short CurrentFrame = uiThread->getCurrentFrameNumber();
+    uiThread->setLastFrameNumber(uiThread->getCurrentFrameNumber());
+    if (uiThread->mStopFrameNumber != 0xFFFF) {
+        if (uiThread->getFrameIncrement() > 0) {
+            if (uiThread->mLastFrameNumber < uiThread->mStopFrameNumber) {
+                uiThread->mCurrentFrameNumber = uiThread->getCurrentFrameNumber() + uiThread->getFrameIncrement();
             }
-        } else if (s->getFrameIncrement() < 0) {
-            if (s->mLastFrameNumber > s->mStopFrameNumber) {
-                s->mCurrentFrameNumber = s->getCurrentFrameNumber() + s->getFrameIncrement();
+        } else if (uiThread->getFrameIncrement() < 0) {
+            if (uiThread->mLastFrameNumber > uiThread->mStopFrameNumber) {
+                uiThread->mCurrentFrameNumber = uiThread->getCurrentFrameNumber() + uiThread->getFrameIncrement();
             }
         }
     } else {
-        s->mCurrentFrameNumber = s->getCurrentFrameNumber() + s->getFrameIncrement();
+        uiThread->mCurrentFrameNumber = uiThread->getCurrentFrameNumber() + uiThread->getFrameIncrement();
     }
     list = (sCmdList_C978 *)func_0039C728(self, CurrentFrame);
     cmd = &list->first;
@@ -372,40 +372,40 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
             do {
                 switch (cmd->op) {
                 case 0x10:
-                    func_0039CBC8_4(self, list, cmd, s);
+                    func_0039CBC8_4(self, list, cmd, uiThread);
                     break;
                 case 0x11:
-                    cUIScreen_parseKeyframeJump_4(self, list, cmd, s);
+                    cUIScreen_parseKeyframeJump_4(self, list, cmd, uiThread);
                     break;
                 case 0x12:
-                    cUIScreen_parseKeyframeSpawn_4(self, list, cmd, s);
+                    cUIScreen_parseKeyframeSpawn_4(self, list, cmd, uiThread);
                     break;
                 case 0x20:
-                    func_0039CCA8_4(self, list, cmd, s);
+                    func_0039CCA8_4(self, list, cmd, uiThread);
                     break;
                 case 0x21:
-                    func_0039CD30_4(self, list, cmd, s);
+                    func_0039CD30_4(self, list, cmd, uiThread);
                     break;
                 case 0x22:
-                    func_0039CD90_4(self, list, cmd, s);
+                    func_0039CD90_4(self, list, cmd, uiThread);
                     break;
                 case 0x30:
-                    func_0039CDA0_4(self, list, cmd, s);
+                    func_0039CDA0_4(self, list, cmd, uiThread);
                     break;
                 case 0x31:
-                    func_0039CD98_4(self, list, cmd, s);
+                    func_0039CD98_4(self, list, cmd, uiThread);
                     break;
                 case 0x40:
-                    func_0039CE90_4(self, list, cmd, s);
+                    func_0039CE90_4(self, list, cmd, uiThread);
                     break;
                 case 0x41:
-                    func_0039CE98_4(self, list, cmd, s);
+                    func_0039CE98_4(self, list, cmd, uiThread);
                     break;
                 case 0x42:
-                    func_0039CE20_4(self, list, cmd, s);
+                    func_0039CE20_4(self, list, cmd, uiThread);
                     break;
                 case 0x43:
-                    cUIScreen_parseScreenFocusLose_4(self, list, cmd, s);
+                    cUIScreen_parseScreenFocusLose_4(self, list, cmd, uiThread);
                     break;
                 }
                 i++;
@@ -437,14 +437,14 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeJump);
  */
 extern "C" void cUIScreen_parseKeyframeJump(cUIScreen* self, void* pFrame, void* pKCP, void* pThread)
 {
-    sFrameEntry* e = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
+    sFrameEntry* entry = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
     unsigned int i;
     for (i = 0; i < (unsigned int)((sFrameList*)self->mpKeyframeBlock)->count; i++) {
-        if (e->label == *(int*)((char*)pKCP + 4)) {
-            *(unsigned short*)((char*)pThread + 0xC) = e->field_0x8;
+        if (entry->label == *(int*)((char*)pKCP + 4)) {
+            *(unsigned short*)((char*)pThread + 0xC) = entry->field_0x8;
             return;
         }
-        e = (sFrameEntry*)((char*)e + e->stride);
+        entry = (sFrameEntry*)((char*)entry + entry->stride);
     }
 }
 #endif
@@ -460,14 +460,14 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeSpawn);
  */
 extern "C" void cUIScreen_parseKeyframeSpawn(cUIScreen* self, void* pFrame, void* pKCP)
 {
-    sFrameEntry* e = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
+    sFrameEntry* entry = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
     unsigned int i;
     for (i = 0; i < (unsigned int)((sFrameList*)self->mpKeyframeBlock)->count; i++) {
-        if (e->label == *(int*)((char*)pKCP + 4)) {
-            cUIScreen_playFrame(self, e->field_0x8, 1);
+        if (entry->label == *(int*)((char*)pKCP + 4)) {
+            cUIScreen_playFrame(self, entry->field_0x8, 1);
             return;
         }
-        e = (sFrameEntry*)((char*)e + e->stride);
+        entry = (sFrameEntry*)((char*)entry + entry->stride);
     }
 }
 #endif
@@ -619,9 +619,9 @@ extern "C" void cUIGroup_setFocus(void*, int);
 extern "C" void cUIScreen_parseScreenFocusLose(cUIScreen* self)
 {
     cUIGroup_setFocus(&self->mRootGroup, 0);
-    void* p = self->mpState;
-    if (p != 0) {
-        ((sUIFlags1C*)((char*)p + 0x1c))->mode = 6;
+    void* state = self->mpState;
+    if (state != 0) {
+        ((sUIFlags1C*)((char*)state + 0x1c))->mode = 6;
     }
 }
 #endif
@@ -687,11 +687,11 @@ extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
         rec += *(unsigned short*)(rec + 2);
     }
     for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
-        void* o = ((void**)self->mppObjectList)[i];
-        if (o != 0) {
-            char* d = (char*)self->mpState;
-            sUIVtCED0* vt = *(sUIVtCED0**)(d + 8);
-            vt[18].fn(d + vt[18].delta, o);
+        void* uiObj = ((void**)self->mppObjectList)[i];
+        if (uiObj != 0) {
+            char* state = (char*)self->mpState;
+            sUIVtCED0* vt = *(sUIVtCED0**)(state + 8);
+            vt[18].fn(state + vt[18].delta, uiObj);
         }
     }
 }
@@ -792,208 +792,208 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
 {
     switch (*(unsigned short*)rec) {
     case 0x11: {
-        char* o = alloc_D078(0x88, D_004A4788);
-        func_0039FB30(o, self, 0);
-        *(void***)(o + 8) = cUIIcon_vtbl;
-        func_0021CCC8(o + 0x74);
-        *(int*)(o + 0x78) = -1;
-        *(int*)(o + 0x7C) = 0;
-        initFromRec_D078(o, rec);
-        return o;
+        char* created = alloc_D078(0x88, D_004A4788);
+        func_0039FB30(created, self, 0);
+        *(void***)(created + 8) = cUIIcon_vtbl;
+        func_0021CCC8(created + 0x74);
+        *(int*)(created + 0x78) = -1;
+        *(int*)(created + 0x7C) = 0;
+        initFromRec_D078(created, rec);
+        return created;
     }
     case 0x10: {
-        char* o = alloc_D078(0x90, D_00493F00);
-        func_0039FB30(o, self, 0);
-        *(void***)(o + 8) = cUIGroup_vtbl;
-        func_003977E8(o + 0x74);
-        int* h = (int*)(rec + 0x24);
-        for (unsigned int i = 0; i < *(unsigned int*)(rec + 0x20); i++, h++) {
-            char* c = (char*)cUIScreen_getObjectByHashName(self, *h);
-            if (c != 0) {
-                cListNode_removeFromList(c);
-                *(char**)(c + 0x40) = o;
-                cList_addToEnd((cList*)(o + 0x74), (cListNode*)c);
+        char* created = alloc_D078(0x90, D_00493F00);
+        func_0039FB30(created, self, 0);
+        *(void***)(created + 8) = cUIGroup_vtbl;
+        func_003977E8(created + 0x74);
+        int* hashes = (int*)(rec + 0x24);
+        for (unsigned int i = 0; i < *(unsigned int*)(rec + 0x20); i++, hashes++) {
+            char* child = (char*)cUIScreen_getObjectByHashName(self, *hashes);
+            if (child != 0) {
+                cListNode_removeFromList(child);
+                *(char**)(child + 0x40) = created;
+                cList_addToEnd((cList*)(created + 0x74), (cListNode*)child);
             }
         }
-        initFromRec_D078(o, rec);
-        return o;
+        initFromRec_D078(created, rec);
+        return created;
     }
     case 0x12: {
-        char* o = (char*)cUIListBox_cUIListBox(alloc_D078(0x31C, D_00493F10), self, 0);
-        initFromRec_D078(o, rec);
-        return o;
+        char* created = (char*)cUIListBox_cUIListBox(alloc_D078(0x31C, D_00493F10), self, 0);
+        initFromRec_D078(created, rec);
+        return created;
     }
     case 0x13: {
-        char* o = alloc_D078(0xA8, D_004A4790);
-        func_0039FB30(o, self, 0);
-        *(void***)(o + 8) = cUIGroup_vtbl;
-        func_003977E8(o + 0x74);
-        *(void***)(o + 8) = cUIMenu_vtbl;
-        func_003A5338(o + 0x90);
-        *(unsigned char*)(o + 0xA4) = 0xFF;
-        *(char*)(o + 0x95) = 0;
-        *(char*)(o + 0x96) = 0;
-        *(char*)(o + 0x97) = 0;
-        *(char*)(o + 0x98) = 0;
-        *(int*)(o + 0x9C) = 0;
-        *(int*)(o + 0xA0) = 0;
-        int* h = (int*)(rec + 0x24);
-        for (unsigned int i = 0; i < *(unsigned char*)(rec + 0x20); i++, h++) {
-            char* c = (char*)cUIScreen_getObjectByHashName(self, *h);
-            if (c != 0) {
-                cListNode_removeFromList(c);
-                *(char**)(c + 0x40) = o;
-                cList_addToEnd((cList*)(o + 0x74), (cListNode*)c);
+        char* created = alloc_D078(0xA8, D_004A4790);
+        func_0039FB30(created, self, 0);
+        *(void***)(created + 8) = cUIGroup_vtbl;
+        func_003977E8(created + 0x74);
+        *(void***)(created + 8) = cUIMenu_vtbl;
+        func_003A5338(created + 0x90);
+        *(unsigned char*)(created + 0xA4) = 0xFF;
+        *(char*)(created + 0x95) = 0;
+        *(char*)(created + 0x96) = 0;
+        *(char*)(created + 0x97) = 0;
+        *(char*)(created + 0x98) = 0;
+        *(int*)(created + 0x9C) = 0;
+        *(int*)(created + 0xA0) = 0;
+        int* hashes = (int*)(rec + 0x24);
+        for (unsigned int i = 0; i < *(unsigned char*)(rec + 0x20); i++, hashes++) {
+            char* child = (char*)cUIScreen_getObjectByHashName(self, *hashes);
+            if (child != 0) {
+                cListNode_removeFromList(child);
+                *(char**)(child + 0x40) = created;
+                cList_addToEnd((cList*)(created + 0x74), (cListNode*)child);
             }
         }
-        initFromRec_D078(o, rec);
-        return o;
+        initFromRec_D078(created, rec);
+        return created;
     }
     case 0x15: {
-        char* o = alloc_D078(0x80, D_004A4798);
-        int* h = (int*)(rec + 0x20);
-        func_0039FB30(o, self, 0);
-        *(void***)(o + 8) = cUIPair_vtbl;
-        func_003A5508(o + 0x74);
-        *(int*)(o + 0x14) |= 2;
-        *(int*)(o + 0x78) = 0;
-        *(int*)(o + 0x7C) = 0;
-        initFromRec_D078(o, rec);
-        char* c = (char*)cUIScreen_getObjectByHashName(self, h[0]);
-        if (c != 0) {
-            cListNode_removeFromList(c);
-            *(char**)(c + 0x40) = o;
-            char* old = *(char**)(o + 0x78);
+        char* created = alloc_D078(0x80, D_004A4798);
+        int* hashes = (int*)(rec + 0x20);
+        func_0039FB30(created, self, 0);
+        *(void***)(created + 8) = cUIPair_vtbl;
+        func_003A5508(created + 0x74);
+        *(int*)(created + 0x14) |= 2;
+        *(int*)(created + 0x78) = 0;
+        *(int*)(created + 0x7C) = 0;
+        initFromRec_D078(created, rec);
+        char* child = (char*)cUIScreen_getObjectByHashName(self, hashes[0]);
+        if (child != 0) {
+            cListNode_removeFromList(child);
+            *(char**)(child + 0x40) = created;
+            char* old = *(char**)(created + 0x78);
             if (old != 0)
                 deleteObj_D078(old);
-            *(char**)(o + 0x78) = c;
+            *(char**)(created + 0x78) = child;
         }
-        c = (char*)cUIScreen_getObjectByHashName(self, h[1]);
-        if (c != 0) {
-            *(int*)(c + 0x14) &= ~1;
-            cListNode_removeFromList(c);
-            *(char**)(c + 0x40) = o;
-            char* old = *(char**)(o + 0x7C);
+        child = (char*)cUIScreen_getObjectByHashName(self, hashes[1]);
+        if (child != 0) {
+            *(int*)(child + 0x14) &= ~1;
+            cListNode_removeFromList(child);
+            *(char**)(child + 0x40) = created;
+            char* old = *(char**)(created + 0x7C);
             if (old != 0)
                 deleteObj_D078(old);
-            *(char**)(o + 0x7C) = c;
+            *(char**)(created + 0x7C) = child;
         }
-        return o;
+        return created;
     }
     case 0x19: {
-        char* o = alloc_D078(0x88, D_00493F20);
-        func_0039FB30(o, self, 0);
-        *(int*)(o + 0x74) = 0;
-        *(int*)(o + 0x78) = 0;
-        *(int*)(o + 0x7C) = 0;
-        *(int*)(o + 0x80) = 0;
-        *(int*)(o + 0x84) = 0;
-        *(void***)(o + 8) = cUIProgress_vtbl;
-        initFromRec_D078(o, rec);
+        char* created = alloc_D078(0x88, D_00493F20);
+        func_0039FB30(created, self, 0);
+        *(int*)(created + 0x74) = 0;
+        *(int*)(created + 0x78) = 0;
+        *(int*)(created + 0x7C) = 0;
+        *(int*)(created + 0x80) = 0;
+        *(int*)(created + 0x84) = 0;
+        *(void***)(created + 8) = cUIProgress_vtbl;
+        initFromRec_D078(created, rec);
         {
-            char* c = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x20));
-            if (c != 0) {
-                cListNode_removeFromList(c);
-                *(char**)(c + 0x40) = o;
-                *(char**)(o + 0x74) = c;
+            char* child = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x20));
+            if (child != 0) {
+                cListNode_removeFromList(child);
+                *(char**)(child + 0x40) = created;
+                *(char**)(created + 0x74) = child;
             }
         }
         {
-            char* c = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x24));
-            if (c != 0) {
-                cListNode_removeFromList(c);
-                *(char**)(c + 0x40) = o;
-                *(char**)(o + 0x78) = c;
+            char* child = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x24));
+            if (child != 0) {
+                cListNode_removeFromList(child);
+                *(char**)(child + 0x40) = created;
+                *(char**)(created + 0x78) = child;
             }
         }
-        return o;
+        return created;
     }
     case 0x21: {
-        char* o = alloc_D078(0xCC, D_00493F30);
-        func_0039FB30(o, self, 0);
-        *(int*)(o + 0x74) = 0;
-        *(int*)(o + 0x78) = 0;
-        *(int*)(o + 0x7C) = 0;
-        *(int*)(o + 0x80) = 0;
-        *(int*)(o + 0x84) = 0;
-        *(int*)(o + 0x88) = 0;
-        *(int*)(o + 0xC0) = 0;
-        *(int*)(o + 0xC4) = 0;
-        *(int*)(o + 0xC8) = 0;
-        *(char*)(o + 0x8C) = 0;
-        *(char*)(o + 0xA5) = 0;
-        *(void***)(o + 8) = cUIScrollBar_vtbl;
-        initFromRec_D078(o, rec);
+        char* created = alloc_D078(0xCC, D_00493F30);
+        func_0039FB30(created, self, 0);
+        *(int*)(created + 0x74) = 0;
+        *(int*)(created + 0x78) = 0;
+        *(int*)(created + 0x7C) = 0;
+        *(int*)(created + 0x80) = 0;
+        *(int*)(created + 0x84) = 0;
+        *(int*)(created + 0x88) = 0;
+        *(int*)(created + 0xC0) = 0;
+        *(int*)(created + 0xC4) = 0;
+        *(int*)(created + 0xC8) = 0;
+        *(char*)(created + 0x8C) = 0;
+        *(char*)(created + 0xA5) = 0;
+        *(void***)(created + 8) = cUIScrollBar_vtbl;
+        initFromRec_D078(created, rec);
         {
-            char* c = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x20));
-            if (c != 0) {
-                cListNode_removeFromList(c);
-                *(char**)(c + 0x40) = o;
-                *(char**)(o + 0x74) = c;
+            char* child = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x20));
+            if (child != 0) {
+                cListNode_removeFromList(child);
+                *(char**)(child + 0x40) = created;
+                *(char**)(created + 0x74) = child;
             }
         }
         {
-            char* c = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x24));
-            if (c != 0) {
-                cListNode_removeFromList(c);
-                *(char**)(c + 0x40) = o;
-                *(char**)(o + 0x78) = c;
+            char* child = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x24));
+            if (child != 0) {
+                cListNode_removeFromList(child);
+                *(char**)(child + 0x40) = created;
+                *(char**)(created + 0x78) = child;
             }
         }
-        return o;
+        return created;
     }
     case 0x16: {
-        char* o = alloc_D078(0x90, D_00493F40);
-        func_0039FB30(o, self, 0);
-        *(int*)(o + 0x74) = 0;
-        *(int*)(o + 0x78) = 0;
-        *(int*)(o + 0x7C) = 0;
-        *(int*)(o + 0x80) = 0;
-        *(int*)(o + 0x88) = 0;
-        *(int*)(o + 0x8C) = 0;
-        *(void***)(o + 8) = cUISlider_vtbl;
-        initFromRec_D078(o, rec);
+        char* created = alloc_D078(0x90, D_00493F40);
+        func_0039FB30(created, self, 0);
+        *(int*)(created + 0x74) = 0;
+        *(int*)(created + 0x78) = 0;
+        *(int*)(created + 0x7C) = 0;
+        *(int*)(created + 0x80) = 0;
+        *(int*)(created + 0x88) = 0;
+        *(int*)(created + 0x8C) = 0;
+        *(void***)(created + 8) = cUISlider_vtbl;
+        initFromRec_D078(created, rec);
         {
-            char* c = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x24));
-            if (c != 0) {
-                cListNode_removeFromList(c);
-                *(char**)(c + 0x40) = o;
-                *(char**)(o + 0x88) = c;
+            char* child = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x24));
+            if (child != 0) {
+                cListNode_removeFromList(child);
+                *(char**)(child + 0x40) = created;
+                *(char**)(created + 0x88) = child;
             }
         }
         {
-            char* c = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x28));
-            if (c != 0) {
-                cListNode_removeFromList(c);
-                *(char**)(c + 0x40) = o;
-                *(char**)(o + 0x8C) = c;
+            char* child = (char*)cUIScreen_getObjectByHashName(self, *(int*)(rec + 0x28));
+            if (child != 0) {
+                cListNode_removeFromList(child);
+                *(char**)(child + 0x40) = created;
+                *(char**)(created + 0x8C) = child;
             }
         }
-        return o;
+        return created;
     }
     case 0x17: {
-        char* o = (char*)func_003A0348(alloc_D078(0xBC, D_004A47A0), self, 0);
-        initFromRec_D078(o, rec);
-        return o;
+        char* created = (char*)func_003A0348(alloc_D078(0xBC, D_004A47A0), self, 0);
+        initFromRec_D078(created, rec);
+        return created;
     }
     case 0x20: {
-        char* o = (char*)cUITextScroll_cUITextScroll(alloc_D078(0xD0, D_00493F50), self, 0);
-        int* h = (int*)(rec + 0x2C);
-        for (unsigned int i = 0; i < *(unsigned char*)(rec + 0x22); i++, h++) {
-            char* c = (char*)cUIScreen_getObjectByHashName(self, *h);
-            if (c != 0) {
-                cListNode_removeFromList(c);
-                *(char**)(c + 0x40) = o;
-                cList_addToEnd((cList*)(o + 0x8C), (cListNode*)c);
+        char* created = (char*)cUITextScroll_cUITextScroll(alloc_D078(0xD0, D_00493F50), self, 0);
+        int* hashes = (int*)(rec + 0x2C);
+        for (unsigned int i = 0; i < *(unsigned char*)(rec + 0x22); i++, hashes++) {
+            char* child = (char*)cUIScreen_getObjectByHashName(self, *hashes);
+            if (child != 0) {
+                cListNode_removeFromList(child);
+                *(char**)(child + 0x40) = created;
+                cList_addToEnd((cList*)(created + 0x8C), (cListNode*)child);
             }
         }
-        initFromRec_D078(o, rec);
-        return o;
+        initFromRec_D078(created, rec);
+        return created;
     }
     case 0x18: {
-        char* o = (char*)cUIVector_cUIVector(alloc_D078(0x90, D_00493F60), self, 0);
-        initFromRec_D078(o, rec);
-        return o;
+        char* created = (char*)cUIVector_cUIVector(alloc_D078(0x90, D_00493F60), self, 0);
+        initFromRec_D078(created, rec);
+        return created;
     }
     }
     return 0;
@@ -1050,13 +1050,13 @@ extern "C" void cUIScreen_update(cUIScreen* self)
         }
     }
     unsigned short frame = 0xFFFF;
-    void* t = cUIScreen_getPrimaryThread(self);
-    if (t != 0) {
-        frame = *(unsigned short*)((char*)t + 0xC);
+    void* thread = cUIScreen_getPrimaryThread(self);
+    if (thread != 0) {
+        frame = *(unsigned short*)((char*)thread + 0xC);
     } else {
-        t = cList_first((cList*)((char*)self + 0x18));
-        if (t != 0) {
-            frame = *(unsigned short*)((char*)t + 0xC);
+        thread = cList_first((cList*)((char*)self + 0x18));
+        if (thread != 0) {
+            frame = *(unsigned short*)((char*)thread + 0xC);
         }
     }
     cUIGroup_update((char*)self + 0x40, frame);
@@ -1077,9 +1077,9 @@ extern "C" void* cUIScreen_getObjectByHashName(cUIScreen* self, int hash)
     void** objs = (void**)self->mppObjectList;
     if (objs != 0) {
         for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
-            void* o = objs[i];
-            if (o != 0 && *(int*)((char*)o + 0x38) == hash) {
-                return o;
+            void* uiObj = objs[i];
+            if (uiObj != 0 && *(int*)((char*)uiObj + 0x38) == hash) {
+                return uiObj;
             }
         }
     }
@@ -1152,18 +1152,18 @@ struct cUIScrollBar_render2D_sVEntry {
  */
 extern "C" void cUIScrollBar_render2D(cUIScrollBar* self, float x, float y)
 {
-    char* a = (char*)self->mpObjBackground;
-    if (a != 0 && self->mpObjKnob != 0) {
+    char* background = (char*)self->mpObjBackground;
+    if (background != 0 && self->mpObjKnob != 0) {
         float px = x + self->mPosition.x;
         float py = y + self->mPosition.y;
-        if ((*(int*)(a + 0x14) >> 6) & 1) {
-            cUIScrollBar_render2D_sVEntry* vt = *(cUIScrollBar_render2D_sVEntry**)(a + 8);
-            vt[0x11].fn(a + vt[0x11].delta, px, py);
+        if ((*(int*)(background + 0x14) >> 6) & 1) {
+            cUIScrollBar_render2D_sVEntry* vt = *(cUIScrollBar_render2D_sVEntry**)(background + 8);
+            vt[0x11].fn(background + vt[0x11].delta, px, py);
         }
-        char* b = (char*)self->mpObjKnob;
-        if ((*(int*)(b + 0x14) >> 6) & 1) {
-            cUIScrollBar_render2D_sVEntry* vt = *(cUIScrollBar_render2D_sVEntry**)(b + 8);
-            vt[0x11].fn(b + vt[0x11].delta, px, py);
+        char* knob = (char*)self->mpObjKnob;
+        if ((*(int*)(knob + 0x14) >> 6) & 1) {
+            cUIScrollBar_render2D_sVEntry* vt = *(cUIScrollBar_render2D_sVEntry**)(knob + 8);
+            vt[0x11].fn(knob + vt[0x11].delta, px, py);
         }
     }
 }
@@ -1354,17 +1354,17 @@ static inline void cUIScrollBar_setScrollVisibile_call(char* o, int a)
  */
 extern "C" void cUIScrollBar_setScrollVisibile(cUIScrollBar* self, int bVisible)
 {
-    char* o = (char*)self->mpUpArrow;
-    if (o != 0) {
-        cUIScrollBar_setScrollVisibile_call(o, bVisible);
+    char* element = (char*)self->mpUpArrow;
+    if (element != 0) {
+        cUIScrollBar_setScrollVisibile_call(element, bVisible);
     }
-    o = (char*)self->mpDownArrow;
-    if (o != 0) {
-        cUIScrollBar_setScrollVisibile_call(o, bVisible);
+    element = (char*)self->mpDownArrow;
+    if (element != 0) {
+        cUIScrollBar_setScrollVisibile_call(element, bVisible);
     }
-    o = (char*)self->mpHideOnEmpty;
-    if (o != 0) {
-        cUIScrollBar_setScrollVisibile_call(o, bVisible);
+    element = (char*)self->mpHideOnEmpty;
+    if (element != 0) {
+        cUIScrollBar_setScrollVisibile_call(element, bVisible);
     }
     cUIScrollBar_setScrollVisibile_call((char*)self->mpObjKnob, bVisible);
     cUIScrollBar_setScrollVisibile_call((char*)self->mpObjBackground, bVisible);
@@ -1453,9 +1453,9 @@ struct cUISlider_onInput_sVEntryS {
  */
 extern "C" int cUISlider_onInput(cUISlider* self, char* input)
 {
-    char* t = *(char**)((char*)func_0039FF50(((char*)self)) + 0x14);
+    char* customSnd = *(char**)((char*)func_0039FF50(((char*)self)) + 0x14);
     char* snd = &D_004A5A58;
-    if (t) snd = t;
+    if (customSnd) snd = customSnd;
     cUISlider_onInput_sVEntryI* vi = *(cUISlider_onInput_sVEntryI**)(input + 8);
     if (vi[19].fn(input + vi[19].delta)) {
         if (self->mValue > 0) {
@@ -1521,28 +1521,28 @@ struct cUISlider_render2D_sVEntryV {
  */
 extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
 {
-    char* a = (char*)self->mpObjBackground;
-    if (a == 0 || (char*)self->mpObjKnob == 0) {
+    char* background = (char*)self->mpObjBackground;
+    if (background == 0 || (char*)self->mpObjKnob == 0) {
         return;
     }
     float x = dx + self->mPosition.x;
     float y = dy + self->mPosition.y;
-    cUISlider_render2D_sVEntryF* va = *(cUISlider_render2D_sVEntryF**)(a + 8);
-    va[17].fn(a + va[17].delta, x, y);
-    char* o = (char*)self->mpObjBackground;
-    cUISlider_render2D_sVec3 pos = *(cUISlider_render2D_sVec3*)(o + 0x44);
-    cUISlider_render2D_sVec3 s1;
-    cUISlider_render2D_sVEntryV* vo = *(cUISlider_render2D_sVEntryV**)(o + 8);
-    vo[20].fn(o + vo[20].delta, &s1);
-    char* b = (char*)self->mpObjKnob;
-    cUISlider_render2D_sVec3 s2;
-    cUISlider_render2D_sVEntryV* vb = *(cUISlider_render2D_sVEntryV**)(b + 8);
-    vb[20].fn(b + vb[20].delta, &s2);
-    float w = s1.x - s2.x;
-    char* b2 = (char*)self->mpObjKnob;
-    cUISlider_render2D_sVec3 p = *(cUISlider_render2D_sVec3*)(b2 + 0x44);
+    cUISlider_render2D_sVEntryF* va = *(cUISlider_render2D_sVEntryF**)(background + 8);
+    va[17].fn(background + va[17].delta, x, y);
+    char* bgObj = (char*)self->mpObjBackground;
+    cUISlider_render2D_sVec3 pos = *(cUISlider_render2D_sVec3*)(bgObj + 0x44);
+    cUISlider_render2D_sVec3 bgSize;
+    cUISlider_render2D_sVEntryV* vo = *(cUISlider_render2D_sVEntryV**)(bgObj + 8);
+    vo[20].fn(bgObj + vo[20].delta, &bgSize);
+    char* knob = (char*)self->mpObjKnob;
+    cUISlider_render2D_sVec3 knobSize;
+    cUISlider_render2D_sVEntryV* vb = *(cUISlider_render2D_sVEntryV**)(knob + 8);
+    vb[20].fn(knob + vb[20].delta, &knobSize);
+    float w = bgSize.x - knobSize.x;
+    char* knobObj = (char*)self->mpObjKnob;
+    cUISlider_render2D_sVec3 p = *(cUISlider_render2D_sVec3*)(knobObj + 0x44);
     p.x = pos.x + w / ((float)self->mNumValues - 1.0f) * (float)self->mValue;
-    *(cUISlider_render2D_sVec3*)(b2 + 0x44) = p;
+    *(cUISlider_render2D_sVec3*)(knobObj + 0x44) = p;
     char* b3 = (char*)self->mpObjKnob;
     cUISlider_render2D_sVEntryF* vb3 = *(cUISlider_render2D_sVEntryF**)(b3 + 8);
     vb3[17].fn(b3 + vb3[17].delta, x, y);

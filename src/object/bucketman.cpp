@@ -91,15 +91,15 @@ extern "C" void cBucketMan_purge(cBucketMan* self)
     for (i = 0; i < *(int*)self; i++) {
         cBucketMan_purgeBucket(self, i);
     }
-    char* b = self->mBuckets;
-    if (b != 0) {
-        char* p = b + ((int*)b)[-4] * 0x44;
-        while (self->mBuckets != p) {
-            p -= 0x44;
-            cObjNode__cObjNode(p + 0x34, 2);
-            cObjNode__cObjNode(p + 0x24, 2);
-            cObjNode__cObjNode(p + 0x14, 2);
-            cObjNode__cObjNode(p + 0x4, 2);
+    char* buckets = self->mBuckets;
+    if (buckets != 0) {
+        char* bucket = buckets + ((int*)buckets)[-4] * 0x44;
+        while (self->mBuckets != bucket) {
+            bucket -= 0x44;
+            cObjNode__cObjNode(bucket + 0x34, 2);
+            cObjNode__cObjNode(bucket + 0x24, 2);
+            cObjNode__cObjNode(bucket + 0x14, 2);
+            cObjNode__cObjNode(bucket + 0x4, 2);
         }
         cMemMan_free(self->mBuckets - 0x10);
     }
@@ -209,30 +209,30 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
         sSortNode_4C98* nextN = (sSortNode_4C98*)cBucketMan_addnext(self, n, index);
         n->next->prev = n->prev;
         n->prev->next = n->next;
-        sSortNode_4C98* m;
-        for (m = (sSortNode_4C98*)cBucketMan_last(self, index); m; m = (sSortNode_4C98*)cBucketMan_prev(self, m, index)) {
-            if (n->vt[6].fn((char*)n + n->vt[6].delta, m)) {
-                if (n->vt[7].fn((char*)n + n->vt[7].delta, m)) {
-                    n->prev = m->prev;
-                    m->prev->next = n;
-                    n->next = m->next;
-                    m->next->prev = n;
-                    m->prev = 0;
-                    m->next = 0;
-                    if (m) {
-                        sSortDelVE_4C98* dv = (sSortDelVE_4C98*)m->vt;
-                        dv[1].fn((char*)m + dv[1].delta, 3);
+        sSortNode_4C98* other;
+        for (other = (sSortNode_4C98*)cBucketMan_last(self, index); other; other = (sSortNode_4C98*)cBucketMan_prev(self, other, index)) {
+            if (n->vt[6].fn((char*)n + n->vt[6].delta, other)) {
+                if (n->vt[7].fn((char*)n + n->vt[7].delta, other)) {
+                    n->prev = other->prev;
+                    other->prev->next = n;
+                    n->next = other->next;
+                    other->next->prev = n;
+                    other->prev = 0;
+                    other->next = 0;
+                    if (other) {
+                        sSortDelVE_4C98* dv = (sSortDelVE_4C98*)other->vt;
+                        dv[1].fn((char*)other + dv[1].delta, 3);
                     }
                 } else {
-                    n->prev = m->prev;
-                    m->prev->next = n;
-                    n->next = m;
-                    m->prev = n;
+                    n->prev = other->prev;
+                    other->prev->next = n;
+                    n->next = other;
+                    other->prev = n;
                 }
                 break;
             }
         }
-        if (m == 0) {
+        if (other == 0) {
             n->prev = ((sSortLists_4C98*)self->mBuckets)[index].head0.prev;
             ((sSortLists_4C98*)self->mBuckets)[index].head0.prev->next = n;
             n->next = (sSortNode_4C98*)(self->mBuckets + index * 0x44 + 0x4);

@@ -44,13 +44,13 @@ extern "C" cWScriptCompileKw* cWScriptCompile_parseKeywords(cWScriptCompileKw* s
     self->count = n;
     cWScriptKeyword** slot = &self->pool;
     cWScriptKeyword* mem = (cWScriptKeyword*)operator_new_tag(n * 0xB0, D_0048E8C0, 0x20000000, 0);
-    cWScriptKeyword* q = mem;
+    cWScriptKeyword* keyword = mem;
     int j;
-    for (j = n - 1; j != -1; j--, q++) {
-        q->f78 = 0xFFFFFFFF;
-        q->f7C = 0;
-        q->f7D = 0xFF;
-        q->f7E = -1;
+    for (j = n - 1; j != -1; j--, keyword++) {
+        keyword->f78 = 0xFFFFFFFF;
+        keyword->f7C = 0;
+        keyword->f7D = 0xFF;
+        keyword->f7E = -1;
     }
     *slot = mem;
     self->free = 0;
@@ -128,18 +128,18 @@ INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan_allocInstance);
 extern "C" sWSNode* cInstanceMan_allocInstance(sWSPool* self, unsigned int id)
 {
     sWSNode** link = &self->free;
-    sWSNode* p = self->free;
-    while (p != 0) {
-        if (p - self->base == (id >> 8)) {
-            *link = p->next;
-            p->type = self->type;
-            int idx = p - self->base;
-            p->flags |= 0x2000;
-            p->index = idx;
-            return p;
+    sWSNode* inst = self->free;
+    while (inst != 0) {
+        if (inst - self->base == (id >> 8)) {
+            *link = inst->next;
+            inst->type = self->type;
+            int idx = inst - self->base;
+            inst->flags |= 0x2000;
+            inst->index = idx;
+            return inst;
         }
-        link = &p->next;
-        p = p->next;
+        link = &inst->next;
+        inst = inst->next;
     }
     return 0;
 }

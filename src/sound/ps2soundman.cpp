@@ -88,11 +88,11 @@ extern "C" sSndPlayOpts9350* cSndPlayOpts_cSndPlayOpts(sSndPlayOpts9350* self, i
     }
     *(const sSmVtbl9350**)(self->vbase + 4) = &D_00483BE0_9350;
     if (inchrg == 0) {
-        sSmVtbl9350 t1 = D_00483BE0_9350;
-        *(sSmVtbl9350**)(self->vbase + 4) = &t1;
+        sSmVtbl9350 vtCopy = D_00483BE0_9350;
+        *(sSmVtbl9350**)(self->vbase + 4) = &vtCopy;
         char* base = self->vbase - 0x88;
-        int d = (char*)self - base;
-        t1.e[1].delta = D_00483BE0_9350.e[1].delta + d;
+        int thisAdjust = (char*)self - base;
+        vtCopy.e[1].delta = D_00483BE0_9350.e[1].delta + thisAdjust;
     }
     self->depth = -1;
     self->descs = (sSndDesc9350*)operator_new_9350(0x60, D_00483178, 0, 0);

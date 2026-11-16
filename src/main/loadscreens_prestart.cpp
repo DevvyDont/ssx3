@@ -42,20 +42,20 @@ struct sPreStart_232348 {
 extern "C" void cPreStartScreen_update(sPreStart_232348* self)
 {
     func_00231F80(SSXApp->LoadIndicator);
-    float* f = (float*)((char*)SSXApp->LoadIndicator + 4);
-    *f += 0.0833333358168602f;
-    if (*f > 1.0f) {
-        *f = 1.0f;
+    float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+    *fade += 0.0833333358168602f;
+    if (*fade > 1.0f) {
+        *fade = 1.0f;
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {
-        sModule_232348* m = (sModule_232348*)cMemMan_alloc(0xC, D_0047B8C8, 0x100, 0);
+        sModule_232348* loadScreen = (sModule_232348*)cMemMan_alloc(0xC, D_0047B8C8, 0x100, 0);
         cAppMan* app = (cAppMan*)SSXApp;
-        m->vt = cInitLoadScreen_vtbl;
-        m->f4 = 0;
-        m->f8 = 0;
-        self->next = m;
+        loadScreen->vt = cInitLoadScreen_vtbl;
+        loadScreen->f4 = 0;
+        loadScreen->f8 = 0;
+        self->next = loadScreen;
         // PORT: setNextModule takes the module pointer as an unsigned int
-        cAppMan_setNextModule(app, (unsigned int)m);
+        cAppMan_setNextModule(app, (unsigned int)loadScreen);
     }
     self->t += 0.01666666753590107f;
     if (*(int*)(PadCache + 0x2EE8) > 0) {
@@ -543,26 +543,26 @@ extern "C" void cPreFELoadScreen_update(void* self)
     func_00231F80(SSXApp->LoadIndicator);
     tmp = *(int*)((char*)self + 4) != 0;
     if (tmp) {
-        float* f = (float*)((char*)SSXApp->LoadIndicator + 4);
-        *f -= 0.0833333358168602f;
-        if (*f < 0.0f) {
-            *f = 0.0f;
+        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        *fade -= 0.0833333358168602f;
+        if (*fade < 0.0f) {
+            *fade = 0.0f;
         }
     } else {
-        float* f = (float*)((char*)SSXApp->LoadIndicator + 4);
-        *f += 0.0833333358168602f;
-        if (*f > 1.0f) {
-            *f = 1.0f;
+        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        *fade += 0.0833333358168602f;
+        if (*fade > 1.0f) {
+            *fade = 1.0f;
         }
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {
-        sModule_232A00* m = (sModule_232A00*)cMemMan_alloc(0x1C, D_004A2AB8, 0x100, 0);
-        func_00231CD0_r(m);
-        tmp = (unsigned int)m;
-        m->vt = cFELoadScreen_vtbl;
-        m->fC = 0;
-        m->f10 = 0;
-        m->f14 = 0;
+        sModule_232A00* loadScreen = (sModule_232A00*)cMemMan_alloc(0x1C, D_004A2AB8, 0x100, 0);
+        func_00231CD0_r(loadScreen);
+        tmp = (unsigned int)loadScreen;
+        loadScreen->vt = cFELoadScreen_vtbl;
+        loadScreen->fC = 0;
+        loadScreen->f10 = 0;
+        loadScreen->f14 = 0;
         cAppMan_setNextModule((cAppMan*)SSXApp, tmp);
     }
 }

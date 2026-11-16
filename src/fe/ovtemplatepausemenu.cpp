@@ -86,11 +86,11 @@ struct sPauseMenu_PM {
  * when func_00231AB8() fails or a controller is unplugged, only return stays enabled. Restores the last
  * selection.
  *
- * @param arg0  the pause menu state
+ * @param state  the pause menu state
  */
-extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* arg0)
+extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* state)
 {
-    sPauseMenu_PM* self = (sPauseMenu_PM*)arg0;
+    sPauseMenu_PM* self = (sPauseMenu_PM*)state;
     char name[2];
     self->f0C = GetHashValue32(D_0046F818);
     void* engine = self->engine;
@@ -104,21 +104,21 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* arg0)
     func_00416210(name, 0, 2);
     for (int i = 0; i < 8; i++) {
         name[0] = '0' + i;
-        char* o = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
-        if (o != 0) {
+        char* textObj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (textObj != 0) {
             if (i < self->fBC) {
-                int h = GetHashValue32(D_00441BC0[self->a9C[i]]);
+                int nameHash = GetHashValue32(D_00441BC0[self->a9C[i]]);
                 char* mgr = *(char**)((char*)self->engine + 0x10);
                 sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(mgr + 4);
-                if (vt[4].fn(mgr + vt[4].delta, h) != 0) {
-                    cUIText_setUnicodeStringByID((cUIText*)o, h);
+                if (vt[4].fn(mgr + vt[4].delta, nameHash) != 0) {
+                    cUIText_setUnicodeStringByID((cUIText*)textObj, nameHash);
                 } else {
-                    cUIText_setAsciiString((cUIText*)o, D_00441BC0[self->a9C[i]]);
+                    cUIText_setAsciiString((cUIText*)textObj, D_00441BC0[self->a9C[i]]);
                 }
-                *(int*)(o + 0x18) = self->a9C[i];
+                *(int*)(textObj + 0x18) = self->a9C[i];
             } else {
-                ((cUIThing*)o)->setVisible(0);
-                ((cUIThing*)o)->setStatic(1);
+                ((cUIThing*)textObj)->setVisible(0);
+                ((cUIThing*)textObj)->setStatic(1);
             }
         }
     }
@@ -193,11 +193,11 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(void* self)
                 if (obj != 0) {
                     sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
                     vt[9].fn(obj + vt[9].delta, 1);
-                    sVec3_001F8448 v;
-                    v.x = 0.0f;
-                    v.z = 0.0f;
-                    v.y = (float)i * 40.0f;
-                    *(sVec3_001F8448*)(obj + 0x44) = v;
+                    sVec3_001F8448 itemPos;
+                    itemPos.x = 0.0f;
+                    itemPos.z = 0.0f;
+                    itemPos.y = (float)i * 40.0f;
+                    *(sVec3_001F8448*)(obj + 0x44) = itemPos;
                 }
             }
         }
@@ -314,25 +314,25 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
     int st = *(int*)((char*)self + 0x110);
     if ((st == 1 || st == 2 || st == 4) && func_001E3408() > 0)
     {
-        float a = *(float*)((char*)self + 0xC8) + *(float*)((char*)self + 0xCC);
-        *(float*)((char*)self + 0xC8) = a;
-        if (a >= 1.0f)
+        float phase = *(float*)((char*)self + 0xC8) + *(float*)((char*)self + 0xCC);
+        *(float*)((char*)self + 0xC8) = phase;
+        if (phase >= 1.0f)
         {
             *(float*)((char*)self + 0xC8) = 1.0f;
             *(float*)((char*)self + 0xCC) = -*(float*)((char*)self + 0xCC);
         }
-        else if (a < 0.0f)
+        else if (phase < 0.0f)
         {
             *(float*)((char*)self + 0xC8) = 0.0f;
             *(float*)((char*)self + 0xCC) = -*(float*)((char*)self + 0xCC);
         }
-        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(D_004A2478));
-        if (o != 0)
+        char* uiObj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(D_004A2478));
+        if (uiObj != 0)
         {
-            sColor_1F8728 c = *(sColor_1F8728*)(o + 0x1C);
-            c.r = *(float*)((char*)self + 0xC8);
-            sVEnt_1F8728* vt = *(sVEnt_1F8728**)(o + 8);
-            vt[11].fn(o + vt[11].delta, &c);
+            sColor_1F8728 color = *(sColor_1F8728*)(uiObj + 0x1C);
+            color.r = *(float*)((char*)self + 0xC8);
+            sVEnt_1F8728* vt = *(sVEnt_1F8728**)(uiObj + 8);
+            vt[11].fn(uiObj + vt[11].delta, &color);
         }
     }
     cOVState_onUpdate(self);
@@ -345,9 +345,9 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
     if (!go)
         return;
     cGameComm_sendPauseCmd((char*)cGameComm_mGameComm, 0);
-    cGameComm* g2 = cGameComm_mGameComm;
-    g2->mPauseTimeout = -1;
-    g2->mOverlayTimeout = -1;
+    cGameComm* comm = cGameComm_mGameComm;
+    comm->mPauseTimeout = -1;
+    comm->mOverlayTimeout = -1;
     int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0xC0), GetHashValue32(D_0046F850));
     cUIScreen_playFrame(*(void**)((char*)self + 0xC0), frame, 1);
     *(int*)((char*)self + 0xD0) = 1;

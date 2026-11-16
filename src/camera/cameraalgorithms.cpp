@@ -63,10 +63,10 @@ static inline int camNetActive_D0A0(int n) { return n != 0 && n < 10; }
 // Creates the chase-camera algorithm for the given kind and blends it in.
 extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int kind, char* ctx, float blend)
 {
-    cCamAlgo_D0A0* r = 0;
-    float b = blend;
+    cCamAlgo_D0A0* algo = 0;
+    float blendRate = blend;
     if (*(int*)(self + 0x30) & 2) {
-        b = 1.0f;
+        blendRate = 1.0f;
     }
     switch (kind) {
     case 91: {
@@ -75,16 +75,16 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
             char* target = *(char**)(ctx + 8);
             if (*(int*)(target + 0x28) == 2) {
                 void* mem = cMemMan_alloc(0x3B0, D_0045B250, 0x20000000, 0);
-                sCamTmp_D0A0 a;
-                func_00170240(&a, target);
-                sCamTmp_D0A0 c;
-                func_001707B0(&c, target);
-                r = cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(mem, &a, &c);
+                sCamTmp_D0A0 lineStart;
+                func_00170240(&lineStart, target);
+                sCamTmp_D0A0 lineEnd;
+                func_001707B0(&lineEnd, target);
+                algo = cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(mem, &lineStart, &lineEnd);
                 break;
             }
         }
-        r = func_00174190(cMemMan_alloc(0x90, D_0045B278, 0x20000000, 0));
-        *(char**)((char*)r + 0x80) = ctx;
+        algo = func_00174190(cMemMan_alloc(0x90, D_0045B278, 0x20000000, 0));
+        *(char**)((char*)algo + 0x80) = ctx;
         break;
     }
     case 92: {
@@ -98,103 +98,103 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         func_00170D20(&c2, target, 2);
         sCamTmp_D0A0 c3;
         func_00170D20(&c3, target, 3);
-        r = cSplineCamAlgorithm_cSplineCamAlgorithm(mem, &c0, &c1, &c2, &c3,
+        algo = cSplineCamAlgorithm_cSplineCamAlgorithm(mem, &c0, &c1, &c2, &c3,
                           *(float*)(ctx + 0x18), *(float*)(ctx + 0x14), *(float*)(ctx + 0x1C), *(float*)(ctx + 0x10));
         break;
     }
     case 7:
-        r = cIdleChaseAlgorithm_cIdleChaseAlgorithm(cMemMan_alloc(0x390, D_0045B328, 0x20000000, 0));
+        algo = cIdleChaseAlgorithm_cIdleChaseAlgorithm(cMemMan_alloc(0x390, D_0045B328, 0x20000000, 0));
         break;
     case 9:
-        r = cMidRightChaseAlgorithm_cMidRightChaseAlgorithm(cMemMan_alloc(0x390, D_0045B348, 0x20000000, 0));
+        algo = cMidRightChaseAlgorithm_cMidRightChaseAlgorithm(cMemMan_alloc(0x390, D_0045B348, 0x20000000, 0));
         break;
     case 10:
-        r = cMidLeftChaseAlgorithm_cMidLeftChaseAlgorithm(cMemMan_alloc(0x390, D_0045B370, 0x20000000, 0));
+        algo = cMidLeftChaseAlgorithm_cMidLeftChaseAlgorithm(cMemMan_alloc(0x390, D_0045B370, 0x20000000, 0));
         break;
     case 11:
-        r = cManualChaseAlgorithm_cManualChaseAlgorithm(cMemMan_alloc(0x390, D_0045B390, 0x20000000, 0));
+        algo = cManualChaseAlgorithm_cManualChaseAlgorithm(cMemMan_alloc(0x390, D_0045B390, 0x20000000, 0));
         break;
     case 13:
-        r = cLazyChaseAlgorithm_cLazyChaseAlgorithm(cMemMan_alloc(0x390, D_0045B3B0, 0x20000000, 0));
+        algo = cLazyChaseAlgorithm_cLazyChaseAlgorithm(cMemMan_alloc(0x390, D_0045B3B0, 0x20000000, 0));
         break;
     case 18:
-        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B3D0, 0x20000000, 0), 0);
+        algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B3D0, 0x20000000, 0), 0);
         break;
     case 19:
-        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B3F8, 0x20000000, 0), 1);
+        algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B3F8, 0x20000000, 0), 1);
         break;
     case 20:
-        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B420, 0x20000000, 0), 2);
+        algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B420, 0x20000000, 0), 2);
         break;
     case 21:
-        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B448, 0x20000000, 0), 3);
+        algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B448, 0x20000000, 0), 3);
         break;
     case 22:
-        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B470, 0x20000000, 0), 4);
+        algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B470, 0x20000000, 0), 4);
         break;
     case 23:
-        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B498, 0x20000000, 0), 5);
+        algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B498, 0x20000000, 0), 5);
         break;
     case 24:
-        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B4C0, 0x20000000, 0), 6);
+        algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B4C0, 0x20000000, 0), 6);
         break;
     case 25:
-        r = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B4E8, 0x20000000, 0), 7);
+        algo = cDirectionChaseAlgorithm_cDirectionChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B4E8, 0x20000000, 0), 7);
         break;
     case 32:
-        r = cLookBackChaseAlgorithm_cLookBackChaseAlgorithm(cMemMan_alloc(0x390, D_0045B510, 0x20000000, 0));
+        algo = cLookBackChaseAlgorithm_cLookBackChaseAlgorithm(cMemMan_alloc(0x390, D_0045B510, 0x20000000, 0));
         break;
     case 41:
-        r = cMatrixChaseAlgorithm_cMatrixChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B538, 0x20000000, 0));
+        algo = cMatrixChaseAlgorithm_cMatrixChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B538, 0x20000000, 0));
         break;
     case 33: case 34: case 35: case 36: case 37: case 38: case 39: case 40: {
         float angle = (float)(kind - 0x21) * 0.7853982f;
-        r = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), angle);
-        *(int*)((char*)r + 0xC) = kind;
+        algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), angle);
+        *(int*)((char*)algo + 0xC) = kind;
         break;
     }
     case 2: case 60:
-        r = cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm(cMemMan_alloc(0x390, D_0045B2D8, 0x20000000, 0));
+        algo = cDEFAULT_2ChaseAlgorithm_cDEFAULT_2ChaseAlgorithm(cMemMan_alloc(0x390, D_0045B2D8, 0x20000000, 0));
         break;
     case 1: case 62:
-        r = cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm(cMemMan_alloc(0x390, D_0045B300, 0x20000000, 0));
+        algo = cDEFAULT_4ChaseAlgorithm_cDEFAULT_4ChaseAlgorithm(cMemMan_alloc(0x390, D_0045B300, 0x20000000, 0));
         break;
     case 0: case 3: case 4: case 5: case 6: case 8: case 12: case 14: case 15: case 16: case 17:
     case 26: case 27: case 28: case 29: case 30: case 31:
     case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50:
     case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59:
     case 61: case 63: case 64: case 65: case 74:
-        r = cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(cMemMan_alloc(0x390, D_0045B2B0, 0x20000000, 0));
+        algo = cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(cMemMan_alloc(0x390, D_0045B2B0, 0x20000000, 0));
         break;
     case 66:
-        r = cSPOKEChaseAlgorithm_cSPOKEChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B578, 0x20000000, 0));
+        algo = cSPOKEChaseAlgorithm_cSPOKEChaseAlgorithm(cMemMan_alloc(0x3A0, D_0045B578, 0x20000000, 0));
         break;
     case 67:
-        r = 0;
+        algo = 0;
         break;
     case 68:
-        r = cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cMemMan_alloc(0x3B0, D_0045B598, 0x20000000, 0), *(void**)(self + 0x20));
+        algo = cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cMemMan_alloc(0x3B0, D_0045B598, 0x20000000, 0), *(void**)(self + 0x20));
         break;
     case 94:
-        r = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -0.3926991f);
-        *(int*)((char*)r + 0xC) = kind;
+        algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -0.3926991f);
+        *(int*)((char*)algo + 0xC) = kind;
         break;
     case 95:
-        r = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 0.3926991f);
-        *(int*)((char*)r + 0xC) = kind;
+        algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 0.3926991f);
+        *(int*)((char*)algo + 0xC) = kind;
         break;
     case 96:
-        r = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -2.3561945f);
-        *(int*)((char*)r + 0xC) = kind;
+        algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -2.3561945f);
+        *(int*)((char*)algo + 0xC) = kind;
         break;
     case 97:
-        r = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 2.3561945f);
-        *(int*)((char*)r + 0xC) = kind;
+        algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), 2.3561945f);
+        *(int*)((char*)algo + 0xC) = kind;
         break;
     }
-    r->setTarget(*(void**)(self + 0x20));
-    cChaseCameraController_addAlgorithm(self, r, b);
-    r->activate();
+    algo->setTarget(*(void**)(self + 0x20));
+    cChaseCameraController_addAlgorithm(self, algo, blendRate);
+    algo->activate();
 }
 #endif
 

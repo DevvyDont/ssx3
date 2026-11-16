@@ -52,11 +52,11 @@ extern "C" void cGraphicsMan_AddBlendedMatrix(sGfxManBlend* self, sBlendMatrix* 
             w += 3;
         }
     }
-    sBlendMatrix* e = self->blend;
-    for (int i = 0; i < self->nBlend; i++, e++) {
-        if (func_00369A78(e, blendedMatrix, 10, 20, 20)) {
-            for (int j = 0; j < e->count; j++) {
-                blendedMatrix->weights[j].bone = e->weights[j].bone;
+    sBlendMatrix* existing = self->blend;
+    for (int i = 0; i < self->nBlend; i++, existing++) {
+        if (func_00369A78(existing, blendedMatrix, 10, 20, 20)) {
+            for (int j = 0; j < existing->count; j++) {
+                blendedMatrix->weights[j].bone = existing->weights[j].bone;
             }
             return;
         }
@@ -350,7 +350,7 @@ static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
 }
 
 // Evaluates the cubic (t^3, t^2, t, 1) * m at n evenly spaced t in [0, 1] and draws the points as one strip.
-extern "C" void cGraphicsMan_RenderSpline(cPS2GraphicsMan* self, sV4_A048* m, float* color, int n)
+extern "C" void cGraphicsMan_RenderSpline(cPS2GraphicsMan* self, sV4_A048* BezMat, float* color, int n)
 {
     float step = 1.0f / ((float)n - 1.0f);
     int c0 = (int)(color[1] * 128.0f);
@@ -362,7 +362,7 @@ extern "C" void cGraphicsMan_RenderSpline(cPS2GraphicsMan* self, sV4_A048* m, fl
     sBezVert_A048 verts[20];
     for (int i = 0; i < n; i++) {
         float t2 = t * t;
-        pos = vu0MtxMul_A048(m, sV4_A048(t * t2, t2, t, 1.0f));
+        pos = vu0MtxMul_A048(BezMat, sV4_A048(t * t2, t2, t, 1.0f));
         verts[i].st[0] = 0.0f;
         verts[i].st[1] = 0.0f;
         verts[i].st[2] = 1.0f;
@@ -526,16 +526,16 @@ static inline void gmMtxCopy_A2C0(sGmMtx_A2C0* dst, sGmMtx_A2C0* src)
         : "memory");
 }
 
-extern "C" void cGraphicsMan_DeformMeshMatrix(cPS2GraphicsMan* self, sGmMtx_A2C0* m)
+extern "C" void cGraphicsMan_DeformMeshMatrix(cPS2GraphicsMan* self, sGmMtx_A2C0* mat)
 {
     if (self->m_isInNIS[6] != 0) {
         sGmMtx_A2C0 t2;
-        sGmVec4_A2C0 pos = m->r[3];
+        sGmVec4_A2C0 pos = mat->r[3];
         sGmMtx_A2C0 tmp;
         sGmMtx_A2C0* r = func_0038F2A8(&pos);
-        gmMtxMul_A2C0(&tmp, m, r);
+        gmMtxMul_A2C0(&tmp, mat, r);
         gmMtxCopy_A2C0(&t2, &tmp);
-        gmMtxCopy_A2C0(m, &t2);
+        gmMtxCopy_A2C0(mat, &t2);
     }
 }
 #endif
@@ -2283,11 +2283,11 @@ extern "C" void func_0036D428(void* self, float val);
  */
 extern "C" void cStaticEmitter_update(char* self, float dt)
 {
-    float t = *(float*)(self + 0x0);
-    if (t == 0.0f) {
+    float timer = *(float*)(self + 0x0);
+    if (timer == 0.0f) {
         return;
     }
-    if (t < 0.0f) {
+    if (timer < 0.0f) {
         func_0036D428(self + 0x10, 1.0f / (float)*(int*)(D_004A5B64 + 0x10));
     } else {
         func_0036D3E8(self + 0x10, 1.0f / (float)*(int*)(D_004A5B64 + 0x10));
@@ -2296,9 +2296,9 @@ extern "C" void cStaticEmitter_update(char* self, float dt)
             *(float*)(self + 0x0) = 0.0f;
         }
     }
-    float v = *(float*)(self + 0x184) + *(float*)(self + 0x188) * dt;
-    *(float*)(self + 0x184) = v;
-    if ((int)v >= *(int*)(self + 0x180)) {
+    float animFrame = *(float*)(self + 0x184) + *(float*)(self + 0x188) * dt;
+    *(float*)(self + 0x184) = animFrame;
+    if ((int)animFrame >= *(int*)(self + 0x180)) {
         *(float*)(self + 0x184) = 0.0f;
     }
     *(int*)(self + 0xC) = 1;
@@ -2395,29 +2395,29 @@ static inline int GetTexId_708C0(int i)
 extern "C" void cStaticEmitter_render1(void* selfp)
 {
     char* self = (char*)selfp;
-    sGfxCtx_708C0* g = D_004A5B80_708C0;
-    sGfxVEntry_708C0* vt = g->vtable;
-    if (((tCull_708C0)vt[93].fn)((char*)g + vt[93].delta, self + 0x160, self + 0x170,
-                                 ((tGetMat_708C0)vt[43].fn)((char*)g + vt[43].delta)) == 1) {
+    sGfxCtx_708C0* gfx = D_004A5B80_708C0;
+    sGfxVEntry_708C0* vt = gfx->vtable;
+    if (((tCull_708C0)vt[93].fn)((char*)gfx + vt[93].delta, self + 0x160, self + 0x170,
+                                 ((tGetMat_708C0)vt[43].fn)((char*)gfx + vt[43].delta)) == 1) {
         return;
     }
     if (((sGfxObj_708C0*)self)->visible == 0) {
         return;
     }
     int layer = D_0044B420[((sGfxObj_708C0*)self)->kind];
-    g->top[1] = g->top[0];
-    sGfxRS_708C0* prev = g->top;
-    g->top = prev + 1;
+    gfx->top[1] = gfx->top[0];
+    sGfxRS_708C0* prev = gfx->top;
+    gfx->top = prev + 1;
     prev[1].flagsB = (prev[1].flagsB & ~0x3E0) | 0xE0;
-    g->top->flagsA = (g->top->flagsA & 0xFFBFFFFF) | 0x400000;
-    g->top->flagsA = g->top->flagsA & 0xFE7FFFFF;
-    g->top->flagsA = g->top->flagsA & 0xFFCFFFFF;
-    g->top->flagsA = (g->top->flagsA & 0xFFF00FFF) | 0x14000;
-    g->top->flagsA = (g->top->flagsA & ~0x7C) | ((layer << 2) & 0x7C);
-    g->top->tex = GetTexId_708C0(((sGfxObj_708C0*)self)->base + (int)*(float*)(self + 0x184));
-    sGfxVEntry_708C0* vt2 = g->vtable;
-    ((tDraw_708C0)vt2[82].fn)((char*)g + vt2[82].delta, self + 0x10);
-    g->top--;
+    gfx->top->flagsA = (gfx->top->flagsA & 0xFFBFFFFF) | 0x400000;
+    gfx->top->flagsA = gfx->top->flagsA & 0xFE7FFFFF;
+    gfx->top->flagsA = gfx->top->flagsA & 0xFFCFFFFF;
+    gfx->top->flagsA = (gfx->top->flagsA & 0xFFF00FFF) | 0x14000;
+    gfx->top->flagsA = (gfx->top->flagsA & ~0x7C) | ((layer << 2) & 0x7C);
+    gfx->top->tex = GetTexId_708C0(((sGfxObj_708C0*)self)->base + (int)*(float*)(self + 0x184));
+    sGfxVEntry_708C0* vt2 = gfx->vtable;
+    ((tDraw_708C0)vt2[82].fn)((char*)gfx + vt2[82].delta, self + 0x10);
+    gfx->top--;
 }
 #endif
 

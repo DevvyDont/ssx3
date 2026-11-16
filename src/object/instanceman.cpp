@@ -333,14 +333,14 @@ struct sImInst_351800 {
 extern "C" void cMeshAnimFrame_update(sImInst_351800* self)
 {
     cAnimFrame_update(self);
-    float r[3];
+    float rotRad[3];
     float sc[3][2];
-    r[0] = -self->rot[0] * 0.01745329424738884f;
-    r[1] = -self->rot[1] * 0.01745329424738884f;
-    r[2] = -self->rot[2] * 0.01745329424738884f;
-    func_0031BE50(&sc[0][0], &sc[0][1], r[0]);
-    func_0031BE50(&sc[1][0], &sc[1][1], r[1]);
-    func_0031BE50(&sc[2][0], &sc[2][1], r[2]);
+    rotRad[0] = -self->rot[0] * 0.01745329424738884f;
+    rotRad[1] = -self->rot[1] * 0.01745329424738884f;
+    rotRad[2] = -self->rot[2] * 0.01745329424738884f;
+    func_0031BE50(&sc[0][0], &sc[0][1], rotRad[0]);
+    func_0031BE50(&sc[1][0], &sc[1][1], rotRad[1]);
+    func_0031BE50(&sc[2][0], &sc[2][1], rotRad[2]);
     float sx = sc[0][0];
     float sy = sc[1][0];
     float cx = sc[0][1];
@@ -838,8 +838,8 @@ extern "C" void* cMeshAnimNode_cMeshAnimNode(void* self, void* bucket, void* str
     new ((char*)self + 0x1B0) sInstElem2168[24];
     new ((char*)self + 0x330) sInstElem2168[24];
     new ((char*)self + 0x4B0) sInstElem2168[24];
-    sInstManVEntry2168* e = &(*(sInstManVEntry2168**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x1C, 0xC);
+    sInstManVEntry2168* vtEntry = &(*(sInstManVEntry2168**)stream)[2];
+    vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x1C, 0xC);
     *(float*)((char*)self + 0x1C) = -1.0f;
     return self;
 }
@@ -1098,15 +1098,15 @@ extern "C" void cMeshAnimNode_update(sDebris_352500* self)
         }
     }
     if (self->timer > 0.0f) {
-        char* g = *(char**)(self->model + 0x80);
-        for (int i = 0; i < *(int*)(g + 4); i++) {
-            float s, c;
-            func_0031BE50(&s, &c, self->spin[i] * 0.5f);
-            sV4_352500* q = &self->rot[i];
-            *q = QMul_352500(*q, sQ_352500(c, s * self->axis[i].x, s * self->axis[i].y, s * self->axis[i].z));
-            NormalizeEq_352500(*q);
+        char* skel = *(char**)(self->model + 0x80);
+        for (int i = 0; i < *(int*)(skel + 4); i++) {
+            float sinHalf, cosHalf;
+            func_0031BE50(&sinHalf, &cosHalf, self->spin[i] * 0.5f);
+            sV4_352500* quat = &self->rot[i];
+            *quat = QMul_352500(*quat, sQ_352500(cosHalf, sinHalf * self->axis[i].x, sinHalf * self->axis[i].y, sinHalf * self->axis[i].z));
+            NormalizeEq_352500(*quat);
         }
-        for (int i = 0; i < *(int*)(g + 4); i++) {
+        for (int i = 0; i < *(int*)(skel + 4); i++) {
             AddEq_352500(self->pos[i], self->vel[i]);
             AddEq_352500(self->vel[i], sV4_352500(0.0f, 0.0f, self->gravity * -980.0f * *(float*)(D_004A5B64 + 0x14), 0.0f));
         }

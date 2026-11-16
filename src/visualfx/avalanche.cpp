@@ -300,27 +300,27 @@ extern "C" tFrameData_5778 tActiveAvalancheNode_getFrameData(sAvAct_5778* self, 
                     while ((int)(time * 30.0f) == self->frame) {
                         float ft = time * 30.0f;
                         int i = (int)ft;
-                        float f = ft - (float)i;
+                        float blend = ft - (float)i;
                         if (i >= (int)self->data->length - 1) {
-                            f = 1.0f;
+                            blend = 1.0f;
                             i = (int)self->data->length - 2;
                         }
-                        float g = 1.0f - f;
+                        float invBlend = 1.0f - blend;
                         time = Min_5778(time + D_004A3A64 * self->data->rate, self->data->length * (1.0f / 30.0f));
                         if (!(ft < self->data->length)) {
                             break;
                         }
                         ASSERT_5778(i + 1 < (int)self->data->length);
-                        sV4_5778 pos = vAdd_5778(sV4_5778(self->data->frames[i * kAvFrameSize_5778 + kAvVel_5778] * f * 2.0f,
-                                                          self->data->frames[i * kAvFrameSize_5778 + kAvVel_5778 + 1] * f * 2.0f,
-                                                          self->data->frames[i * kAvFrameSize_5778 + kAvVel_5778 + 2] * f * 2.0f, 0.0f),
+                        sV4_5778 pos = vAdd_5778(sV4_5778(self->data->frames[i * kAvFrameSize_5778 + kAvVel_5778] * blend * 2.0f,
+                                                          self->data->frames[i * kAvFrameSize_5778 + kAvVel_5778 + 1] * blend * 2.0f,
+                                                          self->data->frames[i * kAvFrameSize_5778 + kAvVel_5778 + 2] * blend * 2.0f, 0.0f),
                                                  self->pos);
-                        sV4_5778 col = vScale_5778(sV4_5778(((unsigned char)self->data->frames[i * kAvFrameSize_5778 + kAvCol_5778] * g +
-                                                             (unsigned char)self->data->frames[(i + 1) * kAvFrameSize_5778 + kAvCol_5778] * f) * (1.0f / 128.0f),
-                                                            ((unsigned char)self->data->frames[i * kAvFrameSize_5778 + kAvCol_5778 + 1] * g +
-                                                             (unsigned char)self->data->frames[(i + 1) * kAvFrameSize_5778 + kAvCol_5778 + 1] * f) * (1.0f / 128.0f),
-                                                            ((unsigned char)self->data->frames[i * kAvFrameSize_5778 + kAvCol_5778 + 2] * g +
-                                                             (unsigned char)self->data->frames[(i + 1) * kAvFrameSize_5778 + kAvCol_5778 + 2] * f) * (1.0f / 128.0f),
+                        sV4_5778 col = vScale_5778(sV4_5778(((unsigned char)self->data->frames[i * kAvFrameSize_5778 + kAvCol_5778] * invBlend +
+                                                             (unsigned char)self->data->frames[(i + 1) * kAvFrameSize_5778 + kAvCol_5778] * blend) * (1.0f / 128.0f),
+                                                            ((unsigned char)self->data->frames[i * kAvFrameSize_5778 + kAvCol_5778 + 1] * invBlend +
+                                                             (unsigned char)self->data->frames[(i + 1) * kAvFrameSize_5778 + kAvCol_5778 + 1] * blend) * (1.0f / 128.0f),
+                                                            ((unsigned char)self->data->frames[i * kAvFrameSize_5778 + kAvCol_5778 + 2] * invBlend +
+                                                             (unsigned char)self->data->frames[(i + 1) * kAvFrameSize_5778 + kAvCol_5778 + 2] * blend) * (1.0f / 128.0f),
                                                             self->fB4),
                                                    D_004A3AA8);
                         self->f1FC = self->fB4;
@@ -470,27 +470,27 @@ extern "C" void cAvalanche_init(void)
 {
     int i;
     for (i = 0; i < 0x800; i++) {
-        int c = (i & 1) ? 0xFF : 0;
-        cAvalanche_init_sElem* e = &D_004D5B70[i];
-        e->a = 0xFF;
-        e->r = c;
-        e->g = c;
-        e->b = c;
-        e->z = 1.0f;
-        e->w = 0.0f;
-        e->x = 0.0f;
-        e->y = 0.0f;
+        int shade = (i & 1) ? 0xFF : 0;
+        cAvalanche_init_sElem* elem = &D_004D5B70[i];
+        elem->a = 0xFF;
+        elem->r = shade;
+        elem->g = shade;
+        elem->b = shade;
+        elem->z = 1.0f;
+        elem->w = 0.0f;
+        elem->x = 0.0f;
+        elem->y = 0.0f;
     }
     for (i = 0; i < 0x20; i++) {
-        cAvalanche_init_sElem* e = &D_004EDB70[i];
-        e->a = 0xFF;
-        e->r = 0xFF;
-        e->g = 0xFF;
-        e->b = 0;
-        e->z = 1.0f;
-        e->w = 0.0f;
-        e->x = 0.0f;
-        e->y = 0.0f;
+        cAvalanche_init_sElem* elem = &D_004EDB70[i];
+        elem->a = 0xFF;
+        elem->r = 0xFF;
+        elem->g = 0xFF;
+        elem->b = 0;
+        elem->z = 1.0f;
+        elem->w = 0.0f;
+        elem->x = 0.0f;
+        elem->y = 0.0f;
     }
     D_004A3AC0 = 0;
     func_00416210(D_00538450, 0, 0x400);
@@ -609,26 +609,26 @@ struct sAvalancheData {
  */
 extern "C" void tActiveAvalancheNode_calculateScale(void* self, float currTime)
 {
-    sAvalancheData* d = *(sAvalancheData**)((char*)self + 0x2E0);
+    sAvalancheData* avData = *(sAvalancheData**)((char*)self + 0x2E0);
     float x = currTime * 30.0f;
-    if (x < d->f104) {
+    if (x < avData->f104) {
         *(float*)((char*)self + 0xB0) = 1.0f;
-        *(float*)((char*)self + 0xB4) = x / d->f104;
+        *(float*)((char*)self + 0xB4) = x / avData->f104;
         return;
     }
-    if (x < d->f100 - d->f108) {
+    if (x < avData->f100 - avData->f108) {
         *(float*)((char*)self + 0xB4) = 1.0f;
         *(float*)((char*)self + 0xB0) = 1.0f;
         return;
     }
-    if (d->type != 2) {
-        float v = (d->f100 - x) / d->f108;
-        *(float*)((char*)self + 0xB4) = v;
-        *(float*)((char*)self + 0xB0) = v;
-        if (v > 0.0f) {
+    if (avData->type != 2) {
+        float fadeOut = (avData->f100 - x) / avData->f108;
+        *(float*)((char*)self + 0xB4) = fadeOut;
+        *(float*)((char*)self + 0xB0) = fadeOut;
+        if (fadeOut > 0.0f) {
             // PORT: sqrt.s (sqrtf without errno check)
-            __asm__("sqrt.s %0, %1" : "=f"(v) : "f"(v));
-            *(float*)((char*)self + 0xB0) = v;
+            __asm__("sqrt.s %0, %1" : "=f"(fadeOut) : "f"(fadeOut));
+            *(float*)((char*)self + 0xB0) = fadeOut;
         }
     }
 }
@@ -742,11 +742,11 @@ struct sVEntry2D7DD8 {
  */
 extern "C" void tActiveAvalancheNode_end(void* self, int force)
 {
-    char* p = *(char**)((char*)self + 0x2E0);
-    if (p != 0 && (force != 0 || *(unsigned short*)(p + 0xF0) != 2)) {
-        char* q = *(char**)(p + 0xF8);
-        if (q != 0) {
-            char* obj = *(char**)(q + 0xC);
+    char* avData = *(char**)((char*)self + 0x2E0);
+    if (avData != 0 && (force != 0 || *(unsigned short*)(avData + 0xF0) != 2)) {
+        char* inst = *(char**)(avData + 0xF8);
+        if (inst != 0) {
+            char* obj = *(char**)(inst + 0xC);
             if (obj != 0) {
                 sVEntry2D7DD8* vt = *(sVEntry2D7DD8**)(obj + 0xC);
                 vt[1].fn(obj + vt[1].delta, 3);
@@ -785,15 +785,15 @@ struct tActiveAvalanche {
  */
 extern "C" void tActiveAvalanche_buildArray(tActiveAvalanche* self)
 {
-    tActiveAvalanche_node* p;
+    tActiveAvalanche_node* node;
     int n = 0;
-    for (p = self->head; p != 0; p = p->next) {
+    for (node = self->head; node != 0; node = node->next) {
         n++;
     }
     self->array = (tActiveAvalanche_node**)operator_new_tag(n * 4, D_00487548, 0, 0);
     int i = 0;
-    for (p = self->head; p != 0; p = p->next) {
-        self->array[i++] = p;
+    for (node = self->head; node != 0; node = node->next) {
+        self->array[i++] = node;
     }
 }
 #endif
@@ -1091,17 +1091,17 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
     sprintf(buf, D_004A3AF0, cBENewRaceInterface_getLocationFile(iface, cBENewRaceInterface_getLocationID(iface)), name);
     int fd;
     if (func_003DEBF0(buf, 0x26, 0x64, &fd)) {
-        sAvGroup_83B8* g;
-        for (g = (sAvGroup_83B8*)cAvalanche_m_avalancheList; g != 0; g = g->next) {
-            for (sAvPart_83B8* p = g->parts; p != 0; p = p->next) {
-                off += 0x10 + (int)p->count * 10;
+        sAvGroup_83B8* avalanche;
+        for (avalanche = (sAvGroup_83B8*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->next) {
+            for (sAvPart_83B8* node = avalanche->parts; node != 0; node = node->next) {
+                off += 0x10 + (int)node->count * 10;
             }
             off += 4;
             int k;
-            for (k = 0; k < g->nlinks; k++) {
+            for (k = 0; k < avalanche->nlinks; k++) {
                 off += 8;
             }
-            for (k = 0; k < g->npairs; k++) {
+            for (k = 0; k < avalanche->npairs; k++) {
                 off += 4;
             }
         }
@@ -1109,28 +1109,28 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
         func_002D82A0(direct, (void*)fd, 0, (char*)&magic, 4, 1);
         func_002D82A0(direct, (void*)fd, (void*)4, (char*)&off, 4, 1);
         off = 8;
-        for (g = (sAvGroup_83B8*)cAvalanche_m_avalancheList; g != 0; g = g->next) {
-            unsigned short h;
-            for (sAvPart_83B8* p = g->parts; p != 0; p = p->next) {
-                h = 0xBEEF;
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&h, 2, 1);
-                h = (int)p->count * 10 + 0xC;
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&h, 2, 1);
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)p->pos, 4, 3);
-                off += func_002D82A0(1, (void*)fd, (void*)off, p->data, 10, (int)p->count);
+        for (avalanche = (sAvGroup_83B8*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->next) {
+            unsigned short header;
+            for (sAvPart_83B8* node = avalanche->parts; node != 0; node = node->next) {
+                header = 0xBEEF;
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
+                header = (int)node->count * 10 + 0xC;
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)node->pos, 4, 3);
+                off += func_002D82A0(1, (void*)fd, (void*)off, node->data, 10, (int)node->count);
             }
-            h = g->nlinks;
-            off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&h, 2, 1);
-            h = g->npairs;
-            off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&h, 2, 1);
+            header = avalanche->nlinks;
+            off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
+            header = avalanche->npairs;
+            off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
             int k;
-            for (k = 0; k < g->nlinks; k++) {
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&g->links[k].id, 4, 1);
-                off += func_002D82A0(direct, (void*)fd, (void*)off, g->links[k].obj + 0x78, 4, 1);
+            for (k = 0; k < avalanche->nlinks; k++) {
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&avalanche->links[k].id, 4, 1);
+                off += func_002D82A0(direct, (void*)fd, (void*)off, avalanche->links[k].obj + 0x78, 4, 1);
             }
-            for (k = 0; k < g->npairs; k++) {
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&g->pairs[k].b, 2, 1);
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&g->pairs[k].a, 2, 1);
+            for (k = 0; k < avalanche->npairs; k++) {
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&avalanche->pairs[k].b, 2, 1);
+                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&avalanche->pairs[k].a, 2, 1);
             }
         }
         func_003DECA0(fd, 0x64);
@@ -1495,8 +1495,8 @@ extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
     if (node->obj == 0) {
         return;
     }
-    sMat_8A00 m;
-    CopyMat_8A00(&m, &D_004FF1A0_8A00);
+    sMat_8A00 matrix;
+    CopyMat_8A00(&matrix, &D_004FF1A0_8A00);
     PushRS_8A00((sCtx_8A00*)GrMan);
     SetBits_8A00(((int)(GrMan->m_pCurrentDrawState)->unk_00[1]), 0x7C, 2, 1);
     if (D_004A3A58 != 0) {
@@ -1510,8 +1510,8 @@ extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
             v.y = n.y;
             v.z = n.z;
             v.w = 0.0f;
-            Rotate_8A00(m, v, node->obj->recs[i].angle * 0.008213315159082413f);
-            m.v[3] = pos;
+            Rotate_8A00(matrix, v, node->obj->recs[i].angle * 0.008213315159082413f);
+            matrix.v[3] = pos;
             D_004D5B70_8A00[i].r = node->obj->recs[i].r;
             D_004D5B70_8A00[i].g = node->obj->recs[i].g;
             D_004D5B70_8A00[i].b = node->obj->recs[i].b;
@@ -1689,8 +1689,8 @@ extern "C" void tActiveAvalanche_render(void* slotv)
     if (D_004A3A58 == 0)
         return;
     for (int j = 0; j < slot->group->nPairs; j++) {
-        sAvVec4_D8EA8 p = *(sAvVec4_D8EA8*)(slot->group->pairs[j].node + 0x40);
-        D_vtx_D8EA8[2 * j].pos = p;
+        sAvVec4_D8EA8 nodePos = *(sAvVec4_D8EA8*)(slot->group->pairs[j].node + 0x40);
+        D_vtx_D8EA8[2 * j].pos = nodePos;
         D_vtx_D8EA8[2 * j].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
         D_vtx_D8EA8[2 * j].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
         char* rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
@@ -1876,18 +1876,18 @@ static inline float Abs_D92D0(float x)
  */
 extern "C" void cAvalanche_addAvalancheNode(int id, char* obj, int type, float life, float fadeIn, float fadeOut, float nodeSpeed)
 {
-    sAvGroupD92D0* g = (sAvGroupD92D0*)cAvalanche_m_avalancheList;
-    while (g != 0 && g->id != id)
-        g = g->next;
-    if (g == 0) {
-        g = new (D_00487568, 0, 0) sAvGroupD92D0;
-        g->init(id);
-        g->next = (sAvGroupD92D0*)cAvalanche_m_avalancheList;
-        cAvalanche_m_avalancheList = g;
+    sAvGroupD92D0* avalanche = (sAvGroupD92D0*)cAvalanche_m_avalancheList;
+    while (avalanche != 0 && avalanche->id != id)
+        avalanche = avalanche->next;
+    if (avalanche == 0) {
+        avalanche = new (D_00487568, 0, 0) sAvGroupD92D0;
+        avalanche->init(id);
+        avalanche->next = (sAvGroupD92D0*)cAvalanche_m_avalancheList;
+        cAvalanche_m_avalancheList = avalanche;
     }
     sAvNodeD92D0* n = new (D_00487578, 0, 0) sAvNodeD92D0;
-    n->next = g->nodes;
-    g->nodes = n;
+    n->next = avalanche->nodes;
+    avalanche->nodes = n;
     n->rate = nodeSpeed;
     n->count = life * 30.0f;
     n->sy = fadeIn * 30.0f;
@@ -2007,8 +2007,8 @@ extern void* cAvalanche_m_avalancheList;
 extern "C" void cAvalanche_calculate(void)
 {
     cAvalanche_end();
-    for (void* p = cAvalanche_m_avalancheList; p != 0; p = *(void**)((char*)p + 0x8)) {
-        tAvalanche_calculate(p);
+    for (void* avalanche = cAvalanche_m_avalancheList; avalanche != 0; avalanche = *(void**)((char*)avalanche + 0x8)) {
+        tAvalanche_calculate(avalanche);
     }
     cAvalanche_SaveData();
     cAvalanche_LoadData();
@@ -2150,25 +2150,25 @@ extern sAvSlot_D97A8 D_slots_D97A8[] __asm__("cAvalanche_m_activeAvalanches");
 extern "C" int cAvalanche_triggerAvalanche(int id)
 {
     cAvalanche_resolveDataPointers();
-    for (sAvGroup_D97A8* g = (sAvGroup_D97A8*)cAvalanche_m_avalancheList; g != 0; g = g->next) {
-        if (g->id != id)
+    for (sAvGroup_D97A8* avalanche = (sAvGroup_D97A8*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->next) {
+        if (avalanche->id != id)
             continue;
         for (int j = 0; j < 16; j++) {
-            if (D_slots_D97A8[j].group == g)
+            if (D_slots_D97A8[j].group == avalanche)
                 return (int)0x80000000;
         }
         sAvSlot_D97A8* slot = D_slots_D97A8;
         for (int i = 0; i < 16; i++, slot++) {
             if (slot->group != 0)
                 continue;
-            slot->group = g;
+            slot->group = avalanche;
             slot->active = 0;
             slot->time = 0.0f;
             slot->f10 = 0;
             slot->f14 = 0;
             sAvAct_D97A8* act = D_act_D97A8;
             int k = 0;
-            for (sAvNode_D97A8* n = g->nodes; n != 0; n = n->next) {
+            for (sAvNode_D97A8* n = avalanche->nodes; n != 0; n = n->next) {
                 for (; k < 64; k++, act++) {
                     if (act->data == 0) {
                         act->data = n;
@@ -2249,8 +2249,8 @@ extern "C" void cAvalanche_end(void)
         freeSlot_9A80(&D_slots_9A80[i]);
     }
     if (cAvalanche_m_fileDataDeleteable != 0) {
-        for (char* p = (char*)cAvalanche_m_avalancheList; p != 0; p = *(char**)(p + 0x8)) {
-            for (char* n = *(char**)(p + 0x4); n != 0; n = *(char**)(n + 0xF4)) {
+        for (char* avalanche = (char*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = *(char**)(avalanche + 0x8)) {
+            for (char* n = *(char**)(avalanche + 0x4); n != 0; n = *(char**)(n + 0xF4)) {
                 if (*(unsigned char*)(n + 0xF3) != 0 && *(void**)(n + 0xFC) != 0) {
                     cMemMan_free(*(void**)(n + 0xFC));
                 }
@@ -2283,16 +2283,16 @@ extern int cAvalanche_m_resolved;
 extern "C" void cAvalanche_reset(void* self)
 {
     cAvalanche_end();
-    char* p = (char*)cAvalanche_m_avalancheList;
-    while (p != 0) {
-        char* cur = p;
-        char* n = *(char**)(p + 0x4);
+    char* avalanche = (char*)cAvalanche_m_avalancheList;
+    while (avalanche != 0) {
+        char* cur = avalanche;
+        char* n = *(char**)(avalanche + 0x4);
         while (n != 0) {
             char* next = *(char**)(n + 0xF4);
             operator_delete((int*)n);
             n = next;
         }
-        p = *(char**)(p + 0x8);
+        avalanche = *(char**)(avalanche + 0x8);
         operator_delete((int*)cur);
     }
     cAvalanche_m_avalancheList = 0;
@@ -2495,30 +2495,30 @@ extern "C" void cAvalanche_readFromReplayFrame(int* self)
         clearSlot_RR(&slots_RR()[i]);
     }
     {
-        sVEntry_RR* e = &(*(sVEntry_RR**)self)[2];
-        e->fn((char*)self + e->delta, buf.ids, 0x80);
+        sVEntry_RR* vtEntry = &(*(sVEntry_RR**)self)[2];
+        vtEntry->fn((char*)self + vtEntry->delta, buf.ids, 0x80);
     }
     for (i = 0; i < 16; i++) {
         if (buf.ids[i] >= 0) {
             int n = cAvalanche_triggerAvalanche(buf.ids[i]);
             if (n >= 0) {
-                sSlotRR* s = &slots_RR()[n];
-                s->time = buf.times[i];
+                sSlotRR* slot = &slots_RR()[n];
+                slot->time = buf.times[i];
                 if (buf.times[i] != 0.0f) {
-                    sActRR* a = s->active;
+                    sActRR* a = slot->active;
                     while (a != 0) {
                         if (*(unsigned char*)(a->data + 0xF2) != 0) {
                             a->f2EC = 1;
                         }
                         tActiveAvalancheNode_calculateScale(a, buf.times[i]);
-                        getFrameData_RR(a, s->time);
+                        getFrameData_RR(a, slot->time);
                         a = a->next;
                     }
-                    while (s->cur0 < s->group->n0 && s->group->a[s->cur0].t <= s->time) {
-                        s->cur0++;
+                    while (slot->cur0 < slot->group->n0 && slot->group->a[slot->cur0].t <= slot->time) {
+                        slot->cur0++;
                     }
-                    while (s->cur1 < s->group->n1 && (float)s->group->b[s->cur1].t <= s->time) {
-                        s->cur1++;
+                    while (slot->cur1 < slot->group->n1 && (float)slot->group->b[slot->cur1].t <= slot->time) {
+                        slot->cur1++;
                     }
                 }
             }
@@ -2605,35 +2605,35 @@ extern "C" void cAvalanche_resolveDataPointers(void)
         return;
     if (cAvalanche_m_resolved != 0)
         return;
-    char* p = (char*)D_004A3AB4 + 8;
-    for (sAvGroupA028* g = (sAvGroupA028*)cAvalanche_m_avalancheList; g != 0; g = g->next) {
-        for (sAvNodeA028* n = g->nodes; n != 0; n = n->next) {
-            p += 4;
-            float* f = (float*)p;
-            n->pos = sAvVec4_A028(f[0], f[1], f[2], 1.0f);
-            p += 12;
+    char* cursor = (char*)D_004A3AB4 + 8;
+    for (sAvGroupA028* avalanche = (sAvGroupA028*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->next) {
+        for (sAvNodeA028* n = avalanche->nodes; n != 0; n = n->next) {
+            cursor += 4;
+            float* start = (float*)cursor;
+            n->pos = sAvVec4_A028(start[0], start[1], start[2], 1.0f);
+            cursor += 12;
             if (n->owned && n->data)
                 cMemMan_free(n->data);
-            n->data = p;
+            n->data = cursor;
             n->owned = 0;
-            p += (int)n->count * 10;
+            cursor += (int)n->count * 10;
         }
-        g->nPairs = *(unsigned short*)p;
-        p += 2;
-        g->nIdx = *(unsigned short*)p;
-        p += 2;
-        for (int i = 0; i < g->nPairs; i++) {
-            g->pairs[i].v = *(float*)p;
-            g->pairs[i].f4 = 0;
-            p += 8;
+        avalanche->nPairs = *(unsigned short*)cursor;
+        cursor += 2;
+        avalanche->nIdx = *(unsigned short*)cursor;
+        cursor += 2;
+        for (int i = 0; i < avalanche->nPairs; i++) {
+            avalanche->pairs[i].v = *(float*)cursor;
+            avalanche->pairs[i].f4 = 0;
+            cursor += 8;
         }
-        for (int j = 0; j < g->nIdx; j++) {
-            g->idx[j].b = *(unsigned short*)p;
-            p += 2;
-            g->idx[j].a = *(unsigned short*)p;
-            p += 2;
+        for (int j = 0; j < avalanche->nIdx; j++) {
+            avalanche->idx[j].b = *(unsigned short*)cursor;
+            cursor += 2;
+            avalanche->idx[j].a = *(unsigned short*)cursor;
+            cursor += 2;
         }
-        g->nPairs = 0;
+        avalanche->nPairs = 0;
     }
     cAvalanche_m_resolved = 1;
 }

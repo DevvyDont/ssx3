@@ -28,10 +28,10 @@ extern "C" void* cDebounceNode_cDebounceNode(void* self, void* bucket, void* str
 {
     cMoveNode_cMoveNode(self, bucket, stream);
     *(void**)((char*)self + 0xC) = cDebounceNode_vtbl;
-    sDebounceVEntry2D10* e = &(*(sDebounceVEntry2D10**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x2C, 4);
-    e = &(*(sDebounceVEntry2D10**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x30, 4);
+    sDebounceVEntry2D10* readEntry = &(*(sDebounceVEntry2D10**)stream)[2];
+    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x2C, 4);
+    readEntry = &(*(sDebounceVEntry2D10**)stream)[2];
+    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x30, 4);
     return self;
 }
 #endif
@@ -195,10 +195,10 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void cDebounceNode_writeToReplayFrame(void* self, void* stream)
 {
     cMoveNode_writeToReplayFrame(self, stream);
-    sDebounceVEntry2FA8* e = &(*(sDebounceVEntry2FA8**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x2C, 4);
-    e = &(*(sDebounceVEntry2FA8**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x30, 4);
+    sDebounceVEntry2FA8* writeEntry = &(*(sDebounceVEntry2FA8**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x2C, 4);
+    writeEntry = &(*(sDebounceVEntry2FA8**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x30, 4);
 }
 #endif
 
@@ -844,27 +844,27 @@ extern "C" void cCounterNode_signal(void* self, int msg, float level)
         bit = 0x200;
     if (msg == 0x1F4)
     {
-        int f = *(int*)((char*)self + 0x20);
-        if ((f & bit) == 0)
+        int seenLevels = *(int*)((char*)self + 0x20);
+        if ((seenLevels & bit) == 0)
         {
             fire = 1;
-            *(int*)((char*)self + 0x20) = f | bit;
+            *(int*)((char*)self + 0x20) = seenLevels | bit;
         }
     }
     else if (msg == 0x1F5)
     {
-        int f = *(int*)((char*)self + 0x20);
-        if ((f & bit) == 0)
+        int seenLevels = *(int*)((char*)self + 0x20);
+        if ((seenLevels & bit) == 0)
         {
             if (level == 1.0f)
             {
                 fire = 1;
-                *(int*)((char*)self + 0x20) = f | 1;
+                *(int*)((char*)self + 0x20) = seenLevels | 1;
             }
-            else if (f & (bit >> 1))
+            else if (seenLevels & (bit >> 1))
             {
                 fire = 1;
-                *(int*)((char*)self + 0x20) = f | bit;
+                *(int*)((char*)self + 0x20) = seenLevels | bit;
             }
         }
     }
@@ -874,9 +874,9 @@ extern "C" void cCounterNode_signal(void* self, int msg, float level)
     }
     if (fire)
     {
-        int c = *(int*)((char*)self + 0x1C);
-        if (c > 0)
-            *(int*)((char*)self + 0x1C) = c - 1;
+        int remaining = *(int*)((char*)self + 0x1C);
+        if (remaining > 0)
+            *(int*)((char*)self + 0x1C) = remaining - 1;
     }
 }
 #endif

@@ -173,20 +173,20 @@ struct sVEUnload {
  */
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(cFEAsyncManager* self, int idx)
 {
-    sFEUnloadFiles* m = (sFEUnloadFiles*)self;
+    sFEUnloadFiles* asyncMan = (sFEUnloadFiles*)self;
     if (cFEAsyncManager_GetFileStatus(self, idx) == 1) {
         cFEAsyncManager_SetFileStatus(self, idx, 0);
     } else if (cFEAsyncManager_GetFileStatus(self, idx) == 2) {
-        ASYNCFILE_release(m->files[idx].handle, 0, 0);
-        if (m->files[idx].data != 0) {
-            cMemMan_free(m->files[idx].data);
+        ASYNCFILE_release(asyncMan->files[idx].handle, 0, 0);
+        if (asyncMan->files[idx].data != 0) {
+            cMemMan_free(asyncMan->files[idx].data);
         }
-        m->files[idx].data = 0;
+        asyncMan->files[idx].data = 0;
         cFEAsyncManager_SetFileStatus(self, idx, 0);
     } else if (cFEAsyncManager_GetFileStatus(self, idx) == 3) {
         cPS2GraphicsMan* obj = GrMan;
         sVEUnload* vt = (sVEUnload*)obj->mVtbl;
-        m->files[idx].f118 = vt[114].fn((char*)obj + vt[114].delta) + 0xE;
+        asyncMan->files[idx].f118 = vt[114].fn((char*)obj + vt[114].delta) + 0xE;
         cFEAsyncManager_SetFileStatus(self, idx, 0);
     }
 }
@@ -287,41 +287,41 @@ extern char D_004A1A18[];
  */
 extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
 {
-    sFE39F0Files* m = (sFE39F0Files*)self;
+    sFE39F0Files* asyncMan = (sFE39F0Files*)self;
     int i;
     for (i = 0; i < 5; i++) {
         if (cFEAsyncManager_GetFileStatus(self, i) == 0 || cFEAsyncManager_GetFileStatus(self, i) == 1) {
             cPS2GraphicsMan* obj = GrMan;
             sVE39F0* vt = (sVE39F0*)obj->mVtbl;
-            if (m->files[i].f118 < vt[114].fn((char*)obj + vt[114].delta)) {
-                if (m->files[i].data != 0) {
+            if (asyncMan->files[i].f118 < vt[114].fn((char*)obj + vt[114].delta)) {
+                if (asyncMan->files[i].data != 0) {
                     cPS2GraphicsMan* obj2 = GrMan;
                     sVE39F0V* vt2 = (sVE39F0V*)obj2->mVtbl;
-                    vt2[50].fn((char*)obj2 + vt2[50].delta, m->files[i].id);
-                    if (m->files[i].data != 0) {
-                        cMemMan_free(m->files[i].data);
+                    vt2[50].fn((char*)obj2 + vt2[50].delta, asyncMan->files[i].id);
+                    if (asyncMan->files[i].data != 0) {
+                        cMemMan_free(asyncMan->files[i].data);
                     }
-                    m->files[i].data = 0;
-                    m->files[i].f118 = 0;
-                    m->files[i].id = -1;
+                    asyncMan->files[i].data = 0;
+                    asyncMan->files[i].f118 = 0;
+                    asyncMan->files[i].id = -1;
                 }
             }
         }
         if (cFEAsyncManager_GetFileStatus(self, i) == 1) {
             cPS2GraphicsMan* obj = GrMan;
             sVE39F0* vt = (sVE39F0*)obj->mVtbl;
-            if (m->files[i].f118 < vt[114].fn((char*)obj + vt[114].delta)) {
+            if (asyncMan->files[i].f118 < vt[114].fn((char*)obj + vt[114].delta)) {
                 cFEAsyncManager_LoadDataFile(self, i);
             }
         }
         if (cFEAsyncManager_GetFileStatus(self, i) == 2) {
-            if (ASYNCFILE_getstatus(m->files[i].handle) == 1) {
+            if (ASYNCFILE_getstatus(asyncMan->files[i].handle) == 1) {
                 cFEAsyncManager_SetFileStatus(self, i, 3);
-                ASYNCFILE_release(m->files[i].handle, 0, 0);
+                ASYNCFILE_release(asyncMan->files[i].handle, 0, 0);
                 cPS2GraphicsMan* obj = GrMan;
                 sVE39F0L* vt = (sVE39F0L*)obj->mVtbl;
-                char* data = m->files[i].data;
-                m->files[i].id = vt[46].fn((char*)obj + vt[46].delta, data + *(int*)(data + 0x14), D_004A1A18, 0, 0, -1);
+                char* data = asyncMan->files[i].data;
+                asyncMan->files[i].id = vt[46].fn((char*)obj + vt[46].delta, data + *(int*)(data + 0x14), D_004A1A18, 0, 0, -1);
             }
         }
     }
@@ -384,19 +384,19 @@ void cMemMan_free(void* p);
  */
 extern "C" void cFEAsyncManager_FlushFEAsyncTextures(cFEAsyncManager* self)
 {
-    sFE3C50Files* m = (sFE3C50Files*)self;
+    sFE3C50Files* asyncMan = (sFE3C50Files*)self;
     int i;
     for (i = 0; i < 5; i++) {
-        if (m->files[i].data != 0) {
+        if (asyncMan->files[i].data != 0) {
             cPS2GraphicsMan* obj = GrMan;
             sVE3C50* vt = (sVE3C50*)obj->mVtbl;
-            vt[50].fn((char*)obj + vt[50].delta, m->files[i].id);
-            if (m->files[i].data != 0) {
-                cMemMan_free(m->files[i].data);
+            vt[50].fn((char*)obj + vt[50].delta, asyncMan->files[i].id);
+            if (asyncMan->files[i].data != 0) {
+                cMemMan_free(asyncMan->files[i].data);
             }
-            m->files[i].data = 0;
-            m->files[i].f118 = 0;
-            m->files[i].id = -1;
+            asyncMan->files[i].data = 0;
+            asyncMan->files[i].f118 = 0;
+            asyncMan->files[i].id = -1;
         }
     }
 }
@@ -438,19 +438,19 @@ extern "C" void func_003E1BB8(void* file, void* data, int size);
  */
 extern "C" void cFEAsyncManager_LoadDataFile(cFEAsyncManager* self, int idx)
 {
-    sFEAsyncFiles* m = (sFEAsyncFiles*)self;
+    sFEAsyncFiles* asyncMan = (sFEAsyncFiles*)self;
     void** pData;
     char* base;
-    m->files[idx].size = 0x109A0;
+    asyncMan->files[idx].size = 0x109A0;
     base = (char*)self + 0x100;
     pData = (void**)(base + idx * 0x11C);
     *pData = operator_new_tag(0x109A0, D_00461430, 0x25000000, 0);
     cFEAsyncManager_SetFileStatus(self, idx, 2);
-    if (m->files[idx].async != 0) {
+    if (asyncMan->files[idx].async != 0) {
         cFEAsyncManager_SetFileStatus(self, idx, 2);
-        m->files[idx].handle = func_003DF748(&m->files[idx], *pData, m->files[idx].size);
+        asyncMan->files[idx].handle = func_003DF748(&asyncMan->files[idx], *pData, asyncMan->files[idx].size);
     } else {
-        func_003E1BB8(&m->files[idx], *pData, m->files[idx].size);
+        func_003E1BB8(&asyncMan->files[idx], *pData, asyncMan->files[idx].size);
         cFEAsyncManager_SetFileStatus(self, idx, 3);
     }
 }
@@ -2788,15 +2788,15 @@ extern "C" void cFEStateReadMessagePopup_onCreateScreen(cFEStateReadMessagePopup
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* a = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619B8));
-    *(int*)(a + 0x14) |= 1;
-    void* b = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
-    void* c = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
+    char* scrollBar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619B8));
+    *(int*)(scrollBar + 0x14) |= 1;
+    void* upArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
+    void* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
     void* d = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619E8));
-    *(void**)(a + 0x7C) = b;
-    *(void**)(a + 0x80) = c;
-    *(void**)(a + 0x84) = d;
-    *(int*)(a + 0x88) = 2;
+    *(void**)(scrollBar + 0x7C) = upArrow;
+    *(void**)(scrollBar + 0x80) = downArrow;
+    *(void**)(scrollBar + 0x84) = d;
+    *(int*)(scrollBar + 0x88) = 2;
     char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619F8));
     if (o != 0) {
         cFEVObj_001A7970* obj = (cFEVObj_001A7970*)o;
@@ -2806,7 +2806,7 @@ extern "C" void cFEStateReadMessagePopup_onCreateScreen(cFEStateReadMessagePopup
         *(int*)(o + 0x14) |= 0x80;
         obj->v11(sCol1A7970(1.0f, 0.0f, 0.0f, 0.0f));
         *(sBlk1A7970*)(o + 0xA8) = *(sBlk1A7970*)&self->mTextColour;
-        *(char**)(o + 0xB8) = a;
+        *(char**)(o + 0xB8) = scrollBar;
     }
 }
 #endif
@@ -6124,9 +6124,9 @@ void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount(cFEUseExistingAccount* self, int pEngine)
 {
     func_001A8500_3(self, pEngine, 0);
-    int d = D_004A3E90;
+    int emptyStr = D_004A3E90;
     self->mVtbl = cFEUseExistingAccount_vtbl;
-    self->mszEmail = (char*)d;
+    self->mszEmail = (char*)emptyStr;
     self->mHashName = 0x35;
     self->unk_6D0 = 0;
     self->mpTextForgotPassword = 0;
@@ -6473,14 +6473,14 @@ extern "C" void cFEUseExistingAccount_onWidgetEvent(cFEUseExistingAccount* self,
             if (!func_001AC408_C5C0(((char*)self))) {
                 break;
             }
-            void* p = func_001A9C50((cFEStateNet*)self);
-            char* sub = (char*)p + 0xBC;
-            *(int*)((char*)p + 0xBC) = 1;
-            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462C70);
-            *(int*)((char*)p + 0xC0) = 3;
+            void* popup = func_001A9C50((cFEStateNet*)self);
+            char* sub = (char*)popup + 0xBC;
+            *(int*)((char*)popup + 0xBC) = 1;
+            *(int*)((char*)popup + 0xC4) = GetHashValue32(D_00462C70);
+            *(int*)((char*)popup + 0xC0) = 3;
             func_001C57C0(sub, 0, GetHashValue32(D_00462C88));
-            *(int*)((char*)p + 0x150) = 0x80E;
-            func_001A9BC0((cFEStateNet*)self, p);
+            *(int*)((char*)popup + 0x150) = 0x80E;
+            func_001A9BC0((cFEStateNet*)self, popup);
             (self)->miRequest = 4;
             func_0025B6D8_C5C0(LobbyMan_mLobbyMan, 0);
             break;
@@ -6489,29 +6489,29 @@ extern "C" void cFEUseExistingAccount_onWidgetEvent(cFEUseExistingAccount* self,
             if (!func_001AC360_C5C0(((char*)self))) {
                 break;
             }
-            void* p = func_001A9C50((cFEStateNet*)self);
-            *(int*)((char*)p + 0xBC) = 0;
-            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462C98);
-            *(int*)((char*)p + 0xC0) = 3;
-            *(int*)((char*)p + 0x164) = 0;
-            *(int*)((char*)p + 0x150) = 0x812;
-            func_001A9BC0((cFEStateNet*)self, p);
+            void* popup = func_001A9C50((cFEStateNet*)self);
+            *(int*)((char*)popup + 0xBC) = 0;
+            *(int*)((char*)popup + 0xC4) = GetHashValue32(D_00462C98);
+            *(int*)((char*)popup + 0xC0) = 3;
+            *(int*)((char*)popup + 0x164) = 0;
+            *(int*)((char*)popup + 0x150) = 0x812;
+            func_001A9BC0((cFEStateNet*)self, popup);
             (self)->miRequest = 2;
             func_0025B6D8_C5C0(LobbyMan_mLobbyMan, 0);
             break;
         }
         case 3: {
-            void* p = func_001A9C50((cFEStateNet*)self);
-            *(int*)((char*)p + 0xBC) = -1;
-            *(int*)((char*)p + 0x180) = 0x32;
-            char* sub = (char*)p + 0xBC;
-            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462CB8);
-            *(int*)((char*)p + 0xC0) = 3;
-            *(int*)((char*)p + 0xD4) = GetHashValue32(D_00462CD0);
-            *(int*)((char*)p + 0xD0) = 3;
+            void* popup = func_001A9C50((cFEStateNet*)self);
+            *(int*)((char*)popup + 0xBC) = -1;
+            *(int*)((char*)popup + 0x180) = 0x32;
+            char* sub = (char*)popup + 0xBC;
+            *(int*)((char*)popup + 0xC4) = GetHashValue32(D_00462CB8);
+            *(int*)((char*)popup + 0xC0) = 3;
+            *(int*)((char*)popup + 0xD4) = GetHashValue32(D_00462CD0);
+            *(int*)((char*)popup + 0xD0) = 3;
             func_001C57C0(sub, 0, GetHashValue32(D_00461618));
-            *(int*)((char*)p + 0x150) = 0x80F;
-            func_001A9BC0((cFEStateNet*)self, p);
+            *(int*)((char*)popup + 0x150) = 0x80F;
+            func_001A9BC0((cFEStateNet*)self, popup);
             break;
         }
         case 0: {
@@ -6539,9 +6539,9 @@ extern "C" void cFEUseExistingAccount_onWidgetEvent(cFEUseExistingAccount* self,
         }
         break;
     case 6: {
-        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, ((char*)self), 0, 0, 0);
-        *(int*)((char*)p + 0x18) = 0x832;
-        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
+        void* popup = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, ((char*)self), 0, 0, 0);
+        *(int*)((char*)popup + 0x18) = 0x832;
+        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, popup);
         break;
     }
     case 13:
@@ -7169,9 +7169,9 @@ extern "C" void cFEStateSelectPersona_onWidgetEvent(cFEStateSelectPersona* selfp
         }
         func_00261408(BuddyMan_mBuddyMan);
         func_0025B800(LobbyMan_mLobbyMan);
-        void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)selfp->mpEngine, ((char*)selfp), 0, 0, 0);
-        *(int*)((char*)p + 0x18) = 0x832;
-        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)selfp->mpScreen + 0xD0) + 0x10) + 0x18, p);
+        void* popup = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)selfp->mpEngine, ((char*)selfp), 0, 0, 0);
+        *(int*)((char*)popup + 0x18) = 0x832;
+        cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)selfp->mpScreen + 0xD0) + 0x10) + 0x18, popup);
         break;
     }
     case 8: {
@@ -7181,17 +7181,17 @@ extern "C" void cFEStateSelectPersona_onWidgetEvent(cFEStateSelectPersona* selfp
         }
         if (idx < LobbyMan_mLobbyMan->mNumPersonas) {
             selfp->miDeletePersona = idx;
-            void* p = func_001A9C50((cFEStateNet*)selfp);
-            char* sub = (char*)p + 0xBC;
-            *(int*)((char*)p + 0xBC) = 2;
-            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00462EE8);
-            *(int*)((char*)p + 0xC0) = 3;
+            void* popup = func_001A9C50((cFEStateNet*)selfp);
+            char* sub = (char*)popup + 0xBC;
+            *(int*)((char*)popup + 0xBC) = 2;
+            *(int*)((char*)popup + 0xC4) = GetHashValue32(D_00462EE8);
+            *(int*)((char*)popup + 0xC0) = 3;
             func_001C57C0(sub, 0, GetHashValue32(D_00462F08));
             func_001C57C0(sub, 1, GetHashValue32(D_00462C88));
             func_001C5878_D5E8(sub, 0, GetHashValue32(D_00462F18), 1);
-            *(int*)((char*)p + 0x168) = 1;
-            *(int*)((char*)p + 0x150) = 0x816;
-            func_001A9BC0((cFEStateNet*)selfp, p);
+            *(int*)((char*)popup + 0x168) = 1;
+            *(int*)((char*)popup + 0x150) = 0x816;
+            func_001A9BC0((cFEStateNet*)selfp, popup);
         }
         break;
     }
@@ -7741,15 +7741,15 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateChallengePopup_onWidgetMenu(cFEStateChallengePopup* self, int pMenu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 8) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -8040,9 +8040,9 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
             cUITemplate_MAP_mPeak = 1;
             D_004A2594 = 0;
             D_004A2598 = 0;
-            char* p = (char*)func_00186610_E7A0(cMemMan_alloc(0x33C, D_00460C38, 0x100, 0), *(int*)(char**)&self->mpEngine, 1);
-            *(int*)(p + 0x1C) = (*(int*)(p + 0x1C) & ~0x3F00) | 0x100;
-            cUIStateStack_pushSpecial_E7A0((char*)self->mpEngine + 0x18, p, 0, 0);
+            char* popup = (char*)func_00186610_E7A0(cMemMan_alloc(0x33C, D_00460C38, 0x100, 0), *(int*)(char**)&self->mpEngine, 1);
+            *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
+            cUIStateStack_pushSpecial_E7A0((char*)self->mpEngine + 0x18, popup, 0, 0);
             break;
         }
         case 9: {
@@ -8977,25 +8977,25 @@ extern "C" void cFEStateChallengeReceivedPopup_onCreateScreen(cFEStateChallengeR
     if (BuddyMan_mBuddyMan == 0)
         func_0025B800((char*)LobbyMan_mLobbyMan);
     char* name = ((char*)self) + 0x6D0;
-    sRaceSetup_FE68* r = (sRaceSetup_FE68*)func_00263270(BuddyMan_mBuddyMan, *(int*)name);
+    sRaceSetup_FE68* challenge = (sRaceSetup_FE68*)func_00263270(BuddyMan_mBuddyMan, *(int*)name);
     cBXString_operatorE((char*)LobbyMan_mLobbyMan + 0x98, name);
-    (*(sInfo_FE68*)&LobbyMan_mLobbyMan->mOpponentStats) = *(sInfo_FE68*)r->info;
-    if (r == 0)
+    (*(sInfo_FE68*)&LobbyMan_mLobbyMan->mOpponentStats) = *(sInfo_FE68*)challenge->info;
+    if (challenge == 0)
         return;
-    cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x8C, r->name);
+    cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x8C, challenge->name);
     MEM_fill(&D_005308B8_FE68, 0, 0x20);
-    D_005308B8_FE68.b6 = r->f18;
-    D_005308B8_FE68.b7 = r->f24;
-    D_005308B8_FE68.b8 = r->f1C;
+    D_005308B8_FE68.b6 = challenge->f18;
+    D_005308B8_FE68.b7 = challenge->f24;
+    D_005308B8_FE68.b8 = challenge->f1C;
     void* be = cBE_getInterface_Fv_FE68(cBE_getBE(), 0);
-    D_00535C08[0] = r->f8;
+    D_00535C08[0] = challenge->f8;
     D_004A11B8 = 1;
-    cBENewRaceInterface_setGameMode_FE68(be, r->mode);
-    cBENewRaceInterface_setGameEvent_FE68(be, r->event);
-    cBENewRaceInterface_setNumberAI(be, r->numAI);
+    cBENewRaceInterface_setGameMode_FE68(be, challenge->mode);
+    cBENewRaceInterface_setGameEvent_FE68(be, challenge->event);
+    cBENewRaceInterface_setNumberAI(be, challenge->numAI);
     vcall_FE68(be);
     void* net = cBE_getInterface_Fv_FE68(SSXApp->BE, 7);
-    D_00534B34[0] = r->f14;
+    D_00534B34[0] = challenge->f14;
     vcall_FE68(net);
     func_001B0850(self, be, self->mpScreen);
     func_0025E6D0((char*)LobbyMan_mLobbyMan, LobbyMan_mLobbyMan->mOpponent);
@@ -9113,38 +9113,38 @@ static inline int IsHash_001B0150(int id, char* name) { return id == GetHashValu
 extern "C" void cFEStateChallengeReceivedPopup_onWidgetCreate(cFEStateChallengeReceivedPopup* self, cFEVObj_001B0150* obj)
 {
     char buf[16];
-    char* o = (char*)obj;
+    char* widget = (char*)obj;
     cUIText* uiText = (cUIText*)obj;
-    if (IsHash_001B0150(*(int*)(o + 0x38), D_00461520)) {
+    if (IsHash_001B0150(*(int*)(widget + 0x38), D_00461520)) {
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004635F8)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_004635F8)) {
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_00463608));
-        *(int*)(o + 0x18) = 0xB;
+        *(int*)(widget + 0x18) = 0xB;
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463618)) {
-        *(int*)(o + 0x18) = 0xC;
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463618)) {
+        *(int*)(widget + 0x18) = 0xC;
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463108)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463108)) {
         cUIText_setAsciiString(uiText, ((const char*)LobbyMan_mLobbyMan->mOpponent));
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463118)) {
-        *(int*)(o + 0x18) = 7;
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463118)) {
+        *(int*)(widget + 0x18) = 7;
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463140)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463140)) {
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_00463150));
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463168)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463168)) {
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_00463178));
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463190)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463190)) {
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_004631A0));
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004631B8)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_004631B8)) {
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463628)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463628)) {
         cUIText_setAsciiString(uiText, D_004A1A90);
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463640)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463640)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         int n = D_00535C04[0];
         if (n == 0) {
@@ -9153,36 +9153,36 @@ extern "C" void cFEStateChallengeReceivedPopup_onWidgetCreate(cFEStateChallengeR
             sprintf(buf, D_004A12C0, n);
             cUIText_setAsciiString(uiText, buf);
         }
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463658)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463658)) {
         if ((D_005308D0[0] >> 8) & 1) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045FCD8));
         } else {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045DCC8));
         }
         cUIText_setAsciiString(uiText, D_004A1A90);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463670)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463670)) {
         if ((D_005308D0[0] >> 6) & 1) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045FCD8));
         } else {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045DCC8));
         }
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463688)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463688)) {
         int f = D_005308D0[0] >> 7;
         if (f & 1) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045FCD8));
         } else {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(D_0045DCC8));
         }
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004636A0)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_004636A0)) {
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004636B0)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_004636B0)) {
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463628)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463628)) {
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_00463640)) {
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_00463640)) {
         obj->v09(1);
-    } else if (IsHash_001B0150(*(int*)(o + 0x38), D_004630E0)) {
-        *(int*)(o + 0x14) |= 0x80;
+    } else if (IsHash_001B0150(*(int*)(widget + 0x38), D_004630E0)) {
+        *(int*)(widget + 0x14) |= 0x80;
     }
 }
 #endif
@@ -9388,15 +9388,15 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateChallengeReceivedPopup_onWidgetMenu(cFEStateChallengeReceivedPopup* self, int pMenu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 8) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -10012,16 +10012,16 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
         break;
     case 6:
         if (self->mbConfirmed == 0) {
-            void* p = func_001A9C50((cFEStateNet*)self);
-            *(int*)((char*)p + 0xBC) = 2;
-            char* sub = (char*)p + 0xBC;
-            *(int*)((char*)p + 0xC4) = GetHashValue32(D_0045FD98);
-            *(int*)((char*)p + 0xC0) = 3;
+            void* popup = func_001A9C50((cFEStateNet*)self);
+            *(int*)((char*)popup + 0xBC) = 2;
+            char* sub = (char*)popup + 0xBC;
+            *(int*)((char*)popup + 0xC4) = GetHashValue32(D_0045FD98);
+            *(int*)((char*)popup + 0xC0) = 3;
             func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
             func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
-            *(int*)((char*)p + 0x150) = 0x838;
-            *(int*)((char*)p + 0x168) = 1;
-            func_001A9BC0((cFEStateNet*)self, p);
+            *(int*)((char*)popup + 0x150) = 0x838;
+            *(int*)((char*)popup + 0x168) = 1;
+            func_001A9BC0((cFEStateNet*)self, popup);
         } else {
             func_00265140(D_004A33CC);
             ((cFEVObj_001B1280*)obj)->v08(0);
@@ -10577,12 +10577,12 @@ extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* s
     self->f6EC = 0;
     self->f6F0 = 0;
     self->f6F4 = 0;
-    sCol_001B1F88 c;
-    c.r = 1.0f;
-    c.g = 1.0f;
-    c.b = 1.0f;
-    c.a = 1.0f;
-    self->color = c;
+    sCol_001B1F88 colour;
+    colour.r = 1.0f;
+    colour.g = 1.0f;
+    colour.b = 1.0f;
+    colour.a = 1.0f;
+    self->color = colour;
     strcpy(self->name, ((const char*)LobbyMan_mLobbyMan->mPersona));
     return self;
 }
@@ -10660,10 +10660,10 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
     *(sBlk1B2070*)((char*)self->mpTextScrollChat + 0xA8) = *(sBlk1B2070*)&self->mChatColour;
     *(void**)((char*)self->mpTextScrollChat + 0xB8) = (void*)self->mpSlider2;
     cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
-    cUIText* b = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
-    cUIText* c = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619E8));
+    cUIText* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
+    cUIText* hideOnEmpty = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619E8));
     *(cUIText**)((char*)self->mpSlider2 + 0x7C) = uiText;
-    *(cUIText**)((char*)self->mpSlider2 + 0x80) = b;
+    *(cUIText**)((char*)self->mpSlider2 + 0x80) = downArrow;
     {
         char* o = (char*)self->mpSlider2;
         if ((unsigned int)strlen(D_004A1B48) > 24) {
@@ -10681,7 +10681,7 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
         }
     }
     int two = 2;
-    *(cUIText**)((char*)self->mpSlider2 + 0x84) = c;
+    *(cUIText**)((char*)self->mpSlider2 + 0x84) = hideOnEmpty;
     *(int*)((char*)self->mpSlider2 + 0x88) = two;
     cUIText* d = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1B58));
     cUIText* e = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00463A18));
@@ -11205,8 +11205,8 @@ public:
 extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cFEVObj_001B2EB8* obj)
 {
     char buf[32];
-    char* o = (char*)obj;
-    int id = *(int*)(o + 0x38);
+    char* widget = (char*)obj;
+    int id = *(int*)(widget + 0x38);
     if (id == GetHashValue32(D_00463C08)) {
         self->mpTextRoomName = (cUIText*)obj;
         obj->v09(1);
@@ -11220,7 +11220,7 @@ extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cFEVObj_
         obj->v09(1);
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(D_00463C68));
     } else if (id == GetHashValue32(D_00463A38)) {
-        *(int*)(o + 0x14) |= 0x80;
+        *(int*)(widget + 0x14) |= 0x80;
         obj->v07(1);
         int n = func_0025F1B0(LobbyMan_mLobbyMan);
         if (n <= 0) {
@@ -11242,12 +11242,12 @@ extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cFEVObj_
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(D_00463CF0));
     } else if (id == GetHashValue32(D_004A1B68)) {
         self->mpSlider1 = (cUIThing*)obj;
-        *(int*)(o + 0x14) |= 1;
+        *(int*)(widget + 0x14) |= 1;
     } else if (id == GetHashValue32(D_00463D00)) {
         self->mpTextScrollChat = (cUIText*)obj;
     } else if (id == GetHashValue32(D_004A1B70)) {
         self->mpSlider2 = (cUIThing*)obj;
-        *(int*)(o + 0x14) |= 1;
+        *(int*)(widget + 0x14) |= 1;
     }
     void** slots = (void**)(((char*)self) + 0x6D0);
     for (int i = 0; i < 6; i++) {
@@ -11301,8 +11301,8 @@ extern "C" void cFEStateChatRoom_onWidgetEvent(cFEStateChatRoom* self, char* msg
     case 1:
         for (i = 0; i < 6; i++) {
             sprintf(buf, D_00463A60, i);
-            int h = *(int*)(msg + 0x38);
-            if (h == GetHashValue32(buf)) {
+            int hash = *(int*)(msg + 0x38);
+            if (hash == GetHashValue32(buf)) {
                 func_001B3D20(((char*)self), i, 1);
                 return;
             }
@@ -11312,8 +11312,8 @@ extern "C" void cFEStateChatRoom_onWidgetEvent(cFEStateChatRoom* self, char* msg
     case 2:
         for (i = 0; i < 6; i++) {
             sprintf(buf, D_00463A60, i);
-            int h = *(int*)(msg + 0x38);
-            if (h == GetHashValue32(buf)) {
+            int hash = *(int*)(msg + 0x38);
+            if (hash == GetHashValue32(buf)) {
                 func_001B3D20(((char*)self), i, 0);
                 return;
             }
@@ -11322,14 +11322,14 @@ extern "C" void cFEStateChatRoom_onWidgetEvent(cFEStateChatRoom* self, char* msg
         return;
     case 6: {
         self->mbExiting = 1;
-        char* p = (char*)func_001A9C50((cFEStateNet*)self);
-        *(int*)(p + 0xBC) = 0;
-        int h = GetHashValue32(D_00463D20);
-        *(int*)(p + 0x164) = 0;
-        *(int*)(p + 0xC4) = h;
-        *(int*)(p + 0xC0) = 3;
-        *(int*)(p + 0x150) = 0x802;
-        func_001A9BC0((cFEStateNet*)self, p);
+        char* popup = (char*)func_001A9C50((cFEStateNet*)self);
+        *(int*)(popup + 0xBC) = 0;
+        int hash = GetHashValue32(D_00463D20);
+        *(int*)(popup + 0x164) = 0;
+        *(int*)(popup + 0xC4) = hash;
+        *(int*)(popup + 0xC0) = 3;
+        *(int*)(popup + 0x150) = 0x802;
+        func_001A9BC0((cFEStateNet*)self, popup);
         func_0025D800(LobbyMan_mLobbyMan, -1, 0);
         return;
     }
@@ -13563,15 +13563,15 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onWidgetListBox);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int cFEStateNetConfig_onWidgetListBox(cFEStateNetConfig* self, int pListBox, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 2) {
         if (self->miNumSettings > 1) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -13634,23 +13634,23 @@ extern "C" void cFEStateNetConfig_onWidgetEvent(cFEStateNetConfig* self, int pWi
     }
     switch (msg) {
     case 5: {
-        int t = *(int*)(obj + 0x18);
-        switch (t) {
+        int miscData = *(int*)(obj + 0x18);
+        switch (miscData) {
         case 0:
             ((cFEVObj_001B60A8*)self->mpPairSettings)->v08(1);
             func_001B4198(self);
             break;
         case 1: {
-            void* p = func_001A9C50((cFEStateNet*)self);
-            *(int*)((char*)p + 0xBC) = 2;
-            char* sub = (char*)p + 0xBC;
+            void* popup = func_001A9C50((cFEStateNet*)self);
+            *(int*)((char*)popup + 0xBC) = 2;
+            char* sub = (char*)popup + 0xBC;
             func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
             func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
-            *(int*)((char*)p + 0xC4) = GetHashValue32(D_004641F0);
-            *(int*)((char*)p + 0xC0) = 3;
-            *(int*)((char*)p + 0x150) = 0x844;
-            *(int*)((char*)p + 0x168) = 1;
-            func_001A9BC0((cFEStateNet*)self, p);
+            *(int*)((char*)popup + 0xC4) = GetHashValue32(D_004641F0);
+            *(int*)((char*)popup + 0xC0) = 3;
+            *(int*)((char*)popup + 0x150) = 0x844;
+            *(int*)((char*)popup + 0x168) = 1;
+            func_001A9BC0((cFEStateNet*)self, popup);
             break;
         }
         }
@@ -13735,9 +13735,9 @@ extern "C" sFEObj_001B6288* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS* 
     self->mpTextAuth = 0;
     self->miState = 0;
     self->mpustrText = 0;
-    char* o = (char*)SSXApp->FELocale;
-    sVE_001B6288* vt = *(sVE_001B6288**)(o + 4);
-    int n = USTR_length(vt[4].fn(o + vt[4].delta, GetHashValue32(D_00464208)));
+    char* locale = (char*)SSXApp->FELocale;
+    sVE_001B6288* vt = *(sVE_001B6288**)(locale + 4);
+    int n = USTR_length(vt[4].fn(locale + vt[4].delta, GetHashValue32(D_00464208)));
     if (self->mpustrText != 0) {
         cMemMan_free(self->mpustrText);
         self->mpustrText = 0;
@@ -13836,9 +13836,9 @@ extern "C" void cFEStateAuthDNAS_onCreateScreen(cFEStateAuthDNAS* self)
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        cFEVObj_001B63E8* o = (cFEVObj_001B63E8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464250));
-        if (o != 0) {
-            o->v09(0);
+        cFEVObj_001B63E8* widget = (cFEVObj_001B63E8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464250));
+        if (widget != 0) {
+            widget->v09(0);
         }
     }
     self->mpAuth = func_002561B8(cMemMan_alloc(0xA50, D_00464260, 0x100, 0));
@@ -14075,9 +14075,9 @@ extern "C" void cFEStateAuthDNAS_onUpdate(cFEStateAuthDNAS* self)
             ((cFEVObj_001B6798*)self->mpSubmitRect)->v09(1);
             ((cFEVObj_001B6798*)self->mpTextAuth)->v09(1);
             cUIText_setUnicodeStringByID(self->mpTextAuth, GetHashValue32(D_00464208));
-            cFEVObj_001B6798* g = (cFEVObj_001B6798*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464250));
-            if (g != 0) {
-                g->v09(1);
+            cFEVObj_001B6798* widget = (cFEVObj_001B6798*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00464250));
+            if (widget != 0) {
+                widget->v09(1);
             }
             self->miState = 2;
             func_002562D0(self->mpAuth);
@@ -14089,30 +14089,30 @@ extern "C" void cFEStateAuthDNAS_onUpdate(cFEStateAuthDNAS* self)
         }
         break;
     case 3: {
-        char* d = (char*)self->mpAuth;
-        if (*(int*)(d + 0x1C) != 0) {
-            char* o = (char*)self->mpParentState;
-            char* a = d + 0x450;
-            char* b = d + 0x650;
-            char* c = d + 0x850;
-            if (*(void**)(o + 0x710) != 0) {
-                cMemMan_free(*(void**)(o + 0x710));
-                *(void**)(o + 0x710) = 0;
+        char* auth = (char*)self->mpAuth;
+        if (*(int*)(auth + 0x1C) != 0) {
+            char* parentState = (char*)self->mpParentState;
+            char* a = auth + 0x450;
+            char* b = auth + 0x650;
+            char* c = auth + 0x850;
+            if (*(void**)(parentState + 0x710) != 0) {
+                cMemMan_free(*(void**)(parentState + 0x710));
+                *(void**)(parentState + 0x710) = 0;
             }
-            *(void**)(o + 0x710) = operator_new_tag((USTR_length(a) + 1) * 2, D_00464220, 0x100, 0);
-            if (*(void**)(o + 0x714) != 0) {
-                cMemMan_free(*(void**)(o + 0x714));
-                *(void**)(o + 0x714) = 0;
+            *(void**)(parentState + 0x710) = operator_new_tag((USTR_length(a) + 1) * 2, D_00464220, 0x100, 0);
+            if (*(void**)(parentState + 0x714) != 0) {
+                cMemMan_free(*(void**)(parentState + 0x714));
+                *(void**)(parentState + 0x714) = 0;
             }
-            *(void**)(o + 0x714) = operator_new_tag((USTR_length(b) + 1) * 2, D_00464220, 0x100, 0);
-            if (*(void**)(o + 0x718) != 0) {
-                cMemMan_free(*(void**)(o + 0x718));
-                *(void**)(o + 0x718) = 0;
+            *(void**)(parentState + 0x714) = operator_new_tag((USTR_length(b) + 1) * 2, D_00464220, 0x100, 0);
+            if (*(void**)(parentState + 0x718) != 0) {
+                cMemMan_free(*(void**)(parentState + 0x718));
+                *(void**)(parentState + 0x718) = 0;
             }
-            *(void**)(o + 0x718) = operator_new_tag((USTR_length(c) + 1) * 2, D_00464220, 0x100, 0);
-            USTR_copy(*(void**)(o + 0x710), a);
-            USTR_copy(*(void**)(o + 0x714), b);
-            USTR_copy(*(void**)(o + 0x718), c);
+            *(void**)(parentState + 0x718) = operator_new_tag((USTR_length(c) + 1) * 2, D_00464220, 0x100, 0);
+            USTR_copy(*(void**)(parentState + 0x710), a);
+            USTR_copy(*(void**)(parentState + 0x714), b);
+            USTR_copy(*(void**)(parentState + 0x718), c);
             ((cFEVObj_001B6798*)self->mpParentState)->v17(self, 0x10);
         } else {
             ((cFEVObj_001B6798*)self->mpParentState)->v17(self, 0xF);
@@ -14143,15 +14143,15 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNAS_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateAuthDNAS_onWidgetMenu(cFEStateAuthDNAS* self, int pMenu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 8) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -14456,15 +14456,15 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNASError_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateAuthDNASError_onWidgetMenu(cFEStateAuthDNASError* self, int pMenu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 8) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -15566,7 +15566,7 @@ public:
  */
 extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, void* w, unsigned int msg)
 {
-    int v;
+    int result;
     switch (self->miState) {
     case 7:
     case 13:
@@ -15628,9 +15628,9 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
             break;
         case 22:
             func_001A97B8_v(self, w, 22);
-            v = self->miResult;
-            if (v != 0) {
-                ((cListener_001B84D8*)self->mpParentState)->v17(self, v);
+            result = self->miResult;
+            if (result != 0) {
+                ((cListener_001B84D8*)self->mpParentState)->v17(self, result);
             }
             break;
         default:
@@ -15654,9 +15654,9 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
             break;
         case 22:
             func_001A97B8_v(self, w, 22);
-            v = self->miResult;
-            if (v != 0) {
-                ((cListener_001B84D8*)self->mpParentState)->v17(self, v);
+            result = self->miResult;
+            if (result != 0) {
+                ((cListener_001B84D8*)self->mpParentState)->v17(self, result);
             }
             break;
         default:
@@ -15681,9 +15681,9 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
             break;
         case 22:
             func_001A97B8_v(self, w, 22);
-            v = self->miResult;
-            if (v != 0) {
-                ((cListener_001B84D8*)self->mpParentState)->v17(self, v);
+            result = self->miResult;
+            if (result != 0) {
+                ((cListener_001B84D8*)self->mpParentState)->v17(self, result);
             }
             break;
         default:
@@ -15791,12 +15791,12 @@ void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* self, int pEngine, int bNewAccount)
 {
     func_001A8500_3(self, pEngine, 0);
-    int d = D_004A3E90;
+    int emptyStr = D_004A3E90;
     self->mpStaticContinue = 0;
     self->mVtbl = cFEStateCreateStep1_vtbl;
-    self->mszSavedPassword = (char*)d;
-    self->mszSavedConfirm = (char*)d;
-    self->mszSavedMail = (char*)d;
+    self->mszSavedPassword = (char*)emptyStr;
+    self->mszSavedConfirm = (char*)emptyStr;
+    self->mszSavedMail = (char*)emptyStr;
     if (bNewAccount != 0) {
         self->mHashName = 0x4D;
     } else {
@@ -15897,8 +15897,8 @@ extern "C" int cFEStateCreateStep1_onGainTransition(cFEStateCreateStep1* self, i
         void* obj = self->mpStaticContinue;
         if (obj != 0) {
             sVE1B8A08* vt = *(sVE1B8A08**)((char*)obj + 0x8);
-            void* o = (char*)obj + vt[8].delta;
-            vt[8].fn(o, !func_001B9558(self));
+            void* target = (char*)obj + vt[8].delta;
+            vt[8].fn(target, !func_001B9558(self));
         }
     }
     return 0;
@@ -17140,8 +17140,8 @@ extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, int
                 *(int*)((char*)self->mpAccount + 0x28) = cUIListBox_getCurrentEntryData(obj);
                 cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1BE0));
                 if (box != 0) {
-                    char* d = (char*)self->mpAccount;
-                    func_001BB840(self, box, *(int*)(d + 0x28), *(int*)(d + 0x30), *(int*)(d + 0x2C));
+                    char* account = (char*)self->mpAccount;
+                    func_001BB840(self, box, *(int*)(account + 0x28), *(int*)(account + 0x30), *(int*)(account + 0x2C));
                 }
             }
             if (IsHash_001BA618(*(int*)(obj + 0x38), D_004A1BE8)) {
@@ -17152,8 +17152,8 @@ extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, int
                 cBXString_Reset((char*)self->mpAccount + 0x10);
                 cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1BE0));
                 if (box != 0) {
-                    char* d = (char*)self->mpAccount;
-                    func_001BB840(self, box, *(int*)(d + 0x28), *(int*)(d + 0x30), *(int*)(d + 0x2C));
+                    char* account = (char*)self->mpAccount;
+                    func_001BB840(self, box, *(int*)(account + 0x28), *(int*)(account + 0x30), *(int*)(account + 0x2C));
                 }
             }
             if (IsHash_001BA618(*(int*)(obj + 0x38), D_004A1BE0)) {
@@ -18251,9 +18251,9 @@ extern "C" void cFEStateCreateDuplicate_onWidgetEvent(cFEStateCreateDuplicate* s
         if (self->mbAccount != 0) {
             func_00261408(GetSession_001BBF18());
             func_0025B800(LobbyMan_mLobbyMan);
-            void* p = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, self, 0, 0, 0);
-            *(int*)((char*)p + 0x18) = 0x832;
-            cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
+            void* popup = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(0xB10, D_00462D10, 0, 0), (int)self->mpEngine, self, 0, 0, 0);
+            *(int*)((char*)popup + 0x18) = 0x832;
+            cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, popup);
         } else {
             func_001A8A40(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(0x6D8, D_00462D68, 0, 0), (int)self->mpEngine));
         }
@@ -18956,8 +18956,8 @@ public:
 extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cFEVObj_001BCE38* obj)
 {
     char buf[16];
-    char* o = (char*)obj;
-    int id = *(int*)(o + 0x38);
+    char* widget = (char*)obj;
+    int id = *(int*)(widget + 0x38);
     if (id == GetHashValue32(D_00464DB0)) {
         self->mpMenuRoomMenus = (cUIMenu*)obj;
     } else if (id == GetHashValue32(D_00464DC0)) {
@@ -18973,19 +18973,19 @@ extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cFEVOb
         self->mpText3InRoom = (cUIText*)obj;
     } else if (id == GetHashValue32(D_00464E00)) {
         self->mpTextCreateRoom = (cUIText*)obj;
-        *(int*)(o + 0x18) = 4;
+        *(int*)(widget + 0x18) = 4;
     } else if (id == GetHashValue32(D_00464E10)) {
         self->mpChannelPair[0] = (cUIThing*)obj;
-        *(int*)(o + 0x18) = 0;
+        *(int*)(widget + 0x18) = 0;
     } else if (id == GetHashValue32(D_00464E20)) {
         self->mpChannelPair[1] = (cUIThing*)obj;
-        *(int*)(o + 0x18) = 1;
+        *(int*)(widget + 0x18) = 1;
     } else if (id == GetHashValue32(D_00464E30)) {
         self->mpChannelPair[2] = (cUIThing*)obj;
-        *(int*)(o + 0x18) = 2;
+        *(int*)(widget + 0x18) = 2;
     } else if (id == GetHashValue32(D_00464E40)) {
         self->mpChannelPair[3] = (cUIThing*)obj;
-        *(int*)(o + 0x18) = 3;
+        *(int*)(widget + 0x18) = 3;
     } else if (id == GetHashValue32(D_00464E50)) {
         self->mpChannelArrow[0] = (cUIThing*)obj;
         obj->v09(1);
@@ -19004,16 +19004,16 @@ extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cFEVOb
         self->mpPlayerDown = (cUIThing*)obj;
     } else if (id == GetHashValue32(D_00464EB0)) {
         self->mpChannelList[0] = (cUIListBox*)obj;
-        *(int*)(o + 0x14) &= ~1;
+        *(int*)(widget + 0x14) &= ~1;
     } else if (id == GetHashValue32(D_00464EC8)) {
         self->mpChannelList[1] = (cUIListBox*)obj;
-        *(int*)(o + 0x14) &= ~1;
+        *(int*)(widget + 0x14) &= ~1;
     } else if (id == GetHashValue32(D_00464EE0)) {
         self->mpChannelList[2] = (cUIListBox*)obj;
-        *(int*)(o + 0x14) &= ~1;
+        *(int*)(widget + 0x14) &= ~1;
     } else if (id == GetHashValue32(D_00464EF8)) {
         self->mpChannelList[3] = (cUIListBox*)obj;
-        *(int*)(o + 0x14) &= ~1;
+        *(int*)(widget + 0x14) &= ~1;
     } else if (id == GetHashValue32(D_00464F10)) {
         self->mpChannelLock[0] = (cUIThing*)obj;
         obj->v09(0);
@@ -19039,7 +19039,7 @@ extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cFEVOb
             }
         }
         *p = obj;
-        *(int*)(o + 0x18) = i;
+        *(int*)(widget + 0x18) = i;
     }
 }
 #endif
@@ -19119,9 +19119,9 @@ extern "C" void cFEStateLobbyMenu_onWidgetEvent(cState_D1B8* self, char* pWidget
                 self->busy = 0;
                 int id = cUIListBox_getCurrentEntryData_D1B8(pWidget);
                 self->curId = id;
-                int r = func_0025F180_D1B8(LobbyMan_mLobbyMan, id);
-                sObj_D1B8* t = self->texts[i];
-                t->vt[9].fn((char*)t + t->vt[9].delta, r);
+                int lockState = func_0025F180_D1B8(LobbyMan_mLobbyMan, id);
+                sObj_D1B8* lockIcon = self->texts[i];
+                lockIcon->vt[9].fn((char*)lockIcon + lockIcon->vt[9].delta, lockState);
                 func_0025D770_D1B8(LobbyMan_mLobbyMan, self->curId);
                 return;
             }
@@ -19130,9 +19130,9 @@ extern "C" void cFEStateLobbyMenu_onWidgetEvent(cState_D1B8* self, char* pWidget
     case 5: {
         char* item = 0;
         if (pWidget == self->backBtn) {
-            void* p = cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup_D1B8(cMemMan_alloc(0x6E8, D_00464F60, 0, 0), self->engine, self);
-            *(int*)((char*)p + 0x18) = 0x823;
-            cUIStateStack_pushPopup(*(char**)(*(char**)(self->screen + 0xD0) + 0x10) + 0x18, p);
+            void* popup = cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup_D1B8(cMemMan_alloc(0x6E8, D_00464F60, 0, 0), self->engine, self);
+            *(int*)((char*)popup + 0x18) = 0x823;
+            cUIStateStack_pushPopup(*(char**)(*(char**)(self->screen + 0xD0) + 0x10) + 0x18, popup);
         }
         for (int i = 0; i < 4; i++) {
             if (pWidget == self->btns[i]) {
@@ -20164,11 +20164,11 @@ void* func_001A8500_3(void* self, int a1, int a2) __asm__("func_001A8500");
 extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup(cFEStateNetCreateRoomPopup* self, int pEngine, int pParentState)
 {
     func_001A8500_3(self, pEngine, pParentState);
-    int d = D_004A3E90;
+    int emptyStr = D_004A3E90;
     self->mVtbl = cFEStateNetCreateRoomPopup_vtbl;
-    self->mszRoomName = (char*)d;
-    self->mszChannelName = (char*)d;
-    self->mszPassword = (char*)d;
+    self->mszRoomName = (char*)emptyStr;
+    self->mszChannelName = (char*)emptyStr;
+    self->mszPassword = (char*)emptyStr;
     self->mHashName = 0x47;
     return ((void*)self);
 }
@@ -20667,11 +20667,11 @@ public:
 extern "C" void cFEStateLogin_onWidgetCreate(cFEStateLogin* self, cFEVObj_001BEF60* pWidget)
 {
     unsigned short buf[64];
-    sItem_001BEF60* o = (sItem_001BEF60*)pWidget;
-    if (IsHash_001BEF60(o->mId, D_004652C0)) {
-        o->mState = 0;
-        int s = Loc_001BEF60(D_004652D0);
-        func_002C2718_1BEF60(buf, D_004A1BF8, s, D_00536760);
+    sItem_001BEF60* widget = (sItem_001BEF60*)pWidget;
+    if (IsHash_001BEF60(widget->mId, D_004652C0)) {
+        widget->mState = 0;
+        int locStr = Loc_001BEF60(D_004652D0);
+        func_002C2718_1BEF60(buf, D_004A1BF8, locStr, D_00536760);
         cUIText_setUnicodeString((cUIText*)pWidget, (char*)buf);
         pWidget->v09(1);
         if (strlen(D_00536760) == 0) {
@@ -20679,28 +20679,28 @@ extern "C" void cFEStateLogin_onWidgetCreate(cFEStateLogin* self, cFEVObj_001BEF
             pWidget->v08(1);
             pWidget->v09(0);
         }
-    } else if (IsHash_001BEF60(o->mId, D_004652E0)) {
+    } else if (IsHash_001BEF60(widget->mId, D_004652E0)) {
         if (strlen(D_00536760) == 0) {
             pWidget->v09(0);
         } else {
             pWidget->v09(1);
         }
-    } else if (IsHash_001BEF60(o->mId, D_004652F0)) {
+    } else if (IsHash_001BEF60(widget->mId, D_004652F0)) {
         if (strlen(D_00536760) == 0) {
             pWidget->v09(0);
         } else {
             pWidget->v09(1);
         }
-    } else if (IsHash_001BEF60(o->mId, D_00465300)) {
-        o->mState = 2;
+    } else if (IsHash_001BEF60(widget->mId, D_00465300)) {
+        widget->mState = 2;
         pWidget->v09(1);
-    } else if (IsHash_001BEF60(o->mId, D_00465318)) {
-        o->mState = 1;
+    } else if (IsHash_001BEF60(widget->mId, D_00465318)) {
+        widget->mState = 1;
         pWidget->v09(1);
-    } else if (IsHash_001BEF60(o->mId, D_00465330)) {
-        o->mState = 3;
-        int s = Loc_001BEF60(D_00462F08);
-        func_002C2718_1BEF60(buf, D_004A1BF8, s, D_00536760);
+    } else if (IsHash_001BEF60(widget->mId, D_00465330)) {
+        widget->mState = 3;
+        int locStr = Loc_001BEF60(D_00462F08);
+        func_002C2718_1BEF60(buf, D_004A1BF8, locStr, D_00536760);
         cUIText_setUnicodeString((cUIText*)pWidget, (char*)buf);
         pWidget->v09(1);
         if (strlen(D_00536760) == 0) {
@@ -21329,9 +21329,9 @@ extern "C" void cFEStateOnlineMainMenu_onWidgetEvent(cFEStateNet* self, void* pW
         switch (*(unsigned int*)((char*)pWidget + 0x18)) {
         case 1: {
             D_004A4E88 = 1;
-            void* p = cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup_FE70(cMemMan_alloc(0x734, D_004654E0, 0, 0), (int)self->mpEngine, self);
-            *(int*)((char*)p + 0x18) = 0x82E;
-            cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, p);
+            void* popup = cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup_FE70(cMemMan_alloc(0x734, D_004654E0, 0, 0), (int)self->mpEngine, self);
+            *(int*)((char*)popup + 0x18) = 0x82E;
+            cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, popup);
             break;
         }
         case 2:
@@ -21352,29 +21352,29 @@ extern "C" void cFEStateOnlineMainMenu_onWidgetEvent(cFEStateNet* self, void* pW
             func_001A8A40(self, cFEStateNetSSXWorld_cFEStateNetSSXWorld_FE70(cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
             break;
         case 5: {
-            void* p = func_001A9C50(self);
-            char* sub = (char*)p + 0xBC;
-            *(int*)((char*)p + 0xBC) = 2;
-            *(int*)((char*)p + 0xC4) = GetHashValue32(D_00465510);
-            *(int*)((char*)p + 0xC0) = 3;
+            void* popup = func_001A9C50(self);
+            char* sub = (char*)popup + 0xBC;
+            *(int*)((char*)popup + 0xBC) = 2;
+            *(int*)((char*)popup + 0xC4) = GetHashValue32(D_00465510);
+            *(int*)((char*)popup + 0xC0) = 3;
             func_001C57C0(sub, 0, GetHashValue32(D_00461618));
             func_001C57C0(sub, 1, GetHashValue32(D_00462C88));
-            *(int*)((char*)p + 0x150) = 0x82D;
-            func_001A9BC0(self, p);
+            *(int*)((char*)popup + 0x150) = 0x82D;
+            func_001A9BC0(self, popup);
             break;
         }
         }
         break;
     case 6: {
-        void* p = func_001A9C50(self);
-        char* sub = (char*)p + 0xBC;
-        *(int*)((char*)p + 0xBC) = 2;
-        *(int*)((char*)p + 0xC4) = GetHashValue32(D_00465530);
-        *(int*)((char*)p + 0xC0) = 3;
+        void* popup = func_001A9C50(self);
+        char* sub = (char*)popup + 0xBC;
+        *(int*)((char*)popup + 0xBC) = 2;
+        *(int*)((char*)popup + 0xC4) = GetHashValue32(D_00465530);
+        *(int*)((char*)popup + 0xC0) = 3;
         func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
         func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
-        *(int*)((char*)p + 0x150) = 0x846;
-        func_001A9BC0(self, p);
+        *(int*)((char*)popup + 0x150) = 0x846;
+        func_001A9BC0(self, popup);
         break;
     }
     case 8:
@@ -21864,34 +21864,34 @@ public:
 extern "C" int cFEStateOnlineAgreement_onGainTransition(cFEStateOnlineAgreement* self)
 {
     ((cFEVObj_001C0B20*)self)->v32();
-    char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619B8));
+    char* scrollBar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619B8));
     cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
-    cUIText* b = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
+    cUIText* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
     cUIText* c = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619E8));
-    *(cUIText**)(o + 0x7C) = uiText;
-    *(cUIText**)(o + 0x80) = b;
+    *(cUIText**)(scrollBar + 0x7C) = uiText;
+    *(cUIText**)(scrollBar + 0x80) = downArrow;
     if ((unsigned int)strlen(D_00465720) > 24) {
-        o[0x8C] = 0;
+        scrollBar[0x8C] = 0;
     } else {
-        strcpy(o + 0x8C, D_00465720);
+        strcpy(scrollBar + 0x8C, D_00465720);
     }
     if ((unsigned int)strlen(D_00465730) > 24) {
-        o[0xA5] = 0;
+        scrollBar[0xA5] = 0;
     } else {
-        strcpy(o + 0xA5, D_00465730);
+        strcpy(scrollBar + 0xA5, D_00465730);
     }
     if ((unsigned int)strlen(D_00465730) > 24) {
-        o[0xA5] = 0;
+        scrollBar[0xA5] = 0;
     } else {
-        strcpy(o + 0xA5, D_00465730);
+        strcpy(scrollBar + 0xA5, D_00465730);
     }
-    *(cUIText**)(o + 0x84) = c;
+    *(cUIText**)(scrollBar + 0x84) = c;
     char* x = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465710));
-    *(char**)(x + 0xB8) = o;
+    *(char**)(x + 0xB8) = scrollBar;
     cUITextScroll_setInputMap(x, 1);
     ((cFEVObj_001C0B20*)x)->v07(1);
-    if (o) {
-        ((cFEVObj_001C0B20*)o)->v09(1);
+    if (scrollBar) {
+        ((cFEVObj_001C0B20*)scrollBar)->v09(1);
     }
     return 1;
 }
@@ -22092,8 +22092,8 @@ extern "C" void* func_001A8770(cFEStateNet* self);
 extern "C" void* cFEStateNetQuickPlayPopup_onUpdate(cFEStateNetQuickPlayPopup* self)
 {
     if (self->mbSearching != 0) {
-        int t = (self->miBlinkFrames)--;
-        if (t == 0) {
+        int blinkFrames = (self->miBlinkFrames)--;
+        if (blinkFrames == 0) {
             self->miBlinkFrames = 30;
         }
     }
@@ -22568,13 +22568,13 @@ extern "C" int func_001A97B8(void* self, void* a1, int a2);
  */
 extern "C" int cFEStateNetQuickPlayPopup_onPopupEvent(cFEStateNetQuickPlayPopup* self, void* pPopup, int Event)
 {
-    int r;
+    int result;
     if (*(int*)((char*)pPopup + 0x18) == 0x82F) {
-        r = func_001C1B88(self, pPopup, Event);
+        result = func_001C1B88(self, pPopup, Event);
     } else {
-        r = func_001A97B8(self, pPopup, Event);
+        result = func_001A97B8(self, pPopup, Event);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -22792,16 +22792,16 @@ extern "C" void cFEStateNetSSXWorld_onWidgetEvent(cFEStateNet* self, char* msg, 
             func_001A8A40(((char*)self), cFEStateNetQuickMessages_cFEStateNetQuickMessages((cFEStateNetQuickMessages*)((cFEStateNet*)cMemMan_alloc(0x6FC, D_00465AE0, 0, 0)), (int)self->mpEngine));
             break;
         case 2: {
-            char* p = (char*)cFEStateOnlineAgreement_cFEStateOnlineAgreement((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
-            *(int*)(p + 0x18) = 0x13;
-            func_001A8A40(((char*)self), p);
+            char* agreement = (char*)cFEStateOnlineAgreement_cFEStateOnlineAgreement((cFEStateOnlineAgreement*)cMemMan_alloc(0x6DC, D_00464860, 0x100, 0), (int)self->mpEngine);
+            *(int*)(agreement + 0x18) = 0x13;
+            func_001A8A40(((char*)self), agreement);
             break;
         }
         case 3:
             if ((self->mAttrState & 6) == 0) {
-                char* q = (char*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0), (int)self->mpEngine, 0);
-                *(int*)(q + 0x1C) = (*(int*)(q + 0x1C) & ~0x3F00) | 0x100;
-                cUIStateStack_pushSpecial((char*)self->mpEngine + 0x18, q, 0, 0);
+                char* optionsState = (char*)func_001887A0(cMemMan_alloc(0x54, D_0045D698, 0x100, 0), (int)self->mpEngine, 0);
+                *(int*)(optionsState + 0x1C) = (*(int*)(optionsState + 0x1C) & ~0x3F00) | 0x100;
+                cUIStateStack_pushSpecial((char*)self->mpEngine + 0x18, optionsState, 0, 0);
             }
             break;
         }
@@ -23268,13 +23268,13 @@ extern "C" void cFEStateNetQuickMessages_onWidgetEvent(cFEStateNetQuickMessages*
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
             char* name = func_0014F6A8(iface, idx);
             if (name == 0) {
-                char tmp[0x40];
-                char* o = (char*)SSXApp->FELocale;
-                sVE_001C2740* vt = *(sVE_001C2740**)(o + 4);
-                char* obj = o + vt[4].delta;
+                char msgBuf[0x40];
+                char* locale = (char*)SSXApp->FELocale;
+                sVE_001C2740* vt = *(sVE_001C2740**)(locale + 4);
+                char* obj = locale + vt[4].delta;
                 void* str = vt[4].fn(obj, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(iface, idx));
-                USTR_strcpyW(tmp, str);
-                func_001A9150((cFEStateNet*)self, 0, GetHashValue32(D_00465BC0), (int)tmp, 0, idx, 0x3F);
+                USTR_strcpyW(msgBuf, str);
+                func_001A9150((cFEStateNet*)self, 0, GetHashValue32(D_00465BC0), (int)msgBuf, 0, idx, 0x3F);
             } else {
                 func_001A9150((cFEStateNet*)self, 0, GetHashValue32(D_00465BC0), (int)name, 0, idx, 0x3F);
             }
@@ -23284,17 +23284,17 @@ extern "C" void cFEStateNetQuickMessages_onWidgetEvent(cFEStateNetQuickMessages*
     }
     case 6:
         if (self->mbChanged != 0) {
-            void* p = func_001A9C50((cFEStateNet*)self);
-            *(int*)((char*)p + 0xBC) = 2;
-            char* sub = (char*)p + 0xBC;
-            int h = GetHashValue32(D_00465BE0);
-            *(int*)((char*)p + 0xC0) = 3;
-            *(int*)((char*)p + 0xC4) = h;
+            void* popup = func_001A9C50((cFEStateNet*)self);
+            *(int*)((char*)popup + 0xBC) = 2;
+            char* sub = (char*)popup + 0xBC;
+            int hash = GetHashValue32(D_00465BE0);
+            *(int*)((char*)popup + 0xC0) = 3;
+            *(int*)((char*)popup + 0xC4) = hash;
             func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
             func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
-            *(int*)((char*)p + 0x168) = 0;
-            *(int*)((char*)p + 0x150) = 0x83A;
-            func_001A9BC0((cFEStateNet*)self, p);
+            *(int*)((char*)popup + 0x168) = 0;
+            *(int*)((char*)popup + 0x150) = 0x83A;
+            func_001A9BC0((cFEStateNet*)self, popup);
         } else {
             func_001A8A40(self, cFEStateNetSSXWorld_cFEStateNetSSXWorld((cFEStateNet*)cMemMan_alloc(0x6D0, D_004611A8, 0, 0), (int)self->mpEngine));
         }
@@ -23308,17 +23308,17 @@ extern "C" void cFEStateNetQuickMessages_onWidgetEvent(cFEStateNetQuickMessages*
         func_001C2A18(self);
         break;
     case 4: {
-        void* p = func_001A9C50((cFEStateNet*)self);
-        *(int*)((char*)p + 0xBC) = 2;
-        char* sub = (char*)p + 0xBC;
-        int h = GetHashValue32(D_00465C00);
-        *(int*)((char*)p + 0xC0) = 3;
-        *(int*)((char*)p + 0xC4) = h;
+        void* popup = func_001A9C50((cFEStateNet*)self);
+        *(int*)((char*)popup + 0xBC) = 2;
+        char* sub = (char*)popup + 0xBC;
+        int hash = GetHashValue32(D_00465C00);
+        *(int*)((char*)popup + 0xC0) = 3;
+        *(int*)((char*)popup + 0xC4) = hash;
         func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
         func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
-        *(int*)((char*)p + 0x150) = 0x83B;
-        *(int*)((char*)p + 0x168) = 1;
-        func_001A9BC0((cFEStateNet*)self, p);
+        *(int*)((char*)popup + 0x150) = 0x83B;
+        *(int*)((char*)popup + 0x168) = 1;
+        func_001A9BC0((cFEStateNet*)self, popup);
         break;
     }
     default:
@@ -23654,43 +23654,43 @@ static inline int IsHash_001C2F00(int id, char* name) { return id == GetHashValu
  */
 extern "C" void cFEStateStats_onWidgetCreate(cFEStateStats* self, cFEVObj_001C2F00* obj)
 {
-    char* o = (char*)obj;
-    if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465C78) || IsHash_001C2F00(*(int*)(o + 0x38), D_00465C88)) {
-        *(int*)(o + 0x14) &= ~1;
+    char* widget = (char*)obj;
+    if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465C78) || IsHash_001C2F00(*(int*)(widget + 0x38), D_00465C88)) {
+        *(int*)(widget + 0x14) &= ~1;
         obj->v11(sCol_001C2F00(1.0f));
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465C98)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465C98)) {
         obj->v09(0);
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_004A1C10)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_004A1C10)) {
         obj->v09(1);
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465CA8)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465CA8)) {
         obj->v09(0);
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465CB8)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465CB8)) {
         obj->v09(0);
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465CC8)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465CC8)) {
         obj->v09(0);
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465CE0)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465CE0)) {
         obj->v09(1);
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_004A1C18)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_004A1C18)) {
         obj->v09(1);
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465CF0)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465CF0)) {
         obj->v07(1);
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D00)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465D00)) {
         obj->v07(1);
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D10)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465D10)) {
         obj->v07(1);
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_004A1BB8)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_004A1BB8)) {
         obj->v09(1);
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D20)) {
-        *(int*)(o + 0x14) &= ~1;
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465D20)) {
+        *(int*)(widget + 0x14) &= ~1;
         obj->v07(1);
         self->mpMenus[0] = (cUIMenu*)obj;
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D30)) {
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465D30)) {
         self->mpMenus[1] = (cUIMenu*)obj;
-        *(int*)(o + 0x90) |= 8;
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D40)) {
+        *(int*)(widget + 0x90) |= 8;
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465D40)) {
         self->mpMenus[2] = (cUIMenu*)obj;
-        *(int*)(o + 0x90) |= 8;
-    } else if (IsHash_001C2F00(*(int*)(o + 0x38), D_00465D50)) {
+        *(int*)(widget + 0x90) |= 8;
+    } else if (IsHash_001C2F00(*(int*)(widget + 0x38), D_00465D50)) {
         cUIMenu_setScrollableMenu(obj, 10);
         self->mpMenus[3] = (cUIMenu*)obj;
         cUIMenu_setInputMap(obj, 1);
@@ -23699,17 +23699,17 @@ extern "C" void cFEStateStats_onWidgetCreate(cFEStateStats* self, cFEVObj_001C2F
         char buf[32];
         for (int i = 0; i < 10; i++) {
             sprintf(buf, D_00465D60, i);
-            if (IsHash_001C2F00(*(int*)(o + 0x38), buf)) {
+            if (IsHash_001C2F00(*(int*)(widget + 0x38), buf)) {
                 obj->v09(1);
                 break;
             }
             sprintf(buf, D_00465D70, i);
-            if (IsHash_001C2F00(*(int*)(o + 0x38), buf)) {
+            if (IsHash_001C2F00(*(int*)(widget + 0x38), buf)) {
                 obj->v09(1);
                 break;
             }
             sprintf(buf, D_00465D80, i);
-            if (IsHash_001C2F00(*(int*)(o + 0x38), buf)) {
+            if (IsHash_001C2F00(*(int*)(widget + 0x38), buf)) {
                 obj->v09(1);
                 break;
             }
@@ -23987,8 +23987,8 @@ static inline int isButton_3668(cObj_3668* w, char* name)
 // Widget events of the online leaderboard screen: page buttons, row highlight and row selection.
 extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, int msg)
 {
-    cObj_3668* o;
-    cObjB_3668* p;
+    cObj_3668* shownObj;
+    cObjB_3668* hiddenObj;
     if (w == 0) {
         return;
     }
@@ -24015,20 +24015,20 @@ extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, i
             func_001C3EE8_3668(((char*)self), 1);
         } else if (isButton_3668(w, D_00465C78)) {
             w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
-            o = getObj_3668(((char*)self), D_00465CA8);
-            o->setVisible(1);
-            o = getObj_3668(((char*)self), D_00465C98);
-            o->setVisible(1);
-            o = getObj_3668(((char*)self), D_00465E10);
-            o->setVisible(1);
+            shownObj = getObj_3668(((char*)self), D_00465CA8);
+            shownObj->setVisible(1);
+            shownObj = getObj_3668(((char*)self), D_00465C98);
+            shownObj->setVisible(1);
+            shownObj = getObj_3668(((char*)self), D_00465E10);
+            shownObj->setVisible(1);
         } else if (isButton_3668(w, D_00465C88)) {
             w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
-            o = getObj_3668(((char*)self), D_00465CC8);
-            o->setVisible(1);
-            o = getObj_3668(((char*)self), D_00465CB8);
-            o->setVisible(1);
-            o = getObj_3668(((char*)self), D_00465E20);
-            o->setVisible(1);
+            shownObj = getObj_3668(((char*)self), D_00465CC8);
+            shownObj->setVisible(1);
+            shownObj = getObj_3668(((char*)self), D_00465CB8);
+            shownObj->setVisible(1);
+            shownObj = getObj_3668(((char*)self), D_00465E20);
+            shownObj->setVisible(1);
         } else {
             char buf[0x20];
             for (int i = 0; i < 10; i++) {
@@ -24067,20 +24067,20 @@ extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, i
             w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
         } else if (isButton_3668(w, D_00465C78)) {
             w->setColor(cVec_3668(1.0f, 0.0f, 0.0f, 0.0f));
-            p = (cObjB_3668*)getObj_3668(((char*)self), D_00465CA8);
-            p->setVisible(0);
-            p = (cObjB_3668*)getObj_3668(((char*)self), D_00465C98);
-            p->setVisible(0);
-            p = (cObjB_3668*)getObj_3668(((char*)self), D_00465E10);
-            p->setVisible(0);
+            hiddenObj = (cObjB_3668*)getObj_3668(((char*)self), D_00465CA8);
+            hiddenObj->setVisible(0);
+            hiddenObj = (cObjB_3668*)getObj_3668(((char*)self), D_00465C98);
+            hiddenObj->setVisible(0);
+            hiddenObj = (cObjB_3668*)getObj_3668(((char*)self), D_00465E10);
+            hiddenObj->setVisible(0);
         } else if (isButton_3668(w, D_00465C88)) {
             w->setColor(cVec_3668(1.0f, 0.0f, 0.0f, 0.0f));
-            p = (cObjB_3668*)getObj_3668(((char*)self), D_00465CC8);
-            ((cObjC_3668*)p)->setVisible(0);
-            p = (cObjB_3668*)getObj_3668(((char*)self), D_00465CB8);
-            ((cObjC_3668*)p)->setVisible(0);
-            p = (cObjB_3668*)getObj_3668(((char*)self), D_00465E20);
-            ((cObjC_3668*)p)->setVisible(0);
+            hiddenObj = (cObjB_3668*)getObj_3668(((char*)self), D_00465CC8);
+            ((cObjC_3668*)hiddenObj)->setVisible(0);
+            hiddenObj = (cObjB_3668*)getObj_3668(((char*)self), D_00465CB8);
+            ((cObjC_3668*)hiddenObj)->setVisible(0);
+            hiddenObj = (cObjB_3668*)getObj_3668(((char*)self), D_00465E20);
+            ((cObjC_3668*)hiddenObj)->setVisible(0);
         }
         break;
     case 8:
@@ -24902,28 +24902,28 @@ public:
 extern "C" int cFEStateNetNews_onGainTransition(cFEStateNet* self, int on)
 {
     if (on) {
-        char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465F28));
+        char* scrollBar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465F28));
         cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619C8));
-        cUIText* b = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
-        cUIText* c = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619E8));
-        *(cUIText**)(o + 0x7C) = uiText;
-        *(cUIText**)(o + 0x80) = b;
+        cUIText* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619D8));
+        cUIText* hideOnEmpty = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004619E8));
+        *(cUIText**)(scrollBar + 0x7C) = uiText;
+        *(cUIText**)(scrollBar + 0x80) = downArrow;
         if ((unsigned int)strlen(D_00465720) > 24) {
-            o[0x8C] = 0;
+            scrollBar[0x8C] = 0;
         } else {
-            strcpy(o + 0x8C, D_00465720);
+            strcpy(scrollBar + 0x8C, D_00465720);
         }
         if ((unsigned int)strlen(D_00465730) > 24) {
-            o[0xA5] = 0;
+            scrollBar[0xA5] = 0;
         } else {
-            strcpy(o + 0xA5, D_00465730);
+            strcpy(scrollBar + 0xA5, D_00465730);
         }
-        *(cUIText**)(o + 0x84) = c;
+        *(cUIText**)(scrollBar + 0x84) = hideOnEmpty;
         char* x = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00465F38));
-        *(char**)(x + 0xB8) = o;
+        *(char**)(x + 0xB8) = scrollBar;
         ((cFEVObj_001C5198*)x)->v07(1);
-        if (o) {
-            ((cFEVObj_001C5198*)o)->v09(1);
+        if (scrollBar) {
+            ((cFEVObj_001C5198*)scrollBar)->v09(1);
         }
     }
     return 0;
@@ -25135,18 +25135,18 @@ extern sVec3_1C5630 t3vect_Zero;
  */
 extern "C" void cPopupInfo_clear(cPopupInfo* self)
 {
-    char* b = (char*)self + 0x54;
-    char* a = (char*)self + 0x24;
+    char* confirmEntry = (char*)self + 0x54;
+    char* optionName = (char*)self + 0x24;
     func_00416210((char*)self + 0x4, 0, 8);
     func_00416210((char*)self + 0xC, 0, 8);
     func_00416210((char*)self + 0x14, 0, 8);
     func_00416210((char*)self + 0x1C, 0, 8);
     int i;
     for (i = 4; i >= 0; i--) {
-        func_00416210(a, 0, 8);
-        a += 8;
-        func_00416210(b, 0, 0xC);
-        b += 0xC;
+        func_00416210(optionName, 0, 8);
+        optionName += 8;
+        func_00416210(confirmEntry, 0, 0xC);
+        confirmEntry += 0xC;
     }
     func_00416210((char*)self + 0x4C, 0, 8);
     self->mbPassUpdate = 0;
@@ -25308,8 +25308,8 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_clearPopupConfirmation);
  */
 extern "C" void cPopupInfo_clearPopupConfirmation(cPopupInfo* self, int iEntryNum)
 {
-    char* p = (char*)self + iEntryNum * 0xc;
-    *(int*)(p + 0x54) = 0;
+    char* entry = (char*)self + iEntryNum * 0xc;
+    *(int*)(entry + 0x54) = 0;
 }
 #endif
 

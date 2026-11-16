@@ -450,9 +450,9 @@ extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self)
     int* mem = (int*)operator_new_tag(0x1190, D_004835A0, 0, 0);
     mem[0] = 40;
     sWorldTrigger58D0* arr = (sWorldTrigger58D0*)((char*)mem + 0x10);
-    sWorldTrigger58D0* p = arr;
-    for (int i = 39; i != -1; i--, p++) {
-        func_002B4B70(p);
+    sWorldTrigger58D0* trigger = arr;
+    for (int i = 39; i != -1; i--, trigger++) {
+        func_002B4B70(trigger);
     }
     *(sWorldTrigger58D0**)self = arr;
     *(int*)((char*)self + 0x338) = 0;

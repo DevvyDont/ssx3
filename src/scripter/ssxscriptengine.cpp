@@ -159,10 +159,10 @@ extern "C" void cSSXScriptEngine_Purge(sSseEngine8590* self)
     cDataManager_DetachAll(self->anims);
     cVidEngine_ResetVideoEngine(self->snd);
     if (self->objsA != 0) {
-        sSseObj8590* q = self->objsA + ((int*)self->objsA)[-4];
-        while (self->objsA != q) {
-            q--;
-            func_00275D90((int*)q, 0);
+        sSseObj8590* objPtr = self->objsA + ((int*)self->objsA)[-4];
+        while (self->objsA != objPtr) {
+            objPtr--;
+            func_00275D90((int*)objPtr, 0);
         }
         cMemMan_free((char*)self->objsA - 0x10);
     }
@@ -170,10 +170,10 @@ extern "C" void cSSXScriptEngine_Purge(sSseEngine8590* self)
         cMemMan_free(self->buf);
     }
     if (self->objsB != 0) {
-        sSseObj8590* q = self->objsB + ((int*)self->objsB)[-4];
-        while (self->objsB != q) {
-            q--;
-            func_00275D90((int*)q, 0);
+        sSseObj8590* objPtr = self->objsB + ((int*)self->objsB)[-4];
+        while (self->objsB != objPtr) {
+            objPtr--;
+            func_00275D90((int*)objPtr, 0);
         }
         cMemMan_free((char*)self->objsB - 0x10);
     }
@@ -275,8 +275,8 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
     func_00280640((sScrObj05B8*)self->fx);
     if (self->state != 2)
     {
-        sSseObj8720* r = &self->objsA[self->state];
-        if (func_00277060((sSsxScriptRider*)r))
+        sSseObj8720* nisList = &self->objsA[self->state];
+        if (func_00277060((sSsxScriptRider*)nisList))
         {
             sLvl8720* lvl = (sLvl8720*)SSXApp->Game->AI;
             int n = lvl->count;
@@ -285,17 +285,17 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
                 void* obj = *(void**)(lvl->riders[j] + 0xDF0);
                 if (**(int**)obj != 0 && self->delay == 0 && cInput_getState(obj, 0x6F))
                 {
-                    func_00276F48(r);
+                    func_00276F48(nisList);
                     goto done;
                 }
             }
         }
     done:
-        if (func_00276B98_i(r) != 3)
+        if (func_00276B98_i(nisList) != 3)
             cSSXScriptEngine_ClearNISPlayListState((cSSXScriptEngine*)self);
         if (cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(D_004A34A0)))
         {
-            if (func_00277298(r))
+            if (func_00277298(nisList))
                 func_001F36C0(SSXApp->Game->LoadIndicator, 1);
             else
                 cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 1);
@@ -328,15 +328,15 @@ struct sScrSlot8918 {
 extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine* self)
 {
     if (self->mNumAsyncs == 0) return;
-    void* f = self->mFilterTableAsyncHandle;
-    if (f != 0 && ASYNCFILE_getstatus(f) != 0) {
+    void* tableHandle = self->mFilterTableAsyncHandle;
+    if (tableHandle != 0 && ASYNCFILE_getstatus(tableHandle) != 0) {
         cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete(self, self->mFilterTableAsyncHandle);
     }
     sScrSlot8918* slots = (sScrSlot8918*)((char*)self + 0x630);
     for (int i = 0; i < 10; i++) {
-        void* p = slots[i].file;
-        if (p != 0 && ASYNCFILE_getstatus(p) != 0) {
-            cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete((cSSXScriptEngine*)self, p);
+        void* bankFile = slots[i].file;
+        if (bankFile != 0 && ASYNCFILE_getstatus(bankFile) != 0) {
+            cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete((cSSXScriptEngine*)self, bankFile);
         }
     }
 }
@@ -452,20 +452,20 @@ struct sScrSlot8AD0 {
  */
 extern "C" int cSSXScriptEngine_ForcePlayUpdate(cSSXScriptEngine* self, int key)
 {
-    int r = func_00282450(self, key);
-    if (r != 0) {
-        sScrSlot8AD0* p = (sScrSlot8AD0*)((char*)self + 0x6D0);
-        for (int i = 0; i < 2; i++, p++) {
+    int result = func_00282450(self, key);
+    if (result != 0) {
+        sScrSlot8AD0* slot = (sScrSlot8AD0*)((char*)self + 0x6D0);
+        for (int i = 0; i < 2; i++, slot++) {
             sSsxVEntry8AD0* vt = (sSsxVEntry8AD0*)self->mVtbl;
-            int id = p->id;
+            int id = slot->id;
             void* obj = (char*)self + vt[4].delta;
             // PORT: func_00282BF0 returns a pointer as int
             if (vt[4].fn(obj, id, *(int*)func_00282BF0(self, key))) {
-                func_00281100(p);
+                func_00281100(slot);
             }
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -510,9 +510,9 @@ extern "C" void cSSXScriptEngine_AsyncLoadTrack(cSSXScriptEngine* self)
 {
     sBXStr_8B98 name((char*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x34);
     sBXStr_8B98 path = D_00481C08 + name + D_004A34B8;
-    void* h = func_003DF690_8B98(path.p, 0);
-    self->mFilterTableAsyncHandle = h;
-    if (h != 0) {
+    void* handle = func_003DF690_8B98(path.p, 0);
+    self->mFilterTableAsyncHandle = handle;
+    if (handle != 0) {
         self->mNumAsyncs += 1;
     }
     path = D_00481C38 + name + D_004A34C0;
@@ -565,13 +565,13 @@ extern "C" int cSSXScriptEngine_IsBankLoading(cSSXScriptEngine*, int);
  */
 extern "C" int cSSXScriptEngine_IsLoadTrackComplete(cSSXScriptEngine* self)
 {
-    int r;
+    int complete;
     cSSXScriptEngine_UpdateLoad(self);
-    r = 0;
+    complete = 0;
     if ((int)self->mFilterTableAsyncHandle == 0) {
-        r = cSSXScriptEngine_IsBankLoading(self, 1) == 0;
+        complete = cSSXScriptEngine_IsBankLoading(self, 1) == 0;
     }
-    return r;
+    return complete;
 }
 #endif
 
@@ -755,12 +755,12 @@ extern "C" int cSSXScriptEngine_PlayNISList(cSSXScriptEngine* self, int i, int s
 {
     self->mPlayingNISList = i;
     func_002EF368(1);
-    int r = func_00276388(&((sSsxScriptRider*)self->mpNISLists)[i], startWithTransitionIn, forceUpdate);
-    if (r != 3) {
+    int state = func_00276388(&((sSsxScriptRider*)self->mpNISLists)[i], startWithTransitionIn, forceUpdate);
+    if (state != 3) {
         self->mPlayingNISList = 2;
         func_002EF368(0);
     }
-    return r;
+    return state;
 }
 #endif
 
@@ -1010,13 +1010,13 @@ extern "C" int cSSXScriptEngine_IsActiveNISSkippable(cSSXScriptEngine* self)
     if (idx == 2) {
         return 1;
     }
-    int r = 0;
+    int skippable = 0;
     if (self->mNumFramesNoSkip == 0) {
         if (func_00277060(&((sSsxScriptRider*)self->mpNISLists)[idx]) != 0) {
-            r = func_00276BD8_i(&((sSsxScriptRider*)self->mpNISLists)[self->mPlayingNISList]) != 3;
+            skippable = func_00276BD8_i(&((sSsxScriptRider*)self->mpNISLists)[self->mPlayingNISList]) != 3;
         }
     }
-    return r;
+    return skippable;
 }
 #endif
 
@@ -1170,17 +1170,17 @@ extern "C" int func_002821A0(void* self, int key, void* node);
 extern "C" int cSSXScriptEngine_RequestScriptByCategory(cSSXScriptEngine* self, int category, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
     // PORT: one variable holds the script pointer and then the result
-    int r = (int)cSSXScriptEngine_GetScriptFromCategory((cSSXScriptEngine*)self, category);
-    if (r == 0) return -1;
+    int outcome = (int)cSSXScriptEngine_GetScriptFromCategory((cSSXScriptEngine*)self, category);
+    if (outcome == 0) return -1;
     int* node = (int*)func_0027BD78(self);
     node[0] = mainCharAIIndex;
     node[1] = supportChar0AIIndex;
     node[2] = supportChar1AIIndex;
-    r = func_002821A0(self, *(int*)r, node);
-    if (r < 0) {
+    outcome = func_002821A0(self, *(int*)outcome, node);
+    if (outcome < 0) {
         func_0027BD90(self, node);
     }
-    return r;
+    return outcome;
 }
 #endif
 
@@ -1218,11 +1218,11 @@ extern "C" int cSSXScriptEngine_RequestScriptByIndex(cSSXScriptEngine* self, int
     node[0] = mainCharAIIndex;
     node[1] = supportChar0AIIndex;
     node[2] = supportChar1AIIndex;
-    int r = func_002821A0(self, key, node);
-    if (r < 0) {
+    int requestId = func_002821A0(self, key, node);
+    if (requestId < 0) {
         func_0027BD90(self, node);
     }
-    return r;
+    return requestId;
 }
 #endif
 
@@ -1400,10 +1400,10 @@ extern char D_004A34D8[];
 extern "C" void cSSXScriptEngine_OnAttachData(cSSXScriptEngine* self, const char* ext, void* data, int dataSize, int* kind, int* bank)
 {
     if (func_00416B18(D_004A34C8, ext, 3) == 0) {
-        char* h = (char*)func_0027C078(data);
-        *(int*)(h + 0x1C) = self->mCurrAttachingBankNum;
+        char* bankHeader = (char*)func_0027C078(data);
+        *(int*)(bankHeader + 0x1C) = self->mCurrAttachingBankNum;
         *kind = 0;
-        func_00282150(((char*)self), data, *(int*)(h + 0x18));
+        func_00282150(((char*)self), data, *(int*)(bankHeader + 0x18));
     } else if (func_00416B18(D_004A34D0, ext, 3) == 0) {
         *kind = 1;
         *bank = self->mCurrAttachingBankNum;
@@ -1514,21 +1514,21 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, sScript_9
         if (func_002743C8(ev) == 5) {
             int cnt = func_00274388(ev);
             if (cnt >= 2) {
-                int m = 0;
+                int numCands = 0;
                 int k;
                 for (k = 0; k < cnt; k++) {
                     sScriptOpt_9A70* opt = (sScriptOpt_9A70*)func_0027C960_9A70(ev, k);
                     int slot = D_00482608[opt->slot];
                     if (slot >= 0) {
                         if (opt->mask == 0 || (opt->mask & flags[slot]) != 0)
-                            cands[m++] = k;
+                            cands[numCands++] = k;
                     } else {
                         if (opt->mask == 0 || (opt->mask & all) != 0)
-                            cands[m++] = k;
+                            cands[numCands++] = k;
                     }
                 }
-                if (m > 0) {
-                    cScriptPlayerEntity_SetEntityVariation(ev, cands[BXrand() % m]);
+                if (numCands > 0) {
+                    cScriptPlayerEntity_SetEntityVariation(ev, cands[BXrand() % numCands]);
                     sScriptOpt_9A70* opt = (sScriptOpt_9A70*)func_0027C958(ev);
                     int slot = D_00482608[opt->slot];
                     if (slot >= 0) {
@@ -1604,13 +1604,13 @@ struct sScrSlot9D00 {
  */
 extern "C" int cSSXScriptEngine_AddObject(cSSXScriptEngine* self, cScriptOwner9D00* obj)
 {
-    int r = func_0027CEA8((self), obj);
+    int result = func_0027CEA8((self), obj);
     if (obj->state == 1) {
         func_00281190(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[*(int*)((char*)obj + 0x7C)], obj);
     } else if (obj->state == 2) {
         func_002812E0(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[obj->v09()], obj);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -1762,21 +1762,21 @@ static inline void* ObjOf_279F18(sLvlObj_279F18* o)
  */
 extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int slot, int pPlayer)
 {
-    int r;
+    int riderIndex;
     switch (slot) {
     case 0: {
-        int* p = (int*)func_0027A668_2(self, pPlayer);
-        if (p[0] < 0) break;
-        return Lvl_279F18()->riders[p[0]];
+        int* riderIds = (int*)func_0027A668_2(self, pPlayer);
+        if (riderIds[0] < 0) break;
+        return Lvl_279F18()->riders[riderIds[0]];
     }
     case 1:
-        r = ((int*)func_0027A668_2(self, pPlayer))[1];
-        if (r < 0) break;
-        return Lvl_279F18()->riders[r];
+        riderIndex = ((int*)func_0027A668_2(self, pPlayer))[1];
+        if (riderIndex < 0) break;
+        return Lvl_279F18()->riders[riderIndex];
     case 2:
-        r = ((int*)func_0027A668_2(self, pPlayer))[2];
-        if (r < 0) break;
-        return Lvl_279F18()->riders[r];
+        riderIndex = ((int*)func_0027A668_2(self, pPlayer))[2];
+        if (riderIndex < 0) break;
+        return Lvl_279F18()->riders[riderIndex];
     case 3: case 4: {
         sLvl_279F18* lvl = Lvl_279F18();
         int j = slot - 3;
@@ -2026,45 +2026,45 @@ static inline sFx_27A4A0* initFx_27A4A0(sFx_27A4A0* p, const sColor_27A4A0& col)
  */
 extern "C" void* cSSXScriptEngine_MakeTransitionObject(cSSXScriptEngine* self, int type, int mode)
 {
-    sColor_27A4A0 c;
+    sColor_27A4A0 color;
     switch (mode) {
     case 0:
-        c.r = 1.0f;
-        c.g = 0.0f;
-        c.b = 0.0f;
-        c.a = 0.0f;
+        color.r = 1.0f;
+        color.g = 0.0f;
+        color.b = 0.0f;
+        color.a = 0.0f;
         break;
     case 1:
-        c.r = 1.0f;
-        c.g = 1.0f;
-        c.b = 1.0f;
-        c.a = 1.0f;
+        color.r = 1.0f;
+        color.g = 1.0f;
+        color.b = 1.0f;
+        color.a = 1.0f;
         break;
     }
     switch (type) {
     case 1: {
-        sFx_27A4A0* p = (sFx_27A4A0*)func_002E4CE8_sz(0x14);
-        sColor_27A4A0 t = c;
-        return initFx_27A4A0(p, t);
+        sFx_27A4A0* fxObj = (sFx_27A4A0*)func_002E4CE8_sz(0x14);
+        sColor_27A4A0 fxColor = color;
+        return initFx_27A4A0(fxObj, fxColor);
     }
     case 2:
-        return func_002EBBA8(func_002E4CE8_sz(0x1C), &c, -1, 0);
+        return func_002EBBA8(func_002E4CE8_sz(0x1C), &color, -1, 0);
     case 3:
-        return func_002EBBA8(func_002E4CE8_sz(0x1C), &c, 1, 0);
+        return func_002EBBA8(func_002E4CE8_sz(0x1C), &color, 1, 0);
     case 4:
-        return func_002EBBA8(func_002E4CE8_sz(0x1C), &c, 0, -1);
+        return func_002EBBA8(func_002E4CE8_sz(0x1C), &color, 0, -1);
     case 5:
-        return func_002EBBA8(func_002E4CE8_sz(0x1C), &c, 0, 1);
+        return func_002EBBA8(func_002E4CE8_sz(0x1C), &color, 0, 1);
     case 6:
-        return func_002EBE20(func_002E4CE8_sz(0x1C), &c);
+        return func_002EBE20(func_002E4CE8_sz(0x1C), &color);
     case 7: {
-        sFx_27A4A0* p = (sFx_27A4A0*)func_002E4CE8_sz(0x14);
-        sColor_27A4A0 t;
-        t.r = 1.0f;
-        t.g = 1.0f;
-        t.b = 1.0f;
-        t.a = 1.0f;
-        return initFx_27A4A0(p, t);
+        sFx_27A4A0* fxObj = (sFx_27A4A0*)func_002E4CE8_sz(0x14);
+        sColor_27A4A0 fxColor;
+        fxColor.r = 1.0f;
+        fxColor.g = 1.0f;
+        fxColor.b = 1.0f;
+        fxColor.a = 1.0f;
+        return initFx_27A4A0(fxObj, fxColor);
     }
     case 0:
     case 8:
@@ -2112,9 +2112,9 @@ int func_00282BE0(void* self, void* a1);
 extern "C" void cSSXScriptEngine_OnInSeqPlay(cSSXScriptEngine* self, void* pPlayer)
 {
     func_002829D0(self, pPlayer);
-    int r = self->mPlayingNISList;
-    if (r != 2) {
-        tNISList_OnScriptPlay((char*)self->mpNISLists + r * 0xCC, func_00282BE0(self, pPlayer), pPlayer);
+    int listIndex = self->mPlayingNISList;
+    if (listIndex != 2) {
+        tNISList_OnScriptPlay((char*)self->mpNISLists + listIndex * 0xCC, func_00282BE0(self, pPlayer), pPlayer);
     }
 }
 #endif
@@ -2134,9 +2134,9 @@ int func_00282BE0(void* self, void* a1);
  */
 extern "C" void cSSXScriptEngine_OnInSeqUpdate(cSSXScriptEngine* self, void* pPlayer, float x, float y)
 {
-    int r = self->mPlayingNISList;
-    if (r != 2) {
-        func_00277310((char*)self->mpNISLists + r * 0xCC, func_00282BE0(self, pPlayer), pPlayer, x, y);
+    int listIndex = self->mPlayingNISList;
+    if (listIndex != 2) {
+        func_00277310((char*)self->mpNISLists + listIndex * 0xCC, func_00282BE0(self, pPlayer), pPlayer, x, y);
     }
 }
 #endif
@@ -2154,9 +2154,9 @@ int func_00282BE0(void* self, void* a1);
  */
 extern "C" void cSSXScriptEngine_OnInSeqPlayStopping(cSSXScriptEngine* self, void* pPlayer)
 {
-    int r = self->mPlayingNISList;
-    if (r != 2) {
-        func_002773A0((char*)self->mpNISLists + r * 0xCC, func_00282BE0(self, pPlayer), pPlayer);
+    int listIndex = self->mPlayingNISList;
+    if (listIndex != 2) {
+        func_002773A0((char*)self->mpNISLists + listIndex * 0xCC, func_00282BE0(self, pPlayer), pPlayer);
     }
 }
 #endif
@@ -2175,9 +2175,9 @@ int func_00282BE0(void* self, void* a1);
  */
 extern "C" void cSSXScriptEngine_OnInSeqStop(cSSXScriptEngine* self, void* pPlayer)
 {
-    int r = self->mPlayingNISList;
-    if (r != 2) {
-        func_00277400((char*)self->mpNISLists + r * 0xCC, func_00282BE0(self, pPlayer), pPlayer);
+    int listIndex = self->mPlayingNISList;
+    if (listIndex != 2) {
+        func_00277400((char*)self->mpNISLists + listIndex * 0xCC, func_00282BE0(self, pPlayer), pPlayer);
     }
     func_00282A18(self, pPlayer);
 }
@@ -2262,22 +2262,22 @@ extern "C" void cSSXScriptEngine_SkipNISListScripts(cSSXScriptEngine* self, int 
  */
 extern "C" bool cSSXScriptEngine_EndTransportSequence(cSSXScriptEngine* self)
 {
-    int v = 0;
+    int skipMode = 0;
     switch (cSSXScriptEngine_GetNISListScriptCategory_r(self, 1, 0)) {
     case 12: case 18:
-        v = 3;
+        skipMode = 3;
         break;
     case 13: case 19:
-        v = 2;
+        skipMode = 2;
         break;
     case 14: case 20:
-        v = 1;
+        skipMode = 1;
         break;
     case 15: case 16: case 17:
         break;
     }
-    cSSXScriptEngine_SkipNISListScripts(self, 1, v, 1);
-    return v != 0;
+    cSSXScriptEngine_SkipNISListScripts(self, 1, skipMode, 1);
+    return skipMode != 0;
 }
 #endif
 
@@ -2298,12 +2298,12 @@ extern "C" int cSSXScriptEngine_IsInTransportSequence(cSSXScriptEngine* self)
     if (self->mPlayingNISList != 1) {
         return 0;
     }
-    int s = cSSXScriptEngine_GetNISListScriptCategory_int(self, 1, 0);
-    int r = 0;
-    if (s == 0x12 || s == 0xC || s == 0x13 || s == 0xD || s == 0x14 || s == 0xE) {
-        r = 1;
+    int category = cSSXScriptEngine_GetNISListScriptCategory_int(self, 1, 0);
+    int inTransport = 0;
+    if (category == 0x12 || category == 0xC || category == 0x13 || category == 0xD || category == 0x14 || category == 0xE) {
+        inTransport = 1;
     }
-    return r;
+    return inTransport;
 }
 #endif
 
@@ -2474,8 +2474,8 @@ done:
         int k = tbl.v[best];
         if (best == 0) {
             k = 9;
-            int c = cBELibrary_getCheatCharacterID(Call_AC60(list->riders[ids[0]], 7));
-            if ((unsigned)(c - 10) < 11 || c == 0x1C) {
+            int cheatCharID = cBELibrary_getCheatCharacterID(Call_AC60(list->riders[ids[0]], 7));
+            if ((unsigned)(cheatCharID - 10) < 11 || cheatCharID == 0x1C) {
                 k = 10;
             }
         }
@@ -2491,7 +2491,7 @@ done:
     sScBlk_AC60 blk = *(sScBlk_AC60*)cBENewRaceInterface_getLocation(econ);
     int first = mode == 0;
     int idx = cBENewPlayerInterface_getHumanRider(players, 0);
-    int r = func_00146150(players, idx, blk.kind, first);
+    int result = func_00146150(players, idx, blk.kind, first);
     if ((unsigned)(cBELibrary_getCheatCharacterID(idx) - 10) < 11) {
         return;
     }
@@ -2499,7 +2499,7 @@ done:
     if (func_001464D0(players, idx, rc, blk.kind, first)) {
         return;
     }
-    if (r != 0) {
+    if (result != 0) {
         return;
     }
     int v = -1;
@@ -2569,14 +2569,14 @@ extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine* engine,
     sScript_27B0C0* scripts = ((sCategory_27B0C0*)self->mpCategoryFilterTable)[cat].scripts;
     for (int i = 0; i < count; i++)
     {
-        sScript_27B0C0* s = &scripts[i];
-        int pri = ((sPri_27B0C0*)self->mpMasterTable)[s->id].pri;
+        sScript_27B0C0* script = &scripts[i];
+        int pri = ((sPri_27B0C0*)self->mpMasterTable)[script->id].pri;
         if (pri <= best)
         {
             int fail = 0;
             for (int j = 0; j < 21; j++)
             {
-                if (s->mask[j] != 0 && (flags[j] & s->mask[j]) == 0)
+                if (script->mask[j] != 0 && (flags[j] & script->mask[j]) == 0)
                 {
                     fail = 1;
                     break;
@@ -2589,14 +2589,14 @@ extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine* engine,
                     best = pri;
                     n = 0;
                 }
-                list[n++] = s;
+                list[n++] = script;
             }
         }
     }
-    sScript_27B0C0* r = n ? list[BXrand() % n] : 0;
+    sScript_27B0C0* chosen = n ? list[BXrand() % n] : 0;
     if (list)
         cMemMan_free(list);
-    return (int*)r;
+    return (int*)chosen;
 }
 #endif
 
@@ -2631,11 +2631,11 @@ struct sSeSlotB268 {
  */
 extern "C" void cSSXScriptEngine_SyncLoadScriptBank(cSSXScriptEngine* self, int i, const char* name, int flags, int key, int* buf)
 {
-    sSeSlotB268* s = (sSeSlotB268*)(((char*)self) + (i * 0x10 + 0x628));
-    if (s->handle != 0) {
+    sSeSlotB268* bankInfo = (sSeSlotB268*)(((char*)self) + (i * 0x10 + 0x628));
+    if (bankInfo->handle != 0) {
         return;
     }
-    s->key = key;
+    bankInfo->key = key;
     int size = 0;
     int* data;
     if (buf != 0) {
@@ -2646,21 +2646,21 @@ extern "C" void cSSXScriptEngine_SyncLoadScriptBank(cSSXScriptEngine* self, int 
     } else {
         data = FILE_loadz(name, flags);
         if (data == 0) {
-            tSSXScriptBankInfo_Clear(s);
+            tSSXScriptBankInfo_Clear(bankInfo);
             return;
         }
         size = BXFILE_size(name);
     }
     if (data == 0) {
-        tSSXScriptBankInfo_Clear(s);
+        tSSXScriptBankInfo_Clear(bankInfo);
         return;
     }
     self->mCurrAttachingBankNum = i;
-    s->handle = func_00275920(((char*)self) + 0x51C, name, data, size);
+    bankInfo->handle = func_00275920(((char*)self) + 0x51C, name, data, size);
     self->mCurrAttachingBankNum = 10;
-    s->temp = 1;
+    bankInfo->temp = 1;
     if (buf != 0) {
-        s->temp = 0;
+        bankInfo->temp = 0;
     }
 }
 #endif
@@ -2721,9 +2721,9 @@ extern "C" void cSSXScriptEngine_PurgeScriptBank(cSSXScriptEngine* self, int i)
     char* slot = (char*)self + (i * 16 + 0x628);
     int key = *(int*)slot;
     if (key != 0) {
-        void* p = cDataManager_DetachData((char*)self + 0x51C, key);
-        if (*(int*)(slot + 0xC) != 0 && p != 0) {
-            cMemMan_free(p);
+        void* bankData = cDataManager_DetachData((char*)self + 0x51C, key);
+        if (*(int*)(slot + 0xC) != 0 && bankData != 0) {
+            cMemMan_free(bankData);
         }
     } else if (*(void**)(slot + 0x8) != 0) {
         ASYNCFILE_cancel(*(void**)(slot + 0x8));
@@ -2843,20 +2843,20 @@ extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(cSSXScriptEn
     struct {
         int* data;
         int size;
-    } r;
+    } loaded;
     for (int i = 0; i < 10; i++) {
         tSSXScriptBankInfo* ssxScriptBankInfo = &((&(self)->mScriptDataBanks[0]))[i];
         if ((void*)((int)ssxScriptBankInfo->asyncHandle) == file) {
-            ASYNCFILE_release_out(file, &r.data, &r.size);
+            ASYNCFILE_release_out(file, &loaded.data, &loaded.size);
             self->mNumAsyncs -= 1;
-            if (r.size == 0) {
+            if (loaded.size == 0) {
                 tSSXScriptBankInfo_Clear(ssxScriptBankInfo);
                 return;
             }
             sprintf(buf, D_00481EB0, ssxScriptBankInfo->dataIdentifier);
             (*(int*)&ssxScriptBankInfo->asyncHandle) = 0;
             self->mCurrAttachingBankNum = i;
-            (*(int*)&ssxScriptBankInfo->dataBankHandle) = func_00275920((char*)self + 0x51C, buf, r.data, r.size);
+            (*(int*)&ssxScriptBankInfo->dataBankHandle) = func_00275920((char*)self + 0x51C, buf, loaded.data, loaded.size);
             self->mCurrAttachingBankNum = 10;
             return;
         }
@@ -2887,17 +2887,17 @@ extern "C" void cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete(cSSXScriptEn
     struct {
         int* data;
         int size;
-    } r;
+    } loaded;
     self->mFilterTableAsyncHandle = 0;
-    ASYNCFILE_release_out(file, &r.data, &r.size);
+    ASYNCFILE_release_out(file, &loaded.data, &loaded.size);
     self->mNumAsyncs -= 1;
-    if (r.size != 0) {
-        (*(int**)&self->mpFilterTableHeader) = r.data;
-        (*(sScrReloc6B0**)&self->mpCategoryFilterTable) = (sScrReloc6B0*)(r.data + 1);
+    if (loaded.size != 0) {
+        (*(int**)&self->mpFilterTableHeader) = loaded.data;
+        (*(sScrReloc6B0**)&self->mpCategoryFilterTable) = (sScrReloc6B0*)(loaded.data + 1);
         for (int i = 0; i < *((int*)self->mpFilterTableHeader); i++) {
             if (((sScrReloc6B0*)self->mpCategoryFilterTable)[i].used != 0) {
                 // PORT: offset relocated to an absolute pointer held in int
-                ((sScrReloc6B0*)self->mpCategoryFilterTable)[i].offset = (int)r.data + ((sScrReloc6B0*)self->mpCategoryFilterTable)[i].offset;
+                ((sScrReloc6B0*)self->mpCategoryFilterTable)[i].offset = (int)loaded.data + ((sScrReloc6B0*)self->mpCategoryFilterTable)[i].offset;
             }
         }
     }
@@ -2981,15 +2981,15 @@ static inline float Atan2_27B750(float y, float x)
 extern "C" void cSSXScriptEngine_FillOrientationFromStartPointInfo(cSSXScriptEngine* self, char* obj, sVec4_27B750* pos, int* roll, float* pitch, float* yaw)
 {
     char* sub = obj + 0x6C0;
-    sVEntry_27B750* e = &(*(sVEntry_27B750**)sub)[7];
-    sNode_27B750* p = (sNode_27B750*)func_0026B5E0(D_004D33A0, 1, e->fn(sub + e->delta));
-    *pos = sVec4_27B750(p->px, p->py, p->pz, 1.0f);
-    *yaw = Atan2_27B750(p->dy, p->dx);
-    float z = p->dz;
-    sVec2_27B750 h;
-    h.x = p->dx;
-    h.y = p->dy;
-    *pitch = Atan2_27B750(z, Length_27B750(h));
+    sVEntry_27B750* vtEntry = &(*(sVEntry_27B750**)sub)[7];
+    sNode_27B750* startPoint = (sNode_27B750*)func_0026B5E0(D_004D33A0, 1, vtEntry->fn(sub + vtEntry->delta));
+    *pos = sVec4_27B750(startPoint->px, startPoint->py, startPoint->pz, 1.0f);
+    *yaw = Atan2_27B750(startPoint->dy, startPoint->dx);
+    float z = startPoint->dz;
+    sVec2_27B750 horiz;
+    horiz.x = startPoint->dx;
+    horiz.y = startPoint->dy;
+    *pitch = Atan2_27B750(z, Length_27B750(horiz));
     *roll = 0;
 }
 #endif
@@ -3058,12 +3058,12 @@ static inline float Atan2_27B948(float y, float x)
 extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo(cSSXScriptEngine* self, char* obj, sVec4_27B948* pos, int* roll, float* pitch, float* yaw)
 {
     char* sub = obj + 0x6C0;
-    sVEntry_27B948* e = &(*(sVEntry_27B948**)sub)[5];
-    *pos = *e->fn(sub + e->delta);
+    sVEntry_27B948* vtEntry = &(*(sVEntry_27B948**)sub)[5];
+    *pos = *vtEntry->fn(sub + vtEntry->delta);
     sVec4_27B948 dir = *(sVec4_27B948*)(obj + 0x1B0);
     *yaw = Atan2_27B948(dir.y, dir.x);
-    sVec2_27B948 h(dir.x, dir.y);
-    *pitch = Atan2_27B948(dir.z, Length_27B948(h));
+    sVec2_27B948 horiz(dir.x, dir.y);
+    *pitch = Atan2_27B948(dir.z, Length_27B948(horiz));
     *roll = 0;
 }
 #endif
@@ -3204,18 +3204,18 @@ extern "C" void cSSXScriptEngine_FillOrientationFromObjectOrientationInfo(cSSXSc
     if (~code == 0)
         return;
     char* model = ((char**)*(char**)((char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[code & 0xFF];
-    char* m = Bone_27BB08(model, code);
-    *pos = sVec_27BB08(*(float*)(m + 0x40), *(float*)(m + 0x44), *(float*)(m + 0x48), 1.0f);
-    *yaw = Atan2_27BB08(*(float*)(m + 0x14), *(float*)(m + 0x10));
-    *pitch = func_0031C128(*(float*)(m + 0x18));
+    char* bone = Bone_27BB08(model, code);
+    *pos = sVec_27BB08(*(float*)(bone + 0x40), *(float*)(bone + 0x44), *(float*)(bone + 0x48), 1.0f);
+    *yaw = Atan2_27BB08(*(float*)(bone + 0x14), *(float*)(bone + 0x10));
+    *pitch = func_0031C128(*(float*)(bone + 0x18));
     *flag = 0;
     if (off) {
         sMat_27BB08 rot;
-        rot = *(sMat_27BB08*)(m + 0x10);
-        sVec_27BB08 v = *off;
-        v.w = 0.0f;
-        v = MulMat_27BB08(&rot, v);
-        AddEq_27BB08(*pos, v);
+        rot = *(sMat_27BB08*)(bone + 0x10);
+        sVec_27BB08 rotatedOff = *off;
+        rotatedOff.w = 0.0f;
+        rotatedOff = MulMat_27BB08(&rot, rotatedOff);
+        AddEq_27BB08(*pos, rotatedOff);
     }
 }
 #endif
@@ -4565,10 +4565,10 @@ public:
 extern "C" void cScriptObjCamera_OnEndObjectUse(void* self)
 {
     func_00283440(self);
-    char* g = (char*)SSXApp;
-    if (*(void**)(g + 0x84) != 0) {
+    char* app = (char*)SSXApp;
+    if (*(void**)(app + 0x84) != 0) {
         *(int*)((char*)self + 0x18) = 0;
-        char* riders = *(char**)(*(char**)(g + 0x84) + 0x84);
+        char* riders = *(char**)(*(char**)(app + 0x84) + 0x84);
         char* rider = *(char**)(riders + (*(int*)((char*)self + 0x7C) << 2) + 4);
         func_001692D8(*(void**)(rider + 0xAC), self);
         if (*(int*)(*(char**)(rider + 0xAC) + 0x18) == 0) {
@@ -5296,10 +5296,10 @@ extern "C" void* cScriptObjEvent_cScriptObjEvent(sScrObj05B8* self)
     self->field_0xF4 = 0;
     self->field_0xF8 = 0;
     for (int i = 0; i < 4; i++) {
-        sScrTrig05B8* t = &self->trig[i];
-        t->target = -1;
-        t->id = -1;
-        t->count = 0;
+        sScrTrig05B8* trigger = &self->trig[i];
+        trigger->target = -1;
+        trigger->id = -1;
+        trigger->count = 0;
     }
     return self;
 }

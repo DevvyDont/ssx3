@@ -37,16 +37,16 @@ extern char D_004A1508[];
  */
 extern "C" void cFEStateBonusMaterial_onWidgetCreate(void* self, void* menu)
 {
-    int h = *(int*)((char*)menu + 0x38);
-    if (h == GetHashValue32(D_004A14F8)) {
+    int menuHash = *(int*)((char*)menu + 0x38);
+    if (menuHash == GetHashValue32(D_004A14F8)) {
         *(int*)((char*)menu + 0x18) = 0;
     }
-    h = *(int*)((char*)menu + 0x38);
-    if (h == GetHashValue32(D_004A1500)) {
+    menuHash = *(int*)((char*)menu + 0x38);
+    if (menuHash == GetHashValue32(D_004A1500)) {
         *(int*)((char*)menu + 0x18) = 1;
     }
-    h = *(int*)((char*)menu + 0x38);
-    if (h == GetHashValue32(D_004A1508)) {
+    menuHash = *(int*)((char*)menu + 0x38);
+    if (menuHash == GetHashValue32(D_004A1508)) {
         *(int*)((char*)menu + 0x18) = 2;
     }
 }
@@ -65,15 +65,15 @@ INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onWidgetMenu);
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateBonusMaterial_onWidgetMenu(void* self, int menu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 8) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -124,18 +124,18 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(void* self, void* item, unsi
     case 4:
         break;
     case 5: {
-        void* p = func_001D22F0(cMemMan_alloc(0x280, D_004601D8, 0, 0), *(void**)((char*)self + 0x10), self,
+        void* popup = func_001D22F0(cMemMan_alloc(0x280, D_004601D8, 0, 0), *(void**)((char*)self + 0x10), self,
                                 *(signed char*)((char*)self + 0x44));
-        func_001D2598(p, D_00441128[*(int*)((char*)item + 0x18)], 0);
-        cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, p);
+        func_001D2598(popup, D_00441128[*(int*)((char*)item + 0x18)], 0);
+        cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, popup);
         break;
     }
     case 6: {
-        char* o = **(char***)((char*)self + 0x10);
-        sVEntryK195600* vt = *(sVEntryK195600**)(o + 4);
-        void* r = vt[5].fn(o + vt[5].delta, self, *(int*)((char*)item + 0x18));
-        if (r != 0)
-            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, r);
+        char* factory = **(char***)((char*)self + 0x10);
+        sVEntryK195600* vt = *(sVEntryK195600**)(factory + 4);
+        void* nextState = vt[5].fn(factory + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (nextState != 0)
+            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
         break;
     }
     }

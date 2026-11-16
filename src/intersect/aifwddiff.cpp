@@ -32,9 +32,9 @@ struct sCache_7890 {
 extern "C" void cAIFwdDiffCache_Init(sCache_7890* self, int n)
 {
     sCacheEntry_7890* mem = (sCacheEntry_7890*)operator_new_tag(n * sizeof(sCacheEntry_7890), D_0048E4F8, 0, 0);
-    sCacheEntry_7890* p = mem;
-    for (int k = n - 1; k != -1; k--, p++) {
-        func_00340970(p);
+    sCacheEntry_7890* entry = mem;
+    for (int k = n - 1; k != -1; k--, entry++) {
+        func_00340970(entry);
     }
     self->entries = mem;
     for (int i = 0; i < n; i++) {

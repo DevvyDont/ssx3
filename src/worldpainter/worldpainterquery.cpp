@@ -19,8 +19,8 @@ extern sWPQuery* D_004A3880;
  */
 extern "C" void cWorldPainterQuery_reset(void)
 {
-    for (sWPQuery* q = D_004A3880; q != 0; q = q->next) {
-        *q->result = -99999.0f;
+    for (sWPQuery* query = D_004A3880; query != 0; query = query->next) {
+        *query->result = -99999.0f;
     }
 }
 #endif

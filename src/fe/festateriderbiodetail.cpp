@@ -329,9 +329,9 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(void* self, void* item, int msg)
     case 6: {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry001912D0* vt = *(sVEntry001912D0**)((char*)obj + 4);
-        void* r = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
-        if (r != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, r);
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
         break;
     }

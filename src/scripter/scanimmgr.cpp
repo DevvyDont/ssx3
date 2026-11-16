@@ -142,33 +142,33 @@ extern "C" void* func_002757F0_v(void* self) __asm__("func_002757F0");
  */
 extern "C" int cScriptAnimBankManager_LinkBank(sScLinkList* self, int id, void* data)
 {
-    sScLinkEntry* e = (sScLinkEntry*)func_00275718((sAnimList*)self, id);
-    if (e == 0) {
-        e = (sScLinkEntry*)func_002757F0_v(self);
-        e->id = id;
-        e->data = data;
-        sScBank* bank = (sScBank*)func_00311220(cMemMan_alloc(0x18, D_00481A98, self->flags, 0), e->data);
+    sScLinkEntry* bankInfo = (sScLinkEntry*)func_00275718((sAnimList*)self, id);
+    if (bankInfo == 0) {
+        bankInfo = (sScLinkEntry*)func_002757F0_v(self);
+        bankInfo->id = id;
+        bankInfo->data = data;
+        sScBank* bank = (sScBank*)func_00311220(cMemMan_alloc(0x18, D_00481A98, self->flags, 0), bankInfo->data);
         int n = bank->hdr->count;
-        e->used = 0;
+        bankInfo->used = 0;
         for (int i = 0; i < n; i++) {
             if (bank->items[i].ptr != 0) {
-                e->used++;
+                bankInfo->used++;
             }
         }
-        if (e->used != 0) {
-            e->map = (int*)operator_new_tag(e->used * 4, D_00481AA8, self->flags, 0);
+        if (bankInfo->used != 0) {
+            bankInfo->map = (int*)operator_new_tag(bankInfo->used * 4, D_00481AA8, self->flags, 0);
             int k = 0;
             for (int i = 0; i < n; i++) {
                 if (bank->items[i].ptr != 0) {
-                    e->map[k++] = i;
+                    bankInfo->map[k++] = i;
                 }
             }
         }
         void** tbl = D_004A3DF8;
-        void** slot = &tbl[*(unsigned char*)&e->slot];
+        void** slot = &tbl[*(unsigned char*)&bankInfo->slot];
         *slot = bank;
     }
-    return e->slot;
+    return bankInfo->slot;
 }
 #endif
 

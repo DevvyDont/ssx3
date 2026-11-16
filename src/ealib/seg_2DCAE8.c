@@ -59,14 +59,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", USTR_length);
 /**
  * Counts the characters of a zero-terminated 16-bit (wide) string.
  *
- * @param arg0  the wide string
+ * @param str  the wide string
  * @return the number of 16-bit characters before the terminating 0
  */
-int USTR_length(unsigned short *arg0) {
+int USTR_length(unsigned short *str) {
     int var_3;
     unsigned short *var_4;
 
-    var_4 = arg0;
+    var_4 = str;
     var_3 = 0;
     if (*var_4 != 0) {
         do {
@@ -162,11 +162,11 @@ extern void USTR_ncopy(int, int, int);
  *
  * Calls USTR_ncopy() with a count of 0x7FFFFFFF, so the copy stops only at the source's terminator.
  *
- * @param a  destination wide string
- * @param b  source wide string
+ * @param dst  destination wide string
+ * @param src  source wide string
  */
-void USTR_copy(int a, int b) {
-    USTR_ncopy(a, b, 0x7FFFFFFF);
+void USTR_copy(int dst, int src) {
+    USTR_ncopy(dst, src, 0x7FFFFFFF);
 }
 #endif
 
@@ -714,9 +714,9 @@ extern int sprintf_CB20(char *, const char *, ...) __asm__("sprintf");
  * @param src  the wide-character string
  */
 void USTR_strcpyW(char *dst, unsigned short *src) {
-    int c;
-    while ((c = *src) != 0) {
-        if ((unsigned short)c >= 0x100 || ((unsigned short)c == 0x5C && src[1] == 0x78)) {
+    int wideChar;
+    while ((wideChar = *src) != 0) {
+        if ((unsigned short)wideChar >= 0x100 || ((unsigned short)wideChar == 0x5C && src[1] == 0x78)) {
             sprintf_CB20(dst, D_00495D18_CB20, *src);
             dst += 6;
         } else {
@@ -753,11 +753,11 @@ extern int D_00519AE8_CBD8[] __asm__("D_00519AE8");
  * @return 1 when the file system was set up by this call, 0 if it already was
  */
 int FILESYS_init(int maxopenfiles, int maxdirfiles, int maxfileops) {
-    int r;
+    int workBuffer;
     if (D_00519AB0_CBD8[0] == 0) {
-        r = D_00450C10_CBD8[1](D_00495D28_CBD8, func_003DCD98_CBD8(maxopenfiles, maxdirfiles, maxfileops), 0x100);
-        D_00519AE8_CBD8[0] = r;
-        return func_003DCC88_CBD8(maxopenfiles, maxdirfiles, maxfileops, r);
+        workBuffer = D_00450C10_CBD8[1](D_00495D28_CBD8, func_003DCD98_CBD8(maxopenfiles, maxdirfiles, maxfileops), 0x100);
+        D_00519AE8_CBD8[0] = workBuffer;
+        return func_003DCC88_CBD8(maxopenfiles, maxdirfiles, maxfileops, workBuffer);
     }
     return 0;
 }
@@ -1904,7 +1904,7 @@ extern int BIG_locateentryz_E4D0(int, char *, int, int *, int *) __asm__("BIG_lo
 int FILESYS_bypassqueuefileinfo(char *name, int flags, int *out) {
     char path[256];
     char file[256];
-    int h;
+    int handle;
     int x;
     int off;
     int found = 0;
@@ -1930,10 +1930,10 @@ int FILESYS_bypassqueuefileinfo(char *name, int flags, int *out) {
             strcpy(file, name);
         }
     }
-    if ((mode & 1) && func_003E3208_E4D0(name, flags, &h)) {
+    if ((mode & 1) && func_003E3208_E4D0(name, flags, &handle)) {
         found = 1;
-        *out = func_003E34E8_E4D0(h);
-        func_003E32F8_E4D0(h);
+        *out = func_003E34E8_E4D0(handle);
+        func_003E32F8_E4D0(handle);
     }
     if (!found && (mode & 6)) {
         for (n = D_00519AE4_E4D0[0]; n != 0 && !found; n = n->next) {
@@ -2574,19 +2574,19 @@ extern char fF0F0_F1E0[] __asm__("func_003DF0F0");
  * @param userdata  the load request (On Tour void* userdata)
  */
 void loadfilesizecallback(int a, int b, char *userdata) {
-    int t5, v, m, old;
-    t5 = fD310_F1E0(*(volatile int *)(userdata + 0x1C));
+    int fileSize, buffer, readSize, old;
+    fileSize = fD310_F1E0(*(volatile int *)(userdata + 0x1C));
     if (*(int *)(userdata + 0x10) != 0) {
         *(volatile int *)(userdata + 0x1C) = fD5A0_F1E0(*(int *)(userdata + 0x20), 0x63, userdata);
         if (*(volatile int *)(userdata + 0x1C) != 0) fCF70_F1E0(*(volatile int *)(userdata + 0x1C), fF0B8_F1E0);
     } else {
         old = *(int *)(userdata + 0x28);
-        *(int *)(userdata + 0x28) = t5;
-        v = D_0C14_F1E0[0](D_5DA8_F1E0, t5, old);
-        m = *(int *)(userdata + 0x28);
-        *(int *)(userdata + 0x14) = v;
-        *(int *)(userdata + 0x2C) = v;
-        *(volatile int *)(userdata + 0x1C) = fD648_F1E0(*(int *)(userdata + 0x20), *(int *)(userdata + 0x24), v, m <= 0x8000 ? m : 0x8000, 0x63, userdata);
+        *(int *)(userdata + 0x28) = fileSize;
+        buffer = D_0C14_F1E0[0](D_5DA8_F1E0, fileSize, old);
+        readSize = *(int *)(userdata + 0x28);
+        *(int *)(userdata + 0x14) = buffer;
+        *(int *)(userdata + 0x2C) = buffer;
+        *(volatile int *)(userdata + 0x1C) = fD648_F1E0(*(int *)(userdata + 0x20), *(int *)(userdata + 0x24), buffer, readSize <= 0x8000 ? readSize : 0x8000, 0x63, userdata);
         if (*(volatile int *)(userdata + 0x1C) != 0) fCF70_F1E0(*(volatile int *)(userdata + 0x1C), fF0F0_F1E0);
     }
 }
@@ -2681,14 +2681,14 @@ extern void MUTEX_create_F488(void *) __asm__("MUTEX_create");
  * @param x  memory type for the pool (On Tour memtype)
  */
 void ASYNCFILE_init(int n, int x) {
-    E_F488 *p;
+    E_F488 *reqs;
     int i;
     if (D_00450C34_F488 == 0 && n < 0x101) {
         D_00519BF0_F488 = n;
-        p = D_00450C14_F488(D_00495DB8_F488, n * 0x30, x);
-        D_00519BF8_F488[1] = &p[n - 1];
-        D_00519BF8_F488[0] = p;
-        D_00450C34_F488 = p;
+        reqs = D_00450C14_F488(D_00495DB8_F488, n * 0x30, x);
+        D_00519BF8_F488[1] = &reqs[n - 1];
+        D_00519BF8_F488[0] = reqs;
+        D_00450C34_F488 = reqs;
         MUTEX_create_F488(D_00519C08_F488);
         for (i = 0; i < n; i++) {
             D_00450C34_F488[i].id = i;
@@ -2873,13 +2873,13 @@ extern void munlock_F980(char *) __asm__("MUTEX_unlock");
  * @return 1 when the request has no file-system command pending, 0 while one is, -1 for an invalid handle
  */
 int ASYNCFILE_getstatus(int handle) {
-    struct sReq *e;
-    int r;
+    struct sReq *req;
+    int status;
     mlock_F980(D_00519C08);
-    e = func_003DEF70(handle);
-    r = e ? e->f1C == 0 : -1;
+    req = func_003DEF70(handle);
+    status = req ? req->f1C == 0 : -1;
     munlock_F980(D_00519C08);
-    return r;
+    return status;
 }
 #endif
 
@@ -2899,38 +2899,38 @@ int ASYNCFILE_release(int h, int *a, int *b);
  * pending command with func_003DD1D8(). If it was cancelled meanwhile, both outputs are zeroed. Either way
  * releaserequest() returns it to the free list.
  *
- * @param h  request handle
- * @param a  if not 0, receives the start of the loaded data
- * @param b  if not 0, receives the number of bytes loaded
+ * @param handle  request handle
+ * @param address  if not 0, receives the start of the loaded data
+ * @param size  if not 0, receives the number of bytes loaded
  * @return 1 on success, -1 for an invalid or cancelled request
  */
-int ASYNCFILE_release(int h, int *a, int *b) {
-    struct sReq *f;
+int ASYNCFILE_release(int handle, int *address, int *size) {
+    struct sReq *req;
     int busy = 0;
     MUTEX_lock(D_00519C08);
-    f = func_003DEF70(h);
-    if (f != 0) {
-        busy = f->f10;
+    req = func_003DEF70(handle);
+    if (req != 0) {
+        busy = req->f10;
         if (busy == 0) {
-            f->f0C = 1;
+            req->f0C = 1;
         }
     }
     MUTEX_unlock_AR(D_00519C08);
-    if (f == 0 || busy != 0) {
+    if (req == 0 || busy != 0) {
         return -1;
     }
-    while (f->f1C != 0) {
-        func_003DD1D8(f->f1C);
+    while (req->f1C != 0) {
+        func_003DD1D8(req->f1C);
     }
-    if (f->f10 != 0) {
-        if (a != 0) *a = 0;
-        if (b != 0) *b = 0;
-        releaserequest(f);
+    if (req->f10 != 0) {
+        if (address != 0) *address = 0;
+        if (size != 0) *size = 0;
+        releaserequest(req);
         return -1;
     }
-    if (a != 0) *a = f->f2C - f->f08;
-    if (b != 0) *b = f->f08;
-    releaserequest(f);
+    if (address != 0) *address = req->f2C - req->f08;
+    if (size != 0) *size = req->f08;
+    releaserequest(req);
     return 1;
 }
 #endif
@@ -2953,25 +2953,25 @@ extern char D_9C08_FAF0[] __asm__("D_00519C08");
  * @return 1 when cancelled; -1 for a bad handle, an already-cancelled request or one that has completed
  */
 int ASYNCFILE_cancel(int handle) {
-    int v18, v19, v20, r;
-    char *t;
-    v19 = 0;
-    v20 = 0;
+    int releaseFlag, fileOp, cancelFlag, r;
+    char *req;
+    fileOp = 0;
+    cancelFlag = 0;
     mlock_FAF0(D_9C08_FAF0);
-    v18 = 0;
-    t = fEF70_FAF0(handle);
-    if (t != 0 && ((v19 = *(volatile int *)(t + 0x1C), v20 = *(int *)(t + 0x10), v18 = *(int *)(t + 0xC), v19 != 0) || v18 == 0)) {
-        *(int *)(t + 0x10) = 1;
+    releaseFlag = 0;
+    req = fEF70_FAF0(handle);
+    if (req != 0 && ((fileOp = *(volatile int *)(req + 0x1C), cancelFlag = *(int *)(req + 0x10), releaseFlag = *(int *)(req + 0xC), fileOp != 0) || releaseFlag == 0)) {
+        *(int *)(req + 0x10) = 1;
     }
     munlock_FAF0(D_9C08_FAF0);
-    if (t != 0 && v20 == 0) {
-        if (*(int *)(t + 0x10) != 0) {
-            if (v19 != 0) {
-                fD148_FAF0(v19);
+    if (req != 0 && cancelFlag == 0) {
+        if (*(int *)(req + 0x10) != 0) {
+            if (fileOp != 0) {
+                fD148_FAF0(fileOp);
                 return 1;
             }
-            if (v18 == 0) {
-                rel_FAF0(t);
+            if (releaseFlag == 0) {
+                rel_FAF0(req);
             }
             return 1;
         }
@@ -4353,20 +4353,20 @@ extern int D_00450C38_18C8[] __asm__("sync_priority");
  * Loads a whole file into newly allocated memory, synchronously.
  *
  * Runs func_003E1810 through FILESYS_atomic() at sync_priority: it opens the file, allocates its size through
- * the file-system allocator hook (with @p arg1 as the allocation flags) and reads it. The C is declared void,
+ * the file-system allocator hook (with @p flags as the allocation flags) and reads it. The C is declared void,
  * but the asm leaves FILESYS_atomic's result, the buffer or 0, in the return register, and callers use it.
  * FILE_loadz() differs only in the 0 it stores in the argument block's fourth word, which func_003E1810
  * does not read.
  *
- * @param arg0  file name
- * @param arg1  allocation flags for the buffer
+ * @param name  file name
+ * @param flags  allocation flags for the buffer
  */
-void FILE_load(int arg0, int arg1) {
+void FILE_load(int name, int flags) {
     int buf[8];
 
-    buf[0] = arg0;
+    buf[0] = name;
     buf[3] = 1;
-    buf[4] = arg1;
+    buf[4] = flags;
     FILESYS_atomic_1900(func_003E1810_18C8, 0, D_00450C38_18C8[0], buf);
 }
 #endif
@@ -4463,23 +4463,23 @@ extern void func_003E1948_1948(void) __asm__("func_003E1948");
  * Runs func_003E1948 through FILESYS_atomic() at sync_priority; it works like FILE_load's loader but also
  * stores the file size in the argument block.
  *
- * @param arg0  file name
- * @param arg1  if not 0, receives the file size
- * @param arg2  allocation flags for the buffer
+ * @param name  file name
+ * @param size  if not 0, receives the file size
+ * @param flags  allocation flags for the buffer
  * @return the loaded buffer, or 0 on failure
  */
-int FILE_loadsizez(int arg0, int *arg1, int arg2) {
-    FLS_args_1ACC s;
-    int r;
+int FILE_loadsizez(int name, int *size, int flags) {
+    FLS_args_1ACC req;
+    int buffer;
 
-    s.a = arg0;
-    s.c = 0;
-    s.d = arg2;
-    r = FILESYS_atomic_1ACC(func_003E1948_1948, 0, D_00450C38_0C38[0], &s);
-    if (arg1 != 0) {
-        *arg1 = s.sz;
+    req.a = name;
+    req.c = 0;
+    req.d = flags;
+    buffer = FILESYS_atomic_1ACC(func_003E1948_1948, 0, D_00450C38_0C38[0], &req);
+    if (size != 0) {
+        *size = req.sz;
     }
-    return r;
+    return buffer;
 }
 #endif
 
@@ -5006,21 +5006,21 @@ INCLUDE_ASM("ealib/seg_2DCAE8", BIG_typeofheader);
  * @return 1 for the compact 0xC0FB form, 2 for "BIGF", 3 for another "BIG" variant, 0 when not a big file
  */
 int BIG_typeofheader(unsigned char *header) {
-    int r;
-    unsigned char b0 = header[0];
-    unsigned char b1 = header[1];
-    unsigned int v;
-    if (((b0 << 8) | b1) == 0xC0FB) {
-        r = 1;
+    int type;
+    unsigned char byte0 = header[0];
+    unsigned char byte1 = header[1];
+    unsigned int magic;
+    if (((byte0 << 8) | byte1) == 0xC0FB) {
+        type = 1;
     } else {
-        v = (b0 << 24) | (b1 << 16) | (header[2] << 8) | header[3];
-        if (v == 0x42494746) {
-            r = 2;
+        magic = (byte0 << 24) | (byte1 << 16) | (header[2] << 8) | header[3];
+        if (magic == 0x42494746) {
+            type = 2;
         } else {
-            r = (((v & 0xFFFFFF00) ^ 0x42494700) != 0) ? 0 : 3;
+            type = (((magic & 0xFFFFFF00) ^ 0x42494700) != 0) ? 0 : 3;
         }
     }
-    return r;
+    return type;
 }
 #endif
 
@@ -5069,24 +5069,24 @@ extern int BIG_sizeofheader_debuginfo(char *) __asm__("BIG_sizeofheader");
  * @return 8 (the trailer's size) when present, otherwise 0
  */
 int BIG_debuginfo(char *base, int *num, int *tag) {
-    int r = 0;
-    unsigned char *p = (unsigned char *)base + BIG_sizeofheader_debuginfo(base);
-    unsigned char c = p[-8];
-    unsigned char *q = p - 8;
-    if (((unsigned)(c - 0x41) < 0x1A || (unsigned)(c - 0x61) < 0x1A)
-        && (unsigned)(q[1] - 0x30) < 10
-        && (unsigned)(q[2] - 0x30) < 10
-        && (unsigned)(q[3] - 0x30) < 10) {
-        r = 8;
+    int infoSize = 0;
+    unsigned char *headerEnd = (unsigned char *)base + BIG_sizeofheader_debuginfo(base);
+    unsigned char firstChar = headerEnd[-8];
+    unsigned char *venomPtr = headerEnd - 8;
+    if (((unsigned)(firstChar - 0x41) < 0x1A || (unsigned)(firstChar - 0x61) < 0x1A)
+        && (unsigned)(venomPtr[1] - 0x30) < 10
+        && (unsigned)(venomPtr[2] - 0x30) < 10
+        && (unsigned)(venomPtr[3] - 0x30) < 10) {
+        infoSize = 8;
         if (num != 0) {
-            *num = ((signed char)q[1] - 0x30) * 100 + ((signed char)q[2] - 0x30) * 10 + ((signed char)q[3] - 0x30);
+            *num = ((signed char)venomPtr[1] - 0x30) * 100 + ((signed char)venomPtr[2] - 0x30) * 10 + ((signed char)venomPtr[3] - 0x30);
         }
         if (tag != 0) {
-            unsigned char *t = p - 4;
-            *tag = (t[0] << 24) | (t[1] << 16) | (t[2] << 8) | t[3];
+            unsigned char *flagsPtr = headerEnd - 4;
+            *tag = (flagsPtr[0] << 24) | (flagsPtr[1] << 16) | (flagsPtr[2] << 8) | flagsPtr[3];
         }
     }
-    return r;
+    return infoSize;
 }
 #endif
 
@@ -6881,19 +6881,19 @@ extern char fE5290_YT[] __asm__("func_003E5290");
 /**
  * Puts the calling thread to sleep for a number of library timer ticks, or just yields when given none.
  *
- * For @p a0 > 0 it converts the ticks to H-blank counts (a0 times the H-blank rate D_00450DA0, divided by the
+ * For @p numTicks > 0 it converts the ticks to H-blank counts (a0 times the H-blank rate D_00450DA0, divided by the
  * tick rate), sets a kernel alarm whose handler wakes this thread, and sleeps; it aborts with "ERROR SETTING
  * WAKEUP ALARM" if the alarm can't be set. Otherwise it rotates the ready queue at the thread's current
  * priority (through func_00424CE8 inside a timer handler).
  *
- * @param a0  ticks to sleep, or 0 or less to yield
+ * @param numTicks  ticks to sleep, or 0 or less to yield
  */
-void THREAD_yieldticks(int a0) {
+void THREAD_yieldticks(int numTicks) {
     int buf[12];
-    int t16;
-    if (a0 > 0) {
-        t16 = ((a0 * D_0DA0_YT[0]) / f5008_YT()) & 0xFFFF;
-        if (f3B20_YT(t16, fE5290_YT, f3C90_YT()) < 0) {
+    int scaledTicks;
+    if (numTicks > 0) {
+        scaledTicks = ((numTicks * D_0DA0_YT[0]) / f5008_YT()) & 0xFFFF;
+        if (f3B20_YT(scaledTicks, fE5290_YT, f3C90_YT()) < 0) {
             abm_YT(D_5E20_YT);
         }
         f3CC0_YT();
@@ -7089,12 +7089,12 @@ extern int func_00423DA0(S_5698 *);
  * @return 0
  */
 int MUTEX_create(int *self) {
-    S_5698 s;
+    S_5698 optParam;
     self[2] = 0;
     self[1] = 0;
-    s.b = 1;
-    s.c = 1;
-    self[3] = func_00423DA0(&s);
+    optParam.b = 1;
+    optParam.c = 1;
+    self[3] = func_00423DA0(&optParam);
     return 0;
 }
 #endif
@@ -7244,15 +7244,15 @@ extern STsk_5924 D_0051ED98_ED98[] __asm__("D_0051ED98");
 /**
  * Removes a function from the synchronous task table.
  *
- * Clears the first of the 16 slots whose function is @p arg0; does nothing if none is.
+ * Clears the first of the 16 slots whose function is @p taskFunc; does nothing if none is.
  *
- * @param arg0  task function to remove
+ * @param taskFunc  task function to remove
  */
-void SYNCTASK_del(int arg0) {
+void SYNCTASK_del(int taskFunc) {
     int i = 0;
 
-    while (i < 16 && D_0051ED98_ED98[i].fn != arg0) i++;
-    if (i < 16 && D_0051ED98_ED98[i].fn == arg0) D_0051ED98_ED98[i].fn = 0;
+    while (i < 16 && D_0051ED98_ED98[i].fn != taskFunc) i++;
+    if (i < 16 && D_0051ED98_ED98[i].fn == taskFunc) D_0051ED98_ED98[i].fn = 0;
 }
 #endif
 
@@ -7274,26 +7274,26 @@ extern int D_00450E04_5928 __asm__("D_00450E04");
  * Runs every synchronous task that is due.
  *
  * Records the current library tick in D_00450E04. Each task whose due time has passed and that isn't
- * already running is marked running, called with (@p arg, ticks late), and rescheduled one period after now.
+ * already running is marked running, called with (@p mode, ticks late), and rescheduled one period after now.
  *
- * @param arg  value passed to every task
+ * @param mode  value passed to every task
  * @return the OR of the results of the tasks that ran
  */
-int SYNCTASK_run(int arg) {
+int SYNCTASK_run(int mode) {
     int i;
-    int r = 0;
+    int result = 0;
 
     D_00450E04_5928 = D_00450DD0_STA;
     for (i = 0; i < 16; i++) {
         int (*fn)(int, int) = D_0051ED98[i].f00;
         if (fn != 0 && D_00450DD0_STA >= D_0051ED98[i].f08 && D_0051ED98[i].f0C == 0) {
             D_0051ED98[i].f0C = 1;
-            r |= fn(arg, D_00450DD0_STA - D_0051ED98[i].f08);
+            result |= fn(mode, D_00450DD0_STA - D_0051ED98[i].f08);
             D_0051ED98[i].f0C = 0;
             D_0051ED98[i].f08 = D_00450DD0_STA + D_0051ED98[i].f04;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -8254,15 +8254,15 @@ extern int D_0051EEC8_6C80[] __asm__("D_0051EEC8");
  * @return 1 when queued, 0 when the send buffer is full
  */
 int NetGameLinkSend(S_6C80 *self, unsigned char *msg, int len) {
-    U4_6C80 t;
+    U4_6C80 readPos;
     int w;
     if (len == 1) {
         len = (msg[3] + 0x17) & 0x7FFC;
         *(short *)msg = len;
     }
-    t = *(U4_6C80 *)((self->f17C & 0x0FFFFFFF) | 0x20000000);
+    readPos = *(U4_6C80 *)((self->f17C & 0x0FFFFFFF) | 0x20000000);
     w = self->f178;
-    if (self->f174 - (w - *(int *)&t) < len) return 0;
+    if (self->f174 - (w - *(int *)&readPos) < len) return 0;
     self->f178 = w + len;
     func_003F4C98_6C80(D_0051EEC8_6C80, 0x676D6C6B, 0x73656E64);
     func_003F4C68_6C80(D_0051EEC8_6C80, 1, self->id, 0, (char *)msg, len, 0, 0, 0, 0);

@@ -69,16 +69,16 @@ extern "C" void* cBoardTrailFX_initialize(sBoardTrailFXView* self, int inChrg)
     *(const void**)(self->vbase + 0x6C0) = &D_00488C00;
     if (inChrg == 0) {
         int vc;
-        sBTVt9 t1 = D_00488BB8;
-        *(void**)(self->vbase + 0x6E8) = &t1;
+        sBTVt9 vtbl1 = D_00488BB8;
+        *(void**)(self->vbase + 0x6E8) = &vtbl1;
         {
             char* vbo = self->vbase - 0xF0;
             vc = (char*)self - vbo;
         }
-        t1.e[1].delta = D_00488BB8.e[1].delta + vc;
-        sBTVt22 t2 = D_00488C00;
-        *(void**)(self->vbase + 0x6C0) = &t2;
-        t2.e[1].delta = D_00488C00.e[1].delta + vc;
+        vtbl1.e[1].delta = D_00488BB8.e[1].delta + vc;
+        sBTVt22 vtbl2 = D_00488C00;
+        *(void**)(self->vbase + 0x6C0) = &vtbl2;
+        vtbl2.e[1].delta = D_00488C00.e[1].delta + vc;
     }
     self->f28 = 0;
     short neg = -1;
@@ -717,22 +717,22 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     sBTV4_8938 b = btScale(side, 17.5f);
     if (func_0011FE98(self->rider) == 0 || (btCanDraw(self->rider) && *(int*)(self->rider + 0xB00) != 0)) {
         sBTV4_8938 left = btSub(pos, a);
-        float s = 0.0f;
+        float sideSign = 0.0f;
         sBTV4_8938 right = btAdd(pos, a);
         if (*(int*)(self->rider + 0x330) != 0) {
             int k = func_00312AA0(*(void**)(self->rider + 0x784), 2);
             if (k >= 0x17 && k <= 0x1E) {
-                s = -1.0f;
-                if (*(int*)(self->rider + 0x320) != 0) s = 1.0f;
+                sideSign = -1.0f;
+                if (*(int*)(self->rider + 0x320) != 0) sideSign = 1.0f;
             } else {
-                s = 1.0f;
-                if (*(int*)(self->rider + 0x320) != 0) s = -1.0f;
+                sideSign = 1.0f;
+                if (*(int*)(self->rider + 0x320) != 0) sideSign = -1.0f;
             }
         }
-        if (0.0f < s) {
-            btAddEq(left, btScale(fwd, s * 175.0f <? 140.0f));
-        } else if (s < 0.0f) {
-            btAddEq(right, btScale(fwd, s * 175.0f >? -140.0f));
+        if (0.0f < sideSign) {
+            btAddEq(left, btScale(fwd, sideSign * 175.0f <? 140.0f));
+        } else if (sideSign < 0.0f) {
+            btAddEq(right, btScale(fwd, sideSign * 175.0f >? -140.0f));
         }
         pts[0] = btAdd(right, b);
         pts[2] = btAdd(left, b);
@@ -1274,24 +1274,24 @@ struct sBTVEntryGet {
  */
 extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self)
 {
-    sBTFx* s = (sBTFx*)self;
+    sBTFx* transMan = (sBTFx*)self;
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-    sBTVEntryGet* e = &(((sBTVEntryGet*)obj->mVtbl))[42];
-    s->saved = *e->fn((char*)obj + e->delta);
+    sBTVEntryGet* vtEntry = &(((sBTVEntryGet*)obj->mVtbl))[42];
+    transMan->saved = *vtEntry->fn((char*)obj + vtEntry->delta);
     float c = 0.75f;
     float d = 0.6299999952316284f;
-    if (s->saved.mode == 2) {
-        s->cur.d = d;
-        s->cur.mode = 2;
-        s->cur.b = 1.0f;
-        s->cur.c = c;
-        s->cur.a = 0.0f;
+    if (transMan->saved.mode == 2) {
+        transMan->cur.d = d;
+        transMan->cur.mode = 2;
+        transMan->cur.b = 1.0f;
+        transMan->cur.c = c;
+        transMan->cur.a = 0.0f;
     } else {
-        s->cur.mode = 1;
-        s->cur.a = 0.125f;
-        s->cur.b = c;
-        s->cur.c = c;
-        s->cur.d = d;
+        transMan->cur.mode = 1;
+        transMan->cur.a = 0.125f;
+        transMan->cur.b = c;
+        transMan->cur.c = c;
+        transMan->cur.d = d;
     }
 }
 #endif
@@ -1470,32 +1470,32 @@ extern "C" void cTrickBoostFX_update(sTrail_2EADD0* self)
     float speed = *(float*)(self->rider + 0x2EC);
     if (cPowerUpFXToggles_m_TestTrickBoost != 0)
         speed = 10.0f;
-    float zero = 0.0f;
-    if (zero < speed)
+    float zeroF = 0.0f;
+    if (zeroF < speed)
     {
         func_00392DE8(*(char**)(self->rider + 0x77C) + 0xD30, 1);
-        char* r0 = self->rider;
+        char* riderBase = self->rider;
         sV3_2EADD0 sz;
         sz.x = 2.0f;
         sz.y = 2.0f;
         sz.z = 2.0f;
-        char* fs = *(char**)(r0 + 0x77C) + 0xD30;
+        char* fs = *(char**)(riderBase + 0x77C) + 0xD30;
         sV4_2EADD0 col;
-        col.x = zero;
-        col.y = zero;
+        col.x = zeroF;
+        col.y = zeroF;
         col.z = 1.0f;
-        col.w = zero;
+        col.w = zeroF;
         cPlayerLights_AddDirectional(fs, &col, &sz);
     }
-    if (zero < speed && func_0011FE98(self->rider) == 1)
+    if (zeroF < speed && func_0011FE98(self->rider) == 1)
     {
         self->cur = (self->cur + 2) % 3;
         int n = self->count + 1;
         self->count = n < 4 ? n : 3;
-        char* r = self->rider;
-        sV4_2EADD0 pos = ((sNode_2EADD0*)(*(char**)(*(char**)(r + 0x780) + 0x30) + (*(int*)(r + 0x8A4) << 6)))->pos;
-        sV4_2EADD0 fwd = ((sNode_2EADD0*)(*(char**)(*(char**)(r + 0x780) + 0x30) + (*(int*)(r + 0x8A4) << 6)))->fwd;
-        sV4_2EADD0 side = ((sNode_2EADD0*)(*(char**)(*(char**)(r + 0x780) + 0x30) + (*(int*)(r + 0x8A4) << 6)))->side;
+        char* riderPtr = self->rider;
+        sV4_2EADD0 pos = ((sNode_2EADD0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6)))->pos;
+        sV4_2EADD0 fwd = ((sNode_2EADD0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6)))->fwd;
+        sV4_2EADD0 side = ((sNode_2EADD0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6)))->side;
         self->e0 = Sub_2EADD0(pos, Scale_2EADD0(side, 12.0f));
         self->f0 = Add_2EADD0(pos, Scale_2EADD0(side, 12.0f));
         self->slots[self->cur].v[0] = Sub_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
@@ -1618,20 +1618,20 @@ extern "C" void cTrickBoostFX_render(sTrail_2EADD0* self)
     addVtx_B198(&verts[1][counts[1]++], col, 0.5f, 0.0f, self->f0);
     addVtx_B198(&verts[3][counts[3]++], col, 0.5f, 0.0f, self->e0);
     for (int i = 0; i < self->count; i++) {
-        int m = (self->cur + i) % 3;
+        int slotIdx = (self->cur + i) % 3;
         col.a = 0.5f;
         col.r = 0.5f;
         col.g = 0.5f;
         col.b = 0.5f;
         float t = 1.0f - (float)i / (float)(self->count - 1);
-        addVtx_B198(&verts[0][counts[0]++], col, 0.0f, t, self->slots[m].v[0]);
-        addVtx_B198(&verts[0][counts[0]++], col, 1.0f, t, self->slots[m].v[1]);
-        addVtx_B198(&verts[1][counts[1]++], col, 1.0f, t, self->slots[m].v[1]);
-        addVtx_B198(&verts[1][counts[1]++], col, 0.0f, t, self->slots[m].v[2]);
-        addVtx_B198(&verts[2][counts[2]++], col, 0.0f, t, self->slots[m].v[2]);
-        addVtx_B198(&verts[2][counts[2]++], col, 1.0f, t, self->slots[m].v[3]);
-        addVtx_B198(&verts[3][counts[3]++], col, 1.0f, t, self->slots[m].v[3]);
-        addVtx_B198(&verts[3][counts[3]++], col, 0.0f, t, self->slots[m].v[0]);
+        addVtx_B198(&verts[0][counts[0]++], col, 0.0f, t, self->slots[slotIdx].v[0]);
+        addVtx_B198(&verts[0][counts[0]++], col, 1.0f, t, self->slots[slotIdx].v[1]);
+        addVtx_B198(&verts[1][counts[1]++], col, 1.0f, t, self->slots[slotIdx].v[1]);
+        addVtx_B198(&verts[1][counts[1]++], col, 0.0f, t, self->slots[slotIdx].v[2]);
+        addVtx_B198(&verts[2][counts[2]++], col, 0.0f, t, self->slots[slotIdx].v[2]);
+        addVtx_B198(&verts[2][counts[2]++], col, 1.0f, t, self->slots[slotIdx].v[3]);
+        addVtx_B198(&verts[3][counts[3]++], col, 1.0f, t, self->slots[slotIdx].v[3]);
+        addVtx_B198(&verts[3][counts[3]++], col, 0.0f, t, self->slots[slotIdx].v[0]);
     }
     for (int k = 0; k < 4; k++) {
         cPS2GraphicsMan* ctx = GrMan;
@@ -1765,38 +1765,38 @@ extern "C" void cWipe_TObj_Draw(char* self, float amount)
     float dx = (float)*(int*)(self + 0x14) * k * 640.0f;
     float dy = (float)*(int*)(self + 0x18) * k * -480.0f;
     float w = 640.0f;
-    float u0, u1;
+    float uStart, uEnd;
     if (dx < 0.0f) {
         w = dx + w;
-        u0 = D_004A3B30 + D_004A3B38 * 0.0015625000232830644f * dx;
-        u1 = D_004A3B34;
+        uStart = D_004A3B30 + D_004A3B38 * 0.0015625000232830644f * dx;
+        uEnd = D_004A3B34;
         dx = 0.0f;
     } else {
         w = w - dx;
-        u0 = D_004A3B30;
-        u1 = u0 + D_004A3B38 * 0.0015625000232830644f * w;
+        uStart = D_004A3B30;
+        uEnd = uStart + D_004A3B38 * 0.0015625000232830644f * w;
     }
-    float h;
+    float height;
     float v0, v1;
     if (dy < 0.0f) {
-        h = dy + 480.0f;
+        height = dy + 480.0f;
         v0 = D_004A3B3C + D_004A3B44 * 0.0020833334419876337f * dy;
         v1 = D_004A3B40;
         dy = 0.0f;
     } else {
-        h = 480.0f - dy;
+        height = 480.0f - dy;
         v0 = D_004A3B3C;
-        v1 = v0 + D_004A3B44 * 0.0020833334419876337f * h;
+        v1 = v0 + D_004A3B44 * 0.0020833334419876337f * height;
     }
-    float uw = u1 - u0;
+    float uw = uEnd - uStart;
     float vh = v1 - v0;
     sBTRect4 pos;
     pos.x = dx;
     pos.y = dy;
     pos.z = w;
-    pos.w = h;
+    pos.w = height;
     sBTRect4 rect;
-    rect.x = u0;
+    rect.x = uStart;
     rect.y = v0;
     rect.z = uw;
     rect.w = vh;
@@ -1955,9 +1955,9 @@ static inline void BuildArc_C060(float* ys, float* xs, const float& cx, float r,
  */
 extern "C" void cCircle_TObj_Draw(char* self, float amount)
 {
-    float r = (1.0f - amount) * 800.0f;
-    float x1 = *(float*)(self + 0x14) + r;
-    float x0 = *(float*)(self + 0x14) - r;
+    float radius = (1.0f - amount) * 800.0f;
+    float x1 = *(float*)(self + 0x14) + radius;
+    float x0 = *(float*)(self + 0x14) - radius;
     sBTRect4 pos;
     sBTRect4 rect;
     pos.x = 0.0f;
@@ -1982,13 +1982,13 @@ extern "C" void cCircle_TObj_Draw(char* self, float amount)
 
     float ys[40];
     float xs[40];
-    BuildArc_C060(ys, xs, *(float*)(self + 0x14), r, 0.08055365830659866f); // pi / 39
+    BuildArc_C060(ys, xs, *(float*)(self + 0x14), radius, 0.08055365830659866f); // pi / 39
 
     sBTVert_C060 top[80];
     sBTVert_C060 bot[80];
     for (int i = 0; i < 40; i++) {
-        sBTVert_C060* t0 = top + i * 2;
-        func_002EBF48_C060(t0->f, (float*)(self + 4), xs[i], 0.0f);
+        sBTVert_C060* topVert = top + i * 2;
+        func_002EBF48_C060(topVert->f, (float*)(self + 4), xs[i], 0.0f);
         sBTVert_C060* t1 = top + i * 2 + 1;
         float y0 = clampBT(*(float*)(self + 0x18) - ys[i], 0.0f, 480.0f);
         func_002EBF48_C060(t1->f, (float*)(self + 4), xs[i], y0);

@@ -199,39 +199,39 @@ extern "C" void cRailModifier_buildXform(cRailModifier_C0E8* self)
 {
     sModel_C0E8* model = self->model;
     sLink_C0E8* links = model->tbl->links;
-    t4Matrix* m;
+    t4Matrix* xform;
     if (self->idx < 0) {
-        t4Matrix* p = &self->mat;
-        vu0CopyMat_C0E8(p, &model->mat);
-        m = p;
+        t4Matrix* selfMat = &self->mat;
+        vu0CopyMat_C0E8(selfMat, &model->mat);
+        xform = selfMat;
     } else {
-        float s = model->scale;
+        float modelScale = model->scale;
         t4Vector scl;
-        scl.x = s;
-        scl.y = s;
-        scl.z = s;
+        scl.x = modelScale;
+        scl.y = modelScale;
+        scl.z = modelScale;
         scl.w = 1.0f;
-        t4Matrix* p = &self->mat;
-        sLink_C0E8* l = (sLink_C0E8*)(self->idx * 16 + (int)links);
-        vu0CopyMat_C0E8(p, l->mat);
-        m = p;
+        t4Matrix* selfMat = &self->mat;
+        sLink_C0E8* link = (sLink_C0E8*)(self->idx * 16 + (int)links);
+        vu0CopyMat_C0E8(selfMat, link->mat);
+        xform = selfMat;
         {
         t4Vector rr;
-        t4Vector r3 = self->mat.row[3];
-        rr.x = r3.x * scl.x;
-        rr.y = r3.y * scl.y;
-        rr.z = r3.z * scl.z;
-        rr.w = r3.w * scl.w;
+        t4Vector origin = self->mat.row[3];
+        rr.x = origin.x * scl.x;
+        rr.y = origin.y * scl.y;
+        rr.z = origin.z * scl.z;
+        rr.w = origin.w * scl.w;
         self->mat.row[3] = rr;
-        int i = l->next;
+        int i = link->next;
         while (i != -1) {
-            sLink_C0E8* l2 = (sLink_C0E8*)(i * 16 + (int)links);
-            t4Matrix* mm = m;
+            sLink_C0E8* nextLink = (sLink_C0E8*)(i * 16 + (int)links);
+            t4Matrix* mm = xform;
             t4Matrix t2;
             t4Matrix a;
             t4Vector res;
             t4Vector r3b;
-            t4Matrix* lm = l2->mat;
+            t4Matrix* lm = nextLink->mat;
             res = lm->row[0];
             a.row[0] = res;
             res = lm->row[1];
@@ -250,16 +250,16 @@ extern "C" void cRailModifier_buildXform(cRailModifier_C0E8* self)
             vu0MulMat_C0E8(pt, &a, mm);
             vu0CopyMat_C0E8(pt2, pt);
             vu0CopyMat_C0E8(mm, pt2);
-            i = l2->next;
+            i = nextLink->next;
         }
         }
         t4Matrix t4;
         t4Matrix t3;
         t4Matrix* pt3 = &t3;
         t4Matrix* pt4 = &t4;
-        vu0MulMat_C0E8(pt3, &self->model->mat, m);
+        vu0MulMat_C0E8(pt3, &self->model->mat, xform);
         vu0CopyMat_C0E8(pt4, &t3);
-        vu0CopyMat_C0E8(m, pt4);
+        vu0CopyMat_C0E8(xform, pt4);
     }
     float f;
     f = self->mat.row[0].y;
@@ -273,7 +273,7 @@ extern "C" void cRailModifier_buildXform(cRailModifier_C0E8* self)
     self->mat.row[2].y = f;
     t4Vector v = vu0Scale(row_C0E8(&self->mat, 3), -1.0f);
     v.w = 0.0f;
-    v = vu0MtxMul_C0E8(m, v);
+    v = vu0MtxMul_C0E8(xform, v);
     v.w = 1.0f;
     self->mat.row[3] = v;
     void* n = cMemMan_alloc(0x10, D_0048EA60, 0x20000000, 0);
@@ -410,11 +410,11 @@ extern "C" void cRailModifier_getInvMat(cRailModifier* self, sRmMat44C5A0* mat)
 {
     func_0034FED8(self->Instance, self->Mesh, mat);
     sRmMat44C5A0* src = (sRmMat44C5A0*)((char*)self + 0x50);
-    sRmMat44C5A0 t2;
-    sRmMat44C5A0 t;
-    vu0MulMatC5A0(&t, mat, src);
-    vu0CopyMatC5A0(&t2, &t);
-    vu0CopyMatC5A0(mat, &t2);
+    sRmMat44C5A0 copy;
+    sRmMat44C5A0 product;
+    vu0MulMatC5A0(&product, mat, src);
+    vu0CopyMatC5A0(&copy, &product);
+    vu0CopyMatC5A0(mat, &copy);
 }
 #endif
 
@@ -781,71 +781,71 @@ extern "C" void cRailModifier_splineIntersect(cRailModifier* self, void* box, vo
     cRailModifier_getInvMat_C698((self), &mat);
     sRmSeg_C698* seg = spline->segs;
     for (int i = 0; i < spline->numSegs; i++, seg = seg->next) {
-        float a = 0.0f;
-        float b = 1.0f;
+        float tLo = 0.0f;
+        float tHi = 1.0f;
         t4Vector pos;
         t4Vector next;
         t4Vector dir;
-        sRmMat44 c;
+        sRmMat44 segMat;
         {
             sRmMat44 t;
             vu0MulMat_C698(&t, &mat, &seg->coef);
-            vu0CopyMat_C698(&c, &t);
+            vu0CopyMat_C698(&segMat, &t);
         }
-        pos = evalSeg_C698(&c, a);
+        pos = evalSeg_C698(&segMat, tLo);
         float best = vu0Length_C698(vu0Sub_C698(*point, pos));
         int bestIdx = 0;
         int k;
         for (k = 1; k < 5; k++) {
-            next = evalSeg_C698(&c, k * 0.25f);
+            next = evalSeg_C698(&segMat, k * 0.25f);
             dir = vu0Sub_C698(next, pos);
-            float u = vu0Dot_C698(vu0Sub_C698(*point, pos), dir) / vu0Dot_C698(dir, dir);
-            dir = vu0Add_C698(pos, vu0Scale(dir, clamp_C698(u, 0.0f, 1.0f)));
-            float d = vu0Length_C698(vu0Sub_C698(*point, dir));
-            if (d < best) {
-                best = d;
+            float proj = vu0Dot_C698(vu0Sub_C698(*point, pos), dir) / vu0Dot_C698(dir, dir);
+            dir = vu0Add_C698(pos, vu0Scale(dir, clamp_C698(proj, 0.0f, 1.0f)));
+            float pointDist = vu0Length_C698(vu0Sub_C698(*point, dir));
+            if (pointDist < best) {
+                best = pointDist;
                 bestIdx = k;
             }
             pos = next;
         }
         sRmF5_C698 lo = D_0048E7D8;
         sRmF5_C698 hi = D_0048E7F0;
-        a = lo.v[bestIdx];
-        b = hi.v[bestIdx];
-        float tc = a + (b - a) * 0.381966f;
-        float td = a + (b - a) * 0.618034f;
+        tLo = lo.v[bestIdx];
+        tHi = hi.v[bestIdx];
+        float tc = tLo + (tHi - tLo) * 0.381966f;
+        float td = tLo + (tHi - tLo) * 0.618034f;
         // Golden-section search on [a, b]. f(a) and f(b) are evaluated but never read (the binary keeps both
         // evaluations; their lengths drop out).
         float fa, fb, fc, fd;
-        pos = evalSeg_C698(&c, a);
+        pos = evalSeg_C698(&segMat, tLo);
         fa = vu0Length_C698(vu0Sub_C698(pos, *point));
-        pos = evalSeg_C698(&c, tc);
+        pos = evalSeg_C698(&segMat, tc);
         fc = vu0Length_C698(vu0Sub_C698(pos, *point));
-        pos = evalSeg_C698(&c, td);
+        pos = evalSeg_C698(&segMat, td);
         fd = vu0Length_C698(vu0Sub_C698(pos, *point));
         float t = td;
         float dist = fd;
-        pos = evalSeg_C698(&c, b);
+        pos = evalSeg_C698(&segMat, tHi);
         fb = vu0Length_C698(vu0Sub_C698(pos, *point));
         for (k = 0; k < 24; k++) {
-            if (fsAbs_C698(b - a) <= 0.0005f) {
+            if (fsAbs_C698(tHi - tLo) <= 0.0005f) {
                 break;
             }
             if (fd < fc) {
-                a = tc;
+                tLo = tc;
                 tc = td;
-                td = tc * 0.618034f + b * 0.381966f;
-                pos = evalSeg_C698(&c, td);
+                td = tc * 0.618034f + tHi * 0.381966f;
+                pos = evalSeg_C698(&segMat, td);
                 float f = vu0Length_C698(vu0Sub_C698(pos, *point));
                 fc = fd;
                 fd = f;
                 t = td;
                 dist = fd;
             } else {
-                b = td;
+                tHi = td;
                 td = tc;
-                tc = td * 0.618034f + a * 0.381966f;
-                pos = evalSeg_C698(&c, tc);
+                tc = td * 0.618034f + tLo * 0.381966f;
+                pos = evalSeg_C698(&segMat, tc);
                 float f = vu0Length_C698(vu0Sub_C698(pos, *point));
                 fd = fc;
                 fc = f;
@@ -858,7 +858,7 @@ extern "C" void cRailModifier_splineIntersect(cRailModifier* self, void* box, vo
             *bestDist = dist;
             resetHit_C698(out);
             out->pos = pos;
-            out->nrm = vu0Normal_C698(evalTan_C698(&c, t));
+            out->nrm = vu0Normal_C698(evalTan_C698(&segMat, t));
             out->id = spline->id;
             out->model = (void*)self->Instance;
             out->bone = self->Mesh;
@@ -1520,16 +1520,16 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
     self->m_pInstance = (tInstanceRecord*)(*(int*)(ii + 0x50));
     func_00327CC8(((char*)self) + 0xE0, *(void**)(ii + 0x48));
     self->mMass = *(float*)(rdata + 0x4);
-    char* t = (char*)self->SphTree.treeInfo;
+    char* info = (char*)self->SphTree.treeInfo;
     self->mElast = *(float*)(rdata + 0x8);
     self->InvM = 1.0f / timing[1];
-    sRmVec4 v;
-    v.x = *(float*)(t + 0x2C);
-    v.y = *(float*)(t + 0x30);
-    v.z = *(float*)(t + 0x34);
-    v.w = 0.0f;
-    *(sRmVec4*)&self->COMOffset = v;
-    *(sRmMat33*)&self->InvBodyMOI[0] = *(sRmMat33*)(t + 0x5C);
+    sRmVec4 offset;
+    offset.x = *(float*)(info + 0x2C);
+    offset.y = *(float*)(info + 0x30);
+    offset.z = *(float*)(info + 0x34);
+    offset.w = 0.0f;
+    *(sRmVec4*)&self->COMOffset = offset;
+    *(sRmMat33*)&self->InvBodyMOI[0] = *(sRmMat33*)(info + 0x5C);
     ((sRmMat33*)(((char*)self) + 0x280))->m[0][0] *= 0.5f;
     ((sRmMat33*)(((char*)self) + 0x280))->m[0][1] *= 0.5f;
     ((sRmMat33*)(((char*)self) + 0x280))->m[0][2] *= 0.5f;
@@ -1541,14 +1541,14 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
     ((sRmMat33*)(((char*)self) + 0x280))->m[2][2] *= 0.5f;
     tPose x = func_0031B748((char*)self->m_pInstance + 0x10);
     {
-        sRmVec4 r1;
-        QuatRotTo_DA70(r1, (*(sRmVec4*)&x.Q), *(sRmVec4*)&self->COMOffset);
-        v = r1;
-        sRmVec4 b;
-        sRmVec4 r2;
-        QuatRotTo_DA70(r2, (*(sRmVec4*)&x.Q), v);
-        b = r2;
-        AddTo_DA70((*(sRmVec4*)&x.P), b);
+        sRmVec4 rotated;
+        QuatRotTo_DA70(rotated, (*(sRmVec4*)&x.Q), *(sRmVec4*)&self->COMOffset);
+        offset = rotated;
+        sRmVec4 shift;
+        sRmVec4 rotatedAgain;
+        QuatRotTo_DA70(rotatedAgain, (*(sRmVec4*)&x.Q), offset);
+        shift = rotatedAgain;
+        AddTo_DA70((*(sRmVec4*)&x.P), shift);
     }
     *(&self->Pose) = x;
     tPose y = func_0035E770_DA70(((char*)self));
@@ -2273,24 +2273,24 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
     sHitEDC8 hit;
     char tree[0x70];
     cWorldSphTree_cWorldSphTree(tree, (char*)self + 0xE0, 1);
-    float zero = 0.0f;
-    float d = func_00336850_EDC8(cObjectInterface_getNash(), tree, &hit, (char*)self + 0x2C0);
-    d -= func_0032C5A8((char*)self + 0xE0);
-    if (zero < d) {
-        sRmVec4 push = vu0ScaleEDC8(hit.normal, d + 2.0f);
+    float zeroF = 0.0f;
+    float overlap = func_00336850_EDC8(cObjectInterface_getNash(), tree, &hit, (char*)self + 0x2C0);
+    overlap -= func_0032C5A8((char*)self + 0xE0);
+    if (zeroF < overlap) {
+        sRmVec4 push = vu0ScaleEDC8(hit.normal, overlap + 2.0f);
         func_0035ED90((sRmBody*)self, &push);
         float k = 0.975f;
         setPosEDC8((self), vu0ScaleEDC8((*(sRmVec4*)&self->L), k));
         setOutDirEDC8((self), vu0ScaleEDC8((*(sRmVec4*)&self->V), k));
         float dp = vu0DotEDC8(vu0AddEDC8((*(sRmVec4*)&self->V), vu0CrossEDC8((*(sRmVec4*)&self->W), vu0SubEDC8(hit.pos, *(sRmVec4*)&(*(sRmBody*)&self->Pose)))), hit.normal);
-        if (dp < zero) {
+        if (dp < zeroF) {
             float lim = self->StopContactSpeed;
             float len = vu0LengthEDC8((*(sRmVec4*)&self->V));
-            float a = self->ContactElastic;
-            float c = self->ContactFriction;
+            float elastic = self->ContactElastic;
+            float friction = self->ContactFriction;
             if (len < lim)
-                a = zero;
-            func_0035D4A0_EDC8(&(*(sRmBody*)&self->Pose), &hit, &hit.normal, a, c);
+                elastic = zeroF;
+            func_0035D4A0_EDC8(&(*(sRmBody*)&self->Pose), &hit, &hit.normal, elastic, friction);
             self->HitFrequency += 0.016666668f;
             if (5.0f < self->Life)
                 self->Life = 10.0f;
@@ -2527,11 +2527,11 @@ extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
             self->TexIndex = 0;
         }
     } else if (self->Type == 2) {
-        union { int i; float f; } u;
+        union { int i; float f; } bits;
         float base = 0.25f;
-        u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+        bits.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
         self->Type = 1;
-        self->Speed = self->BaseSpeed * ((u.f - one) * 0.75f + base);
+        self->Speed = self->BaseSpeed * ((bits.f - one) * 0.75f + base);
         if (++self->TexIndex >= self->NumTexFlipMaterials) {
             self->TexIndex = 0;
         }
@@ -2582,11 +2582,11 @@ extern "C" void cTexFlipModifier_signal(cTexFlipModifier* self, int id, float va
         break;
     case 301:
         if (value >= 0.0f && value < 9.0f) {
-            float c = fTrunc_F598(value);
-            if (c < value) {
-                c += 1.0f;
+            float ceilVal = fTrunc_F598(value);
+            if (ceilVal < value) {
+                ceilVal += 1.0f;
             }
-            int n = (int)c;
+            int n = (int)ceilVal;
             self->TexIndex = n;
             func_0035F378((sRailModSelect*)self, n);
         }
@@ -2773,26 +2773,26 @@ extern "C" void cUVScrollModifier_update(cUVScrollModifier* self)
             if (self->On) {
                 if (self->Type == 6) {
                     if (self->UVScroll[0] < 0.0f) {
-                        float t = self->Time;
-                        if (t < self->TimeOn * 0.5f) {
-                            sV2_F7D0 m = (*(sV2_F7D0*)&self->UVScroll[0]) * t * (1.0f / self->TimeOn);
-                            self->UV[0] += m.x;
-                            self->UV[1] += m.y;
+                        float time = self->Time;
+                        if (time < self->TimeOn * 0.5f) {
+                            sV2_F7D0 step = (*(sV2_F7D0*)&self->UVScroll[0]) * time * (1.0f / self->TimeOn);
+                            self->UV[0] += step.x;
+                            self->UV[1] += step.y;
                         } else {
-                            sV2_F7D0 m = (*(sV2_F7D0*)&self->UVScroll[0]) * (self->TimeOn - t) * (1.0f / self->TimeOn);
-                            self->UV[0] += m.x;
-                            self->UV[1] += m.y;
+                            sV2_F7D0 step = (*(sV2_F7D0*)&self->UVScroll[0]) * (self->TimeOn - time) * (1.0f / self->TimeOn);
+                            self->UV[0] += step.x;
+                            self->UV[1] += step.y;
                         }
                     } else {
-                        float u = self->TimeOn - self->Time;
-                        if (u < self->TimeOn * 0.5f) {
-                            sV2_F7D0 m = (*(sV2_F7D0*)&self->UVScroll[0]) * u * (1.0f / self->TimeOn);
-                            self->UV[0] += m.x;
-                            self->UV[1] += m.y;
+                        float remaining = self->TimeOn - self->Time;
+                        if (remaining < self->TimeOn * 0.5f) {
+                            sV2_F7D0 step = (*(sV2_F7D0*)&self->UVScroll[0]) * remaining * (1.0f / self->TimeOn);
+                            self->UV[0] += step.x;
+                            self->UV[1] += step.y;
                         } else {
-                            sV2_F7D0 m = (*(sV2_F7D0*)&self->UVScroll[0]) * (self->TimeOn - u) * (1.0f / self->TimeOn);
-                            self->UV[0] += m.x;
-                            self->UV[1] += m.y;
+                            sV2_F7D0 step = (*(sV2_F7D0*)&self->UVScroll[0]) * (self->TimeOn - remaining) * (1.0f / self->TimeOn);
+                            self->UV[0] += step.x;
+                            self->UV[1] += step.y;
                         }
                     }
                 } else {
@@ -2892,34 +2892,34 @@ extern sRmMtx_35FC20 D_004FF1A0_35FC20[] __asm__("t4mat_Identity");
  */
 extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, sRmMtx_35FC20* m)
 {
-    float zero = 0.0f;
-    if (self->Angle != zero) {
-        float s;
-        float c;
-        func_0031BE50(&s, &c, self->Angle);
+    float zeroF = 0.0f;
+    if (self->Angle != zeroF) {
+        float sinA;
+        float cosA;
+        func_0031BE50(&sinA, &cosA, self->Angle);
         float one = 1.0f;
-        float t = one - c;
-        float tx = t * self->Axis.x;
-        float sy = s * self->Axis.y;
-        float sz = s * self->Axis.z;
-        float sx = s * self->Axis.x;
-        float ty = t * self->Axis.y;
-        float tz = t * self->Axis.z;
-        m->m[0][0] = tx * self->Axis.x + c;
+        float oneMinusCos = one - cosA;
+        float tx = oneMinusCos * self->Axis.x;
+        float sy = sinA * self->Axis.y;
+        float sz = sinA * self->Axis.z;
+        float sx = sinA * self->Axis.x;
+        float ty = oneMinusCos * self->Axis.y;
+        float tz = oneMinusCos * self->Axis.z;
+        m->m[0][0] = tx * self->Axis.x + cosA;
         m->m[1][0] = tx * self->Axis.y + sz;
         m->m[2][0] = tx * self->Axis.z - sy;
-        m->m[3][0] = zero;
+        m->m[3][0] = zeroF;
         m->m[0][1] = ty * self->Axis.x - sz;
-        m->m[1][1] = ty * self->Axis.y + c;
+        m->m[1][1] = ty * self->Axis.y + cosA;
         m->m[2][1] = ty * self->Axis.z + sx;
-        m->m[3][1] = zero;
+        m->m[3][1] = zeroF;
         m->m[0][2] = tz * self->Axis.x + sy;
         m->m[1][2] = tz * self->Axis.y - sx;
-        m->m[2][2] = tz * self->Axis.z + c;
-        m->m[3][2] = zero;
-        m->m[0][3] = zero;
-        m->m[1][3] = zero;
-        m->m[2][3] = zero;
+        m->m[2][2] = tz * self->Axis.z + cosA;
+        m->m[3][2] = zeroF;
+        m->m[0][3] = zeroF;
+        m->m[1][3] = zeroF;
+        m->m[2][3] = zeroF;
         m->m[3][3] = one;
         } else {
         // PORT: PS2-only VU0 inline asm (4x4 matrix copy, identity -> m).
@@ -4786,8 +4786,8 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_updateRootTransform);
  */
 extern "C" void cMoveNode_updateRootTransform(cMoveNode* self)
 {
-    unsigned short* p = (unsigned short*)((char*)self + 0x12);
-    *p &= 0xFFFE;
+    unsigned short* nodeFlags = (unsigned short*)((char*)self + 0x12);
+    *nodeFlags &= 0xFFFE;
 }
 #endif
 
@@ -4839,9 +4839,9 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_getTransformModifier);
  */
 extern "C" int cMoveNode_getTransformModifier(cMoveNode* self)
 {
-    int* p = (int*)self->ModifierBlock;
-    if (p != 0) {
-        return *p;
+    int* modBlock = (int*)self->ModifierBlock;
+    if (modBlock != 0) {
+        return *modBlock;
     }
     return 0;
 }
@@ -4888,15 +4888,15 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_getMaterialBlock);
 extern "C" int cMoveNode_getMaterialBlock(cMoveNode* self)
 {
     int cond;
-    char* p = (char*)self->ModifierBlock;
+    char* modBlock = (char*)self->ModifierBlock;
     cond = 0;
-    if (p != 0) {
-        cond = *(int*)(p + 8) != 0;
+    if (modBlock != 0) {
+        cond = *(int*)(modBlock + 8) != 0;
     }
     if (cond != 0) {
-        int t = *(int*)(p + 8);
-        if (t != 0) {
-            return t + 0x24;
+        int matRec = *(int*)(modBlock + 8);
+        if (matRec != 0) {
+            return matRec + 0x24;
         }
         return 0;
     }
@@ -4919,15 +4919,15 @@ void* cUVScrollModifier_getTextureMat_1arg(void*) __asm__("cUVScrollModifier_get
  */
 extern "C" void* cMoveNode_getTextureMat(cMoveNode* self)
 {
-    char* p = (char*)self->ModifierBlock;
+    char* modBlock = (char*)self->ModifierBlock;
     int cond = 0;
-    if (p != 0) {
-        cond = *(int*)(p + 4) != 0;
+    if (modBlock != 0) {
+        cond = *(int*)(modBlock + 4) != 0;
     }
     if (cond != 0) {
-        void* q = *(void**)(p + 4);
-        if (q != 0) {
-            return cUVScrollModifier_getTextureMat_1arg(q);
+        void* uvScroll = *(void**)(modBlock + 4);
+        if (uvScroll != 0) {
+            return cUVScrollModifier_getTextureMat_1arg(uvScroll);
         }
     }
     return 0;
@@ -5853,9 +5853,9 @@ extern "C" int tModifierBlock_getBoundBox(void* p);
  */
 extern "C" int cFloatingNode_getBoundBox(cFloatingNode* self)
 {
-    void* p = self->ModifierBlock;
-    if (p != 0) {
-        return tModifierBlock_getBoundBox(p);
+    void* modBlock = self->ModifierBlock;
+    if (modBlock != 0) {
+        return tModifierBlock_getBoundBox(modBlock);
     }
     return (int)self->Info;
 }
@@ -5962,8 +5962,8 @@ extern "C" void cFloatingNode_updateRootTransform(cFloatingNode* self)
 {
     sRmVtbl1858* vt = (sRmVtbl1858*)self->mVtbl;
     void* obj = (char*)self + vt->set.delta;
-    void* r = vt->get.fn((char*)self + vt->get.delta);
-    vt->set.fn(obj, r, self->AnimMats);
+    void* transform = vt->get.fn((char*)self + vt->get.delta);
+    vt->set.fn(obj, transform, self->AnimMats);
     self->Flags &= ~1;
 }
 #endif
@@ -6568,9 +6568,9 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_setBoundBox);
  */
 extern "C" void cMultiSplineModifier_setBoundBox(cMultiSplineModifier* self, void* boundbox)
 {
-    void* p = self->Nodes;
-    *(cQuad128*)((char*)p + 0x30) = *(cQuad128*)boundbox;
-    *(cQuad128*)((char*)p + 0x40) = *(cQuad128*)((char*)boundbox + 0x10);
+    void* nodes = self->Nodes;
+    *(cQuad128*)((char*)nodes + 0x30) = *(cQuad128*)boundbox;
+    *(cQuad128*)((char*)nodes + 0x40) = *(cQuad128*)((char*)boundbox + 0x10);
 }
 #endif
 

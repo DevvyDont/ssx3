@@ -36,14 +36,14 @@ extern "C" void* cFECustom_cFECustom(void* self, void* owner)
     *(void**)((char*)self + 0x0) = owner;
     *(void**)((char*)self + 0x10) = 0;
     *(void***)((char*)self + 0x4) = cFECustom_vtbl;
-    char* o = (char*)cMemMan_alloc(0x50, D_00460B90, 0, 0);
-    func_0039E2A0(o, *(void**)((char*)self + 0x0));
-    *(int*)(o + 0x48) = 0;
-    *(int*)(o + 0x4C) = 0;
-    *(sVE0720**)(o + 0x8) = cFEStateTransition_vtbl;
-    *(void**)((char*)self + 0x10) = o;
-    if (o != 0) {
-        cFEStateTransition_vtbl[4].fn(o + cFEStateTransition_vtbl[4].delta);
+    char* transition = (char*)cMemMan_alloc(0x50, D_00460B90, 0, 0);
+    func_0039E2A0(transition, *(void**)((char*)self + 0x0));
+    *(int*)(transition + 0x48) = 0;
+    *(int*)(transition + 0x4C) = 0;
+    *(sVE0720**)(transition + 0x8) = cFEStateTransition_vtbl;
+    *(void**)((char*)self + 0x10) = transition;
+    if (transition != 0) {
+        cFEStateTransition_vtbl[4].fn(transition + cFEStateTransition_vtbl[4].delta);
         cUIStateStack_pushExplicit((char*)*(void**)((char*)self + 0x0) + 0x18, *(void**)((char*)self + 0x10));
     }
     return self;
@@ -896,17 +896,17 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     cFE* cam = SSXApp->RealFE;
     sV4_1E80 pos;
     sV4_1E80 up;
-    sV4_1E80 t;
-    t.x = 0.0f;
-    t.y = 0.0f;
-    t.z = -195.0f;
-    t.w = 0.0f;
-    pos = t;
-    t.w = 1.0f;
-    t.x = 0.0f;
-    t.y = 1.0f;
-    t.z = 0.0f;
-    up = t;
+    sV4_1E80 scratchVec;
+    scratchVec.x = 0.0f;
+    scratchVec.y = 0.0f;
+    scratchVec.z = -195.0f;
+    scratchVec.w = 0.0f;
+    pos = scratchVec;
+    scratchVec.w = 1.0f;
+    scratchVec.x = 0.0f;
+    scratchVec.y = 1.0f;
+    scratchVec.z = 0.0f;
+    up = scratchVec;
     *(sV4_1E80*)((char*)cam + 0x30) = pos;
     *(sV4_1E80*)((char*)cam + 0x40) = up;
     ((cCamObj_1E80*)((char*)cam + 0x10))->update();
@@ -1456,11 +1456,11 @@ struct sRealFE_1A2C40 {
  */
 extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
 {
-    sStartState_1A2C40* s = new (D_00461358, 0, 0) sStartState_1A2C40;
-    func_0039E2A0(s, self->ui);
-    s->vt = (sVEnt_1A2C40*)cFEStateBackground_vtbl;
-    s->vt[4].fn((char*)s + s->vt[4].delta);
-    cUIStateStack_pushExplicit(self->ui + 0x18, s);
+    sStartState_1A2C40* backState = new (D_00461358, 0, 0) sStartState_1A2C40;
+    func_0039E2A0(backState, self->ui);
+    backState->vt = (sVEnt_1A2C40*)cFEStateBackground_vtbl;
+    backState->vt[4].fn((char*)backState + backState->vt[4].delta);
+    cUIStateStack_pushExplicit(self->ui + 0x18, backState);
     switch (D_004A19C4) {
     case 0: {
         D_004A19D8 = 0;

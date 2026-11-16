@@ -39,12 +39,12 @@ extern "C" void cFELocale_addFile(void* self, int lang)
     if (i >= 0) {
         cFELocale_sFiles* arr = (cFELocale_sFiles*)((char*)self + 8);
         if (arr->items[i] == 0) {
-            cFELocale_sFile* f = (cFELocale_sFile*)operator new(0x14, D_004603F0, 0, 0);
-            arr->items[i] = f;
-            f->lang = -1;
-            f->f4 = 0;
-            f->fC = 0;
-            func_002C6E98(f, D_00441138[i], D_00441188[i]);
+            cFELocale_sFile* file = (cFELocale_sFile*)operator new(0x14, D_004603F0, 0, 0);
+            arr->items[i] = file;
+            file->lang = -1;
+            file->f4 = 0;
+            file->fC = 0;
+            func_002C6E98(file, D_00441138[i], D_00441188[i]);
         }
     }
 }
@@ -360,33 +360,33 @@ extern char D_0045DA38[];
  */
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* engine, signed char idx, int inStore)
 {
-    char* s = (char*)self;
+    char* selfBytes = (char*)self;
     func_0039E2A0(self, engine);
-    *(int*)(s + 0xC) = 0x10;
-    *(void***)(s + 0x8) = cFEStateAudioOptions_vtbl;
-    *(signed char*)(s + 0x44) = idx;
-    void* p = **(void***)(s + 0x10);
+    *(int*)(selfBytes + 0xC) = 0x10;
+    *(void***)(selfBytes + 0x8) = cFEStateAudioOptions_vtbl;
+    *(signed char*)(selfBytes + 0x44) = idx;
+    void* p = **(void***)(selfBytes + 0x10);
     if (p != 0) {
-        *(unsigned char*)(s + 0x15) = func_001A1CD0(p, idx);
+        *(unsigned char*)(selfBytes + 0x15) = func_001A1CD0(p, idx);
     }
-    *(int*)(s + 0x48) = 0;
-    *(int*)(s + 0x64) = 0;
-    *(int*)(s + 0x68) = 0;
-    *(int*)(s + 0x6C) = 0;
+    *(int*)(selfBytes + 0x48) = 0;
+    *(int*)(selfBytes + 0x64) = 0;
+    *(int*)(selfBytes + 0x68) = 0;
+    *(int*)(selfBytes + 0x6C) = 0;
     for (int i = 3; i >= 0; i--) {
-        ((int*)(s + 0x4C))[i] = 0;
+        ((int*)(selfBytes + 0x4C))[i] = 0;
     }
-    *(int*)(s + 0x74) = inStore;
-    char* t = *(char**)(s + 0x10);
-    int h = GetHashValue32(D_0045DA48);
-    *(void**)(s + 0x5C) = func_00398380(t + 0x58, h);
-    char* t2 = *(char**)(s + 0x10);
+    *(int*)(selfBytes + 0x74) = inStore;
+    char* engineObj = *(char**)(selfBytes + 0x10);
+    int hash = GetHashValue32(D_0045DA48);
+    *(void**)(selfBytes + 0x5C) = func_00398380(engineObj + 0x58, hash);
+    char* engineObj2 = *(char**)(selfBytes + 0x10);
     int h2 = GetHashValue32(D_0045DA38);
-    *(void**)(s + 0x60) = func_00398380(t2 + 0x58, h2);
-    *(int*)(s + 0x70) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(s + 0x44));
+    *(void**)(selfBytes + 0x60) = func_00398380(engineObj2 + 0x58, h2);
+    *(int*)(selfBytes + 0x70) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(selfBytes + 0x44));
     void* ri = cBE_getInterface_Fv(cBE_getBE(), 0xD);
-    *(int*)(s + 0x78) = func_00158700(ri, *(signed char*)(s + 0x44), *(int*)(s + 0x70));
-    *(int*)(s + 0x7C) = cBERewardInterface_getNumSongsInPlayList(ri, *(signed char*)(s + 0x44), *(int*)(s + 0x70)) > 0;
+    *(int*)(selfBytes + 0x78) = func_00158700(ri, *(signed char*)(selfBytes + 0x44), *(int*)(selfBytes + 0x70));
+    *(int*)(selfBytes + 0x7C) = cBERewardInterface_getNumSongsInPlayList(ri, *(signed char*)(selfBytes + 0x44), *(int*)(selfBytes + 0x70)) > 0;
     return self;
 }
 #endif
@@ -597,22 +597,22 @@ static inline void cFEStateAudioOptions_onGainFocus_callp(char* o, int slot, voi
  */
 extern "C" void cFEStateAudioOptions_onGainFocus(void* self, int pPrevState)
 {
-    char* s = (char*)self;
-    if (*(int*)(s + 0x7C) == 0) {
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x68), 9, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x50), 9, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x64), 9, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x6C), 9, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x58), 9, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x68), 26, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x68), 6, 0);
-        cFEStateAudioOptions_onGainFocus_callp(*(char**)(s + 0x50), 11, gDisableColour);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x6C), 26, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x6C), 6, 0);
-        cFEStateAudioOptions_onGainFocus_callp(*(char**)(s + 0x58), 11, gDisableColour);
-        if (*(int*)(s + 0x74) == 0) {
-            cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x64), 26, 1);
-            cFEStateAudioOptions_onGainFocus_call(*(char**)(s + 0x64), 6, 0);
+    char* selfBytes = (char*)self;
+    if (*(int*)(selfBytes + 0x7C) == 0) {
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x68), 9, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x50), 9, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x64), 9, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x6C), 9, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x58), 9, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x68), 26, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x68), 6, 0);
+        cFEStateAudioOptions_onGainFocus_callp(*(char**)(selfBytes + 0x50), 11, gDisableColour);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x6C), 26, 1);
+        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x6C), 6, 0);
+        cFEStateAudioOptions_onGainFocus_callp(*(char**)(selfBytes + 0x58), 11, gDisableColour);
+        if (*(int*)(selfBytes + 0x74) == 0) {
+            cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x64), 26, 1);
+            cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x64), 6, 0);
         }
     }
     cFEState_onGainFocus(self, pPrevState);

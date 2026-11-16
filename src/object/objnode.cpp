@@ -15,13 +15,13 @@ INCLUDE_ASM("object/objnode", cObjNode_cObjNode__FP8cObjNodePv);
 /**
  * Constructs a scene object node and adds it to a bucket of the global bucket manager (gBucketMan).
  *
- * @param param2  the bucket to add the node to (On Tour: const int bucket)
+ * @param bucket  the bucket to add the node to (On Tour: const int bucket)
  * @return @p self
  */
-cObjNode* cObjNode_cObjNode(cObjNode* self, void* param2)
+cObjNode* cObjNode_cObjNode(cObjNode* self, void* bucket)
 {
     self->field_0xC = cObjNode_vtbl;
-    cBucketMan_add(&gBucketMan, self, param2);
+    cBucketMan_add(&gBucketMan, self, bucket);
     return self;
 }
 #endif

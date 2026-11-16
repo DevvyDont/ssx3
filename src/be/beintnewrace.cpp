@@ -131,10 +131,10 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberMission__FPvi);
  */
 void cBENewRaceInterface_setNumberMission(void* self, int mission)
 {
-    int a = cBENewRaceInterface_newRace.iNumberHumans;
-    int b = cBENewRaceInterface_newRace.iNumberAI;
+    int numHumans = cBENewRaceInterface_newRace.iNumberHumans;
+    int numAI = cBENewRaceInterface_newRace.iNumberAI;
     cBENewRaceInterface_newRace.iNumberMissionRiders = mission;
-    cBENewRaceInterface_newRace.iNumberRiders = a + b + mission;
+    cBENewRaceInterface_newRace.iNumberRiders = numHumans + numAI + mission;
 }
 #endif
 
@@ -422,19 +422,19 @@ extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode)
         cBENewRaceInterface_setNumberHumans(self, 1);
         cBENewRaceInterface_setNumberAI(self, 0);
         cBENewRaceInterface_setNumberMission(self, 1);
-        char* p = (char*)cBENewPlayerInterface_getThis();
+        char* playerInterface = (char*)cBENewPlayerInterface_getThis();
         func_00147828(1);
-        sVE_144DF0* vt = *(sVE_144DF0**)(p + 0xC);
-        vt[1].fn(p + vt[1].delta);
+        sVE_144DF0* vt = *(sVE_144DF0**)(playerInterface + 0xC);
+        vt[1].fn(playerInterface + vt[1].delta);
     } else if (*((signed char*)Race_144DF0() + 0x48) == 4) {
         cBENewRaceInterface_setNumberHumans(self, humans);
         cBENewRaceInterface_setNumberAI(self, 0);
         cBENewRaceInterface_setNumberMission(self, 0);
-        char* p = (char*)cBENewPlayerInterface_getThis();
+        char* playerInterface = (char*)cBENewPlayerInterface_getThis();
         if (cBENewPlayerInterface_isMissionMan(1) != 0) {
-            cBENewPlayerInterface_resetFromMissionMan(p, 1);
-            sVE_144DF0* vt = *(sVE_144DF0**)(p + 0xC);
-            vt[1].fn(p + vt[1].delta);
+            cBENewPlayerInterface_resetFromMissionMan(playerInterface, 1);
+            sVE_144DF0* vt = *(sVE_144DF0**)(playerInterface + 0xC);
+            vt[1].fn(playerInterface + vt[1].delta);
         }
     }
     *((signed char*)Race_144DF0() + 0x48) = mode;
@@ -518,7 +518,7 @@ static inline char* Race_1451E8()
  */
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event)
 {
-    sGameEvent_001451E8 e = D_0043E978[event];
+    sGameEvent_001451E8 eventRec = D_0043E978[event];
     *((signed char*)Race_1451E8() + 0x4A) = event;
     if (event < 6)
     {
@@ -530,7 +530,7 @@ extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event)
                 cBENewRaceInterface_setNumberAI(self, 1);
         }
     }
-    return e.kind == *((signed char*)Race_1451E8() + 0x48);
+    return eventRec.kind == *((signed char*)Race_1451E8() + 0x48);
 }
 #endif
 

@@ -3022,10 +3022,10 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsInBoxTransformed);
 // segment self->p0 .. p0+dir overlaps the box [mn, mx]?
 extern "C" int cWorldLine_IsInBoxTransformed(sRiderCapsule_E100* self, sSphereVec4* mn, sSphereVec4* mx)
 {
-    sSphereVec4 e = sphereCapsuleAdd(&self->p0, &self->dir);
-    if ((self->p0.x < mn->x && e.x < mn->x) || (mx->x < self->p0.x && mx->x < e.x) ||
-        (self->p0.y < mn->y && e.y < mn->y) || (mx->y < self->p0.y && mx->y < e.y) ||
-        (self->p0.z < mn->z && e.z < mn->z) || (mx->z < self->p0.z && mx->z < e.z)) {
+    sSphereVec4 endPoint = sphereCapsuleAdd(&self->p0, &self->dir);
+    if ((self->p0.x < mn->x && endPoint.x < mn->x) || (mx->x < self->p0.x && mx->x < endPoint.x) ||
+        (self->p0.y < mn->y && endPoint.y < mn->y) || (mx->y < self->p0.y && mx->y < endPoint.y) ||
+        (self->p0.z < mn->z && endPoint.z < mn->z) || (mx->z < self->p0.z && mx->z < endPoint.z)) {
         return 0;
     }
     return 1;
@@ -3072,10 +3072,10 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_UnTransform);
  */
 extern "C" void cWorldLine_UnTransform(void* self)
 {
-    cQuad128 a = *(cQuad128*)((char*)self + 0x80);
-    cQuad128 b = *(cQuad128*)((char*)self + 0x90);
-    *(cQuad128*)((char*)self + 0x60) = a;
-    *(cQuad128*)((char*)self + 0x70) = b;
+    cQuad128 origP0 = *(cQuad128*)((char*)self + 0x80);
+    cQuad128 origDp = *(cQuad128*)((char*)self + 0x90);
+    *(cQuad128*)((char*)self + 0x60) = origP0;
+    *(cQuad128*)((char*)self + 0x70) = origDp;
     *(int*)((char*)self + 0x4) = 0;
 }
 #endif
@@ -3177,16 +3177,16 @@ extern "C" int cWorldLine_IsTriInt(void* self, sSphereVec4* vertA, sSphereVec4* 
     if (__builtin_fabsf(denom) < 1.000000013351432e-10f) {
         return 0;
     }
-    float t;
+    float lineT;
     {
-        sSphereVec4 d = vu0Sub_E4D0(*vertA, *origin);
-        t = vu0Dot_E4D0(d, *n) / denom;
+        sSphereVec4 toVertA = vu0Sub_E4D0(*vertA, *origin);
+        lineT = vu0Dot_E4D0(toVertA, *n) / denom;
     }
-    *outT = t;
-    if (t < 0.0f || 1.0f < t) {
+    *outT = lineT;
+    if (lineT < 0.0f || 1.0f < lineT) {
         return 0;
     }
-    *hit = vu0Add_E4D0(*origin, vu0Scale_E4D0(*dir, t));
+    *hit = vu0Add_E4D0(*origin, vu0Scale_E4D0(*dir, lineT));
     *outN = *n;
     return func_0032B6A8_tol(vertA, vertB, vertC, hit, 9.999999747378752e-05f);
 }
@@ -3220,21 +3220,21 @@ struct sCapsuleV_E5E8 {
  * @param v  the triangle's normal (On Tour n)
  * @param ipos  receives the intersection point (On Tour ipos)
  * @param inorm  receives the hit normal (On Tour inorm)
- * @param f  receives the line parameter (On Tour param)
+ * @param hitParam  receives the line parameter (On Tour param)
  * @return the IsTriInt result
  */
-extern "C" int cWorldLine_Is2SidedTriInt(sCapsuleV_E5E8* self, void* vertA, void* vertB, void* vertC, sSphereVec4* v, void* ipos, void* inorm, void* f)
+extern "C" int cWorldLine_Is2SidedTriInt(sCapsuleV_E5E8* self, void* vertA, void* vertB, void* vertC, sSphereVec4* v, void* ipos, void* inorm, void* hitParam)
 {
     float dp = vu0Dot_E4D0(self->dir, *v);
     sVE_E5E8* vt;
     if (dp < 0.0f) {
         vt = self->vt;
-        char* t = (char*)self + vt[4].delta;
+        char* target = (char*)self + vt[4].delta;
         sSphereVec4 n = vu0Scale_E4D0(*v, -1.0f);
-        return vt[4].fn(t, vertA, vertB, vertC, &n, ipos, inorm, f);
+        return vt[4].fn(target, vertA, vertB, vertC, &n, ipos, inorm, hitParam);
     }
     vt = self->vt;
-    return vt[4].fn((char*)self + vt[4].delta, vertA, vertB, vertC, v, ipos, inorm, f);
+    return vt[4].fn((char*)self + vt[4].delta, vertA, vertB, vertC, v, ipos, inorm, hitParam);
 }
 #endif
 
@@ -3326,24 +3326,24 @@ extern "C" int cWorldLine_IsBoxInt(sRay_E690* self, float* bmin, float* bmax, sH
     int fmin = -1;
     int fmax = -1;
     for (int i = 0; i < 3; i++, bmin++, bmax++, pd++, po++) {
-        float d = *pd;
-        if (__builtin_fabsf(d) > 1.000000013351432e-10f) {
-            float o = *po;
-            float t1 = (*bmin - o) / d;
-            float t2 = (*bmax - o) / d;
+        float dirComp = *pd;
+        if (__builtin_fabsf(dirComp) > 1.000000013351432e-10f) {
+            float originComp = *po;
+            float tNear = (*bmin - originComp) / dirComp;
+            float tFar = (*bmax - originComp) / dirComp;
             int face = i * 2;
-            if (t2 < t1) {
-                float tt = t1;
+            if (tFar < tNear) {
+                float tt = tNear;
                 face++;
-                t1 = t2;
-                t2 = tt;
+                tNear = tFar;
+                tFar = tt;
             }
-            if (tmin < t1) {
-                tmin = t1;
+            if (tmin < tNear) {
+                tmin = tNear;
                 fmin = face;
             }
-            if (t2 < tmax) {
-                tmax = t2;
+            if (tFar < tmax) {
+                tmax = tFar;
                 fmax = face ^ 1;
             }
             if (tmax < tmin)
@@ -3555,38 +3555,38 @@ static inline sSphereVec4 vu0Normalize_E9A0(const sSphereVec4& v)
 extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patch, float& patchU, float& patchV, sSphereVec4* outPos,
                               sSphereVec4* outNrm)
 {
-    sSphereVec4* m0 = patch->m[0];
-    sSphereVec4* m1 = patch->m[1];
-    sSphereVec4* m2 = patch->m[2];
-    sSphereVec4* m3 = patch->m[3];
-    sSphereVec4 P;
-    sSphereVec4 c[4];
+    sSphereVec4* mat0 = patch->m[0];
+    sSphereVec4* mat1 = patch->m[1];
+    sSphereVec4* mat2 = patch->m[2];
+    sSphereVec4* mat3 = patch->m[3];
+    sSphereVec4 surfPos;
+    sSphereVec4 rowVecs[4];
     float v2 = patchV * patchV;
     float v3 = patchV * v2;
     float u2 = patchU * patchU;
     float u3 = patchU * u2;
     sVec4_E9A0 V(v3, v2, patchV, 1.0f);
     sVec4_E9A0 U(u3, u2, patchU, 1.0f);
-    c[0] = mtxMulVec_9B90(m0, &U);
-    c[1] = mtxMulVec_9B90(m1, &U);
-    c[2] = mtxMulVec_9B90(m2, &U);
-    c[3] = mtxMulVec_9B90(m3, &U);
-    P = sVec4_E9A0(vu0Dot_E4D0(Column_E9A0(c, 0), V), vu0Dot_E4D0(Column_E9A0(c, 1), V),
-                   vu0Dot_E4D0(Column_E9A0(c, 2), V), 1.0f);
+    rowVecs[0] = mtxMulVec_9B90(mat0, &U);
+    rowVecs[1] = mtxMulVec_9B90(mat1, &U);
+    rowVecs[2] = mtxMulVec_9B90(mat2, &U);
+    rowVecs[3] = mtxMulVec_9B90(mat3, &U);
+    surfPos = sVec4_E9A0(vu0Dot_E4D0(Column_E9A0(rowVecs, 0), V), vu0Dot_E4D0(Column_E9A0(rowVecs, 1), V),
+                   vu0Dot_E4D0(Column_E9A0(rowVecs, 2), V), 1.0f);
     sVec4_E9A0 dV(3.0f * v2, 2.0f * patchV, 1.0f);
     sVec4_E9A0 dU(3.0f * u2, 2.0f * patchU, 1.0f);
-    float dvx = vu0Dot_E4D0(dV, Column_E9A0(c, 0));
-    float dvy = vu0Dot_E4D0(dV, Column_E9A0(c, 1));
-    float dvz = vu0Dot_E4D0(dV, Column_E9A0(c, 2));
-    c[0] = mtxMulVec_9B90(m0, &dU);
-    c[1] = mtxMulVec_9B90(m1, &dU);
-    c[2] = mtxMulVec_9B90(m2, &dU);
-    c[3] = mtxMulVec_9B90(m3, &dU);
-    float dux = vu0Dot_E4D0(V, Column_E9A0(c, 0));
-    float duy = vu0Dot_E4D0(V, Column_E9A0(c, 1));
-    float duz = vu0Dot_E4D0(V, Column_E9A0(c, 2));
+    float dvx = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 0));
+    float dvy = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 1));
+    float dvz = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 2));
+    rowVecs[0] = mtxMulVec_9B90(mat0, &dU);
+    rowVecs[1] = mtxMulVec_9B90(mat1, &dU);
+    rowVecs[2] = mtxMulVec_9B90(mat2, &dU);
+    rowVecs[3] = mtxMulVec_9B90(mat3, &dU);
+    float dux = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 0));
+    float duy = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 1));
+    float duz = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 2));
     for (int i = 0; i < 4; i++) {
-        sVec3_E9A0 d(vu0Sub_E9A0(line->origin, P));
+        sVec3_E9A0 d(vu0Sub_E9A0(line->origin, surfPos));
         // Jacobian [dP/du dP/dv -dir], filled row by row
         sMat3_E9A0 m;
         m.m[0] = dux;
@@ -3624,29 +3624,29 @@ extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patc
         u3 = patchU * u2;
         V = sVec4_E9A0(v3, v2, patchV, 1.0f);
         U = sVec4_E9A0(u3, u2, patchU, 1.0f);
-        c[0] = mtxMulVec_9B90(m0, &U);
-        c[1] = mtxMulVec_9B90(m1, &U);
-        c[2] = mtxMulVec_9B90(m2, &U);
-        c[3] = mtxMulVec_9B90(m3, &U);
-        P = sVec4_E9A0(vu0Dot_E4D0(Column_E9A0(c, 0), V), vu0Dot_E4D0(Column_E9A0(c, 1), V),
-                       vu0Dot_E4D0(Column_E9A0(c, 2), V), 1.0f);
+        rowVecs[0] = mtxMulVec_9B90(mat0, &U);
+        rowVecs[1] = mtxMulVec_9B90(mat1, &U);
+        rowVecs[2] = mtxMulVec_9B90(mat2, &U);
+        rowVecs[3] = mtxMulVec_9B90(mat3, &U);
+        surfPos = sVec4_E9A0(vu0Dot_E4D0(Column_E9A0(rowVecs, 0), V), vu0Dot_E4D0(Column_E9A0(rowVecs, 1), V),
+                       vu0Dot_E4D0(Column_E9A0(rowVecs, 2), V), 1.0f);
         dV = sVec4_E9A0(3.0f * v2, 2.0f * patchV, 1.0f);
         dU = sVec4_E9A0(3.0f * u2, 2.0f * patchU, 1.0f);
-        dvx = vu0Dot_E4D0(dV, Column_E9A0(c, 0));
-        dvy = vu0Dot_E4D0(dV, Column_E9A0(c, 1));
-        dvz = vu0Dot_E4D0(dV, Column_E9A0(c, 2));
-        c[0] = mtxMulVec_9B90(m0, &dU);
-        c[1] = mtxMulVec_9B90(m1, &dU);
-        c[2] = mtxMulVec_9B90(m2, &dU);
-        c[3] = mtxMulVec_9B90(m3, &dU);
-        dux = vu0Dot_E4D0(V, Column_E9A0(c, 0));
-        duy = vu0Dot_E4D0(V, Column_E9A0(c, 1));
-        duz = vu0Dot_E4D0(V, Column_E9A0(c, 2));
+        dvx = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 0));
+        dvy = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 1));
+        dvz = vu0Dot_E4D0(dV, Column_E9A0(rowVecs, 2));
+        rowVecs[0] = mtxMulVec_9B90(mat0, &dU);
+        rowVecs[1] = mtxMulVec_9B90(mat1, &dU);
+        rowVecs[2] = mtxMulVec_9B90(mat2, &dU);
+        rowVecs[3] = mtxMulVec_9B90(mat3, &dU);
+        dux = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 0));
+        duy = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 1));
+        duz = vu0Dot_E4D0(V, Column_E9A0(rowVecs, 2));
     }
     sVec4_E9A0 du(dux, duy, duz);
     sVec4_E9A0 dv(dvx, dvy, dvz);
     sSphereVec4 n = vu0Normalize_E9A0(vu0Cross_E9A0(dv, du));
-    *outPos = P;
+    *outPos = surfPos;
     *outNrm = n;
 }
 #endif
@@ -3806,7 +3806,7 @@ static inline sSphereVec4 sphereVecAddR(sSphereVec4* a, sSphereVec4* b)
 extern "C" int cWorldRider_IsInBoxTransformed(void* self, sSphereVec4* mn, sSphereVec4* mx)
 {
     sSphereVec4 rv;
-    int r = 0;
+    int inside = 0;
     float rad = (*(sSphereTreeNode**)((char*)self + 0x60))->radius;
     rv.x = rad;
     rv.y = rad;
@@ -3816,9 +3816,9 @@ extern "C" int cWorldRider_IsInBoxTransformed(void* self, sSphereVec4* mn, sSphe
     sSphereVec4 hi = sphereVecAddR(&(*(sSphereTreeNode**)((char*)self + 0x60))->center, &rv);
     if (mx->x >= lo.x && mn->x <= hi.x && mx->y >= lo.y && mn->y <= hi.y &&
         lo.z <= mx->z && mn->z <= hi.z) {
-        r = 1;
+        inside = 1;
     }
-    return r;
+    return inside;
 }
 #endif
 
@@ -3861,10 +3861,10 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldRider_UnTransform__FPv);
  */
 int cWorldRider_UnTransform(void* self)
 {
-    int t0 = *(int*)((char*)self + 0x64);
+    int origTree = *(int*)((char*)self + 0x64);
     *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x60) = t0;
-    return t0;
+    *(int*)((char*)self + 0x60) = origTree;
+    return origTree;
 }
 #endif
 
@@ -3930,14 +3930,14 @@ extern "C" int func_0032A1C0(void* tree, int a1, int a2, int a3, int a4, sSphere
  */
 extern "C" int cWorldRider_IsTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
 {
-    sSphereVec4 v;
-    int r = func_0032A1C0(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &v, ipos);
-    if (r != 0) {
-        float len = sphereLength_32F8F0(v);
+    sSphereVec4 overlap;
+    int result = func_0032A1C0(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &overlap, ipos);
+    if (result != 0) {
+        float len = sphereLength_32F8F0(overlap);
         *outLen = len;
-        *outDir = sphereCapsuleDiv(v, len);
+        *outDir = sphereCapsuleDiv(overlap, len);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3981,14 +3981,14 @@ extern "C" int func_0032AA28(void* tree, int a1, int a2, int a3, int a4, sSphere
  */
 extern "C" int cWorldRider_Is2SidedTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
 {
-    sSphereVec4 v;
-    int r = func_0032AA28(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &v, ipos);
-    if (r != 0) {
-        float len = sphereLength_32F990(v);
+    sSphereVec4 overlap;
+    int result = func_0032AA28(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &overlap, ipos);
+    if (result != 0) {
+        float len = sphereLength_32F990(overlap);
         *outLen = len;
-        *outDir = sphereCapsuleDiv(v, len);
+        *outDir = sphereCapsuleDiv(overlap, len);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -4254,9 +4254,9 @@ static inline sSphereVec4 sphereMtxMulVec(sSphereVec4* m, sSphereVec4* v)
  */
 extern "C" void cWorldSphere_Transform(void* self, sSphereVec4* mat, float scale)
 {
-    sSphereVec4 p = sphereMtxMulVec(mat, (sSphereVec4*)((char*)self + 0x80));
+    sSphereVec4 newCenter = sphereMtxMulVec(mat, (sSphereVec4*)((char*)self + 0x80));
     *(int*)((char*)self + 0x4) = 1;
-    *(sSphereVec4*)((char*)self + 0x60) = p;
+    *(sSphereVec4*)((char*)self + 0x60) = newCenter;
     *(float*)((char*)self + 0x70) = scale * *(float*)((char*)self + 0x90);
 }
 #endif
@@ -4270,10 +4270,10 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldSphere_UnTransform);
  */
 extern "C" void cWorldSphere_UnTransform(void* self)
 {
-    cQuad128 a = *(cQuad128*)((char*)self + 0x80);
-    float f = *(float*)((char*)self + 0x90);
-    *(cQuad128*)((char*)self + 0x60) = a;
-    *(float*)((char*)self + 0x70) = f;
+    cQuad128 origCen = *(cQuad128*)((char*)self + 0x80);
+    float origRad = *(float*)((char*)self + 0x90);
+    *(cQuad128*)((char*)self + 0x60) = origCen;
+    *(float*)((char*)self + 0x70) = origRad;
     *(int*)((char*)self + 0x4) = 0;
 }
 #endif
@@ -4424,21 +4424,21 @@ static inline sSphereVec4 sphereSub_32FE78(const sSphereVec4& a, const sSphereVe
 extern "C" int cWorldSphere_IsTriInt(void* self, sSphereVec4* vertA, sSphereVec4* vertB, sSphereVec4* vertC, sSphereVec4* plane,
                              sSphereVec4* outPos, sSphereVec4* outDir, float* outDist)
 {
-    float t;
-    if (func_00330360(self, plane, vertA, &t) == 0) {
+    float dist;
+    if (func_00330360(self, plane, vertA, &dist) == 0) {
         return 0;
     }
-    sSphereVec4 p = sphereSub_32FE78(*(sSphereVec4*)((char*)self + 0x60), sphereScale_32FE78(*plane, t));
-    *outPos = p;
+    sSphereVec4 hitPos = sphereSub_32FE78(*(sSphereVec4*)((char*)self + 0x60), sphereScale_32FE78(*plane, dist));
+    *outPos = hitPos;
     if (func_0032B6A8_tol(vertA, vertB, vertC, outPos, 9.999999747378752e-05f) != 0) {
         *outDir = *plane;
-        *outDist = *(float*)((char*)self + 0x70) - t;
+        *outDist = *(float*)((char*)self + 0x70) - dist;
         return 1;
     }
     if (func_00330250(self, vertA, vertB, vertC) == 0)
         return 0;
     *outDir = *plane;
-    *outDist = *(float*)((char*)self + 0x70) - t;
+    *outDist = *(float*)((char*)self + 0x70) - dist;
     return 1;
 }
 #endif
@@ -4509,20 +4509,20 @@ static inline sSphereVec4 sphereSub_32FFA0(const sSphereVec4& a, const sSphereVe
 extern "C" int cWorldSphere_Is2SidedTriInt(void* self, sSphereVec4* vertA, sSphereVec4* vertB, sSphereVec4* vertC, sSphereVec4* plane,
                              sSphereVec4* outPos, sSphereVec4* outDir, float* outDist)
 {
-    sSphereVec4 d = *plane;
-    float t;
-    if (func_00330360(self, plane, vertA, &t) == 0) {
+    sSphereVec4 newNorm = *plane;
+    float dist;
+    if (func_00330360(self, plane, vertA, &dist) == 0) {
         return 0;
     }
-    if (t < 0.0f) {
-        t = -t;
-        sphereScaleEq_32FFA0(d, -1.0f);
+    if (dist < 0.0f) {
+        dist = -dist;
+        sphereScaleEq_32FFA0(newNorm, -1.0f);
     }
-    sSphereVec4 p = sphereSub_32FFA0(*(sSphereVec4*)((char*)self + 0x60), sphereScale_32FFA0(d, t));
-    *outPos = p;
+    sSphereVec4 hitPos = sphereSub_32FFA0(*(sSphereVec4*)((char*)self + 0x60), sphereScale_32FFA0(newNorm, dist));
+    *outPos = hitPos;
     if (func_0032B6A8_tol(vertA, vertB, vertC, outPos, 9.999999747378752e-05f) != 0 || func_00330250(self, vertA, vertB, vertC) != 0) {
-        *outDir = d;
-        *outDist = *(float*)((char*)self + 0x70) - t;
+        *outDir = newNorm;
+        *outDist = *(float*)((char*)self + 0x70) - dist;
         return 1;
     }
     return 0;

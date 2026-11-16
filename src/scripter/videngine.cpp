@@ -38,17 +38,17 @@ extern "C" int cVidEngine_ReadyVideo(void** self, int file)
 {
     if (*self != 0) return 0;
     *self = func_002533C8(cMemMan_alloc(0x44, D_00481FC8, 0x100, 0));
-    sVidParams38E8 p;
-    func_00253390(&p);
+    sVidParams38E8 params;
+    func_00253390(&params);
     //S
-    p.file = file;
-    p.f8 = 1;
-    p.f18 = 0x100;
-    p.f1C = 9;
-    p.fC = 0;
-    p.f10 = 0;
+    params.file = file;
+    params.f8 = 1;
+    params.f18 = 0x100;
+    params.f1C = 9;
+    params.fC = 0;
+    params.f10 = 0;
     //E
-    if (func_002534A8(*self, &p) == 0) {
+    if (func_002534A8(*self, &params) == 0) {
         if (*self != 0) func_00253418(*self, 3);
         *self = 0;
         return 0;

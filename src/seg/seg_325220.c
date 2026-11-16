@@ -5945,13 +5945,13 @@ extern long func_0042D380(double);
  *
  * Converts the magnitude with func_0042D380 (the unsigned conversion) and negates it for negative inputs.
  *
- * @param a0  value to convert
+ * @param value  value to convert
  * @return the value truncated toward zero
  */
-long __fixdfdi(double a0) {
-    if (dpcmp(a0, 0.0) < 0)
-        return -func_0042D380(dpsub(0.0, a0));
-    return func_0042D380(a0);
+long __fixdfdi(double value) {
+    if (dpcmp(value, 0.0) < 0)
+        return -func_0042D380(dpsub(0.0, value));
+    return func_0042D380(value);
 }
 #endif
 

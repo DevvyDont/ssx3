@@ -26,13 +26,13 @@ int func_0030B260(void* self, void* a1);
  */
 extern "C" void* cWScriptMan_addProcess(void* self, int sectionId, int data, int front)
 {
-    void* p = cWScriptProcess_cWScriptProcess(cMemMan_alloc(0x60, D_00489908, 0x20000000, 0), self, sectionId, data);
+    void* process = cWScriptProcess_cWScriptProcess(cMemMan_alloc(0x60, D_00489908, 0x20000000, 0), self, sectionId, data);
     if (front != 0) {
-        func_0030B260((char*)self + 0x2BC, p);
+        func_0030B260((char*)self + 0x2BC, process);
     } else {
-        func_0030B260((char*)self + 0x2B4, p);
+        func_0030B260((char*)self + 0x2B4, process);
     }
-    return p;
+    return process;
 }
 #endif
 
@@ -57,13 +57,13 @@ int func_0030B2C0(void* self, void* a1);
  */
 extern "C" void* cWScriptMan_addProcess1(void* self, int sectionId, int data, int key, int front)
 {
-    void* p = cWScriptMission_cWScriptMission(cMemMan_alloc(0x78, D_00489918, 0x20000000, 0), self, sectionId, data, key);
+    void* mission = cWScriptMission_cWScriptMission(cMemMan_alloc(0x78, D_00489918, 0x20000000, 0), self, sectionId, data, key);
     if (front != 0) {
-        func_0030B2C0((char*)self + 0x2BC, p);
+        func_0030B2C0((char*)self + 0x2BC, mission);
     } else {
-        func_0030B2C0((char*)self + 0x2B4, p);
+        func_0030B2C0((char*)self + 0x2B4, mission);
     }
-    return p;
+    return mission;
 }
 #endif
 
@@ -1171,8 +1171,8 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
     case 8:
     case 9:
     case 11: {
-        int v = *(int*)SSXApp->Game->Replay;
-        int busy = v != 0 && v < 10;
+        int replayState = *(int*)SSXApp->Game->Replay;
+        int busy = replayState != 0 && replayState < 10;
         if (!busy) {
             func_0030C7C0_a(self + 0x1C4, id, cmd, *(int*)self);
         }
@@ -1340,23 +1340,23 @@ struct cWScriptMan_runScriptCode_sCall {
  */
 extern "C" void cWScriptMan_runScriptCode(void* self, void* obj, int data)
 {
-    cWScriptMan_runScriptCode_sValue arg;
+    cWScriptMan_runScriptCode_sValue scriptFunc;
     cWScriptMan_runScriptCode_sValue ret;
     cWScriptMan_runScriptCode_sCall call;
     int savedId;
     void* savedObj = *(void**)((char*)self + 0x2A4);
     *(void**)((char*)self + 0x2A4) = obj;
     savedId = *(int*)((char*)self + 0x290);
-    func_00226600(&arg, data, 0);
+    func_00226600(&scriptFunc, data, 0);
     ret.type = 0;
     ret.word0 = 0;
     func_002224A8(&call);
     void* table = *(void**)(*(char**)((char*)self + 0x2A4) + 0x1C);
     if (table != 0) {
-        func_002224B8(&call, &arg, table, &ret);
+        func_002224B8(&call, &scriptFunc, table, &ret);
     } else {
         table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, D_004898D8, 0x20000000, 0), 8);
-        func_002224B8(&call, &arg, table, &ret);
+        func_002224B8(&call, &scriptFunc, table, &ret);
         if (table != 0) {
             luno_cLunoTable__cLunoTable(table, 3);
         }
@@ -1715,17 +1715,17 @@ extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNo
         self->head = node->next;
         return 1;
     }
-    cWScriptListNode* p = (cWScriptListNode*)self->head;
-    if (p != 0) {
-        cWScriptListNode* prev = p;
+    cWScriptListNode* current = (cWScriptListNode*)self->head;
+    if (current != 0) {
+        cWScriptListNode* prev = current;
         do {
-            p = (cWScriptListNode*)p->next;
-            if (p == node) {
-                prev->next = p->next;
+            current = (cWScriptListNode*)current->next;
+            if (current == node) {
+                prev->next = current->next;
                 return 1;
             }
-            prev = p;
-        } while (p != 0);
+            prev = current;
+        } while (current != 0);
     }
     return 0;
 }
@@ -1806,9 +1806,9 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_findProcess);
  */
 extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode* node)
 {
-    cWScriptListNode* p;
-    for (p = (cWScriptListNode*)self->head; p != 0; p = (cWScriptListNode*)p->next) {
-        if (p == node) {
+    cWScriptListNode* process;
+    for (process = (cWScriptListNode*)self->head; process != 0; process = (cWScriptListNode*)process->next) {
+        if (process == node) {
             return 1;
         }
     }
@@ -2147,11 +2147,11 @@ extern "C" void cWScriptMan_collect(void* self, int rider, int id, int instId)
         if (slots[i].id == id) {
             func_0030C3E0((func_0030C3E0_sTable*)&slots[i], instId);
             cSSXAudio_PlayIconSound(func_0028B180(), 5, 0, 1.0f);
-            void* i0 = cBE_getInterface_Fv(cBE_getBE(), 0);
-            void* i11 = cBE_getInterface_Fv(cBE_getBE(), 0xB);
-            int lvl = func_00144C98(i0);
-            int v = func_00151178(i11, lvl);
-            cRider_flagEventAddCollectible(*(void**)((char*)SSXApp->Game->AI + (rider << 2) + 0x28), lvl, v);
+            void* newRace = cBE_getInterface_Fv(cBE_getBE(), 0);
+            void* econ = cBE_getInterface_Fv(cBE_getBE(), 0xB);
+            int lvl = func_00144C98(newRace);
+            int cash = func_00151178(econ, lvl);
+            cRider_flagEventAddCollectible(*(void**)((char*)SSXApp->Game->AI + (rider << 2) + 0x28), lvl, cash);
             return;
         }
     }

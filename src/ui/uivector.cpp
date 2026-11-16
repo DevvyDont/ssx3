@@ -246,7 +246,7 @@ extern "C" void cUIVector_setChannelDataKCP(cUIVector_3808* self, unsigned int n
         return;
     }
     for (unsigned int i = 0; i < n; i++, keys++) {
-        float v = (float)keys->value;
+        float data = (float)keys->value;
         int key = keys->key;
         if (key >= 0x15) {
             key -= 0x15;
@@ -255,27 +255,27 @@ extern "C" void cUIVector_setChannelDataKCP(cUIVector_3808* self, unsigned int n
                 continue;
             }
             switch (key % 9) {
-            case 0: self->verts[idx].x = v; break;
-            case 1: self->verts[idx].y = v; break;
-            case 2: self->verts[idx].z = v; break;
-            case 5: self->cols[idx].r = v; break;
-            case 6: self->cols[idx].g = v; break;
-            case 7: self->cols[idx].b = v; break;
-            case 8: self->cols[idx].a = v; break;
+            case 0: self->verts[idx].x = data; break;
+            case 1: self->verts[idx].y = data; break;
+            case 2: self->verts[idx].z = data; break;
+            case 5: self->cols[idx].r = data; break;
+            case 6: self->cols[idx].g = data; break;
+            case 7: self->cols[idx].b = data; break;
+            case 8: self->cols[idx].a = data; break;
             }
         } else {
             switch (key) {
-            case 0: self->x = v; break;
-            case 1: self->y = v; break;
-            case 9: self->sx = v * 0.01f; break;
-            case 10: self->sy = v * 0.01f; break;
-            case 12: self->bits.layer = (int)v; break;
-            case 13: self->r = v * (1.0f / 255.0f); break;
-            case 14: self->g = v * (1.0f / 255.0f); break;
-            case 15: self->b = v * (1.0f / 255.0f); break;
-            case 16: self->a = v * (1.0f / 255.0f); break;
-            case 6: self->w = v; break;
-            case 7: self->h = v; break;
+            case 0: self->x = data; break;
+            case 1: self->y = data; break;
+            case 9: self->sx = data * 0.01f; break;
+            case 10: self->sy = data * 0.01f; break;
+            case 12: self->bits.layer = (int)data; break;
+            case 13: self->r = data * (1.0f / 255.0f); break;
+            case 14: self->g = data * (1.0f / 255.0f); break;
+            case 15: self->b = data * (1.0f / 255.0f); break;
+            case 16: self->a = data * (1.0f / 255.0f); break;
+            case 6: self->w = data; break;
+            case 7: self->h = data; break;
             }
         }
     }
@@ -405,9 +405,9 @@ extern "C" void cUIAnimation_updateFrame(void*, unsigned char);
  */
 extern "C" void cUIVector_update(cUIVector* self, unsigned short ev)
 {
-    void* a = self->mpAnim;
-    if (a != 0) {
-        cUIAnimation_updateThing(a, self, self->mAnimPlaybackStatus, ev);
+    void* anim = self->mpAnim;
+    if (anim != 0) {
+        cUIAnimation_updateThing(anim, self, self->mAnimPlaybackStatus, ev);
         cUIAnimation_updateFrame(self->mpAnim, self->mAnimPlaybackStatus);
     }
 }
@@ -439,18 +439,18 @@ extern "C" void cUIVector_getSize(cUIVector* self, t3Vector* out)
     float maxY = -1000.0f;
     unsigned int i;
     for (i = 0; i < *(unsigned int*)&self->mAttrVector >> 17; i++) {
-        t3Vector* p = &(self->mpVertexPosition)[i];
-        if (p->x < minX) {
-            minX = p->x;
+        t3Vector* vertexPos = &(self->mpVertexPosition)[i];
+        if (vertexPos->x < minX) {
+            minX = vertexPos->x;
         }
-        if (maxX < p->x) {
-            maxX = p->x;
+        if (maxX < vertexPos->x) {
+            maxX = vertexPos->x;
         }
-        if (p->y < minY) {
-            minY = p->y;
+        if (vertexPos->y < minY) {
+            minY = vertexPos->y;
         }
-        if (maxY < p->y) {
-            maxY = p->y;
+        if (maxY < vertexPos->y) {
+            maxY = vertexPos->y;
         }
     }
     out->x = maxX - minX;

@@ -40,13 +40,13 @@ extern "C" void* cMdfArchive_getModelPartByIndex(sMdfArchive_00314CB0* self, int
 {
     char name[0x40];
     sprintf(name, D_0048A5D0, &self->parts[i]);
-    char* p = (char*)operator_new_tag(self->parts[i].dataSize + 0x60, name, 0x3000000, 0);
-    MEM_copy(p, &self->parts[i], 0x60);
+    char* model = (char*)operator_new_tag(self->parts[i].dataSize + 0x60, name, 0x3000000, 0);
+    MEM_copy(model, &self->parts[i], 0x60);
     if (self->parts[i].dataSize)
     {
-        func_003B47F8(self->data + self->parts[i].dataOffset, p + 0x60);
+        func_003B47F8(self->data + self->parts[i].dataOffset, model + 0x60);
     }
-    return p;
+    return model;
 }
 #endif
 
@@ -124,9 +124,9 @@ extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
 {
     for (int i = 0; i < 0x206; i++)
     {
-        int h = GetHashValue32(D_0048CFC0[i]);
+        int hashValue = GetHashValue32(D_0048CFC0[i]);
         self->order[i] = i;
-        self->hash[i] = h;
+        self->hash[i] = hashValue;
     }
     D_004A3E78 = self->hash;
     func_00418EF8(self->order, 0x206, 4, func_00314D60);

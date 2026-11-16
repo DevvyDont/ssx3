@@ -104,14 +104,14 @@ extern "C" void func_0028BE60(void* bank, int handle, void* data, int b);
  */
 extern "C" int cScriptSoundBankManager_LinkBank(sSndList* self, int id, void* data, int dataSize)
 {
-    char* e = (char*)func_002836D8(self, id);
-    if (e == 0) {
-        e = (char*)func_00283760(self);
-        *(int*)(e + 0x0) = id;
-        *(void**)(e + 0x8) = data;
-        func_0028BE60(**(void***)((char*)func_0028B180() + 0x118), *(int*)(e + 0x4), data, dataSize);
+    char* bankInfo = (char*)func_002836D8(self, id);
+    if (bankInfo == 0) {
+        bankInfo = (char*)func_00283760(self);
+        *(int*)(bankInfo + 0x0) = id;
+        *(void**)(bankInfo + 0x8) = data;
+        func_0028BE60(**(void***)((char*)func_0028B180() + 0x118), *(int*)(bankInfo + 0x4), data, dataSize);
     }
-    return *(int*)(e + 0x4);
+    return *(int*)(bankInfo + 0x4);
 }
 #endif
 
@@ -356,23 +356,23 @@ public:
  */
 extern "C" void cVidEngine_ResetVideoEngine(void* self)
 {
-    char* s = (char*)self;
-    if (*(void**)(s + 0x0) != 0) {
-        func_00253418(*(void**)(s + 0x0), 3);
-        if (*(int*)(s + 0x4) != 0) {
+    char* vidEngine = (char*)self;
+    if (*(void**)(vidEngine + 0x0) != 0) {
+        func_00253418(*(void**)(vidEngine + 0x0), 3);
+        if (*(int*)(vidEngine + 0x4) != 0) {
             D_004A2A50 = D_004428F0[D_005366E8[--D_004A2A54]];
             cSSXAudio_ResumeSFX(func_0028B180());
-            ((cWorld_3818*)GrMan)->v40(*(int*)(s + 0x10));
-            if (*(int*)(s + 0x14) != 0) {
-                *(int*)(s + 0x14) = 0;
+            ((cWorld_3818*)GrMan)->v40(*(int*)(vidEngine + 0x10));
+            if (*(int*)(vidEngine + 0x14) != 0) {
+                *(int*)(vidEngine + 0x14) = 0;
                 func_002EA860(SSXApp->Game->CutSceneTransitionMan);
             }
         }
     }
-    *(int*)(s + 0x0) = 0;
-    *(int*)(s + 0x4) = 0;
-    *(int*)(s + 0x8) = 0;
-    *(int*)(s + 0xC) = 0;
+    *(int*)(vidEngine + 0x0) = 0;
+    *(int*)(vidEngine + 0x4) = 0;
+    *(int*)(vidEngine + 0x8) = 0;
+    *(int*)(vidEngine + 0xC) = 0;
 }
 #endif
 

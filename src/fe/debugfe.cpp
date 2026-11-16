@@ -1836,11 +1836,11 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
     self->snd1C = -1;
     int* data = FILE_loadz(D_0045D4E0, 0x100);
     if (data) {
-        char* p = (char*)data + data[5];
-        if (p) {
-            cPS2GraphicsMan* g = cGraphicsMan_TheGraphicsMan;
-            sVEnt_17F868* gvt = (sVEnt_17F868*)g->mVtbl;
-            self->snd1C = ((Load_17F868)gvt[46].fn)((char*)g + gvt[46].delta, p, D_004A1340, 0, 1, -1);
+        char* payload = (char*)data + data[5];
+        if (payload) {
+            cPS2GraphicsMan* theGraphicsMan = cGraphicsMan_TheGraphicsMan;
+            sVEnt_17F868* gvt = (sVEnt_17F868*)theGraphicsMan->mVtbl;
+            self->snd1C = ((Load_17F868)gvt[46].fn)((char*)theGraphicsMan + gvt[46].delta, payload, D_004A1340, 0, 1, -1);
         }
         cMemMan_free(data);
     }
@@ -1883,13 +1883,13 @@ typedef void (*tFn_17FA60)(void*, const sVec3K17FA60&);
  */
 extern "C" void cDebugFE_gainFocus(void* self)
 {
-    char* m;
+    char* graphicsMan;
     char* vt;
     cGraphicsMan_UploadTextures((char*)GrMan);
     D_004A4324 = 0;
-    m = (char*)GrMan;
-    vt = *(char**)(m + 0x10D8);
-    ((tFn_17FA60)*(void**)(vt + 0x7C))(m + *(short*)(vt + 0x78), sVec3K17FA60());
+    graphicsMan = (char*)GrMan;
+    vt = *(char**)(graphicsMan + 0x10D8);
+    ((tFn_17FA60)*(void**)(vt + 0x7C))(graphicsMan + *(short*)(vt + 0x78), sVec3K17FA60());
 }
 #endif
 
@@ -1941,16 +1941,16 @@ extern "C" void cDebugFE_purge(sDebugFE_0017FAD0* self)
 {
     for (int i = 0; i < 2; i++)
     {
-        char* o = self->objs[i];
-        if (o != 0)
+        char* screen = self->objs[i];
+        if (screen != 0)
         {
-            sVEi_0017FAD0* vt = *(sVEi_0017FAD0**)o;
-            vt[1].fn(o + vt[1].delta, 3);
+            sVEi_0017FAD0* vt = *(sVEi_0017FAD0**)screen;
+            vt[1].fn(screen + vt[1].delta, 3);
         }
     }
-    char* g = (char*)SSXApp;
-    *(int*)(g + 0x7C) = 0;
-    *(int*)(g + 0x80) = 0;
+    char* app = (char*)SSXApp;
+    *(int*)(app + 0x7C) = 0;
+    *(int*)(app + 0x80) = 0;
     if (self->snd20 >= 0)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -2055,38 +2055,38 @@ extern "C" int cDebugFE_render(char* self)
         return 0;
     }
     if (func_00231D60(self) == 0) {
-        cPS2GraphicsMan* m1 = GrMan;
-        sVEnt_17FBF0* vt1 = (sVEnt_17FBF0*)m1->mVtbl;
-        char* this1 = (char*)m1 + vt1[15].delta;
+        cPS2GraphicsMan* graphicsMan1 = GrMan;
+        sVEnt_17FBF0* vt1 = (sVEnt_17FBF0*)graphicsMan1->mVtbl;
+        char* this1 = (char*)graphicsMan1 + vt1[15].delta;
         sVec4_17FBF0 pos;
         float one = 1.0f;
         sVec4_17FBF0 col(one, 0.0f, 0.0f, 0.0f);
-        float zero = 0.0f;
-        pos.x = zero;
-        pos.y = zero;
-        pos.z = zero;
+        float zeroF = 0.0f;
+        pos.x = zeroF;
+        pos.y = zeroF;
+        pos.z = zeroF;
         ((FnP_17FBF0)vt1[15].fn)(this1, &pos);
-        cPS2GraphicsMan* m2 = GrMan;
-        sVEnt_17FBF0* vt2 = (sVEnt_17FBF0*)m2->mVtbl;
-        ((FnView_17FBF0)vt2[26].fn)((char*)m2 + vt2[26].delta, 0, 0, zero, zero, 640.0f, 480.0f, -1.0f, one);
-        cPS2GraphicsMan* m3 = GrMan;
-        sVEnt_17FBF0* vt3 = (sVEnt_17FBF0*)m3->mVtbl;
-        ((FnP_17FBF0)vt3[34].fn)((char*)m3 + vt3[34].delta, t4mat_Identity);
-        cPS2GraphicsMan* m4 = GrMan;
-        setB23_17FBF0(rs_17FBF0((char*)m4), 2);
-        setB20_17FBF0(rs_17FBF0((char*)m4), 3);
-        setB12_17FBF0(rs_17FBF0((char*)m4), 0xD);
-        setB2_17FBF0(rs_17FBF0((char*)m4), 5);
-        setB22_17FBF0(rs_17FBF0((char*)m4), 1);
+        cPS2GraphicsMan* graphicsMan2 = GrMan;
+        sVEnt_17FBF0* vt2 = (sVEnt_17FBF0*)graphicsMan2->mVtbl;
+        ((FnView_17FBF0)vt2[26].fn)((char*)graphicsMan2 + vt2[26].delta, 0, 0, zeroF, zeroF, 640.0f, 480.0f, -1.0f, one);
+        cPS2GraphicsMan* graphicsMan3 = GrMan;
+        sVEnt_17FBF0* vt3 = (sVEnt_17FBF0*)graphicsMan3->mVtbl;
+        ((FnP_17FBF0)vt3[34].fn)((char*)graphicsMan3 + vt3[34].delta, t4mat_Identity);
+        cPS2GraphicsMan* graphicsMan4 = GrMan;
+        setB23_17FBF0(rs_17FBF0((char*)graphicsMan4), 2);
+        setB20_17FBF0(rs_17FBF0((char*)graphicsMan4), 3);
+        setB12_17FBF0(rs_17FBF0((char*)graphicsMan4), 0xD);
+        setB2_17FBF0(rs_17FBF0((char*)graphicsMan4), 5);
+        setB22_17FBF0(rs_17FBF0((char*)graphicsMan4), 1);
         func_0017F500(self + 0x24, *(int*)(self + 0x1C));
         setC5_17FBF0(rs_17FBF0((char*)GrMan), 9);
         void* menu = *(void**)(self + 0x14);
         sVEnt_17FBF0* mvt = *(sVEnt_17FBF0**)menu;
         ((FnV_17FBF0)mvt[3].fn)((char*)menu + mvt[3].delta);
     }
-    cPS2GraphicsMan* m5 = GrMan;
-    sVEnt_17FBF0* vt5 = (sVEnt_17FBF0*)m5->mVtbl;
-    ((FnV_17FBF0)vt5[20].fn)((char*)m5 + vt5[20].delta);
+    cPS2GraphicsMan* graphicsMan5 = GrMan;
+    sVEnt_17FBF0* vt5 = (sVEnt_17FBF0*)graphicsMan5->mVtbl;
+    ((FnV_17FBF0)vt5[20].fn)((char*)graphicsMan5 + vt5[20].delta);
     return 1;
 }
 #endif
@@ -2673,9 +2673,9 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isActive);
  */
 extern "C" int cFEInput_isActive(void* self)
 {
-    void* p = *(void**)((char*)self + 0x18);
-    if (p != 0) {
-        return **(int**)p != 0;
+    void* input = *(void**)((char*)self + 0x18);
+    if (input != 0) {
+        return **(int**)input != 0;
     }
     return 0;
 }

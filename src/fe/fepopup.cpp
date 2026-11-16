@@ -40,9 +40,9 @@ extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, void* engine, voi
     func_0039E318(self, engine, owner);
     self->mVtbl = cScreenPopup_vtbl;
     cPopupInfo_cPopupInfo((char*)self + 0xBC);
-    int d = D_004A3E90;
-    self->mszInputText = (char*)d;
-    self->mszStaticText = (char*)d;
+    int defaultStr = D_004A3E90;
+    self->mszInputText = (char*)defaultStr;
+    self->mszStaticText = (char*)defaultStr;
     self->miDefaultOption = -1;
     self->mpKeyboard = 0;
     self->mbShowing = 0;
@@ -176,15 +176,15 @@ extern "C" void cScreenPopup_onGainFocus(cScreenPopup* self)
     if (self->mpMenu != 0) {
         cScreenPopup_SetTextObjectsAlpha(self, 1.0f);
         {
-            char* o = (char*)self->mpMenu;
-            sVE5B88* vt = *(sVE5B88**)(o + 8);
-            ((void (*)(void*, int))vt[8].fn)(o + vt[8].delta, 0);
+            char* menu = (char*)self->mpMenu;
+            sVE5B88* vt = *(sVE5B88**)(menu + 8);
+            ((void (*)(void*, int))vt[8].fn)(menu + vt[8].delta, 0);
         }
         cScreenPopup_setPrivateDefaultOption(self, self->mpMenu, self->miDefaultOption, self->meType);
         {
-            char* o = (char*)self->mpMenu;
-            sVE5B88* vt = *(sVE5B88**)(o + 8);
-            ((void (*)(void*, int))vt[7].fn)(o + vt[7].delta, 1);
+            char* menu = (char*)self->mpMenu;
+            sVE5B88* vt = *(sVE5B88**)(menu + 8);
+            ((void (*)(void*, int))vt[7].fn)(menu + vt[7].delta, 1);
         }
         {
             sVE5B88* vt = (sVE5B88*)self->mVtbl;
@@ -223,18 +223,18 @@ extern char D_004A1C48[];
 extern "C" int cScreenPopup_onGainTransition(cScreenPopup* self, int first)
 {
     if (first) {
-        sColF_5C30 c;
-        c.r = 0.2f;
-        c.g = 0.2f;
-        c.b = 1.0f;
+        sColF_5C30 bgScale;
+        bgScale.r = 0.2f;
+        bgScale.g = 0.2f;
+        bgScale.b = 1.0f;
         self->mbFirstGainTran = 1;
         cScreenPopup_initScreenPopup(self, (char*)self + 0xBC);
-        cScreenPopup_scaleBackground(self, (sColor_7738*)&c);
+        cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
         if (self->meBackgroundType == 1)
             cScreenPopup_SetTextObjectsAlpha(self, 0.0f);
-        int f = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(D_004A1C48));
-        if (f != 0xFFFF)
-            self->miStartFrame = f;
+        int startFrame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(D_004A1C48));
+        if (startFrame != 0xFFFF)
+            self->miStartFrame = startFrame;
         else
             self->miStartFrame = 25;
         if (self->miStartFrame == 1)
@@ -244,19 +244,19 @@ extern "C" int cScreenPopup_onGainTransition(cScreenPopup* self, int first)
         self->mvAnimateIncrement[1] = (self->mvCurrentScale[1] - 0.2f) / (float)(self->miStartFrame - 1);
     }
     if (self->meBackgroundType == 1) {
-        float t = (float)self->miGainTransistionCount;
+        float transitionStep = (float)self->miGainTransistionCount;
         sVec3_5C30 pos = *(sVec3_5C30*)((char*)self->mpBackGroundSmall + 0x44);
-        sColF_5C30 c;
-        c.r = t * self->mvAnimateIncrement[0] + 0.2f;
-        c.g = t * self->mvAnimateIncrement[1] + 0.2f;
-        cScreenPopup_scaleBackground(self, (sColor_7738*)&c);
+        sColF_5C30 bgScale;
+        bgScale.r = transitionStep * self->mvAnimateIncrement[0] + 0.2f;
+        bgScale.g = transitionStep * self->mvAnimateIncrement[1] + 0.2f;
+        cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
         if (self->miGainTransistionCount < self->miStartFrame) {
             self->miGainTransistionCount += 1;
             return 0;
         }
     } else {
-        sColF_5C30 c = *(sColF_5C30*)&self->mvCurrentScale[0];
-        cScreenPopup_scaleBackground(self, (sColor_7738*)&c);
+        sColF_5C30 bgScale = *(sColF_5C30*)&self->mvCurrentScale[0];
+        cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
     }
     return 1;
 }
@@ -302,8 +302,8 @@ extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
     if (self->mbFirstGainTran != 0) {
         cScreenPopup_restoreElements(self);
         cScreenPopup_initScreenPopup(self, (char*)self + 0xBC);
-        sColor5DD8 c = *(sColor5DD8*)&self->mvCurrentScale[0];
-        cScreenPopup_scaleBackground(self, (sColor_7738*)&c);
+        sColor5DD8 bgScale = *(sColor5DD8*)&self->mvCurrentScale[0];
+        cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
         sVEntry001C5DD8* vt = (sVEntry001C5DD8*)self->mVtbl;
         vt[6].fn((char*)self + vt[6].delta, 0);
     }
@@ -451,81 +451,81 @@ static inline sObj_6260* find_6260(void* self, char* name)
 // Looks up the popup's widgets by name and caches them (and their positions) in the screen object.
 extern "C" void cScreenPopup_FillObjectPointers(cScreenPopup* self)
 {
-    if (sObj_6260* o = find_6260(self, D_004A1C60)) {
-        POS_6260(0x188) = o->pos;
-        o->GetRect((char*)self + 0x1F4);
-        OBJ_6260(0x48) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_004A1C60)) {
+        POS_6260(0x188) = uiObj->pos;
+        uiObj->GetRect((char*)self + 0x1F4);
+        OBJ_6260(0x48) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_004A1C68)) {
-        POS_6260(0x194) = o->pos;
-        OBJ_6260(0x4C) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_004A1C68)) {
+        POS_6260(0x194) = uiObj->pos;
+        OBJ_6260(0x4C) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_00465FA8))
-        OBJ_6260(0x64) = o;
-    if (sObj_6260* o = find_6260(self, D_00465FB8)) {
-        POS_6260(0x230) = o->pos;
-        OBJ_6260(0x54) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_00465FA8))
+        OBJ_6260(0x64) = uiObj;
+    if (sObj_6260* uiObj = find_6260(self, D_00465FB8)) {
+        POS_6260(0x230) = uiObj->pos;
+        OBJ_6260(0x54) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_00465FC8)) {
-        POS_6260(0x224) = o->pos;
-        OBJ_6260(0x50) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_00465FC8)) {
+        POS_6260(0x224) = uiObj->pos;
+        OBJ_6260(0x50) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_00465FD8)) {
-        POS_6260(0x248) = o->pos;
-        OBJ_6260(0x5C) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_00465FD8)) {
+        POS_6260(0x248) = uiObj->pos;
+        OBJ_6260(0x5C) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_00465FE8)) {
-        POS_6260(0x23C) = o->pos;
-        o->GetRect((char*)self + 0x218);
-        OBJ_6260(0x58) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_00465FE8)) {
+        POS_6260(0x23C) = uiObj->pos;
+        uiObj->GetRect((char*)self + 0x218);
+        OBJ_6260(0x58) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_004A1C70)) {
-        POS_6260(0x254) = o->pos;
-        OBJ_6260(0x60) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_004A1C70)) {
+        POS_6260(0x254) = uiObj->pos;
+        OBJ_6260(0x60) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_00465FF8))
-        OBJ_6260(0x68) = o;
-    if (sObj_6260* o = find_6260(self, D_0045DB90)) {
-        POS_6260(0x1A0) = o->pos;
-        OBJ_6260(0x6C) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_00465FF8))
+        OBJ_6260(0x68) = uiObj;
+    if (sObj_6260* uiObj = find_6260(self, D_0045DB90)) {
+        POS_6260(0x1A0) = uiObj->pos;
+        OBJ_6260(0x6C) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_004A1C78)) {
-        POS_6260(0x1AC) = o->pos;
-        OBJ_6260(0x70) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_004A1C78)) {
+        POS_6260(0x1AC) = uiObj->pos;
+        OBJ_6260(0x70) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_00466008)) {
-        POS_6260(0x1C4) = o->pos;
-        OBJ_6260(0x74) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_00466008)) {
+        POS_6260(0x1C4) = uiObj->pos;
+        OBJ_6260(0x74) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_00466018)) {
-        POS_6260(0x1B8) = o->pos;
-        OBJ_6260(0x7C) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_00466018)) {
+        POS_6260(0x1B8) = uiObj->pos;
+        OBJ_6260(0x7C) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_00466028)) {
-        POS_6260(0x1D0) = o->pos;
-        OBJ_6260(0x78) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_00466028)) {
+        POS_6260(0x1D0) = uiObj->pos;
+        OBJ_6260(0x78) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_00466038)) {
-        POS_6260(0x1DC) = o->pos;
-        OBJ_6260(0x80) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_00466038)) {
+        POS_6260(0x1DC) = uiObj->pos;
+        OBJ_6260(0x80) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_00466048)) {
-        POS_6260(0x1E8) = o->pos;
-        OBJ_6260(0x88) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_00466048)) {
+        POS_6260(0x1E8) = uiObj->pos;
+        OBJ_6260(0x88) = uiObj;
     }
-    if (sObj_6260* o = find_6260(self, D_00466058))
-        OBJ_6260(0x84) = o;
-    if (sObj_6260* o = find_6260(self, D_00466070)) {
-        POS_6260(0x200) = o->pos;
-        o->GetRect((char*)self + 0x20C);
-        OBJ_6260(0x8C) = o;
+    if (sObj_6260* uiObj = find_6260(self, D_00466058))
+        OBJ_6260(0x84) = uiObj;
+    if (sObj_6260* uiObj = find_6260(self, D_00466070)) {
+        POS_6260(0x200) = uiObj->pos;
+        uiObj->GetRect((char*)self + 0x20C);
+        OBJ_6260(0x8C) = uiObj;
     }
     for (int i = 0; i < 5; i++) {
         char name[32];
         sprintf(name, D_00466080, i);
-        sObj_6260* o = find_6260(self, name);
-        if (o != 0)
-            ((sObj_6260**)((char*)self + 0x90))[i] = o;
+        sObj_6260* uiObj = find_6260(self, name);
+        if (uiObj != 0)
+            ((sObj_6260**)((char*)self + 0x90))[i] = uiObj;
     }
 }
 #undef POS_6260
@@ -729,31 +729,31 @@ extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, void* info)
     self->meType = *(int*)((char*)info + 0x0);
     self->mbCenterOptions = *(int*)((char*)info + 0xB8);
     self->mbCenterText = *(int*)((char*)info + 0xBC);
-    float t = *(float*)((char*)info + 0xB0);
-    self->mfMinSize = t;
-    if (t != 0.0f)
-        *(sVec3_6B08*)&self->mvCurSize[0] = sVec3_6B08(t, 0.0f, 0.0f);
+    float minSize = *(float*)((char*)info + 0xB0);
+    self->mfMinSize = minSize;
+    if (minSize != 0.0f)
+        *(sVec3_6B08*)&self->mvCurSize[0] = sVec3_6B08(minSize, 0.0f, 0.0f);
     else if (self->mbCenterText == 0)
         *(sVec3_6B08*)&self->mvCurSize[0] = sVec3_6B08(472.0f, 0.0f, 0.0f);
     else
         *(sVec3_6B08*)&self->mvCurSize[0] = sVec3_6B08(300.0f, 0.0f, 0.0f);
     for (int i = 0; i < 5; i++)
         ((sVec3_6B08*)((char*)self + 0x2D0))[i] = *cPopupInfo_getPopupConfirmation(info, i);
-    sVec3_6B08 c = *(sVec3_6B08*)((char*)info + 0x9C);
-    *(sVec3_6B08*)&self->mvOffset[0] = c;
+    sVec3_6B08 offset = *(sVec3_6B08*)((char*)info + 0x9C);
+    *(sVec3_6B08*)&self->mvOffset[0] = offset;
     cScreenPopup_createTitleBar(self, info);
     cScreenPopup_setPopupMessage(self, info);
     cScreenPopup_FillOptions(self, info);
     cScreenPopup_adjustMenuPosition(self);
     cScreenPopup_adjustButtonPosition(self);
     cScreenPopup_handlePostPending(self, info);
-    int v = *(int*)((char*)info + 0x90);
-    self->miLayerOffset = v;
-    if (v != 0)
-        func_001C9CD0(self, v);
-    int m = *(int*)((char*)info + 0xC0);
-    self->meBackgroundType = m;
-    func_001C66E8(self, m);
+    int layerOffset = *(int*)((char*)info + 0x90);
+    self->miLayerOffset = layerOffset;
+    if (layerOffset != 0)
+        func_001C9CD0(self, layerOffset);
+    int bgType = *(int*)((char*)info + 0xC0);
+    self->meBackgroundType = bgType;
+    func_001C66E8(self, bgType);
     self->miDefaultOption = *(int*)((char*)info + 0xAC);
     self->miMaxChars = *(int*)((char*)info + 0xC4);
     func_001C7C20(self);
@@ -822,9 +822,9 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* infop)
         }
         if (((cUIObj_6D30*)screenPopup->mpEnterBox) != 0) {
             cScreenPopup_setTextString1(self, (char*)self + 0x2B0, info + 7);
-            sVec3_6D30 v = pos;
-            v.x = v.x + w + 10.0f;
-            *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpEnterBox) + 0x44) = v;
+            sVec3_6D30 boxPos = pos;
+            boxPos.x = boxPos.x + w + 10.0f;
+            *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpEnterBox) + 0x44) = boxPos;
             func_001C9B68(self, (float*)((char*)self + 0x260), size);
             ((cUIObj_6D30*)screenPopup->mpEnterBox)->setEnabled(0);
             ((cUIObj_6D30*)screenPopup->mpEnterBox)->setVisible(1);
@@ -879,12 +879,12 @@ extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float 
  */
 extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, void* pInfo)
 {
-    char* o = (char*)self->mpPostText;
-    if (o != 0) {
+    char* postText = (char*)self->mpPostText;
+    if (postText != 0) {
         if (*(int*)((char*)pInfo + 0x4C) != 0) {
-            sVec3_7040 v = *(sVec3_7040*)&self->mvPosTitle[0];
-            v.y += self->mvCurSize[1];
-            *(sVec3_7040*)(o + 0x44) = v;
+            sVec3_7040 textPos = *(sVec3_7040*)&self->mvPosTitle[0];
+            textPos.y += self->mvCurSize[1];
+            *(sVec3_7040*)(postText + 0x44) = textPos;
             cScreenPopup_getTextBoxWrapSize(self, (char*)pInfo + 0x4C, (char*)self + 0x260, 0, 10.0f);
             if (self->mbCenterText != 0) {
                 func_001C8930(self, self->mpPostText, 0x11, 0.0f);
@@ -936,30 +936,30 @@ struct sVec3_7258;
  */
 extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, sVec3_7258* vp)
 {
-    sVec3_70F0* v = (sVec3_70F0*)vp;
-    cW_70F0* o = (cW_70F0*)self->mpMessageText;
-    if (o != 0) {
-        sVec3_70F0 t;
-        o->get(&t);
-        if (v->x != 0.0f) t.x = v->x;
-        if (v->y != 0.0f) t.y = v->y;
-        ((cW_70F0*)self->mpMessageText)->set(v);
+    sVec3_70F0* size = (sVec3_70F0*)vp;
+    cW_70F0* textObj = (cW_70F0*)self->mpMessageText;
+    if (textObj != 0) {
+        sVec3_70F0 curSize;
+        textObj->get(&curSize);
+        if (size->x != 0.0f) curSize.x = size->x;
+        if (size->y != 0.0f) curSize.y = size->y;
+        ((cW_70F0*)self->mpMessageText)->set(size);
     }
-    o = (cW_70F0*)self->mpPostText;
-    if (o != 0) {
-        sVec3_70F0 t;
-        o->get(&t);
-        if (v->x != 0.0f) t.x = v->x;
-        if (v->y != 0.0f) t.y = v->y;
-        ((cW_70F0*)self->mpPostText)->set(&t);
+    textObj = (cW_70F0*)self->mpPostText;
+    if (textObj != 0) {
+        sVec3_70F0 curSize;
+        textObj->get(&curSize);
+        if (size->x != 0.0f) curSize.x = size->x;
+        if (size->y != 0.0f) curSize.y = size->y;
+        ((cW_70F0*)self->mpPostText)->set(&curSize);
     }
-    o = (cW_70F0*)self->mpTitleText;
-    if (o != 0) {
-        sVec3_70F0 t;
-        o->get(&t);
-        if (v->x != 0.0f) t.x = v->x;
-        if (v->y != 0.0f) t.y = v->y;
-        ((cW_70F0*)self->mpTitleText)->set(v);
+    textObj = (cW_70F0*)self->mpTitleText;
+    if (textObj != 0) {
+        sVec3_70F0 curSize;
+        textObj->get(&curSize);
+        if (size->x != 0.0f) curSize.x = size->x;
+        if (size->y != 0.0f) curSize.y = size->y;
+        ((cW_70F0*)self->mpTitleText)->set(size);
     }
 }
 #endif
@@ -986,19 +986,19 @@ extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float 
  */
 extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, void* pInfo)
 {
-    char* o = (char*)self->mpMessageText;
-    if (o != 0) {
-        sVec3_7258 v = *(sVec3_7258*)&self->mvPosTitle[0];
-        v.y += self->mvCurSize[1];
-        *(sVec3_7258*)(o + 0x44) = v;
-        char* p = (char*)pInfo + 4;
+    char* messageText = (char*)self->mpMessageText;
+    if (messageText != 0) {
+        sVec3_7258 textPos = *(sVec3_7258*)&self->mvPosTitle[0];
+        textPos.y += self->mvCurSize[1];
+        *(sVec3_7258*)(messageText + 0x44) = textPos;
+        char* message = (char*)pInfo + 4;
         if (self->mbCenterText != 0) {
-            sVec3_7258 t = t3vect_Zero;
-            cScreenPopup_getMessageLineWrapSize1(self, (int*)p, &t);
-            if (t.x > self->mvCurSize[0])
-                cScreenPopup_setTextObjectSize(self, &t);
+            sVec3_7258 wrapSize = t3vect_Zero;
+            cScreenPopup_getMessageLineWrapSize1(self, (int*)message, &wrapSize);
+            if (wrapSize.x > self->mvCurSize[0])
+                cScreenPopup_setTextObjectSize(self, &wrapSize);
         }
-        cScreenPopup_getTextBoxWrapSize(self, p, (char*)self + 0x260, 1, 10.0f);
+        cScreenPopup_getTextBoxWrapSize(self, message, (char*)self + 0x260, 1, 10.0f);
         if (self->mbCenterText != 0)
             func_001C8930(self, self->mpMessageText, 0x11, 0.0f);
     }
@@ -1060,7 +1060,7 @@ extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, void* infop)
     }
     *(int*)&self->mvButtonOffset[0] = 0;
     *(int*)&self->mvLargestOption[0] = 0;
-    int r = cScreenPopup_handleEntryBox(self, info);
+    int hasEntryBox = cScreenPopup_handleEntryBox(self, info);
     if (info[0] == 0)
         ((cUIObj_7388*)self->mpButtonGroup)->setVisible(0);
     else
@@ -1072,23 +1072,23 @@ extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, void* infop)
         }
     }
     for (int j = 0; j < info[0]; j++) {
-        cUIObj_7388* t = ((sPopup_7388*)self)->items[j];
-        if (t != 0) {
+        cUIObj_7388* itemObj = ((sPopup_7388*)self)->items[j];
+        if (itemObj != 0) {
             float size[4];
             float item[4];
             int* it = cPopupInfo_getPopupOptionNames(info, j);
-            func_001C8050(self, (cUIText*)t, it);
-            func_001C8628(self, t, size);
-            func_001C8320(self, (cUIText*)t, it, item);
+            func_001C8050(self, (cUIText*)itemObj, it);
+            func_001C8628(self, itemObj, size);
+            func_001C8320(self, (cUIText*)itemObj, it, item);
             if (self->mvLargestOption[0] < item[2])
                 self->mvLargestOption[0] = item[2];
             func_001C9B68(self, (float*)((char*)self + 0x260), size);
-            t->setEnabled(0);
-            t->setVisible(1);
+            itemObj->setEnabled(0);
+            itemObj->setVisible(1);
         }
     }
     self->mvCurSize[1] += 10.0f;
-    if (r != 0)
+    if (hasEntryBox != 0)
         info[0] = -1;
 }
 #endif
@@ -1179,59 +1179,59 @@ struct sColor_7738 { int r, g, b; };
  */
 extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* color)
 {
-    sColor_7738 c = *color;
+    sColor_7738 scaleColor = *color;
     switch (self->meBackgroundType) {
     case 0:
         {
-            void* p = self->mpBackGroundWhite;
-            if (p != 0) {
-                *(sColor_7738*)((char*)p + 0x50) = c;
+            void* background = self->mpBackGroundWhite;
+            if (background != 0) {
+                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
             }
         }
         {
-            void* p = self->mpBackGroundRed;
-            if (p != 0) {
-                *(sColor_7738*)((char*)p + 0x50) = c;
+            void* background = self->mpBackGroundRed;
+            if (background != 0) {
+                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
             }
         }
         break;
     case 1:
         {
-            void* p = self->mpBackGroundSmall;
-            if (p != 0) {
-                *(sColor_7738*)((char*)p + 0x50) = c;
+            void* background = self->mpBackGroundSmall;
+            if (background != 0) {
+                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
             }
         }
         {
-            void* p = self->mpBackGroundSmallOutline;
-            if (p != 0) {
-                *(sColor_7738*)((char*)p + 0x50) = c;
+            void* background = self->mpBackGroundSmallOutline;
+            if (background != 0) {
+                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
             }
         }
         {
-            void* p = self->mpBackGroundLarge;
-            if (p != 0) {
-                *(sColor_7738*)((char*)p + 0x50) = c;
+            void* background = self->mpBackGroundLarge;
+            if (background != 0) {
+                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
             }
         }
         {
-            void* p = self->mpBackGroundLargeOutline;
-            if (p != 0) {
-                *(sColor_7738*)((char*)p + 0x50) = c;
+            void* background = self->mpBackGroundLargeOutline;
+            if (background != 0) {
+                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
             }
         }
         {
-            void* p = self->mpBackGroundShadow;
-            if (p != 0) {
-                *(sColor_7738*)((char*)p + 0x50) = c;
+            void* background = self->mpBackGroundShadow;
+            if (background != 0) {
+                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
             }
         }
         break;
     case 2:
         {
-            void* p = self->mpBackGroundBlack;
-            if (p != 0) {
-                *(sColor_7738*)((char*)p + 0x50) = c;
+            void* background = self->mpBackGroundBlack;
+            if (background != 0) {
+                *(sColor_7738*)((char*)background + 0x50) = scaleColor;
             }
         }
         break;
@@ -1408,32 +1408,32 @@ struct sVE_7EB0 {
  */
 extern "C" void cScreenPopup_FillTextEntryBox(cScreenPopup* self)
 {
-    char* o80 = (char*)self->mpEnterBox;
-    sVec3_7EB0 a = *(sVec3_7EB0*)(o80 + 0x44);
-    sVec3_7EB0 c;
-    sVec3_7EB0 b = *(sVec3_7EB0*)((char*)self->mpMenu + 0x44);
-    c = *(sVec3_7EB0*)((char*)self->mpStaticBox + 0x44);
+    char* enterBox = (char*)self->mpEnterBox;
+    sVec3_7EB0 enterPos = *(sVec3_7EB0*)(enterBox + 0x44);
+    sVec3_7EB0 staticPos;
+    sVec3_7EB0 menuPos = *(sVec3_7EB0*)((char*)self->mpMenu + 0x44);
+    staticPos = *(sVec3_7EB0*)((char*)self->mpStaticBox + 0x44);
     sVec2_7EB0 size;
     {
-        sVE_7EB0* vt = *(sVE_7EB0**)(o80 + 8);
-        vt[20].fn(o80 + vt[20].delta, &size);
+        sVE_7EB0* vt = *(sVE_7EB0**)(enterBox + 8);
+        vt[20].fn(enterBox + vt[20].delta, &size);
     }
-    size.x = self->mvCurSize[0] - (a.x - c.x) - 10.0f;
+    size.x = self->mvCurSize[0] - (enterPos.x - staticPos.x) - 10.0f;
     {
-        char* o = (char*)self->mpEnterBox;
-        sVE_7EB0* vt = *(sVE_7EB0**)(o + 8);
-        vt[21].fn(o + vt[21].delta, &size);
+        char* box = (char*)self->mpEnterBox;
+        sVE_7EB0* vt = *(sVE_7EB0**)(box + 8);
+        vt[21].fn(box + vt[21].delta, &size);
     }
     sVec3_7EB0 scale;
     scale.x = (size.x + 6.0f) / self->mvSizeBackEnterBox[0];
     scale.y = 1.0f;
     scale.z = 1.0f;
-    char* p = (char*)self->mpEnterBoxBackground;
-    if (p != 0) {
-        sVec3_7EB0 d = a;
-        d.y = d.y + self->mvSizeBackEnterBox[1] * 0.5f + b.y - 3.0f;
+    char* background = (char*)self->mpEnterBoxBackground;
+    if (background != 0) {
+        sVec3_7EB0 d = enterPos;
+        d.y = d.y + self->mvSizeBackEnterBox[1] * 0.5f + menuPos.y - 3.0f;
         d.x = d.x + (size.x + 6.0f) * 0.5f;
-        *(sVec3_7EB0*)(p + 0x44) = d;
+        *(sVec3_7EB0*)(background + 0x44) = d;
         *(sVec3_7EB0*)((char*)self->mpEnterBoxBackground + 0x50) = scale;
     }
 }
@@ -1501,8 +1501,8 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
 {
     switch (info[0]) {
     case 1: {
-        unsigned short* u = (unsigned short*)info[1];
-        char* buf = (char*)operator_new_tag(USTR_length(u) + 1, D_00466098, 0x100, 0);
+        unsigned short* unicode = (unsigned short*)info[1];
+        char* buf = (char*)operator_new_tag(USTR_length(unicode) + 1, D_00466098, 0x100, 0);
         strcpy2(buf, (unsigned short*)info[1]);
         cBXString_cBXString4(dst, buf);
         if (buf != 0) {
@@ -1514,9 +1514,9 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
         cBXString_cBXString4(dst, (const char*)info[1]);
         break;
     case 3: {
-        char* o = (char*)SSXApp->FELocale;
-        sVEntry_80E8* vt = *(sVEntry_80E8**)(o + 4);
-        unsigned short* str = vt[4].fn(o + vt[4].delta, info[1]);
+        char* locale = (char*)SSXApp->FELocale;
+        sVEntry_80E8* vt = *(sVEntry_80E8**)(locale + 4);
+        unsigned short* str = vt[4].fn(locale + vt[4].delta, info[1]);
         if (str) {
             char* buf = (char*)operator_new_tag(USTR_length(str) + 1, D_00466098, 0x100, 0);
             strcpy2(buf, str);
@@ -1525,9 +1525,9 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
                 cMemMan_free(buf);
             }
         } else {
-            char tmp[0x40];
-            sprintf(tmp, D_004660A8, info[1]);
-            cBXString_cBXString4(dst, tmp);
+            char idText[0x40];
+            sprintf(idText, D_004660A8, info[1]);
+            cBXString_cBXString4(dst, idText);
         }
         break;
     }
@@ -1564,15 +1564,15 @@ extern char D_004A1408[];
  */
 extern "C" void cScreenPopup_setTextString(cScreenPopup* self, void* dst, cUIText* text)
 {
-    char* s = cUIText_getAsciiString(text);
-    if (s != 0) {
-        cBXString_cBXString4(dst, s);
+    char* ascii = cUIText_getAsciiString(text);
+    if (ascii != 0) {
+        cBXString_cBXString4(dst, ascii);
         return;
     }
-    unsigned short* u = cUIText_getUnicodeString(text);
-    if (u != 0) {
-        char* buf = (char*)operator_new_tag(USTR_length(u) + 1, D_004660B8, 0x100, 0);
-        strcpy2(buf, u);
+    unsigned short* unicode = cUIText_getUnicodeString(text);
+    if (unicode != 0) {
+        char* buf = (char*)operator_new_tag(USTR_length(unicode) + 1, D_004660B8, 0x100, 0);
+        strcpy2(buf, unicode);
         cBXString_cBXString4(dst, buf);
         if (buf != 0) {
             cMemMan_free(buf);
@@ -1738,9 +1738,9 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, void* pInfo)
             float item[4];
             func_001C8050(self, text, info);
             {
-                char* o = (char*)self->mpTitleText;
-                sVE8678* vt = *(sVE8678**)(o + 8);
-                vt[9].fn(o + vt[9].delta, 1);
+                char* titleText = (char*)self->mpTitleText;
+                sVE8678* vt = *(sVE8678**)(titleText + 8);
+                vt[9].fn(titleText + vt[9].delta, 1);
             }
             func_001C8320(self, self->mpTitleText, info, item);
             func_001C9B68(self, (float*)((char*)self + 0x260), item);
@@ -1771,24 +1771,24 @@ extern "C" void func_001C8930(void* self, void* obj, unsigned char state, float 
  */
 extern "C" void cScreenPopup_adjustMenuPosition(cScreenPopup* self)
 {
-    char* p = (char*)self->mpMenu;
-    if (p != 0) {
-        sVec3_8758 a = *(sVec3_8758*)((char*)self->mpOptions[0] + 0x44);
-        float x = (640.0f - self->mvLargestOption[0]) * 0.5f - a.x;
-        sVec3_8758 b = *(sVec3_8758*)&self->mvPosMenu[0];
-        b.y += self->mvMenuSize[1];
-        b.x += x;
-        *(sVec3_8758*)(p + 0x44) = b;
-        char* q = (char*)self->mpTextBoxPair;
-        sVec3_8758 c = *(sVec3_8758*)(q + 0x44);
-        c.x = c.x - x + 5.0f;
-        *(sVec3_8758*)(q + 0x44) = c;
+    char* menu = (char*)self->mpMenu;
+    if (menu != 0) {
+        sVec3_8758 firstOptionPos = *(sVec3_8758*)((char*)self->mpOptions[0] + 0x44);
+        float x = (640.0f - self->mvLargestOption[0]) * 0.5f - firstOptionPos.x;
+        sVec3_8758 menuPos = *(sVec3_8758*)&self->mvPosMenu[0];
+        menuPos.y += self->mvMenuSize[1];
+        menuPos.x += x;
+        *(sVec3_8758*)(menu + 0x44) = menuPos;
+        char* textBoxPair = (char*)self->mpTextBoxPair;
+        sVec3_8758 pairPos = *(sVec3_8758*)(textBoxPair + 0x44);
+        pairPos.x = pairPos.x - x + 5.0f;
+        *(sVec3_8758*)(textBoxPair + 0x44) = pairPos;
         if (self->mbCenterOptions != 0) {
             int i;
             for (i = 0; i < 5; i++) {
-                void* o = *(void**)((char*)self + 0x90 + i * 4);
-                if (o != 0)
-                    func_001C8930(self, o, 0x12, self->mvLargestOption[0] * 0.5f);
+                void* option = *(void**)((char*)self + 0x90 + i * 4);
+                if (option != 0)
+                    func_001C8930(self, option, 0x12, self->mvLargestOption[0] * 0.5f);
             }
         }
         self->mvButtonOffset[0] = x;
@@ -1808,12 +1808,12 @@ struct sVec3_88C8 { float x, y, z; };
  */
 extern "C" void cScreenPopup_adjustButtonPosition(cScreenPopup* self)
 {
-    void* p = self->mpButtonGroup;
-    if (p != 0) {
-        sVec3_88C8 v = *(sVec3_88C8*)&self->mvPosButtons[0];
-        v.y += self->mvButtonOffset[1];
-        v.x += self->mvButtonOffset[0];
-        *(sVec3_88C8*)((char*)p + 0x44) = v;
+    void* buttonGroup = self->mpButtonGroup;
+    if (buttonGroup != 0) {
+        sVec3_88C8 buttonPos = *(sVec3_88C8*)&self->mvPosButtons[0];
+        buttonPos.y += self->mvButtonOffset[1];
+        buttonPos.x += self->mvButtonOffset[0];
+        *(sVec3_88C8*)((char*)buttonGroup + 0x44) = buttonPos;
     }
 }
 #endif
@@ -1951,14 +1951,14 @@ extern "C" void cScreenPopup_restoreElements(cScreenPopup* self)
     }
     int i;
     for (i = 0; i < 5; i++) {
-        void* o = *(void**)((char*)self + 0x90 + i * 4);
-        if (o != 0) {
-            func_001C8930(self, o, 10, self->mvLargestOption[0] * 0.5f);
+        void* option = *(void**)((char*)self + 0x90 + i * 4);
+        if (option != 0) {
+            func_001C8930(self, option, 10, self->mvLargestOption[0] * 0.5f);
         }
     }
-    sVec3_8A38 t = D_004FF0D8_8A38;
-    t.x = 472.0f;
-    cScreenPopup_setTextObjectSize(self, (sVec3_7258*)&t);
+    sVec3_8A38 textSize = D_004FF0D8_8A38;
+    textSize.x = 472.0f;
+    cScreenPopup_setTextObjectSize(self, (sVec3_7258*)&textSize);
     sVec3_8A38 one;
     one.x = 1.0f;
     one.y = 1.0f;
@@ -2173,9 +2173,9 @@ extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* ms
         func_001C94B0(self, self->mpMessageText, (void*)msg[1], out);
         break;
     case 3: {
-        char* o = (char*)SSXApp->FELocale;
-        sVEntryK93B0* vt = *(sVEntryK93B0**)(o + 4);
-        void* str = vt[4].fn(o + vt[4].delta, msg[1]);
+        char* locale = (char*)SSXApp->FELocale;
+        sVEntryK93B0* vt = *(sVEntryK93B0**)(locale + 4);
+        void* str = vt[4].fn(locale + vt[4].delta, msg[1]);
         if (str) {
             func_001C94B0(self, self->mpMessageText, str, out);
         } else {
@@ -2375,9 +2375,9 @@ extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* ptElem
         func_001C9938(self, text, (void*)info[1], out);
         break;
     case 3: {
-        char* o = (char*)SSXApp->FELocale;
-        sVEntry_97E0* vt = *(sVEntry_97E0**)(o + 4);
-        void* str = vt[4].fn(o + vt[4].delta, info[1]);
+        char* locale = (char*)SSXApp->FELocale;
+        sVEntry_97E0* vt = *(sVEntry_97E0**)(locale + 4);
+        void* str = vt[4].fn(locale + vt[4].delta, info[1]);
         if (str) {
             func_001C9938(self, text, str, out);
         } else {
@@ -2610,12 +2610,12 @@ struct sVEntry_A0F0 {
  */
 extern "C" void cScreenPopup_setStatic(cScreenPopup* self, int idx, int bStatic)
 {
-    char* o = *(char**)((char*)self + (idx << 2) + 0x90);
-    if (o != 0) {
-        sVEntry_A0F0* vt = *(sVEntry_A0F0**)(o + 8);
-        vt[8].fn(o + vt[8].delta, bStatic);
-        sVEntry_A0F0* vt2 = *(sVEntry_A0F0**)(o + 8);
-        vt2[25].fn(o + vt2[25].delta, 1);
+    char* option = *(char**)((char*)self + (idx << 2) + 0x90);
+    if (option != 0) {
+        sVEntry_A0F0* vt = *(sVEntry_A0F0**)(option + 8);
+        vt[8].fn(option + vt[8].delta, bStatic);
+        sVEntry_A0F0* vt2 = *(sVEntry_A0F0**)(option + 8);
+        vt2[25].fn(option + vt2[25].delta, 1);
     }
 }
 #endif
@@ -2633,11 +2633,11 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getCurrentlySelected);
  */
 extern "C" int cScreenPopup_getCurrentlySelected(cScreenPopup* self)
 {
-    void* p = self->mpMenu;
-    if (p == 0) {
+    void* menu = self->mpMenu;
+    if (menu == 0) {
         return self->info.miDefaultOption;
     }
-    int n = *(unsigned char*)((char*)p + 0x95);
+    int n = *(unsigned char*)((char*)menu + 0x95);
     if (self->meType == -1) {
         return n;
     }
@@ -2774,8 +2774,8 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
             if (id != (int)self->mpTextBoxPair) {
                 break;
             }
-            void* p = cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0);
-            self->mpKeyboard = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup((cKeyboardPopup*)p, self->mpEngine, ((char*)self), 0, 0xF);
+            void* mem = cMemMan_alloc(0x444, D_0045D8D8, 0x100, 0);
+            self->mpKeyboard = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup((cKeyboardPopup*)mem, self->mpEngine, ((char*)self), 0, 0xF);
             cKeyboardPopup_setMaxCharacters(self->mpKeyboard, self->miMaxChars);
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, self->mpKeyboard);
             if (self->mpStaticBox != 0) {
@@ -2801,8 +2801,8 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
         break;
     default:
         {
-            sPopupOwner_1CA298* o = (sPopupOwner_1CA298*)self->mpParentState;
-            ((void (*)(void*, int, int))o->vt[19].fn)((char*)o + o->vt[19].delta, id, ev);
+            sPopupOwner_1CA298* parentState = (sPopupOwner_1CA298*)self->mpParentState;
+            ((void (*)(void*, int, int))parentState->vt[19].fn)((char*)parentState + parentState->vt[19].delta, id, ev);
         }
         break;
     }
@@ -3048,11 +3048,11 @@ extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* t
     float dots[4];
     sVEntry_A6A0* vt = *(sVEntry_A6A0**)((char*)text + 8);
     vt[20].fn((char*)text + vt[20].delta, &size);
-    char* f = (char*)cUIText_getFont(text);
-    float sx = *(float*)(f + 0x30) * scale.x;
-    float sy = *(float*)(f + 0x34) * scale.y;
-    *(float*)(f + 0x38) = sx;
-    *(float*)(f + 0x3C) = sy;
+    char* font = (char*)cUIText_getFont(text);
+    float sx = *(float*)(font + 0x30) * scale.x;
+    float sy = *(float*)(font + 0x34) * scale.y;
+    *(float*)(font + 0x38) = sx;
+    *(float*)(font + 0x3C) = sy;
     char* buf = new (D_004661A0, 0x100, 0) char[self->miMaxChars + 4];
     int len = strlen(str) - 1;
     strcpy(buf, str);
@@ -3114,15 +3114,15 @@ extern char D_004661C8[];
 extern "C" void cBuyPopupInfo_initBuySongByCredit(cBuyPopupInfo* self, int song, int credit)
 {
     int three = 3;
-    int h = GetHashValue32(D_004661B8);
+    int hash = GetHashValue32(D_004661B8);
     *(int*)((char*)self + 0x10) = song;
     self->mItemType.eType = three;
     self->mItemName.eType = 2;
-    *(int*)((char*)self + 0x18) = h;
-    h = GetHashValue32(D_004661C8);
+    *(int*)((char*)self + 0x18) = hash;
+    hash = GetHashValue32(D_004661C8);
     self->mCreditsLeft = credit;
     self->mQuestion.eType = three;
-    *(int*)((char*)self + 0x20) = h;
+    *(int*)((char*)self + 0x20) = hash;
 }
 #endif
 
@@ -3147,17 +3147,17 @@ extern char D_004661E0[];
 extern "C" void cBuyPopupInfo_initBuySong(int* self, int songName, int cost, int money)
 {
     int three = 3;
-    int h = GetHashValue32(D_004661B8);
+    int hash = GetHashValue32(D_004661B8);
     self[4] = songName;
     self[5] = three;
     self[3] = 2;
-    self[6] = h;
-    h = GetHashValue32(D_004661E0);
+    self[6] = hash;
+    hash = GetHashValue32(D_004661E0);
     self[1] = money;
     self[7] = three;
     self[0] = cost;
     self[2] = -1;
-    self[8] = h;
+    self[8] = hash;
 }
 #endif
 
@@ -3233,17 +3233,17 @@ extern char D_004661F8[];
 extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int boltName, int cost, int money)
 {
     int three = 3;
-    int h = GetHashValue32(D_004662B8);
+    int hash = GetHashValue32(D_004662B8);
     self[4] = boltName;
     self[5] = three;
     self[3] = 2;
-    self[6] = h;
-    h = GetHashValue32(D_004661F8);
+    self[6] = hash;
+    hash = GetHashValue32(D_004661F8);
     self[1] = money;
     self[7] = three;
     self[0] = cost;
     self[2] = -1;
-    self[8] = h;
+    self[8] = hash;
 }
 #endif
 
@@ -3411,15 +3411,15 @@ INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_onWidgetMenu);
 // Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cUIStateBuyPopup_onWidgetMenu(cUIStateBuyPopup* self, int pMenu, unsigned int key)
 {
-    int r = 0x101;
+    int result = 0x101;
     if (key < 10) {
         if (key < 7) {
-            r = 0x101;
+            result = 0x101;
         } else {
             return 0x100;
         }
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3439,8 +3439,8 @@ extern "C" void cUIStateBuyPopup_onWidgetEvent(cUIStateBuyPopup* self, void* ite
 {
     if (item != 0) {
         if (event == 5) {
-            int h = *(int*)((char*)item + 0x38);
-            if (h == GetHashValue32(D_004A14E8)) {
+            int widgetHash = *(int*)((char*)item + 0x38);
+            if (widgetHash == GetHashValue32(D_004A14E8)) {
                 self->mbAccept = 1;
             } else {
                 self->mbAccept = 0;
@@ -3474,12 +3474,12 @@ extern "C" void cUIStateBuyPopup_initBuyTrick(cUIStateBuyPopup* self, int trick,
     self->mInfo.mMoney = money;
     *(int*)((char*)self + 0x58) = trick;
     self->mInfo.mItemName.eType = 2;
-    int h = GetHashValue32(D_00466338);
+    int hash = GetHashValue32(D_00466338);
     self->mInfo.mItemType.eType = three;
-    *(int*)((char*)self + 0x60) = h;
-    h = GetHashValue32(D_00466350);
+    *(int*)((char*)self + 0x60) = hash;
+    hash = GetHashValue32(D_00466350);
     self->mInfo.mQuestion.eType = three;
-    *(int*)((char*)self + 0x68) = h;
+    *(int*)((char*)self + 0x68) = hash;
 }
 #endif
 
@@ -3502,17 +3502,17 @@ extern char D_004A1408[];
  */
 extern "C" void cUIStateBuyPopup_initBuyAttributes(cUIStateBuyPopup* self, int pAttrName, int cost, int money)
 {
-    char* s = D_004A1408;
+    char* defaultStr = D_004A1408;
     int two = 2;
-    *(char**)((char*)self + 0x58) = s;
+    *(char**)((char*)self + 0x58) = defaultStr;
     self->mInfo.mItemName.eType = two;
     self->mInfo.mCost = cost;
     self->mInfo.mMoney = money;
-    int h = GetHashValue32(D_00466368);
+    int hash = GetHashValue32(D_00466368);
     self->mInfo.mQuestion.eType = two;
-    *(char**)((char*)self + 0x68) = s;
+    *(char**)((char*)self + 0x68) = defaultStr;
     self->mInfo.mItemType.eType = 3;
-    *(int*)((char*)self + 0x60) = h;
+    *(int*)((char*)self + 0x60) = hash;
 }
 #endif
 
@@ -3544,7 +3544,7 @@ extern void* cKeyboardPopup_vtbl[];
 extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, void* engine, void* owner, int Password, unsigned char CtrlBits)
 {
     func_0039E318(self, engine, owner);
-    int d = D_004A3E90;
+    int defaultStr = D_004A3E90;
     self->mCtrlBits = CtrlBits;
     self->mbPassword = Password;
     self->mbSetInputText = 0;
@@ -3561,7 +3561,7 @@ extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, void* engin
     self->mbDisableForFirst = 0;
     self->mVtbl = cKeyboardPopup_vtbl;
     self->miCurrentKey = 0x1D;
-    self->mszStatic = (char*)d;
+    self->mszStatic = (char*)defaultStr;
     self->miMaxCharacters = 0x3F;
     cBXString_Reset((char*)self + 0x424);
     void* bx = D_004A33F0;
@@ -3845,13 +3845,13 @@ extern signed char D_00441390[];
  */
 extern "C" void cKeyboardPopup_kbMoveLeft(cKeyboardPopup* self, int bControllerInput)
 {
-    bool b = self->mbCapsOn != 0;
+    bool capsOn = self->mbCapsOn != 0;
     int flag;
     if (self->mbShiftOn) {
-        flag = b;
+        flag = capsOn;
         flag = !flag;
     } else {
-        flag = b != 0;
+        flag = capsOn != 0;
     }
     int idx = self->miCurrentKey;
     int old = self->miLastKey;
@@ -3868,11 +3868,11 @@ extern "C" void cKeyboardPopup_kbMoveLeft(cKeyboardPopup* self, int bControllerI
             return;
         }
     }
-    int s = self->miCurrentKey;
-    if (s == 0 || s == 14 || s == 28 || s == 42 || s == 56 || s == 70)
+    int curKey = self->miCurrentKey;
+    if (curKey == 0 || curKey == 14 || curKey == 28 || curKey == 42 || curKey == 56 || curKey == 70)
         self->miCurrentKey += 13;
     else
-        self->miCurrentKey = s - 1;
+        self->miCurrentKey = curKey - 1;
     while (D_00441390[self->miCurrentKey] == 0x2A)
         self->miCurrentKey -= 1;
     int val;
@@ -3905,13 +3905,13 @@ extern signed char D_00441390[];
  */
 extern "C" void cKeyboardPopup_kbMoveRight(cKeyboardPopup* self, int bControllerInput)
 {
-    bool b = self->mbCapsOn != 0;
+    bool capsOn = self->mbCapsOn != 0;
     int flag;
     if (self->mbShiftOn) {
-        flag = b;
+        flag = capsOn;
         flag = !flag;
     } else {
-        flag = b != 0;
+        flag = capsOn != 0;
     }
     int idx = self->miCurrentKey;
     int old = self->miLastKey;
@@ -3924,8 +3924,8 @@ extern "C" void cKeyboardPopup_kbMoveRight(cKeyboardPopup* self, int bController
         self->miLastKey = idx;
         self->meLastDirection = 3;
         if (st == 2) {
-            int v = self->meSkipState;
-            if (v == 2 || (flag && v == 0) || (!flag && v == 0)) {
+            int skipState = self->meSkipState;
+            if (skipState == 2 || (flag && skipState == 0) || (!flag && skipState == 0)) {
                 if (cKeyboardPopup_allowSelection_out(self, old, 0)) {
                     // the do/while(0) wrapper (a compiled-out macro block) is needed to match register allocation
                     do {
@@ -3936,11 +3936,11 @@ extern "C" void cKeyboardPopup_kbMoveRight(cKeyboardPopup* self, int bController
             }
         }
     }
-    int s = self->miCurrentKey;
-    if (s == 13 || s == 27 || s == 41 || s == 55 || s == 69 || s == 83)
+    int curKey = self->miCurrentKey;
+    if (curKey == 13 || curKey == 27 || curKey == 41 || curKey == 55 || curKey == 69 || curKey == 83)
         self->miCurrentKey -= 13;
     else
-        self->miCurrentKey = s + 1;
+        self->miCurrentKey = curKey + 1;
     while (D_00441390[self->miCurrentKey] == 0x2A)
         self->miCurrentKey += 1;
     int val;
@@ -3976,13 +3976,13 @@ extern "C" int cKeyboardPopup_handleMovementUpFromLast(cKeyboardPopup* self, int
  */
 extern "C" void cKeyboardPopup_kbMoveUp(cKeyboardPopup* self, int bControllerInput)
 {
-    bool b = self->mbCapsOn != 0;
+    bool capsOn = self->mbCapsOn != 0;
     int flag;
     if (self->mbShiftOn) {
-        flag = b;
+        flag = capsOn;
         flag = !flag;
     } else {
-        flag = b != 0;
+        flag = capsOn != 0;
     }
     int idx = self->miCurrentKey;
     int old = self->miLastKey;
@@ -3995,8 +3995,8 @@ extern "C" void cKeyboardPopup_kbMoveUp(cKeyboardPopup* self, int bControllerInp
         self->miLastKey = idx;
         self->meLastDirection = 0;
         if (st == 1) {
-            int v = self->meSkipState;
-            if (v == 2 || (flag && v == 0) || (!flag && v == 0)) {
+            int skipState = self->meSkipState;
+            if (skipState == 2 || (flag && skipState == 0) || (!flag && skipState == 0)) {
                 if (cKeyboardPopup_allowSelection_out(self, old, 0)) {
                     self->miCurrentKey = old;
                     return;
@@ -4004,22 +4004,22 @@ extern "C" void cKeyboardPopup_kbMoveUp(cKeyboardPopup* self, int bControllerInp
             }
         }
     }
-    unsigned int s = (unsigned int)self->miCurrentKey;
-    if (s >= 70 && s <= 83) {
+    unsigned int curKey = (unsigned int)self->miCurrentKey;
+    if (curKey >= 70 && curKey <= 83) {
         if (cKeyboardPopup_handleMovementUpFromLast(self, flag))
             return;
-        s = (unsigned int)self->miCurrentKey;
-    } else if (s >= 14 && s <= 27) {
+        curKey = (unsigned int)self->miCurrentKey;
+    } else if (curKey >= 14 && curKey <= 27) {
         if (cKeyboardPopup_handleMovementUpFromNumberRow(self, flag))
             return;
-        s = (unsigned int)self->miCurrentKey;
-    } else if (s < 14) {
+        curKey = (unsigned int)self->miCurrentKey;
+    } else if (curKey < 14) {
         if (cKeyboardPopup_handleMovementUpFromQuickKeyRow(self, flag))
             return;
-        s = (unsigned int)self->miCurrentKey;
+        curKey = (unsigned int)self->miCurrentKey;
     }
-    if (s < 14)
-        self->miCurrentKey = s + 70;
+    if (curKey < 14)
+        self->miCurrentKey = curKey + 70;
     else
         self->miCurrentKey -= 14;
     while (D_00441390[self->miCurrentKey] == 0x2A)
@@ -4058,13 +4058,13 @@ extern "C" int cKeyboardPopup_handleMovementDownToLast(cKeyboardPopup* self, int
  */
 extern "C" void cKeyboardPopup_kbMoveDown(cKeyboardPopup* self, int bControllerInput)
 {
-    bool b = self->mbCapsOn != 0;
+    bool capsOn = self->mbCapsOn != 0;
     int flag;
     if (self->mbShiftOn) {
-        flag = b;
+        flag = capsOn;
         flag = !flag;
     } else {
-        flag = b != 0;
+        flag = capsOn != 0;
     }
     int idx = self->miCurrentKey;
     int old = self->miLastKey;
@@ -4077,8 +4077,8 @@ extern "C" void cKeyboardPopup_kbMoveDown(cKeyboardPopup* self, int bControllerI
         self->miLastKey = idx;
         self->meLastDirection = 1;
         if (st == 0) {
-            int v = self->meSkipState;
-            if (v == 2 || (flag && v == 0) || (!flag && v == 0)) {
+            int skipState = self->meSkipState;
+            if (skipState == 2 || (flag && skipState == 0) || (!flag && skipState == 0)) {
                 if (cKeyboardPopup_allowSelection_out(self, old, 0)) {
                     self->miCurrentKey = old;
                     return;
@@ -4086,22 +4086,22 @@ extern "C" void cKeyboardPopup_kbMoveDown(cKeyboardPopup* self, int bControllerI
             }
         }
     }
-    unsigned int s = (unsigned int)self->miCurrentKey;
-    if (s >= 56 && s <= 69) {
+    unsigned int curKey = (unsigned int)self->miCurrentKey;
+    if (curKey >= 56 && curKey <= 69) {
         if (cKeyboardPopup_handleMovementDownToLast(self, flag))
             return;
-    } else if (s >= 70 && s <= 83) {
+    } else if (curKey >= 70 && curKey <= 83) {
         if (cKeyboardPopup_handleMovementDownFromLast(self, flag))
             return;
-    } else if (s < 14) {
+    } else if (curKey < 14) {
         if (cKeyboardPopup_handleMovementDownFromQuickKeyRow(self, flag))
             return;
     }
-    unsigned int s2 = (unsigned int)self->miCurrentKey;
-    if (s2 >= 70 && s2 <= 83)
-        self->miCurrentKey = s2 - 70;
+    unsigned int updatedKey = (unsigned int)self->miCurrentKey;
+    if (updatedKey >= 70 && updatedKey <= 83)
+        self->miCurrentKey = updatedKey - 70;
     else
-        self->miCurrentKey = s2 + 14;
+        self->miCurrentKey = updatedKey + 14;
     while (D_00441390[self->miCurrentKey] == 0x2A)
         self->miCurrentKey += 1;
     int val;
@@ -4233,7 +4233,7 @@ extern "C" void cKeyboardPopup_skipRowToTop(cKeyboardPopup* self);
 extern "C" int cKeyboardPopup_handleMovementDownFromLast(cKeyboardPopup* self, int bUseReg)
 {
     int val;
-    int val2;
+    int otherCaseAllowed;
     int state = self->miCurrentKey;
     if (state == 0x4C) {
         if (cKeyboardPopup_allowSelection_out(self, 0, &val)) {
@@ -4248,10 +4248,10 @@ extern "C" int cKeyboardPopup_handleMovementDownFromLast(cKeyboardPopup* self, i
         }
         return 1;
     } else if (state == 0x4B) {
-        if (cKeyboardPopup_allowSelection_out(self, 0x13, &val2)) {
+        if (cKeyboardPopup_allowSelection_out(self, 0x13, &otherCaseAllowed)) {
             self->miCurrentKey = 0x13;
         } else {
-            if (val2) {
+            if (otherCaseAllowed) {
                 self->meSkipState = bUseReg == 0;
             }
             cKeyboardPopup_skipRowToTop(self);
@@ -4282,9 +4282,9 @@ extern "C" void cKeyboardPopup_skipRowToBottom(cKeyboardPopup* self, int a1);
 extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self, int bUseReg)
 {
     int val;
-    int r = cKeyboardPopup_allowSelection_out(self, 0, 0);
+    int allowed = cKeyboardPopup_allowSelection_out(self, 0, 0);
     int state = self->miCurrentKey;
-    if (r) {
+    if (allowed) {
         if (state >= 16 && state <= 17) {
             self->miCurrentKey = 4;
             return 1;
@@ -4729,10 +4729,10 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
     if (redo) {
         char name[32];
         cKeyboardPopup_getObjName((cKeyboardPopup*)self, 0x46, name, 1);
-        sUIObj_C1E0* o = (sUIObj_C1E0*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
-        if (o != 0) {
+        sUIObj_C1E0* keyObj = (sUIObj_C1E0*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        if (keyObj != 0) {
             // PORT: takes the address of a temporary (accepted by g++ 2.95); use a named local elsewhere.
-            o->vt[11].fn((char*)o + o->vt[11].delta, &sColor_C1E0(0.3f, 0, 0, 0));
+            keyObj->vt[11].fn((char*)keyObj + keyObj->vt[11].delta, &sColor_C1E0(0.3f, 0, 0, 0));
         }
     }
 }
@@ -4755,11 +4755,11 @@ extern "C" int strlen(const char* s);
  */
 extern "C" void cKeyboardPopup_AddAsciiEdit(cKeyboardPopup* self, int value)
 {
-    char c = value;
+    char asciiChar = value;
     char* buf = (char*)self + 0x74;
     int len = strlen(buf);
     int cur = self->miCursorPos;
-    buf[cur] = c;
+    buf[cur] = asciiChar;
     if (cur == len) {
         if (self->miCursorPos == self->miMaxCharacters - 1) {
             buf[self->miMaxCharacters] = 0;
@@ -4798,14 +4798,14 @@ extern signed char D_004413E8[];
  */
 extern "C" int cKeyboardPopup_updateToAscii(cKeyboardPopup* self, int value)
 {
-    char c = value;
+    char asciiChar = value;
     int i;
-    if (c == 0x60) {
+    if (asciiChar == 0x60) {
         self->miCurrentKey = 0xE;
         return 1;
     }
     for (i = 0; i < 0x54; i++) {
-        if ((D_00441390[i] == c || D_004413E8[i] == c) && D_00441390[i] != '*'
+        if ((D_00441390[i] == asciiChar || D_004413E8[i] == asciiChar) && D_00441390[i] != '*'
             && (D_00441390[i] != '@' || D_004413E8[i] != D_00441390[i])) {
             if (cKeyboardPopup_allowSelection((cKeyboardPopup*)self, i, 0)) {
                 self->miCurrentKey = i;
@@ -4833,12 +4833,12 @@ extern signed char D_004413E8[];
  */
 extern "C" void cKeyboardPopup_AddCharacterEdit(cKeyboardPopup* self)
 {
-    bool b = self->mbCapsOn != 0;
+    bool capsOn = self->mbCapsOn != 0;
     int flag = self->mbShiftOn;
     if (flag) {
-        flag = !b;
+        flag = !capsOn;
     } else {
-        flag = b != 0;
+        flag = capsOn != 0;
     }
     int idx = self->miCurrentKey;
     if (idx >= 15 && idx <= 26) {
@@ -5034,14 +5034,14 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
     sVec3_CC30 pos;
 
     void* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466530));
-    char* t = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466530));
-    if (t != 0) {
-        sVEntry_CC30* vt = *(sVEntry_CC30**)(t + 8);
-        vt[20].fn(t + vt[20].delta, ((char*)self) + 0x3F4);
-        *(sVec3_CC30*)&self->mvPosEnter[0] = *(sVec3_CC30*)(t + 0x44);
+    char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466530));
+    if (uiObj != 0) {
+        sVEntry_CC30* vt = *(sVEntry_CC30**)(uiObj + 8);
+        vt[20].fn(uiObj + vt[20].delta, ((char*)self) + 0x3F4);
+        *(sVec3_CC30*)&self->mvPosEnter[0] = *(sVec3_CC30*)(uiObj + 0x44);
     }
     self->mvPosCursor[1] = self->mvSizeEnter[1] + self->mvPosEnter[1] - self->mvSizeCursor[1] - 2.0f;
-    unsigned char c = *(((char*)self) + self->miCursorPos + 0x74);
+    unsigned char cursorChar = *(((char*)self) + self->miCursorPos + 0x74);
     char tc = *(((char*)self) + self->miCursorPos + 0x74);
     pos = *(sVec3_CC30*)&self->mvSizeCursor[0];
     if (tc != 0) {
@@ -5051,16 +5051,16 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
         if (self->mbPassword != 0) {
             ch[0] = '*';
         } else {
-            ch[0] = c;
+            ch[0] = cursorChar;
         }
         cKeyboardPopup_setScale(self, text);
-        char* f = (char*)cUIText_getFont(text);
-        size.Measure(f, ch, ch[0] == ' ');
+        char* font = (char*)cUIText_getFont(text);
+        size.Measure(font, ch, ch[0] == ' ');
         pos.x = size.w;
     }
-    t = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466570));
-    sVEntry_CC30* vt = *(sVEntry_CC30**)(t + 8);
-    vt[21].fn(t + vt[21].delta, &pos);
+    uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_00466570));
+    sVEntry_CC30* vt = *(sVEntry_CC30**)(uiObj + 8);
+    vt[21].fn(uiObj + vt[21].delta, &pos);
     char buf[0x40];
     if (self->mbPassword != 0) {
         cKeyboardPopup_setPasswordText((sPwd_CCE98*)self, ((char*)self) + 0xB4);
@@ -5070,12 +5070,12 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
     }
     buf[self->miCursorPos - self->miViewableStartIndex] = 0;
     cKeyboardPopup_setScale(self, text);
-    char* f = (char*)cUIText_getFont(text);
+    char* font = (char*)cUIText_getFont(text);
     sRect_CC30 size;
-    size.Measure(f, buf, 1);
-    sVec3_CC30 p = *(sVec3_CC30*)&self->mvPosCursor[0];
-    p.x = size.w + self->mvPosEnter[0];
-    *(sVec3_CC30*)(t + 0x44) = p;
+    size.Measure(font, buf, 1);
+    sVec3_CC30 cursorPos = *(sVec3_CC30*)&self->mvPosCursor[0];
+    cursorPos.x = size.w + self->mvPosEnter[0];
+    *(sVec3_CC30*)(uiObj + 0x44) = cursorPos;
 }
 #endif
 
@@ -5156,9 +5156,9 @@ extern char D_00466590[];
 extern "C" void cKeyboardPopup_setStatic(cKeyboardPopup* self, unsigned short* str)
 {
     if (self->mpScreen == 0) {
-        void* p = self->mpustrStatic;
-        if (p != 0) {
-            cMemMan_free(p);
+        void* oldStatic = self->mpustrStatic;
+        if (oldStatic != 0) {
+            cMemMan_free(oldStatic);
             self->mpustrStatic = 0;
         }
         unsigned short* copy = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, D_00466590, 0x100, 0);
@@ -5422,36 +5422,36 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
         self->miViewableStartIndex = 0;
         self->miViewableEndIndex = 0;
         self->miCursorPos = 0;
-        int a = 0;
-        int c = 0;
-        int b = 0;
+        int showCompact = 0;
+        int showRegular = 0;
+        int showExpand = 0;
         cKeyboardPopup_redrawScreen(self);
         switch (self->meType) {
         case 0:
-            c = 1;
+            showRegular = 1;
             sprintf(buf, D_004A1CD0);
             break;
         case 2:
-            b = 1;
+            showExpand = 1;
             sprintf(buf, D_00466700);
             break;
         case 1:
         default:
-            a = 1;
+            showCompact = 1;
             sprintf(buf, D_004A1CD8);
             break;
         }
         char* oa = (char*)self->mpBackCompact;
         if (oa != 0) {
-            SetVis_D348(oa, a);
+            SetVis_D348(oa, showCompact);
         }
         char* ob = (char*)self->mpBackExpand;
         if (ob != 0) {
-            SetVis_D348(ob, b);
+            SetVis_D348(ob, showExpand);
         }
         char* oc = (char*)self->mpBackRegular;
         if (oc != 0) {
-            SetVis_D348(oc, c);
+            SetVis_D348(oc, showRegular);
         }
         int f = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(buf));
         if (f != 0xFFFF) {
@@ -5585,33 +5585,33 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
             }
         }
         cKeyboardPopup_getObjName(self, i, name, 1);
-        char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
-        if (o != 0) {
+        char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+        if (uiObj != 0) {
             if (self->meType == 1) {
                 if (i >= 0 && i < 0xE) {
-                    sVEntry_D708* vt = *(sVEntry_D708**)(o + 8);
-                    vt[9].fn(o + vt[9].delta, (void*)0);
+                    sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
+                    vt[9].fn(uiObj + vt[9].delta, (void*)0);
                 } else {
-                    sVEntry_D708* vt = *(sVEntry_D708**)(o + 8);
-                    vt[9].fn(o + vt[9].delta, (void*)1);
+                    sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
+                    vt[9].fn(uiObj + vt[9].delta, (void*)1);
                 }
             } else {
                 {
-                    sVEntry_D708* vt = *(sVEntry_D708**)(o + 8);
-                    vt[11].fn(o + vt[11].delta, D_004C67F8);
+                    sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
+                    vt[11].fn(uiObj + vt[11].delta, D_004C67F8);
                 }
                 {
-                    sVEntry_D708* vt = *(sVEntry_D708**)(o + 8);
-                    vt[9].fn(o + vt[9].delta, (void*)1);
+                    sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
+                    vt[9].fn(uiObj + vt[9].delta, (void*)1);
                 }
             }
         }
     }
     cKeyboardPopup_getObjName(self, self->miCurrentKey, name, 1);
-    char* o = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
-    if (o != 0) {
-        sVEntry_D708* vt = *(sVEntry_D708**)(o + 8);
-        vt[11].fn(o + vt[11].delta, D_004C67E8);
+    char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+    if (uiObj != 0) {
+        sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
+        vt[11].fn(uiObj + vt[11].delta, D_004C67E8);
     }
 }
 #endif
@@ -5843,17 +5843,17 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
             if (isOnK1CDB98()) {
                 if ((int)SSXApp->Game == 0) {
                     changed = 1;
-                    void* p = func_001D9D48(cMemMan_alloc(0x140, D_00461A70, 0x100, 0), self->mpEngine, self);
-                    func_001DA528(p, 6);
-                    *(int*)((char*)p + 0x54) = GetHashValue32(D_00466940);
-                    func_001DA530(p, 0, GetHashValue32(D_00466950));
-                    func_001DA510(p, 0, GetHashValue32(D_00466968), 4);
-                    func_001DA510(p, 1, GetHashValue32(D_00466968), 3);
-                    func_001DA510(p, 2, GetHashValue32(D_00466988), 5);
-                    func_001DA510(p, 3, GetHashValue32(D_004669A0), 6);
-                    func_001DA510(p, 4, GetHashValue32(D_004669B8), 0);
-                    func_001DA510(p, 5, GetHashValue32(D_004669D8), 1);
-                    cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, p);
+                    void* popup = func_001D9D48(cMemMan_alloc(0x140, D_00461A70, 0x100, 0), self->mpEngine, self);
+                    func_001DA528(popup, 6);
+                    *(int*)((char*)popup + 0x54) = GetHashValue32(D_00466940);
+                    func_001DA530(popup, 0, GetHashValue32(D_00466950));
+                    func_001DA510(popup, 0, GetHashValue32(D_00466968), 4);
+                    func_001DA510(popup, 1, GetHashValue32(D_00466968), 3);
+                    func_001DA510(popup, 2, GetHashValue32(D_00466988), 5);
+                    func_001DA510(popup, 3, GetHashValue32(D_004669A0), 6);
+                    func_001DA510(popup, 4, GetHashValue32(D_004669B8), 0);
+                    func_001DA510(popup, 5, GetHashValue32(D_004669D8), 1);
+                    cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
                 }
                 sound = 5;
             }
@@ -6057,12 +6057,12 @@ extern "C" void* cUIText_getFont(void* self);
  */
 extern "C" void cKeyboardPopup_setScale(cKeyboardPopup* self, void* obj)
 {
-    sVec3_CE4C8 v = *(sVec3_CE4C8*)((char*)obj + 0x50);
-    char* p = (char*)cUIText_getFont(obj);
-    float x = *(float*)(p + 0x30) * v.x;
-    float y = *(float*)(p + 0x34) * v.y;
-    *(float*)(p + 0x38) = x;
-    *(float*)(p + 0x3C) = y;
+    sVec3_CE4C8 objScale = *(sVec3_CE4C8*)((char*)obj + 0x50);
+    char* font = (char*)cUIText_getFont(obj);
+    float x = *(float*)(font + 0x30) * objScale.x;
+    float y = *(float*)(font + 0x34) * objScale.y;
+    *(float*)(font + 0x38) = x;
+    *(float*)(font + 0x3C) = y;
 }
 #endif
 
@@ -6102,13 +6102,13 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_allowSelection);
 // PORT: out is an int* out-param (the unit declares it int)
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup* self, int idx, int out)
 {
-    bool b = self->mbCapsOn != 0;
+    bool capsOn = self->mbCapsOn != 0;
     int flag;
     if (self->mbShiftOn) {
-        flag = b;
+        flag = capsOn;
         flag = !flag;
     } else {
-        flag = b != 0;
+        flag = capsOn != 0;
     }
     if (idx >= 15 && idx <= 26) {
         // PORT: reads the int field at 0x6C as a bool (bool is 4 bytes in SN gcc 2.95); use `*(int*)... == 0` off-PS2.
@@ -6161,9 +6161,9 @@ extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int key
     void* opt = cBE_getInterface_Fv(cBE_getBE(), 4);
     char* msg = func_0014F6A8(opt, key);
     if (msg == 0) {
-        char* o = (char*)SSXApp->FELocale;
-        sVEntryK1CE5E0* vt = *(sVEntryK1CE5E0**)(o + 4);
-        void* str = vt[4].fn(o + vt[4].delta, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(opt, key));
+        char* locale = (char*)SSXApp->FELocale;
+        sVEntryK1CE5E0* vt = *(sVEntryK1CE5E0**)(locale + 4);
+        void* str = vt[4].fn(locale + vt[4].delta, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(opt, key));
         if (str)
             USTR_strcpyW(buf, str);
         else

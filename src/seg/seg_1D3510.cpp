@@ -34,8 +34,8 @@ INCLUDE_ASM("seg/seg_1D3510", get_uint);
  * @return 4, the number of bytes read
  */
 extern "C" int get_uint(unsigned char **pp, unsigned int *out) {
-    unsigned char *p = *pp;
-    *out = (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0];
+    unsigned char *bytes = *pp;
+    *out = (bytes[3] << 24) | (bytes[2] << 16) | (bytes[1] << 8) | bytes[0];
     *pp += 4;
     return 4;
 }
@@ -55,15 +55,15 @@ extern "C" int get_float_25A0(void*, void*) __asm__("get_float");
  * @return number of bytes read
  */
 extern "C" int get_t3Vector(void *src, t3Vector_25A0 *out) {
-    t3Vector_25A0 v;
+    t3Vector_25A0 vec;
     int total = 0;
     int i;
-    float *p = &v.x;
+    float *component = &vec.x;
     for (i = 0; i < 3; i++) {
-        total += get_float_25A0(src, p);
-        p++;
+        total += get_float_25A0(src, component);
+        component++;
     }
-    *out = v;
+    *out = vec;
     return total;
 }
 #endif
@@ -170,15 +170,15 @@ extern char D_00486768[];
  */
 extern "C" int get_string(unsigned char **src, char **out) {
     int n = 0;
-    char c = 1;
+    char curChar = 1;
     do {
-        n += func_002D2790_27B0(src, (unsigned char*)&c);
-        D_004D49B8[n - 1] = c;
-    } while (c != 0 && n < 1000);
+        n += func_002D2790_27B0(src, (unsigned char*)&curChar);
+        D_004D49B8[n - 1] = curChar;
+    } while (curChar != 0 && n < 1000);
     if (n == 1000) D_004D49B8[999] = 0;
-    char *p = (char*)operator_new_tag_27B0(n, D_00486768, 0x100, 0);
-    *out = p;
-    strcpy(p, D_004D49B8);
+    char *copy = (char*)operator_new_tag_27B0(n, D_00486768, 0x100, 0);
+    *out = copy;
+    strcpy(copy, D_004D49B8);
     return n;
 }
 #endif
@@ -203,17 +203,17 @@ struct Data_2868 { unsigned int n; unsigned char *data; };
  */
 extern "C" int get_data(unsigned char **src, Data_2868 **out) {
     unsigned int i = 0;
-    Data_2868 *d = (Data_2868*)cMemMan_alloc_2868(8, D_00486778, 0x100, 0);
-    d->n = 0;
-    d->data = 0;
-    *out = d;
-    int total = get_uint_2868(src, d);
-    Data_2868 *e = *out;
-    e->data = (unsigned char*)operator_new_tag_2868(e->n, D_00486788, 0x100, 0);
-    Data_2868 *t = *out;
-    for (i = 0; i < t->n; i++) {
-        total += func_002D2790_2868(src, t->data + i);
-        t = *out;
+    Data_2868 *newData = (Data_2868*)cMemMan_alloc_2868(8, D_00486778, 0x100, 0);
+    newData->n = 0;
+    newData->data = 0;
+    *out = newData;
+    int total = get_uint_2868(src, newData);
+    Data_2868 *reloaded = *out;
+    reloaded->data = (unsigned char*)operator_new_tag_2868(reloaded->n, D_00486788, 0x100, 0);
+    Data_2868 *current = *out;
+    for (i = 0; i < current->n; i++) {
+        total += func_002D2790_2868(src, current->data + i);
+        current = *out;
     }
     return total;
 }

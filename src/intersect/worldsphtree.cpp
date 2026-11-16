@@ -37,20 +37,20 @@ extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* ast, int isLow)
     }
     *(void**)((char*)self + 0x64) = ast;
     *(void**)((char*)self + 0x60) = ast;
-    sSphV4 c = *(sSphV4*)((char*)ast + 0x80);
-    float r = func_0032C590(ast);
-    sSphV4 t;
-    *(sSphV4*)((char*)self + 0x40) = c;
-    t.x = c.x + r;
-    t.y = c.y + r;
-    t.z = c.z + r;
-    t.w = 1.0f;
-    *(sSphV4*)((char*)self + 0x20) = t;
-    t.x = c.x - r;
-    t.y = c.y - r;
-    t.z = c.z - r;
-    t.w = 1.0f;
-    *(sSphV4*)((char*)self + 0x30) = t;
+    sSphV4 center = *(sSphV4*)((char*)ast + 0x80);
+    float radius = func_0032C590(ast);
+    sSphV4 corner;
+    *(sSphV4*)((char*)self + 0x40) = center;
+    corner.x = center.x + radius;
+    corner.y = center.y + radius;
+    corner.z = center.z + radius;
+    corner.w = 1.0f;
+    *(sSphV4*)((char*)self + 0x20) = corner;
+    corner.x = center.x - radius;
+    corner.y = center.y - radius;
+    corner.z = center.z - radius;
+    corner.w = 1.0f;
+    *(sSphV4*)((char*)self + 0x30) = corner;
     void* p = cMemMan_alloc(0x140, D_0048E550, 0, 0);
     func_0032C508(p);
     *(void**)((char*)self + 0x68) = p;
@@ -172,13 +172,13 @@ extern "C" float func_0032C590(void* self);
  */
 extern "C" float cWorldSphTree_GetIdealParam(void* self)
 {
-    float r;
+    float idealParam;
     if (*(int*)self != 0) {
-        r = func_0032C590(*(void**)((char*)self + 0x60)) * 2.0f;
+        idealParam = func_0032C590(*(void**)((char*)self + 0x60)) * 2.0f;
     } else {
-        r = -1.0f;
+        idealParam = -1.0f;
     }
-    return r;
+    return idealParam;
 }
 #endif
 
@@ -217,10 +217,10 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_UnTransform__FPv);
  */
 int cWorldSphTree_UnTransform(void* self)
 {
-    int t0 = *(int*)((char*)self + 0x64);
+    int original = *(int*)((char*)self + 0x64);
     *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x60) = t0;
-    return t0;
+    *(int*)((char*)self + 0x60) = original;
+    return original;
 }
 #endif
 
@@ -291,14 +291,14 @@ extern "C" int func_0032CA78(void* tree, int a1, int a2, int a3, int a4, sWsVec4
  */
 extern "C" int cWorldSphTree_IsTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
 {
-    sWsVec4 v;
-    int r = func_0032CA78(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &v, ipos);
-    if (r != 0) {
-        float len = wsLength_330788(v);
+    sWsVec4 hitDir;
+    int hit = func_0032CA78(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &hitDir, ipos);
+    if (hit != 0) {
+        float len = wsLength_330788(hitDir);
         *outLen = len;
-        *outDir = wsDiv_330788(v, len);
+        *outDir = wsDiv_330788(hitDir, len);
     }
-    return r;
+    return hit;
 }
 #endif
 
@@ -364,14 +364,14 @@ extern "C" int func_00328030(void* tree, int a1, int a2, int a3, int a4, sWsVec4
  */
 extern "C" int cWorldSphTree_Is2SidedTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
 {
-    sWsVec4 v;
-    int r = func_00328030(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &v, ipos);
-    if (r != 0) {
-        float len = wsLength_330828(v);
+    sWsVec4 hitDir;
+    int hit = func_00328030(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &hitDir, ipos);
+    if (hit != 0) {
+        float len = wsLength_330828(hitDir);
         *outLen = len;
-        *outDir = wsDiv_330828(v, len);
+        *outDir = wsDiv_330828(hitDir, len);
     }
-    return r;
+    return hit;
 }
 #endif
 
@@ -1503,9 +1503,9 @@ extern char D_0048E4F8[];
  */
 extern "C" void cBXNash_initTheAIFwdDiffCache(void* self)
 {
-    void* c = cAIFwdDiffCache_cAIFwdDiffCache(cMemMan_alloc(0x10, D_0048E4F8, 0, 0));
-    *(void**)((char*)self + 0xA4) = c;
-    cAIFwdDiffCache_Init(c, 0x28);
+    void* cache = cAIFwdDiffCache_cAIFwdDiffCache(cMemMan_alloc(0x10, D_0048E4F8, 0, 0));
+    *(void**)((char*)self + 0xA4) = cache;
+    cAIFwdDiffCache_Init(cache, 0x28);
 }
 #endif
 
@@ -5157,9 +5157,9 @@ extern "C" void cBoostNode_update(sNode_003415D0* self)
     if (self->type != 1) {
         hit = 1;
     }
-    int t = self->t3C;
-    if (t > 0) {
-        int n = t - 1;
+    int timeLeft = self->t3C;
+    if (timeLeft > 0) {
+        int n = timeLeft - 1;
         self->t3C = n;
         if (n > 0) {
             hit = 1;
@@ -5178,17 +5178,17 @@ extern "C" void cBoostNode_update(sNode_003415D0* self)
             if (((Test_003415D0)ovt[3].fn)((char*)obj + ovt[3].delta, self->a18) != 0) {
                 hit = 1;
                 if (self->f34 < 0.0f) {
-                    sVEnt_003415D0* v = self->vt;
-                    ((Fn1_003415D0)v[48].fn)((char*)self + v[48].delta, obj);
+                    sVEnt_003415D0* vtbl = self->vt;
+                    ((Fn1_003415D0)vtbl[48].fn)((char*)self + vtbl[48].delta, obj);
                 } else {
-                    sVEnt_003415D0* v = self->vt;
-                    ((Fn1_003415D0)v[47].fn)((char*)self + v[47].delta, obj);
+                    sVEnt_003415D0* vtbl = self->vt;
+                    ((Fn1_003415D0)vtbl[47].fn)((char*)self + vtbl[47].delta, obj);
                 }
             }
         }
     }
-    sVEnt_003415D0* v2 = self->vt;
-    ((Fn0_003415D0)v2[50].fn)((char*)self + v2[50].delta);
+    sVEnt_003415D0* vtbl2 = self->vt;
+    ((Fn0_003415D0)vtbl2[50].fn)((char*)self + vtbl2[50].delta);
     if (hit == 0) {
         sVEnt_003415D0* v3 = self->vt;
         ((FnI_003415D0)v3[34].fn)((char*)self + v3[34].delta, 1);
@@ -6330,11 +6330,11 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
     if (self->Type == 0) {
         self->Active = 1;
     }
-    int t = self->Time;
-    if (t > 0) {
-        t--;
-        self->Time = t;
-        if (t > 0) {
+    int timeLeft = self->Time;
+    if (timeLeft > 0) {
+        timeLeft--;
+        self->Time = timeLeft;
+        if (timeLeft > 0) {
             self->Active = 1;
         }
     }
@@ -6347,17 +6347,17 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
             if (((Test_00342880)ovt[3].fn)((char*)obj + ovt[3].delta, (int)self->Instance) != 0) {
                 self->Active = 1;
                 if (self->Drag < 0.0f) {
-                    sVEnt_00342880* v = (sVEnt_00342880*)self->mVtbl;
-                    ((Fn1_00342880)v[8].fn)((char*)self + v[8].delta, obj);
+                    sVEnt_00342880* vtbl = (sVEnt_00342880*)self->mVtbl;
+                    ((Fn1_00342880)vtbl[8].fn)((char*)self + vtbl[8].delta, obj);
                 } else {
-                    sVEnt_00342880* v = (sVEnt_00342880*)self->mVtbl;
-                    ((Fn1_00342880)v[7].fn)((char*)self + v[7].delta, obj);
+                    sVEnt_00342880* vtbl = (sVEnt_00342880*)self->mVtbl;
+                    ((Fn1_00342880)vtbl[7].fn)((char*)self + vtbl[7].delta, obj);
                 }
             }
         }
     }
-    sVEnt_00342880* v2 = (sVEnt_00342880*)self->mVtbl;
-    ((Fn0_00342880)v2[10].fn)((char*)self + v2[10].delta);
+    sVEnt_00342880* vtbl2 = (sVEnt_00342880*)self->mVtbl;
+    ((Fn0_00342880)vtbl2[10].fn)((char*)self + vtbl2[10].delta);
 }
 #endif
 
@@ -6405,8 +6405,8 @@ extern "C" float func_002D1C70();
  */
 extern "C" void cBoostModifier_applyDrag(cBoostModifier* self, cMover_3429E0* obj)
 {
-    sVec4_3429E0 u = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), self->Drag + 1.0f), func_002D1C70());
-    obj->setVelocity(&u);
+    sVec4_3429E0 newVelocity = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), self->Drag + 1.0f), func_002D1C70());
+    obj->setVelocity(&newVelocity);
 }
 #endif
 
@@ -6495,11 +6495,11 @@ struct sSelf_342A88 {
  */
 extern "C" void cBoostModifier_applyBoost(cBoostModifier* self, cWsMover* obj)
 {
-    float d = self->MaxSpeed - vu0Dot(*obj->getVelocity(), self->Boost);
-    if (d > 0.0f) {
+    float speedDeficit = self->MaxSpeed - vu0Dot(*obj->getVelocity(), self->Boost);
+    if (speedDeficit > 0.0f) {
         // PORT: takes the address of a temporary (g++ 2.95 accepts it).
         sPlane_342A88* pl = &(*(sPlane_342A88*)&self->Boost);
-        setVel_342A88(obj, &vu0Scale(vu0Scale(vu0Scale(pl->n, d), pl->k), func_002D1C70()));
+        setVel_342A88(obj, &vu0Scale(vu0Scale(vu0Scale(pl->n, speedDeficit), pl->k), func_002D1C70()));
     }
 }
 #endif

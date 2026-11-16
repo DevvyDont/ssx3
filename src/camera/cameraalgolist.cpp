@@ -55,10 +55,10 @@ extern "C" void cCameraAlgoList_insert(sAlgoListK2* list, cCamAlgoK2* algo, int 
         n->weight = 1.0f;
     else
         n->weight = 0.0f;
-    sAlgoNodeK2* h = list->head;
+    sAlgoNodeK2* oldHead = list->head;
     n->target = w;
-    if (h != 0)
-        h->prev = n;
+    if (oldHead != 0)
+        oldHead->prev = n;
     sAlgoNodeK2* old = list->head;
     list->head = n;
     list->count++;

@@ -311,15 +311,15 @@ extern "C" void cStaticEmitter_update(void* self, float dt);
  */
 extern "C" void cParticleModifier_update(void* self)
 {
-    char* s = (char*)self;
-    if (*(int*)(s + 0x1E4) == 0) {
-        void* t = s + 0x50;
-        if (*(float*)(s + 0x50) < 0.0f) {
-            cStaticEmitter_update(t, 0.01666666753590107f);
+    char* selfBytes = (char*)self;
+    if (*(int*)(selfBytes + 0x1E4) == 0) {
+        void* emitter = selfBytes + 0x50;
+        if (*(float*)(selfBytes + 0x50) < 0.0f) {
+            cStaticEmitter_update(emitter, 0.01666666753590107f);
         } else {
-            cStaticEmitter_update(t, 0.01666666753590107f);
-            if (*(float*)(s + 0x50) <= 0.0f) {
-                *(int*)(s + 0x1E4) = 1;
+            cStaticEmitter_update(emitter, 0.01666666753590107f);
+            if (*(float*)(selfBytes + 0x50) <= 0.0f) {
+                *(int*)(selfBytes + 0x1E4) = 1;
             }
         }
     }
@@ -367,13 +367,13 @@ extern "C" void cStaticEmitter_writeToReplayFrame(void* self, void* stream);
 extern "C" void cParticleModifier_writeToReplayFrame(void* self, void* stream)
 {
     cEffectModifier_writeToReplayFrame(self, stream);
-    sEffectLinkVEntry5BF0* e = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x1E4, 4);
+    sEffectLinkVEntry5BF0* writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x1E4, 4);
     if (*(int*)((char*)self + 0x1E4) == 0) {
-        e = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-        e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x1E0), 0xD8);
-        e = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-        e->fn((char*)stream + e->delta, (char*)self + 0x10, 0x40);
+        writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
+        writeEntry->fn((char*)stream + writeEntry->delta, *(void**)((char*)self + 0x1E0), 0xD8);
+        writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
+        writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 0x40);
         cStaticEmitter_writeToReplayFrame((char*)self + 0x50, stream);
     }
 }
@@ -587,29 +587,29 @@ extern "C" void func_003710D0(void* sub, void* a, void* b, int flag, float dt);
  */
 extern "C" void cDynamicParticleModifier_update(void* self)
 {
-    char* s = (char*)self;
-    if (*(int*)(s + 0x18) != 0) {
+    char* selfBytes = (char*)self;
+    if (*(int*)(selfBytes + 0x18) != 0) {
         return;
     }
     func_00345EF8((sEffectLink5EF8*)self);
-    if (*(int*)(s + 0x14) > 0) {
-        float* sub = (float*)(s + 0x60);
-        if (*(int*)(s + 0x240) > 0) {
-            func_003710D0(sub, s + 0x30, s + 0x40, 0, 0.01666666753590107f);
+    if (*(int*)(selfBytes + 0x14) > 0) {
+        float* sub = (float*)(selfBytes + 0x60);
+        if (*(int*)(selfBytes + 0x240) > 0) {
+            func_003710D0(sub, selfBytes + 0x30, selfBytes + 0x40, 0, 0.01666666753590107f);
             return;
         }
     } else {
-        float* sub = (float*)(s + 0x60);
-        if (*(float*)(s + 0x60) < 0.0f) {
-            func_003710D0(sub, s + 0x30, s + 0x40, 1, 0.01666666753590107f);
+        float* sub = (float*)(selfBytes + 0x60);
+        if (*(float*)(selfBytes + 0x60) < 0.0f) {
+            func_003710D0(sub, selfBytes + 0x30, selfBytes + 0x40, 1, 0.01666666753590107f);
             return;
         }
-        func_003710D0(sub, s + 0x30, s + 0x40, 1, 0.01666666753590107f);
-        if (!(*(float*)(s + 0x60) <= 0.0f)) {
+        func_003710D0(sub, selfBytes + 0x30, selfBytes + 0x40, 1, 0.01666666753590107f);
+        if (!(*(float*)(selfBytes + 0x60) <= 0.0f)) {
             return;
         }
     }
-    *(int*)(s + 0x18) = 1;
+    *(int*)(selfBytes + 0x18) = 1;
 }
 #endif
 
@@ -669,11 +669,11 @@ extern "C" void func_003712B8(void* self, void* stream);
 extern "C" void cDynamicParticleModifier_writeToReplayFrame(void* self, void* stream)
 {
     cEffectModifier_writeToReplayFrame(self, stream);
-    sEffectLinkVEntry60A0* e = &(*(sEffectLinkVEntry60A0**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x10, 0x50);
+    sEffectLinkVEntry60A0* writeEntry = &(*(sEffectLinkVEntry60A0**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 0x50);
     if (*(int*)((char*)self + 0x18) == 0) {
-        e = &(*(sEffectLinkVEntry60A0**)stream)[1];
-        e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x260), 0xD8);
+        writeEntry = &(*(sEffectLinkVEntry60A0**)stream)[1];
+        writeEntry->fn((char*)stream + writeEntry->delta, *(void**)((char*)self + 0x260), 0xD8);
         func_003712B8((char*)self + 0x60, stream);
     }
 }
@@ -788,9 +788,9 @@ INCLUDE_ASM("object/effectlink", cHaloModifier_update);
 // Advance a rotation angle (degrees) by an integer step, wrapping to 0 at +/-360.
 extern "C" void cHaloModifier_update(void* self)
 {
-    float a = *(float*)((char*)self + 0x30) + (float)*(int*)((char*)self + 0x2c);
-    *(float*)((char*)self + 0x30) = a;
-    if (a >= 360.0f || a <= -360.0f) {
+    float angle = *(float*)((char*)self + 0x30) + (float)*(int*)((char*)self + 0x2c);
+    *(float*)((char*)self + 0x30) = angle;
+    if (angle >= 360.0f || angle <= -360.0f) {
         *(float*)((char*)self + 0x30) = 0.0f;
     }
 }
@@ -818,11 +818,11 @@ extern "C" void func_002D1D10(sEffVec4_62A0* pos, void* p, int n, float a, float
  */
 extern "C" void cHaloModifier_render(void* self)
 {
-    sEffMtx_62A0 m;
+    sEffMtx_62A0 matrix;
     void* p = (char*)self + 0x10;
-    func_0034FED8(*(void**)((char*)self + 0xC), *(int*)((char*)self + 0x28), &m);
-    sEffVec4_62A0 v = m.r[3];
-    func_002D1D10(&v, p, *(int*)((char*)self + 0x24),
+    func_0034FED8(*(void**)((char*)self + 0xC), *(int*)((char*)self + 0x28), &matrix);
+    sEffVec4_62A0 origin = matrix.r[3];
+    func_002D1D10(&origin, p, *(int*)((char*)self + 0x24),
                   *(float*)((char*)self + 0x20), *(float*)((char*)self + 0x30));
 }
 #endif
@@ -926,18 +926,18 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int bucket, int pIn
     sEffV4_346350 col[4];
     sEffVE_346350* vt = (sEffVE_346350*)cGraphicsMan_TheGraphicsMan->mVtbl;
     vt[97].fn((char*)cGraphicsMan_TheGraphicsMan + vt[97].delta, *(void**)((char*)self + 0x18), 0, pts, uv, col);
-    sEffV3_346350 d;
-    d.x = pts[1].x - pts[0].x;
-    d.y = pts[1].y - pts[0].y;
-    d.z = pts[1].z - pts[0].z;
-    func_00353E08((char*)self + 0x50, tdata, sqrtf_346350(d.x * d.x + d.y * d.y + d.z * d.z));
+    sEffV3_346350 span;
+    span.x = pts[1].x - pts[0].x;
+    span.y = pts[1].y - pts[0].y;
+    span.z = pts[1].z - pts[0].z;
+    func_00353E08((char*)self + 0x50, tdata, sqrtf_346350(span.x * span.x + span.y * span.y + span.z * span.z));
     cFlexBridgeNode_setupGrid(self);
     cFlexBridgeNode_initSpringNodes(self);
     cFlexBridgeNode_updateGrid(self);
-    unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
-    *f = (*f & 0xFFFFFFFD) | 4;
-    f = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
-    *f = (*f & 0xFFFFFFDF) | 0x40;
+    unsigned int* flags = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
+    *flags = (*flags & 0xFFFFFFFD) | 4;
+    flags = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
+    *flags = (*flags & 0xFFFFFFDF) | 0x40;
     return self;
 }
 #endif
@@ -969,13 +969,13 @@ struct sEffectLinkVEntry64E0 {
  */
 extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(void* self, void* bucket, void* stream)
 {
-    void* p = (char*)self + 0x20;
+    void* payload = (char*)self + 0x20;
     cInstanceNode_cInstanceNode(self, bucket, stream);
     *(void***)((char*)self + 0xC) = cFlexBridgeNode_vtbl;
     func_00353E80((char*)self + 0x50, stream);
     cFlexBridgeNode_setupGrid(self);
-    sEffectLinkVEntry64E0* e = &(*(sEffectLinkVEntry64E0**)stream)[2];
-    e->fn((char*)stream + e->delta, p, 0x30);
+    sEffectLinkVEntry64E0* readEntry = &(*(sEffectLinkVEntry64E0**)stream)[2];
+    readEntry->fn((char*)stream + readEntry->delta, payload, 0x30);
     cFlexBridgeNode_updateGrid(self);
     return self;
 }

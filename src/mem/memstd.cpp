@@ -53,18 +53,18 @@ struct sMemClass_251718 {
  * @param align  alignment of the first free block's data (MEM_initadr: 0x80)
  * @param hdr    extra header bytes per block
  * @param endMarker     nonzero sets block flag 0x2000, which the block check uses to expect a "BEND" end marker
- * @param a8     nonzero sets block flag 0x1000 (meaning unknown)
+ * @param nameBlocks     nonzero sets block flag 0x1000 (meaning unknown)
  * @param lock   nonzero creates a mutex and marks the class locked
  * @return the size of the initial free block
  */
-extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int sizeAlign, int align, int hdr, int endMarker, int a8, int lock)
+extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int sizeAlign, int align, int hdr, int endMarker, int nameBlocks, int lock)
 {
     char buf[0x100];
     int flags = id;
     if (endMarker) {
         flags |= 0x2000;
     }
-    if (a8) {
+    if (nameBlocks) {
         flags |= 0x1000;
     }
     char* data = mem;
@@ -93,29 +93,29 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int size
     *(int*)(mem + 0x3C) = align;
     *(int*)(mem + 0x40) = hdr;
     *(int*)(mem + 0x44) = flags;
-    sMemNode_251718* h = (sMemNode_251718*)(mem + 0x20);
-    *(sMemNode_251718**)(mem + 0x30) = h;
-    *(sMemNode_251718**)(mem + 0x34) = h;
+    sMemNode_251718* head = (sMemNode_251718*)(mem + 0x20);
+    *(sMemNode_251718**)(mem + 0x30) = head;
+    *(sMemNode_251718**)(mem + 0x34) = head;
     *(int*)(mem + 0x48) = 0;
-    sMemNode_251718* q = h;
-    sMemNode_251718* p = q;
+    sMemNode_251718* nextNode = head;
+    sMemNode_251718* p = nextNode;
     int sz = *(char**)(data - 8) - (char*)blk;
     if (*(char**)(mem + 0x30) + (*(char**)(mem + 0x34) - *(char**)(mem + 0x30)) / 2 < (char*)blk) {
         do
             p = p->prev;
         while (blk < p);
-        q = p->next;
+        nextNode = p->next;
     } else {
         do
-            q = q->next;
-        while (q < blk);
-        p = q->prev;
+            nextNode = nextNode->next;
+        while (nextNode < blk);
+        p = nextNode->prev;
     }
     blk->size = sz;
-    blk->next = q;
+    blk->next = nextNode;
     blk->prev = p;
     p->next = blk;
-    q->prev = blk;
+    nextNode->prev = blk;
     blk->tag = 0x4246;
     blk->flags |= 0x4000;
     if (lock) {
@@ -434,25 +434,25 @@ extern "C" int MEMCLASS_link(int id, char* mem, int size)
     sprintf(buf, D_004A2E40, cls);
     MEM_initblock(end, buf, 0, hdr, flags | 0x8100, blk, 0);
     cls->last = end;
-    sMemNode_251D50* q = &cls->head;
-    sMemNode_251D50* p = q;
+    sMemNode_251D50* nextNode = &cls->head;
+    sMemNode_251D50* prevNode = nextNode;
     int sz = *(char**)(data - 8) - (char*)blk;
     if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)blk) {
         do
-            p = p->prev;
-        while (blk < p);
-        q = p->next;
+            prevNode = prevNode->prev;
+        while (blk < prevNode);
+        nextNode = prevNode->next;
     } else {
         do
-            q = q->next;
-        while (q < blk);
-        p = q->prev;
+            nextNode = nextNode->next;
+        while (nextNode < blk);
+        prevNode = nextNode->prev;
     }
     blk->size = sz;
-    blk->next = q;
-    blk->prev = p;
-    p->next = blk;
-    q->prev = blk;
+    blk->next = nextNode;
+    blk->prev = prevNode;
+    prevNode->next = blk;
+    nextNode->prev = blk;
     blk->tag = 0x4246;
     blk->flags |= 0x4000;
     return 1;
@@ -575,9 +575,9 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
     }
     for (sMemNode_252010* blk = cls->first; blk != 0; blk = (sMemNode_252010*)blk->next) {
         char* data = (char*)blk + 0x10;
-        char* n1 = (char*)func_00252658(data);
-        if (n1 == 0)
-            n1 = D_004A2E58;
+        char* blockName = (char*)func_00252658(data);
+        if (blockName == 0)
+            blockName = D_004A2E58;
         char* n2 = (char*)func_00252660(data);
         if (n2 == 0)
             n2 = D_004A2E58;
@@ -594,7 +594,7 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
             if (sz != 0 && !(blk->flags & 0x8000))
                 crc = func_003E62D0(data, sz, 0xFBEA);
             int st = func_002522B0((sMemBlock002522B0*)blk);
-            cb(fmt, D_004A2E68, n1, data, blk->size, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], n2);
+            cb(fmt, D_004A2E68, blockName, data, blk->size, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], n2);
         }
         cb(D_004A2E70);
     }

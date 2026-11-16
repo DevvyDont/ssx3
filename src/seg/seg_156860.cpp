@@ -252,24 +252,24 @@ extern char D_00480350[];
  * Creates and opens a DirtySock channel in the comm system's single channel slot.
  *
  * If the slot is free, allocates a 0x20-byte "cDSockChannel", constructs it and opens it on the address
- * "<a1>:<port>:<port>" with type 0x102 (cDSockChannel_connect) when @p a3 is set, or 0x101 (cDSockChannel_listen) otherwise.
+ * "<a1>:<port>:<port>" with type 0x102 (cDSockChannel_connect) when @p isListener is set, or 0x101 (cDSockChannel_listen) otherwise.
  *
  * @param slots  the comm system's channel slots (only the first is used)
- * @param a1     peer address string
- * @param a2     port; only the low 16 bits are used
- * @param a3     the lobby's host flag (nonzero when this machine hosts)
+ * @param addr     peer address string
+ * @param port     port; only the low 16 bits are used
+ * @param isListener     the lobby's host flag (nonzero when this machine hosts)
  * @return the slot index (0), or -1 when the slot is already taken
  */
-extern "C" int cCommSystem_openDSockChannel(void **slots, int a1, int a2, int a3) {
+extern "C" int cCommSystem_openDSockChannel(void **slots, int addr, int port, int isListener) {
     int i;
-    int n = a2 & 0xFFFF;
+    int n = port & 0xFFFF;
     for (i = 0; i < 1; i++) {
         if (slots[i] == 0) {
             void *obj = func_00256698_5BF8(cMemMan_alloc_5BF8(0x20, D_00480350, 0x20000000, 0));
-            if (a3 != 0) {
-                cDSockChannel_connect_5BF8(obj, a1, n);
+            if (isListener != 0) {
+                cDSockChannel_connect_5BF8(obj, addr, n);
             } else {
-                cDSockChannel_listen_5BF8(obj, a1, n);
+                cDSockChannel_listen_5BF8(obj, addr, n);
             }
             slots[i] = obj;
             return i;
@@ -865,13 +865,13 @@ extern "C" int NetGameLinkSend(int, void *, int);
 extern "C" int cDSockChannel_writePacket(cDSockChannel* self, int data, int len) {
     char buf[0x108];
     if (self->mState != 2) return 0;
-    int t = self->mError;
-    if (t != 0) return 0;
+    int error = self->mError;
+    if (error != 0) return 0;
     if (len > 0) {
         buf[2] = 5;
         buf[3] = len;
         MEM_copy(buf + 4, data, len);
-        return t < NetGameLinkSend((int)self->mGameLink, buf, 1);
+        return error < NetGameLinkSend((int)self->mGameLink, buf, 1);
     }
     return 0;
 }
@@ -903,9 +903,9 @@ extern "C" void cDSockChannel_listen(cDSockChannel* self, int addr, int port) {
     char *vt = (char*)self->mVtbl;
     (*(void (**)(void *))(vt + 0x14))(((char*)self) + *(short *)(vt + 0x10));
     func_00255830__FPv_6860(((char*)self));
-    int h = func_003E6E08_6860();
-    self->mGameUtil = (NetGameUtilRefT*)h;
-    if (h != 0) {
+    int gameUtil = func_003E6E08_6860();
+    self->mGameUtil = (NetGameUtilRefT*)gameUtil;
+    if (gameUtil != 0) {
         sprintf_6860(buf, D_00480448, addr, n, n);
         func_003E6F40_6860((int)self->mGameUtil, 0x101, buf);
         self->mState = 1;
@@ -940,9 +940,9 @@ extern "C" void cDSockChannel_connect(cDSockChannel* self, int addr, int port) {
     char *vt = (char*)self->mVtbl;
     (*(void (**)(void *))(vt + 0x14))(((char*)self) + *(short *)(vt + 0x10));
     func_00255830__FPv_68F8(((char*)self));
-    int h = func_003E6E08_68F8();
-    self->mGameUtil = (NetGameUtilRefT*)h;
-    if (h != 0) {
+    int gameUtil = func_003E6E08_68F8();
+    self->mGameUtil = (NetGameUtilRefT*)gameUtil;
+    if (gameUtil != 0) {
         sprintf_68F8(buf, D_00480448, addr, n, n);
         func_003E6F40_68F8((int)self->mGameUtil, 0x102, buf);
         self->mState = 1;
@@ -1065,9 +1065,9 @@ extern "C" void cDSockChannel_updateConnected(cDSockChannel* dSockChannel)
             dSockChannel->mError = 1;
             return;
         }
-        float f = (float)*(unsigned int*)(st + 0xC) * 0.0010000000474974513f;
-        if (f > 1.0f) f = 1.0f;
-        dSockChannel->mLatency = (dSockChannel->mLatency * 4.0f + f) * 0.20000000298023224f;
+        float latency = (float)*(unsigned int*)(st + 0xC) * 0.0010000000474974513f;
+        if (latency > 1.0f) latency = 1.0f;
+        dSockChannel->mLatency = (dSockChannel->mLatency * 4.0f + latency) * 0.20000000298023224f;
     }
     if (dSockChannel->mPacketError) {
         dSockChannel->mState = 4;
@@ -1696,13 +1696,13 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_setCommError);
 extern "C" void cGameComm_setCommError(cGameComm* self) {
     if (self->mCommError == 0) {
         self->mCommError = 1;
-        int *p = (int *)(((char*)self) + 0x18);
-        int v = 0;
+        int *significant = (int *)(((char*)self) + 0x18);
+        int isSignificant = 0;
         if (self->mLocalFinishedRace == 0 || self->mRemoteFinishedRace == 0) {
-            int c = self->mState >= 0xF;
-            if (!c) v = 1;
+            int lateState = self->mState >= 0xF;
+            if (!lateState) isSignificant = 1;
         }
-        *p = v;
+        *significant = isSignificant;
         self->mFlagsOnCommError = (unsigned int)(self->mLocalFinishedRace | (self->mRemoteFinishedRace << 1) | (self->mLocalDisconnected << 2) | (self->mRemoteDisconnected << 3)
             | (self->mGameStartGate << 4) | (self->mRaceInProgress << 5) | (self->mAlone << 6) | (self->mRemoteExitGame << 7)
             | (self->mRemoteEndGame << 8) | (self->unk_090 << 9) | (self->mLoading << 10));
@@ -1852,9 +1852,9 @@ extern int D_005366E8[];
  */
 extern "C" void cGameComm_updateDisplayError(cGameComm* self) {
     if (self->mLoading == 0 && self->mDisplayError > 0) {
-        char *p = (char*)SSXApp->Game->UI;
+        char *uiEngine = (char*)SSXApp->Game->UI;
         char *st;
-        if (p != 0 && (p += 0x18) != 0 && ((st = cUIStateStack_getCurrentState_79C8(p), st == 0) || (st[0x1D] & 0x3F) == 5)) {
+        if (uiEngine != 0 && (uiEngine += 0x18) != 0 && ((st = cUIStateStack_getCurrentState_79C8(uiEngine), st == 0) || (st[0x1D] & 0x3F) == 5)) {
             int n = self->mDisplayError - 1;
             self->mDisplayError = n;
             if (n <= 0) {
@@ -1956,12 +1956,12 @@ extern "C" int cGameComm_readPacket(cGameComm* self, int ch, int dst, int maxsiz
     cGameComm* gameComm = self;
     if (gameComm->mError != 0) return 0;
     func_00257CD8(gameComm);
-    PacketQueue_7BD8* q = &((PacketQueue_7BD8*)&gameComm->mReadQueue[0])[ch];
-    if (q->rd != q->wr) {
-        Packet_7BD8* p = q->slots[q->rd++ % 32];
-        int len = p->size - 4;
-        MEM_copy_7BD8((void*)dst, p->data, len);
-        func_002581B8((cGameComm*)gameComm, (int*)p);
+    PacketQueue_7BD8* queue = &((PacketQueue_7BD8*)&gameComm->mReadQueue[0])[ch];
+    if (queue->rd != queue->wr) {
+        Packet_7BD8* packet = queue->slots[queue->rd++ % 32];
+        int len = packet->size - 4;
+        MEM_copy_7BD8((void*)dst, packet->data, len);
+        func_002581B8((cGameComm*)gameComm, (int*)packet);
         if (ch == 0) {
             gameComm->unk_05C = 0;
             gameComm->unk_060 = 0;
@@ -2590,13 +2590,13 @@ struct S88A8_S { int k0; int k4; char p0[0x40]; int k48; char p1[0x24]; int k70;
  */
 extern "C" void cGameComm_setUnPauseTimer(cGameComm* self) {
     cGame *game;
-    S88A8_4 *t4;
+    S88A8_4 *gameAI;
     self->mUnPauseTimer = 0;
     game = ((SSXApp)->Game);
     if (game->mCurrentStateID != 2 && self->mError == 0 && self->mAlone == 0 && self->mConnected != 0
         && self->mState < 0xF
-        && ((t4 = ((S88A8_4*)game->AI), t4->k0 != 4) || t4->k1c < 0x97)
-        && t4->k18 <= 0 && self->mPauseMenu[0] == 0 && self->mPauseMenu[1] == 0) {
+        && ((gameAI = ((S88A8_4*)game->AI), gameAI->k0 != 4) || gameAI->k1c < 0x97)
+        && gameAI->k18 <= 0 && self->mPauseMenu[0] == 0 && self->mPauseMenu[1] == 0) {
         self->mUnPauseTimer = 0xB4;
     }
 }
@@ -2725,8 +2725,8 @@ extern "C" void cGameComm_gameExit(cGameComm* self) {
     void *i = cBE_getInterface_8AE0((int)SSXApp->BE, 7);
     if (D_00534B38[0] == 0) {
         cBENetworkInterface_copyProfile(i, 1, 0);
-        cIface_AE0 *o = (cIface_AE0*)cBE_getInterface_8AE0((int)cBE_getBE(), 3);
-        o->v1();
+        cIface_AE0 *beStat = (cIface_AE0*)cBE_getInterface_8AE0((int)cBE_getBE(), 3);
+        beStat->v1();
     }
 }
 #endif

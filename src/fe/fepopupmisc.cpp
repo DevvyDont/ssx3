@@ -223,8 +223,8 @@ extern "C" void cFEPopupScreenPos_onCreateScreen(void* self)
     }
     void* be = cBE_getBE();
     cBE_getInterface_Fv(be, 4);
-    int* p48 = (int*)((char*)self + 0x48);
-    *p48 = optB6_EE10(D_00535610_EE10);
+    int* offsetX = (int*)((char*)self + 0x48);
+    *offsetX = optB6_EE10(D_00535610_EE10);
     int* p4C = (int*)((char*)self + 0x4C);
     *p4C = optB5_EE10(D_00535610_EE10);
 }
@@ -1909,20 +1909,20 @@ extern char D_004A14F8[];
  */
 extern "C" void cFEPopupSelectMultiplayerMode_onWidgetCreate(void* self, void* item)
 {
-    int h1 = *(int*)((char*)item + 0x38);
-    if (h1 == GetHashValue32(D_00460020)) {
+    int itemHash = *(int*)((char*)item + 0x38);
+    if (itemHash == GetHashValue32(D_00460020)) {
         *(int*)((char*)item + 0x14) |= 1;
         cUIMenu_setScrollableMenu(item, 2);
         *(int*)((char*)item + 0x14) |= 0x80;
         return;
     }
-    int h2 = *(int*)((char*)item + 0x38);
-    if (h2 == GetHashValue32(D_004A13A0)) {
+    int itemHash2 = *(int*)((char*)item + 0x38);
+    if (itemHash2 == GetHashValue32(D_004A13A0)) {
         *(int*)((char*)item + 0x18) = 0;
         return;
     }
-    int h3 = *(int*)((char*)item + 0x38);
-    if (h3 == GetHashValue32(D_004A14F8)) {
+    int itemHash3 = *(int*)((char*)item + 0x38);
+    if (itemHash3 == GetHashValue32(D_004A14F8)) {
         *(int*)((char*)item + 0x18) = 1;
     }
 }
@@ -1947,16 +1947,16 @@ extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(void* self, void* pW
 {
     switch (Event) {
     case 5: {
-        char* p = *(char**)((char*)self + 0x10);
+        char* engine = *(char**)((char*)self + 0x10);
         *(char*)((char*)self + 0x48) = 1;
         D_004A19D4 = *(int*)((char*)pWidget + 0x18) != 0;
-        func_0039F190(p + 0x18, 1);
+        func_0039F190(engine + 0x18, 1);
         break;
     }
     case 6: {
-        char* p = *(char**)((char*)self + 0x10);
+        char* engine = *(char**)((char*)self + 0x10);
         *(char*)((char*)self + 0x48) = 0;
-        func_0039F190(p + 0x18, 1);
+        func_0039F190(engine + 0x18, 1);
         break;
     }
     }
@@ -5782,7 +5782,7 @@ struct sObj_3C00 {
  */
 extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGECENTER* self, void* engine, int id)
 {
-    sObj_3C00* o = (sObj_3C00*)self;
+    sObj_3C00* stateView = (sObj_3C00*)self;
     func_0039E2A0(self, engine);
     self->mOVID = id;
     self->mVtbl = D_00474E08;
@@ -5793,11 +5793,11 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
     self->mVtbl = D_00474318;
     int i;
     for (i = 0; i < 8; i++) {
-        o->a[i] = 0;
-        o->b[i] = 0;
-        o->c[i] = 0;
-        o->d[i] = 0;
-        o->e[i] = 0;
+        stateView->a[i] = 0;
+        stateView->b[i] = 0;
+        stateView->c[i] = 0;
+        stateView->d[i] = 0;
+        stateView->e[i] = 0;
     }
     self->mpTotalMessagesLabel = 0;
     self->mpUnreadMessagesLabel = 0;
@@ -5810,18 +5810,18 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
     self->mpArrowDown = 0;
     {
         char* eng = (char*)self->mpEngine;
-        int h = GetHashValue32(D_004A20D8);
-        o->h164 = func_00398380(eng + 0x58, h);
+        int nameHash = GetHashValue32(D_004A20D8);
+        stateView->h164 = func_00398380(eng + 0x58, nameHash);
     }
     {
         char* eng = (char*)self->mpEngine;
-        int h = GetHashValue32(D_0046DF68);
-        o->h168 = func_00398380(eng + 0x58, h);
+        int nameHash = GetHashValue32(D_0046DF68);
+        stateView->h168 = func_00398380(eng + 0x58, nameHash);
     }
     {
         char* eng = (char*)self->mpEngine;
-        int h = GetHashValue32(D_0046DF78);
-        o->h16C = func_00398380(eng + 0x58, h);
+        int nameHash = GetHashValue32(D_0046DF78);
+        stateView->h16C = func_00398380(eng + 0x58, nameHash);
     }
     if (~D_004A20CC != 0) {
         if (func_001E3A30((void*)7) != 0)
@@ -6916,26 +6916,26 @@ struct sVEntryK1E52F8 {
  */
 extern "C" void cOVState_ViewPopup_onWidgetCreate(cOVState_ViewPopup* self, void* widget)
 {
-    int h = *(int*)((char*)widget + 0x38);
+    int nameHash = *(int*)((char*)widget + 0x38);
     sVEntryK1E52F8* vt = *(sVEntryK1E52F8**)((char*)widget + 8);
     vt[9].fn((char*)widget + vt[9].delta, 1);
-    if (h == GetHashValue32(D_004A2120)) {
+    if (nameHash == GetHashValue32(D_004A2120)) {
         self->mpFrom = (cUIText*)widget;
-    } else if (h == GetHashValue32(D_004A2128)) {
+    } else if (nameHash == GetHashValue32(D_004A2128)) {
         self->mpSubject = (cUIText*)widget;
-    } else if (h == GetHashValue32(D_0046E268)) {
+    } else if (nameHash == GetHashValue32(D_0046E268)) {
         self->mpNumberLabel = (cUIText*)widget;
-    } else if (h == GetHashValue32(D_004A2130)) {
+    } else if (nameHash == GetHashValue32(D_004A2130)) {
         self->mpNumber = (cUIText*)widget;
-    } else if (h == GetHashValue32(D_0046E278)) {
+    } else if (nameHash == GetHashValue32(D_0046E278)) {
         self->mpKeepMessage = (cUIText*)widget;
-    } else if (h == GetHashValue32(D_004A20A8)) {
+    } else if (nameHash == GetHashValue32(D_004A20A8)) {
         self->mpButtonSquare = (cUIThing*)widget;
-    } else if (h == GetHashValue32(D_0046E288)) {
+    } else if (nameHash == GetHashValue32(D_0046E288)) {
         self->mpDeleteMessage = (cUIThing*)widget;
-    } else if (h == GetHashValue32(D_0046E2A0)) {
+    } else if (nameHash == GetHashValue32(D_0046E2A0)) {
         self->mpMessageLine0 = (cUIText*)widget;
-    } else if (h == GetHashValue32(D_0046E2B0)) {
+    } else if (nameHash == GetHashValue32(D_0046E2B0)) {
         *(int*)((char*)widget + 0x90) |= 8;
     }
 }
@@ -7158,23 +7158,23 @@ extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void*
     switch (msg) {
     case 7: {
         int id = self->miMessage;
-        sPopupEntry18_5800* a = &D_004C6C08_5800[id];
-        sEntry14_5800* b = &D_00441630_5800[a->field_0x4];
-        if (b->type == 4) {
+        sPopupEntry18_5800* popupEntry = &D_004C6C08_5800[id];
+        sEntry14_5800* typeEntry = &D_00441630_5800[popupEntry->field_0x4];
+        if (typeEntry->type == 4) {
             return;
         }
         func_001E3268(id);
     }
     case 5: {
-        char* o = (char*)self->mpParentState;
-        sVE5800* vt = *(sVE5800**)(o + 8);
-        vt[17].fn(o + vt[17].delta, self, 0x14);
+        char* parentState = (char*)self->mpParentState;
+        sVE5800* vt = *(sVE5800**)(parentState + 8);
+        vt[17].fn(parentState + vt[17].delta, self, 0x14);
         break;
     }
     case 6: {
-        char* o = (char*)self->mpParentState;
-        sVE5800* vt = *(sVE5800**)(o + 8);
-        vt[17].fn(o + vt[17].delta, self, 0x14);
+        char* parentState = (char*)self->mpParentState;
+        sVE5800* vt = *(sVE5800**)(parentState + 8);
+        vt[17].fn(parentState + vt[17].delta, self, 0x14);
         break;
     }
     }
@@ -7242,9 +7242,9 @@ extern "C" int cOVState_ViewPopup_onWidgetMenu(cOVState_ViewPopup* self, int pMe
     case 9:
         return 0;
     case 8: {
-        sPopupEntry18* a = &D_004C6C08[self->miMessage];
-        sPopupEntry14* b = &D_00441630[a->field_0x4];
-        return *(int*)b->pad_0x0 != 4;
+        sPopupEntry18* popupEntry = &D_004C6C08[self->miMessage];
+        sPopupEntry14* typeEntry = &D_00441630[popupEntry->field_0x4];
+        return *(int*)typeEntry->pad_0x0 != 4;
     }
     }
     return 0x101;

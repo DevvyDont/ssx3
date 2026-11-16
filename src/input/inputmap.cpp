@@ -156,12 +156,12 @@ extern "C" void cInputMap_purgeMapFile(void* self)
         operator_delete(*(int**)((char*)self + 0x8));
     }
     *(int**)((char*)self + 0x8) = 0;
-    void* p = operator_new_tag(*(int*)((char*)self + 0x10) << 2, D_0048DD30, 0, 0);
-    MEM_copy(p, *(void**)((char*)self + 0x14), *(int*)((char*)self + 0x10) << 2);
+    void* copy = operator_new_tag(*(int*)((char*)self + 0x10) << 2, D_0048DD30, 0, 0);
+    MEM_copy(copy, *(void**)((char*)self + 0x14), *(int*)((char*)self + 0x10) << 2);
     if (*(void**)((char*)self + 0x14) != 0) {
         cMemMan_free(*(void**)((char*)self + 0x14));
     }
-    *(void**)((char*)self + 0x14) = p;
+    *(void**)((char*)self + 0x14) = copy;
     *(int*)((char*)self + 0xC) = *(int*)((char*)self + 0x10);
 }
 #endif
@@ -546,23 +546,23 @@ extern "C" int cInputMapParser_lookupButtonName(cInputMapParser* self, char* nam
     if (func_0041AB78(name, D_004A3EF0, 6) != 0) {
         return -1;
     }
-    int d = name[6] - '0';
-    if ((unsigned char)d >= 10) {
+    int firstDigit = name[6] - '0';
+    if ((unsigned char)firstDigit >= 10) {
         return -1;
     }
-    int n = d;
-    char* p = name + 7;
-    while ((unsigned)(*p - '0') < 10) {
-        n = n * 10 + (*p++ - '0');
+    int n = firstDigit;
+    char* cursor = name + 7;
+    while ((unsigned)(*cursor - '0') < 10) {
+        n = n * 10 + (*cursor++ - '0');
     }
     int alpha = 0;
-    if ((unsigned)(*p - 'a') < 26 || (unsigned)(*p - 'A') < 26) {
+    if ((unsigned)(*cursor - 'a') < 26 || (unsigned)(*cursor - 'A') < 26) {
         alpha = 1;
     }
     if (alpha) {
         return -1;
     }
-    if (*p != '_' && n < 0x39C) {
+    if (*cursor != '_' && n < 0x39C) {
         return n;
     }
     return -1;

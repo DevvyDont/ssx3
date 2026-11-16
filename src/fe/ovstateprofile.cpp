@@ -1041,12 +1041,12 @@ extern char D_00471E38[];
  */
 extern "C" void cOVState_AUTOSAVE_displayStatus(void* self)
 {
-    int s = *(int*)((char*)self + 0x1C0);
-    if (s != 0 && s != 6) {
+    int status = *(int*)((char*)self + 0x1C0);
+    if (status != 0 && status != 6) {
         cOVState_AUTOSAVE_displayOn(self);
     } else {
-        sObj002122E8* o = (sObj002122E8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38));
-        o->vt[9].fn((char*)o + o->vt[9].delta, 0);
+        sObj002122E8* autosaveText = (sObj002122E8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38));
+        autosaveText->vt[9].fn((char*)autosaveText + autosaveText->vt[9].delta, 0);
     }
 }
 #endif
@@ -1089,11 +1089,11 @@ public:
 extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
 {
     void* mp = cSSXApp_getMCManager(SSXApp);
-    int v = *(int*)((char*)self + 0x1A8);
-    if (v == *(int*)((char*)self + 0x230)) {
+    int processState = *(int*)((char*)self + 0x1A8);
+    if (processState == *(int*)((char*)self + 0x230)) {
         return;
     }
-    *(int*)((char*)self + 0x230) = v;
+    *(int*)((char*)self + 0x230) = processState;
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2770));
     if (obj == 0) {
         return;
@@ -1104,9 +1104,9 @@ extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 9, 0, 0);
         }
-        cUIObj_2360* t = (cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38));
-        t->setVisible(1);
-        cUIText_setUnicodeStringByID((cUIText*)t, GetHashValue32(D_00471E58));
+        cUIObj_2360* autosaveText = (cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38));
+        autosaveText->setVisible(1);
+        cUIText_setUnicodeStringByID((cUIText*)autosaveText, GetHashValue32(D_00471E58));
     } else {
         cUIThing_deleteAnimation(obj);
         ((cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_00471E38)))->setVisible(0);
@@ -1163,16 +1163,16 @@ struct sVEnt_00212508 { short delta; short index; void (*fn)(void*); };
 extern "C" void cOVState_AUTOSAVE_onDestroyScreen(void* self)
 {
     func_001D58B8(self);
-    int s = *(int*)((char*)self + 0x22C);
-    if (s == 1) {
+    int parentScreen = *(int*)((char*)self + 0x22C);
+    if (parentScreen == 1) {
         cGame_exit(SSXApp->Game, 0);
-    } else if (s == 6) {
-        void* m = func_00194738(cMemMan_alloc(0x4C, D_00471E70, 0, 0), *(void**)((char*)self + 0x10));
-        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, m);
-    } else if (s == 7) {
-        void* m = func_001F3700(cMemMan_alloc(0x58, D_00471E80, 0, 0), *(void**)((char*)self + 0x10));
-        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, m);
-    } else if (s == 0) {
+    } else if (parentScreen == 6) {
+        void* nextState = func_00194738(cMemMan_alloc(0x4C, D_00471E70, 0, 0), *(void**)((char*)self + 0x10));
+        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
+    } else if (parentScreen == 7) {
+        void* nextState = func_001F3700(cMemMan_alloc(0x58, D_00471E80, 0, 0), *(void**)((char*)self + 0x10));
+        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
+    } else if (parentScreen == 0) {
         void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewRaceInterface_setGameMode(race, 4);

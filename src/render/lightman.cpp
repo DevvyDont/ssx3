@@ -2067,12 +2067,12 @@ extern "C" sLmLight_15E8* cFont_cFont(sLmLight_15E8* self, const char* name, int
     self->v30 = sLmVec2_15E8(1.0f, 1.0f);
     self->v38 = self->v30;
     {
-        sLmVec4_15E8 t;
-        t.x = 1.0f;
-        t.y = 1.0f;
-        t.z = 1.0f;
-        t.w = 1.0f;
-        self->v40 = t;
+        sLmVec4_15E8 white;
+        white.x = 1.0f;
+        white.y = 1.0f;
+        white.z = 1.0f;
+        white.w = 1.0f;
+        self->v40 = white;
     }
     self->v50 = sLmVec4_15E8(1.0f, 0.0f, 0.0f, 0.0f);
     self->b64 = 0;

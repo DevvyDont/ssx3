@@ -346,21 +346,21 @@ extern "C" int cComputer_chooseRandomGrab(cComputer* self, float t);
  */
 extern "C" int cComputer_chooseGrabMain(cComputer* self, float airTime)
 {
-    int r = -1;
+    int currentGrab = -1;
     int skip = self->mToRail != 0 && airTime < 1.0f;
     if (!skip && airTime > 0.75f && airTime != 100.0f)
     {
-        if (cComputer_shouldRiderUber(self)) r = cComputer_chooseRandomUberGrab(self, airTime);
-        if (r == -1)
+        if (cComputer_shouldRiderUber(self)) currentGrab = cComputer_chooseRandomUberGrab(self, airTime);
+        if (currentGrab == -1)
         {
-            if (cComputer_shouldRiderTweak(self)) r = cComputer_chooseRandomTweakGrab(self, airTime);
-            if (r == -1)
+            if (cComputer_shouldRiderTweak(self)) currentGrab = cComputer_chooseRandomTweakGrab(self, airTime);
+            if (currentGrab == -1)
             {
-                if (cComputer_shouldRiderGrab(self)) r = cComputer_chooseRandomGrab(self, airTime);
+                if (cComputer_shouldRiderGrab(self)) currentGrab = cComputer_chooseRandomGrab(self, airTime);
             }
         }
     }
-    return r;
+    return currentGrab;
 }
 #endif
 
@@ -407,11 +407,11 @@ extern "C" int cComputer_chooseRandomGrab(cComputer* computer, float time)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
     int anim = func_001500D8(iface, riderV7_10CBE0(((char*)self->mRider)), idx);
     float spd = cRider_getGrabAnimSpeedScale(((char*)self->mRider));
-    float a = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
-    float b = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
-    if (time < a) return -1;
-    self->mGrabEndTime = time - a;
-    self->mHoldToLandTime = a - b;
+    float grabTime = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
+    float holdTime = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
+    if (time < grabTime) return -1;
+    self->mGrabEndTime = time - grabTime;
+    self->mHoldToLandTime = grabTime - holdTime;
     if (idx != -1 && idx < 15)
     {
         self->GrabHistoryCounter[idx]++;
@@ -474,15 +474,15 @@ extern "C" int cComputer_chooseRandomTweakGrab(cComputer* computer, float time)
         if (0.0f < *(float*)(((char*)self->mRider) + 0x2F0) && alt != 0x1B6)
             continue;
         int anim2 = func_001500D8(iface, riderV7_10CD20(((char*)self->mRider)), i);
-        float a = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim2, 1) / spd;
-        float b = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
-        float c = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
-        float sum = c + a;
+        float normalTime = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim2, 1) / spd;
+        float tweakHoldTime = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
+        float tweakTime = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
+        float sum = tweakTime + normalTime;
         if (sum < time && self->TweakHistoryCounter[i] < best)
         {
             self->mIsTweak = 1;
             found = i;
-            self->mHoldToLandTime = c - b;
+            self->mHoldToLandTime = tweakTime - tweakHoldTime;
             self->mGrabEndTime = time - sum;
             best = self->TweakHistoryCounter[i];
         }
@@ -546,15 +546,15 @@ extern "C" int cComputer_chooseRandomUberGrab(cComputer* computer, float time)
         if (anim == 0x1B6)
             continue;
         int anim2 = func_001500D8(iface, riderV7_10CF68(((char*)self->mRider)), i);
-        float a = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim2, 1) / spd;
-        float b = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
-        float c = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
-        float sum = c + a;
+        float normalTime = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim2, 1) / spd;
+        float uberHoldTime = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
+        float uberTime = func_00312820(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
+        float sum = uberTime + normalTime;
         if (sum < time && self->UberHistoryCounter[i] < best)
         {
             self->mIsUber = 1;
             found = i;
-            self->mHoldToLandTime = c - b;
+            self->mHoldToLandTime = uberTime - uberHoldTime;
             self->mGrabEndTime = time - sum;
             best = self->UberHistoryCounter[i];
         }
@@ -818,10 +818,10 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
     if (kind > 8) {
         kind = 0;
     }
-    int b2 = (flags >> 2) & 1;
-    int b1 = (flags >> 1) & 1;
-    int b3 = (flags >> 3) & 1;
-    float base = cComputer_calculateDifficultyScore(self, b3, b2, b1);
+    int isMedium = (flags >> 2) & 1;
+    int isHard = (flags >> 1) & 1;
+    int isEasy = (flags >> 3) & 1;
+    float base = cComputer_calculateDifficultyScore(self, isEasy, isMedium, isHard);
     if (base <= 0.0f) {
         return 0.0f;
     }
@@ -838,11 +838,11 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
             return 0.0f;
         }
     }
-    char* r = (char*)self->mRider;
-    float len = vu0Length_10D410(*(sVec4_10D410*)(r + 0x1E0));
+    char* rider = (char*)self->mRider;
+    float len = vu0Length_10D410(*(sVec4_10D410*)(rider + 0x1E0));
     float total = 22.0f;
-    float s = func_00112588(r, 1) / len;
-    sVec4_10D410 pos = vu0Add_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x110), vu0Scale_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x1E0), s));
+    float lookAheadSec = func_00112588(rider, 1) / len;
+    sVec4_10D410 pos = vu0Add_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x110), vu0Scale_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x1E0), lookAheadSec));
     sVec4_10D410 out;
     float t;
     func_0026A428(tgt, &pos, &out, &t, 1);
@@ -916,18 +916,18 @@ INCLUDE_ASM("ai/computer", cComputer_calculateDifficultyScore);
  */
 extern "C" float cComputer_calculateDifficultyScore(cComputer* self, int IsEasy, int IsMedium, int IsHard)
 {
-    short s = self->mPathDifficulty;
-    if (s == 0)
+    short pathDifficulty = self->mPathDifficulty;
+    if (pathDifficulty == 0)
     {
         if (!IsEasy)
             return 0.0f;
     }
-    else if (s == 1)
+    else if (pathDifficulty == 1)
     {
         if (!IsMedium)
             return 0.0f;
     }
-    else if (s == 2)
+    else if (pathDifficulty == 2)
     {
         if (!IsHard)
             return 0.0f;
@@ -965,10 +965,10 @@ struct sComputer_0010D8F8
  */
 extern "C" int cComputer_myOpponentIndex(cComputer* self)
 {
-    sComputer_0010D8F8* p = (sComputer_0010D8F8*)self->mRider;
-    for (int i = 0; i < 6; i++, p++)
+    sComputer_0010D8F8* relation = (sComputer_0010D8F8*)self->mRider;
+    for (int i = 0; i < 6; i++, relation++)
     {
-        if (p->a != 0 && p->b != 0)
+        if (relation->a != 0 && relation->b != 0)
             return i;
     }
     return -1;
@@ -993,11 +993,11 @@ float func_00113128(void* self);
 extern "C" int cComputer_isFarBehind(cComputer* self)
 {
     // PORT: func_0010DEB0 returns a pointer as int (unit declaration).
-    int p = func_0010DEB0(self);
-    if (p == 0)
+    int opponent = func_0010DEB0(self);
+    if (opponent == 0)
         return 0;
-    float d = func_00113128((void*)p) - (self->mRider)->mDistToFinish;
-    if (d < *(float*)((char*)(self->mRider) + 0xDC))
+    float relDist = func_00113128((void*)opponent) - (self->mRider)->mDistToFinish;
+    if (relDist < *(float*)((char*)(self->mRider) + 0xDC))
         return 1;
     return 0;
 }
@@ -1019,11 +1019,11 @@ float func_00113128(void* self);
 extern "C" int cComputer_isFarAhead(cComputer* self)
 {
     // PORT: func_0010DEB0 returns a pointer as int (unit declaration).
-    int p = func_0010DEB0(self);
-    if (p == 0)
+    int opponent = func_0010DEB0(self);
+    if (opponent == 0)
         return 0;
-    float d = func_00113128((void*)p) - (self->mRider)->mDistToFinish;
-    if (*(float*)((char*)self->mRider + 0xE0) < d)
+    float relDist = func_00113128((void*)opponent) - (self->mRider)->mDistToFinish;
+    if (*(float*)((char*)self->mRider + 0xE0) < relDist)
         return 1;
     return 0;
 }
@@ -1040,12 +1040,12 @@ INCLUDE_ASM("ai/computer", cComputer_checkForAttack);
  */
 extern "C" int cComputer_checkForAttack(cComputer* self, int oppID)
 {
-    void* p = self->mRider;
-    int r = 0;
-    if (*(int*)((char*)p + 0xf0) != 0) {
-        r = *(int*)((char*)p + 0xf8) == oppID;
+    void* rider = self->mRider;
+    int shouldAttack = 0;
+    if (*(int*)((char*)rider + 0xf0) != 0) {
+        shouldAttack = *(int*)((char*)rider + 0xf8) == oppID;
     }
-    return r;
+    return shouldAttack;
 }
 #endif
 
@@ -1071,15 +1071,15 @@ unsigned int AIrand();
  */
 extern "C" int cComputer_checkForBlock(cComputer* self)
 {
-    float t = self->mBlockTimer;
-    if (t < 0.0f)
+    float blockTimer = self->mBlockTimer;
+    if (blockTimer < 0.0f)
     {
         self->mBlockTimer = 0.0f;
         return 0;
     }
-    if (0.0f < t)
+    if (0.0f < blockTimer)
     {
-        self->mBlockTimer = t - 0.01666666753590107f;
+        self->mBlockTimer = blockTimer - 0.01666666753590107f;
         return self->mShouldIBlock;
     }
     if (func_001298C8() % 6 != 0)
@@ -1088,21 +1088,21 @@ extern "C" int cComputer_checkForBlock(cComputer* self)
     int i;
     for (i = 0; i < ai->count; i++)
     {
-        char* o = (char*)self->mRider + 0x6C0;
-        sVE_0010DA10* ve = &(*(sVE_0010DA10**)o)[7];
-        if (i == ve->fn(o + ve->delta))
+        char* myBeing = (char*)self->mRider + 0x6C0;
+        sVE_0010DA10* ve = &(*(sVE_0010DA10**)myBeing)[7];
+        if (i == ve->fn(myBeing + ve->delta))
             continue;
-        char* o2 = ai->riders[i] + 0x6C0;
-        sVE_0010DA10* ve2 = &(*(sVE_0010DA10**)o2)[8];
-        if (ve2->fn(o2 + ve2->delta) == 0)
+        char* otherBeing = ai->riders[i] + 0x6C0;
+        sVE_0010DA10* ve2 = &(*(sVE_0010DA10**)otherBeing)[8];
+        if (ve2->fn(otherBeing + ve2->delta) == 0)
             continue;
         if (!(((sRider_0010DA10*)self->mRider)->ent[i].dist < 200.0f))
             continue;
         if (func_00311AE8(*(void**)(ai->riders[i] + 0x784), 1) != 13)
             continue;
-        unsigned int r = AIrand() % 100;
+        unsigned int randomRoll = AIrand() % 100;
         int* pf = (int*)(((char*)self) + 0xF34);
-        *pf = (float)r < 25.0f;
+        *pf = (float)randomRoll < 25.0f;
         self->mBlockTimer = 2.0f;
         return self->mShouldIBlock;
     }
@@ -1332,21 +1332,21 @@ extern "C" void cRider_flagEventBoostPowerUp(void* self, int mask, float amt)
 {
     if (*(int*)((char*)self + 0x304) == 3)
         return;
-    float zero = 0.0f;
-    if (amt == zero)
+    float floatZero = 0.0f;
+    if (amt == floatZero)
         return;
-    if (amt > zero)
+    if (amt > floatZero)
     {
         func_00149690(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self + 0x86C), *(int*)((char*)self + 0xB34));
         if ((mask & *(int*)((char*)self + 0xB28)) == 0)
             return;
     }
     func_0029AB08(func_0028B180(), self, *(float*)((char*)self + 0x2F8), amt);
-    *(float*)((char*)self + 0x2F8) = clamp_10E098(*(float*)((char*)self + 0x2F8) + amt, zero, 1.0f);
-    if (*(float*)((char*)self + 0x2F8) == 1.0f && amt > zero && *(int*)((char*)self + 0xB2C) != 0)
+    *(float*)((char*)self + 0x2F8) = clamp_10E098(*(float*)((char*)self + 0x2F8) + amt, floatZero, 1.0f);
+    if (*(float*)((char*)self + 0x2F8) == 1.0f && amt > floatZero && *(int*)((char*)self + 0xB2C) != 0)
     {
-        if (*(float*)((char*)self + 0x2F0) == zero)
-            func_0010E028(self, 5, zero);
+        if (*(float*)((char*)self + 0x2F0) == floatZero)
+            func_0010E028(self, 5, floatZero);
         if (*(int*)((char*)self + 0x2F4) <= 0)
             *(int*)((char*)self + 0x2F4) += 1;
         if (*(int*)((char*)self + 0x2F4) >= 1 && *(int*)((char*)self + 0x2F4) <= 9)
@@ -3021,9 +3021,9 @@ extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* self)
 {
     if (D_004A4534 != 0) {
         cRider* rider = self->GroundMotion.mRider;
-        char* o = (char*)&rider->mVtbl;
-        sVE_00111948* e = &(*(sVE_00111948**)o)[kRiderVt_isComputer];
-        if (e->fn(o + e->delta) != 0)
+        char* riderBeing = (char*)&rider->mVtbl;
+        sVE_00111948* isComputerSlot = &(*(sVE_00111948**)riderBeing)[kRiderVt_isComputer];
+        if (isComputerSlot->fn(riderBeing + isComputerSlot->delta) != 0)
             return;
     }
     cPlayerLights_Clear((char*)self + 0xD30);
@@ -3067,9 +3067,9 @@ extern "C" void cRiderHandler_renderRiderFX(cRiderHandler* self)
 {
     if (D_004A4534 != 0) {
         cRider* rider = self->GroundMotion.mRider;
-        char* o = (char*)&rider->mVtbl;
-        sVE_001119F8* e = &(*(sVE_001119F8**)o)[kRiderVt_isComputer];
-        if (e->fn(o + e->delta) != 0)
+        char* riderBeing = (char*)&rider->mVtbl;
+        sVE_001119F8* isComputerSlot = &(*(sVE_001119F8**)riderBeing)[kRiderVt_isComputer];
+        if (isComputerSlot->fn(riderBeing + isComputerSlot->delta) != 0)
             return;
     }
     cBoardWakeFX_render((char*)self + 0x3B0);
@@ -3154,16 +3154,16 @@ extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, char* data
     func_00113AA0(*(void**)((char*)self->GroundMotion.mRider + 0x788), data);
     func_001174B0(*(void**)((char*)self->GroundMotion.mRider + 0x790), data);
     unsigned int id0 = 0xFFFFFFFF;
-    char* p0 = **(char***)((char*)self->GroundMotion.mRider + 0x864);
-    if (p0 != 0) {
-        id0 = *(unsigned int*)(p0 + 0x150);
+    char* line = **(char***)((char*)self->GroundMotion.mRider + 0x864);
+    if (line != 0) {
+        id0 = *(unsigned int*)(line + 0x150);
     }
     st->Write(&id0, 4);
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0x864), 0x10);
     unsigned int id1 = 0xFFFFFFFF;
-    char* p1 = **(char***)((char*)self->GroundMotion.mRider + 0x868);
-    if (p1 != 0) {
-        id1 = *(unsigned int*)(p1 + 0x150);
+    char* wall = **(char***)((char*)self->GroundMotion.mRider + 0x868);
+    if (wall != 0) {
+        id1 = *(unsigned int*)(wall + 0x150);
     }
     st->Write(&id1, 4);
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0x868), 0x10);
@@ -3301,17 +3301,17 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* dat
     func_00113AD8(*(void**)((char*)self->GroundMotion.mRider + 0x788), data);
     func_001174E8(*(void**)((char*)self->GroundMotion.mRider + 0x790), data);
     int ids[2];
-    sRef_00111D98 r0;
-    st->Read(&r0, 4);
+    sRef_00111D98 lineId;
+    st->Read(&lineId, 4);
     st->Read(*(void**)((char*)self->GroundMotion.mRider + 0x864), 0x10);
-    if (~r0.id != 0) {
-        **(void***)((char*)self->GroundMotion.mRider + 0x864) = r0.get();
+    if (~lineId.id != 0) {
+        **(void***)((char*)self->GroundMotion.mRider + 0x864) = lineId.get();
     }
-    sRef_00111D98 r1;
-    st->Read(&r1, 4);
+    sRef_00111D98 wallId;
+    st->Read(&wallId, 4);
     st->Read(*(void**)((char*)self->GroundMotion.mRider + 0x868), 0x10);
-    if (~r1.id != 0) {
-        **(void***)((char*)self->GroundMotion.mRider + 0x868) = r1.get();
+    if (~wallId.id != 0) {
+        **(void***)((char*)self->GroundMotion.mRider + 0x868) = wallId.get();
     }
     st->Read(((char*)self) + 0xDE0, 4);
     st->Read(((char*)self) + 0xDE4, 4);
@@ -3345,9 +3345,9 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* dat
     st->Read(ids, 8);
     *(void**)((char*)self->GroundMotion.mRider + 0xAB4) = func_0026AF70(D_004D33A0, ids[0]);
     *(void**)((char*)self->GroundMotion.mRider + 0xAB8) = func_0026AF88(D_004D33A0, ids[1]);
-    sQuad_00111D98* q = *(sQuad_00111D98**)((char*)self->GroundMotion.mRider + 0x78C);
-    if (q != 0) {
-        *q = *(sQuad_00111D98*)((char*)self->GroundMotion.mRider + 0x110);
+    sQuad_00111D98* focusBox = *(sQuad_00111D98**)((char*)self->GroundMotion.mRider + 0x78C);
+    if (focusBox != 0) {
+        *focusBox = *(sQuad_00111D98*)((char*)self->GroundMotion.mRider + 0x110);
     }
     func_00312598(*(void**)((char*)self->GroundMotion.mRider + 0x784), 0);
     cAnimModel_buildSkelMatrices(*(void**)((char*)self->GroundMotion.mRider + 0x780));

@@ -136,12 +136,12 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     int n = self->count;
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
-    sGridVEntry* e = &(((sGridVEntry*)world->mVtbl))[76];
-    self->mesh = (sGridMesh*)e->fn((char*)world + e->delta, n, 2, 0x20000000);
-    sGridV4*& p0 = self->pts[0];
-    p0 = new (D_0048E778, 0x20000000, 0) sGridV4[nverts];
-    sGridV4*& p1 = self->pts[1];
-    p1 = new (D_0048E788, 0x20000000, 0) sGridV4[nverts];
+    sGridVEntry* vtEntry = &(((sGridVEntry*)world->mVtbl))[76];
+    self->mesh = (sGridMesh*)vtEntry->fn((char*)world + vtEntry->delta, n, 2, 0x20000000);
+    sGridV4*& pts0 = self->pts[0];
+    pts0 = new (D_0048E778, 0x20000000, 0) sGridV4[nverts];
+    sGridV4*& pts1 = self->pts[1];
+    pts1 = new (D_0048E788, 0x20000000, 0) sGridV4[nverts];
     self->idx = new (D_0048E798, 0x20000000, 0) unsigned char[ntris * 3];
     sGridV3 pos[4];
     sGridV2 uvs[4];
@@ -502,19 +502,19 @@ static inline float Torque_6E38(float k, const sV4_6E38& a, const sV4_6E38& b)
  */
 extern "C" void cFlexBridgeNode_applyForce(cBridge_6E38* self, sNode_6E38* intInfo, sV4_6E38* force)
 {
-    sBridgeData_6E38* d = (sBridgeData_6E38*)self;
+    sBridgeData_6E38* data = (sBridgeData_6E38*)self;
     if (intInfo->idx < 0) {
         return;
     }
     sMat_6E38* transform = self->GetMatrix();
-    sV4_6E38 v = vu0Sub_6E38(intInfo->pos, Pos_6E38(transform));
-    sV4_6E38 y = vu0MulMat_6E38(transform, vu0Norm_6E38(d->axis));
-    sV4_6E38 n = vu0MulMat_6E38(transform, d->pts[intInfo->idx]);
-    float yoffset = vu0Dot_6E38(v, y);
+    sV4_6E38 relPos = vu0Sub_6E38(intInfo->pos, Pos_6E38(transform));
+    sV4_6E38 y = vu0MulMat_6E38(transform, vu0Norm_6E38(data->axis));
+    sV4_6E38 n = vu0MulMat_6E38(transform, data->pts[intInfo->idx]);
+    float yoffset = vu0Dot_6E38(relPos, y);
     int seg = intInfo->idx / 2;
-    sSeg_6E38* pNode = d->segs;
-    vu0AddEq_6E38(pNode[seg].force, vu0Scale_6E38(d->kLin, ToLocal_6E38(transform, *force)));
-    pNode[seg].torque += Torque_6E38(d->kAng, n, *force) * yoffset;
+    sSeg_6E38* pNode = data->segs;
+    vu0AddEq_6E38(pNode[seg].force, vu0Scale_6E38(data->kLin, ToLocal_6E38(transform, *force)));
+    pNode[seg].torque += Torque_6E38(data->kAng, n, *force) * yoffset;
 }
 #endif
 
@@ -660,16 +660,16 @@ extern "C" void cFlexBridgeNode_updateIntersectInfo(sFlBridge_70D0* self, sFlSta
 {
     int idx = intInfo->idx;
     if (idx >= 0) {
-        int h = idx / 2;
+        int pairIndex = idx / 2;
         sFlEnt_70D0* ents = self->ents;
         sFlVE_70D0* vt = self->vt;
-        sV4_70D0* m = vt[24].fn((char*)self + vt[24].delta);
-        sFlEnt_70D0* e = (sFlEnt_70D0*)(h * 0x50 + (int)ents);
-        sV4_70D0 r = vu0MtxMul_70D0(m, vu0ScaleP_70D0(&D_004FF140_70D0, e->f24));
-        sV4_70D0 d = vu0Sub_70D0(intInfo->v[0], vu0MtxMul_70D0(m, e->a));
-        sV4_70D0 t = vu0Add_70D0(vu0MtxMul_70D0(m, e->b), vu0Cross_70D0(d, r));
+        sV4_70D0* matrix = vt[24].fn((char*)self + vt[24].delta);
+        sFlEnt_70D0* entry = (sFlEnt_70D0*)(pairIndex * 0x50 + (int)ents);
+        sV4_70D0 axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&D_004FF140_70D0, entry->f24));
+        sV4_70D0 d = vu0Sub_70D0(intInfo->v[0], vu0MtxMul_70D0(matrix, entry->a));
+        sV4_70D0 t = vu0Add_70D0(vu0MtxMul_70D0(matrix, entry->b), vu0Cross_70D0(d, axisVec));
         vu0AddEq_70D0(intInfo->v[2], t);
-        vu0AddEq_70D0(intInfo->v[3], r);
+        vu0AddEq_70D0(intInfo->v[3], axisVec);
     }
 }
 #endif
@@ -881,28 +881,28 @@ extern "C" int cFlexBridgeNode_intersect(sFNode_7268* self, sFTester_7268* teste
     mesh.indices = self->indices;
     mesh.verts = self->pts;
     mesh.normals = self->normals;
-    sFM_7268* m = ((GetMtxFn_7268)self->vt[24].fn)((char*)self + self->vt[24].delta);
+    sFM_7268* matrix = ((GetMtxFn_7268)self->vt[24].fn)((char*)self + self->vt[24].delta);
     sFM_7268 inv;
-    Copy_7268(&inv, m);
+    Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
     ((SetXformFn_7268)tester->vt[1].fn)((char*)tester + tester->vt[1].delta, &inv, 1.0f / self->data->scale);
     int n = func_0032C0F8(tester, &mesh, 1, out, cap);
     ((VoidFn_7268)tester->vt[2].fn)((char*)tester + tester->vt[2].delta);
     for (int i = 0; i < n; i++) {
-        sFHit_7268* h = &out[i];
-        Reset_7268(h);
-        float s = self->data->scale;
+        sFHit_7268* hit = &out[i];
+        Reset_7268(hit);
+        float dataScale = self->data->scale;
         float one = 1.0f;
-        h->pos = MulVec_7268(m, Mul_7268(h->pos, sFV_7268(s, s, s, one)));
-        h->nrm = MulVec_7268(m, h->nrm);
-        h->type = 1;
-        h->owner = self->data;
+        hit->pos = MulVec_7268(matrix, Mul_7268(hit->pos, sFV_7268(dataScale, dataScale, dataScale, one)));
+        hit->nrm = MulVec_7268(matrix, hit->nrm);
+        hit->type = 1;
+        hit->owner = self->data;
         int k = self->data->list->count - 1;
-        h->f48 = 0;
-        h->f5C = k;
-        h->v20 = D_004FF120_v7268;
-        h->v30 = D_004FF120_v7268;
-        h->f4C = *(short*)(self->data->elems + k * 12 + 0x1A);
+        hit->f48 = 0;
+        hit->f5C = k;
+        hit->v20 = D_004FF120_v7268;
+        hit->v30 = D_004FF120_v7268;
+        hit->f4C = *(short*)(self->data->elems + k * 12 + 0x1A);
     }
     return n;
 }
@@ -1148,17 +1148,17 @@ extern "C" void cFlexBridgeNode_updateGrid(void* vself)
 {
     sFlexBridge_75D8* self = (sFlexBridge_75D8*)vself;
     int n = self->count;
-    sV4_75D8 a = Scale_75D8(D_004FF160, Length_75D8(self->up));
-    sV4_75D8 b = Scale_75D8(D_004FF160, Length_75D8(self->side));
+    sV4_75D8 upRef = Scale_75D8(D_004FF160, Length_75D8(self->up));
+    sV4_75D8 sideRef = Scale_75D8(D_004FF160, Length_75D8(self->side));
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
     sFlexNode_75D8* node = self->nodes;
     int i;
     for (i = 0; i < n; i++) {
-        float s, c;
-        func_0031BE50(&s, &c, node->angle);
-        self->pts[i] = Add_75D8(Add_75D8(node->pos, Scale_75D8(self->up, c)), Scale_75D8(a, s));
-        self->pts[n + i] = Sub_75D8(Add_75D8(node->pos, Scale_75D8(self->side, c)), Scale_75D8(b, s));
+        float sinAngle, cosAngle;
+        func_0031BE50(&sinAngle, &cosAngle, node->angle);
+        self->pts[i] = Add_75D8(Add_75D8(node->pos, Scale_75D8(self->up, cosAngle)), Scale_75D8(upRef, sinAngle));
+        self->pts[n + i] = Sub_75D8(Add_75D8(node->pos, Scale_75D8(self->side, cosAngle)), Scale_75D8(sideRef, sinAngle));
         node++;
     }
     int k;
@@ -1172,10 +1172,10 @@ extern "C" void cFlexBridgeNode_updateGrid(void* vself)
     sV3_75D8 pos[32];
     float minX = 1e10f, minY = 1e10f, minZ = 1e10f;
     float maxX = -1e10f, maxY = -1e10f, maxZ = -1e10f;
-    sMat_75D8* m = (sMat_75D8*)self->vt[24].fn((char*)self + self->vt[24].delta);
+    sMat_75D8* matrix = (sMat_75D8*)self->vt[24].fn((char*)self + self->vt[24].delta);
     for (int v = 0; v < nverts; v++) {
         pos[v] = self->pts[v];
-        sV4_75D8 w = MulMat_75D8(m, self->pts[v]);
+        sV4_75D8 w = MulMat_75D8(matrix, self->pts[v]);
         minX = w.X() < minX ? w.X() : minX;
         maxX = maxX < w.X() ? w.X() : maxX;
         minY = w.Y() < minY ? w.Y() : minY;
@@ -1256,8 +1256,8 @@ struct sVE24_7B80 { short delta; short index; void* (*fn)(void*); };
 // Draws the bridge piece's model (through its handler if it has one) unless it is culled or not streamed in.
 extern "C" void cFlexBridgeNode_render(char* self)
 {
-    sModel_7B80* m = *(sModel_7B80**)(self + 0x18);
-    if (!IsLoaded_7B80(m)) {
+    sModel_7B80* model = *(sModel_7B80**)(self + 0x18);
+    if (!IsLoaded_7B80(model)) {
         return;
     }
     char* ctx = (char*)cGraphicsMan_TheGraphicsMan;
@@ -1275,16 +1275,16 @@ extern "C" void cFlexBridgeNode_render(char* self)
     sVE24_7B80* sv = *(sVE24_7B80**)(self + 0xC);
     void* mtx = sv[24].fn(self + sv[24].delta);
     TOP_7B80(ctx)[1] = TOP_7B80(ctx)[0];
-    sRS_7B80* t = TOP_7B80(ctx);
-    TOP_7B80(ctx) = t + 1;
-    t[1].f4_2 = 5;
-    char* h = *(char**)(self + 0x78);
-    if (h != 0) {
-        sVE7_7B80* hv = *(sVE7_7B80**)(h + 4);
-        hv[7].fn(h + hv[7].delta, mtx, (*(sModel_7B80**)(self + 0x18))->mesh, 0);
+    sRS_7B80* state = TOP_7B80(ctx);
+    TOP_7B80(ctx) = state + 1;
+    state[1].f4_2 = 5;
+    char* renderer = *(char**)(self + 0x78);
+    if (renderer != 0) {
+        sVE7_7B80* hv = *(sVE7_7B80**)(renderer + 4);
+        hv[7].fn(renderer + hv[7].delta, mtx, (*(sModel_7B80**)(self + 0x18))->mesh, 0);
     } else {
-        sVE96_7B80* v96 = *(sVE96_7B80**)(ctx + 0x10D8);
-        v96[96].fn(ctx + v96[96].delta, *(void**)(self + 0x18), 0, 0, 0);
+        sVE96_7B80* ctxVtbl = *(sVE96_7B80**)(ctx + 0x10D8);
+        ctxVtbl[96].fn(ctx + ctxVtbl[96].delta, *(void**)(self + 0x18), 0, 0, 0);
     }
     TOP_7B80(ctx)--;
 }

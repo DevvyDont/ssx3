@@ -65,9 +65,9 @@ void cMemMan_free(void* p);
  */
 extern "C" void cReplayFramePtr_purgeBlock(cReplayFramePtr* self)
 {
-    void* p = self->Block;
-    if (p != 0) {
-        cMemMan_free(p);
+    void* block = self->Block;
+    if (block != 0) {
+        cMemMan_free(block);
     }
     cReplayFramePtr_setBlockInl(self, 0, 0);
 }
@@ -480,9 +480,9 @@ extern "C" void cReplay_setupGameCamerasOnExitReplay(cReplay* self)
     int n = list->count;
     int i;
     for (i = 0; i < n; i++) {
-        char* r = list->riders[i];
-        void* cam = *(void**)(r + 0xA8);
-        cCamera_setCurrentController(r, 2);
+        char* camera = list->riders[i];
+        void* cam = *(void**)(camera + 0xA8);
+        cCamera_setCurrentController(camera, 2);
         cChaseCameraController_switchCamera_EndReplay(cam);
     }
     self->CurrentReplayCamIndex = 0;
@@ -531,20 +531,20 @@ void cReplay_setReplayState(void* self, int state);
  */
 extern "C" void* cReplay_cReplay(cReplay* self)
 {
-    char* p = (char*)self + 0x2C;
-    for (int i = 15; i != -1; i--, p += 0x38) {
-        func_0026D5E8(p);
+    char* frame = (char*)self + 0x2C;
+    for (int i = 15; i != -1; i--, frame += 0x38) {
+        func_0026D5E8(frame);
     }
-    char* q = (char*)self + 0x494;
+    char* highlight = (char*)self + 0x494;
     func_0026E5A8((char*)self + 0x3B0);
     func_0026E5A8((char*)self + 0x3BC);
-    for (int i = 1; i != -1; i--, q += 0xB4) {
-        func_00272288(q);
+    for (int i = 1; i != -1; i--, highlight += 0xB4) {
+        func_00272288(highlight);
     }
     cReplay_setReplayState(self, 15);
     for (int i = 1; i >= 0; i--) {
-        int* a = (int*)(0x48C + (char*)self);
-        a[i] = 0;
+        int* caches = (int*)(0x48C + (char*)self);
+        caches[i] = 0;
     }
     return ((void*)self);
 }
@@ -672,12 +672,12 @@ struct sFpSlot_F228 {
 extern "C" void cReplay_reset(cReplay* self)
 {
     unsigned int st = self->State - 14;
-    bool b = !(st < 2);
-    if (!b) return;
+    bool resettable = !(st < 2);
+    if (!resettable) return;
     func_0026F498(self);
     int i = 0;
-    char* l0 = ((char*)self) + 0x3B0;
-    char* l1 = ((char*)self) + 0x3BC;
+    char* frameList = ((char*)self) + 0x3B0;
+    char* freeList = ((char*)self) + 0x3BC;
     int none = -1;
     self->SaveState = 15;
     cReplay_setReplayState(self, 10);
@@ -718,24 +718,24 @@ extern "C" void cReplay_reset(cReplay* self)
     self->WriteSaveSize = 0;
     self->WriteRemaining = 0;
     self->WriteFrameCount = 0;
-    sFpSlot_F228* e = (sFpSlot_F228*)(((char*)self) + 0x494);
-    char* d = ((char*)self) + 0x498;
+    sFpSlot_F228* highlight = (sFpSlot_F228*)(((char*)self) + 0x494);
+    char* highlightData = ((char*)self) + 0x498;
     void** pp = (void**)(((char*)self) + 0x48C);
     do {
         if (*pp) func_0026D168(*pp);
-        e->fB0 = 0;
-        e->id = none;
-        MEM_fill(d, 0, 0xAC);
-        d += 0xB4;
+        highlight->fB0 = 0;
+        highlight->id = none;
+        MEM_fill(highlightData, 0, 0xAC);
+        highlightData += 0xB4;
         pp++;
-        e->id = i;
+        highlight->id = i;
         i++;
-        e++;
+        highlight++;
     } while (i < 2);
-    func_0026E5C0(l0);
-    func_0026E5C0(l1);
+    func_0026E5C0(frameList);
+    func_0026E5C0(freeList);
     for (i = 0; i < self->MaxFrames; i++) {
-        func_0026E5D0(l1, ((char*)self) + 0x2C + i * 0x38);
+        func_0026E5D0(freeList, ((char*)self) + 0x2C + i * 0x38);
     }
     int three = 3;
     self->CurrentReplayCamIndex = 0;
@@ -966,10 +966,10 @@ void cReplay_setReplayState(void* self, int state);
  */
 extern "C" void cReplay_startRace(int* self)
 {
-    int s = *self;
-    bool ok = !(s == 14 || s == 15);
+    int replayState = *self;
+    bool ok = !(replayState == 14 || replayState == 15);
     if (ok) {
-        if (s == 10) {
+        if (replayState == 10) {
             cReplay_setReplayState(self, 11);
         }
     }
@@ -1021,9 +1021,9 @@ extern "C" void cReplay_freeReplayFrame(void* self, void* p);
  */
 extern "C" void cReplay_popReplaySaveFrame(cReplay* self)
 {
-    void* p = self->SaveFrame;
-    if (p != 0) {
-        cReplay_restoreReplayFrame(self, p);
+    void* frame = self->SaveFrame;
+    if (frame != 0) {
+        cReplay_restoreReplayFrame(self, frame);
         cReplay_freeReplayFrame(self, self->SaveFrame);
         self->SaveFrame = 0;
     }

@@ -124,9 +124,9 @@ extern "C" int cAppMan_run(char* self, char* exec, int ac, int av)
     cAppMan_mainLoop(self);
     callv_6D60(self, 0x5C, 4);
     callv_6D60(*(char**)(self + 0x8), 8, 3);
-    char* e = *(char**)(self + 0x8);
-    if (e)
-        call1_6D60(e, 8, 1, 3);
+    char* execMan = *(char**)(self + 0x8);
+    if (execMan)
+        call1_6D60(execMan, 8, 1, 3);
     return 0;
 }
 #endif
@@ -373,12 +373,12 @@ struct sAppObj00317400 {
  */
 extern "C" void cAppMan_loadexecpurge(void* self)
 {
-    sAppObj00317400* o = *(sAppObj00317400**)((char*)self + 8);
-    ((void (*)(void*))o->vt[3].fn)((char*)o + o->vt[3].delta);
-    sAppObj00317400* d = *(sAppObj00317400**)((char*)self + 8);
-    if (d != 0)
+    sAppObj00317400* execMan = *(sAppObj00317400**)((char*)self + 8);
+    ((void (*)(void*))execMan->vt[3].fn)((char*)execMan + execMan->vt[3].delta);
+    sAppObj00317400* execMan2 = *(sAppObj00317400**)((char*)self + 8);
+    if (execMan2 != 0)
     {
-        ((void (*)(void*, int))d->vt[1].fn)((char*)d + d->vt[1].delta, 3);
+        ((void (*)(void*, int))execMan2->vt[1].fn)((char*)execMan2 + execMan2->vt[1].delta, 3);
     }
 }
 #endif

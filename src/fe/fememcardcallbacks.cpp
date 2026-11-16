@@ -39,19 +39,19 @@ extern "C" void cFEMemCard_callbackSaveSuccess(void)
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x1F0) = 0;
     if (*(int*)(fe + 0x208) == 0) {
-        char* o = (char*)SSXApp->FELocale;
-        sVEntryS1D66B0* ovt = *(sVEntryS1D66B0**)(o + 4);
-        void* str = ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004677B8));
+        char* locale = (char*)SSXApp->FELocale;
+        sVEntryS1D66B0* ovt = *(sVEntryS1D66B0**)(locale + 4);
+        void* str = ovt[4].fn(locale + ovt[4].delta, GetHashValue32(D_004677B8));
         char* fe2 = (char*)D_004A2028;
         *(int*)(fe2 + 0x19C) = 5;
         sVEntryVS1D66B0* vt = *(sVEntryVS1D66B0**)(fe2 + 8);
         vt[36].fn(fe2 + vt[36].delta, str, 1, 0, 0, 0, 0);
-        char* o2 = (char*)SSXApp->FELocale;
-        sVEntryS1D66B0* o2vt = *(sVEntryS1D66B0**)(o2 + 4);
-        void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
-        char* m = *(char**)((char*)D_004A2028 + 0x218);
-        sVEntryVS1D66B0* mvt = *(sVEntryVS1D66B0**)(m + 8);
-        mvt[26].fn(m + mvt[26].delta, str2, 0);
+        char* locale2 = (char*)SSXApp->FELocale;
+        sVEntryS1D66B0* o2vt = *(sVEntryS1D66B0**)(locale2 + 4);
+        void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+        char* popup = *(char**)((char*)D_004A2028 + 0x218);
+        sVEntryVS1D66B0* mvt = *(sVEntryVS1D66B0**)(popup + 8);
+        mvt[26].fn(popup + mvt[26].delta, str2, 0);
     } else {
         sVEntryVS1D66B0* vt = *(sVEntryVS1D66B0**)(fe + 8);
         vt[40].fn(fe + vt[40].delta);
@@ -98,19 +98,19 @@ extern "C" void cFEMemCard_callbackReadSuccess(void)
     *(int*)(fe + 0x1B4) = 1;
     *(int*)(fe + 0x1A8) = 0;
     if (*(int*)(fe + 0x204) == 0) {
-        char* o = (char*)SSXApp->FELocale;
-        sVEntryR1D67C8* ovt = *(sVEntryR1D67C8**)(o + 4);
-        void* str = ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_004677D0));
+        char* locale = (char*)SSXApp->FELocale;
+        sVEntryR1D67C8* ovt = *(sVEntryR1D67C8**)(locale + 4);
+        void* str = ovt[4].fn(locale + ovt[4].delta, GetHashValue32(D_004677D0));
         char* fe2 = (char*)D_004A2028;
         *(int*)(fe2 + 0x19C) = 6;
         sVEntryVR1D67C8* vt = *(sVEntryVR1D67C8**)(fe2 + 8);
         vt[36].fn(fe2 + vt[36].delta, str, 1, 0, 0, 0, 0);
-        char* o2 = (char*)SSXApp->FELocale;
-        sVEntryR1D67C8* o2vt = *(sVEntryR1D67C8**)(o2 + 4);
-        void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
-        char* m = *(char**)((char*)D_004A2028 + 0x218);
-        sVEntryVR1D67C8* mvt = *(sVEntryVR1D67C8**)(m + 8);
-        mvt[26].fn(m + mvt[26].delta, str2, 0);
+        char* locale2 = (char*)SSXApp->FELocale;
+        sVEntryR1D67C8* o2vt = *(sVEntryR1D67C8**)(locale2 + 4);
+        void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+        char* popup = *(char**)((char*)D_004A2028 + 0x218);
+        sVEntryVR1D67C8* mvt = *(sVEntryVR1D67C8**)(popup + 8);
+        mvt[26].fn(popup + mvt[26].delta, str2, 0);
     } else {
         sVEntryVR1D67C8* vt = *(sVEntryVR1D67C8**)(fe + 8);
         vt[40].fn(fe + vt[40].delta);
@@ -513,16 +513,16 @@ extern "C" void cFEMemCard_callbackConfirmFormatDone(void)
 {
     void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
     cSSXApp_getMCManager(SSXApp);
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* vt = *(sVEntry001D69E0**)(o + 4);
-    strcpy1(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_00467818)));
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* vt = *(sVEntry001D69E0**)(locale + 4);
+    strcpy1(buf, vt[4].fn(locale + vt[4].delta, GetHashValue32(D_00467818)));
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0x10;
     sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
     vt2[36].fn(fe + vt2[36].delta, buf, 1, 0, 0, 0, 0);
-    char* o2 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* vt4 = *(sVEntry001D69E0**)(o2 + 4);
-    void* str = vt4[4].fn(o2 + vt4[4].delta, GetHashValue32(D_0045F7E0));
+    char* locale2 = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* vt4 = *(sVEntry001D69E0**)(locale2 + 4);
+    void* str = vt4[4].fn(locale2 + vt4[4].delta, GetHashValue32(D_0045F7E0));
     char* m = *(char**)((char*)D_004A2028 + 0x218);
     sVEntryV001D69E0* vt3 = *(sVEntryV001D69E0**)(m + 8);
     vt3[26].fn(m + vt3[26].delta, str, 0);
@@ -606,15 +606,15 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
         char* sf2 = *(char**)(mp + 0x434);
         sVEntryV001D69E0* sfvt2 = *(sVEntryV001D69E0**)sf2;
         sfvt2[14].fn(sf2 + sfvt2[14].delta, *(int*)(mp + 0xF8), name);
-        char* o = (char*)SSXApp->FELocale;
-        sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-        sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467830)), name);
+        char* locale = (char*)SSXApp->FELocale;
+        sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+        sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(D_00467830)), name);
         char* fe = (char*)D_004A2028;
         sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
         vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
-        char* m = *(char**)((char*)D_004A2028 + 0x218);
-        sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-        mvt[25].fn(m + mvt[25].delta, 1);
+        char* popup = *(char**)((char*)D_004A2028 + 0x218);
+        sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+        mvt[25].fn(popup + mvt[25].delta, 1);
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -791,14 +791,14 @@ extern "C" void cFEMemCard_callbackFileExists(void)
     char* fe = (char*)D_004A2028;
     *(int*)(fe + 0x19C) = 0x17;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
-    char* o = *(char**)((char*)app + 0x8C);
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    vt[36].fn(fe + vt[36].delta, ovt[4].fn(o + ovt[4].delta, GetHashValue32(D_00467860)), 1, 0, 0, 0, 0);
-    char* m = *(char**)((char*)D_004A2028 + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    char* o2 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    mvt[26].fn(m + mvt[26].delta, o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0)), 0);
+    char* locale = *(char**)((char*)app + 0x8C);
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    vt[36].fn(fe + vt[36].delta, ovt[4].fn(locale + ovt[4].delta, GetHashValue32(D_00467860)), 1, 0, 0, 0, 0);
+    char* popup = *(char**)((char*)D_004A2028 + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    char* locale2 = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
+    mvt[26].fn(popup + mvt[26].delta, o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(D_0045F7E0)), 0);
     *(int*)((char*)D_004A2028 + 0x1C0) = 1;
 }
 #endif
@@ -875,16 +875,16 @@ extern "C" int cFEMemCard_callbackDeleteDone(void)
 {
     if (*(int*)((char*)D_004A2028 + 0x204) == 0) {
         void* buf = operator_new_tag(0x7D0, D_0045E2A0, 0x100, 0);
-        char* o = (char*)SSXApp->FELocale;
-        sVEntry001D69E0* vt = *(sVEntry001D69E0**)(o + 4);
-        strcpy1(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(D_00467898)));
+        char* locale = (char*)SSXApp->FELocale;
+        sVEntry001D69E0* vt = *(sVEntry001D69E0**)(locale + 4);
+        strcpy1(buf, vt[4].fn(locale + vt[4].delta, GetHashValue32(D_00467898)));
         char* fe = (char*)D_004A2028;
         *(int*)(fe + 0x19C) = 7;
         sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
         vt2[36].fn(fe + vt2[36].delta, buf, 1, 0, 0, 0, 0);
-        char* o2 = (char*)SSXApp->FELocale;
-        sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-        void* str2 = o2vt[4].fn(o2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
+        char* locale2 = (char*)SSXApp->FELocale;
+        sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
+        void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(D_0045F7E0));
         char* m = *(char**)((char*)D_004A2028 + 0x218);
         sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
         mvt[26].fn(m + mvt[26].delta, str2, 0);
@@ -1897,15 +1897,15 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
     *(int*)(self + 0x214) = state;
     switch (state) {
     case 1: {
-        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
-        if (o) {
-            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
-            vt[7].fn(o + vt[7].delta, 0);
+        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        if (widget) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
+            vt[7].fn(widget + vt[7].delta, 0);
         }
-        o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
-        if (o) {
-            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
-            vt[7].fn(o + vt[7].delta, 1);
+        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
+        if (widget) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
+            vt[7].fn(widget + vt[7].delta, 1);
         }
         frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_004A2030));
         char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004678B0));
@@ -1926,15 +1926,15 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
     }
     case 2: {
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
-        if (o) {
-            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
-            vt[7].fn(o + vt[7].delta, 0);
+        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        if (widget) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
+            vt[7].fn(widget + vt[7].delta, 0);
         }
-        o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
-        if (o) {
-            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
-            vt[7].fn(o + vt[7].delta, 1);
+        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
+        if (widget) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
+            vt[7].fn(widget + vt[7].delta, 1);
         }
         frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_00467980));
         char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004678B0));
@@ -1953,15 +1953,15 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
         break;
     }
     case 3: {
-        char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
-        if (o) {
-            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
-            vt[7].fn(o + vt[7].delta, 1);
+        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1600));
+        if (widget) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
+            vt[7].fn(widget + vt[7].delta, 1);
         }
-        o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
-        if (o) {
-            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(o + 8);
-            vt[7].fn(o + vt[7].delta, 0);
+        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(D_004A1608));
+        if (widget) {
+            sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
+            vt[7].fn(widget + vt[7].delta, 0);
         }
         frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(D_004A2038));
         break;
@@ -2105,9 +2105,9 @@ extern "C" void cFEMemCard_createReadBuffer(void* self, unsigned int size)
         *(void**)((char*)self + 0x1D4) = 0;
         *(int*)((char*)self + 0x228) = 0;
     }
-    void* p = operator_new_tag(size, D_00467990, 0x100, 0);
-    *(void**)((char*)self + 0x1D0) = p;
-    *(void**)((char*)self + 0x1D4) = p;
+    void* readBuffer = operator_new_tag(size, D_00467990, 0x100, 0);
+    *(void**)((char*)self + 0x1D0) = readBuffer;
+    *(void**)((char*)self + 0x1D4) = readBuffer;
     *(int*)((char*)self + 0x228) = 1;
 }
 #endif
@@ -2196,39 +2196,39 @@ extern char D_004A1408[];
 extern "C" void cFEPopupConfirm_initPopup(void* self, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
     void* str = (void*)ustrDisplay;
-    char* s = (char*)self;
-    char* sub = s + 0xBC;
+    char* popup = (char*)self;
+    char* sub = popup + 0xBC;
     func_001C57C0(sub, 0, GetHashValue32(D_0045DCC8));
     func_001C57C0(sub, 1, GetHashValue32(D_0045FCD8));
-    *(int*)(s + 0xBC) = 2;
-    *(int*)(s + 0x14C) = layerOffset;
-    *(int*)(s + 0x168) = 0;
-    *(int*)(s + 0x154) = 0;
-    *(int*)(s + 0x164) = 0;
-    char* p;
+    *(int*)(popup + 0xBC) = 2;
+    *(int*)(popup + 0x14C) = layerOffset;
+    *(int*)(popup + 0x168) = 0;
+    *(int*)(popup + 0x154) = 0;
+    *(int*)(popup + 0x164) = 0;
+    char* displayText;
     if (str) {
-        strcpy1(s + 0x360, str);
-        p = s + 0x360;
+        strcpy1(popup + 0x360, str);
+        displayText = popup + 0x360;
     } else {
-        p = s + 0x360;
-        func_002C2540(p, D_004A1408);
+        displayText = popup + 0x360;
+        func_002C2540(displayText, D_004A1408);
     }
-    strcpy1(p, str);
+    strcpy1(displayText, str);
     if (bNoButtons) {
-        *(int*)(s + 0xBF8) = 0;
+        *(int*)(popup + 0xBF8) = 0;
         *(int*)(sub + 0x98) = 1;
         *(int*)(sub + 0) = 0;
     } else if (bYesOnly) {
-        *(int*)(s + 0xBF8) = 1;
+        *(int*)(popup + 0xBF8) = 1;
         *(int*)(sub + 0) = 1;
         *(int*)(sub + 0x98) = passUpdate;
     } else {
-        *(int*)(s + 0xBF8) = 2;
+        *(int*)(popup + 0xBF8) = 2;
         *(int*)(sub + 0x98) = passUpdate;
     }
-    *(char**)(sub + 8) = p;
+    *(char**)(sub + 8) = displayText;
     *(int*)(sub + 4) = 1;
-    if (*(int*)(s + 0x40)) {
+    if (*(int*)(popup + 0x40)) {
         cScreenPopup_redrawPopup_self(self);
     }
 }
@@ -2256,21 +2256,21 @@ extern "C" void cFEPopupConfirm_setButtonText(void* self, void* src, int mode)
 {
     void* slots = (char*)self + 0xBC;
     if (mode == 0) {
-        void* d = (char*)self + 0x9A0;
-        strcpy1(d, src);
-        func_001C57A0(slots, 0, (int)d); // PORT: pointer passed as int
+        void* buttonText = (char*)self + 0x9A0;
+        strcpy1(buttonText, src);
+        func_001C57A0(slots, 0, (int)buttonText); // PORT: pointer passed as int
     } else if (mode == 1) {
         if (*(int*)((char*)self + 0xBF8) >= 2) {
-            void* d = (char*)self + 0xA68;
-            strcpy1(d, src);
-            func_001C57A0(slots, 1, (int)d);
+            void* buttonText = (char*)self + 0xA68;
+            strcpy1(buttonText, src);
+            func_001C57A0(slots, 1, (int)buttonText);
         }
     } else {
-        void* d = (char*)self + 0xB30;
+        void* buttonText = (char*)self + 0xB30;
         *(int*)((char*)self + 0xBF8) = 3;
         *(int*)((char*)self + 0xBC) = 3;
-        strcpy1(d, src);
-        func_001C57A0(slots, 2, (int)d);
+        strcpy1(buttonText, src);
+        func_001C57A0(slots, 2, (int)buttonText);
     }
     if (*(int*)((char*)self + 0x40) != 0) {
         cScreenPopup_redrawPopup_self(self);

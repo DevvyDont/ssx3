@@ -570,16 +570,16 @@ extern "C" sStreamSysA490* cStreamSys_cStreamSys(sStreamSysA490* self, int inchr
     *(const sSsVtblBA490**)(self->vbase + 0x1D4) = &D_004839B8;
     if (!inchrg) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-ups (copied vtables on the stack), written out by hand.
-        sSsVtblAA490 t1 = D_00483998;
-        *(sSsVtblAA490**)(*(char**)(self->vbase + 0x1D8) + 4) = &t1;
+        sSsVtblAA490 vtCopyA = D_00483998;
+        *(sSsVtblAA490**)(*(char**)(self->vbase + 0x1D8) + 4) = &vtCopyA;
         char* base1 = *(char**)(self->vbase + 0x1D8) - 0xC;
-        int d1 = (char*)self - base1;
-        t1.e[1].delta = D_00483998.e[1].delta + d1;
-        sSsVtblBA490 t2 = D_004839B8;
-        *(sSsVtblBA490**)(self->vbase + 0x1D4) = &t2;
+        int adjustA = (char*)self - base1;
+        vtCopyA.e[1].delta = D_00483998.e[1].delta + adjustA;
+        sSsVtblBA490 vtCopyB = D_004839B8;
+        *(sSsVtblBA490**)(self->vbase + 0x1D4) = &vtCopyB;
         char* base2 = self->vbase - 0x14;
         int d2 = (char*)self - base2;
-        t2.e[1].delta = D_004839B8.e[1].delta + d2;
+        vtCopyB.e[1].delta = D_004839B8.e[1].delta + d2;
     }
     self->count = count;
     self->items = new (D_00483218, 0, 0) void*[count];

@@ -201,20 +201,20 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(void* self, void* item, unsigned
         return;
     switch (event) {
     case 5: {
-        char* o = **(char***)((char*)self + 0x10);
-        sVEntryK182C80* vt = *(sVEntryK182C80**)(o + 4);
-        void* r = vt[4].fn(o + vt[4].delta, self, *(int*)((char*)item + 0x18));
-        if (r != 0)
-            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, r);
+        char* factory = **(char***)((char*)self + 0x10);
+        sVEntryK182C80* vt = *(sVEntryK182C80**)(factory + 4);
+        void* nextState = vt[4].fn(factory + vt[4].delta, self, *(int*)((char*)item + 0x18));
+        if (nextState != 0)
+            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
         func_001831D0(self, 0);
         break;
     }
     case 6: {
-        char* o = **(char***)((char*)self + 0x10);
-        sVEntryK182C80* vt = *(sVEntryK182C80**)(o + 4);
-        void* r = vt[5].fn(o + vt[5].delta, self, *(int*)((char*)item + 0x18));
-        if (r != 0) {
-            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, r);
+        char* factory = **(char***)((char*)self + 0x10);
+        sVEntryK182C80* vt = *(sVEntryK182C80**)(factory + 4);
+        void* nextState = vt[5].fn(factory + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
             func_001831D0(self, 0);
         }
         break;

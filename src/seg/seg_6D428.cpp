@@ -16,16 +16,16 @@ extern "C" int readAction_C428(int, void*, int) __asm__("readAction");
  * nonzero step result (4 or 5 or 6) or the last readAction() result is left as the return value, and the caller
  * cCameraTriggerList_loadFromBuffer() treats it as an error code.
  *
- * @param arg0  pointer to the buffer's read cursor
- * @param arg1  pointer to the trigger being filled
- * @param arg2  the trigger list's format version (7), passed to each step
+ * @param cursor  pointer to the buffer's read cursor
+ * @param trigger  pointer to the trigger being filled
+ * @param cookie  the trigger list's format version (7), passed to each step
  */
-extern "C" void readTrigger(int arg0, char **arg1, int arg2) {
-    get_uint(arg0, *arg1);
-    get_uint(arg0, *arg1 + 4);
-    if (readVolume_C428(arg0, *arg1 + 8, arg2) == 0) {
-        if (readAction_C428(arg0, *arg1 + 0xC, arg2) == 0) {
-            readAction_C428(arg0, *arg1 + 0x10, arg2);
+extern "C" void readTrigger(int cursor, char **trigger, int cookie) {
+    get_uint(cursor, *trigger);
+    get_uint(cursor, *trigger + 4);
+    if (readVolume_C428(cursor, *trigger + 8, cookie) == 0) {
+        if (readAction_C428(cursor, *trigger + 0xC, cookie) == 0) {
+            readAction_C428(cursor, *trigger + 0x10, cookie);
         }
     }
 }
@@ -79,22 +79,22 @@ extern "C" int readBoundObj_C510(int, char*, int) __asm__("readBoundObj");
  * Reads the action with get_camaction(). A bounded action (type 1) then reads its bound object with
  * readBoundObj(); a spline action (type 2) reads its spline with get_camspline().
  *
- * @param arg0  pointer to the buffer's read cursor
- * @param arg1  receives the new action
- * @param arg2  the trigger list's format version, passed through
+ * @param cursor  pointer to the buffer's read cursor
+ * @param actionOut  receives the new action
+ * @param cookie  the trigger list's format version, passed through
  * @return 0 on success, readBoundObj()'s error code 5, or 6 when get_camaction() returns 0 (it always counts
  *         the 4-byte type word, so 6 looks unreachable)
  */
-extern "C" int readAction(int arg0, char** arg1, int arg2) {
-    if (get_camaction(arg0, arg1, arg2) == 0) {
+extern "C" int readAction(int cursor, char** actionOut, int cookie) {
+    if (get_camaction(cursor, actionOut, cookie) == 0) {
         return 6;
     }
-    char* p = *arg1;
-    if (*(int*)p == 1) {
-        return readBoundObj_C510(arg0, p + 8, arg2);
+    char* action = *actionOut;
+    if (*(int*)action == 1) {
+        return readBoundObj_C510(cursor, action + 8, cookie);
     }
-    if (*(int*)p == 2) {
-        get_camspline(arg0, p + 8);
+    if (*(int*)action == 2) {
+        get_camspline(cursor, action + 8);
         return 0;
     }
     return 0;

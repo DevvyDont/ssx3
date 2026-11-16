@@ -62,9 +62,9 @@ extern "C" void cUIAnimation_updateFrame(void*, unsigned char);
  */
 extern "C" void cUIThing_update(cUIThing* self, unsigned short ev)
 {
-    void* a = self->mpAnim;
-    if (a != 0) {
-        cUIAnimation_updateThing(a, self, self->mAnimPlaybackStatus, ev);
+    void* anim = self->mpAnim;
+    if (anim != 0) {
+        cUIAnimation_updateThing(anim, self, self->mAnimPlaybackStatus, ev);
         cUIAnimation_updateFrame(self->mpAnim, self->mAnimPlaybackStatus);
     }
 }
@@ -177,50 +177,50 @@ extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, 
 
     if (count != 0) {
         do {
-            float v = (float)pPtr[1];
+            float data = (float)pPtr[1];
             short id = pPtr[0];
             switch (id) {
             case 0:
-                vself->mPosition.x = v;
+                vself->mPosition.x = data;
                 break;
             case 1:
-                vself->mPosition.y = v;
+                vself->mPosition.y = data;
                 break;
             case 9:
-                vself->mScale.x = v * 0.01f;
+                vself->mScale.x = data * 0.01f;
                 break;
             case 10:
-                vself->mScale.y = v * 0.01f;
+                vself->mScale.y = data * 0.01f;
                 break;
             case 3:
-                vself->mAngle.x = v * 0.017444445f;
+                vself->mAngle.x = data * 0.017444445f;
                 break;
             case 4:
-                vself->mAngle.y = v * 0.017444445f;
+                vself->mAngle.y = data * 0.017444445f;
                 break;
             case 5:
-                vself->mAngle.z = v * 0.017444445f;
+                vself->mAngle.z = data * 0.017444445f;
                 break;
             case 12:
-                vself->mAttr = (vself->mAttr & 0xFFF81FFF) | (((int)v & 0x3F) << 13);
+                vself->mAttr = (vself->mAttr & 0xFFF81FFF) | (((int)data & 0x3F) << 13);
                 break;
             case 13:
-                vself->mColour.A = v * 0.003921569f;
+                vself->mColour.A = data * 0.003921569f;
                 break;
             case 14:
-                vself->mColour.R = v * 0.003921569f;
+                vself->mColour.R = data * 0.003921569f;
                 break;
             case 15:
-                vself->mColour.G = v * 0.003921569f;
+                vself->mColour.G = data * 0.003921569f;
                 break;
             case 16:
-                vself->mColour.B = v * 0.003921569f;
+                vself->mColour.B = data * 0.003921569f;
                 break;
             case 6:
-                vself->mSize.x = v;
+                vself->mSize.x = data;
                 break;
             case 7:
-                vself->mSize.y = v;
+                vself->mSize.y = data;
                 break;
             }
             i++;
@@ -361,8 +361,8 @@ extern "C" void cUIText_setUIData(sUIThing03F0* self, sUIData03F0* data)
     self->mode = data->mode & 3;
     self->vt[23].fn((char*)self + self->vt[23].delta, data->vis & 1);
     cUIText_setUnicodeStringByID((cUIText*)self, data->textId);
-    int f = *(int*)((char*)self + 0x74) >> 2;
-    if (f & 1) {
+    int textFlags = *(int*)((char*)self + 0x74) >> 2;
+    if (textFlags & 1) {
         self->color = sUIColor03F0(data->r * 0.003921568859368563f, data->g * 0.003921568859368563f,
                                    data->b * 0.003921568859368563f, data->a * 0.003921568859368563f);
     }
@@ -379,9 +379,9 @@ INCLUDE_ASM("ui/uithing", cUIText_getFont);
  */
 extern "C" int cUIText_getFont(cUIText* self)
 {
-    void* p = *(void**)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
-    if (p != 0) {
-        return *(int*)((char*)*(void**)((char*)p + 0x8) + (*(unsigned char*)&self->mAttrText & 3) * 12 + 0xC);
+    void* engine = *(void**)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
+    if (engine != 0) {
+        return *(int*)((char*)*(void**)((char*)engine + 0x8) + (*(unsigned char*)&self->mAttrText & 3) * 12 + 0xC);
     }
     return 0;
 }
@@ -406,16 +406,16 @@ extern "C" void cUIText_updateLocale(cUIText* self)
 {
     int id = self->mStringID;
     if (id != 0) {
-        void* a = self->mpScreen;
-        void* b = *(void**)((char*)a + 0xD0);
-        void* c = *(void**)((char*)b + 0x10);
-        char* loc = *(char**)((char*)c + 0x10);
+        void* screen = self->mpScreen;
+        void* state = *(void**)((char*)screen + 0xD0);
+        void* engine = *(void**)((char*)state + 0x10);
+        char* loc = *(char**)((char*)engine + 0x10);
         if (loc != 0) {
             cUIText_updateLocale_sVEntry* vt = *(cUIText_updateLocale_sVEntry**)(loc + 4);
             unsigned short* str = ((unsigned short* (*)(void*, int))vt[4].fn)(loc + vt[4].delta, id);
             if (str != 0) {
-                int f14 = self->mAttr >> 7;
-                if ((f14 & 1) || ((self->mAttrText >> 6) & 1)) {
+                int attrBits = self->mAttr >> 7;
+                if ((attrBits & 1) || ((self->mAttrText >> 6) & 1)) {
                     cUIText_setUnicodeStringWrap(self, str);
                 } else {
                     cUIText_setUnicodeStringPrivate(self, str);

@@ -294,11 +294,11 @@ void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
  */
 extern "C" void cDeadFadeNode_update(void* self)
 {
-    float t;
+    float fade;
     *(float*)((char*)self + 0x30) += *(float*)((char*)self + 0x34);
-    t = *(float*)((char*)self + 0x28);
-    if (t > 0.0f) {
-        *(float*)((char*)self + 0x28) = t - *(float*)((char*)self + 0x2C);
+    fade = *(float*)((char*)self + 0x28);
+    if (fade > 0.0f) {
+        *(float*)((char*)self + 0x28) = fade - *(float*)((char*)self + 0x2C);
     } else {
         func_002D1CC0_2(*(void**)((char*)self + 0x18), (char*)self + 0x1C);
     }
@@ -433,28 +433,28 @@ extern "C" void cDeadFadeNode_render(char* self)
     {
         sDfGfxVt_350CB8* vt = (sDfGfxVt_350CB8*)gfx->mVtbl;
         char* thisp = (char*)gfx + vt[93].delta;
-        sDfVec_350CB8 b[2];
-        b[0].x = OBJ_350CB8(self)->pos[0];
-        b[0].y = OBJ_350CB8(self)->pos[1];
-        b[0].z = OBJ_350CB8(self)->pos[2];
-        b[0].w = 1.0f;
-        b[1].x = OBJ_350CB8(self)->scl[0];
-        b[1].y = OBJ_350CB8(self)->scl[1];
-        b[1].z = OBJ_350CB8(self)->scl[2];
-        b[1].w = 1.0f;
-        int res = ((DfCullFn_350CB8)vt[93].fn)(thisp, &b[0], &b[1], ((DfViewFn_350CB8)((sDfGfxVt_350CB8*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_350CB8*)gfx->mVtbl)[43].delta));
+        sDfVec_350CB8 box[2];
+        box[0].x = OBJ_350CB8(self)->pos[0];
+        box[0].y = OBJ_350CB8(self)->pos[1];
+        box[0].z = OBJ_350CB8(self)->pos[2];
+        box[0].w = 1.0f;
+        box[1].x = OBJ_350CB8(self)->scl[0];
+        box[1].y = OBJ_350CB8(self)->scl[1];
+        box[1].z = OBJ_350CB8(self)->scl[2];
+        box[1].w = 1.0f;
+        int res = ((DfCullFn_350CB8)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_350CB8)((sDfGfxVt_350CB8*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_350CB8*)gfx->mVtbl)[43].delta));
         if (res == 1) {
             return;
         }
     }
     sDfMat_350CB8 xf;
     MatCopy_350CB8(&xf, &D_004FF1A0_350CB8);
-    sDfVec_350CB8 t;
-    t.x = 0.0f;
-    t.y = 0.0f;
-    t.z = -*(float*)(self + 0x30);
-    t.w = 1.0f;
-    xf.r[3] = t;
+    sDfVec_350CB8 offset;
+    offset.x = 0.0f;
+    offset.y = 0.0f;
+    offset.z = -*(float*)(self + 0x30);
+    offset.w = 1.0f;
+    xf.r[3] = offset;
     ((DfDrawFn_350CB8)((sDfGfxVt_350CB8*)gfx->mVtbl)[95].fn)((char*)gfx + ((sDfGfxVt_350CB8*)gfx->mVtbl)[95].delta, OBJ_350CB8(self), OBJ_350CB8(self)->light, &xf,
                                       *(float*)(self + 0x28), *(void**)(self + 0x38), 0, 0);
 }

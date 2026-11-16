@@ -144,18 +144,18 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     cPlayerMgr_6900* volatile pm = (cPlayerMgr_6900*)cMemMan_alloc(0x2EFC, D_00479A40, 0, 0);
     func_00326A28(pm);
     PadCache = pm;
-    char* g = (char*)func_00375A08();
-    GrMan = (cPS2GraphicsMan*)(g);
-    sVE_6900* vt = ((sGfx_6900*)g)->vt;
-    ((V0Fn_6900)vt[2].fn)(g + vt[2].delta);
+    char* graphicsMan = (char*)func_00375A08();
+    GrMan = (cPS2GraphicsMan*)(graphicsMan);
+    sVE_6900* vt = ((sGfx_6900*)graphicsMan)->vt;
+    ((V0Fn_6900)vt[2].fn)(graphicsMan + vt[2].delta);
     cLightMan_construct();
     cBezierMan_construct();
     D_004A28AC = cMemMan_alloc(1, D_00479A50, 0, 0);
     int i;
     for (i = 0; i < 2; i++) {
-        int* p = (int*)cMemMan_alloc(0x2A4, D_00479A60, 0, 0);
-        ((int**)(((char*)self) + 0xA8))[i] = p;
-        *p = 0;
+        int* inputPad = (int*)cMemMan_alloc(0x2A4, D_00479A60, 0, 0);
+        ((int**)(((char*)self) + 0xA8))[i] = inputPad;
+        *inputPad = 0;
     }
     *(int*)&self->Game = 0;
     *(int*)&self->DebugFE = 0;
@@ -680,27 +680,27 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                 if (i >= argc) {
                     break;
                 }
-                cBXString s;
-                cBXString_cBXString2(&s, argv[i]);
-                int a = cBXString_FindFirstOf(&s, '/');
-                int b = cBXString_FindFirstOf(&s, '\\');
-                int c = cBXString_FindFirstOf(&s, ':');
-                int p = MAX_7BF0(a, MAX_7BF0(b, c));
-                if (p >= 0) {
+                cBXString track;
+                cBXString_cBXString2(&track, argv[i]);
+                int a = cBXString_FindFirstOf(&track, '/');
+                int b = cBXString_FindFirstOf(&track, '\\');
+                int c = cBXString_FindFirstOf(&track, ':');
+                int sepPos = MAX_7BF0(a, MAX_7BF0(b, c));
+                if (sepPos >= 0) {
                     cBXString t;
-                    cBXString_right(&t, &s, *(int*)((int)s.Str - 8) - p - 1);
-                    cBXString_operatorE(&s, &t);
+                    cBXString_right(&t, &track, *(int*)((int)track.Str - 8) - sepPos - 1);
+                    cBXString_operatorE(&track, &t);
                     cBXString__cBXString(&t, 2);
                 }
-                int dot = cBXString_FindLastOf(&s, '.', 0);
+                int dot = cBXString_FindLastOf(&track, '.', 0);
                 if (dot >= 0) {
                     cBXString t;
-                    cBXString_cBXString5(&t, &s, dot);
-                    cBXString_operatorE(&s, &t);
+                    cBXString_cBXString5(&t, &track, dot);
+                    cBXString_operatorE(&track, &t);
                     cBXString__cBXString(&t, 2);
                 }
-                cBXString_operatorE(((char*)self) + 0xCC, &s);
-                cBXString__cBXString(&s, 2);
+                cBXString_operatorE(((char*)self) + 0xCC, &track);
+                cBXString__cBXString(&track, 2);
             } else if (func_0041AA88(opt, D_0047A7D8) == 0) {
                 i++;
                 if (i >= argc) {
@@ -780,9 +780,9 @@ extern "C" int cSSXApp_preUpdate(cSSXApp* self)
         }
         int i;
         for (i = 0; i < 2; i++) {
-            int a = func_00326CA0(PadCache, i);
-            void* d = func_00326CC8(PadCache, i);
-            func_00321298(((void**)((char*)self + 0xA8))[i], a, d);
+            int valueCount = func_00326CA0(PadCache, i);
+            void* values = func_00326CC8(PadCache, i);
+            func_00321298(((void**)((char*)self + 0xA8))[i], valueCount, values);
         }
         return 1;
     }
@@ -899,10 +899,10 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
             operator_delete(self->fB8[i]);
         }
     }
-    int* q = self->f88;
-    if (q) {
-        func_00398438(q);
-        operator_delete(q);
+    int* fontInterface = self->f88;
+    if (fontInterface) {
+        func_00398438(fontInterface);
+        operator_delete(fontInterface);
     }
     int* mgr = (int*)PadCache;
     self->f88 = 0;
@@ -977,9 +977,9 @@ extern char D_0047A808[];
  */
 extern "C" void cSSXApp_startGameLoad(cSSXApp* self)
 {
-    void* m = cGame_cGame(cMemMan_alloc(0x22C, D_0047A808, 0, 0));
-    *(void**)&self->Game = m;
-    cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
+    void* game = cGame_cGame(cMemMan_alloc(0x22C, D_0047A808, 0, 0));
+    *(void**)&self->Game = game;
+    cAppMan_setNextModule((cAppMan*)self, (unsigned int)game);
     *(void**)&self->GameModeMan = cGameModeMan_getGM();
 }
 #endif
@@ -1002,13 +1002,13 @@ extern "C" void cSSXApp_startFELoad(cSSXApp* self)
 {
     D_004A203C = 0;
     if (self->unk_60 != 0) {
-        void* m = func_001A1CE8(cMemMan_alloc(0xB5AE0, D_0047A818, 0, 0));
-        *(void**)&self->RealFE = m;
-        cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
+        void* frontEnd = func_001A1CE8(cMemMan_alloc(0xB5AE0, D_0047A818, 0, 0));
+        *(void**)&self->RealFE = frontEnd;
+        cAppMan_setNextModule((cAppMan*)self, (unsigned int)frontEnd);
     } else {
-        void* m = func_0017F7B8(cMemMan_alloc(0x238, D_0047A818, 0, 0));
-        *(void**)&self->DebugFE = m;
-        cAppMan_setNextModule((cAppMan*)self, (unsigned int)m);
+        void* frontEnd = func_0017F7B8(cMemMan_alloc(0x238, D_0047A818, 0, 0));
+        *(void**)&self->DebugFE = frontEnd;
+        cAppMan_setNextModule((cAppMan*)self, (unsigned int)frontEnd);
     }
 }
 #endif
@@ -3753,9 +3753,9 @@ extern "C" int cGame_render(sGame_22B008* self)
     }
     ((cGfx_22B008*)GrMan)->v116(-1);
     {
-        sLoader_22B008* l = self->loader;
-        sVELoader_22B008* vt = l->vt;
-        char* thisp = (char*)l + vt[2].delta;
+        sLoader_22B008* streamPause = self->loader;
+        sVELoader_22B008* vt = streamPause->vt;
+        char* thisp = (char*)streamPause + vt[2].delta;
         int (**pfn)(void*, int) = &vt[2].fn;
         if ((*pfn)(thisp, IsReady_22B008(self)) == 0) {
             return 1;

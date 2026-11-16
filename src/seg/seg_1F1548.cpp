@@ -65,22 +65,22 @@ extern "C" sMgr_0548* cPSPVisualEffectsMan_cPSPVisualEffectsMan(sMgr_0548* self)
 {
     cVisualEffectsMan_cVisualEffectsMan(self);
     self->vptr = D_00487D28;
-    { void* p = cMemMan_alloc(4, D_00487BB8, 0, 0); *(char**)p = D_004931A8; self->objs[0] = p; }
-    { void* p = cMemMan_alloc(4, D_00487BC8, 0, 0); *(char**)p = D_00492FD0; self->objs[1] = p; }
-    { void* p = cMemMan_alloc(4, D_00487BE0, 0, 0); *(char**)p = D_00487EB8; self->objs[2] = p; }
-    { void* p = cMemMan_alloc(4, D_004A3B88, 0, 0); *(char**)p = D_00493178; self->objs[3] = p; }
-    { void* p = cMemMan_alloc(4, D_00487BF0, 0, 0); *(char**)p = D_00487E88; self->objs[4] = p; }
-    { void* p = cMemMan_alloc(4, D_00487C00, 0, 0); *(char**)p = D_00487E58; self->objs[5] = p; }
+    { void* effect = cMemMan_alloc(4, D_00487BB8, 0, 0); *(char**)effect = D_004931A8; self->objs[0] = effect; }
+    { void* effect = cMemMan_alloc(4, D_00487BC8, 0, 0); *(char**)effect = D_00492FD0; self->objs[1] = effect; }
+    { void* effect = cMemMan_alloc(4, D_00487BE0, 0, 0); *(char**)effect = D_00487EB8; self->objs[2] = effect; }
+    { void* effect = cMemMan_alloc(4, D_004A3B88, 0, 0); *(char**)effect = D_00493178; self->objs[3] = effect; }
+    { void* effect = cMemMan_alloc(4, D_00487BF0, 0, 0); *(char**)effect = D_00487E88; self->objs[4] = effect; }
+    { void* effect = cMemMan_alloc(4, D_00487C00, 0, 0); *(char**)effect = D_00487E58; self->objs[5] = effect; }
     self->objs[6] = func_003759E8(cMemMan_alloc(4, D_00487C10, 0, 0));
-    { void* p = cMemMan_alloc(4, D_00487C20, 0, 0); *(char**)p = D_00492FA0; self->objs[7] = p; }
-    { void* p = cMemMan_alloc(4, D_004A3B90, 0, 0); *(char**)p = D_00487E28; self->objs[8] = p; }
-    { void* p = cMemMan_alloc(4, D_00487C30, 0, 0); *(char**)p = D_00487DF8; self->objs[9] = p; }
-    { void* p = cMemMan_alloc(4, D_00487C40, 0, 0); *(char**)p = D_00487FA8; self->objs[10] = p; }
-    { void* p = cMemMan_alloc(4, D_004A3B98, 0, 0); *(char**)p = D_00487DC8; self->objs[11] = p; }
-    { void* p = cMemMan_alloc(4, D_00487C50, 0, 0); *(char**)p = D_00488330; self->objs[12] = p; }
-    { void* p = cMemMan_alloc(4, D_00487C68, 0, 0); *(char**)p = D_00488050; self->objs[13] = p; }
-    { void* p = cMemMan_alloc(4, D_00487C78, 0, 0); *(char**)p = D_004882B0; self->objs[14] = p; }
-    { void* p = cMemMan_alloc(4, D_004A3BA0, 0, 0); *(char**)p = D_004930A0; self->objs[15] = p; }
+    { void* effect = cMemMan_alloc(4, D_00487C20, 0, 0); *(char**)effect = D_00492FA0; self->objs[7] = effect; }
+    { void* effect = cMemMan_alloc(4, D_004A3B90, 0, 0); *(char**)effect = D_00487E28; self->objs[8] = effect; }
+    { void* effect = cMemMan_alloc(4, D_00487C30, 0, 0); *(char**)effect = D_00487DF8; self->objs[9] = effect; }
+    { void* effect = cMemMan_alloc(4, D_00487C40, 0, 0); *(char**)effect = D_00487FA8; self->objs[10] = effect; }
+    { void* effect = cMemMan_alloc(4, D_004A3B98, 0, 0); *(char**)effect = D_00487DC8; self->objs[11] = effect; }
+    { void* effect = cMemMan_alloc(4, D_00487C50, 0, 0); *(char**)effect = D_00488330; self->objs[12] = effect; }
+    { void* effect = cMemMan_alloc(4, D_00487C68, 0, 0); *(char**)effect = D_00488050; self->objs[13] = effect; }
+    { void* effect = cMemMan_alloc(4, D_00487C78, 0, 0); *(char**)effect = D_004882B0; self->objs[14] = effect; }
+    { void* effect = cMemMan_alloc(4, D_004A3BA0, 0, 0); *(char**)effect = D_004930A0; self->objs[15] = effect; }
     self->objs[16] = func_00372AA0(cMemMan_alloc(4, D_00487C88, 0, 0));
     return self;
 }
@@ -509,18 +509,18 @@ extern "C" void cPunchFX_update(sFx_1150* self)
     int bone = *(int*)(self->owner + 0x8B0);
     int flag = 0;
     int a = func_00312AA0(*(void**)(self->owner + 0x784), 0);
-    int b = func_00312AA0(*(void**)(self->owner + 0x784), 1);
+    int layer1Anim = func_00312AA0(*(void**)(self->owner + 0x784), 1);
     if (func_00311AE8(*(void**)(self->owner + 0x784), 1) == 0xD) {
         if (func_001446A0(func_00311B20(*(void**)(self->owner + 0x784), 1) + 0xB0, 1) == 0) {
             flag = func_001446A0(func_00311B20(*(void**)(self->owner + 0x784), 1) + 0xB0, 0) != 0;
         }
     }
-    if (a == 0x146 || (b == 0x143 && flag)) {
+    if (a == 0x146 || (layer1Anim == 0x143 && flag)) {
         if (*(int*)(self->owner + 0x320))
             bone = *(int*)(self->owner + 0x8B0);
         else
             bone = *(int*)(self->owner + 0x8B8);
-    } else if (a == 0x147 || (b == 0x144 && flag)) {
+    } else if (a == 0x147 || (layer1Anim == 0x144 && flag)) {
         if (*(int*)(self->owner + 0x320))
             bone = *(int*)(self->owner + 0x8B8);
         else
@@ -530,10 +530,10 @@ extern "C" void cPunchFX_update(sFx_1150* self)
     }
     if (self->active) {
         sVec4_1150 base = *(sVec4_1150*)(*(char**)(*(char**)(self->owner + 0x780) + 0x30) + (bone << 6) + 0x30);
-        sMat_1150 m;
-        CopyMat_1150(&m, &(*(sMat_1150**)(*(char**)(self->owner + 0x780) + 0x30))[bone]);
-        m.r[3] = t4vect_Zero;
-        sVec4_1150 v;
+        sMat_1150 boneMat;
+        CopyMat_1150(&boneMat, &(*(sMat_1150**)(*(char**)(self->owner + 0x780) + 0x30))[bone]);
+        boneMat.r[3] = t4vect_Zero;
+        sVec4_1150 point;
         sVec4_1150 rnd;
         {
             sVec4_1150 dir;
@@ -541,28 +541,28 @@ extern "C" void cPunchFX_update(sFx_1150* self)
             dir.y = 0.0f;
             dir.z = 0.0f;
             dir.w = 0.0f;
-            MulMat_1150(&rnd, &m, dir);
-            Add_1150(&v, base, rnd);
-            base = v;
+            MulMat_1150(&rnd, &boneMat, dir);
+            Add_1150(&point, base, rnd);
+            base = point;
         }
         for (int i = 0; i < 4; i++) {
-            float s = *(float*)(self->owner + 0x350);
-            float a = s * 3.0f;
-            float hi = s * 15.0f + 15.0f;
+            float attackBlend = *(float*)(self->owner + 0x350);
+            float a = attackBlend * 3.0f;
+            float hi = attackBlend * 15.0f + 15.0f;
             rnd.w = 0.0f;
             rnd.x = randRange_1150(-a, a);
             rnd.y = randRange_1150(-a, a);
             rnd.z = randRange_1150(-a, a);
-            Add_1150(&v, base, rnd);
-            self->pos[i] = v;
+            Add_1150(&point, base, rnd);
+            self->pos[i] = point;
             self->size[i] = randRange_1150(15.0f, hi);
-            float c = *(float*)(self->owner + 0x350) * 0.9f;
-            c *= randf_1150();
-            v.x = 1.0f;
-            v.y = c;
-            v.z = c;
-            v.w = c;
-            self->col[i] = *(sCol_1150*)&v;
+            float shade = *(float*)(self->owner + 0x350) * 0.9f;
+            shade *= randf_1150();
+            point.x = 1.0f;
+            point.y = shade;
+            point.z = shade;
+            point.w = shade;
+            self->col[i] = *(sCol_1150*)&point;
         }
     }
 }
@@ -2020,21 +2020,21 @@ extern "C" void* cSplashManager_cSplashManager(void* p, void* bucket, int viewIn
     *(char**)(self + 0xC) = cSplashManager_vtbl;
     *(int*)(self + 0x18) = 0;
     {
-        char* e = self + 0x1C;
+        char* entry = self + 0x1C;
         int i = 29;
         do {
-            func_002F2588((int*)e);
+            func_002F2588((int*)entry);
             i--;
-            e += 0x3C;
+            entry += 0x3C;
         } while (i != -1);
     }
     {
-        char* e = self + 0x724;
+        char* entry = self + 0x724;
         int i = 29;
         do {
-            func_002F2D60(e);
+            func_002F2D60(entry);
             i--;
-            e += 0x4C;
+            entry += 0x4C;
         } while (i != -1);
     }
     *(int*)(self + 0x100C) = 0;
@@ -2325,9 +2325,9 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
         return;
     sV4_39E0 pos = *(sV4_39E0*)(*(char**)(w + (self->idx << 2) + 4) + 0x20);
     if (self->hasPrev) {
-        sV4_39E0 d;
-        Sub_39E0(&d, pos, self->prevPos);
-        self->speed = Length_39E0(d) * 59.999996185302734f * 0.035999998450279236f;
+        sV4_39E0 moved;
+        Sub_39E0(&moved, pos, self->prevPos);
+        self->speed = Length_39E0(moved) * 59.999996185302734f * 0.035999998450279236f;
     } else {
         self->speed = 0.0f;
         self->hasPrev = 1;
@@ -2355,19 +2355,19 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
     union {
         unsigned int i;
         float f;
-    } u;
-    u.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
-    if ((u.f - 1.0f) * (float)self->nParts / (float)D_004A4258 < D_004A4260 && self->nParts > 0)
+    } rnd;
+    rnd.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
+    if ((rnd.f - 1.0f) * (float)self->nParts / (float)D_004A4258 < D_004A4260 && self->nParts > 0)
         pick = BXrand() % self->nParts;
 
     i = 0;
     while (i < self->nParts) {
-        sPart_39E0* p = &self->parts[i];
-        func_002F3030_39E0(p, self->speed);
-        if (p->active) {
+        sPart_39E0* part = &self->parts[i];
+        func_002F3030_39E0(part, self->speed);
+        if (part->active) {
             if (pick == i && self->parts[i].bursts < D_004A426C) {
                 self->parts[i].bursts++;
-                sV2_39E0 sz = p->size * 0.6000000238418579f;
+                sV2_39E0 sz = part->size * 0.6000000238418579f;
                 if (sz.X() > D_004A4294_39E0.v && sz.Y() > D_004A4294_39E0.v)
                     func_002F37A8_39E0(self, &self->parts[i].pos, &sz);
             }
@@ -3232,8 +3232,8 @@ extern "C" void *cWorldLightMan_cWorldLightMan(void *self, int pNash) {
     new ((char*)self + 0x210) B5180[32];
     *(int *)self = pNash;
     cWorldLightMan_initLightCache(self);
-    char *t = (char*)SSXApp->Game->World;
-    *(void **)((char*)self + 4) = cWorldPainterMan_getQuery(*(void **)(t + 8), (cWorldPainterManArg *)&kWPR_Lighting);
+    char *world = (char*)SSXApp->Game->World;
+    *(void **)((char*)self + 4) = cWorldPainterMan_getQuery(*(void **)(world + 8), (cWorldPainterManArg *)&kWPR_Lighting);
     return self;
 }
 #endif

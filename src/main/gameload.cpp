@@ -496,19 +496,19 @@ extern "C" void cGame_loadTrack(cGame* self)
     sBXStr_F6B0 name;
     name.p = D_004A3E90;
     if (D_004A11B8 != 0) {
-        sBXStr_F6B0 a;
-        sBXStr_F6B0 b;
-        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, cBENewRaceInterface_getLocation(iface) + 0x44), &b));
-        cBXString_operatorE(&name, &a);
-        cBXString__cBXString(&a, 2);
-        cBXString__cBXString(&b, 2);
+        sBXStr_F6B0 worldPath;
+        sBXStr_F6B0 locName;
+        func_003186D0(&worldPath, D_0047B480, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x44), &locName));
+        cBXString_operatorE(&name, &worldPath);
+        cBXString__cBXString(&worldPath, 2);
+        cBXString__cBXString(&locName, 2);
     } else {
-        sBXStr_F6B0 a;
-        sBXStr_F6B0 b;
-        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, cBENewRaceInterface_getLocation(iface) + 0x34), &b));
-        cBXString_operatorE(&name, &a);
-        cBXString__cBXString(&a, 2);
-        cBXString__cBXString(&b, 2);
+        sBXStr_F6B0 worldPath;
+        sBXStr_F6B0 locName;
+        func_003186D0(&worldPath, D_0047B480, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x34), &locName));
+        cBXString_operatorE(&name, &worldPath);
+        cBXString__cBXString(&worldPath, 2);
+        cBXString__cBXString(&locName, 2);
     }
     {
         sBXStr_F6B0 path;
@@ -529,12 +529,12 @@ extern "C" void cGame_loadTrack(cGame* self)
     dir.p = D_004A3E90;
     *(int*)(*(char**)self->World + 0x3D4) = 0;
     {
-        sBXStr_F6B0 a;
-        sBXStr_F6B0 b;
-        func_003186D0(&a, D_0047B480, (cBXString_cBXString2(&b, cBENewRaceInterface_getLocation(iface) + 0x34), &b));
-        cBXString_operatorE(&dir, &a);
-        cBXString__cBXString(&a, 2);
-        cBXString__cBXString(&b, 2);
+        sBXStr_F6B0 worldPath;
+        sBXStr_F6B0 locName;
+        func_003186D0(&worldPath, D_0047B480, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x34), &locName));
+        cBXString_operatorE(&dir, &worldPath);
+        cBXString__cBXString(&worldPath, 2);
+        cBXString__cBXString(&locName, 2);
     }
     int id = *(int*)cBENewRaceInterface_getLocation(iface);
     cSectionMan_activate(self->SectionMan, id, 0);
@@ -546,10 +546,10 @@ extern "C" void cGame_loadTrack(cGame* self)
     }
     *(int*)(*(char**)self->World + 0x3D4) = 1;
     {
-        sBXStr_F6B0 a;
+        sBXStr_F6B0 worldPath;
         sBXStr_F6B0 c;
-        func_0016CA10_F6B0(D_004C5830, (func_003186D0(&c, D_004A2AA0, &dir), func_00318630(&a, &c, D_004A2AA8), a.p));
-        cBXString__cBXString(&a, 2);
+        func_0016CA10_F6B0(D_004C5830, (func_003186D0(&c, D_004A2AA0, &dir), func_00318630(&worldPath, &c, D_004A2AA8), worldPath.p));
+        cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&c, 2);
     }
     char* obj = (char*)cMemMan_alloc(0x3010, D_0047B758, 0, 0);
@@ -705,14 +705,14 @@ extern "C" void cGame_purge(char* self)
         int other = which != 0;
         *(sRec_FA98*)((char*)&cBENetworkInterface_networkOpt + 0x330) = *(sRec_FA98*)(*(char**)(GetRider_FA98(which == 0) + 0x790) + 0xFC);
         D_00534F0C_FA98 = *(sRec_FA98*)(*(char**)(GetRider_FA98(other) + 0x790) + 0xFC);
-        sVEnt0_FA98* e = (sVEnt0_FA98*)(*(char**)(iface + 0xC) + 8);
-        e->fn(iface + e->delta);
+        sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)(*(char**)(iface + 0xC) + 8);
+        vtEntry->fn(iface + vtEntry->delta);
     }
     cCameraTriggerMan_cleanupOnExit(D_004C5830);
     {
         cPS2GraphicsMan* be = GrMan;
-        sVEnt0_FA98* e = (sVEnt0_FA98*)((char*)be->mVtbl + 0x98);
-        e->fn((char*)be + e->delta);
+        sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)be->mVtbl + 0x98);
+        vtEntry->fn((char*)be + vtEntry->delta);
     }
     cFEAsyncManager_FlushFEAsyncTextures(SSXApp->mFEAsyncManager);
     cSSXScriptEngine_ForceEndScriptsAll(ScriptEngine);
@@ -751,21 +751,21 @@ extern "C" void cGame_purge(char* self)
     operator_delete(*(int**)(self + 0x94));
     if (*(void**)(self + 0x24) != 0) func_003916C0(*(void**)(self + 0x24), 3);
     {
-        sObj20_FA98* o = *(sObj20_FA98**)(self + 0x20);
-        if (o != 0) {
-            o->~sObj20_FA98();
-            operator_delete((int*)o);
+        sObj20_FA98* nash = *(sObj20_FA98**)(self + 0x20);
+        if (nash != 0) {
+            nash->~sObj20_FA98();
+            operator_delete((int*)nash);
         }
     }
     {
         cPS2GraphicsMan* be = GrMan;
-        sVEnt0_FA98* e = (sVEnt0_FA98*)((char*)be->mVtbl + 0x388);
-        e->fn((char*)be + e->delta);
+        sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)be->mVtbl + 0x388);
+        vtEntry->fn((char*)be + vtEntry->delta);
     }
     {
         cPS2GraphicsMan* be = GrMan;
-        sVEnt1_FA98* e = (sVEnt1_FA98*)((char*)be->mVtbl + 0x190);
-        e->fn((char*)be + e->delta, *(void**)(self + 0x220));
+        sVEnt1_FA98* vtEntry = (sVEnt1_FA98*)((char*)be->mVtbl + 0x190);
+        vtEntry->fn((char*)be + vtEntry->delta, *(void**)(self + 0x220));
     }
     cGraphicsMan_PurgeTextures(GrMan);
     func_0038ADB0(D_005047F8);
@@ -829,9 +829,9 @@ extern int cScreenTint_m_Enable;
 extern "C" void cGame_gainFocus(cGame* self)
 {
     func_00195D50(SSXApp->FELocale);
-    void* p94 = self->LoadIndicator;
+    void* loadIndicator = self->LoadIndicator;
     cOVStateManager_mpPDATemplate = 0;
-    func_001F30D8(p94);
+    func_001F30D8(loadIndicator);
     func_00278710(ScriptEngine);
     cBezierMan_TheBezierMan->v17();
     cBezierMan_TheBezierMan->v04();
@@ -927,9 +927,9 @@ extern "C" void cGame_partialRestart(cGame* self)
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 8);
-    char* o = (char*)self->AI;
-    sVEntry_230180a* vt = *(sVEntry_230180a**)(o + 0xCC);
-    vt[5].fn(o + vt[5].delta, 3);
+    char* gameAI = (char*)self->AI;
+    sVEntry_230180a* vt = *(sVEntry_230180a**)(gameAI + 0xCC);
+    vt[5].fn(gameAI + vt[5].delta, 3);
     cAvalanche_reset();
     cGameViewMan_snapAll(self->ViewMan);
     cWorld_resetMap(self->World);
@@ -940,10 +940,10 @@ extern "C" void cGame_partialRestart(cGame* self)
     func_00343BC0(self->CrowdMan3d);
     func_00357B38(self->MultiParticleMan);
     void* list = (char*)self->UI + 0x18;
-    char* r = (char*)cUIStateStack_findState(list, GetHashValue32(D_004A2AB0));
-    if (r != 0) {
-        sVEntry_230180b* vt2 = *(sVEntry_230180b**)(r + 8);
-        vt2[24].fn(r + vt2[24].delta, 7, 0);
+    char* hudState = (char*)cUIStateStack_findState(list, GetHashValue32(D_004A2AB0));
+    if (hudState != 0) {
+        sVEntry_230180b* vt2 = *(sVEntry_230180b**)(hudState + 8);
+        vt2[24].fn(hudState + vt2[24].delta, 7, 0);
     }
     cWScriptMan_runGlobalScripts(D_004A3DD8);
     cWScriptMan_setupMissions(self->WScriptMan);
@@ -1037,11 +1037,11 @@ extern "C" void cGame_sectionUnloading(cGame* self, int id)
     cBucketMan_mergeBucket(bm, 1);
     func_003551A8(bm, 1, id);
     func_003551A8(bm, 8, id);
-    void* p = self->AI;
-    if (p != 0) {
-        void* q = *(void**)((char*)p + 0xA4);
-        if (q != 0) {
-            func_00103308(q, id);
+    void* gameAI = self->AI;
+    if (gameAI != 0) {
+        void* focusMan = *(void**)((char*)gameAI + 0xA4);
+        if (focusMan != 0) {
+            func_00103308(focusMan, id);
             func_00103308(*(void**)((char*)self->AI + 0xA4), 0x80);
         }
     }
@@ -1518,9 +1518,9 @@ extern "C" void cGame_update(cGame* self)
                     cBucketMan_applyBucket(&gBucketMan, 1);
                 }
                 {
-                    char* c = (char*)self->AI;
-                    sVEntry_2306B8* vt = *(sVEntry_2306B8**)(c + 0xCC);
-                    vt[3].fn(c + vt[3].delta);
+                    char* gameAI = (char*)self->AI;
+                    sVEntry_2306B8* vt = *(sVEntry_2306B8**)(gameAI + 0xCC);
+                    vt[3].fn(gameAI + vt[3].delta);
                 }
                 if (!(D_004A2A50 & 0x10)) {
                     cBucketMan_updateBucket(&gBucketMan, 2);
@@ -1541,8 +1541,8 @@ extern "C" void cGame_update(cGame* self)
             }
             cBucketMan_updateBucket(&gBucketMan, 4);
             {
-                int s = *((int*)(char*)self->Replay);
-                if (!inRace_2306B8(s) || notMode3_2306B8(s)) {
+                int replayState = *((int*)(char*)self->Replay);
+                if (!inRace_2306B8(replayState) || notMode3_2306B8(replayState)) {
                     cGameViewMan_updateAll((char*)self->ViewMan);
                 }
             }
@@ -1556,9 +1556,9 @@ extern "C" void cGame_update(cGame* self)
             {
                 int i;
                 for (i = 0; i < (((sRiderList_2306B8*)(char*)self->AI))->getCount(); i++) {
-                    char* r = (((sRiderList_2306B8*)(char*)self->AI))->getRider(i);
-                    sVEntry_2306B8* vt = *(sVEntry_2306B8**)(r + 0x6C0);
-                    vt[19].fn(r + vt[19].delta);
+                    char* rider = (((sRiderList_2306B8*)(char*)self->AI))->getRider(i);
+                    sVEntry_2306B8* vt = *(sVEntry_2306B8**)(rider + 0x6C0);
+                    vt[19].fn(rider + vt[19].delta);
                 }
             }
         }

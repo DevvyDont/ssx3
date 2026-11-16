@@ -80,8 +80,8 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
     for (i = 0; i < 2; i++) {
         if (i < self->count) {
             self->cams[i].p = (sCam22E3B8*)cCamera_cCamera(cMemMan_alloc(0x4B0, D_0047B538, 0x20000000, 0), i);
-            sCam22E3B8* c = self->cams[i].p;
-            c->vt[2].fn((char*)c + c->vt[2].delta, i, 0.7853981852531433f, 30.0f, farClip);
+            sCam22E3B8* camera = self->cams[i].p;
+            camera->vt[2].fn((char*)camera + camera->vt[2].delta, i, 0.7853981852531433f, 30.0f, farClip);
             cCamera_setCurrentController(self->cams[i].p, 2);
         } else {
             self->cams[i].p = 0;
@@ -91,9 +91,9 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
     self->f10 = 1;
     self->f14 = 0;
     float w = (float)((cDisp22E3B8*)GrMan)->v10();
-    float h = (float)((cDisp22E3B8*)GrMan)->v11();
+    float screenHeight = (float)((cDisp22E3B8*)GrMan)->v11();
     self->width = w;
-    self->height = h;
+    self->height = screenHeight;
     self->f18 = 0;
     self->f1C = 0;
     return self;
@@ -262,10 +262,10 @@ extern "C" void cGameViewMan_snapAll(void* self)
 {
     unsigned int i;
     for (i = 0; i < *(unsigned int*)((char*)self + 0x10); i++) {
-        void* v = ((void**)((char*)self + 0x4))[i];
-        void* o = *(void**)((char*)v + 0xA0);
-        sVEntry_0022E7C8* vt = *(sVEntry_0022E7C8**)((char*)o + 0x14);
-        vt[4].fn((char*)o + vt[4].delta);
+        void* camera = ((void**)((char*)self + 0x4))[i];
+        void* controller = *(void**)((char*)camera + 0xA0);
+        sVEntry_0022E7C8* vt = *(sVEntry_0022E7C8**)((char*)controller + 0x14);
+        vt[4].fn((char*)controller + vt[4].delta);
     }
 }
 #endif
@@ -288,9 +288,9 @@ extern "C" void cGameViewMan_updateAll(void* self)
 {
     unsigned int i;
     for (i = 0; i < *(unsigned int*)((char*)self + 0x10); i++) {
-        void* v = ((void**)((char*)self + 0x4))[i];
-        sVEntry_0022E840* vt = *(sVEntry_0022E840**)((char*)v + 0x90);
-        vt[3].fn((char*)v + vt[3].delta);
+        void* camera = ((void**)((char*)self + 0x4))[i];
+        sVEntry_0022E840* vt = *(sVEntry_0022E840**)((char*)camera + 0x90);
+        vt[3].fn((char*)camera + vt[3].delta);
     }
 }
 #endif
