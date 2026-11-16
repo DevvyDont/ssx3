@@ -167,7 +167,7 @@ INCLUDE_ASM("scripter/bxscriptengine", func_002821A0);
 #ifdef SKIP_ASM
 struct sBxsThreadHdr;
 extern "C" sBxsThreadHdr* func_00282C38(void* self, int a1);
-extern "C" int func_00272938(void* self, void* src);
+extern "C" int cInSeq_ReadyPlayer(void* self, void* src);
 // PORT: the unit declares cInSeq_GetPlayer(int), but it really takes (self, id).
 void* cInSeq_GetPlayer_2(void* self, int id) __asm__("cInSeq_GetPlayer");
 // PORT: the setter's mangled signature is (void*, int); a pointer is passed as int.
@@ -215,7 +215,7 @@ extern "C" int func_002821A0(void* self, int idx, int arg)
     } else {
         t->slot = idx;
         t->state = 2;
-        int id = func_00272938(*(void**)((char*)self + 0x2B8), s->data);
+        int id = cInSeq_ReadyPlayer(*(void**)((char*)self + 0x2B8), s->data);
         void* obj = cInSeq_GetPlayer_2(*(void**)((char*)self + 0x2B8), id);
         t->owner = obj;
         func_00274C10(obj, (int)t);
@@ -667,7 +667,7 @@ extern "C" void cBXScriptEngine_ResetInstVars(sScriptEngine2B8* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", func_00282908);
 #ifdef SKIP_ASM
-extern "C" int func_00272938(void* self, void* src);
+extern "C" int cInSeq_ReadyPlayer(void* self, void* src);
 // PORT: the unit declares cInSeq_GetPlayer(int), but it really takes (self, id).
 void* cInSeq_GetPlayer_2(void* self, int id) __asm__("cInSeq_GetPlayer");
 // PORT: the setter's mangled signature is (void*, int); a pointer is passed as int.
@@ -700,7 +700,7 @@ extern "C" void func_00282908(void* self, void* script)
     t->pending = -1;
     t->state = 2;
     t->f12 = 0;
-    int id = func_00272938(*(void**)((char*)self + 0x2B8), s->data);
+    int id = cInSeq_ReadyPlayer(*(void**)((char*)self + 0x2B8), s->data);
     void* obj = cInSeq_GetPlayer_2(*(void**)((char*)self + 0x2B8), id);
     t->owner = obj;
     func_00274C10(obj, (int)t);

@@ -723,7 +723,7 @@ extern "C" void func_0028C2D0(char* self, long key)
 INCLUDE_ASM("sound/bankmanager", func_0028C430);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" int func_002906B8(void* self);
+extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void func_002B2850(void* a, void* mon);
 
 struct sEntry_C430 {
@@ -843,7 +843,7 @@ extern "C" int func_0028C430(void* p, sCue_C430* cue)
         st2->a38[m2->st.depth] = (int)BM_MAX_C430(BM_MIN_C430(st2->a38[st2->depth] * (vol * 0.009999999776482582f), 127.0f), 0.0f);
         st2->entries[st2->depth].kind = BM_MAX_C430(BM_MIN_C430(st2->a38[st2->depth], 127), 0);
         func_002B2850(*(void**)((char*)self + 0x520), (char*)self + 0x118);
-        func_002906B8(self);
+        cBankSys_SFX_End(self);
         (*pidx)++;
         cue->f4 = saved;
     }
@@ -2349,7 +2349,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028F768);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(void* self);
+extern "C" int cBankSys_SFX_End(void* self);
 
 struct sEntry_F768 {
     signed char kind;
@@ -2428,7 +2428,7 @@ extern "C" void func_0028F768(void* p)
     st2->entries[m2->st.depth].kind = BM_MAX_F768(BM_MIN_F768(st2->a38[st2->depth], 127), 0);
     sMgr_F768** pp = *(sMgr_F768***)((char*)self + 0x118);
     (*pp)->st.a3C[(*pp)->st.depth] = (int)func_00287968(self, 1, 0);
-    *(int*)((char*)self + 0x62A8) = func_002906B8(self);
+    *(int*)((char*)self + 0x62A8) = cBankSys_SFX_End(self);
 }
 #endif
 

@@ -20,7 +20,7 @@
 struct FileParser {
     int mFileSize;       // 0x000 [O]; [R] ctor = BXFILE_size(Filename); [U] IsEOF (FileParser_IsEOF) stops at mPtr - mBasePtr >= mFileSize
     char* mBasePtr;      // 0x004 [O]; [R] ctor operator new(mFileSize + 1, Filename, MemType), loads the file and 0-terminates it; dtor cMemMan_free()s it
-    char* mPtr;          // 0x008 [O]; [R] ctor = mBasePtr; [U] GetChar (func_002A78E0__FPv) returns *mPtr++; every scan method reads *mPtr
+    char* mPtr;          // 0x008 [O]; [R] ctor = mBasePtr; [U] GetChar (FileParser_GetChar__FPv) returns *mPtr++; every scan method reads *mPtr
     char mTempStr[2048]; // 0x00C [O]; [U] FindNextSection / GetString / GetName copy the token here and return it; GetFloat/GetInt sscanf it; Assign* compare the key in it
 };
 

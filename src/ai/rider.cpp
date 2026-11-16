@@ -6408,7 +6408,7 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, f
 void func_00280548(void* self, int a1, void* a2, void* a3);
 extern "C" int func_00287968(void* self, int a1, int a2);
 extern "C" int func_00288A20(void* self, void* rider);
-extern "C" int func_002906B8(void* self);
+extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 
 struct sWtEnt_5448 {
@@ -6544,7 +6544,7 @@ extern "C" void func_00125448(void* vself, void* vobj, float when, float b, int 
                 int h = func_00288A20(snd, self);
                 (*pt)->sub.p64[(*pt)->sub.cur] = h;
             }
-            *(int*)((char*)ids + (e->slot << 2)) = func_002906B8(snd);
+            *(int*)((char*)ids + (e->slot << 2)) = cBankSys_SFX_End(snd);
             e = e->next;
         } while (e != 0);
         }

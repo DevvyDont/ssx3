@@ -3318,6 +3318,29 @@ cUITextScroll_setShadow = 0x003A6378; //type:func
 cUITextScroll_setUnicode = 0x003A6398; //type:func
 cUITextScroll_setShadowColour = 0x003A63B8; //type:func
 
+// fn_cascade4: names by evidence (docs/function_names.tsv)
+cManualCameraAlgorithm_update = 0x0015FD50; //type:func
+cMatrixChaseAlgorithm__cMatrixChaseAlgorithm__FPv = 0x001607A0; //type:func
+cRelativeChaseAlgorithm__cRelativeChaseAlgorithm__FPv = 0x00160BB8; //type:func
+cLookAtChaseAlgorithm_updateCamTargetLate = 0x00162B90; //type:func
+cLookAtChaseAlgorithm_setupCamDirection = 0x00162C78; //type:func
+cLookAtChaseAlgorithm_updateFollowDistance = 0x00163010; //type:func
+cLookAtChaseAlgorithm_updateLateralShift = 0x00163158; //type:func
+cLookAtChaseAlgorithm_updateDropWithSpeed = 0x00163270; //type:func
+cLookAtChaseAlgorithm_updateViewCam = 0x001641C0; //type:func
+cLookAtChaseAlgorithm_updateRailCam = 0x001646A0; //type:func
+cLookAtChaseAlgorithm_updateDebugCam__FPv = 0x00166530; //type:func
+cLookAtChaseAlgorithm_setupInitialCamDir = 0x00166550; //type:func
+cSPOKEChaseAlgorithm_update = 0x00178208; //type:func
+cReplay_rewindFrame = 0x0026E4B8; //type:func
+cReplay_writeFrameCount = 0x002712F8; //type:func
+cReplay_writeCheckSumStart__FPv = 0x002716F0; //type:func
+cInSeq_ReadyPlayer = 0x00272938; //type:func
+cBankSys_SFX_End = 0x002906B8; //type:func
+FileParser_GetChar__FPv = 0x002A78E0; //type:func
+FileParser_SkipSpace = 0x002A78F8; //type:func
+FileParser_GetName = 0x002A7DA0; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

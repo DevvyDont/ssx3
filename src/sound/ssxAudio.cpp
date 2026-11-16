@@ -833,7 +833,7 @@ extern "C" void cSSXAudio_SetAudioUpdateState(cSSXAudio* self, int a1);
 extern "C" void* FileParser_FileParser_r(void* self, char* name, int size) __asm__("FileParser_FileParser");
 extern "C" int FileParser_FindSection(void* self, const char* section);
 extern "C" int FileParser_IsEOF(void* self);
-extern "C" char* func_002A7DA0(void* self);
+extern "C" char* FileParser_GetName(void* self);
 extern "C" int FileParser_AssignString_r(void* self, const char* key, char* out) __asm__("FileParser_AssignString");
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -875,7 +875,7 @@ extern "C" void func_00285FB0(char* self)
     parser.cur = parser.start;
     if (FileParser_FindSection(&parser, D_004A3570)) {
         while (FileParser_IsEOF(&parser) == 0) {
-            func_002A7DA0(&parser);
+            FileParser_GetName(&parser);
             FileParser_AssignString_r(&parser, D_004828C0, key);
         }
     }
@@ -883,7 +883,7 @@ extern "C" void func_00285FB0(char* self)
     if (FileParser_FindSection(&parser, D_004A3578)) {
         strcpy(name, key);
         while (FileParser_IsEOF(&parser) == 0) {
-            char* k = func_002A7DA0(&parser);
+            char* k = FileParser_GetName(&parser);
             FileParser_AssignString_r(&parser, D_004828C0, name);
             if (func_0041AA88(k, D_004A3580) == 0) {
                 FileParser_AssignString_r(&parser, D_004A3580, val);
@@ -1005,7 +1005,7 @@ extern "C" void cSSXAudio_InGameLoad(char* self)
     parser.cur = parser.start;
     if (FileParser_FindSection(&parser, D_004A3570)) {
         while (FileParser_IsEOF(&parser) == 0) {
-            if (func_0041AA88(func_002A7DA0(&parser), D_004828C0) == 0) {
+            if (func_0041AA88(FileParser_GetName(&parser), D_004828C0) == 0) {
                 FileParser_AssignString_r(&parser, D_004828C0, key);
             }
         }
@@ -1017,7 +1017,7 @@ extern "C" void cSSXAudio_InGameLoad(char* self)
             strcpy(name, key);
             strcpy(self + 0x587C, name);
             while (FileParser_IsEOF(&parser) == 0) {
-                char* k = func_002A7DA0(&parser);
+                char* k = FileParser_GetName(&parser);
                 FileParser_AssignString_r(&parser, D_004828C0, name);
                 if (func_0041AA88(k, D_004A3580) == 0) {
                     FileParser_AssignString_r(&parser, D_004A3580, val);
@@ -2159,7 +2159,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_LoadMixes);
 extern "C" void* FileParser_FileParser_r(void* self, char* name, int size) __asm__("FileParser_FileParser");
 extern "C" void FileParser__FileParser(void* self, int flags);
 extern "C" char* FileParser_FindNextSection(void* self);
-extern "C" char* func_002A7DA0(void* self);
+extern "C" char* FileParser_GetName(void* self);
 extern "C" int FileParser_IsEOF(void* self);
 extern "C" int FileParser_AssignInt(void* self, const char* key, int* out);
 extern "C" int func_0041AA88(const char* a, const char* b);
@@ -2229,7 +2229,7 @@ extern "C" void cSSXAudio_LoadMixes(sAudio7FC8* self)
     }
     while (self->count < 25 && FileParser_FindNextSection(&parser) != 0) {
         while (FileParser_IsEOF(&parser) == 0) {
-            char* key = func_002A7DA0(&parser);
+            char* key = FileParser_GetName(&parser);
             if (func_0041AA88(key, D_004A35D8) == 0) {
                 FileParser_AssignInt(&parser, D_004A35D8, &val);
                 self->entries[self->count].f0 = val;
@@ -3010,7 +3010,7 @@ extern "C" void FileParser__FileParser(void* self, int flags);
 extern "C" int FileParser_FindPartialSection(void* self, const char* section);
 extern "C" void FileParser_SkipSectionNames(void* self);
 extern "C" int FileParser_IsEOF(void* self);
-extern "C" char* func_002A7DA0(void* self);
+extern "C" char* FileParser_GetName(void* self);
 extern "C" void FileParser_AssignString(void* self, const char* key, char* out);
 extern "C" int func_0041AA88(const char* a, const char* b);
 extern "C" int func_004165A8(const void* a, const void* b);
@@ -3030,7 +3030,7 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
     if (FileParser_FindPartialSection(parser, name) != 0) {
         FileParser_SkipSectionNames(parser);
         while (FileParser_IsEOF(parser) == 0) {
-            char* key = func_002A7DA0(parser);
+            char* key = FileParser_GetName(parser);
             if (func_0041AA88(D_004A3608, key) == 0) {
                 FileParser_AssignString(parser, D_004A3608, buf);
                 func_002B3EE8((char*)self + 0x118, buf);

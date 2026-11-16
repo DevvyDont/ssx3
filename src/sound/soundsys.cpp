@@ -144,7 +144,7 @@ INCLUDE_ASM("sound/soundsys", cBankSys_Play2DCallback);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd0018Ch {
     signed char vol;
@@ -237,7 +237,7 @@ extern "C" int cBankSys_Play2DCallback(cBankSys* self, sSnd0018Req* req)
     sSnd0018Sub* s2 = &m2->sub;
     s2->vals[m2->sub.cur] = req->vol;
     s2->ch[m2->sub.cur].vol = SND_0018_MAX(0, SND_0018_MIN(s2->vals[s2->cur], 0x7F));
-    func_002906B8((cBankSys*)gBankSys);
+    cBankSys_SFX_End((cBankSys*)gBankSys);
     return 1;
 }
 #endif
@@ -246,7 +246,7 @@ INCLUDE_ASM("sound/soundsys", cBankSys_Play2DCallbackWithPitchMult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd0358Ch {
     signed char vol;
@@ -344,13 +344,13 @@ extern "C" int cBankSys_Play2DCallbackWithPitchMult(cBankSys* self, sSnd0358Req*
     s2->ch[m2->sub.cur].vol = SND_0358_MAX(0, SND_0358_MIN(s2->vals[s2->cur], 0x7F));
     sSnd0358Mgr* m3 = (sSnd0358Mgr*)gBankSys->mpVBankManager;
     m3->sub.ch[m3->sub.cur].fC = req->f28;
-    func_002906B8((cBankSys*)gBankSys);
+    cBankSys_SFX_End((cBankSys*)gBankSys);
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002906B8);
+INCLUDE_ASM("sound/soundsys", cBankSys_SFX_End);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -439,7 +439,7 @@ static inline int snd06B8CloseOnEnd(sSnd06B8Sub* o)
     return o->p7C[o->cur];
 }
 
-extern "C" int func_002906B8(cBankSys* vself)
+extern "C" int cBankSys_SFX_End(cBankSys* vself)
 {
     cBankSys* self = vself;
     sSnd06B8Mgr* m = ((sSnd06B8Mgr*)self->mpVBankManager);
@@ -583,7 +583,7 @@ INCLUDE_ASM("sound/soundsys", func_00290CC0);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd0CC0Ch {
     signed char vol;
@@ -651,7 +651,7 @@ extern "C" int func_00290CC0(cSSXAudio* vself, int a, int b)
     sSnd0CC0Mgr** pp = ((sSnd0CC0Mgr**)self->MusicSys.mpVStreamSys);
     int r = (int)func_00287968(self, 5, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
 
@@ -720,7 +720,7 @@ INCLUDE_ASM("sound/soundsys", func_002910E0);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd10E0Ch {
     signed char vol;
@@ -814,7 +814,7 @@ extern "C" void func_002910E0(cSSXAudio* vself)
     sSndKey8_10E0 k = D_004A3680[0];
     sSnd10E0Sub* s = &m->sub;
     *(sSndKey8_10E0*)((char*)s + (m->sub.cur << 3) + 0x40) = k;
-    func_002906B8((cBankSys*)self);
+    cBankSys_SFX_End((cBankSys*)self);
     *(int*)((char*)self + 0x5834) = 1;
 }
 #endif
@@ -859,7 +859,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayThunder);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd1438Ch {
     signed char vol;
@@ -934,7 +934,7 @@ static inline int snd1438AddVoice(void* vself, int a, int b, int type)
     sSnd1438Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" void func_003B58A0();
@@ -1014,7 +1014,7 @@ INCLUDE_ASM("sound/soundsys", func_002917D0);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int func_00288A20(void* self, void* obj);
 extern "C" int func_00288AE0(void* self);
 extern "C" void func_002A9988(void* self, float a, float b);
@@ -1141,7 +1141,7 @@ void func_002917D0_17D0(void* vself, void* obj)
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
         (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)((char*)obj + 0x870);
     }
-    func_002906B8((cBankSys*)self);
+    cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
 
@@ -1150,7 +1150,7 @@ INCLUDE_ASM("sound/soundsys", func_00291C88);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int func_00288A20(void* self, void* obj);
 extern "C" int func_00288AE0(void* self);
 extern "C" void func_002A9988(void* self, float a, float b);
@@ -1282,7 +1282,7 @@ void func_00291C88_1C88(void* vself, void* obj, int n)
             (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
             (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)((char*)obj + 0x870);
         }
-        func_002906B8((cBankSys*)self);
+        cBankSys_SFX_End((cBankSys*)self);
     } else {
         int a = func_002917B8(self, n);
         int b = n * 8 + 6;
@@ -1310,7 +1310,7 @@ void func_00291C88_1C88(void* vself, void* obj, int n)
             m2->sub.p60[m2->sub.cur] = (int)obj;
         }
         func_002A9988(&(*self->p118)->sub, 100.0f, -1.0f);
-        func_002906B8((cBankSys*)self);
+        cBankSys_SFX_End((cBankSys*)self);
     }
 }
 #endif
@@ -1320,7 +1320,7 @@ INCLUDE_ASM("sound/soundsys", func_00292508);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int func_00288A20(void* self, void* obj);
 extern "C" int func_00288AE0(void* self);
 extern "C" void func_002A9988(void* self, float a, float b);
@@ -1448,7 +1448,7 @@ void func_00292508_2508(void* vself, void* obj, int n)
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
         (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)((char*)obj + 0x870);
     }
-    func_002906B8((cBankSys*)self);
+    cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
 
@@ -2201,7 +2201,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_Lift);
 #include "fakematch.h"
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int func_00288A20(void* self, void* obj);
 extern "C" int func_00288AE0(void* self);
 extern "C" int func_00285D98(void* self, int which);
@@ -2305,7 +2305,7 @@ static inline int snd4170Add(void* vself, void* obj, int a, int b, int c, int fl
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
         (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)((char*)obj + 0x870);
     }
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 static inline int clampVol_4170(int v, int lo, int hi)
@@ -2628,7 +2628,7 @@ extern "C" void func_002948D0(cSSXAudio* vself, cRider* rider, float v)
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
         (*self->p118)->sub.p84[(*self->p118)->sub.cur] = rider->mViewIndex;
     }
-    *(int*)((char*)self + 0x5FB8) = func_002906B8((cBankSys*)self);
+    *(int*)((char*)self + 0x5FB8) = cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
 
@@ -3264,7 +3264,7 @@ static inline int sndVCall(char* o, int slot)
 extern "C" {
 void* func_00416210(void* dst, int c, int n);
 void* func_00287968(void* self, int a1, int a2);
-int func_002906B8(cBankSys* self);
+int cBankSys_SFX_End(cBankSys* self);
 int func_00288A20(void* self, void* obj);
 int func_00288AE0(void* self);
 int func_00288B40(void* self, int which, float f);
@@ -3368,7 +3368,7 @@ state23:
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
         (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)(obj + 0x870);
     }
-    func_002906B8((cBankSys*)self);
+    cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
 
@@ -3481,7 +3481,7 @@ extern "C" void func_00296868(cSSXAudio* vself, sSndOwner* t)
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
         (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)(t->rider + 0x870);
     }
-    *(int*)(t->rider + 0x774) = func_002906B8((cBankSys*)self);
+    *(int*)(t->rider + 0x774) = cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
 
@@ -3617,7 +3617,7 @@ extern "C" void func_00296E80(cSSXAudio* vself, sSndOwner* t)
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
         (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)(t->rider + 0x870);
     }
-    *(int*)(t->rider + 0x778) = func_002906B8((cBankSys*)self);
+    *(int*)(t->rider + 0x778) = cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
 
@@ -3657,7 +3657,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_WorldSound);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd74A0Ch {
     signed char vol;
@@ -3800,7 +3800,7 @@ extern "C" void cSSXAudio_WorldSound(cSSXAudio* self, char* evt, int n)
     (*pp)->sub.p64[(*pp)->sub.cur] = r;
     sSnd74A0Mgr* m5 = *sys->p118;
     m5->sub.p78[m5->sub.cur] = pri;
-    int h = func_002906B8((cBankSys*)self);
+    int h = cBankSys_SFX_End((cBankSys*)self);
     cSSXAudio_PlayHistoryAdd(self, evt, h, *(volatile int*)(*(char**)self->MusicSys.mpVStreamSys + 0x260) + 50, 0, 0);
 }
 #endif
@@ -3869,7 +3869,7 @@ static inline int snd7950Commit(void* vself, void* tgt, float f, int pri)
     (*self->p118)->sub.tgt[(*self->p118)->sub.cur] = tgt;
     func_002A9988(&(*self->p118)->sub, f, -1.0f);
     (*self->p118)->sub.p78[(*self->p118)->sub.cur] = pri;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 /**
@@ -4081,7 +4081,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_Punch);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd8138Ch {
     signed char vol;
@@ -4170,7 +4170,7 @@ static inline int snd8138AddVoice(void* vself, void* obj, int a, int b, int type
     pp = self->p118;
     r = func_00288A20(self, obj);
     (*pp)->sub.p64[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 /**
@@ -4198,7 +4198,7 @@ INCLUDE_ASM("sound/soundsys", func_00298488);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int func_00288A20(void* self, void* obj);
 extern "C" int func_00288B40(void* self, int which, float f);
 int func_00288C08_8488(void* self, int which, float f) __asm__("func_00288C08");
@@ -4346,7 +4346,7 @@ static inline int snd8488Add(void* vself, void* obj, int a, int b, int c)
     (*pp)->sub.p64[(*pp)->sub.cur] = r;
     sSnd8488Mgr* m2 = *self->p118;
     m2->sub.tgt[m2->sub.cur] = (char*)obj + 0x110;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 void func_00298488_8488(void* self, sSs8488Rider* a, sSs8488Rider* b) __asm__("func_00298488");
@@ -4372,7 +4372,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_WallCollision);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd89A8Ch {
     signed char vol;
@@ -4458,7 +4458,7 @@ static inline int snd89A8AddVoice(void* vself, void* obj, int a, int b, int type
     (*pp)->sub.p64[(*pp)->sub.cur] = r;
     sSnd89A8Mgr* m2 = *self->p118;
     m2->sub.tgt[m2->sub.cur] = (char*)obj + 0x110;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 /**
@@ -4521,7 +4521,7 @@ INCLUDE_ASM("sound/soundsys", func_00298D90);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int func_00288AE0(void* self);
 void func_002ADDE0_8D90(void* p, long key) __asm__("func_002ADDE0");
 
@@ -4603,7 +4603,7 @@ static inline int snd8D90Add(void* vself, int a, int b)
     sSnd8D90Mgr** pp = self->p118;
     int r = (int)func_00287968(self, 9, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 static inline void snd8D90Start(sSnd8D90Sys* self, int a, int b)
@@ -4636,7 +4636,7 @@ static inline void snd8D90Start(sSnd8D90Sys* self, int a, int b)
         sSnd8D90Mgr** pp = self->p118;
         int r = (int)func_00287968(self, 9, 0);
         (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-        *(int*)((char*)self + 0x59E0) = func_002906B8((cBankSys*)self);
+        *(int*)((char*)self + 0x59E0) = cBankSys_SFX_End((cBankSys*)self);
     }
 }
 
@@ -4687,7 +4687,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_TurboDeny);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd9368Ch {
     signed char vol;
@@ -4787,7 +4787,7 @@ extern "C" void cSSXAudio_TurboDeny(cSSXAudio* self, char* obj)
     }
     func_002ADDE0(&(*(sSnd9368Mgr**)self->MusicSys.mpVStreamSys)->sub, D_004A36A8_9368[0].v);
     AddVoice299368((self), 0, 0x6C, 9);
-    func_002906B8((cBankSys*)(self));
+    cBankSys_SFX_End((cBankSys*)(self));
 }
 #endif
 
@@ -4846,7 +4846,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_LoseMaxPowerEvent);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd97B8Ch {
     signed char vol;
@@ -4930,7 +4930,7 @@ static inline int snd97B8AddVoice(void* vself, int a, int b, int type)
     sSnd97B8Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" int func_00288AE0(void* self);
@@ -4970,7 +4970,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_UberRailDeny);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd9B70Ch {
     signed char vol;
@@ -5045,7 +5045,7 @@ static inline int snd9B70AddVoice(void* vself, int a, int b, int type)
     sSnd9B70Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" int func_00288AE0(void* self);
@@ -5072,7 +5072,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_ChangePosition);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd9E28Ch {
     signed char vol;
@@ -5147,7 +5147,7 @@ static inline int snd9E28AddVoice(void* vself, int a, int b, int type)
     sSnd9E28Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" void* cBE_getBE();
@@ -5218,7 +5218,7 @@ INCLUDE_ASM("sound/soundsys", func_0029A220);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndA220Ch {
     signed char vol;
@@ -5293,7 +5293,7 @@ static inline int sndA220AddVoice(void* vself, int a, int b, int type)
     sSndA220Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" int func_00288AE0(void* self);
@@ -5326,7 +5326,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_Tweak);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndA530Ch {
     signed char vol;
@@ -5401,7 +5401,7 @@ static inline int sndA530AddVoice(void* vself, int a, int b, int type)
     sSndA530Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 /**
@@ -5423,7 +5423,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_PointsEvent);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndA7D8Ch {
     signed char vol;
@@ -5498,7 +5498,7 @@ static inline int sndA7D8AddVoice(void* vself, int a, int b, int type)
     sSndA7D8Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" int func_00288AE0(void* self);
@@ -5555,7 +5555,7 @@ INCLUDE_ASM("sound/soundsys", func_0029AB40);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int func_00288AE0(void* self);
 extern "C" void* func_0028B1C8();
 extern "C" void* func_0028B1D8();
@@ -5694,7 +5694,7 @@ static inline int sndAB40Add(void* vself, int a, int b, int type)
     sSndAB40Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 // PORT: 64-bit long sound key; PS2-only FPU asm
@@ -5747,7 +5747,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_StartUberSpin);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndB0E0Ch {
     signed char vol;
@@ -5822,7 +5822,7 @@ static inline int sndB0E0AddVoice(void* vself, int a, int b, int type)
     sSndB0E0Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" int func_00288AE0(void* self);
@@ -5881,7 +5881,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_LandedUberTrick);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndB430Ch {
     signed char vol;
@@ -5956,7 +5956,7 @@ static inline int sndB430AddVoice(void* vself, int a, int b, int type)
     sSndB430Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" int func_00288AE0(void* self);
@@ -6053,7 +6053,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_BindingsOn);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndB968Ch {
     signed char vol;
@@ -6142,7 +6142,7 @@ static inline int sndB968AddVoice(void* vself, void* obj, int a, int b, int type
     pp = self->p118;
     r = func_00288A20(self, obj);
     (*pp)->sub.p64[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 /**
@@ -6164,7 +6164,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_BindingsOff);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndBCF8Ch {
     signed char vol;
@@ -6253,7 +6253,7 @@ static inline int sndBCF8AddVoice(void* vself, void* obj, int a, int b, int type
     pp = self->p118;
     r = func_00288A20(self, obj);
     (*pp)->sub.p64[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 /**
@@ -6275,7 +6275,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_UndoBindings);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndC088Ch {
     signed char vol;
@@ -6364,7 +6364,7 @@ static inline int sndC088AddVoice(void* vself, void* obj, int a, int b, int type
     pp = self->p118;
     r = func_00288A20(self, obj);
     (*pp)->sub.p64[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 /**
@@ -6394,7 +6394,7 @@ INCLUDE_ASM("sound/soundsys", func_0029C420);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndC420Ch {
     signed char vol;
@@ -6469,7 +6469,7 @@ static inline int sndC420AddVoice(void* vself, char* mon, int a, int b, int type
     sSndC420Mgr** pp = *(sSndC420Mgr***)mon;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" int func_00288AE0(void* self);
@@ -6513,7 +6513,7 @@ INCLUDE_ASM("sound/soundsys", func_0029C7B0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int func_00288AE0(void* self);
 extern "C" void* func_0028B1C8();
 extern "C" void* cBE_getBE();
@@ -6620,7 +6620,7 @@ static inline int snd7B0Add(void* vself, int a, int b)
         sSnd7B0Mgr** pp = self->p118;
         int r = (int)func_00287968(self, 9, 0);
         (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-        return func_002906B8((cBankSys*)self);
+        return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" void func_0029C7B0(void* vself)
@@ -6776,7 +6776,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayIconSound);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndCED8Ch {
     signed char vol;
@@ -6851,7 +6851,7 @@ static inline int sndCED8AddVoice(void* vself, int a, int b, int type)
     sSndCED8Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" void func_002A3EB8(cSSXAudio* self, void* obj, int n);
@@ -6956,7 +6956,7 @@ INCLUDE_ASM("sound/soundsys", func_0029D370);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndD370Ch {
     signed char vol;
@@ -7031,7 +7031,7 @@ static inline int sndD370AddVoice(void* vself, int a, int b)
     sSndD370Mgr** pp = self->p118;
     int r = (int)func_00287968(self, 5, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" void func_0029D370(void* self)
@@ -7196,7 +7196,7 @@ INCLUDE_ASM("sound/soundsys", func_0029D8E0);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndD8E0Ch {
     signed char vol;
@@ -7271,7 +7271,7 @@ static inline int sndD8E0AddVoice(void* vself, int a, int b, int type)
     sSndD8E0Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" void* func_0028B1D8();
@@ -7326,7 +7326,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_HandPlantSound);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndDC48Ch {
     signed char vol;
@@ -7401,7 +7401,7 @@ static inline int sndDC48AddVoice(void* vself, int a, int b, int type)
     sSndDC48Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 /**
@@ -7533,7 +7533,7 @@ extern "C" void func_0029DEF0(cSSXAudio* vself, int on)
                 (*pq)->sub.p64[(*pq)->sub.cur] = q;
             }
             (*self->p118)->sub.p74[(*self->p118)->sub.cur] = 1;
-            self->handle5FF4 = func_002906B8((cBankSys*)self);
+            self->handle5FF4 = cBankSys_SFX_End((cBankSys*)self);
         }
     } else {
         if (--self->users == 0) {
@@ -7636,7 +7636,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayWipeoutRecoverHit);
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndE590Ch {
     signed char vol;
@@ -7722,7 +7722,7 @@ static inline int sndE590AddVoice(void* vself, int a, int b, int type, unsigned 
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
     sSndE590Mgr* m3 = *self->p118;
     *(unsigned short*)((char*)&m3->sub.ch[m3->sub.cur] + 0xC) = pitch;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 
@@ -7763,7 +7763,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayWipeoutRecoverFull);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSndE970Ch {
     signed char vol;
@@ -7847,7 +7847,7 @@ static inline int sndE970AddVoice(void* vself, int a, int b, int type)
     sSndE970Mgr** pp = self->p118;
     int r = (int)func_00287968(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-    return func_002906B8((cBankSys*)self);
+    return cBankSys_SFX_End((cBankSys*)self);
 }
 
 extern "C" int func_00288AE0(void* self);
@@ -8245,7 +8245,7 @@ extern "C" int func_002A1028(cSSXAudio* self, int id);
 extern "C" unsigned int func_002ADF60(void* mon);
 extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* self, void* evt, int h, int t, int a, int idx);
 extern "C" int cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int func_00288A20(void* self, void* obj);
 
 struct sSsVtF660 { short delta; short index; void* (*fn)(void*); };
@@ -8360,7 +8360,7 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, void* vrider, int length, 
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
         (*self->p118)->sub.p84[(*self->p118)->sub.cur] = rider->mViewIndex;
     }
-    int h = func_002906B8((cBankSys*)self);
+    int h = cBankSys_SFX_End((cBankSys*)self);
     cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)3, h, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
 }
 #endif
@@ -11647,7 +11647,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                     cBankManager* m2 = D_004A36F8->mpVBankManager;
                     m2->sub.p64[m2->sub.cur] = self->mViewPort;
                 }
-                pCurrAmbientInfo->handle = func_002906B8((cBankSys*)D_004A36F8);
+                pCurrAmbientInfo->handle = cBankSys_SFX_End((cBankSys*)D_004A36F8);
             } else {
                 h->vol = best;
             }
@@ -11692,7 +11692,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                         cBankManager* m2 = D_004A36F8->mpVBankManager;
                         m2->sub.p7C[m2->sub.cur] = 0;
                     }
-                    pCurrAmbientInfo->handle = func_002906B8((cBankSys*)D_004A36F8);
+                    pCurrAmbientInfo->handle = cBankSys_SFX_End((cBankSys*)D_004A36F8);
                 } else {
                     h->vol = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
                 }
@@ -11789,7 +11789,7 @@ extern "C" void func_002A5CD8(s2A5CD8* self, int i, int v)
 INCLUDE_ASM("sound/soundsys", func_002A5D08);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" int func_002906B8(cBankSys* self);
+extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sVec4_5D08 {
     float x, y, z, w;
@@ -11976,7 +11976,7 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* P, int key)
             sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
             m2->sub.p7C[m2->sub.cur] = 0;
         }
-        found->grp->handle = func_002906B8((cBankSys*)D_004A36F8);
+        found->grp->handle = cBankSys_SFX_End((cBankSys*)D_004A36F8);
     }
     return idx;
 }
@@ -12556,8 +12556,8 @@ extern "C" int func_0041AA88(const char* a, const char* b);
 extern "C" int FileParser_IsEOF(FileParser* self);
 extern "C" int FileParser_AssignString(FileParser* self, const char* name, char* out);
 extern "C" int FileParser_AssignFloat(FileParser* self, const char* name, float* out);
-// func_002A7DA0 returns the token buffer (the unit declares it void elsewhere).
-extern "C" const char* func_002A7DA0_s(void* self) __asm__("func_002A7DA0");
+// FileParser_GetName returns the token buffer (the unit declares it void elsewhere).
+extern "C" const char* FileParser_GetName_s(void* self) __asm__("FileParser_GetName");
 extern const char D_004A3708[];
 extern const char D_004A3710[];
 extern const char D_00483118[];
@@ -12571,7 +12571,7 @@ extern "C" void func_002A7040(cCrowdSys* self, void* parser)
     char val[0x200];
     char key[0x200];
     while (!FileParser_IsEOF((FileParser*)parser)) {
-        const char* name = func_002A7DA0_s(parser);
+        const char* name = FileParser_GetName_s(parser);
         for (int i = 0; i < 3; i++) {
             sprintf(key, D_004A3708, i + 1);
             if (func_0041AA88(name, key) == 0) {
@@ -12903,25 +12903,25 @@ extern "C" void FileParser__FileParser(FileParser* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A78E0__FPv);
+INCLUDE_ASM("sound/soundsys", FileParser_GetChar__FPv);
 #ifdef SKIP_ASM
-signed char func_002A78E0(void* self)
+signed char FileParser_GetChar(void* self)
 {
     return *(*(signed char**)((char*)self + 0x8))++;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/soundsys", func_002A78F8);
+INCLUDE_ASM("sound/soundsys", FileParser_SkipSpace);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-signed char func_002A78E0(void* self);
+signed char FileParser_GetChar(void* self);
 extern "C" int FileParser_SkipComment(FileParser* self);
 
-// func_002A78F8 returns int (its body leaves a result in v0); the unit declares it void.
-int func_002A78F8_r(void*) __asm__("func_002A78F8");
+// FileParser_SkipSpace returns int (its body leaves a result in v0); the unit declares it void.
+int FileParser_SkipSpace_r(void*) __asm__("FileParser_SkipSpace");
 
-int func_002A78F8_r(void* self)
+int FileParser_SkipSpace_r(void* self)
 {
     while (**(signed char**)((char*)self + 0x8) != 0) {
         if (FileParser_SkipComment((FileParser*)self) == 1) return 1;
@@ -12931,7 +12931,7 @@ int func_002A78F8_r(void* self)
             if (c == '[') r = 1;
             return r;
         }
-        func_002A78E0(self);
+        FileParser_GetChar(self);
     }
     return 1;
 }
@@ -12962,17 +12962,17 @@ extern "C" int FileParser_SkipComment(FileParser* self)
 INCLUDE_ASM("sound/soundsys", FileParser_SkipSectionNames);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// func_002A78F8 returns int (its body leaves a result in v0); the unit declares it void.
-int func_002A78F8_r(void*) __asm__("func_002A78F8");
+// FileParser_SkipSpace returns int (its body leaves a result in v0); the unit declares it void.
+int FileParser_SkipSpace_r(void*) __asm__("FileParser_SkipSpace");
 extern "C" char* FileParser_FindNextSection(FileParser*);
 extern "C" int FileParser_IsEOF(FileParser*);
 
 extern "C" void FileParser_SkipSectionNames(FileParser* self)
 {
-    func_002A78F8_r(self);
+    FileParser_SkipSpace_r(self);
     while (*(signed char*)self->mPtr == '[') {
         FileParser_FindNextSection(self);
-        func_002A78F8_r(self);
+        FileParser_SkipSpace_r(self);
     }
     FileParser_IsEOF(self);
 }
@@ -12991,7 +12991,7 @@ extern "C" int FileParser_FindEOL(FileParser* self)
         if (c == '\n') {
             return 0;
         }
-        func_002A78E0(self);
+        FileParser_GetChar(self);
     }
     return 1;
 }
@@ -13000,7 +13000,7 @@ extern "C" int FileParser_FindEOL(FileParser* self)
 //100%
 INCLUDE_ASM("sound/soundsys", FileParser_FindNextSection);
 #ifdef SKIP_ASM
-signed char func_002A78E0(void* self);
+signed char FileParser_GetChar(void* self);
 extern "C" int FileParser_SkipComment(FileParser* self);
 extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
 extern const char D_004A3720[];
@@ -13009,12 +13009,12 @@ extern "C" char* FileParser_FindNextSection(FileParser* self)
 {
     while (*(signed char*)self->mPtr != 0) {
         FileParser_SkipComment(self);
-        if (func_002A78E0(self) == '[') {
+        if (FileParser_GetChar(self) == '[') {
             int n = 0;
             if (*(signed char*)self->mPtr != ']') {
                 do {
                     char* dst = (char*)self + 0xC;
-                    dst[n] = func_002A78E0(self);
+                    dst[n] = FileParser_GetChar(self);
                     n++;
                 } while (*(signed char*)self->mPtr != ']');
             }
@@ -13069,20 +13069,20 @@ extern "C" int FileParser_FindPartialSection(FileParser* self, char* name)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", FileParser_GetString);
 #ifdef SKIP_ASM
-signed char func_002A78E0(void* self);
-extern "C" void func_002A78F8(void*);
+signed char FileParser_GetChar(void* self);
+extern "C" void FileParser_SkipSpace(void*);
 extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
 extern const char D_004A3728[];
 
 extern "C" char* FileParser_GetString(FileParser* self)
 {
     int n = 0;
-    func_002A78F8(self);
+    FileParser_SkipSpace(self);
     FileParser_ExpectToken(self, D_004A3728);
     if (*(signed char*)self->mPtr != '"') {
         char* dst = (char*)self + 0xC;
         do {
-            dst[n] = func_002A78E0(self);
+            dst[n] = FileParser_GetChar(self);
             n++;
         } while (*(signed char*)self->mPtr != '"');
     }
@@ -13094,20 +13094,20 @@ extern "C" char* FileParser_GetString(FileParser* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_002A7DA0);
+INCLUDE_ASM("sound/soundsys", FileParser_GetName);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" char* func_002A7DA0_t(void* self) __asm__("func_002A7DA0");
-extern "C" char* func_002A7DA0_t(void* self)
+extern "C" char* FileParser_GetName_t(void* self) __asm__("FileParser_GetName");
+extern "C" char* FileParser_GetName_t(void* self)
 {
     int n = 0;
-    func_002A78F8_r(self);
+    FileParser_SkipSpace_r(self);
     while (**(signed char**)((char*)self + 0x8) != 0 && **(signed char**)((char*)self + 0x8) != ' ' &&
            **(signed char**)((char*)self + 0x8) != '\t' && **(signed char**)((char*)self + 0x8) != '\n' &&
            **(signed char**)((char*)self + 0x8) != '\r') {
         char* dst = (char*)self + 0xC;
-        dst[n] = func_002A78E0(self);
+        dst[n] = FileParser_GetChar(self);
         n++;
     }
     char* buf = (char*)self + 0xC;
@@ -13119,16 +13119,16 @@ extern "C" char* func_002A7DA0_t(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", FileParser_GetFloat);
 #ifdef SKIP_ASM
-extern "C" void func_002A78F8(void*);
-extern "C" void func_002A7DA0(void*);
+extern "C" void FileParser_SkipSpace(void*);
+extern "C" void FileParser_GetName(void*);
 extern "C" int func_004178B0(const char* s, const char* fmt, ...);
 extern char D_004A3730[];
 
 extern "C" float FileParser_GetFloat(FileParser* self)
 {
     float f;
-    func_002A78F8(self);
-    func_002A7DA0(self);
+    FileParser_SkipSpace(self);
+    FileParser_GetName(self);
     func_004178B0((char*)self + 0xC, D_004A3730, &f);
     return f;
 }
@@ -13137,16 +13137,16 @@ extern "C" float FileParser_GetFloat(FileParser* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", FileParser_GetInt);
 #ifdef SKIP_ASM
-extern "C" void func_002A78F8(void*);
-extern "C" void func_002A7DA0(void*);
+extern "C" void FileParser_SkipSpace(void*);
+extern "C" void FileParser_GetName(void*);
 extern "C" int func_004178B0(const char* s, const char* fmt, ...);
 extern char D_004A3738[];
 
 extern "C" int FileParser_GetInt(FileParser* self)
 {
     int v;
-    func_002A78F8(self);
-    func_002A7DA0(self);
+    FileParser_SkipSpace(self);
+    FileParser_GetName(self);
     func_004178B0((char*)self + 0xC, D_004A3738, &v);
     return v;
 }
@@ -13156,15 +13156,15 @@ extern "C" int FileParser_GetInt(FileParser* self)
 INCLUDE_ASM("sound/soundsys", FileParser_ExpectToken);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-signed char func_002A78E0(void* self);
-int func_002A78F8_r(void*) __asm__("func_002A78F8");
+signed char FileParser_GetChar(void* self);
+int FileParser_SkipSpace_r(void*) __asm__("FileParser_SkipSpace");
 
 extern "C" int FileParser_ExpectToken(FileParser* self, const char* name)
 {
     int i = 0;
-    func_002A78F8_r(self);
+    FileParser_SkipSpace_r(self);
     while (*self->mPtr != 0 && name[i] != 0) {
-        if (func_002A78E0(self) != name[i]) {
+        if (FileParser_GetChar(self) != name[i]) {
             return 1;
         }
         i++;
@@ -13177,14 +13177,14 @@ extern "C" int FileParser_ExpectToken(FileParser* self, const char* name)
 INCLUDE_ASM("sound/soundsys", FileParser_IsEOF);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int func_002A78F8_r(void*) __asm__("func_002A78F8");
+int FileParser_SkipSpace_r(void*) __asm__("FileParser_SkipSpace");
 
 extern "C" int FileParser_IsEOF(FileParser* self)
 {
     if (self->mPtr - self->mBasePtr >= self->mFileSize) {
         return 1;
     }
-    func_002A78F8_r(self);
+    FileParser_SkipSpace_r(self);
     signed char c = *(signed char*)self->mPtr;
     int r = 0;
     if (c == 0 || c == '[') {

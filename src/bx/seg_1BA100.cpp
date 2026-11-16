@@ -965,7 +965,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BA6B0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_00416210(void*, int, unsigned int);
 
-extern "C" int func_002906B8(void*);
+extern "C" int cBankSys_SFX_End(void*);
 extern "C" void func_002BA6B0(sSndOptsUser* arg, int v, int v2) {
     sSoundSysView* o = arg->o;
     sSndPlayOpts* p = &o->sub;
@@ -991,7 +991,7 @@ extern "C" void func_002BA6B0(sSndOptsUser* arg, int v, int v2) {
     p->p7C[o->sub.idx] = 1;
     arg->vals[arg->o->sub.idx] = v;
     arg->vals2[arg->o->sub.idx] = v2;
-    func_002906B8(arg);
+    cBankSys_SFX_End(arg);
 }
 #endif
 
@@ -1003,7 +1003,7 @@ extern "C" void* func_00416210(void*, int, unsigned int);
 
 #define MIN_A920(a,b) ((a) < (b) ? (a) : (b))
 #define MAX_A920(a,b) ((a) < (b) ? (b) : (a))
-extern "C" int func_002906B8(void*);
+extern "C" int cBankSys_SFX_End(void*);
 extern "C" void func_002BA920(sSndOptsUser* arg, int v, int v2, int v3) {
     sSoundSysView* o = arg->o;
     sSndPlayOpts* p = &o->sub;
@@ -1035,7 +1035,7 @@ extern "C" void func_002BA920(sSndOptsUser* arg, int v, int v2, int v3) {
         p2->vals[o2->sub.idx] = v3;
         p2->recs[o2->sub.idx].v = MAX_A920(MIN_A920(p2->vals[p2->idx], 127), 0);
     }
-    func_002906B8(arg);
+    cBankSys_SFX_End(arg);
 }
 #endif
 

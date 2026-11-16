@@ -121,7 +121,7 @@ struct cReplay {
                                          //       stops there (cReplay_stepFrame, cReplay_isPauseAI, func_0026FB88)
     cReplayFrame* SaveFrame;             // 0x3D0 [O]; [U] cReplay_pushReplaySaveFrame saves it (frame type 1), cReplay_popReplaySaveFrame
                                          //       restores and frees it; playback and the writer skip it
-                                         //       (cReplay_stepFrame, func_002712F8, func_00271380)
+                                         //       (cReplay_stepFrame, cReplay_writeFrameCount, func_00271380)
     cReplayFrame* InstantReplayFrame;    // 0x3D4 [O]; [U] tested by cReplay_endMarkInstantReplay (endMarkInstantReplay), cleared by
                                          //       cReplay_cancelMarkInstantReplay (cancelMarkInstantReplay); cReplay_update starts the
                                          //       instant replay from it
@@ -129,7 +129,7 @@ struct cReplay {
                                          //       0xB0); [U] cReplay_endMarkInstantReplay reads the ints at +0x9C / +0xA4 (0x474 /
                                          //       0x47C)
     int PlaybackTick;                    // 0x484 [O]; [U] the playback cursor: cReplay_rewind (rewind), cReplay_stepFrame
-                                         //       (stepFrame), func_0026E4B8/E528/E568
+                                         //       (stepFrame), cReplay_rewindFrame/E528/E568
     cReplayFrame* PlaybackFrame;         // 0x488 [O]; [U] ditto: the frame PlaybackTick lies in
     cReplayCache* InputCache[2];         // 0x48C [O] (On Tour 4); [R] cReplay_addCache: cMemMan_alloc(0x10,
                                          //       "ReplayCache") into the first free slot of 2, ctor cReplay_cReplay
@@ -179,7 +179,7 @@ struct cReplay {
     int WriteIndex;                      // 0x654 [O]; [U] func_00271510 walks InputCache[WriteIndex]
     int WriteIndexMax;                   // 0x658 [O]; [U] cReplay_writeInputStart stores 2 (the InputCache count)
     cReplayFrame* WriteFrame;            // 0x65C [O]; [U] frame being written (cReplay_writeFramesStart, func_00271380,
-                                         //       func_002712F8)
+                                         //       cReplay_writeFrameCount)
     char* WriteBlockData;                // 0x660 [O]; [U] func_00271380: the frame block pending compression
     int WriteBlockDataSize;              // 0x664 [O]; [U] its size
     int WriteFrameCount;                 // 0x668 [O]; [U] frames written (cReplay_writeFramesStart, func_00271380)

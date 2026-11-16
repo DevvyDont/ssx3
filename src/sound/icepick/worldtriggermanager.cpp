@@ -105,7 +105,7 @@ struct sTriggerIdCache;
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* func_0028B180();
 extern "C" int func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(void* self);
+extern "C" int cBankSys_SFX_End(void* self);
 extern "C" char* func_00285D98(void* self, int which);
 extern "C" int func_004165A8(const void* a, const void* b);
 extern "C" int func_0029B818(void* sys, void* name, int* rec);
@@ -305,7 +305,7 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
             }
             sfxBegin_4C38((struct sSnd4C38Sys*)func_0028B180(), rec[0], rec[1]);
             voiceTail_4C38(t);
-            t->f30 = func_002906B8(func_0028B180());
+            t->f30 = cBankSys_SFX_End(func_0028B180());
             return;
         }
         func_002B5898(t);
@@ -316,7 +316,7 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
             cBankMonitor_BANKMONITOR_StopHandle(&(*((struct sSnd4C38Sys*)func_0028B180())->p118)->sub, t->f30, 1, 0.1f);
         sfxBegin_4C38((struct sSnd4C38Sys*)func_0028B180(), t->f60, t->f64);
         voiceTail_4C38(t);
-        t->f30 = func_002906B8(func_0028B180());
+        t->f30 = cBankSys_SFX_End(func_0028B180());
         return;
     }
     if (t->f38 != 0) {
@@ -717,7 +717,7 @@ struct sTriggerIdCache;
 extern "C" void func_002B6868(sTriggerIdCache* self, int id);
 extern "C" int func_00287968(void* self, int a1, int a2);
 extern "C" int func_00288A20(void* self, void* rider);
-extern "C" int func_002906B8(void* self);
+extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 
 struct sWtEnt5F60 {
@@ -840,7 +840,7 @@ extern "C" int func_002B5F60(char* self, void* evt, int id, char* rider, int vol
             sWtTrack5F60* t4 = *((sWtSnd5F60*)func_0028B180())->cur;
             t4->sub.p34[t4->sub.cur] = 1;
         }
-        return func_002906B8(func_0028B180());
+        return cBankSys_SFX_End(func_0028B180());
     }
     return -1;
 }

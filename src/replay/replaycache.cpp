@@ -957,7 +957,7 @@ struct sReplayCache1510;
 extern "C" void func_00271510(sReplayCache1510* self);
 extern "C" void cReplay_writePadStart(cReplay* self);
 extern "C" void cReplay_writePad(cReplay* self);
-void* func_002716F0(void* self);
+void* cReplay_writeCheckSumStart(void* self);
 extern "C" void cReplay_writeCheckSum(cReplay* self);
 
 
@@ -985,7 +985,7 @@ extern "C" int cReplay_getSaveData(cReplay* self, char** block, int* size)
         case 5: func_00271510((sReplayCache1510*)self); break;
         case 6: cReplay_writePadStart(self); break;
         case 7: cReplay_writePad(self); break;
-        case 8: func_002716F0((self)); break;
+        case 8: cReplay_writeCheckSumStart((self)); break;
         case 9: cReplay_writeCheckSum(self); break;
         case 10: self->WriteState++; break;
         case 11: break;
@@ -1002,7 +1002,7 @@ done:
 INCLUDE_ASM("replay/replaycache", cReplay_writeHeaderStart);
 #ifdef SKIP_ASM
 struct sReplayCache;
-extern "C" int func_002712F8(cReplay* self);
+extern "C" int cReplay_writeFrameCount(cReplay* self);
 extern "C" void cAI_getPodiumActorList(void* self, int* dst);
 
 struct sReplayHdr_1228 {
@@ -1020,7 +1020,7 @@ struct sReplayHdr_1228 {
 extern "C" void cReplay_writeHeaderStart(cReplay* self)
 {
     sReplayHdr_1228* hdr = (sReplayHdr_1228*)self->WriteTmp;
-    hdr->count = func_002712F8(self);
+    hdr->count = cReplay_writeFrameCount(self);
     char* g = (char*)SSXApp;
     hdr->a = self->SaveFrameTicks;
     hdr->b = self->ReplayError;
@@ -1047,7 +1047,7 @@ extern "C" void cReplay_writeHeader(cReplay* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002712F8);
+INCLUDE_ASM("replay/replaycache", cReplay_writeFrameCount);
 #ifdef SKIP_ASM
 struct sCacheNode {
     char pad[0x14];
@@ -1055,7 +1055,7 @@ struct sCacheNode {
 };
 
 
-extern "C" int func_002712F8(cReplay* self)
+extern "C" int cReplay_writeFrameCount(cReplay* self)
 {
     int count = 0;
     (*(sCacheNode**)&self->WriteFrame) = (*(sCacheNode**)&self->FrameList);
@@ -1276,9 +1276,9 @@ extern "C" void cReplay_writePad(cReplay* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_002716F0__FPv);
+INCLUDE_ASM("replay/replaycache", cReplay_writeCheckSumStart__FPv);
 #ifdef SKIP_ASM
-void* func_002716F0(void* self)
+void* cReplay_writeCheckSumStart(void* self)
 {
     int t0 = 0;
     void* t1 = (char*)*(void**)((char*)self + 0x638) + 0x1;
@@ -2053,7 +2053,7 @@ extern "C" void cInSeq_UpdateFrame(cInSeq* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", func_00272938);
+INCLUDE_ASM("replay/replaycache", cInSeq_ReadyPlayer);
 #ifdef SKIP_ASM
 extern "C" void* func_002745C0(void* data, void* src, void* owner, int id);
 
@@ -2066,7 +2066,7 @@ struct sRcNode272938 {
 };
 
 
-extern "C" int func_00272938(cInSeq* self, void* src)
+extern "C" int cInSeq_ReadyPlayer(cInSeq* self, void* src)
 {
     sRcNode272938* n = ((sRcNode272938*)self->mpScriptUnused);
     (*(sRcNode272938**)&self->mpScriptUnused) = n->next;

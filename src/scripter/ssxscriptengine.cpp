@@ -5473,7 +5473,7 @@ extern "C" void func_002A19D8(void* self, int id);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 void func_00281000(void* self, int a1, void* a2, void* a3);
 extern "C" int func_00287968(void* self, int a1, int a2);
-extern "C" int func_002906B8(void* self);
+extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* D_004A3DD8;
 extern int D_004A3B60;
@@ -5717,7 +5717,7 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float
                     sWtTrack_08E8* t3 = *snd->cur;
                     t3->sub.p64[t3->sub.cur] = 0;
                 }
-                self->sounds[slot].id = func_002906B8(snd);
+                self->sounds[slot].id = cBankSys_SFX_End(snd);
                 self->sounds[slot].target = e->id;
                 self->sounds[slot].count = 0;
             }

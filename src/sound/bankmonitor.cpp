@@ -2807,7 +2807,7 @@ extern "C" void FileParser_FileParser(void* parser, void* src, int n);
 extern "C" void FileParser__FileParser(void* parser, int flags);
 extern "C" void FileParser_SkipSectionNames(void* parser);
 extern "C" int FileParser_FindPartialSection(void* parser, int file);
-extern "C" char* func_002A7DA0(void* parser);
+extern "C" char* FileParser_GetName(void* parser);
 extern "C" int FileParser_IsEOF(void* parser);
 extern "C" int FileParser_AssignString(void* parser, const char* key, char* out);
 void func_002AAB98_2B0088(void* self, int i, char* val) __asm__("func_002AAB98");
@@ -2836,7 +2836,7 @@ extern "C" void func_002B0088(cSpeechInstance* p, int a1, int a2, int a3)
         FileParser_SkipSectionNames(parser);
         while (FileParser_IsEOF(parser) == 0)
         {
-            char* key = func_002A7DA0(parser);
+            char* key = FileParser_GetName(parser);
             if (func_0041AA88(D_004A37C8, key) == 0)
             {
                 FileParser_AssignString(parser, D_004A37C8, v40);
@@ -4656,7 +4656,7 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
     *(int*)(L.parser + 8) = *(int*)(L.parser + 4);
     if (FileParser_FindSection(L.parser, D_004A3570) != 0) {
         while (FileParser_IsEOF(L.parser) == 0) {
-            func_002A7DA0(L.parser);
+            FileParser_GetName(L.parser);
             FileParser_AssignString(L.parser, D_004828C0, self + 0x104);
         }
     }
@@ -4677,7 +4677,7 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         strcpy(self + (*(int*)(self + 0x3E4) * 0xB + 0x124), tok);
         sv->ents[*(int*)(self + 0x3E4)] = (char*)func_002B1A98((cSongConfiguration*)cMemMan_alloc(0xAC, D_00483458, 0, 0));
         while (FileParser_IsEOF(L.parser) == 0) {
-            char* key = func_002A7DA0(L.parser);
+            char* key = FileParser_GetName(L.parser);
             if (func_0041AA88(key, D_004A37F0) == 0) {
                 FileParser_AssignString(L.parser, D_004A37F0, self + (*(int*)(self + 0x3E4) * 100 + 0x934));
             } else if (func_0041AA88(key, D_004A37F8) == 0) {

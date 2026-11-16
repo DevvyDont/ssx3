@@ -33,7 +33,7 @@
 struct cRiderCameraTarget;
 
 // cMatrixChaseAlgorithm (0x3A0; On Tour 0x390). Ctor cMatrixChaseAlgorithm_cMatrixChaseAlgorithm (stores vtable D_0045BA58, AlgorithmType),
-// dtor func_001607A0, snap cMatrixChaseAlgorithm_snap, update cMatrixChaseAlgorithm_update, getRaceCamFinalPhaseData func_001607D8,
+// dtor cMatrixChaseAlgorithm__cMatrixChaseAlgorithm, snap cMatrixChaseAlgorithm_snap, update cMatrixChaseAlgorithm_update, getRaceCamFinalPhaseData func_001607D8,
 // getRestDrop func_001607C8.
 struct cMatrixChaseAlgorithm {
     // --- cLookAtChaseAlgorithm (camera/cameraalgorithms.h, 0x390; its own bases cChaseAlgorithm <- cCameraAlgorithm
@@ -76,25 +76,25 @@ struct cMatrixChaseAlgorithm {
     t4Vector LastSlowVelocity;      // 0x190 [O]; [U] snap
     t4Vector SlowCamEnterLook;      // 0x1A0 [O]; [U] snap
     t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] func_00162568, snap
-    t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] func_00162C78, snap
-    float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] func_00163010
-    float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] func_00163270
+    t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] cLookAtChaseAlgorithm_setupCamDirection, snap
+    float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] cLookAtChaseAlgorithm_updateFollowDistance
+    float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] cLookAtChaseAlgorithm_updateDropWithSpeed
     float LastPitch;                // 0x1D8 [O]; [R] = Pitch; [U] cLookAtChaseAlgorithm_updatePitchBlending
     float LastViewScalar;           // 0x1DC [O]; [R] 1.0f; [U] cLookAtChaseAlgorithm_updateFOVWithSpeed
     float SecondsSinceLastHandplant; // 0x1E0 [O]; [R] 10.0f; [U] cLookAtChaseAlgorithm_updateHandplant (lwc1/swc1; one sw)
-    float LastHeight;               // 0x1E4 [O]; [R] 0; [U] func_00162B90
-    float ExtraBoostDist;           // 0x1E8 [O]; [U] func_00163010
-    float LastBoostWarp;            // 0x1EC [O]; [U] func_00163010
+    float LastHeight;               // 0x1E4 [O]; [R] 0; [U] cLookAtChaseAlgorithm_updateCamTargetLate
+    float ExtraBoostDist;           // 0x1E8 [O]; [U] cLookAtChaseAlgorithm_updateFollowDistance
+    float LastBoostWarp;            // 0x1EC [O]; [U] cLookAtChaseAlgorithm_updateFollowDistance
     float LastCameraSwing;          // 0x1F0 [O]; [U] snap zeroes it (sw)
     float AirCamTimeInAir;          // 0x1F4 [O]; [U] cLookAtChaseAlgorithm_updateAirCam (updateAirCam)
     float AirSplineScalar;          // 0x1F8 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float AirTimeScalar;            // 0x1FC [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float AirCamMaxTime;            // 0x200 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
-    float LastCrouchFactor;         // 0x204 [O]; [U] func_00163270
-    float LastTargetCrouchFactor;   // 0x208 [O]; [U] func_00162B90
+    float LastCrouchFactor;         // 0x204 [O]; [U] cLookAtChaseAlgorithm_updateDropWithSpeed
+    float LastTargetCrouchFactor;   // 0x208 [O]; [U] cLookAtChaseAlgorithm_updateCamTargetLate
     float LastAirTargetDelta;       // 0x20C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastAirPositionDelta;     // 0x210 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
-    float ViewCamLastFactor;        // 0x214 [O]; [U] func_001641C0 (updateViewCam)
+    float ViewCamLastFactor;        // 0x214 [O]; [U] cLookAtChaseAlgorithm_updateViewCam (updateViewCam)
     float FullAirCamTimeInAir;      // 0x218 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastFullAirTargetDelta;   // 0x21C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastFullAirPositionDelta; // 0x220 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
@@ -163,7 +163,7 @@ struct cMatrixChaseAlgorithm {
     char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto
     char HalfPipeAngleSpline[0xC];  // 0x334 [O] cCubicSplineInterpolant; [R] ditto
     cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls cPIDFilter_reset (reset);
-                                    //       [U] func_00162C78 runs the filter inline
+                                    //       [U] cLookAtChaseAlgorithm_setupCamDirection runs the filter inline
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment
     // --- cMatrixChaseAlgorithm
     float LastAngle;                // 0x390 [O] (On Tour 0x380); [R] = 0 (sw zero); [U] cMatrixChaseAlgorithm_update update (lwc1/swc1)
@@ -295,7 +295,7 @@ CHECK_OFFSET(cMatrixChaseAlgorithm, unk_394, 0x394);
 CHECK_SIZE(cMatrixChaseAlgorithm, 0x3A0);
 
 // cRelativeChaseAlgorithm (0x3C0; On Tour 0x3B0). Ctor cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(this, angle) (vtable D_0045B9E0; the factory
-// then stores the camera type into AlgorithmType), dtor func_00160BB8, snap cRelativeChaseAlgorithm_snap, update cRelativeChaseAlgorithm_update,
+// then stores the camera type into AlgorithmType), dtor cRelativeChaseAlgorithm__cRelativeChaseAlgorithm, snap cRelativeChaseAlgorithm_snap, update cRelativeChaseAlgorithm_update,
 // getRaceCamFinalPhaseData func_00160BF0, getRestDrop func_00160BE0.
 struct cRelativeChaseAlgorithm {
     // --- cLookAtChaseAlgorithm (camera/cameraalgorithms.h, 0x390; its own bases cChaseAlgorithm <- cCameraAlgorithm
@@ -338,25 +338,25 @@ struct cRelativeChaseAlgorithm {
     t4Vector LastSlowVelocity;      // 0x190 [O]; [U] snap
     t4Vector SlowCamEnterLook;      // 0x1A0 [O]; [U] snap
     t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] func_00162568, snap
-    t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] func_00162C78, snap
-    float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] func_00163010
-    float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] func_00163270
+    t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] cLookAtChaseAlgorithm_setupCamDirection, snap
+    float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] cLookAtChaseAlgorithm_updateFollowDistance
+    float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] cLookAtChaseAlgorithm_updateDropWithSpeed
     float LastPitch;                // 0x1D8 [O]; [R] = Pitch; [U] cLookAtChaseAlgorithm_updatePitchBlending
     float LastViewScalar;           // 0x1DC [O]; [R] 1.0f; [U] cLookAtChaseAlgorithm_updateFOVWithSpeed
     float SecondsSinceLastHandplant; // 0x1E0 [O]; [R] 10.0f; [U] cLookAtChaseAlgorithm_updateHandplant (lwc1/swc1; one sw)
-    float LastHeight;               // 0x1E4 [O]; [R] 0; [U] func_00162B90
-    float ExtraBoostDist;           // 0x1E8 [O]; [U] func_00163010
-    float LastBoostWarp;            // 0x1EC [O]; [U] func_00163010
+    float LastHeight;               // 0x1E4 [O]; [R] 0; [U] cLookAtChaseAlgorithm_updateCamTargetLate
+    float ExtraBoostDist;           // 0x1E8 [O]; [U] cLookAtChaseAlgorithm_updateFollowDistance
+    float LastBoostWarp;            // 0x1EC [O]; [U] cLookAtChaseAlgorithm_updateFollowDistance
     float LastCameraSwing;          // 0x1F0 [O]; [U] snap zeroes it (sw)
     float AirCamTimeInAir;          // 0x1F4 [O]; [U] cLookAtChaseAlgorithm_updateAirCam (updateAirCam)
     float AirSplineScalar;          // 0x1F8 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float AirTimeScalar;            // 0x1FC [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float AirCamMaxTime;            // 0x200 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
-    float LastCrouchFactor;         // 0x204 [O]; [U] func_00163270
-    float LastTargetCrouchFactor;   // 0x208 [O]; [U] func_00162B90
+    float LastCrouchFactor;         // 0x204 [O]; [U] cLookAtChaseAlgorithm_updateDropWithSpeed
+    float LastTargetCrouchFactor;   // 0x208 [O]; [U] cLookAtChaseAlgorithm_updateCamTargetLate
     float LastAirTargetDelta;       // 0x20C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastAirPositionDelta;     // 0x210 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
-    float ViewCamLastFactor;        // 0x214 [O]; [U] func_001641C0 (updateViewCam)
+    float ViewCamLastFactor;        // 0x214 [O]; [U] cLookAtChaseAlgorithm_updateViewCam (updateViewCam)
     float FullAirCamTimeInAir;      // 0x218 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastFullAirTargetDelta;   // 0x21C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastFullAirPositionDelta; // 0x220 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
@@ -425,7 +425,7 @@ struct cRelativeChaseAlgorithm {
     char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto
     char HalfPipeAngleSpline[0xC];  // 0x334 [O] cCubicSplineInterpolant; [R] ditto
     cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls cPIDFilter_reset (reset);
-                                    //       [U] func_00162C78 runs the filter inline
+                                    //       [U] cLookAtChaseAlgorithm_setupCamDirection runs the filter inline
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment
     // --- cRelativeChaseAlgorithm
     float Angle;                    // 0x390 [O] (On Tour 0x380); [R] = angle (swc1); [U] cRelativeChaseAlgorithm_update (lwc1)
@@ -607,25 +607,25 @@ struct cSplineCamAlgorithm {
     t4Vector LastSlowVelocity;      // 0x190 [O]; [U] snap
     t4Vector SlowCamEnterLook;      // 0x1A0 [O]; [U] snap
     t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] func_00162568, snap
-    t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] func_00162C78, snap
-    float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] func_00163010
-    float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] func_00163270
+    t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] cLookAtChaseAlgorithm_setupCamDirection, snap
+    float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] cLookAtChaseAlgorithm_updateFollowDistance
+    float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] cLookAtChaseAlgorithm_updateDropWithSpeed
     float LastPitch;                // 0x1D8 [O]; [R] = Pitch; [U] cLookAtChaseAlgorithm_updatePitchBlending
     float LastViewScalar;           // 0x1DC [O]; [R] 1.0f; [U] cLookAtChaseAlgorithm_updateFOVWithSpeed
     float SecondsSinceLastHandplant; // 0x1E0 [O]; [R] 10.0f; [U] cLookAtChaseAlgorithm_updateHandplant (lwc1/swc1; one sw)
-    float LastHeight;               // 0x1E4 [O]; [R] 0; [U] func_00162B90
-    float ExtraBoostDist;           // 0x1E8 [O]; [U] func_00163010
-    float LastBoostWarp;            // 0x1EC [O]; [U] func_00163010
+    float LastHeight;               // 0x1E4 [O]; [R] 0; [U] cLookAtChaseAlgorithm_updateCamTargetLate
+    float ExtraBoostDist;           // 0x1E8 [O]; [U] cLookAtChaseAlgorithm_updateFollowDistance
+    float LastBoostWarp;            // 0x1EC [O]; [U] cLookAtChaseAlgorithm_updateFollowDistance
     float LastCameraSwing;          // 0x1F0 [O]; [U] snap zeroes it (sw)
     float AirCamTimeInAir;          // 0x1F4 [O]; [U] cLookAtChaseAlgorithm_updateAirCam (updateAirCam)
     float AirSplineScalar;          // 0x1F8 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float AirTimeScalar;            // 0x1FC [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float AirCamMaxTime;            // 0x200 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
-    float LastCrouchFactor;         // 0x204 [O]; [U] func_00163270
-    float LastTargetCrouchFactor;   // 0x208 [O]; [U] func_00162B90
+    float LastCrouchFactor;         // 0x204 [O]; [U] cLookAtChaseAlgorithm_updateDropWithSpeed
+    float LastTargetCrouchFactor;   // 0x208 [O]; [U] cLookAtChaseAlgorithm_updateCamTargetLate
     float LastAirTargetDelta;       // 0x20C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastAirPositionDelta;     // 0x210 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
-    float ViewCamLastFactor;        // 0x214 [O]; [U] func_001641C0 (updateViewCam)
+    float ViewCamLastFactor;        // 0x214 [O]; [U] cLookAtChaseAlgorithm_updateViewCam (updateViewCam)
     float FullAirCamTimeInAir;      // 0x218 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastFullAirTargetDelta;   // 0x21C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastFullAirPositionDelta; // 0x220 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
@@ -694,7 +694,7 @@ struct cSplineCamAlgorithm {
     char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto
     char HalfPipeAngleSpline[0xC];  // 0x334 [O] cCubicSplineInterpolant; [R] ditto
     cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls cPIDFilter_reset (reset);
-                                    //       [U] func_00162C78 runs the filter inline
+                                    //       [U] cLookAtChaseAlgorithm_setupCamDirection runs the filter inline
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment
     // --- cSplineCamAlgorithm
     char XOfT[0xC];                 // 0x390 [O] cCubicSplineInterpolant (On Tour 0x380); [R] ctor passes this+0x390

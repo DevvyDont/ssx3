@@ -84,7 +84,7 @@ INCLUDE_ASM("replay/replay2", cReplay_writeHeaderStart);
 
 INCLUDE_ASM("replay/replay2", cReplay_writeHeader);
 
-INCLUDE_ASM("replay/replay2", func_002712F8);
+INCLUDE_ASM("replay/replay2", cReplay_writeFrameCount);
 
 INCLUDE_ASM("replay/replay2", cReplay_writeFramesStart);
 
@@ -98,7 +98,7 @@ INCLUDE_ASM("replay/replay2", cReplay_writePadStart);
 
 INCLUDE_ASM("replay/replay2", cReplay_writePad);
 
-INCLUDE_ASM("replay/replay2", func_002716F0);
+INCLUDE_ASM("replay/replay2", cReplay_writeCheckSumStart);
 
 INCLUDE_ASM("replay/replay2", cReplay_writeCheckSum);
 
@@ -144,7 +144,7 @@ INCLUDE_ASM("replay/replay2", cInSeq__cInSeq);
 
 INCLUDE_ASM("replay/replay2", cInSeq_UpdateFrame);
 
-INCLUDE_ASM("replay/replay2", func_00272938);
+INCLUDE_ASM("replay/replay2", cInSeq_ReadyPlayer);
 
 INCLUDE_ASM("replay/replay2", func_002729A8);
 

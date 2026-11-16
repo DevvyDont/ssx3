@@ -406,7 +406,7 @@ extern "C" void* cReplay_findPrevFrame(cReplay* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E4B8);
+INCLUDE_ASM("replay/replay", cReplay_rewindFrame);
 #ifdef SKIP_ASM
 // PORT: func_0026E448 is declared in this unit with one parameter, but this caller
 // passes (self, index); bind the 2-arg form to the symbol.
@@ -414,7 +414,7 @@ void* func_0026E448_2(void* self, int idx) __asm__("func_0026E448__FPv");
 extern "C" int func_0026D4D8(void* stream, unsigned int pos);
 
 
-extern "C" void func_0026E4B8(cReplay* self_)
+extern "C" void cReplay_rewindFrame(cReplay* self_)
 {
     cReplay* self = self_;
     int i;
@@ -434,14 +434,14 @@ INCLUDE_ASM("replay/replay", cReplay_nextFrame);
 #ifdef SKIP_ASM
 // PORT: cReplay_findNextFrame really takes (self, index); the unit declares it with 1 arg
 void* cReplay_findNextFrame_2(void* self, int idx) __asm__("cReplay_findNextFrame");
-extern "C" void func_0026E4B8(cReplay* self);
+extern "C" void cReplay_rewindFrame(cReplay* self);
 
 extern "C" void cReplay_nextFrame(cReplay* self)
 {
     void* p = cReplay_findNextFrame_2(self, self->PlaybackTick);
     self->PlaybackFrame = (cReplayFrame*)p;
     self->PlaybackTick = *(int*)((char*)p + 0x30);
-    func_0026E4B8(self);
+    cReplay_rewindFrame(self);
 }
 #endif
 
@@ -450,14 +450,14 @@ INCLUDE_ASM("replay/replay", cReplay_prevFrame);
 #ifdef SKIP_ASM
 // PORT: cReplay_findPrevFrame really takes (self, index); the unit declares it with 1 arg
 void* cReplay_findPrevFrame_2(void* self, int idx) __asm__("cReplay_findPrevFrame");
-extern "C" void func_0026E4B8(cReplay* self);
+extern "C" void cReplay_rewindFrame(cReplay* self);
 
 extern "C" void cReplay_prevFrame(cReplay* self)
 {
     void* p = cReplay_findPrevFrame_2(self, self->PlaybackTick);
     self->PlaybackFrame = (cReplayFrame*)p;
     self->PlaybackTick = *(int*)((char*)p + 0x30);
-    func_0026E4B8(self);
+    cReplay_rewindFrame(self);
 }
 #endif
 
