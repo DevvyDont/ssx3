@@ -3090,7 +3090,101 @@ int func_00428600(int a0, unsigned a1, int a2)
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_004288C0);
+#ifdef SKIP_ASM
+/* sceIoctl (libkernel fileio): requests 1-3 are answered on the EE, the rest go to the IOP as RPC 5. */
+extern int *D_0052D6C8;         /* argument of the pending sceIoctl */
+extern char D_0052E390[];       /* D_0052E380 + 0x10: read-ahead buffer payload */
+extern int D_00455208;
+extern int func_00427988_b(int) __asm__("func_00427988");
+extern void func_00427A90(void);
+extern void func_004279B8(void);
+extern void func_00426358(int, int);
+extern int func_00423DA0(int *p);
+extern void func_00423DB0(int);
+extern void func_00423DC0(int);
+extern int func_00423DE0_i(int) __asm__("func_00423DE0");
+struct Blk88C0 { char b[0x400]; };
+// FAKEMATCH: stand-in local `one = 1` (retail keeps the constant 1 in $21 from the prologue for the switch's case-1 compare) plus a dead `one = 0;` at the end of case 1, so jump1 keeps the local until cse substitutes it into the compare; plain form 97.75%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+int func_004288C0(int fd, int req, void *arg) {
+    int buf[12];
+    int sem;
+    int v;
+    int i;
+    sFioFile *t;
+    sFioIoctl2Cmd *p = &D_0052D700.ioctl2;
+    int one = 1; /* FAKEMATCH: stand-in for the case-1 constant */
+    t = func_00427520(fd);
+    func_00427988_b(5);
+    D_0052D6C8 = arg;
+    if (D_0045520C == 0) {
+        func_00427A90();
+    }
+    if (t == 0 || t->f4 == 0) {
+        func_004279B8();
+        return -9;
+    }
+    p->f414 = 0;
+    p->f418 = 0;
+    switch (req) {
+    case 1:
+        func_00423DE0_i(D_0045521C);
+        for (i = 0; i < 32; i++) {
+            if (D_00455188[i] != -1)
+                break;
+        }
+        if (i == 32)
+            *D_0052D6C8 = 0;
+        else
+            *D_0052D6C8 = 1;
+        one = 0; /* FAKEMATCH: dead store, keeps `one` a variable */
+        func_00423DC0(D_0045521C);
+        func_004279B8();
+        return 0;
+    case 2:
+        *(int *)arg = *(int *)((int)(D_0052E390 + D_00455208 * 0x440) | 0x20000000);
+        func_004279B8();
+        return 0;
+    case 3:
+        *(long *)arg = *(long *)((int)(D_0052E390 + D_00455208 * 0x440) | 0x20000000);
+        func_004279B8();
+        return 0;
+    default:
+        p->fC = t->f0;
+        p->f10 = req;
+        if (arg == 0) {
+            p->f41C = 0;
+        } else {
+            p->f41C = 0x400;
+            *(struct Blk88C0 *)p->data = *(struct Blk88C0 *)arg;
+        }
+        buf[1] = 1;
+        buf[2] = 0;
+        buf[5] = 0;
+        sem = func_00423DA0(&buf[0]);
+        p->f0 = sem;
+        p->f4 = (int)&buf[8];
+        p->f8 = 4;
+        func_00426358((int)&D_0052D700.ioctl2, 0x420);
+        if (func_00426D18(&D_0052EE00, 5, 0, &D_0052D700.ioctl2, 0x420, D_0052E340, 4, 0, 0) < 0) {
+            func_00423DB0(sem);
+            func_004279B8();
+            return -0xB;
+        }
+        v = *(int *)((int)D_0052E340 | 0x20000000);
+        func_004279B8();
+        if (v == 0) {
+            func_00423DB0(sem);
+            return -0xB;
+        }
+        func_00423DE0_i(sem);
+        func_00423DB0(sem);
+        return buf[8];
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00428C38);
@@ -5544,16 +5638,67 @@ int func_0042CD58(void) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_325220", func_0042CD98);
 #ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
+#include "fakematch.h"
 struct sTlbCfg_4248 { int a, b, c, cnt; int *t1; int *t2; int *t3; };
 extern struct sTlbCfg_4248 D_004567F0;
 extern char D_0049AD98[], D_0049ADD0[], D_0049ADE8[], D_0049AE00[];
 extern int func_00425C28_pf(const char *, ...) __asm__("func_00425C28");
 extern void func_0042C6E8(int);
 extern int func_0042CCB8_tlb(int, int, int, int, int) __asm__("func_0042CCB8");
-int func_0042CD98(void); /* peak3 body held: see notes/stuck.md */
-
+// FAKEMATCH: `register int i FM_REG("$25")` pins the TLB index to $25, where retail keeps it across the calls to the
+// func_0042CCB8 syscall stub (no allocator picks a call-clobbered register there, so the original most likely declared
+// it as a register variable); plain form 88.93%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+int func_0042CD98(void) {
+    struct sTlbCfg_4248 *c = &D_004567F0;
+    register int i FM_REG("$25");
+    int n, k, *p;
+    func_00425C28_pf(D_0049AD98, c->a - 1, c->a, c->a + c->b - 1, c->a + c->b, c->a + c->b + c->c - 1);
+    MTC0_WIRED_4248(0);
+    n = c->a;
+    i = 0;
+    if (n > 48) {
+        func_00425C28_pf(D_0049ADD0);
+        func_0042C6E8(1);
+    }
+    p = c->t1;
+    for (; i < n; i++, p += 4) func_0042CCB8_tlb(i, p[0], p[1], p[2], p[3]);
+    c = &D_004567F0;
+    n = i + c->b;
+    if (n > 48) {
+        func_00425C28_pf(D_0049ADE8);
+        func_0042C6E8(1);
+    }
+    p = c->t2;
+    for (; i < n; i++, p += 4) func_0042CCB8_tlb(i, p[0], p[1], p[2], p[3]);
+    c = &D_004567F0;
+    c->cnt = i;
+    MTC0_WIRED_4248(i);
+    if (c->c > 0) {
+        n = i + c->c;
+        if (n > 48) {
+            func_00425C28_pf(D_0049AE00);
+            func_0042C6E8(1);
+        }
+        p = c->t3;
+        for (; i < n; i++, p += 4) func_0042CCB8_tlb(i, p[0], p[1], p[2], p[3]);
+    }
+    k = i;
+    i <<= 13;
+    if (k < 48) {
+        int addr = i + 0xE0000000;
+        do {
+            func_0042CCB8_tlb(k, 0, addr, 0, 0);
+            k++;
+            addr += 0x2000;
+        } while (k < 48);
+    }
+    return i;
+}
 #endif
 
 //100%

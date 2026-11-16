@@ -5671,7 +5671,88 @@ void func_004200F0(char *r) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_316FB8", func_00420180);
+#ifdef SKIP_ASM
+/* newlib stdio/flags.c (__sflags), as in Sony's copy: no mode[1] guard and no O_BINARY/O_TEXT part.
+ * Copyright (c) 1990 The Regents of the University of California.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms are permitted
+ * provided that the above copyright notice and this paragraph are
+ * duplicated in all such forms and that any documentation,
+ * advertising materials, and other materials related to such
+ * distribution and use acknowledge that the software was developed
+ * by the University of California, Berkeley.  The name of the
+ * University may not be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+#include "fakematch.h"
+struct _reent_0180 {
+  int _errno;
+};
+#define __SRD_0180	0x0004
+#define __SWR_0180	0x0008
+#define __SRW_0180	0x0010
+#define __SAPP_0180	0x0100
+#define O_RDONLY_0180	0
+#define O_WRONLY_0180	1
+#define O_RDWR_0180	2
+#define O_APPEND_0180	0x0008
+#define O_CREAT_0180	0x0200
+#define O_TRUNC_0180	0x0400
+#define EINVAL_0180	22
+
+/* the unit declares func_00420180(int, char *, int *) for its caller func_00416EB0 */
+int __sflags_0180(struct _reent_0180 *ptr, register char *mode, int *optr) __asm__("func_00420180");
+// FAKEMATCH: fakematch.h pins on all four locals (ret $9, m $7, o $8, and the `m | o` result r $3; retail keeps
+// them off v0/a0, as if ptr stayed live, which no spelling reproduced; every 3-pin subset scores 98.93-99.64);
+// plain form 97.62% (97.86% honest best with `*optr = o | m`).
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+int
+__sflags_0180 (struct _reent_0180 *ptr, register char *mode, int *optr)
+{
+  register int r FM_REG("$3");
+  register int ret FM_REG("$9");
+  register int m FM_REG("$7");
+  register int o FM_REG("$8");
+
+  switch (mode[0])
+    {
+    case 'r':			/* open for reading */
+      ret = __SRD_0180;
+      m = O_RDONLY_0180;
+      o = 0;
+      break;
+
+    case 'w':			/* open for writing */
+      ret = __SWR_0180;
+      m = O_WRONLY_0180;
+      o = O_CREAT_0180 | O_TRUNC_0180;
+      break;
+
+    case 'a':			/* open for appending */
+      ret = __SWR_0180 | __SAPP_0180;
+      m = O_WRONLY_0180;
+      o = O_CREAT_0180 | O_APPEND_0180;
+      break;
+    default:			/* illegal mode */
+      ptr->_errno = EINVAL_0180;
+      return (0);
+    }
+  if (mode[1] == '+' || mode[2] == '+')
+    {
+      ret = __SRW_0180;
+      m = O_RDWR_0180;
+    }
+  r = m | o;
+  *optr = r;
+  return ret;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", func_00420228);

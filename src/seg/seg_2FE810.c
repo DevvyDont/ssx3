@@ -5677,7 +5677,107 @@ int func_00406510(int *p, int *q, int *r, int *s, int *t) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_004065D0);
+#ifdef SKIP_ASM
+/* MSSG mpeg2decode getpic.c decode_macroblock() with macroblock_modes() folded in (Sony libmpeg): p is the decoder
+   state (0x11C Fault_Flag, 0x150 picture_coding_type, 0x174 picture_structure, 0x17C frame_pred_frame_dct,
+   0x180 concealment_motion_vectors, 0x848 MPEG2_Flag); the block is decoded by an IPU BDEC command. */
+extern char D_00497FC0[];
+extern void func_004034A8(int *, int);
+extern int m65D0_6F78(int *, int) __asm__("func_00406F78");
+extern int m65D0_72E8(int *, int) __asm__("func_004072E8");
+extern void m65D0_71F8(int *, int) __asm__("func_004071F8");
+extern void m65D0_6B00(int *, int *, int *, int *, int, int, int, int, int, int, int) __asm__("func_00406B00");
+extern void m65D0_6CA0(int *, int *, int *, int, int, int, int, int) __asm__("func_00406CA0");
+extern void m65D0_6DF0(int *, unsigned) __asm__("func_00406DF0");
+extern void m65D0_6E20(int *) __asm__("func_00406E20");
+extern void m65D0_8AF8(int, int) __asm__("func_00408AF8");
+int func_004065D0(int *p, int *mbtype, int *motion_type, int *dct_type, int *PMV, int *mvfs, int *dmvector) {
+    int macroblock_type;
+    int motion_vector_count, mv_format, dmv, mvscale;
+    *(volatile unsigned int *)0x10002010 = (*(volatile unsigned int *)0x10002010 & 0xF8FFFFFF) | (p[0x150 / 4] << 24);
+    macroblock_type = m65D0_6F78(p, 1);
+    *mbtype = macroblock_type;
+    if (macroblock_type == 0) {
+        func_004034A8(p, (int)D_00497FC0);
+        p[0x11C / 4] = 1;
+        return 0;
+    }
+    if (macroblock_type & 0xC) {
+        if (p[0x174 / 4] == 3 && p[0x17C / 4])
+            *motion_type = 2;
+        else
+            *motion_type = m65D0_72E8(p, 2);
+    } else if ((macroblock_type & 1) && p[0x180 / 4]) {
+        *motion_type = (p[0x174 / 4] == 3) ? 2 : 1;
+    }
+    if (p[0x174 / 4] == 3) {
+        motion_vector_count = (*motion_type == 1) ? 2 : 1;
+        mv_format = (*motion_type == 2);
+    } else {
+        motion_vector_count = (*motion_type == 2) ? 2 : 1;
+        mv_format = 0;
+    }
+    dmv = (*motion_type == 3);
+    mvscale = (mv_format == 0 && p[0x174 / 4] == 3);
+    *dct_type = (p[0x174 / 4] == 3 && !p[0x17C / 4] && (*mbtype & 3)) ? m65D0_72E8(p, 1) : 0;
+
+    if (*mbtype & 0x10)
+        p[0x1B4 / 4] = m65D0_72E8(p, 5);
+
+    if ((*mbtype & 8) || ((*mbtype & 1) && p[0x180 / 4])) {
+        if (p[0x848 / 4])
+            m65D0_6B00(p, PMV, dmvector, mvfs, 0, motion_vector_count, mv_format, p[0x164 / 4] - 1, p[0x168 / 4] - 1, dmv, mvscale);
+        else
+            m65D0_6CA0(p, PMV, dmvector, p[0x158 / 4] - 1, p[0x158 / 4] - 1, 0, 0, p[0x154 / 4]);
+    }
+    if (p[0x11C / 4])
+        return 0;
+
+    if (*mbtype & 4) {
+        if (p[0x848 / 4])
+            m65D0_6B00(p, PMV, dmvector, mvfs, 1, motion_vector_count, mv_format, p[0x16C / 4] - 1, p[0x170 / 4] - 1, 0, mvscale);
+        else
+            m65D0_6CA0(p, PMV + 2, dmvector, p[0x160 / 4] - 1, p[0x160 / 4] - 1, 0, 0, p[0x15C / 4]);
+    }
+    if (p[0x11C / 4])
+        return 0;
+
+    if ((*mbtype & 1) && p[0x180 / 4])
+        m65D0_71F8(p, 1);
+
+    if (*mbtype & 3) {
+        m65D0_8AF8(p[p[0x810 / 4] * 0x140 / 4 + 0x594 / 4], 0x300);
+        m65D0_6E20(p);
+        m65D0_6DF0(p, 0x20000000 | ((*mbtype & 1) << 27) | (p[0x1B0 / 4] << 26) | (*dct_type << 25) | (p[0x1B4 / 4] << 16));
+    } else {
+        p[p[0x810 / 4] * 0x140 / 4 + 0x6CC / 4] = 1;
+    }
+    p[0x1B0 / 4] = 0;
+    if (p[0x11C / 4])
+        return 0;
+
+    if (!(*mbtype & 1))
+        p[0x1B0 / 4] = 1;
+
+    if ((*mbtype & 1) && !p[0x180 / 4]) {
+        PMV[0] = PMV[1] = PMV[4] = PMV[5] = 0;
+        PMV[2] = PMV[3] = PMV[6] = PMV[7] = 0;
+    }
+
+    if (p[0x150 / 4] == 2 && !(*mbtype & 9)) {
+        PMV[0] = PMV[1] = PMV[4] = PMV[5] = 0;
+        if (p[0x174 / 4] == 3) {
+            *motion_type = 2;
+        } else {
+            *motion_type = 1;
+            mvfs[0] = (p[0x174 / 4] == 2);
+        }
+    }
+    return 1;
+}
+#endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00406A78);
@@ -7005,10 +7105,28 @@ void q94E8(int *p) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409638);
 #ifdef SKIP_ASM
-int func_00409638(int a); /* peak3 body held: see notes/stuck.md */
-
+// From peak3project's fork (github.com/peak3project/ssx3).
+// NOTE: volatile = the IPU_CTRL hardware register (0x10002010), polled until BUSY clears; without it the poll is hoisted
+// (strip test 85.54). The R5900 short-loop nops in the loop come from the assembler, not from the source.
+int func_00409638(int a) {
+    int r = 0;
+    int v;
+    switch (a) {
+    case 0:
+        do {
+            v = *(volatile int *)0x10002010;
+        } while (v < 0);
+        r = 0;
+        break;
+    case 1:
+        r = *(volatile unsigned *)0x10002010 >> 31;
+        break;
+    }
+    return r;
+}
 #endif
 
 //100%
@@ -7025,19 +7143,53 @@ void func_004096A0(int a) {
 }
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409708);
 #ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
 typedef int i128_9708 __attribute__((mode(TI)));
 extern volatile i128_9708 D_00453340[];
 extern i128_9708 D_00453390[];
 extern void func_004096A0(int);
 #define WAIT_9708() while (*(volatile int *)0x10002010 < 0)
-void func_00409708(void); /* peak3 body held: see notes/stuck.md */
-
+// FAKEMATCH: `extern volatile` view of the IPU quantiser table D_00453340 (only this function reads it), so its four
+// copies of entry 4 are reloaded for each FIFO write as in retail instead of being CSEd; plain form 97.11%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+void func_00409708(void) {
+    func_004096A0(1);
+    *(volatile int *)0x10002010 = 0x40000000;
+    WAIT_9708();
+    *(volatile int *)0x10002000 = 0;
+    WAIT_9708();
+    *(volatile i128_9708 *)0x10007010 = D_00453340[0];
+    *(volatile i128_9708 *)0x10007010 = D_00453340[1];
+    *(volatile i128_9708 *)0x10007010 = D_00453340[2];
+    *(volatile i128_9708 *)0x10007010 = D_00453340[3];
+    *(volatile i128_9708 *)0x10007010 = D_00453340[4];
+    *(volatile i128_9708 *)0x10007010 = D_00453340[4];
+    *(volatile i128_9708 *)0x10007010 = D_00453340[4];
+    *(volatile i128_9708 *)0x10007010 = D_00453340[4];
+    *(volatile int *)0x10002000 = 0x50000000;
+    WAIT_9708();
+    *(volatile int *)0x10002000 = 0x58000000;
+    WAIT_9708();
+    *(volatile i128_9708 *)0x10007010 = D_00453390[0];
+    *(volatile i128_9708 *)0x10007010 = D_00453390[1];
+    *(volatile int *)0x10002000 = 0x60000000;
+    WAIT_9708();
+    *(volatile int *)0x10002000 = 0x90000000;
+    WAIT_9708();
+    *(volatile int *)0x10002010 = 0x40000000;
+    WAIT_9708();
+    *(volatile int *)0x10002000 = 0;
+    WAIT_9708();
+}
 #endif
 
+//100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409940);
 #ifdef SKIP_ASM
+// From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_004980F0[];
 extern char D_00498108[];
 extern char D_00498130[];
@@ -7046,8 +7198,55 @@ extern void Q_sig(int) __asm__("func_00423DC0");
 extern void Q_log(char *) __asm__("func_00425C60");
 extern int Q_A360(int, int, int) __asm__("func_0040A360");
 extern void Q_6408(int) __asm__("func_00426408");
-int func_00409940(void); /* peak3 body held: see notes/stuck.md */
-
+// NOTE: the nops in retail's two wait loops are the assembler's R5900 short-loop padding, so the loops are plain C.
+int func_00409940(void) {
+    int s[6];
+    int r;
+    int i;
+    if (D_004533C4 < 0) {
+        s[5] = 0;
+        s[2] = 1;
+        s[1] = 1;
+        D_004533C4 = Q_sema(s);
+        s[1] = 1;
+        s[2] = 0;
+        s[5] = 0;
+        D_004533C8 = Q_sema(s);
+    }
+    Q_A360(0, 0, 0);
+    func_00423DE0(D_004533C4);
+    Q_6408(0);
+    for (;;) {
+        if (func_00426B48(&D_005271C0, 0x80000400, 0) < 0) {
+            Q_log(D_004980F0);
+            for (;;)
+                ;
+        }
+        if (D_005271C0.server != 0)
+            break;
+        i = 0x100000;
+        do {
+            i--;
+        } while (i != 0);
+    }
+    r = func_00426D18(&D_005271C0, 0xFE, 0, &D_00527240, 48, D_00528780, 12, 0, 0);
+    Q_sig(D_004533C4);
+    if (r < 0) {
+        D_005271C0.server = 0;
+        return r - 100;
+    }
+    if (D_00528780[1] < 0x20A) {
+        Q_log(D_00498108);
+        D_005271C0.server = 0;
+        return -120;
+    }
+    if (D_00528780[2] < 0x20E) {
+        Q_log(D_00498130);
+        D_005271C0.server = 0;
+        return -121;
+    }
+    return D_00528780[0];
+}
 #endif
 
 //100%
