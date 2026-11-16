@@ -9977,7 +9977,7 @@ extern "C" int func_002A34D0(void *vself, cRider *rider, int flag, int which)
     if (sel != 0) {
         c = func_002A1E68(self, rider);
     } else {
-        switch (*(unsigned int *)((char *)rider + 0xEC)) {
+        switch ((unsigned int)rider->unk_0EC) {
         case 0:
             c = 1;
             break;

@@ -7451,7 +7451,7 @@ extern "C" void func_00133308(sSpinCtl_133308* self, int* input)
     if (!busy && self->mode == 3)
         self->mode = 0;
 
-    *(int*)((char*)self->rider + 0x330) = 0;
+    self->rider->mPressType = 0;
     float maxFlip = D_004A4C9C;
     int dir = (input[1] << 12) >> 30;
     float d;
@@ -7472,9 +7472,9 @@ extern "C" void func_00133308(sSpinCtl_133308* self, int* input)
         flipAdj = d;
         maxFlip = D_004A4CA0;
         if (self->flipVel < 0.0f || (self->flipVel == 0.0f && flipAdj < 0.0f))
-            *(int*)((char*)self->rider + 0x330) = 2;
+            self->rider->mPressType = 2;
         else
-            *(int*)((char*)self->rider + 0x330) = 1;
+            self->rider->mPressType = 1;
     }
     func_00114130(self->rider, 0, 0);
 

@@ -1720,7 +1720,7 @@ extern "C" int func_001163B0(cRider* self, int a1, int a2)
         if (a1 != 0 && a2 != 0) {
             if (seqDone_163B0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0)) {
                 *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x90) = 0.0f;
-                *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)((char*)self + 0x8C0);
+                *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
                 cRiderAnimBase_play(self->mRiderAnim, 0x145, 0, -1.0f);
                 float w = *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x94);
                 float f = *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x98);
@@ -1743,7 +1743,7 @@ extern "C" int func_001163B0(cRider* self, int a1, int a2)
         if ((a1 != 0 && a2 == 0 && match) || (a1 == 0 && a2 != 0 && !match)) {
             if (seqDone_163B0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0)) {
                 *(float*)((char*)func_00311B20(self->mRiderAnim, 1) + 0x90) = 0.0f;
-                *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)((char*)self + 0x8C0);
+                *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
                 if (id == 0x143)
                     cRiderAnimBase_play(self->mRiderAnim, 0x146, 0, -1.0f);
                 else
@@ -1777,7 +1777,7 @@ extern "C" int func_001163B0(cRider* self, int a1, int a2)
             return 1;
         if (func_00311AE8(self->mRiderAnim, 1) == 3 && func_001446A0((char*)func_00311B20(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
-        *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)((char*)self + 0x8C0);
+        *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
         cRiderAnimBase_play(self->mRiderAnim, 0x142, 1, -1.0f);
         *(long*)((char*)self->mRiderAnim + 0x20) = -1;
         self->mAttackBlend = 0.0f;
@@ -1795,7 +1795,7 @@ extern "C" int func_001163B0(cRider* self, int a1, int a2)
             self->mAttackDir = GetSide_163B0(self);
             anim = self->unk_320 ? 0x144 : 0x143;
         }
-        *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)((char*)self + 0x8C0);
+        *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
         cRiderAnimBase_play(self->mRiderAnim, anim, 1, -1.0f);
         *(long*)((char*)self->mRiderAnim + 0x20) = -1;
         self->mAttackBlend = 0.0f;

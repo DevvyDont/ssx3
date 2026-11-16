@@ -658,7 +658,7 @@ void func_0011D390_impl(cRider* self)
         self->mPowerUpBoostTimer = 0;
         self->mPowerUpTrickTimer = 0;
         self->unk_5A0 = 0;
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)self + 0x6C0);
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)self->mVtbl;
         vt[kRiderVt_vibrationReset].fn((char*)self + vt[kRiderVt_vibrationReset].delta);
         func_00111890(self->mRiderHandler);
         self->unk_5A4 = 0;
@@ -1873,8 +1873,8 @@ extern "C" void func_0011EB98_impl(cRider* self)
                 q = AxisAngle_EB98(c, (1.5707963705062866f - func_0031C128(m)) * self->mSlewed[17].cur);
             b1->rot = QuatMul_EB98(q, b1->rot);
         }
-        if (0.0f < *(float*)((char*)self + 0x31C))
-            AddTo_EB98(b1->pos, Scale_EB98(Scale_EB98(*(sVec4W*)&self->mGroundNormal, *(float*)((char*)self + 0x31C)), self->mSlewed[17].cur));
+        if (0.0f < self->unk_31C)
+            AddTo_EB98(b1->pos, Scale_EB98(Scale_EB98(*(sVec4W*)&self->mGroundNormal, self->unk_31C), self->mSlewed[17].cur));
         {
             cAnimModel* am = self->mAnimModel;
             sXf_EB98 local;
@@ -4632,7 +4632,7 @@ extern "C" void func_00123640(cRider* self)
     cRiderAnimBase_reset(self->mRiderAnim);
     cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
     self->mIsInNIS = 1;
-    *(int*)((char*)self + 0x2D8) = *(int*)((char*)self + 0x320);
+    self->unk_2D8 = self->unk_320;
     self->unk_AC8 = 0;
     int j;
     for (j = 3; j >= 0; j--)
@@ -4652,23 +4652,23 @@ extern "C" void func_00123640(cRider* self)
     q.y = fb[7];
     q.z = fb[8];
     q.w = one;
-    *(float*)((char*)self + 0xAF0) = fb[9] * 0.01745329424738884f;
-    *(float*)((char*)self + 0xAF4) = fb[10] * 0.01745329424738884f;
-    *(float*)((char*)self + 0xAF8) = fb[11] * 0.01745329424738884f;
-    *(sV_3640*)((char*)self + 0xAE0) = q;
-    q = MatMulV_3640((char*)self + 0x700, *(sV_3640*)((char*)self + 0xAE0));
+    self->unk_AF0 = fb[9] * 0.01745329424738884f;
+    self->unk_AF4 = fb[10] * 0.01745329424738884f;
+    self->unk_AF8 = fb[11] * 0.01745329424738884f;
+    *(sV_3640*)&self->unk_AE0 = q;
+    q = MatMulV_3640((char*)self + 0x700, *(sV_3640*)&self->unk_AE0);
     *(sV_3640*)&self->mPosition = q;
-    float ry = *(float*)((char*)self + 0x744);
-    float rz = *(float*)((char*)self + 0x740);
+    float ry = self->unk_744;
+    float rz = self->unk_740;
     func_001241C0(self, (sQuat_001241C0*)&q, zero,
-                  *(float*)((char*)self + 0xAF4) + ry,
-                  *(float*)((char*)self + 0xAF0) + rz);
-    float rx = *(float*)((char*)self + 0x748);
-    *(sV_3640*)&self->mRotation = AxisAngle_3640(D_004FF160_3640, *(float*)((char*)self + 0xAF8) + rx - 1.5707963705062866f);
+                  self->unk_AF4 + ry,
+                  self->unk_AF0 + rz);
+    float rx = self->unk_748;
+    *(sV_3640*)&self->mRotation = AxisAngle_3640(D_004FF160_3640, self->unk_AF8 + rx - 1.5707963705062866f);
     *(sV_3640*)&self->mRotation = QuatMul_3640(q, *(sV_3640*)&self->mRotation);
     cRider_updateOrientationImplicit(self);
     *(sV_3640*)&self->mVelocity = D_004FF120_3640;
-    *(float*)((char*)self + 0xB04) = zero;
+    self->unk_B04 = zero;
     func_00111890(self->mRiderHandler);
     initTrack_3640(self, 0x1F0, zero, zero);
     initTrack_3640(self, 0x1FC, zero, zero);
@@ -4992,7 +4992,7 @@ static inline void AddTo_3F38(sV_3F38& a, const sV_3F38& b)
 
 extern "C" sV_3F38 func_00123F38(cRider* self)
 {
-    if (*(int*)((char*)self + 0x6E4) <= 0)
+    if (self->unk_6E4 <= 0)
         return *(sV_3F38*)&self->mPosition;
     float lift = 0.0f;
     // PORT: func_0027C958 returns a record pointer as int
@@ -5303,51 +5303,51 @@ extern "C" void func_001242B0_impl(cRider* self, void* p)
     char* o = (char*)&self->mVtbl;
     sVE_42B0* ve = &(*(sVE_42B0**)o)[kRiderVt_getVelocity];
     float speed = Length_42B0(*ve->fn(o + ve->delta));
-    float s = self->mAnimModel->unk_140.x * (*(float*)((char*)self + 0x1F0) * 45.0f);
-    sV_42B0 b = Add_42B0(*(sV_42B0*)p, Scale_42B0(*(sV_42B0*)((char*)self + 0x3B0), s));
+    float s = self->mAnimModel->unk_140.x * (self->mSlewed[0].cur * 45.0f);
+    sV_42B0 b = Add_42B0(*(sV_42B0*)p, Scale_42B0(*(sV_42B0*)&self->mGroundSide, s));
     sV_42B0 lo = Add_42B0(b, Scale_42B0(*(sV_42B0*)&self->mGroundNormal, -100.0f));
     sV_42B0 hi = Add_42B0(b, Scale_42B0(*(sV_42B0*)&self->mGroundNormal, 200.0f));
     sHit_42B0 hit;
     sRay_42B0 ray;
     func_0032E100(&ray, lo, hi, 2, 0.5f);
     float t = func_003342D0(self->mOverlapList, &ray, &hit, 0);
-    *(sV_42B0*)((char*)self + 0x380) = *(sV_42B0*)&self->mGroundNormal;
+    *(sV_42B0*)&self->unk_380 = *(sV_42B0*)&self->mGroundNormal;
     if (t > 0.0f && hit.obj != 0) {
         self->mGroundPolyId = *(int*)(hit.obj + 0x150);
-        *(float*)((char*)self + 0xAAC) = hit.f6C;
-        *(float*)((char*)self + 0xAB0) = hit.f70;
-        *(unsigned short*)((char*)self + 0x2D4) = *(unsigned short*)(hit.obj + 0xA);
+        self->unk_AAC = hit.f6C;
+        self->unk_AB0 = hit.f70;
+        self->unk_2D4 = *(unsigned short*)(hit.obj + 0xA);
     } else {
         *(unsigned int*)&self->mGroundPolyId = 0xFFFFFFFF;
     }
     if (t < 0.0f) {
         self->unk_B00 = 0;
         *(sV_42B0*)&self->mGroundNormal = D_004FF160_42B0;
-        *(sV_42B0*)((char*)self + 0x3D0) = D_004FF120_42B0;
-        *(sV_42B0*)((char*)self + 0x3A0) = Normalize_42B0(SubV_42B0(*(sV_42B0*)&self->mMatrix.row[1], Scale_42B0(*(sV_42B0*)&self->mGroundNormal, DotV_42B0(*(sV_42B0*)&self->mMatrix.row[1], *(sV_42B0*)&self->mGroundNormal))));
-        *(sV_42B0*)((char*)self + 0x3B0) = Cross_42B0(*(sV_42B0*)&self->mGroundNormal, *(sV_42B0*)((char*)self + 0x3A0));
-        *(int*)((char*)self + 0x438) = 0;
+        *(sV_42B0*)&self->unk_3D0 = D_004FF120_42B0;
+        *(sV_42B0*)&self->mGroundForward = Normalize_42B0(SubV_42B0(*(sV_42B0*)&self->mMatrix.row[1], Scale_42B0(*(sV_42B0*)&self->mGroundNormal, DotV_42B0(*(sV_42B0*)&self->mMatrix.row[1], *(sV_42B0*)&self->mGroundNormal))));
+        *(sV_42B0*)&self->mGroundSide = Cross_42B0(*(sV_42B0*)&self->mGroundNormal, *(sV_42B0*)&self->mGroundForward);
+        self->mSurfaceType = 0;
         self->mAudioBraking = 0.0f;
         self->mAudioEdging = 0.0f;
         self->mAudioPressure = 0.0f;
         self->mAudioSpeed = 0.0f;
-        *(float*)((char*)self + 0xB04) = speed;
+        self->unk_B04 = speed;
         return;
     }
     if (self->unk_AFC != 0 && self->unk_B00 == 0) {
         func_00111AA0_42B0(self->mRiderHandler, &hit, &hit.nrm, hit.mat, Length_42B0(hit.v20));
     }
     self->unk_B00 = 1;
-    *(int*)((char*)self + 0x438) = hit.mat;
+    self->mSurfaceType = hit.mat;
     if (hit.mat == -1)
-        *(int*)((char*)self + 0x438) = 0;
+        self->mSurfaceType = 0;
     *(sV_42B0*)&self->mGroundNormal = hit.nrm;
-    *(sV_42B0*)((char*)self + 0x460) = hit.pos;
-    *(sV_42B0*)((char*)self + 0x3D0) = hit.v20;
-    *(sV_42B0*)((char*)self + 0x3A0) = Normalize_42B0(SubV_42B0(*(sV_42B0*)&self->mMatrix.row[1], Scale_42B0(*(sV_42B0*)&self->mGroundNormal, DotV_42B0(*(sV_42B0*)&self->mMatrix.row[1], *(sV_42B0*)&self->mGroundNormal))));
-    *(sV_42B0*)((char*)self + 0x3B0) = Cross_42B0(*(sV_42B0*)&self->mGroundNormal, *(sV_42B0*)((char*)self + 0x3A0));
-    *(float*)((char*)self + 0x454) = Dot_42B0(Sub_42B0(b, hit.pos), *(sV_42B0*)&self->mGroundNormal);
-    float d = *(float*)((char*)self + 0xB04) - speed;
+    *(sV_42B0*)&self->mGroundContactPoint = hit.pos;
+    *(sV_42B0*)&self->unk_3D0 = hit.v20;
+    *(sV_42B0*)&self->mGroundForward = Normalize_42B0(SubV_42B0(*(sV_42B0*)&self->mMatrix.row[1], Scale_42B0(*(sV_42B0*)&self->mGroundNormal, DotV_42B0(*(sV_42B0*)&self->mMatrix.row[1], *(sV_42B0*)&self->mGroundNormal))));
+    *(sV_42B0*)&self->mGroundSide = Cross_42B0(*(sV_42B0*)&self->mGroundNormal, *(sV_42B0*)&self->mGroundForward);
+    self->unk_454 = Dot_42B0(Sub_42B0(b, hit.pos), *(sV_42B0*)&self->mGroundNormal);
+    float d = self->unk_B04 - speed;
     *(int*)&self->mAudioBraking = 0;
     if (d < self->mAudioBraking) {
         float v = -d * 0.0036000001709908247f;
@@ -5359,7 +5359,7 @@ extern "C" void func_001242B0_impl(cRider* self, void* p)
     self->mAudioSpeed = v2;
     if (1.0f < v2)
         self->mAudioSpeed = 1.0f;
-    *(float*)((char*)self + 0xB04) = speed;
+    self->unk_B04 = speed;
     self->mAudioPressure = 0.30000001192092896f;
     self->mAudioEdging = 0.0f;
 }
