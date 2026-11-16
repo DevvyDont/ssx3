@@ -1116,7 +1116,48 @@ void* func_0038F800(void* self)
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/lightman", func_0038F820);
+#ifdef SKIP_ASM
+#include "fakematch.h"
+extern unsigned int D_0044B9E0[];
+
+// FAKEMATCH: variable reuse (`a` holds both table entries, `x` both byte indices, so each second value shares its
+// first value's register and sched1 keeps the second load after the first value's last use) plus a register pin
+// `register unsigned char* d FM_REG("$16") = dst;` (fakematch.h; global-alloc tie between dst and the outer i+1);
+// plain form (separate a/b and index locals, no pin) 77.33%, reuse without the pin 96.45%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+extern "C" int func_0038F820(void* self, unsigned char* src, unsigned char* dst)
+{
+    register unsigned char* d FM_REG("$16") = dst;
+    unsigned int n = 0;
+    unsigned int i;
+    for (i = 0; i < 4; i++) {
+        unsigned int k = (i & 1) << 7;
+        unsigned int j;
+        for (j = 0; j < 16; j++) {
+            unsigned int* p = &D_0044B9E0[k];
+            unsigned int m;
+            for (m = 0; m < 4; m++) {
+                unsigned int a = *p++;
+                int sa = (a & 1) * 4;
+                unsigned int x = a >> 1;
+                unsigned char* pa = &src[x];
+                a = *p++;
+                k += 2;
+                int sb = (a & 1) * 4;
+                x = a >> 1;
+                int lo = (*pa & (0xF << sa)) >> sa;
+                unsigned char hi = (src[x] & (0xF << sb)) >> sb;
+                d[n] = lo | ((hi * 0x10) & ~0xF);
+                n++;
+            }
+        }
+        src += 0x40;
+    }
+    return 0;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/lightman", func_0038F930);

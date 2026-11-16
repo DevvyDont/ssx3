@@ -2094,7 +2094,171 @@ extern "C" void func_00293FC8(void* self, cRider* rider, int* volume, int* pitch
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_00294170);
+#ifdef SKIP_ASM
+// PORT: PS2-only inline asm; needs a C fallback off-PS2.
+#include "fakematch.h"
+extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* func_00287968(void* self, int a1, int a2);
+extern "C" int func_002906B8(void* self);
+extern "C" int func_00288A20(void* self, void* obj);
+extern "C" int func_00288AE0(void* self);
+extern "C" int func_00285D98(void* self, int which);
+extern "C" int func_00291710(void* self, int id);
+void func_00294678_4170(void* self, char* obj) __asm__("func_00294678");
+extern "C" void* cBE_getBE();
+void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
+extern "C" void func_003B58A0();
+extern "C" int func_003B8AB8(int id);
+extern "C" void func_003B58D8();
+extern "C" void func_002AD5F0(void* p, int idx, int a2, float v);
+extern signed char D_00535C11[];
+
+struct sSnd4170Ch {
+    signed char vol;
+    char pad1[0x17];
+};
+struct sSnd4170E16 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+};
+struct sSnd4170Sub {
+    char pad0[4];
+    sSnd4170Ch def;          // 0x04
+    volatile int cur;        // 0x1C
+    sSnd4170Ch* ch;          // 0x20
+    void* tgt[4];            // 0x24
+    int* p34;                // 0x34
+    int* vals;               // 0x38
+    int* p3C;                // 0x3C
+    char e40[4][8];          // 0x40
+    int* p60;                // 0x60
+    int* p64;                // 0x64
+    int* p68;                // 0x68
+    int* p6C;                // 0x6C
+    sSnd4170E16* p70;        // 0x70
+    int* p74;                // 0x74
+    int* p78;                // 0x78
+    int* p7C;                // 0x7C
+    int* p80;                // 0x80
+    int* p84;                // 0x84
+};
+struct sSnd4170Mgr {
+    char pad0[0x1D8];
+    sSnd4170Sub sub;         // 0x1D8
+};
+struct sSnd4170Sys {
+    sSnd4170Mgr* mgr;
+    int* a4;                 // 0x4
+    int* a8;                 // 0x8
+    char padC[0x118 - 0xC];
+    sSnd4170Mgr** p118;      // 0x118
+};
+
+static inline int snd4170Add(void* vself, void* obj, int a, int b, int c, int flag)
+{
+    sSnd4170Sys* self = (sSnd4170Sys*)vself;
+    sSnd4170Mgr* m = self->mgr;
+    sSnd4170Sub* s = &m->sub;
+    m->sub.cur++;
+    s->ch[m->sub.cur] = m->sub.def;
+    m->sub.tgt[m->sub.cur] = 0;
+    s->p34[m->sub.cur] = 0;
+    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
+    s->p3C[m->sub.cur] = 0;
+    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    s->p60[m->sub.cur] = 0;
+    s->p64[m->sub.cur] = 0;
+    s->p68[m->sub.cur] = 0;
+    s->p6C[m->sub.cur] = 0;
+    s->p70[m->sub.cur].f4 = 0;
+    s->p70[m->sub.cur].f0 = 100;
+    s->p70[m->sub.cur].f8 = 90;
+    s->p70[m->sub.cur].fC = 50;
+    s->p74[m->sub.cur] = 0;
+    s->p80[m->sub.cur] = 0;
+    s->p84[m->sub.cur] = 0;
+    s->p78[m->sub.cur] = 0x7F;
+    s->p7C[m->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = a;
+    self->a8[self->mgr->sub.cur] = b;
+    sSnd4170Mgr* m3 = *self->p118;
+    sSnd4170Sub* s3 = &m3->sub;
+    s3->vals[m3->sub.cur] = c;
+    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    sSnd4170Mgr** pp = self->p118;
+    int r = (int)func_00287968(self, 6, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    {
+        sSnd4170Mgr* m2 = *self->p118;
+        m2->sub.tgt[m2->sub.cur] = (char*)obj + 0x110;
+    }
+    {
+        sSnd4170Mgr** pq = self->p118;
+        int q = func_00288A20(self, obj);
+        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+    }
+    if (flag) {
+        (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
+        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)((char*)obj + 0x870);
+    }
+    return func_002906B8(self);
+}
+
+static inline int clampVol_4170(int v, int lo, int hi)
+{
+    bool belowHi = v < hi;
+    if (belowHi && v < lo) {
+        return lo;
+    }
+    if (belowHi) {
+        return v;
+    }
+    FM_BARRIER(); // FAKEMATCH: see func_00294170
+    return hi;
+}
+
+// FAKEMATCH: per-function volatile view (`volatile int cur` in sSnd4170Sub) plus FM_BARRIER() before clampVol_4170's
+// `return hi` (stops jump1 turning the second belowHi test into a movn; retail keeps the branch); plain form 90.49%
+// (99.07% with the volatile view alone).
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+extern "C" void func_00294170(void* self, void* obj)
+{
+    int idx = -1;
+    if (func_00288AE0(self) != 0) {
+        idx = 0;
+    } else {
+        bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+        if (ok) {
+            idx = *(int*)((char*)obj + 0x870);
+        }
+    }
+    if (func_00285D98(self, idx) == (int)obj) {
+        int c = clampVol_4170((int)(*(float*)((char*)obj + 0x75C) * 127.0f), 0x40, 0x7F);
+        func_003B58A0();
+        int busy = func_003B8AB8(*(int*)((char*)self + 0x5FBC)) != 0;
+        func_003B58D8();
+        if (!busy) {
+            func_002AD5F0(**(char***)((char*)self + 0x118) + 0x1D8, *(int*)((char*)self + 0x5FBC), 1, 0.0f);
+        }
+        int flag = 0;
+        bool ok2 = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+        if (ok2) {
+            cBE_getInterface_Fv(cBE_getBE(), 0);
+            if (D_00535C11[0] == 2) {
+                flag = func_00288AE0(self) == 0;
+            }
+        }
+        int a = func_00291710(self, (int)obj);
+        int b = a * 8 + 2;
+        *(int*)((char*)self + 0x5FBC) = snd4170Add(self, obj, 10, b, c, flag);
+    }
+    func_00294678_4170(self, (char*)obj);
+}
+#endif
 
 //100%
 INCLUDE_ASM("sound/soundsys", func_00294678);
@@ -9880,7 +10044,57 @@ extern "C" void func_002A3708(void* self, char* rider)
 }
 #endif
 
+//100%
 INCLUDE_ASM("sound/soundsys", func_002A3860);
+#ifdef SKIP_ASM
+#include "fakematch.h"
+extern "C" int func_0029F128(void* self);
+extern "C" int func_0029F198(void* self);
+// PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
+extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
+extern char D_00535BC8[];
+extern int D_00536730[];
+
+struct sSndRiderList3860 {
+    void* r[8];
+};
+
+// FAKEMATCH: FM_OPAQUE(lst) after `lst = func_0028B1D8() + 0x28` (keeps combine from folding +0x28 into the
+// lw offset; retail computes addiu 0x28 / addu / lw 0); plain form 96.86%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+extern "C" void func_002A3860(void* self)
+{
+    if (func_0029F128(self) == 0) return;
+    if (func_00288AE0(self) != 0) return;
+    int n = 0;
+    cBE_getInterface_Fv(cBE_getBE(), 0);
+    signed char* g = (signed char*)D_00535BC8;
+    if (g[0x49] == 2) {
+        n = D_00536730[1] < D_00536730[0];
+    }
+    if (func_002B1458((char*)self + 0x5560, 0, 0x20C7, 0, 0xB, 0, 0, 0.0f) == 0) return;
+    int a = func_0029F198(self);
+    sSndRiderList3860* lst = (sSndRiderList3860*)((char*)func_0028B1D8() + 0x28);
+    FM_OPAQUE(lst);
+    int b = func_002A1D48_i(self, lst->r[n]);
+    char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0xD);
+    if (g[0x49] != 2 && *(int*)(iface + 0x14) == 0) {
+        n = 8;
+    } else {
+        n = D_00536730[n];
+        if (n == 0) {
+            n = 1;
+        } else if (n == 1) {
+            n = 2;
+        } else {
+            int z = n != 2;
+            n = 4;
+            if (z) n = 0;
+        }
+    }
+    D_004A482C_5(func_003D8008(1, 0, 0x20C7), 3, a, b, n);
+}
+#endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A39E0);

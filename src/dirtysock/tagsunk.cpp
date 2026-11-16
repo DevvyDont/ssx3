@@ -5799,7 +5799,80 @@ extern "C" void func_002615C8(char* self, int* msg)
 }
 #endif
 
+//100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00261770);
+#ifdef SKIP_ASM
+#include "fakematch.h"
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
+// result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
+extern char D_00480488[];
+extern char D_004804A8[];
+extern void* D_004A3028;
+extern "C" void func_002610D0();
+extern void* D_004812B0[];
+extern void* D_00481290[];
+
+struct sMsgListNode1770 {
+    sMsgListNode1770* next;
+    sMsgListNode1770* prev;
+    void* data;
+};
+
+struct sMsgListIter1770 {
+    sMsgListNode1770* node;
+    sMsgListIter1770(sMsgListNode1770* x) : node(x) {}
+    sMsgListIter1770(const sMsgListIter1770& x) : node(x.node) {}
+};
+
+static inline sMsgListIter1770 sMsgList1770_insert(sMsgListIter1770 pos, void* const& x)
+{
+    sMsgListNode1770* tmp = (sMsgListNode1770*)operator new(0xC, D_004804A8, 0x20000000, 0);
+    void** data = &tmp->data;
+    if (data != 0)
+        *data = x;
+    tmp->next = pos.node;
+    tmp->prev = pos.node->prev;
+    pos.node->prev->next = tmp;
+    pos.node->prev = tmp;
+    return tmp;
+}
+
+static inline void post_1770(char* self, void* msg)
+{
+    void* mp = msg;
+    sMsgList1770_insert(*(sMsgListNode1770**)(self + 0xF0), mp);
+}
+
+struct sDsE8_261770 {
+    char pad[0xE8];
+    int ended;      // 0xE8
+};
+
+// FAKEMATCH: register pin `register int type FM_REG("$17")` (local-alloc ties type and g at equal priority and
+// the lower quantity, type, takes s0; retail gives s0 to g); plain form 99.43%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+extern "C" void func_00261770(char* self, int* msg)
+{
+    if (msg[0] == 0x656E6472 && *(int*)(self + 0xE8) == 0) {
+        func_002610D0();
+        register int type FM_REG("$17") = 0x107;
+        ((sDsE8_261770*)self)->ended = 1;
+        char* g = (char*)D_004A3028;
+        int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+        *(void***)((char*)m + 0x4) = D_004812B0;
+        m[0] = type;
+        post_1770(g, m);
+    } else {
+        char* g = (char*)D_004A3028;
+        int* m = (int*)operator new(8, D_00480488, 0x20000000, 0);
+        *(void***)((char*)m + 0x4) = D_004812B0;
+        m[0] = 0x106;
+        post_1770(g, m);
+    }
+}
+#endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002618C0);

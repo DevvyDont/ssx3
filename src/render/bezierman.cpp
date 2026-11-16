@@ -1266,7 +1266,143 @@ extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, i
 }
 #endif
 
+//100%
 INCLUDE_ASM("render/bezierman", func_0038D168);
+#ifdef SKIP_ASM
+#include "fakematch.h"
+struct sRS_D168 {
+    int f0;
+    int f4;
+    int f8;
+    int fC;
+    short tex;
+    short tex2;
+};
+struct sEnt_D168 {
+    sRS_D168 rs;                    // 0x00
+    unsigned int buf;               // 0x14
+    unsigned int next;              // 0x18
+    short key;                      // 0x1C
+    short flag;                     // 0x1E
+    char pad_0x20[0x60];
+};
+struct sRing_D168 {
+    int count;                      // 0x0
+    char pad_0x4[0x7C];
+    sEnt_D168 ents[1];              // 0x80
+};
+struct sGfx_D168 {
+    char pad_0x0[0xE84];
+    sRS_D168* top;                  // 0xE84
+    char pad_0xE88[0x10A8 - 0xE88];
+    int defTex;                     // 0x10A8
+    char pad_0x10AC[0x18F0 - 0x10AC];
+    sRing_D168* ring;               // 0x18F0
+};
+// PORT: PS2-only VU0 inline asm (4x4 matrix copy).
+static inline void CopyMat_D168(void* d, const void* src)
+{
+    __asm__ __volatile__(
+        "lqc2      $vf1, 0x0(%1)\n"
+        "lqc2      $vf2, 0x10(%1)\n"
+        "lqc2      $vf3, 0x20(%1)\n"
+        "lqc2      $vf4, 0x30(%1)\n"
+        "sqc2      $vf1, 0x0(%0)\n"
+        "sqc2      $vf2, 0x10(%0)\n"
+        "sqc2      $vf3, 0x20(%0)\n"
+        "sqc2      $vf4, 0x30(%0)\n"
+        :
+        : "r"(d), "r"(src)
+        : "memory");
+}
+
+struct sProg_D168 { int addr; int size; };
+struct sPatch_D168 { void* obj; int extra; };
+extern sGfx_D168* D_004A5B80_D168 __asm__("D_004A5B80");
+
+static inline void QueueRecord_D168(sGfx_D168* gfx, unsigned int buf, unsigned int next, int flag)
+{
+    sRing_D168* ring = gfx->ring;
+    sRS_D168* rs = gfx->top;
+    if (ring->count < 0xA28) {
+        int lyr = *(int*)((char*)ring + 0x69CC4) & 0x1F;
+        rs->f8 = (rs->f8 & ~0x1F) | lyr;
+        int key = *(int*)((char*)ring + 0x69CC0);
+        sEnt_D168* e = (sEnt_D168*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        e->rs = *rs;
+        e->buf = buf;
+        e->next = next;
+        e->key = key;
+        e->flag = flag;
+    }
+}
+
+// FAKEMATCH: register pin `register long k FM_REG("$8") = 0x20000000; p[8] = k;` (fakematch.h) breaks the local-alloc tie between the
+// GIF tag constant 0x20000000 and the CopyMat source `s + 0x360` (retail: a4 / a2, ours swapped); plain form 99.81%.
+// Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
+// PORT: builds a DMA/VIF packet in uncached (0x30000000) memory; addresses held in int and packed into 64-bit words.
+extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type, char* progs, void* prog, unsigned int* handle) __asm__("func_0038D168");
+extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type, char* progs, void* prog, unsigned int* handle)
+{
+    char* s = (char*)self;
+    sGfx_D168* gfx = D_004A5B80_D168;
+    gfx->top[1] = gfx->top[0];
+    gfx->top++;
+    int idx = *(int*)((char*)patch + 8);
+    int a;
+    switch (type) {
+    case 0:
+        a = *(int*)(s + 0x1C4) + idx * 0xC0;
+        break;
+    case 1:
+        a = *(int*)(s + 0x1C8) + idx * 0x1B0;
+        break;
+    case 2:
+        a = *(int*)(s + 0x1CC) + idx * 0x300;
+        break;
+    default:
+        a = 0;
+        break;
+    }
+    gfx->top->tex = -1;
+    int tex = *(short*)((char*)obj + 0x1A4);
+    if (tex < 0) {
+        tex = gfx->defTex;
+    }
+    gfx->top->tex2 = tex;
+    gfx->top->f0 |= 0x30;
+    if (*(int*)((char*)obj + 0xC) & 0x400000) {
+        gfx->top->f4 = (gfx->top->f4 & ~0xF80) | 0x880;
+    } else {
+        gfx->top->f4 = (gfx->top->f4 & ~0xF80) | 0x100;
+    }
+    int n = type * 2 + 4;
+    int nn = n * n;
+    unsigned int buf = *handle;
+    long* p = (long*)(buf | 0x30000000);
+    p[0] = 0x10000001;
+    p[1] = 0;
+    p[2] = 0x4040404020000000;
+    p[3] = (unsigned long)(unsigned int)((nn << 16) | 0x78008040) << 32;
+    p[4] = (((nn * 3) >> 2) | 0x30000000) | ((long)a << 32);
+    p[5] = 0;
+    p[6] = 0x10000006;
+    p[7] = 0;
+    register long k FM_REG("$8") = 0x20000000;
+    p[8] = k;
+    p[9] = (long)0x6C048080 << 32;
+    CopyMat_D168(p + 10, s + 0x360);
+    int extra = ((sPatch_D168*)prog)->extra;
+    p[18] = 0;
+    p[19] = (long)(((sProg_D168*)progs)[extra + 8].addr | 0x14000000) << 32;
+    p += 20;
+    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    *handle = next;
+    QueueRecord_D168(gfx, buf, next, 1);
+    *handle += 0x10;
+    gfx->top--;
+}
+#endif
 
 //100%
 INCLUDE_ASM("render/bezierman", func_0038D448);
