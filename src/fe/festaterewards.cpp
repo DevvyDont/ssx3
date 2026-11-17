@@ -236,8 +236,8 @@ extern "C" int func_001CF270(char* self, char* in)
         cUIScreen_playFrame(*(void**)(self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_TransitionOut)), 1);
         char* mgr = **(char***)(self + 0x10);
         sVEr_F270* vt = *(sVEr_F270**)(mgr + 4);
-        void* r = vt[5].fn(mgr + vt[5].delta, self, *(int*)(self + 0x8F0) >= 0);
-        cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+        void* backState = vt[5].fn(mgr + vt[5].delta, self, *(int*)(self + 0x8F0) >= 0);
+        cUIStateStack_push(*(char**)(self + 0x10) + 0x18, backState);
         return 1;
     }
     char* cur = *(char**)(self + 0x8FC);
@@ -936,9 +936,9 @@ extern "C" void func_001D00C0(sSelf001D00C0* self)
         self->entries[i].handle = -1;
         self->entries[i].name[0] = 0;
     }
-    int h = *(int*)((char*)self + 0x8EC);
-    if (h >= 0) {
-        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0x50), h);
+    int iconSlot = *(int*)((char*)self + 0x8EC);
+    if (iconSlot >= 0) {
+        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0x50), iconSlot);
         *(int*)((char*)self + 0x8EC) = -1;
     }
     *(int*)((char*)self + 0x48) &= ~8;
@@ -1696,16 +1696,16 @@ extern "C" void func_001D0F30(void* self)
     char* icon = *(char**)((char*)self + 0x8F8);
     if (icon != 0) {
         if (*(char**)((char*)self + 0x8FC) != 0) {
-            sVec3_F168 a;
-            sVec3_F168 b;
-            func_003A0290(*(char**)((char*)self + 0x8FC), &a);
-            func_003A0290(*(char**)((char*)self + 0x8F8), &b);
-            b.y = a.y + *(float*)((char*)self + 0x74);
-            b.x = a.x + *(float*)((char*)self + 0x70);
-            *(sVec3_F168*)(*(char**)((char*)self + 0x8F8) + 0x44) = b;
-            char* o = *(char**)((char*)self + 0x8F8);
-            sVEK1D0F30a* vt = *(sVEK1D0F30a**)(o + 8);
-            vt[9].fn(o + vt[9].delta, 1);
+            sVec3_F168 cellPos;
+            sVec3_F168 barPos;
+            func_003A0290(*(char**)((char*)self + 0x8FC), &cellPos);
+            func_003A0290(*(char**)((char*)self + 0x8F8), &barPos);
+            barPos.y = cellPos.y + *(float*)((char*)self + 0x74);
+            barPos.x = cellPos.x + *(float*)((char*)self + 0x70);
+            *(sVec3_F168*)(*(char**)((char*)self + 0x8F8) + 0x44) = barPos;
+            char* selectBar = *(char**)((char*)self + 0x8F8);
+            sVEK1D0F30a* vt = *(sVEK1D0F30a**)(selectBar + 8);
+            vt[9].fn(selectBar + vt[9].delta, 1);
         } else {
             sVEK1D0F30a* vt = *(sVEK1D0F30a**)(icon + 8);
             vt[9].fn(icon + vt[9].delta, 0);
@@ -1718,22 +1718,22 @@ extern "C" void func_001D0F30(void* self)
     sVEK1D0F30b* vt = *(sVEK1D0F30b**)((char*)self + 8);
     if (vt[38].fn((char*)self + vt[38].delta, idx) != 0) {
         sVEK1D0F30b* vt2 = *(sVEK1D0F30b**)((char*)self + 8);
-        int r = vt2[26].fn((char*)self + vt2[26].delta, idx);
-        if (r < 0) {
+        int iconId = vt2[26].fn((char*)self + vt2[26].delta, idx);
+        if (iconId < 0) {
             sVEK1D0F30b* vt3 = *(sVEK1D0F30b**)((char*)self + 8);
-            int t = vt3[27].fn((char*)self + vt3[27].delta, idx);
-            char* g = *(char**)((char*)self + 0x8FC);
-            *(int*)(g + 0x78) = -1;
-            *(int*)(g + 0x7C) = t;
+            int textureElement = vt3[27].fn((char*)self + vt3[27].delta, idx);
+            char* curCell = *(char**)((char*)self + 0x8FC);
+            *(int*)(curCell + 0x78) = -1;
+            *(int*)(curCell + 0x7C) = textureElement;
         } else {
-            char* g = *(char**)((char*)self + 0x8FC);
-            *(int*)(g + 0x78) = r;
-            *(int*)(g + 0x7C) = 0;
+            char* curCell = *(char**)((char*)self + 0x8FC);
+            *(int*)(curCell + 0x78) = iconId;
+            *(int*)(curCell + 0x7C) = 0;
         }
     }
-    char* g = *(char**)((char*)self + 0x8FC);
-    sVEK1D0F30c* vt4 = *(sVEK1D0F30c**)(g + 8);
-    vt4[11].fn(g + vt4[11].delta, D_004C6808);
+    char* curCell = *(char**)((char*)self + 0x8FC);
+    sVEK1D0F30c* vt4 = *(sVEK1D0F30c**)(curCell + 8);
+    vt4[11].fn(curCell + vt4[11].delta, D_004C6808);
 }
 #endif
 
@@ -1781,13 +1781,13 @@ extern void* D_0046A248[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param a3      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D1128(void* self, void* engine, signed char idx, int a3)
+extern "C" void* func_001D1128(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, a3, 3);
+    func_001CEEA0(self, engine, idx, inStore, 3);
     *(void***)((char*)self + 0x8) = D_0046A248;
     *(int*)((char*)self + 0x68) = 0;
     *(int*)((char*)self + 0xA24) = 0;
@@ -1912,13 +1912,13 @@ extern void* D_0046A0C8[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param a3      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D12C8(void* self, void* engine, signed char idx, int a3)
+extern "C" void* func_001D12C8(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, a3, 4);
+    func_001CEEA0(self, engine, idx, inStore, 4);
     *(void***)((char*)self + 0x8) = D_0046A0C8;
     *(int*)((char*)self + 0xA24) = 0;
     for (int i = 115; i >= 0; i--) {
@@ -2042,13 +2042,13 @@ extern void* D_00469F48[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param a3      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D1460(void* self, void* engine, signed char idx, int a3)
+extern "C" void* func_001D1460(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, a3, 5);
+    func_001CEEA0(self, engine, idx, inStore, 5);
     *(void***)((char*)self + 0x8) = D_00469F48;
     *(int*)((char*)self + 0xA24) = 0;
     for (int i = 99; i >= 0; i--) {
@@ -2172,13 +2172,13 @@ extern void* D_00469DC8[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param a3      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D15F8(void* self, void* engine, signed char idx, int a3)
+extern "C" void* func_001D15F8(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, a3, 6);
+    func_001CEEA0(self, engine, idx, inStore, 6);
     *(void***)((char*)self + 0x8) = D_00469DC8;
     *(int*)((char*)self + 0xA24) = 0;
     for (int i = 1; i >= 0; i--) {
@@ -2302,13 +2302,13 @@ extern void* D_00469C48[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param a3      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D1790(void* self, void* engine, signed char idx, int a3)
+extern "C" void* func_001D1790(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, a3, 7);
+    func_001CEEA0(self, engine, idx, inStore, 7);
     *(void***)((char*)self + 0x8) = D_00469C48;
     *(int*)((char*)self + 0xA24) = 0;
     for (int i = 27; i >= 0; i--) {
@@ -2433,13 +2433,13 @@ extern void* D_00469AC8[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param a3      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D1928(void* self, void* engine, signed char idx, int a3)
+extern "C" void* func_001D1928(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, a3, 8);
+    func_001CEEA0(self, engine, idx, inStore, 8);
     *(void***)((char*)self + 0x8) = D_00469AC8;
     *(int*)((char*)self + 0xA24) = 0;
     for (int i = 27; i >= 0; i--) {
@@ -3015,29 +3015,29 @@ extern "C" void func_001D2198(void* self)
     if (func_0019E238(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C)) == 0)
         return;
     sData001CFFF8* data = func_0019E2B0(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C));
-    char* e = (char*)data + data->tbl[0].off;
-    short a = *(short*)(e + 4);
-    short b = *(short*)(e + 6);
-    if (b < a)
+    char* shapeHeader = (char*)data + data->tbl[0].off;
+    short shapeWidth = *(short*)(shapeHeader + 4);
+    short shapeHeight = *(short*)(shapeHeader + 6);
+    if (shapeHeight < shapeWidth)
         *(int*)((char*)self + 0x74) = 1;
-    else if (a < b)
+    else if (shapeWidth < shapeHeight)
         *(int*)((char*)self + 0x74) = 2;
     else
         *(int*)((char*)self + 0x74) = 0;
     sEntry001CFFF8 ent;
     SHAPE_name(data, 0, &ent);
     ent.name[4] = 0;
-    *(int*)((char*)self + 0x70) = ((cGame001CFFF8*)GrMan)->v46(e, &ent, 0, 1, -1);
+    *(int*)((char*)self + 0x70) = ((cGame001CFFF8*)GrMan)->v46(shapeHeader, &ent, 0, 1, -1);
     func_0019DC20(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C));
     *(int*)((char*)self + 0x6C) = -1;
-    sSelfK1D2198* s = (sSelfK1D2198*)self;
-    char* o = s->a48[s->kind];
-    if (o != 0 && s->a54[s->kind] != 0) {
-        *(int*)(o + 0x78) = s->handle;
-        *(int*)(o + 0x7C) = 0;
-        char* o2 = s->a54[s->kind];
-        sVEK1D2198* vt = *(sVEK1D2198**)(o2 + 8);
-        vt[9].fn(o2 + vt[9].delta, 1);
+    sSelfK1D2198* previewState = (sSelfK1D2198*)self;
+    char* bitmapWidget = previewState->a48[previewState->kind];
+    if (bitmapWidget != 0 && previewState->a54[previewState->kind] != 0) {
+        *(int*)(bitmapWidget + 0x78) = previewState->handle;
+        *(int*)(bitmapWidget + 0x7C) = 0;
+        char* frameWidget = previewState->a54[previewState->kind];
+        sVEK1D2198* vt = *(sVEK1D2198**)(frameWidget + 8);
+        vt[9].fn(frameWidget + vt[9].delta, 1);
     }
 }
 #endif

@@ -124,96 +124,96 @@ struct sAsync_A298 {
  */
 extern "C" void func_0028A298(void* self)
 {
-    sAsync_A298* s = (sAsync_A298*)self;
-    if (s->busy != 0) {
+    sAsync_A298* asyncSys = (sAsync_A298*)self;
+    if (asyncSys->busy != 0) {
         return;
     }
-    sRing_A298* q0 = &s->q18C;
-    if (s->q18C.head == s->q18C.tail) {
+    sRing_A298* userHandleQueue = &asyncSys->q18C;
+    if (asyncSys->q18C.head == asyncSys->q18C.tail) {
         return;
     }
-    s->busy = 1;
-    ((cAsync_A298*)self)->notify(q0->data[q0->tail]);
+    asyncSys->busy = 1;
+    ((cAsync_A298*)self)->notify(userHandleQueue->data[userHandleQueue->tail]);
     int kind;
     {
-        sRing_A298* q = &s->q1AC;
-        if (s->q1AC.head == s->q1AC.tail) {
+        sRing_A298* peekQueue = &asyncSys->q1AC;
+        if (asyncSys->q1AC.head == asyncSys->q1AC.tail) {
             kind = -1;
         } else {
-            kind = q->data[q->tail];
+            kind = peekQueue->data[peekQueue->tail];
         }
     }
     switch (kind) {
     case 0: {
         int idx;
-        sRing_A298* q = &s->q19C;
-        if (s->q19C.head == s->q19C.tail) {
+        sRing_A298* peekQueue = &asyncSys->q19C;
+        if (asyncSys->q19C.head == asyncSys->q19C.tail) {
             idx = -1;
         } else {
-            idx = q->data[q->tail];
+            idx = peekQueue->data[peekQueue->tail];
         }
-        s->result = func_003DF748(s->names[idx], (int)s->buf, s->bufSize);
+        asyncSys->result = func_003DF748(asyncSys->names[idx], (int)asyncSys->buf, asyncSys->bufSize);
         break;
     }
     case 2: {
         int idx;
-        sRing_A298* q = &s->q19C;
-        if (s->q19C.head == s->q19C.tail) {
+        sRing_A298* peekQueue = &asyncSys->q19C;
+        if (asyncSys->q19C.head == asyncSys->q19C.tail) {
             idx = -1;
         } else {
-            idx = q->data[q->tail];
+            idx = peekQueue->data[peekQueue->tail];
         }
-        s->result = func_003DF748(s->names[idx], (int)s->buf, s->bufSize);
+        asyncSys->result = func_003DF748(asyncSys->names[idx], (int)asyncSys->buf, asyncSys->bufSize);
         break;
     }
     case 1: {
         int idx;
         {
-            sRing_A298* q = &s->q19C;
-            if (s->q19C.head == s->q19C.tail) {
+            sRing_A298* peekQueue = &asyncSys->q19C;
+            if (asyncSys->q19C.head == asyncSys->q19C.tail) {
                 idx = -1;
             } else {
-                idx = q->data[q->tail];
+                idx = peekQueue->data[peekQueue->tail];
             }
         }
-        char* name = s->names[idx];
-        int a, c;
+        char* name = asyncSys->names[idx];
+        int allocHandle, allocFlags;
         // PORT: g++ 2.95 virtual calls (vptr at 0x1D4) written out by hand: delta + saved &pfn, args evaluated after.
-        sVE_A298* vt = s->vt;
-        char* thisp = (char*)s + vt[3].delta;
+        sVE_A298* vt = asyncSys->vt;
+        char* thisp = (char*)asyncSys + vt[3].delta;
         int (**pf)(void*, int, int, int) = &vt[3].fn;
-        if (s->q18C.head == s->q18C.tail) {
-            a = -1;
+        if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+            allocHandle = -1;
         } else {
-            a = q0->data[q0->tail];
+            allocHandle = userHandleQueue->data[userHandleQueue->tail];
         }
-        sRing_A298* q3 = &s->q1BC;
-        if (s->q1BC.head == s->q1BC.tail) {
-            c = -1;
+        sRing_A298* flagQueue = &asyncSys->q1BC;
+        if (asyncSys->q1BC.head == asyncSys->q1BC.tail) {
+            allocFlags = -1;
         } else {
-            c = q3->data[q3->tail];
+            allocFlags = flagQueue->data[flagQueue->tail];
         }
-        int r = (*pf)(thisp, a, -1, c);
-        sVE_A298* vt2 = s->vt;
-        char* thisp2 = (char*)s + vt2[4].delta;
+        int allocBuffer = (*pf)(thisp, allocHandle, -1, allocFlags);
+        sVE_A298* vt2 = asyncSys->vt;
+        char* thisp2 = (char*)asyncSys + vt2[4].delta;
         int (**pf2)(void*, int, int, int) = &vt2[4].fn;
-        int b;
-        if (s->q18C.head == s->q18C.tail) {
-            b = -1;
+        int sizeHandle;
+        if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+            sizeHandle = -1;
         } else {
-            b = q0->data[q0->tail];
+            sizeHandle = userHandleQueue->data[userHandleQueue->tail];
         }
-        int r2 = ((int (*)(void*, int))*pf2)(thisp2, b);
-        if (r != 0) {
-            s->result = func_003DF748(name, r, r2);
+        int allocSize = ((int (*)(void*, int))*pf2)(thisp2, sizeHandle);
+        if (allocBuffer != 0) {
+            asyncSys->result = func_003DF748(name, allocBuffer, allocSize);
         } else {
-            int d;
-            if (s->q1BC.head == s->q1BC.tail) {
-                d = -1;
+            int loadFlags;
+            if (asyncSys->q1BC.head == asyncSys->q1BC.tail) {
+                loadFlags = -1;
             } else {
-                d = q3->data[q3->tail];
+                loadFlags = flagQueue->data[flagQueue->tail];
             }
-            s->result = ASYNCFILE_load(name, d);
+            asyncSys->result = ASYNCFILE_load(name, loadFlags);
         }
         break;
     }
@@ -248,61 +248,61 @@ struct sAsync28A558 {
 /**
  * Queues a sound-bank file for asynchronous loading and starts it when the system is idle.
  *
- * Pushes @p a1 onto the user-handle queue (+0x18C, On Tour mUserHandle), @p a3 onto the memory-type queue (+0x1AC,
- * mMemType) and @p a4 onto the flags queue (+0x1BC, mMainMemFlags); each push is skipped when that queue is full.
+ * Pushes @p bankId onto the user-handle queue (+0x18C, On Tour mUserHandle), @p memType onto the memory-type queue (+0x1AC,
+ * mMemType) and @p memFlags onto the flags queue (+0x1BC, mMainMemFlags); each push is skipped when that queue is full.
  * Copies @p name into the file-name slot +0x8 (mFileIndex) of the six 64-byte names at +0xC, pushes that slot onto the
  * name-index queue (+0x19C), advances the slot (back to 0 after 5) and calls func_0028A298. The name ring has six slots
  * whatever the queue size, so a seventh pending load overwrites the oldest name. func_0028BD10 (the bank manager's
  * async load) calls it.
  *
- * @param a1  the bank's user handle, given back to the owner's callbacks (On Tour bankID)
+ * @param bankId  the bank's user handle, given back to the owner's callbacks (On Tour bankID)
  * @param name  the file name
- * @param a3  where the bank goes: 0 dynamic (shared buffer), 1 main memory, 2 sound memory (On Tour eSoundMemLocation)
- * @param a4  main-memory allocation flags (On Tour allocMainMemFlags)
+ * @param memType  where the bank goes: 0 dynamic (shared buffer), 1 main memory, 2 sound memory (On Tour eSoundMemLocation)
+ * @param memFlags  main-memory allocation flags (On Tour allocMainMemFlags)
  */
-extern "C" void func_0028A558(void* self, int a1, const char* name, int a3, int a4)
+extern "C" void func_0028A558(void* self, int bankId, const char* name, int memType, int memFlags)
 {
-    sAsync28A558* s = (sAsync28A558*)self;
+    sAsync28A558* asyncSys = (sAsync28A558*)self;
     {
-        sRing28A558* q = &s->q18C;
-        if ((s->q18C.head + 1) % s->q18C.size != s->q18C.tail) {
-            q->data[q->head] = a1;
-            if (++s->q18C.head >= s->q18C.size) {
-                s->q18C.head = 0;
+        sRing28A558* pushQueue = &asyncSys->q18C;
+        if ((asyncSys->q18C.head + 1) % asyncSys->q18C.size != asyncSys->q18C.tail) {
+            pushQueue->data[pushQueue->head] = bankId;
+            if (++asyncSys->q18C.head >= asyncSys->q18C.size) {
+                asyncSys->q18C.head = 0;
             }
         }
     }
     {
-        sRing28A558* q = &s->q1AC;
-        if ((s->q1AC.head + 1) % s->q1AC.size != s->q1AC.tail) {
-            q->data[q->head] = a3;
-            if (++s->q1AC.head >= s->q1AC.size) {
-                s->q1AC.head = 0;
+        sRing28A558* pushQueue = &asyncSys->q1AC;
+        if ((asyncSys->q1AC.head + 1) % asyncSys->q1AC.size != asyncSys->q1AC.tail) {
+            pushQueue->data[pushQueue->head] = memType;
+            if (++asyncSys->q1AC.head >= asyncSys->q1AC.size) {
+                asyncSys->q1AC.head = 0;
             }
         }
     }
     {
-        sRing28A558* q = &s->q1BC;
-        if ((s->q1BC.head + 1) % s->q1BC.size != s->q1BC.tail) {
-            q->data[q->head] = a4;
-            if (++s->q1BC.head >= s->q1BC.size) {
-                s->q1BC.head = 0;
+        sRing28A558* pushQueue = &asyncSys->q1BC;
+        if ((asyncSys->q1BC.head + 1) % asyncSys->q1BC.size != asyncSys->q1BC.tail) {
+            pushQueue->data[pushQueue->head] = memFlags;
+            if (++asyncSys->q1BC.head >= asyncSys->q1BC.size) {
+                asyncSys->q1BC.head = 0;
             }
         }
     }
-    strcpy(s->names[s->slot], name);
-    int slot = s->slot++;
+    strcpy(asyncSys->names[asyncSys->slot], name);
+    int slot = asyncSys->slot++;
     {
-        sRing28A558* q = &s->q19C;
-        if ((s->q19C.head + 1) % s->q19C.size != s->q19C.tail) {
-            q->data[q->head] = slot;
-            if (++s->q19C.head >= s->q19C.size) {
-                s->q19C.head = 0;
+        sRing28A558* pushQueue = &asyncSys->q19C;
+        if ((asyncSys->q19C.head + 1) % asyncSys->q19C.size != asyncSys->q19C.tail) {
+            pushQueue->data[pushQueue->head] = slot;
+            if (++asyncSys->q19C.head >= asyncSys->q19C.size) {
+                asyncSys->q19C.head = 0;
             }
         }
     }
-    if (s->slot >= 6) {
-        s->slot = 0;
+    if (asyncSys->slot >= 6) {
+        asyncSys->slot = 0;
     }
     func_0028A298(self);
 }
@@ -471,26 +471,26 @@ static inline void Push1BC_A728(sAsync_A728* s, int v)
  */
 extern "C" void func_0028A728(void* self, int id)
 {
-    sAsync_A728* s = (sAsync_A728*)self;
-    if (s->busy != 0 && Peek18C_A728(s) == id) {
+    sAsync_A728* asyncSys = (sAsync_A728*)self;
+    if (asyncSys->busy != 0 && Peek18C_A728(asyncSys) == id) {
         func_00289DF0(self, 0);
         return;
     }
-    int n = (s->q18C.head - s->q18C.tail + s->q18C.size) % s->q18C.size;
+    int n = (asyncSys->q18C.head - asyncSys->q18C.tail + asyncSys->q18C.size) % asyncSys->q18C.size;
     for (int i = 0; i < n; i++) {
-        int e = Pop18C_A728(s);
-        if (e == id) {
-            Pop19C_A728(s);
-            Pop1AC_A728(s);
-            Pop1BC_A728(s);
+        int queuedHandle = Pop18C_A728(asyncSys);
+        if (queuedHandle == id) {
+            Pop19C_A728(asyncSys);
+            Pop1AC_A728(asyncSys);
+            Pop1BC_A728(asyncSys);
         } else {
-            Push18C_A728(s, e);
-            Push19C_A728(s, Pop19C_A728(s));
-            Push1AC_A728(s, Pop1AC_A728(s));
-            Push1BC_A728(s, Pop1BC_A728(s));
+            Push18C_A728(asyncSys, queuedHandle);
+            Push19C_A728(asyncSys, Pop19C_A728(asyncSys));
+            Push1AC_A728(asyncSys, Pop1AC_A728(asyncSys));
+            Push1BC_A728(asyncSys, Pop1BC_A728(asyncSys));
         }
     }
-    if (s->busy == 0) {
+    if (asyncSys->busy == 0) {
         func_0028A298(self);
     }
 }
@@ -558,249 +558,249 @@ struct sAsync_AAF8 {
  */
 extern "C" void func_0028AAF8(void* self)
 {
-    sAsync_AAF8* s = (sAsync_AAF8*)self;
-    if (s->busy == 0) {
+    sAsync_AAF8* asyncSys = (sAsync_AAF8*)self;
+    if (asyncSys->busy == 0) {
         return;
     }
     int kind;
     {
-        sRing_AAF8* q = &s->q1AC;
-        if (s->q1AC.head == s->q1AC.tail) {
+        sRing_AAF8* memTypeQueue = &asyncSys->q1AC;
+        if (asyncSys->q1AC.head == asyncSys->q1AC.tail) {
             kind = -1;
         } else {
-            kind = q->data[q->tail];
+            kind = memTypeQueue->data[memTypeQueue->tail];
         }
     }
     switch (kind) {
     case 0:
     case 2:
-        switch (ASYNCFILE_getstatus(s->result)) {
+        switch (ASYNCFILE_getstatus(asyncSys->result)) {
         case 0:
             break;
         case 1: {
             int buf = 0;
             int size = 0;
-            ASYNCFILE_release(s->result, &buf, &size);
+            ASYNCFILE_release(asyncSys->result, &buf, &size);
             if (size > 0) {
-                if (func_003B6098(s, buf) != 7) {
-                    func_003B6300(s->result);
-                    sRing_AAF8* q0 = &s->q18C;
-                    sVE_AAF8* vt = s->vt;
-                    char* thisp = (char*)s + vt[3].delta;
+                if (func_003B6098(asyncSys, buf) != 7) {
+                    func_003B6300(asyncSys->result);
+                    sRing_AAF8* userHandleQueue = &asyncSys->q18C;
+                    sVE_AAF8* vt = asyncSys->vt;
+                    char* thisp = (char*)asyncSys + vt[3].delta;
                     int (**pf)(void*, int, int, int) = &vt[3].fn;
-                    int a;
-                    int c;
-                    if (s->q18C.head == s->q18C.tail) {
-                        a = -1;
+                    int allocHandle;
+                    int allocFlags;
+                    if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+                        allocHandle = -1;
                     } else {
-                        a = q0->data[q0->tail];
+                        allocHandle = userHandleQueue->data[userHandleQueue->tail];
                     }
                     int n = size;
                     {
-                        sRing_AAF8* q3 = &s->q1BC;
-                        if (s->q1BC.head == s->q1BC.tail) {
-                            c = -1;
+                        sRing_AAF8* flagQueue = &asyncSys->q1BC;
+                        if (asyncSys->q1BC.head == asyncSys->q1BC.tail) {
+                            allocFlags = -1;
                         } else {
-                            c = q3->data[q3->tail];
+                            allocFlags = flagQueue->data[flagQueue->tail];
                         }
                     }
-                    int r = (*pf)(thisp, a, n, c);
-                    MEM_copy((void*)r, (void*)buf, size);
-                    func_003B6098(s, r);
-                    sVE_AAF8* vt2 = s->vt;
-                    char* thisp2 = (char*)s + vt2[5].delta;
+                    int allocBuffer = (*pf)(thisp, allocHandle, n, allocFlags);
+                    MEM_copy((void*)allocBuffer, (void*)buf, size);
+                    func_003B6098(asyncSys, allocBuffer);
+                    sVE_AAF8* vt2 = asyncSys->vt;
+                    char* thisp2 = (char*)asyncSys + vt2[5].delta;
                     tDone_AAF8* pf2 = (tDone_AAF8*)&vt2[5].fn;
-                    int b;
+                    int endHandle;
                     int idx;
-                    if (s->q18C.head == s->q18C.tail) {
-                        b = -1;
+                    if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+                        endHandle = -1;
                     } else {
-                        b = q0->data[q0->tail];
+                        endHandle = userHandleQueue->data[userHandleQueue->tail];
                     }
                     {
-                        sRing_AAF8* q1 = &s->q19C;
-                        if (s->q19C.head == s->q19C.tail) {
+                        sRing_AAF8* nameIndexQueue = &asyncSys->q19C;
+                        if (asyncSys->q19C.head == asyncSys->q19C.tail) {
                             idx = -1;
                         } else {
-                            idx = q1->data[q1->tail];
+                            idx = nameIndexQueue->data[nameIndexQueue->tail];
                         }
                     }
-                    (*pf2)(thisp2, b, s->result, 0, s->names[idx], r, size);
+                    (*pf2)(thisp2, endHandle, asyncSys->result, 0, asyncSys->names[idx], allocBuffer, size);
                 } else {
-                    int id = func_003B6528(s->result);
-                    sRing_AAF8* q0 = &s->q18C;
+                    int id = func_003B6528(asyncSys->result);
+                    sRing_AAF8* userHandleQueue = &asyncSys->q18C;
                     // PORT: g++ 2.95 virtual calls (vptr at 0x1D4) written out by hand: delta + saved &pfn, args evaluated after.
-                    sVE_AAF8* vt = s->vt;
-                    char* thisp = (char*)s + vt[3].delta;
+                    sVE_AAF8* vt = asyncSys->vt;
+                    char* thisp = (char*)asyncSys + vt[3].delta;
                     int (**pf)(void*, int, int, int) = &vt[3].fn;
-                    int a;
-                    int c;
-                    if (s->q18C.head == s->q18C.tail) {
-                        a = -1;
+                    int allocHandle;
+                    int allocFlags;
+                    if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+                        allocHandle = -1;
                     } else {
-                        a = q0->data[q0->tail];
+                        allocHandle = userHandleQueue->data[userHandleQueue->tail];
                     }
                     {
-                        sRing_AAF8* q3 = &s->q1BC;
-                        if (s->q1BC.head == s->q1BC.tail) {
-                            c = -1;
+                        sRing_AAF8* flagQueue = &asyncSys->q1BC;
+                        if (asyncSys->q1BC.head == asyncSys->q1BC.tail) {
+                            allocFlags = -1;
                         } else {
-                            c = q3->data[q3->tail];
+                            allocFlags = flagQueue->data[flagQueue->tail];
                         }
                     }
-                    int r = (*pf)(thisp, a, id, c);
-                    f_6548_AAF8((void*)r, s->result);
-                    sVE_AAF8* vt2 = s->vt;
-                    char* thisp2 = (char*)s + vt2[5].delta;
+                    int allocBuffer = (*pf)(thisp, allocHandle, id, allocFlags);
+                    f_6548_AAF8((void*)allocBuffer, asyncSys->result);
+                    sVE_AAF8* vt2 = asyncSys->vt;
+                    char* thisp2 = (char*)asyncSys + vt2[5].delta;
                     tDone_AAF8* pf2 = (tDone_AAF8*)&vt2[5].fn;
-                    int b;
+                    int endHandle;
                     int idx;
-                    if (s->q18C.head == s->q18C.tail) {
-                        b = -1;
+                    if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+                        endHandle = -1;
                     } else {
-                        b = q0->data[q0->tail];
+                        endHandle = userHandleQueue->data[userHandleQueue->tail];
                     }
                     {
-                        sRing_AAF8* q1 = &s->q19C;
-                        if (s->q19C.head == s->q19C.tail) {
+                        sRing_AAF8* nameIndexQueue = &asyncSys->q19C;
+                        if (asyncSys->q19C.head == asyncSys->q19C.tail) {
                             idx = -1;
                         } else {
-                            idx = q1->data[q1->tail];
+                            idx = nameIndexQueue->data[nameIndexQueue->tail];
                         }
                     }
-                    (*pf2)(thisp2, b, s->result, 0, s->names[idx], r, id);
+                    (*pf2)(thisp2, endHandle, asyncSys->result, 0, asyncSys->names[idx], allocBuffer, id);
                 }
             } else {
-                sRing_AAF8* q0 = &s->q18C;
-                sVE_AAF8* vt2 = s->vt;
-                char* thisp2 = (char*)s + vt2[5].delta;
+                sRing_AAF8* userHandleQueue = &asyncSys->q18C;
+                sVE_AAF8* vt2 = asyncSys->vt;
+                char* thisp2 = (char*)asyncSys + vt2[5].delta;
                 tDone_AAF8* pf2 = (tDone_AAF8*)&vt2[5].fn;
-                int b;
+                int endHandle;
                 int idx;
-                if (s->q18C.head == s->q18C.tail) {
-                    b = -1;
+                if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+                    endHandle = -1;
                 } else {
-                    b = q0->data[q0->tail];
+                    endHandle = userHandleQueue->data[userHandleQueue->tail];
                 }
                 {
-                    sRing_AAF8* q1 = &s->q19C;
-                    if (s->q19C.head == s->q19C.tail) {
+                    sRing_AAF8* nameIndexQueue = &asyncSys->q19C;
+                    if (asyncSys->q19C.head == asyncSys->q19C.tail) {
                         idx = -1;
                     } else {
-                        idx = q1->data[q1->tail];
+                        idx = nameIndexQueue->data[nameIndexQueue->tail];
                     }
                 }
-                (*pf2)(thisp2, b, -1, 2, s->names[idx], 0, 0);
+                (*pf2)(thisp2, endHandle, -1, 2, asyncSys->names[idx], 0, 0);
             }
-            s->busy = 0;
-            if (s->q18C.head != s->q18C.tail) {
-                if (++s->q18C.tail >= s->q18C.size) {
-                    s->q18C.tail = 0;
+            asyncSys->busy = 0;
+            if (asyncSys->q18C.head != asyncSys->q18C.tail) {
+                if (++asyncSys->q18C.tail >= asyncSys->q18C.size) {
+                    asyncSys->q18C.tail = 0;
                 }
             }
-            if (s->q19C.head != s->q19C.tail) {
-                if (++s->q19C.tail >= s->q19C.size) {
-                    s->q19C.tail = 0;
+            if (asyncSys->q19C.head != asyncSys->q19C.tail) {
+                if (++asyncSys->q19C.tail >= asyncSys->q19C.size) {
+                    asyncSys->q19C.tail = 0;
                 }
             }
-            if (s->q1AC.head != s->q1AC.tail) {
-                if (++s->q1AC.tail >= s->q1AC.size) {
-                    s->q1AC.tail = 0;
+            if (asyncSys->q1AC.head != asyncSys->q1AC.tail) {
+                if (++asyncSys->q1AC.tail >= asyncSys->q1AC.size) {
+                    asyncSys->q1AC.tail = 0;
                 }
             }
-            if (s->q1BC.head != s->q1BC.tail) {
-                if (++s->q1BC.tail >= s->q1BC.size) {
-                    s->q1BC.tail = 0;
+            if (asyncSys->q1BC.head != asyncSys->q1BC.tail) {
+                if (++asyncSys->q1BC.tail >= asyncSys->q1BC.size) {
+                    asyncSys->q1BC.tail = 0;
                 }
             }
-            func_0028A298(s);
+            func_0028A298(asyncSys);
             break;
         }
         case -1:
         default:
-            func_00289DF0(s, 0);
+            func_00289DF0(asyncSys, 0);
             break;
         }
         break;
     case 1:
-        switch (ASYNCFILE_getstatus(s->result)) {
+        switch (ASYNCFILE_getstatus(asyncSys->result)) {
         case 0:
             break;
         case 1: {
             int buf = 0;
             int size = 0;
-            ASYNCFILE_release(s->result, &buf, &size);
+            ASYNCFILE_release(asyncSys->result, &buf, &size);
             if (size > 0) {
-                func_003B6098(s, buf);
-                sRing_AAF8* q0 = &s->q18C;
-                sVE_AAF8* vt2 = s->vt;
-                char* thisp2 = (char*)s + vt2[5].delta;
+                func_003B6098(asyncSys, buf);
+                sRing_AAF8* userHandleQueue = &asyncSys->q18C;
+                sVE_AAF8* vt2 = asyncSys->vt;
+                char* thisp2 = (char*)asyncSys + vt2[5].delta;
                 tDone_AAF8* pf2 = (tDone_AAF8*)&vt2[5].fn;
-                int b;
+                int endHandle;
                 int idx;
-                if (s->q18C.head == s->q18C.tail) {
-                    b = -1;
+                if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+                    endHandle = -1;
                 } else {
-                    b = q0->data[q0->tail];
+                    endHandle = userHandleQueue->data[userHandleQueue->tail];
                 }
                 {
-                    sRing_AAF8* q1 = &s->q19C;
-                    if (s->q19C.head == s->q19C.tail) {
+                    sRing_AAF8* nameIndexQueue = &asyncSys->q19C;
+                    if (asyncSys->q19C.head == asyncSys->q19C.tail) {
                         idx = -1;
                     } else {
-                        idx = q1->data[q1->tail];
+                        idx = nameIndexQueue->data[nameIndexQueue->tail];
                     }
                 }
-                (*pf2)(thisp2, b, s->result, 0, s->names[idx], buf, size);
+                (*pf2)(thisp2, endHandle, asyncSys->result, 0, asyncSys->names[idx], buf, size);
             } else {
-                sRing_AAF8* q0 = &s->q18C;
-                sVE_AAF8* vt2 = s->vt;
-                char* thisp2 = (char*)s + vt2[5].delta;
+                sRing_AAF8* userHandleQueue = &asyncSys->q18C;
+                sVE_AAF8* vt2 = asyncSys->vt;
+                char* thisp2 = (char*)asyncSys + vt2[5].delta;
                 tDone_AAF8* pf2 = (tDone_AAF8*)&vt2[5].fn;
-                int b;
+                int endHandle;
                 int idx;
-                if (s->q18C.head == s->q18C.tail) {
-                    b = -1;
+                if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+                    endHandle = -1;
                 } else {
-                    b = q0->data[q0->tail];
+                    endHandle = userHandleQueue->data[userHandleQueue->tail];
                 }
                 {
-                    sRing_AAF8* q1 = &s->q19C;
-                    if (s->q19C.head == s->q19C.tail) {
+                    sRing_AAF8* nameIndexQueue = &asyncSys->q19C;
+                    if (asyncSys->q19C.head == asyncSys->q19C.tail) {
                         idx = -1;
                     } else {
-                        idx = q1->data[q1->tail];
+                        idx = nameIndexQueue->data[nameIndexQueue->tail];
                     }
                 }
-                (*pf2)(thisp2, b, -1, 2, s->names[idx], buf, 0);
+                (*pf2)(thisp2, endHandle, -1, 2, asyncSys->names[idx], buf, 0);
             }
-            s->busy = 0;
-            if (s->q18C.head != s->q18C.tail) {
-                if (++s->q18C.tail >= s->q18C.size) {
-                    s->q18C.tail = 0;
+            asyncSys->busy = 0;
+            if (asyncSys->q18C.head != asyncSys->q18C.tail) {
+                if (++asyncSys->q18C.tail >= asyncSys->q18C.size) {
+                    asyncSys->q18C.tail = 0;
                 }
             }
-            if (s->q19C.head != s->q19C.tail) {
-                if (++s->q19C.tail >= s->q19C.size) {
-                    s->q19C.tail = 0;
+            if (asyncSys->q19C.head != asyncSys->q19C.tail) {
+                if (++asyncSys->q19C.tail >= asyncSys->q19C.size) {
+                    asyncSys->q19C.tail = 0;
                 }
             }
-            if (s->q1AC.head != s->q1AC.tail) {
-                if (++s->q1AC.tail >= s->q1AC.size) {
-                    s->q1AC.tail = 0;
+            if (asyncSys->q1AC.head != asyncSys->q1AC.tail) {
+                if (++asyncSys->q1AC.tail >= asyncSys->q1AC.size) {
+                    asyncSys->q1AC.tail = 0;
                 }
             }
-            if (s->q1BC.head != s->q1BC.tail) {
-                if (++s->q1BC.tail >= s->q1BC.size) {
-                    s->q1BC.tail = 0;
+            if (asyncSys->q1BC.head != asyncSys->q1BC.tail) {
+                if (++asyncSys->q1BC.tail >= asyncSys->q1BC.size) {
+                    asyncSys->q1BC.tail = 0;
                 }
             }
-            func_0028A298(s);
+            func_0028A298(asyncSys);
             break;
         }
         case -1:
         default:
-            func_00289DF0(s, 0);
+            func_00289DF0(asyncSys, 0);
             break;
         }
         break;
@@ -1199,15 +1199,15 @@ extern "C" void func_0028B320(void* self, const char* file, int align)
     }
     switch (func_003B6098((char*)self + 0x4, (int)data)) {
     case 7: {
-        int h = func_003B6528(*(int*)((char*)self + 0x4));
+        int headerSize = func_003B6528(*(int*)((char*)self + 0x4));
         if (*(int*)((char*)self + 0x8) == 2) {
             func_003B6548(*(void**)((char*)self + 0x10), *(int*)((char*)self + 0x4));
         } else {
-            void* m = MEM_alloc((void*)file, h, 0);
-            *(void**)((char*)self + 0x10) = m;
-            func_003B6548(m, *(int*)((char*)self + 0x4));
+            void* headerMem = MEM_alloc((void*)file, headerSize, 0);
+            *(void**)((char*)self + 0x10) = headerMem;
+            func_003B6548(headerMem, *(int*)((char*)self + 0x4));
             MEM_free(data);
-            *(int*)((char*)self + 0x14) = h;
+            *(int*)((char*)self + 0x14) = headerSize;
         }
         *(int*)self = 1;
         break;

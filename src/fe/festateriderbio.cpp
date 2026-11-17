@@ -337,18 +337,18 @@ extern "C" unsigned char func_001A1CD0(void* self, int a1);
 /**
  * Constructs the uber-trick store state for a user (allocated as "cFEStateUberTrick", 0x60 bytes).
  *
- * Runs cUIState's constructor (func_0039E2A0; @p a1 reaches it untouched in the second argument register as the
- * engine), stores the vtable D_0046CCC0 and mHashName 18, sets mUserNum to @p a2 and mCtrlBits to that user's
+ * Runs cUIState's constructor (func_0039E2A0; @p engine reaches it untouched in the second argument register as the
+ * engine), stores the vtable D_0046CCC0 and mHashName 18, sets mUserNum to @p userNum and mCtrlBits to that user's
  * controller bits (func_001A1CD0 on the engine's front end), and clears the two menu pointers +0x4C and +0x50 (On Tour
  * mpMainMenu, mpTrickMenu) and the rider-shown flag +0x48 (On Tour mbModelVisible).
  *
- * @param a1  the UI engine (only passed on to cUIState's constructor)
- * @param a2  the user number
+ * @param engine  the UI engine (only passed on to cUIState's constructor)
+ * @param userNum  the user number
  * @return @p self
  */
-extern "C" void* func_00183A98(void* self, int a1, int a2)
+extern "C" void* func_00183A98(void* self, int engine, int userNum)
 {
-    signed char idx = a2;
+    signed char idx = userNum;
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = D_0046CCC0;
     *(int*)((char*)self + 0xC) = 18;

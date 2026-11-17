@@ -172,10 +172,10 @@ extern "C" void func_00186C98(void)
     sLocalK186C98 loc;
     void* mp = cSSXApp_getMCManager(SSXApp);
     cMCOverlayManager_getDeviceNumberString(mp, &loc, *(int*)((char*)mp + 0x428));
-    char* o = (char*)SSXApp->FELocale;
-    sVtEntK186C98* vt = *(sVtEntK186C98**)(o + 4);
-    unsigned short* r = vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_MEMOVNotFormattedPS2));
-    sprintf1(buf, r, &loc);
+    char* locale = (char*)SSXApp->FELocale;
+    sVtEntK186C98* vt = *(sVtEntK186C98**)(locale + 4);
+    unsigned short* formatText = vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMOVNotFormattedPS2));
+    sprintf1(buf, formatText, &loc);
     cFEMemCardStateK186C98* st = D_004A14B8_K186C98;
     *(int*)((char*)st + 0x19C) = 4;
     st->v36(buf, 1, 1, 0, 0, 0);
@@ -222,20 +222,20 @@ extern "C" void func_00186D60(void)
     void* mp = cSSXApp_getMCManager(SSXApp);
     cMCOverlayManager_getDeviceNumberString(mp, &loc, *(int*)((char*)mp + 0x428));
     cBE_getInterface_Fv(cBE_getBE(), 5);
-    char* o = *(char**)((char*)mp + 0x434);
-    sVtI_86D60* vt = *(sVtI_86D60**)o;
-    o += vt[22].delta;
-    int need = vt[22].fn(o, cBESaveInterface_getSaveProfileSize());
-    unsigned short* b = buf;
+    char* memCard = *(char**)((char*)mp + 0x434);
+    sVtI_86D60* vt = *(sVtI_86D60**)memCard;
+    memCard += vt[22].delta;
+    int need = vt[22].fn(memCard, cBESaveInterface_getSaveProfileSize());
+    unsigned short* popupText = buf;
     char* lo = (char*)SSXApp->FELocale;
     sVtS_86D60* lvt = *(sVtS_86D60**)(lo + 4);
     lo += lvt[4].delta;
     unsigned short* fmt = lvt[4].fn(lo, GetHashValue32(str_kT_MEMFENotDetectedStartUpPS2));
-    sprintf1(b, fmt, &loc, need);
+    sprintf1(popupText, fmt, &loc, need);
     char* st = D_004A14B8_86D60;
     *(int*)(st + 0x19C) = 9;
     sVtB_86D60* svt = *(sVtB_86D60**)(st + 8);
-    svt[36].fn(st + svt[36].delta, b, 0, 0, 0, 0, 0);
+    svt[36].fn(st + svt[36].delta, popupText, 0, 0, 0, 0, 0);
 
     {
         char* w = *(char**)(D_004A14B8_86D60 + 0x218);
@@ -331,9 +331,9 @@ extern "C" void func_00186F90(void)
         if (D_004A14BC < 4)
             return;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        char* o = *(char**)(mp + 0x434);
-        sVtA_86F90* vt = *(sVtA_86F90**)o;
-        vt[14].fn(o + vt[14].delta, *(int*)(mp + 0xF8), D_004A14B8_86F90 + 0x9C);
+        char* memCard = *(char**)(mp + 0x434);
+        sVtA_86F90* vt = *(sVtA_86F90**)memCard;
+        vt[14].fn(memCard + vt[14].delta, *(int*)(mp + 0xF8), D_004A14B8_86F90 + 0x9C);
         return;
     }
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
@@ -347,16 +347,16 @@ extern "C" void func_00186F90(void)
         *(int*)(st + 0x230) = 0;
         if (flags & 1) {
             extra = 1;
-            char* o = *(char**)(mp + 0x434);
-            sVtI_86F90* vt = *(sVtI_86F90**)o;
-            char* thisp = o + vt[22].delta;
-            int r = vt[22].fn(thisp, cBESaveInterface_getSaveProfileSize());
-            *(int*)(D_004A14B8_86F90 + 0x230) += r;
+            char* memCard = *(char**)(mp + 0x434);
+            sVtI_86F90* vt = *(sVtI_86F90**)memCard;
+            char* thisp = memCard + vt[22].delta;
+            int profileSpace = vt[22].fn(thisp, cBESaveInterface_getSaveProfileSize());
+            *(int*)(D_004A14B8_86F90 + 0x230) += profileSpace;
         }
-        char* o;
+        char* memCard;
         if (avail < *(int*)(D_004A14B8_86F90 + 0x230)
-            || ((o = *(char**)(mp + 0x434), (*(sVt0_86F90**)o)[25].fn(o + (*(sVt0_86F90**)o)[25].delta) != -1)
-                && (o = *(char**)(mp + 0x434), (*(sVt0_86F90**)o)[25].fn(o + (*(sVt0_86F90**)o)[25].delta) < extra)))
+            || ((memCard = *(char**)(mp + 0x434), (*(sVt0_86F90**)memCard)[25].fn(memCard + (*(sVt0_86F90**)memCard)[25].delta) != -1)
+                && (memCard = *(char**)(mp + 0x434), (*(sVt0_86F90**)memCard)[25].fn(memCard + (*(sVt0_86F90**)memCard)[25].delta) < extra)))
             fail = 1;
         if (fail) {
             *(int*)(D_004A14B8_86F90 + 0x234) = 1;
@@ -659,17 +659,17 @@ extern "C" void func_00187360(void)
     sVtI_00187360* sfvt = *(sVtI_00187360**)sf;
     int size = sfvt[22].fn(sf + sfvt[22].delta, cBESaveInterface_getSaveProfileSize());
     cMCOverlayManager_getDeviceNumberString(mp, &loc, *(int*)((char*)mp + 0x428));
-    char* o = (char*)SSXApp->FELocale;
-    sVtS_00187360* vt = *(sVtS_00187360**)(o + 4);
-    unsigned short* fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_MEMNoSpaceStartPS2));
+    char* locale = (char*)SSXApp->FELocale;
+    sVtS_00187360* vt = *(sVtS_00187360**)(locale + 4);
+    unsigned short* fmt = vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMNoSpaceStartPS2));
     sprintf1(buf, fmt, &loc, size);
     D_004A14B8_K186C98->v36(buf, 0, 0, 0, 0, 0);
     char* box = *(char**)((char*)D_004A14B8 + 0x218);
     sVtB_00187360* bvt = *(sVtB_00187360**)(box + 8);
     char* bthis = box + bvt[26].delta;
-    char* o2 = (char*)SSXApp->FELocale;
-    sVtI_00187360* vt2 = *(sVtI_00187360**)(o2 + 4);
-    char* o2this = o2 + vt2[4].delta;
+    char* buttonLocale = (char*)SSXApp->FELocale;
+    sVtI_00187360* vt2 = *(sVtI_00187360**)(buttonLocale + 4);
+    char* o2this = buttonLocale + vt2[4].delta;
     int id = vt2[4].fn(o2this, GetHashValue32(str_kT_MEMOVRetry));
     bvt[26].fn(bthis, id, 1);
     char* box2 = *(char**)((char*)D_004A14B8 + 0x218);
@@ -835,9 +835,9 @@ extern "C" void func_001876A8(void)
     void* st = D_004A14B8;
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_mc_messages));
     void* mp = cSSXApp_getMCManager(SSXApp);
-    int e = *(int*)((char*)mp + 0x130);
-    if (e == 0x1F || e == 33 || e == 0x20 || e == 34 || e == 49 || e == 50 || e == 51
-        || e == 53 || e == 54 || e == 52 || e == 2 || e == 3 || e == 6) {
+    int managerState = *(int*)((char*)mp + 0x130);
+    if (managerState == 0x1F || managerState == 33 || managerState == 0x20 || managerState == 34 || managerState == 49 || managerState == 50 || managerState == 51
+        || managerState == 53 || managerState == 54 || managerState == 52 || managerState == 2 || managerState == 3 || managerState == 6) {
         unsigned short buf[800];
         cMCOverlayManager_GetMessage(mp, buf, 800);
         cUIText_setUnicodeStringWrap(obj, buf);
@@ -907,11 +907,11 @@ extern "C" void func_001877B0(void)
     D_004A14BC = five;
     func_0023CAA0(mp, cBESaveInterface_getSaveProfileSize());
     func_0023C8F0(mp, 1);
-    void* s1 = D_004A14B8;
-    int t = D_004A14B4;
-    *(int*)((char*)mp + 0xF8) = t;
-    *(int*)((char*)s1 + 0x1C4) = t;
-    *(int*)((char*)s1 + 0x1BC) = 0;
+    void* memCardState = D_004A14B8;
+    int profileFile = D_004A14B4;
+    *(int*)((char*)mp + 0xF8) = profileFile;
+    *(int*)((char*)memCardState + 0x1C4) = profileFile;
+    *(int*)((char*)memCardState + 0x1BC) = 0;
     sVtEnt_001877B0* vt = *(sVtEnt_001877B0**)((char*)mp + 0x748);
     vt[1].fn((char*)mp + vt[1].delta, 53);
     func_00241D40_r(mp, 1, name, 20);
@@ -966,9 +966,9 @@ extern "C" void func_00187920(void)
     *(int*)((char*)D_004A14B8 + 0x1C0) = 5;
     cBE_getInterface_Fv(cBE_getBE(), 5);
     void* mp = cSSXApp_getMCManager(SSXApp);
-    void* s1 = D_004A14B8;
-    *(int*)((char*)s1 + 0x1BC) = two;
-    *(int*)((char*)s1 + 0x1C4) = 0;
+    void* memCardState = D_004A14B8;
+    *(int*)((char*)memCardState + 0x1BC) = two;
+    *(int*)((char*)memCardState + 0x1C4) = 0;
     func_0023CAA0(mp, cBESaveInterface_getSaveGameSize_K187920());
     func_0023C8F0(mp, 2);
     sVtEntK187920* vt = *(sVtEntK187920**)((char*)mp + 0x748);
@@ -1033,11 +1033,11 @@ static inline void mpNotify_87A38(char* mp, int msg)
  * - 2: file type 0 present clears bit 2; stage 3, then as 3.
  * - 3: on device 0 the flags are copied into +0x238 (the first card's flags); +0x234 is cleared.
  *
- * @param p  the memory-card state (D_004A14B8)
+ * @param memCardState  the memory-card state (D_004A14B8)
  */
-extern "C" void func_00187A38(void* p)
+extern "C" void func_00187A38(void* memCardState)
 {
-    sMemCard_87A38* self = (sMemCard_87A38*)p;
+    sMemCard_87A38* self = (sMemCard_87A38*)memCardState;
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     char* card = *(char**)(mp + 0x434);
     if (cMCOverlayManager_hasCardStatusCriticalError(mp))
@@ -1055,9 +1055,9 @@ extern "C" void func_00187A38(void* p)
         if (cardCall_87A38(card, 13))
             self->flags.b0 = 0;
         if (*(int*)(mp + 0x428) == 0) {
-            int r = cardCall_87A38(*(char**)(mp + 0x434), 17);
-            D_004A14B4 = r;
-            if (r == -1)
+            int lastSavedFile = cardCall_87A38(*(char**)(mp + 0x434), 17);
+            D_004A14B4 = lastSavedFile;
+            if (lastSavedFile == -1)
                 D_004A14B4 = 0;
         }
         func_0023C8F0(mp, 0);

@@ -792,37 +792,37 @@ public:
  */
 extern "C" void func_00233CD8(void* self)
 {
-    char* s = (char*)self;
+    char* stateBytes = (char*)self;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (*(int*)(s + 0x14) != 0) {
-        if (--*(int*)(s + 0x14) == 0) {
+    if (*(int*)(stateBytes + 0x14) != 0) {
+        if (--*(int*)(stateBytes + 0x14) == 0) {
             int n = *(int*)SSXApp->Game->Replay;
             int ok = n != 0 && n < 10;
             if (!ok) {
                 func_0020CC60();
-                if (*(int*)(s + 0x10) != 2) {
-                    cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_finishov_b));
-                    if (o != 0) {
-                        o->v24(0, 0);
+                if (*(int*)(stateBytes + 0x10) != 2) {
+                    cFEVObj_233CD8* finishOverlay = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_finishov_b));
+                    if (finishOverlay != 0) {
+                        finishOverlay->v24(0, 0);
                     }
                 }
             }
         }
     }
-    int state = *(int*)(s + 0x10);
+    int state = *(int*)(stateBytes + 0x10);
     switch (state) {
     case 0: {
-        char* g = (char*)SSXApp;
-        char* x = *(char**)(g + 0xC0);
-        char* r = *(char**)(*(char**)(g + 0x84) + 0xC);
-        int cnt = *(int*)(r + 0x7C);
+        char* ssxApp = (char*)SSXApp;
+        char* x = *(char**)(ssxApp + 0xC0);
+        char* gameAI = *(char**)(*(char**)(ssxApp + 0x84) + 0xC);
+        int cnt = *(int*)(gameAI + 0x7C);
         if (D_005366A8[0] == 0) {
             for (int i = 0; i < cnt; i++) {
                 if (D_004A4F64 == 0) {
                     *(float*)&D_004A4F60 = 277.77777099609375f;
                     D_004A4F64 = 1;
                 }
-                if (D_004A4F60 < vLen_233CD8(*riderPos_233CD8(*(char**)(((char**)(r + 0x40))[i] + 0x18)))) {
+                if (D_004A4F60 < vLen_233CD8(*riderPos_233CD8(*(char**)(((char**)(gameAI + 0x40))[i] + 0x18)))) {
                     return;
                 }
             }
@@ -836,25 +836,25 @@ extern "C" void func_00233CD8(void* self)
         cSSXScriptEngine_AppendEndEventSequence(ScriptEngine);
         cSSXScriptEngine_ReadyNISList(ScriptEngine, 0);
         if (cSSXScriptEngine_GetNISListLength(ScriptEngine, 0) > 0) {
-            *(int*)s = 0xC;
+            *(int*)stateBytes = 0xC;
         }
         sRace_233CD8* rc2 = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
         if (rc2->mode48 == 0) {
             func_00155E58(cBEAggressionInterface_getThis());
         }
-        *(int*)(s + 0x10) = 1;
+        *(int*)(stateBytes + 0x10) = 1;
         break;
     }
     case 1: {
         if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 1) {
             break;
         }
-        cFEVObj_233CD8* o = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_finishov_b));
-        if (o != 0) {
-            o->v24(1, 0);
+        cFEVObj_233CD8* finishOverlay = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_finishov_b));
+        if (finishOverlay != 0) {
+            finishOverlay->v24(1, 0);
         }
         cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 4);
-        *(int*)(s + 0x10) = 2;
+        *(int*)(stateBytes + 0x10) = 2;
         break;
     }
     case 2: {

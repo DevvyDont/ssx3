@@ -626,19 +626,19 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
     int total = 0;
     for (int i = 0; i < 7; i++) {
         name.c[7] = '0' + i;
-        cFEVObj_181BD0* t = (cFEVObj_181BD0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name.c));
+        cFEVObj_181BD0* statText = (cFEVObj_181BD0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name.c));
         bar[0] = '0' + i;
-        char* b = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(bar));
-        if (t != 0 && b != 0) {
-            int v = stats[i];
+        char* statBar = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(bar));
+        if (statText != 0 && statBar != 0) {
+            int statValue = stats[i];
             // PORT: g++ minimum/maximum operator
-            int c = v >? 0;
-            total += v;
-            sprintf(buf, &str_pct_1f, fptodp((float)v * k));
-            t->v09(1);
-            cUIText_setAsciiString((cUIText*)t, buf);
-            *(int*)(b + 0x80) = 55;
-            cUIProgress_setValue(b, c);
+            int barValue = statValue >? 0;
+            total += statValue;
+            sprintf(buf, &str_pct_1f, fptodp((float)statValue * k));
+            statText->v09(1);
+            cUIText_setAsciiString((cUIText*)statText, buf);
+            *(int*)(statBar + 0x80) = 55;
+            cUIProgress_setValue(statBar, barValue);
         }
     }
     total -= total % 5;
@@ -838,21 +838,21 @@ extern "C" sCharSel_2220* func_00182220(sCharSel_2220* self, void* engine, void*
     self->count = 1;
     self->f70 = 0;
     self->ids[0] = 0;
-    char* o = self->owner;
-    int h = GetHashValue32(D_00440F78[slot]);
-    self->hashes[0] = cUITextureBank_getElementByHashname(o + 0x58, h);
+    char* ownerState = self->owner;
+    int faceHash = GetHashValue32(D_00440F78[slot]);
+    self->hashes[0] = cUITextureBank_getElementByHashname(ownerState + 0x58, faceHash);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
     sCharList_2220* list = (sCharList_2220*)cBERewardInterface_getDB();
     int n = list->count;
     for (int i = 0; i < n; i++) {
-        sCharEnt_2220* e = &list->ents[i];
-        if (func_00157EE0(iface, self->player, slot, e->id)) {
-            char* lbl = e->label;
-            self->ids[self->count] = e->id;
-            char* o2 = self->owner;
-            int h2 = GetHashValue32(lbl);
-            self->hashes[self->count] = cUITextureBank_getElementByHashname(o2 + 0x58, h2);
-            self->names[self->count] = e->name;
+        sCharEnt_2220* charEntry = &list->ents[i];
+        if (func_00157EE0(iface, self->player, slot, charEntry->id)) {
+            char* lbl = charEntry->label;
+            self->ids[self->count] = charEntry->id;
+            char* entryOwner = self->owner;
+            int labelHash = GetHashValue32(lbl);
+            self->hashes[self->count] = cUITextureBank_getElementByHashname(entryOwner + 0x58, labelHash);
+            self->names[self->count] = charEntry->name;
             self->count++;
         }
     }

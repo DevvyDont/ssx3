@@ -1304,17 +1304,17 @@ struct sMsgCenter_988D8 {
  */
 extern "C" void func_001988D8(void* self, int idx)
 {
-    sMsgCenter_988D8* s = (sMsgCenter_988D8*)self;
+    sMsgCenter_988D8* requestLine = (sMsgCenter_988D8*)self;
     int n = 0;
     int j;
     for (j = 0; j < 64; j++) {
-        n += (int)((s->mask >> j) & 1);
+        n += (int)((requestLine->mask >> j) & 1);
     }
     int full = n >= 6;
-    s->result = func_00158558(cBE_getInterface_Fv(cBE_getBE(), 13), s->rider, s->a48, idx, full);
+    requestLine->result = func_00158558(cBE_getInterface_Fv(cBE_getBE(), 13), requestLine->rider, requestLine->a48, idx, full);
     ulong bit = (ulong)1 << idx;
-    s->mask |= bit;
-    s->seen |= bit;
+    requestLine->mask |= bit;
+    requestLine->seen |= bit;
 }
 #endif
 

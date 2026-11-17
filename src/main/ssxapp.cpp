@@ -3445,11 +3445,11 @@ extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
     int vec[4] __attribute__((aligned(16)));
     sQ_A830 sphere;
     int mask = ctx->mask;
-    int r;
+    int cullResult;
     if (ctx->inside != 0) {
-        r = 0;
+        cullResult = 0;
         if (mask != 0)
-            { sQ_A830 t; float s = cellScale_A830(cfg->level); t.w = s * 1.2124354839324951f; t.x = ((float)cfg->x + 0.5f) * s; t.y = ((float)cfg->y + 0.5f) * s; t.z = ((float)cfg->z + 0.5f) * s; sphere = t; }
+            { sQ_A830 cellSphere; float cellSize = cellScale_A830(cfg->level); cellSphere.w = cellSize * 1.2124354839324951f; cellSphere.x = ((float)cfg->x + 0.5f) * cellSize; cellSphere.y = ((float)cfg->y + 0.5f) * cellSize; cellSphere.z = ((float)cfg->z + 0.5f) * cellSize; sphere = cellSphere; }
     } else {
         vec[0] = cfg->x;
         vec[1] = cfg->y;
@@ -3474,75 +3474,75 @@ extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
             : "r"(vec), "r"(D_00442130), "r"(ctx->owner + 0x10)
             : "memory");
         if (mask != 0)
-            { sQ_A830 t; float s = cellScale_A830(cfg->level); t.w = s * 1.2124354839324951f; t.x = ((float)cfg->x + 0.5f) * s; t.y = ((float)cfg->y + 0.5f) * s; t.z = ((float)cfg->z + 0.5f) * s; sphere = t; }
-        boxResult_A830(&r);
+            { sQ_A830 cellSphere; float cellSize = cellScale_A830(cfg->level); cellSphere.w = cellSize * 1.2124354839324951f; cellSphere.x = ((float)cfg->x + 0.5f) * cellSize; cellSphere.y = ((float)cfg->y + 0.5f) * cellSize; cellSphere.z = ((float)cfg->z + 0.5f) * cellSize; sphere = cellSphere; }
+        boxResult_A830(&cullResult);
     }
-    bool out_ = r == 1;
+    bool out_ = cullResult == 1;
     if (out_)
         return;
     if (mask != 0 && sphereTest_A830(ctx->inst, &mask, &sphere) == 0)
         return;
-    if (r == 0) {
+    if (cullResult == 0) {
         ((sVisOwner_A830*)ctx->owner)->in[((sVisOwner_A830*)ctx->owner)->countIn].node = node;
         ((sVisOwner_A830*)ctx->owner)->in[((sVisOwner_A830*)ctx->owner)->countIn].mask = mask;
         ((sVisOwner_A830*)ctx->owner)->countIn++;
-        sVisCtx_A830 c;
-        c.inside = 1;
-        c.owner = ctx->owner;
-        c.inst = ctx->inst;
-        c.mask = mask;
+        sVisCtx_A830 childCtx;
+        childCtx.inside = 1;
+        childCtx.owner = ctx->owner;
+        childCtx.inst = ctx->inst;
+        childCtx.mask = mask;
         if (cfg->level != 11) {
             sVisCell_A830 n;
             n.level = cfg->level - 1;
             n.x = cfg->x * 2;
             n.y = cfg->y * 2;
             n.z = cfg->z * 2;
-            if (node->child[0]) func_0022A830(&c, node->child[0], &n);
+            if (node->child[0]) func_0022A830(&childCtx, node->child[0], &n);
             n.x++;
-            if (node->child[4]) func_0022A830(&c, node->child[4], &n);
+            if (node->child[4]) func_0022A830(&childCtx, node->child[4], &n);
             n.y++;
-            if (node->child[6]) func_0022A830(&c, node->child[6], &n);
+            if (node->child[6]) func_0022A830(&childCtx, node->child[6], &n);
             n.x--;
-            if (node->child[2]) func_0022A830(&c, node->child[2], &n);
+            if (node->child[2]) func_0022A830(&childCtx, node->child[2], &n);
             n.z++;
-            if (node->child[3]) func_0022A830(&c, node->child[3], &n);
+            if (node->child[3]) func_0022A830(&childCtx, node->child[3], &n);
             n.x++;
-            if (node->child[7]) func_0022A830(&c, node->child[7], &n);
+            if (node->child[7]) func_0022A830(&childCtx, node->child[7], &n);
             n.y--;
-            if (node->child[5]) func_0022A830(&c, node->child[5], &n);
+            if (node->child[5]) func_0022A830(&childCtx, node->child[5], &n);
             n.x--;
-            if (node->child[1]) func_0022A830(&c, node->child[1], &n);
+            if (node->child[1]) func_0022A830(&childCtx, node->child[1], &n);
         }
-    } else if (r == 2) {
+    } else if (cullResult == 2) {
         ((sVisOwner_A830*)ctx->owner)->part[((sVisOwner_A830*)ctx->owner)->countPart].node = node;
         ((sVisOwner_A830*)ctx->owner)->part[((sVisOwner_A830*)ctx->owner)->countPart].mask = mask;
         ((sVisOwner_A830*)ctx->owner)->countPart++;
-        sVisCtx_A830 c;
-        c.inside = 0;
-        c.owner = ctx->owner;
-        c.inst = ctx->inst;
-        c.mask = mask;
+        sVisCtx_A830 childCtx;
+        childCtx.inside = 0;
+        childCtx.owner = ctx->owner;
+        childCtx.inst = ctx->inst;
+        childCtx.mask = mask;
         if (cfg->level != 11) {
             sVisCell_A830 n;
             n.level = cfg->level - 1;
             n.x = cfg->x * 2;
             n.y = cfg->y * 2;
             n.z = cfg->z * 2;
-            if (node->child[0]) func_0022A830(&c, node->child[0], &n);
+            if (node->child[0]) func_0022A830(&childCtx, node->child[0], &n);
             n.x++;
-            if (node->child[4]) func_0022A830(&c, node->child[4], &n);
+            if (node->child[4]) func_0022A830(&childCtx, node->child[4], &n);
             n.y++;
-            if (node->child[6]) func_0022A830(&c, node->child[6], &n);
+            if (node->child[6]) func_0022A830(&childCtx, node->child[6], &n);
             n.x--;
-            if (node->child[2]) func_0022A830(&c, node->child[2], &n);
+            if (node->child[2]) func_0022A830(&childCtx, node->child[2], &n);
             n.z++;
-            if (node->child[3]) func_0022A830(&c, node->child[3], &n);
+            if (node->child[3]) func_0022A830(&childCtx, node->child[3], &n);
             n.x++;
-            if (node->child[7]) func_0022A830(&c, node->child[7], &n);
+            if (node->child[7]) func_0022A830(&childCtx, node->child[7], &n);
             n.y--;
-            if (node->child[5]) func_0022A830(&c, node->child[5], &n);
+            if (node->child[5]) func_0022A830(&childCtx, node->child[5], &n);
             n.x--;
-            if (node->child[1]) func_0022A830(&c, node->child[1], &n);
+            if (node->child[1]) func_0022A830(&childCtx, node->child[1], &n);
         }
     }
 }
@@ -3636,27 +3636,27 @@ static inline void Load_22ADD8(sCtx_22ADD8* ctx, void* data, sCfg_22ADD8* c)
 /**
  * Builds a camera view's visible world: culls the octree and fills the view's object lists.
  *
- * Stores @p a2, @p a3 and @p a4 at +0x0, +0x4 and +0x90 and zeroes every list count (+0x94, +0x1098, +0x209C, +0x40A0,
+ * Stores @p visSource, @p viewBounds and @p cameraSlots at +0x0, +0x4 and +0x90 and zeroes every list count (+0x94, +0x1098, +0x209C, +0x40A0,
  * +0x50A8, +0x70AC, +0x78B4, +0x7ABC, +0x7BC0, +0x7FC4) and pending slot (+0x50A4, +0x78B0, +0x7AB8). Copies the matrix
  * returned by the graphics manager's vtable slot 43 to +0x10 and GrMan's matrix at +0x5800 to +0x50, calls
- * func_002425C0(@p a2, @p a3), loads both matrices into VU0 with func_00229F30 and calls func_00229F80 (empty). Then
+ * func_002425C0(@p visSource, @p viewBounds), loads both matrices into VU0 with func_00229F30 and calls func_00229F80 (empty). Then
  * runs func_0022A830 on each non-null root of the eight @p cfg entries (data at +0x10 of each 0x14-byte entry) with
- * plane mask *(@p a2 + 0x110), and sorts the culled cells' objects: func_0022A698, func_0022A5A0 and func_0022A770 over
+ * plane mask *(@p visSource + 0x110), and sorts the culled cells' objects: func_0022A698, func_0022A5A0 and func_0022A770 over
  * the inside list (+0x98), func_0022A408, func_0022A368 and func_0022A4A8 over the partial list (+0x109C). cGame_render
  * calls it once per view with a stack-allocated view.
  *
  * @param cfg  the eight octree roots (cell entries whose node pointer is at +0x10)
- * @param a2  the visibility source: holds the clip planes and the initial plane mask (+0x110)
- * @param a3  the view's bounding box (passed to func_002425C0)
- * @param a4  the camera-slot table pointer stored at +0x90 (read by func_0022A5A0 and func_0022A698)
+ * @param visSource  the visibility source: holds the clip planes and the initial plane mask (+0x110)
+ * @param viewBounds  the view's bounding box (passed to func_002425C0)
+ * @param cameraSlots  the camera-slot table pointer stored at +0x90 (read by func_0022A5A0 and func_0022A698)
  * @return @p self
  */
-extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3, int a4)
+extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* visSource, void* viewBounds, int cameraSlots)
 {
     sWorldInit_22ADD8* w = (sWorldInit_22ADD8*)self;
-    w->f0 = a2;
-    w->f4 = a3;
-    w->f90 = a4;
+    w->f0 = visSource;
+    w->f4 = viewBounds;
+    w->f90 = cameraSlots;
     w->f94 = 0;
     w->f1098 = 0;
     w->f209C = 0;
@@ -3673,8 +3673,8 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3,
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEMat_22ADD8* vt = (sVEMat_22ADD8*)ps2GraphicsMan->mVtbl;
-        sMat_22ADD8 m = vt[43].fn((char*)ps2GraphicsMan + vt[43].delta);
-        MatCopy_22ADD8((sMat_22ADD8*)(self + 0x10), &m);
+        sMat_22ADD8 gfxMatrix = vt[43].fn((char*)ps2GraphicsMan + vt[43].delta);
+        MatCopy_22ADD8((sMat_22ADD8*)(self + 0x10), &gfxMatrix);
     }
     MatCopy_22ADD8((sMat_22ADD8*)(self + 0x50), (sMat_22ADD8*)((char*)GrMan + 0x5800));
     func_002425C0(*(void**)(self + 0x0), *(void**)(self + 0x4));
@@ -3682,10 +3682,10 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3,
     func_00229F80(*(void**)(self + 0x4));
     sCtx_22ADD8 ctx;
     char* f0 = *(char**)(self + 0x0);
-    void* f8 = *(void**)(f0 + 0x110);
+    void* planeMask = *(void**)(f0 + 0x110);
     ctx.owner = self;
     ctx.f4 = f0;
-    ctx.f8 = f8;
+    ctx.f8 = planeMask;
     ctx.fC = 0;
     Load_22ADD8(&ctx, cfg[0].data, &cfg[0]);
     Load_22ADD8(&ctx, cfg[1].data, &cfg[1]);

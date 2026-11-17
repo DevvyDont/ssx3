@@ -296,12 +296,12 @@ extern sIcon_1E92A8 D_004C8980[];
  * to the six slots (a third picture writes past them into the text). The picture name is copied from 16-bit characters
  * into an 8-bit buffer, keeping the low byte of each.
  *
- * @param p  the text line to lay out
+ * @param textLine  the text line to lay out
  */
-extern "C" void func_001E92A8(void* p)
+extern "C" void func_001E92A8(void* textLine)
 {
-    sLine_1E92A8* self = (sLine_1E92A8*)p;
-    unsigned short* s;
+    sLine_1E92A8* self = (sLine_1E92A8*)textLine;
+    unsigned short* cursor;
     int n = 0;
     sFont_1E92A8* font = self->font;
     sSeg_1E92A8* segs = self->segs;
@@ -313,43 +313,43 @@ extern "C" void func_001E92A8(void* p)
     float maxh = self->segs[0].w;
     self->count = 0;
     self->segs[0].str = self->text;
-    s = self->segs[0].str;
+    cursor = self->segs[0].str;
     float total = maxh;
-    while (*s != 0) {
-        if (*s == 0x40) {
-            *s = 0;
-            s++;
+    while (*cursor != 0) {
+        if (*cursor == 0x40) {
+            *cursor = 0;
+            cursor++;
             if (*segs[n].str != 0) {
                 float w = func_003921F0(font, segs[n].str, buf, 1, font->sx, font->sy);
                 total += w;
                 segs[n].w = w;
             }
             n++;
-            char* d = name;
+            char* namePos = name;
             do {
-                if (*s == 0x20 || *s == 0) break;
-                *d = *s;
-                s++;
-                d++;
+                if (*cursor == 0x20 || *cursor == 0) break;
+                *namePos = *cursor;
+                cursor++;
+                namePos++;
             } while (1);
-            *d = 0;
+            *namePos = 0;
             int h = GetHashValue32(name);
-            sIcon_1E92A8* e = 0;
-            for (sIcon_1E92A8* q = D_004C8980; q->hash != 0; q++) {
-                if (q->hash == h) { e = q; break; }
+            sIcon_1E92A8* picture = 0;
+            for (sIcon_1E92A8* candidate = D_004C8980; candidate->hash != 0; candidate++) {
+                if (candidate->hash == h) { picture = candidate; break; }
             }
             // The icon entry is kept in the segment's string slot.
-            segs[n].str = (unsigned short*)e;
-            float ew = e->w;
+            segs[n].str = (unsigned short*)picture;
+            float ew = picture->w;
             segs[n].w = ew;
             total += ew;
             n++;
-            if (maxh < e->h) maxh = e->h;
-            segs[n].str = s;
+            if (maxh < picture->h) maxh = picture->h;
+            segs[n].str = cursor;
             segs[n].w = 0;
-            if (*s != 0) s++;
+            if (*cursor != 0) cursor++;
         } else {
-            s++;
+            cursor++;
         }
     }
     if (*segs[n].str != 0) {
@@ -362,9 +362,9 @@ extern "C" void func_001E92A8(void* p)
     float h = (float)font->lineH * font->h34 * self->sy;
     self->total = total;
     // PORT: `>?` is the g++ maximum operator (EE max.s).
-    float m = h >? maxh;
-    self->height = m;
-    self->yoff = (m - h) * 0.5f;
+    float lineHeight = h >? maxh;
+    self->height = lineHeight;
+    self->yoff = (lineHeight - h) * 0.5f;
 }
 #endif
 
@@ -527,81 +527,81 @@ extern "C" void func_001E95A0(sHudLine_E95A0* self, float* pos, float* scale, sC
     self->font->color = *color;
     self->font->shadow = shadow;
     if (alignX == 0) {
-        float s = scale[0];
-        pos[0] -= self->w * s * 0.5f;
+        float axisScale = scale[0];
+        pos[0] -= self->w * axisScale * 0.5f;
     } else if (alignX > 0) {
-        float s = scale[0];
-        pos[0] -= self->w * s;
+        float axisScale = scale[0];
+        pos[0] -= self->w * axisScale;
     }
     if (alignY == 0) {
-        float s = scale[1];
-        pos[1] -= self->h * s * 0.5f;
+        float axisScale = scale[1];
+        pos[1] -= self->h * axisScale * 0.5f;
     } else if (alignY > 0) {
-        float s = scale[1];
-        pos[1] -= self->h * s;
+        float axisScale = scale[1];
+        pos[1] -= self->h * axisScale;
     }
     float lineOff = self->lineH * scale[1];
     float yc = pos[1] + self->h * scale[1] * 0.5f;
-    sHudVert_E95A0 v[4];
+    sHudVert_E95A0 verts[4];
     for (int i = 0; i < 4; i++) {
-        v[i].a = (int)(color->a * 128.0f);
-        v[i].r = (int)(color->r * 128.0f);
-        v[i].g = (int)(color->g * 128.0f);
-        v[i].b = (int)(color->b * 128.0f);
-        v[i].q = 1.0f;
+        verts[i].a = (int)(color->a * 128.0f);
+        verts[i].r = (int)(color->r * 128.0f);
+        verts[i].g = (int)(color->g * 128.0f);
+        verts[i].b = (int)(color->b * 128.0f);
+        verts[i].q = 1.0f;
     }
-    sHudEntry_E95A0* e = self->entries;
-    for (int i = 0; i < self->count; i++, e++) {
+    sHudEntry_E95A0* entry = self->entries;
+    for (int i = 0; i < self->count; i++, entry++) {
         if (!(i & 1)) {
-            unsigned short* str = (unsigned short*)e->p;
+            unsigned short* str = (unsigned short*)entry->p;
             if (*str != 0) {
                 func_00391E30_95A0(self->font, pos[0], pos[1] + lineOff, str);
                 float sx = scale[0];
-                pos[0] += e->w * sx;
+                pos[0] += entry->w * sx;
             }
         } else {
-            sHudImg_E95A0* img = (sHudImg_E95A0*)e->p;
+            sHudImg_E95A0* img = (sHudImg_E95A0*)entry->p;
             sSize_E95A0 wh;
             float w = img->w * scale[0];
-            float h = img->h * scale[1];
+            float scaledHeight = img->h * scale[1];
             wh.x = w;
-            wh.y = h;
+            wh.y = scaledHeight;
             float x0 = pos[0];
             float x1 = x0 + wh.x;
             float y0 = yc - wh.y * 0.5f;
             float y1 = y0 + wh.y;
-            v[0].u = img->u0;
-            v[0].v = img->v0;
-            v[1].u = img->u1;
-            v[1].v = img->v0;
-            v[2].u = img->u0;
-            v[2].v = img->v1;
-            v[3].u = img->u1;
-            v[3].v = img->v1;
-            sPos_E95A0 p;
-            p.x = x0;
-            p.y = y0;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[0].pos = p;
-            p.x = x1;
-            p.y = y0;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[1].pos = p;
-            p.x = x0;
-            p.y = y1;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[2].pos = p;
-            p.x = x1;
-            p.y = y1;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[3].pos = p;
+            verts[0].u = img->u0;
+            verts[0].v = img->v0;
+            verts[1].u = img->u1;
+            verts[1].v = img->v0;
+            verts[2].u = img->u0;
+            verts[2].v = img->v1;
+            verts[3].u = img->u1;
+            verts[3].v = img->v1;
+            sPos_E95A0 corner;
+            corner.x = x0;
+            corner.y = y0;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[0].pos = corner;
+            corner.x = x1;
+            corner.y = y0;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[1].pos = corner;
+            corner.x = x0;
+            corner.y = y1;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[2].pos = corner;
+            corner.x = x1;
+            corner.y = y1;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[3].pos = corner;
             *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_E95A0(img);
             sVEnt_E95A0* vt = (sVEnt_E95A0*)GrMan->mVtbl;
-            vt[71].fn((char*)GrMan + vt[71].delta, 4, v, 0);
+            vt[71].fn((char*)GrMan + vt[71].delta, 4, verts, 0);
             pos[0] += wh.x;
         }
     }
@@ -1545,28 +1545,28 @@ extern "C" void func_001F14B0(void* self, const char* str, sGlyphTable_1F14B0* f
     buf[1] = 0;
     for (int i = 0; i < len; i++) {
         buf[0] = str[i];
-        int d = i - (len >> 1);
+        int centreDistance = i - (len >> 1);
         int neg = 0;
-        if (d == 0) {
-            d = 1;
-        } else if (d < 0) {
+        if (centreDistance == 0) {
+            centreDistance = 1;
+        } else if (centreDistance < 0) {
             neg = 1;
-            d = -d;
+            centreDistance = -centreDistance;
         }
         unsigned char ch = buf[0];
-        int d2 = d * 2;
+        int doubledDistance = centreDistance * 2;
         int half = (ch & 0x7F) >> 1;
-        int a = (d2 * half * 5) & 0x7F;
-        int b = (d * (ch & 0xF) * 4) & 0x7F;
-        float oy = (float)a;
-        float ox = (float)b;
+        int riseOffset = (doubledDistance * half * 5) & 0x7F;
+        int sideOffset = (centreDistance * (ch & 0xF) * 4) & 0x7F;
+        float oy = (float)riseOffset;
+        float ox = (float)sideOffset;
         oy = -oy;
         if (neg) {
             ox = -ox;
         }
         cFont_text(font, x + amp * ox, y + amp * oy, buf);
-        sGlyph_1F14B0* g = findGlyph_1F14B0(font, buf[0]);
-        x += (float)(g->width + g->lead) * sc.x;
+        sGlyph_1F14B0* glyph = findGlyph_1F14B0(font, buf[0]);
+        x += (float)(glyph->width + glyph->lead) * sc.x;
     }
 }
 #endif
@@ -1761,7 +1761,7 @@ struct sFont_001F1B30 {
  * From element @p idx of @p defs it takes the position (func_001E91F8) and the scale (func_001E9290, times @p scaleMul
  * when given). The font's Scale becomes BaseScale times that scale and the text is measured with cFont_textExtent. The
  * pivots are the element's (+0x20, +0x21) unless @p align / @p flags give one (0x7F means "use the element's");
- * func_001F10F8 places the measured box with reflect bits @p a5, @p posOff is added and @p rect receives the box. The
+ * func_001F10F8 places the measured box with reflect bits @p reflect, @p posOff is added and @p rect receives the box. The
  * colour is the element's (func_001E91A8) or @p color. The element's layer byte (+0x22, On Tour tHUDDef::layer) goes
  * into bits 5-9 of the current draw state's word 2, the font's Color is set and its ShadowColor becomes (colour alpha,
  * 0, 0, 0); cFont_text draws the text. Afterwards ShadowColor is reset to (1, 0, 0, 0) and Scale to BaseScale.
@@ -1771,7 +1771,7 @@ struct sFont_001F1B30 {
  * @param defs  the HUD definition table (0x24-byte records)
  * @param idx  the element index
  * @param str  the text
- * @param a5  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
+ * @param reflect  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
  * @param scaleMul  extra scale, or 0
  * @param posOff  offset added after placing, or 0
  * @param color  colour override (tARGB), or 0 for the element's
@@ -1779,32 +1779,32 @@ struct sFont_001F1B30 {
  * @param align  horizontal pivot override, 0x7F for the element's
  * @param flags  vertical pivot override, 0x7F for the element's
  */
-extern "C" void func_001F1B30(void* ctx, sFont_001F1B30* font, sHudElemDef_001F16C0* defs, int idx, const char* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
+extern "C" void func_001F1B30(void* ctx, sFont_001F1B30* font, sHudElemDef_001F16C0* defs, int idx, const char* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
     float scale[2];
     float pos[4];
     float escale[2];
-    float r[4];
+    float extent[4];
     float out[2];
     float size[2];
     sColor_001F16C0 col;
     scale[0] = 1.0f;
     scale[1] = 1.0f;
-    sHudElemDef_001F16C0* e = &defs[idx];
-    func_001E91F8(e, pos);
-    func_001E9290(e, escale);
+    sHudElemDef_001F16C0* hudDef = &defs[idx];
+    func_001E91F8(hudDef, pos);
+    func_001E9290(hudDef, escale);
     if (scaleMul != 0) {
         escale[0] *= scaleMul[0];
         escale[1] *= scaleMul[1];
     }
     font->f38 = font->f30 * escale[0];
     font->f3C = font->f34 * escale[1];
-    cFont_textExtent(font, str, r, 0, font->f38, font->f3C);
-    int ax = (align == 0x7F) ? e->align : align;
+    cFont_textExtent(font, str, extent, 0, font->f38, font->f3C);
+    int ax = (align == 0x7F) ? hudDef->align : align;
     int ay = (flags == 0x7F) ? defs[idx].flags : flags;
-    size[0] = r[2];
-    size[1] = r[3];
-    func_001F10F8(ctx, out, pos, size, scale, ax, ay, a5);
+    size[0] = extent[2];
+    size[1] = extent[3];
+    func_001F10F8(ctx, out, pos, size, scale, ax, ay, reflect);
     if (posOff != 0) {
         out[0] += posOff[0];
         out[1] += posOff[1];
@@ -1812,19 +1812,19 @@ extern "C" void func_001F1B30(void* ctx, sFont_001F1B30* font, sHudElemDef_001F1
     if (rect != 0) {
         rect[0] = out[0];
         rect[1] = out[1];
-        rect[2] = r[2];
-        rect[3] = r[3];
+        rect[2] = extent[2];
+        rect[3] = extent[3];
     }
     if (color == 0) {
         func_001E91A8(&defs[idx], &col);
     } else {
         col = *color;
     }
-    sVec4_001F1B30 t(col.r, 0.0f, 0.0f, 0.0f);
+    sVec4_001F1B30 shadowColour(col.r, 0.0f, 0.0f, 0.0f);
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     font->color = col;
-    font->tint = t;
+    font->tint = shadowColour;
     cFont_text(font, out[0], out[1], str);
     font->tint = sVec4_001F1B30(1.0f, 0.0f, 0.0f, 0.0f);
     font->f38 = font->f30 * scale[0];
@@ -1913,25 +1913,25 @@ static inline sV4_001F1E28 vu0Scale_1E28(const sV4_001F1E28& v, float s)
 }
 
 /**
- * Draws an 8-bit string blended between two HUD element definitions, interpolating position, scale and colour by @p t.
+ * Draws an 8-bit string blended between two HUD element definitions, interpolating position, scale and colour by @p blend.
  *
  * Measures the text at the font's BaseScale (cFont_textExtent), reads the position and scale of elements @p idx1
  * and @p idx2 (both times @p scaleMul when given), places each scaled box with func_001F10F8 (pivots as in
- * func_001F1B30, 0x7F = the element's; reflect bits @p a5) and interpolates position and scale linearly by @p t;
+ * func_001F1B30, 0x7F = the element's; reflect bits @p reflect) and interpolates position and scale linearly by @p blend;
  * then @p posOff is added and @p rect filled. Without @p color the two element colours (func_001E91D0, as r, g, b, a
- * vectors) are interpolated with VU0 vector maths, the end colour's alpha forced to 0 so the text fades out toward @p t
- * = 1; with @p color its alpha is multiplied by 1 - @p t. The draw state's layer bits (5-9 of word 2) come from element
+ * vectors) are interpolated with VU0 vector maths, the end colour's alpha forced to 0 so the text fades out toward @p blend
+ * = 1; with @p color its alpha is multiplied by 1 - @p blend. The draw state's layer bits (5-9 of word 2) come from element
  * 26's layer byte whatever the indices. Draws with cFont_text at the blended scale and resets Scale to BaseScale;
  * unlike func_001F1B30 it leaves ShadowColor alone.
  *
  * @param ctx  the HUD state, passed on to func_001F10F8
- * @param t  the blend: 0 = element @p idx1, 1 = element @p idx2
+ * @param blend  the blend: 0 = element @p idx1, 1 = element @p idx2
  * @param font  the font
  * @param defs  the HUD definition table (0x24-byte records)
- * @param idx1  the element at @p t = 0
- * @param idx2  the element at @p t = 1
+ * @param idx1  the element at @p blend = 0
+ * @param idx2  the element at @p blend = 1
  * @param str  the text
- * @param a5  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
+ * @param reflect  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
  * @param scaleMul  extra scale, or 0
  * @param posOff  offset added after placing, or 0
  * @param color  colour override (tARGB), or 0 to blend the elements' colours
@@ -1940,10 +1940,10 @@ static inline sV4_001F1E28 vu0Scale_1E28(const sV4_001F1E28& v, float s)
  * @param flags  vertical pivot override, 0x7F for the elements'
  */
 // Draws text blended between two HUD element layouts (t = 0 is element idx1, t = 1 is element idx2).
-extern "C" void func_001F1E28(void* ctx, float t, sFont_001F1E28* font, sHudElemDef_001F16C0* defs, int idx1, int idx2, const char* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
+extern "C" void func_001F1E28(void* ctx, float blend, sFont_001F1E28* font, sHudElemDef_001F16C0* defs, int idx1, int idx2, const char* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
     float scale[2];
-    float r[4];
+    float extent[4];
     float pos1[4];
     float esc1[2];
     float pos2[4];
@@ -1959,31 +1959,31 @@ extern "C" void func_001F1E28(void* ctx, float t, sFont_001F1E28* font, sHudElem
     scale[1] = 1.0f;
     font->f38 = font->f30;
     font->f3C = font->f34;
-    cFont_textExtent(font, str, r, 0, font->f38, font->f3C);
-    sHudElemDef_001F16C0* e1 = &defs[idx1];
-    func_001E91F8(e1, pos1);
-    func_001E9290(e1, esc1);
+    cFont_textExtent(font, str, extent, 0, font->f38, font->f3C);
+    sHudElemDef_001F16C0* startDef = &defs[idx1];
+    func_001E91F8(startDef, pos1);
+    func_001E9290(startDef, esc1);
     if (scaleMul != 0) {
         esc1[0] *= scaleMul[0];
         esc1[1] *= scaleMul[1];
     }
-    sHudElemDef_001F16C0* e2 = &defs[idx2];
-    func_001E91F8(e2, pos2);
-    func_001E9290(e2, esc2);
+    sHudElemDef_001F16C0* endDef = &defs[idx2];
+    func_001E91F8(endDef, pos2);
+    func_001E9290(endDef, esc2);
     if (scaleMul != 0) {
         esc2[0] *= scaleMul[0];
         esc2[1] *= scaleMul[1];
     }
-    size1[0] = r[2] * esc1[0];
-    size1[1] = r[3] * esc1[1];
-    size2[0] = r[2] * esc2[0];
-    size2[1] = r[3] * esc2[1];
-    int ax1 = (align == 0x7F) ? e1->align : (signed char)align;
+    size1[0] = extent[2] * esc1[0];
+    size1[1] = extent[3] * esc1[1];
+    size2[0] = extent[2] * esc2[0];
+    size2[1] = extent[3] * esc2[1];
+    int ax1 = (align == 0x7F) ? startDef->align : (signed char)align;
     int ay1 = (flags == 0x7F) ? defs[idx1].flags : (signed char)flags;
     int ax2 = (align == 0x7F) ? defs[idx2].align : (signed char)align;
     int ay2 = (flags == 0x7F) ? defs[idx2].flags : (signed char)flags;
-    func_001F10F8(ctx, out1, pos1, size1, scale, ax1, ay1, a5);
-    func_001F10F8(ctx, out2, pos2, size2, scale, ax2, ay2, a5);
+    func_001F10F8(ctx, out1, pos1, size1, scale, ax1, ay1, reflect);
+    func_001F10F8(ctx, out2, pos2, size2, scale, ax2, ay2, reflect);
     dEsc[0] = esc2[0] - esc1[0];
     dEsc[1] = esc2[1] - esc1[1];
     {
@@ -1991,12 +1991,12 @@ extern "C" void func_001F1E28(void* ctx, float t, sFont_001F1E28* font, sHudElem
         float dOut[2];
         dOut[0] = out2[0] - out1[0];
         dOut[1] = out2[1] - out1[1];
-        dOutT[0] = dOut[0] * t;
-        dOutT[1] = dOut[1] * t;
+        dOutT[0] = dOut[0] * blend;
+        dOutT[1] = dOut[1] * blend;
         resPos[0] = dOutT[0] + out1[0];
         resPos[1] = dOutT[1] + out1[1];
-        resEsc[0] = dEsc[0] * t + esc1[0];
-        resEsc[1] = dEsc[1] * t + esc1[1];
+        resEsc[0] = dEsc[0] * blend + esc1[0];
+        resEsc[1] = dEsc[1] * blend + esc1[1];
     }
     if (posOff != 0) {
         resPos[0] = resPos[0] + posOff[0];
@@ -2005,31 +2005,31 @@ extern "C" void func_001F1E28(void* ctx, float t, sFont_001F1E28* font, sHudElem
     if (rect != 0) {
         rect[0] = resPos[0];
         rect[1] = resPos[1];
-        rect[2] = r[2] * resEsc[0];
-        rect[3] = r[3] * resEsc[1];
+        rect[2] = extent[2] * resEsc[0];
+        rect[3] = extent[3] * resEsc[1];
     }
     sCol_001F1E28 col;
     if (color == 0) {
-        sV4_001F1E28 c1;
-        sV4_001F1E28 c2;
-        func_001E91D0(&defs[idx1], &c1);
-        func_001E91D0(&defs[idx2], &c2);
-        c2.w = 0.0f;
-        sV4_001F1E28 v = vu0Add_1E28(vu0Scale_1E28(vu0Sub_1E28(c2, c1), t), c1);
-        col = sCol_001F1E28(v.w, v.x, v.y, v.z);
+        sV4_001F1E28 startColour;
+        sV4_001F1E28 endColour;
+        func_001E91D0(&defs[idx1], &startColour);
+        func_001E91D0(&defs[idx2], &endColour);
+        endColour.w = 0.0f;
+        sV4_001F1E28 blendedColour = vu0Add_1E28(vu0Scale_1E28(vu0Sub_1E28(endColour, startColour), blend), startColour);
+        col = sCol_001F1E28(blendedColour.w, blendedColour.x, blendedColour.y, blendedColour.z);
     } else {
         col = *(sCol_001F1E28*)color;
-        col.r = col.r * (1.0f - t);
+        col.r = col.r * (1.0f - blend);
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[26].pad22[0] << 5) & 0x3E0);
     font->color = col;
-    float g0 = font->f30;
-    float q0 = resEsc[0];
-    float q1 = resEsc[1];
-    float g1 = font->f34;
-    font->f3C = g1 * q1;
-    font->f38 = g0 * q0;
+    float baseScaleX = font->f30;
+    float blendScaleX = resEsc[0];
+    float blendScaleY = resEsc[1];
+    float baseScaleY = font->f34;
+    font->f3C = baseScaleY * blendScaleY;
+    font->f38 = baseScaleX * blendScaleX;
     cFont_text(font, resPos[0], resPos[1], str);
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
@@ -2063,7 +2063,7 @@ struct sFont_001F22E8 {
  *
  * The same as func_001F1B30 except that the text is measured with func_003921F0 and drawn with func_00391E30: element
  * position and scale (times @p scaleMul), pivots from the element unless overridden (0x7F), placement by func_001F10F8
- * with reflect bits @p a5, @p posOff, the box into @p rect, the element's or @p color's colour, the layer byte into
+ * with reflect bits @p reflect, @p posOff, the box into @p rect, the element's or @p color's colour, the layer byte into
  * bits 5-9 of the draw state's word 2, ShadowColor (colour alpha, 0, 0, 0) while drawing, then ShadowColor (1, 0, 0, 0)
  * and Scale = BaseScale again.
  *
@@ -2072,7 +2072,7 @@ struct sFont_001F22E8 {
  * @param defs  the HUD definition table (0x24-byte records)
  * @param idx  the element index
  * @param str  the 16-bit text
- * @param a5  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
+ * @param reflect  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
  * @param scaleMul  extra scale, or 0
  * @param posOff  offset added after placing, or 0
  * @param color  colour override (tARGB), or 0 for the element's
@@ -2080,32 +2080,32 @@ struct sFont_001F22E8 {
  * @param align  horizontal pivot override, 0x7F for the element's
  * @param flags  vertical pivot override, 0x7F for the element's
  */
-extern "C" void func_001F22E8(void* ctx, sFont_001F22E8* font, sHudElemDef_001F16C0* defs, int idx, const unsigned short* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
+extern "C" void func_001F22E8(void* ctx, sFont_001F22E8* font, sHudElemDef_001F16C0* defs, int idx, const unsigned short* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
     float scale[2];
     float pos[4];
     float escale[2];
-    float r[4];
+    float extent[4];
     float out[2];
     float size[2];
     sColor_001F16C0 col;
     scale[0] = 1.0f;
     scale[1] = 1.0f;
-    sHudElemDef_001F16C0* e = &defs[idx];
-    func_001E91F8(e, pos);
-    func_001E9290(e, escale);
+    sHudElemDef_001F16C0* hudDef = &defs[idx];
+    func_001E91F8(hudDef, pos);
+    func_001E9290(hudDef, escale);
     if (scaleMul != 0) {
         escale[0] *= scaleMul[0];
         escale[1] *= scaleMul[1];
     }
     font->f38 = font->f30 * escale[0];
     font->f3C = font->f34 * escale[1];
-    func_003921F0(font, str, r, 0, font->f38, font->f3C);
-    int ax = (align == 0x7F) ? e->align : align;
+    func_003921F0(font, str, extent, 0, font->f38, font->f3C);
+    int ax = (align == 0x7F) ? hudDef->align : align;
     int ay = (flags == 0x7F) ? defs[idx].flags : flags;
-    size[0] = r[2];
-    size[1] = r[3];
-    func_001F10F8(ctx, out, pos, size, scale, ax, ay, a5);
+    size[0] = extent[2];
+    size[1] = extent[3];
+    func_001F10F8(ctx, out, pos, size, scale, ax, ay, reflect);
     if (posOff != 0) {
         out[0] += posOff[0];
         out[1] += posOff[1];
@@ -2113,19 +2113,19 @@ extern "C" void func_001F22E8(void* ctx, sFont_001F22E8* font, sHudElemDef_001F1
     if (rect != 0) {
         rect[0] = out[0];
         rect[1] = out[1];
-        rect[2] = r[2];
-        rect[3] = r[3];
+        rect[2] = extent[2];
+        rect[3] = extent[3];
     }
     if (color == 0) {
         func_001E91A8(&defs[idx], &col);
     } else {
         col = *color;
     }
-    sVec4_001F22E8 t(col.r, 0.0f, 0.0f, 0.0f);
+    sVec4_001F22E8 shadowColour(col.r, 0.0f, 0.0f, 0.0f);
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     font->color = col;
-    font->tint = t;
+    font->tint = shadowColour;
     func_00391E30(font, out[0], out[1], str);
     font->tint = sVec4_001F22E8(1.0f, 0.0f, 0.0f, 0.0f);
     font->f38 = font->f30 * scale[0];
@@ -2205,22 +2205,22 @@ static inline sV4_001F25E0 vu0Scale_25E0(const sV4_001F25E0& v, float s)
 }
 
 /**
- * Draws a 16-bit string blended between two HUD element definitions, interpolating position, scale and colour by @p t.
+ * Draws a 16-bit string blended between two HUD element definitions, interpolating position, scale and colour by @p blend.
  *
  * The same as func_001F1E28 except that the text is measured with func_003921F0 and drawn with func_00391E30: both
- * elements' positions and scales (times @p scaleMul), boxes placed by func_001F10F8 with reflect bits @p a5, linear
- * interpolation by @p t, @p posOff and @p rect, colours blended with VU0 maths toward an end alpha of 0 (or @p color
- * with its alpha times 1 - @p t), and the layer bits taken from element 26 whatever the indices. Nothing in retail
+ * elements' positions and scales (times @p scaleMul), boxes placed by func_001F10F8 with reflect bits @p reflect, linear
+ * interpolation by @p blend, @p posOff and @p rect, colours blended with VU0 maths toward an end alpha of 0 (or @p color
+ * with its alpha times 1 - @p blend), and the layer bits taken from element 26 whatever the indices. Nothing in retail
  * calls it.
  *
  * @param ctx  the HUD state, passed on to func_001F10F8
- * @param t  the blend: 0 = element @p idx1, 1 = element @p idx2
+ * @param blend  the blend: 0 = element @p idx1, 1 = element @p idx2
  * @param font  the font
  * @param defs  the HUD definition table (0x24-byte records)
- * @param idx1  the element at @p t = 0
- * @param idx2  the element at @p t = 1
+ * @param idx1  the element at @p blend = 0
+ * @param idx2  the element at @p blend = 1
  * @param str  the 16-bit text
- * @param a5  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
+ * @param reflect  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
  * @param scaleMul  extra scale, or 0
  * @param posOff  offset added after placing, or 0
  * @param color  colour override (tARGB), or 0 to blend the elements' colours
@@ -2229,10 +2229,10 @@ static inline sV4_001F25E0 vu0Scale_25E0(const sV4_001F25E0& v, float s)
  * @param flags  vertical pivot override, 0x7F for the elements'
  */
 // Draws text blended between two HUD element layouts (t = 0 is element idx1, t = 1 is element idx2).
-extern "C" void func_001F25E0(void* ctx, float t, sFont_001F25E0* font, sHudElemDef_001F16C0* defs, int idx1, int idx2, const unsigned short* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
+extern "C" void func_001F25E0(void* ctx, float blend, sFont_001F25E0* font, sHudElemDef_001F16C0* defs, int idx1, int idx2, const unsigned short* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
     float scale[2];
-    float r[4];
+    float extent[4];
     float pos1[4];
     float esc1[2];
     float pos2[4];
@@ -2248,31 +2248,31 @@ extern "C" void func_001F25E0(void* ctx, float t, sFont_001F25E0* font, sHudElem
     scale[1] = 1.0f;
     font->f38 = font->f30;
     font->f3C = font->f34;
-    func_003921F0(font, str, r, 0, font->f38, font->f3C);
-    sHudElemDef_001F16C0* e1 = &defs[idx1];
-    func_001E91F8(e1, pos1);
-    func_001E9290(e1, esc1);
+    func_003921F0(font, str, extent, 0, font->f38, font->f3C);
+    sHudElemDef_001F16C0* startDef = &defs[idx1];
+    func_001E91F8(startDef, pos1);
+    func_001E9290(startDef, esc1);
     if (scaleMul != 0) {
         esc1[0] *= scaleMul[0];
         esc1[1] *= scaleMul[1];
     }
-    sHudElemDef_001F16C0* e2 = &defs[idx2];
-    func_001E91F8(e2, pos2);
-    func_001E9290(e2, esc2);
+    sHudElemDef_001F16C0* endDef = &defs[idx2];
+    func_001E91F8(endDef, pos2);
+    func_001E9290(endDef, esc2);
     if (scaleMul != 0) {
         esc2[0] *= scaleMul[0];
         esc2[1] *= scaleMul[1];
     }
-    size1[0] = r[2] * esc1[0];
-    size1[1] = r[3] * esc1[1];
-    size2[0] = r[2] * esc2[0];
-    size2[1] = r[3] * esc2[1];
-    int ax1 = (align == 0x7F) ? e1->align : (signed char)align;
+    size1[0] = extent[2] * esc1[0];
+    size1[1] = extent[3] * esc1[1];
+    size2[0] = extent[2] * esc2[0];
+    size2[1] = extent[3] * esc2[1];
+    int ax1 = (align == 0x7F) ? startDef->align : (signed char)align;
     int ay1 = (flags == 0x7F) ? defs[idx1].flags : (signed char)flags;
     int ax2 = (align == 0x7F) ? defs[idx2].align : (signed char)align;
     int ay2 = (flags == 0x7F) ? defs[idx2].flags : (signed char)flags;
-    func_001F10F8(ctx, out1, pos1, size1, scale, ax1, ay1, a5);
-    func_001F10F8(ctx, out2, pos2, size2, scale, ax2, ay2, a5);
+    func_001F10F8(ctx, out1, pos1, size1, scale, ax1, ay1, reflect);
+    func_001F10F8(ctx, out2, pos2, size2, scale, ax2, ay2, reflect);
     dEsc[0] = esc2[0] - esc1[0];
     dEsc[1] = esc2[1] - esc1[1];
     {
@@ -2280,12 +2280,12 @@ extern "C" void func_001F25E0(void* ctx, float t, sFont_001F25E0* font, sHudElem
         float dOut[2];
         dOut[0] = out2[0] - out1[0];
         dOut[1] = out2[1] - out1[1];
-        dOutT[0] = dOut[0] * t;
-        dOutT[1] = dOut[1] * t;
+        dOutT[0] = dOut[0] * blend;
+        dOutT[1] = dOut[1] * blend;
         resPos[0] = dOutT[0] + out1[0];
         resPos[1] = dOutT[1] + out1[1];
-        resEsc[0] = dEsc[0] * t + esc1[0];
-        resEsc[1] = dEsc[1] * t + esc1[1];
+        resEsc[0] = dEsc[0] * blend + esc1[0];
+        resEsc[1] = dEsc[1] * blend + esc1[1];
     }
     if (posOff != 0) {
         resPos[0] = resPos[0] + posOff[0];
@@ -2294,31 +2294,31 @@ extern "C" void func_001F25E0(void* ctx, float t, sFont_001F25E0* font, sHudElem
     if (rect != 0) {
         rect[0] = resPos[0];
         rect[1] = resPos[1];
-        rect[2] = r[2] * resEsc[0];
-        rect[3] = r[3] * resEsc[1];
+        rect[2] = extent[2] * resEsc[0];
+        rect[3] = extent[3] * resEsc[1];
     }
     sCol_001F25E0 col;
     if (color == 0) {
-        sV4_001F25E0 c1;
-        sV4_001F25E0 c2;
-        func_001E91D0(&defs[idx1], &c1);
-        func_001E91D0(&defs[idx2], &c2);
-        c2.w = 0.0f;
-        sV4_001F25E0 v = vu0Add_25E0(vu0Scale_25E0(vu0Sub_25E0(c2, c1), t), c1);
-        col = sCol_001F25E0(v.w, v.x, v.y, v.z);
+        sV4_001F25E0 startColour;
+        sV4_001F25E0 endColour;
+        func_001E91D0(&defs[idx1], &startColour);
+        func_001E91D0(&defs[idx2], &endColour);
+        endColour.w = 0.0f;
+        sV4_001F25E0 blendedColour = vu0Add_25E0(vu0Scale_25E0(vu0Sub_25E0(endColour, startColour), blend), startColour);
+        col = sCol_001F25E0(blendedColour.w, blendedColour.x, blendedColour.y, blendedColour.z);
     } else {
         col = *(sCol_001F25E0*)color;
-        col.r = col.r * (1.0f - t);
+        col.r = col.r * (1.0f - blend);
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[26].pad22[0] << 5) & 0x3E0);
     font->color = col;
-    float g0 = font->f30;
-    float q0 = resEsc[0];
-    float q1 = resEsc[1];
-    float g1 = font->f34;
-    font->f3C = g1 * q1;
-    font->f38 = g0 * q0;
+    float baseScaleX = font->f30;
+    float blendScaleX = resEsc[0];
+    float blendScaleY = resEsc[1];
+    float baseScaleY = font->f34;
+    font->f3C = baseScaleY * blendScaleY;
+    font->f38 = baseScaleX * blendScaleX;
     func_00391E30(font, resPos[0], resPos[1], str);
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
@@ -2382,16 +2382,16 @@ extern "C" void func_001F2AA0(void* self, sFont_001F2AA0* font, sHudElemDef_001F
     sColor_001F16C0 col;
     float scale[2];
     int n = 0;
-    sHudElemDef_001F16C0* e = &defs[idx];
-    func_001E9220(e, wrap, 0);
-    func_001E91F8(e, pos);
-    func_001E9290(e, escale);
+    sHudElemDef_001F16C0* hudDef = &defs[idx];
+    func_001E9220(hudDef, wrap, 0);
+    func_001E91F8(hudDef, pos);
+    func_001E9290(hudDef, escale);
     sFont_001F2AA0* sf = *(sFont_001F2AA0**)((char*)self + 0x428);
     sf->f38 = sf->f30 * escale[0];
     sf->f3C = sf->f34 * escale[1];
-    const char* p = str;
-    while (p != 0) {
-        p = func_00392430(*(sFont_001F2AA0**)((char*)self + 0x428), p, lines[n], 50, (*(sFont_001F2AA0**)((char*)self + 0x428))->f38, wrap[0]);
+    const char* remaining = str;
+    while (remaining != 0) {
+        remaining = func_00392430(*(sFont_001F2AA0**)((char*)self + 0x428), remaining, lines[n], 50, (*(sFont_001F2AA0**)((char*)self + 0x428))->f38, wrap[0]);
         n++;
     }
     func_001E91A8(&defs[idx], &col);
@@ -2490,15 +2490,15 @@ extern "C" void func_001F2DB0(void* self, sFont_001F2DB0* font, sHudElemDef_001F
     float scale[2];
     int n = 0;
     func_001E9220(&defs[29], wrap, 0);
-    sHudElemDef_001F16C0* e = &defs[idx];
-    func_001E91F8(e, pos);
-    func_001E9290(e, escale);
+    sHudElemDef_001F16C0* hudDef = &defs[idx];
+    func_001E91F8(hudDef, pos);
+    func_001E9290(hudDef, escale);
     sFont_001F2DB0* sf = *(sFont_001F2DB0**)((char*)self + 0x428);
     sf->f38 = sf->f30 * escale[0];
     sf->f3C = sf->f34 * escale[1];
-    const unsigned short* p = str;
-    while (p != 0) {
-        p = func_00392680(*(sFont_001F2DB0**)((char*)self + 0x428), (*(sFont_001F2DB0**)((char*)self + 0x428))->f38, wrap[0], p, lines[n], 50);
+    const unsigned short* remaining = str;
+    while (remaining != 0) {
+        remaining = func_00392680(*(sFont_001F2DB0**)((char*)self + 0x428), (*(sFont_001F2DB0**)((char*)self + 0x428))->f38, wrap[0], remaining, lines[n], 50);
         n++;
     }
     func_001E91A8(&defs[idx], &col);
@@ -2786,9 +2786,9 @@ extern "C" void func_001F31E0(sHudTimer_001F31E0* self)
         D_004A4EB0 = 1;
         D_004A4EA8.y = D_004A4EA8.x = 3.0f;
     }
-    float f = self->t - 1.0f;
-    if (f < 0.0f) {
-        f = -f;
+    float flipScale = self->t - 1.0f;
+    if (flipScale < 0.0f) {
+        flipScale = -flipScale;
     }
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ((cGfx_31E0*)ps2GraphicsMan)->stateTop[1] = ((cGfx_31E0*)ps2GraphicsMan)->stateTop[0];
@@ -2822,7 +2822,7 @@ extern "C" void func_001F31E0(sHudTimer_001F31E0* self)
     sV2_31E0 size;
     sV2_31E0 uv0(0.0f, 0.0f);
     sV2_31E0 uv1(1.0f, 1.0f);
-    size.x = f * 18.0f;
+    size.x = flipScale * 18.0f;
     size.y = 18.0f;
     *(short*)((char*)((cGfx_31E0*)GrMan)->stateTop + 0x10) = ((cGfx_31E0*)GrMan)->GetF1068();
     ((cGfx_31E0*)GrMan)->DrawSprite(pos, size, uv0, uv1, sCol_31E0(1.0f, 1.0f, 1.0f, 1.0f));

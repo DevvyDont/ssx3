@@ -3016,9 +3016,9 @@ extern "C" void func_0019CA70(void* self, void* nodep)
 {
     sNode_CA70* node = (sNode_CA70*)nodep;
     if (node != 0) {
-        int h = node->key % 400;
+        int bucketIndex = node->key % 400;
         if (node->prev < 0) {
-            *(void**)((char*)self + (h << 2) + 0x1900) = func_0019C8F8(self, node);
+            *(void**)((char*)self + (bucketIndex << 2) + 0x1900) = func_0019C8F8(self, node);
         } else {
             ((sNode_CA70*)func_0019C8D0(self, node))->next = node->next;
         }
@@ -3145,23 +3145,23 @@ struct sNode_CC30 {
  * freed, so a node whose first value was ever set stays allocated after both masks clear.
  *
  * @param bit  high half of the key and the mask bit (the rider manager passes the rider's profile index, +0x4)
- * @param a2  low half of the key (an item id)
+ * @param lowKey  low half of the key (an item id)
  * @param val  value to store, or a negative value to clear it
  */
-extern "C" void func_0019CC30(void* self, int bit, int a2, int val)
+extern "C" void func_0019CC30(void* self, int bit, int lowKey, int val)
 {
-    sNode_CC30* p = (sNode_CC30*)func_0019C938(self, bit, a2, val != -1);
-    if (p != 0) {
+    sNode_CC30* node = (sNode_CC30*)func_0019C938(self, bit, lowKey, val != -1);
+    if (node != 0) {
         if (val < 0) {
-            if ((p->mask >> bit) & 1) {
-                p->mask &= ~(1 << bit);
-                if (p->mask == 0 && p->f8 < 0) {
-                    func_0019CA70(self, p);
+            if ((node->mask >> bit) & 1) {
+                node->mask &= ~(1 << bit);
+                if (node->mask == 0 && node->f8 < 0) {
+                    func_0019CA70(self, node);
                 }
             }
         } else {
-            p->val = val;
-            p->mask |= 1 << bit;
+            node->val = val;
+            node->mask |= 1 << bit;
         }
     }
 }
@@ -3324,24 +3324,24 @@ struct sEquipTableK19CE68 {
  */
 extern "C" void func_0019CE68(void* self)
 {
-    sEquipTableK19CE68* t = (sEquipTableK19CE68*)self;
+    sEquipTableK19CE68* cache = (sEquipTableK19CE68*)self;
     int i;
     int j;
     for (i = 0; i < 10; i++) {
         for (j = 0; j < 256; j++) {
-            sEquipEntryK19CE68* e = &t->slots[i].e[j];
-            e->f0 = 0;
-            e->b4 = 0;
-            e->f104 = 0;
-            e->f118 = 0;
-            e->f108 = 0;
-            e->f114 = 0;
-            e->f110 = -1;
+            sEquipEntryK19CE68* slot = &cache->slots[i].e[j];
+            slot->f0 = 0;
+            slot->b4 = 0;
+            slot->f104 = 0;
+            slot->f118 = 0;
+            slot->f108 = 0;
+            slot->f114 = 0;
+            slot->f110 = -1;
         }
-        t->counts[i] = 1;
+        cache->counts[i] = 1;
     }
-    t->fB4004 = 0;
-    t->fB4000 = 0;
+    cache->fB4004 = 0;
+    cache->fB4000 = 0;
     if (D_004A1968 == 0) {
         D_004A1968 = func_0019CB38(cMemMan_alloc(8004, str_BoltFileIndexManager, 0, 0));
     } else {
@@ -3372,14 +3372,14 @@ struct sEquipTableK19CF40 {
  */
 extern "C" void func_0019CF40(void* self)
 {
-    sEquipTableK19CF40* t = (sEquipTableK19CF40*)self;
+    sEquipTableK19CF40* cache = (sEquipTableK19CF40*)self;
     int i;
     int j;
     for (i = 0; i < 10; i++) {
         for (j = 0; j < 256; j++) {
             func_0019D4B8((sEquipTable_D4B8*)self, i, j);
         }
-        t->counts[i] = 1;
+        cache->counts[i] = 1;
     }
     if (D_004A1968 != 0) {
         operator_delete((int*)D_004A1968);
@@ -3705,24 +3705,24 @@ struct sEquipTable_D4B8 {
 extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i)
 {
     int status;
-    sEquipSlot_D4B8* s = &self->rows[bank].slots[i];
-    if (s->state == 2) {
-        if (s->pending != 0) {
-            ASYNCFILE_release(s->handle, 0, &status);
+    sEquipSlot_D4B8* slot = &self->rows[bank].slots[i];
+    if (slot->state == 2) {
+        if (slot->pending != 0) {
+            ASYNCFILE_release(slot->handle, 0, &status);
         }
     }
-    *(int*)((char*)self + 0xB4000) -= s->size;
-    if (s->data != 0) {
-        cMemMan_free(s->data);
+    *(int*)((char*)self + 0xB4000) -= slot->size;
+    if (slot->data != 0) {
+        cMemMan_free(slot->data);
     }
-    s->data = 0;
-    s->size = 0;
-    s->state = 0;
-    s->name[0] = 0;
-    s->handle = 0;
-    s->pending = 0;
-    s->f114 = 0;
-    s->f110 = -1;
+    slot->data = 0;
+    slot->size = 0;
+    slot->state = 0;
+    slot->name[0] = 0;
+    slot->handle = 0;
+    slot->pending = 0;
+    slot->f114 = 0;
+    slot->f110 = -1;
 }
 #endif
 
@@ -3980,67 +3980,67 @@ struct sTableK19DA10 {
 /**
  * Requests a file from the FE file cache and returns its slot, adding one use.
  *
- * When the name is already cached (func_0019D428): the stamp becomes 0 with @p a5 or the bank's next stamp otherwise;
- * with @p a4 an idle slot becomes loaded (state 1); without it, pending is cleared, an in-flight load is waited on
+ * When the name is already cached (func_0019D428): the stamp becomes 0 with @p deferred or the bank's next stamp otherwise;
+ * with @p async an idle slot becomes loaded (state 1); without it, pending is cleared, an in-flight load is waited on
  * (ASYNCFILE_release), a queued one is loaded at once (func_0019D8B8), and the slot is marked loaded with handle -1.
  * Otherwise it reuses a slot (func_0019D3B0, emptied with func_0019D4B8), stamps it the same way, copies the name and
- * stores @p a3 as the type and @p a4 as pending; it loads at once (func_0019D8B8) unless @p a5 is set or an
+ * stores @p fileType as the type and @p async as pending; it loads at once (func_0019D8B8) unless @p deferred is set or an
  * asynchronous request meets loads already in flight, in which case it is queued (state 3). Either way the use count
  * (timer) goes up by 1; func_0019DC20 gives the use back.
  *
  * Likely bug: the cached path that waits on an in-flight load neither unpacks it (func_0019D000) nor decrements
  * nPending, unlike func_0019DC20. Likely bug: a -1 from func_0019D3B0 (no idle slot) is used as a slot index.
  *
- * @param p  the FE file cache
+ * @param cache  the FE file cache
  * @param bank  the bank (0-9)
  * @param namep  the file name
- * @param a3  the file type stored in the slot (the rider manager uses 8 and 11)
- * @param a4  nonzero to load asynchronously
- * @param a5  nonzero to defer the load: stamp 0 and queued, to be ordered later by func_0019DF20 or func_0019E070
+ * @param fileType  the file type stored in the slot (the rider manager uses 8 and 11)
+ * @param async  nonzero to load asynchronously
+ * @param deferred  nonzero to defer the load: stamp 0 and queued, to be ordered later by func_0019DF20 or func_0019E070
  * @return the slot index
  */
-extern "C" int func_0019DA10(void* p, int bank, void* namep, int a3, int a4, int a5)
+extern "C" int func_0019DA10(void* cache, int bank, void* namep, int fileType, int async, int deferred)
 {
-    sTableK19DA10* self = (sTableK19DA10*)p;
+    sTableK19DA10* self = (sTableK19DA10*)cache;
     const char* name = (const char*)namep;
     int i = func_0019D428((sEquipTable_D428*)self, bank, name);
     if (i >= 0) {
-        sSlotK19DA10* s = &self->banks[bank].e[i];
-        if (a5)
-            s->stamp = 0;
+        sSlotK19DA10* slot = &self->banks[bank].e[i];
+        if (deferred)
+            slot->stamp = 0;
         else
-            s->stamp = self->counts[bank]++;
-        if (a4) {
-            if (s->state == 0)
-                s->state = 1;
+            slot->stamp = self->counts[bank]++;
+        if (async) {
+            if (slot->state == 0)
+                slot->state = 1;
         } else {
-            s->pending = 0;
-            if (s->state == 2) {
+            slot->pending = 0;
+            if (slot->state == 2) {
                 int status;
-                ASYNCFILE_release(s->handle, 0, &status);
-            } else if (s->state == 3) {
+                ASYNCFILE_release(slot->handle, 0, &status);
+            } else if (slot->state == 3) {
                 func_0019D8B8((sEquipTable_DC20*)self, bank, i);
             }
-            s->state = 1;
-            s->handle = -1;
+            slot->state = 1;
+            slot->handle = -1;
         }
-        s->timer++;
+        slot->timer++;
     } else {
     i = func_0019D3B0(self, bank);
-    sSlotK19DA10* s = &self->banks[bank].e[i];
+    sSlotK19DA10* slot = &self->banks[bank].e[i];
     func_0019D4B8((sEquipTable_D4B8*)self, bank, i);
-    if (a5)
-        s->stamp = 0;
+    if (deferred)
+        slot->stamp = 0;
     else
-        s->stamp = self->counts[bank]++;
-    strcpy(s->name, name);
-    s->timer++;
-    s->f110 = a3;
-    s->pending = a4;
-    if (a5 == 0 && (a4 == 0 || self->nPending <= 0))
+        slot->stamp = self->counts[bank]++;
+    strcpy(slot->name, name);
+    slot->timer++;
+    slot->f110 = fileType;
+    slot->pending = async;
+    if (deferred == 0 && (async == 0 || self->nPending <= 0))
         func_0019D8B8((sEquipTable_DC20*)self, bank, i);
     else
-        s->state = 3;
+        slot->state = 3;
     }
     return i;
 }
@@ -4133,16 +4133,16 @@ struct sRowK19DD10 {
  * counts when it is queued (state 3), has type 8 and stamp 0. Two counted slots compare by name with strcasecmp; a
  * counted slot sorts before any other; two others compare equal.
  *
- * @param a  first packed key
- * @param b  second packed key
+ * @param firstKey  first packed key
+ * @param secondKey  second packed key
  * @return negative, 0 or positive in qsort fashion
  */
-extern "C" int func_0019DD10(const int* a, const int* b)
+extern "C" int func_0019DD10(const int* firstKey, const int* secondKey)
 {
-    int ka = *a;
+    int ka = *firstKey;
     sRowK19DD10* row = (sRowK19DD10*)D_004A196C + (ka >> 16);
     sSlotK19DD10* sa = &row->slots[ka & 0xFFFF];
-    sSlotK19DD10* sb = &row->slots[*b & 0xFFFF];
+    sSlotK19DD10* sb = &row->slots[*secondKey & 0xFFFF];
     if (sa->state == 3 && sa->type == 8 && sa->f11C == 0) {
         if (sb->state == 3 && sb->type == 8 && sb->f11C == 0)
             return strcasecmp(sa->name, sb->name);
@@ -4181,16 +4181,16 @@ struct sRowK19DE18 {
  * Same as func_0019DD10 for type 11: queued (state 3), type 11, stamp 0 slots sort first, by name with strcasecmp; two
  * others compare equal.
  *
- * @param a  first packed key
- * @param b  second packed key
+ * @param firstKey  first packed key
+ * @param secondKey  second packed key
  * @return negative, 0 or positive in qsort fashion
  */
-extern "C" int func_0019DE18(const int* a, const int* b)
+extern "C" int func_0019DE18(const int* firstKey, const int* secondKey)
 {
-    int ka = *a;
+    int ka = *firstKey;
     sRowK19DE18* row = (sRowK19DE18*)D_004A196C + (ka >> 16);
     sSlotK19DE18* sa = &row->slots[ka & 0xFFFF];
-    sSlotK19DE18* sb = &row->slots[*b & 0xFFFF];
+    sSlotK19DE18* sb = &row->slots[*secondKey & 0xFFFF];
     if (sa->state == 3 && sa->type == 11 && sa->f11C == 0) {
         if (sb->state == 3 && sb->type == 11 && sb->f11C == 0)
             return strcasecmp(sa->name, sb->name);
@@ -4525,40 +4525,40 @@ struct sRiderSlotCE {
 extern "C" void* func_0019E3D0(sRiderSlotCE* self)
 {
     int i;
-    char* p = (char*)self;
-    sSlotEntryCE* e;
-    *(int*)(p + 0xC70) = 0;
-    *(int*)(p + 0xC74) = 0;
+    char* riderBytes = (char*)self;
+    sSlotEntryCE* textureEntry;
+    *(int*)(riderBytes + 0xC70) = 0;
+    *(int*)(riderBytes + 0xC74) = 0;
     self->f0 = -1;
     self->f4 = -1;
     int none = -1;
-    e = self->entries;
+    textureEntry = self->entries;
     self->f8 = 0;
     self->fC = 0;
     self->f10 = 0;
     self->f14 = 0;
     self->f18 = 0;
     for (i = 0; i < 256; i++) {
-        e->flag = 0;
-        e->id = none;
-        e++;
+        textureEntry->flag = 0;
+        textureEntry->id = none;
+        textureEntry++;
     }
-    *(int*)(p + 0xC1C) = 0;
-    *(unsigned int*)(p + 0xC2C) = 0xFFFFFFFF;
-    *(int*)(p + 0xC20) = 0;
-    *(int*)(p + 0xC24) = -1;
-    *(int*)(p + 0xC28) = 0;
-    *(int*)(p + 0xCCC) = 0;
-    *(sQuadPairCE*)(p + 0xC30) = tPose_Identity;
-    *(sQuadPairCE*)(p + 0xC50) = tPose_Identity;
-    *(int*)(p + 0xCD4) = -1;
-    *(int*)(p + 0xC78) = 0;
-    *(int*)(p + 0xCC4) = 0;
-    *(int*)(p + 0xCC8) = 0;
-    *(int*)(p + 0xCB4) = 0;
-    *(int*)(p + 0xCB8) = 0;
-    *(int*)(p + 0xCBC) = 0;
-    *(int*)(p + 0xCC0) = 0;
+    *(int*)(riderBytes + 0xC1C) = 0;
+    *(unsigned int*)(riderBytes + 0xC2C) = 0xFFFFFFFF;
+    *(int*)(riderBytes + 0xC20) = 0;
+    *(int*)(riderBytes + 0xC24) = -1;
+    *(int*)(riderBytes + 0xC28) = 0;
+    *(int*)(riderBytes + 0xCCC) = 0;
+    *(sQuadPairCE*)(riderBytes + 0xC30) = tPose_Identity;
+    *(sQuadPairCE*)(riderBytes + 0xC50) = tPose_Identity;
+    *(int*)(riderBytes + 0xCD4) = -1;
+    *(int*)(riderBytes + 0xC78) = 0;
+    *(int*)(riderBytes + 0xCC4) = 0;
+    *(int*)(riderBytes + 0xCC8) = 0;
+    *(int*)(riderBytes + 0xCB4) = 0;
+    *(int*)(riderBytes + 0xCB8) = 0;
+    *(int*)(riderBytes + 0xCBC) = 0;
+    *(int*)(riderBytes + 0xCC0) = 0;
     return self;
 }
 #endif
@@ -4691,12 +4691,12 @@ extern "C" void func_0019E588(sRider_E588* self, unsigned int item, int flag)
         }
         if (ok) {
             self->timer = -1;
-            int* p = &self->fCC8;
-            int v = 0;
-            if (*p != 0 || self->fCC4 != 0) {
-                v = 1;
+            int* visibleField = &self->fCC8;
+            int showNow = 0;
+            if (*visibleField != 0 || self->fCC4 != 0) {
+                showNow = 1;
             }
-            *p = v;
+            *visibleField = showNow;
             self->fCC4 = 0;
         }
         return;

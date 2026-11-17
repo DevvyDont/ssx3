@@ -119,13 +119,13 @@ extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r);
  */
 extern "C" void* func_0020EAA0(void* self)
 {
-    sRect20EAA0 r;
+    sRect20EAA0 screenRect;
     *(void**)((char*)self + 0x38) = D_00474230;
-    r.x = 0.0f;
-    r.y = 0.0f;
-    r.w = 640.0f;
-    r.h = 480.0f;
-    func_0020EC18(self, &r, &r);
+    screenRect.x = 0.0f;
+    screenRect.y = 0.0f;
+    screenRect.w = 640.0f;
+    screenRect.h = 480.0f;
+    func_0020EC18(self, &screenRect, &screenRect);
     D_004A276C++;
     return self;
 }
@@ -189,10 +189,10 @@ extern sTex_20EB50 D_004C8C58[];
  * D_004A2764, and sets D_004A2768. Then func_0020EC18 does the layout. cOVStateHUD1P_onCreateScreen calls it for both
  * panels' trackers.
  *
- * @param a  the screen bounds (the HUD passes 0, 0, 640, 480); not used beyond being passed on
- * @param r  the rectangle (x, y, w, h) the tracker fills
+ * @param screenRect  the screen bounds (the HUD passes 0, 0, 640, 480); not used beyond being passed on
+ * @param area  the rectangle (x, y, w, h) the tracker fills
  */
-extern "C" void func_0020EB50(void* self, sRect20EAA0* a, sRect20EAA0* r)
+extern "C" void func_0020EB50(void* self, sRect20EAA0* screenRect, sRect20EAA0* area)
 {
     if (D_004A2768 == 0) {
         char* res = (char*)SSXApp->Game->UI;
@@ -204,7 +204,7 @@ extern "C" void func_0020EB50(void* self, sRect20EAA0* a, sRect20EAA0* r)
         D_004A2764 = func_003983F0(bank, GetHashValue32(str_fefont));
         D_004A2768 = 1;
     }
-    func_0020EC18(self, a, r);
+    func_0020EC18(self, screenRect, area);
 }
 #endif
 
@@ -237,33 +237,33 @@ struct sTrophyBox_20EC18 {
  *
  * h is the height of the percentage text (the shared font's MaxCharHeight * BaseScale.y * 0.6667 once loaded, else 30)
  * and m the arrow icon's height (record 4 of D_004C8C58). It stores the text position (+0x0, +0x4) at the bottom centre
- * of @p r, the top y (+0x8), the bottom of the bar area above the text and the bottom arrow row (+0xC, again at +0x18),
+ * of @p area, the top y (+0x8), the bottom of the bar area above the text and the bottom arrow row (+0xC, again at +0x18),
  * the centre x (+0x10), the bar top below the top arrow row (+0x14 = y + m), the pixels per course distance unit for
  * the single-player bar (+0x1C = (+0xC - +0x8 - m) / 10000, the window being 10000 units long), the rectangle itself
  * (+0x20..+0x2C) and its height / 10000 for the split-screen bar (+0x30).
  *
- * @param a  the screen bounds; not used
- * @param r  the rectangle (x, y, w, h)
+ * @param screenRect  the screen bounds; not used
+ * @param area  the rectangle (x, y, w, h)
  */
 // PORT: D_004A2764 holds a texture pointer in an int (declared int elsewhere in the unit).
-extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r)
+extern "C" void func_0020EC18(void* self, sRect20EAA0* screenRect, sRect20EAA0* area)
 {
-    float h;
+    float textHeight;
     if (D_004A2768 != 0) {
         char* tex = (char*)D_004A2764;
-        h = (float)*(int*)(tex + 0x14) * *(float*)(tex + 0x34) * 0.666700005531311f;
+        textHeight = (float)*(int*)(tex + 0x14) * *(float*)(tex + 0x34) * 0.666700005531311f;
     } else {
-        h = 30.0f;
+        textHeight = 30.0f;
     }
-    float m = D_004C8C58_f[72 / 4];
-    ((sTrophyBox_20EC18*)self)->pos = sVec2_20EC18(r->x + r->w * 0.5f, (r->y + r->h) - h);
-    ((sTrophyBox_20EC18*)self)->top = r->y;
-    ((sTrophyBox_20EC18*)self)->bottom = r->y + r->h - h - m;
-    ((sTrophyBox_20EC18*)self)->cx = r->x + r->w * 0.5f;
-    ((sTrophyBox_20EC18*)self)->y14 = r->y + m;
+    float arrowHeight = D_004C8C58_f[72 / 4];
+    ((sTrophyBox_20EC18*)self)->pos = sVec2_20EC18(area->x + area->w * 0.5f, (area->y + area->h) - textHeight);
+    ((sTrophyBox_20EC18*)self)->top = area->y;
+    ((sTrophyBox_20EC18*)self)->bottom = area->y + area->h - textHeight - arrowHeight;
+    ((sTrophyBox_20EC18*)self)->cx = area->x + area->w * 0.5f;
+    ((sTrophyBox_20EC18*)self)->y14 = area->y + arrowHeight;
     ((sTrophyBox_20EC18*)self)->y18 = ((sTrophyBox_20EC18*)self)->bottom;
-    ((sTrophyBox_20EC18*)self)->s1C = (((sTrophyBox_20EC18*)self)->bottom - ((sTrophyBox_20EC18*)self)->top - m) * 9.999999747378752e-05f;
-    ((sTrophyBox_20EC18*)self)->rect = *r;
+    ((sTrophyBox_20EC18*)self)->s1C = (((sTrophyBox_20EC18*)self)->bottom - ((sTrophyBox_20EC18*)self)->top - arrowHeight) * 9.999999747378752e-05f;
+    ((sTrophyBox_20EC18*)self)->rect = *area;
     ((sTrophyBox_20EC18*)self)->s30 = ((sTrophyBox_20EC18*)self)->rect.h * 9.999999747378752e-05f;
 }
 #endif
@@ -549,13 +549,13 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
             D_004C8BC8_EDA0[i].relValid = 1;
         }
     }
-    sVert_EDA0 v[4];
+    sVert_EDA0 verts[4];
     for (int i = 0; i < 4; i++) {
-        v[i].r = 0x80;
-        v[i].g = 0x80;
-        v[i].b = 0x80;
-        v[i].a = 0x80;
-        v[i].q = 1.0f;
+        verts[i].r = 0x80;
+        verts[i].g = 0x80;
+        verts[i].b = 0x80;
+        verts[i].a = 0x80;
+        verts[i].q = 1.0f;
     }
     ((cGfx_EDA0*)GrMan)->Begin2D();
     ((cGfx_EDA0*)GrMan)->PushState();
@@ -615,38 +615,38 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
             va = atex->v0;
             vb = atex->v1;
         }
-        v[0].u = atex->u0;
-        v[0].v = va;
-        v[1].u = atex->u1;
-        v[1].v = va;
-        v[2].u = atex->u0;
-        v[2].v = vb;
-        v[3].u = atex->u1;
-        v[3].v = vb;
-        sPos_EDA0 p;
-        p.x = ax - hw;
-        p.y = y;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[0].pos = p;
-        p.x = ax + hw;
-        p.y = y;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[1].pos = p;
-        p.x = ax - hw;
-        p.y = y + arrow->h;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[2].pos = p;
-        p.x = ax + hw;
-        p.y = y + arrow->h;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[3].pos = p;
+        verts[0].u = atex->u0;
+        verts[0].v = va;
+        verts[1].u = atex->u1;
+        verts[1].v = va;
+        verts[2].u = atex->u0;
+        verts[2].v = vb;
+        verts[3].u = atex->u1;
+        verts[3].v = vb;
+        sPos_EDA0 corner;
+        corner.x = ax - hw;
+        corner.y = y;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[0].pos = corner;
+        corner.x = ax + hw;
+        corner.y = y;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[1].pos = corner;
+        corner.x = ax - hw;
+        corner.y = y + arrow->h;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[2].pos = corner;
+        corner.x = ax + hw;
+        corner.y = y + arrow->h;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[3].pos = corner;
         ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
         *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = atex->GetHandle();
-        ((cGfx_EDA0*)GrMan)->DrawPrims(4, v, 0);
+        ((cGfx_EDA0*)GrMan)->DrawPrims(4, verts, 0);
     }
 
     sTex_EDA0* tex = D_004C8C58_EDA0[0].tex;
@@ -656,72 +656,72 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         barBottom += (hi - *(float*)(course + 0x10)) * self->s1C;
     if (lo < 0.0f)
         barTop += lo * self->s1C;
-    v[0].u = tex->u0;
-    v[0].v = tex->v0;
-    v[1].u = tex->u1;
-    v[1].v = tex->v0;
-    v[2].u = tex->u0;
-    v[2].v = tex->v1;
-    v[3].u = tex->u1;
-    v[3].v = tex->v1;
-    sPos_EDA0 p;
-    p.x = self->cx - 5.499532222747803f;
-    p.y = barTop;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[0].pos = p;
-    p.x = self->cx + 5.499532222747803f;
-    p.y = barTop;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[1].pos = p;
-    p.x = self->cx - 5.499532222747803f;
-    p.y = barBottom;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[2].pos = p;
-    p.x = self->cx + 5.499532222747803f;
-    p.y = barBottom;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[3].pos = p;
+    verts[0].u = tex->u0;
+    verts[0].v = tex->v0;
+    verts[1].u = tex->u1;
+    verts[1].v = tex->v0;
+    verts[2].u = tex->u0;
+    verts[2].v = tex->v1;
+    verts[3].u = tex->u1;
+    verts[3].v = tex->v1;
+    sPos_EDA0 corner;
+    corner.x = self->cx - 5.499532222747803f;
+    corner.y = barTop;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[0].pos = corner;
+    corner.x = self->cx + 5.499532222747803f;
+    corner.y = barTop;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[1].pos = corner;
+    corner.x = self->cx - 5.499532222747803f;
+    corner.y = barBottom;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[2].pos = corner;
+    corner.x = self->cx + 5.499532222747803f;
+    corner.y = barBottom;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[3].pos = corner;
     ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(9);
     *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = tex->GetHandle();
-    ((cGfx_EDA0*)GrMan)->DrawPrims(4, v, 0);
+    ((cGfx_EDA0*)GrMan)->DrawPrims(4, verts, 0);
 
     float markY = barTop + (barBottom - barTop) * frac;
-    p.x = self->cx - 2.7497661113739014f;
-    p.y = barTop;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[0].pos = p;
-    p.x = self->cx + 2.7497661113739014f;
-    p.y = barTop;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[1].pos = p;
-    p.x = self->cx - 2.7497661113739014f;
-    p.y = markY;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[2].pos = p;
-    p.x = self->cx + 2.7497661113739014f;
-    p.y = markY;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[3].pos = p;
+    corner.x = self->cx - 2.7497661113739014f;
+    corner.y = barTop;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[0].pos = corner;
+    corner.x = self->cx + 2.7497661113739014f;
+    corner.y = barTop;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[1].pos = corner;
+    corner.x = self->cx - 2.7497661113739014f;
+    corner.y = markY;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[2].pos = corner;
+    corner.x = self->cx + 2.7497661113739014f;
+    corner.y = markY;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[3].pos = corner;
     for (int i = 0; i < 4; i++) {
-        v[i].r = 0x80;
-        v[i].g = 0;
-        v[i].b = 0;
+        verts[i].r = 0x80;
+        verts[i].g = 0;
+        verts[i].b = 0;
     }
     ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
     *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = -1;
-    ((cGfx_EDA0*)GrMan)->DrawPrims(4, v, 0);
+    ((cGfx_EDA0*)GrMan)->DrawPrims(4, verts, 0);
     for (int i = 0; i < 4; i++) {
-        v[i].r = 0x80;
-        v[i].g = 0x80;
-        v[i].b = 0x80;
+        verts[i].r = 0x80;
+        verts[i].g = 0x80;
+        verts[i].b = 0x80;
     }
 
     float margin = 20.0f / self->s1C;
@@ -739,8 +739,8 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         int icon = 1;
         if (me != i) {
             x -= D_004C8BC8_EDA0[i].rel * 0.0050000004f;
-            char* r = race->riders[i];
-            if (((cBeing_EDA0*)(r + 0x6C0))->isHuman()) {
+            char* otherRider = race->riders[i];
+            if (((cBeing_EDA0*)(otherRider + 0x6C0))->isHuman()) {
                 prim = 13;
                 icon = 3;
             } else {
@@ -748,17 +748,17 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
                 icon = 2;
             }
         }
-        sIcon_EDA0* e = &D_004C8C58_EDA0[icon];
-        sTex_EDA0* t = e->tex;
-        float hh = e->h * 0.5f;
+        sIcon_EDA0* iconEntry = &D_004C8C58_EDA0[icon];
+        sTex_EDA0* iconTexture = iconEntry->tex;
+        float hh = iconEntry->h * 0.5f;
         float y0 = y - hh;
         float y1 = y + hh;
         if (self->y18 <= y0)
             continue;
         if (y1 <= self->y14)
             continue;
-        float va = t->v0;
-        float vb = t->v1;
+        float va = iconTexture->v0;
+        float vb = iconTexture->v1;
         if (y0 < self->y14) {
             va = vb + (va - vb) * (y1 - self->y14) / (hh * 2.0f);
             y0 = self->y14;
@@ -766,38 +766,38 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
             vb = va + (vb - va) * (self->y18 - y0) / (hh * 2.0f);
             y1 = self->y18;
         }
-        v[0].u = t->u0;
-        v[0].v = va;
-        v[1].u = t->u1;
-        v[1].v = va;
-        v[2].u = t->u0;
-        v[2].v = vb;
-        v[3].u = t->u1;
-        v[3].v = vb;
-        float hw = e->w * 0.5f;
-        p.x = x - hw;
-        p.y = y0;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[0].pos = p;
-        p.x = x + hw;
-        p.y = y0;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[1].pos = p;
-        p.x = x - hw;
-        p.y = y1;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[2].pos = p;
-        p.x = x + hw;
-        p.y = y1;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        v[3].pos = p;
+        verts[0].u = iconTexture->u0;
+        verts[0].v = va;
+        verts[1].u = iconTexture->u1;
+        verts[1].v = va;
+        verts[2].u = iconTexture->u0;
+        verts[2].v = vb;
+        verts[3].u = iconTexture->u1;
+        verts[3].v = vb;
+        float hw = iconEntry->w * 0.5f;
+        corner.x = x - hw;
+        corner.y = y0;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[0].pos = corner;
+        corner.x = x + hw;
+        corner.y = y0;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[1].pos = corner;
+        corner.x = x - hw;
+        corner.y = y1;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[2].pos = corner;
+        corner.x = x + hw;
+        corner.y = y1;
+        corner.z = 0.0f;
+        corner.w = 1.0f;
+        verts[3].pos = corner;
         ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(prim);
-        *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = t->GetHandle();
-        ((cGfx_EDA0*)GrMan)->DrawPrims(4, v, 0);
+        *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
+        ((cGfx_EDA0*)GrMan)->DrawPrims(4, verts, 0);
     }
 
     if (*(int*)(course + 8) != 0) {
@@ -814,57 +814,57 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
                 continue;
             if (markers[i].type == 1 && !show)
                 continue;
-            sIcon_EDA0* e = &D_004C8C58_EDA0[markers[i].type + 5];
-            sTex_EDA0* t = e->tex;
+            sIcon_EDA0* iconEntry = &D_004C8C58_EDA0[markers[i].type + 5];
+            sTex_EDA0* iconTexture = iconEntry->tex;
             float y = self->y18 - (d - lo) * self->s1C;
-            float hw = e->w * 0.5f;
-            float hh = e->h * 0.5f;
+            float hw = iconEntry->w * 0.5f;
+            float hh = iconEntry->h * 0.5f;
             float y0 = y - hh;
             float y1 = y + hh;
             if (self->y18 <= y0)
                 continue;
             if (y1 <= self->y14)
                 continue;
-            float va = t->v0;
-            float vb = t->v1;
+            float va = iconTexture->v0;
+            float vb = iconTexture->v1;
             if (y0 < self->y14) {
-                va = vb + (va - vb) * (y1 - self->y14) / e->h;
+                va = vb + (va - vb) * (y1 - self->y14) / iconEntry->h;
                 y0 = self->y14;
             } else if (self->y18 < y1) {
-                vb = va + (vb - va) * (self->y18 - y0) / e->h;
+                vb = va + (vb - va) * (self->y18 - y0) / iconEntry->h;
                 y1 = self->y18;
             }
-            v[0].u = t->u0;
-            v[0].v = va;
-            v[1].u = t->u1;
-            v[1].v = va;
-            v[2].u = t->u0;
-            v[2].v = vb;
-            v[3].u = t->u1;
-            v[3].v = vb;
-            p.x = self->cx - hw;
-            p.y = y0;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[0].pos = p;
-            p.x = self->cx + hw;
-            p.y = y0;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[1].pos = p;
-            p.x = self->cx - hw;
-            p.y = y1;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[2].pos = p;
-            p.x = self->cx + hw;
-            p.y = y1;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[3].pos = p;
+            verts[0].u = iconTexture->u0;
+            verts[0].v = va;
+            verts[1].u = iconTexture->u1;
+            verts[1].v = va;
+            verts[2].u = iconTexture->u0;
+            verts[2].v = vb;
+            verts[3].u = iconTexture->u1;
+            verts[3].v = vb;
+            corner.x = self->cx - hw;
+            corner.y = y0;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[0].pos = corner;
+            corner.x = self->cx + hw;
+            corner.y = y0;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[1].pos = corner;
+            corner.x = self->cx - hw;
+            corner.y = y1;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[2].pos = corner;
+            corner.x = self->cx + hw;
+            corner.y = y1;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[3].pos = corner;
             ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(11);
-            *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = t->GetHandle();
-            ((cGfx_EDA0*)GrMan)->DrawPrims(4, v, 0);
+            *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
+            ((cGfx_EDA0*)GrMan)->DrawPrims(4, verts, 0);
         }
     }
     ((cGfx_EDA0*)GrMan)->stateTop--;
@@ -1070,13 +1070,13 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
             D_004C8BC8_FB40[i].relValid = 1;
         }
     }
-    sVert_FB40 v[4];
+    sVert_FB40 verts[4];
     for (int i = 0; i < 4; i++) {
-        v[i].r = 0x80;
-        v[i].g = 0x80;
-        v[i].b = 0x80;
-        v[i].a = 0x80;
-        v[i].q = 1.0f;
+        verts[i].r = 0x80;
+        verts[i].g = 0x80;
+        verts[i].b = 0x80;
+        verts[i].a = 0x80;
+        verts[i].q = 1.0f;
     }
     float x = self->x;
     if (right == 0)
@@ -1095,38 +1095,38 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     float bottom = top + self->h;
     float lo = myDist - 5000.0f;
     float hi = lo + 10000.0f;
-    sPos_FB40 p;
-    v[0].u = tex->u0;
-    v[0].v = tex->v0;
-    v[1].u = tex->u1;
-    v[1].v = tex->v0;
-    v[2].u = tex->u0;
-    v[2].v = tex->v1;
-    v[3].u = tex->u1;
-    v[3].v = tex->v1;
-    p.x = x - 2.7497661113739014f;
-    p.y = bottom;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[0].pos = p;
-    p.x = x + 2.7497661113739014f;
-    p.y = bottom;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[1].pos = p;
-    p.x = x - 2.7497661113739014f;
-    p.y = top;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[2].pos = p;
-    p.x = x + 2.7497661113739014f;
-    p.y = top;
-    p.z = 0.0f;
-    p.w = 1.0f;
-    v[3].pos = p;
+    sPos_FB40 corner;
+    verts[0].u = tex->u0;
+    verts[0].v = tex->v0;
+    verts[1].u = tex->u1;
+    verts[1].v = tex->v0;
+    verts[2].u = tex->u0;
+    verts[2].v = tex->v1;
+    verts[3].u = tex->u1;
+    verts[3].v = tex->v1;
+    corner.x = x - 2.7497661113739014f;
+    corner.y = bottom;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[0].pos = corner;
+    corner.x = x + 2.7497661113739014f;
+    corner.y = bottom;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[1].pos = corner;
+    corner.x = x - 2.7497661113739014f;
+    corner.y = top;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[2].pos = corner;
+    corner.x = x + 2.7497661113739014f;
+    corner.y = top;
+    corner.z = 0.0f;
+    corner.w = 1.0f;
+    verts[3].pos = corner;
     ((cGfx_FB40*)GrMan)->stateTop->SetPrim(9);
     *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = tex->GetHandle();
-    ((cGfx_FB40*)GrMan)->DrawPrims(4, v, 0);
+    ((cGfx_FB40*)GrMan)->DrawPrims(4, verts, 0);
 
     float topFade = top + 60.0f;
     float bottomFade = bottom - 60.0f;
@@ -1140,8 +1140,8 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
         int icon = 8;
         float y = bottom - (d - lo) * self->scale;
         if (me != i) {
-            char* r = race->riders[i];
-            if (((cBeing_FB40*)(r + 0x6C0))->isHuman()) {
+            char* otherRider = race->riders[i];
+            if (((cBeing_FB40*)(otherRider + 0x6C0))->isHuman()) {
                 prim = 13;
                 icon = 10;
             } else {
@@ -1149,89 +1149,89 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
                 icon = 9;
             }
         }
-        sIcon_FB40* e = &D_004C8C58_FB40[icon];
-        sTex_FB40* t = e->tex;
-        float y0 = y - e->h * 0.5f;
-        float y1 = y + e->h * 0.5f;
+        sIcon_FB40* iconEntry = &D_004C8C58_FB40[icon];
+        sTex_FB40* iconTexture = iconEntry->tex;
+        float y0 = y - iconEntry->h * 0.5f;
+        float y1 = y + iconEntry->h * 0.5f;
         if (y0 <= top)
             continue;
         if (bottom <= y1)
             continue;
-        float a = 1.0f;
+        float fadeAlpha = 1.0f;
         if (y0 < topFade)
-            a = 1.0f - (topFade - y0) * 0.01666666753590107f;
+            fadeAlpha = 1.0f - (topFade - y0) * 0.01666666753590107f;
         else if (y1 > bottomFade)
-            a = 1.0f - (y1 - bottomFade) * 0.01666666753590107f;
-        if (a < 0.0f)
-            a = 0.0f;
-        float u0 = t->u0;
-        float u1 = t->u1;
+            fadeAlpha = 1.0f - (y1 - bottomFade) * 0.01666666753590107f;
+        if (fadeAlpha < 0.0f)
+            fadeAlpha = 0.0f;
+        float u0 = iconTexture->u0;
+        float u1 = iconTexture->u1;
         if (right == 0) {
-            u0 = t->u1;
-            u1 = t->u0;
+            u0 = iconTexture->u1;
+            u1 = iconTexture->u0;
         }
-        int alpha = (int)(a * 128.0f);
+        int alpha = (int)(fadeAlpha * 128.0f);
         int k;
         for (k = 0; k < 4; k++)
-            v[k].a = alpha;
-        v[0].u = u0;
-        v[0].v = t->v0;
-        v[1].u = u1;
-        v[1].v = t->v0;
-        v[2].u = u0;
-        v[2].v = t->v1;
-        v[3].u = u1;
-        v[3].v = t->v1;
+            verts[k].a = alpha;
+        verts[0].u = u0;
+        verts[0].v = iconTexture->v0;
+        verts[1].u = u1;
+        verts[1].v = iconTexture->v0;
+        verts[2].u = u0;
+        verts[2].v = iconTexture->v1;
+        verts[3].u = u1;
+        verts[3].v = iconTexture->v1;
         if (right != 0) {
-            p.x = x;
-            p.y = y0;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[0].pos = p;
-            p.x = x + e->w;
-            p.y = y0;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[1].pos = p;
-            p.x = x;
-            p.y = y1;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[2].pos = p;
-            p.x = x + e->w;
-            p.y = y1;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[3].pos = p;
+            corner.x = x;
+            corner.y = y0;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[0].pos = corner;
+            corner.x = x + iconEntry->w;
+            corner.y = y0;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[1].pos = corner;
+            corner.x = x;
+            corner.y = y1;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[2].pos = corner;
+            corner.x = x + iconEntry->w;
+            corner.y = y1;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[3].pos = corner;
         } else {
-            p.x = x - e->w;
-            p.y = y0;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[0].pos = p;
-            p.x = x;
-            p.y = y0;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[1].pos = p;
-            p.x = x - e->w;
-            p.y = y1;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[2].pos = p;
-            p.x = x;
-            p.y = y1;
-            p.z = 0.0f;
-            p.w = 1.0f;
-            v[3].pos = p;
+            corner.x = x - iconEntry->w;
+            corner.y = y0;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[0].pos = corner;
+            corner.x = x;
+            corner.y = y0;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[1].pos = corner;
+            corner.x = x - iconEntry->w;
+            corner.y = y1;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[2].pos = corner;
+            corner.x = x;
+            corner.y = y1;
+            corner.z = 0.0f;
+            corner.w = 1.0f;
+            verts[3].pos = corner;
         }
         ((cGfx_FB40*)GrMan)->stateTop->SetPrim(prim);
-        *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = t->GetHandle();
-        ((cGfx_FB40*)GrMan)->DrawPrims(4, v, 0);
+        *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
+        ((cGfx_FB40*)GrMan)->DrawPrims(4, verts, 0);
     }
 
     for (int i = 0; i < 4; i++)
-        v[i].a = 0x80;
+        verts[i].a = 0x80;
     if (*(int*)(course + 8) != 0) {
         int show = 1;
         if ((D_005308D0[0] >> 9) & 1) {
@@ -1246,10 +1246,10 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
                 continue;
             if (markers[i].type == 1 && !show)
                 continue;
-            sIcon_FB40* e = &D_004C8C58_FB40[markers[i].type + 5];
-            sTex_FB40* t = e->tex;
-            float hw = e->w * 0.5f;
-            float hh = e->h * 0.5f;
+            sIcon_FB40* iconEntry = &D_004C8C58_FB40[markers[i].type + 5];
+            sTex_FB40* iconTexture = iconEntry->tex;
+            float hw = iconEntry->w * 0.5f;
+            float hh = iconEntry->h * 0.5f;
             float y = bottom - (d - lo) * self->scale;
             float y0 = y - hh;
             float y1 = y + hh;
@@ -1257,77 +1257,77 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
                 continue;
             if (bottom <= y1)
                 continue;
-            float a = 1.0f;
+            float fadeAlpha = 1.0f;
             if (y0 < topFade)
-                a = 1.0f - (topFade - y0) * 0.01666666753590107f;
+                fadeAlpha = 1.0f - (topFade - y0) * 0.01666666753590107f;
             else if (y1 > bottomFade)
-                a = 1.0f - (y1 - bottomFade) * 0.01666666753590107f;
-            if (a < 0.0f)
-                a = 0.0f;
-            float u0 = t->u0;
-            float u1 = t->u1;
+                fadeAlpha = 1.0f - (y1 - bottomFade) * 0.01666666753590107f;
+            if (fadeAlpha < 0.0f)
+                fadeAlpha = 0.0f;
+            float u0 = iconTexture->u0;
+            float u1 = iconTexture->u1;
             if (right != 0)
                 u0 = (u0 + u1) * 0.5f;
             else
                 u1 = (u0 + u1) * 0.5f;
-            v[0].u = u0;
-            v[0].v = t->v0;
-            v[1].u = u1;
-            v[1].v = t->v0;
-            v[2].u = u0;
-            v[2].v = t->v1;
-            v[3].u = u1;
-            v[3].v = t->v1;
-            int alpha = (int)(a * 128.0f);
+            verts[0].u = u0;
+            verts[0].v = iconTexture->v0;
+            verts[1].u = u1;
+            verts[1].v = iconTexture->v0;
+            verts[2].u = u0;
+            verts[2].v = iconTexture->v1;
+            verts[3].u = u1;
+            verts[3].v = iconTexture->v1;
+            int alpha = (int)(fadeAlpha * 128.0f);
             int k;
             for (k = 0; k < 4; k++)
-                v[k].a = alpha;
+                verts[k].a = alpha;
             if (right != 0) {
-                p.x = x;
-                p.y = y0;
-                p.z = 0.0f;
-                p.w = 1.0f;
-                v[0].pos = p;
-                p.x = x + hw;
-                p.y = y0;
-                p.z = 0.0f;
-                p.w = 1.0f;
-                v[1].pos = p;
-                p.x = x;
-                p.y = y1;
-                p.z = 0.0f;
-                p.w = 1.0f;
-                v[2].pos = p;
-                p.x = x + hw;
-                p.y = y1;
-                p.z = 0.0f;
-                p.w = 1.0f;
-                v[3].pos = p;
+                corner.x = x;
+                corner.y = y0;
+                corner.z = 0.0f;
+                corner.w = 1.0f;
+                verts[0].pos = corner;
+                corner.x = x + hw;
+                corner.y = y0;
+                corner.z = 0.0f;
+                corner.w = 1.0f;
+                verts[1].pos = corner;
+                corner.x = x;
+                corner.y = y1;
+                corner.z = 0.0f;
+                corner.w = 1.0f;
+                verts[2].pos = corner;
+                corner.x = x + hw;
+                corner.y = y1;
+                corner.z = 0.0f;
+                corner.w = 1.0f;
+                verts[3].pos = corner;
             } else {
-                p.x = x - hw;
-                p.y = y0;
-                p.z = 0.0f;
-                p.w = 1.0f;
-                v[0].pos = p;
-                p.x = x;
-                p.y = y0;
-                p.z = 0.0f;
-                p.w = 1.0f;
-                v[1].pos = p;
-                p.x = x - hw;
-                p.y = y1;
-                p.z = 0.0f;
-                p.w = 1.0f;
-                v[2].pos = p;
-                p.x = x;
-                p.y = y1;
-                p.z = 0.0f;
-                p.w = 1.0f;
-                v[3].pos = p;
+                corner.x = x - hw;
+                corner.y = y0;
+                corner.z = 0.0f;
+                corner.w = 1.0f;
+                verts[0].pos = corner;
+                corner.x = x;
+                corner.y = y0;
+                corner.z = 0.0f;
+                corner.w = 1.0f;
+                verts[1].pos = corner;
+                corner.x = x - hw;
+                corner.y = y1;
+                corner.z = 0.0f;
+                corner.w = 1.0f;
+                verts[2].pos = corner;
+                corner.x = x;
+                corner.y = y1;
+                corner.z = 0.0f;
+                corner.w = 1.0f;
+                verts[3].pos = corner;
             }
             ((cGfx_FB40*)GrMan)->stateTop->SetPrim(11);
-            *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = t->GetHandle();
-            ((cGfx_FB40*)GrMan)->DrawPrims(4, v, 0);
+            *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
+            ((cGfx_FB40*)GrMan)->DrawPrims(4, verts, 0);
         }
     }
     ((cGfx_FB40*)GrMan)->stateTop--;
@@ -1343,18 +1343,18 @@ extern sPad16 D_004C8BC8;
 INCLUDE_ASM("fe/ovstatetrophy", func_002105B0);
 #ifdef SKIP_ASM
 /**
- * Flags rider @p a0's course-progress slot for a reset.
+ * Flags rider @p riderIndex's course-progress slot for a reset.
  *
- * Sets the first word of slot @p a0 of D_004C8BC8 (0x18-byte slots): the next update (func_00210618) then takes the
+ * Sets the first word of slot @p riderIndex of D_004C8BC8 (0x18-byte slots): the next update (func_00210618) then takes the
  * rider's real progress instead of limiting the change, and func_00210820 invalidates the slot's smoothed offset.
  * cRider_putAt calls it when a rider is moved.
  *
- * @param a0  the rider's index in the race
+ * @param riderIndex  the rider's index in the race
  */
-extern "C" void func_002105B0(int a0)
+extern "C" void func_002105B0(int riderIndex)
 {
-    char* p = (char*)&D_004C8BC8 + a0 * 0x18;
-    *(int*)p = 1;
+    char* slot = (char*)&D_004C8BC8 + riderIndex * 0x18;
+    *(int*)slot = 1;
 }
 #endif
 
@@ -1377,11 +1377,11 @@ extern "C" void func_002108F8(void);
  */
 extern "C" void func_002105D0(char* data)
 {
-    char* a = data + *(int*)(data + 4);
-    char* b = data + *(int*)(data + 0xC);
+    char* segments = data + *(int*)(data + 4);
+    char* markers = data + *(int*)(data + 0xC);
     D_004A2750 = data;
-    D_004A2754 = a;
-    D_004A2758 = b;
+    D_004A2754 = segments;
+    D_004A2758 = markers;
     func_002108F8();
 }
 #endif
@@ -1449,18 +1449,18 @@ extern "C" void func_00210618(int i)
     char* race = (char*)SSXApp->Game->AI;
     if (i >= *(int*)(race + 0x78))
         return;
-    float d = *(float*)(course + 0x10) - cRider_getDistanceLeft(*(void**)(race + (i << 2) + 0x28));
+    float travelled = *(float*)(course + 0x10) - cRider_getDistanceLeft(*(void**)(race + (i << 2) + 0x28));
     if (D_004C8BC8_210618[i].active == 0)
     {
         float prev = D_004C8BC8_210618[i].dist;
-        float dd = d - prev;
+        float dd = travelled - prev;
         float lim = 138.88890075683594f;
         if (dd > lim)
-            d = prev + lim;
+            travelled = prev + lim;
         else if (dd < -lim)
-            d = prev - lim;
+            travelled = prev - lim;
     }
-    if (d <= 0.0f)
+    if (travelled <= 0.0f)
     {
         D_004C8BC8_210618[i].seg = 0;
         D_004C8BC8_210618[i].dist = 0.0f;
@@ -1469,7 +1469,7 @@ extern "C" void func_00210618(int i)
     else
     {
         int last = *(int*)course - 1;
-        if (segs[last].dist <= d)
+        if (segs[last].dist <= travelled)
         {
             D_004C8BC8_210618[i].seg = last;
             D_004C8BC8_210618[i].dist = *(float*)(course + 0x10);
@@ -1478,12 +1478,12 @@ extern "C" void func_00210618(int i)
         else
         {
             int k = D_004C8BC8_210618[i].seg;
-            while (segs[k].dist <= d)
+            while (segs[k].dist <= travelled)
                 k++;
-            while (d < segs[k].dist)
+            while (travelled < segs[k].dist)
                 k--;
             D_004C8BC8_210618[i].seg = k;
-            D_004C8BC8_210618[i].dist = d;
+            D_004C8BC8_210618[i].dist = travelled;
             D_004C8BC8_210618[i].pos = func_00210820(i);
         }
     }
@@ -1552,11 +1552,11 @@ extern "C" float func_00210820(int idx)
     sQuad_210820 pos = *((cPosObj_210820*)(rider + 0x6C0))->v05();
     float dy = suby_210820(&zones[D_slots210820[idx].zone], pos);
     float dx = subx_210820(&zones[D_slots210820[idx].zone], pos);
-    float r = dy * sy_210820(&zones[D_slots210820[idx].zone]) + dx * sx_210820(&zones[D_slots210820[idx].zone]);
+    float lateral = dy * sy_210820(&zones[D_slots210820[idx].zone]) + dx * sx_210820(&zones[D_slots210820[idx].zone]);
     if (D_slots210820[idx].active) {
         D_slots210820[idx].e = 0;
     }
-    return r;
+    return lateral;
 }
 #endif
 
@@ -1660,32 +1660,32 @@ extern "C" void func_00210940(void* self)
     if (screen == 0)
         return;
     cUIScreen_playFrame(screen, 0, 0);
-    cUIObj_210940* t = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextFromX_b));
-    if (t != 0)
+    cUIObj_210940* fromText = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextFromX_b));
+    if (fromText != 0)
     {
-        t->setVisible(1);
+        fromText->setVisible(1);
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        cUIText_setAsciiString((cUIText*)t, D_00534FC8);
+        cUIText_setAsciiString((cUIText*)fromText, D_00534FC8);
     }
-    char* a = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_AgreementSlider_b));
-    *(int*)(a + 0x14) |= 1;
-    void* b = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatUpArrow_b));
-    void* c = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatDownArrow_b));
-    void* d = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_slideroutline2_b));
-    *(void**)(a + 0x7C) = b;
-    *(void**)(a + 0x80) = c;
-    *(void**)(a + 0x84) = d;
-    *(int*)(a + 0x88) = 2;
-    cUIObj_210940* e = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
-    if (e != 0)
+    char* scrollBar = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_AgreementSlider_b));
+    *(int*)(scrollBar + 0x14) |= 1;
+    void* upArrow = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatUpArrow_b));
+    void* downArrow = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatDownArrow_b));
+    void* sliderOutline = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_slideroutline2_b));
+    *(void**)(scrollBar + 0x7C) = upArrow;
+    *(void**)(scrollBar + 0x80) = downArrow;
+    *(void**)(scrollBar + 0x84) = sliderOutline;
+    *(int*)(scrollBar + 0x88) = 2;
+    cUIObj_210940* chatScroll = (cUIObj_210940*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
+    if (chatScroll != 0)
     {
-        *(int*)((char*)e + 0x74) |= 1;
-        cUITextScroll_setInputMap(e, 1);
-        e->setVisible(1);
-        *(int*)((char*)e + 0x14) |= 0x80;
-        e->setColor(sColor_210940(1.0f, 0.0f, 0.0f, 0.0f));
-        *(sRect_210940*)((char*)e + 0xA8) = D_004C8D08;
-        *(char**)((char*)e + 0xB8) = a;
+        *(int*)((char*)chatScroll + 0x74) |= 1;
+        cUITextScroll_setInputMap(chatScroll, 1);
+        chatScroll->setVisible(1);
+        *(int*)((char*)chatScroll + 0x14) |= 0x80;
+        chatScroll->setColor(sColor_210940(1.0f, 0.0f, 0.0f, 0.0f));
+        *(sRect_210940*)((char*)chatScroll + 0xA8) = D_004C8D08;
+        *(char**)((char*)chatScroll + 0xB8) = scrollBar;
     }
     cOVState_onCreateScreen(self);
 }
@@ -1753,39 +1753,39 @@ struct sBXString_00210BD8 {
  * Appends a chat line "<name>: <text>" to the chat overlay's scroller.
  *
  * Finds "textScrollChat" and does nothing without it. It saves the scroller's mLineSize, mSelectedIndex and
- * mLinesOffset, builds the line in a cBXString from our name (D_00534FB8) when @p a is set or the opponent's
+ * mLinesOffset, builds the line in a cBXString from our name (D_00534FB8) when @p ownMessage is set or the opponent's
  * (D_00534FC8) otherwise, ": " (D_004A2710) and @p name, adds it with cUITextScroll_addAsciiString, then func_001A83D8
  * trims the scroller to 30 lines and restores its scroll state from the saved values.
  *
  * @param name  the message text
- * @param a  nonzero for our own message, 0 for the opponent's
+ * @param ownMessage  nonzero for our own message, 0 for the opponent's
  */
-extern "C" void func_00210BD8(void* self, char* name, int a)
+extern "C" void func_00210BD8(void* self, char* name, int ownMessage)
 {
     char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
     if (obj == 0) {
         return;
     }
-    unsigned short c8 = *(unsigned short*)(obj + 0xC8);
-    unsigned short c4 = *(unsigned short*)(obj + 0xC4);
-    unsigned short c6 = *(unsigned short*)(obj + 0xC6);
+    unsigned short lineCount = *(unsigned short*)(obj + 0xC8);
+    unsigned short selectedIndex = *(unsigned short*)(obj + 0xC4);
+    unsigned short linesOffset = *(unsigned short*)(obj + 0xC6);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (a != 0) {
-        sBXString_00210BD8 s;
-        cBXString_cBXString2(&s, D_00534FB8);
-        cBXString_Concat(&s, D_004A2710);
-        cBXString_Concat(&s, name);
-        cUITextScroll_addAsciiString(obj, s.str);
-        cBXString__cBXString(&s, 2);
+    if (ownMessage != 0) {
+        sBXString_00210BD8 lineText;
+        cBXString_cBXString2(&lineText, D_00534FB8);
+        cBXString_Concat(&lineText, D_004A2710);
+        cBXString_Concat(&lineText, name);
+        cUITextScroll_addAsciiString(obj, lineText.str);
+        cBXString__cBXString(&lineText, 2);
     } else {
-        sBXString_00210BD8 s;
-        cBXString_cBXString2(&s, D_00534FC8);
-        cBXString_Concat(&s, D_004A2710);
-        cBXString_Concat(&s, name);
-        cUITextScroll_addAsciiString(obj, s.str);
-        cBXString__cBXString(&s, 2);
+        sBXString_00210BD8 lineText;
+        cBXString_cBXString2(&lineText, D_00534FC8);
+        cBXString_Concat(&lineText, D_004A2710);
+        cBXString_Concat(&lineText, name);
+        cUITextScroll_addAsciiString(obj, lineText.str);
+        cBXString__cBXString(&lineText, 2);
     }
-    func_001A83D8(obj, 0x1E, 8, c8, c4, c6, 0, 1);
+    func_001A83D8(obj, 0x1E, 8, lineCount, selectedIndex, linesOffset, 0, 1);
 }
 #endif
 
@@ -1893,10 +1893,10 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
         if (func_00258160((int)cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8(self, name, 0);
         }
-        char* p = *(char**)((char*)self + 0xE0) + 0x74;
-        if (strlen(p) != 0) {
-            func_00258C50((int)cGameComm_mGameComm, p);
-            func_00210BD8(self, p, 1);
+        char* typedText = *(char**)((char*)self + 0xE0) + 0x74;
+        if (strlen(typedText) != 0) {
+            func_00258C50((int)cGameComm_mGameComm, typedText);
+            func_00210BD8(self, typedText, 1);
         }
         break;
     }

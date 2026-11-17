@@ -285,11 +285,11 @@ extern "C" void func_001A0708(void* self, int a1, int a2);
  * non-zero, writes 0 to entry 0x18 of the flow-state table D_004A4E80 (func_001A0708()). Callers allocate 84 bytes
  * ("cFEStateOptions" or "FEOptions").
  *
- * @param a1  the UI engine (passed to the base constructor)
+ * @param engine  the UI engine (passed to the base constructor)
  * @param reset  non-zero to clear the options entry in D_004A4E80
  * @return @p self
  */
-extern "C" void* func_001887A0(void* self, int a1, int reset)
+extern "C" void* func_001887A0(void* self, int engine, int reset)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 0x18;

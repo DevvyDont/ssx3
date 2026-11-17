@@ -108,23 +108,23 @@ extern sRewardDesc_0388 D_00478D38[][8];
 /**
  * Returns (by value) one 0x6C-byte map goal entry: race, freestyle or freeride, by peak and index.
  *
- * Kind 0 reads D_004781D0[@p a][@p b] (4 per peak), 1 D_004786E0 (5 per peak), 2 D_00478D38 (8 per peak); any other
+ * Kind 0 reads D_004781D0[@p peak][@p goalIndex] (4 per peak), 1 D_004786E0 (5 per peak), 2 D_00478D38 (8 per peak); any other
  * kind returns D_004781D0[0][0]. cUITemplate_MAP_onWidgetEvent calls it with cUITemplate_MAP_mPeak, the item's misc
  * data and cUITemplate_MAP_mSelectedEvent.
  *
- * @param a  the peak, 0-2
- * @param b  the goal index within the peak's table
+ * @param peak  the peak, 0-2
+ * @param goalIndex  the goal index within the peak's table
  * @param kind  0 race, 1 freestyle, 2 freeride
  * @return a copy of the goal entry
  */
-extern "C" sRewardDesc_0388 func_00200388(int a, int b, int kind)
+extern "C" sRewardDesc_0388 func_00200388(int peak, int goalIndex, int kind)
 {
     if (kind == 0) {
-        return D_004781D0[a][b];
+        return D_004781D0[peak][goalIndex];
     } else if (kind == 1) {
-        return D_004786E0[a][b];
+        return D_004786E0[peak][goalIndex];
     } else if (kind == 2) {
-        return D_00478D38[a][b];
+        return D_00478D38[peak][goalIndex];
     }
     return D_004781D0[0][0];
 }

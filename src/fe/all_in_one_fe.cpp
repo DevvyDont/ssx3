@@ -38,27 +38,27 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVState for engine @p arg1 and overlay id @p arg2.
+ * Constructs a cOVState for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
- * it), then sets mOVID (0x98) to @p arg2, clears mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54),
+ * it), then sets mOVID (0x98) to @p overlayId, clears mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54),
  * stores the cOVState vtable D_00474E08 and copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088.
  * Every overlay-state constructor in this unit and cOVStateManager_triggerOverlay inline the same steps.
  *
  * @param ovState  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021C678(cOVState* ovState, int arg1, int arg2) {
+extern "C" void *func_0021C678(cOVState* ovState, int engine, int overlayId) {
     func_0039E2A0(ovState);
-    (ovState->mOVID) = arg2;
+    (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
     ((char*)ovState->mVtbl) = D_00474E08;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = t;
+    unsigned short chatInit = D_004A2088[0];
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -78,11 +78,11 @@ extern char D_00474E08[];
  * own. It is the destructor slot (+0xC) of the cOVState vtable D_00474E08. cOVState_REPLAY__cOVState_REPLAY,
  * cOVStateHiScoreList__cOVStateHiScoreList and the other empty overlay destructors repeat the same body.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C6D8(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021C6D8(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -115,11 +115,11 @@ extern char D_00474E08[];
  * own. It is the destructor slot (+0xC) of D_00474D30. Its onCreateScreen func_0020D1D8 fills the single "overlayOpt"
  * entry; nothing outside this unit stores D_00474D30.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C708(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021C708(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -132,7 +132,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the one-option overlay menu (onCreateScreen func_0020D1D8) for engine @p arg1 and overlay id @p arg2;
+ * Constructs the one-option overlay menu (onCreateScreen func_0020D1D8) for engine @p engine and overlay id @p overlayId;
  * installs D_00474D30.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -141,20 +141,20 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021C730(cOVState* ovState, int arg1, int arg2) {
+extern "C" void *func_0021C730(cOVState* ovState, int engine, int overlayId) {
     func_0039E2A0(ovState);
-    (ovState->mOVID) = arg2;
+    (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
     ((char*)ovState->mVtbl) = D_00474E08;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short t = D_004A2088[0];
+    unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = D_00474D30;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = t;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -174,11 +174,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00474C58.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C798(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021C798(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -191,7 +191,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the dialog-template overlay for engine @p arg1 and overlay id @p arg2; installs D_00474C58.
+ * Constructs the dialog-template overlay for engine @p engine and overlay id @p overlayId; installs D_00474C58.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -200,22 +200,22 @@ extern unsigned short D_004A2088[];
  * cOVTemplate_Dialog_onCreateScreen / cOVTemplate_Dialog_onWidgetEvent, and the dialog overlays (ids 23-28 and 38)
  * reuse every slot but the destructor.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_0021C7C0(void *arg0, int arg1, int arg2) {
-    func_0039E2A0(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00474C58;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_0021C7C0(void *ovState, int engine, int overlayId) {
+    func_0039E2A0(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00474C58;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -249,11 +249,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00474B80.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C848(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021C848(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -288,7 +288,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVState_REPLAY for engine @p arg1 and overlay id @p arg2; installs cOVState_REPLAY_vtbl.
+ * Constructs a cOVState_REPLAY for engine @p engine and overlay id @p overlayId; installs cOVState_REPLAY_vtbl.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -296,22 +296,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 17 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_0021C898(void *arg0, int arg1, int arg2) {
-    func_0039E2A0(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVState_REPLAY_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_0021C898(void *ovState, int engine, int overlayId) {
+    func_0039E2A0(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVState_REPLAY_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -329,11 +329,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_004749D0.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C900(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021C900(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -351,11 +351,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_004748F8.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C928(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021C928(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -369,7 +369,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the dialog overlay with vtable D_004748F8 for engine @p arg1 and overlay id @p arg2 and sets its dialog
+ * Constructs the dialog overlay with vtable D_004748F8 for engine @p engine and overlay id @p overlayId and sets its dialog
  * kind (0x9C) to 1.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -379,23 +379,23 @@ extern unsigned short D_004A2088[];
  * the same steps; this out-of-line copy has no callers. Its slots are those of the dialog template D_00474C58 except
  * the destructor; the dialog kind picks the text.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_0021C950(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_C950(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_004748F8;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0x9C))) = 1;
-    return arg0;
+extern "C" void *func_0021C950(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_C950(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_004748F8;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0x9C))) = 1;
+    return ovState;
 }
 #endif
 
@@ -413,11 +413,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00474820.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C9C0(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021C9C0(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -435,11 +435,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00474748.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C9E8(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021C9E8(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -457,11 +457,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00474670.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CA10(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021CA10(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -479,11 +479,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00474598.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CA38(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021CA38(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -501,11 +501,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_004744C0.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CA60(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021CA60(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -561,11 +561,11 @@ extern char D_00474E08[];
  * own. It is the destructor slot (+0xC) of its vtable D_00474318. include/fe/messagecenter.h already lists it as that
  * class's destructor.
  *
- * @param arg0  the object being destroyed
+ * @param messageCenter  the object being destroyed
  */
-extern "C" void func_0021CAE0(cOVState_MESSAGECENTER* arg0) {
-    arg0->mVtbl = (void**)D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021CAE0(cOVState_MESSAGECENTER* messageCenter) {
+    messageCenter->mVtbl = (void**)D_00474E08;
+    func_0039E390_a(messageCenter);
 }
 #endif
 
@@ -657,10 +657,10 @@ extern int D_004A275C;
  * cOVStateHUD1P_onUpdate also writes it, and the HUD marker drawers func_0020EDA0 / func_0020FB40 draw nothing while it
  * is 0. No callers.
  *
- * @param arg0  the new value
+ * @param newValue  the new value
  */
-extern "C" void func_0021CB90(int arg0) {
-    D_004A275C = arg0;
+extern "C" void func_0021CB90(int newValue) {
+    D_004A275C = newValue;
 }
 #endif
 
@@ -782,11 +782,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00474088.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CCE0(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021CCE0(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -799,7 +799,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the overlay with vtable D_00474088 for engine @p arg1 and overlay id @p arg2.
+ * Constructs the overlay with vtable D_00474088 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -807,22 +807,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 10 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_0021CD08(void *arg0, int arg1, int arg2) {
-    func_0039E2A0(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00474088;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_0021CD08(void *ovState, int engine, int overlayId) {
+    func_0039E2A0(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00474088;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -840,11 +840,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00473FB0.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CD70(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021CD70(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -857,7 +857,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the overlay with vtable D_00473FB0 for engine @p arg1 and overlay id @p arg2.
+ * Constructs the overlay with vtable D_00473FB0 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -865,22 +865,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 11 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_0021CD98(void *arg0, int arg1, int arg2) {
-    func_0039E2A0(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473FB0;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_0021CD98(void *ovState, int engine, int overlayId) {
+    func_0039E2A0(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00473FB0;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -898,11 +898,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00473ED8.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CE00(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021CE00(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -916,7 +916,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the overlay with vtable D_00473ED8 for engine @p arg1 and overlay id @p arg2.
+ * Constructs the overlay with vtable D_00473ED8 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -924,22 +924,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 22 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_0021CE28(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_CE28(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473ED8;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_0021CE28(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_CE28(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00473ED8;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -957,11 +957,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00473E00.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CE90(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021CE90(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -977,7 +977,7 @@ extern char str_finishov[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the finish overlay with vtable D_00473E00 for engine @p arg1 and overlay id @p arg2, sets the word at 0xA0
+ * Constructs the finish overlay with vtable D_00473E00 for engine @p engine and overlay id @p overlayId, sets the word at 0xA0
  * to 1 and names the state "finishov" (mHashName, 0xC, = GetHashValue32).
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -986,24 +986,24 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 12 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_0021CEB8(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_CEB8(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xA0))) = 1;
-    (*(char **)((char*)(arg0) + (8))) = D_00473E00;
-    (*(int *)((char*)(arg0) + (0xC))) = GetHashValue32(str_finishov);
-    return arg0;
+extern "C" void *func_0021CEB8(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_CEB8(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xA0))) = 1;
+    (*(char **)((char*)(ovState) + (8))) = D_00473E00;
+    (*(int *)((char*)(ovState) + (0xC))) = GetHashValue32(str_finishov);
+    return ovState;
 }
 #endif
 
@@ -1021,11 +1021,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00473D28.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CF38(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021CF38(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -1041,7 +1041,7 @@ extern char str_finishov[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the finish overlay with vtable D_00473D28 for engine @p arg1 and overlay id @p arg2, sets the word at 0xA0
+ * Constructs the finish overlay with vtable D_00473D28 for engine @p engine and overlay id @p overlayId, sets the word at 0xA0
  * to 1 and names the state "finishov" (mHashName, 0xC, = GetHashValue32).
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -1050,24 +1050,24 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 13 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_0021CF60(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_CF60(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xA0))) = 1;
-    (*(char **)((char*)(arg0) + (8))) = D_00473D28;
-    (*(int *)((char*)(arg0) + (0xC))) = GetHashValue32(str_finishov);
-    return arg0;
+extern "C" void *func_0021CF60(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_CF60(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xA0))) = 1;
+    (*(char **)((char*)(ovState) + (8))) = D_00473D28;
+    (*(int *)((char*)(ovState) + (0xC))) = GetHashValue32(str_finishov);
+    return ovState;
 }
 #endif
 
@@ -1085,11 +1085,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00473C50.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CFE0(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_0021CFE0(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -1103,7 +1103,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the overlay with vtable D_00473C50 for engine @p arg1 and overlay id @p arg2.
+ * Constructs the overlay with vtable D_00473C50 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -1111,22 +1111,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 35 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_0021D008(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_D008(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473C50;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_0021D008(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_D008(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00473C50;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -1146,20 +1146,20 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Out-of-line copy with
  * no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_0021D070(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVStateHiScoreList_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_0021D070(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVStateHiScoreList_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -1173,29 +1173,29 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVStateHiScoreList for engine @p arg1 and overlay id @p arg2; installs cOVStateHiScoreList_vtbl.
+ * Constructs a cOVStateHiScoreList for engine @p engine and overlay id @p overlayId; installs cOVStateHiScoreList_vtbl.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
  * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
  * cOVState vtable D_00474E08 before the class's own. Out-of-line copy with no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_0021D0D0(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_D0D0(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVStateHiScoreList_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_0021D0D0(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_D0D0(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVStateHiScoreList_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -1384,15 +1384,15 @@ extern "C" void func_0021D1A0(float fill, float sx, float sy, char* self, char* 
                               sGaugeBar* bar, float* col, int x, float* rect)
 {
     t2Vector a;
-    t2Vector p;
+    t2Vector drawPos;
     t2Vector size;
     t2Vector sc;
     t2Vector one;
     sHudSprite** sprites = (sHudSprite**)(self + (idx * 0xC + 0x4FC));
-    char* e = elems + sel * 36;
-    func_001E91F8(e, &a);
-    func_001E9220(e, &size, 0);
-    func_001E9290(e, &sc);
+    char* hudDef = elems + sel * 36;
+    func_001E91F8(hudDef, &a);
+    func_001E9220(hudDef, &size, 0);
+    func_001E9290(hudDef, &sc);
     sc.x *= sx;
     sc.y *= sy;
     size.x *= sc.x;
@@ -1400,107 +1400,107 @@ extern "C" void func_0021D1A0(float fill, float sx, float sy, char* self, char* 
     sc.y *= bar->scale;
     one.x = 1.0f;
     one.y = 1.0f;
-    func_001F10F8(self, &p, &a, &size, &one, e[0x20], e[0x21], x);
+    func_001F10F8(self, &drawPos, &a, &size, &one, hudDef[0x20], hudDef[0x21], x);
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
-    *w = (*w & ~0x3E0) | ((e[0x22] << 5) & 0x3E0);
+    *w = (*w & ~0x3E0) | ((hudDef[0x22] << 5) & 0x3E0);
     sHudVertex vtx[4];
     sHudVertex* verts = vtx;
     for (int i = 0; i < 4; i++) {
-        int r = (int)(col[0] * 128.0f);
-        int g = (int)(col[1] * 128.0f);
-        int b = (int)(col[2] * 128.0f);
+        int vtxAlpha = (int)(col[0] * 128.0f);
+        int vtxRed = (int)(col[1] * 128.0f);
+        int vtxGreen = (int)(col[2] * 128.0f);
         int a = (int)(col[3] * 128.0f);
-        vtx[i].r = r;
-        vtx[i].g = g;
-        vtx[i].b = b;
+        vtx[i].r = vtxAlpha;
+        vtx[i].g = vtxRed;
+        vtx[i].b = vtxGreen;
         vtx[i].a = a;
         vtx[i].q = 1.0f;
         vtx[i].pos.setZW(0.0f, 1.0f);
     }
     if (fill == 1.0f) {
         if (rect != 0) {
-            rect[0] = p.x;
-            rect[1] = p.y;
+            rect[0] = drawPos.x;
+            rect[1] = drawPos.y;
             rect[2] = size.x;
             rect[3] = size.y;
         }
-        p.y += size.y;
+        drawPos.y += size.y;
         {
-            sHudSprite* s = sprites[2];
-            setTex(s);
-            float h = sc.y * 23.0f;
-            setUV(vtx, s);
-            setPos(vtx, p.x, p.y - h, p.x + size.x, p.y);
+            sHudSprite* pieceSprite = sprites[2];
+            setTex(pieceSprite);
+            float pieceHeight = sc.y * 23.0f;
+            setUV(vtx, pieceSprite);
+            setPos(vtx, drawPos.x, drawPos.y - pieceHeight, drawPos.x + size.x, drawPos.y);
             drawQuad(verts);
-            p.y -= h;
+            drawPos.y -= pieceHeight;
         }
         {
-            sHudSprite* s = sprites[1];
-            setTex(s);
-            float h = sc.y * 23.0f;
-            setUV(vtx, s);
+            sHudSprite* pieceSprite = sprites[1];
+            setTex(pieceSprite);
+            float pieceHeight = sc.y * 23.0f;
+            setUV(vtx, pieceSprite);
             for (int i = 0; i < bar->count; i++) {
-                setPos(vtx, p.x, p.y - h, p.x + size.x, p.y);
+                setPos(vtx, drawPos.x, drawPos.y - pieceHeight, drawPos.x + size.x, drawPos.y);
                 drawQuad(verts);
-                p.y -= h;
+                drawPos.y -= pieceHeight;
             }
         }
         {
-            sHudSprite* s = sprites[0];
-            setTex(s);
-            setUV(vtx, s);
-            setPos(vtx, p.x, p.y - sc.y * 31.0f, p.x + size.x, p.y);
+            sHudSprite* pieceSprite = sprites[0];
+            setTex(pieceSprite);
+            setUV(vtx, pieceSprite);
+            setPos(vtx, drawPos.x, drawPos.y - sc.y * 31.0f, drawPos.x + size.x, drawPos.y);
             drawQuad(verts);
         }
     } else {
-        float bottom = p.y + size.y;
-        float top = p.y + size.y * (1.0f - fill);
+        float bottom = drawPos.y + size.y;
+        float top = drawPos.y + size.y * (1.0f - fill);
         if (rect != 0) {
-            rect[0] = p.x;
+            rect[0] = drawPos.x;
             rect[3] = bottom - top;
             rect[2] = size.x;
             rect[1] = top;
         }
         {
-            sHudSprite* s = sprites[2];
-            float h = sc.y * 23.0f;
-            float y = bottom - h;
-            float tv = s->v0;
+            sHudSprite* pieceSprite = sprites[2];
+            float pieceHeight = sc.y * 23.0f;
+            float y = bottom - pieceHeight;
+            float tv = pieceSprite->v0;
             int clipped = y <= top;
             if (clipped) {
-                tv = tv + (s->v1 - tv) * (top - y) / h;
+                tv = tv + (pieceSprite->v1 - tv) * (top - y) / pieceHeight;
                 y = top;
             }
-            setTex(s);
-            vtx[0].u = s->u0;
+            setTex(pieceSprite);
+            vtx[0].u = pieceSprite->u0;
             vtx[0].v = tv;
-            vtx[1].u = s->u1;
+            vtx[1].u = pieceSprite->u1;
             vtx[1].v = tv;
-            vtx[2].u = s->u0;
-            vtx[2].v = s->v1;
-            vtx[3].u = s->u1;
-            vtx[3].v = s->v1;
-            setPos(vtx, p.x, y, p.x + size.x, bottom);
+            vtx[2].u = pieceSprite->u0;
+            vtx[2].v = pieceSprite->v1;
+            vtx[3].u = pieceSprite->u1;
+            vtx[3].v = pieceSprite->v1;
+            setPos(vtx, drawPos.x, y, drawPos.x + size.x, bottom);
             drawQuad(verts);
             bottom = y;
             if (clipped)
                 return;
         }
         {
-            sHudSprite* s = sprites[1];
-            float h = sc.y * 23.0f;
-            setTex(s);
-            setUV(vtx, s);
+            sHudSprite* pieceSprite = sprites[1];
+            float pieceHeight = sc.y * 23.0f;
+            setTex(pieceSprite);
+            setUV(vtx, pieceSprite);
             for (int i = 0; i < bar->count; i++) {
-                float y = bottom - h;
+                float y = bottom - pieceHeight;
                 int last = y <= top;
                 if (last) {
-                    float tv = s->v0 + (s->v1 - s->v0) * (top - y) / h;
+                    float tv = pieceSprite->v0 + (pieceSprite->v1 - pieceSprite->v0) * (top - y) / pieceHeight;
                     vtx[0].v = tv;
                     vtx[1].v = tv;
                     y = top;
                 }
-                setPos(vtx, p.x, y, p.x + size.x, bottom);
+                setPos(vtx, drawPos.x, y, drawPos.x + size.x, bottom);
                 drawQuad(verts);
                 bottom = y;
                 if (last)
@@ -1508,25 +1508,25 @@ extern "C" void func_0021D1A0(float fill, float sx, float sy, char* self, char* 
             }
         }
         {
-            sHudSprite* s = sprites[0];
-            float h = sc.y * 31.0f;
-            float y = bottom - h;
-            float tv = s->v0;
+            sHudSprite* pieceSprite = sprites[0];
+            float pieceHeight = sc.y * 31.0f;
+            float y = bottom - pieceHeight;
+            float tv = pieceSprite->v0;
             int clipped = y <= top;
             if (clipped) {
-                tv = tv + (s->v1 - tv) * (top - y) / h;
+                tv = tv + (pieceSprite->v1 - tv) * (top - y) / pieceHeight;
                 y = top;
             }
-            setTex(s);
-            vtx[0].u = s->u0;
+            setTex(pieceSprite);
+            vtx[0].u = pieceSprite->u0;
             vtx[0].v = tv;
-            vtx[1].u = s->u1;
+            vtx[1].u = pieceSprite->u1;
             vtx[1].v = tv;
-            vtx[2].u = s->u0;
-            vtx[2].v = s->v1;
-            vtx[3].u = s->u1;
-            vtx[3].v = s->v1;
-            setPos(vtx, p.x, y, p.x + size.x, bottom);
+            vtx[2].u = pieceSprite->u0;
+            vtx[2].v = pieceSprite->v1;
+            vtx[3].u = pieceSprite->u1;
+            vtx[3].v = pieceSprite->v1;
+            setPos(vtx, drawPos.x, y, drawPos.x + size.x, bottom);
             drawQuad(verts);
         }
     }
@@ -1660,101 +1660,101 @@ extern "C" void func_0021D9A0(float fill, float alpha, char* self, char* elems, 
                               int icon, float* scale)
 {
     int alt = cBENewPlayerInterface_getControllerMapping(cBE_getInterface_Fv(cBE_getBE(), 1), ((sHudRoot_D9A0*)self)->players[idx].rider);
-    t2Vector a;
+    t2Vector elemPos;
     t2Vector sc;
     sVtxPos t;     // icon colour first, then reused for the bar size
     t2Vector pos;
-    t2Vector p;
+    t2Vector drawPos;
     t2Vector v;
     if (icon != 0) {
         char* ie = elems + 0x7BC;
-        func_001E91F8(ie, &a);
+        func_001E91F8(ie, &elemPos);
         func_001E9290(ie, &sc);
         func_001E91A8(ie, &t);
         if (alt == 0) {
-            pos = a;
+            pos = elemPos;
             func_001E95A0(self + 0x6AC, &pos, &sc, &t, elems[0x7DC], elems[0x7DD]);
         } else {
-            pos = a;
+            pos = elemPos;
             func_001E95A0(self + 0x7F8, &pos, &sc, &t, elems[0x7DC], elems[0x7DD]);
         }
     }
-    char* e = elems + 0x798;
-    func_001E91F8(e, &a);
-    func_001E9220(e, &t, 0);
-    func_001E9290(e, &sc);
+    char* meterDef = elems + 0x798;
+    func_001E91F8(meterDef, &elemPos);
+    func_001E9220(meterDef, &t, 0);
+    func_001E9290(meterDef, &sc);
     sc.x *= scale[0];
     sc.y *= scale[1];
     t.x *= sc.x;
     t.y *= sc.y;
     v.x = 1.0f;
     v.y = 1.0f;
-    func_001F10F8(self, &p, &a, &t, &v, elems[0x7B8], elems[0x7B9], idx);
+    func_001F10F8(self, &drawPos, &elemPos, &t, &v, elems[0x7B8], elems[0x7B9], idx);
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | ((elems[0x7BA] << 5) & 0x3E0);
     sHudVertex vtx[4];
     sHudVertex* verts = vtx;
     for (int i = 0; i < 4; i++) {
-        int r = (int)(alpha * 128.0f);
-        vtx[i].r = r;
+        int vtxAlpha = (int)(alpha * 128.0f);
+        vtx[i].r = vtxAlpha;
         vtx[i].g = 0x80;
         vtx[i].b = 0x80;
         vtx[i].a = 0x80;
         vtx[i].q = 1.0f;
     }
     {
-        sHudSprite* s = ((sHudRoot_D9A0*)self)->sprites[alt == 0 ? 18 : 19];
+        sHudSprite* pieceSprite = ((sHudRoot_D9A0*)self)->sprites[alt == 0 ? 18 : 19];
         v.x = sc.x * 20.0f;
         v.y = sc.y * 20.0f;
-        t2Vector c;
-        c.x = p.x;
-        c.y = p.y + (t.y - v.y) * 0.5f;
-        setTex_D9A0(s);
-        setUV(vtx, s);
-        vtx[0].pos = sVtxPos(c.x, c.y, 0.0f, 1.0f);
-        vtx[1].pos = sVtxPos(c.x + v.x, c.y, 0.0f, 1.0f);
-        vtx[2].pos = sVtxPos(c.x, c.y + v.y, 0.0f, 1.0f);
-        vtx[3].pos = sVtxPos(c.x + v.x, c.y + v.y, 0.0f, 1.0f);
+        t2Vector iconPos;
+        iconPos.x = drawPos.x;
+        iconPos.y = drawPos.y + (t.y - v.y) * 0.5f;
+        setTex_D9A0(pieceSprite);
+        setUV(vtx, pieceSprite);
+        vtx[0].pos = sVtxPos(iconPos.x, iconPos.y, 0.0f, 1.0f);
+        vtx[1].pos = sVtxPos(iconPos.x + v.x, iconPos.y, 0.0f, 1.0f);
+        vtx[2].pos = sVtxPos(iconPos.x, iconPos.y + v.y, 0.0f, 1.0f);
+        vtx[3].pos = sVtxPos(iconPos.x + v.x, iconPos.y + v.y, 0.0f, 1.0f);
         drawQuad_D9A0(verts);
     }
-    float d = v.x + sc.x * 3.0f;
-    p.x += d;
-    t.x -= d;
-    v = p;
+    float iconSpan = v.x + sc.x * 3.0f;
+    drawPos.x += iconSpan;
+    t.x -= iconSpan;
+    v = drawPos;
     float segW = sc.x * (bar->scale * 9.0f);
     {
-        sHudSprite* s = ((sHudRoot_D9A0*)self)->sprites[0x10];
-        setTex_D9A0(s);
-        setUV(vtx, s);
-        vtx[0].pos = sVtxPos(p.x, p.y, 0.0f, 1.0f);
-        vtx[1].pos = sVtxPos(p.x + segW, p.y, 0.0f, 1.0f);
-        vtx[2].pos = sVtxPos(p.x, p.y + t.y, 0.0f, 1.0f);
-        vtx[3].pos = sVtxPos(p.x + segW, p.y + t.y, 0.0f, 1.0f);
+        sHudSprite* pieceSprite = ((sHudRoot_D9A0*)self)->sprites[0x10];
+        setTex_D9A0(pieceSprite);
+        setUV(vtx, pieceSprite);
+        vtx[0].pos = sVtxPos(drawPos.x, drawPos.y, 0.0f, 1.0f);
+        vtx[1].pos = sVtxPos(drawPos.x + segW, drawPos.y, 0.0f, 1.0f);
+        vtx[2].pos = sVtxPos(drawPos.x, drawPos.y + t.y, 0.0f, 1.0f);
+        vtx[3].pos = sVtxPos(drawPos.x + segW, drawPos.y + t.y, 0.0f, 1.0f);
         drawQuad_D9A0(verts);
-        p.x += segW;
+        drawPos.x += segW;
     }
     if (bar->count > 0) {
-        sHudSprite* s = ((sHudRoot_D9A0*)self)->sprites[17];
-        setTex_D9A0(s);
+        sHudSprite* pieceSprite = ((sHudRoot_D9A0*)self)->sprites[17];
+        setTex_D9A0(pieceSprite);
         float midW = t.x - (segW + segW);
-        setUV(vtx, s);
-        vtx[0].pos = sVtxPos(p.x, p.y, 0.0f, 1.0f);
-        vtx[1].pos = sVtxPos(p.x + midW, p.y, 0.0f, 1.0f);
-        vtx[2].pos = sVtxPos(p.x, p.y + t.y, 0.0f, 1.0f);
-        vtx[3].pos = sVtxPos(p.x + midW, p.y + t.y, 0.0f, 1.0f);
+        setUV(vtx, pieceSprite);
+        vtx[0].pos = sVtxPos(drawPos.x, drawPos.y, 0.0f, 1.0f);
+        vtx[1].pos = sVtxPos(drawPos.x + midW, drawPos.y, 0.0f, 1.0f);
+        vtx[2].pos = sVtxPos(drawPos.x, drawPos.y + t.y, 0.0f, 1.0f);
+        vtx[3].pos = sVtxPos(drawPos.x + midW, drawPos.y + t.y, 0.0f, 1.0f);
         drawQuad_D9A0(verts);
-        p.x += midW;
+        drawPos.x += midW;
     }
     {
-        sHudSprite* s = ((sHudRoot_D9A0*)self)->sprites[0x10];
-        setTex_D9A0(s);
-        setUVFlip(vtx, s);
-        vtx[0].pos = sVtxPos(p.x, p.y, 0.0f, 1.0f);
-        vtx[1].pos = sVtxPos(p.x + segW, p.y, 0.0f, 1.0f);
-        vtx[2].pos = sVtxPos(p.x, p.y + t.y, 0.0f, 1.0f);
-        vtx[3].pos = sVtxPos(p.x + segW, p.y + t.y, 0.0f, 1.0f);
+        sHudSprite* pieceSprite = ((sHudRoot_D9A0*)self)->sprites[0x10];
+        setTex_D9A0(pieceSprite);
+        setUVFlip(vtx, pieceSprite);
+        vtx[0].pos = sVtxPos(drawPos.x, drawPos.y, 0.0f, 1.0f);
+        vtx[1].pos = sVtxPos(drawPos.x + segW, drawPos.y, 0.0f, 1.0f);
+        vtx[2].pos = sVtxPos(drawPos.x, drawPos.y + t.y, 0.0f, 1.0f);
+        vtx[3].pos = sVtxPos(drawPos.x + segW, drawPos.y + t.y, 0.0f, 1.0f);
         drawQuad_D9A0(verts);
-        p.x += segW;
+        drawPos.x += segW;
     }
     if (fill <= 0.0f)
         return;
@@ -1764,16 +1764,16 @@ extern "C" void func_0021D9A0(float fill, float alpha, char* self, char* elems, 
             D_004A5B28 = 3.0f;
             D_004A5B2C = 3.0f;
         }
-        t2Vector m;
-        m.x = D_004A5B28 * sc.x;
-        m.y = D_004A5B2C * sc.y;
+        t2Vector fillInset;
+        fillInset.x = D_004A5B28 * sc.x;
+        fillInset.y = D_004A5B2C * sc.y;
         t2Vector fs;
-        fs.x = (t.x - (m.x + m.x)) * fill;
-        fs.y = t.y - (m.y + m.y);
+        fs.x = (t.x - (fillInset.x + fillInset.x)) * fill;
+        fs.y = t.y - (fillInset.y + fillInset.y);
         sColour col = D_004C8668;
         col.r *= alpha;
-        v.x += m.x;
-        v.y += m.y;
+        v.x += fillInset.x;
+        v.y += fillInset.y;
         int* w2 = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
         *w2 = (*w2 & ~0x3E0) | (((elems[0x7BA] + 1) << 5) & 0x3E0);
         t2Vector one;
@@ -1855,58 +1855,58 @@ extern "C" void func_0021E1B0(char* self, char* obj, int* rider, int x)
     t2Vector scale;
     sColour col;
     t2Vector sc;
-    sFloat4 a;
+    sFloat4 elemPos;
     t2Vector size1;
     t2Vector size2;
     t2Vector dim;
-    t2Vector p;
-    sColour c2;
+    t2Vector drawPos;
+    sColour totalColour;
     t2Vector size3;
-    t2Vector tmp;
+    t2Vector suffixPos;
     t2Vector pa;
     t2Vector sa;
     t2Vector sb;
     scale.x = 1.0f;
     scale.y = 1.0f;
     float k = 1.0f;
-    char* r = *(char**)((char*)SSXApp->Game->AI + (rider[0] << 2) + 0x28);
-    func_001E91A8(D_00477F30 + *(int*)(r + 0xEC) * 36, &col);
-    float t = ((float*)rider)[0x12];
-    if (t >= 0.0f) {
-        if (*(int*)(r + 0xEC) == 0) {
-            k = D_00504FB8[(int)(t * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.199636310338974f * (1.0f - t * t) + k;
+    char* panelRider = *(char**)((char*)SSXApp->Game->AI + (rider[0] << 2) + 0x28);
+    func_001E91A8(D_00477F30 + *(int*)(panelRider + 0xEC) * 36, &col);
+    float rankAnimFrame = ((float*)rider)[0x12];
+    if (rankAnimFrame >= 0.0f) {
+        if (*(int*)(panelRider + 0xEC) == 0) {
+            k = D_00504FB8[(int)(rankAnimFrame * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.199636310338974f * (1.0f - rankAnimFrame * rankAnimFrame) + k;
         } else {
-            col.r = col.r * (t * 0.5f + 0.5f);
+            col.r = col.r * (rankAnimFrame * 0.5f + 0.5f);
         }
     }
     func_001E9290(obj + 0x360, &sc);
     int* tex = (int*)(self + 0x444);
-    func_001E91F8(obj + 0x360, &a);
+    func_001E91F8(obj + 0x360, &elemPos);
     func_001E9220(D_00477F30 + 0xD8, &size1, 0);
     size1.x *= sc.x;
     size1.y *= sc.y;
-    int off = *(int*)(r + 0xEC) << 2;
-    func_001E9220(D_00477F30 + *(int*)(r + 0xEC) * 36, &size2, *(int*)((char*)tex + off));
+    int off = *(int*)(panelRider + 0xEC) << 2;
+    func_001E9220(D_00477F30 + *(int*)(panelRider + 0xEC) * 36, &size2, *(int*)((char*)tex + off));
     size2.x *= sc.x;
     size2.y *= sc.y;
     dim.x = size2.x + size1.x;
     dim.y = size2.y;
-    func_001F10F8(self, &p, &a, &dim, &scale, obj[0x380], obj[0x381], x);
-    p.x += size2.x;
-    p.y += size1.y;
+    func_001F10F8(self, &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
+    drawPos.x += size2.x;
+    drawPos.y += size1.y;
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | ((obj[0x382] << 5) & 0x3E0);
-    func_001E91A8(D_00477F30 + 0xFC, &c2);
+    func_001E91A8(D_00477F30 + 0xFC, &totalColour);
     func_001E9220(D_00477F30 + 0xFC, &size3, 0);
     size3.x *= sc.x;
     size3.y *= sc.y;
-    func_001F1190(self, *(int*)(self + 0x46C), &p, &size3, &scale, &c2);
-    p.x += size3.x;
-    func_001E91A8(D_00477F30 + 0x120, &c2);
+    func_001F1190(self, *(int*)(self + 0x46C), &drawPos, &size3, &scale, &totalColour);
+    drawPos.x += size3.x;
+    func_001E91A8(D_00477F30 + 0x120, &totalColour);
     func_001E9220(D_00477F30 + 0x120, &size3, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int off3 = (D_00535BF8[0] - 1) << 2;
-    func_001F1190(self, *(int*)((char*)tex + off3), &p, &size3, &sc, &c2);
+    func_001F1190(self, *(int*)((char*)tex + off3), &drawPos, &size3, &sc, &totalColour);
     if (k != 1.0f) {
         size2.x *= k;
         size2.y *= k;
@@ -1915,24 +1915,24 @@ extern "C" void func_0021E1B0(char* self, char* obj, int* rider, int x)
         dim.x *= k;
         dim.y *= k;
     }
-    func_001F10F8(self, &p, &a, &dim, &scale, obj[0x380], obj[0x381], x);
+    func_001F10F8(self, &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
     w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | ((obj[0x382] << 5) & 0x3E0);
-    int off4 = *(int*)(r + 0xEC) << 2;
-    func_001F1190(self, *(int*)((char*)tex + off4), &p, &size2, &scale, &col);
-    signed char n = *(int*)(r + 0xEC) < 4 ? *(int*)(r + 0xEC) : 3;
-    tmp = p;
+    int off4 = *(int*)(panelRider + 0xEC) << 2;
+    func_001F1190(self, *(int*)((char*)tex + off4), &drawPos, &size2, &scale, &col);
+    signed char n = *(int*)(panelRider + 0xEC) < 4 ? *(int*)(panelRider + 0xEC) : 3;
+    suffixPos = drawPos;
     int off5 = n * 4;
     int tx = *(int*)(self + off5 + 0x45C);
-    tmp.x += size2.x;
-    func_001F1190(self, tx, &tmp, &size1, &scale, &col);
+    suffixPos.x += size2.x;
+    func_001F1190(self, tx, &suffixPos, &size1, &scale, &col);
     if (((float*)rider)[0x13] >= 0.0f) {
         w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
         *w = (*w & ~0x3E0) | (((obj[0x382] - 1) << 5) & 0x3E0);
-        pa = p;
+        pa = drawPos;
         sa = size2;
         func_0021E7E0_E1B0(self, &col, &pa, &sa, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
-        pa = tmp;
+        pa = suffixPos;
         sb = size1;
         func_0021E7E0_E1B0(self, &col, &pa, &sb, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
     }
@@ -1950,7 +1950,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021E750);
  * (@p x - @p y * @p z), a negative one leaves @p x as the left edge. func_001F10F8 uses it for x, and
  * cOVStateHUD1P_onRender2D calls it directly.
  *
- * @param unused  the HUD state (this); not read
+ * @param hudState  the HUD state (this); not read
  * @param align  horizontal alignment (the element's alignX; On Tour pivotX)
  * @param flags  reflect flags: bit 0 mirrors, bit 1 keeps the alignment when mirroring
  * @param x  the element's x position
@@ -1958,7 +1958,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021E750);
  * @param z  the element's x scale
  * @return the left edge
  */
-extern "C" float func_0021E750(int unused, int align, int flags, float x, float y, float z) {
+extern "C" float func_0021E750(int hudState, int align, int flags, float x, float y, float z) {
     int effAlign = align;
     if (flags & 1) {
         x = 640.0f - x;
@@ -1983,14 +1983,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021E7A8);
  * - @p width * @p scale), a negative one leaves @p pos as the top edge. Unlike func_0021E750 there is no reflection.
  * func_001F10F8 uses it for y, and cOVStateHUD1P_onRender2D calls it directly.
  *
- * @param arg0  the HUD state (this); not read
+ * @param hudState  the HUD state (this); not read
  * @param mode  vertical alignment (the element's alignY; On Tour pivotY)
  * @param pos  the element's y position
  * @param width  the element's height, despite the name
  * @param scale  the element's y scale
  * @return the top edge
  */
-extern "C" float func_0021E7A8(int arg0, int mode, float pos, float width, float scale) {
+extern "C" float func_0021E7A8(int hudState, int mode, float pos, float width, float scale) {
     if (mode == 0) {
         pos -= scale * width * 0.5f;
     } else if (mode > 0) {
@@ -2252,19 +2252,19 @@ extern "C" void func_0021ED48(char* self, int elems, char* rider, int mode, int 
     V2_ED48 one;
     Tab_ED48 tab;
     Str_ED48 str;
-    V2_ED48 a;
+    V2_ED48 elemPos;
     V2_ED48 size;
-    V2_ED48 p;
+    V2_ED48 drawPos;
     Col_E7E0 col;
-    signed char e;
+    signed char defIndex;
     one.x = 1.0f;
     one.y = 1.0f;
     tab = D_0046ED40;
     str = D_004A22E8[0];
     if (mode == 0) {
-        e = idx * 2 + 30;
+        defIndex = idx * 2 + 30;
     } else {
-        e = tab.e[idx].a;
+        defIndex = tab.e[idx].a;
     }
     col.r = 0.4000000059604645f;
     col.g = 1.0f;
@@ -2272,42 +2272,42 @@ extern "C" void func_0021ED48(char* self, int elems, char* rider, int mode, int 
     col.a = 1.0f;
     Col_E7E0* cp = &col;
     if (kind == 2) {
-        func_001E91A8((char*)(e * 0x24 + elems), cp);
+        func_001E91A8((char*)(defIndex * 0x24 + elems), cp);
     }
     str.c[0] = D_004A21C8[idx];
-    char* E = (char*)(e * 0x24 + elems);
-    func_001E91F8(E, &a);
-    func_001E9220(E, &size, 0);
-    func_001F10F8(self, &p, &a, &size, scale, E[0x20], E[0x21], mode);
+    char* letterDef = (char*)(defIndex * 0x24 + elems);
+    func_001E91F8(letterDef, &elemPos);
+    func_001E9220(letterDef, &size, 0);
+    func_001F10F8(self, &drawPos, &elemPos, &size, scale, letterDef[0x20], letterDef[0x21], mode);
     scale[0] = scale[0] * 0.0555555559694767f * size.x;
     scale[1] = scale[1] * 0.0555555559694767f * size.y;
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
-    *w = (*w & ~0x3E0) | (((E[0x22] + layer) << 5) & 0x3E0);
+    *w = (*w & ~0x3E0) | (((letterDef[0x22] + layer) << 5) & 0x3E0);
     *(Col_E7E0*)(*(char**)(self + 0x42C) + 0x40) = col;
-    char* t = *(char**)(self + 0x42C);
-    *(float*)(t + 0x38) = *(float*)(t + 0x30) * scale[0];
-    *(float*)(t + 0x3C) = *(float*)(t + 0x34) * scale[1];
-    cFont_text(*(char**)(self + 0x42C), p.x, p.y, str.c);
-    char* t2 = *(char**)(self + 0x42C);
-    *(float*)(t2 + 0x38) = *(float*)(t2 + 0x30) * one.x;
-    *(float*)(t2 + 0x3C) = *(float*)(t2 + 0x34) * one.y;
+    char* hudFont = *(char**)(self + 0x42C);
+    *(float*)(hudFont + 0x38) = *(float*)(hudFont + 0x30) * scale[0];
+    *(float*)(hudFont + 0x3C) = *(float*)(hudFont + 0x34) * scale[1];
+    cFont_text(*(char**)(self + 0x42C), drawPos.x, drawPos.y, str.c);
+    char* hudFont2 = *(char**)(self + 0x42C);
+    *(float*)(hudFont2 + 0x38) = *(float*)(hudFont2 + 0x30) * one.x;
+    *(float*)(hudFont2 + 0x3C) = *(float*)(hudFont2 + 0x34) * one.y;
     if (kind != 0) {
-        char* E2 = (char*)(elems + (e + 1) * 0x24);
-        func_001E91F8(E2, &a);
-        func_001E9220(E2, &size, 0);
+        char* bkgdDef = (char*)(elems + (defIndex + 1) * 0x24);
+        func_001E91F8(bkgdDef, &elemPos);
+        func_001E9220(bkgdDef, &size, 0);
         size.x *= sc2->x;
         size.y *= sc2->y;
-        func_001F10F8(self, &p, &a, &size, &one, E[0x20], E[0x21], mode);
-        func_001E91A8(E2, cp);
+        func_001F10F8(self, &drawPos, &elemPos, &size, &one, letterDef[0x20], letterDef[0x21], mode);
+        func_001E91A8(bkgdDef, cp);
         *(Col_E7E0*)(*(char**)(self + 0x42C) + 0x40) = col;
         w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
-        *w = (*w & ~0x3E0) | (((E2[0x22] + layer) << 5) & 0x3E0);
-        func_001F1190(self, *(int*)(self + 0x494), &p, &size, &one, cp);
+        *w = (*w & ~0x3E0) | (((bkgdDef[0x22] + layer) << 5) & 0x3E0);
+        func_001F1190(self, *(int*)(self + 0x494), &drawPos, &size, &one, cp);
         if (kind == 2 && *(float*)(rider + 0x64) >= 0.0f) {
             int under = layer - 1;
             w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
-            *w = (*w & ~0x3E0) | (((E2[0x22] + under) << 5) & 0x3E0);
-            draw_ED48(self, (Col_E7E0*)(rider + 0x54), &p, &size, *(float*)(rider + 0x64), 3.4000000953674316f, 3.4000000953674316f, 0.2603548765182495f, 0.49998536705970764f);
+            *w = (*w & ~0x3E0) | (((bkgdDef[0x22] + under) << 5) & 0x3E0);
+            draw_ED48(self, (Col_E7E0*)(rider + 0x54), &drawPos, &size, *(float*)(rider + 0x64), 3.4000000953674316f, 3.4000000953674316f, 0.2603548765182495f, 0.49998536705970764f);
         }
     }
 }
@@ -2349,8 +2349,8 @@ extern "C" void func_001F1190(void*, int, void*, void*, void*, void*);
 extern "C" void func_0021F338(char* self, char* obj, int n, int x, V2_F338* pos, V2_F338* scale, float alpha) {
     if (n > 0) {
         V4_F338 cols[5];
-        V4_F338 a;
-        V2_F338 p;
+        V4_F338 elemPos;
+        V2_F338 starPos;
         V2_F338 size;
         V2_F338 sc;
         V2_F338 dim;
@@ -2362,7 +2362,7 @@ extern "C" void func_0021F338(char* self, char* obj, int n, int x, V2_F338* pos,
         cols[2] = D_004C85A8;
         cols[3] = D_004C85C8;
         cols[4] = D_004C85E8;
-        func_001E91F8(obj + 0x240, &a);
+        func_001E91F8(obj + 0x240, &elemPos);
         func_001E9220(obj + 0x240, &size, *(int*)(self + 0x4A0));
         func_001E9290(obj + 0x240, &sc);
         if (scale) {
@@ -2372,11 +2372,11 @@ extern "C" void func_0021F338(char* self, char* obj, int n, int x, V2_F338* pos,
         if (pos == 0) {
             dim.x = size.x * n + (n - 1) * 2.0f;
             dim.y = size.y;
-            func_001F10F8(self, &p, &a, &dim, &sc, obj[0x260], obj[0x261], x);
+            func_001F10F8(self, &starPos, &elemPos, &dim, &sc, obj[0x260], obj[0x261], x);
         } else {
-            p = *pos;
-            p.x -= (size.x * n + (n - 1) * 2.0f) * sc.x * 0.5f;
-            p.y -= size.y * sc.y * 0.5f;
+            starPos = *pos;
+            starPos.x -= (size.x * n + (n - 1) * 2.0f) * sc.x * 0.5f;
+            starPos.y -= size.y * sc.y * 0.5f;
         }
         int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
         *w = (*w & ~0x3E0) | ((obj[0x262] << 5) & 0x3E0);
@@ -2384,8 +2384,8 @@ extern "C" void func_0021F338(char* self, char* obj, int n, int x, V2_F338* pos,
         col = cols[n - 1];
         col.x *= alpha;
         for (i = 0; i < n; i++) {
-            func_001F1190(self, *(int*)(self + 0x4A0), &p, &size, &sc, &col);
-            p.x += step;
+            func_001F1190(self, *(int*)(self + 0x4A0), &starPos, &size, &sc, &col);
+            starPos.x += step;
         }
     }
 }
@@ -2442,38 +2442,38 @@ extern "C" void func_00392908(void*, float, float, char*);
  */
 extern "C" void func_0021F660(char* self, int elems, int* rider, int x, int flag) {
     V2_F660 scale;
-    V2_F660 p;
-    V4_F660 a;
+    V2_F660 drawPos;
+    V4_F660 elemPos;
     V2_F660 size;
     V2_F660 sc;
-    V4_F660 c;
+    V4_F660 spriteColour;
     char buf[64];
     V4_F660 col;
     int idx = 66;
-    char* r = *(char**)((char*)SSXApp->Game->AI + (*rider << 2) + 0x28);
+    char* panelRider = *(char**)((char*)SSXApp->Game->AI + (*rider << 2) + 0x28);
     int sz = *(int*)(self + 0x4B4);
     if (flag) {
         sz = *(int*)(self + 0x49C);
         idx = 27;
     }
-    char* e = (char*)(idx * 0x24 + elems); // PORT: pointer passed as int
+    char* msgDef = (char*)(idx * 0x24 + elems); // PORT: pointer passed as int
     scale.x = 1.0f;
     scale.y = 1.0f;
-    func_001E91F8(e, &a);
-    func_001E9220(e, &size, sz);
-    func_001E9290(e, &sc);
+    func_001E91F8(msgDef, &elemPos);
+    func_001E9220(msgDef, &size, sz);
+    func_001E9290(msgDef, &sc);
     size.x *= sc.x;
     size.y *= sc.y;
-    func_001F10F8(self, &p, &a, &size, &scale, e[0x20], e[0x21], x);
-    func_001E91A8(e, &c);
+    func_001F10F8(self, &drawPos, &elemPos, &size, &scale, msgDef[0x20], msgDef[0x21], x);
+    func_001E91A8(msgDef, &spriteColour);
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
-    *w = (*w & ~0x3E0) | ((e[0x22] << 5) & 0x3E0);
-    func_001F1190(self, sz, &p, &size, &scale, &c);
+    *w = (*w & ~0x3E0) | ((msgDef[0x22] << 5) & 0x3E0);
+    func_001F1190(self, sz, &drawPos, &size, &scale, &spriteColour);
     if (flag == 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         signed char mode = D_00535C10[0];
-        Obj_F660* o = (Obj_F660*)(r + 0x6C0);
-        int k = o->v07();
+        Obj_F660* being = (Obj_F660*)(panelRider + 0x6C0);
+        int k = being->v07();
         int val = D_00536640[k];
         if (mode == 0 || mode == 5) {
             int t = (int)((float)val * 0.01666666753590107f);
@@ -2483,15 +2483,15 @@ extern "C" void func_0021F660(char* self, int elems, int* rider, int x, int flag
             sprintf(buf, D_004A2138, val + rider[0x7C / 4]);
         }
         char* t = *(char**)(self + 0x42C);
-        p.x += size.x * 0.5f;
-        p.y += size.y;
+        drawPos.x += size.x * 0.5f;
+        drawPos.y += size.y;
         sc.x *= 1.907578468322754f;
         sc.y *= 1.907578468322754f;
         *(float*)(t + 0x38) = *(float*)(t + 0x30) * sc.x;
         *(float*)(t + 0x3C) = *(float*)(t + 0x34) * sc.y;
         col = D_004C8808;
         *(V4_F660*)(*(char**)(self + 0x42C) + 0x40) = col;
-        func_00392908(*(char**)(self + 0x42C), p.x, p.y, buf);
+        func_00392908(*(char**)(self + 0x42C), drawPos.x, drawPos.y, buf);
         t = *(char**)(self + 0x42C);
         *(float*)(t + 0x38) = *(float*)(t + 0x30) * scale.x;
         *(float*)(t + 0x3C) = *(float*)(t + 0x34) * scale.y;
@@ -2533,14 +2533,14 @@ extern "C" void cFont_text(void*, float, float, char*);
 
 /**
  * Draws the collectibles counter: the "collectibles_icon" texture and "collected/total" for the current location,
- * pulsing while @p t is below 0.44.
+ * pulsing while @p animFrame is below 0.44.
  *
  * Draws only while cSectionMan_isActive says the SectionMan's location (mBELocationID, +0x1BC) is loaded and active.
- * With @p t < 0.44 the icon and the text scale by 1 + 0.2 * sin(4 pi k) * (1 - k^2), k being @p t / 0.44 (sine table
+ * With @p animFrame < 0.44 the icon and the text scale by 1 + 0.2 * sin(4 pi k) * (1 - k^2), k being @p animFrame / 0.44 (sine table
  * D_00504FB8). Element 57 of @p obj (+0x804) gives position, size (fallback: the texture icons[5], +0x4A8) and scale;
  * func_001F10F8 places the icon with the element's alignment and @p x, and it is drawn white at the element's size
  * (times the pulse) on the element's layer; the element's scale applies to the text only. The text goes right of the
- * icon, centred on it vertically, in the HUD font (+0x42C), coloured D_004C8648 while @p t <= 0.44 and in the element's
+ * icon, centred on it vertically, in the HUD font (+0x42C), coloured D_004C8648 while @p animFrame <= 0.44 and in the element's
  * colour after. It prints "%d/%d" with func_00153520 (the rider's collected count for the location, from its profile)
  * and func_00153350 (the location's total) on back-end interface 10, the rider given by its AI index (cBeing interface
  * at +0x6C0, virtual getAIIndex). The font Scale is then restored to BaseScale.
@@ -2548,46 +2548,46 @@ extern "C" void cFont_text(void*, float, float, char*);
  * @param obj  the HUD element table (0x24-byte tHUDDef records)
  * @param rider  the rider (cRider; its cBeing interface at +0x6C0 gives the AI index)
  * @param x  reflect flags for func_001F10F8
- * @param t  the counter's animation time; below 0.44 it pulses
+ * @param animFrame  the counter's animation time; below 0.44 it pulses
  */
-extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float t) {
+extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float animFrame) {
     V2_F9B0 scale;
-    V2_F9B0 p;
-    V4_F9B0 a;
+    V2_F9B0 drawPos;
+    V4_F9B0 elemPos;
     V2_F9B0 size;
     V2_F9B0 sc;
     V4_F9B0 col;
     char buf[64];
-    char* m = (char*)SSXApp->Game->SectionMan;
-    int id = *(int*)(m + 0x1BC);
-    if (cSectionMan_isActive(m, id)) {
-        float s = 1.0f;
+    char* sectionMan = (char*)SSXApp->Game->SectionMan;
+    int id = *(int*)(sectionMan + 0x1BC);
+    if (cSectionMan_isActive(sectionMan, id)) {
+        float pulseScale = 1.0f;
         scale.x = 1.0f;
         scale.y = 1.0f;
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
-        if (t < 0.4399542808532715f) {
-            float u = t * 2.272963523864746f;
-            s = D_00504FB8[(int)(u * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.19996199011802673f * (1.0f - u * u) + 1.0f;
+        if (animFrame < 0.4399542808532715f) {
+            float pulsePhase = animFrame * 2.272963523864746f;
+            pulseScale = D_00504FB8[(int)(pulsePhase * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.19996199011802673f * (1.0f - pulsePhase * pulsePhase) + 1.0f;
         }
-        func_001E91F8(obj + 0x804, &a);
+        func_001E91F8(obj + 0x804, &elemPos);
         func_001E9220(obj + 0x804, &size, *(int*)(self + 0x4A8));
         func_001E9290(obj + 0x804, &sc);
-        size.x *= s;
-        size.y *= s;
-        sc.x *= s;
-        sc.y *= s;
-        func_001F10F8(self, &p, &a, &size, &scale, obj[0x824], obj[0x825], x);
+        size.x *= pulseScale;
+        size.y *= pulseScale;
+        sc.x *= pulseScale;
+        sc.y *= pulseScale;
+        func_001F10F8(self, &drawPos, &elemPos, &size, &scale, obj[0x824], obj[0x825], x);
         int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
         *w = (*w & ~0x3E0) | ((obj[0x826] << 5) & 0x3E0);
         col.x = 1.0f;
         col.y = 1.0f;
         col.z = 1.0f;
         col.w = 1.0f;
-        func_001F1190(self, *(int*)(self + 0x4A8), &p, &size, &scale, &col);
+        func_001F1190(self, *(int*)(self + 0x4A8), &drawPos, &size, &scale, &col);
         char* tx = *(char**)(self + 0x42C);
-        p.x += size.x;
-        p.y += (size.y - (float)*(int*)(tx + 0x14) * *(float*)(tx + 0x34) * sc.y) * 0.5f;
-        if (t > 0.4399542808532715f) {
+        drawPos.x += size.x;
+        drawPos.y += (size.y - (float)*(int*)(tx + 0x14) * *(float*)(tx + 0x34) * sc.y) * 0.5f;
+        if (animFrame > 0.4399542808532715f) {
             func_001E91A8(obj + 0x804, &col);
         } else {
             col = D_004C8648;
@@ -2596,9 +2596,9 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float t
         *(float*)(tx2 + 0x38) = *(float*)(tx2 + 0x30) * sc.x;
         *(float*)(tx2 + 0x3C) = *(float*)(tx2 + 0x34) * sc.y;
         *(V4_F9B0*)(*(char**)(self + 0x42C) + 0x40) = col;
-        Obj_F9B0* o = (Obj_F9B0*)(rider + 0x6C0);
-        sprintf(buf, str_pct_d_pct_d_b, func_00153520(iface, o->v07(), id), func_00153350(iface, id));
-        cFont_text(*(char**)(self + 0x42C), p.x, p.y, buf);
+        Obj_F9B0* being = (Obj_F9B0*)(rider + 0x6C0);
+        sprintf(buf, str_pct_d_pct_d_b, func_00153520(iface, being->v07(), id), func_00153350(iface, id));
+        cFont_text(*(char**)(self + 0x42C), drawPos.x, drawPos.y, buf);
         tx = *(char**)(self + 0x42C);
         *(float*)(tx + 0x38) = *(float*)(tx + 0x30) * scale.x;
         *(float*)(tx + 0x3C) = *(float*)(tx + 0x34) * scale.y;
@@ -2661,12 +2661,12 @@ static inline float* scaleP() { return &D_004A5B38; }
  * @param obj  the HUD element table (0x24-byte tHUDDef records)
  */
 extern "C" void func_0021FD38(char* self, char* obj) {
-    t2Vector q;
+    t2Vector circleCentre;
     t2Vector half;
     sColour col;
-    sFloat4 a;
+    sFloat4 elemPos;
     t2Vector size;
-    t2Vector p2;
+    t2Vector circlePos;
     if (D_004A4E9C == 0) {
         D_004A4E9C = 1;
         D_004A5B3C = D_004A5B38 = 1.0f;
@@ -2680,15 +2680,15 @@ extern "C" void func_0021FD38(char* self, char* obj) {
         D_004A5B44 = D_004A5B40 = 34.0f;
     }
     Scale2(half, D_004A5B40, D_004A5B44, 0.5f);
-    q.x = D_004A5B30 + half.x;
-    q.y = D_004A5B34 + half.y;
-    int c = obj[0x9D6];
-    func_001E91F8(obj + 0x9B4, &a);
+    circleCentre.x = D_004A5B30 + half.x;
+    circleCentre.y = D_004A5B34 + half.y;
+    int drawLayer = obj[0x9D6];
+    func_001E91F8(obj + 0x9B4, &elemPos);
     func_001E9220(obj + 0x9B4, &size, *(int*)(self + 0x4CC));
-    func_001F10F8(self, &half, &a, &size, scaleP(), obj[0x9D4], obj[0x9D5], 0);
+    func_001F10F8(self, &half, &elemPos, &size, scaleP(), obj[0x9D4], obj[0x9D5], 0);
     func_001E91A8(obj + 0x9B4, &col);
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
-    *w = (*w & ~0x3E0) | ((c << 5) & 0x3E0);
+    *w = (*w & ~0x3E0) | ((drawLayer << 5) & 0x3E0);
     func_001F1190(self, *(int*)(self + 0x4CC), &half, &size, scaleP(), &col);
     void* be = cBE_getInterface_Fv(cBE_getBE(), 10);
     if (cBEMissionInterface_isMissionCompleted(be, *(int*)(self + 0x18C)) == 0) {
@@ -2696,24 +2696,24 @@ extern "C" void func_0021FD38(char* self, char* obj) {
     } else {
         col = D_004C8828;
     }
-    p2.x = half.x + D_004A5B30;
-    p2.y = half.x + D_004A5B34;
+    circlePos.x = half.x + D_004A5B30;
+    circlePos.y = half.x + D_004A5B34;
     w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
-    *w = (*w & ~0x3E0) | (((++c) << 5) & 0x3E0);
-    func_001F1190(self, *(int*)(self + 0x4D0), &p2, &D_004A5B40, scaleP(), &col);
-    float f = (float)*(int*)(*(char**)(self + 0x42C) + 0x14) * *(float*)(*(char**)(self + 0x42C) + 0x34) * 0.38805678486824036f;
+    *w = (*w & ~0x3E0) | (((++drawLayer) << 5) & 0x3E0);
+    func_001F1190(self, *(int*)(self + 0x4D0), &circlePos, &D_004A5B40, scaleP(), &col);
+    float halfTextHeight = (float)*(int*)(*(char**)(self + 0x42C) + 0x14) * *(float*)(*(char**)(self + 0x42C) + 0x34) * 0.38805678486824036f;
     int n = func_00154240(be, *(int*)(self + 0x18C));
     col = D_004C8868;
     *(sColour*)(*(char**)(self + 0x42C) + 0x40) = col;
-    char* t = *(char**)(self + 0x42C);
-    *(float*)(t + 0x38) = *(float*)(t + 0x30) * 0.7761135697364807f;
-    *(float*)(t + 0x3C) = *(float*)(t + 0x34) * 0.7761135697364807f;
+    char* hudFont = *(char**)(self + 0x42C);
+    *(float*)(hudFont + 0x38) = *(float*)(hudFont + 0x30) * 0.7761135697364807f;
+    *(float*)(hudFont + 0x3C) = *(float*)(hudFont + 0x34) * 0.7761135697364807f;
     w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
-    *w = (*w & ~0x3E0) | (((c += 2) << 5) & 0x3E0);
-    PrintAt_FD38(*(char**)(self + 0x42C), q.x, q.y, half, f, n + 1);
-    char* t2 = *(char**)(self + 0x42C);
-    *(float*)(t2 + 0x38) = *(float*)(t2 + 0x30);
-    *(float*)(t2 + 0x3C) = *(float*)(t2 + 0x34);
+    *w = (*w & ~0x3E0) | (((drawLayer += 2) << 5) & 0x3E0);
+    PrintAt_FD38(*(char**)(self + 0x42C), circleCentre.x, circleCentre.y, half, halfTextHeight, n + 1);
+    char* hudFont2 = *(char**)(self + 0x42C);
+    *(float*)(hudFont2 + 0x38) = *(float*)(hudFont2 + 0x30);
+    *(float*)(hudFont2 + 0x3C) = *(float*)(hudFont2 + 0x34);
 }
 #endif
 
@@ -2858,11 +2858,11 @@ static inline void TextSize_00C0(sFont_00C0* f, const char* str, float* rect, t2
 extern "C" void func_002200C0(char* self, char* obj, char* rider, int x)
 {
     sSettings_00C0 settings;
-    t2Vector a;
+    t2Vector elemPos;
     sV2_00C0 sc;
     sColour col;
     float rect[4];
-    t2Vector p;
+    t2Vector drawPos;
     t2Vector size;
     cBE_getInterface_Fv(cBE_getBE(), 4);
     settings = D_00535610_00C0;
@@ -2877,15 +2877,15 @@ extern "C" void func_002200C0(char* self, char* obj, char* rider, int x)
         speed *= 0.6209999918937683f;
         units = mph;
     }
-    char* e = obj + 0x384;
-    func_001E91F8(e, &a);
-    func_001E9290(e, &sc);
-    func_001E91A8(e, &col);
+    char* speedDef = obj + 0x384;
+    func_001E91F8(speedDef, &elemPos);
+    func_001E9290(speedDef, &sc);
+    func_001E91A8(speedDef, &col);
     font_00C0(self)->colour = col;
     SetScale_00C0(font_00C0(self), sc);
     TextSize_00C0(font_00C0(self), units, rect, size);
-    func_001F10F8_00C0(self, &p, &a, &size, sV2_00C0(1.0f, 1.0f), obj[0x3A4], obj[0x3A5], x);
-    cFont_text(font_00C0(self), p.x, p.y, units);
+    func_001F10F8_00C0(self, &drawPos, &elemPos, &size, sV2_00C0(1.0f, 1.0f), obj[0x3A4], obj[0x3A5], x);
+    cFont_text(font_00C0(self), drawPos.x, drawPos.y, units);
     char buf[8];
     sprintf(buf, D_004A2138, (int)(speed + 0.5f));
     if (strlen(buf) > 2)
@@ -2893,9 +2893,9 @@ extern "C" void func_002200C0(char* self, char* obj, char* rider, int x)
     else
         ScaleV2_00C0(sc, 1.3623675107955933f);
     SetScale_00C0(font_00C0(self), sc);
-    p.x += size.x * 0.5f;
-    p.y -= (float)font_00C0(self)->lineHeight * font_00C0(self)->scaleY * sc.y * 0.5f + 14.003287315368652f;
-    func_00392908(font_00C0(self), p.x, p.y, buf);
+    drawPos.x += size.x * 0.5f;
+    drawPos.y -= (float)font_00C0(self)->lineHeight * font_00C0(self)->scaleY * sc.y * 0.5f + 14.003287315368652f;
+    func_00392908(font_00C0(self), drawPos.x, drawPos.y, buf);
     SetScale_00C0(font_00C0(self), sV2_00C0(1.0f, 1.0f));
 }
 #endif
@@ -3161,7 +3161,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVState_ENTERLODGE for engine @p arg1 and overlay id @p arg2; installs cOVState_ENTERLODGE_vtbl.
+ * Constructs a cOVState_ENTERLODGE for engine @p engine and overlay id @p overlayId; installs cOVState_ENTERLODGE_vtbl.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -3169,22 +3169,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 31 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00220EE0(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_0EE0(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVState_ENTERLODGE_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00220EE0(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_0EE0(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVState_ENTERLODGE_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -3204,20 +3204,20 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Unlike func_00220FA8
  * it does not call func_001F7548. Out-of-line copy with no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_00220F48(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVState_BIGCHALLENGE_START_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00220F48(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVState_BIGCHALLENGE_START_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -3232,7 +3232,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVState_BIGCHALLENGE_START for engine @p arg1 and overlay id @p arg2; installs
+ * Constructs a cOVState_BIGCHALLENGE_START for engine @p engine and overlay id @p overlayId; installs
  * cOVState_BIGCHALLENGE_START_vtbl, then runs func_001F7548 on it.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -3241,23 +3241,23 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 29 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00220FA8(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_0FA8(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVState_BIGCHALLENGE_START_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    func_001F7548(arg0);
-    return arg0;
+extern "C" void *func_00220FA8(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_0FA8(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVState_BIGCHALLENGE_START_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    func_001F7548(ovState);
+    return ovState;
 }
 #endif
 
@@ -3297,20 +3297,20 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Unlike func_002210A0
  * it does not call func_001F7738. Out-of-line copy with no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_00221040(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_004735B0;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00221040(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_004735B0;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -3325,7 +3325,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the big-challenge overlay with vtable D_004735B0 for engine @p arg1 and overlay id @p arg2, then runs
+ * Constructs the big-challenge overlay with vtable D_004735B0 for engine @p engine and overlay id @p overlayId, then runs
  * func_001F7738 on it.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -3335,23 +3335,23 @@ extern unsigned short D_004A2088[];
  * the same steps; this out-of-line copy has no callers. func_001F7738 lives next to func_001F7548, which the
  * cOVState_BIGCHALLENGE_START constructor calls the same way.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_002210A0(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_10A0(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_004735B0;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    func_001F7738(arg0);
-    return arg0;
+extern "C" void *func_002210A0(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_10A0(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_004735B0;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    func_001F7738(ovState);
+    return ovState;
 }
 #endif
 
@@ -3369,11 +3369,11 @@ extern char D_00474E08[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_004735B0.
  *
- * @param arg0  the object being destroyed
+ * @param ovState  the object being destroyed
  */
-extern "C" void func_00221110(void *arg0) {
-    *(char **)((char*)arg0 + 8) = D_00474E08;
-    func_0039E390_a(arg0);
+extern "C" void func_00221110(void *ovState) {
+    *(char **)((char*)ovState + 8) = D_00474E08;
+    func_0039E390_a(ovState);
 }
 #endif
 
@@ -3409,7 +3409,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVState_TOPTIMES for engine @p arg1 and overlay id @p arg2; installs cOVState_TOPTIMES_vtbl.
+ * Constructs a cOVState_TOPTIMES for engine @p engine and overlay id @p overlayId; installs cOVState_TOPTIMES_vtbl.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -3417,22 +3417,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 15 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221160(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1160(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVState_TOPTIMES_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00221160(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1160(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVState_TOPTIMES_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -3452,20 +3452,20 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Unlike func_00221228
  * it does not run func_002006B8 on the member at 0x9C. Out-of-line copy with no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_002211C8(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_004733F8;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_002211C8(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_004733F8;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -3480,7 +3480,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the overlay with vtable D_004733F8 for engine @p arg1 and overlay id @p arg2, then runs func_002006B8 on
+ * Constructs the overlay with vtable D_004733F8 for engine @p engine and overlay id @p overlayId, then runs func_002006B8 on
  * its member at 0x9C.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -3490,23 +3490,23 @@ extern unsigned short D_004A2088[];
  * the same steps; this out-of-line copy has no callers. func_002006B8 (declared without arguments) refreshes
  * cUITemplate_MAP_mPeak from the race location when cUITemplate_MAP_mMapStyle is 2 or more.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221228(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1228(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_004733F8;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    func_002006B8((char*)arg0 + 0x9C);
-    return arg0;
+extern "C" void *func_00221228(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1228(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_004733F8;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    func_002006B8((char*)ovState + 0x9C);
+    return ovState;
 }
 #endif
 
@@ -3557,21 +3557,21 @@ struct Elem { Elem() {} };
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Out-of-line copy with
  * no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_002212C8(void *arg0) {
-    func_0039E2A0_12C8(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVState_MAP_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    new ((char*)arg0 + 0x9C) Elem[8];
-    return arg0;
+extern "C" void *func_002212C8(void *ovState) {
+    func_0039E2A0_12C8(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVState_MAP_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    new ((char*)ovState + 0x9C) Elem[8];
+    return ovState;
 }
 #endif
 
@@ -3585,7 +3585,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVState_MAP for engine @p arg1 and overlay id @p arg2; installs cOVState_MAP_vtbl and runs the (empty)
+ * Constructs a cOVState_MAP for engine @p engine and overlay id @p overlayId; installs cOVState_MAP_vtbl and runs the (empty)
  * constructor loop over its eight two-word entries at 0x9C.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -3594,23 +3594,23 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 32 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221350(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1350(arg0, arg1);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVState_MAP_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    new ((char*)arg0 + 0x9C) Elem[8];
-    return arg0;
+extern "C" void *func_00221350(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1350(ovState, engine);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVState_MAP_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    new ((char*)ovState + 0x9C) Elem[8];
+    return ovState;
 }
 #endif
 
@@ -3658,20 +3658,20 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Out-of-line copy with
  * no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_00221408(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473248;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00221408(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00473248;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -3685,7 +3685,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the overlay with vtable D_00473248 for engine @p arg1 and overlay id @p arg2.
+ * Constructs the overlay with vtable D_00473248 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -3693,22 +3693,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 40 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221468(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1468(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473248;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00221468(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1468(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00473248;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -3749,20 +3749,20 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Unlike func_00221558
  * and the pause-menu subclasses' constructors, it leaves the word at 0xC4 alone. Out-of-line copy with no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_002214F8(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVTemplate_PauseMenu_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_002214F8(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVTemplate_PauseMenu_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -3776,7 +3776,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVTemplate_PauseMenu for engine @p arg1 and overlay id @p arg2; installs cOVTemplate_PauseMenu_vtbl and
+ * Constructs a cOVTemplate_PauseMenu for engine @p engine and overlay id @p overlayId; installs cOVTemplate_PauseMenu_vtbl and
  * clears the word at 0xC4.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -3784,23 +3784,23 @@ extern unsigned short D_004A2088[];
  * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
  * cOVState vtable D_00474E08 before the class's own. Out-of-line copy with no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221558(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1558(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVTemplate_PauseMenu_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_00221558(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1558(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVTemplate_PauseMenu_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -3842,21 +3842,21 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Out-of-line copy with
  * no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_002215F0(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473098;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_002215F0(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00473098;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -3870,7 +3870,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the pause menu with vtable D_00473098 for engine @p arg1 and overlay id @p arg2 and clears the word at
+ * Constructs the pause menu with vtable D_00473098 for engine @p engine and overlay id @p overlayId and clears the word at
  * 0xC4.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -3879,23 +3879,23 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 1 inline with the
  * same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221658(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1658(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00473098;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_00221658(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1658(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00473098;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -3937,21 +3937,21 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Out-of-line copy with
  * no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_002216F0(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472FC0;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_002216F0(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472FC0;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -3965,7 +3965,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the pause menu with vtable D_00472FC0 for engine @p arg1 and overlay id @p arg2 and clears the word at
+ * Constructs the pause menu with vtable D_00472FC0 for engine @p engine and overlay id @p overlayId and clears the word at
  * 0xC4.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -3974,23 +3974,23 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 2 inline with the
  * same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221758(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1758(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472FC0;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_00221758(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1758(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472FC0;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -4032,21 +4032,21 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Out-of-line copy with
  * no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_002217F0(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472EE8;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_002217F0(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472EE8;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -4060,7 +4060,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the pause menu with vtable D_00472EE8 for engine @p arg1 and overlay id @p arg2 and clears the word at
+ * Constructs the pause menu with vtable D_00472EE8 for engine @p engine and overlay id @p overlayId and clears the word at
  * 0xC4.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -4069,23 +4069,23 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 3 inline with the
  * same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221858(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1858(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472EE8;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_00221858(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1858(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472EE8;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -4127,21 +4127,21 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Out-of-line copy with
  * no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_002218F0(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472E10;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_002218F0(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472E10;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -4155,7 +4155,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the pause menu with vtable D_00472E10 for engine @p arg1 and overlay id @p arg2 and clears the word at
+ * Constructs the pause menu with vtable D_00472E10 for engine @p engine and overlay id @p overlayId and clears the word at
  * 0xC4.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -4164,23 +4164,23 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 4 inline with the
  * same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221958(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1958(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472E10;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_00221958(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1958(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472E10;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -4222,21 +4222,21 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Out-of-line copy with
  * no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_002219F0(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472D38;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_002219F0(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472D38;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -4250,7 +4250,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the pause menu with vtable D_00472D38 for engine @p arg1 and overlay id @p arg2 and clears the word at
+ * Constructs the pause menu with vtable D_00472D38 for engine @p engine and overlay id @p overlayId and clears the word at
  * 0xC4.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -4259,23 +4259,23 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 5 inline with the
  * same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221A58(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1A58(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472D38;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_00221A58(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1A58(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472D38;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -4316,21 +4316,21 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. D_00472C60's
  * destructor slot is cOVState_PAUSE_ONLINE__cOVState_PAUSE_ONLINE. Out-of-line copy with no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_00221AF0(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472C60;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_00221AF0(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472C60;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -4344,7 +4344,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVState_PAUSE_ONLINE for engine @p arg1 and overlay id @p arg2; installs D_00472C60 and clears the word
+ * Constructs a cOVState_PAUSE_ONLINE for engine @p engine and overlay id @p overlayId; installs D_00472C60 and clears the word
  * at 0xC4.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -4353,23 +4353,23 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 6 inline with the
  * same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221B58(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1B58(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472C60;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    return arg0;
+extern "C" void *func_00221B58(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1B58(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472C60;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xC4))) = 0;
+    return ovState;
 }
 #endif
 
@@ -4425,7 +4425,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVState_PAUSE_OPTIONS for engine @p arg1 and overlay id @p arg2; installs cOVState_PAUSE_OPTIONS_vtbl.
+ * Constructs a cOVState_PAUSE_OPTIONS for engine @p engine and overlay id @p overlayId; installs cOVState_PAUSE_OPTIONS_vtbl.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -4433,22 +4433,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 7 inline with the
  * same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221C18(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1C18(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVState_PAUSE_OPTIONS_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00221C18(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1C18(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_OPTIONS_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -4468,20 +4468,20 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Unlike func_00221CE0
  * it leaves the words at 0x9C and 0xA0 alone. Out-of-line copy with no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_00221C80(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00221C80(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -4495,7 +4495,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVState_PAUSE_ONLINE_ERROR for engine @p arg1 and overlay id @p arg2; installs
+ * Constructs a cOVState_PAUSE_ONLINE_ERROR for engine @p engine and overlay id @p overlayId; installs
  * cOVState_PAUSE_ONLINE_ERROR_vtbl, sets the word at 0xA0 to 1 and clears the one at 0x9C.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
@@ -4504,24 +4504,24 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 39 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221CE0(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1CE0(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    (*(int *)((char*)(arg0) + (0xA0))) = 1;
-    (*(int *)((char*)(arg0) + (0x9C))) = 0;
-    return arg0;
+extern "C" void *func_00221CE0(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1CE0(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(int *)((char*)(ovState) + (0xA0))) = 1;
+    (*(int *)((char*)(ovState) + (0x9C))) = 0;
+    return ovState;
 }
 #endif
 
@@ -4626,7 +4626,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the overlay with vtable D_00472850 for engine @p arg1 and overlay id @p arg2.
+ * Constructs the overlay with vtable D_00472850 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -4634,22 +4634,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 8 inline with the
  * same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221E18(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1E18(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472850;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00221E18(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1E18(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472850;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -4684,7 +4684,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the overlay with vtable D_00472778 for engine @p arg1 and overlay id @p arg2.
+ * Constructs the overlay with vtable D_00472778 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -4692,22 +4692,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 9 inline with the
  * same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221EA8(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1EA8(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_00472778;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00221EA8(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1EA8(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_00472778;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -4742,7 +4742,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the overlay with vtable D_004726A0 for engine @p arg1 and overlay id @p arg2.
+ * Constructs the overlay with vtable D_004726A0 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -4750,22 +4750,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 21 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221F38(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1F38(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_004726A0;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00221F38(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1F38(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_004726A0;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -4800,7 +4800,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs the overlay with vtable D_004725C8 for engine @p arg1 and overlay id @p arg2.
+ * Constructs the overlay with vtable D_004725C8 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -4808,22 +4808,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 20 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00221FC8(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_1FC8(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = D_004725C8;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00221FC8(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_1FC8(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = D_004725C8;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -4856,17 +4856,17 @@ extern char D_00472440[];
 
 /**
  * Constructs the memory-card save overlay with vtable D_00472440 (overlay id 18) without an engine: runs
- * cFEMemCard_cFEMemCard(@p arg0, 0, 0) and installs D_00472440.
+ * cFEMemCard_cFEMemCard(@p ovState, 0, 0) and installs D_00472440.
  *
  * Out-of-line copy with no callers; cOVStateManager_triggerOverlay builds id 18 through func_001FDBF0 instead.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_00222058(void *arg0) {
-    cFEMemCard_cFEMemCard(arg0, 0, 0);
-    (*(char **)((char*)(arg0) + (8))) = D_00472440;
-    return arg0;
+extern "C" void *func_00222058(void *ovState) {
+    cFEMemCard_cFEMemCard(ovState, 0, 0);
+    (*(char **)((char*)(ovState) + (8))) = D_00472440;
+    return ovState;
 }
 #endif
 
@@ -4899,17 +4899,17 @@ extern char D_004722B8[];
 
 /**
  * Constructs the memory-card save overlay with vtable D_004722B8 (overlay id 19) without an engine: runs
- * cFEMemCard_cFEMemCard(@p arg0, 0, 0) and installs D_004722B8.
+ * cFEMemCard_cFEMemCard(@p ovState, 0, 0) and installs D_004722B8.
  *
  * Out-of-line copy with no callers; cOVStateManager_triggerOverlay builds id 19 through func_001FE968 instead.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_002220C0(void *arg0) {
-    cFEMemCard_cFEMemCard(arg0, 0, 0);
-    (*(char **)((char*)(arg0) + (8))) = D_004722B8;
-    return arg0;
+extern "C" void *func_002220C0(void *ovState) {
+    cFEMemCard_cFEMemCard(ovState, 0, 0);
+    (*(char **)((char*)(ovState) + (8))) = D_004722B8;
+    return ovState;
 }
 #endif
 
@@ -4929,20 +4929,20 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Out-of-line copy with
  * no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_00222100(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVStateRewardsList_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00222100(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVStateRewardsList_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -4956,29 +4956,29 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVStateRewardsList for engine @p arg1 and overlay id @p arg2; installs cOVStateRewardsList_vtbl.
+ * Constructs a cOVStateRewardsList for engine @p engine and overlay id @p overlayId; installs cOVStateRewardsList_vtbl.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
  * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
  * cOVState vtable D_00474E08 before the class's own. Out-of-line copy with no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00222160(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_2160(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVStateRewardsList_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00222160(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_2160(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVStateRewardsList_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -5034,7 +5034,7 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVState_REWARDS for engine @p arg1 and overlay id @p arg2; installs cOVState_REWARDS_vtbl.
+ * Constructs a cOVState_REWARDS for engine @p engine and overlay id @p overlayId; installs cOVState_REWARDS_vtbl.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -5042,22 +5042,22 @@ extern unsigned short D_004A2088[];
  * cOVState vtable D_00474E08 before the class's own. cOVStateManager_triggerOverlay builds overlay id 16 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00222218(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_2218(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVState_REWARDS_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00222218(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_2218(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVState_REWARDS_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -5134,20 +5134,20 @@ extern unsigned short D_004A2088[];
  * halfword from D_004A2088) and the cOVState vtable D_00474E08 is stored before the class's own. Out-of-line copy with
  * no callers.
  *
- * @param arg0  the object to construct
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @return @p ovState
  */
-extern "C" void *func_002222F8(void *arg0) {
-    func_0039E2A0(arg0, 0);
-    (*(int *)((char*)(arg0) + (0x98))) = 0;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVStateTrophy_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_002222F8(void *ovState) {
+    func_0039E2A0(ovState, 0);
+    (*(int *)((char*)(ovState) + (0x98))) = 0;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVStateTrophy_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -5161,29 +5161,29 @@ extern char D_00474E08[];
 extern unsigned short D_004A2088[];
 
 /**
- * Constructs a cOVStateTrophy for engine @p arg1 and overlay id @p arg2; installs cOVStateTrophy_vtbl.
+ * Constructs a cOVStateTrophy for engine @p engine and overlay id @p overlayId; installs cOVStateTrophy_vtbl.
  *
  * Runs the cUIState constructor func_0039E2A0 with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
  * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
  * cOVState vtable D_00474E08 before the class's own. Out-of-line copy with no callers.
  *
- * @param arg0  the object to construct
- * @param arg1  the UI engine, passed through to func_0039E2A0
- * @param arg2  the overlay id (tOVStateEnum), stored in mOVID
- * @return @p arg0
+ * @param ovState  the object to construct
+ * @param engine  the UI engine, passed through to func_0039E2A0
+ * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
+ * @return @p ovState
  */
-extern "C" void *func_00222358(void *arg0, int arg1, int arg2) {
-    func_0039E2A0_2358(arg0);
-    (*(int *)((char*)(arg0) + (0x98))) = arg2;
-    (*(int *)((char*)(arg0) + (0x48))) = 0;
-    (*(char **)((char*)(arg0) + (8))) = D_00474E08;
-    (*(int *)((char*)(arg0) + (0x4C))) = 0;
-    (*(int *)((char*)(arg0) + (0x54))) = 0;
-    unsigned short t = D_004A2088[0];
-    (*(char **)((char*)(arg0) + (8))) = cOVStateTrophy_vtbl;
-    (*(unsigned short *)((char*)(arg0) + (0x58))) = t;
-    return arg0;
+extern "C" void *func_00222358(void *ovState, int engine, int overlayId) {
+    func_0039E2A0_2358(ovState);
+    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
+    (*(int *)((char*)(ovState) + (0x48))) = 0;
+    (*(char **)((char*)(ovState) + (8))) = D_00474E08;
+    (*(int *)((char*)(ovState) + (0x4C))) = 0;
+    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    unsigned short chatInit = D_004A2088[0];
+    (*(char **)((char*)(ovState) + (8))) = cOVStateTrophy_vtbl;
+    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    return ovState;
 }
 #endif
 
@@ -5257,20 +5257,20 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00222448);
 extern unsigned short D_00441D38[];
 
 /**
- * Computes a CRC-16 over @p n bytes at @p p with the 256-entry table D_00441D38.
+ * Computes a CRC-16 over @p n bytes at @p bytes with the 256-entry table D_00441D38.
  *
  * D_00441D38 is the reflected CRC-16/IBM table (0x0000, 0xC0C1, 0xC181, 0x0140, ...; polynomial 0xA001). Byte-wise: crc
  * = D_00441D38[(byte ^ crc) & 0xFF] ^ (crc >> 8), starting from 0xFBEA (64490), with no final XOR. No callers.
  *
- * @param p  the bytes to checksum
+ * @param bytes  the bytes to checksum
  * @param n  how many bytes
  * @return the CRC
  */
-extern "C" unsigned int func_00222448(const unsigned char *p, int n) {
-    const unsigned char *end = p + n;
+extern "C" unsigned int func_00222448(const unsigned char *bytes, int n) {
+    const unsigned char *end = bytes + n;
     unsigned int crc = 64490;
-    while (p < end) {
-        crc = D_00441D38[(*p++ ^ crc) & 0xFF] ^ (crc >> 8);
+    while (bytes < end) {
+        crc = D_00441D38[(*bytes++ ^ crc) & 0xFF] ^ (crc >> 8);
     }
     return crc;
 }
@@ -5363,15 +5363,15 @@ extern LV_24B8 luno_gLunoNil;
  * Reads the register count from the function's chunk (at chunk + chunk[1] + 8), allocates that many 8-byte values with
  * operator new[] ("LunoVMRegister"), stores the array in the VM's first word, makes register 0 a table reference
  * to @p table (func_00225068), copies luno_gLunoNil into register 1 (releasing a table it held with
- * luno_cLunoTable__cLunoTable) and calls luno_cLunoVM_execute(@p out, @p state, @p c). func_00309C88 (world scripts)
+ * luno_cLunoTable__cLunoTable) and calls luno_cLunoVM_execute(@p out, @p state, @p retVar). func_00309C88 (world scripts)
  * uses it.
  *
  * @param out  the VM; its first word receives the register array
  * @param state  the function to run (its first word points at the compiled chunk)
  * @param table  the global table, placed in register 0
- * @param c  receives the function's return value
+ * @param retVar  receives the function's return value
  */
-extern "C" void func_002224B8(LV_24B8** out, char** state, LV_24B8* table, int c) {
+extern "C" void func_002224B8(LV_24B8** out, char** state, LV_24B8* table, int retVar) {
     char* chunk = *state;
     int n = *(int*)(chunk + *(int*)(chunk + 4) + 8);
     LV_24B8* arr = new (str_LunoVMRegister, 0x20000000, 0) LV_24B8[n];
@@ -5391,7 +5391,7 @@ extern "C" void func_002224B8(LV_24B8** out, char** state, LV_24B8* table, int c
         regs[1].u.i = nilVal->u.i;
     }
     secondReg->type = nilVal->type;
-    luno_cLunoVM_execute_24B8(out, state, c);
+    luno_cLunoVM_execute_24B8(out, state, retVar);
 }
 #endif
 
@@ -5445,9 +5445,9 @@ struct LV_2648 {
  * @param state  the function to run (its first word points at the compiled chunk)
  * @param table  the global table, placed in register 0
  * @param value  the argument, copied into register 1
- * @param c  receives the function's return value
+ * @param retVar  receives the function's return value
  */
-extern "C" void func_00222648(LV_2648** out, char** state, LV_2648* table, LV_2648* value, int c) {
+extern "C" void func_00222648(LV_2648** out, char** state, LV_2648* table, LV_2648* value, int retVar) {
     char* chunk = *state;
     int n = *(int*)(chunk + *(int*)(chunk + 4) + 8);
     LV_2648* arr = new (str_LunoVMRegister, 0x20000000, 0) LV_2648[n];
@@ -5466,6 +5466,6 @@ extern "C" void func_00222648(LV_2648** out, char** state, LV_2648* table, LV_26
         regs[1].u.i = value->u.i;
     }
     secondReg->type = value->type;
-    luno_cLunoVM_execute_2648(out, state, c);
+    luno_cLunoVM_execute_2648(out, state, retVar);
 }
 #endif

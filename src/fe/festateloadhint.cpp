@@ -324,14 +324,14 @@ extern unsigned int D_00536640[];
  *
  * cGameModeMan_sortScores() passes it to func_00418EF8() to sort D_00536708. The scores are compared unsigned.
  *
- * @param a  the first rider index
- * @param b  the second rider index
- * @return -1 when @p a's score is higher, 1 when it is lower, 0 when equal
+ * @param firstRider  the first rider index
+ * @param secondRider  the second rider index
+ * @return -1 when @p firstRider's score is higher, 1 when it is lower, 0 when equal
  */
-extern "C" int func_00245E30(int* a, int* b)
+extern "C" int func_00245E30(int* firstRider, int* secondRider)
 {
-    unsigned int va = D_00536640[*a];
-    unsigned int vb = D_00536640[*b];
+    unsigned int va = D_00536640[*firstRider];
+    unsigned int vb = D_00536640[*secondRider];
     if (vb < va) {
         return -1;
     }
@@ -349,14 +349,14 @@ extern unsigned int D_00536640[];
  *
  * cGameModeMan_sortTimes() passes it to func_00418EF8() to sort D_00536708. The values are compared unsigned.
  *
- * @param a  the first rider index
- * @param b  the second rider index
- * @return -1 when @p a's value is lower, 1 when it is higher, 0 when equal
+ * @param firstRider  the first rider index
+ * @param secondRider  the second rider index
+ * @return -1 when @p firstRider's value is lower, 1 when it is higher, 0 when equal
  */
-extern "C" int func_00245E78(int* a, int* b)
+extern "C" int func_00245E78(int* firstRider, int* secondRider)
 {
-    unsigned int va = D_00536640[*a];
-    unsigned int vb = D_00536640[*b];
+    unsigned int va = D_00536640[*firstRider];
+    unsigned int vb = D_00536640[*secondRider];
     if (va < vb) {
         return -1;
     }
@@ -376,14 +376,14 @@ extern int D_00536708[];
  * cGameModeMan_sortScores() and cGameModeMan_sortTimes() use it to sort D_00536730 after D_00536708 holds the ranked
  * riders. It never returns 0, which is harmless here because the entries of D_00536708 are distinct.
  *
- * @param a  the first rider index
- * @param b  the second rider index
- * @return 1 when @p a's entry is greater, otherwise -1
+ * @param firstRider  the first rider index
+ * @param secondRider  the second rider index
+ * @return 1 when @p firstRider's entry is greater, otherwise -1
  */
-extern "C" int func_00245EC0(int* a, int* b)
+extern "C" int func_00245EC0(int* firstRider, int* secondRider)
 {
-    int va = D_00536708[*a];
-    int vb = D_00536708[*b];
+    int va = D_00536708[*firstRider];
+    int vb = D_00536708[*secondRider];
     if (vb < va) {
         return 1;
     }
@@ -926,9 +926,9 @@ extern "C" void func_002464E8(void* self, char* obj)
         sprintf1((unsigned short*)buf, fmtA, D_005308B8[idx].b1 ? 1 : v);
         cUIText_setUnicodeString(obj, buf);
     } else if (IsId_2464E8(obj, str_map_box)) {
-        char* p = *(char**)((char*)self + 0x48);
-        if (p != 0) {
-            int v = *(int*)(p + 0x10);
+        char* loadScreen = *(char**)((char*)self + 0x48);
+        if (loadScreen != 0) {
+            int v = *(int*)(loadScreen + 0x10);
             if (v != 0) {
                 *(int*)(obj + 0x78) = v;
                 *(int*)(obj + 0x7C) = 0;
@@ -1062,9 +1062,9 @@ extern "C" void func_00246CF8(void* self, char player)
                     sum += cBENetworkInterface_networkOpt.oppCharacterAttributes[i];
                 }
                 rank = sum / 35;
-                unsigned char* s = GetStats_6CF8();
+                unsigned char* statBlock = GetStats_6CF8();
                 for (int i = 0; i < 7; i++) {
-                    stats[i] = s[i];
+                    stats[i] = statBlock[i];
                 }
             }
         } else {
@@ -1102,24 +1102,24 @@ extern "C" void func_00246CF8(void* self, char player)
             barName.c[1] = i + '0';
             char* bar = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(barName.c));
             if (label != 0 && bar != 0) {
-                int v = stats[i];
-                int level = v / 5;
-                char* o = (char*)SSXApp->FELocale;
-                sVEntry_6CF8<void*(void*, int)>* vt = *(sVEntry_6CF8<void*(void*, int)>**)(o + 4);
-                sprintf1(text, (unsigned short*)vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_CMNLvNum)), level);
+                int statValue = stats[i];
+                int level = statValue / 5;
+                char* locale = (char*)SSXApp->FELocale;
+                sVEntry_6CF8<void*(void*, int)>* vt = *(sVEntry_6CF8<void*(void*, int)>**)(locale + 4);
+                sprintf1(text, (unsigned short*)vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_CMNLvNum)), level);
                 sVEntry_6CF8<void(void*, int)>* vt2 = *(sVEntry_6CF8<void(void*, int)>**)(label + 8);
                 vt2[9].fn(label + vt2[9].delta, 1);
                 cUIText_setUnicodeString(label, (char*)text);
                 *(int*)(bar + 0x80) = 55;
-                cUIProgress_setValue(bar, v);
+                cUIProgress_setValue(bar, statValue);
             }
         }
         char* pic = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(picName.c));
-        sLoadInfo_6CF8* p = *(sLoadInfo_6CF8**)((char*)self + 0x48);
-        if (p != 0 && pic != 0) {
-            int q = p->image[player];
-            if (q != 0) {
-                *(int*)(pic + 0x78) = q;
+        sLoadInfo_6CF8* loadScreen = *(sLoadInfo_6CF8**)((char*)self + 0x48);
+        if (loadScreen != 0 && pic != 0) {
+            int portraitTexture = loadScreen->image[player];
+            if (portraitTexture != 0) {
+                *(int*)(pic + 0x78) = portraitTexture;
                 *(int*)(pic + 0x7C) = 0;
             }
         }

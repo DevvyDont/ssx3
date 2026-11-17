@@ -348,10 +348,10 @@ INCLUDE_ASM("main/ssxappdtor", func_00243A70);
  *
  * cFadeScreen_cFadeScreen (the fade constructor) clears this flag; cFadeScreen_loseFocus starts the fade-out.
  *
- * @param arg0  the screen fade
+ * @param fadeScreen  the screen fade
  */
-extern "C" void func_00243A70(void *arg0) {
-    (*(int *)((char*)(arg0) + (8))) = 1;
+extern "C" void func_00243A70(void *fadeScreen) {
+    (*(int *)((char*)(fadeScreen) + (8))) = 1;
 }
 #endif
 
@@ -1138,11 +1138,11 @@ INCLUDE_ASM("main/ssxappdtor", func_00244058);
 /**
  * Sets the user-select state's next location (+0x18).
  *
- * @param arg0  the user-select game-flow state
- * @param arg1  the location to go to next
+ * @param userSelectState  the user-select game-flow state
+ * @param location  the location to go to next
  */
-extern "C" void func_00244058(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_00244058(void *userSelectState, int location) {
+    (*(int *)((char*)(userSelectState) + (0x18))) = location;
 }
 #endif
 
@@ -1885,16 +1885,16 @@ extern "C" void func_002443C0(int* self, int flags)
 INCLUDE_ASM("main/ssxappdtor", func_002443F0);
 #ifdef SKIP_ASM
 /**
- * Reports the stream focus as rendered exactly when the stream is ready: returns @p a1 unchanged.
+ * Reports the stream focus as rendered exactly when the stream is ready: returns @p streamReady unchanged.
  *
  * Slot +0x14 of the generic stream-pause vtable D_0047D0E8.
  *
- * @param a1  whether the stream is ready
- * @return @p a1
+ * @param streamReady  whether the stream is ready
+ * @return @p streamReady
  */
-extern "C" void* func_002443F0(void* self, void* a1)
+extern "C" void* func_002443F0(void* self, void* streamReady)
 {
-    return a1;
+    return streamReady;
 }
 #endif
 
@@ -2028,12 +2028,12 @@ extern char D_0047D008[];
  * D_0047D008's slots are the base cGameModeHandler methods (cGameModeHandler_purge, cleanRiderRanksPoints,
  * cleanRiderRanksTime and the stubs after func_00244520).
  *
- * @param arg0  the handler
- * @return @p arg0
+ * @param handler  the handler
+ * @return @p handler
  */
-extern "C" int **func_002444D8(int **arg0) {
-    *arg0 = &(*(int*)&D_0047D008);
-    return arg0;
+extern "C" int **func_002444D8(int **handler) {
+    *handler = &(*(int*)&D_0047D008);
+    return handler;
 }
 #endif
 
@@ -3096,9 +3096,9 @@ extern "C" bool func_00244B48(sApp_4B48* self)
     cOVStateManager_update();
     if (cMenuSys_isActive(self->fA4) == 0) {
         sScript_4B48* sm = self->script;
-        sQueue_4B48* q = &sm->queue;
+        sQueue_4B48* msgQueue = &sm->queue;
         if (sm->hasMessage()) {
-            sMsg_4B48* msg = tMissionMenuQueue_getEntry(q);
+            sMsg_4B48* msg = tMissionMenuQueue_getEntry(msgQueue);
             if (msg->type == 8) {
                 cOVStateManager_triggerOverlay(29);
                 D_005366E8[++D_004A2A54] = 3;
@@ -3138,8 +3138,8 @@ extern "C" bool func_00244B48(sApp_4B48* self)
         func_0020CA10();
         D_005366E8[++D_004A2A54] = 2;
         cPauseState_Flags = D_004428F8[0];
-        sUIObj_4B48* o = self->ui->fC;
-        o->vt[44].fn((char*)o + o->vt[44].delta, self->f228);
+        sUIObj_4B48* uiObject = self->ui->fC;
+        uiObject->vt[44].fn((char*)uiObject + uiObject->vt[44].delta, self->f228);
         cSSXAudio_PauseAudio(func_0028B180());
         func_00294F48(func_0028B180());
         return false;
@@ -3609,16 +3609,16 @@ extern signed char D_00535C11[];
  *
  * Fetches the BE interface 0 first (result unused). Slot +0x94 (onWidgetCreate) of D_0047C948.
  *
- * @param a1  the widget being created (passed on)
+ * @param widget  the widget being created (passed on)
  */
-extern "C" void func_00245598(void* self, int a1)
+extern "C" void func_00245598(void* self, int widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     bool ok = D_00535C11[0] != 2;
     if (ok) {
-        func_002464E8(self, a1);
+        func_002464E8(self, widget);
     } else {
-        func_00246278(self, a1);
+        func_00246278(self, widget);
     }
 }
 #endif

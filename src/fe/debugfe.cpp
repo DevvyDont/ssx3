@@ -470,43 +470,43 @@ extern "C" void* func_0017D298(char* self)
     *(void***)self = D_0046D350;
     *(int*)(self + 0x4) = 0;
     cMenuSys_cMenuSys(self + 0x8);
-    sDbgOwner17D298 o0;
-    o0.owner = self;
-    sDbgOwner17D298 o1;
-    o1.owner = self;
-    func_001DA988(self + 0x70, &o0, &o1);
+    sDbgOwner17D298 onCreate;
+    onCreate.owner = self;
+    sDbgOwner17D298 onLogin;
+    onLogin.owner = self;
+    func_001DA988(self + 0x70, &onCreate, &onLogin);
     func_0017D200(self + 0x604);
-    sDbgOwner17D298 o2;
-    o2.owner = self;
-    sDbgOwner17D298 o3;
-    o3.owner = self;
-    sDbgOwner17D298 o4;
-    o4.owner = self;
-    func_001DACB8(self + 0x74C, &o2, &o3, &o4);
-    sDbgOwner17D298 o5;
-    o5.owner = self;
-    func_001DAE20(self + 0xD2C, &o5);
-    sDbgOwner17D298 o6;
-    o6.owner = self;
-    sDbgOwner17D298 o7;
-    o7.owner = self;
-    func_001DAF08(self + 0x1044, &o6, &o7);
-    sDbgOwner17D298 o8;
-    o8.owner = self;
-    func_001DB028(self + 0x1534, &o8);
-    sDbgOwner17D298 o9;
-    o9.owner = self;
-    sDbgOwner17D298 o10;
-    o10.owner = self;
-    __sti__all_in_one_main_cpp(self + 0x18C0, &o9, &o10);
-    sDbgOwner17D298 o11;
-    o11.owner = self;
-    func_001DB2B0(self + 0x1AAC, &o11);
-    int g = cBXString_EmptyString;
+    sDbgOwner17D298 onSelectPersona;
+    onSelectPersona.owner = self;
+    sDbgOwner17D298 onCreatePersona;
+    onCreatePersona.owner = self;
+    sDbgOwner17D298 onDeletePersona;
+    onDeletePersona.owner = self;
+    func_001DACB8(self + 0x74C, &onSelectPersona, &onCreatePersona, &onDeletePersona);
+    sDbgOwner17D298 onSelectRoom;
+    onSelectRoom.owner = self;
+    func_001DAE20(self + 0xD2C, &onSelectRoom);
+    sDbgOwner17D298 onSelectUser;
+    onSelectUser.owner = self;
+    sDbgOwner17D298 onChat;
+    onChat.owner = self;
+    func_001DAF08(self + 0x1044, &onSelectUser, &onChat);
+    sDbgOwner17D298 onMessage;
+    onMessage.owner = self;
+    func_001DB028(self + 0x1534, &onMessage);
+    sDbgOwner17D298 onAcceptChallenge;
+    onAcceptChallenge.owner = self;
+    sDbgOwner17D298 onDeclineChallenge;
+    onDeclineChallenge.owner = self;
+    __sti__all_in_one_main_cpp(self + 0x18C0, &onAcceptChallenge, &onDeclineChallenge);
+    sDbgOwner17D298 onAbortChallenge;
+    onAbortChallenge.owner = self;
+    func_001DB2B0(self + 0x1AAC, &onAbortChallenge);
+    int emptyText = cBXString_EmptyString;
     char* app = (char*)SSXApp;
-    *(int*)(self + 0x1C04) = g;
-    *(int*)(self + 0x1C08) = g;
-    *(int*)(self + 0x1C0C) = g;
+    *(int*)(self + 0x1C04) = emptyText;
+    *(int*)(self + 0x1C08) = emptyText;
+    *(int*)(self + 0x1C0C) = emptyText;
     *(int*)(self + 0x60) = *(int*)(*(char**)(app + 0x80) + 0x18);
     *(int*)(self + 0x64) = *(int*)(app + 0xB0);
     *(int*)(self + 0x68) = *(int*)(*(char**)(app + 0x80) + 0x20);
@@ -877,7 +877,7 @@ static inline void SetMode0017DA30(void* self, int mode)
 /**
  * Shows the error screen that fits the debug lobby screen's current step after a lobby error event.
  *
- * Stores @p a1 at +0x1C14 (func_0017E5C8 prints its text through func_00260E50) and, by the state at +0x4, moves to the
+ * Stores @p errorCode at +0x1C14 (func_0017E5C8 prints its text through func_00260E50) and, by the state at +0x4, moves to the
  * matching error state and opens the Continue menu (+0x604): 2 (connecting) goes to 18, 4 (creating account) to 20, 7,
  * 8 and 9 (persona steps) to 22, 11 (joining a room) to 23 and 13 (waiting on a challenge) to 24. In state 5
  * (authenticating) it goes to 21 unless SSXApp->unk_74 (automatic login) is set; then it copies SSXApp->UserName and
@@ -887,11 +887,11 @@ static inline void SetMode0017DA30(void* self, int mode)
  * Likely bug: with automatic login a rejected login is retried at once with the same credentials, with no limit and no
  * error shown.
  *
- * @param a1  the lobby error code (a four-character tag)
+ * @param errorCode  the lobby error code (a four-character tag)
  */
-extern "C" void func_0017DA30(void* self, int a1)
+extern "C" void func_0017DA30(void* self, int errorCode)
 {
-    *(int*)((char*)self + 0x1C14) = a1;
+    *(int*)((char*)self + 0x1C14) = errorCode;
     switch (*(int*)((char*)self + 0x4)) {
     case 2:
         SetMode0017DA30(self, 18);
@@ -1232,28 +1232,28 @@ struct sDsReq17E030 {
  * Creates a lobby account from the debug "Create Account" menu: keeps the typed name and password and sends the
  * request.
  *
- * Closes all menus (func_002CC460 until the stack is empty), copies @p a and @p b into the screen's strings at +0x1C04
- * and +0x1C08 and sets state 4 ("Creating account"). Fills LobbyMan's mNewAccount form: mName @p a, mPassword and
- * unk_08 @p b, mMail "please@get.lost", born 1950-01-01 (mBornYear, mBornMonth, mBornDay), mGender 1 (sent as 'F'),
+ * Closes all menus (func_002CC460 until the stack is empty), copies @p userName and @p password into the screen's strings at +0x1C04
+ * and +0x1C08 and sets state 4 ("Creating account"). Fills LobbyMan's mNewAccount form: mName @p userName, mPassword and
+ * unk_08 @p password, mMail "please@get.lost", born 1950-01-01 (mBornYear, mBornMonth, mBornDay), mGender 1 (sent as 'F'),
  * both mSpam flags 0, and sends it with func_0025B9C8. On event 203 func_0017D6F0 then logs in with the same name and
  * password. Called by the Create Account menu's command handler func_001DBC38.
  *
- * @param a  account name
- * @param b  password
+ * @param userName  account name
+ * @param password  password
  */
-extern "C" void func_0017E030(sDebugFEState17E030* self, const char* a, const char* b)
+extern "C" void func_0017E030(sDebugFEState17E030* self, const char* userName, const char* password)
 {
     int* list = &self->list;
     while (*list != 0) {
         func_002CC460(list);
     }
-    cBXString_cBXString4((char*)self + 0x1C04, a);
-    cBXString_cBXString4((char*)self + 0x1C08, b);
+    cBXString_cBXString4((char*)self + 0x1C04, userName);
+    cBXString_cBXString4((char*)self + 0x1C08, password);
     self->state = 0x4;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    cBXString_cBXString4(&lobbyMan->mNewAccount.mName, a);
-    cBXString_cBXString4(&lobbyMan->mNewAccount.mPassword, b);
-    cBXString_cBXString4(&lobbyMan->mNewAccount.unk_08, b);
+    cBXString_cBXString4(&lobbyMan->mNewAccount.mName, userName);
+    cBXString_cBXString4(&lobbyMan->mNewAccount.mPassword, password);
+    cBXString_cBXString4(&lobbyMan->mNewAccount.unk_08, password);
     cBXString_cBXString4(&lobbyMan->mNewAccount.mMail, str_pleaseat_get_lost);
     lobbyMan->mNewAccount.mBornYear = 1950;
     lobbyMan->mNewAccount.mGender = 1;
@@ -1484,12 +1484,12 @@ extern "C" void func_0025AAE0(void* a, int b);
 /**
  * Sends a chat line chosen in the debug chat menu and returns to "Room Occupants".
  *
- * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and sends @p arg as a lobby message with
+ * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and sends @p messageText as a lobby message with
  * func_0025AAE0 ('mesg'). The chat menu's command handler func_001DBB20 passes the item's caption.
  *
- * @param arg  the line to send (a char pointer, declared int)
+ * @param messageText  the line to send (a char pointer, declared int)
  */
-extern "C" void func_0017E418(sDebugFEState17E418* self, int arg)
+extern "C" void func_0017E418(sDebugFEState17E418* self, int messageText)
 {
     int* list = &self->list;
     while (*list != 0) {
@@ -1497,7 +1497,7 @@ extern "C" void func_0017E418(sDebugFEState17E418* self, int arg)
     }
     func_002CC3B8((char*)self + 0x8, (char*)self + 0x1044);
     self->state = 0xC;
-    func_0025AAE0(LobbyMan_mLobbyMan, arg);
+    func_0025AAE0(LobbyMan_mLobbyMan, messageText);
 }
 #endif
 
@@ -2013,8 +2013,8 @@ extern "C" void func_0017F500(void* p_, int tex)
     (ps2GraphicsMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
     for (int i = 1; i < 64; i++) {
         sVec2_17F2D0& pt = self->trail[(self->head + i) % 64];
-        float t = (float)i * 0.015625f;
-        func_0038EC40_r(D_004A28AC, pt - size * 0.5f, pt + size * 0.5f, sCol_17F500(t * t * 0.15f, 0.5f, t * 0.2f + 0.3f, t * (t * 0.5f)), 0.0f);
+        float recency = (float)i * 0.015625f;
+        func_0038EC40_r(D_004A28AC, pt - size * 0.5f, pt + size * 0.5f, sCol_17F500(recency * recency * 0.15f, 0.5f, recency * 0.2f + 0.3f, recency * (recency * 0.5f)), 0.0f);
     }
     // Head marker colour; named locals (not literals) so the inlined ctor stores sp-relative (CHEATSHEET).
     float hi = 0.5f;
@@ -3055,16 +3055,16 @@ extern int cUIGroup_vtbl[];
  * Constructs an on-screen keyboard (cScreenKeyboard) for a UI state, with its default options.
  *
  * Builds the cUIScreen part like cScreenKeyboard_cScreenKeyboard (list links, cUIScreen_vtbl, tAttrScreen_tAttrScreen
- * at +0x14, the lists at +0x18 and +0xB4, the root group cUIThing_cUIThing at +0x40 with cUIGroup_vtbl), stores @p a1
+ * at +0x14, the lists at +0x18 and +0xB4, the root group cUIThing_cUIThing at +0x40 with cUIGroup_vtbl), stores @p parentState
  * at +0xD0 and the keyboard vtable D_0046D1A0, then sets the keyboard's fields (On Tour names): mIncludeNumbers
  * (+0xD8), mIncludeShift (+0xDC) and mIncludeSpace (+0xE0) 0, mShiftOn (+0xE4) and mFirstKey (+0xE8) 1, an empty input
  * text (+0xEC), mCursorPos (+0x16C) 0, mCurrentKey (+0x170) 10 (the "A" key) and mMaxChars (+0xD4) 45. No caller of it
  * is known (none in the C sources or the asm).
  *
- * @param a1  the owning UI state; func_00180840 calls its virtual slot 19 after each key press
+ * @param parentState  the owning UI state; func_00180840 calls its virtual slot 19 after each key press
  * @return @p self
  */
-extern "C" void* func_00180508(char* self, int a1)
+extern "C" void* func_00180508(char* self, int parentState)
 {
     *(char**)(self + 4) = self;
     *(char**)(self + 0) = self;
@@ -3079,7 +3079,7 @@ extern "C" void* func_00180508(char* self, int a1)
     cUIThing_cUIThing(self + 0x40, 0, 0);
     *(int**)(self + 0x48) = cUIGroup_vtbl;
     cList_cList(self + 0xB4);
-    *(int*)(self + 0xD0) = a1;
+    *(int*)(self + 0xD0) = parentState;
     *(int**)(self + 8) = D_0046D1A0;
     *(int*)(self + 0xD8) = 0;
     *(int*)(self + 0xDC) = 0;
@@ -3325,8 +3325,8 @@ extern "C" void func_00180840(sDbgKbd* self)
         if (self->cur + 1 < self->maxLen)
             self->cur = self->cur + 1;
     } else if (k >= 10 && k < 36) {
-        int c = !self->caps ? 'a' : 'A';
-        self->buf[self->cur] = c + (self->key - 10);
+        int letterBase = !self->caps ? 'a' : 'A';
+        self->buf[self->cur] = letterBase + (self->key - 10);
         if (self->cur + 1 < self->maxLen)
             self->cur = self->cur + 1;
         self->buf[self->cur] = 0;
@@ -3368,28 +3368,28 @@ extern "C" char* strcat(char*, const char*);
  * "arrLeft", "arrRight", "spc" or "end" for 36..39; other values leave just the prefix.
  * cScreenKeyboard_initScreenKeyboard uses it to find the key objects.
  *
- * @param c  key index (0-39)
+ * @param keyIndex  key index (0-39)
  * @param dst  output buffer (at least 18 bytes)
  */
-extern "C" void func_001809B0(void* self, int c, char* dst)
+extern "C" void func_001809B0(void* self, int keyIndex, char* dst)
 {
     char buf[2];
     *(sStr10*)dst = D_0045D550;
-    if (c < 10) {
-        buf[0] = c + '0';
+    if (keyIndex < 10) {
+        buf[0] = keyIndex + '0';
         buf[1] = 0;
         strcat(dst, buf);
-    } else if (c < 36) {
-        buf[0] = c + 'A' - 10;
+    } else if (keyIndex < 36) {
+        buf[0] = keyIndex + 'A' - 10;
         buf[1] = 0;
         strcat(dst, buf);
-    } else if (c == 36) {
+    } else if (keyIndex == 36) {
         strcat(dst, str_arrLeft);
-    } else if (c == 37) {
+    } else if (keyIndex == 37) {
         strcat(dst, str_arrRight);
-    } else if (c == 38) {
+    } else if (keyIndex == 38) {
         strcat(dst, str_spc);
-    } else if (c == 39) {
+    } else if (keyIndex == 39) {
         strcat(dst, str_end);
     }
 }

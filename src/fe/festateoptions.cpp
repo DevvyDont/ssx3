@@ -384,11 +384,11 @@ extern int D_004A14E0;
  */
 extern "C" void func_00188E58(void* self)
 {
-    char* p = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-    func_0039E318(p, *(void**)((char*)self + 0x10), self);
-    *(void***)(p + 8) = D_0046B3D0;
-    *(char*)(p + 0x48) = 0;
-    cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, p);
+    char* savePopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
+    func_0039E318(savePopup, *(void**)((char*)self + 0x10), self);
+    *(void***)(savePopup + 8) = D_0046B3D0;
+    *(char*)(savePopup + 0x48) = 0;
+    cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, savePopup);
     D_004A14D8 = 0;
     D_004A14E0 = 1;
     D_004A14DC = 0;
@@ -705,12 +705,12 @@ extern "C" void func_00189610(void* self, char* popup, int event)
             }
         } else if (Is_189610(*(int*)(popup + 0xC), str_24screen_position)) {
             if (GetOpt_189610(popup, 2)) {
-                int a = GetOpt_189610(popup, 0);
-                int b = GetOpt_189610(popup, 1);
-                sGameCfg_189610* c = &D_00535610_189610;
+                int hzOffset = GetOpt_189610(popup, 0);
+                int vtOffset = GetOpt_189610(popup, 1);
+                sGameCfg_189610* gameOptions = &D_00535610_189610;
                 D_004A14D0 = 1;
-                c->f6 = a;
-                c->f5 = b;
+                gameOptions->f6 = hzOffset;
+                gameOptions->f5 = vtOffset;
             } else {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVE_189610b* vt = (sVE_189610b*)ps2GraphicsMan->mVtbl;
@@ -1015,9 +1015,9 @@ extern "C" void func_00189D60(void* self_)
         void* w = find_189D60(self, 0);
         if (w != 0) {
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().mode);
-            char* o = (char*)SSXApp->FELocale;
-            sVE_189D60b* vt = *(sVE_189D60b**)(o + 4);
-            vt[3].fn(o + vt[3].delta, cUIListBox_getCurrentEntryData(w));
+            char* locale = (char*)SSXApp->FELocale;
+            sVE_189D60b* vt = *(sVE_189D60b**)(locale + 4);
+            vt[3].fn(locale + vt[3].delta, cUIListBox_getCurrentEntryData(w));
             char* scr = self->screen;
             sVE_189D60a* vt2 = *(sVE_189D60a**)(scr + 0x48);
             char* sub = scr + 0x40;
@@ -1379,11 +1379,11 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
     case 5: // empty case; needed for the original compare-tree shape
         break;
     case 7: {
-        char* p = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        func_0039E318(p, self->engine, self);
-        *(void***)(p + 8) = D_0046B3D0;
-        p[0x48] = 0;
-        cUIStateStack_pushPopup(self->engine + 0x18, p);
+        char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
+        func_0039E318(resetPopup, self->engine, self);
+        *(void***)(resetPopup + 8) = D_0046B3D0;
+        resetPopup[0x48] = 0;
+        cUIStateStack_pushPopup(self->engine + 0x18, resetPopup);
         break;
     }
     case 6: {
@@ -1398,9 +1398,9 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
         func_002875D0(func_0028B180(), Cfg_18A8D0().f16 != 0);
         char* eng = *(char**)self->engine;
         sVE_18A8D0c* vt = *(sVE_18A8D0c**)(eng + 4);
-        void* r = vt[5].fn(eng + vt[5].delta, self, *(int*)(widget + 0x18));
-        if (r != 0)
-            cUIStateStack_push(self->engine + 0x18, r);
+        void* nextState = vt[5].fn(eng + vt[5].delta, self, *(int*)(widget + 0x18));
+        if (nextState != 0)
+            cUIStateStack_push(self->engine + 0x18, nextState);
         break;
     }
     case 9:
@@ -1682,22 +1682,22 @@ extern "C" void func_0018BEF8(void* self, unsigned int mode)
         float sfxVolume = func_00287670(func_0028B180());
         float speechVolume = func_002876A0(func_0028B180());
         float musicVolume = func_002876D0(func_0028B180());
-        int s0 = *(int*)((char*)func_0028B180() + 0x62B8);
+        int arcadeOn = *(int*)((char*)func_0028B180() + 0x62B8);
         int arcadeSfx = *(int*)((char*)func_0028B180() + 0x62B4);
-        int s2 = *(int*)((char*)func_0028B180() + 0x534);
+        int saved534 = *(int*)((char*)func_0028B180() + 0x534);
         cSSXAudio_FrontEndPurge(func_0028B180());
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(audioMode);
         func_00287410(func_0028B180(), (int)sfxVolume);
         func_00287488(func_0028B180(), (int)speechVolume);
         func_00287520(func_0028B180(), (int)musicVolume);
-        cSSXAudio_SetArcadeSFX(func_0028B180(), s0);
+        cSSXAudio_SetArcadeSFX(func_0028B180(), arcadeOn);
         func_002875D0(func_0028B180(), arcadeSfx);
         func_00285FB0(func_0028B180());
         char* snd = (char*)func_0028B180();
         sVE_18BEF8v* vt2 = *(sVE_18BEF8v**)(snd + 0x5558);
         char* sub = snd + 0x118;
-        vt2[4].fn(sub + vt2[4].delta, s2);
+        vt2[4].fn(sub + vt2[4].delta, saved534);
     }
 }
 #endif
@@ -1805,10 +1805,10 @@ extern "C" void func_0018C1B8(void* self, void* widget, int msg)
     case 21:
         break;
     case 22: {
-        int h = *(int*)((char*)widget + 0xC);
-        if (h == GetHashValue32(str_111resetopts)) {
-            sVE_18C1B8* e = &(*(sVE_18C1B8**)((char*)widget + 8))[23];
-            if (e->fn((char*)widget + e->delta, 2) != 0) {
+        int popupHash = *(int*)((char*)widget + 0xC);
+        if (popupHash == GetHashValue32(str_111resetopts)) {
+            sVE_18C1B8* getDataEntry = &(*(sVE_18C1B8**)((char*)widget + 8))[23];
+            if (getDataEntry->fn((char*)widget + getDataEntry->delta, 2) != 0) {
                 func_0014F600(iface);
                 func_0018C478(self);
                 D_004A14D8 = 1;
@@ -1907,11 +1907,11 @@ extern "C" void func_0018C2A0(char* self, char* widget, unsigned int event)
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
     case 7: {
-        char* p = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        func_0039E318(p, *(void**)(self + 0x10), self);
-        *(void***)(p + 8) = D_0046B3D0;
-        *(char*)(p + 0x48) = 0;
-        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, p);
+        char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
+        func_0039E318(resetPopup, *(void**)(self + 0x10), self);
+        *(void***)(resetPopup + 8) = D_0046B3D0;
+        *(char*)(resetPopup + 0x48) = 0;
+        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, resetPopup);
         break;
     }
     case 6: {
@@ -1919,9 +1919,9 @@ extern "C" void func_0018C2A0(char* self, char* widget, unsigned int event)
         vt[1].fn(iface + vt[1].delta);
         char* obj = **(char***)(self + 0x10);
         sVE_18C2A0p* vt2 = *(sVE_18C2A0p**)(obj + 4);
-        void* r = vt2[5].fn(obj + vt2[5].delta, self, *(int*)(widget + 0x18));
-        if (r != 0) {
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+        void* nextState = vt2[5].fn(obj + vt2[5].delta, self, *(int*)(widget + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
         }
         break;
     }
@@ -2276,11 +2276,11 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
     switch (event) {
     case 7: {
-        char* p = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        func_0039E318(p, *(void**)(self + 0x10), self);
-        *(void***)(p + 8) = D_0046B3D0;
-        *(char*)(p + 0x48) = 0;
-        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, p);
+        char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
+        func_0039E318(resetPopup, *(void**)(self + 0x10), self);
+        *(void***)(resetPopup + 8) = D_0046B3D0;
+        *(char*)(resetPopup + 0x48) = 0;
+        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, resetPopup);
         break;
     }
     case 6: {
@@ -2288,9 +2288,9 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
         vt[1].fn(iface + vt[1].delta);
         char* obj = **(char***)(self + 0x10);
         sVE_18CA10p* vt2 = *(sVE_18CA10p**)(obj + 4);
-        void* r = vt2[5].fn(obj + vt2[5].delta, self, *(int*)(widget + 0x18));
-        if (r != 0) {
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
+        void* nextState = vt2[5].fn(obj + vt2[5].delta, self, *(int*)(widget + 0x18));
+        if (nextState != 0) {
+            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
         }
         break;
     }
@@ -2483,21 +2483,21 @@ public:
  */
 extern "C" void func_0018CF50(void* self, int on)
 {
-    cUIObj_18CF50* a = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15BC));
-    if (a != 0) {
-        a->setVisible(on);
+    cUIObj_18CF50* defaultPicture = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15BC));
+    if (defaultPicture != 0) {
+        defaultPicture->setVisible(on);
     }
-    cUIObj_18CF50* b = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15C0));
-    if (b != 0) {
-        b->setVisible(on ^ 1);
+    cUIObj_18CF50* proPicture = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15C0));
+    if (proPicture != 0) {
+        proPicture->setVisible(on ^ 1);
     }
-    cUIObj_18CF50* c = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_default_text));
-    if (c != 0) {
-        c->setVisible(on);
+    cUIObj_18CF50* defaultText = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_default_text));
+    if (defaultText != 0) {
+        defaultText->setVisible(on);
     }
-    cUIObj_18CF50* d = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pro_text));
-    if (d != 0) {
-        d->setVisible(on ^ 1);
+    cUIObj_18CF50* proText = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pro_text));
+    if (proText != 0) {
+        proText->setVisible(on ^ 1);
     }
 }
 #endif
@@ -2919,21 +2919,21 @@ extern void* cFEStateOptionsDeviceSelect_vtbl[];
  * Constructs the memory-card device select state (state id 33) for a load or a save.
  *
  * Runs cFEMemCard_cFEMemCard with @p engine and @p cardMode, installs cFEStateOptionsDeviceSelect_vtbl, stores @p
- * isSave at +0x22C and @p a4 at +0x230, and clears +0x234 (the hidden-buttons flag) and +0x238. A load screen (@p
+ * isSave at +0x22C and @p isOnline at +0x230, and clears +0x234 (the hidden-buttons flag) and +0x238. A load screen (@p
  * isSave 0) also clears the card manager's mPollForFullCard. cFECustom_getNextState creates it with (2, 1, 0), (1, 0,
  * 0) or (2, 0, 0), and the quick-messages popup (func_001C2C50) with (2, 1, 1).
  *
  * @param engine  the UI engine
  * @param cardMode  the memory-card screen type passed to cFEMemCard_cFEMemCard (kept at +0x1BC)
  * @param isSave  nonzero for a save screen
- * @param a4  nonzero when opened from the online front end (On Tour bOnline); func_0018E478 then picks next-state
+ * @param isOnline  nonzero when opened from the online front end (On Tour bOnline); func_0018E478 then picks next-state
  *            choice 2
  * @return @p self
  */
-extern "C" void* func_0018D7F0(void* self, int engine, int cardMode, int isSave, int a4)
+extern "C" void* func_0018D7F0(void* self, int engine, int cardMode, int isSave, int isOnline)
 {
     cFEMemCard_cFEMemCard(self, engine, cardMode);
-    *(int*)((char*)self + 0x230) = a4;
+    *(int*)((char*)self + 0x230) = isOnline;
     *(void***)((char*)self + 8) = cFEStateOptionsDeviceSelect_vtbl;
     *(int*)((char*)self + 0xC) = 33;
     *(int*)((char*)self + 0x22C) = isSave;
@@ -3351,9 +3351,9 @@ extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int e
             return;
         if (self->f224 == 0)
             return;
-        int v = *(int*)(widget + 0x18);
-        self->slot = v;
-        *(int*)(app + 0xF8) = v;
+        int pickedSlot = *(int*)(widget + 0x18);
+        self->slot = pickedSlot;
+        *(int*)(app + 0xF8) = pickedSlot;
         if (self->mode == 2 && self->f22C != 0) {
             func_0023CAE8(app, 2, -1);
             self->f1DC = 1;
@@ -3379,16 +3379,16 @@ extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int e
     }
     case 6: {
         self->f238 = 0;
-        char* a = (char*)cSSXApp_getMCManager(SSXApp);
+        char* mcManager = (char*)cSSXApp_getMCManager(SSXApp);
         if (self->busy == 1)
             return;
-        int s = self->state;
-        if (s == 6)
+        int currentState = self->state;
+        if (currentState == 6)
             return;
         self->f1E4 = 1;
-        if (s == 0 || s == 2 || s == 1) {
-            sVE_18DEA0v* vt = *(sVE_18DEA0v**)(a + 0x748);
-            vt[1].fn(a + vt[1].delta, 0);
+        if (currentState == 0 || currentState == 2 || currentState == 1) {
+            sVE_18DEA0v* vt = *(sVE_18DEA0v**)(mcManager + 0x748);
+            vt[1].fn(mcManager + vt[1].delta, 0);
         }
         self->state = 6;
         break;
@@ -3400,21 +3400,21 @@ extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int e
             return;
         if (self->f22C == 0)
             return;
-        char* a = (char*)cSSXApp_getMCManager(SSXApp);
-        if ((*(cDev_18DEA0**)(a + 0x434))->v54(*(int*)(a + 0x428)) == 0)
+        char* mcManager = (char*)cSSXApp_getMCManager(SSXApp);
+        if ((*(cDev_18DEA0**)(mcManager + 0x434))->v54(*(int*)(mcManager + 0x428)) == 0)
             return;
-        int v = *(int*)(widget + 0x18);
-        self->slot = v;
-        *(int*)(a + 0xF8) = v;
-        int s = self->state;
-        if (s != 1)
+        int pickedSlot = *(int*)(widget + 0x18);
+        self->slot = pickedSlot;
+        *(int*)(mcManager + 0xF8) = pickedSlot;
+        int currentState = self->state;
+        if (currentState != 1)
             return;
-        if ((*(cDev_18DEA0**)(a + 0x434))->v67(self->slot)) {
-            self->busy = s;
+        if ((*(cDev_18DEA0**)(mcManager + 0x434))->v67(self->slot)) {
+            self->busy = currentState;
             self->state = 4;
-            cMCOverlayManager_SetAction(a, 0);
-            sVE_18DEA0v* vt = *(sVE_18DEA0v**)(a + 0x748);
-            vt[1].fn(a + vt[1].delta, 0x18);
+            cMCOverlayManager_SetAction(mcManager, 0);
+            sVE_18DEA0v* vt = *(sVE_18DEA0v**)(mcManager + 0x748);
+            vt[1].fn(mcManager + vt[1].delta, 0x18);
         }
         break;
     }

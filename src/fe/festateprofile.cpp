@@ -887,11 +887,11 @@ extern "C" void func_0018FAF0(void* self)
     if (*(int*)((char*)self + 0x1AC) == 0) {
         int sel = *(int*)((char*)self + 0x27C);
         if (sel == 0) {
-            char* g = **(char***)((char*)self + 0x10);
-            sVEK18FAF0a* vt = *(sVEK18FAF0a**)(g + 4);
-            void* r = vt[5].fn(g + vt[5].delta, self, *(int*)((char*)self + 0x1BC));
-            if (r != 0)
-                cUIStateStack_pushCheck(*(char**)((char*)self + 0x10) + 0x18, r);
+            char* frontEnd = **(char***)((char*)self + 0x10);
+            sVEK18FAF0a* vt = *(sVEK18FAF0a**)(frontEnd + 4);
+            void* nextState = vt[5].fn(frontEnd + vt[5].delta, self, *(int*)((char*)self + 0x1BC));
+            if (nextState != 0)
+                cUIStateStack_pushCheck(*(char**)((char*)self + 0x10) + 0x18, nextState);
         } else if (sel == 1) {
             char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);

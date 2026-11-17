@@ -503,17 +503,17 @@ struct sSelf_4A20 {
  * (func_0019DC20), sets the slot to -1, decrements the pending count (+0x5C) and redraws the selected row's picture
  * (func_001D47A0 with +0x9C). Called from cFEStateTrophyRoom_onUpdate.
  *
- * @param p  the trophy room state
+ * @param trophyRoom  the trophy room state
  */
-extern "C" void func_001D4A20(void* p)
+extern "C" void func_001D4A20(void* trophyRoom)
 {
-    sSelf_4A20* self = (sSelf_4A20*)p;
+    sSelf_4A20* self = (sSelf_4A20*)trophyRoom;
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     int i;
     for (i = 0; i < 5; i++) {
         if (self->tex[i] >= 0 && func_0019E238(mgr, self->bank, self->tex[i]) != 0) {
-            char* d = func_0019E2B0(mgr, self->bank, self->tex[i]);
-            self->snd[i] = ((cGame_4A20*)GrMan)->playSound(d + *(int*)(d + 0x14), str_trph, 0, 1, -1);
+            char* fileData = func_0019E2B0(mgr, self->bank, self->tex[i]);
+            self->snd[i] = ((cGame_4A20*)GrMan)->playSound(fileData + *(int*)(fileData + 0x14), str_trph, 0, 1, -1);
             func_0019DC20(mgr, self->bank, self->tex[i]);
             self->tex[i] = -1;
             self->count--;
@@ -629,22 +629,22 @@ extern void* cFEStateRewardsRoom_vtbl[];
  *
  * Runs cUIState's constructor (func_0039E2A0; @p engine reaches it untouched in the second argument register), stores
  * mHashName 46 and cFEStateRewardsRoom_vtbl, sets mUserNum to @p idx and mCtrlBits to that user's controller bits
- * (func_001A1CD0 on the engine's front end), +0x4C to @p a3 (On Tour mInStore) and +0x48 to the user's character
+ * (func_001A1CD0 on the engine's front end), +0x4C to @p inStore (On Tour mInStore) and +0x48 to the user's character
  * (cBENewPlayerInterface_getPlayerCharID; On Tour mCharID).
  *
  * @param engine  the UI engine (only passed on to cUIState's constructor)
  * @param idx  the user number
- * @param a3  the in-store flag; the front end's factories pass 1
+ * @param inStore  the in-store flag; the front end's factories pass 1
  * @return @p self
  */
-extern "C" void* func_001D4BC8(void* self, int engine, signed char idx, int a3)
+extern "C" void* func_001D4BC8(void* self, int engine, signed char idx, int inStore)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 46;
     *(void***)((char*)self + 0x8) = cFEStateRewardsRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
-    *(int*)((char*)self + 0x4C) = a3;
+    *(int*)((char*)self + 0x4C) = inStore;
     *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
     return self;
 }
@@ -1017,27 +1017,27 @@ extern unsigned short D_004A1390[];
  * Constructs a memory-card overlay state with an overlay id: cFEMemCard_cFEMemCard's work, but with mOVID (+0x98) = @p
  * a3.
  *
- * Runs cUIState's constructor (func_0039E2A0; @p a1 reaches it untouched in the second argument register as the
+ * Runs cUIState's constructor (func_0039E2A0; @p engine reaches it untouched in the second argument register as the
  * engine), the inlined cOVState part (vtable D_00474E08; mDoneTransition, mAllowPauseMenu and mRemovePDA 0; mszChatBuff
- * " " from D_004A1390), stores cFEMemCard's vtable D_0046C980 and runs func_001D5488 with @p a2. func_001FDBF0 and
+ * " " from D_004A1390), stores cFEMemCard's vtable D_0046C980 and runs func_001D5488 with @p memCardType. func_001FDBF0 and
  * func_001FE968 (fe/ovstatepause) call it with types 1 and 2.
  *
- * @param a1  the UI engine (only passed on to cUIState's constructor)
- * @param a2  the memory-card screen type, passed to func_001D5488
- * @param a3  the overlay id stored in mOVID
+ * @param engine  the UI engine (only passed on to cUIState's constructor)
+ * @param memCardType  the memory-card screen type, passed to func_001D5488
+ * @param overlayId  the overlay id stored in mOVID
  * @return @p self
  */
-extern "C" void* func_001D5330(void* self, int a1, int a2, int a3)
+extern "C" void* func_001D5330(void* self, int engine, int memCardType, int overlayId)
 {
     func_0039E2A0(self);
-    *(int*)((char*)self + 0x98) = a3;
+    *(int*)((char*)self + 0x98) = overlayId;
     *(void***)((char*)self + 0x8) = D_00474E08;
     *(int*)((char*)self + 0x48) = 0;
     *(int*)((char*)self + 0x4C) = 0;
     *(int*)((char*)self + 0x54) = 0;
     *(unsigned short*)((char*)self + 0x58) = D_004A1390[0];
     *(void***)((char*)self + 0x8) = D_0046C980;
-    func_001D5488(self, a2);
+    func_001D5488(self, memCardType);
     return self;
 }
 #endif
@@ -1851,23 +1851,23 @@ extern "C" void func_001D64C0(unsigned int mode)
         break;
     }
     if ((*((sOpt_001D64C0*)func_0028B180())->holder)->lang->v02(lang) == 1) {
-        float a = func_00287670(func_0028B180());
-        float b = func_002876A0(func_0028B180());
-        float c = func_002876D0(func_0028B180());
+        float sfxVolume = func_00287670(func_0028B180());
+        float speechVolume = func_002876A0(func_0028B180());
+        float musicVolume = func_002876D0(func_0028B180());
         int x = *(int*)((char*)func_0028B180() + 0x62B8);
         int y = *(int*)((char*)func_0028B180() + 0x62B4);
         int z = *(int*)((char*)func_0028B180() + 0x534);
         cSSXAudio_FrontEndPurge(func_0028B180());
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(lang);
-        func_00287410(func_0028B180(), (int)a);
-        func_00287488(func_0028B180(), (int)b);
-        func_00287520(func_0028B180(), (int)c);
+        func_00287410(func_0028B180(), (int)sfxVolume);
+        func_00287488(func_0028B180(), (int)speechVolume);
+        func_00287520(func_0028B180(), (int)musicVolume);
         cSSXAudio_SetArcadeSFX(func_0028B180(), x);
         func_002875D0(func_0028B180(), y);
         func_00285FB0(func_0028B180());
-        sOpt_001D64C0* o = (sOpt_001D64C0*)func_0028B180();
-        o->v04(z);
+        sOpt_001D64C0* audio = (sOpt_001D64C0*)func_0028B180();
+        audio->v04(z);
     }
 }
 #endif

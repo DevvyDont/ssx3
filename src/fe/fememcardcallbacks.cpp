@@ -444,18 +444,18 @@ extern "C" void func_001D7010(void)
     sVEntryV001D69E0* sfvt = *(sVEntryV001D69E0**)sf;
     sfvt[14].fn(sf + sfvt[14].delta, *(int*)(mp + 0xF8), name2);
     ((sFEMC_001D7010*)cFEMemCard_mInstance)->f19C = 0xC;
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(o + 4);
-    sprintf1(buf, (unsigned short*)ovt[4].fn(o + ovt[4].delta, GetHashValue32(str_kT_MEMOVGameCorruptPS2)), name);
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
+    sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMOVGameCorruptPS2)), name);
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 1, 0);
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
-    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
-    char* mthis = m + mvt[26].delta;
-    char* o2 = (char*)SSXApp->FELocale;
-    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(o2 + 4);
-    char* o2this = o2 + o2vt[4].delta;
+    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
+    char* mthis = popup + mvt[26].delta;
+    char* buttonLocale = (char*)SSXApp->FELocale;
+    sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(buttonLocale + 4);
+    char* o2this = buttonLocale + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
     if (buf != 0) {
@@ -1342,26 +1342,26 @@ public:
  * instance.
  *
  * @param self_  the memory-card screen
- * @param a1  the 16-bit message text
- * @param a2  nonzero for a single (yes) button
- * @param a3  nonzero for no buttons
- * @param a4  layer offset of the popup
- * @param a5  passUpdate: nonzero lets updates pass to the screen below
- * @param a6  nonzero for the snowflake variant
+ * @param displayText  the 16-bit message text
+ * @param yesOnly  nonzero for a single (yes) button
+ * @param noButtons  nonzero for no buttons
+ * @param layerOffset  layer offset of the popup
+ * @param passUpdate  passUpdate: nonzero lets updates pass to the screen below
+ * @param snowFlake  nonzero for the snowflake variant
  */
-extern "C" void func_001D8530(void* self_, int a1, int a2, int a3, int a4, int a5, int a6)
+extern "C" void func_001D8530(void* self_, int displayText, int yesOnly, int noButtons, int layerOffset, int passUpdate, int snowFlake)
 {
     char* self = (char*)self_;
     if (*(int*)((char*)cFEMemCard_mInstance + 0x19C) != 22) {
         *(int*)(self + 0x210) = 0;
     }
-    cPopup_8530* p = *(cPopup_8530**)(self + 0x218);
-    if (p != 0) {
-        p->v28(a1, a2, a3, a4, a5, a6);
+    cPopup_8530* existingPopup = *(cPopup_8530**)(self + 0x218);
+    if (existingPopup != 0) {
+        existingPopup->v28(displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
     } else {
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm, 0x100, 0);
         void* engine = *(void**)((char*)cFEMemCard_mInstance + 0x10);
-        cPopup_8530* n = (cPopup_8530*)cFEPopupConfirm_cFEPopupConfirm_8530(mem, engine, cFEMemCard_mInstance, a1, a2, a3, a4, a5, a6);
+        cPopup_8530* n = (cPopup_8530*)cFEPopupConfirm_cFEPopupConfirm_8530(mem, engine, cFEMemCard_mInstance, displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
         *(cPopup_8530**)(self + 0x218) = n;
         cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, n);
     }
@@ -1945,9 +1945,9 @@ extern "C" void func_001D8DE0(cMemCardK1D8DE0* card)
         break;
     }
     if (*(int*)((char*)cFEMemCard_mInstance + 0x210) == 0 && *(int*)((char*)cFEMemCard_mInstance + 0x208) == 0 && *(int*)((char*)cFEMemCard_mInstance + 0x204) == 0) {
-        int m = *(int*)(mp + 0x130);
-        if (m == 40 || m == 11 || m == 0xF || m == 0x10 || m == 17 || m == 18 || m == 0x1F
-            || m == 33 || m == 0x20 || m == 34 || m == 44 || m == 25 || m == 26) {
+        int managerState = *(int*)(mp + 0x130);
+        if (managerState == 40 || managerState == 11 || managerState == 0xF || managerState == 0x10 || managerState == 17 || managerState == 18 || managerState == 0x1F
+            || managerState == 33 || managerState == 0x20 || managerState == 34 || managerState == 44 || managerState == 25 || managerState == 26) {
             VCALL_K1D8DE0(self, 8, 47));
         }
     }
@@ -1969,9 +1969,9 @@ extern "C" void func_001D8DE0(cMemCardK1D8DE0* card)
         sVEntryK1D8DE0* vt = *(sVEntryK1D8DE0**)(self + 8);
         void (**pf)(void*, ...) = &vt[38].fn;
         (*pf)(self + vt[38].delta, (*(cStreamK1D8DE0**)(mp + 0x434))->v67(sel) == 0 || (*(cStreamK1D8DE0**)(mp + 0x434))->v53() == 0);
-        bool a = !(*(cStreamK1D8DE0**)(mp + 0x434))->v67(sel);
-        bool b = !(*(cStreamK1D8DE0**)(mp + 0x434))->v53();
-        VCALL_K1D8DE0(self, 8, 39), a, b);
+        bool slotEmpty = !(*(cStreamK1D8DE0**)(mp + 0x434))->v67(sel);
+        bool cardMissing = !(*(cStreamK1D8DE0**)(mp + 0x434))->v53();
+        VCALL_K1D8DE0(self, 8, 39), slotEmpty, cardMissing);
     }
 }
 #endif

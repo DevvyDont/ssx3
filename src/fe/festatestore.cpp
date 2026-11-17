@@ -750,11 +750,11 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                 func_00184780(self, 1);
             }
         } else if (*(char**)(item + 0x40) == *(char**)(self + 0x50)) {
-            char* a = *(char**)(*(char**)(self + 0x4C) + 0xA0);
-            char* b = *(char**)(*(char**)(self + 0x50) + 0xA0);
-            if (a != 0 && b != 0) {
-                int ai = *(signed char*)(a + 0x18);
-                int bi = *(signed char*)(b + 0x18);
+            char* categoryItem = *(char**)(*(char**)(self + 0x4C) + 0xA0);
+            char* trickItem = *(char**)(*(char**)(self + 0x50) + 0xA0);
+            if (categoryItem != 0 && trickItem != 0) {
+                int ai = *(signed char*)(categoryItem + 0x18);
+                int bi = *(signed char*)(trickItem + 0x18);
                 char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 if (func_00150048(pi, *(signed char*)(self + 0x44), ai, bi) && !func_0014FFB8(pi, *(signed char*)(self + 0x44), ai, bi)) {
@@ -791,9 +791,9 @@ extern "C" void func_00185268(char* self, char* item, int msg)
             SetActive_185268(*(char**)(self + 0x4C), 1);
             SetActive_185268(*(char**)(self + 0x50), 0);
             {
-                cUIObj_185268* o = *(cUIObj_185268**)(*(char**)(self + 0x50) + 0xA0);
-                if (o != 0)
-                    o->SetColor(sColor_185268(1.0f, 0.0f, 0.0f, 0.0f));
+                cUIObj_185268* trickSelection = *(cUIObj_185268**)(*(char**)(self + 0x50) + 0xA0);
+                if (trickSelection != 0)
+                    trickSelection->SetColor(sColor_185268(1.0f, 0.0f, 0.0f, 0.0f));
             }
             cUIMenu_setSelectedByIndex(*(void**)(self + 0x50), 0xFF);
             func_00183B08(self);
@@ -805,17 +805,17 @@ extern "C" void func_00185268(char* self, char* item, int msg)
         break;
     case 7:
         if (*(char**)(item + 0x40) == *(char**)(self + 0x50)) {
-            char* a = *(char**)(*(char**)(self + 0x4C) + 0xA0);
-            char* b = *(char**)(*(char**)(self + 0x50) + 0xA0);
-            if (a != 0 && b != 0) {
+            char* categoryItem = *(char**)(*(char**)(self + 0x4C) + 0xA0);
+            char* trickItem = *(char**)(*(char**)(self + 0x50) + 0xA0);
+            if (categoryItem != 0 && trickItem != 0) {
                 char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
-                int bi = *(signed char*)(b + 0x18);
-                int ai = *(signed char*)(a + 0x18);
+                int bi = *(signed char*)(trickItem + 0x18);
+                int ai = *(signed char*)(categoryItem + 0x18);
                 int n = 0;
                 sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
                 if (*(int*)(self + 0x48) != 0) {
-                    char* r = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
-                    cRiderAnimBase_play(*(void**)(r + 0xC), tbl[bi].anim, 0, -1.0f);
+                    char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
+                    cRiderAnimBase_play(*(void**)(feRider + 0xC), tbl[bi].anim, 0, -1.0f);
                 }
             }
         }
@@ -826,26 +826,26 @@ extern "C" void func_00185268(char* self, char* item, int msg)
             if (*(void**)(self + 0x50) != 0 && *(int*)(item + 0x18) != -1) {
                 cFEStateUberTrick_trickVisible(self, 1);
                 cWScriptMan_checkGate(self);
-                cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_choose));
-                if (t != 0)
-                    cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_66HELPChooseCat));
+                cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_choose));
+                if (helpText != 0)
+                    cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_66HELPChooseCat));
             } else {
                 cFEStateUberTrick_trickVisible(self, 0);
-                cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_choose));
-                if (t != 0)
-                    cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_FEHELPAcceptTrick));
+                cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_choose));
+                if (helpText != 0)
+                    cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_FEHELPAcceptTrick));
             }
         } else if (*(char**)(self + 0x50) != 0 && *(char**)(item + 0x40) == *(char**)(self + 0x50)) {
-            cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_custom));
-            char* a = *(char**)(*(char**)(self + 0x4C) + 0xA0);
-            char* b = *(char**)(*(char**)(self + 0x50) + 0xA0);
-            if (a != 0 && b != 0 && t != 0) {
-                int ai = *(signed char*)(a + 0x18);
-                int bi = *(signed char*)(b + 0x18);
+            cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_custom));
+            char* categoryItem = *(char**)(*(char**)(self + 0x4C) + 0xA0);
+            char* trickItem = *(char**)(*(char**)(self + 0x50) + 0xA0);
+            if (categoryItem != 0 && trickItem != 0 && helpText != 0) {
+                int ai = *(signed char*)(categoryItem + 0x18);
+                int bi = *(signed char*)(trickItem + 0x18);
                 char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 if (func_00150048(pi, *(signed char*)(self + 0x44), ai, bi) && !func_0014FFB8(pi, *(signed char*)(self + 0x44), ai, bi)) {
-                    cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_66HELPCustomUber));
+                    cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_66HELPCustomUber));
                 } else if (D_00535C11[0] == 0) {
                     if (func_0014FFB8(pi, *(signed char*)(self + 0x44), ai, bi)) {
                         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -858,12 +858,12 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                         int n;
                         sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
                         if (points >= tbl[bi].cost)
-                            cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_FEHELPTrickAvailBuy));
+                            cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_FEHELPTrickAvailBuy));
                         else
-                            cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_OVRCMNSaveCashUber));
+                            cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_OVRCMNSaveCashUber));
                     }
                 } else {
-                    cUIText_setUnicodeStringByID(t, GetHashValue32(str_kT_FEHELPTrickBuyCTM));
+                    cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_FEHELPTrickBuyCTM));
                 }
                 func_00184520(self);
             }

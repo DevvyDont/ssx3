@@ -491,8 +491,8 @@ extern "C" void func_001F7800(void* self, void* item, int msg)
     }
     switch (msg) {
     case 5: {
-        int v = *(int*)((char*)item + 0x18);
-        if (v == 0) {
+        int choice = *(int*)((char*)item + 0x18);
+        if (choice == 0) {
             ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
             cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             func_0039F190_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
@@ -500,7 +500,7 @@ extern "C" void func_001F7800(void* self, void* item, int msg)
             func_0029D6D0(func_0028B180());
             return;
         }
-        if (v == 2) {
+        if (choice == 2) {
             cOVStateManager_triggerOverlay(29);
             return;
         }

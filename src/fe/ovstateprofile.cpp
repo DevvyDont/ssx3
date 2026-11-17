@@ -441,12 +441,12 @@ static inline cUIObj_1380* getObj_1380(cState_1380* self, char* name)
  * exactly when slot 66 says yes for its file; with no usable device every button is enabled and selected. Finally
  * "arrowleft" / "arrowright" are shown only when cFEMemCard_checkNextAvailableDevice finds a device in that direction.
  *
- * @param p  the profile overlay state (this)
+ * @param profileState  the profile overlay state (this)
  */
 // Refreshes the memory-card profile list: device name, then the six profile slots and the arrow hints.
-extern "C" void func_00211380(void* p)
+extern "C" void func_00211380(void* profileState)
 {
-    cState_1380* self = (cState_1380*)p;
+    cState_1380* self = (cState_1380*)profileState;
     unsigned short buf[800];
     char name[0x40];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
@@ -465,36 +465,36 @@ extern "C" void func_00211380(void* p)
         cUIText_setUnicodeStringWrap(getObj_1380(self, str_Memory_card_text_b), buf);
         *(int*)((char*)self + 0x21C) = *(int*)(mp + 0x428);
         self->v43();
-        cUIObj_1380* o = getObj_1380(self, str_1percentage_b);
-        *(sCol_1380*)((char*)o + 0x88) = D_004C66C8_1380;
+        cUIObj_1380* textWidget = getObj_1380(self, str_1percentage_b);
+        *(sCol_1380*)((char*)textWidget + 0x88) = D_004C66C8_1380;
         (*(cMCSub_1380**)(mp + 0x434))->v64(buf);
-        cUIText_setUnicodeString(o, buf);
-        o->v09(0);
+        cUIText_setUnicodeString(textWidget, buf);
+        textWidget->v09(0);
         for (int i = 1; i < 7; i++) {
             sprintf(name, str_playerpct_d_b, i);
-            o = getObj_1380(self, name);
+            textWidget = getObj_1380(self, name);
             (*(cMCSub_1380**)(mp + 0x434))->v14(i - 1, (char*)self + 0x234);
-            cUIText_setUnicodeString(o, (unsigned short*)((char*)self + 0x234));
+            cUIText_setUnicodeString(textWidget, (unsigned short*)((char*)self + 0x234));
             if (!(*(cMCSub_1380**)(mp + 0x434))->v67(i - 1) && !(*(cMCSub_1380**)(mp + 0x434))->v66(i - 1)
                 && (*(cMCSub_1380**)(mp + 0x434))->v55()) {
                 if (!first) {
                     first = 1;
-                    o->v08(0);
+                    textWidget->v08(0);
                 } else {
-                    o->v25(1);
-                    o->v08(1);
+                    textWidget->v25(1);
+                    textWidget->v08(1);
                 }
             } else if ((*(cMCSub_1380**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
                 if ((*(cMCSub_1380**)(mp + 0x434))->v66(i - 1)) {
-                    o->v08(1);
-                    o->v25(1);
+                    textWidget->v08(1);
+                    textWidget->v25(1);
                 } else {
-                    o->v08(0);
-                    o->v25(0);
+                    textWidget->v08(0);
+                    textWidget->v25(0);
                 }
             } else {
-                o->v25(1);
-                o->v08(1);
+                textWidget->v25(1);
+                textWidget->v08(1);
             }
         }
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
@@ -761,11 +761,11 @@ extern "C" void* cSSXApp_getMCManager(void* app);
  * Usability is slot 54 of the manager's mpMemCard for mSelectedDevice. It is the onWidgetMenu slot (+0xA4) of
  * cOVState_PROFILE_vtbl.
  *
- * @param a1  the menu (unused)
+ * @param menu  the menu (unused)
  * @param key  the menu event
  * @return 0x100 or 0x101 as above
  */
-extern "C" int func_00211B38(void* self, int a1, unsigned int key)
+extern "C" int func_00211B38(void* self, int menu, unsigned int key)
 {
     char* mgr = (char*)cSSXApp_getMCManager(SSXApp);
     switch (key) {

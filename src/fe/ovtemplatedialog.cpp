@@ -787,201 +787,201 @@ extern "C" void func_0020BAB8(int type)
     char* mgr = (char*)SSXApp->Game->UI;
     int cur = (int)cUIStateStack_getCurrentState(mgr + 0x18);
     if (type == 0x1) {
-        char* p = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00473098;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        *(int*)(p + 0xC4) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00473098;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        *(int*)(newOverlay + 0xC4) = 0;
+        result = newOverlay;
     }
     if (type == 0x2) {
-        char* p = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472FC0;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        *(int*)(p + 0xC4) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00472FC0;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        *(int*)(newOverlay + 0xC4) = 0;
+        result = newOverlay;
     }
     if (type == 0x3) {
-        char* p = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472EE8;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        *(int*)(p + 0xC4) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00472EE8;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        *(int*)(newOverlay + 0xC4) = 0;
+        result = newOverlay;
     }
     if (type == 0x4) {
-        char* p = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472E10;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        *(int*)(p + 0xC4) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00472E10;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        *(int*)(newOverlay + 0xC4) = 0;
+        result = newOverlay;
     }
     if (type == 0x5) {
-        char* p = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472D38;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        *(int*)(p + 0xC4) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00472D38;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        *(int*)(newOverlay + 0xC4) = 0;
+        result = newOverlay;
     }
     if (type == 0x6) {
-        char* p = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472C60;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        *(int*)(p + 0xC4) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00472C60;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        *(int*)(newOverlay + 0xC4) = 0;
+        result = newOverlay;
     }
     if (type == 0x7) {
-        char* p = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = cOVState_PAUSE_OPTIONS_vtbl;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_OPTIONS_vtbl;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 0x8) {
-        char* p = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472850;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00472850;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 0x9) {
-        char* p = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00472778;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00472778;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 10) {
-        char* p = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00474088;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00474088;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 11) {
-        char* p = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00473FB0;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00473FB0;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 0xC) {
-        char* p = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(void**)(p + 0x8) = D_00473E00;
-        *(int*)(p + 0xA0) = 0x1;
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        *(int*)(p + 0xC) = GetHashValue32(str_finishov);
-        result = p;
+        char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(void**)(newOverlay + 0x8) = D_00473E00;
+        *(int*)(newOverlay + 0xA0) = 0x1;
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        *(int*)(newOverlay + 0xC) = GetHashValue32(str_finishov);
+        result = newOverlay;
     }
     if (type == 13) {
-        char* p = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(void**)(p + 0x8) = D_00473D28;
-        *(int*)(p + 0xA0) = 0x1;
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        *(int*)(p + 0xC) = GetHashValue32(str_finishov);
-        result = p;
+        char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(void**)(newOverlay + 0x8) = D_00473D28;
+        *(int*)(newOverlay + 0xA0) = 0x1;
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        *(int*)(newOverlay + 0xC) = GetHashValue32(str_finishov);
+        result = newOverlay;
     }
     if (type == 0xE) {
-        char* p = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00474B80;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00474B80;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 0xF) {
-        char* p = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = cOVState_TOPTIMES_vtbl;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = cOVState_TOPTIMES_vtbl;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 0x10) {
-        char* p = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = cOVState_REWARDS_vtbl;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = cOVState_REWARDS_vtbl;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 17) {
-        char* p = (char*)operator new(184, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = cOVState_REPLAY_vtbl;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(184, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = cOVState_REPLAY_vtbl;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 18) {
         result = (char*)func_001FDBF0(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
@@ -990,182 +990,182 @@ extern "C" void func_0020BAB8(int type)
         result = (char*)func_001FE968(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
     }
     if (type == 20) {
-        char* p = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_004725C8;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_004725C8;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 21) {
-        char* p = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_004726A0;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_004726A0;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 22) {
-        char* p = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00473ED8;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00473ED8;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 23) {
-        char* p = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_004749D0;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        *(int*)(p + 0x9C) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_004749D0;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        *(int*)(newOverlay + 0x9C) = 0;
+        result = newOverlay;
     }
     if (type == 0x18) {
-        char* p = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_004748F8;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x9C) = 0x1;
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_004748F8;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x9C) = 0x1;
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 25) {
-        char* p = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00474820;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x9C) = 0x2;
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00474820;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x9C) = 0x2;
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 26) {
-        char* p = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00474748;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x9C) = 0x3;
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00474748;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x9C) = 0x3;
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 27) {
-        char* p = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00474670;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x9C) = 0x4;
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00474670;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x9C) = 0x4;
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 0x1C) {
-        char* p = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00474598;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x9C) = 0x5;
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00474598;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x9C) = 0x5;
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 29) {
-        char* p = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = cOVState_BIGCHALLENGE_START_vtbl;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        func_001F7548(p);
-        result = p;
+        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = cOVState_BIGCHALLENGE_START_vtbl;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        func_001F7548(newOverlay);
+        result = newOverlay;
     }
     if (type == 0x1E) {
-        char* p = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_004735B0;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        func_001F7738(p);
-        result = p;
+        char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_004735B0;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        func_001F7738(newOverlay);
+        result = newOverlay;
     }
     if (type == 0x1F) {
-        char* p = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = cOVState_ENTERLODGE_vtbl;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = cOVState_ENTERLODGE_vtbl;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 0x20) {
-        char* p = (char*)operator new(468, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(void**)(p + 0x8) = cOVState_MAP_vtbl;
-        new (p + 0x9C) sDlgSlot_BAB8[8];
-        result = p;
+        char* newOverlay = (char*)operator new(468, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(void**)(newOverlay + 0x8) = cOVState_MAP_vtbl;
+        new (newOverlay + 0x9C) sDlgSlot_BAB8[8];
+        result = newOverlay;
     }
     if (type == 33) {
-        char* p = (char*)operator new(912, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_004733F8;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        func_002006B8(p + 0x9C);
-        result = p;
+        char* newOverlay = (char*)operator new(912, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_004733F8;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        func_002006B8(newOverlay + 0x9C);
+        result = newOverlay;
     }
     if (type == 34) {
         result = (char*)cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(operator new(0x180, str_cOVStateOverlay, 0, 0), mgr, 34);
     }
     if (type == 35) {
-        char* p = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_00473C50;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_00473C50;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 36) {
         result = (char*)cOVState_PROFILE_cOVState_PROFILE(operator new(636, str_cOVStateOverlay, 0, 0), mgr, 36, 42);
@@ -1174,40 +1174,40 @@ extern "C" void func_0020BAB8(int type)
         result = (char*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(operator new(564, str_cOVStateOverlay, 0, 0), mgr, 37);
     }
     if (type == 38) {
-        char* p = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = D_004744C0;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0x9C) = 0x6;
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = D_004744C0;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0x9C) = 0x6;
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
     if (type == 39) {
-        char* p = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(void**)(p + 0x8) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(int*)(p + 0xA0) = 0x1;
-        *(int*)(p + 0x98) = type;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        *(int*)(p + 0x9C) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(int*)(newOverlay + 0xA0) = 0x1;
+        *(int*)(newOverlay + 0x98) = type;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        *(int*)(newOverlay + 0x9C) = 0;
+        result = newOverlay;
     }
     if (type == 40) {
-        char* p = (char*)operator new(228, str_cOVStateOverlay, 0, 0);
-        func_0039E2A0(p, mgr);
-        *(int*)(p + 0x98) = type;
-        *(unsigned short*)(p + 0x58) = D_004A2088[0];
-        *(void**)(p + 0x8) = D_00473248;
-        *(int*)(p + 0x48) = 0;
-        *(int*)(p + 0x4C) = 0;
-        *(int*)(p + 0x54) = 0;
-        result = p;
+        char* newOverlay = (char*)operator new(228, str_cOVStateOverlay, 0, 0);
+        func_0039E2A0(newOverlay, mgr);
+        *(int*)(newOverlay + 0x98) = type;
+        *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
+        *(void**)(newOverlay + 0x8) = D_00473248;
+        *(int*)(newOverlay + 0x48) = 0;
+        *(int*)(newOverlay + 0x4C) = 0;
+        *(int*)(newOverlay + 0x54) = 0;
+        result = newOverlay;
     }
 
     *(int*)(result + 0x20) = cur;
@@ -1268,14 +1268,14 @@ extern "C" void func_0020CA10(void)
     } else if (cWScriptMan_isLocalMissionActive(cWScriptMan_TheWScriptMan) != 0) {
         cOVStateManager_triggerOverlay(2);
     } else {
-        signed char* g = (signed char*)cBENewRaceInterface_newRace;
-        if (g[0x49] == 0 && notMode4_0020CA10(g)) {
+        signed char* raceDb = (signed char*)cBENewRaceInterface_newRace;
+        if (raceDb[0x49] == 0 && notMode4_0020CA10(raceDb)) {
             cOVStateManager_triggerOverlay(1);
         } else if (SSXApp->Game->mCurrentStateID == 11) {
             cOVStateManager_triggerOverlay(4);
         } else {
-            signed char* g2 = (signed char*)cBENewRaceInterface_newRace;
-            if (g2[0x48] == 4) {
+            signed char* modeRaceDb = (signed char*)cBENewRaceInterface_newRace;
+            if (modeRaceDb[0x48] == 4) {
                 cOVStateManager_triggerOverlay(3);
             } else {
                 cOVStateManager_triggerOverlay(5);
@@ -1375,12 +1375,12 @@ extern "C" int func_0020CBE8(void)
 {
     char* mgr = (char*)SSXApp->Game->UI;
     if (func_0020CBA0() == 0) {
-        cUIState20CBE8* s = (cUIState20CBE8*)cUIStateStack_getCurrentState(mgr + 0x18);
-        if (s != 0) {
-            if (*(int*)((char*)s + 0x1C) & 1) {
+        cUIState20CBE8* topState = (cUIState20CBE8*)cUIStateStack_getCurrentState(mgr + 0x18);
+        if (topState != 0) {
+            if (*(int*)((char*)topState + 0x1C) & 1) {
                 return 0;
             }
-            return s->v25();
+            return topState->v25();
         }
         return 1;
     }
@@ -1702,15 +1702,15 @@ extern "C" void func_0020D1D8(void* self)
     for (int i = 0; i < 5; i++) {
         char buf[32];
         sprintf(buf, str_overlayOptpct_d, i);
-        cUIObj_20D1D8* o = (cUIObj_20D1D8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
-        if (o != 0) {
+        cUIObj_20D1D8* optionWidget = (cUIObj_20D1D8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        if (optionWidget != 0) {
             if (i < 1) {
-                int v = D_004A2860[i];
-                cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_00441D10[v]));
-                *(int*)((char*)o + 0x18) = v;
+                int labelIndex = D_004A2860[i];
+                cUIText_setUnicodeStringByID((cUIText*)optionWidget, GetHashValue32(D_00441D10[labelIndex]));
+                *(int*)((char*)optionWidget + 0x18) = labelIndex;
             } else {
-                o->setVisible(0);
-                o->setEnabled(1);
+                optionWidget->setVisible(0);
+                optionWidget->setEnabled(1);
             }
         }
     }

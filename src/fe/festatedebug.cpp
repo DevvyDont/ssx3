@@ -193,9 +193,9 @@ extern "C" int func_00180EF0(sDbgState_180EF0* self, sDbgInput_180EF0* in)
 {
     char buf[0x20];
     func_00180A90(self, self->sel, buf);
-    sDbgObj_180EF0* o = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(self, GetHashValue32(buf));
-    if (o) {
-        o->v09(0);
+    sDbgObj_180EF0* keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(self, GetHashValue32(buf));
+    if (keyObject) {
+        keyObject->v09(0);
     }
     if (in->v19()) {
         func_00180618(self);
@@ -211,9 +211,9 @@ extern "C" int func_00180EF0(sDbgState_180EF0* self, sDbgInput_180EF0* in)
         func_001807C8(self);
     }
     func_00180A90(self, self->sel, buf);
-    o = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(self, GetHashValue32(buf));
-    if (o) {
-        o->v09(1);
+    keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(self, GetHashValue32(buf));
+    if (keyObject) {
+        keyObject->v09(1);
     }
     return 1;
 }

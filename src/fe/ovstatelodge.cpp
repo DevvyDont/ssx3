@@ -721,13 +721,13 @@ extern "C" void func_001D31C0(void* vself)
     *(int*)(self + 0xC4) = id;
     *(int*)(snd + 0x78) = id;
     *(int*)(snd + 0x7C) = 0;
-    sWidget_31C0* a = *(sWidget_31C0**)(self + 0x48);
-    if (isActive_31C0(a)) {
+    sWidget_31C0* passGroup = *(sWidget_31C0**)(self + 0x48);
+    if (isActive_31C0(passGroup)) {
         int both = 0;
-        if (isActive_31C0(a)) {
-            sWidget_31C0* b = *(sWidget_31C0**)(self + 0x4C);
-            if (b != 0) {
-                both = (b->flags >> 6) & 1;
+        if (isActive_31C0(passGroup)) {
+            sWidget_31C0* passFrontGroup = *(sWidget_31C0**)(self + 0x4C);
+            if (passFrontGroup != 0) {
+                both = (passFrontGroup->flags >> 6) & 1;
             }
         }
         if (!both) {
@@ -836,11 +836,11 @@ static inline void wColour_3340(cWidget_3340* w, int col)
  * +0x6C, 2 -> +0x90, 3 -> +0x9C, 4 -> +0x78, 5 -> +0x84 (3 each). The marker gets the element (+0x7C, texture id +0x78
  * = -1) and is shown (virtual slot 8).
  *
- * @param p  the mountain-room state (this)
+ * @param mountainRoom  the mountain-room state (this)
  */
-extern "C" void func_001D3340(void* p)
+extern "C" void func_001D3340(void* mountainRoom)
 {
-    sLodge_3340* self = (sLodge_3340*)p;
+    sLodge_3340* self = (sLodge_3340*)mountainRoom;
     int n0 = 0;
     int n1 = 0;
     int n2 = 0;
@@ -900,39 +900,39 @@ struct sLodge_3780 {
  * Constructs the lodge's peak room state (the list of one peak's trophies) for a player.
  *
  * Runs the cUIState constructor (func_0039E2A0), sets mHashName to 44 and the vtable cFEStatePeakRoom_vtbl, stores the
- * player number (low byte of @p a2) in mUserNum and that player's controller mask (func_001A1CD0 on the engine's first
+ * player number (low byte of @p userNum) in mUserNum and that player's controller mask (func_001A1CD0 on the engine's first
  * word) in mCtrlBits. The character id (+0xDC) comes from the player interface (back-end interface 1,
- * cBENewPlayerInterface_getPlayerCharID), the peak (+0xE0) is @p a3; the widget pointers from +0x48 to +0xD0 are
+ * cBENewPlayerInterface_getPlayerCharID), the peak (+0xE0) is @p peakNum; the widget pointers from +0x48 to +0xD0 are
  * cleared.
  *
- * @param a1  the UI engine (passed through to the cUIState constructor)
- * @param a2  the player number (On Tour userNum)
- * @param a3  the peak (On Tour peakNum)
+ * @param engine  the UI engine (passed through to the cUIState constructor)
+ * @param userNum  the player number (On Tour userNum)
+ * @param peakNum  the peak (On Tour peakNum)
  * @return @p self
  */
-extern "C" void* func_001D3780(void* self, int a1, int a2, int a3)
+extern "C" void* func_001D3780(void* self, int engine, int userNum, int peakNum)
 {
-    signed char idx = a2;
+    signed char idx = userNum;
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 44;
     *(void***)((char*)self + 0x8) = cFEStatePeakRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
-    sLodge_3780* s = (sLodge_3780*)self;
-    s->charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-    s->fE0 = a3;
+    sLodge_3780* peakRoom = (sLodge_3780*)self;
+    peakRoom->charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
+    peakRoom->fE0 = peakNum;
     for (int i = 3; i >= 0; i--) {
-        s->slots[i] = 0;
+        peakRoom->slots[i] = 0;
     }
     for (int j = 0; j < 5; j++) {
-        s->grid[0][j] = 0;
-        s->grid[1][j] = 0;
-        s->grid[2][j] = 0;
-        s->grid[3][j] = 0;
-        s->grid[4][j] = 0;
-        s->grid[5][j] = 0;
+        peakRoom->grid[0][j] = 0;
+        peakRoom->grid[1][j] = 0;
+        peakRoom->grid[2][j] = 0;
+        peakRoom->grid[3][j] = 0;
+        peakRoom->grid[4][j] = 0;
+        peakRoom->grid[5][j] = 0;
     }
-    s->fD0 = 0;
+    peakRoom->fD0 = 0;
     return self;
 }
 #endif
@@ -1423,42 +1423,42 @@ struct sTrophy_4268 {
  * Constructs the lodge's trophy room state (one trophy and its medals) and starts loading their pictures.
  *
  * Runs the cUIState constructor (func_0039E2A0), sets mHashName to 45 and the vtable cFEStateTrophyRoom_vtbl, stores
- * the player number (low byte of @p a2) in mUserNum and that player's controller mask (func_001A1CD0) in mCtrlBits, and
+ * the player number (low byte of @p userNum) in mUserNum and that player's controller mask (func_001A1CD0) in mCtrlBits, and
  * clears +0x48. The character id (+0x50) comes from the player interface (back-end interface 1,
- * cBENewPlayerInterface_getPlayerCharID), followed by a call of that interface's virtual slot 2. @p a3 goes to +0x54
- * and @p a4 to +0x58; the load count (+0x5C) is zeroed, the five texture ids (+0x60) and five loader slots (+0x74) are
+ * cBENewPlayerInterface_getPlayerCharID), followed by a call of that interface's virtual slot 2. @p peakNum goes to +0x54
+ * and @p trophyType to +0x58; the load count (+0x5C) is zeroed, the five texture ids (+0x60) and five loader slots (+0x74) are
  * set to -1 and so is +0x9C. Ends with func_001D4918, which starts the loads of the trophy picture and its up to four
  * medal pictures. The prelude's name `bank` for +0x58 is misleading: it is the trophy, passed to
  * cBERewardInterface_getTrophy / getMedal.
  *
- * @param a1  the UI engine (passed through to the cUIState constructor)
- * @param a2  the player number (On Tour userNum)
- * @param a3  the peak (On Tour peakNum)
- * @param a4  the trophy within the peak (On Tour trophyType)
+ * @param engine  the UI engine (passed through to the cUIState constructor)
+ * @param userNum  the player number (On Tour userNum)
+ * @param peakNum  the peak (On Tour peakNum)
+ * @param trophyType  the trophy within the peak (On Tour trophyType)
  * @return @p self
  */
-extern "C" void* func_001D4268(void* self, int a1, int a2, int a3, int a4)
+extern "C" void* func_001D4268(void* self, int engine, int userNum, int peakNum, int trophyType)
 {
-    signed char idx = a2;
+    signed char idx = userNum;
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 45;
     *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
-    sTrophy_4268* s = (sTrophy_4268*)self;
-    s->f48 = 0;
+    sTrophy_4268* trophyRoom = (sTrophy_4268*)self;
+    trophyRoom->f48 = 0;
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
-    s->charID = cBENewPlayerInterface_getPlayerCharID(pi, *(signed char*)((char*)self + 0x44));
+    trophyRoom->charID = cBENewPlayerInterface_getPlayerCharID(pi, *(signed char*)((char*)self + 0x44));
     sVE_4268* vt = *(sVE_4268**)((char*)pi + 0xC);
     vt[2].fn((char*)pi + vt[2].delta);
-    s->f54 = a3;
-    s->bank = a4;
-    s->count = 0;
+    trophyRoom->f54 = peakNum;
+    trophyRoom->bank = trophyType;
+    trophyRoom->count = 0;
     for (int i = 0; i < 5; i++) {
-        s->snd[i] = -1;
-        s->tex[i] = -1;
+        trophyRoom->snd[i] = -1;
+        trophyRoom->tex[i] = -1;
     }
-    s->f9C = -1;
+    trophyRoom->f9C = -1;
     func_001D4918(self);
     return self;
 }

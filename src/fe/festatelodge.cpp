@@ -731,31 +731,31 @@ struct sLodgeStats_4728 {
  * Constructs the lodge attribute-buying state: base cUIState, cFEStateBuyAttrib_vtbl, state id 41, and a copy of the
  * rider's seven attribute values.
  *
- * Runs the cUIState constructor func_0039E2A0() on @p a1, stores mHashName 41 and the vtable, sets mUserNum (+0x44) to
+ * Runs the cUIState constructor func_0039E2A0() on @p engine, stores mHashName 41 and the vtable, sets mUserNum (+0x44) to
  * 0 and mCtrlBits (+0x15) to rider slot 0's controller mask (func_001A1CD0()), and clears the 0x1C bytes at +0x84. For
  * each of the seven attributes listed in D_004780B0 it stores func_00148158() (player interface, rider 0) at +0x4C[i]
  * and that value / 5 (the level) at +0x68[i]. cFECustom_getNextState() creates it.
  *
- * @param p  the memory for the state
- * @param a1  the UI engine
- * @return @p p
+ * @param stateMemory  the memory for the state
+ * @param engine  the UI engine
+ * @return @p stateMemory
  */
-extern "C" void* func_001F4728(void* p, int a1)
+extern "C" void* func_001F4728(void* stateMemory, int engine)
 {
-    sLodgeStats_4728* self = (sLodgeStats_4728*)p;
-    char* s = (char*)p;
-    func_0039E2A0_4728(self, a1);
-    *(int*)(s + 0xC) = 41;
-    *(void***)(s + 0x8) = cFEStateBuyAttrib_vtbl;
-    *(signed char*)(s + 0x44) = 0;
-    *(unsigned char*)(s + 0x15) = func_001A1CD0_4728(**(void***)(s + 0x10), 0);
+    sLodgeStats_4728* self = (sLodgeStats_4728*)stateMemory;
+    char* stateBytes = (char*)stateMemory;
+    func_0039E2A0_4728(self, engine);
+    *(int*)(stateBytes + 0xC) = 41;
+    *(void***)(stateBytes + 0x8) = cFEStateBuyAttrib_vtbl;
+    *(signed char*)(stateBytes + 0x44) = 0;
+    *(unsigned char*)(stateBytes + 0x15) = func_001A1CD0_4728(**(void***)(stateBytes + 0x10), 0);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
-    MEM_fill(s + 0x84, 0, 0x1C);
+    MEM_fill(stateBytes + 0x84, 0, 0x1C);
     for (int i = 0; i < 7; i++) {
         self->base[i] = func_00148158_4728(iface, 0, D_004780B0[i]);
         self->level[i] = (signed char)(func_00148158_4728(iface, 0, D_004780B0[i]) / 5);
     }
-    return p;
+    return stateMemory;
 }
 #endif
 

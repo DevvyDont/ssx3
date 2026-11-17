@@ -204,8 +204,8 @@ extern "C" void func_001867A8(void* self, void* obj, int msg)
                 PlayIntro1867A8(self);
                 func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
             } else {
-                cMgr1867A8* m = **(cMgr1867A8***)((char*)self + 0x10);
-                Opened1867A8(self, m->v04(self, *(int*)((char*)obj + 0x18)));
+                cMgr1867A8* feCustom = **(cMgr1867A8***)((char*)self + 0x10);
+                Opened1867A8(self, feCustom->v04(self, *(int*)((char*)obj + 0x18)));
             }
         }
     } else if (msg == 6) {
@@ -214,8 +214,8 @@ extern "C" void func_001867A8(void* self, void* obj, int msg)
                 PlayIntro1867A8(self);
                 func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
             } else {
-                cMgr1867A8* m = **(cMgr1867A8***)((char*)self + 0x10);
-                Opened1867A8(self, m->v05(self, *(int*)((char*)obj + 0x18)));
+                cMgr1867A8* feCustom = **(cMgr1867A8***)((char*)self + 0x10);
+                Opened1867A8(self, feCustom->v05(self, *(int*)((char*)obj + 0x18)));
             }
         }
     } else {

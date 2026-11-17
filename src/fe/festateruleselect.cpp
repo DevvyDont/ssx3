@@ -560,57 +560,57 @@ extern int D_005308D4_2088[] __asm__("D_005308D4");
 /**
  * Stores a custom race rule's new setting in the rule settings D_005308B8.
  *
- * Rule 2 stores @p v whole in D_005308D4. The others store bit 0 of @p v as one flag: rules 3, 7 and 14 in word 0 of
+ * Rule 2 stores @p ruleValue whole in D_005308D4. The others store bit 0 of @p ruleValue as one flag: rules 3, 7 and 14 in word 0 of
  * D_005308B8 (bits 3, 4 and 5); rules 4, 8, 1, 5, 6 and 9-13 in word 6 (D_005308D0; bits 0, 1, 2, 3, 4 and 5-9).
  * Unknown rules change nothing and @p self is not used. func_00192240 reads the same bits back.
  *
  * @param idx  the rule id (1-14)
- * @param v  the new value: the list box's entry data
+ * @param ruleValue  the new value: the list box's entry data
  */
-extern "C" void func_00192088(void* self, int idx, int v)
+extern "C" void func_00192088(void* self, int idx, int ruleValue)
 {
     switch (idx) {
     case 4:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -2) | ((v & 1) << 0);
+        D_005308B8_2088[6] = (D_005308B8_2088[6] & -2) | ((ruleValue & 1) << 0);
         break;
     case 3:
-        D_005308B8_2088[0] = (D_005308B8_2088[0] & -9) | ((v & 1) << 3);
+        D_005308B8_2088[0] = (D_005308B8_2088[0] & -9) | ((ruleValue & 1) << 3);
         break;
     case 5:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -9) | ((v & 1) << 3);
+        D_005308B8_2088[6] = (D_005308B8_2088[6] & -9) | ((ruleValue & 1) << 3);
         break;
     case 14:
-        D_005308B8_2088[0] = (D_005308B8_2088[0] & -33) | ((v & 1) << 5);
+        D_005308B8_2088[0] = (D_005308B8_2088[0] & -33) | ((ruleValue & 1) << 5);
         break;
     case 7:
-        D_005308B8_2088[0] = (D_005308B8_2088[0] & -17) | ((v & 1) << 4);
+        D_005308B8_2088[0] = (D_005308B8_2088[0] & -17) | ((ruleValue & 1) << 4);
         break;
     case 8:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -3) | ((v & 1) << 1);
+        D_005308B8_2088[6] = (D_005308B8_2088[6] & -3) | ((ruleValue & 1) << 1);
         break;
     case 1:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -5) | ((v & 1) << 2);
+        D_005308B8_2088[6] = (D_005308B8_2088[6] & -5) | ((ruleValue & 1) << 2);
         break;
     case 2:
-        D_005308D4_2088[0] = v;
+        D_005308D4_2088[0] = ruleValue;
         break;
     case 6:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -17) | ((v & 1) << 4);
+        D_005308B8_2088[6] = (D_005308B8_2088[6] & -17) | ((ruleValue & 1) << 4);
         break;
     case 9:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -33) | ((v & 1) << 5);
+        D_005308B8_2088[6] = (D_005308B8_2088[6] & -33) | ((ruleValue & 1) << 5);
         break;
     case 10:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -65) | ((v & 1) << 6);
+        D_005308B8_2088[6] = (D_005308B8_2088[6] & -65) | ((ruleValue & 1) << 6);
         break;
     case 11:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -129) | ((v & 1) << 7);
+        D_005308B8_2088[6] = (D_005308B8_2088[6] & -129) | ((ruleValue & 1) << 7);
         break;
     case 12:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -257) | ((v & 1) << 8);
+        D_005308B8_2088[6] = (D_005308B8_2088[6] & -257) | ((ruleValue & 1) << 8);
         break;
     case 13:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -513) | ((v & 1) << 9);
+        D_005308B8_2088[6] = (D_005308B8_2088[6] & -513) | ((ruleValue & 1) << 9);
         break;
     }
 }
@@ -661,8 +661,8 @@ extern "C" int func_00192240(void* self, int rule)
     case 10:
         return (D_005308D0[0] >> 6) & 1;
     case 11: {
-        int f = D_005308D0[0] >> 7;
-        return f & 1;
+        int shiftedRules = D_005308D0[0] >> 7;
+        return shiftedRules & 1;
     }
     case 12:
         return (D_005308D0[0] >> 8) & 1;
@@ -704,9 +704,9 @@ extern "C" void func_00192380(sRuleSel_2380* self, void* item)
         for (int i = 1; i < 15; i++) {
             int bit = 1 << i;
             if ((bit & mask) == 0) {
-                int v = self->count[i] - 1;
-                self->count[i] = v;
-                if ((signed char)v <= 0) {
+                int newCount = self->count[i] - 1;
+                self->count[i] = newCount;
+                if ((signed char)newCount <= 0) {
                     self->count[i] = 0;
                 }
             }
@@ -1034,35 +1034,35 @@ struct sOwner_00192970 {
  */
 extern "C" void func_00192970(sOwner_00192970* self, void* screen)
 {
-    sName11_00192970 n0 = *(sName11_00192970*)str_0arrw_left;
-    sName12_00192970 n1 = *(sName12_00192970*)str_0arrw_right;
-    sName12_00192970 n2 = *(sName12_00192970*)str_0arrw_left1;
-    sName13_00192970 n3 = *(sName13_00192970*)str_0arrw_right1;
-    sName4_00192970 n4 = *(sName4_00192970*)str_w11;
-    sName4_00192970 n5 = *(sName4_00192970*)str_w21;
-    sName2_00192970 n6 = *(sName2_00192970*)D_004A14F8;
-    sName5_00192970 n7 = *(sName5_00192970*)str_box1;
+    sName11_00192970 leftArrowName = *(sName11_00192970*)str_0arrw_left;
+    sName12_00192970 rightArrowName = *(sName12_00192970*)str_0arrw_right;
+    sName12_00192970 leftArrow1Name = *(sName12_00192970*)str_0arrw_left1;
+    sName13_00192970 rightArrow1Name = *(sName13_00192970*)str_0arrw_right1;
+    sName4_00192970 w1Name = *(sName4_00192970*)str_w11;
+    sName4_00192970 w2Name = *(sName4_00192970*)str_w21;
+    sName2_00192970 rowLabelName = *(sName2_00192970*)D_004A14F8;
+    sName5_00192970 boxName = *(sName5_00192970*)str_box1;
     for (int i = 0; i < 8; i++) {
         if (((self->mask >> i) & 1) == 0) {
             if (self->items[i] != 0) {
                 self->items[i]->v08(1);
                 self->items[i]->v09(0);
-                n0.c[0] = i + '0';
-                n1.c[0] = i + '0';
-                n2.c[0] = i + '0';
-                n3.c[0] = i + '0';
-                n6.c[0] = i + '1';
-                n7.c[3] = i + '1';
-                n4.c[2] = i + '1';
-                n5.c[2] = i + '1';
-                Hide_00192970(screen, n0.c);
-                Hide_00192970(screen, n1.c);
-                Hide_00192970(screen, n2.c);
-                Hide_00192970(screen, n3.c);
-                Hide_00192970(screen, n6.c);
-                Hide_00192970(screen, n7.c);
-                Hide_00192970(screen, n4.c);
-                Hide_00192970(screen, n5.c);
+                leftArrowName.c[0] = i + '0';
+                rightArrowName.c[0] = i + '0';
+                leftArrow1Name.c[0] = i + '0';
+                rightArrow1Name.c[0] = i + '0';
+                rowLabelName.c[0] = i + '1';
+                boxName.c[3] = i + '1';
+                w1Name.c[2] = i + '1';
+                w2Name.c[2] = i + '1';
+                Hide_00192970(screen, leftArrowName.c);
+                Hide_00192970(screen, rightArrowName.c);
+                Hide_00192970(screen, leftArrow1Name.c);
+                Hide_00192970(screen, rightArrow1Name.c);
+                Hide_00192970(screen, rowLabelName.c);
+                Hide_00192970(screen, boxName.c);
+                Hide_00192970(screen, w1Name.c);
+                Hide_00192970(screen, w2Name.c);
             }
         }
     }

@@ -394,17 +394,17 @@ struct sNetHelpPopup_DA4A8 {
  */
 extern "C" void func_001DA4A8(void* self)
 {
-    sNetHelpPopup_DA4A8* s = (sNetHelpPopup_DA4A8*)self;
+    sNetHelpPopup_DA4A8* helpPopup = (sNetHelpPopup_DA4A8*)self;
     int i;
-    s->state = 0;
-    s->f54 = 0;
+    helpPopup->state = 0;
+    helpPopup->f54 = 0;
     for (i = 2; i >= 0; i--) {
-        s->c[i] = 0;
+        helpPopup->c[i] = 0;
     }
-    s->f64 = 0;
+    helpPopup->f64 = 0;
     for (i = 0; i < 7; i++) {
-        s->a[i] = 0;
-        s->b[i] = -1;
+        helpPopup->a[i] = 0;
+        helpPopup->b[i] = -1;
     }
 }
 #endif
@@ -541,16 +541,16 @@ static inline void copyName_1DA648(char* dst, const char* src)
  *
  * Runs cMenu_cMenu(), stores vtable D_0046D690 (onCommand func_001DBC38, which creates the account) and the owner from
  * @p vinfo at +0x130, and builds the items in place: the "Create Account" title (cNullMenuItem), a spacer of 10, two
- * text entries (func_002CE418()) labelled "Login Name" (+0x168) and "Password" (+0x194), an action item labelled @p a2
+ * text entries (func_002CE418()) labelled "Login Name" (+0x168) and "Password" (+0x194), an action item labelled @p actionLabel
  * (func_002CCF98(), +0x1C0) and a "Cancel" item (func_002CCDF0(), +0x1E4), adding all six in that order. The entries'
  * text buffers (+0x180, +0x1AC) get up to 15 characters of SSXApp's UserName and Password. func_001DA7E8 is the same
  * menu with the Login vtable; func_001DA988 embeds both.
  *
  * @param vinfo  a holder whose first word (the debug front end) is stored at +0x130
- * @param a2  the action item's label
+ * @param actionLabel  the action item's label
  * @return @p self
  */
-extern "C" void* func_001DA648(void* self, void* vinfo, void* a2)
+extern "C" void* func_001DA648(void* self, void* vinfo, void* actionLabel)
 {
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D690;
@@ -559,7 +559,7 @@ extern "C" void* func_001DA648(void* self, void* vinfo, void* a2)
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)10);
     func_002CE418((char*)self + 0x168, str_Login_Name, D_004A1408);
     func_002CE418((char*)self + 0x194, str_Password, D_004A1408);
-    func_002CCF98((char*)self + 0x1C0, 0, a2, 0);
+    func_002CCF98((char*)self + 0x1C0, 0, actionLabel, 0);
     func_002CCDF0((char*)self + 0x1E4, str_Cancel);
     cMenu_addItem(self, (char*)self + 0x134, -1);
     cMenu_addItem(self, (char*)self + 0x150, -1);
@@ -609,10 +609,10 @@ static inline void copyName_1DA7E8(char* dst, const char* src)
  * here too (likely a copy-paste slip; func_001DA988 labels the sub-menu "Login").
  *
  * @param vinfo  a holder whose first word (the debug front end) is stored at +0x130
- * @param a2  the action item's label
+ * @param actionLabel  the action item's label
  * @return @p self
  */
-extern "C" void* func_001DA7E8(void* self, void* vinfo, void* a2)
+extern "C" void* func_001DA7E8(void* self, void* vinfo, void* actionLabel)
 {
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D6E8;
@@ -621,7 +621,7 @@ extern "C" void* func_001DA7E8(void* self, void* vinfo, void* a2)
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)10);
     func_002CE418((char*)self + 0x168, str_Login_Name, D_004A1408);
     func_002CE418((char*)self + 0x194, str_Password, D_004A1408);
-    func_002CCF98((char*)self + 0x1C0, 0, a2, 0);
+    func_002CCF98((char*)self + 0x1C0, 0, actionLabel, 0);
     func_002CCDF0((char*)self + 0x1E4, str_Cancel);
     cMenu_addItem(self, (char*)self + 0x134, -1);
     cMenu_addItem(self, (char*)self + 0x150, -1);
@@ -660,16 +660,16 @@ extern char str_Login_Method[];
  * "Login Method" title, a spacer of 10 and two cSubMenuItems opening those menus. func_0017D298() builds it at +0x70 of
  * the debug front end.
  *
- * @param a1  owner holder passed to the Create Account menu
- * @param a2  owner holder passed to the Login menu
+ * @param createOwner  owner holder passed to the Create Account menu
+ * @param loginOwner  owner holder passed to the Login menu
  * @return @p self
  */
-extern "C" void* func_001DA988(void* self, void* a1, void* a2)
+extern "C" void* func_001DA988(void* self, void* createOwner, void* loginOwner)
 {
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D638;
-    func_001DA648((char*)self + 0x130, a1, str_Create_Account);
-    func_001DA7E8((char*)self + 0x32C, a2, str_Login);
+    func_001DA648((char*)self + 0x130, createOwner, str_Create_Account);
+    func_001DA7E8((char*)self + 0x32C, loginOwner, str_Login);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x528), str_Login_Method);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x544), (void*)10);
     cSubMenuItem_cSubMenuItem((char*)self + 0x55C, (char*)self + 0x130, str_Create_Account);
@@ -752,7 +752,7 @@ extern char str_Delete_Persona[];
  */
 extern "C" void* func_001DABD0(void* self, int* info)
 {
-    char* p = (char*)self + 0x168;
+    char* personaItem = (char*)self + 0x168;
     int i = 3;
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D5E0;
@@ -760,8 +760,8 @@ extern "C" void* func_001DABD0(void* self, int* info)
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), str_Delete_Persona);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xE);
     for (; i != -1; i--) {
-        func_002CCF08(p);
-        p += 0x24;
+        func_002CCF08(personaItem);
+        personaItem += 0x24;
     }
     cMenu_addItem(self, (char*)self + 0x134, -1);
     cMenu_addItem(self, (char*)self + 0x150, -1);
@@ -803,23 +803,23 @@ extern char str_Delete_Persona[];
  * in the persona lines; func_0017D298() builds it at +0x74C of the debug front end.
  *
  * @param info  a holder whose first word (the debug front end) is stored at +0x4E0
- * @param a2  owner holder passed to the Create Persona menu
- * @param a3  owner holder passed to the Delete Persona menu
+ * @param createOwner  owner holder passed to the Create Persona menu
+ * @param deleteOwner  owner holder passed to the Delete Persona menu
  * @return @p self
  */
-extern "C" void* func_001DACB8(void* self, int* info, int* a2, int* a3)
+extern "C" void* func_001DACB8(void* self, int* info, int* createOwner, int* deleteOwner)
 {
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D530;
-    func_001DAAC8_v((char*)self + 0x130, a2);
-    func_001DABD0_v((char*)self + 0x2E8, a3);
+    func_001DAAC8_v((char*)self + 0x130, createOwner);
+    func_001DABD0_v((char*)self + 0x2E8, deleteOwner);
     *(int*)((char*)self + 0x4E0) = *info;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x4E4), str_Select_Persona);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x500), (void*)0xE);
-    char* p = (char*)self + 0x518;
+    char* personaItem = (char*)self + 0x518;
     for (int i = 3; i != -1; i--) {
-        func_002CCF08(p);
-        p += 0x24;
+        func_002CCF08(personaItem);
+        personaItem += 0x24;
     }
     cSubMenuItem_cSubMenuItem((char*)self + 0x5A8, (char*)self + 0x130, str_Create_Persona);
     cSubMenuItem_cSubMenuItem((char*)self + 0x5C4, (char*)self + 0x2E8, str_Delete_Persona);
@@ -860,7 +860,7 @@ extern char str_Select_Room[];
  */
 extern "C" void* func_001DAE20(void* self, int* info)
 {
-    char* p = (char*)self + 0x168;
+    char* roomItem = (char*)self + 0x168;
     int i = 11;
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D4D8;
@@ -868,8 +868,8 @@ extern "C" void* func_001DAE20(void* self, int* info)
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x134), str_Select_Room);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xE);
     for (; i != -1; i--) {
-        func_002CCF08(p);
-        p += 0x24;
+        func_002CCF08(roomItem);
+        roomItem += 0x24;
     }
     cMenu_addItem(self, (char*)self + 0x134, -1);
     cMenu_addItem(self, (char*)self + 0x150, -1);
@@ -899,28 +899,28 @@ extern char str_Chat[];
 /**
  * Constructs the debug "Room Occupants" menu: a title, a spacer, 24 blank occupant lines and a "Chat" item.
  *
- * Runs cMenu_cMenu(), stores vtable D_0046D480 (onCommand func_001DBB48) and the owners from @p a (+0x130, used for an
- * occupant) and @p b (+0x134, used by "Chat"), builds the "Room Occupants" title and a spacer of 14, 24 empty command
+ * Runs cMenu_cMenu(), stores vtable D_0046D480 (onCommand func_001DBB48) and the owners from @p occupantOwner (+0x130, used for an
+ * occupant) and @p chatOwner (+0x134, used by "Chat"), builds the "Room Occupants" title and a spacer of 14, 24 empty command
  * items (func_002CCF08()) at +0x16C (0x24 bytes apart) and a "Chat" action item with id -2 (func_002CCF98(), +0x4CC),
  * and adds them in that order. func_001DB620 fills in the occupants.
  *
- * @param a  holder whose first word is stored at +0x130 (owner for an occupant command)
- * @param b  holder whose first word is stored at +0x134 (owner for the "Chat" command)
+ * @param occupantOwner  holder whose first word is stored at +0x130 (owner for an occupant command)
+ * @param chatOwner  holder whose first word is stored at +0x134 (owner for the "Chat" command)
  * @return @p self
  */
-extern "C" void* func_001DAF08(void* self, int* a, int* b)
+extern "C" void* func_001DAF08(void* self, int* occupantOwner, int* chatOwner)
 {
-    char* p = (char*)self + 0x16C;
+    char* occupantItem = (char*)self + 0x16C;
     int i = 23;
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D480;
-    *(int*)((char*)self + 0x130) = *a;
-    *(int*)((char*)self + 0x134) = *b;
+    *(int*)((char*)self + 0x130) = *occupantOwner;
+    *(int*)((char*)self + 0x134) = *chatOwner;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x138), str_Room_Occupants);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x154), (void*)0xE);
     for (; i != -1; i--) {
-        func_002CCF08(p);
-        p += 0x24;
+        func_002CCF08(occupantItem);
+        occupantItem += 0x24;
     }
     func_002CCF98((char*)self + 0x4CC, -2, str_Chat, 0);
     cMenu_addItem(self, (char*)self + 0x138, -1);
@@ -965,7 +965,7 @@ extern int D_00467D70[];
  */
 extern "C" void* func_001DB028(void* self, int* info)
 {
-    char* p = (char*)self + 0x194;
+    char* chatItem = (char*)self + 0x194;
     int i = 13;
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D428;
@@ -974,8 +974,8 @@ extern "C" void* func_001DB028(void* self, int* info)
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x150), (void*)0xE);
     func_002CE418((char*)self + 0x168, str_Enter_Chat, D_004A1408);
     for (; i != -1; i--) {
-        func_002CCF08(p);
-        p += 0x24;
+        func_002CCF08(chatItem);
+        chatItem += 0x24;
     }
     cMenu_addItem(self, (char*)self + 0x134, -1);
     cMenu_addItem(self, (char*)self + 0x150, -1);
