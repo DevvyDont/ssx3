@@ -7,7 +7,7 @@
 // ABI_OK). The C prototypes are left as void(void): the callers declare the real signatures.
 // PORT: PS2 kernel syscall stubs; a PC port replaces this whole unit.
 #define SYSCALL_STUB(name, n) \
-    void name(void) { register int v __asm__("$3") = (n); __asm__ volatile("syscall" : : "r"(v)); }
+    void name(void) { register int callNum __asm__("$3") = (n); __asm__ volatile("syscall" : : "r"(callNum)); }
 
 //100%
 INCLUDE_ASM("seg/seg_3249A0", SetGsCrt);
