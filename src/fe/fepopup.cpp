@@ -577,31 +577,31 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* self)
         cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x60));
         cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x68));
         {
-            char* o = *(char**)(self + 0x74);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupBlack);
+            char* frameWidget = *(char**)(self + 0x74);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* o = *(char**)(self + 0x78);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupBlack);
+            char* frameWidget = *(char**)(self + 0x78);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* o = *(char**)(self + 0x7C);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupBlack);
+            char* frameWidget = *(char**)(self + 0x7C);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* o = *(char**)(self + 0x80);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupBlack);
+            char* frameWidget = *(char**)(self + 0x80);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         *(sQuad_58E8*)(self + 0x32C) = gPopupWhite;
@@ -618,31 +618,31 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* self)
         cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x4C));
         cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x68));
         {
-            char* o = *(char**)(self + 0x74);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupBlack);
+            char* frameWidget = *(char**)(self + 0x74);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* o = *(char**)(self + 0x78);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupBlack);
+            char* frameWidget = *(char**)(self + 0x78);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* o = *(char**)(self + 0x7C);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupBlack);
+            char* frameWidget = *(char**)(self + 0x7C);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         {
-            char* o = *(char**)(self + 0x80);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupBlack);
+            char* frameWidget = *(char**)(self + 0x80);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
             }
         }
         *(sQuad_58E8*)(self + 0x32C) = gPopupWhite;
@@ -659,31 +659,31 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* self)
         cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x64));
         cScreenPopup_showWidgetSafe(self, *(void**)(self + 0x68));
         {
-            char* o = *(char**)(self + 0x74);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupWhite);
+            char* frameWidget = *(char**)(self + 0x74);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
             }
         }
         {
-            char* o = *(char**)(self + 0x78);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupWhite);
+            char* frameWidget = *(char**)(self + 0x78);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
             }
         }
         {
-            char* o = *(char**)(self + 0x7C);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupWhite);
+            char* frameWidget = *(char**)(self + 0x7C);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
             }
         }
         {
-            char* o = *(char**)(self + 0x80);
-            if (o != 0) {
-                sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-                vt[11].fn(o + vt[11].delta, &gPopupWhite);
+            char* frameWidget = *(char**)(self + 0x80);
+            if (frameWidget != 0) {
+                sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
+                vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
             }
         }
         *(sQuad_58E8*)(self + 0x32C) = D_004C67A8;
@@ -1161,19 +1161,19 @@ extern "C" double dpmul(double a, double b);
 // Converts a screen position into the popup's normalised scroll position for the current layout.
 extern "C" void cScreenPopup_determineAndSetScaling(void* self, t3Vector pos)
 {
-    char* s = (char*)self;
-    switch (*(int*)(s + 0x31C)) {
+    char* selfBytes = (char*)self;
+    switch (*(int*)(selfBytes + 0x31C)) {
     case 0:
-        *(float*)(s + 0x278) = (pos.x + 15.0f) / *(float*)(s + 0x1F4);
-        *(float*)(s + 0x27C) = (pos.y + 10.0f) / *(float*)(s + 0x1F8);
+        *(float*)(selfBytes + 0x278) = (pos.x + 15.0f) / *(float*)(selfBytes + 0x1F4);
+        *(float*)(selfBytes + 0x27C) = (pos.y + 10.0f) / *(float*)(selfBytes + 0x1F8);
         break;
     case 1:
-        *(float*)(s + 0x278) = dptofp(dpmul(fptodp((pos.x + 20.0f) / *(float*)(s + 0x218)), 1.05));
-        *(float*)(s + 0x27C) = (pos.y + 15.0f) / *(float*)(s + 0x21C);
+        *(float*)(selfBytes + 0x278) = dptofp(dpmul(fptodp((pos.x + 20.0f) / *(float*)(selfBytes + 0x218)), 1.05));
+        *(float*)(selfBytes + 0x27C) = (pos.y + 15.0f) / *(float*)(selfBytes + 0x21C);
         break;
     case 2:
-        *(float*)(s + 0x278) = 1.0f;
-        *(float*)(s + 0x27C) = 1.0f;
+        *(float*)(selfBytes + 0x278) = 1.0f;
+        *(float*)(selfBytes + 0x27C) = 1.0f;
         break;
     }
 }
@@ -1276,59 +1276,59 @@ extern "C" float dptofp(double d);
  */
 extern "C" void cScreenPopup_resizeBackground(void* self, sVec3_78C0 vSize, float fXOffset, float fYOffset)
 {
-    char* s = (char*)self;
+    char* selfBytes = (char*)self;
     float y = 0.0f;
-    switch (*(int*)(s + 0x31C)) {
+    switch (*(int*)(selfBytes + 0x31C)) {
     case 0:
-        if (*(char**)(s + 0x48) != 0) {
-            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x188);
-            y = *(float*)(s + 0x1BC) + fYOffset + vSize.y * 0.5f - 5.0f;
-            p.x += fXOffset;
-            p.y = y;
-            *(sVec3_78C0*)(*(char**)(s + 0x48) + 0x44) = p;
+        if (*(char**)(selfBytes + 0x48) != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x188);
+            y = *(float*)(selfBytes + 0x1BC) + fYOffset + vSize.y * 0.5f - 5.0f;
+            piecePos.x += fXOffset;
+            piecePos.y = y;
+            *(sVec3_78C0*)(*(char**)(selfBytes + 0x48) + 0x44) = piecePos;
         }
-        if (*(char**)(s + 0x4C) != 0) {
-            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x194);
-            p.y = y;
-            p.x += fXOffset;
-            *(sVec3_78C0*)(*(char**)(s + 0x4C) + 0x44) = p;
+        if (*(char**)(selfBytes + 0x4C) != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x194);
+            piecePos.y = y;
+            piecePos.x += fXOffset;
+            *(sVec3_78C0*)(*(char**)(selfBytes + 0x4C) + 0x44) = piecePos;
         }
         break;
     case 1:
-        if (*(char**)(s + 0x58) != 0) {
-            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x23C);
-            y = dptofp(dpsub(fptodp(*(float*)(s + 0x1BC) + fYOffset + vSize.y * 0.5f), 7.5));
-            p.x += fXOffset;
-            p.y = y;
-            *(sVec3_78C0*)(*(char**)(s + 0x58) + 0x44) = p;
+        if (*(char**)(selfBytes + 0x58) != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x23C);
+            y = dptofp(dpsub(fptodp(*(float*)(selfBytes + 0x1BC) + fYOffset + vSize.y * 0.5f), 7.5));
+            piecePos.x += fXOffset;
+            piecePos.y = y;
+            *(sVec3_78C0*)(*(char**)(selfBytes + 0x58) + 0x44) = piecePos;
         }
-        if (*(char**)(s + 0x5C) != 0) {
-            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x248);
-            p.y = y;
-            p.x += fXOffset;
-            *(sVec3_78C0*)(*(char**)(s + 0x5C) + 0x44) = p;
+        if (*(char**)(selfBytes + 0x5C) != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x248);
+            piecePos.y = y;
+            piecePos.x += fXOffset;
+            *(sVec3_78C0*)(*(char**)(selfBytes + 0x5C) + 0x44) = piecePos;
         }
-        if (*(char**)(s + 0x50) != 0) {
-            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x224);
-            p.y = y;
-            p.x += fXOffset;
-            *(sVec3_78C0*)(*(char**)(s + 0x50) + 0x44) = p;
+        if (*(char**)(selfBytes + 0x50) != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x224);
+            piecePos.y = y;
+            piecePos.x += fXOffset;
+            *(sVec3_78C0*)(*(char**)(selfBytes + 0x50) + 0x44) = piecePos;
         }
-        if (*(char**)(s + 0x54) != 0) {
-            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x230);
-            p.y = y;
-            p.x += fXOffset;
-            *(sVec3_78C0*)(*(char**)(s + 0x54) + 0x44) = p;
+        if (*(char**)(selfBytes + 0x54) != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x230);
+            piecePos.y = y;
+            piecePos.x += fXOffset;
+            *(sVec3_78C0*)(*(char**)(selfBytes + 0x54) + 0x44) = piecePos;
         }
-        if (*(char**)(s + 0x60) != 0) {
-            sVec3_78C0 p = *(sVec3_78C0*)(s + 0x254);
-            p.y = y;
-            p.x += fXOffset;
-            *(sVec3_78C0*)(*(char**)(s + 0x60) + 0x44) = p;
+        if (*(char**)(selfBytes + 0x60) != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x254);
+            piecePos.y = y;
+            piecePos.x += fXOffset;
+            *(sVec3_78C0*)(*(char**)(selfBytes + 0x60) + 0x44) = piecePos;
         }
         break;
     case 2:
-        *(float*)(s + 0x27C) = *(float*)(s + 0x278) = 1.0f;
+        *(float*)(selfBytes + 0x27C) = *(float*)(selfBytes + 0x278) = 1.0f;
         break;
     }
 }
@@ -1369,54 +1369,54 @@ void cScreenPopup_resizeBackground_7C20(void* self, sVec3_7C20 v, float a, float
  */
 extern "C" void cScreenPopup_centerPopup(void* self)
 {
-    char* s = (char*)self;
-    float x = cScreenPopup_centerOffset((cScreenPopup*)self) + *(float*)(s + 0x26C);
-    float y = *(float*)(s + 0x270);
-    cScreenPopup_determineAndSetScaling_7C20(self, *(sVec3_7C20*)(s + 0x260));
-    cScreenPopup_resizeBackground_7C20(self, *(sVec3_7C20*)(s + 0x260), *(float*)(s + 0x26C), y);
-    char* p = *(char**)(s + 0x6C);
-    if (p != 0) {
-        sVec3_7C20 v = *(sVec3_7C20*)(p + 0x44);
-        v.x += *(float*)(s + 0x26C);
-        v.y += y;
-        *(sVec3_7C20*)(p + 0x44) = v;
+    char* selfBytes = (char*)self;
+    float x = cScreenPopup_centerOffset((cScreenPopup*)self) + *(float*)(selfBytes + 0x26C);
+    float y = *(float*)(selfBytes + 0x270);
+    cScreenPopup_determineAndSetScaling_7C20(self, *(sVec3_7C20*)(selfBytes + 0x260));
+    cScreenPopup_resizeBackground_7C20(self, *(sVec3_7C20*)(selfBytes + 0x260), *(float*)(selfBytes + 0x26C), y);
+    char* widget = *(char**)(selfBytes + 0x6C);
+    if (widget != 0) {
+        sVec3_7C20 widgetPos = *(sVec3_7C20*)(widget + 0x44);
+        widgetPos.x += *(float*)(selfBytes + 0x26C);
+        widgetPos.y += y;
+        *(sVec3_7C20*)(widget + 0x44) = widgetPos;
     }
-    p = *(char**)(s + 0x70);
-    if (p != 0) {
-        sVec3_7C20 v = *(sVec3_7C20*)(p + 0x44);
-        v.x += *(float*)(s + 0x26C);
-        v.y += y;
-        *(sVec3_7C20*)(p + 0x44) = v;
+    widget = *(char**)(selfBytes + 0x70);
+    if (widget != 0) {
+        sVec3_7C20 widgetPos = *(sVec3_7C20*)(widget + 0x44);
+        widgetPos.x += *(float*)(selfBytes + 0x26C);
+        widgetPos.y += y;
+        *(sVec3_7C20*)(widget + 0x44) = widgetPos;
     }
-    if (*(char**)(s + 0x74) != 0) {
-        sVec3_7C20 v = *(sVec3_7C20*)(*(char**)(s + 0x74) + 0x44);
-        if (*(int*)(s + 0x2CC) != 0) {
-            v.x = x + 320.0f;
+    if (*(char**)(selfBytes + 0x74) != 0) {
+        sVec3_7C20 widgetPos = *(sVec3_7C20*)(*(char**)(selfBytes + 0x74) + 0x44);
+        if (*(int*)(selfBytes + 0x2CC) != 0) {
+            widgetPos.x = x + 320.0f;
         } else {
-            v.x += x;
+            widgetPos.x += x;
         }
-        v.y += y;
-        *(sVec3_7C20*)(*(char**)(s + 0x74) + 0x44) = v;
+        widgetPos.y += y;
+        *(sVec3_7C20*)(*(char**)(selfBytes + 0x74) + 0x44) = widgetPos;
     }
-    if (*(char**)(s + 0x7C) != 0) {
-        sVec3_7C20 v = *(sVec3_7C20*)(*(char**)(s + 0x7C) + 0x44);
-        if (*(int*)(s + 0x2CC) != 0) {
-            v.x = x + 320.0f;
+    if (*(char**)(selfBytes + 0x7C) != 0) {
+        sVec3_7C20 widgetPos = *(sVec3_7C20*)(*(char**)(selfBytes + 0x7C) + 0x44);
+        if (*(int*)(selfBytes + 0x2CC) != 0) {
+            widgetPos.x = x + 320.0f;
         } else {
-            v.x += x;
+            widgetPos.x += x;
         }
-        v.y += y;
-        *(sVec3_7C20*)(*(char**)(s + 0x7C) + 0x44) = v;
+        widgetPos.y += y;
+        *(sVec3_7C20*)(*(char**)(selfBytes + 0x7C) + 0x44) = widgetPos;
     }
-    if (*(char**)(s + 0x78) != 0) {
-        sVec3_7C20 v = *(sVec3_7C20*)(*(char**)(s + 0x78) + 0x44);
-        if (*(int*)(s + 0x2CC) != 0) {
-            v.x = x + 320.0f;
+    if (*(char**)(selfBytes + 0x78) != 0) {
+        sVec3_7C20 widgetPos = *(sVec3_7C20*)(*(char**)(selfBytes + 0x78) + 0x44);
+        if (*(int*)(selfBytes + 0x2CC) != 0) {
+            widgetPos.x = x + 320.0f;
         } else {
-            v.x += x;
+            widgetPos.x += x;
         }
-        v.y += y;
-        *(sVec3_7C20*)(*(char**)(s + 0x78) + 0x44) = v;
+        widgetPos.y += y;
+        *(sVec3_7C20*)(*(char**)(selfBytes + 0x78) + 0x44) = widgetPos;
     }
 }
 #endif
@@ -1880,14 +1880,14 @@ struct sVEntryK8930 {
  */
 extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char state, float fOffset)
 {
-    sObjBitsK8930* b = (sObjBitsK8930*)((char*)obj + 0x14);
-    if (b->state == state)
+    sObjBitsK8930* pivotBits = (sObjBitsK8930*)((char*)obj + 0x14);
+    if (pivotBits->state == state)
         return;
     sVec2K8930 size;
     sVEntryK8930* vt = *(sVEntryK8930**)((char*)obj + 8);
     vt[20].fn((char*)obj + vt[20].delta, &size);
     sVec3K8930 pos = *(sVec3K8930*)((char*)obj + 0x44);
-    b->state = state;
+    pivotBits->state = state;
     if (fOffset == 0.0f)
         fOffset = size.x * 0.5f;
     switch (state) {

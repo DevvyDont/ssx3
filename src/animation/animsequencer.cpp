@@ -234,19 +234,19 @@ struct sSeq_00313C50
  */
 extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim)
 {
-    sSeq_00313C50* s = (sSeq_00313C50*)self;
-    (s->e + i)->anim = anim;
+    sSeq_00313C50* sequence = (sSeq_00313C50*)self;
+    (sequence->e + i)->anim = anim;
     char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((anim & 0xFF) << 2));
-    char* q = (char*)(((unsigned)anim >> 8) * 0x14 + *(int*)(clip + 0x8));
-    s->e[i].len = (*(unsigned short*)(q + 0xC) - 1) * 0.03333333507180214f;
-    if (s->e[i].active == 0)
+    char* clipEntry = (char*)(((unsigned)anim >> 8) * 0x14 + *(int*)(clip + 0x8));
+    sequence->e[i].len = (*(unsigned short*)(clipEntry + 0xC) - 1) * 0.03333333507180214f;
+    if (sequence->e[i].active == 0)
     {
-        s->e[i].t = 0;
-        s->e[i].w = 1.0f;
-        s->e[i].speed = 1.0f;
-        s->e[i].active = 1;
-        s->e[i].f18 = 0;
-        s->dirty = 1;
+        sequence->e[i].t = 0;
+        sequence->e[i].w = 1.0f;
+        sequence->e[i].speed = 1.0f;
+        sequence->e[i].active = 1;
+        sequence->e[i].f18 = 0;
+        sequence->dirty = 1;
     }
 }
 #endif
@@ -636,15 +636,15 @@ extern "C" int cAnimSequencer_getAnimBlendFrames(void* self, sSeqState_314418* o
         {
             if (n->tracks[j].flag != 0)
             {
-                sSeqState_314418* o = &out[count];
-                o->id = n->tracks[j].id;
-                o->time = n->tracks[j].time;
-                o->a = n->a;
-                o->b = n->b;
-                o->c = n->c;
-                o->d = n->d;
-                o->weight = func_00313D70_314418(n, j);
-                o->e = n->e;
+                sSeqState_314418* blendFrame = &out[count];
+                blendFrame->id = n->tracks[j].id;
+                blendFrame->time = n->tracks[j].time;
+                blendFrame->a = n->a;
+                blendFrame->b = n->b;
+                blendFrame->c = n->c;
+                blendFrame->d = n->d;
+                blendFrame->weight = func_00313D70_314418(n, j);
+                blendFrame->e = n->e;
                 count++;
             }
         }

@@ -1302,13 +1302,13 @@ extern "C" void cFEMemCard_writeStart(void)
     } else {
         char* app2 = (char*)cSSXApp_getMCManager(SSXApp);
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
-        int a = cBESaveInterface_generateSaveProfile(iface, *(int*)((char*)cFEMemCard_mInstance + 0x1CC));
-        int b = cBESaveInterface_getSaveProfileSize();
+        int profileData = cBESaveInterface_generateSaveProfile(iface, *(int*)((char*)cFEMemCard_mInstance + 0x1CC));
+        int profileSize = cBESaveInterface_getSaveProfileSize();
         func_00241D40(app2, 1, name, 65);
         func_002C2540_59A0(fmt2, str_pct_s_pct_spct_04d);
         func_00241AA0(slot, 0x100);
         sprintf1_59A0(title, fmt2, slot, name, *(int*)(app2 + 0xF8) + 1);
-        func_00241000(app2, title, a, b);
+        func_00241000(app2, title, profileData, profileSize);
     }
     char* fe = (char*)cFEMemCard_mInstance;
     if (*(int*)(fe + 0x210) == 0 && *(int*)(fe + 0x208) == 0) {
@@ -1367,15 +1367,15 @@ extern sTrophyRoom_001D5C28* D_004A2028_tr __asm__("cFEMemCard_mInstance");
  */
 extern "C" int cFEMemCard_callbackReadUpdate(int size)
 {
-    sTrophyRoom_001D5C28* g = D_004A2028_tr;
-    int mode = g->mode;
+    sTrophyRoom_001D5C28* memCard = D_004A2028_tr;
+    int mode = memCard->mode;
     if (mode != 1) {
         return 1;
     }
-    if (g->pending != 0) {
-        g->pending = 0;
-        char* base = g->cur;
-        int crc = func_003E62D0(g->cur, cBE_getDataSize(cBE_getBE()) - 4, 64490);
+    if (memCard->pending != 0) {
+        memCard->pending = 0;
+        char* base = memCard->cur;
+        int crc = func_003E62D0(memCard->cur, cBE_getDataSize(cBE_getBE()) - 4, 64490);
         D_004A2028_tr->cur += cBE_getDataSize(cBE_getBE()) - 4;
         int stored = 0;
         memcpy(&stored, D_004A2028_tr->cur, 4);
@@ -1481,11 +1481,11 @@ extern "C" void cFEMemCard_readStart()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
     sMoviePlayer_001D5DF0* app = (sMoviePlayer_001D5DF0*)cSSXApp_getMCManager(SSXApp);
-    sTrophyRoom_001D5DF0* g = D_004A2028_tr5;
-    g->f1B0 = 1;
-    g->f1B4 = 0;
-    app->fF8 = g->size;
-    int mode = g->mode;
+    sTrophyRoom_001D5DF0* memCard = D_004A2028_tr5;
+    memCard->f1B0 = 1;
+    memCard->f1B4 = 0;
+    app->fF8 = memCard->size;
+    int mode = memCard->mode;
     switch (mode) {
     case 2: {
         int n = cBESaveInterface_getSaveGameSize_r();
@@ -1495,10 +1495,10 @@ extern "C" void cFEMemCard_readStart()
     }
     case 1: {
         D_004A2028_tr5->state = 2;
-        int b = cBESaveInterface_getReplayBuffer(iface);
-        sTrophyRoom_001D5DF0* t = D_004A2028_tr5;
-        t->buf = t->cur = b;
-        cMCOverlayManager_readFile(app, t->size, t->cur, cBE_getDataSize(cBE_getBE()));
+        int replayBuffer = cBESaveInterface_getReplayBuffer(iface);
+        sTrophyRoom_001D5DF0* memCardInst = D_004A2028_tr5;
+        memCardInst->buf = memCardInst->cur = replayBuffer;
+        cMCOverlayManager_readFile(app, memCardInst->size, memCardInst->cur, cBE_getDataSize(cBE_getBE()));
         D_004A2028_tr5->pending = mode;
         break;
     }

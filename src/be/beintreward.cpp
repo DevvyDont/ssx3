@@ -2251,15 +2251,15 @@ extern int D_0045B018_2d[][4] __asm__("D_0045B018");
 extern "C" void cBERewardInterface_awardUserBigChallenge(void* self, int rider, int k)
 {
     int cur = cBEMissionInterface_getNumberCompletedMissionsOnPeak(cBE_getInterface_Fv(cBE_getBE(), 10), k);
-    int* p = &gNextBigChallengesLimit[k];
-    if (*p <= 0)
+    int* nextLimit = &gNextBigChallengesLimit[k];
+    if (*nextLimit <= 0)
         return;
-    if (cur < *p)
+    if (cur < *nextLimit)
         return;
     int prof = cBELibrary_getProfileIndex(rider);
     int ch = cBELibrary_getCharacterID(rider);
     int was = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, prof, ch, k, 2);
-    *p = cBERewardInterface_calculateNextBigChallengesLevel((cBERewardInterface*)self, prof, ch, k);
+    *nextLimit = cBERewardInterface_calculateNextBigChallengesLevel((cBERewardInterface*)self, prof, ch, k);
     if (was && cur == D_0045B018_2d[k][3])
         cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, prof, ch, k, 2);
     if (cBERewardInterface_isMountainConquered((cBERewardInterface*)self, prof, ch))
@@ -2482,8 +2482,8 @@ extern "C" int func_0015A320(void* self, int bit, unsigned char* bits);
  */
 extern "C" int cBERewardInterface_isAwardReceived(void* self, int iProfileIndex, int iCharacterID, int bit)
 {
-    char* p = (char*)cBELibrary_profileLib + iProfileIndex * 0x9b50 + iCharacterID * 3976;
-    return func_0015A320(self, bit, (unsigned char*)(p + 0xF28));
+    char* profileRec = (char*)cBELibrary_profileLib + iProfileIndex * 0x9b50 + iCharacterID * 3976;
+    return func_0015A320(self, bit, (unsigned char*)(profileRec + 0xF28));
 }
 #endif
 

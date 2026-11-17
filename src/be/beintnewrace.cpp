@@ -155,12 +155,12 @@ extern char str_dbg[];
 extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char* name)
 {
     char* base = (char*)&D_0043D984;
-    char* g = (char*)&(*(&cBENewRaceInterface_newRace));
-    strcpy(base + *(int*)(g + 0x40) * 100, name);
+    char* newRace = (char*)&(*(&cBENewRaceInterface_newRace));
+    strcpy(base + *(int*)(newRace + 0x40) * 100, name);
     char* p1 = base + 0x10;
-    strcpy(p1 + *(int*)(g + 0x40) * 100, name);
+    strcpy(p1 + *(int*)(newRace + 0x40) * 100, name);
     char* p2 = base - 0x30;
-    strcpy(p2 + *(int*)(g + 0x40) * 100, name);
+    strcpy(p2 + *(int*)(newRace + 0x40) * 100, name);
     strcpy(str_dbg, name);
 }
 #endif

@@ -1013,25 +1013,25 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
     sHit_137860 hitB;
     cRider* rider = RIDER;
     cWorldRider_cWorldRider(&sph, rider->mSphereTree, !isHuman_137860(rider));
-    float d = func_003342D0(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
-    if (d >= 0.0f)
+    float depth = func_003342D0(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
+    if (depth >= 0.0f)
     {
-        float t = cWipeoutMotion_intersectGround(self, (char*)&hitB, (sVec4WG*)&hitA.normal);
+        float groundParam = cWipeoutMotion_intersectGround(self, (char*)&hitB, (sVec4WG*)&hitA.normal);
         float vn = 0.0f;
-        float h = 0.0f;
-        if (t >= 0.4000000059604645f)
+        float height = 0.0f;
+        if (groundParam >= 0.4000000059604645f)
         {
             vn = vu0Dot_137860(RIDER->mVelocity, hitB.normal);
-            h = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.pos), hitB.normal);
+            height = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.pos), hitB.normal);
         }
-        if (t >= 0.4000000059604645f && vn <= 0.0f && h <= 10.0f)
+        if (groundParam >= 0.4000000059604645f && vn <= 0.0f && height <= 10.0f)
         {
             cAirPredictor_land_137860(RIDER->mAirPredictor, &RIDER->mPosition, &RIDER->mVelocity);
             func_00111AA0_137860(RIDER->mRiderHandler, &hitB, &hitB.normal, hitB.material, vn);
-            cRider* r2 = RIDER;
-            char* hd = (char*)r2->mRiderHandler;
+            cRider* landedRider = RIDER;
+            char* hd = (char*)landedRider->mRiderHandler;
             *(int*)(hd + 0x314) = 1;
-            *(t4Vector*)(hd + 0x320) = r2->mVelocity;
+            *(t4Vector*)(hd + 0x320) = landedRider->mVelocity;
             RIDER->unk_3D0 = hitB.v20;
             RIDER->mGroundNormal = hitB.normal;
             RIDER->mSurfaceType = hitB.material;
@@ -1041,11 +1041,11 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
             vu0AddEq_137860(RIDER->mVelocity, impulse);
             if (hitB.obj != 0)
             {
-                char* o = *(char**)(hitB.obj + 0xC);
-                if (o != 0)
+                char* hitOwner = *(char**)(hitB.obj + 0xC);
+                if (hitOwner != 0)
                 {
-                    sVEntH_137860* vt = *(sVEntH_137860**)(o + 0xC);
-                    vt[43].fn(o + vt[43].delta, &hitB,
+                    sVEntH_137860* vt = *(sVEntH_137860**)(hitOwner + 0xC);
+                    vt[43].fn(hitOwner + vt[43].delta, &hitB,
                               vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)*(int*)((char*)SSXApp + 0x10)));
                 }
             }
@@ -1058,14 +1058,14 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
         }
         else
         {
-            t4Vector push = vu0Scale_137860(vu0Scale_137860(hitA.normal, 1.100000023841858f), d);
+            t4Vector push = vu0Scale_137860(vu0Scale_137860(hitA.normal, 1.100000023841858f), depth);
             func_00106538(RIDER, push);
-            if (t < 0.0f || vu0Dot_137860(hitB.normal, hitA.normal) < 0.8999999761581421f)
+            if (groundParam < 0.0f || vu0Dot_137860(hitB.normal, hitA.normal) < 0.8999999761581421f)
             {
-                float v = vu0Dot_137860(hitA.normal, RIDER->mVelocity);
-                if (v < 0.0f)
+                float normSpeed = vu0Dot_137860(hitA.normal, RIDER->mVelocity);
+                if (normSpeed < 0.0f)
                 {
-                    vu0SubEq_137860(RIDER->mVelocity, vu0Scale_137860(hitA.normal, v));
+                    vu0SubEq_137860(RIDER->mVelocity, vu0Scale_137860(hitA.normal, normSpeed));
                 }
             }
             cAirPredictor_startLaunchIntoAir(RIDER->mAirPredictor, &RIDER->mPosition, &RIDER->mVelocity, 3333.33349609375f);
@@ -1359,19 +1359,19 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
     if (0.0010000000474974513f < len)
         vu0ScaleEq_137D18(*(t4Vector*)(self + 0x30), nl / len);
     sMat_137D18* mat = &materials_137D18()[RIDER->mSurfaceType];
-    t4Vector v = vu0Sub_137D18(RIDER->mVelocity, RIDER->unk_3D0);
-    float vn = vu0Dot_137D18(v, RIDER->mGroundNormal);
+    t4Vector netVelocity = vu0Sub_137D18(RIDER->mVelocity, RIDER->unk_3D0);
+    float vn = vu0Dot_137D18(netVelocity, RIDER->mGroundNormal);
     t4Vector n = vu0Scale_137D18(RIDER->mGroundNormal, vn);
-    t4Vector tang = vu0Sub_137D18(v, n);
+    t4Vector tang = vu0Sub_137D18(netVelocity, n);
     float tl = vu0Length_137D18(tang);
     float fric = curve_137D18(mat, tl * 0.035999998450279236f) * 3.0f + 1.5f;
     if (tl < 1111.111083984375f
         && (RIDER->mUseRootPoseOverride != 0 || cRiderAnimBase_getCurrentAnimCategory(RIDER->mRiderAnim, 2) == 29
             || cRiderAnimBase_getCurrentAnimCategory(RIDER->mRiderAnim, 2) == 25)) {
-        float q = 1.0f - tl * 0.0009000000427477062f;
-        q *= q;
-        q *= q;
-        fric = q * 40.0f + (1.0f - q) * fric;
+        float slowBlend = 1.0f - tl * 0.0009000000427477062f;
+        slowBlend *= slowBlend;
+        slowBlend *= slowBlend;
+        fric = slowBlend * 40.0f + (1.0f - slowBlend) * fric;
     }
     fric *= clamp_137D18(RIDER->mGroundNormal.z + 0.30000001192092896f, 0.0f, 1.0f);
     if (1.0f / dt < fric)
@@ -1387,8 +1387,8 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
     t4Vector dir = vu0Normalize_137D18(vu0Add_137D18(getFront_137D18(RIDER), vu0Scale_137D18(RIDER->mVelocity, 0.0036000001709908247f)));
     cRider_alignRiderAxis(RIDER, &RIDER->mGroundNormal, &dir, RIDER->mTimeScale * 2.0f, RIDER->mTimeScale * 6.632251739501953f);
     sHit_137D18 hit;
-    float d = cWipeoutMotion_intersectGround(self, (char*)&hit, (sVec4WG*)&RIDER->mGroundNormal);
-    if (0.0f <= d) {
+    float groundParam = cWipeoutMotion_intersectGround(self, (char*)&hit, (sVec4WG*)&RIDER->mGroundNormal);
+    if (0.0f <= groundParam) {
         RIDER->unk_3D0 = hit.v20;
         RIDER->mGroundNormal = hit.normal;
         RIDER->mSurfaceType = hit.material;
@@ -1415,11 +1415,11 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
             *(int*)(self + 0x4) = 1;
         }
         if (hit.obj != 0) {
-            char* o = *(char**)(hit.obj + 0xC);
-            if (o != 0) {
-                sVEntH_137D18* vt = *(sVEntH_137D18**)(o + 0xC);
-                vt[43].fn(o + vt[43].delta, &hit,
-                          vu0Div_137D18(vu0Add_137D18(vu0Sub_137D18(v, RIDER->mVelocity), RIDER->unk_3D0), dt));
+            char* hitOwner = *(char**)(hit.obj + 0xC);
+            if (hitOwner != 0) {
+                sVEntH_137D18* vt = *(sVEntH_137D18**)(hitOwner + 0xC);
+                vt[43].fn(hitOwner + vt[43].delta, &hit,
+                          vu0Div_137D18(vu0Add_137D18(vu0Sub_137D18(netVelocity, RIDER->mVelocity), RIDER->unk_3D0), dt));
             }
         }
         sMat_137D18* ground = &materials_137D18()[hit.material];
@@ -1604,23 +1604,23 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
     cWorldRider_cWorldRider(&sph, RIDER->mSphereTree, 1);
     sph.f8 = 1;
     sph.dir = RIDER->mGroundNormal;
-    float d = func_003342D0(RIDER->mOverlapList, &sph, &hit, (int)RIDER->mWallHint);
-    if (0.0f <= d) {
+    float depth = func_003342D0(RIDER->mOverlapList, &sph, &hit, (int)RIDER->mWallHint);
+    if (0.0f <= depth) {
         float dot = vu0Dot_138640(RIDER->mGroundNormal, hit.normal);
         if (-0.9998999834060669f < dot) {
             if (dot < 0.0f)
                 hit.normal = vu0Normalize_138640(vu0Sub_138640(hit.normal, vu0Scale_138640(RIDER->mGroundNormal, dot)));
             if (hit.obj != 0) {
-                char* o = *(char**)(hit.obj + 0xC);
-                if (o != 0) {
-                    sVEntH_138640* vt = *(sVEntH_138640**)(o + 0xC);
-                    vt[42].fn(o + vt[42].delta, &hit);
+                char* hitOwner = *(char**)(hit.obj + 0xC);
+                if (hitOwner != 0) {
+                    sVEntH_138640* vt = *(sVEntH_138640**)(hitOwner + 0xC);
+                    vt[42].fn(hitOwner + vt[42].delta, &hit);
                 }
             }
-            t4Vector push = vu0Scale_138640(vu0Scale_138640(hit.normal, 1.100000023841858f), d);
+            t4Vector push = vu0Scale_138640(vu0Scale_138640(hit.normal, 1.100000023841858f), depth);
             func_00106538(RIDER, push);
-            t4Vector a = vu0Sub_138640(RIDER->mVelocity, hit.v20);
-            float dot2 = vu0Dot_138640(vu0Scale_138640(hit.normal, -1.0f), a);
+            t4Vector netVelocity = vu0Sub_138640(RIDER->mVelocity, hit.v20);
+            float dot2 = vu0Dot_138640(vu0Scale_138640(hit.normal, -1.0f), netVelocity);
             if (0.0f <= dot2) {
                 float k = clamp_138640(dot2 * 0.5f, 27.77777862548828f, 555.5555419921875f);
                 vu0AddEq_138640(RIDER->mVelocity, vu0Scale_138640(hit.normal, dot2 + k));

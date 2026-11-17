@@ -1228,10 +1228,10 @@ extern int D_00536708[];
 extern "C" int func_0012A1F0(cAI* self, int idx)
 {
     char* tbl = (char*)SSXApp->GameModeMan;
-    int v = *(int*)((char*)tbl + (idx << 2) + 0x18);
+    int characterId = *(int*)((char*)tbl + (idx << 2) + 0x18);
     int found = 0;
     for (int i = 0; i < 6; i++) {
-        if (v == D_00536708[i]) found = 1;
+        if (characterId == D_00536708[i]) found = 1;
     }
     return found;
 }
@@ -1794,11 +1794,11 @@ extern "C" void cAI_prepareToPurgeComputerRiders(sAiObj12AB20* self)
     self->m14 = 0;
     for (int i = 0; i < self->mCount; i++)
     {
-        char* r = *(char**)(self->mRiders[i] + 0x18);
-        if (*(int*)(r + 0x884) != 0)
+        char* computerRider = *(char**)(self->mRiders[i] + 0x18);
+        if (*(int*)(computerRider + 0x884) != 0)
         {
-            *(int*)(r + 0x884) = 0;
-            *(int*)(r + 0x888) = -1;
+            *(int*)(computerRider + 0x884) = 0;
+            *(int*)(computerRider + 0x888) = -1;
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             char* rider = self->mRiders[i];
             sVEntry0012AB20* vt = (sVEntry0012AB20*)ps2GraphicsMan->mVtbl;
@@ -1869,11 +1869,11 @@ extern "C" void cAI_prepareToPurgeComputerActors(sAiObj12AC48* self)
     self->m8C = 0;
     for (int i = 0; i < self->mCount; i++)
     {
-        char* r = *(char**)(self->mRiders[i] + 0x18);
-        if (*(int*)(r + 0x884) != 0)
+        char* actorRider = *(char**)(self->mRiders[i] + 0x18);
+        if (*(int*)(actorRider + 0x884) != 0)
         {
-            *(int*)(r + 0x884) = 0;
-            *(int*)(r + 0x888) = -1;
+            *(int*)(actorRider + 0x884) = 0;
+            *(int*)(actorRider + 0x888) = -1;
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             char* rider = self->mRiders[i];
             sVEntry0012AC48* vt = (sVEntry0012AC48*)ps2GraphicsMan->mVtbl;
@@ -2696,14 +2696,14 @@ extern "C" void cAI_onlineAICheck(sAi_12BB20* self)
             return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char m = D_00535C12[0];
-    if (m == 0 || m == 4) {
-        int t = self->countdown;
-        if (t >= 0) {
-            if (t > 0) {
-                t--;
-                self->countdown = t;
-                if (t <= 0) {
+    signed char gameEvent = D_00535C12[0];
+    if (gameEvent == 0 || gameEvent == 4) {
+        int endTimer = self->countdown;
+        if (endTimer >= 0) {
+            if (endTimer > 0) {
+                endTimer--;
+                self->countdown = endTimer;
+                if (endTimer <= 0) {
                     for (int i = 0; i < self->count; i++) {
                         bool ok = riderOk_12BB20(self->riders[i]);
                         if (!ok) {
@@ -2721,9 +2721,9 @@ extern "C" void cAI_onlineAICheck(sAi_12BB20* self)
                 for (int j = 0; j < n; j++) {
                     bool ok = riderOk_12BB20(self->riders[j]);
                     if (ok && cGameComm_mGameComm->mRemoteEndGame == 0 && cGameComm_mGameComm->mAlone == 0) {
-                        int d = 54180 - self->timer;
-                        if (d > 7200) d = 7200;
-                        self->countdown = d;
+                        int timeLeft = 54180 - self->timer;
+                        if (timeLeft > 7200) timeLeft = 7200;
+                        self->countdown = timeLeft;
                     }
                 }
             }
@@ -2740,8 +2740,8 @@ extern "C" void cAI_onlineAICheck(sAi_12BB20* self)
             }
         }
     }
-    int v = *(int*)SSXApp->Game->Replay;
-    int busy = v != 0 && v < 10;
+    int replayState = *(int*)SSXApp->Game->Replay;
+    int busy = replayState != 0 && replayState < 10;
     if (busy)
         return;
     if (self->timer % 60 == 0)
@@ -7956,11 +7956,11 @@ extern "C" void cHandplantControl_init(sState_29B0* self, sOwner_29B0* intersect
     self->t = enterSec;
     self->flag = flag ? on : 0;
     self->fast = Length_29B0(self->rider->vel) > 2222.2222f;
-    bool c = false;
-    sFlags_29B0* f = intersectInfo->ctl;
-    if (f != 0)
-        c = (f->flags & 1) ? on : 0;
-    self->ctl = c;
+    bool surfaceFlag = false;
+    sFlags_29B0* hitObj = intersectInfo->ctl;
+    if (hitObj != 0)
+        surfaceFlag = (hitObj->flags & 1) ? on : 0;
+    self->ctl = surfaceFlag;
 }
 #endif
 
@@ -9386,15 +9386,15 @@ extern "C" void cSpinControl_applyFlipSpinAngle_x(void* self, sXf* xf)
     char* rd = *(char**)((char*)self + 0x58);
     char* trk = *(char**)(rd + 0x780);
     sVec4* n = (sVec4*)((*(int*)(rd + 0x89C) << 4) + *(int*)(trk + 0x24));
-    float a1 = -(*(float*)((char*)self + 0x20) + *(float*)((char*)self + 0x28));
-    float a2 = *(float*)((char*)self + 0x24) + *(float*)((char*)self + 0x2C);
-    sVec4 d = SubO_134DD0(sVec4(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
+    float spinAngle = -(*(float*)((char*)self + 0x20) + *(float*)((char*)self + 0x28));
+    float flipAngle = *(float*)((char*)self + 0x24) + *(float*)((char*)self + 0x2C);
+    sVec4 pivot = SubO_134DD0(sVec4(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
                                               n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C)),
                                  D_004FF130_4DD0);
     {
-        sVec4 v = Rot_12E010_4DD0(xf->rot, d);
-        AddToL_134DD0(xf->pos, v);
-        xf->rot *= AxisAngle2_134DD0(D_004FF160_4DD0, a1);
+        sVec4 rotPivot = Rot_12E010_4DD0(xf->rot, pivot);
+        AddToL_134DD0(xf->pos, rotPivot);
+        xf->rot *= AxisAngle2_134DD0(D_004FF160_4DD0, spinAngle);
     }
     float cur = cSpinControl_calcFlipAxisWeight((cSpinControl*)self);
     float old = *(float*)((char*)self + 0x40);
@@ -9410,13 +9410,13 @@ extern "C" void cSpinControl_applyFlipSpinAngle_x(void* self, sXf* xf)
     sVec4 ax = Norm_134DD0(Sub_12E010_4DD0(ScaleO_134DD0(t4vect_YAxis, nv),
                                              ScaleO_134DD0(t4vect_XAxis, 1.0f - *(float*)((char*)self + 0x40))));
     {
-        sVec4 q3;
-        q3 = AxisAngleB_134DD0(ax, a2);
-        xf->rot *= q3;
+        sVec4 flipQuat;
+        flipQuat = AxisAngleB_134DD0(ax, flipAngle);
+        xf->rot *= flipQuat;
     }
-    sVec4 w = Scale_12E010_4DD0(d, -1.0f);
-    sVec4 u = Rot_12E010_4DD0(xf->rot, w);
-    AddTo_134DD0(xf->pos, u);
+    sVec4 w = Scale_12E010_4DD0(pivot, -1.0f);
+    sVec4 backOffset = Rot_12E010_4DD0(xf->rot, w);
+    AddTo_134DD0(xf->pos, backOffset);
 }
 #endif
 
@@ -9725,15 +9725,15 @@ static inline float aiWrap_135BE0(float x)
  */
 extern "C" int cSpinControl_checkChangeFakieAir(void* self)
 {
-    char* s = (char*)self;
-    if (cRider_isChangeFakieAir(*(void**)(s + 0x58)) != 0)
+    char* spinCtl = (char*)self;
+    if (cRider_isChangeFakieAir(*(void**)(spinCtl + 0x58)) != 0)
     {
-    *(float*)(s + 0x20) = aiWrap_135BE0(*(float*)(s + 0x20) + 3.1415927410125732f);
-    *(float*)(s + 0x24) = -*(float*)(s + 0x24);
-    *(float*)(s + 0x2C) = -*(float*)(s + 0x2C);
-    *(float*)(s + 0x18) = -*(float*)(s + 0x18);
-    *(float*)(s + 0x10) = -*(float*)(s + 0x10);
-    cRiderAnimBase_play(*(void**)(*(char**)(s + 0x58) + 0x784), 288, 0, -1.0f);
+    *(float*)(spinCtl + 0x20) = aiWrap_135BE0(*(float*)(spinCtl + 0x20) + 3.1415927410125732f);
+    *(float*)(spinCtl + 0x24) = -*(float*)(spinCtl + 0x24);
+    *(float*)(spinCtl + 0x2C) = -*(float*)(spinCtl + 0x2C);
+    *(float*)(spinCtl + 0x18) = -*(float*)(spinCtl + 0x18);
+    *(float*)(spinCtl + 0x10) = -*(float*)(spinCtl + 0x10);
+    cRiderAnimBase_play(*(void**)(*(char**)(spinCtl + 0x58) + 0x784), 288, 0, -1.0f);
     return 1;
     }
     return 0;

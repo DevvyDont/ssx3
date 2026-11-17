@@ -227,28 +227,28 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
 // Builds the save block of rider profile 'idx': name, profile, character flag, CRC.
 extern "C" void* cBESaveInterface_generateSaveProfile(void* self, int idx)
 {
-    cBEIface_2950* o;
+    cBEIface_2950* iface;
     int size = cBESaveInterface_getSaveProfileSize_2950();
     cBESaveInterface_releaseBuffer_2950(self);
     cBESaveInterface_buffer = new (str_save_file_buffer, 0x100, 0) char[size];
-    char* p = (char*)cBESaveInterface_buffer;
-    strncpy(p, (char*)&cBELibrary_playerDB[idx], 0xC);
-    p += 0xC;
-    *(sProfile_2950*)p = D_004A6CA8_2950[idx];
-    p += sizeof(sProfile_2950);
-    *p++ = D_00535B31_2950[idx].f;
-    o = cBENewPlayerInterface_getThis_2950();
-    o->v2();
-    o = cBEBAGTInterface_getThis_2950();
-    o->v2();
-    o = cBEMissionInterface_getThis_2950();
-    o->v2();
-    o = cBEScoreInterface_getThis_2950();
-    o->v2();
-    o = cBEStatInterface_getThis_2950();
-    o->v2();
+    char* dataPtr = (char*)cBESaveInterface_buffer;
+    strncpy(dataPtr, (char*)&cBELibrary_playerDB[idx], 0xC);
+    dataPtr += 0xC;
+    *(sProfile_2950*)dataPtr = D_004A6CA8_2950[idx];
+    dataPtr += sizeof(sProfile_2950);
+    *dataPtr++ = D_00535B31_2950[idx].f;
+    iface = cBENewPlayerInterface_getThis_2950();
+    iface->v2();
+    iface = cBEBAGTInterface_getThis_2950();
+    iface->v2();
+    iface = cBEMissionInterface_getThis_2950();
+    iface->v2();
+    iface = cBEScoreInterface_getThis_2950();
+    iface->v2();
+    iface = cBEStatInterface_getThis_2950();
+    iface->v2();
     int crc = func_003E62D0(cBESaveInterface_buffer, size - 4, 64490);
-    __builtin_memcpy(p, &crc, 4);
+    __builtin_memcpy(dataPtr, &crc, 4);
     return cBESaveInterface_buffer;
 }
 #endif

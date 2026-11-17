@@ -345,16 +345,16 @@ struct sObj00208BB8 {
  */
 extern "C" void cOVState_MAP_setupScreenExit(void* self)
 {
-    sObj00208BB8* o;
+    sObj00208BB8* popupWidget;
     *(int*)((char*)self + 0xDC) = 1;
     *(int*)((char*)self + 0xC8) = 0;
-    o = *(sObj00208BB8**)((char*)self + 0xD0);
-    if (o != 0) {
-        o->vt[9].fn((char*)o + o->vt[9].delta, 0);
+    popupWidget = *(sObj00208BB8**)((char*)self + 0xD0);
+    if (popupWidget != 0) {
+        popupWidget->vt[9].fn((char*)popupWidget + popupWidget->vt[9].delta, 0);
     }
-    o = *(sObj00208BB8**)((char*)self + 0xE0);
-    if (o != 0) {
-        o->vt[9].fn((char*)o + o->vt[9].delta, 0);
+    popupWidget = *(sObj00208BB8**)((char*)self + 0xE0);
+    if (popupWidget != 0) {
+        popupWidget->vt[9].fn((char*)popupWidget + popupWidget->vt[9].delta, 0);
     }
 }
 #endif
@@ -785,10 +785,10 @@ extern "C" void cOVState_MAP_onUpdate(sMap_9370* self)
         if (self->fade < 1.0f) {
             self->fade += 0.10000000149011612f;
         }
-        cFEObj_9370* o = self->img;
-        sCol_9370 c = ((sFEObjData_9370*)o)->col;
-        c.a = self->fade;
-        o->SetColor(&c);
+        cFEObj_9370* feObj = self->img;
+        sCol_9370 colour = ((sFEObjData_9370*)feObj)->col;
+        colour.a = self->fade;
+        feObj->SetColor(&colour);
         self->img->SetVisible(1);
     } else {
         self->fade = 0.0f;
@@ -796,11 +796,11 @@ extern "C" void cOVState_MAP_onUpdate(sMap_9370* self)
     }
     sAsyncFile_9370* am = (sAsyncFile_9370*)SSXApp->mFEAsyncManager;
     if (cFEAsyncManager_GetFileStatus((cFEAsyncManager*)am, self->file) == 3 && self->loaded == 0) {
-        cFEObj_9370* o = self->img;
-        if (o != 0) {
+        cFEObj_9370* feObj = self->img;
+        if (feObj != 0) {
             int data = am[self->file].data;
-            ((sFEObjData_9370*)o)->f7C = 0;
-            ((sFEObjData_9370*)o)->f78 = data;
+            ((sFEObjData_9370*)feObj)->f7C = 0;
+            ((sFEObjData_9370*)feObj)->f78 = data;
             self->loaded = 1;
             self->fade = 0.0f;
         }
@@ -815,14 +815,14 @@ extern "C" void cOVState_MAP_onUpdate(sMap_9370* self)
     self->bob += self->bobVel;
     int i;
     for (i = 0; i < 8; i++) {
-        cFEObj_9370* o = self->icons[i];
-        if (o != 0) {
+        cFEObj_9370* feObj = self->icons[i];
+        if (feObj != 0) {
             sV3_9370* bp = &self->iconPos[i];
-            float d = (self->bob - 18.0f) * 0.5f;
-            sV3_9370 p;
-            p.x = bp->x - d;
-            p.y = bp->y - d;
-            ((sFEObjData_9370*)o)->pos = p;
+            float halfGrowth = (self->bob - 18.0f) * 0.5f;
+            sV3_9370 placedPos;
+            placedPos.x = bp->x - halfGrowth;
+            placedPos.y = bp->y - halfGrowth;
+            ((sFEObjData_9370*)feObj)->pos = placedPos;
             self->icons[i]->SetScale(sV3_9370(self->bob, self->bob, 0.0f));
         }
     }
@@ -1274,11 +1274,11 @@ struct sMap_A088 {
  * For the player icon (+0xE0) and each of the two eight-entry icon arrays (+0xE4 and +0x104; On Tour mpPlayerIcon,
  * mpSessionIcons, mpSessionHighlights) it hides a present widget (setVisible(0)), deletes it and clears the pointer.
  *
- * @param p  the map overlay state (this)
+ * @param mapOverlay  the map overlay state (this)
  */
-extern "C" void cOVState_MAP_cleanupIndicators(void* p)
+extern "C" void cOVState_MAP_cleanupIndicators(void* mapOverlay)
 {
-    sMap_A088* self = (sMap_A088*)p;
+    sMap_A088* self = (sMap_A088*)mapOverlay;
     if (self->cursor != 0) {
         self->cursor->setVisible(0);
         delete self->cursor;

@@ -146,14 +146,14 @@ extern signed char D_004A4A70;
  *
  * D_004A4A70 starts as '\n'; func_003EBD70() and func_003ECBD8() write it between fields.
  *
- * @param arg0  the new divider character
+ * @param divider  the new divider character
  * @return the divider character it replaced
  */
-extern "C" signed char func_003EB578(signed char arg0) {
+extern "C" signed char func_003EB578(signed char divider) {
     signed char temp_2;
 
     temp_2 = D_004A4A70;
-    D_004A4A70 = arg0;
+    D_004A4A70 = divider;
     return temp_2;
 }
 #endif
@@ -325,16 +325,16 @@ extern char D_004A4A78[];
  */
 extern "C" unsigned char* func_003EB8B8(char* record)
 {
-    unsigned char* p = cDirtysock_tag_TagFieldFind(record, D_004A4A78);
-    if (p != 0) {
-        while ((unsigned int)(*p - 1) < 0x20U) {
-            p++;
+    unsigned char* cursor = cDirtysock_tag_TagFieldFind(record, D_004A4A78);
+    if (cursor != 0) {
+        while ((unsigned int)(*cursor - 1) < 0x20U) {
+            cursor++;
         }
-        if (*p == 0) {
-            p = 0;
+        if (*cursor == 0) {
+            cursor = 0;
         }
     }
-    return p;
+    return cursor;
 }
 #endif
 
@@ -597,7 +597,7 @@ extern signed char D_004A4A80[];
  */
 extern "C" int func_003EBD70(unsigned char* buf, int len)
 {
-    const signed char* s = D_004A4A80;
+    const signed char* marker = D_004A4A80;
     int ret = -1;
     int n = 0;
     if (*buf != 0) {
@@ -617,9 +617,9 @@ extern "C" int func_003EBD70(unsigned char* buf, int len)
         }
     }
     if (n + 4 < len) {
-        while (*s != 0) {
-            buf[n++] = (unsigned char)*s;
-            s++;
+        while (*marker != 0) {
+            buf[n++] = (unsigned char)*marker;
+            marker++;
         }
         ret = 0;
         buf[n] = 0;
@@ -1331,38 +1331,38 @@ extern "C" int func_003ECBD8(char* buf, int len, const char* fmt, ...)
     func_003ECBD8_va_list args;
     func_003ECBD8_va_start(args);
     int size = len;
-    unsigned char c = *fmt++;
-    while (c != 0 && len >= 2) {
-        if (c <= ' ') {
+    unsigned char fmtChar = *fmt++;
+    while (fmtChar != 0 && len >= 2) {
+        if (fmtChar <= ' ') {
             *buf++ = D_004A4A70;
             len--;
             while (*fmt != 0 && *fmt <= ' ')
                 fmt++;
-        } else if (c != '%') {
-            *buf++ = c;
+        } else if (fmtChar != '%') {
+            *buf++ = fmtChar;
             len--;
         } else if (*fmt != 0) {
             int n = 0;
-            c = *fmt++;
+            fmtChar = *fmt++;
             if (buf[-1] == '=') {
                 buf--;
                 len++;
             }
             *buf = 0;
-            if (c == 's') {
+            if (fmtChar == 's') {
                 n = cDirtysock_tag_TagFieldSetString(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, char*));
-            } else if (c == 'd') {
+            } else if (fmtChar == 'd') {
                 n = cDirtysock_tag_TagFieldSetNumber(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, int));
-            } else if (c == 'a') {
+            } else if (fmtChar == 'a') {
                 n = cDirtysock_tag_TagFieldSetAddress(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, unsigned int));
-            } else if (c == 'f') {
+            } else if (fmtChar == 'f') {
                 n = cDirtysock_tag_TagFieldSetFlags(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, int));
-            } else if (c == 'e') {
+            } else if (fmtChar == 'e') {
                 n = cDirtysock_tag_TagFieldSetEpoch(buf, len, D_004A4A90, func_003ECBD8_va_arg(args, unsigned int));
-            } else if (c == 'r') {
-                const char* r = func_003ECBD8_va_arg(args, char*);
-                while (*r != 0 && len > 0) {
-                    *buf++ = *r++;
+            } else if (fmtChar == 'r') {
+                const char* rawText = func_003ECBD8_va_arg(args, char*);
+                while (*rawText != 0 && len > 0) {
+                    *buf++ = *rawText++;
                     len--;
                 }
             }
@@ -1371,7 +1371,7 @@ extern "C" int func_003ECBD8(char* buf, int len, const char* fmt, ...)
                 len -= n;
             }
         }
-        c = *fmt++;
+        fmtChar = *fmt++;
     }
     if (len > 0)
         *buf = 0;
@@ -1580,7 +1580,7 @@ extern "C" int func_003ED0F8(const char* pData, char* pBuffer, int iLength, cons
 {
     int iSize;
     unsigned char cQuote;
-    const unsigned char* p;
+    const unsigned char* scan;
 
     if (pData != 0) {
         if ((*pData == '"') || (*pData == '\'')) {
@@ -1590,8 +1590,8 @@ extern "C" int func_003ED0F8(const char* pData, char* pBuffer, int iLength, cons
         }
         for (; iIndex > 0; --iIndex) {
             for (;;) {
-                char c = *pData;
-                if ((c == cQuote) || (c < ' ') || (c == iDelim)) {
+                char curChar = *pData;
+                if ((curChar == cQuote) || (curChar < ' ') || (curChar == iDelim)) {
                     break;
                 }
                 ++pData;
@@ -1616,31 +1616,31 @@ extern "C" int func_003ED0F8(const char* pData, char* pBuffer, int iLength, cons
         return iSize - 1;
     }
     if (pBuffer == 0) {
-        p = (const unsigned char*)pData;
-        for (iSize = 0; (*p != cQuote) && (*p >= ' ') && (*p != iDelim); ++iSize) {
-            if ((p[0] == '%') && (p[1] >= ' ') && (p[2] >= ' ')) {
-                p += 2;
+        scan = (const unsigned char*)pData;
+        for (iSize = 0; (*scan != cQuote) && (*scan >= ' ') && (*scan != iDelim); ++iSize) {
+            if ((scan[0] == '%') && (scan[1] >= ' ') && (scan[2] >= ' ')) {
+                scan += 2;
             }
-            ++p;
+            ++scan;
         }
         return iSize;
     }
     if (iLength <= 0) {
         return -1;
     }
-    p = (const unsigned char*)pData;
-    for (iSize = 1; (iSize < iLength) && (*p != cQuote) && (*p >= ' ') && (*p != iDelim);) {
-        if ((p[0] == '%') && (p[1] == '%')) {
+    scan = (const unsigned char*)pData;
+    for (iSize = 1; (iSize < iLength) && (*scan != cQuote) && (*scan >= ' ') && (*scan != iDelim);) {
+        if ((scan[0] == '%') && (scan[1] == '%')) {
             *pBuffer++ = '%';
-            p += 2;
+            scan += 2;
             ++iSize;
-        } else if ((p[0] == '%') && (p[1] >= ' ') && (p[2] >= ' ')) {
+        } else if ((scan[0] == '%') && (scan[1] >= ' ') && (scan[2] >= ' ')) {
             ++iSize;
-            *pBuffer++ = D_004961C0[p[1]] | D_004962C0[p[2]];
-            p += 3;
+            *pBuffer++ = D_004961C0[scan[1]] | D_004962C0[scan[2]];
+            scan += 3;
         } else {
             ++iSize;
-            *pBuffer++ = *p++;
+            *pBuffer++ = *scan++;
         }
     }
     *pBuffer = 0;

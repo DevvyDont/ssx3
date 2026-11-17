@@ -1484,15 +1484,15 @@ extern "C" int cOverlapList_splineIntersect(char* self, sWsVec4* pos, int intInf
     wsSubEq_334680(box.min, ext);
     wsAddEq_334680(box.max, ext);
     for (unsigned int i = 0; i < *(unsigned int*)(self + 0x210); i++) {
-        char* o = ((char**)(self + 0x214))[i];
-        int type = *(int*)(o + 8);
+        char* spaceNode = ((char**)(self + 0x214))[i];
+        int type = *(int*)(spaceNode + 8);
         if (type == 2) {
-            cRailModifier_splineIntersect(*(void**)(o + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
+            cRailModifier_splineIntersect(*(void**)(spaceNode + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
         } else if (type == 3) {
-            func_00348290(*(void**)(o + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
+            func_00348290(*(void**)(spaceNode + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
         } else if (type == 1) {
-            if (*(int*)(*(char**)(o + 0x68) + 0x1C) & mask) {
-                func_00335128(o, &box, pos, &cnt, &dist, intInfo);
+            if (*(int*)(*(char**)(spaceNode + 0x68) + 0x1C) & mask) {
+                func_00335128(spaceNode, &box, pos, &cnt, &dist, intInfo);
             }
         }
     }
@@ -1532,9 +1532,9 @@ extern "C" void func_00327828(void* p, int flags);
  */
 extern "C" void cBXNash_purgeTheAIFwdDiffCache(void* self)
 {
-    void* p = *(void**)((char*)self + 0xA4);
-    if (p != 0) {
-        func_00327828(p, 3);
+    void* fwdDiffCache = *(void**)((char*)self + 0xA4);
+    if (fwdDiffCache != 0) {
+        func_00327828(fwdDiffCache, 3);
     }
     *(void**)((char*)self + 0xA4) = 0;
 }
@@ -1860,63 +1860,63 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
     }
     sWsBoneTbl_4888* tbl = node->tbl;
     sWsBone_4888* bone = tbl->bones;
-    float s = node->scale;
+    float instScale = node->scale;
     t4Vector scl;
-    scl.x = s;
-    scl.y = s;
-    scl.z = s;
+    scl.x = instScale;
+    scl.y = instScale;
+    scl.z = instScale;
     scl.w = 1.0f;
     int n = 0;
-    sWsMat_4888* m = boneMats;
-    for (int i = 0, k = 0; i < tbl->count; i++, bone++, m++) {
+    sWsMat_4888* boneMat = boneMats;
+    for (int i = 0, k = 0; i < tbl->count; i++, bone++, boneMat++) {
         if (useLocal) {
             int parent = bone->parent;
             if (parent != -1) {
-                sWsMat_4888 t2;
-                sWsMat_4888 a;
+                sWsMat_4888 productCopy;
+                sWsMat_4888 scaledLocal;
                 t4Vector res;
-                t4Vector r3;
+                t4Vector translation;
                 sWsMat_4888* lm = bone->mat;
                 res = lm->row[0];
-                a.row[0] = res;
+                scaledLocal.row[0] = res;
                 res = lm->row[1];
-                a.row[1] = res;
+                scaledLocal.row[1] = res;
                 res = lm->row[2];
-                a.row[2] = res;
-                r3 = lm->row[3];
-                res.x = r3.x * scl.x;
-                res.y = r3.y * scl.y;
-                res.z = r3.z * scl.z;
-                res.w = r3.w * scl.w;
-                a.row[3] = res;
-                sWsMat_4888 t;
-                sWsMat_4888* pt2 = &t2;
-                sWsMat_4888* pt = &t;
-                vu0MulMat_4888(pt, &mats[parent], &a);
+                scaledLocal.row[2] = res;
+                translation = lm->row[3];
+                res.x = translation.x * scl.x;
+                res.y = translation.y * scl.y;
+                res.z = translation.z * scl.z;
+                res.w = translation.w * scl.w;
+                scaledLocal.row[3] = res;
+                sWsMat_4888 product;
+                sWsMat_4888* pt2 = &productCopy;
+                sWsMat_4888* pt = &product;
+                vu0MulMat_4888(pt, &mats[parent], &scaledLocal);
                 vu0CopyMat_4888(pt2, pt);
                 vu0CopyMat_4888(&mats[i], pt2);
             } else {
-                sWsMat_4888 t2;
-                sWsMat_4888 a;
+                sWsMat_4888 productCopy;
+                sWsMat_4888 scaledLocal;
                 t4Vector res;
-                t4Vector r3;
+                t4Vector translation;
                 sWsMat_4888* lm = bone->mat;
                 res = lm->row[0];
-                a.row[0] = res;
+                scaledLocal.row[0] = res;
                 res = lm->row[1];
-                a.row[1] = res;
+                scaledLocal.row[1] = res;
                 res = lm->row[2];
-                a.row[2] = res;
-                r3 = lm->row[3];
-                res.x = r3.x * scl.x;
-                res.y = r3.y * scl.y;
-                res.z = r3.z * scl.z;
-                res.w = r3.w * scl.w;
-                a.row[3] = res;
-                sWsMat_4888 t;
-                sWsMat_4888* pt2 = &t2;
-                sWsMat_4888* pt = &t;
-                vu0MulMat_4888(pt, pMat, &a);
+                scaledLocal.row[2] = res;
+                translation = lm->row[3];
+                res.x = translation.x * scl.x;
+                res.y = translation.y * scl.y;
+                res.z = translation.z * scl.z;
+                res.w = translation.w * scl.w;
+                scaledLocal.row[3] = res;
+                sWsMat_4888 product;
+                sWsMat_4888* pt2 = &productCopy;
+                sWsMat_4888* pt = &product;
+                vu0MulMat_4888(pt, pMat, &scaledLocal);
                 vu0CopyMat_4888(pt2, pt);
                 vu0CopyMat_4888(&mats[i], pt2);
             }
@@ -1937,7 +1937,7 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
             }
         }
         sWsHit_4888 ii[64];
-        sWsMat_4888 inv = *m;
+        sWsMat_4888 inv = *boneMat;
         InvertOrtho_4888(inv);
         int inum = 0;
         void* tri = 0;
@@ -1958,9 +1958,9 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
         }
         ((Reset_4888)intersectType->vt[2].fn)((char*)intersectType + intersectType->vt[2].delta);
         for (int j = 0; j < inum; j++) {
-            ii[j].nrm = vu0MtxMul_4888(m, ii[j].nrm);
+            ii[j].nrm = vu0MtxMul_4888(boneMat, ii[j].nrm);
             buf[n] = ii[j];
-            buf[n].pos = vu0MtxMul_4888(m, MulVec_4888(buf[n].pos, scl));
+            buf[n].pos = vu0MtxMul_4888(boneMat, MulVec_4888(buf[n].pos, scl));
             buf[n].type = 1;
             buf[n].inst = node;
             buf[n].bone = i;

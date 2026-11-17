@@ -81,15 +81,15 @@ extern sCharStat_cBEStatInterface_getStrikingAttrib D_005308D8_cBEStatInterface_
 extern "C" float cBEStatInterface_getStrikingAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int character = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
-    int v;
+    int level;
     if (value > 0)
-        v = value;
+        level = value;
     else
-        v = D_00535538_cBEStatInterface_getStrikingAttrib[profile].e[c][5] / 5;
-    return (float)v / (float)D_005308D8_cBEStatInterface_getStrikingAttrib[c].v[0xD];
+        level = D_00535538_cBEStatInterface_getStrikingAttrib[profile].e[character][5] / 5;
+    return (float)level / (float)D_005308D8_cBEStatInterface_getStrikingAttrib[character].v[0xD];
 }
 #endif
 
@@ -125,15 +125,15 @@ extern sCharStat_cBEStatInterface_getLandingAttrib D_005308D8_cBEStatInterface_g
 extern "C" float cBEStatInterface_getLandingAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int character = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
-    int v;
+    int level;
     if (value > 0)
-        v = value;
+        level = value;
     else
-        v = D_00535538_cBEStatInterface_getLandingAttrib[profile].e[c][6] / 5;
-    return (float)v / (float)D_005308D8_cBEStatInterface_getLandingAttrib[c].v[0xE];
+        level = D_00535538_cBEStatInterface_getLandingAttrib[profile].e[character][6] / 5;
+    return (float)level / (float)D_005308D8_cBEStatInterface_getLandingAttrib[character].v[0xE];
 }
 #endif
 
@@ -289,15 +289,15 @@ extern sCharStat_cBEStatInterface_getSpinAttrib D_005308D8_cBEStatInterface_getS
 extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int character = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
-    int v;
+    int level;
     if (value > 0)
-        v = value;
+        level = value;
     else
-        v = D_00535538_cBEStatInterface_getSpinAttrib[profile].e[c][4] / 5;
-    return (float)v / (float)D_005308D8_cBEStatInterface_getSpinAttrib[c].v[0xC];
+        level = D_00535538_cBEStatInterface_getSpinAttrib[profile].e[character][4] / 5;
+    return (float)level / (float)D_005308D8_cBEStatInterface_getSpinAttrib[character].v[0xC];
 }
 #endif
 
@@ -333,15 +333,15 @@ extern sCharStat_cBEStatInterface_getTrickAttrib D_005308D8_cBEStatInterface_get
 extern "C" float cBEStatInterface_getTrickAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int character = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
-    int v;
+    int level;
     if (value > 0)
-        v = value;
+        level = value;
     else
-        v = D_00535538_cBEStatInterface_getTrickAttrib[profile].e[c][2] / 5;
-    return (float)v / (float)D_005308D8_cBEStatInterface_getTrickAttrib[c].v[0xA];
+        level = D_00535538_cBEStatInterface_getTrickAttrib[profile].e[character][2] / 5;
+    return (float)level / (float)D_005308D8_cBEStatInterface_getTrickAttrib[character].v[0xA];
 }
 #endif
 
@@ -373,7 +373,7 @@ extern "C" int cBEStatInterface_shouldCelebrateTrick(void* self, int rider, int 
 {
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0;
-    sLevelTable_00149778 t = D_0045A2B0;
+    sLevelTable_00149778 pointThresholds = D_0045A2B0;
     int n = func_00148950(self, rider) - 1;
     int lvl;
     int hi = 10;
@@ -385,7 +385,7 @@ extern "C" int cBEStatInterface_shouldCelebrateTrick(void* self, int rider, int 
     }
     else
         lvl = 0;
-    return value >= t.v[lvl];
+    return value >= pointThresholds.v[lvl];
 }
 #endif
 
@@ -625,7 +625,7 @@ extern "C" void cBELibrary_loadData(void)
 {
     int i;
     void* buf;
-    int* p;
+    int* grabPoints;
 
     func_0014C6A0(D_004A6750);
     cBERewardDB_init(cBELibrary_rewardDB, 0);
@@ -666,169 +666,169 @@ extern "C" void cBELibrary_loadData(void)
     for (i = 0; i < 3; i++) {
         cBEProfileLib_init(cBELibrary_profileLib + i * 39760, 1);
     }
-    p = cBELibrary_grabPointsDB;
-    p[0x0 / 4] = 0;
-    p[0x4 / 4] = 0;
-    p[0x18 / 4] = 200;
-    p[0x1C / 4] = 400;
-    p[0x20 / 4] = 200;
-    p[36 / 4] = 400;
-    p[40 / 4] = 200;
-    p[44 / 4] = 400;
-    p[0x30 / 4] = 200;
-    p[52 / 4] = 400;
-    p[0x38 / 4] = 250;
-    p[0x3C / 4] = 400;
-    p[0x40 / 4] = 250;
-    p[68 / 4] = 400;
-    p[72 / 4] = 250;
-    p[76 / 4] = 400;
-    p[80 / 4] = 300;
-    p[84 / 4] = 400;
-    p[88 / 4] = 300;
-    p[92 / 4] = 400;
-    p[0x60 / 4] = 300;
-    p[100 / 4] = 400;
-    p[104 / 4] = 300;
-    p[108 / 4] = 400;
-    p[0x70 / 4] = 350;
-    p[116 / 4] = 400;
-    p[0x78 / 4] = 300;
-    p[0x7C / 4] = 400;
-    p[0x80 / 4] = 300;
-    p[132 / 4] = 400;
-    p[136 / 4] = 300;
-    p[140 / 4] = 400;
-    p[152 / 4] = 200;
-    p[156 / 4] = 500;
-    p[160 / 4] = 200;
-    p[164 / 4] = 500;
-    p[168 / 4] = 200;
-    p[172 / 4] = 500;
-    p[176 / 4] = 200;
-    p[180 / 4] = 500;
-    p[184 / 4] = 200;
-    p[188 / 4] = 500;
-    p[0xC0 / 4] = 200;
-    p[196 / 4] = 500;
-    p[200 / 4] = 200;
-    p[204 / 4] = 500;
-    p[208 / 4] = 200;
-    p[212 / 4] = 500;
-    p[216 / 4] = 200;
-    p[220 / 4] = 500;
-    p[0xE0 / 4] = 200;
-    p[228 / 4] = 500;
-    p[232 / 4] = 200;
-    p[236 / 4] = 500;
-    p[0xF0 / 4] = 200;
-    p[244 / 4] = 500;
-    p[0xF8 / 4] = 200;
-    p[0xFC / 4] = 500;
-    p[0x100 / 4] = 200;
-    p[260 / 4] = 500;
-    p[264 / 4] = 200;
-    p[268 / 4] = 500;
-    p[328 / 4] = 1000;
-    p[332 / 4] = 3000;
-    p[344 / 4] = 2000;
-    p[348 / 4] = 3000;
-    p[360 / 4] = 2500;
-    p[364 / 4] = 3000;
-    p[336 / 4] = 1000;
-    p[340 / 4] = 3000;
-    p[352 / 4] = 2000;
-    p[356 / 4] = 3000;
-    p[368 / 4] = 2500;
-    p[372 / 4] = 3000;
-    p[376 / 4] = 1000;
-    p[380 / 4] = 3000;
-    p[392 / 4] = 2000;
-    p[396 / 4] = 3000;
-    p[408 / 4] = 2500;
-    p[412 / 4] = 3000;
-    p[0x180 / 4] = 1000;
-    p[388 / 4] = 3000;
-    p[400 / 4] = 2000;
-    p[404 / 4] = 3000;
-    p[416 / 4] = 2500;
-    p[420 / 4] = 3000;
-    p[424 / 4] = 1000;
-    p[428 / 4] = 3000;
-    p[440 / 4] = 2000;
-    p[444 / 4] = 3000;
-    p[456 / 4] = 2500;
-    p[460 / 4] = 3000;
-    p[432 / 4] = 1000;
-    p[436 / 4] = 3000;
-    p[0x1C0 / 4] = 2000;
-    p[452 / 4] = 3000;
-    p[464 / 4] = 2500;
-    p[468 / 4] = 3000;
-    p[280 / 4] = 1000;
-    p[284 / 4] = 3000;
-    p[296 / 4] = 2000;
-    p[300 / 4] = 3000;
-    p[312 / 4] = 2500;
-    p[316 / 4] = 3000;
-    p[288 / 4] = 1000;
-    p[292 / 4] = 3000;
-    p[304 / 4] = 2000;
-    p[308 / 4] = 3000;
-    p[320 / 4] = 2500;
-    p[324 / 4] = 3000;
-    p[520 / 4] = 1000;
-    p[524 / 4] = 3000;
-    p[536 / 4] = 2000;
-    p[540 / 4] = 3000;
-    p[552 / 4] = 2500;
-    p[556 / 4] = 3000;
-    p[528 / 4] = 1000;
-    p[532 / 4] = 3000;
-    p[544 / 4] = 2000;
-    p[548 / 4] = 3000;
-    p[560 / 4] = 2500;
-    p[564 / 4] = 3000;
-    p[472 / 4] = 1000;
-    p[476 / 4] = 3000;
-    p[488 / 4] = 2000;
-    p[492 / 4] = 3000;
-    p[0x1F8 / 4] = 2500;
-    p[0x1FC / 4] = 3000;
-    p[0x1E0 / 4] = 1000;
-    p[484 / 4] = 3000;
-    p[0x1F0 / 4] = 2000;
-    p[500 / 4] = 3000;
-    p[0x200 / 4] = 2500;
-    p[516 / 4] = 3000;
-    p[568 / 4] = 3000;
-    p[572 / 4] = 4000;
-    p[576 / 4] = 3000;
-    p[580 / 4] = 4000;
-    p[584 / 4] = 3000;
-    p[588 / 4] = 4000;
-    p[592 / 4] = 3000;
-    p[596 / 4] = 4000;
-    p[600 / 4] = 3000;
-    p[604 / 4] = 4000;
-    p[608 / 4] = 3000;
-    p[612 / 4] = 4000;
-    p[616 / 4] = 3000;
-    p[620 / 4] = 4000;
-    p[624 / 4] = 3000;
-    p[628 / 4] = 4000;
-    p[632 / 4] = 3000;
-    p[636 / 4] = 4000;
-    p[640 / 4] = 3000;
-    p[644 / 4] = 4000;
-    p[648 / 4] = 5000;
-    p[652 / 4] = 5000;
-    p[656 / 4] = 5000;
-    p[660 / 4] = 5000;
-    p[664 / 4] = 5000;
-    p[668 / 4] = 5000;
-    p[672 / 4] = 5000;
-    p[676 / 4] = 5000;
+    grabPoints = cBELibrary_grabPointsDB;
+    grabPoints[0x0 / 4] = 0;
+    grabPoints[0x4 / 4] = 0;
+    grabPoints[0x18 / 4] = 200;
+    grabPoints[0x1C / 4] = 400;
+    grabPoints[0x20 / 4] = 200;
+    grabPoints[36 / 4] = 400;
+    grabPoints[40 / 4] = 200;
+    grabPoints[44 / 4] = 400;
+    grabPoints[0x30 / 4] = 200;
+    grabPoints[52 / 4] = 400;
+    grabPoints[0x38 / 4] = 250;
+    grabPoints[0x3C / 4] = 400;
+    grabPoints[0x40 / 4] = 250;
+    grabPoints[68 / 4] = 400;
+    grabPoints[72 / 4] = 250;
+    grabPoints[76 / 4] = 400;
+    grabPoints[80 / 4] = 300;
+    grabPoints[84 / 4] = 400;
+    grabPoints[88 / 4] = 300;
+    grabPoints[92 / 4] = 400;
+    grabPoints[0x60 / 4] = 300;
+    grabPoints[100 / 4] = 400;
+    grabPoints[104 / 4] = 300;
+    grabPoints[108 / 4] = 400;
+    grabPoints[0x70 / 4] = 350;
+    grabPoints[116 / 4] = 400;
+    grabPoints[0x78 / 4] = 300;
+    grabPoints[0x7C / 4] = 400;
+    grabPoints[0x80 / 4] = 300;
+    grabPoints[132 / 4] = 400;
+    grabPoints[136 / 4] = 300;
+    grabPoints[140 / 4] = 400;
+    grabPoints[152 / 4] = 200;
+    grabPoints[156 / 4] = 500;
+    grabPoints[160 / 4] = 200;
+    grabPoints[164 / 4] = 500;
+    grabPoints[168 / 4] = 200;
+    grabPoints[172 / 4] = 500;
+    grabPoints[176 / 4] = 200;
+    grabPoints[180 / 4] = 500;
+    grabPoints[184 / 4] = 200;
+    grabPoints[188 / 4] = 500;
+    grabPoints[0xC0 / 4] = 200;
+    grabPoints[196 / 4] = 500;
+    grabPoints[200 / 4] = 200;
+    grabPoints[204 / 4] = 500;
+    grabPoints[208 / 4] = 200;
+    grabPoints[212 / 4] = 500;
+    grabPoints[216 / 4] = 200;
+    grabPoints[220 / 4] = 500;
+    grabPoints[0xE0 / 4] = 200;
+    grabPoints[228 / 4] = 500;
+    grabPoints[232 / 4] = 200;
+    grabPoints[236 / 4] = 500;
+    grabPoints[0xF0 / 4] = 200;
+    grabPoints[244 / 4] = 500;
+    grabPoints[0xF8 / 4] = 200;
+    grabPoints[0xFC / 4] = 500;
+    grabPoints[0x100 / 4] = 200;
+    grabPoints[260 / 4] = 500;
+    grabPoints[264 / 4] = 200;
+    grabPoints[268 / 4] = 500;
+    grabPoints[328 / 4] = 1000;
+    grabPoints[332 / 4] = 3000;
+    grabPoints[344 / 4] = 2000;
+    grabPoints[348 / 4] = 3000;
+    grabPoints[360 / 4] = 2500;
+    grabPoints[364 / 4] = 3000;
+    grabPoints[336 / 4] = 1000;
+    grabPoints[340 / 4] = 3000;
+    grabPoints[352 / 4] = 2000;
+    grabPoints[356 / 4] = 3000;
+    grabPoints[368 / 4] = 2500;
+    grabPoints[372 / 4] = 3000;
+    grabPoints[376 / 4] = 1000;
+    grabPoints[380 / 4] = 3000;
+    grabPoints[392 / 4] = 2000;
+    grabPoints[396 / 4] = 3000;
+    grabPoints[408 / 4] = 2500;
+    grabPoints[412 / 4] = 3000;
+    grabPoints[0x180 / 4] = 1000;
+    grabPoints[388 / 4] = 3000;
+    grabPoints[400 / 4] = 2000;
+    grabPoints[404 / 4] = 3000;
+    grabPoints[416 / 4] = 2500;
+    grabPoints[420 / 4] = 3000;
+    grabPoints[424 / 4] = 1000;
+    grabPoints[428 / 4] = 3000;
+    grabPoints[440 / 4] = 2000;
+    grabPoints[444 / 4] = 3000;
+    grabPoints[456 / 4] = 2500;
+    grabPoints[460 / 4] = 3000;
+    grabPoints[432 / 4] = 1000;
+    grabPoints[436 / 4] = 3000;
+    grabPoints[0x1C0 / 4] = 2000;
+    grabPoints[452 / 4] = 3000;
+    grabPoints[464 / 4] = 2500;
+    grabPoints[468 / 4] = 3000;
+    grabPoints[280 / 4] = 1000;
+    grabPoints[284 / 4] = 3000;
+    grabPoints[296 / 4] = 2000;
+    grabPoints[300 / 4] = 3000;
+    grabPoints[312 / 4] = 2500;
+    grabPoints[316 / 4] = 3000;
+    grabPoints[288 / 4] = 1000;
+    grabPoints[292 / 4] = 3000;
+    grabPoints[304 / 4] = 2000;
+    grabPoints[308 / 4] = 3000;
+    grabPoints[320 / 4] = 2500;
+    grabPoints[324 / 4] = 3000;
+    grabPoints[520 / 4] = 1000;
+    grabPoints[524 / 4] = 3000;
+    grabPoints[536 / 4] = 2000;
+    grabPoints[540 / 4] = 3000;
+    grabPoints[552 / 4] = 2500;
+    grabPoints[556 / 4] = 3000;
+    grabPoints[528 / 4] = 1000;
+    grabPoints[532 / 4] = 3000;
+    grabPoints[544 / 4] = 2000;
+    grabPoints[548 / 4] = 3000;
+    grabPoints[560 / 4] = 2500;
+    grabPoints[564 / 4] = 3000;
+    grabPoints[472 / 4] = 1000;
+    grabPoints[476 / 4] = 3000;
+    grabPoints[488 / 4] = 2000;
+    grabPoints[492 / 4] = 3000;
+    grabPoints[0x1F8 / 4] = 2500;
+    grabPoints[0x1FC / 4] = 3000;
+    grabPoints[0x1E0 / 4] = 1000;
+    grabPoints[484 / 4] = 3000;
+    grabPoints[0x1F0 / 4] = 2000;
+    grabPoints[500 / 4] = 3000;
+    grabPoints[0x200 / 4] = 2500;
+    grabPoints[516 / 4] = 3000;
+    grabPoints[568 / 4] = 3000;
+    grabPoints[572 / 4] = 4000;
+    grabPoints[576 / 4] = 3000;
+    grabPoints[580 / 4] = 4000;
+    grabPoints[584 / 4] = 3000;
+    grabPoints[588 / 4] = 4000;
+    grabPoints[592 / 4] = 3000;
+    grabPoints[596 / 4] = 4000;
+    grabPoints[600 / 4] = 3000;
+    grabPoints[604 / 4] = 4000;
+    grabPoints[608 / 4] = 3000;
+    grabPoints[612 / 4] = 4000;
+    grabPoints[616 / 4] = 3000;
+    grabPoints[620 / 4] = 4000;
+    grabPoints[624 / 4] = 3000;
+    grabPoints[628 / 4] = 4000;
+    grabPoints[632 / 4] = 3000;
+    grabPoints[636 / 4] = 4000;
+    grabPoints[640 / 4] = 3000;
+    grabPoints[644 / 4] = 4000;
+    grabPoints[648 / 4] = 5000;
+    grabPoints[652 / 4] = 5000;
+    grabPoints[656 / 4] = 5000;
+    grabPoints[660 / 4] = 5000;
+    grabPoints[664 / 4] = 5000;
+    grabPoints[668 / 4] = 5000;
+    grabPoints[672 / 4] = 5000;
+    grabPoints[676 / 4] = 5000;
 }
 #endif
 

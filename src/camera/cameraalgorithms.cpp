@@ -216,15 +216,15 @@ extern cSimpleCamera_cSimpleCamera_sVec4 t4vect_XAxis;
  */
 extern "C" void* cSimpleCamera_cSimpleCamera(void* self)
 {
-    cSimpleCamera_cSimpleCamera_sVec4 v;
+    cSimpleCamera_cSimpleCamera_sVec4 poseVec;
     *(void***)((char*)self + 0x90) = cSimpleCamera_vtbl;
-    v.x = 0; v.y = 0; v.z = 0; v.w = 0;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x20) = v;
-    v.w = 1.0f;
-    v.x = 0;
-    v.y = 1.0f;
-    v.z = 0;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x30) = v;
+    poseVec.x = 0; poseVec.y = 0; poseVec.z = 0; poseVec.w = 0;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x20) = poseVec;
+    poseVec.w = 1.0f;
+    poseVec.x = 0;
+    poseVec.y = 1.0f;
+    poseVec.z = 0;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x30) = poseVec;
     *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x80) = t4vect_XAxis;
     return self;
 }
@@ -563,16 +563,16 @@ extern "C" void cCamera_onRestart(void)
     int n = *(int*)riders;
     cChaseCameraController_switchCamera_Restart(*(void**)(*(char**)(riders + 4) + 0xA8));
     char* cam = *(char**)(*(char**)(riders + 4) + 0xA8);
-    sCamVE_0015DB58* e = &(*(sCamVE_0015DB58**)(cam + 0x14))[4];
-    e->fn(cam + e->delta);
+    sCamVE_0015DB58* snapEntry = &(*(sCamVE_0015DB58**)(cam + 0x14))[4];
+    snapEntry->fn(cam + snapEntry->delta);
     *(int*)(*(char**)(riders + 4) + 0x460) = 0;
     *(int*)(*(char**)(riders + 4) + 0x4A4) = 1;
     if (n >= 2)
     {
         cChaseCameraController_switchCamera_Restart(*(void**)(*(char**)(riders + 8) + 0xA8));
         char* cam2 = *(char**)(*(char**)(riders + 8) + 0xA8);
-        sCamVE_0015DB58* e2 = &(*(sCamVE_0015DB58**)(cam2 + 0x14))[4];
-        e2->fn(cam2 + e2->delta);
+        sCamVE_0015DB58* snapEntry2 = &(*(sCamVE_0015DB58**)(cam2 + 0x14))[4];
+        snapEntry2->fn(cam2 + snapEntry2->delta);
         *(int*)(*(char**)(riders + 8) + 0x460) = 0;
     }
 }

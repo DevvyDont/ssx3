@@ -513,19 +513,19 @@ extern "C" void cCameraTriggerMan_setTriggers_impl(void* vself, int mask)
 {
     sCtMan_CF48* self = (sCtMan_CF48*)vself;
     for (int i = 0; i < self->count; i++) {
-        sCtTrig_CF48* t = self->trigs[i];
-        if (t->mask & mask) {
-            if (t->reg == 0) {
-                t->reg = t;
+        sCtTrig_CF48* trigger = self->trigs[i];
+        if (trigger->mask & mask) {
+            if (trigger->reg == 0) {
+                trigger->reg = trigger;
                 char* w = (char*)SSXApp->Game->BXNash;
-                sCtBox_CF48 box = t->shape->bounds();
-                insert_CF48(w, t->item, &box);
+                sCtBox_CF48 box = trigger->shape->bounds();
+                insert_CF48(w, trigger->item, &box);
             }
-        } else if (t->reg != 0) {
+        } else if (trigger->reg != 0) {
             char* w = (char*)SSXApp->Game->BXNash;
-            sCtBox_CF48 box = t->shape->bounds();
-            remove_CF48(w, t->item, &box);
-            t->reg = 0;
+            sCtBox_CF48 box = trigger->shape->bounds();
+            remove_CF48(w, trigger->item, &box);
+            trigger->reg = 0;
         }
     }
 }

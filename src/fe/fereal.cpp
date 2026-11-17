@@ -782,7 +782,7 @@ typedef void (*tVoid_1A1DC0)(void*);
  */
 extern "C" void cRealFE_gainFocus(char* self)
 {
-    char* m;
+    char* graphicsMan;
     char* vt;
     if (gWeHaveToClearTheBackEnd != 0) {
         func_0014DE28(cBE_getBE(), 0);
@@ -799,9 +799,9 @@ extern "C" void cRealFE_gainFocus(char* self)
     cDepthFog_m_Enable = 0;
     cScreenTint_m_Enable = 0;
     cLightGlow_m_Enable = 0;
-    m = (char*)GrMan;
-    vt = *(char**)(m + 0x10D8);
-    ((tFn_1A1DC0)*(void**)(vt + 0x7C))(m + *(short*)(vt + 0x78), sVec3K1A1DC0());
+    graphicsMan = (char*)GrMan;
+    vt = *(char**)(graphicsMan + 0x10D8);
+    ((tFn_1A1DC0)*(void**)(vt + 0x7C))(graphicsMan + *(short*)(vt + 0x78), sVec3K1A1DC0());
     cFEFlowState_setNumStates(&D_004A4E80, 86);
     ((tVoid_1A1DC0)*(void**)(*(char**)self + 0x44))(self + *(short*)(*(char**)self + 0x40));
 }
@@ -973,9 +973,9 @@ extern "C" int cRealFE_loseFocus(void* self)
     if (cFadeScreen_loseFocus(self) == 0) {
         return 0;
     }
-    void* h = *(void**)((char*)self + 0xB5AD4);
-    if (h != 0) {
-        func_00253418(h, 3);
+    void* moviePlayer = *(void**)((char*)self + 0xB5AD4);
+    if (moviePlayer != 0) {
+        func_00253418(moviePlayer, 3);
         *(void**)((char*)self + 0xB5AD4) = 0;
     }
     *(int*)((char*)self + 0xB5AD8) = 0;
@@ -1132,9 +1132,9 @@ extern "C" int cRealFE_render(void* self)
         feCall(20);
         return 1;
     }
-    void* h = *(void**)((char*)self + 0xB5AD4);
-    if (h != 0) {
-        func_00253890(h, 0);
+    void* moviePlayer = *(void**)((char*)self + 0xB5AD4);
+    if (moviePlayer != 0) {
+        func_00253890(moviePlayer, 0);
         feCall(20);
         return 1;
     }
@@ -1312,17 +1312,17 @@ extern "C" void cRealFE_update(char* self)
             func_002B3A70((char*)func_0028B180() + 0x118);
             sVidInfo_27A0 info;
             func_00253390(&info);
-            int f = cRealFE_mMovieList;
+            int movieBits = cRealFE_mMovieList;
             *(int*)(self + 0xB5AD8) = 0;
-            if (f & 1) {
+            if (movieBits & 1) {
                 info.a = D_00441248[0];
-                cRealFE_mMovieList = f & 0xFFFFFFFE;
+                cRealFE_mMovieList = movieBits & 0xFFFFFFFE;
                 D_004A19D0 = 1;
-            } else if (f & 2) {
+            } else if (movieBits & 2) {
                 info.a = D_0044124C[0];
-                cRealFE_mMovieList = f & 0xFFFFFFFD;
+                cRealFE_mMovieList = movieBits & 0xFFFFFFFD;
                 D_004A19D0 = 2;
-            } else if (f & 4) {
+            } else if (movieBits & 4) {
                 cBE_getInterface_Fv(cBE_getBE(), 4);
                 if (((cBEOptionInterface_mOption[0] >> 22) & 7) == 0 && func_00289DE0(func_0028B180()) != 0) {
                     info.b = D_004A19E0;
@@ -1347,10 +1347,10 @@ extern "C" void cRealFE_update(char* self)
         cMoviePlayer_asyncUpdate(*(void**)(self + 0xB5AD4));
         if (*(int*)(self + 0xB5AD8) != 0) {
             for (int i = 0; i < 2; i++) {
-                void** p = *(void***)((char*)SSXApp + (i << 2) + 0xB0);
-                int ok = *p != 0 && **(int**)p != 0;
+                void** input = *(void***)((char*)SSXApp + (i << 2) + 0xB0);
+                int ok = *input != 0 && **(int**)input != 0;
                 if (ok) {
-                    if (cInput_getState(p, 0x70) != 0 || cInput_getState(p, 122) != 0) {
+                    if (cInput_getState(input, 0x70) != 0 || cInput_getState(input, 122) != 0) {
                         done = 1;
                         goto out;
                     }
@@ -1363,11 +1363,11 @@ extern "C" void cRealFE_update(char* self)
     if (*(void**)(self + 0xB5AD4) != 0) {
         func_00253418(*(void**)(self + 0xB5AD4), 3);
     }
-    int f = cRealFE_mMovieList;
+    int movieBits = cRealFE_mMovieList;
     *(int*)(self + 0xB5ADC) = 1;
     *(void**)(self + 0xB5AD4) = 0;
     *(int*)(self + 0xB5AD8) = 0;
-    if (f == 0) {
+    if (movieBits == 0) {
         func_002B3A98((char*)func_0028B180() + 0x118);
     }
     return;

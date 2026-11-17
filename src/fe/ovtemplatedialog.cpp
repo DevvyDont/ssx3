@@ -126,16 +126,16 @@ static inline bool isKind_A8F8(int k, int v)
  */
 extern "C" void cOVStateManager_gotoOverlay(int mode)
 {
-    int v = *(int*)SSXApp->Game->Replay;
-    int busy = v != 0 && v < 10;
+    int replayMode = *(int*)SSXApp->Game->Replay;
+    int busy = replayMode != 0 && replayMode < 10;
     if (busy) return;
     int state = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* g = (signed char*)cBENewRaceInterface_newRace;
+    signed char* newRace = (signed char*)cBENewRaceInterface_newRace;
     int type = *(int*)SSXApp->GameModeMan;
-    int sub = g[0x48];
-    int team = g[0x49];
-    int kind = g[0x4A];
+    int sub = newRace[0x48];
+    int team = newRace[0x49];
+    int kind = newRace[0x4A];
     switch (mode) {
     case 2:
         D_004A2704 = 0;
@@ -162,10 +162,10 @@ extern "C" void cOVStateManager_gotoOverlay(int mode)
             return;
         }
         cOVStateManager_mStatus = 0;
-        char* a = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
-        char* b = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
+        char* scoreIface = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
+        char* rewardIface = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
         int any = 0;
-        if (*(int*)(a + 0x18) >= 0 || *(int*)(a + 0x1C) >= 0) any = 1;
+        if (*(int*)(scoreIface + 0x18) >= 0 || *(int*)(scoreIface + 0x1C) >= 0) any = 1;
         if (any) {
             if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                 state = cOVStateManager_getResultsOverlay(kind, type);
@@ -174,7 +174,7 @@ extern "C" void cOVStateManager_gotoOverlay(int mode)
                 state = 0xF;
             }
         } else {
-            if (cBERewardInterface_getTotalNumUserAwards(b) > 0 || *(int*)(b + 0x10) != 0) {
+            if (cBERewardInterface_getTotalNumUserAwards(rewardIface) > 0 || *(int*)(rewardIface + 0x10) != 0) {
                 state = 0x10;
             } else {
                 state = cOVStateManager_getResultsOverlay(kind, type);
@@ -1444,8 +1444,8 @@ extern "C" void cOVStateManager_gotoNextOverlay(void)
         if (cOVStateManager_mMiscData == 19) {
             cOVStateManager_triggerOverlay(19);
         } else {
-            char* b = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
-            if (cBERewardInterface_getTotalNumUserAwards(b) > 0 || *(int*)(b + 0x10) != 0) {
+            char* rewardIface = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
+            if (cBERewardInterface_getTotalNumUserAwards(rewardIface) > 0 || *(int*)(rewardIface + 0x10) != 0) {
                 cOVStateManager_triggerOverlay(0x10);
             } else {
                 cOVStateManager_triggerOverlay(cOVStateManager_getResultsOverlay(kind, type));

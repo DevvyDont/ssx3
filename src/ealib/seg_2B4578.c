@@ -1008,22 +1008,22 @@ static __inline__ int get32_4818(unsigned char *q) { return (q[0] << 24) | (q[1]
  * @return the unpacked size in bytes, or 0
  */
 int f_4818(unsigned char *src) {
-    int v = 0;
+    int len = 0;
     if (src[1] == 251) {
         switch (src[0] & 0xFE) {
         case 0x10: case 0x18: case 26: case 0x1E:
         case 0x30: case 50: case 52: case 70:
-            v = get24_4818(src + 2);
+            len = get24_4818(src + 2);
             break;
         case 144: case 152: case 154: case 158:
         case 176: case 178: case 180: case 198:
-            v = get32_4818(src + 2);
+            len = get32_4818(src + 2);
             break;
         case 0xC0:
             break;
         }
     }
-    return v;
+    return len;
 }
 #endif
 
@@ -1053,80 +1053,80 @@ INCLUDE_ASM("ealib/seg_2B4578", REF_decode);
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int REF_decode(unsigned char *dst, unsigned char *src, int *used) {
-    unsigned char *s = src;
+    unsigned char *srcPos = src;
     unsigned char *ref;
-    unsigned int t;
-    unsigned char c;
-    unsigned int b1;
-    unsigned int b2;
-    unsigned int b3;
+    unsigned int type;
+    unsigned char first;
+    unsigned int second;
+    unsigned int third;
+    unsigned int fourth;
     unsigned int run;
     int len = 0;
 
     if (src != 0) {
-        t = s[0];
-        t = (t << 8) + s[1];
-        s = src + 2;
-        if (t & 0x8000) {
-            if (t & 0x100) {
-                s = src + 6;
+        type = srcPos[0];
+        type = (type << 8) + srcPos[1];
+        srcPos = src + 2;
+        if (type & 0x8000) {
+            if (type & 0x100) {
+                srcPos = src + 6;
             }
-            len = *s++;
-            len = (len << 8) + *s++;
-            len = (len << 8) + *s++;
-            len = (len << 8) + *s++;
+            len = *srcPos++;
+            len = (len << 8) + *srcPos++;
+            len = (len << 8) + *srcPos++;
+            len = (len << 8) + *srcPos++;
         } else {
-            if (t & 0x100) {
-                s = src + 5;
+            if (type & 0x100) {
+                srcPos = src + 5;
             }
-            len = *s++;
-            len = (len << 8) + *s++;
-            len = (len << 8) + *s++;
+            len = *srcPos++;
+            len = (len << 8) + *srcPos++;
+            len = (len << 8) + *srcPos++;
         }
         for (;;) {
-            c = *s++;
-            if (!(c & 0x80)) {
-                b1 = *s++;
-                run = c & 3;
-                while (run--) *dst++ = *s++;
-                ref = dst - 1 - (((c & 0x60) << 3) + b1);
-                run = ((c & 0x1C) >> 2) + 3 - 1;
+            first = *srcPos++;
+            if (!(first & 0x80)) {
+                second = *srcPos++;
+                run = first & 3;
+                while (run--) *dst++ = *srcPos++;
+                ref = dst - 1 - (((first & 0x60) << 3) + second);
+                run = ((first & 0x1C) >> 2) + 3 - 1;
                 do *dst++ = *ref++; while (run--);
                 continue;
             }
-            if (!(c & 0x40)) {
-                b1 = *s++;
-                b2 = *s++;
-                run = b1 >> 6;
-                while (run--) *dst++ = *s++;
-                ref = dst - 1 - (((b1 & 0x3F) << 8) + b2);
-                run = (c & 0x3F) + 4 - 1;
+            if (!(first & 0x40)) {
+                second = *srcPos++;
+                third = *srcPos++;
+                run = second >> 6;
+                while (run--) *dst++ = *srcPos++;
+                ref = dst - 1 - (((second & 0x3F) << 8) + third);
+                run = (first & 0x3F) + 4 - 1;
                 do *dst++ = *ref++; while (run--);
                 continue;
             }
-            if (!(c & 0x20)) {
-                b1 = *s++;
-                b2 = *s++;
-                b3 = *s++;
-                run = c & 3;
-                while (run--) *dst++ = *s++;
-                ref = dst - 1 - ((((c & 0x10) >> 4) << 16) + (b1 << 8) + b2);
-                run = ((c & 0x0C) << 6) + b3 + 5 - 1;
+            if (!(first & 0x20)) {
+                second = *srcPos++;
+                third = *srcPos++;
+                fourth = *srcPos++;
+                run = first & 3;
+                while (run--) *dst++ = *srcPos++;
+                ref = dst - 1 - ((((first & 0x10) >> 4) << 16) + (second << 8) + third);
+                run = ((first & 0x0C) << 6) + fourth + 5 - 1;
                 do *dst++ = *ref++; while (run--);
                 continue;
             }
-            run = ((c & 0x1F) << 2) + 4;
+            run = ((first & 0x1F) << 2) + 4;
             if (run <= 0x70) {
-                while (run--) *dst++ = *s++;
+                while (run--) *dst++ = *srcPos++;
                 continue;
             }
-            run = c & 3;
-            while (run--) *dst++ = *s++;
+            run = first & 3;
+            while (run--) *dst++ = *srcPos++;
             break;
         }
     }
     if (used != 0) {
-        *used = s - src;
+        *used = srcPos - src;
     }
     return len;
 }

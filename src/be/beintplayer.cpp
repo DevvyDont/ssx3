@@ -241,11 +241,11 @@ extern "C" int cBENewPlayerInterface_isFirstTimeOnTrack(void* self, int index, i
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = profile * 39760 + c * 3976;
-    char* p = (char*)cBELibrary_profileLib + off;
+    int characterId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    int off = profile * 39760 + characterId * 3976;
+    char* profileRec = (char*)cBELibrary_profileLib + off;
     int mask = 1 << bit;
-    return (*(int*)(p + 0xACC) & mask) == 0;
+    return (*(int*)(profileRec + 0xACC) & mask) == 0;
 }
 #endif
 
@@ -275,8 +275,8 @@ extern "C" void cBENewPlayerInterface_setFirstTimeOnTrack(void* self, bool flag,
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    cBECharProfileDB_setLocationVisited(&((sProfileSlot_00145DD0 (*)[10])cBELibrary_profileLib)[profile][c], bit, !flag);
+    int characterId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    cBECharProfileDB_setLocationVisited(&((sProfileSlot_00145DD0 (*)[10])cBELibrary_profileLib)[profile][characterId], bit, !flag);
 }
 #endif
 
@@ -709,33 +709,33 @@ extern "C" int cBENewPlayerInterface_isEventLocked(void* self, int index, int ch
     switch (kind) {
     case 6: {
         int off = character * 3976 + profile * 39760;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(p + 0x278) >> 14) & 1;
+        char* profileRec = (char*)cBELibrary_profileLib + off;
+        return (int)(*(long*)(profileRec + 0x278) >> 14) & 1;
     }
     case 7: {
         int off = character * 3976 + profile * 39760;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(p + 0x278) >> 15) & 1;
+        char* profileRec = (char*)cBELibrary_profileLib + off;
+        return (int)(*(long*)(profileRec + 0x278) >> 15) & 1;
     }
     case 8: {
         int off = character * 3976 + profile * 39760;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(p + 0x278) >> 16) & 1;
+        char* profileRec = (char*)cBELibrary_profileLib + off;
+        return (int)(*(long*)(profileRec + 0x278) >> 16) & 1;
     }
     case 9: {
         int off = character * 3976 + profile * 39760;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(p + 0x278) >> 17) & 1;
+        char* profileRec = (char*)cBELibrary_profileLib + off;
+        return (int)(*(long*)(profileRec + 0x278) >> 17) & 1;
     }
     case 10: {
         int off = character * 3976 + profile * 39760;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(p + 0x278) >> 18) & 1;
+        char* profileRec = (char*)cBELibrary_profileLib + off;
+        return (int)(*(long*)(profileRec + 0x278) >> 18) & 1;
     }
     case 11: {
         int off = character * 3976 + profile * 39760;
-        char* p = (char*)cBELibrary_profileLib + off;
-        return (int)(*(long*)(p + 0x278) >> 19) & 1;
+        char* profileRec = (char*)cBELibrary_profileLib + off;
+        return (int)(*(long*)(profileRec + 0x278) >> 19) & 1;
     }
     }
     return 0;
@@ -826,10 +826,10 @@ extern "C" void cBENewPlayerInterface_setLastHub(void* self, int index, int valu
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    int c = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    int off = c * 3976 + profile * 39760;
-    char* p = (char*)cBELibrary_profileLib + off;
-    *(int*)(p + 0x27C) = value;
+    int characterId = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    int off = characterId * 3976 + profile * 39760;
+    char* profileRec = (char*)cBELibrary_profileLib + off;
+    *(int*)(profileRec + 0x27C) = value;
 }
 #endif
 
@@ -1060,10 +1060,10 @@ extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int iPlayer, i
 {
     cBENewPlayerInterface_tempPlayers[iPlayer].field_0xc = ctrlID;
     if (ctrlID >= 0) {
-        char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + iPlayer * 0x1c;
-        sPlayerCharFlags_001472C8* f = (sPlayerCharFlags_001472C8*)(p + 0x10);
-        f->bit0 = iPlayer;
-        f->bit2 = 0;
+        char* playerRec = (char*)&cBENewPlayerInterface_tempPlayers[0] + iPlayer * 0x1c;
+        sPlayerCharFlags_001472C8* charFlags = (sPlayerCharFlags_001472C8*)(playerRec + 0x10);
+        charFlags->bit0 = iPlayer;
+        charFlags->bit2 = 0;
     }
 }
 #endif
@@ -1191,11 +1191,11 @@ static inline int cBENewPlayerInterface_setPlayerCharID_getBit2(char* p)
  */
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int iPlayer, int charID)
 {
-    char* p = (char*)&cBENewPlayerInterface_tempPlayers[0] + iPlayer * 0x1c;
-    if (cBENewPlayerInterface_setPlayerCharID_getBit2(p) == 1) {
-        *(signed char*)(p + 0x11) = cBENewPlayerInterface_tempPlayers[0].mCharID;
+    char* playerRec = (char*)&cBENewPlayerInterface_tempPlayers[0] + iPlayer * 0x1c;
+    if (cBENewPlayerInterface_setPlayerCharID_getBit2(playerRec) == 1) {
+        *(signed char*)(playerRec + 0x11) = cBENewPlayerInterface_tempPlayers[0].mCharID;
     } else {
-        *(signed char*)(p + 0x11) = charID;
+        *(signed char*)(playerRec + 0x11) = charID;
     }
 }
 #endif
@@ -1470,8 +1470,8 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setToMissionMan);
 extern "C" void cBENewPlayerInterface_setToMissionMan(int index)
 {
     cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].mCharID = cBENewPlayerInterface_tempPlayers[0].mCharID;
-    sPlayerCharEntry* e = &cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)];
-    ((sPlayerCharFlags_0x10*)((char*)e + 0x10))->bit2 = 1;
+    sPlayerCharEntry* playerRec = &cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)];
+    ((sPlayerCharFlags_0x10*)((char*)playerRec + 0x10))->bit2 = 1;
 }
 #endif
 
@@ -2254,14 +2254,14 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setStatLevel);
  */
 extern "C" void cBEStatInterface_setStatLevel(void* self, int rider, int value)
 {
-    int v = value * 5;
-    func_00148470(self, rider, v);
-    func_00148610(self, rider, v);
-    func_001483A0(self, rider, v);
-    func_001486E0(self, rider, v);
-    func_001487B0(self, rider, v);
-    func_00148880(self, rider, v);
-    func_00148540(self, rider, v);
+    int statPoints = value * 5;
+    func_00148470(self, rider, statPoints);
+    func_00148610(self, rider, statPoints);
+    func_001483A0(self, rider, statPoints);
+    func_001486E0(self, rider, statPoints);
+    func_001487B0(self, rider, statPoints);
+    func_00148880(self, rider, statPoints);
+    func_00148540(self, rider, statPoints);
 }
 #endif
 

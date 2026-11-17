@@ -533,14 +533,14 @@ struct sElem_9A30 {
  * +0x480 and +0x484 and sets the four scales +0x478, +0x47C, +0x488 and +0x48C to 1.0. The caller (gameload) passes a
  * third argument, 0, which is not used.
  *
- * @param arg0     the memory for the state (this; the caller allocates 3224 bytes)
+ * @param hud     the memory for the state (this; the caller allocates 3224 bytes)
  * @param pEngine  the UI engine
- * @return @p arg0
+ * @return @p hud
  */
 // HUD overlay state constructor: base state, vtable, the two sub-panels and default scales.
-extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* arg0, int pEngine)
+extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* hud, int pEngine)
 {
-    char* self = (char*)arg0;
+    char* self = (char*)hud;
     func_0039E2A0_9A30(self, pEngine);
     *(char**)(self + 8) = cOVStateHUD1P_vtbl;
     new (self + 0x48) sElem_9A30[2];
@@ -553,7 +553,7 @@ extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* arg0, int pEngine)
     *(int*)(self + 0x484) = 0;
     *(float*)(self + 0x488) = 1.0f;
     *(float*)(self + 0x48C) = 1.0f;
-    return arg0;
+    return hud;
 }
 #endif
 
@@ -2296,12 +2296,12 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_DeInit__FPv);
  */
 void cBXLoadIndicator_DeInit(void* self)
 {
-    cOVStateHUDElem* e = (cOVStateHUDElem*)self;
-    int t0 = 0;
-    e->field_0x0 = t0;
-    *(int*)&e->rangeMax = t0;
-    e->field_0x4 = t0;
-    *(int*)&e->rangeMin = t0;
+    cOVStateHUDElem* indicator = (cOVStateHUDElem*)self;
+    int zero = 0;
+    indicator->field_0x0 = zero;
+    *(int*)&indicator->rangeMax = zero;
+    indicator->field_0x4 = zero;
+    *(int*)&indicator->rangeMin = zero;
 }
 #endif
 
@@ -2317,11 +2317,11 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Update);
 extern "C" void cBXLoadIndicator_Update(void* self)
 {
     if (*(int*)((char*)self + 4) != 0) {
-        float* t = (float*)((char*)self + 8);
+        float* animFrame = (float*)((char*)self + 8);
         float two = 2.0f;
-        *t += 0.01666666753590107f;
-        while (*t > two) {
-            *t -= two;
+        *animFrame += 0.01666666753590107f;
+        while (*animFrame > two) {
+            *animFrame -= two;
         }
     }
 }

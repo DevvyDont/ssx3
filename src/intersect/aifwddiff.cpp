@@ -320,26 +320,26 @@ extern "C" int bxSphereTree_Load(sFwdDiff_27CC8* self, char* buf, int aTreeID)
     MEM_copy((char*)self->blkp + 0x2C, buf + 0x1C, 0xC);
     MEM_copy((char*)self->blkp + 0x38, buf + 0x28, 36);
     MEM_copy((char*)self->blkp + 0x5C, buf + 0x4C, 36);
-    char* p = buf + 0x70;
-    *(char**)((char*)self->blkp + 0x20) = p;
-    p += (*(int*)((char*)self->blkp + 0xC) + 1) * 0xC;
-    *(char**)((char*)self->blkp + 0x24) = p;
-    p += len1;
-    p += len0;
-    char* b = (char*)self->blkp;
-    if (*(int*)(b + 0x8) != 0) {
-        *(char**)(b + 0x28) = 0;
+    char* cursor = buf + 0x70;
+    *(char**)((char*)self->blkp + 0x20) = cursor;
+    cursor += (*(int*)((char*)self->blkp + 0xC) + 1) * 0xC;
+    *(char**)((char*)self->blkp + 0x24) = cursor;
+    cursor += len1;
+    cursor += len0;
+    char* treeInfo = (char*)self->blkp;
+    if (*(int*)(treeInfo + 0x8) != 0) {
+        *(char**)(treeInfo + 0x28) = 0;
     } else {
-        *(char**)(b + 0x28) = *(char**)(b + 0x24);
+        *(char**)(treeInfo + 0x28) = *(char**)(treeInfo + 0x24);
     }
-    sQuad_27CC8 v;
-    char* c = (char*)self->blkp;
-    v.x = *(float*)(c + 0x14);
-    v.y = *(float*)(c + 0x18);
-    v.z = *(float*)(c + 0x1C);
-    v.w = 1.0f;
-    self->q = v;
-    return p - buf;
+    sQuad_27CC8 centre;
+    char* infoBlock = (char*)self->blkp;
+    centre.x = *(float*)(infoBlock + 0x14);
+    centre.y = *(float*)(infoBlock + 0x18);
+    centre.z = *(float*)(infoBlock + 0x1C);
+    centre.w = 1.0f;
+    self->q = centre;
+    return cursor - buf;
 }
 #endif
 
@@ -463,8 +463,8 @@ extern "C" int bxSphereTree_Is2SidedTriCollision(void* self, sVec4_28030* point1
 {
     float dot;
     {
-        sVec4_28030 d = vu0Sub_28030(*(sVec4_28030*)((char*)self + 0x80), *point1);
-        dot = vu0Dot_28030(*dir, d);
+        sVec4_28030 toCentre = vu0Sub_28030(*(sVec4_28030*)((char*)self + 0x80), *point1);
+        dot = vu0Dot_28030(*dir, toCentre);
     }
     if (func_0032C590(self) < __builtin_fabsf(dot)) {
         return 0;
@@ -713,13 +713,13 @@ extern "C" void nash_Cell_remnode(sNode_003284B8* node, int idx, sItem_003284B8*
     int dx = (target->x >> sh) - cur->x * 2;
     int dy = (target->y >> sh) - cur->y * 2;
     int dz = (target->z >> sh) - cur->z * 2;
-    sCell_003284B8 c;
-    c.x = cur->x * 2 + dx;
-    c.level = --lv;
-    c.y = cur->y * 2 + dy;
-    c.z = cur->z * 2 + dz;
+    sCell_003284B8 childKey;
+    childKey.x = cur->x * 2 + dx;
+    childKey.level = --lv;
+    childKey.y = cur->y * 2 + dy;
+    childKey.z = cur->z * 2 + dz;
     sNode_003284B8** ch = &node->child[dx][dy][dz];
-    nash_Cell_remnode(*ch, idx, item, target, &c);
+    nash_Cell_remnode(*ch, idx, item, target, &childKey);
     if ((*ch)->empty()) {
         operator_delete((int*)*ch);
         *ch = 0;
@@ -785,11 +785,11 @@ extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, sItem_00328660*
         cur.x = cur.x * 2 + dx;
         cur.y = cur.y * 2 + dy;
         cur.z = cur.z * 2 + dz;
-        sNode_00328660** c = &node->child[dx][dy][dz];
-        if (*c == 0) {
-            *c = new (str_Cell, 0x20000000, 0) sNode_00328660;
+        sNode_00328660** childSlot = &node->child[dx][dy][dz];
+        if (*childSlot == 0) {
+            *childSlot = new (str_Cell, 0x20000000, 0) sNode_00328660;
         }
-        node = *c;
+        node = *childSlot;
     }
     node->lists[idx].push(item);
 }
@@ -1042,34 +1042,34 @@ extern "C" void nash_Nash_findkey(sCell_8F28* key, sBox_8F28* box)
 {
     sVec4_8F28 size = vu0Sub_8F28(box->max, box->min);
     sVec4_8F28 center = vu0Add_8F28(box->min, vu0Scale_8F28(size, 0.5f));
-    float m = size.x;
-    if (m < size.y) {
-        m = size.y;
+    float maxExtent = size.x;
+    if (maxExtent < size.y) {
+        maxExtent = size.y;
     }
-    if (m < size.z) {
-        m = size.z;
+    if (maxExtent < size.z) {
+        maxExtent = size.z;
     }
     union {
         float f;
         int i;
-    } u;
-    u.f = m * 0.7142857313156128f;
-    key->level = ((u.i >> 23) & 0xFF) - 0x7F;
+    } extentBits;
+    extentBits.f = maxExtent * 0.7142857313156128f;
+    key->level = ((extentBits.i >> 23) & 0xFF) - 0x7F;
     if (key->level < 11) {
         key->level = 11;
     }
     union {
         int i;
         float f;
-    } s;
-    s.i = (key->level + 0x7F) << 23;
-    float scale = s.f;
+    } scaleBits;
+    scaleBits.i = (key->level + 0x7F) << 23;
+    float scale = scaleBits.f;
     key->x = Floor_8F28(center.x / scale);
     key->y = Floor_8F28(center.y / scale);
     key->z = Floor_8F28(center.z / scale);
     for (;;) {
-        s.i = (key->level + 0x7F) << 23;
-        scale = s.f;
+        scaleBits.i = (key->level + 0x7F) << 23;
+        scale = scaleBits.f;
         int ok = 0;
         if (((float)key->x - 0.2f) * scale <= box->min.x && ((float)key->y - 0.2f) * scale <= box->min.y && ((float)key->z - 0.2f) * scale <= box->min.z
             && box->max.x <= ((float)(key->x + 1) + 0.2f) * scale && box->max.y <= ((float)(key->y + 1) + 0.2f) * scale && box->max.z <= ((float)(key->z + 1) + 0.2f) * scale) {

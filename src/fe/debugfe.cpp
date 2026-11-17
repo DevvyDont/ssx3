@@ -348,16 +348,16 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_getMaxAIRiders);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int cDebugMenuScreen_getMaxAIRiders(void* self, int path, int mode)
 {
-    int r = (path == 2) ? 4 : 5;
+    int maxAIRiders = (path == 2) ? 4 : 5;
     switch (mode) {
     case 0: case 4: case 5: case 6:
-        r = 0;
+        maxAIRiders = 0;
         break;
     case 1: case 2: case 3:
-        r = 1;
+        maxAIRiders = 1;
         break;
     }
-    return r;
+    return maxAIRiders;
 }
 #endif
 
@@ -1667,17 +1667,17 @@ extern "C" void cHeartBeat_update(void* heartBeat)
 {
     sFirefly_17F2D0* self = (sFirefly_17F2D0*)heartBeat;
     for (int i = 0; i < 2; i++) {
-        sVec2_17F2D0 v(func_0031BF60(self->phase.x), func_0031BF60(self->phase.y));
-        v += 1.899999976158142f;
-        v *= 0.03200000151991844f;
+        sVec2_17F2D0 posStep(func_0031BF60(self->phase.x), func_0031BF60(self->phase.y));
+        posStep += 1.899999976158142f;
+        posStep *= 0.03200000151991844f;
         {
-            sVec2_17F2D0 d;
-            d.x = 0.004999999888241291f;
-            d.y = 0.008999999612569809f;
-            self->phase.x += d.x;
-            self->phase.y += d.y;
+            sVec2_17F2D0 phaseStep;
+            phaseStep.x = 0.004999999888241291f;
+            phaseStep.y = 0.008999999612569809f;
+            self->phase.x += phaseStep.x;
+            self->phase.y += phaseStep.y;
         }
-        self->pos += v;
+        self->pos += posStep;
         self->phase.x = wrap_17F2D0(self->phase.x);
         self->phase.y = wrap_17F2D0(self->phase.y);
         self->pos.x = wrap_17F2D0(self->pos.x);
@@ -2672,7 +2672,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_keyPressed);
  */
 extern "C" int cFEInput_keyPressed(void* self)
 {
-    int r = 0;
+    int pressed = 0;
     if (cInput_getState(*(int*)((char*)self + 0x18), 114) || cInput_getState(*(int*)((char*)self + 0x18), 115) ||
         cInput_getState(*(int*)((char*)self + 0x18), 116) || cInput_getState(*(int*)((char*)self + 0x18), 117) ||
         cInput_getState(*(int*)((char*)self + 0x18), 118) || cInput_getState(*(int*)((char*)self + 0x18), 119) ||
@@ -2681,8 +2681,8 @@ extern "C" int cFEInput_keyPressed(void* self)
         cInput_getState(*(int*)((char*)self + 0x18), 125) || cInput_getState(*(int*)((char*)self + 0x18), 0x7C) ||
         cInput_getState(*(int*)((char*)self + 0x18), 144) || cInput_getState(*(int*)((char*)self + 0x18), 146) ||
         cInput_getState(*(int*)((char*)self + 0x18), 145) || cInput_getState(*(int*)((char*)self + 0x18), 113))
-        r = 1;
-    return r;
+        pressed = 1;
+    return pressed;
 }
 #endif
 
@@ -2699,9 +2699,9 @@ INCLUDE_ASM("fe/debugfe", cFEInput_setPadNum);
  */
 extern "C" void cFEInput_setPadNum(void* self, unsigned char idx)
 {
-    int v = *(int*)((char*)SSXApp + (idx << 2) + 0xB0);
+    int controllerInput = *(int*)((char*)SSXApp + (idx << 2) + 0xB0);
     *(unsigned char*)((char*)self + 0x4) = idx;
-    *(int*)((char*)self + 0x18) = v;
+    *(int*)((char*)self + 0x18) = controllerInput;
 }
 #endif
 

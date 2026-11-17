@@ -188,10 +188,10 @@ extern "C" void cCameraTriggerMan__cCameraTriggerMan(void* self, int flags)
 {
     cCameraTriggerMan_purge(self);
     if ((char*)self + 0x14 != 0) {
-        char* p = (char*)self + 0x14 + 8;
-        while ((char*)self + 0x14 != p) {
-            p -= 4;
-            cActiveTriggerList__cActiveTriggerList(p, 0);
+        char* activeList = (char*)self + 0x14 + 8;
+        while ((char*)self + 0x14 != activeList) {
+            activeList -= 4;
+            cActiveTriggerList__cActiveTriggerList(activeList, 0);
         }
     }
     func_0016BEF8(self, 2);

@@ -769,83 +769,83 @@ extern "C" int cHandplantMotion_calcExitVel_x(sHP_9548* s) __asm__("cHandplantMo
  * ApproachDir in mode 4 and away from it in mode 5, and a vertical 0 (5) km/h. Mode 6: SplineDir x 30 km/h plus 15 km/h
  * upward. The vertical value overwrites ExitVel.z in modes 3-5. Other modes return 0.
  *
- * @param s  the cHandplantMotion (this)
+ * @param handplant  the cHandplantMotion (this)
  * @return 1 when ExitVel is set, else 0
  */
-extern "C" int cHandplantMotion_calcExitVel_x(sHP_9548* s)
+extern "C" int cHandplantMotion_calcExitVel_x(sHP_9548* handplant)
 {
-    if (neq_9548(s, D_004FF120_9548))
+    if (neq_9548(handplant, D_004FF120_9548))
         return 1;
-    int kind = *(int*)(s->rider + 0x32C);
+    int kind = *(int*)(handplant->rider + 0x32C);
     t4Vector n;
     if (kind == 3) {
-        t4Vector c;
-        vu0CrossTo_9548(c, D_004FF160_9548, s->v20);
-        vu0NormTo_9548(n, c);
-        float a = s->m8C * 0.699999988079071f;
+        t4Vector exitVel;
+        vu0CrossTo_9548(exitVel, D_004FF160_9548, handplant->v20);
+        vu0NormTo_9548(n, exitVel);
+        float tangentSpeed = handplant->m8C * 0.699999988079071f;
         float k = 2.0f;
-        if (s->m90 != 0)
+        if (handplant->m90 != 0)
             k = 15.0f;
-        float d = vu0Dot_9548(s->v40, n);
-        float f = k * 27.77777862548828f;
-        if (d < 0.0f)
-            f = -f;
-        t4Vector u;
-        vu0ScaleTo_9548(u, s->v20, a);
-        t4Vector v;
-        vu0ScaleTo_9548(v, n, f);
-        vu0SubTo_9548(c, u, v);
-        *(t4Vector*)&s->fx = c;
+        float approachDot = vu0Dot_9548(handplant->v40, n);
+        float sideSpeed = k * 27.77777862548828f;
+        if (approachDot < 0.0f)
+            sideSpeed = -sideSpeed;
+        t4Vector alongVel;
+        vu0ScaleTo_9548(alongVel, handplant->v20, tangentSpeed);
+        t4Vector sideVel;
+        vu0ScaleTo_9548(sideVel, n, sideSpeed);
+        vu0SubTo_9548(exitVel, alongVel, sideVel);
+        *(t4Vector*)&handplant->fx = exitVel;
         float z = 0.0f;
-        if (s->m90 != 0)
+        if (handplant->m90 != 0)
             z = 10.0f;
-        *(float*)((char*)s + 0x18) = z * 27.77777862548828f;
+        *(float*)((char*)handplant + 0x18) = z * 27.77777862548828f;
         return 1;
     }
     if (kind == 4) {
-        t4Vector c;
-        vu0CrossTo_9548(c, s->v20, D_004FF160_9548);
-        vu0NormTo_9548(n, c);
+        t4Vector exitVel;
+        vu0CrossTo_9548(exitVel, handplant->v20, D_004FF160_9548);
+        vu0NormTo_9548(n, exitVel);
         float z = 0.0f;
-        float d = vu0Dot_9548(n, s->v40);
-        if (d < z)
+        float approachDot = vu0Dot_9548(n, handplant->v40);
+        if (approachDot < z)
             vu0ScaleEq_9548(n, -1.0f);
         float k = 5.0f;
-        if (s->m90 != 0)
+        if (handplant->m90 != 0)
             k = 15.0f;
-        float g = 27.77777862548828f;
-        vu0ScaleTo_9548(c, n, k * g);
-        *(t4Vector*)&s->fx = c;
-        if (s->m90 != 0)
+        float kphScale = 27.77777862548828f;
+        vu0ScaleTo_9548(exitVel, n, k * kphScale);
+        *(t4Vector*)&handplant->fx = exitVel;
+        if (handplant->m90 != 0)
             z = 5.0f;
-        k = z * g;
-        *(float*)((char*)s + 0x18) = k;
+        k = z * kphScale;
+        *(float*)((char*)handplant + 0x18) = k;
         return 1;
     }
     if (kind == 5) {
-        t4Vector c;
-        vu0CrossTo_9548(c, s->v20, D_004FF160_9548);
-        vu0NormTo_9548(n, c);
+        t4Vector exitVel;
+        vu0CrossTo_9548(exitVel, handplant->v20, D_004FF160_9548);
+        vu0NormTo_9548(n, exitVel);
         float z = 0.0f;
-        float d = vu0Dot_9548(n, s->v40);
-        if (z < d)
+        float approachDot = vu0Dot_9548(n, handplant->v40);
+        if (z < approachDot)
             vu0ScaleEq_9548(n, -1.0f);
         float k = 5.0f;
-        if (s->m90 != 0)
+        if (handplant->m90 != 0)
             k = 15.0f;
-        float g = 27.77777862548828f;
-        vu0ScaleTo_9548(c, n, k * g);
-        *(t4Vector*)&s->fx = c;
-        if (s->m90 != 0)
+        float kphScale = 27.77777862548828f;
+        vu0ScaleTo_9548(exitVel, n, k * kphScale);
+        *(t4Vector*)&handplant->fx = exitVel;
+        if (handplant->m90 != 0)
             z = 5.0f;
-        k = z * g;
-        *(float*)((char*)s + 0x18) = k;
+        k = z * kphScale;
+        *(float*)((char*)handplant + 0x18) = k;
         return 1;
     }
     if (kind == 6) {
-        vu0ScaleTo_9548(n, s->v20, 833.3333740234375f);
-        *(t4Vector*)&s->fx = n;
-        *(float*)((char*)s + 0x18) += 416.66668701171875f;
+        vu0ScaleTo_9548(n, handplant->v20, 833.3333740234375f);
+        *(t4Vector*)&handplant->fx = n;
+        *(float*)((char*)handplant + 0x18) += 416.66668701171875f;
         return 1;
     }
     return 0;
@@ -2574,26 +2574,26 @@ extern "C" t4Vector cRailslideMotion_getRailUpNorm_BD80(char* p, const t4Vector&
  * normalised and flipped to agree with the rider's up (mMatrix row 2). For a steep one it builds a = normalised (up x
  * n) and b = n x a, and returns b cos(RailLeanAngle) - a sin(RailLeanAngle) (func_0031BE50).
  *
- * @param p  the cRailslideMotion (this)
+ * @param railslide  the cRailslideMotion (this)
  * @param n  the rail normal
  * @return the up vector
  */
-extern "C" t4Vector cRailslideMotion_getRailUpNorm_BD80(char* p, const t4Vector& n)
+extern "C" t4Vector cRailslideMotion_getRailUpNorm_BD80(char* railslide, const t4Vector& n)
 {
-    float s, c;
-    func_0031BE50(&s, &c, *(float*)(p + 0x10));
+    float sinLean, cosLean;
+    func_0031BE50(&sinLean, &cosLean, *(float*)(railslide + 0x10));
     bool steep = absf_BD80(n.z) > 0.92f;
-    t4Vector r;
+    t4Vector railUp;
     if (!steep) {
-        r = vu0Normalize_BD80(vu0Sub_BD80(D_004FF160_BD80, vu0Scale_BD80(n, n.z)));
-        if (vu0Dot_BD80(r, up_BD80(p)) < 0.0f)
-            vu0ScaleEq_BD80(r, -1.0f);
+        railUp = vu0Normalize_BD80(vu0Sub_BD80(D_004FF160_BD80, vu0Scale_BD80(n, n.z)));
+        if (vu0Dot_BD80(railUp, up_BD80(railslide)) < 0.0f)
+            vu0ScaleEq_BD80(railUp, -1.0f);
     } else {
-        t4Vector a = vu0Normalize_BD80(vu0Cross_BD80(up_BD80(p), n));
-        t4Vector b = vu0Cross_BD80(n, a);
-        r = vu0Sub_BD80(vu0Scale_BD80(b, c), vu0Scale_BD80(a, s));
+        t4Vector sideDir = vu0Normalize_BD80(vu0Cross_BD80(up_BD80(railslide), n));
+        t4Vector perpDir = vu0Cross_BD80(n, sideDir);
+        railUp = vu0Sub_BD80(vu0Scale_BD80(perpDir, cosLean), vu0Scale_BD80(sideDir, sinLean));
     }
-    return r;
+    return railUp;
 }
 #endif
 
@@ -5735,9 +5735,9 @@ extern "C" sHPC140738* cRiderState_cRiderState(sHPC140738* self)
     self->v[18][0] = 0;
     self->v[18][1] = 0;
     self->u430 = 0xFFFFFFFF;
-    unsigned int* p = self->arr;
-    for (int i = 63; i != -1; i--, p++) {
-        *p = 0xFFFFFFFF;
+    unsigned int* visited = self->arr;
+    for (int i = 63; i != -1; i--, visited++) {
+        *visited = 0xFFFFFFFF;
     }
     return self;
 }
@@ -8543,14 +8543,14 @@ extern "C" void func_00144368(sTree_144368* self, sNode_144368* node, sKey_14436
         if (i == n) {
             return;
         }
-        union { int i; float f; } u;
-        u.i = (key->level + 0x7F) << 23;
-        float s = u.f;
+        union { int i; float f; } scaleBits;
+        scaleBits.i = (key->level + 0x7F) << 23;
+        float cellSize = scaleBits.f;
         // PORT: pointer arithmetic through int
-        sBox_144368* b = (sBox_144368*)((i << 5) + (int)self->boxes);
+        sBox_144368* box = (sBox_144368*)((i << 5) + (int)self->boxes);
         ok = 0;
-        if (((float)key->x - 0.2f) * s <= b->max[0] && ((float)key->y - 0.2f) * s <= b->max[1] && ((float)key->z - 0.2f) * s <= b->max[2]
-            && b->min[0] <= ((float)(key->x + 1) + 0.2f) * s && b->min[1] <= ((float)(key->y + 1) + 0.2f) * s && b->min[2] <= ((float)(key->z + 1) + 0.2f) * s) {
+        if (((float)key->x - 0.2f) * cellSize <= box->max[0] && ((float)key->y - 0.2f) * cellSize <= box->max[1] && ((float)key->z - 0.2f) * cellSize <= box->max[2]
+            && box->min[0] <= ((float)(key->x + 1) + 0.2f) * cellSize && box->min[1] <= ((float)(key->y + 1) + 0.2f) * cellSize && box->min[2] <= ((float)(key->z + 1) + 0.2f) * cellSize) {
             ok = 1;
         }
         i++;

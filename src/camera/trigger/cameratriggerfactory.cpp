@@ -4686,15 +4686,15 @@ extern "C" t4Vector cSPOKEChaseAlgorithm_getDesiredPosition(cSPOKEChaseAlgorithm
         dir = ctGetC_7FC0(self);
     else
         ctDivEq_7FC0(dir, len);
-    t4Vector v = ctAdd_00177EF8_7FC0(ctScale_00177EF8_7FC0(self->LastLookDir, 0.9599999785423279f), ctScale_00177EF8_7FC0(dir, 0.04000002145767212f));
-    len = ctLength_7FC0(v);
+    t4Vector lookDir = ctAdd_00177EF8_7FC0(ctScale_00177EF8_7FC0(self->LastLookDir, 0.9599999785423279f), ctScale_00177EF8_7FC0(dir, 0.04000002145767212f));
+    len = ctLength_7FC0(lookDir);
     if (len < 0.019999999552965164f)
-        v = dir;
+        lookDir = dir;
     else
-        ctDivEq_7FC0(v, len);
-    self->LastLookDir = v;
-    t4Vector r = ctSub_7FC0(ctAdd_00177EF8_7FC0(cSPOKEChaseAlgorithm_getRiderPosition_7FC0(self), ctScaleP_7FC0(&D_004FF160_7FC0, 30.0f)), ctScale_00177EF8_7FC0(v, 250.0f));
-    return r;
+        ctDivEq_7FC0(lookDir, len);
+    self->LastLookDir = lookDir;
+    t4Vector desiredPos = ctSub_7FC0(ctAdd_00177EF8_7FC0(cSPOKEChaseAlgorithm_getRiderPosition_7FC0(self), ctScaleP_7FC0(&D_004FF160_7FC0, 30.0f)), ctScale_00177EF8_7FC0(lookDir, 250.0f));
+    return desiredPos;
 }
 #endif
 
@@ -4857,24 +4857,24 @@ extern "C" void cSPOKEChaseAlgorithm_update_v(char* self)
     *(float*)self = 0.7853981852531433f;
     t4Vector d = Sub_8208(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
     float len = Length_8208(d);
-    float t;
+    float distFrac;
     if (len >= 150.0f) {
         if (len <= 1500.0f) {
-            t = (len - 150.0f) / 1350.0f;
+            distFrac = (len - 150.0f) / 1350.0f;
         } else {
-            t = 1.0f;
+            distFrac = 1.0f;
         }
     } else {
-        t = 0.0f;
+        distFrac = 0.0f;
     }
-    float f = (1.0f - t) * 0.9879999756813049f;
+    float keepWeight = (1.0f - distFrac) * 0.9879999756813049f;
     if (cRider_getMotionState(*(void**)(*(char**)(self + 0x30) + 4)) == 5) {
-        f = Sqrt_8208(f);
+        keepWeight = Sqrt_8208(keepWeight);
     }
     {
-        t4Vector s = Scale_8208(*(t4Vector*)(self + 0x40), f);
-        float g = 1.0f - f;
-        AddD_8208(d, s, Scale_8208(f_177FC0_8208(self, info.dir), g));
+        t4Vector keptEye = Scale_8208(*(t4Vector*)(self + 0x40), keepWeight);
+        float newWeight = 1.0f - keepWeight;
+        AddD_8208(d, keptEye, Scale_8208(f_177FC0_8208(self, info.dir), newWeight));
         *(t4Vector*)(self + 0x40) = d;
     }
     AddD_8208(d, f_177EF8_8208(self), ScaleP_8208(&D_004FF160_8208, 37.0f));
@@ -5599,12 +5599,12 @@ static inline sVec4_1789E8 Get_1789E8(char* o, int slot)
 extern "C" void* cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cPOST_RACE_1ChaseAlgorithm* self, char* src)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((char*)self));
-    sVec4_1789E8* d = (sVec4_1789E8*)(((char*)self) + 0x390);
+    sVec4_1789E8* startDir = (sVec4_1789E8*)(((char*)self) + 0x390);
     self->AlgorithmType = 68;
     self->mVtbl = cPOST_RACE_1ChaseAlgorithm_vtbl;
     self->AgeInFrames = 0;
     sVec4_1789E8 dir = (Length_1789E8(Get_1789E8(src, 3)) > 1.0f) ? Normalize_1789E8(Get_1789E8(src, 3)) : Get_1789E8(src, 4);
-    *d = dir;
+    *startDir = dir;
     self->StartDir.z = 0.0f;
     float len = Length_1789E8(*(sVec4_1789E8*)&self->StartDir);
     if (len > 0.009999999776482582f)
@@ -6310,26 +6310,26 @@ extern "C" int cTrackFileMan_legalTrackMode_impl(int* list, int idx, int kind) _
 extern "C" int cTrackFileMan_legalTrackMode_impl(int* list, int idx, int kind)
 {
     if (idx >= 0 && idx < list[0]) {
-        unsigned int v = *(unsigned int*)((char*)list + idx * 0x8C + 0x84);
+        unsigned int locationId = *(unsigned int*)((char*)list + idx * 0x8C + 0x84);
         switch (kind) {
         case 0:
-            if (v < 5) return 1;
+            if (locationId < 5) return 1;
             break;
         case 1:
-            if (v >= 5 && v < 8) return 1;
+            if (locationId >= 5 && locationId < 8) return 1;
             break;
         case 2:
-            if (v >= 8 && v < 11) return 1;
+            if (locationId >= 8 && locationId < 11) return 1;
             break;
         case 3:
-            if (v >= 11 && v < 14) return 1;
+            if (locationId >= 11 && locationId < 14) return 1;
             break;
         case 5:
         case 6:
-            if (v >= 14 && v < 17) return 1;
+            if (locationId >= 14 && locationId < 17) return 1;
             break;
         case 4:
-            if (!cBENewRaceInterface_getLocationType(cBE_getInterface_A158(cBE_getBE(), 0), v)) return 1;
+            if (!cBENewRaceInterface_getLocationType(cBE_getInterface_A158(cBE_getBE(), 0), locationId)) return 1;
             break;
         }
     }
@@ -6769,10 +6769,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBackgroundMan_cBackgroundMan
  */
 void* cBackgroundMan_cBackgroundMan(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0x4) = t0;
+    int zero = 0;
+    *(int*)((char*)self + 0x4) = zero;
     *(int*)((char*)self + 0x8) = -1;
-    *(int*)self = t0;
+    *(int*)self = zero;
     return self;
 }
 #endif

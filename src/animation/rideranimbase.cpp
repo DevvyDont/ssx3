@@ -529,11 +529,11 @@ extern "C" int cRiderAnimBase_onInput(void* vself, void* vseq, int anim, int ani
     }
     if (seq->mCount == 1)
     {
-        float t = ((float*)cAIAnimEventMap_getAnimPlayAttr(anim))[5];
-        if (t != 0.0f)
+        float fadeTime = ((float*)cAIAnimEventMap_getAnimPlayAttr(anim))[5];
+        if (fadeTime != 0.0f)
         {
             nd->weight = nd->targetWeight = 0.0f;
-            cAnimSequence_fadeWeight((cAnimSequence*)node, 1.0f, t);
+            cAnimSequence_fadeWeight((cAnimSequence*)node, 1.0f, fadeTime);
         }
     }
     else if (blend != 0.0f)
@@ -783,10 +783,10 @@ extern "C" float cRiderAnimBase_getAIAnimDuration(char* self, int aid)
     int id = vt[4].fn(self + vt[4].delta, aid);
     if (id == 519)
         return 0.0f;
-    unsigned int h = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
-    char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((h & 0xFF) << 2));
-    char* q = (char*)((h >> 8) * 0x14 + *(int*)(clip + 0x8));
-    return (*(unsigned short*)(q + 0xC) - 1) * 0.03333333507180214f;
+    unsigned int animId = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
+    char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((animId & 0xFF) << 2));
+    char* clipEntry = (char*)((animId >> 8) * 0x14 + *(int*)(clip + 0x8));
+    return (*(unsigned short*)(clipEntry + 0xC) - 1) * 0.03333333507180214f;
 }
 #endif
 

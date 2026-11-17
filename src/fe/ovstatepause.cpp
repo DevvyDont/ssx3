@@ -1172,16 +1172,16 @@ public:
  */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(void* self, int on)
 {
-    cUIObj_FB458* t = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_ContinueGame));
-    cUIObj_FB458* a = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Continueps2X));
-    cUIObj_FB458* b = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ContinueButtonBack));
+    cUIObj_FB458* continueText = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_ContinueGame));
+    cUIObj_FB458* buttonIcon = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Continueps2X));
+    cUIObj_FB458* buttonBack = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ContinueButtonBack));
     if (on) {
-        t->setColor(sColor_FB458(1.0f, 1.0f, 1.0f, 1.0f));
+        continueText->setColor(sColor_FB458(1.0f, 1.0f, 1.0f, 1.0f));
     } else {
-        t->setColor(sColor_FB458(1.0f, 0.0f, 0.0f, 0.0f));
+        continueText->setColor(sColor_FB458(1.0f, 0.0f, 0.0f, 0.0f));
     }
-    a->setVisible(on);
-    b->setVisible(on);
+    buttonIcon->setVisible(on);
+    buttonBack->setVisible(on);
 }
 #endif
 
@@ -1225,16 +1225,16 @@ public:
  */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(void* self, int on)
 {
-    cUIObj_FB588* t = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_CancelGame));
-    cUIObj_FB588* a = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Cancelps2X));
-    cUIObj_FB588* b = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_CancelButtonBack));
+    cUIObj_FB588* cancelText = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_CancelGame));
+    cUIObj_FB588* buttonIcon = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Cancelps2X));
+    cUIObj_FB588* buttonBack = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_CancelButtonBack));
     if (on) {
-        t->setColor(sColor_FB588(1.0f, 1.0f, 1.0f, 1.0f));
+        cancelText->setColor(sColor_FB588(1.0f, 1.0f, 1.0f, 1.0f));
     } else {
-        t->setColor(sColor_FB588(1.0f, 0.0f, 0.0f, 0.0f));
+        cancelText->setColor(sColor_FB588(1.0f, 0.0f, 0.0f, 0.0f));
     }
-    a->setVisible(on);
-    b->setVisible(on);
+    buttonIcon->setVisible(on);
+    buttonBack->setVisible(on);
 }
 #endif
 

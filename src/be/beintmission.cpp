@@ -627,10 +627,10 @@ extern "C" int func_00154240(void* self, int id);
 extern "C" int cBEMissionInterface_isMissionLocked(void* self, int id)
 {
     int i = func_00154240(self, id);
-    int c = cBELibrary_getCharacterID(0);
-    int off = (i << 2) + c * 3976;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return (*(unsigned int*)(p + 0x118)) & 1;
+    int characterId = cBELibrary_getCharacterID(0);
+    int off = (i << 2) + characterId * 3976;
+    char* profile = (char*)cBELibrary_profileLib + off;
+    return (*(unsigned int*)(profile + 0x118)) & 1;
 }
 #endif
 

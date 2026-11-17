@@ -257,25 +257,25 @@ extern "C" void cAirPredictor_simStep(char* vself)
         }
         if (maxResampleSteps < numSubStep) break;
     } while (!(speed * 0.9900000095367432f > vu0Dot_3200(uPrevVel, self->vel)));
-    sVec4_3200 p0 = prevPos;
-    sVec4_3200 p1 = self->pos;
-    sVec4_3200 ray = vu0Sub_3200(p1, p0);
+    sVec4_3200 segStart = prevPos;
+    sVec4_3200 segEnd = self->pos;
+    sVec4_3200 ray = vu0Sub_3200(segEnd, segStart);
     vu0ScaleEq_3200(ray, 0.019999999552965164f);
-    vu0SubEq_3200(p0, ray);
-    vu0AddEq_3200(p1, ray);
+    vu0SubEq_3200(segStart, ray);
+    vu0AddEq_3200(segEnd, ray);
     sHit_3200 ti;
     sRay_3200 w1;
-    func_0032E100(&w1, &p1, &p0, 1, 1.0f);
-    float param;
+    func_0032E100(&w1, &segEnd, &segStart, 1, 1.0f);
+    float hitParam;
     if (self->state == 0) {
-        param = func_00336850(SSXApp->Game->BXNash, &w1, &ti, 0);
+        hitParam = func_00336850(SSXApp->Game->BXNash, &w1, &ti, 0);
     } else {
-        param = func_003378C0(SSXApp->Game->BXNash, &w1, &ti, 0);
+        hitParam = func_003378C0(SSXApp->Game->BXNash, &w1, &ti, 0);
     }
-    if (param >= 0.0f && vu0Dot_3200(ray, ti.normal) < 0.0f) {
+    if (hitParam >= 0.0f && vu0Dot_3200(ray, ti.normal) < 0.0f) {
         self->f00 = ti.pos;
-        self->f98 = self->f98 - numSubStep * (param * 0.01666666753590107f);
-        self->f10 = vu0Add_3200(vu0Scale_3200(prevVel, param), vu0Scale_3200(self->vel, 1.0f - param));
+        self->f98 = self->f98 - numSubStep * (hitParam * 0.01666666753590107f);
+        self->f10 = vu0Add_3200(vu0Scale_3200(prevVel, hitParam), vu0Scale_3200(self->vel, 1.0f - hitParam));
         if (self->state == 2) {
             self->state = 3;
             *(sQuadR*)&self->f20 = t4vect_ZAxis;
@@ -289,10 +289,10 @@ extern "C" void cAirPredictor_simStep(char* vself)
             self->f20 = ti.normal;
             self->f90 = ti.surf;
         }
-        char* o = ti.obj;
-        if (o != 0 && self->state == 1) {
-            self->f94 = *(short*)(o + 0xA);
-            self->f30 = *(int*)(o + 0x150);
+        char* hitObj = ti.obj;
+        if (hitObj != 0 && self->state == 1) {
+            self->f94 = *(short*)(hitObj + 0xA);
+            self->f30 = *(int*)(hitObj + 0x150);
             self->f34 = ti.u;
             self->f38 = ti.v;
         } else {
@@ -447,19 +447,19 @@ extern "C" void cAirPredictor_updateFlightPath(char* self, sQuad* airPos, sQuad*
             }
         }
     }
-    float t = *(float*)(self + 0xA0) - *(float*)(self + 0xA4) + dt;
-    while (t >= 0.01666666753590107f) {
-        t -= 0.01666666753590107f;
+    float sinceLastTick = *(float*)(self + 0xA0) - *(float*)(self + 0xA4) + dt;
+    while (sinceLastTick >= 0.01666666753590107f) {
+        sinceLastTick -= 0.01666666753590107f;
         cAirPredictor_simOneTick_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80));
         *(float*)(self + 0xA4) += 0.01666666753590107f;
     }
-    if (t > 0.009999999776482582f) {
-        sVec4_3648 p;
-        sVec4_3648 v;
-        cAirPredictor_simOneTick_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), &p, &v);
-        float k = t * 59.999996185302734f;
-        *(sVec4_3648*)airPos = vu0Add_3648(vu0Scale_3648(p, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x70), 1.0f - k));
-        *(sVec4_3648*)airVel = vu0Add_3648(vu0Scale_3648(v, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x80), 1.0f - k));
+    if (sinceLastTick > 0.009999999776482582f) {
+        sVec4_3648 nextSimPos;
+        sVec4_3648 nextSimVel;
+        cAirPredictor_simOneTick_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), &nextSimPos, &nextSimVel);
+        float k = sinceLastTick * 59.999996185302734f;
+        *(sVec4_3648*)airPos = vu0Add_3648(vu0Scale_3648(nextSimPos, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x70), 1.0f - k));
+        *(sVec4_3648*)airVel = vu0Add_3648(vu0Scale_3648(nextSimVel, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x80), 1.0f - k));
         ((float*)airPos)[3] = 1.0f;
     } else {
         *(sQuad*)airPos = *(sQuad*)(self + 0x70);

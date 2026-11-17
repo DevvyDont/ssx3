@@ -1421,8 +1421,8 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getRotation);
  */
 extern "C" void* cRiderCameraTarget_getRotation(void* self, void* target)
 {
-    void* p = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)p + 0x120);
+    void* rider = *(void**)((char*)target + 0x4);
+    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x120);
     return self;
 }
 #endif
@@ -1451,8 +1451,8 @@ public:
  */
 extern "C" void* cRiderCameraTarget_getVelocity(void* self, void* target)
 {
-    char* p = *(char**)((char*)target + 0x4);
-    *(sQuad_0015F5B0*)self = *((cCamVObj_0015F5B0*)(p + 0x6C0))->v02();
+    char* rider = *(char**)((char*)target + 0x4);
+    *(sQuad_0015F5B0*)self = *((cCamVObj_0015F5B0*)(rider + 0x6C0))->v02();
     return self;
 }
 #endif
@@ -1470,8 +1470,8 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getFront);
  */
 extern "C" void* cRiderCameraTarget_getFront(void* self, void* target)
 {
-    void* p = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)p + 0x1b0);
+    void* rider = *(void**)((char*)target + 0x4);
+    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x1b0);
     return self;
 }
 #endif
@@ -1489,8 +1489,8 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getSide);
  */
 extern "C" void* cRiderCameraTarget_getSide(void* self, void* target)
 {
-    void* p = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)p + 0x1a0);
+    void* rider = *(void**)((char*)target + 0x4);
+    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x1a0);
     return self;
 }
 #endif
@@ -1508,8 +1508,8 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getUp);
  */
 extern "C" void* cRiderCameraTarget_getUp(void* self, void* target)
 {
-    void* p = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)p + 0x1c0);
+    void* rider = *(void**)((char*)target + 0x4);
+    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x1c0);
     return self;
 }
 #endif
@@ -1543,8 +1543,8 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getNormal);
  */
 extern "C" void* cRiderCameraTarget_getNormal(void* self, void* target)
 {
-    void* p = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)p + 0x370);
+    void* rider = *(void**)((char*)target + 0x4);
+    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x370);
     return self;
 }
 #endif
@@ -1562,8 +1562,8 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLastGroundNormal);
  */
 extern "C" void* cRiderCameraTarget_getLastGroundNormal(void* self, void* target)
 {
-    void* p = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)p + 0x380);
+    void* rider = *(void**)((char*)target + 0x4);
+    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x380);
     return self;
 }
 #endif
@@ -2747,11 +2747,11 @@ extern "C" void cManualChaseAlgorithm_update(cManualChaseAlgorithm* self)
     func_00162568(((char*)self), (sCamInfo_001607E0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
-    sGame_1604B8* g = (sGame_1604B8*)SSXApp;
-    int pad = g->pads[*(int*)(*(char**)(g->f84 + 0x28) + 0x28)];
-    float ax = cInput_getValue(pad, 190);
-    float ay = cInput_getValue(pad, 191);
-    float az = -cInput_getValue(pad, 0xC0);
+    sGame_1604B8* app = (sGame_1604B8*)SSXApp;
+    int inputPad = app->pads[*(int*)(*(char**)(app->f84 + 0x28) + 0x28)];
+    float ax = cInput_getValue(inputPad, 190);
+    float ay = cInput_getValue(inputPad, 191);
+    float az = -cInput_getValue(inputPad, 0xC0);
     ax *= Abs_1604B8(ax);
     ay *= Abs_1604B8(ay);
     az *= Abs_1604B8(az);
@@ -3062,11 +3062,11 @@ extern "C" void cMatrixChaseAlgorithm_update(cMatrixChaseAlgorithm* self)
     float* ang = (float*)(((char*)self) + 0x390);
     *ang += 0.061352409422397614f;
     *ang -= ffloor_001607E0(*ang * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
-    float r = 216.23182678222656f;
+    float radius = 216.23182678222656f;
     *(sVec_001607E0*)&self->CamTargetPos = cmAdd_001607E0(cmGet_001607E0(((char*)self), 1), cmScale_001607E0(D_004FF160_v1607E0, 0.0f));
     *(sVec_001607E0*)&self->Position = cmAdd_001607E0(
-        cmAdd_001607E0(cmAdd_001607E0(*(sVec_001607E0*)&self->CamTargetPos, cmScale_001607E0(dir, func_0031C040(*ang) * r)),
-                       cmScale_001607E0(side, func_0031BF60(*ang) * r)),
+        cmAdd_001607E0(cmAdd_001607E0(*(sVec_001607E0*)&self->CamTargetPos, cmScale_001607E0(dir, func_0031C040(*ang) * radius)),
+                       cmScale_001607E0(side, func_0031BF60(*ang) * radius)),
         cmScale_001607E0(D_004FF160_v1607E0, -0.5597707033157349f));
 }
 #endif
@@ -3231,16 +3231,16 @@ extern "C" void cRelativeChaseAlgorithm_update(cRelativeChaseAlgorithm* self)
                                                     cmScale_001607E0(*(sVec_001607E0*)&self->CamTargetPos, 0.36000001430511475f));
     }
     *(sVec_001607E0*)&self->LastCamTargetPos = *(sVec_001607E0*)&self->CamTargetPos;
-    float r = 385.91839599609375f;
+    float radius = 385.91839599609375f;
     *(sVec_001607E0*)&self->Position = cmAdd_001607E0(
-        cmAdd_001607E0(cmAdd_001607E0(*(sVec_001607E0*)&self->CamTargetPos, cmScale_001607E0(dir, func_0031C040(self->Angle) * r)),
-                       cmScale_001607E0(side, func_0031BF60(self->Angle) * r)),
+        cmAdd_001607E0(cmAdd_001607E0(*(sVec_001607E0*)&self->CamTargetPos, cmScale_001607E0(dir, func_0031C040(self->Angle) * radius)),
+                       cmScale_001607E0(side, func_0031BF60(self->Angle) * radius)),
         cmScale_001607E0(D_004FF160_v1607E0, 53.241573333740234f));
     if (self->Initialized) {
-        sVec_001607E0 d = cmSub_00160BF8(*(sVec_001607E0*)&self->CamTargetPos, *(sVec_001607E0*)&self->Position);
-        sVec_001607E0 e = cmAdd_001607E0(cmScale_001607E0(*(sVec_001607E0*)&self->LastLook, 0.9700000286102295f),
-                                         cmScale_001607E0(d, 0.029999971389770508f));
-        *(sVec_001607E0*)&self->Position = cmSub_00160BF8(*(sVec_001607E0*)&self->CamTargetPos, e);
+        sVec_001607E0 look = cmSub_00160BF8(*(sVec_001607E0*)&self->CamTargetPos, *(sVec_001607E0*)&self->Position);
+        sVec_001607E0 newLook = cmAdd_001607E0(cmScale_001607E0(*(sVec_001607E0*)&self->LastLook, 0.9700000286102295f),
+                                         cmScale_001607E0(look, 0.029999971389770508f));
+        *(sVec_001607E0*)&self->Position = cmSub_00160BF8(*(sVec_001607E0*)&self->CamTargetPos, newLook);
     }
     *(sVec_001607E0*)&self->LastLook = cmSub_00160BF8(*(sVec_001607E0*)&self->CamTargetPos, *(sVec_001607E0*)&self->Position);
     self->Initialized = 1;
@@ -3830,11 +3830,11 @@ extern "C" void cIdleChaseAlgorithm_update_v(char* self)
     func_00162568_1728(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
-    t4Vector* p20 = (t4Vector*)(self + 0x20);
-    t4Vector* p40 = (t4Vector*)(self + 0x40);
-    *p20 = cmAdd_001607E0_1728(cmGet_001607E0_1728(self, 1), cmScaleP_1728(&D_004FF160_1728, 13.495580673217773f));
-    t4Vector d = cmSub_00160BF8_1728(*p20, *p40);
-    float len = cmLength_001607E0_1728(d);
+    t4Vector* camTargetPos = (t4Vector*)(self + 0x20);
+    t4Vector* eyePos = (t4Vector*)(self + 0x40);
+    *camTargetPos = cmAdd_001607E0_1728(cmGet_001607E0_1728(self, 1), cmScaleP_1728(&D_004FF160_1728, 13.495580673217773f));
+    t4Vector eyeToTarget = cmSub_00160BF8_1728(*camTargetPos, *eyePos);
+    float len = cmLength_001607E0_1728(eyeToTarget);
     if (0.0f < len) {
         *(float*)self = (531.6604614257812f / len <? 1.0f) * 0.7853981852531433f;
     }
@@ -5186,14 +5186,14 @@ extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate_i(float a, float b, fl
 extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate_i(float defaultHeight, float height, float crouchCorrection, float boostHeight, float smoothness, sCam_162B90* self, sCamInfo* src)
 {
     float dist = src->speed - 1388.888916015625f;
-    float t = Min_162B90(ClampLo_162B90(dist, 0.0f) * 0.0005142856971360743f, 1.0f);
+    float speedFrac = Min_162B90(ClampLo_162B90(dist, 0.0f) * 0.0005142856971360743f, 1.0f);
     float x;
     if (src->f60 != 0) x = self->f208;
     else x = src->f54;
     self->f208 = x;
-    float r = smoothness * self->f1E4 + (1.0f - smoothness) * (defaultHeight + t * height + src->f4C * boostHeight + crouchCorrection * x);
-    self->f1E4 = r;
-    AddTo_162B90(self->v20, Scale_162B90(D_004FF160_2B90, r));
+    float smoothedHeight = smoothness * self->f1E4 + (1.0f - smoothness) * (defaultHeight + speedFrac * height + src->f4C * boostHeight + crouchCorrection * x);
+    self->f1E4 = smoothedHeight;
+    AddTo_162B90(self->v20, Scale_162B90(D_004FF160_2B90, smoothedHeight));
     func_00168150_v(self);
 }
 #endif
@@ -5378,11 +5378,11 @@ extern "C" void cLookAtChaseAlgorithm_setupCamDirection_impl(char* self, sInfo_1
 {
     sV_162C78 n;
     if (info->speed > 27.77777862548828f) {
-        sV_162C78 v = Get_162C78(self, 3);
-        if (Dot_162C78(v, v) < 1.0f) {
-            v = *(sV_162C78*)(self + 0x1C0);
+        sV_162C78 velocity = Get_162C78(self, 3);
+        if (Dot_162C78(velocity, velocity) < 1.0f) {
+            velocity = *(sV_162C78*)(self + 0x1C0);
         }
-        *(sV_162C78*)(self + 0x1C0) = v;
+        *(sV_162C78*)(self + 0x1C0) = velocity;
         float ang;
         float len = Sqrt_162C78(Dot_162C78(*(sV_162C78*)(self + 0x80), *(sV_162C78*)(self + 0x80)) *
                                 Dot_162C78(*(sV_162C78*)(self + 0x1C0), *(sV_162C78*)(self + 0x1C0)));
@@ -5395,24 +5395,24 @@ extern "C" void cLookAtChaseAlgorithm_setupCamDirection_impl(char* self, sInfo_1
         }
         ang = (ang - 0.19082477688789368f) >? 0.0f;
         float prev = ((sHist_162C78*)(self + 0x340))->b[(((sHist_162C78*)(self + 0x340))->idx + 4) % 5];
-        float d = ang - ((sHist_162C78*)(self + 0x340))->b[(((sHist_162C78*)(self + 0x340))->idx + 4) % 5];
-        sHist_162C78* h = (sHist_162C78*)(self + 0x340);
+        float error = ang - ((sHist_162C78*)(self + 0x340))->b[(((sHist_162C78*)(self + 0x340))->idx + 4) % 5];
+        sHist_162C78* pidFilter = (sHist_162C78*)(self + 0x340);
         float sum = 0.0f;
         for (int i = 0; i < 5; i++) {
-            sum += h->c[i];
+            sum += pidFilter->c[i];
         }
-        int p2 = (h->idx + 4) % 5;
-        float val = prev + d * h->k0 + sum * h->k1 + (h->a[p2] - ang) * h->k2;
-        h->a[h->idx] = ang;
-        h->b[h->idx] = val;
-        h->c[h->idx] = ang - val;
-        float s = (1.0f - ((val * 2.5214130878448486f) <? 1.0f >? 0.0f)) * 0.03946405649185181f +
+        int prevIndex = (pidFilter->idx + 4) % 5;
+        float val = prev + error * pidFilter->k0 + sum * pidFilter->k1 + (pidFilter->a[prevIndex] - ang) * pidFilter->k2;
+        pidFilter->a[pidFilter->idx] = ang;
+        pidFilter->b[pidFilter->idx] = val;
+        pidFilter->c[pidFilter->idx] = ang - val;
+        float smoothing = (1.0f - ((val * 2.5214130878448486f) <? 1.0f >? 0.0f)) * 0.03946405649185181f +
                   0.95552659034729f;
-        h->idx = (h->idx + 1) % 5;
+        pidFilter->idx = (pidFilter->idx + 1) % 5;
         if ((unsigned)(*(int*)(*(char**)(*(char**)(self + 0x30) + 4) + 0x434) - 11) < 3) {
-            s = Sqrt_162C78(Sqrt_162C78(s));
+            smoothing = Sqrt_162C78(Sqrt_162C78(smoothing));
         }
-        LerpTo_162C78(n, *(sV_162C78*)(self + 0x80), Scale_162C78(info->dir, 1.0f / info->speed), s);
+        LerpTo_162C78(n, *(sV_162C78*)(self + 0x80), Scale_162C78(info->dir, 1.0f / info->speed), smoothing);
         *(sV_162C78*)(self + 0x80) = n;
     } else {
         n = *(sV_162C78*)(self + 0x80);
@@ -5670,14 +5670,14 @@ static inline float Length_163158(const t4Vector& v)
 extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* self_, void* info, float proportion, float targetProportion)
 {
     float zero = 0.0f;
-    t4Vector d = Sub_163158(self_->CamTargetPos, self_->Position);
-    t4Vector c = Cross_163158(&D_004FF160_3158, d);
-    float len = Length_163158(c);
+    t4Vector look = Sub_163158(self_->CamTargetPos, self_->Position);
+    t4Vector left = Cross_163158(&D_004FF160_3158, look);
+    float len = Length_163158(left);
     if (len > zero) {
-        ScaleEq_163158(c, proportion * Length_163158(d) / len);
-        AddTo_163158(self_->Position, self_->Position, c);
-        t4Vector t = Scale_163158(c, targetProportion);
-        AddTo_163158(self_->CamTargetPos, self_->CamTargetPos, t);
+        ScaleEq_163158(left, proportion * Length_163158(look) / len);
+        AddTo_163158(self_->Position, self_->Position, left);
+        t4Vector targetShift = Scale_163158(left, targetProportion);
+        AddTo_163158(self_->CamTargetPos, self_->CamTargetPos, targetShift);
     }
     func_00168150(((char*)self_));
 }
@@ -5746,23 +5746,23 @@ extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed_i(float a, float b, fl
 extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed_i(float dropPerSpeed, float defaultRise, float boostDrop, float crouchDrop, float smoothness, sCam_163270* self, sCamInfo* src)
 {
     float dist = ClampLo_162B90(src->speed - 1388.888916015625f, 0.0f);
-    float t;
+    float speedFrac;
     if (src->speed >= 833.3333740234375f) {
         if (src->speed <= 1666.666748046875f)
-            t = (src->speed - 833.3333740234375f) / 833.3333740234375f;
+            speedFrac = (src->speed - 833.3333740234375f) / 833.3333740234375f;
         else
-            t = 1.0f;
+            speedFrac = 1.0f;
     } else {
-        t = 0.0f;
+        speedFrac = 0.0f;
     }
-    float tt = t * t;
+    float tt = speedFrac * speedFrac;
     float x;
     if (src->f60 != 0) x = self->f204;
     else x = tt * crouchDrop * (src->f54 - 0.5f);
     self->f204 = x;
-    float r = smoothness * self->f1D4 + (1.0f - smoothness) * (dropPerSpeed * (dist * 9.999999747378752e-05f) * Sqrt_163270(dist) - defaultRise + (x >? (boostDrop * Sqrt_163270(src->f4C))));
-    self->f1D4 = r;
-    SubTo_163270(self->v40, Scale_162B90(D_004FF160_3270, r));
+    float smoothedDrop = smoothness * self->f1D4 + (1.0f - smoothness) * (dropPerSpeed * (dist * 9.999999747378752e-05f) * Sqrt_163270(dist) - defaultRise + (x >? (boostDrop * Sqrt_163270(src->f4C))));
+    self->f1D4 = smoothedDrop;
+    SubTo_163270(self->v40, Scale_162B90(D_004FF160_3270, smoothedDrop));
     func_00168150_v(self);
 }
 #endif
@@ -6155,39 +6155,39 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
         if (self->AirCamSetupCountdown == 14) {
             self->FullAirCamTimeInAir = 0.01666666753590107f;
             float k = Ramp_1635F8(CallF_1635F8(S_1635F8, 21), 300.0f, 500.0f);
-            float h = amplitude * fullScalar * k;
+            float airAmplitude = amplitude * fullScalar * k;
             self->VerticalJumpFactor = k;
-            if (0.0f < h) {
+            if (0.0f < airAmplitude) {
                 void* sa = S_1635F8 + 0x31C;
                 void* sb = S_1635F8 + 0x328;
                 func_0031D700_2(sa, 13);
                 func_0031D7E0(sa, 0.0f, 0.0f);
-                func_0031D7E0(sa, 0.33000001311302185f, h * -121.1346664428711f);
-                func_0031D7E0(sa, 0.6600000262260437f, h * -217.7401123046875f);
-                func_0031D7E0(sa, 0.998885452747345f, h * -254.97467041015625f);
-                func_0031D7E0(sa, 1.3300000429153442f, h * -250.5922088623047f);
-                func_0031D7E0(sa, 1.659999966621399f, h * -193.38156127929688f);
-                func_0031D7E0(sa, 2.0f, h * -63.02951431274414f);
-                func_0031D7E0(sa, 2.3299999237060547f, h * 110.80419158935547f);
-                func_0031D7E0(sa, 2.6600000858306885f, h * 307.46771240234375f);
-                func_0031D7E0(sa, 3.0f, h * 496.44952392578125f);
-                func_0031D7E0(sa, 3.3299999237060547f, h * 689.6500854492188f);
-                func_0031D7E0(sa, 3.6600000858306885f, h * 820.5333862304688f);
-                func_0031D7E0(sa, 4.0f, h * 849.3922119140625f);
+                func_0031D7E0(sa, 0.33000001311302185f, airAmplitude * -121.1346664428711f);
+                func_0031D7E0(sa, 0.6600000262260437f, airAmplitude * -217.7401123046875f);
+                func_0031D7E0(sa, 0.998885452747345f, airAmplitude * -254.97467041015625f);
+                func_0031D7E0(sa, 1.3300000429153442f, airAmplitude * -250.5922088623047f);
+                func_0031D7E0(sa, 1.659999966621399f, airAmplitude * -193.38156127929688f);
+                func_0031D7E0(sa, 2.0f, airAmplitude * -63.02951431274414f);
+                func_0031D7E0(sa, 2.3299999237060547f, airAmplitude * 110.80419158935547f);
+                func_0031D7E0(sa, 2.6600000858306885f, airAmplitude * 307.46771240234375f);
+                func_0031D7E0(sa, 3.0f, airAmplitude * 496.44952392578125f);
+                func_0031D7E0(sa, 3.3299999237060547f, airAmplitude * 689.6500854492188f);
+                func_0031D7E0(sa, 3.6600000858306885f, airAmplitude * 820.5333862304688f);
+                func_0031D7E0(sa, 4.0f, airAmplitude * 849.3922119140625f);
                 func_0031D700_2(sb, 13);
                 func_0031D7E0(sb, 0.0f, 0.0f);
-                func_0031D7E0(sb, 0.33000001311302185f, h * -22.06365966796875f);
-                func_0031D7E0(sb, 0.6600000262260437f, h * -34.630374908447266f);
-                func_0031D7E0(sb, 1.0f, h * 13.823330879211426f);
-                func_0031D7E0(sb, 1.3290001153945923f, h * 92.12850952148438f);
-                func_0031D7E0(sb, 1.659500002861023f, h * 213.1912384033203f);
-                func_0031D7E0(sb, 2.0000672340393066f, h * 383.46197509765625f);
-                func_0031D7E0(sb, 2.333711624145508f, h * 624.2830200195312f);
-                func_0031D7E0(sb, 2.6603856086730957f, h * 813.0820922851562f);
-                func_0031D7E0(sb, 3.0f, h * 977.65869140625f);
-                func_0031D7E0(sb, 3.3299999237060547f, h * 1070.9466552734375f);
-                func_0031D7E0(sb, 3.659675359725952f, h * 1104.7698974609375f);
-                func_0031D7E0(sb, 4.0f, h * 1131.4307861328125f);
+                func_0031D7E0(sb, 0.33000001311302185f, airAmplitude * -22.06365966796875f);
+                func_0031D7E0(sb, 0.6600000262260437f, airAmplitude * -34.630374908447266f);
+                func_0031D7E0(sb, 1.0f, airAmplitude * 13.823330879211426f);
+                func_0031D7E0(sb, 1.3290001153945923f, airAmplitude * 92.12850952148438f);
+                func_0031D7E0(sb, 1.659500002861023f, airAmplitude * 213.1912384033203f);
+                func_0031D7E0(sb, 2.0000672340393066f, airAmplitude * 383.46197509765625f);
+                func_0031D7E0(sb, 2.333711624145508f, airAmplitude * 624.2830200195312f);
+                func_0031D7E0(sb, 2.6603856086730957f, airAmplitude * 813.0820922851562f);
+                func_0031D7E0(sb, 3.0f, airAmplitude * 977.65869140625f);
+                func_0031D7E0(sb, 3.3299999237060547f, airAmplitude * 1070.9466552734375f);
+                func_0031D7E0(sb, 3.659675359725952f, airAmplitude * 1104.7698974609375f);
+                func_0031D7E0(sb, 4.0f, airAmplitude * 1131.4307861328125f);
                 self->AirCamMaxTime = 4.0f;
                 self->ApplyingFullAirFunc = 1;
                 self->AirSplineScalar = 1.0f;
@@ -6202,9 +6202,9 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
             float k;
             if (1.7f <= len) {
                 if (len <= 2.8f) {
-                    float t = (len - 1.7f) / (2.8f - 1.7f);
-                    float t2 = t * t;
-                    k = t2 * 3.0f - (t + t) * t2;
+                    float airTimeFrac = (len - 1.7f) / (2.8f - 1.7f);
+                    float airTimeFracSq = airTimeFrac * airTimeFrac;
+                    k = airTimeFracSq * 3.0f - (airTimeFrac + airTimeFrac) * airTimeFracSq;
                     if (k > 1.0f) {
                         k = 1.0f;
                     }
@@ -6214,38 +6214,38 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
             } else {
                 k = 0.0f;
             }
-            float h = k * amplitude * self->VerticalJumpFactor;
-            if (0.0f < h) {
+            float airAmplitude = k * amplitude * self->VerticalJumpFactor;
+            if (0.0f < airAmplitude) {
                 void* sc = S_1635F8 + 0x304;
                 void* sd = S_1635F8 + 0x310;
                 func_0031D700_2(sc, 13);
                 func_0031D7E0(sc, 0.0f, 0.0f);
-                func_0031D7E0(sc, sx * 0.33000001311302185f, h * -121.1346664428711f);
-                func_0031D7E0(sc, sx * 0.6600000262260437f, h * -217.7401123046875f);
-                func_0031D7E0(sc, sx * 0.998885452747345f, h * -254.97467041015625f);
-                func_0031D7E0(sc, sx * 1.3300000429153442f, h * -250.5922088623047f);
-                func_0031D7E0(sc, sx * 1.659999966621399f, h * -193.38156127929688f);
-                func_0031D7E0(sc, sx * 2.0f, h * -63.02951431274414f);
-                func_0031D7E0(sc, sx * 2.3299999237060547f, h * 110.80419158935547f);
-                func_0031D7E0(sc, sx * 2.6600000858306885f, h * 307.46771240234375f);
-                func_0031D7E0(sc, sx * 3.0f, h * 496.44952392578125f);
-                func_0031D7E0(sc, sx * 3.3299999237060547f, h * 689.6500854492188f);
-                func_0031D7E0(sc, sx * 3.6600000858306885f, h * 820.5333862304688f);
-                func_0031D7E0(sc, sx * 4.0f, h * 849.3922119140625f);
+                func_0031D7E0(sc, sx * 0.33000001311302185f, airAmplitude * -121.1346664428711f);
+                func_0031D7E0(sc, sx * 0.6600000262260437f, airAmplitude * -217.7401123046875f);
+                func_0031D7E0(sc, sx * 0.998885452747345f, airAmplitude * -254.97467041015625f);
+                func_0031D7E0(sc, sx * 1.3300000429153442f, airAmplitude * -250.5922088623047f);
+                func_0031D7E0(sc, sx * 1.659999966621399f, airAmplitude * -193.38156127929688f);
+                func_0031D7E0(sc, sx * 2.0f, airAmplitude * -63.02951431274414f);
+                func_0031D7E0(sc, sx * 2.3299999237060547f, airAmplitude * 110.80419158935547f);
+                func_0031D7E0(sc, sx * 2.6600000858306885f, airAmplitude * 307.46771240234375f);
+                func_0031D7E0(sc, sx * 3.0f, airAmplitude * 496.44952392578125f);
+                func_0031D7E0(sc, sx * 3.3299999237060547f, airAmplitude * 689.6500854492188f);
+                func_0031D7E0(sc, sx * 3.6600000858306885f, airAmplitude * 820.5333862304688f);
+                func_0031D7E0(sc, sx * 4.0f, airAmplitude * 849.3922119140625f);
                 func_0031D700_2(sd, 13);
                 func_0031D7E0(sd, 0.0f, 0.0f);
-                func_0031D7E0(sd, sx * 0.33000001311302185f, h * -22.06365966796875f);
-                func_0031D7E0(sd, sx * 0.6600000262260437f, h * -34.630374908447266f);
-                func_0031D7E0(sd, sx * 1.0f, h * 13.823330879211426f);
-                func_0031D7E0(sd, sx * 1.3290001153945923f, h * 92.12850952148438f);
-                func_0031D7E0(sd, sx * 1.659500002861023f, h * 213.1912384033203f);
-                func_0031D7E0(sd, sx * 2.0000672340393066f, h * 383.46197509765625f);
-                func_0031D7E0(sd, sx * 2.333711624145508f, h * 624.2830200195312f);
-                func_0031D7E0(sd, sx * 2.6603856086730957f, h * 813.0820922851562f);
-                func_0031D7E0(sd, sx * 3.0f, h * 977.65869140625f);
-                func_0031D7E0(sd, sx * 3.3299999237060547f, h * 1070.9466552734375f);
-                func_0031D7E0(sd, sx * 3.659675359725952f, h * 1104.7698974609375f);
-                func_0031D7E0(sd, sx * 4.0f, h * 1131.4307861328125f);
+                func_0031D7E0(sd, sx * 0.33000001311302185f, airAmplitude * -22.06365966796875f);
+                func_0031D7E0(sd, sx * 0.6600000262260437f, airAmplitude * -34.630374908447266f);
+                func_0031D7E0(sd, sx * 1.0f, airAmplitude * 13.823330879211426f);
+                func_0031D7E0(sd, sx * 1.3290001153945923f, airAmplitude * 92.12850952148438f);
+                func_0031D7E0(sd, sx * 1.659500002861023f, airAmplitude * 213.1912384033203f);
+                func_0031D7E0(sd, sx * 2.0000672340393066f, airAmplitude * 383.46197509765625f);
+                func_0031D7E0(sd, sx * 2.333711624145508f, airAmplitude * 624.2830200195312f);
+                func_0031D7E0(sd, sx * 2.6603856086730957f, airAmplitude * 813.0820922851562f);
+                func_0031D7E0(sd, sx * 3.0f, airAmplitude * 977.65869140625f);
+                func_0031D7E0(sd, sx * 3.3299999237060547f, airAmplitude * 1070.9466552734375f);
+                func_0031D7E0(sd, sx * 3.659675359725952f, airAmplitude * 1104.7698974609375f);
+                func_0031D7E0(sd, sx * 4.0f, airAmplitude * 1131.4307861328125f);
                 self->ApplyingAirFunc = 1;
                 self->AirSplineScalar = 1.0f;
                 self->AirTimeScalar = 1.0f;
@@ -6283,22 +6283,22 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
     if (*(int*)(I_1635F8 + 0x60) == 0) {
         if (self->HitGroundSinceStartingAirFunc == 0) {
             self->AirExitSmoothness = Lerp_1635F8(0.93f, exitSmoothness, Ramp_1635F8(self->FullAirCamTimeInAir, 1.2f, 2.2f));
-            float v = CallF_1635F8(S_1635F8, 23);
+            float landAngle = CallF_1635F8(S_1635F8, 23);
             float cur = self->AirExitSmoothness;
             float up = cur + (1.0f - cur) * 0.5f;
-            float r = Ramp_1635F8(v, 1.05f, 1.4f);
-            self->AirExitSmoothness = Lerp_1635F8(self->AirExitSmoothness, up, r);
+            float impactFraction = Ramp_1635F8(landAngle, 1.05f, 1.4f);
+            self->AirExitSmoothness = Lerp_1635F8(self->AirExitSmoothness, up, impactFraction);
         }
         self->ApplyingAirFunc = 0;
         self->HitGroundSinceStartingAirFunc = 1;
         self->ApplyingFullAirFunc = 0;
     }
     if (self->HitGroundSinceStartingAirFunc != 0) {
-        float m = self->AirExitSmoothness;
-        self->LastAirTargetDelta *= m;
-        self->LastAirPositionDelta *= m;
-        self->LastFullAirTargetDelta *= m;
-        self->LastFullAirPositionDelta *= m;
+        float smoothness = self->AirExitSmoothness;
+        self->LastAirTargetDelta *= smoothness;
+        self->LastAirPositionDelta *= smoothness;
+        self->LastFullAirTargetDelta *= smoothness;
+        self->LastFullAirPositionDelta *= smoothness;
     }
     float w;
     if (self->ApplyingAirFunc != 0) {
@@ -6511,23 +6511,23 @@ extern "C" void cLookAtChaseAlgorithm_updateViewCam_v(char* self, float a, float
  */
 extern "C" void cLookAtChaseAlgorithm_updateViewCam_v(char* self, float side, float back, float up, float ease)
 {
-    char* o = *(char**)(self + 0x30);
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)o;
-    int r = vt[24].fn(o + vt[24].delta);
-    t4Vector d = Sub_41C0(*(t4Vector*)(self + 0x40), *(t4Vector*)(self + 0x20));
-    float t = 0.0f;
-    if (r) {
-        t = 1.0f;
+    char* target = *(char**)(self + 0x30);
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)target;
+    int onFlexRail = vt[24].fn(target + vt[24].delta);
+    t4Vector eyeOffset = Sub_41C0(*(t4Vector*)(self + 0x40), *(t4Vector*)(self + 0x20));
+    float wantedFactor = 0.0f;
+    if (onFlexRail) {
+        wantedFactor = 1.0f;
     }
-    float f = ease * *(float*)(self + 0x214) + (1.0f - ease) * t;
-    *(float*)(self + 0x214) = f;
-    t4Vector v = Scale_41C0(Normalize_41C0(d), f * back);
-    v.z += f * up;
-    t4Vector cr = Cross_41C0(&D_004FF160_41C0, v);
+    float factor = ease * *(float*)(self + 0x214) + (1.0f - ease) * wantedFactor;
+    *(float*)(self + 0x214) = factor;
+    t4Vector offset = Scale_41C0(Normalize_41C0(eyeOffset), factor * back);
+    offset.z += factor * up;
+    t4Vector cr = Cross_41C0(&D_004FF160_41C0, offset);
     if (0.0f < Dot_41C0(cr, cr)) {
-        ScaleEq_41C0(cr, f * side / Length_41C0(cr));
+        ScaleEq_41C0(cr, factor * side / Length_41C0(cr));
     }
-    t4Vector sum = Add_41C0(v, cr);
+    t4Vector sum = Add_41C0(offset, cr);
     AddEq_41C0(*(t4Vector*)(self + 0x40), sum);
     func_00168150(self);
 }
@@ -6857,22 +6857,22 @@ static inline void cmStep_1646A0(t4Vector& pos, t4Vector& vel, t4Vector v)
  */
 extern "C" void cLookAtChaseAlgorithm_updateRailCam_def(char* self, char* src, float rise, float smoothness)
 {
-    t4Vector v;
+    t4Vector wantedEye;
     if (0.0f < *(float*)(src + 0x44)) {
-        float l1 = cmLengthV_1646A0(cmSub_1646A0(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40)));
-        float l2 = cmLengthV_1646A0(*(t4Vector*)(src + 0x20));
-        float s = l1 / l2;
+        float eyeDist = cmLengthV_1646A0(cmSub_1646A0(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40)));
+        float velocityLen = cmLengthV_1646A0(*(t4Vector*)(src + 0x20));
+        float scale = eyeDist / velocityLen;
         t4Vector sv = *(t4Vector*)(src + 0x20);
-        cmScaleEq_1646A0(sv, s);
+        cmScaleEq_1646A0(sv, scale);
         cmSubEq_1646A0(sv, cmScaleP_1646A0(&D_004FF160_46A0, rise));
-        v = cmSub_1646A0(*(t4Vector*)(self + 0x20), sv);
+        wantedEye = cmSub_1646A0(*(t4Vector*)(self + 0x20), sv);
     } else {
-        v = *(t4Vector*)(self + 0x40);
+        wantedEye = *(t4Vector*)(self + 0x40);
     }
-    t4Vector d = cmSub_1646A0(v, *(t4Vector*)(self + 0x40));
-    const t4Vector* pe = *(int*)(src + 0x64) ? &d : &D_004FF120_46A0;
-    t4Vector e = *pe;
-    cmStep_1646A0(*(t4Vector*)(self + 0x40), *(t4Vector*)(self + 0xC0), cmLerp_1646A0(*(t4Vector*)(self + 0xC0), e, smoothness));
+    t4Vector correction = cmSub_1646A0(wantedEye, *(t4Vector*)(self + 0x40));
+    const t4Vector* pe = *(int*)(src + 0x64) ? &correction : &D_004FF120_46A0;
+    t4Vector appliedCorrection = *pe;
+    cmStep_1646A0(*(t4Vector*)(self + 0x40), *(t4Vector*)(self + 0xC0), cmLerp_1646A0(*(t4Vector*)(self + 0xC0), appliedCorrection, smoothness));
     func_00168150(self);
 }
 #endif
@@ -7266,9 +7266,9 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
                 sVec_164878 lat = Sub_164878(V_164878(288), V_164878(336));
                 if (Dot_164878(lat, lat) < 40000.0f) {
                     lat.z = 0.0f;
-                    float l = Length_164878(lat);
-                    if (1.0f < l) {
-                        ScaleEq_164878(lat, 200.0f / l);
+                    float length = Length_164878(lat);
+                    if (1.0f < length) {
+                        ScaleEq_164878(lat, 200.0f / length);
                         AddEq_164878(V_164878(288), lat);
                         SubEq_164878(V_164878(288), Scale_164878(D_004FF160_v164878, 100.0f));
                     }
@@ -7281,13 +7281,13 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
                 if (len < 0.0010000000474974513f) {
                     ang = 0.0f;
                 } else {
-                    float c = Dot_164878(V_164878(272), V_164878(288)) / len;
-                    if (-1.0f <= c) {
-                        c = c <? 1.0f;
+                    float cosAngle = Dot_164878(V_164878(272), V_164878(288)) / len;
+                    if (-1.0f <= cosAngle) {
+                        cosAngle = cosAngle <? 1.0f;
                     } else {
-                        c = -1.0f;
+                        cosAngle = -1.0f;
                     }
-                    ang = 1.5707963705062866f - func_0031C128(c);
+                    ang = 1.5707963705062866f - func_0031C128(cosAngle);
                 }
                 F_164878(568) = ang;
                 void* spl = S_164878 + 0x334;
@@ -7307,16 +7307,16 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
         if (self->HalfPipeCamInitialized != 0) {
             F_164878(564) += 0.01666666753590107f;
             if (F_164878(564) < F_164878(560)) {
-                float t = F_164878(564) / F_164878(560);
+                float timeFraction = F_164878(564) / F_164878(560);
                 D_004A128C = 1;
                 // PORT: spline pointer kept in an int global.
                 D_004A4DE0 = (int)(S_164878 + 0x334);
-                float s = func_0031DEE0(S_164878 + 0x334, t);
+                float fraction = func_0031DEE0(S_164878 + 0x334, timeFraction);
                 float sn, cs;
-                func_0031BE50(&sn, &cs, s * F_164878(568) * 0.5f);
-                sQuat_164878 q = Quat_164878(sn * V_164878(304).x, sn * V_164878(304).y, sn * V_164878(304).z, cs);
-                V_164878(320) = RotQ_164878(q, V_164878(272));
-                V_164878(352) = Scale_164878(V_164878(336), s);
+                func_0031BE50(&sn, &cs, fraction * F_164878(568) * 0.5f);
+                sQuat_164878 rotation = Quat_164878(sn * V_164878(304).x, sn * V_164878(304).y, sn * V_164878(304).z, cs);
+                V_164878(320) = RotQ_164878(rotation, V_164878(272));
+                V_164878(352) = Scale_164878(V_164878(336), fraction);
             }
             float k = (F_164878(564) / (F_164878(560) * 0.30000001192092896f)) <? 1.0f >? 0.0f;
             k = Smooth_164878(k);
@@ -7325,33 +7325,33 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
         }
     } else if (0.0f < F_164878(572)) {
         float bt = (F_164878(572) - 0.01666666753590107f) >? 0.0f;
-        float s = bt / blendOut;
+        float fraction = bt / blendOut;
         F_164878(572) = bt;
-        s = Smooth_164878(s);
+        fraction = Smooth_164878(fraction);
         sVec_164878 eye = V_164878(0x20);
-        V_164878(0x20) = Add_164878(Scale_164878(V_164878(0x20), 1.0f - s), Scale_164878(*(sVec_164878*)(I_164878 + 0x10), s));
-        V_164878(0x40) = Add_164878(Scale_164878(V_164878(0x40), 1.0f - s),
-                                    Scale_164878(Add_164878(Sub_164878(*(sVec_164878*)(I_164878 + 0x10), V_164878(320)), V_164878(352)), s));
+        V_164878(0x20) = Add_164878(Scale_164878(V_164878(0x20), 1.0f - fraction), Scale_164878(*(sVec_164878*)(I_164878 + 0x10), fraction));
+        V_164878(0x40) = Add_164878(Scale_164878(V_164878(0x40), 1.0f - fraction),
+                                    Scale_164878(Add_164878(Sub_164878(*(sVec_164878*)(I_164878 + 0x10), V_164878(320)), V_164878(352)), fraction));
         V_164878(368) = Sub_164878(V_164878(0x20), V_164878(0x40));
         V_164878(0x180) = Sub_164878(V_164878(0x20), eye);
         F_164878(580) = F_164878(576) = F_164878(572);
     }
     if (self->DoingHalfPipeCam != 0 && 0.0f < F_164878(576) && 0.0f < F_164878(580)) {
         float bt = (F_164878(576) - 0.01666666753590107f) >? 0.0f;
-        float s = bt / F_164878(580);
+        float fraction = bt / F_164878(580);
         F_164878(576) = bt;
-        s = Smooth_164878(s);
-        sVec_164878 d = Sub_164878(V_164878(0x20), V_164878(0x40));
-        sVec_164878 dd = Add_164878(Scale_164878(V_164878(368), s), Scale_164878(d, 1.0f - s));
-        AddEq_164878(V_164878(0x20), Scale_164878(V_164878(0x180), s));
+        fraction = Smooth_164878(fraction);
+        sVec_164878 look = Sub_164878(V_164878(0x20), V_164878(0x40));
+        sVec_164878 dd = Add_164878(Scale_164878(V_164878(368), fraction), Scale_164878(look, 1.0f - fraction));
+        AddEq_164878(V_164878(0x20), Scale_164878(V_164878(0x180), fraction));
         V_164878(0x40) = Sub_164878(V_164878(0x20), dd);
     }
     sVec_164878 cur = Sub_164878(V_164878(0x20), V_164878(0x40));
     float lmin = Length_164878(off0) * 0.6000000238418579f;
-    float l = Length_164878(cur);
-    if (l < lmin) {
-        if (1.0f < l) {
-            ScaleEq_164878(cur, lmin / l);
+    float length = Length_164878(cur);
+    if (length < lmin) {
+        if (1.0f < length) {
+            ScaleEq_164878(cur, lmin / length);
             V_164878(0x40) = Sub_164878(V_164878(0x20), cur);
         } else {
             V_164878(0x40) = eye0;
@@ -7484,10 +7484,10 @@ extern "C" void cLookAtChaseAlgorithm_updateRotation(cLookAtChaseAlgorithm* self
     {
         ScaleEq_165540(dir, len);
         dir.z = z;
-        sVec4_165540 q = AxisAngle_165540(D_004FF160_v165540, ang);
-        sVec4_165540 rd = Rot_165540(q, dir);
-        sVec4_165540 t = Sub_165540(*(sVec4_165540*)&self->CamTargetPos, rd);
-        *(sVec4_165540*)&self->Position = t;
+        sVec4_165540 rotator = AxisAngle_165540(D_004FF160_v165540, ang);
+        sVec4_165540 rd = Rot_165540(rotator, dir);
+        sVec4_165540 newPos = Sub_165540(*(sVec4_165540*)&self->CamTargetPos, rd);
+        *(sVec4_165540*)&self->Position = newPos;
     }
     func_00168150(((char*)self));
 }
@@ -8117,10 +8117,10 @@ static inline void SubTo_166550(t4Vector& r, const t4Vector& a, const t4Vector& 
  */
 extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(cLookAtChaseAlgorithm* self_, float backDist, float height)
 {
-    t4Vector& v = self_->LastCamDir;
-    v = Scale_166550(Get_166550(((char*)self_), 4), backDist);
-    SubTo_166550(v, v, Scale_166550(D_004FF160_6550, height));
-    DivEq_166550(v, Length_166550(v));
+    t4Vector& camDir = self_->LastCamDir;
+    camDir = Scale_166550(Get_166550(((char*)self_), 4), backDist);
+    SubTo_166550(camDir, camDir, Scale_166550(D_004FF160_6550, height));
+    DivEq_166550(camDir, Length_166550(camDir));
 }
 #endif
 
@@ -8540,7 +8540,7 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         sVec4 dir = getVec_6C60(self, 3);
         sVec4 v;
         sVec4 t;
-        sVec4 u;
+        sVec4 directionVel;
         *(int*)(self + 0x2C0) = 5000;
         *(float*)(self + 0x1E0) = 10.0f;
         *(float*)(self + 0x1DC) = 1.0f;
@@ -8600,21 +8600,21 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         *(int*)(self + 0x2F0) = 0;
         *(int*)(self + 0x2BC) = 0;
         *(int*)(self + 0x37C) = 0;
-        int* q = (int*)(self + 0x340);
+        int* pidHistory = (int*)(self + 0x340);
         for (int i = 4; i >= 0; i--) {
-            q[0] = 0;
-            q[5] = 0;
-            q[10] = 0;
-            q++;
+            pidHistory[0] = 0;
+            pidHistory[5] = 0;
+            pidHistory[10] = 0;
+            pidHistory++;
         }
         {
             char* cam = *(char**)(self + 0x30);
             sVEntry<void>* cvt = *(sVEntry<void>**)cam;
             ((VecFn2_6C60)cvt[4].fn)(&t, cam + cvt[4].delta);
         }
-        Scale_6C60(u, t, 2.0f);
-        v = u;
-        *(sVec4*)(self + 0x1C0) = u;
+        Scale_6C60(directionVel, t, 2.0f);
+        v = directionVel;
+        *(sVec4*)(self + 0x1C0) = directionVel;
         *(sVec4*)(self + 0x100) = dir;
         *(int*)(self + 0x108) = 0;
         sVEntry<void>* svt2 = *(sVEntry<void>**)(self + 0x10);
@@ -10113,23 +10113,23 @@ extern "C" void cLazyChaseAlgorithm_update_v(char* self)
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     *(t4Vector*)(self + 0x20) = cmAdd_001607E0_8338(info.pos, cmScaleP_1848(&D_004FF160_8338, 2.3602666854858398f));
-    t4Vector d = cmSub_168150(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
-    float len = cmLength_168150(d);
+    t4Vector offset = cmSub_168150(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
+    float len = cmLength_168150(offset);
     if (len > 0.0f) {
-        cmScaleEq_8338(d, 180.19183349609375f / len);
-        t4Vector e = cmSub_168150(*(t4Vector*)(self + 0x20), d);
-        float t;
+        cmScaleEq_8338(offset, 180.19183349609375f / len);
+        t4Vector wantedEye = cmSub_168150(*(t4Vector*)(self + 0x20), offset);
+        float blend;
         if (len >= 188.07302856445312f) {
             if (len <= 775.4580078125f) {
-                t = (len - 188.07302856445312f) / 587.385009765625f;
+                blend = (len - 188.07302856445312f) / 587.385009765625f;
             } else {
-                t = 1.0f;
+                blend = 1.0f;
             }
         } else {
-            t = 0.0f;
+            blend = 0.0f;
         }
-        float f = (1.0f - t) * 0.9916903972625732f + t * 0.8601375222206116f;
-        *(t4Vector*)(self + 0x40) = cmAdd_001607E0_8338(cmScale_001607E0_8338(*(t4Vector*)(self + 0x40), f), cmScale_001607E0_8338(e, 1.0f - f));
+        float keepFraction = (1.0f - blend) * 0.9916903972625732f + blend * 0.8601375222206116f;
+        *(t4Vector*)(self + 0x40) = cmAdd_001607E0_8338(cmScale_001607E0_8338(*(t4Vector*)(self + 0x40), keepFraction), cmScale_001607E0_8338(wantedEye, 1.0f - keepFraction));
     }
 }
 #endif

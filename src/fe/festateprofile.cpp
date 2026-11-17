@@ -143,9 +143,9 @@ extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* self, int pEngine
     }
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* g = (signed char*)((char*)&cBENewRaceInterface_newRace);
+    signed char* newRace = (signed char*)((char*)&cBENewRaceInterface_newRace);
     int n = 1;
-    if (g[0x49] == 2) {
+    if (newRace[0x49] == 2) {
         n = 2;
     }
     for (int j = 0; j < n; j++) {

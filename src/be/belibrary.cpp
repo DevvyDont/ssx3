@@ -197,7 +197,7 @@ extern sBlk20_14A5E0 D_005308B8;
  */
 extern "C" void cBELibrary_readFromData(char* data)
 {
-    cBEIface_14A5E0* o;
+    cBEIface_14A5E0* beInterface;
     int idx;
 
     *(sBlk4C_14A5E0*)cBELibrary_raceDB = *(sBlk4C_14A5E0*)data;
@@ -217,14 +217,14 @@ extern "C" void cBELibrary_readFromData(char* data)
     D_004BA348 = *(sBlk9B50_14A5E0*)data;
     data += 0x9B50;
     D_005308B8 = *(sBlk20_14A5E0*)data;
-    o = cBEBAGTInterface_getThis();
-    o->onLoad();
-    o = cBEMissionInterface_getThis();
-    o->onLoad();
-    o = cBEScoreInterface_getThis();
-    o->onLoad();
-    o = cBEStatInterface_getThis();
-    o->onLoad();
+    beInterface = cBEBAGTInterface_getThis();
+    beInterface->onLoad();
+    beInterface = cBEMissionInterface_getThis();
+    beInterface->onLoad();
+    beInterface = cBEScoreInterface_getThis();
+    beInterface->onLoad();
+    beInterface = cBEStatInterface_getThis();
+    beInterface->onLoad();
 }
 #endif
 

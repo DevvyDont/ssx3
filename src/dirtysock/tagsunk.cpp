@@ -261,7 +261,7 @@ struct sList_94D0 {
 extern "C" void* LobbyMan_LobbyMan(LobbyMan* self_)
 {
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
-    int unused[4];
+    int frameFiller[4];
     self_->mState = 0;
     self_->mServerAddr = 0;
     self_->mAuthenticated = 0;
@@ -278,9 +278,9 @@ extern "C" void* LobbyMan_LobbyMan(LobbyMan* self_)
     self_->mpUserList = 0;
     self_->mpRankList = 0;
     self_->mNumPersonas = 0;
-    sBXStr_94D0* p = (sBXStr_94D0*)(((char*)self_) + 0x70);
-    for (int i = 3; i != -1; i--, p++) {
-        p->str = D_004A3E90_94D0;
+    sBXStr_94D0* persona = (sBXStr_94D0*)(((char*)self_) + 0x70);
+    for (int i = 3; i != -1; i--, persona++) {
+        persona->str = D_004A3E90_94D0;
     }
     self_->mPersona = (char*)D_004A3E90_94D0;
     self_->mRoomName = (char*)D_004A3E90_94D0;
@@ -454,10 +454,10 @@ static inline sMsgListIterK2 sMsgListK2_insert(sMsgListIterK2 pos, void* const& 
 extern "C" void LobbyMan_onconnectionmsg(LobbyMan* self, int* msg)
 {
     if (msg[1] == 0x64697363) {
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 277;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        void* mp = m;
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = 277;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        void* mp = event;
         sMsgListK2_insert(*(sMsgListNodeK2**)(((char*)self) + 0xF0), mp);
         self->mDisconnected = 1;
         if (*func_002591D0() != 0)
@@ -509,10 +509,10 @@ static inline sMsgListIterK2b sMsgListK2b_insert(sMsgListIterK2b pos, void* cons
  */
 extern "C" void LobbyMan_onuserlistupdate(LobbyMan* self)
 {
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = 0xE0;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    event[0] = 0xE0;
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    void* mp = event;
     sMsgListK2b_insert(*(sMsgListNodeK2b**)(((char*)self) + 0xF0), mp);
 }
 #endif
@@ -562,10 +562,10 @@ static inline sMsgListIterK2c sMsgListK2c_insert(sMsgListIterK2c pos, void* cons
  */
 extern "C" void LobbyMan_onranklistupdate(LobbyMan* self, int unused)
 {
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = 225;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    event[0] = 225;
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    void* mp = event;
     sMsgListK2c_insert(*(sMsgListNodeK2c**)(((char*)self) + 0xF0), mp);
 }
 #endif
@@ -735,10 +735,10 @@ extern "C" void LobbyMan_onchatmsg(LobbyMan* self, char* msg)
             if (*(int*)self == 22)
                 *(int*)self = 1;
             {
-                int* m = newMsg_9B10();
-                m[0] = 237;
-                *(void***)((char*)m + 0x4) = online_Event_vtbl;
-                post_9B10(((char*)self), m);
+                int* event = newMsg_9B10();
+                event[0] = 237;
+                *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                post_9B10(((char*)self), event);
             }
         } else if (func_004165A8(cmd, str_abortChal) == 0) {
             if (func_00263128((BuddyMan*)((char*)Mgr_9B10()), name) != 0)
@@ -760,28 +760,28 @@ extern "C" void LobbyMan_onchatmsg(LobbyMan* self, char* msg)
             }
             if (send)
                 {
-                int* m = newMsg_9B10();
-                m[0] = 238;
-                *(void***)((char*)m + 0x4) = online_Event_vtbl;
-                post_9B10(((char*)self), m);
+                int* event = newMsg_9B10();
+                event[0] = 238;
+                *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                post_9B10(((char*)self), event);
             }
         } else if (func_004165A8(cmd, str_ignore) == 0) {
             if (*(int*)self == 22)
                 *(int*)self = 1;
             {
-                int* m = newMsg_9B10();
-                m[0] = 0xF0;
-                *(void***)((char*)m + 0x4) = online_Event_vtbl;
-                post_9B10(((char*)self), m);
+                int* event = newMsg_9B10();
+                event[0] = 0xF0;
+                *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                post_9B10(((char*)self), event);
             }
         } else if (func_004165A8(cmd, str_badversion) == 0) {
             if (*(int*)self == 22)
                 *(int*)self = 1;
             {
-                int* m = newMsg_9B10();
-                m[0] = 242;
-                *(void***)((char*)m + 0x4) = online_Event_vtbl;
-                post_9B10(((char*)self), m);
+                int* event = newMsg_9B10();
+                event[0] = 242;
+                *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                post_9B10(((char*)self), event);
             }
         }
         break;
@@ -896,29 +896,29 @@ struct sVEntryA1D0 { short delta; short index; int (*fn)(void*); };
 extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
 {
     char name[0x100];
-    char b1[0x100];
-    char b2[0x100];
-    char b3[0x100];
-    char b4[0x100];
-    char b5[0x100];
+    char selfName[0x100];
+    char hostName[0x100];
+    char oppoName[0x100];
+    char auth[0x100];
+    char p1Text[0x100];
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_NAME), name, 0x100, D_004A2F40);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SELF), b1, 0x100, D_004A2F40);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_HOST), b2, 0x100, D_004A2F40);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_OPPO), b3, 0x100, D_004A2F40);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_AUTH), b4, 0x100, D_004A2F40);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SELF), selfName, 0x100, D_004A2F40);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_HOST), hostName, 0x100, D_004A2F40);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_OPPO), oppoName, 0x100, D_004A2F40);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_AUTH), auth, 0x100, D_004A2F40);
     self->mWhen = cDirtysock_tag_TagFieldGetTime(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_WHEN), 0);
     int ev = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_P1), -1);
     int kind = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_P2), -1);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_P1), b5, 0x100, D_004A2F40);
-    self->mHostAddr = func_0025A730(self, b2, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_FROM), 0));
-    self->mOppoAddr = func_0025A730(self, b3, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_ADDR), 0));
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_P1), p1Text, 0x100, D_004A2F40);
+    self->mHostAddr = func_0025A730(self, hostName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_FROM), 0));
+    self->mOppoAddr = func_0025A730(self, oppoName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_ADDR), 0));
     cBXString_cBXString4(((char*)self) + 0x88, name);
-    cBXString_cBXString4(((char*)self) + 0x90, b2);
-    cBXString_cBXString4(((char*)self) + 0x94, b3);
-    cBXString_cBXString4(((char*)self) + 0x9C, b4);
-    int same = func_004165A8(b1, b2) == 0;
+    cBXString_cBXString4(((char*)self) + 0x90, hostName);
+    cBXString_cBXString4(((char*)self) + 0x94, oppoName);
+    cBXString_cBXString4(((char*)self) + 0x9C, auth);
+    int same = func_004165A8(selfName, hostName) == 0;
     self->mIsHost = same;
-    cBXString_cBXString4(((char*)self) + 0x98, same ? b3 : b2);
+    cBXString_cBXString4(((char*)self) + 0x98, same ? oppoName : hostName);
     self->mSeed = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SEED), 0);
     if (*(int*)self != 0x18 && *(int*)self != 20)
     {
@@ -927,7 +927,7 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
         return;
     }
     *(int*)self = 25;
-    if (strlen(b5))
+    if (strlen(p1Text))
     {
         char* ri = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         int mode = 0;
@@ -974,10 +974,10 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
     }
     int type = 239;
     func_00259098(func_002591D0(), self->mMatchType, 0);
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = type;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    post_A1D0(((char*)self), m);
+    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    event[0] = type;
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    post_A1D0(((char*)self), event);
 }
 #endif
 
@@ -1307,26 +1307,26 @@ struct cBXStrAB40 {
 /**
  * Posts a chat event carrying a sender and a text on mEventList.
  *
- * The event is 0x10 bytes from cMemMan_alloc ("ChatEvent"): type 222, vtable D_00481230, cBXString copies of @p a at
- * +0x8 and @p b at +0xC. The chat handler LobbyMan_onchatmsg() calls it for room chat and broadcasts.
+ * The event is 0x10 bytes from cMemMan_alloc ("ChatEvent"): type 222, vtable D_00481230, cBXString copies of @p sender at
+ * +0x8 and @p text at +0xC. The chat handler LobbyMan_onchatmsg() calls it for room chat and broadcasts.
  *
- * @param a  the sender's name
- * @param b  the message text
+ * @param sender  the sender's name
+ * @param text  the message text
  */
-extern "C" void func_0025AB40(LobbyMan* self, const char* a, const char* b)
+extern "C" void func_0025AB40(LobbyMan* self, const char* sender, const char* text)
 {
-    int* m = (int*)operator new(0x10, str_ChatEvent, 0x20000000, 0);
+    int* event = (int*)operator new(0x10, str_ChatEvent, 0x20000000, 0);
     cBXStrAB40 sa;
-    cBXString_cBXString2(&sa, a);
+    cBXString_cBXString2(&sa, sender);
     cBXStrAB40 sb;
-    cBXString_cBXString2(&sb, b);
-    m[0] = 222;
-    *(void***)((char*)m + 0x4) = D_00481230;
-    cBXString_cBXString1((char*)m + 0x8, &sa);
-    cBXString_cBXString1((char*)m + 0xC, &sb);
+    cBXString_cBXString2(&sb, text);
+    event[0] = 222;
+    *(void***)((char*)event + 0x4) = D_00481230;
+    cBXString_cBXString1((char*)event + 0x8, &sa);
+    cBXString_cBXString1((char*)event + 0xC, &sb);
     cBXString__cBXString(&sa, 2);
     cBXString__cBXString(&sb, 2);
-    void* mp = m;
+    void* mp = event;
     sMsgListAB40_insert(*(sMsgListNodeAB40**)(((char*)self) + 0xF0), mp);
 }
 #endif
@@ -1496,102 +1496,102 @@ extern "C" void func_0025AC50(LobbyMan* self)
         if (self->mDisconnected != 0) {
             self->mDisconnected = 0;
             func_0025B800(self);
-            int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-            m[0] = 277;
-            *(void***)((char*)m + 0x4) = online_Event_vtbl;
-            post_AC50(((char*)self), m);
+            int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+            event[0] = 277;
+            *(void***)((char*)event + 0x4) = online_Event_vtbl;
+            post_AC50(((char*)self), event);
         } else {
             int state = *(int*)self;
             if (state == 2) {
                 sDsCallbackAC50* obj = (sDsCallbackAC50*)self->mpHostLookup;
-                int r = obj->poll(obj);
-                if (r > 0) {
+                int lookupStatus = obj->poll(obj);
+                if (lookupStatus > 0) {
                     LobbyMan* sess = self;
-                    int g = ((sDsCallbackAC50*)sess->mpHostLookup)->value;
-                    sess->mServerAddr = g;
-                    D_004A3018 = g;
+                    int serverAddr = ((sDsCallbackAC50*)sess->mpHostLookup)->value;
+                    sess->mServerAddr = serverAddr;
+                    D_004A3018 = serverAddr;
                     sess->mState = 3;
                     sess->mTimeout = 30.0f;
                     // PORT: function pointer passed as a callback argument.
-                    func_003E8260(((void*)sess->mpLobbyApi), g, 11000, (void*)func_00268BA8, ((char*)self));
-                } else if (r < 0) {
+                    func_003E8260(((void*)sess->mpLobbyApi), serverAddr, 11000, (void*)func_00268BA8, ((char*)self));
+                } else if (lookupStatus < 0) {
                     func_0025B800(self);
-                    int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-                    m[0] = 258;
-                    *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-                    m[2] = 0x646E7366; // 'dnsf'
-                    post_AC50(((char*)self), m);
+                    int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+                    event[0] = 258;
+                    *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+                    event[2] = 0x646E7366; // 'dnsf'
+                    post_AC50(((char*)self), event);
                 }
-                if (r != 0)
+                if (lookupStatus != 0)
                     closeConn_AC50(((char*)self));
             } else if (state == 3) {
                 if (ev == 0x400) {
-                    char* s = func_003E8A70(self->mpLobbyApi, 0x646F776E);
-                    int* m = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
-                    m[0] = 258;
-                    m[2] = 0x646F776E; // 'down'
-                    *(void***)((char*)m + 0x4) = D_004811B0;
-                    cBXString_cBXString2((char*)m + 0xC, s);
-                    post_AC50(((char*)self), m);
+                    char* downReason = func_003E8A70(self->mpLobbyApi, 0x646F776E);
+                    int* event = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
+                    event[0] = 258;
+                    event[2] = 0x646F776E; // 'down'
+                    *(void***)((char*)event + 0x4) = D_004811B0;
+                    cBXString_cBXString2((char*)event + 0xC, downReason);
+                    post_AC50(((char*)self), event);
                     func_0025B800(self);
                 } else if (expired_AC50(((char*)self))) {
                     func_0025B800(self);
-                    int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-                    m[0] = 258;
-                    *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-                    m[2] = 0x74696D65; // 'time'
-                    post_AC50(((char*)self), m);
+                    int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+                    event[0] = 258;
+                    *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+                    event[2] = 0x74696D65; // 'time'
+                    post_AC50(((char*)self), event);
                     closeConn_AC50(((char*)self));
                 }
             } else if (state == 26) {
                 if (BuddyMan_mBuddyMan->miError != 0) {
                     func_00261408(BuddyMan_mBuddyMan);
-                    int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+                    int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     int val = BuddyMan_mBuddyMan->miError;
-                    m[0] = 259;
-                    *(void***)((char*)m + 0x4) = online_BuddyErrorEvent_vtbl;
-                    m[2] = val;
-                    post_AC50(((char*)self), m);
+                    event[0] = 259;
+                    *(void***)((char*)event + 0x4) = online_BuddyErrorEvent_vtbl;
+                    event[2] = val;
+                    post_AC50(((char*)self), event);
                 } else if (func_00261460(BuddyMan_mBuddyMan) != 0) {
                     *(int*)self = 1;
-                    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-                    m[0] = 218;
-                    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-                    post_AC50(((char*)self), m);
+                    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+                    event[0] = 218;
+                    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                    post_AC50(((char*)self), event);
                 }
             } else if (state == 22) {
             } else if (state == 23) {
-                float t = self->mTimeout;
-                if (t < D_004A5154 - 1.0f)
-                    D_004A5154 = t;
-                if (isNeg_AC50(t)) {
+                float timeout = self->mTimeout;
+                if (timeout < D_004A5154 - 1.0f)
+                    D_004A5154 = timeout;
+                if (isNeg_AC50(timeout)) {
                     if (func_00263128((BuddyMan*)((char*)Mgr_AC50()), self->mOpponent) != 0)
                         func_00263018((BuddyMan*)Mgr_AC50(), self->mOpponent);
                     int type = 274;
-                    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-                    m[0] = type;
-                    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-                    post_AC50(((char*)self), m);
+                    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+                    event[0] = type;
+                    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                    post_AC50(((char*)self), event);
                     *(int*)self = 1;
                 }
             } else if (state == 0x18) {
-                float t = self->mTimeout;
-                if (t < D_004A5154 - 1.0f)
-                    D_004A5154 = t;
-                if (isNeg_AC50(t)) {
+                float timeout = self->mTimeout;
+                if (timeout < D_004A5154 - 1.0f)
+                    D_004A5154 = timeout;
+                if (isNeg_AC50(timeout)) {
                     int type = 274;
-                    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-                    m[0] = type;
-                    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-                    post_AC50(((char*)self), m);
+                    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+                    event[0] = type;
+                    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                    post_AC50(((char*)self), event);
                     func_0025F628(self, 0, 1);
                 }
             } else if (state == 20) {
                 if (expired_AC50(((char*)self))) {
-                    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-                    m[0] = 230;
-                    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-                    post_AC50(((char*)self), m);
+                    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+                    event[0] = 230;
+                    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                    post_AC50(((char*)self), event);
                     func_0025EED8(self);
                 }
             } else if (state != 25) {
@@ -1599,11 +1599,11 @@ extern "C" void func_0025AC50(LobbyMan* self)
                 int active = notIdle || self->mFindingPlayer != 0;
                 if (active && expired_AC50(((char*)self))) {
                     func_0025B800(self);
-                    int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-                    m[0] = 258;
-                    *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-                    m[2] = 0x74696D65; // 'time'
-                    post_AC50(((char*)self), m);
+                    int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+                    event[0] = 258;
+                    *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+                    event[2] = 0x74696D65; // 'time'
+                    post_AC50(((char*)self), event);
                     self->mFindingPlayer = 0;
                     closeConn_AC50(((char*)self));
                 }
@@ -1762,21 +1762,21 @@ extern "C" void func_0025B6D8(LobbyMan* self, int conn)
         func_0025A948(self);
     self->unk_014 = conn;
     if (conn != 0) {
-        int g = D_004A3018;
+        int serverAddr = D_004A3018;
         *(int*)self = 3;
         self->mTimeout = 30.0f;
-        self->mServerAddr = g;
+        self->mServerAddr = serverAddr;
         // PORT: function pointer passed as a callback argument.
-        func_003E8260(self->mpLobbyApi, g, 11000, (void*)func_00268BA8, ((char*)self));
+        func_003E8260(self->mpLobbyApi, serverAddr, 11000, (void*)func_00268BA8, ((char*)self));
     } else {
         *(int*)self = 2;
         self->mpHostLookup = (void*)func_003F3A98(self->mServerName, 0);
     }
     int type = 200;
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = type;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    event[0] = type;
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    void* mp = event;
     sMsgListB6D8_insert(*(sMsgListNodeB6D8**)(((char*)self) + 0xF0), mp);
 }
 #endif
@@ -1862,16 +1862,16 @@ extern "C" void LobbyMan_onlobbyconnect(LobbyMan* self, char* msg)
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         func_003E8B10(self->mpLobbyApi, 0x73656C65, str_ROOMS_1_USERS_1_RANKS_0_MESGS_1_GAMES_1, 0, 0);
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 201;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_B848(((char*)self), m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = 201;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_B848(((char*)self), event);
     } else {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = *(int*)(msg + 0x8);
-        post_B848(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = *(int*)(msg + 0x8);
+        post_B848(((char*)self), event);
         self->mDisconnected = 1;
     }
 }
@@ -1965,10 +1965,10 @@ extern "C" void func_0025B9C8(LobbyMan* self, char* msg)
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_LANG, func_00259198());
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608(self, 4, 0x61636374, buf, (int)func_00268BD0, 20.0f);
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = type;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    event[0] = type;
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    void* mp = event;
     sMsgListB9C8_insert(*(sMsgListNodeB9C8**)(((char*)self) + 0xF0), mp);
 }
 #endif
@@ -2001,17 +2001,17 @@ struct sDsNameListK2 {
 extern "C" void func_0025BC48(LobbyMan* self, char* msg)
 {
     char buf[256];
-    char* p;
+    char* cursor;
     char* start;
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_OPTS), buf, 256, D_004A2F40);
     self->mNewAccount.mNumNameOptions = 0;
-    p = buf;
-    while ((*p != 0) && (self->mNewAccount.mNumNameOptions < 4)) {
-        start = p;
-        while ((*p != 0) && (*p != ','))
-            p++;
-        if (*p != 0)
-            *p++ = 0;
+    cursor = buf;
+    while ((*cursor != 0) && (self->mNewAccount.mNumNameOptions < 4)) {
+        start = cursor;
+        while ((*cursor != 0) && (*cursor != ','))
+            cursor++;
+        if (*cursor != 0)
+            *cursor++ = 0;
         cBXString_cBXString4(&self->mNewAccount.mNameOptions[self->mNewAccount.mNumNameOptions++], start);
     }
 }
@@ -2078,26 +2078,26 @@ extern "C" void LobbyMan_onaccountcreated(LobbyMan* self, char* msg)
     *(int*)self = 1;
     int err = *(int*)(msg + 0x8);
     if (err == 0) {
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 203;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_BD30(((char*)self), m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = 203;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_BD30(((char*)self), event);
     } else if (err == 0x746F6F79) {
         int n = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_AGE), 0);
-        int* m = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        m[2] = err;
-        *(void***)((char*)m + 0x4) = online_AcctTooYoungEvent_vtbl;
-        m[3] = n;
-        post_BD30(((char*)self), m);
+        int* event = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        event[2] = err;
+        *(void***)((char*)event + 0x4) = online_AcctTooYoungEvent_vtbl;
+        event[3] = n;
+        post_BD30(((char*)self), event);
     } else {
         if (err == 0x6475706C)
             func_0025BC48(self, msg);
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = *(int*)(msg + 0x8);
-        post_BD30(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = *(int*)(msg + 0x8);
+        post_BD30(((char*)self), event);
     }
 }
 #endif
@@ -2154,7 +2154,7 @@ static inline sMsgListIterBF18 sMsgListBF18_insert(sMsgListIterBF18 pos, void* c
 extern "C" void func_0025BF18(LobbyMan* self, char* msg)
 {
     char buf[0x200];
-    char tmp[16];
+    char spamText[16];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, (const char*)self->mUserName);
     if (*(int*)(msg + 0x44) != 0) {
@@ -2162,8 +2162,8 @@ extern "C" void func_0025BF18(LobbyMan* self, char* msg)
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_CHNG, *(const char**)(msg + 0x4));
     }
     if (*(int*)(msg + 0x48) != 0) {
-        sprintf(tmp, str_pct_cpct_c, *(int*)(msg + 0x38) ? 'Y' : 'N', *(int*)(msg + 0x3C) ? 'Y' : 'N');
-        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_SPAM, tmp);
+        sprintf(spamText, str_pct_cpct_c, *(int*)(msg + 0x38) ? 'Y' : 'N', *(int*)(msg + 0x3C) ? 'Y' : 'N');
+        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_SPAM, spamText);
     }
     if (*(int*)(msg + 0x4C) != 0) {
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MAIL, *(const char**)(msg + 0xC));
@@ -2171,10 +2171,10 @@ extern "C" void func_0025BF18(LobbyMan* self, char* msg)
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608(self, 5, 0x65646974, buf, (int)func_00268BF8, 20.0f);
     int type = 205;
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = type;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    event[0] = type;
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    void* mp = event;
     sMsgListBF18_insert(*(sMsgListNodeBF18**)(((char*)self) + 0xF0), mp);
 }
 #endif
@@ -2230,16 +2230,16 @@ extern "C" void LobbyMan_onaccountedited(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 206;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_C0C0(((char*)self), m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = 206;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_C0C0(((char*)self), event);
     } else {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = *(int*)(msg + 0x8);
-        post_C0C0(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = *(int*)(msg + 0x8);
+        post_C0C0(((char*)self), event);
     }
 }
 #endif
@@ -2294,10 +2294,10 @@ extern "C" void func_0025C1E0(LobbyMan* self, const char* value)
     int type = 209;
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608(self, 6, 0x6C6F7374, buf, (int)func_00268C20, 20.0f);
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = type;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    event[0] = type;
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    void* mp = event;
     sMsgListC1E0_insert(*(sMsgListNodeC1E0**)(((char*)self) + 0xF0), mp);
 }
 #endif
@@ -2353,16 +2353,16 @@ extern "C" void LobbyMan_onlostaccountrequestsent(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 207;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_C2D8(((char*)self), m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = 207;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_C2D8(((char*)self), event);
     } else {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = *(int*)(msg + 0x8);
-        post_C2D8(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = *(int*)(msg + 0x8);
+        post_C2D8(((char*)self), event);
     }
 }
 #endif
@@ -2417,10 +2417,10 @@ extern "C" void func_0025C3F8(LobbyMan* self, const char* value)
     int type = 208;
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608(self, 7, 0x6C6F7374, buf, (int)func_00268C48, 20.0f);
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = type;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    event[0] = type;
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    void* mp = event;
     sMsgListC3F8_insert(*(sMsgListNodeC3F8**)(((char*)self) + 0xF0), mp);
 }
 #endif
@@ -2476,16 +2476,16 @@ extern "C" void LobbyMan_onlostpasswordrequestsent(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 210;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_C4F0(((char*)self), m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = 210;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_C4F0(((char*)self), event);
     } else {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = *(int*)(msg + 0x8);
-        post_C4F0(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = *(int*)(msg + 0x8);
+        post_C4F0(((char*)self), event);
     }
 }
 #endif
@@ -2573,13 +2573,13 @@ extern "C" void func_0025C610(LobbyMan* self)
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_TOS, 1);
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MID, func_003F3F78());
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PID, str_SSX_PS2_2004);
-    int v = cCommSystem_mCommSystem->mInterfaceType;
-    if (v != 1) {
-        flags = v & 4;
+    int interfaceType = cCommSystem_mCommSystem->mInterfaceType;
+    if (interfaceType != 1) {
+        flags = interfaceType & 4;
         caps = 0x10024;
-        if (v & 0x10)
+        if (interfaceType & 0x10)
             flags |= 0x10000;
-        if (v & 8)
+        if (interfaceType & 8)
             flags |= 0x20;
     }
     caps |= 0x800;
@@ -2600,10 +2600,10 @@ extern "C" void func_0025C610(LobbyMan* self)
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_HWMASK, caps);
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608(self, 8, 0x61757468, buf, (int)func_00268C70, 20.0f);
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = type;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    post_C610(((char*)self) + 0xEC, m);
+    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    event[0] = type;
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    post_C610(((char*)self) + 0xEC, event);
 }
 #endif
 
@@ -2678,49 +2678,49 @@ extern "C" void LobbyMan_onauthentication(LobbyMan* self, char *msg)
   if (status == 0)
   {
     char name[0x100];
-    char b1[0x100];
-    char b2[0x10];
+    char mail[0x100];
+    char spam[0x10];
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_PERSONAS), name, 0x100, D_004A2F40);
-    char *p = name;
+    char *cursor = name;
     (self)->mNumPersonas = 0;
-    while (((*p) != 0) && ((self)->mNumPersonas < 4))
+    while (((*cursor) != 0) && ((self)->mNumPersonas < 4))
     {
-      char *start = p;
-      while (((*p) != 0) && ((*p) != ','))
+      char *start = cursor;
+      while (((*cursor) != 0) && ((*cursor) != ','))
       {
-        p++;
+        cursor++;
       }
 
-      if ((*p) != 0)
+      if ((*cursor) != 0)
       {
-        *p = 0;
-        p++;
+        *cursor = 0;
+        cursor++;
       }
       cBXString_cBXString4(&((sBXStrC8A8*)&(self)->mPersonas[0])[(self)->mNumPersonas++], start);
     }
 
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_MAIL), b1, 0x100, D_004A2F40);
-    cBXString_cBXString4(((char*)self) + 0x2BC, b1);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_SPAM), b2, 3, D_004A2F40);
-    self->mAccount.mSpam[0] = b2[0] == 'Y';
-    self->mAccount.mSpam[1] = b2[1] == 'Y';
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_MAIL), mail, 0x100, D_004A2F40);
+    cBXString_cBXString4(((char*)self) + 0x2BC, mail);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_SPAM), spam, 3, D_004A2F40);
+    self->mAccount.mSpam[0] = spam[0] == 'Y';
+    self->mAccount.mSpam[1] = spam[1] == 'Y';
     cBXString_operatorE(((char*)self) + 0x2B0, ((char*)self) + 0x48);
     cBXString_operatorE(((char*)self) + 0x2B4, ((char*)self) + 0x4C);
     cBXString_operatorE(((char*)self) + 0x2B8, ((char*)self) + 0x4C);
-    const char *t = cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), D_004A30F0);
-    if (t != 0)
+    const char *cpatField = cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), D_004A30F0);
+    if (cpatField != 0)
     {
-      char b3[0x100];
-      if (p)
+      char cpatText[0x100];
+      if (cursor)
       {
-        cDirtysock_tag_TagFieldGetString4(t, b3, 0x100, D_004A2F40);
-        func_003EFD30(b3, strlen(b3), ((char*)self) + 0x1C, 33);
+        cDirtysock_tag_TagFieldGetString4(cpatField, cpatText, 0x100, D_004A2F40);
+        func_003EFD30(cpatText, strlen(cpatText), ((char*)self) + 0x1C, 33);
         self->mHaveCPAT = 1;
       }
       else
       {
-        cDirtysock_tag_TagFieldGetString4(t, b3, 0x100, D_004A2F40);
-        func_003EFD30(b3, strlen(b3), ((char*)self) + 0x1C, 33);
+        cDirtysock_tag_TagFieldGetString4(cpatField, cpatText, 0x100, D_004A2F40);
+        func_003EFD30(cpatText, strlen(cpatText), ((char*)self) + 0x1C, 33);
         self->mHaveCPAT = 1;
       }
     }
@@ -2729,33 +2729,33 @@ extern "C" void LobbyMan_onauthentication(LobbyMan* self, char *msg)
       self->mHaveCPAT = 0;
     }
     self->mAuthenticated = 1;
-    int *m = (int *) operator new(8, str_NetEvent, 0x20000000, 0);
-    *((void ***) (((char *) m) + 0x4)) = online_Event_vtbl;
-    m[0] = 212;
-    post_C610(((char*)self) + 0xEC, m);
+    int *event = (int *) operator new(8, str_NetEvent, 0x20000000, 0);
+    *((void ***) (((char *) event) + 0x4)) = online_Event_vtbl;
+    event[0] = 212;
+    post_C610(((char*)self) + 0xEC, event);
   }
   else
     if (status == 0x6C6F636B)
   {
-    char a[0x100];
-    char b[0x100];
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_DATE), a, 0x100, D_004A2F40);
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_INTRO), b, 0x100, D_004A2F40);
-    int *m = (int *) operator new(20, str_NetEvent, 0x20000000, 0);
-    m[0] = 258;
-    *((void ***) (((char *) m) + 0x4)) = D_004811D0_C8A8;
-    m[2] = 0x6C6F636B;
-    cBXString_cBXString2(m + 3, a);
-    cBXString_cBXString2(m + 4, b);
-    post_C8A8(((char*)self), m);
+    char lockDate[0x100];
+    char intro[0x100];
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_DATE), lockDate, 0x100, D_004A2F40);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_INTRO), intro, 0x100, D_004A2F40);
+    int *event = (int *) operator new(20, str_NetEvent, 0x20000000, 0);
+    event[0] = 258;
+    *((void ***) (((char *) event) + 0x4)) = D_004811D0_C8A8;
+    event[2] = 0x6C6F636B;
+    cBXString_cBXString2(event + 3, lockDate);
+    cBXString_cBXString2(event + 4, intro);
+    post_C8A8(((char*)self), event);
   }
   else
   {
-    int *m = (int *) operator new(0xC, str_NetEvent, 0x20000000, 0);
-    m[2] = *((int *) (msg + 8));
-    m[0] = 258;
-    *((void ***) (((char *) m) + 0x4)) = online_ErrorEvent_vtbl;
-    post_C8A8(((char*)self), m);
+    int *event = (int *) operator new(0xC, str_NetEvent, 0x20000000, 0);
+    event[2] = *((int *) (msg + 8));
+    event[0] = 258;
+    *((void ***) (((char *) event) + 0x4)) = online_ErrorEvent_vtbl;
+    post_C8A8(((char*)self), event);
   }
 }
 #endif
@@ -2850,10 +2850,10 @@ extern "C" void func_0025CD50_impl(char* self, const char* name)
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608((LobbyMan*)self, 9, 0x70657273, buf, (int)func_00268C98, 20.0f);
     int type = 217;
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = type;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    event[0] = type;
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    void* mp = event;
     sMsgListCD50_insert(*(sMsgListNodeCD50**)(self + 0xF0), mp);
 }
 #endif
@@ -2912,16 +2912,16 @@ extern "C" void LobbyMan_onpersonaselected(LobbyMan* self, char* msg)
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         func_0025CFE0(self);
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 218;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_CEB0(((char*)self), m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = 218;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_CEB0(((char*)self), event);
     } else {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = *(int*)(msg + 0x8);
-        post_CEB0(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = *(int*)(msg + 0x8);
+        post_CEB0(((char*)self), event);
     }
 }
 #endif
@@ -3027,11 +3027,11 @@ extern "C" void func_0025D048(LobbyMan* self, char* msg)
         self->mStats.unk_10 = -1;
         func_0025E0C8(self, 0);
     } else {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = *(int*)(msg + 0x8);
-        post_D048(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = *(int*)(msg + 0x8);
+        post_D048(((char*)self), event);
     }
 }
 #endif
@@ -3093,10 +3093,10 @@ extern "C" void func_0025D1B8(LobbyMan* self, const char* name)
         func_0025B608(self, 10, 0x63706572, buf, (int)func_00268CE8, 20.0f);
         LobbyMan* lobbyMan = self;
         cBXString_cBXString4(&((char**)&lobbyMan->mPersonas[0])[lobbyMan->mNumPersonas], name);
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = type;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        void* mp = m;
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = type;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        void* mp = event;
         sMsgListD1B8_insert(*(sMsgListNodeD1B8**)(((char*)self) + 0xF0), mp);
     }
 }
@@ -3161,18 +3161,18 @@ extern "C" void LobbyMan_onpersonacreated(LobbyMan* self, char* msg)
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         (self->mNumPersonas)++;
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 214;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_D2D8(((char*)self), m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = 214;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_D2D8(((char*)self), event);
     } else {
         if (*(int*)(msg + 0x8) == 0x6475706C)
             func_0025BC48(self, msg);
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = *(int*)(msg + 0x8);
-        post_D2D8(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = *(int*)(msg + 0x8);
+        post_D2D8(((char*)self), event);
     }
 }
 #endif
@@ -3230,10 +3230,10 @@ extern "C" void func_0025D428(LobbyMan* self, int idx)
         // PORT: function pointer passed through func_0025B608's int parameter.
         func_0025B608(self, 11, 0x64706572, buf, (int)func_00268D10, 20.0f);
         self->mDeletePersonaIdx = idx;
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = type;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        void* mp = m;
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = type;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        void* mp = event;
         sMsgListD428_insert(*(sMsgListNodeD428**)(((char*)self) + 0xF0), mp);
     }
 }
@@ -3303,16 +3303,16 @@ extern "C" void LobbyMan_onpersonadeleted(LobbyMan* self, char* msg)
         lobbyMan->mNumPersonas--;
         for (int i = lobbyMan->mDeletePersonaIdx; i < lobbyMan->mNumPersonas; i++)
             cBXString_operatorE(&((char**)&lobbyMan->mPersonas[0])[i], &((char**)&lobbyMan->mPersonas[0])[i + 1]);
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        m[0] = 216;
-        post_D538(lst, m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        event[0] = 216;
+        post_D538(lst, event);
     } else {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = *(int*)(msg + 0x8);
-        post_D538(((char*)self) + 0xEC, m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = *(int*)(msg + 0x8);
+        post_D538(((char*)self) + 0xEC, event);
     }
 }
 #endif
@@ -3361,11 +3361,11 @@ static inline sMsgListIterK6c0 sMsgListK6c0_insert(sMsgListIterK6c0 pos, void* c
  */
 extern "C" void LobbyMan_onroomlistupdate(LobbyMan* self)
 {
-    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    int* event = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     sMsgListNodeK6c0* list = *(sMsgListNodeK6c0**)(((char*)self) + 0xF0);
-    m[0] = 223;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    event[0] = 223;
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    void* mp = event;
     sMsgListK6c0_insert(list, mp);
 }
 #endif
@@ -3418,9 +3418,9 @@ extern "C" void func_0025D860(LobbyMan* self, void* name, int a2);
  * passes it to func_0025D860().
  *
  * @param idx  index into the room list, or -1
- * @param a2   the room password, or 0
+ * @param password   the room password, or 0
  */
-extern "C" void func_0025D800(LobbyMan* self, int idx, int a2)
+extern "C" void func_0025D800(LobbyMan* self, int idx, int password)
 {
     void* name;
     if (idx != -1) {
@@ -3428,7 +3428,7 @@ extern "C" void func_0025D800(LobbyMan* self, int idx, int a2)
     } else {
         name = D_004A2F40;
     }
-    func_0025D860(self, name, a2);
+    func_0025D860(self, name, password);
 }
 #endif
 
@@ -3525,17 +3525,17 @@ extern "C" void LobbyMan_onroomselected(LobbyMan* self, char* msg)
         char buf[0x100];
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_NAME), buf, 0x100, D_004A2F40);
         cBXString_cBXString4(((char*)self) + 0x84, buf);
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 220;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_D8F8(((char*)self), m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = 220;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_D8F8(((char*)self), event);
     } else {
         cBXString_Reset(((char*)self) + 0x84);
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = *(int*)(msg + 0x8);
-        post_D8F8(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = *(int*)(msg + 0x8);
+        post_D8F8(((char*)self), event);
     }
 }
 #endif
@@ -3660,22 +3660,22 @@ static inline void post_DB80(char* self, void* msg)
 extern "C" void LobbyMan_onRoomCreated(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
-    int v = *(int*)(msg + 0x8);
-    if (v == 0) {
+    int status = *(int*)(msg + 0x8);
+    if (status == 0) {
         int type = 228;
         char buf[0x100];
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_NAME), buf, 0x100, D_004A2F40);
         cBXString_cBXString4(((char*)self) + 0x84, buf);
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = type;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_DB80(((char*)self), m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = type;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_DB80(((char*)self), event);
     } else {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = v;
-        post_DB80(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = status;
+        post_DB80(((char*)self), event);
     }
 }
 #endif
@@ -3784,17 +3784,17 @@ extern "C" void LobbyMan_onPingReceived(LobbyMan* self, char* msg)
 {
     char name[0x20];
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_NAME), name, 0x20, D_004A2F40);
-    int v;
+    int pingTime;
     if (*(int*)(msg + 0x8) != 0)
-        v = 32656;
+        pingTime = 32656;
     else
-        v = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_PING), 0);
-    int* m = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
-    m[0] = 229;
-    *(void***)((char*)m + 0x4) = online_PingEvent_vtbl;
-    cBXString_cBXString2((char*)m + 0x8, name);
-    m[3] = v;
-    void* mp = m;
+        pingTime = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_PING), 0);
+    int* event = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
+    event[0] = 229;
+    *(void***)((char*)event + 0x4) = online_PingEvent_vtbl;
+    cBXString_cBXString2((char*)event + 0x8, name);
+    event[3] = pingTime;
+    void* mp = event;
     sMsgListDDE0_insert(*(sMsgListNodeDDE0**)(((char*)self) + 0xF0), mp);
 }
 #endif
@@ -3879,19 +3879,19 @@ static inline void post_DF98(char* self, void* msg)
 extern "C" void LobbyMan_onAbuseReportReceived(LobbyMan* self, char* msg)
 {
     *(int*)self = 1;
-    int v = *(int*)(msg + 0x8);
-    if (v == 0) {
+    int status = *(int*)(msg + 0x8);
+    if (status == 0) {
         int type = 232;
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = type;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_DF98(((char*)self), m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = type;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_DF98(((char*)self), event);
     } else {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = v;
-        post_DF98(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = status;
+        post_DF98(((char*)self), event);
     }
 }
 #endif
@@ -4001,11 +4001,11 @@ extern "C" void LobbyMan_onNewsRetrieved(LobbyMan* self, char* msg)
     st->mState = 1;
     int type = *(int*)(msg + 0x8);
     if (type == 0x6E657731) {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 226;
-        *(void***)((char*)m + 0x4) = online_NewsEvent_vtbl;
-        cBXString_cBXString2(m + 2, *(char**)(msg + 0xC));
-        post_E138(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 226;
+        *(void***)((char*)event + 0x4) = online_NewsEvent_vtbl;
+        cBXString_cBXString2(event + 2, *(char**)(msg + 0xC));
+        post_E138(((char*)self), event);
     } else if (type == 0x6E657730) {
         st->mLoggedIn = 1;
         if (func_00261460(BuddyMan_mBuddyMan) == 0) {
@@ -4018,10 +4018,10 @@ extern "C" void LobbyMan_onNewsRetrieved(LobbyMan* self, char* msg)
             // PORT: a pointer passed through func_00261248's int parameter.
             func_00261248(BuddyMan_mBuddyMan, host, port, self->mPersona, self->mPassword, (int)name);
         }
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = 273;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_E138(((char*)self), m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = 273;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_E138(((char*)self), event);
     }
 }
 #endif
@@ -4112,16 +4112,16 @@ struct sDsSlotSessE420 {
  *
  * Does nothing when mState is 0. Opens a type-4 snapshot for mRankSlot when it has none (func_003E85B0, callback thunk
  * func_00268AE0), builds INDEX = mRankSlot, CHAN = D_004A3180 + 4 (D_004A3180 is zero and only read here), START = @p
- * a1, RANGE = @p a2 and SEQN = mRankSlot, cancels the request stored for slot @p a3 (func_003E8D70) and sends 'snap'
+ * a1, RANGE = @p range and SEQN = mRankSlot, cancels the request stored for slot @p prevSlot (func_003E8D70) and sends 'snap'
  * with func_0025B608(), keeping the current mState (20 s timeout, reply through func_00268E00 to LobbyMan_onRanklistRetrieved()). The
  * new request id goes into mRankRequest[mRankSlot].
  *
  * @param self_  the lobby manager (LobbyMan_mLobbyMan)
- * @param a1     first row to fetch
- * @param a2     number of rows to fetch
- * @param a3     slot whose pending request is cancelled (the previously selected one)
+ * @param start     first row to fetch
+ * @param range     number of rows to fetch
+ * @param prevSlot     slot whose pending request is cancelled (the previously selected one)
  */
-extern "C" void func_0025E420(LobbyMan* self_, int a1, int a2, int a3)
+extern "C" void func_0025E420(LobbyMan* self_, int start, int range, int prevSlot)
 {
     sDsSlotSessE420* self = (sDsSlotSessE420*)self_;
     if (self->active == 0)
@@ -4132,10 +4132,10 @@ extern "C" void func_0025E420(LobbyMan* self_, int a1, int a2, int a3)
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_INDEX, self->slot);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_CHAN, D_004A3180 + 4);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_START, a1);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_RANGE, a2);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_START, start);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_RANGE, range);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_SEQN, self->slot);
-    func_003E8D70(self->ctx, self->limitB[a3]);
+    func_003E8D70(self->ctx, self->limitB[prevSlot]);
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608((LobbyMan*)self, self->active, 0x736E6170, buf, (int)func_00268E00, 20.0f);
     self->limitB[self->slot] = self->f40;
@@ -4190,18 +4190,18 @@ static inline sMsgListIterE590 sMsgListE590_insert(sMsgListIterE590 pos, void* c
  */
 extern "C" void LobbyMan_onRanklistRetrieved(LobbyMan* self, char* msg)
 {
-    int v = *(int*)(msg + 0x8);
-    if (v == 0) {
-        int a = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_START), 0);
+    int status = *(int*)(msg + 0x8);
+    if (status == 0) {
+        int start = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_START), 0);
         int idx = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SEQN), 0);
-        int b = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_RANGE), 0);
-        *(int*)(((char*)self) + (idx << 2) + 0x104) = a + b;
+        int range = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_RANGE), 0);
+        *(int*)(((char*)self) + (idx << 2) + 0x104) = start + range;
     } else {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = v;
-        void* mp = m;
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = status;
+        void* mp = event;
         sMsgListE590_insert(*(sMsgListNodeE590**)(((char*)self) + 0xF0), mp);
     }
 }
@@ -4255,10 +4255,10 @@ extern "C" void func_0025E6D0(LobbyMan* self, const char* name)
     if (*(int*)self != 0) {
         if (strcasecmp(self->mPersona, (void*)name) == 0) {
             int type = 270;
-            int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-            m[0] = type;
-            *(void***)((char*)m + 0x4) = online_Event_vtbl;
-            void* mp = m;
+            int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+            event[0] = type;
+            *(void***)((char*)event + 0x4) = online_Event_vtbl;
+            void* mp = event;
             sMsgListE6D0_insert(*(sMsgListNodeE6D0**)(((char*)self) + 0xF0), mp);
         } else {
             char buf[0x100];
@@ -4376,21 +4376,21 @@ extern "C" void LobbyMan_onPlayerFound(LobbyMan* self, char* msg)
         int count = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_ADDR), 0);
         int on = count > 0;
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_ROOM), text, 0x100, D_004A2F40);
-        sMsgE7F0* m = (sMsgE7F0*)operator new(44, str_NetEvent, 0x20000000, 0);
-        m->type = 227;
-        m->vt = online_FindPlayerEvent_vtbl;
-        cBXString_cBXString2(m->name, name);
-        cBXString_cBXString2(m->text, text);
-        m->on = on;
-        m->count = count;
-        m->rec = rec;
-        post_E7F0(((char*)self), m);
+        sMsgE7F0* event = (sMsgE7F0*)operator new(44, str_NetEvent, 0x20000000, 0);
+        event->type = 227;
+        event->vt = online_FindPlayerEvent_vtbl;
+        cBXString_cBXString2(event->name, name);
+        cBXString_cBXString2(event->text, text);
+        event->on = on;
+        event->count = count;
+        event->rec = rec;
+        post_E7F0(((char*)self), event);
     } else {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = err;
-        post_E7F0(((char*)self), m);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = err;
+        post_E7F0(((char*)self), event);
     }
 }
 #endif
@@ -4491,44 +4491,44 @@ extern "C" void func_0025EB00(LobbyMan* self, char* msg)
     int type = *(int*)(msg + 0x8);
     if (type == 0) {
         char name[0x100];
-        char s2[0x100];
-        char s3[0x100];
+        char tagN[0x100];
+        char tagA[0x100];
         char raw[0x20];
         int st[0x10];
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31D8), name, 0x100, D_004A2F40);
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F38), s2, 0x100, D_004A2F40);
-        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31E0), s3, 0x100, D_004A2F40);
-        int n1 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31E8), -1);
-        int n2 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31F0), -1);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A2F38), tagN, 0x100, D_004A2F40);
+        cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31E0), tagA, 0x100, D_004A2F40);
+        int tagF = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31E8), -1);
+        int tagP = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31F0), -1);
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A31F8), raw, 20, D_004A2F40);
-        int n3 = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3130), 0);
+        int rank = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), D_004A3130), 0);
         cDirtysock_tag_TagFieldGetStructure(raw, st, 0x40, str_l);
         sUserStats_25EB00 info;
-        info.a = n3;
+        info.a = rank;
         info.b = st[2];
         info.c = st[2] + st[3] + st[4];
         info.d = st[6];
-        info.e = n1;
-        sUserMsg_25EB00* m = (sUserMsg_25EB00*)operator new(356, str_NetEvent, 0x20000000, 0);
-        m->kind = 269;
-        m->vt = D_00481110;
-        m->n2 = n2;
-        m->n1 = n1;
-        strcpy(m->name, name);
-        strcpy(m->s2, s2);
-        strcpy(m->s3, s3);
-        m->stats = info;
-        sMsgList_25EB00* l = (sMsgList_25EB00*)(((char*)self) + 0xF0);
-        void* mp = m;
-        l->insert(l->end(), mp);
+        info.e = tagF;
+        sUserMsg_25EB00* netEvent = (sUserMsg_25EB00*)operator new(356, str_NetEvent, 0x20000000, 0);
+        netEvent->kind = 269;
+        netEvent->vt = D_00481110;
+        netEvent->n2 = tagP;
+        netEvent->n1 = tagF;
+        strcpy(netEvent->name, name);
+        strcpy(netEvent->s2, tagN);
+        strcpy(netEvent->s3, tagA);
+        netEvent->stats = info;
+        sMsgList_25EB00* eventList = (sMsgList_25EB00*)(((char*)self) + 0xF0);
+        void* mp = netEvent;
+        eventList->insert(eventList->end(), mp);
     } else if (type != 0x75757372) {
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = type;
-        sMsgList_25EB00* l = (sMsgList_25EB00*)(((char*)self) + 0xF0);
-        void* mp = m;
-        l->insert(l->end(), mp);
+        int* netEvent = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        netEvent[0] = 258;
+        *(void***)((char*)netEvent + 0x4) = online_ErrorEvent_vtbl;
+        netEvent[2] = type;
+        sMsgList_25EB00* eventList = (sMsgList_25EB00*)(((char*)self) + 0xF0);
+        void* mp = netEvent;
+        eventList->insert(eventList->end(), mp);
     }
 }
 #endif
@@ -4645,10 +4645,10 @@ extern "C" void func_0025EED8(LobbyMan* self)
     }
     *(int*)self = 1;
     int type = 231;
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = type;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    post_EED8(((char*)self), m);
+    int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    netEvent[0] = type;
+    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+    post_EED8(((char*)self), netEvent);
 }
 #endif
 
@@ -4705,12 +4705,12 @@ extern "C" void LobbyMan_onQuickMatchResponse(LobbyMan* self, char* msg)
             *(int*)self = 20;
     } else {
         *(int*)self = 1;
-        int v = *(int*)(msg + 0x8);
-        int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = v;
-        void* mp = m;
+        int status = *(int*)(msg + 0x8);
+        int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = status;
+        void* mp = event;
         sMsgListK2e_insert(*(sMsgListNodeK2e**)(((char*)self) + 0xF0), mp);
     }
 }
@@ -4824,12 +4824,12 @@ extern "C" char* func_0025F1E0(LobbyMan* self, int idx, int* outFlag)
     if (*(int*)self == 0) {
         return 0;
     }
-    char* p = (char*)func_003EE560_2(self->mpUserList, idx);
-    if (p != 0) {
+    char* userEntry = (char*)func_003EE560_2(self->mpUserList, idx);
+    if (userEntry != 0) {
         if (outFlag != 0) {
-            *outFlag = (*(int*)(p + 0x4) >> 21) & 1;
+            *outFlag = (*(int*)(userEntry + 0x4) >> 21) & 1;
         }
-        return p + 8;
+        return userEntry + 8;
     }
     return D_004A2ED0;
 }
@@ -4886,15 +4886,15 @@ struct sDsPeerInfoK2 {
 /**
  * Fills a small info block about a player in the room's user list.
  *
- * Does nothing when mState is 0. For entry @p a1 of mpUserList it stores the entry's word +0x34 in @p out +0x0 and the
+ * Does nothing when mState is 0. For entry @p userIndex of mpUserList it stores the entry's word +0x34 in @p out +0x0 and the
  * number parsed (atoi, base 10) from its text at +0x28 in @p out +0x10, then decodes the stats record at +0x38
  * with the "l*" template and stores item 2 at +0x4, items 2 + 3 + 4 at +0x8 and item 6 at +0xC. Without an entry +0x0
  * and +0x10 are 0 and the stats come from decoding a null record.
  *
- * @param a1   index into mpUserList (also passed on to func_003EE560() through the second argument register)
+ * @param userIndex   index into mpUserList (also passed on to func_003EE560() through the second argument register)
  * @param out  receives the five words
  */
-extern "C" void func_0025F288(LobbyMan* self, int a1, sDsPeerInfoK2* out)
+extern "C" void func_0025F288(LobbyMan* self, int userIndex, sDsPeerInfoK2* out)
 {
     if (*(int*)self != 0) {
         int st[16];
@@ -5003,16 +5003,16 @@ struct sDsSlotSessK2b {
 /**
  * Returns a row of the selected rank list and decodes two of its numbers.
  *
- * Looks up row @p a1 in mRankSnapshot[mRankSlot] (func_003EE560), decodes the text at entry + 0x28 with the "l*"
+ * Looks up row @p rowIndex in mRankSnapshot[mRankSlot] (func_003EE560), decodes the text at entry + 0x28 with the "l*"
  * template into two ints, stores the second in @p outB and, for slots other than 0, the first in @p outA; slot 0 gets
  * the entry's first word instead. Nothing is written when the row is missing.
  *
- * @param a1    row index (passed on to func_003EE560() through the second argument register)
+ * @param rowIndex    row index (passed on to func_003EE560() through the second argument register)
  * @param outA  receives the row's first value
  * @param outB  receives the row's second value
  * @return the row entry, or 0 when it is missing or mState is 0
  */
-extern "C" void* func_0025F388(LobbyMan* self, int a1, int* outA, int* outB)
+extern "C" void* func_0025F388(LobbyMan* self, int rowIndex, int* outA, int* outB)
 {
     if (self->mState == 0)
         return 0;
@@ -5099,7 +5099,7 @@ extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2) __asm__
 /**
  * Challenges a player: sends a "challenge" private message with the race setup and waits for the answer.
  *
- * Does nothing when mState is 0. Sets mIsHost to 1, assigns @p name to mOpponent and stores @p a2 in mMatchType. It
+ * Does nothing when mState is 0. Sets mIsHost to 1, assigns @p name to mOpponent and stores @p matchType in mMatchType. It
  * then formats "%s %d %d %d %d %d %d %d %d %s %d %d %d %d" into a 64-byte buffer: "challenge", the location id
  * (cBENewRaceInterface_getLocationID), cBENewRaceInterface_newRace's cGameMode and cGameEvent, D_00534B34, bits 0x40
  * and 0x100 of D_005308D0, iNumberAI, bit 0x80 of D_005308D0, cCommSystem_getSignature(), then mStats.unk_04, unk_08,
@@ -5107,15 +5107,15 @@ extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2) __asm__
  * cBE_getInterface__Fv(SSXApp->BE, 7) call's result is unused.
  *
  * @param name  the challenged persona
- * @param a2    the game kind, kept in mMatchType
+ * @param matchType    the game kind, kept in mMatchType
  */
-extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2)
+extern "C" void func_0025F4C0_impl(char* self, const char* name, int matchType)
 {
     if (*(int*)self == 0)
         return;
     *(int*)(self + 0xB4) = 1;
     cBXString_cBXString4(self + 0x98, name);
-    *(int*)(self + 0xA4) = a2;
+    *(int*)(self + 0xA4) = matchType;
     cBE_getInterface_Fv(SSXApp->BE, 7);
     int locationID = cBENewRaceInterface_getLocationID(cBE_getInterface_Fv(cBE_getBE(), 0));
     int flags = D_005308D0[0];
@@ -5123,11 +5123,11 @@ extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2)
     int track = *(signed char*)(Race_25F4C0() + 0x4A);
     int y = D_00534B34[0];
     int ai = *(int*)(Race_25F4C0() + 0x3C);
-    bool b6 = (flags & 0x40) != 0;
-    bool b8 = (flags & 0x100) != 0;
-    bool b7 = (flags & 0x80) != 0;
+    bool multipliers = (flags & 0x40) != 0;
+    bool powerUps = (flags & 0x100) != 0;
+    bool pointIcons = (flags & 0x80) != 0;
     char buf[0x40];
-    sprintf(buf, str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct_b, str_challenge, locationID, event, track, y, b6, b8, ai, b7,
+    sprintf(buf, str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct_b, str_challenge, locationID, event, track, y, multipliers, powerUps, ai, pointIcons,
             cCommSystem_getSignature_F4C0(cCommSystem_mCommSystem),
             ((sDsStats_25F4C0*)self)->fBC, ((sDsStats_25F4C0*)self)->fC0, ((sDsStats_25F4C0*)self)->fC4, ((sDsStats_25F4C0*)self)->fB8);
     func_0025FB80_v(self, *(int*)(self + 0x98), buf);
@@ -5198,10 +5198,10 @@ extern "C" void func_0025F628(LobbyMan* selfp, int notify, int flag)
         }
         if (notify) {
             int type = 238;
-            int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-            m[0] = type;
-            *(void***)((char*)m + 0x4) = online_Event_vtbl;
-            void* mp = m;
+            int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+            netEvent[0] = type;
+            *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+            void* mp = netEvent;
             sMsgListF628_insert(*(sMsgListNodeF628**)(((char*)selfp) + 0xF0), mp);
         }
     }
@@ -5265,10 +5265,10 @@ extern "C" void func_0025F740(LobbyMan* selfp, int type)
             *(int*)selfp = 1;
         }
         if (type != 0) {
-            int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-            m[0] = type;
-            *(void***)((char*)m + 0x4) = online_Event_vtbl;
-            void* mp = m;
+            int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+            netEvent[0] = type;
+            *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+            void* mp = netEvent;
             sMsgListF740_insert(*(sMsgListNodeF740**)(((char*)selfp) + 0xF0), mp);
         }
     }
@@ -5356,11 +5356,11 @@ extern "C" void LobbyMan_onchallengeresponse(LobbyMan* self, char* msg)
         if (*(int*)self == 21) {
             *(int*)self = 1;
             func_0025FC48(((char*)self));
-            int* m = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
-            m[0] = 258;
-            *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-            m[2] = *(int*)(msg + 0x8);
-            void* mp = m;
+            int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
+            event[0] = 258;
+            *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+            event[2] = *(int*)(msg + 0x8);
+            void* mp = event;
             sMsgListF8A0_insert(*(sMsgListNodeF8A0**)(((char*)self) + 0xF0), mp);
         }
     } else if (func_004165A8(buf, str_chal) == 0) {
@@ -5510,12 +5510,12 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025FC28__FPvi);
 /**
  * Sends "decline" as a private lobby message to a player (func_0025FB80).
  *
- * @param a1  name of the player whose challenge is declined (a string pointer passed as an int)
+ * @param playerName  name of the player whose challenge is declined (a string pointer passed as an int)
  * @return func_0025FB80()'s result
  */
-void* func_0025FC28(void* self, int a1)
+void* func_0025FC28(void* self, int playerName)
 {
-    return func_0025FB80((LobbyMan*)self, a1, (void*)D_004A3270);
+    return func_0025FB80((LobbyMan*)self, playerName, (void*)D_004A3270);
 }
 #endif
 
@@ -5576,21 +5576,21 @@ static inline sMsgListIter_0025FC70 sMsgList_0025FC70_insert(sMsgListIter_0025FC
 /**
  * Sends "lockChal" to a player, switches to the given challenge state and restarts the challenge timer.
  *
- * After the private message (func_0025FB80) it stores @p a2 in mState, posts an online::Event of type 272 (vtable
+ * After the private message (func_0025FB80) it stores @p newState in mState, posts an online::Event of type 272 (vtable
  * online_Event_vtbl) on mEventList, sets mTimeout to 20.0 and the countdown D_004A5154 to 21.0.
  *
- * @param a1    name of the player (a string pointer passed as an int)
- * @param a2    the new mState (23 from func_0025FB58, 24 from LobbyMan_onchallengeresponse)
+ * @param playerName    name of the player (a string pointer passed as an int)
+ * @param newState    the new mState (23 from func_0025FB58, 24 from LobbyMan_onchallengeresponse)
  */
-extern "C" void func_0025FC70(LobbyMan* self, int a1, int a2)
+extern "C" void func_0025FC70(LobbyMan* self, int playerName, int newState)
 {
-    func_0025FB80(self, a1, str_lockChal_b);
+    func_0025FB80(self, playerName, str_lockChal_b);
     int kind = 272;
-    *(int*)self = a2;
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    m[0] = kind;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    *(int*)self = newState;
+    int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    netEvent[0] = kind;
+    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+    void* mp = netEvent;
     sMsgList_0025FC70_insert(*(sMsgListNode_0025FC70**)((char*)self + 0xF0), mp);
     self->mTimeout = 20.0f;
     D_004A5154 = 21.0f;
@@ -6135,24 +6135,24 @@ extern "C" void LobbyMan_onresultsreportresponse(LobbyMan* self, char* msg)
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (*(int*)(msg + 0x8) == 0 || (*(int*)(msg + 0x8) == 0x72616E6B && D_00534B34[0] == 0)) {
         int type = 257;
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = type;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        post_0C68(((char*)self) + 0xEC, m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        event[0] = type;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        post_0C68(((char*)self) + 0xEC, event);
     } else {
         int err = *(int*)(msg + 0x8);
         char* lst = ((char*)self) + 0xEC;
-        int* m = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-        m[0] = 258;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        *(void***)((char*)m + 0x4) = online_ErrorEvent_vtbl;
-        m[2] = err;
-        post_0C68(lst, m);
+        int* event = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
+        event[0] = 258;
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
+        event[2] = err;
+        post_0C68(lst, event);
         int type = 257;
-        int* m2 = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m2 + 0x4) = online_Event_vtbl;
-        m2[0] = type;
-        post_0C68(lst, m2);
+        int* resultEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+        *(void***)((char*)resultEvent + 0x4) = online_Event_vtbl;
+        resultEvent[0] = type;
+        post_0C68(lst, resultEvent);
     }
 }
 #endif
@@ -6196,11 +6196,11 @@ extern "C" void* func_00260E50(void* ret, void* self, unsigned int tag)
         break;
     default:
     {
-        sBXStr_00260E50 s;
-        s.p = (char*)cBXString_EmptyString;
-        func_003194A8(&s, D_00480E20, tag, tag >> 24, (tag >> 16) & 0xFF, (tag >> 8) & 0xFF, tag & 0xFF);
-        cBXString_cBXString1(ret, &s);
-        cBXString__cBXString(&s, 2);
+        sBXStr_00260E50 tagText;
+        tagText.p = (char*)cBXString_EmptyString;
+        func_003194A8(&tagText, D_00480E20, tag, tag >> 24, (tag >> 16) & 0xFF, (tag >> 8) & 0xFF, tag & 0xFF);
+        cBXString_cBXString1(ret, &tagText);
+        cBXString__cBXString(&tagText, 2);
         break;
     }
     }
@@ -6434,7 +6434,7 @@ struct sBXStr_261248 {
  * Connects the buddy manager to a buddy server and logs in.
  *
  * Creates the BuddyApi on first use (func_002614E8 with the resource name, then func_003F0818(mpBuddyApi, resource,
- * 'ssx3', "en", 0)). Copies the host into mServerName, @p a2 into miPort, the user into mUserName and the password into
+ * 'ssx3', "en", 0)). Copies the host into mServerName, @p port into miPort, the user into mUserName and the password into
  * mPassword; clears miError, mbDisconnected and mbLoggedIn, sets mfTimeout to 30.0 and mState to 1 (connecting). It
  * stores the resource in mResource and calls func_003F08E8(mpBuddyApi, host, port, 30, "user:password", "/cso/" +
  * resource, func_00268F18, self), whose callback runs BuddyMan_onconnect. LobbyMan's LobbyMan_onNewsRetrieved passes the server's
@@ -6442,44 +6442,44 @@ struct sBXStr_261248 {
  *
  * @param self_  the buddy manager
  * @param name_  buddy server host name (at most 0x3F characters)
- * @param a2     buddy server port
+ * @param port     buddy server port
  * @param a3_    user name (the persona; at most 0x1F characters)
  * @param a4_    password (at most 0x3F characters)
  * @param a5_    resource name, a string pointer passed as an int
  */
 // PORT: the unit declares (void*, void*, int, void*, void*, int); the last int is really a string pointer.
-extern "C" void func_00261248(BuddyMan* self_, void* name_, int a2, void* a3_, void* a4_, int a5_)
+extern "C" void func_00261248(BuddyMan* self_, void* name_, int port, void* a3_, void* a4_, int a5_)
 {
     const char* name = (const char*)name_;
-    const char* a3 = (const char*)a3_;
-    const char* a4 = (const char*)a4_;
-    const char* a5 = (const char*)a5_;
+    const char* userName = (const char*)a3_;
+    const char* password = (const char*)a4_;
+    const char* resource = (const char*)a5_;
     if (self_->mpBuddyApi == 0)
     {
-        func_002614E8(self_, (void*)a5);
-        func_003F0818(self_->mpBuddyApi, a5, 0x73737833, func_00259198(), 0);
+        func_002614E8(self_, (void*)resource);
+        func_003F0818(self_->mpBuddyApi, resource, 0x73737833, func_00259198(), 0);
     }
     strcpy(((char*)self_), name);
-    self_->miPort = a2;
-    strcpy(((char*)self_) + 0x44, a3);
-    strcpy(((char*)self_) + 0x64, a4);
+    self_->miPort = port;
+    strcpy(((char*)self_) + 0x44, userName);
+    strcpy(((char*)self_) + 0x64, password);
     BuddyMan* buddyMan = self_;
     buddyMan->miError = 0;
     buddyMan->mfTimeout = 30.0f;
     buddyMan->mState = 1;
     buddyMan->mbDisconnected = 0;
     buddyMan->mbLoggedIn = 0;
-    sBXStr_261248 s1;
-    cBXString_cBXString4(&s1, a3);
-    cBXString_Concat(&s1, D_004A3330);
-    cBXString_Concat(&s1, a4);
-    sBXStr_261248 s2;
-    cBXString_cBXString4(&s2, str_cso);
-    cBXString_Concat(&s2, a5);
-    cBXString_cBXString4(((char*)self_) + 0xEC, a5);
-    func_003F08E8(self_->mpBuddyApi, name, a2, 0x1E, s1.p, s2.p, (void*)func_00268F18, ((char*)self_));
-    cBXString__cBXString(&s2, 2);
-    cBXString__cBXString(&s1, 2);
+    sBXStr_261248 loginString;
+    cBXString_cBXString4(&loginString, userName);
+    cBXString_Concat(&loginString, D_004A3330);
+    cBXString_Concat(&loginString, password);
+    sBXStr_261248 resourceString;
+    cBXString_cBXString4(&resourceString, str_cso);
+    cBXString_Concat(&resourceString, resource);
+    cBXString_cBXString4(((char*)self_) + 0xEC, resource);
+    func_003F08E8(self_->mpBuddyApi, name, port, 0x1E, loginString.p, resourceString.p, (void*)func_00268F18, ((char*)self_));
+    cBXString__cBXString(&resourceString, 2);
+    cBXString__cBXString(&loginString, 2);
 }
 #endif
 
@@ -6539,13 +6539,13 @@ extern "C" long f_261460(void* p) __asm__("func_00261460");
 /**
  * Tells whether the buddy manager is connected and logged in.
  *
- * @param p  the buddy manager
+ * @param buddyMan  the buddy manager
  * @return 1 when mpBuddyApi is set, mState is not 1 (connecting) and mbLoggedIn is set, otherwise 0
  */
-extern "C" long f_261460(void* p)
+extern "C" long f_261460(void* buddyMan)
 {
-    char* s = (char*)p;
-    return *(int*)(s + 0xC8) != 0 && (*(int*)(s + 0xD8) ^ 1) != 0 && *(int*)(s + 0xE0) != 0;
+    char* buddyBytes = (char*)buddyMan;
+    return *(int*)(buddyBytes + 0xC8) != 0 && (*(int*)(buddyBytes + 0xD8) ^ 1) != 0 && *(int*)(buddyBytes + 0xE0) != 0;
 }
 #endif
 
@@ -6596,14 +6596,14 @@ extern "C" void func_003F17C8(void* h, void (*cb)(void*), void* user);
 /**
  * Creates the buddy manager's BuddyApi instance and registers its incoming-message callback.
  *
- * Stores func_003F0710(@p a1, "2003-10-20") in mpBuddyApi and registers func_00268F40 (which runs BuddyMan_onReceiveMessage) with
+ * Stores func_003F0710(@p resourceName, "2003-10-20") in mpBuddyApi and registers func_00268F40 (which runs BuddyMan_onReceiveMessage) with
  * func_003F17C8(mpBuddyApi, .., self).
  *
- * @param a1    the resource name passed on from func_00261248
+ * @param resourceName    the resource name passed on from func_00261248
  */
-extern "C" void func_002614E8(BuddyMan* self, void* a1)
+extern "C" void func_002614E8(BuddyMan* self, void* resourceName)
 {
-    void* buddyApi = func_003F0710(a1, str_2003_10_20);
+    void* buddyApi = func_003F0710(resourceName, str_2003_10_20);
     self->mpBuddyApi = (BuddyApiRefT*)buddyApi;
     func_003F17C8(buddyApi, func_00268F40, self);
 }
@@ -6721,21 +6721,21 @@ extern "C" void BuddyMan_onconnect(BuddyMan* self, int* msg)
     switch (msg[0]) {
     case 0x636F6E6E:
         {
-            int s = msg[1];
-            if (s == 2) {
+            int status = msg[1];
+            if (status == 2) {
                 self->mbDisconnected = 1;
                 if (self->miError == 0)
                     self->miError = 1;
-            } else if (s == 6) {
+            } else if (status == 6) {
                 self->mbRosterDone = 0;
                 self->mbDisconnected = 1;
                 if (self->miError == 0)
                     self->miError = 1;
-            } else if (s == 4) {
+            } else if (status == 4) {
                 self->mbDisconnected = 1;
                 if (self->miError == 0)
                     self->miError = 1;
-            } else if (s == 3) {
+            } else if (status == 3) {
                 self->mbDisconnected = 1;
                 if (self->miError == 0)
                     self->miError = 1;
@@ -6752,13 +6752,13 @@ extern "C" void BuddyMan_onconnect(BuddyMan* self, int* msg)
             self->mbLoggedIn = 1;
         } else {
             LobbyMan* owner = LobbyMan_mLobbyMan;
-            int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-            *(void***)((char*)m + 0x4) = online_Event_vtbl;
-            m[0] = 260;
-            post_15C8((char*)owner, m);
-            int r = msg[2];
+            int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+            *(void***)((char*)event + 0x4) = online_Event_vtbl;
+            event[0] = 260;
+            post_15C8((char*)owner, event);
+            int error = msg[2];
             self->mbDisconnected = 1;
-            self->miError = r;
+            self->miError = error;
         }
         break;
     }
@@ -6830,16 +6830,16 @@ extern "C" void BuddyMan_onrosterupdate(BuddyMan* self, int* msg)
         register int type FM_REG("$17") = 263;
         (self)->mbRosterDone = 1;
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        m[0] = type;
-        post_1770((char*)lobbyMan, m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        event[0] = type;
+        post_1770((char*)lobbyMan, event);
     } else {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        m[0] = 262;
-        post_1770((char*)lobbyMan, m);
+        int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        *(void***)((char*)event + 0x4) = online_Event_vtbl;
+        event[0] = 262;
+        post_1770((char*)lobbyMan, event);
     }
 }
 #endif
@@ -6890,10 +6890,10 @@ static inline sMsgListIter_002618C0 sMsgList_002618C0_insert(sMsgListIter_002618
 extern "C" void BuddyMan_onBuddyAdd(int unused)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    m[0] = 266;
-    void* mp = m;
+    int* event = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    *(void***)((char*)event + 0x4) = online_Event_vtbl;
+    event[0] = 266;
+    void* mp = event;
     sMsgList_002618C0_insert((*(sMsgListNode_002618C0**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
@@ -6949,10 +6949,10 @@ struct sMsg_00261970 {
 extern "C" void BuddyMan_onBuddyDelete(int unused)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    sMsg_00261970* m = (sMsg_00261970*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    m->vt = online_Event_vtbl;
-    m->kind = 267;
-    void* mp = m;
+    sMsg_00261970* event = (sMsg_00261970*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    event->vt = online_Event_vtbl;
+    event->kind = 267;
+    void* mp = event;
     sMsgList_00261970_insert((*(sMsgListNode_00261970**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
@@ -7052,7 +7052,7 @@ extern "C" void BuddyMan_onReceiveMessage(BuddyMan* self, char* msg)
     char name[0x40];
     char date[0x40];
     char flag[0x10];
-    int t0, t1, t2, t3, t4, t5;
+    int year, month, day, hour, minute, second;
 
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_TYPE), flag, 2, str_Not_Present);
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_USER), name, 0x40, str_Not_Present);
@@ -7061,16 +7061,16 @@ extern "C" void BuddyMan_onReceiveMessage(BuddyMan* self, char* msg)
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SUBJ), text, 2255, D_004A2ED0);
     cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_BODY), raw, 0x800, str_Not_Present);
     strcat(text, raw);
-    func_003EDD70(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_TIME), &t0, &t1, &t2, &t3, &t4, &t5, 0);
-    sprintf(date, str_pct_02d_pct_02d_pct_02d_pct_02d_pct_02d, t1, t2, t0, t3, t4);
+    func_003EDD70(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_TIME), &year, &month, &day, &hour, &minute, &second, 0);
+    sprintf(date, str_pct_02d_pct_02d_pct_02d_pct_02d_pct_02d, month, day, year, hour, minute);
     func_00261CD0(self, name, text, date);
     if (func_00262A08(self, (int)name) >= 0x1F) {
         sTagVec_00261A28_remove(((char*)self), name);
     }
     int kind = 265;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    sMsg_00261A28* m = new (str_NetEvent, 0x20000000, 0) sMsg_00261A28(kind);
-    sMsgList_00261A28_insert((*(sMsgListNode_00261A28**)((char*)lobbyMan + 0xF0)), m);
+    sMsg_00261A28* event = new (str_NetEvent, 0x20000000, 0) sMsg_00261A28(kind);
+    sMsgList_00261A28_insert((*(sMsgListNode_00261A28**)((char*)lobbyMan + 0xF0)), event);
 }
 #endif
 
@@ -7160,11 +7160,11 @@ static inline void post_1CD0(char* owner, void* msg)
  * full).
  *
  * @param name  the sender's name
- * @param a2    the message text
- * @param a3    the formatted date
+ * @param text    the message text
+ * @param date    the formatted date
  */
 // PORT: name pointers passed through int parameters of some callees.
-extern "C" void func_00261CD0(BuddyMan* self, char* name, char* a2, char* a3)
+extern "C" void func_00261CD0(BuddyMan* self, char* name, char* text, char* date)
 {
     if (func_00262360(self, (int)name) == 0
         && func_002623B0(self, (int)name) == 0
@@ -7181,19 +7181,19 @@ extern "C" void func_00261CD0(BuddyMan* self, char* name, char* a2, char* a3)
             func_002620D8(self, name, 2, &err, 0);
             int type = 264;
             LobbyMan* owner = LobbyMan_mLobbyMan;
-            int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-            m[0] = type;
-            *(void***)((char*)m + 0x4) = online_Event_vtbl;
-            post_1CD0((char*)owner, m);
+            int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+            netEvent[0] = type;
+            *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+            post_1CD0((char*)owner, netEvent);
         }
     }
     char* obj = (char*)cMemMan_alloc(0x10, str_cPrivateMessage_b, 0x20000000, 0);
     *(void***)(obj + 0xC) = D_0046D8C0;
     cBXString_cBXString2(obj, name);
-    cBXString_cBXString2(obj + 4, a2);
-    cBXString_cBXString2(obj + 8, a3);
-    void* o = obj;
-    sOwner1CD0_push_back(self, o);
+    cBXString_cBXString2(obj + 4, text);
+    cBXString_cBXString2(obj + 8, date);
+    void* message = obj;
+    sOwner1CD0_push_back(self, message);
 }
 #endif
 
@@ -7321,36 +7321,36 @@ extern "C" int func_002620D8(BuddyMan* self, char* name, int kind, int* err, cha
         *err = 3;
         return 0;
     }
-    int a = 0;
-    int b = 0;
+    int extraUnflagged = 0;
+    int extraFlagged = 0;
     if (other == 0) {
-        a = 1;
-        b = 1;
+        extraUnflagged = 1;
+        extraFlagged = 1;
     } else if (*(int*)(other + 0xA8) & 0x100000) {
-        a = 1;
+        extraUnflagged = 1;
     } else {
-        b = 1;
+        extraFlagged = 1;
     }
     strcpy(rec.name, name);
     strcpy(rec.x40, self->mResource);
     rec.x20[0] = 0;
     switch (kind) {
     case 0:
-        if (func_00262280(self) + a >= 41) {
+        if (func_00262280(self) + extraUnflagged >= 41) {
             *err = 1;
             return 0;
         }
         rec.flags |= 4;
         break;
     case 1:
-        if (func_00262280(self) + a >= 41) {
+        if (func_00262280(self) + extraUnflagged >= 41) {
             *err = 1;
             return 0;
         }
         rec.flags |= 0x200;
         break;
     case 2:
-        if (func_002622F0(self) + b >= 11) {
+        if (func_002622F0(self) + extraFlagged >= 11) {
             *err = 2;
             return 0;
         }
@@ -7718,21 +7718,21 @@ extern "C" void func_003F16D8(void* ctx, char* buf, void* cb, void* user, int a4
 /**
  * Sends a private text message to another player through the buddy server.
  *
- * Builds a 0x1000-byte tag record: TYPE "C", SUBJ "" (D_004A2F40), USER @p name, BODY @p a2 (through
+ * Builds a 0x1000-byte tag record: TYPE "C", SUBJ "" (D_004A2F40), USER @p name, BODY @p messageText (through
  * cDirtysock_tag_TagFieldSetUnk(), which escapes a leading quote) and SECS miMsgTimeout, then hands it to
  * func_003F16D8() on mpBuddyApi with the callback func_00268FE0, this BuddyMan as its user data and miMsgTimeout again.
  *
  * @param name  recipient's name
- * @param a2    message text, passed as an int
+ * @param messageText    message text, passed as an int
  */
-extern "C" void func_00262690(BuddyMan* self, const char* name, int a2)
+extern "C" void func_00262690(BuddyMan* self, const char* name, int messageText)
 {
     char buf[0x1000];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x1000, str_TYPE, D_004A3390);
     cDirtysock_tag_TagFieldSetString(buf, 0x1000, str_SUBJ, D_004A2F40);
     cDirtysock_tag_TagFieldSetString(buf, 0x1000, str_USER, name);
-    cDirtysock_tag_TagFieldSetUnk(buf, 0x1000, str_BODY, a2);
+    cDirtysock_tag_TagFieldSetUnk(buf, 0x1000, str_BODY, messageText);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x1000, str_SECS, self->miMsgTimeout);
     func_003F16D8(self->mpBuddyApi, buf, (void*)func_00268FE0, ((char*)self), self->miMsgTimeout);
 }
@@ -7760,22 +7760,22 @@ extern char str_en[];
 /**
  * Publishes this player's presence on the buddy server.
  *
- * Does nothing without mpBuddyApi. Builds an 80-byte tag record: S = mResource, SSXID = 3, LOCID = @p a2, then SZ1, SZ2
- * and SZ3 from @p a3..@p a5 (each only when it and the ones before it are non-null), and passes it through
+ * Does nothing without mpBuddyApi. Builds an 80-byte tag record: S = mResource, SSXID = 3, LOCID = @p locationId, then SZ1, SZ2
+ * and SZ3 from @p detail1..@p detail3 (each only when it and the ones before it are non-null), and passes it through
  * func_003F1538(), func_003F1548() (with the record) and func_003F1578() ("is playing SSX 3", "en"); finally
- * func_003F15C8() gets mResource, the state func_002628C0() maps @p a1 to, and 2000. func_00261408 calls it with state
+ * func_003F15C8() gets mResource, the state func_002628C0() maps @p presenceState to, and 2000. func_00261408 calls it with state
  * 0 and location 1 on disconnect, func_00263CF0 with state 1, location 9 and the opponent's name when an online race
  * starts.
  *
  * @param self_  the BuddyMan
- * @param a1     presence state, 0..3 (anything else becomes -1)
- * @param a2     location id, sent as LOCID
- * @param a3     first detail string (SZ1), passed as an int, or 0
- * @param a4     second detail string (SZ2), passed as an int, or 0
- * @param a5     third detail string (SZ3), passed as an int, or 0
+ * @param presenceState     presence state, 0..3 (anything else becomes -1)
+ * @param locationId     location id, sent as LOCID
+ * @param detail1     first detail string (SZ1), passed as an int, or 0
+ * @param detail2     second detail string (SZ2), passed as an int, or 0
+ * @param detail3     third detail string (SZ3), passed as an int, or 0
  */
 // PORT: the unit declares every argument as int; a3..a5 are really string pointers.
-extern "C" void func_00262768(BuddyMan* self_, int a1, int a2, int a3, int a4, int a5)
+extern "C" void func_00262768(BuddyMan* self_, int presenceState, int locationId, int detail1, int detail2, int detail3)
 {
     if (self_->mpBuddyApi == 0)
         return;
@@ -7783,22 +7783,22 @@ extern "C" void func_00262768(BuddyMan* self_, int a1, int a2, int a3, int a4, i
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 80, D_004A31F8, (const char*)self_->mResource);
     cDirtysock_tag_TagFieldSetNumber(buf, 80, str_SSXID, 3);
-    cDirtysock_tag_TagFieldSetNumber(buf, 80, str_LOCID_b, a2);
-    if (a3 != 0)
+    cDirtysock_tag_TagFieldSetNumber(buf, 80, str_LOCID_b, locationId);
+    if (detail1 != 0)
     {
-        cDirtysock_tag_TagFieldSetString(buf, 80, str_SZ1_b, (const char*)a3);
-        if (a4 != 0)
+        cDirtysock_tag_TagFieldSetString(buf, 80, str_SZ1_b, (const char*)detail1);
+        if (detail2 != 0)
         {
-            cDirtysock_tag_TagFieldSetString(buf, 80, str_SZ2_b, (const char*)a4);
-            if (a5 != 0)
-                cDirtysock_tag_TagFieldSetString(buf, 80, str_SZ3_b, (const char*)a5);
+            cDirtysock_tag_TagFieldSetString(buf, 80, str_SZ2_b, (const char*)detail2);
+            if (detail3 != 0)
+                cDirtysock_tag_TagFieldSetString(buf, 80, str_SZ3_b, (const char*)detail3);
         }
     }
     func_003F1538(self_->mpBuddyApi);
     func_003F1548(self_->mpBuddyApi, buf);
     func_003F1578(self_->mpBuddyApi, str_is_playing_SSX_3, str_en);
     const char* name = (const char*)self_->mResource;
-    func_003F15C8(self_->mpBuddyApi, name, func_002628C0(self_, a1), 2000);
+    func_003F15C8(self_->mpBuddyApi, name, func_002628C0(self_, presenceState), 2000);
 }
 #endif
 
@@ -8040,27 +8040,27 @@ static inline void push_back_262AF0(char* o, sObjVec_262AF0* v, void* const& x)
  * is added as a kind-2 entry with func_002620D8(); when those are full (error 2) it removes the first entry with bit 20
  * (func_00262EC0()), retries, and posts an online::Event of type 264 to LobbyMan's mEventList. A name on the roster
  * with the blocked flag (func_002623E0()) is ignored. Otherwise it allocates a 0x40-byte object (tag "cChallenger",
- * vtable D_004810E0 at +0x3C) holding @p name and @p s2 as cBXStrings and the numbers below, appends it to
+ * vtable D_004810E0 at +0x3C) holding @p name and @p messageText as cBXStrings and the numbers below, appends it to
  * mChallengersStart..mChallengersFinish (func_002672C8 when full) and posts an event of type 236. The only caller,
  * LobbyMan_onchatmsg, passes the fields of a "challenge" private message.
  *
  * @param name  challenger's name; stored at +0x0
- * @param a2    first number of the message; stored at +0x8
- * @param a3    second number; stored at +0xC
- * @param a4    third number; stored at +0x10
- * @param a5    fourth number, as 0/1; stored at +0x14
- * @param a6    fifth number, as 0/1; stored at +0x18
- * @param a7    sixth number, as 0/1; stored at +0x1C
- * @param s0    seventh number; stored at +0x20
- * @param s1    eighth number, as 0/1; stored at +0x24
- * @param s2    the whole message text; stored as a cBXString at +0x4
- * @param s3    first number after the signature; stored at +0x2C
- * @param s4    second number after it; stored at +0x30
- * @param s5    third number after it; stored at +0x34
- * @param s6    fourth number after it; stored at +0x28
+ * @param locationId    first number of the message; stored at +0x8
+ * @param gameMode    second number; stored at +0xC
+ * @param gameEvent    third number; stored at +0x10
+ * @param ranked    fourth number, as 0/1; stored at +0x14
+ * @param multipliers    fifth number, as 0/1; stored at +0x18
+ * @param powerUps    sixth number, as 0/1; stored at +0x1C
+ * @param numberAI    seventh number; stored at +0x20
+ * @param pointIcons    eighth number, as 0/1; stored at +0x24
+ * @param messageText    the whole message text; stored as a cBXString at +0x4
+ * @param statField2    first number after the signature; stored at +0x2C
+ * @param statTotal    second number after it; stored at +0x30
+ * @param statField6    third number after it; stored at +0x34
+ * @param rank    fourth number after it; stored at +0x28
  */
-extern "C" void func_00262AF0(BuddyMan* self, char* name, int a2, int a3, int a4, int a5, int a6, int a7,
-                              int s0, int s1, char* s2, int s3, int s4, int s5, int s6)
+extern "C" void func_00262AF0(BuddyMan* self, char* name, int locationId, int gameMode, int gameEvent, int ranked, int multipliers, int powerUps,
+                              int numberAI, int pointIcons, char* messageText, int statField2, int statTotal, int statField6, int rank)
 {
     if (strcasecmp(LobbyMan_mLobbyMan->mPersona, name) == 0)
         return;
@@ -8085,10 +8085,10 @@ extern "C" void func_00262AF0(BuddyMan* self, char* name, int a2, int a3, int a4
             int type = 264;
             func_002620D8(self, name, 2, &err, 0);
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-            int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-            m[0] = type;
-            *(void***)((char*)m + 0x4) = online_Event_vtbl;
-            post_262AF0((char*)lobbyMan, m);
+            int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+            netEvent[0] = type;
+            *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+            post_262AF0((char*)lobbyMan, netEvent);
         }
     }
     else if (func_002623E0_2(((char*)self), idx))
@@ -8098,26 +8098,26 @@ extern "C" void func_00262AF0(BuddyMan* self, char* name, int a2, int a3, int a4
     char* obj = (char*)operator new(0x40, str_cChallenger, 0x20000000, 0);
     *(char**)(obj + 0x3C) = D_004810E0;
     cBXString_cBXString2(obj, name);
-    cBXString_cBXString2(obj + 4, s2);
-    *(int*)(obj + 0x8) = a2;
-    *(int*)(obj + 0xC) = a3;
-    *(int*)(obj + 0x10) = a4;
-    *(int*)(obj + 0x14) = a5;
-    *(int*)(obj + 0x18) = a6;
-    *(int*)(obj + 0x1C) = a7;
-    *(int*)(obj + 0x20) = s0;
-    *(int*)(obj + 0x24) = s1;
-    *(int*)(obj + 0x2C) = s3;
-    *(int*)(obj + 0x30) = s4;
-    *(int*)(obj + 0x34) = s5;
-    *(int*)(obj + 0x28) = s6;
+    cBXString_cBXString2(obj + 4, messageText);
+    *(int*)(obj + 0x8) = locationId;
+    *(int*)(obj + 0xC) = gameMode;
+    *(int*)(obj + 0x10) = gameEvent;
+    *(int*)(obj + 0x14) = ranked;
+    *(int*)(obj + 0x18) = multipliers;
+    *(int*)(obj + 0x1C) = powerUps;
+    *(int*)(obj + 0x20) = numberAI;
+    *(int*)(obj + 0x24) = pointIcons;
+    *(int*)(obj + 0x2C) = statField2;
+    *(int*)(obj + 0x30) = statTotal;
+    *(int*)(obj + 0x34) = statField6;
+    *(int*)(obj + 0x28) = rank;
     void* op = obj;
     push_back_262AF0(((char*)self), (sObjVec_262AF0*)(((char*)self) + 0xB8), op);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    m[0] = 236;
-    post_262AF0((char*)lobbyMan, m);
+    int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+    netEvent[0] = 236;
+    post_262AF0((char*)lobbyMan, netEvent);
 }
 #endif
 
@@ -8499,12 +8499,12 @@ extern "C" int func_002633F8(BuddyMan* self, int idx)
     if (func_00262598_noarg() < idx) {
         return 0;
     }
-    char* e = (char*)func_002625C8(self, idx);
-    if (e == 0) {
+    char* rosterEntry = (char*)func_002625C8(self, idx);
+    if (rosterEntry == 0) {
         return 0;
     }
     char buf[16];
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(e + 0x54, D_004A31F8), buf, 0x10, D_004A2F40);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(rosterEntry + 0x54, D_004A31F8), buf, 0x10, D_004A2F40);
     return func_004165A8(self->mResource, buf) == 0;
 }
 #endif
@@ -8714,13 +8714,13 @@ extern "C" void func_00255F50(void* p);
 extern "C" void func_002636A8(void* self)
 {
     func_00255F50(cCommSystem_mCommSystem);
-    float v;
+    float timeout;
     if (cCommSystem_mCommSystem->mBroadBand != 0) {
-        v = D_004A2F0C;
+        timeout = D_004A2F0C;
     } else {
-        v = D_004A2F10;
+        timeout = D_004A2F10;
     }
-    *(float*)((char*)self + 0x4) = v;
+    *(float*)((char*)self + 0x4) = timeout;
     *(int*)self = 1;
 }
 #endif
@@ -8793,11 +8793,11 @@ extern "C" void func_002636F0(int* out, int val)
         func_00255FA0(cCommSystem_mCommSystem);
         if (val != 0) {
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-            int* m = (int*)operator new(0xC, str_NetErrorEvent, 0x20000000, 0);
-            m[0] = 278;
-            *(void***)((char*)m + 0x4) = online_NetErrorEvent_vtbl;
-            m[2] = val;
-            void* mp = m;
+            int* errorEvent = (int*)operator new(0xC, str_NetErrorEvent, 0x20000000, 0);
+            errorEvent[0] = 278;
+            *(void***)((char*)errorEvent + 0x4) = online_NetErrorEvent_vtbl;
+            errorEvent[2] = val;
+            void* mp = errorEvent;
             sMsgList36F0_insert((*(sMsgListNode36F0**)((char*)lobbyMan + 0xF0)), mp);
         }
         *out = 0;
@@ -8869,27 +8869,27 @@ struct sDsTimer_263828 {
  */
 extern "C" void func_00263828(int* self)
 {
-    sDsTimer_263828* t = (sDsTimer_263828*)self;
-    switch (t->state)
+    sDsTimer_263828* connection = (sDsTimer_263828*)self;
+    switch (connection->state)
     {
     case 0:
         break;
     case 1:
         if (isState_3828(5)) {
-            t->state = 2;
+            connection->state = 2;
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-            int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-            *(void***)((char*)m + 0x4) = online_Event_vtbl;
-            m[0] = 261;
-            post_3828((char*)lobbyMan, m);
+            int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+            *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+            netEvent[0] = 261;
+            post_3828((char*)lobbyMan, netEvent);
         } else if (isState_3828(6)) {
             func_002636F0(self, cCommSystem_mCommSystem->mNetConnError);
         } else {
-            int expired = t->timer < 0.0f;
+            int expired = connection->timer < 0.0f;
             if (expired)
                 func_002636F0(self, 0x2D3F3F3F);
             else
-                t->timer -= *(float*)((char*)SSXApp + 0x14);
+                connection->timer -= *(float*)((char*)SSXApp + 0x14);
         }
         break;
     case 2:
@@ -8983,7 +8983,7 @@ struct sNetCfg_002639E0 {
 /**
  * Sets up a two-player online race and opens the peer-to-peer channel to the opponent.
  *
- * Sets the new-race interface to 2 humans, player 0's controller to @p a3 and player 1's to 0 (each interface's slot-1
+ * Sets the new-race interface to 2 humans, player 0's controller to @p ctrlId and player 1's to 0 (each interface's slot-1
  * virtual applies it), and writes the network options: bIsNetworkGame 1, fLatency 1/60, iPort 3658, bIsHost @p isHost
  * (the network interface's slot-1 virtual runs twice). Formats @p ip as dotted decimal and opens a DirtySock channel to
  * it with cCommSystem_openDSockChannel(), keeping the channel at +0x4. When bit 18 of cBEOptionInterface_mOption is set
@@ -8993,29 +8993,29 @@ struct sNetCfg_002639E0 {
  *
  * @param ip      the opponent's IPv4 address, most significant byte first
  * @param isHost  non-zero when this console hosts the race; stored at +0x8
- * @param a3      controller id for player 0
- * @param a4      stored at +0xC; when non-zero func_00263CF0() shuts the connection down (event 268) as soon as it
+ * @param ctrlId      controller id for player 0
+ * @param cancel      stored at +0xC; when non-zero func_00263CF0() shuts the connection down (event 268) as soon as it
  *                connects
  */
-extern "C" void func_002639E0(int* self, unsigned int ip, int isHost, int a3, int a4)
+extern "C" void func_002639E0(int* self, unsigned int ip, int isHost, int ctrlId, int cancel)
 {
     char buf[256];
     int one = 1;
-    self[3] = a4;
-    sIf_002639E0* p = (sIf_002639E0*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    sIf_002639E0* q = (sIf_002639E0*)cBE_getInterface_Fv(cBE_getBE(), 0);
-    cBENewRaceInterface_setNumberHumans(q, 2);
-    q->vt[1].fn((char*)q + q->vt[1].delta);
-    cBENewPlayerInterface_setPlayerCtrlID(p, 0, a3);
-    cBENewPlayerInterface_setPlayerCtrlID(p, 1, 0);
-    p->vt[1].fn((char*)p + p->vt[1].delta);
-    sIf_002639E0* r = (sIf_002639E0*)cBE_getInterface_Fv(SSXApp->BE, 7);
+    self[3] = cancel;
+    sIf_002639E0* playerInterface = (sIf_002639E0*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    sIf_002639E0* raceInterface = (sIf_002639E0*)cBE_getInterface_Fv(cBE_getBE(), 0);
+    cBENewRaceInterface_setNumberHumans(raceInterface, 2);
+    raceInterface->vt[1].fn((char*)raceInterface + raceInterface->vt[1].delta);
+    cBENewPlayerInterface_setPlayerCtrlID(playerInterface, 0, ctrlId);
+    cBENewPlayerInterface_setPlayerCtrlID(playerInterface, 1, 0);
+    playerInterface->vt[1].fn((char*)playerInterface + playerInterface->vt[1].delta);
+    sIf_002639E0* networkInterface = (sIf_002639E0*)cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.bIsNetworkGame = one;
     cBENetworkInterface_networkOpt.fLatency = 0.01666666753590107f;
     cBENetworkInterface_networkOpt.iPort = 3658;
     cBENetworkInterface_networkOpt.bIsHost = isHost;
-    r->vt[1].fn((char*)r + r->vt[1].delta);
-    r->vt[1].fn((char*)r + r->vt[1].delta);
+    networkInterface->vt[1].fn((char*)networkInterface + networkInterface->vt[1].delta);
+    networkInterface->vt[1].fn((char*)networkInterface + networkInterface->vt[1].delta);
     self[2] = isHost;
     sprintf(buf, str_pct_d_pct_d_pct_d_pct_d_b, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
     self[1] = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, cBENetworkInterface_networkOpt.iPort, isHost);
@@ -9086,14 +9086,14 @@ static inline void post_3BA8(char* self, void* msg)
  * When it is active and its channel is open (func_00255D38) it closes the channel (func_00255CC8) and calls
  * func_00266E88 and func_00266DF8 on the voice manager D_004A33F4. It destroys the setup manager if there is one
  * (func_00264098()), calls func_0025F740(LobbyMan, 0), clears the state and posts an online::Event to LobbyMan's
- * mEventList: type 268 for @p arg 1, type 274 for @p arg 0, none otherwise (callers pass 2).
+ * mEventList: type 268 for @p reason 1, type 274 for @p reason 0, none otherwise (callers pass 2).
  *
- * @param p    the game-connection manager (cRealFE + 0xB5ABC, from func_002591D0)
- * @param arg  reason: 0 connect failure or timeout, 1 cancelled after connecting, other values post nothing
+ * @param gameConn    the game-connection manager (cRealFE + 0xB5ABC, from func_002591D0)
+ * @param reason  reason: 0 connect failure or timeout, 1 cancelled after connecting, other values post nothing
  */
-extern "C" void func_00263BA8(void* p, int arg)
+extern "C" void func_00263BA8(void* gameConn, int reason)
 {
-    int* self = (int*)p;
+    int* self = (int*)gameConn;
     if (self[0] != 0 && func_00255D38(cCommSystem_mCommSystem, self[1]) != 0)
     {
         func_00255CC8(cCommSystem_mCommSystem, self[1]);
@@ -9104,18 +9104,18 @@ extern "C" void func_00263BA8(void* p, int arg)
         func_00264098();
     func_0025F740(LobbyMan_mLobbyMan, 0);
     self[0] = 0;
-    if (arg == 1) {
+    if (reason == 1) {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        m[0] = 268;
-        post_3BA8((char*)lobbyMan, m);
-    } else if (arg == 0) {
+        int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+        netEvent[0] = 268;
+        post_3BA8((char*)lobbyMan, netEvent);
+    } else if (reason == 0) {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        m[0] = 274;
-        post_3BA8((char*)lobbyMan, m);
+        int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+        netEvent[0] = 274;
+        post_3BA8((char*)lobbyMan, netEvent);
     }
 }
 #endif
@@ -9222,10 +9222,10 @@ extern "C" void func_00263CF0(int* self)
             if (!tsIsState_263CF0(11))
             {
                 LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-                int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-                *(void***)((char*)m + 0x4) = online_Event_vtbl;
-                m[0] = 275;
-                post_3BA8((char*)lobbyMan, m);
+                int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+                *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+                netEvent[0] = 275;
+                post_3BA8((char*)lobbyMan, netEvent);
             }
             func_00263BA8(self, 2);
             return;
@@ -9273,13 +9273,13 @@ extern "C" void* func_002640C0(void* self, int a1, int a2, int a3);
  * Creates the online setup manager D_004A33CC: allocates 300 bytes (tag "cSetupMan") and constructs it with
  * func_002640C0().
  *
- * @param a1  comm channel index (from the game-connection manager)
- * @param a2  non-zero on the host
- * @param a3  bIsRankedGame from the network options
+ * @param channel  comm channel index (from the game-connection manager)
+ * @param isHost  non-zero on the host
+ * @param ranked  bIsRankedGame from the network options
  */
-extern "C" void func_00264030(int a1, int a2, int a3)
+extern "C" void func_00264030(int channel, int isHost, int ranked)
 {
-    D_004A33CC = func_002640C0(cMemMan_alloc(300, str_cSetupMan, 0x20000000, 0), a1, a2, a3);
+    D_004A33CC = func_002640C0(cMemMan_alloc(300, str_cSetupMan, 0x20000000, 0), channel, isHost, ranked);
 }
 #endif
 
@@ -9315,10 +9315,10 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
  *
  * @param channel  comm channel index; stored at +0x120
  * @param isHost   non-zero on the host; stored at +0x124
- * @param a3       bIsRankedGame; stored at +0x128 (func_00264E50() then sends flat attributes)
+ * @param ranked       bIsRankedGame; stored at +0x128 (func_00264E50() then sends flat attributes)
  * @return the object
  */
-extern "C" void* func_002640C0(void* self, int channel, int isHost, int a3)
+extern "C" void* func_002640C0(void* self, int channel, int isHost, int ranked)
 {
     *(int*)((char*)self + 0x0) = 1;
     *(int*)((char*)self + 0x120) = channel;
@@ -9328,7 +9328,7 @@ extern "C" void* func_002640C0(void* self, int channel, int isHost, int a3)
     *(int*)((char*)self + 0x11C) = 0;
     *(int*)((char*)self + 0x8) = 0;
     *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x128) = a3;
+    *(int*)((char*)self + 0x128) = ranked;
     MEM_fill((char*)self + 0x10, 0, 0x80);
     *(int*)((char*)self + 0x90) = 0;
     *(int*)((char*)self + 0x94) = 0;
@@ -9544,10 +9544,10 @@ extern "C" void func_002642B8(void* vself)
         } else {
             self->state = 7;
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-            int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-            *(void***)((char*)m + 4) = online_Event_vtbl;
-            m[0] = 246;
-            post_42B8((char*)lobbyMan, m);
+            int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+            *(void***)((char*)netEvent + 4) = online_Event_vtbl;
+            netEvent[0] = 246;
+            post_42B8((char*)lobbyMan, netEvent);
         }
     }
     if (func_002649B0_3(self, &msg, 20) == 0)
@@ -9555,11 +9555,11 @@ extern "C" void func_002642B8(void* vself)
     if (msg.type == 0xF) {
         if (self->host == 0) {
             self->state = 0xC;
-            sMsg42B8 r;
-            r.type = 0xF;
-            r.a = 0;
-            r.b = 0;
-            func_00264BE8(self, &r, 20);
+            sMsg42B8 reply;
+            reply.type = 0xF;
+            reply.a = 0;
+            reply.b = 0;
+            func_00264BE8(self, &reply, 20);
         }
         self->state = 13;
         return;
@@ -9937,12 +9937,12 @@ struct sIf264CF0 {
  */
 extern "C" void func_00264CF0(void* self, int charID)
 {
-    sIf264CF0* p = (sIf264CF0*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    cBENewPlayerInterface_setPlayerCharID(p, 0, charID);
-    p->vt[1].fn((char*)p + p->vt[1].delta);
-    sIf264CF0* q = (sIf264CF0*)cBE_getInterface_Fv(SSXApp->BE, 7);
+    sIf264CF0* playerInterface = (sIf264CF0*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBENewPlayerInterface_setPlayerCharID(playerInterface, 0, charID);
+    playerInterface->vt[1].fn((char*)playerInterface + playerInterface->vt[1].delta);
+    sIf264CF0* networkInterface = (sIf264CF0*)cBE_getInterface_Fv(SSXApp->BE, 7);
     D_00534E58[0] = charID;
-    q->vt[1].fn((char*)q + q->vt[1].delta);
+    networkInterface->vt[1].fn((char*)networkInterface + networkInterface->vt[1].delta);
 }
 #endif
 
@@ -10149,10 +10149,10 @@ extern "C" void func_00265018(void* self, int rider)
         int type = 244;
         func_00264E50(self, 2, rider, *(int*)self);
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = type;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        void* mp = m;
+        int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        netEvent[0] = type;
+        *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+        void* mp = netEvent;
         sMsgList5018_insert((*(sMsgListNode5018**)((char*)lobbyMan + 0xF0)), mp);
     } else {
         func_00264E50(self, 3, rider, *(int*)self);
@@ -10248,10 +10248,10 @@ extern "C" void func_00265190(void* self, int rider, sName7_00264D80* name)
     func_00264E50(self, 1, rider, *(int*)self);
     {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = type;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        void* mp = m;
+        int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        netEvent[0] = type;
+        *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+        void* mp = netEvent;
         sMsgList5190_insert((*(sMsgListNode5190**)((char*)lobbyMan + 0xF0)), mp);
     }
 }
@@ -10315,10 +10315,10 @@ extern "C" void func_00265290(void* self, int rider)
     func_00264E50(self, 3, rider, *(int*)self);
     {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-        int* m = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
-        m[0] = type;
-        *(void***)((char*)m + 0x4) = online_Event_vtbl;
-        void* mp = m;
+        int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
+        netEvent[0] = type;
+        *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+        void* mp = netEvent;
         sMsgList5290_insert((*(sMsgListNode5290**)((char*)lobbyMan + 0xF0)), mp);
     }
 }
@@ -10375,10 +10375,10 @@ extern "C" void func_00265398(int* self)
     if (*self == 3)
         *self = 2;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    sMsg_00265398* m = (sMsg_00265398*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    m->vt = online_Event_vtbl;
-    m->kind = 247;
-    void* mp = m;
+    sMsg_00265398* netEvent = (sMsg_00265398*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent->vt = online_Event_vtbl;
+    netEvent->kind = 247;
+    void* mp = netEvent;
     sMsgList_00265398_insert((*(sMsgListNode_00265398**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
@@ -10460,12 +10460,12 @@ extern "C" void func_00265458(void* self, int id)
         msg.state = *(int*)self;
         msg.id = id;
         func_00264BE8(self, &msg, sizeof(msg));
-        sNetMsg5458* m = (sNetMsg5458*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
-        m->type = 251;
-        m->vt = D_00481150;
-        m->v0 = id;
-        m->flag = 0;
-        void* mp = m;
+        sNetMsg5458* updateEvent = (sNetMsg5458*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
+        updateEvent->type = 251;
+        updateEvent->vt = D_00481150;
+        updateEvent->v0 = id;
+        updateEvent->flag = 0;
+        void* mp = updateEvent;
         sMsgList5458_insert((*(sMsgListNode5458**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
     }
 }
@@ -10528,10 +10528,10 @@ struct sNetMsg5568 {
  * (vtable D_00481130, tag "cSetupMan::Update") carrying both values is pushed onto LobbyMan's mEventList.
  * cFEStateBraggingRights_onWidgetEvent calls it with the rule slot and the list box's new value.
  *
- * @param a  the rule slot
- * @param b  the new value
+ * @param ruleSlot  the rule slot
+ * @param newValue  the new value
  */
-extern "C" void func_00265568(void* self, int a, int b)
+extern "C" void func_00265568(void* self, int ruleSlot, int newValue)
 {
     int st = *(int*)self;
     if (st != 12) {
@@ -10546,16 +10546,16 @@ extern "C" void func_00265568(void* self, int a, int b)
             type = 9;
         sTagMsg5568 msg;
         msg.type = type;
-        msg.a = a;
-        msg.b = b;
+        msg.a = ruleSlot;
+        msg.b = newValue;
         func_00264BE8(self, &msg, sizeof(msg));
-        sNetMsg5568* m = (sNetMsg5568*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
-        m->type = 0xFC;
-        m->vt = D_00481130;
-        m->v0 = a;
-        m->v1 = b;
-        m->flag = 0;
-        void* mp = m;
+        sNetMsg5568* updateEvent = (sNetMsg5568*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
+        updateEvent->type = 0xFC;
+        updateEvent->vt = D_00481130;
+        updateEvent->v0 = ruleSlot;
+        updateEvent->v1 = newValue;
+        updateEvent->flag = 0;
+        void* mp = updateEvent;
         sMsgList5568_insert((*(sMsgListNode5568**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
     }
 }
@@ -10983,9 +10983,9 @@ extern "C" void func_00265A68(int* state)
     case 7:
     case 11:
     case 15: {
-        int r = func_003F80E0(&status);
-        state[1] = r;
-        if (r == 0) {
+        int pollError = func_003F80E0(&status);
+        state[1] = pollError;
+        if (pollError == 0) {
             if (status == 2) {
                 *state += 1;
             }
@@ -11565,18 +11565,18 @@ struct sDsErr265FB8 {
  * Memory-card callback 0 of the network-account library: starts a directory search on the card.
  *
  * Decodes @p code into a port/slot pair (func_003FA1D0; the result is not used), clears the 0x40-byte name buffer
- * D_00537190 and starts a sceMcGetDir with @p arg as the pattern (func_002C6810 on the card D_004A33D8). Sets the card
+ * D_00537190 and starts a sceMcGetDir with @p pattern as the pattern (func_002C6810 on the card D_004A33D8). Sets the card
  * operation D_004A33D4 to 2; func_00266358 then looks for a matching entry. Entry 0 of D_00442A18.
  *
- * @param arg   the directory pattern
+ * @param pattern   the directory pattern
  * @param code  the library's card unit code
  */
-extern "C" void func_00265FB8(void* arg, int code)
+extern "C" void func_00265FB8(void* pattern, int code)
 {
     sDsErr265FB8 err;
     func_003FA1D0(code, &err);
     MEM_fill(D_00537190, 0, 0x40);
-    func_002C6810(D_004A33D8, arg);
+    func_002C6810(D_004A33D8, pattern);
     D_004A33D4 = 2;
 }
 #endif
@@ -11714,22 +11714,22 @@ struct sDsErr2660C8 {
 /**
  * Memory-card callback 5 of the network-account library: opens a file on the card.
  *
- * Decodes @p code (func_003FA1D0), joins @p a0 and @p a1 with "%s/%s" into an 80-byte stack buffer (no length check),
- * starts a sceMcOpen of it with mode @p a3 (func_002C6968) and sets the card operation D_004A33D4 to 4. Entry 5 of
+ * Decodes @p code (func_003FA1D0), joins @p dirName and @p fileName with "%s/%s" into an 80-byte stack buffer (no length check),
+ * starts a sceMcOpen of it with mode @p openMode (func_002C6968) and sets the card operation D_004A33D4 to 4. Entry 5 of
  * D_00442A18.
  *
- * @param a0    the directory name
- * @param a1    the file name
+ * @param dirName    the directory name
+ * @param fileName    the file name
  * @param code  the library's card unit code
- * @param a3    the open mode passed to sceMcOpen
+ * @param openMode    the open mode passed to sceMcOpen
  */
-extern "C" void func_002660C8(const char* a0, const char* a1, int code, int a3)
+extern "C" void func_002660C8(const char* dirName, const char* fileName, int code, int openMode)
 {
     sDsErr2660C8 err;
     char buf[80];
     func_003FA1D0(code, &err);
-    sprintf(buf, str_pct_s_pct_s_g, a0, a1);
-    func_002C6968(D_004A33D8, buf, a3);
+    sprintf(buf, str_pct_s_pct_s_g, dirName, fileName);
+    func_002C6968(D_004A33D8, buf, openMode);
     D_004A33D4 = 4;
 }
 #endif
@@ -11771,20 +11771,20 @@ struct sDsErr266170 {
  * Memory-card callback 7 of the network-account library: creates a directory on the card.
  *
  * Decodes @p code (func_003FA1D0), copies @p name into an 80-byte stack buffer (no length check), starts a sceMcMkdir
- * of it (func_002C6C50, which also stores @p a1 in the card's unk_020) and sets the card operation D_004A33D4 to 11.
+ * of it (func_002C6C50, which also stores @p requestValue in the card's unk_020) and sets the card operation D_004A33D4 to 11.
  * Entry 7 of D_00442A18.
  *
  * @param name  the directory name
- * @param a1    value stored with the request (the card's unk_020)
+ * @param requestValue    value stored with the request (the card's unk_020)
  * @param code  the library's card unit code
  */
-extern "C" void func_00266170(const char* name, int a1, int code)
+extern "C" void func_00266170(const char* name, int requestValue, int code)
 {
     sDsErr266170 err;
     char buf[80];
     func_003FA1D0(code, &err);
     strcpy(buf, name);
-    func_002C6C50(D_004A33D8, buf, a1);
+    func_002C6C50(D_004A33D8, buf, requestValue);
     D_004A33D4 = 11;
 }
 #endif
@@ -11807,19 +11807,19 @@ struct sDsErr2661D8 {
 /**
  * Memory-card callback 8 of the network-account library: deletes a file on the card.
  *
- * Decodes @p code (func_003FA1D0), joins @p a0 and @p a1 with "%s/%s" into an 80-byte stack buffer (no length check),
+ * Decodes @p code (func_003FA1D0), joins @p dirName and @p fileName with "%s/%s" into an 80-byte stack buffer (no length check),
  * starts a sceMcDelete of it (func_002C6CE0) and sets the card operation D_004A33D4 to 12. Entry 8 of D_00442A18.
  *
- * @param a0    the directory name
- * @param a1    the file name
+ * @param dirName    the directory name
+ * @param fileName    the file name
  * @param code  the library's card unit code
  */
-extern "C" void func_002661D8(const char* a0, const char* a1, int code)
+extern "C" void func_002661D8(const char* dirName, const char* fileName, int code)
 {
     sDsErr2661D8 err;
     char buf[80];
     func_003FA1D0(code, &err);
-    sprintf(buf, str_pct_s_pct_s_g, a0, a1);
+    sprintf(buf, str_pct_s_pct_s_g, dirName, fileName);
     func_002C6CE0(D_004A33D8, buf);
     D_004A33D4 = 0xC;
 }
@@ -11869,16 +11869,16 @@ void func_002C6B50(void* obj, int a1, int a2);
 /**
  * Memory-card callback 10 of the network-account library: reads from the open card file.
  *
- * Starts a sceMcRead into @p a1 of @p a2 bytes (func_002C6B50) and sets the card operation D_004A33D4 to 6;
+ * Starts a sceMcRead into @p dest of @p byteCount bytes (func_002C6B50) and sets the card operation D_004A33D4 to 6;
  * func_00266358 reports the libmc result (bytes read). Entry 10 of D_00442A18.
  *
- * @param a0  not read (the library's file handle)
- * @param a1  the destination buffer
- * @param a2  the number of bytes to read
+ * @param fileHandle  not read (the library's file handle)
+ * @param dest  the destination buffer
+ * @param byteCount  the number of bytes to read
  */
-extern "C" void func_00266298(int a0, int a1, int a2)
+extern "C" void func_00266298(int fileHandle, int dest, int byteCount)
 {
-    func_002C6B50(D_004A33D8, a1, a2);
+    func_002C6B50(D_004A33D8, dest, byteCount);
     D_004A33D4 = 6;
 }
 #endif
@@ -11893,16 +11893,16 @@ void func_002C6BD0(void* obj, int a1, int a2);
 /**
  * Memory-card callback 11 of the network-account library: writes to the open card file.
  *
- * Starts a sceMcWrite from @p a1 of @p a2 bytes (func_002C6BD0) and sets the card operation D_004A33D4 to 14;
+ * Starts a sceMcWrite from @p source of @p byteCount bytes (func_002C6BD0) and sets the card operation D_004A33D4 to 14;
  * func_00266358 reports the libmc result (bytes written). Entry 11 of D_00442A18.
  *
- * @param a0  not read (the library's file handle)
- * @param a1  the source buffer
- * @param a2  the number of bytes to write
+ * @param fileHandle  not read (the library's file handle)
+ * @param source  the source buffer
+ * @param byteCount  the number of bytes to write
  */
-extern "C" void func_002662C0(int a0, int a1, int a2)
+extern "C" void func_002662C0(int fileHandle, int source, int byteCount)
 {
-    func_002C6BD0(D_004A33D8, a1, a2);
+    func_002C6BD0(D_004A33D8, source, byteCount);
     D_004A33D4 = 0xE;
 }
 #endif
@@ -11917,21 +11917,21 @@ void func_002C6A60(void* obj, int a1, int a2);
 /**
  * Memory-card callback 12 of the network-account library: seeks in the open card file.
  *
- * Starts a sceMcSeek to @p a1 (func_002C6A60) and sets the card operation D_004A33D4 to 5. The origin passed on is 1
- * when @p a2 is 1 and 0 otherwise. Quirk: an origin of 2 (from the end) becomes 0 (from the start). Entry 12 of
+ * Starts a sceMcSeek to @p offset (func_002C6A60) and sets the card operation D_004A33D4 to 5. The origin passed on is 1
+ * when @p origin is 1 and 0 otherwise. Quirk: an origin of 2 (from the end) becomes 0 (from the start). Entry 12 of
  * D_00442A18.
  *
- * @param a0  not read (the library's file handle)
- * @param a1  the seek offset
- * @param a2  the seek origin (0 start, 1 current)
+ * @param fileHandle  not read (the library's file handle)
+ * @param offset  the seek offset
+ * @param origin  the seek origin (0 start, 1 current)
  */
-extern "C" void func_002662E8(int a0, int a1, int a2)
+extern "C" void func_002662E8(int fileHandle, int offset, int origin)
 {
-    int r = 0;
-    if (a2 != 0) {
-        r = (a2 == 1);
+    int mcOrigin = 0;
+    if (origin != 0) {
+        mcOrigin = (origin == 1);
     }
-    func_002C6A60(D_004A33D8, a1, r);
+    func_002C6A60(D_004A33D8, offset, mcOrigin);
     D_004A33D4 = 5;
 }
 #endif
@@ -12424,36 +12424,36 @@ extern "C" void func_002668E8(sSlots_668E8* self)
         return;
     func_003F63F0();
     for (int i = 0; i < 8; i++) {
-        sSlot_668E8* s = &self->slot[i];
-        s->flags.active = func_003F6520(i) == 1;
-        if (!s->flags.active)
-            *(int*)&s->flags = 0;
+        sSlot_668E8* keyboardSlot = &self->slot[i];
+        keyboardSlot->flags.active = func_003F6520(i) == 1;
+        if (!keyboardSlot->flags.active)
+            *(int*)&keyboardSlot->flags = 0;
     }
     int n = func_003F6348();
     for (int j = 0; j < n; j++) {
         if (self->slot[j].flags.active) {
-            sConn_668E8* c = (sConn_668E8*)func_003F64E0(j);
-            if (c != 0) {
-                for (int k = 0; k < c->count; k++) {
-                    unsigned char* e = func_003F68F0(c, 0, k);
-                    if (e[0] != 0 || e[1] != 0) {
+            sConn_668E8* readBlock = (sConn_668E8*)func_003F64E0(j);
+            if (readBlock != 0) {
+                for (int k = 0; k < readBlock->count; k++) {
+                    unsigned char* translated = func_003F68F0(readBlock, 0, k);
+                    if (translated[0] != 0 || translated[1] != 0) {
                         int w = self->slot[j].count;
                         int idx = ringIdx_668E8(w);
-                        int r = self->slot[j].start;
-                        if (w - r >= 0x40)
-                            self->slot[j].start = r + 1;
-                        self->slot[j].buf[idx][0] = e[0];
-                        self->slot[j].buf[idx][1] = e[1];
+                        int ringStart = self->slot[j].start;
+                        if (w - ringStart >= 0x40)
+                            self->slot[j].start = ringStart + 1;
+                        self->slot[j].buf[idx][0] = translated[0];
+                        self->slot[j].buf[idx][1] = translated[1];
                         self->slot[j].count++;
                     }
                 }
-                if (func_003F6838(c, 0, 0, 0x10))
+                if (func_003F6838(readBlock, 0, 0, 0x10))
                     self->slot[j].flags.b4 = 1;
                 else
                     self->slot[j].flags.b4 = 0;
-                self->slot[j].flags.b2 = c->on;
-                self->slot[j].flags.b3 = c->on;
-                self->slot[j].flags.b1 = c->on;
+                self->slot[j].flags.b2 = readBlock->on;
+                self->slot[j].flags.b3 = readBlock->on;
+                self->slot[j].flags.b1 = readBlock->on;
             }
         }
     }
@@ -12629,17 +12629,17 @@ extern "C" void func_00266E30(void* self);
 /**
  * Connects voice chat to a peer and turns the voice on or off from the settings.
  *
- * Only when not yet connected: connects the voice module to @p a1 on ports 6000/6000 (func_003F6AB8), sets the
+ * Only when not yet connected: connects the voice module to @p peerAddr on ports 6000/6000 (func_003F6AB8), sets the
  * connected word (+0x0) and applies the voice level D_004A33F8 (func_003F6C10 with 85). A level below 10 turns the
  * voice off (func_00266E88); otherwise it is turned on (func_00266E30) when bit 18 of the option word
  * cBEOptionInterface_mOption is set. func_002639E0 and the debug front end call it.
  *
- * @param a1  the peer's address
+ * @param peerAddr  the peer's address
  */
-extern "C" void func_00266D58(void* self, void* a1)
+extern "C" void func_00266D58(void* self, void* peerAddr)
 {
     if (*(int*)self == 0) {
-        func_003F6AB8(a1, 6000, 6000);
+        func_003F6AB8(peerAddr, 6000, 6000);
         int n = D_004A33F8;
         *(int*)self = 1;
         func_003F6C10(n, 85);
@@ -12765,20 +12765,20 @@ extern int D_004A33F8;
 extern "C" void func_003F6C10(int a0, int a1);
 
 /**
- * Sets the voice level: sends @p a1 and @p a2 to the voice module (func_003F6C10) when connected, and always stores @p
+ * Sets the voice level: sends @p level and @p maxLevel to the voice module (func_003F6C10) when connected, and always stores @p
  * a1 in D_004A33F8.
  *
  * cOVState_PAUSE_OPTIONS_onWidgetEvent passes the voice slider value times 10 and the maximum func_00266F90 read.
  *
- * @param a1  the voice level (below 10 counts as off)
- * @param a2  the second value for the module (the maximum level)
+ * @param level  the voice level (below 10 counts as off)
+ * @param maxLevel  the second value for the module (the maximum level)
  */
-extern "C" void func_00266F58(void* self, int a1, int a2)
+extern "C" void func_00266F58(void* self, int level, int maxLevel)
 {
     if (*(int*)self != 0) {
-        func_003F6C10(a1, a2);
+        func_003F6C10(level, maxLevel);
     }
-    D_004A33F8 = a1;
+    D_004A33F8 = level;
 }
 #endif
 
@@ -12792,13 +12792,13 @@ extern "C" void func_003F6BA0(void* a, void* b);
  *
  * The pause options screen reads them as the current voice level and its maximum.
  *
- * @param a  receives the first word (the level)
- * @param b  receives the second word (the maximum)
+ * @param outLevel  receives the first word (the level)
+ * @param outMax  receives the second word (the maximum)
  */
-extern "C" void func_00266F90(void* self, void* a, void* b)
+extern "C" void func_00266F90(void* self, void* outLevel, void* outMax)
 {
     if (*(int*)self != 0) {
-        func_003F6BA0(a, b);
+        func_003F6BA0(outLevel, outMax);
     }
 }
 #endif
@@ -13479,11 +13479,11 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  */
 extern "C" void* online_Event_clone(int* self)
 {
-    int* p = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    int v = *self;
-    *(void***)((char*)p + 0x4) = online_Event_vtbl;
-    p[0] = v;
-    return p;
+    int* copy = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    int kind = *self;
+    *(void***)((char*)copy + 0x4) = online_Event_vtbl;
+    copy[0] = kind;
+    return copy;
 }
 #endif
 
@@ -13529,12 +13529,12 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  */
 extern "C" void* online_ErrorEvent_clone(void* self)
 {
-    int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int v = *(int*)((char*)self + 0x8);
-    p[0] = 258;
-    *(void***)((char*)p + 0x4) = online_ErrorEvent_vtbl;
-    p[2] = v;
-    return p;
+    int* copy = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
+    int errorCode = *(int*)((char*)self + 0x8);
+    copy[0] = 258;
+    *(void***)((char*)copy + 0x4) = online_ErrorEvent_vtbl;
+    copy[2] = errorCode;
+    return copy;
 }
 #endif
 
@@ -13581,12 +13581,12 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  */
 extern "C" void* online_BuddyErrorEvent_clone(void* self)
 {
-    int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int v = *(int*)((char*)self + 0x8);
-    p[0] = 258;
-    *(void***)((char*)p + 0x4) = online_ErrorEvent_vtbl;
-    p[2] = v;
-    return p;
+    int* copy = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
+    int errorCode = *(int*)((char*)self + 0x8);
+    copy[0] = 258;
+    *(void***)((char*)copy + 0x4) = online_ErrorEvent_vtbl;
+    copy[2] = errorCode;
+    return copy;
 }
 #endif
 
@@ -13632,12 +13632,12 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  */
 extern "C" void* online_NetErrorEvent_clone(void* self)
 {
-    int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int v = *(int*)((char*)self + 0x8);
-    p[0] = 278;
-    *(void***)((char*)p + 0x4) = online_NetErrorEvent_vtbl;
-    p[2] = v;
-    return p;
+    int* copy = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
+    int errorValue = *(int*)((char*)self + 0x8);
+    copy[0] = 278;
+    *(void***)((char*)copy + 0x4) = online_NetErrorEvent_vtbl;
+    copy[2] = errorValue;
+    return copy;
 }
 #endif
 
@@ -13695,18 +13695,18 @@ struct sBXStrK2 {
 // Clone of a two-string message (type 0xDE).
 extern "C" void* func_002680A8(char* self)
 {
-    char* p = (char*)cMemMan_alloc(0x10, str_ChatEvent, 0x20000000, 0);
-    sBXStrK2 a;
-    sBXStrK2 b;
-    cBXString_cBXString1(&a, self + 0x8);
-    cBXString_cBXString1(&b, self + 0xC);
-    *(void***)(p + 0x4) = D_00481230;
-    *(int*)p = 222;
-    cBXString_cBXString1(p + 0x8, &a);
-    cBXString_cBXString1(p + 0xC, &b);
-    cBXString__cBXString(&a, 2);
-    cBXString__cBXString(&b, 2);
-    return p;
+    char* eventCopy = (char*)cMemMan_alloc(0x10, str_ChatEvent, 0x20000000, 0);
+    sBXStrK2 sender;
+    sBXStrK2 text;
+    cBXString_cBXString1(&sender, self + 0x8);
+    cBXString_cBXString1(&text, self + 0xC);
+    *(void***)(eventCopy + 0x4) = D_00481230;
+    *(int*)eventCopy = 222;
+    cBXString_cBXString1(eventCopy + 0x8, &sender);
+    cBXString_cBXString1(eventCopy + 0xC, &text);
+    cBXString__cBXString(&sender, 2);
+    cBXString__cBXString(&text, 2);
+    return eventCopy;
 }
 #endif
 
@@ -13753,12 +13753,12 @@ extern "C" void* cBXString_cBXString2(void* self, const char* s);
  */
 extern "C" void* online_NewsEvent_clone(void* self)
 {
-    int* p = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    const char* s = *(const char**)((char*)self + 0x8);
-    *(void***)((char*)p + 0x4) = online_NewsEvent_vtbl;
-    p[0] = 226;
-    cBXString_cBXString2((char*)p + 0x8, s);
-    return p;
+    int* copy = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
+    const char* newsText = *(const char**)((char*)self + 0x8);
+    *(void***)((char*)copy + 0x4) = online_NewsEvent_vtbl;
+    copy[0] = 226;
+    cBXString_cBXString2((char*)copy + 0x8, newsText);
+    return copy;
 }
 #endif
 
@@ -13804,13 +13804,13 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  */
 extern "C" void* online_AcctTooYoungEvent_clone(void* self)
 {
-    int* p = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
-    int b = *(int*)((char*)self + 0xC);
-    p[0] = 258;
-    p[2] = 0x746F6F79;
-    *(void***)((char*)p + 0x4) = online_AcctTooYoungEvent_vtbl;
-    p[3] = b;
-    return p;
+    int* copy = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
+    int age = *(int*)((char*)self + 0xC);
+    copy[0] = 258;
+    copy[2] = 0x746F6F79;
+    *(void***)((char*)copy + 0x4) = online_AcctTooYoungEvent_vtbl;
+    copy[3] = age;
+    return copy;
 }
 #endif
 
@@ -13926,13 +13926,13 @@ extern void* D_004811B0[];
  */
 extern "C" void* func_002683F0(void* self)
 {
-    int* p = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
-    const char* s = *(const char**)((char*)self + 0xC);
-    p[2] = 0x646F776E;
-    *(void***)((char*)p + 0x4) = D_004811B0;
-    p[0] = 258;
-    cBXString_cBXString2((char*)p + 0xC, s);
-    return p;
+    int* eventCopy = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
+    const char* message = *(const char**)((char*)self + 0xC);
+    eventCopy[2] = 0x646F776E;
+    *(void***)((char*)eventCopy + 0x4) = D_004811B0;
+    eventCopy[0] = 258;
+    cBXString_cBXString2((char*)eventCopy + 0xC, message);
+    return eventCopy;
 }
 #endif
 
@@ -14009,10 +14009,10 @@ static inline void Init2684C0(sMsg2684C0* m, const char* a, const char* b, int c
 // Clones a 0xE3 message (strings, ids and trailing data block).
 extern "C" void* online_FindPlayerEvent_clone(sMsg2684C0* src)
 {
-    sMsg2684C0* m = (sMsg2684C0*)operator new(44, str_NetEvent, 0x20000000, 0);
-    Init2684C0(m, *(const char**)src->a, *(const char**)src->b, src->f10, src->f14);
-    m->blk = src->blk;
-    return m;
+    sMsg2684C0* copy = (sMsg2684C0*)operator new(44, str_NetEvent, 0x20000000, 0);
+    Init2684C0(copy, *(const char**)src->a, *(const char**)src->b, src->f10, src->f14);
+    copy->blk = src->blk;
+    return copy;
 }
 #endif
 
@@ -14057,14 +14057,14 @@ extern void* online_PingEvent_vtbl[];
  */
 extern "C" void* online_PingEvent_clone(void* self)
 {
-    int* p = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
-    int b = *(int*)((char*)self + 0xC);
-    const char* s = *(const char**)((char*)self + 0x8);
-    *(void***)((char*)p + 0x4) = online_PingEvent_vtbl;
-    p[0] = 229;
-    cBXString_cBXString2((char*)p + 0x8, s);
-    p[3] = b;
-    return p;
+    int* copy = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
+    int ping = *(int*)((char*)self + 0xC);
+    const char* name = *(const char**)((char*)self + 0x8);
+    *(void***)((char*)copy + 0x4) = online_PingEvent_vtbl;
+    copy[0] = 229;
+    cBXString_cBXString2((char*)copy + 0x8, name);
+    copy[3] = ping;
+    return copy;
 }
 #endif
 
@@ -14110,14 +14110,14 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  */
 extern "C" void* func_00268688(void* self)
 {
-    int* p = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
-    int a = *(int*)((char*)self + 0x8);
-    int b = *(int*)((char*)self + 0xC);
-    p[0] = 251;
-    *(void***)((char*)p + 0x4) = D_00481150;
-    p[2] = a;
-    p[3] = b;
-    return p;
+    int* eventCopy = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
+    int rowId = *(int*)((char*)self + 0x8);
+    int flagWord = *(int*)((char*)self + 0xC);
+    eventCopy[0] = 251;
+    *(void***)((char*)eventCopy + 0x4) = D_00481150;
+    eventCopy[2] = rowId;
+    eventCopy[3] = flagWord;
+    return eventCopy;
 }
 #endif
 
@@ -14161,16 +14161,16 @@ extern void* D_00481130[];
  */
 extern "C" void* func_00268720(void* self)
 {
-    int* p = (int*)cMemMan_alloc(20, str_NetEvent, 0x20000000, 0);
-    int a = *(int*)((char*)self + 0x8);
-    int b = *(int*)((char*)self + 0xC);
-    int c = *(int*)((char*)self + 0x10);
-    p[0] = 0xFC;
-    *(void***)((char*)p + 0x4) = D_00481130;
-    p[2] = a;
-    p[3] = b;
-    p[4] = c;
-    return p;
+    int* eventCopy = (int*)cMemMan_alloc(20, str_NetEvent, 0x20000000, 0);
+    int ruleSlot = *(int*)((char*)self + 0x8);
+    int ruleValue = *(int*)((char*)self + 0xC);
+    int flagWord = *(int*)((char*)self + 0x10);
+    eventCopy[0] = 0xFC;
+    *(void***)((char*)eventCopy + 0x4) = D_00481130;
+    eventCopy[2] = ruleSlot;
+    eventCopy[3] = ruleValue;
+    eventCopy[4] = flagWord;
+    return eventCopy;
 }
 #endif
 
@@ -14222,21 +14222,21 @@ struct sDsBlob14K2b {
 // Clone of a message of type 0x10D (three names, two ints, a 20-byte blob).
 extern "C" void* func_002687C0(char* self)
 {
-    char* p = (char*)cMemMan_alloc(356, str_NetEvent, 0x20000000, 0);
-    const char* b = self + 0x28;
+    char* eventCopy = (char*)cMemMan_alloc(356, str_NetEvent, 0x20000000, 0);
+    const char* tagN = self + 0x28;
     int x = *(int*)(self + 0x148);
     int y = *(int*)(self + 0x14C);
-    const char* c;
-    *(void***)(p + 0x4) = D_00481110;
-    *(int*)p = 269;
-    c = self + 0x48;
-    *(int*)(p + 0x148) = x;
-    *(int*)(p + 0x14C) = y;
-    strcpy(p + 0x8, self + 0x8);
-    strcpy(p + 0x28, b);
-    strcpy(p + 0x48, c);
-    *(sDsBlob14K2b*)(p + 0x150) = *(sDsBlob14K2b*)(self + 0x150);
-    return p;
+    const char* tagA;
+    *(void***)(eventCopy + 0x4) = D_00481110;
+    *(int*)eventCopy = 269;
+    tagA = self + 0x48;
+    *(int*)(eventCopy + 0x148) = x;
+    *(int*)(eventCopy + 0x14C) = y;
+    strcpy(eventCopy + 0x8, self + 0x8);
+    strcpy(eventCopy + 0x28, tagN);
+    strcpy(eventCopy + 0x48, tagA);
+    *(sDsBlob14K2b*)(eventCopy + 0x150) = *(sDsBlob14K2b*)(self + 0x150);
+    return eventCopy;
 }
 #endif
 

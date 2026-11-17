@@ -58,20 +58,20 @@ void* func_00320078_K2(void* heap, unsigned int align, unsigned int size) __asm_
  */
 extern "C" void* cMemMan_internalAlloc(unsigned int size, unsigned int align, int flags, int top)
 {
-    void* p;
+    void* block;
     if (top == 0 && size != 0 && size <= 0x200) {
-        p = cMemBlockMan_alloc(size);
+        block = cMemBlockMan_alloc(size);
     } else {
         if (align <= 15)
             align = 16;
         if (top != 0)
-            p = func_00320078_K2(TheDynamicMemMan, align, size);
+            block = func_00320078_K2(TheDynamicMemMan, align, size);
         else
-            p = func_00320058_K2(TheDynamicMemMan, align, size);
+            block = func_00320058_K2(TheDynamicMemMan, align, size);
     }
-    if (p != 0 && flags < 0)
-        MEM_clear(p, size);
-    return p;
+    if (block != 0 && flags < 0)
+        MEM_clear(block, size);
+    return block;
 }
 #endif
 

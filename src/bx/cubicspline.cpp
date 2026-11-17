@@ -863,7 +863,7 @@ extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem) __asm_
 extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem)
 {
     sMState_31ED60* av = ms->av;
-    sMChunk_31ED60* p;
+    sMChunk_31ED60* freedChunk;
     sMChunk_31ED60* nextchunk;
     unsigned int size;
     unsigned int nextsize;
@@ -877,26 +877,26 @@ extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem)
     if (mem != 0)
     {
         size = ((sMChunk_31ED60*)((int)mem - 8))->size & ~3U;
-        p = (sMChunk_31ED60*)((char*)mem - 8);
+        freedChunk = (sMChunk_31ED60*)((char*)mem - 8);
         if (size <= av->max_fast)
         {
             av->max_fast |= 3;
             fb = &av->fastbins[(size >> 3) - 2];
             *(sMChunk_31ED60**)mem = *fb;
-            *fb = p;
+            *fb = freedChunk;
         }
         else if (!(((sMChunk_31ED60*)((int)mem - 8))->size & 2))
         {
             av->max_fast |= 1;
-            nextchunk = (sMChunk_31ED60*)((char*)p + size);
+            nextchunk = (sMChunk_31ED60*)((char*)freedChunk + size);
             nextsize = nextchunk->size & ~3U;
             if (!(((sMChunk_31ED60*)((int)mem - 8))->size & 1))
             {
-                prevsize = p->prev_size;
+                prevsize = freedChunk->prev_size;
                 size += prevsize;
-                p = (sMChunk_31ED60*)((char*)p - (long)prevsize);
-                fwd = p->fd;
-                bck = p->bk;
+                freedChunk = (sMChunk_31ED60*)((char*)freedChunk - (long)prevsize);
+                fwd = freedChunk->fd;
+                bck = freedChunk->bk;
                 fwd->bk = bck;
                 bck->fd = fwd;
             }
@@ -913,18 +913,18 @@ extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem)
                     size += nextsize;
                 }
                 fwd = ((sMChunk_31ED60*)((char*)&av->bins[1 << 1] - 8))->fd;
-                p->bk = (sMChunk_31ED60*)((char*)&av->bins[1 << 1] - 8);
-                p->fd = fwd;
-                ((sMChunk_31ED60*)((char*)&av->bins[1 << 1] - 8))->fd = p;
-                fwd->bk = p;
-                p->size = size | 1;
-                ((sMChunk_31ED60*)((char*)p + size))->prev_size = size;
+                freedChunk->bk = (sMChunk_31ED60*)((char*)&av->bins[1 << 1] - 8);
+                freedChunk->fd = fwd;
+                ((sMChunk_31ED60*)((char*)&av->bins[1 << 1] - 8))->fd = freedChunk;
+                fwd->bk = freedChunk;
+                freedChunk->size = size | 1;
+                ((sMChunk_31ED60*)((char*)freedChunk + size))->prev_size = size;
             }
             else
             {
                 size += nextsize;
-                p->size = size | 1;
-                av->top = p;
+                freedChunk->size = size | 1;
+                av->top = freedChunk;
             }
             if (size >= 0x4000)
             {

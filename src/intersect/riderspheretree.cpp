@@ -424,15 +424,15 @@ extern "C" void cRiderSphereTree_GetMaskBoundBox(void* tree, sVec4_2F650* mnp, s
     }
     for (int i = 0; i < node->count; i++) {
         if (node->mask & (1 << i)) {
-            sSphereV4_9DC8 r(node->kids[i].radius, node->kids[i].radius, node->kids[i].radius, 1.0f);
-            sSphereV4_9DC8 t = Sub_9DC8(node->kids[i].pos, r);
-            if (t.x < mn->x) mn->x = t.x;
-            if (t.y < mn->y) mn->y = t.y;
-            if (t.z < mn->z) mn->z = t.z;
-            t = Add_9DC8(node->kids[i].pos, r);
-            if (t.x > mx->x) mx->x = t.x;
-            if (t.y > mx->y) mx->y = t.y;
-            if (t.z > mx->z) mx->z = t.z;
+            sSphereV4_9DC8 radVect(node->kids[i].radius, node->kids[i].radius, node->kids[i].radius, 1.0f);
+            sSphereV4_9DC8 corner = Sub_9DC8(node->kids[i].pos, radVect);
+            if (corner.x < mn->x) mn->x = corner.x;
+            if (corner.y < mn->y) mn->y = corner.y;
+            if (corner.z < mn->z) mn->z = corner.z;
+            corner = Add_9DC8(node->kids[i].pos, radVect);
+            if (corner.x > mx->x) mx->x = corner.x;
+            if (corner.y > mx->y) mx->y = corner.y;
+            if (corner.z > mx->z) mx->z = corner.z;
         }
     }
 }
@@ -742,29 +742,29 @@ extern "C" int cRiderSphereTree_IsTriCollision_impl(sNode_A1C0* self, sV_A1C0* p
 extern "C" int cRiderSphereTree_IsTriCollision_impl(sNode_A1C0* self, sV_A1C0* point1, sV_A1C0* point2, sV_A1C0* point3, sV_A1C0* n, sV_A1C0* outPush, sV_A1C0* outPoint)
 {
     float dist = Dot_A1C0(*n, Sub_A1C0(self->center, *point1));
-    float r = self->radius;
-    if (r < __builtin_fabsf(dist)) {
+    float sphereRadius = self->radius;
+    if (sphereRadius < __builtin_fabsf(dist)) {
         return 0;
     }
-    sV_A1C0 d = Sub_A1C0(self->center, Scale_A1C0(*n, dist));
-    if (!Touch_A1C0(self->center, r, point1, point2, point3, &d)) {
+    sV_A1C0 contactPoint = Sub_A1C0(self->center, Scale_A1C0(*n, dist));
+    if (!Touch_A1C0(self->center, sphereRadius, point1, point2, point3, &contactPoint)) {
         return 0;
     }
     if (self->mask == 0) {
-        *outPush = Scale_A1C0(*n, r - dist);
-        *outPoint = d;
+        *outPush = Scale_A1C0(*n, sphereRadius - dist);
+        *outPoint = contactPoint;
         return 1;
     }
     float best = 10000000000.0f;
     for (int i = 0; i < self->count; i++) {
         if (self->mask & (1 << i)) {
             dist = Dot_A1C0(*n, Sub_A1C0(self->kids[i].pos, *point1));
-            r = self->kids[i].radius;
-            if (__builtin_fabsf(dist) < r && dist < best) {
-                d = Sub_A1C0(self->kids[i].pos, Scale_A1C0(*n, dist));
-                if (Touch_A1C0(self->kids[i].pos, r, point1, point2, point3, &d)) {
-                    *outPush = Scale_A1C0(*n, r - dist);
-                    *outPoint = d;
+            sphereRadius = self->kids[i].radius;
+            if (__builtin_fabsf(dist) < sphereRadius && dist < best) {
+                contactPoint = Sub_A1C0(self->kids[i].pos, Scale_A1C0(*n, dist));
+                if (Touch_A1C0(self->kids[i].pos, sphereRadius, point1, point2, point3, &contactPoint)) {
+                    *outPush = Scale_A1C0(*n, sphereRadius - dist);
+                    *outPoint = contactPoint;
                     best = dist;
                 }
             }
@@ -940,33 +940,33 @@ extern "C" int cRiderSphereTree_Is2SidedTriCollision_impl(sNode_AA28* self, sV_A
 {
     sV_AA28 n = *np;
     float dist = Dot_AA28(n, Sub_AA28(self->center, *point1));
-    float r = self->radius;
-    if (r < __builtin_fabsf(dist)) {
+    float sphereRadius = self->radius;
+    if (sphereRadius < __builtin_fabsf(dist)) {
         return 0;
     }
     if (dist < 0.0f) {
         dist = -dist;
         n = Scale_AA28(n, -1.0f);
     }
-    sV_AA28 d = Sub_AA28(self->center, Scale_AA28(n, dist));
-    if (!Touch_AA28(self->center, r, point1, point2, point3, &d)) {
+    sV_AA28 contactPoint = Sub_AA28(self->center, Scale_AA28(n, dist));
+    if (!Touch_AA28(self->center, sphereRadius, point1, point2, point3, &contactPoint)) {
         return 0;
     }
     if (self->mask == 0) {
-        *outPush = Scale_AA28(n, r - dist);
-        *outPoint = d;
+        *outPush = Scale_AA28(n, sphereRadius - dist);
+        *outPoint = contactPoint;
         return 1;
     }
     float best = 10000000000.0f;
     for (int i = 0; i < self->count; i++) {
         if (self->mask & (1 << i)) {
             dist = Dot_AA28(n, Sub_AA28(self->kids[i].pos, *point1));
-            r = self->kids[i].radius;
-            if (dist < r && dist < best) {
-                d = Sub_AA28(self->kids[i].pos, Scale_AA28(n, dist));
-                if (Touch_AA28(self->kids[i].pos, r, point1, point2, point3, &d)) {
-                    *outPush = Scale_AA28(n, r - dist);
-                    *outPoint = d;
+            sphereRadius = self->kids[i].radius;
+            if (dist < sphereRadius && dist < best) {
+                contactPoint = Sub_AA28(self->kids[i].pos, Scale_AA28(n, dist));
+                if (Touch_AA28(self->kids[i].pos, sphereRadius, point1, point2, point3, &contactPoint)) {
+                    *outPush = Scale_AA28(n, sphereRadius - dist);
+                    *outPoint = contactPoint;
                     best = dist;
                 }
             }
@@ -1544,7 +1544,7 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F
 {
     sV4_C0F8 pos;
     sV4_C0F8 hn;
-    float t;
+    float hitParam;
     int n = 0;
     if (mesh->numTris < 11) {
         for (int i = 0; i < mesh->numTris; i++) {
@@ -1552,86 +1552,86 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F
             if (self->useNormal != 0 && vDot_C0F8(*nrm, self->dir) > 0.8f) {
                 continue;
             }
-                        sV4_C0F8* v = mesh->verts;
-            sV4_C0F8* p0 = &v[mesh->indices[i * 3]];
-            sV4_C0F8* p1 = &v[mesh->indices[i * 3 + 1]];
-            sV4_C0F8* p2 = &v[mesh->indices[i * 3 + 2]];
-            int r;
+                        sV4_C0F8* vertices = mesh->verts;
+            sV4_C0F8* corner0 = &vertices[mesh->indices[i * 3]];
+            sV4_C0F8* corner1 = &vertices[mesh->indices[i * 3 + 1]];
+            sV4_C0F8* corner2 = &vertices[mesh->indices[i * 3 + 2]];
+            int isHit;
             if (flag != 0) {
-                r = self->vt[5].fn((char*)self + self->vt[5].delta, p0, p1, p2, nrm, &pos, &hn, &t);
+                isHit = self->vt[5].fn((char*)self + self->vt[5].delta, corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
             } else {
-                r = self->vt[4].fn((char*)self + self->vt[4].delta, p0, p1, p2, nrm, &pos, &hn, &t);
+                isHit = self->vt[4].fn((char*)self + self->vt[4].delta, corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
             }
-            if (r == 0) {
+            if (isHit == 0) {
                 continue;
             }
-            sTriHit_C0F8* h = &out[n];
-            h->f54 = 0;
-            h->type = 2;
-            h->tri = -1;
-            h->f50 = 0;
-            h->f58 = 0;
-            h->f5C = -1;
-            h->f64 = -1;
-            h->f4C = -1;
-            h->v20 = t4vect_Zero;
-            h->v30 = t4vect_Zero;
-            h->f68 = 0;
-            h->f6C = 0;
-            h->f70 = 0;
-            h->pos = pos;
-            h->nrm = hn;
-            h->t = t;
-            h->tri = i;
-            h->f54 = 0;
+            sTriHit_C0F8* record = &out[n];
+            record->f54 = 0;
+            record->type = 2;
+            record->tri = -1;
+            record->f50 = 0;
+            record->f58 = 0;
+            record->f5C = -1;
+            record->f64 = -1;
+            record->f4C = -1;
+            record->v20 = t4vect_Zero;
+            record->v30 = t4vect_Zero;
+            record->f68 = 0;
+            record->f6C = 0;
+            record->f70 = 0;
+            record->pos = pos;
+            record->nrm = hn;
+            record->t = hitParam;
+            record->tri = i;
+            record->f54 = 0;
             n++;
         }
     } else {
         int nb = (mesh->numTris + 9) / 10;
-        for (int b = 0; b < nb; b++) {
-            sTriBox_C0F8* box = &mesh->boxes[b];
+        for (int boxIndex = 0; boxIndex < nb; boxIndex++) {
+            sTriBox_C0F8* box = &mesh->boxes[boxIndex];
             sVE_C0F8b* vt = (sVE_C0F8b*)self->vt;
             if (!vt[9].fn((char*)self + vt[9].delta, box->lo, box->hi)) {
                 continue;
             }
-            int end = (b + 1) * 10 < mesh->numTris ? (b + 1) * 10 : mesh->numTris;
-            for (int i = b * 10; i < end; i++) {
+            int end = (boxIndex + 1) * 10 < mesh->numTris ? (boxIndex + 1) * 10 : mesh->numTris;
+            for (int i = boxIndex * 10; i < end; i++) {
                 sV4_C0F8* nrm = &mesh->normals[i];
                 if (self->useNormal != 0 && vDot_C0F8(*nrm, self->dir) > 0.8f) {
                     continue;
                 }
-                                sV4_C0F8* v = mesh->verts;
-                sV4_C0F8* p0 = &v[mesh->indices[i * 3]];
-                sV4_C0F8* p1 = &v[mesh->indices[i * 3 + 1]];
-                sV4_C0F8* p2 = &v[mesh->indices[i * 3 + 2]];
-                int r;
+                                sV4_C0F8* vertices = mesh->verts;
+                sV4_C0F8* corner0 = &vertices[mesh->indices[i * 3]];
+                sV4_C0F8* corner1 = &vertices[mesh->indices[i * 3 + 1]];
+                sV4_C0F8* corner2 = &vertices[mesh->indices[i * 3 + 2]];
+                int isHit;
                 if (flag != 0) {
-                    r = self->vt[5].fn((char*)self + self->vt[5].delta, p0, p1, p2, nrm, &pos, &hn, &t);
+                    isHit = self->vt[5].fn((char*)self + self->vt[5].delta, corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
                 } else {
-                    r = self->vt[4].fn((char*)self + self->vt[4].delta, p0, p1, p2, nrm, &pos, &hn, &t);
+                    isHit = self->vt[4].fn((char*)self + self->vt[4].delta, corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
                 }
-                if (r == 0) {
+                if (isHit == 0) {
                     continue;
                 }
-                sTriHit_C0F8* h = &out[n];
-                h->f54 = 0;
-                h->type = 2;
-                h->tri = -1;
-                h->f50 = 0;
-                h->f58 = 0;
-                h->f5C = -1;
-                h->f64 = -1;
-                h->f4C = -1;
-                h->v20 = t4vect_Zero;
-                h->v30 = t4vect_Zero;
-                h->f68 = 0;
-                h->f6C = 0;
-                h->f70 = 0;
-                h->pos = pos;
-                h->nrm = hn;
-                h->t = t;
-                h->tri = i;
-                h->f54 = 0;
+                sTriHit_C0F8* record = &out[n];
+                record->f54 = 0;
+                record->type = 2;
+                record->tri = -1;
+                record->f50 = 0;
+                record->f58 = 0;
+                record->f5C = -1;
+                record->f64 = -1;
+                record->f4C = -1;
+                record->v20 = t4vect_Zero;
+                record->v30 = t4vect_Zero;
+                record->f68 = 0;
+                record->f6C = 0;
+                record->f70 = 0;
+                record->pos = pos;
+                record->nrm = hn;
+                record->t = hitParam;
+                record->tri = i;
+                record->f54 = 0;
                 n++;
             }
         }
@@ -1712,9 +1712,9 @@ struct sSphereRadius12 {
  */
 extern "C" float SphereTree_GetResolution(void* self)
 {
-    void* p = *(void**)((char*)self + 0x98);
-    int idx = *(int*)((char*)p + 0xc);
-    sSphereRadius12* tab = *(sSphereRadius12**)((char*)p + 0x20);
+    void* treeInfo = *(void**)((char*)self + 0x98);
+    int idx = *(int*)((char*)treeInfo + 0xc);
+    sSphereRadius12* tab = *(sSphereRadius12**)((char*)treeInfo + 0x20);
     return tab[idx].value * *(float*)((char*)self + 0x90) * 0.5f;
 }
 #endif
@@ -1990,9 +1990,9 @@ extern "C" int SphereTree_checkTriCollision(void* self, void* a1, void* a2, void
  */
 extern "C" int SphereTree_IsTriCollision(void* self, void* point1, void* point2, void* point3, void* uNorm, void* overlap, void* loc)
 {
-    void* t = *(void**)((char*)self + 0x98);
-    if (*(int*)((char*)t + 0x8) != 0) {
-        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = SphereTree_AllocBuf(t);
+    void* treeInfo = *(void**)((char*)self + 0x98);
+    if (*(int*)((char*)treeInfo + 0x8) != 0) {
+        *(int*)((char*)*(void**)((char*)self + 0x98) + 0x28) = SphereTree_AllocBuf(treeInfo);
     }
     SphereTree_populateSortAxis(self, uNorm);
     *(float*)((char*)self + 0x94) = 0.0f;
@@ -2673,12 +2673,12 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* a1, sSp
 extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* point1, sSphereVec4* point2, sSphereVec4* point3, sSphereVec4* uNorm, sSphereVec4* pos, int depth, int base, sSphereVec4* outA, sSphereVec4* outB)
 {
     sSphereOct_D470* self = (sSphereOct_D470*)selfp;
-    float d = Dot_D470(*uNorm, Sub_D470(*pos, *point1));
-    float r = self->tree->levels[depth].radius * self->scale;
-    if (depth == 0 && d < 0.0f) {
+    float planeDist = Dot_D470(*uNorm, Sub_D470(*pos, *point1));
+    float levelRadius = self->tree->levels[depth].radius * self->scale;
+    if (depth == 0 && planeDist < 0.0f) {
         return;
     }
-    if (!(d < r + self->best)) {
+    if (!(planeDist < levelRadius + self->best)) {
         return;
     }
     int leaf = 0;
@@ -2686,28 +2686,28 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* point1,
     if (!(depth < self->tree->depth && depth < 3 && mask != 0)) {
         leaf = 1;
     }
-    sSphereVec4 p = Sub_D470(*pos, Scale_D470(*uNorm, d));
-    if (func_0032D440_r(self, point1, point2, point3, &p, r) == 0) {
+    sSphereVec4 planePoint = Sub_D470(*pos, Scale_D470(*uNorm, planeDist));
+    if (func_0032D440_r(self, point1, point2, point3, &planePoint, levelRadius) == 0) {
         if (leaf) {
             return;
         }
-        if (r < 20.0f) {
+        if (levelRadius < 20.0f) {
             return;
         }
-        sSphereVec4 e = Sub_D470(*pos, *point1);
-        float rr = r * r;
-        float ee = Dot_D470(e, e);
+        sSphereVec4 fromCorner1 = Sub_D470(*pos, *point1);
+        float rr = levelRadius * levelRadius;
+        float ee = Dot_D470(fromCorner1, fromCorner1);
         if (rr < ee) {
-            sSphereVec4 g = Sub_D470(*point2, *point1);
-            bool miss = !SegHit_D470(e, g, ee, rr);
+            sSphereVec4 edge12 = Sub_D470(*point2, *point1);
+            bool miss = !SegHit_D470(fromCorner1, edge12, ee, rr);
             if (miss) {
-                sSphereVec4 g2 = Sub_D470(*point3, *point1);
-                miss = !SegHit_D470(e, g2, ee, rr);
+                sSphereVec4 edge13 = Sub_D470(*point3, *point1);
+                miss = !SegHit_D470(fromCorner1, edge13, ee, rr);
                 if (miss) {
-                    sSphereVec4 e3 = Sub_D470(*pos, *point2);
-                    float ee3 = Dot_D470(e3, e3);
-                    sSphereVec4 g3 = Sub_D470(*point3, *point2);
-                    miss = !SegHit_D470(e3, g3, ee3, rr);
+                    sSphereVec4 fromCorner2 = Sub_D470(*pos, *point2);
+                    float ee3 = Dot_D470(fromCorner2, fromCorner2);
+                    sSphereVec4 edge23 = Sub_D470(*point3, *point2);
+                    miss = !SegHit_D470(fromCorner2, edge23, ee3, rr);
                     if (miss) {
                         return;
                     }
@@ -2720,17 +2720,17 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* point1,
         for (int i = 0; i < 8; i++) {
             int k = self->order[i];
             if ((mask >> k) & 1) {
-                sSphereVec4 q = Add_D470(*pos, Scale_D470(self->dirs[k], f));
-                SphereTree_checkTriCollision_v(self, point1, point2, point3, uNorm, &q, depth + 1, (k + 1) * self->tree->levels[depth].stride + base, outA, outB);
+                sSphereVec4 childPos = Add_D470(*pos, Scale_D470(self->dirs[k], f));
+                SphereTree_checkTriCollision_v(self, point1, point2, point3, uNorm, &childPos, depth + 1, (k + 1) * self->tree->levels[depth].stride + base, outA, outB);
             }
         }
         return;
     }
-    float f = d - r;
+    float f = planeDist - levelRadius;
     if (f < self->best) {
         sSphereVec4 n = Scale_D470(*uNorm, -f);
         *outA = n;
-        *outB = p;
+        *outB = planePoint;
         self->best = f;
     }
 }
@@ -2847,10 +2847,10 @@ extern "C" void SphereTree_populateSortAxis(void* vself, void* vdir)
     sBox_DB40* self = (sBox_DB40*)vself;
     sV4_DB40* dir = (sV4_DB40*)vdir;
     int keys[8];
-    sV4_DB40 v = vu0Scale_DB40(*dir, -1000.0f);
+    sV4_DB40 scaledDir = vu0Scale_DB40(*dir, -1000.0f);
     int i;
     for (i = 0; i < 4; i++) {
-        int n = (int)vu0Dot_DB40(self->axes[i], v);
+        int n = (int)vu0Dot_DB40(self->axes[i], scaledDir);
         keys[i] = n;
         keys[7 - i] = -n;
         self->order[i] = i;

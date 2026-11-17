@@ -819,12 +819,12 @@ extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
         }
     }
     for (i = 0; i < 88; i++) {
-        sEconDef_1600* d = &D_0043EE10_v1600[i];
-        self->flags[i].f0 = d->a;
+        sEconDef_1600* missionDef = &D_0043EE10_v1600[i];
+        self->flags[i].f0 = missionDef->a;
         self->flags[i].f1 = 1;
         self->flags[i].f2 = 0;
         self->flags[i].f3 = 0;
-        self->flags[i].f4 = d->b;
+        self->flags[i].f4 = missionDef->b;
     }
     func_00416210(&self->col, 1, 7);
     self->col = D_005308D9[k].col;

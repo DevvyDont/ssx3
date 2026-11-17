@@ -268,18 +268,18 @@ INCLUDE_ASM("bx/execman", memlog2);
 // window (16/8/4/2 bits), then subtract one more if x isn't a power of two.
 extern "C" int memlog2(int x)
 {
-    int n, m, y;
+    int n, shift, y;
     n = ((x - 0x10000) >> 31) & 16;
     y = x << n;
-    m = ((y - 0x1000000) >> 31) & 8;
-    y <<= m;
-    n += m;
-    m = ((y - 0x10000000) >> 31) & 4;
-    y <<= m;
-    n += m;
-    m = ((y - 0x40000000) >> 31) & 2;
-    y <<= m;
-    n += m;
+    shift = ((y - 0x1000000) >> 31) & 8;
+    y <<= shift;
+    n += shift;
+    shift = ((y - 0x10000000) >> 31) & 4;
+    y <<= shift;
+    n += shift;
+    shift = ((y - 0x40000000) >> 31) & 2;
+    y <<= shift;
+    n += shift;
     n += 1 + (y >> 31);
     n += -(x & (x - 1)) >> 31;
     return n ^ 31;

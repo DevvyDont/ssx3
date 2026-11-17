@@ -179,17 +179,17 @@ void USTR_ncopy_impl(unsigned short *d, unsigned short *s, int n) __asm__("USTR_
 /**
  * Copies at most @p n characters of a wide string and always terminates the copy.
  *
- * Stops early at the source's 0, then writes a 0 after the last character copied, so @p d needs room for
+ * Stops early at the source's 0, then writes a 0 after the last character copied, so @p dst needs room for
  * n + 1 characters.
  *
- * @param d  destination wide string
- * @param s  source wide string
+ * @param dst  destination wide string
+ * @param src  source wide string
  * @param n  maximum number of characters to copy
  */
-void USTR_ncopy_impl(unsigned short *d, unsigned short *s, int n) {
+void USTR_ncopy_impl(unsigned short *dst, unsigned short *src, int n) {
     int i;
-    for (i = 0; i < n && s[i] != 0; i++) d[i] = s[i];
-    d[i] = 0;
+    for (i = 0; i < n && src[i] != 0; i++) dst[i] = src[i];
+    dst[i] = 0;
 }
 #endif
 
@@ -482,7 +482,7 @@ void USTR_vsprintf_impl(unsigned short *dst, unsigned short *fmt, char *ap) __as
 void USTR_vsprintf_impl(unsigned short *dst, unsigned short *fmt, char *ap) {
     unsigned short lower[24];
     unsigned short upper[24];
-    unsigned short c;
+    unsigned short fmtChar;
     int count;
     int flags;
     int width;
@@ -492,78 +492,78 @@ void USTR_vsprintf_impl(unsigned short *dst, unsigned short *fmt, char *ap) {
     count = 0;
     USTR_copycstr((short *)lower, D_00495BC0_C450);
     USTR_copycstr((short *)upper, D_00495BD8_C450);
-    c = *fmt++;
+    fmtChar = *fmt++;
     for (;;) {
-        while (c != 0 && c != '%') {
+        while (fmtChar != 0 && fmtChar != '%') {
             count++;
-            *dst++ = c;
-            c = *fmt++;
+            *dst++ = fmtChar;
+            fmtChar = *fmt++;
         }
-        if (c == 0) {
+        if (fmtChar == 0) {
             break;
         }
         more = 1;
-        c = *fmt++;
+        fmtChar = *fmt++;
         flags = 0;
         width = 0;
         prec = 6;
         while (more) {
-            switch (c) {
+            switch (fmtChar) {
             case '-':
                 flags |= 0x10;
-                c = *fmt++;
+                fmtChar = *fmt++;
                 break;
             case '+':
                 flags |= 1;
-                c = *fmt++;
+                fmtChar = *fmt++;
                 break;
             case '0':
                 flags |= 8;
-                c = *fmt++;
+                fmtChar = *fmt++;
                 break;
             case ' ':
                 flags |= 4;
-                c = *fmt++;
+                fmtChar = *fmt++;
                 break;
             case '#':
                 flags |= 2;
-                c = *fmt++;
+                fmtChar = *fmt++;
                 break;
             default:
                 more = 0;
                 break;
             }
         }
-        switch (c) {
+        switch (fmtChar) {
         case '*':
             width = VA_ARG_C450(ap, int);
-            c = *fmt++;
+            fmtChar = *fmt++;
             break;
         case '1' ... '9':
             width = 0;
-            while ((unsigned int)(c - '0') < 10) {
-                width = width * 10 + (c - '0');
-                c = *fmt++;
+            while ((unsigned int)(fmtChar - '0') < 10) {
+                width = width * 10 + (fmtChar - '0');
+                fmtChar = *fmt++;
             }
             break;
         }
-        if (c == '.') {
-            c = *fmt++;
-            switch (c) {
+        if (fmtChar == '.') {
+            fmtChar = *fmt++;
+            switch (fmtChar) {
             case '*':
                 prec = VA_ARG_C450(ap, int);
-                c = *fmt++;
+                fmtChar = *fmt++;
                 break;
             case '1' ... '9':
                 prec = 0;
-                while ((unsigned int)(c - '0') < 10) {
-                    prec = prec * 10 + (c - '0');
-                    c = *fmt++;
+                while ((unsigned int)(fmtChar - '0') < 10) {
+                    prec = prec * 10 + (fmtChar - '0');
+                    fmtChar = *fmt++;
                 }
                 break;
             }
         }
-        switch (c) {
+        switch (fmtChar) {
         case 'c':
             count++;
             *dst++ = (unsigned short)VA_ARG_C450(ap, int);
@@ -587,7 +587,7 @@ void USTR_vsprintf_impl(unsigned short *dst, unsigned short *fmt, char *ap) {
         case 'x':
         case 'X':
             flags |= 0x20;
-            count += output_number_C450(&dst, func_00412550_C450(VA_ARG_C450(ap, int)), 16, flags, width, prec, c == 'x' ? lower : upper);
+            count += output_number_C450(&dst, func_00412550_C450(VA_ARG_C450(ap, int)), 16, flags, width, prec, fmtChar == 'x' ? lower : upper);
             break;
         case 'e':
         case 'E':
@@ -606,13 +606,13 @@ void USTR_vsprintf_impl(unsigned short *dst, unsigned short *fmt, char *ap) {
         case 'p':
         case 'P':
             flags |= 0x28;
-            count += output_number_C450(&dst, func_00412550_C450(VA_ARG_C450(ap, int)), 16, flags, 8, prec, c == 'p' ? lower : upper);
+            count += output_number_C450(&dst, func_00412550_C450(VA_ARG_C450(ap, int)), 16, flags, 8, prec, fmtChar == 'p' ? lower : upper);
             break;
         case 's': {
-            unsigned short *s = VA_ARG_C450(ap, unsigned short *);
-            if (s != 0) {
+            unsigned short *strArg = VA_ARG_C450(ap, unsigned short *);
+            if (strArg != 0) {
                 unsigned short ch;
-                while ((ch = *s++) != 0) {
+                while ((ch = *strArg++) != 0) {
                     count++;
                     *dst++ = ch;
                 }
@@ -628,10 +628,10 @@ void USTR_vsprintf_impl(unsigned short *dst, unsigned short *fmt, char *ap) {
             break;
         }
         case 'S': {
-            char *s = VA_ARG_C450(ap, char *);
-            if (s != 0) {
+            char *strArg = VA_ARG_C450(ap, char *);
+            if (strArg != 0) {
                 char ch;
-                while ((ch = *s++) != 0) {
+                while ((ch = *strArg++) != 0) {
                     count++;
                     *dst++ = ch;
                 }
@@ -648,10 +648,10 @@ void USTR_vsprintf_impl(unsigned short *dst, unsigned short *fmt, char *ap) {
         }
         default:
             count++;
-            *dst++ = c;
+            *dst++ = fmtChar;
             break;
         }
-        c = *fmt++;
+        fmtChar = *fmt++;
     }
     *dst++ = 0;
 }
@@ -806,7 +806,7 @@ extern void func_003E3020_CC88(int, int) __asm__("func_003E3020");
  * @return 1 when initialised now, 0 when already initialised
  */
 int FILESYS_initadr(int maxopenfiles, int maxdirfiles, int maxfileops, int mem) {
-    int v;
+    int alignedDir;
     if (maxopenfiles == 0) maxopenfiles = 0x10;
     if (maxdirfiles == 0) maxdirfiles = 1000;
     if (maxfileops == 0) maxfileops = 0x20;
@@ -819,11 +819,11 @@ int FILESYS_initadr(int maxopenfiles, int maxdirfiles, int maxfileops, int mem) 
         MEM_fill_CC88(D_00519AB0_CC88[10], 0, FILESYS_overhead_CC88(maxopenfiles, maxdirfiles, maxfileops));
         D_00519AB0_CC88[11] = D_00519AB0_CC88[10] + D_00519AB0_CC88[0] * 0x30;
         if (D_00450C60_CC88 != 0) {
-            v = func_003E4040_CC88(maxdirfiles, D_00519AB0_CC88[1] * 272 + D_00519AB0_CC88[11]);
+            alignedDir = func_003E4040_CC88(maxdirfiles, D_00519AB0_CC88[1] * 272 + D_00519AB0_CC88[11]);
         } else {
-            v = 0;
+            alignedDir = 0;
         }
-        func_003E3020_CC88(maxopenfiles, v);
+        func_003E3020_CC88(maxopenfiles, alignedDir);
         return 1;
     }
     return 0;
@@ -952,10 +952,10 @@ void FILESYS_callbackop_impl(int h, Fn_CF70 fn) __asm__("FILESYS_callbackop");
  * @param fn  the completion callback
  */
 void FILESYS_callbackop_impl(int ophandle, Fn_CF70 fn) {
-    struct E_CF70 *e = &D_00519AD8_CF70[((unsigned char *)&ophandle)[3]];
-    e->fn = fn;
-    if (e->f8 != 0) {
-        fn(ophandle, e->f8, e->f14);
+    struct E_CF70 *fop = &D_00519AD8_CF70[((unsigned char *)&ophandle)[3]];
+    fop->fn = fn;
+    if (fop->f8 != 0) {
+        fn(ophandle, fop->f8, fop->f14);
     }
 }
 #endif
@@ -1037,17 +1037,17 @@ extern char *D_00519AD8_D148[] __asm__("D_00519AD8");
  * @param ophandle  the operation handle
  */
 void FILESYS_cancelop(struct H_D148 ophandle) {
-    struct H_D148 c;
-    unsigned int u = ophandle.v;
-    int t;
+    struct H_D148 handleCopy;
+    unsigned int handleBits = ophandle.v;
+    int opType;
     int ok = 0;
-    c.v = u;
-    if (u != 0) {
-        ok = ((*(unsigned int *)(((unsigned char *)&c)[3] * 0x30 + D_00519AD8_D148[0]) ^ u) & 0xFFFFF) == 0;
+    handleCopy.v = handleBits;
+    if (handleBits != 0) {
+        ok = ((*(unsigned int *)(((unsigned char *)&handleCopy)[3] * 0x30 + D_00519AD8_D148[0]) ^ handleBits) & 0xFFFFF) == 0;
     }
     if (ok != 0) {
-        t = (u >> 20) & 0xF;
-        if (t != 3 && t != 10) {
+        opType = (handleBits >> 20) & 0xF;
+        if (opType != 3 && opType != 10) {
             *(int *)(((unsigned char *)&ophandle)[3] * 0x30 + D_00519AD8_D148[0] + 4) = 1;
         }
     }
@@ -1147,11 +1147,11 @@ static inline int hValid_D1D8(int h) {
  * @return the operation's result, or -3 for an invalid handle
  */
 int FILESYS_waitop(int ophandle) {
-    struct sFsCmd *e = &D_00519AB0.f28[((unsigned char *)&ophandle)[3]];
+    struct sFsCmd *fop = &D_00519AB0.f28[((unsigned char *)&ophandle)[3]];
     if (!hValid_D1D8(ophandle)) {
         return -3;
     }
-    while (e->f08 == 0) {
+    while (fop->f08 == 0) {
         if (func_003E5440(0) != 0) {
             SYNCTASK_run(0);
         } else {
@@ -1161,7 +1161,7 @@ int FILESYS_waitop(int ophandle) {
             return -3;
         }
     }
-    return e->f08;
+    return fop->f08;
 }
 #endif
 
@@ -1208,7 +1208,7 @@ int FILESYS_completeop_a(struct sHandle_D310 ophandle) {
     int ret = 0;
     struct sSlot_D310 *slot = (struct sSlot_D310 *)((char *)D_00519AD8 + ophandle.idx * 0x30);
     int sum;
-    int *t;
+    int *fileHandle;
 
     switch (slot->state) {
     case 0:
@@ -1232,11 +1232,11 @@ int FILESYS_completeop_a(struct sHandle_D310 ophandle) {
             ret = slot->f1C;
             break;
         case 5:
-            t = slot->f24;
+            fileHandle = slot->f24;
             ret = slot->f1C;
             sum = ret + slot->f18;
-            if (t[1] < sum) {
-                t[1] = sum;
+            if (fileHandle[1] < sum) {
+                fileHandle[1] = sum;
             }
             break;
         }
@@ -1303,21 +1303,21 @@ extern void func_003DE668();
  * @return the operation handle
  */
 int FILESYS_open(char *name, int modeflags, int priority, int userdata) {
-    char *p = (char *)func_003DE670();
-    int r;
-    *(int *)(p + 0x14) = userdata;
-    *(int *)(p + 0x18) = modeflags;
-    *(int *)(p + 0x10) = priority;
-    *(int *)p = (*(int *)p & 0xFF0FFFFF) | 0x200000;
-    r = func_003DE800();
-    *(int *)(p + 0x24) = r;
-    if (r == 0) {
-        *(int *)(p + 0xC) = 2;
-        func_003DE668(p);
+    char *fop = (char *)func_003DE670();
+    int fileHandle;
+    *(int *)(fop + 0x14) = userdata;
+    *(int *)(fop + 0x18) = modeflags;
+    *(int *)(fop + 0x10) = priority;
+    *(int *)fop = (*(int *)fop & 0xFF0FFFFF) | 0x200000;
+    fileHandle = func_003DE800();
+    *(int *)(fop + 0x24) = fileHandle;
+    if (fileHandle == 0) {
+        *(int *)(fop + 0xC) = 2;
+        func_003DE668(fop);
     }
-    strncpy(*(char **)(p + 0x24) + 0x10, name, 0x100);
-    iFILESYS_ExecCommand(p);
-    return *(int *)p;
+    strncpy(*(char **)(fop + 0x24) + 0x10, name, 0x100);
+    iFILESYS_ExecCommand(fop);
+    return *(int *)fop;
 }
 #endif
 
@@ -1344,24 +1344,24 @@ int FILESYS_close_impl(int arg0, int arg1, int arg2) __asm__("FILESYS_close");
  * @return the operation handle
  */
 int FILESYS_close_impl(int filehandle, int priority, int userdata) {
-    C_D5A0 *c;
+    C_D5A0 *fop;
     struct sFsNode *n;
 
-    c = func_003DE670_D5A0();
+    fop = func_003DE670_D5A0();
     n = D_00519AE4;
-    c->f = 3;
-    *(int*)((char*)c + 0x10) = priority;
-    *(int*)((char*)c + 0x14) = userdata;
-    *(int*)((char*)c + 0x24) = filehandle;
+    fop->f = 3;
+    *(int*)((char*)fop + 0x10) = priority;
+    *(int*)((char*)fop + 0x14) = userdata;
+    *(int*)((char*)fop + 0x24) = filehandle;
     for (; n != 0; n = n->f14) {
         if ((int)n->f0C == filehandle) {
-            *(int*)((char*)c + 0xC) = 3;
-            func_003DE668_D5A0(c);
+            *(int*)((char*)fop + 0xC) = 3;
+            func_003DE668_D5A0(fop);
             break;
         }
     }
-    iFILESYS_ExecCommand_D5A0(c);
-    return *(int*)c;
+    iFILESYS_ExecCommand_D5A0(fop);
+    return *(int*)fop;
 }
 #endif
 
@@ -1391,25 +1391,25 @@ int FILESYS_read_impl(int *arg0, int arg1, int arg2, int arg3, int arg4, int arg
  * @return the operation handle
  */
 int FILESYS_read_impl(int *filehandle, int offset, int buffer, int bytes, int priority, int userdata) {
-    C_D648 *c;
+    C_D648 *fop;
     int n;
 
-    c = func_003DE670_D648();
-    *(int*)((char*)c + 0x14) = userdata;
-    *(int*)((char*)c + 0x10) = priority;
-    c->f = 4;
+    fop = func_003DE670_D648();
+    *(int*)((char*)fop + 0x14) = userdata;
+    *(int*)((char*)fop + 0x10) = priority;
+    fop->f = 4;
     if (filehandle == 0) {
-        *(int*)((char*)c + 0xC) = 6;
-        func_003DE668_D648(c);
+        *(int*)((char*)fop + 0xC) = 6;
+        func_003DE668_D648(fop);
     }
-    *(int**)((char*)c + 0x24) = filehandle;
+    *(int**)((char*)fop + 0x24) = filehandle;
     n = filehandle[1];
-    *(int*)((char*)c + 0x20) = buffer;
+    *(int*)((char*)fop + 0x20) = buffer;
     if (n < offset + bytes) bytes = n - offset;
-    *(int*)((char*)c + 0x18) = offset;
-    *(int*)((char*)c + 0x1C) = bytes;
-    iFILESYS_ExecCommand_D648(c);
-    return *(int*)c;
+    *(int*)((char*)fop + 0x18) = offset;
+    *(int*)((char*)fop + 0x1C) = bytes;
+    iFILESYS_ExecCommand_D648(fop);
+    return *(int*)fop;
 }
 #endif
 
@@ -2299,26 +2299,26 @@ extern void func_003DEA48_EB50(void) __asm__("func_003DEA48");
  * @return the number of bytes transferred
  */
 int syncblockio(int filehandle, int offset, int buffer, int bytes, int priority, int (*fn)(int, int, int, int, int, void *)) {
-    struct S_EA48 s;
-    s.e = priority;
-    s.a = filehandle;
-    s.b = offset;
-    s.d = bytes;
-    s.r = 0;
-    s.n = bytes;
-    s.c = buffer;
-    s.fn = fn;
-    if (s.n > 0x8000) {
-        s.n = 0x8000;
+    struct S_EA48 desc;
+    desc.e = priority;
+    desc.a = filehandle;
+    desc.b = offset;
+    desc.d = bytes;
+    desc.r = 0;
+    desc.n = bytes;
+    desc.c = buffer;
+    desc.fn = fn;
+    if (desc.n > 0x8000) {
+        desc.n = 0x8000;
     }
-    s.h = fn(filehandle, offset, s.c, s.n, priority, &s);
-    if (s.h) {
-        FILESYS_callbackop_EB50(s.h, func_003DEA48_EB50);
+    desc.h = fn(filehandle, offset, desc.c, desc.n, priority, &desc);
+    if (desc.h) {
+        FILESYS_callbackop_EB50(desc.h, func_003DEA48_EB50);
         do {
-            FILESYS_waitop(s.h);
-        } while (s.d || s.h);
+            FILESYS_waitop(desc.h);
+        } while (desc.d || desc.h);
     }
-    return s.r;
+    return desc.r;
 }
 #endif
 
@@ -2552,17 +2552,17 @@ extern char D_00519C08_9C08[] __asm__("hlafile_mutex");
  */
 void *queuefetch(void **queue) {
     void *temp_2;
-    void *var_16;
+    void *req;
 
     MUTEX_lock(D_00519C08_9C08);
     temp_2 = *queue;
-    var_16 = 0;
+    req = 0;
     if (temp_2 != 0) {
-        var_16 = temp_2;
-        *queue = *(void **)((char *)var_16 + 4);
+        req = temp_2;
+        *queue = *(void **)((char *)req + 4);
     }
     MUTEX_unlock_EED8(D_00519C08_9C08);
-    return var_16;
+    return req;
 }
 #endif
 
@@ -2669,22 +2669,22 @@ extern void releaserequest_F028(void *) __asm__("releaserequest");
  * @param req  the request
  */
 void finishrequest(void *req) {
-    int (*temp_19)(int);
-    int temp_16;
-    int temp_18;
+    int (*callback)(int);
+    int cancelFlag;
+    int waitFlag;
 
     MUTEX_lock_F028(D_00519C08_F028);
     (*(volatile int *)((char*)(req) + (0x1C))) = 0;
-    temp_16 = (*(int *)((char*)(req) + (0x10)));
-    temp_19 = (*(int (**)(int))((char*)(req) + (0x18)));
-    temp_18 = (*(int *)((char*)(req) + (0xC)));
+    cancelFlag = (*(int *)((char*)(req) + (0x10)));
+    callback = (*(int (**)(int))((char*)(req) + (0x18)));
+    waitFlag = (*(int *)((char*)(req) + (0xC)));
     MUTEX_unlock_F028(D_00519C08_F028);
-    if (temp_16 != 0) {
-        if (temp_18 == 0) {
+    if (cancelFlag != 0) {
+        if (waitFlag == 0) {
             releaserequest_F028(req);
         }
-    } else if (temp_19 != 0) {
-        temp_19((*(int *)((char*)(req) + (0))));
+    } else if (callback != 0) {
+        callback((*(int *)((char*)(req) + (0))));
     }
 }
 #endif
@@ -2971,21 +2971,21 @@ struct O_F690 { int w0, w4, w8, wC, w10, w14, w18; volatile int w1C; int w20, w2
  * @return the request id, or 0
  */
 int ASYNCFILE_load(int name, int memtype) {
-    struct O_F690 *t = (struct O_F690 *)f_EED8_F690(D_00519BF8_F690);
-    if (t != 0) {
-        f_EF40_F690(t);
-        t->w28 = memtype;
-        t->w8 = 0;
-        t->wC = 0;
-        t->w10 = 0;
-        t->w18 = 0;
-        t->w24 = 0;
-        t->w2C = 0;
-        t->w14 = 1;
-        t->w1C = f_D4E8_F690(name, 1, 100, t);
-        if (t->w1C != 0) {
-            f_CF70_F690(t->w1C, f_F2C0_F690);
-            return t->w0;
+    struct O_F690 *req = (struct O_F690 *)f_EED8_F690(D_00519BF8_F690);
+    if (req != 0) {
+        f_EF40_F690(req);
+        req->w28 = memtype;
+        req->w8 = 0;
+        req->wC = 0;
+        req->w10 = 0;
+        req->w18 = 0;
+        req->w24 = 0;
+        req->w2C = 0;
+        req->w14 = 1;
+        req->w1C = f_D4E8_F690(name, 1, 100, req);
+        if (req->w1C != 0) {
+            f_CF70_F690(req->w1C, f_F2C0_F690);
+            return req->w0;
         }
         return 0;
     }
@@ -3300,22 +3300,22 @@ extern void *getfreerequest_impl(char *arg0) __asm__("getfreerequest");
  * @return the request, or null
  */
 void *getfreerequest_impl(char *strm) {
-    char *r;
-    int t;
+    char *req;
+    int nextId;
     MUTEX_lock(strm + 4);
-    r = 0;
+    req = 0;
     if (*(char **)(strm + 0x68) != 0) {
-        r = *(char **)(strm + 0x68);
-        t = D_00519C18_FCD8[0] + 0x100;
-        *(char **)(strm + 0x68) = *(char **)(r + 0xC);
-        D_00519C18_FCD8[0] = t;
-        if (t == 0) {
+        req = *(char **)(strm + 0x68);
+        nextId = D_00519C18_FCD8[0] + 0x100;
+        *(char **)(strm + 0x68) = *(char **)(req + 0xC);
+        D_00519C18_FCD8[0] = nextId;
+        if (nextId == 0) {
             D_00519C18_FCD8[0] = 0x100;
         }
-        *(int *)r = *(unsigned char *)r | D_00519C18_FCD8[0];
+        *(int *)req = *(unsigned char *)req | D_00519C18_FCD8[0];
     }
     MUTEX_unlock((int *)(strm + 4));
-    return r;
+    return req;
 }
 #endif
 
@@ -3638,21 +3638,21 @@ void startnextrequest(char *self, int priority) {
             *(int *)(self + 0x170) = 0;
         } else {
             char *nm = self + 0x6C;
-            int h;
+            int opHandle;
             *(int *)(self + 0x170) = *(int *)(job + 0x118);
             if (func_004165A8_0270(job + 0x14, nm) != 0) {
                 strcpy_0270(nm, job + 0x14);
                 if (*(int *)(self + 0x16C) == 0) {
-                    h = FILESYS_open_0270(nm, 1, priority, self);
-                    *(int *)(self + 0x174) = h;
-                    if (h != 0) {
-                        FILESYS_callbackop(h, cb_00D8_0270);
+                    opHandle = FILESYS_open_0270(nm, 1, priority, self);
+                    *(int *)(self + 0x174) = opHandle;
+                    if (opHandle != 0) {
+                        FILESYS_callbackop(opHandle, cb_00D8_0270);
                     }
                 } else {
-                    h = FILESYS_close(*(int *)(self + 0x16C), priority, self);
-                    *(int *)(self + 0x174) = h;
-                    if (h != 0) {
-                        FILESYS_callbackop(h, cb_0118_0270);
+                    opHandle = FILESYS_close(*(int *)(self + 0x16C), priority, self);
+                    *(int *)(self + 0x174) = opHandle;
+                    if (opHandle != 0) {
+                        FILESYS_callbackop(opHandle, cb_0118_0270);
                     }
                 }
                 return;
@@ -3804,8 +3804,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_overhead);
  * @return the size in bytes
  */
 int STREAM_overhead(int requests, int filters, int taps) {
-    int t = filters * 0xC + 0x180;
-    return requests * 292 + t + taps * 0x10 + 0x40;
+    int subtotal = filters * 0xC + 0x180;
+    return requests * 292 + subtotal + taps * 0x10 + 0x40;
 }
 #endif
 
@@ -3896,29 +3896,29 @@ void *STREAM_create(int nslots, int nq, int nreq, char *mem, int size) {
         *(int *)(mem + 0x17C) = 0x8000;
     }
     for (i = 0; i < nslots; i++) {
-        char *e;
+        char *entry;
 
-        e = *(char **)(mem + 0x14) + i * 292;
-        *(int *)(e + 0) = i;
-        *(int *)(e + 4) = 0;
-        *(char **)(e + 0xC) = *(char **)(mem + 0x14) + (i + 1) * 292;
+        entry = *(char **)(mem + 0x14) + i * 292;
+        *(int *)(entry + 0) = i;
+        *(int *)(entry + 4) = 0;
+        *(char **)(entry + 0xC) = *(char **)(mem + 0x14) + (i + 1) * 292;
     }
     *(char **)(*(char **)(mem + 0x14) + (nslots - 1) * 0x124 + 0xC) = 0;
     for (i = 0; i < nq; i++) {
-        char *e;
+        char *entry;
 
-        e = *(char **)(mem + 0x1C) + i * 0xC;
-        *(int *)(e + 0) = 0;
-        *(int *)(e + 4) = 0;
-        *(int *)(e + 8) = 1;
+        entry = *(char **)(mem + 0x1C) + i * 0xC;
+        *(int *)(entry + 0) = 0;
+        *(int *)(entry + 4) = 0;
+        *(int *)(entry + 8) = 1;
     }
     for (i = 0; i < nreq; i++) {
-        char *e;
+        char *entry;
 
-        e = *(char **)(mem + 0x24) + i * 0x10;
-        *(char **)(e + 0) = mem;
-        *(int *)(e + 4) = i + 1;
-        *(int *)(e + 8) = 0;
+        entry = *(char **)(mem + 0x24) + i * 0x10;
+        *(char **)(entry + 0) = mem;
+        *(int *)(entry + 4) = i + 1;
+        *(int *)(entry + 8) = 0;
     }
     return *(void **)(mem + 0x24);
 }
@@ -3970,19 +3970,19 @@ struct S_0A28 { int w0; char pad[0x34]; volatile int w38; char pad2[0x130]; int 
  * @param handle  the stream handle
  */
 void STREAM_destroy(int handle) {
-    struct S_0A28 *sp0;
-    int sp4;
-    if (f_FBD0_0A28(handle, &sp0, &sp4) == 0) {
+    struct S_0A28 *strm;
+    int tap;
+    if (f_FBD0_0A28(handle, &strm, &tap) == 0) {
         f_1110_0A28(handle);
-        while (sp0->w38 == 1) {
+        while (strm->w38 == 1) {
             if (f_5440_0A28(0) != 0)
                 f_SYNC_0A28(0);
             f_5398_0A28(0);
         }
-        sp0->w0 = 0;
-        f_56E0_0A28((char *)sp0 + 4);
-        if (sp0->w16C != 0)
-            f_ECA0_0A28(sp0->w16C, 100);
+        strm->w0 = 0;
+        f_56E0_0A28((char *)strm + 4);
+        if (strm->w16C != 0)
+            f_ECA0_0A28(strm->w16C, 100);
     }
 }
 #endif
@@ -4105,13 +4105,13 @@ extern void MUTEX_unlock_0C88(char *) __asm__("MUTEX_unlock");
  * @return the request id, or 0
  */
 int STREAM_queuefile(int handle, char *name, int x, int y) {
-    struct L_0C88 l;
+    struct L_0C88 streamRefs;
     char *node;
     int old;
-    if (validatehandle_0C88(handle, &l.p, &l.q) != 0) {
+    if (validatehandle_0C88(handle, &streamRefs.p, &streamRefs.q) != 0) {
         return 0;
     }
-    node = getfreerequest_0C88(l.p);
+    node = getfreerequest_0C88(streamRefs.p);
     if (node == 0) {
         return 0;
     }
@@ -4119,18 +4119,18 @@ int STREAM_queuefile(int handle, char *name, int x, int y) {
     strncpy(node + 0x14, name, 0xFF);
     *(int *)(node + 0x118) = x;
     *(int *)(node + 0x11C) = y;
-    queuerequest_0C88(l.p, node);
-    MUTEX_lock_0C88(l.p + 4);
-    old = *(volatile int *)(l.p + 0x38);
+    queuerequest_0C88(streamRefs.p, node);
+    MUTEX_lock_0C88(streamRefs.p + 4);
+    old = *(volatile int *)(streamRefs.p + 0x38);
     if (old == 0) {
-        *(volatile int *)(l.p + 0x38) = 1;
+        *(volatile int *)(streamRefs.p + 0x38) = 1;
     }
-    MUTEX_unlock_0C88(l.p + 4);
+    MUTEX_unlock_0C88(streamRefs.p + 4);
     if (old == 0) {
-        if (*(int *)(l.p + 0x48) != 0) {
-            startnextrequest_0C88(l.p, *(int *)(l.p + 0x40));
+        if (*(int *)(streamRefs.p + 0x48) != 0) {
+            startnextrequest_0C88(streamRefs.p, *(int *)(streamRefs.p + 0x40));
         } else {
-            startnextrequest_0C88(l.p, *(int *)(l.p + 0x3C));
+            startnextrequest_0C88(streamRefs.p, *(int *)(streamRefs.p + 0x3C));
         }
     }
     return *(int *)node;
@@ -4833,13 +4833,13 @@ extern int func_003E1AD0[];
  * @param maxsize  the maximum number of bytes
  */
 void FILE_loadat(int name, int address, int maxsize) {
-    int s[5];
-    s[0] = name;
-    s[1] = address;
-    s[2] = maxsize;
-    s[3] = 1;
-    s[4] = 0;
-    FILESYS_atomic(func_003E1AD0, 0, D_00450C38_0C38[0], s);
+    int req[5];
+    req[0] = name;
+    req[1] = address;
+    req[2] = maxsize;
+    req[3] = 1;
+    req[4] = 0;
+    FILESYS_atomic(func_003E1AD0, 0, D_00450C38_0C38[0], req);
 }
 #endif
 
@@ -4862,13 +4862,13 @@ extern int FILESYS_atomic_1BB8(void (*)(void), int, int, void *) __asm__("FILESY
  * @param maxsize  the maximum number of bytes
  */
 void FILE_loadatz(int name, int address, int maxsize) {
-    S_1BB8 s;
-    s.a = name;
-    s.b = address;
-    s.c = maxsize;
-    s.d = 0;
-    s.e = 0;
-    FILESYS_atomic_1BB8(f_1BB8_cb, 0, D_00450C38_1BB8[0], &s);
+    S_1BB8 req;
+    req.a = name;
+    req.b = address;
+    req.c = maxsize;
+    req.d = 0;
+    req.e = 0;
+    FILESYS_atomic_1BB8(f_1BB8_cb, 0, D_00450C38_1BB8[0], &req);
 }
 #endif
 
@@ -5185,28 +5185,28 @@ int FILE_loadpackz_impl(int a, int size) __asm__("FILE_loadpackz");
  */
 int FILE_loadpackz_impl(int name, int size) {
     int sz;
-    int h, buf, tmp;
-    h = FILE_loadsizez(name, &sz, size ^ 0x100);
-    if (h == 0) return 0;
-    buf = unpacksizez_2190(h);
-    if (sz == 0 || buf == 0) return h;
-    tmp = (int)gFileSysOpts.f04((char *)name, sz, size ^ 0x100);
-    if (tmp == 0) {
-        gFileSysOpts.f08((void *)h);
+    int data, buf, packedCopy;
+    data = FILE_loadsizez(name, &sz, size ^ 0x100);
+    if (data == 0) return 0;
+    buf = unpacksizez_2190(data);
+    if (sz == 0 || buf == 0) return data;
+    packedCopy = (int)gFileSysOpts.f04((char *)name, sz, size ^ 0x100);
+    if (packedCopy == 0) {
+        gFileSysOpts.f08((void *)data);
         return 0;
     }
-    func_003E6574_2190(tmp, h, sz);
-    gFileSysOpts.f08((void *)h);
-    h = (int)gFileSysOpts.f04((char *)name, buf, size);
-    if (h != 0) {
-        if (unpackz_2190(tmp, h) == 0) {
-            gFileSysOpts.f08((void *)h);
-            h = 0;
+    func_003E6574_2190(packedCopy, data, sz);
+    gFileSysOpts.f08((void *)data);
+    data = (int)gFileSysOpts.f04((char *)name, buf, size);
+    if (data != 0) {
+        if (unpackz_2190(packedCopy, data) == 0) {
+            gFileSysOpts.f08((void *)data);
+            data = 0;
         }
     }
-    gFileSysOpts.f08((void *)tmp);
+    gFileSysOpts.f08((void *)packedCopy);
     DCACHE_WB_ALL_2190();
-    return h;
+    return data;
 }
 #endif
 
@@ -7749,17 +7749,17 @@ void PRINT_init(void) {
             D_00451250_5B60[i].on = 0;
         }
         for (i = 0; i < 64; i++) {
-            struct sDbgChan *e = &PRINTchannellist[i];
-            e->on = 0;
+            struct sDbgChan *channel = &PRINTchannellist[i];
+            channel->on = 0;
         }
         for (i = 4; i < 8; i++) {
             D_00451250_5B60[i].f00 = 0;
             D_00451250_5B60[i].f04 = 0;
         }
         for (i = 14; i < 64; i++) {
-            struct sDbgChan *e = &PRINTchannellist[i];
-            e->f00 = 0;
-            e->f04b1 = 0;
+            struct sDbgChan *channel = &PRINTchannellist[i];
+            channel->f00 = 0;
+            channel->f04b1 = 0;
         }
         PRINT_setchannelstate(2, 1);
         PRINT_setdevicestate(2, 1);
@@ -8241,66 +8241,66 @@ void MEM_fill_memset(char *p, int c, int n) __asm__("MEM_fill");
  * as
  * 0) give a uniform byte fill.
  *
- * @param p  start of the memory (On Tour dest)
- * @param c  the fill value (On Tour unsigned int val)
+ * @param dest  start of the memory (On Tour dest)
+ * @param fillValue  the fill value (On Tour unsigned int val)
  * @param n  number of bytes
  */
-void MEM_fill_memset(char *p, int c, int n) {
-    if (n > 0 && ((int)p & 1)) {
-        *p = c;
+void MEM_fill_memset(char *dest, int fillValue, int n) {
+    if (n > 0 && ((int)dest & 1)) {
+        *dest = fillValue;
         n--;
-        p++;
+        dest++;
     }
-    if (n >= 2 && ((int)p & 2)) {
-        *(short *)p = c;
+    if (n >= 2 && ((int)dest & 2)) {
+        *(short *)dest = fillValue;
         n -= 2;
-        p += 2;
+        dest += 2;
     }
-    if (n >= 4 && ((int)p & 4)) {
-        *(int *)p = c;
+    if (n >= 4 && ((int)dest & 4)) {
+        *(int *)dest = fillValue;
         n -= 4;
-        p += 4;
+        dest += 4;
     }
     if (n >= 64) {
-        long d;
-        int *q = (int *)&d;
-        q[1] = c;
-        q[0] = c;
+        long fillWide;
+        int *fillHalves = (int *)&fillWide;
+        fillHalves[1] = fillValue;
+        fillHalves[0] = fillValue;
         do {
-            ((long *)p)[0] = d;
+            ((long *)dest)[0] = fillWide;
             n -= 64;
-            ((long *)p)[1] = d;
-            ((long *)p)[2] = d;
-            ((long *)p)[3] = d;
-            ((long *)p)[4] = d;
-            ((long *)p)[5] = d;
-            ((long *)p)[6] = d;
-            ((long *)p)[7] = d;
-            p += 64;
+            ((long *)dest)[1] = fillWide;
+            ((long *)dest)[2] = fillWide;
+            ((long *)dest)[3] = fillWide;
+            ((long *)dest)[4] = fillWide;
+            ((long *)dest)[5] = fillWide;
+            ((long *)dest)[6] = fillWide;
+            ((long *)dest)[7] = fillWide;
+            dest += 64;
         } while (n >= 64);
     }
     if (n >= 16) {
         do {
-            ((int *)p)[0] = c;
+            ((int *)dest)[0] = fillValue;
             n -= 16;
-            ((int *)p)[1] = c;
-            ((int *)p)[2] = c;
-            ((int *)p)[3] = c;
-            p += 16;
+            ((int *)dest)[1] = fillValue;
+            ((int *)dest)[2] = fillValue;
+            ((int *)dest)[3] = fillValue;
+            dest += 16;
         } while (n >= 16);
     }
     while (n >= 4) {
-        *(int *)p = c;
+        *(int *)dest = fillValue;
         n -= 4;
-        p += 4;
+        dest += 4;
     }
     if (n >= 2) {
-        *(short *)p = c;
+        *(short *)dest = fillValue;
         n -= 2;
-        p += 2;
+        dest += 2;
     }
     if (n > 0) {
-        *p = c;
+        *dest = fillValue;
     }
 }
 #endif
@@ -8715,10 +8715,10 @@ extern int func_003F4C98_6E70(int *, int, int) __asm__("func_003F4C98");
  * @param utilRef  the game util ref
  */
 void NetGameUtilDestroy(int utilRef) {
-    int sp10[4];
+    int request[4];
 
-    func_003F4C98_6E70(sp10, 0x676D7574, 0x64657374);
-    func_003F4C68_6E70(sp10, 1, utilRef, 0, 0, 0, 0, 0, 1, 0);
+    func_003F4C98_6E70(request, 0x676D7574, 0x64657374);
+    func_003F4C68_6E70(request, 1, utilRef, 0, 0, 0, 0, 0, 1, 0);
 }
 #endif
 

@@ -1042,11 +1042,11 @@ extern "C" void DisableTextWidget(void* self)
 {
     sVEntry00194498a* vt = *(sVEntry00194498a**)((char*)self + 8);
     vt[8].fn((char*)self + vt[8].delta, 1);
-    sColor4_4498 c = *(sColor4_4498*)((char*)self + 0x1C);
-    if (c.x > 0.5f) {
-        c.x = 0.5f;
+    sColor4_4498 colour = *(sColor4_4498*)((char*)self + 0x1C);
+    if (colour.x > 0.5f) {
+        colour.x = 0.5f;
         sVEntry00194498b* vt2 = *(sVEntry00194498b**)((char*)self + 8);
-        vt2[11].fn((char*)self + vt2[11].delta, &c);
+        vt2[11].fn((char*)self + vt2[11].delta, &colour);
     }
 }
 #endif

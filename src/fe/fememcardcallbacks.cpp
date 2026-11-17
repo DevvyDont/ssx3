@@ -1765,10 +1765,10 @@ extern "C" void cFEMemCard_SetLoadPressed(void* self, int on)
 {
     *(int*)((char*)self + 0x1F4) = on;
     if (on) {
-        char* r = (char*)cSSXApp_getMCManager(SSXApp);
-        char* obj = *(char**)(r + 0x434);
+        char* mcManager = (char*)cSSXApp_getMCManager(SSXApp);
+        char* obj = *(char**)(mcManager + 0x434);
         sVEntry001D9308* vt = *(sVEntry001D9308**)obj;
-        vt[14].fn(obj + vt[14].delta, *(void**)(r + 0xF8), (char*)self + 0x9C);
+        vt[14].fn(obj + vt[14].delta, *(void**)(mcManager + 0xF8), (char*)self + 0x9C);
     } else {
         *(short*)((char*)self + 0x9C) = 0;
     }

@@ -1645,10 +1645,10 @@ INCLUDE_ASM("bx/bxstringctor", cAIPath_populateDataWithDefaults__FPv);
  */
 int cAIPath_populateDataWithDefaults(void* self)
 {
-    int t0 = 46;
-    *(int*)((char*)self + 0x38) = t0;
+    int pathAttributes = 46;
+    *(int*)((char*)self + 0x38) = pathAttributes;
     *(int*)((char*)self + 0x3c) = 1;
-    return t0;
+    return pathAttributes;
 }
 #endif
 
@@ -1719,17 +1719,17 @@ extern "C" sBXVec4K2 cAIPath_getResetPos(sBXPath* path, float* pathParam)
     float lo = hi;
     int i;
     for (i = 0; i < list->count; i++) {
-        sBXRangeK2* e = &list->entries[i];
-        if (*pathParam < e->lo)
+        sBXRangeK2* pathEvent = &list->entries[i];
+        if (*pathParam < pathEvent->lo)
             continue;
-        if (e->hi < *pathParam)
+        if (pathEvent->hi < *pathParam)
             continue;
-        if (e->type == 16)
-            hi = e->hi >? hi;
-        else if (e->type == 12)
-            lo = e->lo <? lo;
-        else if (e->type == 14)
-            lo = e->hi >? lo;
+        if (pathEvent->type == 16)
+            hi = pathEvent->hi >? hi;
+        else if (pathEvent->type == 12)
+            lo = pathEvent->lo <? lo;
+        else if (pathEvent->type == 14)
+            lo = pathEvent->hi >? lo;
     }
     if (lo != *pathParam)
         *pathParam = lo;
@@ -2381,15 +2381,15 @@ extern "C" sBXSeg16* cPath_getPathHeading(sBXSeg16* out, void* self, float pathP
 {
     int i = 0;
     for (;;) {
-        sBXSeg16* e = &(*(sBXSeg16**)((char*)self + 0x18))[i];
-        if (i == *(int*)((char*)self + 0x8) - 1 || pathParam <= e->fC) {
-            out->f0 = e->f0;
-            out->f4 = e->f4;
-            out->f8 = e->f8;
+        sBXSeg16* segment = &(*(sBXSeg16**)((char*)self + 0x18))[i];
+        if (i == *(int*)((char*)self + 0x8) - 1 || pathParam <= segment->fC) {
+            out->f0 = segment->f0;
+            out->f4 = segment->f4;
+            out->f8 = segment->f8;
             *(int*)&out->fC = 0;
             goto done;
         }
-        pathParam -= e->fC;
+        pathParam -= segment->fC;
         i++;
     }
 done:
@@ -2875,14 +2875,14 @@ int cPathSys_getNearResetPaths_impl(void* self, void* a1, void** out, int maxOut
  * cPathSys_getNearAIPaths with the last argument 1. The C definition is cPathSys_getNearResetPaths_impl, bound to the
  * symbol cPathSys_getNearResetPaths__FPv by asm label because the mangled name says (void *).
  *
- * @param a1  the position (On Tour pos)
+ * @param position  the position (On Tour pos)
  * @param out  receives the paths (On Tour pathList)
  * @param maxOut  the most paths to return (On Tour maxListLen)
  * @return the number of paths written
  */
-int cPathSys_getNearResetPaths_impl(void* self, void* a1, void** out, int maxOut)
+int cPathSys_getNearResetPaths_impl(void* self, void* position, void** out, int maxOut)
 {
-    return cPathSys_getNearAIPaths_impl(self, a1, out, maxOut, 1);
+    return cPathSys_getNearAIPaths_impl(self, position, out, maxOut, 1);
 }
 #endif
 
