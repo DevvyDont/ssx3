@@ -639,7 +639,18 @@ struct sBuyAttrib_5300 {
     sObj_5300* confirm;     // 0xAC
 };
 
-// Commits the purchased attribute points: pays, records each point with the economy and resets the counters.
+/**
+ * Buys the attribute points the player has added: pays for them, records them with the economy and resets the counters.
+ *
+ * Takes the total cost (+0xA0) from the bank (+0xA4) and zeroes it (cFEStateBuyAttrib_updateTotalCost), clears the
+ * prompt flag (+0xA8), hides "PopupGroup" and focuses the attribute menu (+0xAC, vtable entry 7 with 1). For each of
+ * the seven attributes it calls func_00150C20(BE interface 11, 0, character, D_004780B0[i]) once per point bought
+ * (+0x84), then calls that interface's vtable entry 1; adds the bought points to the experience (+0x4C) and zeroes
+ * them, and refreshes the levels, cost per level, experience display and bank. cFEStateBuyAttrib_onPopupEvent calls it
+ * when the confirm popup closes with a yes.
+ *
+ * @param p  the buy-attributes state
+ */
 extern "C" void func_001F5300(void* p)
 {
     sBuyAttrib_5300* self = (sBuyAttrib_5300*)p;
@@ -674,6 +685,9 @@ extern "C" void func_001F5300(void* p)
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F54A8);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ */
 extern "C" void func_001F54A8(void) {
 
 }
@@ -686,6 +700,15 @@ extern void* cFEStateCareerStats_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 
+/**
+ * Constructs a career-stats state.
+ *
+ * Runs the cUIState constructor func_0039E2A0 (the engine reaches it in the second argument register), stores
+ * cFEStateCareerStats_vtbl, sets the state id (+0xC) to 42 and the user (+0x44) to 0, and copies player 0's control
+ * mask from the custom interface (func_001A1CD0) into +0x15, without checking that the interface exists.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001F54B0(void* self)
 {
     func_0039E2A0(self);
@@ -1032,6 +1055,12 @@ struct sVEK1F5A38 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Shows the career-stats page chosen by the page index (+0x48).
+ *
+ * Hides "highlights", "race_platinum", "freestyle_platinum" and "ridersbest", then shows page 0, 1, 2 or 3 of those.
+ * The "horizontal_dash_b" and "vertical_dash_b" lines are shown (vtable entry 9) except on pages 0 and 3.
+ */
 extern "C" void func_001F5A38(void* self)
 {
     cUIState_hideObjSafe(self, str_highlights);
@@ -1305,6 +1334,17 @@ struct sCareer_60E0 {
     unsigned int done;          // 0x60
 };
 
+/**
+ * Fills the career-stats race platinum medal list: five rows from the scroll position (+0x50).
+ *
+ * Shows "race_arrowup" while the scroll is above 0 and "race_arrowdown" while rows remain below; "race_medals" reads
+ * "%d / %d" (owned +0x5C of the total +0x58). Each row gets its peak number (D_004780F0 + 1), the location name
+ * (cBENewRaceInterface_getLocationName of D_004780D0; "%s Race" with the mode-4 time for every third event, else the
+ * mode-0 time), the best time formatted by func_0020A1A8 (func_001456A0) and the "race_medal%d" icon when bit idx of
+ * +0x60 is set; rows past the total are hidden.
+ *
+ * @param vself  the career-stats state
+ */
 extern "C" void func_001F60E0(void* vself)
 {
     sCareer_60E0* self = (sCareer_60E0*)vself;
@@ -1412,6 +1452,15 @@ struct sCareer_6490 {
     unsigned int done;          // 0x70
 };
 
+/**
+ * Fills the career-stats freestyle platinum medal list: five rows from the scroll position (+0x54).
+ *
+ * Like the race list with the "fs_" widgets: the peak number is idx / 4 + 1, the location name of D_00478110 ("%s Jam"
+ * with the mode-5 score for every fourth event, else the score of the location's mode from func_00145870), the points
+ * as "%d" and the medal icon by bit idx of +0x70; the counter reads +0x6C of +0x68.
+ *
+ * @param vself  the career-stats state
+ */
 extern "C" void func_001F6490(void* vself)
 {
     sCareer_6490* self = (sCareer_6490*)vself;
@@ -1492,6 +1541,12 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 
+/**
+ * Sets the text of the screen object named @p name when it exists.
+ *
+ * @param name  the object's name
+ * @param str   the ASCII text
+ */
 extern "C" void func_001F6840(void* self, char* name, const char* str)
 {
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
@@ -1684,6 +1739,14 @@ extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", func_001F6EE0);
 #ifdef SKIP_ASM
+/**
+ * Returns the bit number of the @p n-th set bit (counting from 0) among the low @p count bits of @p mask.
+ *
+ * @param mask   the bit set
+ * @param n      which set bit
+ * @param count  how many bits to look at
+ * @return the bit number, or -1 when there are not that many
+ */
 extern "C" int func_001F6EE0(void* self, unsigned int mask, int n, int count)
 {
     int seen = -1;
@@ -1710,6 +1773,17 @@ int cBERewardInterface_getTrackMedal(void* self, int a, int charID, int mode, in
 extern int D_004780D0[];
 extern int D_00478110[];
 
+/**
+ * Counts the career-stats events and the platinum medals the human rider owns.
+ *
+ * For each peak not locked for the human rider (func_00157B08 returns 0; peaks 1 and 2 can be) adds 3, 3 or 2 race
+ * events (+0x58) and 4 freestyle events (+0x68). Then for the 8 race events (D_004780D0; mode 4 for every third, else
+ * 0) and the 12 freestyle events (D_00478110; mode 5 for every fourth, else func_00145870's mode) whose
+ * cBERewardInterface_getTrackMedal is 0, sets bit i of +0x60 / +0x70 and counts +0x5C / +0x6C. All events are checked
+ * whether or not their peak is counted.
+ *
+ * @param vself  the career-stats state
+ */
 extern "C" void func_001F6F30(void* vself)
 {
     char* self = (char*)vself;

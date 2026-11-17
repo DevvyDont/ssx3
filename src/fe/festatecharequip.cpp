@@ -66,6 +66,17 @@ extern void* D_0046D878[];
 extern void* D_0046D970[];
 extern void* cSimpleCamera_vtbl[];
 
+/**
+ * Destroys the front-end module's base part, freeing it when asked.
+ *
+ * Stores the vtable D_0046D878, destroys the UI engine (+0xC, func_00397B70 with 3), purges the graphics manager's
+ * textures, destroys the FX loader (+0xB5AA0) when present, then the file manager (+0x1A70, func_0019CE20) and the
+ * rider manager (+0xB0, func_001A0420), resets the camera's (+0x10) vtable word (+0xA0) to cSimpleCamera_vtbl and
+ * stores the base vtable D_0046D970. Calls operator_delete when bit 0 of @p flags is set. cRealFE__cRealFE calls it as
+ * its base destructor.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001957D0(void* self, int flags)
 {
     *(void***)((char*)self + 0x0) = D_0046D878;
@@ -126,6 +137,14 @@ extern void* D_0046D848[];
 extern "C" void func_00195948(void* self);
 void operator_delete(int* p);
 
+/**
+ * Destroys the front-end locale, freeing it when asked.
+ *
+ * Stores the cFELocale vtable D_0046BF98 at +0x4, deletes all its string files (func_00195948), stores the base vtable
+ * D_0046D848 and calls operator_delete when bit 0 of @p flags is set.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001958F0(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = D_0046BF98;
@@ -142,6 +161,9 @@ INCLUDE_ASM("fe/festatecharequip", func_00195948);
 #ifdef SKIP_ASM
 extern "C" void func_00195A50(void* self, int i);
 
+/**
+ * Deletes all 20 string files of the front-end locale (func_00195A50 for each index).
+ */
 extern "C" void func_00195948(void* self)
 {
     signed char i;

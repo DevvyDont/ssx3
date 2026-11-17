@@ -661,6 +661,15 @@ extern char str_kT_HELPCmnChangeHighlight[];
 extern char str_kT_HELP65Confirm[];
 extern char str_kT_HELP65Cancel[];
 
+/**
+ * Fills the bragging-rights help popup (vtable word 51, the cFEStateNet help-popup entry).
+ *
+ * Sets four options, the title kT_HELP65BraggingRights (+0x54), the two description lines
+ * kT_HELP65BraggingRightsMessage and Message2, and the options kT_HELPCmnToggleHighlight (button 4),
+ * kT_HELPCmnChangeHighlight (3), kT_HELP65Confirm (0) and kT_HELP65Cancel (1).
+ *
+ * @param popup  the help popup (cFEStateNetHelpPopup)
+ */
 extern "C" void func_00193C00(void* self, void* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
@@ -752,7 +761,17 @@ static inline int other_193DE0(int p)
     return p == 0;
 }
 
-// Sets one of the per-player radio/HUD options.
+/**
+ * Stores the value of one bragging-rights rule for a player in the rule records D_005308B8 (0xC bytes per player).
+ *
+ * Rules 0 (word +0x8), 1 (bit 3), 2 (bit 0) and 7 (word +0x4) go into the other player's record; rules 3 (bit 4), 4
+ * (bit 5), 5 (bit 1) and 6 (bit 2) into the player's own. Other rules are ignored. The bragging-rights widget handler
+ * calls it when a choice changes, and func_001941B0 when the online peer reports one.
+ *
+ * @param player  the player whose panel set the rule (0 or 1)
+ * @param which   the rule (0-7)
+ * @param value   the chosen value
+ */
 extern "C" void func_00193DE0(void* self, int player, int which, int value)
 {
     switch (which) {
@@ -786,6 +805,16 @@ struct sRadioChan_3F38 {
 };
 extern sRadioChan_3F38 D_005308B8_a[] __asm__("D_005308B8");
 
+/**
+ * Returns the value of one bragging-rights rule for a player from the rule records D_005308B8.
+ *
+ * Reads the same fields func_00193DE0 writes: rules 0, 1, 2 and 7 from the other player's record, 3-6 from the player's
+ * own.
+ *
+ * @param chan  the player (0 or 1)
+ * @param kind  the rule (0-7)
+ * @return the rule's value, or -1 for other rules
+ */
 extern "C" int func_00193F38(void *self, int chan, int kind) {
     switch (kind) {
     case 0:
@@ -821,6 +850,12 @@ extern char str_wait_1[];
 extern char str_wait_2[];
 
 static inline int get6F8_4080(void* p) { return *(int*)((char*)p + 0x6F8); }
+/**
+ * Plays the bragging-rights screen's "wait 1" or "wait 2" label when exactly one of the two panels is locked.
+ *
+ * "wait 1" when the first panel's flag (+0x6F8) is set and the second's (+0x72C) clear, "wait 2" the other way round;
+ * nothing when both or neither are locked.
+ */
 extern "C" void func_00194080(void* self)
 {
     if (*(int*)((char*)self + 0x6F8) != 0 && *(int*)((char*)self + 0x72C) == 0) {
@@ -936,6 +971,20 @@ struct sRadioMsg_41B0 {
     int key;             // 0x10
 };
 
+/**
+ * Handles the online messages of the bragging-rights screen (vtable word 63, cFEStateNet entry 31).
+ *
+ * 251 selects row @p data's idx in the given panel's menu. 252 finds the list entry whose data is the message's key in
+ * the given panel's list idx, selects it and stores the value for the row's rule (+0x738 table; func_00193DE0) unless
+ * the rule is -1. 253 locks the panel (cBraggingRightsMenu_setConfirmed with 1) and refreshes the wait labels (func_00194080). 254 unlocks
+ * it, recolours it (cBraggingRightsMenu_setEnableItem), selects its row 0 and plays label "11" (panel 0) or "21". 238, 241, 248, 250, 274
+ * and 275 call func_001AB288. 268 hands func_001A8A40 a new chat room (cFEStateChatRoom, 1852 bytes) when
+ * func_0025DA90(LobbyMan_mLobbyMan) is true, else a new online main menu (1744 bytes). Others go to func_001A8E40.
+ *
+ * @param msg   the message
+ * @param data  the message data (+0x8 panel, +0xC row or list index, +0x10 key)
+ * @return 0, or func_001A8E40's result for other messages
+ */
 extern "C" int func_001941B0(char* self, int msg, sRadioMsg_41B0* data)
 {
     switch (msg) {
@@ -998,6 +1047,16 @@ extern "C" void func_00265768(void* snd, int id);
 void func_001A94D8(void* self);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
+/**
+ * Handles an event of the bragging-rights screen's cancel-challenge popup (id 2104).
+ *
+ * Event 0xF (confirmed) cancels the online race setup (func_00265768(D_004A33CC, 249) when D_004A33CC is set) and calls
+ * the empty func_001A94D8; other events go to cFEStateNet_onPopupEvent. cFEStateBraggingRights_onPopupEvent calls it
+ * online for that popup.
+ *
+ * @param a1  the popup
+ * @param a2  the popup event
+ */
 extern "C" void func_00194440(void* self, void* a1, int a2)
 {
     if (a2 == 0xF) {

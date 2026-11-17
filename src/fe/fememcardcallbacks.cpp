@@ -2054,6 +2054,13 @@ struct sVEntry001D9368 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Switches the memory-card screen to display state 1 unless it is already there.
+ *
+ * When the display state (+0x214) is not 1, sets it to 1 and calls vtable entry 35 (cFEMemCard_triggerDisplayState)
+ * with 1. Fills vtable entry 31 (+0xFC) of the memory-card states (cFEStateMemCard, cFEStateProfileLoad,
+ * cFEStateOptionsDeviceSelect), between the empty update entries and the skip handler.
+ */
 extern "C" void func_001D9368(void* self)
 {
     if (*(int*)((char*)self + 0x214) != 1) {
@@ -2067,6 +2074,9 @@ extern "C" void func_001D9368(void* self)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D93A8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (the memory-card screen's empty update handler in vtable entry 27, +0xDC).
+ */
 void func_001D93A8(void* self)
 {
 }
@@ -2075,6 +2085,9 @@ void func_001D93A8(void* self)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D93B0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Sets the memory-card screen state (+0x1C0) to 1.
+ */
 void func_001D93B0(void* self)
 {
     *(int*)((char*)self + 0x1C0) = 1;
@@ -2084,6 +2097,9 @@ void func_001D93B0(void* self)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D93C0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (the memory-card screen's empty update handler in vtable entry 28, +0xE4).
+ */
 void func_001D93C0(void* self)
 {
 }
@@ -2092,6 +2108,9 @@ void func_001D93C0(void* self)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D93C8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (the memory-card screen's empty update handler in vtable entry 30, +0xF4).
+ */
 void func_001D93C8(void* self)
 {
 }
@@ -2100,6 +2119,9 @@ void func_001D93C8(void* self)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D93D0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (the memory-card screen's empty update handler in vtable entry 29, +0xEC).
+ */
 void func_001D93D0(void* self)
 {
 }
@@ -2108,6 +2130,13 @@ void func_001D93D0(void* self)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D93D8);
 #ifdef SKIP_ASM
+/**
+ * Reports whether the memory-card screen may finish its leaving transition: the screen state (+0x1C0) is 6.
+ *
+ * Installed in the cUIState onLoseTransition entry (vtable entry 10) of the memory-card states.
+ *
+ * @return 1 when the screen state is 6, else 0
+ */
 extern "C" int func_001D93D8(void* self)
 {
     return *(int*)((char*)self + 0x1c0) == 6;
@@ -2122,6 +2151,16 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* self, int hash);
 extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a, int b, int c);
 
+/**
+ * Plays an animation on a named widget of the memory-card screen.
+ *
+ * Looks up the widget @p objName on the state's screen (mpScreen, +0x40) and the animation @p animName in the UI
+ * engine's animation bank (mpEngine + 0x50, cUIAnimationBank_getAnimationByHashName), both by GetHashValue32(), and
+ * plays it with cUIThing_playAnimation(widget, anim, 3, 0, 1). Does nothing when either is missing.
+ *
+ * @param objName   name of the widget to animate
+ * @param animName  name of the animation to play
+ */
 extern "C" void func_001D93E8(void* self, char* objName, char* animName)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(objName));
@@ -2302,6 +2341,12 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_text_box_message[];
 
+/**
+ * Gains focus for the memory-card screen and hides its "text box message" widget.
+ *
+ * Runs the base cUIState_onGainFocus(), then looks up "text box message" (str_text_box_message) on mpScreen (+0x40) and
+ * calls its setVisible (cUIThing vtable slot 9) with 0.
+ */
 extern "C" void func_001D9818(void* self)
 {
     cUIState_onGainFocus(self);
@@ -2316,6 +2361,9 @@ extern "C" void func_001D9818(void* self)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9878__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (the memory-card screen's onLoseFocus handler, vtable entry 11).
+ */
 void func_001D9878(void* self)
 {
 }
@@ -2351,6 +2399,15 @@ public:
 
 static inline bool IsModeK1D9880(char* mp, int m) { return *(int*)(mp + 0x130) == m; }
 
+/**
+ * Reports whether the memory-card screen may show the file display now.
+ *
+ * True only when the screen state (+0x1C0) is neither 0 nor 6, the memory-card overlay manager
+ * (cSSXApp_getMCManager(SSXApp)) has mCheckAllowed set and mGetDir clear, its card (mpMemCard) answers 0 from virtual
+ * slot 11, the manager's mState is neither 6 nor 1, and the card answers non-zero from virtual slot 75.
+ *
+ * @return 1 when all the checks pass, else 0
+ */
 extern "C" int func_001D9880(void* self)
 {
     int r = 0;
@@ -2635,6 +2692,18 @@ struct sMcSlot9D48 {
     sMcSlot9D48() {}
 };
 
+/**
+ * Constructs a network help popup state owned by another state.
+ *
+ * Runs the cUIState constructor func_0039E318(self, engine, owner), stores cFEStateNetHelpPopup_vtbl, runs the empty
+ * constructor of a 7-element array at +0x54 (8-byte elements), clears +0x4C and +0x50 (the flag that makes
+ * cFEStateNetHelpPopup_handleEvent forward events to the owner), sets mHashName (+0xC) to 76 and clears the popup's
+ * texts and options with cFEStateNetHelpPopup_clear().
+ *
+ * @param engine  the UI engine
+ * @param owner   the parent state (mpParentState)
+ * @return @p self
+ */
 extern "C" void* func_001D9D48(void* self, void* engine, void* owner)
 {
     func_0039E318(self, engine, owner);

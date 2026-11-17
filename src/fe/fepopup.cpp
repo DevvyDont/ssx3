@@ -327,6 +327,14 @@ static inline void Call9_5E58(char* o, int a)
     }
 }
 
+/**
+ * Shows or hides the popup's text objects.
+ *
+ * Calls setVisible (cUIThing vtable slot 9) with @p visible on mpButtonGroup, mpMessageText, mpPostText, mpTitleText
+ * and mpTextBoxPair, skipping any that is null.
+ *
+ * @param visible  nonzero to show, 0 to hide
+ */
 extern "C" void func_001C5E58(void* self, int visible)
 {
     char* obj = (char*)self;
@@ -1481,6 +1489,16 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cUIText_setUnicodeString(cUIText* text, void* p);
 extern char D_004A1408[];
 
+/**
+ * Sets a text widget's string from a popup string element.
+ *
+ * By @p info's eType (tPopupElement): 1 sets the unicode string (cUIText_setUnicodeString), 2 the ascii string
+ * (cUIText_setAsciiString), 3 the localised string by id (cUIText_setUnicodeStringByID); 0 sets the empty string
+ * D_004A1408. Other types leave the text unchanged.
+ *
+ * @param text  the text widget to fill
+ * @param info  the string element: eType at [0], the string or id at [1]
+ */
 extern "C" void func_001C8050(void* self, cUIText* text, int* info)
 {
     switch (info[0]) {
@@ -1633,6 +1651,18 @@ struct sVEntry_8320 {
     char* (*fn)(void*, int);
 };
 
+/**
+ * Measures a popup string element as a text widget would draw it.
+ *
+ * Scales the widget's font by the widget's mScale (font +0x38/+0x3C = font +0x30/+0x34 times mScale.x/.y), then by @p
+ * info's eType: 1 measures the unicode string (func_003921F0), 2 the ascii string (cFont_textExtent); 3 looks the id up
+ * through SSXApp->FELocale's virtual slot 4 and measures that unicode string, or, when it is missing, the text "String
+ * %08x" of the id (64-byte stack buffer) as ascii. Type 0 sets @p out[2] and @p out[3] (width and height) to 0.
+ *
+ * @param text  the text widget whose font and scale are used
+ * @param info  the string element: eType at [0], the string or id at [1]
+ * @param out   the result rectangle (four floats, written by the font's extent function)
+ */
 extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out)
 {
     sVec3_8320 v = *(sVec3_8320*)((char*)text + 0x50);
@@ -1681,6 +1711,17 @@ struct sVec3_84A8 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
+/**
+ * Measures an ascii string as a text widget would draw it, including the line height.
+ *
+ * Scales the widget's font by its mScale (as func_001C8320 does), measures @p str with cFont_textExtent into @p out,
+ * and sets @p out's height (+0xC) to mScale.y times the font's line height (font +0x14, as a float) times its y scale
+ * (font +0x34).
+ *
+ * @param text  the text widget whose font and scale are used
+ * @param str   the ascii string
+ * @param out   the result rectangle (four floats)
+ */
 extern "C" void func_001C84A8(void* self, void* text, const char* str, void* out)
 {
     sVec3_84A8 scale = *(sVec3_84A8*)((char*)text + 0x50);
@@ -1703,6 +1744,16 @@ struct sVec3_8568 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float func_003921F0(void* self, const char* str, void* out, int n, float sx, float sy);
 
+/**
+ * Measures a unicode string as a text widget would draw it, including the line height.
+ *
+ * Same as func_001C84A8() but measures with the unicode extent function func_003921F0 (@p str is passed through as a
+ * char pointer).
+ *
+ * @param text  the text widget whose font and scale are used
+ * @param str   the unicode string
+ * @param out   the result rectangle (four floats)
+ */
 extern "C" void func_001C8568(void* self, void* text, const char* str, void* out)
 {
     sVec3_8568 scale = *(sVec3_8568*)((char*)text + 0x50);
@@ -1729,6 +1780,14 @@ struct sVEntry001C8628 {
     void (*fn)(void*, sVec2_8628*);
 };
 
+/**
+ * Copies a widget's size into a rectangle's width and height.
+ *
+ * Calls the widget's getSize (cUIThing vtable slot 20) and stores its x and y at @p out + 0x8 and + 0xC.
+ *
+ * @param obj  the widget
+ * @param out  the result rectangle (four floats)
+ */
 extern "C" void func_001C8628(void* self, void* obj, void* out)
 {
     sVec2_8628 v;
@@ -2029,6 +2088,20 @@ struct sVEntry_8EF0 {
     unsigned short* (*fn)(void*, int);
 };
 
+/**
+ * Grows a text-box size to fit a popup string element, plus a gap.
+ *
+ * Picks mpMessageText when @p flag is nonzero, else mpPostText, and returns when it is null. By @p item's eType: 1
+ * measures the unicode string with func_001C9038(), 2 the ascii string with func_001C9210(), 3 the localised string
+ * (SSXApp->FELocale virtual slot 4) with func_001C9038(), or the text "String %08x" with func_001C9210() when the id
+ * has no string. Afterwards adds @p extra to @p size[1], except for type 0 and a missing id.
+ *
+ * @param vself  the popup (cScreenPopup)
+ * @param item   the string element: eType at [0], the string or id at [1]
+ * @param size   the box size (t3Vector) to grow
+ * @param flag   nonzero to measure with the message text, 0 with the post text
+ * @param extra  gap added to the height
+ */
 extern "C" void func_001C8EF0(void* vself, int* item, float* size, int flag, float extra)
 {
     char* self = (char*)vself;
@@ -2082,6 +2155,17 @@ extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* ite
 extern char str_getTextBoxSize[];
 extern char D_004A1C38;
 
+/**
+ * Grows a text-box size to fit a unicode string, line by line.
+ *
+ * Splits a copy of @p str (allocated "getTextBoxSize") at each pair of backslashes (D_004A1C38 is a backslash) and each
+ * '\r'; each line is measured with func_001C8568(), added to @p size with cScreenPopup_increaseBoxSize() and followed
+ * by 3 units of height. The copy is freed at the end.
+ *
+ * @param text  the text widget whose font is used
+ * @param str   the unicode string
+ * @param size  the box size (t3Vector) to grow
+ */
 extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float* size)
 {
     int j = 0;
@@ -2135,6 +2219,17 @@ extern "C" void func_001C84A8(void* self, void* text, const char* str, void* out
 extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item);
 extern char str_getTextBoxSize[];
 
+/**
+ * Grows a text-box size to fit an ascii string, line by line.
+ *
+ * Splits a copy of @p str (allocated "getTextBoxSize") at each pair of backslashes and each '\r'; each line is measured
+ * with func_001C84A8() and added to the size with cScreenPopup_increaseBoxSize(). Lines ended by a separator add 3
+ * units of height; unlike func_001C9038() the last line does not. The copy is freed at the end.
+ *
+ * @param text     the text widget whose font is used
+ * @param str      the ascii string
+ * @param sizePtr  the box size (a float* to a t3Vector, declared int)
+ */
 // PORT: a3 is the float* size out pointer (the unit declares it int)
 extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int sizePtr)
 {
@@ -2252,6 +2347,18 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
 extern char str_UITEXTTEMP[];
 extern char D_004A1C38;
 
+/**
+ * Measures how wide the first line of a unicode string gets before it would overflow the text widget.
+ *
+ * Sets bit 7 of the widget's mAttr, then walks a copy of @p strp (allocated "UITEXTTEMP") adding each character's width
+ * (func_00392C60 times mScale.x); a pair of backslashes (D_004A1C38) restarts the width at 0. Stops at the first
+ * character that makes the width exceed the widget's width (getSize, vtable slot 20) and stores the width before it in
+ * @p outp; otherwise stores the full width. Returns early, without writing, when the widget has no font.
+ *
+ * @param text  the text widget
+ * @param strp  the unicode string
+ * @param outp  receives the width (float)
+ */
 extern "C" void func_001C94B0(void* self, void* text, void* strp, void* outp)
 {
     unsigned short* str = (unsigned short*)strp;
@@ -2462,6 +2569,18 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
 extern char str_UITEXTTEMP[];
 extern char D_004A1C38;
 
+/**
+ * Word-wraps a unicode string to a text widget's width, grows a box size to fit it, and puts it in the widget.
+ *
+ * Sets bit 7 of the widget's mAttr; returns when the widget has no font. On a copy of @p strp (allocated "UITEXTTEMP")
+ * it adds character widths (func_00392C60 times mScale.x), restarting at backslash pairs and '\r'; when the width
+ * passes the widget's width (getSize) after a space was seen, that space becomes '\r' and scanning resumes after it.
+ * The wrapped copy is measured into @p out with func_001C9038() and set with cUIText_setUnicodeString(), then freed.
+ *
+ * @param text  the text widget
+ * @param strp  the unicode string
+ * @param out   the box size (t3Vector) to grow
+ */
 extern "C" void func_001C9938(void* self, cUIText* text, void* strp, float* out)
 {
     unsigned short* str = (unsigned short*)strp;
@@ -2518,6 +2637,15 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int a3);
 
+/**
+ * Grows a box size to fit an ascii string and puts the string in the text widget.
+ *
+ * Runs func_001C9210() and then cUIText_setAsciiString(); the ascii string is not wrapped.
+ *
+ * @param text     the text widget
+ * @param str      the ascii string
+ * @param sizePtr  the box size (a float* to a t3Vector, declared int)
+ */
 extern "C" void func_001C9B28(void* self, cUIText* text, const char* str, int sizePtr)
 {
     func_001C9210(self, text, str, sizePtr);
@@ -3248,7 +3376,20 @@ extern char str_kT_OVRCMNVideoColon[];
 extern char str_kT_OVRCMNToyColon[];
 extern char str_kT_OVRCMNCheatCharColon[];
 
-// Fills in a popup description: title, OK button and the message text for the given kind.
+/**
+ * Fills a buy popup for a reward: price, cash, the reward's name and type, and the "buy item" question.
+ *
+ * Sets mCost to @p a3, mMoney to @p a4 and mCreditsLeft to -1; mItemName is the ascii string @p a2, mQuestion the text
+ * id of "kT_OVRCMNBuyItem". mItemType gets the text id for @p kind: 3 "kT_OVRCMNPosterColon", 4 "kT_OVRCMNCardColon", 5
+ * "kT_OVRCMNArtColon", 6 "kT_OVRCMNVideoColon", 7 "kT_OVRCMNToyColon", 8 "kT_OVRCMNCheatCharColon"; any other kind
+ * leaves it unchanged.
+ *
+ * @param desc  the cBuyPopupInfo to fill
+ * @param kind  the reward type (3..8)
+ * @param a2    the reward's name (ascii string, passed as int)
+ * @param a3    the price
+ * @param a4    the player's cash
+ */
 extern "C" void func_001CAA18(int* desc, int kind, int a2, int a3, int a4)
 {
     desc[4] = a2;
@@ -5191,6 +5332,14 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBXString_cBXString4(void* self, const char* str);
 
+/**
+ * Sets the keyboard popup's static label from an ascii string.
+ *
+ * Before the screen exists (mpScreen null) the string is kept in mszStatic (cBXString at +0x424); otherwise it is put
+ * straight into the "StaticValue" text widget.
+ *
+ * @param str  the label text
+ */
 extern "C" void func_001CCF00(cKeyboardPopup* self, const char* str)
 {
     if (self->mpScreen == 0) {
@@ -6096,6 +6245,14 @@ extern "C" void cKeyboardPopup_setIncludeKey(cKeyboardPopup* self, int i, int bI
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CE408);
 #ifdef SKIP_ASM
+/**
+ * Enables or disables the shifted number keys of the keyboard popup.
+ *
+ * For keys 15..24 (the number row) calls cKeyboardPopup_setIncludeKey(key, !on, 1), changing only the alternate key set
+ * (mbAlternate).
+ *
+ * @param on  nonzero to disable the keys in the alternate set, 0 to enable them
+ */
 extern "C" void func_001CE408(void* self, bool on)
 {
     int i;
@@ -6108,6 +6265,14 @@ extern "C" void func_001CE408(void* self, bool on)
 //100%
 INCLUDE_ASM("fe/fepopup", func_001CE468);
 #ifdef SKIP_ASM
+/**
+ * Includes or excludes the keyboard popup's quick-key row.
+ *
+ * For keys 0..13 calls cKeyboardPopup_setIncludeKey(key, @p included, 2), in both key sets.
+ * cKeyboardPopup_fillSelectableKeys ends with a call that excludes them.
+ *
+ * @param included  nonzero to make the keys selectable
+ */
 extern "C" void func_001CE468(void* self, int included)
 {
     int i;
@@ -6265,6 +6430,17 @@ struct sPopupSlot_E6F0 {
 
 extern sPopupSlot_E6F0 D_0045AAD8[][4][5];
 
+/**
+ * Counts the events listed for one peak of one mountain in the event table D_0045AAD8.
+ *
+ * Looks at the five entries D_0045AAD8[@p a][@p b][0..4] and counts them up to the first whose first byte (the event's
+ * track/kind selector) is negative. Used by the trophy room (cFEStateTrophyRoom_onWidgetCreate) and the lodge
+ * (cFEStatePeakRoom_updateMedalsList) to size their event rows.
+ *
+ * @param a  the mountain (0..2)
+ * @param b  the peak (0..3)
+ * @return the number of events before the first terminator (0..5)
+ */
 extern "C" int func_001CE6F0(int a, int b)
 {
     int n = 0;

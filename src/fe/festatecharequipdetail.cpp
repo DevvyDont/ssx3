@@ -1121,6 +1121,17 @@ struct sVEK19A098b {
     void (*fn)(void*, int, char*, int);
 };
 
+/**
+ * Finds an icon in the character's loaded icon package and returns its texture.
+ *
+ * Needs the icon package loaded (+0xA60) and present in the file manager (func_0019E2B0 with the character's bank +0xBC
+ * and file +0xA64). Compares each image's name, cut to 4 characters, with @p name; on a match creates the icon texture
+ * (graphics manager vtable entry 46, kind "icon") into +0xA68 the first time, or reloads that texture with the image
+ * (entry 48). All icons share that one texture.
+ *
+ * @param name  the icon name
+ * @return the texture id (+0xA68), or -1 when the package is not loaded or has no such image
+ */
 extern "C" int func_0019A098(void* self, const char* name)
 {
     if (*(int*)((char*)self + 0xA60) == 0)
@@ -1162,6 +1173,12 @@ struct sEquipTable;
 extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
 extern "C" void func_0019A9B8(void* self);
 
+/**
+ * Marks the icon package loaded once its file is ready and refreshes the item preview.
+ *
+ * When +0xA60 is clear and the file manager reports the icon file ready (func_0019E238 on +0xBC, +0xA64), sets +0xA60
+ * and calls func_0019A9B8. No call site was found in the asm.
+ */
 extern "C" void func_0019A1E0(void* self)
 {
     if (*(int*)((char*)self + 0xA60) == 0
@@ -1187,6 +1204,13 @@ struct sVEntry0019A238 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Sets the equip screen up for the inventory.
+ *
+ * Titles it kT_CMNEquipGear (+0x48), hides the money group (+0x60) and the large preview (+0x88), shows the small icon
+ * preview group (+0x80), shows the user's front-end rider (cFERider_setVisible with 1) and sets the camera state (+0xAE0) to
+ * 1.
+ */
 extern "C" void func_0019A238(void* self)
 {
     if (*(cUIText**)((char*)self + 0x48) != 0) {
@@ -1226,6 +1250,12 @@ struct sVEntry0019A308 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Sets the equip screen up for the store.
+ *
+ * Titles it kT_CMNBuyGear (+0x48), hides the small icon preview group (+0x80) and the points group (+0x6C), hides the
+ * user's front-end rider and shows the money group (+0x60).
+ */
 extern "C" void func_0019A308(void* self)
 {
     if (*(cUIText**)((char*)self + 0x48) != 0) {
@@ -1273,6 +1303,14 @@ static inline int isDetailK19A3D0(void* self)
     return *(int*)((char*)self + 0xC8) == 1;
 }
 
+/**
+ * Switches the equip screen between the inventory (mode 0) and the store (mode 1) and lists the root category again.
+ *
+ * Flips +0xC8, sets the screen up for the new mode (func_0019A238 or func_0019A308) and labels the button help (+0x50)
+ * with the other mode (kT_CMNBuyGear in the inventory, kT_CMNEquipGear in the store). Then empties the category stack
+ * (depth +0x120 = 0, the 80 bytes at +0xD0 filled with D_004A11D0), updates the heading and rebuilds and redraws the
+ * list (func_0019B180, func_0019B618 with 1, 1).
+ */
 extern "C" void func_0019A3D0(void* self)
 {
     if (isDetailK19A3D0(self)) {
@@ -1302,6 +1340,12 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019A498);
 struct sEquipTable_DC20;
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
 
+/**
+ * Cancels the pending large-preview load.
+ *
+ * Releases the queued preview file (+0xA6C, func_0019DC20) if any, clears the file name (+0x960) and sets +0xA6C and
+ * the delay (+0x95C) to -1.
+ */
 extern "C" void func_0019A498(void* self)
 {
     int idx = *(int*)((char*)self + 0xA6C);
@@ -1332,6 +1376,17 @@ static inline int isDigitK19A4E8(unsigned char c)
     return c >= '0' && c <= '9';
 }
 
+/**
+ * Starts loading the large preview of the selected item after a delay.
+ *
+ * Cancels the previous load (func_0019A498), releases the old preview texture (+0xA74) and moves the current one
+ * (+0xA70) there. For a selected row with a name (+0x30) sets the delay (+0x95C: 20 frames when @p flag is set, else 1)
+ * and builds the file name at +0x960 as "%s_%s%s": the character's file name (func_0014B700) without the character
+ * before its '.', the item name from its first digit, and the extension. The name buffer is both the destination and
+ * the first source of that sprintf.
+ *
+ * @param flag  nonzero for the longer delay
+ */
 extern "C" void func_0019A4E8(void* self, int flag)
 {
     if (*(void**)((char*)self + 0x5C) == 0)
@@ -1386,6 +1441,13 @@ struct sVEntryK19A638 {
     int (*fn)(void*, void*, char*, int, int, int);
 };
 
+/**
+ * Advances the store's large-preview load (store mode only).
+ *
+ * Counts the delay (+0x95C) down and, when it reaches 0, queues the preview file (func_0019DA10 kind 9 into +0xA6C).
+ * Once the queued file is ready, makes its texture (graphics manager vtable entry 46, kind "preview") into +0xA70, or
+ * -1 when the file is empty, releases the file and refreshes the item preview (func_0019A9B8).
+ */
 extern "C" void func_0019A638(void* self)
 {
     int mode1 = *(int*)((char*)self + 0xC8) == 1;
@@ -1421,6 +1483,11 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019A758);
 #ifdef SKIP_ASM
 extern "C" void func_0019FA78(void* a0, int a1);
 
+/**
+ * Cancels the user's front-end rider's texture loads (func_0019FA78 with no item list) when the front end exists.
+ *
+ * No call site was found in the asm.
+ */
 extern "C" void func_0019A758(void* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
@@ -1509,6 +1576,15 @@ static inline void setText_A798(void* self, char* s)
     cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x4C), GetHashValue32(s));
 }
 
+/**
+ * Sets the equip screen's help text for the selected row.
+ *
+ * Hides the help text (+0x4C), then: with no item selected, kT_HELPBoughtMaxItems in the store, else kT_HELPNoItemsCTM
+ * (when +0xAE4 is set) or kT_HELPBuyItemInCTM; on a category (flag 0x20) kT_FEHELPChooseCatContinue; in the store
+ * kT_FEHELPItemAvailBuy when the money (+0xC0) covers the price x 10, else kT_129HELPSaveCashItem; in the inventory
+ * kT_FEHELPRemoveItems when the row's points would pass the limit D_004A18D8, else kT_FEYourCurrentOutfit. Shows the
+ * help text again. Likely bug: both outcomes of the item's equipped test (entry flag 4) choose kT_FEYourCurrentOutfit.
+ */
 extern "C" void func_0019A798(void* self)
 {
     if (*(cUIObj_A798**)((char*)self + 0x4C) == 0)
@@ -1562,6 +1638,10 @@ extern "C" void func_0019AB78(void* self);
 extern "C" void func_0019AA08(void* self);
 extern "C" void func_0019A798(void* self);
 
+/**
+ * Refreshes the equip screen's item preview for the current mode (func_0019AB78 in the store, func_0019AA08 in the
+ * inventory) and then its help text (func_0019A798).
+ */
 extern "C" void func_0019A9B8(void* self)
 {
     bool buyMode = *(int*)((char*)self + 0xC8) == 1;
@@ -1592,6 +1672,14 @@ static inline void showK19AA08(char* o, int on)
     vt[9].fn(o + vt[9].delta, on);
 }
 
+/**
+ * Refreshes the inventory preview for the selected row.
+ *
+ * Hides the points group (+0x6C), the small bolt icon (+0x84) and the points cost (+0x7C). For an item (flag 4, not a
+ * category) shows the points group, takes the row's points (+0xA78) and, when the icons are loaded and the item has a
+ * name, shows the icon with its texture (func_0019A098). Finally updates the points preview bar (func_0019BD48) with
+ * the row's points, or 0.
+ */
 extern "C" void func_0019AA08(void* self)
 {
     if (*(void**)((char*)self + 0x5C) == 0)
@@ -1650,6 +1738,13 @@ static inline void showK19AB78(void* o, int on)
     vt[9].fn((char*)o + vt[9].delta, on);
 }
 
+/**
+ * Refreshes the store preview for the selected row.
+ *
+ * Shows the large preview (+0x88) with the loaded preview texture (+0xA70) when an item is selected and the texture is
+ * ready, and the cost (+0x68) as the item's price x 10 (getDollarString) for an item that is not a category; otherwise
+ * hides them.
+ */
 extern "C" void func_0019AB78(void* self)
 {
     char* menu = *(char**)((char*)self + 0x5C);
@@ -1691,6 +1786,11 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0014AD28(void* self, int a1, int a2);
 extern "C" void func_0019FBE0(void* rider, void* item, int a2, int a3);
 
+/**
+ * Requeues the user's front-end rider's textures for the character's current items (func_0019FBE0 with 0, 1).
+ *
+ * cFEStateCharEquip_onWidgetEvent calls it after equipping or removing an item.
+ */
 extern "C" void func_0019ACA0(void* self)
 {
     void* rider = func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
@@ -1746,6 +1846,16 @@ static inline void copyRow_19AD18(sCharEquipDetail_19AD18* self, int dst, int sr
     vt2[9].fn(o + vt2[9].delta, (*(int*)(self->aA4[src] + 0x14) >> 6) & 1);
 }
 
+/**
+ * Scrolls the equip screen's six item rows by @p n.
+ *
+ * Beyond six rows either way redraws all rows (func_0019B598 in the store, func_0019B518 in the inventory). Otherwise
+ * copies each kept row from the row @p n away (the source text's +0x1C passed to vtable entry 11, its string, and the
+ * icon's visibility from bit 6 of the source icon's +0x14) and redraws the rows that came into view. No call site was
+ * found in the asm.
+ *
+ * @param n  rows to scroll (negative moves the rows down)
+ */
 extern "C" void func_0019AD18(sCharEquipDetail_19AD18* self, int n)
 {
     if (self->f5C == 0) {
@@ -1825,6 +1935,17 @@ static inline sEquipEntry_AFD0* getEntry_AFD0(sEquipDb_AFD0* db, int id)
     return 0;
 }
 
+/**
+ * Reports whether a category holds an item of the character that is in the inventory.
+ *
+ * Lists the category's items (func_0014D7E8 with the character +0xBC) and looks for one with flag 4, not a category,
+ * whose character entry has flag 2 (the flag the inventory lists by).
+ *
+ * @param library  the item library
+ * @param db       the character's item entries
+ * @param itemId   the category
+ * @return 1 when there is one, else 0
+ */
 extern "C" int func_0019AFD0(void* self, int library, sEquipDb_AFD0* db, int itemId)
 {
     sEquipItem_AFD0* items[528];
@@ -1876,6 +1997,17 @@ static inline sEquipEntry_B098* getEntry_B098(sEquipDb_B098* db, int id)
     return 0;
 }
 
+/**
+ * Reports whether a category has nothing to buy in the current store.
+ *
+ * Lists the category's items and returns 0 at the first one with flag 4, not a category, whose character entry lacks
+ * flag 2 and whose store number equals +0xCC. Unlike func_0019B180's item test it does not accept +0xCC == -1.
+ *
+ * @param library  the item library
+ * @param db       the character's item entries
+ * @param itemId   the category
+ * @return 0 when the store sells something in it, else 1
+ */
 extern "C" int func_0019B098(void* self, int library, sEquipDb_B098* db, int itemId)
 {
     sEquipItem_B098* items[528];
@@ -1952,6 +2084,18 @@ struct sCharEquip_B180 {
 
 // PORT: the unit declares func_0019B180 as void; the body returns the item count.
 extern "C" int func_0019B180_impl(void* selfv, int cat) __asm__("func_0019B180");
+/**
+ * Builds the equip screen's item list for a category.
+ *
+ * Lists the category's items (func_0014D7E8) into the list at +0x124 (count +0x958, cleared first), keeping only named
+ * items and categories. In the store (mode 1): items whose character entry lacks flag 2 and whose store number matches
+ * +0xCC (or +0xCC is -1), and categories with something to buy (func_0019B098). In the inventory: items whose entry has
+ * flag 2 and categories holding one (func_0019AFD0). Sorts the list (func_00418EF8 with func_00198DA0).
+ *
+ * @param selfv  the equip state
+ * @param cat  the category
+ * @return the number of entries
+ */
 // FAKEMATCH: identical arms `if (self) { if (it->name == 0) continue; } else { <same> }` in the second
 // loop (cross-jumped away after reload; before that they lengthen the live range of the self->items
 // copy, so global-alloc gives the loop-1 counter s5 and the copy s6 as in retail); plain form 99.01%.
@@ -2030,6 +2174,14 @@ struct sEquipDetail {
     int count;   // 0x958
 };
 
+/**
+ * Removes entry @p idx from the equip screen's item list and keeps the menu's top row and selection in range.
+ *
+ * cFEStateCharEquip_onPopupEvent calls it after a purchase.
+ *
+ * @param idx  the list position
+ * @return 1, or 0 when @p idx is past the end
+ */
 extern "C" int func_0019B458(sEquipDetail* self, int idx)
 {
     int top, sel, n;
@@ -2067,6 +2219,11 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019B518);
 #ifdef SKIP_ASM
 extern "C" void func_0019B7E0(void* self, int idx);
 
+/**
+ * Draws the inventory rows from the menu's top row (func_0019B7E0), up to six or the end of the list.
+ *
+ * @return the number of rows drawn
+ */
 extern "C" int func_0019B518(void* self)
 {
     int j = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x98);
@@ -2085,6 +2242,11 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019B598);
 #ifdef SKIP_ASM
 extern "C" void func_0019BA60(void* self, int idx);
 
+/**
+ * Draws the store rows from the menu's top row (func_0019BA60), up to six or the end of the list.
+ *
+ * @return the number of rows drawn
+ */
 extern "C" int func_0019B598(void* self)
 {
     int j = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x98);
@@ -2138,6 +2300,17 @@ static inline int isMode1_B618(void* self)
     return *(int*)((char*)self + 0xC8) == 1;
 }
 
+/**
+ * Redraws the equip screen's item rows.
+ *
+ * Hides the six name (+0x8C) and check (+0xA4) widgets, sets the menu's item count when @p reset is set (the count, or
+ * 1 for an empty list) and draws the rows for the mode. With nothing drawn shows kT_FEEmpty in the first row (colour
+ * D_004C6708) and resets the menu to one row. The visible row is clamped (0 when @p reset is set) and selected when @p
+ * select is set.
+ *
+ * @param reset   nonzero to reset the menu to the top of a new list
+ * @param select  nonzero to select the visible row
+ */
 extern "C" void func_0019B618(void* self, int reset, int select)
 {
     if (*(void**)((char*)self + 0x5C) == 0)
@@ -2248,6 +2421,18 @@ struct sCharEquip_19B7E0 {
     int colOwned;                   // 0xAA0
 };
 
+/**
+ * Draws inventory row @p i.
+ *
+ * Writes the item's name (a string id for categories). For an item, tries toggling its equipped flag (func_0014AFB0) on
+ * a saved copy of the character's entries, stores the change in equip points (func_0014B478) in the row's points
+ * (+0xA78, else -99999) and shows the checkbox (+0xA98) when the item is equipped or the empty box (+0xA9C) when it is
+ * not; a failed toggle shows no box. The entries are restored afterwards (func_0014ACB0). A category gets the texture
+ * at +0xAA0 (0, so no box).
+ *
+ * @param selfv  the equip state
+ * @param i  the row (0-5)
+ */
 extern "C" void func_0019B7E0(void* selfv, int i)
 {
     sCharEquip_19B7E0* self = (sCharEquip_19B7E0*)selfv;
@@ -2327,6 +2512,15 @@ struct sCharEquipK19BA60 {
     char* items[1];         // 0x124
 };
 
+/**
+ * Draws store row @p i: the item's name and a green (+0xA90) or red (+0xA94) dollar sign by whether the money (+0xC0)
+ * covers its price x 10.
+ *
+ * A category shows its name as a string id and the texture at +0xAA0 (0, so no icon).
+ *
+ * @param equipState  the equip state
+ * @param i  the row (0-5)
+ */
 extern "C" void func_0019BA60(void* equipState, int i)
 {
     sCharEquipK19BA60* self = (sCharEquipK19BA60*)equipState;
@@ -2375,6 +2569,9 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" const char* getDollarString(void* a0);
 
+/**
+ * Shows the money (+0xC0) in the bank text (+0x64) through getDollarString.
+ */
 extern "C" void func_0019BBA0(void* self)
 {
     if (*(cUIText**)((char*)self + 0x64) != 0) {
@@ -2451,6 +2648,12 @@ struct sVec3K19BC90 {
     sVec3K19BC90(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
 };
 
+/**
+ * Shows the equip points bar (+0x70) scaled to the current points (+0xC4).
+ *
+ * The bar's scale (+0x50) becomes (1, -t, 1) with t = (points - 1500) / (D_004A18D8 - 1500), not below 0 (there is no
+ * upper clamp).
+ */
 extern "C" void func_0019BC90(void* self)
 {
     char* o = *(char**)((char*)self + 0x70);
@@ -2490,6 +2693,14 @@ struct sVEntryIK19BD48 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Shows the equip points preview bar (+0x74) for the current points plus @p delta.
+ *
+ * Scales it (+0x50) to (1, -t, 1) with t = (points + delta - 1500) / (D_004A18D8 - 1500) clamped to 0-1, and colours it
+ * (vtable entry 11) D_004C66E8 when the total would pass D_004A18D8, else D_004C66F8.
+ *
+ * @param delta  the selected item's points
+ */
 extern "C" void func_0019BD48(void* self, int delta)
 {
     if (*(void**)((char*)self + 0x74) == 0)
@@ -2525,6 +2736,12 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0014B560(void* iface, int a1, int a2, int a3, int a4);
 
+/**
+ * Buys the selected item: stores the result of func_0014B560 (BE interface 9, the user, the character, the item's id,
+ * 1) as the money (+0xC0).
+ *
+ * cFEStateCharEquip_onPopupEvent calls it when the buy popup closes with a yes.
+ */
 extern "C" void func_0019BE80(void* self)
 {
     int idx = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95);
@@ -2563,6 +2780,14 @@ static inline sItemK19BEE8* getItemK19BEE8(sItemListK19BEE8* l, int id)
     return 0;
 }
 
+/**
+ * Equips or takes off the selected inventory item.
+ *
+ * For a selected item (flag 4) toggles its equipped flag (entry flag 4) with func_0014AFB0 and, on success, calls
+ * func_0014AEA8 for the character.
+ *
+ * @return 1 when the item changed, else 0
+ */
 extern "C" int func_0019BEE8(void* self)
 {
     if (*(int*)((char*)self + 0x958) <= 0)
@@ -2587,6 +2812,9 @@ extern "C" int func_0019BEE8(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ */
 extern "C" void func_0019BFE0(void) {
 
 }
@@ -2713,8 +2941,19 @@ static inline float VecDot_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
     return r;
 }
 
-// Character-equip screen camera: snaps or eases the camera between the board view (states 1/4) and
-// the rider view (states 2/3), poses the rider and the board, then sets the scene camera.
+/**
+ * Poses the user's front-end rider and board for the equip screen and sets the front-end camera.
+ *
+ * Once the rider is loaded (character below 10, +0xCB8 and +0xCB4 set): camera state (+0xAE0) 1 puts the rider at
+ * (-105, -100 + zoom x 320, -80 + pan x zoom x 65) (zoom +0xAA4, pan +0xAA8) and the board at (265.75, -1073.5, -232);
+ * state 2 puts the rider at (-250, -650, -215) and the board at (-100, 45, 15); states 3 and 4 ease (0.2 of the gap per
+ * call) toward the state-2 and state-1 positions and switch to that state when close. The rider (+0xAC0) is turned
+ * +0xAAC + 80 degrees about Z (func_0019F3E8); the board (+0xAD0) is turned 245 degrees about Z, 320 about Y and its
+ * spin angle (+0xAB0, one degree more per call) + 90 about X (func_0019F548). Always places the camera (RealFE + 0x10,
+ * func_0015E050) at (-110, 394, 0) looking at (-35, 0, 0) and stores 0.43633 (25 degrees) in its first word.
+ *
+ * @param vself  the equip state
+ */
 extern "C" void func_0019BFE8(void* vself)
 {
     char* self = (char*)vself;
@@ -2844,6 +3083,14 @@ extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int a1, int a2, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char str_cUIStateBuyPopup[];
 
+/**
+ * Opens the buy popup for an item.
+ *
+ * Constructs a cUIStateBuyPopup (0x70 bytes) for the user, sets it up for the item (cBuyPopupInfo_initBuyBolt with the
+ * item's id +0x14, the price +0xE x 10 and the money +0xC0) and pushes it on the state stack.
+ *
+ * @param item  the item
+ */
 extern "C" void func_0019C7E8(void* self, void* item)
 {
     void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), *(void**)((char*)self + 0x10), self, *(signed char*)((char*)self + 0x44));
@@ -2862,6 +3109,14 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019C880);
 #ifdef SKIP_ASM
 extern "C" void* func_0019C8F8(void* self, void* item);
 
+/**
+ * Takes the first node off the node pool's free list (+0x1F40) and returns it.
+ *
+ * The next node (func_0019C8F8) becomes the head with its previous index (+0xC) cleared; the taken node's next index
+ * (+0xE) is set to -1. Likely bug: an empty free list is not checked, so the null head is written through.
+ *
+ * @return the node
+ */
 extern "C" void* func_0019C880(void* self)
 {
     char* item = *(char**)((char*)self + 0x1F40);
@@ -2878,6 +3133,12 @@ extern "C" void* func_0019C880(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C8D0);
 #ifdef SKIP_ASM
+/**
+ * Returns the node before @p item: the pool's 16-byte node at index +0xC of @p item.
+ *
+ * @param item  the node, or null
+ * @return the previous node, or null when there is none
+ */
 extern "C" void* func_0019C8D0(void* self, void* item)
 {
     if (item != 0) {
@@ -2893,6 +3154,12 @@ extern "C" void* func_0019C8D0(void* self, void* item)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C8F8);
 #ifdef SKIP_ASM
+/**
+ * Returns the node after @p item: the pool's 16-byte node at index +0xE of @p item.
+ *
+ * @param item  the node, or null
+ * @return the next node, or null when there is none
+ */
 extern "C" void* func_0019C8F8(void* self, void* item)
 {
     if (item != 0) {
@@ -2908,6 +3175,12 @@ extern "C" void* func_0019C8F8(void* self, void* item)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019C920);
 #ifdef SKIP_ASM
+/**
+ * Returns the pool index of the node at @p nodeAddr ((address - pool) / 16).
+ *
+ * @param nodeAddr  the node's address, or 0
+ * @return the index, or -1 for 0
+ */
 extern "C" int func_0019C920(void* self, int nodeAddr)
 {
     int diff = nodeAddr - (int)self;

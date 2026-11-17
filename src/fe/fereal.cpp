@@ -61,6 +61,16 @@ struct sVEntry001A07C8 {
     int (*fn)(void*, int, int);
 };
 
+/**
+ * Handles the front end's screen events: answers the "whitefade" event (cFECustom_vtbl entry 3, onScreenEvent).
+ *
+ * For the event whose hash is "whitefade" sends handleEvent (vtable entry 24) with (1, 0) to the state at +0x10 when
+ * there is one and reports the event handled.
+ *
+ * @param a1    the screen that sent the event
+ * @param hash  the event (a name hash)
+ * @return 1 for "whitefade", else 0
+ */
 extern "C" int func_001A07C8(void* self, int a1, int hash)
 {
     if (hash == GetHashValue32(str_whitefade)) {
@@ -538,6 +548,21 @@ static inline bool IsMode1_1A16C0()
     return D_004A1A70 == 1;
 }
 
+/**
+ * Builds the state to go back to from the current front-end state (cFECustom_vtbl entry 5, getPrevState).
+ *
+ * Switches on the current state's id (+0xC) and returns a newly allocated (cMemMan_alloc) and constructed state: the
+ * main menu, character select or character setup by the new race's cGamePath (D_00535C11) and the user number (+0x44);
+ * the lodge or lodge rider detail instead of character setup / rider detail while D_004A19D8 is set; audio options;
+ * event select (clearing cUITemplate_MAP_mMapStyle, setting D_004A2598); options; options save/load; title; mountain,
+ * peak and rewards rooms; the online main menu or SSX world when D_004A1A70 is 1. For state 35 and out-of-range paths
+ * it goes by the custom interface's +0xC (24 options save/load, 9 character select, 39 lodge). State 33 with @p arg 1
+ * sets the next app module to a new cPreGameLoadScreen and returns 0.
+ *
+ * @param desc  the current state
+ * @param arg   the state data passed along (picks the branch for state 33; the peak and rewards rooms get it)
+ * @return the new state, or 0 when there is none
+ */
 extern "C" void* func_001A16C0(void** self, char* desc, int arg)
 {
     switch (*(int*)(desc + 0xC)) {
@@ -682,6 +707,12 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
 //100%
 INCLUDE_ASM("fe/fereal", func_001A1CB8);
 #ifdef SKIP_ASM
+/**
+ * Stores the control mask byte of player @p index (+0x8 + index of the front end's custom interface).
+ *
+ * @param index  the player (a signed char)
+ * @param val    the mask
+ */
 extern "C" void func_001A1CB8(void* self, int index, int val)
 {
     char* entry = (char*)self + (signed char)index;
@@ -692,6 +723,14 @@ extern "C" void func_001A1CB8(void* self, int index, int val)
 //100%
 INCLUDE_ASM("fe/fereal", func_001A1CD0);
 #ifdef SKIP_ASM
+/**
+ * Returns the control mask byte of player @p index (+0x8 + index of the front end's custom interface).
+ *
+ * State constructors copy it into the new state's mCtrlBits (+0x15).
+ *
+ * @param index  the player (a signed char)
+ * @return the mask
+ */
 extern "C" unsigned char func_001A1CD0(void* self, int index)
 {
     char* entry = (char*)self + (signed char)index;
@@ -707,6 +746,14 @@ void cConnMan_cConnMan(void* p);
 void cGameConnMan_cGameConnMan(void* p);
 extern void* cRealFE_vtbl[];
 
+/**
+ * Constructs the front-end module.
+ *
+ * Runs cFE_cFE, stores cRealFE_vtbl, constructs the connection managers at +0xB5AB0 (cConnMan_cConnMan) and +0xB5ABC
+ * (cGameConnMan_cGameConnMan) and zeroes +0xB5AD4, +0xB5AD8 and +0xB5ADC.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001A1CE8(void* self)
 {
     cFE_cFE(self);
@@ -1445,6 +1492,13 @@ extern "C" void func_00314FE8(void* a, void* b);
 extern "C" void func_00311110(void* a);
 extern "C" void func_003112C8(void* a, int b);
 
+/**
+ * Releases the front end's character animation data loaded by cRealFE_loadCharAnimations.
+ *
+ * For its one animation slot: when cAnimDataBase_TheAnimDataBase holds data, removes it from
+ * cGameAnimMap_TheGameAnimMap (func_00314FE8), clears the slot, calls func_00311110 on the table and destroys the data
+ * (func_003112C8 with 3).
+ */
 extern "C" void func_001A2BC0(void* self)
 {
     int i;
@@ -1561,6 +1615,13 @@ INCLUDE_ASM("fe/fereal", func_001A2E20);
 void* func_0039E288(void* self);
 extern void* D_00469348[];
 
+/**
+ * Constructs the front end's sound interface.
+ *
+ * Runs the base constructor func_0039E288, stores the vtable D_00469348 and zeroes +0x4.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001A2E20(void* self)
 {
     func_0039E288(self);
@@ -1576,6 +1637,14 @@ INCLUDE_ASM("fe/fereal", func_001A2E58);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
+/**
+ * Plays the front-end menu sound for a UI sound event (vtable D_00469348 entry 2, playSound).
+ *
+ * Event 1 plays menu sound 2, 2 plays 3, 3 plays 1, 4 plays 4 and 5 and 6 play 0 (cSSXAudio_MenuSound on
+ * cAudioInterface_bxAudio()); other events are silent.
+ *
+ * @param sel  the UI sound event
+ */
 extern "C" void func_001A2E58(void* self, int sel)
 {
     switch (sel) {
@@ -1668,6 +1737,15 @@ INCLUDE_ASM("fe/fereal", func_001A3050);
 #ifdef SKIP_ASM
 extern void* cFEStateSelectMultiplayerMode_vtbl[];
 
+/**
+ * Constructs a select-multiplayer-mode state.
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, owner), sets the state id (+0xC) to 22 and stores
+ * cFEStateSelectMultiplayerMode_vtbl.
+ *
+ * @param owner  the UI engine
+ * @return @p self
+ */
 extern "C" void* func_001A3050(void* self, void* owner)
 {
     func_0039E2A0(self, owner);

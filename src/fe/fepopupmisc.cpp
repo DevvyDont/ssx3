@@ -418,6 +418,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF380);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateRiderBio_vtbl[];
 
+/**
+ * Constructs a rider-bio state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateRiderBio_vtbl; nothing else is set (the full
+ * constructor cFEStateRiderBio_cFEStateRiderBio also stores the user number and controller bits).
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DF380(void* self)
 {
     func_0039E2A0(self, 0);
@@ -453,6 +461,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF3E0);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateRuleSelect_vtbl[];
 
+/**
+ * Constructs a rule-select state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateRuleSelect_vtbl; nothing else is set (the
+ * full constructor is cFEStateRuleSelect_cFEStateRuleSelect).
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DF3E0(void* self)
 {
     func_0039E2A0(self, 0);
@@ -486,6 +502,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF440);
 void operator_delete(int* ptr);
 extern void* D_0046B078[];
 
+/**
+ * Destroys a rule-select element (the 0x34-byte objects whose vptr is at +0x30), freeing it when asked.
+ *
+ * Stores the element's vtable D_0046B078 at +0x30 and calls operator_delete when bit 0 of @p flags is set. The elements
+ * are built by cBraggingRightsMenu_cBraggingRightsMenu; cFEStateBraggingRights holds two of them at +0x6D0.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001DF440(void* self, int flags)
 {
     *(void***)((char*)self + 0x30) = D_0046B078;
@@ -510,6 +534,15 @@ struct sElem_F470 {
     sElem_F470() { cBraggingRightsMenu_cBraggingRightsMenu(this); }
 };
 
+/**
+ * Constructs a bragging-rights state with no engine (the default-constructor copy).
+ *
+ * Runs the cFEStateNet constructor cFEStateNet_cFEStateNet(self, 0, 0), stores cFEStateBraggingRights_vtbl and builds
+ * the two rule-select elements at +0x6D0 (0x34 bytes each) with cBraggingRightsMenu_cBraggingRightsMenu. The full constructor cFEStateBraggingRights_cFEStateBraggingRights also
+ * sets mHashName and clears +0x738.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DF470(void* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -574,6 +607,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF580);
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateChatRoom_vtbl[];
 
+/**
+ * Constructs a chat-room state with no engine (the default-constructor copy).
+ *
+ * Runs cFEStateNet_cFEStateNet(self, 0, 0), clears +0x6F8 and stores cFEStateChatRoom_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DF580(void* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -760,6 +800,15 @@ void* cFEStateNetQuickMessages__cFEStateNetQuickMessages(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF778);
 #ifdef SKIP_ASM
+/**
+ * Returns the int at +0x6D0 of an online state.
+ *
+ * An out-of-line inline accessor with no caller. It sits right after cFEStateNetQuickMessages' destructor; in that
+ * class +0x6D0 is mbChanged.
+ *
+ * @param arg0  the state
+ * @return the int at +0x6D0
+ */
 extern "C" int func_001DF778(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x6D0)));
 }
@@ -901,6 +950,14 @@ struct sSlot_F900 {
     sSlot_F900() {}
 };
 
+/**
+ * Constructs a network help popup with no engine or parent (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0), stores cFEStateNetHelpPopup_vtbl and runs the empty constructor
+ * of a 7-element array at +0x20 (only the loop is left). The full constructor is func_001D9D48.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DF900(void* self)
 {
     func_0039E2A0(self, 0);
@@ -947,6 +1004,15 @@ int cFEStateNetHelpPopup_onLoseTransition(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF990);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value at +0x54 of a network help popup: its title text id.
+ *
+ * cFEStateNetHelpPopup_onGainTransition shows the title from this id (an empty title when 0). An out-of-line inline
+ * setter with no caller.
+ *
+ * @param arg0   the help popup
+ * @param value  the title's text id
+ */
 extern "C" void func_001DF990(void *arg0, int value) {
     (*(int *)((char*)(arg0) + (0x54))) = value;
 }
@@ -954,6 +1020,15 @@ extern "C" void func_001DF990(void *arg0, int value) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF998);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value at +0x64 of a network help popup: the text id of its bottom note.
+ *
+ * cFEStateNetHelpPopup_onGainTransition shows it in the third text widget (+0xB0). An out-of-line inline setter with no
+ * caller.
+ *
+ * @param arg0   the help popup
+ * @param value  the bottom note's text id
+ */
 extern "C" void func_001DF998(void *arg0, int value) {
     (*(int *)((char*)(arg0) + (0x64))) = value;
 }
@@ -961,6 +1036,15 @@ extern "C" void func_001DF998(void *arg0, int value) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF9A0);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value at +0x50 of a network help popup: whether it passes events to its parent state.
+ *
+ * When it is nonzero, cFEStateNetHelpPopup_handleEvent forwards events to mpParentState. An out-of-line inline setter
+ * with no caller.
+ *
+ * @param arg0   the help popup
+ * @param value  nonzero to forward events to the parent
+ */
 extern "C" void func_001DF9A0(void *arg0, int value) {
     (*(int *)((char*)(arg0) + (0x50))) = value;
 }
@@ -968,6 +1052,14 @@ extern "C" void func_001DF9A0(void *arg0, int value) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF9A8);
 #ifdef SKIP_ASM
+/**
+ * Returns +0x50 of a network help popup: whether it passes events to its parent state.
+ *
+ * An out-of-line inline getter with no caller (see func_001DF9A0).
+ *
+ * @param arg0  the help popup
+ * @return the forwarding flag
+ */
 extern "C" int func_001DF9A8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x50)));
 }
@@ -975,6 +1067,14 @@ extern "C" int func_001DF9A8(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF9B0);
 #ifdef SKIP_ASM
+/**
+ * Reports whether the equip-gear state is in store (buying) mode: its mode at +0xC8 is 1.
+ *
+ * An out-of-line inline accessor with no caller; cFEStateCharEquip_cFEStateCharEquip stores 1 there in the store.
+ *
+ * @param arg0  the equip-gear state
+ * @return 1 in store mode, else 0
+ */
 extern "C" int func_001DF9B0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0xC8))) == 1;
 }
@@ -982,6 +1082,15 @@ extern "C" int func_001DF9B0(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF9C0);
 #ifdef SKIP_ASM
+/**
+ * Returns the equip-gear state's icons-loaded flag (+0xA60).
+ *
+ * cFEStateCharEquip_onUpdate sets it to 1 once the character's icon file has arrived in the FE file cache. An
+ * out-of-line inline getter with no caller.
+ *
+ * @param arg0  the equip-gear state
+ * @return nonzero once the icons are loaded
+ */
 extern "C" int func_001DF9C0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0xA60)));
 }
@@ -989,6 +1098,15 @@ extern "C" int func_001DF9C0(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF9C8);
 #ifdef SKIP_ASM
+/**
+ * Stores whether the equip-gear state may switch between store and inventory mode (+0xAE4).
+ *
+ * The constructor cFEStateCharEquip_cFEStateCharEquip stores its canSwitchMode argument there. An out-of-line inline
+ * setter with no caller.
+ *
+ * @param arg0   the equip-gear state
+ * @param value  nonzero to allow switching
+ */
 extern "C" void func_001DF9C8(void *arg0, int value) {
     (*(int *)((char*)(arg0) + (0xAE4))) = value;
 }
@@ -996,6 +1114,14 @@ extern "C" void func_001DF9C8(void *arg0, int value) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DF9D0);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the equip-gear state may switch between store and inventory mode (+0xAE4).
+ *
+ * An out-of-line inline getter with no caller.
+ *
+ * @param arg0  the equip-gear state
+ * @return the stored flag
+ */
 extern "C" int func_001DF9D0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0xAE4)));
 }
@@ -1006,6 +1132,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9D8);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_0046A3C8[];
 
+/**
+ * Constructs a reward-gallery base state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the reward-gallery base vtable D_0046A3C8.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DF9D8(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1024,6 +1157,15 @@ extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
+/**
+ * Destroys a reward-gallery state through the base classes.
+ *
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * with @p flags.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001DFA10(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
@@ -1037,6 +1179,14 @@ extern "C" void func_001DFA10(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFA70);
 #ifdef SKIP_ASM
+/**
+ * Returns a reward gallery's store number (+0x8F0); negative when the gallery is not a store.
+ *
+ * An out-of-line inline getter with no caller.
+ *
+ * @param arg0  the gallery state
+ * @return the store number, or a negative value outside a store
+ */
 extern "C" int func_001DFA70(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x8F0)));
 }
@@ -1044,6 +1194,14 @@ extern "C" int func_001DFA70(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFA78);
 #ifdef SKIP_ASM
+/**
+ * Reports whether a reward gallery is a store: its store number (+0x8F0) is not negative.
+ *
+ * An out-of-line inline accessor with no caller.
+ *
+ * @param arg0  the gallery state
+ * @return 1 when the store number is 0 or more, else 0
+ */
 extern "C" unsigned int func_001DFA78(void *arg0) {
     return (unsigned int) ~(*(int *)((char*)(arg0) + (0x8F0))) >> 0x1F;
 }
@@ -1052,6 +1210,14 @@ extern "C" unsigned int func_001DFA78(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFA88__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: the reward-gallery base has no icon file name (vtable entry 25, +0xCC).
+ *
+ * The gallery classes override it with their icon file's name (posters: cFEStateRewardGalleryPosters_getIconsFileName__FPv); the cheat-character gallery
+ * keeps this one.
+ *
+ * @return 0
+ */
 int func_001DFA88(void* self)
 {
     return 0;
@@ -1061,6 +1227,15 @@ int func_001DFA88(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFA90);
 #ifdef SKIP_ASM
+/**
+ * Reports whether a reward gallery's icon file has finished loading (bit 3 of the flags at +0x48).
+ *
+ * cFEStateRewardGalleryBase_updateIconsLoad sets the bit when the icon file has arrived; cFEStateRewardGalleryBase_loadIcons sets it right away when there is no icon
+ * file. An out-of-line inline accessor with no caller.
+ *
+ * @param arg0  the gallery state
+ * @return 1 when the icons are loaded, else 0
+ */
 extern "C" int func_001DFA90(void *arg0) {
     return ((int) (*(int *)((char*)(arg0) + (0x48))) >> 3) & 1;
 }
@@ -1069,6 +1244,13 @@ extern "C" int func_001DFA90(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAA0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns -1: the reward-gallery base finds no icon for a reward (vtable entry 26, +0xD4).
+ *
+ * The poster-style galleries override it with a lookup by the reward's icon name (cFEStateRewardGalleryPosters_getIconID).
+ *
+ * @return -1
+ */
 int func_001DFAA0(void* self)
 {
     return -0x1;
@@ -1078,6 +1260,13 @@ int func_001DFAA0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAA8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: the reward-gallery base has no texture element for a reward (vtable entry 27, +0xDC).
+ *
+ * The cheat-character gallery overrides it (cFEStateRewardGalleryCheatChars_getTextureElement looks the reward's texture up in the engine's texture bank).
+ *
+ * @return 0 (no texture element)
+ */
 int func_001DFAA8(void* self)
 {
     return 0;
@@ -1087,6 +1276,15 @@ int func_001DFAA8(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAB0);
 #ifdef SKIP_ASM
+/**
+ * Reports whether a reward gallery's reward list has been built (bit 1 of the flags at +0x48).
+ *
+ * The gallery code sets bit 1 (clearing bit 0, loading) once the rewards are allocated. An out-of-line inline accessor
+ * with no caller.
+ *
+ * @param arg0  the gallery state
+ * @return 1 when the rewards are loaded, else 0
+ */
 extern "C" int func_001DFAB0(void *arg0) {
     return ((int) (*(int *)((char*)(arg0) + (0x48))) >> 1) & 1;
 }
@@ -1095,6 +1293,11 @@ extern "C" int func_001DFAB0(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAC0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the reward-gallery base builds no reward list (vtable entry 28, +0xE4).
+ *
+ * Each gallery class overrides it with the code that fills its reward array at +0xA28 (posters: cFEStateRewardGalleryPosters_allocRewards).
+ */
 void func_001DFAC0(void* self)
 {
 }
@@ -1103,6 +1306,12 @@ void func_001DFAC0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAC8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the reward-gallery base has no reward list to free (vtable entry 29, +0xEC).
+ *
+ * The gallery classes override it (posters: cFEStateRewardGalleryPosters_purgeRewards clears the list); the destructors call this base version
+ * directly.
+ */
 void func_001DFAC8(void* self)
 {
 }
@@ -1111,6 +1320,11 @@ void func_001DFAC8(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAD0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: the reward-gallery base has no reward to return (vtable entry 34, +0x114).
+ *
+ * @return 0
+ */
 int func_001DFAD0(void* self)
 {
     return 0;
@@ -1120,6 +1334,11 @@ int func_001DFAD0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAD8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: the reward-gallery base gives no reward a price (vtable entry 35, +0x11C).
+ *
+ * @return 0
+ */
 int func_001DFAD8(void* self)
 {
     return 0;
@@ -1129,6 +1348,11 @@ int func_001DFAD8(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAE0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: the reward-gallery base puts every reward in store 0 (vtable entry 36, +0x124).
+ *
+ * @return 0
+ */
 int func_001DFAE0(void* self)
 {
     return 0;
@@ -1138,6 +1362,11 @@ int func_001DFAE0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFAE8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: the reward-gallery base has no reward names (vtable entry 37, +0x12C).
+ *
+ * @return 0 (no name)
+ */
 int func_001DFAE8(void* self)
 {
     return 0;
@@ -1150,6 +1379,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFAF0);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_0046A248[];
 
+/**
+ * Constructs the posters gallery state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the posters gallery's vtable D_0046A248; the full
+ * constructor (cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters, reward kind 3) also builds the gallery base and clears the reward list.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DFAF0(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1168,6 +1405,15 @@ extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
+/**
+ * Destroys the posters gallery state through the gallery base and its bases.
+ *
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001DFB28(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
@@ -1181,6 +1427,14 @@ extern "C" void func_001DFB28(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFB88__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the posters gallery's reward @p i: entry @p i of its reward array at +0xA28.
+ *
+ * Vtable entry 34 (+0x114) of D_0046A248; no bounds check.
+ *
+ * @param i  the reward index
+ * @return the reward record (passed around as an int)
+ */
 int func_001DFB88(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
@@ -1190,6 +1444,14 @@ int func_001DFB88(void* self, int i)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFB98);
 #ifdef SKIP_ASM
+/**
+ * Returns the price of a posters gallery reward: its short at +0xC, times 10 when positive.
+ *
+ * Vtable entry 35 (+0x11C) of D_0046A248; zero and negative values are returned unchanged.
+ *
+ * @param a1  the reward record
+ * @return the price
+ */
 extern "C" int func_001DFB98(void* self, void* a1)
 {
     int value = *(short*)((char*)a1 + 0xc);
@@ -1201,6 +1463,14 @@ extern "C" int func_001DFB98(void* self, void* a1)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFBB0__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the store number of a posters gallery reward: its signed byte at +0xE.
+ *
+ * Vtable entry 36 (+0x124) of D_0046A248.
+ *
+ * @param other  the reward record
+ * @return the store the reward is sold in
+ */
 signed char func_001DFBB0(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
@@ -1210,6 +1480,14 @@ signed char func_001DFBB0(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFBB8__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the name of a posters gallery reward: the record's first word (a string pointer).
+ *
+ * Vtable entry 37 (+0x12C) of D_0046A248.
+ *
+ * @param other  the reward record
+ * @return the reward's name
+ */
 int func_001DFBB8(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
@@ -1222,6 +1500,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFBC0);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_0046A0C8[];
 
+/**
+ * Constructs the trading-card gallery state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the trading-card gallery's vtable D_0046A0C8; the
+ * full constructor (cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards, reward kind 4) also builds the gallery base and clears the reward list.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DFBC0(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1240,6 +1526,15 @@ extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
+/**
+ * Destroys the trading-card gallery state through the gallery base and its bases.
+ *
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001DFBF8(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
@@ -1253,6 +1548,14 @@ extern "C" void func_001DFBF8(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFC58__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the trading-card gallery's reward @p i: entry @p i of its reward array at +0xA28.
+ *
+ * Vtable entry 34 (+0x114) of D_0046A0C8; no bounds check.
+ *
+ * @param i  the reward index
+ * @return the reward record (passed around as an int)
+ */
 int func_001DFC58(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
@@ -1262,6 +1565,14 @@ int func_001DFC58(void* self, int i)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFC68);
 #ifdef SKIP_ASM
+/**
+ * Returns the price of a trading-card gallery reward: its short at +0xC, times 10 when positive.
+ *
+ * Vtable entry 35 (+0x11C) of D_0046A0C8; zero and negative values are returned unchanged.
+ *
+ * @param a1  the reward record
+ * @return the price
+ */
 extern "C" int func_001DFC68(void* self, void* a1)
 {
     int value = *(short*)((char*)a1 + 0xc);
@@ -1273,6 +1584,14 @@ extern "C" int func_001DFC68(void* self, void* a1)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFC80__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the store number of a trading-card gallery reward: its signed byte at +0xE.
+ *
+ * Vtable entry 36 (+0x124) of D_0046A0C8.
+ *
+ * @param other  the reward record
+ * @return the store the reward is sold in
+ */
 signed char func_001DFC80(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
@@ -1282,6 +1601,14 @@ signed char func_001DFC80(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFC88__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the name of a trading-card gallery reward: the record's first word (a string pointer).
+ *
+ * Vtable entry 37 (+0x12C) of D_0046A0C8.
+ *
+ * @param other  the reward record
+ * @return the reward's name
+ */
 int func_001DFC88(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
@@ -1294,6 +1621,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFC90);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_00469F48[];
 
+/**
+ * Constructs the concept-art gallery state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the concept-art gallery's vtable D_00469F48; the full
+ * constructor (cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts, reward kind 5) also builds the gallery base and clears the reward list.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DFC90(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1312,6 +1647,15 @@ extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
+/**
+ * Destroys the concept-art gallery state through the gallery base and its bases.
+ *
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001DFCC8(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
@@ -1325,6 +1669,14 @@ extern "C" void func_001DFCC8(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFD28__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the concept-art gallery's reward @p i: entry @p i of its reward array at +0xA28.
+ *
+ * Vtable entry 34 (+0x114) of D_00469F48; no bounds check.
+ *
+ * @param i  the reward index
+ * @return the reward record (passed around as an int)
+ */
 int func_001DFD28(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
@@ -1334,6 +1686,14 @@ int func_001DFD28(void* self, int i)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFD38);
 #ifdef SKIP_ASM
+/**
+ * Returns the price of a concept-art gallery reward: its short at +0xC, times 10 when positive.
+ *
+ * Vtable entry 35 (+0x11C) of D_00469F48; zero and negative values are returned unchanged.
+ *
+ * @param a1  the reward record
+ * @return the price
+ */
 extern "C" int func_001DFD38(void* self, void* a1)
 {
     int value = *(short*)((char*)a1 + 0xc);
@@ -1345,6 +1705,14 @@ extern "C" int func_001DFD38(void* self, void* a1)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFD50__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the store number of a concept-art gallery reward: its signed byte at +0xE.
+ *
+ * Vtable entry 36 (+0x124) of D_00469F48.
+ *
+ * @param other  the reward record
+ * @return the store the reward is sold in
+ */
 signed char func_001DFD50(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
@@ -1354,6 +1722,14 @@ signed char func_001DFD50(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFD58__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the name of a concept-art gallery reward: the record's first word (a string pointer).
+ *
+ * Vtable entry 37 (+0x12C) of D_00469F48.
+ *
+ * @param other  the reward record
+ * @return the reward's name
+ */
 int func_001DFD58(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
@@ -1366,6 +1742,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFD60);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_00469DC8[];
 
+/**
+ * Constructs the video gallery state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the video gallery's vtable D_00469DC8; the full
+ * constructor (cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos, reward kind 6) also builds the gallery base and clears the reward list.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DFD60(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1384,6 +1768,15 @@ extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
+/**
+ * Destroys the video gallery state through the gallery base and its bases.
+ *
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001DFD98(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
@@ -1397,6 +1790,14 @@ extern "C" void func_001DFD98(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFDF8__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the video gallery's reward @p i: entry @p i of its reward array at +0xA28.
+ *
+ * Vtable entry 34 (+0x114) of D_00469DC8; no bounds check.
+ *
+ * @param i  the reward index
+ * @return the reward record (passed around as an int)
+ */
 int func_001DFDF8(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
@@ -1406,6 +1807,14 @@ int func_001DFDF8(void* self, int i)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFE08);
 #ifdef SKIP_ASM
+/**
+ * Returns the price of a video gallery reward: its short at +0xC, times 10 when positive.
+ *
+ * Vtable entry 35 (+0x11C) of D_00469DC8; zero and negative values are returned unchanged.
+ *
+ * @param a1  the reward record
+ * @return the price
+ */
 extern "C" int func_001DFE08(void* self, void* a1)
 {
     int value = *(short*)((char*)a1 + 0xc);
@@ -1417,6 +1826,14 @@ extern "C" int func_001DFE08(void* self, void* a1)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFE20__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the store number of a video gallery reward: its signed byte at +0xE.
+ *
+ * Vtable entry 36 (+0x124) of D_00469DC8.
+ *
+ * @param other  the reward record
+ * @return the store the reward is sold in
+ */
 signed char func_001DFE20(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
@@ -1426,6 +1843,14 @@ signed char func_001DFE20(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFE28__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the name of a video gallery reward: the record's first word (a string pointer).
+ *
+ * Vtable entry 37 (+0x12C) of D_00469DC8.
+ *
+ * @param other  the reward record
+ * @return the reward's name
+ */
 int func_001DFE28(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
@@ -1438,6 +1863,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFE30);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_00469C48[];
 
+/**
+ * Constructs the toy gallery state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the toy gallery's vtable D_00469C48; the full
+ * constructor (cFEStateRewardGalleryToys_cFEStateRewardGalleryToys, reward kind 7) also builds the gallery base and clears the reward list.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DFE30(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1456,6 +1889,15 @@ extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
+/**
+ * Destroys the toy gallery state through the gallery base and its bases.
+ *
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001DFE68(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
@@ -1469,6 +1911,14 @@ extern "C" void func_001DFE68(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFEC8__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the toy gallery's reward @p i: entry @p i of its reward array at +0xA28.
+ *
+ * Vtable entry 34 (+0x114) of D_00469C48; no bounds check.
+ *
+ * @param i  the reward index
+ * @return the reward record (passed around as an int)
+ */
 int func_001DFEC8(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
@@ -1478,6 +1928,14 @@ int func_001DFEC8(void* self, int i)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFED8);
 #ifdef SKIP_ASM
+/**
+ * Returns the price of a toy gallery reward: its short at +0xC, times 10 when positive.
+ *
+ * Vtable entry 35 (+0x11C) of D_00469C48; zero and negative values are returned unchanged.
+ *
+ * @param a1  the reward record
+ * @return the price
+ */
 extern "C" int func_001DFED8(void* self, void* a1)
 {
     int value = *(short*)((char*)a1 + 0xc);
@@ -1489,6 +1947,14 @@ extern "C" int func_001DFED8(void* self, void* a1)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFEF0__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the store number of a toy gallery reward: its signed byte at +0xE.
+ *
+ * Vtable entry 36 (+0x124) of D_00469C48.
+ *
+ * @param other  the reward record
+ * @return the store the reward is sold in
+ */
 signed char func_001DFEF0(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
@@ -1498,6 +1964,14 @@ signed char func_001DFEF0(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFEF8__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the name of a toy gallery reward: the record's first word (a string pointer).
+ *
+ * Vtable entry 37 (+0x12C) of D_00469C48.
+ *
+ * @param other  the reward record
+ * @return the reward's name
+ */
 int func_001DFEF8(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
@@ -1510,6 +1984,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFF00);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_00469AC8[];
 
+/**
+ * Constructs the cheat-character gallery state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the cheat-character gallery's vtable D_00469AC8; the
+ * full constructor (cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars, reward kind 8) also builds the gallery base and clears the reward list.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DFF00(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1528,6 +2010,15 @@ extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
+/**
+ * Destroys the cheat-character gallery state through the gallery base and its bases.
+ *
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001DFF38(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
@@ -1541,6 +2032,14 @@ extern "C" void func_001DFF38(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFF98__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the cheat-character gallery's reward @p i: entry @p i of its reward array at +0xA28.
+ *
+ * Vtable entry 34 (+0x114) of D_00469AC8; no bounds check.
+ *
+ * @param i  the reward index
+ * @return the reward record (passed around as an int)
+ */
 int func_001DFF98(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
@@ -1550,6 +2049,14 @@ int func_001DFF98(void* self, int i)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFFA8);
 #ifdef SKIP_ASM
+/**
+ * Returns the price of a cheat-character gallery reward: its short at +0xC, times 10 when positive.
+ *
+ * Vtable entry 35 (+0x11C) of D_00469AC8; zero and negative values are returned unchanged.
+ *
+ * @param a1  the reward record
+ * @return the price
+ */
 extern "C" int func_001DFFA8(void* self, void* a1)
 {
     int value = *(short*)((char*)a1 + 0xc);
@@ -1561,6 +2068,14 @@ extern "C" int func_001DFFA8(void* self, void* a1)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFFC0__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the store number of a cheat-character gallery reward: its signed byte at +0xE.
+ *
+ * Vtable entry 36 (+0x124) of D_00469AC8.
+ *
+ * @param other  the reward record
+ * @return the store the reward is sold in
+ */
 signed char func_001DFFC0(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
@@ -1570,6 +2085,14 @@ signed char func_001DFFC0(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001DFFC8__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns the name of a cheat-character gallery reward: the record's first word (a string pointer).
+ *
+ * Vtable entry 37 (+0x12C) of D_00469AC8.
+ *
+ * @param other  the reward record
+ * @return the reward's name
+ */
 int func_001DFFC8(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
@@ -1582,6 +2105,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFFD0);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStatePreviewReward_vtbl[];
 
+/**
+ * Constructs a reward-preview state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStatePreviewReward_vtbl. The full constructor is
+ * cFEStatePreviewReward_cFEStatePreviewReward.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DFFD0(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1592,6 +2123,13 @@ extern "C" void* func_001DFFD0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0008);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.
+ *
+ * An out-of-line copy with no caller and no table entry; nothing in it shows which class it belongs to.
+ *
+ * @return 0
+ */
 extern "C" int func_001E0008(void) {
     return 0;
 }
@@ -1599,6 +2137,13 @@ extern "C" int func_001E0008(void) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0010);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.
+ *
+ * An out-of-line copy with no caller and no table entry; nothing in it shows which class it belongs to.
+ *
+ * @return 0
+ */
 extern "C" int func_001E0010(void) {
     return 0;
 }
@@ -1606,6 +2151,13 @@ extern "C" int func_001E0010(void) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0018);
 #ifdef SKIP_ASM
+/**
+ * Returns 1.
+ *
+ * An out-of-line copy with no caller and no table entry; nothing in it shows which class it belongs to.
+ *
+ * @return 1
+ */
 extern "C" int func_001E0018(void) {
     return 1;
 }
@@ -1614,6 +2166,14 @@ extern "C" int func_001E0018(void) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0020__FPv);
 #ifdef SKIP_ASM
+/**
+ * Lets the video-player state's gaining transition finish at once (vtable entry 7, onGainTransition).
+ *
+ * Entry 7 of D_00469928, the vtable cFEStateVideoPlayer_cFEStateVideoPlayer stores for the video-player state (video and audio file names at
+ * +0x48 and +0x148, movie player at +0x248).
+ *
+ * @return 1 (transition done)
+ */
 int func_001E0020(void* self)
 {
     return 0x1;
@@ -1623,6 +2183,13 @@ int func_001E0020(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0028__FPv);
 #ifdef SKIP_ASM
+/**
+ * Lets the video-player state's leaving transition finish at once (vtable entry 10, onLoseTransition).
+ *
+ * Entry 10 of D_00469928, the video-player state's vtable.
+ *
+ * @return 1 (transition done)
+ */
 int func_001E0028(void* self)
 {
     return 0x1;
@@ -1632,6 +2199,15 @@ int func_001E0028(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0030);
 #ifdef SKIP_ASM
+/**
+ * Stores whether the video-player state's movie may be interrupted (+0x270).
+ *
+ * The constructor cFEStateVideoPlayer_cFEStateVideoPlayer sets it to 1; while it is set, the input handler cFEStateVideoPlayer_onInputBegin stops the movie when the
+ * input's entry 5 or 6 answers nonzero. An out-of-line inline setter with no caller.
+ *
+ * @param arg0   the video-player state
+ * @param value  nonzero to let input stop the movie
+ */
 extern "C" void func_001E0030(void *arg0, int value) {
     (*(int *)((char*)(arg0) + (0x270))) = value;
 }
@@ -1639,6 +2215,14 @@ extern "C" void func_001E0030(void *arg0, int value) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0038);
 #ifdef SKIP_ASM
+/**
+ * Stores the full-screen option of the video-player state's movie (+0x258, in the play options at +0x24C).
+ *
+ * An out-of-line inline setter with no caller.
+ *
+ * @param arg0   the video-player state
+ * @param value  nonzero for full screen
+ */
 extern "C" void func_001E0038(void *arg0, int value) {
     (*(int *)((char*)(arg0) + (0x258))) = value;
 }
@@ -1646,6 +2230,14 @@ extern "C" void func_001E0038(void *arg0, int value) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0040);
 #ifdef SKIP_ASM
+/**
+ * Stores the sound option of the video-player state's movie (+0x254, in the play options at +0x24C).
+ *
+ * An out-of-line inline setter with no caller. The start routine cFEStateVideoPlayer_Start also sets the word to 1.
+ *
+ * @param arg0   the video-player state
+ * @param value  nonzero to play the movie's sound
+ */
 extern "C" void func_001E0040(void *arg0, int value) {
     (*(int *)((char*)(arg0) + (0x254))) = value;
 }
@@ -1657,6 +2249,14 @@ struct sBlock24 {
     int w[9];
 };
 
+/**
+ * Copies a whole set of movie play options (0x24 bytes) into the video-player state at +0x24C.
+ *
+ * cFEStateVideoPlayer_Start hands that block to the movie player when the video starts. An out-of-line inline setter with no
+ * caller.
+ *
+ * @param src  the options to copy (nine words)
+ */
 extern "C" void func_001E0048(void* self, void* src)
 {
     *(sBlock24*)((char*)self + 0x24C) = *(sBlock24*)src;
@@ -1668,6 +2268,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0098);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateMountainRoom_vtbl[];
 
+/**
+ * Constructs a mountain-room state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateMountainRoom_vtbl; the full constructor is
+ * cFEStateMountainRoom_cFEStateMountainRoom.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001E0098(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1678,6 +2286,15 @@ extern "C" void* func_001E0098(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E00D0);
 #ifdef SKIP_ASM
+/**
+ * Reports whether the mountain room has no peak-pass load outstanding: its load slot (+0xBC) is -1.
+ *
+ * The room starts the pass image load in its constructor and resets the slot to -1 once the image is taken
+ * (cFEStateMountainRoom_updateTextureLoad). An out-of-line inline accessor with no caller.
+ *
+ * @param arg0  the mountain-room state
+ * @return 1 when the slot is -1, else 0
+ */
 extern "C" int func_001E00D0(void *arg0) {
     return ~(*(int *)((char*)(arg0) + (0xBC))) == 0;
 }
@@ -1702,6 +2319,11 @@ public:
     virtual void setVisible(int on);
 };
 
+/**
+ * Hides the mountain room's peak-pass group (the widget at +0x48).
+ *
+ * Calls its setVisible with 0, as cFEStateMountainRoom_onInputBegin does to close the pass view. No null check.
+ */
 extern "C" void func_001E00E0(void* self)
 {
     (*(cUIThing**)((char*)self + 0x48))->setVisible(0);
@@ -1710,6 +2332,15 @@ extern "C" void func_001E00E0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0110);
 #ifdef SKIP_ASM
+/**
+ * Reports whether the mountain room's peak-pass group (the widget at +0x48) is visible.
+ *
+ * Reads the mVisible bit (bit 6) of the widget's mAttr; 0 when there is no widget. An out-of-line inline accessor with
+ * no caller.
+ *
+ * @param arg0  the mountain-room state
+ * @return 1 when the pass is shown, else 0
+ */
 extern "C" int func_001E0110(void *arg0) {
     int var_2;
     void *temp_3;
@@ -1725,6 +2356,15 @@ extern "C" int func_001E0110(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0130);
 #ifdef SKIP_ASM
+/**
+ * Reports whether both the mountain room's peak-pass group (+0x48) and its pass picture (+0x4C) are visible.
+ *
+ * Each check reads the widget's mVisible bit (bit 6 of mAttr) and is 0 for a missing widget. cFEStateMountainRoom_updateTextureLoad makes the
+ * same test before showing the pass. An out-of-line inline accessor with no caller.
+ *
+ * @param arg0  the mountain-room state
+ * @return 1 when both are shown, else 0
+ */
 extern "C" int func_001E0130(void *arg0) {
     int var_2;
     int var_5;
@@ -1752,6 +2392,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0178);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStatePeakRoom_vtbl[];
 
+/**
+ * Constructs a peak-room state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStatePeakRoom_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001E0178(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1785,6 +2432,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E01D8);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateTrophyRoom_vtbl[];
 
+/**
+ * Constructs a trophy-room state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateTrophyRoom_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001E01D8(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1823,6 +2477,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0268);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateRewardsRoom_vtbl[];
 
+/**
+ * Constructs a rewards-room state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateRewardsRoom_vtbl. The full constructor is
+ * cFEStateRewardsRoom_cFEStateRewardsRoom.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001E0268(void* self)
 {
     func_0039E2A0(self, 0);
@@ -1856,6 +2518,14 @@ extern "C" void* func_0039E390(void*);
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E02C8);
 #ifdef SKIP_ASM
+/**
+ * Reports whether the rewards room was opened as a store: its flag at +0x4C.
+ *
+ * The constructor cFEStateRewardsRoom_cFEStateRewardsRoom stores its inStore argument there. An out-of-line inline accessor with no caller.
+ *
+ * @param arg0  the rewards-room state
+ * @return the in-store flag
+ */
 extern "C" int func_001E02C8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x4C)));
 }
@@ -2064,6 +2734,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0510);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateAudioOptions_vtbl[];
 
+/**
+ * Constructs an audio-options state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateAudioOptions_vtbl; the full constructor is
+ * cFEStateAudioOptions_cFEStateAudioOptions.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001E0510(void* self)
 {
     func_0039E2A0(self, 0);
@@ -2094,6 +2772,14 @@ void* cFEStateAudioOptions__cFEStateAudioOptions(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0570);
 #ifdef SKIP_ASM
+/**
+ * Reports whether the audio options were opened from a store: the flag at +0x74.
+ *
+ * An out-of-line inline accessor with no caller.
+ *
+ * @param arg0  the audio-options state
+ * @return the in-store flag
+ */
 extern "C" int func_001E0570(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x74)));
 }
@@ -2104,6 +2790,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0578);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateRequestLine_vtbl[];
 
+/**
+ * Constructs a request-line (radio playlist) state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateRequestLine_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001E0578(void* self)
 {
     func_0039E2A0(self, 0);
@@ -2134,6 +2827,14 @@ void* cFEStateRequestLine__cFEStateRequestLine(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E05D8);
 #ifdef SKIP_ASM
+/**
+ * Reports whether the request line was opened as a store: the flag at +0x16C.
+ *
+ * An out-of-line inline accessor with no caller.
+ *
+ * @param arg0  the request-line state
+ * @return the in-store flag
+ */
 extern "C" int func_001E05D8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x16C)));
 }
@@ -2141,6 +2842,13 @@ extern "C" int func_001E05D8(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E05E0);
 #ifdef SKIP_ASM
+/**
+ * Counts the set bits of a 64-bit mask.
+ *
+ * @param unused  the request-line state (not used)
+ * @param bits    the 64-bit mask
+ * @return the number of bits set (0..64)
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" int func_001E05E0(void* unused, unsigned long bits) {
     int count;
@@ -2160,6 +2868,11 @@ extern "C" int func_001E05E0(void* unused, unsigned long bits) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0610);
 #ifdef SKIP_ASM
+/**
+ * Adds song @p bit to the request line's playlist: sets that bit of the 64-bit mask at +0x158.
+ *
+ * @param bit  the song index (0..63)
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_001E0610(void* self, int bit)
 {
@@ -2169,6 +2882,11 @@ extern "C" void func_001E0610(void* self, int bit)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0628);
 #ifdef SKIP_ASM
+/**
+ * Removes song @p bit from the request line's playlist: clears that bit of the 64-bit mask at +0x158.
+ *
+ * @param bit  the song index (0..63)
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_001E0628(void* self, int bit)
 {
@@ -2178,6 +2896,12 @@ extern "C" void func_001E0628(void* self, int bit)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0648);
 #ifdef SKIP_ASM
+/**
+ * Reports whether the request line's playlist (the 64-bit mask at +0x158) is empty.
+ *
+ * @param arg0  the request-line state
+ * @return 1 when no song is selected, else 0
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" int func_001E0648(void *arg0) {
     return (*(long *)((char*)(arg0) + (0x158))) == 0;
@@ -2186,6 +2910,14 @@ extern "C" int func_001E0648(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0658);
 #ifdef SKIP_ASM
+/**
+ * Reports whether song @p bit is the only song the playlist could hold: no other bit of the mask at +0x158 is set.
+ *
+ * Also true for an empty playlist, since the song's own bit is ignored.
+ *
+ * @param bit  the song index (0..63)
+ * @return 1 when no other song is selected, else 0
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" int func_001E0658(void* self, int bit)
 {
@@ -2195,6 +2927,12 @@ extern "C" int func_001E0658(void* self, int bit)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0678);
 #ifdef SKIP_ASM
+/**
+ * Reports whether song @p bit is in the request line's playlist (bit @p bit of the mask at +0x158).
+ *
+ * @param bit  the song index (0..63)
+ * @return 1 when selected, else 0
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" int func_001E0678(void* self, int bit)
 {
@@ -2204,6 +2942,12 @@ extern "C" int func_001E0678(void* self, int bit)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0698);
 #ifdef SKIP_ASM
+/**
+ * Counts the songs in the request line's playlist (the set bits of the 64-bit mask at +0x158).
+ *
+ * @param arg0  the request-line state
+ * @return the number of selected songs
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" int func_001E0698(void *arg0) {
     int temp_2;
@@ -2223,6 +2967,12 @@ extern "C" int func_001E0698(void *arg0) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E06D0);
 #ifdef SKIP_ASM
+/**
+ * Reports whether song @p bit is owned (bit @p bit of the 64-bit mask at +0x160).
+ *
+ * @param bit  the song index (0..63)
+ * @return 1 when owned, else 0
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" int func_001E06D0(void* self, int bit)
 {
@@ -2232,6 +2982,11 @@ extern "C" int func_001E06D0(void* self, int bit)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E06F0);
 #ifdef SKIP_ASM
+/**
+ * Marks song @p bit as owned: sets that bit of the 64-bit mask at +0x160.
+ *
+ * @param bit  the song index (0..63)
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_001E06F0(void* self, int bit)
 {
@@ -2241,6 +2996,12 @@ extern "C" void func_001E06F0(void* self, int bit)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0708);
 #ifdef SKIP_ASM
+/**
+ * Counts the owned songs (the set bits of the 64-bit mask at +0x160).
+ *
+ * @param arg0  the request-line state
+ * @return the number of owned songs
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" int func_001E0708(void *arg0) {
     int temp_2;
@@ -2264,6 +3025,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0740);
 void operator_delete(int* ptr);
 extern void* D_0046DD60[];
 
+/**
+ * Destroys the front end's sound interface (vtable D_00469348), freeing it when asked.
+ *
+ * Puts back the base sound-interface vtable D_0046DD60 and calls operator_delete when bit 0 of @p flags is set. The
+ * object is built by func_001A2E20 (fe/fereal); its play routine is func_001A2E58.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001E0740(void* self, int flags)
 {
     *(void***)self = D_0046DD60;
@@ -2276,6 +3045,9 @@ extern "C" void func_001E0740(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0770__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the front end's sound interface needs no set-up (entry 3 of D_00469348).
+ */
 void func_001E0770(void* self)
 {
 }
@@ -2284,6 +3056,9 @@ void func_001E0770(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0778__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the front end's sound interface has nothing to shut down (entry 4 of D_00469348).
+ */
 void func_001E0778(void* self)
 {
 }
@@ -2346,6 +3121,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E07C0);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateSelectMultiplayerMode_vtbl[];
 
+/**
+ * Constructs a select-multiplayer-mode state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateSelectMultiplayerMode_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001E07C0(void* self)
 {
     func_0039E2A0(self, 0);
@@ -2379,6 +3161,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0820);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateMPCircuit_vtbl[];
 
+/**
+ * Constructs a multiplayer-circuit state with no engine (the default-constructor copy).
+ *
+ * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateMPCircuit_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001E0820(void* self)
 {
     func_0039E2A0(self, 0);
@@ -2428,6 +3217,14 @@ extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount1(cFEUseExistingAcco
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E08D0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0, so the use-existing-account state publishes the player's buddy presence as offline.
+ *
+ * Entry 29 (+0xEC) of cFEUseExistingAccount_vtbl; cFEStateNet's func_001A8830 asks this entry (func_001DE870, 1, by
+ * default) whether to show the player online.
+ *
+ * @return 0
+ */
 int func_001E08D0(void* self)
 {
     return 0;
@@ -2470,6 +3267,14 @@ void* cFEStateSelectPersona__cFEStateSelectPersona(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0940__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0, so the select-persona state publishes the player's buddy presence as offline.
+ *
+ * Entry 29 (+0xEC) of cFEStateSelectPersona_vtbl; cFEStateNet's func_001A8830 asks this entry (func_001DE870, 1, by
+ * default) whether to show the player online.
+ *
+ * @return 0
+ */
 int func_001E0940(void* self)
 {
     return 0;
@@ -2479,6 +3284,12 @@ int func_001E0940(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0948__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the select-persona state does not publish the player's buddy presence when it gains focus.
+ *
+ * Entry 32 (+0x104) of cFEStateSelectPersona_vtbl, replacing cFEStateNet's func_001A8830, which cFEStateNet_onGainFocus
+ * calls.
+ */
 void func_001E0948(void* self)
 {
 }
@@ -2674,6 +3485,12 @@ extern "C" void* cFEStateNetConfig_cFEStateNetConfig1(cFEStateNetConfig* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0BA0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the network-configuration state does not publish the player's buddy presence when it gains focus.
+ *
+ * Entry 32 (+0x104) of cFEStateNetConfig_vtbl, replacing cFEStateNet's func_001A8830, which cFEStateNet_onGainFocus
+ * calls.
+ */
 void func_001E0BA0(void* self)
 {
 }
@@ -2682,6 +3499,13 @@ void func_001E0BA0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0BA8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0, so the network-configuration state counts the player as offline for buddy presence.
+ *
+ * Entry 29 (+0xEC) of cFEStateNetConfig_vtbl, replacing cFEStateNet's func_001DE870 (returns 1).
+ *
+ * @return 0
+ */
 int func_001E0BA8(void* self)
 {
     return 0;
@@ -2739,6 +3563,12 @@ int cFEStateAuthDNAS_onLoseTransition(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0C20__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the DNAS authentication state does not publish the player's buddy presence when it gains focus.
+ *
+ * Entry 32 (+0x104) of cFEStateAuthDNAS_vtbl, replacing cFEStateNet's func_001A8830, which cFEStateNet_onGainFocus
+ * calls.
+ */
 void func_001E0C20(void* self)
 {
 }
@@ -2747,6 +3577,13 @@ void func_001E0C20(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0C28__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0, so the DNAS authentication state counts the player as offline for buddy presence.
+ *
+ * Entry 29 (+0xEC) of cFEStateAuthDNAS_vtbl, replacing cFEStateNet's func_001DE870 (returns 1).
+ *
+ * @return 0
+ */
 int func_001E0C28(void* self)
 {
     return 0;
@@ -2787,6 +3624,12 @@ int cFEStateAuthDNASError_onLoseTransition(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0C80__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the DNAS error state does not publish the player's buddy presence when it gains focus.
+ *
+ * Entry 32 (+0x104) of cFEStateAuthDNASError_vtbl, replacing cFEStateNet's func_001A8830, which cFEStateNet_onGainFocus
+ * calls.
+ */
 void func_001E0C80(void* self)
 {
 }
@@ -2795,6 +3638,13 @@ void func_001E0C80(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0C88__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0, so the DNAS error state counts the player as offline for buddy presence.
+ *
+ * Entry 29 (+0xEC) of cFEStateAuthDNASError_vtbl, replacing cFEStateNet's func_001DE870 (returns 1).
+ *
+ * @return 0
+ */
 int func_001E0C88(void* self)
 {
     return 0;
@@ -2836,6 +3686,14 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateCreateStep1_vtbl[];
 extern int cBXString_EmptyString;
 
+/**
+ * Constructs an account-creation step-1 state with no engine (the default-constructor copy).
+ *
+ * Runs cFEStateNet_cFEStateNet(self, 0, 0), stores cFEStateCreateStep1_vtbl, points mszSavedPassword, mszSavedConfirm
+ * and mszSavedMail at the empty cBXString rep, sets mbEditAccount to 1 and clears mpStaticContinue.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001E0CA0(cFEStateCreateStep1* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -2880,6 +3738,13 @@ extern "C" void cFEStateCreateStep1__cFEStateCreateStep1(cFEStateCreateStep1* se
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0D60__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0, so the account-creation step-1 state counts the player as offline for buddy presence.
+ *
+ * Entry 29 (+0xEC) of cFEStateCreateStep1_vtbl, replacing cFEStateNet's func_001DE870 (returns 1).
+ *
+ * @return 0
+ */
 int func_001E0D60(void* self)
 {
     return 0;
@@ -2894,6 +3759,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0D68);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
+/**
+ * Constructs an account-creation step-2 state with no engine (the default-constructor copy).
+ *
+ * Runs cFEStateNet_cFEStateNet(self, 0, 0) and stores cFEStateCreateStep2_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void *func_001E0D68(cFEStateCreateStep2* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateCreateStep2_vtbl;
@@ -2922,6 +3794,13 @@ void* cFEStateCreateStep2__cFEStateCreateStep2(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0DD0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0, so the account-creation step-2 state counts the player as offline for buddy presence.
+ *
+ * Entry 29 (+0xEC) of cFEStateCreateStep2_vtbl, replacing cFEStateNet's func_001DE870 (returns 1).
+ *
+ * @return 0
+ */
 int func_001E0DD0(void* self)
 {
     return 0;
@@ -2964,6 +3843,13 @@ void* cFEStateCreateDuplicate__cFEStateCreateDuplicate(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0E40__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0, so the duplicate-account state counts the player as offline for buddy presence.
+ *
+ * Entry 29 (+0xEC) of cFEStateCreateDuplicate_vtbl, replacing cFEStateNet's func_001DE870 (returns 1).
+ *
+ * @return 0
+ */
 int func_001E0E40(void* self)
 {
     return 0;
@@ -2988,6 +3874,12 @@ extern "C" void* cFEStateLogin_cFEStateLogin1(cFEStateLogin* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0E88__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the login and re-login states do not publish the player's buddy presence when they gain focus.
+ *
+ * Entry 32 (+0x104) of cFEStateLogin_vtbl and cFEStateRelogin_vtbl, replacing cFEStateNet's func_001A8830, which
+ * cFEStateNet_onGainFocus calls.
+ */
 void func_001E0E88(void* self)
 {
 }
@@ -2996,6 +3888,13 @@ void func_001E0E88(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E0E90__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0, so the login and re-login states count the player as offline for buddy presence.
+ *
+ * Entry 29 (+0xEC) of cFEStateLogin_vtbl and cFEStateRelogin_vtbl, replacing cFEStateNet's func_001DE870 (returns 1).
+ *
+ * @return 0
+ */
 int func_001E0E90(void* self)
 {
     return 0;
@@ -3220,6 +4119,14 @@ static inline void InitVec_E0FF0(void* self, const sAlloc_E0FF0& a = sAlloc_E0FF
     *(int*)((char*)self + 0x6E4) = 0;
 }
 
+/**
+ * Constructs a read-message popup with no engine (the default-constructor copy).
+ *
+ * Runs cFEStateNet_cFEStateNet(self, 0, 0), stores cFEStateReadMessagePopup_vtbl, points mszSender at the empty
+ * cBXString rep and zeroes the message vector's three words (+0x6DC..+0x6E4).
+ *
+ * @return @p self
+ */
 extern "C" void* func_001E0FF0(void* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -3251,6 +4158,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E1048);
 void operator_delete(int* ptr);
 extern void* D_0046DD60[];
 
+/**
+ * Destroys a base UI sound interface, freeing it when asked.
+ *
+ * Stores the base sound-interface vtable D_0046DD60 at +0x0 and calls operator_delete when bit 0 of @p flags is set.
+ * D_0046DD60 is also the vtable of the null sound object gUISoundNull.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001E1048(void* self, int flags)
 {
     *(void***)self = D_0046DD60;
@@ -3263,6 +4178,9 @@ extern "C" void func_001E1048(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1078__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base UI sound interface plays no sound (entry 2 of D_0046DD60).
+ */
 void func_001E1078(void* self)
 {
 }
@@ -3271,6 +4189,9 @@ void func_001E1078(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1080__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base UI sound interface needs no set-up (entry 3 of D_0046DD60).
+ */
 void func_001E1080(void* self)
 {
 }
@@ -3279,6 +4200,9 @@ void func_001E1080(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1088__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base UI sound interface has nothing to shut down (entry 4 of D_0046DD60).
+ */
 void func_001E1088(void* self)
 {
 }
@@ -3292,6 +4216,14 @@ struct sFlags_001E1090 {
     unsigned int flag : 1;
 };
 
+/**
+ * Sets or clears a locale interface's text-num-char flag (bit 27 of the word at +0x0, bit 3 of its attribute byte at
+ * +0x3).
+ *
+ * cUILocaleInterface_setDisplayMode calls it with (mode == 2).
+ *
+ * @param enabled  nonzero to set the flag
+ */
 extern "C" void func_001E1090(void* self, int enabled)
 {
     ((sFlags_001E1090*)self)->flag = (enabled != 0);
@@ -3304,6 +4236,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E10B8);
 void operator_delete(int* ptr);
 extern void* D_0046DD28[];
 
+/**
+ * Destroys a base UI custom interface, freeing it when asked.
+ *
+ * Stores the base vtable D_0046DD28 at +0x4 and calls operator_delete when bit 0 of @p flags is set;
+ * cFECustom__cFECustom puts back the same table.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_001E10B8(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = D_0046DD28;
@@ -3316,6 +4256,9 @@ extern "C" void func_001E10B8(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E10E8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base UI custom interface has no per-frame work (entry 2 of D_0046DD28).
+ */
 void func_001E10E8(void* self)
 {
 }
@@ -3324,6 +4267,11 @@ void func_001E10E8(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E10F0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: the base UI custom interface handles no screen event (entry 3 of D_0046DD28).
+ *
+ * @return 0 (not handled)
+ */
 int func_001E10F0(void* self)
 {
     return 0;
@@ -3333,6 +4281,11 @@ int func_001E10F0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E10F8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: the base UI custom interface has no next state (entry 4 of D_0046DD28).
+ *
+ * @return 0 (no state)
+ */
 int func_001E10F8(void* self)
 {
     return 0;
@@ -3342,6 +4295,11 @@ int func_001E10F8(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1100__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: the base UI custom interface has no previous state (entry 5 of D_0046DD28).
+ *
+ * @return 0 (no state)
+ */
 int func_001E1100(void* self)
 {
     return 0;
@@ -3986,6 +4944,14 @@ extern "C" void* func_001DBC98(int, int);
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E12B0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs all_in_one_main's static constructors: calls func_001DBC98(1, 0xFFFF).
+ *
+ * Entry +0x20 of the global constructor table D_0043CE38 that func_0040FBE0 (__do_global_ctors) walks; func_001E12D0 is
+ * its destructor twin. The declared parameter is not used.
+ *
+ * @return func_001DBC98's result
+ */
 void* func_001E12B0(void* self)
 {
     return func_001DBC98(1, 0xffff);
@@ -3997,6 +4963,14 @@ extern "C" void* func_001DBC98(int, int);
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E12D0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs all_in_one_main's static destructors: calls func_001DBC98(0, 0xFFFF).
+ *
+ * Entry +0x8 of the global destructor table D_0043CEE4; func_001E12B0 is its constructor twin. The declared parameter
+ * is not used.
+ *
+ * @return func_001DBC98's result
+ */
 void* func_001E12D0(void* self)
 {
     return func_001DBC98(0, 0xffff);
@@ -4027,6 +5001,15 @@ struct sRun_12F0 {
     int f10;
 };
 
+/**
+ * Fills in the message-group table D_00441630: how many messages each of its 61 groups holds and where each group
+ * starts.
+ *
+ * Each 0x14-byte group gets its message count (+0x8): 0 for group 0, 6 for groups 1-6, 11, 17, 7, 6 and 8 for groups
+ * 7-11, 3 for groups 12-21, 4 for groups 22-27, 16 for groups 28-33, 2 for groups 34-39, 0 for groups 40-51 and 1 for
+ * groups 52-60 (256 messages in all). Group 0 starts at message 0 and every later group's first message (+0x4) is the
+ * previous group's start plus its count. func_001E1458 runs it once.
+ */
 // FAKEMATCH: statement order (each run of equal counts is written with its first entry last, and the
 // zero and one entries of the tail interleaved, so sched1 reproduces retail's store order) plus five
 // FM_OPAQUE(n) after n = 1 (delays the ones by five cycles so d[52] issues after d[46]); plain form 99.82%
@@ -4126,6 +5109,9 @@ extern "C" void func_001E12F0(void)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1450);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ */
 extern "C" void func_001E1450(void) {
 
 }
@@ -4141,6 +5127,13 @@ extern void* cAppMan_TheAppMan;
 extern "C" void func_001E12F0(void);
 extern "C" void func_001E14C0(int type);
 
+/**
+ * Runs the message system's periodic check (called every frame by cGame_update).
+ *
+ * Skipped while the message center is open (D_004A20C0 set). The first call fills in the message-group table
+ * (func_001E12F0, guarded by D_004A20C8). Whenever the app manager's counter at +0x1C has moved more than 600 past
+ * D_004A20BC, calls func_001E14C0(1) and stores the counter in D_004A20BC.
+ */
 extern "C" void func_001E1458(void)
 {
     if (D_004A20C0 == 0) {
@@ -4170,6 +5163,15 @@ struct sEntry14_14C0 {
 };
 extern sEntry14_14C0 D_00441630_14C0[] __asm__("D_00441630");
 
+/**
+ * Runs the timed-delivery hook for every message group of a given type that has not been flagged yet.
+ *
+ * Calls func_001E1548 with the group index for each of the 61 groups whose message flag is clear (func_001E3A30) and
+ * whose type (+0x0 of D_00441630) is @p type or 5. func_001E1548 is empty, so this has no effect (and no group has type
+ * 5).
+ *
+ * @param type  the group type to deliver (func_001E1458 passes 1)
+ */
 extern "C" void func_001E14C0(int type)
 {
     int i;
@@ -4187,6 +5189,9 @@ extern "C" void func_001E14C0(int type)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1548__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the per-group hook func_001E14C0 calls.
+ */
 void func_001E1548(void* self)
 {
 }
@@ -4207,6 +5212,17 @@ extern "C" int func_001464D0(void* iface, int a, int ch, int b, int c);
 extern "C" int func_00145EF0(void* iface, int a, int b, int c);
 unsigned int BXrand();
 
+/**
+ * Flags and queues the first message of the back-country groups 1-6 after a race, when the player has not yet earned
+ * them.
+ *
+ * Skipped during replay playback (the replay's first word 1-9). For the first of groups 1, 2, 3 whose message flag is
+ * clear (peak k = 0, 1, 2; later groups are not tried in the same call): when func_001464D0(player interface, 0,
+ * character, k, 1) and func_00145EF0(player interface, 0, 14 + k, 4) both return 0, sets the group's flag
+ * (func_001E3A78) and queues a random one of the group's first three messages (func_001E2FE0), or of its last three
+ * when the human rider's character is 3, 7 or 8 respectively. Groups 4, 5, 6 are handled the same way, independently,
+ * with func_001464D0(..., k, 0) and event 5. func_00154EE8 (race result) calls it except in modes 4 and 5.
+ */
 extern "C" void func_001E1550(void)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4277,6 +5293,13 @@ extern "C" void func_001E1550(void)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E1A30);
 #ifdef SKIP_ASM
+/**
+ * Reports whether @p x is a character id (0-9) equal to @p y.
+ *
+ * @param x  the value to test (only 0-9 can match)
+ * @param y  the character id to compare with
+ * @return 1 on a match, else 0
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int func_001E1A30(int x, int y)
 {
@@ -4323,6 +5346,18 @@ struct sRangeK1E1AD0 {
     int count;   // 0x8
 };
 
+/**
+ * Picks a random message from a message group that is not about a given character and not already queued.
+ *
+ * Allocates a list (operator new, tag "AddForeshadowMessage"), collects the group's message indices i (from its first
+ * message for its count) whose character (+0xC of D_004C6C08[i]) does not match @p arg (func_001E1A30) and that are not
+ * in the message list (func_001E3388 returns -1), returns one of them at random (BXrand) and frees the list. Likely
+ * bug: when nothing qualifies it returns 0x100 without freeing the list.
+ *
+ * @param r    the message group (a D_00441630 entry: +0x4 first message, +0x8 count)
+ * @param arg  the character whose messages are skipped
+ * @return a message index, or 0x100 when none qualifies
+ */
 extern "C" int func_001E1AD0(sRangeK1E1AD0* r, int arg)
 {
     int* list = (int*)operator_new_tag(r->count * 4, str_AddForeshadowMessage, 0x100, 0);
@@ -4362,6 +5397,17 @@ extern sEntry14_1C10 D_00441630_1C10[] __asm__("D_00441630");
 
 
 
+/**
+ * Queues a foreshadowing message for a peak.
+ *
+ * Skipped during replay playback and when either of the peak's two foreshadow groups (28/29, 30/31, 32/33) has its
+ * message flag set. Uses the pair's second group when the human rider's character is 3, 7 or 8 (for peaks 0, 1, 2),
+ * else the first, picks a message from it that is not about the human rider's character (func_001E1AD0) and queues it
+ * (func_001E2FE0) unless none was found. Sets no flag itself (func_001E2370 does). Called by the reward interface after
+ * a peak event.
+ *
+ * @param which  the peak (0-2)
+ */
 extern "C" void func_001E1C10(int which)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4450,7 +5496,17 @@ static inline int IsBusy001E1DD0()
     int n = *(int*)SSXApp->Game->Replay;
     return n != 0 && n < 10;
 }
-// Queues the follow-up popup for an event kind unless one is already pending.
+/**
+ * Flags the follow-up message for an event mode 6-11 unless the player already has it.
+ *
+ * Skipped during replay playback. Mode 6, 7, 8, 9, 10, 11 maps to group 34, 36, 38, 35, 37, 39; when that group's
+ * message flag is clear, sets pending flag 40, 44, 48, 42, 46 or 50 (one higher when @p alt is set) with func_001E3A78.
+ * func_001E1EB8 later turns the pending flags into messages. The first argument is not used (the reward interface
+ * passes the peak).
+ *
+ * @param kind  the event mode (6-11; others do nothing)
+ * @param alt   nonzero to set the pending flag one above (the reward interface passes 1 for medal 2, 0 for medal 3)
+ */
 extern "C" void func_001E1DD0(void* self, int kind, int alt)
 {
     if (IsBusy001E1DD0()) return;
@@ -4478,6 +5534,14 @@ extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E20D0(int which, int flag);
 extern "C" void func_001E2220(int which, int flag);
 
+/**
+ * Queues the follow-up messages flagged by func_001E1DD0 and clears their pending flags.
+ *
+ * Skipped during replay playback. For peaks 0-2, pending flag 40/44/48 calls func_001E2220(peak, 0) and 41/45/49 calls
+ * func_001E2220(peak, 1); pending flag 42/46/50 calls func_001E20D0(peak, 0) and 43/47/51 func_001E20D0(peak, 1). Each
+ * handled flag is cleared (func_001E3A78(flag, 0)); the second of a pair is only checked when the first is clear.
+ * func_00154EE8 (race result) calls it.
+ */
 extern "C" void func_001E1EB8(void)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4544,6 +5608,15 @@ struct sEntry14_20D0 {
 };
 extern sEntry14_20D0 D_00441630_20D0[] __asm__("D_00441630");
 
+/**
+ * Queues the message of group 35, 37 or 39 for peak @p which unless that group's flag is set.
+ *
+ * Skipped during replay playback. Queues the group's first message (+0x4 of D_00441630), or, when @p flag is set, sets
+ * the group's flag and queues its second message.
+ *
+ * @param which  the peak (0-2; others do nothing)
+ * @param flag   nonzero to send the second message and flag the group
+ */
 extern "C" void func_001E20D0(int which, int flag)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4603,6 +5676,15 @@ struct sEntry14_2220 {
 };
 extern sEntry14_2220 D_00441630_2220[] __asm__("D_00441630");
 
+/**
+ * Queues the message of group 34, 36 or 38 for peak @p which unless that group's flag is set.
+ *
+ * Skipped during replay playback. Queues the group's first message (+0x4 of D_00441630), or, when @p flag is set, sets
+ * the group's flag and queues its second message.
+ *
+ * @param which  the peak (0-2; others do nothing)
+ * @param flag   nonzero to send the second message and flag the group
+ */
 extern "C" void func_001E2220(int which, int flag)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4652,6 +5734,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2370);
 #ifdef SKIP_ASM
 extern "C" void func_001E3A78(int a, int b);
 
+/**
+ * Sets the message flags of both foreshadow groups of a peak (28/29, 30/31 or 32/33), so func_001E1C10 sends no more.
+ *
+ * Skipped during replay playback. The reward interface calls it once a peak's events are all won.
+ *
+ * @param which  the peak (0-2; others do nothing)
+ */
 extern "C" void func_001E2370(int which)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4682,6 +5771,14 @@ extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
+/**
+ * Queues the peak-award message for peak @p which once: message 252, 253 or 254, guarded by flag 57, 58 or 59.
+ *
+ * Skipped during replay playback. cBERewardInterface_awardUser calls it for award categories 2, 3 and 4. Likely bug:
+ * for peak 1 it tests flag 58 but sets flag 57, so flag 58 is never set.
+ *
+ * @param which  the peak (0-2; others do nothing)
+ */
 extern "C" void func_001E2428(int which)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4718,6 +5815,11 @@ extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
+/**
+ * Queues message 255 once (guarded by message flag 60).
+ *
+ * Skipped during replay playback. cBERewardInterface_awardUser calls it for award category 1.
+ */
 extern "C" void func_001E2518(void)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4736,6 +5838,11 @@ extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
+/**
+ * Queues message 251 once (guarded by message flag 56).
+ *
+ * Skipped during replay playback. cBERewardInterface_awardUser calls it for award category 0.
+ */
 extern "C" void func_001E2578(void)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4753,6 +5860,16 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E25D8);
 extern "C" void func_001E2648(void* a, int b);
 extern "C" void func_001E2828(void* a, int b);
 
+/**
+ * Passes a back-country race result to the message system: mode 4 to func_001E2648, mode 5 to func_001E2828.
+ *
+ * Skipped during replay playback; other modes do nothing. func_00154EE8 (race result) calls it with the game mode, the
+ * event's location id and the result.
+ *
+ * @param key  the game mode
+ * @param a1   the event's location id (declared void*)
+ * @param a2   the race result (0 = won)
+ */
 extern "C" void func_001E25D8(int key, void* a1, int a2)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4784,6 +5901,17 @@ extern "C" void func_001E32C8(int type);
 
 // PORT: the unit declares func_001E2648(void*, int); the first arg is really an int id.
 extern "C" void func_001E2648_impl(int which, int flag) __asm__("func_001E2648");
+/**
+ * Queues the result message of a mode-4 back-country event at location 14, 15 or 16 (peak 0, 1, 2).
+ *
+ * Skipped during replay playback and when the location's group (22, 23, 24) is already flagged. First removes the
+ * queued messages of groups 1/2/3 and 22/23/24 (func_001E32C8). On a win (@p flag 0) sets the group's flag and queues
+ * message 116, 120 or 124 (118, 122, 126 when the human rider's character is 3, 7 or 8 respectively); otherwise queues
+ * 115, 119 or 123 (117, 121, 125) and leaves the flag clear.
+ *
+ * @param which  the location id (14-16; others do nothing)
+ * @param flag   the race result (0 = won)
+ */
 extern "C" void func_001E2648_impl(int which, int flag)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4874,6 +6002,17 @@ extern "C" void func_001E32C8(int type);
 
 // PORT: the unit declares func_001E2828(void*, int); the first arg is really an int id.
 extern "C" void func_001E2828_impl(int which, int flag) __asm__("func_001E2828");
+/**
+ * Queues the result message of a mode-5 back-country event at location 14, 15 or 16 (peak 0, 1, 2).
+ *
+ * Skipped during replay playback and when the location's group (25, 26, 27) is already flagged. First removes the
+ * queued messages of groups 4/5/6 and 25/26/27 (func_001E32C8). On a win (@p flag 0) sets the group's flag and queues
+ * message 128, 132 or 136 (130, 134, 138 when the human rider's character is 3, 7 or 8 respectively); otherwise queues
+ * 127, 131 or 135 (129, 133, 137) and leaves the flag clear.
+ *
+ * @param which  the location id (14-16; others do nothing)
+ * @param flag   the race result (0 = won)
+ */
 extern "C" void func_001E2828_impl(int which, int flag)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4972,6 +6111,17 @@ struct sEntry14_2A08 {
 };
 extern sEntry14_2A08 D_00441630_2A08[] __asm__("D_00441630");
 
+/**
+ * Queues an aggression message about another character when the human rider's grudge against it runs high.
+ *
+ * Skipped during replay playback and when @p charID is the human rider's own character. The character's group is
+ * func_001E2B38(charID) (12-21). When the group is flagged, clears the flag once @p level falls below 5; otherwise,
+ * when @p level exceeds 15 plus a random 0-7, queues a random message of the group and sets the flag.
+ * cBEAggressionInterface_applyAggression calls it for rider 0.
+ *
+ * @param charID  the other rider's character id
+ * @param level   the aggression ticks toward that rider
+ */
 extern "C" void func_001E2A08(int charID, int level)
 {
     int n = *(int*)SSXApp->Game->Replay;
@@ -4996,6 +6146,12 @@ extern "C" void func_001E2A08(int charID, int level)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2B38);
 #ifdef SKIP_ASM
+/**
+ * Returns the aggression message group of a character: 12 + @p x for characters 0-9, else 61.
+ *
+ * @param x  the character id
+ * @return the message group index
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int func_001E2B38(int x)
 {
@@ -5032,6 +6188,16 @@ struct sEntry14_2BB8 {
 };
 extern sEntry14_2BB8 D_00441630_2BB8[] __asm__("D_00441630");
 
+/**
+ * Counts the message-center rows taken by all message groups of one type.
+ *
+ * A group of that type counts all its messages when @p all is set or when it is a folder (+0x10 set) whose flag is set
+ * (expanded), else one row.
+ *
+ * @param type  the group type (+0x0 of D_00441630; the message center uses 4, the FAQ groups 7-11)
+ * @param all   nonzero to count every message
+ * @return the number of rows
+ */
 extern "C" int func_001E2BB8(int type, int all)
 {
     int total = 0;
@@ -5063,6 +6229,12 @@ struct sEntry14_2C60 {
 };
 extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
 
+/**
+ * Returns the number of messages in message group @p i (+0x8 of D_00441630).
+ *
+ * @param i  the group index
+ * @return its message count
+ */
 extern "C" int func_001E2C60(int i)
 {
     return D_00441630_2C60[i].count;
@@ -5084,6 +6256,18 @@ struct sEntry14_2C80 {
 };
 extern sEntry14_2C80 D_00441630_2C80[] __asm__("D_00441630");
 
+/**
+ * Returns the message shown in row @p idx of the rows built from the message groups of one type.
+ *
+ * Walks the groups of that type; each takes all its messages when @p mode is 0, when it is not a folder (+0x10 clear)
+ * or when its flag is set, else one row (its first message). Note that func_001E2BB8 counts a non-folder group as one
+ * row in its non-full mode; the two agree for type 4, whose groups (7-11) are all folders.
+ *
+ * @param type  the group type (+0x0 of D_00441630)
+ * @param idx   the row
+ * @param mode  0 to list every message
+ * @return the message index, or -1 past the last row
+ */
 extern "C" int func_001E2C80(int type, int idx, int mode)
 {
     int base = 0;
@@ -5128,6 +6312,14 @@ struct sPopupEntry14 {
 };
 extern sPopupEntry14 D_00441630[];
 
+/**
+ * Reports whether message @p i belongs to a group of category @p v (+0xC of its D_00441630 group).
+ *
+ * @param v  the category (3 back-country result, 4 foreshadow, 5 aggression, 8 peak awards, as the subject strings name
+ *           them)
+ * @param i  the message index
+ * @return 1 when it does, else 0
+ */
 extern "C" int func_001E2D58(int v, int i)
 {
     sPopupEntry18* a = &D_004C6C08[i];
@@ -5142,6 +6334,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2D98);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
 
+/**
+ * Reports whether message group @p i has category @p v (+0xC of D_00441630).
+ *
+ * @param v  the category
+ * @param i  the group index
+ * @return 1 when it does, else 0
+ */
 extern "C" int func_001E2D98(int v, int i)
 {
     int* p = (int*)&D_00441630_2C60[0] + i * 5;
@@ -5152,6 +6351,15 @@ extern "C" int func_001E2D98(int v, int i)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E2DC0);
 #ifdef SKIP_ASM
+/**
+ * Returns message @p idx's 0-based position among all messages of the same category.
+ *
+ * Walks the messages from 0 a group at a time, adding the counts of earlier groups with that category and, for the
+ * group holding @p idx, its offset within the group.
+ *
+ * @param idx  the message index
+ * @return the position (the variant number func_001E5AA0 and func_001E4B80 derive the subject from)
+ */
 extern "C" int func_001E2DC0(int idx)
 {
     sPopupEntry18* ta = &D_004C6C08[idx];
@@ -5181,6 +6389,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2E80);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
 
+/**
+ * Returns the index of message @p n of message group @p i (the group's first message, +0x4, plus @p n).
+ *
+ * @param i  the group index
+ * @param n  the offset within the group
+ * @return the message index
+ */
 extern "C" int func_001E2E80(int i, int n)
 {
     return D_00441630_2C60[i].start + n;
@@ -5206,7 +6421,15 @@ extern char str_kT_CMNGameTitle[];
 extern char str_kT_CMNDJAtomica[];
 extern char str_kT_FAQFolder[];
 
-// Returns the string hash of the title for popup message kind (0-12), or 0.
+/**
+ * Returns the string hash of a message sender's name, shown in the message center's From column.
+ *
+ * Kinds 0-9 are the characters (kT_CHARMoby, Kaori, Allegra, Mac, Zoe, Griff, Elise, Nate, Psymon, Viggo), 10 the game
+ * title (kT_CMNGameTitle), 11 DJ Atomica (kT_CMNDJAtomica) and 12 the FAQ folder (kT_FAQFolder).
+ *
+ * @param kind  the sender (+0xC of the D_004C6C08 message)
+ * @return GetHashValue32 of the name's string id, or 0 for other kinds
+ */
 extern "C" int func_001E2EA0(int kind)
 {
     switch ((unsigned int)kind) {
@@ -5277,6 +6500,17 @@ struct sVEntryK1E2FE0 {
     int (*fn)(void*, int, int);
 };
 
+/**
+ * Adds a message to the human rider's message list as unread and notifies the HUD.
+ *
+ * The list (func_001E39F8) holds up to 25 {message, variant byte} entries, a read mask at +0xC8 and a count byte at
+ * +0xCC. When it is full the oldest entry is dropped first (func_001E31B8(0)). A message whose D_004C6C08 kind (+0x8)
+ * is 1 gets a random variant from func_001E3100 instead of @p flag. The new entry's read bit is cleared; then, when the
+ * game has a UI, the "hud_b" state found on its state stack gets handleEvent (vtable entry 24) with event 8.
+ *
+ * @param id    the message index (D_004C6C08)
+ * @param flag  the variant byte stored with it
+ */
 extern "C" void func_001E2FE0(int id, unsigned char flag)
 {
     sPopupList_2FE0* t = func_001E39F8_list2FE0();
@@ -5305,6 +6539,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3100);
 extern "C" int func_001E2D58(int v, int i);
 unsigned int BXrand();
 
+/**
+ * Picks a random subject variant for message @p i by its group's category.
+ *
+ * Category 3 gives 0-9, 5 gives 0-10, 8 gives 0-3 and 4 gives 0-9 (BXrand); any other category gives 0xFF.
+ *
+ * @param i  the message index
+ * @return the variant, or 0xFF
+ */
 extern "C" unsigned char func_001E3100(int i)
 {
     unsigned char pick = 0xFF;
@@ -5337,6 +6579,13 @@ struct sPopupList_31B8 {
 // PORT: unit declares func_001E39F8(void*), but its body takes no arguments
 extern "C" sPopupList_31B8* func_001E39F8_list31B8() __asm__("func_001E39F8");
 
+/**
+ * Removes entry @p idx from the message list, moving later entries and their read bits down one place.
+ *
+ * The read bit of the old last slot is left as it was.
+ *
+ * @param idx  the list position to remove
+ */
 extern "C" void func_001E31B8(int idx)
 {
     sPopupList_31B8* msgList = func_001E39F8_list31B8();
@@ -5371,6 +6620,11 @@ struct sPopupList {
 extern "C" sPopupList* func_001E39F8_list() __asm__("func_001E39F8");
 extern "C" void func_001E31B8(int idx);
 
+/**
+ * Removes the first message-list entry holding message @p id, if any.
+ *
+ * @param id  the message index
+ */
 extern "C" void func_001E3268(int id)
 {
     sPopupList* msgList = func_001E39F8_list();
@@ -5407,6 +6661,14 @@ struct sPopupList_32C8 {
 extern "C" sPopupList_32C8* func_001E39F8_list32C8() __asm__("func_001E39F8");
 extern "C" void func_001E31B8(int idx);
 
+/**
+ * Removes every queued message that belongs to message group @p type.
+ *
+ * Likely bug: the loop compares an iteration count with the shrinking list count, so after each removal one entry at
+ * the end of the list is never examined.
+ *
+ * @param type  the message group (D_00441630 index) whose messages are removed
+ */
 extern "C" void func_001E32C8(int type)
 {
     int n = 0;
@@ -5429,6 +6691,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3388);
 // PORT: unit declares func_001E39F8(void*), but its body takes no arguments
 extern "C" sPopupList* func_001E39F8_list() __asm__("func_001E39F8");
 
+/**
+ * Returns the message-list position of message @p id.
+ *
+ * @param id  the message index
+ * @return its position, or -1 when it is not queued
+ */
 extern "C" int func_001E3388(int id)
 {
     sPopupList* msgList = func_001E39F8_list();
@@ -5447,6 +6715,11 @@ extern "C" void* func_001E39F8(void* self);
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E33E8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns how many messages the human rider's message list holds (its count byte at +0xCC).
+ *
+ * @return the message count
+ */
 unsigned char func_001E33E8(void* self)
 {
     return *(unsigned char*)((char*)func_001E39F8(self) + 0xcc);
@@ -5459,6 +6732,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3408);
 // PORT: unit declares func_001E39F8(void*), but its body takes no arguments
 extern "C" sPopupList* func_001E39F8_list() __asm__("func_001E39F8");
 
+/**
+ * Counts the unread messages in the human rider's message list (entries whose read bit at +0xC8 is clear).
+ *
+ * The pause menu pulses its "NewMail" icon while this is nonzero; the message center prints it as the unread count.
+ *
+ * @return the number of unread messages
+ */
 extern "C" int func_001E3408()
 {
     sPopupList* msgList = func_001E39F8_list();
@@ -5481,6 +6761,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3460);
 extern "C" sPopupList* func_001E39F8_list() __asm__("func_001E39F8");
 extern "C" int func_001E3620(int idx);
 
+/**
+ * Finds the first unread message in the human rider's message list.
+ *
+ * @param out  receives the list position when one is found
+ * @return its message index (func_001E3620), or -1 when every message is read
+ */
 extern "C" int func_001E3460(int* out)
 {
     sPopupList* msgList = func_001E39F8_list();
@@ -5498,6 +6784,12 @@ extern "C" int func_001E3460(int* out)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E34D8);
 #ifdef SKIP_ASM
+/**
+ * Returns the next message of the same group as message @p i: @p i + 1 when that message is in the same group.
+ *
+ * @param i  the message index
+ * @return i + 1, or -1 when message i is the last of its group
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" int func_001E34D8(int i)
 {
@@ -5520,6 +6812,13 @@ extern "C" void func_001475C0(void* iface, int a1, int a2);
 extern int D_004A20CC;
 extern signed char D_00535C11[];
 
+/**
+ * Asks for the message center to open, from a world script (func_00306300, when not in a network game).
+ *
+ * When the new race's cGamePath (D_00535C11) is 0, sets D_004A20CC to 0, so the game update triggers overlay 0x22 (the
+ * message center) on its next pass, and sets player 0's flag through func_001475C0(player interface, 0, 1); otherwise
+ * does nothing.
+ */
 extern "C" void func_001E3510(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -5538,6 +6837,14 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00147580(void* iface, int a1);
 
+/**
+ * Reports whether a world script may open the message center (func_00307020 returns it to the script).
+ *
+ * Returns 0 when the new race's cGamePath is not 0 or its cGameEvent is 6 or 9; otherwise 1 while player 0's flag read
+ * by func_00147580 is still clear (func_001E3510 sets it).
+ *
+ * @return 1 when the message center may be opened, else 0
+ */
 extern "C" int func_001E3570(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -5556,6 +6863,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E35F0);
 #ifdef SKIP_ASM
 extern "C" void* func_001E39F8(void* self);
 
+/**
+ * Returns the address of message-list entry @p self (the list plus 8 bytes per entry).
+ *
+ * The declared parameter is really the entry index.
+ *
+ * @return the entry's address
+ */
 extern "C" int func_001E35F0(void* self)
 {
     return (int)func_001E39F8(self) + ((int)self << 3);
@@ -5576,6 +6890,12 @@ struct sPopupTable8 {
 // PORT: unit declares func_001E39F8(void*), but its body takes no arguments
 extern "C" sPopupTable8* func_001E39F8_get() __asm__("func_001E39F8");
 
+/**
+ * Returns the message index stored in message-list entry @p idx.
+ *
+ * @param idx  the list position
+ * @return the message index (D_004C6C08)
+ */
 extern "C" int func_001E3620(int idx)
 {
     return func_001E39F8_get()->entries[idx].field_0x0;
@@ -5588,6 +6908,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3650);
 // PORT: unit declares func_001E39F8(void*), but its body takes no arguments
 extern "C" sPopupTable8* func_001E39F8_get() __asm__("func_001E39F8");
 
+/**
+ * Returns the variant byte stored in message-list entry @p idx.
+ *
+ * @param idx  the list position
+ * @return the subject variant (0xFF for none)
+ */
 extern "C" unsigned char func_001E3650(int idx)
 {
     return func_001E39F8_get()->entries[idx].field_0x4;
@@ -5601,6 +6927,15 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3680);
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 extern int D_004A20C4;
 
+/**
+ * Returns the message-center row that shows message @p id.
+ *
+ * The rows list the queued messages newest first, then the FAQ rows (type 4, built by func_001E2C80 with collapsed
+ * folders as one row). Returns @p id unchanged when D_004A20C4 is set.
+ *
+ * @param id  the message index
+ * @return the row, or 0xFF when the message is not shown
+ */
 extern "C" unsigned char func_001E3680(int id)
 {
     if (D_004A20C4 != 0) {
@@ -5639,6 +6974,16 @@ extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
+/**
+ * Queues the earnings messages when an amount of career money would reach a peak's earnings target.
+ *
+ * Only for rider 0. When peak 1 is locked (cBENewPlayerInterface_isPeakLocked1) and the money earned so far plus @p amt
+ * reaches cBERewardInterface_getEarningsTarget(.., 0), sets flag 52 and queues message 247 once; the same for peak 2
+ * with target 1, flag 53 and message 248. cRiderMetrix_evAddCash calls it before crediting the money.
+ *
+ * @param rider  the rider's AI index (only 0 does anything)
+ * @param amt    the money about to be credited
+ */
 extern "C" void func_001E3760(int rider, int amt)
 {
     if (rider == 0) {
@@ -5675,6 +7020,15 @@ extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 
+/**
+ * Queues the trophy messages for the locked peaks once the human rider owns the needed trophy.
+ *
+ * Only for player 0. When peak 1 is locked and cBERewardInterface_isTrophyOwned(.., character, 0, 2) is true, sets flag
+ * 54 and queues message 249 once; peak 2 with trophy (1, 2), flag 55 and message 250 likewise.
+ * cBERewardInterface_awardUser calls it for award categories 11 and 12.
+ *
+ * @param player  the profile (only 0 does anything)
+ */
 extern "C" void func_001E38B8(int player)
 {
     if (player == 0) {
@@ -5705,6 +7059,14 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_00147908(void* iface, int a1);
 
+/**
+ * Returns the human rider's message list: func_00147908(player interface, 0), the character record at +0xE38.
+ *
+ * The list holds 25 {message, variant byte} entries, a read mask at +0xC8 and a count byte at +0xCC. The declared
+ * parameter is not used.
+ *
+ * @return the message list
+ */
 extern "C" void* func_001E39F8(void* self)
 {
     return func_00147908(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
@@ -5718,6 +7080,13 @@ extern "C" int func_00147980(void* iface, int a1, void* a2);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
+/**
+ * Reports whether the human rider's message flag number @p self is set (func_00147980 on the player interface).
+ *
+ * The flags are the bits of the character record's words at +0xF08; the declared parameter is really the flag index.
+ *
+ * @return 1 when the flag is set, else 0
+ */
 extern "C" int func_001E3A30(void* self)
 {
     return func_00147980(cBE_getInterface_Fv(cBE_getBE(), 1), 0, self) != 0;
@@ -5732,6 +7101,12 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00147A30(void* iface, int a1, int a2, int a3);
 
+/**
+ * Sets or clears the human rider's message flag number @p a (func_00147A30 on the player interface).
+ *
+ * @param a  the flag index
+ * @param b  nonzero to set the flag, 0 to clear it
+ */
 extern "C" void func_001E3A78(int a, int b)
 {
     func_00147A30(cBE_getInterface_Fv(cBE_getBE(), 1), 0, a, b);
@@ -5751,6 +7126,19 @@ public:
     virtual void setVolume(int ch, float v);
 };
 
+/**
+ * Sets the two vibration levels of pad @p idx from two values.
+ *
+ * Uses the pad device at PadCache + 0x2EEC + 4 x idx (the virtuals the source declares as getState and setVolume). With
+ * x' = max(0, 0.91333 x - 18.5185) and y scaled by 0.99167, when the device's state is 2 sets channel 0 to max((y -
+ * 0.5) / 100, (x' - 2) / 972.22, 0) and channel 1 to max((y - 70) / 160, (x' - 100) / 5000, 0). Same body as
+ * cFEStateOptionsController_vibratePad in fe/festateoptions without its unused state argument. Likely bug: with PadCache null the device stays
+ * null and is still called.
+ *
+ * @param idx  the pad (0 or 1)
+ * @param x    the first level input
+ * @param y    the second level input
+ */
 // PORT: uses g++'s >? (max) operator.
 extern "C" void func_001E3AC8(int idx, float x, float y)
 {
@@ -5884,6 +7272,15 @@ extern "C" void func_001E4458(cOVState_MESSAGECENTER*);
 extern "C" void func_001E4658(cOVState_MESSAGECENTER*);
 extern char str_112messagecenter[];
 
+/**
+ * Creates the message center's screen and fills it (vtable entry 4, onCreateScreen).
+ *
+ * Adds the "112messagecenter" screen (cUIEngine_addScreenByHashName), keeps it in mpMessageScreen and plays its first
+ * frame, runs cOVState_onCreateScreen, adds the PDA template in opening modes 0 and 1 (miMiscData), zeroes
+ * mScrollOffset, sizes the menu to the queued messages plus every FAQ row (cUIMenu_setScrollableMenu), refreshes the
+ * rows, labels, buttons and arrows (func_001E48B0, func_001E4758, func_001E4458, func_001E4658) and sets D_004A20C0
+ * (message center open).
+ */
 extern "C" void func_001E3D58(cOVState_MESSAGECENTER* self)
 {
     void* engine = self->mpEngine;
@@ -5924,6 +7321,13 @@ extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
 
+/**
+ * Closes the message center's screen (vtable entry 5, onDestroyScreen).
+ *
+ * In opening modes 0 and 1 (miMiscData) sets message flag 7 (mode 0) or clears it (mode 1), removes the PDA template
+ * and restores cPauseState_Flags from the saved pause-state stack (D_005366E8, D_004A2A54, D_004428F0); then runs
+ * cOVState_onDestroyScreen.
+ */
 extern "C" void func_001E3E30(cOVState_MESSAGECENTER* self)
 {
     int s = self->miMiscData;
@@ -5986,6 +7390,16 @@ struct sPopup_1E3EC0 {
     void* f160;         // 0x160
 };
 
+/**
+ * Binds the message center's widgets by their hashed names as the screen creates them (vtable entry 18,
+ * onWidgetCreate).
+ *
+ * Stores "ps2sq", "btext3", "ps2x", "btext1", "TotalMessagesLabel", "UnreadMessagesLabel", "MenuFroms", "arr_down",
+ * "arr_up" and "NoMessage" (hidden) in their fields, hides "MessageView", and fills the eight-row tables from
+ * "UnreadMail%d", "FAQIcon%d", "From%d", "Subject%d" (also calls its vtable entry 27 with 1) and "Number%d".
+ *
+ * @param w  the widget being created (its name hash at +0x38)
+ */
 extern "C" void func_001E3EC0(sPopup_1E3EC0* self, void* w)
 {
     char buf[32];
@@ -6078,6 +7492,12 @@ struct sVEntry001E4168 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Focuses the message center's menu and, when it opened by itself, shows message 37 (vtable entry 6, onGainFocus).
+ *
+ * In opening modes 0 and 1 (miMiscData) selects the row of message 37 (func_001E3680), focuses the menu (vtable entry 7
+ * with 1) and opens the view popup for message 37 with number -1 (func_001E50C8); otherwise only focuses the menu.
+ */
 extern "C" void func_001E4168(cOVState_MESSAGECENTER* self)
 {
     int state = self->miMiscData;
@@ -6141,6 +7561,19 @@ extern "C" void func_001E4658(cOVState_MESSAGECENTER*);
 extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int a1, int a2);
 extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx);
 
+/**
+ * Handles the message center's widget events (vtable entry 19, onWidgetEvent).
+ *
+ * Event 5 (select): on a queued-message row marks it read and opens the view popup with its row number (func_001E50C8);
+ * on a FAQ row either toggles the folder (when the row is a folder's first message: flips the group's message flag and
+ * refreshes rows, arrows and buttons) or opens the view popup. Event 7: clears mbMessageDeleted and, on a queued row,
+ * deletes that message (func_001E5148) and sets mbMessageDeleted, then refreshes the buttons. Event 6: plays the
+ * screen's "TransitionOut" frame, calls func_0039F190(mpEngine + 0x18, 1) and clears D_004A20C0. Event 1: calls vtable
+ * entry 5 with 0 on the eight subject texts. Ignores a null @p widget.
+ *
+ * @param widget  the widget (a row's From text holds its message index at +0x18)
+ * @param event   the widget event
+ */
 extern "C" void func_001E4200(cOVState_MESSAGECENTER* self, void* widget, unsigned int event)
 {
     if (widget == 0) {
@@ -6235,6 +7668,13 @@ struct sEntry14_4458 {
 };
 extern sEntry14_4458 D_00441630_4458[] __asm__("D_00441630");
 
+/**
+ * Updates the message center's buttons for the selected row.
+ *
+ * On a queued-message row shows the square button and "btext3" and labels "btext1" kT_BTNView. On a FAQ row hides them
+ * and labels "btext1" kT_BTNCollapse or kT_BTNExpand on a folder's first message (by the folder's message flag), else
+ * kT_BTNView.
+ */
 extern "C" void func_001E4458(cOVState_MESSAGECENTER* self)
 {
     int base = *(unsigned char*)((char*)self->mpMenu + 0x95);
@@ -6273,6 +7713,17 @@ extern "C" void func_001E4658(cOVState_MESSAGECENTER* self);
 extern "C" void func_001E48B0(cOVState_MESSAGECENTER* self);
 extern "C" void func_001E4458(cOVState_MESSAGECENTER* self);
 
+/**
+ * Answers the message center menu's events (vtable entry 20, onWidgetMenu).
+ *
+ * Event 4 (scrolled) stores @p value in mScrollOffset and refreshes arrows and rows; event 5 refreshes the buttons;
+ * event 8 reports whether mbMessageDeleted is set; events 6 and 7 return 1 and event 9 returns 0.
+ *
+ * @param widget  the menu
+ * @param event   the menu event
+ * @param value   the event's value (the new scroll offset for event 4)
+ * @return 257 for events 4, 5 and others, the answers above otherwise
+ */
 extern "C" int func_001E4578(cOVState_MESSAGECENTER* self, void* widget, int event, int value)
 {
     switch (event) {
@@ -6303,6 +7754,15 @@ extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
 extern "C" void func_001E4758(cOVState_MESSAGECENTER*);
 extern "C" void func_0039F190(void* self, int a1);
 
+/**
+ * Refreshes the message center when its view popup closes (vtable entry 17, onPopupEvent).
+ *
+ * On event 20 (sent by the view popup) refreshes the rows and the count labels (func_001E48B0, func_001E4758) and calls
+ * func_0039F190(mpEngine + 0x18, 1).
+ *
+ * @param popup  the popup
+ * @param event  the popup event
+ */
 extern "C" void func_001E4610(cOVState_MESSAGECENTER* self, int popup, int event)
 {
     if (event == 20) {
@@ -6327,6 +7787,12 @@ struct sVEntryK1E4658 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Shows or hides the message center's scroll arrows.
+ *
+ * mpArrowUp is shown while mScrollOffset is not 0; mpArrowDown while mScrollOffset + 8 is below the row count (the
+ * queued messages plus the FAQ rows, every FAQ row when D_004A20C4 is set).
+ */
 extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
 {
     if (self->mScrollOffset == 0) {
@@ -6374,6 +7840,13 @@ struct sVEntry001E4758 {
     unsigned short* (*fn)(void*, int);
 };
 
+/**
+ * Prints the message center's total and unread counts.
+ *
+ * Formats kT_OVRCMNTotalMsg with the queued message count and kT_OVRCMNUnread with the unread count (func_001E3408),
+ * each looked up through the front-end locale (vtable entry 4) and written with sprintf1 into mpTotalMessagesLabel and
+ * mpUnreadMessagesLabel when present.
+ */
 extern "C" void func_001E4758(cOVState_MESSAGECENTER* self)
 {
     unsigned short buf[0x38];
@@ -6403,6 +7876,11 @@ struct sVEntry_func_001E4840 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Hides a widget (vtable entry 9, setVisible, with 0); does nothing for null.
+ *
+ * @param obj  the widget
+ */
 extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, void* obj)
 {
     if (obj != 0) {
@@ -6421,6 +7899,11 @@ struct sVEntry_func_001E4878 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Shows a widget (vtable entry 9, setVisible, with 1); does nothing for null.
+ *
+ * @param obj  the widget
+ */
 extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, void* obj)
 {
     if (obj != 0) {
@@ -6472,7 +7955,18 @@ struct sList_48B0 {
     int scroll;     // 0x174
 };
 
-// Rebuilds the eight rows of the friends/buddies list from the local and online entries.
+/**
+ * Rebuilds the message center's eight visible rows.
+ *
+ * With no rows hides the "MessageNumbers", "MessageFroms", "MessageSubjects", "UnreadMailBitmaps" and
+ * "MessageHighlights" groups, shows "NoMessages" and hides the buttons. Otherwise shows them and fills the rows from
+ * mScrollOffset: queued messages newest first (func_001E4C78 with the list position and the entry's variant), then FAQ
+ * rows (func_001E4C78 with -1 and func_001E4B80's variant), hiding a row's widgets past the end. Finally resets the
+ * menu's item count (cUIMenu_setScrollableMenu) while keeping its selected row (+0x95) and stores the scroll offset's
+ * low byte in the menu's +0x98.
+ *
+ * @param selfp  the message center
+ */
 extern "C" void func_001E48B0(cOVState_MESSAGECENTER* selfp)
 {
     sList_48B0* self = (sList_48B0*)selfp;
@@ -6553,6 +8047,15 @@ struct sPopupEntry18_4B80 {
 };
 extern sPopupEntry18_4B80 D_004C6C08_4B80[] __asm__("D_004C6C08");
 
+/**
+ * Returns the subject variant of a FAQ-row message when D_004A20C4 is set.
+ *
+ * For a message of kind 1 (+0x8) takes its position in its category (func_001E2DC0) and reduces it by the group's
+ * category: 3 gives (position / 2) mod 10, 5 mod 11, 4 mod 10, 8 mod 4, others 0. Same rule as func_001E5AA0.
+ *
+ * @param idx  the message index
+ * @return the variant, or 0xFF when D_004A20C4 is clear or the message is not of kind 1
+ */
 extern "C" unsigned char func_001E4B80(cOVState_MESSAGECENTER* self, int idx)
 {
     unsigned char r = 0xFF;
@@ -6661,6 +8164,22 @@ static inline void show_4C78(sObj_4C78* o)
     o->vt[9].fn((char*)o + o->vt[9].delta, 1);
 }
 
+/**
+ * Fills one row of the message center with a message.
+ *
+ * For a FAQ row (@p idx -1) hides the unread icon and shows the FAQ icon, textured (+0x7C) as a closed folder
+ * (miFolderTex), an open folder (miMinusFolderTex, folder flag set) or a question mark (miQuestionMarkTex, not a
+ * folder's first message); for a queued message shows the unread icon while its read bit (+0xC8) is clear and hides the
+ * FAQ icon. The number reads "+", "-" or " >" on folder rows, else "%d." with mScrollOffset + @p slot + 1. From gets
+ * the sender's name (func_001E2EA0) and keeps @p id at +0x18. The subject is func_001E4F70's variant text for messages
+ * of kind 1, else the message's subject id (+0x10).
+ *
+ * @param self_  the message center
+ * @param idx    the message-list position, or -1 for a FAQ row
+ * @param slot   the row (0-7)
+ * @param id     the message index (D_004C6C08)
+ * @param sub    the subject variant
+ */
 extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, int id, unsigned char sub)
 {
     sPopup_4C78* self = (sPopup_4C78*)self_;
@@ -6751,7 +8270,18 @@ struct sVE1E4F70 {
     void (*fn)(void*, int);
 };
 
-// Fills text slot `slot` with the "level N" string for the reward id and shows it.
+/**
+ * Sets a message-center row's subject to the text for a message's variant.
+ *
+ * Builds the string id from the message's category: kT_MSGSubjectBCFinishLoss%d / Win%d (odd / even messages 115-138)
+ * for category 3, Aggression%d (5), Foreshadow%d (4), BeatThePeak%d (8), formatted with @p lvl, and sets it on
+ * mpSubject[@p slot] (GetHashValue32) and shows it. Likely bug: for any other message the buffer is hashed without
+ * being written.
+ *
+ * @param slot  the row (0-7)
+ * @param id    the message index
+ * @param lvl   the variant number
+ */
 extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, unsigned char lvl)
 {
     char buf[48];
@@ -6789,6 +8319,16 @@ extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self,
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char str_cOVState_ViewPopup[];
 
+/**
+ * Opens the view popup for a message.
+ *
+ * Allocates a cOVState_ViewPopup (0x70 bytes, cMemMan_alloc), constructs it (cOVState_ViewPopup_cOVState_ViewPopup with
+ * mpEngine, this, @p a1, @p a2) and pushes it (cUIStateStack_pushPopup) on the stack at +0x18 of the object reached
+ * through mpMessageScreen's word +0xD0 and that object's +0x10.
+ *
+ * @param a1  the message index (the popup's miMessage)
+ * @param a2  the number to show (miNumber; -1 from onGainFocus)
+ */
 extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int a1, int a2)
 {
     void* item = cOVState_ViewPopup_cOVState_ViewPopup((cOVState_ViewPopup*)cMemMan_alloc(0x70, str_cOVState_ViewPopup, 0, 0), self->mpEngine, self, a1, a2);
@@ -6810,6 +8350,14 @@ extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
 extern "C" void func_001E4758(cOVState_MESSAGECENTER*);
 extern "C" void func_001E4658(cOVState_MESSAGECENTER*);
 
+/**
+ * Deletes a queued message from the message center and refreshes it.
+ *
+ * Removes list entry @p idx (func_001E31B8), moves the menu's selected row (+0x95) back by one when it is now past the
+ * end, then refreshes the rows, labels and arrows.
+ *
+ * @param idx  the message-list position
+ */
 extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx)
 {
     func_001E31B8(idx);
@@ -7017,6 +8565,14 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_001E55D0(cOVState_ViewPopup* self, int idx);
 extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx);
 
+/**
+ * Fills the view popup with its message (miMessage).
+ *
+ * For a FAQ message (group type 4) hides the square button and mpDeleteMessage and sets mpKeepMessage to kT_BTNKeepMsg.
+ * mpNumber shows kT_MSGFAQNumber with the message's position in its category (func_001E2DC0) for FAQ messages, else
+ * miNumber ("%d"). mpFrom gets the sender's name (func_001E2EA0); then the subject (func_001E55D0) and the body
+ * (func_001E5780) are set.
+ */
 extern "C" void func_001E5428(cOVState_ViewPopup* self)
 {
     sPopupEntry18_5428* a = &D_004C6C08_5428[self->miMessage];
@@ -7065,6 +8621,11 @@ struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void func_001E5638(cOVState_ViewPopup* self, int idx);
 
+/**
+ * Sets the view popup's subject: the variant text (func_001E5638) for messages of kind 1, else the subject id (+0x10).
+ *
+ * @param idx  the message index
+ */
 extern "C" void func_001E55D0(cOVState_ViewPopup* self, int idx)
 {
     char* e = (char*)&D_004C6C08[idx];
@@ -7098,7 +8659,15 @@ extern char str_kT_MSGSubjectAggressionpct_d[];
 extern char str_kT_MSGSubjectForeshadowpct_d[];
 extern char str_kT_MSGSubjectBeatThePeakpct_d[];
 
-// Sets the popup text to the "level N" string matching the reward id's category.
+/**
+ * Sets the view popup's subject to the text for a message's variant.
+ *
+ * The variant is func_001E5AA0's when D_004A20C4 is set, else the one stored with the queued message (func_001E3650 of
+ * its list position). The string id is built as in func_001E4F70 (BCFinishLoss / Win, Aggression, Foreshadow,
+ * BeatThePeak) and set on mpSubject.
+ *
+ * @param id  the message index
+ */
 extern "C" void func_001E5638(cOVState_ViewPopup* self, int id)
 {
     char buf[32];
@@ -7139,6 +8708,14 @@ struct sVEntry001E5780 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Sets and shows the view popup's body text for messages of kind 0 or 1.
+ *
+ * Sets 0x80 in mpMessageLine0's attribute word (+0x14), gives it the message's body id (+0x14) and shows it; messages
+ * of other kinds leave it unchanged.
+ *
+ * @param idx  the message index
+ */
 extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx)
 {
     char* e = (char*)&D_004C6C08[idx];
@@ -7227,6 +8804,14 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self);
 // PORT: func_001E33E8 is declared (void*) but called with no argument here
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 
+/**
+ * Steps the view popup to the next message, or tells its parent to close it.
+ *
+ * For a FAQ message moves to the next message of the same folder (func_001E34D8), adds 1 to miNumber and refills the
+ * popup. Otherwise, while unread messages remain, shows the first unread one (func_001E3460), marks it read and sets
+ * miNumber to its row number (count minus position). When there is nothing more it sends mpParentState onPopupEvent
+ * (vtable entry 17) with this popup and event 20.
+ */
 extern "C" void func_001E58E0(cOVState_ViewPopup* self)
 {
     int id = self->miMessage;
@@ -7291,6 +8876,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E5AA0);
 #ifdef SKIP_ASM
 extern int D_004A20C4;
 
+/**
+ * Returns a message's subject variant from its position in its category, when D_004A20C4 is set.
+ *
+ * Category 3 gives (position / 2) mod 10, 5 mod 11, 4 mod 10, 8 mod 4, others 0 (position from func_001E2DC0).
+ *
+ * @param idx  the message index
+ * @return the variant, or 0xFF when D_004A20C4 is clear
+ */
 extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx)
 {
     if (D_004A20C4 == 0) {
@@ -7398,6 +8991,18 @@ public:
     virtual void setVisible(int on);
 };
 
+/**
+ * Builds the freestyle heat standings overlay (overlay 10, vtable D_00474088, entry 4 onCreateScreen).
+ *
+ * Adds the "42freestyle_standings" screen (kept at +0x40) over "OV_darkblue", runs cOVState_onCreateScreen and fills
+ * it: "track_event" reads "<location> - <Slope|Big Air|Pipe>" by the new race's cGameMode; the title is
+ * kT_OVRCMNQFHeat1Stand (hiding "total") or kT_OVRCMNQFHeat2Stand by the game mode manager's heat; "heat1" reads
+ * kT_OVRCMNScoreColon off the career path. Each standing row (D_00536708 order) gets the rider's name (func_0014EEC8),
+ * run 1 and run 2 scores and the total (cGameModeMan_getHeatScore) or DNF for a human rider who gave up
+ * (cGameModeMan_bGiveUp); the player's help_current0N marker shows in heat 1 (kT_CMNHELPEarnedEnoughPoints in a final
+ * qualifying round), help_advance or help_sorry in heat 2, and the five overlayOpt buttons take their option ids from
+ * D_0046E488 (names D_00441D10, kT_OVRCMNFinalRound for a final round), stored at +0x18.
+ */
 extern "C" void func_001E5B80(void* self)
 {
     unsigned short title[0x38];
@@ -7577,6 +9182,11 @@ extern "C" void* cOVState_onUpdate(void* self);
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E64A8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Updates the freestyle standings overlay: runs cOVState_onUpdate (vtable entry 12).
+ *
+ * @return cOVState_onUpdate's result
+ */
 void* func_001E64A8(void* self)
 {
     return cOVState_onUpdate(self);
@@ -7601,6 +9211,13 @@ extern char str_rider_pct_d[];
 extern char str_at_TextPulseWhiteOrange[];
 extern char str_run_pct_d_pct_d[];
 
+/**
+ * Pulses the player's standings row when the freestyle standings overlay gains focus (vtable entry 6, onGainFocus).
+ *
+ * Runs cUIState_onGainFocus, fades the human rider's "rider_%d" row and the "run_%d_%d" entry (heat from the game mode
+ * manager's first word) with "@TextPulseWhiteOrange" (cOVState_triggerTextFade; place capped at 6) and plays menu sound
+ * 0xE.
+ */
 extern "C" void func_001E64C8(void* self)
 {
     char buf[32];
@@ -7628,6 +9245,15 @@ extern char str_overlayMenu[];
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void func_0026F898(void* self, int val);
 
+/**
+ * Notes the input's pad in the replay while the standings menu has its third button highlighted (vtable entry 8).
+ *
+ * When the screen's "overlayMenu" has row 2 selected (+0x95; Replay in the default option list) passes the input's byte
+ * +0x4 to the replay (func_0026F898).
+ *
+ * @param a1  the input
+ * @return 0
+ */
 extern "C" int func_001E65B8(void* self, void* a1)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_overlayMenu));
@@ -7643,6 +9269,13 @@ extern "C" int func_001E65B8(void* self, void* a1)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E6630);
 #ifdef SKIP_ASM
+/**
+ * Answers the freestyle standings menu's events (vtable entry 20, onWidgetMenu): 257 for event 6, else 0.
+ *
+ * @param widget  the menu
+ * @param event   the menu event
+ * @return 257 or 0
+ */
 extern "C" int func_001E6630(void* self, int widget, int event)
 {
     return event == 6 ? 257 : 0;
@@ -7655,6 +9288,15 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E6640);
 extern int cOVStateManager_mStatus;
 extern int cOVStateManager_mMiscData;
 
+/**
+ * Passes the chosen option of the freestyle standings overlay to the overlay manager (vtable entry 19, onWidgetEvent).
+ *
+ * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (+0x18), which
+ * cOVStateManager_gotoNextOverlay then acts on.
+ *
+ * @param popup  the widget
+ * @param event  the widget event
+ */
 extern "C" void func_001E6640(void* self, void* popup, int event)
 {
     if (popup != 0 && event == 5) {
@@ -7675,6 +9317,12 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cOVState_onCreateScreen(void* self);
 
+/**
+ * Creates the final standings overlay's screens (overlay 11, vtable D_00473FB0, entry 4 onCreateScreen).
+ *
+ * Adds "43final_standings" (kept at +0x40) over "OV_darkblue", runs cOVState_onCreateScreen and sets +0x9C so the next
+ * onGainTransition fills the screen.
+ */
 extern "C" void func_001E6668(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -7819,6 +9467,19 @@ static inline unsigned short* Loc1E6718(char* name)
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
 
+/**
+ * Fills the final standings overlay on its first transition (vtable entry 7, onGainTransition).
+ *
+ * Runs only while +0x9C is set, which it clears. Sets "track_event" to "<location> - <Race|Slope|Big Air|Pipe>" ("%s -
+ * Jam" for game mode 6), the title by game path and mode (multiplayer, quick play, qualifier / semi-final / final
+ * results, rival challenge, final results), the Time or Score column, then up to six rider rows (two for rival
+ * challenges and two-player games, the AI's rider count for races) with names and times, scores or DNF; the help text
+ * (won / lost challenge, go to the semi-final, sorry, platinum / gold / silver / bronze, or the two-player winner line
+ * kT_OVRCMNCongratP1); the medal icons (platinum instead of gold when D_004A213C is set) and the option buttons from
+ * D_0046E648, or only option 8 in a network game. Raises "screenData" (y = 200) in two-player and challenge games.
+ *
+ * @return 0 (the transition is not finished)
+ */
 extern "C" int func_001E6718(void* self)
 {
     if (*(int*)((char*)self + 0x9C) != 0) {
@@ -8105,6 +9766,13 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern signed char D_00535C11[];
 
+/**
+ * Preselects the second button of the final standings menu on the quick-play path (vtable entry 18, onWidgetCreate).
+ *
+ * When the created widget is "overlayMenu" and the new race's cGamePath is 1, selects its row 1.
+ *
+ * @param menu  the widget being created
+ */
 extern "C" void func_001E7558(void* self, void* menu)
 {
     int hash = *(int*)((char*)menu + 0x38);
@@ -8148,6 +9816,14 @@ struct sRect_75D0 {
 };
 extern sRect_75D0 D_004C8408;
 
+/**
+ * Highlights the players' rows and sets up online chat when the final standings overlay gains focus (vtable entry 6).
+ *
+ * Runs cUIState_onGainFocus, fades the human riders' "rider%d" and "timePoints%d" entries with "@TextPulseWhiteOrange"
+ * (player 1, and player 2 online; neither online in freestyle or challenge modes). In a connected network game shows
+ * "ChatGroup", sets "chatText" to kT_POPUP235Chat, shows "helptexts" and prepares "textScrollChat" (flag +0x74 bit 0,
+ * rectangle D_004C8408, input map 1). Plays menu sound 0xE.
+ */
 extern "C" void func_001E75D0(void* self)
 {
     char buf[32];
@@ -8204,6 +9880,9 @@ extern "C" void func_001E75D0(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E7920__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when the final standings overlay loses focus (vtable entry 11, onLoseFocus).
+ */
 void func_001E7920(void* self)
 {
 }
@@ -8222,6 +9901,13 @@ extern char str_ChatGroup[];
 extern char str_chatText[];
 extern char str_kT_POPUP235Chat_b[];
 
+/**
+ * Updates the final standings overlay and its online chat (vtable entry 12, onUpdate).
+ *
+ * Runs cOVState_onUpdate. With a game connection: when incoming chat arrives (cOVState_onUpdate_HandleIncomingChat)
+ * hides "helptext" and "helptexts"; every 30 frames while disconnected hides "ChatGroup" and resets "chatText"; when
+ * cGameComm's mOverlayTimeout reaches 0 sets it to -1 and chooses option 8 (cOVStateManager_mMiscData 8, mStatus 1).
+ */
 extern "C" void func_001E7928(void* self)
 {
     cOVState_onUpdate(self);
@@ -8268,6 +9954,15 @@ struct sVEntry001E7AA8 {
     int (*fn)(void*);
 };
 
+/**
+ * Handles input on the final standings overlay (vtable entry 8, onInputBegin).
+ *
+ * Passes the input's pad byte (+0x4) to the replay (func_0026F898) while "overlayMenu" has row 2 selected; in a
+ * connected network game triggers overlay 40 when the input's vtable entry 27 answers nonzero.
+ *
+ * @param a1  the input
+ * @return 0
+ */
 extern "C" int func_001E7AA8(void* self, void* a1)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_overlayMenu));
@@ -8290,6 +9985,13 @@ extern "C" int func_001E7AA8(void* self, void* a1)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E7B78);
 #ifdef SKIP_ASM
+/**
+ * Answers the final standings menu's events (vtable entry 20, onWidgetMenu): 257 for event 6, else 0.
+ *
+ * @param widget  the menu
+ * @param event   the menu event
+ * @return 257 or 0
+ */
 extern "C" int func_001E7B78(void* self, int widget, int event)
 {
     return event == 6 ? 257 : 0;
@@ -8302,6 +10004,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E7B88);
 extern int cOVStateManager_mStatus;
 extern int cOVStateManager_mMiscData;
 
+/**
+ * Passes the chosen option of the final standings overlay to the overlay manager (vtable entry 19, onWidgetEvent).
+ *
+ * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (+0x18).
+ *
+ * @param popup  the widget
+ * @param event  the widget event
+ */
 extern "C" void func_001E7B88(void* self, void* popup, int event)
 {
     if (popup != 0 && event == 5) {
@@ -8366,6 +10076,16 @@ public:
     virtual void setVisible(int on);
 };
 
+/**
+ * Builds the race finish overlay (overlay 12, vtable D_00473E00, entry 4 onCreateScreen).
+ *
+ * Adds the "finishov" screen (kept at +0x40), runs cOVState_onCreateScreen, zeroes the timer (+0x9C), sets flag 8 in
+ * "Menu0000"'s +0x90, hides the run labels, shows the human rider's time in "pointstotal" (frames / 60) and only their
+ * "place%d". Shows the platinum, gold, silver or bronze icon by the reward interface's word +0x14 (0-3) on a final
+ * (mode 3) or game event 4, setting D_004A213C for platinum, and "new_record" when the score interface has a new record
+ * (+0x18 or +0x1C not negative). Online, when the human rider's word +0x480 is set, or for game events 6-8 hides
+ * "screendata" and "3D_Ov"; otherwise plays menu sound 0xE.
+ */
 extern "C" void func_001E7BB0(void* self)
 {
     char buf[32];
@@ -8456,6 +10176,12 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cGame_doNextState(void* self);
 
+/**
+ * Moves the race finish overlay on after a delay (vtable entry 12, onUpdate).
+ *
+ * Runs cOVState_onUpdate and adds 1/60 to the timer (+0x9C); when +0xA0 is set and the timer reaches 3 seconds (1
+ * second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
+ */
 extern "C" void func_001E8098(void* self)
 {
     float limit = 3.0f;
@@ -8480,6 +10206,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E8160);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cGame_doNextState(void* self);
 
+/**
+ * Moves the race finish overlay on when its button is pressed while +0xA0 is set (vtable entry 19, onWidgetEvent).
+ *
+ * On event 5 purges the normal UI states and calls cGame_doNextState.
+ *
+ * @param popup  the widget
+ * @param event  the widget event
+ */
 extern "C" void func_001E8160(void* self, void* popup, int event)
 {
     if (popup != 0) {
@@ -8498,6 +10232,13 @@ extern "C" void func_001E8160(void* self, void* popup, int event)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E81B0);
 #ifdef SKIP_ASM
+/**
+ * Answers the race finish menu's events (vtable entry 20): 257 for event 6 while +0xA0 is set, else 0.
+ *
+ * @param widget  the menu
+ * @param key     the menu event
+ * @return 257 or 0
+ */
 extern "C" int func_001E81B0(void* self, int widget, int key)
 {
     int result = 0;
@@ -8515,6 +10256,14 @@ extern "C" int func_001E81B0(void* self, int widget, int key)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E81D0);
 #ifdef SKIP_ASM
+/**
+ * Sets the race finish overlay's may-continue flag (+0xA0) from a message (vtable entry 24, handleEvent).
+ *
+ * Message 0 clears it and 1 sets it (the overlay factory starts it at 1); others are ignored.
+ *
+ * @param a1  the message
+ * @return 0
+ */
 extern "C" int func_001E81D0(void* self, int a1)
 {
     switch (a1) {
@@ -8559,6 +10308,16 @@ struct sVEntry8200 {
     unsigned short* (*fn)(void*, int);
 };
 
+/**
+ * Builds the event finish overlay for scored runs (overlay 13, vtable D_00473D28, entry 4 onCreateScreen).
+ *
+ * Like the race finish overlay: "finishov" screen, timer reset, "Menu0000" flag 8. Shows firstrun / secondrun /
+ * finalrun by the game mode manager's heat (not for game mode 6), the medal icon by the reward interface's word +0x14
+ * on a final or game event 4/5 (platinum also sets D_004A213C), the human rider's "place%d" (or "place6" past sixth),
+ * "pointstotal" as kT_OVRCMNPointstotal with the rider's points and "new_record". Hides "screendata" and "3D_Ov"
+ * online, when the human rider's word +0x480 is set, for game events 9-11 or in a final qualifying round; plays menu
+ * sound 0xE.
+ */
 extern "C" void func_001E8200(void* self)
 {
     char buf[32];
@@ -8674,6 +10433,12 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cGame_doNextState(void* self);
 
+/**
+ * Moves the event finish overlay on after a delay (vtable entry 12, onUpdate).
+ *
+ * Runs cOVState_onUpdate and adds 1/60 to the timer (+0x9C); when +0xA0 is set and the timer reaches 3 seconds (1
+ * second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
+ */
 extern "C" void func_001E87B8(void* self)
 {
     float limit = 3.0f;
@@ -8698,6 +10463,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E8880);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cGame_doNextState(void* self);
 
+/**
+ * Moves the event finish overlay on when its button is pressed while +0xA0 is set (vtable entry 19, onWidgetEvent).
+ *
+ * On event 5 purges the normal UI states and calls cGame_doNextState.
+ *
+ * @param popup  the widget
+ * @param event  the widget event
+ */
 extern "C" void func_001E8880(void* self, void* popup, int event)
 {
     if (popup != 0) {
@@ -8713,6 +10486,13 @@ extern "C" void func_001E8880(void* self, void* popup, int event)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E88D0);
 #ifdef SKIP_ASM
+/**
+ * Answers the event finish menu's events (vtable entry 20): 257 for event 6 while +0xA0 is set, else 0.
+ *
+ * @param widget  the menu
+ * @param key     the menu event
+ * @return 257 or 0
+ */
 extern "C" int func_001E88D0(void* self, int widget, int key)
 {
     int result = 0;
@@ -8730,6 +10510,14 @@ extern "C" int func_001E88D0(void* self, int widget, int key)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E88F0);
 #ifdef SKIP_ASM
+/**
+ * Sets the event finish overlay's may-continue flag (+0xA0) from a message (vtable entry 24, handleEvent).
+ *
+ * Message 0 clears it and 1 sets it (the overlay factory starts it at 1); others are ignored.
+ *
+ * @param a1  the message
+ * @return 0
+ */
 extern "C" int func_001E88F0(void* self, int a1)
 {
     switch (a1) {
@@ -8809,6 +10597,16 @@ public:
     virtual void setVisible(int on);
 };
 
+/**
+ * Builds the peak challenge results overlay (overlay 22, vtable D_00473ED8, entry 4 onCreateScreen).
+ *
+ * Adds "70peakchal_results" (kept at +0x40) over "OV_darkblue" and runs cOVState_onCreateScreen. "title1" reads
+ * kT_TITLERivalChallenge and "title2" func_001FD190's name for game events 6-11. For events 6-8 the labels read
+ * kT_OVRCMNTimeToBeatColon / kT_OVRCMNYourTimeColon with the target time (mode data +0x78) and the rider's time or DNF;
+ * otherwise kT_OVRCMNScoreToBeatColon / kT_CMNYourScore with the target score (+0x7C). The help text is
+ * kT_HELPCongratWonChal for places 0-3, else kT_HELPSorryBeatTime or kT_HELPSorryBeatScore, hidden when the player gave
+ * up; the first three overlayOpt buttons take option ids from D_0046E9B0 and the rest are hidden.
+ */
 extern "C" void func_001E8920(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -8905,6 +10703,11 @@ done:
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8E70__FPv);
 #ifdef SKIP_ASM
+/**
+ * Updates the peak challenge results overlay: runs cOVState_onUpdate (vtable entry 12).
+ *
+ * @return cOVState_onUpdate's result
+ */
 void* func_001E8E70(void* self)
 {
     return cOVState_onUpdate(self);
@@ -8914,6 +10717,11 @@ void* func_001E8E70(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8E90__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores input on the peak challenge results overlay (vtable entry 8, onInputBegin).
+ *
+ * @return 0
+ */
 int func_001E8E90(void* self)
 {
     return 0;
@@ -8923,6 +10731,13 @@ int func_001E8E90(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8E98);
 #ifdef SKIP_ASM
+/**
+ * Answers the peak challenge results menu's events (vtable entry 20, onWidgetMenu): 257 for event 6, else 0.
+ *
+ * @param widget  the menu
+ * @param event   the menu event
+ * @return 257 or 0
+ */
 extern "C" int func_001E8E98(void* self, int widget, int event)
 {
     return event == 6 ? 257 : 0;
@@ -8935,6 +10750,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E8EA8);
 extern int cOVStateManager_mStatus;
 extern int cOVStateManager_mMiscData;
 
+/**
+ * Passes the chosen option of the peak challenge results overlay to the overlay manager (vtable entry 19).
+ *
+ * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (+0x18).
+ *
+ * @param popup  the widget
+ * @param event  the widget event
+ */
 extern "C" void func_001E8EA8(void* self, void* popup, int event)
 {
     if (popup != 0 && event == 5) {
@@ -8952,6 +10775,10 @@ extern "C" void* cUIState_onGainFocus(void* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 
+/**
+ * Plays menu sound 0xE when the peak challenge results overlay gains focus, after cUIState_onGainFocus (vtable entry
+ * 6).
+ */
 extern "C" void func_001E8ED0(void* self)
 {
     cUIState_onGainFocus(self);
@@ -8972,6 +10799,12 @@ void func_001E8FC0(void* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 
+/**
+ * Creates the multiplayer standings overlay's screens (overlay 35, vtable D_00473C50, entry 4 onCreateScreen).
+ *
+ * Adds "109MultiplayerStandings" (kept at +0x40) over "OV_darkblue", calls the empty func_001E8FC0, runs
+ * cOVState_onCreateScreen and plays menu sound 0xE.
+ */
 extern "C" void func_001E8F00(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -8994,6 +10827,9 @@ extern "C" void func_001E8F00(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E8FC0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (the multiplayer standings overlay's fill step, called from its onCreateScreen).
+ */
 void func_001E8FC0(void* self)
 {
 }
@@ -9005,6 +10841,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E8FC8);
 extern int cOVStateManager_mStatus;
 extern int cOVStateManager_mMiscData;
 
+/**
+ * Passes the chosen option of the multiplayer standings overlay to the overlay manager (vtable entry 19).
+ *
+ * On event 5 sets cOVStateManager_mStatus to 1 and cOVStateManager_mMiscData to the widget's option id (+0x18).
+ *
+ * @param popup  the widget
+ * @param event  the widget event
+ */
 extern "C" void func_001E8FC8(void* self, void* popup, int event)
 {
     if (popup != 0 && event == 5) {

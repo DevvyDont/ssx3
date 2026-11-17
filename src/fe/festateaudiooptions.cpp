@@ -413,6 +413,23 @@ static inline int Find_196B90(char* mgr, int hash)
     return cUITextureBank_getElementByHashname(mgr + 0x58, hash);
 }
 
+/**
+ * Constructs a request-line (playlist) state for a user.
+ *
+ * Runs the cUIState constructor func_0039E2A0 (the engine reaches it in the second argument register), sets the state
+ * id (+0xC) to 17, stores cFEStateRequestLine_vtbl and the user (+0x44), and copies the user's control mask from the
+ * custom interface (func_001A1CD0) into +0x15 when there is one. Zeroes the 0x100-byte buffer at +0x4C and the fields
+ * up to +0x200, keeps @p a3 at +0x16C, finds the "checkbox", "empty_box" and "yell_dollar_sign" texture elements
+ * (+0x204, +0x208, +0x20C), reads the user's character (+0x48, cBENewPlayerInterface_getPlayerCharID), money (+0x168,
+ * cBEEconInterface_getMoney) and two 64-bit values of BE interface 13 (func_00158728 into +0x160, func_00158750 into
+ * +0x158), copies the audio object's word +0x504 into +0x14C and runs cFEStateRequestLine_generatePlayList.
+ *
+ * @param p    the state's memory (528 bytes)
+ * @param a1   the UI engine (not read here; see above)
+ * @param idx  the user
+ * @param a3   nonzero when opened from the store (cFECustom_getNextState passes D_004A19D8)
+ * @return @p p
+ */
 extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
 {
     sAudioState_196B90* self = (sAudioState_196B90*)p;
