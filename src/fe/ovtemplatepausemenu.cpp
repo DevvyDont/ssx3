@@ -667,6 +667,15 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8EE0);
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478160[];
 
+/**
+ * Builds pause overlay 1's screen: sets its 6 menu options from D_00478160, then runs the shared pause-menu screen
+ * setup.
+ *
+ * Sets +0xBC (On Tour mPauseMenuNumOptions) to 6, copies that many option ids from D_00478160 into the array at +0x9C
+ * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 1 and calls
+ * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of D_00473098, the vtable
+ * cOVStateManager_triggerOverlay gives overlay 1 (the career (game path 0) event pause that func_0020CA10 opens).
+ */
 extern "C" void func_001F8EE0(void* self)
 {
     int i;
@@ -685,6 +694,15 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8F48);
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478178[];
 
+/**
+ * Builds pause overlay 2's screen: sets its 6 menu options from D_00478178, then runs the shared pause-menu screen
+ * setup.
+ *
+ * Sets +0xBC (On Tour mPauseMenuNumOptions) to 6, copies that many option ids from D_00478178 into the array at +0x9C
+ * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 2 and calls
+ * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of D_00472FC0, the vtable
+ * cOVStateManager_triggerOverlay gives overlay 2 (the local-mission pause that func_0020CA10 opens).
+ */
 extern "C" void func_001F8F48(void* self)
 {
     int i;
@@ -703,6 +721,15 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8FB0);
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478140[];
 
+/**
+ * Builds pause overlay 3's screen: sets its 7 menu options from D_00478140, then runs the shared pause-menu screen
+ * setup.
+ *
+ * Sets +0xBC (On Tour mPauseMenuNumOptions) to 7, copies that many option ids from D_00478140 into the array at +0x9C
+ * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 3 and calls
+ * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of D_00472EE8, the vtable
+ * cOVStateManager_triggerOverlay gives overlay 3 (the freeride (cGameMode 4) pause that func_0020CA10 opens).
+ */
 extern "C" void func_001F8FB0(void* self)
 {
     int i;
@@ -721,6 +748,15 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F9018);
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478190[];
 
+/**
+ * Builds pause overlay 4's screen: sets its 5 menu options from D_00478190, then runs the shared pause-menu screen
+ * setup.
+ *
+ * Sets +0xBC (On Tour mPauseMenuNumOptions) to 5, copies that many option ids from D_00478190 into the array at +0x9C
+ * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 4 and calls
+ * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of D_00472E10, the vtable
+ * cOVStateManager_triggerOverlay gives overlay 4 (the game-state-11 pause that func_0020CA10 opens).
+ */
 extern "C" void func_001F9018(void* self)
 {
     int i;
@@ -739,6 +775,15 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F9080);
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_004781A8[];
 
+/**
+ * Builds pause overlay 5's screen: sets its 5 menu options from D_004781A8, then runs the shared pause-menu screen
+ * setup.
+ *
+ * Sets +0xBC (On Tour mPauseMenuNumOptions) to 5, copies that many option ids from D_004781A8 into the array at +0x9C
+ * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 5 and calls
+ * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of D_00472D38, the vtable
+ * cOVStateManager_triggerOverlay gives overlay 5 (the fallback pause that func_0020CA10 opens).
+ */
 extern "C" void func_001F9080(void* self)
 {
     int i;

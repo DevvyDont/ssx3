@@ -42,6 +42,14 @@ extern "C" void* func_002009D0(void*);
 //100%
 INCLUDE_ASM("fe/festateload", func_00186708__FPv);
 #ifdef SKIP_ASM
+/**
+ * Forwards widget creation to the embedded map template at +0x48 (func_002009D0()).
+ *
+ * Sits in the onWidgetCreate slot of cFEStateEventSelect_vtbl; the widget passes through untouched in the second
+ * argument register, and func_002009D0() selects the peak in the "SP_PeakList" menu.
+ *
+ * @return func_002009D0()'s return value (it returns nothing meaningful)
+ */
 void* func_00186708(void* self)
 {
     return func_002009D0((char*)self + 0x48);
@@ -175,6 +183,19 @@ static inline void Opened1867A8(void* self, void* item)
     }
 }
 
+/**
+ * Handles widget events for the event-select map screen, moving to the next or previous state on accept or back.
+ *
+ * Every event first goes to the embedded map template's handler, cUITemplate_MAP_onWidgetEvent() on +0x48. For event 5
+ * (accept) or 6 (back) that the template answers with 1: online (D_004A1A70 == 1) it plays the screen's "TransitionOut"
+ * frame and pops this state (func_0039F190() with count 1 on the engine's state stack, mpEngine +0x18); otherwise it
+ * asks the engine's FE custom object for a state (cFECustom_getNextState(), slot 4, for 5; func_001A16C0(), slot 5, for
+ * 6) with the widget's id (+0x18) and, when one comes back, calls handleEvent (slot 24) with (1, 0) on the state at the
+ * custom object's +0x10, plays "TransitionOut" and pushes the new state.
+ *
+ * @param obj  the widget
+ * @param msg  the widget event (5 accept, 6 back)
+ */
 extern "C" void func_001867A8(void* self, void* obj, int msg)
 {
     if (msg == 5) {
@@ -208,6 +229,15 @@ INCLUDE_ASM("fe/festateload", func_00186950);
 #ifdef SKIP_ASM
 extern "C" int func_00202738(void* self, int a1, int a2);
 
+/**
+ * Answers a menu event for the event-select screen with 257 when the map template accepts it, else 0.
+ *
+ * func_00202738() on the template at +0x48 rejects events 6, 8 and 9.
+ *
+ * @param menu  the menu
+ * @param event  the menu event
+ * @return 257 (0x101) when func_00202738() returns non-zero, else 0
+ */
 extern "C" int func_00186950(void* self, int menu, int event)
 {
     if (func_00202738((char*)self + 0x48, menu, event) != 0) {
@@ -331,6 +361,19 @@ struct sMemCardK186A08 {
     int f12C;           // 0x12C
 };
 
+/**
+ * Constructs the memory-card load state and points the memory-card manager's callbacks at the load handlers.
+ *
+ * Runs cFEMemCard_cFEMemCard() with type 2, stores cFEStateMemCard_vtbl, makes itself the active load state
+ * (D_004A14B8) and clears D_004A14B4 and D_004A14BC. Sets mHashName (+0xC), +0x204 and +0x23C to 1, +0x230, +0x234,
+ * +0x240 and +0x244 to 0, +0x19C to 26 and +0x22C and +0x238 to -1. On cSSXApp_getMCManager()'s manager it sets +0x120,
+ * +0x124 and +0x12C to 1, +0x11C and +0x128 to 0, and installs nine callbacks from fememcard (func_00186F90,
+ * func_00187148, func_00187180, func_00187230, func_001871A8, func_00186C98, func_00186D60, func_00186F40,
+ * func_00187360). Callers allocate 584 bytes ("cFEStateMemCard").
+ *
+ * @param engine  the UI engine
+ * @return @p self
+ */
 extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* engine)
 {
     cFEMemCard_cFEMemCard(self, engine, 2);
@@ -391,6 +434,11 @@ extern "C" void cFEStateMemCard__cFEStateMemCard(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/festateload", func_00186B48__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0x100 for every menu event (the onWidgetMenu slot of cFEStateMemCard_vtbl).
+ *
+ * @return 0x100
+ */
 int func_00186B48(void* self)
 {
     return 0x100;

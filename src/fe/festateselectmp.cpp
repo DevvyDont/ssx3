@@ -106,6 +106,14 @@ INCLUDE_ASM("fe/festateselectmp", func_001A3218);
 extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateMPCircuit_vtbl[];
 
+/**
+ * Constructs the multiplayer circuit state (allocated as "cFEStateMPCircuit", 72 bytes).
+ *
+ * Runs cUIState's constructor (func_0039E2A0; the engine argument reaches it untouched in the second argument
+ * register), then stores cFEStateMPCircuit_vtbl and mHashName 23.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001A3218(void* self)
 {
     func_0039E2A0(self);

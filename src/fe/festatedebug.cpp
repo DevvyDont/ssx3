@@ -174,6 +174,21 @@ struct sDbgState_180EF0 {
     int sel;    // 0x170
 };
 
+/**
+ * Handles one input event on the on-screen debug keyboard: moves the key cursor or presses the highlighted key, and
+ * moves the highlight to match.
+ *
+ * Before acting, it builds the highlighted key's object name for the current key index (sel, +0x170) with
+ * func_00180A90() and calls slot 9 of that screen object (found with cUIScreen_getObjectByHashName()) with 0; after
+ * acting it does the same for the new index with 1. Only the first matching input is handled, tested through @p in's
+ * virtual slots (cFEInput's order): isLeft (19) func_00180618(), isRight (20) func_00180678(), isUp (17)
+ * func_001806D8(), isDown (18) func_00180768() (cursor moves), isNext (5) func_00180840() (types the key), isRShift2
+ * (26) func_001807C8() (toggles the +0xE4 flag). The object sits in vtable D_0046D1A0 next to
+ * cScreenKeyboard__cScreenKeyboard.
+ *
+ * @param in  the UI input to read
+ * @return always 1 (input consumed)
+ */
 extern "C" int func_00180EF0(sDbgState_180EF0* self, sDbgInput_180EF0* in)
 {
     char buf[0x20];
@@ -211,6 +226,19 @@ extern "C" void* func_0039E2A0(void* self, void* owner);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
 extern void* cFEStateCharSelect_vtbl[];
 
+/**
+ * Constructs the character-select state for one rider slot: base cUIState, cFEStateCharSelect_vtbl, state id 9.
+ *
+ * Runs the cUIState constructor func_0039E2A0(), stores cFEStateCharSelect_vtbl and mHashName 9, sets +0x54 to 1,
+ * mUserNum (+0x44) to @p count and clears +0x48 and +0x4C. mCtrlBits (+0x15) starts at 0xFF with the controller mask of
+ * every earlier rider slot (0 .. @p count - 1, func_001A1CD0() on the engine's FE custom object) removed, so a
+ * controller that already picked a character cannot drive this one. cFECustom_getNextState() and func_001A16C0()
+ * allocate it (144 bytes, "cFEStateCharSelect").
+ *
+ * @param owner  the UI engine (mpEngine)
+ * @param count  the rider slot choosing now (0 = first player); stored as mUserNum
+ * @return @p self
+ */
 extern "C" void* func_00181090(void* self, void* owner, int count)
 {
     signed char n = count;

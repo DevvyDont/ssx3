@@ -914,6 +914,15 @@ public:
     virtual void setVisible(int v);
 };
 
+/**
+ * Shows or hides the online-error overlay's "Cancel game" option.
+ *
+ * Sets the "Text_CancelGame" text visible and live (setVisible(@p on), setStatic(!@p on)). When showing it, also gives
+ * the "Menu_b" menu the focus (setFocus(1)) and selects its entry 1 (cUIMenu_setSelectedByIndex). The online-error
+ * overlay's cOVState_PAUSE_ONLINE_ERROR_onCreateScreen and cOVState_PAUSE_ONLINE_ERROR_onUpdate call it.
+ *
+ * @param on  true to show and select the option, false to hide it and make it static
+ */
 extern "C" void func_001FAFF8(void* self, bool on)
 {
     cUIObj_1FAFF8* o = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_CancelGame));
@@ -1254,6 +1263,15 @@ extern char str_riderpct_d[];
 extern char str_at_TextPulseWhiteOrange[];
 extern signed char D_00535C11[];
 
+/**
+ * Gains focus on the race pre-event overlay: pulses the riders' labels and starts the online overlay timeout.
+ *
+ * Runs cUIState_onGainFocus, then plays "@TextPulseWhiteOrange" (cOVState_triggerTextFade) on "rider<n>" for the first
+ * human rider (cBENewPlayerInterface_getHumanRider(.., 0) + 1) and, in an online race (cBENewRaceInterface_newRace's
+ * cGamePath == 2), for the second. With a cGameComm_mGameComm link it sets mOverlayTimeout to 1200 frames, after which
+ * func_001FBCE0 closes the overlay. The overlay factory builds this state (vtable D_00472850, screen "40race_pre") for
+ * overlay type 8. BE interface 0 is fetched and unused.
+ */
 extern "C" void func_001FBBD8(void* self)
 {
     char buf[32];
@@ -1277,6 +1295,11 @@ extern "C" void func_001FBBD8(void* self)
 INCLUDE_ASM("fe/ovstatepause", func_001FBCC8);
 #ifdef SKIP_ASM
 
+/**
+ * Loses focus on the race pre-event overlay: stops the online overlay timeout.
+ *
+ * Sets cGameComm_mGameComm's mOverlayTimeout to -1 when there is a link.
+ */
 extern "C" void func_001FBCC8(void)
 {
     cGameComm* gameComm = cGameComm_mGameComm;
@@ -1292,6 +1315,12 @@ INCLUDE_ASM("fe/ovstatepause", func_001FBCE0);
 extern int cOVStateManager_mStatus;
 extern "C" void* cOVState_onUpdate(void* self);
 
+/**
+ * Updates the race pre-event overlay and closes it when the online overlay timeout runs out.
+ *
+ * Runs cOVState_onUpdate; when cGameComm_mGameComm exists and its mOverlayTimeout has counted down to 0, sets it to -1
+ * and cOVStateManager_mStatus to 1 (go to the next overlay).
+ */
 extern "C" void func_001FBCE0(void* self)
 {
     cOVState_onUpdate(self);
@@ -1445,6 +1474,31 @@ static inline void* getObj_1FBD20(void* self, char* name)
     return cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
 }
 
+/**
+ * Builds the freestyle pre-event overlay: the event title, the heat's objectives and tab, and the standings table.
+ *
+ * Adds the "41freestyle_pre" screen (kept in mpScreen) and the "OV_darkblue" backdrop, plays frame 0 of each and runs
+ * func_0020D1D8 (cOVState_onCreateScreen plus the "overlayMenu" option). Reads cBENewRaceInterface_newRace's cGameMode
+ * and cGamePath and SSXApp->GameModeMan's iHeatNum.
+ *
+ * "track_event" gets "<location> - <event>" ("%s - %s" through sprintf2; the location name from func_00144BF0, the
+ * event kT_cmnSlopeCaps / kT_cmnBigAirCaps / kT_cmnPipeCaps for cGameMode 1 / 2 / 3). On game path 0 (career) the
+ * objectives depend on the heat: heat 1 shows kT_FSOBJ2HeatsQF and kT_FSOBJHeatsGrandTtl; heat 2 shows how many points
+ * the player still needs (kT_FSOBJEarnXpts with the third-placed rider's two-heat total minus the player's heat-1
+ * score, or kT_CMNHELPEarnedEnoughPoints) and hides "objText2" and "bullet1"; otherwise kT_FSOBJFinalSolo and
+ * kT_OVRCMNPlaceTop3Medal. Other paths show kT_OVRCMNPlaceTop3Medal and, offline, kT_OVRCMNCollPointAndMulti
+ * (slopestyle) or kT_OVRCMNCollPointIcons; online "objText2" is hidden. Career shows the tab of the current heat
+ * ("heat1_tab", "heat2_tab", "finalheat_tab") and hides "title_b"; other paths hide the tabs and title it
+ * kT_CMNStateMultiPlay (online) or kT_CMNStateQuickPlay.
+ *
+ * The table: column "heat1" reads kT_OVRCMNHeat1, or kT_OVRCMNScoreColon in the final heat and outside career, where
+ * "column_secondrun" and "column_total" are hidden too (also in heat 1). Rows "rider1".."rider3" list the first three
+ * riders of the standings order D_00536708 other than the human player: name (func_0014EEC8 with GameModeMan's
+ * iCharacters / iCheatCharacters), heat score (cGameModeMan_getHeatScore heat 0, or 2 in the final), and in career heat
+ * 2 the second-run and total scores; "- - -" otherwise. "p0rider" gets the player's name and "p0run1" the player's
+ * heat-1 score in career heat 2 ("- - -" otherwise); "p1rider" gets the second player online, else it and "p1dashes"
+ * are hidden. "topScore" shows the event's record (func_00155130 on BE interface 8) with "%d".
+ */
 extern "C" void func_001FBD20(void* self)
 {
     unsigned short title[0x38];
@@ -1640,6 +1694,14 @@ extern char str_p1rider[];
 extern char str_p0dashes[];
 extern char str_p1dashes[];
 
+/**
+ * Gains focus on the freestyle pre-event overlay: pulses the players' rows and plays its menu sound.
+ *
+ * Runs cUIState_onGainFocus and plays "@TextPulseWhiteOrange" (cOVState_triggerTextFade) on "p0rider" and on "p0dashes"
+ * in heat 2 (SSXApp->GameModeMan's iHeatNum) or "p0run1" otherwise; in an online race (cBENewRaceInterface_newRace's
+ * cGamePath == 2) also on "p1rider" and "p1dashes". Then plays menu sound 0xE (cSSXAudio_MenuSound) and calls
+ * func_002A31C0 on the sound system (func_0028B180()). BE interface 0 is fetched and unused.
+ */
 extern "C" void func_001FC768(void* self)
 {
     cUIState_onGainFocus(self);
@@ -1744,6 +1806,25 @@ static inline void* getObj_1FC878(void* self, char* name)
     return cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
 }
 
+/**
+ * Builds the two-player pre-event overlay: titles, both players' names, the objectives and the event record.
+ *
+ * Adds the "50multifs_pre" screen (kept in mpScreen) and the "OV_darkblue" backdrop, plays frame 0 of each and runs
+ * cOVState_onCreateScreen. Reads cBENewRaceInterface_newRace's cGameMode, cGamePath and cGameEvent.
+ *
+ * "title1" reads kT_CMNStateMultiPlay (set twice). "title2" gets "<location> - <event>" ("%s - %s" through sprintf2;
+ * the location from func_00144BF0, the event kT_cmnRaceCaps_b / kT_cmnSlopeCaps / kT_cmnBigAirCaps / kT_cmnPipeCaps for
+ * cGameMode 5 / 1 / 2 / 3), or "<location> - Jam" for cGameMode 6. Quirk: the "%s - %s" call passes only the location;
+ * the event string reaches it because the compiler keeps it in $a3 (fine on the PS2, undefined elsewhere). "name" gets
+ * player 1 (the online player name func_00146F88 on game path 2, else cBECharacterInterface_getShortName of the first
+ * human rider); "vs" gets kT_OVRCMNVs formatted with player 2's name, found the same way.
+ *
+ * For cGameMode 1-3 "obj2" and "bullet2" are shown with kT_OVRCMNCollPointAndMulti (slopestyle) or
+ * kT_OVRCMNCollPointIcons, otherwise hidden; modes 2-3 hide "screendata1", modes 5-6 hide "screendata" and
+ * "screendata1". "obj1" reads kT_HELPFirstToBottom for cGameEvent 4, else kT_OVRCMNBeatOppMaxTrick. For cGameEvent 4 or
+ * 0 "topScoreLabel" reads kT_OVRCMNRecordTime and "topScore" the record as a time (func_0020A1A8); otherwise
+ * kT_OVRCMNRecordScore and the record with "%d". The record is func_00155130 on BE interface 8.
+ */
 extern "C" void func_001FC878(void* self)
 {
     unsigned short title[0x38];
@@ -1878,6 +1959,16 @@ struct sVec3_1FCEC0
     sVec3_1FCEC0(float a, float b, float c) : x(a), y(b), z(c) {}
 };
 
+/**
+ * Shifts the two-player pre-event overlay's groups for the event kind when its transition starts.
+ *
+ * Only when @p msg is nonzero. For cGameMode (cBENewRaceInterface_newRace, D_00535C10) 2 or 3 it moves "screendata" 130
+ * units right; for 5 or 6 it moves "vsGroup" by +40 and "objectives" by +67 on y and "topScoreGroup" by -48 on y (the
+ * object's position vector at +0x44). BE interface 0 is fetched and unused.
+ *
+ * @param msg  nonzero on the transition the layout is applied for (the first-time flag)
+ * @return always 0
+ */
 extern "C" int func_001FCEC0(void* self, void* msg)
 {
     if (msg != 0)
@@ -1914,6 +2005,12 @@ extern "C" void* func_0028B180();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void cUIState_onGainFocus(void* self);
 
+/**
+ * Gains focus on the two-player pre-event overlay: starts the online overlay timeout and plays its menu sound.
+ *
+ * Runs cUIState_onGainFocus, sets cGameComm_mGameComm's mOverlayTimeout to 1200 frames when there is a link
+ * (func_001FD150 closes the overlay when it runs out) and plays menu sound 0xE (cSSXAudio_MenuSound).
+ */
 extern "C" void func_001FD0D8(void* self)
 {
     cUIState_onGainFocus(self);
@@ -1931,6 +2028,12 @@ INCLUDE_ASM("fe/ovstatepause", func_001FD118);
 extern "C" void* func_0028B180();
 extern "C" void func_002872A8(void* self);
 
+/**
+ * Loses focus on the two-player pre-event overlay: stops the online overlay timeout and calls func_002872A8.
+ *
+ * Sets cGameComm_mGameComm's mOverlayTimeout to -1 when there is a link, then calls func_002872A8 on the sound system
+ * (func_0028B180()).
+ */
 extern "C" void func_001FD118(void)
 {
     cGameComm* gameComm = cGameComm_mGameComm;
@@ -1947,6 +2050,12 @@ INCLUDE_ASM("fe/ovstatepause", func_001FD150);
 extern int cOVStateManager_mStatus;
 extern "C" void* cOVState_onUpdate(void* self);
 
+/**
+ * Updates the two-player pre-event overlay and closes it when the online overlay timeout runs out.
+ *
+ * Runs cOVState_onUpdate; when cGameComm_mGameComm exists and its mOverlayTimeout has counted down to 0, sets it to -1
+ * and cOVStateManager_mStatus to 1 (go to the next overlay).
+ */
 extern "C" void func_001FD150(void* self)
 {
     cOVState_onUpdate(self);
@@ -1970,13 +2079,24 @@ extern char str_kT_EventPk2Jam_b[];
 extern char str_kT_EventAllPeakJam_b[];
 struct sVEnt_1FD190 { short delta; short index; int (*fn)(void*, int); };
 
-// Sends the hash of the named pause-menu item to the front end's screen object.
+// Looks up a localized string by the hash of its key (SSXApp->FELocale's virtual slot 4).
 static inline int sendHash_1FD190(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEnt_1FD190* vt = *(sVEnt_1FD190**)(obj + 4);
     return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
 }
+/**
+ * Returns the localized name of a peak challenge event.
+ *
+ * Looks up the string through SSXApp->FELocale's virtual slot 4 by the hash of its key: 6 kT_EventPk1Race_b, 7
+ * kT_EventPk2Race_b, 8 kT_EventAllPeakRace_b, 9 kT_EventPk1Jam_b, 10 kT_EventPk2Jam_b, 11 kT_EventAllPeakJam_b. The map
+ * template (cUITemplate_MAP_setupMenus, cUITemplate_MAP_setupPeakGoals), cOVState_REWARDS_onGainTransition,
+ * cOVState_TOPTIMES_onCreateScreen and func_001FD320 use it.
+ *
+ * @param id  the event id, 6 to 11 (cBENewRaceInterface_newRace's cGameEvent)
+ * @return the 16-bit string (as an int), or 0 for any other id
+ */
 extern "C" int func_001FD190(int id)
 {
     switch (id) {
@@ -2003,6 +2123,12 @@ extern "C" void cSSXAudio_MenuSound(void*, int);
 extern char str_68rival_pre[];
 extern char str_OV_darkblue[];
 
+/**
+ * Builds the rival-challenge pre-event overlay's screens.
+ *
+ * Adds the "68rival_pre" screen (kept in mpScreen) and the "OV_darkblue" backdrop, plays frame 0 of each, runs
+ * cOVState_onCreateScreen and plays menu sound 0xE (cSSXAudio_MenuSound). The texts are filled in by func_001FD320.
+ */
 extern "C" void func_001FD268(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -2074,6 +2200,29 @@ static inline void* getObj_1FD320(void* self, char* name)
     return cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
 }
 
+/**
+ * Fills the rival-challenge pre-event overlay's texts when its transition starts: title, challenger, objectives and
+ * target.
+ *
+ * Only when @p msg is nonzero. Works from cBENewRaceInterface_newRace's cGameEvent. "name" first gets the player's
+ * short character name, then (wrapped) the challenge line: kT_OVRCMNChallengeBy (events 4-5), kT_HELPChalPeakRace (6-8)
+ * or kT_HELPChalPeakJam (9-11) formatted with the rival's name (func_0014EEC8 of func_00145750), which replaces it.
+ * "title1" reads kT_TITLERivalChallenge; "title2" gets "<location> - <kT_cmnRaceCaps_b>" (event 4), "<location> - Jam"
+ * (5) or the event name func_001FD190 (6-11).
+ *
+ * Objectives ("obj1", "obj2"): event 4 kT_HELPFirstToBottom and kT_HELPBeatChallengePeakRace, event 5
+ * kT_HELPGetToBottomPoints and kT_HELPBeatChallPeakJam; both hide "obj2" and "bullet2" on game path 1 or when the peak
+ * event (6-8 for race, 9-11 for jam) of the current location (0xE, 0xF, 0x10) is already unlocked
+ * (cBENewPlayerInterface_isEventLocked), and hide "timescoretobeat". Events 6-8 show "<Time to beat:> <time>"
+ * (kT_OVRCMNTimeToBeatColon and SSXApp->GameModeMan's uiTimeLimit / 60 as a time string, func_0020A1A8), with
+ * kT_HELPRaceToBottom and kT_HELPBeatPostedTime, or kT_HELPBeatPostedTimePass while that peak (1 for event 6, 2 for
+ * event 7) is still locked for the player (func_00157B08 on BE interface 13; event 8 always uses the plain text).
+ * Events 9-11 do the same with kT_OVRCMNScoreToBeatColon and uiPointTarget, kT_HELPMakeWayDnSlope and
+ * kT_HELPBeatPostedScore(Pass).
+ *
+ * @param msg  nonzero on the transition the texts are filled for (the first-time flag)
+ * @return always 0
+ */
 extern "C" int func_001FD320(void* self, void* msg)
 {
     unsigned short out[304];
@@ -2196,6 +2345,14 @@ extern "C" int func_001FD320(void* self, void* msg)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FDB78);
 #ifdef SKIP_ASM
+/**
+ * Answers the rival-challenge pre-event overlay's menu events: feedback 0x101 (animation and sound) for event 6, else
+ * 0.
+ *
+ * @param menu  the menu (unused)
+ * @param event  the menu event
+ * @return 0x101 for event 6 (back), 0 otherwise
+ */
 extern "C" int func_001FDB78(void* self, int menu, int event)
 {
     return event == 6 ? 257 : 0;
@@ -2212,6 +2369,17 @@ struct sPauseMgr_DB88 {
 
 extern "C" void func_002872A8(void* snd);
 
+/**
+ * Starts the rival challenge when the pre-event overlay's button is selected.
+ *
+ * On event 5 (select) with a widget: sets cOVStateManager_mStatus to 3 (close the overlay), sets the word at +0x8 of
+ * the current game state (SSXApp->Game->mCurrentState) to 1 as the overlay manager does to let the game state continue,
+ * calls func_002872A8 on the sound system (func_0028B180()) and pops the top state of the engine's state stack
+ * (func_0039F190(mpEngine + 0x18, 1)).
+ *
+ * @param a1  the widget the event is for; nothing happens when it is null
+ * @param a2  the widget event
+ */
 extern "C" void func_001FDB88(void* self, int a1, int a2)
 {
     if (a1 != 0 && a2 == 5) {
@@ -2229,6 +2397,17 @@ INCLUDE_ASM("fe/ovstatepause", func_001FDBF0);
 extern "C" void* func_001D5330(void* self, int a1, int a2, int a3);
 extern void* D_00472440[];
 
+/**
+ * Constructs the save-replay memory-card overlay.
+ *
+ * Runs the 4-argument cFEMemCard constructor func_001D5330 with iType 1 (replay), installs this class's vtable
+ * D_00472440 and clears +0x22C (mIsHidden in On Tour, the hideActionButtons state). The overlay factory
+ * (cOVStateManager_triggerOverlay, func_0020BAB8) builds it in 628 bytes for overlay type 18.
+ *
+ * @param a1  the UI engine (On Tour pEngine)
+ * @param a2  the overlay id, 18 (On Tour tOVStateEnum eOVState)
+ * @return @p self
+ */
 extern "C" void* func_001FDBF0(void* self, int a1, int a2)
 {
     func_001D5330(self, a1, 1, a2);
@@ -2282,7 +2461,15 @@ static inline cUIObj_DC30* getObj_DC30(char* self, char* name)
     return (cUIObj_DC30*)cUIScreen_getObjectByHashName_DC30(*(void**)(self + 0x40), GetHashValue32(name));
 }
 
-// Builds the memory-card device-select overlay and pushes its menu state.
+/**
+ * Builds the save-replay overlay's screen, pushes pause state 2 and runs the base overlay setup.
+ *
+ * Adds the "119Save_Replay" screen (kept in mpScreen); when it exists, plays frame 0, clears "1percentage_b" and
+ * "Memory_card_info", shows "title_Save_Replay", hides "title_Save_Records" and "helptext01", and stores 0..3 in the
+ * miMiscData (+0x18) of "1memory_card_b".."4memory_card_b". Adds the "OV_darkblue" backdrop, pushes pause state 2
+ * (D_005366E8[++D_004A2A54] = 2, cPauseState_Flags = D_004428F0[2]) and runs cOVState_onCreateScreen. The `//` note
+ * above calls this a device-select overlay that pushes its menu state; it pushes the pause state.
+ */
 extern "C" void func_001FDC30(char* self)
 {
     void* engine = *(void**)(self + 0x10);
@@ -2330,6 +2517,14 @@ void func_00270ED8(void* self);
 extern "C" void* cFEMemCard_onDestroyScreen(void* self);
 extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
 
+/**
+ * Tears down the save-replay overlay and restarts the replay.
+ *
+ * When a replay save buffer is still held (+0x1C8, On Tour mIsReplayAlloc) it releases it (func_00270ED8 on
+ * SSXApp->Game->Replay, On Tour cReplay::purgeSave) and clears the flag. Pops the pause state (cPauseState_Flags =
+ * D_004428F0[D_005366E8[--D_004A2A54]]), runs cFEMemCard_onDestroyScreen and restarts playback with
+ * cReplay_startReplay(Replay, 0, 0, 0).
+ */
 extern "C" void func_001FDE60(void* self)
 {
     if (*(int*)((char*)self + 0x1C8) == 1) {
@@ -2347,6 +2542,12 @@ INCLUDE_ASM("fe/ovstatepause", func_001FDF00);
 #ifdef SKIP_ASM
 extern "C" void func_0039F718(void* self);
 
+/**
+ * Finishes the save-replay overlay once: pops the UI state stack down to it.
+ *
+ * When +0x1AC (On Tour mIsDone) is still 0 it calls func_0039F718(mpEngine + 0x18) (On Tour
+ * cUIStateStack::popToStateInclusive); then sets +0x1AC to 1.
+ */
 extern "C" void func_001FDF00(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
@@ -2541,6 +2742,24 @@ static inline cUIObj_DF40* getObj_DF40(cState_DF40* self, char* name)
     return (cUIObj_DF40*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
 }
 
+/**
+ * Refreshes the save-replay overlay's device panel: card name, free space, the four save slots and the device arrows.
+ *
+ * Works on the memory-card manager (cSSXApp_getMCManager). When func_001D9880 (vtable slot 42) reports the card can be
+ * shown, a missing card (mpMemCard slot 53, cPS2MemCard_IsAvailable on the current device) shows the no-cards message
+ * (func_001D8240), else the screen moves to display state 3 (cFEMemCard_triggerDisplayState) unless already there. When
+ * slot 42 still holds, it re-highlights the menu (cFEMemCard_setMenuHighlight), writes the selected device's label
+ * (cMCOverlayManager_GetDeviceDisplayString on mSelectedDevice) into "Memory_card_info", puts the free-space text
+ * (mpMemCard slot 64) into "1percentage_b" and hides it. It looks up kT_MEMEmpty_b and drops the result.
+ *
+ * Each of "1memory_card_b".."4memory_card_b" gets its file slot's title (mpMemCard slot 14, cPS2MemCard_GetTitleString,
+ * through the buffer at +0x230). An empty slot (no cPS2MemCard_HasFileName, not cPS2MemCard_IsFileSlotDisabled) on a
+ * formatted card (slot 55) is live only if it is the first such one; later empty ones are static. A slot with a save is
+ * live when the device is usable (slot 54) and the slot is not disabled; anything else is static. Static means
+ * setStatic(1) and vtable slot 25 (cUIText_setUseStaticColour) 1. "arrw_left_b" / "arrw_right_b" are shown when
+ * cFEMemCard_checkNextAvailableDevice finds a device that way. When the display state (+0x214) is not 3, all four slots
+ * end up static with the normal colour.
+ */
 extern "C" void func_001FDF40(cState_DF40* self)
 {
     unsigned short buf[800];
@@ -2637,6 +2856,14 @@ extern char str_x_save[];
 extern char str_o_delete[];
 extern char str_ps2sq_b[];
 
+/**
+ * Hides or shows all four action buttons of the save-replay overlay.
+ *
+ * Only acts when @p on differs from +0x22C (On Tour mIsHidden): sets "ps2x_b", "x_save", "o_delete" and "ps2sq_b"
+ * visible when @p on is false and hidden when true, then stores @p on at +0x22C.
+ *
+ * @param on  true to hide the buttons
+ */
 extern "C" void func_001FE4A8(void* self, bool on)
 {
     if (*(int*)((char*)self + 0x22C) != on) {
@@ -2671,6 +2898,14 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_o_delete[];
 extern char str_ps2sq_b[];
 
+/**
+ * Hides or shows the save-replay overlay's delete button.
+ *
+ * Sets "o_delete" and "ps2sq_b" visible when @p on is false and hidden when true, and stores !@p on at +0x220 (On Tour
+ * mDeleteButtonActive).
+ *
+ * @param on  true to hide the button
+ */
 extern "C" void func_001FE5B0(void* self, bool on)
 {
     ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(!on);
@@ -2700,6 +2935,15 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 
+/**
+ * Hides or shows the save-replay overlay's save button.
+ *
+ * Sets "ps2x_b" and "x_save" visible when @p on is false and hidden when true, and stores !@p on at +0x224 (On Tour
+ * mMainButtonActive). @p loadBlocked is ignored.
+ *
+ * @param loadBlocked  whether the load button should be hidden (unused: the screen has no load button)
+ * @param on  true to hide the save button
+ */
 extern "C" void func_001FE648(void* self, int loadBlocked, bool on)
 {
     cUIObj_1FE648* xButton = (cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
@@ -2795,6 +3039,21 @@ public:
     virtual void v01(int);
 };
 
+/**
+ * Handles the save-replay overlay's file-slot buttons: save to a slot, back out, or ask to delete a save.
+ *
+ * Ignores events without a widget or while busy (+0x1A8, mIsProcessing). Event 5 (select), when the screen is not
+ * leaving (mState +0x1C0 != 6) and the display state (+0x214) is 3: stores the widget's slot (miMiscData) in +0x1C4
+ * (mSlot) and the manager's mFileCursor, releases a held replay buffer (+0x1C8, func_00270ED8 on the replay), starts
+ * the replay save with func_0023CAE8(manager, 0, -1) (On Tour writeSetFileType, file type 0 = replay), and sets
+ * mIsProcessing, mIsSavePressed (+0x1DC) and mState 3. Event 6 (back) sets mIsCancelPressed (+0x1E4), resets the
+ * manager to state 0 (vtable slot 1, cMCOverlayManager_SetState) when mState is 0-2, and sets mState 6. Event 7, on a
+ * usable device (mpMemCard slot 54) in mState 1 for a slot holding a save (cPS2MemCard_HasFileName): mIsProcessing,
+ * mState 4, cMCOverlayManager_SetAction(0) and manager state 0x18 (On Tour kMCOverlay_DeleteConfirm).
+ *
+ * @param msg  the widget the event is for (its miMiscData, +0x18, is the file slot)
+ * @param type  the widget event: 5 select, 6 back, 7 delete
+ */
 extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
 {
     if (msg == 0)
@@ -2873,6 +3132,16 @@ INCLUDE_ASM("fe/ovstatepause", func_001FE8F0);
 void func_00270ED8(void* self);
 extern "C" void func_001D8700(void* self, void* a1, int key);
 
+/**
+ * Handles the save-replay overlay's popup events: frees the replay buffer once the save-done popup closes.
+ *
+ * On event 22 while the popup type (+0x19C, mPopupType) is 5 (save done), releases the replay save buffer
+ * (func_00270ED8 on SSXApp->Game->Replay) and clears +0x1C8 (mIsReplayAlloc); then hands every event to the memory-card
+ * base handler func_001D8700.
+ *
+ * @param popup  the popup state that sent the event
+ * @param key  the popup event
+ */
 extern "C" void func_001FE8F0(void* self, void* popup, int key)
 {
     if (key == 22) {
@@ -2891,6 +3160,17 @@ INCLUDE_ASM("fe/ovstatepause", func_001FE968);
 extern "C" void* func_001D5330(void* self, int a1, int a2, int a3);
 extern void* D_004722B8[];
 
+/**
+ * Constructs the save-records memory-card overlay.
+ *
+ * Runs the 4-argument cFEMemCard constructor func_001D5330 with iType 2 (settings), installs this class's vtable
+ * D_004722B8 and clears +0x22C (mIsHidden in On Tour). The overlay factory (cOVStateManager_triggerOverlay,
+ * func_0020BAB8) builds it in 628 bytes for overlay type 19.
+ *
+ * @param a1  the UI engine (On Tour pEngine)
+ * @param a2  the overlay id, 19 (On Tour tOVStateEnum eOVState)
+ * @return @p self
+ */
 extern "C" void* func_001FE968(void* self, int a1, int a2)
 {
     func_001D5330(self, a1, 2, a2);
@@ -2941,6 +3221,14 @@ static inline void* engine_1FE9A8(char* self)
     return *(void**)(self + 0x10);
 }
 
+/**
+ * Builds the save-records overlay's screen: one save slot under the "Save Records" title.
+ *
+ * Adds the shared "119Save_Replay" screen (kept in mpScreen); when it exists, plays frame 0, clears "1percentage_b" and
+ * "Memory_card_info", hides "title_Save_Replay" and shows "title_Save_Records" and "helptext01". Slot "1memory_card_b"
+ * gets miMiscData 0; "2memory_card_b".."4memory_card_b" are made static and hidden, as are their number labels
+ * "2".."4". Adds the "OV_darkblue" backdrop and runs cOVState_onCreateScreen.
+ */
 extern "C" void func_001FE9A8(char* self)
 {
     void* scr = cUIEngine_addScreenByHashName(engine_1FE9A8(self), self, GetHashValue32(str_119Save_Replay), 0);
@@ -2983,6 +3271,11 @@ extern "C" void* cFEMemCard_onDestroyScreen(void* self);
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FEC40__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tears down the save-records overlay: runs cFEMemCard_onDestroyScreen.
+ *
+ * @return what cFEMemCard_onDestroyScreen returns (declared void* here)
+ */
 void* func_001FEC40(void* self)
 {
     return cFEMemCard_onDestroyScreen(self);
@@ -2994,6 +3287,12 @@ INCLUDE_ASM("fe/ovstatepause", func_001FEC60);
 #ifdef SKIP_ASM
 extern "C" void func_0039F718(void* self);
 
+/**
+ * Finishes the save-records overlay once: pops the UI state stack down to it.
+ *
+ * When +0x1AC (On Tour mIsDone) is still 0 it calls func_0039F718(mpEngine + 0x18) (On Tour
+ * cUIStateStack::popToStateInclusive); then sets +0x1AC to 1.
+ */
 extern "C" void func_001FEC60(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
@@ -3188,6 +3487,19 @@ static inline cUIObj_ECA0* getObj_ECA0(cState_ECA0* self, char* name)
     return (cUIObj_ECA0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
 }
 
+/**
+ * Refreshes the save-records overlay's device panel: card name, free space, its one save slot and the device arrows.
+ *
+ * The single-slot form of func_001FDF40. When func_001D9880 (vtable slot 42) reports the card can be shown, a missing
+ * card (mpMemCard slot 53) shows the no-cards message (func_001D8240), else the screen moves to display state 3
+ * (cFEMemCard_triggerDisplayState) unless already there. When slot 42 still holds, it re-highlights the menu
+ * (cFEMemCard_setMenuHighlight), writes the selected device's label into "Memory_card_info" and the free-space text
+ * into "1percentage_b" (then hidden), and looks up kT_MEMEmpty_b without using it. "1memory_card_b" gets file slot 0's
+ * title (cPS2MemCard_GetTitleString, through +0x230) and is live when empty on a formatted card, or when it holds a
+ * save on a usable device and is not disabled; otherwise static (setStatic(1), slot 25 cUIText_setUseStaticColour 1).
+ * The device arrows follow cFEMemCard_checkNextAvailableDevice. Outside display state 3 (+0x214) the slot ends up
+ * static with the normal colour.
+ */
 extern "C" void func_001FECA0(cState_ECA0* self)
 {
     unsigned short buf[800];
@@ -3273,6 +3585,14 @@ extern char str_x_save[];
 extern char str_o_delete[];
 extern char str_ps2sq_b[];
 
+/**
+ * Hides or shows all four action buttons of the save-records overlay.
+ *
+ * Only acts when @p on differs from +0x22C (On Tour mIsHidden): sets "ps2x_b", "x_save", "o_delete" and "ps2sq_b"
+ * visible when @p on is false and hidden when true, then stores @p on at +0x22C.
+ *
+ * @param on  true to hide the buttons
+ */
 extern "C" void func_001FF170(void* self, bool on)
 {
     if (*(int*)((char*)self + 0x22C) != on) {
@@ -3307,6 +3627,14 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_o_delete[];
 extern char str_ps2sq_b[];
 
+/**
+ * Hides or shows the save-records overlay's delete button.
+ *
+ * Sets "o_delete" and "ps2sq_b" visible when @p on is false and hidden when true, and stores !@p on at +0x220 (On Tour
+ * mDeleteButtonActive).
+ *
+ * @param on  true to hide the button
+ */
 extern "C" void func_001FF278(void* self, bool on)
 {
     ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(!on);
@@ -3336,6 +3664,15 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 
+/**
+ * Hides or shows the save-records overlay's save button.
+ *
+ * Sets "ps2x_b" and "x_save" visible when @p on is false and hidden when true, and stores !@p on at +0x224 (On Tour
+ * mMainButtonActive). @p loadBlocked is ignored.
+ *
+ * @param loadBlocked  whether the load button should be hidden (unused: the screen has no load button)
+ * @param on  true to hide the save button
+ */
 extern "C" void func_001FF310(void* self, int loadBlocked, bool on)
 {
     cUIObj_1FF310* xButton = (cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
@@ -3430,6 +3767,21 @@ public:
     virtual void v01(int);
 };
 
+/**
+ * Handles the save-records overlay's file-slot buttons: save the settings, back out, or ask to delete a save.
+ *
+ * Same as func_001FE6E8 without the replay buffer. Ignores events without a widget or while busy (+0x1A8,
+ * mIsProcessing). Event 5 (select), when mState (+0x1C0) is not 6 and the display state (+0x214) is 3: stores the
+ * widget's slot (miMiscData) in +0x1C4 (mSlot) and the manager's mFileCursor, starts the save with
+ * func_0023CAE8(manager, 2, -1) (On Tour writeSetFileType, file type 2 = settings) and sets mIsProcessing,
+ * mIsSavePressed (+0x1DC) and mState 3. Event 6 (back) sets mIsCancelPressed (+0x1E4), resets the manager to state 0
+ * (vtable slot 1, cMCOverlayManager_SetState) when mState is 0-2, and sets mState 6. Event 7, on a usable device
+ * (mpMemCard slot 54) in mState 1 for a slot holding a save (cPS2MemCard_HasFileName): mIsProcessing, mState 4,
+ * cMCOverlayManager_SetAction(0) and manager state 0x18 (On Tour kMCOverlay_DeleteConfirm).
+ *
+ * @param msg  the widget the event is for (its miMiscData, +0x18, is the file slot)
+ * @param type  the widget event: 5 select, 6 back, 7 delete
+ */
 extern "C" void func_001FF3B0(void* self, void* msg, unsigned int type)
 {
     if (msg == 0)

@@ -764,6 +764,23 @@ extern char D_004749D0[];
 extern char cOVState_REPLAY_vtbl[];
 extern char D_00474B80[];
 
+/**
+ * Creates the in-game overlay state of the given type and pushes it as a popup over the current UI state.
+ *
+ * Builds the same overlays as cOVStateManager_triggerOverlay, case by case for types 1-40: each is allocated as
+ * "cOVStateOverlay" with its own size, gets the cUIState base constructor (func_0039E2A0), its vtable, mOVID = @p type
+ * and the overlay defaults. Types 18, 19, 34, 36 and 37 use their own constructors (func_001FDBF0, func_001FE968,
+ * cOVState_MESSAGECENTER_cOVState_MESSAGECENTER, cOVState_PROFILE_cOVState_PROFILE with 42,
+ * cOVState_AUTOSAVE_cOVState_AUTOSAVE), 29 and 30 load their challenge data (func_001F7548, func_001F7738) and 33
+ * initialises its map template at +0x9C (func_002006B8). Unlike cOVStateManager_triggerOverlay it records the state
+ * that was current (cUIStateStack_getCurrentState) as the new state's mpParentState and pushes it with
+ * cUIStateStack_pushPopup on the engine's state stack.
+ *
+ * There is no default case: any other type leaves the result null and the mpParentState write dereferences it (likely
+ * bug, shared with cOVStateManager_triggerOverlay). Nothing in the program calls it.
+ *
+ * @param type  the overlay (On Tour tOVStateEnum overlay)
+ */
 extern "C" void func_0020BAB8(int type)
 {
     char* result = 0;
@@ -1217,6 +1234,20 @@ static inline bool notMode4_0020CA10(signed char* g)
     return g[0x48] != 4;
 }
 
+/**
+ * Pauses the game by opening the pause overlay that fits the current game.
+ *
+ * Online (cBENetworkInterface_networkOpt.bIsNetworkGame) it first, when cGameComm_mGameComm exists, sends the
+ * controller-unplugged command (func_00258C00) if SSXApp->Game's ControllerUnplugged is set, sends the pause command
+ * (cGameComm_sendPauseCmd with 1) and starts mPauseTimeout = 3600 and mOverlayTimeout = 1800; then triggers overlay 6.
+ * Offline: overlay 2 while a local mission is active (cWScriptMan_isLocalMissionActive), else overlay 1 on game path 0
+ * outside cGameMode 4, overlay 4 in game state 11 (mCurrentStateID), overlay 3 in cGameMode 4 and overlay 5 otherwise
+ * (cGameMode and cGamePath of cBENewRaceInterface_newRace; the overlays through cOVStateManager_triggerOverlay).
+ * Finally clears D_004A2468, the pause menu's remembered selection. The results of the two cBE_getInterface__Fv calls
+ * (interfaces 0 and 7) are not used.
+ *
+ * cGame_update and func_00244B48 call it after func_0020CBE8 allows the pause menu.
+ */
 extern "C" void func_0020CA10(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1262,6 +1293,11 @@ int GetHashValue32(char* str);
 extern "C" int cUIStateStack_findState(void* stack, int hash);
 extern char str_64replay[];
 
+/**
+ * Tells whether a "64replay" state is on the game UI's state stack.
+ *
+ * @return 1 when cUIStateStack_findState finds the hash of "64replay" on SSXApp->Game->UI's stack, else 0
+ */
 extern "C" int func_0020CB58(void)
 {
     char* stack = (char*)SSXApp->Game->UI + 0x18;
@@ -1276,6 +1312,14 @@ int GetHashValue32(char* str);
 extern "C" int cUIStateStack_findState(void* stack, int hash);
 extern char str_cOVTemplate_PauseMenu[];
 
+/**
+ * Tells whether the pause menu is open: whether a "cOVTemplate_PauseMenu" state is on the game UI's state stack.
+ *
+ * cGame_update checks it before updating the playback manager, and func_0020CBE8 refuses the pause menu while it is
+ * open.
+ *
+ * @return 1 when cUIStateStack_findState finds the hash of "cOVTemplate_PauseMenu", else 0
+ */
 extern "C" int func_0020CBA0(void)
 {
     char* stack = (char*)SSXApp->Game->UI + 0x18;
@@ -1318,6 +1362,15 @@ public:
 extern "C" void* cUIStateStack_getCurrentState(void* stack);
 extern "C" int func_0020CBA0(void);
 
+/**
+ * Tells whether the pause menu may be opened now.
+ *
+ * No while the pause menu is already open (func_0020CBA0). Otherwise asks the game UI's current state
+ * (cUIStateStack_getCurrentState): with no state the answer is yes; a popup state (mAttrState bit 0, On Tour mIsPopup)
+ * says no; any other state answers through its virtual slot 25 (cOVState_allowPauseMenu in the overlay vtables).
+ *
+ * @return nonzero when the pause menu may open
+ */
 extern "C" int func_0020CBE8(void)
 {
     char* mgr = (char*)SSXApp->Game->UI;
@@ -1345,6 +1398,14 @@ extern "C" void cOVStateManager_triggerOverlay(int state);
 extern char cBENewRaceInterface_newRace[];
 extern int cOVStateManager_mStatus;
 
+/**
+ * Opens the overlay that follows a finished event, or lets play resume when there is none.
+ *
+ * By cBENewRaceInterface_newRace's cGameMode and cGamePath: cGameMode 0 or game path 2 (online) trigger overlay 0xC;
+ * cGameMode 1-3 and 6 overlay 13 (cOVStateManager_triggerOverlay; both are the "finishov" overlays); cGameMode 4 sets
+ * cOVStateManager_mStatus to 2 so the next cOVStateManager_update resumes play; any other mode overlay 0xC. The result
+ * of cBE_getInterface__Fv (interface 0) is not used. func_00233CD8 (load screen) calls it.
+ */
 extern "C" void func_0020CC60(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1624,6 +1685,15 @@ public:
     virtual void setVisible(int v);
 };
 
+/**
+ * Builds the screen of a simple overlay: the base overlay screen plus a menu with one visible option.
+ *
+ * Runs cOVState_onCreateScreen, sets flag 8 in the "overlayMenu" widget's word at +0x90, then walks "overlayOpt0" ...
+ * "overlayOpt4" of mpScreen: option 0 gets the localised string named D_00441D10[D_004A2860[0]] and that index as its
+ * misc data (+0x18); options 1-4 are hidden (setVisible(0), slot 9) and enabled (setEnabled(1), slot 8). It fills the
+ * onCreateScreen slot (+0x24) of D_00474D30, the vtable that also holds func_0020D308 and func_0020D318; func_001FBD20
+ * and func_001FB6B8 call it as their base.
+ */
 extern "C" void func_0020D1D8(void* self)
 {
     cOVState_onCreateScreen(self);
@@ -1650,6 +1720,16 @@ extern "C" void func_0020D1D8(void* self)
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020D308);
 #ifdef SKIP_ASM
+/**
+ * Simple overlay's menu-event filter: event 6 gets 0x101, every other event 0.
+ *
+ * It fills the onWidgetMenu slot (+0xA4) of D_00474D30 and of the overlay vtables built on it (D_004726A0, D_00472778,
+ * D_00472850).
+ *
+ * @param menu  the menu (unused)
+ * @param event  the menu event
+ * @return 0x101 for event 6, else 0
+ */
 extern "C" int func_0020D308(void* self, int menu, int event)
 {
     return event == 6 ? 257 : 0;
@@ -1661,6 +1741,16 @@ INCLUDE_ASM("fe/ovtemplatedialog", func_0020D318);
 #ifdef SKIP_ASM
 extern int cOVStateManager_mStatus;
 
+/**
+ * Simple overlay's widget handler: selecting a widget (event 5) sets cOVStateManager_mStatus to 1, so the next
+ * cOVStateManager_update moves on to the next overlay.
+ *
+ * It fills the onWidgetEvent slot (+0x9C) of D_00474D30 and of the overlay vtables built on it (D_004726A0, D_00472778,
+ * D_00472850).
+ *
+ * @param widget  the widget; nothing happens when it is null
+ * @param key  the widget event
+ */
 extern "C" void func_0020D318(void* self, int widget, int key)
 {
     if (widget != 0 && key == 5) {
@@ -1759,6 +1849,15 @@ int GetHashValue32(char* str);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int idx);
 extern char str_Menu0000_b[];
 
+/**
+ * Preselects the dialog's "Menu0000" menu when it is created: entry 0 for dialog type 6, entry 1 for every other type.
+ *
+ * The dialog type is the word at +0x9C, the value cOVStateManager_triggerOverlay stores per dialog overlay (0-6; On
+ * Tour mDialogType). It fills the onWidgetCreate slot (+0x94) of the dialog vtables (D_004744C0 ... D_00474C58) whose
+ * onCreateScreen and onWidgetEvent are cOVTemplate_Dialog_onCreateScreen and cOVTemplate_Dialog_onWidgetEvent.
+ *
+ * @param item  the widget being created; only the one whose hash name (+0x38) is "Menu0000" is touched
+ */
 extern "C" void func_0020D4F0(void* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
@@ -1775,7 +1874,15 @@ extern "C" void func_0020D4F0(void* self, void* item)
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", func_0020D568);
 #ifdef SKIP_ASM
-// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
+/**
+ * Dialog's menu-event filter: events 8 and 9 get 0x100, every other event 0x101.
+ *
+ * It fills the onWidgetMenu slot (+0xA4) of the dialog vtables (D_004744C0 ... D_00474C58).
+ *
+ * @param menu  the menu (unused)
+ * @param key  the menu event
+ * @return 0x100 for events 8 and 9, else 0x101
+ */
 extern "C" int func_0020D568(void* self, int menu, unsigned int key)
 {
     int result = 257;
@@ -2020,6 +2127,15 @@ extern "C" void cOVState_onUpdate(void* self);
 extern "C" void func_0039F190(void* self, int a1);
 extern char str_TransitionOut_b[];
 
+/**
+ * Updates the online quit dialog: once the network pause or overlay timer has run out, plays the screen's
+ * "TransitionOut" frame and pops the state.
+ *
+ * After cOVState_onUpdate, when cGameComm_mGameComm exists and its mPauseTimeout or mOverlayTimeout is 0: plays the
+ * "TransitionOut" label of mpScreen (cUIScreen_getFrameByLabel, cUIScreen_playFrame) when it exists, and pops one state
+ * from mpEngine's state stack (func_0039F190, On Tour cUIStateStack::pop). It is the onUpdate slot (+0x64) of
+ * D_004748F8, the dialog type 1 overlay (cOVStateManager_triggerOverlay type 0x18).
+ */
 extern "C" void func_0020DBD0(void* self)
 {
     cOVState_onUpdate(self);

@@ -141,6 +141,12 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(void* self, void* item, unsigned
 //100%
 INCLUDE_ASM("fe/ovstatemission", func_001A34A0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Fills the multiplayer circuit select's list box; empty in this build.
+ *
+ * cFEStateMPCircuit_onCreateScreen calls it with the screen's "ListBox" widget as a second argument, which this
+ * definition does not declare.
+ */
 void func_001A34A0(void* self)
 {
 }
@@ -149,6 +155,12 @@ void func_001A34A0(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatemission", func_001A34A8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Refreshes the multiplayer circuit select after its selection changes; empty in this build.
+ *
+ * Called by cFEStateMPCircuit_onGainFocus and by cFEStateMPCircuit_onWidgetEvent for a list change (event 9), each
+ * after playing the frame of the current entry.
+ */
 void func_001A34A8(void* self)
 {
 }
@@ -157,6 +169,11 @@ void func_001A34A8(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatemission", func_001A34B0);
 #ifdef SKIP_ASM
+/**
+ * Stub that always returns -1; nothing in the program calls it.
+ *
+ * @return -1
+ */
 extern "C" int func_001A34B0(void) {
     return -1;
 }
@@ -170,6 +187,17 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void*, int);
 
+/**
+ * Returns the highest count, over the two human riders, of peaks 1 and 2 that carry the peak flag
+ * cBENewPlayerInterface_isPeakLocked1 reports.
+ *
+ * For the first and second human (cBENewPlayerInterface_getHumanRider on back-end interface 1) it adds
+ * cBENewPlayerInterface_isPeakLocked1 for peaks 1 and 2 and keeps the largest sum (0-2). That interface's doc calls the
+ * flag "locked"; for a function shaped like this the count reads more naturally as the number of unlocked peaks, so one
+ * of the two may be named the wrong way round. Nothing in the program calls it.
+ *
+ * @return the largest per-rider count, 0-2
+ */
 extern "C" unsigned int func_001A34B8(void)
 {
     signed char i;
@@ -280,6 +308,13 @@ INCLUDE_ASM("fe/ovstatemission", func_001A3698);
 #ifdef SKIP_ASM
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int slot);
 
+/**
+ * Unloads all five front-end async file slots (cFEAsyncManager_UnloadFEAsyncFile on 0-4).
+ *
+ * Nothing in the program calls it.
+ *
+ * @param mgr  the front-end async manager (this)
+ */
 extern "C" void func_001A3698(void* mgr)
 {
     for (int i = 0; i < 5; i++) {

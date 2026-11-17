@@ -117,6 +117,15 @@ extern "C" void cOVStateHiScoreList_onWidgetEvent(void* self, void* item, int Ev
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E91A8__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Copies a HUD element definition's colour into @p outColor in alpha, red, green, blue order.
+ *
+ * The four floats at +0x10..+0x1C (x, y, z, w in this unit's cOVStateHUDElem view; On Tour tHUDDef::a, r, g, b) are
+ * copied unchanged. The text renderers (func_001F16C0, func_001F1B30, func_001F2AA0, ...) use it for an element's
+ * default colour.
+ *
+ * @param outColor  receives the colour as four floats (a tARGB: alpha, red, green, blue)
+ */
 void func_001E91A8(void* self, void* outColor)
 {
     cOVStateHUDElem* elem = (cOVStateHUDElem*)self;
@@ -131,6 +140,14 @@ void func_001E91A8(void* self, void* outColor)
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E91D0__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Copies a HUD element definition's colour into @p outColor as an (r, g, b, a) vector.
+ *
+ * The alpha at +0x10 goes to the fourth float and red, green, blue (+0x14..+0x1C) to the first three. The blending text
+ * renderers func_001F1E28 and func_001F25E0 use it to interpolate two elements' colours with VU0 vector maths.
+ *
+ * @param outColor  receives the colour as an (r, g, b, a) 4-vector
+ */
 void func_001E91D0(void* self, void* outColor)
 {
     cOVStateHUDElem* elem = (cOVStateHUDElem*)self;
@@ -145,6 +162,13 @@ void func_001E91D0(void* self, void* outColor)
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E91F8);
 #ifdef SKIP_ASM
+/**
+ * Writes a HUD element definition's screen position into @p outPos.
+ *
+ * The position is the two shorts at +0x0 and +0x2 (On Tour tHUDDef::px, py), converted to float.
+ *
+ * @param outPos  receives (x, y)
+ */
 extern "C" void func_001E91F8(void* self, void* outPos)
 {
     short* in = (short*)self;
@@ -157,6 +181,16 @@ extern "C" void func_001E91F8(void* self, void* outPos)
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E9220);
 #ifdef SKIP_ASM
+/**
+ * Writes a HUD element definition's size into @p outVec, taking unset dimensions from a texture element.
+ *
+ * Each dimension comes from the shorts at +0x4/+0x6 (On Tour tHUDDef::sx, sy). A negative value means "not set": the
+ * dimension becomes 0, or the texture element's width or height (+0x4/+0x8, On Tour cTextureElement::mWidth/mHeight)
+ * when @p fallback is given. func_001F2AA0 and func_001F2DB0 pass no texture and use the width as their wrap width.
+ *
+ * @param outVec  receives (width, height)
+ * @param fallback  a texture element whose mWidth/mHeight replace unset dimensions, or 0
+ */
 extern "C" void func_001E9220(void* self, void* outVec, void* fallback)
 {
     short* in = (short*)self;
@@ -186,6 +220,16 @@ extern "C" void func_001E9220(void* self, void* outVec, void* fallback)
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001E9290__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Writes a HUD element definition's x and y scale into @p outRange.
+ *
+ * Copies the floats at +0x8/+0xC (rangeMin/rangeMax in this unit's cOVStateHUDElem view; On Tour tHUDDef::xx, xy).
+ * Every renderer multiplies the element's size and font scale by them. The declaration also returns the x scale; the
+ * callers ignore it.
+ *
+ * @param outRange  receives (scale x, scale y)
+ * @return the x scale it copied
+ */
 float func_001E9290(void* self, void* outRange)
 {
     cOVStateHUDElem* elem = (cOVStateHUDElem*)self;
@@ -234,6 +278,26 @@ struct sLine_1E92A8 {
 };
 extern sIcon_1E92A8 D_004C8980[];
 
+/**
+ * Lays out a HUD text line with inline pictures: splits its 16-bit text into text and picture segments and measures
+ * them.
+ *
+ * The line object (filled by func_001E94E0 / func_001E9540) holds the total width (+0x0), height (+0x4), font (+0x8),
+ * text y offset (+0xC), scale (+0x10, +0x14), segment count (+0x18), six (width, pointer) segments (+0x1C) and the text
+ * (+0x4C). First the font's Scale is set to BaseScale times the line scale. Each '@' ends the current text segment (it
+ * is overwritten with 0) and starts a picture name that runs to the next space or the end; the name's GetHashValue32 is
+ * looked up in the picture table D_004C8980 (0x24-byte records: hash, texture, width +0xC, height +0x10, uvs; On Tour
+ * tHUDPictureDB) and the record becomes the next segment, so even segments are text and odd ones pictures. Text
+ * segments are measured with func_003921F0, with the end advance before a picture and without it for the last one. It
+ * stores the total width, the height max(font MaxCharHeight * BaseScale.y * scale y, tallest picture) and the y offset
+ * that centres the text in that height.
+ *
+ * Likely bugs: a name missing from the table leaves a null record that is read anyway, and nothing limits the segments
+ * to the six slots (a third picture writes past them into the text). The picture name is copied from 16-bit characters
+ * into an 8-bit buffer, keeping the low byte of each.
+ *
+ * @param p  the text line to lay out
+ */
 extern "C" void func_001E92A8(void* p)
 {
     sLine_1E92A8* self = (sLine_1E92A8*)p;
@@ -311,6 +375,17 @@ extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
 extern "C" void func_001E92A8(void* self);
 struct sVec2f { float x, y; };
 
+/**
+ * Sets a HUD text line from an 8-bit string and lays it out.
+ *
+ * Widens @p str into the line's 16-bit text (+0x4C) with func_002C2540, stores @p font (+0x8) and @p scale (+0x10),
+ * then runs func_001E92A8. cOVStateHUD1P_onCreateScreen fills three of its message lines this way with the HUD's +0x428
+ * font.
+ *
+ * @param str  the text; "@name" embeds a picture from D_004C8980
+ * @param font  the font (a cFont*) to measure and draw with
+ * @param scale  the line's x and y scale
+ */
 extern "C" void func_001E94E0(void* self, char* str, int font, sVec2f* scale)
 {
     func_002C2540((unsigned short*)((char*)self + 0x4C), str);
@@ -325,6 +400,16 @@ INCLUDE_ASM("fe/ovstatehud", func_001E9540);
 #ifdef SKIP_ASM
 extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src);
 extern "C" void func_001E92A8(void* self);
+/**
+ * Sets a HUD text line from a 16-bit string and lays it out.
+ *
+ * Copies @p str into the line's text (+0x4C) with strcpy1, stores @p font (+0x8) and @p scale (+0x10), then runs
+ * func_001E92A8. cOVStateHUD1P_onCreateScreen uses it for a line built with USTR_sprintf.
+ *
+ * @param str  the 16-bit text; "@name" embeds a picture from D_004C8980
+ * @param font  the font (a cFont*) to measure and draw with
+ * @param scale  the line's x and y scale
+ */
 extern "C" void func_001E9540(void* self, unsigned short* str, int font, sVec2f* scale)
 {
     strcpy1((unsigned short*)((char*)self + 0x4C), str);
@@ -407,6 +492,24 @@ static inline void setScale_E95A0(sFont_E95A0* f, const sSize_E95A0& s)
     f->scaleH = f->baseH * s.y;
 }
 
+/**
+ * Draws a laid-out HUD text line, pictures included, at a screen position.
+ *
+ * Does nothing for a line without segments. Sets the line font's Scale to BaseScale * line scale * @p scale, its Color
+ * to @p color and its ShadowColor to the saved shadow colour with the alpha multiplied by @p color's alpha. @p alignX
+ * / @p alignY place the line around @p pos: 0 centres it, a positive value puts its right (bottom) edge there, a
+ * negative one its left (top) edge. It then walks the segments left to right, advancing pos[0] (the caller's array is
+ * modified): text segments are drawn with func_00391E30 at y plus the line's text offset; picture segments are drawn as
+ * a quad (the record's texture id into the current draw state's texture slot, its uvs, its size times @p scale, centred
+ * vertically on the line, colour channels times 128) through GrMan's virtual slot 71 (cPS2GraphicsMan_RenderTriStrip).
+ * Finally the shadow colour is restored and the font Scale reset to BaseScale.
+ *
+ * @param pos  screen position (x, y); updated in place, x ends after the last segment
+ * @param scale  extra x and y scale
+ * @param color  the colour (tARGB: alpha, red, green, blue)
+ * @param alignX  horizontal pivot: 0 centre, > 0 right edge at pos, < 0 left edge
+ * @param alignY  vertical pivot: 0 centre, > 0 bottom edge at pos, < 0 top edge
+ */
 extern "C" void func_001E95A0(sHudLine_E95A0* self, float* pos, float* scale, sCol_E95A0* color, int alignX, int alignY)
 {
     if (self->count == 0) {
@@ -1180,6 +1283,21 @@ INCLUDE_ASM("fe/ovstatehud", func_001F10F8);
 extern "C" float func_0021E750(void* self, int align, int flags, float pos, float size, float scale);
 extern "C" float func_0021E7A8(void* self, int align, float pos, float size, float scale);
 
+/**
+ * Computes the screen position of a HUD element's top-left corner from its anchor, size, scale and pivots.
+ *
+ * out.x = func_0021E750: with bit 0 of @p flags it mirrors x about 640 and, unless bit 1 is also set, flips the
+ * horizontal pivot; pivot 0 then subtracts half the scaled width, a positive pivot the whole scaled width. out.y =
+ * func_0021E7A8: the same for the vertical pivot, without mirroring.
+ *
+ * @param out  receives the corner (x, y)
+ * @param pos  the element's anchor position
+ * @param size  its unscaled size
+ * @param scale  its scale
+ * @param alignX  horizontal pivot (On Tour pivotX): 0 centre, > 0 right edge at the anchor, < 0 left edge
+ * @param alignY  vertical pivot (On Tour pivotY), the same way
+ * @param flags  reflect bits: 1 mirrors x about 640, 2 then keeps the horizontal pivot unflipped
+ */
 extern "C" void func_001F10F8(void* self, float* out, float* pos, float* size, float* scale, int alignX, int alignY, int flags)
 {
     out[0] = func_0021E750(self, alignX, flags, pos[0], size[0], scale[0]);
@@ -1205,6 +1323,21 @@ static inline int texOf_001F1190(cOVStateHUDElem* e) { return e->field_0x0; }
 
 struct sVEnt_001F1190 { short delta; short index; void (*fn)(void*, int, sHudVert_001F1190*, int); };
 
+/**
+ * Draws a texture element as a coloured quad.
+ *
+ * Does nothing when @p elem is 0. Puts the element's texture (word +0x0) into the current draw state's texture slot,
+ * colours four vertices with @p color times 128 (alpha, red, green, blue), takes the uvs from the element's left, top,
+ * right and bottom (+0x10, +0xC, +0x14, +0x18: On Tour cTextureElement::mLeft, mTop, mRight, mBottom; this unit's
+ * cOVStateHUDElem view calls them x, rangeMax, y, z), spans @p pos to @p pos + @p size * @p scale and draws the strip
+ * through GrMan's virtual slot 71 (cPS2GraphicsMan_RenderTriStrip).
+ *
+ * @param elem  the texture element (typed cOVStateHUDElem* here), or 0
+ * @param pos  the top-left corner
+ * @param size  the unscaled size
+ * @param scale  the scale
+ * @param color  the colour (tARGB, 1.0 = full)
+ */
 extern "C" void func_001F1190(void* self, cOVStateHUDElem* elem, float* pos, float* size, float* scale, float* color)
 {
     if (elem != 0) {
@@ -1276,6 +1409,19 @@ struct sHudVert_001F1338 {
 
 struct sVEnt_001F1338 { short delta; short index; void (*fn)(void*, int, sHudVert_001F1338*, int); };
 
+/**
+ * Draws an untextured coloured quad.
+ *
+ * Spans @p pos to @p pos + @p size * @p scale with texture -1 and draws it through GrMan's virtual slot 71
+ * (cPS2GraphicsMan_RenderTriStrip). The alpha is scaled by 128 but red, green and blue by 255, unlike func_001F1190
+ * (all by 128); on the PS2's 0x80 = 1.0 colour scale that doubles the colour (likely a bug, or a deliberate
+ * brightening).
+ *
+ * @param pos  the top-left corner
+ * @param size  the unscaled size
+ * @param scale  the scale
+ * @param color  the colour (tARGB)
+ */
 extern "C" void func_001F1338(void* self, float* pos, float* size, float* scale, float* color)
 {
     sHudVert_001F1338 verts[4];
@@ -1374,6 +1520,21 @@ struct sVec2_1F14B0 {
     float x, y;
 };
 
+/**
+ * Draws a string one character at a time, each flung away from its place by an amount ("exploding" text).
+ *
+ * Character i is drawn with cFont_text at (@p x, @p y) plus @p amp times a per-character offset: up by (2 * d * ((c &
+ * 0x7F) >> 1) * 5) & 0x7F and sideways by (d * (c & 0xF) * 4) & 0x7F, where c is the character code and d its distance
+ * from the middle character (the middle counts as 1); characters left of the middle move left. x then advances by the
+ * glyph's width plus x offset (tGlyph width and xoffset) times the font's Scale / BaseScale. cOVStateHUD1P_onRender2D
+ * is the only caller.
+ *
+ * @param str  the text
+ * @param font  the font (a cFont)
+ * @param amp  how far the characters fly out (0 draws the plain text)
+ * @param x  the left edge
+ * @param y  the top
+ */
 extern "C" void func_001F14B0(void* self, const char* str, sGlyphTable_1F14B0* font, float amp, float x, float y)
 {
     sVec2_1F14B0 sc;
@@ -1424,6 +1585,25 @@ struct sHudElemDef_001F16C0 {
 };
 extern "C" void cOVStateHUD1P_renderTime(void* self, int a1, int a2, int a3, int a4, int a5, float* pos, float* scale, sColor_001F16C0* color, int align, int flags, int a11);
 
+/**
+ * Draws a clock time placed, scaled and coloured by a HUD element definition.
+ *
+ * Takes element @p idx of @p defs: its position (func_001E91F8) plus @p posOff when given, its scale (func_001E9290)
+ * times @p scaleMul when given, and its colour (func_001E91A8) unless @p color overrides it, then passes these, the
+ * element's pivots (+0x20, +0x21) and @p reflect to cOVStateHUD1P_renderTime.
+ *
+ * @param hour  the first field (hours)
+ * @param minute  the second field (minutes)
+ * @param sec  the third field (seconds)
+ * @param secFrac  hundredths, drawn with flag bit 0
+ * @param timeRenderFlags  bit 0 hundredths, bit 1 a "-" sign, bit 2 a "+" sign
+ * @param defs  the HUD definition table (0x24-byte records)
+ * @param idx  the element index
+ * @param reflect  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
+ * @param scaleMul  extra scale, or 0
+ * @param posOff  offset added to the position, or 0
+ * @param color  colour override (tARGB), or 0 for the element's
+ */
 extern "C" void func_001F16C0(void* self, int hour, int minute, int sec, int secFrac, int timeRenderFlags, sHudElemDef_001F16C0* defs, int idx, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color)
 {
     float pos[4];
@@ -1575,6 +1755,30 @@ struct sFont_001F1B30 {
 };
 
 
+/**
+ * Draws an 8-bit string placed, scaled and coloured by a HUD element definition.
+ *
+ * From element @p idx of @p defs it takes the position (func_001E91F8) and the scale (func_001E9290, times @p scaleMul
+ * when given). The font's Scale becomes BaseScale times that scale and the text is measured with cFont_textExtent. The
+ * pivots are the element's (+0x20, +0x21) unless @p align / @p flags give one (0x7F means "use the element's");
+ * func_001F10F8 places the measured box with reflect bits @p a5, @p posOff is added and @p rect receives the box. The
+ * colour is the element's (func_001E91A8) or @p color. The element's layer byte (+0x22, On Tour tHUDDef::layer) goes
+ * into bits 5-9 of the current draw state's word 2, the font's Color is set and its ShadowColor becomes (colour alpha,
+ * 0, 0, 0); cFont_text draws the text. Afterwards ShadowColor is reset to (1, 0, 0, 0) and Scale to BaseScale.
+ *
+ * @param ctx  the HUD state, passed on to func_001F10F8
+ * @param font  the font
+ * @param defs  the HUD definition table (0x24-byte records)
+ * @param idx  the element index
+ * @param str  the text
+ * @param a5  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
+ * @param scaleMul  extra scale, or 0
+ * @param posOff  offset added after placing, or 0
+ * @param color  colour override (tARGB), or 0 for the element's
+ * @param rect  receives the drawn box (x, y, width, height), or 0
+ * @param align  horizontal pivot override, 0x7F for the element's
+ * @param flags  vertical pivot override, 0x7F for the element's
+ */
 extern "C" void func_001F1B30(void* ctx, sFont_001F1B30* font, sHudElemDef_001F16C0* defs, int idx, const char* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
     float scale[2];
@@ -1708,6 +1912,33 @@ static inline sV4_001F1E28 vu0Scale_1E28(const sV4_001F1E28& v, float s)
     return r;
 }
 
+/**
+ * Draws an 8-bit string blended between two HUD element definitions, interpolating position, scale and colour by @p t.
+ *
+ * Measures the text at the font's BaseScale (cFont_textExtent), reads the position and scale of elements @p idx1
+ * and @p idx2 (both times @p scaleMul when given), places each scaled box with func_001F10F8 (pivots as in
+ * func_001F1B30, 0x7F = the element's; reflect bits @p a5) and interpolates position and scale linearly by @p t;
+ * then @p posOff is added and @p rect filled. Without @p color the two element colours (func_001E91D0, as r, g, b, a
+ * vectors) are interpolated with VU0 vector maths, the end colour's alpha forced to 0 so the text fades out toward @p t
+ * = 1; with @p color its alpha is multiplied by 1 - @p t. The draw state's layer bits (5-9 of word 2) come from element
+ * 26's layer byte whatever the indices. Draws with cFont_text at the blended scale and resets Scale to BaseScale;
+ * unlike func_001F1B30 it leaves ShadowColor alone.
+ *
+ * @param ctx  the HUD state, passed on to func_001F10F8
+ * @param t  the blend: 0 = element @p idx1, 1 = element @p idx2
+ * @param font  the font
+ * @param defs  the HUD definition table (0x24-byte records)
+ * @param idx1  the element at @p t = 0
+ * @param idx2  the element at @p t = 1
+ * @param str  the text
+ * @param a5  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
+ * @param scaleMul  extra scale, or 0
+ * @param posOff  offset added after placing, or 0
+ * @param color  colour override (tARGB), or 0 to blend the elements' colours
+ * @param rect  receives the drawn box (x, y, width, height), or 0
+ * @param align  horizontal pivot override, 0x7F for the elements'
+ * @param flags  vertical pivot override, 0x7F for the elements'
+ */
 // Draws text blended between two HUD element layouts (t = 0 is element idx1, t = 1 is element idx2).
 extern "C" void func_001F1E28(void* ctx, float t, sFont_001F1E28* font, sHudElemDef_001F16C0* defs, int idx1, int idx2, const char* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
@@ -1827,6 +2058,28 @@ struct sFont_001F22E8 {
 };
 
 
+/**
+ * Draws a 16-bit string placed, scaled and coloured by a HUD element definition.
+ *
+ * The same as func_001F1B30 except that the text is measured with func_003921F0 and drawn with func_00391E30: element
+ * position and scale (times @p scaleMul), pivots from the element unless overridden (0x7F), placement by func_001F10F8
+ * with reflect bits @p a5, @p posOff, the box into @p rect, the element's or @p color's colour, the layer byte into
+ * bits 5-9 of the draw state's word 2, ShadowColor (colour alpha, 0, 0, 0) while drawing, then ShadowColor (1, 0, 0, 0)
+ * and Scale = BaseScale again.
+ *
+ * @param ctx  the HUD state, passed on to func_001F10F8
+ * @param font  the font
+ * @param defs  the HUD definition table (0x24-byte records)
+ * @param idx  the element index
+ * @param str  the 16-bit text
+ * @param a5  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
+ * @param scaleMul  extra scale, or 0
+ * @param posOff  offset added after placing, or 0
+ * @param color  colour override (tARGB), or 0 for the element's
+ * @param rect  receives the drawn box (x, y, width, height), or 0
+ * @param align  horizontal pivot override, 0x7F for the element's
+ * @param flags  vertical pivot override, 0x7F for the element's
+ */
 extern "C" void func_001F22E8(void* ctx, sFont_001F22E8* font, sHudElemDef_001F16C0* defs, int idx, const unsigned short* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
     float scale[2];
@@ -1951,6 +2204,30 @@ static inline sV4_001F25E0 vu0Scale_25E0(const sV4_001F25E0& v, float s)
     return r;
 }
 
+/**
+ * Draws a 16-bit string blended between two HUD element definitions, interpolating position, scale and colour by @p t.
+ *
+ * The same as func_001F1E28 except that the text is measured with func_003921F0 and drawn with func_00391E30: both
+ * elements' positions and scales (times @p scaleMul), boxes placed by func_001F10F8 with reflect bits @p a5, linear
+ * interpolation by @p t, @p posOff and @p rect, colours blended with VU0 maths toward an end alpha of 0 (or @p color
+ * with its alpha times 1 - @p t), and the layer bits taken from element 26 whatever the indices. Nothing in retail
+ * calls it.
+ *
+ * @param ctx  the HUD state, passed on to func_001F10F8
+ * @param t  the blend: 0 = element @p idx1, 1 = element @p idx2
+ * @param font  the font
+ * @param defs  the HUD definition table (0x24-byte records)
+ * @param idx1  the element at @p t = 0
+ * @param idx2  the element at @p t = 1
+ * @param str  the 16-bit text
+ * @param a5  reflect bits for func_001F10F8 (bit 0 mirrors x about 640)
+ * @param scaleMul  extra scale, or 0
+ * @param posOff  offset added after placing, or 0
+ * @param color  colour override (tARGB), or 0 to blend the elements' colours
+ * @param rect  receives the drawn box (x, y, width, height), or 0
+ * @param align  horizontal pivot override, 0x7F for the elements'
+ * @param flags  vertical pivot override, 0x7F for the elements'
+ */
 // Draws text blended between two HUD element layouts (t = 0 is element idx1, t = 1 is element idx2).
 extern "C" void func_001F25E0(void* ctx, float t, sFont_001F25E0* font, sHudElemDef_001F16C0* defs, int idx1, int idx2, const unsigned short* str, int a5, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
@@ -2075,6 +2352,27 @@ static inline float alignPos_001F2AA0(float v, int a, float size)
     return v;
 }
 
+/**
+ * Draws an 8-bit string word-wrapped to a HUD element's width, as lines stacked from the element's position.
+ *
+ * The wrapping uses the HUD state's font at +0x428 (cOVStateHUD1P's "fefont"; every caller also passes it as @p font),
+ * scaled to the element's scale: func_00392430 cuts lines of at most 50 characters to fit the element's width
+ * (func_001E9220). The colour is the element's (no override) and its layer byte goes into the draw state as in
+ * func_001F1B30. The block's top is the element's y moved up by half (pivot 0) or all (pivot > 0) of the total height,
+ * lines * MaxCharHeight * BaseScale.y * scale y. Each line is measured with cFont_textExtent at @p font's current
+ * Scale, placed by the horizontal pivot (bit 0 of @p flags mirrors x about 640 and, without bit 1, flips the pivot) and
+ * drawn with cFont_text. @p rect, when given, receives the leftmost x, the top, the widest line and the total height.
+ * Finally @p font's Scale is reset to BaseScale.
+ *
+ * Likely bug: nothing stops the wrap loop at five lines, so a longer text overruns the 5 x 50 line buffer on the stack.
+ *
+ * @param font  the font to draw with
+ * @param defs  the HUD definition table (0x24-byte records)
+ * @param idx  the element index
+ * @param str  the text
+ * @param flags  reflect bits: 1 mirrors x about 640, 2 then keeps the pivot unflipped
+ * @param rect  receives the drawn area (x, y, width, height), or 0
+ */
 extern "C" void func_001F2AA0(void* self, sFont_001F2AA0* font, sHudElemDef_001F16C0* defs, int idx, const char* str, int flags, float* rect)
 {
     float wrap[2];
@@ -2166,6 +2464,22 @@ static inline float alignPos_001F2DB0(float v, int a, float size)
     return v;
 }
 
+/**
+ * Draws a 16-bit string word-wrapped to a HUD element's width, as lines stacked from the element's position.
+ *
+ * The same as func_001F2AA0 with 16-bit text: func_00392680 wraps it (HUD state font at +0x428, scaled to the element),
+ * func_003921F0 measures and func_00391E30 draws each line, with the element's colour, layer, pivots, @p flags reflect
+ * bits and the @p rect out. Up to five lines of 50 characters fit the stack buffer and nothing enforces it.
+ *
+ * Likely bug: the wrap width always comes from element 29 (func_001E9220 on defs[29]), not from element @p idx.
+ *
+ * @param font  the font to draw with
+ * @param defs  the HUD definition table (0x24-byte records)
+ * @param idx  the element index
+ * @param str  the 16-bit text
+ * @param flags  reflect bits: 1 mirrors x about 640, 2 then keeps the pivot unflipped
+ * @param rect  receives the drawn area (x, y, width, height), or 0
+ */
 extern "C" void func_001F2DB0(void* self, sFont_001F2DB0* font, sHudElemDef_001F16C0* defs, int idx, const unsigned short* str, int flags, float* rect)
 {
     float wrap[2];
@@ -2271,6 +2585,15 @@ extern "C" int func_003983F0(void* self, int key);
 extern char str_kT_ovrcmnloading_b[];
 extern char str_fefont[];
 
+/**
+ * Loads the loading indicator's text and font and clears its state.
+ *
+ * mpLoadText (+0x0) becomes the localized "kT_ovrcmnloading_b" string (its GetHashValue32 looked up through
+ * SSXApp->FELocale's virtual slot 4) and mpFont (+0xC) the "fefont" font from the UI's font bank (func_003983F0 on
+ * SSXApp->Game->UI + 0x8); mLoadIndicators (+0x4) and mAnimFrame (+0x8) are cleared. cGame_gainFocus calls it.
+ *
+ * @param vself  the loading indicator (this)
+ */
 extern "C" void func_001F30D8(void* vself)
 {
     sHudIds001F30D8* self = (sHudIds001F30D8*)vself;
@@ -2440,6 +2763,20 @@ struct sHudTimer_001F31E0 {
     sFont_001F31E0* font;       // 0xC
 };
 
+/**
+ * Draws the loading indicator, its "loading" text and a flipping icon in the bottom-right corner, while any reason to
+ * show it is set.
+ *
+ * Does nothing when mLoadIndicators (+0x4) is 0. Saves the render state (pushes a copy of the current draw state,
+ * cPS2GraphicsMan_PushViewport, cPS2GraphicsMan_PushView), resets the draw state to sDrawState_s_defaultDrawState with
+ * four bit fields of its word 1 set (2, 0, 20, 5), sets an identity view (func_00395C38 with t4mat_Identity), a
+ * full-screen viewport window (func_00376A70 with the screen width and height) and func_00377458 (0, 0, 640, 480, ...).
+ * mpLoadText is drawn with mpFont at 0.7 scale in colour (1, 1, 1, 0) (tARGB: opaque yellow) with a black shadow offset
+ * by (3, 3), right-aligned at x 620 and vertically centred on y 445, with layer 31 in the draw state. Then an icon
+ * sprite (texture: GrMan's word +0x1068) is drawn with cPS2GraphicsMan_DrawSprite 17 px left of the text at y 445, 18
+ * high and |mAnimFrame - 1| * 18 wide, so it flips as mAnimFrame runs from 0 to 2, and everything is popped again. The
+ * font keeps the 0.7 Scale and a (2, 2) shadow offset afterwards. cGame_render and func_0022C830 call it.
+ */
 extern "C" void func_001F31E0(sHudTimer_001F31E0* self)
 {
     if (self->active == 0) {
@@ -2542,6 +2879,17 @@ extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* self, int a1);
 extern "C" void func_001A1CB8(void* self, int a1, int val);
 extern void* cFEStateLodge_vtbl[];
 
+/**
+ * Constructs the lodge front-end state.
+ *
+ * Runs the cUIState constructor func_0039E2A0 (the engine the callers pass as a second argument reaches it untouched in
+ * $a1; this declaration takes only the memory), sets mHashName to 39 and mVtbl to cFEStateLodge_vtbl and sets mUserNum
+ * to 0. When the engine's first word (an object) is set, the state is limited to player 0's controller: mCtrlBits = 1
+ * << cBENewPlayerInterface_getPlayerCtrlID(player 0), and the same mask is stored in that object's byte at +0x8
+ * (func_001A1CB8, index 0). The callers allocate 88 bytes tagged "cFEStateLodge".
+ *
+ * @return @p self
+ */
 extern "C" void* func_001F3700(void* self)
 {
     func_0039E2A0(self);

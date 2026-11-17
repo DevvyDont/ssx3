@@ -521,6 +521,17 @@ extern "C" void* func_0039E2A0(void* self);
 extern "C" void func_002006B8(void* self);
 extern void* cFEStateEventSelect_vtbl[];
 
+/**
+ * Constructs the event-select state with an engine, as built by the state factory (cFECustom_getNextState).
+ *
+ * Builds the UI state (func_0039E2A0; the caller's engine argument reaches it unchanged in the second argument
+ * register, since the C declares only self), sets state id 19 and the cFEStateEventSelect_vtbl vtable, and calls
+ * func_002006B8 on +0x48 (its definition takes no argument and, for map styles 2 and up, sets cUITemplate_MAP_mPeak to
+ * the current race location's peak). cFEStateEventSelect_cFEStateEventSelect is the null-engine variant of this
+ * constructor, which does not set the state id.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00186610(void* self)
 {
     func_0039E2A0(self);

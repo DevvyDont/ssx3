@@ -37,6 +37,14 @@ INCLUDE_ASM("fe/ovstateprofile", func_00211220);
 extern "C" void func_00211380(void* self);
 extern "C" void func_00211270(void* self);
 
+/**
+ * Refreshes the profile overlay's memory-card display: the file list when the screen is in display state 3, the empty
+ * layout otherwise.
+ *
+ * When the card state +0x1C0 (On Tour mState) is nonzero it first sets +0x22C, the flag that lets func_00211850 show
+ * the action buttons. Display state +0x214 (On Tour mScreenStatus, set by cFEMemCard_triggerDisplayState) 3 runs
+ * func_00211380, any other func_00211270. It is the displayStatus slot (+0xD4) of cOVState_PROFILE_vtbl.
+ */
 extern "C" void func_00211220(void* self)
 {
     if (*(int*)((char*)self + 0x1C0) != 0) {
@@ -191,6 +199,16 @@ struct cUIObj_11270 {
     virtual void setSelected(int v);
 };
 
+/**
+ * Shows the profile overlay's empty layout, or switches to the file list as soon as a card is in.
+ *
+ * When func_001D9880 (virtual slot 42) allows the file display and the memory card (mpMemCard of cSSXApp_getMCManager,
+ * its slot 53) is present, moves to display state 3 through cFEMemCard_triggerDisplayState (virtual slot 35) and runs
+ * func_00211380. Otherwise resets the six profile buttons "player1" ... "player6" of mpScreen: setSelected(0) (slot 25)
+ * and setEnabled(1) (slot 8).
+ *
+ * @param vself  the profile overlay state (this)
+ */
 extern "C" void func_00211270(void* vself)
 {
     cSelf_11270* self = (cSelf_11270*)vself;
@@ -406,6 +424,25 @@ static inline cUIObj_1380* getObj_1380(cState_1380* self, char* name)
     return (cUIObj_1380*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
 }
 
+/**
+ * Shows the profile overlay's file list for the selected memory card: the card's name, the six profile slots and the
+ * device arrows.
+ *
+ * With the memory-card manager (cSSXApp_getMCManager) mp: when func_001D9880 (virtual slot 42) allows the file display
+ * but the card (mpMemCard slot 53) is missing, it shows the no-card message (func_001D8240, the front end's
+ * callbackDisplayNoCards) and falls back to func_00211270; otherwise it switches to display state 3
+ * (cFEMemCard_triggerDisplayState, virtual slot 35) if not there yet. Then, still allowed: writes the device name of
+ * mSelectedDevice (cMCOverlayManager_GetDeviceDisplayString) into "Memory card text", stores mSelectedDevice at +0x21C
+ * (On Tour mLastSelectedDevice), runs cFEMemCard_setMenuHighlight (slot 43), colours "1percentage" with D_004C66C8,
+ * fills it from card slot 64 and hides it (slot 9). Each "player%d" button 1-6 gets the name of card file i - 1 (card
+ * slot 14, through the 16-bit buffer at +0x234), and its state from the card: when slots 67 and 66 both say no for that
+ * file and slot 55 says yes, the first such button is disabled (setEnabled(0), slot 8) and later ones enabled and
+ * selected (setSelected, slot 25); otherwise, when slot 54 accepts mSelectedDevice, the button is enabled and selected
+ * exactly when slot 66 says yes for its file; with no usable device every button is enabled and selected. Finally
+ * "arrowleft" / "arrowright" are shown only when cFEMemCard_checkNextAvailableDevice finds a device in that direction.
+ *
+ * @param p  the profile overlay state (this)
+ */
 // Refreshes the memory-card profile list: device name, then the six profile slots and the arrow hints.
 extern "C" void func_00211380(void* p)
 {
@@ -495,6 +532,17 @@ extern char str_x_save[];
 extern char str_delete_text[];
 extern char str_ps2sq_b[];
 
+/**
+ * Hides or shows the profile overlay's action buttons ("ps2x_b", "x_save", "delete text", "ps2sq_b"), skipping the work
+ * when nothing changes.
+ *
+ * The buttons stay hidden while +0x22C is clear; once it is set (func_00211220 sets it when the card state +0x1C0 is
+ * nonzero), @p show decides. The new hidden state is compared with the one cached at +0x230; on a change every button
+ * gets setVisible(!hidden) (slot 9; the two button icons are null-checked, the texts are not) and the cache is updated.
+ * It is the hideActionButtons slot (+0x12C) of cOVState_PROFILE_vtbl.
+ *
+ * @param show  nonzero hides the buttons (On Tour bHide): despite its name a true value means hidden
+ */
 extern "C" void func_00211850(void* self, bool show)
 {
     bool on = true;
@@ -539,6 +587,15 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_delete_text[];
 extern char str_ps2sq_b[];
 
+/**
+ * Hides or shows the profile overlay's delete button ("delete text" and "ps2sq_b") and records whether delete is
+ * available.
+ *
+ * Both widgets get setVisible(!@p on) (slot 9, not null-checked) and +0x220 (On Tour mDeleteButtonActive) becomes
+ * !@p on. It is the hideDeleteButton slot (+0x134) of cOVState_PROFILE_vtbl.
+ *
+ * @param on  nonzero hides the button (On Tour bHide)
+ */
 extern "C" void func_00211970(void* self, bool on)
 {
     ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_delete_text)))->setVisible(!on);
@@ -568,6 +625,16 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_ps2x_b[];
 extern char str_x_save[];
 
+/**
+ * Hides or shows the profile overlay's main (save) button ("ps2x_b" and "x_save") and records whether it is available.
+ *
+ * "x_save" and the X icon get setVisible(!@p on) (slot 9; neither is null-checked) and +0x224 (On Tour
+ * mMainButtonActive) becomes !@p on. @p loadBlocked is not used. It is the hideMainButton slot (+0x13C) of
+ * cOVState_PROFILE_vtbl.
+ *
+ * @param loadBlocked  unused (On Tour bLoadHide)
+ * @param on  nonzero hides the button (On Tour bSaveHide)
+ */
 extern "C" void func_00211A08(void* self, int loadBlocked, bool on)
 {
     cUIObj_211A08* xButton = (cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
@@ -583,6 +650,15 @@ INCLUDE_ASM("fe/ovstateprofile", func_00211AA8);
 extern "C" void cGame_exit(void* game, int a);
 extern "C" void func_0039F718(void* self);
 
+/**
+ * Leaves the profile overlay once its memory-card work is done: quits the game when it was opened for overlay 0x18,
+ * otherwise pops the UI state stack.
+ *
+ * Runs only the first time (+0x1AC, On Tour mIsDone, clear): when +0x278 (the constructor's last argument, On Tour
+ * tOVStateEnum ov) is 0x18 it calls cGame_exit(SSXApp->Game, 0), else func_0039F718 (On Tour
+ * cUIStateStack::popToStateInclusive) on mpEngine's state stack (+0x18). Then sets +0x1AC. It is the updateDone slot
+ * (+0x10C) of cOVState_PROFILE_vtbl.
+ */
 extern "C" void func_00211AA8(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
@@ -678,6 +754,17 @@ public:
 
 extern "C" void* cSSXApp_getMCManager(void* app);
 
+/**
+ * Profile overlay's menu-event filter: events 6 and 8 get 0x100 when the selected memory card is not usable, event 9
+ * always 0x100, everything else 0x101.
+ *
+ * Usability is slot 54 of the manager's mpMemCard for mSelectedDevice. It is the onWidgetMenu slot (+0xA4) of
+ * cOVState_PROFILE_vtbl.
+ *
+ * @param a1  the menu (unused)
+ * @param key  the menu event
+ * @return 0x100 or 0x101 as above
+ */
 extern "C" int func_00211B38(void* self, int a1, unsigned int key)
 {
     char* mgr = (char*)cSSXApp_getMCManager(SSXApp);
@@ -782,6 +869,33 @@ static inline void* GetText_K211BC8(char* key)
     return vt[4].fn(db + vt[4].delta, GetHashValue32(key));
 }
 
+/**
+ * Handles the profile overlay's widget events: picking a profile slot, naming it on the on-screen keyboard, loading it,
+ * and backing out.
+ *
+ * Event 13 (the keyboard finished): widens the typed name (+0x74 of the keyboard at +0x1A4) into the manager's
+ * mNewFileName, gives the profile +0x1CC (On Tour mPlayerIdx) that name through func_00147138 on the player interface
+ * (back-end interface 1), or, for an empty name, the localised "kT_MEMPlayerName" format with the profile number; then
+ * calls the interface's virtual slot 1, starts the save with func_0023CAE8(manager, 1, profile), and sets +0x1A8
+ * (processing), +0x1DC (save pressed) and the card state +0x1C0 = 3.
+ *
+ * Event 5 (select) on an item, when not processing and in display state 3 (+0x214): the item's misc data becomes both
+ * +0x1C4 (On Tour mSlot) and the manager's mFileCursor. In card state 1 it opens the name keyboard: on first use builds
+ * a cKeyboardPopup ("Keyboard", 1092 bytes) for mpEngine with the state's controller mask, id 55, at most 8 and at
+ * least 1 character, and a set of keys switched off through cKeyboardPopup_setIncludeKey; then sets its prompt to the
+ * localised "kT_KEYUserName", its text to the profile's current name (cBENewPlayerInterface_getPlayerName) and pushes
+ * it as a popup; +0x1A0 is set and +0x19C cleared.
+ *
+ * Event 6 (back), unless processing or already in card state 6: sets +0x1E4 (cancel pressed), puts the manager in state
+ * 0 through its SetState slot (vtable at +0x748, slot 1) when the card state is 0, 1 or 2, and sets card state 6. Event
+ * 7, under the same condition and when mpMemCard slot 54 accepts mSelectedDevice: takes the item's slot like event 5
+ * and, in card state 1 when slot 67 accepts that slot, sets processing, card state 4,
+ * cMCOverlayManager_SetAction(manager, 0) and manager state 0x18. Event 14 and others do nothing.
+ *
+ * @param vself  the profile overlay state (this)
+ * @param item  the widget; its misc data (+0x18) is the profile slot
+ * @param event  the widget event: 5, 6, 7, 13 or 14
+ */
 // Profile screen: handles menu events (5 = name picked, 6 = back, 7 = slot chosen, 13 = name entered).
 extern "C" void func_00211BC8(void* vself, char* item, int event)
 {
@@ -1138,6 +1252,12 @@ INCLUDE_ASM("fe/ovstateprofile", func_002124C8);
 #ifdef SKIP_ASM
 extern "C" void func_0039F718(void* self);
 
+/**
+ * Leaves the autosave overlay once its memory-card work is done: pops the UI state stack the first time.
+ *
+ * When +0x1AC (On Tour mIsDone) is clear, calls func_0039F718 (On Tour cUIStateStack::popToStateInclusive) on
+ * mpEngine's state stack (+0x18); then sets +0x1AC. It is the updateDone slot (+0x10C) of cOVState_AUTOSAVE_vtbl.
+ */
 extern "C" void func_002124C8(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
@@ -1209,6 +1329,13 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", func_00212680);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument; the variadic definition only spills the other argument registers.
+ *
+ * Nothing in the program calls it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00212680(void* self, ...)
 {
     return self;
@@ -1217,6 +1344,18 @@ extern "C" void* func_00212680(void* self, ...)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", func_002126C0);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the character range [@p first1, @p last1) sorts before [@p first2, @p last2), comparing signed chars.
+ *
+ * The same algorithm as the SGI STL's lexicographical_compare: the first differing character decides; when one range is
+ * a prefix of the other, the shorter one is less.
+ *
+ * @param first1  start of the first range
+ * @param last1  end of the first range
+ * @param first2  start of the second range
+ * @param last2  end of the second range
+ * @return 1 when the first range is less, else 0
+ */
 extern "C" int func_002126C0(const char* first1, const char* last1, const char* first2, const char* last2)
 {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
@@ -1229,6 +1368,18 @@ extern "C" int func_002126C0(const char* first1, const char* last1, const char* 
 //100%
 INCLUDE_ASM("fe/ovstateprofile", func_00212728);
 #ifdef SKIP_ASM
+/**
+ * Three-way compares the character ranges [@p first1, @p last1) and [@p first2, @p last2), comparing signed chars.
+ *
+ * The same algorithm as the SGI STL's __lexicographical_compare_3way: the first differing character decides; a range
+ * that is a prefix of the other is the smaller one.
+ *
+ * @param first1  start of the first range
+ * @param last1  end of the first range
+ * @param first2  start of the second range
+ * @param last2  end of the second range
+ * @return -1, 0 or 1 as the first range is less than, equal to or greater than the second
+ */
 extern "C" int func_00212728(const char* first1, const char* last1, const char* first2, const char* last2)
 {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
@@ -1253,6 +1404,12 @@ struct sList_00212788 {
     sListNode_00212788* node;
 };
 
+/**
+ * Empties a doubly linked list: deletes every node and leaves the head node (+0x4) linked to itself.
+ *
+ * Walks next pointers from the head, freeing each node with operator delete, then sets the head's next and prev back to
+ * the head: the shape of the SGI STL list's clear().
+ */
 extern "C" void func_00212788(sList_00212788* self)
 {
     sListNode_00212788* cur = self->node->next;

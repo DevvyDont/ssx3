@@ -3101,6 +3101,20 @@ static inline int visUsable_A5A0(sVisOwner_A5A0* self, sVisNode_A5A0* n)
     return visOnPath_A5A0(*self->cam, n);
 }
 
+/**
+ * Collects the visible, path-usable objects of each listed octree cell into the world view's object list at +0x20A0.
+ *
+ * Each of the @p count 8-byte entries holds a cell (its linked object list starts at +0x20, next link at +0x0) and the
+ * cell's remaining clip-plane mask. An object qualifies when both low bits of its flags (+0x8) are set and it is either
+ * unassigned (slot +0x7D is 0xFF) or its slot in the camera-slot table (*(self + 0x90), entries at +0x20) has type 6
+ * and the path it names (+0x7E) has kind 3. Qualifying objects are sphere-tested against the masked planes by the VU0
+ * microprogram at 0xEF0 (skipped when the mask is 0; result 2 means outside) and appended to the list at +0x20A0, count
+ * +0x209C (no bounds check). func_0022ADD8 calls it with the fully-inside cell list (+0x98, count +0x94).
+ *
+ * @param self_  the world view being built (see func_0022ADD8)
+ * @param list_  the cell entries (cell, plane mask)
+ * @param count  the number of entries
+ */
 extern "C" void func_0022A5A0(void* self_, void* list_, int count)
 {
     sVisOwner_A5A0* self = (sVisOwner_A5A0*)self_;
@@ -3195,7 +3209,18 @@ static inline int visOnPath_A698(sVisCam_A698* cam, sVisNode_A698* n)
     return 0;
 }
 
-// Collects the visible path-bound nodes of each source list (sphere-vs-frustum tested on VU0).
+/**
+ * Collects the visible path-bound objects of each listed octree cell into the world view's list at +0x50AC.
+ *
+ * Same walk as func_0022A5A0 over the object list at +0x24 of each cell: an object qualifies when its path index
+ * (+0x156) is not negative, its slot (+0x155) is a type-6 entry of the camera-slot table and that path has kind 3. Its
+ * sphere (+0x140) is tested on VU0 (microprogram 0xEF0, 2 = outside) unless the entry's plane mask is 0; survivors go
+ * to the list at +0x50AC, count +0x50A8 (no bounds check).
+ *
+ * @param self_  the world view being built (see func_0022ADD8)
+ * @param list_  the cell entries (cell, plane mask)
+ * @param count  the number of entries
+ */
 extern "C" void func_0022A698(void* self_, void* list_, int count)
 {
     sVisOwner_A698* self = (sVisOwner_A698*)self_;
@@ -3263,6 +3288,17 @@ static inline int visSphereTest_A770(int* sphere, int frustum)
     return r;
 }
 
+/**
+ * Sorts the objects of each listed octree cell by type into two lists of the world view.
+ *
+ * Walks the linked list at +0x28 of each entry's cell; the type is at +0x8 of each object. Type 7 objects are
+ * sphere-tested on VU0 (microprogram 0xEF0, 2 = outside; skipped when the entry's plane mask is 0) and appended to
+ * nodesA (+0x78B8, count +0x78B4, room for 192); type 8 objects go to nodesB (+0x7BC4, count +0x7BC0) untested. Other
+ * types are skipped. Neither append checks for overflow.
+ *
+ * @param list  the cell entries (cell, plane mask)
+ * @param count  the number of entries
+ */
 extern "C" void func_0022A770(sVisOwner_A770* self, sVisList_A770* list, int count)
 {
     for (; count > 0; count--, list++) {
@@ -3383,6 +3419,24 @@ static inline void boxResult_A830(int* r)
         *r = 0;
 }
 
+/**
+ * Culls one octree cell against the view and, when it is visible, files it and recurses into its eight children.
+ *
+ * The context @p vctx holds the world view being built (+0x0), the clip-plane source (+0x4: plane count at +0x10C,
+ * planes at +0x8 in 8-byte steps), the mask of planes still to test (+0x8) and an inside flag (+0xC). A cell's size is
+ * 2^level (built from the float exponent). Unless the parent was fully inside, the cell box goes through the VU0
+ * box-vs-frustum microprogram at 0x570 (matrices at D_00442130 and the view's +0x10): 1 is outside (return), 2 is
+ * partly inside, 0 is inside. With a non-zero mask the cell's bounding sphere (center at the cell middle, radius 1.2124
+ * * size) is then tested against each masked plane by the microprogram at D_948: 0 culls the cell, and planes the
+ * sphere is wholly in front of are cleared from the mask. A fully-inside cell is appended (node, mask) to the list at
+ * +0x98 (count +0x94) and its children are visited with the inside flag set; a partly-inside one goes to the list at
+ * +0x109C (count +0x1098) and its children are box-tested again. Children are visited unless the level is 11 (the leaf
+ * level); child index bit 2 is +x, bit 1 +y, bit 0 +z. No list bounds checks.
+ *
+ * @param vctx  the cull context (view, plane source, plane mask, inside flag)
+ * @param vnode  the octree node (eight child pointers)
+ * @param vcfg  the cell: level (+0x0) and integer x, y, z (+0x4..+0xC)
+ */
 extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
 {
     sVisCtx_A830* ctx = (sVisCtx_A830*)vctx;
@@ -3579,6 +3633,24 @@ static inline void Load_22ADD8(sCtx_22ADD8* ctx, void* data, sCfg_22ADD8* c)
     }
 }
 
+/**
+ * Builds a camera view's visible world: culls the octree and fills the view's object lists.
+ *
+ * Stores @p a2, @p a3 and @p a4 at +0x0, +0x4 and +0x90 and zeroes every list count (+0x94, +0x1098, +0x209C, +0x40A0,
+ * +0x50A8, +0x70AC, +0x78B4, +0x7ABC, +0x7BC0, +0x7FC4) and pending slot (+0x50A4, +0x78B0, +0x7AB8). Copies the matrix
+ * returned by the graphics manager's vtable slot 43 to +0x10 and GrMan's matrix at +0x5800 to +0x50, calls
+ * func_002425C0(@p a2, @p a3), loads both matrices into VU0 with func_00229F30 and calls func_00229F80 (empty). Then
+ * runs func_0022A830 on each non-null root of the eight @p cfg entries (data at +0x10 of each 0x14-byte entry) with
+ * plane mask *(@p a2 + 0x110), and sorts the culled cells' objects: func_0022A698, func_0022A5A0 and func_0022A770 over
+ * the inside list (+0x98), func_0022A408, func_0022A368 and func_0022A4A8 over the partial list (+0x109C). cGame_render
+ * calls it once per view with a stack-allocated view.
+ *
+ * @param cfg  the eight octree roots (cell entries whose node pointer is at +0x10)
+ * @param a2  the visibility source: holds the clip planes and the initial plane mask (+0x110)
+ * @param a3  the view's bounding box (passed to func_002425C0)
+ * @param a4  the camera-slot table pointer stored at +0x90 (read by func_0022A5A0 and func_0022A698)
+ * @return @p self
+ */
 extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* a2, void* a3, int a4)
 {
     sWorldInit_22ADD8* w = (sWorldInit_22ADD8*)self;

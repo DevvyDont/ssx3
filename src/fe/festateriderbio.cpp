@@ -334,6 +334,18 @@ extern void* D_0046CCC0[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 
+/**
+ * Constructs the uber-trick store state for a user (allocated as "cFEStateUberTrick", 0x60 bytes).
+ *
+ * Runs cUIState's constructor (func_0039E2A0; @p a1 reaches it untouched in the second argument register as the
+ * engine), stores the vtable D_0046CCC0 and mHashName 18, sets mUserNum to @p a2 and mCtrlBits to that user's
+ * controller bits (func_001A1CD0 on the engine's front end), and clears the two menu pointers +0x4C and +0x50 (On Tour
+ * mpMainMenu, mpTrickMenu) and the rider-shown flag +0x48 (On Tour mbModelVisible).
+ *
+ * @param a1  the UI engine (only passed on to cUIState's constructor)
+ * @param a2  the user number
+ * @return @p self
+ */
 extern "C" void* func_00183A98(void* self, int a1, int a2)
 {
     signed char idx = a2;
@@ -373,6 +385,13 @@ public:
     virtual void setVisible(int v);
 };
 
+/**
+ * Switches the uber-trick screen's highlight and help text to the category menu.
+ *
+ * On mpScreen (+0x40) it hides "hilite_right" and "helptext_custom" and shows "hilite_left" and "helptext_choose"
+ * (setVisible, vtable slot 9); objects that are missing are skipped. func_00183C08 does the opposite. Called when the
+ * state gains focus (func_00184BE0) and when the trick menu is left (event 6 in func_00185268).
+ */
 extern "C" void func_00183B08(void* self)
 {
     cUIObj_183B08* hiliteRight = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
@@ -418,6 +437,13 @@ public:
     virtual void setVisible(int v);
 };
 
+/**
+ * Switches the uber-trick screen's highlight and help text to the trick menu.
+ *
+ * On mpScreen (+0x40) it shows "hilite_right" and "helptext_custom" and hides "hilite_left" and "helptext_choose"
+ * (setVisible, vtable slot 9); objects that are missing are skipped. func_00183B08 does the opposite. Called when a
+ * category is accepted (event 5 in func_00185268).
+ */
 extern "C" void func_00183C08(void* self)
 {
     cUIObj_183C08* hiliteRight = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
@@ -471,6 +497,17 @@ public:
     virtual void v21(sVec2_00183D08* p);
 };
 
+/**
+ * Sizes a UI object to a texture element and shows it, or hides the object when there is no element.
+ *
+ * With @p rect it reads the object's size (getSize, vtable slot 20), sets x to (mRight - mLeft) * 256 * @p scale and y
+ * to (mBottom - mTop) * 256 * @p scale from the cTextureElement (+0x14, +0x10, +0x18, +0xC), writes the size back
+ * (setSize, slot 21) and shows the object (setVisible(1), slot 9). A null @p rect only hides it (setVisible(0)).
+ * cWScriptMan_checkGate uses it for the uber-trick screen's "InstBtn" button icons with scale 0.8.
+ *
+ * @param rect  the texture element (cTextureElement), or 0
+ * @param scale  size factor on top of 256 per texture-coordinate unit
+ */
 extern "C" void func_00183D08(cWidget_00183D08* self, void* rect, float scale)
 {
     if (rect) {

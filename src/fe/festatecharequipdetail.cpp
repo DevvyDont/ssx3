@@ -2934,6 +2934,25 @@ extern "C" void* func_0019C8F8(void* self, void* item);
 // PORT: func_0019C920 takes the node pointer as an int.
 extern "C" int func_0019C920(void* self, int a1);
 
+/**
+ * Finds the node for a two-part key in the file-index hash table, optionally creating it.
+ *
+ * The table (allocated as "BoltFileIndexManager", 8004 bytes; D_004A1968) holds 400 16-byte nodes at +0x0, 400 bucket
+ * head pointers at +0x1900 and the free-list head at +0x1F40. The key is (@p hi << 16) | @p lo and its bucket is key %
+ * 400. Walks the bucket's chain (next index at node +0xE, via func_0019C8F8) for a node with that key. When the chain
+ * ends and @p create is set, takes a node from the free list (func_0019C880) and appends it: its prev index (+0xC) is
+ * the old tail's index (func_0019C920) or -1 when it becomes the bucket head, and its next index is -1. Whatever node
+ * results gets the key stored at +0x0.
+ *
+ * The search also stops when the free list is empty and the chain is exhausted, so a missing key with no free node
+ * returns 0 even with @p create set.
+ *
+ * @param hi  high half of the key (the rider manager passes the rider's +0x4, its profile index, also used as the mask
+ *            bit)
+ * @param lo  low half of the key (the callers pass an item id)
+ * @param create  nonzero to add a node when the key is missing
+ * @return the node, or 0 when the key is missing and no node was created
+ */
 extern "C" void* func_0019C938(void* self, int hi, int lo, int create)
 {
     int key = (hi << 16) | lo;
@@ -2983,6 +3002,16 @@ extern "C" void* func_0019C8D0(void* self, void* item);
 extern "C" void* func_0019C8F8(void* self, void* item);
 extern "C" int func_0019C920(void* self, int a1);
 
+/**
+ * Unlinks a node from its hash bucket in the file-index table and returns it to the free list.
+ *
+ * Does nothing for a null @p nodep. Otherwise the bucket (key % 400) head at +0x1900 or the previous node's next index
+ * takes the node's next, the next node's prev index takes the node's prev, the node's key and both values (+0x8, +0xA)
+ * and prev index become -1, and the node is pushed onto the free list at +0x1F40 (its next index is the old head's
+ * index, func_0019C920).
+ *
+ * @param nodep  the node to release (from func_0019C938), or 0
+ */
 extern "C" void func_0019CA70(void* self, void* nodep)
 {
     sNode_CA70* node = (sNode_CA70*)nodep;
@@ -3012,6 +3041,11 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019CB38);
 #ifdef SKIP_ASM
 extern "C" void func_0019CB60(void* self);
 
+/**
+ * Constructs the file-index hash table by resetting it with func_0019CB60.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0019CB38(void* self)
 {
     func_0019CB60(self);
@@ -3033,6 +3067,13 @@ struct sNode0019CB60 {
     short next;
 };
 
+/**
+ * Resets the file-index hash table to 400 free nodes and empty buckets.
+ *
+ * Fills the 400 16-byte nodes (6400 bytes) with 0xFF, clears the 400 bucket heads at +0x1900, points the free-list head
+ * (+0x1F40) at node 0 and chains every node to its neighbours (prev i - 1, next i + 1, the last next -1) with both mask
+ * words (+0x4, +0x6) cleared.
+ */
 extern "C" void func_0019CB60(void* self)
 {
     MEM_fill(self, 0xFFFFFFFF, 6400);
@@ -3054,6 +3095,17 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019CBE0);
 #ifdef SKIP_ASM
 extern "C" void* func_0019C938(void* self, int a1, int a2, int a3);
 
+/**
+ * Returns the second value stored for a key in the file-index hash table, or -1 when it is not set.
+ *
+ * Looks the node up without creating it (func_0019C938) and returns its value at +0xA when bit @p bit of its mask at
+ * +0x6 is set. The rider manager stores, per profile index and item id, the FE file cache slot of the item's type-8
+ * file here (a func_0019DA10 result).
+ *
+ * @param bit  high half of the key and the mask bit to test (the rider manager passes the rider's profile index, +0x4)
+ * @param lowKey  low half of the key (an item id)
+ * @return the stored value, or -1
+ */
 extern "C" int func_0019CBE0(void* self, int bit, int lowKey)
 {
     void* node = func_0019C938(self, bit, lowKey, 0);
@@ -3082,6 +3134,20 @@ struct sNode_CC30 {
     short next;
 };
 
+/**
+ * Stores or clears the second value for a key in the file-index hash table.
+ *
+ * A @p val of -1 looks the node up without creating it; any other value creates it if needed (func_0019C938). A
+ * negative @p val clears bit @p bit of the mask at +0x6 and, once that mask is 0 and the first value (+0x8) is
+ * negative, frees the node (func_0019CA70). Otherwise the value goes to +0xA and the mask bit is set.
+ *
+ * Quirk: the free test checks the first value rather than the first mask, and +0x8 is only reset to -1 when a node is
+ * freed, so a node whose first value was ever set stays allocated after both masks clear.
+ *
+ * @param bit  high half of the key and the mask bit (the rider manager passes the rider's profile index, +0x4)
+ * @param a2  low half of the key (an item id)
+ * @param val  value to store, or a negative value to clear it
+ */
 extern "C" void func_0019CC30(void* self, int bit, int a2, int val)
 {
     sNode_CC30* p = (sNode_CC30*)func_0019C938(self, bit, a2, val != -1);
@@ -3106,6 +3172,17 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019CCE8);
 #ifdef SKIP_ASM
 extern "C" void* func_0019C938(void* self, int a1, int a2, int a3);
 
+/**
+ * Returns the first value stored for a key in the file-index hash table, or -1 when it is not set.
+ *
+ * Looks the node up without creating it (func_0019C938) and returns its value at +0x8 when bit @p bit of its mask at
+ * +0x4 is set. The rider manager stores, per profile index and item id, the FE file cache slot of the item's type-11
+ * file here (a func_0019DA10 result).
+ *
+ * @param bit  high half of the key and the mask bit to test (the rider manager passes the rider's profile index, +0x4)
+ * @param lowKey  low half of the key (an item id)
+ * @return the stored value, or -1
+ */
 extern "C" int func_0019CCE8(void* self, int bit, int lowKey)
 {
     void* node = func_0019C938(self, bit, lowKey, 0);
@@ -3133,6 +3210,18 @@ struct sNode_CD38 {
     short next;
 };
 
+/**
+ * Stores or clears the first value for a key in the file-index hash table.
+ *
+ * A @p val of -1 looks the node up without creating it; any other value creates it if needed (func_0019C938). A
+ * negative @p val clears bit @p bit of the mask at +0x4 and, once that mask is 0 and the second value (+0xA) is
+ * negative, frees the node (func_0019CA70). Otherwise the value goes to +0x8 and the mask bit is set. Same quirk as
+ * func_0019CC30: the free test checks the other value, not the other mask.
+ *
+ * @param bit  high half of the key and the mask bit (the rider manager passes the rider's profile index, +0x4)
+ * @param lowKey  low half of the key (an item id)
+ * @param val  value to store, or a negative value to clear it
+ */
 extern "C" void func_0019CD38(void* self, int bit, int lowKey, int val)
 {
     sNode_CD38* node = (sNode_CD38*)func_0019C938(self, bit, lowKey, val != -1);
@@ -3158,6 +3247,14 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019CDF0);
 extern void* D_004A196C;
 extern "C" void func_0019CE68(void* self);
 
+/**
+ * Constructs the FE file cache: records it in D_004A196C and initialises it with func_0019CE68.
+ *
+ * cFE_cFE builds it at the front end's +0x1A70. D_004A196C is what the sort comparators func_0019DD10 and func_0019DE18
+ * read.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0019CDF0(void* self)
 {
     D_004A196C = self;
@@ -3173,6 +3270,12 @@ extern void* D_004A196C;
 extern "C" void func_0019CF40(void* self);
 void operator_delete(int* p);
 
+/**
+ * Destroys the FE file cache: clears D_004A196C, purges every slot (func_0019CF40) and frees the object when bit 0 of
+ * @p flags is set.
+ *
+ * @param flags  deleting-destructor flags; bit 0 frees the object
+ */
 extern "C" void func_0019CE20(void* self, int flags)
 {
     D_004A196C = 0;
@@ -3211,6 +3314,14 @@ struct sEquipTableK19CE68 {
     int counts[10];              // 0xB4008
 };
 
+/**
+ * Initialises the FE file cache and its file-index hash table.
+ *
+ * For each of the 10 banks it clears all 256 slots (state, name, data, handle, size and use count `timer` to 0, type
+ * -1) and sets the bank's stamp counter (counts) to 1; then clears used and nPending. The file-index table D_004A1968
+ * is allocated on first use (cMemMan_alloc, 8004 bytes, tag "BoltFileIndexManager", built by func_0019CB38), otherwise
+ * reset with func_0019CB60. cRealFE_load calls it on the front end's +0x1A70.
+ */
 extern "C" void func_0019CE68(void* self)
 {
     sEquipTableK19CE68* t = (sEquipTableK19CE68*)self;
@@ -3252,6 +3363,13 @@ struct sEquipTableK19CF40 {
     int counts[10];    // 0xB4008
 };
 
+/**
+ * Empties the FE file cache and frees its file-index hash table.
+ *
+ * Releases every slot of the 10 banks with func_0019D4B8 and resets each bank's stamp counter to 1, then deletes
+ * D_004A1968 (operator_delete, no destructor call) and clears it. nPending is not reset here. Called by the cache's
+ * destructor and by cRealFE_purge.
+ */
 extern "C" void func_0019CF40(void* self)
 {
     sEquipTableK19CF40* t = (sEquipTableK19CF40*)self;
@@ -3298,6 +3416,18 @@ struct sSlotK19D000 {
     int size;       // 0x118
 };
 
+/**
+ * Unpacks a slot's compressed file data in place in the FE file cache.
+ *
+ * Does nothing when @p rawSlot or its data is null or unpacksizez() reports no unpacked size. Otherwise it makes room
+ * for the unpacked size (func_0019D578), allocates it (operator new, tag "UncompressedData", flags 0x60000000), and
+ * while that fails it locks and unlocks cMemMan_m_mutex, evicts that many bytes (func_0019D738) and retries. It then
+ * unpacks into the new block, frees the packed data, stores the new block as the slot's data and adjusts used by the
+ * size difference. Called when an asynchronous load completes (func_0019D250, func_0019DC20).
+ *
+ * @param bank  the slot's bank (0-9), passed to the eviction helpers
+ * @param rawSlot  the slot
+ */
 extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20* rawSlot)
 {
     sSlotK19D000* slot = (sSlotK19D000*)rawSlot;
@@ -3337,6 +3467,18 @@ struct sEquipSlot_D140 {
     unsigned int stamp;     // 0x11C
 };
 
+/**
+ * Starts the oldest queued load, preferring the given bank of the FE file cache.
+ *
+ * Picks the queued (state 3) slot with the lowest stamp in @p bank; when the bank has none, it searches the other banks
+ * in order and takes the lowest-stamp queued slot of the first bank that has one. The chosen slot is loaded with
+ * func_0019D8B8.
+ *
+ * Quirk: a best stamp of 0 counts as "nothing chosen yet", so a queued slot with stamp 0 loses to any later queued
+ * slot.
+ *
+ * @param bank  the bank to try first
+ */
 extern "C" void func_0019D140(void* self, int bank)
 {
     unsigned int best = 0;
@@ -3407,6 +3549,17 @@ struct sTableK19D250 {
     int nPending;                // 0xB4004
 };
 
+/**
+ * Polls the FE file cache's asynchronous loads once per frame (cRealFE_update).
+ *
+ * For every slot of the 10 banks: an asynchronous load in flight (pending set, state 2) whose ASYNCFILE_getstatus()
+ * reports 1 is released (ASYNCFILE_release), unpacked (func_0019D000) and becomes loaded (state 1) or idle (state 0)
+ * when its use count is 0; pending is cleared and nPending decremented, and when no loads remain in flight the next
+ * queued load starts (func_0019D140 for that bank). A queued slot (state 3) starts loading (func_0019D8B8) whenever no
+ * loads are in flight.
+ *
+ * @param table  the FE file cache
+ */
 extern "C" void func_0019D250(void* table)
 {
     sTableK19D250* self = (sTableK19D250*)table;
@@ -3448,6 +3601,15 @@ struct sEquipSlot_D3B0 {
     unsigned int stamp;     // 0x11C
 };
 
+/**
+ * Picks the slot to reuse for a new file in a bank of the FE file cache.
+ *
+ * Returns the first idle slot (state 0) that holds no data; otherwise the idle slot with the oldest stamp (least
+ * recently used).
+ *
+ * @param bank  the bank (0-9)
+ * @return the slot index, or -1 when no slot of the bank is idle
+ */
 extern "C" int func_0019D3B0(void* self, int bank)
 {
     unsigned int best = 0;
@@ -3486,6 +3648,15 @@ struct sEquipTable_D428 {
     sEquipRow_D428 rows[1];
 };
 
+/**
+ * Finds the slot holding a file name in a bank of the FE file cache.
+ *
+ * Compares @p name with every non-empty slot name using func_004165A8 (a strcmp routine).
+ *
+ * @param bank  the bank (0-9)
+ * @param name  the file name
+ * @return the slot index, or -1 when the name is not cached
+ */
 extern "C" int func_0019D428(sEquipTable_D428* self, int bank, const char* name)
 {
     for (int i = 0; i < 256; i++) {
@@ -3521,6 +3692,16 @@ struct sEquipTable_D4B8 {
     sEquipRow_D4B8 rows[1];
 };
 
+/**
+ * Frees one slot of the FE file cache.
+ *
+ * When an asynchronous load is in flight (state 2, pending) it releases the request (ASYNCFILE_release). Subtracts the
+ * slot's size from used, frees its data and clears data, size, state, name, handle, pending and use count; the type
+ * becomes -1. The stamp is kept and nPending is not adjusted.
+ *
+ * @param bank  the bank (0-9)
+ * @param i  the slot index
+ */
 extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i)
 {
     int status;
@@ -3571,6 +3752,17 @@ struct sTableK19D578 {
     int used;                    // 0xB4000
 };
 
+/**
+ * Evicts idle cached files until a new file fits in the FE file cache's 9,999,999-byte budget.
+ *
+ * Returns at once when used plus @p size fits. Otherwise frees idle slots (data present, use count 0, state 0) of the
+ * other banks in bank order, stopping as soon as it fits, then frees this bank's idle slots oldest stamp first until it
+ * fits or none remain (func_0019D4B8).
+ *
+ * @param table  the FE file cache
+ * @param bank  the bank being loaded into; its own files go last
+ * @param size  bytes about to be added
+ */
 extern "C" void func_0019D578(sEquipTable_DC20* table, int bank, int size)
 {
     sTableK19D578* self = (sTableK19D578*)table;
@@ -3634,6 +3826,17 @@ struct sTableK19D738 {
     sBankK19D738 banks[10];      // 0x0
 };
 
+/**
+ * Evicts at least a given number of bytes of idle cached files from the FE file cache.
+ *
+ * Used after an allocation fails, regardless of the budget. Frees idle slots (data present, use count 0, state 0) of
+ * the other banks in bank order until the freed sizes reach @p size, then this bank's idle slots oldest stamp first
+ * until they do or none remain (func_0019D4B8).
+ *
+ * @param table  the FE file cache
+ * @param bank  the bank being loaded into; its own files go last
+ * @param size  bytes to free
+ */
 extern "C" void func_0019D738(sEquipTable_DC20* table, int bank, int size)
 {
     sTableK19D738* self = (sTableK19D738*)table;
@@ -3700,6 +3903,20 @@ struct sSlotK19D8B8 {
     unsigned int stamp; // 0x11C
 };
 
+/**
+ * Starts loading a slot's file into the FE file cache.
+ *
+ * Reads the file size (BXFILE_sizez), makes room (func_0019D578) and allocates the data (operator new, tag "Bolt
+ * FileData", flags 0x60000000), and while that fails it locks and unlocks cMemMan_m_mutex, evicts that many bytes
+ * (func_0019D738) and retries; used grows by the size. With pending set the load is asynchronous: state 2, handle from
+ * func_003DF748 (an async load request) and nPending incremented. Otherwise FILE_loadatz() loads it at once and the
+ * state becomes 1 (loaded).
+ *
+ * Quirk: a synchronous load is not unpacked; only completed asynchronous loads go through func_0019D000.
+ *
+ * @param bank  the bank (0-9)
+ * @param i  the slot index
+ */
 extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i)
 {
     sSlotK19D8B8* slot = &((sSlotK19D8B8*)((char*)self + bank * 0x12000))[i];
@@ -3760,6 +3977,28 @@ struct sTableK19DA10 {
     int counts[10];              // 0xB4008
 };
 
+/**
+ * Requests a file from the FE file cache and returns its slot, adding one use.
+ *
+ * When the name is already cached (func_0019D428): the stamp becomes 0 with @p a5 or the bank's next stamp otherwise;
+ * with @p a4 an idle slot becomes loaded (state 1); without it, pending is cleared, an in-flight load is waited on
+ * (ASYNCFILE_release), a queued one is loaded at once (func_0019D8B8), and the slot is marked loaded with handle -1.
+ * Otherwise it reuses a slot (func_0019D3B0, emptied with func_0019D4B8), stamps it the same way, copies the name and
+ * stores @p a3 as the type and @p a4 as pending; it loads at once (func_0019D8B8) unless @p a5 is set or an
+ * asynchronous request meets loads already in flight, in which case it is queued (state 3). Either way the use count
+ * (timer) goes up by 1; func_0019DC20 gives the use back.
+ *
+ * Likely bug: the cached path that waits on an in-flight load neither unpacks it (func_0019D000) nor decrements
+ * nPending, unlike func_0019DC20. Likely bug: a -1 from func_0019D3B0 (no idle slot) is used as a slot index.
+ *
+ * @param p  the FE file cache
+ * @param bank  the bank (0-9)
+ * @param namep  the file name
+ * @param a3  the file type stored in the slot (the rider manager uses 8 and 11)
+ * @param a4  nonzero to load asynchronously
+ * @param a5  nonzero to defer the load: stamp 0 and queued, to be ordered later by func_0019DF20 or func_0019E070
+ * @return the slot index
+ */
 extern "C" int func_0019DA10(void* p, int bank, void* namep, int a3, int a4, int a5)
 {
     sTableK19DA10* self = (sTableK19DA10*)p;
@@ -3833,6 +4072,17 @@ extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20*
 struct sEquipTable_D4B8;
 extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i);
 
+/**
+ * Drops one use of a slot in the FE file cache, keeping its data cached for reuse.
+ *
+ * Decrements the use count (timer) and returns while it is still positive. An asynchronous load still in flight
+ * (ASYNCFILE_getstatus() not 1) is left to finish; a finished one is released, unpacked (func_0019D000) and counted out
+ * of nPending. A slot without data is then freed (func_0019D4B8); one with data becomes idle (state 0), so a later
+ * request can reuse it until it is evicted.
+ *
+ * @param bank  the bank (0-9)
+ * @param i  the slot index (from func_0019DA10)
+ */
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i)
 {
     int status;
@@ -3876,6 +4126,17 @@ struct sRowK19DD10 {
     sSlotK19DD10 slots[0x100];
 };
 
+/**
+ * Compares two FE file cache slots to sort the deferred type-8 loads by name (qsort comparator).
+ *
+ * Each argument is a packed key (bank << 16 | slot) into the cache D_004A196C; both use the first key's bank. A slot
+ * counts when it is queued (state 3), has type 8 and stamp 0. Two counted slots compare by name with strcasecmp; a
+ * counted slot sorts before any other; two others compare equal.
+ *
+ * @param a  first packed key
+ * @param b  second packed key
+ * @return negative, 0 or positive in qsort fashion
+ */
 extern "C" int func_0019DD10(const int* a, const int* b)
 {
     int ka = *a;
@@ -3914,6 +4175,16 @@ struct sRowK19DE18 {
     sSlotK19DE18 slots[0x100];
 };
 
+/**
+ * Compares two FE file cache slots to sort the deferred type-11 loads by name (qsort comparator).
+ *
+ * Same as func_0019DD10 for type 11: queued (state 3), type 11, stamp 0 slots sort first, by name with strcasecmp; two
+ * others compare equal.
+ *
+ * @param a  first packed key
+ * @param b  second packed key
+ * @return negative, 0 or positive in qsort fashion
+ */
 extern "C" int func_0019DE18(const int* a, const int* b)
 {
     int ka = *a;
@@ -3973,6 +4244,15 @@ extern "C" int func_0019DD10_DF20(const int* a, const int* b) __asm__("func_0019
 
 extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const int*, const int*));
 
+/**
+ * Stamps a bank's deferred type-8 loads in name order and starts the first one.
+ *
+ * Sorts the bank's 256 packed keys with func_00418EF8 (qsort) and func_0019DD10, then walks them while the slot has
+ * type 8 and stamp 0: each gets the bank's next stamp (counts) and, when no loads are in flight and it is queued,
+ * starts loading (func_0019D8B8). The rider manager (func_0019FF00) calls it after requesting deferred files.
+ *
+ * @param bank  the bank (0-9)
+ */
 extern "C" void func_0019DF20(sFileCache* self, int bank)
 {
     int keys[256];
@@ -4007,6 +4287,14 @@ extern "C" int func_0019DE18_E070(const int* a, const int* b) __asm__("func_0019
 
 extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const int*, const int*));
 
+/**
+ * Stamps a bank's deferred type-11 loads in name order and starts the first one.
+ *
+ * Same as func_0019DF20 with func_0019DE18 and type 11. The rider manager (func_0019FBE0) calls it after requesting
+ * deferred files.
+ *
+ * @param bank  the bank (0-9)
+ */
 extern "C" void func_0019E070(sFileCache* self, int bank)
 {
     int keys[256];
@@ -4028,6 +4316,12 @@ extern "C" void func_0019E070(sFileCache* self, int bank)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E1C0);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a bank of the FE file cache has no load in flight or queued.
+ *
+ * @param bank  the bank (0-9)
+ * @return 0 when any slot's state is 2 or 3 (or negative), else 1
+ */
 extern "C" int func_0019E1C0(sTableK19D250* self, int bank) {
     for (int i = 0; i < 0x100; i++) {
         if ((unsigned int)self->banks[bank].e[i].state >= 2) return 0;
@@ -4038,6 +4332,13 @@ extern "C" int func_0019E1C0(sTableK19D250* self, int bank) {
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E208);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a slot of the FE file cache is loading (state 2).
+ *
+ * @param bank  the bank (0-9)
+ * @param i  the slot index
+ * @return 1 while the load is in flight, else 0
+ */
 extern "C" int func_0019E208(sTableK19D250* self, int bank, int i) {
     return self->banks[bank].e[i].state == 2;
 }
@@ -4059,6 +4360,13 @@ struct sEquipTable {
     sEquipRow12000 rows[1];
 };
 
+/**
+ * Returns whether a slot of the FE file cache is loaded (state 1).
+ *
+ * @param bank  the bank (0-9)
+ * @param slotIndex  the slot index
+ * @return 1 when loaded, else 0
+ */
 extern "C" int func_0019E238(sEquipTable* self, int bank, int slotIndex)
 {
     return self->rows[bank].slots[slotIndex].state == 1;
@@ -4068,6 +4376,15 @@ extern "C" int func_0019E238(sEquipTable* self, int bank, int slotIndex)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E268);
 #ifdef SKIP_ASM
+/**
+ * Returns a slot's file name in the FE file cache.
+ *
+ * Returns 0 only for state -1, which the cache's own functions never set.
+ *
+ * @param bank  the bank (0-9)
+ * @param i  the slot index
+ * @return the name buffer, or 0
+ */
 extern "C" char* func_0019E268(sTableK19D250* self, int bank, int i) {
     if (self->banks[bank].e[i].state == -1) return 0;
     return self->banks[bank].e[i].name;
@@ -4077,6 +4394,15 @@ extern "C" char* func_0019E268(sTableK19D250* self, int bank, int i) {
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2B0);
 #ifdef SKIP_ASM
+/**
+ * Returns a slot's file data in the FE file cache once it is loaded.
+ *
+ * The view calls the data pointer at +0x104 `value`; func_0019E2F0 is the same lookup typed as a pointer.
+ *
+ * @param bank  the bank (0-9)
+ * @param slotIndex  the slot index
+ * @return the data pointer as an int when the state is 1, else 0
+ */
 extern "C" int func_0019E2B0(sEquipTable* self, int bank, int slotIndex)
 {
     if (self->rows[bank].slots[slotIndex].state != 1) {
@@ -4089,6 +4415,15 @@ extern "C" int func_0019E2B0(sEquipTable* self, int bank, int slotIndex)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2F0);
 #ifdef SKIP_ASM
+/**
+ * Returns a slot's file data in the FE file cache once it is loaded (state 1), else 0.
+ *
+ * Same as func_0019E2B0, typed as a pointer.
+ *
+ * @param bank  the bank (0-9)
+ * @param i  the slot index
+ * @return the data, or 0
+ */
 extern "C" void* func_0019E2F0(sTableK19D250* self, int bank, int i) {
     if (self->banks[bank].e[i].state != 1) return 0;
     return self->banks[bank].e[i].data;
@@ -4097,6 +4432,18 @@ extern "C" void* func_0019E2F0(sTableK19D250* self, int bank, int i) {
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E330);
 #ifdef SKIP_ASM
+/**
+ * Detaches a slot's file data from the FE file cache and returns it.
+ *
+ * Clears the slot's data and size and subtracts the size from used (+0xB4000); state, name and use count stay. The
+ * reward database (func_0015AEC0) takes the block this way and then drops its use with func_0019DC20, which frees the
+ * now empty slot.
+ *
+ * @param base  the FE file cache
+ * @param bank  the bank (0-9)
+ * @param slotIndex  the slot index
+ * @return the data pointer as an int (the caller now owns it)
+ */
 extern "C" int func_0019E330(char* base, int bank, int slotIndex) {
     char* pb = base + 0x104;
     char* qb = base + 0x118;
@@ -4113,6 +4460,13 @@ extern "C" int func_0019E330(char* base, int bank, int slotIndex) {
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E380);
 #ifdef SKIP_ASM
+/**
+ * Returns a slot's file type (+0x110, as passed to func_0019DA10) in the FE file cache.
+ *
+ * @param bank  the bank (0-9)
+ * @param i  the slot index
+ * @return the type
+ */
 extern "C" int func_0019E380(sTableK19D250* self, int bank, int i) {
     return self->banks[bank].e[i].f110;
 }
@@ -4120,6 +4474,13 @@ extern "C" int func_0019E380(sTableK19D250* self, int bank, int i) {
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3A8);
 #ifdef SKIP_ASM
+/**
+ * Returns a slot's use count (+0x114, `timer` in the views) in the FE file cache.
+ *
+ * @param bank  the bank (0-9)
+ * @param i  the slot index
+ * @return the use count
+ */
 extern "C" int func_0019E3A8(sTableK19D250* self, int bank, int i) {
     return self->banks[bank].e[i].timer;
 }
@@ -4151,6 +4512,16 @@ struct sRiderSlotCE {
     sSlotEntryCE entries[256];  // 0x1C
 };
 
+/**
+ * Constructs a front-end rider (0xCE0 bytes; the rider manager holds two).
+ *
+ * Sets the character id (+0x0), the profile index (+0x4), the requested character (+0xC24), the reload frame (+0xCD4)
+ * and the 256 texture entries' ids (+0x1C, 8 bytes each) to -1 and their flags to 0; +0xC2C to 0xFFFFFFFF; both poses
+ * (+0xC30, +0xC50) to tPose_Identity; and clears +0x8 to +0x18, +0xC1C, +0xC20, +0xC28, +0xC70 to +0xC78, the
+ * load-stage flags +0xCB4 to +0xCC0, +0xCC4 (show once loaded), +0xCC8 (visible) and +0xCCC.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0019E3D0(sRiderSlotCE* self)
 {
     int i;
@@ -4209,6 +4580,15 @@ struct sSlot0019E498 {
 extern "C" void func_0019EBA0(void* self);
 void operator_delete(int* p);
 
+/**
+ * Destroys a front-end rider: unloads it and releases its textures.
+ *
+ * Calls func_0019EBA0 (deletes the animation model at +0x8 and the objects at +0xC, +0xC70 and +0xC74), then for each
+ * of the 256 texture entries at +0x1C with an id >= 0 calls GrMan's virtual slot 50 with the id; every entry's id
+ * becomes -1 and its flag 0. Frees the rider when bit 0 of @p flags is set.
+ *
+ * @param flags  deleting-destructor flags; bit 0 frees the object
+ */
 extern "C" void func_0019E498(void* self, int flags)
 {
     sSlot0019E498* slot = (sSlot0019E498*)((char*)self + 0x1C);
@@ -4233,6 +4613,15 @@ extern "C" void func_0019E498(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019E538);
 #ifdef SKIP_ASM
+/**
+ * Shows or hides a front-end rider, deferring the show until its model is loaded.
+ *
+ * With @p enable set: when the load stages +0xCC0, +0xCB8 and +0xCB4 are all done and no reload is pending (+0xCD4 <
+ * 0), sets visible (+0xCC8); otherwise sets +0xCC4 so the update shows it once loaded. With @p enable 0 both flags are
+ * cleared.
+ *
+ * @param enable  nonzero to show, 0 to hide
+ */
 extern "C" void func_0019E538(void* self, int enable)
 {
     if (enable != 0) {
@@ -4276,7 +4665,19 @@ struct sRider_E588 {
     int timer;          // 0xCD4
 };
 
-// Item request for a rider slot: applies it straight away when allowed, otherwise arms a delayed retry.
+/**
+ * Requests a character for a front-end rider, reloading it a few frames later when it changes.
+ *
+ * Stores @p item as the requested character (+0xC24) and @p flag at +0xC28. When the rider already has that character
+ * (+0x0) and either +0x10 is set or @p flag is 0: if a valid character (below 10) is loaded (+0xCB8 and +0xCB4 set),
+ * cancels any pending reload (+0xCD4 = -1) and makes the rider visible when it was visible or waiting to be (+0xCC8 |=
+ * +0xCC4, then +0xCC4 = 0); without a loaded character nothing changes. Otherwise, unless a reload is already pending,
+ * arms one for GrMan's frame counter (virtual slot 114) + 4, moving visible into +0xCC4 and hiding the rider; the
+ * rider's update then calls cFERider_init with the requested values.
+ *
+ * @param item  the character id
+ * @param flag  stored at +0xC28 and passed to cFERider_init as its last argument
+ */
 extern "C" void func_0019E588(sRider_E588* self, unsigned int item, int flag)
 {
     self->reqItem = item;

@@ -105,6 +105,18 @@ extern sRewardDesc_0388 D_004781D0[][4];
 extern sRewardDesc_0388 D_004786E0[][5];
 extern sRewardDesc_0388 D_00478D38[][8];
 
+/**
+ * Returns (by value) one 0x6C-byte map goal entry: race, freestyle or freeride, by peak and index.
+ *
+ * Kind 0 reads D_004781D0[@p a][@p b] (4 per peak), 1 D_004786E0 (5 per peak), 2 D_00478D38 (8 per peak); any other
+ * kind returns D_004781D0[0][0]. cUITemplate_MAP_onWidgetEvent calls it with cUITemplate_MAP_mPeak, the item's misc
+ * data and cUITemplate_MAP_mSelectedEvent.
+ *
+ * @param a  the peak, 0-2
+ * @param b  the goal index within the peak's table
+ * @param kind  0 race, 1 freestyle, 2 freeride
+ * @return a copy of the goal entry
+ */
 extern "C" sRewardDesc_0388 func_00200388(int a, int b, int kind)
 {
     if (kind == 0) {
@@ -128,6 +140,13 @@ extern "C" void* cBENewRaceInterface_getLocation(void* iface);
 extern unsigned int cUITemplate_MAP_mMapStyle;
 extern int cUITemplate_MAP_mPeak;
 
+/**
+ * Points the map template at the peak of the current race location when the map style is 2 or more.
+ *
+ * Then cUITemplate_MAP_mPeak = the word at +0x54 of cBENewRaceInterface_getLocation (back-end interface 0); styles 0
+ * and 1 leave it alone. Called when the map overlays are built (cOVStateManager_triggerOverlay, func_0020BAB8,
+ * func_00221228) and by the credits and main-module code.
+ */
 extern "C" void func_002006B8(void)
 {
     if (cUITemplate_MAP_mMapStyle >= 2) {

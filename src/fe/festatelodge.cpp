@@ -371,6 +371,15 @@ extern void* cFEStateLodgeRiderDetail_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 
+/**
+ * Constructs the lodge rider-detail state: base cUIState, cFEStateLodgeRiderDetail_vtbl, state id 40, user 0.
+ *
+ * Runs the cUIState constructor func_0039E2A0() (the engine passes through in the second argument register), stores the
+ * vtable and mHashName 40, sets mUserNum (+0x44) to 0 and mCtrlBits (+0x15) to rider slot 0's controller mask
+ * (func_001A1CD0() on the engine's FE custom object). cFECustom_getNextState() and func_001A16C0() create it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001F3FF8(void* self)
 {
     func_0039E2A0(self);
@@ -718,7 +727,19 @@ struct sLodgeStats_4728 {
     char pad84[0x1C];   // 0x84
 };
 
-// Lodge stats state constructor: records the seven attribute values from the player interface and their value/5 levels.
+/**
+ * Constructs the lodge attribute-buying state: base cUIState, cFEStateBuyAttrib_vtbl, state id 41, and a copy of the
+ * rider's seven attribute values.
+ *
+ * Runs the cUIState constructor func_0039E2A0() on @p a1, stores mHashName 41 and the vtable, sets mUserNum (+0x44) to
+ * 0 and mCtrlBits (+0x15) to rider slot 0's controller mask (func_001A1CD0()), and clears the 0x1C bytes at +0x84. For
+ * each of the seven attributes listed in D_004780B0 it stores func_00148158() (player interface, rider 0) at +0x4C[i]
+ * and that value / 5 (the level) at +0x68[i]. cFECustom_getNextState() creates it.
+ *
+ * @param p  the memory for the state
+ * @param a1  the UI engine
+ * @return @p p
+ */
 extern "C" void* func_001F4728(void* p, int a1)
 {
     sLodgeStats_4728* self = (sLodgeStats_4728*)p;

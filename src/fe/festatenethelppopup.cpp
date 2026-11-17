@@ -214,7 +214,17 @@ struct sStrings_A110 {
     sVE_A110* vt;
 };
 
-// Joins up to three localised help strings into one buffer and shows it in the popup text.
+/**
+ * Builds the help popup's description: concatenates its (up to three) localised description strings and shows them in
+ * the popup's text.
+ *
+ * Looks up each non-zero description id at +0x58 (stopping at the first 0) through SSXApp's FELocale (slot 4),
+ * allocates one buffer of the total length (tag "cFEStateNetHelpPopup"), appends the strings with func_002C2688(),
+ * hands it to cUIText_setUnicodeStringWrap() on the text at +0xAC and frees it again. With no description the text gets
+ * a null string. cFEStateNetHelpPopup_onGainTransition() calls it.
+ *
+ * @param helpPopup  the help popup state
+ */
 extern "C" void func_001DA110(void* helpPopup)
 {
     char* self = (char*)helpPopup;
@@ -375,6 +385,13 @@ struct sNetHelpPopup_DA4A8 {
     int b[7];       // 0x84
 };
 
+/**
+ * Clears the help popup's contents: no options, no descriptions, every option's text 0 and icon -1.
+ *
+ * Sets the option count (+0x48, see cFEStateNetHelpPopup_setNumHelpOptions()), +0x54, the three description ids (+0x58)
+ * and +0x64 to 0, and the seven option text ids (+0x68) to 0 and icons (+0x84) to -1 (see
+ * cFEStateNetHelpPopup_setOption()). The help popup's constructor func_001D9D48() calls it.
+ */
 extern "C" void func_001DA4A8(void* self)
 {
     sNetHelpPopup_DA4A8* s = (sNetHelpPopup_DA4A8*)self;
@@ -430,6 +447,14 @@ void cFEStateNetHelpPopup_setDescription(void* self, int descriptionNum, int des
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA540);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument unchanged.
+ *
+ * Declared variadic: the body only spills the remaining argument registers (integer and float) to its stack frame
+ * before returning. Nothing in the source calls it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_001DA540(void* self, ...)
 {
     return self;
@@ -438,6 +463,18 @@ extern "C" void* func_001DA540(void* self, ...)
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA580);
 #ifdef SKIP_ASM
+/**
+ * Compares two character ranges lexicographically and reports whether the first is less than the second.
+ *
+ * Characters compare as signed chars; a range that is a proper prefix of the other is less. This is a char
+ * instantiation of the STL lexicographical_compare; nothing in the source calls it.
+ *
+ * @param first1  start of the first range
+ * @param last1  end of the first range
+ * @param first2  start of the second range
+ * @param last2  end of the second range
+ * @return 1 when the first range sorts before the second, else 0
+ */
 extern "C" int func_001DA580(const char* first1, const char* last1, const char* first2, const char* last2)
 {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
@@ -450,6 +487,17 @@ extern "C" int func_001DA580(const char* first1, const char* last1, const char* 
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", func_001DA5E8);
 #ifdef SKIP_ASM
+/**
+ * Compares two character ranges lexicographically, three-way.
+ *
+ * Characters compare as signed chars; a proper prefix sorts first. Nothing in the source calls it.
+ *
+ * @param first1  start of the first range
+ * @param last1  end of the first range
+ * @param first2  start of the second range
+ * @param last2  end of the second range
+ * @return -1 when the first range sorts first, 1 when it sorts after, 0 when the ranges are equal
+ */
 extern "C" int func_001DA5E8(const char* first1, const char* last1, const char* first2, const char* last2)
 {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
@@ -487,6 +535,21 @@ static inline void copyName_1DA648(char* dst, const char* src)
     func_00416958(dst, src, 0xF);
 }
 
+/**
+ * Constructs the debug "Create Account" menu: a title, a spacer, "Login Name" and "Password" entries pre-filled from
+ * SSXApp, an action item and "Cancel".
+ *
+ * Runs cMenu_cMenu(), stores vtable D_0046D690 (onCommand func_001DBC38, which creates the account) and the owner from
+ * @p vinfo at +0x130, and builds the items in place: the "Create Account" title (cNullMenuItem), a spacer of 10, two
+ * text entries (func_002CE418()) labelled "Login Name" (+0x168) and "Password" (+0x194), an action item labelled @p a2
+ * (func_002CCF98(), +0x1C0) and a "Cancel" item (func_002CCDF0(), +0x1E4), adding all six in that order. The entries'
+ * text buffers (+0x180, +0x1AC) get up to 15 characters of SSXApp's UserName and Password. func_001DA7E8 is the same
+ * menu with the Login vtable; func_001DA988 embeds both.
+ *
+ * @param vinfo  a holder whose first word (the debug front end) is stored at +0x130
+ * @param a2  the action item's label
+ * @return @p self
+ */
 extern "C" void* func_001DA648(void* self, void* vinfo, void* a2)
 {
     cMenu_cMenu(self);
@@ -536,6 +599,19 @@ static inline void copyName_1DA7E8(char* dst, const char* src)
     func_00416958(dst, src, 0xF);
 }
 
+/**
+ * Constructs the debug "Login" menu: the same items as func_001DA648 ("Create Account" title, "Login Name", "Password",
+ * an action item, "Cancel") with the Login vtable.
+ *
+ * Runs cMenu_cMenu(), stores vtable D_0046D6E8 (onCommand func_001DBC68, which logs in with the typed name and
+ * password) and the owner from @p vinfo at +0x130, builds and adds the six items, and pre-fills the name and password
+ * entries (+0x180, +0x1AC) with up to 15 characters of SSXApp's UserName and Password. The title is "Create Account"
+ * here too (likely a copy-paste slip; func_001DA988 labels the sub-menu "Login").
+ *
+ * @param vinfo  a holder whose first word (the debug front end) is stored at +0x130
+ * @param a2  the action item's label
+ * @return @p self
+ */
 extern "C" void* func_001DA7E8(void* self, void* vinfo, void* a2)
 {
     cMenu_cMenu(self);
@@ -576,6 +652,18 @@ extern char str_Create_Account[];
 extern char str_Login[];
 extern char str_Login_Method[];
 
+/**
+ * Constructs the debug "Login Method" menu with "Create Account" and "Login" sub-menus.
+ *
+ * Runs cMenu_cMenu(), stores vtable D_0046D638, builds the Create Account menu (func_001DA648()) at +0x130 and the
+ * Login menu (func_001DA7E8()) at +0x32C, labelling their action items "Create Account" and "Login", then adds the
+ * "Login Method" title, a spacer of 10 and two cSubMenuItems opening those menus. func_0017D298() builds it at +0x70 of
+ * the debug front end.
+ *
+ * @param a1  owner holder passed to the Create Account menu
+ * @param a2  owner holder passed to the Login menu
+ * @return @p self
+ */
 extern "C" void* func_001DA988(void* self, void* a1, void* a2)
 {
     cMenu_cMenu(self);
@@ -611,6 +699,16 @@ extern char str_Persona_Name[];
 extern char D_004A1408[];
 extern char str_Create[];
 
+/**
+ * Constructs the debug "Create Persona" menu: a title, a spacer, a "Persona Name" entry and a "Create" item.
+ *
+ * Runs cMenu_cMenu(), stores vtable D_0046D588 (onCommand func_001DBBE8, which creates the persona) and the owner from
+ * @p info at +0x130, builds the "Create Persona" title, a spacer of 14, a text entry labelled "Persona Name"
+ * (func_002CE418(), +0x168) and a "Create" action item (func_002CCF98(), +0x194), and adds them in that order.
+ *
+ * @param info  a holder whose first word (the debug front end) is stored at +0x130
+ * @return @p self
+ */
 extern "C" void* func_001DAAC8(void* self, int* info)
 {
     cMenu_cMenu(self);
@@ -641,6 +739,17 @@ extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* D_0046D5E0[];
 extern char str_Delete_Persona[];
 
+/**
+ * Constructs the debug "Delete Persona" menu: a title, a spacer and four blank persona lines.
+ *
+ * Runs cMenu_cMenu(), stores vtable D_0046D5E0 (onCommand func_001DBC10, which deletes the chosen persona) and the
+ * owner from @p info at +0x130, builds the "Delete Persona" title and a spacer of 14, constructs four empty command
+ * items (func_002CCF08()) at +0x168 (0x24 bytes apart) and adds all six. func_001DB330 later fills in the persona
+ * lines.
+ *
+ * @param info  a holder whose first word (the debug front end) is stored at +0x130
+ * @return @p self
+ */
 extern "C" void* func_001DABD0(void* self, int* info)
 {
     char* p = (char*)self + 0x168;
@@ -684,6 +793,20 @@ extern char str_Create_Persona[];
 extern char str_Delete_Persona[];
 
 
+/**
+ * Constructs the debug "Select Persona" menu with four persona lines and "Create Persona" / "Delete Persona" sub-menus.
+ *
+ * Runs cMenu_cMenu(), stores vtable D_0046D530 (onCommand func_001DBBC0, which selects the chosen persona), builds the
+ * Create Persona menu (func_001DAAC8()) at +0x130 and the Delete Persona menu (func_001DABD0()) at +0x2E8, stores the
+ * owner from @p info at +0x4E0, then builds the "Select Persona" title, a spacer of 14, four empty command items
+ * (func_002CCF08()) at +0x518 and cSubMenuItems for the two sub-menus, adding them in that order. func_001DB418 fills
+ * in the persona lines; func_0017D298() builds it at +0x74C of the debug front end.
+ *
+ * @param info  a holder whose first word (the debug front end) is stored at +0x4E0
+ * @param a2  owner holder passed to the Create Persona menu
+ * @param a3  owner holder passed to the Delete Persona menu
+ * @return @p self
+ */
 extern "C" void* func_001DACB8(void* self, int* info, int* a2, int* a3)
 {
     cMenu_cMenu(self);
@@ -725,6 +848,16 @@ extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* D_0046D4D8[];
 extern char str_Select_Room[];
 
+/**
+ * Constructs the debug "Select Room" menu: a title, a spacer and twelve blank room lines.
+ *
+ * Runs cMenu_cMenu(), stores vtable D_0046D4D8 (onCommand func_001DBB90, which joins the chosen room) and the owner
+ * from @p info at +0x130, builds the "Select Room" title and a spacer of 14, constructs twelve empty command items
+ * (func_002CCF08()) at +0x168 (0x24 bytes apart) and adds all fourteen. func_001DB528 fills in the room names.
+ *
+ * @param info  a holder whose first word (the debug front end) is stored at +0x130
+ * @return @p self
+ */
 extern "C" void* func_001DAE20(void* self, int* info)
 {
     char* p = (char*)self + 0x168;
@@ -763,6 +896,18 @@ extern void* D_0046D480[];
 extern char str_Room_Occupants[];
 extern char str_Chat[];
 
+/**
+ * Constructs the debug "Room Occupants" menu: a title, a spacer, 24 blank occupant lines and a "Chat" item.
+ *
+ * Runs cMenu_cMenu(), stores vtable D_0046D480 (onCommand func_001DBB48) and the owners from @p a (+0x130, used for an
+ * occupant) and @p b (+0x134, used by "Chat"), builds the "Room Occupants" title and a spacer of 14, 24 empty command
+ * items (func_002CCF08()) at +0x16C (0x24 bytes apart) and a "Chat" action item with id -2 (func_002CCF98(), +0x4CC),
+ * and adds them in that order. func_001DB620 fills in the occupants.
+ *
+ * @param a  holder whose first word is stored at +0x130 (owner for an occupant command)
+ * @param b  holder whose first word is stored at +0x134 (owner for the "Chat" command)
+ * @return @p self
+ */
 extern "C" void* func_001DAF08(void* self, int* a, int* b)
 {
     char* p = (char*)self + 0x16C;
@@ -806,6 +951,18 @@ extern char str_Enter_Chat[];
 extern char D_004A1408[];
 extern int D_00467D70[];
 
+/**
+ * Constructs the debug "Chat Menu": a title, a spacer, an "Enter Chat" entry and fourteen canned chat lines.
+ *
+ * Runs cMenu_cMenu(), stores vtable D_0046D428 (onCommand func_001DBB20, which sends the chosen line as a lobby chat
+ * message) and the owner from @p info at +0x130, builds the "Chat Menu" title, a spacer of 14 and a text entry labelled
+ * "Enter Chat" (func_002CE418(), +0x168), then fourteen command items (func_002CCF08()) at +0x194, each with id j
+ * (+0x8) and the label D_00467D70[j] (canned lines such as "Assassins!"). Adds the title, the spacer and the fourteen
+ * lines; likely bug: the "Enter Chat" entry is built but never added to the menu.
+ *
+ * @param info  a holder whose first word (the debug front end) is stored at +0x130
+ * @return @p self
+ */
 extern "C" void* func_001DB028(void* self, int* info)
 {
     char* p = (char*)self + 0x194;

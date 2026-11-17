@@ -31,6 +31,11 @@ cStreamPause* cStreamPause_construct()
 //100%
 INCLUDE_ASM("main/streampause", func_00242D50);
 #ifdef SKIP_ASM
+/**
+ * Returns @p self; the variadic body only spills the argument registers (no callers or references).
+ *
+ * @return @p self
+ */
 extern "C" void* func_00242D50(void* self, ...)
 {
     return self;
@@ -39,6 +44,15 @@ extern "C" void* func_00242D50(void* self, ...)
 //100%
 INCLUDE_ASM("main/streampause", func_00242D90);
 #ifdef SKIP_ASM
+/**
+ * Compares two signed-char ranges lexicographically (the STL lexicographical_compare).
+ *
+ * @param first1  start of the first range
+ * @param last1  end of the first range
+ * @param first2  start of the second range
+ * @param last2  end of the second range
+ * @return 1 when the first range orders before the second (a smaller element first, or a proper prefix), else 0
+ */
 extern "C" int func_00242D90(signed char *first1, signed char *last1, signed char *first2, signed char *last2) {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
         if (*first1 < *first2) return 1;
@@ -50,6 +64,15 @@ extern "C" int func_00242D90(signed char *first1, signed char *last1, signed cha
 //100%
 INCLUDE_ASM("main/streampause", func_00242DF8);
 #ifdef SKIP_ASM
+/**
+ * Three-way compares two signed-char ranges lexicographically (the STL lexicographical_compare_3way).
+ *
+ * @param first1  start of the first range
+ * @param last1  end of the first range
+ * @param first2  start of the second range
+ * @param last2  end of the second range
+ * @return -1 when the first range orders first, 1 when the second does, 0 when they are equal
+ */
 extern "C" int func_00242DF8(signed char *first1, signed char *last1, signed char *first2, signed char *last2) {
     for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
         if (*first1 < *first2) return -1;
@@ -64,6 +87,13 @@ INCLUDE_ASM("main/streampause", func_00242E58);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Clears a linked list: frees every node of the circular list whose sentinel is at +0x4, then relinks the sentinel to
+ * itself.
+ *
+ * Each node's next link is at +0x0 and is freed with operator_delete(); the sentinel's next (+0x0) and prev (+0x4) are
+ * set back to the sentinel.
+ */
 extern "C" void func_00242E58(void *self) {
     int **head = *(int ***)((char*)self + 4);
     int **node = (int **)*head;
@@ -125,6 +155,19 @@ extern int D_004A4F70;
 extern int D_004A4F74;
 extern sSlot_2EB8 D_004A4F68, D_004A4F78, D_004A4F80, D_004A4F88, D_004A4F90, D_004A4F98, D_004A4FA0, D_004A4FA8, D_004A4FB0, D_004A4FB8, D_004A4FC0, D_004A4FC8, D_004A4FD0, D_004A4FD8, D_004A4FE0;
 
+/**
+ * Runs the static constructors or destructors of this unit's globals (g++'s static initialization and destruction).
+ *
+ * Only priority 0xFFFF does anything. With @p init set it constructs the 56 four-float constants D_004C90A8..D_004C9418
+ * (colour and blend vectors), the fifteen two-word slots D_004A4F68 (-1) and D_004A4F78..D_004A4FE0 (0..13) whose first
+ * word packs the number twice (8 + 24 bits), clears D_004A4F70 / D_004A4F74, constructs the application object at
+ * D_004C9428 with cSSXApp_cSSXApp and GMrandom with func_00317930. With @p init clear it destroys the application
+ * object (its three cBXString members, then the cAppMan base). func_00247E20 calls it with (1, 0xFFFF) and
+ * func_00247E40 with (0, 0xFFFF).
+ *
+ * @param init  1 to construct, 0 to destroy
+ * @param prio  the init priority; only 0xFFFF is handled
+ */
 extern "C" void func_00242EB8(int init, int prio)
 {
     if (prio == 0xFFFF) {
@@ -257,6 +300,12 @@ INCLUDE_ASM("main/streampause", func_002438B0);
 void operator_delete(int* ptr);
 extern void* D_0046D970[];
 
+/**
+ * Destroys an object of a cAppModule-derived class: resets the vtable to the cAppModule vtable D_0046D970 and frees the
+ * object when asked (unreferenced copy).
+ *
+ * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
+ */
 extern "C" void func_002438B0(void* self, int flags)
 {
     *(void***)((char*)self + 0x0) = D_0046D970;
@@ -268,6 +317,9 @@ extern "C" void func_002438B0(void* self, int flags)
 //100%
 INCLUDE_ASM("main/streampause", func_002438E0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body; no callers or references).
+ */
 extern "C" void func_002438E0(void) {
 
 }
@@ -275,6 +327,9 @@ extern "C" void func_002438E0(void) {
 //100%
 INCLUDE_ASM("main/streampause", func_002438E8);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body; no callers or references).
+ */
 extern "C" void func_002438E8(void) {
 
 }

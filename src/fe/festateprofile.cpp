@@ -207,6 +207,13 @@ extern "C" void* cUIState_onRender2D(void* self);
 //100%
 INCLUDE_ASM("fe/festateprofile", func_0018EE98__FPv);
 #ifdef SKIP_ASM
+/**
+ * Draws the profile load screen by running cUIState_onRender2D.
+ *
+ * Fills slot +0x7C (onRender2D) of cFEStateProfileLoad_vtbl.
+ *
+ * @return cUIState_onRender2D's result
+ */
 void* func_0018EE98(void* self)
 {
     return cUIState_onRender2D(self);
@@ -275,6 +282,18 @@ struct cList0018EEB8 {
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern int cFEStateProfileLoad_mScreenAction;
 
+/**
+ * Answers the profile load screen's menu events: refuses events the current screen cannot take.
+ *
+ * Event 6 gives 0x100 when the card manager's mSelectedDevice fails the memory card's slot-54 check (mpMemCard,
+ * func_002D3840); event 8 gives 0x100 on the load screen (cFEStateProfileLoad_mScreenAction 2) or while the delete
+ * button is inactive (+0x220 clear); event 9 always gives 0x100; everything else gives 0x101. Fills slot +0xA4
+ * (onWidgetMenu) of cFEStateProfileLoad_vtbl.
+ *
+ * @param widget  the menu that sent the event (unused)
+ * @param msg  the menu event
+ * @return 0x100 to refuse the event, 0x101 to allow it
+ */
 extern "C" int func_0018EEB8(void* self, void* widget, unsigned int msg)
 {
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
@@ -321,6 +340,16 @@ struct cUIObj_EF70 {
     virtual void setVisible(int on);
 };
 
+/**
+ * Shows or hides the profile load screen's action buttons.
+ *
+ * Does nothing when +0x234 already equals @p on. Otherwise sets "ps2x" visible when @p on is 0 and hidden when 1, and
+ * likewise "btext3", "btext5" and "ps2sq" unless this is the load screen (cFEStateProfileLoad_mScreenAction 2), where
+ * it is "btext3a"; then stores @p on in +0x234. Fills slot +0x12C of cFEStateProfileLoad_vtbl
+ * (cFEMemCard_hideActionButtons's slot).
+ *
+ * @param on  1 to hide the buttons, 0 to show them
+ */
 extern "C" void func_0018EF70(void* self, int on)
 {
     if (*(int*)((char*)self + 0x234) == on)
@@ -360,6 +389,15 @@ struct cUIObj_F0B8 {
     virtual void setActive(int on);
 };
 
+/**
+ * Shows or hides the profile load screen's delete button.
+ *
+ * Except on the load screen (cFEStateProfileLoad_mScreenAction 2) sets "btext5" and "ps2sq" visible when @p on is false
+ * (cUIThing_setVisible; the view calls the slot setActive); always stores !@p on in +0x220, which func_0018EEB8 tests
+ * for event 8. Fills slot +0x134 of cFEStateProfileLoad_vtbl (cFEMemCard_hideDeleteButton's slot).
+ *
+ * @param on  true to hide the button
+ */
 extern "C" void func_0018F0B8(void* self, bool on)
 {
     if (cFEStateProfileLoad_mScreenAction != 2) {
@@ -395,6 +433,17 @@ struct cUIObj_F168 {
     virtual void setVisible(int on);
 };
 
+/**
+ * Shows or hides the profile load screen's main (accept) button.
+ *
+ * Except on the load screen (cFEStateProfileLoad_mScreenAction 2) shows "btext3" and "ps2x" only when @p saveBlocked is
+ * false; on the load screen shows "btext3a" and "ps2x" only when @p loadBlocked is false. The shown state is also
+ * stored in +0x224, which func_0018FD90 and func_0018FC98 require. Fills slot +0x13C of cFEStateProfileLoad_vtbl
+ * (cFEMemCard_hideMainButton's slot).
+ *
+ * @param loadBlocked  true to hide the button on the load screen
+ * @param saveBlocked  true to hide the button on the other screens
+ */
 extern "C" void func_0018F168(void* self, bool loadBlocked, bool saveBlocked)
 {
     cUIObj_F168* xButton = (cUIObj_F168*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x));
@@ -418,6 +467,12 @@ INCLUDE_ASM("fe/festateprofile", func_0018F278);
 extern "C" void cFEStateProfileLoad_displayOn(void* self);
 extern "C" void func_0018F9D8(void* self);
 
+/**
+ * Redraws the profile load screen's card panel for the current display state.
+ *
+ * Runs cFEStateProfileLoad_displayOn when the display state (+0x214) is 3, otherwise func_0018F9D8. Fills slot +0xD4 of
+ * cFEStateProfileLoad_vtbl (cFEMemCard_displayStatus's slot).
+ */
 extern "C" void func_0018F278(void* self)
 {
     if (*(int*)((char*)self + 0x214) == 3) {
@@ -750,6 +805,17 @@ struct cUIObj_F9D8 {
     virtual void setSelected(int v);
 };
 
+/**
+ * Resets the profile rows when no card is ready, or hands over to cFEStateProfileLoad_displayOn when one is.
+ *
+ * When this state's vtable slot 42 (func_001D9880) passes and the memory card (the card manager's mpMemCard) passes its
+ * slot-53 check (func_002D3810), it switches the display state to 3 (slot 35, cFEMemCard_triggerDisplayState) and runs
+ * cFEStateProfileLoad_displayOn. Otherwise it resets the six rows "player1" to "player6": slot 25
+ * (cUIText_setUseStaticColour for a text; the view calls it setSelected) with 0 and setStatic(1) (the view calls it
+ * setEnabled). Called by func_0018F278 and by cFEStateProfileLoad_displayOn when no card is found.
+ *
+ * @param vself  the profile load state
+ */
 extern "C" void func_0018F9D8(void* vself)
 {
     cSelf_F9D8* self = (cSelf_F9D8*)vself;
@@ -804,6 +870,18 @@ struct sVEK18FAF0b {
     void (*fn)(void*);
 };
 
+/**
+ * Leaves the profile load screen once its card work is done, going where +0x27C says.
+ *
+ * Runs once: unless +0x1AC is already set it switches on +0x27C (On Tour mTypeOfQuit). 0 asks the engine owner (the
+ * first word of the engine at +0x10) for the next state through its vtable slot 5 (func_001A16C0 in cFECustom_vtbl)
+ * with this state and the mode (+0x1BC), and pushes it with cUIStateStack_pushCheck. 1 sets up a race on the new-race
+ * interface (game mode 4, event 0xC), sets D_004A11B8 to 1 and the location (D_00535C08[0]) to the player's last hub
+ * (cBENewPlayerInterface_getLastHub), submits it (the interface's vtable slot 1, func_00144928) and makes a new
+ * cPreGameLoadScreen the next app module. 2 clears D_004A19D8 and pushes a new title state (func_00194738,
+ * "cFEStateTitle"). Sets +0x1AC afterwards. Fills slot +0x10C of cFEStateProfileLoad_vtbl (cFEMemCard_updateDone's
+ * slot).
+ */
 extern "C" void func_0018FAF0(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
@@ -905,6 +983,18 @@ struct cSelf_FC98 {
     virtual void showMessage(unsigned short* text, int a2, int a3, int a4, int a5, int a6);
 };
 
+/**
+ * Starts saving the profile to the selected card slot when the save button is active.
+ *
+ * Only with the main button active (+0x224): starts a save of file type 1 for the player (+0x1CC) with func_0023CAE8,
+ * sets the state (+0x1C0) to 3, the busy flag (+0x1A8) and +0x1DC. Unless the status popup is already up (+0x210) or
+ * +0x204 is set, it sets the popup type (+0x19C) to 22, fetches the card manager's message
+ * (cMCOverlayManager_GetMessage, 800 characters into a 1600-byte "Temp String" buffer), shows it in the status popup
+ * (this state's vtable slot 36, func_001D8530, with 1, 1, 0, 0, 1), sets +0x210 and frees the buffer. Called by
+ * func_0018FD90 once a profile name has been entered.
+ *
+ * @param vself  the profile load state
+ */
 extern "C" void func_0018FC98(void* vself)
 {
     cSelf_FC98* self = (cSelf_FC98*)vself;
@@ -1016,7 +1106,35 @@ static inline void* GetText_K18FD90(char* key)
     return vt[4].fn(db + vt[4].delta, GetHashValue32(key));
 }
 
-// Profile screen: handles menu events (5 = name picked, 6 = back, 7 = slot chosen, 13 = name entered).
+/**
+ * Handles the profile load screen's widget events: picking a slot, entering a name, backing out and the event-7 action.
+ *
+ * Event 5 (a slot widget, not busy, display state 3): takes the slot from the widget (+0x18) into +0x1C4 and the card
+ * manager's mFileCursor. On the create and save screens (cFEStateProfileLoad_mScreenAction 1 or 3), in state 1 with the
+ * main button active (+0x224), it opens the name keyboard: the first time it builds a cKeyboardPopup ("Keyboard", 1092
+ * bytes) with miCurrentKey 55, at most 8 and at least 1 character, key 75 (space) included in both key sets,
+ * mbDisableForFirst set, keys 0xF-0x18 excluded from the alternate set (func_001CE408) and keys 14, 25, 26, 39, 40, 52,
+ * 53, 64, 65 and 66 from both; each time it sets the "kT_KEYUserName" label, mbClearOnFirst and the player's current
+ * name, pushes it as a popup on the engine's state stack (cUIStateStack_pushPopup) and sets +0x1A0 and clears +0x19C.
+ * On the load screen (2) with the main button active it starts a load of file type 1 (func_0023C8F0) and calls this
+ * state's vtable slot 44 (func_001D69E0).
+ *
+ * Event 13 (the keyboard is done): stores the entered name (mszEditString) as the player's name (func_00147138, for the
+ * player at +0x1CC) and in the manager's mNewFileName, or "kT_MEMPlayerName" formatted with the player number when it
+ * is empty; submits the player interface (vtable slot 1, cBENewPlayerInterface_submit) and starts the save
+ * (func_0018FC98).
+ *
+ * Event 6 (back): unless busy is 1 or state is 6, sets +0x1E4, resets the manager (cMCOverlayManager_SetState, state 0)
+ * when state is 0, 1 or 2, and sets state 6. Event 7: unless busy, in state 6, on the load screen or with the delete
+ * button inactive (+0x220), and only when the selected device passes the card's slot-54 check (func_002D3840): takes
+ * the widget's slot as for event 5; in state 1 with a file in it (cPS2MemCard_HasFileName) sets busy and state 4,
+ * cMCOverlayManager_SetAction(0) and manager state 0x18. Event 14 does nothing. Fills slot +0x9C (onWidgetEvent) of
+ * cFEStateProfileLoad_vtbl.
+ *
+ * @param vself  the profile load state
+ * @param item  the widget that sent the event (its +0x18 word is the slot index)
+ * @param event  the widget event
+ */
 extern "C" void func_0018FD90(void* vself, char* item, int event)
 {
     sProfileK18FD90* self = (sProfileK18FD90*)vself;
@@ -1282,6 +1400,13 @@ struct sProfile_0670 {
     int f224;
 };
 
+/**
+ * Sets up the profile screen as the load screen.
+ *
+ * Shows "Title_LoadProfile", "helptext_load" and "btext3a", hides "ps2sq" (cUIThing_setVisible; the view calls the slot
+ * setActive), clears the delete-button flag (+0x220), sets the main-button flag (+0x224) and clears the card manager's
+ * mPollForFullCard. cFEStateProfileLoad_onCreateScreen runs it when cFEStateProfileLoad_mScreenAction is 2.
+ */
 extern "C" void func_00190670(void* self)
 {
     ((cUIObj_0670*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_LoadProfile)))->setActive(1);
@@ -1317,6 +1442,13 @@ struct cUIObj_0768 {
     virtual void setActive(int on);
 };
 
+/**
+ * Sets up the profile screen as the save screen.
+ *
+ * Shows "Title_SaveProfile", "helptext_save", "btext3" and "btext5" (cUIThing_setVisible; the view calls the slot
+ * setActive) and sets the delete-button (+0x220) and main-button (+0x224) flags. cFEStateProfileLoad_onCreateScreen
+ * runs it when cFEStateProfileLoad_mScreenAction is 3.
+ */
 extern "C" void func_00190768(void* self)
 {
     ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_SaveProfile)))->setActive(1);
@@ -1335,6 +1467,17 @@ extern void* cFEStateRiderBio_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 
+/**
+ * Constructs the rider bio state (state id 0xF) for a user.
+ *
+ * Runs the cUIState constructor (func_0039E2A0) on @p engine, installs cFEStateRiderBio_vtbl, stores @p userNum (as a
+ * signed char) at +0x44 and the user's controller bits at +0x15 (func_001A1CD0 on the engine's owner).
+ * cFECustom_getNextState allocates it as "cFEStateRiderBio" (80 bytes) with the current state's user number.
+ *
+ * @param engine  the UI engine
+ * @param userNum  the user number
+ * @return @p self
+ */
 extern "C" void* func_00190858(void* self, int engine, int userNum)
 {
     signed char idx = userNum;

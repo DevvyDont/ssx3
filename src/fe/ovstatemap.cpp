@@ -103,6 +103,11 @@ extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_002087E8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Map overlay's widget-creation handler; does nothing.
+ *
+ * It is the onWidgetCreate slot (+0x94) of cOVState_MAP_vtbl.
+ */
 void func_002087E8(void* self)
 {
 }
@@ -489,6 +494,15 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* pWidget, int Event
 //100%
 INCLUDE_ASM("fe/ovstatemap", func_00208EF8);
 #ifdef SKIP_ASM
+/**
+ * Map overlay's menu-event filter: events 8 and 9 get 0, every other event 0x101 (animation and sound).
+ *
+ * It is the onWidgetMenu slot (+0xA4) of cOVState_MAP_vtbl.
+ *
+ * @param menu  unused
+ * @param event  the menu event
+ * @return 0 for events 8 and 9, else 0x101
+ */
 extern "C" int func_00208EF8(void* self, int menu, int event)
 {
     return ((unsigned int)(event - 8) < 2) ? 0 : 257;
@@ -1227,6 +1241,15 @@ struct sMap_9FD0 {
     cUIObj_9FD0* b[8];      // 0x104
 };
 
+/**
+ * Hides the map overlay's indicators without deleting them: the player icon (+0xE0) and, for each of the +0xC0 session
+ * points, its icon (+0xE4 array) and highlight (+0x104 array).
+ *
+ * Each present widget gets setVisible(0) (virtual slot 9). cOVState_MAP_showIndicators shows the same widgets and
+ * cOVState_MAP_cleanupIndicators deletes them; nothing in the program calls this one.
+ *
+ * @param vself  the map overlay state (this)
+ */
 extern "C" void func_00209FD0(void* vself)
 {
     sMap_9FD0* self = (sMap_9FD0*)vself;
@@ -1317,6 +1340,18 @@ struct sGameSettings_A1A8 {
 };
 extern sGameSettings_A1A8 D_00535610_A1A8 __asm__("cBEOptionInterface_mOption");
 
+/**
+ * Formats a time in seconds as minutes and seconds in a static buffer, with the separator the language setting asks
+ * for.
+ *
+ * Fetches back-end interface 4 (result unused), splits @p secs into minutes and seconds, and prints them as floats with
+ * "%02.0f:%02.0f" when the language field (bits 22-24 of cBEOptionInterface_mOption) is 0 or 2, or "%02.0f'%02.0f\""
+ * when it is 1 or 3, into D_004C6848. Other values leave the buffer as it was. Used by the map, pause, HUD-popup and
+ * load-hint screens.
+ *
+ * @param secs  the time in whole seconds
+ * @return D_004C6848, the formatted text (overwritten by the next call)
+ */
 // Format a time in seconds as minutes/seconds for the current language.
 extern "C" char* func_0020A1A8(int secs)
 {

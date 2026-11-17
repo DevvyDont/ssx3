@@ -236,6 +236,14 @@ INCLUDE_ASM("fe/ovstates", func_00194A60);
 extern "C" void* func_0039E2A0(void*);
 extern void* cFEStateMainMenu_vtbl[];
 
+/**
+ * Constructs the front end's main menu state.
+ *
+ * Runs the cUIState constructor (func_0039E2A0; the engine reaches it in the second argument register, which this
+ * definition does not declare), sets mHashName to 2 and the vtable cFEStateMainMenu_vtbl, and clears +0x48 and +0x4C.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00194A60(void* self)
 {
     func_0039E2A0(self);
@@ -775,6 +783,12 @@ INCLUDE_ASM("fe/ovstates", func_00195498);
 extern "C" void* func_0039E2A0(void*);
 extern char cFEStateBonusMaterial_vtbl[];
 
+/**
+ * Constructs the front end's bonus material state: the cUIState constructor (func_0039E2A0, with the engine left in the
+ * second argument register), the vtable cFEStateBonusMaterial_vtbl and mHashName 5.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00195498(void* self)
 {
     func_0039E2A0(self);

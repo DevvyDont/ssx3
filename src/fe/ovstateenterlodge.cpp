@@ -260,6 +260,13 @@ INCLUDE_ASM("fe/ovstateenterlodge", func_001F7548);
 extern void* cWScriptMan_TheWScriptMan;
 extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
 
+/**
+ * Picks the mission the Big Challenge start overlay offers: the next entry of the mission menu queue, or the local
+ * mission when the queue is empty.
+ *
+ * Reads the queue at cWScriptMan_TheWScriptMan + 0x1C4 with tMissionMenuQueue_getNextEntry; its entry's first word, or
+ * else the local mission id at +0x2A0, is stored as the overlay's mission id (+0x9C).
+ */
 extern "C" void func_001F7548(void* self)
 {
     int* queueEntry = tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
@@ -360,6 +367,13 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern char str_90bc_fail[];
 
+/**
+ * Creates the Big Challenge failed overlay's screen ("90bc_fail") and starts its animation.
+ *
+ * Sets mHashName to the hash of "90bc_fail", adds that screen to mpEngine for this state
+ * (cUIEngine_addScreenByHashName) into mpScreen, plays it from frame 0 when it exists, then runs
+ * cOVState_onCreateScreen. It is the onCreateScreen slot of this overlay's vtable D_004735B0.
+ */
 extern "C" void func_001F76B8(void* self)
 {
     void* engine;
@@ -381,6 +395,12 @@ INCLUDE_ASM("fe/ovstateenterlodge", func_001F7738);
 extern void* cWScriptMan_TheWScriptMan;
 extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
 
+/**
+ * Takes the Big Challenge failed overlay's mission: the next entry of the mission menu queue.
+ *
+ * Stores the first word of tMissionMenuQueue_getNextEntry(cWScriptMan_TheWScriptMan + 0x1C4) as the mission id (+0x9C).
+ * Unlike func_001F7548 it does not check for an empty queue (likely bug if the queue can be empty: a null dereference).
+ */
 extern "C" void func_001F7738(void* self)
 {
     *(int*)((char*)self + 0x9C) = *tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
@@ -395,6 +415,14 @@ extern char str_yes_b[];
 extern char str_no_b[];
 extern char str_info[];
 
+/**
+ * Tags the Big Challenge failed overlay's buttons as they are created: "yes_b" gets misc data 0, "no_b" 1 and "info" 2.
+ *
+ * Compares the widget's hash name (+0x38) with the hashes of the three names and stores the index in its misc data
+ * (+0x18), which func_001F7800 switches on.
+ *
+ * @param item  the widget being created
+ */
 extern "C" void func_001F7770(void* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
@@ -417,6 +445,14 @@ extern "C" void func_001F7770(void* self, void* item)
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", func_001F77F0);
 #ifdef SKIP_ASM
+/**
+ * Menu-event filter of the Big Challenge failed overlay: event 6 (back) gets 0x101 (animation and sound), every other
+ * event 0.
+ *
+ * @param menu  unused
+ * @param event  the menu event
+ * @return 0x101 for event 6, else 0
+ */
 extern "C" int func_001F77F0(void* self, int menu, int event)
 {
     return event == 6 ? 257 : 0;
@@ -433,6 +469,21 @@ struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
 extern char str_TransitionOut_b[];
 
+/**
+ * Handles the Big Challenge failed overlay's buttons: retry restarts the challenge, info opens overlay 29, and anything
+ * else (no, back) gives the challenge up.
+ *
+ * Ignored for a null @p item. Event 5 (select) on "yes_b" (misc data 0) puts the mission id (+0x9C) into
+ * cWScriptMan_TheWScriptMan + 0x2A0, restarts it (cWScriptMan_restartLocalMission), pops this state from mpEngine's
+ * state stack (func_0039F190), pops the pause-mode stack (D_005366E8 / D_004A2A54) into cPauseState_Flags and calls
+ * func_0029D6D0 on the audio object. On "info" (misc data 2) it opens overlay 29 (cOVStateManager_triggerOverlay) and
+ * stays. Event 6 (back) first plays mpScreen's "TransitionOut_b" frame when it has one. Event 6, and event 5 on any
+ * other widget, then cancel the challenge (cWScriptMan_cancelLocalMission), pop the state and restore cPauseState_Flags
+ * the same way. Other events do nothing.
+ *
+ * @param item  the widget; its misc data (+0x18) is set by func_001F7770
+ * @param msg  the widget event: 5 select, 6 back
+ */
 extern "C" void func_001F7800(void* self, void* item, int msg)
 {
     if (item == 0) {

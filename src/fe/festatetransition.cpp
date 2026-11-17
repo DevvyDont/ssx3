@@ -114,6 +114,14 @@ INCLUDE_ASM("fe/festatetransition", func_00194738);
 extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateTitle_vtbl[];
 
+/**
+ * Constructs the title-screen state (allocated as "cFEStateTitle", 76 bytes).
+ *
+ * Runs cUIState's constructor (func_0039E2A0; the engine argument reaches it untouched in the second argument
+ * register), stores cFEStateTitle_vtbl, clears +0x48 (On Tour mNumTicksIdle) and sets mHashName to 0.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00194738(void* self)
 {
     func_0039E2A0(self);

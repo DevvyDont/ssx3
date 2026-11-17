@@ -557,6 +557,16 @@ INCLUDE_ASM("fe/festateruleselect", func_00192088);
 extern int D_005308B8_2088[] __asm__("D_005308B8");
 extern int D_005308D4_2088[] __asm__("D_005308D4");
 
+/**
+ * Stores a custom race rule's new setting in the rule settings D_005308B8.
+ *
+ * Rule 2 stores @p v whole in D_005308D4. The others store bit 0 of @p v as one flag: rules 3, 7 and 14 in word 0 of
+ * D_005308B8 (bits 3, 4 and 5); rules 4, 8, 1, 5, 6 and 9-13 in word 6 (D_005308D0; bits 0, 1, 2, 3, 4 and 5-9).
+ * Unknown rules change nothing and @p self is not used. func_00192240 reads the same bits back.
+ *
+ * @param idx  the rule id (1-14)
+ * @param v  the new value: the list box's entry data
+ */
 extern "C" void func_00192088(void* self, int idx, int v)
 {
     switch (idx) {
@@ -615,7 +625,16 @@ extern unsigned int D_005308B8_192240[] __asm__("D_005308B8");
 extern int D_005308D0[];
 extern int D_005308D4[];
 
-// Returns the current setting of a race rule (1-14), or -1 for an unknown rule.
+/**
+ * Returns the current setting of a custom race rule from the rule settings D_005308B8.
+ *
+ * Rule 2 returns D_005308D4 whole. Rules 3, 7 and 14 return bits 3, 4 and 5 of D_005308B8's word 0; rules 4, 8, 1, 5, 6
+ * and 9-13 return bits 0, 1, 2, 3, 4 and 5-9 of D_005308D0 (word 6): the bits func_00192088 writes. @p self is not
+ * used.
+ *
+ * @param rule  the rule id (1-14)
+ * @return the rule's flag (0 or 1) or rule 2's value, or -1 for an unknown rule
+ */
 extern "C" int func_00192240(void* self, int rule)
 {
     switch (rule) {
@@ -667,6 +686,17 @@ struct sRuleSel_2380 {
     unsigned char count[15];
 };
 
+/**
+ * Updates the rule conflict counters after a rule's list box changed, and turns conflicting rules off.
+ *
+ * The rule is the list box's mMiscData (+0x18); D_004410C8[rule] << 1 has a bit for each rule (1-14) that may stay on
+ * with it, so every rule whose bit is clear conflicts. When the list box's current entry data
+ * (cUIListBox_getCurrentEntryData) is 0 each conflicting rule's counter in +0x51 (On Tour mcRuleConflictRefTable) is
+ * decremented, not below 0; otherwise each is incremented and that rule's setting is cleared (func_00192088 with 0).
+ * Then the menu is recoloured (cFEStateRuleSelect_updateMenuColor).
+ *
+ * @param item  the rule's list box that changed
+ */
 extern "C" void func_00192380(sRuleSel_2380* self, void* item)
 {
     int mask = D_004410C8[*(int*)((char*)item + 0x18)] << 1;
@@ -771,6 +801,15 @@ INCLUDE_ASM("fe/festateruleselect", func_001926F0);
 #ifdef SKIP_ASM
 extern void* D_0046B078[];
 
+/**
+ * Constructs one bragging-rights choice panel (0x34 bytes; the bragging-rights state holds two at +0x6D0).
+ *
+ * Stores the vtable D_0046B078 at +0x30 and clears the eight list-box pointers (+0x8), the menu (+0x0), the group
+ * (+0x4), the confirmed flag (+0x28) and the row enable mask (+0x2C) (On Tour mpListBox, mpPlayerMenu, mpGroup,
+ * mbConfirmed, mcItemEnableFlag).
+ *
+ * @return @p self
+ */
 extern "C" void* func_001926F0(void* self)
 {
     int i;
@@ -800,6 +839,15 @@ struct sObj00192740 {
     sVEntry00192740* vt;
 };
 
+/**
+ * Sets a bragging-rights panel's confirmed flag (+0x28) and locks or unlocks its list boxes with it.
+ *
+ * Each of the eight list boxes (+0x8) that exists gets setStatic(@p enabled) (vtable slot 8).
+ * cFEStateBraggingRights_onWidgetEvent passes 1 when a row is accepted; cFEStateBraggingRights_onCreateScreen and
+ * func_001941B0 pass 0.
+ *
+ * @param enabled  the new flag: 1 confirms (locks), 0 unlocks
+ */
 extern "C" void func_00192740(void* self, int enabled)
 {
     int i;
@@ -827,6 +875,14 @@ struct sVEnt_001927B0 { short delta; short index; void (*fn)(void*, const sColor
 struct sObj_001927B0 { int pad[2]; sVEnt_001927B0* vt; };
 struct sRuleSel_001927B0 { void* owner; int f4; sObj_001927B0* items[8]; };
 
+/**
+ * Colours a bragging-rights panel's rows: the selected row white, the others by their current value.
+ *
+ * Does nothing without a menu (+0x0). Skips missing list boxes and rows not enabled (func_00192948). The row equal to
+ * the menu's mScrollItemCurrent (+0x95) gets (A, R, G, B) = (1, 1, 1, 1); a row whose current entry data
+ * (cUIListBox_getCurrentEntryData) is non-zero gets (1, 0.592, 0.043, 0) and the rest (1, 0.145, 0.027, 0.020), through
+ * setColour (vtable slot 11).
+ */
 extern "C" void func_001927B0(sRuleSel_001927B0* self)
 {
     void* owner = self->owner;
@@ -861,6 +917,12 @@ extern "C" void func_001927B0(sRuleSel_001927B0* self)
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_00192918);
 #ifdef SKIP_ASM
+/**
+ * Returns the row index (0-7) of a list box in a bragging-rights panel's eight list boxes (+0x8), or -1.
+ *
+ * @param val  the list box to look for
+ * @return its index, or -1 when the panel does not hold it
+ */
 extern "C" int func_00192918(void* self, int val)
 {
     int i;
@@ -876,6 +938,15 @@ extern "C" int func_00192918(void* self, int val)
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_00192948);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a bragging-rights panel's row is enabled in its enable mask (+0x2C).
+ *
+ * Quirk: the mask is built as (0x1000000 << @p itemIndex) >> 24, a sign-extended byte, so for row 7 the test also
+ * covers bits 8-31.
+ *
+ * @param itemIndex  the row (0-7)
+ * @return 1 when the row's bit is set, else 0
+ */
 extern "C" int func_00192948(void* self, int itemIndex)
 {
     int mask = (int)(0x1000000 << itemIndex) >> 24;
@@ -886,6 +957,13 @@ extern "C" int func_00192948(void* self, int itemIndex)
 //100%
 INCLUDE_ASM("fe/festateruleselect", func_00192968__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Stores a bragging-rights panel's row enable mask (+0x2C).
+ *
+ * cFEStateBraggingRights_onCreateScreen passes a bit for each rule row of the current event.
+ *
+ * @param val  the mask, bit i for row i
+ */
 void func_00192968(void* self, int val)
 {
     *(int*)((char*)self + 0x2C) = val;
@@ -944,6 +1022,16 @@ struct sOwner_00192970 {
     int mask;                       // 0x2C
 };
 
+/**
+ * Locks and hides the rows that a bragging-rights panel's enable mask leaves out, with their arrows and labels.
+ *
+ * For each row i (0-7) whose bit in +0x2C is clear and whose list box exists, the list box gets setStatic(1) and
+ * setVisible(0) (vtable slots 8 and 9), and the objects named "<i>arrw_left", "<i>arrw_right", "<i>arrw_left1",
+ * "<i>arrw_right1", the row label "<i+1>", "box<i+1>", "w1<i+1>" and "w2<i+1>" are hidden on @p screen (setVisible(0)).
+ * The names are stack copies of the strings with the digit patched in.
+ *
+ * @param screen  the screen holding the panel's widgets
+ */
 extern "C" void func_00192970(sOwner_00192970* self, void* screen)
 {
     sName11_00192970 n0 = *(sName11_00192970*)str_0arrw_left;
@@ -987,6 +1075,15 @@ INCLUDE_ASM("fe/festateruleselect", func_00192D00);
 extern void* cFEStateBraggingRights_vtbl[];
 extern "C" void* cFEStateNet_cFEStateNet(void* self, int a1, int a2);
 
+/**
+ * Constructs the bragging-rights state (allocated as "cFEStateBraggingRights", 1852 bytes).
+ *
+ * Runs cFEStateNet_cFEStateNet with @p engine and 0, stores cFEStateBraggingRights_vtbl, builds the two choice panels
+ * at +0x6D0 and +0x704 (func_001926F0), sets mHashName 20 and clears +0x738.
+ *
+ * @param engine  the UI engine
+ * @return @p self
+ */
 extern "C" void* func_00192D00(void* self, int engine)
 {
     char* ruleSel;

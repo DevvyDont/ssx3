@@ -300,7 +300,21 @@ struct sNetCfg_D0A8 {
 };
 extern sNetCfg_D0A8 D_00534B30_D0A8 __asm__("cBENetworkInterface_networkOpt");
 
-// Debug menu: opens the direct-socket link to the paired test console and starts the game comm.
+/**
+ * Opens the debug direct link to a fixed partner console when a network game is set, then starts the game comm on it.
+ *
+ * Fetches the network interface (cBE_getInterface__Fv kind 7; the result is unused) and returns at once unless
+ * cBENetworkInterface_networkOpt.bIsNetworkGame is set. Reads this console's address with func_00256038: a console at
+ * 10.10.53.25 (0x0A0A3519) dials "10.10.53.35" (D_0045D018), any other dials "10.10.53.25" (D_0045D028). Opens a
+ * DirtySock channel with cCommSystem_openDSockChannel on networkOpt.iPort, as host or client by bIsHost, and spins
+ * until the channel reports connected (func_00255D50), running the comm update func_00255A20, SYNCTASK_run(0) and
+ * THREAD_yieldticks(1) on each pass. Then creates the game comm (cGameComm_construct with the channel and bIsHost) and
+ * connects and enables voice chat on D_004A33F4 (func_00266D58, func_00266E30). cDebugMenuScreen_update calls it when
+ * the debug start menu starts a game.
+ *
+ * Likely bug: voice chat is given this console's own address (from func_00256038), not the partner's; func_002639E0
+ * passes the opponent's. The wait loop has no timeout.
+ */
 extern "C" void func_0017D0A8(void)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -370,6 +384,15 @@ void* cMenu_cMenu(void* self);
 extern "C" void* func_002CCDF0(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 
+/**
+ * Constructs the debug lobby's "Continue" menu: a cMenu with a single "Continue" command item.
+ *
+ * Runs cMenu_cMenu, stores the menu's vtable D_0046D740 at +0x12C (its destructor is func_001DCD58), builds the item at
+ * +0x130 with func_002CCDF0 and str_Continue and appends it (cMenu_addItem, index -1). The debug lobby screen
+ * (func_0017D298) keeps it at +0x604 and pushes it under every error and "declined" message.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0017D200(void* self)
 {
     cMenu_cMenu(self);
@@ -387,6 +410,15 @@ extern void* D_004A4E90;
 extern "C" void func_0017D6F0(void* self, void* ev);
 extern "C" void func_00259230(void* ev);
 
+/**
+ * Passes one lobby event to the debug lobby screen, when one exists, and then to the real front end.
+ *
+ * The lobby manager's update (func_0025AC50) calls it for every event it pops from mEventList, with itself as @p self
+ * (unused here). When the debug lobby screen pointer D_004A4E90 is set (func_0017D298 sets it, func_0017D3B0 clears it)
+ * the event goes to func_0017D6F0; func_00259230 then hands it to the real front end's top UI state.
+ *
+ * @param ev  the event (its type at +0x0)
+ */
 extern "C" void func_0017D260(void* self, void* ev)
 {
     if (D_004A4E90 != 0)
@@ -415,6 +447,24 @@ struct sDbgOwner17D298 {
     void* owner;
 };
 
+/**
+ * Constructs the debug front end's lobby screen (cDebugLobbyScreen in the July 2003 preview) with its eight menus.
+ *
+ * Stores the vtable D_0046D350 (slots: destructor func_0017D3B0, update func_0017D688, draw func_0017E5C8), zeroes the
+ * state at +0x4 and builds the menu system at +0x8 (cMenuSys_cMenuSys). Each menu gets a one-pointer functor holding
+ * this screen, which its command handler calls back: the account menu "Login Method" at +0x70 (func_001DA988, Create
+ * Account and Login), the "Continue" menu at +0x604 (func_0017D200), "Select Persona" at +0x74C (func_001DACB8, with
+ * Create Persona and Delete Persona), "Select Room" at +0xD2C (func_001DAE20), "Room Occupants" at +0x1044
+ * (func_001DAF08, occupants and Chat), the chat menu at +0x1534 (func_001DB028), the "You've been Challenged!" menu at
+ * +0x18C0 (__sti__all_in_one_main_cpp, Accept and Decline) and the "Abort" menu at +0x1AAC (func_001DB2B0). The three
+ * cBXStrings at +0x1C04 (typed user name), +0x1C08 (typed password) and +0x1C0C (challenger's name) start empty. The
+ * menu system's font, input and box texture (its +0x58, +0x5C, +0x60, here +0x60, +0x64, +0x68) are taken from the
+ * debug front end's font (+0x18), SSXApp->Inputs[0] and its box texture (+0x20). Finally the screen registers itself in
+ * D_004A4E90, which func_0017D260 uses to deliver lobby events. cDebugFE_load allocates it (7192 bytes, "LobbyMenu") as
+ * its second screen.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0017D298(char* self)
 {
     *(void***)self = D_0046D350;
@@ -544,6 +594,19 @@ static inline void dtorF_17D3B0(char* sub)
     cMenu__cMenu(sub, 2);
 }
 
+/**
+ * Destroys the debug lobby screen: unregisters it, destroys its strings, menus and menu system, and frees it when
+ * asked.
+ *
+ * Stores the vtable D_0046D350 again, clears the screen pointer D_004A4E90, destroys the cBXStrings at +0x1C0C, +0x1C08
+ * and +0x1C04, then the menus in reverse order: Abort (+0x1AAC), You've been Challenged (+0x18C0), the chat menu
+ * (+0x1534, its 14 line items through their virtual destructors), Room Occupants (+0x1044, 24 items), Select Room
+ * (+0xD2C, 12 items), Select Persona (+0x74C, func_001DD0C8), Continue (+0x604) and Login Method (+0x70,
+ * func_001DCEA0), and the menu system (+0x8, cMenuSys__cMenuSys). Ends with cDebugScreen's vtable cDebugScreen_vtbl and
+ * operator_delete when bit 0 of @p flags is set. The item and menu destructors run with flags 2 (no free).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the screen
+ */
 extern "C" void func_0017D3B0(char* self, int flags)
 {
     *(void***)self = D_0046D350;
@@ -591,6 +654,14 @@ static inline void* sMenuStack17D688_top(sMenuStack17D688* self)
     return 0;
 }
 
+/**
+ * Runs one frame of the debug lobby screen: the network and lobby updates, menu input and the screen's state machine.
+ *
+ * Calls the comm system update func_00255A20 (cCommSystem_mCommSystem) and the lobby manager update func_0025AC50
+ * (LobbyMan_mLobbyMan), which delivers queued lobby events to func_0017D6F0 through func_0017D260. When the menu system
+ * at +0x8 has a menu open it runs its input (func_002CC0C0), then func_0017DB18 advances the state. cDebugFE_update
+ * calls it through the active screen's virtual slot 2.
+ */
 extern "C" void func_0017D688(sDebugFE17D688* self)
 {
     func_00255A20(cCommSystem_mCommSystem);
@@ -652,7 +723,36 @@ static inline void SetMenu0017D6F0(int* menu, void* items)
     func_002CC3B8(menu, items);
 }
 
-// Debug front end: handles a menu event (id at ev+0, argument at ev+8).
+/**
+ * Handles one lobby event for the debug lobby screen: moves its state (+0x4) on and opens the menu for the next step.
+ *
+ * The event type is at +0x0 of @p ev and its argument at +0x8. SSXApp->unk_74 set (automatic lobby login) skips the
+ * menus. By type:
+ * - 277 (disconnected): closes all menus (func_002CC460 until the stack is empty); automatic mode restarts at state 0,
+ *   otherwise state 19 with the Continue menu (+0x604).
+ * - 258 (error): func_0017DA30 with the error code.
+ * - 201 (connected to the lobby server): automatic mode copies SSXApp->UserName and Password into LobbyMan's mUserName
+ *   and mPassword, logs in (func_0025C610) and sets state 5; otherwise state 3 and the Login Method menu (+0x70).
+ * - 203 (account created): state 5 and a login with the typed user name and password (+0x1C04, +0x1C08).
+ * - 212 (logged in): automatic mode selects persona 0 (func_0025CD28, state 7); otherwise fills Select Persona (+0x74C)
+ *   from the lobby (func_001DB418), opens it and sets state 6.
+ * - 218 (persona selected): automatic mode joins every room named "A.West" (func_0025F120, func_0025F150,
+ *   func_004165A8, then func_0025D800, state 11); otherwise state 10 with Select Room (+0xD2C).
+ * - 214, 216 (persona created or deleted): refills and opens Select Persona, state 6.
+ * - 220 (room joined): Room Occupants (+0x1044) and state 12 when func_0025F430 reports a current room, else Select
+ *   Room and state 10.
+ * - 237, 240, 241 (challenge declined, ignored, ...): state 17, closes all menus and opens Continue.
+ * - 239 (game ready): func_0017DE70 sets up the race and opens the game channel; state 16.
+ * - 236 (challenge received): in state 12 it closes all menus, sets state 15, copies the challenger's name (the event's
+ *   cBXString at +0x8) into +0x1C0C, shows it as the third line of the challenge menu (+0x1A44) and opens that menu
+ *   (+0x18C0); in any other state it declines at once (func_0025FC28 with the name).
+ *
+ * Likely bug: in automatic mode a lobby without an "A.West" room leaves the screen in state 7 ("Selecting Persona") for
+ * good, and the room search does not stop at the first match.
+ *
+ * @param vself  the debug lobby screen
+ * @param ev  the lobby event
+ */
 extern "C" void func_0017D6F0(void* vself, void* ev)
 {
     sDebugFE17D6F0* self = (sDebugFE17D6F0*)vself;
@@ -774,7 +874,21 @@ static inline void SetMode0017DA30(void* self, int mode)
     *(int*)((char*)self + 0x4) = mode;
     func_002CC3B8((char*)self + 0x8, (char*)self + 0x604);
 }
-// Advances the debug menu to the follow-up screen for the current mode.
+/**
+ * Shows the error screen that fits the debug lobby screen's current step after a lobby error event.
+ *
+ * Stores @p a1 at +0x1C14 (func_0017E5C8 prints its text through func_00260E50) and, by the state at +0x4, moves to the
+ * matching error state and opens the Continue menu (+0x604): 2 (connecting) goes to 18, 4 (creating account) to 20, 7,
+ * 8 and 9 (persona steps) to 22, 11 (joining a room) to 23 and 13 (waiting on a challenge) to 24. In state 5
+ * (authenticating) it goes to 21 unless SSXApp->unk_74 (automatic login) is set; then it copies SSXApp->UserName and
+ * Password into LobbyMan again and resends the login (func_0025C610), staying in state 5. Other states only keep the
+ * code. func_0017D6F0 calls it for event 258.
+ *
+ * Likely bug: with automatic login a rejected login is retried at once with the same credentials, with no limit and no
+ * error shown.
+ *
+ * @param a1  the lobby error code (a four-character tag)
+ */
 extern "C" void func_0017DA30(void* self, int a1)
 {
     *(int*)((char*)self + 0x1C14) = a1;
@@ -849,7 +963,30 @@ struct sDebugFE17DB18 {
     int channel;                     // 0x1C10
 };
 
-// Debug front end: runs the menu state machine until the state settles.
+/**
+ * Advances the debug lobby screen's state machine, re-running it until the state (+0x4) stops changing.
+ *
+ * - 0: starts the network connection with config 0 (func_00255F50) when the comm system is idle (mNetConnState 1), then
+ *   state 1.
+ * - 1: once mNetConnState is neither 3 nor 4, starts connecting to the lobby server (func_0025B6D8) and sets state 2.
+ * - 3, 6, 10, 15: reopens Login Method (+0x70), Select Persona (+0x74C), Select Room (+0xD2C) or the challenge menu
+ *   (+0x18C0) when no menu is open (func_002CC3B8); state 10 also refreshes the room list (func_001DB528) every pass.
+ * - 12: with no menu open it joins the empty-named room (func_0025D800 with index -1) and sets state 11; otherwise it
+ *   refreshes the occupant list (func_001DB620).
+ * - 13: opens the Abort menu (+0x1AAC) when the menu system is inactive (cMenuSys_isActive).
+ * - 14: with no menu open, state 12 and Room Occupants (+0x1044).
+ * - After the Continue menu closes: 17 and 24 return to Room Occupants (state 12), 20 and 21 to Login Method (state 3),
+ *   22 to a refilled Select Persona (state 6), 23 to Select Room (state 10), 18 and 19 to state 0.
+ * - 16: once the game channel (+0x1C10) reports connected (func_00255D50) it creates the game comm (cGameComm_construct
+ *   with LobbyMan's mIsHost), queues a new cPreGameLoadScreen as the next module and connects voice chat
+ *   (func_00266D58, func_00266E30 on D_004A33F4).
+ *
+ * Likely bugs: in state 1 the loop runs again at once after state 0, when mNetConnState is still 2 (connect requested),
+ * so the lobby connect starts before the network is up (a failed connection, 6, does not stop it either); voice chat in
+ * state 16 gets this console's own address (func_00256038), not the opponent's.
+ *
+ * @param vself  the debug lobby screen
+ */
 extern "C" void func_0017DB18(void* vself)
 {
     sDebugFE17DB18* self = (sDebugFE17DB18*)vself;
@@ -1015,6 +1152,18 @@ static inline void vcall1_17DE70(void* obj)
     vt[1].fn((char*)obj + vt[1].delta);
 }
 
+/**
+ * Sets up the debug lobby's two-player online race and opens the game channel to the opponent.
+ *
+ * The new-race interface (cBE_getInterface__Fv kind 0) gets game path 1, game mode 4 and no AI riders, sets
+ * cBENewRaceInterface_newRace.iLocationIdx (D_00535C08) to 0 and D_004A11B8 to 1, then applies them through the
+ * interface's virtual slot 1. The player interface (kind 1) gets controller -1 and character 0 for riders 2..5,
+ * controller 0 for player 0 and -1 for player 1, and is applied the same way. cBENetworkInterface_networkOpt gets
+ * bIsNetworkGame 1 and bIsHost from LobbyMan's mIsHost (network interface, kind 7, applied). The address to dial is
+ * mOppoAddr when hosting and mHostAddr otherwise; it is formatted as dotted decimal and passed to
+ * cCommSystem_openDSockChannel with networkOpt.iPort and bIsHost. Stores the channel at +0x1C10 and sets state 16,
+ * where func_0017DB18 waits for the connection. func_0017D6F0 calls it for event 239 (game ready).
+ */
 extern "C" void func_0017DE70(char* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1079,6 +1228,19 @@ struct sDsReq17E030 {
     int f29C;
 };
 
+/**
+ * Creates a lobby account from the debug "Create Account" menu: keeps the typed name and password and sends the
+ * request.
+ *
+ * Closes all menus (func_002CC460 until the stack is empty), copies @p a and @p b into the screen's strings at +0x1C04
+ * and +0x1C08 and sets state 4 ("Creating account"). Fills LobbyMan's mNewAccount form: mName @p a, mPassword and
+ * unk_08 @p b, mMail "please@get.lost", born 1950-01-01 (mBornYear, mBornMonth, mBornDay), mGender 1 (sent as 'F'),
+ * both mSpam flags 0, and sends it with func_0025B9C8. On event 203 func_0017D6F0 then logs in with the same name and
+ * password. Called by the Create Account menu's command handler func_001DBC38.
+ *
+ * @param a  account name
+ * @param b  password
+ */
 extern "C" void func_0017E030(sDebugFEState17E030* self, const char* a, const char* b)
 {
     int* list = &self->list;
@@ -1119,6 +1281,16 @@ struct sDebugFEState17E118 {
     char* pass;  // 0x1C08
 };
 
+/**
+ * Logs in from the debug "Login" menu: keeps the typed name and password and sends the lobby login.
+ *
+ * Closes all menus, copies @p userName and @p password into the screen's strings at +0x1C04 and +0x1C08, sets state 5
+ * ("Authenticating account"), copies both into LobbyMan's mUserName and mPassword and sends the login (func_0025C610).
+ * Called by the Login menu's command handler func_001DBC68.
+ *
+ * @param userName  account name
+ * @param password  password
+ */
 extern "C" void func_0017E118(sDebugFEState17E118* self, const char* userName, const char* password)
 {
     int* list = &self->list;
@@ -1145,6 +1317,14 @@ struct sDebugFEState17E1C0 {
 extern "C" void func_002CC460(void* list);
 extern "C" void func_0025D1B8(void* a, int b);
 
+/**
+ * Creates a persona from the debug "Create Persona" menu.
+ *
+ * Closes all menus, sets state 8 ("Creating Persona") and sends the create-persona request (func_0025D1B8). The menu's
+ * command handler func_001DBBE8 passes the typed name buffer, although the parameter is declared int.
+ *
+ * @param persona  the new persona's name (a char pointer)
+ */
 extern "C" void func_0017E1C0(sDebugFEState17E1C0* self, int persona)
 {
     int* list = &self->list;
@@ -1167,6 +1347,14 @@ struct sDebugFEState17E228 {
 extern "C" void func_002CC460(void* list);
 extern "C" void func_0025D428(void* a, int b);
 
+/**
+ * Deletes a persona chosen in the debug "Delete Persona" menu.
+ *
+ * Closes all menus, sets state 9 ("Deleting Persona") and sends the delete-persona request for that index
+ * (func_0025D428). Called by the menu's command handler func_001DBC10.
+ *
+ * @param persona  index of the persona in LobbyMan's list
+ */
 extern "C" void func_0017E228(sDebugFEState17E228* self, int persona)
 {
     int* list = &self->list;
@@ -1189,6 +1377,14 @@ struct sDebugFEState17E290 {
 extern "C" void func_002CC460(void* list);
 void func_0025CD28(void* a, int b);
 
+/**
+ * Selects the persona chosen in the debug "Select Persona" menu.
+ *
+ * Closes all menus, sets state 7 ("Selecting Persona") and selects the persona with func_0025CD28. Called by the menu's
+ * command handler func_001DBBC0.
+ *
+ * @param persona  index of the persona in LobbyMan's list
+ */
 extern "C" void func_0017E290(sDebugFEState17E290* self, int persona)
 {
     int* list = &self->list;
@@ -1211,6 +1407,14 @@ struct sDebugFEState17E2F8 {
 extern "C" void func_002CC460(void* list);
 extern "C" void func_0025D800(void* a, int b, int c);
 
+/**
+ * Joins the room chosen in the debug "Select Room" menu.
+ *
+ * Closes all menus, sets state 11 ("Selecting Room") and joins the room without a password (func_0025D800). Called by
+ * the menu's command handler func_001DBB90.
+ *
+ * @param room  index in the lobby's room list
+ */
 extern "C" void func_0017E2F8(sDebugFEState17E2F8* self, int room)
 {
     int* list = &self->list;
@@ -1227,6 +1431,14 @@ INCLUDE_ASM("fe/debugfe", func_0017E368);
 #ifdef SKIP_ASM
 extern "C" void func_002CC460(void* list);
 
+/**
+ * Handles picking a user in the debug "Room Occupants" menu: closes all menus and sets state 13 ("Waiting for
+ * reponse").
+ *
+ * Likely bug: the menu's command handler func_001DBB48 passes the chosen occupant's index as a second argument, but
+ * this function ignores it and sends no challenge, so the screen waits for a reply that is never requested (the Abort
+ * menu, func_0017E558, gets it out).
+ */
 extern "C" void func_0017E368(void* self)
 {
     int* list = (int*)((char*)self + 0x8);
@@ -1243,6 +1455,9 @@ INCLUDE_ASM("fe/debugfe", func_0017E3B8);
 extern "C" void func_002CC460(void* list);
 extern "C" void func_002CC3B8(void* list, void* item);
 
+/**
+ * Opens the debug chat menu from "Room Occupants": closes all menus, sets state 14 and pushes the chat menu (+0x1534).
+ */
 extern "C" void func_0017E3B8(void* self)
 {
     int* list = (int*)((char*)self + 0x8);
@@ -1266,6 +1481,14 @@ extern "C" void func_002CC460(void* list);
 extern "C" void func_002CC3B8(void* list, void* item);
 extern "C" void func_0025AAE0(void* a, int b);
 
+/**
+ * Sends a chat line chosen in the debug chat menu and returns to "Room Occupants".
+ *
+ * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and sends @p arg as a lobby message with
+ * func_0025AAE0 ('mesg'). The chat menu's command handler func_001DBB20 passes the item's caption.
+ *
+ * @param arg  the line to send (a char pointer, declared int)
+ */
 extern "C" void func_0017E418(sDebugFEState17E418* self, int arg)
 {
     int* list = &self->list;
@@ -1289,6 +1512,13 @@ struct sDebugFEState17E490 {
 extern "C" void func_002CC460(void* list);
 extern "C" void func_0025FB58(void* a, int b, int c);
 
+/**
+ * Accepts a challenge from the debug "You've been Challenged!" menu.
+ *
+ * Closes all menus, sets state 13 ("Waiting for reponse") and locks the challenge with the challenger named in +0x1C0C
+ * (func_0025FB58, match type 0). func_0017DB18 then shows the Abort menu. Called by the challenge menu's command
+ * handler func_001DBAD8.
+ */
 extern "C" void func_0017E490(sDebugFEState17E490* self)
 {
     int* list = &self->list;
@@ -1312,6 +1542,12 @@ extern "C" void func_002CC460(void* list);
 extern "C" void func_002CC3B8(void* list, void* item);
 void func_0025FC28(void* a, int b);
 
+/**
+ * Declines a challenge from the debug "You've been Challenged!" menu and returns to "Room Occupants".
+ *
+ * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and sends "decline" to the challenger named in
+ * +0x1C0C (func_0025FC28). Called by the challenge menu's command handler func_001DBAD8.
+ */
 extern "C" void func_0017E4F0(sDebugFEState17E4F0* self)
 {
     int* list = &self->list;
@@ -1336,6 +1572,13 @@ extern "C" void func_002CC460(void* list);
 extern "C" void func_002CC3B8(void* list, void* item);
 extern "C" void func_0025F628(void* a, int b, int c);
 
+/**
+ * Aborts the pending challenge from the debug "Abort" menu and returns to "Room Occupants".
+ *
+ * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and cancels the challenge with func_0025F628(..., 1,
+ * 0): a type-238 event is posted and no "abortChal" is sent to the opponent. Called by the Abort menu's command handler
+ * func_001DBAB8.
+ */
 extern "C" void func_0017E558(sDebugFEState17E558* self)
 {
     int* list = &self->list;
@@ -1441,6 +1684,24 @@ static inline void onOff17E5C8(void* font, int on, float x, float y)
 
 static inline int isEq17E5C8(int a, int b) { return a == b; }
 
+/**
+ * Draws the debug lobby screen: a status line for the current state, the error text or game details, the menus and this
+ * console's address.
+ *
+ * Uses the debug front end's font (SSXApp->DebugFE +0x18), setting its Scale to BaseScale times a factor and its Color
+ * (tARGB) before each part. By the state at +0x4 it centres a red (0.9, 0.2, 0.2) line at scale 1.5 (func_00392908):
+ * "Connecting to network" (0, 1), "Connecting to lobby" (2), "Creating account" (4), "Authenticating account" (5),
+ * "Selecting Persona" (7), "Creating Persona" (8), "Deleting Persona" (9) and "Selecting Room" (11) at (320, 200);
+ * "Waiting for reponse" (13) and "Challenge Declined!" (17) at (320, 100). The error states 18 "Error Connecting!", 19
+ * "Disconnected from server!", 20 "Error Creating Account!", 21 "Error Authenticating Account!", 22 "Persona Error!",
+ * 23 "Error Entering room!" and 24 "Error Issueing Challenge!" add a light grey line at scale 0.8 and y 150: the text
+ * func_00260E50 builds for the error code at +0x1C14. State 16 shows "Play Game!" and, at scale 0.7 in pale yellow,
+ * rows 20 apart from y 200 with labels at x 110 and values right-aligned at x 530: Game (LobbyMan mGameName), Opponent
+ * (mOpponent), Host/Client ("Host" or "Client" by mIsHost), Host Address (mHostAddr) and Client Address (mOppoAddr) in
+ * dotted form, and Seed (mSeed). Then, at scale 0.9, the menu system renders its top menu (func_002CC350) when one is
+ * open, and while the comm system is connected (mNetConnState 5) this console's address (func_00256038) is centred in
+ * yellow at (320, 420), scale 0.8. cDebugFE_render calls it through the active screen's virtual slot 3.
+ */
 extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
 {
     sFont17E5C8* font = *(sFont17E5C8**)((char*)SSXApp->DebugFE + 0x18);
@@ -1725,6 +1986,20 @@ static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned i
 }
 
 
+/**
+ * Draws the debug front end's heartbeat doodle: its trail of 64 points as small quads, then a larger quad on the newest
+ * point.
+ *
+ * Sets the same draw-state bits on GrMan's current draw state (+0xE84) as cDebugFE_render does and makes @p tex its
+ * texture 0. For i = 1..63 it takes trail point (head + i) mod 64 (the History array at +0x10, head index at +0x210),
+ * so the oldest point comes first, and with f = i/64 draws a 6x6 quad centred on it through the 2D renderer D_004A28AC
+ * (func_0038EC40, z 0) in colour (0.15 f^2, 0.5, 0.3 + 0.2 f, 0.5 f^2) in the code's a, r, g, b order. The head point
+ * gets a 12x12 quad in (0.5, 0.25, 0.25, 0.5). cDebugFE_render calls it on the heartbeat at +0x24 with the particle
+ * texture (+0x1C).
+ *
+ * @param p_  the heartbeat (cHeartBeat_update advances it)
+ * @param tex  texture id to draw with
+ */
 extern "C" void func_0017F500(void* p_, int tex)
 {
     sFirefly_17F2D0* self = (sFirefly_17F2D0*)p_;
@@ -1772,6 +2047,15 @@ struct sDbgList17F7B8 {
     int n;                      // 0x210
 };
 
+/**
+ * Constructs the debug front end: the cFadeScreen base, cDebugFE's vtable and a zeroed heartbeat.
+ *
+ * Runs cFadeScreen_cFadeScreen, stores cDebugFE_vtbl, zeroes the heartbeat at +0x24 (its two vectors at +0x24..+0x30,
+ * the 64-point trail at +0x34 through MEM_fill and the head index at +0x234). The screens, font and textures are set
+ * later by cDebugFE_load. cSSXApp_startFELoad builds the 0x238-byte DebugFE with it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0017F7B8(void* self)
 {
     cFadeScreen_cFadeScreen(self);
@@ -2767,6 +3051,19 @@ extern int D_0046D1A0[];
 extern int cUIScreen_vtbl[];
 extern int cUIGroup_vtbl[];
 
+/**
+ * Constructs an on-screen keyboard (cScreenKeyboard) for a UI state, with its default options.
+ *
+ * Builds the cUIScreen part like cScreenKeyboard_cScreenKeyboard (list links, cUIScreen_vtbl, tAttrScreen_tAttrScreen
+ * at +0x14, the lists at +0x18 and +0xB4, the root group cUIThing_cUIThing at +0x40 with cUIGroup_vtbl), stores @p a1
+ * at +0xD0 and the keyboard vtable D_0046D1A0, then sets the keyboard's fields (On Tour names): mIncludeNumbers
+ * (+0xD8), mIncludeShift (+0xDC) and mIncludeSpace (+0xE0) 0, mShiftOn (+0xE4) and mFirstKey (+0xE8) 1, an empty input
+ * text (+0xEC), mCursorPos (+0x16C) 0, mCurrentKey (+0x170) 10 (the "A" key) and mMaxChars (+0xD4) 45. No caller of it
+ * is known (none in the C sources or the asm).
+ *
+ * @param a1  the owning UI state; func_00180840 calls its virtual slot 19 after each key press
+ * @return @p self
+ */
 extern "C" void* func_00180508(char* self, int a1)
 {
     *(char**)(self + 4) = self;
@@ -2803,6 +3100,14 @@ INCLUDE_ASM("fe/debugfe", func_001805D8);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
 
+/**
+ * Sets the on-screen keyboard's input text and puts the cursor at its end.
+ *
+ * Copies @p text into the input buffer at +0xEC (strcpy, no length check) and stores its length in mCursorPos (+0x16C).
+ * cScreenKeyboard_initScreenKeyboard calls it with "mypro1".
+ *
+ * @param text  the new text
+ */
 extern "C" void func_001805D8(void* self, const char* text)
 {
     char* buf = (char*)self + 0xEC;
@@ -2814,6 +3119,13 @@ extern "C" void func_001805D8(void* self, const char* text)
 //100%
 INCLUDE_ASM("fe/debugfe", func_00180618);
 #ifdef SKIP_ASM
+/**
+ * Moves the on-screen keyboard's selection one key left, wrapping within the row.
+ *
+ * Keys are 4 rows of 10 (0-9 digits, 10-35 A-Z, 36 arrLeft, 37 arrRight, 38 spc, 39 end) in mCurrentKey (+0x170). The
+ * first key of a row (0, 10, 20, 30) wraps to the last (+9); from 39 it jumps to 37 when mIncludeSpace (+0xE0) is 0,
+ * skipping the space key; otherwise it steps back one. Called by the keyboard's input handler func_00180EF0.
+ */
 extern "C" void func_00180618(void* self)
 {
     int keyIndex = *(int*)((char*)self + 0x170);
@@ -2830,6 +3142,13 @@ extern "C" void func_00180618(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_00180678);
 #ifdef SKIP_ASM
+/**
+ * Moves the on-screen keyboard's selection one key right, wrapping within the row.
+ *
+ * The last key of a row (9, 19, 29, 39) wraps to the first (-9); from 37 it jumps to 39 when mIncludeSpace (+0xE0) is
+ * 0, skipping the space key; otherwise mCurrentKey (+0x170) steps forward one. Called by the keyboard's input handler
+ * func_00180EF0.
+ */
 extern "C" void func_00180678(void* self)
 {
     int keyIndex = *(int*)((char*)self + 0x170);
@@ -2846,6 +3165,14 @@ extern "C" void func_00180678(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_001806D8);
 #ifdef SKIP_ASM
+/**
+ * Moves the on-screen keyboard's selection one row up, wrapping from the top row to the bottom one.
+ *
+ * From the digit row (0-9) it goes to the bottom row (+30), or to 39 from key 8 when mIncludeSpace (+0xE0) is 0 (key 38
+ * is the space). From the A-J row (10-19) with mIncludeNumbers (+0xD8) 0 it skips the hidden digit row and goes to the
+ * bottom row (+20), again 39 from key 18 without space. Otherwise mCurrentKey (+0x170) goes up one row (-10). Called by
+ * the keyboard's input handler func_00180EF0.
+ */
 extern "C" void func_001806D8(void* self)
 {
     int keyIndex = *(int*)((char*)self + 0x170);
@@ -2870,6 +3197,13 @@ extern "C" void func_001806D8(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_00180768);
 #ifdef SKIP_ASM
+/**
+ * Moves the on-screen keyboard's selection one row down, wrapping from the bottom row to the top one.
+ *
+ * From the bottom row (30-39) it goes to the digit row (-30) when mIncludeNumbers (+0xD8) is set, else to the A-J row
+ * (-20). From key 28 with mIncludeSpace (+0xE0) 0 it goes to 39 (skipping the space key 38). Otherwise mCurrentKey
+ * (+0x170) goes down one row (+10). Called by the keyboard's input handler func_00180EF0.
+ */
 extern "C" void func_00180768(void* self)
 {
     int keyIndex = *(int*)((char*)self + 0x170);
@@ -2890,6 +3224,11 @@ extern "C" void func_00180768(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_001807C8);
 #ifdef SKIP_ASM
+/**
+ * Toggles the on-screen keyboard's shift (mShiftOn, +0xE4), which func_00180840 uses to choose upper case.
+ *
+ * @return the new mShiftOn value
+ */
 extern "C" int func_001807C8(void* self)
 {
     int toggled = *(int*)((char*)self + 0xe4) ^ 1;
@@ -2908,6 +3247,11 @@ struct sStarsK1807D8 {
     char stars[0x40];   // 0x12C
 };
 
+/**
+ * Returns the on-screen keyboard's input text masked as a password: one '*' per character, in the buffer at +0x12C.
+ *
+ * @return the masked text (+0x12C)
+ */
 extern "C" char* func_001807D8(sStarsK1807D8* self)
 {
     int n = strlen(self->name);
@@ -2959,6 +3303,20 @@ struct sDbgKbd {
     int key;
 };
 
+/**
+ * Applies the on-screen keyboard's selected key (mCurrentKey, +0x170) to the input text at +0xEC, then notifies the
+ * owning state.
+ *
+ * Keys 0-9 write a digit and 10-35 a letter (lower case unless mShiftOn, +0xE4, is set) at mCursorPos (+0x16C); 38
+ * writes a space. 36 (arrLeft) moves the cursor back one and cuts the text there; 37 (arrRight) moves it forward one
+ * and writes a terminator at the new place. Moving forward stops below mMaxChars (+0xD4). Finally the owner state at
+ * +0xD0 gets its virtual slot 19 with (0, 13) for the end key (39) or (0, 12) for any other. Called by the keyboard's
+ * input handler func_00180EF0.
+ *
+ * Likely bugs: the digit and space keys do not write a terminator after the new character (the letter keys do), so
+ * characters cut off by arrLeft come back after typing a digit or a space; arrRight at the end of the text leaves the
+ * old terminator in place, so what is typed after it is hidden.
+ */
 extern "C" void func_00180840(sDbgKbd* self)
 {
     int k = self->key;
@@ -3003,6 +3361,16 @@ extern char str_spc[];
 extern char str_end[];
 extern "C" char* strcat(char*, const char*);
 
+/**
+ * Builds the UI object name of a keyboard key: "keyboard_" plus the key's label.
+ *
+ * Starts @p dst with "keyboard_" (D_0045D550) and appends the digit for 0-9, the upper-case letter for 10-35, or
+ * "arrLeft", "arrRight", "spc" or "end" for 36..39; other values leave just the prefix.
+ * cScreenKeyboard_initScreenKeyboard uses it to find the key objects.
+ *
+ * @param c  key index (0-39)
+ * @param dst  output buffer (at least 18 bytes)
+ */
 extern "C" void func_001809B0(void* self, int c, char* dst)
 {
     char buf[2];
@@ -3038,6 +3406,16 @@ extern char str_spc[];
 extern char str_end[];
 extern "C" char* strcat(char*, const char*);
 
+/**
+ * Builds the UI object name of a keyboard key's cursor: "cursor_" plus the key's label.
+ *
+ * Starts @p dst with "cursor_" (str_cursor) and appends the digit for 0-9, the upper-case letter for 10-35, or
+ * "arrLeft", "arrRight", "spc" or "end" for 36..39. The keyboard's input handler func_00180EF0 uses it to hide the old
+ * cursor and show the new one; cScreenKeyboard_initScreenKeyboard to hide every cursor but the one on "A".
+ *
+ * @param keyIndex  key index (0-39)
+ * @param dst  output buffer (at least 16 bytes)
+ */
 extern "C" void func_00180A90(void* self, int keyIndex, char* dst)
 {
     char buf[2];

@@ -126,6 +126,11 @@ INCLUDE_ASM("fe/festatecharsetup", func_00182C08);
 extern "C" void func_001831D0(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
+/**
+ * Hides the user's 3D rider (func_001831D0 with 0), then destroys the screens (cUIState_onDestroyScreen).
+ *
+ * It fills the onDestroyScreen slot (+0x2C) of cFEStateCharSetup_vtbl and cFEStateRiderDetail_vtbl.
+ */
 extern "C" void func_00182C08(void* self)
 {
     func_001831D0(self, 0);
@@ -155,6 +160,15 @@ extern "C" void cFEStateCharSetup_onUpdate(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharsetup", func_00182C68);
 #ifdef SKIP_ASM
+/**
+ * Answers the character-setup menu's events: 0x100 for event 9, otherwise 0x101.
+ *
+ * It fills the onWidgetMenu slot (+0xA4) of cFEStateCharSetup_vtbl and cFEStateRiderDetail_vtbl.
+ *
+ * @param menu  the menu (unused)
+ * @param event  the menu event
+ * @return 0x100 for event 9, else 0x101
+ */
 extern "C" int func_00182C68(void* self, int menu, int event)
 {
     return event != 9 ? 257 : 0x100;
@@ -249,6 +263,15 @@ extern "C" void func_001831D0(void* self, int a1);
 extern "C" void func_00182EC0(void* self);
 extern char str_rider_name[];
 
+/**
+ * Shows the user's character name and sets up the front-end camera and rider for the character-setup screen.
+ *
+ * Sets the "rider_name" text to the name of the user's character (cBENewPlayerInterface_getPlayerCharID, then
+ * func_0014EEC8 on interface 2). Points the camera (cFE +0x10) from (0, 200, 0) at the origin (func_0015E050) with a
+ * field of view of 0.436 (25 degrees), shows the rider (func_001831D0 with 1), sets the restart-animation flag (+0x48)
+ * and places the rider (func_00182EC0). Called by cFEStateCharSetup_onCreateScreen and
+ * cFEStateRiderDetail_onCreateScreen.
+ */
 extern "C" void func_00182DB8(void* self)
 {
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_rider_name));
@@ -332,7 +355,17 @@ static inline sQuat_182EC0 AxisAngle_182EC0(const sQuat_182EC0& axis, float angl
     return sQuat_182EC0(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
-// Places the rider on the setup screen's podium and, when requested, restarts its idle animation.
+/**
+ * Places the user's front-end rider on the character-setup screen and restarts its animation when asked.
+ *
+ * Gets the user's rider (func_001A0548). When it has a valid character loaded (id below 10, +0xCB8 and +0xCB4 set) and
+ * the show-rider flag (+0x4C) is set: sets the rider pose (func_0019F3E8) to position (136, -250, -82) turned 100
+ * degrees about Z, moves the board out of view to (0, 10000, 0) (func_0019F548), and when +0x48 is set resets the rider
+ * animation and plays animation 435, clears the rider's +0xCCC and +0x48 and calls func_001A0358 on the rider; finally
+ * makes the rider visible (func_0019E538).
+ *
+ * @param self_  the character-setup (or rider-detail) state
+ */
 extern "C" void func_00182EC0(void* self_)
 {
     char* self = (char*)self_;
@@ -391,6 +424,15 @@ INCLUDE_ASM("fe/festatecharsetup", func_001831D0);
 extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void func_0019E538(void* self, int a1);
 
+/**
+ * Turns the character-setup screen's 3D rider on or off.
+ *
+ * Does nothing without a front end. Off hides the user's rider (func_0019E538 with 0) and sets the restart-animation
+ * flag (+0x48); either way the show-rider flag (+0x4C) becomes @p on. Turning it on does not show the rider directly;
+ * func_00182EC0 does once the model is loaded.
+ *
+ * @param on  nonzero to show the rider
+ */
 extern "C" void func_001831D0(void* self, int on)
 {
     char* mgr = (char*)SSXApp->RealFE;
@@ -414,6 +456,16 @@ extern "C" void* func_001828C0(void* self, void* engine, signed char idx);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 extern void* cFEStateRiderDetail_vtbl[];
 
+/**
+ * Constructs the rider-detail state for a user on top of the character-setup state.
+ *
+ * Runs the character-setup constructor (func_001828C0), then sets state id 13, the cFEStateRiderDetail_vtbl vtable, the
+ * user (+0x44), func_001A1CD0's value for the user at +0x15 and clears the show-rider flag (+0x4C).
+ *
+ * @param engine  the UI engine
+ * @param idx  the user (controller) index
+ * @return @p self
+ */
 extern "C" void* func_00183238(void* self, void* engine, signed char idx)
 {
     func_001828C0(self, engine, idx);

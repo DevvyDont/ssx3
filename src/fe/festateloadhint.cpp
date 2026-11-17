@@ -319,6 +319,15 @@ INCLUDE_ASM("fe/festateloadhint", func_00245E30);
 #ifdef SKIP_ASM
 extern unsigned int D_00536640[];
 
+/**
+ * Compares two rider indices by their scores in D_00536640, higher score first (qsort comparator).
+ *
+ * cGameModeMan_sortScores() passes it to func_00418EF8() to sort D_00536708. The scores are compared unsigned.
+ *
+ * @param a  the first rider index
+ * @param b  the second rider index
+ * @return -1 when @p a's score is higher, 1 when it is lower, 0 when equal
+ */
 extern "C" int func_00245E30(int* a, int* b)
 {
     unsigned int va = D_00536640[*a];
@@ -335,6 +344,15 @@ INCLUDE_ASM("fe/festateloadhint", func_00245E78);
 #ifdef SKIP_ASM
 extern unsigned int D_00536640[];
 
+/**
+ * Compares two rider indices by their values in D_00536640, lower value first (qsort comparator).
+ *
+ * cGameModeMan_sortTimes() passes it to func_00418EF8() to sort D_00536708. The values are compared unsigned.
+ *
+ * @param a  the first rider index
+ * @param b  the second rider index
+ * @return -1 when @p a's value is lower, 1 when it is higher, 0 when equal
+ */
 extern "C" int func_00245E78(int* a, int* b)
 {
     unsigned int va = D_00536640[*a];
@@ -351,6 +369,17 @@ INCLUDE_ASM("fe/festateloadhint", func_00245EC0);
 #ifdef SKIP_ASM
 extern int D_00536708[];
 
+/**
+ * Compares two rider indices by their entries in D_00536708 (qsort comparator), giving each rider's position in the
+ * sorted order.
+ *
+ * cGameModeMan_sortScores() and cGameModeMan_sortTimes() use it to sort D_00536730 after D_00536708 holds the ranked
+ * riders. It never returns 0, which is harmless here because the entries of D_00536708 are distinct.
+ *
+ * @param a  the first rider index
+ * @param b  the second rider index
+ * @return 1 when @p a's entry is greater, otherwise -1
+ */
 extern "C" int func_00245EC0(int* a, int* b)
 {
     int va = D_00536708[*a];
@@ -368,6 +397,13 @@ INCLUDE_ASM("fe/festateloadhint", func_00245F00);
 void operator_delete(int* ptr);
 extern char D_0047DB28[];
 
+/**
+ * Destroys an object whose vptr is at +0: stores vtable D_0047DB28 and frees the object when bit 0 of @p flags is set.
+ *
+ * D_0047DB28 holds this destructor and two slots of func_00411530. func_002443C0 in ssxappdtor is an identical copy.
+ *
+ * @param flags  g++ destructor flags (bit 0: free with operator_delete)
+ */
 extern "C" void func_00245F00(void* self, int flags)
 {
     *(void**)self = D_0047DB28;
@@ -382,6 +418,13 @@ extern "C" void* func_0039E390(void* self);
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00245F30__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the display-mode popup state (vtable D_0047DA58) by running the cUIState destructor func_0039E390().
+ *
+ * The g++ delete flags pass through untouched in the second argument register.
+ *
+ * @return func_0039E390()'s return value
+ */
 void* func_00245F30(void* self)
 {
     return func_0039E390(self);
@@ -412,6 +455,16 @@ struct sVEK245F50 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Creates the display-mode popup's "supopup" screen and fills in its message and buttons (onCreateScreen slot of
+ * D_0047DA58).
+ *
+ * Adds the screen through the engine (cUIEngine_addScreenByHashName()), stores it in mpScreen (+0x40) and plays frame
+ * 0. The "Title" text gets "The display mode has been switched to Pr..." when the flag at +0x48 is 0, or "The display
+ * mode has been set to interla..." otherwise; "yes" gets the localised "kT_CMNContinue"; "no" is hidden (setVisible,
+ * slot 9, with 0) and made static (setStatic, slot 8, with 1). Starts the 300-frame countdown at +0x4C. The state is
+ * pushed by func_002452D8() after the progressive-scan choice.
+ */
 extern "C" void func_00245F50(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -464,6 +517,14 @@ struct sVEK246098 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Counts down the display-mode popup's confirm timer and, when it runs out unanswered, switches back to interlaced
+ * output (onUpdate slot of D_0047DA58).
+ *
+ * When the counter at +0x4C reaches 0 while the flag at +0x48 is 0 (the "switched to progressive" message), sets the
+ * flag to 1, rewrites "Title", "yes" and "no" as func_00245F50() does (so the text now says the mode was set to
+ * interlaced) and calls cGraphicsMan_TheGraphicsMan's SetDTV (slot 8) with 0. Always ends with cUIState_onUpdate().
+ */
 extern "C" void func_00246098(void* self)
 {
     if (*(int*)((char*)self + 0x4C) != 0) {
@@ -508,6 +569,15 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_yes_c[];
 extern char str_cFEStateMemCard[];
 
+/**
+ * Handles a button press on the display-mode popup: "yes" (accept, event 5) pushes a new memory-card load state.
+ *
+ * The state is a 584-byte "cFEStateMemCard" built by func_00186A08() on this state's engine and pushed on its state
+ * stack (mpEngine +0x18). Other buttons and events do nothing. onWidgetEvent slot of D_0047DA58.
+ *
+ * @param item  the widget (ignored when 0); its hash name is at +0x38
+ * @param msg  the widget event
+ */
 extern "C" void func_002461E0(void* self, void* item, int msg)
 {
     if (item != 0) {
@@ -525,6 +595,13 @@ extern "C" void func_002461E0(void* self, void* item, int msg)
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00246268);
 #ifdef SKIP_ASM
+/**
+ * Answers 257 to menu event 6 (back) and 0 to everything else (onWidgetMenu slot of D_0047DA58).
+ *
+ * @param menu  the menu (unused)
+ * @param event  the menu event
+ * @return 257 (0x101) for event 6, else 0
+ */
 extern "C" int func_00246268(void* self, int menu, int event)
 {
     return event == 6 ? 257 : 0;
@@ -587,6 +664,17 @@ static inline bool IsId_246278(char* obj, char* key)
     return id == GetHashValue32(key);
 }
 
+/**
+ * Fills in one widget of the online load screen as it is created: the location text or the game-mode title.
+ *
+ * func_00245598() calls it when the game path (cBENewRaceInterface_newRace.cGamePath, D_00535C11) is 2 (online).
+ * "Location Text" gets "%s-%S" of the localised peak name ("kT_Peak1name".."kT_Peak3name" by func_00144C98(), the
+ * location's peak) and the location name (func_00144BF0()). Otherwise the title widget matching the game mode
+ * (cGameMode, D_00535C10) is shown (setVisible, slot 9, with 1): "Title_Multi_Race" for modes 0 and 4, "_SS" 1, "_BA"
+ * 2, "_SP" 3, "_BC" 5 and 6.
+ *
+ * @param obj  the widget being created (its hash name is at +0x38)
+ */
 extern "C" void func_00246278(void* self, char* obj)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -719,6 +807,23 @@ static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
     sprintf2(buf, fmt, str, func_00144BF0(iface));
 }
 
+/**
+ * Fills in one widget of the offline load screen as it is created: location, titles, course stats, rider name and
+ * level, and the map image.
+ *
+ * func_00245598() calls it when the game path (cGamePath, D_00535C11) is not 2. "Location" gets the peak and location
+ * name as in func_00246278(). The widgets matching the game mode (cBENewRaceInterface_newRace.cGameMode) are shown
+ * (setVisible, slot 9, with 1): "Title_Quick_Race/SS/BA/SP/BC" (modes 0/4, 1, 2, 3, 5/6) and "et_race/SS/BA/SP/TChal/
+ * PChal" (modes 0, 1, 2, 3, 5, 6), and "ec_beg/inter/expert" by the location's func_00144D18() value (0-2).
+ * "vert_drop_percent" and "cou_leng_percent" get "kT_OVRCMNNumberOfFeet" with the location's entry in the 17-entry
+ * tables D_0047BB28 and D_0047BAE0. "rider_name" gets the first human rider's short name
+ * (cBECharacterInterface_getShortName()), "player_rank_num" gets "kT_OVRCMNLevelNum" with the rider's level
+ * (func_00148950(), or 1 when bit 1 of the rule record D_005308B8[rider] is set), and "map box" takes the portrait
+ * texture (into +0x78, clearing +0x7C) that func_00233640() loaded into the load screen at +0x48 (its +0x10), when
+ * there is one.
+ *
+ * @param obj  the widget being created (its hash name is at +0x38)
+ */
 extern "C" void func_002464E8(void* self, char* obj)
 {
     sTable17_2464E8 tA = D_0047BAE0;
@@ -905,6 +1010,22 @@ struct sName4_6CF8 { char c[4]; };
 struct sName2_6CF8 { char c[2]; };
 struct sName5_6CF8 { char c[5]; };
 
+/**
+ * Shows one player's level and seven attribute bars on the online load screen.
+ *
+ * Does nothing unless the game path (cGamePath, D_00535C11) is 2 (online). The level is func_00148950() for the
+ * player's human rider (1 when bit 1 of the rule record D_005308B8[rider] is set) and the stats are the rider's seven
+ * attributes (func_001484E0, func_00148680, func_00148410, func_00148750, func_001488F0, func_00148820, func_001485B0).
+ * With a comm system (cCommSystem_mCommSystem) and either player 1 or a ranked game
+ * (cBENetworkInterface_networkOpt.bIsRankedGame): a ranked game shows level 8 and all stats 40, the rule bit shows all
+ * stats 5, otherwise the level is the sum of oppCharacterAttributes / 35 and the stats come from the BE stat block
+ * D_00534FD8. Writes the level ("%d") into "ranking00" or "ranking01"; for each stat i shows label "<player+1>0<i>"
+ * (setVisible 1, text "kT_CMNLvNum" with stat / 5) and sets bar "<player><i>pb" to range 55 (+0x80) and value stat
+ * (cUIProgress_setValue()). The picture widget "<player>" takes this player's portrait texture (+0x10 or +0x14 of the
+ * load screen at +0x48, loaded by func_00233640()). func_00245418() and func_002454F8() call it for players 0 and 1.
+ *
+ * @param player  the player slot (0 or 1)
+ */
 extern "C" void func_00246CF8(void* self, char player)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1336,6 +1457,14 @@ extern "C" void* func_00242EB8(int, int);
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00247E20__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs a static-constructor pass: calls func_00242EB8(1, 0xFFFF), the static initialiser of the SSXApp globals.
+ *
+ * It is entry +0x2C of the global constructor table D_0043CE38; func_00247E40 is its destructor twin. The declared
+ * parameter is not used.
+ *
+ * @return func_00242EB8()'s result
+ */
 void* func_00247E20(void* self)
 {
     return func_00242EB8(1, 0xffff);
@@ -1347,6 +1476,13 @@ extern "C" void* func_00242EB8(int, int);
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00247E40__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs a static-destructor pass: calls func_00242EB8(0, 0xFFFF), destroying what func_00247E20 constructed.
+ *
+ * It is entry +0x10 of the global destructor table D_0043CEE4. The declared parameter is not used.
+ *
+ * @return func_00242EB8()'s result
+ */
 void* func_00247E40(void* self)
 {
     return func_00242EB8(0, 0xffff);

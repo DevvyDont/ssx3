@@ -290,6 +290,17 @@ public:
     virtual void show(int on);
 };
 
+/**
+ * Shows the trophy room's big picture (+0x48, a cUIIcon) for a list row, or hides it.
+ *
+ * Row 0 is the trophy: its texture (+0x60[0]) is used when the character owns it (cBERewardInterface_isTrophyOwned on
+ * reward interface 13 with mUserNum, character +0x50, peak +0x54 and trophy +0x58). Rows 1-4 are challenges:
+ * func_001CED90 gives the medal earned in challenge row - 1 (-1 for none) and the texture is +0x60[medal + 1]. With a
+ * texture the icon is shown (setVisible, vtable slot 9) and gets mTextureID = it and mpTextureElem = 0; a negative @p
+ * index or no texture hides it.
+ *
+ * @param index  the selected row (0 trophy, 1-4 challenges), or negative to hide
+ */
 extern "C" void func_001D47A0(void* self, int index)
 {
     int textureId;
@@ -345,6 +356,14 @@ public:
     virtual void show(int on);
 };
 
+/**
+ * Shows the trophy room's stats text (+0x4C) for a challenge row, or hides it for row 0 (the trophy).
+ *
+ * Rows 1 and up fill it with setChallengeStats (mUserNum, character +0x50, peak +0x54, trophy +0x58, row - 1). Nothing
+ * happens without the text.
+ *
+ * @param index  the selected row
+ */
 extern "C" void func_001D4890(void* self, int index)
 {
     cTrophyWidget_4890* widget = *(cTrophyWidget_4890**)((char*)self + 0x4C);
@@ -381,6 +400,14 @@ struct sTrophyRoom_4918 {
     int ids[5];
 };
 
+/**
+ * Requests the trophy room's five images from the FE file cache.
+ *
+ * On the cache at RealFE + 0x1A70, bank +0x50 (the character), func_0019DA10 (with 10, 1, 0) loads the trophy's image
+ * (the name at +4 of cBERewardInterface_getTrophy for peak +0x54 and trophy +0x58) into slot index +0x74[0], and the
+ * image of each of the trophy's four medals that has a name (cBERewardInterface_getMedal) into +0x74[1-4]. +0x5C counts
+ * the requests. Called by the trophy room's constructor func_001D4268.
+ */
 extern "C" void func_001D4918(sTrophyRoom_4918* self)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 13);
@@ -467,6 +494,17 @@ struct sSelf_4A20 {
     int f9C;
 };
 
+/**
+ * Turns each finished trophy-room image load into a texture and redraws the big picture.
+ *
+ * For each of the five cache slots (+0x74) still pending whose file has loaded (func_0019E238 on RealFE + 0x1A70, bank
+ * +0x50) it creates the texture "trph" from the file data (func_0019E2B0's pointer plus the offset at its +0x14)
+ * through GrMan's vtable slot 46 (func_0037C8C0 in cPS2GraphicsMan_vtbl) into +0x60[i], releases the file
+ * (func_0019DC20), sets the slot to -1, decrements the pending count (+0x5C) and redraws the selected row's picture
+ * (func_001D47A0 with +0x9C). Called from cFEStateTrophyRoom_onUpdate.
+ *
+ * @param p  the trophy room state
+ */
 extern "C" void func_001D4A20(void* p)
 {
     sSelf_4A20* self = (sSelf_4A20*)p;
@@ -551,6 +589,13 @@ struct sSelf001D4B20 {
     int tex[5];
 };
 
+/**
+ * Releases the trophy room's five images.
+ *
+ * Each texture (+0x60) is removed with GrMan's vtable slot 50 (cPS2GraphicsMan_RemoveTexture) and each cached file
+ * (+0x74) released with func_0019DC20 (RealFE + 0x1A70, bank +0x50); both are set to -1. Called by
+ * cFEStateTrophyRoom__cFEStateTrophyRoom.
+ */
 extern "C" void func_001D4B20(sSelf001D4B20* self)
 {
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
@@ -579,6 +624,19 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern void* cFEStateRewardsRoom_vtbl[];
 
+/**
+ * Constructs the rewards-room state for a user (allocated as "cFEStateRewardsRoom", 80 bytes).
+ *
+ * Runs cUIState's constructor (func_0039E2A0; @p engine reaches it untouched in the second argument register), stores
+ * mHashName 46 and cFEStateRewardsRoom_vtbl, sets mUserNum to @p idx and mCtrlBits to that user's controller bits
+ * (func_001A1CD0 on the engine's front end), +0x4C to @p a3 (On Tour mInStore) and +0x48 to the user's character
+ * (cBENewPlayerInterface_getPlayerCharID; On Tour mCharID).
+ *
+ * @param engine  the UI engine (only passed on to cUIState's constructor)
+ * @param idx  the user number
+ * @param a3  the in-store flag; the front end's factories pass 1
+ * @return @p self
+ */
 extern "C" void* func_001D4BC8(void* self, int engine, signed char idx, int a3)
 {
     func_0039E2A0(self);
@@ -764,6 +822,15 @@ extern "C" int func_00157210(void* iface, int index);
 extern "C" int func_00157518(void* iface, int rider, int a, int index);
 extern char str_pct_d_pct_d[];
 
+/**
+ * Sets a rewards-room text to "<got> / <total>" for one kind of reward.
+ *
+ * The total comes from func_00157210 and the count that the user's character (+0x48) has from func_00157518, both on
+ * reward interface 13.
+ *
+ * @param index  the reward kind
+ * @param text  the text to set
+ */
 extern "C" void func_001D4F90(void* self, int index, cUIText* text)
 {
     char buf[256];
@@ -841,6 +908,19 @@ extern "C" void* func_0025CD50(void*, int);
 extern "C" void func_0025FD50(void* mgr, int a1, int a2, int a3, char* a4, char* a5);
 extern char str_cFEStateOnlineMainMenu[];
 
+/**
+ * Handles lobby events on the reconnect screen: logs in again, re-selects the persona and returns to the online main
+ * menu.
+ *
+ * 201 sends the login request (func_0025C610 on LobbyMan_mLobbyMan); 212 selects the current persona again
+ * (func_0025CD50 with mPersona); 257 pushes a new cFEStateOnlineMainMenu (1744 bytes) through func_001A8A40; 273 calls
+ * func_0025FD50 with fields of cBENetworkInterface_networkOpt (+0x4, whether +0x8 is 0, whether it is not, and the
+ * strings at +0x330 and +0x3DC). Other events go to cFEStateLogin's handler func_001BF228. Lobby event slot (+0xFC) of
+ * cFEStateRelogin_vtbl.
+ *
+ * @param msg  the lobby event id
+ * @return 0 for the handled events, else func_001BF228's result
+ */
 extern "C" int func_001D5138(void* self, int msg)
 {
     switch (msg) {
@@ -897,6 +977,18 @@ extern "C" void* cFEStateNetConfig_cFEStateNetConfig(void* mem, void* owner);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern char str_cFEStateNetConfig[];
 
+/**
+ * Handles the reconnect screen's popup: on its first option or back it gives up and opens the network configuration.
+ *
+ * Every event goes to cFEStateNet_onPopupEvent first. On 0xF (first option) or 20 (back) it then runs func_0039F698 on
+ * the state stack (mpEngine + 0x18), sets bit 0x80 in the current state's mAttrState (+0x1C,
+ * cUIStateStack_getCurrentState), logs out of the online services (func_002636F0 on func_002591B8(), no error) and
+ * pushes a new cFEStateNetConfig (2332 bytes) through func_001A8A40. Popup handler slot (+0x10C) of
+ * cFEStateRelogin_vtbl.
+ *
+ * @param item  the popup that sent the event
+ * @param msg  the popup event
+ */
 extern "C" void func_001D5280(void* self, void* item, int msg)
 {
     if (msg == 0xF || msg == 20) {
@@ -921,6 +1013,20 @@ extern void* D_00474E08[];
 extern void* D_0046C980[];
 extern unsigned short D_004A1390[];
 
+/**
+ * Constructs a memory-card overlay state with an overlay id: cFEMemCard_cFEMemCard's work, but with mOVID (+0x98) = @p
+ * a3.
+ *
+ * Runs cUIState's constructor (func_0039E2A0; @p a1 reaches it untouched in the second argument register as the
+ * engine), the inlined cOVState part (vtable D_00474E08; mDoneTransition, mAllowPauseMenu and mRemovePDA 0; mszChatBuff
+ * " " from D_004A1390), stores cFEMemCard's vtable D_0046C980 and runs func_001D5488 with @p a2. func_001FDBF0 and
+ * func_001FE968 (fe/ovstatepause) call it with types 1 and 2.
+ *
+ * @param a1  the UI engine (only passed on to cUIState's constructor)
+ * @param a2  the memory-card screen type, passed to func_001D5488
+ * @param a3  the overlay id stored in mOVID
+ * @return @p self
+ */
 extern "C" void* func_001D5330(void* self, int a1, int a2, int a3)
 {
     func_0039E2A0(self);
@@ -979,6 +1085,15 @@ extern void* D_00474E08[];
 extern void* cFEMemCard_mInstance;
 extern "C" void func_0039E390(void* self, int flags);
 
+/**
+ * Destroys a memory-card state.
+ *
+ * Stores cFEMemCard's vtable D_0046C980, clears cFEMemCard_mInstance, stores cOVState's vtable D_00474E08 and runs
+ * cUIState's destructor (func_0039E390) with @p flags. Destructor slot (+0xC) of D_0046C980; the destructors of
+ * cFEStateMemCard, cOVState_PROFILE, cOVState_AUTOSAVE, cFEStateProfileLoad and cFEStateOptionsDeviceSelect end in it.
+ *
+ * @param flags  the g++ delete flags, passed on to func_0039E390
+ */
 extern "C" void func_001D5428(void* self, int flags)
 {
     *(void***)((char*)self + 8) = D_0046C980;
@@ -991,7 +1106,16 @@ extern "C" void func_001D5428(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5460);
 #ifdef SKIP_ASM
-// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
+/**
+ * Answers the memory-card screens' menu events: 0x100 for events 8 and 9, otherwise 0x101.
+ *
+ * onWidgetMenu slot (+0xA4) of cFEMemCard's vtable D_0046C980, also used by cOVState_AUTOSAVE_vtbl, D_004722B8 and
+ * D_00472440.
+ *
+ * @param menu  the menu that asks (not used)
+ * @param key  the menu event
+ * @return 0x100 for events 8 and 9, otherwise 0x101
+ */
 extern "C" int func_001D5460(void* self, int menu, unsigned int key)
 {
     int result = 257;
@@ -1068,6 +1192,29 @@ extern char func_001D8240_a5488[] __asm__("func_001D8240");
 extern char cFEMemCard_callbackFileExists_a5488[] __asm__("cFEMemCard_callbackFileExists");
 extern char func_001D7D70_a5488[] __asm__("func_001D7D70");
 
+/**
+ * Sets up a memory-card screen: makes it the active instance, plugs the front end's handlers into the memory-card
+ * manager and sizes the manager's file operations for the screen's save kind.
+ *
+ * Stores @p self_ in cFEMemCard_mInstance and fills 40 of the 45 cMCOverlayManager callback slots
+ * (cSSXApp_getMCManager): callbackWriteStart = cFEMemCard_writeStart, callbackWriteUpdate = func_001D5D78,
+ * callbackWriteEnd = func_001D5F38, callbackReadStart = cFEMemCard_readStart, callbackReadUpdate =
+ * cFEMemCard_callbackReadUpdate, callbackReadEnd = func_001D5F40, the cFEMemCard_callback* handlers in the slots of the
+ * same name, the button queries (cFEMemCard_isSavePressed, cFEMemCard_isCancelPressed,
+ * cFEMemCard_callbackIsRetryPressed, ...) in the callbackIs* slots, and unnamed handlers (func_001D68E8 ...
+ * func_001D8358) in the rest; callbackLoadStart, callbackReadFailed, callbackLoadReady, callbackSysRecheckFile and
+ * callbackAcknowledgeCardStatusChange keep their defaults.
+ *
+ * Then stores @p mode at +0x1BC and 25 at +0x19C, zeroes the state words from +0x1A0 to +0x228 and the short at +0x9C,
+ * and calls func_0023D5A8 (On Tour cMCOverlayManager::ManagerGainState). By mode it sets the manager's write size, read
+ * size and file type (func_0023CC58, func_0023CAA0, func_0023C8F0): 2 = settings, cBESaveInterface_getSaveGameSize__FPv
+ * bytes, file type 2 ("SET"); 1 = replay, 0x80000 bytes, file type 0 ("REP"); anything else = profile,
+ * cBESaveInterface_getSaveProfileSize bytes, file type 1 ("GAM"). Last it builds the 16-bit file-name wildcard
+ * "<product code>-<type>*" ("%s-%s*" with func_00241AA0 and func_00241D40 for mFileType) at +0x11C.
+ *
+ * @param self_  the memory-card screen (this)
+ * @param mode  the save kind: 0 profile, 1 replay, 2 settings (On Tour iType)
+ */
 extern "C" void func_001D5488(void* self_, int mode)
 {
     char* self = (char*)self_;
@@ -1415,6 +1562,16 @@ struct sFEMemCard_5D78 {
     int mode;   // 0x1BC
 };
 
+/**
+ * Memory-card write-progress callback: feeds the manager the next block of a replay being saved.
+ *
+ * Only replay saves (mode +0x1BC of cFEMemCard_mInstance == 1) are handled. cReplay_getSaveData on SSXApp->Game->Replay
+ * produces the next block; when it does, func_00241138 writes it through the manager (cSSXApp_getMCManager) and adds
+ * its size to mSavedSize.
+ *
+ * @param key  the size the manager asks for; cReplay_getSaveData overwrites it with the size of the produced block
+ * @return 1 when a block was handed over, 0 when the replay is complete or the screen is not saving a replay
+ */
 extern "C" int func_001D5D78(int key)
 {
     int out;
@@ -1515,6 +1672,11 @@ extern "C" void cFEMemCard_readStart()
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5F38__FPv);
 #ifdef SKIP_ASM
+/**
+ * Memory-card write-finished callback; does nothing.
+ *
+ * func_001D5488 installs it as the manager's callbackWriteEnd.
+ */
 void func_001D5F38(void* self)
 {
 }
@@ -1565,6 +1727,22 @@ struct sMemCard_1D5F40 {
     int busy;                       // 0x228
 };
 
+/**
+ * Memory-card read-finished callback: loads what was read into the back end and frees the read buffer.
+ *
+ * With the save interface (back-end interface 5) it handles the read by the screen's mode (+0x1BC of
+ * cFEMemCard_mInstance). Mode 2 (settings) loads the buffer at +0x1D0 with func_00152BB0 (On Tour
+ * cBESaveInterface::loadSaveGame) and, when the audio object exists (func_0028B180), applies the loaded sound options
+ * from cBEOptionInterface_mOption: the output mode (bits 12-13) through func_001D64C0, the SFX, speech and music
+ * volumes (4-bit fields) through func_00287410, func_00287488 and func_00287520, bit 17 through cSSXAudio_SetArcadeSFX
+ * and bit 16 through func_002875D0. Mode 0 (profile) loads it with func_00152DE0 (On Tour loadSaveProfile) into slot
+ * +0x1CC. Mode 1 (replay) does nothing here. A failed load returns 0 at once, keeping the buffer.
+ *
+ * Afterwards, when the buffer state (+0x228) is 1 (allocated by this screen), frees the allocation at +0x1D4 and clears
+ * +0x1D0, +0x1D4 and +0x228.
+ *
+ * @return 0 when the save interface rejected the data, else 1
+ */
 // Memory-card load/save step: applies the loaded sound options, then frees the transfer buffer.
 extern "C" int func_001D5F40()
 {
@@ -1641,6 +1819,19 @@ struct sOptBase_001D64C0 {
 struct sOpt_001D64C0 : sOptBase_001D64C0, sOptSub_001D64C0 {
 };
 
+/**
+ * Switches the audio output mode, restarting the sound system when the mode changes.
+ *
+ * The output setting @p mode maps to an SSXAUDIO mode: 1 -> 2, 2 -> 0, 3 -> 3, anything else -> 1. The audio object
+ * (func_0028B180) is asked to switch through method slot 2 of the object at +0x1D8 of its +0x118 member's first
+ * pointer; only when that returns 1 does the restart run: it saves the SFX, speech and music volumes (func_00287670,
+ * func_002876A0, func_002876D0), the arcade-SFX flag (+0x62B8), the +0x62B4 flag and the +0x534 word, then calls
+ * cSSXAudio_FrontEndPurge, SSXAUDIO_DeInit and SSXAUDIO_Init(new mode), puts the volumes and flags back (func_00287410,
+ * func_00287488, func_00287520, cSSXAudio_SetArcadeSFX, func_002875D0), reloads with func_00285FB0 and hands the saved
+ * +0x534 word back through virtual slot 4 of the audio object's second base.
+ *
+ * @param mode  the output setting, 0-3 (bits 12-13 of cBEOptionInterface_mOption)
+ */
 extern "C" void func_001D64C0(unsigned int mode)
 {
     int lang;

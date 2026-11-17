@@ -647,6 +647,14 @@ INCLUDE_ASM("fe/ovstatelodge", func_001D3160);
 #ifdef SKIP_ASM
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 
+/**
+ * Starts loading the mountain room's peak-pass picture, unless a load is already pending or there is no pass to show.
+ *
+ * Only when the load slot (+0xBC) is negative and the pass item (+0xC0) is set: asks the front end's file loader
+ * (SSXApp->RealFE + 0x1A70, func_0019DA10) for the item's file (its word at +4) under the character id (+0xB0), with
+ * arguments 10, 1, 0, and keeps the returned slot at +0xBC. cFEStateMountainRoom_onUpdate finishes the load through
+ * func_001D31C0.
+ */
 extern "C" void func_001D3160(void* self)
 {
     if (*(int*)((char*)self + 0xBC) < 0) {
@@ -682,7 +690,19 @@ static inline int isActive_31C0(sWidget_31C0* w)
     return w != 0 && ((w->flags >> 6) & 1);
 }
 
-// Starts the preview sound of the selected lodge item once its bank entry has loaded.
+/**
+ * Finishes the mountain room's peak-pass picture load: once the file is in, turns it into the "pass" texture, shows the
+ * pass front when appropriate and releases the file.
+ *
+ * Does nothing without the pass icon (+0x50) or while the loader (SSXApp->RealFE + 0x1A70) reports slot +0xBC of
+ * character +0xB0 as not loaded (func_0019E238). Otherwise takes the file data (func_0019E2B0), creates the texture
+ * "pass" from the data at its own offset (+0x14) through GrMan's virtual slot 46, and stores the texture id at +0xC4
+ * and in the icon (+0x78, with +0x7C cleared). When the pass group (+0x48) is visible (widget flag bit 6) and the
+ * pass-front group (+0x4C) is not, shows them (func_001D32E0). Finally frees the loader slot (func_0019DC20) and sets
+ * +0xBC to -1.
+ *
+ * @param vself  the mountain-room state (this)
+ */
 extern "C" void func_001D31C0(void* vself)
 {
     char* self = (char*)vself;
@@ -728,6 +748,12 @@ struct sVEntry_func_001D32E0 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Shows the mountain room's peak pass: the pass group (+0x48) always, the pass-front group (+0x4C) only when the front
+ * texture exists (+0xC4 >= 0).
+ *
+ * Both through virtual slot 9 (show) of the widget's vtable at +0x8 with 1.
+ */
 extern "C" void func_001D32E0(void* self)
 {
     {
@@ -799,6 +825,19 @@ static inline void wColour_3340(cWidget_3340* w, int col)
         self->arr[n++]->show(1);                            \
     }
 
+/**
+ * Fills the mountain room's event markers: one marker per event of the first two challenge groups of every peak,
+ * showing a done or not-done picture.
+ *
+ * For peaks 0-2 and challenge groups 0 and 1 (groups 2 and 3, collectibles / big challenges and earnings, are skipped)
+ * it walks the peak's challenge table D_0045AAD8 until an entry's list selector is negative. func_001CED90 gives the
+ * entry's medal for the player (+0x44) and character (+0xB0); a value below 4 picks the done element (+0xA8), anything
+ * else the not-done element (+0xAC). The selector picks the next free marker of one list: 0 -> +0x58 (5 markers), 1 ->
+ * +0x6C, 2 -> +0x90, 3 -> +0x9C, 4 -> +0x78, 5 -> +0x84 (3 each). The marker gets the element (+0x7C, texture id +0x78
+ * = -1) and is shown (virtual slot 8).
+ *
+ * @param p  the mountain-room state (this)
+ */
 extern "C" void func_001D3340(void* p)
 {
     sLodge_3340* self = (sLodge_3340*)p;
@@ -857,6 +896,20 @@ struct sLodge_3780 {
     int fE0;            // 0xE0
 };
 
+/**
+ * Constructs the lodge's peak room state (the list of one peak's trophies) for a player.
+ *
+ * Runs the cUIState constructor (func_0039E2A0), sets mHashName to 44 and the vtable cFEStatePeakRoom_vtbl, stores the
+ * player number (low byte of @p a2) in mUserNum and that player's controller mask (func_001A1CD0 on the engine's first
+ * word) in mCtrlBits. The character id (+0xDC) comes from the player interface (back-end interface 1,
+ * cBENewPlayerInterface_getPlayerCharID), the peak (+0xE0) is @p a3; the widget pointers from +0x48 to +0xD0 are
+ * cleared.
+ *
+ * @param a1  the UI engine (passed through to the cUIState constructor)
+ * @param a2  the player number (On Tour userNum)
+ * @param a3  the peak (On Tour peakNum)
+ * @return @p self
+ */
 extern "C" void* func_001D3780(void* self, int a1, int a2, int a3)
 {
     signed char idx = a2;
@@ -1274,6 +1327,21 @@ struct sRoom_3F80 {
     int mountain;                   // 0xE0
 };
 
+/**
+ * Fills the peak room's medal list for one trophy group of the current peak: a line per challenge with its name and,
+ * when earned, the medal and a check mark, else a cross.
+ *
+ * First hides all six widget lists (+0x58 medal icons, +0x6C backgrounds, +0x80 names, +0x94 name backgrounds, +0xA8
+ * check marks, +0xBC cross marks). func_001CE6F0 counts the group's entries in the challenge table for the peak
+ * (+0xE0); it is declared here with one argument and gets the group from $a1, which still holds @p peak. For each
+ * entry: func_001CED90 gives the medal for the player (+0x44) and character (+0xDC), setChallengeName labels the line,
+ * and the name, its background and the medal background are shown. With a medal (not -1) the icon takes the
+ * texture-bank element (mpEngine + 0x58) named by the medal record's string (cBERewardInterface_getMedal on back-end
+ * interface 13, record +0x8) and is shown with the check mark; without one the cross mark is shown.
+ *
+ * @param vself  the peak-room state (this)
+ * @param peak  the trophy group, 0-3 (On Tour trophyType): despite its name not a peak; the peak is +0xE0
+ */
 extern "C" void func_001D3F80(void* vself, int peak)
 {
     sRoom_3F80* self = (sRoom_3F80*)vself;
@@ -1351,6 +1419,24 @@ struct sTrophy_4268 {
     int f9C;            // 0x9C
 };
 
+/**
+ * Constructs the lodge's trophy room state (one trophy and its medals) and starts loading their pictures.
+ *
+ * Runs the cUIState constructor (func_0039E2A0), sets mHashName to 45 and the vtable cFEStateTrophyRoom_vtbl, stores
+ * the player number (low byte of @p a2) in mUserNum and that player's controller mask (func_001A1CD0) in mCtrlBits, and
+ * clears +0x48. The character id (+0x50) comes from the player interface (back-end interface 1,
+ * cBENewPlayerInterface_getPlayerCharID), followed by a call of that interface's virtual slot 2. @p a3 goes to +0x54
+ * and @p a4 to +0x58; the load count (+0x5C) is zeroed, the five texture ids (+0x60) and five loader slots (+0x74) are
+ * set to -1 and so is +0x9C. Ends with func_001D4918, which starts the loads of the trophy picture and its up to four
+ * medal pictures. The prelude's name `bank` for +0x58 is misleading: it is the trophy, passed to
+ * cBERewardInterface_getTrophy / getMedal.
+ *
+ * @param a1  the UI engine (passed through to the cUIState constructor)
+ * @param a2  the player number (On Tour userNum)
+ * @param a3  the peak (On Tour peakNum)
+ * @param a4  the trophy within the peak (On Tour trophyType)
+ * @return @p self
+ */
 extern "C" void* func_001D4268(void* self, int a1, int a2, int a3, int a4)
 {
     signed char idx = a2;

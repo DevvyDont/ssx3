@@ -521,6 +521,12 @@ struct sMsgCenter_97AD8 {
     ulong mask;     // 0x160
 };
 
+/**
+ * Builds the request line's song order: the owned songs first, then the rest, each group in index order.
+ *
+ * Walks songs 0 to mNumSongs (+0x14C) twice, writing into mSongOrder (+0x4C): first every song whose bit is set in the
+ * owned-songs mask (+0x160), then every song whose bit is clear.
+ */
 extern "C" void func_00197AD8(void* self)
 {
     sMsgCenter_97AD8* msgCenter = (sMsgCenter_97AD8*)self;
@@ -775,6 +781,19 @@ struct sReqLine_197E70 {
     cMsgWidget_197E70* artist;  // 0x1B8
 };
 
+/**
+ * Shows the title and artist of the song now playing on the request line.
+ *
+ * Returns at once unless both now-playing texts exist (+0x1B4 title, +0x1B8 artist). When the audio object's current
+ * song (+0x508 of func_0028B180) is below its song count (+0x504), takes that song's title (func_002B40F0) and artist
+ * (func_002B4120) from the music list at +0x118. A non-empty title shows the title text (virtual slot 8) and sets it to
+ * the localised "NowPlaying" format (FELocale, hash of str_kT_16NowPlaying) printed with the title through sprintf1
+ * into a temporary 16-bit buffer (operator new tagged "cFEStateRequestLine", freed after cUIText_setUnicodeString); an
+ * empty title hides it. The artist text gets the same treatment with the "Artist" format. With no current song both
+ * texts are hidden.
+ *
+ * @param vself  the request-line state (this)
+ */
 extern "C" void func_00197E70(void* vself)
 {
     sReqLine_197E70* self = (sReqLine_197E70*)vself;
@@ -1271,6 +1290,18 @@ struct sMsgCenter_988D8 {
     int result;     // 0x168
 };
 
+/**
+ * Buys a song on the request line: marks it owned for the character, charges for it unless it is one of the free six,
+ * and adds it to the playlist.
+ *
+ * Counts the bits of the owned-songs mask (+0x160); with 6 or more already owned the purchase costs money.
+ * func_00158558 on back-end interface 13 sets the song's owned bit for the user (+0x44) and character (+0x48) and, when
+ * charging, takes 5000 from the character's cash (func_00150B48); its result, the cash left (from
+ * cBEEconInterface_getMoney), is stored at +0x168. Finally sets the song's bit in both the owned mask (+0x160) and the
+ * playlist mask (+0x158).
+ *
+ * @param idx  the song index (bit number in both masks)
+ */
 extern "C" void func_001988D8(void* self, int idx)
 {
     sMsgCenter_988D8* s = (sMsgCenter_988D8*)self;
@@ -1361,6 +1392,13 @@ INCLUDE_ASM("fe/messagecenter", func_00198AB8);
 extern "C" void* func_0028B180();
 extern "C" void* func_002B4120(void* self, int i);
 
+/**
+ * Returns the artist of a request-line song from the audio object's music list (func_0028B180 + 0x118) through
+ * func_002B4120.
+ *
+ * @param i  the song index
+ * @return the artist string
+ */
 extern "C" void* func_00198AB8(void* self, int i)
 {
     return func_002B4120((char*)func_0028B180() + 0x118, i);
@@ -1469,6 +1507,16 @@ extern "C" const char* getDollarString(void* amount_)
 //100%
 INCLUDE_ASM("fe/messagecenter", func_00198DA0);
 #ifdef SKIP_ASM
+/**
+ * Compares two item pointers for qsort, ordering them by the signed short at +0xA of the items they point to,
+ * ascending.
+ *
+ * Both arguments (@p self, @p other) point at array elements, each a pointer to an item. func_0019B180 passes it to
+ * func_00418EF8 to sort its list of equipment item pointers.
+ *
+ * @param other  the second element
+ * @return the first item's key minus the second's
+ */
 extern "C" int func_00198DA0(void* self, void* other)
 {
     void* lhs = *(void**)self;

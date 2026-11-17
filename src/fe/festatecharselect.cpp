@@ -592,6 +592,20 @@ public:
 // PORT: the unit declares func_00181BD0 with an int index; the body sign-extends both id arguments.
 extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char charID) __asm__("func_00181BD0");
 
+/**
+ * Fills the character-select stats widgets for a character and puts it on the user's front-end rider.
+ *
+ * Reads the 7 attribute ratings from the player interface (cBE_getInterface kind 3: func_00148BC8, func_00148C68,
+ * func_00148B78, func_00148CB8, func_00148D58, func_00148D08, func_00148C18). For attribute i it finds the text
+ * "NumAttr<i>" and the bar "<i>pb" on the screen (+0x40); when both exist it shows the text with rating * 0.2 ("%.1f"),
+ * sets the bar's style (+0x80) to 55 and its value to the rating (at least 0). The total, rounded down to a multiple of
+ * 5, gives "NumAttrOver" (total / 35, "%.1f") and the "overall" bar (total / 7); neither of these two lookups is
+ * null-checked. Finally sets the user's rider to the character (func_001A0508 on the front end's rider manager at
+ * +0xB0, flag 0).
+ *
+ * @param rider  the user (controller) index
+ * @param charID  the character id
+ */
 extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char charID)
 {
     sStr9_181BD0 name = D_0045D6E0;
@@ -696,6 +710,17 @@ static inline sQuat_181EF0 AxisAngle_181EF0(const sQuat_181EF0& axis, float angl
     return sQuat_181EF0(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
+/**
+ * Places the user's front-end rider on the character-select screen and shows it once its model is loaded.
+ *
+ * Gets the rider for the user (+0x44) from the rider manager (func_001A0548). When it has a valid character loaded (id
+ * below 10, +0xCB8 and +0xCB4 set) and the state's +0x80 flag is set: sets the rider pose (func_0019F3E8) to position
+ * (136, -250, -82) turned about Z by the model angle (+0x60, degrees) + 100; when +0x54 is set, resets the rider
+ * animation (+0xC) and plays animation 434, clears the rider's +0xCCC and +0x54; moves the board out of view to (0,
+ * 10000, 0) (func_0019F548) and makes the rider visible (func_0019E538).
+ *
+ * @param vself  the character-select state
+ */
 extern "C" void func_00181EF0(void* vself)
 {
     char* self = (char*)vself;
@@ -788,6 +813,22 @@ struct sCharSel_2220 {
     char* names[30];            // 0x16C
 };
 
+/**
+ * Constructs the cheat-character select state for a user and a base character.
+ *
+ * Builds the UI state (func_0039E318), sets state id 10, the cFEStateCheatCharSelect_vtbl vtable and the user. Entry 0
+ * is the base character itself: id 0, its face picture (D_00440F78[@p slot], looked up in the owner's texture bank at
+ * +0x58) and its name (func_0014EEC8 on interface 2). Then every reward-database character (cBERewardInterface_getDB)
+ * that func_00157EE0 reports as owned by the user for @p slot is appended with its id, picture and name (count +0x78;
+ * ids +0x7C, pictures +0xF4, names +0x16C, 30 entries). Clears +0x70, the six picture slots (+0x54) and +0x74, and
+ * stores func_001A1CD0's value for the user at +0x15.
+ *
+ * @param engine  the UI engine
+ * @param owner  the parent state
+ * @param player  the user (controller) index
+ * @param slot  the base character id
+ * @return @p self
+ */
 extern "C" sCharSel_2220* func_00182220(sCharSel_2220* self, void* engine, void* owner, signed char player, int slot)
 {
     func_0039E318(self, engine, owner);
@@ -1059,6 +1100,13 @@ extern "C" int cFEStateCheatCharSelect_onWidgetMenu(void* self, int pMenu, unsig
 //100%
 INCLUDE_ASM("fe/festatecharselect", func_00182870);
 #ifdef SKIP_ASM
+/**
+ * Refreshes the cheat-character select's six picture slots from the menu's scroll position.
+ *
+ * Reads the first visible entry from the menu (+0x6C, byte +0x98) and gives each existing picture widget (+0x54) the
+ * texture element of entry first + i (+0xF4) at +0x7C, with +0x78 set to -1. cFEStateCheatCharSelect_onWidgetMenu calls
+ * it for menu event 5.
+ */
 extern "C" void func_00182870(void* self)
 {
     int i;
@@ -1081,6 +1129,16 @@ extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 extern void* cFEStateCharSetup_vtbl[];
 
+/**
+ * Constructs the character-setup state for a user.
+ *
+ * Builds the UI state (func_0039E2A0), sets state id 0xC, the cFEStateCharSetup_vtbl vtable and the user (+0x44),
+ * stores func_001A1CD0's value for the user at +0x15 and clears the show-rider flag (+0x4C).
+ *
+ * @param engine  the UI engine
+ * @param idx  the user (controller) index
+ * @return @p self
+ */
 extern "C" void* func_001828C0(void* self, void* engine, signed char idx)
 {
     func_0039E2A0(self, engine);

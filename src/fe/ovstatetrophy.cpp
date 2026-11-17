@@ -109,6 +109,14 @@ extern char D_00474230[];
 extern int D_004A276C;
 extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r);
 
+/**
+ * Constructs a course-progress tracker, the 0x3C-byte object at +0x8 of each cOVStateHUD1P panel.
+ *
+ * Installs its vtable D_00474230 at +0x38, lays it out over the whole 640 x 480 screen with func_0020EC18 and counts
+ * the instance in D_004A276C (func_0020EB08 drops the count). cOVStateHUD1P_cOVStateHUD1P and func_0021CBA0 call it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0020EAA0(void* self)
 {
     sRect20EAA0 r;
@@ -131,6 +139,15 @@ extern int D_004A276C;
 extern int D_004A2768;
 void operator_delete(int*);
 
+/**
+ * Destroys a course-progress tracker: restores its vtable D_00474230 and drops the instance count D_004A276C.
+ *
+ * When the last tracker goes, D_004A2768 is cleared so the next layout (func_0020EB50) looks the icon textures and the
+ * font up again. It is the only slot of D_00474230 (+0xC); cOVStateHUD1P__cOVStateHUD1P calls it for the panels'
+ * trackers.
+ *
+ * @param flags  bit 0 frees the object with operator_delete (the g++ deleting-destructor flag)
+ */
 extern "C" void func_0020EB08(void* self, int flags)
 {
     int n = D_004A276C - 1;
@@ -163,6 +180,18 @@ struct sTex_20EB50 {
 };
 extern sTex_20EB50 D_004C8C58[];
 
+/**
+ * Lays out a course-progress tracker in a screen rectangle, loading the shared icons and font first when needed.
+ *
+ * On the first call after the last tracker was destroyed (D_004A2768 clear) it looks up the 11 icon records of
+ * D_004C8C58 (name hash, width, height, texture) in the UI texture bank (SSXApp->Game->UI + 0x58,
+ * cUITextureBank_getElementByHashname) and the "fefont" font in the UI's font bank (func_003983F0 on UI + 0x8) into
+ * D_004A2764, and sets D_004A2768. Then func_0020EC18 does the layout. cOVStateHUD1P_onCreateScreen calls it for both
+ * panels' trackers.
+ *
+ * @param a  the screen bounds (the HUD passes 0, 0, 640, 480); not used beyond being passed on
+ * @param r  the rectangle (x, y, w, h) the tracker fills
+ */
 extern "C" void func_0020EB50(void* self, sRect20EAA0* a, sRect20EAA0* r)
 {
     if (D_004A2768 == 0) {
@@ -203,6 +232,19 @@ struct sTrophyBox_20EC18 {
     float s30;            // 0x30
 };
 
+/**
+ * Computes a course-progress tracker's screen layout from the rectangle it is drawn in.
+ *
+ * h is the height of the percentage text (the shared font's MaxCharHeight * BaseScale.y * 0.6667 once loaded, else 30)
+ * and m the arrow icon's height (record 4 of D_004C8C58). It stores the text position (+0x0, +0x4) at the bottom centre
+ * of @p r, the top y (+0x8), the bottom of the bar area above the text and the bottom arrow row (+0xC, again at +0x18),
+ * the centre x (+0x10), the bar top below the top arrow row (+0x14 = y + m), the pixels per course distance unit for
+ * the single-player bar (+0x1C = (+0xC - +0x8 - m) / 10000, the window being 10000 units long), the rectangle itself
+ * (+0x20..+0x2C) and its height / 10000 for the split-screen bar (+0x30).
+ *
+ * @param a  the screen bounds; not used
+ * @param r  the rectangle (x, y, w, h)
+ */
 // PORT: D_004A2764 holds a texture pointer in an int (declared int elsewhere in the unit).
 extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r)
 {
@@ -239,6 +281,13 @@ extern char* D_004A2750;
 extern int D_004A2760;
 extern "C" void func_00210618(int i);
 
+/**
+ * Updates every rider's course progress for the trackers.
+ *
+ * When course data is loaded (D_004A2750) it runs func_00210618 for each rider of the race (SSXApp->Game->AI, count at
+ * +0x78), clears that rider's reset flag in D_004C8BC8 and finally clears D_004A2760 so the trackers may draw.
+ * cOVStateHUD1P_onUpdate calls it.
+ */
 extern "C" void func_0020ED20(void)
 {
     if (D_004A2750 != 0) {
@@ -441,6 +490,33 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
 }
 
 
+/**
+ * Draws the single-player course-progress tracker for @p rider: a vertical bar over the 10000-unit stretch of course
+ * around the rider, with every racer, the course markers and the percentage done.
+ *
+ * It draws nothing until the progress table has been updated (D_004A2760 clear), while the tracker is off (D_004A275C,
+ * func_0021CB90), without a rider or without course data. The viewer is the rider's AI index (the cBeing at rider +
+ * 0x6C0). First each racer's lateral offset from the viewer (its slot position minus the viewer's, clamped to +-2000)
+ * is smoothed into the slot (+0x10), moving at most 46.3 per frame unless the slot is invalid, and all slots are
+ * invalidated when the viewer changed since the last draw (+0x34). The drawing runs inside cPS2GraphicsMan_PushView and
+ * a pushed draw state reset to sDrawState_s_defaultDrawState with an identity view (func_00395C38):
+ * - "%d%%" of the course done (distance / course length, D_004A2750 + 0x10), centred at the text position
+ *   (func_00392908) in the shared font at 0.6667 scale, white with a black shadow offset by (2, 2);
+ * - an arrow (icon 4) at the top for each racer ahead of the window and at the bottom for each one behind it, shifted
+ *   sideways by -offset * 0.005;
+ * - the bar (icon 0, 11 px wide), cut where the window passes the start or the finish, and a red untextured strip over
+ *   the part done;
+ * - each racer inside the window (plus a 20 px margin) at its distance, shifted sideways by its offset and clipped to
+ *   the bar with matching uvs: the viewer icon 1, humans icon 3, AI racers icon 2 (layers 12, 13, 14);
+ * - the course markers (D_004A2758: type and distance pairs) inside the window as icon 5 + type, except type 1 when bit
+ *   9 of D_005308D0 is set and GameModeMan + 0x88 is nonzero.
+ *
+ * Each quad goes through cPS2GraphicsMan_RenderTriStrip (GrMan's virtual slot 70) with its layer in bits 5-9 of the
+ * draw state's word 2. Finally the state and view are popped and the viewer is kept in +0x34. cOVStateHUD1P_onRender2D
+ * calls it with the panel's tracker when fewer than two players play.
+ *
+ * @param rider  the rider the panel follows (the cBeing at +0x6C0 gives its AI index)
+ */
 extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
 {
     if (D_004A2760 != 0)
@@ -945,6 +1021,23 @@ static inline float limitStep_FB40(float v, float prev, float lim)
     return v;
 }
 
+/**
+ * Draws the split-screen course-progress tracker for @p rider: a thin vertical line along one side of the panel with
+ * racer and marker icons beside it.
+ *
+ * It has func_0020EDA0's early-outs and lateral-offset smoothing (the offsets are updated but not used here). The line
+ * (icon 0, 5.5 px wide) runs down the left edge of the tracker rectangle (+0x20..+0x2C) when @p right is set and down
+ * its right edge otherwise, covering the 10000-unit window centred on the viewer at +0x30 pixels per unit. Each racer
+ * inside the window is drawn beside the line at its distance (the viewer icon 8, humans icon 10, AI racers icon 9;
+ * layers 12, 13, 14), and so are the course markers (half of icon 5 + type, with func_0020EDA0's type-1 rule). Icons
+ * point away from the line (uvs mirrored on the left side), are skipped when they reach either end and fade out over
+ * the 60 px nearest the ends. The viewer is kept in +0x34. cOVStateHUD1P_onRender2D calls it for each panel in
+ * two-player games, with @p right = (panel index != 0).
+ *
+ * @param rider  the rider the panel follows (the cBeing at +0x6C0 gives its AI index)
+ * @param right  nonzero: line at the rectangle's left edge with the icons to its right; 0: line at the right edge,
+ *               icons to the left
+ */
 extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
 {
     if (D_004A2760 != 0)
@@ -1249,6 +1342,15 @@ extern sPad16 D_004C8BC8;
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_002105B0);
 #ifdef SKIP_ASM
+/**
+ * Flags rider @p a0's course-progress slot for a reset.
+ *
+ * Sets the first word of slot @p a0 of D_004C8BC8 (0x18-byte slots): the next update (func_00210618) then takes the
+ * rider's real progress instead of limiting the change, and func_00210820 invalidates the slot's smoothed offset.
+ * cRider_putAt calls it when a rider is moved.
+ *
+ * @param a0  the rider's index in the race
+ */
 extern "C" void func_002105B0(int a0)
 {
     char* p = (char*)&D_004C8BC8 + a0 * 0x18;
@@ -1264,6 +1366,15 @@ extern char* D_004A2754;
 extern char* D_004A2758;
 extern "C" void func_002108F8(void);
 
+/**
+ * Installs the course-progress data of a resolved world chunk (kind 21 in cPS2ChunkResolve_resolve).
+ *
+ * Stores @p data in D_004A2750, its segment table (data + the offset at +0x4) in D_004A2754 and its marker table (data
+ * + the offset at +0xC) in D_004A2758, then resets every rider slot (func_002108F8). The data also holds the segment
+ * count (+0x0), the marker count (+0x8) and the course length (+0x10).
+ *
+ * @param data  the chunk's data
+ */
 extern "C" void func_002105D0(char* data)
 {
     char* a = data + *(int*)(data + 4);
@@ -1282,6 +1393,9 @@ extern char* D_004A2750;
 extern char* D_004A2754;
 extern char* D_004A2758;
 
+/**
+ * Forgets the course-progress data: clears D_004A2750, D_004A2754 and D_004A2758 (cPS2ChunkResolve_unresolve calls it).
+ */
 extern "C" void func_00210608(void)
 {
     D_004A2750 = 0;
@@ -1315,6 +1429,17 @@ struct sTrophySeg_210618 {
 // The unit declares D_004C8BC8 as a 16-byte pad struct; view it as the per-rider table by asm label.
 extern sTrophyEntry_210618 D_004C8BC8_210618[] __asm__("D_004C8BC8");
 
+/**
+ * Updates rider @p i's course progress: its distance along the course, current segment and lateral position.
+ *
+ * Does nothing without course data or for an index past the race's rider count. The distance is the course length
+ * (+0x10) minus cRider_getDistanceLeft; unless the slot's reset flag is set it may change by at most 138.89 per call.
+ * At or below 0 the slot gets segment 0 and distance 0; at or past the last segment's start it gets the last segment
+ * and the full course length; otherwise the segment index is walked from its previous value to the segment holding the
+ * distance (0x14-byte segments, start distance at +0x10). The lateral position comes from func_00210820.
+ *
+ * @param i  the rider's index in the race
+ */
 extern "C" void func_00210618(int i)
 {
     char* course = D_004A2750;
@@ -1409,6 +1534,16 @@ static inline float sy_210820(sZone_210820* z)
     return z->sy;
 }
 
+/**
+ * Returns rider @p idx's lateral position in its current course segment.
+ *
+ * Projects the rider's position (cBeing getPosition, at rider + 0x6C0) relative to the segment's origin (+0x8, +0xC)
+ * onto the segment's axis (+0x0, +0x4): (x - ox) * ax + (y - oy) * ay. When the slot's reset flag is set it also
+ * invalidates the slot's smoothed offset (+0x14).
+ *
+ * @param idx  the rider's index in the race
+ * @return the lateral position
+ */
 extern "C" float func_00210820(int idx)
 {
     sZone_210820* zones = (sZone_210820*)D_004A2754;
@@ -1446,6 +1581,12 @@ static inline void resetSlot2108F8(sTrophySlot2108F8* s)
     s->e = 0;
 }
 
+/**
+ * Resets all six rider slots of the course-progress table D_004C8BC8.
+ *
+ * Each slot gets its reset flag set and its segment, distance, position and smoothed offset cleared; then D_004A2760 is
+ * set so the trackers wait for the next update (func_0020ED20).
+ */
 extern "C" void func_002108F8(void)
 {
     int i;
@@ -1501,6 +1642,16 @@ extern char str_textScrollChat_b[];
 extern char D_00534FC8[];
 extern sRect_210940 D_004C8D08;
 
+/**
+ * Builds the in-race private-message screen ("282ReadPrivateMessage") of the online chat overlay (overlay id 40).
+ *
+ * Shows "TextFromX" with the opponent's name (D_00534FC8, as an ASCII string). "AgreementSlider" becomes a vertical
+ * scroll bar (mAttr bit 0) with "ChatUpArrow", "ChatDownArrow" and "slideroutline2" as its mpUpArrow, mpDownArrow and
+ * mpHideOnEmpty and meHideState 2. The chat scroller "textScrollChat" gets bit 0 of mAttrTextScroll and input map 1
+ * (cUITextScroll_setInputMap), is shown, gets the wrap bit (mAttr 0x80), the colour (1, 0, 0, 0) through its virtual
+ * slot 11, mSelectedColour D_004C8D08 and the scroll bar as mpScrollBar. Ends with cOVState_onCreateScreen; returns
+ * early when the screen cannot be added. "AgreementSlider" is used without a null check.
+ */
 extern "C" void func_00210940(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -1548,6 +1699,18 @@ extern "C" int func_00258160(int a, char* name, int len);
 extern "C" void func_00210BD8(void* self, char* name, int a);
 extern "C" void func_00210F40(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
 
+/**
+ * Starts the chat overlay: on the first transition it shows a waiting incoming message, or else opens the keyboard.
+ *
+ * When @p ok is set it reads an incoming chat packet into the buffer at +0x9C (func_00258160, up to 65 bytes) and
+ * appends it as the opponent's line (func_00210BD8); without one it opens the keyboard (func_00210F40 with empty texts
+ * and a 61-character limit).
+ *
+ * Likely bug: 65 bytes are allowed into the buffer at +0x9C, which ends at +0xDC, where func_00210FA0 keeps a word.
+ *
+ * @param ok  nonzero on the first transition
+ * @return 1 (the transition is done)
+ */
 extern "C" int func_00210B58(void* self, int ok)
 {
     if (ok != 0) {
@@ -1586,6 +1749,17 @@ struct sBXString_00210BD8 {
     sBXString_00210BD8(const sBXString_00210BD8& o);
 };
 
+/**
+ * Appends a chat line "<name>: <text>" to the chat overlay's scroller.
+ *
+ * Finds "textScrollChat" and does nothing without it. It saves the scroller's mLineSize, mSelectedIndex and
+ * mLinesOffset, builds the line in a cBXString from our name (D_00534FB8) when @p a is set or the opponent's
+ * (D_00534FC8) otherwise, ": " (D_004A2710) and @p name, adds it with cUITextScroll_addAsciiString, then func_001A83D8
+ * trims the scroller to 30 lines and restores its scroll state from the saved values.
+ *
+ * @param name  the message text
+ * @param a  nonzero for our own message, 0 for the opponent's
+ */
 extern "C" void func_00210BD8(void* self, char* name, int a)
 {
     char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
@@ -1624,6 +1798,14 @@ extern "C" void* func_0039F698(void* list);
 extern "C" int func_00258160(int a, char* name, int len);
 extern "C" void func_00210BD8(void* self, char* name, int a);
 
+/**
+ * Updates the chat overlay each frame: closes it when the online pause runs out and shows incoming messages.
+ *
+ * After cOVState_onUpdate, if cGameComm_mGameComm exists and its mPauseTimeout or mOverlayTimeout has reached 0, it
+ * closes the engine's popups (func_0039F698 on the state stack) and sets this state's mAttrState to mode 7 with
+ * mPendingDelete. While the screen exists it then reads an incoming chat packet into +0x9C (func_00258160, up to 65
+ * bytes) and appends it as the opponent's line (func_00210BD8).
+ */
 extern "C" void func_00210D20(void* self)
 {
     cOVState_onUpdate(self);
@@ -1647,6 +1829,12 @@ extern "C" void func_00210D20(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210DD0);
 #ifdef SKIP_ASM
+/**
+ * Forgets the chat overlay's keyboard popup (+0xE0) when that popup reports event 22.
+ *
+ * @param popup  the popup that sent the event
+ * @param event  the event id; only 22 is handled
+ */
 extern "C" void func_00210DD0(void* self, int popup, int event)
 {
     if (event == 22) {
@@ -1668,6 +1856,19 @@ extern "C" void func_00258C50(int a, char* name);
 void* func_0039F190_r(void* list, int a1) __asm__("func_0039F190");
 extern "C" int strlen(const char* s);
 
+/**
+ * Handles the chat overlay's widget events: closing it, opening the keyboard and sending the typed message.
+ *
+ * Ignored without a screen. Event 6, while no keyboard is open, pops the top state (func_0039F190 on the engine's
+ * stack) and sets this state's mAttrState to mode 7 with mPendingDelete. Event 5, while no keyboard is open, opens the
+ * keyboard (func_00210F40, empty texts, 61 characters) and calls cKeyboardPopup_setIncludeKey(75, 1, 2) on it. Event 13
+ * first shows any incoming message (func_00258160, func_00210BD8), then sends the keyboard's mszEditString (+0x74) when
+ * it is not empty (func_00258C50 on cGameComm_mGameComm) and appends it as our own line. Other events go to
+ * cOVState_onWidgetEvent. Event 13 reads the keyboard at +0xE0 without checking that one is open.
+ *
+ * @param item  the widget (not read)
+ * @param key  the event id
+ */
 extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
 {
     if (*(int*)((char*)self + 0x40) == 0) {
@@ -1713,6 +1914,19 @@ extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_001CCF00(void* p, int a);
 extern "C" void cKeyboardPopup_setInputText(void* p, int a);
 
+/**
+ * Opens the chat overlay's keyboard with a prompt and a starting text.
+ *
+ * func_00210FA0 creates and pushes the keyboard popup, func_001CCF00 sets its static (prompt) text to @p staticText and
+ * cKeyboardPopup_setInputText its edit text to @p inputText.
+ *
+ * @param a1  stored at +0xDC by func_00210FA0 (the callers pass 0)
+ * @param staticText  the prompt text (a char*)
+ * @param inputText  the initial edit text (a char*)
+ * @param password  nonzero for a password keyboard
+ * @param miscData  the popup's miMiscData
+ * @param maxChars  the text length limit
+ */
 extern "C" void func_00210F40(void* self, int a1, int staticText, int inputText, int password, int miscData, int maxChars)
 {
     func_00210FA0(self, a1, password, miscData, maxChars);
@@ -1732,6 +1946,20 @@ extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode)
 extern "C" void func_001CE468(void* self, int v);
 extern char str_cKeyboardPopup_b[];
 
+/**
+ * Creates the chat overlay's keyboard popup and pushes it on the UI state stack.
+ *
+ * Allocates a 1092-byte cKeyboardPopup ("cKeyboardPopup", flags 0x100), constructs it for this state's engine with this
+ * state as owner, @p password and controller bits 0xF, stores it at +0xE0 and pushes it with cUIStateStack_pushPopup on
+ * the stack reached through the screen (mpScreen + 0xD0, then + 0x10, + 0x18). Then it sets the popup's miMiscData
+ * to @p miscData, cKeyboardPopup_setMaxCharacters(@p maxChars), meType 0, includes key 75 and keys 0..13
+ * (cKeyboardPopup_setIncludeKey, func_001CE468), sets mbCallParentsUpdate and stores @p a1 at +0xDC.
+ *
+ * @param a1  stored at +0xDC (the callers pass 0)
+ * @param password  nonzero for a password keyboard
+ * @param miscData  the popup's miMiscData
+ * @param maxChars  the text length limit
+ */
 extern "C" void func_00210FA0(void* self, int a1, int password, int miscData, int maxChars)
 {
     void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup_b, 0x100, 0), *(void**)((char*)self + 0x10), self, password, 0xF);

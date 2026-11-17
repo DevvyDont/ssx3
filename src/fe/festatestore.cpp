@@ -83,6 +83,15 @@ public:
 
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 
+/**
+ * Shows or hides the uber-trick screen's "btext5" and "ps2sq" objects.
+ *
+ * Looks both up on the state's first screen (cList_first on the screen list +0x24) and calls setVisible (vtable slot
+ * 9). func_00185268 shows them with the cost display when the trick menu gets focus and hides them when it is left;
+ * func_001849B0 hides them.
+ *
+ * @param on  1 to show, 0 to hide
+ */
 extern "C" void func_00184780(void* self, int on)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
@@ -180,6 +189,17 @@ struct sVE_1849B0 {
     void (*fn)(void*);
 };
 
+/**
+ * Builds the uber-trick store screen ("66ut_btnmap") and sets up the rider preview, the camera and the icons.
+ *
+ * Adds the screen through mpEngine into mpScreen (+0x40) and plays frame 0. Calls the player interface's (cBE interface
+ * 1) vtable slot 2, has the FE rider manager (RealFE + 0xB0) set the user's rider to the user's character
+ * (func_001A0508) and hides that rider (func_001A0570 with 0). Points the FE camera (RealFE + 0x10, func_0015E050) from
+ * (0, 660, 80) at (0, 0, 80) and sets its first float to 0.4363 (25 degrees). Looks up the "empty_box", "checkbox" and
+ * "yell_dollar_sign" texture elements (mpEngine + 0x58) into +0x58, +0x54 and +0x5C (On Tour mpCheckbox, mpCheckmark,
+ * mpDollarSign), sets the sound bank manager's mode 5 (func_0028F140 on func_0028B180()) and hides the cost display
+ * (cFEStateUberTrick_costVisible) and func_00184780's objects. onCreateScreen slot (+0x24) of the vtable D_0046CCC0.
+ */
 extern "C" void func_001849B0(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -238,6 +258,12 @@ INCLUDE_ASM("fe/festatestore", func_00184B70);
 extern "C" void func_001A0570(void* self, int a1, int a2);
 void* cUIState_onDestroyScreen(void* self);
 
+/**
+ * Hides the user's FE rider when the uber-trick screen goes away, then runs cUIState_onDestroyScreen.
+ *
+ * The rider is hidden with func_001A0570 (user mUserNum, 0) on RealFE + 0xB0, skipped when there is no front end.
+ * onDestroyScreen slot (+0x2C) of the vtable D_0046CCC0.
+ */
 extern "C" void func_00184B70(void* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
@@ -253,6 +279,14 @@ INCLUDE_ASM("fe/festatestore", func_00184BB8);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_checkGate(void* self);
 
+/**
+ * Refills the uber-trick screen's trick list (cWScriptMan_checkGate) when @p on is set.
+ *
+ * onGainTransition slot (+0x3C) of the vtable D_0046CCC0.
+ *
+ * @param on  non-zero to refill the trick list
+ * @return 0
+ */
 extern "C" int func_00184BB8(void* self, int on)
 {
     if (on != 0) {
@@ -279,6 +313,14 @@ struct sObj00184BE0 {
 extern "C" void func_00183B08(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 
+/**
+ * Gives the uber-trick screen's category menu the focus when the state gains focus.
+ *
+ * Runs func_00183B08, calls setFocus(1) on the category menu +0x4C and setFocus(0) on the trick menu +0x50 (vtable slot
+ * 7; skipped when missing), then cUIState_onGainFocus. onGainFocus slot (+0x34) of the vtable D_0046CCC0.
+ *
+ * @param prevState  the state that had focus before, passed on to cUIState_onGainFocus
+ */
 extern "C" void func_00184BE0(void* self, int prevState)
 {
     sObj00184BE0* menu;
@@ -352,6 +394,15 @@ static inline sQuat_184C60 AxisAngle_184C60(const sQuat_184C60& axis, float angl
     return sQuat_184C60(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
+/**
+ * Poses the user's FE rider on the uber-trick screen once it has loaded, then runs cUIState_onUpdate.
+ *
+ * Until +0x48 (On Tour mbModelVisible) is set it takes the user's FE rider (func_001A0548 on RealFE + 0xB0). When the
+ * rider's character (+0x0) is below 10 and +0xCB8 and +0xCB4 are both set, it sets the rider's +0xCCC, resets its
+ * animation (+0xC, cRiderAnimBase_reset) and plays animation 436 (cRiderAnimBase_play, blend -1), places it at (-228,
+ * -205, 63) turned 1.0821 rad (62 degrees) about Z (the X and Y turns are 0; func_0031BE50 gives the sines) with
+ * func_0019F3E8, shows it (func_001A0570 with 1) and sets +0x48. onUpdate slot (+0x64) of the vtable D_0046CCC0.
+ */
 extern "C" void func_00184C60(char* self)
 {
     if (*(int*)(self + 0x48) == 0) {
@@ -418,6 +469,19 @@ struct sVE_4F40 {
     int (*fn)(void*);
 };
 
+/**
+ * Pays for and unlocks the selected uber trick when the buy popup closes accepted.
+ *
+ * On event 22, when the popup's mbAccept (+0x6C) is set: subtracts its mInfo.mCost (+0x48) from the character's money
+ * (func_00150B48 on cBE interface 11), clears flag bit "trick" (the trick menu's selected mMiscData) of the category's
+ * entry (the category menu's selected mMiscData) with func_0014FE08 on interface 6, calls that interface's vtable slot
+ * 1, sets "helptext_custom" to "kT_66HELPCustomUber" and refreshes the cost numbers (func_00184520). On event 22 the
+ * trick list is refilled either way (cWScriptMan_checkGate). Other events do nothing. onPopupEvent slot (+0x8C) of the
+ * vtable D_0046CCC0.
+ *
+ * @param item  the popup (the cUIStateBuyPopup)
+ * @param msg  the popup event
+ */
 extern "C" void func_00184F40(void* self, void* item, int msg)
 {
     switch (msg) {
@@ -639,6 +703,37 @@ static inline void Back_185268(char* self)
         cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
 }
 
+/**
+ * Handles the uber-trick screen's widget events: moving between the menus, equipping or buying a trick, previewing it,
+ * and the help texts.
+ *
+ * A widget's menu is its mpParent (+0x40): the category menu +0x4C or the trick menu +0x50 (On Tour mpMainMenu,
+ * mpTrickMenu). The category and trick are the menus' selected items' (mpSelected, +0xA0) mMiscData (+0x18); the trick
+ * table comes from func_0014FF90 on cBE interface 6. "Back" pushes the state that the custom front end (*mpEngine)
+ * returns from its vtable slot 5 (func_001A16C0). onWidgetEvent slot (+0x9C) of the vtable D_0046CCC0.
+ * - 5 (accept) on the category menu: "done" goes back; another item gives the trick menu focus at row 0 (setFocus,
+ *   vtable slot 7), runs func_00183C08 and shows the cost display (cFEStateUberTrick_costVisible) and func_00184780's
+ *   objects. On the trick menu: an unlocked trick (func_00150048) that is not for sale (func_0014FFB8) becomes the
+ *   category's trick (func_0014FD80), interface 6's vtable slot 1 runs and the list is refilled
+ *   (cWScriptMan_checkGate). Otherwise, outside game path 0 (D_00535C11) UI sound 4 plays; a trick for sale opens a
+ *   "UITRICKBUY" cUIStateBuyPopup (cUIStateBuyPopup_initBuyTrick with the trick's name, cost and the character's money)
+ *   when the money covers the cost, else sound 4 plays.
+ * - 6 (back) on the trick menu: gives the category menu focus, colours the trick menu's selected item opaque black
+ *   (setColour, slot 11), deselects it (index 0xFF), runs func_00183B08 and hides the cost display and func_00184780's
+ *   objects. On the category menu it goes back.
+ * - 7 on the trick menu: once the rider is shown (+0x48) plays the trick's animation (its table entry's first
+ *   halfword).
+ * - 1 (highlight) sets the FE rider's +0xCD0. On the category menu an item with a category (mMiscData not -1) shows the
+ *   trick widgets (cFEStateUberTrick_trickVisible), refills the list and sets "helptext_choose" to
+ *   "kT_66HELPChooseCat"; other items hide them and set "kT_FEHELPAcceptTrick". On the trick menu "helptext_custom"
+ *   says "kT_66HELPCustomUber" for an equippable trick, "kT_FEHELPTrickAvailBuy" or "kT_OVRCMNSaveCashUber" for a trick
+ *   for sale by whether the money covers it, "kT_FEHELPTrickBuyCTM" outside game path 0; then the cost numbers are
+ *   refreshed (func_00184520).
+ * - 2 clears the FE rider's +0xCD0.
+ *
+ * @param item  the widget that sent the event
+ * @param msg  the widget event
+ */
 extern "C" void func_00185268(char* self, char* item, int msg)
 {
     switch (msg) {
@@ -784,6 +879,16 @@ extern "C" void func_00185268(char* self, char* item, int msg)
 //100%
 INCLUDE_ASM("fe/festatestore", func_001859D8);
 #ifdef SKIP_ASM
+/**
+ * Answers the uber-trick screen's menu events: 0x100 for event 9 on the trick menu and for events 8 and 9 on the
+ * category menu, otherwise 0x101.
+ *
+ * The trick menu is +0x50. onWidgetMenu slot (+0xA4) of the vtable D_0046CCC0.
+ *
+ * @param menu  the menu that asks
+ * @param event  the menu event
+ * @return 0x100 or 0x101 as above
+ */
 extern "C" int func_001859D8(void* self, int menu, unsigned int event)
 {
     if (menu == *(int*)((char*)self + 0x50)) {
@@ -808,6 +913,15 @@ INCLUDE_ASM("fe/festatestore", func_00185A18);
 extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateCredits_vtbl[];
 
+/**
+ * Constructs the credits state (allocated as "cFEOptionsCredits", 104 bytes).
+ *
+ * Runs cUIState's constructor (func_0039E2A0; the engine argument reaches it untouched in the second argument
+ * register), stores cFEStateCredits_vtbl and mHashName 36, sets +0x60 to -100 and +0x64 to 1 (On Tour mPixelOffset,
+ * mPixelDelta) and clears +0x48, +0x58 and +0x5C (On Tour mpWidget, mpDolbyIcon, mpTextScroll).
+ *
+ * @return @p self
+ */
 extern "C" void* func_00185A18(void* self)
 {
     func_0039E2A0(self);

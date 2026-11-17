@@ -107,6 +107,21 @@ struct sAsync_A298 {
     sVE_A298* vt;           // 0x1D4
 };
 
+/**
+ * Starts the next queued sound-bank load when the async system is idle and something is queued.
+ *
+ * Field names are On Tour's cAsyncSys (same offsets): sets mBusy (+0x4) and tells the owner through virtual slot 2
+ * (cBankManager_ASYNCSYS_OnBeginAsyncLoad; vtable at +0x1D4) with the front user handle (queue mUserHandle, +0x18C).
+ * Then by the front memory type (queue mMemType, +0x1AC; On Tour eSoundMemLocation 0 dynamic, 1 main, 2 sound): 0 and 2
+ * load the front file name (mFilename slot from queue mFilenameIndex, +0x19C) into the shared buffer mpBuffer (+0x1CC)
+ * of mBufferSize (+0x1D0) bytes with func_003DF748; 1 asks the owner for main memory through slots 3
+ * (cBankManager_ASYNCSYS_OnAsyncMainMemAlloc, size -1 and the front flags of queue mMainMemFlags, +0x1BC) and 4
+ * (cBankManager_ASYNCSYS_OnAsyncMainMemSize) and loads there with func_003DF748, or with ASYNCFILE_load and those flags
+ * when no memory came back. The file handle goes to mHandle (+0x0). Any other memory type starts nothing but leaves
+ * mBusy set.
+ *
+ * The queues are only peeked here; func_0028AAF8 pops them when the load has ended.
+ */
 extern "C" void func_0028A298(void* self)
 {
     sAsync_A298* s = (sAsync_A298*)self;
@@ -230,6 +245,21 @@ struct sAsync28A558 {
     sRing28A558 q1BC;      // 0x1BC
 };
 
+/**
+ * Queues a sound-bank file for asynchronous loading and starts it when the system is idle.
+ *
+ * Pushes @p a1 onto the user-handle queue (+0x18C, On Tour mUserHandle), @p a3 onto the memory-type queue (+0x1AC,
+ * mMemType) and @p a4 onto the flags queue (+0x1BC, mMainMemFlags); each push is skipped when that queue is full.
+ * Copies @p name into the file-name slot +0x8 (mFileIndex) of the six 64-byte names at +0xC, pushes that slot onto the
+ * name-index queue (+0x19C), advances the slot (back to 0 after 5) and calls func_0028A298. The name ring has six slots
+ * whatever the queue size, so a seventh pending load overwrites the oldest name. func_0028BD10 (the bank manager's
+ * async load) calls it.
+ *
+ * @param a1  the bank's user handle, given back to the owner's callbacks (On Tour bankID)
+ * @param name  the file name
+ * @param a3  where the bank goes: 0 dynamic (shared buffer), 1 main memory, 2 sound memory (On Tour eSoundMemLocation)
+ * @param a4  main-memory allocation flags (On Tour allocMainMemFlags)
+ */
 extern "C" void func_0028A558(void* self, int a1, const char* name, int a3, int a4)
 {
     sAsync28A558* s = (sAsync28A558*)self;
@@ -429,6 +459,16 @@ static inline void Push1BC_A728(sAsync_A728* s, int v)
     }
 }
 
+/**
+ * Cancels every load queued for one bank, aborting it when it is the one in progress.
+ *
+ * When busy (+0x4) and the front user handle (+0x18C) is @p id, calls func_00289DF0(this, 0) and returns. Otherwise
+ * pops every queued entry from the four queues (user handle, name index, memory type, flags) and pushes back those
+ * whose user handle is not @p id, which keeps their order; then, when not busy, starts the next load (func_0028A298).
+ * func_0028BC58 calls it.
+ *
+ * @param id  the bank's user handle (On Tour bankID)
+ */
 extern "C" void func_0028A728(void* self, int id)
 {
     sAsync_A728* s = (sAsync_A728*)self;
@@ -498,6 +538,24 @@ struct sAsync_AAF8 {
     sVE_AAF8* vt;           // 0x1D4
 };
 
+/**
+ * Polls the sound-bank load in progress and, once it has finished, registers the bank, hands it to the owner and starts
+ * the next load.
+ *
+ * Only while busy (+0x4). By the front memory type (+0x1AC): for 0 and 2 (loaded into the shared buffer) and for 1
+ * (main memory) it checks ASYNCFILE_getstatus on the file handle (+0x0): 0 is still loading; 1 is done:
+ * ASYNCFILE_release gives the data and size. Shared buffer: func_003B6098 adds the bank and writes its handle to +0x0;
+ * unless it returns 7 the bank is removed again (func_003B6300), the owner provides main memory of the full size
+ * (virtual slot 3, cBankManager_ASYNCSYS_OnAsyncMainMemAlloc, with the front user handle and flags), the data is copied
+ * there (MEM_copy) and added from there; on 7 only the header is kept: func_003B6528 gives its size, the owner provides
+ * that much and func_003B6548 copies it. Main memory: the data is added where it is. The owner then gets virtual slot 5
+ * (cBankManager_ASYNCSYS_OnEndAsyncLoad) with the user handle, the bank handle, end state 0 (complete), the file name,
+ * the memory and the size; an empty file reports handle -1 and end state 2 (error). Then mBusy is cleared, all four
+ * queues are popped and func_0028A298 starts the next load. Any status other than 0 or 1 cancels through
+ * func_00289DF0(this, 0).
+ *
+ * func_002AB958 (the stream system's update) calls it.
+ */
 extern "C" void func_0028AAF8(void* self)
 {
     sAsync_AAF8* s = (sAsync_AAF8*)self;
@@ -770,6 +828,16 @@ struct sAsync_0028B0F0 {
     char pad1ec[0];
 };
 
+/**
+ * Asks the owner for main memory for the load in progress: virtual slot 3 (cBankManager_ASYNCSYS_OnAsyncMainMemAlloc)
+ * with the front user handle (+0x18C), @p size and the front allocation flags (+0x1BC).
+ *
+ * Declared void, but the owner's result (the memory) stays in the return register. Its local queue view names the
+ * ring's head and tail words the other way round from the rest of the unit (it reads the tail, +0xC). Nothing in the
+ * program calls it.
+ *
+ * @param size  the number of bytes wanted
+ */
 extern "C" void func_0028B0F0(sAsync_0028B0F0* self, int size)
 {
     sVE_0028B0F0* vtEntry = &(*(sVE_0028B0F0**)((char*)self + 0x1D4))[3];
@@ -795,6 +863,11 @@ extern "C" void func_0028B0F0(sAsync_0028B0F0* self, int size)
 INCLUDE_ASM("sound/asyncsys", func_0028B180);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the game's audio object.
+ *
+ * @return gSSXAudio (On Tour cSSXAudio*)
+ */
 extern "C" void* func_0028B180()
 {
     return gSSXAudio;
@@ -805,6 +878,11 @@ extern "C" void* func_0028B180()
 INCLUDE_ASM("sound/asyncsys", func_0028B188);
 #ifdef SKIP_ASM
 
+/**
+ * Tells whether the front end is running: 1 when SSXApp's RealFE or DebugFE is set, else 0.
+ *
+ * @return 1 in the front end, else 0
+ */
 extern "C" int func_0028B188(void) {
     int var_4;
 
@@ -838,6 +916,11 @@ extern "C" int cAudioInterface_isInGame()
 INCLUDE_ASM("sound/asyncsys", func_0028B1C0);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the application object SSXApp.
+ *
+ * @return SSXApp
+ */
 extern "C" void* func_0028B1C0()
 {
     return (char*)SSXApp;
@@ -884,6 +967,11 @@ extern "C" void* cAudioInterface_getAI()
 INCLUDE_ASM("sound/asyncsys", func_0028B1E8);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the back end, SSXApp->BE.
+ *
+ * @return SSXApp->BE
+ */
 extern "C" void* func_0028B1E8()
 {
     return SSXApp->BE;
@@ -894,6 +982,13 @@ extern "C" void* func_0028B1E8()
 INCLUDE_ASM("sound/asyncsys", func_0028B1F8);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the number of game views: the word at +0x10 of SSXApp->Game->ViewMan.
+ *
+ * cSSXAudio_GetNumViews uses it when the app runs several views.
+ *
+ * @return the view count
+ */
 extern "C" void* func_0028B1F8()
 {
     return *(void**)((char*)SSXApp->Game->ViewMan + 0x10);
@@ -904,6 +999,14 @@ extern "C" void* func_0028B1F8()
 INCLUDE_ASM("sound/asyncsys", func_0028B210);
 #ifdef SKIP_ASM
 
+/**
+ * Returns game view @p i's camera: entry @p i of the camera array at +0x4 of SSXApp->Game->ViewMan.
+ *
+ * cSSXAudio_GetCameraPos and func_00288A20 use it.
+ *
+ * @param i  the view index
+ * @return the view's camera
+ */
 extern "C" void* func_0028B210(int i)
 {
     char* riders = (char*)SSXApp->Game->ViewMan;
@@ -914,6 +1017,13 @@ extern "C" void* func_0028B210(int i)
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B230);
 #ifdef SKIP_ASM
+/**
+ * Returns the world, SSXApp->Game->World.
+ *
+ * Nothing in the program calls it.
+ *
+ * @return SSXApp->Game->World, as an int
+ */
 extern "C" int func_0028B230(void) {
     return ((int)SSXApp->Game->World);
 }
@@ -922,6 +1032,11 @@ extern "C" int func_0028B230(void) {
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B240__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the audio timer rate, 60.
+ *
+ * @return 60 (0x3C)
+ */
 int func_0028B240(void* self)
 {
     return 0x3C;
@@ -931,6 +1046,16 @@ int func_0028B240(void* self)
 //100%
 INCLUDE_ASM("sound/asyncsys", func_0028B248);
 #ifdef SKIP_ASM
+/**
+ * Constructs an empty sound-bank instance.
+ *
+ * On Tour's cBankInstance layout (same offsets): mBankStatus (+0x0) 0 (EMPTY), mBankHandle (+0x4) -1, mAllocLocation
+ * (+0x8) 0 (dynamic), mSoundMemHandle (+0xC) -1, mpMainMemData (+0x10) and mMainMemDataSize (+0x14) 0, no share links
+ * mpNext / mpPrev (+0x18 / +0x1C) and an empty mBankFilename (+0x20). cBankManager_cBankManager builds its bank table
+ * ("BankInstances") with it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0028B248(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
@@ -954,6 +1079,14 @@ extern "C" void func_0028B528(void* self);
 extern "C" void func_0028B730(void* self);
 extern "C" void func_0028B650(void* self);
 
+/**
+ * Destroys a sound-bank instance: unloads it (func_0028B528), then runs func_0028B730 and func_0028B650, and frees it
+ * with operator_delete when bit 0 of @p flags is set.
+ *
+ * cBankManager__cBankManager destroys its bank table with it.
+ *
+ * @param flags  g++ destructor flags: bit 0 frees the object
+ */
 extern "C" void func_0028B278(void* self, int flags)
 {
     func_0028B528(self);
@@ -970,6 +1103,12 @@ INCLUDE_ASM("sound/asyncsys", func_0028B2D0);
 #ifdef SKIP_ASM
 extern "C" void func_0028B528(void* self);
 
+/**
+ * Unloads every other instance sharing this bank: walks the share ring through +0x18 (On Tour mpNext) back to this
+ * instance and runs func_0028B528 on each.
+ *
+ * Does nothing when the instance is not shared (+0x18 null).
+ */
 extern "C" void func_0028B2D0(void* self)
 {
     if (*(void**)((char*)self + 0x18) != 0) {
@@ -1006,6 +1145,27 @@ public:
     virtual void v7();
 };
 
+/**
+ * Loads a sound-bank file synchronously into this bank instance and registers it with the sound library.
+ *
+ * First unloads the instance (func_0028B528) and the instances sharing it (func_0028B2D0). By +0x8 (On Tour
+ * mAllocLocation: 0 dynamic, 1 main, 2 sound memory): 0 loads the whole file with FILE_loadsizez using @p align as its
+ * flags, 2 the same with flags 0x100, 1 loads into the instance's main memory (+0x10 mpMainMemData, +0x14
+ * mMainMemDataSize bytes) with FILE_loadatz; a missing file returns at once. For sound memory, virtual slot 6 of the
+ * sound system reached through gpBankManager + 0x1D8 gets +0xC (mSoundMemHandle) first.
+ *
+ * func_003B6098 adds the bank and writes its handle to +0x4 (mBankHandle). Result 7 keeps only the header
+ * (func_003B6528 sizes it, func_003B6548 copies it): into mpMainMemData for sound memory, otherwise into a new
+ * MEM_alloc block tagged with the file name, which becomes mpMainMemData / mMainMemDataSize while the loaded file is
+ * freed (MEM_free). Result 8 keeps the loaded data (recorded as mpMainMemData and its size for a dynamic bank). Both
+ * set +0x0 (mBankStatus) to 1; any other result frees the loaded data (unless it is the instance's main memory) and
+ * sets it to 0. Finally calls slot 7 of the same sound-system object and copies @p file into +0x20 (mBankFilename).
+ * func_0028BC58 calls it.
+ *
+ * @param file  the bank file name
+ * @param align  allocation flags for FILE_loadsizez when the bank is dynamic (On Tour mainMemFlag); despite the name,
+ *               not an alignment
+ */
 // PORT: data pointers are passed through int parameters of the semaphore/bank helpers
 extern "C" void func_0028B320(void* self, const char* file, int align)
 {
@@ -1077,6 +1237,13 @@ INCLUDE_ASM("sound/asyncsys", func_0028B528);
 extern "C" int func_003B6300(int id);
 extern "C" void* MEM_free(void* self);
 
+/**
+ * Unloads this sound-bank instance when it holds a bank.
+ *
+ * When +0x0 (On Tour mBankStatus) is 1: sets it to 0, removes the bank from the sound library (func_003B6300 on +0x4,
+ * mBankHandle, which becomes -1) and, for a dynamic bank (+0x8 mAllocLocation 0), frees +0x10 (mpMainMemData) with
+ * MEM_free and clears it and +0x14 (mMainMemDataSize).
+ */
 extern "C" void func_0028B528(void* self)
 {
     if (*(int*)self == 1) {

@@ -370,6 +370,18 @@ extern int D_004A14D8;
 extern int D_004A14DC;
 extern int D_004A14E0;
 
+/**
+ * Pushes the save-options popup (a cFEPopupOptionReset) over the options menu and clears every options-changed flag.
+ *
+ * Allocates the 76-byte popup (tag "cFEPopupOptionReset"), constructs it as a child of this state (func_0039E318 with
+ * the engine at +0x10), stores its vtable D_0046B3D0, clears its byte at +0x48 and pushes it onto the engine's state
+ * stack (engine + 0x18) with cUIStateStack_pushPopup. cFEStateOptions_onPopupEvent sets the popup's question to
+ * kT_FESaveOptionsQuesPS2 and handles the answer.
+ *
+ * It then clears the game, sound, HUD and controller changed flags (D_004A14D0, D_004A14D4, D_004A14D8, D_004A14DC),
+ * sets D_004A14E0 to 1 (cFEStateOptions_onWidgetEvent only prompts while it is 0 and clears it when the menu is left)
+ * and clears +0x4C, which cFEStateOptions_onPopupEvent sets to 1 once the popup is answered.
+ */
 extern "C" void func_00188E58(void* self)
 {
     char* p = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
@@ -392,6 +404,17 @@ INCLUDE_ASM("fe/festateoptions", func_00188EE8);
 extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateOptionsGame_vtbl[];
 
+/**
+ * Constructs the game options state (tag "cFEStateOptionsGame", 76 bytes), which cFECustom_getNextState creates for
+ * state 28.
+ *
+ * Runs cUIState's constructor func_0039E2A0 (the engine pointer the caller passes in the second argument register goes
+ * straight through; it is not declared here), stores cFEStateOptionsGame_vtbl in mVtbl (+0x8) and sets mHashName (+0xC)
+ * to 0x1C. Unlike the sound, HUD and controller constructors it leaves its changed flag D_004A14D0 alone.
+ * cFEStateOptionsGame_cFEStateOptionsGame is the variant built with a null engine.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00188EE8(void* self)
 {
     func_0039E2A0(self);
@@ -648,6 +671,24 @@ static inline sGameCfg_189610 Cfg_189610()
     return D_00535610_189610;
 }
 
+/**
+ * Handles the results of the game options screen's popups: reset to defaults, screen position and video calibration.
+ *
+ * Event 21 does nothing. On event 22 the popup's answer is its virtual slot 23 (getData) with 2, nonzero meaning
+ * accepted, and the popup is told apart by its mHashName (+0xC):
+ * - "111resetopts" accepted: resets the game options to their defaults (func_0014F4F8), sets the changed flag
+ *   D_004A14D0, refreshes the widgets (func_00189D60) and reloads the language audio (func_0029ED90 on func_0028B180's
+ *   gSSXAudio, restart 1).
+ * - "24screen_position" accepted: stores the popup's getData(0) and getData(1) into bytes 6 and 5 (f6, f5) of
+ *   cBEOptionInterface_mOption, the horizontal and vertical screen offsets, and sets D_004A14D0. Declined: sends the
+ *   stored f6 and f5 back to GrMan's virtual slot 12.
+ * - 27 (the cFEPopupVideoCalibration popup) accepted: the same reset as "111resetopts" without the audio reload.
+ *
+ * After any event 22 it calls virtual slot 1 of the option interface (cBE interface 4).
+ *
+ * @param popup  the popup state; its mHashName (+0xC) says which popup it is
+ * @param event  popup event code (22 is handled; 21 and the rest are ignored)
+ */
 extern "C" void func_00189610(void* self, char* popup, int event)
 {
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -696,6 +737,15 @@ extern "C" void func_00189610(void* self, char* popup, int event)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_00189958);
 #ifdef SKIP_ASM
+/**
+ * Filters menu events on the game options screen: returns 0x100 for event 9 and 0x101 for every other event.
+ *
+ * The menu index the caller passes as a fourth argument is not declared.
+ *
+ * @param menu  the menu (unused)
+ * @param event  menu event code
+ * @return 0x100 or 0x101 (cUIMenu reply codes)
+ */
 extern "C" int func_00189958(void* self, int menu, int event)
 {
     return event != 9 ? 257 : 0x100;
@@ -705,6 +755,13 @@ extern "C" int func_00189958(void* self, int menu, int event)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_00189970);
 #ifdef SKIP_ASM
+/**
+ * Returns 0x100 for any nonzero pair event on the game options screen, and 0 for event 0.
+ *
+ * @param pair  the pair widget (unused)
+ * @param event  pair event code
+ * @return 0x100 when @p event is nonzero, else 0
+ */
 extern "C" int func_00189970(void* self, int pair, int event)
 {
     return event ? 0x100 : 0;
@@ -935,7 +992,21 @@ static inline void* find_189D60(sOptGame_189D60* self, int i)
     return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00440FD8[self->item[i]]));
 }
 
-// Pushes the current game options into the option widgets of the screen.
+/**
+ * Pushes the current game options into the game options screen's widgets and applies them.
+ *
+ * The three list boxes are found on mpScreen (+0x40) by the names D_00440FD8[item[i]] (item[0..2] at +0x48: language,
+ * speed units and widescreen; a negative slot is skipped, as is a missing widget). Their current entries come from
+ * cBEOptionInterface_mOption: item[0] from bits 22-24 (the view's `mode`), whose selected entry data is also passed to
+ * SSXApp->FELocale's virtual slot 3 before virtual slot 16 of the screen's sub-object at +0x40 is called; item[1] from
+ * bit 19 (the view's `showHud`, which cFEStateOptionsGame_onWidgetEvent's doc calls the speed-unit choice); item[2]
+ * from bits 20-21 (`f20`).
+ *
+ * It then sends the screen offsets f6 and f5 to GrMan's virtual slot 12 and calls cSSXApp_activateBEOptions.
+ * func_00189610 calls it after resetting the options to their defaults.
+ *
+ * @param self_  the cFEStateOptionsGame state
+ */
 extern "C" void func_00189D60(void* self_)
 {
     sOptGame_189D60* self = (sOptGame_189D60*)self_;
@@ -979,6 +1050,17 @@ extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateOptionsSound_vtbl[];
 extern int D_004A14D4;
 
+/**
+ * Constructs the sound options state (tag "cFEStateOptionsSound", 72 bytes), which cFECustom_getNextState creates for
+ * state 29.
+ *
+ * Runs cUIState's constructor func_0039E2A0 (the engine pointer from the second argument register goes straight
+ * through; it is not declared here), stores cFEStateOptionsSound_vtbl in mVtbl (+0x8), sets mHashName (+0xC) to 29 and
+ * clears the sound changed flag D_004A14D4. cFEStateOptionsSound_cFEStateOptionsSound is the variant built with a null
+ * engine.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0018A258(void* self)
 {
     func_0039E2A0(self);
@@ -1103,6 +1185,21 @@ static inline sSndCfg_18A3D8 Cfg_18A3D8()
     return D_00535610_18A3D8;
 }
 
+/**
+ * Handles the sound options screen's reset popup: on acceptance it restores the default sound options and re-applies
+ * them.
+ *
+ * Only event 22 from the popup hashed "111resetopts" does anything. When the popup's virtual slot 23 (getData) with 2
+ * is nonzero it resets the sound options (func_0014F458, the sound step of cBEOptionInterface_revert), switches the
+ * speaker mode to bits 12-13 (`output`) with func_0018BEF8, re-applies the effects, speech and music volumes
+ * (func_00287410, func_00287488, func_00287520 on gSSXAudio), bit 17 (`f17`) through cSSXAudio_SetArcadeSFX and bit 16
+ * (`f16`) through func_002875D0, and refreshes the widgets with cFEStateOptionsSound_updateWidget.
+ *
+ * It sets the sound changed flag D_004A14D4 even when the reset is declined, unlike the game and HUD popup handlers.
+ *
+ * @param popup  the popup state; its mHashName (+0xC) is checked
+ * @param event  popup event code (22 is handled)
+ */
 extern "C" void func_0018A3D8(void* self, char* popup, int event)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1145,6 +1242,15 @@ void* cFEStateOptionsSound_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018A890);
 #ifdef SKIP_ASM
+/**
+ * Filters menu events on the sound options screen: 0x100 for event 9, 0 for event 6, 0x101 for anything else.
+ *
+ * The menu index the caller passes as a fourth argument is not declared.
+ *
+ * @param menu  the menu (unused)
+ * @param event  menu event code
+ * @return 0x100, 0 or 0x101 (cUIMenu reply codes)
+ */
 extern "C" int func_0018A890(void* self, int menu, int event)
 {
     switch (event) {
@@ -1160,6 +1266,13 @@ extern "C" int func_0018A890(void* self, int menu, int event)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018A8C0);
 #ifdef SKIP_ASM
+/**
+ * Returns 0x100 for any nonzero pair event on the sound options screen, and 0 for event 0.
+ *
+ * @param pair  the pair widget (unused)
+ * @param event  pair event code
+ * @return 0x100 when @p event is nonzero, else 0
+ */
 extern "C" int func_0018A8C0(void* self, int pair, int event)
 {
     return event ? 0x100 : 0;
@@ -1239,7 +1352,24 @@ struct sOptSound_18A8D0 {
     char* engine;                   // 0x10
 };
 
-// Sound options screen: widget event handler (popup, apply on exit, value changes).
+/**
+ * Handles a widget event on the sound options screen: the reset popup, leaving the screen and value changes.
+ *
+ * A null widget is ignored, and event 5 does nothing. Event 7 pushes a cFEPopupOptionReset popup (vtable D_0046B3D0)
+ * onto the engine's state stack. Event 6 (back) calls virtual slot 1 of the option interface (cBE interface 4),
+ * re-applies the effects, speech and music volumes and the two switches (`f17` through cSSXAudio_SetArcadeSFX, `f16`
+ * through func_002875D0), then pushes the state that virtual slot 5 of the engine's custom interface (engine + 0x0)
+ * returns for the widget's mMiscData.
+ *
+ * Event 9 (a value changed) stores the widget's value into cBEOptionInterface_mOption and applies it: "1lb" the speaker
+ * mode `output` (func_0018BEF8), the sliders "2sl" `sfxVol` (func_00287410), "3sl" `speechVol` (func_00287488) and
+ * "4sl" `musicVol` (func_00287520) from the slider value at +0x74, "5lb" bit 17 (cSSXAudio_SetArcadeSFX) and "6lb" bit
+ * 16 (func_002875D0); "7lb" sets bit 18 (`f18`) only while D_004A1A70 is 1. Every event 9 sets the sound changed flag
+ * D_004A14D4.
+ *
+ * @param widget  the widget the event is for (null: nothing happens)
+ * @param event  UI event code (6, 7 and 9 are handled)
+ */
 extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int event)
 {
     if (widget == 0)
@@ -1512,6 +1642,22 @@ struct sVE_18BEF8v {
     void (*fn)(void*, int);
 };
 
+/**
+ * Switches the audio output mode and, when the audio device accepts it, restarts the audio system in that mode.
+ *
+ * @p mode is mapped to an audio mode: 0 (stereo) to 1, 1 (surround) to 2, 2 (mono) to 0, 3 (DTS) to 3, anything else to
+ * 1. The device object is reached from gSSXAudio (func_0028B180) + 0x118 through two loads and then +0x1D8; its virtual
+ * slot 2 is asked to take the audio mode, and only a return of 1 goes on.
+ *
+ * The restart saves the effects, speech and music levels (func_00287670, func_002876A0, func_002876D0, 0-11 scale), the
+ * switches at gSSXAudio + 0x62B8 (the arcade effects flag) and + 0x62B4 (func_002875D0's flag) and the word at + 0x534;
+ * calls cSSXAudio_FrontEndPurge, SSXAUDIO_DeInit and SSXAUDIO_Init(audio mode); re-applies the volumes (func_00287410,
+ * func_00287488, func_00287520), the two switches (cSSXAudio_SetArcadeSFX, func_002875D0) and func_00285FB0; and
+ * finally passes the saved + 0x534 word to virtual slot 4 of the sub-object at gSSXAudio + 0x118 (its vtable pointer is
+ * at + 0x5558).
+ *
+ * @param mode  the speaker list choice ("1lb" entry data): 0 stereo, 1 surround, 2 mono, 3 DTS
+ */
 extern "C" void func_0018BEF8(void* self, unsigned int mode)
 {
     int audioMode;
@@ -1563,6 +1709,17 @@ extern "C" void* func_0039E2A0(void* self);
 extern void* D_0046C550[];
 extern int D_004A14D8;
 
+/**
+ * Constructs the HUD options state (tag "cFEStateOptionsHUD", 72 bytes), which cFECustom_getNextState creates for state
+ * 30.
+ *
+ * Runs cUIState's constructor func_0039E2A0 (the engine pointer from the second argument register goes straight
+ * through; it is not declared here), stores the vtable D_0046C550 in mVtbl (+0x8), sets mHashName (+0xC) to 0x1E and
+ * clears the HUD changed flag D_004A14D8. cFEStateOptionsHUD_cFEStateOptionsHUD is the variant built with a null
+ * engine.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0018C0E8(void* self)
 {
     func_0039E2A0(self);
@@ -1582,6 +1739,12 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_0018C478(void* self);
 
+/**
+ * Creates the HUD options screen ("21hud_opt"), plays its frame 0 and fills its menu with func_0018C478.
+ *
+ * The screen comes from cUIEngine_addScreenByHashName on the engine (+0x10) and is stored in mpScreen (+0x40); a
+ * missing screen is not played, but func_0018C478 runs either way.
+ */
 extern "C" void func_0018C128(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -1597,6 +1760,11 @@ extern "C" void func_0018C128(void* self)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018C198__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gives the HUD options state focus using the base cUIState_onGainFocus().
+ *
+ * @return no meaningful value (cUIState_onGainFocus() returns nothing)
+ */
 void* func_0018C198(void* self)
 {
     return cUIState_onGainFocus(self);
@@ -1620,6 +1788,16 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0014F600(void* self);
 extern "C" void func_0018C478(void* self);
 
+/**
+ * Handles the HUD options screen's reset popup: on acceptance it restores the default HUD options.
+ *
+ * Only event 22 from the popup hashed "111resetopts" does anything: when the popup's virtual slot 23 (getData) with 2
+ * is nonzero it resets the HUD options (func_0014F600, the HUD step of cBEOptionInterface_revert, on cBE interface 4),
+ * refreshes the menu (func_0018C478) and sets the HUD changed flag D_004A14D8.
+ *
+ * @param widget  the popup state (despite the name); its mHashName (+0xC) is checked
+ * @param msg  popup event code (22 is handled)
+ */
 extern "C" void func_0018C1B8(void* self, void* widget, int msg)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1645,6 +1823,15 @@ extern "C" void func_0018C1B8(void* self, void* widget, int msg)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018C270);
 #ifdef SKIP_ASM
+/**
+ * Filters menu events on the HUD options screen: 0x100 for event 9, 0 for event 6, 0x101 for anything else.
+ *
+ * The menu index the caller passes as a fourth argument is not declared.
+ *
+ * @param menu  the menu (unused)
+ * @param event  menu event code
+ * @return 0x100, 0 or 0x101 (cUIMenu reply codes)
+ */
 extern "C" int func_0018C270(void* self, int menu, int event)
 {
     switch (event) {
@@ -1698,6 +1885,20 @@ struct sVE_18C2A0p {
 
 static inline int Is_0018C2A0(int id, char* s) { return id == GetHashValue32(s); }
 
+/**
+ * Handles a widget event on the HUD options screen: the reset popup, leaving the screen and highlighting a HUD choice.
+ *
+ * A null widget is ignored. Event 7 pushes a cFEPopupOptionReset popup (vtable D_0046B3D0). Event 6 (back) calls
+ * virtual slot 1 of the option interface (cBE interface 4) and pushes the state that virtual slot 5 of the engine's
+ * custom interface (engine + 0x0) returns for the widget's mMiscData.
+ *
+ * Event 1 (item focused) shows the item (its virtual slot 9, setVisible, with 1), sets the HUD changed flag D_004A14D8
+ * and stores the item's mMiscData (+0x18, read as a byte) into bits 30-31 of cBEOptionInterface_mOption (the view's
+ * `mode`). Event 2 (focus lost) hides the item when it is "1", "2" or "3" (D_004A14F8, D_004A1500, D_004A1508).
+ *
+ * @param widget  the widget the event is for (null: nothing happens)
+ * @param event  UI event code (1, 2, 6 and 7 are handled)
+ */
 extern "C" void func_0018C2A0(char* self, char* widget, unsigned int event)
 {
     if (widget == 0) {
@@ -1780,6 +1981,18 @@ struct sVE_18C478v {
     void (*fn)(void*, int);
 };
 
+/**
+ * Fills the HUD options menu: tags items "1" to "3" with their index and shows and selects the one for the current HUD
+ * setting.
+ *
+ * Finds "Menu" on mpScreen (+0x40) and looks up items "1", "2", "3" with the menu's virtual slot 14
+ * (getObjectByHashName). Each item found gets its index (0-2) in mMiscData (+0x18); the item whose index equals bits
+ * 30-31 of cBEOptionInterface_mOption (the view's `mode`) is shown (virtual slot 9, setVisible) and selected
+ * (cUIMenu_setSelectedByIndex), the others are hidden. Finally it clears bit 0 of the menu's mAttr (+0x14; mOrientation
+ * in On Tour's tAttrThing). The option interface (cBE interface 4) is fetched but not used.
+ *
+ * @param vself  the HUD options state
+ */
 extern "C" void func_0018C478(void* vself)
 {
     char* self = (char*)vself;
@@ -1816,6 +2029,17 @@ extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateOptionsController_vtbl[];
 extern int D_004A14DC;
 
+/**
+ * Constructs the controller options state (tag "cFEStateOptionsController", 84 bytes), which cFECustom_getNextState
+ * creates for state 31.
+ *
+ * Runs cUIState's constructor func_0039E2A0 (the engine pointer from the second argument register goes straight
+ * through; it is not declared here), stores cFEStateOptionsController_vtbl in mVtbl (+0x8), sets mHashName (+0xC) to
+ * 0x1F, clears the byte at +0x50 (the pads whose test vibration is running) and clears the controller changed flag
+ * D_004A14DC.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0018C658(void* self)
 {
     func_0039E2A0(self);
@@ -1953,6 +2177,18 @@ public:
     virtual int v23(int a);
 };
 
+/**
+ * Handles the controller options screen's popups: stops both pads' vibration when one opens and restores the default
+ * controller settings on an accepted reset.
+ *
+ * Event 21 calls func_0018D108(self, pad, 0, 0) for pads 0 and 1, setting both of their motor levels to 0. Event 22
+ * from the popup hashed "111resetopts", when its virtual slot 23 (getData) with 2 is nonzero, resets the controller
+ * settings (cBENewPlayerInterface_defaultCtrl on the player interface, cBE interface 1), refreshes the widgets
+ * (func_0018CDC0) and sets the controller changed flag D_004A14DC.
+ *
+ * @param obj  the popup state; its mHashName (+0xC) is checked
+ * @param msg  popup event code (21 and 22 are handled)
+ */
 extern "C" void func_0018C910(void* self, cUIObj_18C910* obj, int msg)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2016,6 +2252,22 @@ struct sVE_18CA10p {
 
 static inline int Is_0018CA10(int id, char* s) { return id == GetHashValue32(s); }
 
+/**
+ * Handles a widget event on the controller options screen: the reset popup, leaving the screen and setting changes.
+ *
+ * A null widget is ignored. Event 7 pushes a cFEPopupOptionReset popup (vtable D_0046B3D0). Event 6 (back) calls
+ * virtual slot 1 of the player interface (cBE interface 1) and pushes the state that virtual slot 5 of the engine's
+ * custom interface (engine + 0x0) returns for the widget's mMiscData.
+ *
+ * Event 9 (a value changed): "1lb" and "2lb" set pad 0's or pad 1's vibration flag (func_00147528) to the chosen entry;
+ * when the flag reads back set (func_001474E8) the pad buzzes (func_0018D108 with 10, 10), its timer (+0x48 for pad 0,
+ * +0x4C for pad 1) is set to 60 and its bit (1 or 2) is set in +0x50 so func_0018D058 stops it later; otherwise its
+ * motors are set to 0. "3lb" and "4lb" store pad 0's or pad 1's button layout (func_00147658) and show the default or
+ * pro layout picture (func_0018CF50 with entry data == 0). Every event 9 sets the controller changed flag D_004A14DC.
+ *
+ * @param widget  the widget the event is for (null: nothing happens)
+ * @param event  UI event code (6, 7 and 9 are handled)
+ */
 extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
 {
     if (widget == 0) {
@@ -2084,7 +2336,17 @@ extern "C" int cBENewPlayerInterface_getControllerMapping(void* player, int whic
 // func_0018CF50 returns void; declaring it int ($v0 set by the call) reproduces the original argument scheduling.
 extern "C" int func_0018CF50_CCE0(void* self, int on) __asm__("func_0018CF50");
 
-// Options toggle row: accept flips the setting chosen by the cursor (items 2 and 3), back is consumed.
+/**
+ * Filters menu keys on the controller options screen; accepting a button-layout row shows that pad's layout picture.
+ *
+ * Key 9 gives 0x100 and key 6 gives 0. Key 5 on menu item 2 or 3 (the menu's mScrollItemCurrent, +0x95) calls
+ * func_0018CF50 with whether pad 0 or pad 1 uses layout 0 (cBENewPlayerInterface_getControllerMapping) and gives 0x101;
+ * it changes no setting. Every other key, and key 5 on other items, gives 0x101.
+ *
+ * @param menu  the menu; its mScrollItemCurrent (+0x95) is the highlighted item
+ * @param key  menu event code
+ * @return 0x100, 0 or 0x101 (cUIMenu reply codes)
+ */
 extern "C" int func_0018CCE0(void* self, char* menu, unsigned int key)
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2116,6 +2378,13 @@ extern "C" int func_0018CCE0(void* self, char* menu, unsigned int key)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018CDB0);
 #ifdef SKIP_ASM
+/**
+ * Returns 0x100 for any nonzero pair event on the controller options screen, and 0 for event 0.
+ *
+ * @param pair  the pair widget (unused)
+ * @param event  pair event code
+ * @return 0x100 when @p event is nonzero, else 0
+ */
 extern "C" int func_0018CDB0(void* self, int pair, int event)
 {
     return event ? 0x100 : 0;
@@ -2140,6 +2409,17 @@ extern char str_2lb[];
 extern char str_3lb[];
 extern char str_4lb[];
 
+/**
+ * Sets the controller options lists from the current player settings.
+ *
+ * On mpScreen (+0x40), "1lb" and "2lb" get pad 0's and pad 1's vibration flag (func_001474E8), "3lb" and "4lb" their
+ * button layout (cBENewPlayerInterface_getControllerMapping on cBE interface 1); each list selects the entry whose data
+ * matches (cUIListBox_getEntryByData, cUIListBox_setCurrentEntryByIndex). With "3lb" present it also shows pad 0's
+ * layout picture (func_0018CF50 with layout == 0). Missing lists are skipped.
+ *
+ * Likely bug: the result of cUIListBox_getEntryByData is not checked, so a value no entry matches selects an
+ * uninitialised index.
+ */
 extern "C" void func_0018CDC0(void* self)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2192,6 +2472,15 @@ public:
     virtual void setVisible(int v);
 };
 
+/**
+ * Shows the default or the pro button-layout picture and caption on the controller options screen.
+ *
+ * With @p on set it shows "CtrlPS2_default" (D_004A15BC) and "default_text" and hides "CtrlPS2_pro" (D_004A15C0) and
+ * "pro_text"; with @p on clear it does the reverse. Each object is found on mpScreen (+0x40) and changed through its
+ * virtual slot 9 (setVisible); missing ones are skipped.
+ *
+ * @param on  nonzero for the default layout, zero for the pro layout
+ */
 extern "C" void func_0018CF50(void* self, int on)
 {
     cUIObj_18CF50* a = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15BC));
@@ -2219,6 +2508,13 @@ INCLUDE_ASM("fe/festateoptions", func_0018D058);
 extern "C" void* cUIState_onUpdate(void* self);
 extern "C" void func_0018D108(void* self, int idx, float x, float y);
 
+/**
+ * Runs the base cUIState_onUpdate() and counts down each pad's test vibration, stopping it when its timer runs out.
+ *
+ * For pad 0 (bit 0 of +0x50, timer +0x48) and pad 1 (bit 1, timer +0x4C): while the bit is set the timer drops by one
+ * per update; once it reaches 0 the bit is cleared and func_0018D108(self, pad, 0, 0) sets the pad's motor levels to 0.
+ * func_0018CA10 starts the timers at 60.
+ */
 extern "C" void func_0018D058(void* self)
 {
     cUIState_onUpdate(self);
@@ -2256,6 +2552,20 @@ public:
     virtual void setVolume(int ch, float v);
 };
 
+/**
+ * Rumbles a controller pad with two motor strengths derived from @p x and @p y.
+ *
+ * Scales @p x to x' = max(0, x * 0.91333 - 18.5185) and @p y by 0.99167, then looks up pad @p idx (as a signed char) in
+ * PadCache's device table (+0x2EEC). When the device's getState() is 2, sets motor 0 to the largest of 0, (y - 0.5) *
+ * 0.01 and (x' - 2) / 972.22, and motor 1 to the largest of 0, (y - 70) * 0.00625 and (x' - 100) / 5000 (setVolume).
+ * Callers: cFEStateOptionsController_onCreateScreen and _onDestroyScreen, func_0018C910, func_0018CA10, func_0018D058;
+ * fepopupmisc's func_001E3AC8 is the same body without the state argument. Likely bug: with no PadCache the device
+ * stays 0 and getState() is still called through it.
+ *
+ * @param idx  the pad index
+ * @param x  first strength input (feeds both motors' second terms)
+ * @param y  second strength input (feeds both motors' first terms)
+ */
 // PORT: uses g++'s >? (max) operator.
 extern "C" void func_0018D108(void* self, int idx, float x, float y)
 {
@@ -2283,6 +2593,15 @@ INCLUDE_ASM("fe/festateoptions", func_0018D240);
 extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateOptionsSaveLoad_vtbl[];
 
+/**
+ * Constructs the save/load options state on the engine the caller passes.
+ *
+ * Runs the cUIState constructor (func_0039E2A0; the engine argument stays in place in the second argument register),
+ * sets the state id (+0xC) to 0x20, installs cFEStateOptionsSaveLoad_vtbl and clears the byte at +0x48. The front end's
+ * next-state choosers (cFECustom_getNextState, func_001A16C0) allocate it as "cFEStateOptionsSaveLoad" (76 bytes).
+ *
+ * @return @p self
+ */
 extern "C" void* func_0018D240(void* self)
 {
     func_0039E2A0(self);
@@ -2596,6 +2915,21 @@ extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern void* cFEStateOptionsDeviceSelect_vtbl[];
 
+/**
+ * Constructs the memory-card device select state (state id 33) for a load or a save.
+ *
+ * Runs cFEMemCard_cFEMemCard with @p engine and @p cardMode, installs cFEStateOptionsDeviceSelect_vtbl, stores @p
+ * isSave at +0x22C and @p a4 at +0x230, and clears +0x234 (the hidden-buttons flag) and +0x238. A load screen (@p
+ * isSave 0) also clears the card manager's mPollForFullCard. cFECustom_getNextState creates it with (2, 1, 0), (1, 0,
+ * 0) or (2, 0, 0), and the quick-messages popup (func_001C2C50) with (2, 1, 1).
+ *
+ * @param engine  the UI engine
+ * @param cardMode  the memory-card screen type passed to cFEMemCard_cFEMemCard (kept at +0x1BC)
+ * @param isSave  nonzero for a save screen
+ * @param a4  nonzero when opened from the online front end (On Tour bOnline); func_0018E478 then picks next-state
+ *            choice 2
+ * @return @p self
+ */
 extern "C" void* func_0018D7F0(void* self, int engine, int cardMode, int isSave, int a4)
 {
     cFEMemCard_cFEMemCard(self, engine, cardMode);
@@ -2829,6 +3163,18 @@ struct cList0018DDD0 {
 };
 extern "C" void* cSSXApp_getMCManager(void* app);
 
+/**
+ * Answers the device select menu's events: refuses accepting on an unusable memory card.
+ *
+ * Events 6 and 8 give 0x100 when the selected device (the card manager's mSelectedDevice) fails the memory card's
+ * slot-54 check (mpMemCard vtable, func_002D3840 for a cPS2MemCard); event 9 always gives 0x100; everything else gives
+ * 0x101. The extra event-8 test on a save screen (+0x22C) returns 0x101 early for a usable card, the same result as
+ * falling through. Fills slot +0xA4 (onWidgetMenu) of cFEStateOptionsDeviceSelect_vtbl.
+ *
+ * @param widget  the menu that sent the event (unused)
+ * @param msg  the menu event
+ * @return 0x100 to refuse the event, 0x101 to allow it
+ */
 extern "C" int func_0018DDD0(void* self, void* widget, unsigned int msg)
 {
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
@@ -2969,6 +3315,27 @@ public:
     virtual int v67(int a);
 };
 
+/**
+ * Handles the device select screen's widget events: accepting a save slot, backing out and the event-7 action.
+ *
+ * Event 5 (a slot widget): does nothing without a widget or while busy (+0x1A8); sets +0x238, then acts only when the
+ * display state f214 is 3 and the main button is active (+0x224). It takes the slot from the widget (+0x18) into slot
+ * and the card manager's mFileCursor. In mode 2 on a save screen (+0x22C) it starts a save of file type 2
+ * (func_0023CAE8 with profile -1), sets +0x1DC, busy and state 3 and calls this state's vtable slot 47 (func_001D8D68,
+ * the status popup with the manager's message). Otherwise a slot holding a file (cPS2MemCard_HasFileName through
+ * mpMemCard) starts a load (func_0023C8F0, file type 0 in mode 1, else 2) and calls slot 44 (func_001D69E0); an empty
+ * slot calls slot 47.
+ *
+ * Event 6 (back): clears +0x238; unless busy is 1 or state is already 6, sets +0x1E4, resets the manager
+ * (cMCOverlayManager_SetState through its mVtbl, state 0) when state is 0, 1 or 2, and sets state 6.
+ *
+ * Event 7: on a save screen, not busy and not in state 6, with the selected device passing the card's slot-54 check
+ * (func_002D3840), takes the widget's slot as for event 5; in state 1 with a file in that slot it sets busy and state
+ * 4, cMCOverlayManager_SetAction(0) and the manager state 0x18.
+ *
+ * @param widget  the widget that sent the event (its +0x18 word is the slot index)
+ * @param event  the widget event
+ */
 extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int event)
 {
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
@@ -3066,6 +3433,16 @@ extern char str_btext3a[];
 extern char str_btext5[];
 extern char str_ps2sq[];
 
+/**
+ * Shows or hides the device select screen's action buttons.
+ *
+ * Does nothing when +0x234 already equals @p on. Otherwise sets "ps2x" visible when @p on is 0 and hidden when 1, and
+ * likewise "btext3", "btext5" and "ps2sq" on a save screen (+0x22C) or "btext3a" otherwise (cUIThing_setVisible), then
+ * stores @p on in +0x234. Fills slot +0x12C of cFEStateOptionsDeviceSelect_vtbl, the slot of
+ * cFEMemCard_hideActionButtons in the memory-card base vtable.
+ *
+ * @param on  1 to hide the buttons, 0 to show them
+ */
 extern "C" void func_0018E178(void* self, int on)
 {
     if (*(int*)((char*)self + 0x234) == on)
@@ -3104,6 +3481,15 @@ struct cUIObj_E2C0 {
     virtual void setActive(int on);
 };
 
+/**
+ * Shows or hides the device select screen's delete button.
+ *
+ * On a save screen (+0x22C) sets "btext5" and "ps2sq" visible when @p on is false (cUIThing_setVisible; the view calls
+ * the slot setActive); always stores !@p on in +0x220 (the delete-button-active flag that event 8 of the profile menu
+ * tests). Fills slot +0x134 of cFEStateOptionsDeviceSelect_vtbl (cFEMemCard_hideDeleteButton's slot).
+ *
+ * @param on  true to hide the button
+ */
 extern "C" void func_0018E2C0(void* self, bool on)
 {
     if (*(int*)((char*)self + 0x22C) != 0) {
@@ -3138,6 +3524,16 @@ struct cUIObj_E368 {
     virtual void setVisible(int on);
 };
 
+/**
+ * Shows or hides the device select screen's main (accept) button.
+ *
+ * On a save screen (+0x22C) shows "btext3" and "ps2x" only when @p saveBlocked is false; otherwise shows "btext3a" and
+ * "ps2x" only when @p loadBlocked is false. The shown state is also stored in +0x224, which event 5 of func_0018DEA0
+ * requires. Fills slot +0x13C of cFEStateOptionsDeviceSelect_vtbl (cFEMemCard_hideMainButton's slot).
+ *
+ * @param loadBlocked  true to hide the button on a load screen
+ * @param saveBlocked  true to hide the button on a save screen
+ */
 extern "C" void func_0018E368(void* self, bool loadBlocked, bool saveBlocked)
 {
     cUIObj_E368* xButton = (cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x));
@@ -3166,6 +3562,15 @@ struct sVEntry0018E478 {
     void* (*fn)(void*, void*, int);
 };
 
+/**
+ * Leaves the device select screen once its card work is done, pushing the state chosen for the outcome.
+ *
+ * Runs once: unless +0x1AC is already set it computes a choice, 1 when the mode (+0x1BC) is 1, forced to 0 when +0x1E4
+ * (set by backing out) is set or +0x1B4 is clear, and 2 when the screen was opened online (+0x230). It asks the engine
+ * owner (the first word of the engine at +0x10) for the next state through its vtable slot 5 (func_001A16C0 in
+ * cFECustom_vtbl) with this state and the choice, and pushes the result on the engine's state stack (+0x18) with
+ * cUIStateStack_pushCheck. Sets +0x1AC afterwards. Fills slot +0x10C (cFEMemCard_updateDone's slot).
+ */
 extern "C" void func_0018E478(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
@@ -3323,8 +3728,25 @@ struct cState_18E510 : cStateBase_18E510 {
     int f22C;               // 0x22C
 };
 
-// cFEStateOptions*::displayStatus (On Tour: cOVState_SAVEOPTIONS::displayStatus, ovstatereplay.cpp): the memory-card
-// device text, the per-slot "%dmemory card" entries and the arrows.
+/**
+ * Refreshes the device select screen's memory-card panel: the device label, the slot entries and the device arrows.
+ *
+ * When this state's vtable slot 42 (func_001D9880) passes: with no card found (mpMemCard slot 53, func_002D3810) it
+ * shows the no-cards message (func_001D8240), otherwise it switches the display state to 3 (slot 35,
+ * cFEMemCard_triggerDisplayState) unless f214 is 3 already. If slot 42 still passes it highlights a menu entry (slot
+ * 43, cFEMemCard_setMenuHighlight), puts the label of the card manager's mSelectedDevice
+ * (cMCOverlayManager_GetDeviceDisplayString) in "Memory card text", stores that device in dev and hides "1percentage".
+ *
+ * Then for entries 1 to 4 (only entry 1 unless mode is 1) it sets the "%dmemory card" text to the card's title string
+ * for file slot i - 1 (mpMemCard slot 14, cPS2MemCard_GetTitleString) and makes the entry selectable (setStatic(0) and
+ * slot 25, cUIText_setUseStaticColour(0)) or static (both 1): an empty, enabled slot on a usable card (slots 67 and 66
+ * false, slot 55 true) is static in mode 1, and on a save screen (f22C) only the first one is selectable; any other
+ * slot is selectable when the selected device passes slot 54 and the slot is not disabled. The "arrow left" and "arrow
+ * right" widgets are shown when cFEMemCard_checkNextAvailableDevice finds a device that way. Whenever f214 is not 3,
+ * the shown entries get setUseStaticColour(0) and setStatic(1). Fills slot +0xD4 of cFEStateOptionsDeviceSelect_vtbl
+ * (cFEMemCard_displayStatus's slot).
+ * On Tour: cOVState_SAVEOPTIONS::displayStatus (ovstatereplay.cpp).
+ */
 extern "C" void func_0018E510(cState_18E510* self)
 {
     char* pMC = (char*)cSSXApp_getMCManager(SSXApp);
@@ -3410,6 +3832,14 @@ INCLUDE_ASM("fe/festateoptions", func_0018EA98);
 extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateProfileSelect_vtbl[];
 
+/**
+ * Constructs the profile select state on the engine the caller passes.
+ *
+ * Runs the cUIState constructor (func_0039E2A0; the engine argument stays in place in the second argument register),
+ * installs cFEStateProfileSelect_vtbl and sets the state id (+0xC) to 8. No caller in the source references it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0018EA98(void* self)
 {
     func_0039E2A0(self);

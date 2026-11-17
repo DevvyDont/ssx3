@@ -169,6 +169,20 @@ static inline int loadTex_3640(char* data, const char* name)
     return vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
 }
 
+/**
+ * Loads the character portrait textures for the load screen from "data/ui/charpic.big".
+ *
+ * Opens the big file (cBigFile_cBigFile1, flags 0x100) for the duration. Type 1 loads one portrait into +0x10: in a
+ * network game (cBENetworkInterface_networkOpt.bIsNetworkGame) rider 0's character when hosting (bIsHost) and rider 1's
+ * otherwise, else the first human rider's character (cBENewPlayerInterface_getRiderCharID()). Type 2, only when the
+ * game path (cGamePath, D_00535C11) is 2 (online), loads players 0 and 1's characters
+ * (cBENewPlayerInterface_getPlayerCharID()) into +0x10 and +0x14. Each file is "%s%s.ssh" of the character's name
+ * D_00442928[id] and a suffix (D_004A2B38, "_flat", for type 1; D_004A2B3C for type 2), loaded with FILE_loadpackz()
+ * and uploaded through the graphics manager's slot 46 (func_0037C8C0) as "CharaPics"; the file buffer is then freed.
+ * cFELoadScreen_load() calls it with 1 or 2 depending on the screen it pushes.
+ *
+ * @param type  1 for the single-player portrait, 2 for the two online players' portraits
+ */
 extern "C" void func_00233640(void* self, int type)
 {
     char name[0x70];
@@ -424,6 +438,11 @@ INCLUDE_ASM("fe/festateloadscreen", func_00233AD0);
 #ifdef SKIP_ASM
 extern "C" void cGame_setPreloadState__FPvi(int);
 
+/**
+ * Asks the game to preload a game-flow state: calls cGame_setPreloadState() on cGameState_mpGame.
+ *
+ * The state id passes through untouched in the second argument register (the declaration has no parameters).
+ */
 extern "C" void func_00233AD0(void) {
     cGame_setPreloadState__FPvi((*(int*)&cGameState_mpGame));
 }
@@ -493,6 +512,11 @@ INCLUDE_ASM("fe/festateloadscreen", func_00233B60);
 extern void* cGameState_mpGame;
 extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 
+/**
+ * Switches the game to game-flow state 10 at its next state update: cGame_setState(cGameState_mpGame, 10, 0, 0).
+ *
+ * It is the gainFocus slot of vtable D_0047D690, the game-flow state func_00243D20 constructs (mNextState 8).
+ */
 extern "C" void func_00233B60(void)
 {
     cGame_setState(cGameState_mpGame, 10, 0, 0);
@@ -502,6 +526,9 @@ extern "C" void func_00233B60(void)
 //100%
 INCLUDE_ASM("fe/festateloadscreen", func_00233B88__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the loseFocus slot of vtable D_0047D690.
+ */
 void func_00233B88(void* self)
 {
 }
@@ -586,6 +613,15 @@ extern void* D_0047D6E8[];
 extern void* D_0047D5E0[];
 extern void* cGameState_mpGame;
 
+/**
+ * Constructs the finish-line game-flow state in place: base cGameState, vtable D_0047D5E0, next state 7.
+ *
+ * Runs the inlined cGameState constructor (mNextState 0, vtable D_0047D6E8 at +0xC, cGameState_mpGame cleared), then
+ * stores D_0047D5E0, mNextState (+0x0) 7, mStartupFlag (+0x4) 0, the sub-state (+0x10) 2 and the results delay (+0x14)
+ * 0. cGame_cGame() builds it at +0x100 of the game.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00233C10(void* self)
 {
     *(int*)self = 0;
@@ -610,6 +646,15 @@ extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
 extern "C" void cBXLoadIndicator_Show(void* self, int bit);
 void func_00244880(void* self);
 
+/**
+ * Starts the finish-line state: ends the replay, clears the UI states and NIS list, and starts the 180-frame results
+ * delay.
+ *
+ * Calls cReplay_endReplay() on the game's Replay, cUIStateStack_purgeNormalStates() on the game UI's state stack and
+ * cSSXScriptEngine_ResetNISList() for list 0, sets the sub-state (+0x10) to 0 and the delay (+0x14) to 180, shows load
+ * indicator bit 4 (cBXLoadIndicator_Show()) and, with a cGameComm_mGameComm, calls func_00244880() on it and sets its
+ * unk_090 to 1. gainFocus slot of vtable D_0047D5E0.
+ */
 extern "C" void func_00233C50(void* self)
 {
     cReplay_endReplay(*(void**)((char*)cGameState_mpGame + 0x28));
@@ -730,6 +775,21 @@ public:
 };
 
 
+/**
+ * Runs the finish-line state each frame: counts down the results delay, then plays the end-of-event NIS and moves on
+ * when the race says so.
+ *
+ * When the delay (+0x14) reaches 0 and no replay is running (the Replay's first word is 0 or 10 or more), it calls
+ * func_0020CC60() and, unless the sub-state (+0x10) is already 2, handleEvent (slot 24) with (0, 0) on the "finishov"
+ * UI state. Sub-state 0: unless D_005366A8[0] is set, waits while any AI rider's vector from slot 2 of its +0x6C0
+ * object is longer than 277.78 (a function-local static float); also waits while the race mode is not 4 and the game
+ * mode manager has +0x98 set and +0x9C clear. Then it builds and readies NIS list 0 with the end-event sequence
+ * (cSSXScriptEngine_AppendEndEventSequence()), sets mNextState (+0x0) to 12 when the list is not empty, calls
+ * func_00155E58() on the aggression interface in race mode 0, and moves to sub-state 1. Sub-state 1: once the NIS list
+ * is no longer playing (state 1), calls "finishov"'s handleEvent with (1, 0), hides load indicator bit 4 and moves to
+ * 2. Sub-state 2: calls cGameState_gotoNextState() when the race's mode (+0x48) is 4 and its +0x49 flag is clear.
+ * update slot of vtable D_0047D5E0.
+ */
 extern "C" void func_00233CD8(void* self)
 {
     char* s = (char*)self;
@@ -821,6 +881,13 @@ void func_00162290_v(void* self) __asm__("func_00162290__FPv");
 extern "C" int cSSXScriptEngine_PlayNISList(void* self, int i, int a, int b);
 void func_00278DE8(void* self, int val);
 
+/**
+ * Leaves the finish-line state: updates every game view's camera, starts NIS list 0 and sets the next state to 7.
+ *
+ * For each view of the game's ViewMan (count at +0x10) calls func_00162290() on the view's +0xA8 object, sets the
+ * sub-state (+0x10) to 2, calls cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 1, 0) and func_00278DE8(ScriptEngine, 1),
+ * and stores mNextState (+0x0) 7. loseFocus slot of vtable D_0047D5E0.
+ */
 extern "C" void func_00234008(sLoadScreen00234008* self)
 {
     int n = *(int*)((char*)SSXApp->Game->ViewMan + 0x10);
@@ -898,6 +965,15 @@ extern void* D_0047D6E8[];
 extern void* cGFEventStartState_vtbl[];
 extern void* cGameState_mpGame;
 
+/**
+ * Constructs the event-start game-flow state in place: base cGameState, cGFEventStartState_vtbl, next state 2.
+ *
+ * Runs the inlined cGameState constructor (vtable D_0047D6E8, cGameState_mpGame cleared), then stores
+ * cGFEventStartState_vtbl, mNextState (+0x0) 2, the sub-state (+0x14) 0, +0x1C 4 and clears mStartupFlag (+0x4), the
+ * bytes at +0x10 and +0x8. cGame_cGame() builds it at +0xB0 of the game.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00234188(void* self)
 {
     *(int*)self = 0;
@@ -1281,6 +1357,13 @@ static inline int isState00234910(void* e, int s)
     return *(int*)((char*)e + 0x550) == s;
 }
 
+/**
+ * Starts the event's opening NIS lists: plays list 1 and then list 0 when the script engine is in state 2, and records
+ * whether a list is playing.
+ *
+ * Each call is cSSXScriptEngine_PlayNISList(ScriptEngine, list, 1, 1), made only while the engine's +0x550
+ * (mPlayingNISList) is 2. Then +0x14 is 1 when mPlayingNISList is 1, else 0. cGFEventStartState_update() calls it.
+ */
 extern "C" void func_00234910(void* self)
 {
     if (isState00234910(ScriptEngine, 2)) {

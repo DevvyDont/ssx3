@@ -88,6 +88,25 @@ static inline int ItemType_7D38(char* item)
     return item[2];
 }
 
+/**
+ * Applies a cheat code: lower-cases @p code, hashes it and, when the hash is a known code, unlocks rewards or items for
+ * every character of profile 0.
+ *
+ * Copies @p code into a 128-byte buffer (strcpy, no length check), lower-cases it (func_002C2868()) and compares
+ * GetHashValue32() of it (recomputed for every comparison) against a fixed list. Uses the BE interfaces 11 (econ), 13
+ * (rewards) and 9 (profiles). Most codes call func_00158618() for characters 0-9 with one reward index (10, 11, 13, 15,
+ * 17-28) and no money award. 0x82DE683 unlocks peak 1 and 0x4B1FF67 peaks 1 and 2 for all characters through
+ * func_00150B88(). 0x61F9F02 sets every bit below func_00157350()'s count with func_00158558() and stores the mask with
+ * func_00158848(); 0x5B65653, 0xA0CF7C4, 0xB5D8914, 0x717257D and 0x74F6CF4 do every index below the matching count
+ * (func_001572B0, func_001572D0, func_001572F0, func_00157330, func_00157310) with func_00157FD0, func_001580F8,
+ * func_00158220, func_00158470 and func_00158348. 0xBCF3974 marks every library item of types 1-3 that passes
+ * func_0014D908() against D_004A11E0 as owned (func_00151C48()) for profiles 0-2 and characters 0-9; 0x70694D5 does the
+ * same for every type-1 item without the check. cFEStateOptions_onWidgetEvent() calls it with the text typed into its
+ * popup.
+ *
+ * @param code  the typed code (copied, not modified)
+ * @return 1 when the code was recognised and applied, else 0
+ */
 extern "C" int func_00187D38(char* code)
 {
     void* gear = cBE_getInterface_Fv(cBE_getBE(), 11);
@@ -258,6 +277,18 @@ extern void* cFEStateOptions_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
 extern "C" void func_001A0708(void* self, int a1, int a2);
 
+/**
+ * Constructs the options state: base cUIState, cFEStateOptions_vtbl, state id 0x18, optionally resetting its flow
+ * entry.
+ *
+ * Runs the cUIState constructor func_0039E2A0(), stores mHashName 0x18 and cFEStateOptions_vtbl. When @p reset is
+ * non-zero, writes 0 to entry 0x18 of the flow-state table D_004A4E80 (func_001A0708()). Callers allocate 84 bytes
+ * ("cFEStateOptions" or "FEOptions").
+ *
+ * @param a1  the UI engine (passed to the base constructor)
+ * @param reset  non-zero to clear the options entry in D_004A4E80
+ * @return @p self
+ */
 extern "C" void* func_001887A0(void* self, int a1, int reset)
 {
     func_0039E2A0(self);

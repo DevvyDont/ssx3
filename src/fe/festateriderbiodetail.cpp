@@ -74,6 +74,15 @@ extern char str_BIOAutoScrollText[];
 extern char str_vertical_dash[];
 extern char str_horizontal_dash[];
 
+/**
+ * Shows the rider-bio page selected by +0x4C (On Tour mScreen) and fills it.
+ *
+ * Page 0 is DNA ("DNALabels", "DNAText", cFEStateRiderBio_fillDNAInfo), 1 favourites ("FavesLabels", "FavesText",
+ * cFEStateRiderBio_fillFavesInfo), 2 Q&A ("QNALabels", "QNAText", cFEStateRiderBio_fillQnAInfo) and 3 the bio
+ * ("BIOAutoScrollText", cFEStateRiderBio_fillBioInfo). The page's objects are shown and the other pages' hidden
+ * (cUIState_showObjSafe, cUIState_hideObjSafe); "vertical_dash" and "horizontal_dash" are shown on pages 0-1 and hidden
+ * on 2-3. Any other value does nothing.
+ */
 extern "C" void func_00190A08(void* self)
 {
     switch (*(int*)((char*)self + 0x4C)) {
@@ -142,6 +151,13 @@ struct sNames_0CD8 {
 extern sNames_0CD8 D_0045E470;
 extern char str_pct_s_s[];
 
+/**
+ * Shows the picture objects of the rider in +0x48 (On Tour mCharID) and hides the other riders'.
+ *
+ * For each of the ten rider names in D_0045E470 ("moby", "kaori", ...) the object of that name and its "<name>_s"
+ * companion (str_pct_s_s, "%s_s") are shown when the index equals +0x48 and hidden otherwise (cUIState_showObjSafe,
+ * cUIState_hideObjSafe).
+ */
 extern "C" void func_00190CD8(void* self)
 {
     sNames_0CD8 names = D_0045E470;
@@ -350,6 +366,16 @@ extern "C" void* func_0039E2A0(void* self);
 extern "C" char func_001A1CD0(void* p, int a);
 extern void* cFEStateRuleSelect_vtbl[];
 
+/**
+ * Constructs the custom race rules state (allocated as "cFEStateRuleSelect", 156 bytes).
+ *
+ * Runs cUIState's constructor (func_0039E2A0; the engine argument reaches it untouched in the second argument
+ * register), stores cFEStateRuleSelect_vtbl, clears +0x48 (On Tour mpGameEventMapping), sets mUserNum to 0 and
+ * mCtrlBits to user 0's controller bits (func_001A1CD0 on the engine's front end) and mHashName to 20. It lives in the
+ * rider-bio unit.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00191360(void* self)
 {
     func_0039E2A0(self);
