@@ -19,17 +19,17 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual void v06(int v);
-    virtual void v07(int v);
     virtual void setEnabled(int v);
+    virtual void v07(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 
 /**
  * Tags the replay menu's items with their choice ids and hides Save Replay for a loaded replay.
  *
- * option_savereplay 0 (for a cReplay with Loaded set: setEnabled(0) at slot 6, static at slot 8, hidden),
- * option_exitreplay 1, option_continue 2. The slot called setEnabled here is cUIThing_setStatic.
+ * option_savereplay 0 (for a cReplay with Loaded set: setEnabled(0) at slot 6, setStatic(1) at slot 8, hidden),
+ * option_exitreplay 1, option_continue 2.
  *
  * @param w  the widget being created
  */
@@ -39,8 +39,8 @@ extern "C" void cOVState_REPLAY_onWidgetCreate(void* self, cUIObj_20DE30* w)
     if (id == GetHashValue32(str_option_savereplay)) {
         *(int*)((char*)w + 0x18) = 0;
         if (*(int*)((char*)SSXApp->Game->Replay + 0x608) != 0) {
-            w->v06(0);
-            w->setEnabled(1);
+            w->setEnabled(0);
+            w->setStatic(1);
             w->setVisible(0);
         }
     } else {

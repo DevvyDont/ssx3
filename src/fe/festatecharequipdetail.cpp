@@ -1512,7 +1512,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 struct sEquipEntry_A798 {
@@ -2274,7 +2274,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
     virtual void v10();
     virtual void setColor(void* c);

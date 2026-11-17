@@ -386,14 +386,14 @@ struct cUIObj_F0B8 {
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void setActive(int on);
+    virtual void setVisible(int on);
 };
 
 /**
  * Shows or hides the profile load screen's delete button.
  *
  * Except on the load screen (cFEStateProfileLoad_mScreenAction 2) sets "btext5" and "ps2sq" visible when @p on is false
- * (cUIThing_setVisible; the view calls the slot setActive); always stores !@p on in +0x220, which cFEStateProfileLoad_onWidgetMenu tests
+ * (cUIThing_setVisible); always stores !@p on in +0x220, which cFEStateProfileLoad_onWidgetMenu tests
  * for event 8. Fills slot +0x134 of cFEStateProfileLoad_vtbl (cFEMemCard_hideDeleteButton's slot).
  *
  * @param on  true to hide the button
@@ -402,8 +402,8 @@ extern "C" void cFEStateProfileLoad_hideDeleteButton(void* self, bool on)
 {
     if (cFEStateProfileLoad_mScreenAction != 2) {
         int off = !on;
-        ((cUIObj_F0B8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setActive(off);
-        ((cUIObj_F0B8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setActive(off);
+        ((cUIObj_F0B8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setVisible(off);
+        ((cUIObj_F0B8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setVisible(off);
     }
     *(int*)((char*)self + 0x220) = !on;
 }
@@ -785,7 +785,7 @@ struct cUIObj_F9D8 {
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void v09();
     virtual void v10();
     virtual void v11();
@@ -802,7 +802,7 @@ struct cUIObj_F9D8 {
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual void setSelected(int v);
+    virtual void setUseStaticColour(int v);
 };
 
 /**
@@ -811,8 +811,8 @@ struct cUIObj_F9D8 {
  * When this state's vtable slot 42 (cFEMemCard_displayFileOK) passes and the memory card (the card manager's mpMemCard) passes its
  * slot-53 check (func_002D3810), it switches the display state to 3 (slot 35, cFEMemCard_triggerDisplayState) and runs
  * cFEStateProfileLoad_displayOn. Otherwise it resets the six rows "player1" to "player6": slot 25
- * (cUIText_setUseStaticColour for a text; the view calls it setSelected) with 0 and setStatic(1) (the view calls it
- * setEnabled). Called by cFEStateProfileLoad_displayStatus and by cFEStateProfileLoad_displayOn when no card is found.
+ * (cUIText_setUseStaticColour for a text) with 0 and setStatic(1). Called by cFEStateProfileLoad_displayStatus and by
+ * cFEStateProfileLoad_displayOn when no card is found.
  *
  * @param vself  the profile load state
  */
@@ -831,8 +831,8 @@ extern "C" void cFEStateProfileLoad_displayOff(void* vself)
         char buf[64];
         sprintf(buf, str_playerpct_d, i);
         cUIObj_F9D8* playerButton = (cUIObj_F9D8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
-        playerButton->setSelected(0);
-        playerButton->setEnabled(1);
+        playerButton->setUseStaticColour(0);
+        playerButton->setStatic(1);
     }
 }
 #endif
@@ -1269,7 +1269,7 @@ struct cUIObj_02C0 {
     virtual void v4();
     virtual void v5();
     virtual void v6();
-    virtual void setEnabled(int on);
+    virtual void setFocus(int on);
     virtual void v8();
     virtual void setVisible(int on);
 };
@@ -1315,8 +1315,8 @@ extern "C" void cFEStateProfileLoad_initGeneral(void* selfp)
         widget = getObj_02C0(self, buf);
         *(int*)((char*)widget + 0x18) = i - 1;
     }
-    getObj_02C0(self, str_onmenu)->setEnabled(0);
-    getObj_02C0(self, str_offmenu)->setEnabled(1);
+    getObj_02C0(self, str_onmenu)->setFocus(0);
+    getObj_02C0(self, str_offmenu)->setFocus(1);
 }
 #endif
 
@@ -1345,7 +1345,7 @@ struct cUIObj_0540 {
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void setActive(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -1357,13 +1357,13 @@ struct cUIObj_0540 {
 extern "C" void cFEStateProfileLoad_initCreateScreen(void* self)
 {
     cUIObj_0540* titleText = (cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_SaveProfile));
-    titleText->setActive(1);
+    titleText->setVisible(1);
     cUIText_setUnicodeStringByID((cUIText*)titleText, GetHashValue32(str_kT_FEProfileNew));
     cUIObj_0540* helpText = (cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_save));
-    helpText->setActive(1);
+    helpText->setVisible(1);
     cUIText_setUnicodeStringByID((cUIText*)helpText, GetHashValue32(str_kT_HELPCreateSaveNewFile));
-    ((cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setActive(1);
-    ((cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setActive(1);
+    ((cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(1);
+    ((cUIObj_0540*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setVisible(1);
     *(int*)((char*)self + 0x220) = 1;
     *(int*)((char*)self + 0x224) = 1;
 }
@@ -1391,7 +1391,7 @@ struct cUIObj_0670 {
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void setActive(int on);
+    virtual void setVisible(int on);
 };
 
 struct sProfile_0670 {
@@ -1403,16 +1403,15 @@ struct sProfile_0670 {
 /**
  * Sets up the profile screen as the load screen.
  *
- * Shows "Title_LoadProfile", "helptext_load" and "btext3a", hides "ps2sq" (cUIThing_setVisible; the view calls the slot
- * setActive), clears the delete-button flag (+0x220), sets the main-button flag (+0x224) and clears the card manager's
+ * Shows "Title_LoadProfile", "helptext_load" and "btext3a", hides "ps2sq" (cUIThing_setVisible), clears the delete-button flag (+0x220), sets the main-button flag (+0x224) and clears the card manager's
  * mPollForFullCard. cFEStateProfileLoad_onCreateScreen runs it when cFEStateProfileLoad_mScreenAction is 2.
  */
 extern "C" void cFEStateProfileLoad_initLoadScreen(void* self)
 {
-    ((cUIObj_0670*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_LoadProfile)))->setActive(1);
-    ((cUIObj_0670*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_load)))->setActive(1);
-    ((cUIObj_0670*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3a)))->setActive(1);
-    ((cUIObj_0670*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setActive(0);
+    ((cUIObj_0670*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_LoadProfile)))->setVisible(1);
+    ((cUIObj_0670*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_load)))->setVisible(1);
+    ((cUIObj_0670*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3a)))->setVisible(1);
+    ((cUIObj_0670*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setVisible(0);
     ((sProfile_0670*)self)->f220 = 0;
     ((sProfile_0670*)self)->f224 = 1;
     *(int*)((char*)cSSXApp_getMCManager(SSXApp) + 0x11C) = 0;
@@ -1439,22 +1438,21 @@ struct cUIObj_0768 {
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void setActive(int on);
+    virtual void setVisible(int on);
 };
 
 /**
  * Sets up the profile screen as the save screen.
  *
- * Shows "Title_SaveProfile", "helptext_save", "btext3" and "btext5" (cUIThing_setVisible; the view calls the slot
- * setActive) and sets the delete-button (+0x220) and main-button (+0x224) flags. cFEStateProfileLoad_onCreateScreen
+ * Shows "Title_SaveProfile", "helptext_save", "btext3" and "btext5" (cUIThing_setVisible) and sets the delete-button (+0x220) and main-button (+0x224) flags. cFEStateProfileLoad_onCreateScreen
  * runs it when cFEStateProfileLoad_mScreenAction is 3.
  */
 extern "C" void cFEStateProfileLoad_initSaveScreen(void* self)
 {
-    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_SaveProfile)))->setActive(1);
-    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_save)))->setActive(1);
-    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setActive(1);
-    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setActive(1);
+    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_SaveProfile)))->setVisible(1);
+    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_save)))->setVisible(1);
+    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(1);
+    ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setVisible(1);
     *(int*)((char*)self + 0x220) = 1;
     *(int*)((char*)self + 0x224) = 1;
 }

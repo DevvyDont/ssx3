@@ -796,7 +796,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 extern sVec3_6D30 D_004FF0D8_6D30 __asm__("t3vect_Zero");
@@ -833,7 +833,7 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* infop)
             cScreenPopup_getStringSize(self, (cUIText*)((cUIObj_6D30*)screenPopup->mpStaticBox), it, item);
             w = item[2];
             pos = *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpStaticBox) + 0x44);
-            ((cUIObj_6D30*)screenPopup->mpStaticBox)->setEnabled(0);
+            ((cUIObj_6D30*)screenPopup->mpStaticBox)->setStatic(0);
             ((cUIObj_6D30*)screenPopup->mpStaticBox)->setVisible(1);
         }
         if (((cUIObj_6D30*)screenPopup->mpEnterBox) != 0) {
@@ -842,11 +842,11 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* infop)
             boxPos.x = boxPos.x + w + 10.0f;
             *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpEnterBox) + 0x44) = boxPos;
             cScreenPopup_increaseBoxSize(self, (float*)((char*)self + 0x260), size);
-            ((cUIObj_6D30*)screenPopup->mpEnterBox)->setEnabled(0);
+            ((cUIObj_6D30*)screenPopup->mpEnterBox)->setStatic(0);
             ((cUIObj_6D30*)screenPopup->mpEnterBox)->setVisible(1);
         }
         if (((cUIObj_6D30*)screenPopup->mpTextBoxPair) != 0) {
-            ((cUIObj_6D30*)screenPopup->mpTextBoxPair)->setEnabled(0);
+            ((cUIObj_6D30*)screenPopup->mpTextBoxPair)->setStatic(0);
             ((cUIObj_6D30*)screenPopup->mpTextBoxPair)->setVisible(1);
         }
         if (((cUIObj_6D30*)screenPopup->mpEnterBoxBackground) != 0) {
@@ -856,15 +856,15 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* infop)
         return 1;
     }
     if (((cUIObj_6D30*)screenPopup->mpTextBoxPair) != 0) {
-        ((cUIObj_6D30*)screenPopup->mpTextBoxPair)->setEnabled(1);
+        ((cUIObj_6D30*)screenPopup->mpTextBoxPair)->setStatic(1);
         ((cUIObj_6D30*)screenPopup->mpTextBoxPair)->setVisible(0);
     }
     if (((cUIObj_6D30*)screenPopup->mpStaticBox) != 0) {
-        ((cUIObj_6D30*)screenPopup->mpStaticBox)->setEnabled(1);
+        ((cUIObj_6D30*)screenPopup->mpStaticBox)->setStatic(1);
         ((cUIObj_6D30*)screenPopup->mpStaticBox)->setVisible(0);
     }
     if (((cUIObj_6D30*)screenPopup->mpEnterBox) != 0) {
-        ((cUIObj_6D30*)screenPopup->mpEnterBox)->setEnabled(1);
+        ((cUIObj_6D30*)screenPopup->mpEnterBox)->setStatic(1);
         ((cUIObj_6D30*)screenPopup->mpEnterBox)->setVisible(0);
     }
     if (((cUIObj_6D30*)screenPopup->mpEnterBoxBackground) != 0) {
@@ -1036,7 +1036,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 struct sPopup_7388 {
@@ -1083,7 +1083,7 @@ extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, void* infop)
         ((cUIObj_7388*)self->mpButtonGroup)->setVisible(1);
     for (int i = info[0]; i < 5; i++) {
         if (((sPopup_7388*)self)->items[i] != 0) {
-            ((sPopup_7388*)self)->items[i]->setEnabled(1);
+            ((sPopup_7388*)self)->items[i]->setStatic(1);
             ((sPopup_7388*)self)->items[i]->setVisible(0);
         }
     }
@@ -1099,7 +1099,7 @@ extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, void* infop)
             if (self->mvLargestOption[0] < item[2])
                 self->mvLargestOption[0] = item[2];
             cScreenPopup_increaseBoxSize(self, (float*)((char*)self + 0x260), size);
-            itemObj->setEnabled(0);
+            itemObj->setStatic(0);
             itemObj->setVisible(1);
         }
     }
@@ -3534,7 +3534,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 int GetHashValue32(char* str);

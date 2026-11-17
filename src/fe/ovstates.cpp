@@ -50,7 +50,7 @@ public:
     virtual void v05();
     virtual void v06(int v);
     virtual void v07(int v);
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 
@@ -339,7 +339,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
     virtual void v10();
     virtual void setColor(const sColor_194BF0& c);
@@ -356,15 +356,14 @@ public:
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual void setSelected(int v);
+    virtual void setUseStaticColour(int v);
 };
 
 /**
  * Greys out Multi Play without two controllers and Online without online support, every frame.
  *
  * "3multi play" is greyed out (DisableTextWidget) with fewer than two active pads (+0x55); otherwise, while the
- * state's mode is 5, it is restored: slot 25 (declared setSelected) and slot 8 (cUIThing_setStatic, declared
- * setEnabled) cleared, alpha 1. "5online" is greyed out while D_004A29EC (set by initOnline) is 0.
+ * state's mode is 5, it is restored: slot 25 (cUIText_setUseStaticColour) and slot 8 (cUIThing_setStatic) cleared, alpha 1. "5online" is greyed out while D_004A29EC (set by initOnline) is 0.
  */
 extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
 {
@@ -373,8 +372,8 @@ extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
         if (*(signed char*)((char*)self + 0x55) < 2) {
             DisableTextWidget(obj);
         } else if ((*(unsigned char*)((char*)self + 0x1D) & 0x3F) == 5) {
-            obj->setSelected(0);
-            obj->setEnabled(0);
+            obj->setUseStaticColour(0);
+            obj->setStatic(0);
             sColor_194BF0 color = *(sColor_194BF0*)((char*)obj + 0x1C);
             color.r = 1.0f;
             obj->setColor(color);

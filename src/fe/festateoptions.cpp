@@ -3481,14 +3481,13 @@ struct cUIObj_E2C0 {
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void setActive(int on);
+    virtual void setVisible(int on);
 };
 
 /**
  * Shows or hides the device select screen's delete button.
  *
- * On a save screen (+0x22C) sets "btext5" and "ps2sq" visible when @p on is false (cUIThing_setVisible; the view calls
- * the slot setActive); always stores !@p on in +0x220 (the delete-button-active flag that event 8 of the profile menu
+ * On a save screen (+0x22C) sets "btext5" and "ps2sq" visible when @p on is false (cUIThing_setVisible); always stores !@p on in +0x220 (the delete-button-active flag that event 8 of the profile menu
  * tests). Fills slot +0x134 of cFEStateOptionsDeviceSelect_vtbl (cFEMemCard_hideDeleteButton's slot).
  *
  * @param on  true to hide the button
@@ -3497,8 +3496,8 @@ extern "C" void cFEStateOptionsDeviceSelect_hideDeleteButton(void* self, bool on
 {
     if (*(int*)((char*)self + 0x22C) != 0) {
         int off = !on;
-        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setActive(off);
-        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setActive(off);
+        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setVisible(off);
+        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setVisible(off);
     }
     *(int*)((char*)self + 0x220) = !on;
 }

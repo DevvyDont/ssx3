@@ -1681,7 +1681,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 
@@ -1690,7 +1690,7 @@ public:
  *
  * Runs cOVState_onCreateScreen, sets flag 8 in the "overlayMenu" widget's word at +0x90, then walks "overlayOpt0" ...
  * "overlayOpt4" of mpScreen: option 0 gets the localised string named D_00441D10[D_004A2860[0]] and that index as its
- * misc data (+0x18); options 1-4 are hidden (setVisible(0), slot 9) and enabled (setEnabled(1), slot 8). It fills the
+ * misc data (+0x18); options 1-4 are hidden (setVisible(0), slot 9) and made static (setStatic(1), slot 8). It fills the
  * onCreateScreen slot (+0x24) of D_00474D30, the vtable that also holds cOVTemplate_Simple_onWidgetMenu and cOVTemplate_Simple_onWidgetEvent; func_001FBD20
  * and func_001FB6B8 call it as their base.
  */
@@ -1710,7 +1710,7 @@ extern "C" void cOVTemplate_Simple_onCreateScreen(void* self)
                 *(int*)((char*)optionWidget + 0x18) = labelIndex;
             } else {
                 optionWidget->setVisible(0);
-                optionWidget->setEnabled(1);
+                optionWidget->setStatic(1);
             }
         }
     }

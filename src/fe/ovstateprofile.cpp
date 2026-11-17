@@ -179,7 +179,7 @@ struct cUIObj_11270 {
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void v09();
     virtual void v10();
     virtual void v11();
@@ -196,7 +196,7 @@ struct cUIObj_11270 {
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual void setSelected(int v);
+    virtual void setUseStaticColour(int v);
 };
 
 /**
@@ -204,8 +204,8 @@ struct cUIObj_11270 {
  *
  * When cFEMemCard_displayFileOK (virtual slot 42) allows the file display and the memory card (mpMemCard of cSSXApp_getMCManager,
  * its slot 53) is present, moves to display state 3 through cFEMemCard_triggerDisplayState (virtual slot 35) and runs
- * cOVState_PROFILE_displayOn. Otherwise resets the six profile buttons "player1" ... "player6" of mpScreen: setSelected(0) (slot 25)
- * and setEnabled(1) (slot 8).
+ * cOVState_PROFILE_displayOn. Otherwise resets the six profile buttons "player1" ... "player6" of mpScreen:
+ * setUseStaticColour(0) (slot 25) and setStatic(1) (slot 8).
  *
  * @param vself  the profile overlay state (this)
  */
@@ -223,8 +223,8 @@ extern "C" void cOVState_PROFILE_displayOff(void* vself)
         char buf[64];
         sprintf(buf, str_playerpct_d_b, i);
         cUIObj_11270* playerButton = (cUIObj_11270*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
-        playerButton->setSelected(0);
-        playerButton->setEnabled(1);
+        playerButton->setUseStaticColour(0);
+        playerButton->setStatic(1);
     }
 }
 #endif
@@ -362,8 +362,8 @@ public:
     virtual int v05();
     virtual int v06();
     virtual int v07();
-    virtual void v08(int);
-    virtual void v09(int);
+    virtual void setStatic(int);
+    virtual void setVisible(int);
     virtual int v10();
     virtual int v11();
     virtual int v12();
@@ -379,7 +379,7 @@ public:
     virtual int v22();
     virtual int v23();
     virtual int v24();
-    virtual void v25(int);
+    virtual void setUseStaticColour(int);
 };
 
 struct sVE_1380 {
@@ -436,9 +436,10 @@ static inline cUIObj_1380* getObj_1380(cState_1380* self, char* name)
  * (On Tour mLastSelectedDevice), runs cFEMemCard_setMenuHighlight (slot 43), colours "1percentage" with D_004C66C8,
  * fills it from card slot 64 and hides it (slot 9). Each "player%d" button 1-6 gets the name of card file i - 1 (card
  * slot 14, through the 16-bit buffer at +0x234), and its state from the card: when slots 67 and 66 both say no for that
- * file and slot 55 says yes, the first such button is disabled (setEnabled(0), slot 8) and later ones enabled and
- * selected (setSelected, slot 25); otherwise, when slot 54 accepts mSelectedDevice, the button is enabled and selected
- * exactly when slot 66 says yes for its file; with no usable device every button is enabled and selected. Finally
+ * file and slot 55 says yes, the first such button is made selectable (setStatic(0), slot 8) and later ones static
+ * and greyed (setUseStaticColour(1), slot 25, and setStatic(1)); otherwise, when slot 54 accepts mSelectedDevice, a
+ * button is static and greyed exactly when slot 66 says yes for its file (else selectable and normally coloured); with
+ * no usable device every button is static and greyed. Finally
  * "arrowleft" / "arrowright" are shown only when cFEMemCard_checkNextAvailableDevice finds a device in that direction.
  *
  * @param profileState  the profile overlay state (this)
@@ -469,7 +470,7 @@ extern "C" void cOVState_PROFILE_displayOn(void* profileState)
         *(sCol_1380*)((char*)textWidget + 0x88) = D_004C66C8_1380;
         (*(cMCSub_1380**)(mp + 0x434))->v64(buf);
         cUIText_setUnicodeString(textWidget, buf);
-        textWidget->v09(0);
+        textWidget->setVisible(0);
         for (int i = 1; i < 7; i++) {
             sprintf(name, str_playerpct_d_b, i);
             textWidget = getObj_1380(self, name);
@@ -479,32 +480,32 @@ extern "C" void cOVState_PROFILE_displayOn(void* profileState)
                 && (*(cMCSub_1380**)(mp + 0x434))->v55()) {
                 if (!first) {
                     first = 1;
-                    textWidget->v08(0);
+                    textWidget->setStatic(0);
                 } else {
-                    textWidget->v25(1);
-                    textWidget->v08(1);
+                    textWidget->setUseStaticColour(1);
+                    textWidget->setStatic(1);
                 }
             } else if ((*(cMCSub_1380**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
                 if ((*(cMCSub_1380**)(mp + 0x434))->v66(i - 1)) {
-                    textWidget->v08(1);
-                    textWidget->v25(1);
+                    textWidget->setStatic(1);
+                    textWidget->setUseStaticColour(1);
                 } else {
-                    textWidget->v08(0);
-                    textWidget->v25(0);
+                    textWidget->setStatic(0);
+                    textWidget->setUseStaticColour(0);
                 }
             } else {
-                textWidget->v25(1);
-                textWidget->v08(1);
+                textWidget->setUseStaticColour(1);
+                textWidget->setStatic(1);
             }
         }
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
-            getObj_1380(self, str_arrowleft_b)->v09(0);
+            getObj_1380(self, str_arrowleft_b)->setVisible(0);
         else
-            getObj_1380(self, str_arrowleft_b)->v09(1);
+            getObj_1380(self, str_arrowleft_b)->setVisible(1);
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
-            getObj_1380(self, str_arrowright_b)->v09(0);
+            getObj_1380(self, str_arrowright_b)->setVisible(0);
         else
-            getObj_1380(self, str_arrowright_b)->v09(1);
+            getObj_1380(self, str_arrowright_b)->setVisible(1);
     }
 }
 #endif
@@ -1208,7 +1209,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setFocus(int v);
     virtual void setVisible(int v);
 };
 

@@ -32,7 +32,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
 
@@ -1162,7 +1162,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setFocus(int v);
     virtual void setVisible(int v);
 };
 struct sMap_9E78 {
@@ -1229,7 +1229,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setFocus(int v);
     virtual void setVisible(int v);
 };
 struct sMap_9FD0 {
@@ -1280,7 +1280,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void setEnabled(int v);
+    virtual void setFocus(int v);
     virtual void setVisible(int v);
 };
 
