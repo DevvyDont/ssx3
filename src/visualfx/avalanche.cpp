@@ -889,7 +889,7 @@ extern char str_AnimObject_b[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_00341AA0(void* self, int a, int type, void* b, void* c);
 extern "C" bool tActiveAvalancheNode_update_7EF8(void* node, float t) __asm__("tActiveAvalancheNode_update");
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void tActiveAvalanche_end_7EF8(void* self) __asm__("tActiveAvalanche_end");
 void func_0029E560_7EF8(void* snd, const sAvV4_7EF8& pos) __asm__("func_0029E560__FPv");
 
@@ -941,13 +941,13 @@ extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self)
             }
             func_00341AA0(cMemMan_alloc(108, str_AnimObject_b, 0x20000000, 0), 1, 1, self->data->events[self->nextEvent].obj, &D_004D5770);
         }
-        func_0029E560_7EF8(func_0028B180(), pos_7EF8(self->data->events[self->nextEvent].obj));
+        func_0029E560_7EF8(cAudioInterface_bxAudio(), pos_7EF8(self->data->events[self->nextEvent].obj));
         self->nextEvent++;
     }
     while (self->nextSound < self->data->nSounds && (float)soundFrame_7EF8(self) <= toFrames_7EF8(self->time)) {
         sAvObj_7EF8* cueObj = self->objs[self->data->sounds[self->nextSound].obj];
         if (cueObj != 0) {
-            func_0029E560_7EF8(func_0028B180(), cueObj->sndPos);
+            func_0029E560_7EF8(cAudioInterface_bxAudio(), cueObj->sndPos);
         }
         self->nextSound++;
     }
@@ -961,7 +961,7 @@ extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self)
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_end);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0029DEF0(void* self, int a1);
 
 /**
@@ -984,7 +984,7 @@ extern "C" void tActiveAvalanche_end(void* self)
             n = *(char**)(n + 0x2E4);
         }
         *(int*)self = 0;
-        func_0029DEF0(func_0028B180(), 0);
+        func_0029DEF0(cAudioInterface_bxAudio(), 0);
         char* dangerMan = *(char**)((char*)SSXApp->Game->AI + 0xA8);
         if (*(int*)(dangerMan + 0x708) != 0) {
             *(int*)(dangerMan + 0x708) = *(int*)(dangerMan + 0x708) - 1;
@@ -2230,7 +2230,7 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                 }
             }
             tActiveAvalanche_buildArray((tActiveAvalanche*)slot);
-            func_0029DEF0(func_0028B180(), 1);
+            func_0029DEF0(cAudioInterface_bxAudio(), 1);
             (*(int*)(*(char**)((char*)SSXApp->Game->AI + 0xA8) + 0x708))++;
             return slot - D_slots_D97A8;
         }

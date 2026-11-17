@@ -1240,7 +1240,7 @@ INCLUDE_ASM("world/worldcache", cWorldCache_flushInActivePages);
  *
  * A page that is not locked and whose m_iTouchTick is before the app tick has expired. Queued pages that expired go
  * back to Empty; Active ones that expired become InActive and, like every InActive page, are purged
- * (cWorldCache_purgePage) and set Empty. Loading pages are left alone. Called by cGame_update and func_00244A40.
+ * (cWorldCache_purgePage) and set Empty. Loading pages are left alone. Called by cGame_update and cGame_updateStreamLoading.
  *
  * @param worldCache  the cWorldCache
  */

@@ -12,13 +12,13 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_0015E050(void* cam, sVec4_181148* a, sVec4_181148* b);
 extern "C" void* func_001A0548(void* self, int a1);
-extern "C" void func_0019E538(void* self, int a1);
+extern "C" void cFERider_setVisible(void* self, int a1);
 
 /**
  * Creates the character-select screen "08sel_char" and sets up the front-end camera and rider view.
  *
  * The camera (cFE::mCamera) gets (0, 200, 0) and the origin, probably position and target (func_0015E050),
- * and a field of view of 0.436 (25 degrees). Calls func_0019E538 with 0 on the user's front-end rider, sets
+ * and a field of view of 0.436 (25 degrees). Calls cFERider_setVisible with 0 on the user's front-end rider, sets
  * +0x80 to 1, +0x5C to -1 and +0x58 and +0x60 to 0.
  */
 extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
@@ -42,7 +42,7 @@ extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
     lookAt.w = 1.0f;
     func_0015E050((char*)cam + 0x10, &pos, &lookAt);
     cam->fov = 0.4363323450088501f;
-    func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    cFERider_setVisible(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     *(int*)((char*)self + 0x80) = 1;
     *(float*)((char*)self + 0x5C) = -1.0f;
     *(int*)((char*)self + 0x58) = 0;
@@ -58,13 +58,13 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_001A0548(void* self, int a1);
-extern "C" void func_0019E538(void* self, int a1);
+extern "C" void cFERider_setVisible(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
 /**
  * Destroys the character-select screen; off game path 0 it first resets the user's front-end rider.
  *
- * The rider (cFE::mRiderManager slot for mUserNum) gets func_0019E538 with 0, then cUIState_onDestroyScreen()
+ * The rider (cFE::mRiderManager slot for mUserNum) gets cFERider_setVisible with 0, then cUIState_onDestroyScreen()
  * runs.
  */
 extern "C" void cFEStateCharSelect_onDestroyScreen(void* self)
@@ -72,7 +72,7 @@ extern "C" void cFEStateCharSelect_onDestroyScreen(void* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0 && D_00535C11[0] != 0) {
-        func_0019E538(func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+        cFERider_setVisible(func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     }
     cUIState_onDestroyScreen(self);
 }
@@ -85,13 +85,13 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
-extern "C" void func_00181BD0(void* self, int index, signed char charID);
+extern "C" void cFEStateCharSelect_updateWidget(void* self, int index, signed char charID);
 
 /**
  * Shows the stats of the player's current character when the character-select gain transition starts.
  *
  * When @p on is nonzero, reads the character id for mUserNum from the new-player interface and passes both to
- * func_00181BD0(), which fills the seven stat texts and bars and the overall average.
+ * cFEStateCharSelect_updateWidget(), which fills the seven stat texts and bars and the overall average.
  *
  * @param on  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
  * @return always 0
@@ -100,7 +100,7 @@ extern "C" int cFEStateCharSelect_onGainTransition(void* self, int on)
 {
     if (on != 0) {
         int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-        func_00181BD0(self, *(signed char*)((char*)self + 0x44), id);
+        cFEStateCharSelect_updateWidget(self, *(signed char*)((char*)self + 0x44), id);
     }
     return 0;
 }
@@ -118,7 +118,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
 extern "C" void* func_001A0548(void* self, int a1);
-extern "C" void func_00181EF0(void* self);
+extern "C" void cFEStateCharSelect_updateCharacter3DPos(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern signed char D_00440F68[];
 extern char str_Menu[];
@@ -127,7 +127,7 @@ extern char str_Menu[];
  * Gives the character-select screen the focus: selects the player's character in "Menu" and shows the rider.
  *
  * Finds the player's character among the 10 selectable ones (D_00440F68) and selects its entry. The front-end
- * rider is then set to D_00440F68[0] (not the player's character), its +0xCCC cleared, and func_00181EF0
+ * rider is then set to D_00440F68[0] (not the player's character), its +0xCCC cleared, and cFEStateCharSelect_updateCharacter3DPos
  * places it before cUIState_onGainFocus() runs.
  *
  * @param pPrevState  the state that had focus before, passed on
@@ -147,7 +147,7 @@ extern "C" void cFEStateCharSelect_onGainFocus(void* self, int pPrevState)
     func_001A0508((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), D_00440F68[0], 0);
     char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
     *(int*)(feRider + 0xCCC) = 0;
-    func_00181EF0(self);
+    cFEStateCharSelect_updateCharacter3DPos(self);
     cUIState_onGainFocus(self, pPrevState);
 }
 #endif
@@ -171,19 +171,19 @@ void* cFEStateCharSelect_onRender2D(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_00181EF0(void* self);
+extern "C" void cFEStateCharSelect_updateCharacter3DPos(void* self);
 extern "C" void* cUIState_onUpdate(void* self);
 
 /**
  * Updates the character-select state: poses the front-end rider model, then runs the base UI-state update.
  *
- * func_00181EF0() places and turns the rider model once it is loaded and restarts its animation when the state
+ * cFEStateCharSelect_updateCharacter3DPos() places and turns the rider model once it is loaded and restarts its animation when the state
  * asks for it. cUIState_onUpdate() is the base UI-state update, which dispatches controller input to the state and
  * its screens.
  */
 extern "C" void cFEStateCharSelect_onUpdate(void* self)
 {
-    func_00181EF0(self);
+    cFEStateCharSelect_updateCharacter3DPos(self);
     cUIState_onUpdate(self);
 }
 #endif
@@ -376,9 +376,9 @@ extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int 
 extern "C" void* func_001887A0(void* mem, void* owner, int a2);
 extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* mem, void* owner, int a2, unsigned char a3);
 extern "C" void* func_001A0548(void* self, int a1);
-extern "C" void func_0019E538(void* self, int a1);
+extern "C" void cFERider_setVisible(void* self, int a1);
 extern "C" void func_001A1CB8(void* self, int rider, unsigned char mask);
-extern "C" void func_00181BD0(void* self, int index, signed char charID);
+extern "C" void cFEStateCharSelect_updateWidget(void* self, int index, signed char charID);
 extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* iface, int rider, int idx);
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* iface, int rider, int id);
 extern "C" void func_001474A8(void* iface, int rider, int id);
@@ -452,7 +452,7 @@ static inline void refresh_17E8(sIface_17E8* iface)
  *
  * Event 5 sets +0xC20 (clearing +0xC1C) on the user's front-end rider, stores the controller, the character
  * and +0x4C in the player table, commits it, records the controller mask (func_001A1CB8) and pushes the
- * custom interface's next state. Event 1 shows the highlighted name and its stats (func_00181BD0) and stores
+ * custom interface's next state. Event 1 shows the highlighted name and its stats (cFEStateCharSelect_updateWidget) and stores
  * the choice; 2 hides the name. 6 pushes the previous state; 7 opens "FEOptions" (state bits 0x100); 8 opens
  * "cFEStateProfileLoad" for this controller.
  *
@@ -484,7 +484,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         void* st = (*(cStateFactory_17E8**)self->engine)->onSelect(self, widget->id);
         if (st != 0)
             cUIStateStack_push(self->engine + 0x18, st);
-        func_0019E538(riderSlot_17E8(self), 0);
+        cFERider_setVisible(riderSlot_17E8(self), 0);
         self->dirty = 0;
         break;
     }
@@ -492,14 +492,14 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         void* st = (*(cStateFactory_17E8**)self->engine)->onBack(self, widget->id);
         if (st != 0) {
             cUIStateStack_push(self->engine + 0x18, st);
-            func_0019E538(riderSlot_17E8(self), 0);
+            cFERider_setVisible(riderSlot_17E8(self), 0);
             self->dirty = 0;
         }
         break;
     }
     case 1: {
         widget->setVisible(1);
-        func_00181BD0(self, self->rider, D_00440F68[widget->id]);
+        cFEStateCharSelect_updateWidget(self, self->rider, D_00440F68[widget->id]);
         int rider = self->rider;
         int player = self->player;
         int ch = D_00440F68[widget->id];
@@ -524,7 +524,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->engine, 1);
         *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(self->engine + 0x18, st, 0, 0);
-        func_0019E538(riderSlot_17E8(self), 0);
+        cFERider_setVisible(riderSlot_17E8(self), 0);
         self->dirty = 0;
         break;
     }
@@ -537,7 +537,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         char* top = *(char**)self->engine;
         if (top != 0)
             *(int*)(top + 0xC) = 9;
-        func_0019E538(riderSlot_17E8(self), 0);
+        cFERider_setVisible(riderSlot_17E8(self), 0);
         self->dirty = 0;
         break;
     }
@@ -546,7 +546,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181BD0);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_updateWidget);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIText;
@@ -589,8 +589,8 @@ public:
     virtual void v09(int on);
 };
 
-// PORT: the unit declares func_00181BD0 with an int index; the body sign-extends both id arguments.
-extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char charID) __asm__("func_00181BD0");
+// PORT: the unit declares cFEStateCharSelect_updateWidget with an int index; the body sign-extends both id arguments.
+extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rider, signed char charID) __asm__("cFEStateCharSelect_updateWidget");
 
 /**
  * Fills the character-select stats widgets for a character and puts it on the user's front-end rider.
@@ -606,7 +606,7 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
  * @param rider  the user (controller) index
  * @param charID  the character id
  */
-extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char charID)
+extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rider, signed char charID)
 {
     sStr9_181BD0 name = D_0045D6E0;
     char bar[8];
@@ -654,7 +654,7 @@ extern "C" void func_00181BD0_impl(void* self, signed char rider, signed char ch
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00181EF0);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_updateCharacter3DPos);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_reset(void* anim);
@@ -717,11 +717,11 @@ static inline sQuat_181EF0 AxisAngle_181EF0(const sQuat_181EF0& axis, float angl
  * below 10, +0xCB8 and +0xCB4 set) and the state's +0x80 flag is set: sets the rider pose (func_0019F3E8) to position
  * (136, -250, -82) turned about Z by the model angle (+0x60, degrees) + 100; when +0x54 is set, resets the rider
  * animation (+0xC) and plays animation 434, clears the rider's +0xCCC and +0x54; moves the board out of view to (0,
- * 10000, 0) (func_0019F548) and makes the rider visible (func_0019E538).
+ * 10000, 0) (func_0019F548) and makes the rider visible (cFERider_setVisible).
  *
  * @param vself  the character-select state
  */
-extern "C" void func_00181EF0(void* vself)
+extern "C" void cFEStateCharSelect_updateCharacter3DPos(void* vself)
 {
     char* self = (char*)vself;
     char* rider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
@@ -770,13 +770,13 @@ extern "C" void func_00181EF0(void* vself)
             xf.pos = position;
         }
         func_0019F548(rider, &xf);
-        func_0019E538(rider, 1);
+        cFERider_setVisible(rider, 1);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00182220);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_cFEStateCheatCharSelect);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -829,7 +829,7 @@ struct sCharSel_2220 {
  * @param slot  the base character id
  * @return @p self
  */
-extern "C" sCharSel_2220* func_00182220(sCharSel_2220* self, void* engine, void* owner, signed char player, int slot)
+extern "C" sCharSel_2220* cFEStateCheatCharSelect_cFEStateCheatCharSelect(sCharSel_2220* self, void* engine, void* owner, signed char player, int slot)
 {
     func_0039E318(self, engine, owner);
     self->fC = 10;
@@ -1069,7 +1069,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, void* menu, un
 //100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" void func_00182870(void* self);
+extern "C" void cFEStateCheatCharSelect_updateCharWidgets(void* self);
 
 /**
  * Handles the cheat-character menu's events: entry checks, picture refresh and which events pass on.
@@ -1090,7 +1090,7 @@ extern "C" int cFEStateCheatCharSelect_onWidgetMenu(void* self, int pMenu, unsig
     case 1:
         return value < *(int*)((char*)self + 0x78);
     case 5:
-        func_00182870(self);
+        cFEStateCheatCharSelect_updateCharWidgets(self);
         break;
     }
     return 257;
@@ -1098,7 +1098,7 @@ extern "C" int cFEStateCheatCharSelect_onWidgetMenu(void* self, int pMenu, unsig
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_00182870);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_updateCharWidgets);
 #ifdef SKIP_ASM
 /**
  * Refreshes the cheat-character select's six picture slots from the menu's scroll position.
@@ -1107,7 +1107,7 @@ INCLUDE_ASM("fe/festatecharselect", func_00182870);
  * texture element of entry first + i (+0xF4) at +0x7C, with +0x78 set to -1. cFEStateCheatCharSelect_onWidgetMenu calls
  * it for menu event 5.
  */
-extern "C" void func_00182870(void* self)
+extern "C" void cFEStateCheatCharSelect_updateCharWidgets(void* self)
 {
     int i;
     int idx = *(unsigned char*)(*(char**)((char*)self + 0x6c) + 0x98);
@@ -1123,7 +1123,7 @@ extern "C" void func_00182870(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharselect", func_001828C0);
+INCLUDE_ASM("fe/festatecharselect", cFEStateCharSetup_cFEStateCharSetup);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
@@ -1139,7 +1139,7 @@ extern void* cFEStateCharSetup_vtbl[];
  * @param idx  the user (controller) index
  * @return @p self
  */
-extern "C" void* func_001828C0(void* self, void* engine, signed char idx)
+extern "C" void* cFEStateCharSetup_cFEStateCharSetup(void* self, void* engine, signed char idx)
 {
     func_0039E2A0(self, engine);
     *(int*)((char*)self + 0xC) = 0xC;

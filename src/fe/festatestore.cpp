@@ -58,7 +58,7 @@ extern "C" void cFEStateUberTrick_costVisible(void* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184780);
+INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_previewVisible);
 #ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList* list);
@@ -87,12 +87,12 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
  * Shows or hides the uber-trick screen's "btext5" and "ps2sq" objects.
  *
  * Looks both up on the state's first screen (cList_first on the screen list +0x24) and calls setVisible (vtable slot
- * 9). func_00185268 shows them with the cost display when the trick menu gets focus and hides them when it is left;
- * func_001849B0 hides them.
+ * 9). cFEStateUberTrick_onWidgetEvent shows them with the cost display when the trick menu gets focus and hides them when it is left;
+ * cFEStateUberTrick_onCreateScreen hides them.
  *
  * @param on  1 to show, 0 to hide
  */
-extern "C" void func_00184780(void* self, int on)
+extern "C" void cFEStateUberTrick_previewVisible(void* self, int on)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_btext5));
@@ -157,7 +157,7 @@ extern "C" void cFEStateUberTrick_trickVisible(void* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_001849B0);
+INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -170,10 +170,10 @@ extern "C" void func_001A0508(void* self, int a1, int a2, int a3);
 extern "C" void func_001A0570(void* self, int a1, int a2);
 extern "C" void func_0015E050(void* cam, void* a, void* b);
 extern "C" void* cUITextureBank_getElementByHashname(void* list, int hash);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* p, int a);
 extern "C" void cFEStateUberTrick_costVisible(void* self, int on);
-extern "C" void func_00184780(void* self, int on);
+extern "C" void cFEStateUberTrick_previewVisible(void* self, int on);
 extern char str_66ut_btnmap[];
 extern char str_empty_box[];
 extern char str_checkbox[];
@@ -197,10 +197,10 @@ struct sVE_1849B0 {
  * (func_001A0508) and hides that rider (func_001A0570 with 0). Points the FE camera (RealFE + 0x10, func_0015E050) from
  * (0, 660, 80) at (0, 0, 80) and sets its first float to 0.4363 (25 degrees). Looks up the "empty_box", "checkbox" and
  * "yell_dollar_sign" texture elements (mpEngine + 0x58) into +0x58, +0x54 and +0x5C (On Tour mpCheckbox, mpCheckmark,
- * mpDollarSign), sets the sound bank manager's mode 5 (func_0028F140 on func_0028B180()) and hides the cost display
- * (cFEStateUberTrick_costVisible) and func_00184780's objects. onCreateScreen slot (+0x24) of the vtable D_0046CCC0.
+ * mpDollarSign), sets the sound bank manager's mode 5 (func_0028F140 on cAudioInterface_bxAudio()) and hides the cost display
+ * (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's objects. onCreateScreen slot (+0x24) of the vtable D_0046CCC0.
  */
-extern "C" void func_001849B0(void* self)
+extern "C" void cFEStateUberTrick_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_66ut_btnmap), 0);
@@ -246,14 +246,14 @@ extern "C" void func_001849B0(void* self)
         int iconHash = GetHashValue32(str_yell_dollar_sign);
         *(void**)((char*)self + 0x5C) = cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
     }
-    func_0028F140(func_0028B180(), 5);
+    func_0028F140(cAudioInterface_bxAudio(), 5);
     cFEStateUberTrick_costVisible(self, 0);
-    func_00184780(self, 0);
+    cFEStateUberTrick_previewVisible(self, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184B70);
+INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void func_001A0570(void* self, int a1, int a2);
 void* cUIState_onDestroyScreen(void* self);
@@ -264,7 +264,7 @@ void* cUIState_onDestroyScreen(void* self);
  * The rider is hidden with func_001A0570 (user mUserNum, 0) on RealFE + 0xB0, skipped when there is no front end.
  * onDestroyScreen slot (+0x2C) of the vtable D_0046CCC0.
  */
-extern "C" void func_00184B70(void* self)
+extern "C" void cFEStateUberTrick_onDestroyScreen(void* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
@@ -275,29 +275,29 @@ extern "C" void func_00184B70(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184BB8);
+INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onGainTransition);
 #ifdef SKIP_ASM
-extern "C" void cWScriptMan_checkGate(void* self);
+extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
 
 /**
- * Refills the uber-trick screen's trick list (cWScriptMan_checkGate) when @p on is set.
+ * Refills the uber-trick screen's trick list (cFEStateUberTrick_updateTrickMenu) when @p on is set.
  *
  * onGainTransition slot (+0x3C) of the vtable D_0046CCC0.
  *
  * @param on  non-zero to refill the trick list
  * @return 0
  */
-extern "C" int func_00184BB8(void* self, int on)
+extern "C" int cFEStateUberTrick_onGainTransition(void* self, int on)
 {
     if (on != 0) {
-        cWScriptMan_checkGate(self);
+        cFEStateUberTrick_updateTrickMenu(self);
     }
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184BE0);
+INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onGainFocus);
 #ifdef SKIP_ASM
 struct sVEntry00184BE0 {
     short delta;
@@ -310,21 +310,21 @@ struct sObj00184BE0 {
     sVEntry00184BE0* vt;
 };
 
-extern "C" void func_00183B08(void* self);
+extern "C" void cFEStateUberTrick_activateMainMenu(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 
 /**
  * Gives the uber-trick screen's category menu the focus when the state gains focus.
  *
- * Runs func_00183B08, calls setFocus(1) on the category menu +0x4C and setFocus(0) on the trick menu +0x50 (vtable slot
+ * Runs cFEStateUberTrick_activateMainMenu, calls setFocus(1) on the category menu +0x4C and setFocus(0) on the trick menu +0x50 (vtable slot
  * 7; skipped when missing), then cUIState_onGainFocus. onGainFocus slot (+0x34) of the vtable D_0046CCC0.
  *
  * @param prevState  the state that had focus before, passed on to cUIState_onGainFocus
  */
-extern "C" void func_00184BE0(void* self, int prevState)
+extern "C" void cFEStateUberTrick_onGainFocus(void* self, int prevState)
 {
     sObj00184BE0* menu;
-    func_00183B08(self);
+    cFEStateUberTrick_activateMainMenu(self);
     menu = *(sObj00184BE0**)((char*)self + 0x4C);
     if (menu != 0) {
         menu->vt[7].fn((char*)menu + menu->vt[7].delta, 1);
@@ -338,7 +338,7 @@ extern "C" void func_00184BE0(void* self, int prevState)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184C60);
+INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern "C" void* func_001A0548(void* self, int idx);
@@ -403,7 +403,7 @@ static inline sQuat_184C60 AxisAngle_184C60(const sQuat_184C60& axis, float angl
  * -205, 63) turned 1.0821 rad (62 degrees) about Z (the X and Y turns are 0; func_0031BE50 gives the sines) with
  * func_0019F3E8, shows it (func_001A0570 with 1) and sets +0x48. onUpdate slot (+0x64) of the vtable D_0046CCC0.
  */
-extern "C" void func_00184C60(char* self)
+extern "C" void cFEStateUberTrick_onUpdate(char* self)
 {
     if (*(int*)(self + 0x48) == 0) {
         char* rider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
@@ -446,7 +446,7 @@ extern "C" void func_00184C60(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00184F40);
+INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -459,7 +459,7 @@ void cUIText_setUnicodeStringByID(cUIText* t, int id);
 extern "C" int func_00150B48(void* self, int a, int b, int amount);
 extern "C" int func_0014FE08(void* self, int rider, int idx, int bit);
 extern "C" void func_00184520(void* self);
-extern "C" void cWScriptMan_checkGate(void* self);
+extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
 extern char str_helptext_custom[];
 extern char str_kT_66HELPCustomUber[];
 
@@ -476,13 +476,13 @@ struct sVE_4F40 {
  * (func_00150B48 on cBE interface 11), clears flag bit "trick" (the trick menu's selected mMiscData) of the category's
  * entry (the category menu's selected mMiscData) with func_0014FE08 on interface 6, calls that interface's vtable slot
  * 1, sets "helptext_custom" to "kT_66HELPCustomUber" and refreshes the cost numbers (func_00184520). On event 22 the
- * trick list is refilled either way (cWScriptMan_checkGate). Other events do nothing. onPopupEvent slot (+0x8C) of the
+ * trick list is refilled either way (cFEStateUberTrick_updateTrickMenu). Other events do nothing. onPopupEvent slot (+0x8C) of the
  * vtable D_0046CCC0.
  *
  * @param item  the popup (the cUIStateBuyPopup)
  * @param msg  the popup event
  */
-extern "C" void func_00184F40(void* self, void* item, int msg)
+extern "C" void cFEStateUberTrick_onPopupEvent(void* self, void* item, int msg)
 {
     switch (msg) {
     case 21:
@@ -503,7 +503,7 @@ extern "C" void func_00184F40(void* self, void* item, int msg)
             }
             func_00184520(self);
         }
-        cWScriptMan_checkGate(self);
+        cFEStateUberTrick_updateTrickMenu(self);
         break;
     }
 }
@@ -593,7 +593,7 @@ extern "C" void cFEStateUberTrick_onWidgetCreate(void* self, void* widget)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00185268);
+INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -609,7 +609,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void cUIStateBuyPopup_initBuyTrick(void* popup, int trick, int cost, int points);
-extern "C" void cWScriptMan_checkGate(void* self);
+extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
 extern "C" int func_00116938(int id);
 extern "C" void func_0014FD80(void* iface, int rider, int a, int b);
 struct sTrick_185268;
@@ -617,10 +617,10 @@ extern "C" sTrick_185268* func_0014FF90(void* iface, int rider, int a, int* out)
 extern "C" int func_0014FFB8(void* iface, int rider, int a, int b);
 extern "C" int func_00150048(void* iface, int rider, int a, int b);
 extern "C" int cBEEconInterface_getMoney(void* iface, int a1, int charID);
-extern "C" void func_00183B08(void* self);
-extern "C" void func_00183C08(void* self);
+extern "C" void cFEStateUberTrick_activateMainMenu(void* self);
+extern "C" void cFEStateUberTrick_activateTrickMenu(void* self);
 extern "C" void func_00184520(void* self);
-extern "C" void func_00184780(void* self, int on);
+extern "C" void cFEStateUberTrick_previewVisible(void* self, int on);
 extern "C" void* func_001A0548(void* self, int idx);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* mem, void* owner, void* state, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
@@ -712,14 +712,14 @@ static inline void Back_185268(char* self)
  * table comes from func_0014FF90 on cBE interface 6. "Back" pushes the state that the custom front end (*mpEngine)
  * returns from its vtable slot 5 (func_001A16C0). onWidgetEvent slot (+0x9C) of the vtable D_0046CCC0.
  * - 5 (accept) on the category menu: "done" goes back; another item gives the trick menu focus at row 0 (setFocus,
- *   vtable slot 7), runs func_00183C08 and shows the cost display (cFEStateUberTrick_costVisible) and func_00184780's
+ *   vtable slot 7), runs cFEStateUberTrick_activateTrickMenu and shows the cost display (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's
  *   objects. On the trick menu: an unlocked trick (func_00150048) that is not for sale (func_0014FFB8) becomes the
  *   category's trick (func_0014FD80), interface 6's vtable slot 1 runs and the list is refilled
- *   (cWScriptMan_checkGate). Otherwise, outside game path 0 (D_00535C11) UI sound 4 plays; a trick for sale opens a
+ *   (cFEStateUberTrick_updateTrickMenu). Otherwise, outside game path 0 (D_00535C11) UI sound 4 plays; a trick for sale opens a
  *   "UITRICKBUY" cUIStateBuyPopup (cUIStateBuyPopup_initBuyTrick with the trick's name, cost and the character's money)
  *   when the money covers the cost, else sound 4 plays.
  * - 6 (back) on the trick menu: gives the category menu focus, colours the trick menu's selected item opaque black
- *   (setColour, slot 11), deselects it (index 0xFF), runs func_00183B08 and hides the cost display and func_00184780's
+ *   (setColour, slot 11), deselects it (index 0xFF), runs cFEStateUberTrick_activateMainMenu and hides the cost display and cFEStateUberTrick_previewVisible's
  *   objects. On the category menu it goes back.
  * - 7 on the trick menu: once the rider is shown (+0x48) plays the trick's animation (its table entry's first
  *   halfword).
@@ -734,7 +734,7 @@ static inline void Back_185268(char* self)
  * @param item  the widget that sent the event
  * @param msg  the widget event
  */
-extern "C" void func_00185268(char* self, char* item, int msg)
+extern "C" void cFEStateUberTrick_onWidgetEvent(char* self, char* item, int msg)
 {
     switch (msg) {
     case 5:
@@ -745,9 +745,9 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                 SetActive_185268(*(char**)(self + 0x4C), 0);
                 cUIMenu_setSelectedByIndex(*(void**)(self + 0x50), 0);
                 SetActive_185268(*(char**)(self + 0x50), 1);
-                func_00183C08(self);
+                cFEStateUberTrick_activateTrickMenu(self);
                 cFEStateUberTrick_costVisible(self, 1);
-                func_00184780(self, 1);
+                cFEStateUberTrick_previewVisible(self, 1);
             }
         } else if (*(char**)(item + 0x40) == *(char**)(self + 0x50)) {
             char* categoryItem = *(char**)(*(char**)(self + 0x4C) + 0xA0);
@@ -761,7 +761,7 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                     func_0014FD80(pi, *(signed char*)(self + 0x44), ai, bi);
                     sVE_185268* vt = *(sVE_185268**)(pi + 0xC);
                     ((int (*)(void*))vt[1].fn)(pi + vt[1].delta);
-                    cWScriptMan_checkGate(self);
+                    cFEStateUberTrick_updateTrickMenu(self);
                 } else if (D_00535C11[0] != 0) {
                     PlaySound_185268(self, 4);
                 } else if (func_0014FFB8(pi, *(signed char*)(self + 0x44), ai, bi)) {
@@ -796,9 +796,9 @@ extern "C" void func_00185268(char* self, char* item, int msg)
                     trickSelection->SetColor(sColor_185268(1.0f, 0.0f, 0.0f, 0.0f));
             }
             cUIMenu_setSelectedByIndex(*(void**)(self + 0x50), 0xFF);
-            func_00183B08(self);
+            cFEStateUberTrick_activateMainMenu(self);
             cFEStateUberTrick_costVisible(self, 0);
-            func_00184780(self, 0);
+            cFEStateUberTrick_previewVisible(self, 0);
         } else {
             Back_185268(self);
         }
@@ -825,7 +825,7 @@ extern "C" void func_00185268(char* self, char* item, int msg)
         if (*(char**)(item + 0x40) == *(char**)(self + 0x4C)) {
             if (*(void**)(self + 0x50) != 0 && *(int*)(item + 0x18) != -1) {
                 cFEStateUberTrick_trickVisible(self, 1);
-                cWScriptMan_checkGate(self);
+                cFEStateUberTrick_updateTrickMenu(self);
                 cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_choose));
                 if (helpText != 0)
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_66HELPChooseCat));
@@ -877,7 +877,7 @@ extern "C" void func_00185268(char* self, char* item, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_001859D8);
+INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Answers the uber-trick screen's menu events: 0x100 for event 9 on the trick menu and for events 8 and 9 on the
@@ -889,7 +889,7 @@ INCLUDE_ASM("fe/festatestore", func_001859D8);
  * @param event  the menu event
  * @return 0x100 or 0x101 as above
  */
-extern "C" int func_001859D8(void* self, int menu, unsigned int event)
+extern "C" int cFEStateUberTrick_onWidgetMenu(void* self, int menu, unsigned int event)
 {
     if (menu == *(int*)((char*)self + 0x50)) {
         switch (event) {
@@ -908,7 +908,7 @@ extern "C" int func_001859D8(void* self, int menu, unsigned int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatestore", func_00185A18);
+INCLUDE_ASM("fe/festatestore", cFEStateCredits_cFEStateCredits1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateCredits_vtbl[];
@@ -922,7 +922,7 @@ extern void* cFEStateCredits_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_00185A18(void* self)
+extern "C" void* cFEStateCredits_cFEStateCredits1(void* self)
 {
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = cFEStateCredits_vtbl;

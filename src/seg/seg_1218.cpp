@@ -5910,7 +5910,7 @@ void cRider_setControlState_8388(void* self, int v) __asm__("cRider_setControlSt
 int AIrand();
 extern "C" void cBoardPressControl_forceExit(void*);
 extern "C" void cRiderAnimBase_play(void*, int, int, float);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002A0E70(void*, void*, int);
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
@@ -6014,7 +6014,7 @@ extern "C" void cRider_doBump(char* self, char* info, int flag)
         }
     }
     if (flag)
-        func_002A0E70(func_0028B180(), self, played);
+        func_002A0E70(cAudioInterface_bxAudio(), self, played);
     cRider_setControlState_8388(self, 3);
 }
 #endif

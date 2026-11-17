@@ -8,7 +8,7 @@ INCLUDE_ASM("fe/ovstates", cFEStateTitle_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern char str_06title[];
 
@@ -27,7 +27,7 @@ extern "C" void cFEStateTitle_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0028F140(func_0028B180(), 0);
+    func_0028F140(cAudioInterface_bxAudio(), 0);
 }
 #endif
 
@@ -231,7 +231,7 @@ extern "C" int cFEStateTitle_onWidgetMenu(void* self, int pMenu, int Event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00194A60);
+INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_cFEStateMainMenu1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void*);
 extern void* cFEStateMainMenu_vtbl[];
@@ -244,7 +244,7 @@ extern void* cFEStateMainMenu_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_00194A60(void* self)
+extern "C" void* cFEStateMainMenu_cFEStateMainMenu1(void* self)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 2;
@@ -301,7 +301,7 @@ extern "C" void cFEStateMainMenu_onCreateScreen(void* self)
     cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
     sVEnt0_00194AA8* vt0 = *(sVEnt0_00194AA8**)((char*)iface + 0xC);
     vt0[1].fn((char*)iface + vt0[1].delta);
-    func_0028F140(func_0028B180(), 1);
+    func_0028F140(cAudioInterface_bxAudio(), 1);
     char* obj = *(char**)(*(char**)((char*)self + 0x10) + 0xC);
     *(unsigned char*)((char*)self + 0x55) = 0;
     for (int i = 0; i < 2; i++) {
@@ -778,7 +778,7 @@ extern "C" void cFEStateMainMenu_onPopupEvent(void* self, char* obj, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstates", func_00195498);
+INCLUDE_ASM("fe/ovstates", cFEStateBonusMaterial_cFEStateBonusMaterial1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void*);
 extern char cFEStateBonusMaterial_vtbl[];
@@ -789,7 +789,7 @@ extern char cFEStateBonusMaterial_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_00195498(void* self)
+extern "C" void* cFEStateBonusMaterial_cFEStateBonusMaterial1(void* self)
 {
     func_0039E2A0(self);
     *(void**)((char*)self + 0x8) = cFEStateBonusMaterial_vtbl;

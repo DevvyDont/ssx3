@@ -1650,8 +1650,8 @@ extern "C" void* cWorld_getMissionScripts(void* world, int i);
 // PORT: the unit declares cWScriptMan_getScriptCode as (int); its body takes (self, id) and returns an int.
 extern "C" int cWScriptMan_getScriptCode_2(void* self, int id) __asm__("cWScriptMan_getScriptCode");
 void func_00226600(void* self, int a1, int a2);
-extern "C" void* func_002224A8(void* self);
-extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void* luno_cLunoVM_cLunoVM(void* self);
+extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 
 /**
@@ -1680,8 +1680,8 @@ extern "C" void cWScriptMan_updateWorld(void* self)
                     func_00226600(&scriptFunc, scriptCode, 0);
                     ret.type = 0;
                     ret.word0 = 0;
-                    func_002224A8(&call);
-                    func_002224B8(&call, &scriptFunc, table, &ret);
+                    luno_cLunoVM_cLunoVM(&call);
+                    luno_cLunoVM_run(&call, &scriptFunc, table, &ret);
                     luno_cLunoVar__cLunoVar((cWScriptMan_isFunc_sValue*)&ret, 2);
                 }
                 if (table != 0) {
@@ -1825,7 +1825,7 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_processLocalMissionCmd);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cWScriptMan_updateWorld(void* self);
 extern "C" void cWScriptMan_doMissionCmd(void* self, int id, int a2, int a3);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0029D6E0(void* snd, int a1);
 extern "C" void cSSXAudio_BigChallengeFailed(void* snd, int a1);
 extern "C" void cReplay_startRace(void* p);
@@ -1852,7 +1852,7 @@ extern "C" void cWScriptMan_processLocalMissionCmd(void* vself)
     case 1:
         cWScriptMan_updateWorld(self);
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 1, 0);
-        func_0029D6E0(func_0028B180(), *(int*)(self + 0x2A0));
+        func_0029D6E0(cAudioInterface_bxAudio(), *(int*)(self + 0x2A0));
         cReplay_startRace(SSXApp->Game->Replay);
         break;
     case 2:
@@ -1861,12 +1861,12 @@ extern "C" void cWScriptMan_processLocalMissionCmd(void* vself)
     case 3:
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 18, 0);
         cWScriptMan_updateWorld(self);
-        cSSXAudio_BigChallengeFailed(func_0028B180(), 1);
+        cSSXAudio_BigChallengeFailed(cAudioInterface_bxAudio(), 1);
         break;
     case 4:
         cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 5, 0);
         cWScriptMan_updateWorld(self);
-        cSSXAudio_BigChallengeFailed(func_0028B180(), 1);
+        cSSXAudio_BigChallengeFailed(cAudioInterface_bxAudio(), 1);
         break;
     case 5:
         cPlaybackMan_startPreview(SSXApp->Game->PlaybackMan);

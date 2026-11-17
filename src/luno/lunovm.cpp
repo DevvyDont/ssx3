@@ -547,9 +547,9 @@ union tLunoOp {
 class cLunoVM {
 public:
     cLunoVar* m_Regs;
-    cLunoVM() __asm__("func_002224A8");
+    cLunoVM() __asm__("luno_cLunoVM_cLunoVM");
     ~cLunoVM() {}
-    void call(const cLunoFunc& func, cLunoVar& self, const cLunoVar& arg, cLunoVar& result) __asm__("func_00222648");
+    void call(const cLunoFunc& func, cLunoVar& self, const cLunoVar& arg, cLunoVar& result) __asm__("luno_cLunoVM_run1");
     void execute(const cLunoFunc& func, cLunoVar& result) __asm__("luno_cLunoVM_execute");
 };
 

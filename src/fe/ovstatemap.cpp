@@ -101,14 +101,14 @@ extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_002087E8__FPv);
+INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
 /**
  * Map overlay's widget-creation handler; does nothing.
  *
  * It is the onWidgetCreate slot (+0x94) of cOVState_MAP_vtbl.
  */
-void func_002087E8(void* self)
+void cOVState_MAP_onWidgetCreate(void* self)
 {
 }
 #endif
@@ -369,7 +369,7 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028FAE0(void* self);
 extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 extern "C" void cOVState_MAP_setWidgetHiliteColor(void* self, void* obj, int on);
@@ -434,7 +434,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* pWidget, int Event
             }
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
             *(int*)((char*)iface + 0x10) = *(int*)(self + 0xD8);
-            func_0028FAE0(func_0028B180());
+            func_0028FAE0(cAudioInterface_bxAudio());
             void* game = SSXApp->Game;
             cOVStateManager_mStatus = 3;
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
@@ -492,7 +492,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* pWidget, int Event
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00208EF8);
+INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Map overlay's menu-event filter: events 8 and 9 get 0, every other event 0x101 (animation and sound).
@@ -503,7 +503,7 @@ INCLUDE_ASM("fe/ovstatemap", func_00208EF8);
  * @param event  the menu event
  * @return 0 for events 8 and 9, else 0x101
  */
-extern "C" int func_00208EF8(void* self, int menu, int event)
+extern "C" int cOVState_MAP_onWidgetMenu(void* self, int menu, int event)
 {
     return ((unsigned int)(event - 8) < 2) ? 0 : 257;
 }
@@ -1217,7 +1217,7 @@ extern "C" void cOVState_MAP_showIndicators(void* mapState)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemap", func_00209FD0);
+INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_hideIndicators);
 #ifdef SKIP_ASM
 class cUIObj_9FD0 {
 public:
@@ -1250,7 +1250,7 @@ struct sMap_9FD0 {
  *
  * @param vself  the map overlay state (this)
  */
-extern "C" void func_00209FD0(void* vself)
+extern "C" void cOVState_MAP_hideIndicators(void* vself)
 {
     sMap_9FD0* self = (sMap_9FD0*)vself;
     if (self->cursor != 0) {

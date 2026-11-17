@@ -113,7 +113,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void func_001587F8(void* iface, int player, int a2, int a3);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028BF78(void* audio, int a1);
 extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
@@ -188,7 +188,7 @@ static inline void setText_AOWE(cUIText* t, char* str)
 static inline void applyMode_AOWE(sAudioOptions_AOWE* self)
 {
     func_001587F8(cBE_getInterface_Fv(cBE_getBE(), 0xD), self->player, self->f70, self->sel);
-    func_0028BF78(func_0028B180(), self->sel);
+    func_0028BF78(cAudioInterface_bxAudio(), self->sel);
 }
 
 static inline void* vcall_AOWE(sAudioOptions_AOWE* self, int slot, sWidget_AOWE* w)
@@ -367,8 +367,8 @@ extern "C" int cBEEconInterface_getMoney(void* iface, int idx, int ch);
 // PORT: 64-bit results (long is 8 bytes on the EE).
 extern "C" long func_00158728(void* iface, int idx, int ch);
 extern "C" long func_00158750(void* iface, int idx, int ch);
-extern "C" void* func_0028B180();
-extern "C" void func_00197AD8(void* self);
+extern "C" void* cAudioInterface_bxAudio();
+extern "C" void cFEStateRequestLine_generatePlayList(void* self);
 extern void* cFEStateRequestLine_vtbl[];
 extern char str_checkbox[];
 extern char str_empty_box[];
@@ -466,8 +466,8 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
     void* ifc = cBE_getInterface_Fv(cBE_getBE(), 13);
     self->f160 = func_00158728(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
     self->f158 = func_00158750(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
-    self->f14C = *(int*)((char*)func_0028B180() + 0x504);
-    func_00197AD8(self);
+    self->f14C = *(int*)((char*)cAudioInterface_bxAudio() + 0x504);
+    cFEStateRequestLine_generatePlayList(self);
     return self;
 }
 #endif
@@ -552,7 +552,7 @@ INCLUDE_ASM("fe/festateaudiooptions", cFEStateRequestLine_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cFEState_onGainFocus(void* self);
 extern "C" void cFEStateRequestLine_updatePlayList(void* self);
-extern "C" void func_00197E70(void* self);
+extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(void* self);
 extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
 extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
 
@@ -560,14 +560,14 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
  * Gives the request-line state focus and redraws its play list from the top.
  *
  * Runs the base cFEState_onGainFocus(), resets the list's first visible song (0x150) to 0, then refreshes the
- * play list, the now-playing title and artist texts (func_00197E70()), the button texts and the help text.
+ * play list, the now-playing title and artist texts (cFEStateRequestLine_updateCurrentlyPlaying()), the button texts and the help text.
  */
 extern "C" void cFEStateRequestLine_onGainFocus(void* self)
 {
     cFEState_onGainFocus(self);
     *(int*)((char*)self + 0x150) = 0;
     cFEStateRequestLine_updatePlayList(self);
-    func_00197E70(self);
+    cFEStateRequestLine_updateCurrentlyPlaying(self);
     cFEStateRequestLine_updateButtonsText(self, 0);
     cFEStateRequestLine_updateHelpText(self, 0);
 }

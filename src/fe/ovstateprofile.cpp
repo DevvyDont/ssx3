@@ -32,38 +32,38 @@ extern "C" void cOVState_PROFILE_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211220);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_displayStatus);
 #ifdef SKIP_ASM
-extern "C" void func_00211380(void* self);
-extern "C" void func_00211270(void* self);
+extern "C" void cOVState_PROFILE_displayOn(void* self);
+extern "C" void cOVState_PROFILE_displayOff(void* self);
 
 /**
  * Refreshes the profile overlay's memory-card display: the file list when the screen is in display state 3, the empty
  * layout otherwise.
  *
- * When the card state +0x1C0 (On Tour mState) is nonzero it first sets +0x22C, the flag that lets func_00211850 show
+ * When the card state +0x1C0 (On Tour mState) is nonzero it first sets +0x22C, the flag that lets cOVState_PROFILE_hideActionButtons show
  * the action buttons. Display state +0x214 (On Tour mScreenStatus, set by cFEMemCard_triggerDisplayState) 3 runs
- * func_00211380, any other func_00211270. It is the displayStatus slot (+0xD4) of cOVState_PROFILE_vtbl.
+ * cOVState_PROFILE_displayOn, any other cOVState_PROFILE_displayOff. It is the displayStatus slot (+0xD4) of cOVState_PROFILE_vtbl.
  */
-extern "C" void func_00211220(void* self)
+extern "C" void cOVState_PROFILE_displayStatus(void* self)
 {
     if (*(int*)((char*)self + 0x1C0) != 0) {
         *(int*)((char*)self + 0x22C) = 1;
     }
     if (*(int*)((char*)self + 0x214) == 3) {
-        func_00211380(self);
+        cOVState_PROFILE_displayOn(self);
     } else {
-        func_00211270(self);
+        cOVState_PROFILE_displayOff(self);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211270);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_displayOff);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_00211380(void* self);
+extern "C" void cOVState_PROFILE_displayOn(void* self);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_playerpct_d_b[];
@@ -204,18 +204,18 @@ struct cUIObj_11270 {
  *
  * When func_001D9880 (virtual slot 42) allows the file display and the memory card (mpMemCard of cSSXApp_getMCManager,
  * its slot 53) is present, moves to display state 3 through cFEMemCard_triggerDisplayState (virtual slot 35) and runs
- * func_00211380. Otherwise resets the six profile buttons "player1" ... "player6" of mpScreen: setSelected(0) (slot 25)
+ * cOVState_PROFILE_displayOn. Otherwise resets the six profile buttons "player1" ... "player6" of mpScreen: setSelected(0) (slot 25)
  * and setEnabled(1) (slot 8).
  *
  * @param vself  the profile overlay state (this)
  */
-extern "C" void func_00211270(void* vself)
+extern "C" void cOVState_PROFILE_displayOff(void* vself)
 {
     cSelf_11270* self = (cSelf_11270*)vself;
     if (self->isReady() != 0) {
         if ((*(cCard_11270**)((char*)cSSXApp_getMCManager(SSXApp) + 0x434))->isPresent() != 0) {
             self->setState(3);
-            func_00211380(self);
+            cOVState_PROFILE_displayOn(self);
             return;
         }
     }
@@ -230,7 +230,7 @@ extern "C" void func_00211270(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211380);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_displayOn);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cMCSub_1380 {
@@ -400,8 +400,8 @@ public:
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_001D8240();
-extern "C" void func_00211270(void* self);
+extern "C" void cFEMemCard_callbackDisplayNoCards();
+extern "C" void cOVState_PROFILE_displayOff(void* self);
 extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* mp, int dev, int a3);
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsigned short* buf, int len);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
@@ -429,8 +429,8 @@ static inline cUIObj_1380* getObj_1380(cState_1380* self, char* name)
  * device arrows.
  *
  * With the memory-card manager (cSSXApp_getMCManager) mp: when func_001D9880 (virtual slot 42) allows the file display
- * but the card (mpMemCard slot 53) is missing, it shows the no-card message (func_001D8240, the front end's
- * callbackDisplayNoCards) and falls back to func_00211270; otherwise it switches to display state 3
+ * but the card (mpMemCard slot 53) is missing, it shows the no-card message (cFEMemCard_callbackDisplayNoCards, the front end's
+ * callbackDisplayNoCards) and falls back to cOVState_PROFILE_displayOff; otherwise it switches to display state 3
  * (cFEMemCard_triggerDisplayState, virtual slot 35) if not there yet. Then, still allowed: writes the device name of
  * mSelectedDevice (cMCOverlayManager_GetDeviceDisplayString) into "Memory card text", stores mSelectedDevice at +0x21C
  * (On Tour mLastSelectedDevice), runs cFEMemCard_setMenuHighlight (slot 43), colours "1percentage" with D_004C66C8,
@@ -444,7 +444,7 @@ static inline cUIObj_1380* getObj_1380(cState_1380* self, char* name)
  * @param profileState  the profile overlay state (this)
  */
 // Refreshes the memory-card profile list: device name, then the six profile slots and the arrow hints.
-extern "C" void func_00211380(void* profileState)
+extern "C" void cOVState_PROFILE_displayOn(void* profileState)
 {
     cState_1380* self = (cState_1380*)profileState;
     unsigned short buf[800];
@@ -452,8 +452,8 @@ extern "C" void func_00211380(void* profileState)
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     if (self->v42()) {
         if (!(*(cMCSub_1380**)(mp + 0x434))->v53()) {
-            func_001D8240();
-            func_00211270(self);
+            cFEMemCard_callbackDisplayNoCards();
+            cOVState_PROFILE_displayOff(self);
             return;
         }
         if (*(int*)((char*)self + 0x214) != 3)
@@ -510,7 +510,7 @@ extern "C" void func_00211380(void* profileState)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211850);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_hideActionButtons);
 #ifdef SKIP_ASM
 class cUIObj_211850 {
 public:
@@ -536,14 +536,14 @@ extern char str_ps2sq_b[];
  * Hides or shows the profile overlay's action buttons ("ps2x_b", "x_save", "delete text", "ps2sq_b"), skipping the work
  * when nothing changes.
  *
- * The buttons stay hidden while +0x22C is clear; once it is set (func_00211220 sets it when the card state +0x1C0 is
+ * The buttons stay hidden while +0x22C is clear; once it is set (cOVState_PROFILE_displayStatus sets it when the card state +0x1C0 is
  * nonzero), @p show decides. The new hidden state is compared with the one cached at +0x230; on a change every button
  * gets setVisible(!hidden) (slot 9; the two button icons are null-checked, the texts are not) and the cache is updated.
  * It is the hideActionButtons slot (+0x12C) of cOVState_PROFILE_vtbl.
  *
  * @param show  nonzero hides the buttons (On Tour bHide): despite its name a true value means hidden
  */
-extern "C" void func_00211850(void* self, bool show)
+extern "C" void cOVState_PROFILE_hideActionButtons(void* self, bool show)
 {
     bool on = true;
     if (*(int*)((char*)self + 0x22C) != 0) {
@@ -567,7 +567,7 @@ extern "C" void func_00211850(void* self, bool show)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211970);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_hideDeleteButton);
 #ifdef SKIP_ASM
 class cUIObj_211970 {
 public:
@@ -596,7 +596,7 @@ extern char str_ps2sq_b[];
  *
  * @param on  nonzero hides the button (On Tour bHide)
  */
-extern "C" void func_00211970(void* self, bool on)
+extern "C" void cOVState_PROFILE_hideDeleteButton(void* self, bool on)
 {
     ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_delete_text)))->setVisible(!on);
     ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(!on);
@@ -605,7 +605,7 @@ extern "C" void func_00211970(void* self, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211A08);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_hideMainButton);
 #ifdef SKIP_ASM
 class cUIObj_211A08 {
 public:
@@ -635,7 +635,7 @@ extern char str_x_save[];
  * @param loadBlocked  unused (On Tour bLoadHide)
  * @param on  nonzero hides the button (On Tour bSaveHide)
  */
-extern "C" void func_00211A08(void* self, int loadBlocked, bool on)
+extern "C" void cOVState_PROFILE_hideMainButton(void* self, int loadBlocked, bool on)
 {
     cUIObj_211A08* xButton = (cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
     ((cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
@@ -645,7 +645,7 @@ extern "C" void func_00211A08(void* self, int loadBlocked, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211AA8);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_updateDone);
 #ifdef SKIP_ASM
 extern "C" void cGame_exit(void* game, int a);
 extern "C" void func_0039F718(void* self);
@@ -659,7 +659,7 @@ extern "C" void func_0039F718(void* self);
  * cUIStateStack::popToStateInclusive) on mpEngine's state stack (+0x18). Then sets +0x1AC. It is the updateDone slot
  * (+0x10C) of cOVState_PROFILE_vtbl.
  */
-extern "C" void func_00211AA8(void* self)
+extern "C" void cOVState_PROFILE_updateDone(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
         if (*(int*)((char*)self + 0x278) == 0x18) {
@@ -692,7 +692,7 @@ void cOVState_PROFILE_onDestroyScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211B38);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onWidgetMenu);
 #ifdef SKIP_ASM
 class cOvl211B38 {
 public:
@@ -765,7 +765,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
  * @param key  the menu event
  * @return 0x100 or 0x101 as above
  */
-extern "C" int func_00211B38(void* self, int menu, unsigned int key)
+extern "C" int cOVState_PROFILE_onWidgetMenu(void* self, int menu, unsigned int key)
 {
     char* mgr = (char*)cSSXApp_getMCManager(SSXApp);
     switch (key) {
@@ -781,7 +781,7 @@ extern "C" int func_00211B38(void* self, int menu, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_00211BC8);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -897,7 +897,7 @@ static inline void* GetText_K211BC8(char* key)
  * @param event  the widget event: 5, 6, 7, 13 or 14
  */
 // Profile screen: handles menu events (5 = name picked, 6 = back, 7 = slot chosen, 13 = name entered).
-extern "C" void func_00211BC8(void* vself, char* item, int event)
+extern "C" void cOVState_PROFILE_onWidgetEvent(void* vself, char* item, int event)
 {
     sProfileK211BC8* self = (sProfileK211BC8*)vself;
     switch (event) {
@@ -1079,7 +1079,7 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_0023CAE8(void* app, int a1, int a2);
-extern "C" void func_001D8DE0(void* self);
+extern "C" void cFEMemCard_onUpdate(void* self);
 
 // On Tour: cMCOverlayManager::sdevice (bools are 4 bytes in SSX 3).
 struct sdevice_2208 {
@@ -1105,7 +1105,7 @@ struct cMCOverlayManager_2208 {
  * overlay manager (func_0023CAE8(pMC, 1, 0)), sets mIsProcessing, mIsSavePressed (+0x1DC) and mIsOverwriteOK (+0x1F0)
  * and moves to state 3. In state 3, if the selected card is no longer plugged in, valid and formatted, it clears
  * mIsSavePressed, sets mIsCancelPressed (+0x1E4), clears mIsProcessing and moves to state 6. It always finishes with
- * the memory-card base update func_001D8DE0.
+ * the memory-card base update cFEMemCard_onUpdate.
  */
 // cOVState_AUTOSAVE::onUpdate (On Tour name); cFEMemCard fields: 0x1A8 mIsProcessing, 0x1C0 mState,
 // 0x1DC mIsSavePressed, 0x1E4 mIsCancelPressed, 0x1F0 mIsOverwriteOK.
@@ -1127,7 +1127,7 @@ extern "C" void cOVState_AUTOSAVE_onUpdate(void* self)
             *(int*)((char*)self + 0x1C0) = 6;
         }
     }
-    func_001D8DE0(self);
+    cFEMemCard_onUpdate(self);
 }
 #endif
 
@@ -1248,7 +1248,7 @@ extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateprofile", func_002124C8);
+INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_updateDone);
 #ifdef SKIP_ASM
 extern "C" void func_0039F718(void* self);
 
@@ -1258,7 +1258,7 @@ extern "C" void func_0039F718(void* self);
  * When +0x1AC (On Tour mIsDone) is clear, calls func_0039F718 (On Tour cUIStateStack::popToStateInclusive) on
  * mpEngine's state stack (+0x18); then sets +0x1AC. It is the updateDone slot (+0x10C) of cOVState_AUTOSAVE_vtbl.
  */
-extern "C" void func_002124C8(void* self)
+extern "C" void cOVState_AUTOSAVE_updateDone(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
         func_0039F718(*(char**)((char*)self + 0x10) + 0x18);
@@ -1281,8 +1281,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cGame_exit(void* game, int a);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00194738(void* self, void* mgr);
-extern "C" void* func_001F3700(void* self, void* mgr);
+extern "C" void* cFEStateTitle_cFEStateTitle1(void* self, void* mgr);
+extern "C" void* cFEStateLodge_cFEStateLodge(void* self, void* mgr);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
@@ -1306,10 +1306,10 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(void* self)
     if (parentScreen == 1) {
         cGame_exit(SSXApp->Game, 0);
     } else if (parentScreen == 6) {
-        void* nextState = func_00194738(cMemMan_alloc(76, str_cFEStateTitle_b, 0, 0), *(void**)((char*)self + 0x10));
+        void* nextState = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle_b, 0, 0), *(void**)((char*)self + 0x10));
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
     } else if (parentScreen == 7) {
-        void* nextState = func_001F3700(cMemMan_alloc(88, str_cFEStateLodge_b, 0, 0), *(void**)((char*)self + 0x10));
+        void* nextState = cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge_b, 0, 0), *(void**)((char*)self + 0x10));
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
     } else if (parentScreen == 0) {
         void* race = cBE_getInterface_Fv(cBE_getBE(), 0);

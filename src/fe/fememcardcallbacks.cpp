@@ -26,11 +26,11 @@ struct sVEntryVS1D66B0 {
  * Memory-card callback for a finished save: resets the screen's save state and reports the success.
  *
  * Works on the current memory-card screen cFEMemCard_mInstance and is plugged into the cMCOverlayManager slot of the
- * same name by func_001D5488. Runs cFEMemCard_exitSave() (busy flag +0x1A8 cleared, screen state +0x1C0 back to 1)
+ * same name by cFEMemCard_initFEMemCard. Runs cFEMemCard_exitSave() (busy flag +0x1A8 cleared, screen state +0x1C0 back to 1)
  * and clears +0x1F0. Unless the flag at +0x208 is set it shows popup 5 (+0x19C), "kT_MEMOVSaveDone"; with the
- * flag set it calls the screen's vtable slot 40 instead (func_001D86A0, screen state 6).
+ * flag set it calls the screen's vtable slot 40 instead (cFEMemCard_exit, screen state 6).
  *
- * The popup opens through the screen's getPopup (vtable slot 36, func_001D8530) with one button, which the
+ * The popup opens through the screen's getPopup (vtable slot 36, cFEMemCard_getPopup) with one button, which the
  * popup's setButtonText (slot 26) labels "kT_CMNContinue".
  */
 extern "C" void cFEMemCard_callbackSaveSuccess(void)
@@ -84,11 +84,11 @@ struct sVEntryVR1D67C8 {
  * Memory-card callback for a finished load: clears the screen's busy state and reports the success.
  *
  * Works on the current memory-card screen cFEMemCard_mInstance and is plugged into the cMCOverlayManager slot of the
- * same name by func_001D5488. Clears the cached file name (cFEMemCard_SetLoadPressed(screen, 0)), sets +0x1B4 and clears
+ * same name by cFEMemCard_initFEMemCard. Clears the cached file name (cFEMemCard_SetLoadPressed(screen, 0)), sets +0x1B4 and clears
  * the busy flag +0x1A8. Unless the flag at +0x204 is set it shows popup 6 (+0x19C), "kT_MEMOVLoadDone"; with
- * the flag set it calls the screen's vtable slot 40 instead (func_001D86A0, screen state 6).
+ * the flag set it calls the screen's vtable slot 40 instead (cFEMemCard_exit, screen state 6).
  *
- * The popup opens through the screen's getPopup (vtable slot 36, func_001D8530) with one button, which the
+ * The popup opens through the screen's getPopup (vtable slot 36, cFEMemCard_getPopup) with one button, which the
  * popup's setButtonText (slot 26) labels "kT_CMNContinue".
  */
 extern "C" void cFEMemCard_callbackReadSuccess(void)
@@ -119,7 +119,7 @@ extern "C" void cFEMemCard_callbackReadSuccess(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D68E8);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmOverwrite);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -146,14 +146,14 @@ struct sVEntryVK1D68E8 {
 /**
  * Asks whether to overwrite the existing save file (popup 1).
  *
- * Callback that func_001D5488 plugs into the memory-card manager's callbackConfirmOverwrite slot (0x44); works on
+ * Callback that cFEMemCard_initFEMemCard plugs into the memory-card manager's callbackConfirmOverwrite slot (0x44); works on
  * cFEMemCard_mInstance. Allocates a 1600-byte "Temp String" buffer, has the card's GetTitleString (slot 14) write the
  * title of the file at mFileCursor, formats it into the localized kT_MEMOVOverWriteFile text, sets popup id 1 (+0x19C)
- * and opens it through getPopup (vtable slot 36, func_001D8530) with passUpdate set; getPopup makes button 1 the
- * default for popup 1. Frees the buffer. In func_001D8700, button 0 sets screen state 3 and the overwrite word (+0x1F0)
+ * and opens it through getPopup (vtable slot 36, cFEMemCard_getPopup) with passUpdate set; getPopup makes button 1 the
+ * default for popup 1. Frees the buffer. In cFEMemCard_onPopupEvent, button 0 sets screen state 3 and the overwrite word (+0x1F0)
  * that cFEMemCard_isOWPressed returns; button 1 cancels.
  */
-extern "C" void func_001D68E8(void)
+extern "C" void cFEMemCard_callbackConfirmOverwrite(void)
 {
     unsigned short name[40];
     unsigned short* buf = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
@@ -175,7 +175,7 @@ extern "C" void func_001D68E8(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D69E0);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_confirmLoad);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -203,10 +203,10 @@ struct sVEntryV001D69E0 {
  *
  * Vtable slot +0x164 of the memory-card screens; works on cFEMemCard_mInstance. Copies the localized
  * kT_POPUP200CreateEdit text into a 2000-byte "Temp String" buffer, sets popup id 2 (+0x19C), opens a two-button popup
- * through getPopup (slot 36), makes button 1 the default (popup slot 25) and frees the buffer. In func_001D8700, button
- * 0 starts the load (slot 45, func_001D86B0); the other buttons set screen state 1.
+ * through getPopup (slot 36), makes button 1 the default (popup slot 25) and frees the buffer. In cFEMemCard_onPopupEvent, button
+ * 0 starts the load (slot 45, cFEMemCard_startLoad); the other buttons set screen state 1.
  */
-extern "C" void func_001D69E0(void)
+extern "C" void cFEMemCard_confirmLoad(void)
 {
     void* buf = operator_new_tag(2000, str_Temp_String, 0x100, 0);
     char* locale = (char*)SSXApp->FELocale;
@@ -226,7 +226,7 @@ extern "C" void func_001D69E0(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D6AD0);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmLoadFailed);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -243,12 +243,12 @@ extern char str_kT_CMNContinue[];
 /**
  * Reports a failed load with a Continue button (popup 10).
  *
- * Callback for the memory-card manager's callbackConfirmLoadFailed slot (0x24), installed by func_001D5488. Writes the
+ * Callback for the memory-card manager's callbackConfirmLoadFailed slot (0x24), installed by cFEMemCard_initFEMemCard. Writes the
  * selected device's number into the localized kT_MEMOVLoadFailedPS2NGC text (2000-byte "Temp String" buffer), sets
  * popup id 10 (+0x19C of cFEMemCard_mInstance), opens a one-button popup through getPopup (slot 36), labels the button
- * "kT_CMNContinue" (popup slot 26) and frees the buffer. Continue cancels the operation (func_001D8700).
+ * "kT_CMNContinue" (popup slot 26) and frees the buffer. Continue cancels the operation (cFEMemCard_onPopupEvent).
  */
-extern "C" void func_001D6AD0(void)
+extern "C" void cFEMemCard_callbackConfirmLoadFailed(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
@@ -276,7 +276,7 @@ extern "C" void func_001D6AD0(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D6C28);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmSaveFailed);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -293,13 +293,13 @@ extern char str_kT_CMNContinue[];
 /**
  * Reports a failed save with a Continue button (popup 11).
  *
- * Callback for the memory-card manager's callbackConfirmSaveFailed slot (0x10), installed by func_001D5488. Sets popup
+ * Callback for the memory-card manager's callbackConfirmSaveFailed slot (0x10), installed by cFEMemCard_initFEMemCard. Sets popup
  * id 11 (+0x19C of cFEMemCard_mInstance), writes the selected device's number into the localized kT_MEMOVSaveFailed
  * text (2000-byte "Temp String" buffer), opens a one-button popup through getPopup (slot 36), labels the button
  * "kT_CMNContinue" (popup slot 26) and frees the buffer. Continue clears the overwrite word (+0x1F0) and cancels
- * (func_001D8700).
+ * (cFEMemCard_onPopupEvent).
  */
-extern "C" void func_001D6C28(void)
+extern "C" void cFEMemCard_callbackConfirmSaveFailed(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
@@ -327,7 +327,7 @@ extern "C" void func_001D6C28(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D6D88);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmNoCards);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -363,14 +363,14 @@ static inline void SetLine_1D6D88(char* key, int a)
 /**
  * Reports that no memory card was detected (popup 9): Retry/Cancel when no operation is pending, else Continue.
  *
- * Callback for the memory-card manager's callbackConfirmNoCards slot (0x3C), installed by func_001D5488. Writes the
+ * Callback for the memory-card manager's callbackConfirmNoCards slot (0x3C), installed by cFEMemCard_initFEMemCard. Writes the
  * selected device's number into the localized kT_MEMOVNotDetectedPS2 text (2000-byte "Temp String" buffer) and sets
  * popup id 9 (+0x19C of cFEMemCard_mInstance). Unless the manager has mSave or mDelete set or its
  * callbackIsLoadPressed() is true, it opens a two-button popup through getPopup (slot 36) with button 1 "kT_MEMOVRetry"
  * (the default) and button 0 "kT_BTNCancel"; otherwise a one-button popup with "kT_CMNContinue". Frees the buffer. In
- * func_001D8700, button 0 cancels and button 1 sets the retry flag (+0x1EC).
+ * cFEMemCard_onPopupEvent, button 0 cancels and button 1 sets the retry flag (+0x1EC).
  */
-extern "C" void func_001D6D88(void)
+extern "C" void cFEMemCard_callbackConfirmNoCards(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
@@ -402,7 +402,7 @@ extern "C" void func_001D6D88(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7010);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackFileCorrupt);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -424,16 +424,16 @@ struct sFEMC_001D7010 {
 /**
  * Reports a corrupt save file with a Continue button (popup 12).
  *
- * Callback for the memory-card manager's callbackFileCorrupt slot (0x40), installed by func_001D5488. Writes the
+ * Callback for the memory-card manager's callbackFileCorrupt slot (0x40), installed by cFEMemCard_initFEMemCard. Writes the
  * selected device's number into the localized kT_MEMOVGameCorruptPS2 text (2000-byte "Temp String" buffer), sets popup
  * id 12 (+0x19C of cFEMemCard_mInstance), opens a one-button popup through getPopup (slot 36) with passUpdate set,
  * labels the button "kT_CMNContinue" (popup slot 26) and frees the buffer. Continue cancels the operation and sets
- * screen state 1 (func_001D8700).
+ * screen state 1 (cFEMemCard_onPopupEvent).
  *
  * Quirk: the card's GetTitleString (slot 14) writes the title of the file at mFileCursor into a second buffer that is
  * never used.
  */
-extern "C" void func_001D7010(void)
+extern "C" void cFEMemCard_callbackFileCorrupt(void)
 {
     unsigned short name[0x100];
     unsigned short name2[0x100];
@@ -465,7 +465,7 @@ extern "C" void func_001D7010(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7190);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackSaveFileCorrupt);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
@@ -475,13 +475,13 @@ extern char str_kT_MEMCorruptSavePS2[];
 /**
  * Reports a corrupt save file before saving (popup 13), with button 1 as the default.
  *
- * Callback for the memory-card manager's callbackSaveFileCorrupt slot (0x8C), installed by func_001D5488; func_001D8700
+ * Callback for the memory-card manager's callbackSaveFileCorrupt slot (0x8C), installed by cFEMemCard_initFEMemCard; cFEMemCard_onPopupEvent
  * also calls it for button 2 of popup 12. Sets popup id 13 (+0x19C of cFEMemCard_mInstance), writes the selected
  * device's number into the localized kT_MEMCorruptSavePS2 text (2000-byte "Temp String" buffer), opens a two-button
  * popup through getPopup (slot 36) with passUpdate set, makes button 1 the default (popup slot 25) and frees the
- * buffer. In func_001D8700, button 0 sets screen state 3 and the overwrite word (+0x1F0); the other buttons cancel.
+ * buffer. In cFEMemCard_onPopupEvent, button 0 sets screen state 3 and the overwrite word (+0x1F0); the other buttons cancel.
  */
-extern "C" void func_001D7190(void)
+extern "C" void cFEMemCard_callbackSaveFileCorrupt(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
@@ -505,7 +505,7 @@ extern "C" void func_001D7190(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D72A8);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackFileNotFound);
 #ifdef SKIP_ASM
 struct sVEntry001D72A8 {
     short delta;
@@ -520,11 +520,11 @@ extern "C" void cMCOverlayManager_SetAction(void*, int);
 /**
  * Handles a missing file: cancels the screen and moves the memory-card manager to LoadFailed (36), action 0.
  *
- * Callback for the manager's callbackFileNotFound slot (0x38), installed by func_001D5488. Calls the screen's cancel
- * (vtable slot 41, func_001D8BE0) on cFEMemCard_mInstance, clears the cancel word (+0x1E4) that cancel just set, then
+ * Callback for the manager's callbackFileNotFound slot (0x38), installed by cFEMemCard_initFEMemCard. Calls the screen's cancel
+ * (vtable slot 41, cFEMemCard_cancel) on cFEMemCard_mInstance, clears the cancel word (+0x1E4) that cancel just set, then
  * SetState(36) (manager vtable slot 1) and cMCOverlayManager_SetAction(manager, 0).
  */
-extern "C" void func_001D72A8(void)
+extern "C" void cFEMemCard_callbackFileNotFound(void)
 {
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntry001D72A8* vt = *(sVEntry001D72A8**)(fe + 8);
@@ -539,7 +539,7 @@ extern "C" void func_001D72A8(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7318);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmFormat);
 #ifdef SKIP_ASM
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
@@ -548,13 +548,13 @@ extern char str_kT_MEMFormatCardPS2[];
 /**
  * Asks whether to format the memory card (popup 14), with button 1 as the default.
  *
- * Callback for the memory-card manager's callbackConfirmFormat slot (0x48), installed by func_001D5488. Writes the
+ * Callback for the memory-card manager's callbackConfirmFormat slot (0x48), installed by cFEMemCard_initFEMemCard. Writes the
  * selected device's number into the localized kT_MEMFormatCardPS2 text (2000-byte "Temp String" buffer), sets popup id
  * 14 (+0x19C of cFEMemCard_mInstance), opens a two-button popup through getPopup (slot 36) with passUpdate set, makes
- * button 1 the default (popup slot 25) and frees the buffer. In func_001D8700, button 0 sets +0x1A8 and the format word
+ * button 1 the default (popup slot 25) and frees the buffer. In cFEMemCard_onPopupEvent, button 0 sets +0x1A8 and the format word
  * (+0x1E8) that cFEMemCard_isFormatPressed returns; button 1 clears it and cancels.
  */
-extern "C" void func_001D7318(void)
+extern "C" void cFEMemCard_callbackConfirmFormat(void)
 {
     unsigned short name[0x100];
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
@@ -586,8 +586,8 @@ extern char str_kT_CMNContinue[];
  * Memory-card callback for a finished format: shows "kT_MEMOVFormatComplete" as popup 0x10 (+0x19C).
  *
  * Works on the current memory-card screen cFEMemCard_mInstance and is plugged into the cMCOverlayManager slot of the
- * same name by func_001D5488. The text is copied into a 0x7D0-byte "Temp String" buffer, freed again at the
- * end. The popup opens through the screen's getPopup (vtable slot 36, func_001D8530) with one button, which
+ * same name by cFEMemCard_initFEMemCard. The text is copied into a 0x7D0-byte "Temp String" buffer, freed again at the
+ * end. The popup opens through the screen's getPopup (vtable slot 36, cFEMemCard_getPopup) with one button, which
  * the popup's setButtonText (slot 26) labels "kT_CMNContinue". The result of its cSSXApp_getMCManager() call
  * is unused.
  */
@@ -615,7 +615,7 @@ extern "C" void cFEMemCard_callbackConfirmFormatDone(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7548);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmFormatFail);
 #ifdef SKIP_ASM
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
@@ -625,13 +625,13 @@ extern char str_kT_CMNContinue[];
 /**
  * Reports a failed format with a Continue button (popup 17).
  *
- * Callback for the memory-card manager's callbackConfirmFormatFail slot (0x4C), installed by func_001D5488. Writes the
+ * Callback for the memory-card manager's callbackConfirmFormatFail slot (0x4C), installed by cFEMemCard_initFEMemCard. Writes the
  * selected device's number into the localized kT_MEMFEFormatFailed text (2000-byte "Temp String" buffer), sets popup id
  * 17 (+0x19C of cFEMemCard_mInstance), opens a one-button popup through getPopup (slot 36), labels the button
  * "kT_CMNContinue" (popup slot 26) and frees the buffer. Continue clears the format word (+0x1E8) and cancels
- * (func_001D8700).
+ * (cFEMemCard_onPopupEvent).
  */
-extern "C" void func_001D7548(void)
+extern "C" void cFEMemCard_callbackConfirmFormatFail(void)
 {
     unsigned short name[0x100];
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
@@ -679,7 +679,7 @@ struct sVEntryI_001D7688 {
  * Memory-card callback asking to confirm a delete: a Yes/No popup naming the file under the cursor.
  *
  * Works on the current memory-card screen cFEMemCard_mInstance and is plugged into the cMCOverlayManager slot of the
- * same name by func_001D5488. Only when the card (cMCOverlayManager::mpMemCard) holds a save file (its vtable
+ * same name by cFEMemCard_initFEMemCard. Only when the card (cMCOverlayManager::mpMemCard) holds a save file (its vtable
  * slot 13 counts them): sets popup 3 (+0x19C), formats "kT_MEMConfirmDeletePS2" with the name of file
  * mFileCursor (card slot 14) into a "Temp String" buffer, opens a two-button popup that passes updates
  * through and makes button 1 (No) the default. With no files it clears +0x1A8 and +0x1E0 when the screen
@@ -720,7 +720,7 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D77E8);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmInvalidCard);
 #ifdef SKIP_ASM
 extern char str_kT_MEMOVNotDetectedPS2[];
 extern char str_kT_MEMOVRetry[];
@@ -729,13 +729,13 @@ extern char str_kT_BTNCancel[];
 /**
  * Reports an unusable memory card with Retry and Cancel buttons (popup 18).
  *
- * Callback for the memory-card manager's callbackConfirmInvalidCard slot (0x58), installed by func_001D5488. Writes the
- * selected device's number into the localized kT_MEMOVNotDetectedPS2 text (the same text as func_001D6D88; 2000-byte
+ * Callback for the memory-card manager's callbackConfirmInvalidCard slot (0x58), installed by cFEMemCard_initFEMemCard. Writes the
+ * selected device's number into the localized kT_MEMOVNotDetectedPS2 text (the same text as cFEMemCard_callbackConfirmNoCards; 2000-byte
  * "Temp String" buffer), sets popup id 18 (+0x19C of cFEMemCard_mInstance), opens a two-button popup through getPopup
  * (slot 36), labels button 0 "kT_MEMOVRetry" and button 1 "kT_BTNCancel" (popup slot 26) and frees the buffer. In
- * func_001D8700, button 0 sets the retry flag (+0x1EC) and the other buttons cancel.
+ * cFEMemCard_onPopupEvent, button 0 sets the retry flag (+0x1EC) and the other buttons cancel.
  */
-extern "C" void func_001D77E8(void)
+extern "C" void cFEMemCard_callbackConfirmInvalidCard(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
@@ -771,7 +771,7 @@ extern "C" void func_001D77E8(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7998);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmSaveTooBig);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -794,14 +794,14 @@ struct sVEntryI_001D7998 {
 /**
  * Reports that the save does not fit on the memory card (popup 19), with a Continue button.
  *
- * Callback for the memory-card manager's callbackConfirmSaveTooBig slot (0x60), installed by func_001D5488. Sets popup
+ * Callback for the memory-card manager's callbackConfirmSaveTooBig slot (0x60), installed by cFEMemCard_initFEMemCard. Sets popup
  * id 19 (+0x19C of cFEMemCard_mInstance), writes the selected device's number and the card's SpaceRequired1 (slot 23:
  * the space the current file size needs) into the localized kT_MEMFETooBigPS2 text (2000-byte "Temp String" buffer),
  * opens a one-button popup through getPopup (slot 36) with layer offset 3 and passUpdate set, labels the button
- * "kT_CMNContinue" (popup slot 26) and frees the buffer. In func_001D8700, button 0 clears the overwrite word (+0x1F0)
+ * "kT_CMNContinue" (popup slot 26) and frees the buffer. In cFEMemCard_onPopupEvent, button 0 clears the overwrite word (+0x1F0)
  * and cancels.
  */
-extern "C" void func_001D7998(void)
+extern "C" void cFEMemCard_callbackConfirmSaveTooBig(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
@@ -833,7 +833,7 @@ extern "C" void func_001D7998(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7B18);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackConfirmNoFreeBlocks);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
@@ -856,11 +856,11 @@ struct sLocal_001D7B18 {
 /**
  * Reports that the memory card has too little free space (popup 19), with a Continue button.
  *
- * Callback for the memory-card manager's callbackConfirmNoFreeBlocks slot (0x5C), installed by func_001D5488. Same
- * popup as func_001D7998 (id 19, kT_MEMFETooBigPS2 with the device number and the card's SpaceRequired1, slot 23; layer
+ * Callback for the memory-card manager's callbackConfirmNoFreeBlocks slot (0x5C), installed by cFEMemCard_initFEMemCard. Same
+ * popup as cFEMemCard_callbackConfirmSaveTooBig (id 19, kT_MEMFETooBigPS2 with the device number and the card's SpaceRequired1, slot 23; layer
  * offset 3, passUpdate set, "kT_CMNContinue"), but formatted into an 800-char stack buffer instead of a heap one.
  */
-extern "C" void func_001D7B18(void)
+extern "C" void cFEMemCard_callbackConfirmNoFreeBlocks(void)
 {
     unsigned short buf[800];
     sLocal_001D7B18 name;
@@ -898,7 +898,7 @@ extern char str_kT_CMNContinue[];
  * Memory-card callback for a name clash: shows popup 0x17, "kT_FENameAlreadyExists", with a Continue button.
  *
  * Works on the current memory-card screen cFEMemCard_mInstance and is plugged into the cMCOverlayManager slot of the
- * same name by func_001D5488. The popup opens through the screen's getPopup (vtable slot 36, func_001D8530)
+ * same name by cFEMemCard_initFEMemCard. The popup opens through the screen's getPopup (vtable slot 36, cFEMemCard_getPopup)
  * with one button, which the popup's setButtonText (slot 26) labels "kT_CMNContinue". Then sets the screen
  * state (+0x1C0) to 1.
  */
@@ -921,7 +921,7 @@ extern "C" void cFEMemCard_callbackFileExists(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D7D70);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackCardChanged);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -938,13 +938,13 @@ extern char str_kT_CMNContinue[];
 /**
  * Reports that a different memory card was inserted (popup 24), with a Continue button.
  *
- * Callback for the memory-card manager's callbackCardChanged slot (0xA8), installed by func_001D5488. Writes the
+ * Callback for the memory-card manager's callbackCardChanged slot (0xA8), installed by cFEMemCard_initFEMemCard. Writes the
  * selected device's number into the localized kT_MEMDifferentMemcardPS2 text (1600-byte "Temp String" buffer), sets
  * popup id 24 (+0x19C of cFEMemCard_mInstance), opens a one-button popup through getPopup (slot 36), labels the button
  * "kT_CMNContinue" (popup slot 26), sets the screen state (+0x1C0) to 1 and frees the buffer. Continue cancels
- * (func_001D8700).
+ * (cFEMemCard_onPopupEvent).
  */
-extern "C" void func_001D7D70(void)
+extern "C" void cFEMemCard_callbackCardChanged(void)
 {
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
@@ -989,10 +989,10 @@ extern char str_kT_CMNContinue[];
  * Memory-card callback for a finished delete: reports the success and resets the screen state.
  *
  * Works on the current memory-card screen cFEMemCard_mInstance and is plugged into the cMCOverlayManager slot of the
- * same name by func_001D5488. Unless the flag at +0x204 is set it copies "kT_MEMDeleteSuccess" into a "Temp
+ * same name by cFEMemCard_initFEMemCard. Unless the flag at +0x204 is set it copies "kT_MEMDeleteSuccess" into a "Temp
  * String" buffer and shows it as popup 7 (+0x19C). Then a screen state (+0x1C0) of 4 is set back to 1.
  *
- * The popup opens through the screen's getPopup (vtable slot 36, func_001D8530) with one button, which the
+ * The popup opens through the screen's getPopup (vtable slot 36, cFEMemCard_getPopup) with one button, which the
  * popup's setButtonText (slot 26) labels "kT_CMNContinue".
  *
  * @return 1, always
@@ -1027,7 +1027,7 @@ extern "C" int cFEMemCard_callbackDeleteDone(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8020);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackDeleteFailed);
 #ifdef SKIP_ASM
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
@@ -1037,14 +1037,14 @@ extern char str_kT_CMNContinue[];
 /**
  * Reports a failed delete with a Continue button (popup 8).
  *
- * Callback for the memory-card manager's callbackDeleteFailed slot (0x34), installed by func_001D5488. Writes the
+ * Callback for the memory-card manager's callbackDeleteFailed slot (0x34), installed by cFEMemCard_initFEMemCard. Writes the
  * selected device's number into the localized kT_MEMOVDeleteFailedError text (2000-byte "Temp String" buffer), sets
  * popup id 8 (+0x19C of cFEMemCard_mInstance), opens a one-button popup through getPopup (slot 36), labels the button
- * "kT_CMNContinue" (popup slot 26) and frees the buffer. Continue cancels (func_001D8700).
+ * "kT_CMNContinue" (popup slot 26) and frees the buffer. Continue cancels (cFEMemCard_onPopupEvent).
  *
  * @return always 0
  */
-extern "C" int func_001D8020(void)
+extern "C" int cFEMemCard_callbackDeleteFailed(void)
 {
     unsigned short name[0x100];
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
@@ -1071,7 +1071,7 @@ extern "C" int func_001D8020(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8160);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackCardsChecked);
 #ifdef SKIP_ASM
 void func_0023FB18(void* mp, int a);
 extern "C" void cMCOverlayManager_setSelectedDevice(void* mp);
@@ -1104,14 +1104,14 @@ public:
 /**
  * Moves the card check to the next device, or picks the device to use once every device is checked.
  *
- * Callback for the memory-card manager's callbackCardsChecked slot (0x90), installed by func_001D5488. While
+ * Callback for the memory-card manager's callbackCardsChecked slot (0x90), installed by cFEMemCard_initFEMemCard. While
  * mSelectedDevice + 1 is below mMaxDevices it selects that device (func_0023FB18) and goes to InitCardsCheck (49,
  * SetState through vtable slot 1). Otherwise it selects device 0; when the card's IsAvailable (slot 52) says device 0
  * has no card, an auto-save screen (+0x208 of cFEMemCard_mInstance set) gets screen state 6 and the manager
  * CheckCardsWait (2), and any other screen moves the highlight to the next device with a card
  * (cMCOverlayManager_OnHighlightNextDevice). Then cMCOverlayManager_setSelectedDevice and InitFileCheckDevice (54).
  */
-extern "C" void func_001D8160(void)
+extern "C" void cFEMemCard_callbackCardsChecked(void)
 {
     cMoviePlayerK1D8160* mp = (cMoviePlayerK1D8160*)cSSXApp_getMCManager(SSXApp);
     int next = *(int*)((char*)mp + 0x428) + 1;
@@ -1136,7 +1136,7 @@ extern "C" void func_001D8160(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8240);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackDisplayNoCards);
 #ifdef SKIP_ASM
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
@@ -1152,14 +1152,14 @@ struct sVEntryK1D8240 {
 /**
  * Shows the "no memory cards" message in the screen's "text box message" object and switches to display state 1.
  *
- * Callback for the memory-card manager's callbackDisplayNoCards slot (0x9C), installed by func_001D5488; many
+ * Callback for the memory-card manager's callbackDisplayNoCards slot (0x9C), installed by cFEMemCard_initFEMemCard; many
  * memory-card screens also call it directly. Sets the screen state (+0x1C0 of cFEMemCard_mInstance) to 1; when the
  * display state (+0x214) is not 1 yet it records 1 there and calls triggerDisplayState (vtable slot 35,
  * cFEMemCard_triggerDisplayState) with 1. When the screen has a "text box message" object, the localized
  * kT_MEMNoCardsPS2 text is copied into a 2000-byte "Temp String" buffer, word-wrapped into the object
  * (cUIText_setUnicodeStringWrap) and the object is shown (slot 9 with 1).
  */
-extern "C" void func_001D8240(void)
+extern "C" void cFEMemCard_callbackDisplayNoCards(void)
 {
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x1C0) = 1;
@@ -1186,7 +1186,7 @@ extern "C" void func_001D8240(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8358);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackDisplayNoFiles);
 #ifdef SKIP_ASM
 struct sVEntry001D8358 {
     short delta;
@@ -1199,11 +1199,11 @@ extern void* cFEMemCard_mInstance;
 /**
  * Switches the memory-card screen to display state 2 when no files were found, while the screen is still starting.
  *
- * Callback for the memory-card manager's callbackDisplayNoFiles slot (0x98), installed by func_001D5488. Only when the
+ * Callback for the memory-card manager's callbackDisplayNoFiles slot (0x98), installed by cFEMemCard_initFEMemCard. Only when the
  * screen state (+0x1C0 of cFEMemCard_mInstance) is 0 and the display state (+0x214) is not already 2: records 2 and
  * calls triggerDisplayState (vtable slot 35) with 2.
  */
-extern "C" void func_001D8358(void)
+extern "C" void cFEMemCard_callbackDisplayNoFiles(void)
 {
     char* fe = (char*)cFEMemCard_mInstance;
     if (*(int*)(fe + 0x214) != 2 && *(int*)(fe + 0x1C0) == 0) {
@@ -1215,7 +1215,7 @@ extern "C" void func_001D8358(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D83A8);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackFileChecked);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -1249,13 +1249,13 @@ static inline void SetMode_001D83A8(char* fe, int mode)
  * Handles a finished file check: back to the checking state, then display state 3 with a card, or 1 and the "no cards"
  * text without.
  *
- * Callback for the memory-card manager's callbackFileChecked slot (0x94), installed by func_001D5488. Sets the screen
+ * Callback for the memory-card manager's callbackFileChecked slot (0x94), installed by cFEMemCard_initFEMemCard. Sets the screen
  * state (+0x1C0 of cFEMemCard_mInstance) to 1 and moves the manager to CheckCardsWait (2, SetState through vtable slot
  * 1). When the card's slot 53 (IsAvailable for its own device) is true it switches to display state 3 (+0x214 and
  * triggerDisplayState, vtable slot 35, when it changes); otherwise to display state 1 and, when the screen has a "text
- * box message" object, shows kT_MEMNoCardsPS2 in it as func_001D8240 does.
+ * box message" object, shows kT_MEMNoCardsPS2 in it as cFEMemCard_callbackDisplayNoCards does.
  */
-extern "C" void func_001D83A8(void)
+extern "C" void cFEMemCard_callbackFileChecked(void)
 {
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     *(int*)((char*)cFEMemCard_mInstance + 0x1C0) = 1;
@@ -1287,7 +1287,7 @@ extern "C" void func_001D83A8(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8530);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_getPopup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* cFEMemCard_mInstance;
@@ -1349,7 +1349,7 @@ public:
  * @param passUpdate  passUpdate: nonzero lets updates pass to the screen below
  * @param snowFlake  nonzero for the snowflake variant
  */
-extern "C" void func_001D8530(void* self_, int displayText, int yesOnly, int noButtons, int layerOffset, int passUpdate, int snowFlake)
+extern "C" void cFEMemCard_getPopup(void* self_, int displayText, int yesOnly, int noButtons, int layerOffset, int passUpdate, int snowFlake)
 {
     char* self = (char*)self_;
     if (*(int*)((char*)cFEMemCard_mInstance + 0x19C) != 22) {
@@ -1372,7 +1372,7 @@ extern "C" void func_001D8530(void* self_, int displayText, int yesOnly, int noB
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8670);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_exitDelete);
 #ifdef SKIP_ASM
 extern void* cFEMemCard_mInstance;
 
@@ -1383,7 +1383,7 @@ extern void* cFEMemCard_mInstance;
  * Vtable slot +0x174 of the memory-card screens; works on cFEMemCard_mInstance. +0x1E0 is the word
  * cFEMemCard_isDeletePressed returns.
  */
-extern "C" void func_001D8670(void)
+extern "C" void cFEMemCard_exitDelete(void)
 {
     if (*(int*)((char*)cFEMemCard_mInstance + 0x1C0) == 4) {
         *(int*)((char*)cFEMemCard_mInstance + 0x1C0) = 1;
@@ -1395,19 +1395,19 @@ extern "C" void func_001D8670(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D86A0__FPv);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_exit__FPv);
 #ifdef SKIP_ASM
 /**
  * Sets the memory-card screen's state (+0x1C0) to 6.
  */
-void func_001D86A0(void* self)
+void cFEMemCard_exit(void* self)
 {
     *(int*)((char*)self + 0x1C0) = 6;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D86B0);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_startLoad);
 #ifdef SKIP_ASM
 struct sVEntry001D86B0 {
     short delta;
@@ -1420,9 +1420,9 @@ extern "C" void cFEMemCard_SetLoadPressed(void*, int);
 /**
  * Starts the load: records the load request, sets +0x1A8 and screen state 5 (loading), and shows the status popup.
  *
- * Calls cFEMemCard_SetLoadPressed(@p self, 1), then vtable slot 47 (func_001D8D68).
+ * Calls cFEMemCard_SetLoadPressed(@p self, 1), then vtable slot 47 (cFEMemCard_displayStatusPopup).
  */
-extern "C" void func_001D86B0(void* self)
+extern "C" void cFEMemCard_startLoad(void* self)
 {
     cFEMemCard_SetLoadPressed(self, 1);
     *(int*)((char*)self + 0x1A8) = 1;
@@ -1433,12 +1433,12 @@ extern "C" void func_001D86B0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8700);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onPopupEvent);
 #ifdef SKIP_ASM
 extern void* cFEMemCard_mInstance;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cFEMemCard_SetLoadPressed(void*, int);
-extern "C" void func_001D7190(void);
+extern "C" void cFEMemCard_callbackSaveFileCorrupt(void);
 extern "C" void func_0039F190(void* list, int a1);
 
 struct sVEntryK1D8700 {
@@ -1460,8 +1460,8 @@ static inline void notifyK1D8700(char* self, char* mp)
 /**
  * Handles a button on the memory-card screen's popup, by popup id (+0x19C).
  *
- * Buttons 0xF, 0x10 and 0x11 are choices 0, 1 and 2. "Cancel" is vtable slot 41 (func_001D8BE0); "finish" means that on
- * an auto-load screen (+0x204 is 1) the manager's mCurrDeviceStateAck is set to 1 and vtable slot 40 (func_001D86A0,
+ * Buttons 0xF, 0x10 and 0x11 are choices 0, 1 and 2. "Cancel" is vtable slot 41 (cFEMemCard_cancel); "finish" means that on
+ * an auto-load screen (+0x204 is 1) the manager's mCurrDeviceStateAck is set to 1 and vtable slot 40 (cFEMemCard_exit,
  * state 6) runs. Per popup:
  * - 2: choice 0 starts the load (slot 45), else screen state (+0x1C0) 1.
  * - 19: choice 0 clears the overwrite word (+0x1F0), cancels, finishes; else sets the retry word (+0x1EC).
@@ -1470,7 +1470,7 @@ static inline void notifyK1D8700(char* self, char* mp)
  * - 10: choice 0 cancels and finishes. 11: clears +0x1F0, cancels, finishes.
  * - 4, 5, 6: slot 40.
  * - 3: clears +0x1B0; choice 0 sets +0x1A8 and the delete word (+0x1E0), else cancel and finish.
- * - 12: choice 0 cancels, sets state 1, finishes; choice 1 retries; choice 2 opens popup 13 (func_001D7190) and returns
+ * - 12: choice 0 cancels, sets state 1, finishes; choice 1 retries; choice 2 opens popup 13 (cFEMemCard_callbackSaveFileCorrupt) and returns
  *   at once.
  * - 7: clears +0x1A8 and +0x1E0, cancels when the load word (+0x1F4) is set, sets +0x1A8 again when the save word
  *   (+0x1DC) is set, finishes.
@@ -1488,7 +1488,7 @@ static inline void notifyK1D8700(char* self, char* mp)
  * @param popup  the popup state that sent the event (unused)
  * @param button  the popup event: 0xF / 0x10 / 0x11 for buttons 0-2, 22 when the popup closes
  */
-extern "C" void func_001D8700(void* self_, int popup, int button)
+extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
 {
     char* self = (char*)self_;
     if (button >= 0xF && button <= 17) {
@@ -1575,7 +1575,7 @@ extern "C" void func_001D8700(void* self_, int popup, int button)
             } else if (choice == 1) {
                 *(int*)(self + 0x1EC) = 1;
             } else {
-                func_001D7190();
+                cFEMemCard_callbackSaveFileCorrupt();
                 return;
             }
             break;
@@ -1653,7 +1653,7 @@ extern "C" void func_001D8700(void* self_, int popup, int button)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8BE0);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_cancel);
 #ifdef SKIP_ASM
 extern "C" void cFEMemCard_SetLoadPressed(void*, int);
 
@@ -1664,7 +1664,7 @@ extern "C" void cFEMemCard_SetLoadPressed(void*, int);
  * words and the load request (cFEMemCard_SetLoadPressed 0); sets the cancel word (+0x1E4) that
  * cFEMemCard_isCancelPressed returns and the screen state (+0x1C0) to 2.
  */
-extern "C" void func_001D8BE0(void* self)
+extern "C" void cFEMemCard_cancel(void* self)
 {
     *(int*)((char*)self + 0x1A8) = 0;
     *(int*)((char*)self + 0x1F0) = 0;
@@ -1753,7 +1753,7 @@ extern "C" int cFEMemCard_onInputBegin(void* self, void* input)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8D68);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_displayStatusPopup);
 #ifdef SKIP_ASM
 struct sVEntry001D8D68 {
     short delta;
@@ -1768,10 +1768,10 @@ extern "C" void cMCOverlayManager_GetMessage(void*, unsigned short*, int);
  * Opens the memory-card status popup (popup 22) with the manager's current message and no buttons.
  *
  * Sets popup id 22 (+0x19C), fills an 800-char buffer with cMCOverlayManager_GetMessage and opens it through getPopup
- * (vtable slot 36) with yes-only, no-buttons and snowflake set, then sets the status-popup flag (+0x210); func_001D8DE0
+ * (vtable slot 36) with yes-only, no-buttons and snowflake set, then sets the status-popup flag (+0x210); cFEMemCard_onUpdate
  * refreshes the text every frame while that flag is set.
  */
-extern "C" void func_001D8D68(void* self)
+extern "C" void cFEMemCard_displayStatusPopup(void* self)
 {
     unsigned short buf[800];
     void* obj = cSSXApp_getMCManager(SSXApp);
@@ -1784,7 +1784,7 @@ extern "C" void func_001D8D68(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D8DE0);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onUpdate);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -1896,7 +1896,7 @@ struct sVEntryK1D8DE0 {
  *
  * @param card  the memory-card screen
  */
-extern "C" void func_001D8DE0(cMemCardK1D8DE0* card)
+extern "C" void cFEMemCard_onUpdate(cMemCardK1D8DE0* card)
 {
     char* self = (char*)card;
     if (*(void**)(self + 0x218) == 0 && *(int*)(self + 0x1A4) == 0) {
@@ -2625,7 +2625,7 @@ extern "C" void cFEPopupConfirm_setDefaultButton(void* self, int uiButton)
 INCLUDE_ASM("fe/fememcardcallbacks", func_001D9D48);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
-extern "C" void func_001DA4A8(void* self);
+extern "C" void cFEStateNetHelpPopup_clear(void* self);
 extern char cFEStateNetHelpPopup_vtbl[];
 
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -2643,7 +2643,7 @@ extern "C" void* func_001D9D48(void* self, void* engine, void* owner)
     *(int*)((char*)self + 0x4C) = 0;
     *(int*)((char*)self + 0x50) = 0;
     *(int*)((char*)self + 0xC) = 76;
-    func_001DA4A8(self);
+    cFEStateNetHelpPopup_clear(self);
     return self;
 }
 #endif

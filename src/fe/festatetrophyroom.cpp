@@ -55,7 +55,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" char* cBERewardInterface_getTrophy(void* self, int a1, int a2);
 extern "C" int func_001CE6F0(int a, int b);
-extern "C" void func_001D47A0(void* self, int index);
+extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index);
 extern "C" void setChallengeName(void* text, int a1, int a2, int idx);
 extern char str_bitmap[];
 extern char str_stats[];
@@ -93,7 +93,7 @@ static inline void vcall_43F0(void* o, int slot, int arg)
 /**
  * Sets up the trophy room's widgets: the big icon, the stats text, the title and the trophy and event rows.
  *
- * "bitmap" is kept at 0x48 (On Tour mpBigIcon) and shows the selection (func_001D47A0, probably
+ * "bitmap" is kept at 0x48 (On Tour mpBigIcon) and shows the selection (cFEStateTrophyRoom_updateBigArt, probably
  * updateBigArt); "stats" is kept at 0x4C and hidden. "screentitle" names the trophy type (0x58): 0 race, 1
  * freestyle, 2 explore, 3 earnings. Rows "trophy" and "event_0" to "event_4" (misc data 0-5) and "0text
  * blocks" to "5text blocks" are hidden and made static past the peak's event count (func_001CE6F0); "trophy"
@@ -106,7 +106,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
     int hashName = *(int*)((char*)w + 0x38);
     if (hashName == GetHashValue32(str_bitmap)) {
         self->f48 = w;
-        func_001D47A0(self, self->f9C);
+        cFEStateTrophyRoom_updateBigArt(self, self->f9C);
         return;
     }
     if (hashName == GetHashValue32(str_stats)) {
@@ -190,8 +190,8 @@ struct sVEntry001D4698 {
     void* (*fn)(void*, void*, int);
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern "C" void func_001D47A0(void* self, int index);
-extern "C" void func_001D4890(void* self, int index);
+extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index);
+extern "C" void cFEStateTrophyRoom_updateStats(void* self, int index);
 
 class cTrophyWidget_4698 {
 public:
@@ -210,8 +210,8 @@ public:
 /**
  * Updates the big art and stats when a trophy row gets focus, and leaves the trophy room on back.
  *
- * Event 1 (a row focused) stores the row's misc data as the selection (0x9C) and runs func_001D47A0() and
- * func_001D4890() (probably On Tour updateBigArt and updateStats). Event 6 (back) hides the big icon and
+ * Event 1 (a row focused) stores the row's misc data as the selection (0x9C) and runs cFEStateTrophyRoom_updateBigArt() and
+ * cFEStateTrophyRoom_updateStats() (probably On Tour updateBigArt and updateStats). Event 6 (back) hides the big icon and
  * pushes getPrevState's state for the peak (0x54).
  *
  * @param item  the widget that sent the event; nothing happens when null
@@ -238,8 +238,8 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(void* self, void* item, int msg
     }
     case 1:
         *(int*)((char*)self + 0x9C) = *(int*)((char*)item + 0x18);
-        func_001D47A0(self, *(int*)((char*)item + 0x18));
-        func_001D4890(self, *(int*)((char*)item + 0x18));
+        cFEStateTrophyRoom_updateBigArt(self, *(int*)((char*)item + 0x18));
+        cFEStateTrophyRoom_updateStats(self, *(int*)((char*)item + 0x18));
         break;
     }
 }
@@ -248,27 +248,27 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(void* self, void* item, int msg
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_001D4A20(void* self);
+extern "C" void cFEStateTrophyRoom_updateTexturesLoad(void* self);
 extern "C" void* cUIState_onUpdate(void* self);
 
 /**
  * Updates the trophy room, first finishing any of its pending trophy picture loads.
  *
- * While the pending count at 0x5C is positive, func_001D4A20() hands each of the five slots that has finished
+ * While the pending count at 0x5C is positive, cFEStateTrophyRoom_updateTexturesLoad() hands each of the five slots that has finished
  * loading to GrMan under the name "trph", releases it and decrements the count. Then runs the base UI-state
  * update cUIState_onUpdate().
  */
 extern "C" void cFEStateTrophyRoom_onUpdate(void* self)
 {
     if (*(int*)((char*)self + 0x5C) > 0) {
-        func_001D4A20(self);
+        cFEStateTrophyRoom_updateTexturesLoad(self);
     }
     cUIState_onUpdate(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D47A0);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_updateBigArt);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -301,7 +301,7 @@ public:
  *
  * @param index  the selected row (0 trophy, 1-4 challenges), or negative to hide
  */
-extern "C" void func_001D47A0(void* self, int index)
+extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index)
 {
     int textureId;
     if (index < 0) {
@@ -337,7 +337,7 @@ extern "C" void func_001D47A0(void* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4890);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_updateStats);
 #ifdef SKIP_ASM
 extern "C" void setChallengeStats(void* widget, signed char rider, int a2, int a3, int a4, int index);
 
@@ -364,7 +364,7 @@ public:
  *
  * @param index  the selected row
  */
-extern "C" void func_001D4890(void* self, int index)
+extern "C" void cFEStateTrophyRoom_updateStats(void* self, int index)
 {
     cTrophyWidget_4890* widget = *(cTrophyWidget_4890**)((char*)self + 0x4C);
     if (widget != 0) {
@@ -381,7 +381,7 @@ extern "C" void func_001D4890(void* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4918);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_loadTextures);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -406,9 +406,9 @@ struct sTrophyRoom_4918 {
  * On the cache at RealFE + 0x1A70, bank +0x50 (the character), func_0019DA10 (with 10, 1, 0) loads the trophy's image
  * (the name at +4 of cBERewardInterface_getTrophy for peak +0x54 and trophy +0x58) into slot index +0x74[0], and the
  * image of each of the trophy's four medals that has a name (cBERewardInterface_getMedal) into +0x74[1-4]. +0x5C counts
- * the requests. Called by the trophy room's constructor func_001D4268.
+ * the requests. Called by the trophy room's constructor cFEStateTrophyRoom_cFEStateTrophyRoom.
  */
-extern "C" void func_001D4918(sTrophyRoom_4918* self)
+extern "C" void cFEStateTrophyRoom_loadTextures(sTrophyRoom_4918* self)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* snd = (char*)SSXApp->RealFE + 0x1A70;
@@ -425,12 +425,12 @@ extern "C" void func_001D4918(sTrophyRoom_4918* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4A20);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_updateTexturesLoad);
 #ifdef SKIP_ASM
 extern "C" int func_0019E238(void* self, int bank, int i);
 extern "C" char* func_0019E2B0(void* self, int bank, int i);
 extern "C" void func_0019DC20(void* self, int bank, int i);
-extern "C" void func_001D47A0(void* self, int index);
+extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index);
 extern char str_trph[];
 
 struct cGame_4A20 {
@@ -501,11 +501,11 @@ struct sSelf_4A20 {
  * +0x50) it creates the texture "trph" from the file data (func_0019E2B0's pointer plus the offset at its +0x14)
  * through GrMan's vtable slot 46 (func_0037C8C0 in cPS2GraphicsMan_vtbl) into +0x60[i], releases the file
  * (func_0019DC20), sets the slot to -1, decrements the pending count (+0x5C) and redraws the selected row's picture
- * (func_001D47A0 with +0x9C). Called from cFEStateTrophyRoom_onUpdate.
+ * (cFEStateTrophyRoom_updateBigArt with +0x9C). Called from cFEStateTrophyRoom_onUpdate.
  *
  * @param trophyRoom  the trophy room state
  */
-extern "C" void func_001D4A20(void* trophyRoom)
+extern "C" void cFEStateTrophyRoom_updateTexturesLoad(void* trophyRoom)
 {
     sSelf_4A20* self = (sSelf_4A20*)trophyRoom;
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
@@ -517,14 +517,14 @@ extern "C" void func_001D4A20(void* trophyRoom)
             func_0019DC20(mgr, self->bank, self->tex[i]);
             self->tex[i] = -1;
             self->count--;
-            func_001D47A0(self, self->f9C);
+            cFEStateTrophyRoom_updateBigArt(self, self->f9C);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4B20);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_purgeTextures);
 #ifdef SKIP_ASM
 struct cGame001D4B20 {
     char pad[0x10D8];
@@ -596,7 +596,7 @@ struct sSelf001D4B20 {
  * (+0x74) released with func_0019DC20 (RealFE + 0x1A70, bank +0x50); both are set to -1. Called by
  * cFEStateTrophyRoom__cFEStateTrophyRoom.
  */
-extern "C" void func_001D4B20(sSelf001D4B20* self)
+extern "C" void cFEStateTrophyRoom_purgeTextures(sSelf001D4B20* self)
 {
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     int i;
@@ -614,7 +614,7 @@ extern "C" void func_001D4B20(sSelf001D4B20* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4BC8);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_cFEStateRewardsRoom);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
@@ -637,7 +637,7 @@ extern void* cFEStateRewardsRoom_vtbl[];
  * @param inStore  the in-store flag; the front end's factories pass 1
  * @return @p self
  */
-extern "C" void* func_001D4BC8(void* self, int engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom(void* self, int engine, signed char idx, int inStore)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 46;
@@ -656,7 +656,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern char str_128rewardsroom[];
 
@@ -671,7 +671,7 @@ extern "C" void cFEStateRewardsRoom_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0028F140(func_0028B180(), 6);
+    func_0028F140(cAudioInterface_bxAudio(), 6);
 }
 #endif
 
@@ -679,7 +679,7 @@ extern "C" void cFEStateRewardsRoom_onCreateScreen(void* self)
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetCreate);
 #ifdef SKIP_ASM
 struct cUIText;
-extern "C" void func_001D4F90(void* self, int index, cUIText* text);
+extern "C" void cFEStateRewardsRoom_setRewardsWidgetText(void* self, int index, cUIText* text);
 extern char str_art[];
 extern char str_video[];
 extern char str_poster[];
@@ -697,7 +697,7 @@ extern char str_txtmdl_5[];
  * Tags the rewards room's category buttons with their reward type and fills their text blocks.
  *
  * "poster", "trading cards", "art", "video", "toys" and "cheat character" get misc data 3 to 8 in that order;
- * the texts "txtmdl_0" to "txtmdl_5" are filled by func_001D4F90() (probably On Tour setRewardsWidgetText)
+ * the texts "txtmdl_0" to "txtmdl_5" are filled by cFEStateRewardsRoom_setRewardsWidgetText() (probably On Tour setRewardsWidgetText)
  * for types 5, 3, 7, 4, 8 and 6.
  *
  * @param w  the widget just created (its hash name is at +0x38)
@@ -718,17 +718,17 @@ extern "C" void cFEStateRewardsRoom_onWidgetCreate(void* self, void* w)
     } else if (id == GetHashValue32(str_cheat_character)) {
         *(int*)((char*)w + 0x18) = 8;
     } else if (id == GetHashValue32(str_txtmdl_0)) {
-        func_001D4F90(self, 5, (cUIText*)w);
+        cFEStateRewardsRoom_setRewardsWidgetText(self, 5, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_1)) {
-        func_001D4F90(self, 3, (cUIText*)w);
+        cFEStateRewardsRoom_setRewardsWidgetText(self, 3, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_2)) {
-        func_001D4F90(self, 7, (cUIText*)w);
+        cFEStateRewardsRoom_setRewardsWidgetText(self, 7, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_3)) {
-        func_001D4F90(self, 4, (cUIText*)w);
+        cFEStateRewardsRoom_setRewardsWidgetText(self, 4, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_4)) {
-        func_001D4F90(self, 8, (cUIText*)w);
+        cFEStateRewardsRoom_setRewardsWidgetText(self, 8, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_5)) {
-        func_001D4F90(self, 6, (cUIText*)w);
+        cFEStateRewardsRoom_setRewardsWidgetText(self, 6, (cUIText*)w);
     }
 }
 #endif
@@ -810,7 +810,7 @@ extern "C" int cFEStateRewardsRoom_onWidgetMenu(void* self, int pMenu, unsigned 
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D4F90);
+INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_setRewardsWidgetText);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -831,7 +831,7 @@ extern char str_pct_d_pct_d[];
  * @param index  the reward kind
  * @param text  the text to set
  */
-extern "C" void func_001D4F90(void* self, int index, cUIText* text)
+extern "C" void cFEStateRewardsRoom_setRewardsWidgetText(void* self, int index, cUIText* text)
 {
     char buf[256];
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
@@ -1008,7 +1008,7 @@ extern "C" void func_001D5280(void* self, void* item, int msg)
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5330);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern "C" void func_001D5488(void* self, int a1);
+extern "C" void cFEMemCard_initFEMemCard(void* self, int a1);
 extern void* D_00474E08[];
 extern void* D_0046C980[];
 extern unsigned short D_004A1390[];
@@ -1019,11 +1019,11 @@ extern unsigned short D_004A1390[];
  *
  * Runs cUIState's constructor (func_0039E2A0; @p engine reaches it untouched in the second argument register as the
  * engine), the inlined cOVState part (vtable D_00474E08; mDoneTransition, mAllowPauseMenu and mRemovePDA 0; mszChatBuff
- * " " from D_004A1390), stores cFEMemCard's vtable D_0046C980 and runs func_001D5488 with @p memCardType. func_001FDBF0 and
- * func_001FE968 (fe/ovstatepause) call it with types 1 and 2.
+ * " " from D_004A1390), stores cFEMemCard's vtable D_0046C980 and runs cFEMemCard_initFEMemCard with @p memCardType. cOVState_SAVEREPLAY_cOVState_SAVEREPLAY and
+ * cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS (fe/ovstatepause) call it with types 1 and 2.
  *
  * @param engine  the UI engine (only passed on to cUIState's constructor)
- * @param memCardType  the memory-card screen type, passed to func_001D5488
+ * @param memCardType  the memory-card screen type, passed to cFEMemCard_initFEMemCard
  * @param overlayId  the overlay id stored in mOVID
  * @return @p self
  */
@@ -1037,7 +1037,7 @@ extern "C" void* func_001D5330(void* self, int engine, int memCardType, int over
     *(int*)((char*)self + 0x54) = 0;
     *(unsigned short*)((char*)self + 0x58) = D_004A1390[0];
     *(void***)((char*)self + 0x8) = D_0046C980;
-    func_001D5488(self, memCardType);
+    cFEMemCard_initFEMemCard(self, memCardType);
     return self;
 }
 #endif
@@ -1046,7 +1046,7 @@ extern "C" void* func_001D5330(void* self, int engine, int memCardType, int over
 INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_cFEMemCard);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern "C" void func_001D5488(void* self, int a1);
+extern "C" void cFEMemCard_initFEMemCard(void* self, int a1);
 extern void* D_00474E08[];
 extern void* D_0046C980[];
 extern unsigned short D_004A1390[];
@@ -1055,7 +1055,7 @@ extern unsigned short D_004A1390[];
  * Constructs the memory card screen base used by the profile, autosave and save screens.
  *
  * Runs the cUIState constructor, installs the cOVState vtable (D_00474E08) and then this class's (D_0046C980),
- * clears +0x48, +0x4C, +0x54 and +0x98, copies the empty string D_004A1390 into +0x58, and runs func_001D5488
+ * clears +0x48, +0x4C, +0x54 and +0x98, copies the empty string D_004A1390 into +0x58, and runs cFEMemCard_initFEMemCard
  * (On Tour initFEMemCard) with @p iType. The engine argument is not used.
  *
  * @param pEngine  the UI engine (unused)
@@ -1072,13 +1072,13 @@ extern "C" void* cFEMemCard_cFEMemCard(void* self, int pEngine, int iType)
     *(int*)((char*)self + 0x54) = 0;
     *(unsigned short*)((char*)self + 0x58) = D_004A1390[0];
     *(void***)((char*)self + 0x8) = D_0046C980;
-    func_001D5488(self, iType);
+    cFEMemCard_initFEMemCard(self, iType);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5428);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard__cFEMemCard);
 #ifdef SKIP_ASM
 extern void* D_0046C980[];
 extern void* D_00474E08[];
@@ -1094,7 +1094,7 @@ extern "C" void func_0039E390(void* self, int flags);
  *
  * @param flags  the g++ delete flags, passed on to func_0039E390
  */
-extern "C" void func_001D5428(void* self, int flags)
+extern "C" void cFEMemCard__cFEMemCard(void* self, int flags)
 {
     *(void***)((char*)self + 8) = D_0046C980;
     cFEMemCard_mInstance = 0;
@@ -1104,7 +1104,7 @@ extern "C" void func_001D5428(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5460);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Answers the memory-card screens' menu events: 0x100 for events 8 and 9, otherwise 0x101.
@@ -1116,7 +1116,7 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D5460);
  * @param key  the menu event
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
-extern "C" int func_001D5460(void* self, int menu, unsigned int key)
+extern "C" int cFEMemCard_onWidgetMenu(void* self, int menu, unsigned int key)
 {
     int result = 257;
     if (key < 10) {
@@ -1131,7 +1131,7 @@ extern "C" int func_001D5460(void* self, int menu, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5488);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_initFEMemCard);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cBE_getBE();
@@ -1152,28 +1152,28 @@ extern void* cFEMemCard_mInstance;
 extern char str_pct_s_pct_s_c[];
 // PORT: callback function addresses taken through asm-label views (their real prototypes vary).
 extern char cFEMemCard_writeStart_a5488[] __asm__("cFEMemCard_writeStart");
-extern char func_001D5D78_a5488[] __asm__("func_001D5D78");
-extern char func_001D5F38_a5488[] __asm__("func_001D5F38__FPv");
+extern char cFEMemCard_callbackWriteUpdate_a5488[] __asm__("cFEMemCard_callbackWriteUpdate");
+extern char cFEMemCard_writeDone_a5488[] __asm__("cFEMemCard_writeDone__FPv");
 extern char cFEMemCard_callbackSaveSuccess_a5488[] __asm__("cFEMemCard_callbackSaveSuccess");
-extern char func_001D6C28_a5488[] __asm__("func_001D6C28");
+extern char cFEMemCard_callbackConfirmSaveFailed_a5488[] __asm__("cFEMemCard_callbackConfirmSaveFailed");
 extern char cFEMemCard_readStart_a5488[] __asm__("cFEMemCard_readStart");
 extern char cFEMemCard_callbackReadUpdate_a5488[] __asm__("cFEMemCard_callbackReadUpdate");
-extern char func_001D5F40_a5488[] __asm__("func_001D5F40");
-extern char func_001D6AD0_a5488[] __asm__("func_001D6AD0");
+extern char cFEMemCard_readDone_a5488[] __asm__("cFEMemCard_readDone");
+extern char cFEMemCard_callbackConfirmLoadFailed_a5488[] __asm__("cFEMemCard_callbackConfirmLoadFailed");
 extern char cFEMemCard_callbackReadSuccess_a5488[] __asm__("cFEMemCard_callbackReadSuccess");
 extern char cFEMemCard_callbackDeleteDone_a5488[] __asm__("cFEMemCard_callbackDeleteDone");
-extern char func_001D8020_a5488[] __asm__("func_001D8020");
-extern char func_001D72A8_a5488[] __asm__("func_001D72A8");
-extern char func_001D6D88_a5488[] __asm__("func_001D6D88");
-extern char func_001D7010_a5488[] __asm__("func_001D7010");
-extern char func_001D68E8_a5488[] __asm__("func_001D68E8");
-extern char func_001D7318_a5488[] __asm__("func_001D7318");
-extern char func_001D7548_a5488[] __asm__("func_001D7548");
+extern char cFEMemCard_callbackDeleteFailed_a5488[] __asm__("cFEMemCard_callbackDeleteFailed");
+extern char cFEMemCard_callbackFileNotFound_a5488[] __asm__("cFEMemCard_callbackFileNotFound");
+extern char cFEMemCard_callbackConfirmNoCards_a5488[] __asm__("cFEMemCard_callbackConfirmNoCards");
+extern char cFEMemCard_callbackFileCorrupt_a5488[] __asm__("cFEMemCard_callbackFileCorrupt");
+extern char cFEMemCard_callbackConfirmOverwrite_a5488[] __asm__("cFEMemCard_callbackConfirmOverwrite");
+extern char cFEMemCard_callbackConfirmFormat_a5488[] __asm__("cFEMemCard_callbackConfirmFormat");
+extern char cFEMemCard_callbackConfirmFormatFail_a5488[] __asm__("cFEMemCard_callbackConfirmFormatFail");
 extern char cFEMemCard_callbackConfirmFormatDone_a5488[] __asm__("cFEMemCard_callbackConfirmFormatDone");
 extern char cFEMemCard_callbackConfirmDelete_a5488[] __asm__("cFEMemCard_callbackConfirmDelete");
-extern char func_001D77E8_a5488[] __asm__("func_001D77E8");
-extern char func_001D7B18_a5488[] __asm__("func_001D7B18");
-extern char func_001D7998_a5488[] __asm__("func_001D7998");
+extern char cFEMemCard_callbackConfirmInvalidCard_a5488[] __asm__("cFEMemCard_callbackConfirmInvalidCard");
+extern char cFEMemCard_callbackConfirmNoFreeBlocks_a5488[] __asm__("cFEMemCard_callbackConfirmNoFreeBlocks");
+extern char cFEMemCard_callbackConfirmSaveTooBig_a5488[] __asm__("cFEMemCard_callbackConfirmSaveTooBig");
 extern char cFEMemCard_isSavePressed_a5488[] __asm__("cFEMemCard_isSavePressed");
 extern char cFEMemCard_isDeletePressed_a5488[] __asm__("cFEMemCard_isDeletePressed");
 extern char cFEMemCard_isCancelPressed_a5488[] __asm__("cFEMemCard_isCancelPressed");
@@ -1184,25 +1184,25 @@ extern char cFEMemCard_isNextMCPressed_a5488[] __asm__("cFEMemCard_isNextMCPress
 extern char cFEMemCard_isPrevMCPressed_a5488[] __asm__("cFEMemCard_isPrevMCPressed");
 extern char cFEMemCard_callbackIsRetryPressed_a5488[] __asm__("cFEMemCard_callbackIsRetryPressed");
 extern char cFEMemCard_isFormatPressed_a5488[] __asm__("cFEMemCard_isFormatPressed");
-extern char func_001D7190_a5488[] __asm__("func_001D7190");
-extern char func_001D8160_a5488[] __asm__("func_001D8160");
-extern char func_001D83A8_a5488[] __asm__("func_001D83A8");
-extern char func_001D8358_a5488[] __asm__("func_001D8358");
-extern char func_001D8240_a5488[] __asm__("func_001D8240");
+extern char cFEMemCard_callbackSaveFileCorrupt_a5488[] __asm__("cFEMemCard_callbackSaveFileCorrupt");
+extern char cFEMemCard_callbackCardsChecked_a5488[] __asm__("cFEMemCard_callbackCardsChecked");
+extern char cFEMemCard_callbackFileChecked_a5488[] __asm__("cFEMemCard_callbackFileChecked");
+extern char cFEMemCard_callbackDisplayNoFiles_a5488[] __asm__("cFEMemCard_callbackDisplayNoFiles");
+extern char cFEMemCard_callbackDisplayNoCards_a5488[] __asm__("cFEMemCard_callbackDisplayNoCards");
 extern char cFEMemCard_callbackFileExists_a5488[] __asm__("cFEMemCard_callbackFileExists");
-extern char func_001D7D70_a5488[] __asm__("func_001D7D70");
+extern char cFEMemCard_callbackCardChanged_a5488[] __asm__("cFEMemCard_callbackCardChanged");
 
 /**
  * Sets up a memory-card screen: makes it the active instance, plugs the front end's handlers into the memory-card
  * manager and sizes the manager's file operations for the screen's save kind.
  *
  * Stores @p self_ in cFEMemCard_mInstance and fills 40 of the 45 cMCOverlayManager callback slots
- * (cSSXApp_getMCManager): callbackWriteStart = cFEMemCard_writeStart, callbackWriteUpdate = func_001D5D78,
- * callbackWriteEnd = func_001D5F38, callbackReadStart = cFEMemCard_readStart, callbackReadUpdate =
- * cFEMemCard_callbackReadUpdate, callbackReadEnd = func_001D5F40, the cFEMemCard_callback* handlers in the slots of the
+ * (cSSXApp_getMCManager): callbackWriteStart = cFEMemCard_writeStart, callbackWriteUpdate = cFEMemCard_callbackWriteUpdate,
+ * callbackWriteEnd = cFEMemCard_writeDone, callbackReadStart = cFEMemCard_readStart, callbackReadUpdate =
+ * cFEMemCard_callbackReadUpdate, callbackReadEnd = cFEMemCard_readDone, the cFEMemCard_callback* handlers in the slots of the
  * same name, the button queries (cFEMemCard_isSavePressed, cFEMemCard_isCancelPressed,
- * cFEMemCard_callbackIsRetryPressed, ...) in the callbackIs* slots, and unnamed handlers (func_001D68E8 ...
- * func_001D8358) in the rest; callbackLoadStart, callbackReadFailed, callbackLoadReady, callbackSysRecheckFile and
+ * cFEMemCard_callbackIsRetryPressed, ...) in the callbackIs* slots, and unnamed handlers (cFEMemCard_callbackConfirmOverwrite ...
+ * cFEMemCard_callbackDisplayNoFiles) in the rest; callbackLoadStart, callbackReadFailed, callbackLoadReady, callbackSysRecheckFile and
  * callbackAcknowledgeCardStatusChange keep their defaults.
  *
  * Then stores @p mode at +0x1BC and 25 at +0x19C, zeroes the state words from +0x1A0 to +0x228 and the short at +0x9C,
@@ -1215,7 +1215,7 @@ extern char func_001D7D70_a5488[] __asm__("func_001D7D70");
  * @param self_  the memory-card screen (this)
  * @param mode  the save kind: 0 profile, 1 replay, 2 settings (On Tour iType)
  */
-extern "C" void func_001D5488(void* self_, int mode)
+extern "C" void cFEMemCard_initFEMemCard(void* self_, int mode)
 {
     char* self = (char*)self_;
     void* gapp = SSXApp;
@@ -1225,8 +1225,8 @@ extern "C" void func_001D5488(void* self_, int mode)
     char* app = (char*)cSSXApp_getMCManager(gapp);
     *(void**)(app + 0x0) = cFEMemCard_writeStart_a5488;
     *(void**)(app + 0x18) = cFEMemCard_readStart_a5488;
-    *(void**)(app + 0x8) = func_001D5F38_a5488;
-    *(void**)(app + 0x20) = func_001D5F40_a5488;
+    *(void**)(app + 0x8) = cFEMemCard_writeDone_a5488;
+    *(void**)(app + 0x20) = cFEMemCard_readDone_a5488;
     *(void**)(app + 0x6C) = cFEMemCard_isCancelPressed_a5488;
     *(void**)(app + 0x68) = cFEMemCard_isDeletePressed_a5488;
     *(void**)(app + 0x64) = cFEMemCard_isSavePressed_a5488;
@@ -1236,33 +1236,33 @@ extern "C" void func_001D5488(void* self_, int mode)
     *(void**)(app + 0x7C) = cFEMemCard_isNextMCPressed_a5488;
     *(void**)(app + 0x80) = cFEMemCard_isPrevMCPressed_a5488;
     *(void**)(app + 0x84) = cFEMemCard_callbackIsRetryPressed_a5488;
-    *(void**)(app + 0x4) = func_001D5D78_a5488;
-    *(void**)(app + 0x44) = func_001D68E8_a5488;
-    *(void**)(app + 0x40) = func_001D7010_a5488;
+    *(void**)(app + 0x4) = cFEMemCard_callbackWriteUpdate_a5488;
+    *(void**)(app + 0x44) = cFEMemCard_callbackConfirmOverwrite_a5488;
+    *(void**)(app + 0x40) = cFEMemCard_callbackFileCorrupt_a5488;
     *(void**)(app + 0x1C) = cFEMemCard_callbackReadUpdate_a5488;
     *(void**)(app + 0x88) = cFEMemCard_isFormatPressed_a5488;
-    *(void**)(app + 0x48) = func_001D7318_a5488;
+    *(void**)(app + 0x48) = cFEMemCard_callbackConfirmFormat_a5488;
     *(void**)(app + 0x50) = cFEMemCard_callbackConfirmFormatDone_a5488;
-    *(void**)(app + 0x4C) = func_001D7548_a5488;
+    *(void**)(app + 0x4C) = cFEMemCard_callbackConfirmFormatFail_a5488;
     *(void**)(app + 0x54) = cFEMemCard_callbackConfirmDelete_a5488;
-    *(void**)(app + 0x38) = func_001D72A8_a5488;
+    *(void**)(app + 0x38) = cFEMemCard_callbackFileNotFound_a5488;
     *(void**)(app + 0x28) = cFEMemCard_callbackReadSuccess_a5488;
-    *(void**)(app + 0x24) = func_001D6AD0_a5488;
-    *(void**)(app + 0x3C) = func_001D6D88_a5488;
-    *(void**)(app + 0x58) = func_001D77E8_a5488;
-    *(void**)(app + 0x10) = func_001D6C28_a5488;
+    *(void**)(app + 0x24) = cFEMemCard_callbackConfirmLoadFailed_a5488;
+    *(void**)(app + 0x3C) = cFEMemCard_callbackConfirmNoCards_a5488;
+    *(void**)(app + 0x58) = cFEMemCard_callbackConfirmInvalidCard_a5488;
+    *(void**)(app + 0x10) = cFEMemCard_callbackConfirmSaveFailed_a5488;
     *(void**)(app + 0xC) = cFEMemCard_callbackSaveSuccess_a5488;
-    *(void**)(app + 0x60) = func_001D7998_a5488;
+    *(void**)(app + 0x60) = cFEMemCard_callbackConfirmSaveTooBig_a5488;
     *(void**)(app + 0x30) = cFEMemCard_callbackDeleteDone_a5488;
-    *(void**)(app + 0x34) = func_001D8020_a5488;
-    *(void**)(app + 0x8C) = func_001D7190_a5488;
-    *(void**)(app + 0x90) = func_001D8160_a5488;
-    *(void**)(app + 0x94) = func_001D83A8_a5488;
-    *(void**)(app + 0x98) = func_001D8358_a5488;
-    *(void**)(app + 0x9C) = func_001D8240_a5488;
-    *(void**)(app + 0x5C) = func_001D7B18_a5488;
+    *(void**)(app + 0x34) = cFEMemCard_callbackDeleteFailed_a5488;
+    *(void**)(app + 0x8C) = cFEMemCard_callbackSaveFileCorrupt_a5488;
+    *(void**)(app + 0x90) = cFEMemCard_callbackCardsChecked_a5488;
+    *(void**)(app + 0x94) = cFEMemCard_callbackFileChecked_a5488;
+    *(void**)(app + 0x98) = cFEMemCard_callbackDisplayNoFiles_a5488;
+    *(void**)(app + 0x9C) = cFEMemCard_callbackDisplayNoCards_a5488;
+    *(void**)(app + 0x5C) = cFEMemCard_callbackConfirmNoFreeBlocks_a5488;
     *(void**)(app + 0xA0) = cFEMemCard_callbackFileExists_a5488;
-    *(void**)(app + 0xA8) = func_001D7D70_a5488;
+    *(void**)(app + 0xA8) = cFEMemCard_callbackCardChanged_a5488;
     *(int*)(self + 0x19C) = 25;
     *(int*)(self + 0x1BC) = mode;
     *(int*)(self + 0x1A8) = 0;
@@ -1549,7 +1549,7 @@ extern "C" int cFEMemCard_callbackReadUpdate(int size)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5D78);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_callbackWriteUpdate);
 #ifdef SKIP_ASM
 extern void* cFEMemCard_mInstance;
 extern "C" void* cSSXApp_getMCManager(void* app);
@@ -1572,7 +1572,7 @@ struct sFEMemCard_5D78 {
  * @param key  the size the manager asks for; cReplay_getSaveData overwrites it with the size of the produced block
  * @return 1 when a block was handed over, 0 when the replay is complete or the screen is not saving a replay
  */
-extern "C" int func_001D5D78(int key)
+extern "C" int cFEMemCard_callbackWriteUpdate(int key)
 {
     int out;
     if (((sFEMemCard_5D78*)cFEMemCard_mInstance)->mode == 1) {
@@ -1670,25 +1670,25 @@ extern "C" void cFEMemCard_readStart()
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5F38__FPv);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_writeDone__FPv);
 #ifdef SKIP_ASM
 /**
  * Memory-card write-finished callback; does nothing.
  *
- * func_001D5488 installs it as the manager's callbackWriteEnd.
+ * cFEMemCard_initFEMemCard installs it as the manager's callbackWriteEnd.
  */
-void func_001D5F38(void* self)
+void cFEMemCard_writeDone(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5F40);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_readDone);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" int func_00152BB0(void* self, char* buf);
 extern "C" int func_00152DE0(void* self, char* buf, int idx);
-extern "C" void func_001D64C0(unsigned int mode);
+extern "C" void cFEMemCard_setSoundMode(unsigned int mode);
 extern "C" void func_00287410(void* opt, int v);
 extern "C" void func_00287488(void* opt, int v);
 extern "C" void func_00287520(void* opt, int v);
@@ -1732,8 +1732,8 @@ struct sMemCard_1D5F40 {
  *
  * With the save interface (back-end interface 5) it handles the read by the screen's mode (+0x1BC of
  * cFEMemCard_mInstance). Mode 2 (settings) loads the buffer at +0x1D0 with func_00152BB0 (On Tour
- * cBESaveInterface::loadSaveGame) and, when the audio object exists (func_0028B180), applies the loaded sound options
- * from cBEOptionInterface_mOption: the output mode (bits 12-13) through func_001D64C0, the SFX, speech and music
+ * cBESaveInterface::loadSaveGame) and, when the audio object exists (cAudioInterface_bxAudio), applies the loaded sound options
+ * from cBEOptionInterface_mOption: the output mode (bits 12-13) through cFEMemCard_setSoundMode, the SFX, speech and music
  * volumes (4-bit fields) through func_00287410, func_00287488 and func_00287520, bit 17 through cSSXAudio_SetArcadeSFX
  * and bit 16 through func_002875D0. Mode 0 (profile) loads it with func_00152DE0 (On Tour loadSaveProfile) into slot
  * +0x1CC. Mode 1 (replay) does nothing here. A failed load returns 0 at once, keeping the buffer.
@@ -1744,21 +1744,21 @@ struct sMemCard_1D5F40 {
  * @return 0 when the save interface rejected the data, else 1
  */
 // Memory-card load/save step: applies the loaded sound options, then frees the transfer buffer.
-extern "C" int func_001D5F40()
+extern "C" int cFEMemCard_readDone()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
     switch (((sMemCard_1D5F40*)cFEMemCard_mInstance)->op) {
     case 2:
         if (!func_00152BB0(iface, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->buf))
             return 0;
-        if (func_0028B180() != 0) {
+        if (cAudioInterface_bxAudio() != 0) {
             cBE_getInterface_Fv(cBE_getBE(), 4);
-            func_001D64C0(Cfg_1D5F40().output);
-            func_00287410(func_0028B180(), Cfg_1D5F40().sfxVol);
-            func_00287488(func_0028B180(), Cfg_1D5F40().speechVol);
-            func_00287520(func_0028B180(), Cfg_1D5F40().musicVol);
-            cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_1D5F40().f17 != 0);
-            func_002875D0(func_0028B180(), Cfg_1D5F40().f16 != 0);
+            cFEMemCard_setSoundMode(Cfg_1D5F40().output);
+            func_00287410(cAudioInterface_bxAudio(), Cfg_1D5F40().sfxVol);
+            func_00287488(cAudioInterface_bxAudio(), Cfg_1D5F40().speechVol);
+            func_00287520(cAudioInterface_bxAudio(), Cfg_1D5F40().musicVol);
+            cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_1D5F40().f17 != 0);
+            func_002875D0(cAudioInterface_bxAudio(), Cfg_1D5F40().f16 != 0);
         }
         break;
     case 0:
@@ -1780,9 +1780,9 @@ extern "C" int func_001D5F40()
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D64C0);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_setSoundMode);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" int func_00287670(void* opt);
 extern "C" int func_002876A0(void* opt);
 extern "C" int func_002876D0(void* opt);
@@ -1823,7 +1823,7 @@ struct sOpt_001D64C0 : sOptBase_001D64C0, sOptSub_001D64C0 {
  * Switches the audio output mode, restarting the sound system when the mode changes.
  *
  * The output setting @p mode maps to an SSXAUDIO mode: 1 -> 2, 2 -> 0, 3 -> 3, anything else -> 1. The audio object
- * (func_0028B180) is asked to switch through method slot 2 of the object at +0x1D8 of its +0x118 member's first
+ * (cAudioInterface_bxAudio) is asked to switch through method slot 2 of the object at +0x1D8 of its +0x118 member's first
  * pointer; only when that returns 1 does the restart run: it saves the SFX, speech and music volumes (func_00287670,
  * func_002876A0, func_002876D0), the arcade-SFX flag (+0x62B8), the +0x62B4 flag and the +0x534 word, then calls
  * cSSXAudio_FrontEndPurge, SSXAUDIO_DeInit and SSXAUDIO_Init(new mode), puts the volumes and flags back (func_00287410,
@@ -1832,7 +1832,7 @@ struct sOpt_001D64C0 : sOptBase_001D64C0, sOptSub_001D64C0 {
  *
  * @param mode  the output setting, 0-3 (bits 12-13 of cBEOptionInterface_mOption)
  */
-extern "C" void func_001D64C0(unsigned int mode)
+extern "C" void cFEMemCard_setSoundMode(unsigned int mode)
 {
     int lang;
     switch (mode) {
@@ -1850,23 +1850,23 @@ extern "C" void func_001D64C0(unsigned int mode)
         lang = 1;
         break;
     }
-    if ((*((sOpt_001D64C0*)func_0028B180())->holder)->lang->v02(lang) == 1) {
-        float sfxVolume = func_00287670(func_0028B180());
-        float speechVolume = func_002876A0(func_0028B180());
-        float musicVolume = func_002876D0(func_0028B180());
-        int x = *(int*)((char*)func_0028B180() + 0x62B8);
-        int y = *(int*)((char*)func_0028B180() + 0x62B4);
-        int z = *(int*)((char*)func_0028B180() + 0x534);
-        cSSXAudio_FrontEndPurge(func_0028B180());
+    if ((*((sOpt_001D64C0*)cAudioInterface_bxAudio())->holder)->lang->v02(lang) == 1) {
+        float sfxVolume = func_00287670(cAudioInterface_bxAudio());
+        float speechVolume = func_002876A0(cAudioInterface_bxAudio());
+        float musicVolume = func_002876D0(cAudioInterface_bxAudio());
+        int x = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B8);
+        int y = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B4);
+        int z = *(int*)((char*)cAudioInterface_bxAudio() + 0x534);
+        cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(lang);
-        func_00287410(func_0028B180(), (int)sfxVolume);
-        func_00287488(func_0028B180(), (int)speechVolume);
-        func_00287520(func_0028B180(), (int)musicVolume);
-        cSSXAudio_SetArcadeSFX(func_0028B180(), x);
-        func_002875D0(func_0028B180(), y);
-        func_00285FB0(func_0028B180());
-        sOpt_001D64C0* audio = (sOpt_001D64C0*)func_0028B180();
+        func_00287410(cAudioInterface_bxAudio(), (int)sfxVolume);
+        func_00287488(cAudioInterface_bxAudio(), (int)speechVolume);
+        func_00287520(cAudioInterface_bxAudio(), (int)musicVolume);
+        cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), x);
+        func_002875D0(cAudioInterface_bxAudio(), y);
+        func_00285FB0(cAudioInterface_bxAudio());
+        sOpt_001D64C0* audio = (sOpt_001D64C0*)cAudioInterface_bxAudio();
         audio->v04(z);
     }
 }

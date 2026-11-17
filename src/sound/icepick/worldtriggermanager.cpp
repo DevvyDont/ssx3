@@ -103,7 +103,7 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4C38);
 struct sWorldTrigger70;
 struct sTriggerIdCache;
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" int func_00287968(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(void* self);
 extern "C" char* cSSXAudio_GetFocusRider(void* self, int which);
@@ -224,19 +224,19 @@ static inline void sfxBegin_4C38(struct sSnd4C38Sys* self, int a, int b)
 // vol/target/handle set-up shared by the play paths (SFX_Play2DVol tail)
 static inline void voiceTail_4C38(struct sWt4C38* t)
 {
-    optsVol_4C38(*((struct sSnd4C38Sys*)func_0028B180())->p118, (int)(t->f10 * 127.0f));
-    struct sSnd4C38Mgr** pp = ((struct sSnd4C38Sys*)func_0028B180())->p118;
-    int r = func_00287968(func_0028B180(), 5, 0);
+    optsVol_4C38(*((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118, (int)(t->f10 * 127.0f));
+    struct sSnd4C38Mgr** pp = ((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118;
+    int r = func_00287968(cAudioInterface_bxAudio(), 5, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
     if (t->f14 != 0) {
-        struct sSnd4C38Mgr** p1 = ((struct sSnd4C38Sys*)func_0028B180())->p118;
+        struct sSnd4C38Mgr** p1 = ((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118;
         (*p1)->sub.tgt[(*p1)->sub.cur] = t->f20;
-        struct sSnd4C38Mgr** p2 = ((struct sSnd4C38Sys*)func_0028B180())->p118;
+        struct sSnd4C38Mgr** p2 = ((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118;
         (*p2)->sub.p74[(*p2)->sub.cur] = 1;
-        struct sSnd4C38Mgr** p3 = ((struct sSnd4C38Sys*)func_0028B180())->p118;
+        struct sSnd4C38Mgr** p3 = ((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118;
         (*p3)->sub.p7C[(*p3)->sub.cur] = 0;
     }
-    struct sSnd4C38Mgr** p4 = ((struct sSnd4C38Sys*)func_0028B180())->p118;
+    struct sSnd4C38Mgr** p4 = ((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118;
     (*p4)->sub.p64[(*p4)->sub.cur] = t->f3C;
 }
 
@@ -271,7 +271,7 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
         }
         r = -1;
         if (rec[0] == 3) {
-            if (*(int*)(cSSXAudio_GetFocusRider(func_0028B180(), -1) + 0x870) != t->f3C) {
+            if (*(int*)(cSSXAudio_GetFocusRider(cAudioInterface_bxAudio(), -1) + 0x870) != t->f3C) {
                 func_002B5898(t);
                 return;
             }
@@ -286,7 +286,7 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
                     return;
                 }
             }
-            r = func_0029B818(func_0028B180(), t->f40, rec);
+            r = func_0029B818(cAudioInterface_bxAudio(), t->f40, rec);
         }
         if (func_002B67D8(gWorldTriggerManager, t->fC) == 0 || func_002B6808((sTriggerIdCache*)gWorldTriggerManager, t->f4) != 0) {
             if (rec[0] == 3 && r != 1)
@@ -298,14 +298,14 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
                 }
             }
             if (t->f38 != 0) {
-                func_002A7468(func_0028B180());
+                func_002A7468(cAudioInterface_bxAudio());
                 voiceTail_4C38(t);
-                t->f30 = func_002A7678(func_0028B180(), rec[1]);
+                t->f30 = func_002A7678(cAudioInterface_bxAudio(), rec[1]);
                 return;
             }
-            sfxBegin_4C38((struct sSnd4C38Sys*)func_0028B180(), rec[0], rec[1]);
+            sfxBegin_4C38((struct sSnd4C38Sys*)cAudioInterface_bxAudio(), rec[0], rec[1]);
             voiceTail_4C38(t);
-            t->f30 = cBankSys_SFX_End(func_0028B180());
+            t->f30 = cBankSys_SFX_End(cAudioInterface_bxAudio());
             return;
         }
         func_002B5898(t);
@@ -313,22 +313,22 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
     }
     if (func_002B6988(gWorldTriggerManager, t->fC) != 0 && func_002B69B8(gWorldTriggerManager, (void*)t->f4, tt) != 0) {
         if (t->f30 != -9999)
-            cBankMonitor_BANKMONITOR_StopHandle(&(*((struct sSnd4C38Sys*)func_0028B180())->p118)->sub, t->f30, 1, 0.1f);
-        sfxBegin_4C38((struct sSnd4C38Sys*)func_0028B180(), t->f60, t->f64);
+            cBankMonitor_BANKMONITOR_StopHandle(&(*((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118)->sub, t->f30, 1, 0.1f);
+        sfxBegin_4C38((struct sSnd4C38Sys*)cAudioInterface_bxAudio(), t->f60, t->f64);
         voiceTail_4C38(t);
-        t->f30 = cBankSys_SFX_End(func_0028B180());
+        t->f30 = cBankSys_SFX_End(cAudioInterface_bxAudio());
         return;
     }
     if (t->f38 != 0) {
         if (t->f30 == -9999)
             return;
-        func_002A7340(func_0028B180(), t->f30, (int)(t->f10 * 127.0f));
+        func_002A7340(cAudioInterface_bxAudio(), t->f30, (int)(t->f10 * 127.0f));
         return;
     }
     if (t->f30 == -9999)
         return;
     {
-        char* h = (char*)cBankMonitor_BANKMONITOR_GetHandle(&(*((struct sSnd4C38Sys*)func_0028B180())->p118)->sub, t->f30, 1);
+        char* h = (char*)cBankMonitor_BANKMONITOR_GetHandle(&(*((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118)->sub, t->f30, 1);
         if (h == 0)
             return;
         *(int*)(h + 100) = (int)(t->f10 * 127.0f);
@@ -339,7 +339,7 @@ extern "C" void func_002B4C38(sWorldTrigger70* tt)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_Stop);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002A72D8(void* snd, int id, float t);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* self, int idx, int a2, float v);
 extern unsigned char D_004A35A8[];
@@ -349,7 +349,7 @@ struct sWorldTrigger70;
  * Stops a world audio trigger instance's sound and resets the instance.
  *
  * If the handle at +0x30 (On Tour m_iAudioHandle) is live (not -9999) it is stopped with a 0.25 s fade: through the
- * crowd system (func_002A72D8 on gSSXAudio, func_0028B180) when the crowd flag at +0x38 is set, else through
+ * crowd system (func_002A72D8 on gSSXAudio, cAudioInterface_bxAudio) when the crowd flag at +0x38 is set, else through
  * cBankMonitor_BANKMONITOR_StopHandle on the bank monitor. Then the handle becomes -1, the swap name at +0x40 is
  * emptied (On Tour strcpy(name, "")), +0x68 (On Tour m_iLastAnimFrame) is set to -1.0f and +0x60, +0x64 and +0x6C are
  * zeroed.
@@ -361,10 +361,10 @@ extern "C" void cWorldTriggerInstance_Stop(sWorldTrigger70* instance)
     char* self = (char*)instance;
     if (*(int*)((char*)self + 0x38) != 0) {
         if (*(int*)((char*)self + 0x30) != -9999) {
-            func_002A72D8(func_0028B180(), *(int*)((char*)self + 0x30), 0.25f);
+            func_002A72D8(cAudioInterface_bxAudio(), *(int*)((char*)self + 0x30), 0.25f);
         }
     } else if (*(int*)((char*)self + 0x30) != -9999) {
-        cBankMonitor_BANKMONITOR_StopHandle(**(char***)((char*)func_0028B180() + 0x118) + 0x1D8, *(int*)((char*)self + 0x30), 1, 0.25f);
+        cBankMonitor_BANKMONITOR_StopHandle(**(char***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, *(int*)((char*)self + 0x30), 1, 0.25f);
     }
     *(int*)((char*)self + 0x30) = -1;
     *(unsigned char*)((char*)self + 0x40) = D_004A35A8[0];
@@ -657,7 +657,7 @@ extern "C" void func_002B5C68(sWorldTrigger70** self, int objectRef, int volNum,
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5D78);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" int func_004165A8(const void* a, const void* b);
 // PORT: func_0029B960__FPv is an empty stub whose caller passes (mgr, name).
 void func_0029B960_2(void* mgr, void* name) __asm__("func_0029B960__FPv");
@@ -667,13 +667,13 @@ extern unsigned char D_004A35A8[];
 
 extern "C" void func_002B5D78(sWorldTrigger70** self)
 {
-    if (*(int*)((char*)func_0028B180() + 0x5FB0) != 0) return;
+    if (*(int*)((char*)cAudioInterface_bxAudio() + 0x5FB0) != 0) return;
     for (int i = 0; i < 40; i++) {
         if ((*self)[i].active == 1) {
             if ((*self)[i].unk34 == 0) {
                 if (func_004165A8((char*)&(*self)[i] + 0x40, D_004A35A8)) {
                     // PORT: pointer arithmetic through int
-                    func_0029B960_2(func_0028B180(), (char*)(i * 0x70 + *(int*)self) + 0x40);
+                    func_0029B960_2(cAudioInterface_bxAudio(), (char*)(i * 0x70 + *(int*)self) + 0x40);
                 }
                 (*self)[i].active = 0;
                 cWorldTriggerInstance_Stop(&(*self)[i]);
@@ -727,7 +727,7 @@ extern "C" void func_002B5ED8(sWorldTrigger70** self, int id)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5F60);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
 extern "C" int func_002B6740(void* self, void* obj);
 struct sTriggerIdCache;
@@ -809,7 +809,7 @@ extern "C" int func_002B5F60(char* self, void* evt, int id, char* rider, int vol
     int type, a, b;
     if (cWorldTriggerManager_TriggerToPatch(self, id, &type, &a, &b, 1, 0) != 0 && b == 0)
     {
-        sWtSnd5F60* snd = (sWtSnd5F60*)func_0028B180();
+        sWtSnd5F60* snd = (sWtSnd5F60*)cAudioInterface_bxAudio();
         int tp = type;
         int ar = a;
         sWtTrack5F60* t = snd->track;
@@ -837,27 +837,27 @@ extern "C" int func_002B5F60(char* self, void* evt, int id, char* rider, int vol
         snd->types[snd->track->sub.cur] = tp;
         snd->args[snd->track->sub.cur] = ar;
         {
-            sWtTrack5F60* t2 = *((sWtSnd5F60*)func_0028B180())->cur;
+            sWtTrack5F60* t2 = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
             sWtSub5F60* s2 = &t2->sub;
             s2->p38[t2->sub.cur] = vol;
             s2->ents[t2->sub.cur].b0 = MAX_5F60(MIN_5F60(s2->p38[s2->cur], 0x7F), 0);
         }
         {
-            sWtTrack5F60** pt = ((sWtSnd5F60*)func_0028B180())->cur;
-            int h = func_00287968(func_0028B180(), 7, 0);
+            sWtTrack5F60** pt = ((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
+            int h = func_00287968(cAudioInterface_bxAudio(), 7, 0);
             (*pt)->sub.p3C[(*pt)->sub.cur] = h;
         }
         if (rider != 0)
         {
-            sWtTrack5F60* t3 = *((sWtSnd5F60*)func_0028B180())->cur;
+            sWtTrack5F60* t3 = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
             t3->sub.arr24[t3->sub.cur] = (int)(rider + 0x110);
-            sWtTrack5F60** pt = ((sWtSnd5F60*)func_0028B180())->cur;
-            int h = func_00288A20(func_0028B180(), rider);
+            sWtTrack5F60** pt = ((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
+            int h = func_00288A20(cAudioInterface_bxAudio(), rider);
             (*pt)->sub.p64[(*pt)->sub.cur] = h;
-            sWtTrack5F60* t4 = *((sWtSnd5F60*)func_0028B180())->cur;
+            sWtTrack5F60* t4 = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
             t4->sub.p34[t4->sub.cur] = 1;
         }
-        return cBankSys_SFX_End(func_0028B180());
+        return cBankSys_SFX_End(cAudioInterface_bxAudio());
     }
     return -1;
 }
@@ -866,7 +866,7 @@ extern "C" int func_002B5F60(char* self, void* evt, int id, char* rider, int vol
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_TriggerToPatch);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" int func_002ADF60(int a);
 extern "C" int cWorldTriggerManager_AdvancedTriggerToPatch(void* self, int type, int* a, int* b, int* c, int arg);
 
@@ -925,7 +925,7 @@ extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int trigger, int*
         *patch = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj->f14;
     } else if (triggerType == 2) {
         *bank = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj->f10;
-        void* audio = func_0028B180();
+        void* audio = cAudioInterface_bxAudio();
         int rnd = func_002ADF60(*(int*)(*(char**)*(void**)((char*)audio + 0x118) + 0x1D8));
         sWTMObj* randomData = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj;
         int pick = (unsigned)((rnd & 0x7FFF) * randomData->f34) / 0x7FFF;
@@ -943,7 +943,7 @@ extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int trigger, int*
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_AdvancedTriggerToPatch);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" int func_002A34D0(void* mgr, int a1, int a2, int a3);
 
 /**
@@ -967,7 +967,7 @@ extern "C" int cWorldTriggerManager_AdvancedTriggerToPatch(void* self, int trigg
     *noAudio = 0;
     if (trigger == 77) {
         *noAudio = 1;
-        found = func_002A34D0(func_0028B180(), 0, 1, viewPort);
+        found = func_002A34D0(cAudioInterface_bxAudio(), 0, 1, viewPort);
     }
     return found;
 }
@@ -1194,7 +1194,7 @@ extern "C" void func_002B6950(char* self, int enable, int delay)
         *(int*)(self + 0x334) = enable;
         return;
     }
-    cSSXAudio_DelayMonitorTriggers(func_0028B180());
+    cSSXAudio_DelayMonitorTriggers(cAudioInterface_bxAudio());
 }
 #endif
 

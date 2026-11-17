@@ -3592,13 +3592,13 @@ extern "C" void func_00296E18(void) {
 //100%
 INCLUDE_ASM("sound/soundsys", func_00296E20);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
 extern "C" void func_00296E20(void* self, void* obj)
 {
     if (*(int*)((char*)obj + 0x774) >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)func_0028B180() + 0x118) + 0x1D8, *(int*)((char*)obj + 0x774), 1, 0.75f);
+        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, *(int*)((char*)obj + 0x774), 1, 0.75f);
         *(int*)((char*)obj + 0x774) = -1;
     }
 }
@@ -3728,13 +3728,13 @@ extern "C" void func_00297430(void) {
 //100%
 INCLUDE_ASM("sound/soundsys", func_00297438);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
 extern "C" void func_00297438(void* self, void* obj)
 {
     if (*(int*)((char*)obj + 0x778) >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)func_0028B180() + 0x118) + 0x1D8, *(int*)((char*)obj + 0x778), 1, 0.75f);
+        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, *(int*)((char*)obj + 0x778), 1, 0.75f);
         *(int*)((char*)obj + 0x778) = -1;
     }
 }
@@ -3957,7 +3957,7 @@ static inline void sndPushVoice(void* vself, int a, int b)
 }
 
 extern "C" int* cBENewRaceInterface_getLocation(void* p);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 
 static inline int snd7950Commit(void* vself, void* tgt, float f, int pri)
 {
@@ -4054,7 +4054,7 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int 
     int pri = 80;
     *(int*)((char*)self + i * 0x30 + 0x5A20) = type;
     if (type == 201) {
-        if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)) == 8) {
+        if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)) == 8) {
             radius = 400.0f;
             pri = 50;
         }
@@ -8476,7 +8476,7 @@ INCLUDE_ASM("sound/soundsys", func_0029FCC8);
 extern "C" int func_002A3FE8(void* self);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, int which, float f);
 extern "C" int func_002B0E28(void* self, int i);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
@@ -8534,7 +8534,7 @@ extern "C" void func_0029FCC8(cSSXAudio* self, void* vrider)
     if (func_002B0E28(snd, 0) == 0) return;
     int r = func_0029F330_i(rider);
     if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
-    int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+    int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
         if (func_002B1458(snd, 0, 8324, (int)rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8324), 2, r, 3);
@@ -8558,7 +8558,7 @@ extern "C" int func_0029F0A0(void* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, int which, float f);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -8604,7 +8604,7 @@ extern "C" void func_0029FF80(cSSXAudio* self, sSsFF80Rider* rider, int alt)
     int r = func_0029F330_i(rider);
     if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
     if (alt != 0) {
-        int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+        int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (sel == 1) {
             if (func_002B1458((char*)self + 0x5560, 0, 8336, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
                 D_004A482C(func_003D8008(1, 0, 8336), 1, r);
@@ -8619,7 +8619,7 @@ extern "C" void func_0029FF80(cSSXAudio* self, sSsFF80Rider* rider, int alt)
             }
         }
     } else {
-        int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+        int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (sel == 1) {
             if (func_002B1458((char*)self + 0x5560, 0, 8322, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
                 D_004A482C(func_003D8008(1, 0, 8322), 1, r);
@@ -8644,7 +8644,7 @@ extern "C" int func_002A3F90(void* self);
 extern "C" int func_002A4040(void* self);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 extern "C" int cSSXAudio_CameraInRange(void* self, int which, float f);
 extern "C" int func_002B0E28(void* self, int i);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
@@ -8698,7 +8698,7 @@ extern "C" void func_002A02D8(cSSXAudio* self, sSs02D8Rider* rider)
         mode = 3;
     }
     if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
-    int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+    int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
         if (func_002B1458((char*)self + 0x5560, 0, 8328, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8328), 2, r, mode);
@@ -9635,7 +9635,7 @@ INCLUDE_ASM("sound/soundsys", func_002A2018);
 extern "C" int func_0029F0D8(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -9649,7 +9649,7 @@ extern "C" void func_002A2018(cSSXAudio* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8392, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8392), 2, r, m);
         }
     }
@@ -9662,7 +9662,7 @@ INCLUDE_ASM("sound/soundsys", func_002A20D0);
 extern "C" int func_0029F0D8(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -9676,7 +9676,7 @@ extern "C" void func_002A20D0(cSSXAudio* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8393, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8393), 2, r, m);
         }
     }
@@ -9692,7 +9692,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getAI();
 // func_002A1D48 returns its tail call's value (the unit defines it as void).
 int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -9707,7 +9707,7 @@ extern "C" void func_002A2188(cSSXAudio* self)
         if (func_002B1458((char*)self + 0x5560, 0, 8394, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int a = func_002A1D48_r(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_5(func_003D8008(1, 0, 8394), 3, r, a, m);
         }
     }
@@ -9720,7 +9720,7 @@ INCLUDE_ASM("sound/soundsys", func_002A2260);
 extern "C" int func_0029F0D8(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -9734,7 +9734,7 @@ extern "C" void func_002A2260(cSSXAudio* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8423, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8423), 2, r, m);
         }
     }
@@ -9747,7 +9747,7 @@ INCLUDE_ASM("sound/soundsys", func_002A2318);
 extern "C" int func_0029F0D8(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -9761,7 +9761,7 @@ extern "C" void func_002A2318(cSSXAudio* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8424, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8424), 2, r, m);
         }
     }
@@ -9774,7 +9774,7 @@ INCLUDE_ASM("sound/soundsys", func_002A23D0);
 extern "C" int func_0029F0D8(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -9790,7 +9790,7 @@ extern "C" void func_002A23D0(cSSXAudio* self, int mode)
             int r = func_0029F198(self);
             int m;
             if (mode == -1) {
-                m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             } else {
                 m = func_002A1E20(self, mode);
             }
@@ -9830,7 +9830,7 @@ INCLUDE_ASM("sound/soundsys", func_002A2568);
 extern "C" int func_0029F0D8(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -9844,7 +9844,7 @@ extern "C" void func_002A2568(cSSXAudio* self, int a1)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), a1);
+            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), a1);
             D_004A482C_5(func_003D8008(1, 0, 8396), 3, r, m, 3);
         }
     }
@@ -9857,7 +9857,7 @@ INCLUDE_ASM("sound/soundsys", func_002A2638);
 extern "C" int func_0029F0D8(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -9871,7 +9871,7 @@ extern "C" void func_002A2638(cSSXAudio* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8378, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8378), 2, r, m);
         }
     }
@@ -9971,7 +9971,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getAI();
 // func_002A1D48 returns its tail call's value (the unit defines it as void).
 int func_002A1D48_r(void* self, void* obj) __asm__("func_002A1D48");
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -9986,7 +9986,7 @@ extern "C" void func_002A2938(cSSXAudio* self)
         if (func_002B1458((char*)self + 0x5560, 0, 8450, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
             int a = func_002A1D48_r(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_5(func_003D8008(1, 0, 8450), 3, r, a, m);
         }
     }
@@ -9999,7 +9999,7 @@ INCLUDE_ASM("sound/soundsys", func_002A2A10);
 extern "C" int func_0029F0D8(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_00145750(void*);
@@ -10014,7 +10014,7 @@ extern "C" void func_002A2A10(cSSXAudio* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8459, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1DA0_r(self, func_00145750(cBE_getInterface_Fv(func_0028B1E8(), 0)), 0);
+            int m = func_002A1DA0_r(self, func_00145750(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), 0);
             D_004A482C_4(func_003D8008(1, 0, 8459), 2, r, m);
         }
     }
@@ -10027,7 +10027,7 @@ INCLUDE_ASM("sound/soundsys", func_002A2AD0);
 extern "C" int func_0029F0D8(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -10041,7 +10041,7 @@ extern "C" void func_002A2AD0(cSSXAudio* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8491, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_4(func_003D8008(1, 0, 8491), 2, r, m);
         }
     }
@@ -10078,7 +10078,7 @@ INCLUDE_ASM("sound/soundsys", func_002A2C30);
 extern "C" int func_0029F0D8(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -10092,7 +10092,7 @@ extern "C" void func_002A2C30(cSSXAudio* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8493, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
+            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
             D_004A482C_4(func_003D8008(1, 0, 8493), 2, r, m);
         }
     }
@@ -10162,7 +10162,7 @@ extern "C" void func_002A2318(cSSXAudio* self);
 extern "C" void func_002A20D0(cSSXAudio* self);
 extern "C" int func_002A1E20(void* self, unsigned int a1);
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 extern "C" unsigned int func_002ADF60(void* rng);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 // PORT: declared signed char elsewhere; the caller here sign-extends an int result itself.
@@ -10201,7 +10201,7 @@ extern "C" void func_002A2E50(void* vself, int bonus)
                 int track = 0xE;
                 void* players = cBE_getInterface_Fv(cBE_getBE(), 1);
                 signed char ch = cBENewPlayerInterface_getRiderCharID_i(players, cBENewPlayerInterface_getHumanRider(players, 0));
-                int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
                 if (sel != 1) {
                     track = sel == 2 ? 0xF : 0x10;
                 }
@@ -10358,7 +10358,7 @@ extern "C" int func_0029F128(void* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -10373,7 +10373,7 @@ extern "C" void func_002A3400(cSSXAudio* self)
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (func_002B1458((char*)self + 0x5560, 0, 8387, 0, 11, 0, 0, 0.0f) == 0) return;
     int r = func_0029F198(self);
-    int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
+    int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
     D_004A482C_4(func_003D8008(1, 0, 8387), 2, r, m);
 }
 #endif
@@ -10567,7 +10567,7 @@ INCLUDE_ASM("sound/soundsys", func_002A39E0);
 extern "C" int func_0029F128(void* self);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -10581,7 +10581,7 @@ extern "C" void func_002A39E0(cSSXAudio* self)
     if (func_0029F128(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8379, 0, 11, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)), -1);
+            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
             D_004A482C_4(func_003D8008(1, 0, 8379), 2, r, m);
         }
     }
@@ -11151,7 +11151,7 @@ extern "C" void func_002A45C0(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4660);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
@@ -11165,7 +11165,7 @@ extern "C" void func_002A4660(void* self, int a1, int a2, int a3, int a4)
             *(int*)((char*)self + 0x57FC) = 1;
         }
         *(int*)((char*)self + 0x5800) = a1;
-        *(int*)((char*)self + 0x5810) = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0));
+        *(int*)((char*)self + 0x5810) = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0));
     }
     *(int*)((char*)self + 0x5804) += a2;
     *(int*)((char*)self + 0x5808) += a3;

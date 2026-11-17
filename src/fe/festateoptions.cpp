@@ -88,7 +88,7 @@ extern "C" void cKeyboardPopup_setInputText(void* self, char* s);
 extern "C" void func_001CCF00(void* self, char* s);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int a1, int a2, int a3);
 extern "C" int func_00187D38(void* self);
-extern "C" void func_00188E58(void* self);
+extern "C" void cFEStateOptions_saveOptionPrompt(void* self);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_cKeyboardPopup[];
@@ -136,7 +136,7 @@ static inline int Is_00188980(int id, char* s) { return id == GetHashValue32(s);
  * Handles a widget event on the options menu (select, back, keyboard popup closed).
  *
  * Event 5 (select): entry "6" opens a cKeyboardPopup with empty text; entry "8" asks to save first
- * (func_00188E58, probably saveOptionPrompt) when an options-changed flag (D_004A14D0/D4/D8/DC) is set and
+ * (cFEStateOptions_saveOptionPrompt, probably saveOptionPrompt) when an options-changed flag (D_004A14D0/D4/D8/DC) is set and
  * D_004A14E0 is clear, otherwise it sets the pending-delete bit 0x80 of mAttrState (+0x1C), plays
  * "TransitionOut" and, when +0x48 is set, stores 0x18 at +0xC of the custom interface; every other entry (and
  * "8" with +0x48 set) pushes the state that the engine's custom interface (engine + 0x0) virtual slot 4,
@@ -164,7 +164,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, u
             break;
         } else if (Is_00188980(*(int*)(widget + 0x38), D_004A1530)) {
             if (D_004A14E0 == 0 && (D_004A14D0 != 0 || D_004A14D4 != 0 || D_004A14DC != 0 || D_004A14D8 != 0)) {
-                func_00188E58(self);
+                cFEStateOptions_saveOptionPrompt(self);
                 break;
             }
             D_004A14E0 = 0;
@@ -188,7 +188,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, u
         break;
     case 6: {
         if (D_004A14E0 == 0 && (D_004A14D0 != 0 || D_004A14D4 != 0 || D_004A14DC != 0 || D_004A14D8 != 0)) {
-            func_00188E58(self);
+            cFEStateOptions_saveOptionPrompt(self);
             break;
         }
         D_004A14E0 = 0;
@@ -356,7 +356,7 @@ extern "C" void cFEStateOptions_onPopupEvent(void* self, char* popup, int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00188E58);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptions_saveOptionPrompt);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -382,7 +382,7 @@ extern int D_004A14E0;
  * sets D_004A14E0 to 1 (cFEStateOptions_onWidgetEvent only prompts while it is 0 and clears it when the menu is left)
  * and clears +0x4C, which cFEStateOptions_onPopupEvent sets to 1 once the popup is answered.
  */
-extern "C" void func_00188E58(void* self)
+extern "C" void cFEStateOptions_saveOptionPrompt(void* self)
 {
     char* savePopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
     func_0039E318(savePopup, *(void**)((char*)self + 0x10), self);
@@ -616,14 +616,14 @@ void* cFEStateOptionsGame_onGainFocus(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00189610);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0014F4F8(void* iface);
-extern "C" void func_00189D60(void* self);
-extern "C" void* func_0028B180();
+extern "C" void cFEStateOptionsGame_updateWidget(void* self);
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0029ED90(void* p, int a);
 extern char str_111resetopts[];
 extern char str_24screen_position[];
@@ -677,7 +677,7 @@ static inline sGameCfg_189610 Cfg_189610()
  * Event 21 does nothing. On event 22 the popup's answer is its virtual slot 23 (getData) with 2, nonzero meaning
  * accepted, and the popup is told apart by its mHashName (+0xC):
  * - "111resetopts" accepted: resets the game options to their defaults (func_0014F4F8), sets the changed flag
- *   D_004A14D0, refreshes the widgets (func_00189D60) and reloads the language audio (func_0029ED90 on func_0028B180's
+ *   D_004A14D0, refreshes the widgets (cFEStateOptionsGame_updateWidget) and reloads the language audio (func_0029ED90 on cAudioInterface_bxAudio's
  *   gSSXAudio, restart 1).
  * - "24screen_position" accepted: stores the popup's getData(0) and getData(1) into bytes 6 and 5 (f6, f5) of
  *   cBEOptionInterface_mOption, the horizontal and vertical screen offsets, and sets D_004A14D0. Declined: sends the
@@ -689,7 +689,7 @@ static inline sGameCfg_189610 Cfg_189610()
  * @param popup  the popup state; its mHashName (+0xC) says which popup it is
  * @param event  popup event code (22 is handled; 21 and the rest are ignored)
  */
-extern "C" void func_00189610(void* self, char* popup, int event)
+extern "C" void cFEStateOptionsGame_onPopupEvent(void* self, char* popup, int event)
 {
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
@@ -700,8 +700,8 @@ extern "C" void func_00189610(void* self, char* popup, int event)
             if (GetOpt_189610(popup, 2)) {
                 func_0014F4F8(iface);
                 D_004A14D0 = 1;
-                func_00189D60(self);
-                func_0029ED90(func_0028B180(), 1);
+                cFEStateOptionsGame_updateWidget(self);
+                func_0029ED90(cAudioInterface_bxAudio(), 1);
             }
         } else if (Is_189610(*(int*)(popup + 0xC), str_24screen_position)) {
             if (GetOpt_189610(popup, 2)) {
@@ -722,7 +722,7 @@ extern "C" void func_00189610(void* self, char* popup, int event)
             if (GetOpt_189610(popup, 2)) {
                 func_0014F4F8(iface);
                 D_004A14D0 = 1;
-                func_00189D60(self);
+                cFEStateOptionsGame_updateWidget(self);
             }
         }
         {
@@ -735,7 +735,7 @@ extern "C" void func_00189610(void* self, char* popup, int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00189958);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Filters menu events on the game options screen: returns 0x100 for event 9 and 0x101 for every other event.
@@ -746,14 +746,14 @@ INCLUDE_ASM("fe/festateoptions", func_00189958);
  * @param event  menu event code
  * @return 0x100 or 0x101 (cUIMenu reply codes)
  */
-extern "C" int func_00189958(void* self, int menu, int event)
+extern "C" int cFEStateOptionsGame_onWidgetMenu(void* self, int menu, int event)
 {
     return event != 9 ? 257 : 0x100;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00189970);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onWidgetPair);
 #ifdef SKIP_ASM
 /**
  * Returns 0x100 for any nonzero pair event on the game options screen, and 0 for event 0.
@@ -762,7 +762,7 @@ INCLUDE_ASM("fe/festateoptions", func_00189970);
  * @param event  pair event code
  * @return 0x100 when @p event is nonzero, else 0
  */
-extern "C" int func_00189970(void* self, int pair, int event)
+extern "C" int cFEStateOptionsGame_onWidgetPair(void* self, int pair, int event)
 {
     return event ? 0x100 : 0;
 }
@@ -777,7 +777,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cSSXApp_activateBEOptions(void* p);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0029ED90(void* p, int a);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void func_0039E318(void* self, void* engine, void* owner);
@@ -918,7 +918,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
             char* thisp = locale + vt[3].delta;
             vt[3].fn(thisp, cUIListBox_getCurrentEntryData(widget));
             Refresh_189980(self);
-            func_0029ED90(func_0028B180(), 1);
+            func_0029ED90(cAudioInterface_bxAudio(), 1);
         }
         if (self->item[1] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[1]])) {
             bool on = *(unsigned char*)(widget + 0x319);
@@ -935,7 +935,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_00189D60);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_updateWidget);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -1003,11 +1003,11 @@ static inline void* find_189D60(sOptGame_189D60* self, int i)
  * from bits 20-21 (`f20`).
  *
  * It then sends the screen offsets f6 and f5 to GrMan's virtual slot 12 and calls cSSXApp_activateBEOptions.
- * func_00189610 calls it after resetting the options to their defaults.
+ * cFEStateOptionsGame_onPopupEvent calls it after resetting the options to their defaults.
  *
  * @param self_  the cFEStateOptionsGame state
  */
-extern "C" void func_00189D60(void* self_)
+extern "C" void cFEStateOptionsGame_updateWidget(void* self_)
 {
     sOptGame_189D60* self = (sOptGame_189D60*)self_;
     sOptionIface_189D60* iface = (sOptionIface_189D60*)cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1132,14 +1132,14 @@ extern "C" void cFEStateOptionsSound_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018A3D8);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0014F458(void* iface);
-extern "C" void func_0018BEF8(void* self, unsigned int mode);
-extern "C" void* func_0028B180();
+extern "C" void cFEStateOptionsSound_setSoundMode(void* self, unsigned int mode);
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
@@ -1191,7 +1191,7 @@ static inline sSndCfg_18A3D8 Cfg_18A3D8()
  *
  * Only event 22 from the popup hashed "111resetopts" does anything. When the popup's virtual slot 23 (getData) with 2
  * is nonzero it resets the sound options (func_0014F458, the sound step of cBEOptionInterface_revert), switches the
- * speaker mode to bits 12-13 (`output`) with func_0018BEF8, re-applies the effects, speech and music volumes
+ * speaker mode to bits 12-13 (`output`) with cFEStateOptionsSound_setSoundMode, re-applies the effects, speech and music volumes
  * (func_00287410, func_00287488, func_00287520 on gSSXAudio), bit 17 (`f17`) through cSSXAudio_SetArcadeSFX and bit 16
  * (`f16`) through func_002875D0, and refreshes the widgets with cFEStateOptionsSound_updateWidget.
  *
@@ -1200,7 +1200,7 @@ static inline sSndCfg_18A3D8 Cfg_18A3D8()
  * @param popup  the popup state; its mHashName (+0xC) is checked
  * @param event  popup event code (22 is handled)
  */
-extern "C" void func_0018A3D8(void* self, char* popup, int event)
+extern "C" void cFEStateOptionsSound_onPopupEvent(void* self, char* popup, int event)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
@@ -1210,12 +1210,12 @@ extern "C" void func_0018A3D8(void* self, char* popup, int event)
         if (Is_18A3D8(*(int*)(popup + 0xC), str_111resetopts)) {
             if (GetOpt_18A3D8(popup, 2)) {
                 func_0014F458(iface);
-                func_0018BEF8(self, D_00535610_18A3D8.output);
-                func_00287410(func_0028B180(), Cfg_18A3D8().sfxVol);
-                func_00287488(func_0028B180(), Cfg_18A3D8().speechVol);
-                func_00287520(func_0028B180(), Cfg_18A3D8().musicVol);
-                cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_18A3D8().f17 != 0);
-                func_002875D0(func_0028B180(), Cfg_18A3D8().f16 != 0);
+                cFEStateOptionsSound_setSoundMode(self, D_00535610_18A3D8.output);
+                func_00287410(cAudioInterface_bxAudio(), Cfg_18A3D8().sfxVol);
+                func_00287488(cAudioInterface_bxAudio(), Cfg_18A3D8().speechVol);
+                func_00287520(cAudioInterface_bxAudio(), Cfg_18A3D8().musicVol);
+                cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A3D8().f17 != 0);
+                func_002875D0(cAudioInterface_bxAudio(), Cfg_18A3D8().f16 != 0);
                 cFEStateOptionsSound_updateWidget(self);
             }
             D_004A14D4 = 1;
@@ -1240,7 +1240,7 @@ void* cFEStateOptionsSound_onGainFocus(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018A890);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Filters menu events on the sound options screen: 0x100 for event 9, 0 for event 6, 0x101 for anything else.
@@ -1251,7 +1251,7 @@ INCLUDE_ASM("fe/festateoptions", func_0018A890);
  * @param event  menu event code
  * @return 0x100, 0 or 0x101 (cUIMenu reply codes)
  */
-extern "C" int func_0018A890(void* self, int menu, int event)
+extern "C" int cFEStateOptionsSound_onWidgetMenu(void* self, int menu, int event)
 {
     switch (event) {
     case 9:
@@ -1264,7 +1264,7 @@ extern "C" int func_0018A890(void* self, int menu, int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018A8C0);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onWidgetPair);
 #ifdef SKIP_ASM
 /**
  * Returns 0x100 for any nonzero pair event on the sound options screen, and 0 for event 0.
@@ -1273,14 +1273,14 @@ INCLUDE_ASM("fe/festateoptions", func_0018A8C0);
  * @param event  pair event code
  * @return 0x100 when @p event is nonzero, else 0
  */
-extern "C" int func_0018A8C0(void* self, int pair, int event)
+extern "C" int cFEStateOptionsSound_onWidgetPair(void* self, int pair, int event)
 {
     return event ? 0x100 : 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018A8D0);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -1291,8 +1291,8 @@ extern "C" void func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
-extern "C" void func_0018BEF8(void* self, unsigned int mode);
-extern "C" void* func_0028B180();
+extern "C" void cFEStateOptionsSound_setSoundMode(void* self, unsigned int mode);
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
@@ -1362,7 +1362,7 @@ struct sOptSound_18A8D0 {
  * returns for the widget's mMiscData.
  *
  * Event 9 (a value changed) stores the widget's value into cBEOptionInterface_mOption and applies it: "1lb" the speaker
- * mode `output` (func_0018BEF8), the sliders "2sl" `sfxVol` (func_00287410), "3sl" `speechVol` (func_00287488) and
+ * mode `output` (cFEStateOptionsSound_setSoundMode), the sliders "2sl" `sfxVol` (func_00287410), "3sl" `speechVol` (func_00287488) and
  * "4sl" `musicVol` (func_00287520) from the slider value at +0x74, "5lb" bit 17 (cSSXAudio_SetArcadeSFX) and "6lb" bit
  * 16 (func_002875D0); "7lb" sets bit 18 (`f18`) only while D_004A1A70 is 1. Every event 9 sets the sound changed flag
  * D_004A14D4.
@@ -1370,7 +1370,7 @@ struct sOptSound_18A8D0 {
  * @param widget  the widget the event is for (null: nothing happens)
  * @param event  UI event code (6, 7 and 9 are handled)
  */
-extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsSound_onWidgetEvent(sOptSound_18A8D0* self, char* widget, unsigned int event)
 {
     if (widget == 0)
         return;
@@ -1391,11 +1391,11 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
             sVE_18A8D0a* vt = *(sVE_18A8D0a**)(iface + 0xC);
             vt[1].fn(iface + vt[1].delta);
         }
-        func_00287410(func_0028B180(), Cfg_18A8D0().sfxVol);
-        func_00287488(func_0028B180(), Cfg_18A8D0().speechVol);
-        func_00287520(func_0028B180(), Cfg_18A8D0().musicVol);
-        cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_18A8D0().f17 != 0);
-        func_002875D0(func_0028B180(), Cfg_18A8D0().f16 != 0);
+        func_00287410(cAudioInterface_bxAudio(), Cfg_18A8D0().sfxVol);
+        func_00287488(cAudioInterface_bxAudio(), Cfg_18A8D0().speechVol);
+        func_00287520(cAudioInterface_bxAudio(), Cfg_18A8D0().musicVol);
+        cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A8D0().f17 != 0);
+        func_002875D0(cAudioInterface_bxAudio(), Cfg_18A8D0().f16 != 0);
         char* eng = *(char**)self->engine;
         sVE_18A8D0c* vt = *(sVE_18A8D0c**)(eng + 4);
         void* nextState = vt[5].fn(eng + vt[5].delta, self, *(int*)(widget + 0x18));
@@ -1406,30 +1406,30 @@ extern "C" void func_0018A8D0(sOptSound_18A8D0* self, char* widget, unsigned int
     case 9:
         if (Is_18A8D0(*(int*)(widget + 0x38), str_1lb)) {
             D_00535610_18A8D0.output = cUIListBox_getCurrentEntryData(widget);
-            func_0018BEF8(self, cUIListBox_getCurrentEntryData(widget));
+            cFEStateOptionsSound_setSoundMode(self, cUIListBox_getCurrentEntryData(widget));
         }
         else if (Is_18A8D0(*(int*)(widget + 0x38), str_2sl)) {
             unsigned char vol = *(unsigned char*)(widget + 0x74);
             D_00535610_18A8D0.sfxVol = vol;
-            func_00287410(func_0028B180(), Cfg_18A8D0().sfxVol);
+            func_00287410(cAudioInterface_bxAudio(), Cfg_18A8D0().sfxVol);
         }
         else if (Is_18A8D0(*(int*)(widget + 0x38), str_3sl)) {
             unsigned char vol = *(unsigned char*)(widget + 0x74);
             D_00535610_18A8D0.speechVol = vol;
-            func_00287488(func_0028B180(), Cfg_18A8D0().speechVol);
+            func_00287488(cAudioInterface_bxAudio(), Cfg_18A8D0().speechVol);
         }
         else if (Is_18A8D0(*(int*)(widget + 0x38), str_4sl)) {
             unsigned char vol = *(unsigned char*)(widget + 0x74);
             D_00535610_18A8D0.musicVol = vol;
-            func_00287520(func_0028B180(), Cfg_18A8D0().musicVol);
+            func_00287520(cAudioInterface_bxAudio(), Cfg_18A8D0().musicVol);
         }
         else if (Is_18A8D0(*(int*)(widget + 0x38), str_5lb)) {
             D_00535610_18A8D0.f17 = cUIListBox_getCurrentEntryData(widget) != 0;
-            cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_18A8D0().f17 != 0);
+            cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A8D0().f17 != 0);
         }
         else if (Is_18A8D0(*(int*)(widget + 0x38), str_6lb)) {
             D_00535610_18A8D0.f16 = cUIListBox_getCurrentEntryData(widget) != 0;
-            func_002875D0(func_0028B180(), Cfg_18A8D0().f16 != 0);
+            func_002875D0(cAudioInterface_bxAudio(), Cfg_18A8D0().f16 != 0);
         }
         bool on = D_004A1A70 == 1;
         if (on && Is_18A8D0(*(int*)(widget + 0x38), str_7lb))
@@ -1451,7 +1451,7 @@ extern "C" int cUIListBox_addEntryByStringID_i(void* box, int id, int idx) __asm
 extern "C" void func_0039A670(void* box);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 int func_00289DC0(void* snd);
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
@@ -1527,7 +1527,7 @@ static inline void* Find_18B380(sOptSound_18B380* self, char* name)
  *
  * "1lb" lists stereo/surround/mono/DTS and selects the sound manager's current mode (func_00289DC0); the
  * sliders "2sl", "3sl", "4sl" (range 12) show the effects, speech and music volumes and push them to the
- * sound manager (func_0028B180); "5lb" and "6lb" are off/on switches applied the same way; "7lb" is filled
+ * sound manager (cAudioInterface_bxAudio); "5lb" and "6lb" are off/on switches applied the same way; "7lb" is filled
  * only when D_004A1A70 is 1.
  *
  * @param vself  the cFEStateOptionsSound state
@@ -1546,7 +1546,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_20SpeakerMono), 2);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_20SpeakerDTS), 3);
         unsigned char sel;
-        if (cUIListBox_getEntryByData(w, func_00289DC0(func_0028B180()), &sel))
+        if (cUIListBox_getEntryByData(w, func_00289DC0(cAudioInterface_bxAudio()), &sel))
             cUIListBox_setCurrentEntryByIndex(w, sel);
     }
     }
@@ -1555,7 +1555,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
     if (w != 0) {
         *(int*)(w + 0x78) = 12;
         *(int*)(w + 0x74) = iface->getOptions().sfxVol;
-        func_00287410(func_0028B180(), Cfg_18B380().sfxVol);
+        func_00287410(cAudioInterface_bxAudio(), Cfg_18B380().sfxVol);
     }
     }
     {
@@ -1563,7 +1563,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
     if (w != 0) {
         *(int*)(w + 0x78) = 12;
         *(int*)(w + 0x74) = iface->getOptions().speechVol;
-        func_00287488(func_0028B180(), Cfg_18B380().speechVol);
+        func_00287488(cAudioInterface_bxAudio(), Cfg_18B380().speechVol);
     }
     }
     {
@@ -1571,7 +1571,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
     if (w != 0) {
         *(int*)(w + 0x78) = 12;
         *(int*)(w + 0x74) = iface->getOptions().musicVol;
-        func_00287520(func_0028B180(), Cfg_18B380().musicVol);
+        func_00287520(cAudioInterface_bxAudio(), Cfg_18B380().musicVol);
     }
     }
     {
@@ -1583,7 +1583,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
         unsigned char sel;
         if (cUIListBox_getEntryByData(w, iface->getOptions().f17, &sel))
             cUIListBox_setCurrentEntryByIndex(w, sel);
-        cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_18B380().f17 != 0);
+        cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18B380().f17 != 0);
     }
     }
     {
@@ -1595,7 +1595,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
         unsigned char sel;
         if (cUIListBox_getEntryByData(w, iface->getOptions().f16, &sel))
             cUIListBox_setCurrentEntryByIndex(w, sel);
-        func_002875D0(func_0028B180(), Cfg_18B380().f16 != 0);
+        func_002875D0(cAudioInterface_bxAudio(), Cfg_18B380().f16 != 0);
     }
     }
     bool on = D_004A1A70 == 1;
@@ -1614,9 +1614,9 @@ extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018BEF8);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_setSoundMode);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" int func_00287670(void* snd);
 extern "C" int func_002876A0(void* snd);
 extern "C" int func_002876D0(void* snd);
@@ -1646,7 +1646,7 @@ struct sVE_18BEF8v {
  * Switches the audio output mode and, when the audio device accepts it, restarts the audio system in that mode.
  *
  * @p mode is mapped to an audio mode: 0 (stereo) to 1, 1 (surround) to 2, 2 (mono) to 0, 3 (DTS) to 3, anything else to
- * 1. The device object is reached from gSSXAudio (func_0028B180) + 0x118 through two loads and then +0x1D8; its virtual
+ * 1. The device object is reached from gSSXAudio (cAudioInterface_bxAudio) + 0x118 through two loads and then +0x1D8; its virtual
  * slot 2 is asked to take the audio mode, and only a return of 1 goes on.
  *
  * The restart saves the effects, speech and music levels (func_00287670, func_002876A0, func_002876D0, 0-11 scale), the
@@ -1658,7 +1658,7 @@ struct sVE_18BEF8v {
  *
  * @param mode  the speaker list choice ("1lb" entry data): 0 stereo, 1 surround, 2 mono, 3 DTS
  */
-extern "C" void func_0018BEF8(void* self, unsigned int mode)
+extern "C" void cFEStateOptionsSound_setSoundMode(void* self, unsigned int mode)
 {
     int audioMode;
     switch (mode) {
@@ -1676,25 +1676,25 @@ extern "C" void func_0018BEF8(void* self, unsigned int mode)
         audioMode = 1;
         break;
     }
-    char* obj = *(char**)(**(char***)((char*)func_0028B180() + 0x118) + 0x1D8);
+    char* obj = *(char**)(**(char***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8);
     sVE_18BEF8i* vt = *(sVE_18BEF8i**)(obj + 4);
     if (vt[2].fn(obj + vt[2].delta, audioMode) == 1) {
-        float sfxVolume = func_00287670(func_0028B180());
-        float speechVolume = func_002876A0(func_0028B180());
-        float musicVolume = func_002876D0(func_0028B180());
-        int arcadeOn = *(int*)((char*)func_0028B180() + 0x62B8);
-        int arcadeSfx = *(int*)((char*)func_0028B180() + 0x62B4);
-        int saved534 = *(int*)((char*)func_0028B180() + 0x534);
-        cSSXAudio_FrontEndPurge(func_0028B180());
+        float sfxVolume = func_00287670(cAudioInterface_bxAudio());
+        float speechVolume = func_002876A0(cAudioInterface_bxAudio());
+        float musicVolume = func_002876D0(cAudioInterface_bxAudio());
+        int arcadeOn = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B8);
+        int arcadeSfx = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B4);
+        int saved534 = *(int*)((char*)cAudioInterface_bxAudio() + 0x534);
+        cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(audioMode);
-        func_00287410(func_0028B180(), (int)sfxVolume);
-        func_00287488(func_0028B180(), (int)speechVolume);
-        func_00287520(func_0028B180(), (int)musicVolume);
-        cSSXAudio_SetArcadeSFX(func_0028B180(), arcadeOn);
-        func_002875D0(func_0028B180(), arcadeSfx);
-        func_00285FB0(func_0028B180());
-        char* snd = (char*)func_0028B180();
+        func_00287410(cAudioInterface_bxAudio(), (int)sfxVolume);
+        func_00287488(cAudioInterface_bxAudio(), (int)speechVolume);
+        func_00287520(cAudioInterface_bxAudio(), (int)musicVolume);
+        cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), arcadeOn);
+        func_002875D0(cAudioInterface_bxAudio(), arcadeSfx);
+        func_00285FB0(cAudioInterface_bxAudio());
+        char* snd = (char*)cAudioInterface_bxAudio();
         sVE_18BEF8v* vt2 = *(sVE_18BEF8v**)(snd + 0x5558);
         char* sub = snd + 0x118;
         vt2[4].fn(sub + vt2[4].delta, saved534);
@@ -1731,21 +1731,21 @@ extern "C" void* func_0018C0E8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C128);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_21hud_opt[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_0018C478(void* self);
+extern "C" void cFEStateOptionsHUD_updateWidget(void* self);
 
 /**
- * Creates the HUD options screen ("21hud_opt"), plays its frame 0 and fills its menu with func_0018C478.
+ * Creates the HUD options screen ("21hud_opt"), plays its frame 0 and fills its menu with cFEStateOptionsHUD_updateWidget.
  *
  * The screen comes from cUIEngine_addScreenByHashName on the engine (+0x10) and is stored in mpScreen (+0x40); a
- * missing screen is not played, but func_0018C478 runs either way.
+ * missing screen is not played, but cFEStateOptionsHUD_updateWidget runs either way.
  */
-extern "C" void func_0018C128(void* self)
+extern "C" void cFEStateOptionsHUD_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_21hud_opt), 0);
@@ -1753,26 +1753,26 @@ extern "C" void func_0018C128(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_0018C478(self);
+    cFEStateOptionsHUD_updateWidget(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C198__FPv);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onGainFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Gives the HUD options state focus using the base cUIState_onGainFocus().
  *
  * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* func_0018C198(void* self)
+void* cFEStateOptionsHUD_onGainFocus(void* self)
 {
     return cUIState_onGainFocus(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C1B8);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onPopupEvent);
 #ifdef SKIP_ASM
 struct sVE_18C1B8 {
     short delta;
@@ -1786,19 +1786,19 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0014F600(void* self);
-extern "C" void func_0018C478(void* self);
+extern "C" void cFEStateOptionsHUD_updateWidget(void* self);
 
 /**
  * Handles the HUD options screen's reset popup: on acceptance it restores the default HUD options.
  *
  * Only event 22 from the popup hashed "111resetopts" does anything: when the popup's virtual slot 23 (getData) with 2
  * is nonzero it resets the HUD options (func_0014F600, the HUD step of cBEOptionInterface_revert, on cBE interface 4),
- * refreshes the menu (func_0018C478) and sets the HUD changed flag D_004A14D8.
+ * refreshes the menu (cFEStateOptionsHUD_updateWidget) and sets the HUD changed flag D_004A14D8.
  *
  * @param widget  the popup state (despite the name); its mHashName (+0xC) is checked
  * @param msg  popup event code (22 is handled)
  */
-extern "C" void func_0018C1B8(void* self, void* widget, int msg)
+extern "C" void cFEStateOptionsHUD_onPopupEvent(void* self, void* widget, int msg)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (msg) {
@@ -1810,7 +1810,7 @@ extern "C" void func_0018C1B8(void* self, void* widget, int msg)
             sVE_18C1B8* getDataEntry = &(*(sVE_18C1B8**)((char*)widget + 8))[23];
             if (getDataEntry->fn((char*)widget + getDataEntry->delta, 2) != 0) {
                 func_0014F600(iface);
-                func_0018C478(self);
+                cFEStateOptionsHUD_updateWidget(self);
                 D_004A14D8 = 1;
             }
         }
@@ -1821,7 +1821,7 @@ extern "C" void func_0018C1B8(void* self, void* widget, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C270);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Filters menu events on the HUD options screen: 0x100 for event 9, 0 for event 6, 0x101 for anything else.
@@ -1832,7 +1832,7 @@ INCLUDE_ASM("fe/festateoptions", func_0018C270);
  * @param event  menu event code
  * @return 0x100, 0 or 0x101 (cUIMenu reply codes)
  */
-extern "C" int func_0018C270(void* self, int menu, int event)
+extern "C" int cFEStateOptionsHUD_onWidgetMenu(void* self, int menu, int event)
 {
     switch (event) {
     case 9:
@@ -1845,7 +1845,7 @@ extern "C" int func_0018C270(void* self, int menu, int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C2A0);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1899,7 +1899,7 @@ static inline int Is_0018C2A0(int id, char* s) { return id == GetHashValue32(s);
  * @param widget  the widget the event is for (null: nothing happens)
  * @param event  UI event code (1, 2, 6 and 7 are handled)
  */
-extern "C" void func_0018C2A0(char* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsHUD_onWidgetEvent(char* self, char* widget, unsigned int event)
 {
     if (widget == 0) {
         return;
@@ -1944,7 +1944,7 @@ extern "C" void func_0018C2A0(char* self, char* widget, unsigned int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C478);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_updateWidget);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
@@ -1993,7 +1993,7 @@ struct sVE_18C478v {
  *
  * @param vself  the HUD options state
  */
-extern "C" void func_0018C478(void* vself)
+extern "C" void cFEStateOptionsHUD_updateWidget(void* vself)
 {
     char* self = (char*)vself;
     cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -2055,8 +2055,8 @@ extern "C" void* func_0018C658(void* self)
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cUIListBox_addEntryByStringID(void* box, int id, int idx);
-extern "C" void func_0018D108(void* self, int idx, float x, float y);
-extern "C" void func_0018CDC0(void* self);
+extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
+extern "C" void cFEStateOptionsController_updateWidget(void* self);
 extern char str_22control[];
 extern char str_1lb[];
 extern char str_2lb[];
@@ -2071,8 +2071,8 @@ extern char str_kT_OVRCMNPro[];
  * Creates the controller options screen ("22control") and fills its lists.
  *
  * Clears +0x48 and +0x4C, gives "1lb" and "2lb" off/on entries and "3lb"/"4lb" default/pro preset entries,
- * calls func_0018D108(self, pad, 0, 0) for pads 0 and 1 (probably vibratePad, stopping vibration) and then
- * func_0018CDC0 (probably updateWidget).
+ * calls cFEStateOptionsController_vibratePad(self, pad, 0, 0) for pads 0 and 1 (probably vibratePad, stopping vibration) and then
+ * cFEStateOptionsController_updateWidget (probably updateWidget).
  */
 extern "C" void cFEStateOptionsController_onCreateScreen(void* self)
 {
@@ -2105,22 +2105,22 @@ extern "C" void cFEStateOptionsController_onCreateScreen(void* self)
         cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_OVRCMNPro), 1);
     }
     float zero = 0.0f;
-    func_0018D108(self, 0, zero, zero);
-    func_0018D108(self, 1, zero, zero);
-    func_0018CDC0(self);
+    cFEStateOptionsController_vibratePad(self, 0, zero, zero);
+    cFEStateOptionsController_vibratePad(self, 1, zero, zero);
+    cFEStateOptionsController_updateWidget(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onDestroyScreen);
 #ifdef SKIP_ASM
-extern "C" void func_0018D108(void* self, int idx, float x, float y);
+extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
 void* cUIState_onDestroyScreen(void* self);
 
 /**
  * Sets both controllers' output channels to zero, then destroys the controller-options state's screens.
  *
- * Calls func_0018D108(self, pad, 0, 0) for pads 0 and 1; for a pad whose device reports state 2 that sets both
+ * Calls cFEStateOptionsController_vibratePad(self, pad, 0, 0) for pads 0 and 1; for a pad whose device reports state 2 that sets both
  * of its output channels to 0, which probably stops any vibration. cUIState_onDestroyScreen() then destroys the
  * state's screen list.
  *
@@ -2128,22 +2128,22 @@ void* cUIState_onDestroyScreen(void* self);
  */
 extern "C" void* cFEStateOptionsController_onDestroyScreen(void* self)
 {
-    func_0018D108(self, 0, 0.0f, 0.0f);
-    func_0018D108(self, 1, 0.0f, 0.0f);
+    cFEStateOptionsController_vibratePad(self, 0, 0.0f, 0.0f);
+    cFEStateOptionsController_vibratePad(self, 1, 0.0f, 0.0f);
     return cUIState_onDestroyScreen(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018C910);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onPopupEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_defaultCtrl(void* self);
-extern "C" void func_0018CDC0(void* self);
-extern "C" void func_0018D108(void* self, int idx, float x, float y);
+extern "C" void cFEStateOptionsController_updateWidget(void* self);
+extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
 extern char str_111resetopts[];
 extern int D_004A14DC;
 
@@ -2181,29 +2181,29 @@ public:
  * Handles the controller options screen's popups: stops both pads' vibration when one opens and restores the default
  * controller settings on an accepted reset.
  *
- * Event 21 calls func_0018D108(self, pad, 0, 0) for pads 0 and 1, setting both of their motor levels to 0. Event 22
+ * Event 21 calls cFEStateOptionsController_vibratePad(self, pad, 0, 0) for pads 0 and 1, setting both of their motor levels to 0. Event 22
  * from the popup hashed "111resetopts", when its virtual slot 23 (getData) with 2 is nonzero, resets the controller
  * settings (cBENewPlayerInterface_defaultCtrl on the player interface, cBE interface 1), refreshes the widgets
- * (func_0018CDC0) and sets the controller changed flag D_004A14DC.
+ * (cFEStateOptionsController_updateWidget) and sets the controller changed flag D_004A14DC.
  *
  * @param obj  the popup state; its mHashName (+0xC) is checked
  * @param msg  popup event code (21 and 22 are handled)
  */
-extern "C" void func_0018C910(void* self, cUIObj_18C910* obj, int msg)
+extern "C" void cFEStateOptionsController_onPopupEvent(void* self, cUIObj_18C910* obj, int msg)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     switch (msg) {
     case 21: {
         float zero = 0.0f;
-        func_0018D108(self, 0, zero, zero);
-        func_0018D108(self, 1, zero, zero);
+        cFEStateOptionsController_vibratePad(self, 0, zero, zero);
+        cFEStateOptionsController_vibratePad(self, 1, zero, zero);
         break;
     }
     case 22:
         if (Is_0018C910(*(int*)((char*)obj + 0xC), str_111resetopts)) {
             if (obj->v23(2) != 0) {
                 cBENewPlayerInterface_defaultCtrl(pi);
-                func_0018CDC0(self);
+                cFEStateOptionsController_updateWidget(self);
                 D_004A14DC = 1;
             }
         }
@@ -2213,7 +2213,7 @@ extern "C" void func_0018C910(void* self, cUIObj_18C910* obj, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018CA10);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -2228,8 +2228,8 @@ extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void func_00147528(void* self, int index, int value);
 extern "C" void func_00147658(void* self, int index, int value);
 extern "C" int func_001474E8(void* iface, int a1);
-extern "C" void func_0018CF50(void* self, int on);
-extern "C" void func_0018D108(void* self, int idx, float x, float y);
+extern "C" void cFEStateOptionsController_displayPadConfig(void* self, int on);
+extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
 extern char str_cFEPopupOptionReset[];
 extern void* D_0046B3D0[];
 extern char str_1lb[];
@@ -2260,15 +2260,15 @@ static inline int Is_0018CA10(int id, char* s) { return id == GetHashValue32(s);
  * custom interface (engine + 0x0) returns for the widget's mMiscData.
  *
  * Event 9 (a value changed): "1lb" and "2lb" set pad 0's or pad 1's vibration flag (func_00147528) to the chosen entry;
- * when the flag reads back set (func_001474E8) the pad buzzes (func_0018D108 with 10, 10), its timer (+0x48 for pad 0,
- * +0x4C for pad 1) is set to 60 and its bit (1 or 2) is set in +0x50 so func_0018D058 stops it later; otherwise its
+ * when the flag reads back set (func_001474E8) the pad buzzes (cFEStateOptionsController_vibratePad with 10, 10), its timer (+0x48 for pad 0,
+ * +0x4C for pad 1) is set to 60 and its bit (1 or 2) is set in +0x50 so cFEStateOptionsController_onUpdate stops it later; otherwise its
  * motors are set to 0. "3lb" and "4lb" store pad 0's or pad 1's button layout (func_00147658) and show the default or
- * pro layout picture (func_0018CF50 with entry data == 0). Every event 9 sets the controller changed flag D_004A14DC.
+ * pro layout picture (cFEStateOptionsController_displayPadConfig with entry data == 0). Every event 9 sets the controller changed flag D_004A14DC.
  *
  * @param widget  the widget the event is for (null: nothing happens)
  * @param event  UI event code (6, 7 and 9 are handled)
  */
-extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, char* widget, unsigned int event)
 {
     if (widget == 0) {
         return;
@@ -2298,27 +2298,27 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
         if (Is_0018CA10(*(int*)(widget + 0x38), str_1lb)) {
             func_00147528(iface, 0, cUIListBox_getCurrentEntryData(widget) != 0);
             if (func_001474E8(iface, 0)) {
-                func_0018D108(self, 0, 10.0f, 10.0f);
+                cFEStateOptionsController_vibratePad(self, 0, 10.0f, 10.0f);
                 *(int*)(self + 0x48) = 0x3C;
                 *(unsigned char*)(self + 0x50) |= 1;
             } else {
-                func_0018D108(self, 0, 0.0f, 0.0f);
+                cFEStateOptionsController_vibratePad(self, 0, 0.0f, 0.0f);
             }
         } else if (Is_0018CA10(*(int*)(widget + 0x38), str_2lb)) {
             func_00147528(iface, 1, cUIListBox_getCurrentEntryData(widget) != 0);
             if (func_001474E8(iface, 1)) {
-                func_0018D108(self, 1, 10.0f, 10.0f);
+                cFEStateOptionsController_vibratePad(self, 1, 10.0f, 10.0f);
                 *(int*)(self + 0x4C) = 0x3C;
                 *(unsigned char*)(self + 0x50) |= 2;
             } else {
-                func_0018D108(self, 1, 0.0f, 0.0f);
+                cFEStateOptionsController_vibratePad(self, 1, 0.0f, 0.0f);
             }
         } else if (Is_0018CA10(*(int*)(widget + 0x38), str_3lb)) {
             func_00147658(iface, 0, cUIListBox_getCurrentEntryData(widget));
-            func_0018CF50(self, cUIListBox_getCurrentEntryData(widget) == 0);
+            cFEStateOptionsController_displayPadConfig(self, cUIListBox_getCurrentEntryData(widget) == 0);
         } else if (Is_0018CA10(*(int*)(widget + 0x38), str_4lb)) {
             func_00147658(iface, 1, cUIListBox_getCurrentEntryData(widget));
-            func_0018CF50(self, cUIListBox_getCurrentEntryData(widget) == 0);
+            cFEStateOptionsController_displayPadConfig(self, cUIListBox_getCurrentEntryData(widget) == 0);
         }
         D_004A14DC = 1;
         break;
@@ -2327,27 +2327,27 @@ extern "C" void func_0018CA10(char* self, char* widget, unsigned int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018CCE0);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onWidgetMenu);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* player, int which);
-// func_0018CF50 returns void; declaring it int ($v0 set by the call) reproduces the original argument scheduling.
-extern "C" int func_0018CF50_CCE0(void* self, int on) __asm__("func_0018CF50");
+// cFEStateOptionsController_displayPadConfig returns void; declaring it int ($v0 set by the call) reproduces the original argument scheduling.
+extern "C" int cFEStateOptionsController_displayPadConfig_CCE0(void* self, int on) __asm__("cFEStateOptionsController_displayPadConfig");
 
 /**
  * Filters menu keys on the controller options screen; accepting a button-layout row shows that pad's layout picture.
  *
  * Key 9 gives 0x100 and key 6 gives 0. Key 5 on menu item 2 or 3 (the menu's mScrollItemCurrent, +0x95) calls
- * func_0018CF50 with whether pad 0 or pad 1 uses layout 0 (cBENewPlayerInterface_getControllerMapping) and gives 0x101;
+ * cFEStateOptionsController_displayPadConfig with whether pad 0 or pad 1 uses layout 0 (cBENewPlayerInterface_getControllerMapping) and gives 0x101;
  * it changes no setting. Every other key, and key 5 on other items, gives 0x101.
  *
  * @param menu  the menu; its mScrollItemCurrent (+0x95) is the highlighted item
  * @param key  menu event code
  * @return 0x100, 0 or 0x101 (cUIMenu reply codes)
  */
-extern "C" int func_0018CCE0(void* self, char* menu, unsigned int key)
+extern "C" int cFEStateOptionsController_onWidgetMenu(void* self, char* menu, unsigned int key)
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     switch (key) {
@@ -2365,7 +2365,7 @@ extern "C" int func_0018CCE0(void* self, char* menu, unsigned int key)
         default:
             return 257;
         }
-        func_0018CF50_CCE0(self, cBENewPlayerInterface_getControllerMapping(player, which) == 0);
+        cFEStateOptionsController_displayPadConfig_CCE0(self, cBENewPlayerInterface_getControllerMapping(player, which) == 0);
         return 257;
     }
     case 6:
@@ -2376,7 +2376,7 @@ extern "C" int func_0018CCE0(void* self, char* menu, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018CDB0);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onWidgetPair);
 #ifdef SKIP_ASM
 /**
  * Returns 0x100 for any nonzero pair event on the controller options screen, and 0 for event 0.
@@ -2385,14 +2385,14 @@ INCLUDE_ASM("fe/festateoptions", func_0018CDB0);
  * @param event  pair event code
  * @return 0x100 when @p event is nonzero, else 0
  */
-extern "C" int func_0018CDB0(void* self, int pair, int event)
+extern "C" int cFEStateOptionsController_onWidgetPair(void* self, int pair, int event)
 {
     return event ? 0x100 : 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018CDC0);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_updateWidget);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -2403,7 +2403,7 @@ extern "C" int func_001474E8(void* iface, int a1);
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int a1);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
-extern "C" void func_0018CF50(void* self, int on);
+extern "C" void cFEStateOptionsController_displayPadConfig(void* self, int on);
 extern char str_1lb[];
 extern char str_2lb[];
 extern char str_3lb[];
@@ -2415,12 +2415,12 @@ extern char str_4lb[];
  * On mpScreen (+0x40), "1lb" and "2lb" get pad 0's and pad 1's vibration flag (func_001474E8), "3lb" and "4lb" their
  * button layout (cBENewPlayerInterface_getControllerMapping on cBE interface 1); each list selects the entry whose data
  * matches (cUIListBox_getEntryByData, cUIListBox_setCurrentEntryByIndex). With "3lb" present it also shows pad 0's
- * layout picture (func_0018CF50 with layout == 0). Missing lists are skipped.
+ * layout picture (cFEStateOptionsController_displayPadConfig with layout == 0). Missing lists are skipped.
  *
  * Likely bug: the result of cUIListBox_getEntryByData is not checked, so a value no entry matches selects an
  * uninitialised index.
  */
-extern "C" void func_0018CDC0(void* self)
+extern "C" void cFEStateOptionsController_updateWidget(void* self)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     unsigned char vals[4];
@@ -2438,7 +2438,7 @@ extern "C" void func_0018CDC0(void* self)
     if (listBox != 0) {
         cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getControllerMapping(np, 0), &vals[2]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[2]);
-        func_0018CF50(self, cBENewPlayerInterface_getControllerMapping(np, 0) == 0);
+        cFEStateOptionsController_displayPadConfig(self, cBENewPlayerInterface_getControllerMapping(np, 0) == 0);
     }
     listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_4lb));
     if (listBox != 0) {
@@ -2449,7 +2449,7 @@ extern "C" void func_0018CDC0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018CF50);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_displayPadConfig);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -2481,7 +2481,7 @@ public:
  *
  * @param on  nonzero for the default layout, zero for the pro layout
  */
-extern "C" void func_0018CF50(void* self, int on)
+extern "C" void cFEStateOptionsController_displayPadConfig(void* self, int on)
 {
     cUIObj_18CF50* defaultPicture = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15BC));
     if (defaultPicture != 0) {
@@ -2503,19 +2503,19 @@ extern "C" void func_0018CF50(void* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D058);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_onUpdate(void* self);
-extern "C" void func_0018D108(void* self, int idx, float x, float y);
+extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
 
 /**
  * Runs the base cUIState_onUpdate() and counts down each pad's test vibration, stopping it when its timer runs out.
  *
  * For pad 0 (bit 0 of +0x50, timer +0x48) and pad 1 (bit 1, timer +0x4C): while the bit is set the timer drops by one
- * per update; once it reaches 0 the bit is cleared and func_0018D108(self, pad, 0, 0) sets the pad's motor levels to 0.
- * func_0018CA10 starts the timers at 60.
+ * per update; once it reaches 0 the bit is cleared and cFEStateOptionsController_vibratePad(self, pad, 0, 0) sets the pad's motor levels to 0.
+ * cFEStateOptionsController_onWidgetEvent starts the timers at 60.
  */
-extern "C" void func_0018D058(void* self)
+extern "C" void cFEStateOptionsController_onUpdate(void* self)
 {
     cUIState_onUpdate(self);
     if (*(unsigned char*)((char*)self + 0x50) & 1) {
@@ -2524,7 +2524,7 @@ extern "C" void func_0018D058(void* self)
         } else {
             *(int*)((char*)self + 0x48) = 0;
             *(unsigned char*)((char*)self + 0x50) &= ~1;
-            func_0018D108(self, 0, 0.0f, 0.0f);
+            cFEStateOptionsController_vibratePad(self, 0, 0.0f, 0.0f);
         }
     }
     if (*(unsigned char*)((char*)self + 0x50) & 2) {
@@ -2533,14 +2533,14 @@ extern "C" void func_0018D058(void* self)
         } else {
             *(int*)((char*)self + 0x4C) = 0;
             *(unsigned char*)((char*)self + 0x50) &= ~2;
-            func_0018D108(self, 1, 0.0f, 0.0f);
+            cFEStateOptionsController_vibratePad(self, 1, 0.0f, 0.0f);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D108);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_vibratePad);
 #ifdef SKIP_ASM
 extern char* PadCache;
 
@@ -2558,7 +2558,7 @@ public:
  * Scales @p x to x' = max(0, x * 0.91333 - 18.5185) and @p y by 0.99167, then looks up pad @p idx (as a signed char) in
  * PadCache's device table (+0x2EEC). When the device's getState() is 2, sets motor 0 to the largest of 0, (y - 0.5) *
  * 0.01 and (x' - 2) / 972.22, and motor 1 to the largest of 0, (y - 70) * 0.00625 and (x' - 100) / 5000 (setVolume).
- * Callers: cFEStateOptionsController_onCreateScreen and _onDestroyScreen, func_0018C910, func_0018CA10, func_0018D058;
+ * Callers: cFEStateOptionsController_onCreateScreen and _onDestroyScreen, cFEStateOptionsController_onPopupEvent, cFEStateOptionsController_onWidgetEvent, cFEStateOptionsController_onUpdate;
  * fepopupmisc's func_001E3AC8 is the same body without the state argument. Likely bug: with no PadCache the device
  * stays 0 and getState() is still called through it.
  *
@@ -2567,7 +2567,7 @@ public:
  * @param y  second strength input (feeds both motors' first terms)
  */
 // PORT: uses g++'s >? (max) operator.
-extern "C" void func_0018D108(void* self, int idx, float x, float y)
+extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y)
 {
     signed char i = idx;
     float scaledX = x * 0.9133333563804626f - 18.518518447875977f;
@@ -2588,7 +2588,7 @@ extern "C" void func_0018D108(void* self, int idx, float x, float y)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D240);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateOptionsSaveLoad_vtbl[];
@@ -2602,7 +2602,7 @@ extern void* cFEStateOptionsSaveLoad_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_0018D240(void* self)
+extern "C" void* cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(void* self)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 0x20;
@@ -2909,7 +2909,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, 
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018D7F0);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1);
 #ifdef SKIP_ASM
 extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* app);
@@ -2926,11 +2926,11 @@ extern void* cFEStateOptionsDeviceSelect_vtbl[];
  * @param engine  the UI engine
  * @param cardMode  the memory-card screen type passed to cFEMemCard_cFEMemCard (kept at +0x1BC)
  * @param isSave  nonzero for a save screen
- * @param isOnline  nonzero when opened from the online front end (On Tour bOnline); func_0018E478 then picks next-state
+ * @param isOnline  nonzero when opened from the online front end (On Tour bOnline); cFEStateOptionsDeviceSelect_updateDone then picks next-state
  *            choice 2
  * @return @p self
  */
-extern "C" void* func_0018D7F0(void* self, int engine, int cardMode, int isSave, int isOnline)
+extern "C" void* cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(void* self, int engine, int cardMode, int isSave, int isOnline)
 {
     cFEMemCard_cFEMemCard(self, engine, cardMode);
     *(int*)((char*)self + 0x230) = isOnline;
@@ -3103,7 +3103,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018DDD0);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_onWidgetMenu);
 #ifdef SKIP_ASM
 struct cList0018DDD0 {
     virtual void v01();
@@ -3175,7 +3175,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
  * @param msg  the menu event
  * @return 0x100 to refuse the event, 0x101 to allow it
  */
-extern "C" int func_0018DDD0(void* self, void* widget, unsigned int msg)
+extern "C" int cFEStateOptionsDeviceSelect_onWidgetMenu(void* self, void* widget, unsigned int msg)
 {
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
     switch (msg) {
@@ -3196,7 +3196,7 @@ extern "C" int func_0018DDD0(void* self, void* widget, unsigned int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018DEA0);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void func_0023CAE8(void* app, int a1, int a2);
@@ -3321,9 +3321,9 @@ public:
  * Event 5 (a slot widget): does nothing without a widget or while busy (+0x1A8); sets +0x238, then acts only when the
  * display state f214 is 3 and the main button is active (+0x224). It takes the slot from the widget (+0x18) into slot
  * and the card manager's mFileCursor. In mode 2 on a save screen (+0x22C) it starts a save of file type 2
- * (func_0023CAE8 with profile -1), sets +0x1DC, busy and state 3 and calls this state's vtable slot 47 (func_001D8D68,
+ * (func_0023CAE8 with profile -1), sets +0x1DC, busy and state 3 and calls this state's vtable slot 47 (cFEMemCard_displayStatusPopup,
  * the status popup with the manager's message). Otherwise a slot holding a file (cPS2MemCard_HasFileName through
- * mpMemCard) starts a load (func_0023C8F0, file type 0 in mode 1, else 2) and calls slot 44 (func_001D69E0); an empty
+ * mpMemCard) starts a load (func_0023C8F0, file type 0 in mode 1, else 2) and calls slot 44 (cFEMemCard_confirmLoad); an empty
  * slot calls slot 47.
  *
  * Event 6 (back): clears +0x238; unless busy is 1 or state is already 6, sets +0x1E4, resets the manager
@@ -3336,7 +3336,7 @@ public:
  * @param widget  the widget that sent the event (its +0x18 word is the slot index)
  * @param event  the widget event
  */
-extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(sDevSel_18DEA0* self, char* widget, unsigned int event)
 {
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
     switch (event) {
@@ -3423,7 +3423,7 @@ extern "C" void func_0018DEA0(sDevSel_18DEA0* self, char* widget, unsigned int e
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018E178);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_hideActionButtons);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -3443,7 +3443,7 @@ extern char str_ps2sq[];
  *
  * @param on  1 to hide the buttons, 0 to show them
  */
-extern "C" void func_0018E178(void* self, int on)
+extern "C" void cFEStateOptionsDeviceSelect_hideActionButtons(void* self, int on)
 {
     if (*(int*)((char*)self + 0x234) == on)
         return;
@@ -3461,7 +3461,7 @@ extern "C" void func_0018E178(void* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018E2C0);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_hideDeleteButton);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -3490,7 +3490,7 @@ struct cUIObj_E2C0 {
  *
  * @param on  true to hide the button
  */
-extern "C" void func_0018E2C0(void* self, bool on)
+extern "C" void cFEStateOptionsDeviceSelect_hideDeleteButton(void* self, bool on)
 {
     if (*(int*)((char*)self + 0x22C) != 0) {
         int off = !on;
@@ -3502,7 +3502,7 @@ extern "C" void func_0018E2C0(void* self, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018E368);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_hideMainButton);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -3528,13 +3528,13 @@ struct cUIObj_E368 {
  * Shows or hides the device select screen's main (accept) button.
  *
  * On a save screen (+0x22C) shows "btext3" and "ps2x" only when @p saveBlocked is false; otherwise shows "btext3a" and
- * "ps2x" only when @p loadBlocked is false. The shown state is also stored in +0x224, which event 5 of func_0018DEA0
+ * "ps2x" only when @p loadBlocked is false. The shown state is also stored in +0x224, which event 5 of cFEStateOptionsDeviceSelect_onWidgetEvent
  * requires. Fills slot +0x13C of cFEStateOptionsDeviceSelect_vtbl (cFEMemCard_hideMainButton's slot).
  *
  * @param loadBlocked  true to hide the button on a load screen
  * @param saveBlocked  true to hide the button on a save screen
  */
-extern "C" void func_0018E368(void* self, bool loadBlocked, bool saveBlocked)
+extern "C" void cFEStateOptionsDeviceSelect_hideMainButton(void* self, bool loadBlocked, bool saveBlocked)
 {
     cUIObj_E368* xButton = (cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x));
     if (*(int*)((char*)self + 0x22C) != 0) {
@@ -3552,7 +3552,7 @@ extern "C" void func_0018E368(void* self, bool loadBlocked, bool saveBlocked)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018E478);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_updateDone);
 #ifdef SKIP_ASM
 extern "C" void cUIStateStack_pushCheck(void* list, void* item);
 
@@ -3571,7 +3571,7 @@ struct sVEntry0018E478 {
  * cFECustom_vtbl) with this state and the choice, and pushes the result on the engine's state stack (+0x18) with
  * cUIStateStack_pushCheck. Sets +0x1AC afterwards. Fills slot +0x10C (cFEMemCard_updateDone's slot).
  */
-extern "C" void func_0018E478(void* self)
+extern "C" void cFEStateOptionsDeviceSelect_updateDone(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
         int mode = *(int*)((char*)self + 0x1BC) == 1;
@@ -3596,7 +3596,7 @@ extern "C" void func_0018E478(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018E510);
+INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_displayStatus);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -3604,7 +3604,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mgr, int dev, unsigned short* buf, int n);
 extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
 extern "C" void cUIText_setUnicodeString(void* text, char* str);
-extern "C" void func_001D8240();
+extern "C" void cFEMemCard_callbackDisplayNoCards();
 extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* app, int dev, int a3);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_1percentage[];
@@ -3732,7 +3732,7 @@ struct cState_18E510 : cStateBase_18E510 {
  * Refreshes the device select screen's memory-card panel: the device label, the slot entries and the device arrows.
  *
  * When this state's vtable slot 42 (func_001D9880) passes: with no card found (mpMemCard slot 53, func_002D3810) it
- * shows the no-cards message (func_001D8240), otherwise it switches the display state to 3 (slot 35,
+ * shows the no-cards message (cFEMemCard_callbackDisplayNoCards), otherwise it switches the display state to 3 (slot 35,
  * cFEMemCard_triggerDisplayState) unless f214 is 3 already. If slot 42 still passes it highlights a menu entry (slot
  * 43, cFEMemCard_setMenuHighlight), puts the label of the card manager's mSelectedDevice
  * (cMCOverlayManager_GetDeviceDisplayString) in "Memory card text", stores that device in dev and hides "1percentage".
@@ -3747,13 +3747,13 @@ struct cState_18E510 : cStateBase_18E510 {
  * (cFEMemCard_displayStatus's slot).
  * On Tour: cOVState_SAVEOPTIONS::displayStatus (ovstatereplay.cpp).
  */
-extern "C" void func_0018E510(cState_18E510* self)
+extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cState_18E510* self)
 {
     char* pMC = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short ustrDisplay[800];
     if (self->v42()) {
         if (DEV0_18E510(pMC, 53) == 0) {
-            func_001D8240();
+            cFEMemCard_callbackDisplayNoCards();
         } else if (self->f214 != 3) {
             self->v35(3);
         }
@@ -3827,7 +3827,7 @@ extern "C" void func_0018E510(cState_18E510* self)
 
 
 //100%
-INCLUDE_ASM("fe/festateoptions", func_0018EA98);
+INCLUDE_ASM("fe/festateoptions", cFEStateProfileSelect_cFEStateProfileSelect1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateProfileSelect_vtbl[];
@@ -3840,7 +3840,7 @@ extern void* cFEStateProfileSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_0018EA98(void* self)
+extern "C" void* cFEStateProfileSelect_cFEStateProfileSelect1(void* self)
 {
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = cFEStateProfileSelect_vtbl;

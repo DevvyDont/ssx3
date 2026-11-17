@@ -1363,7 +1363,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventBoostPowerUp);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cBEStatInterface_getTrickAttrib(void* iface, int rider, int b);
 extern "C" void func_0029AB08(void* mgr, void* rider, float cur, float amt);
 extern "C" void cRider_flagEventReaction(void* self, int mode, float t);
@@ -1401,7 +1401,7 @@ extern "C" void cRider_flagEventBoostPowerUp(void* self, int mask, float amt)
         if ((mask & *(int*)((char*)self + 0xB28)) == 0)
             return;
     }
-    func_0029AB08(func_0028B180(), self, *(float*)((char*)self + 0x2F8), amt);
+    func_0029AB08(cAudioInterface_bxAudio(), self, *(float*)((char*)self + 0x2F8), amt);
     *(float*)((char*)self + 0x2F8) = clamp_10E098(*(float*)((char*)self + 0x2F8) + amt, floatZero, 1.0f);
     if (*(float*)((char*)self + 0x2F8) == 1.0f && amt > floatZero && *(int*)((char*)self + 0xB2C) != 0)
     {
@@ -1431,7 +1431,7 @@ struct sVEntry0010E228 {
     int (*fn)(void*);
 };
 
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00298488(void* snd, void* a, void* b);
 extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
@@ -1450,8 +1450,8 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
  */
 extern "C" void cRider_flagEventBump(void* self, void* attacker)
 {
-    func_00298488(func_0028B180(), self, attacker);
-    func_002A0A30(func_0028B180(), attacker, self, 1, 0);
+    func_00298488(cAudioInterface_bxAudio(), self, attacker);
+    func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 1, 0);
     void* agg = cBEAggressionInterface_getThis();
     char* ob = (char*)attacker + 0x6C0;
     sVEntry0010E228* eb = &(*(sVEntry0010E228**)ob)[7];
@@ -1471,7 +1471,7 @@ struct sVEntry0010E2E8 {
     int (*fn)(void*);
 };
 
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00298488(void* snd, void* a, void* b);
 extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
@@ -1488,8 +1488,8 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
  */
 extern "C" void cRider_flagEventBumpKnockdown(void* self, void* attacker)
 {
-    func_00298488(func_0028B180(), self, attacker);
-    func_002A0A30(func_0028B180(), attacker, self, 1, 1);
+    func_00298488(cAudioInterface_bxAudio(), self, attacker);
+    func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 1, 1);
     void* agg = cBEAggressionInterface_getThis();
     char* ob = (char*)attacker + 0x6C0;
     sVEntry0010E2E8* eb = &(*(sVEntry0010E2E8**)ob)[7];
@@ -1509,7 +1509,7 @@ struct sVEntry0010E3A8 {
     int (*fn)(void*);
 };
 
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_Punch(void* snd, void* a, void* b);
 extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
@@ -1527,8 +1527,8 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
  */
 extern "C" void cRider_flagEventPunch(void* self, void* attacker)
 {
-    cSSXAudio_Punch(func_0028B180(), attacker, self);
-    func_002A0A30(func_0028B180(), attacker, self, 0, 0);
+    cSSXAudio_Punch(cAudioInterface_bxAudio(), attacker, self);
+    func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 0, 0);
     void* agg = cBEAggressionInterface_getThis();
     char* ob = (char*)attacker + 0x6C0;
     sVEntry0010E3A8* eb = &(*(sVEntry0010E3A8**)ob)[7];
@@ -1548,7 +1548,7 @@ struct sVEntry0010E468 {
     int (*fn)(void*);
 };
 
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_Punch(void* snd, void* a, void* b);
 extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 extern "C" void cSSXAudio_KnockdownSFX(void* snd, void* obj);
@@ -1572,9 +1572,9 @@ extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
  */
 extern "C" void cRider_flagEventPunchKnockdown(void* self, void* attacker)
 {
-    cSSXAudio_Punch(func_0028B180(), attacker, self);
-    func_002A0A30(func_0028B180(), attacker, self, 0, 1);
-    cSSXAudio_KnockdownSFX(func_0028B180(), attacker);
+    cSSXAudio_Punch(cAudioInterface_bxAudio(), attacker, self);
+    func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 0, 1);
+    cSSXAudio_KnockdownSFX(cAudioInterface_bxAudio(), attacker);
     void* agg = cBEAggressionInterface_getThis();
     char* ob = (char*)attacker + 0x6C0;
     sVEntry0010E468* eb = &(*(sVEntry0010E468**)ob)[7];
@@ -1680,7 +1680,7 @@ extern "C" void cRider_flagEventPathEvent(void* self, int* pathEvent, int isPrev
 //100%
 INCLUDE_ASM("ai/computer", cRider_flagEventSpeedBoost);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" void func_002A3B18(void*, void*, int);
 
@@ -1696,15 +1696,15 @@ extern "C" void func_002A3B18(void*, void*, int);
 extern "C" void cRider_flagEventSpeedBoost(void* self, float amount)
 {
     *(float*)((char*)self + 0x2E8) += amount;
-    cSSXAudio_PlayIconSound(func_0028B180(), 0, self, 1.0f);
-    func_002A3B18(func_0028B180(), self, 1);
+    cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 0, self, 1.0f);
+    func_002A3B18(cAudioInterface_bxAudio(), self, 1);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ai/computer", cRider_flagEventTrickBoost);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" void func_002A3B18(void*, void*, int);
 
@@ -1718,8 +1718,8 @@ extern "C" void func_002A3B18(void*, void*, int);
 extern "C" void cRider_flagEventTrickBoost(void* self, float amount)
 {
     *(float*)((char*)self + 0x2EC) += amount;
-    cSSXAudio_PlayIconSound(func_0028B180(), 1, self, 1.0f);
-    func_002A3B18(func_0028B180(), self, 2);
+    cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 1, self, 1.0f);
+    func_002A3B18(cAudioInterface_bxAudio(), self, 2);
 }
 #endif
 
@@ -1729,7 +1729,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventTrickMultiplier);
 int cRider_getMotionState(void* self);
 extern "C" float cRiderMetrix_evCollectMultiplier(char* self, float value);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 
 /**
@@ -1746,7 +1746,7 @@ extern "C" void cRider_flagEventTrickMultiplier(void* self, float value)
     if (cRider_getMotionState(self) == 1 || cRider_getMotionState(self) == 4)
     {
         cRider_flagEventBoostPowerUp(self, 4, cRiderMetrix_evCollectMultiplier(*(char**)((char*)self + 0x790), value));
-        cSSXAudio_PlayIconSound(func_0028B180(), 2, self, value);
+        cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 2, self, value);
     }
 }
 #endif
@@ -1756,7 +1756,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventAddPoints);
 #ifdef SKIP_ASM
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 extern "C" float cRiderMetrix_evAddPoints(int);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 
 /**
@@ -1768,7 +1768,7 @@ extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" void cRider_flagEventAddPoints(void* self)
 {
     cRider_flagEventBoostPowerUp(self, 0x10, cRiderMetrix_evAddPoints(*(int*)((char*)self + 0x790)));
-    cSSXAudio_PlayIconSound(func_0028B180(), 3, self, 1.0f);
+    cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 3, self, 1.0f);
 }
 #endif
 
@@ -2061,9 +2061,9 @@ extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, in
     vt[kRiderVt_vibrationBump].fn((char*)rider + vt[kRiderVt_vibrationBump].delta, *(float*)(evt + 0x30) * 5.0f);
     float amt = cRiderMetrix_evWipeout(rider->mMetrix, isPunch);
     cRider_flagEventBoostPowerUp(rider, 1, amt);
-    func_00296310(func_0028B180(), rider);
-    cSSXAudio_PlayGrunt(func_0028B180(), rider, 0, 0);
-    func_002961F0(func_0028B180(), rider, amt);
+    func_00296310(cAudioInterface_bxAudio(), rider);
+    cSSXAudio_PlayGrunt(cAudioInterface_bxAudio(), rider, 0, 0);
+    func_002961F0(cAudioInterface_bxAudio(), rider, amt);
     func_00111AA0_impl(rider->mRiderHandler, evt, evt + 0x20, surf, *(float*)(evt + 0x30));
     cRider_setControlState_EB30(rider, 13);
     if (rider->RailslideMode == 3) {
@@ -2533,7 +2533,7 @@ INCLUDE_ASM("ai/computer", cAI_UpdateRankingPlacement);
 #ifdef SKIP_ASM
 struct sAI_0010F998 { char pad[0x28]; cRider* riders[19]; int mode; int count; };
 extern "C" int cAI_isAILoadedAndReady(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ChangePosition(void* mgr, void* rider, void* next, void* prev, int oldPos, int newPos);
 extern "C" void func_003E6328(int n, int* keys, int* idx);
 float cRider_getDistanceLeft(void* self);
@@ -2601,7 +2601,7 @@ extern "C" void cAI_UpdateRankingPlacement(void* aiObj)
                 prev = self->riders[idx[j - 1]];
             if (j < self->count - 1)
                 next = self->riders[idx[j + 1]];
-            cSSXAudio_ChangePosition(func_0028B180(), self->riders[idx[j]], next, prev, self->riders[idx[j]]->unk_0EC, j);
+            cSSXAudio_ChangePosition(cAudioInterface_bxAudio(), self->riders[idx[j]], next, prev, self->riders[idx[j]]->unk_0EC, j);
         }
         self->riders[idx[j]]->unk_0EC = j;
     }

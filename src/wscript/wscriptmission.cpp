@@ -1,7 +1,7 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("wscript/wscriptmission", cWScriptMan_checkGate);
+INCLUDE_ASM("wscript/wscriptmission", cFEStateUberTrick_updateTrickMenu);
 #ifdef SKIP_ASM
 struct cList;
 struct cUIText;
@@ -94,7 +94,7 @@ static inline void setTab_3DE0(char* t, int c)
  *
  * @param vself  the store state
  */
-extern "C" void cWScriptMan_checkGate(void* vself)
+extern "C" void cFEStateUberTrick_updateTrickMenu(void* vself)
 {
     char* self = (char*)vself;
     void* screen = cList_first((cList*)(self + 0x24));

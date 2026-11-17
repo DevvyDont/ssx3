@@ -7,9 +7,9 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* s);
-extern "C" void func_001805D8(void* self, char* s);
-extern "C" void func_001809B0(void* self, int id, char* buf);
-extern "C" void func_00180A90(void* self, int id, char* buf);
+extern "C" void cScreenKeyboard_setInputText(void* self, char* s);
+extern "C" void cScreenKeyboard_getKeyObjName(void* self, int id, char* buf);
+extern "C" void cScreenKeyboard_getCursorObjName(void* self, int id, char* buf);
 extern char str_keyboard_arrLeft[];
 extern char str_keyboard_arrRight[];
 extern char str_keyboard_end[];
@@ -82,11 +82,11 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, void* screen)
     ch[0] = 'A';
     for (int i = 0; i < 26; i++)
     {
-        func_001809B0(self, i + 10, name);
+        cScreenKeyboard_getKeyObjName(self, i + 10, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             cUIText_setAsciiString((cUIText*)textObj, ch);
-        func_00180A90(self, i + 10, name);
+        cScreenKeyboard_getCursorObjName(self, i + 10, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             textObj->setVisible(0);
@@ -95,11 +95,11 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, void* screen)
     ch[0] = '0';
     for (int j = 0; j < 10; j++)
     {
-        func_001809B0(self, j, name);
+        cScreenKeyboard_getKeyObjName(self, j, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             cUIText_setAsciiString((cUIText*)textObj, ch);
-        func_00180A90(self, j, name);
+        cScreenKeyboard_getCursorObjName(self, j, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             textObj->setVisible(0);
@@ -108,7 +108,7 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, void* screen)
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_A));
     if (textObj != 0)
         textObj->setVisible(1);
-    func_001805D8(self, str_mypro1);
+    cScreenKeyboard_setInputText(self, str_mypro1);
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_profilename));
     if (textObj != 0)
         cUIText_setAsciiString((cUIText*)textObj, self + 0xEC);
@@ -116,17 +116,17 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, void* screen)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatedebug", func_00180EF0);
+INCLUDE_ASM("fe/festatedebug", cScreenKeyboard_onInput);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_00180A90(void* self, int id, char* buf);
-extern "C" void func_00180618(void* self);
-extern "C" void func_00180678(void* self);
-extern "C" void func_001806D8(void* self);
-extern "C" void func_00180768(void* self);
-extern "C" void func_00180840(void* self);
-extern "C" void func_001807C8(void* self);
+extern "C" void cScreenKeyboard_getCursorObjName(void* self, int id, char* buf);
+extern "C" void cScreenKeyboard_kbMoveLeft(void* self);
+extern "C" void cScreenKeyboard_kbMoveRight(void* self);
+extern "C" void cScreenKeyboard_kbMoveUp(void* self);
+extern "C" void cScreenKeyboard_kbMoveDown(void* self);
+extern "C" void cScreenKeyboard_pressKey(void* self);
+extern "C" void cScreenKeyboard_toggleShift(void* self);
 
 struct sDbgObj_180EF0 {
     char pad0[0x8];
@@ -179,38 +179,38 @@ struct sDbgState_180EF0 {
  * moves the highlight to match.
  *
  * Before acting, it builds the highlighted key's object name for the current key index (sel, +0x170) with
- * func_00180A90() and calls slot 9 of that screen object (found with cUIScreen_getObjectByHashName()) with 0; after
+ * cScreenKeyboard_getCursorObjName() and calls slot 9 of that screen object (found with cUIScreen_getObjectByHashName()) with 0; after
  * acting it does the same for the new index with 1. Only the first matching input is handled, tested through @p in's
- * virtual slots (cFEInput's order): isLeft (19) func_00180618(), isRight (20) func_00180678(), isUp (17)
- * func_001806D8(), isDown (18) func_00180768() (cursor moves), isNext (5) func_00180840() (types the key), isRShift2
- * (26) func_001807C8() (toggles the +0xE4 flag). The object sits in vtable D_0046D1A0 next to
+ * virtual slots (cFEInput's order): isLeft (19) cScreenKeyboard_kbMoveLeft(), isRight (20) cScreenKeyboard_kbMoveRight(), isUp (17)
+ * cScreenKeyboard_kbMoveUp(), isDown (18) cScreenKeyboard_kbMoveDown() (cursor moves), isNext (5) cScreenKeyboard_pressKey() (types the key), isRShift2
+ * (26) cScreenKeyboard_toggleShift() (toggles the +0xE4 flag). The object sits in vtable D_0046D1A0 next to
  * cScreenKeyboard__cScreenKeyboard.
  *
  * @param in  the UI input to read
  * @return always 1 (input consumed)
  */
-extern "C" int func_00180EF0(sDbgState_180EF0* self, sDbgInput_180EF0* in)
+extern "C" int cScreenKeyboard_onInput(sDbgState_180EF0* self, sDbgInput_180EF0* in)
 {
     char buf[0x20];
-    func_00180A90(self, self->sel, buf);
+    cScreenKeyboard_getCursorObjName(self, self->sel, buf);
     sDbgObj_180EF0* keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(self, GetHashValue32(buf));
     if (keyObject) {
         keyObject->v09(0);
     }
     if (in->v19()) {
-        func_00180618(self);
+        cScreenKeyboard_kbMoveLeft(self);
     } else if (in->v20()) {
-        func_00180678(self);
+        cScreenKeyboard_kbMoveRight(self);
     } else if (in->v17()) {
-        func_001806D8(self);
+        cScreenKeyboard_kbMoveUp(self);
     } else if (in->v18()) {
-        func_00180768(self);
+        cScreenKeyboard_kbMoveDown(self);
     } else if (in->v05()) {
-        func_00180840(self);
+        cScreenKeyboard_pressKey(self);
     } else if (in->v26()) {
-        func_001807C8(self);
+        cScreenKeyboard_toggleShift(self);
     }
-    func_00180A90(self, self->sel, buf);
+    cScreenKeyboard_getCursorObjName(self, self->sel, buf);
     keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(self, GetHashValue32(buf));
     if (keyObject) {
         keyObject->v09(1);
@@ -220,7 +220,7 @@ extern "C" int func_00180EF0(sDbgState_180EF0* self, sDbgInput_180EF0* in)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatedebug", func_00181090);
+INCLUDE_ASM("fe/festatedebug", cFEStateCharSelect_cFEStateCharSelect);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* owner);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
@@ -239,7 +239,7 @@ extern void* cFEStateCharSelect_vtbl[];
  * @param count  the rider slot choosing now (0 = first player); stored as mUserNum
  * @return @p self
  */
-extern "C" void* func_00181090(void* self, void* owner, int count)
+extern "C" void* cFEStateCharSelect_cFEStateCharSelect(void* self, void* owner, int count)
 {
     signed char n = count;
     int i = 0;

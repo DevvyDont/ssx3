@@ -3076,7 +3076,7 @@ extern char *D_004A3DD8_FF00 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_FF00 __asm__("SSXApp");
 static inline char *refToPtr_FF00(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_FF00(unsigned i) { if (i == 0) return 0; return refToPtr_FF00(i); }
-extern "C" void *func_0028B180_FF00(void) __asm__("func_0028B180");
+extern "C" void *cAudioInterface_bxAudio_FF00(void) __asm__("cAudioInterface_bxAudio");
 extern "C" void cSSXAudio_WorldSound_FF00(void*, void*, int) __asm__("cSSXAudio_WorldSound");
 struct V3_FF00 { float x, y, z; };
 extern V3_FF00 D_004C9098_FF00 __asm__("luno_gLunoNil");
@@ -3126,7 +3126,7 @@ extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *e) {
     }
     if (obj) {
         int b1 = buf[1];
-        cSSXAudio_WorldSound_FF00(func_0028B180_FF00(), obj, b1);
+        cSSXAudio_WorldSound_FF00(cAudioInterface_bxAudio_FF00(), obj, b1);
     }
     return D_004C9098_FF00;
 }
@@ -3140,7 +3140,7 @@ extern char *D_004A3DD8_00A8 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_00A8 __asm__("SSXApp");
 static inline char *refToPtr_00A8(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_00A8(unsigned i) { if (i == 0) return 0; return refToPtr_00A8(i); }
-extern "C" void *func_0028B180_00A8(void) __asm__("func_0028B180");
+extern "C" void *cAudioInterface_bxAudio_00A8(void) __asm__("cAudioInterface_bxAudio");
 extern "C" void cSSXAudio_AttachSound_00A8(void*, void*, int, int) __asm__("cSSXAudio_AttachSound");
 struct V3_00A8 { float x, y, z; };
 extern V3_00A8 D_004C9098_00A8 __asm__("luno_gLunoNil");
@@ -3192,7 +3192,7 @@ extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *e) {
     if (obj) {
         int b1 = buf[1];
         int b2 = buf[2];
-        cSSXAudio_AttachSound_00A8(func_0028B180_00A8(), obj, b1, b2);
+        cSSXAudio_AttachSound_00A8(cAudioInterface_bxAudio_00A8(), obj, b1, b2);
     }
     return D_004C9098_00A8;
 }
@@ -3206,7 +3206,7 @@ extern char *D_004A3DD8_0260 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_0260 __asm__("SSXApp");
 static inline char *refToPtr_0260(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_0260(unsigned i) { if (i == 0) return 0; return refToPtr_0260(i); }
-extern "C" void *func_0028B180_0260(void) __asm__("func_0028B180");
+extern "C" void *cAudioInterface_bxAudio_0260(void) __asm__("cAudioInterface_bxAudio");
 extern "C" void cSSXAudio_DetachSound_0260(void*, void*, int, int) __asm__("cSSXAudio_DetachSound");
 struct V3_0260 { float x, y, z; };
 extern V3_0260 D_004C9098_0260 __asm__("luno_gLunoNil");
@@ -3258,7 +3258,7 @@ extern "C" V3_0260 func_00300260(int n, Ent_0260 *e) {
     if (obj) {
         int b1 = buf[1];
         int b2 = buf[2];
-        cSSXAudio_DetachSound_0260(func_0028B180_0260(), obj, b1, b2);
+        cSSXAudio_DetachSound_0260(cAudioInterface_bxAudio_0260(), obj, b1, b2);
     }
     return D_004C9098_0260;
 }
@@ -4522,7 +4522,7 @@ extern "C" int func_00144CE0_2210(void* iface, int id) __asm__("func_00144CE0");
 extern "C" void cSectionMan_load_2210(void* self, int hash, char* name) __asm__("cSectionMan_load");
 extern "C" void cSectionMan_activate_2210(void* self, int hash, char* name) __asm__("cSectionMan_activate");
 extern "C" void cGame_setState_2210(void* self, int a, int b, int refresh) __asm__("cGame_setState");
-extern "C" void* func_0028B180_2210() __asm__("func_0028B180");
+extern "C" void* cAudioInterface_bxAudio_2210() __asm__("cAudioInterface_bxAudio");
 extern "C" void func_002A49E8_2210(void* self) __asm__("func_002A49E8");
 
 struct Ent_2210 { int idx; int val; int pad; int kind; };
@@ -4540,7 +4540,7 @@ public:
  * Defaults (D_004FBC20, under D_004A5730: -1, -1, -1) take the keyword arguments (types from D_004465C8). Only when the
  * script's rider is set and not busy: the location comes from the script ID through func_00144CE0 (BE interface 0) and
  * the mode from D_00445E40 (index < 8). The action: 0 cSectionMan_load (load), 2 cSectionMan_activate, 3
- * cGame_setState(game, 0xE, 2, 0) and func_002A49E8(func_0028B180()), 4 cGame_setState(game, 0xE, 0, 0), 5 sets
+ * cGame_setState(game, 0xE, 2, 0) and func_002A49E8(cAudioInterface_bxAudio()), 4 cGame_setState(game, 0xE, 0, 0), 5 sets
  * SectionMan +0x1A4; 1 does nothing (load and activate act on SSXApp->Game->SectionMan).
  *
  * The view types D_00445E40 as strings (name) and the location as a hash, but the table is the eSectionManMode one that
@@ -4605,7 +4605,7 @@ extern "C" V3_2210 SectionFunc(int n, Ent_2210* params)
             break;
         case 3:
             cGame_setState_2210(*(void**)(D_004A28A8_2210 + 0x84), 0xE, 2, 0);
-            func_002A49E8_2210(func_0028B180_2210());
+            func_002A49E8_2210(cAudioInterface_bxAudio_2210());
             break;
         case 4:
             cGame_setState_2210(*(void**)(D_004A28A8_2210 + 0x84), 0xE, 0, 0);
@@ -7693,7 +7693,7 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00306E68);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A3DD8_6E68 __asm__("cWScriptMan_TheWScriptMan");
 extern "C" int func_0030BFC0_6E68(int, int, int, int) __asm__("func_0030BFC0");
-extern "C" void *func_0028B180_6E68() __asm__("func_0028B180");
+extern "C" void *cAudioInterface_bxAudio_6E68() __asm__("cAudioInterface_bxAudio");
 extern "C" void cSSXAudio_WorldSound_6E68(void*, void*, int) __asm__("cSSXAudio_WorldSound");
 int *func_00226610(void*);
 static inline char *refToPtr_6E68(unsigned i) { return (char*)(i << 2); }
@@ -7744,7 +7744,7 @@ extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *e) {
             obj = t;
         }
         if (obj)
-            cSSXAudio_WorldSound_6E68(func_0028B180_6E68(), obj, 92);
+            cSSXAudio_WorldSound_6E68(cAudioInterface_bxAudio_6E68(), obj, 92);
     }
     ((int*)ret)[2] = 1;
     *func_00226610(ret) = r;
@@ -7864,7 +7864,7 @@ INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_processComplete);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_7240 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); };
 int cWScriptMan_isProcessActive_7240(void*, void*) __asm__("cWScriptMan_isProcessActive__FPvT0");
-extern "C" void *func_0028B180_7240(void) __asm__("func_0028B180");
+extern "C" void *cAudioInterface_bxAudio_7240(void) __asm__("cAudioInterface_bxAudio");
 extern "C" void func_0029D8E0_7240(void*) __asm__("func_0029D8E0");
 /**
  * Completes a mission that the script manager still lists: runs its virtual slots 6 and 18, then calls
@@ -7874,7 +7874,7 @@ extern "C" void cWScriptMission_processComplete(P_7240* self) {
     if (cWScriptMan_isProcessActive_7240(*(void**)((char*)self + 0x10), self)) {
         self->v06();
         self->v18();
-        func_0029D8E0_7240(func_0028B180_7240());
+        func_0029D8E0_7240(cAudioInterface_bxAudio_7240());
     }
 }
 #endif

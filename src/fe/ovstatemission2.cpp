@@ -2,25 +2,25 @@
 
 INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_onCreateScreen);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00211220);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_displayStatus);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00211270);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_displayOff);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00211380);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_displayOn);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00211850);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_hideActionButtons);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00211970);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_hideDeleteButton);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00211A08);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_hideMainButton);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00211AA8);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_updateDone);
 
 INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_onDestroyScreen);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00211B38);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_onWidgetMenu);
 
-INCLUDE_ASM("fe/ovstatemission2", func_00211BC8);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_onWidgetEvent);
 
 INCLUDE_ASM("fe/ovstatemission2", cOVState_PROFILE_initGeneral);
 
@@ -36,7 +36,7 @@ INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_displayStatus);
 
 INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_displayOn);
 
-INCLUDE_ASM("fe/ovstatemission2", func_002124C8);
+INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_updateDone);
 
 INCLUDE_ASM("fe/ovstatemission2", cOVState_AUTOSAVE_onDestroyScreen);
 

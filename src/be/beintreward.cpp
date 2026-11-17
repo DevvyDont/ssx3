@@ -489,14 +489,14 @@ int func_00157330(void* self)
 }
 #endif
 
-extern "C" void* func_0028B180(void* self);
+extern "C" void* cAudioInterface_bxAudio(void* self);
 
 //100%
 INCLUDE_ASM("be/beintreward", func_00157350__FPv);
 #ifdef SKIP_ASM
 int func_00157350(void* self)
 {
-    return *(int*)((char*)func_0028B180(self) + 0x504);
+    return *(int*)((char*)cAudioInterface_bxAudio(self) + 0x504);
 }
 #endif
 

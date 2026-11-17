@@ -23,7 +23,7 @@ extern "C" void* func_002F1850(void* mem, void* rider);
 extern "C" void* func_002EC9E0(void* self, int a1, int a2);
 void* cPlayerShadow_cPlayerShadow(void* self);
 extern "C" void cScriptObject_InitScriptObject(void* rig);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 // PORT: cSSXAudio_RiderCreated is declared (void*) but takes (mgr, rider).
 void cSSXAudio_RiderCreated_impl(void* mgr, void* rider) __asm__("cSSXAudio_RiderCreated__FPv");
 extern "C" void* MEM_fill(void* dst, int value, int size);
@@ -140,7 +140,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     cScriptObject_InitScriptObject(self->unk_6DC);
     self->mWipeoutSlideHandle = invalidHandle;
     self->mWipeoutTumbleHandle = invalidHandle;
-    cSSXAudio_RiderCreated_impl(func_0028B180(), self);
+    cSSXAudio_RiderCreated_impl(cAudioInterface_bxAudio(), self);
     self->mBoostMeterStart = 0.0f;
     self->mBoostMode = 1;
     self->unk_B20 = 1;
@@ -164,7 +164,7 @@ struct sVE_11B978 {
     short index;
     void (*fn)(void*, int);
 };
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 // PORT: func_00289AF8 takes (mgr, rider); the mangled name says one void* param.
 void func_00289AF8_impl(void* mgr, void* rider) __asm__("func_00289AF8__FPv");
 extern "C" void cScriptObject_DeInitScriptObject(void* p);
@@ -205,7 +205,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
     self->mScriptObjectVtbl = D_00459BD0;
     self->mScriptObjRiderVtbl = D_00459B90;
     self->mVtbl = D_00459C18;
-    func_00289AF8_impl(func_0028B180(), self);
+    func_00289AF8_impl(cAudioInterface_bxAudio(), self);
     cScriptObject_DeInitScriptObject(self->unk_6DC);
     char* polyMember = (char*)self->mRiderAnim;
     if (polyMember != 0)
@@ -3533,7 +3533,7 @@ extern "C" void cRider_updateSplit11(cRider* self)
 INCLUDE_ASM("ai/rider", cRider_updateSplit12);
 #ifdef SKIP_ASM
 extern "C" int cRider_isGroundNormalValid(cRider* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_UpdateAudioWorldPainter(void* mgr, void* rider);
 extern "C" float func_0031C228(float x);
 extern "C" void cRider_updateDangerLevel(cRider* self);
@@ -3587,7 +3587,7 @@ static inline float Atan2_121950(float y, float x)
  */
 extern "C" void cRider_updateSplit12(cRider* self)
 {
-    cSSXAudio_UpdateAudioWorldPainter(func_0028B180(), self);
+    cSSXAudio_UpdateAudioWorldPainter(cAudioInterface_bxAudio(), self);
     if (cRider_isGroundNormalValid(self))
     {
         sVec2_121950 normalXY(self->mGroundNormal.x, self->mGroundNormal.y);
@@ -5405,7 +5405,7 @@ INCLUDE_ASM("ai/rider", cRider_OnEndObjectUse);
 #ifdef SKIP_ASM
 extern "C" void cScriptObjRider_OnEndObjectUse(void* self);
 extern "C" void cRider_initAlways(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 void func_002A1BD0(void* p);
 extern "C" void func_0030EA80(void* model, int i, int channel);
 extern "C" void func_0030E9E0(void* model, int i, int channel);
@@ -5490,7 +5490,7 @@ extern "C" void cRider_OnEndObjectUse(cRider* self)
     cScriptObjRider_OnEndObjectUse((char*)&self->mScriptObjRiderVtbl);
     cRider_initAlways(self);
     if (self->unk_AC8 != 0) {
-        func_002A1BD0(func_0028B180());
+        func_002A1BD0(cAudioInterface_bxAudio());
     }
     self->unk_AFC = 0;
     self->unk_B04 = 0;
@@ -5529,7 +5529,7 @@ extern "C" void cRider_OnEndObjectUse(cRider* self)
     int j;
     for (j = 0; j < 4; j++) {
         if (ids[j] >= 0) {
-            cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)((char*)func_0028B180() + 0x118) + 0x1D8, ids[j], 1, 0.0f);
+            cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, ids[j], 1, 0.0f);
         }
         ids[j] = -1;
     }
@@ -5573,7 +5573,7 @@ extern "C" void cRider_OnInSeqUpdate(cRider* self, int id, float currFrame, floa
 INCLUDE_ASM("ai/rider", cRider_OnInSeqKeyEvent);
 #ifdef SKIP_ASM
 extern "C" void GetSSXActorFrame(int, void*);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" int func_002A1B58(void* self, int msg, int a);
 extern "C" int func_002A1B88(void* self, int type, int a, int b);
 extern "C" void* cSSXScriptEngine_GetSubjectRider(void* self, int i, int a2);
@@ -5619,13 +5619,13 @@ extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float currFrame, fl
             if (ev == 102) continue;
             if (ev < 100)
             {
-                func_002A1B58(func_0028B180(), ev, (int)self);
+                func_002A1B58(cAudioInterface_bxAudio(), ev, (int)self);
                 self->unk_AC8 = 1;
             }
             else
             {
                 ev -= 100;
-                void* snd = func_0028B180();
+                void* snd = cAudioInterface_bxAudio();
                 // PORT: id is a handle that is also read as a pointer here.
                 int subjectRider = (int)cSSXScriptEngine_GetSubjectRider(ScriptEngine, *event->arg, *(int*)(id + 8));
                 func_002A1B88(snd, ev, (int)self, subjectRider);
@@ -6567,7 +6567,7 @@ extern "C" float cRiderMetrix_evFinishRace(void* self);
 extern "C" void cChaseCameraController_switchCamera_EndRace(void* self);
 extern "C" void cGameModeMan_raceFinish(void* self, int a1, int a2);
 extern "C" void func_00286EA0(void* self, void* rider);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 
 struct sVEntry125108 { short delta; short index; int (*fn)(void*); };
 
@@ -6607,7 +6607,7 @@ extern "C" void cRider_doFinishEvent(cRider* self)
         char* tbl = (char*)SSXApp->Game->ViewMan;
         cChaseCameraController_switchCamera_EndRace(*(void**)(*(char**)(tbl + (k << 2) + 4) + 0xA8));
     }
-    func_00286EA0(func_0028B180(), self);
+    func_00286EA0(cAudioInterface_bxAudio(), self);
     if (self->mDidNotFinish == 1) self->unk_100 = 0;
 }
 #endif
@@ -6624,7 +6624,7 @@ struct sVE_125228 {
 extern "C" void* cBE_getBE();
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRider_doFinishEvent(cRider* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002A3C00(void* a, void* self, int n);
 extern "C" unsigned int func_004139F8(float f);
 extern signed char D_00535C10[];
@@ -6660,7 +6660,7 @@ extern "C" int cRider_updateFinishTest(cRider* self)
                 if (secs * 60 < eventTicks) {
                     self->mDidNotFinish = 1;
                     cRider_doFinishEvent(self);
-                    func_002A3C00(func_0028B180(), self, 2);
+                    func_002A3C00(cAudioInterface_bxAudio(), self, 2);
                     goto end;
                 }
             }
@@ -6711,7 +6711,7 @@ extern "C" void cRider_quitEvent(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_DoInSeqSoundUpdate);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" int cBankMonitor_BANKMONITOR_GetHandle(void* bank, int id, int a);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 void func_00280548(void* self, int a1, void* a2, void* a3);
@@ -6808,7 +6808,7 @@ extern "C" void cRider_DoInSeqSoundUpdate(void* vself, void* vobj, float when, f
     cRider* self = (cRider*)vself;
     char* obj = (char*)vobj;
     int* ids = self->unk_B08;
-    sWtSnd_5448* snd = (sWtSnd_5448*)func_0028B180();
+    sWtSnd_5448* snd = (sWtSnd_5448*)cAudioInterface_bxAudio();
     int i;
     for (i = 0; i < 4; i++) {
         if (ids[i] >= 0) {

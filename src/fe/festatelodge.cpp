@@ -13,7 +13,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_001474C8(void* iface, int player);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 
 /**
@@ -34,7 +34,7 @@ extern "C" void cFEStateLodge_onCreateScreen(void* self)
     }
     *(int*)((char*)self + 0x48) = func_001474C8(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
     D_00441B14[0] = 0;
-    func_0028F140(func_0028B180(), 1);
+    func_0028F140(cAudioInterface_bxAudio(), 1);
     *(int*)((char*)self + 0x4C) = 0;
     *(int*)((char*)self + 0x50) = 18;
     *(int*)((char*)self + 0x54) = 0;
@@ -365,7 +365,7 @@ extern "C" void cFEStateLodge_onPopupEvent(char* self, char* msg, unsigned int i
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F3FF8);
+INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail);
 #ifdef SKIP_ASM
 extern void* cFEStateLodgeRiderDetail_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
@@ -380,7 +380,7 @@ extern "C" unsigned char func_001A1CD0(void* self, int a1);
  *
  * @return @p self
  */
-extern "C" void* func_001F3FF8(void* self)
+extern "C" void* cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(void* self)
 {
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = cFEStateLodgeRiderDetail_vtbl;
@@ -611,7 +611,7 @@ extern "C" void cKeyboardPopup_setIncludeKey(void* self, int key, int a2, int a3
 extern "C" void func_001CE408(void* self, int a1);
 extern "C" void cKeyboardPopup_setInputText(void* self, const char* str);
 extern "C" const char* cBENewPlayerInterface_getPlayerName(void* iface, int player);
-extern "C" void* func_00182220(void* self, void* engine, void* owner, int player, int charID);
+extern "C" void* cFEStateCheatCharSelect_cFEStateCheatCharSelect(void* self, void* engine, void* owner, int player, int charID);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -636,7 +636,7 @@ struct sVE_1F4400 {
  * Event 5 (accept), for options enabled in D_00441AF8 (read at 9-15, past its 7 entries): option 14
  * ("Option_6") opens a "cKeyboardPopup" (cKeyboardPopup_cKeyboardPopup) limited to 8 characters, with some keys left out and
  * the player's name as its text; option 11 ("Option_3") opens a "cFEStateCheatCharSelect" popup
- * (func_00182220) when a cheat character is unlocked; any other plays "TransitionOut" and pushes
+ * (cFEStateCheatCharSelect_cFEStateCheatCharSelect) when a cheat character is unlocked; any other plays "TransitionOut" and pushes
  * getNextState's state for the option. Event 6 (back) pushes getPrevState's state.
  *
  * @param w  the option widget that sent the event; nothing happens when null
@@ -680,7 +680,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(char* self, char* w, int 
             int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44));
             if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)(self + 0x44), id) > 0) {
                 void* mem = cMemMan_alloc(484, str_cFEStateCheatCharSelect_b, 0, 0);
-                void* popup = func_00182220(mem, *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), id);
+                void* popup = cFEStateCheatCharSelect_cFEStateCheatCharSelect(mem, *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), id);
                 cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, popup);
             }
             return;
@@ -708,7 +708,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(char* self, char* w, int 
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatelodge", func_001F4728);
+INCLUDE_ASM("fe/festatelodge", cFEStateBuyAttrib_cFEStateBuyAttrib);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E2A0_4728(void* self, int a1) __asm__("func_0039E2A0");
@@ -740,7 +740,7 @@ struct sLodgeStats_4728 {
  * @param engine  the UI engine
  * @return @p stateMemory
  */
-extern "C" void* func_001F4728(void* stateMemory, int engine)
+extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(void* stateMemory, int engine)
 {
     sLodgeStats_4728* self = (sLodgeStats_4728*)stateMemory;
     char* stateBytes = (char*)stateMemory;

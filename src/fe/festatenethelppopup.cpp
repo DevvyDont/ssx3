@@ -193,7 +193,7 @@ extern "C" void cFEStateNetHelpPopup_onWidgetCreate(sNetHelp_1D9F38* self, sWidg
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatenethelppopup", func_001DA110);
+INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_createAndSetDescriptionString);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -225,7 +225,7 @@ struct sStrings_A110 {
  *
  * @param helpPopup  the help popup state
  */
-extern "C" void func_001DA110(void* helpPopup)
+extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(void* helpPopup)
 {
     char* self = (char*)helpPopup;
     unsigned short* strs[3];
@@ -264,7 +264,7 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onGainTransition);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" void func_001DA110(void* self);
+extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(void* self);
 extern char D_004A1408[];
 
 struct sVEnt_1DA238 { short delta; short index; void (*fn)(void*, int); };
@@ -305,7 +305,7 @@ static inline void show_1DA238(sWidget_1DA238* w, int on)
  *
  * Rows past the option count are hidden; each shown row's icon is moved down 22 units per row. A missing
  * string
- * ID leaves the text empty; the body is built by func_001DA110().
+ * ID leaves the text empty; the body is built by cFEStateNetHelpPopup_createAndSetDescriptionString().
  *
  * @param bFirstTime  nonzero on the first transition
  * @return 1
@@ -319,7 +319,7 @@ extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int 
             cUIText_setAsciiString((cUIText*)self->wA8, D_004A1408);
         }
         if (self->c[0]) {
-            func_001DA110(self);
+            cFEStateNetHelpPopup_createAndSetDescriptionString(self);
         } else {
             cUIText_setAsciiString((cUIText*)self->wAC, D_004A1408);
         }
@@ -372,7 +372,7 @@ extern "C" void cFEStateNetHelpPopup_onWidgetEvent(void* self, int pWidget, int 
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatenethelppopup", func_001DA4A8);
+INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_clear);
 #ifdef SKIP_ASM
 struct sNetHelpPopup_DA4A8 {
     char pad_0x0[0x48];
@@ -392,7 +392,7 @@ struct sNetHelpPopup_DA4A8 {
  * and +0x64 to 0, and the seven option text ids (+0x68) to 0 and icons (+0x84) to -1 (see
  * cFEStateNetHelpPopup_setOption()). The help popup's constructor func_001D9D48() calls it.
  */
-extern "C" void func_001DA4A8(void* self)
+extern "C" void cFEStateNetHelpPopup_clear(void* self)
 {
     sNetHelpPopup_DA4A8* helpPopup = (sNetHelpPopup_DA4A8*)self;
     int i;
@@ -657,7 +657,7 @@ extern char str_Login_Method[];
  *
  * Runs cMenu_cMenu(), stores vtable D_0046D638, builds the Create Account menu (func_001DA648()) at +0x130 and the
  * Login menu (func_001DA7E8()) at +0x32C, labelling their action items "Create Account" and "Login", then adds the
- * "Login Method" title, a spacer of 10 and two cSubMenuItems opening those menus. func_0017D298() builds it at +0x70 of
+ * "Login Method" title, a spacer of 10 and two cSubMenuItems opening those menus. cDebugLobbyScreen_cDebugLobbyScreen() builds it at +0x70 of
  * the debug front end.
  *
  * @param createOwner  owner holder passed to the Create Account menu
@@ -800,7 +800,7 @@ extern char str_Delete_Persona[];
  * Create Persona menu (func_001DAAC8()) at +0x130 and the Delete Persona menu (func_001DABD0()) at +0x2E8, stores the
  * owner from @p info at +0x4E0, then builds the "Select Persona" title, a spacer of 14, four empty command items
  * (func_002CCF08()) at +0x518 and cSubMenuItems for the two sub-menus, adding them in that order. func_001DB418 fills
- * in the persona lines; func_0017D298() builds it at +0x74C of the debug front end.
+ * in the persona lines; cDebugLobbyScreen_cDebugLobbyScreen() builds it at +0x74C of the debug front end.
  *
  * @param info  a holder whose first word (the debug front end) is stored at +0x4E0
  * @param createOwner  owner holder passed to the Create Persona menu

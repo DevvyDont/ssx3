@@ -20,15 +20,15 @@ INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_onInputBegin);
 
 INCLUDE_ASM("fe/ovstates4", cOVTemplate_PauseMenu_setPDAIconColor);
 
-INCLUDE_ASM("fe/ovstates4", func_001F8EE0);
+INCLUDE_ASM("fe/ovstates4", cOVState_PAUSE_COMPETE_onCreateScreen);
 
-INCLUDE_ASM("fe/ovstates4", func_001F8F48);
+INCLUDE_ASM("fe/ovstates4", cOVState_PAUSE_BIGCHAL_onCreateScreen);
 
-INCLUDE_ASM("fe/ovstates4", func_001F8FB0);
+INCLUDE_ASM("fe/ovstates4", cOVState_PAUSE_FREERIDE_onCreateScreen);
 
-INCLUDE_ASM("fe/ovstates4", func_001F9018);
+INCLUDE_ASM("fe/ovstates4", cOVState_PAUSE_SPOKE_onCreateScreen);
 
-INCLUDE_ASM("fe/ovstates4", func_001F9080);
+INCLUDE_ASM("fe/ovstates4", cOVState_PAUSE_QUICKPLAY_onCreateScreen);
 
 INCLUDE_ASM("fe/ovstates4", cOVState_PAUSE_ONLINE_onCreateScreen);
 

@@ -23,7 +23,7 @@ extern "C" int cUIListBox_getEntryByData(void* box, int key, unsigned char* out)
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* box, unsigned char sel);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
@@ -248,7 +248,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
         if (w != 0) {
             w->max = 12;
             w->value = iface->getOptions().f0;
-            func_00287410(func_0028B180(), Cfg_PO().f0);
+            func_00287410(cAudioInterface_bxAudio(), Cfg_PO().f0);
         }
     }
     {
@@ -256,7 +256,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
         if (w != 0) {
             w->max = 12;
             w->value = iface->getOptions().f8;
-            func_00287488(func_0028B180(), Cfg_PO().f8);
+            func_00287488(cAudioInterface_bxAudio(), Cfg_PO().f8);
         }
     }
     {
@@ -264,7 +264,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
         if (w != 0) {
             w->max = 12;
             w->value = iface->getOptions().f4;
-            func_00287520(func_0028B180(), Cfg_PO().f4);
+            func_00287520(cAudioInterface_bxAudio(), Cfg_PO().f4);
         }
     }
     {
@@ -275,7 +275,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
             unsigned char sel2;
             if (cUIListBox_getEntryByData(w, iface->getOptions().f17, &sel2))
                 cUIListBox_setCurrentEntryByIndex(w, sel2);
-            cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_PO().f17 != 0);
+            cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_PO().f17 != 0);
         }
     }
     {
@@ -286,7 +286,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
             unsigned char sel3;
             if (cUIListBox_getEntryByData(w, iface->getOptions().f16, &sel3))
                 cUIListBox_setCurrentEntryByIndex(w, sel3);
-            func_002875D0(func_0028B180(), Cfg_PO().f16 != 0);
+            func_002875D0(cAudioInterface_bxAudio(), Cfg_PO().f16 != 0);
         }
     }
     cUIObj_PO* eaTalkPair = (cUIObj_PO*)find_PO(self, str_EATalkPair);
@@ -410,7 +410,7 @@ extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int 
 extern "C" void func_0039F190(void* self, int a1);
 extern "C" int cUIListBox_getCurrentEntryData(void* obj);
 extern "C" void cChaseCameraController_switchCamera_UserChange(void* a0, int a1, void* a2);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
@@ -523,19 +523,19 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
             cChaseCameraController_switchCamera_UserChange(*(void**)(camera + 0xA8), on, camera);
         } else if (IsId_A238(obj, str_4sl_b)) {
             SetF0_A238(*(int*)(obj + 0x74));
-            func_00287410(func_0028B180(), iface->getOptions().f0);
+            func_00287410(cAudioInterface_bxAudio(), iface->getOptions().f0);
         } else if (IsId_A238(obj, str_5sl)) {
             SetF8_A238(*(int*)(obj + 0x74));
-            func_00287488(func_0028B180(), iface->getOptions().f8);
+            func_00287488(cAudioInterface_bxAudio(), iface->getOptions().f8);
         } else if (IsId_A238(obj, str_6sl)) {
             SetF4_A238(*(int*)(obj + 0x74));
-            func_00287520(func_0028B180(), iface->getOptions().f4);
+            func_00287520(cAudioInterface_bxAudio(), iface->getOptions().f4);
         } else if (IsId_A238(obj, str_7lb_b)) {
             D_00535610_A238.f17 = cUIListBox_getCurrentEntryData(obj) != 0;
-            cSSXAudio_SetArcadeSFX(func_0028B180(), iface->getOptions().f17 != 0);
+            cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), iface->getOptions().f17 != 0);
         } else if (IsId_A238(obj, str_8lb)) {
             D_00535610_A238.f16 = cUIListBox_getCurrentEntryData(obj) != 0;
-            func_002875D0(func_0028B180(), iface->getOptions().f16 != 0);
+            func_002875D0(cAudioInterface_bxAudio(), iface->getOptions().f16 != 0);
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && IsId_A238(obj, str_EATalksl)) {
@@ -669,7 +669,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_onCreateScreen(void* self);
-extern "C" void func_001FAFF8(void* self, bool on);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(void* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible);
 extern "C" void func_002583A8(void* self, int a1, int a2);
 extern void* cAppMan_TheAppMan;
@@ -715,7 +715,7 @@ public:
  * texts.
  * Text_CancelGame reads kT_BTNOK after the local finish, else kT_OVRCancelEvent (choice 0); it, the four
  * button graphics and the continue option start hidden. With a cGameComm it pings the lobby server for 3 s
- * (func_002583A8), stores the start time in +0x9C, hides Cancel (func_001FAFF8) and shows
+ * (func_002583A8), stores the start time in +0x9C, hides Cancel (cOVState_PAUSE_ONLINE_ERROR_enableCancelButton) and shows
  * kT_PauseErrorCheckingServer; without one it shows Cancel. The TextError branch reads cGameComm_mGameComm
  * before that null check.
  */
@@ -803,13 +803,13 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
     if (cGameComm_mGameComm != 0) {
         func_002583A8(cGameComm_mGameComm, LobbyMan_mLobbyMan->mServerAddr, 3);
         *(int*)(state + 0x9C) = *(int*)((char*)cAppMan_TheAppMan + 0x18);
-        func_001FAFF8(self, 0);
+        cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 0);
         cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_TextInfo));
         if (infoText != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorCheckingServer));
         }
     } else {
-        func_001FAFF8(self, 1);
+        cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 1);
     }
 }
 #endif
@@ -836,7 +836,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_onUpdate);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cOVState_onUpdate(void* self);
-extern "C" void func_001FAFF8(void* self, bool on);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(void* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(void* self);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self);
 extern char str_TextInfo[];
@@ -862,7 +862,7 @@ public:
  * has run out with no reply (unk_13C == 0), it clears the comm's unk_09C and shows the timed-out message
  * (cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut()). If a reply came, it shows the received message
  * (cOVState_PAUSE_ONLINE_ERROR_displayPingReceived()) when a race is in progress, the local rider has not finished and
- * mCheating[0] is clear, else it hides the "TextInfo" object. In both cases it then calls func_001FAFF8(self, 1)
+ * mCheating[0] is clear, else it hides the "TextInfo" object. In both cases it then calls cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 1)
  * and clears +0x9C; with no reply and time left it waits.
  */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_onUpdate(void* self)
@@ -885,14 +885,14 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onUpdate(void* self)
                 ((cUIObj_1FAF10*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextInfo)))->setVisible(0);
             }
         }
-        func_001FAFF8(self, 1);
+        cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 1);
         *(int*)((char*)self + 0x9C) = 0;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FAFF8);
+INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_enableCancelButton);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -923,7 +923,7 @@ public:
  *
  * @param on  true to show and select the option, false to hide it and make it static
  */
-extern "C" void func_001FAFF8(void* self, bool on)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(void* self, bool on)
 {
     cUIObj_1FAFF8* cancelText = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_CancelGame));
     cancelText->setVisible(on);
@@ -1250,7 +1250,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(void* self, int o
 INCLUDE_ASM("fe/ovstatepause", func_001FB6B8);
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FBBD8);
+INCLUDE_ASM("fe/ovstatepause", cOVState_HEAT_PREEVENT_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1269,10 +1269,10 @@ extern signed char D_00535C11[];
  * Runs cUIState_onGainFocus, then plays "@TextPulseWhiteOrange" (cOVState_triggerTextFade) on "rider<n>" for the first
  * human rider (cBENewPlayerInterface_getHumanRider(.., 0) + 1) and, in an online race (cBENewRaceInterface_newRace's
  * cGamePath == 2), for the second. With a cGameComm_mGameComm link it sets mOverlayTimeout to 1200 frames, after which
- * func_001FBCE0 closes the overlay. The overlay factory builds this state (vtable D_00472850, screen "40race_pre") for
+ * cOVState_HEAT_PREEVENT_onUpdate closes the overlay. The overlay factory builds this state (vtable D_00472850, screen "40race_pre") for
  * overlay type 8. BE interface 0 is fetched and unused.
  */
-extern "C" void func_001FBBD8(void* self)
+extern "C" void cOVState_HEAT_PREEVENT_onGainFocus(void* self)
 {
     char buf[32];
     cUIState_onGainFocus(self);
@@ -1292,7 +1292,7 @@ extern "C" void func_001FBBD8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FBCC8);
+INCLUDE_ASM("fe/ovstatepause", cOVState_HEAT_PREEVENT_onLoseFocus);
 #ifdef SKIP_ASM
 
 /**
@@ -1300,7 +1300,7 @@ INCLUDE_ASM("fe/ovstatepause", func_001FBCC8);
  *
  * Sets cGameComm_mGameComm's mOverlayTimeout to -1 when there is a link.
  */
-extern "C" void func_001FBCC8(void)
+extern "C" void cOVState_HEAT_PREEVENT_onLoseFocus(void)
 {
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
@@ -1310,7 +1310,7 @@ extern "C" void func_001FBCC8(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FBCE0);
+INCLUDE_ASM("fe/ovstatepause", cOVState_HEAT_PREEVENT_onUpdate);
 #ifdef SKIP_ASM
 extern int cOVStateManager_mStatus;
 extern "C" void* cOVState_onUpdate(void* self);
@@ -1321,7 +1321,7 @@ extern "C" void* cOVState_onUpdate(void* self);
  * Runs cOVState_onUpdate; when cGameComm_mGameComm exists and its mOverlayTimeout has counted down to 0, sets it to -1
  * and cOVStateManager_mStatus to 1 (go to the next overlay).
  */
-extern "C" void func_001FBCE0(void* self)
+extern "C" void cOVState_HEAT_PREEVENT_onUpdate(void* self)
 {
     cOVState_onUpdate(self);
     cGameComm* gameComm = cGameComm_mGameComm;
@@ -1407,7 +1407,7 @@ extern char str_OV_darkblue[];
 
 extern char D_004A2138[];
 
-extern "C" void func_0020D1D8(void* self);
+extern "C" void cOVTemplate_Simple_onCreateScreen(void* self);
 extern "C" char* func_00144BF0(void* iface);
 extern "C" unsigned short* func_002C2540_BD20(unsigned short* dst, char* src) __asm__("func_002C2540");
 extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
@@ -1478,7 +1478,7 @@ static inline void* getObj_1FBD20(void* self, char* name)
  * Builds the freestyle pre-event overlay: the event title, the heat's objectives and tab, and the standings table.
  *
  * Adds the "41freestyle_pre" screen (kept in mpScreen) and the "OV_darkblue" backdrop, plays frame 0 of each and runs
- * func_0020D1D8 (cOVState_onCreateScreen plus the "overlayMenu" option). Reads cBENewRaceInterface_newRace's cGameMode
+ * cOVTemplate_Simple_onCreateScreen (cOVState_onCreateScreen plus the "overlayMenu" option). Reads cBENewRaceInterface_newRace's cGameMode
  * and cGamePath and SSXApp->GameModeMan's iHeatNum.
  *
  * "track_event" gets "<location> - <event>" ("%s - %s" through sprintf2; the location name from func_00144BF0, the
@@ -1513,7 +1513,7 @@ extern "C" void func_001FBD20(void* self)
     scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_OV_darkblue), 0);
     if (scr != 0)
         cUIScreen_playFrame_BD20(scr, 0, 0);
-    func_0020D1D8(self);
+    cOVTemplate_Simple_onCreateScreen(self);
     void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
@@ -1683,7 +1683,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVState_triggerTextFade(void* self, char* text, char* label);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void func_002A31C0(void* self);
 extern signed char D_00535C11[];
@@ -1700,7 +1700,7 @@ extern char str_p1dashes[];
  * Runs cUIState_onGainFocus and plays "@TextPulseWhiteOrange" (cOVState_triggerTextFade) on "p0rider" and on "p0dashes"
  * in heat 2 (SSXApp->GameModeMan's iHeatNum) or "p0run1" otherwise; in an online race (cBENewRaceInterface_newRace's
  * cGamePath == 2) also on "p1rider" and "p1dashes". Then plays menu sound 0xE (cSSXAudio_MenuSound) and calls
- * func_002A31C0 on the sound system (func_0028B180()). BE interface 0 is fetched and unused.
+ * func_002A31C0 on the sound system (cAudioInterface_bxAudio()). BE interface 0 is fetched and unused.
  */
 extern "C" void func_001FC768(void* self)
 {
@@ -1717,8 +1717,8 @@ extern "C" void func_001FC768(void* self)
         cOVState_triggerTextFade(self, str_p1rider, str_at_TextPulseWhiteOrange);
         cOVState_triggerTextFade(self, str_p1dashes, str_at_TextPulseWhiteOrange);
     }
-    cSSXAudio_MenuSound(func_0028B180(), 0xE);
-    func_002A31C0(func_0028B180());
+    cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
+    func_002A31C0(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -2001,7 +2001,7 @@ extern "C" int func_001FCEC0(void* self, void* msg)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FD0D8);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void cUIState_onGainFocus(void* self);
 
@@ -2018,21 +2018,21 @@ extern "C" void func_001FD0D8(void* self)
     if (gameComm != 0) {
         gameComm->mOverlayTimeout = 1200;
     }
-    cSSXAudio_MenuSound(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FD118);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002872A8(void* self);
 
 /**
  * Loses focus on the two-player pre-event overlay: stops the online overlay timeout and calls func_002872A8.
  *
  * Sets cGameComm_mGameComm's mOverlayTimeout to -1 when there is a link, then calls func_002872A8 on the sound system
- * (func_0028B180()).
+ * (cAudioInterface_bxAudio()).
  */
 extern "C" void func_001FD118(void)
 {
@@ -2040,7 +2040,7 @@ extern "C" void func_001FD118(void)
     if (gameComm != 0) {
         gameComm->mOverlayTimeout = -1;
     }
-    func_002872A8(func_0028B180());
+    func_002872A8(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -2118,7 +2118,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVState_onCreateScreen(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern char str_68rival_pre[];
 extern char str_OV_darkblue[];
@@ -2143,7 +2143,7 @@ extern "C" void func_001FD268(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    cSSXAudio_MenuSound(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
 #endif
 
@@ -2374,7 +2374,7 @@ extern "C" void func_002872A8(void* snd);
  *
  * On event 5 (select) with a widget: sets cOVStateManager_mStatus to 3 (close the overlay), sets the word at +0x8 of
  * the current game state (SSXApp->Game->mCurrentState) to 1 as the overlay manager does to let the game state continue,
- * calls func_002872A8 on the sound system (func_0028B180()) and pops the top state of the engine's state stack
+ * calls func_002872A8 on the sound system (cAudioInterface_bxAudio()) and pops the top state of the engine's state stack
  * (func_0039F190(mpEngine + 0x18, 1)).
  *
  * @param widget  the widget the event is for; nothing happens when it is null
@@ -2385,14 +2385,14 @@ extern "C" void func_001FDB88(void* self, int widget, int event)
     if (widget != 0 && event == 5) {
         cOVStateManager_mStatus = 3;
         ((sPauseMgr_DB88*)((SSXApp)->Game)->mCurrentState)->f8 = 1;
-        func_002872A8(func_0028B180());
+        func_002872A8(cAudioInterface_bxAudio());
         func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FDBF0);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_cOVState_SAVEREPLAY);
 #ifdef SKIP_ASM
 extern "C" void* func_001D5330(void* self, int a1, int a2, int a3);
 extern void* D_00472440[];
@@ -2402,13 +2402,13 @@ extern void* D_00472440[];
  *
  * Runs the 4-argument cFEMemCard constructor func_001D5330 with iType 1 (replay), installs this class's vtable
  * D_00472440 and clears +0x22C (mIsHidden in On Tour, the hideActionButtons state). The overlay factory
- * (cOVStateManager_triggerOverlay, func_0020BAB8) builds it in 628 bytes for overlay type 18.
+ * (cOVStateManager_triggerOverlay, cOVStateManager_triggerPopup) builds it in 628 bytes for overlay type 18.
  *
  * @param engine  the UI engine (On Tour pEngine)
  * @param ovStateId  the overlay id, 18 (On Tour tOVStateEnum eOVState)
  * @return @p self
  */
-extern "C" void* func_001FDBF0(void* self, int engine, int ovStateId)
+extern "C" void* cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(void* self, int engine, int ovStateId)
 {
     func_001D5330(self, engine, 1, ovStateId);
     *(void***)((char*)self + 0x8) = D_00472440;
@@ -2418,7 +2418,7 @@ extern "C" void* func_001FDBF0(void* self, int engine, int ovStateId)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FDC30);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int GetHashValue32(char* str);
@@ -2470,7 +2470,7 @@ static inline cUIObj_DC30* getObj_DC30(char* self, char* name)
  * (D_005366E8[++D_004A2A54] = 2, cPauseState_Flags = D_004428F0[2]) and runs cOVState_onCreateScreen. The `//` note
  * above calls this a device-select overlay that pushes its menu state; it pushes the pause state.
  */
-extern "C" void func_001FDC30(char* self)
+extern "C" void cOVState_SAVEREPLAY_onCreateScreen(char* self)
 {
     void* engine = *(void**)(self + 0x10);
     void* screen = cUIEngine_addScreenByHashName_DC30(engine, self, GetHashValue32(str_119Save_Replay), 0);
@@ -2507,7 +2507,7 @@ extern "C" void func_001FDC30(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FDE60);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_onDestroyScreen);
 #ifdef SKIP_ASM
 extern int D_004A2A54;
 extern int cPauseState_Flags;
@@ -2525,7 +2525,7 @@ extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
  * D_004428F0[D_005366E8[--D_004A2A54]]), runs cFEMemCard_onDestroyScreen and restarts playback with
  * cReplay_startReplay(Replay, 0, 0, 0).
  */
-extern "C" void func_001FDE60(void* self)
+extern "C" void cOVState_SAVEREPLAY_onDestroyScreen(void* self)
 {
     if (*(int*)((char*)self + 0x1C8) == 1) {
         func_00270ED8(SSXApp->Game->Replay);
@@ -2538,7 +2538,7 @@ extern "C" void func_001FDE60(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FDF00);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_updateDone);
 #ifdef SKIP_ASM
 extern "C" void func_0039F718(void* self);
 
@@ -2548,7 +2548,7 @@ extern "C" void func_0039F718(void* self);
  * When +0x1AC (On Tour mIsDone) is still 0 it calls func_0039F718(mpEngine + 0x18) (On Tour
  * cUIStateStack::popToStateInclusive); then sets +0x1AC to 1.
  */
-extern "C" void func_001FDF00(void* self)
+extern "C" void cOVState_SAVEREPLAY_updateDone(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
         func_0039F718(*(char**)((char*)self + 0x10) + 0x18);
@@ -2558,7 +2558,7 @@ extern "C" void func_001FDF00(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FDF40);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_displayStatus);
 #ifdef SKIP_ASM
 class cMCSub_DF40 {
 public:
@@ -2724,7 +2724,7 @@ public:
     virtual void v04(int);
 };
 
-extern "C" void func_001D8240();
+extern "C" void cFEMemCard_callbackDisplayNoCards();
 extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* mp, int dev, int a3);
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsigned short* buf, int len);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
@@ -2747,7 +2747,7 @@ static inline cUIObj_DF40* getObj_DF40(cState_DF40* self, char* name)
  *
  * Works on the memory-card manager (cSSXApp_getMCManager). When func_001D9880 (vtable slot 42) reports the card can be
  * shown, a missing card (mpMemCard slot 53, cPS2MemCard_IsAvailable on the current device) shows the no-cards message
- * (func_001D8240), else the screen moves to display state 3 (cFEMemCard_triggerDisplayState) unless already there. When
+ * (cFEMemCard_callbackDisplayNoCards), else the screen moves to display state 3 (cFEMemCard_triggerDisplayState) unless already there. When
  * slot 42 still holds, it re-highlights the menu (cFEMemCard_setMenuHighlight), writes the selected device's label
  * (cMCOverlayManager_GetDeviceDisplayString on mSelectedDevice) into "Memory_card_info", puts the free-space text
  * (mpMemCard slot 64) into "1percentage_b" and hides it. It looks up kT_MEMEmpty_b and drops the result.
@@ -2760,14 +2760,14 @@ static inline cUIObj_DF40* getObj_DF40(cState_DF40* self, char* name)
  * cFEMemCard_checkNextAvailableDevice finds a device that way. When the display state (+0x214) is not 3, all four slots
  * end up static with the normal colour.
  */
-extern "C" void func_001FDF40(cState_DF40* self)
+extern "C" void cOVState_SAVEREPLAY_displayStatus(cState_DF40* self)
 {
     unsigned short buf[800];
     char name[0x40];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     if (self->v42()) {
         if (!(*(cMCSub_DF40**)(mp + 0x434))->v53()) {
-            func_001D8240();
+            cFEMemCard_callbackDisplayNoCards();
         } else if (*(int*)((char*)self + 0x214) != 3) {
             self->v35(3);
         }
@@ -2834,7 +2834,7 @@ extern "C" void func_001FDF40(cState_DF40* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FE4A8);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_hideActionButtons);
 #ifdef SKIP_ASM
 class cUIObj_1FE4A8 {
 public:
@@ -2864,7 +2864,7 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the buttons
  */
-extern "C" void func_001FE4A8(void* self, bool on)
+extern "C" void cOVState_SAVEREPLAY_hideActionButtons(void* self, bool on)
 {
     if (*(int*)((char*)self + 0x22C) != on) {
         int off = !on;
@@ -2878,7 +2878,7 @@ extern "C" void func_001FE4A8(void* self, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FE5B0);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_hideDeleteButton);
 #ifdef SKIP_ASM
 class cUIObj_1FE5B0 {
 public:
@@ -2906,7 +2906,7 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the button
  */
-extern "C" void func_001FE5B0(void* self, bool on)
+extern "C" void cOVState_SAVEREPLAY_hideDeleteButton(void* self, bool on)
 {
     ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(!on);
     ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(!on);
@@ -2915,7 +2915,7 @@ extern "C" void func_001FE5B0(void* self, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FE648);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_hideMainButton);
 #ifdef SKIP_ASM
 class cUIObj_1FE648 {
 public:
@@ -2944,7 +2944,7 @@ extern char str_x_save[];
  * @param loadBlocked  whether the load button should be hidden (unused: the screen has no load button)
  * @param on  true to hide the save button
  */
-extern "C" void func_001FE648(void* self, int loadBlocked, bool on)
+extern "C" void cOVState_SAVEREPLAY_hideMainButton(void* self, int loadBlocked, bool on)
 {
     cUIObj_1FE648* xButton = (cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
     ((cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
@@ -2954,7 +2954,7 @@ extern "C" void func_001FE648(void* self, int loadBlocked, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FE6E8);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* self);
 extern "C" void func_0023CAE8(void* self, int a, int b);
@@ -3054,7 +3054,7 @@ public:
  * @param msg  the widget the event is for (its miMiscData, +0x18, is the file slot)
  * @param type  the widget event: 5 select, 6 back, 7 delete
  */
-extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
+extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(void* self, void* msg, unsigned int type)
 {
     if (msg == 0)
         return;
@@ -3127,22 +3127,22 @@ extern "C" void func_001FE6E8(void* self, void* msg, unsigned int type)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FE8F0);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_onPopupEvent);
 #ifdef SKIP_ASM
 void func_00270ED8(void* self);
-extern "C" void func_001D8700(void* self, void* a1, int key);
+extern "C" void cFEMemCard_onPopupEvent(void* self, void* a1, int key);
 
 /**
  * Handles the save-replay overlay's popup events: frees the replay buffer once the save-done popup closes.
  *
  * On event 22 while the popup type (+0x19C, mPopupType) is 5 (save done), releases the replay save buffer
  * (func_00270ED8 on SSXApp->Game->Replay) and clears +0x1C8 (mIsReplayAlloc); then hands every event to the memory-card
- * base handler func_001D8700.
+ * base handler cFEMemCard_onPopupEvent.
  *
  * @param popup  the popup state that sent the event
  * @param key  the popup event
  */
-extern "C" void func_001FE8F0(void* self, void* popup, int key)
+extern "C" void cOVState_SAVEREPLAY_onPopupEvent(void* self, void* popup, int key)
 {
     if (key == 22) {
         if (*(int*)((char*)self + 0x19C) == 5) {
@@ -3150,12 +3150,12 @@ extern "C" void func_001FE8F0(void* self, void* popup, int key)
             *(int*)((char*)self + 0x1C8) = 0;
         }
     }
-    func_001D8700(self, popup, key);
+    cFEMemCard_onPopupEvent(self, popup, key);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FE968);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS);
 #ifdef SKIP_ASM
 extern "C" void* func_001D5330(void* self, int a1, int a2, int a3);
 extern void* D_004722B8[];
@@ -3165,13 +3165,13 @@ extern void* D_004722B8[];
  *
  * Runs the 4-argument cFEMemCard constructor func_001D5330 with iType 2 (settings), installs this class's vtable
  * D_004722B8 and clears +0x22C (mIsHidden in On Tour). The overlay factory (cOVStateManager_triggerOverlay,
- * func_0020BAB8) builds it in 628 bytes for overlay type 19.
+ * cOVStateManager_triggerPopup) builds it in 628 bytes for overlay type 19.
  *
  * @param engine  the UI engine (On Tour pEngine)
  * @param ovStateId  the overlay id, 19 (On Tour tOVStateEnum eOVState)
  * @return @p self
  */
-extern "C" void* func_001FE968(void* self, int engine, int ovStateId)
+extern "C" void* cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(void* self, int engine, int ovStateId)
 {
     func_001D5330(self, engine, 2, ovStateId);
     *(void***)((char*)self + 0x8) = D_004722B8;
@@ -3181,7 +3181,7 @@ extern "C" void* func_001FE968(void* self, int engine, int ovStateId)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FE9A8);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -3229,7 +3229,7 @@ static inline void* engine_1FE9A8(char* self)
  * gets miMiscData 0; "2memory_card_b".."4memory_card_b" are made static and hidden, as are their number labels
  * "2".."4". Adds the "OV_darkblue" backdrop and runs cOVState_onCreateScreen.
  */
-extern "C" void func_001FE9A8(char* self)
+extern "C" void cOVState_SAVEOPTIONS_onCreateScreen(char* self)
 {
     void* scr = cUIEngine_addScreenByHashName(engine_1FE9A8(self), self, GetHashValue32(str_119Save_Replay), 0);
     *(void**)(self + 0x40) = scr;
@@ -3269,21 +3269,21 @@ extern "C" void func_001FE9A8(char* self)
 extern "C" void* cFEMemCard_onDestroyScreen(void* self);
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FEC40__FPv);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
 /**
  * Tears down the save-records overlay: runs cFEMemCard_onDestroyScreen.
  *
  * @return what cFEMemCard_onDestroyScreen returns (declared void* here)
  */
-void* func_001FEC40(void* self)
+void* cOVState_SAVEOPTIONS_onDestroyScreen(void* self)
 {
     return cFEMemCard_onDestroyScreen(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FEC60);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_updateDone);
 #ifdef SKIP_ASM
 extern "C" void func_0039F718(void* self);
 
@@ -3293,7 +3293,7 @@ extern "C" void func_0039F718(void* self);
  * When +0x1AC (On Tour mIsDone) is still 0 it calls func_0039F718(mpEngine + 0x18) (On Tour
  * cUIStateStack::popToStateInclusive); then sets +0x1AC to 1.
  */
-extern "C" void func_001FEC60(void* self)
+extern "C" void cOVState_SAVEOPTIONS_updateDone(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
         func_0039F718(*(char**)((char*)self + 0x10) + 0x18);
@@ -3303,7 +3303,7 @@ extern "C" void func_001FEC60(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FECA0);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_displayStatus);
 #ifdef SKIP_ASM
 class cMCSub_ECA0 {
 public:
@@ -3469,7 +3469,7 @@ public:
     virtual void v04(int);
 };
 
-extern "C" void func_001D8240();
+extern "C" void cFEMemCard_callbackDisplayNoCards();
 extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* mp, int dev, int a3);
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsigned short* buf, int len);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
@@ -3490,8 +3490,8 @@ static inline cUIObj_ECA0* getObj_ECA0(cState_ECA0* self, char* name)
 /**
  * Refreshes the save-records overlay's device panel: card name, free space, its one save slot and the device arrows.
  *
- * The single-slot form of func_001FDF40. When func_001D9880 (vtable slot 42) reports the card can be shown, a missing
- * card (mpMemCard slot 53) shows the no-cards message (func_001D8240), else the screen moves to display state 3
+ * The single-slot form of cOVState_SAVEREPLAY_displayStatus. When func_001D9880 (vtable slot 42) reports the card can be shown, a missing
+ * card (mpMemCard slot 53) shows the no-cards message (cFEMemCard_callbackDisplayNoCards), else the screen moves to display state 3
  * (cFEMemCard_triggerDisplayState) unless already there. When slot 42 still holds, it re-highlights the menu
  * (cFEMemCard_setMenuHighlight), writes the selected device's label into "Memory_card_info" and the free-space text
  * into "1percentage_b" (then hidden), and looks up kT_MEMEmpty_b without using it. "1memory_card_b" gets file slot 0's
@@ -3500,14 +3500,14 @@ static inline cUIObj_ECA0* getObj_ECA0(cState_ECA0* self, char* name)
  * The device arrows follow cFEMemCard_checkNextAvailableDevice. Outside display state 3 (+0x214) the slot ends up
  * static with the normal colour.
  */
-extern "C" void func_001FECA0(cState_ECA0* self)
+extern "C" void cOVState_SAVEOPTIONS_displayStatus(cState_ECA0* self)
 {
     unsigned short buf[800];
     char name[0x40];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     if (self->v42()) {
         if (!(*(cMCSub_ECA0**)(mp + 0x434))->v53()) {
-            func_001D8240();
+            cFEMemCard_callbackDisplayNoCards();
         } else if (*(int*)((char*)self + 0x214) != 3) {
             self->v35(3);
         }
@@ -3563,7 +3563,7 @@ extern "C" void func_001FECA0(cState_ECA0* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FF170);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_hideActionButtons);
 #ifdef SKIP_ASM
 class cUIObj_1FF170 {
 public:
@@ -3593,7 +3593,7 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the buttons
  */
-extern "C" void func_001FF170(void* self, bool on)
+extern "C" void cOVState_SAVEOPTIONS_hideActionButtons(void* self, bool on)
 {
     if (*(int*)((char*)self + 0x22C) != on) {
         int off = !on;
@@ -3607,7 +3607,7 @@ extern "C" void func_001FF170(void* self, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FF278);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_hideDeleteButton);
 #ifdef SKIP_ASM
 class cUIObj_1FF278 {
 public:
@@ -3635,7 +3635,7 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the button
  */
-extern "C" void func_001FF278(void* self, bool on)
+extern "C" void cOVState_SAVEOPTIONS_hideDeleteButton(void* self, bool on)
 {
     ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(!on);
     ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(!on);
@@ -3644,7 +3644,7 @@ extern "C" void func_001FF278(void* self, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FF310);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_hideMainButton);
 #ifdef SKIP_ASM
 class cUIObj_1FF310 {
 public:
@@ -3673,7 +3673,7 @@ extern char str_x_save[];
  * @param loadBlocked  whether the load button should be hidden (unused: the screen has no load button)
  * @param on  true to hide the save button
  */
-extern "C" void func_001FF310(void* self, int loadBlocked, bool on)
+extern "C" void cOVState_SAVEOPTIONS_hideMainButton(void* self, int loadBlocked, bool on)
 {
     cUIObj_1FF310* xButton = (cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
     ((cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
@@ -3683,7 +3683,7 @@ extern "C" void func_001FF310(void* self, int loadBlocked, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatepause", func_001FF3B0);
+INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* self);
 extern "C" void func_0023CAE8(void* self, int a, int b);
@@ -3770,7 +3770,7 @@ public:
 /**
  * Handles the save-records overlay's file-slot buttons: save the settings, back out, or ask to delete a save.
  *
- * Same as func_001FE6E8 without the replay buffer. Ignores events without a widget or while busy (+0x1A8,
+ * Same as cOVState_SAVEREPLAY_onWidgetEvent without the replay buffer. Ignores events without a widget or while busy (+0x1A8,
  * mIsProcessing). Event 5 (select), when mState (+0x1C0) is not 6 and the display state (+0x214) is 3: stores the
  * widget's slot (miMiscData) in +0x1C4 (mSlot) and the manager's mFileCursor, starts the save with
  * func_0023CAE8(manager, 2, -1) (On Tour writeSetFileType, file type 2 = settings) and sets mIsProcessing,
@@ -3782,7 +3782,7 @@ public:
  * @param msg  the widget the event is for (its miMiscData, +0x18, is the file slot)
  * @param type  the widget event: 5 select, 6 back, 7 delete
  */
-extern "C" void func_001FF3B0(void* self, void* msg, unsigned int type)
+extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(void* self, void* msg, unsigned int type)
 {
     if (msg == 0)
         return;

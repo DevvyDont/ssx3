@@ -11,8 +11,8 @@ cBigFile* cBigFile_cBigFile(cBigFile* self);
 extern "C" int cBigFile_open(cBigFile* self, const char* name, int memclass);
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 // PORT: the second argument is a pointer passed as int (mangled FPvi).
-void func_00244400(void* self, int buf);
-void func_00244408(void* self, int n);
+void cInput_setPad(void* self, int buf);
+void cInput_setMap(void* self, int n);
 extern "C" void* cReplayFrame_cReplayFrame(void* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* D_004A3418;
@@ -76,8 +76,8 @@ extern "C" cPlaybackMan_C458* cPlaybackMan_cPlaybackMan(cPlaybackMan_C458* self,
     self->buf = (int*)cMemMan_alloc(676, str_cInputPad, 0x20000000, 0);
     self->buf[0] = 0;
     void* replayStream = cMemMan_alloc(8, str_cInput, 0x20000000, 0);
-    func_00244400(replayStream, (int)self->buf);
-    func_00244408(replayStream, n);
+    cInput_setPad(replayStream, (int)self->buf);
+    cInput_setMap(replayStream, n);
     self->stream = replayStream;
     char name[0x100];
     sprintf(name, D_004A3418, D_004A3410);

@@ -186,7 +186,7 @@ extern "C" void func_002A9F38(void* self, int pitch)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002A9F80);
 #ifdef SKIP_ASM
-int func_0028B240(void* self);
+int cAudioInterface_getTimerHz(void* self);
 void* cStreamInstance_Purge(void* self);
 extern "C" void func_003B58A0();
 extern "C" void func_003B58D8();
@@ -194,7 +194,7 @@ extern "C" void func_003B7E70(int h, int vol);
 
 extern "C" void func_002A9F80(void* self)
 {
-    if (func_0028B240(self) * 2 < *(int*)((char*)self + 0x80)) {
+    if (cAudioInterface_getTimerHz(self) * 2 < *(int*)((char*)self + 0x80)) {
         cStreamInstance_Purge(self);
         *(int*)((char*)self + 0x80) = 0;
         return;
@@ -1392,7 +1392,7 @@ extern "C" void func_002AB8E8(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", func_002AB958);
 #ifdef SKIP_ASM
-extern "C" void func_0028AAF8(void* snd);
+extern "C" void cAsyncSys_ASYNCSYS_Update(void* snd);
 extern "C" void func_002A6D18(void* self);
 extern "C" void func_002AAC28(void* self);
 extern "C" void func_002B0C78(void* self);
@@ -1403,7 +1403,7 @@ struct sStrmVtEntF { short delta; short index; void (*fn)(void*, float); };
 extern "C" void func_002AB958(void* self, float v)
 {
     char** sys = (char**)((char*)self + 0x118);
-    func_0028AAF8(*(void**)*sys);
+    cAsyncSys_ASYNCSYS_Update(*(void**)*sys);
     func_002A6D18(self);
     char* bankMan = *(char**)*sys;
     char* bankMon = bankMan + 0x1D8;

@@ -275,7 +275,7 @@ extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char*
 extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int a1, int a2);
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int a2);
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* self, int a1);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00289520(void* snd, void* entry);
 
 
@@ -414,8 +414,8 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     self->f8C28 = 2;
     cBENewPlayerInterface_setPlayerCharID(iface1, 0, 2);
     self->f8C2C = cBENewPlayerInterface_getControllerMapping(iface1, 0);
-    void* snd = func_0028B180();
-    func_00289520(snd, (char*)func_0028B180() + (self->f8C34 * 0x14 + 0x60A4));
+    void* snd = cAudioInterface_bxAudio();
+    func_00289520(snd, (char*)cAudioInterface_bxAudio() + (self->f8C34 * 0x14 + 0x60A4));
     sVE_B1B0* vt1 = *(sVE_B1B0**)((char*)iface1 + 0xC);
     vt1[1].fn((char*)iface1 + vt1[1].delta);
     sVE_B1B0* vt0 = *(sVE_B1B0**)((char*)iface0 + 0xC);
@@ -441,7 +441,7 @@ extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char*
 
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int a2);
 
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 
 extern "C" void func_00289520(void* snd, void* entry);
 
@@ -541,13 +541,13 @@ static inline bool netOn_B4E0(int mode)
 
 static inline int numSongs_B4E0()
 {
-    return *(int*)((char*)func_0028B180() + 0x6234);
+    return *(int*)((char*)cAudioInterface_bxAudio() + 0x6234);
 }
 
 static inline void playSong_B4E0(sLS_B1B0* self)
 {
-    void* snd = func_0028B180();
-    func_00289520(snd, (char*)func_0028B180() + (self->f8C34 * 0x14 + 0x60A4));
+    void* snd = cAudioInterface_bxAudio();
+    func_00289520(snd, (char*)cAudioInterface_bxAudio() + (self->f8C34 * 0x14 + 0x60A4));
 }
 
 static inline int bgCount_B4E0(sBgMan_17ACC8* bg)

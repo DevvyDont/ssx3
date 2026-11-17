@@ -97,8 +97,8 @@ void* cFEStateBonusMaterial_onGainFocus(void* self)
 INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001D22F0(void* self, void* engine, void* owner, signed char idx);
-extern "C" void func_001D2598(void* self, const char* a, const char* b);
+extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* self, void* engine, void* owner, signed char idx);
+extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(void* self, const char* a, const char* b);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_cFEStateVideoPlayer[];
@@ -124,9 +124,9 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(void* self, void* item, unsi
     case 4:
         break;
     case 5: {
-        void* popup = func_001D22F0(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), *(void**)((char*)self + 0x10), self,
+        void* popup = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), *(void**)((char*)self + 0x10), self,
                                 *(signed char*)((char*)self + 0x44));
-        func_001D2598(popup, D_00441128[*(int*)((char*)item + 0x18)], 0);
+        cFEStateVideoPlayer_setVideoSourceFiles(popup, D_00441128[*(int*)((char*)item + 0x18)], 0);
         cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, popup);
         break;
     }

@@ -205,14 +205,14 @@ int GetHashValue32(char* str);
 extern "C" void* cUIStateStack_getCurrentState(void* stack);
 extern "C" void* func_0039E2A0(void* self, void* mgr);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern "C" void* func_001FDBF0(void* self, void* mgr, int type);
-extern "C" void* func_001FE968(void* self, void* mgr, int type);
+extern "C" void* cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(void* self, void* mgr, int type);
+extern "C" void* cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(void* self, void* mgr, int type);
 extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(void* self, void* mgr, int type);
 extern "C" void* cOVState_PROFILE_cOVState_PROFILE(void* self, void* mgr, int type, int a3);
 extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(void* self, void* mgr, int type);
-extern "C" void func_001F7548(void* self);
-extern "C" void func_001F7738(void* self);
-extern "C" void func_002006B8(void* self);
+extern "C" void cOVState_BIGCHALLENGE_START_getChallengeData(void* self);
+extern "C" void cOVState_BIGCHALLENGE_FAIL_getChallengeData(void* self);
+extern "C" void cUITemplate_MAP_init(void* self);
 struct sDlgSlot_AB50 {
     int v[2];
     sDlgSlot_AB50() {}
@@ -470,10 +470,10 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         result = overlay;
     }
     if (type == 18) {
-        result = (char*)func_001FDBF0(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
+        result = (char*)cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
     }
     if (type == 19) {
-        result = (char*)func_001FE968(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
+        result = (char*)cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
     }
     if (type == 20) {
         char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
@@ -589,7 +589,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         *(int*)(overlay + 0x48) = 0;
         *(int*)(overlay + 0x4C) = 0;
         *(int*)(overlay + 0x54) = 0;
-        func_001F7548(overlay);
+        cOVState_BIGCHALLENGE_START_getChallengeData(overlay);
         result = overlay;
     }
     if (type == 0x1E) {
@@ -601,7 +601,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         *(int*)(overlay + 0x48) = 0;
         *(int*)(overlay + 0x4C) = 0;
         *(int*)(overlay + 0x54) = 0;
-        func_001F7738(overlay);
+        cOVState_BIGCHALLENGE_FAIL_getChallengeData(overlay);
         result = overlay;
     }
     if (type == 0x1F) {
@@ -636,7 +636,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         *(int*)(overlay + 0x48) = 0;
         *(int*)(overlay + 0x4C) = 0;
         *(int*)(overlay + 0x54) = 0;
-        func_002006B8(overlay + 0x9C);
+        cUITemplate_MAP_init(overlay + 0x9C);
         result = overlay;
     }
     if (type == 34) {
@@ -702,7 +702,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020BAB8);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_triggerPopup);
 #ifdef SKIP_ASM
 // Dialog/state factory: builds the UI state for `type` (the cases inline the state constructors over
 // the cUIState base ctor func_0039E2A0) and pushes it on the front-end state stack.
@@ -712,14 +712,14 @@ int GetHashValue32(char* str);
 extern "C" void* cUIStateStack_getCurrentState(void* stack);
 extern "C" void* func_0039E2A0(void* self, void* mgr);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
-extern "C" void* func_001FDBF0(void* self, void* mgr, int type);
-extern "C" void* func_001FE968(void* self, void* mgr, int type);
+extern "C" void* cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(void* self, void* mgr, int type);
+extern "C" void* cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(void* self, void* mgr, int type);
 extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(void* self, void* mgr, int type);
 extern "C" void* cOVState_PROFILE_cOVState_PROFILE(void* self, void* mgr, int type, int a3);
 extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(void* self, void* mgr, int type);
-extern "C" void func_001F7548(void* self);
-extern "C" void func_001F7738(void* self);
-extern "C" void func_002006B8(void* self);
+extern "C" void cOVState_BIGCHALLENGE_START_getChallengeData(void* self);
+extern "C" void cOVState_BIGCHALLENGE_FAIL_getChallengeData(void* self);
+extern "C" void cUITemplate_MAP_init(void* self);
 struct sDlgSlot_BAB8 {
     int v[2];
     sDlgSlot_BAB8() {}
@@ -769,10 +769,10 @@ extern char D_00474B80[];
  *
  * Builds the same overlays as cOVStateManager_triggerOverlay, case by case for types 1-40: each is allocated as
  * "cOVStateOverlay" with its own size, gets the cUIState base constructor (func_0039E2A0), its vtable, mOVID = @p type
- * and the overlay defaults. Types 18, 19, 34, 36 and 37 use their own constructors (func_001FDBF0, func_001FE968,
+ * and the overlay defaults. Types 18, 19, 34, 36 and 37 use their own constructors (cOVState_SAVEREPLAY_cOVState_SAVEREPLAY, cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS,
  * cOVState_MESSAGECENTER_cOVState_MESSAGECENTER, cOVState_PROFILE_cOVState_PROFILE with 42,
- * cOVState_AUTOSAVE_cOVState_AUTOSAVE), 29 and 30 load their challenge data (func_001F7548, func_001F7738) and 33
- * initialises its map template at +0x9C (func_002006B8). Unlike cOVStateManager_triggerOverlay it records the state
+ * cOVState_AUTOSAVE_cOVState_AUTOSAVE), 29 and 30 load their challenge data (cOVState_BIGCHALLENGE_START_getChallengeData, cOVState_BIGCHALLENGE_FAIL_getChallengeData) and 33
+ * initialises its map template at +0x9C (cUITemplate_MAP_init). Unlike cOVStateManager_triggerOverlay it records the state
  * that was current (cUIStateStack_getCurrentState) as the new state's mpParentState and pushes it with
  * cUIStateStack_pushPopup on the engine's state stack.
  *
@@ -781,7 +781,7 @@ extern char D_00474B80[];
  *
  * @param type  the overlay (On Tour tOVStateEnum overlay)
  */
-extern "C" void func_0020BAB8(int type)
+extern "C" void cOVStateManager_triggerPopup(int type)
 {
     char* result = 0;
     char* mgr = (char*)SSXApp->Game->UI;
@@ -984,10 +984,10 @@ extern "C" void func_0020BAB8(int type)
         result = newOverlay;
     }
     if (type == 18) {
-        result = (char*)func_001FDBF0(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
+        result = (char*)cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 18);
     }
     if (type == 19) {
-        result = (char*)func_001FE968(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
+        result = (char*)cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(operator new(628, str_cOVStateOverlay, 0, 0), mgr, 19);
     }
     if (type == 20) {
         char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
@@ -1103,7 +1103,7 @@ extern "C" void func_0020BAB8(int type)
         *(int*)(newOverlay + 0x48) = 0;
         *(int*)(newOverlay + 0x4C) = 0;
         *(int*)(newOverlay + 0x54) = 0;
-        func_001F7548(newOverlay);
+        cOVState_BIGCHALLENGE_START_getChallengeData(newOverlay);
         result = newOverlay;
     }
     if (type == 0x1E) {
@@ -1115,7 +1115,7 @@ extern "C" void func_0020BAB8(int type)
         *(int*)(newOverlay + 0x48) = 0;
         *(int*)(newOverlay + 0x4C) = 0;
         *(int*)(newOverlay + 0x54) = 0;
-        func_001F7738(newOverlay);
+        cOVState_BIGCHALLENGE_FAIL_getChallengeData(newOverlay);
         result = newOverlay;
     }
     if (type == 0x1F) {
@@ -1150,7 +1150,7 @@ extern "C" void func_0020BAB8(int type)
         *(int*)(newOverlay + 0x48) = 0;
         *(int*)(newOverlay + 0x4C) = 0;
         *(int*)(newOverlay + 0x54) = 0;
-        func_002006B8(newOverlay + 0x9C);
+        cUITemplate_MAP_init(newOverlay + 0x9C);
         result = newOverlay;
     }
     if (type == 34) {
@@ -1246,7 +1246,7 @@ static inline bool notMode4_0020CA10(signed char* g)
  * Finally clears D_004A2468, the pause menu's remembered selection. The results of the two cBE_getInterface__Fv calls
  * (interfaces 0 and 7) are not used.
  *
- * cGame_update and func_00244B48 call it after func_0020CBE8 allows the pause menu.
+ * cGame_update and cGame_updateUI call it after cOVStateManager_allowPauseMenu allows the pause menu.
  */
 extern "C" void func_0020CA10(void)
 {
@@ -1306,7 +1306,7 @@ extern "C" int func_0020CB58(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CBA0);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_pauseOverlayActive);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int cUIStateStack_findState(void* stack, int hash);
@@ -1315,12 +1315,12 @@ extern char str_cOVTemplate_PauseMenu[];
 /**
  * Tells whether the pause menu is open: whether a "cOVTemplate_PauseMenu" state is on the game UI's state stack.
  *
- * cGame_update checks it before updating the playback manager, and func_0020CBE8 refuses the pause menu while it is
+ * cGame_update checks it before updating the playback manager, and cOVStateManager_allowPauseMenu refuses the pause menu while it is
  * open.
  *
  * @return 1 when cUIStateStack_findState finds the hash of "cOVTemplate_PauseMenu", else 0
  */
-extern "C" int func_0020CBA0(void)
+extern "C" int cOVStateManager_pauseOverlayActive(void)
 {
     char* stack = (char*)SSXApp->Game->UI + 0x18;
     return cUIStateStack_findState(stack, GetHashValue32(str_cOVTemplate_PauseMenu)) != 0;
@@ -1328,7 +1328,7 @@ extern "C" int func_0020CBA0(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CBE8);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_allowPauseMenu);
 #ifdef SKIP_ASM
 class cUIState20CBE8 {
 public:
@@ -1360,21 +1360,21 @@ public:
     virtual int v25();
 };
 extern "C" void* cUIStateStack_getCurrentState(void* stack);
-extern "C" int func_0020CBA0(void);
+extern "C" int cOVStateManager_pauseOverlayActive(void);
 
 /**
  * Tells whether the pause menu may be opened now.
  *
- * No while the pause menu is already open (func_0020CBA0). Otherwise asks the game UI's current state
+ * No while the pause menu is already open (cOVStateManager_pauseOverlayActive). Otherwise asks the game UI's current state
  * (cUIStateStack_getCurrentState): with no state the answer is yes; a popup state (mAttrState bit 0, On Tour mIsPopup)
  * says no; any other state answers through its virtual slot 25 (cOVState_allowPauseMenu in the overlay vtables).
  *
  * @return nonzero when the pause menu may open
  */
-extern "C" int func_0020CBE8(void)
+extern "C" int cOVStateManager_allowPauseMenu(void)
 {
     char* mgr = (char*)SSXApp->Game->UI;
-    if (func_0020CBA0() == 0) {
+    if (cOVStateManager_pauseOverlayActive() == 0) {
         cUIState20CBE8* topState = (cUIState20CBE8*)cUIStateStack_getCurrentState(mgr + 0x18);
         if (topState != 0) {
             if (*(int*)((char*)topState + 0x1C) & 1) {
@@ -1389,7 +1389,7 @@ extern "C" int func_0020CBE8(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CC60);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_triggerFinishOverlay);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1404,9 +1404,9 @@ extern int cOVStateManager_mStatus;
  * By cBENewRaceInterface_newRace's cGameMode and cGamePath: cGameMode 0 or game path 2 (online) trigger overlay 0xC;
  * cGameMode 1-3 and 6 overlay 13 (cOVStateManager_triggerOverlay; both are the "finishov" overlays); cGameMode 4 sets
  * cOVStateManager_mStatus to 2 so the next cOVStateManager_update resumes play; any other mode overlay 0xC. The result
- * of cBE_getInterface__Fv (interface 0) is not used. func_00233CD8 (load screen) calls it.
+ * of cBE_getInterface__Fv (interface 0) is not used. cGFFinishlineState_update (load screen) calls it.
  */
-extern "C" void func_0020CC60(void)
+extern "C" void cOVStateManager_triggerFinishOverlay(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     signed char* newRace = (signed char*)cBENewRaceInterface_newRace;
@@ -1658,7 +1658,7 @@ extern "C" void cOVStateManager_removePDATemplate(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020D1D8);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Simple_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1691,10 +1691,10 @@ public:
  * Runs cOVState_onCreateScreen, sets flag 8 in the "overlayMenu" widget's word at +0x90, then walks "overlayOpt0" ...
  * "overlayOpt4" of mpScreen: option 0 gets the localised string named D_00441D10[D_004A2860[0]] and that index as its
  * misc data (+0x18); options 1-4 are hidden (setVisible(0), slot 9) and enabled (setEnabled(1), slot 8). It fills the
- * onCreateScreen slot (+0x24) of D_00474D30, the vtable that also holds func_0020D308 and func_0020D318; func_001FBD20
+ * onCreateScreen slot (+0x24) of D_00474D30, the vtable that also holds cOVTemplate_Simple_onWidgetMenu and cOVTemplate_Simple_onWidgetEvent; func_001FBD20
  * and func_001FB6B8 call it as their base.
  */
-extern "C" void func_0020D1D8(void* self)
+extern "C" void cOVTemplate_Simple_onCreateScreen(void* self)
 {
     cOVState_onCreateScreen(self);
     char* list = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_overlayMenu));
@@ -1718,7 +1718,7 @@ extern "C" void func_0020D1D8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020D308);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Simple_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Simple overlay's menu-event filter: event 6 gets 0x101, every other event 0.
@@ -1730,14 +1730,14 @@ INCLUDE_ASM("fe/ovtemplatedialog", func_0020D308);
  * @param event  the menu event
  * @return 0x101 for event 6, else 0
  */
-extern "C" int func_0020D308(void* self, int menu, int event)
+extern "C" int cOVTemplate_Simple_onWidgetMenu(void* self, int menu, int event)
 {
     return event == 6 ? 257 : 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020D318);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Simple_onWidgetEvent);
 #ifdef SKIP_ASM
 extern int cOVStateManager_mStatus;
 
@@ -1751,7 +1751,7 @@ extern int cOVStateManager_mStatus;
  * @param widget  the widget; nothing happens when it is null
  * @param key  the widget event
  */
-extern "C" void func_0020D318(void* self, int widget, int key)
+extern "C" void cOVTemplate_Simple_onWidgetEvent(void* self, int widget, int key)
 {
     if (widget != 0 && key == 5) {
         cOVStateManager_mStatus = 1;
@@ -1843,7 +1843,7 @@ extern "C" void cOVTemplate_Dialog_onCreateScreen(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020D4F0);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Dialog_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int idx);
@@ -1858,7 +1858,7 @@ extern char str_Menu0000_b[];
  *
  * @param item  the widget being created; only the one whose hash name (+0x38) is "Menu0000" is touched
  */
-extern "C" void func_0020D4F0(void* self, void* item)
+extern "C" void cOVTemplate_Dialog_onWidgetCreate(void* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(str_Menu0000_b)) {
@@ -1872,7 +1872,7 @@ extern "C" void func_0020D4F0(void* self, void* item)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020D568);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Dialog_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Dialog's menu-event filter: events 8 and 9 get 0x100, every other event 0x101.
@@ -1883,7 +1883,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", func_0020D568);
  * @param key  the menu event
  * @return 0x100 for events 8 and 9, else 0x101
  */
-extern "C" int func_0020D568(void* self, int menu, unsigned int key)
+extern "C" int cOVTemplate_Dialog_onWidgetMenu(void* self, int menu, unsigned int key)
 {
     int result = 257;
     if (key < 10) {
@@ -2117,7 +2117,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020DBD0);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVState_QUIT_onUpdate);
 #ifdef SKIP_ASM
 struct cUIScreen;
 int GetHashValue32(char* str);
@@ -2136,7 +2136,7 @@ extern char str_TransitionOut_b[];
  * from mpEngine's state stack (func_0039F190, On Tour cUIStateStack::pop). It is the onUpdate slot (+0x64) of
  * D_004748F8, the dialog type 1 overlay (cOVStateManager_triggerOverlay type 0x18).
  */
-extern "C" void func_0020DBD0(void* self)
+extern "C" void cOVState_QUIT_onUpdate(void* self)
 {
     cOVState_onUpdate(self);
     cGameComm* gameComm = cGameComm_mGameComm;

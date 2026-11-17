@@ -454,7 +454,7 @@ int GetHashValue32(char* str);
 extern char str_Menu[];
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
-extern "C" signed char func_001A06F0(void* self, int a1);
+extern "C" signed char cFEFlowState_getValue(void* self, int a1);
 extern "C" void cUIState_onGainFocus(void* self, void* a1);
 // NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
 struct sFlowState_865A8 {
@@ -466,7 +466,7 @@ extern sFlowState_865A8 D_004A4E80;
 /**
  * Gives an FE state focus and restores the selection of its first screen's "Menu" from the FE flow state.
  *
- * The index saved for the state's id (mHashName, 0xC) is read from the flow state (D_004A4E80, func_001A06F0)
+ * The index saved for the state's id (mHashName, 0xC) is read from the flow state (D_004A4E80, cFEFlowState_getValue)
  * and set with cUIMenu_setSelectedByIndex(); then cUIState_onGainFocus() runs.
  *
  * @param pPrevState  the state that had focus before, passed on to cUIState_onGainFocus()
@@ -477,7 +477,7 @@ extern "C" void cFEState_onGainFocus(void* self, void* pPrevState)
     if (screen != 0) {
         void* menu = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (menu != 0) {
-            cUIMenu_setSelectedByIndex(menu, func_001A06F0(&D_004A4E80, *(signed char*)((char*)self + 0xC)));
+            cUIMenu_setSelectedByIndex(menu, cFEFlowState_getValue(&D_004A4E80, *(signed char*)((char*)self + 0xC)));
         }
     }
     cUIState_onGainFocus(self, pPrevState);
@@ -492,14 +492,14 @@ void* cList_first(cList* list);
 int GetHashValue32(char* str);
 extern char str_Menu[];
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_001A0708(void* self, int a1, int a2);
+extern "C" void cFEFlowState_setValue(void* self, int a1, int a2);
 // NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
 extern sFlowState_865A8 D_004A4E80;
 
 /**
  * Front-end state losing focus: remembers which menu entry was selected, so it can be restored later.
  *
- * Finds the "Menu" object on the state's first screen and calls func_001A0708 (On Tour cFEFlowState::setValue)
+ * Finds the "Menu" object on the state's first screen and calls cFEFlowState_setValue (On Tour cFEFlowState::setValue)
  * on the flow state D_004A4E80 with this state's id (+0xC) and the menu's selected index (+0x95).
  */
 extern "C" void cFEState_onLoseFocus(void* self)
@@ -508,17 +508,17 @@ extern "C" void cFEState_onLoseFocus(void* self)
     if (screen != 0) {
         void* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (obj != 0) {
-            func_001A0708(&D_004A4E80, *(signed char*)((char*)self + 0xC), *(signed char*)((char*)obj + 0x95));
+            cFEFlowState_setValue(&D_004A4E80, *(signed char*)((char*)self + 0xC), *(signed char*)((char*)obj + 0x95));
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecredits", func_00186610);
+INCLUDE_ASM("fe/festatecredits", cFEStateEventSelect_cFEStateEventSelect1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern "C" void func_002006B8(void* self);
+extern "C" void cUITemplate_MAP_init(void* self);
 extern void* cFEStateEventSelect_vtbl[];
 
 /**
@@ -526,18 +526,18 @@ extern void* cFEStateEventSelect_vtbl[];
  *
  * Builds the UI state (func_0039E2A0; the caller's engine argument reaches it unchanged in the second argument
  * register, since the C declares only self), sets state id 19 and the cFEStateEventSelect_vtbl vtable, and calls
- * func_002006B8 on +0x48 (its definition takes no argument and, for map styles 2 and up, sets cUITemplate_MAP_mPeak to
+ * cUITemplate_MAP_init on +0x48 (its definition takes no argument and, for map styles 2 and up, sets cUITemplate_MAP_mPeak to
  * the current race location's peak). cFEStateEventSelect_cFEStateEventSelect is the null-engine variant of this
  * constructor, which does not set the state id.
  *
  * @return @p self
  */
-extern "C" void* func_00186610(void* self)
+extern "C" void* cFEStateEventSelect_cFEStateEventSelect1(void* self)
 {
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 19;
     *(void***)((char*)self + 0x8) = cFEStateEventSelect_vtbl;
-    func_002006B8((char*)self + 0x48);
+    cUITemplate_MAP_init((char*)self + 0x48);
     return self;
 }
 #endif

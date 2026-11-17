@@ -5,7 +5,7 @@
 // memory-card screens. One instance, made on demand by cMCOverlayManager_getManager__Fv
 // (cMemMan_alloc(0x74C, "MCManager"), pointer in cMCOverlayManager_instance; cSSXApp_getMCManager returns it). Its methods live in
 // src/movie/movieplayer.cpp (the unit mixes them with movie-player code; some local views there call the card
-// object a "decoder"). The front end (cFEMemCard, fe/festatetrophyroom.cpp func_001D5488) plugs its handlers into
+// object a "decoder"). The front end (cFEMemCard, fe/festatetrophyroom.cpp cFEMemCard_initFEMemCard) plugs its handlers into
 // the 45 callback slots at 0x000-0x0B0.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. The class has no base; g++ 2.95 puts its vptr
@@ -51,8 +51,8 @@ CHECK_SIZE(cMCOverlayManager_sdevice, 0xE0);
 
 struct cMCOverlayManager {
     // --- 45 front-end callbacks. [R] the ctor fills all 45 words with default stubs whose kind matches On Tour's
-    // return type slot for slot: void slots get func_00244860 (returns nothing), bool slots func_00244868 /
-    // func_00244870 / func_00244878 (return 0 / 1 / 0). [U] func_001D5488 (fe/festatetrophyroom.cpp) stores
+    // return type slot for slot: void slots get cMCOverlayManager_CallbackMemcard (returns nothing), bool slots cMCOverlayManager_CallbackFalse /
+    // cMCOverlayManager_CallbackTrue / cMCOverlayManager_Callbackpdate (return 0 / 1 / 0). [U] cFEMemCard_initFEMemCard (fe/festatetrophyroom.cpp) stores
     // cFEMemCard_callback<Name> into the slots of the same name at 0x0C, 0x28, 0x30, 0x50, 0x54 and 0xA0.
     void (*callbackWriteStart)();                  // 0x000 [O][R]
     int (*callbackWriteUpdate)(int);               // 0x004 [O][R]; [U] UpdateSaveProgress calls it with an arg

@@ -69,7 +69,7 @@ struct cStreamMan {
                                     //       (its view types it int); the dtor frees it when a shared chunk is unfinished
     char* m_pBxChunkMemPtr;         // 0x0D0 [O]; [R] reset = 0; [U] processChunk's copy cursor
     int m_bLimitBandWidth;          // 0x0D4 [O] (a bool); [R] reset = 1; [U] update throttles while set; cGame_loadTrack,
-                                    //       cGame_update, func_00244A40 store 0/1 through the world (sw cache+0x3D4)
+                                    //       cGame_update, cGame_updateStreamLoading store 0/1 through the world (sw cache+0x3D4)
     int m_iDataRatePerSecond;       // 0x0D8 [O]; [R] setBandWidthLimit stores max(0x8000, rate); reset passes 0x19000
     float m_fTicksPerChunk;         // 0x0DC [O]; [R] setBandWidthLimit: ticks per second / (rate / 32768)
     float m_fTicksLeft;             // 0x0E0 [O]; [U] update counts it down and reloads it from m_fTicksPerChunk;

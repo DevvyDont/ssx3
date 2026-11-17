@@ -255,7 +255,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetCreate(void* self, void* ite
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7548);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_getChallengeData);
 #ifdef SKIP_ASM
 extern void* cWScriptMan_TheWScriptMan;
 extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
@@ -267,7 +267,7 @@ extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
  * Reads the queue at cWScriptMan_TheWScriptMan + 0x1C4 with tMissionMenuQueue_getNextEntry; its entry's first word, or
  * else the local mission id at +0x2A0, is stored as the overlay's mission id (+0x9C).
  */
-extern "C" void func_001F7548(void* self)
+extern "C" void cOVState_BIGCHALLENGE_START_getChallengeData(void* self)
 {
     int* queueEntry = tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
     if (queueEntry != 0) {
@@ -297,7 +297,7 @@ extern "C" int cOVState_BIGCHALLENGE_START_onWidgetMenu(void* self, int pMenu, i
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetEvent);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 void func_0029D6D0(void* self);
 extern "C" void func_0030B540(void* self);
 extern "C" void cWScriptMan_cancelLocalMission(void* self);
@@ -345,7 +345,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item
             }
             cOVStateManager_mStatus = 3;
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-            func_0029D6D0(func_0028B180());
+            func_0029D6D0(cAudioInterface_bxAudio());
             break;
         }
     case 6:
@@ -359,7 +359,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F76B8);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_FAIL_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -374,7 +374,7 @@ extern char str_90bc_fail[];
  * (cUIEngine_addScreenByHashName) into mpScreen, plays it from frame 0 when it exists, then runs
  * cOVState_onCreateScreen. It is the onCreateScreen slot of this overlay's vtable D_004735B0.
  */
-extern "C" void func_001F76B8(void* self)
+extern "C" void cOVState_BIGCHALLENGE_FAIL_onCreateScreen(void* self)
 {
     void* engine;
     void* screen;
@@ -390,7 +390,7 @@ extern "C" void func_001F76B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7738);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_FAIL_getChallengeData);
 #ifdef SKIP_ASM
 extern void* cWScriptMan_TheWScriptMan;
 extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
@@ -399,16 +399,16 @@ extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
  * Takes the Big Challenge failed overlay's mission: the next entry of the mission menu queue.
  *
  * Stores the first word of tMissionMenuQueue_getNextEntry(cWScriptMan_TheWScriptMan + 0x1C4) as the mission id (+0x9C).
- * Unlike func_001F7548 it does not check for an empty queue (likely bug if the queue can be empty: a null dereference).
+ * Unlike cOVState_BIGCHALLENGE_START_getChallengeData it does not check for an empty queue (likely bug if the queue can be empty: a null dereference).
  */
-extern "C" void func_001F7738(void* self)
+extern "C" void cOVState_BIGCHALLENGE_FAIL_getChallengeData(void* self)
 {
     *(int*)((char*)self + 0x9C) = *tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7770);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_FAIL_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_yes_b[];
@@ -419,11 +419,11 @@ extern char str_info[];
  * Tags the Big Challenge failed overlay's buttons as they are created: "yes_b" gets misc data 0, "no_b" 1 and "info" 2.
  *
  * Compares the widget's hash name (+0x38) with the hashes of the three names and stores the index in its misc data
- * (+0x18), which func_001F7800 switches on.
+ * (+0x18), which cOVState_BIGCHALLENGE_FAIL_onWidgetEvent switches on.
  *
  * @param item  the widget being created
  */
-extern "C" void func_001F7770(void* self, void* item)
+extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetCreate(void* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(str_yes_b)) {
@@ -443,7 +443,7 @@ extern "C" void func_001F7770(void* self, void* item)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F77F0);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_FAIL_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Menu-event filter of the Big Challenge failed overlay: event 6 (back) gets 0x101 (animation and sound), every other
@@ -453,14 +453,14 @@ INCLUDE_ASM("fe/ovstateenterlodge", func_001F77F0);
  * @param event  the menu event
  * @return 0x101 for event 6, else 0
  */
-extern "C" int func_001F77F0(void* self, int menu, int event)
+extern "C" int cOVState_BIGCHALLENGE_FAIL_onWidgetMenu(void* self, int menu, int event)
 {
     return event == 6 ? 257 : 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstateenterlodge", func_001F7800);
+INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_FAIL_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void cOVStateManager_triggerOverlay(int id);
 // PORT: func_0039F190 returns the last node; the unit declares it void.
@@ -481,10 +481,10 @@ extern char str_TransitionOut_b[];
  * other widget, then cancel the challenge (cWScriptMan_cancelLocalMission), pop the state and restore cPauseState_Flags
  * the same way. Other events do nothing.
  *
- * @param item  the widget; its misc data (+0x18) is set by func_001F7770
+ * @param item  the widget; its misc data (+0x18) is set by cOVState_BIGCHALLENGE_FAIL_onWidgetCreate
  * @param msg  the widget event: 5 select, 6 back
  */
-extern "C" void func_001F7800(void* self, void* item, int msg)
+extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(void* self, void* item, int msg)
 {
     if (item == 0) {
         return;
@@ -497,7 +497,7 @@ extern "C" void func_001F7800(void* self, void* item, int msg)
             cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             func_0039F190_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-            func_0029D6D0(func_0028B180());
+            func_0029D6D0(cAudioInterface_bxAudio());
             return;
         }
         if (choice == 2) {
@@ -544,7 +544,7 @@ extern "C" char* func_00155208(void* iface, int i);
 extern "C" int func_001FD190();
 extern "C" char* func_0020A1A8(char* s);
 extern "C" void cOVState_onCreateScreen(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void* p, int id);
 extern "C" void strcpy1(void* str, int a1);
 extern "C" void func_002C2540(void* str, const char* s);
@@ -696,7 +696,7 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
         }
         cUIText_setAsciiString_i(timeText, line);
     }
-    cSSXAudio_MenuSound(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
 #endif
 

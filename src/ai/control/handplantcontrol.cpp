@@ -4690,7 +4690,7 @@ extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, void* v);
 extern "C" void func_001065B0(void* rider, void* hit);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_WallCollision(void* snd, void* rider);
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
@@ -4895,7 +4895,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
         info.normal = hit.normal;
         info.depth = dot2;
         cRider_reactToCollision(RIDER, &info, hit.m4C);
-        cSSXAudio_WallCollision(func_0028B180(), RIDER);
+        cSSXAudio_WallCollision(cAudioInterface_bxAudio(), RIDER);
     }
     cWorldRider__cWorldRider(&sph, 2);
 }

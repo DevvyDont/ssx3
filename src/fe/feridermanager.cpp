@@ -1500,17 +1500,17 @@ extern "C" int func_001A0100(int* self)
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A0358);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002A16B0(void* mgr, int id);
 extern "C" void func_002A1778(void* mgr, int id);
 
 extern "C" void func_001A0358(void* self)
 {
     if (*(int*)((char*)self + 0xC1C) != 0) {
-        func_002A1778(func_0028B180(), *(int*)self);
+        func_002A1778(cAudioInterface_bxAudio(), *(int*)self);
         *(int*)((char*)self + 0xC1C) = 0;
     } else if (*(int*)((char*)self + 0xC20) != 0) {
-        func_002A16B0(func_0028B180(), *(int*)self);
+        func_002A16B0(cAudioInterface_bxAudio(), *(int*)self);
         *(int*)((char*)self + 0xC20) = 0;
     }
 }
@@ -1519,14 +1519,14 @@ extern "C" void func_001A0358(void* self)
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A03C0);
 #ifdef SKIP_ASM
-extern "C" void* func_0019E3D0(void* self);
+extern "C" void* cFERider_cFERider(void* self);
 
 extern "C" void* func_001A03C0(void* self)
 {
     char* slot = (char*)self;
     int i;
     for (i = 1; i != -1; i--, slot += 0xCE0) {
-        func_0019E3D0(slot);
+        cFERider_cFERider(slot);
     }
     return self;
 }
@@ -1536,7 +1536,7 @@ extern "C" void* func_001A03C0(void* self)
 INCLUDE_ASM("fe/feridermanager", func_001A0420);
 #ifdef SKIP_ASM
 extern "C" void func_001A04C8(void* self);
-extern "C" void func_0019E498(void* self, int flags);
+extern "C" void cFERider__cFERider(void* self, int flags);
 void operator_delete(int* p);
 
 extern "C" void func_001A0420(void* self, int flags)
@@ -1547,7 +1547,7 @@ extern "C" void func_001A0420(void* self, int flags)
         char* slot = base + 0x19C0;
         while (base != slot) {
             slot -= 0xCE0;
-            func_0019E498(slot, 0);
+            cFERider__cFERider(slot, 0);
         }
     }
     if (flags & 1) {
@@ -1593,11 +1593,11 @@ extern "C" void func_001A04C8(void* self)
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A0508);
 #ifdef SKIP_ASM
-extern "C" void func_0019E588(void* slot, int a1, int a2);
+extern "C" void cFERider_setCharID(void* slot, int a1, int a2);
 
 extern "C" void func_001A0508(void* self, int idx, int a2, int a3)
 {
-    func_0019E588((char*)self + idx * 0xce0, a2, a3);
+    cFERider_setCharID((char*)self + idx * 0xce0, a2, a3);
 }
 #endif
 
@@ -1630,11 +1630,11 @@ extern "C" int func_001A0558(int slots, int index) {
 //100%
 INCLUDE_ASM("fe/feridermanager", func_001A0570);
 #ifdef SKIP_ASM
-extern "C" void func_0019E538(void* slot, int v);
+extern "C" void cFERider_setVisible(void* slot, int v);
 
 extern "C" void func_001A0570(void* self, int i, int v)
 {
-    func_0019E538((char*)self + i * 0xce0, v);
+    cFERider_setVisible((char*)self + i * 0xce0, v);
 }
 #endif
 

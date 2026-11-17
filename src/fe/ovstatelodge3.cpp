@@ -16,21 +16,21 @@ INCLUDE_ASM("fe/ovstatelodge3", cOVState_BIGCHALLENGE_START_onGainTransition);
 
 INCLUDE_ASM("fe/ovstatelodge3", cOVState_BIGCHALLENGE_START_onWidgetCreate);
 
-INCLUDE_ASM("fe/ovstatelodge3", func_001F7548);
+INCLUDE_ASM("fe/ovstatelodge3", cOVState_BIGCHALLENGE_START_getChallengeData);
 
 INCLUDE_ASM("fe/ovstatelodge3", cOVState_BIGCHALLENGE_START_onWidgetMenu);
 
 INCLUDE_ASM("fe/ovstatelodge3", cOVState_BIGCHALLENGE_START_onWidgetEvent);
 
-INCLUDE_ASM("fe/ovstatelodge3", func_001F76B8);
+INCLUDE_ASM("fe/ovstatelodge3", cOVState_BIGCHALLENGE_FAIL_onCreateScreen);
 
-INCLUDE_ASM("fe/ovstatelodge3", func_001F7738);
+INCLUDE_ASM("fe/ovstatelodge3", cOVState_BIGCHALLENGE_FAIL_getChallengeData);
 
-INCLUDE_ASM("fe/ovstatelodge3", func_001F7770);
+INCLUDE_ASM("fe/ovstatelodge3", cOVState_BIGCHALLENGE_FAIL_onWidgetCreate);
 
-INCLUDE_ASM("fe/ovstatelodge3", func_001F77F0);
+INCLUDE_ASM("fe/ovstatelodge3", cOVState_BIGCHALLENGE_FAIL_onWidgetMenu);
 
-INCLUDE_ASM("fe/ovstatelodge3", func_001F7800);
+INCLUDE_ASM("fe/ovstatelodge3", cOVState_BIGCHALLENGE_FAIL_onWidgetEvent);
 
 INCLUDE_ASM("fe/ovstatelodge3", cOVState_TOPTIMES_onCreateScreen);
 

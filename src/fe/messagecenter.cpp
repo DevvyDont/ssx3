@@ -230,7 +230,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00158848(void* iface, int a, int b, unsigned long m);
 extern "C" void func_00158820(void* iface, int a, int b, unsigned long m);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028C2D0(void* p, unsigned long m);
 extern "C" void func_0039F190(void* list, int a);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -337,9 +337,9 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, void* item,
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
         func_00158848(iface, self->player, self->f48, self->done);
         func_00158820(iface, self->player, self->f48, self->sel);
-        func_0028C2D0(func_0028B180(), self->done);
+        func_0028C2D0(cAudioInterface_bxAudio(), self->done);
         if (self->f16C != 0) {
-            char* pl = (char*)func_0028B180();
+            char* pl = (char*)cAudioInterface_bxAudio();
             sVE_7500* vt = *(sVE_7500**)(pl + 0x5558);
             char* obj = pl + 0x118;
             vt[3].fn(obj + vt[3].delta, 10);
@@ -372,11 +372,11 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_onWidgetMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 
 extern "C" void cFEStateRequestLine_updatePlayList_77D0(void* self) __asm__("cFEStateRequestLine_updatePlayList");
 
-extern "C" void func_00197E70_77D0(void* self) __asm__("func_00197E70");
+extern "C" void cFEStateRequestLine_updateCurrentlyPlaying_77D0(void* self) __asm__("cFEStateRequestLine_updateCurrentlyPlaying");
 extern "C" void func_0028CF98(void* p, int a, int b, long c, int d);
 extern "C" void func_002B4978(void* list, int idx);
 
@@ -432,11 +432,11 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, void* item, u
                 ret10:
                     return 0x10;
                 }
-                *(int*)((char*)func_0028B180() + 0x508) = idx;
-                func_0028CF98(func_0028B180(), 0, 0, -1, 1);
-                func_00197E70_77D0(self);
+                *(int*)((char*)cAudioInterface_bxAudio() + 0x508) = idx;
+                func_0028CF98(cAudioInterface_bxAudio(), 0, 0, -1, 1);
+                cFEStateRequestLine_updateCurrentlyPlaying_77D0(self);
             } else {
-                func_002B4978((char*)func_0028B180() + 0x118, idx);
+                func_002B4978((char*)cAudioInterface_bxAudio() + 0x118, idx);
             }
         }
         break;
@@ -453,7 +453,7 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, void* item, u
 //100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_onPopupEvent);
 #ifdef SKIP_ASM
-extern "C" void func_001988D8(void* self, int idx);
+extern "C" void cFEStateRequestLine_buySong(void* self, int idx);
 extern "C" void cFEStateRequestLine_updatePlayList(void* self);
 extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* self, int a1);
 extern "C" void cFEStateRequestLine_updateCash(void* self);
@@ -476,7 +476,7 @@ struct sMsgCenter_979D8 {
  * Hides the request line while another popup is up and completes song purchases.
  *
  * Event 0x15 clears the visible bit (bit 3 of mAttrState) unless the popup's id (+0xC) is 7 (the buy popup);
- * event 0x16 sets it again and, for a confirmed buy popup (+0x6C), buys the selected song (func_001988D8,
+ * event 0x16 sets it again and, for a confirmed buy popup (+0x6C), buys the selected song (cFEStateRequestLine_buySong,
  * probably buySong) and refreshes the list, song info, cash, free markers, buttons and help.
  *
  * @param item  the popup state
@@ -496,7 +496,7 @@ extern "C" void cFEStateRequestLine_onPopupEvent(sMsgCenter_979D8* self, void* i
         }
         if (*(int*)((char*)item + 0xC) == 7 && *(int*)((char*)item + 0x6C) != 0) {
             int song = self->list[self->top + *(int*)(*(char**)(self->menu + 0xA0) + 0x18)];
-            func_001988D8(self, song);
+            cFEStateRequestLine_buySong(self, song);
             cFEStateRequestLine_updatePlayList(self);
             cFEStateRequestLine_updateHilightedSongInfo(self, song);
             cFEStateRequestLine_updateCash(self);
@@ -510,7 +510,7 @@ extern "C" void cFEStateRequestLine_onPopupEvent(sMsgCenter_979D8* self, void* i
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197AD8);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_generatePlayList);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sMsgCenter_97AD8 {
@@ -527,7 +527,7 @@ struct sMsgCenter_97AD8 {
  * Walks songs 0 to mNumSongs (+0x14C) twice, writing into mSongOrder (+0x4C): first every song whose bit is set in the
  * owned-songs mask (+0x160), then every song whose bit is clear.
  */
-extern "C" void func_00197AD8(void* self)
+extern "C" void cFEStateRequestLine_generatePlayList(void* self)
 {
     sMsgCenter_97AD8* msgCenter = (sMsgCenter_97AD8*)self;
     int i;
@@ -739,7 +739,7 @@ extern "C" void cFEStateRequestLine_updatePlayListArrows(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00197E70);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updateCurrentlyPlaying);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int USTR_length(unsigned short* s);
@@ -748,7 +748,7 @@ void cMemMan_free(void* p);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void* func_002B40F0(void* self, int i);
 extern "C" void* func_002B4120(void* self, int i);
 extern char str_cFEStateRequestLine[];
@@ -785,7 +785,7 @@ struct sReqLine_197E70 {
  * Shows the title and artist of the song now playing on the request line.
  *
  * Returns at once unless both now-playing texts exist (+0x1B4 title, +0x1B8 artist). When the audio object's current
- * song (+0x508 of func_0028B180) is below its song count (+0x504), takes that song's title (func_002B40F0) and artist
+ * song (+0x508 of cAudioInterface_bxAudio) is below its song count (+0x504), takes that song's title (func_002B40F0) and artist
  * (func_002B4120) from the music list at +0x118. A non-empty title shows the title text (virtual slot 8) and sets it to
  * the localised "NowPlaying" format (FELocale, hash of str_kT_16NowPlaying) printed with the title through sprintf1
  * into a temporary 16-bit buffer (operator new tagged "cFEStateRequestLine", freed after cUIText_setUnicodeString); an
@@ -794,16 +794,16 @@ struct sReqLine_197E70 {
  *
  * @param vself  the request-line state (this)
  */
-extern "C" void func_00197E70(void* vself)
+extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(void* vself)
 {
     sReqLine_197E70* self = (sReqLine_197E70*)vself;
     if (self->title == 0 || self->artist == 0) {
         return;
     }
-    int cur = *(int*)((char*)func_0028B180() + 0x508);
-    if (cur < *(int*)((char*)func_0028B180() + 0x504)) {
-        char* name = (char*)func_002B40F0((char*)func_0028B180() + 0x118, cur);
-        char* artist = (char*)func_002B4120((char*)func_0028B180() + 0x118, cur);
+    int cur = *(int*)((char*)cAudioInterface_bxAudio() + 0x508);
+    if (cur < *(int*)((char*)cAudioInterface_bxAudio() + 0x504)) {
+        char* name = (char*)func_002B40F0((char*)cAudioInterface_bxAudio() + 0x118, cur);
+        char* artist = (char*)func_002B4120((char*)cAudioInterface_bxAudio() + 0x118, cur);
         if (strlen(name) != 0) {
             self->title->show(1);
             char* db = (char*)SSXApp->FELocale;
@@ -1171,7 +1171,7 @@ void cMemMan_free(void* p);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void* func_00198AB8(void* self, int i);
+extern "C" void* cFEStateRequestLine_getSongArtist(void* self, int i);
 // PORT: cFEStateRequestLine_getSongCost__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
 int cFEStateRequestLine_getSongCost_2(void* self, int idx) __asm__("cFEStateRequestLine_getSongCost__FPv");
 extern "C" const char* getDollarString(void* a0);
@@ -1218,7 +1218,7 @@ struct sReqLine_1986D0 {
 /**
  * Shows the highlighted song's artist line and its price.
  *
- * "song by" gets kT_OVRCMNSongBy with the artist (func_00198AB8). The cost text is empty for an owned song,
+ * "song by" gets kT_OVRCMNSongBy with the artist (cFEStateRequestLine_getSongArtist). The cost text is empty for an owned song,
  * kT_OVRCMNFree while fewer than 6 are owned, else the price (cFEStateRequestLine_getSongCost, always $5000); the cost icon
  * shows only in the store.
  *
@@ -1232,7 +1232,7 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx
         char* db = (char*)SSXApp->FELocale;
         sVtEntry_001986D0* vt = *(sVtEntry_001986D0**)(db + 4);
         unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_OVRCMNSongBy));
-        char* name = (char*)func_00198AB8(self, idx);
+        char* name = (char*)cFEStateRequestLine_getSongArtist(self, idx);
         int len = USTR_length(fmt) + strlen(name) + 1;
         unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_disconnected_from_serverErrorString, 0x100, 0);
         // PORT: the format argument is a string pointer passed through an int parameter
@@ -1271,7 +1271,7 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_001988D8);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_buySong);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1302,7 +1302,7 @@ struct sMsgCenter_988D8 {
  *
  * @param idx  the song index (bit number in both masks)
  */
-extern "C" void func_001988D8(void* self, int idx)
+extern "C" void cFEStateRequestLine_buySong(void* self, int idx)
 {
     sMsgCenter_988D8* requestLine = (sMsgCenter_988D8*)self;
     int n = 0;
@@ -1371,7 +1371,7 @@ extern "C" void cFEStateRequestLine_showBuyPopup(sMsgCenter_98988* self, int idx
 //100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongTitle);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void* func_002B40F0(void* self, int i);
 
 /**
@@ -1382,26 +1382,26 @@ extern "C" void* func_002B40F0(void* self, int i);
  */
 extern "C" void* cFEStateRequestLine_getSongTitle(void* self, int i)
 {
-    return func_002B40F0((char*)func_0028B180() + 0x118, i);
+    return func_002B40F0((char*)cAudioInterface_bxAudio() + 0x118, i);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/messagecenter", func_00198AB8);
+INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongArtist);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void* func_002B4120(void* self, int i);
 
 /**
- * Returns the artist of a request-line song from the audio object's music list (func_0028B180 + 0x118) through
+ * Returns the artist of a request-line song from the audio object's music list (cAudioInterface_bxAudio + 0x118) through
  * func_002B4120.
  *
  * @param i  the song index
  * @return the artist string
  */
-extern "C" void* func_00198AB8(void* self, int i)
+extern "C" void* cFEStateRequestLine_getSongArtist(void* self, int i)
 {
-    return func_002B4120((char*)func_0028B180() + 0x118, i);
+    return func_002B4120((char*)cAudioInterface_bxAudio() + 0x118, i);
 }
 #endif
 

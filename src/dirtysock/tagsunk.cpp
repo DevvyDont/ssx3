@@ -6177,7 +6177,7 @@ struct sBXStr_00260E50 {
  * Builds the display text for a lobby error code given as a four-character tag.
  *
  * 'dupl' gives "Duplicate", 'time' gives "Timeout"; any other code is formatted with func_003194A8 as "Unknown Error
- * Code %08x '%c%c%c%c'\n" (D_00480E20) from the code and its four bytes. Used by the debug front end (func_0017E5C8).
+ * Code %08x '%c%c%c%c'\n" (D_00480E20) from the code and its four bytes. Used by the debug front end (cDebugLobbyScreen_draw).
  *
  * @param ret   the cBXString to construct (the g++ return slot)
  * @param tag   the error code

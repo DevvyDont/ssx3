@@ -61,7 +61,7 @@ extern "C" int cVidEngine_ReadyVideo(void** self, int file)
 INCLUDE_ASM("scripter/videngine", cVidEngine_PlayVideo);
 #ifdef SKIP_ASM
 extern "C" int func_00253860(void*);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PauseSFX(void*);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void*);
 extern int D_004A2A54;
@@ -83,7 +83,7 @@ struct sVtEnt { short delta; short index; void* fn; };
  * D_005366E8[++D_004A2A54] = 10 and cPauseState_Flags = D_00442918 (the flags table's entry 10). On Tour asserts the
  * pause stack has room; retail does not. It then records in +0x14 whether the state (+0x10) of the game's +0x64 object
  * is neither 0 nor 2, calls cCutSceneTransitionMan_ForceToRegularMode on that object, saves GrMan's virtual slot 42 result in +0x10, calls GrMan's
- * slot 40 with 0, and pauses the sound effects (cSSXAudio_PauseSFX on func_0028B180()).
+ * slot 40 with 0, and pauses the sound effects (cSSXAudio_PauseSFX on cAudioInterface_bxAudio()).
  *
  * @return 1 if the video is (now) playing, 0 without a movie player
  */
@@ -113,7 +113,7 @@ extern "C" int cVidEngine_PlayVideo(sVidPlayer* self)
         sVtEnt* vt = (sVtEnt*)ps2GraphicsMan->mVtbl;
         ((void(*)(void*, int))vt[40].fn)((char*)ps2GraphicsMan + vt[40].delta, 0);
     }
-    cSSXAudio_PauseSFX(func_0028B180());
+    cSSXAudio_PauseSFX(cAudioInterface_bxAudio());
     return 1;
 }
 #endif

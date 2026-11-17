@@ -2213,7 +2213,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_PlayTransportSequence);
 extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(cSSXScriptEngine* self, int i, int a, int b, int c, int d, int f, int g);
 extern "C" void cSSXScriptEngine_ReadyNISList(cSSXScriptEngine* self, int i);
 extern "C" int cSSXScriptEngine_PlayNISList(cSSXScriptEngine* self, int i, int a, int b);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028E8C0(void* self, int id, int a2);
 struct sSseGame_A860 {
     char pad_0x0[0xF44];
@@ -2262,7 +2262,7 @@ extern "C" void cSSXScriptEngine_PlayTransportSequence(cSSXScriptEngine* self, i
     }
     cSSXScriptEngine_ReadyNISList(self, 1);
     cSSXScriptEngine_PlayNISList(self, 1, 0, 1);
-    func_0028E8C0(func_0028B180(), 20, 1);
+    func_0028E8C0(cAudioInterface_bxAudio(), 20, 1);
 }
 #endif
 
@@ -3377,7 +3377,7 @@ extern "C" int cSSXScriptEngine_IsBankLoading(cSSXScriptEngine* self, int i)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ClearNISPlayListState);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028E888(void*);
 extern "C" void cRenderStateMan_setInNIS(int);
 
@@ -3393,7 +3393,7 @@ extern "C" void cSSXScriptEngine_ClearNISPlayListState(cSSXScriptEngine* self)
     if (self->mPlayingNISList != 2) {
         self->mPlayingNISList = 2;
         self->mNumFramesNoSkip = 0;
-        func_0028E888(func_0028B180());
+        func_0028E888(cAudioInterface_bxAudio());
         cRenderStateMan_setInNIS(0);
     }
 }
@@ -5424,14 +5424,14 @@ extern "C" int func_002B0E28(void* p, int i);
  *
  * For each of the 4 sound slots (+0xBC; ID, count, target; On Tour mSounds) holding a sound ID (>= 0): a slot whose
  * count word is non-zero is stopped (cBankMonitor_BANKMONITOR_StopHandle on the audio system's bank monitor,
- * func_0028B180() +0x118 then +0x1D8) and cleared; any other slot is cleared once cBankMonitor_BANKMONITOR_GetHandle no
+ * cAudioInterface_bxAudio() +0x118 then +0x1D8) and cleared; any other slot is cleared once cBankMonitor_BANKMONITOR_GetHandle no
  * longer finds the sound. If the flag at +0xF4 (On Tour mCheckForStopOnSpeechEnd) is set it is cleared, and when
  * func_002B0E28(audio + 0x5560, 0) returns non-zero the playing NIS list's scripts are skipped
  * (cSSXScriptEngine_SkipNISListScripts).
  */
 extern "C" void cScriptObjEvent_Update(sScrObj05B8* self)
 {
-    char* snd = (char*)func_0028B180();
+    char* snd = (char*)cAudioInterface_bxAudio();
     for (int i = 0; i < 4; i++) {
         sScrTrig05B8* soundSlot = &self->trig[i];
         if (soundSlot->id >= 0) {
@@ -5502,7 +5502,7 @@ extern "C" void cScriptObjEvent_OnStartObjectUse(void* self)
 INCLUDE_ASM("scripter/ssxscriptengine", func_002807B0);
 #ifdef SKIP_ASM
 void func_00283440(void*);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 void func_002A1BD0(void* p);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 extern "C" void cWScriptMan_runFunc(void* mgr, int a, int b);
@@ -5547,12 +5547,12 @@ extern "C" void func_002807B0(sSeEngine07B0* self)
         cWScriptMan_runFunc(cWScriptMan_TheWScriptMan, self->pairs[i].b, self->pairs[i].a);
     }
     if (self->field_0xF0 != 0) {
-        func_002A1BD0(func_0028B180());
+        func_002A1BD0(cAudioInterface_bxAudio());
     }
     for (int i = 0; i < 4; i++) {
         int id = self->sounds[i].id;
         if (id >= 0) {
-            cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)((char*)func_0028B180() + 0x118) + 0x1D8, id, 1, 0.0f);
+            cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, id, 1, 0.0f);
         }
         sSeSound07B0* s = &self->sounds[i];
         s->field_0x8 = -1;
@@ -5592,7 +5592,7 @@ int func_0027A688_08E8(void* engine) __asm__("func_0027A688");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(void* mgr, int id);
 extern "C" void cWScriptMan_runFunc(void* mgr, int a, int b);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028E8C0(void* self, int id, int a2);
 extern "C" void func_002A19D8(void* self, int id);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
@@ -5755,7 +5755,7 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float
     if (flags & 4) {
         D_004A3B60 = 1;
     }
-    sWtSnd_08E8* snd = (sWtSnd_08E8*)func_0028B180();
+    sWtSnd_08E8* snd = (sWtSnd_08E8*)cAudioInterface_bxAudio();
     for (i = 0; i < info.nStops; i++) {
         sSeCmd_08E8* c = &info.stops[i];
         int id = c->id;
@@ -6219,7 +6219,7 @@ void func_0027D788(void* self, float val);
 extern "C" int func_00281C40(void* self, int i);
 extern "C" void func_00281C68(void* self, int* info, float t);
 extern "C" void func_00282D30(void* self, float dt);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" float func_002B4920(void* p);
 
 struct sNode_2816A0
@@ -6238,7 +6238,7 @@ extern "C" void func_002816A0(char* self, void* obj, float currFrame, float dt)
     func_0027C8E0(obj, info);
     if (*func_0027C888_p(obj) != 0) {
         *(int*)(self + 0xF0) = 0;
-        char* soundMan = (char*)func_0028B180();
+        char* soundMan = (char*)cAudioInterface_bxAudio();
         void* timer = soundMan + 0x118;
         if (*(int*)(soundMan + 0x530) != 0) {
             float now = func_002B4920(timer);

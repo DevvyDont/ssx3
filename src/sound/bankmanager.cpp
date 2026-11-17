@@ -53,7 +53,7 @@ extern "C" void* cBankInstance_AllocMem(void* self, int size, int extra, int tag
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028B650);
 #ifdef SKIP_ASM
-extern "C" void func_0028B528(void*);
+extern "C" void cBankInstance_Unload(void*);
 extern "C" void* MEM_free(void* self);
 extern char* gpBankManager;
 
@@ -68,7 +68,7 @@ public:
 
 extern "C" void func_0028B650(void* self)
 {
-    func_0028B528(self);
+    cBankInstance_Unload(self);
     int state = *(int*)((char*)self + 0x8);
     if (state != 0) {
         if (state == 2) {
@@ -198,8 +198,8 @@ extern "C" int func_0028B830(void* self, void* name)
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_OnBeginAsyncLoad);
 #ifdef SKIP_ASM
-extern "C" void func_0028B528(void*);
-extern "C" void func_0028B2D0(void* self);
+extern "C" void cBankInstance_Unload(void*);
+extern "C" void cBankInstance_SharedUnload(void* self);
 extern char* gpBankManager;
 
 class cSndStream_B878 {
@@ -215,15 +215,15 @@ public:
 /**
  * Prepares a bank slot for an asynchronous load: unloads whatever it holds and marks it loading.
  *
- * Calls func_0028B528 and func_0028B2D0 (On Tour Unload and SharedUnload), sets the status (+0x0, mBankStatus) to 2
+ * Calls cBankInstance_Unload and cBankInstance_SharedUnload (On Tour Unload and SharedUnload), sets the status (+0x0, mBankStatus) to 2
  * (loading) and, for a bank held in sound memory (mAllocLocation +0x8 == 2), passes its sound memory handle (+0xC) to
  * virtual slot 6 of the bank manager's sound system (the cSoundSys virtual base reached through gpBankManager +0x1D8).
  * On Tour asserts the bank was not already loading and that the handle is valid; retail checks neither.
  */
 extern "C" void cBankInstance_OnBeginAsyncLoad(void* self)
 {
-    func_0028B528(self);
-    func_0028B2D0(self);
+    cBankInstance_Unload(self);
+    cBankInstance_SharedUnload(self);
     *(int*)self = 2;
     if (*(int*)((char*)self + 0x8) == 2) {
         (**(cSndStream_B878***)(gpBankManager + 0x1D8))->v6(*(int*)((char*)self + 0xC));
@@ -323,7 +323,7 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_cBankManager);
 #ifdef SKIP_ASM
 extern "C" void* cBankMonitor_cBankMonitor(void* self, int a1, int heap);
 extern "C" void* cAsyncSys_cAsyncSys(void* self);
-extern "C" void* func_0028B248(void* self);
+extern "C" void* cBankInstance_cBankInstance(void* self);
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -344,7 +344,7 @@ extern const sBmVtbl D_00483AB8;
 
 struct sBmBank {
     char pad_0x0[0x60];
-    sBmBank() { func_0028B248(this); }
+    sBmBank() { cBankInstance_cBankInstance(this); }
     void operator delete[](void* p, unsigned int size);
 };
 
@@ -405,7 +405,7 @@ INCLUDE_ASM("sound/bankmanager", cBankManager__cBankManager);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void cAsyncSys__cAsyncSys(void* self, int flags);
-extern "C" void func_0028B278(void* self, int flags);
+extern "C" void cBankInstance__cBankInstance(void* self, int flags);
 extern "C" void cBankMonitor__cBankMonitor(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern char* gpBankManager;
@@ -443,7 +443,7 @@ struct sBankManagerBB10 {
  *
  * Restores the cBankManager and cBankMonitor vtables and the virtual base's vtable (D_00483AB8; with flags 0 the g++
  * 2.95 virtual-base this-adjust fix-up runs on a stack copy), clears gpBankManager, destroys the cBankInstance array at
- * +0xACC last-first with func_0028B278 (its count is the word 0x10 bytes before it) and frees it, then runs
+ * +0xACC last-first with cBankInstance__cBankInstance (its count is the word 0x10 bytes before it) and frees it, then runs
  * cBankMonitor__cBankMonitor on +0x1D8 and cAsyncSys__cAsyncSys (On Tour ~cAsyncSys) on the object. cSoundSys__cSoundSys
  * destroys the virtual base only when flags bit 1 is set.
  *
@@ -467,7 +467,7 @@ extern "C" void cBankManager__cBankManager(sBankManagerBB10* self, int flags)
         sBmBankBB10* bankInstance = self->banks + ((int*)self->banks)[-4];
         while (self->banks != bankInstance) {
             bankInstance--;
-            func_0028B278(bankInstance, 0);
+            cBankInstance__cBankInstance(bankInstance, 0);
         }
         cMemMan_free((char*)self->banks - 0x10);
     }
@@ -485,15 +485,15 @@ extern "C" void cBankManager__cBankManager(sBankManagerBB10* self, int flags)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", func_0028BC58);
 #ifdef SKIP_ASM
-extern "C" void func_0028A728(void* self, int i);
-extern "C" void func_0028B320(void* bank, void* id, int a3);
+extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int i);
+extern "C" void cBankInstance_SyncLoad(void* bank, void* id, int a3);
 
 extern "C" void func_0028BC58(void* self, int i, void* id, int mainMemFlag)
 {
     int off = i * 0x60;
     if (func_0028B830((char*)*(void**)((char*)self + 0xACC) + off, id) == 0) {
-        func_0028A728(self, i);
-        func_0028B320((char*)*(void**)((char*)self + 0xACC) + off, id, mainMemFlag);
+        cAsyncSys_ASYNCSYS_Cancel(self, i);
+        cBankInstance_SyncLoad((char*)*(void**)((char*)self + 0xACC) + off, id, mainMemFlag);
     }
 }
 #endif
@@ -501,27 +501,27 @@ extern "C" void func_0028BC58(void* self, int i, void* id, int mainMemFlag)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028BCE8);
 #ifdef SKIP_ASM
-extern "C" void func_0028B528(void*);
+extern "C" void cBankInstance_Unload(void*);
 
 extern "C" void func_0028BCE8(void* self, int i)
 {
-    func_0028B528((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
+    cBankInstance_Unload((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", func_0028BD10);
 #ifdef SKIP_ASM
-extern "C" void func_0028A728(void* self, int i);
-extern "C" void func_0028A558(void* self, int i, void* id, int a3, int a4);
+extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int i);
+extern "C" void cAsyncSys_ASYNCSYS_QueueLoad(void* self, int i, void* id, int a3, int a4);
 
 struct sBankInst60 { char pad0[8]; int f8; char pad1[0x60 - 0xC]; };
 
 extern "C" void func_0028BD10(void* self, int i, void* id, int a3)
 {
     if (func_0028B830((char*)*(void**)((char*)self + 0xACC) + i * 0x60, id) == 0) {
-        func_0028A728(self, i);
-        func_0028A558(self, i, id, (*(sBankInst60**)((char*)self + 0xACC))[i].f8, a3);
+        cAsyncSys_ASYNCSYS_Cancel(self, i);
+        cAsyncSys_ASYNCSYS_QueueLoad(self, i, id, (*(sBankInst60**)((char*)self + 0xACC))[i].f8, a3);
     }
 }
 #endif
@@ -1222,7 +1222,7 @@ extern "C" void* cBE_getBE();
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 extern "C" void func_0028F108(void* self, int a1);
 extern "C" int func_002A1E20(void* self, int id);
 extern "C" int func_002A42C8(void* self);
@@ -1261,7 +1261,7 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     *(int*)((char*)self + 0x623C) = 0;
     *(int*)((char*)self + 0x6240) = 0;
     if (*(int*)((char*)self + 0x608C) == 2) {
-        int t = type == -1 ? func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0))) : type;
+        int t = type == -1 ? func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0))) : type;
         if (t == 1) {
             bmLoad_CF98(self, str_Peak1Amb, 8, 101);
         } else if (t == 2) {
@@ -1279,7 +1279,7 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     sBmInfo_CF98 info = *(sBmInfo_CF98*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     char* mon = (char*)self + 0x118;
     if (info.f0 >= 17 && a2 == 0 && a4 == 0 && func_002A42C8(self) == 0) {
-        int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+        int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (t == 1) {
             bmLoad_CF98(self, str_Peak1_b, 1, 1);
         } else if (t == 2) {
@@ -1650,7 +1650,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028E100);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* func_00287968(void* self, int a1, int a2);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028D488(void* self);
 extern "C" int func_0028D960(void* self);
@@ -1705,7 +1705,7 @@ extern "C" void func_0028E100(char* self)
             int locGroup;
             id = *(int*)(self + 0x6284);
             if (id == 23) {
-                locGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                locGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             } else {
                 locGroup = func_002A1E20(self, id);
                 *(int*)(self + 0x6284) = 23;
@@ -1759,7 +1759,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028E548);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
-extern "C" void* func_0028B1E8();
+extern "C" void* cAudioInterface_getBE();
 extern "C" int func_002A1E20(void* self, int id);
 extern "C" int func_002A40E0(void* self, int id);
 extern "C" int func_002A4158(void* self, int id);
@@ -1785,7 +1785,7 @@ extern "C" int func_0028E548(char* self, char* ev)
         func_002B1758(mon, 0);
         if (func_002A42C8(self) == 0) {
             *(int*)(self + 0x576C) = 1;
-            int locGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+            int locGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             if (locGroup == 1) {
                 *(int*)(self + 0x577C) = locGroup;
                 *(int*)(self + 0x5780) = 2;
@@ -1812,7 +1812,7 @@ extern "C" int func_0028E548(char* self, char* ev)
             func_002B1758(self + 0x5560, 0);
         }
         if (func_002A42C8(self) == 0 && cBENewPlayerInterface_isPeakLocked1(cBE_getInterface_Fv(cBE_getBE(), 1), 0, 1) != 0) {
-            int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0));
+            int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0));
             int locGroup = func_002A1E20(self, id);
             if (locGroup == 1) {
                 int lock = ((sLocks_E548*)(self + 0x579C))->v[id];
@@ -1834,7 +1834,7 @@ extern "C" int func_0028E548(char* self, char* ev)
         *(int*)(self + 0x5784) = 1;
         *(int*)(self + 0x5774) = 1;
         *(int*)(self + 0x5778) = func_002B4908(self + 0x118);
-        if (func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0))) == 2)
+        if (func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0))) == 2)
             *(int*)(self + 0x57D8) = 0;
         else
             *(int*)(self + 0x57DC) = 0;
@@ -1927,7 +1927,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
             if (func_0028D960(self)) {
                 // NOTE: the target keeps this 1 in $s1 across five calls (a named local, not a literal).
                 int wantType = 1;
-                int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(func_0028B1E8(), 0)));
+                int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
                 if (*(int*)(self + 0x62B8) == 0) {
                     func_002B3D48(self + 0x118, 2.0f);
                 }

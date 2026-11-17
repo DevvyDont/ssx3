@@ -29,7 +29,7 @@ extern "C" void cSSXApp__cSSXApp(cSSXApp* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243950);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getBE);
 #ifdef SKIP_ASM
 /**
  * Returns the application's back end (BE).
@@ -37,12 +37,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243950);
  * @param ssxApp  the application object
  * @return BE (+0x78)
  */
-extern "C" int func_00243950(void *ssxApp) {
+extern "C" int cSSXApp_getBE(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0x78)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243958);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getRealFE);
 #ifdef SKIP_ASM
 /**
  * Returns the application's real front end (RealFE).
@@ -50,12 +50,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243958);
  * @param ssxApp  the application object
  * @return RealFE (+0x7C)
  */
-extern "C" int func_00243958(void *ssxApp) {
+extern "C" int cSSXApp_getRealFE(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0x7C)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243960);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getDebugFE);
 #ifdef SKIP_ASM
 /**
  * Returns the application's debug front end (DebugFE).
@@ -63,12 +63,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243960);
  * @param ssxApp  the application object
  * @return DebugFE (+0x80)
  */
-extern "C" int func_00243960(void *ssxApp) {
+extern "C" int cSSXApp_getDebugFE(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0x80)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243968);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getGame);
 #ifdef SKIP_ASM
 /**
  * Returns the application's game object (Game).
@@ -76,12 +76,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243968);
  * @param ssxApp  the application object
  * @return Game (+0x84); 0 outside a game
  */
-extern "C" int func_00243968(void *ssxApp) {
+extern "C" int cSSXApp_getGame(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0x84)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243970);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getFonts);
 #ifdef SKIP_ASM
 /**
  * Returns the application's UI font interface (Fonts).
@@ -89,12 +89,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243970);
  * @param ssxApp  the application object
  * @return Fonts (+0x88)
  */
-extern "C" int func_00243970(void *ssxApp) {
+extern "C" int cSSXApp_getFonts(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0x88)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243978);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getFELocale);
 #ifdef SKIP_ASM
 /**
  * Returns the application's front-end locale (FELocale).
@@ -102,12 +102,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243978);
  * @param ssxApp  the application object
  * @return FELocale (+0x8C)
  */
-extern "C" int func_00243978(void *ssxApp) {
+extern "C" int cSSXApp_getFELocale(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0x8C)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243980);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getInput);
 #ifdef SKIP_ASM
 /**
  * Returns one player's input object from Inputs.
@@ -115,12 +115,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243980);
  * @param index  the player (0 or 1; not range-checked)
  * @return Inputs[@p index] (+0xB0)
  */
-extern "C" int func_00243980(void *self, int index) {
+extern "C" int cSSXApp_getInput(void *self, int index) {
     return *(int *)((char *)self + (index << 2) + 0xB0);
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243990);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getInputMap);
 #ifdef SKIP_ASM
 /**
  * Returns one player's input map from InputMaps.
@@ -128,12 +128,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243990);
  * @param index  the player (0 or 1; not range-checked)
  * @return InputMaps[@p index] (+0xB8)
  */
-extern "C" int func_00243990(void *self, int index) {
+extern "C" int cSSXApp_getInputMap(void *self, int index) {
     return *(int *)((char *)self + (index << 2) + 0xB8);
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002439A0);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getGameManager);
 #ifdef SKIP_ASM
 /**
  * Returns the application's game mode manager (GameModeMan).
@@ -141,12 +141,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002439A0);
  * @param ssxApp  the application object
  * @return GameModeMan (+0xC0)
  */
-extern "C" int func_002439A0(void *ssxApp) {
+extern "C" int cSSXApp_getGameManager(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0xC0)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002439A8);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getUserName);
 #ifdef SKIP_ASM
 /**
  * Returns the address of the application's UserName string.
@@ -154,12 +154,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002439A8);
  * @param ssxApp  the application object (taken as an int)
  * @return @p ssxApp + 0xC4, the UserName cBXString
  */
-extern "C" int func_002439A8(int ssxApp) {
+extern "C" int cSSXApp_getUserName(int ssxApp) {
     return ssxApp + 196;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002439B0);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getPassword);
 #ifdef SKIP_ASM
 /**
  * Returns the address of the application's Password string.
@@ -167,12 +167,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002439B0);
  * @param ssxApp  the application object (taken as an int)
  * @return @p ssxApp + 0xC8, the Password cBXString
  */
-extern "C" int func_002439B0(int ssxApp) {
+extern "C" int cSSXApp_getPassword(int ssxApp) {
     return ssxApp + 200;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002439B8);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getNetMan);
 #ifdef SKIP_ASM
 /**
  * Returns the application's network manager (NetMan).
@@ -180,12 +180,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002439B8);
  * @param ssxApp  the application object
  * @return NetMan (+0xD0)
  */
-extern "C" int func_002439B8(void *ssxApp) {
+extern "C" int cSSXApp_getNetMan(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0xD0)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002439C0);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getConsoleConfig);
 #ifdef SKIP_ASM
 /**
  * Returns the application's console configuration (ConsoleConfig).
@@ -193,12 +193,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002439C0);
  * @param ssxApp  the application object
  * @return ConsoleConfig (+0x9C)
  */
-extern "C" int func_002439C0(void *ssxApp) {
+extern "C" int cSSXApp_getConsoleConfig(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0x9C)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002439C8);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getLoadIndicator);
 #ifdef SKIP_ASM
 /**
  * Returns the application's load indicator (LoadIndicator).
@@ -206,24 +206,24 @@ INCLUDE_ASM("main/ssxappdtor", func_002439C8);
  * @param ssxApp  the application object
  * @return LoadIndicator (+0xA4)
  */
-extern "C" int func_002439C8(void *ssxApp) {
+extern "C" int cSSXApp_getLoadIndicator(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0xA4)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002439D0);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getNumInputs);
 #ifdef SKIP_ASM
 /**
  * Returns the number of player inputs: always 2.
  *
  * @return 2
  */
-extern "C" int func_002439D0(void) {
+extern "C" int cSSXApp_getNumInputs(void) {
     return 2;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002439D8);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_getLoadIconTextureID);
 #ifdef SKIP_ASM
 /**
  * Returns the texture id of the loading icon (LoadIconTextureID).
@@ -231,12 +231,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002439D8);
  * @param ssxApp  the application object
  * @return LoadIconTextureID (+0xA0)
  */
-extern "C" int func_002439D8(void *ssxApp) {
+extern "C" int cSSXApp_getLoadIconTextureID(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0xA0)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002439E0);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_setLoadIconTextureID);
 #ifdef SKIP_ASM
 /**
  * Sets the texture id of the loading icon (LoadIconTextureID).
@@ -244,35 +244,35 @@ INCLUDE_ASM("main/ssxappdtor", func_002439E0);
  * @param ssxApp  the application object
  * @param textureId  the new texture id
  */
-extern "C" void func_002439E0(void *ssxApp, int textureId) {
+extern "C" void cSSXApp_setLoadIconTextureID(void *ssxApp, int textureId) {
     (*(int *)((char*)(ssxApp) + (0xA0))) = textureId;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002439E8);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_endFE);
 #ifdef SKIP_ASM
 /**
  * Clears both front-end pointers, RealFE and DebugFE, marking the front end as ended.
  */
-extern "C" void func_002439E8(void *self) {
+extern "C" void cSSXApp_endFE(void *self) {
     *(int *)((char *)self + 0x7C) = 0;
     *(int *)((char *)self + 0x80) = 0;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002439F8);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_endGame);
 #ifdef SKIP_ASM
 /**
  * Clears the Game pointer, marking the game as ended.
  *
  * @param ssxApp  the application object
  */
-extern "C" void func_002439F8(void *ssxApp) {
+extern "C" void cSSXApp_endGame(void *ssxApp) {
     (*(int *)((char*)(ssxApp) + (0x84))) = 0;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243A00);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_InGame);
 #ifdef SKIP_ASM
 /**
  * Returns whether a game is running (Game is set).
@@ -280,12 +280,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00243A00);
  * @param ssxApp  the application object
  * @return 1 when Game (+0x84) is non-null, else 0
  */
-extern "C" int func_00243A00(void *ssxApp) {
+extern "C" int cSSXApp_InGame(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0x84))) != 0;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243A10);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_InFE);
 #ifdef SKIP_ASM
 /**
  * Returns whether the front end is running (RealFE or DebugFE is set).
@@ -293,7 +293,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00243A10);
  * @param ssxApp  the application object
  * @return 1 when RealFE (+0x7C) or DebugFE (+0x80) is non-null, else 0
  */
-extern "C" int func_00243A10(void *ssxApp) {
+extern "C" int cSSXApp_InFE(void *ssxApp) {
     int var_3;
 
     var_3 = 0;
@@ -304,7 +304,7 @@ extern "C" int func_00243A10(void *ssxApp) {
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243A38);
+INCLUDE_ASM("main/ssxappdtor", cSSXApp_GetFEAsyncManager);
 #ifdef SKIP_ASM
 /**
  * Returns the application's front-end async manager (mFEAsyncManager).
@@ -312,13 +312,13 @@ INCLUDE_ASM("main/ssxappdtor", func_00243A38);
  * @param ssxApp  the application object
  * @return mFEAsyncManager (+0x11C)
  */
-extern "C" int func_00243A38(void *ssxApp) {
+extern "C" int cSSXApp_GetFEAsyncManager(void *ssxApp) {
     return (*(int *)((char*)(ssxApp) + (0x11C)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243A40);
+INCLUDE_ASM("main/ssxappdtor", cFadeScreen__cFadeScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern char D_0046D970[];
@@ -331,7 +331,7 @@ extern char D_0046D970[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00243A40(int* self, int flags)
+extern "C" void cFadeScreen__cFadeScreen(int* self, int flags)
 {
     *(void**)self = D_0046D970;
     if (flags & 1) {
@@ -390,7 +390,7 @@ void cPreStartScreen_load(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243AB8);
+INCLUDE_ASM("main/ssxappdtor", cInitLoadScreen_cInitLoadScreen);
 #ifdef SKIP_ASM
 extern char cInitLoadScreen_vtbl[];
 
@@ -399,7 +399,7 @@ extern char cInitLoadScreen_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_00243AB8(void *self) {
+extern "C" void *cInitLoadScreen_cInitLoadScreen(void *self) {
     *(void **)((char *)self + 0) = cInitLoadScreen_vtbl;
     *(int *)((char *)self + 4) = 0;
     *(int *)((char *)self + 8) = 0;
@@ -407,22 +407,22 @@ extern "C" void *func_00243AB8(void *self) {
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243AD8);
+INCLUDE_ASM("main/ssxappdtor", cInitLoadScreen_activateProgressiveMode);
 #ifdef SKIP_ASM
 /**
- * Sets the initial load screen's flag at +0x4 to 1 (the field after the vtable, cleared by func_00243AB8).
+ * Sets the initial load screen's flag at +0x4 to 1 (the field after the vtable, cleared by cInitLoadScreen_cInitLoadScreen).
  *
  * cInitLoadScreen_loseFocus uses the other flag (+0x8) as the ending flag.
  *
  * @param initLoadScreen  the initial load screen
  */
-extern "C" void func_00243AD8(void *initLoadScreen) {
+extern "C" void cInitLoadScreen_activateProgressiveMode(void *initLoadScreen) {
     (*(int *)((char*)(initLoadScreen) + (4))) = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243AE8);
+INCLUDE_ASM("main/ssxappdtor", cLoadScreen__cLoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern char D_0046D970[];
@@ -430,12 +430,12 @@ extern char D_0046D970[];
 /**
  * Destroys a plain load screen: resets the vtable to the root module vtable D_0046D970 and frees the object when asked.
  *
- * It is the destructor slot (+0xC) of D_0047D818, the vtable func_00243B18 installs (loseFocus is
+ * It is the destructor slot (+0xC) of D_0047D818, the vtable cLoadScreen_cLoadScreen installs (loseFocus is
  * cLoadScreen_loseFocus).
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00243AE8(int* self, int flags)
+extern "C" void cLoadScreen__cLoadScreen(int* self, int flags)
 {
     *(void**)self = D_0046D970;
     if (flags & 1) {
@@ -445,7 +445,7 @@ extern "C" void func_00243AE8(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243B18);
+INCLUDE_ASM("main/ssxappdtor", cLoadScreen_cLoadScreen);
 #ifdef SKIP_ASM
 extern "C" void cFadeScreen_cFadeScreen(void *);
 extern char D_0047D818[];
@@ -458,7 +458,7 @@ extern char D_0047D818[];
  *
  * @return @p self
  */
-extern "C" void *func_00243B18(void *self) {
+extern "C" void *cLoadScreen_cLoadScreen(void *self) {
     cFadeScreen_cFadeScreen(self);
     *(int *)((char *)self + 0xC) = 0;
     *(void **)((char *)self + 0) = D_0047D818;
@@ -467,7 +467,7 @@ extern "C" void *func_00243B18(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243B50);
+INCLUDE_ASM("main/ssxappdtor", cStartScreen__cStartScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern char D_0046D970[];
@@ -480,7 +480,7 @@ extern char D_0046D970[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00243B50(int* self, int flags)
+extern "C" void cStartScreen__cStartScreen(int* self, int flags)
 {
     *(void**)self = D_0046D970;
     if (flags & 1) {
@@ -490,7 +490,7 @@ extern "C" void func_00243B50(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243B80);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadScreen__cGameLoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern char D_0046D970[];
@@ -500,11 +500,11 @@ extern char D_0046D970[];
  * asked.
  *
  * It is the destructor slot (+0xC) of cGameLoadScreen_vtbl, whose load slot is cGameLoadScreen_load (loads the
- * "data/ui/gl" game load screen); func_00243BB0 installs that vtable.
+ * "data/ui/gl" game load screen); cGameLoadScreen_cGameLoadScreen installs that vtable.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00243B80(int* self, int flags)
+extern "C" void cGameLoadScreen__cGameLoadScreen(int* self, int flags)
 {
     *(void**)self = D_0046D970;
     if (flags & 1) {
@@ -514,7 +514,7 @@ extern "C" void func_00243B80(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243BB0);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadScreen_cGameLoadScreen);
 #ifdef SKIP_ASM
 extern "C" void cFadeScreen_cFadeScreen(void *);
 extern char cGameLoadScreen_vtbl[];
@@ -525,7 +525,7 @@ extern char cGameLoadScreen_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_00243BB0(void *self) {
+extern "C" void *cGameLoadScreen_cGameLoadScreen(void *self) {
     cFadeScreen_cFadeScreen(self);
     *(int *)((char *)self + 0xC) = 0;
     *(void **)((char *)self + 0) = cGameLoadScreen_vtbl;
@@ -573,7 +573,7 @@ extern "C" void cFELoadScreen__cFELoadScreen(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243C30);
+INCLUDE_ASM("main/ssxappdtor", cFELoadScreen_cFELoadScreen);
 #ifdef SKIP_ASM
 extern "C" void cFadeScreen_cFadeScreen(void *);
 extern char cFELoadScreen_vtbl[];
@@ -584,7 +584,7 @@ extern char cFELoadScreen_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *func_00243C30(void *self) {
+extern "C" void *cFELoadScreen_cFELoadScreen(void *self) {
     cFadeScreen_cFadeScreen(self);
     *(int *)((char *)self + 0xC) = 0;
     *(void **)((char *)self + 0) = cFELoadScreen_vtbl;
@@ -594,7 +594,7 @@ extern "C" void *func_00243C30(void *self) {
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243C70);
+INCLUDE_ASM("main/ssxappdtor", cFELoadScreen_getTexttureID);
 #ifdef SKIP_ASM
 /**
  * Returns one of the front-end load screen's two texture ids (+0x10).
@@ -602,13 +602,13 @@ INCLUDE_ASM("main/ssxappdtor", func_00243C70);
  * @param index  which texture (0 or 1; not range-checked)
  * @return the texture id at +0x10 + 4 * @p index
  */
-extern "C" int func_00243C70(void *self, int index) {
+extern "C" int cFELoadScreen_getTexttureID(void *self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x10);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243C80);
+INCLUDE_ASM("main/ssxappdtor", cGameState__cGameState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -623,7 +623,7 @@ extern char D_0047D6E8[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00243C80(int* self, int flags)
+extern "C" void cGameState__cGameState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -666,7 +666,7 @@ void cGameState_preloadCancel(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243CC8__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameState_gainFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base game state's gainFocus has an empty body.
@@ -674,13 +674,13 @@ INCLUDE_ASM("main/ssxappdtor", func_00243CC8__FPv);
  * It fills slot +0x2C of the base game-state vtable D_0047D6E8 and of the states that keep the default (the end-wait
  * and transport-wait states).
  */
-void func_00243CC8(void* self)
+void cGameState_gainFocus(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243CD0__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameState_update__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base game state's update has an empty body.
@@ -688,7 +688,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00243CD0__FPv);
  * It fills slot +0x34 of the base game-state vtable D_0047D6E8 and of the states without their own update (end,
  * end-wait, transport-wait, riding).
  */
-void func_00243CD0(void* self)
+void cGameState_update(void* self)
 {
 }
 #endif
@@ -730,7 +730,7 @@ void cGameState_onWidgetEvent(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243CF0);
+INCLUDE_ASM("main/ssxappdtor", cGFEndState__cGFEndState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -740,12 +740,12 @@ extern char D_0047D6E8[];
  * Destroys the end game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable D_0047D6E8 and frees
  * the object when asked.
  *
- * It is the destructor slot of D_0047D690, the vtable func_00243D20 installs (gainFocus func_00233B60, loseFocus
- * func_00233B88).
+ * It is the destructor slot of D_0047D690, the vtable cGFEndState_cGFEndState installs (gainFocus cGFEndState_gainFocus, loseFocus
+ * cGFEndState_loseFocus).
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00243CF0(int* self, int flags)
+extern "C" void cGFEndState__cGFEndState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -755,7 +755,7 @@ extern "C" void func_00243CF0(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243D20);
+INCLUDE_ASM("main/ssxappdtor", cGFEndState_cGFEndState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D690[];
@@ -769,7 +769,7 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *func_00243D20(void *self) {
+extern "C" void *cGFEndState_cGFEndState(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
@@ -806,7 +806,7 @@ extern "C" void func_00243D58(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243D88);
+INCLUDE_ASM("main/ssxappdtor", cGFFinishlineState__cGFFinishlineState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -816,12 +816,12 @@ extern char D_0047D6E8[];
  * Destroys the finish-line game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable D_0047D6E8
  * and frees the object when asked.
  *
- * It is the destructor slot of D_0047D5E0, whose gainFocus, update and loseFocus (func_00233C50, func_00233CD8,
- * func_00234008) sit right before cGFFinishlineState_writeToReplayFrame in fe/festateloadscreen.
+ * It is the destructor slot of D_0047D5E0, whose gainFocus, update and loseFocus (cGFFinishlineState_gainFocus, cGFFinishlineState_update,
+ * cGFFinishlineState_loseFocus) sit right before cGFFinishlineState_writeToReplayFrame in fe/festateloadscreen.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00243D88(int* self, int flags)
+extern "C" void cGFFinishlineState__cGFFinishlineState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -831,7 +831,7 @@ extern "C" void func_00243D88(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243DB8);
+INCLUDE_ASM("main/ssxappdtor", cGFTransportWaitState__cGFTransportWaitState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -845,7 +845,7 @@ extern char D_0047D6E8[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00243DB8(int* self, int flags)
+extern "C" void cGFTransportWaitState__cGFTransportWaitState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -855,7 +855,7 @@ extern "C" void func_00243DB8(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243DE8);
+INCLUDE_ASM("main/ssxappdtor", cGFTransportWaitState_cGFTransportWaitState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D588[];
@@ -867,7 +867,7 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *func_00243DE8(void *self) {
+extern "C" void *cGFTransportWaitState_cGFTransportWaitState(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
@@ -923,7 +923,7 @@ extern "C" void cGFGateState__cGFGateState(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243E80);
+INCLUDE_ASM("main/ssxappdtor", cGFGateState_cGFGateState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char cGFGateState_vtbl[];
@@ -935,7 +935,7 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *func_00243E80(void *self) {
+extern "C" void *cGFGateState_cGFGateState(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
@@ -947,7 +947,7 @@ extern "C" void *func_00243E80(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243EB8);
+INCLUDE_ASM("main/ssxappdtor", cGFRidingState__cGFRidingState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -961,7 +961,7 @@ extern char D_0047D6E8[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00243EB8(int* self, int flags)
+extern "C" void cGFRidingState__cGFRidingState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -971,7 +971,7 @@ extern "C" void func_00243EB8(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243EE8);
+INCLUDE_ASM("main/ssxappdtor", cGFRidingState_cGFRidingState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D480[];
@@ -983,7 +983,7 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *func_00243EE8(void *self) {
+extern "C" void *cGFRidingState_cGFRidingState(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
@@ -1039,7 +1039,7 @@ extern "C" void cGFNextHeatState__cGFNextHeatState(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243F80);
+INCLUDE_ASM("main/ssxappdtor", cGFNextHeatState_cGFNextHeatState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char cGFNextHeatState_vtbl[];
@@ -1051,7 +1051,7 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *func_00243F80(void *self) {
+extern "C" void *cGFNextHeatState_cGFNextHeatState(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
@@ -1087,7 +1087,7 @@ extern "C" void cGFSessionTeleportState__cGFSessionTeleportState(int* self, int 
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243FF0);
+INCLUDE_ASM("main/ssxappdtor", cGFSessionTeleportState_cGFSessionTeleportState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char cGFSessionTeleportState_vtbl[];
@@ -1099,7 +1099,7 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *func_00243FF0(void *self) {
+extern "C" void *cGFSessionTeleportState_cGFSessionTeleportState(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
@@ -1133,7 +1133,7 @@ extern "C" void cGFUserSelectState__cGFUserSelectState(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244058);
+INCLUDE_ASM("main/ssxappdtor", cGFUserSelectState_setNextLocation);
 #ifdef SKIP_ASM
 /**
  * Sets the user-select state's next location (+0x18).
@@ -1141,13 +1141,13 @@ INCLUDE_ASM("main/ssxappdtor", func_00244058);
  * @param userSelectState  the user-select game-flow state
  * @param location  the location to go to next
  */
-extern "C" void func_00244058(void *userSelectState, int location) {
+extern "C" void cGFUserSelectState_setNextLocation(void *userSelectState, int location) {
     (*(int *)((char*)(userSelectState) + (0x18))) = location;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244060);
+INCLUDE_ASM("main/ssxappdtor", cGFSectionLoadState__cGFSectionLoadState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1161,7 +1161,7 @@ extern char D_0047D6E8[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00244060(int* self, int flags)
+extern "C" void cGFSectionLoadState__cGFSectionLoadState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -1171,7 +1171,7 @@ extern "C" void func_00244060(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244090);
+INCLUDE_ASM("main/ssxappdtor", cGFPreEventState__cGFPreEventState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1185,7 +1185,7 @@ extern char D_0047D6E8[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00244090(int* self, int flags)
+extern "C" void cGFPreEventState__cGFPreEventState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -1195,7 +1195,7 @@ extern "C" void func_00244090(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002440C0);
+INCLUDE_ASM("main/ssxappdtor", cGFPreEventState_cGFPreEventState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D270[];
@@ -1207,7 +1207,7 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *func_002440C0(void *self) {
+extern "C" void *cGFPreEventState_cGFPreEventState(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
@@ -1219,7 +1219,7 @@ extern "C" void *func_002440C0(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002440F8);
+INCLUDE_ASM("main/ssxappdtor", cGFPostEventState__cGFPostEventState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1233,7 +1233,7 @@ extern char D_0047D6E8[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_002440F8(int* self, int flags)
+extern "C" void cGFPostEventState__cGFPostEventState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0047D6E8;
     if (flags & 1) {
@@ -1243,7 +1243,7 @@ extern "C" void func_002440F8(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244128);
+INCLUDE_ASM("main/ssxappdtor", cGFPostEventState_cGFPostEventState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char D_0047D218[];
@@ -1255,7 +1255,7 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *func_00244128(void *self) {
+extern "C" void *cGFPostEventState_cGFPostEventState(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
@@ -1289,7 +1289,7 @@ extern "C" void cGFPodiumState__cGFPodiumState(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244190);
+INCLUDE_ASM("main/ssxappdtor", cGFPodiumState_cGFPodiumState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char cGFPodiumState_vtbl[];
@@ -1301,7 +1301,7 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *func_00244190(void *self) {
+extern "C" void *cGFPodiumState_cGFPodiumState(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
@@ -1335,7 +1335,7 @@ extern "C" void cGFReplayStartState__cGFReplayStartState(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002441F8);
+INCLUDE_ASM("main/ssxappdtor", cGFReplayStartState_cGFReplayStartState);
 #ifdef SKIP_ASM
 extern char D_0047D6E8[];
 extern char cGFReplayStartState_vtbl[];
@@ -1347,7 +1347,7 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *func_002441F8(void *self) {
+extern "C" void *cGFReplayStartState_cGFReplayStartState(void *self) {
     *(int *)((char *)self + 0) = 0;
     *(void **)((char *)self + 0xC) = D_0047D6E8;
     cGameState_mpGame = 0;
@@ -1402,7 +1402,7 @@ extern "C" void func_00244240(int id)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244278);
+INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentState);
 #ifdef SKIP_ASM
 /**
  * Returns the current game-flow state number (mCurrentStateID).
@@ -1410,12 +1410,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244278);
  * @param game  the game
  * @return mCurrentStateID (+0x214)
  */
-extern "C" int func_00244278(void *game) {
+extern "C" int cGame_getCurrentState(void *game) {
     return (*(int *)((char*)(game) + (0x214)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244280);
+INCLUDE_ASM("main/ssxappdtor", cGame_getPreviousState);
 #ifdef SKIP_ASM
 /**
  * Returns the previous game-flow state number (mPrevStateID).
@@ -1423,12 +1423,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244280);
  * @param game  the game
  * @return mPrevStateID (+0x218)
  */
-extern "C" int func_00244280(void *game) {
+extern "C" int cGame_getPreviousState(void *game) {
     return (*(int *)((char*)(game) + (0x218)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244288);
+INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentStateInstance);
 #ifdef SKIP_ASM
 /**
  * Returns the current game-flow state object (mCurrentState).
@@ -1436,12 +1436,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244288);
  * @param game  the game
  * @return mCurrentState (+0x200)
  */
-extern "C" int func_00244288(void *game) {
+extern "C" int cGame_getCurrentStateInstance(void *game) {
     return (*(int *)((char*)(game) + (0x200)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244290);
+INCLUDE_ASM("main/ssxappdtor", cGame_getNash);
 #ifdef SKIP_ASM
 /**
  * Returns the game's Nash ray-query object (BXNash).
@@ -1449,12 +1449,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244290);
  * @param game  the game
  * @return BXNash (+0x20)
  */
-extern "C" int func_00244290(void *game) {
+extern "C" int cGame_getNash(void *game) {
     return (*(int *)((char*)(game) + (0x20)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244298);
+INCLUDE_ASM("main/ssxappdtor", cGame_getWorld);
 #ifdef SKIP_ASM
 /**
  * Returns the game's world (World).
@@ -1462,12 +1462,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244298);
  * @param game  the game
  * @return World (+0x10)
  */
-extern "C" int func_00244298(void *game) {
+extern "C" int cGame_getWorld(void *game) {
     return (*(int *)((char*)(game) + (0x10)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442A0);
+INCLUDE_ASM("main/ssxappdtor", cGame_getDebugFont);
 #ifdef SKIP_ASM
 /**
  * Returns the game's debug font (DebugFont).
@@ -1475,12 +1475,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442A0);
  * @param game  the game
  * @return DebugFont (+0x24)
  */
-extern "C" int func_002442A0(void *game) {
+extern "C" int cGame_getDebugFont(void *game) {
     return (*(int *)((char*)(game) + (0x24)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442A8);
+INCLUDE_ASM("main/ssxappdtor", cGame_getMenuSys);
 #ifdef SKIP_ASM
 /**
  * Returns the game's menu system (MenuSys).
@@ -1488,12 +1488,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442A8);
  * @param game  the game
  * @return MenuSys (+0xA4)
  */
-extern "C" int func_002442A8(void *game) {
+extern "C" int cGame_getMenuSys(void *game) {
     return (*(int *)((char*)(game) + (0xA4)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442B0);
+INCLUDE_ASM("main/ssxappdtor", cGame_getAI);
 #ifdef SKIP_ASM
 /**
  * Returns the game's AI (AI).
@@ -1501,12 +1501,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442B0);
  * @param game  the game
  * @return AI (+0xC)
  */
-extern "C" int func_002442B0(void *game) {
+extern "C" int cGame_getAI(void *game) {
     return (*(int *)((char*)(game) + (0xC)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442B8);
+INCLUDE_ASM("main/ssxappdtor", cGame_getUI);
 #ifdef SKIP_ASM
 /**
  * Returns the game's UI engine (UI).
@@ -1514,12 +1514,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442B8);
  * @param game  the game
  * @return UI (+0x48)
  */
-extern "C" int func_002442B8(void *game) {
+extern "C" int cGame_getUI(void *game) {
     return (*(int *)((char*)(game) + (0x48)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442C0);
+INCLUDE_ASM("main/ssxappdtor", cGame_getReplay);
 #ifdef SKIP_ASM
 /**
  * Returns the game's replay (Replay).
@@ -1527,12 +1527,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442C0);
  * @param game  the game
  * @return Replay (+0x28)
  */
-extern "C" int func_002442C0(void *game) {
+extern "C" int cGame_getReplay(void *game) {
     return (*(int *)((char*)(game) + (0x28)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442C8);
+INCLUDE_ASM("main/ssxappdtor", cGame_getFXLoader);
 #ifdef SKIP_ASM
 /**
  * Returns the game's effects loader (FXLoader).
@@ -1540,12 +1540,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442C8);
  * @param game  the game
  * @return FXLoader (+0x2C)
  */
-extern "C" int func_002442C8(void *game) {
+extern "C" int cGame_getFXLoader(void *game) {
     return (*(int *)((char*)(game) + (0x2C)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442D0);
+INCLUDE_ASM("main/ssxappdtor", cGame_getSurfPropCache);
 #ifdef SKIP_ASM
 /**
  * Returns the game's surface property cache (SurfPropCache).
@@ -1553,12 +1553,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442D0);
  * @param game  the game
  * @return SurfPropCache (+0x44)
  */
-extern "C" int func_002442D0(void *game) {
+extern "C" int cGame_getSurfPropCache(void *game) {
     return (*(int *)((char*)(game) + (0x44)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442D8);
+INCLUDE_ASM("main/ssxappdtor", cGame_getWorldSound);
 #ifdef SKIP_ASM
 /**
  * Returns the game's world sound (WorldSound).
@@ -1566,12 +1566,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442D8);
  * @param game  the game
  * @return WorldSound (+0x4C)
  */
-extern "C" int func_002442D8(void *game) {
+extern "C" int cGame_getWorldSound(void *game) {
     return (*(int *)((char*)(game) + (0x4C)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442E0);
+INCLUDE_ASM("main/ssxappdtor", cGame_getAIVisualEffectsObjNode);
 #ifdef SKIP_ASM
 /**
  * Returns the game's AI visual-effects object node (AIVisualEffectsMan).
@@ -1579,12 +1579,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442E0);
  * @param game  the game
  * @return AIVisualEffectsMan (+0x50)
  */
-extern "C" int func_002442E0(void *game) {
+extern "C" int cGame_getAIVisualEffectsObjNode(void *game) {
     return (*(int *)((char*)(game) + (0x50)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442E8);
+INCLUDE_ASM("main/ssxappdtor", cGame_getVisualEffectsObjNode);
 #ifdef SKIP_ASM
 /**
  * Returns the game's visual-effects object node (VisualEffectsMan).
@@ -1592,12 +1592,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442E8);
  * @param game  the game
  * @return VisualEffectsMan (+0x54)
  */
-extern "C" int func_002442E8(void *game) {
+extern "C" int cGame_getVisualEffectsObjNode(void *game) {
     return (*(int *)((char*)(game) + (0x54)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442F0);
+INCLUDE_ASM("main/ssxappdtor", cGame_getCutSceneTransitionman);
 #ifdef SKIP_ASM
 /**
  * Returns the game's cut-scene transition manager (CutSceneTransitionMan).
@@ -1605,12 +1605,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442F0);
  * @param game  the game
  * @return CutSceneTransitionMan (+0x64)
  */
-extern "C" int func_002442F0(void *game) {
+extern "C" int cGame_getCutSceneTransitionman(void *game) {
     return (*(int *)((char*)(game) + (0x64)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002442F8);
+INCLUDE_ASM("main/ssxappdtor", cGame_getFlagManager);
 #ifdef SKIP_ASM
 /**
  * Returns the game's flag manager (FlagManager).
@@ -1618,12 +1618,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002442F8);
  * @param game  the game
  * @return FlagManager (+0x70)
  */
-extern "C" int func_002442F8(void *game) {
+extern "C" int cGame_getFlagManager(void *game) {
     return (*(int *)((char*)(game) + (0x70)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244300);
+INCLUDE_ASM("main/ssxappdtor", cGame_getSnowFall);
 #ifdef SKIP_ASM
 /**
  * Returns the game's snowfall effect (SnowFall).
@@ -1631,12 +1631,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244300);
  * @param game  the game
  * @return SnowFall (+0x74)
  */
-extern "C" int func_00244300(void *game) {
+extern "C" int cGame_getSnowFall(void *game) {
     return (*(int *)((char*)(game) + (0x74)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244308);
+INCLUDE_ASM("main/ssxappdtor", cGame_getPlaybackMan);
 #ifdef SKIP_ASM
 /**
  * Returns the game's replay playback manager (PlaybackMan).
@@ -1644,12 +1644,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244308);
  * @param game  the game
  * @return PlaybackMan (+0x34)
  */
-extern "C" int func_00244308(void *game) {
+extern "C" int cGame_getPlaybackMan(void *game) {
     return (*(int *)((char*)(game) + (0x34)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244310);
+INCLUDE_ASM("main/ssxappdtor", cGame_getSectionMan);
 #ifdef SKIP_ASM
 /**
  * Returns the game's section manager (SectionMan).
@@ -1657,12 +1657,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244310);
  * @param game  the game
  * @return SectionMan (+0x78)
  */
-extern "C" int func_00244310(void *game) {
+extern "C" int cGame_getSectionMan(void *game) {
     return (*(int *)((char*)(game) + (0x78)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244318);
+INCLUDE_ASM("main/ssxappdtor", cGame_getInputSync);
 #ifdef SKIP_ASM
 /**
  * Returns the game's input synchroniser (InputSync).
@@ -1670,12 +1670,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244318);
  * @param game  the game
  * @return InputSync (+0x7C)
  */
-extern "C" int func_00244318(void *game) {
+extern "C" int cGame_getInputSync(void *game) {
     return (*(int *)((char*)(game) + (0x7C)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244320);
+INCLUDE_ASM("main/ssxappdtor", cGame_getSkyBox);
 #ifdef SKIP_ASM
 /**
  * Returns the game's sky box (SkyBox).
@@ -1683,12 +1683,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244320);
  * @param game  the game
  * @return SkyBox (+0x14)
  */
-extern "C" int func_00244320(void *game) {
+extern "C" int cGame_getSkyBox(void *game) {
     return (*(int *)((char*)(game) + (0x14)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244328);
+INCLUDE_ASM("main/ssxappdtor", cGame_getCrowdMan2d);
 #ifdef SKIP_ASM
 /**
  * Returns the game's 2D crowd manager (CrowdMan2d).
@@ -1696,12 +1696,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244328);
  * @param game  the game
  * @return CrowdMan2d (+0x38)
  */
-extern "C" int func_00244328(void *game) {
+extern "C" int cGame_getCrowdMan2d(void *game) {
     return (*(int *)((char*)(game) + (0x38)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244330);
+INCLUDE_ASM("main/ssxappdtor", cGame_getCrowdMan3d);
 #ifdef SKIP_ASM
 /**
  * Returns the game's 3D crowd manager (CrowdMan3d).
@@ -1709,12 +1709,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244330);
  * @param game  the game
  * @return CrowdMan3d (+0x3C)
  */
-extern "C" int func_00244330(void *game) {
+extern "C" int cGame_getCrowdMan3d(void *game) {
     return (*(int *)((char*)(game) + (0x3C)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244338);
+INCLUDE_ASM("main/ssxappdtor", cGame_getMultiParticleMan);
 #ifdef SKIP_ASM
 /**
  * Returns the game's multi-particle manager (MultiParticleMan).
@@ -1722,12 +1722,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244338);
  * @param game  the game
  * @return MultiParticleMan (+0x40)
  */
-extern "C" int func_00244338(void *game) {
+extern "C" int cGame_getMultiParticleMan(void *game) {
     return (*(int *)((char*)(game) + (0x40)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244340);
+INCLUDE_ASM("main/ssxappdtor", cGame_getInstanceMan);
 #ifdef SKIP_ASM
 /**
  * Returns the game's instance manager (InstanceMan).
@@ -1735,12 +1735,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244340);
  * @param game  the game
  * @return InstanceMan (+0x88)
  */
-extern "C" int func_00244340(void *game) {
+extern "C" int cGame_getInstanceMan(void *game) {
     return (*(int *)((char*)(game) + (0x88)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244348);
+INCLUDE_ASM("main/ssxappdtor", cGame_getOcclusionMan);
 #ifdef SKIP_ASM
 /**
  * Returns the game's occlusion manager (OcclusionMan).
@@ -1748,12 +1748,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244348);
  * @param game  the game
  * @return OcclusionMan (+0x8C)
  */
-extern "C" int func_00244348(void *game) {
+extern "C" int cGame_getOcclusionMan(void *game) {
     return (*(int *)((char*)(game) + (0x8C)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244350);
+INCLUDE_ASM("main/ssxappdtor", cGame_getWorldLightMan);
 #ifdef SKIP_ASM
 /**
  * Returns the game's world light manager (WorldLightMan).
@@ -1761,12 +1761,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244350);
  * @param game  the game
  * @return WorldLightMan (+0x90)
  */
-extern "C" int func_00244350(void *game) {
+extern "C" int cGame_getWorldLightMan(void *game) {
     return (*(int *)((char*)(game) + (0x90)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244358);
+INCLUDE_ASM("main/ssxappdtor", cGame_getLoadIndicator);
 #ifdef SKIP_ASM
 /**
  * Returns the game's load indicator (LoadIndicator).
@@ -1774,12 +1774,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244358);
  * @param game  the game
  * @return LoadIndicator (+0x94)
  */
-extern "C" int func_00244358(void *game) {
+extern "C" int cGame_getLoadIndicator(void *game) {
     return (*(int *)((char*)(game) + (0x94)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244360);
+INCLUDE_ASM("main/ssxappdtor", cGame_getControllerUnplugged);
 #ifdef SKIP_ASM
 /**
  * Returns the game's controller-unplugged flag (ControllerUnplugged).
@@ -1787,12 +1787,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244360);
  * @param game  the game
  * @return ControllerUnplugged (+0x224)
  */
-extern "C" int func_00244360(void *game) {
+extern "C" int cGame_getControllerUnplugged(void *game) {
     return (*(int *)((char*)(game) + (0x224)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244368);
+INCLUDE_ASM("main/ssxappdtor", cGame_getViewMan);
 #ifdef SKIP_ASM
 /**
  * Returns the game's game view manager (ViewMan).
@@ -1800,12 +1800,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244368);
  * @param game  the game
  * @return ViewMan (+0x84)
  */
-extern "C" int func_00244368(void *game) {
+extern "C" int cGame_getViewMan(void *game) {
     return (*(int *)((char*)(game) + (0x84)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244370);
+INCLUDE_ASM("main/ssxappdtor", cGame_getGameView);
 #ifdef SKIP_ASM
 /**
  * Returns one camera view from the game's view manager (ViewMan): the camera pointer at +0x4 + 4 * @p index of it.
@@ -1813,12 +1813,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244370);
  * @param index  the view number (not range-checked)
  * @return the view's camera
  */
-extern "C" int func_00244370(void *self, int index) {
+extern "C" int cGame_getGameView(void *self, int index) {
     return *(int *)((char *)(*(int *)((char *)self + 0x84)) + (index << 2) + 4);
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244388);
+INCLUDE_ASM("main/ssxappdtor", cGame_getNumGameView);
 #ifdef SKIP_ASM
 /**
  * Returns the number of camera views in the game's view manager (ViewMan +0x10).
@@ -1826,25 +1826,25 @@ INCLUDE_ASM("main/ssxappdtor", func_00244388);
  * @param game  the game
  * @return the view count
  */
-extern "C" int func_00244388(void *game) {
+extern "C" int cGame_getNumGameView(void *game) {
     return (*(int *)((char*)((*(void **)((char*)(game) + (0x84)))) + (0x10)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244398);
+INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentRenderView);
 #ifdef SKIP_ASM
 /**
  * Returns the camera of the view being rendered: ViewMan's camera indexed by its current view number (+0x14).
  *
  * @return the current render view's camera
  */
-extern "C" int func_00244398(void *self) {
+extern "C" int cGame_getCurrentRenderView(void *self) {
     char *list = *(char **)((char *)self + 0x84);
     return *(int *)(list + (*(int *)(list + 0x14) << 2) + 4);
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002443B0);
+INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentRenderViewNum);
 #ifdef SKIP_ASM
 /**
  * Returns the number of the view being rendered (ViewMan +0x14).
@@ -1852,7 +1852,7 @@ INCLUDE_ASM("main/ssxappdtor", func_002443B0);
  * @param game  the game
  * @return the current render view number
  */
-extern "C" int func_002443B0(void *game) {
+extern "C" int cGame_getCurrentRenderViewNum(void *game) {
     return (*(int *)((char*)((*(void **)((char*)(game) + (0x84)))) + (0x14)));
 }
 #endif
@@ -1882,7 +1882,7 @@ extern "C" void func_002443C0(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002443F0);
+INCLUDE_ASM("main/ssxappdtor", cGenericStreamPause_StreamFocusRender);
 #ifdef SKIP_ASM
 /**
  * Reports the stream focus as rendered exactly when the stream is ready: returns @p streamReady unchanged.
@@ -1892,14 +1892,14 @@ INCLUDE_ASM("main/ssxappdtor", func_002443F0);
  * @param streamReady  whether the stream is ready
  * @return @p streamReady
  */
-extern "C" void* func_002443F0(void* self, void* streamReady)
+extern "C" void* cGenericStreamPause_StreamFocusRender(void* self, void* streamReady)
 {
     return streamReady;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002443F8__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGenericStreamPause_Flush__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 1: the generic stream pause always reports the flush as done.
@@ -1908,14 +1908,14 @@ INCLUDE_ASM("main/ssxappdtor", func_002443F8__FPv);
  *
  * @return 1
  */
-int func_002443F8(void* self)
+int cGenericStreamPause_Flush(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244400__FPvi);
+INCLUDE_ASM("main/ssxappdtor", cInput_setPad__FPvi);
 #ifdef SKIP_ASM
 /**
  * Sets an input's pad (+0x0).
@@ -1925,34 +1925,34 @@ INCLUDE_ASM("main/ssxappdtor", func_00244400__FPvi);
  *
  * @param val  the pad (a pointer passed as an int)
  */
-void func_00244400(void* self, int val)
+void cInput_setPad(void* self, int val)
 {
     *(int*)((char*)self + 0x0) = val;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244408__FPvi);
+INCLUDE_ASM("main/ssxappdtor", cInput_setMap__FPvi);
 #ifdef SKIP_ASM
 /**
  * Sets an input's input map (+0x4).
  *
- * Called right after func_00244400 on the same new "cInput" objects.
+ * Called right after cInput_setPad on the same new "cInput" objects.
  *
  * @param val  the input map (passed as an int)
  */
-void func_00244408(void* self, int val)
+void cInput_setMap(void* self, int val)
 {
     *(int*)((char*)self + 0x4) = val;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244410);
+INCLUDE_ASM("main/ssxappdtor", cVisualEffectsObjNode__cVisualEffectsObjNode);
 #ifdef SKIP_ASM
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* D_0047D070[];
-struct sVEntry_func_00244410 {
+struct sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode {
     short delta;
     short index;
     void (*fn)(void*, int);
@@ -1967,12 +1967,12 @@ struct sVEntry_func_00244410 {
  *
  * @param flags  destructor flags, passed on to cObjNode__cObjNode
  */
-extern "C" void func_00244410(void* self, int flags)
+extern "C" void cVisualEffectsObjNode__cVisualEffectsObjNode(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = D_0047D070;
     void* obj = *(void**)((char*)self + 0x10);
     if (obj != 0) {
-        sVEntry_func_00244410* vt = *(sVEntry_func_00244410**)((char*)obj + 0x44);
+        sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode* vt = *(sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode**)((char*)obj + 0x44);
         vt[1].fn((char*)obj + vt[1].delta, 3);
     }
     cObjNode__cObjNode(self, flags);
@@ -1980,7 +1980,7 @@ extern "C" void func_00244410(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244478);
+INCLUDE_ASM("main/ssxappdtor", cVisualEffectsObjNode_update);
 #ifdef SKIP_ASM
 class cAppDtorVirt44 {
 public:
@@ -1997,28 +1997,28 @@ public:
  *
  * Slot +0x14 (update) of D_0047D070.
  */
-extern "C" void func_00244478(void* self)
+extern "C" void cVisualEffectsObjNode_update(void* self)
 {
     (*(cAppDtorVirt44**)((char*)self + 0x10))->v02();
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002444A8);
+INCLUDE_ASM("main/ssxappdtor", cVisualEffectsObjNode_render);
 #ifdef SKIP_ASM
 /**
  * Renders the visual-effects object node: calls the owned cVisualEffectsMan's (+0x10) virtual slot 3 (vptr at +0x44).
  *
  * Slot +0x24 (render) of D_0047D070.
  */
-extern "C" void func_002444A8(void* self)
+extern "C" void cVisualEffectsObjNode_render(void* self)
 {
     (*(cAppDtorVirt44**)((char*)self + 0x10))->v03();
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002444D8);
+INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_cGameModeHandler);
 #ifdef SKIP_ASM
 extern char D_0047D008[];
 
@@ -2026,19 +2026,19 @@ extern char D_0047D008[];
  * Constructs a game mode handler: installs the base handler vtable D_0047D008.
  *
  * D_0047D008's slots are the base cGameModeHandler methods (cGameModeHandler_purge, cleanRiderRanksPoints,
- * cleanRiderRanksTime and the stubs after func_00244520).
+ * cleanRiderRanksTime and the stubs after cGameModeHandler_setManager).
  *
  * @param handler  the handler
  * @return @p handler
  */
-extern "C" int **func_002444D8(int **handler) {
+extern "C" int **cGameModeHandler_cGameModeHandler(int **handler) {
     *handler = &(*(int*)&D_0047D008);
     return handler;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002444F0);
+INCLUDE_ASM("main/ssxappdtor", cGameModeHandler__cGameModeHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2052,7 +2052,7 @@ extern char D_0047D008[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_002444F0(int* self, int flags)
+extern "C" void cGameModeHandler__cGameModeHandler(int* self, int flags)
 {
     *(void**)self = D_0047D008;
     if (flags & 1) {
@@ -2062,7 +2062,7 @@ extern "C" void func_002444F0(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244520);
+INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_setManager);
 #ifdef SKIP_ASM
 
 /**
@@ -2070,13 +2070,13 @@ INCLUDE_ASM("main/ssxappdtor", func_00244520);
  *
  * @param gameModeMan  the cGameModeMan (passed as an int)
  */
-extern "C" void func_00244520(int gameModeMan) {
+extern "C" void cGameModeHandler_setManager(int gameModeMan) {
     cGameModeHandler_pManager = (cGameModeMan*)(gameModeMan);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244528__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_init__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base game mode handler's init.
@@ -2084,13 +2084,13 @@ INCLUDE_ASM("main/ssxappdtor", func_00244528__FPv);
  * Slot +0x14 of the base handler vtable D_0047D008; the event handlers override it with their heat set-up (for example
  * func_00238E20, func_0023A108).
  */
-void func_00244528(void* self)
+void cGameModeHandler_init(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244530__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_riderCheckpointHit__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 1: the base game mode handler's checkpoint handler accepts every checkpoint.
@@ -2100,27 +2100,27 @@ INCLUDE_ASM("main/ssxappdtor", func_00244530__FPv);
  *
  * @return 1
  */
-int func_00244530(void* self)
+int cGameModeHandler_riderCheckpointHit(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244538__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_riderGateHit__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base game mode handler's gate handler.
  *
  * Slot +0x3C of the base handler vtable D_0047D008 and of most event handlers.
  */
-void func_00244538(void* self)
+void cGameModeHandler_riderGateHit(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244540__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_raceFinish__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base game mode handler's race-finish handler.
@@ -2128,13 +2128,13 @@ INCLUDE_ASM("main/ssxappdtor", func_00244540__FPv);
  * Slot +0x44 of the base handler vtable D_0047D008; the event handlers override it to record a rider's result (for
  * example func_00239230, func_0023A760).
  */
-void func_00244540(void* self)
+void cGameModeHandler_raceFinish(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244548__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_getHeatScore__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the base game mode handler has no heat scores.
@@ -2143,34 +2143,34 @@ INCLUDE_ASM("main/ssxappdtor", func_00244548__FPv);
  *
  * @return 0
  */
-int func_00244548(void* self)
+int cGameModeHandler_getHeatScore(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244550__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base game mode handler saves nothing into a replay frame.
  *
  * Slot +0x54 of the base handler vtable D_0047D008; func_00239D18 overrides it for the scored event.
  */
-void func_00244550(void* self)
+void cGameModeHandler_writeToReplayFrame(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244558__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base game mode handler restores nothing from a replay frame.
  *
  * Slot +0x5C of the base handler vtable D_0047D008; func_00239D50 overrides it for the scored event.
  */
-void func_00244558(void* self)
+void cGameModeHandler_readFromReplayFrame(void* self)
 {
 }
 #endif
@@ -2425,7 +2425,7 @@ extern "C" void func_00244720(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244750);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_getMemCard);
 #ifdef SKIP_ASM
 /**
  * Returns the memory-card overlay manager's card interface (mpMemCard).
@@ -2433,12 +2433,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244750);
  * @param overlayManager  the cMCOverlayManager
  * @return mpMemCard (+0x434)
  */
-extern "C" int func_00244750(void *overlayManager) {
+extern "C" int cMCOverlayManager_getMemCard(void *overlayManager) {
     return (*(int *)((char*)(overlayManager) + (0x434)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244758);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_GetState);
 #ifdef SKIP_ASM
 /**
  * Returns the memory-card overlay manager's current state (mState).
@@ -2446,12 +2446,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244758);
  * @param overlayManager  the cMCOverlayManager
  * @return mState (+0x130)
  */
-extern "C" int func_00244758(void *overlayManager) {
+extern "C" int cMCOverlayManager_GetState(void *overlayManager) {
     return (*(int *)((char*)(overlayManager) + (0x130)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244760);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isInSaveOperation);
 #ifdef SKIP_ASM
 /**
  * Returns whether the overlay manager is running a save (mSave).
@@ -2459,12 +2459,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244760);
  * @param overlayManager  the cMCOverlayManager
  * @return mSave (+0xBC)
  */
-extern "C" int func_00244760(void *overlayManager) {
+extern "C" int cMCOverlayManager_isInSaveOperation(void *overlayManager) {
     return (*(int *)((char*)(overlayManager) + (0xBC)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244768);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isInDeleteOperation);
 #ifdef SKIP_ASM
 /**
  * Returns whether the overlay manager is running a delete (mDelete).
@@ -2472,7 +2472,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00244768);
  * @param overlayManager  the cMCOverlayManager
  * @return mDelete (+0xC0)
  */
-extern "C" int func_00244768(void *overlayManager) {
+extern "C" int cMCOverlayManager_isInDeleteOperation(void *overlayManager) {
     return (*(int *)((char*)(overlayManager) + (0xC0)));
 }
 #endif
@@ -2491,7 +2491,7 @@ extern "C" void func_00244770(void *overlayManager) {
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244790);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isCardStatusErrorUnacknowledged);
 #ifdef SKIP_ASM
 /**
  * Returns whether a card status error is pending acknowledgement.
@@ -2499,7 +2499,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00244790);
  * @param overlayManager  the cMCOverlayManager
  * @return 1 when mCurrDeviceStateAck (+0x440) is clear and mCurrDeviceStateLast (+0x43C) is non-zero, else 0
  */
-extern "C" int func_00244790(void *overlayManager) {
+extern "C" int cMCOverlayManager_isCardStatusErrorUnacknowledged(void *overlayManager) {
     int var_3;
 
     var_3 = 0;
@@ -2510,7 +2510,7 @@ extern "C" int func_00244790(void *overlayManager) {
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002447B0);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_hasCardStatusError);
 #ifdef SKIP_ASM
 /**
  * Returns whether the last card status is an error (mCurrDeviceStateLast is non-zero).
@@ -2518,12 +2518,12 @@ INCLUDE_ASM("main/ssxappdtor", func_002447B0);
  * @param overlayManager  the cMCOverlayManager
  * @return 1 when mCurrDeviceStateLast (+0x43C) is non-zero, else 0
  */
-extern "C" int func_002447B0(void *overlayManager) {
+extern "C" int cMCOverlayManager_hasCardStatusError(void *overlayManager) {
     return (*(int *)((char*)(overlayManager) + (0x43C))) != 0;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002447C0);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_getCardLastState);
 #ifdef SKIP_ASM
 /**
  * Returns the last card status word (mCurrDeviceStateLast; bits: 4 full, 8 no card, 0x10 unformatted).
@@ -2531,24 +2531,24 @@ INCLUDE_ASM("main/ssxappdtor", func_002447C0);
  * @param overlayManager  the cMCOverlayManager
  * @return mCurrDeviceStateLast (+0x43C)
  */
-extern "C" int func_002447C0(void *overlayManager) {
+extern "C" int cMCOverlayManager_getCardLastState(void *overlayManager) {
     return (*(int *)((char*)(overlayManager) + (0x43C)));
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002447C8);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_forceCardStatusAck);
 #ifdef SKIP_ASM
 /**
  * Acknowledges the current card status: sets mCurrDeviceStateAck (+0x440) to 1.
  *
  * @param overlayManager  the cMCOverlayManager
  */
-extern "C" void func_002447C8(void *overlayManager) {
+extern "C" void cMCOverlayManager_forceCardStatusAck(void *overlayManager) {
     (*(int *)((char*)(overlayManager) + (0x440))) = 1;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002447D8);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_getFirstCorruptFile);
 #ifdef SKIP_ASM
 /**
  * Returns the first corrupt file's index, from bits 5..8 of mCurrDeviceStateLast (+0x43C), minus 1.
@@ -2556,7 +2556,7 @@ INCLUDE_ASM("main/ssxappdtor", func_002447D8);
  * @param overlayManager  the cMCOverlayManager
  * @return the 4-bit field minus 1 (-1 when it is 0)
  */
-extern "C" int func_002447D8(void *overlayManager) {
+extern "C" int cMCOverlayManager_getFirstCorruptFile(void *overlayManager) {
     return (((unsigned int) (*(unsigned int *)((char*)(overlayManager) + (0x43C))) >> 5) & 0xF) - 1;
 }
 #endif
@@ -2593,7 +2593,7 @@ extern "C" void func_00244810(int overlayManager) {
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244830);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_getNewFileName);
 #ifdef SKIP_ASM
 /**
  * Returns the overlay manager's new file name (mNewFileName, a 16-bit string).
@@ -2601,12 +2601,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244830);
  * @param overlayManager  the cMCOverlayManager (taken as an int)
  * @return @p overlayManager + 0x276
  */
-extern "C" int func_00244830(int overlayManager) {
+extern "C" int cMCOverlayManager_getNewFileName(int overlayManager) {
     return overlayManager + 630;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244838);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForFullCard);
 #ifdef SKIP_ASM
 /**
  * Sets whether the overlay manager polls for a full card (mPollForFullCard, +0x11C).
@@ -2614,12 +2614,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244838);
  * @param overlayManager  the cMCOverlayManager
  * @param pollFullCard  non-zero to poll
  */
-extern "C" void func_00244838(void *overlayManager, int pollFullCard) {
+extern "C" void cMCOverlayManager_PollForFullCard(void *overlayManager, int pollFullCard) {
     (*(int *)((char*)(overlayManager) + (0x11C))) = pollFullCard;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244840);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForUnformatted);
 #ifdef SKIP_ASM
 /**
  * Sets whether the overlay manager polls for an unformatted card (mPollForUnformatted, +0x120).
@@ -2627,12 +2627,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244840);
  * @param overlayManager  the cMCOverlayManager
  * @param pollUnformatted  non-zero to poll
  */
-extern "C" void func_00244840(void *overlayManager, int pollUnformatted) {
+extern "C" void cMCOverlayManager_PollForUnformatted(void *overlayManager, int pollUnformatted) {
     (*(int *)((char*)(overlayManager) + (0x120))) = pollUnformatted;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244848);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForNoCard);
 #ifdef SKIP_ASM
 /**
  * Sets whether the overlay manager polls for a missing card (mPollForNoCard, +0x124).
@@ -2640,12 +2640,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244848);
  * @param overlayManager  the cMCOverlayManager
  * @param pollNoCard  non-zero to poll
  */
-extern "C" void func_00244848(void *overlayManager, int pollNoCard) {
+extern "C" void cMCOverlayManager_PollForNoCard(void *overlayManager, int pollNoCard) {
     (*(int *)((char*)(overlayManager) + (0x124))) = pollNoCard;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244850);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_ShowCardChangeNotify);
 #ifdef SKIP_ASM
 /**
  * Sets whether the overlay manager shows the card-changed notice (mShowCardChangeNotify, +0x128).
@@ -2653,12 +2653,12 @@ INCLUDE_ASM("main/ssxappdtor", func_00244850);
  * @param overlayManager  the cMCOverlayManager
  * @param showCardChange  non-zero to show it
  */
-extern "C" void func_00244850(void *overlayManager, int showCardChange) {
+extern "C" void cMCOverlayManager_ShowCardChangeNotify(void *overlayManager, int showCardChange) {
     (*(int *)((char*)(overlayManager) + (0x128))) = showCardChange;
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244858);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_RetryToInit);
 #ifdef SKIP_ASM
 /**
  * Sets the overlay manager's retry-to-init flag (mRetryToInit, +0x12C).
@@ -2666,26 +2666,26 @@ INCLUDE_ASM("main/ssxappdtor", func_00244858);
  * @param overlayManager  the cMCOverlayManager
  * @param retryToInit  the new flag value
  */
-extern "C" void func_00244858(void *overlayManager, int retryToInit) {
+extern "C" void cMCOverlayManager_RetryToInit(void *overlayManager, int retryToInit) {
     (*(int *)((char*)(overlayManager) + (0x12C))) = retryToInit;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244860__FPv);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_CallbackMemcard__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the default for the overlay manager's void callbacks.
  *
  * cMCOverlayManager_cMCOverlayManager stores it in every void callback slot until the front end plugs in its own.
  */
-void func_00244860(void* self)
+void cMCOverlayManager_CallbackMemcard(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244868__FPv);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_CallbackFalse__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: a default for the overlay manager's bool callbacks.
@@ -2694,14 +2694,14 @@ INCLUDE_ASM("main/ssxappdtor", func_00244868__FPv);
  *
  * @return 0
  */
-int func_00244868(void* self)
+int cMCOverlayManager_CallbackFalse(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244870__FPv);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_CallbackTrue__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 1: a default for the overlay manager's bool callbacks.
@@ -2710,42 +2710,42 @@ INCLUDE_ASM("main/ssxappdtor", func_00244870__FPv);
  *
  * @return 1
  */
-int func_00244870(void* self)
+int cMCOverlayManager_CallbackTrue(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244878__FPv);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_Callbackpdate__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the default for the overlay manager's progress callbacks (callbackWriteUpdate, callbackReadUpdate).
  *
  * @return 0
  */
-int func_00244878(void* self)
+int cMCOverlayManager_Callbackpdate(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244880__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameComm_stopSyncInput__FPv);
 #ifdef SKIP_ASM
 /**
  * Stops exchanging input with the peer: clears the game comm's mSyncInput (+0x40).
  *
- * func_00233C50 calls it on cGameComm_mGameComm before the race-end flow.
+ * cGFFinishlineState_gainFocus calls it on cGameComm_mGameComm before the race-end flow.
  */
-void func_00244880(void* self)
+void cGameComm_stopSyncInput(void* self)
 {
     *(int*)((char*)self + 0x40) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244888);
+INCLUDE_ASM("main/ssxappdtor", cGame_updateStreamFocus);
 #ifdef SKIP_ASM
 extern "C" void cGameViewMan_updateStreamFocus(int);
 extern "C" int cGameViewMan_isStreamReady(int);
@@ -2759,7 +2759,7 @@ extern "C" int cGameViewMan_isStreamReady(int);
  *
  * @return 1 when the stream is ready and not paused, else 0
  */
-extern "C" int func_00244888(void *self) {
+extern "C" int cGame_updateStreamFocus(void *self) {
     cGameViewMan_updateStreamFocus(*(int *)((char*)self + 0x84));
     if (*(int *)((char*)self + 0x9C) != 0) {
         return 0;
@@ -2774,11 +2774,11 @@ extern "C" int func_00244888(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002448E0);
+INCLUDE_ASM("main/ssxappdtor", cAIVisualEffectsObjNode__cAIVisualEffectsObjNode);
 #ifdef SKIP_ASM
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* D_0047CB60[];
-struct sVEntry_func_002448E0 {
+struct sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode {
     short delta;
     short index;
     void (*fn)(void*, int);
@@ -2794,12 +2794,12 @@ struct sVEntry_func_002448E0 {
  *
  * @param flags  destructor flags, passed on to cObjNode__cObjNode
  */
-extern "C" void func_002448E0(void* self, int flags)
+extern "C" void cAIVisualEffectsObjNode__cAIVisualEffectsObjNode(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = D_0047CB60;
     void* obj = *(void**)((char*)self + 0x10);
     if (obj != 0) {
-        sVEntry_func_002448E0* vt = *(sVEntry_func_002448E0**)((char*)obj + 0x4);
+        sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode* vt = *(sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode**)((char*)obj + 0x4);
         vt[1].fn((char*)obj + vt[1].delta, 3);
     }
     cObjNode__cObjNode(self, flags);
@@ -2807,7 +2807,7 @@ extern "C" void func_002448E0(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244948);
+INCLUDE_ASM("main/ssxappdtor", cAIVisualEffectsObjNode_update);
 #ifdef SKIP_ASM
 class cAppDtorVirt04 {
 public:
@@ -2825,14 +2825,14 @@ public:
  *
  * Slot +0x14 (update) of D_0047CB60.
  */
-extern "C" void func_00244948(void* self)
+extern "C" void cAIVisualEffectsObjNode_update(void* self)
 {
     (*(cAppDtorVirt04**)((char*)self + 0x10))->v02();
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244978);
+INCLUDE_ASM("main/ssxappdtor", cAIVisualEffectsObjNode_render);
 #ifdef SKIP_ASM
 /**
  * Renders the AI visual-effects object node: calls the owned cAIVisualEffectsMan's (+0x10) virtual slot 3 (vptr at
@@ -2840,7 +2840,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00244978);
  *
  * Slot +0x24 (render) of D_0047CB60.
  */
-extern "C" void func_00244978(void* self)
+extern "C" void cAIVisualEffectsObjNode_render(void* self)
 {
     (*(cAppDtorVirt04**)((char*)self + 0x10))->v03();
 }
@@ -2909,7 +2909,7 @@ extern "C" void func_00244A38(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244A40);
+INCLUDE_ASM("main/ssxappdtor", cGame_updateStreamLoading);
 #ifdef SKIP_ASM
 extern "C" void cGameViewMan_updateAll(int);
 extern "C" void cSectionMan_update(void *);
@@ -2932,7 +2932,7 @@ extern "C" void cWorldCache_flushInActivePages(void *);
  *
  * @return 0 while waiting on the stream, 1 when the game can update
  */
-extern "C" int func_00244A40(void *self) {
+extern "C" int cGame_updateStreamLoading(void *self) {
     void *vtbl;
 
     if ((cGameViewMan_isStreamReady(*(int *)((char*)self + 0x84)) == 0) || (*(int *)(*(char **)((char*)self + 0x78) + 0x1D0) == 0)) {
@@ -2965,26 +2965,26 @@ extern "C" int func_00244A40(void *self) {
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244B48);
+INCLUDE_ASM("main/ssxappdtor", cGame_updateUI);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cOVStateManager_update(void);
 extern "C" int cMenuSys_isActive(void* p);
 extern "C" void cOVStateManager_triggerOverlay(int id);
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_PlayIconSound(void* snd, int a, int b, float f);
 extern "C" void cWScriptMan_doMissionCmd(void* mgr, int a, int b, int c);
 extern "C" void func_00398038(void* p);
 extern "C" void func_0029ED18(void* snd);
 extern "C" void func_002CC0C0(void* p);
 extern "C" int cGame_activatePauseMenu(char* self, int a);
-extern "C" int func_0020CBE8(void);
+extern "C" int cOVStateManager_allowPauseMenu(void);
 extern "C" void func_00326AE0(void* p);
 extern "C" void func_0020CA10(void);
 extern "C" void cSSXAudio_PauseAudio(void* snd);
 extern "C" void func_00294F48(void* snd);
-extern "C" int func_0020CBA0(void);
+extern "C" int cOVStateManager_pauseOverlayActive(void);
 extern "C" void cPlaybackMan_update(void* p);
 int GetHashValue32(char* str);
 extern void* PadCache;
@@ -3083,15 +3083,15 @@ static inline bool playing_4B48(char* pb)
  * type 9 runs cWScriptMan_doMissionCmd(..., 5, ...) and either opens overlay 0x1E with pause owner 3 (when the UI has
  * no "fail" state) or pops the message. A pending script pause request (D_004A20CC not 0xFFFFFFFF) opens overlay 34
  * with pause owner 0xC and clears the request. An active MenuSys is updated (func_002CC0C0). When
- * cGame_activatePauseMenu allows it, no replay mode 1..9 is set and no playback is running, func_0020CBE8 opens the
+ * cGame_activatePauseMenu allows it, no replay mode 1..9 is set and no playback is running, cOVStateManager_allowPauseMenu opens the
  * pause menu: pause owner 2, the UI's virtual slot 44 with PauseOwner (+0x228), audio paused. Otherwise
- * func_00398038(UI), func_0020CBA0 and cPlaybackMan_update run. Each pause push writes D_005366E8[++D_004A2A54] and
+ * func_00398038(UI), cOVStateManager_pauseOverlayActive and cPlaybackMan_update run. Each pause push writes D_005366E8[++D_004A2A54] and
  * cPauseState_Flags.
  *
  * @return true when the race should update this frame (no menu, no new pause, not just unpaused), else false
  */
 // Handles script messages and pause requests; returns true when the race should run this frame.
-extern "C" bool func_00244B48(sApp_4B48* self)
+extern "C" bool cGame_updateUI(sApp_4B48* self)
 {
     cOVStateManager_update();
     if (cMenuSys_isActive(self->fA4) == 0) {
@@ -3103,7 +3103,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
                 cOVStateManager_triggerOverlay(29);
                 D_005366E8[++D_004A2A54] = 3;
                 cPauseState_Flags = D_004428FC[0];
-                cSSXAudio_PlayIconSound(func_0028B180(), 4, 0, 1.0f);
+                cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 4, 0, 1.0f);
                 return false;
             }
             if (msg->type == 9) {
@@ -3125,7 +3125,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
         D_005366E8[++D_004A2A54] = 0xC;
         cPauseState_Flags = D_00442920[0];
         D_004A20CC_4B48 = 0xFFFFFFFF;
-        func_0029ED18(func_0028B180());
+        func_0029ED18(cAudioInterface_bxAudio());
         return false;
     }
     if (cMenuSys_isActive(self->fA4) != 0) {
@@ -3133,20 +3133,20 @@ extern "C" bool func_00244B48(sApp_4B48* self)
         func_002CC0C0(self->fA4);
         return false;
     }
-    if (cGame_activatePauseMenu((char*)self, 0) != 0 && !racing_4B48(*self->state) && !playing_4B48(self->playback) && func_0020CBE8() != 0) {
+    if (cGame_activatePauseMenu((char*)self, 0) != 0 && !racing_4B48(*self->state) && !playing_4B48(self->playback) && cOVStateManager_allowPauseMenu() != 0) {
         func_00326AE0(PadCache);
         func_0020CA10();
         D_005366E8[++D_004A2A54] = 2;
         cPauseState_Flags = D_004428F8[0];
         sUIObj_4B48* uiObject = self->ui->fC;
         uiObject->vt[44].fn((char*)uiObject + uiObject->vt[44].delta, self->f228);
-        cSSXAudio_PauseAudio(func_0028B180());
-        func_00294F48(func_0028B180());
+        cSSXAudio_PauseAudio(cAudioInterface_bxAudio());
+        func_00294F48(cAudioInterface_bxAudio());
         return false;
     }
     int wasPaused = cPauseState_Flags & 1;
     func_00398038(self->ui);
-    if (func_0020CBA0() != 0) {
+    if (cOVStateManager_pauseOverlayActive() != 0) {
         return false;
     }
     cPlaybackMan_update(self->playback);
@@ -3160,7 +3160,7 @@ extern "C" bool func_00244B48(sApp_4B48* self)
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244E60);
+INCLUDE_ASM("main/ssxappdtor", cGame_updateAI);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sVE_244E60 { short delta; short index; void* fn; };
@@ -3196,7 +3196,7 @@ struct sApp_244E60 { char pad0[0x4C]; int f4C; char pad1[0x84-0x50]; sList_244E6
  * bucket 4, cGameViewMan_updateAll (except in replay mode 3), mUpdateTick (+0xAC) is counted and
  * cWorldSound_TriggerWorldAudio runs for each view camera (+0x20 of it). cGame_update has the same code inline.
  */
-extern "C" void func_00244E60(void* self)
+extern "C" void cGame_updateAI(void* self)
 {
     char* game = (char*)self;
     char* obj;
@@ -3278,35 +3278,35 @@ extern "C" void func_00244E60(void* self)
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245118);
+INCLUDE_ASM("main/ssxappdtor", cGame_preUpdateOnline);
 #ifdef SKIP_ASM
 extern "C" void cGameComm_update(int);
 
 /**
  * Updates online play before the frame: cGameComm_update on cGameComm_mGameComm when one exists.
  */
-extern "C" void func_00245118(void) {
+extern "C" void cGame_preUpdateOnline(void) {
     if (cGameComm_mGameComm != 0) {
         cGameComm_update((int)cGameComm_mGameComm);
     }
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245140);
+INCLUDE_ASM("main/ssxappdtor", cGame_postUpdateOnline);
 #ifdef SKIP_ASM
 extern "C" void NetConnIdle();
 
 /**
  * Idles the network connection after the frame: NetConnIdle() when cCommSystem_mCommSystem exists.
  */
-extern "C" void func_00245140(void) {
+extern "C" void cGame_postUpdateOnline(void) {
     if (cCommSystem_mCommSystem != 0) {
         NetConnIdle();
     }
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245168);
+INCLUDE_ASM("main/ssxappdtor", cGame_updateScreenFade);
 #ifdef SKIP_ASM
 extern "C" void cFadeScreen_update(void *);
 
@@ -3318,7 +3318,7 @@ extern "C" void cFadeScreen_update(void *);
  *
  * @return 1 when the game may update, 0 when it is ending
  */
-extern "C" int func_00245168(void *self) {
+extern "C" int cGame_updateScreenFade(void *self) {
     cFadeScreen_update(self);
     if (*(int *)((char*)SSXApp + 4) != 0) {
         *(int *)((char *)self + 8) = 1;

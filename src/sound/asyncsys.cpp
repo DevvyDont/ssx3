@@ -66,7 +66,7 @@ extern "C" void cAsyncSys_ASYNCSYS_DeInit(cAsyncSys* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028A298);
+INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_StartLoad);
 #ifdef SKIP_ASM
 extern "C" int func_003DF748(char* name, int a1, int a2);
 extern "C" int ASYNCFILE_load(char* name, int a1);
@@ -120,9 +120,9 @@ struct sAsync_A298 {
  * when no memory came back. The file handle goes to mHandle (+0x0). Any other memory type starts nothing but leaves
  * mBusy set.
  *
- * The queues are only peeked here; func_0028AAF8 pops them when the load has ended.
+ * The queues are only peeked here; cAsyncSys_ASYNCSYS_Update pops them when the load has ended.
  */
-extern "C" void func_0028A298(void* self)
+extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self)
 {
     sAsync_A298* asyncSys = (sAsync_A298*)self;
     if (asyncSys->busy != 0) {
@@ -222,10 +222,10 @@ extern "C" void func_0028A298(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/asyncsys", func_0028A558);
+INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_QueueLoad);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
-extern "C" void func_0028A298(void* self);
+extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self);
 
 struct sRing28A558 {
     int size;
@@ -251,7 +251,7 @@ struct sAsync28A558 {
  * Pushes @p bankId onto the user-handle queue (+0x18C, On Tour mUserHandle), @p memType onto the memory-type queue (+0x1AC,
  * mMemType) and @p memFlags onto the flags queue (+0x1BC, mMainMemFlags); each push is skipped when that queue is full.
  * Copies @p name into the file-name slot +0x8 (mFileIndex) of the six 64-byte names at +0xC, pushes that slot onto the
- * name-index queue (+0x19C), advances the slot (back to 0 after 5) and calls func_0028A298. The name ring has six slots
+ * name-index queue (+0x19C), advances the slot (back to 0 after 5) and calls cAsyncSys_ASYNCSYS_StartLoad. The name ring has six slots
  * whatever the queue size, so a seventh pending load overwrites the oldest name. func_0028BD10 (the bank manager's
  * async load) calls it.
  *
@@ -260,7 +260,7 @@ struct sAsync28A558 {
  * @param memType  where the bank goes: 0 dynamic (shared buffer), 1 main memory, 2 sound memory (On Tour eSoundMemLocation)
  * @param memFlags  main-memory allocation flags (On Tour allocMainMemFlags)
  */
-extern "C" void func_0028A558(void* self, int bankId, const char* name, int memType, int memFlags)
+extern "C" void cAsyncSys_ASYNCSYS_QueueLoad(void* self, int bankId, const char* name, int memType, int memFlags)
 {
     sAsync28A558* asyncSys = (sAsync28A558*)self;
     {
@@ -304,16 +304,16 @@ extern "C" void func_0028A558(void* self, int bankId, const char* name, int memT
     if (asyncSys->slot >= 6) {
         asyncSys->slot = 0;
     }
-    func_0028A298(self);
+    cAsyncSys_ASYNCSYS_StartLoad(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028A728);
+INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_Cancel);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_00289DF0(void* self, int a);
-extern "C" void func_0028A298(void* self);
+extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self);
 
 struct sRing_A728 {
     int size;
@@ -464,12 +464,12 @@ static inline void Push1BC_A728(sAsync_A728* s, int v)
  *
  * When busy (+0x4) and the front user handle (+0x18C) is @p id, calls func_00289DF0(this, 0) and returns. Otherwise
  * pops every queued entry from the four queues (user handle, name index, memory type, flags) and pushes back those
- * whose user handle is not @p id, which keeps their order; then, when not busy, starts the next load (func_0028A298).
+ * whose user handle is not @p id, which keeps their order; then, when not busy, starts the next load (cAsyncSys_ASYNCSYS_StartLoad).
  * func_0028BC58 calls it.
  *
  * @param id  the bank's user handle (On Tour bankID)
  */
-extern "C" void func_0028A728(void* self, int id)
+extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int id)
 {
     sAsync_A728* asyncSys = (sAsync_A728*)self;
     if (asyncSys->busy != 0 && Peek18C_A728(asyncSys) == id) {
@@ -491,13 +491,13 @@ extern "C" void func_0028A728(void* self, int id)
         }
     }
     if (asyncSys->busy == 0) {
-        func_0028A298(self);
+        cAsyncSys_ASYNCSYS_StartLoad(self);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028AAF8);
+INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_Update);
 #ifdef SKIP_ASM
 extern "C" int func_003B6098(void* sema, int a1);
 extern "C" int func_003B6300(int id);
@@ -506,7 +506,7 @@ extern "C" int f_6548_AAF8(void* data, int id) __asm__("func_003B6548");
 extern "C" int ASYNCFILE_getstatus(int handle);
 extern "C" void MEM_copy(void* dst, void* src, int n);
 extern "C" int ASYNCFILE_release(int handle, int* buf, int* size);
-extern "C" void func_0028A298(void* self);
+extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self);
 
 struct sRing_AAF8 {
     int size;
@@ -551,12 +551,12 @@ struct sAsync_AAF8 {
  * that much and func_003B6548 copies it. Main memory: the data is added where it is. The owner then gets virtual slot 5
  * (cBankManager_ASYNCSYS_OnEndAsyncLoad) with the user handle, the bank handle, end state 0 (complete), the file name,
  * the memory and the size; an empty file reports handle -1 and end state 2 (error). Then mBusy is cleared, all four
- * queues are popped and func_0028A298 starts the next load. Any status other than 0 or 1 cancels through
+ * queues are popped and cAsyncSys_ASYNCSYS_StartLoad starts the next load. Any status other than 0 or 1 cancels through
  * func_00289DF0(this, 0).
  *
  * func_002AB958 (the stream system's update) calls it.
  */
-extern "C" void func_0028AAF8(void* self)
+extern "C" void cAsyncSys_ASYNCSYS_Update(void* self)
 {
     sAsync_AAF8* asyncSys = (sAsync_AAF8*)self;
     if (asyncSys->busy == 0) {
@@ -713,7 +713,7 @@ extern "C" void func_0028AAF8(void* self)
                     asyncSys->q1BC.tail = 0;
                 }
             }
-            func_0028A298(asyncSys);
+            cAsyncSys_ASYNCSYS_StartLoad(asyncSys);
             break;
         }
         case -1:
@@ -795,7 +795,7 @@ extern "C" void func_0028AAF8(void* self)
                     asyncSys->q1BC.tail = 0;
                 }
             }
-            func_0028A298(asyncSys);
+            cAsyncSys_ASYNCSYS_StartLoad(asyncSys);
             break;
         }
         case -1:
@@ -809,7 +809,7 @@ extern "C" void func_0028AAF8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B0F0);
+INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_OnCurAsyncMainMemAlloc);
 #ifdef SKIP_ASM
 struct sVE_0028B0F0 { short delta; short index; void (*fn)(void*, int, int, int); };
 
@@ -838,7 +838,7 @@ struct sAsync_0028B0F0 {
  *
  * @param size  the number of bytes wanted
  */
-extern "C" void func_0028B0F0(sAsync_0028B0F0* self, int size)
+extern "C" void cAsyncSys_ASYNCSYS_OnCurAsyncMainMemAlloc(sAsync_0028B0F0* self, int size)
 {
     sVE_0028B0F0* vtEntry = &(*(sVE_0028B0F0**)((char*)self + 0x1D4))[3];
     void (**pf)(void*, int, int, int) = &vtEntry->fn;
@@ -860,7 +860,7 @@ extern "C" void func_0028B0F0(sAsync_0028B0F0* self, int size)
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B180);
+INCLUDE_ASM("sound/asyncsys", cAudioInterface_bxAudio);
 #ifdef SKIP_ASM
 
 /**
@@ -868,14 +868,14 @@ INCLUDE_ASM("sound/asyncsys", func_0028B180);
  *
  * @return gSSXAudio (On Tour cSSXAudio*)
  */
-extern "C" void* func_0028B180()
+extern "C" void* cAudioInterface_bxAudio()
 {
     return gSSXAudio;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B188);
+INCLUDE_ASM("sound/asyncsys", cAudioInterface_isInFE);
 #ifdef SKIP_ASM
 
 /**
@@ -883,7 +883,7 @@ INCLUDE_ASM("sound/asyncsys", func_0028B188);
  *
  * @return 1 in the front end, else 0
  */
-extern "C" int func_0028B188(void) {
+extern "C" int cAudioInterface_isInFE(void) {
     int var_4;
 
     var_4 = 0;
@@ -913,7 +913,7 @@ extern "C" int cAudioInterface_isInGame()
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1C0);
+INCLUDE_ASM("sound/asyncsys", cAudioInterface_getApp);
 #ifdef SKIP_ASM
 
 /**
@@ -921,7 +921,7 @@ INCLUDE_ASM("sound/asyncsys", func_0028B1C0);
  *
  * @return SSXApp
  */
-extern "C" void* func_0028B1C0()
+extern "C" void* cAudioInterface_getApp()
 {
     return (char*)SSXApp;
 }
@@ -964,7 +964,7 @@ extern "C" void* cAudioInterface_getAI()
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1E8);
+INCLUDE_ASM("sound/asyncsys", cAudioInterface_getBE);
 #ifdef SKIP_ASM
 
 /**
@@ -972,14 +972,14 @@ INCLUDE_ASM("sound/asyncsys", func_0028B1E8);
  *
  * @return SSXApp->BE
  */
-extern "C" void* func_0028B1E8()
+extern "C" void* cAudioInterface_getBE()
 {
     return SSXApp->BE;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B1F8);
+INCLUDE_ASM("sound/asyncsys", cAudioInterface_getNumGameView);
 #ifdef SKIP_ASM
 
 /**
@@ -989,14 +989,14 @@ INCLUDE_ASM("sound/asyncsys", func_0028B1F8);
  *
  * @return the view count
  */
-extern "C" void* func_0028B1F8()
+extern "C" void* cAudioInterface_getNumGameView()
 {
     return *(void**)((char*)SSXApp->Game->ViewMan + 0x10);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B210);
+INCLUDE_ASM("sound/asyncsys", cAudioInterface_getGameView);
 #ifdef SKIP_ASM
 
 /**
@@ -1007,7 +1007,7 @@ INCLUDE_ASM("sound/asyncsys", func_0028B210);
  * @param i  the view index
  * @return the view's camera
  */
-extern "C" void* func_0028B210(int i)
+extern "C" void* cAudioInterface_getGameView(int i)
 {
     char* riders = (char*)SSXApp->Game->ViewMan;
     return *(void**)(riders + (i << 2) + 4);
@@ -1015,7 +1015,7 @@ extern "C" void* func_0028B210(int i)
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B230);
+INCLUDE_ASM("sound/asyncsys", cAudioInterface_getWorld);
 #ifdef SKIP_ASM
 /**
  * Returns the world, SSXApp->Game->World.
@@ -1024,27 +1024,27 @@ INCLUDE_ASM("sound/asyncsys", func_0028B230);
  *
  * @return SSXApp->Game->World, as an int
  */
-extern "C" int func_0028B230(void) {
+extern "C" int cAudioInterface_getWorld(void) {
     return ((int)SSXApp->Game->World);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B240__FPv);
+INCLUDE_ASM("sound/asyncsys", cAudioInterface_getTimerHz__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the audio timer rate, 60.
  *
  * @return 60 (0x3C)
  */
-int func_0028B240(void* self)
+int cAudioInterface_getTimerHz(void* self)
 {
     return 0x3C;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B248);
+INCLUDE_ASM("sound/asyncsys", cBankInstance_cBankInstance);
 #ifdef SKIP_ASM
 /**
  * Constructs an empty sound-bank instance.
@@ -1056,7 +1056,7 @@ INCLUDE_ASM("sound/asyncsys", func_0028B248);
  *
  * @return @p self
  */
-extern "C" void* func_0028B248(void* self)
+extern "C" void* cBankInstance_cBankInstance(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x4) = -1;
@@ -1072,24 +1072,24 @@ extern "C" void* func_0028B248(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B278);
+INCLUDE_ASM("sound/asyncsys", cBankInstance__cBankInstance);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void func_0028B528(void* self);
+extern "C" void cBankInstance_Unload(void* self);
 extern "C" void func_0028B730(void* self);
 extern "C" void func_0028B650(void* self);
 
 /**
- * Destroys a sound-bank instance: unloads it (func_0028B528), then runs func_0028B730 and func_0028B650, and frees it
+ * Destroys a sound-bank instance: unloads it (cBankInstance_Unload), then runs func_0028B730 and func_0028B650, and frees it
  * with operator_delete when bit 0 of @p flags is set.
  *
  * cBankManager__cBankManager destroys its bank table with it.
  *
  * @param flags  g++ destructor flags: bit 0 frees the object
  */
-extern "C" void func_0028B278(void* self, int flags)
+extern "C" void cBankInstance__cBankInstance(void* self, int flags)
 {
-    func_0028B528(self);
+    cBankInstance_Unload(self);
     func_0028B730(self);
     func_0028B650(self);
     if (flags & 1) {
@@ -1099,35 +1099,35 @@ extern "C" void func_0028B278(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B2D0);
+INCLUDE_ASM("sound/asyncsys", cBankInstance_SharedUnload);
 #ifdef SKIP_ASM
-extern "C" void func_0028B528(void* self);
+extern "C" void cBankInstance_Unload(void* self);
 
 /**
  * Unloads every other instance sharing this bank: walks the share ring through +0x18 (On Tour mpNext) back to this
- * instance and runs func_0028B528 on each.
+ * instance and runs cBankInstance_Unload on each.
  *
  * Does nothing when the instance is not shared (+0x18 null).
  */
-extern "C" void func_0028B2D0(void* self)
+extern "C" void cBankInstance_SharedUnload(void* self)
 {
     if (*(void**)((char*)self + 0x18) != 0) {
         for (void* node = *(void**)((char*)self + 0x18); node != self; node = *(void**)((char*)node + 0x18)) {
-            func_0028B528(node);
+            cBankInstance_Unload(node);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B320);
+INCLUDE_ASM("sound/asyncsys", cBankInstance_SyncLoad);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void* FILE_loadsizez(const char* name, int* size, int align);
 extern "C" void* MEM_free(void* self);
 extern "C" void* MEM_alloc(void* a0, int a1, int a2);
-extern "C" void func_0028B2D0(void* self);
-extern "C" void func_0028B528(void* self);
+extern "C" void cBankInstance_SharedUnload(void* self);
+extern "C" void cBankInstance_Unload(void* self);
 extern "C" int func_003B6098(void* sema, int a1);
 extern "C" int func_003B6528(int id);
 extern "C" void func_003B6548(void* data, int id);
@@ -1148,7 +1148,7 @@ public:
 /**
  * Loads a sound-bank file synchronously into this bank instance and registers it with the sound library.
  *
- * First unloads the instance (func_0028B528) and the instances sharing it (func_0028B2D0). By +0x8 (On Tour
+ * First unloads the instance (cBankInstance_Unload) and the instances sharing it (cBankInstance_SharedUnload). By +0x8 (On Tour
  * mAllocLocation: 0 dynamic, 1 main, 2 sound memory): 0 loads the whole file with FILE_loadsizez using @p align as its
  * flags, 2 the same with flags 0x100, 1 loads into the instance's main memory (+0x10 mpMainMemData, +0x14
  * mMainMemDataSize bytes) with FILE_loadatz; a missing file returns at once. For sound memory, virtual slot 6 of the
@@ -1167,11 +1167,11 @@ public:
  *               not an alignment
  */
 // PORT: data pointers are passed through int parameters of the semaphore/bank helpers
-extern "C" void func_0028B320(void* self, const char* file, int align)
+extern "C" void cBankInstance_SyncLoad(void* self, const char* file, int align)
 {
     void* data = 0;
-    func_0028B528(self);
-    func_0028B2D0(self);
+    cBankInstance_Unload(self);
+    cBankInstance_SharedUnload(self);
     int size = 0;
     switch (*(int*)((char*)self + 0x8)) {
     case 0:
@@ -1232,7 +1232,7 @@ extern "C" void func_0028B320(void* self, const char* file, int align)
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", func_0028B528);
+INCLUDE_ASM("sound/asyncsys", cBankInstance_Unload);
 #ifdef SKIP_ASM
 extern "C" int func_003B6300(int id);
 extern "C" void* MEM_free(void* self);
@@ -1244,7 +1244,7 @@ extern "C" void* MEM_free(void* self);
  * mBankHandle, which becomes -1) and, for a dynamic bank (+0x8 mAllocLocation 0), frees +0x10 (mpMainMemData) with
  * MEM_free and clears it and +0x14 (mMainMemDataSize).
  */
-extern "C" void func_0028B528(void* self)
+extern "C" void cBankInstance_Unload(void* self)
 {
     if (*(int*)self == 1) {
         *(int*)self = 0;

@@ -9,8 +9,8 @@ int GetHashValue32(char* str);
 extern char str_129_rewardgallery[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_001D0180(void* self);
-extern "C" void func_001CFE60(void* self);
+extern "C" void cFEStateRewardGalleryBase_loadRewards(void* self);
+extern "C" void cFEStateRewardGalleryBase_loadIcons(void* self);
 struct sRewardEntry_F0B0 {
     char name[8];
     int id;
@@ -23,9 +23,9 @@ struct sRewardGallery_F0B0 {
 /**
  * Creates the reward gallery screen ("129 rewardgallery"), clears the 180 reward entries and starts loading.
  *
- * Calls func_001D0180() (checks whether the rewards are loaded, else starts the load) and, unless flag bit 3
+ * Calls cFEStateRewardGalleryBase_loadRewards() (checks whether the rewards are loaded, else starts the load) and, unless flag bit 3
  * of
- * +0x48 is set, func_001CFE60().
+ * +0x48 is set, cFEStateRewardGalleryBase_loadIcons().
  */
 extern "C" void cFEStateRewardGalleryBase_onCreateScreen(void* self)
 {
@@ -41,15 +41,15 @@ extern "C" void cFEStateRewardGalleryBase_onCreateScreen(void* self)
         ((sRewardGallery_F0B0*)self)->entries[i].id = -1;
     }
     *(int*)((char*)self + 0x78) = 0;
-    func_001D0180(self);
+    cFEStateRewardGalleryBase_loadRewards(self);
     if (((*(int*)((char*)self + 0x48) >> 3) & 1) == 0) {
-        func_001CFE60(self);
+        cFEStateRewardGalleryBase_loadIcons(self);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001CF168);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onGainFocus);
 #ifdef SKIP_ASM
 struct sVec3_F168 { float x, y, z; };
 extern "C" void func_003A0290(void* thing, sVec3_F168* out);
@@ -70,12 +70,12 @@ struct sVE_F168b {
  *
  * Vtable slot 6 of all six gallery vtables (the slot cFEStateCharEquip_onGainFocus fills in cFEStateCharEquip_vtbl).
  * With the first cell (+0x924) and the select bar (+0x8F8, "orange_select_bar") both bound, stores the bar's position
- * minus the cell's (func_003A0290) in +0x70 (x) and +0x74 (y); func_001D0F30 adds this offset back onto the highlighted
+ * minus the cell's (func_003A0290) in +0x70 (x) and +0x74 (y); cFEStateRewardGalleryBase_updateHighlither adds this offset back onto the highlighted
  * cell. Resets the first visible row (+0x64) to 0. When flags +0x48 have bit 3 (icons loaded) and bit 1 (rewards
- * loaded), the first cell becomes the current cell (+0x8FC) if none is set, then vtable slot 40 (func_001D0B00)
+ * loaded), the first cell becomes the current cell (+0x8FC) if none is set, then vtable slot 40 (cFEStateRewardGalleryBase_updateList)
  * refreshes the grid and slot 33 (cFEStateRewardGalleryBase_updateHelpText) shows the help text for reward 0.
  */
-extern "C" void func_001CF168(void* self)
+extern "C" void cFEStateRewardGalleryBase_onGainFocus(void* self)
 {
     sVec3_F168 firstCellPos;
     sVec3_F168 widgetPos;
@@ -104,28 +104,28 @@ extern "C" void func_001CF168(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001CF238);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_001D0238(void* self);
-extern "C" void func_001CFF10(void* self);
+extern "C" void cFEStateRewardGalleryBase_updateRewardsLoad(void* self);
+extern "C" void cFEStateRewardGalleryBase_updateIconsLoad(void* self);
 extern "C" void* cUIState_onUpdate(void* self);
 
 /**
  * Runs the reward gallery's per-frame update: finishes the reward-list load, then the icon-file load, then the base
  * cUIState_onUpdate().
  *
- * Vtable slot 12 of the gallery vtables (cFEStateCharEquip_onUpdate's slot). Calls func_001D0238() and func_001CFF10().
+ * Vtable slot 12 of the gallery vtables (cFEStateCharEquip_onUpdate's slot). Calls cFEStateRewardGalleryBase_updateRewardsLoad() and cFEStateRewardGalleryBase_updateIconsLoad().
  */
-extern "C" void func_001CF238(void* self)
+extern "C" void cFEStateRewardGalleryBase_onUpdate(void* self)
 {
-    func_001D0238(self);
-    func_001CFF10(self);
+    cFEStateRewardGalleryBase_updateRewardsLoad(self);
+    cFEStateRewardGalleryBase_updateIconsLoad(self);
     cUIState_onUpdate(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001CF270);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onInputBegin);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIScreen;
@@ -199,9 +199,9 @@ struct sGallery_F270 {
  *   asks the engine's cFECustom (*mpEngine, its vtable slot 5: func_001A16C0) for the state to return to, passing 1
  *   when a store number is set (+0x8F0 >= 0), and pushes that with cUIStateStack_push().
  * - Accept (test 5): the reward index is first visible row (+0x64) * columns (+0x5C) + the current cell's mMiscData. An
- *   empty gallery (reward count +0x68 = 0) gets sound 4. An owned reward (slot 38, func_001D05F0) opens with sound 6
+ *   empty gallery (reward count +0x68 = 0) gets sound 4. An owned reward (slot 38, cFEStateRewardGalleryBase_isRewardOwned) opens with sound 6
  *   and slot 31 (cFEStateRewardGalleryBase_showReward), except cheat characters (type +0x4C = 8), which get sound 4. An
- *   unowned one opens the buy popup (slot 32, func_001D0510) with sound 6 only in a store (+0x8F0 >= 0) whose number
+ *   unowned one opens the buy popup (slot 32, cFEStateRewardGalleryBase_showBuyPopup) with sound 6 only in a store (+0x8F0 >= 0) whose number
  *   equals the reward's store number (slot 36) when its cost (slot 35) is at most the cash (+0x54); otherwise sound 4.
  * - Tests 19/20 move the column left/right with wrap-around (right also wraps past the last reward); 17/18 move the row
  *   within the visible rows (+0x58), down wrapping once the row passes the total row count (+0x60); 27 and 25 move the
@@ -214,7 +214,7 @@ struct sGallery_F270 {
  * @param in  the input object; its vtable slots are the button tests
  * @return 1 when the input was handled (every back, accept and move input), otherwise 0
  */
-extern "C" int func_001CF270(char* self, char* in)
+extern "C" int cFEStateRewardGalleryBase_onInputBegin(char* self, char* in)
 {
     sSnd_F270* snd = &D_004A5A58_F270;
     if (*(sSnd_F270**)(*(char**)(self + 0x10) + 0x14) != 0) {
@@ -580,7 +580,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001CFD18);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onPopupEvent);
 #ifdef SKIP_ASM
 struct sVE_FD18 {
     short delta;
@@ -593,14 +593,14 @@ struct sVE_FD18 {
  *
  * Vtable slot 17 of the gallery vtables (cFEStateCharEquip_onPopupEvent's slot). Event 21: unless the popup's mHashName
  * is 7 (cUIStateBuyPopup's id), clears the mVisible bit (bit 3) of the gallery's mAttrState. Event 22: sets mVisible
- * again and, when the popup is the buy popup (mHashName 7) with mbAccept set, calls vtable slot 30 (func_001D0320) for
+ * again and, when the popup is the buy popup (mHashName 7) with mbAccept set, calls vtable slot 30 (cFEStateRewardGalleryBase_buyReward) for
  * the highlighted reward (first visible row +0x64 * columns +0x5C + the current cell's mMiscData). Other events are
  * ignored.
  *
  * @param widget  the popup state that sent the event (a cUIStateBuyPopup when its mHashName is 7)
  * @param msg     the popup event; 21 and 22 are handled
  */
-extern "C" void func_001CFD18(void* self, void* widget, int msg)
+extern "C" void cFEStateRewardGalleryBase_onPopupEvent(void* self, void* widget, int msg)
 {
     switch (msg) {
     case 21:
@@ -623,7 +623,7 @@ extern "C" void func_001CFD18(void* self, void* widget, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001CFDD0);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_getIconID);
 #ifdef SKIP_ASM
 extern "C" int func_004165A8(const void* a, const void* b);
 
@@ -638,20 +638,20 @@ struct sRewardTable_FDD0 {
     sRewardName_FDD0 entries[1];
 };
 
-// PORT: the unit declares func_001CFDD0 as `void (void*, char*)`, but the body returns the id.
-int func_001CFDD0_find(sRewardTable_FDD0* self, char* name) __asm__("func_001CFDD0");
+// PORT: the unit declares cFEStateRewardGalleryBase_getIconID as `void (void*, char*)`, but the body returns the id.
+int cFEStateRewardGalleryBase_getIconID_find(sRewardTable_FDD0* self, char* name) __asm__("cFEStateRewardGalleryBase_getIconID");
 
 /**
  * Returns the GrMan handle of the gallery icon with the given name, or -1.
  *
- * Searches the icon table built by func_001CFFF8 (count +0x78; 12-byte entries from +0x7C holding the name and the
- * handle) with func_004165A8 (strcmp). The per-gallery icon lookups (func_001D11A8 and its copies) call it with the
+ * Searches the icon table built by cFEStateRewardGalleryBase_allocIcons (count +0x78; 12-byte entries from +0x7C holding the name and the
+ * handle) with func_004165A8 (strcmp). The per-gallery icon lookups (cFEStateRewardGalleryPosters_getIconID and its copies) call it with the
  * first 4 characters of a reward's icon name.
  *
  * @param name  the icon name (4 characters, NUL-terminated)
  * @return the icon's handle, or -1 when no entry has that name
  */
-int func_001CFDD0_find(sRewardTable_FDD0* self, char* name)
+int cFEStateRewardGalleryBase_getIconID_find(sRewardTable_FDD0* self, char* name)
 {
     int i;
     for (i = 0; i < self->count; i++) {
@@ -664,7 +664,7 @@ int func_001CFDD0_find(sRewardTable_FDD0* self, char* name)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001CFE60);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_loadIcons);
 #ifdef SKIP_ASM
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 struct sVE_FE60 {
@@ -676,14 +676,14 @@ struct sVE_FE60 {
 /**
  * Starts loading the gallery's icon file, or marks the icons loaded when the gallery has none.
  *
- * The file name comes from vtable slot 25 (the per-gallery icon file, e.g. func_001D1198's
+ * The file name comes from vtable slot 25 (the per-gallery icon file, e.g. cFEStateRewardGalleryPosters_getIconsFileName's
  * "data/char/rwrdps2.big|poster_icon.ssh"; the cheat-character gallery has none). With a name, func_0019DA10() requests
  * it from the FE file table (SSXApp->RealFE + 0x1A70) in the bank of the player's character (+0x50) with arguments 9, 1
  * and 0, the slot goes into +0x8EC, and flags +0x48 get bit 2 (icons loading) set and bit 3 (icons loaded) cleared;
  * otherwise bit 3 is set and bit 2 cleared. Slot 25 is called twice, once to test and once for the name. Called by
  * cFEStateRewardGalleryBase_onCreateScreen while bit 3 is clear.
  */
-extern "C" void func_001CFE60(void* self)
+extern "C" void cFEStateRewardGalleryBase_loadIcons(void* self)
 {
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     sVE_FE60* vt = *(sVE_FE60**)((char*)self + 8);
@@ -698,14 +698,14 @@ extern "C" void func_001CFE60(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001CFF10);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateIconsLoad);
 #ifdef SKIP_ASM
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" int func_0019E238(void* self, int bank, int i);
 struct sSelf001CFFF8;
 struct sData001CFFF8;
 extern "C" sData001CFFF8* func_0019E2B0(void* self, int bank, int i);
-extern "C" void func_001CFFF8(sSelf001CFFF8* self, sData001CFFF8* data);
+extern "C" void cFEStateRewardGalleryBase_allocIcons(sSelf001CFFF8* self, sData001CFFF8* data);
 struct sVE_FF10 {
     short delta;
     short index;
@@ -721,17 +721,17 @@ struct sVE_FF10i {
  * Finishes the icon-file load: once the file is in, builds the icon table from it and releases the file.
  *
  * Only while bit 3 (icons loaded) of flags +0x48 is clear, and once func_0019E238() reports the slot in +0x8EC (bank
- * +0x50 of the FE file table, SSXApp->RealFE + 0x1A70) ready: passes the file from func_0019E2B0() to func_001CFFF8(),
+ * +0x50 of the FE file table, SSXApp->RealFE + 0x1A70) ready: passes the file from func_0019E2B0() to cFEStateRewardGalleryBase_allocIcons(),
  * releases the slot (func_0019DC20), sets +0x8EC to -1, clears bit 2 and sets bit 3. If the rewards are loaded too (bit
- * 1), the first cell (+0x924) becomes the current cell (+0x8FC) and vtable slots 40 (func_001D0B00, grid refresh) and
+ * 1), the first cell (+0x924) becomes the current cell (+0x8FC) and vtable slots 40 (cFEStateRewardGalleryBase_updateList, grid refresh) and
  * 33 (cFEStateRewardGalleryBase_updateHelpText, reward 0) run.
  */
-extern "C" void func_001CFF10(void* self)
+extern "C" void cFEStateRewardGalleryBase_updateIconsLoad(void* self)
 {
     if (((*(int*)((char*)self + 0x48) >> 3) & 1) == 0) {
         char* mgr = (char*)SSXApp->RealFE + 0x1A70;
         if (func_0019E238(mgr, *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x8EC)) != 0) {
-            func_001CFFF8((sSelf001CFFF8*)self, func_0019E2B0(mgr, *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x8EC)));
+            cFEStateRewardGalleryBase_allocIcons((sSelf001CFFF8*)self, func_0019E2B0(mgr, *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x8EC)));
             func_0019DC20(mgr, *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x8EC));
             *(int*)((char*)self + 0x8EC) = -1;
             *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) & ~4) | 8;
@@ -748,7 +748,7 @@ extern "C" void func_001CFF10(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001CFFF8);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_allocIcons);
 #ifdef SKIP_ASM
 struct cGame001CFFF8 {
     char pad[0x10D8];
@@ -834,7 +834,7 @@ struct sSelf001CFFF8 {
  *
  * @param data  the loaded icon file, or 0
  */
-extern "C" void func_001CFFF8(sSelf001CFFF8* self, sData001CFFF8* data)
+extern "C" void cFEStateRewardGalleryBase_allocIcons(sSelf001CFFF8* self, sData001CFFF8* data)
 {
     if (data == 0) {
         self->count = 0;
@@ -851,7 +851,7 @@ extern "C" void func_001CFFF8(sSelf001CFFF8* self, sData001CFFF8* data)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D00C0);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_purgeIcons);
 #ifdef SKIP_ASM
 struct cGame001D00C0 {
     char pad[0x10D8];
@@ -926,7 +926,7 @@ struct sSelf001D00C0 {
  * bank +0x50) and set to -1. Clears bit 3 (icons loaded) of flags +0x48. The callers are in fe/fepopupmisc.cpp, among
  * them the gallery vtables' slot-1 destructors (func_001DFCC8, func_001DFD98, func_001DFE68, func_001DFF38).
  */
-extern "C" void func_001D00C0(sSelf001D00C0* self)
+extern "C" void cFEStateRewardGalleryBase_purgeIcons(sSelf001D00C0* self)
 {
     int i;
     for (i = 0; i < self->count; i++) {
@@ -946,7 +946,7 @@ extern "C" void func_001D00C0(sSelf001D00C0* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D0180);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_loadRewards);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -965,10 +965,10 @@ struct sVE_0180 {
  * Uses the reward interface (cBE_getInterface__Fv kind 13). When func_00156A38() reports the database not ready, sets
  * bit 0 (rewards loading) of flags +0x48, clears bit 1 and starts it with func_00156A10() (cBERewardDB_init). Otherwise
  * sets bit 1 (rewards loaded), clears bit 0, fills the gallery's list through vtable slot 28 (the per-gallery list
- * builder, e.g. func_001D11F8) and sets the total row count +0x60 to the reward count (+0x68) divided by the columns
+ * builder, e.g. cFEStateRewardGalleryPosters_allocRewards) and sets the total row count +0x60 to the reward count (+0x68) divided by the columns
  * (+0x5C), rounded up. Called by cFEStateRewardGalleryBase_onCreateScreen.
  */
-extern "C" void func_001D0180(void* self)
+extern "C" void cFEStateRewardGalleryBase_loadRewards(void* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
     if (func_00156A38(iface) == 0) {
@@ -984,7 +984,7 @@ extern "C" void func_001D0180(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D0238);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateRewardsLoad);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1013,10 +1013,10 @@ struct sVE_0238c {
  * Only while bit 1 (rewards loaded) of flags +0x48 is clear and func_00156A38() reports the database (reward interface,
  * kind 13) ready: sets bit 1, clears bit 0, builds the list (vtable slot 28) and sets the total row count +0x60 to the
  * reward count (+0x68) divided by the columns (+0x5C), rounded up. When the icons are loaded (bit 3), the first cell
- * (+0x924) becomes the current cell (+0x8FC) and slots 40 (func_001D0B00) and 33
+ * (+0x924) becomes the current cell (+0x8FC) and slots 40 (cFEStateRewardGalleryBase_updateList) and 33
  * (cFEStateRewardGalleryBase_updateHelpText, reward 0) run.
  */
-extern "C" void func_001D0238(void* self)
+extern "C" void cFEStateRewardGalleryBase_updateRewardsLoad(void* self)
 {
     if (((*(int*)((char*)self + 0x48) >> 1) & 1) == 0) {
         if (func_00156A38(cBE_getInterface_Fv(cBE_getBE(), 13)) != 0) {
@@ -1037,7 +1037,7 @@ extern "C" void func_001D0238(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D0320);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_buyReward);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1058,15 +1058,15 @@ struct sVE_0320b {
 /**
  * Gives the player a reward bought in the gallery, then refreshes the cash and the reward display.
  *
- * Vtable slot 30 of the gallery vtables; func_001CFD18 calls it when the buy popup is accepted. Calls func_00157F20()
+ * Vtable slot 30 of the gallery vtables; cFEStateRewardGalleryBase_onPopupEvent calls it when the buy popup is accepted. Calls func_00157F20()
  * on the reward interface (kind 13) with mUserNum, the character (+0x50), the gallery's reward type (+0x4C), @p
  * rewardIndex and 1; reads the cash back into +0x54 with cBEEconInterface_getMoney() (interface kind 11); then runs
- * vtable slots 42 (func_001D0D30, name and cost), 33 (cFEStateRewardGalleryBase_updateHelpText for @p rewardIndex), 43
- * (func_001D0E78, cash) and 45 (func_001D0F30, highlight).
+ * vtable slots 42 (cFEStateRewardGalleryBase_updateRewardInfo, name and cost), 33 (cFEStateRewardGalleryBase_updateHelpText for @p rewardIndex), 43
+ * (cFEStateRewardGalleryBase_updateAvailableCash, cash) and 45 (cFEStateRewardGalleryBase_updateHighlither, highlight).
  *
  * @param rewardIndex  index of the reward in the gallery's list
  */
-extern "C" void func_001D0320(void* self, int rewardIndex)
+extern "C" void cFEStateRewardGalleryBase_buyReward(void* self, int rewardIndex)
 {
     func_00157F20(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
                   *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), rewardIndex, 1);
@@ -1087,10 +1087,10 @@ extern "C" void func_001D0320(void* self, int rewardIndex)
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_showReward);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001D1AA0(void* self, void* engine, void* owner, int player);
-extern "C" void func_001D20D8(void* self, int kind, void* data);
-extern "C" void* func_001D22F0(void* self, void* engine, void* owner, signed char idx);
-extern "C" void func_001D2598(void* self, const char* a, const char* b);
+extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(void* self, void* engine, void* owner, int player);
+extern "C" void cFEStatePreviewReward_setReward(void* self, int kind, void* data);
+extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* self, void* engine, void* owner, signed char idx);
+extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(void* self, const char* a, const char* b);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern char str_cFEStatePreviewReward[];
 extern char str_cFEStateVideoPlayer[];
@@ -1119,14 +1119,14 @@ extern "C" void cFEStateRewardGalleryBase_showReward(void* self)
     case 4:
     case 5:
     case 7:
-        nextState = func_001D1AA0(cMemMan_alloc(0x78, str_cFEStatePreviewReward, 0, 0), *(void**)((char*)self + 0x10), self,
+        nextState = cFEStatePreviewReward_cFEStatePreviewReward(cMemMan_alloc(0x78, str_cFEStatePreviewReward, 0, 0), *(void**)((char*)self + 0x10), self,
                           *(signed char*)((char*)self + 0x44));
-        func_001D20D8(nextState, *(int*)((char*)self + 0x4C), data);
+        cFEStatePreviewReward_setReward(nextState, *(int*)((char*)self + 0x4C), data);
         break;
     case 6:
-        nextState = func_001D22F0(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), *(void**)((char*)self + 0x10), self,
+        nextState = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), *(void**)((char*)self + 0x10), self,
                           *(signed char*)((char*)self + 0x44));
-        func_001D2598(nextState, *(const char**)((char*)data + 4), 0);
+        cFEStateVideoPlayer_setVideoSourceFiles(nextState, *(const char**)((char*)data + 4), 0);
         break;
     }
     if (nextState != 0) {
@@ -1136,7 +1136,7 @@ extern "C" void cFEStateRewardGalleryBase_showReward(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D0510);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_showBuyPopup);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, void* owner, signed char idx);
@@ -1158,13 +1158,13 @@ struct sVE_0510b {
  * Opens the buy popup for a reward: a 0x70-byte cUIStateBuyPopup holding the reward's name and cost and the player's
  * cash.
  *
- * Vtable slot 32 of the gallery vtables; func_001CF270 calls it with the reward index, which this C view does not
+ * Vtable slot 32 of the gallery vtables; cFEStateRewardGalleryBase_onInputBegin calls it with the reward index, which this C view does not
  * declare: the index stays in the second argument register and reaches vtable slot 34 (the per-gallery reward getter)
  * unchanged. The popup is built by cUIStateBuyPopup_cUIStateBuyPopup() (the engine, this gallery as parent, mUserNum);
  * func_001CAA18() fills its mInfo (+0x48) with the reward type (+0x4C), the reward's name (slot 37), its cost (slot 35)
  * and the cash (+0x54); cUIStateStack_pushPopup() pushes it on the engine's state stack (mpEngine + 0x18).
  */
-extern "C" void func_001D0510(void* self)
+extern "C" void cFEStateRewardGalleryBase_showBuyPopup(void* self)
 {
     sVE_0510a* vt = *(sVE_0510a**)((char*)self + 8);
     int sel = vt[34].fn((char*)self + vt[34].delta);
@@ -1180,7 +1180,7 @@ extern "C" void func_001D0510(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D05F0);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_isRewardOwned);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1192,11 +1192,11 @@ extern "C" void func_00157468(void* iface, int a, int b, int c, int d);
  *
  * Vtable slot 38 of the gallery vtables. Calls func_00157468() on the reward interface (kind 13) with mUserNum, the
  * character (+0x50), the reward type (+0x4C) and @p rewardIndex. The C definition is void, but the callee's result
- * stays in the return register, and the slot's callers (func_001CF270, func_001D0D30, func_001D0F30) test it.
+ * stays in the return register, and the slot's callers (cFEStateRewardGalleryBase_onInputBegin, cFEStateRewardGalleryBase_updateRewardInfo, cFEStateRewardGalleryBase_updateHighlither) test it.
  *
  * @param rewardIndex  index of the reward in the gallery's list
  */
-extern "C" void func_001D05F0(void* self, int rewardIndex)
+extern "C" void cFEStateRewardGalleryBase_isRewardOwned(void* self, int rewardIndex)
 {
     func_00157468(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
                   *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), rewardIndex);
@@ -1440,7 +1440,7 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(sGallery_08A0* self, int row
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D0B00);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateList);
 #ifdef SKIP_ASM
 struct sVE_0B00a {
     short delta;
@@ -1457,10 +1457,10 @@ struct sVE_0B00b {
  * Refreshes the whole reward grid: every visible row, then the arrows, highlight, counters, page number and reward
  * info.
  *
- * Calls vtable slot 39 (cFEStateRewardGalleryBase_updateRow) for each of the +0x58 rows, then slots 46 (func_001D10A8),
- * 45 (func_001D0F30), 44 (func_001D0EB8), 41 (cFEStateRewardGalleryBase_updatePageNumber) and 42 (func_001D0D30).
+ * Calls vtable slot 39 (cFEStateRewardGalleryBase_updateRow) for each of the +0x58 rows, then slots 46 (cFEStateRewardGalleryBase_updateArrows),
+ * 45 (cFEStateRewardGalleryBase_updateHighlither), 44 (cFEStateRewardGalleryBase_updateCounter), 41 (cFEStateRewardGalleryBase_updatePageNumber) and 42 (cFEStateRewardGalleryBase_updateRewardInfo).
  */
-extern "C" void func_001D0B00(void* self)
+extern "C" void cFEStateRewardGalleryBase_updateList(void* self)
 {
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x58); i++) {
@@ -1543,7 +1543,7 @@ extern "C" void cFEStateRewardGalleryBase_updatePageNumber(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D0D30);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateRewardInfo);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -1581,7 +1581,7 @@ struct sVEK1D0D30d {
  * (slot 37) goes into reward_name, and reward_cost shows getDollarString() of its cost (slot 35) when that is above 0
  * and the reward is not owned (slot 38), else an empty string. Missing text widgets are skipped.
  */
-extern "C" void func_001D0D30(void* self)
+extern "C" void cFEStateRewardGalleryBase_updateRewardInfo(void* self)
 {
     char* grid = *(char**)((char*)self + 0x8FC);
     if (grid == 0) {
@@ -1614,7 +1614,7 @@ extern "C" void func_001D0D30(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D0E78);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateAvailableCash);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -1623,7 +1623,7 @@ extern "C" const char* getDollarString(void* a0);
 /**
  * Shows the player's cash (+0x54) as a dollar string in the "you_have_amount" text (+0x910), when that widget exists.
  */
-extern "C" void func_001D0E78(void* self)
+extern "C" void cFEStateRewardGalleryBase_updateAvailableCash(void* self)
 {
     if (*(cUIText**)((char*)self + 0x910) != 0) {
         cUIText_setAsciiString(*(cUIText**)((char*)self + 0x910), getDollarString(*(void**)((char*)self + 0x54)));
@@ -1632,7 +1632,7 @@ extern "C" void func_001D0E78(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D0EB8);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateCounter);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -1646,7 +1646,7 @@ extern char str_pct_d_b[];
  * A missing widget is skipped. Likely bug: cFEStateRewardGalleryBase_onWidgetCreate fills the same widgets the other
  * way round (max_rewards from +0x68, num_rewards from +0x6C), so one of the two has the pair swapped.
  */
-extern "C" void func_001D0EB8(void* self)
+extern "C" void cFEStateRewardGalleryBase_updateCounter(void* self)
 {
     char buf[32];
     if (*(cUIText**)((char*)self + 0x918) != 0) {
@@ -1661,7 +1661,7 @@ extern "C" void func_001D0EB8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D0F30);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateHighlither);
 #ifdef SKIP_ASM
 extern char D_004C6808[];
 
@@ -1691,7 +1691,7 @@ struct sVEK1D0F30c {
  * mpTextureElem 0, or, when that id is negative, mTextureID -1 and mpTextureElem from slot 27 (the texture-element
  * lookup the cheat-character gallery fills in). Finally sets the cell's colour (setColour) to D_004C6808.
  */
-extern "C" void func_001D0F30(void* self)
+extern "C" void cFEStateRewardGalleryBase_updateHighlither(void* self)
 {
     char* icon = *(char**)((char*)self + 0x8F8);
     if (icon != 0) {
@@ -1738,7 +1738,7 @@ extern "C" void func_001D0F30(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D10A8);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateArrows);
 #ifdef SKIP_ASM
 struct sVEntry001D10A8 {
     short delta;
@@ -1750,7 +1750,7 @@ struct sVEntry001D10A8 {
  * Shows the up arrow (+0x91C) when the first visible row (+0x64) is past 0, and the down arrow (+0x920) when more rows
  * (+0x60) follow the visible ones (+0x58).
  */
-extern "C" void func_001D10A8(void* self)
+extern "C" void cFEStateRewardGalleryBase_updateArrows(void* self)
 {
     void* obj = *(void**)((char*)self + 0x91C);
     if (obj != 0) {
@@ -1767,7 +1767,7 @@ extern "C" void func_001D10A8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1128);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters);
 #ifdef SKIP_ASM
 extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* D_0046A248[];
@@ -1785,7 +1785,7 @@ extern void* D_0046A248[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D1128(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters(void* self, void* engine, signed char idx, int inStore)
 {
     func_001CEEA0(self, engine, idx, inStore, 3);
     *(void***)((char*)self + 0x8) = D_0046A248;
@@ -1801,7 +1801,7 @@ extern "C" void* func_001D1128(void* self, void* engine, signed char idx, int in
 extern void* D_00467070[];
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1198__FPv);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_getIconsFileName__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the posters gallery's icon file name, "data/char/rwrdps2.big|poster_icon.ssh" (D_00467070).
@@ -1810,39 +1810,39 @@ INCLUDE_ASM("fe/festaterewards", func_001D1198__FPv);
  *
  * @return D_00467070
  */
-void* func_001D1198(void* self)
+void* cFEStateRewardGalleryPosters_getIconsFileName(void* self)
 {
     return (void*)D_00467070;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festaterewards", func_001D11A8);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_getIconID);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void func_001CFDD0(void* self, char* name);
+extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 
 /**
  * Looks up the icon of a poster in the gallery's icon table by the first 4 characters of the reward's icon name.
  *
  * Vtable slot 26 of the posters vtable D_0046A248. Takes the reward record in list entry @p i (+0xA28), copies 4
- * characters of the name its word at +8 points to into a terminated buffer and calls func_001CFDD0(). The C definition
- * is void, but func_001CFDD0()'s handle (or -1) stays in the return register, and func_001D0F30 reads it.
+ * characters of the name its word at +8 points to into a terminated buffer and calls cFEStateRewardGalleryBase_getIconID(). The C definition
+ * is void, but cFEStateRewardGalleryBase_getIconID()'s handle (or -1) stays in the return register, and cFEStateRewardGalleryBase_updateHighlither reads it.
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void func_001D11A8(void* self, int i)
+extern "C" void cFEStateRewardGalleryPosters_getIconID(void* self, int i)
 {
     char buf[5];
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
     strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
-    func_001CFDD0(self, buf);
+    cFEStateRewardGalleryBase_getIconID(self, buf);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D11F8);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_allocRewards);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1866,7 +1866,7 @@ struct sRewardList_11F8 {
  * gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 43
  * entries the object has room for.
  */
-extern "C" void func_001D11F8(sRewardList_11F8* self)
+extern "C" void cFEStateRewardGalleryPosters_allocRewards(sRewardList_11F8* self)
 {
     int n = func_001572B0(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
@@ -1878,7 +1878,7 @@ extern "C" void func_001D11F8(sRewardList_11F8* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1290);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_purgeRewards);
 #ifdef SKIP_ASM
 /**
  * Clears the posters gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 43 entries from
@@ -1886,7 +1886,7 @@ INCLUDE_ASM("fe/festaterewards", func_001D1290);
  *
  * Vtable slot 29 of the posters vtable D_0046A248.
  */
-extern "C" void func_001D1290(void* self)
+extern "C" void cFEStateRewardGalleryPosters_purgeRewards(void* self)
 {
     int i;
     *(int*)((char*)self + 0x68) = 0;
@@ -1898,7 +1898,7 @@ extern "C" void func_001D1290(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D12C8);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards);
 #ifdef SKIP_ASM
 extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* D_0046A0C8[];
@@ -1916,7 +1916,7 @@ extern void* D_0046A0C8[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D12C8(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards(void* self, void* engine, signed char idx, int inStore)
 {
     func_001CEEA0(self, engine, idx, inStore, 4);
     *(void***)((char*)self + 0x8) = D_0046A0C8;
@@ -1931,7 +1931,7 @@ extern "C" void* func_001D12C8(void* self, void* engine, signed char idx, int in
 extern void* D_00467098[];
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1330__FPv);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_getIconsFileName__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the trading-card gallery's icon file name, "data/char/rwrdps2.big|tradingcard_icon.ssh" (D_00467098).
@@ -1940,39 +1940,39 @@ INCLUDE_ASM("fe/festaterewards", func_001D1330__FPv);
  *
  * @return D_00467098
  */
-void* func_001D1330(void* self)
+void* cFEStateRewardGalleryTradingCards_getIconsFileName(void* self)
 {
     return (void*)D_00467098;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festaterewards", func_001D1340);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_getIconID);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void func_001CFDD0(void* self, char* name);
+extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 
 /**
  * Looks up the icon of a trading card in the gallery's icon table by the first 4 characters of the reward's icon name.
  *
  * Vtable slot 26 of the trading-card vtable D_0046A0C8. Takes the reward record in list entry @p i (+0xA28), copies 4
- * characters of the name its word at +8 points to into a terminated buffer and calls func_001CFDD0(). The C definition
- * is void, but func_001CFDD0()'s handle (or -1) stays in the return register, and func_001D0F30 reads it.
+ * characters of the name its word at +8 points to into a terminated buffer and calls cFEStateRewardGalleryBase_getIconID(). The C definition
+ * is void, but cFEStateRewardGalleryBase_getIconID()'s handle (or -1) stays in the return register, and cFEStateRewardGalleryBase_updateHighlither reads it.
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void func_001D1340(void* self, int i)
+extern "C" void cFEStateRewardGalleryTradingCards_getIconID(void* self, int i)
 {
     char buf[5];
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
     strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
-    func_001CFDD0(self, buf);
+    cFEStateRewardGalleryBase_getIconID(self, buf);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1390);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_allocRewards);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1996,7 +1996,7 @@ struct sRewardList_1390 {
  * k (+0xA28) gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check
  * against the 116 entries the object has room for.
  */
-extern "C" void func_001D1390(sRewardList_1390* self)
+extern "C" void cFEStateRewardGalleryTradingCards_allocRewards(sRewardList_1390* self)
 {
     int n = func_001572D0(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
@@ -2008,7 +2008,7 @@ extern "C" void func_001D1390(sRewardList_1390* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1428);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_purgeRewards);
 #ifdef SKIP_ASM
 /**
  * Clears the trading-card gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 116 entries
@@ -2016,7 +2016,7 @@ INCLUDE_ASM("fe/festaterewards", func_001D1428);
  *
  * Vtable slot 29 of the trading-card vtable D_0046A0C8.
  */
-extern "C" void func_001D1428(void* self)
+extern "C" void cFEStateRewardGalleryTradingCards_purgeRewards(void* self)
 {
     int i;
     *(int*)((char*)self + 0x68) = 0;
@@ -2028,7 +2028,7 @@ extern "C" void func_001D1428(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1460);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts);
 #ifdef SKIP_ASM
 extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* D_00469F48[];
@@ -2046,7 +2046,7 @@ extern void* D_00469F48[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D1460(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts(void* self, void* engine, signed char idx, int inStore)
 {
     func_001CEEA0(self, engine, idx, inStore, 5);
     *(void***)((char*)self + 0x8) = D_00469F48;
@@ -2061,7 +2061,7 @@ extern "C" void* func_001D1460(void* self, void* engine, signed char idx, int in
 extern void* D_004670C8[];
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D14C8__FPv);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_getIconsFileName__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the art gallery's icon file name, "data/char/rwrdps2.big|gallery_icon.ssh" (D_004670C8).
@@ -2070,39 +2070,39 @@ INCLUDE_ASM("fe/festaterewards", func_001D14C8__FPv);
  *
  * @return D_004670C8
  */
-void* func_001D14C8(void* self)
+void* cFEStateRewardGalleryConceptArts_getIconsFileName(void* self)
 {
     return (void*)D_004670C8;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festaterewards", func_001D14D8);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_getIconID);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void func_001CFDD0(void* self, char* name);
+extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 
 /**
  * Looks up the icon of an art reward in the gallery's icon table by the first 4 characters of the reward's icon name.
  *
  * Vtable slot 26 of the art vtable D_00469F48. Takes the reward record in list entry @p i (+0xA28), copies 4 characters
- * of the name its word at +8 points to into a terminated buffer and calls func_001CFDD0(). The C definition is void,
- * but func_001CFDD0()'s handle (or -1) stays in the return register, and func_001D0F30 reads it.
+ * of the name its word at +8 points to into a terminated buffer and calls cFEStateRewardGalleryBase_getIconID(). The C definition is void,
+ * but cFEStateRewardGalleryBase_getIconID()'s handle (or -1) stays in the return register, and cFEStateRewardGalleryBase_updateHighlither reads it.
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void func_001D14D8(void* self, int i)
+extern "C" void cFEStateRewardGalleryConceptArts_getIconID(void* self, int i)
 {
     char buf[5];
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
     strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
-    func_001CFDD0(self, buf);
+    cFEStateRewardGalleryBase_getIconID(self, buf);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1528);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_allocRewards);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -2126,7 +2126,7 @@ struct sRewardList_1528 {
  * + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 100 entries
  * the object has room for.
  */
-extern "C" void func_001D1528(sRewardList_1528* self)
+extern "C" void cFEStateRewardGalleryConceptArts_allocRewards(sRewardList_1528* self)
 {
     int n = func_001572F0(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
@@ -2138,7 +2138,7 @@ extern "C" void func_001D1528(sRewardList_1528* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D15C0);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_purgeRewards);
 #ifdef SKIP_ASM
 /**
  * Clears the art gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 100 entries from
@@ -2146,7 +2146,7 @@ INCLUDE_ASM("fe/festaterewards", func_001D15C0);
  *
  * Vtable slot 29 of the art vtable D_00469F48.
  */
-extern "C" void func_001D15C0(void* self)
+extern "C" void cFEStateRewardGalleryConceptArts_purgeRewards(void* self)
 {
     int i;
     *(int*)((char*)self + 0x68) = 0;
@@ -2158,7 +2158,7 @@ extern "C" void func_001D15C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D15F8);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos);
 #ifdef SKIP_ASM
 extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* D_00469DC8[];
@@ -2176,7 +2176,7 @@ extern void* D_00469DC8[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D15F8(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos(void* self, void* engine, signed char idx, int inStore)
 {
     func_001CEEA0(self, engine, idx, inStore, 6);
     *(void***)((char*)self + 0x8) = D_00469DC8;
@@ -2191,7 +2191,7 @@ extern "C" void* func_001D15F8(void* self, void* engine, signed char idx, int in
 extern void* D_004670F0[];
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1660__FPv);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_getIconsFileName__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the video gallery's icon file name, "data/char/rwrdps2.big|video_icon.ssh" (D_004670F0).
@@ -2200,39 +2200,39 @@ INCLUDE_ASM("fe/festaterewards", func_001D1660__FPv);
  *
  * @return D_004670F0
  */
-void* func_001D1660(void* self)
+void* cFEStateRewardGalleryVideos_getIconsFileName(void* self)
 {
     return (void*)D_004670F0;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festaterewards", func_001D1670);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_getIconID);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void func_001CFDD0(void* self, char* name);
+extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 
 /**
  * Looks up the icon of a video reward in the gallery's icon table by the first 4 characters of the reward's icon name.
  *
  * Vtable slot 26 of the video vtable D_00469DC8. Takes the reward record in list entry @p i (+0xA28), copies 4
- * characters of the name its word at +8 points to into a terminated buffer and calls func_001CFDD0(). The C definition
- * is void, but func_001CFDD0()'s handle (or -1) stays in the return register, and func_001D0F30 reads it.
+ * characters of the name its word at +8 points to into a terminated buffer and calls cFEStateRewardGalleryBase_getIconID(). The C definition
+ * is void, but cFEStateRewardGalleryBase_getIconID()'s handle (or -1) stays in the return register, and cFEStateRewardGalleryBase_updateHighlither reads it.
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void func_001D1670(void* self, int i)
+extern "C" void cFEStateRewardGalleryVideos_getIconID(void* self, int i)
 {
     char buf[5];
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
     strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
-    func_001CFDD0(self, buf);
+    cFEStateRewardGalleryBase_getIconID(self, buf);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D16C0);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_allocRewards);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -2256,7 +2256,7 @@ struct sRewardList_16C0 {
  * gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 2
  * entries the object has room for, so more than 2 videos in the database would overrun it.
  */
-extern "C" void func_001D16C0(sRewardList_16C0* self)
+extern "C" void cFEStateRewardGalleryVideos_allocRewards(sRewardList_16C0* self)
 {
     int n = func_00157330(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
@@ -2268,7 +2268,7 @@ extern "C" void func_001D16C0(sRewardList_16C0* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1758);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_purgeRewards);
 #ifdef SKIP_ASM
 /**
  * Clears the video gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 2 entries from
@@ -2276,7 +2276,7 @@ INCLUDE_ASM("fe/festaterewards", func_001D1758);
  *
  * Vtable slot 29 of the video vtable D_00469DC8.
  */
-extern "C" void func_001D1758(void* self)
+extern "C" void cFEStateRewardGalleryVideos_purgeRewards(void* self)
 {
     int i;
     *(int*)((char*)self + 0x68) = 0;
@@ -2288,7 +2288,7 @@ extern "C" void func_001D1758(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1790);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_cFEStateRewardGalleryToys);
 #ifdef SKIP_ASM
 extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* D_00469C48[];
@@ -2306,7 +2306,7 @@ extern void* D_00469C48[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D1790(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(void* self, void* engine, signed char idx, int inStore)
 {
     func_001CEEA0(self, engine, idx, inStore, 7);
     *(void***)((char*)self + 0x8) = D_00469C48;
@@ -2321,7 +2321,7 @@ extern "C" void* func_001D1790(void* self, void* engine, signed char idx, int in
 extern void* D_00467118[];
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D17F8__FPv);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_getIconsFileName__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the toy gallery's icon file name, "data/char/rwrdps2.big|toy_icon.ssh" (D_00467118).
@@ -2330,39 +2330,39 @@ INCLUDE_ASM("fe/festaterewards", func_001D17F8__FPv);
  *
  * @return D_00467118
  */
-void* func_001D17F8(void* self)
+void* cFEStateRewardGalleryToys_getIconsFileName(void* self)
 {
     return (void*)D_00467118;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festaterewards", func_001D1808);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_getIconID);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void func_001CFDD0(void* self, char* name);
+extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 
 /**
  * Looks up the icon of a toy in the gallery's icon table by the first 4 characters of the reward's icon name.
  *
  * Vtable slot 26 of the toy vtable D_00469C48. Takes the reward record in list entry @p i (+0xA28), copies 4 characters
- * of the name its word at +8 points to into a terminated buffer and calls func_001CFDD0(). The C definition is void,
- * but func_001CFDD0()'s handle (or -1) stays in the return register, and func_001D0F30 reads it.
+ * of the name its word at +8 points to into a terminated buffer and calls cFEStateRewardGalleryBase_getIconID(). The C definition is void,
+ * but cFEStateRewardGalleryBase_getIconID()'s handle (or -1) stays in the return register, and cFEStateRewardGalleryBase_updateHighlither reads it.
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void func_001D1808(void* self, int i)
+extern "C" void cFEStateRewardGalleryToys_getIconID(void* self, int i)
 {
     char buf[5];
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
     strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
-    func_001CFDD0(self, buf);
+    cFEStateRewardGalleryBase_getIconID(self, buf);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1858);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_allocRewards);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -2386,7 +2386,7 @@ struct sRewardList_1858 {
  * + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 28 entries
  * the object has room for.
  */
-extern "C" void func_001D1858(sRewardList_1858* self)
+extern "C" void cFEStateRewardGalleryToys_allocRewards(sRewardList_1858* self)
 {
     int n = func_00157310(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
@@ -2398,7 +2398,7 @@ extern "C" void func_001D1858(sRewardList_1858* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D18F0);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_purgeRewards);
 #ifdef SKIP_ASM
 /**
  * Clears the toy gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 28 entries from
@@ -2406,7 +2406,7 @@ INCLUDE_ASM("fe/festaterewards", func_001D18F0);
  *
  * Vtable slot 29 of the toy vtable D_00469C48.
  */
-extern "C" void func_001D18F0(void* self)
+extern "C" void cFEStateRewardGalleryToys_purgeRewards(void* self)
 {
     int i;
     *(int*)((char*)self + 0x68) = 0;
@@ -2418,7 +2418,7 @@ extern "C" void func_001D18F0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1928);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars);
 #ifdef SKIP_ASM
 extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* D_00469AC8[];
@@ -2429,7 +2429,7 @@ extern void* D_00469AC8[];
  *
  * Runs the gallery base constructor func_001CEEA0() with type 8, installs vtable D_00469AC8 and clears the list base
  * (+0xA24) and the 28 list entries from +0xA28. This gallery keeps the base icon-file and icon-id slots (no icon file)
- * and supplies texture elements instead (slot 27, func_001D1A60).
+ * and supplies texture elements instead (slot 27, cFEStateRewardGalleryCheatChars_getTextureElement).
  *
  * @param engine  the UI engine
  * @param idx     user number
@@ -2437,7 +2437,7 @@ extern void* D_00469AC8[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* func_001D1928(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars(void* self, void* engine, signed char idx, int inStore)
 {
     func_001CEEA0(self, engine, idx, inStore, 8);
     *(void***)((char*)self + 0x8) = D_00469AC8;
@@ -2450,7 +2450,7 @@ extern "C" void* func_001D1928(void* self, void* engine, signed char idx, int in
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1990);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryCheatChars_allocRewards);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -2474,7 +2474,7 @@ struct sRewardList_1990 {
  * entry k (+0xA28) gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no
  * check against the 28 entries the object has room for.
  */
-extern "C" void func_001D1990(sRewardList_1990* self)
+extern "C" void cFEStateRewardGalleryCheatChars_allocRewards(sRewardList_1990* self)
 {
     int n = func_00157370(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
@@ -2486,7 +2486,7 @@ extern "C" void func_001D1990(sRewardList_1990* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1A28);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryCheatChars_purgeRewards);
 #ifdef SKIP_ASM
 /**
  * Clears the cheat-character gallery's reward list: the reward count (+0x68), the list base (+0xA24) and the 28 entries
@@ -2494,7 +2494,7 @@ INCLUDE_ASM("fe/festaterewards", func_001D1A28);
  *
  * Vtable slot 29 of the cheat-character vtable D_00469AC8.
  */
-extern "C" void func_001D1A28(void* self)
+extern "C" void cFEStateRewardGalleryCheatChars_purgeRewards(void* self)
 {
     int i;
     *(int*)((char*)self + 0x68) = 0;
@@ -2506,7 +2506,7 @@ extern "C" void func_001D1A28(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1A60);
+INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryCheatChars_getTextureElement);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
@@ -2518,11 +2518,11 @@ extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
  * Vtable slot 27 of the cheat-character vtable D_00469AC8 (the other galleries keep the base slot). Hashes the string
  * at +4 of the reward record in list entry @p i (+0xA28) with GetHashValue32() and looks it up with
  * cUITextureBank_getElementByHashname() in mpEngine + 0x58. The C definition is void, but the element stays in the
- * return register, and func_001D0F30 stores it in the highlighted cell's mpTextureElem.
+ * return register, and cFEStateRewardGalleryBase_updateHighlither stores it in the highlighted cell's mpTextureElem.
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void func_001D1A60(void* self, int i)
+extern "C" void cFEStateRewardGalleryCheatChars_getTextureElement(void* self, int i)
 {
     char* obj = *(char**)((char*)self + 0x10);
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
@@ -2532,7 +2532,7 @@ extern "C" void func_001D1A60(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D1AA0);
+INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_cFEStatePreviewReward);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
@@ -2561,7 +2561,7 @@ struct sRewardState_1AA0 {
  * @param player  user number
  * @return @p self
  */
-extern "C" void* func_001D1AA0(void* self, void* engine, void* owner, int player)
+extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(void* self, void* engine, void* owner, int player)
 {
     signed char idx = player;
     int i;
@@ -2841,20 +2841,20 @@ extern "C" int cFEStatePreviewReward_onWidgetMenu(void* self, int menu, unsigned
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_001D2198(void* self);
+extern "C" void cFEStatePreviewReward_updateTextureLoad(void* self);
 extern "C" void* cUIState_onUpdate(void* self);
 
 /**
  * Updates the reward preview, first finishing its preview picture load while one is pending.
  *
- * While the async slot at 0x6C is not negative, func_001D2198() checks the load; once it has loaded, the shape
+ * While the async slot at 0x6C is not negative, cFEStatePreviewReward_updateTextureLoad() checks the load; once it has loaded, the shape
  * is handed to GrMan, the slot is released and set to -1 and the preview widget shows it. Then runs the base
  * UI-state update cUIState_onUpdate().
  */
 extern "C" void cFEStatePreviewReward_onUpdate(void* self)
 {
     if (*(int*)((char*)self + 0x6C) >= 0) {
-        func_001D2198(self);
+        cFEStatePreviewReward_updateTextureLoad(self);
     }
     cUIState_onUpdate(self);
 }
@@ -2920,43 +2920,43 @@ extern "C" int cFEStatePreviewReward_onInputBegin(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D20D8);
+INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_setReward);
 #ifdef SKIP_ASM
-extern "C" void func_001D2150(void* self, int a1);
+extern "C" void cFEStatePreviewReward_loadTexture(void* self, int a1);
 
 /**
  * Sets the reward the preview shows and starts loading its picture.
  *
  * Stores @p kind in +0x68 and @p data in +0x60; for types 3, 4, 5 and 7 (posters, trading cards, art, toys) loads the
- * file named by the record's word at +4 with func_001D2150(). Videos (type 6) and other types load nothing. Called by
+ * file named by the record's word at +4 with cFEStatePreviewReward_loadTexture(). Videos (type 6) and other types load nothing. Called by
  * cFEStateRewardGalleryBase_showReward.
  *
  * @param kind  the reward type (3 posters, 4 trading cards, 5 art, 6 videos, 7 toys)
  * @param data  the 16-byte reward record
  */
-extern "C" void func_001D20D8(void* self, int kind, void* data)
+extern "C" void cFEStatePreviewReward_setReward(void* self, int kind, void* data)
 {
     *(int*)((char*)self + 0x68) = kind;
     *(void**)((char*)self + 0x60) = data;
     switch (kind) {
     case 3:
-        func_001D2150(self, *(int*)((char*)data + 4));
+        cFEStatePreviewReward_loadTexture(self, *(int*)((char*)data + 4));
         break;
     case 4:
-        func_001D2150(self, *(int*)((char*)data + 4));
+        cFEStatePreviewReward_loadTexture(self, *(int*)((char*)data + 4));
         break;
     case 5:
-        func_001D2150(self, *(int*)((char*)data + 4));
+        cFEStatePreviewReward_loadTexture(self, *(int*)((char*)data + 4));
         break;
     case 7:
-        func_001D2150(self, *(int*)((char*)data + 4));
+        cFEStatePreviewReward_loadTexture(self, *(int*)((char*)data + 4));
         break;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D2150);
+INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_loadTexture);
 #ifdef SKIP_ASM
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 
@@ -2968,14 +2968,14 @@ extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a
  *
  * @param id  the picture file name (the reward record's word at +4), passed as an int
  */
-extern "C" void func_001D2150(void* self, int id)
+extern "C" void cFEStatePreviewReward_loadTexture(void* self, int id)
 {
     *(int*)((char*)self + 0x6C) = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0x64), id, 9, 1, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D2198);
+INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_updateTextureLoad);
 #ifdef SKIP_ASM
 extern "C" int func_0019E238(void* self, int bank, int i);
 extern "C" void func_0019DC20(void* self, int bank, int i);
@@ -3009,7 +3009,7 @@ struct sVEK1D2198 {
  * mpTextureElem 0 and the frame is shown (setVisible 1). Called by cFEStatePreviewReward_onUpdate while the slot is >=
  * 0.
  */
-extern "C" void func_001D2198(void* self)
+extern "C" void cFEStatePreviewReward_updateTextureLoad(void* self)
 {
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     if (func_0019E238(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C)) == 0)
@@ -3043,7 +3043,7 @@ extern "C" void func_001D2198(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D22F0);
+INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_cFEStateVideoPlayer);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" void func_00253390(void* p);
@@ -3065,7 +3065,7 @@ extern void* D_00469928[];
  * @param player  user number
  * @return @p vself
  */
-extern "C" void* func_001D22F0(void* vself, void* engine, void* owner, signed char player)
+extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* vself, void* engine, void* owner, signed char player)
 {
     char* self = (char*)vself;
     func_0039E318(self, engine, owner);
@@ -3089,7 +3089,7 @@ extern "C" void* func_001D22F0(void* vself, void* engine, void* owner, signed ch
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D2380);
+INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer__cFEStateVideoPlayer);
 #ifdef SKIP_ASM
 extern "C" void func_00253418(void* p, int a1);
 extern "C" void func_0039E390(void* self, int flags);
@@ -3104,7 +3104,7 @@ extern void* D_0046D0D0[];
  *
  * @param flags  g++ destructor flags, passed on to func_0039E390 (bit 0 frees the object's memory)
  */
-extern "C" void func_001D2380(void* self, int flags)
+extern "C" void cFEStateVideoPlayer__cFEStateVideoPlayer(void* self, int flags)
 {
     *(void***)((char*)self + 8) = D_00469928;
     if (*(void**)((char*)self + 0x248) != 0) {
@@ -3116,28 +3116,28 @@ extern "C" void func_001D2380(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D23E0);
+INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002533C8(void* mem);
-extern "C" void func_001D25E8(void* self);
+extern "C" void cFEStateVideoPlayer_Start(void* self);
 extern char str_MoviePlayer[];
 
 /**
  * Creates the video player's movie player and starts playback.
  *
  * Vtable slot 4 of D_00469928 (the create-screen slot; no screen is created). Allocates 68 bytes under the tag
- * "MoviePlayer", constructs them with func_002533C8() into +0x248 and calls func_001D25E8().
+ * "MoviePlayer", constructs them with func_002533C8() into +0x248 and calls cFEStateVideoPlayer_Start().
  */
-extern "C" void func_001D23E0(void* self)
+extern "C" void cFEStateVideoPlayer_onCreateScreen(void* self)
 {
     *(void**)((char*)self + 0x248) = func_002533C8(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
-    func_001D25E8(self);
+    cFEStateVideoPlayer_Start(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D2430);
+INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void func_00253418(void* p, int a1);
 
@@ -3147,7 +3147,7 @@ extern "C" void func_00253418(void* p, int a1);
  *
  * Vtable slot 5 of D_00469928.
  */
-extern "C" void func_001D2430(void* self)
+extern "C" void cFEStateVideoPlayer_onDestroyScreen(void* self)
 {
     void* moviePlayer = *(void**)((char*)self + 0x248);
     if (moviePlayer != 0) {
@@ -3158,7 +3158,7 @@ extern "C" void func_001D2430(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D2468);
+INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onRender2D);
 #ifdef SKIP_ASM
 extern "C" void func_00253890(void* p, int a1);
 extern "C" void* cUIState_onRender2D(void* self);
@@ -3169,7 +3169,7 @@ extern "C" void* cUIState_onRender2D(void* self);
  *
  * Vtable slot 15 of D_00469928.
  */
-extern "C" void func_001D2468(void* self)
+extern "C" void cFEStateVideoPlayer_onRender2D(void* self)
 {
     void* moviePlayer = *(void**)((char*)self + 0x248);
     if (moviePlayer != 0) {
@@ -3181,21 +3181,21 @@ extern "C" void func_001D2468(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D24A8);
+INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void cMoviePlayer_asyncUpdate(void* p);
-extern "C" void func_001D2638(void* self);
+extern "C" void cFEStateVideoPlayer_Stop(void* self);
 extern "C" void* cUIState_onUpdate(void* self);
 
 /**
  * Steps the movie each frame and stops the player once the movie ends or a requested stop has been drawn.
  *
  * Vtable slot 12 of D_00469928. With a movie player (+0x248): sets the updated flag (+0x274), runs
- * cMoviePlayer_asyncUpdate(), and calls func_001D2638() when a stop was requested (+0x27C) and a frame has been drawn
+ * cMoviePlayer_asyncUpdate(), and calls cFEStateVideoPlayer_Stop() when a stop was requested (+0x27C) and a frame has been drawn
  * since playback started (+0x278), or when the player's first word (its status) is nonzero. Then runs
  * cUIState_onUpdate().
  */
-extern "C" void func_001D24A8(void* self)
+extern "C" void cFEStateVideoPlayer_onUpdate(void* self)
 {
     void* moviePlayer = *(void**)((char*)self + 0x248);
     if (moviePlayer != 0) {
@@ -3203,7 +3203,7 @@ extern "C" void func_001D24A8(void* self)
         cMoviePlayer_asyncUpdate(moviePlayer);
         if ((*(int*)((char*)self + 0x27C) != 0 && *(int*)((char*)self + 0x278) != 0)
             || **(int**)((char*)self + 0x248) != 0) {
-            func_001D2638(self);
+            cFEStateVideoPlayer_Stop(self);
         }
     }
     cUIState_onUpdate(self);
@@ -3211,7 +3211,7 @@ extern "C" void func_001D24A8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D2518);
+INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onInputBegin);
 #ifdef SKIP_ASM
 struct sVEntry001D2518 {
     short delta;
@@ -3229,12 +3229,12 @@ static inline int vcall001D2518(void* obj, int slot)
  * Requests a stop of the video when the accept or back input (tests 5 and 6, vtable slots of @p obj) fires while input
  * is enabled (+0x270).
  *
- * Vtable slot 8 of D_00469928. Sets the stop request (+0x27C); func_001D24A8 acts on it.
+ * Vtable slot 8 of D_00469928. Sets the stop request (+0x27C); cFEStateVideoPlayer_onUpdate acts on it.
  *
  * @param obj  the input object
  * @return 1 when a stop was requested, otherwise 0
  */
-extern "C" int func_001D2518(void* self, void* obj)
+extern "C" int cFEStateVideoPlayer_onInputBegin(void* self, void* obj)
 {
     if (*(int*)((char*)self + 0x270) != 0) {
         if (vcall001D2518(obj, 5) != 0 || vcall001D2518(obj, 6) != 0) {
@@ -3247,7 +3247,7 @@ extern "C" int func_001D2518(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D2598);
+INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_setVideoSourceFiles);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 
@@ -3256,12 +3256,12 @@ extern "C" char* strcpy(char* dst, const char* src);
  * latter when it is 0.
  *
  * strcpy() without a length check into 256-byte buffers. Called by cFEStateRewardGalleryBase_showReward and
- * cFEStateBonusMaterial_onWidgetEvent right after the constructor func_001D22F0.
+ * cFEStateBonusMaterial_onWidgetEvent right after the constructor cFEStateVideoPlayer_cFEStateVideoPlayer.
  *
  * @param videoFile  the video file name
  * @param audioFile  the audio file name, or 0 for none
  */
-extern "C" void func_001D2598(void* self, const char* videoFile, const char* audioFile)
+extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(void* self, const char* videoFile, const char* audioFile)
 {
     strcpy((char*)self + 0x48, videoFile);
     if (audioFile != 0) {
@@ -3273,9 +3273,9 @@ extern "C" void func_001D2598(void* self, const char* videoFile, const char* aud
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D25E8);
+INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_Start);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002B3A70(void* p);
 extern "C" int func_002534A8(void* p, void* q);
 extern "C" void func_00253860(void* p);
@@ -3283,13 +3283,13 @@ extern "C" void func_00253860(void* p);
 /**
  * Starts the movie: turns the current song down, then opens and starts the movie player with the source files.
  *
- * Calls func_002B3A70() on func_0028B180() + 0x118 (it sets the current song's level to 0), sets the word at +0x254 of
+ * Calls func_002B3A70() on cAudioInterface_bxAudio() + 0x118 (it sets the current song's level to 0), sets the word at +0x254 of
  * the settings block to 1, opens the movie with func_002534A8() and the settings block (+0x24C), starts it with
- * func_00253860(), and clears the rendered (+0x278) and updated (+0x274) flags. Called by func_001D23E0.
+ * func_00253860(), and clears the rendered (+0x278) and updated (+0x274) flags. Called by cFEStateVideoPlayer_onCreateScreen.
  */
-extern "C" void func_001D25E8(void* self)
+extern "C" void cFEStateVideoPlayer_Start(void* self)
 {
-    func_002B3A70((char*)func_0028B180() + 0x118);
+    func_002B3A70((char*)cAudioInterface_bxAudio() + 0x118);
     *(int*)((char*)self + 0x254) = 1;
     func_002534A8(*(void**)((char*)self + 0x248), (char*)self + 0x24C);
     func_00253860(*(void**)((char*)self + 0x248));
@@ -3299,22 +3299,22 @@ extern "C" void func_001D25E8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", func_001D2638);
+INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_Stop);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002B3A98(void* self);
 extern "C" void func_0039F190(void* self, int a1);
 
 /**
  * Stops the video player: restores the current song and closes the front state.
  *
- * Calls func_002B3A98() on func_0028B180() + 0x118 (it sets the current song's level back to 0x1000), clears the stop
+ * Calls func_002B3A98() on cAudioInterface_bxAudio() + 0x118 (it sets the current song's level back to 0x1000), clears the stop
  * request (+0x27C), and marks the front state on the engine's state stack (mpEngine + 0x18) pending delete in mode 6
- * with func_0039F190(stack, 1). Called by func_001D24A8.
+ * with func_0039F190(stack, 1). Called by cFEStateVideoPlayer_onUpdate.
  */
-extern "C" void func_001D2638(void* self)
+extern "C" void cFEStateVideoPlayer_Stop(void* self)
 {
-    func_002B3A98((char*)func_0028B180() + 0x118);
+    func_002B3A98((char*)cAudioInterface_bxAudio() + 0x118);
     *(int*)((char*)self + 0x27C) = 0;
     func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
 }

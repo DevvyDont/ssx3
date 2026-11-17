@@ -58,7 +58,7 @@ extern "C" void cFont_textf1(void* self, float x, float y, float sx, float sy, c
 extern "C" void cFont_centertextf(void* self, float x, float y, const char* fmt, ...);
 extern "C" void cFont_righttextf(void* self, float x, float y, const char* fmt, ...);
 extern "C" void func_00256038(void* comm, int* info);
-extern "C" char* func_0028B180();
+extern "C" char* cAudioInterface_bxAudio();
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
 extern "C" void func_00392908(void* self, float x, float y, const char* str);
 extern "C" void func_00392A60(void* self, const char* str, float x, float y);
@@ -194,7 +194,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     y += lineheight;
     font->setColor(self->cursor == 11 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Playlist);
-    cFont_righttextf(font, 580.0f, y, str_pct_s, func_0028B180() + (self->optTrack * 20 + 24740));
+    cFont_righttextf(font, 580.0f, y, str_pct_s, cAudioInterface_bxAudio() + (self->optTrack * 20 + 24740));
     y += lineheight;
     unsigned int ip = 0;
     if (cCommSystem_mCommSystem != 0)
@@ -376,7 +376,7 @@ extern "C" int cDebugMenuScreen_getMaxAIRiders(void* self, int path, int mode)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017D200);
+INCLUDE_ASM("fe/debugfe", ContinueMenu_ContinueMenu);
 #ifdef SKIP_ASM
 extern void* D_0046D740[];
 extern char str_Continue[];
@@ -389,11 +389,11 @@ extern "C" void cMenu_addItem(void* menu, void* item, int index);
  *
  * Runs cMenu_cMenu, stores the menu's vtable D_0046D740 at +0x12C (its destructor is func_001DCD58), builds the item at
  * +0x130 with func_002CCDF0 and str_Continue and appends it (cMenu_addItem, index -1). The debug lobby screen
- * (func_0017D298) keeps it at +0x604 and pushes it under every error and "declined" message.
+ * (cDebugLobbyScreen_cDebugLobbyScreen) keeps it at +0x604 and pushes it under every error and "declined" message.
  *
  * @return @p self
  */
-extern "C" void* func_0017D200(void* self)
+extern "C" void* ContinueMenu_ContinueMenu(void* self)
 {
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D740;
@@ -414,7 +414,7 @@ extern "C" void func_00259230(void* ev);
  * Passes one lobby event to the debug lobby screen, when one exists, and then to the real front end.
  *
  * The lobby manager's update (func_0025AC50) calls it for every event it pops from mEventList, with itself as @p self
- * (unused here). When the debug lobby screen pointer D_004A4E90 is set (func_0017D298 sets it, func_0017D3B0 clears it)
+ * (unused here). When the debug lobby screen pointer D_004A4E90 is set (cDebugLobbyScreen_cDebugLobbyScreen sets it, cDebugLobbyScreen__cDebugLobbyScreen clears it)
  * the event goes to func_0017D6F0; func_00259230 then hands it to the real front end's top UI state.
  *
  * @param ev  the event (its type at +0x0)
@@ -428,7 +428,7 @@ extern "C" void func_0017D260(void* self, void* ev)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017D298);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_cDebugLobbyScreen);
 #ifdef SKIP_ASM
 extern void* D_0046D350[];
 extern int cBXString_EmptyString;
@@ -450,10 +450,10 @@ struct sDbgOwner17D298 {
 /**
  * Constructs the debug front end's lobby screen (cDebugLobbyScreen in the July 2003 preview) with its eight menus.
  *
- * Stores the vtable D_0046D350 (slots: destructor func_0017D3B0, update func_0017D688, draw func_0017E5C8), zeroes the
+ * Stores the vtable D_0046D350 (slots: destructor cDebugLobbyScreen__cDebugLobbyScreen, update cDebugLobbyScreen_update, draw cDebugLobbyScreen_draw), zeroes the
  * state at +0x4 and builds the menu system at +0x8 (cMenuSys_cMenuSys). Each menu gets a one-pointer functor holding
  * this screen, which its command handler calls back: the account menu "Login Method" at +0x70 (func_001DA988, Create
- * Account and Login), the "Continue" menu at +0x604 (func_0017D200), "Select Persona" at +0x74C (func_001DACB8, with
+ * Account and Login), the "Continue" menu at +0x604 (ContinueMenu_ContinueMenu), "Select Persona" at +0x74C (func_001DACB8, with
  * Create Persona and Delete Persona), "Select Room" at +0xD2C (func_001DAE20), "Room Occupants" at +0x1044
  * (func_001DAF08, occupants and Chat), the chat menu at +0x1534 (func_001DB028), the "You've been Challenged!" menu at
  * +0x18C0 (__sti__all_in_one_main_cpp, Accept and Decline) and the "Abort" menu at +0x1AAC (func_001DB2B0). The three
@@ -465,7 +465,7 @@ struct sDbgOwner17D298 {
  *
  * @return @p self
  */
-extern "C" void* func_0017D298(char* self)
+extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(char* self)
 {
     *(void***)self = D_0046D350;
     *(int*)(self + 0x4) = 0;
@@ -475,7 +475,7 @@ extern "C" void* func_0017D298(char* self)
     sDbgOwner17D298 onLogin;
     onLogin.owner = self;
     func_001DA988(self + 0x70, &onCreate, &onLogin);
-    func_0017D200(self + 0x604);
+    ContinueMenu_ContinueMenu(self + 0x604);
     sDbgOwner17D298 onSelectPersona;
     onSelectPersona.owner = self;
     sDbgOwner17D298 onCreatePersona;
@@ -516,7 +516,7 @@ extern "C" void* func_0017D298(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017D3B0);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen__cDebugLobbyScreen);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cMenuItem__cMenuItem(void* self, int flags);
@@ -607,7 +607,7 @@ static inline void dtorF_17D3B0(char* sub)
  *
  * @param flags  g++ destructor flags; bit 0 set frees the screen
  */
-extern "C" void func_0017D3B0(char* self, int flags)
+extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(char* self, int flags)
 {
     *(void***)self = D_0046D350;
     D_004A4E90 = 0;
@@ -630,7 +630,7 @@ extern "C" void func_0017D3B0(char* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017D688);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_update);
 #ifdef SKIP_ASM
 extern "C" void func_00255A20(void*);
 extern "C" void func_0025AC50(void*);
@@ -662,7 +662,7 @@ static inline void* sMenuStack17D688_top(sMenuStack17D688* self)
  * at +0x8 has a menu open it runs its input (func_002CC0C0), then func_0017DB18 advances the state. cDebugFE_update
  * calls it through the active screen's virtual slot 2.
  */
-extern "C" void func_0017D688(sDebugFE17D688* self)
+extern "C" void cDebugLobbyScreen_update(sDebugFE17D688* self)
 {
     func_00255A20(cCommSystem_mCommSystem);
     func_0025AC50(LobbyMan_mLobbyMan);
@@ -877,7 +877,7 @@ static inline void SetMode0017DA30(void* self, int mode)
 /**
  * Shows the error screen that fits the debug lobby screen's current step after a lobby error event.
  *
- * Stores @p errorCode at +0x1C14 (func_0017E5C8 prints its text through func_00260E50) and, by the state at +0x4, moves to the
+ * Stores @p errorCode at +0x1C14 (cDebugLobbyScreen_draw prints its text through func_00260E50) and, by the state at +0x4, moves to the
  * matching error state and opens the Continue menu (+0x604): 2 (connecting) goes to 18, 4 (creating account) to 20, 7,
  * 8 and 9 (persona steps) to 22, 11 (joining a room) to 23 and 13 (waiting on a challenge) to 24. In state 5
  * (authenticating) it goes to 21 unless SSXApp->unk_74 (automatic login) is set; then it copies SSXApp->UserName and
@@ -1592,7 +1592,7 @@ extern "C" void func_0017E558(sDebugFEState17E558* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017E5C8);
+INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_draw);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -1702,7 +1702,7 @@ static inline int isEq17E5C8(int a, int b) { return a == b; }
  * open, and while the comm system is connected (mNetConnState 5) this console's address (func_00256038) is centred in
  * yellow at (320, 420), scale 0.8. cDebugFE_render calls it through the active screen's virtual slot 3.
  */
-extern "C" void func_0017E5C8(sDebugFE17E5C8* self)
+extern "C" void cDebugLobbyScreen_draw(sDebugFE17E5C8* self)
 {
     sFont17E5C8* font = *(sFont17E5C8**)((char*)SSXApp->DebugFE + 0x18);
     switch (self->state) {
@@ -1952,7 +1952,7 @@ extern "C" void cHeartBeat_update(void* heartBeat)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017F500);
+INCLUDE_ASM("fe/debugfe", cHeartBeat_draw);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_004A28AC;
@@ -2000,7 +2000,7 @@ static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned i
  * @param p_  the heartbeat (cHeartBeat_update advances it)
  * @param tex  texture id to draw with
  */
-extern "C" void func_0017F500(void* p_, int tex)
+extern "C" void cHeartBeat_draw(void* p_, int tex)
 {
     sFirefly_17F2D0* self = (sFirefly_17F2D0*)p_;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -2024,7 +2024,7 @@ extern "C" void func_0017F500(void* p_, int tex)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_0017F7B8);
+INCLUDE_ASM("fe/debugfe", cDebugFE_cDebugFE);
 #ifdef SKIP_ASM
 extern "C" void cFadeScreen_cFadeScreen(void* self);
 extern "C" void MEM_fill(void* dst, int c, int n);
@@ -2056,7 +2056,7 @@ struct sDbgList17F7B8 {
  *
  * @return @p self
  */
-extern "C" void* func_0017F7B8(void* self)
+extern "C" void* cDebugFE_cDebugFE(void* self)
 {
     cFadeScreen_cFadeScreen(self);
     *(void**)self = cDebugFE_vtbl;
@@ -2111,7 +2111,7 @@ extern "C" void* cFont_cFont(void* self, const char* name, int a2);
 extern "C" int* FILE_loadz(const char* name, int flags);
 extern "C" int* FILE_load(const char* name, int flags);
 extern "C" void* cDebugMenuScreen_cDebugMenuScreen(void* self);
-extern "C" void* func_0017D298(char* self);
+extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(char* self);
 
 struct sVEnt_17F868 { short delta; short index; void* fn; };
 typedef void (*Fn1_17F868)(void*, int);
@@ -2167,7 +2167,7 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
         self->objs[i] = 0;
     }
     self->cur = self->objs[0] = cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(35912, str_DebugMenu, 0, 0));
-    self->objs[1] = func_0017D298((char*)cMemMan_alloc(7192, str_LobbyMenu, 0, 0));
+    self->objs[1] = cDebugLobbyScreen_cDebugLobbyScreen((char*)cMemMan_alloc(7192, str_LobbyMenu, 0, 0));
     if (SSXApp->unk_74) {
         self->cur = self->objs[1];
     } else {
@@ -2311,7 +2311,7 @@ INCLUDE_ASM("fe/debugfe", cDebugFE_render);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 extern "C" int cFadeScreen_drawFade(void* self);
-extern "C" void func_0017F500(void* self, int a1);
+extern "C" void cHeartBeat_draw(void* self, int a1);
 
 struct sVEnt_17FBF0 { short delta; short index; void* fn; };
 typedef int (*FnI_17FBF0)(void*);
@@ -2353,7 +2353,7 @@ static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
  *
  * Returns 0 at once when GrMan's slot 17 returns 0. Draws the fade overlay with cFadeScreen_drawFade (cFadeScreen's
  * render); unless that reports the screen fully faded it sets a black clear colour (slot 15), the 640x480 viewport
- * (slot 26), the identity matrix (slot 34) and the render-state bits, draws the heartbeat (func_0017F500 on +0x24
+ * (slot 26), the identity matrix (slot 34) and the render-state bits, draws the heartbeat (cHeartBeat_draw on +0x24
  * with the texture at +0x1C) and calls the active screen's render virtual (+0x14, slot 3). Always ends with GrMan
  * slot 20.
  *
@@ -2390,7 +2390,7 @@ extern "C" int cDebugFE_render(char* self)
         setB12_17FBF0(rs_17FBF0((char*)graphicsMan4), 13);
         setB2_17FBF0(rs_17FBF0((char*)graphicsMan4), 5);
         setB22_17FBF0(rs_17FBF0((char*)graphicsMan4), 1);
-        func_0017F500(self + 0x24, *(int*)(self + 0x1C));
+        cHeartBeat_draw(self + 0x24, *(int*)(self + 0x1C));
         setC5_17FBF0(rs_17FBF0((char*)GrMan), 9);
         void* menu = *(void**)(self + 0x14);
         sVEnt_17FBF0* mvt = *(sVEnt_17FBF0**)menu;
@@ -3061,7 +3061,7 @@ extern int cUIGroup_vtbl[];
  * text (+0xEC), mCursorPos (+0x16C) 0, mCurrentKey (+0x170) 10 (the "A" key) and mMaxChars (+0xD4) 45. No caller of it
  * is known (none in the C sources or the asm).
  *
- * @param parentState  the owning UI state; func_00180840 calls its virtual slot 19 after each key press
+ * @param parentState  the owning UI state; cScreenKeyboard_pressKey calls its virtual slot 19 after each key press
  * @return @p self
  */
 extern "C" void* func_00180508(char* self, int parentState)
@@ -3095,7 +3095,7 @@ extern "C" void* func_00180508(char* self, int parentState)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001805D8);
+INCLUDE_ASM("fe/debugfe", cScreenKeyboard_setInputText);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
@@ -3108,7 +3108,7 @@ extern "C" int strlen(const char* s);
  *
  * @param text  the new text
  */
-extern "C" void func_001805D8(void* self, const char* text)
+extern "C" void cScreenKeyboard_setInputText(void* self, const char* text)
 {
     char* buf = (char*)self + 0xEC;
     strcpy(buf, text);
@@ -3117,16 +3117,16 @@ extern "C" void func_001805D8(void* self, const char* text)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180618);
+INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveLeft);
 #ifdef SKIP_ASM
 /**
  * Moves the on-screen keyboard's selection one key left, wrapping within the row.
  *
  * Keys are 4 rows of 10 (0-9 digits, 10-35 A-Z, 36 arrLeft, 37 arrRight, 38 spc, 39 end) in mCurrentKey (+0x170). The
  * first key of a row (0, 10, 20, 30) wraps to the last (+9); from 39 it jumps to 37 when mIncludeSpace (+0xE0) is 0,
- * skipping the space key; otherwise it steps back one. Called by the keyboard's input handler func_00180EF0.
+ * skipping the space key; otherwise it steps back one. Called by the keyboard's input handler cScreenKeyboard_onInput.
  */
-extern "C" void func_00180618(void* self)
+extern "C" void cScreenKeyboard_kbMoveLeft(void* self)
 {
     int keyIndex = *(int*)((char*)self + 0x170);
     if (keyIndex == 0 || keyIndex == 10 || keyIndex == 20 || keyIndex == 30) {
@@ -3140,16 +3140,16 @@ extern "C" void func_00180618(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180678);
+INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveRight);
 #ifdef SKIP_ASM
 /**
  * Moves the on-screen keyboard's selection one key right, wrapping within the row.
  *
  * The last key of a row (9, 19, 29, 39) wraps to the first (-9); from 37 it jumps to 39 when mIncludeSpace (+0xE0) is
  * 0, skipping the space key; otherwise mCurrentKey (+0x170) steps forward one. Called by the keyboard's input handler
- * func_00180EF0.
+ * cScreenKeyboard_onInput.
  */
-extern "C" void func_00180678(void* self)
+extern "C" void cScreenKeyboard_kbMoveRight(void* self)
 {
     int keyIndex = *(int*)((char*)self + 0x170);
     if (keyIndex == 9 || keyIndex == 19 || keyIndex == 29 || keyIndex == 39) {
@@ -3163,7 +3163,7 @@ extern "C" void func_00180678(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001806D8);
+INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveUp);
 #ifdef SKIP_ASM
 /**
  * Moves the on-screen keyboard's selection one row up, wrapping from the top row to the bottom one.
@@ -3171,9 +3171,9 @@ INCLUDE_ASM("fe/debugfe", func_001806D8);
  * From the digit row (0-9) it goes to the bottom row (+30), or to 39 from key 8 when mIncludeSpace (+0xE0) is 0 (key 38
  * is the space). From the A-J row (10-19) with mIncludeNumbers (+0xD8) 0 it skips the hidden digit row and goes to the
  * bottom row (+20), again 39 from key 18 without space. Otherwise mCurrentKey (+0x170) goes up one row (-10). Called by
- * the keyboard's input handler func_00180EF0.
+ * the keyboard's input handler cScreenKeyboard_onInput.
  */
-extern "C" void func_001806D8(void* self)
+extern "C" void cScreenKeyboard_kbMoveUp(void* self)
 {
     int keyIndex = *(int*)((char*)self + 0x170);
     if (keyIndex >= 0 && keyIndex < 10) {
@@ -3195,16 +3195,16 @@ extern "C" void func_001806D8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180768);
+INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveDown);
 #ifdef SKIP_ASM
 /**
  * Moves the on-screen keyboard's selection one row down, wrapping from the bottom row to the top one.
  *
  * From the bottom row (30-39) it goes to the digit row (-30) when mIncludeNumbers (+0xD8) is set, else to the A-J row
  * (-20). From key 28 with mIncludeSpace (+0xE0) 0 it goes to 39 (skipping the space key 38). Otherwise mCurrentKey
- * (+0x170) goes down one row (+10). Called by the keyboard's input handler func_00180EF0.
+ * (+0x170) goes down one row (+10). Called by the keyboard's input handler cScreenKeyboard_onInput.
  */
-extern "C" void func_00180768(void* self)
+extern "C" void cScreenKeyboard_kbMoveDown(void* self)
 {
     int keyIndex = *(int*)((char*)self + 0x170);
     if (keyIndex >= 30 && keyIndex < 40) {
@@ -3222,14 +3222,14 @@ extern "C" void func_00180768(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001807C8);
+INCLUDE_ASM("fe/debugfe", cScreenKeyboard_toggleShift);
 #ifdef SKIP_ASM
 /**
- * Toggles the on-screen keyboard's shift (mShiftOn, +0xE4), which func_00180840 uses to choose upper case.
+ * Toggles the on-screen keyboard's shift (mShiftOn, +0xE4), which cScreenKeyboard_pressKey uses to choose upper case.
  *
  * @return the new mShiftOn value
  */
-extern "C" int func_001807C8(void* self)
+extern "C" int cScreenKeyboard_toggleShift(void* self)
 {
     int toggled = *(int*)((char*)self + 0xe4) ^ 1;
     *(int*)((char*)self + 0xe4) = toggled;
@@ -3238,7 +3238,7 @@ extern "C" int func_001807C8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001807D8);
+INCLUDE_ASM("fe/debugfe", cScreenKeyboard_getPasswordText);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct sStarsK1807D8 {
@@ -3252,7 +3252,7 @@ struct sStarsK1807D8 {
  *
  * @return the masked text (+0x12C)
  */
-extern "C" char* func_001807D8(sStarsK1807D8* self)
+extern "C" char* cScreenKeyboard_getPasswordText(sStarsK1807D8* self)
 {
     int n = strlen(self->name);
     int i;
@@ -3265,7 +3265,7 @@ extern "C" char* func_001807D8(sStarsK1807D8* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180840);
+INCLUDE_ASM("fe/debugfe", cScreenKeyboard_pressKey);
 #ifdef SKIP_ASM
 struct cDbgKbdTarget {
     int f0;
@@ -3311,13 +3311,13 @@ struct sDbgKbd {
  * writes a space. 36 (arrLeft) moves the cursor back one and cuts the text there; 37 (arrRight) moves it forward one
  * and writes a terminator at the new place. Moving forward stops below mMaxChars (+0xD4). Finally the owner state at
  * +0xD0 gets its virtual slot 19 with (0, 13) for the end key (39) or (0, 12) for any other. Called by the keyboard's
- * input handler func_00180EF0.
+ * input handler cScreenKeyboard_onInput.
  *
  * Likely bugs: the digit and space keys do not write a terminator after the new character (the letter keys do), so
  * characters cut off by arrLeft come back after typing a digit or a space; arrRight at the end of the text leaves the
  * old terminator in place, so what is typed after it is hidden.
  */
-extern "C" void func_00180840(sDbgKbd* self)
+extern "C" void cScreenKeyboard_pressKey(sDbgKbd* self)
 {
     int k = self->key;
     if (k >= 0 && k < 10) {
@@ -3351,7 +3351,7 @@ extern "C" void func_00180840(sDbgKbd* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_001809B0);
+INCLUDE_ASM("fe/debugfe", cScreenKeyboard_getKeyObjName);
 #ifdef SKIP_ASM
 struct sStr10 { char c[10]; };
 extern sStr10 D_0045D550;
@@ -3371,7 +3371,7 @@ extern "C" char* strcat(char*, const char*);
  * @param keyIndex  key index (0-39)
  * @param dst  output buffer (at least 18 bytes)
  */
-extern "C" void func_001809B0(void* self, int keyIndex, char* dst)
+extern "C" void cScreenKeyboard_getKeyObjName(void* self, int keyIndex, char* dst)
 {
     char buf[2];
     *(sStr10*)dst = D_0045D550;
@@ -3396,7 +3396,7 @@ extern "C" void func_001809B0(void* self, int keyIndex, char* dst)
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", func_00180A90);
+INCLUDE_ASM("fe/debugfe", cScreenKeyboard_getCursorObjName);
 #ifdef SKIP_ASM
 struct sStr8 { char c[8]; };
 extern char str_cursor[];
@@ -3410,13 +3410,13 @@ extern "C" char* strcat(char*, const char*);
  * Builds the UI object name of a keyboard key's cursor: "cursor_" plus the key's label.
  *
  * Starts @p dst with "cursor_" (str_cursor) and appends the digit for 0-9, the upper-case letter for 10-35, or
- * "arrLeft", "arrRight", "spc" or "end" for 36..39. The keyboard's input handler func_00180EF0 uses it to hide the old
+ * "arrLeft", "arrRight", "spc" or "end" for 36..39. The keyboard's input handler cScreenKeyboard_onInput uses it to hide the old
  * cursor and show the new one; cScreenKeyboard_initScreenKeyboard to hide every cursor but the one on "A".
  *
  * @param keyIndex  key index (0-39)
  * @param dst  output buffer (at least 16 bytes)
  */
-extern "C" void func_00180A90(void* self, int keyIndex, char* dst)
+extern "C" void cScreenKeyboard_getCursorObjName(void* self, int keyIndex, char* dst)
 {
     char buf[2];
     *(sStr8*)dst = *(sStr8*)str_cursor;

@@ -716,7 +716,7 @@ int cRiderMetrix_addHUDfx1_impl(void* self, int type, int value, int data, float
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_update);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_earnComboChain(void*);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 struct sGradeStep_119210;
 extern "C" int cRiderMetrix_updateBonusLevelAndCalcPoints(void* self, int* idx, sGradeStep_119210* tbl, int type, float x);
 extern "C" void cHUDFX_update(void* slot);
@@ -883,7 +883,7 @@ extern "C" void cRiderMetrix_update(sMetrix17C28* self)
     }
     func_00416210(self->clear, 0, 8);
     self->dirty = 1;
-    cSSXAudio_SetCurTrickPower(func_0028B180(), self->rider, self->mult);
+    cSSXAudio_SetCurTrickPower(cAudioInterface_bxAudio(), self->rider, self->mult);
 }
 #endif
 
@@ -1033,7 +1033,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
     int pts = cRiderMetrix_getCurTrickPoints(self);
     if (pts > 0) {
         cRiderMetrix_addHUDfx1(self, 1, pts, cRiderMetrix_calcTrickLevel(self, pts), -1.0f);
-        cSSXAudio_PointsEvent(func_0028B180(), self->rider, pts);
+        cSSXAudio_PointsEvent(cAudioInterface_bxAudio(), self->rider, pts);
     }
     if (cRider_getControlState(self->rider) == 8 && !subStateIs_117FE0(self->rider->sub, 3))
         func_001171A8_f(&self->slots[11], 11, 0, self->rider->sub->f330 <? 1.0f, 0);
@@ -1254,26 +1254,26 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
             k = left;
         if (slotFree_117FE0(&self->slots[10])) {
             func_001171A8_f(&self->slots[10], 10, 0, 0.0f, 0);
-            cSSXAudio_StartUberSpin(func_0028B180(), self->rider);
+            cSSXAudio_StartUberSpin(cAudioInterface_bxAudio(), self->rider);
         }
         float cur = self->slots[10].value / self->slots[10].total;
         float curPct = approach_117FE0((float)k * 0.1111111119389534f <? 1.0f, cur, 0.01666666753590107f);
         func_001171A8_f(&self->slots[10], 10, 0, curPct, k);
     } else {
         if (!slotFree_117FE0(&self->slots[10]))
-            cSSXAudio_EndUberSpin(func_0028B180(), self->rider);
+            cSSXAudio_EndUberSpin(cAudioInterface_bxAudio(), self->rider);
         cRiderMetrix_removeHUDfx(self, 10);
     }
     if (slotFree_117FE0(&self->slots[9])) {
         if (self->rider->f2F0 > 0.0f) {
             func_001171A8_f(&self->slots[9], 9, 0, 0.0f, 0);
-            func_00299638(func_0028B180(), self->rider);
+            func_00299638(cAudioInterface_bxAudio(), self->rider);
         }
     } else {
         float cur = self->slots[9].value / self->slots[9].total;
         if (cur == 1.0f && self->rider->f2F0 == 0.0f) {
             cRiderMetrix_removeHUDfx(self, 9);
-            cSSXAudio_LoseMaxPowerEvent(func_0028B180(), self->rider);
+            cSSXAudio_LoseMaxPowerEvent(cAudioInterface_bxAudio(), self->rider);
         } else {
             func_001171A8_f(&self->slots[9], 9, 0, approach_117FE0(1.0f - self->rider->f2F0 * 0.05000000074505806f, cur, 0.01666666753590107f), self->rider->f2F4 > 11 ? 11 : self->rider->f2F4);
         }
@@ -1643,7 +1643,7 @@ extern "C" float cRiderMetrix_evCollectMultiplier(char* self, float value)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evCheckpoint);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" int cGameModeMan_riderCheckpointHit(void* mgr, int id, int a2);
 extern "C" void func_002A3CE8(void* snd, void* rider, int a2);
@@ -1679,7 +1679,7 @@ extern "C" float cRiderMetrix_evCheckpoint(char* self, int timeBonusSec)
             cRiderMetrix_addHUDfx1(self, 41, timeBonusSec, 0, 2.5f);
             if (rmRiderFlags_1194C0(*(char**)(self + 0x1AC)))
             {
-                func_002A3CE8(func_0028B180(), *(void**)(self + 0x1AC), 1);
+                func_002A3CE8(cAudioInterface_bxAudio(), *(void**)(self + 0x1AC), 1);
             }
         }
     }
@@ -2482,7 +2482,7 @@ struct sTrickId;
 extern "C" int cRiderMetrix_buildTrickName(void* self, sTrickId* id, int stance, int alternate, int style, int flag);
 extern "C" int cRiderMetrix_checkForMonsterTrick(void* self, sTrickId* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, int rider);
 extern "C" int cRiderMetrix_addToHistory(void* self, sTrickId* id);
 extern "C" void cRiderMetrix_addTrick(void* self, sTrickId* id, int repeat);
@@ -2516,7 +2516,7 @@ extern "C" void cRiderMetrix_earnName(void* self, int stance, int alternate, int
         {
             *(float*)((char*)self + 0x14) += pts * 9.999999747378752e-05f;
             cRiderMetrix_addHUDfx1(self, 50, pts, 0, 1.5f);
-            cSSXAudio_LandedMonsterCombo(func_0028B180(), *(int*)((char*)self + 0x1AC));
+            cSSXAudio_LandedMonsterCombo(cAudioInterface_bxAudio(), *(int*)((char*)self + 0x1AC));
         }
         cRiderMetrix_addTrick(self, id, cRiderMetrix_addToHistory(self, id) > 0);
     }
@@ -2548,7 +2548,7 @@ extern "C" int cRiderMetrix_buildTrickName(void* self, sTrickId* id, int stance,
 extern "C" int cRiderMetrix_getCurTrickPoints(void* self);
 extern "C" int cRiderMetrix_checkForMonsterTrick(void* self, sTrickId* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, int rider);
 extern "C" int cRiderMetrix_addToHistory(void* self, sTrickId* id);
 extern "C" void cRiderMetrix_addTrick(void* self, sTrickId* id, int repeat);
@@ -2642,7 +2642,7 @@ extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alte
             if (bonus > 0) {
                 *(float*)((char*)self + 0x14) += (float)bonus * 0.0001f;
                 cRiderMetrix_addHUDfx1(self, 50, bonus, 0, 1.5f);
-                cSSXAudio_LandedMonsterCombo(func_0028B180(), *(int*)((char*)self + 0x1ac));
+                cSSXAudio_LandedMonsterCombo(cAudioInterface_bxAudio(), *(int*)((char*)self + 0x1ac));
             }
             repeats = cRiderMetrix_addToHistory(self, &id);
             cRiderMetrix_addTrick(self, &id, repeats > 0);
@@ -2676,7 +2676,7 @@ extern "C" float cRiderMetrix_earnNameAndPoints(void* self, int stance, int alte
         *(int*)((char*)self + 0x108) += *(int*)((char*)self + 0x80);
 
         if (*(int*)((char*)self + 0x54) > 0) {
-            cSSXAudio_LandedUberTrick(func_0028B180(), *(int*)((char*)self + 0x1ac), *(int*)((char*)self + 0x54),
+            cSSXAudio_LandedUberTrick(cAudioInterface_bxAudio(), *(int*)((char*)self + 0x1ac), *(int*)((char*)self + 0x54),
                           *(int*)((char*)self + 0x114));
         }
 

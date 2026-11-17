@@ -1614,7 +1614,7 @@ extern "C" int func_00283BB8(void* self);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00283DA0(void* self);
 extern "C" int func_00283DC0(void* self, void* out);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 
 struct sDmCmd7598 {
     int category;   // 0x0
@@ -1653,7 +1653,7 @@ extern "C" void func_00277598(void* selfp, int n)
                         snd = ent[5];
                     }
                     if (snd >= 0) {
-                        char* soundMan = (char*)func_0028B180();
+                        char* soundMan = (char*)cAudioInterface_bxAudio();
                         sDmSndVEntry7598* vt = *(sDmSndVEntry7598**)(soundMan + 0x5558);
                         char* sys = soundMan + 0x118;
                         vt[4].fn(sys + vt[4].delta, snd);

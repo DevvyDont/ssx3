@@ -7,15 +7,15 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-// PORT: func_001A34A0__FPv is called with (self, obj) here; bind the 2-arg form to that symbol.
-void func_001A34A0_2(void* self, void* obj) __asm__("func_001A34A0__FPv");
+// PORT: cFEStateMPCircuit_initCircuitList__FPv is called with (self, obj) here; bind the 2-arg form to that symbol.
+void cFEStateMPCircuit_initCircuitList_2(void* self, void* obj) __asm__("cFEStateMPCircuit_initCircuitList__FPv");
 extern char str_108cct_select[];
 extern char str_ListBox[];
 
 /**
  * Creates the multiplayer circuit select screen ("108cct_select") and sets up its "ListBox".
  *
- * Sets the list box's flag 0x80, clears flag 1, and fills it with func_001A34A0().
+ * Sets the list box's flag 0x80, clears flag 1, and fills it with cFEStateMPCircuit_initCircuitList().
  */
 extern "C" void cFEStateMPCircuit_onCreateScreen(void* self)
 {
@@ -28,7 +28,7 @@ extern "C" void cFEStateMPCircuit_onCreateScreen(void* self)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ListBox));
     if (obj != 0) {
         *(int*)((char*)obj + 0x14) = (*(int*)((char*)obj + 0x14) & ~1) | 0x80;
-        func_001A34A0_2(self, obj);
+        cFEStateMPCircuit_initCircuitList_2(self, obj);
     }
 }
 #endif
@@ -54,13 +54,13 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" char* cUIListBox_getCurrentAsciiText(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
-void func_001A34A8(void* self);
+void cFEStateMPCircuit_updateWidget(void* self);
 extern char str_ListBox[];
 
 /**
  * Plays the screen frame named after the list box's current entry, then gives the state focus.
  *
- * func_001A34A8() is empty in this build.
+ * cFEStateMPCircuit_updateWidget() is empty in this build.
  *
  * @param pPreSt  the state that had focus before (On Tour pPreSt), passed on to cUIState_onGainFocus()
  */
@@ -73,7 +73,7 @@ extern "C" void cFEStateMPCircuit_onGainFocus(void* self, int pPreSt)
             cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
         }
     }
-    func_001A34A8(self);
+    cFEStateMPCircuit_updateWidget(self);
     cUIState_onGainFocus(self, pPreSt);
 }
 #endif
@@ -87,7 +87,7 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" char* cUIListBox_getCurrentAsciiText(void* self);
 extern "C" void cUIStateStack_push(void* list, void* item);
-void func_001A34A8(void* self);
+void cFEStateMPCircuit_updateWidget(void* self);
 
 struct sVEntry_33A0 {
     short delta;
@@ -131,7 +131,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(void* self, void* item, unsigned
         if (frame != 0xFFFF) {
             cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
         }
-        func_001A34A8(self);
+        cFEStateMPCircuit_updateWidget(self);
         break;
     }
     }
@@ -139,7 +139,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(void* self, void* item, unsigned
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A34A0__FPv);
+INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_initCircuitList__FPv);
 #ifdef SKIP_ASM
 /**
  * Fills the multiplayer circuit select's list box; empty in this build.
@@ -147,13 +147,13 @@ INCLUDE_ASM("fe/ovstatemission", func_001A34A0__FPv);
  * cFEStateMPCircuit_onCreateScreen calls it with the screen's "ListBox" widget as a second argument, which this
  * definition does not declare.
  */
-void func_001A34A0(void* self)
+void cFEStateMPCircuit_initCircuitList(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A34A8__FPv);
+INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_updateWidget__FPv);
 #ifdef SKIP_ASM
 /**
  * Refreshes the multiplayer circuit select after its selection changes; empty in this build.
@@ -161,25 +161,25 @@ INCLUDE_ASM("fe/ovstatemission", func_001A34A8__FPv);
  * Called by cFEStateMPCircuit_onGainFocus and by cFEStateMPCircuit_onWidgetEvent for a list change (event 9), each
  * after playing the frame of the current entry.
  */
-void func_001A34A8(void* self)
+void cFEStateMPCircuit_updateWidget(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A34B0);
+INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_getCircuitEvent);
 #ifdef SKIP_ASM
 /**
  * Stub that always returns -1; nothing in the program calls it.
  *
  * @return -1
  */
-extern "C" int func_001A34B0(void) {
+extern "C" int cFEStateMPCircuit_getCircuitEvent(void) {
     return -1;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A34B8);
+INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_getTopUnlockedPeakNum);
 #ifdef SKIP_ASM
 extern "C" int cBENewPlayerInterface_isPeakLocked1(void*, int, int);
 extern "C" void* cBE_getBE();
@@ -198,7 +198,7 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void*, int);
  *
  * @return the largest per-rider count, 0-2
  */
-extern "C" unsigned int func_001A34B8(void)
+extern "C" unsigned int cFEStateMPCircuit_getTopUnlockedPeakNum(void)
 {
     signed char i;
     unsigned char best = 0;
@@ -304,7 +304,7 @@ extern "C" void cFEAsyncManager_Init(sMissionSlot* self)
 
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", func_001A3698);
+INCLUDE_ASM("fe/ovstatemission", cFEAsyncManager_UnloadAll);
 #ifdef SKIP_ASM
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int slot);
 
@@ -315,7 +315,7 @@ extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int slot);
  *
  * @param mgr  the front-end async manager (this)
  */
-extern "C" void func_001A3698(void* mgr)
+extern "C" void cFEAsyncManager_UnloadAll(void* mgr)
 {
     for (int i = 0; i < 5; i++) {
         cFEAsyncManager_UnloadFEAsyncFile(mgr, i);

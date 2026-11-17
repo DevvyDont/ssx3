@@ -10,7 +10,7 @@
 // factory (cOVStateManager_triggerOverlay, fe/ovtemplatedialog.cpp) does operator new(0x180, "cOVStateOverlay") and
 // calls the out-of-line constructor cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(this, pEngine, 0x22). Base cOVState (fe/ovstate.h, 0x9C), written
 // out flat below. Retail vtable D_00474318 (stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER after cOVState's D_00474E08; destructor
-// func_0021CAE0 in fe/all_in_one_fe).
+// cOVState_MESSAGECENTER__cOVState_MESSAGECENTER in fe/all_in_one_fe).
 //
 // cOVState_ViewPopup: the popup that shows one message (screen "113ViewMessage"), pushed by
 // cOVState_MESSAGECENTER (func_001E50C8: cMemMan_alloc(0x70, "cOVState_ViewPopup") + constructor cOVState_ViewPopup_cOVState_ViewPopup(this,

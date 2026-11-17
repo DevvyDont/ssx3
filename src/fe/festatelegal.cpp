@@ -275,14 +275,14 @@ struct sFlowState_887A0 {
 extern sFlowState_887A0 D_004A4E80;
 extern void* cFEStateOptions_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
-extern "C" void func_001A0708(void* self, int a1, int a2);
+extern "C" void cFEFlowState_setValue(void* self, int a1, int a2);
 
 /**
  * Constructs the options state: base cUIState, cFEStateOptions_vtbl, state id 0x18, optionally resetting its flow
  * entry.
  *
  * Runs the cUIState constructor func_0039E2A0(), stores mHashName 0x18 and cFEStateOptions_vtbl. When @p reset is
- * non-zero, writes 0 to entry 0x18 of the flow-state table D_004A4E80 (func_001A0708()). Callers allocate 84 bytes
+ * non-zero, writes 0 to entry 0x18 of the flow-state table D_004A4E80 (cFEFlowState_setValue()). Callers allocate 84 bytes
  * ("cFEStateOptions" or "FEOptions").
  *
  * @param engine  the UI engine (passed to the base constructor)
@@ -295,7 +295,7 @@ extern "C" void* func_001887A0(void* self, int engine, int reset)
     *(int*)((char*)self + 0xC) = 0x18;
     *(void***)((char*)self + 0x8) = cFEStateOptions_vtbl;
     if (reset != 0) {
-        func_001A0708(&D_004A4E80, 0x18, 0);
+        cFEFlowState_setValue(&D_004A4E80, 0x18, 0);
     }
     return self;
 }

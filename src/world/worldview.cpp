@@ -1663,7 +1663,7 @@ extern "C" void cSSXScriptEngine_AttachAnchorDataTable(void* self, int a, void* 
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void func_001547D8_AE68(void* self, int a, void* p, int v) __asm__("func_001547D8__FPv");
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00286CA8(void* self, unsigned int arg, void* obj);
 extern "C" void func_002105D0(void* obj);
 extern "C" void cAvalanche_resolve(void* obj);
@@ -1790,7 +1790,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         cSSXScriptEngine_AttachAnchorDataTable(ScriptEngine, RID & 0xFF, obj);
         break;
     case 20:
-        func_00286CA8(func_0028B180(), RID, obj);
+        func_00286CA8(cAudioInterface_bxAudio(), RID, obj);
         break;
     case 19:
         func_001547D8_AE68(cBE_getInterface_Fv(cBE_getBE(), 10), RID & 0xFF, obj + 4, *(int*)obj);
@@ -1831,7 +1831,7 @@ extern "C" void func_00210608(void* data);
 extern "C" void func_00242570(void* p, void* data);
 extern "C" void cSSXScriptEngine_DetachAnchorDataTable(void* p, unsigned char id);
 extern "C" void cSSXAudio_UnAttachAudioBank(void* p, unsigned int param, void* data);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void* cAudioInterface_getGame();
 extern "C" void func_002B6B30(void* p, void* data, unsigned int param);
 extern "C" void func_002BB5A8(void* entry);
@@ -2006,7 +2006,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         cSSXScriptEngine_DetachAnchorDataTable(ScriptEngine, resourceId);
         break;
     case 20:
-        cSSXAudio_UnAttachAudioBank(func_0028B180(), resourceId, data);
+        cSSXAudio_UnAttachAudioBank(cAudioInterface_bxAudio(), resourceId, data);
         break;
     case 19:
         func_001547E0_2(cBE_getInterface_Fv(cBE_getBE(), 10), resourceId);

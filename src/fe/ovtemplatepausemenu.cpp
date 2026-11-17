@@ -40,7 +40,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 
 extern "C" int cGame_canUserActivatePauseMenu(void* game);
 
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 
 
 extern char str_Menu_b[];
@@ -149,7 +149,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* state)
     if (menu != 0) {
         cUIMenu_setSelectedByIndex(menu, D_004A2468);
     }
-    cSSXAudio_PauseAudio(func_0028B180());
+    cSSXAudio_PauseAudio(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -420,7 +420,7 @@ extern "C" void cOVStateManager_removePDATemplate(void);
 void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
 extern "C" void cOVStateManager_triggerOverlay(int cmd);
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* owner, int a2, int a3);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00289BB8(void* audio);
 extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int on);
 extern int cPauseState_Flags;
@@ -522,7 +522,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
             cOVStateManager_removePDATemplate();
             func_0039F190_r(self->owner + 0x18, 1);
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-            func_00289BB8(func_0028B180());
+            func_00289BB8(cAudioInterface_bxAudio());
             break;
         case 2:
             D_004A2708 = 1;
@@ -572,7 +572,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
         cOVStateManager_removePDATemplate();
         cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
         func_0039F190_r(self->owner + 0x18, 1);
-        func_00289BB8(func_0028B180());
+        func_00289BB8(cAudioInterface_bxAudio());
         break;
     case 1: {
         if (self->busy == 0) {
@@ -662,7 +662,7 @@ extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int o
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8EE0);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_COMPETE_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478160[];
@@ -676,7 +676,7 @@ extern int D_00478160[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of D_00473098, the vtable
  * cOVStateManager_triggerOverlay gives overlay 1 (the career (game path 0) event pause that func_0020CA10 opens).
  */
-extern "C" void func_001F8EE0(void* self)
+extern "C" void cOVState_PAUSE_COMPETE_onCreateScreen(void* self)
 {
     int i;
     *(int*)((char*)self + 0xBC) = 6;
@@ -689,7 +689,7 @@ extern "C" void func_001F8EE0(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8F48);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_BIGCHAL_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478178[];
@@ -703,7 +703,7 @@ extern int D_00478178[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of D_00472FC0, the vtable
  * cOVStateManager_triggerOverlay gives overlay 2 (the local-mission pause that func_0020CA10 opens).
  */
-extern "C" void func_001F8F48(void* self)
+extern "C" void cOVState_PAUSE_BIGCHAL_onCreateScreen(void* self)
 {
     int i;
     *(int*)((char*)self + 0xBC) = 6;
@@ -716,7 +716,7 @@ extern "C" void func_001F8F48(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F8FB0);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_FREERIDE_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478140[];
@@ -730,7 +730,7 @@ extern int D_00478140[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of D_00472EE8, the vtable
  * cOVStateManager_triggerOverlay gives overlay 3 (the freeride (cGameMode 4) pause that func_0020CA10 opens).
  */
-extern "C" void func_001F8FB0(void* self)
+extern "C" void cOVState_PAUSE_FREERIDE_onCreateScreen(void* self)
 {
     int i;
     *(int*)((char*)self + 0xBC) = 7;
@@ -743,7 +743,7 @@ extern "C" void func_001F8FB0(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F9018);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_SPOKE_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_00478190[];
@@ -757,7 +757,7 @@ extern int D_00478190[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of D_00472E10, the vtable
  * cOVStateManager_triggerOverlay gives overlay 4 (the game-state-11 pause that func_0020CA10 opens).
  */
-extern "C" void func_001F9018(void* self)
+extern "C" void cOVState_PAUSE_SPOKE_onCreateScreen(void* self)
 {
     int i;
     *(int*)((char*)self + 0xBC) = 5;
@@ -770,7 +770,7 @@ extern "C" void func_001F9018(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovtemplatepausemenu", func_001F9080);
+INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_QUICKPLAY_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
 extern int D_004781A8[];
@@ -784,7 +784,7 @@ extern int D_004781A8[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of D_00472D38, the vtable
  * cOVStateManager_triggerOverlay gives overlay 5 (the fallback pause that func_0020CA10 opens).
  */
-extern "C" void func_001F9080(void* self)
+extern "C" void cOVState_PAUSE_QUICKPLAY_onCreateScreen(void* self)
 {
     int i;
     *(int*)((char*)self + 0xBC) = 5;

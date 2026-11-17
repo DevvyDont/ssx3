@@ -2,9 +2,9 @@
 
 INCLUDE_ASM("fe/festateriderbio2", cFEStateRiderBio_onCreateScreen);
 
-INCLUDE_ASM("fe/festateriderbio2", func_00190A08);
+INCLUDE_ASM("fe/festateriderbio2", cFEStateRiderBio_setupBioScreen);
 
-INCLUDE_ASM("fe/festateriderbio2", func_00190CD8);
+INCLUDE_ASM("fe/festateriderbio2", cFEStateRiderBio_setupCharPics);
 
 INCLUDE_ASM("fe/festateriderbio2", cFEStateRiderBio_fillDNAInfo);
 
@@ -16,5 +16,5 @@ INCLUDE_ASM("fe/festateriderbio2", cFEStateRiderBio_fillBioInfo);
 
 INCLUDE_ASM("fe/festateriderbio2", cFEStateRiderBio_onWidgetEvent);
 
-INCLUDE_ASM("fe/festateriderbio2", func_00191360);
+INCLUDE_ASM("fe/festateriderbio2", cFEStateRuleSelect_cFEStateRuleSelect);
 

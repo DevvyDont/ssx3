@@ -111,7 +111,7 @@ struct cGameComm {
     int mSyncInput;              // 0x040 [O] (just before mServer in both games); [R] 1; [U] cInputSync (gamestate
                                  //       cInputSync_preupdate / cInputSync_sendClientInput) exchanges pads only while it is set;
                                  //       updateSyncPacket requires it; displayError, gameEnded and the out-of-line
-                                 //       stopSyncInput func_00244880 (main/ssxappdtor: sw $0, 0x40) clear it
+                                 //       stopSyncInput cGameComm_stopSyncInput (main/ssxappdtor: sw $0, 0x40) clear it
     int mServer;                 // 0x044 [O]; [R] the constructor's second argument; [U] update/syncGame take the
                                  //       server side of the handshake when set
     int mAlone;                  // 0x048 [O] (On Tour's next member after mServer that retail has); [U] setFinishRaceAlone
@@ -140,7 +140,7 @@ struct cGameComm {
     int mRemoteExitGame;         // 0x088 [O]; [U] the exit-game command sets 1
     int mRemoteEndGame;          // 0x08C [O]; [U] the exit-game command sets 1 while the race still runs; checkErrors
                                  //       then calls displayError
-    int unk_090;                 // 0x090 [R] 0; [U] festateloadscreen func_00233C50 sets 1 right after stopSyncInput
+    int unk_090;                 // 0x090 [R] 0; [U] festateloadscreen cGFFinishlineState_gainFocus sets 1 right after stopSyncInput
                                  //       (leaving the race for a load state); read only into bit 9 of mFlagsOnCommError
     int unk_094;                 // 0x094 [U] link timeout in frames: func_00258870 arms it (1800/3600/3660), checkErrors
                                  //       counts it down (0 = timed out, unk_02C)

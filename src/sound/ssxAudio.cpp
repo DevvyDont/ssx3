@@ -532,7 +532,7 @@ extern "C" int func_002854F8(cSSXAudio* vself, int a1, const char* a2, int a3, i
 INCLUDE_ASM("sound/ssxAudio", func_00285930);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_0028B1C0();
+extern "C" void* cAudioInterface_getApp();
 extern "C" void* cAudioInterface_getGame();
 extern "C" float func_0031C228(float);
 
@@ -605,7 +605,7 @@ static inline float Atan2_5930(float y, float x)
 
 extern "C" float func_00285930(char* audio, char* source, char* outAngles)
 {
-    if (*(int*)((char*)func_0028B1C0() + 0x84) == 0)
+    if (*(int*)((char*)cAudioInterface_getApp() + 0x84) == 0)
         return 1.0f;
     char* game = (char*)cAudioInterface_getGame();
     char* obj = (*(sObjList_5930**)(game + 0x84))->items[*(int*)(source + 0x84)];
@@ -660,7 +660,7 @@ INCLUDE_ASM("sound/ssxAudio", func_00285BF8);
 #ifdef SKIP_ASM
 extern int cPauseState_Flags;
 extern "C" int func_00390EF8();
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayThunder(void* p, float f);
 extern "C" void func_002AB958(void* self, float dt);
 extern "C" int func_002AB028(void* p, int idx);
@@ -680,7 +680,7 @@ extern "C" void cSSXAudio_UpdateTimedEvent(void* self);
 extern "C" void cSSXAudio_UpdateTone(void* self);
 extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self);
 extern "C" void func_00287F00(void* self, int a1, float f0, float f1);
-extern "C" void* func_0028B1C0();
+extern "C" void* cAudioInterface_getApp();
 extern "C" void* cAudioInterface_getGame();
 extern "C" void cSSXAudio_ResetLift(void* self);
 extern "C" void func_00289BB8(void* self);
@@ -688,7 +688,7 @@ extern "C" void func_00289BB8(void* self);
 extern "C" void func_00285BF8(char* self, float dt)
 {
     if (func_00390EF8() != 0)
-        cSSXAudio_PlayThunder(func_0028B180(), 0.0f);
+        cSSXAudio_PlayThunder(cAudioInterface_bxAudio(), 0.0f);
     func_002AB958(self, dt);
     int st = *(int*)(self + 0x63D4);
     if (st != 3) {
@@ -701,7 +701,7 @@ extern "C" void func_00285BF8(char* self, float dt)
     }
     cSSXAudio_UpdateDuck((cSSXAudio*)self);
     func_002887F8((sSaMix87F8*)self);
-    if (*(int*)((char*)func_0028B1C0() + 0x84) != 0) {
+    if (*(int*)((char*)cAudioInterface_getApp() + 0x84) != 0) {
         func_0028C8C8(self);
         if (*(int*)(self + 0x6474) == 6) {
             if (*(int*)(self + 0x5FB4) == 0)
@@ -2638,7 +2638,7 @@ extern "C" int func_00288A20(void* self, void* obj)
 }
 #endif
 
-extern "C" void* func_0028B210(int);
+extern "C" void* cAudioInterface_getGameView(int);
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCameraPos__FPvi);
@@ -2646,14 +2646,14 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCameraPos__FPvi);
 /**
  * Returns the camera position of one game view.
  *
- * func_0028B210 returns the game view; its position is at +0x20.
+ * cAudioInterface_getGameView returns the game view; its position is at +0x20.
  *
  * @param viewport  the view index (On Tour viewport)
  * @return pointer to the view's position (On Tour const t4Vector&)
  */
 void* cSSXAudio_GetCameraPos(void* self, int viewport)
 {
-    return (char*)func_0028B210(viewport) + 0x20;
+    return (char*)cAudioInterface_getGameView(viewport) + 0x20;
 }
 #endif
 
@@ -2779,20 +2779,20 @@ extern "C" int func_00288C08(void* self, sAudV4* pos, float radius)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetNumViews);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B1C0();
-extern "C" int func_0028B1F8();
+extern "C" void* cAudioInterface_getApp();
+extern "C" int cAudioInterface_getNumGameView();
 
 /**
  * Returns the number of game views (viewports) the audio has to consider.
  *
- * When the app (func_0028B1C0) has its multi-view flag at +0x84 set, returns func_0028B1F8's view count, else 1.
+ * When the app (cAudioInterface_getApp) has its multi-view flag at +0x84 set, returns cAudioInterface_getNumGameView's view count, else 1.
  *
  * @return the number of views
  */
 extern "C" int cSSXAudio_GetNumViews()
 {
-    if (*(int*)((char*)func_0028B1C0() + 0x84) != 0) {
-        return func_0028B1F8();
+    if (*(int*)((char*)cAudioInterface_getApp() + 0x84) != 0) {
+        return cAudioInterface_getNumGameView();
     }
     return 1;
 }
@@ -3598,7 +3598,7 @@ INCLUDE_ASM("sound/ssxAudio", func_00289DF0);
 #ifdef SKIP_ASM
 extern "C" int ASYNCFILE_cancel(int h);
 extern "C" int ASYNCFILE_release(int h, int a, int b);
-extern "C" void func_0028A298(void* self);
+extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self);
 
 struct sRing289DF0 {
     int size;
@@ -3702,7 +3702,7 @@ extern "C" void func_00289DF0(void* self, int flush)
         s->q1AC.tail = s->q1AC.head;
         s->q1BC.tail = s->q1BC.head;
     }
-    func_0028A298(self);
+    cAsyncSys_ASYNCSYS_StartLoad(self);
 }
 #endif
 

@@ -17,7 +17,7 @@ extern "C" unsigned char cUIListBox_addEntryByStringID(void* box, int id, int id
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* box, const char* str, unsigned int data);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
-extern "C" int func_00192240(void* self, int rule);
+extern "C" int cFEStateRuleSelect_getBEData(void* self, int rule);
 extern "C" void cFEStateRuleSelect_updateMenuColor(void* self);
 extern char str_0b[];
 extern char str_0t[];
@@ -88,7 +88,7 @@ static inline void* find_1388(sRuleSel_1388* self, char* name)
  *
  * Each rule's kind picks its options: off/on, no/yes, off or 90-60%, +10s to -10s, 0-5, or skill levels 1-3;
  * the
- * list box selects the rule's current setting (func_00192240) and rule 0 has none. Plays the "normal" or
+ * list box selects the rule's current setting (cFEStateRuleSelect_getBEData) and rule 0 has none. Plays the "normal" or
  * "greyedout" frame for the selected row, then updates the row colours.
  *
  * @param self_  the rule select state
@@ -159,7 +159,7 @@ extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
             }
             if (rule != 0) {
                 unsigned char out;
-                cUIListBox_getEntryByData(lb, func_00192240(self, rule), &out);
+                cUIListBox_getEntryByData(lb, cFEStateRuleSelect_getBEData(self, rule), &out);
                 cUIListBox_setCurrentEntryByIndex(lb, out);
             } else {
                 SetVisible_1388(lb, 0);
@@ -364,9 +364,9 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onWidgetEvent);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void* func_001887A0(void* mem, void* owner, int a2);
-extern "C" void func_00192088(void* self, int idx, int a2);
+extern "C" void cFEStateRuleSelect_updateBE(void* self, int idx, int a2);
 struct sRuleSel_2380;
-extern "C" void func_00192380(sRuleSel_2380* self, void* item);
+extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, void* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern "C" void MEM_fill(void* dst, int c, int n);
@@ -427,8 +427,8 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(char* self, sMsg_1C68* msg, uns
     }
     case 9: {
         int id = msg->id;
-        func_00192088(self, id, cUIListBox_getCurrentEntryData(msg));
-        func_00192380((sRuleSel_2380*)self, msg);
+        cFEStateRuleSelect_updateBE(self, id, cUIListBox_getCurrentEntryData(msg));
+        cFEStateRuleSelect_checkConflictForMenu((sRuleSel_2380*)self, msg);
         break;
     }
     case 7: {
@@ -550,7 +550,7 @@ extern "C" int cFEStateRuleSelect_onWidgetMenu(char* self, void* pMenu, unsigned
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192088);
+INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_updateBE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -562,12 +562,12 @@ extern int D_005308D4_2088[] __asm__("D_005308D4");
  *
  * Rule 2 stores @p ruleValue whole in D_005308D4. The others store bit 0 of @p ruleValue as one flag: rules 3, 7 and 14 in word 0 of
  * D_005308B8 (bits 3, 4 and 5); rules 4, 8, 1, 5, 6 and 9-13 in word 6 (D_005308D0; bits 0, 1, 2, 3, 4 and 5-9).
- * Unknown rules change nothing and @p self is not used. func_00192240 reads the same bits back.
+ * Unknown rules change nothing and @p self is not used. cFEStateRuleSelect_getBEData reads the same bits back.
  *
  * @param idx  the rule id (1-14)
  * @param ruleValue  the new value: the list box's entry data
  */
-extern "C" void func_00192088(void* self, int idx, int ruleValue)
+extern "C" void cFEStateRuleSelect_updateBE(void* self, int idx, int ruleValue)
 {
     switch (idx) {
     case 4:
@@ -617,7 +617,7 @@ extern "C" void func_00192088(void* self, int idx, int ruleValue)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192240);
+INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_getBEData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -629,13 +629,13 @@ extern int D_005308D4[];
  * Returns the current setting of a custom race rule from the rule settings D_005308B8.
  *
  * Rule 2 returns D_005308D4 whole. Rules 3, 7 and 14 return bits 3, 4 and 5 of D_005308B8's word 0; rules 4, 8, 1, 5, 6
- * and 9-13 return bits 0, 1, 2, 3, 4 and 5-9 of D_005308D0 (word 6): the bits func_00192088 writes. @p self is not
+ * and 9-13 return bits 0, 1, 2, 3, 4 and 5-9 of D_005308D0 (word 6): the bits cFEStateRuleSelect_updateBE writes. @p self is not
  * used.
  *
  * @param rule  the rule id (1-14)
  * @return the rule's flag (0 or 1) or rule 2's value, or -1 for an unknown rule
  */
-extern "C" int func_00192240(void* self, int rule)
+extern "C" int cFEStateRuleSelect_getBEData(void* self, int rule)
 {
     switch (rule) {
     case 4:
@@ -674,10 +674,10 @@ extern "C" int func_00192240(void* self, int rule)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192380);
+INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_checkConflictForMenu);
 #ifdef SKIP_ASM
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
-extern "C" void func_00192088(void* self, int idx, int a2);
+extern "C" void cFEStateRuleSelect_updateBE(void* self, int idx, int a2);
 extern "C" void cFEStateRuleSelect_updateMenuColor(void* self);
 extern int D_004410C8[];
 
@@ -692,12 +692,12 @@ struct sRuleSel_2380 {
  * The rule is the list box's mMiscData (+0x18); D_004410C8[rule] << 1 has a bit for each rule (1-14) that may stay on
  * with it, so every rule whose bit is clear conflicts. When the list box's current entry data
  * (cUIListBox_getCurrentEntryData) is 0 each conflicting rule's counter in +0x51 (On Tour mcRuleConflictRefTable) is
- * decremented, not below 0; otherwise each is incremented and that rule's setting is cleared (func_00192088 with 0).
+ * decremented, not below 0; otherwise each is incremented and that rule's setting is cleared (cFEStateRuleSelect_updateBE with 0).
  * Then the menu is recoloured (cFEStateRuleSelect_updateMenuColor).
  *
  * @param item  the rule's list box that changed
  */
-extern "C" void func_00192380(sRuleSel_2380* self, void* item)
+extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, void* item)
 {
     int mask = D_004410C8[*(int*)((char*)item + 0x18)] << 1;
     if (cUIListBox_getCurrentEntryData(item) == 0) {
@@ -716,7 +716,7 @@ extern "C" void func_00192380(sRuleSel_2380* self, void* item)
             int bit = 1 << i;
             if ((bit & mask) == 0) {
                 self->count[i] += 1;
-                func_00192088(self, i, 0);
+                cFEStateRuleSelect_updateBE(self, i, 0);
             }
         }
     }
@@ -797,7 +797,7 @@ extern "C" void cFEStateRuleSelect_updateMenuColor(void* selfp)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_001926F0);
+INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_cBraggingRightsMenu);
 #ifdef SKIP_ASM
 extern void* D_0046B078[];
 
@@ -810,7 +810,7 @@ extern void* D_0046B078[];
  *
  * @return @p self
  */
-extern "C" void* func_001926F0(void* self)
+extern "C" void* cBraggingRightsMenu_cBraggingRightsMenu(void* self)
 {
     int i;
     *(void***)((char*)self + 0x30) = D_0046B078;
@@ -826,7 +826,7 @@ extern "C" void* func_001926F0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192740);
+INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setConfirmed);
 #ifdef SKIP_ASM
 struct sVEntry00192740 {
     short delta;
@@ -848,7 +848,7 @@ struct sObj00192740 {
  *
  * @param enabled  the new flag: 1 confirms (locks), 0 unlocks
  */
-extern "C" void func_00192740(void* self, int enabled)
+extern "C" void cBraggingRightsMenu_setConfirmed(void* self, int enabled)
 {
     int i;
     *(int*)((char*)self + 0x28) = enabled;
@@ -862,10 +862,10 @@ extern "C" void func_00192740(void* self, int enabled)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_001927B0);
+INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setMenuItemColor);
 #ifdef SKIP_ASM
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
-extern "C" int func_00192948(void* self, int idx);
+extern "C" int cBraggingRightsMenu_isItemEnable(void* self, int idx);
 
 struct sColor_001927B0 {
     float r, g, b, a;
@@ -878,12 +878,12 @@ struct sRuleSel_001927B0 { void* owner; int f4; sObj_001927B0* items[8]; };
 /**
  * Colours a bragging-rights panel's rows: the selected row white, the others by their current value.
  *
- * Does nothing without a menu (+0x0). Skips missing list boxes and rows not enabled (func_00192948). The row equal to
+ * Does nothing without a menu (+0x0). Skips missing list boxes and rows not enabled (cBraggingRightsMenu_isItemEnable). The row equal to
  * the menu's mScrollItemCurrent (+0x95) gets (A, R, G, B) = (1, 1, 1, 1); a row whose current entry data
  * (cUIListBox_getCurrentEntryData) is non-zero gets (1, 0.592, 0.043, 0) and the rest (1, 0.145, 0.027, 0.020), through
  * setColour (vtable slot 11).
  */
-extern "C" void func_001927B0(sRuleSel_001927B0* self)
+extern "C" void cBraggingRightsMenu_setMenuItemColor(sRuleSel_001927B0* self)
 {
     void* owner = self->owner;
     if (owner == 0) {
@@ -894,7 +894,7 @@ extern "C" void func_001927B0(sRuleSel_001927B0* self)
         if (self->items[i] == 0) {
             continue;
         }
-        if (func_00192948(self, i) == 0) {
+        if (cBraggingRightsMenu_isItemEnable(self, i) == 0) {
             continue;
         }
         if (i == sel) {
@@ -915,7 +915,7 @@ extern "C" void func_001927B0(sRuleSel_001927B0* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192918);
+INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_findListBoxP);
 #ifdef SKIP_ASM
 /**
  * Returns the row index (0-7) of a list box in a bragging-rights panel's eight list boxes (+0x8), or -1.
@@ -923,7 +923,7 @@ INCLUDE_ASM("fe/festateruleselect", func_00192918);
  * @param val  the list box to look for
  * @return its index, or -1 when the panel does not hold it
  */
-extern "C" int func_00192918(void* self, int val)
+extern "C" int cBraggingRightsMenu_findListBoxP(void* self, int val)
 {
     int i;
     for (i = 0; i < 8; i++) {
@@ -936,7 +936,7 @@ extern "C" int func_00192918(void* self, int val)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192948);
+INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_isItemEnable);
 #ifdef SKIP_ASM
 /**
  * Tells whether a bragging-rights panel's row is enabled in its enable mask (+0x2C).
@@ -947,7 +947,7 @@ INCLUDE_ASM("fe/festateruleselect", func_00192948);
  * @param itemIndex  the row (0-7)
  * @return 1 when the row's bit is set, else 0
  */
-extern "C" int func_00192948(void* self, int itemIndex)
+extern "C" int cBraggingRightsMenu_isItemEnable(void* self, int itemIndex)
 {
     int mask = (int)(0x1000000 << itemIndex) >> 24;
     return (*(int*)((char*)self + 0x2c) & mask) != 0;
@@ -955,7 +955,7 @@ extern "C" int func_00192948(void* self, int itemIndex)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192968__FPvi);
+INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setEnableFlag__FPvi);
 #ifdef SKIP_ASM
 /**
  * Stores a bragging-rights panel's row enable mask (+0x2C).
@@ -964,14 +964,14 @@ INCLUDE_ASM("fe/festateruleselect", func_00192968__FPvi);
  *
  * @param val  the mask, bit i for row i
  */
-void func_00192968(void* self, int val)
+void cBraggingRightsMenu_setEnableFlag(void* self, int val)
 {
     *(int*)((char*)self + 0x2C) = val;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateruleselect", func_00192970);
+INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setEnableItem);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1032,7 +1032,7 @@ struct sOwner_00192970 {
  *
  * @param screen  the screen holding the panel's widgets
  */
-extern "C" void func_00192970(sOwner_00192970* self, void* screen)
+extern "C" void cBraggingRightsMenu_setEnableItem(sOwner_00192970* self, void* screen)
 {
     sName11_00192970 leftArrowName = *(sName11_00192970*)str_0arrw_left;
     sName12_00192970 rightArrowName = *(sName12_00192970*)str_0arrw_right;
@@ -1070,7 +1070,7 @@ extern "C" void func_00192970(sOwner_00192970* self, void* screen)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/festateruleselect", func_00192D00);
+INCLUDE_ASM("fe/festateruleselect", cFEStateBraggingRights_cFEStateBraggingRights);
 #ifdef SKIP_ASM
 extern void* cFEStateBraggingRights_vtbl[];
 extern "C" void* cFEStateNet_cFEStateNet(void* self, int a1, int a2);
@@ -1079,12 +1079,12 @@ extern "C" void* cFEStateNet_cFEStateNet(void* self, int a1, int a2);
  * Constructs the bragging-rights state (allocated as "cFEStateBraggingRights", 1852 bytes).
  *
  * Runs cFEStateNet_cFEStateNet with @p engine and 0, stores cFEStateBraggingRights_vtbl, builds the two choice panels
- * at +0x6D0 and +0x704 (func_001926F0), sets mHashName 20 and clears +0x738.
+ * at +0x6D0 and +0x704 (cBraggingRightsMenu_cBraggingRightsMenu), sets mHashName 20 and clears +0x738.
  *
  * @param engine  the UI engine
  * @return @p self
  */
-extern "C" void* func_00192D00(void* self, int engine)
+extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights(void* self, int engine)
 {
     char* ruleSel;
     int i;
@@ -1092,7 +1092,7 @@ extern "C" void* func_00192D00(void* self, int engine)
     *(void***)((char*)self + 0x8) = cFEStateBraggingRights_vtbl;
     ruleSel = (char*)self + 0x6D0;
     for (i = 1; i != -1; i--, ruleSel += 0x34) {
-        func_001926F0(ruleSel);
+        cBraggingRightsMenu_cBraggingRightsMenu(ruleSel);
     }
     *(int*)((char*)self + 0xC) = 20;
     *(int*)((char*)self + 0x738) = 0;

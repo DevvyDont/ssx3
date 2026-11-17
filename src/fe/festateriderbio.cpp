@@ -7,14 +7,14 @@ INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_00182DB8(void* self);
+extern "C" void cFEStateCharSetup_updateWidget(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void func_001A0570(void* self, int a1, int a2);
 extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern "C" int func_001577A0(void* self, int a1, int a2);
 extern char str_154rider_details[];
@@ -28,7 +28,7 @@ struct sVE_32A8 {
 /**
  * Creates the rider-details screen "154rider_details" and shows the player's character.
  *
- * Runs func_00182DB8, reloads the player table (the interface's slot 2, discard), sets up the user's
+ * Runs cFEStateCharSetup_updateWidget, reloads the player table (the interface's slot 2, discard), sets up the user's
  * front-end rider with the player's character, calls func_0028F140 with 1, and sets +0x50 when the character
  * has any cheat characters unlocked (func_001577A0).
  */
@@ -40,14 +40,14 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    func_00182DB8(self);
+    cFEStateCharSetup_updateWidget(self);
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     int charID = cBENewPlayerInterface_getPlayerCharID(pi, *(signed char*)((char*)self + 0x44));
     sVE_32A8* vt = *(sVE_32A8**)((char*)pi + 0xC);
     vt[2].fn((char*)pi + vt[2].delta);
     func_001A0570((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), 0);
     func_001A0508((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
-    func_0028F140(func_0028B180(), 1);
+    func_0028F140(cAudioInterface_bxAudio(), 1);
     *(int*)((char*)self + 0x50) = 1;
     if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44), charID) == 0) {
         *(int*)((char*)self + 0x50) = 0;
@@ -143,19 +143,19 @@ void* cFEStateRiderDetail_onRender2D(void* self)
 INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void cUIState_onUpdate(void*);
-extern "C" void func_00182EC0(void*);
+extern "C" void cFEStateCharSetup_updateCharacter3DPos(void*);
 
 /**
  * Updates the rider-detail state: runs the base UI-state update, then poses the front-end rider model.
  *
  * cUIState_onUpdate() is the base UI-state update, which dispatches controller input to the state and its screens.
- * func_00182EC0() (shared with the character-setup state) places the loaded rider model and, when the state asks
+ * cFEStateCharSetup_updateCharacter3DPos() (shared with the character-setup state) places the loaded rider model and, when the state asks
  * for it, restarts its animation.
  */
 extern "C" void cFEStateRiderDetail_onUpdate(void* self)
 {
     cUIState_onUpdate(self);
-    func_00182EC0(self);
+    cFEStateCharSetup_updateCharacter3DPos(self);
 }
 #endif
 
@@ -168,7 +168,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00147138(void* self, int a1, const char* name);
 extern "C" void func_001474A8(void* self, int a1, int a2);
-extern "C" void func_001831D0(void* self, int a1);
+extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int a1);
 extern "C" unsigned int strlen(const char* s);
 extern char str_131cheat_char[];
 
@@ -185,7 +185,7 @@ static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s);
  *
  * From "131cheat_char" a confirmed choice (+0x74) is stored in the player table (func_001474A8) and
  * committed; from the keyboard (hash name 0) an accepted, non-empty text becomes the player's name
- * (func_00147138). Then func_001831D0 with 1.
+ * (func_00147138). Then cFEStateCharSetup_show3DCharacter with 1.
  *
  * @param item  the popup that sent the event
  * @param msg  the popup event; only 0x16 is handled
@@ -210,7 +210,7 @@ extern "C" void cFEStateRiderDetail_onPopupEvent(void* self, void* item, int msg
                 vt[1].fn((char*)pi + vt[1].delta);
             }
         }
-        func_001831D0(self, 1);
+        cFEStateCharSetup_show3DCharacter(self, 1);
     }
 }
 #endif
@@ -226,8 +226,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" char* cBENewPlayerInterface_getPlayerName(void* iface, int rider);
 extern "C" int func_001577A0(void* self, int a1, int a2);
-extern "C" void* func_00182220(void* mem, void* engine, void* owner, int rider, int cid);
-extern "C" void func_001831D0(void* self, int a1);
+extern "C" void* cFEStateCheatCharSelect_cFEStateCheatCharSelect(void* mem, void* engine, void* owner, int rider, int cid);
+extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int a1);
 extern "C" void* func_001887A0(void* mem, void* engine, int a2);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* self, void* engine, void* owner, int a3, unsigned char a4);
@@ -287,14 +287,14 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
             cKeyboardPopup_setIncludeKey(w, 66, 0, 2);
             cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, w);
             cKeyboardPopup_setInputText(w, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44)));
-            func_001831D0(self, 0);
+            cFEStateCharSetup_show3DCharacter(self, 0);
         } else if (sub == 6) {
             int cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44));
             if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)(self + 0x44), cid) > 0) {
-                char* w = (char*)func_00182220(cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), cid);
+                char* w = (char*)cFEStateCheatCharSelect_cFEStateCheatCharSelect(cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), cid);
                 *(unsigned char*)(w + 0x15) = func_001A1CD0(**(void***)(self + 0x10), *(signed char*)(self + 0x44));
                 cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, w);
-                func_001831D0(self, 0);
+                cFEStateCharSetup_show3DCharacter(self, 0);
             }
         } else {
             char* obj = **(char***)(self + 0x10);
@@ -304,7 +304,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
                 cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
             }
         }
-        func_001831D0(self, 0);
+        cFEStateCharSetup_show3DCharacter(self, 0);
         break;
     }
     case 6: {
@@ -313,7 +313,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
         void* nextState = vt[5].fn(obj + vt[5].delta, self, *(int*)(item + 0x18));
         if (nextState != 0) {
             cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
-            func_001831D0(self, 0);
+            cFEStateCharSetup_show3DCharacter(self, 0);
         }
         break;
     }
@@ -328,7 +328,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183A98);
+INCLUDE_ASM("fe/festateriderbio", cFEStateUberTrick_cFEStateUberTrick);
 #ifdef SKIP_ASM
 extern void* D_0046CCC0[];
 extern "C" void* func_0039E2A0(void* self);
@@ -346,7 +346,7 @@ extern "C" unsigned char func_001A1CD0(void* self, int a1);
  * @param userNum  the user number
  * @return @p self
  */
-extern "C" void* func_00183A98(void* self, int engine, int userNum)
+extern "C" void* cFEStateUberTrick_cFEStateUberTrick(void* self, int engine, int userNum)
 {
     signed char idx = userNum;
     func_0039E2A0(self);
@@ -362,7 +362,7 @@ extern "C" void* func_00183A98(void* self, int engine, int userNum)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183B08);
+INCLUDE_ASM("fe/festateriderbio", cFEStateUberTrick_activateMainMenu);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -389,10 +389,10 @@ public:
  * Switches the uber-trick screen's highlight and help text to the category menu.
  *
  * On mpScreen (+0x40) it hides "hilite_right" and "helptext_custom" and shows "hilite_left" and "helptext_choose"
- * (setVisible, vtable slot 9); objects that are missing are skipped. func_00183C08 does the opposite. Called when the
- * state gains focus (func_00184BE0) and when the trick menu is left (event 6 in func_00185268).
+ * (setVisible, vtable slot 9); objects that are missing are skipped. cFEStateUberTrick_activateTrickMenu does the opposite. Called when the
+ * state gains focus (cFEStateUberTrick_onGainFocus) and when the trick menu is left (event 6 in cFEStateUberTrick_onWidgetEvent).
  */
-extern "C" void func_00183B08(void* self)
+extern "C" void cFEStateUberTrick_activateMainMenu(void* self)
 {
     cUIObj_183B08* hiliteRight = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
     if (hiliteRight != 0) {
@@ -414,7 +414,7 @@ extern "C" void func_00183B08(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbio", func_00183C08);
+INCLUDE_ASM("fe/festateriderbio", cFEStateUberTrick_activateTrickMenu);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -441,10 +441,10 @@ public:
  * Switches the uber-trick screen's highlight and help text to the trick menu.
  *
  * On mpScreen (+0x40) it shows "hilite_right" and "helptext_custom" and hides "hilite_left" and "helptext_choose"
- * (setVisible, vtable slot 9); objects that are missing are skipped. func_00183B08 does the opposite. Called when a
- * category is accepted (event 5 in func_00185268).
+ * (setVisible, vtable slot 9); objects that are missing are skipped. cFEStateUberTrick_activateMainMenu does the opposite. Called when a
+ * category is accepted (event 5 in cFEStateUberTrick_onWidgetEvent).
  */
-extern "C" void func_00183C08(void* self)
+extern "C" void cFEStateUberTrick_activateTrickMenu(void* self)
 {
     cUIObj_183C08* hiliteRight = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
     if (hiliteRight != 0) {
@@ -503,7 +503,7 @@ public:
  * With @p rect it reads the object's size (getSize, vtable slot 20), sets x to (mRight - mLeft) * 256 * @p scale and y
  * to (mBottom - mTop) * 256 * @p scale from the cTextureElement (+0x14, +0x10, +0x18, +0xC), writes the size back
  * (setSize, slot 21) and shows the object (setVisible(1), slot 9). A null @p rect only hides it (setVisible(0)).
- * cWScriptMan_checkGate uses it for the uber-trick screen's "InstBtn" button icons with scale 0.8.
+ * cFEStateUberTrick_updateTrickMenu uses it for the uber-trick screen's "InstBtn" button icons with scale 0.8.
  *
  * @param rect  the texture element (cTextureElement), or 0
  * @param scale  size factor on top of 256 per texture-coordinate unit

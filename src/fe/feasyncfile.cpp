@@ -4394,7 +4394,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNet_handleEvent);
 #ifdef SKIP_ASM
 void func_00261058(void* self);
 extern "C" void func_00261408(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void* p, int id);
 void operator_delete(int* ptr);
 
@@ -4536,7 +4536,7 @@ extern "C" int cFEStateNet_handleEvent_impl(cFEState1A8B88* st, int msg, int* da
                 st->v31(item->type, item);
                 switch (item->type) {
                 case 236:
-                    cSSXAudio_MenuSound(func_0028B180(), 7);
+                    cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 7);
                 case 237:
                 case 239:
                 case 241:
@@ -4545,7 +4545,7 @@ extern "C" int cFEStateNet_handleEvent_impl(cFEState1A8B88* st, int msg, int* da
                     st->v27();
                     break;
                 case 265:
-                    cSSXAudio_MenuSound(func_0028B180(), 8);
+                    cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 8);
                     st->v27();
                     break;
                 }
@@ -9099,7 +9099,7 @@ extern "C" int cUIListBox_getCurrentEntryData_E7A0(void* item) __asm__("cUIListB
 extern "C" void func_0025F4C0_E7A0(void* self, int a1, int a2) __asm__("func_0025F4C0");
 extern "C" void func_0025F628_E7A0(void* self, int a1, int a2) __asm__("func_0025F628");
 extern "C" void func_0039F600_E7A0(void* list) __asm__("func_0039F600");
-extern "C" void* func_00186610_E7A0(void* mem, int a1, int a2) __asm__("func_00186610");
+extern "C" void* cFEStateEventSelect_cFEStateEventSelect1_E7A0(void* mem, int a1, int a2) __asm__("cFEStateEventSelect_cFEStateEventSelect1");
 extern "C" void cUIStateStack_pushSpecial_E7A0(void* stack, void* state, int a2, int a3) __asm__("cUIStateStack_pushSpecial");
 extern "C" void func_001AF098_E7A0(void* self, int on) __asm__("func_001AF098");
 extern "C" void func_001AEC60_E7A0(void* self, int v) __asm__("func_001AEC60");
@@ -9162,7 +9162,7 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
             cUITemplate_MAP_mPeak = 1;
             cUITemplate_MAP_mMapStyle = 0;
             D_004A2598 = 0;
-            char* popup = (char*)func_00186610_E7A0(cMemMan_alloc(828, str_cFEStateEventSelect, 0x100, 0), *(int*)(char**)&self->mpEngine, 1);
+            char* popup = (char*)cFEStateEventSelect_cFEStateEventSelect1_E7A0(cMemMan_alloc(828, str_cFEStateEventSelect, 0x100, 0), *(int*)(char**)&self->mpEngine, 1);
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial_E7A0((char*)self->mpEngine + 0x18, popup, 0, 0);
             break;
@@ -11424,7 +11424,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct sFEObj_001B1F88;
 extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* mem, int a1);
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* mem, int a1);
-extern "C" void* func_00192D00(void* mem, int a1);
+extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights(void* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_0025DA90(void* self);
 extern "C" void func_001B1760(cFEStateOnlineCharacterSelect* self, int index);
@@ -11442,7 +11442,7 @@ extern const char str_cFEStateBraggingRights[];
  * 243: when the opponent's rider is known (cBENetworkInterface_networkOpt.OpponentCharacterID >= 0) shows its name
  * (func_001B1760) and stats panel (func_001B1B10(.., 1)). 245 raises and 247 lowers the challenger's frame
  * (func_001B1A08(.., 1 / 0, 1)). 238, 241, 248, 250, 274 and 275 show func_001AB288's error popup. 246 pushes a new
- * cFEStateBraggingRights (func_00192D00). 268 pushes a new cFEStateChatRoom when in a room (func_0025DA90) and
+ * cFEStateBraggingRights (cFEStateBraggingRights_cFEStateBraggingRights). 268 pushes a new cFEStateChatRoom when in a room (func_0025DA90) and
  * D_004A4E88 is 0, else a cFEStateOnlineMainMenu. 224 is ignored; anything else goes to func_001A8E40. The existing
  * comment's "profile list" does not match the body.
  *
@@ -11472,7 +11472,7 @@ extern "C" void* func_001B15D8(cFEStateOnlineCharacterSelect* self, int eventTyp
         func_001AB288(((cFEStateNet*)self), eventType);
         break;
     case 246:
-        func_001A8A40(((cFEStateNet*)self), func_00192D00(cMemMan_alloc(1852, str_cFEStateBraggingRights, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((cFEStateNet*)self), cFEStateBraggingRights_cFEStateBraggingRights(cMemMan_alloc(1852, str_cFEStateBraggingRights, 0, 0), (int)self->mpEngine));
         break;
     case 268:
         if (func_0025DA90(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
@@ -13571,7 +13571,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_00256C50();
 extern "C" void func_001B5268(cFEStateNetConfig* self, int a1);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 void func_0028FC38(void* self);
 extern char str_200net_config[];
 
@@ -13594,7 +13594,7 @@ extern "C" void cFEStateNetConfig_onCreateScreen(cFEStateNetConfig* self)
         func_00256C50();
     }
     func_001B5268(self, 0);
-    func_0028FC38(func_0028B180());
+    func_0028FC38(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -13602,7 +13602,7 @@ extern "C" void cFEStateNetConfig_onCreateScreen(cFEStateNetConfig* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onDestroyScreen);
 #ifdef SKIP_ASM
 void* cUIState_onDestroyScreen(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028FC58(void*);
 
 /**
@@ -13612,7 +13612,7 @@ extern "C" void func_0028FC58(void*);
 extern "C" void cFEStateNetConfig_onDestroyScreen(cFEStateNetConfig* self)
 {
     cUIState_onDestroyScreen(self);
-    func_0028FC58(func_0028B180());
+    func_0028FC58(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -14996,7 +14996,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_FrontEndPurge(void* p);
 extern "C" void func_00256088();
 extern char str_TextCreateConfig[];
@@ -15044,7 +15044,7 @@ extern "C" void func_001B5BD8(cFEStateNetConfig* self, void* popup, unsigned int
     switch (kind) {
     case 15: {
         cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, 15);
-        cSSXAudio_FrontEndPurge(func_0028B180());
+        cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());
         func_00256088();
         cFEVObj_001B5BD8* createConfigText = (cFEVObj_001B5BD8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextCreateConfig));
         if (createConfigText != 0) {
@@ -15304,7 +15304,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00194A60(void* mem, int a1);
+extern "C" void* cFEStateMainMenu_cFEStateMainMenu1(void* mem, int a1);
 extern "C" void func_001A86E8(int on);
 extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
@@ -15344,7 +15344,7 @@ static inline int IsHash1B60A8(int id, char* name) { return id == GetHashValue32
  * miState 6); 1 ("TextCreateConfig") opens a Yes/No popup "kT_POPUP200CreateEdit" (id 0x844, default option 1).
  * Event 9 on "LBSettings" stores its row (+0x319) in miSelectedSetting and selects it in mpLBAdapters; event 8
  * calls func_001B5268 (menu row 0); event 6 sets the FE path offline (func_001A86E8(0)) and switches to a new
- * cFEStateMainMenu (func_00194A60). Others go to the cFEStateNet handler (cFEStateNet_onWidgetEvent). A null widget is ignored.
+ * cFEStateMainMenu (cFEStateMainMenu_cFEStateMainMenu1). Others go to the cFEStateNet handler (cFEStateNet_onWidgetEvent). A null widget is ignored.
  *
  * @param pWidget  the widget, as an int (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
@@ -15391,7 +15391,7 @@ extern "C" void cFEStateNetConfig_onWidgetEvent(cFEStateNetConfig* self, int pWi
         break;
     case 6:
         func_001A86E8(0);
-        func_001A8A40(self, func_00194A60(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), (int)self->mpEngine));
+        func_001A8A40(self, cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), (int)self->mpEngine));
         break;
     default:
         cFEStateNet_onWidgetEvent((cFEStateNet*)self, pWidget, msg);
@@ -23819,7 +23819,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_001A9930(cFEStateNet* self);
 extern "C" void func_00256C50();
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* p, int a1);
 extern char str_230online_main_menu[];
 
@@ -23827,7 +23827,7 @@ extern char str_230online_main_menu[];
  * Creates the "230online_main_menu" screen and tidies up any previous online session.
  *
  * Adds and plays the screen, opens the disconnected popup (func_001A9930) when LobbyMan's mState is 0, calls
- * func_00256C50 when a cGameComm exists, and calls func_0028F140(func_0028B180(), 1).
+ * func_00256C50 when a cGameComm exists, and calls func_0028F140(cAudioInterface_bxAudio(), 1).
  */
 extern "C" void cFEStateOnlineMainMenu_onCreateScreen(cFEStateNet* self)
 {
@@ -23843,7 +23843,7 @@ extern "C" void cFEStateOnlineMainMenu_onCreateScreen(cFEStateNet* self)
     if (cGameComm_mGameComm != 0) {
         func_00256C50();
     }
-    func_0028F140(func_0028B180(), 1);
+    func_0028F140(cAudioInterface_bxAudio(), 1);
 }
 #endif
 
@@ -24056,7 +24056,7 @@ extern "C" void cFEStateNet_onPopupEvent_v(void* self, void* a1, int a2) __asm__
 // PORT: the unit declares func_001A8A40 as returning void; the body returns 0/1
 extern "C" int func_001A8A40_r(void* self, void* obj) __asm__("func_001A8A40");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00194A60(void* mem, int a1);
+extern "C" void* cFEStateMainMenu_cFEStateMainMenu1(void* mem, int a1);
 extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
 extern const char str_cFEStateMainMenu[];
@@ -24080,7 +24080,7 @@ static inline void* GetSession_001C0138()
  * off.
  *
  * On event 0xF it runs cFEStateNet_onPopupEvent, sets unk_6B0 and switches to a new cFEStateMainMenu (cMemMan_alloc(0x58) +
- * func_00194A60, handed to func_001A8A40); when the switch is accepted it makes sure BuddyMan exists and is started,
+ * cFEStateMainMenu_cFEStateMainMenu1, handed to func_001A8A40); when the switch is accepted it makes sure BuddyMan exists and is started,
  * logs it out (func_00261408), disconnects the lobby (func_0025B800) and calls func_002636F0(func_002591B8(), 0). Other
  * events only run cFEStateNet_onPopupEvent.
  *
@@ -24092,7 +24092,7 @@ extern "C" void func_001C0138(cFEStateNet* self, void* popup, int event)
     if (event == 0xF) {
         cFEStateNet_onPopupEvent_v(self, popup, 0xF);
         self->unk_6B0 = 1;
-        if (func_001A8A40_r(self, func_00194A60(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), (int)self->mpEngine)) != 0) {
+        if (func_001A8A40_r(self, cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), (int)self->mpEngine)) != 0) {
             func_00261408(GetSession_001C0138());
             func_0025B800(LobbyMan_mLobbyMan);
             func_002636F0(func_002591B8(), 0);
@@ -26282,7 +26282,7 @@ extern "C" void func_001C2BA8(cFEStateNetQuickMessages* self, void* popup, int e
 INCLUDE_ASM("fe/feasyncfile", func_001C2C50);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_0018D7F0(void* mem, int engine, int a2, int a3, int a4);
+extern "C" void* cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(void* mem, int engine, int a2, int a3, int a4);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void* cFEStateNetSSXWorld_cFEStateNetSSXWorld(cFEStateNet* self, int a1);
@@ -26293,7 +26293,7 @@ extern const char str_cFEStateNetSSXWorld[];
  * Popup handler for the quick-messages screen's 0x83A (save changes?) popup: yes goes to the save screen, no back to
  * SSX World.
  *
- * Event 0xF runs cFEStateNet_onPopupEvent and switches to a new cFEStateOptionsDeviceSelect (cMemMan_alloc 0x23C, func_0018D7F0
+ * Event 0xF runs cFEStateNet_onPopupEvent and switches to a new cFEStateOptionsDeviceSelect (cMemMan_alloc 0x23C, cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1
  * with 2, 1, 1); event 0x10 runs cFEStateNet_onPopupEvent and switches to a new cFEStateNetSSXWorld (0x6D0). Both switches go
  * through func_001A8A40. Other events only run cFEStateNet_onPopupEvent.
  *
@@ -26305,7 +26305,7 @@ extern "C" void func_001C2C50(cFEStateNetQuickMessages* self, void* popup, int e
     switch (event) {
     case 0xF:
         cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, 0xF);
-        func_001A8A40(((cFEStateNet*)self), func_0018D7F0(cMemMan_alloc(572, str_cFEStateOptionsDeviceSelect, 0, 0), (int)self->mpEngine, 2, 1, 1));
+        func_001A8A40(((cFEStateNet*)self), cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(cMemMan_alloc(572, str_cFEStateOptionsDeviceSelect, 0, 0), (int)self->mpEngine, 2, 1, 1));
         break;
     case 0x10:
         cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, 0x10);

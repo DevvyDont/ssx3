@@ -85,7 +85,7 @@ struct cSectionMan {
     int mModeReset;                        // 0x1CC [O] (a bool); [R] init = 0; [U] gotoLocation = 1; changeMode clears
                                            //       it and calls the AI's vtable slot 5
     int m_bStreamReady;                    // 0x1D0 [O] (a bool); [R] init = 1; [U] update stores 0/1; isStreamReady()
-                                           //       in cGame_update, func_00244A40
+                                           //       in cGame_update, cGame_updateStreamLoading
 };
 
 CHECK_OFFSET(cSectionMan, m_EventPool, 0x000);

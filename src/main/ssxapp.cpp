@@ -995,7 +995,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_startFELoad);
 extern int cFEPopupConfirm_mUsePreFE;
 extern char str_FEModule[];
 extern "C" void* func_001A1CE8(void* p);
-extern "C" void* func_0017F7B8(void* p);
+extern "C" void* cDebugFE_cDebugFE(void* p);
 
 /**
  * Starts the front-end module: creates the real or the debug front end and queues it as the next module.
@@ -1011,7 +1011,7 @@ extern "C" void cSSXApp_startFELoad(cSSXApp* self)
         *(void**)&self->RealFE = frontEnd;
         cAppMan_setNextModule((cAppMan*)self, (unsigned int)frontEnd);
     } else {
-        void* frontEnd = func_0017F7B8(cMemMan_alloc(568, str_FEModule, 0, 0));
+        void* frontEnd = cDebugFE_cDebugFE(cMemMan_alloc(568, str_FEModule, 0, 0));
         *(void**)&self->DebugFE = frontEnd;
         cAppMan_setNextModule((cAppMan*)self, (unsigned int)frontEnd);
     }
@@ -1028,8 +1028,8 @@ extern "C" void func_00256188();
 extern "C" void* cSSXScriptEngine_cSSXScriptEngine(void* self);
 extern "C" void cSSXScriptEngine_InitOnce(void* self);
 extern "C" int cSSXApp_loadInputMap(cSSXApp* self, const char* name);
-void func_00244400(void* self, int a1);
-void func_00244408(void* self, int a1);
+void cInput_setPad(void* self, int a1);
+void cInput_setMap(void* self, int a1);
 int GetHashValue32(char* s);
 extern "C" void func_003984B0(void* self, unsigned int index, void* data, int type);
 extern "C" void cUIFontInterface_loadFonts(void* self);
@@ -1043,7 +1043,7 @@ extern "C" void cRiderAnimBase_initAIAnimEventMap();
 extern "C" void* func_00314D98(void* self);
 extern "C" void cGameAnimMap_initMap(void* self);
 extern "C" void* cAnimDataBase_cAnimDataBase(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" int func_00289D08(void* self, unsigned char a1);
 extern "C" void SSXAUDIO_Init(int a);
 extern "C" void func_0031A6B8();
@@ -1116,7 +1116,7 @@ struct sFontIface_82D0 {
 struct sPlayerInput_82D0 {
     int a;
     int b;
-    sPlayerInput_82D0(int x, int y) { func_00244400(this, x); func_00244408(this, y); }
+    sPlayerInput_82D0(int x, int y) { cInput_setPad(this, x); cInput_setMap(this, y); }
 };
 
 struct sSSXApp_82D0 {
@@ -1190,13 +1190,13 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cGameAnimMap_initMap(self->f94);
     self->f90 = cAnimDataBase_cAnimDataBase(cMemMan_alloc(0x3FC, str_AnimDataBase, 0, 0));
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    SSXAUDIO_Init(func_00289D08(func_0028B180(), D_00535610_82D0.output));
+    SSXAUDIO_Init(func_00289D08(cAudioInterface_bxAudio(), D_00535610_82D0.output));
     func_0031A6B8();
-    func_00287410(func_0028B180(), Cfg_82D0().sfxVol);
-    func_00287488(func_0028B180(), Cfg_82D0().speechVol);
-    func_00287520(func_0028B180(), Cfg_82D0().musicVol);
-    cSSXAudio_SetArcadeSFX(func_0028B180(), Cfg_82D0().f17 != 0);
-    func_002875D0(func_0028B180(), Cfg_82D0().f16 != 0);
+    func_00287410(cAudioInterface_bxAudio(), Cfg_82D0().sfxVol);
+    func_00287488(cAudioInterface_bxAudio(), Cfg_82D0().speechVol);
+    func_00287520(cAudioInterface_bxAudio(), Cfg_82D0().musicVol);
+    cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_82D0().f17 != 0);
+    func_002875D0(cAudioInterface_bxAudio(), Cfg_82D0().f16 != 0);
     WORLDTRIGGERMANAGER_Init();
     if (func_004165A8(self->fCC, D_004A29E8)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -3728,7 +3728,7 @@ extern "C" void func_002CC350(void* menu);
 extern "C" void func_00397DF8(void* p);
 void func_0030B4B8(void* p);
 void func_002789C0(void* p);
-extern "C" void func_001F31E0(void* p);
+extern "C" void cBXLoadIndicator_Render(void* p);
 extern "C" void func_00285BF8(void* snd, float dt, int a2);
 extern "C" void func_002B5D78(void* p);
 extern void* gWorldTriggerManager;
@@ -4184,7 +4184,7 @@ extern "C" int cGame_render(sGame_22B008* self)
         func_0030B4B8(self->f30);
     }
     func_002789C0(ScriptEngine);
-    func_001F31E0(self->f94);
+    cBXLoadIndicator_Render(self->f94);
     ((cGfx_22B008*)GrMan)->v20();
     func_00285BF8(gSSXAudio, (float)self->frames * (1.0f / 60.0f), 1);
     func_002B5D78(gWorldTriggerManager);

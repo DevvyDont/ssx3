@@ -12,8 +12,8 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
-extern "C" void func_00190A08(void* self);
-extern "C" void func_00190CD8(void* self);
+extern "C" void cFEStateRiderBio_setupBioScreen(void* self);
+extern "C" void cFEStateRiderBio_setupCharPics(void* self);
 extern char str_14rid_prof[];
 extern char str_ListBox0000[];
 extern char str_kT_14Heading1[];
@@ -28,7 +28,7 @@ struct sVEnt_001908C0 { short delta; short index; void (*fn)(void*); };
  *
  * Adds "kT_14Heading1" to "kT_14Heading4" to "ListBox0000", stores the character ID of player mUserNum
  * (+0x44) at +0x48 (then discards the player interface, its vtable slot 2), selects page 0 (+0x4C), shows
- * that page (func_00190A08) and shows only this rider's "<name>" and "<name>_s" objects (func_00190CD8).
+ * that page (cFEStateRiderBio_setupBioScreen) and shows only this rider's "<name>" and "<name>_s" objects (cFEStateRiderBio_setupCharPics).
  */
 extern "C" void cFEStateRiderBio_onCreateScreen(void* self)
 {
@@ -50,13 +50,13 @@ extern "C" void cFEStateRiderBio_onCreateScreen(void* self)
     sVEnt_001908C0* vt = *(sVEnt_001908C0**)((char*)iface + 0xC);
     vt[2].fn((char*)iface + vt[2].delta);
     *(int*)((char*)self + 0x4C) = 0;
-    func_00190A08(self);
-    func_00190CD8(self);
+    cFEStateRiderBio_setupBioScreen(self);
+    cFEStateRiderBio_setupCharPics(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", func_00190A08);
+INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_setupBioScreen);
 #ifdef SKIP_ASM
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
@@ -83,7 +83,7 @@ extern char str_horizontal_dash[];
  * (cUIState_showObjSafe, cUIState_hideObjSafe); "vertical_dash" and "horizontal_dash" are shown on pages 0-1 and hidden
  * on 2-3. Any other value does nothing.
  */
-extern "C" void func_00190A08(void* self)
+extern "C" void cFEStateRiderBio_setupBioScreen(void* self)
 {
     switch (*(int*)((char*)self + 0x4C)) {
     case 0:
@@ -139,7 +139,7 @@ extern "C" void func_00190A08(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", func_00190CD8);
+INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_setupCharPics);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
@@ -158,7 +158,7 @@ extern char str_pct_s_s[];
  * companion (str_pct_s_s, "%s_s") are shown when the index equals +0x48 and hidden otherwise (cUIState_showObjSafe,
  * cUIState_hideObjSafe).
  */
-extern "C" void func_00190CD8(void* self)
+extern "C" void cFEStateRiderBio_setupCharPics(void* self)
 {
     sNames_0CD8 names = D_0045E470;
     char buf[32];
@@ -324,14 +324,14 @@ struct sVEntry001912D0 {
     void* (*fn)(void*, void*, int);
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern "C" void func_00190A08(void* self);
+extern "C" void cFEStateRiderBio_setupBioScreen(void* self);
 
 /**
  * Handles the rider bio screen's widget events: probably going back, and switching the page shown.
  *
  * Event 6 asks the engine's custom interface (vtable slot 5, probably getPrevState) for the state to go to,
  * passing the widget's misc data, and pushes it when there is one. Event 9 takes the widget's current
- * list-box entry (+0x319) as the page (+0x4C) and shows it (func_00190A08). A null widget is ignored.
+ * list-box entry (+0x319) as the page (+0x4C) and shows it (cFEStateRiderBio_setupBioScreen). A null widget is ignored.
  *
  * @param item  the widget (On Tour pWidget)
  * @param msg  the event (On Tour Event)
@@ -353,14 +353,14 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(void* self, void* item, int msg)
     }
     case 9:
         *(int*)((char*)self + 0x4C) = *(unsigned char*)((char*)item + 0x319);
-        func_00190A08(self);
+        cFEStateRiderBio_setupBioScreen(self);
         break;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateriderbiodetail", func_00191360);
+INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRuleSelect_cFEStateRuleSelect);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" char func_001A1CD0(void* p, int a);
@@ -376,7 +376,7 @@ extern void* cFEStateRuleSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_00191360(void* self)
+extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect(void* self)
 {
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = cFEStateRuleSelect_vtbl;

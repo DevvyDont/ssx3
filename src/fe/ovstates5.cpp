@@ -2,13 +2,13 @@
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_onCreateScreen);
 
-INCLUDE_ASM("fe/ovstates5", func_002009D0);
+INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_onWidgetCreate);
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_onGainTransition);
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_onGainFocus);
 
-INCLUDE_ASM("fe/ovstates5", func_00200AF0);
+INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_onDestroyScreen);
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_isMapEventCompleted);
 
@@ -20,13 +20,13 @@ INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_setupEventUnlock__FP15cUITemplate_MA
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_setupPeakUnlock);
 
-INCLUDE_ASM("fe/ovstates5", func_00201868);
+INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_setupScreenExit);
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_onWidgetEvent);
 
-INCLUDE_ASM("fe/ovstates5", func_00202738);
+INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_onWidgetMenu);
 
-INCLUDE_ASM("fe/ovstates5", func_00202768);
+INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_onInputBegin);
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_onInputAlways);
 
@@ -50,29 +50,29 @@ INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_setupPeakGoals);
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_showEventPath);
 
-INCLUDE_ASM("fe/ovstates5", func_00207430);
+INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_setupLocationInfo);
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_setWidgetHiliteColor);
 
 INCLUDE_ASM("fe/ovstates5", cUITemplate_MAP_setWidgetUnHiliteColor);
 
-INCLUDE_ASM("fe/ovstates5", func_00208498);
+INCLUDE_ASM("fe/ovstates5", cOVState_TRANSPORT_onCreateScreen);
 
-INCLUDE_ASM("fe/ovstates5", func_00208518);
+INCLUDE_ASM("fe/ovstates5", cOVState_TRANSPORT_onWidgetCreate);
 
-INCLUDE_ASM("fe/ovstates5", func_00208538);
+INCLUDE_ASM("fe/ovstates5", cOVState_TRANSPORT_onGainTransition);
 
-INCLUDE_ASM("fe/ovstates5", func_00208558);
+INCLUDE_ASM("fe/ovstates5", cOVState_TRANSPORT_onGainFocus);
 
-INCLUDE_ASM("fe/ovstates5", func_00208588);
+INCLUDE_ASM("fe/ovstates5", cOVState_TRANSPORT_onDestroyScreen);
 
-INCLUDE_ASM("fe/ovstates5", func_002085B8);
+INCLUDE_ASM("fe/ovstates5", cOVState_TRANSPORT_onWidgetEvent);
 
-INCLUDE_ASM("fe/ovstates5", func_00208610);
+INCLUDE_ASM("fe/ovstates5", cOVState_TRANSPORT_onWidgetMenu);
 
-INCLUDE_ASM("fe/ovstates5", func_00208638);
+INCLUDE_ASM("fe/ovstates5", cOVState_TRANSPORT_onInputBegin);
 
-INCLUDE_ASM("fe/ovstates5", func_00208658);
+INCLUDE_ASM("fe/ovstates5", cOVState_TRANSPORT_onInputAlways);
 
-INCLUDE_ASM("fe/ovstates5", func_00208678);
+INCLUDE_ASM("fe/ovstates5", cOVState_TRANSPORT_onUpdate);
 

@@ -155,7 +155,7 @@ extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* o
 #endif
 
 //100%
-INCLUDE_ASM("fe/uitemplatemap", func_002009D0);
+INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onWidgetCreate);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -169,8 +169,8 @@ static inline int isLabel2009D0(int id, char* s)
 {
     return id == GetHashValue32(s);
 }
-// PORT: the unit declares func_002009D0(void*); the body also takes the menu in $5.
-extern "C" void func_002009D0_r(void* self, void* menu) __asm__("func_002009D0");
+// PORT: the unit declares cUITemplate_MAP_onWidgetCreate(void*); the body also takes the menu in $5.
+extern "C" void cUITemplate_MAP_onWidgetCreate_r(void* self, void* menu) __asm__("cUITemplate_MAP_onWidgetCreate");
 
 /**
  * Preselects the map's peak list when it is created: entry 2, or for map styles 2 and up the entry of the current race
@@ -182,7 +182,7 @@ extern "C" void func_002009D0_r(void* self, void* menu) __asm__("func_002009D0")
  *
  * @param menu  the widget being created (On Tour cUIThing* pWidget)
  */
-extern "C" void func_002009D0_r(void* self, void* menu)
+extern "C" void cUITemplate_MAP_onWidgetCreate_r(void* self, void* menu)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (isLabel2009D0(*(int*)((char*)menu + 0x38), str_SP_PeakList)) {
@@ -200,7 +200,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onGainTransition);
 #ifdef SKIP_ASM
 extern "C" void cUITemplate_MAP_setupMenuFocus(void* self, int focus);
 extern "C" void cUITemplate_MAP_setupMenus(void* self);
-extern "C" void func_00207430(void* self);
+extern "C" void cUITemplate_MAP_setupLocationInfo(void* self);
 extern "C" void cUITemplate_MAP_setShowInfo(void* self, int show);
 extern int cUITemplate_MAP_mMapState;
 // PORT: the unit declares cUITemplate_MAP_onGainTransition(void*); the body also takes a flag in $5.
@@ -210,7 +210,7 @@ extern "C" int cUITemplate_MAP_onGainTransition_r(void* self, int on) __asm__("c
  * Sets up the map screen's menus when its gain transition starts.
  *
  * When @p on is nonzero: sets the menu focus for cUITemplate_MAP_mMapState, builds the menus, calls
- * func_00207430() and passes the object's first word to cUITemplate_MAP_setShowInfo(). Does nothing otherwise.
+ * cUITemplate_MAP_setupLocationInfo() and passes the object's first word to cUITemplate_MAP_setShowInfo(). Does nothing otherwise.
  *
  * @param on  nonzero to run the setup
  * @return always 0
@@ -220,7 +220,7 @@ extern "C" int cUITemplate_MAP_onGainTransition_r(void* self, int on)
     if (on != 0) {
         cUITemplate_MAP_setupMenuFocus(self, cUITemplate_MAP_mMapState);
         cUITemplate_MAP_setupMenus(self);
-        func_00207430(self);
+        cUITemplate_MAP_setupLocationInfo(self);
         cUITemplate_MAP_setShowInfo(self, *(int*)self);
     }
     return 0;
@@ -231,7 +231,7 @@ extern "C" int cUITemplate_MAP_onGainTransition_r(void* self, int on)
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cUITemplate_MAP_setupMenuFocus(void* self, int focus);
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void func_0028F5B8(void* mgr);
 extern int cUITemplate_MAP_mMapState;
 
@@ -239,21 +239,21 @@ extern int cUITemplate_MAP_mMapState;
  * Restores the map screen's menu focus for the current map state when it gains focus.
  *
  * Calls cUITemplate_MAP_setupMenuFocus() for cUITemplate_MAP_mMapState, then func_0028F5B8() on the game audio
- * object returned by func_0028B180().
+ * object returned by cAudioInterface_bxAudio().
  */
 extern "C" void cUITemplate_MAP_onGainFocus(void* self)
 {
     cUITemplate_MAP_setupMenuFocus(self, cUITemplate_MAP_mMapState);
-    func_0028F5B8(func_0028B180());
+    func_0028F5B8(cAudioInterface_bxAudio());
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/uitemplatemap", func_00200AF0);
+INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
 extern "C" void cOVStateManager_removePDATemplate(void);
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void func_0028F678(void* mgr, int a);
 extern unsigned int cUITemplate_MAP_mMapStyle;
 
@@ -263,16 +263,16 @@ extern unsigned int cUITemplate_MAP_mMapStyle;
  *
  * Unloads the FE async file whose index is at +0x2D8 (On Tour mFEAsyncMapFileIndex) through SSXApp->mFEAsyncManager
  * (cFEAsyncManager_UnloadFEAsyncFile), calls cOVStateManager_removePDATemplate for cUITemplate_MAP_mMapStyle 1, 3 or 4,
- * and finally calls func_0028F678(func_0028B180(), 0) on the game audio. func_00208588 and
+ * and finally calls func_0028F678(cAudioInterface_bxAudio(), 0) on the game audio. cOVState_TRANSPORT_onDestroyScreen and
  * cFEStateEventSelect_onDestroyScreen call it for their embedded template.
  */
-extern "C" void func_00200AF0(void* self)
+extern "C" void cUITemplate_MAP_onDestroyScreen(void* self)
 {
     cFEAsyncManager_UnloadFEAsyncFile(SSXApp->mFEAsyncManager, *(int*)((char*)self + 0x2D8));
     if (cUITemplate_MAP_mMapStyle == 1 || cUITemplate_MAP_mMapStyle == 3 || cUITemplate_MAP_mMapStyle == 4) {
         cOVStateManager_removePDATemplate();
     }
-    func_0028F678(func_0028B180(), 0);
+    func_0028F678(cAudioInterface_bxAudio(), 0);
 }
 #endif
 
@@ -418,7 +418,7 @@ struct sPeakGoal {
     int f0C;
     int useTrackName;   // 0x10
     char name[0x1E];    // 0x14
-    char help[0x23];    // 0x32 help-text key (func_00207430)
+    char help[0x23];    // 0x32 help-text key (cUITemplate_MAP_setupLocationInfo)
     char path[0x17];    // 0x55
 };
 
@@ -702,7 +702,7 @@ extern "C" void cUITemplate_MAP_setupPeakUnlock(void* tmpl)
 #endif
 
 //100%
-INCLUDE_ASM("fe/uitemplatemap", func_00201868);
+INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupScreenExit);
 #ifdef SKIP_ASM
 struct sVEntry00201868 {
     short delta;
@@ -717,7 +717,7 @@ struct sVEntry00201868 {
  * Sets +0x2F0 (On Tour mScreenExiting) to 1 and +0x2DC (On Tour mMapTextureSet) to 0, and calls setVisible(0) (slot 9)
  * on the map icon at +0x2E4 (On Tour mpMap) when there is one.
  */
-extern "C" void func_00201868(void* self)
+extern "C" void cUITemplate_MAP_setupScreenExit(void* self)
 {
     *(int*)((char*)self + 0x2F0) = 1;
     *(int*)((char*)self + 0x2DC) = 0;
@@ -732,18 +732,18 @@ extern "C" void func_00201868(void* self)
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onWidgetEvent);
 
 //100%
-INCLUDE_ASM("fe/uitemplatemap", func_00202738);
+INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Map template's menu-event filter: events 6, 8 and 9 get 0, every other event 0x101.
  *
- * func_00208610 and func_00186950 forward their menu events to it.
+ * cOVState_TRANSPORT_onWidgetMenu and func_00186950 forward their menu events to it.
  *
  * @param menu  the menu (unused)
  * @param event  the menu event
  * @return 0 for events 6, 8 and 9, else 0x101
  */
-extern "C" int func_00202738(void* self, int menu, int event)
+extern "C" int cUITemplate_MAP_onWidgetMenu(void* self, int menu, int event)
 {
     if (event == 6 || event == 9 || event == 8) {
         return 0;
@@ -753,14 +753,14 @@ extern "C" int func_00202738(void* self, int menu, int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/uitemplatemap", func_00202768__FPv);
+INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onInputBegin__FPv);
 #ifdef SKIP_ASM
 /**
  * Map template's input hook: lets the input through unhandled.
  *
  * @return always 0
  */
-int func_00202768(void* self)
+int cUITemplate_MAP_onInputBegin(void* self)
 {
     return 0;
 }
@@ -772,7 +772,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onInputAlways);
 extern "C" void cUITemplate_MAP_setupPeakInfo(void* self);
 extern "C" void cUITemplate_MAP_setupPeakGoals(void* self);
 extern "C" void cUITemplate_MAP_setupLayout(void* self);
-extern "C" void func_00207430(void* self);
+extern "C" void cUITemplate_MAP_setupLocationInfo(void* self);
 extern int cUITemplate_MAP_mMapState;
 
 struct sVEntry00202770 {
@@ -788,7 +788,7 @@ extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, void* menu) __asm__(
  * Refreshes the map's info for the current map state when the input's vtable slot 17 or 18 test passes.
  *
  * Select peak refreshes the peak info, select goal the peak goals (both with the layout), select location
- * func_00207430().
+ * cUITemplate_MAP_setupLocationInfo().
  *
  * @param menu  the input (On Tour cUIInput* pInput)
  */
@@ -810,7 +810,7 @@ extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, void* menu)
         cUITemplate_MAP_setupLayout(self);
     }
     if (cUITemplate_MAP_mMapState == 2) {
-        func_00207430(self);
+        cUITemplate_MAP_setupLocationInfo(self);
     }
 }
 #endif
@@ -926,7 +926,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupLayout);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_00207430(void* self);
+extern "C" void cUITemplate_MAP_setupLocationInfo(void* self);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern int cUITemplate_MAP_mMapState;
@@ -968,7 +968,7 @@ extern char str_SE_Info[];
  *
  * Select peak, select goal (the peak's goal list and its completion icon) and select location (the event
  * type's
- * title and func_00207430()); the bottom tabs are hidden while the list's fourth entry (the mountain) is
+ * title and cUITemplate_MAP_setupLocationInfo()); the bottom tabs are hidden while the list's fourth entry (the mountain) is
  * selected.
  *
  * @param vself  the map template
@@ -1090,7 +1090,7 @@ extern "C" void cUITemplate_MAP_setupLayout(void* vself)
         cUIState_hideObjSafe(*(void**)(self + 0x2EC), str_SE_Info);
         if (*(int*)self != 0)
             cUIState_showObjSafe(*(void**)(self + 0x2EC), str_SE_Info);
-        func_00207430(self);
+        cUITemplate_MAP_setupLocationInfo(self);
         cUIState_hideObjSafe(*(void**)(self + 0x2EC), str_peak0indicators);
         cUIState_hideObjSafe(*(void**)(self + 0x2EC), str_peak1indicators);
         cUIState_hideObjSafe(*(void**)(self + 0x2EC), str_peak2indicators);
@@ -2582,7 +2582,7 @@ extern "C" void cUITemplate_MAP_showEventPath(void* tmpl, char* name)
 #endif
 
 //100%
-INCLUDE_ASM("fe/uitemplatemap", func_00207430);
+INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupLocationInfo);
 #ifdef SKIP_ASM
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cUIText_setAsciiString(cUIText* text, const char* str);
@@ -2681,8 +2681,8 @@ static inline void* getObj_207430(sMapTmpl_207430* self, char* name)
     return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
 }
 
-// PORT: the unit declares func_00207430(void*).
-extern "C" void func_00207430_r(sMapTmpl_207430* self) __asm__("func_00207430");
+// PORT: the unit declares cUITemplate_MAP_setupLocationInfo(void*).
+extern "C" void cUITemplate_MAP_setupLocationInfo_r(sMapTmpl_207430* self) __asm__("cUITemplate_MAP_setupLocationInfo");
 
 /**
  * Fills the map's location panel for the location selected in the current event list: name, event type, help text, and
@@ -2709,7 +2709,7 @@ extern "C" void func_00207430_r(sMapTmpl_207430* self) __asm__("func_00207430");
  * (cBERewardInterface_getTrackMedal through cUITemplate_MAP_getMedalStr, or kT_CMNNoMedal) and the top time (races,
  * formatted by func_0020A1A8) or top score (func_001550E8), with D_004A2108 for no result.
  */
-extern "C" void func_00207430_r(sMapTmpl_207430* self)
+extern "C" void cUITemplate_MAP_setupLocationInfo_r(sMapTmpl_207430* self)
 {
     char buf[200];
     sRewardDesc_0388 desc;
@@ -3016,7 +3016,7 @@ extern "C" void cUITemplate_MAP_setWidgetUnHiliteColor(void* self, void* obj, in
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/uitemplatemap", func_00208498);
+INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -3032,9 +3032,9 @@ extern char str_Map_b[];
  * Adds the screen with cUIEngine_addScreenByHashName on mpEngine and keeps it in mpScreen, plays frame 0 when it
  * exists, calls cOVState_onCreateScreen and then cUITemplate_MAP_onCreateScreen for the template embedded at +0x9C with
  * mpScreen and this state. It is the onCreateScreen slot (+0x24) of D_004733F8, the vtable of overlay 33
- * (cOVStateManager_triggerOverlay), whose template func_002006B8 initialises.
+ * (cOVStateManager_triggerOverlay), whose template cUITemplate_MAP_init initialises.
  */
-extern "C" void func_00208498(void* self)
+extern "C" void cOVState_TRANSPORT_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_Map_b), 0);
@@ -3047,28 +3047,28 @@ extern "C" void func_00208498(void* self)
 }
 #endif
 
-extern "C" void* func_002009D0(void*);
+extern "C" void* cUITemplate_MAP_onWidgetCreate(void*);
 
 //99.29%
-INCLUDE_ASM("fe/uitemplatemap", func_00208518__FPv);
+INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
 /**
- * Transport overlay's widget-create hook: forwards to the embedded map template (func_002009D0 on +0x9C).
+ * Transport overlay's widget-create hook: forwards to the embedded map template (cUITemplate_MAP_onWidgetCreate on +0x9C).
  *
- * As declared it takes only the state; the widget reaches func_002009D0 untouched in the second argument register.
+ * As declared it takes only the state; the widget reaches cUITemplate_MAP_onWidgetCreate untouched in the second argument register.
  *
- * @return what func_002009D0 leaves in the return register (that function returns nothing)
+ * @return what cUITemplate_MAP_onWidgetCreate leaves in the return register (that function returns nothing)
  */
-void* func_00208518(void* self)
+void* cOVState_TRANSPORT_onWidgetCreate(void* self)
 {
-    return func_002009D0((char*)self + 0x9c);
+    return cUITemplate_MAP_onWidgetCreate((char*)self + 0x9c);
 }
 #endif
 
 extern "C" void* cUITemplate_MAP_onGainTransition(void*);
 
 //99.29%
-INCLUDE_ASM("fe/uitemplatemap", func_00208538__FPv);
+INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onGainTransition__FPv);
 #ifdef SKIP_ASM
 /**
  * Transport overlay's gain-transition hook: forwards to the embedded map template (cUITemplate_MAP_onGainTransition on
@@ -3079,14 +3079,14 @@ INCLUDE_ASM("fe/uitemplatemap", func_00208538__FPv);
  *
  * @return the template's result
  */
-void* func_00208538(void* self)
+void* cOVState_TRANSPORT_onGainTransition(void* self)
 {
     return cUITemplate_MAP_onGainTransition((char*)self + 0x9c);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/uitemplatemap", func_00208558);
+INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cUIState_onGainFocus(void* self);
 extern "C" void cUITemplate_MAP_onGainFocus(void* self);
@@ -3095,7 +3095,7 @@ extern "C" void cUITemplate_MAP_onGainFocus(void* self);
  * Transport overlay's gain-focus hook: runs cUIState_onGainFocus, then cUITemplate_MAP_onGainFocus for the template at
  * +0x9C.
  */
-extern "C" void func_00208558(void* self)
+extern "C" void cOVState_TRANSPORT_onGainFocus(void* self)
 {
     cUIState_onGainFocus(self);
     cUITemplate_MAP_onGainFocus((char*)self + 0x9C);
@@ -3103,24 +3103,24 @@ extern "C" void func_00208558(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/uitemplatemap", func_00208588);
+INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onDestroyScreen);
 #ifdef SKIP_ASM
-extern "C" void func_00200AF0(void* self);
+extern "C" void cUITemplate_MAP_onDestroyScreen(void* self);
 extern "C" void cOVState_onDestroyScreen(void* self);
 
 /**
- * Transport overlay's screen teardown: tears down the map template at +0x9C (func_00200AF0), then runs
+ * Transport overlay's screen teardown: tears down the map template at +0x9C (cUITemplate_MAP_onDestroyScreen), then runs
  * cOVState_onDestroyScreen.
  */
-extern "C" void func_00208588(void* self)
+extern "C" void cOVState_TRANSPORT_onDestroyScreen(void* self)
 {
-    func_00200AF0((char*)self + 0x9C);
+    cUITemplate_MAP_onDestroyScreen((char*)self + 0x9C);
     cOVState_onDestroyScreen(self);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/uitemplatemap", func_002085B8);
+INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" int cUITemplate_MAP_onWidgetEvent(void* p);
 // PORT: returns int (value unused here); the int return type keeps the target's register choice after the call.
@@ -3134,7 +3134,7 @@ extern "C" int func_0039F190_85B8(void* self, int a1) __asm__("func_0039F190");
  * pending-delete bit in mAttrState (bits 8-13 = 7, bit 7 set). As declared the template call only gets the template
  * (+0x9C); the widget and event reach it in the argument registers.
  */
-extern "C" void func_002085B8(char* self)
+extern "C" void cOVState_TRANSPORT_onWidgetEvent(char* self)
 {
     if (cUITemplate_MAP_onWidgetEvent(self + 0x9C) == 1) {
         func_0039F190_85B8(*(char**)(self + 0x10) + 0x18, 1);
@@ -3144,19 +3144,19 @@ extern "C" void func_002085B8(char* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/uitemplatemap", func_00208610);
+INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
- * Transport overlay's menu-event filter: forwards to the map template's filter (func_00202738) and returns 0x101 when
+ * Transport overlay's menu-event filter: forwards to the map template's filter (cUITemplate_MAP_onWidgetMenu) and returns 0x101 when
  * that one returns nonzero, else 0.
  *
  * @param menu  the menu, passed on
  * @param event  the menu event, passed on
  * @return 0x101 or 0
  */
-extern "C" int func_00208610(void* self, int menu, int event)
+extern "C" int cOVState_TRANSPORT_onWidgetMenu(void* self, int menu, int event)
 {
-    if (func_00202738((char*)self + 0x9C, menu, event) != 0) {
+    if (cUITemplate_MAP_onWidgetMenu((char*)self + 0x9C, menu, event) != 0) {
         return 257;
     }
     return 0;
@@ -3165,21 +3165,21 @@ extern "C" int func_00208610(void* self, int menu, int event)
 
 //99.29% - identical instructions; jal addend differs only because the
 // callee sits at a different .text offset in our object than in the target
-INCLUDE_ASM("fe/uitemplatemap", func_00208638);
+INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onInputBegin);
 #ifdef SKIP_ASM
 /**
- * Transport overlay's input hook: calls the map template's (func_00202768 on +0x9C) and drops its result.
+ * Transport overlay's input hook: calls the map template's (cUITemplate_MAP_onInputBegin on +0x9C) and drops its result.
  */
-extern "C" void func_00208638(void* self)
+extern "C" void cOVState_TRANSPORT_onInputBegin(void* self)
 {
-    func_00202768((char*)self + 0x9c);
+    cUITemplate_MAP_onInputBegin((char*)self + 0x9c);
 }
 #endif
 
 extern "C" void* cUITemplate_MAP_onInputAlways(void*);
 
 //99.29%
-INCLUDE_ASM("fe/uitemplatemap", func_00208658__FPv);
+INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onInputAlways__FPv);
 #ifdef SKIP_ASM
 /**
  * Transport overlay's every-frame input hook: forwards to cUITemplate_MAP_onInputAlways for the template at +0x9C.
@@ -3188,14 +3188,14 @@ INCLUDE_ASM("fe/uitemplatemap", func_00208658__FPv);
  *
  * @return what cUITemplate_MAP_onInputAlways leaves in the return register (it returns nothing)
  */
-void* func_00208658(void* self)
+void* cOVState_TRANSPORT_onInputAlways(void* self)
 {
     return cUITemplate_MAP_onInputAlways((char*)self + 0x9c);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/uitemplatemap", func_00208678);
+INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void cOVState_onUpdate(void* self);
 extern "C" void cUITemplate_MAP_onUpdate(void* self);
@@ -3203,7 +3203,7 @@ extern "C" void cUITemplate_MAP_onUpdate(void* self);
 /**
  * Transport overlay's update: runs cOVState_onUpdate, then cUITemplate_MAP_onUpdate for the template at +0x9C.
  */
-extern "C" void func_00208678(void* self)
+extern "C" void cOVState_TRANSPORT_onUpdate(void* self)
 {
     cOVState_onUpdate(self);
     cUITemplate_MAP_onUpdate((char*)self + 0x9C);

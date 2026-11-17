@@ -10,13 +10,13 @@ INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_onInputBegin);
 
 INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_onWidgetCreate);
 
-INCLUDE_ASM("fe/fepopup2", func_001DA110);
+INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_createAndSetDescriptionString);
 
 INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_onGainTransition);
 
 INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_onWidgetEvent);
 
-INCLUDE_ASM("fe/fepopup2", func_001DA4A8);
+INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_clear);
 
 INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_setOption);
 

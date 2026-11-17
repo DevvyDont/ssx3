@@ -501,13 +501,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF470);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 inline void* operator new[](unsigned int, void* p) { return p; }
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
-extern "C" void func_001926F0(void* self);
+extern "C" void cBraggingRightsMenu_cBraggingRightsMenu(void* self);
 extern void* cFEStateBraggingRights_vtbl[];
 
-// Element type of an inline-constructed array (0x34 bytes, constructed by func_001926F0).
+// Element type of an inline-constructed array (0x34 bytes, constructed by cBraggingRightsMenu_cBraggingRightsMenu).
 struct sElem_F470 {
     char pad[0x34];
-    sElem_F470() { func_001926F0(this); }
+    sElem_F470() { cBraggingRightsMenu_cBraggingRightsMenu(this); }
 };
 
 extern "C" void* func_001DF470(void* self)
@@ -1020,7 +1020,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFA10);
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void func_001DFAC8(void* self);
-extern "C" void func_001D00C0(void* self);
+extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
@@ -1028,7 +1028,7 @@ extern "C" void func_001DFA10(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
     func_001DFAC8(self);
-    func_001D00C0(self);
+    cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
 }
@@ -1164,7 +1164,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFB28);
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void func_001DFAC8(void* self);
-extern "C" void func_001D00C0(void* self);
+extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
@@ -1172,7 +1172,7 @@ extern "C" void func_001DFB28(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
     func_001DFAC8(self);
-    func_001D00C0(self);
+    cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
 }
@@ -1236,7 +1236,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFBF8);
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void func_001DFAC8(void* self);
-extern "C" void func_001D00C0(void* self);
+extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
@@ -1244,7 +1244,7 @@ extern "C" void func_001DFBF8(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
     func_001DFAC8(self);
-    func_001D00C0(self);
+    cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
 }
@@ -1308,7 +1308,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFCC8);
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void func_001DFAC8(void* self);
-extern "C" void func_001D00C0(void* self);
+extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
@@ -1316,7 +1316,7 @@ extern "C" void func_001DFCC8(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
     func_001DFAC8(self);
-    func_001D00C0(self);
+    cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
 }
@@ -1380,7 +1380,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFD98);
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void func_001DFAC8(void* self);
-extern "C" void func_001D00C0(void* self);
+extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
@@ -1388,7 +1388,7 @@ extern "C" void func_001DFD98(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
     func_001DFAC8(self);
-    func_001D00C0(self);
+    cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
 }
@@ -1452,7 +1452,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFE68);
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void func_001DFAC8(void* self);
-extern "C" void func_001D00C0(void* self);
+extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
@@ -1460,7 +1460,7 @@ extern "C" void func_001DFE68(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
     func_001DFAC8(self);
-    func_001D00C0(self);
+    cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
 }
@@ -1524,7 +1524,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFF38);
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void func_001DFAC8(void* self);
-extern "C" void func_001D00C0(void* self);
+extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
@@ -1532,7 +1532,7 @@ extern "C" void func_001DFF38(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
     func_001DFAC8(self);
-    func_001D00C0(self);
+    cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
 }
@@ -1798,12 +1798,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateTrophyRoom__cFEStateTrophyRoom);
 #ifdef SKIP_ASM
 extern void* cFEStateTrophyRoom_vtbl[];
 extern void* D_0046D0D0[];
-extern "C" void func_001D4B20(void* self);
+extern "C" void cFEStateTrophyRoom_purgeTextures(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
 
 /**
- * Destroys the trophy-room front-end state: releases its five loaded images (func_001D4B20), then the base
+ * Destroys the trophy-room front-end state: releases its five loaded images (cFEStateTrophyRoom_purgeTextures), then the base
  * states.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -1811,7 +1811,7 @@ extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390
 extern "C" void cFEStateTrophyRoom__cFEStateTrophyRoom(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
-    func_001D4B20(self);
+    cFEStateTrophyRoom_purgeTextures(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
 }
@@ -7588,7 +7588,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E64C8);
 #ifdef SKIP_ASM
 // cUIState_onGainFocus returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
 void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -7616,7 +7616,7 @@ extern "C" void func_001E64C8(void* self)
     cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
     sprintf(buf, str_run_pct_d_pct_d, x, n);
     cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
-    cSSXAudio_MenuSound(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
 #endif
 
@@ -8122,7 +8122,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E75D0);
 #ifdef SKIP_ASM
 // cUIState_onGainFocus returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
 void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -8197,7 +8197,7 @@ extern "C" void func_001E75D0(void* self)
         cUITextScroll_setInputMap(p, 1);
         ((cUIObjK1DEB90*)p)->v09(0);
     }
-    cSSXAudio_MenuSound(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
 #endif
 
@@ -8331,7 +8331,7 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int func_004139F8(float f);
 extern "C" char* func_0020A1A8(int v);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern int D_004A213C;
 extern int D_00536730[];
@@ -8444,7 +8444,7 @@ extern "C" void func_001E7BB0(void* self)
         cUIState_hideObjSafe(self, str_screendata);
         cUIState_hideObjSafe(self, str_3D_Ov);
     } else {
-        cSSXAudio_MenuSound(func_0028B180(), 0xE);
+        cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
     }
 }
 #endif
@@ -8663,7 +8663,7 @@ extern "C" void func_001E8200(void* self)
         cUIState_hideObjSafe(self, str_screendata);
         cUIState_hideObjSafe(self, str_3D_Ov);
     }
-    cSSXAudio_MenuSound(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
 #endif
 
@@ -8949,13 +8949,13 @@ extern "C" void func_001E8EA8(void* self, void* popup, int event)
 INCLUDE_ASM("fe/fepopupmisc", func_001E8ED0);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_onGainFocus(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 
 extern "C" void func_001E8ED0(void* self)
 {
     cUIState_onGainFocus(self);
-    cSSXAudio_MenuSound(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
 #endif
 
@@ -8969,7 +8969,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cOVState_onCreateScreen(void* self);
 void func_001E8FC0(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 
 extern "C" void func_001E8F00(void* self)
@@ -8987,7 +8987,7 @@ extern "C" void func_001E8F00(void* self)
     }
     func_001E8FC0(self);
     cOVState_onCreateScreen(self);
-    cSSXAudio_MenuSound(func_0028B180(), 0xE);
+    cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
 #endif
 

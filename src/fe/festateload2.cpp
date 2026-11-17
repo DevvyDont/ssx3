@@ -8,5 +8,5 @@ INCLUDE_ASM("fe/festateload2", cFEStateTransition_onScreenEvent);
 
 INCLUDE_ASM("fe/festateload2", cFEStateTransition_handleEvent);
 
-INCLUDE_ASM("fe/festateload2", func_00194738);
+INCLUDE_ASM("fe/festateload2", cFEStateTitle_cFEStateTitle1);
 

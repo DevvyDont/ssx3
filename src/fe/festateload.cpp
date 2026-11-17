@@ -37,22 +37,22 @@ extern "C" void cFEStateEventSelect_onCreateScreen(void* self)
 }
 #endif
 
-extern "C" void* func_002009D0(void*);
+extern "C" void* cUITemplate_MAP_onWidgetCreate(void*);
 
 //100%
 INCLUDE_ASM("fe/festateload", func_00186708__FPv);
 #ifdef SKIP_ASM
 /**
- * Forwards widget creation to the embedded map template at +0x48 (func_002009D0()).
+ * Forwards widget creation to the embedded map template at +0x48 (cUITemplate_MAP_onWidgetCreate()).
  *
  * Sits in the onWidgetCreate slot of cFEStateEventSelect_vtbl; the widget passes through untouched in the second
- * argument register, and func_002009D0() selects the peak in the "SP_PeakList" menu.
+ * argument register, and cUITemplate_MAP_onWidgetCreate() selects the peak in the "SP_PeakList" menu.
  *
- * @return func_002009D0()'s return value (it returns nothing meaningful)
+ * @return cUITemplate_MAP_onWidgetCreate()'s return value (it returns nothing meaningful)
  */
 void* func_00186708(void* self)
 {
-    return func_002009D0((char*)self + 0x48);
+    return cUITemplate_MAP_onWidgetCreate((char*)self + 0x48);
 }
 #endif
 
@@ -92,18 +92,18 @@ extern "C" void cFEStateEventSelect_onGainFocus(void* self)
 INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onDestroyScreen);
 #ifdef SKIP_ASM
 void* cUIState_onDestroyScreen(void* self);
-extern "C" void func_00200AF0(void* tmpl);
+extern "C" void cUITemplate_MAP_onDestroyScreen(void* tmpl);
 
 /**
  * Destroys the event select state's screens, then tears down its map template (+0x48).
  *
- * After cUIState_onDestroyScreen(), func_00200AF0() unloads the template's async file, removes the PDA template
+ * After cUIState_onDestroyScreen(), cUITemplate_MAP_onDestroyScreen() unloads the template's async file, removes the PDA template
  * in map states 1, 3 and 4, and calls func_0028F678() on the audio object with 0.
  */
 extern "C" void cFEStateEventSelect_onDestroyScreen(void* self)
 {
     cUIState_onDestroyScreen(self);
-    func_00200AF0((char*)self + 0x48);
+    cUITemplate_MAP_onDestroyScreen((char*)self + 0x48);
 }
 #endif
 
@@ -227,37 +227,37 @@ extern "C" void func_001867A8(void* self, void* obj, int msg)
 //100%
 INCLUDE_ASM("fe/festateload", func_00186950);
 #ifdef SKIP_ASM
-extern "C" int func_00202738(void* self, int a1, int a2);
+extern "C" int cUITemplate_MAP_onWidgetMenu(void* self, int a1, int a2);
 
 /**
  * Answers a menu event for the event-select screen with 257 when the map template accepts it, else 0.
  *
- * func_00202738() on the template at +0x48 rejects events 6, 8 and 9.
+ * cUITemplate_MAP_onWidgetMenu() on the template at +0x48 rejects events 6, 8 and 9.
  *
  * @param menu  the menu
  * @param event  the menu event
- * @return 257 (0x101) when func_00202738() returns non-zero, else 0
+ * @return 257 (0x101) when cUITemplate_MAP_onWidgetMenu() returns non-zero, else 0
  */
 extern "C" int func_00186950(void* self, int menu, int event)
 {
-    if (func_00202738((char*)self + 0x48, menu, event) != 0) {
+    if (cUITemplate_MAP_onWidgetMenu((char*)self + 0x48, menu, event) != 0) {
         return 257;
     }
     return 0;
 }
 #endif
 
-void func_00202768(void*);
+void cUITemplate_MAP_onInputBegin(void*);
 
 //100%
 INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onInputBegin);
 #ifdef SKIP_ASM
 /**
- * Passes the start of input handling to the map template (+0x48) through func_00202768(), which returns 0.
+ * Passes the start of input handling to the map template (+0x48) through cUITemplate_MAP_onInputBegin(), which returns 0.
  */
 extern "C" void cFEStateEventSelect_onInputBegin(void* self)
 {
-    func_00202768((char*)self + 0x48);
+    cUITemplate_MAP_onInputBegin((char*)self + 0x48);
 }
 #endif
 
@@ -309,15 +309,15 @@ extern void* cFEStateMemCard_vtbl[];
 extern void* D_004A14B8_K186A08 __asm__("D_004A14B8");
 extern int D_004A14B4;
 extern int D_004A14BC;
-extern "C" void func_00186F90();
-extern "C" void func_00187148();
-extern "C" void func_00187180();
-extern "C" void func_00187230();
-extern "C" void func_001871A8();
+extern "C" void cFEStateMemCard_callbackLoadReady();
+extern "C" void cFEStateMemCard_callbackFileNotFound();
+extern "C" void cFEStateMemCard_callbackFileChecked();
+extern "C" void cFEStateMemCard_callbackSysRecheckFile();
+extern "C" void cFEStateMemCard_callbackCardsChecked();
 extern "C" void func_00186C98();
 extern "C" void func_00186D60();
-extern "C" void func_00186F40();
-extern "C" void func_00187360();
+extern "C" void cFEStateMemCard_callbackAcknowledgeCardStatusChange();
+extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks();
 
 struct sFEStateLoadK186A08 {
     char pad_0x0[0x8];
@@ -367,9 +367,9 @@ struct sMemCardK186A08 {
  * Runs cFEMemCard_cFEMemCard() with type 2, stores cFEStateMemCard_vtbl, makes itself the active load state
  * (D_004A14B8) and clears D_004A14B4 and D_004A14BC. Sets mHashName (+0xC), +0x204 and +0x23C to 1, +0x230, +0x234,
  * +0x240 and +0x244 to 0, +0x19C to 26 and +0x22C and +0x238 to -1. On cSSXApp_getMCManager()'s manager it sets +0x120,
- * +0x124 and +0x12C to 1, +0x11C and +0x128 to 0, and installs nine callbacks from fememcard (func_00186F90,
- * func_00187148, func_00187180, func_00187230, func_001871A8, func_00186C98, func_00186D60, func_00186F40,
- * func_00187360). Callers allocate 584 bytes ("cFEStateMemCard").
+ * +0x124 and +0x12C to 1, +0x11C and +0x128 to 0, and installs nine callbacks from fememcard (cFEStateMemCard_callbackLoadReady,
+ * cFEStateMemCard_callbackFileNotFound, cFEStateMemCard_callbackFileChecked, cFEStateMemCard_callbackSysRecheckFile, cFEStateMemCard_callbackCardsChecked, func_00186C98, func_00186D60, cFEStateMemCard_callbackAcknowledgeCardStatusChange,
+ * cFEStateMemCard_callbackConfirmNoFreeBlocks). Callers allocate 584 bytes ("cFEStateMemCard").
  *
  * @param engine  the UI engine
  * @return @p self
@@ -396,15 +396,15 @@ extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* e
     mc->f12C = one;
     mc->f124 = one;
     mc->f120 = one;
-    mc->cbA4 = (void*)func_00186F90;
-    mc->cb38 = (void*)func_00187148;
-    mc->cb94 = (void*)func_00187180;
-    mc->cbAC = (void*)func_00187230;
-    mc->cb90 = (void*)func_001871A8;
+    mc->cbA4 = (void*)cFEStateMemCard_callbackLoadReady;
+    mc->cb38 = (void*)cFEStateMemCard_callbackFileNotFound;
+    mc->cb94 = (void*)cFEStateMemCard_callbackFileChecked;
+    mc->cbAC = (void*)cFEStateMemCard_callbackSysRecheckFile;
+    mc->cb90 = (void*)cFEStateMemCard_callbackCardsChecked;
     mc->cb48 = (void*)func_00186C98;
     mc->cb3C = (void*)func_00186D60;
-    mc->cbB0 = (void*)func_00186F40;
-    mc->cb5C = (void*)func_00187360;
+    mc->cbB0 = (void*)cFEStateMemCard_callbackAcknowledgeCardStatusChange;
+    mc->cb5C = (void*)cFEStateMemCard_callbackConfirmNoFreeBlocks;
     mc->f128 = 0;
     mc->f11C = 0;
     return self;
@@ -416,10 +416,10 @@ INCLUDE_ASM("fe/festateload", cFEStateMemCard__cFEStateMemCard);
 #ifdef SKIP_ASM
 extern void* cFEStateMemCard_vtbl[];
 extern int D_004A14B8;
-extern "C" void func_001D5428(void* self, int flags);
+extern "C" void cFEMemCard__cFEMemCard(void* self, int flags);
 
 /**
- * Destroys a memory-card state: clears D_004A14B8 and runs the base destructor func_001D5428.
+ * Destroys a memory-card state: clears D_004A14B8 and runs the base destructor cFEMemCard__cFEMemCard.
  *
  * @param flags  destructor flags, passed on
  */
@@ -427,7 +427,7 @@ extern "C" void cFEStateMemCard__cFEStateMemCard(void* self, int flags)
 {
     *(void***)((char*)self + 8) = cFEStateMemCard_vtbl;
     D_004A14B8 = 0;
-    func_001D5428(self, flags);
+    cFEMemCard__cFEMemCard(self, flags);
 }
 #endif
 

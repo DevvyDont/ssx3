@@ -18,7 +18,7 @@ extern "C" void cBE_setState(int state);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cGameState_gotoNextState(void* self);
 extern "C" void cReplay_reset(void* p);
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void cGameComm_gameStartGate(void* p);
 extern "C" void cGame_resetWorld(void* self);
 extern "C" void cReplay_startRace(void* p);
@@ -61,8 +61,8 @@ extern "C" void cGFGateState_gainFocus(void* self)
         return;
     }
     cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 4);
-    func_0029C418(func_0028B180());
-    func_0029C420(func_0028B180(), 3);
+    func_0029C418(cAudioInterface_bxAudio());
+    func_0029C420(cAudioInterface_bxAudio(), 3);
     cGFGateState_runScript(self, GetHashValue32(str_StartlightBegin));
     cUIStateStack_purgeNormalStates(*(char**)(cGameState_mpGame + 0x48) + 0x18);
 }
@@ -109,7 +109,7 @@ int GetHashValue32(char* str);
 extern "C" int cReplay_isPauseAI(void* p);
 extern "C" void cGFGateState_runScript(void* self, int a1);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void func_0029C7B0(void* p);
 void func_0028C8C0(void* self, int val);
 extern "C" void cGameState_gotoNextState(void* self);
@@ -160,14 +160,14 @@ extern "C" void cGFGateState_update(void* self)
             sVEntry00234C68* vtEntry = &(*(sVEntry00234C68**)(obj + 8))[24];
             vtEntry->fn(obj + vtEntry->delta, 6, 0);
         }
-        func_0029C7B0(func_0028B180());
-        func_0028C8C0(func_0028B180(), 0x78);
+        func_0029C7B0(cAudioInterface_bxAudio());
+        func_0028C8C0(cAudioInterface_bxAudio(), 0x78);
         cGameState_gotoNextState(self);
     }
     int frames = *(int*)(*(char**)(cGameState_mpGame + 0xC) + 0x1C);
     float secs = frames / 60;
     if (frames % 60 == 0) {
-        func_0029C420(func_0028B180(), (int)ffloor_00234C68(secs));
+        func_0029C420(cAudioInterface_bxAudio(), (int)ffloor_00234C68(secs));
     }
 }
 #endif
@@ -328,7 +328,7 @@ extern "C" void cAI_prepareToPurgeComputerRiders(void* self);
 extern "C" void cAI_prepareToPurgeComputerActors(void* self);
 extern "C" int cBENewPlayerInterface_isFirstTimeOnTrack(void* self, int index, int bit);
 extern "C" void cSSXScriptEngine_AppendStartSequence(void* a, int b);
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 extern char* cGameState_mpGame;
 extern signed char D_00535C11[];
 
@@ -372,7 +372,7 @@ extern "C" void cGFTrackStartState_preloadInit(sState_234F40* self)
             char* sub = *(char**)(*(char**)(*(char**)(cGameState_mpGame + 0xC) + 0x40) + 0x18) + 0x6C0;
             sVEntry_234F40* vt = *(sVEntry_234F40**)sub;
             if (cBENewPlayerInterface_isFirstTimeOnTrack(iface, vt[7].fn(sub + vt[7].delta), locationId) != 0) {
-                char* audio = (char*)func_0028B180();
+                char* audio = (char*)cAudioInterface_bxAudio();
                 *(int*)(audio + 0x5790) = 0;
                 *(int*)(audio + 0x578C) = 1;
                 *(int*)(audio + 0x6254) = 1;
@@ -460,7 +460,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 
 
 // PORT: cSSXScriptEngine_ReadyNISList returns func_00276270's result (ssxscriptengine defines it void).
@@ -525,8 +525,8 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
         if (*(int*)((char*)self + 0x14) != 0) {
             if (locationId == 14) {
                 cSSXScriptEngine_AddToNISListByVideoCategory(ScriptEngine, 1, 29, 3);
-                func_0028CD48(func_0028B180());
-                func_002B3A70((char*)func_0028B180() + 0x118);
+                func_0028CD48(cAudioInterface_bxAudio());
+                func_002B3A70((char*)cAudioInterface_bxAudio() + 0x118);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0, 3, 0, -1, -1, -1);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 1, 3, 0, -1, -1, -1);
             } else {
@@ -683,7 +683,7 @@ extern "C" int cBENewRaceInterface_getLocationType(void* race, int a);
 extern "C" void cBENewPlayerInterface_setLastHub(void* player, int a, int b);
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
 extern "C" int cSSXScriptEngine_PlayNISList(void* self, int i, int a, int b);
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void func_002B3A98(void* p);
 extern "C" void func_002A4B68(void* p);
 extern char* cGameState_mpGame;
@@ -760,8 +760,8 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
     } else if (*(int*)((char*)self + 0x14)) {
         cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 0);
     }
-    func_002B3A98((char*)func_0028B180() + 0x118);
-    func_002A4B68(func_0028B180());
+    func_002B3A98((char*)cAudioInterface_bxAudio() + 0x118);
+    func_002A4B68(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -2002,7 +2002,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void func_002871B0(void* mgr);
 extern char* cGameState_mpGame;
 extern signed char D_00535C10[];
@@ -2016,7 +2016,7 @@ static inline int isMode4_236CD8()
  * Resets the race for the event: clears the NIS list, sets the AI back, and resets the audio.
  *
  * Calls cSSXScriptEngine_ResetNISList(ScriptEngine, 0); unless the race's game mode (cGameMode, D_00535C10) is 4, calls
- * virtual slot 5 of the game's AI with 3 and sets the AI's +0x14 to 1; then func_002871B0 on the audio (func_0028B180).
+ * virtual slot 5 of the game's AI with 3 and sets the AI's +0x14 to 1; then func_002871B0 on the audio (cAudioInterface_bxAudio).
  */
 extern "C" void cGFPreEventState_ResetGameState(void* self)
 {
@@ -2026,7 +2026,7 @@ extern "C" void cGFPreEventState_ResetGameState(void* self)
         (*(cRace236CD8**)(cGameState_mpGame + 0xC))->v05(3);
         *(int*)(*(char**)(cGameState_mpGame + 0xC) + 0x14) = 1;
     }
-    func_002871B0(func_0028B180());
+    func_002871B0(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -2179,18 +2179,18 @@ void* cGFPostEventState_readFromReplayFrame(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFPodiumState_gainFocus);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void func_0028CDF8(void* mgr);
 
 /**
  * Enters the podium state: calls func_0028CDF8() on the audio object and turns the AI's computer actors on.
  *
- * func_0028B180() returns gSSXAudio; the AI's ComputerActorsActive (+0x8C) is set to 1. On Tour's version takes
+ * cAudioInterface_bxAudio() returns gSSXAudio; the AI's ComputerActorsActive (+0x8C) is set to 1. On Tour's version takes
  * this and a startup flag, which the body does not use.
  */
 extern "C" void cGFPodiumState_gainFocus(void)
 {
-    func_0028CDF8(func_0028B180());
+    func_0028CDF8(cAudioInterface_bxAudio());
     *(int*)((char*)SSXApp->Game->AI + 0x8C) = 1;
 }
 #endif
@@ -2389,9 +2389,9 @@ INCLUDE_ASM("main/gamestate", cInputSync_createlocalinput);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void MEM_fill(void* dst, int value, int size);
-// PORT: func_00244400__FPvi takes the 0x2A4-byte block as an int (pointer in int)
-void func_00244400(void* self, int a1);
-void func_00244408(void* self, int a1);
+// PORT: cInput_setPad__FPvi takes the 0x2A4-byte block as an int (pointer in int)
+void cInput_setPad(void* self, int a1);
+void cInput_setMap(void* self, int a1);
 extern char str_InputSamples[];
 extern char str_SyncedPad[];
 extern char str_SyncedInput[];
@@ -2420,8 +2420,8 @@ struct sOwner_237140 {
 
 static inline void* initObj_237140(void* o, int a, int b)
 {
-    func_00244400(o, a);
-    func_00244408(o, b);
+    cInput_setPad(o, a);
+    cInput_setMap(o, b);
     return o;
 }
 
@@ -2461,9 +2461,9 @@ INCLUDE_ASM("main/gamestate", cInputSync_createremoteinput);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void MEM_fill(void* dst, int value, int size);
-// PORT: func_00244400__FPvi takes the 0x2A4-byte block as an int (pointer in int)
-void func_00244400(void* self, int a1);
-void func_00244408(void* self, int a1);
+// PORT: cInput_setPad__FPvi takes the 0x2A4-byte block as an int (pointer in int)
+void cInput_setPad(void* self, int a1);
+void cInput_setMap(void* self, int a1);
 extern char str_InputSamples[];
 extern char str_SyncedPad[];
 extern char str_SyncedInput[];
@@ -2492,8 +2492,8 @@ struct sOwner_237280 {
 
 static inline void* initObj_237280(void* o, int a, int b)
 {
-    func_00244400(o, a);
-    func_00244408(o, b);
+    cInput_setPad(o, a);
+    cInput_setMap(o, b);
     return o;
 }
 

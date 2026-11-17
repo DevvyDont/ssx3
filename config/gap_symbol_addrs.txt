@@ -1069,11 +1069,7 @@ lbl_0017C580 = 0x0017C580; //type:label
 func_0017D0A8 = 0x0017D0A8; //type:func
 lbl_0017D1EC = 0x0017D1EC; //type:label
 lbl_0017D1F4 = 0x0017D1F4; //type:label
-func_0017D200 = 0x0017D200; //type:func
 func_0017D260 = 0x0017D260; //type:func
-func_0017D298 = 0x0017D298; //type:func
-func_0017D3B0 = 0x0017D3B0; //type:func
-func_0017D688 = 0x0017D688; //type:func
 func_0017D6F0 = 0x0017D6F0; //type:func
 lbl_0017D740 = 0x0017D740; //type:label
 lbl_0017D794 = 0x0017D794; //type:label
@@ -1129,7 +1125,6 @@ func_0017E418 = 0x0017E418; //type:func
 func_0017E490 = 0x0017E490; //type:func
 func_0017E4F0 = 0x0017E4F0; //type:func
 func_0017E558 = 0x0017E558; //type:func
-func_0017E5C8 = 0x0017E5C8; //type:func
 lbl_0017E628 = 0x0017E628; //type:label
 lbl_0017E688 = 0x0017E688; //type:label
 lbl_0017E6E8 = 0x0017E6E8; //type:label
@@ -1149,8 +1144,6 @@ lbl_0017ED3C = 0x0017ED3C; //type:label
 lbl_0017EE14 = 0x0017EE14; //type:label
 lbl_0017EF20 = 0x0017EF20; //type:label
 lbl_0017F1A8 = 0x0017F1A8; //type:label
-func_0017F500 = 0x0017F500; //type:func
-func_0017F7B8 = 0x0017F7B8; //type:func
 lbl_0017FE2C = 0x0017FE2C; //type:label
 lbl_0017FE34 = 0x0017FE34; //type:label
 lbl_0017FE3C = 0x0017FE3C; //type:label
@@ -1159,19 +1152,8 @@ lbl_0017FE4C = 0x0017FE4C; //type:label
 lbl_0017FE54 = 0x0017FE54; //type:label
 lbl_0017FE5C = 0x0017FE5C; //type:label
 lbl_0017FE64 = 0x0017FE64; //type:label
-func_001805D8 = 0x001805D8; //type:func
-func_00180618 = 0x00180618; //type:func
-func_00180678 = 0x00180678; //type:func
-func_001806D8 = 0x001806D8; //type:func
-func_00180768 = 0x00180768; //type:func
-func_001807C8 = 0x001807C8; //type:func
-func_00180840 = 0x00180840; //type:func
-func_001809B0 = 0x001809B0; //type:func
-func_00180A90 = 0x00180A90; //type:func
 
 // --- src/fe/festatedebug.cpp ---
-func_00180EF0 = 0x00180EF0; //type:func
-func_00181090 = 0x00181090; //type:func
 
 // --- src/fe/festatecharselect.cpp ---
 lbl_00181844 = 0x00181844; //type:label
@@ -1181,24 +1163,10 @@ lbl_00181A30 = 0x00181A30; //type:label
 lbl_00181A50 = 0x00181A50; //type:label
 lbl_00181AE8 = 0x00181AE8; //type:label
 lbl_00181BA4 = 0x00181BA4; //type:label
-func_00181BD0 = 0x00181BD0; //type:func
-func_00181EF0 = 0x00181EF0; //type:func
-func_00182220 = 0x00182220; //type:func
-func_00182870 = 0x00182870; //type:func
-func_001828C0 = 0x001828C0; //type:func
 
 // --- src/fe/festatecharsetup.cpp ---
-func_00182C08 = 0x00182C08; //type:func
-func_00182C68 = 0x00182C68; //type:func
-func_00182DB8 = 0x00182DB8; //type:func
-func_00182EC0 = 0x00182EC0; //type:func
-func_001831D0 = 0x001831D0; //type:func
-func_00183238 = 0x00183238; //type:func
 
 // --- src/fe/festateriderbio.cpp ---
-func_00183A98 = 0x00183A98; //type:func
-func_00183B08 = 0x00183B08; //type:func
-func_00183C08 = 0x00183C08; //type:func
 func_00183D08 = 0x00183D08; //type:func
 
 // --- src/wscript/wscriptmission.cpp ---
@@ -1212,25 +1180,14 @@ lbl_001841DC = 0x001841DC; //type:label
 func_00184520 = 0x00184520; //type:func
 
 // --- src/fe/festatestore.cpp ---
-func_00184780 = 0x00184780; //type:func
-func_001849B0 = 0x001849B0; //type:func
-func_00184B70 = 0x00184B70; //type:func
-func_00184BB8 = 0x00184BB8; //type:func
-func_00184BE0 = 0x00184BE0; //type:func
-func_00184C60 = 0x00184C60; //type:func
-func_00184F40 = 0x00184F40; //type:func
-func_00185268 = 0x00185268; //type:func
 lbl_001852BC = 0x001852BC; //type:label
 lbl_00185558 = 0x00185558; //type:label
 lbl_00185654 = 0x00185654; //type:label
 lbl_001856F4 = 0x001856F4; //type:label
 lbl_00185998 = 0x00185998; //type:label
 lbl_001859B0 = 0x001859B0; //type:label
-func_001859D8 = 0x001859D8; //type:func
-func_00185A18 = 0x00185A18; //type:func
 
 // --- src/fe/festatecredits.cpp ---
-func_00186610 = 0x00186610; //type:func
 
 // --- src/fe/festateload.cpp ---
 func_00186708__FPv = 0x00186708; //type:func
@@ -1242,89 +1199,26 @@ func_00186B48__FPv = 0x00186B48; //type:func
 // --- src/fe/fememcard.cpp ---
 func_00186C98 = 0x00186C98; //type:func
 func_00186D60 = 0x00186D60; //type:func
-func_00186F40 = 0x00186F40; //type:func
-func_00186F90 = 0x00186F90; //type:func
-func_00187148 = 0x00187148; //type:func
-func_00187180 = 0x00187180; //type:func
-func_001871A8 = 0x001871A8; //type:func
-func_00187230 = 0x00187230; //type:func
-func_00187270 = 0x00187270; //type:func
-func_00187318 = 0x00187318; //type:func
-func_00187360 = 0x00187360; //type:func
-func_001874E8 = 0x001874E8; //type:func
-func_00187580 = 0x00187580; //type:func
-func_001876A8 = 0x001876A8; //type:func
-func_001877B0 = 0x001877B0; //type:func
-func_00187920 = 0x00187920; //type:func
-func_00187A38 = 0x00187A38; //type:func
 
 // --- src/fe/festatelegal.cpp ---
 func_00187D38 = 0x00187D38; //type:func
 func_001887A0 = 0x001887A0; //type:func
 
 // --- src/fe/festateoptions.cpp ---
-func_00188E58 = 0x00188E58; //type:func
 func_00188EE8 = 0x00188EE8; //type:func
-func_00189610 = 0x00189610; //type:func
-func_00189958 = 0x00189958; //type:func
-func_00189970 = 0x00189970; //type:func
-func_00189D60 = 0x00189D60; //type:func
 func_0018A258 = 0x0018A258; //type:func
-func_0018A3D8 = 0x0018A3D8; //type:func
-func_0018A890 = 0x0018A890; //type:func
-func_0018A8C0 = 0x0018A8C0; //type:func
-func_0018A8D0 = 0x0018A8D0; //type:func
-func_0018BEF8 = 0x0018BEF8; //type:func
 func_0018C0E8 = 0x0018C0E8; //type:func
-func_0018C128 = 0x0018C128; //type:func
-func_0018C198__FPv = 0x0018C198; //type:func
-func_0018C1B8 = 0x0018C1B8; //type:func
-func_0018C270 = 0x0018C270; //type:func
-func_0018C2A0 = 0x0018C2A0; //type:func
-func_0018C478 = 0x0018C478; //type:func
 func_0018C658 = 0x0018C658; //type:func
-func_0018C910 = 0x0018C910; //type:func
-func_0018CA10 = 0x0018CA10; //type:func
-func_0018CCE0 = 0x0018CCE0; //type:func
-func_0018CDB0 = 0x0018CDB0; //type:func
-func_0018CDC0 = 0x0018CDC0; //type:func
-func_0018CF50 = 0x0018CF50; //type:func
-func_0018D058 = 0x0018D058; //type:func
-func_0018D108 = 0x0018D108; //type:func
-func_0018D240 = 0x0018D240; //type:func
-func_0018D7F0 = 0x0018D7F0; //type:func
-func_0018DDD0 = 0x0018DDD0; //type:func
-func_0018DEA0 = 0x0018DEA0; //type:func
-func_0018E178 = 0x0018E178; //type:func
-func_0018E2C0 = 0x0018E2C0; //type:func
-func_0018E368 = 0x0018E368; //type:func
-func_0018E478 = 0x0018E478; //type:func
-func_0018E510 = 0x0018E510; //type:func
 
 // --- src/fe/festateprofile.cpp ---
-func_0018EE98__FPv = 0x0018EE98; //type:func
-func_0018EEB8 = 0x0018EEB8; //type:func
-func_0018EF70 = 0x0018EF70; //type:func
-func_0018F0B8 = 0x0018F0B8; //type:func
-func_0018F168 = 0x0018F168; //type:func
-func_0018F278 = 0x0018F278; //type:func
-func_0018F9D8 = 0x0018F9D8; //type:func
-func_0018FAF0 = 0x0018FAF0; //type:func
 func_0018FC98 = 0x0018FC98; //type:func
-func_0018FD90 = 0x0018FD90; //type:func
 lbl_0018FDE0 = 0x0018FDE0; //type:label
 lbl_0018FECC = 0x0018FECC; //type:label
 lbl_00190164 = 0x00190164; //type:label
 lbl_001901CC = 0x001901CC; //type:label
 lbl_00190298 = 0x00190298; //type:label
-func_00190670 = 0x00190670; //type:func
-func_00190768 = 0x00190768; //type:func
-func_00190858 = 0x00190858; //type:func
 
 // --- src/fe/festateriderbiodetail.cpp ---
-func_00190A08 = 0x00190A08; //type:func
-func_00190CD8 = 0x00190CD8; //type:func
-func_00191360 = 0x00191360; //type:func
 
 // --- src/fe/festateruleselect.cpp ---
 lbl_00191500 = 0x00191500; //type:label
@@ -1340,7 +1234,6 @@ lbl_00191A04 = 0x00191A04; //type:label
 lbl_00191A10 = 0x00191A10; //type:label
 lbl_00191A1C = 0x00191A1C; //type:label
 lbl_00191A2C = 0x00191A2C; //type:label
-func_00192088 = 0x00192088; //type:func
 lbl_001920B0 = 0x001920B0; //type:label
 lbl_001920D4 = 0x001920D4; //type:label
 lbl_001920F8 = 0x001920F8; //type:label
@@ -1355,7 +1248,6 @@ lbl_001921C0 = 0x001921C0; //type:label
 lbl_001921DC = 0x001921DC; //type:label
 lbl_001921F8 = 0x001921F8; //type:label
 lbl_00192214 = 0x00192214; //type:label
-func_00192240 = 0x00192240; //type:func
 lbl_00192268 = 0x00192268; //type:label
 lbl_00192278 = 0x00192278; //type:label
 lbl_0019228C = 0x0019228C; //type:label
@@ -1370,15 +1262,6 @@ lbl_00192324 = 0x00192324; //type:label
 lbl_00192338 = 0x00192338; //type:label
 lbl_0019234C = 0x0019234C; //type:label
 lbl_00192360 = 0x00192360; //type:label
-func_00192380 = 0x00192380; //type:func
-func_001926F0 = 0x001926F0; //type:func
-func_00192740 = 0x00192740; //type:func
-func_001927B0 = 0x001927B0; //type:func
-func_00192918 = 0x00192918; //type:func
-func_00192948 = 0x00192948; //type:func
-func_00192968__FPvi = 0x00192968; //type:func
-func_00192970 = 0x00192970; //type:func
-func_00192D00 = 0x00192D00; //type:func
 
 // --- src/fe/festatebigradio.cpp ---
 lbl_00192E60 = 0x00192E60; //type:label
@@ -1428,17 +1311,14 @@ lbl_00194404 = 0x00194404; //type:label
 func_00194440 = 0x00194440; //type:func
 
 // --- src/fe/festatetransition.cpp ---
-func_00194738 = 0x00194738; //type:func
 
 // --- src/fe/ovstates.cpp ---
-func_00194A60 = 0x00194A60; //type:func
 lbl_00194F54 = 0x00194F54; //type:label
 lbl_00194F68 = 0x00194F68; //type:label
 lbl_00194F88 = 0x00194F88; //type:label
 lbl_00194F9C = 0x00194F9C; //type:label
 lbl_00194FC8 = 0x00194FC8; //type:label
 lbl_00194FD0 = 0x00194FD0; //type:label
-func_00195498 = 0x00195498; //type:func
 
 // --- src/fe/festatebonusmaterial.cpp ---
 
@@ -1466,10 +1346,6 @@ lbl_00196A1C = 0x00196A1C; //type:label
 func_00196B90 = 0x00196B90; //type:func
 
 // --- src/fe/messagecenter.cpp ---
-func_00197AD8 = 0x00197AD8; //type:func
-func_00197E70 = 0x00197E70; //type:func
-func_001988D8 = 0x001988D8; //type:func
-func_00198AB8 = 0x00198AB8; //type:func
 func_00198DA0 = 0x00198DA0; //type:func
 
 // --- src/fe/festatecharequipdetail.cpp ---
@@ -1547,10 +1423,6 @@ func_0019DF20 = 0x0019DF20; //type:func
 func_0019E070 = 0x0019E070; //type:func
 func_0019E238 = 0x0019E238; //type:func
 func_0019E2B0 = 0x0019E2B0; //type:func
-func_0019E3D0 = 0x0019E3D0; //type:func
-func_0019E498 = 0x0019E498; //type:func
-func_0019E538 = 0x0019E538; //type:func
-func_0019E588 = 0x0019E588; //type:func
 
 // --- src/fe/feridermanager.cpp ---
 func_0019E7F0 = 0x0019E7F0; //type:func
@@ -1603,9 +1475,6 @@ func_001A0598 = 0x001A0598; //type:func
 func_001A0608 = 0x001A0608; //type:func
 
 // --- src/fe/feflowstate.cpp ---
-func_001A06B0 = 0x001A06B0; //type:func
-func_001A06F0 = 0x001A06F0; //type:func
-func_001A0708 = 0x001A0708; //type:func
 
 // --- src/fe/fereal.cpp ---
 func_001A07C8 = 0x001A07C8; //type:func
@@ -1704,11 +1573,8 @@ lbl_001A3010 = 0x001A3010; //type:label
 lbl_001A302C = 0x001A302C; //type:label
 
 // --- src/fe/festateselectmp.cpp ---
-func_001A3218 = 0x001A3218; //type:func
 
 // --- src/fe/ovstatemission.cpp ---
-func_001A34A0__FPv = 0x001A34A0; //type:func
-func_001A34A8__FPv = 0x001A34A8; //type:func
 
 // --- src/fe/feasyncfile.cpp ---
 func_001A3E30 = 0x001A3E30; //type:func
@@ -2387,9 +2253,6 @@ func_001CE468 = 0x001CE468; //type:func
 func_001CE6F0 = 0x001CE6F0; //type:func
 
 // --- src/fe/festaterewards.cpp ---
-func_001CF168 = 0x001CF168; //type:func
-func_001CF238 = 0x001CF238; //type:func
-func_001CF270 = 0x001CF270; //type:func
 lbl_001CF9C0 = 0x001CF9C0; //type:label
 lbl_001CF9D0 = 0x001CF9D0; //type:label
 lbl_001CF9E0 = 0x001CF9E0; //type:label
@@ -2401,53 +2264,6 @@ lbl_001CFA84 = 0x001CFA84; //type:label
 lbl_001CFA90 = 0x001CFA90; //type:label
 lbl_001CFA9C = 0x001CFA9C; //type:label
 lbl_001CFAA8 = 0x001CFAA8; //type:label
-func_001CFD18 = 0x001CFD18; //type:func
-func_001CFDD0 = 0x001CFDD0; //type:func
-func_001CFE60 = 0x001CFE60; //type:func
-func_001CFF10 = 0x001CFF10; //type:func
-func_001CFFF8 = 0x001CFFF8; //type:func
-func_001D00C0 = 0x001D00C0; //type:func
-func_001D0180 = 0x001D0180; //type:func
-func_001D0238 = 0x001D0238; //type:func
-func_001D0320 = 0x001D0320; //type:func
-func_001D0510 = 0x001D0510; //type:func
-func_001D05F0 = 0x001D05F0; //type:func
-func_001D0B00 = 0x001D0B00; //type:func
-func_001D0D30 = 0x001D0D30; //type:func
-func_001D0E78 = 0x001D0E78; //type:func
-func_001D0EB8 = 0x001D0EB8; //type:func
-func_001D0F30 = 0x001D0F30; //type:func
-func_001D10A8 = 0x001D10A8; //type:func
-func_001D1128 = 0x001D1128; //type:func
-func_001D1198__FPv = 0x001D1198; //type:func
-func_001D11A8 = 0x001D11A8; //type:func
-func_001D11F8 = 0x001D11F8; //type:func
-func_001D1290 = 0x001D1290; //type:func
-func_001D12C8 = 0x001D12C8; //type:func
-func_001D1330__FPv = 0x001D1330; //type:func
-func_001D1340 = 0x001D1340; //type:func
-func_001D1390 = 0x001D1390; //type:func
-func_001D1428 = 0x001D1428; //type:func
-func_001D1460 = 0x001D1460; //type:func
-func_001D14C8__FPv = 0x001D14C8; //type:func
-func_001D14D8 = 0x001D14D8; //type:func
-func_001D1528 = 0x001D1528; //type:func
-func_001D15C0 = 0x001D15C0; //type:func
-func_001D15F8 = 0x001D15F8; //type:func
-func_001D1660__FPv = 0x001D1660; //type:func
-func_001D1670 = 0x001D1670; //type:func
-func_001D16C0 = 0x001D16C0; //type:func
-func_001D1758 = 0x001D1758; //type:func
-func_001D1790 = 0x001D1790; //type:func
-func_001D17F8__FPv = 0x001D17F8; //type:func
-func_001D1808 = 0x001D1808; //type:func
-func_001D1858 = 0x001D1858; //type:func
-func_001D18F0 = 0x001D18F0; //type:func
-func_001D1928 = 0x001D1928; //type:func
-func_001D1990 = 0x001D1990; //type:func
-func_001D1A28 = 0x001D1A28; //type:func
-func_001D1A60 = 0x001D1A60; //type:func
-func_001D1AA0 = 0x001D1AA0; //type:func
 lbl_001D1DA8 = 0x001D1DA8; //type:label
 lbl_001D1DB4 = 0x001D1DB4; //type:label
 lbl_001D1DC0 = 0x001D1DC0; //type:label
@@ -2456,73 +2272,15 @@ lbl_001D1DD8 = 0x001D1DD8; //type:label
 lbl_001D1E38 = 0x001D1E38; //type:label
 lbl_001D1E44 = 0x001D1E44; //type:label
 lbl_001D1F00 = 0x001D1F00; //type:label
-func_001D20D8 = 0x001D20D8; //type:func
-func_001D2150 = 0x001D2150; //type:func
-func_001D2198 = 0x001D2198; //type:func
-func_001D22F0 = 0x001D22F0; //type:func
-func_001D2380 = 0x001D2380; //type:func
-func_001D23E0 = 0x001D23E0; //type:func
-func_001D2430 = 0x001D2430; //type:func
-func_001D2468 = 0x001D2468; //type:func
-func_001D24A8 = 0x001D24A8; //type:func
-func_001D2518 = 0x001D2518; //type:func
-func_001D2598 = 0x001D2598; //type:func
-func_001D25E8 = 0x001D25E8; //type:func
-func_001D2638 = 0x001D2638; //type:func
 
 // --- src/fe/ovstatelodge.cpp ---
-func_001D3160 = 0x001D3160; //type:func
-func_001D31C0 = 0x001D31C0; //type:func
-func_001D32E0 = 0x001D32E0; //type:func
-func_001D3340 = 0x001D3340; //type:func
-func_001D3780 = 0x001D3780; //type:func
-func_001D3F80 = 0x001D3F80; //type:func
-func_001D4268 = 0x001D4268; //type:func
 
 // --- src/fe/festatetrophyroom.cpp ---
-func_001D47A0 = 0x001D47A0; //type:func
-func_001D4890 = 0x001D4890; //type:func
-func_001D4918 = 0x001D4918; //type:func
-func_001D4A20 = 0x001D4A20; //type:func
-func_001D4B20 = 0x001D4B20; //type:func
-func_001D4BC8 = 0x001D4BC8; //type:func
-func_001D4F90 = 0x001D4F90; //type:func
 func_001D5138 = 0x001D5138; //type:func
 func_001D5280 = 0x001D5280; //type:func
 func_001D5330 = 0x001D5330; //type:func
-func_001D5428 = 0x001D5428; //type:func
-func_001D5460 = 0x001D5460; //type:func
-func_001D5488 = 0x001D5488; //type:func
-func_001D5D78 = 0x001D5D78; //type:func
-func_001D5F38__FPv = 0x001D5F38; //type:func
-func_001D5F40 = 0x001D5F40; //type:func
-func_001D64C0 = 0x001D64C0; //type:func
 
 // --- src/fe/fememcardcallbacks.cpp ---
-func_001D68E8 = 0x001D68E8; //type:func
-func_001D69E0 = 0x001D69E0; //type:func
-func_001D6AD0 = 0x001D6AD0; //type:func
-func_001D6C28 = 0x001D6C28; //type:func
-func_001D6D88 = 0x001D6D88; //type:func
-func_001D7010 = 0x001D7010; //type:func
-func_001D7190 = 0x001D7190; //type:func
-func_001D72A8 = 0x001D72A8; //type:func
-func_001D7318 = 0x001D7318; //type:func
-func_001D7548 = 0x001D7548; //type:func
-func_001D77E8 = 0x001D77E8; //type:func
-func_001D7998 = 0x001D7998; //type:func
-func_001D7B18 = 0x001D7B18; //type:func
-func_001D7D70 = 0x001D7D70; //type:func
-func_001D8020 = 0x001D8020; //type:func
-func_001D8160 = 0x001D8160; //type:func
-func_001D8240 = 0x001D8240; //type:func
-func_001D8358 = 0x001D8358; //type:func
-func_001D83A8 = 0x001D83A8; //type:func
-func_001D8530 = 0x001D8530; //type:func
-func_001D8670 = 0x001D8670; //type:func
-func_001D86A0__FPv = 0x001D86A0; //type:func
-func_001D86B0 = 0x001D86B0; //type:func
-func_001D8700 = 0x001D8700; //type:func
 lbl_001D8778 = 0x001D8778; //type:label
 lbl_001D8798 = 0x001D8798; //type:label
 lbl_001D87DC = 0x001D87DC; //type:label
@@ -2541,9 +2299,6 @@ lbl_001D8ADC = 0x001D8ADC; //type:label
 lbl_001D8B38 = 0x001D8B38; //type:label
 lbl_001D8B54 = 0x001D8B54; //type:label
 lbl_001D8B68 = 0x001D8B68; //type:label
-func_001D8BE0 = 0x001D8BE0; //type:func
-func_001D8D68 = 0x001D8D68; //type:func
-func_001D8DE0 = 0x001D8DE0; //type:func
 lbl_001D8F24 = 0x001D8F24; //type:label
 lbl_001D8F34 = 0x001D8F34; //type:label
 lbl_001D8F44 = 0x001D8F44; //type:label
@@ -2565,8 +2320,6 @@ func_001D9880 = 0x001D9880; //type:func
 func_001D9D48 = 0x001D9D48; //type:func
 
 // --- src/fe/festatenethelppopup.cpp ---
-func_001DA110 = 0x001DA110; //type:func
-func_001DA4A8 = 0x001DA4A8; //type:func
 func_001DA648 = 0x001DA648; //type:func
 func_001DA7E8 = 0x001DA7E8; //type:func
 func_001DA988 = 0x001DA988; //type:func
@@ -2809,11 +2562,6 @@ func_001E8FC8 = 0x001E8FC8; //type:func
 // --- src/fe/ovstatehud.cpp ---
 lbl_001E9088 = 0x001E9088; //type:label
 lbl_001E90A0 = 0x001E90A0; //type:label
-func_001E91A8__FPvT0 = 0x001E91A8; //type:func
-func_001E91D0__FPvT0 = 0x001E91D0; //type:func
-func_001E91F8 = 0x001E91F8; //type:func
-func_001E9220 = 0x001E9220; //type:func
-func_001E9290__FPvT0 = 0x001E9290; //type:func
 func_001E92A8 = 0x001E92A8; //type:func
 func_001E94E0 = 0x001E94E0; //type:func
 func_001E9540 = 0x001E9540; //type:func
@@ -2864,23 +2612,8 @@ lbl_001EF82C = 0x001EF82C; //type:label
 lbl_001EF850 = 0x001EF850; //type:label
 lbl_001EF924 = 0x001EF924; //type:label
 lbl_001EFAC0 = 0x001EFAC0; //type:label
-func_001F10F8 = 0x001F10F8; //type:func
-func_001F1190 = 0x001F1190; //type:func
-func_001F1338 = 0x001F1338; //type:func
-func_001F14B0 = 0x001F14B0; //type:func
-func_001F16C0 = 0x001F16C0; //type:func
-func_001F1B30 = 0x001F1B30; //type:func
-func_001F1E28 = 0x001F1E28; //type:func
-func_001F22E8 = 0x001F22E8; //type:func
-func_001F2AA0 = 0x001F2AA0; //type:func
-func_001F2DB0 = 0x001F2DB0; //type:func
-func_001F30D8 = 0x001F30D8; //type:func
-func_001F31E0 = 0x001F31E0; //type:func
-func_001F3700 = 0x001F3700; //type:func
 
 // --- src/fe/festatelodge.cpp ---
-func_001F3FF8 = 0x001F3FF8; //type:func
-func_001F4728 = 0x001F4728; //type:func
 
 // --- src/fe/festatebuyattrib.cpp ---
 func_001F5300 = 0x001F5300; //type:func
@@ -2892,12 +2625,6 @@ func_001F6840 = 0x001F6840; //type:func
 func_001F6F30 = 0x001F6F30; //type:func
 
 // --- src/fe/ovstateenterlodge.cpp ---
-func_001F7548 = 0x001F7548; //type:func
-func_001F76B8 = 0x001F76B8; //type:func
-func_001F7738 = 0x001F7738; //type:func
-func_001F7770 = 0x001F7770; //type:func
-func_001F77F0 = 0x001F77F0; //type:func
-func_001F7800 = 0x001F7800; //type:func
 lbl_001F7AF0 = 0x001F7AF0; //type:label
 lbl_001F7B00 = 0x001F7B00; //type:label
 lbl_001F7B10 = 0x001F7B10; //type:label
@@ -2922,18 +2649,9 @@ lbl_001F8BFC = 0x001F8BFC; //type:label
 lbl_001F8C88 = 0x001F8C88; //type:label
 lbl_001F8D54 = 0x001F8D54; //type:label
 lbl_001F8DD0 = 0x001F8DD0; //type:label
-func_001F8EE0 = 0x001F8EE0; //type:func
-func_001F8F48 = 0x001F8F48; //type:func
-func_001F8FB0 = 0x001F8FB0; //type:func
-func_001F9018 = 0x001F9018; //type:func
-func_001F9080 = 0x001F9080; //type:func
 
 // --- src/fe/ovstatepause.cpp ---
-func_001FAFF8 = 0x001FAFF8; //type:func
 func_001FB6B8 = 0x001FB6B8; //type:func
-func_001FBBD8 = 0x001FBBD8; //type:func
-func_001FBCC8 = 0x001FBCC8; //type:func
-func_001FBCE0 = 0x001FBCE0; //type:func
 func_001FBD20 = 0x001FBD20; //type:func
 func_001FC768 = 0x001FC768; //type:func
 func_001FC878 = 0x001FC878; //type:func
@@ -2956,25 +2674,6 @@ lbl_001FD8C0 = 0x001FD8C0; //type:label
 lbl_001FDA18 = 0x001FDA18; //type:label
 func_001FDB78 = 0x001FDB78; //type:func
 func_001FDB88 = 0x001FDB88; //type:func
-func_001FDBF0 = 0x001FDBF0; //type:func
-func_001FDC30 = 0x001FDC30; //type:func
-func_001FDE60 = 0x001FDE60; //type:func
-func_001FDF00 = 0x001FDF00; //type:func
-func_001FDF40 = 0x001FDF40; //type:func
-func_001FE4A8 = 0x001FE4A8; //type:func
-func_001FE5B0 = 0x001FE5B0; //type:func
-func_001FE648 = 0x001FE648; //type:func
-func_001FE6E8 = 0x001FE6E8; //type:func
-func_001FE8F0 = 0x001FE8F0; //type:func
-func_001FE968 = 0x001FE968; //type:func
-func_001FE9A8 = 0x001FE9A8; //type:func
-func_001FEC40__FPv = 0x001FEC40; //type:func
-func_001FEC60 = 0x001FEC60; //type:func
-func_001FECA0 = 0x001FECA0; //type:func
-func_001FF170 = 0x001FF170; //type:func
-func_001FF278 = 0x001FF278; //type:func
-func_001FF310 = 0x001FF310; //type:func
-func_001FF3B0 = 0x001FF3B0; //type:func
 lbl_001FF780 = 0x001FF780; //type:label
 lbl_001FF790 = 0x001FF790; //type:label
 lbl_001FF798 = 0x001FF798; //type:label
@@ -2987,21 +2686,14 @@ lbl_002000F0 = 0x002000F0; //type:label
 
 // --- src/fe/ovstaterewardslist.cpp ---
 func_00200388 = 0x00200388; //type:func
-func_002006B8 = 0x002006B8; //type:func
 
 // --- src/fe/uitemplatemap.cpp ---
-func_002009D0 = 0x002009D0; //type:func
-func_00200AF0 = 0x00200AF0; //type:func
-func_00201868 = 0x00201868; //type:func
 lbl_0020193C = 0x0020193C; //type:label
 lbl_002021D8 = 0x002021D8; //type:label
 lbl_002022BC = 0x002022BC; //type:label
 lbl_002023D4 = 0x002023D4; //type:label
 lbl_0020261C = 0x0020261C; //type:label
 lbl_0020270C = 0x0020270C; //type:label
-func_00202738 = 0x00202738; //type:func
-func_00202768__FPv = 0x00202768; //type:func
-func_00207430 = 0x00207430; //type:func
 lbl_00207F7C = 0x00207F7C; //type:label
 lbl_00207F88 = 0x00207F88; //type:label
 lbl_00207F94 = 0x00207F94; //type:label
@@ -3010,32 +2702,17 @@ lbl_00207FD8 = 0x00207FD8; //type:label
 lbl_00207FE4 = 0x00207FE4; //type:label
 lbl_00207FF0 = 0x00207FF0; //type:label
 lbl_00208024 = 0x00208024; //type:label
-func_00208498 = 0x00208498; //type:func
-func_00208518__FPv = 0x00208518; //type:func
-func_00208538__FPv = 0x00208538; //type:func
-func_00208558 = 0x00208558; //type:func
-func_00208588 = 0x00208588; //type:func
-func_002085B8 = 0x002085B8; //type:func
-func_00208610 = 0x00208610; //type:func
-func_00208638 = 0x00208638; //type:func
-func_00208658__FPv = 0x00208658; //type:func
-func_00208678 = 0x00208678; //type:func
 
 // --- src/fe/ovstatemap.cpp ---
-func_002087E8__FPv = 0x002087E8; //type:func
 lbl_00208C6C = 0x00208C6C; //type:label
 lbl_00208D80 = 0x00208D80; //type:label
 lbl_00208DD8 = 0x00208DD8; //type:label
 lbl_00208EC8 = 0x00208EC8; //type:label
 lbl_00208EE0 = 0x00208EE0; //type:label
-func_00208EF8 = 0x00208EF8; //type:func
 func_0020A1A8 = 0x0020A1A8; //type:func
 
 // --- src/fe/ovtemplatedialog.cpp ---
 func_0020CA10 = 0x0020CA10; //type:func
-func_0020CBA0 = 0x0020CBA0; //type:func
-func_0020CBE8 = 0x0020CBE8; //type:func
-func_0020CC60 = 0x0020CC60; //type:func
 lbl_0020CD78 = 0x0020CD78; //type:label
 lbl_0020CDA4 = 0x0020CDA4; //type:label
 lbl_0020CDCC = 0x0020CDCC; //type:label
@@ -3055,9 +2732,6 @@ lbl_0020D03C = 0x0020D03C; //type:label
 lbl_0020D0B8 = 0x0020D0B8; //type:label
 lbl_0020D0DC = 0x0020D0DC; //type:label
 lbl_0020D0F8 = 0x0020D0F8; //type:label
-func_0020D1D8 = 0x0020D1D8; //type:func
-func_0020D308 = 0x0020D308; //type:func
-func_0020D318 = 0x0020D318; //type:func
 lbl_0020D410 = 0x0020D410; //type:label
 lbl_0020D41C = 0x0020D41C; //type:label
 lbl_0020D428 = 0x0020D428; //type:label
@@ -3065,8 +2739,6 @@ lbl_0020D434 = 0x0020D434; //type:label
 lbl_0020D440 = 0x0020D440; //type:label
 lbl_0020D44C = 0x0020D44C; //type:label
 lbl_0020D470 = 0x0020D470; //type:label
-func_0020D4F0 = 0x0020D4F0; //type:func
-func_0020D568 = 0x0020D568; //type:func
 lbl_0020D664 = 0x0020D664; //type:label
 lbl_0020D82C = 0x0020D82C; //type:label
 lbl_0020D8F4 = 0x0020D8F4; //type:label
@@ -3074,7 +2746,6 @@ lbl_0020D904 = 0x0020D904; //type:label
 lbl_0020D954 = 0x0020D954; //type:label
 lbl_0020DA58 = 0x0020DA58; //type:label
 lbl_0020DAB8 = 0x0020DAB8; //type:label
-func_0020DBD0 = 0x0020DBD0; //type:func
 
 // --- src/fe/ovstatereplay.cpp ---
 lbl_0020E714 = 0x0020E714; //type:label
@@ -3111,21 +2782,11 @@ func_00210F40 = 0x00210F40; //type:func
 func_00210FA0 = 0x00210FA0; //type:func
 
 // --- src/fe/ovstateprofile.cpp ---
-func_00211220 = 0x00211220; //type:func
-func_00211270 = 0x00211270; //type:func
-func_00211380 = 0x00211380; //type:func
-func_00211850 = 0x00211850; //type:func
-func_00211970 = 0x00211970; //type:func
-func_00211A08 = 0x00211A08; //type:func
-func_00211AA8 = 0x00211AA8; //type:func
-func_00211B38 = 0x00211B38; //type:func
-func_00211BC8 = 0x00211BC8; //type:func
 lbl_00211C14 = 0x00211C14; //type:label
 lbl_00211D14 = 0x00211D14; //type:label
 lbl_00211F40 = 0x00211F40; //type:label
 lbl_00211FA8 = 0x00211FA8; //type:label
 lbl_0021205C = 0x0021205C; //type:label
-func_002124C8 = 0x002124C8; //type:func
 
 // --- src/luno/lunovm.cpp ---
 lbl_002228F0 = 0x002228F0; //type:label
@@ -3354,19 +3015,11 @@ lbl_00231824 = 0x00231824; //type:label
 
 // --- src/fe/festateloadscreen.cpp ---
 func_00233640 = 0x00233640; //type:func
-func_00233B60 = 0x00233B60; //type:func
-func_00233B88__FPv = 0x00233B88; //type:func
-func_00233C10 = 0x00233C10; //type:func
-func_00233C50 = 0x00233C50; //type:func
-func_00233CD8 = 0x00233CD8; //type:func
-func_00234008 = 0x00234008; //type:func
-func_00234188 = 0x00234188; //type:func
 lbl_00234478 = 0x00234478; //type:label
 lbl_00234494 = 0x00234494; //type:label
 lbl_002345C4 = 0x002345C4; //type:label
 lbl_002345F4 = 0x002345F4; //type:label
 lbl_0023473C = 0x0023473C; //type:label
-func_00234910 = 0x00234910; //type:func
 
 // --- src/main/gamestate.cpp ---
 lbl_002350E0 = 0x002350E0; //type:label
@@ -3563,38 +3216,9 @@ func_002429B0 = 0x002429B0; //type:func
 func_00242EB8 = 0x00242EB8; //type:func
 
 // --- src/main/ssxappdtor.cpp ---
-func_00243A40 = 0x00243A40; //type:func
-func_00243AE8 = 0x00243AE8; //type:func
-func_00243B50 = 0x00243B50; //type:func
-func_00243B80 = 0x00243B80; //type:func
-func_00243C80 = 0x00243C80; //type:func
-func_00243CC8__FPv = 0x00243CC8; //type:func
-func_00243CD0__FPv = 0x00243CD0; //type:func
-func_00243CF0 = 0x00243CF0; //type:func
 func_00243D58 = 0x00243D58; //type:func
-func_00243D88 = 0x00243D88; //type:func
-func_00243DB8 = 0x00243DB8; //type:func
-func_00243EB8 = 0x00243EB8; //type:func
-func_00244060 = 0x00244060; //type:func
-func_00244090 = 0x00244090; //type:func
-func_002440F8 = 0x002440F8; //type:func
 func_00244240 = 0x00244240; //type:func
 func_002443C0 = 0x002443C0; //type:func
-func_002443F0 = 0x002443F0; //type:func
-func_002443F8__FPv = 0x002443F8; //type:func
-func_00244400__FPvi = 0x00244400; //type:func
-func_00244408__FPvi = 0x00244408; //type:func
-func_00244410 = 0x00244410; //type:func
-func_00244478 = 0x00244478; //type:func
-func_002444A8 = 0x002444A8; //type:func
-func_002444F0 = 0x002444F0; //type:func
-func_00244528__FPv = 0x00244528; //type:func
-func_00244530__FPv = 0x00244530; //type:func
-func_00244538__FPv = 0x00244538; //type:func
-func_00244540__FPv = 0x00244540; //type:func
-func_00244548__FPv = 0x00244548; //type:func
-func_00244550__FPv = 0x00244550; //type:func
-func_00244558__FPv = 0x00244558; //type:func
 func_00244560 = 0x00244560; //type:func
 func_00244590 = 0x00244590; //type:func
 func_002445C0 = 0x002445C0; //type:func
@@ -3607,14 +3231,6 @@ func_00244690 = 0x00244690; //type:func
 func_002446C0 = 0x002446C0; //type:func
 func_002446F0 = 0x002446F0; //type:func
 func_00244720 = 0x00244720; //type:func
-func_00244860__FPv = 0x00244860; //type:func
-func_00244868__FPv = 0x00244868; //type:func
-func_00244870__FPv = 0x00244870; //type:func
-func_00244878__FPv = 0x00244878; //type:func
-func_00244880__FPv = 0x00244880; //type:func
-func_002448E0 = 0x002448E0; //type:func
-func_00244948 = 0x00244948; //type:func
-func_00244978 = 0x00244978; //type:func
 func_00245228__FPv = 0x00245228; //type:func
 func_00245248 = 0x00245248; //type:func
 func_002452D8 = 0x002452D8; //type:func
@@ -4452,21 +4068,6 @@ func_00289DE0__FPv = 0x00289DE0; //type:func
 func_00289DF0 = 0x00289DF0; //type:func
 
 // --- src/sound/asyncsys.cpp ---
-func_0028A298 = 0x0028A298; //type:func
-func_0028A558 = 0x0028A558; //type:func
-func_0028A728 = 0x0028A728; //type:func
-func_0028AAF8 = 0x0028AAF8; //type:func
-func_0028B180 = 0x0028B180; //type:func
-func_0028B1C0 = 0x0028B1C0; //type:func
-func_0028B1E8 = 0x0028B1E8; //type:func
-func_0028B1F8 = 0x0028B1F8; //type:func
-func_0028B210 = 0x0028B210; //type:func
-func_0028B240__FPv = 0x0028B240; //type:func
-func_0028B248 = 0x0028B248; //type:func
-func_0028B278 = 0x0028B278; //type:func
-func_0028B2D0 = 0x0028B2D0; //type:func
-func_0028B320 = 0x0028B320; //type:func
-func_0028B528 = 0x0028B528; //type:func
 
 // --- src/sound/bankmanager.cpp ---
 func_0028B650 = 0x0028B650; //type:func

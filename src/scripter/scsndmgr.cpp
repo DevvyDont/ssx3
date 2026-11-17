@@ -87,7 +87,7 @@ struct sSndEntry;
 struct sSndList;
 extern "C" sSndEntry* func_002836D8(sSndList* self, int id);
 extern "C" sSndEntry* func_00283760(sSndList* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028BE60(void* bank, int handle, void* data, int b);
 
 /**
@@ -109,7 +109,7 @@ extern "C" int cScriptSoundBankManager_LinkBank(sSndList* self, int id, void* da
         bankInfo = (char*)func_00283760(self);
         *(int*)(bankInfo + 0x0) = id;
         *(void**)(bankInfo + 0x8) = data;
-        func_0028BE60(**(void***)((char*)func_0028B180() + 0x118), *(int*)(bankInfo + 0x4), data, dataSize);
+        func_0028BE60(**(void***)((char*)cAudioInterface_bxAudio() + 0x118), *(int*)(bankInfo + 0x4), data, dataSize);
     }
     return *(int*)(bankInfo + 0x4);
 }
@@ -209,20 +209,20 @@ extern "C" sSndEntry* func_002836D8(sSndList* self, int id)
 //100%
 INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_UnlinkBank);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028BE90(void* bank, int handle);
 
 /**
  * Unloads one script sound bank from the audio system and frees its slot.
  *
- * Unloads the slot's bank number (+0x4) from the audio object's sound system (func_0028B180() +0x118,
+ * Unloads the slot's bank number (+0x4) from the audio object's sound system (cAudioInterface_bxAudio() +0x118,
  * func_0028BE90), then sets the slot's user ID to -1 and its data to 0.
  *
  * @param pBankInfo  the bank's slot (On Tour tScriptSoundBankInfo* pBankInfo: userID, bankNum, pData)
  */
 extern "C" void cScriptSoundBankManager_UnlinkBank(sSndList* self, sSndEntry* pBankInfo)
 {
-    func_0028BE90(**(void***)((char*)func_0028B180() + 0x118), pBankInfo->unk4);
+    func_0028BE90(**(void***)((char*)cAudioInterface_bxAudio() + 0x118), pBankInfo->unk4);
     pBankInfo->id = -1;
     pBankInfo->data = 0;
 }
@@ -292,7 +292,7 @@ extern "C" void cVidEngine__cVidEngine(void* self, int flags)
 INCLUDE_ASM("scripter/scsndmgr", cVidEngine_ResetVideoEngine);
 #ifdef SKIP_ASM
 extern "C" void func_00253418(void* p, int flags);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ResumeSFX(void* p);
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* p);
 extern int D_004A2A54;
@@ -361,7 +361,7 @@ extern "C" void cVidEngine_ResetVideoEngine(void* self)
         func_00253418(*(void**)(vidEngine + 0x0), 3);
         if (*(int*)(vidEngine + 0x4) != 0) {
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-            cSSXAudio_ResumeSFX(func_0028B180());
+            cSSXAudio_ResumeSFX(cAudioInterface_bxAudio());
             ((cWorld_3818*)GrMan)->v40(*(int*)(vidEngine + 0x10));
             if (*(int*)(vidEngine + 0x14) != 0) {
                 *(int*)(vidEngine + 0x14) = 0;

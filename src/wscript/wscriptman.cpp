@@ -439,8 +439,8 @@ struct sLunoCall_9C88 {
     int pad[4];
 };
 void func_00226600(void* self, int a1, int a2);
-extern "C" void* func_002224A8(void* self);
-extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void* luno_cLunoVM_cLunoVM(void* self);
+extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 extern "C" void func_00309C88(void* self, int* handle)
 {
@@ -451,8 +451,8 @@ extern "C" void func_00309C88(void* self, int* handle)
     ret.type = 0;
     ret.word0 = 0;
     void* table = *(void**)((char*)self + (*(unsigned char*)handle << 2) + 0x3CC);
-    func_002224A8(&call);
-    func_002224B8(&call, &scriptVar, table, &ret);
+    luno_cLunoVM_cLunoVM(&call);
+    luno_cLunoVM_run(&call, &scriptVar, table, &ret);
     luno_cLunoVar__cLunoVar((cWScriptMan_isFunc_sValue*)&ret, 2);
 }
 #endif
@@ -472,8 +472,8 @@ struct func_00309D20_sCall {
 };
 
 void func_00226600(void* self, int a1, int a2);
-extern "C" void* func_002224A8(void* self);
-extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void* luno_cLunoVM_cLunoVM(void* self);
+extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 
 extern "C" void func_00309D20(void* self, int* handle, int id)
@@ -487,8 +487,8 @@ extern "C" void func_00309D20(void* self, int* handle, int id)
     ret.type = 0;
     ret.word0 = 0;
     void* table = *(void**)((char*)self + (*(unsigned char*)handle << 2) + 0x3CC);
-    func_002224A8(&call);
-    func_002224B8(&call, &scriptVar, table, &ret);
+    luno_cLunoVM_cLunoVM(&call);
+    luno_cLunoVM_run(&call, &scriptVar, table, &ret);
     *(int*)((char*)self + 0x290) = saved;
     luno_cLunoVar__cLunoVar((cWScriptMan_isFunc_sValue*)&ret, 2);
 }
@@ -546,14 +546,14 @@ struct cWScriptMan_runFunc_sCall {
     int pad[4];
 };
 
-extern "C" void* func_002224A8(void* self);
-extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void* luno_cLunoVM_cLunoVM(void* self);
+extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 
 /**
  * Runs one function of a world section's script table.
  *
  * Makes an integer key from @p value, gets the entry from the table of section @p idx (+0x3CC), builds a VM
- * (func_002224A8) and runs the function with that table (func_002224B8), then destroys the result and the key.
+ * (luno_cLunoVM_cLunoVM) and runs the function with that table (luno_cLunoVM_run), then destroys the result and the key.
  *
  * @param idx  the world section (On Tour sectionId)
  * @param value  the function id (On Tour funcId)
@@ -571,8 +571,8 @@ extern "C" void cWScriptMan_runFunc(void* self, int idx, int value)
     ret.type = 0;
     ret.word0 = 0;
     cWScriptMan_runFunc_sCall call;
-    func_002224A8(&call);
-    func_002224B8(&call, &scriptFunc, *slot, &ret);
+    luno_cLunoVM_cLunoVM(&call);
+    luno_cLunoVM_run(&call, &scriptFunc, *slot, &ret);
     luno_cLunoVar__cLunoVar(&ret, 2);
     luno_cLunoVar__cLunoVar(&key, 2);
 }
@@ -697,8 +697,8 @@ struct sVEF_30A060 {
 };
 
 void func_00226600(void* self, int a1, int a2);
-extern "C" void* func_002224A8(void* self);
-extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void* luno_cLunoVM_cLunoVM(void* self);
+extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
@@ -762,7 +762,7 @@ extern "C" void cWScriptMan_doOnCollideScript(void* self, void* collideInfo, voi
                 func_00226600(&scriptFunc, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), &id), 0);
                 ret.type = 0;
                 ret.word0 = 0;
-                func_002224A8(&call);
+                luno_cLunoVM_cLunoVM(&call);
                 char* process = *(char**)((char*)self + 0x2A8);
                 if (process != 0)
                     process = *(char**)(process + 0x3C);
@@ -770,10 +770,10 @@ extern "C" void cWScriptMan_doOnCollideScript(void* self, void* collideInfo, voi
                     process = *(char**)((char*)self + 0x2A4);
                 void* table = *(void**)(process + 0x1C);
                 if (table != 0) {
-                    func_002224B8(&call, &scriptFunc, table, &ret);
+                    luno_cLunoVM_run(&call, &scriptFunc, table, &ret);
                 } else {
                     table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_SetupLocalTable, 0x20000000, 0), 8);
-                    func_002224B8(&call, &scriptFunc, table, &ret);
+                    luno_cLunoVM_run(&call, &scriptFunc, table, &ret);
                     if (table != 0)
                         luno_cLunoTable__cLunoTable(table, 3);
                 }
@@ -1185,7 +1185,7 @@ extern "C" int cBEMissionInterface_isMissionLocked(void* iface, unsigned int id)
 extern "C" int cBEMissionInterface_isMissionAvailable(void* iface, unsigned int id);
 extern "C" int func_00153ED8(void* iface, unsigned int id);
 extern "C" int cBEMissionInterface_getNextMissionID(void* iface, unsigned int id);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0029D6E0(void* p, unsigned int id);
 extern "C" void cSSXAudio_BigChallengeFailed(void* p, int a1);
 extern signed char D_00535C10[];
@@ -1286,7 +1286,7 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
         }
         if (obj != 0) {
             obj->v17();
-            func_0029D6E0(func_0028B180(), id);
+            func_0029D6E0(cAudioInterface_bxAudio(), id);
         }
         break;
     case 4:
@@ -1303,7 +1303,7 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
         }
         if (obj != 0) {
             obj->v19();
-            cSSXAudio_BigChallengeFailed(func_0028B180(), 0);
+            cSSXAudio_BigChallengeFailed(cAudioInterface_bxAudio(), 0);
         }
         break;
     case 17:
@@ -1404,8 +1404,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_runScriptCode);
 #ifdef SKIP_ASM
 struct cWScriptMan_isFunc_sValue;
 void func_00226600(void* self, int a1, int a2);
-extern "C" void* func_002224A8(void* self);
-extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void* luno_cLunoVM_cLunoVM(void* self);
+extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
@@ -1442,13 +1442,13 @@ extern "C" void cWScriptMan_runScriptCode(void* self, void* obj, int data)
     func_00226600(&scriptFunc, data, 0);
     ret.type = 0;
     ret.word0 = 0;
-    func_002224A8(&call);
+    luno_cLunoVM_cLunoVM(&call);
     void* table = *(void**)(*(char**)((char*)self + 0x2A4) + 0x1C);
     if (table != 0) {
-        func_002224B8(&call, &scriptFunc, table, &ret);
+        luno_cLunoVM_run(&call, &scriptFunc, table, &ret);
     } else {
         table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_SetupLocalTable, 0x20000000, 0), 8);
-        func_002224B8(&call, &scriptFunc, table, &ret);
+        luno_cLunoVM_run(&call, &scriptFunc, table, &ret);
         if (table != 0) {
             luno_cLunoTable__cLunoTable(table, 3);
         }
@@ -1464,8 +1464,8 @@ INCLUDE_ASM("wscript/wscriptman", func_0030ADA8);
 #ifdef SKIP_ASM
 struct cWScriptMan_isFunc_sValue;
 void func_00226600(void* self, int a1, int a2);
-extern "C" void* func_002224A8(void* self);
-extern "C" void func_002224B8(void* self, void* args, void* table, void* ret);
+extern "C" void* luno_cLunoVM_cLunoVM(void* self);
+extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
@@ -1493,13 +1493,13 @@ extern "C" void func_0030ADA8(void* self, void* obj, int a2)
     func_00226600(&arg, a2, 0);
     ret.type = 0;
     ret.word0 = 0;
-    func_002224A8(&call);
+    luno_cLunoVM_cLunoVM(&call);
     void* table = *(void**)(*(char**)(*(char**)((char*)self + 0x2A8) + 0x3C) + 0x1C);
     if (table != 0) {
-        func_002224B8(&call, &arg, table, &ret);
+        luno_cLunoVM_run(&call, &arg, table, &ret);
     } else {
         table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_SetupLocalTable, 0x20000000, 0), 8);
-        func_002224B8(&call, &arg, table, &ret);
+        luno_cLunoVM_run(&call, &arg, table, &ret);
         if (table != 0) {
             luno_cLunoTable__cLunoTable(table, 3);
         }
@@ -2285,7 +2285,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct func_0030C3E0_sTable;
 extern "C" void func_0030C3E0(func_0030C3E0_sTable* self, int id);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" int func_00144C98(void* iface);
 extern "C" int func_00151178(void* self, int level);
@@ -2313,7 +2313,7 @@ extern "C" void cWScriptMan_collect(void* self, int rider, int id, int instId)
     for (i = 0; i < 1; i++) {
         if (slots[i].id == id) {
             func_0030C3E0((func_0030C3E0_sTable*)&slots[i], instId);
-            cSSXAudio_PlayIconSound(func_0028B180(), 5, 0, 1.0f);
+            cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 5, 0, 1.0f);
             void* newRace = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
             int lvl = func_00144C98(newRace);

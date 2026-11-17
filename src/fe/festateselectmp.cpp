@@ -101,7 +101,7 @@ extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(void* self, void* it
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateselectmp", func_001A3218);
+INCLUDE_ASM("fe/festateselectmp", cFEStateMPCircuit_cFEStateMPCircuit);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateMPCircuit_vtbl[];
@@ -114,7 +114,7 @@ extern void* cFEStateMPCircuit_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001A3218(void* self)
+extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit(void* self)
 {
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = cFEStateMPCircuit_vtbl;

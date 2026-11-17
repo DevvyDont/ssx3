@@ -5,7 +5,7 @@
 // owns a cList of cUIScreens (cUIState_addScreen, cUIEngine_addScreenByHashName). The FE and in-game states
 // (cFEState*, cOVState*, cGameLoadState, popups ...) derive from it: they call the cUIState constructor
 // func_0039E2A0(this, pEngine) or func_0039E318(this, pEngine, pParentState), store their own vtable at 0x8, and
-// put their own members from 0x48 on (func_00181090; ovstates allocates a 0x4C-byte popup), so cUIState is 0x48 bytes.
+// put their own members from 0x48 on (cFEStateCharSelect_cFEStateCharSelect; ovstates allocates a 0x4C-byte popup), so cUIState is 0x48 bytes.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
 // Base class: cListNode (On Tour: mpPrev 0x0, mpNext 0x4; its vptr follows at 0x8). _vt$8cUIState (D_004946C8)
@@ -37,7 +37,7 @@ struct cUIState {
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked
     void** mVtbl;                    // 0x008 [R] _vt$8cUIState (D_004946C8), stored by func_0039E2A0/func_0039E318/func_003A57B8
     int mHashName;                   // 0x00C [P] getHashName/setHashName (retail func_003A5808/func_003A5800); [R] = 0
-                                     //       (derived states store their state id here, e.g. 9 in func_00181090)
+                                     //       (derived states store their state id here, e.g. 9 in cFEStateCharSelect_cFEStateCharSelect)
     cUIEngine* mpEngine;             // 0x010 [P] getEngine (retail func_003A5810); [R] = pEngine; [U] cUIState_onUpdate reads the
                                      //       engine's input object through it
     signed char mCurrentCtrl;        // 0x014 [P] getCurrentCtrl/setCurrentCtrl (lb/sb; retail func_003A5820/func_003A5818);

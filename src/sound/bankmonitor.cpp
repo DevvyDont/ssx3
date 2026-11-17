@@ -2371,7 +2371,7 @@ extern "C" int func_002AF608(int idx, int c, int v, char busy)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF6C0);
 #ifdef SKIP_ASM
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002AEFA8(int a0);
 extern "C" void func_003B58A0(void);
 extern "C" void func_003B58D8(void);
@@ -2382,7 +2382,7 @@ extern "C" int func_002AF6C0(int idx, int v)
 {
     void* m = D_004D3E98[idx];
     int r = 0;
-    if (*(int*)((char*)func_0028B180() + 0x6280) == 0) return 0;
+    if (*(int*)((char*)cAudioInterface_bxAudio() + 0x6280) == 0) return 0;
     if (*(signed char*)((char*)m + 0x65) != 0) {
         func_002AEFA8(0);
     }
@@ -4068,14 +4068,14 @@ extern "C" void* func_002B1C50_body(sBankMon_1C50* self, int a0, int a1, int a2,
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B1F78);
 #ifdef SKIP_ASM
-extern "C" void func_0028A728(void* self, int i);
+extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int i);
 extern "C" int func_003D2A68(int id);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 
 extern "C" void func_002B1F78(cSongInstance* self, int flags)
 {
-    func_0028A728(*((void**)gMusicSys->mpVStreamSys), self->unk_34);
+    cAsyncSys_ASYNCSYS_Cancel(*((void**)gMusicSys->mpVStreamSys), self->unk_34);
     func_003D2A68(0x11000001);
     if (*(int*)(*(char**)self + 0x40) > 0) {
         func_003D2A68(0x11000002);
@@ -5123,7 +5123,7 @@ extern const sSndKey8_3AC0 D_004A3838[];
 extern const sSndKey8_3AC0 D_004A3840[];
 extern const sSndKey8_3AC0 D_004A3848[];
 extern void func_002ADDE0_3AC0(void* bank, long key) __asm__("func_002ADDE0");
-extern "C" void func_0028A728(void* self, int i);
+extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int i);
 extern "C" void func_0028BCE8(void* self, int i);
 extern "C" void func_002B3A98(void* self);
 extern "C" void func_002B1F78(cSongInstance* self, int flags);
@@ -5136,7 +5136,7 @@ extern "C" void func_002B3AC0(void* self)
     func_002ADDE0_3AC0(**(char***)s + 0x1D8, D_004A3840[0].v);
     func_002ADDE0_3AC0(**(char***)s + 0x1D8, D_004A3848[0].v);
     if (*(void**)(s + 0x408) != 0) {
-        func_0028A728(**(void***)s, *(int*)(*(char**)(s + 0x408) + 0x34));
+        cAsyncSys_ASYNCSYS_Cancel(**(void***)s, *(int*)(*(char**)(s + 0x408) + 0x34));
         func_0028BCE8(**(void***)s, *(int*)(*(char**)(s + 0x408) + 0x34));
     }
     func_002B3A98(self);

@@ -1066,7 +1066,7 @@ extern "C" void cReplay_pushReplaySaveFrame(cReplay* self);
 void cReplay_setReplayState(void* self, int state);
 extern "C" void cReplay_rewind(void* self, void* a1);
 extern "C" void cReplay_stepFrame(void* self, int a1);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F200(void* self);
 
 
@@ -1102,7 +1102,7 @@ extern "C" void cReplay_startReplay(cReplay* self, void* frame, int instantRepla
             cReplay_setupReplayCameras(self);
         }
         if (instantReplay == 0 && autoReplay == 0) {
-            func_0028F200(func_0028B180());
+            func_0028F200(cAudioInterface_bxAudio());
         }
     }
 }
@@ -1116,7 +1116,7 @@ extern "C" void func_0026EF80(void* self);
 void cReplay_setReplayState(void* self, int state);
 extern "C" void cReplay_popReplaySaveFrame(cReplay* self);
 extern "C" void cReplay_cancelMarkInstantReplay(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F2C0(void* self);
 
 struct cReplayFramePtr_F980 {
@@ -1145,7 +1145,7 @@ extern "C" void cReplay_stopReplay(cReplay* self)
     if (ok) {
         cReplay_cancelMarkInstantReplay(((cReplayFramePtr_F980*)self));
         if (self->AutoReplay == 0 && self->InstantReplay == 0) {
-            func_0028F2C0(func_0028B180());
+            func_0028F2C0(cAudioInterface_bxAudio());
         }
         self->AutoReplay = 0;
         self->InstantReplay = 0;

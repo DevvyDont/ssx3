@@ -148,11 +148,11 @@ INCLUDE_ASM("fe/festatecharequip2", func_0019E238);
 
 INCLUDE_ASM("fe/festatecharequip2", func_0019E2B0);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019E3D0);
+INCLUDE_ASM("fe/festatecharequip2", cFERider_cFERider);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019E498);
+INCLUDE_ASM("fe/festatecharequip2", cFERider__cFERider);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019E538);
+INCLUDE_ASM("fe/festatecharequip2", cFERider_setVisible);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019E588);
+INCLUDE_ASM("fe/festatecharequip2", cFERider_setCharID);
 

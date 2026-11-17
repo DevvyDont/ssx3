@@ -302,7 +302,7 @@ extern "C" void* func_001A0548(void* self, int a1);
 extern "C" void cRiderAnimBase_reset(void* self);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void func_0019BFE8(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern char str_12equ_char[];
 
@@ -336,7 +336,7 @@ extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
     *(int*)((char*)self + 0xAAC) = 0;
     *(float*)((char*)self + 0xAA8) = -1.0f;
     func_0019BFE8(self);
-    func_0028F140(func_0028B180(), 2);
+    func_0028F140(cAudioInterface_bxAudio(), 2);
 }
 #endif
 
@@ -401,17 +401,17 @@ extern "C" void cFEStateCharEquip_onGainFocus(void* self, int pPrevState)
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onLoseFocus);
 #ifdef SKIP_ASM
 extern "C" void* func_001A0548(void* self, int a1);
-extern "C" void func_0019E538(void* rider, int a1);
+extern "C" void cFERider_setVisible(void* rider, int a1);
 
 /**
  * Clears two flags of the front-end rider record this equip screen works on when the screen loses focus.
  *
  * The record is entry @p self+0x44 (a signed char rider index) of the 0xCE0-byte records at SSXApp->RealFE +
- * 0xB0 (func_001A0548); func_0019E538(record, 0) zeroes its words at +0xCC4 and +0xCC8.
+ * 0xB0 (func_001A0548); cFERider_setVisible(record, 0) zeroes its words at +0xCC4 and +0xCC8.
  */
 extern "C" void cFEStateCharEquip_onLoseFocus(void* self)
 {
-    func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    cFERider_setVisible(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
 }
 #endif
 
@@ -1207,7 +1207,7 @@ extern "C" void func_0019A238(void* self)
         sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 1);
     }
-    func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 1);
+    cFERider_setVisible(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 1);
     *(int*)((char*)self + 0xAE0) = 1;
 }
 #endif
@@ -1241,7 +1241,7 @@ extern "C" void func_0019A308(void* self)
         sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
-    func_0019E538(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    cFERider_setVisible(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     widget = *(char**)((char*)self + 0x60);
     if (widget != 0) {
         sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
@@ -4487,7 +4487,7 @@ extern "C" int func_0019E3A8(sTableK19D250* self, int bank, int i) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3D0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFERider_cFERider);
 #ifdef SKIP_ASM
 // FAKEMATCH: stand-in local `int none = -1;` (declared after the -1 header stores, before `e`) used for the loop's `e->id` store instead
 // of a literal -1 that loop.c hoists after `e`; plain form 99.56%. Byte-identical and behaves like the plain form; landed marked under
@@ -4522,7 +4522,7 @@ struct sRiderSlotCE {
  *
  * @return @p self
  */
-extern "C" void* func_0019E3D0(sRiderSlotCE* self)
+extern "C" void* cFERider_cFERider(sRiderSlotCE* self)
 {
     int i;
     char* riderBytes = (char*)self;
@@ -4564,7 +4564,7 @@ extern "C" void* func_0019E3D0(sRiderSlotCE* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E498);
+INCLUDE_ASM("fe/festatecharequipdetail", cFERider__cFERider);
 #ifdef SKIP_ASM
 struct sVEntry0019E498 {
     short delta;
@@ -4589,7 +4589,7 @@ void operator_delete(int* p);
  *
  * @param flags  deleting-destructor flags; bit 0 frees the object
  */
-extern "C" void func_0019E498(void* self, int flags)
+extern "C" void cFERider__cFERider(void* self, int flags)
 {
     sSlot0019E498* slot = (sSlot0019E498*)((char*)self + 0x1C);
     func_0019EBA0(self);
@@ -4611,7 +4611,7 @@ extern "C" void func_0019E498(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E538);
+INCLUDE_ASM("fe/festatecharequipdetail", cFERider_setVisible);
 #ifdef SKIP_ASM
 /**
  * Shows or hides a front-end rider, deferring the show until its model is loaded.
@@ -4622,7 +4622,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E538);
  *
  * @param enable  nonzero to show, 0 to hide
  */
-extern "C" void func_0019E538(void* self, int enable)
+extern "C" void cFERider_setVisible(void* self, int enable)
 {
     if (enable != 0) {
         if (*(int*)((char*)self + 0xcc0) != 0 && *(int*)((char*)self + 0xcb8) != 0 &&
@@ -4639,7 +4639,7 @@ extern "C" void func_0019E538(void* self, int enable)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019E588);
+INCLUDE_ASM("fe/festatecharequipdetail", cFERider_setCharID);
 #ifdef SKIP_ASM
 
 struct sVE_E588 {
@@ -4678,7 +4678,7 @@ struct sRider_E588 {
  * @param item  the character id
  * @param flag  stored at +0xC28 and passed to cFERider_init as its last argument
  */
-extern "C" void func_0019E588(sRider_E588* self, unsigned int item, int flag)
+extern "C" void cFERider_setCharID(sRider_E588* self, unsigned int item, int flag)
 {
     self->reqItem = item;
     self->reqFlag = flag;

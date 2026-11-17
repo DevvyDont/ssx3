@@ -131,7 +131,7 @@ extern "C" sRewardDesc_0388 func_00200388(int peak, int goalIndex, int kind)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstaterewardslist", func_002006B8);
+INCLUDE_ASM("fe/ovstaterewardslist", cUITemplate_MAP_init);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -144,10 +144,10 @@ extern int cUITemplate_MAP_mPeak;
  * Points the map template at the peak of the current race location when the map style is 2 or more.
  *
  * Then cUITemplate_MAP_mPeak = the word at +0x54 of cBENewRaceInterface_getLocation (back-end interface 0); styles 0
- * and 1 leave it alone. Called when the map overlays are built (cOVStateManager_triggerOverlay, func_0020BAB8,
+ * and 1 leave it alone. Called when the map overlays are built (cOVStateManager_triggerOverlay, cOVStateManager_triggerPopup,
  * func_00221228) and by the credits and main-module code.
  */
-extern "C" void func_002006B8(void)
+extern "C" void cUITemplate_MAP_init(void)
 {
     if (cUITemplate_MAP_mMapStyle >= 2) {
         cUITemplate_MAP_mPeak = *(int*)((char*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x54);

@@ -228,7 +228,7 @@ INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_gainFocus);
 extern int cDepthFog_m_Enable;
 extern "C" void cGraphicsMan_UploadTextures(void* g);
 extern "C" void cSSXApp_startFELoad(void* app);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F768(void* snd);
 
 struct sVec3i_38C8 {
@@ -259,7 +259,7 @@ extern "C" void cFELoadScreen_gainFocus(void)
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_38C8* vt = (sVE_38C8*)ps2GraphicsMan->mVtbl;
     vt[15].fn((char*)ps2GraphicsMan + vt[15].delta, sVec3i_38C8(0, 0, 0));
-    func_0028F768(func_0028B180());
+    func_0028F768(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -322,7 +322,7 @@ struct cGame00233930 {
 
 extern "C" void func_00397B70(void* self, int a1);
 extern "C" void cGraphicsMan_PurgeTextures(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028FA98(void* self, float f);
 
 /**
@@ -352,7 +352,7 @@ extern "C" void cFELoadScreen_purge(void* self)
         }
     }
     cGraphicsMan_PurgeTextures(GrMan);
-    func_0028FA98(func_0028B180(), 1.0f);
+    func_0028FA98(cAudioInterface_bxAudio(), 1.0f);
 }
 #endif
 
@@ -434,7 +434,7 @@ extern "C" void cGameState_gotoNextState(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233AD0);
+INCLUDE_ASM("fe/festateloadscreen", cGameState_preloadNextState);
 #ifdef SKIP_ASM
 extern "C" void cGame_setPreloadState__FPvi(int);
 
@@ -443,7 +443,7 @@ extern "C" void cGame_setPreloadState__FPvi(int);
  *
  * The state id passes through untouched in the second argument register (the declaration has no parameters).
  */
-extern "C" void func_00233AD0(void) {
+extern "C" void cGameState_preloadNextState(void) {
     cGame_setPreloadState__FPvi((*(int*)&cGameState_mpGame));
 }
 #endif
@@ -507,7 +507,7 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233B60);
+INCLUDE_ASM("fe/festateloadscreen", cGFEndState_gainFocus);
 #ifdef SKIP_ASM
 extern void* cGameState_mpGame;
 extern "C" void cGame_setState(void* self, int a, int b, int refresh);
@@ -515,21 +515,21 @@ extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 /**
  * Switches the game to game-flow state 10 at its next state update: cGame_setState(cGameState_mpGame, 10, 0, 0).
  *
- * It is the gainFocus slot of vtable D_0047D690, the game-flow state func_00243D20 constructs (mNextState 8).
+ * It is the gainFocus slot of vtable D_0047D690, the game-flow state cGFEndState_cGFEndState constructs (mNextState 8).
  */
-extern "C" void func_00233B60(void)
+extern "C" void cGFEndState_gainFocus(void)
 {
     cGame_setState(cGameState_mpGame, 10, 0, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233B88__FPv);
+INCLUDE_ASM("fe/festateloadscreen", cGFEndState_loseFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the loseFocus slot of vtable D_0047D690.
  */
-void func_00233B88(void* self)
+void cGFEndState_loseFocus(void* self)
 {
 }
 #endif
@@ -607,7 +607,7 @@ void* cGFEndWaitState_readFromReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233C10);
+INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_cGFFinishlineState);
 #ifdef SKIP_ASM
 extern void* D_0047D6E8[];
 extern void* D_0047D5E0[];
@@ -622,7 +622,7 @@ extern void* cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void* func_00233C10(void* self)
+extern "C" void* cGFFinishlineState_cGFFinishlineState(void* self)
 {
     *(int*)self = 0;
     *(void***)((char*)self + 0xC) = D_0047D6E8;
@@ -637,14 +637,14 @@ extern "C" void* func_00233C10(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233C50);
+INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_gainFocus);
 #ifdef SKIP_ASM
 extern void* cGameState_mpGame;
 extern "C" void cReplay_endReplay(void* self);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
 extern "C" void cBXLoadIndicator_Show(void* self, int bit);
-void func_00244880(void* self);
+void cGameComm_stopSyncInput(void* self);
 
 /**
  * Starts the finish-line state: ends the replay, clears the UI states and NIS list, and starts the 180-frame results
@@ -652,10 +652,10 @@ void func_00244880(void* self);
  *
  * Calls cReplay_endReplay() on the game's Replay, cUIStateStack_purgeNormalStates() on the game UI's state stack and
  * cSSXScriptEngine_ResetNISList() for list 0, sets the sub-state (+0x10) to 0 and the delay (+0x14) to 180, shows load
- * indicator bit 4 (cBXLoadIndicator_Show()) and, with a cGameComm_mGameComm, calls func_00244880() on it and sets its
+ * indicator bit 4 (cBXLoadIndicator_Show()) and, with a cGameComm_mGameComm, calls cGameComm_stopSyncInput() on it and sets its
  * unk_090 to 1. gainFocus slot of vtable D_0047D5E0.
  */
-extern "C" void func_00233C50(void* self)
+extern "C" void cGFFinishlineState_gainFocus(void* self)
 {
     cReplay_endReplay(*(void**)((char*)cGameState_mpGame + 0x28));
     cUIStateStack_purgeNormalStates(*(char**)((char*)cGameState_mpGame + 0x48) + 0x18);
@@ -665,14 +665,14 @@ extern "C" void func_00233C50(void* self)
     cBXLoadIndicator_Show(SSXApp->Game->LoadIndicator, 4);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
-        func_00244880(gameComm);
+        cGameComm_stopSyncInput(gameComm);
         gameComm->unk_090 = 1;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233CD8);
+INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_update);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -680,7 +680,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void* cBEAggressionInterface_getThis();
 extern "C" void func_00155E58(void* p);
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
-extern "C" void func_0020CC60();
+extern "C" void cOVStateManager_triggerFinishOverlay();
 extern "C" void cGameState_gotoNextState(void* self);
 extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
 extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
@@ -780,7 +780,7 @@ public:
  * when the race says so.
  *
  * When the delay (+0x14) reaches 0 and no replay is running (the Replay's first word is 0 or 10 or more), it calls
- * func_0020CC60() and, unless the sub-state (+0x10) is already 2, handleEvent (slot 24) with (0, 0) on the "finishov"
+ * cOVStateManager_triggerFinishOverlay() and, unless the sub-state (+0x10) is already 2, handleEvent (slot 24) with (0, 0) on the "finishov"
  * UI state. Sub-state 0: unless D_005366A8[0] is set, waits while any AI rider's vector from slot 2 of its +0x6C0
  * object is longer than 277.78 (a function-local static float); also waits while the race mode is not 4 and the game
  * mode manager has +0x98 set and +0x9C clear. Then it builds and readies NIS list 0 with the end-event sequence
@@ -790,7 +790,7 @@ public:
  * 2. Sub-state 2: calls cGameState_gotoNextState() when the race's mode (+0x48) is 4 and its +0x49 flag is clear.
  * update slot of vtable D_0047D5E0.
  */
-extern "C" void func_00233CD8(void* self)
+extern "C" void cGFFinishlineState_update(void* self)
 {
     char* stateBytes = (char*)self;
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -799,7 +799,7 @@ extern "C" void func_00233CD8(void* self)
             int n = *(int*)SSXApp->Game->Replay;
             int ok = n != 0 && n < 10;
             if (!ok) {
-                func_0020CC60();
+                cOVStateManager_triggerFinishOverlay();
                 if (*(int*)(stateBytes + 0x10) != 2) {
                     cFEVObj_233CD8* finishOverlay = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_finishov_b));
                     if (finishOverlay != 0) {
@@ -869,7 +869,7 @@ extern "C" void func_00233CD8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00234008);
+INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_loseFocus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sLoadScreen00234008 {
@@ -888,7 +888,7 @@ void func_00278DE8(void* self, int val);
  * sub-state (+0x10) to 2, calls cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 1, 0) and func_00278DE8(ScriptEngine, 1),
  * and stores mNextState (+0x0) 7. loseFocus slot of vtable D_0047D5E0.
  */
-extern "C" void func_00234008(sLoadScreen00234008* self)
+extern "C" void cGFFinishlineState_loseFocus(sLoadScreen00234008* self)
 {
     int n = *(int*)((char*)SSXApp->Game->ViewMan + 0x10);
     int i;
@@ -959,7 +959,7 @@ extern "C" void cGFFinishlineState_readFromReplayFrame(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00234188);
+INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_cGFEventStartState);
 #ifdef SKIP_ASM
 extern void* D_0047D6E8[];
 extern void* cGFEventStartState_vtbl[];
@@ -974,7 +974,7 @@ extern void* cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void* func_00234188(void* self)
+extern "C" void* cGFEventStartState_cGFEventStartState(void* self)
 {
     *(int*)self = 0;
     *(void***)((char*)self + 0xC) = D_0047D6E8;
@@ -1101,7 +1101,7 @@ extern "C" int cSSXScriptEngine_IsActiveNISInTransition(void* snd);
 extern "C" int cSSXScriptEngine_GetNISListState(void* snd, int a1);
 extern "C" int cSSXScriptEngine_PlayNISList(void* snd, int a1, int a2, int a3);
 extern "C" int cSSXScriptEngine_GetNISListScriptCategory(void* snd, int a1, int a2);
-extern "C" void func_00234910(void* self);
+extern "C" void cGFEventStartState_ReadyEvent(void* self);
 extern "C" void cGameState_gotoNextState(void* self);
 extern "C" void cAI_prepareToPurgeComputerRiders(void* o);
 extern "C" void cAI_prepareToPurgeComputerActors(void* o);
@@ -1176,7 +1176,7 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
         break;
     case 1: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        func_00234910(self);
+        cGFEventStartState_ReadyEvent(self);
         signed char* cfg = ((signed char*)&cBENewRaceInterface_newRace);
         int mode = cfg[0x48];
         int skip = cfg[0x49];
@@ -1348,7 +1348,7 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00234910);
+INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_ReadyEvent);
 #ifdef SKIP_ASM
 extern "C" int cSSXScriptEngine_PlayNISList(void* self, int i, int a, int b);
 
@@ -1364,7 +1364,7 @@ static inline int isState00234910(void* e, int s)
  * Each call is cSSXScriptEngine_PlayNISList(ScriptEngine, list, 1, 1), made only while the engine's +0x550
  * (mPlayingNISList) is 2. Then +0x14 is 1 when mPlayingNISList is 1, else 0. cGFEventStartState_update() calls it.
  */
-extern "C" void func_00234910(void* self)
+extern "C" void cGFEventStartState_ReadyEvent(void* self)
 {
     if (isState00234910(ScriptEngine, 2)) {
         cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 1);

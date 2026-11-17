@@ -526,7 +526,7 @@ extern "C" void cRider_setupCrouchBrake(char *self, float desCrouch, float desBr
 //100%
 INCLUDE_ASM("seg/seg_14B10", cRider_setupBoostWarp);
 #ifdef SKIP_ASM
-extern "C" int func_0028B180();
+extern "C" int cAudioInterface_bxAudio();
 extern "C" void cCheatFX_setCheatInput(char *, int);
 extern "C" void func_00298D90(int mgr, char* rider, int b);
 extern "C" void cSSXAudio_TurboDeny(int mgr, char* rider);
@@ -556,16 +556,16 @@ extern "C" void cRider_setupBoostWarp(char* rider, int isHeld, int isPressed)
                 if (x > 0.6666666865348816f) *(float*)(rider + 0x2FC) = 1.0f;
                 else if (x > 0.3333333432674408f) *(float*)(rider + 0x2FC) = 0.625f;
                 else *(float*)(rider + 0x2FC) = 0.25f;
-                func_00298D90(func_0028B180(), rider, isPressed);
+                func_00298D90(cAudioInterface_bxAudio(), rider, isPressed);
             }
             if (*(float*)(rider + 0x2E8) == 0.0f && *(int*)(rider + 0x304) != 0 && *(int*)(rider + 0x2F4) < 10) {
                 *(float*)(rider + 0x2F8) -= 0.00150679936632514f;
             }
             return;
         }
-        if (isPressed) cSSXAudio_TurboDeny(func_0028B180(), rider);
+        if (isPressed) cSSXAudio_TurboDeny(cAudioInterface_bxAudio(), rider);
     }
-    if (*(float*)(rider + 0x2FC) > 0.0f) func_002992D8(func_0028B180(), rider);
+    if (*(float*)(rider + 0x2FC) > 0.0f) func_002992D8(cAudioInterface_bxAudio(), rider);
     *(float*)(rider + 0x2FC) = 0.0f;
 }
 #endif
@@ -1629,13 +1629,13 @@ extern "C" void cRider_checkForReaction(char* self)
             *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
             cRiderAnimBase_play(*(void**)(self + 0x784), 315, 0, -1.0f);
             *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
-            func_0029FF80(func_0028B180(), self, 0);
+            func_0029FF80(cAudioInterface_bxAudio(), self, 0);
             break;
         case 2:
             *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
             cRiderAnimBase_play(*(void**)(self + 0x784), 315, 0, -1.0f);
             *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
-            func_0029FF80(func_0028B180(), self, 1);
+            func_0029FF80(cAudioInterface_bxAudio(), self, 1);
             break;
         case 3:
             *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
@@ -1771,7 +1771,7 @@ INCLUDE_ASM("seg/seg_14B10", cRider_checkForReset);
 void cRiderMetrix_evAutoResetSurface(void *);
 extern "C" void cRider_setMotionState_6120(void *, int) __asm__("cRider_setMotionState__FPv");
 extern "C" void cRider_setControlState_6120(void *, int) __asm__("cRider_setControlState__FPv");
-extern "C" int func_0028B180();
+extern "C" int cAudioInterface_bxAudio();
 extern "C" void func_0029A220(int, void *);
 extern "C" void cReplay_eventReset(int, int);
 
@@ -1795,7 +1795,7 @@ extern "C" int cRider_checkForReset(cRider* self, int isResetInput, int forceAut
         *(int *)((char*)self->mRiderHandler + 0x350) = (forceAutoReset != 0);
         cRider_setControlState_6120(((char*)self), 9);
         cRider_setMotionState_6120(((char*)self), 3);
-        func_0029A220(func_0028B180(), ((char*)self));
+        func_0029A220(cAudioInterface_bxAudio(), ((char*)self));
         cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
         return 1;
     }

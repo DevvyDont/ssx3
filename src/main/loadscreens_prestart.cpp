@@ -1265,7 +1265,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_gainFocus);
 extern int cDepthFog_m_Enable;
 extern "C" void cGraphicsMan_UploadTextures(void* g);
 extern "C" void cSSXApp_startGameLoad(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F768(void* snd);
 
 struct sVec3i_3260 {
@@ -1283,7 +1283,7 @@ struct sVE_3260 {
  * Starts the game load screen: uploads textures, starts the game load, turns off depth fog and clears to black.
  *
  * Calls cGraphicsMan_UploadTextures and cSSXApp_startGameLoad(SSXApp), clears cDepthFog_m_Enable, sets the clear colour
- * (0, 0, 0) (SetScreenClearColour, slot 15) and calls func_0028F768 on the audio (func_0028B180). GainFocus slot
+ * (0, 0, 0) (SetScreenClearColour, slot 15) and calls func_0028F768 on the audio (cAudioInterface_bxAudio). GainFocus slot
  * (+0x2C) of cGameLoadScreen_vtbl.
  */
 extern "C" void cGameLoadScreen_gainFocus(void)
@@ -1296,7 +1296,7 @@ extern "C" void cGameLoadScreen_gainFocus(void)
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_3260* vt = (sVE_3260*)ps2GraphicsMan->mVtbl;
     vt[15].fn((char*)ps2GraphicsMan + vt[15].delta, sVec3i_3260(0, 0, 0));
-    func_0028F768(func_0028B180());
+    func_0028F768(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -1323,7 +1323,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_purge);
 #ifdef SKIP_ASM
 extern "C" void cGraphicsMan_PurgeTextures(void* world);
 extern "C" void func_00397B70(void* obj, int a);
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void func_0028FA98(void* self, float v);
 
 class cWorld002332E8 {
@@ -1387,7 +1387,7 @@ public:
  *
  * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with func_00397B70(engine, 3) when set (the
  * pointer is not cleared), removes each non-zero texture id of the pair at +0x10 (RemoveTexture, slot 50), calls
- * cGraphicsMan_PurgeTextures and func_0028FA98(audio, 1.0) on the audio (func_0028B180). Purge slot (+0x1C) of
+ * cGraphicsMan_PurgeTextures and func_0028FA98(audio, 1.0) on the audio (cAudioInterface_bxAudio). Purge slot (+0x1C) of
  * cGameLoadScreen_vtbl.
  */
 extern "C" void cGameLoadScreen_purge(void* self)
@@ -1405,7 +1405,7 @@ extern "C" void cGameLoadScreen_purge(void* self)
         }
     }
     cGraphicsMan_PurgeTextures(GrMan);
-    func_0028FA98(func_0028B180(), 1.0f);
+    func_0028FA98(cAudioInterface_bxAudio(), 1.0f);
 }
 #endif
 

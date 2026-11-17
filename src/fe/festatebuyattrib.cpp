@@ -17,7 +17,7 @@ extern "C" void cFEStateBuyAttrib_updateLevels(void* self);
 extern "C" void cFEStateBuyAttrib_updateCostPerLevel(void* self);
 extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* self);
 extern "C" void cFEStateBuyAttrib_updateBank(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 
 /**
@@ -45,7 +45,7 @@ extern "C" void cFEStateBuyAttrib_onCreateScreen(void* self)
     cFEStateBuyAttrib_updateCostPerLevel(self);
     cFEStateBuyAttrib_updateExperienceDisplay(self);
     cFEStateBuyAttrib_updateBank(self);
-    func_0028F140(func_0028B180(), 3);
+    func_0028F140(cAudioInterface_bxAudio(), 3);
 }
 #endif
 
@@ -706,7 +706,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_001F6F30(void* self);
 extern "C" void func_001F5A38(void* self);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 
 /**
@@ -738,7 +738,7 @@ extern "C" void cFEStateCareerStats_onCreateScreen(void* self)
     *(int*)((char*)self + 0x48) = 0;
     func_001F6F30(self);
     func_001F5A38(self);
-    func_0028F140(func_0028B180(), 8);
+    func_0028F140(cAudioInterface_bxAudio(), 8);
 }
 #endif
 

@@ -74,7 +74,7 @@ extern int D_0046D378[];
  *
  * Runs cMenu_cMenu, stores the menu's vtable D_0046D378 at +0x12C and the owner's first word at +0x130, builds a
  * command item (func_002CCF98) at +0x134 with ID 0 and caption "Abort", and adds it with cMenu_addItem. Selecting it
- * runs func_001DBAB8. func_0017D298 builds it at +0x1AAC of the debug front end.
+ * runs func_001DBAB8. cDebugLobbyScreen_cDebugLobbyScreen builds it at +0x1AAC of the debug front end.
  *
  * @param menu  the menu to construct
  * @param owner  the owner reference; its first word (the debug front end) is stored at +0x130
@@ -786,7 +786,7 @@ extern sE D_004A4E78;
 extern char D_004A4E80;
 extern int D_004A4E84;
 extern int D_004A4E88_v[2] __asm__("D_004A4E88"); // {int, int} pair (feasyncfile names it the same way)
-extern "C" void func_001A06B0(void*);
+extern "C" void cFEFlowState_purge(void*);
 extern float D_004C6328[4];
 extern float D_004C6338[4];
 extern float D_004C6348[4];
@@ -877,7 +877,7 @@ void sti_001DBC98(int init, int prio) __asm__("func_001DBC98");
  * constants (D_004C6328 .. D_004C6838, including gDisableColour = {1, 0.6, 0.6, 0.6}, gPopupWhite = {1, 1, 1, 1} and
  * gPopupBlack = {1, 0, 0, 0}), two three-float vectors (D_004C66A8 = {100, 128, 0}, D_004C66B8 = {130, 166, 0}),
  * fifteen packed id/value pairs D_004A4E08 .. D_004A4E78 (0 to 13, then -1), and zeroes D_004A4E00, D_004A4E04 and the
- * front-end flow state words D_004A4E80 .. D_004A4E8C. On the destroy pass it calls func_001A06B0 on D_004A4E80. The
+ * front-end flow state words D_004A4E80 .. D_004A4E8C. On the destroy pass it calls cFEFlowState_purge on D_004A4E80. The
  * first colour values are the same as the ones func_003AD290 writes in world/wscriptcache, so they come from a shared
  * header.
  *
@@ -1236,7 +1236,7 @@ void sti_001DBC98(int init, int prio)
             D_004C6838[2] = 1.0f;
             D_004C6838[3] = 1.0f;
         } else {
-            func_001A06B0(&D_004A4E80);
+            cFEFlowState_purge(&D_004A4E80);
         }
     }
 }
@@ -1924,7 +1924,7 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Continue" menu (vtable D_0046D740, built by func_0017D200): its one item, then the menu.
+ * Destroys the debug lobby's "Continue" menu (vtable D_0046D740, built by ContinueMenu_ContinueMenu): its one item, then the menu.
  *
  * Destroys the item at +0x130 with cMenuItem__cMenuItem (flags 2: no free), then runs cMenu__cMenu with the caller's
  * flags. The July 2003 preview calls this class ContinueMenu.
@@ -2031,7 +2031,7 @@ static inline void SubMenuA_CEA0(int m)
  *
  * Tears down, innermost first, the menu's four items (+0x578, +0x55C, +0x544, +0x528), the embedded Login menu at
  * +0x32C (its items and cMenu base) and the Create Account menu at +0x130 (its items and cMenu base), all with flags 2,
- * then runs cMenu__cMenu on itself with the caller's flags. The debug front end's destructor (func_0017D3B0) calls it
+ * then runs cMenu__cMenu on itself with the caller's flags. The debug front end's destructor (cDebugLobbyScreen__cDebugLobbyScreen) calls it
  * for its member at +0x70. The preview calls this class AccountMenu<OnCreate, OnLogin>.
  *
  * @param flags  g++ destructor flags passed on to the last cMenu__cMenu; bit 0 set frees the menu
@@ -2854,7 +2854,7 @@ extern void* D_0046D0D0[];
  * Destroys the uber-trick front-end state (vtable D_0046CCC0): restores cFEState's vtable D_0046D0D0 and runs
  * cUIState's destructor (func_0039E390).
  *
- * The g++ delete flags pass through in the second argument register. D_0046CCC0 is the vtable func_00183A98 stores in
+ * The g++ delete flags pass through in the second argument register. D_0046CCC0 is the vtable cFEStateUberTrick_cFEStateUberTrick stores in
  * the state allocated as "cFEStateUberTrick".
  */
 extern "C" void cFEStateUberTrick__cFEStateUberTrick(void *self) {
@@ -3854,7 +3854,7 @@ extern void *cFEMemCard_mInstance;
  * Reports whether Save was pressed on the current memory-card screen: returns the word at +0x1DC of
  * cFEMemCard_mInstance.
  *
- * func_001D5488 installs it as the memory-card manager's callbackIsSavePressed (+0x64).
+ * cFEMemCard_initFEMemCard installs it as the memory-card manager's callbackIsSavePressed (+0x64).
  *
  * @return the save-pressed word
  */
@@ -3872,7 +3872,7 @@ extern void *cFEMemCard_mInstance;
  * Reports whether Load was pressed on the current memory-card screen: returns the word at +0x1F4 of
  * cFEMemCard_mInstance.
  *
- * func_001D5488 installs it as the memory-card manager's callbackIsLoadPressed (+0x78).
+ * cFEMemCard_initFEMemCard installs it as the memory-card manager's callbackIsLoadPressed (+0x78).
  *
  * @return the load-pressed word
  */
@@ -3890,7 +3890,7 @@ extern void *cFEMemCard_mInstance;
  * Reports whether Delete was pressed on the current memory-card screen: returns the word at +0x1E0 of
  * cFEMemCard_mInstance.
  *
- * func_001D5488 installs it as the memory-card manager's callbackIsDeletePressed (+0x68).
+ * cFEMemCard_initFEMemCard installs it as the memory-card manager's callbackIsDeletePressed (+0x68).
  *
  * @return the delete-pressed word
  */
@@ -3907,7 +3907,7 @@ extern void *cFEMemCard_mInstance;
 /**
  * Reports whether Cancel was pressed on the current memory-card screen, and consumes it.
  *
- * Returns the word at +0x1E4 of cFEMemCard_mInstance and clears it. func_001D5488 installs it as the memory-card
+ * Returns the word at +0x1E4 of cFEMemCard_mInstance and clears it. cFEMemCard_initFEMemCard installs it as the memory-card
  * manager's callbackIsCancelPressed (+0x6C).
  *
  * @return the cancel-pressed word before it was cleared
@@ -3930,7 +3930,7 @@ extern void *cFEMemCard_mInstance;
  * Reports whether Overwrite was confirmed on the current memory-card screen: returns the word at +0x1F0 of
  * cFEMemCard_mInstance.
  *
- * func_001D5488 installs it as the memory-card manager's callbackIsOverwritePressed (+0x70).
+ * cFEMemCard_initFEMemCard installs it as the memory-card manager's callbackIsOverwritePressed (+0x70).
  *
  * @return the overwrite-pressed word
  */
@@ -3947,7 +3947,7 @@ extern void *cFEMemCard_mInstance;
 /**
  * Reports whether a memory-card device is selected: returns the word at +0x1A8 of cFEMemCard_mInstance.
  *
- * func_001D5488 installs it as the memory-card manager's callbackIsDeviceSelected (+0x74). The same word is the "busy"
+ * cFEMemCard_initFEMemCard installs it as the memory-card manager's callbackIsDeviceSelected (+0x74). The same word is the "busy"
  * flag that makes cFEMemCard_onInputBegin ignore input.
  *
  * @return the device-selected word
@@ -3966,7 +3966,7 @@ extern void *cFEMemCard_mInstance;
  * Reports whether the next memory card was requested, and consumes it.
  *
  * Returns the word at +0x1F8 of cFEMemCard_mInstance and clears it; cFEMemCard_onInputBegin sets the word when right is
- * pressed. func_001D5488 installs it as the memory-card manager's callbackIsNextDevicePressed (+0x7C).
+ * pressed. cFEMemCard_initFEMemCard installs it as the memory-card manager's callbackIsNextDevicePressed (+0x7C).
  *
  * @return the next-device word before it was cleared
  */
@@ -3988,7 +3988,7 @@ extern void *cFEMemCard_mInstance;
  * Reports whether the previous memory card was requested, and consumes it.
  *
  * Returns the word at +0x1FC of cFEMemCard_mInstance and clears it; cFEMemCard_onInputBegin sets the word when left is
- * pressed. func_001D5488 installs it as the memory-card manager's callbackIsPrevDevicePressed (+0x80).
+ * pressed. cFEMemCard_initFEMemCard installs it as the memory-card manager's callbackIsPrevDevicePressed (+0x80).
  *
  * @return the previous-device word before it was cleared
  */
@@ -4010,7 +4010,7 @@ extern void *cFEMemCard_mInstance;
  * Reports whether Format was confirmed on the current memory-card screen: returns the word at +0x1E8 of
  * cFEMemCard_mInstance.
  *
- * func_001D5488 installs it as the memory-card manager's callbackIsFormatPressed (+0x88).
+ * cFEMemCard_initFEMemCard installs it as the memory-card manager's callbackIsFormatPressed (+0x88).
  *
  * @return the format-pressed word
  */
@@ -4027,7 +4027,7 @@ extern void *cFEMemCard_mInstance;
 /**
  * Reports whether Retry was pressed on the current memory-card screen, and consumes it.
  *
- * Returns the word at +0x1EC of cFEMemCard_mInstance and clears it. func_001D5488 installs it as the memory-card
+ * Returns the word at +0x1EC of cFEMemCard_mInstance and clears it. cFEMemCard_initFEMemCard installs it as the memory-card
  * manager's callbackIsRetryPressed (+0x84).
  *
  * @return the retry-pressed word before it was cleared
@@ -4088,7 +4088,7 @@ extern "C" void cFEMemCard_displayStatus(void) {
 
 /**
  * Does nothing: the memory-card screen base's slot +0x10C of D_0046C980, which cFEStateProfileLoad overrides with
- * func_0018FAF0 and cFEStateOptionsDeviceSelect with func_0018E478.
+ * cFEStateProfileLoad_updateDone and cFEStateOptionsDeviceSelect with cFEStateOptionsDeviceSelect_updateDone.
  */
 extern "C" void cFEMemCard_updateDone(void) {
 }
@@ -4096,7 +4096,7 @@ extern "C" void cFEMemCard_updateDone(void) {
 /**
  * Does nothing: the memory-card screen base's slot +0x12C of D_0046C980.
  *
- * cFEStateProfileLoad (func_0018EF70), cFEStateOptionsDeviceSelect (func_0018E178), cOVState_PROFILE and
+ * cFEStateProfileLoad (cFEStateProfileLoad_hideActionButtons), cFEStateOptionsDeviceSelect (cFEStateOptionsDeviceSelect_hideActionButtons), cOVState_PROFILE and
  * cFEStateMemCard override it with functions taking one flag.
  */
 extern "C" void cFEMemCard_hideActionButtons(void) {
@@ -4106,7 +4106,7 @@ extern "C" void cFEMemCard_hideActionButtons(void) {
  * Does nothing: the memory-card screen base's slot +0x134 of D_0046C980 (kept by cFEStateMemCard and
  * cOVState_AUTOSAVE).
  *
- * cFEStateProfileLoad (func_0018F0B8) and cFEStateOptionsDeviceSelect (func_0018E2C0) override it with functions taking
+ * cFEStateProfileLoad (cFEStateProfileLoad_hideDeleteButton) and cFEStateOptionsDeviceSelect (cFEStateOptionsDeviceSelect_hideDeleteButton) override it with functions taking
  * one flag.
  */
 extern "C" void cFEMemCard_hideDeleteButton(void) {
@@ -4116,7 +4116,7 @@ extern "C" void cFEMemCard_hideDeleteButton(void) {
  * Does nothing: the memory-card screen base's slot +0x13C of D_0046C980 (kept by cFEStateMemCard and
  * cOVState_AUTOSAVE).
  *
- * cFEStateProfileLoad (func_0018F168) and cFEStateOptionsDeviceSelect (func_0018E368) override it with functions taking
+ * cFEStateProfileLoad (cFEStateProfileLoad_hideMainButton) and cFEStateOptionsDeviceSelect (cFEStateOptionsDeviceSelect_hideMainButton) override it with functions taking
  * a load flag and a save flag.
  */
 extern "C" void cFEMemCard_hideMainButton(void) {
@@ -4136,7 +4136,7 @@ extern unsigned short D_004A1390[];
  *
  * Runs cUIState's constructor (func_0039E2A0) with a null engine, stores the cOVState vtable D_00474E08 and then
  * D_0046C980 at +0x8, clears +0x48, +0x4C, +0x54 and +0x98 and copies the empty string D_004A1390 into +0x58. Unlike
- * the constructor that takes an engine and a type, it does not run func_001D5488, so cFEMemCard_mInstance is left
+ * the constructor that takes an engine and a type, it does not run cFEMemCard_initFEMemCard, so cFEMemCard_mInstance is left
  * alone.
  *
  * @return @p self
@@ -4482,20 +4482,20 @@ extern "C" void cFEStateOptionsSaveLoad__cFEStateOptionsSaveLoad(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsDeviceSelect__cFEStateOptionsDeviceSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_001D5428_E150(void*) __asm__("func_001D5428");
+extern "C" void* cFEMemCard__cFEMemCard_E150(void*) __asm__("cFEMemCard__cFEMemCard");
 extern void* cFEStateOptionsDeviceSelect_vtbl[];
 
 /**
  * Destroys the options device-select state: stores its vtable at +0x8, then runs the base destructor.
  *
- * The base, func_001D5428(), clears the global cFEMemCard_mInstance and runs the cUIState destructor (func_0039E390). The
+ * The base, cFEMemCard__cFEMemCard(), clears the global cFEMemCard_mInstance and runs the cUIState destructor (func_0039E390). The
  * g++ delete flags in the second argument register pass through untouched.
  *
- * @return no meaningful value (func_001D5428 returns nothing)
+ * @return no meaningful value (cFEMemCard__cFEMemCard returns nothing)
  */
 extern "C" void* cFEStateOptionsDeviceSelect__cFEStateOptionsDeviceSelect(void *self) {
     *(void***)((char*)self + 8) = cFEStateOptionsDeviceSelect_vtbl;
-    return func_001D5428_E150(self);
+    return cFEMemCard__cFEMemCard_E150(self);
 }
 #endif
 
@@ -4565,20 +4565,20 @@ extern "C" void* cFEStateProfileSelect__cFEStateProfileSelect(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateProfileLoad__cFEStateProfileLoad);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_001D5428_E218(void*) __asm__("func_001D5428");
+extern "C" void* cFEMemCard__cFEMemCard_E218(void*) __asm__("cFEMemCard__cFEMemCard");
 extern void* cFEStateProfileLoad_vtbl[];
 
 /**
  * Destroys the profile-load state: stores its vtable at +0x8, then runs the base destructor.
  *
- * The base, func_001D5428(), clears the global cFEMemCard_mInstance and runs the cUIState destructor (func_0039E390). The
+ * The base, cFEMemCard__cFEMemCard(), clears the global cFEMemCard_mInstance and runs the cUIState destructor (func_0039E390). The
  * g++ delete flags in the second argument register pass through untouched.
  *
- * @return no meaningful value (func_001D5428 returns nothing)
+ * @return no meaningful value (cFEMemCard__cFEMemCard returns nothing)
  */
 extern "C" void* cFEStateProfileLoad__cFEStateProfileLoad(void *self) {
     *(void***)((char*)self + 8) = cFEStateProfileLoad_vtbl;
-    return func_001D5428_E218(self);
+    return cFEMemCard__cFEMemCard_E218(self);
 }
 #endif
 
@@ -4610,7 +4610,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE280);
 /**
  * Sets what a profile load/save state does when it finishes, the last word of the object (+0x27C).
  *
- * func_0018FAF0 (the state's slot +0x10C) reads it: 0 pushes the state the parent's factory returns, 1 starts a
+ * cFEStateProfileLoad_updateDone (the state's slot +0x10C) reads it: 0 pushes the state the parent's factory returns, 1 starts a
  * pre-game load (cPreGameLoadScreen), 2 returns to the title screen. The constructor clears it; cFEStateLodge's callers
  * set 1 or 2 directly.
  *
@@ -5078,21 +5078,21 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateEventSelect_cFEStateEventSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *func_0039E2A0_E4E8(void *, int) __asm__("func_0039E2A0");
-extern "C" void func_002006B8_E4E8(void *) __asm__("func_002006B8");
+extern "C" void cUITemplate_MAP_init_E4E8(void *) __asm__("cUITemplate_MAP_init");
 extern int cFEStateEventSelect_vtbl[];
 
 /**
  * Constructs the event select state with no engine.
  *
  * Runs cUIState's constructor (func_0039E2A0) with a null engine, stores cFEStateEventSelect_vtbl at +0x8 and
- * constructs the member at +0x48 with func_002006B8 (On Tour keeps its cUITemplate_MAP mMap there).
+ * constructs the member at +0x48 with cUITemplate_MAP_init (On Tour keeps its cUITemplate_MAP mMap there).
  *
  * @return @p self
  */
 extern "C" void *cFEStateEventSelect_cFEStateEventSelect(void *self) {
     func_0039E2A0_E4E8(self, 0);
     *(int **)((char *)self + 8) = cFEStateEventSelect_vtbl;
-    func_002006B8_E4E8((char *)self + 0x48);
+    cUITemplate_MAP_init_E4E8((char *)self + 0x48);
     return self;
 }
 #endif

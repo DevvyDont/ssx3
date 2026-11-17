@@ -170,13 +170,13 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cFEStateProfileLoad_initGeneral(void* self);
 extern "C" void cFEStateProfileLoad_initCreateScreen(void* self);
-extern "C" void func_00190670(void* self);
-extern "C" void func_00190768(void* self);
+extern "C" void cFEStateProfileLoad_initLoadScreen(void* self);
+extern "C" void cFEStateProfileLoad_initSaveScreen(void* self);
 
 /**
  * Creates the profile load/save screen ("93profile_load") and sets it up for the current mode.
  *
- * After initGeneral, mode cFEStateProfileLoad_mScreenAction picks initCreateScreen (1), func_00190670 (2) or func_00190768 (3),
+ * After initGeneral, mode cFEStateProfileLoad_mScreenAction picks initCreateScreen (1), cFEStateProfileLoad_initLoadScreen (2) or cFEStateProfileLoad_initSaveScreen (3),
  * probably On Tour's initLoadScreen and initSaveScreen.
  */
 extern "C" void cFEStateProfileLoad_onCreateScreen(void* self)
@@ -193,10 +193,10 @@ extern "C" void cFEStateProfileLoad_onCreateScreen(void* self)
         cFEStateProfileLoad_initCreateScreen(self);
         break;
     case 2:
-        func_00190670(self);
+        cFEStateProfileLoad_initLoadScreen(self);
         break;
     case 3:
-        func_00190768(self);
+        cFEStateProfileLoad_initSaveScreen(self);
         break;
     }
 }
@@ -205,7 +205,7 @@ extern "C" void cFEStateProfileLoad_onCreateScreen(void* self)
 extern "C" void* cUIState_onRender2D(void* self);
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018EE98__FPv);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onRender2D__FPv);
 #ifdef SKIP_ASM
 /**
  * Draws the profile load screen by running cUIState_onRender2D.
@@ -214,14 +214,14 @@ INCLUDE_ASM("fe/festateprofile", func_0018EE98__FPv);
  *
  * @return cUIState_onRender2D's result
  */
-void* func_0018EE98(void* self)
+void* cFEStateProfileLoad_onRender2D(void* self)
 {
     return cUIState_onRender2D(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018EEB8);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onWidgetMenu);
 #ifdef SKIP_ASM
 struct cList0018EEB8 {
     virtual void v01();
@@ -294,7 +294,7 @@ extern int cFEStateProfileLoad_mScreenAction;
  * @param msg  the menu event
  * @return 0x100 to refuse the event, 0x101 to allow it
  */
-extern "C" int func_0018EEB8(void* self, void* widget, unsigned int msg)
+extern "C" int cFEStateProfileLoad_onWidgetMenu(void* self, void* widget, unsigned int msg)
 {
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
     switch (msg) {
@@ -316,7 +316,7 @@ extern "C" int func_0018EEB8(void* self, void* widget, unsigned int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018EF70);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_hideActionButtons);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -350,7 +350,7 @@ struct cUIObj_EF70 {
  *
  * @param on  1 to hide the buttons, 0 to show them
  */
-extern "C" void func_0018EF70(void* self, int on)
+extern "C" void cFEStateProfileLoad_hideActionButtons(void* self, int on)
 {
     if (*(int*)((char*)self + 0x234) == on)
         return;
@@ -368,7 +368,7 @@ extern "C" void func_0018EF70(void* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018F0B8);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_hideDeleteButton);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -393,12 +393,12 @@ struct cUIObj_F0B8 {
  * Shows or hides the profile load screen's delete button.
  *
  * Except on the load screen (cFEStateProfileLoad_mScreenAction 2) sets "btext5" and "ps2sq" visible when @p on is false
- * (cUIThing_setVisible; the view calls the slot setActive); always stores !@p on in +0x220, which func_0018EEB8 tests
+ * (cUIThing_setVisible; the view calls the slot setActive); always stores !@p on in +0x220, which cFEStateProfileLoad_onWidgetMenu tests
  * for event 8. Fills slot +0x134 of cFEStateProfileLoad_vtbl (cFEMemCard_hideDeleteButton's slot).
  *
  * @param on  true to hide the button
  */
-extern "C" void func_0018F0B8(void* self, bool on)
+extern "C" void cFEStateProfileLoad_hideDeleteButton(void* self, bool on)
 {
     if (cFEStateProfileLoad_mScreenAction != 2) {
         int off = !on;
@@ -410,7 +410,7 @@ extern "C" void func_0018F0B8(void* self, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018F168);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_hideMainButton);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -438,13 +438,13 @@ struct cUIObj_F168 {
  *
  * Except on the load screen (cFEStateProfileLoad_mScreenAction 2) shows "btext3" and "ps2x" only when @p saveBlocked is
  * false; on the load screen shows "btext3a" and "ps2x" only when @p loadBlocked is false. The shown state is also
- * stored in +0x224, which func_0018FD90 and func_0018FC98 require. Fills slot +0x13C of cFEStateProfileLoad_vtbl
+ * stored in +0x224, which cFEStateProfileLoad_onWidgetEvent and func_0018FC98 require. Fills slot +0x13C of cFEStateProfileLoad_vtbl
  * (cFEMemCard_hideMainButton's slot).
  *
  * @param loadBlocked  true to hide the button on the load screen
  * @param saveBlocked  true to hide the button on the other screens
  */
-extern "C" void func_0018F168(void* self, bool loadBlocked, bool saveBlocked)
+extern "C" void cFEStateProfileLoad_hideMainButton(void* self, bool loadBlocked, bool saveBlocked)
 {
     cUIObj_F168* xButton = (cUIObj_F168*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x));
     if (cFEStateProfileLoad_mScreenAction != 2) {
@@ -462,23 +462,23 @@ extern "C" void func_0018F168(void* self, bool loadBlocked, bool saveBlocked)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018F278);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_displayStatus);
 #ifdef SKIP_ASM
 extern "C" void cFEStateProfileLoad_displayOn(void* self);
-extern "C" void func_0018F9D8(void* self);
+extern "C" void cFEStateProfileLoad_displayOff(void* self);
 
 /**
  * Redraws the profile load screen's card panel for the current display state.
  *
- * Runs cFEStateProfileLoad_displayOn when the display state (+0x214) is 3, otherwise func_0018F9D8. Fills slot +0xD4 of
+ * Runs cFEStateProfileLoad_displayOn when the display state (+0x214) is 3, otherwise cFEStateProfileLoad_displayOff. Fills slot +0xD4 of
  * cFEStateProfileLoad_vtbl (cFEMemCard_displayStatus's slot).
  */
-extern "C" void func_0018F278(void* self)
+extern "C" void cFEStateProfileLoad_displayStatus(void* self)
 {
     if (*(int*)((char*)self + 0x214) == 3) {
         cFEStateProfileLoad_displayOn(self);
     } else {
-        func_0018F9D8(self);
+        cFEStateProfileLoad_displayOff(self);
     }
 }
 #endif
@@ -488,10 +488,10 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_displayOn);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void func_0018F9D8(void* self);
+extern "C" void cFEStateProfileLoad_displayOff(void* self);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_001D8240();
+extern "C" void cFEMemCard_callbackDisplayNoCards();
 extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* mp, int dev, int a3);
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsigned short* buf, int len);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
@@ -566,7 +566,7 @@ static inline cUIObj_F2B8* getObj_F2B8(cState_F2B8* self, char* name)
  * Refreshes the memory card panel and the six profile slot rows.
  *
  * Does nothing unless this state's virtual slot 42 returns true (probably: a card is ready). If the memory
- * card manager's profile object (+0x434) then fails its slot 53, calls func_001D8240 and func_0018F9D8 and
+ * card manager's profile object (+0x434) then fails its slot 53, calls cFEMemCard_callbackDisplayNoCards and cFEStateProfileLoad_displayOff and
  * returns; otherwise it moves to state 3 (slot 35) if needed, shows the device name, fills
  * "player1".."player6" with the slot names (plus the "date%d"/"time%d" lines for used slots) and shows the
  * left/right device arrows when another device is available.
@@ -582,8 +582,8 @@ extern "C" void cFEStateProfileLoad_displayOn(void* vself)
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     if (self->v42()) {
         if (!(*(cMCSub_F2B8**)(mp + 0x434))->v53()) {
-            func_001D8240();
-            func_0018F9D8(self);
+            cFEMemCard_callbackDisplayNoCards();
+            cFEStateProfileLoad_displayOff(self);
             return;
         } else if (*(int*)((char*)self + 0x214) != 3) {
             self->v35(3);
@@ -665,7 +665,7 @@ extern "C" void cFEStateProfileLoad_displayOn(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018F9D8);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_displayOff);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -812,11 +812,11 @@ struct cUIObj_F9D8 {
  * slot-53 check (func_002D3810), it switches the display state to 3 (slot 35, cFEMemCard_triggerDisplayState) and runs
  * cFEStateProfileLoad_displayOn. Otherwise it resets the six rows "player1" to "player6": slot 25
  * (cUIText_setUseStaticColour for a text; the view calls it setSelected) with 0 and setStatic(1) (the view calls it
- * setEnabled). Called by func_0018F278 and by cFEStateProfileLoad_displayOn when no card is found.
+ * setEnabled). Called by cFEStateProfileLoad_displayStatus and by cFEStateProfileLoad_displayOn when no card is found.
  *
  * @param vself  the profile load state
  */
-extern "C" void func_0018F9D8(void* vself)
+extern "C" void cFEStateProfileLoad_displayOff(void* vself)
 {
     cSelf_F9D8* self = (cSelf_F9D8*)vself;
     void* app = cSSXApp_getMCManager(SSXApp);
@@ -838,7 +838,7 @@ extern "C" void func_0018F9D8(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018FAF0);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_updateDone);
 #ifdef SKIP_ASM
 struct cAppMan;
 extern "C" void* cBE_getBE();
@@ -850,7 +850,7 @@ extern "C" int cBENewPlayerInterface_getLastHub(void* iface, int a1);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
-extern "C" void* func_00194738(void* self, void* engine);
+extern "C" void* cFEStateTitle_cFEStateTitle1(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* self, void* state);
 extern "C" void cUIStateStack_pushCheck(void* self, void* state);
 extern int D_004A11B8;
@@ -878,11 +878,11 @@ struct sVEK18FAF0b {
  * with this state and the mode (+0x1BC), and pushes it with cUIStateStack_pushCheck. 1 sets up a race on the new-race
  * interface (game mode 4, event 0xC), sets D_004A11B8 to 1 and the location (D_00535C08[0]) to the player's last hub
  * (cBENewPlayerInterface_getLastHub), submits it (the interface's vtable slot 1, func_00144928) and makes a new
- * cPreGameLoadScreen the next app module. 2 clears D_004A19D8 and pushes a new title state (func_00194738,
+ * cPreGameLoadScreen the next app module. 2 clears D_004A19D8 and pushes a new title state (cFEStateTitle_cFEStateTitle1,
  * "cFEStateTitle"). Sets +0x1AC afterwards. Fills slot +0x10C of cFEStateProfileLoad_vtbl (cFEMemCard_updateDone's
  * slot).
  */
-extern "C" void func_0018FAF0(void* self)
+extern "C" void cFEStateProfileLoad_updateDone(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
         int sel = *(int*)((char*)self + 0x27C);
@@ -905,7 +905,7 @@ extern "C" void func_0018FAF0(void* self)
             cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         } else if (sel == 2) {
             D_004A19D8 = 0;
-            void* st = func_00194738(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), *(void**)((char*)self + 0x10));
+            void* st = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), *(void**)((char*)self + 0x10));
             cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, st);
         }
     }
@@ -990,8 +990,8 @@ struct cSelf_FC98 {
  * sets the state (+0x1C0) to 3, the busy flag (+0x1A8) and +0x1DC. Unless the status popup is already up (+0x210) or
  * +0x204 is set, it sets the popup type (+0x19C) to 22, fetches the card manager's message
  * (cMCOverlayManager_GetMessage, 800 characters into a 1600-byte "Temp String" buffer), shows it in the status popup
- * (this state's vtable slot 36, func_001D8530, with 1, 1, 0, 0, 1), sets +0x210 and frees the buffer. Called by
- * func_0018FD90 once a profile name has been entered.
+ * (this state's vtable slot 36, cFEMemCard_getPopup, with 1, 1, 0, 0, 1), sets +0x210 and frees the buffer. Called by
+ * cFEStateProfileLoad_onWidgetEvent once a profile name has been entered.
  *
  * @param vself  the profile load state
  */
@@ -1018,7 +1018,7 @@ extern "C" void func_0018FC98(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018FD90);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1117,7 +1117,7 @@ static inline void* GetText_K18FD90(char* key)
  * 53, 64, 65 and 66 from both; each time it sets the "kT_KEYUserName" label, mbClearOnFirst and the player's current
  * name, pushes it as a popup on the engine's state stack (cUIStateStack_pushPopup) and sets +0x1A0 and clears +0x19C.
  * On the load screen (2) with the main button active it starts a load of file type 1 (func_0023C8F0) and calls this
- * state's vtable slot 44 (func_001D69E0).
+ * state's vtable slot 44 (cFEMemCard_confirmLoad).
  *
  * Event 13 (the keyboard is done): stores the entered name (mszEditString) as the player's name (func_00147138, for the
  * player at +0x1CC) and in the manager's mNewFileName, or "kT_MEMPlayerName" formatted with the player number when it
@@ -1135,7 +1135,7 @@ static inline void* GetText_K18FD90(char* key)
  * @param item  the widget that sent the event (its +0x18 word is the slot index)
  * @param event  the widget event
  */
-extern "C" void func_0018FD90(void* vself, char* item, int event)
+extern "C" void cFEStateProfileLoad_onWidgetEvent(void* vself, char* item, int event)
 {
     sProfileK18FD90* self = (sProfileK18FD90*)vself;
     switch (event) {
@@ -1370,7 +1370,7 @@ extern "C" void cFEStateProfileLoad_initCreateScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_00190670);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_initLoadScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1407,7 +1407,7 @@ struct sProfile_0670 {
  * setActive), clears the delete-button flag (+0x220), sets the main-button flag (+0x224) and clears the card manager's
  * mPollForFullCard. cFEStateProfileLoad_onCreateScreen runs it when cFEStateProfileLoad_mScreenAction is 2.
  */
-extern "C" void func_00190670(void* self)
+extern "C" void cFEStateProfileLoad_initLoadScreen(void* self)
 {
     ((cUIObj_0670*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_LoadProfile)))->setActive(1);
     ((cUIObj_0670*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_load)))->setActive(1);
@@ -1420,7 +1420,7 @@ extern "C" void func_00190670(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_00190768);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_initSaveScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1449,7 +1449,7 @@ struct cUIObj_0768 {
  * setActive) and sets the delete-button (+0x220) and main-button (+0x224) flags. cFEStateProfileLoad_onCreateScreen
  * runs it when cFEStateProfileLoad_mScreenAction is 3.
  */
-extern "C" void func_00190768(void* self)
+extern "C" void cFEStateProfileLoad_initSaveScreen(void* self)
 {
     ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Title_SaveProfile)))->setActive(1);
     ((cUIObj_0768*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_save)))->setActive(1);
@@ -1461,7 +1461,7 @@ extern "C" void func_00190768(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_00190858);
+INCLUDE_ASM("fe/festateprofile", cFEStateRiderBio_cFEStateRiderBio);
 #ifdef SKIP_ASM
 extern void* cFEStateRiderBio_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
@@ -1478,7 +1478,7 @@ extern "C" unsigned char func_001A1CD0(void* self, int a1);
  * @param userNum  the user number
  * @return @p self
  */
-extern "C" void* func_00190858(void* self, int engine, int userNum)
+extern "C" void* cFEStateRiderBio_cFEStateRiderBio(void* self, int engine, int userNum)
 {
     signed char idx = userNum;
     func_0039E2A0(self);

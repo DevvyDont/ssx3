@@ -806,7 +806,7 @@ public:
     virtual void v17();
 };
 extern "C" void func_00195D50(void* a);
-extern "C" void func_001F30D8(void* a);
+extern "C" void cBXLoadIndicator_Init(void* a);
 void func_00278710(void* a);
 extern "C" void cGraphicsMan_UploadTextures(void* a);
 extern "C" void cWorld_init(void* a);
@@ -831,7 +831,7 @@ extern "C" void cGame_gainFocus(cGame* self)
     func_00195D50(SSXApp->FELocale);
     void* loadIndicator = self->LoadIndicator;
     cOVStateManager_mpPDATemplate = 0;
-    func_001F30D8(loadIndicator);
+    cBXLoadIndicator_Init(loadIndicator);
     func_00278710(ScriptEngine);
     cBezierMan_TheBezierMan->v17();
     cBezierMan_TheBezierMan->v04();
@@ -896,7 +896,7 @@ extern "C" void func_00343BC0(void* self);
 extern "C" void cMultiParticleMan_reset(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern "C" void func_00287108(void* self);
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 int GetHashValue32(char* s);
 extern char str_hud_c[];
 
@@ -947,7 +947,7 @@ extern "C" void cGame_partialRestart(cGame* self)
     }
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
     cWScriptMan_setupMissions(self->WScriptMan);
-    func_00287108(func_0028B180());
+    func_00287108(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -957,7 +957,7 @@ INCLUDE_ASM("main/gameload", cGame_restart);
 extern "C" void cGame_partialRestart(cGame* self);
 extern "C" void cGameModeMan_restartHeat(void* gm);
 extern "C" void cGame_setState(void* self, int a, int b, int refresh);
-extern "C" void* func_0028B180(void);
+extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_RestartEvent(void* mgr);
 
 static inline int numRiders_2302A8(void* game)
@@ -986,7 +986,7 @@ extern "C" void cGame_restart(cGame* self)
         *(int*)(rider_2302A8(self, i) + 0x2F8) = 0;
     }
     cGame_setState(self, 1, 2, 1);
-    cSSXAudio_RestartEvent(func_0028B180());
+    cSSXAudio_RestartEvent(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -1285,12 +1285,12 @@ extern "C" void func_0029ED18(void* p);
 extern "C" int cGame_activatePauseMenu_pi(void* self, int a) __asm__("cGame_activatePauseMenu");
 // cFadeScreen_update returns nothing (its body has no return value); the unit declares it void*.
 extern "C" void cFadeScreen_update_v(void* self) __asm__("cFadeScreen_update");
-extern "C" int func_0020CBE8(void);
+extern "C" int cOVStateManager_allowPauseMenu(void);
 extern "C" void func_00326AE0(void* p);
 extern "C" void func_0020CA10(void);
 extern "C" void cSSXAudio_PauseAudio(void* p);
 extern "C" void func_00294F48(void* p);
-extern "C" int func_0020CBA0(void);
+extern "C" int cOVStateManager_pauseOverlayActive(void);
 extern "C" void cPlaybackMan_update(void* p);
 extern "C" int cInputSync_aiinputready(void* p);
 extern "C" int cInputSync_aiupdate(void* p);
@@ -1441,7 +1441,7 @@ static inline int updateState_2306B8(cGame* self)
             if (e[1] == 8) {
                 cOVStateManager_triggerOverlay(0x1D);
                 pushState_2306B8(3);
-                cSSXAudio_PlayIconSound(func_0028B180(), 4, 0, 1.0f);
+                cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 4, 0, 1.0f);
                 return 0;
             }
             if (e[1] == 9) {
@@ -1461,7 +1461,7 @@ static inline int updateState_2306B8(cGame* self)
         cOVStateManager_triggerOverlay(0x22);
         pushState_2306B8(12);
         D_004A20CC = 0xFFFFFFFF;
-        func_0029ED18(func_0028B180());
+        func_0029ED18(cAudioInterface_bxAudio());
         return 0;
     }
     if (cMenuSys_isActive(((char*)self->MenuSys)) != 0) {
@@ -1470,7 +1470,7 @@ static inline int updateState_2306B8(cGame* self)
         return 0;
     }
     if (cGame_activatePauseMenu_pi(self, 0) != 0 && !inRace_2306B8(*((int*)((char*)self->Replay)))
-        && notPlaying_2306B8(((char*)self->PlaybackMan)) && func_0020CBE8() != 0) {
+        && notPlaying_2306B8(((char*)self->PlaybackMan)) && cOVStateManager_allowPauseMenu() != 0) {
         func_00326AE0(PadCache);
         func_0020CA10();
         pushState_2306B8(2);
@@ -1479,14 +1479,14 @@ static inline int updateState_2306B8(cGame* self)
             sVEntryI_2306B8* vt = o->vtbl;
             vt[44].fn((char*)o + vt[44].delta, (*(unsigned char*)&self->PauseOwner));
         }
-        cSSXAudio_PauseAudio(func_0028B180());
-        func_00294F48(func_0028B180());
+        cSSXAudio_PauseAudio(cAudioInterface_bxAudio());
+        func_00294F48(cAudioInterface_bxAudio());
         return 0;
     }
     {
         int wasPaused = paused_2306B8();
         func_00398038(((char*)self->UI));
-        if (func_0020CBA0() == 0) {
+        if (cOVStateManager_pauseOverlayActive() == 0) {
             cPlaybackMan_update(((char*)self->PlaybackMan));
             if (cMenuSys_isActive(((char*)self->MenuSys)) != 0) {
                 return 0;

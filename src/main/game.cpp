@@ -567,7 +567,7 @@ extern int cDepthFog_m_Enable;
 extern "C" void cBucketMan_renderBucket(void* self, int index);
 void func_002789C0(void* p);
 extern "C" void func_00397DF8(void* p);
-extern "C" void func_001F31E0(void* p);
+extern "C" void cBXLoadIndicator_Render(void* p);
 extern "C" int cMenuSys_isActive(void* p);
 extern "C" void func_002CC350(void* p);
 extern "C" void func_00285BF8(void* self, int a, float dt);
@@ -582,7 +582,7 @@ extern "C" void func_002B5D78(void* p);
  * cBucketMan_renderBucket(gBucketMan, 3). Then it resets the viewport to the full screen (slot 22 with GrMan's width
  * and height, then SetViewport 640x480), loads t4mat_Identity, sets the debug font (+0x24) to scale 0.8, size 2 and
  * colour (1, 0.8, 0.8, 0), and draws the script engine (func_002789C0(ScriptEngine)), the UI (func_00397DF8 on +0x48),
- * the load indicator (func_001F31E0 on +0x94) and, when cMenuSys_isActive, the debug menu system (func_002CC350 on
+ * the load indicator (cBXLoadIndicator_Render on +0x94) and, when cMenuSys_isActive, the debug menu system (func_002CC350 on
  * +0xA4). It calls GrMan slot 14 with a zero vector and slot 19 with cDepthFog_m_Enable cleared for the call, then
  * advances the audio by mUpdateTick / 60 seconds (func_00285BF8(gSSXAudio, 1, ..)), runs
  * func_002B5D78(gWorldTriggerManager) and zeroes mUpdateTick (+0xAC). cGame_render calls it at the end of each of its
@@ -626,7 +626,7 @@ extern "C" void func_0022C830(sGame_C830* self)
     self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
     func_002789C0(ScriptEngine);
     func_00397DF8(self->f48);
-    func_001F31E0(self->hudTimer);
+    cBXLoadIndicator_Render(self->hudTimer);
     if (cMenuSys_isActive(self->fA4) != 0) {
         func_002CC350(self->fA4);
         self->font->scale = sV2_C830(2.0f, 2.0f);

@@ -76,7 +76,7 @@ extern "C" int cFEStateTransition_onScreenEvent(void* self, void* screen, int id
 INCLUDE_ASM("fe/festatetransition", cFEStateTransition_handleEvent);
 #ifdef SKIP_ASM
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 
 /**
@@ -95,7 +95,7 @@ extern "C" int cFEStateTransition_handleEvent(void* self, int which)
         if (screen != 0) {
             *(int*)((char*)screen + 0x54) |= 0x40;
             cUIScreen_playFrame(*(void**)((char*)self + 0x48), 0, 0);
-            cSSXAudio_MenuSound(func_0028B180(), 0xF);
+            cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xF);
         }
     } else if (which == 1) {
         void* screen = *(void**)((char*)self + 0x4C);
@@ -109,7 +109,7 @@ extern "C" int cFEStateTransition_handleEvent(void* self, int which)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetransition", func_00194738);
+INCLUDE_ASM("fe/festatetransition", cFEStateTitle_cFEStateTitle1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern void* cFEStateTitle_vtbl[];
@@ -122,7 +122,7 @@ extern void* cFEStateTitle_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_00194738(void* self)
+extern "C" void* cFEStateTitle_cFEStateTitle1(void* self)
 {
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = cFEStateTitle_vtbl;

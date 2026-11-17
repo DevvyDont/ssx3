@@ -12,17 +12,17 @@ INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_onWidgetEvent);
 
 INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_onUpdate);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D47A0);
+INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_updateBigArt);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D4890);
+INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_updateStats);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D4918);
+INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_loadTextures);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D4A20);
+INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_updateTexturesLoad);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D4B20);
+INCLUDE_ASM("fe/festaterewards2", cFEStateTrophyRoom_purgeTextures);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D4BC8);
+INCLUDE_ASM("fe/festaterewards2", cFEStateRewardsRoom_cFEStateRewardsRoom);
 
 INCLUDE_ASM("fe/festaterewards2", cFEStateRewardsRoom_onCreateScreen);
 
@@ -32,7 +32,7 @@ INCLUDE_ASM("fe/festaterewards2", cFEStateRewardsRoom_onWidgetEvent);
 
 INCLUDE_ASM("fe/festaterewards2", cFEStateRewardsRoom_onWidgetMenu);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D4F90);
+INCLUDE_ASM("fe/festaterewards2", cFEStateRewardsRoom_setRewardsWidgetText);
 
 INCLUDE_ASM("fe/festaterewards2", cFEStateRelogin_cFEStateRelogin);
 
@@ -50,11 +50,11 @@ INCLUDE_ASM("fe/festaterewards2", func_001D5330);
 
 INCLUDE_ASM("fe/festaterewards2", cFEMemCard_cFEMemCard);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5428);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard__cFEMemCard);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5460);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_onWidgetMenu);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5488);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_initFEMemCard);
 
 INCLUDE_ASM("fe/festaterewards2", cFEMemCard_onDestroyScreen);
 
@@ -62,13 +62,13 @@ INCLUDE_ASM("fe/festaterewards2", cFEMemCard_writeStart);
 
 INCLUDE_ASM("fe/festaterewards2", cFEMemCard_callbackReadUpdate);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5D78);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_callbackWriteUpdate);
 
 INCLUDE_ASM("fe/festaterewards2", cFEMemCard_readStart);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5F38);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_writeDone);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5F40);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_readDone);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D64C0);
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_setSoundMode);
 

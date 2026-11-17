@@ -27,7 +27,7 @@ extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int 
 int cBELibrary_getRiderIndex(int rider) __asm__("cBELibrary_getRiderIndex__Fi");
 extern "C" int func_00148950(void* iface, int rider);
 extern "C" char* cBERewardInterface_getPeakPass(void* self, int a1, int a2);
-extern "C" void func_001D3160_Room(void* self) __asm__("func_001D3160");
+extern "C" void cFEStateMountainRoom_loadPeakPass_Room(void* self) __asm__("cFEStateMountainRoom_loadPeakPass");
 extern char str_dot_loc_arrow[];
 extern char str_dot_visit_arrow[];
 
@@ -58,7 +58,7 @@ struct sMountainRoomK2678 {
  * Records the player's character, the highest unlocked peak (+0xB4), the rider's level (+0xB8) and that
  * peak's pass
  * item (+0xC0), loads the "dot_loc arrow" and "dot_visit arrow" textures, then starts the pass image load
- * (func_001D3160).
+ * (cFEStateMountainRoom_loadPeakPass).
  *
  * @param ui  the UI engine (On Tour cUIEngine* pEngine)
  * @param idx  the player number (On Tour userNum)
@@ -116,7 +116,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
     room->fC0 = item;
     room->fAC = cUITextureBank_getElementByHashname((char*)ui + 0x58, GetHashValue32(str_dot_loc_arrow));
     room->fA8 = cUITextureBank_getElementByHashname((char*)ui + 0x58, GetHashValue32(str_dot_visit_arrow));
-    func_001D3160_Room(self);
+    cFEStateMountainRoom_loadPeakPass_Room(self);
     return self;
 }
 #endif
@@ -169,7 +169,7 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" void* func_0028B180();
+extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern char str_125mountainroom[];
 extern char str_Numb_1[];
@@ -203,27 +203,27 @@ extern "C" void cFEStateMountainRoom_onCreateScreen(void* self)
     if (textObj3 != 0) {
         cUIText_setAsciiString(textObj3, D_004A1508);
     }
-    func_0028F140(func_0028B180(), 7);
+    func_0028F140(cAudioInterface_bxAudio(), 7);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onGainFocus);
 #ifdef SKIP_ASM
-extern "C" void func_001D3340(void* self);
+extern "C" void cFEStateMountainRoom_updateMarkers(void* self);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 
 /**
  * Refreshes the mountain room's event widgets, then gives the state focus.
  *
- * func_001D3340() shows one widget per event of the first two peaks on each of the three mountains, coloured by
+ * cFEStateMountainRoom_updateMarkers() shows one widget per event of the first two peaks on each of the three mountains, coloured by
  * the event's state for the room's player and character; cFEState_onGainFocus() is the base focus handling.
  *
  * @param pPrevState  the state that had focus before (On Tour: pPrevState), passed on to cFEState_onGainFocus()
  */
 extern "C" void cFEStateMountainRoom_onGainFocus(void* self, int pPrevState)
 {
-    func_001D3340(self);
+    cFEStateMountainRoom_updateMarkers(self);
     cFEState_onGainFocus(self, pPrevState);
 }
 #endif
@@ -518,7 +518,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetEvent);
 int GetHashValue32(char* str);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
-extern "C" void func_001D32E0_MR(void* self) __asm__("func_001D32E0");
+extern "C" void cFEStateMountainRoom_showPassFront_MR(void* self) __asm__("cFEStateMountainRoom_showPassFront");
 extern "C" void cUIStateStack_push_MR(void* list, void* item) __asm__("cUIStateStack_push");
 extern char str_kT_HELPViewPass[];
 extern char str_kT_HELPViewTrophies[];
@@ -567,7 +567,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
     case 5: {
         int idx = *(int*)(w + 0x18);
         if (idx == 0) {
-            func_001D32E0_MR(self);
+            cFEStateMountainRoom_showPassFront_MR(self);
             break;
         }
         sFactory_MR* factory = **(sFactory_MR***)(self + 0x10);
@@ -623,27 +623,27 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_001D31C0(void* self);
+extern "C" void cFEStateMountainRoom_updateTextureLoad(void* self);
 extern "C" void* cUIState_onUpdate(void* self);
 
 /**
  * Updates the mountain room, first finishing its picture load while one is pending.
  *
- * While the async slot at 0xBC is not -1, func_001D31C0() checks the load; once it has loaded, the data is
+ * While the async slot at 0xBC is not -1, cFEStateMountainRoom_updateTextureLoad() checks the load; once it has loaded, the data is
  * handed to GrMan under the name "pass" and attached to the widget at 0x50, and the slot is released. Then runs
  * the base UI-state update cUIState_onUpdate().
  */
 extern "C" void cFEStateMountainRoom_onUpdate(void* self)
 {
     if (~*(int*)((char*)self + 0xBC) != 0) {
-        func_001D31C0(self);
+        cFEStateMountainRoom_updateTextureLoad(self);
     }
     cUIState_onUpdate(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3160);
+INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_loadPeakPass);
 #ifdef SKIP_ASM
 extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a5);
 
@@ -653,9 +653,9 @@ extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a
  * Only when the load slot (+0xBC) is negative and the pass item (+0xC0) is set: asks the front end's file loader
  * (SSXApp->RealFE + 0x1A70, func_0019DA10) for the item's file (its word at +4) under the character id (+0xB0), with
  * arguments 10, 1, 0, and keeps the returned slot at +0xBC. cFEStateMountainRoom_onUpdate finishes the load through
- * func_001D31C0.
+ * cFEStateMountainRoom_updateTextureLoad.
  */
-extern "C" void func_001D3160(void* self)
+extern "C" void cFEStateMountainRoom_loadPeakPass(void* self)
 {
     if (*(int*)((char*)self + 0xBC) < 0) {
         void* item = *(void**)((char*)self + 0xC0);
@@ -667,11 +667,11 @@ extern "C" void func_001D3160(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D31C0);
+INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_updateTextureLoad);
 #ifdef SKIP_ASM
 extern "C" int func_0019E238(void* mgr, int bank, int i);
 extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
-extern "C" void func_001D32E0(void* self);
+extern "C" void cFEStateMountainRoom_showPassFront(void* self);
 extern char str_pass[];
 
 struct sVE_31C0 {
@@ -698,12 +698,12 @@ static inline int isActive_31C0(sWidget_31C0* w)
  * character +0xB0 as not loaded (func_0019E238). Otherwise takes the file data (func_0019E2B0), creates the texture
  * "pass" from the data at its own offset (+0x14) through GrMan's virtual slot 46, and stores the texture id at +0xC4
  * and in the icon (+0x78, with +0x7C cleared). When the pass group (+0x48) is visible (widget flag bit 6) and the
- * pass-front group (+0x4C) is not, shows them (func_001D32E0). Finally frees the loader slot (func_0019DC20) and sets
+ * pass-front group (+0x4C) is not, shows them (cFEStateMountainRoom_showPassFront). Finally frees the loader slot (func_0019DC20) and sets
  * +0xBC to -1.
  *
  * @param vself  the mountain-room state (this)
  */
-extern "C" void func_001D31C0(void* vself)
+extern "C" void cFEStateMountainRoom_updateTextureLoad(void* vself)
 {
     char* self = (char*)vself;
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
@@ -731,7 +731,7 @@ extern "C" void func_001D31C0(void* vself)
             }
         }
         if (!both) {
-            func_001D32E0(self);
+            cFEStateMountainRoom_showPassFront(self);
         }
     }
     func_0019DC20(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC));
@@ -740,9 +740,9 @@ extern "C" void func_001D31C0(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D32E0);
+INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_showPassFront);
 #ifdef SKIP_ASM
-struct sVEntry_func_001D32E0 {
+struct sVEntry_cFEStateMountainRoom_showPassFront {
     short delta;
     short index;
     void (*fn)(void*, int);
@@ -754,23 +754,23 @@ struct sVEntry_func_001D32E0 {
  *
  * Both through virtual slot 9 (show) of the widget's vtable at +0x8 with 1.
  */
-extern "C" void func_001D32E0(void* self)
+extern "C" void cFEStateMountainRoom_showPassFront(void* self)
 {
     {
         void* obj = *(void**)((char*)self + 0x48);
-        sVEntry_func_001D32E0* vt = *(sVEntry_func_001D32E0**)((char*)obj + 0x8);
+        sVEntry_cFEStateMountainRoom_showPassFront* vt = *(sVEntry_cFEStateMountainRoom_showPassFront**)((char*)obj + 0x8);
         vt[9].fn((char*)obj + vt[9].delta, 1);
     }
     if (*(int*)((char*)self + 0xC4) >= 0) {
         void* obj = *(void**)((char*)self + 0x4C);
-        sVEntry_func_001D32E0* vt = *(sVEntry_func_001D32E0**)((char*)obj + 0x8);
+        sVEntry_cFEStateMountainRoom_showPassFront* vt = *(sVEntry_cFEStateMountainRoom_showPassFront**)((char*)obj + 0x8);
         vt[9].fn((char*)obj + vt[9].delta, 1);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3340);
+INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_updateMarkers);
 #ifdef SKIP_ASM
 extern "C" int func_001CED90(int player, int charId, int mountain, int peak, int i);
 
@@ -838,7 +838,7 @@ static inline void wColour_3340(cWidget_3340* w, int col)
  *
  * @param mountainRoom  the mountain-room state (this)
  */
-extern "C" void func_001D3340(void* mountainRoom)
+extern "C" void cFEStateMountainRoom_updateMarkers(void* mountainRoom)
 {
     sLodge_3340* self = (sLodge_3340*)mountainRoom;
     int n0 = 0;
@@ -876,7 +876,7 @@ extern "C" void func_001D3340(void* mountainRoom)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3780);
+INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_cFEStatePeakRoom);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
@@ -910,7 +910,7 @@ struct sLodge_3780 {
  * @param peakNum  the peak (On Tour peakNum)
  * @return @p self
  */
-extern "C" void* func_001D3780(void* self, int engine, int userNum, int peakNum)
+extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom(void* self, int engine, int userNum, int peakNum)
 {
     signed char idx = userNum;
     func_0039E2A0(self);
@@ -1141,7 +1141,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
 extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int id);
-extern "C" void func_001D3F80(void* self, int id);
+extern "C" void cFEStatePeakRoom_updateMedalsList(void* self, int id);
 extern "C" void cUIStateStack_push(void* list, void* item);
 
 struct sVEntA_001D3C80 { short delta; short index; void* (*fn)(void*, void*, int); };
@@ -1154,7 +1154,7 @@ struct sItem_001D3C80 { int pad[2]; sVEntB_001D3C80* vt; };
  *
  * Both open through the engine's state factory with (peak << 16 | trophy); event 6 first hides the four
  * trophy
- * slots. Event 1 updates the help text and calls func_001D3F80().
+ * slots. Event 1 updates the help text and calls cFEStatePeakRoom_updateMedalsList().
  *
  * @param item  the menu entry (its trophy index at +0x18), or 0
  * @param key  widget event number (On Tour Event)
@@ -1192,7 +1192,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(void* self, void* item, unsigned 
     }
     case 1:
         cFEStatePeakRoom_updateHelpText(self, *(int*)((char*)item + 0x18));
-        func_001D3F80(self, *(int*)((char*)item + 0x18));
+        cFEStatePeakRoom_updateMedalsList(self, *(int*)((char*)item + 0x18));
         break;
     }
 }
@@ -1284,7 +1284,7 @@ extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D3F80);
+INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_updateMedalsList);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -1342,7 +1342,7 @@ struct sRoom_3F80 {
  * @param vself  the peak-room state (this)
  * @param peak  the trophy group, 0-3 (On Tour trophyType): despite its name not a peak; the peak is +0xE0
  */
-extern "C" void func_001D3F80(void* vself, int peak)
+extern "C" void cFEStatePeakRoom_updateMedalsList(void* vself, int peak)
 {
     sRoom_3F80* self = (sRoom_3F80*)vself;
     int n;
@@ -1388,7 +1388,7 @@ extern "C" void func_001D3F80(void* vself, int peak)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", func_001D4268);
+INCLUDE_ASM("fe/ovstatelodge", cFEStateTrophyRoom_cFEStateTrophyRoom);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
 extern "C" unsigned char func_001A1CD0(void* self, int a1);
@@ -1396,7 +1396,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
-extern "C" void func_001D4918(void* self);
+extern "C" void cFEStateTrophyRoom_loadTextures(void* self);
 extern void* cFEStateTrophyRoom_vtbl[];
 
 struct sVE_4268 {
@@ -1427,7 +1427,7 @@ struct sTrophy_4268 {
  * clears +0x48. The character id (+0x50) comes from the player interface (back-end interface 1,
  * cBENewPlayerInterface_getPlayerCharID), followed by a call of that interface's virtual slot 2. @p peakNum goes to +0x54
  * and @p trophyType to +0x58; the load count (+0x5C) is zeroed, the five texture ids (+0x60) and five loader slots (+0x74) are
- * set to -1 and so is +0x9C. Ends with func_001D4918, which starts the loads of the trophy picture and its up to four
+ * set to -1 and so is +0x9C. Ends with cFEStateTrophyRoom_loadTextures, which starts the loads of the trophy picture and its up to four
  * medal pictures. The prelude's name `bank` for +0x58 is misleading: it is the trophy, passed to
  * cBERewardInterface_getTrophy / getMedal.
  *
@@ -1437,7 +1437,7 @@ struct sTrophy_4268 {
  * @param trophyType  the trophy within the peak (On Tour trophyType)
  * @return @p self
  */
-extern "C" void* func_001D4268(void* self, int engine, int userNum, int peakNum, int trophyType)
+extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(void* self, int engine, int userNum, int peakNum, int trophyType)
 {
     signed char idx = userNum;
     func_0039E2A0(self);
@@ -1459,7 +1459,7 @@ extern "C" void* func_001D4268(void* self, int engine, int userNum, int peakNum,
         trophyRoom->tex[i] = -1;
     }
     trophyRoom->f9C = -1;
-    func_001D4918(self);
+    cFEStateTrophyRoom_loadTextures(self);
     return self;
 }
 #endif
