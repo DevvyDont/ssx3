@@ -1409,9 +1409,10 @@ extern float cLightGlow_m_PS2FrameDstScale;
 extern float cLightGlow_m_PS2IntensityTex2;
 extern float cLightGlow_m_PS2IntensityTex3;
 
+// A colour in On Tour's tARGB order: alpha first, then red, green, blue.
 struct sRsCol_F00A0 {
-    float r, g, b, a;
-    sRsCol_F00A0(const float& x, const float& y, const float& z, const float& w) : r(x), g(y), b(z), a(w) {}
+    float A, R, G, B;
+    sRsCol_F00A0(const float& ia, const float& ir, const float& ig, const float& ib) : A(ia), R(ir), G(ig), B(ib) {}
 };
 extern sRsCol_F00A0 cDepthFog_m_Colour;
 

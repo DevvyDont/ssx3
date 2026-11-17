@@ -458,11 +458,12 @@ extern char* D_00440FD8[];
 extern char* D_00440FE8[];
 extern char* D_00440FF8[];
 
+// cBEOptionInterface_mOption's first word (field names from On Tour's tBEOptionDB bitfields).
 struct sGameCfg_188F28 {
     unsigned int pad0 : 19;
-    unsigned int showHud : 1;       // bit 19
-    unsigned int f20 : 2;           // bits 20-21
-    unsigned int mode : 3;          // bits 22-24
+    unsigned int iUseMetricUnits : 1;       // bit 19: MPH (0) / KPH (1)
+    unsigned int iUseWidescreen : 2;           // bits 20-21: off / 16:9 / anamorphic
+    unsigned int iLanguage : 3;          // bits 22-24 (FELocale's language)
     unsigned int pad25 : 7;
     signed char f4;
     signed char f5;                 // 0x5
@@ -515,8 +516,8 @@ static inline void setText_188F28(sOptGame_188F28* self, char** names, int i, ch
  * Creates the game options screen ("19game_opt") and fills its option rows.
  *
  * Row indices are item[0] = -1, item[1] = 1, item[2] = 2, so the language row (four kT_LANG entries) is
- * skipped. Row 1 gets MPH/KPH and selects the speed-unit setting (the view's field is named showHud); row 2
- * gets Off/16:9/anamorphic and selects the widescreen setting (f20). Each row also gets its title and help
+ * skipped. Row 1 gets MPH/KPH and selects the speed-unit setting (iUseMetricUnits); row 2
+ * gets Off/16:9/anamorphic and selects the widescreen setting (iUseWidescreen). Each row also gets its title and help
  * text, the entry "1" is hidden but enabled, and the "Menu" selection starts at entry 1.
  */
 extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
@@ -545,7 +546,7 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGGerman), 2);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGSpanish), 3);
             unsigned char sel;
-            if (cUIListBox_getEntryByData(w, iface->getOptions().mode, &sel))
+            if (cUIListBox_getEntryByData(w, iface->getOptions().iLanguage, &sel))
                 cUIListBox_setCurrentEntryByIndex(w, sel);
         }
         {
@@ -564,7 +565,7 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
         if (w != 0) {
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNMPH), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNKPH), 0);
-            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().showHud);
+            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iUseMetricUnits);
         }
         {
             cUIText* label = (cUIText*)find_188F28(self, D_00440FB8, 1);
@@ -583,7 +584,7 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOff), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_19Widescreen169), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_19WidescreenAnimorphic), 0);
-            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().f20);
+            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iUseWidescreen);
         }
         {
             cUIText* label = (cUIText*)find_188F28(self, D_00440FB8, 2);
@@ -794,11 +795,12 @@ extern char D_004A1528[];
 extern char* D_00440FD8[];
 extern int D_004A14D0;
 
+// cBEOptionInterface_mOption's first word (field names from On Tour's tBEOptionDB bitfields).
 struct sGameCfg_189980 {
     unsigned int pad0 : 19;
-    bool showHud : 1;           // bit 19
-    unsigned int f20 : 2;       // bits 20-21
-    unsigned int mode : 3;      // bits 22-24
+    bool iUseMetricUnits : 1;           // bit 19: MPH (0) / KPH (1)
+    unsigned int iUseWidescreen : 2;       // bits 20-21: off / 16:9 / anamorphic
+    unsigned int iLanguage : 3;      // bits 22-24 (FELocale's language)
     unsigned int pad25 : 7;
     char rest[0x288 - 4];
 };
@@ -899,7 +901,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
         {
             char* locale = (char*)SSXApp->FELocale;
             sVE_189980b* vt = *(sVE_189980b**)(locale + 4);
-            vt[3].fn(locale + vt[3].delta, D_00535610_189980.mode);
+            vt[3].fn(locale + vt[3].delta, D_00535610_189980.iLanguage);
         }
         Refresh_189980(self);
         char* eng = *(char**)self->engine;
@@ -912,7 +914,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
     }
     case 9:
         if (self->item[0] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[0]])) {
-            D_00535610_189980.mode = cUIListBox_getCurrentEntryData(widget);
+            D_00535610_189980.iLanguage = cUIListBox_getCurrentEntryData(widget);
             char* locale = (char*)SSXApp->FELocale;
             sVE_189980b* vt = *(sVE_189980b**)(locale + 4);
             char* thisp = locale + vt[3].delta;
@@ -922,10 +924,10 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
         }
         if (self->item[1] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[1]])) {
             bool on = *(unsigned char*)(widget + 0x319);
-            D_00535610_189980.showHud = on;
+            D_00535610_189980.iUseMetricUnits = on;
         }
         if (self->item[2] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[2]])) {
-            D_00535610_189980.f20 = *(unsigned char*)(widget + 0x319);
+            D_00535610_189980.iUseWidescreen = *(unsigned char*)(widget + 0x319);
         }
         cSSXApp_activateBEOptions(SSXApp);
         D_004A14D0 = 1;
@@ -946,11 +948,12 @@ extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cSSXApp_activateBEOptions(void* p);
 extern char* D_00440FD8[];
 
+// cBEOptionInterface_mOption's first word (field names from On Tour's tBEOptionDB bitfields).
 struct sGameCfg_189D60 {
     unsigned int pad0 : 19;
-    unsigned int showHud : 1;       // bit 19
-    unsigned int f20 : 2;           // bits 20-21
-    unsigned int mode : 3;          // bits 22-24
+    unsigned int iUseMetricUnits : 1;       // bit 19: MPH (0) / KPH (1)
+    unsigned int iUseWidescreen : 2;           // bits 20-21: off / 16:9 / anamorphic
+    unsigned int iLanguage : 3;          // bits 22-24 (FELocale's language)
     unsigned int pad25 : 7;
     signed char f4;
     signed char f5;                 // 0x5
@@ -999,7 +1002,7 @@ static inline void* find_189D60(sOptGame_189D60* self, int i)
  * speed units and widescreen; a negative slot is skipped, as is a missing widget). Their current entries come from
  * cBEOptionInterface_mOption: item[0] from bits 22-24 (the view's `mode`), whose selected entry data is also passed to
  * SSXApp->FELocale's virtual slot 3 before virtual slot 16 of the screen's sub-object at +0x40 is called; item[1] from
- * bit 19 (the view's `showHud`, which cFEStateOptionsGame_onWidgetEvent's doc calls the speed-unit choice); item[2]
+ * bit 19 (iUseMetricUnits, the speed-unit choice); item[2]
  * from bits 20-21 (`f20`).
  *
  * It then sends the screen offsets f6 and f5 to GrMan's virtual slot 12 and calls cSSXApp_activateBEOptions.
@@ -1014,7 +1017,7 @@ extern "C" void cFEStateOptionsGame_updateWidget(void* self_)
     if (self->item[0] >= 0) {
         void* w = find_189D60(self, 0);
         if (w != 0) {
-            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().mode);
+            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iLanguage);
             char* locale = (char*)SSXApp->FELocale;
             sVE_189D60b* vt = *(sVE_189D60b**)(locale + 4);
             vt[3].fn(locale + vt[3].delta, cUIListBox_getCurrentEntryData(w));
@@ -1027,12 +1030,12 @@ extern "C" void cFEStateOptionsGame_updateWidget(void* self_)
     if (self->item[1] >= 0) {
         void* w = find_189D60(self, 1);
         if (w != 0)
-            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().showHud);
+            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iUseMetricUnits);
     }
     if (self->item[2] >= 0) {
         void* w = find_189D60(self, 2);
         if (w != 0)
-            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().f20);
+            cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iUseWidescreen);
     }
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_189D60c* vt = (sVE_189D60c*)ps2GraphicsMan->mVtbl;
