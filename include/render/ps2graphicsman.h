@@ -158,7 +158,7 @@ struct cPS2GraphicsMan {
     cPS2DeferManager* mpDeferMan;   // 0x18F0 [P] GetDeferMan (func_00395658); [X] "DEFER MAN" (0x6B100)
     cTextureMan* mpTextureMan;      // 0x18F4 [P] GetTextureMan (func_00395538); [X] "TEX MAN" (0x6740)
     int unk_18F8[2000];             // 0x18F8 [U] per texture id: cPS2GraphicsMan_PlatformPurgeTextures frees each non-zero one, cPS2GraphicsMan_RemoveTexture clears it
-    int unk_3838[2000];             // 0x3838 [U] per texture id: func_0037CAF8 sets 1 after creating it
+    int unk_3838[2000];             // 0x3838 [U] per texture id: cPS2GraphicsMan_AddTexture1 sets 1 after creating it
     char unk_5778[0x8];             // 0x5778 padding to 16
     t4Matrix mWorld;                // 0x5780 [X] world (copy of *mCurrentView); [U] cPS2GraphicsMan_PopViewport restores it
     t4Matrix mView;                 // 0x57C0 [X] view; [U] func_00376C58 / func_00377458 build it

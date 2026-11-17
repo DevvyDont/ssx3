@@ -6527,7 +6527,7 @@ extern "C" void cPS2GraphicsMan_SetTextureMemType(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037C8C0);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddTexture);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -6575,7 +6575,7 @@ static inline int clampW_C8C0(int v, int lo, int hi)
 {
     return v < lo ? lo : (v <= hi ? v : hi);
 }
-extern "C" int func_0037C8C0(cPS2GraphicsMan* self, sTexHdr_C8C0* src, int a2, int a3, int a4, int a5)
+extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, sTexHdr_C8C0* src, int a2, int a3, int a4, int a5)
 {
     int fmt = 0;
     int cls = 0;
@@ -6635,12 +6635,12 @@ extern "C" int func_0037C8C0(cPS2GraphicsMan* self, sTexHdr_C8C0* src, int a2, i
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_0037CAF8);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddTexture1);
 #ifdef SKIP_ASM
 extern "C" int func_00367440(void* mgr, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
                              int a8, int a9, int a10, int a11);
 
-extern "C" int func_0037CAF8(cPS2GraphicsMan* self, int pixels, int name, int width, int height, int a5, int a6, int a7,
+extern "C" int cPS2GraphicsMan_AddTexture1(cPS2GraphicsMan* self, int pixels, int name, int width, int height, int a5, int a6, int a7,
                               int a8, int a9, int a10, int a11)
 {
     int i = func_00367440(self->mpTextureMan, pixels, name, width, height, a5, a6, a7, a8, a9, a10, a11);

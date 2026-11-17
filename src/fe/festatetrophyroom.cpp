@@ -433,7 +433,7 @@ extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index);
 extern char str_trph[];
 
-struct cGame_4A20 {
+struct cGraphicsMan_4A20 {
     char pad[0x10D8];
     virtual void v01();
     virtual void v02();
@@ -480,7 +480,7 @@ struct cGame_4A20 {
     virtual void v43();
     virtual void v44();
     virtual void v45();
-    virtual int playSound(void* data, char* name, int a3, int a4, int a5);
+    virtual int AddTexture(void* shape, char* name, int lockType, int copyMem, int bindId);  // slot 46
 };
 
 struct sSelf_4A20 {
@@ -488,8 +488,8 @@ struct sSelf_4A20 {
     int bank;
     char pad54[0x8];
     int count;
-    int snd[5];
-    int tex[5];
+    int textureId[5];   // 0x60: GrMan texture ids
+    int fileSlot[5];    // 0x74: pending file-cache slots (-1 once loaded)
     char pad88[0x14];
     int f9C;
 };
@@ -499,7 +499,7 @@ struct sSelf_4A20 {
  *
  * For each of the five cache slots (+0x74) still pending whose file has loaded (func_0019E238 on RealFE + 0x1A70, bank
  * +0x50) it creates the texture "trph" from the file data (func_0019E2B0's pointer plus the offset at its +0x14)
- * through GrMan's vtable slot 46 (func_0037C8C0 in cPS2GraphicsMan_vtbl) into +0x60[i], releases the file
+ * through GrMan's vtable slot 46 (cPS2GraphicsMan_AddTexture in cPS2GraphicsMan_vtbl) into +0x60[i], releases the file
  * (func_0019DC20), sets the slot to -1, decrements the pending count (+0x5C) and redraws the selected row's picture
  * (cFEStateTrophyRoom_updateBigArt with +0x9C). Called from cFEStateTrophyRoom_onUpdate.
  *
@@ -511,11 +511,11 @@ extern "C" void cFEStateTrophyRoom_updateTexturesLoad(void* trophyRoom)
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     int i;
     for (i = 0; i < 5; i++) {
-        if (self->tex[i] >= 0 && func_0019E238(mgr, self->bank, self->tex[i]) != 0) {
-            char* fileData = func_0019E2B0(mgr, self->bank, self->tex[i]);
-            self->snd[i] = ((cGame_4A20*)GrMan)->playSound(fileData + *(int*)(fileData + 0x14), str_trph, 0, 1, -1);
-            func_0019DC20(mgr, self->bank, self->tex[i]);
-            self->tex[i] = -1;
+        if (self->fileSlot[i] >= 0 && func_0019E238(mgr, self->bank, self->fileSlot[i]) != 0) {
+            char* fileData = func_0019E2B0(mgr, self->bank, self->fileSlot[i]);
+            self->textureId[i] = ((cGraphicsMan_4A20*)GrMan)->AddTexture(fileData + *(int*)(fileData + 0x14), str_trph, 0, 1, -1);
+            func_0019DC20(mgr, self->bank, self->fileSlot[i]);
+            self->fileSlot[i] = -1;
             self->count--;
             cFEStateTrophyRoom_updateBigArt(self, self->f9C);
         }
@@ -526,7 +526,7 @@ extern "C" void cFEStateTrophyRoom_updateTexturesLoad(void* trophyRoom)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_purgeTextures);
 #ifdef SKIP_ASM
-struct cGame001D4B20 {
+struct cGraphicsMan001D4B20 {
     char pad[0x10D8];
     virtual void v01();
     virtual void v02();
@@ -577,7 +577,7 @@ struct cGame001D4B20 {
     virtual void v47();
     virtual void v48();
     virtual void v49();
-    virtual void v50(int id);
+    virtual void RemoveTexture(int id);  // slot 50
 };
 
 extern "C" void func_0019DC20(void* self, int bank, int i);
@@ -585,8 +585,8 @@ struct sSelf001D4B20 {
     char pad[0x50];
     int bank;
     char pad54[0xC];
-    int snd[5];
-    int tex[5];
+    int textureId[5];   // 0x60: GrMan texture ids
+    int fileSlot[5];    // 0x74: pending file-cache slots (-1 once loaded)
 };
 
 /**
@@ -601,14 +601,14 @@ extern "C" void cFEStateTrophyRoom_purgeTextures(sSelf001D4B20* self)
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     int i;
     for (i = 0; i < 5; i++) {
-        if (self->snd[i] >= 0) {
-            ((cGame001D4B20*)GrMan)->v50(self->snd[i]);
+        if (self->textureId[i] >= 0) {
+            ((cGraphicsMan001D4B20*)GrMan)->RemoveTexture(self->textureId[i]);
         }
-        self->snd[i] = -1;
-        if (self->tex[i] >= 0) {
-            func_0019DC20(mgr, self->bank, self->tex[i]);
+        self->textureId[i] = -1;
+        if (self->fileSlot[i] >= 0) {
+            func_0019DC20(mgr, self->bank, self->fileSlot[i]);
         }
-        self->tex[i] = -1;
+        self->fileSlot[i] = -1;
     }
 }
 #endif

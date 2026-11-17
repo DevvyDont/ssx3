@@ -1450,7 +1450,7 @@ struct sGfx_96C8 {
  * Uses up to the first 4 characters of @p name. Searches the texture-ref cache (On Tour mTexRefs: 256 entries of {id,
  * name[8]} at +0x280, count +0xE80) with func_004165A8 (strcmp). On a miss it copies the name into the next entry and
  * asks each loaded texture file (+0x27C, count +0x278) for the shape (SHAPE_locatez); the first hit is added through
- * vtable slot 46 (func_0037C8C0) as a "charshp" texture. A name no file has is cached with id -1. There is no check
+ * vtable slot 46 (cPS2GraphicsMan_AddTexture) as a "charshp" texture. A name no file has is cached with id -1. There is no check
  * against the 256-entry limit (On Tour asserts mNumTexRefs < arraysize(mTexRefs)): a 257th distinct name would
  * overwrite the count.
  *

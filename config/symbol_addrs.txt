@@ -6244,6 +6244,10 @@ cFEStateCareerStats_setTextSafe = 0x001F6840; //type:func
 cFEStateCareerStats_getOwnedMedalByith = 0x001F6EE0; //type:func
 cFEStateCareerStats_initTotalEventMedal = 0x001F6F30; //type:func
 
+// fn_addtexture: names by evidence (docs/function_names.tsv)
+cPS2GraphicsMan_AddTexture = 0x0037C8C0; //type:func
+cPS2GraphicsMan_AddTexture1 = 0x0037CAF8; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

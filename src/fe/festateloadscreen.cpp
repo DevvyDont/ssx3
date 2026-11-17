@@ -178,7 +178,7 @@ static inline int loadTex_3640(char* data, const char* name)
  * game path (cGamePath, D_00535C11) is 2 (online), loads players 0 and 1's characters
  * (cBENewPlayerInterface_getPlayerCharID()) into +0x10 and +0x14. Each file is "%s%s.ssh" of the character's name
  * D_00442928[id] and a suffix (D_004A2B38, "_flat", for type 1; D_004A2B3C for type 2), loaded with FILE_loadpackz()
- * and uploaded through the graphics manager's slot 46 (func_0037C8C0) as "CharaPics"; the file buffer is then freed.
+ * and uploaded through the graphics manager's slot 46 (cPS2GraphicsMan_AddTexture) as "CharaPics"; the file buffer is then freed.
  * cFELoadScreen_load() calls it with 1 or 2 depending on the screen it pushes.
  *
  * @param type  1 for the single-player portrait, 2 for the two online players' portraits
