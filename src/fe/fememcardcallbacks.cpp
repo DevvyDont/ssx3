@@ -2046,7 +2046,7 @@ extern "C" void cFEMemCard_SetLoadPressed(void* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9368);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateStart);
 #ifdef SKIP_ASM
 struct sVEntry001D9368 {
     short delta;
@@ -2061,7 +2061,7 @@ struct sVEntry001D9368 {
  * with 1. Fills vtable entry 31 (+0xFC) of the memory-card states (cFEStateMemCard, cFEStateProfileLoad,
  * cFEStateOptionsDeviceSelect), between the empty update entries and the skip handler.
  */
-extern "C" void func_001D9368(void* self)
+extern "C" void cFEMemCard_updateStart(void* self)
 {
     if (*(int*)((char*)self + 0x214) != 1) {
         *(int*)((char*)self + 0x214) = 1;
@@ -2072,63 +2072,63 @@ extern "C" void func_001D9368(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93A8__FPv);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateChecking__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (the memory-card screen's empty update handler in vtable entry 27, +0xDC).
  */
-void func_001D93A8(void* self)
+void cFEMemCard_updateChecking(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93B0__FPv);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateSkip__FPv);
 #ifdef SKIP_ASM
 /**
  * Sets the memory-card screen state (+0x1C0) to 1.
  */
-void func_001D93B0(void* self)
+void cFEMemCard_updateSkip(void* self)
 {
     *(int*)((char*)self + 0x1C0) = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93C0__FPv);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateSaving__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (the memory-card screen's empty update handler in vtable entry 28, +0xE4).
  */
-void func_001D93C0(void* self)
+void cFEMemCard_updateSaving(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93C8__FPv);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateDeleting__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (the memory-card screen's empty update handler in vtable entry 30, +0xF4).
  */
-void func_001D93C8(void* self)
+void cFEMemCard_updateDeleting(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93D0__FPv);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateLoading__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (the memory-card screen's empty update handler in vtable entry 29, +0xEC).
  */
-void func_001D93D0(void* self)
+void cFEMemCard_updateLoading(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93D8);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onLoseTransition);
 #ifdef SKIP_ASM
 /**
  * Reports whether the memory-card screen may finish its leaving transition: the screen state (+0x1C0) is 6.
@@ -2137,14 +2137,14 @@ INCLUDE_ASM("fe/fememcardcallbacks", func_001D93D8);
  *
  * @return 1 when the screen state is 6, else 0
  */
-extern "C" int func_001D93D8(void* self)
+extern "C" int cFEMemCard_onLoseTransition(void* self)
 {
     return *(int*)((char*)self + 0x1c0) == 6;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D93E8);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_triggerArrowPulse);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -2161,7 +2161,7 @@ extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a, int b, int 
  * @param objName   name of the widget to animate
  * @param animName  name of the animation to play
  */
-extern "C" void func_001D93E8(void* self, char* objName, char* animName)
+extern "C" void cFEMemCard_triggerArrowPulse(void* self, char* objName, char* animName)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(objName));
     if (obj != 0) {
@@ -2328,7 +2328,7 @@ extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* list, int i
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9818);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onGainFocus);
 #ifdef SKIP_ASM
 struct sVEntry001D9818 {
     short delta;
@@ -2347,7 +2347,7 @@ extern char str_text_box_message[];
  * Runs the base cUIState_onGainFocus(), then looks up "text box message" (str_text_box_message) on mpScreen (+0x40) and
  * calls its setVisible (cUIThing vtable slot 9) with 0.
  */
-extern "C" void func_001D9818(void* self)
+extern "C" void cFEMemCard_onGainFocus(void* self)
 {
     cUIState_onGainFocus(self);
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_text_box_message));
@@ -2359,18 +2359,18 @@ extern "C" void func_001D9818(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9878__FPv);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onLoseFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (the memory-card screen's onLoseFocus handler, vtable entry 11).
  */
-void func_001D9878(void* self)
+void cFEMemCard_onLoseFocus(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9880);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_displayFileOK);
 #ifdef SKIP_ASM
 class cMovieStreamK1D9880 {
 public:
@@ -2408,7 +2408,7 @@ static inline bool IsModeK1D9880(char* mp, int m) { return *(int*)(mp + 0x130) =
  *
  * @return 1 when all the checks pass, else 0
  */
-extern "C" int func_001D9880(void* self)
+extern "C" int cFEMemCard_displayFileOK(void* self)
 {
     int allowed = 0;
     int one = 1;
@@ -2679,7 +2679,7 @@ extern "C" void cFEPopupConfirm_setDefaultButton(void* self, int uiButton)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fememcardcallbacks", func_001D9D48);
+INCLUDE_ASM("fe/fememcardcallbacks", cFEStateNetHelpPopup_cFEStateNetHelpPopup);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cFEStateNetHelpPopup_clear(void* self);
@@ -2704,7 +2704,7 @@ struct sMcSlot9D48 {
  * @param owner   the parent state (mpParentState)
  * @return @p self
  */
-extern "C" void* func_001D9D48(void* self, void* engine, void* owner)
+extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup(void* self, void* engine, void* owner)
 {
     func_0039E318(self, engine, owner);
     *(void**)((char*)self + 0x8) = cFEStateNetHelpPopup_vtbl;

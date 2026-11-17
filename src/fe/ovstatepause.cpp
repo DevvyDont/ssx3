@@ -2745,7 +2745,7 @@ static inline cUIObj_DF40* getObj_DF40(cState_DF40* self, char* name)
 /**
  * Refreshes the save-replay overlay's device panel: card name, free space, the four save slots and the device arrows.
  *
- * Works on the memory-card manager (cSSXApp_getMCManager). When func_001D9880 (vtable slot 42) reports the card can be
+ * Works on the memory-card manager (cSSXApp_getMCManager). When cFEMemCard_displayFileOK (vtable slot 42) reports the card can be
  * shown, a missing card (mpMemCard slot 53, cPS2MemCard_IsAvailable on the current device) shows the no-cards message
  * (cFEMemCard_callbackDisplayNoCards), else the screen moves to display state 3 (cFEMemCard_triggerDisplayState) unless already there. When
  * slot 42 still holds, it re-highlights the menu (cFEMemCard_setMenuHighlight), writes the selected device's label
@@ -3490,7 +3490,7 @@ static inline cUIObj_ECA0* getObj_ECA0(cState_ECA0* self, char* name)
 /**
  * Refreshes the save-records overlay's device panel: card name, free space, its one save slot and the device arrows.
  *
- * The single-slot form of cOVState_SAVEREPLAY_displayStatus. When func_001D9880 (vtable slot 42) reports the card can be shown, a missing
+ * The single-slot form of cOVState_SAVEREPLAY_displayStatus. When cFEMemCard_displayFileOK (vtable slot 42) reports the card can be shown, a missing
  * card (mpMemCard slot 53) shows the no-cards message (cFEMemCard_callbackDisplayNoCards), else the screen moves to display state 3
  * (cFEMemCard_triggerDisplayState) unless already there. When slot 42 still holds, it re-highlights the menu
  * (cFEMemCard_setMenuHighlight), writes the selected device's label into "Memory_card_info" and the free-space text

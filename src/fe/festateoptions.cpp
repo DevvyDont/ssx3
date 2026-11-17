@@ -85,7 +85,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* self, void* engine, void* owner, int a3, int a4);
 extern "C" void cKeyboardPopup_setInputText(void* self, char* s);
-extern "C" void func_001CCF00(void* self, char* s);
+extern "C" void cKeyboardPopup_setStatic2(void* self, char* s);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int a1, int a2, int a3);
 extern "C" int func_00187D38(void* self);
 extern "C" void cFEStateOptions_saveOptionPrompt(void* self);
@@ -158,7 +158,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, u
             void* pop = cKeyboardPopup_cKeyboardPopup(mem, self->engine, self, 0, self->port);
             self->popup = pop;
             cKeyboardPopup_setInputText(pop, D_004A1408);
-            func_001CCF00(self->popup, D_004A1408);
+            cKeyboardPopup_setStatic2(self->popup, D_004A1408);
             cKeyboardPopup_setIncludeKey(self->popup, 75, 1, 2);
             cUIStateStack_pushPopup(self->engine + 0x18, self->popup);
             break;
@@ -2598,7 +2598,7 @@ extern void* cFEStateOptionsSaveLoad_vtbl[];
  *
  * Runs the cUIState constructor (func_0039E2A0; the engine argument stays in place in the second argument register),
  * sets the state id (+0xC) to 0x20, installs cFEStateOptionsSaveLoad_vtbl and clears the byte at +0x48. The front end's
- * next-state choosers (cFECustom_getNextState, func_001A16C0) allocate it as "cFEStateOptionsSaveLoad" (76 bytes).
+ * next-state choosers (cFECustom_getNextState, cFECustom_getPrevState) allocate it as "cFEStateOptionsSaveLoad" (76 bytes).
  *
  * @return @p self
  */
@@ -2740,8 +2740,8 @@ extern "C" void func_0039F190(void* list, int a1);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void func_00147138(void* self, int a1, const char* name);
 extern "C" void func_0014DE28(void* self, int c);
-extern "C" void* func_001A0548(void* self, int a1);
-extern "C" void func_0019EBA0(void* self);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" void cFERider_purge(void* self);
 extern "C" int cFERider_init(void* self, int a1, int a2, int a3);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* self, int label);
@@ -2798,11 +2798,11 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(char* self, char* widget, u
         sVE_18D460n* vt = *(sVE_18D460n**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
         func_0014DE28(cBE_getBE(), sel);
-        void* feRider = func_001A0548((char*)SSXApp->RealFE + 0xB0, 0);
-        func_0019EBA0(feRider);
+        void* feRider = cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, 0);
+        cFERider_purge(feRider);
         cFERider_init(feRider, 0, 4, 0);
-        feRider = func_001A0548((char*)SSXApp->RealFE + 0xB0, 1);
-        func_0019EBA0(feRider);
+        feRider = cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, 1);
+        cFERider_purge(feRider);
         cFERider_init(feRider, 1, 0, 0);
         char* obj = **(char***)(self + 0x10);
         sVE_18D460p* vt2 = *(sVE_18D460p**)(obj + 4);
@@ -3567,7 +3567,7 @@ struct sVEntry0018E478 {
  *
  * Runs once: unless +0x1AC is already set it computes a choice, 1 when the mode (+0x1BC) is 1, forced to 0 when +0x1E4
  * (set by backing out) is set or +0x1B4 is clear, and 2 when the screen was opened online (+0x230). It asks the engine
- * owner (the first word of the engine at +0x10) for the next state through its vtable slot 5 (func_001A16C0 in
+ * owner (the first word of the engine at +0x10) for the next state through its vtable slot 5 (cFECustom_getPrevState in
  * cFECustom_vtbl) with this state and the choice, and pushes the result on the engine's state stack (+0x18) with
  * cUIStateStack_pushCheck. Sets +0x1AC afterwards. Fills slot +0x10C (cFEMemCard_updateDone's slot).
  */
@@ -3731,7 +3731,7 @@ struct cState_18E510 : cStateBase_18E510 {
 /**
  * Refreshes the device select screen's memory-card panel: the device label, the slot entries and the device arrows.
  *
- * When this state's vtable slot 42 (func_001D9880) passes: with no card found (mpMemCard slot 53, func_002D3810) it
+ * When this state's vtable slot 42 (cFEMemCard_displayFileOK) passes: with no card found (mpMemCard slot 53, func_002D3810) it
  * shows the no-cards message (cFEMemCard_callbackDisplayNoCards), otherwise it switches the display state to 3 (slot 35,
  * cFEMemCard_triggerDisplayState) unless f214 is 3 already. If slot 42 still passes it highlights a menu entry (slot
  * 43, cFEMemCard_setMenuHighlight), puts the label of the card manager's mSelectedDevice

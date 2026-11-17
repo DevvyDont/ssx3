@@ -24,21 +24,21 @@ INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onWidgetEvent);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onWidgetMenu);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019A098);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_getIconID);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019A238);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_initInventoryPreview);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019A308);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_initStorePreview);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019A3D0);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_switchEquipMode);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019A498);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_cancelLargePreviewLoad);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019A4E8);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_startLargePreviewLoad);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019A638);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updatePreviewLoad);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019A798);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updateHelpText);
 
 INCLUDE_ASM("fe/festatecharequip2", func_0019A9B8);
 
@@ -66,19 +66,19 @@ INCLUDE_ASM("fe/festatecharequip2", func_0019B7E0);
 
 INCLUDE_ASM("fe/festatecharequip2", func_0019BA60);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019BBA0);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updateBankWidget);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updateHeading);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019BC90);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updatePolyBar);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019BD48);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updatePolyEquipPreviewBar);
 
 INCLUDE_ASM("fe/festatecharequip2", func_0019BE80);
 
 INCLUDE_ASM("fe/festatecharequip2", func_0019BEE8);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019BFE8);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_update3DPositions);
 
 INCLUDE_ASM("fe/festatecharequip2", func_0019C7E8);
 

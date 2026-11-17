@@ -2876,7 +2876,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* self, int a1);
-extern "C" void func_001A1CB8(void* self, int a1, int val);
+extern "C" void cFECustom_setPlayerCtrlMask(void* self, int a1, int val);
 extern void* cFEStateLodge_vtbl[];
 
 /**
@@ -2886,7 +2886,7 @@ extern void* cFEStateLodge_vtbl[];
  * $a1; this declaration takes only the memory), sets mHashName to 39 and mVtbl to cFEStateLodge_vtbl and sets mUserNum
  * to 0. When the engine's first word (an object) is set, the state is limited to player 0's controller: mCtrlBits = 1
  * << cBENewPlayerInterface_getPlayerCtrlID(player 0), and the same mask is stored in that object's byte at +0x8
- * (func_001A1CB8, index 0). The callers allocate 88 bytes tagged "cFEStateLodge".
+ * (cFECustom_setPlayerCtrlMask, index 0). The callers allocate 88 bytes tagged "cFEStateLodge".
  *
  * @return @p self
  */
@@ -2900,7 +2900,7 @@ extern "C" void* cFEStateLodge_cFEStateLodge(void* self)
     void* factory = **(void***)((char*)self + 0x10);
     if (factory != 0) {
         unsigned char mask = 1 << idx;
-        func_001A1CB8(factory, 0, mask);
+        cFECustom_setPlayerCtrlMask(factory, 0, mask);
         *(unsigned char*)((char*)self + 0x15) = mask;
     }
     return self;

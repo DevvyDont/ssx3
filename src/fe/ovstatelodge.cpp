@@ -8,7 +8,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_cFEStateMountainRoom);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_0039E2A0_Room(void *, int) __asm__("func_0039E2A0");
 
-extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 
 extern "C" void* cBE_getBE();
 
@@ -72,7 +72,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
     *(void***)((char*)self + 0x8) = cFEStateMountainRoom_vtbl;
     sMountainRoomK2678* room = (sMountainRoomK2678*)self;
     room->player = pl;
-    *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), pl);
+    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), pl);
     room->f48 = 0;
     room->f50 = 0;
     room->f54 = 0;
@@ -879,7 +879,7 @@ extern "C" void cFEStateMountainRoom_updateMarkers(void* mountainRoom)
 INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_cFEStatePeakRoom);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -900,7 +900,7 @@ struct sLodge_3780 {
  * Constructs the lodge's peak room state (the list of one peak's trophies) for a player.
  *
  * Runs the cUIState constructor (func_0039E2A0), sets mHashName to 44 and the vtable cFEStatePeakRoom_vtbl, stores the
- * player number (low byte of @p userNum) in mUserNum and that player's controller mask (func_001A1CD0 on the engine's first
+ * player number (low byte of @p userNum) in mUserNum and that player's controller mask (cFECustom_getPlayerCtrlMask on the engine's first
  * word) in mCtrlBits. The character id (+0xDC) comes from the player interface (back-end interface 1,
  * cBENewPlayerInterface_getPlayerCharID), the peak (+0xE0) is @p peakNum; the widget pointers from +0x48 to +0xD0 are
  * cleared.
@@ -917,7 +917,7 @@ extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom(void* self, int engine, int u
     *(int*)((char*)self + 0xC) = 44;
     *(void***)((char*)self + 0x8) = cFEStatePeakRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
-    *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
     sLodge_3780* peakRoom = (sLodge_3780*)self;
     peakRoom->charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
     peakRoom->fE0 = peakNum;
@@ -1391,7 +1391,7 @@ extern "C" void cFEStatePeakRoom_updateMedalsList(void* vself, int peak)
 INCLUDE_ASM("fe/ovstatelodge", cFEStateTrophyRoom_cFEStateTrophyRoom);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1423,7 +1423,7 @@ struct sTrophy_4268 {
  * Constructs the lodge's trophy room state (one trophy and its medals) and starts loading their pictures.
  *
  * Runs the cUIState constructor (func_0039E2A0), sets mHashName to 45 and the vtable cFEStateTrophyRoom_vtbl, stores
- * the player number (low byte of @p userNum) in mUserNum and that player's controller mask (func_001A1CD0) in mCtrlBits, and
+ * the player number (low byte of @p userNum) in mUserNum and that player's controller mask (cFECustom_getPlayerCtrlMask) in mCtrlBits, and
  * clears +0x48. The character id (+0x50) comes from the player interface (back-end interface 1,
  * cBENewPlayerInterface_getPlayerCharID), followed by a call of that interface's virtual slot 2. @p peakNum goes to +0x54
  * and @p trophyType to +0x58; the load count (+0x5C) is zeroed, the five texture ids (+0x60) and five loader slots (+0x74) are
@@ -1444,7 +1444,7 @@ extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(void* self, int engine, i
     *(int*)((char*)self + 0xC) = 45;
     *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
-    *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
     sTrophy_4268* trophyRoom = (sTrophy_4268*)self;
     trophyRoom->f48 = 0;
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);

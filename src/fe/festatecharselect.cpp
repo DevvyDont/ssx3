@@ -11,7 +11,7 @@ extern char str_08sel_char[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_0015E050(void* cam, sVec4_181148* a, sVec4_181148* b);
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
 
 /**
@@ -42,7 +42,7 @@ extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
     lookAt.w = 1.0f;
     func_0015E050((char*)cam + 0x10, &pos, &lookAt);
     cam->fov = 0.4363323450088501f;
-    cFERider_setVisible(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    cFERider_setVisible(cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     *(int*)((char*)self + 0x80) = 1;
     *(float*)((char*)self + 0x5C) = -1.0f;
     *(int*)((char*)self + 0x58) = 0;
@@ -57,7 +57,7 @@ extern signed char D_00535C11[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
@@ -72,7 +72,7 @@ extern "C" void cFEStateCharSelect_onDestroyScreen(void* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0 && D_00535C11[0] != 0) {
-        cFERider_setVisible(func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+        cFERider_setVisible(cFERiderManager_getHuman1(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     }
     cUIState_onDestroyScreen(self);
 }
@@ -116,8 +116,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
-extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFEStateCharSelect_updateCharacter3DPos(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern signed char D_00440F68[];
@@ -144,8 +144,8 @@ extern "C" void cFEStateCharSelect_onGainFocus(void* self, int pPrevState)
             break;
         }
     }
-    func_001A0508((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), D_00440F68[0], 0);
-    char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
+    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), D_00440F68[0], 0);
+    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
     *(int*)(feRider + 0xCCC) = 0;
     cFEStateCharSelect_updateCharacter3DPos(self);
     cUIState_onGainFocus(self, pPrevState);
@@ -375,9 +375,9 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void* func_001887A0(void* mem, void* owner, int a2);
 extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* mem, void* owner, int a2, unsigned char a3);
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
-extern "C" void func_001A1CB8(void* self, int rider, unsigned char mask);
+extern "C" void cFECustom_setPlayerCtrlMask(void* self, int rider, unsigned char mask);
 extern "C" void cFEStateCharSelect_updateWidget(void* self, int index, signed char charID);
 extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* iface, int rider, int idx);
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* iface, int rider, int id);
@@ -439,7 +439,7 @@ struct sCharSel_17E8 {
 
 static inline char* riderSlot_17E8(sCharSel_17E8* self)
 {
-    return (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, self->rider);
+    return (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->rider);
 }
 
 static inline void refresh_17E8(sIface_17E8* iface)
@@ -451,7 +451,7 @@ static inline void refresh_17E8(sIface_17E8* iface)
  * Handles character-select events: picking or highlighting a character, back, options and profile load.
  *
  * Event 5 sets +0xC20 (clearing +0xC1C) on the user's front-end rider, stores the controller, the character
- * and +0x4C in the player table, commits it, records the controller mask (func_001A1CB8) and pushes the
+ * and +0x4C in the player table, commits it, records the controller mask (cFECustom_setPlayerCtrlMask) and pushes the
  * custom interface's next state. Event 1 shows the highlighted name and its stats (cFEStateCharSelect_updateWidget) and stores
  * the choice; 2 hides the name. 6 pushes the previous state; 7 opens "FEOptions" (state bits 0x100); 8 opens
  * "cFEStateProfileLoad" for this controller.
@@ -480,7 +480,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         func_001474A8(iface, rider, board);
         refresh_17E8(iface);
         unsigned char mask = on << self->player;
-        func_001A1CB8(*(void**)self->engine, self->rider, mask);
+        cFECustom_setPlayerCtrlMask(*(void**)self->engine, self->rider, mask);
         void* st = (*(cStateFactory_17E8**)self->engine)->onSelect(self, widget->id);
         if (st != 0)
             cUIStateStack_push(self->engine + 0x18, st);
@@ -562,7 +562,7 @@ extern "C" int func_00148C68(void* iface, int a, int b);
 extern "C" int func_00148CB8(void* iface, int a, int b);
 extern "C" int func_00148D08(void* iface, int a, int b);
 extern "C" int func_00148D58(void* iface, int a, int b);
-extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
+extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" void cUIProgress_setValue(void* bar, int v);
 extern "C" double fptodp(float f);
 extern "C" void* func_00416210(void* dst, int c, int n);
@@ -600,7 +600,7 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rid
  * "NumAttr<i>" and the bar "<i>pb" on the screen (+0x40); when both exist it shows the text with rating * 0.2 ("%.1f"),
  * sets the bar's style (+0x80) to 55 and its value to the rating (at least 0). The total, rounded down to a multiple of
  * 5, gives "NumAttrOver" (total / 35, "%.1f") and the "overall" bar (total / 7); neither of these two lookups is
- * null-checked. Finally sets the user's rider to the character (func_001A0508 on the front end's rider manager at
+ * null-checked. Finally sets the user's rider to the character (cFERiderManager_setHumanCharacter on the front end's rider manager at
  * +0xB0, flag 0).
  *
  * @param rider  the user (controller) index
@@ -649,7 +649,7 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rid
     char* ob = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ovr));
     *(int*)(ob + 0x80) = 55;
     cUIProgress_setValue(ob, total / 7);
-    func_001A0508((char*)SSXApp->RealFE + 0xB0, rider, charID, 0);
+    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, rider, charID, 0);
 }
 #endif
 
@@ -677,8 +677,8 @@ struct sXform_181EF0
 extern sQuat_181EF0 t4vect_XAxis;
 extern sQuat_181EF0 t4vect_YAxis;
 extern sQuat_181EF0 t4vect_ZAxis;
-extern "C" void func_0019F3E8(void* rider, sXform_181EF0* xf);
-extern "C" void func_0019F548(void* rider, sXform_181EF0* xf);
+extern "C" void cFERider_setPose(void* rider, sXform_181EF0* xf);
+extern "C" void cFERider_setBoardPose(void* rider, sXform_181EF0* xf);
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sQuat_181EF0 QuatMul_181EF0(const sQuat_181EF0& a, const sQuat_181EF0& b)
@@ -713,18 +713,18 @@ static inline sQuat_181EF0 AxisAngle_181EF0(const sQuat_181EF0& axis, float angl
 /**
  * Places the user's front-end rider on the character-select screen and shows it once its model is loaded.
  *
- * Gets the rider for the user (+0x44) from the rider manager (func_001A0548). When it has a valid character loaded (id
- * below 10, +0xCB8 and +0xCB4 set) and the state's +0x80 flag is set: sets the rider pose (func_0019F3E8) to position
+ * Gets the rider for the user (+0x44) from the rider manager (cFERiderManager_getHuman1). When it has a valid character loaded (id
+ * below 10, +0xCB8 and +0xCB4 set) and the state's +0x80 flag is set: sets the rider pose (cFERider_setPose) to position
  * (136, -250, -82) turned about Z by the model angle (+0x60, degrees) + 100; when +0x54 is set, resets the rider
  * animation (+0xC) and plays animation 434, clears the rider's +0xCCC and +0x54; moves the board out of view to (0,
- * 10000, 0) (func_0019F548) and makes the rider visible (cFERider_setVisible).
+ * 10000, 0) (cFERider_setBoardPose) and makes the rider visible (cFERider_setVisible).
  *
  * @param vself  the character-select state
  */
 extern "C" void cFEStateCharSelect_updateCharacter3DPos(void* vself)
 {
     char* self = (char*)vself;
-    char* rider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
+    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;
@@ -751,7 +751,7 @@ extern "C" void cFEStateCharSelect_updateCharacter3DPos(void* vself)
         ang += 100.0f;
         ang *= 0.01745329424738884f;
         xf.rot = QuatMul_181EF0(xf.rot, AxisAngle_181EF0(t4vect_ZAxis, ang));
-        func_0019F3E8(rider, &xf);
+        cFERider_setPose(rider, &xf);
         if (*(int*)(self + 0x54) != 0) {
             void* anim = *(void**)(rider + 0xC);
             if (anim != 0) {
@@ -769,7 +769,7 @@ extern "C" void cFEStateCharSelect_updateCharacter3DPos(void* vself)
             position.w = 1.0f;
             xf.pos = position;
         }
-        func_0019F548(rider, &xf);
+        cFERider_setBoardPose(rider, &xf);
         cFERider_setVisible(rider, 1);
     }
 }
@@ -787,7 +787,7 @@ extern "C" int func_00157EE0(void* iface, int a1, int a2, int a3);
 extern "C" void* cBERewardInterface_getDB();
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
-extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern void* cFEStateCheatCharSelect_vtbl[];
 extern char* D_00440F78[];
 
@@ -821,7 +821,7 @@ struct sCharSel_2220 {
  * +0x58) and its name (func_0014EEC8 on interface 2). Then every reward-database character (cBERewardInterface_getDB)
  * that func_00157EE0 reports as owned by the user for @p slot is appended with its id, picture and name (count +0x78;
  * ids +0x7C, pictures +0xF4, names +0x16C, 30 entries). Clears +0x70, the six picture slots (+0x54) and +0x74, and
- * stores func_001A1CD0's value for the user at +0x15.
+ * stores cFECustom_getPlayerCtrlMask's value for the user at +0x15.
  *
  * @param engine  the UI engine
  * @param owner  the parent state
@@ -860,7 +860,7 @@ extern "C" sCharSel_2220* cFEStateCheatCharSelect_cFEStateCheatCharSelect(sCharS
     for (int j = 5; j >= 0; j--)
         self->sel[j] = 0;
     self->f74 = 0;
-    self->f15 = func_001A1CD0(*(void**)self->owner, self->player);
+    self->f15 = cFECustom_getPlayerCtrlMask(*(void**)self->owner, self->player);
     return self;
 }
 #endif
@@ -1126,14 +1126,14 @@ extern "C" void cFEStateCheatCharSelect_updateCharWidgets(void* self)
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSetup_cFEStateCharSetup);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
-extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern void* cFEStateCharSetup_vtbl[];
 
 /**
  * Constructs the character-setup state for a user.
  *
  * Builds the UI state (func_0039E2A0), sets state id 0xC, the cFEStateCharSetup_vtbl vtable and the user (+0x44),
- * stores func_001A1CD0's value for the user at +0x15 and clears the show-rider flag (+0x4C).
+ * stores cFECustom_getPlayerCtrlMask's value for the user at +0x15 and clears the show-rider flag (+0x4C).
  *
  * @param engine  the UI engine
  * @param idx  the user (controller) index
@@ -1145,7 +1145,7 @@ extern "C" void* cFEStateCharSetup_cFEStateCharSetup(void* self, void* engine, s
     *(int*)((char*)self + 0xC) = 0xC;
     *(void***)((char*)self + 0x8) = cFEStateCharSetup_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
-    *(unsigned char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    *(unsigned char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
     *(int*)((char*)self + 0x4C) = 0;
     return self;
 }

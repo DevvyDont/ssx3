@@ -12,8 +12,8 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
-extern "C" void func_001A0570(void* self, int a1, int a2);
-extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
+extern "C" void cFERiderManager_setHumanVisible(void* self, int a1, int a2);
+extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern "C" int func_001577A0(void* self, int a1, int a2);
@@ -45,8 +45,8 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(void* self)
     int charID = cBENewPlayerInterface_getPlayerCharID(pi, *(signed char*)((char*)self + 0x44));
     sVE_32A8* vt = *(sVE_32A8**)((char*)pi + 0xC);
     vt[2].fn((char*)pi + vt[2].delta);
-    func_001A0570((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), 0);
-    func_001A0508((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
+    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), 0);
+    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
     func_0028F140(cAudioInterface_bxAudio(), 1);
     *(int*)((char*)self + 0x50) = 1;
     if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44), charID) == 0) {
@@ -229,12 +229,12 @@ extern "C" int func_001577A0(void* self, int a1, int a2);
 extern "C" void* cFEStateCheatCharSelect_cFEStateCheatCharSelect(void* mem, void* engine, void* owner, int rider, int cid);
 extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int a1);
 extern "C" void* func_001887A0(void* mem, void* engine, int a2);
-extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* self, void* engine, void* owner, int a3, unsigned char a4);
 extern "C" void cKeyboardPopup_setInputText(void* self, const char* str);
 extern "C" void cKeyboardPopup_setMaxCharacters(void* self, int v);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
-extern "C" void func_001CE408(void* self, int v);
+extern "C" void cKeyboardPopup_setDisableShiftNumbers(void* self, int v);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern const char str_cKeyboardPopup[];
@@ -274,7 +274,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
             cKeyboardPopup_setMaxCharacters(w, 8);
             cKeyboardPopup_setIncludeKey(w, 75, 1, 2);
             *(int*)(w + 0x58) = 1;
-            func_001CE408(w, 1);
+            cKeyboardPopup_setDisableShiftNumbers(w, 1);
             cKeyboardPopup_setIncludeKey(w, 0xE, 0, 2);
             cKeyboardPopup_setIncludeKey(w, 39, 0, 2);
             cKeyboardPopup_setIncludeKey(w, 40, 0, 2);
@@ -292,7 +292,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
             int cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44));
             if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)(self + 0x44), cid) > 0) {
                 char* w = (char*)cFEStateCheatCharSelect_cFEStateCheatCharSelect(cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), cid);
-                *(unsigned char*)(w + 0x15) = func_001A1CD0(**(void***)(self + 0x10), *(signed char*)(self + 0x44));
+                *(unsigned char*)(w + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)(self + 0x10), *(signed char*)(self + 0x44));
                 cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, w);
                 cFEStateCharSetup_show3DCharacter(self, 0);
             }
@@ -332,14 +332,14 @@ INCLUDE_ASM("fe/festateriderbio", cFEStateUberTrick_cFEStateUberTrick);
 #ifdef SKIP_ASM
 extern void* D_0046CCC0[];
 extern "C" void* func_0039E2A0(void* self);
-extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 
 /**
  * Constructs the uber-trick store state for a user (allocated as "cFEStateUberTrick", 0x60 bytes).
  *
  * Runs cUIState's constructor (func_0039E2A0; @p engine reaches it untouched in the second argument register as the
  * engine), stores the vtable D_0046CCC0 and mHashName 18, sets mUserNum to @p userNum and mCtrlBits to that user's
- * controller bits (func_001A1CD0 on the engine's front end), and clears the two menu pointers +0x4C and +0x50 (On Tour
+ * controller bits (cFECustom_getPlayerCtrlMask on the engine's front end), and clears the two menu pointers +0x4C and +0x50 (On Tour
  * mpMainMenu, mpTrickMenu) and the rider-shown flag +0x48 (On Tour mbModelVisible).
  *
  * @param engine  the UI engine (only passed on to cUIState's constructor)
@@ -353,7 +353,7 @@ extern "C" void* cFEStateUberTrick_cFEStateUberTrick(void* self, int engine, int
     *(void***)((char*)self + 0x8) = D_0046CCC0;
     *(int*)((char*)self + 0xC) = 18;
     *(signed char*)((char*)self + 0x44) = idx;
-    *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
     *(int*)((char*)self + 0x4C) = 0;
     *(int*)((char*)self + 0x50) = 0;
     *(int*)((char*)self + 0x48) = 0;

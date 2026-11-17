@@ -26,9 +26,9 @@ INCLUDE_ASM("fe/festaterewards3", cFEStateBuyAttrib_updateTotalCost);
 
 INCLUDE_ASM("fe/festaterewards3", cFEStateBuyAttrib_updateBank);
 
-INCLUDE_ASM("fe/festaterewards3", func_001F5300);
+INCLUDE_ASM("fe/festaterewards3", cFEStateBuyAttrib_buyExperience);
 
-INCLUDE_ASM("fe/festaterewards3", func_001F54B0);
+INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_cFEStateCareerStats);
 
 INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_onCreateScreen);
 
@@ -42,19 +42,19 @@ INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_onWidgetEvent);
 
 INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_onInputBegin);
 
-INCLUDE_ASM("fe/festaterewards3", func_001F5A38);
+INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_setupLayout);
 
 INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_setupMenuFocus);
 
 INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_setupHighlightsList);
 
-INCLUDE_ASM("fe/festaterewards3", func_001F60E0);
+INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_setupRacePlatinumMedalsList);
 
-INCLUDE_ASM("fe/festaterewards3", func_001F6490);
+INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_setupFSPlatinumMedalsList);
 
-INCLUDE_ASM("fe/festaterewards3", func_001F6840);
+INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_setTextSafe);
 
 INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_setupRidersBest);
 
-INCLUDE_ASM("fe/festaterewards3", func_001F6F30);
+INCLUDE_ASM("fe/festaterewards3", cFEStateCareerStats_initTotalEventMedal);
 

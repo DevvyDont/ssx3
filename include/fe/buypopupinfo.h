@@ -10,7 +10,7 @@
 // all_in_one_fe.cpp in On Tour; retail keeps the methods in fe/fepopup (0x1CA8A0-0x1CAB10).
 // Methods: cBuyPopupInfo_clear clear() (On Tour's first method; the constructor is inlined into cUIStateBuyPopup's),
 // cBuyPopupInfo_initBuySongByCredit (songName, creditsLeft), cBuyPopupInfo_initBuySong (songName, cost, money),
-// func_001CAA18 initBuyReward (rewardType, rewardName, cost, money), cBuyPopupInfo_initBuyBolt (boltName, cost,
+// cBuyPopupInfo_initBuyReward initBuyReward (rewardType, rewardName, cost, money), cBuyPopupInfo_initBuyBolt (boltName, cost,
 // money). The setters (setCost, setCash, setItemName ...) are inlined at every call site.
 //
 // A FLAT layout. Member names, order and types are EA's (On Tour), every offset checked against retail. Evidence tags:

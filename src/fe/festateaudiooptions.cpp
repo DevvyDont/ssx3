@@ -115,7 +115,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void func_001587F8(void* iface, int player, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028BF78(void* audio, int a1);
-extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3);
+extern "C" void* cFEStateRequestLine_cFEStateRequestLine(void* p, int a1, signed char idx, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void func_0039F190(void* stack, int a1);
 extern "C" void cUIStateStack_push(void* stack, void* state);
@@ -240,7 +240,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             return;
         if (self->f74 == 0 && self->f7C == 0)
             return;
-        char* popup = (char*)func_00196B90(cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), (int)self->owner, self->player, self->f74);
+        char* popup = (char*)cFEStateRequestLine_cFEStateRequestLine(cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), (int)self->owner, self->player, self->f74);
         if (online_AOWE()) {
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(self->owner + 0x18, popup, 0, 0);
@@ -352,10 +352,10 @@ extern "C" int cFEStateAudioOptions_onWidgetMenu(void* self, int pMenu, int Even
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateaudiooptions", func_00196B90);
+INCLUDE_ASM("fe/festateaudiooptions", cFEStateRequestLine_cFEStateRequestLine);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -418,7 +418,7 @@ static inline int Find_196B90(char* mgr, int hash)
  *
  * Runs the cUIState constructor func_0039E2A0 (the engine reaches it in the second argument register), sets the state
  * id (+0xC) to 17, stores cFEStateRequestLine_vtbl and the user (+0x44), and copies the user's control mask from the
- * custom interface (func_001A1CD0) into +0x15 when there is one. Zeroes the 0x100-byte buffer at +0x4C and the fields
+ * custom interface (cFECustom_getPlayerCtrlMask) into +0x15 when there is one. Zeroes the 0x100-byte buffer at +0x4C and the fields
  * up to +0x200, keeps @p inStore at +0x16C, finds the "checkbox", "empty_box" and "yell_dollar_sign" texture elements
  * (+0x204, +0x208, +0x20C), reads the user's character (+0x48, cBENewPlayerInterface_getPlayerCharID), money (+0x168,
  * cBEEconInterface_getMoney) and two 64-bit values of BE interface 13 (func_00158728 into +0x160, func_00158750 into
@@ -430,7 +430,7 @@ static inline int Find_196B90(char* mgr, int hash)
  * @param inStore   nonzero when opened from the store (cFECustom_getNextState passes D_004A19D8)
  * @return @p requestLine
  */
-extern "C" void* func_00196B90(void* requestLine, int uiEngine, signed char idx, int inStore)
+extern "C" void* cFEStateRequestLine_cFEStateRequestLine(void* requestLine, int uiEngine, signed char idx, int inStore)
 {
     sAudioState_196B90* self = (sAudioState_196B90*)requestLine;
     func_0039E2A0(self);
@@ -438,7 +438,7 @@ extern "C" void* func_00196B90(void* requestLine, int uiEngine, signed char idx,
     *(void***)((char*)self + 0x8) = cFEStateRequestLine_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
     if (**(void***)((char*)self + 0x10) != 0)
-        *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+        *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
     MEM_fill(self->buf, 0, 0x100);
     self->f14C = 0;
     self->f150 = 0;

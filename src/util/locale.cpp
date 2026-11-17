@@ -80,7 +80,7 @@ extern "C" void func_00195A98(void) {
 //100%
 INCLUDE_ASM("util/locale", func_00195AA0);
 #ifdef SKIP_ASM
-extern "C" void func_00195948(void* self);
+extern "C" void cFELocale_deleteAllFiles(void* self);
 extern "C" void func_00195BE0(void* self);
 extern "C" void func_00195DE0(void* self);
 extern "C" void cFELocale_addFile(void* self, int lang);
@@ -91,7 +91,7 @@ extern "C" void func_00195AA0(void* self, signed char lang)
         *(signed char*)((char*)self + 0x1) = lang;
         int flags = *(signed char*)((char*)self + 0x3);
         if ((flags & 1) == 0) {
-            func_00195948(self);
+            cFELocale_deleteAllFiles(self);
             int langIndex = -1;
             switch (lang) {
             case 0:
@@ -338,7 +338,7 @@ extern "C" void* func_00195F70(void* self, void* arg)
 INCLUDE_ASM("util/locale", cFEStateAudioOptions_cFEStateAudioOptions);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
-extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" int func_00158700(void* self, int a1, int a2);
 extern "C" int cBERewardInterface_getNumSongsInPlayList(void* self, int a1, int a2);
@@ -373,7 +373,7 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* eng
     *(signed char*)(selfBytes + 0x44) = idx;
     void* feCustom = **(void***)(selfBytes + 0x10);
     if (feCustom != 0) {
-        *(unsigned char*)(selfBytes + 0x15) = func_001A1CD0(feCustom, idx);
+        *(unsigned char*)(selfBytes + 0x15) = cFECustom_getPlayerCtrlMask(feCustom, idx);
     }
     *(int*)(selfBytes + 0x48) = 0;
     *(int*)(selfBytes + 0x64) = 0;

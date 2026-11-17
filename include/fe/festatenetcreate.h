@@ -10,7 +10,7 @@
 // "inform me" / "share info" yes-no boxes. Size 0x6F4: cFEStateCreateStep1 is allocated with
 // cMemMan_alloc(0x6F4, "cFEStateCreateStep1") (cFEStateSelectPersona_onWidgetEvent, cFEStateCreateStep2_onWidgetEvent, cFEStateLogin_onWidgetEvent, cFEStateOnlineAgreement_onWidgetEvent) and
 // constructed by cFEStateCreateStep1_cFEStateCreateStep1(mem, pEngine, bEdit); every own field ends below 0x6F4. Constructors cFEStateCreateStep1_cFEStateCreateStep1
-// and the default func_001E0CA0 (fe/fepopupmisc; the preview's __19cFEStateCreateStep1), destructor cFEStateCreateStep1__cFEStateCreateStep1
+// and the default cFEStateCreateStep1_cFEStateCreateStep11 (fe/fepopupmisc; the preview's __19cFEStateCreateStep1), destructor cFEStateCreateStep1__cFEStateCreateStep1
 // (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep1). Retail vtable cFEStateCreateStep1_vtbl (32 slots: 1 dtor, 4
 // onCreateScreen cFEStateCreateStep1_onCreateScreen, 7 onGainTransition cFEStateCreateStep1_onGainTransition, 12 onUpdate cFEStateCreateStep1_onUpdate, 17 onPopupEvent
 // cFEStateCreateStep1_onPopupEvent, 18 onWidgetCreate cFEStateCreateStep1_onWidgetCreate, 19 onWidgetEvent cFEStateCreateStep1_onWidgetEvent, 25 func_001B9088 (help text),
@@ -18,7 +18,7 @@
 //
 // cFEStateCreateStep2: screen "211create_step2": birth date, gender and the spam option of the same form. Size
 // 0x6E0: cMemMan_alloc(0x6E0, "cFEStateCreateStep2") + cFEStateCreateStep2_cFEStateCreateStep2(mem, pEngine) (cFEStateCreateStep1_onWidgetEvent, cFEStateOnlineAgreement_onWidgetEvent);
-// own fields end below 0x6E0. Constructors cFEStateCreateStep2_cFEStateCreateStep2 and the default func_001E0D68 (fe/fepopupmisc),
+// own fields end below 0x6E0. Constructors cFEStateCreateStep2_cFEStateCreateStep2 and the default cFEStateCreateStep2_cFEStateCreateStep21 (fe/fepopupmisc),
 // destructor cFEStateCreateStep2__cFEStateCreateStep2 (fe/fepopupmisc; the preview's _$_19cFEStateCreateStep2). Retail vtable cFEStateCreateStep2_vtbl
 // (slots 4 onCreateScreen cFEStateCreateStep2_onCreateScreen, 12 onUpdate cFEStateCreateStep2_onUpdate, 17 onPopupEvent cFEStateCreateStep2_onPopupEvent, 18
 // onWidgetCreate cFEStateCreateStep2_onWidgetCreate, 19 onWidgetEvent cFEStateCreateStep2_onWidgetEvent, 25 func_001BA8B8, 29 func_001E0DD0, 31
@@ -46,7 +46,7 @@ struct cFEStateCreateStep1 {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateCreateStep1_vtbl (32 slots), stored by cFEStateCreateStep1_cFEStateCreateStep1 / func_001E0CA0 after the cFEStateNet ctor
+    void** mVtbl;                   // 0x008 [R] cFEStateCreateStep1_vtbl (32 slots), stored by cFEStateCreateStep1_cFEStateCreateStep1 / cFEStateCreateStep1_cFEStateCreateStep11 after the cFEStateNet ctor
                                     //       and by the destructor cFEStateCreateStep1__cFEStateCreateStep1
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateCreateStep1_cFEStateCreateStep1 stores 0x4D (edit) or 0x50 (create)
@@ -187,7 +187,7 @@ struct cFEStateCreateStep2 {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] cFEStateCreateStep2_vtbl (32 slots), stored by cFEStateCreateStep2_cFEStateCreateStep2 / func_001E0D68 and the destructor cFEStateCreateStep2__cFEStateCreateStep2
+    void** mVtbl;                   // 0x008 [R] cFEStateCreateStep2_vtbl (32 slots), stored by cFEStateCreateStep2_cFEStateCreateStep2 / cFEStateCreateStep2_cFEStateCreateStep21 and the destructor cFEStateCreateStep2__cFEStateCreateStep2
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateCreateStep2_cFEStateCreateStep2 stores 0x4E
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] passed to every child state's ctor

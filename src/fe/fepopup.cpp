@@ -311,7 +311,7 @@ extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C5E58);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_SetTextObjectsVisibility);
 #ifdef SKIP_ASM
 struct sVEntry_5E58 {
     short delta;
@@ -335,7 +335,7 @@ static inline void Call9_5E58(char* o, int a)
  *
  * @param visible  nonzero to show, 0 to hide
  */
-extern "C" void func_001C5E58(void* self, int visible)
+extern "C" void cScreenPopup_SetTextObjectsVisibility(void* self, int visible)
 {
     char* obj = (char*)self;
     Call9_5E58(*(char**)(obj + 0x70), visible);
@@ -801,9 +801,9 @@ public:
 };
 extern sVec3_6D30 D_004FF0D8_6D30 __asm__("t3vect_Zero");
 extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* info);
-extern "C" void func_001C8050(void* self, cUIText* text, int* info);
-extern "C" void func_001C8628(void* self, void* obj, void* out);
-extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out);
+extern "C" void cScreenPopup_setTextString2(void* self, cUIText* text, int* info);
+extern "C" void cScreenPopup_getStringSize3(void* self, void* obj, void* out);
+extern "C" void cScreenPopup_getStringSize(void* self, cUIText* text, int* info, float* out);
 extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item);
 
 /**
@@ -828,9 +828,9 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* infop)
         if (((cUIObj_6D30*)screenPopup->mpStaticBox) != 0) {
             float item[4];
             int* it = info + 5;
-            func_001C8050(self, (cUIText*)((cUIObj_6D30*)screenPopup->mpStaticBox), it);
-            func_001C8628(self, ((cUIObj_6D30*)screenPopup->mpStaticBox), size);
-            func_001C8320(self, (cUIText*)((cUIObj_6D30*)screenPopup->mpStaticBox), it, item);
+            cScreenPopup_setTextString2(self, (cUIText*)((cUIObj_6D30*)screenPopup->mpStaticBox), it);
+            cScreenPopup_getStringSize3(self, ((cUIObj_6D30*)screenPopup->mpStaticBox), size);
+            cScreenPopup_getStringSize(self, (cUIText*)((cUIObj_6D30*)screenPopup->mpStaticBox), it, item);
             w = item[2];
             pos = *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpStaticBox) + 0x44);
             ((cUIObj_6D30*)screenPopup->mpStaticBox)->setEnabled(0);
@@ -870,7 +870,7 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* infop)
     if (((cUIObj_6D30*)screenPopup->mpEnterBoxBackground) != 0) {
         ((cUIObj_6D30*)screenPopup->mpEnterBoxBackground)->setVisible(0);
     }
-    func_001C8628(self, ((cUIObj_6D30*)screenPopup->mpEnterBox), size);
+    cScreenPopup_getStringSize3(self, ((cUIObj_6D30*)screenPopup->mpEnterBox), size);
     cScreenPopup_increaseBoxSize(self, (float*)((char*)self + 0x260), size);
     return 0;
 }
@@ -1045,9 +1045,9 @@ struct sPopup_7388 {
 };
 extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* info);
 extern "C" int* cPopupInfo_getPopupOptionNames(void* info, int i);
-extern "C" void func_001C8050(void* self, cUIText* text, int* info);
-extern "C" void func_001C8628(void* self, void* obj, void* out);
-extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out);
+extern "C" void cScreenPopup_setTextString2(void* self, cUIText* text, int* info);
+extern "C" void cScreenPopup_getStringSize3(void* self, void* obj, void* out);
+extern "C" void cScreenPopup_getStringSize(void* self, cUIText* text, int* info, float* out);
 extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item);
 
 /**
@@ -1093,9 +1093,9 @@ extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, void* infop)
             float size[4];
             float item[4];
             int* it = cPopupInfo_getPopupOptionNames(info, j);
-            func_001C8050(self, (cUIText*)itemObj, it);
-            func_001C8628(self, itemObj, size);
-            func_001C8320(self, (cUIText*)itemObj, it, item);
+            cScreenPopup_setTextString2(self, (cUIText*)itemObj, it);
+            cScreenPopup_getStringSize3(self, itemObj, size);
+            cScreenPopup_getStringSize(self, (cUIText*)itemObj, it, item);
             if (self->mvLargestOption[0] < item[2])
                 self->mvLargestOption[0] = item[2];
             cScreenPopup_increaseBoxSize(self, (float*)((char*)self + 0x260), size);
@@ -1481,7 +1481,7 @@ extern "C" void cScreenPopup_FillTextEntryBox(cScreenPopup* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C8050);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_setTextString2);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -1499,7 +1499,7 @@ extern char D_004A1408[];
  * @param text  the text widget to fill
  * @param info  the string element: eType at [0], the string or id at [1]
  */
-extern "C" void func_001C8050(void* self, cUIText* text, int* info)
+extern "C" void cScreenPopup_setTextString2(void* self, cUIText* text, int* info)
 {
     switch (info[0]) {
     case 1:
@@ -1635,7 +1635,7 @@ extern "C" void cScreenPopup_setTextString(cScreenPopup* self, void* dst, cUITex
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C8320);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_getStringSize);
 #ifdef SKIP_ASM
 struct cUIText;
 struct sVec3_8320 { float x, y, z; };
@@ -1663,7 +1663,7 @@ struct sVEntry_8320 {
  * @param info  the string element: eType at [0], the string or id at [1]
  * @param out   the result rectangle (four floats, written by the font's extent function)
  */
-extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out)
+extern "C" void cScreenPopup_getStringSize(void* self, cUIText* text, int* info, float* out)
 {
     sVec3_8320 textScale = *(sVec3_8320*)((char*)text + 0x50);
     char* scaledFont = (char*)cUIText_getFont(text);
@@ -1705,7 +1705,7 @@ extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C84A8);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_getStringSize1);
 #ifdef SKIP_ASM
 struct sVec3_84A8 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
@@ -1714,7 +1714,7 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
 /**
  * Measures an ascii string as a text widget would draw it, including the line height.
  *
- * Scales the widget's font by its mScale (as func_001C8320 does), measures @p str with cFont_textExtent into @p out,
+ * Scales the widget's font by its mScale (as cScreenPopup_getStringSize does), measures @p str with cFont_textExtent into @p out,
  * and sets @p out's height (+0xC) to mScale.y times the font's line height (font +0x14, as a float) times its y scale
  * (font +0x34).
  *
@@ -1722,7 +1722,7 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
  * @param str   the ascii string
  * @param out   the result rectangle (four floats)
  */
-extern "C" void func_001C84A8(void* self, void* text, const char* str, void* out)
+extern "C" void cScreenPopup_getStringSize1(void* self, void* text, const char* str, void* out)
 {
     sVec3_84A8 scale = *(sVec3_84A8*)((char*)text + 0x50);
     char* font = (char*)cUIText_getFont(text);
@@ -1738,7 +1738,7 @@ extern "C" void func_001C84A8(void* self, void* text, const char* str, void* out
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C8568);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_getStringSize2);
 #ifdef SKIP_ASM
 struct sVec3_8568 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
@@ -1747,14 +1747,14 @@ extern "C" float func_003921F0(void* self, const char* str, void* out, int n, fl
 /**
  * Measures a unicode string as a text widget would draw it, including the line height.
  *
- * Same as func_001C84A8() but measures with the unicode extent function func_003921F0 (@p str is passed through as a
+ * Same as cScreenPopup_getStringSize1() but measures with the unicode extent function func_003921F0 (@p str is passed through as a
  * char pointer).
  *
  * @param text  the text widget whose font and scale are used
  * @param str   the unicode string
  * @param out   the result rectangle (four floats)
  */
-extern "C" void func_001C8568(void* self, void* text, const char* str, void* out)
+extern "C" void cScreenPopup_getStringSize2(void* self, void* text, const char* str, void* out)
 {
     sVec3_8568 scale = *(sVec3_8568*)((char*)text + 0x50);
     char* font = (char*)cUIText_getFont(text);
@@ -1770,7 +1770,7 @@ extern "C" void func_001C8568(void* self, void* text, const char* str, void* out
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C8628);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_getStringSize3);
 #ifdef SKIP_ASM
 struct sVec2_8628 { float x, y; };
 
@@ -1788,7 +1788,7 @@ struct sVEntry001C8628 {
  * @param obj  the widget
  * @param out  the result rectangle (four floats)
  */
-extern "C" void func_001C8628(void* self, void* obj, void* out)
+extern "C" void cScreenPopup_getStringSize3(void* self, void* obj, void* out)
 {
     sVec2_8628 widgetSize;
     sVEntry001C8628* vt = *(sVEntry001C8628**)((char*)obj + 8);
@@ -1807,8 +1807,8 @@ struct sVE8678 {
     short index;
     void (*fn)(void*, int);
 };
-extern "C" void func_001C8050(void* self, cUIText* text, int* info);
-extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out);
+extern "C" void cScreenPopup_setTextString2(void* self, cUIText* text, int* info);
+extern "C" void cScreenPopup_getStringSize(void* self, cUIText* text, int* info, float* out);
 extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item);
 extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char state, float t);
 
@@ -1816,7 +1816,7 @@ extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char st
  * Shows and sizes the popup's title bar from the popup description, or hides it when there is no title.
  *
  * With mpTitleText set: when the description's mtTitle is given (eType at +0xC nonzero) it sets the text
- * (func_001C8050, On Tour setTextString), shows it (slot 9), adds its size (getStringSize, increaseBoxSize) to
+ * (cScreenPopup_setTextString2, On Tour setTextString), shows it (slot 9), adds its size (getStringSize, increaseBoxSize) to
  * mvCurSize plus 5 in y and re-pivots it when mbCenterText is set; otherwise it hides it.
  *
  * @param pInfo  the popup description (On Tour cPopupInfo* pInfo)
@@ -1828,13 +1828,13 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, void* pInfo)
         int* info = (int*)((char*)pInfo + 0xC);
         if (*(int*)((char*)pInfo + 0xC) != 0) {
             float item[4];
-            func_001C8050(self, text, info);
+            cScreenPopup_setTextString2(self, text, info);
             {
                 char* titleText = (char*)self->mpTitleText;
                 sVE8678* vt = *(sVE8678**)(titleText + 8);
                 vt[9].fn(titleText + vt[9].delta, 1);
             }
-            func_001C8320(self, self->mpTitleText, info, item);
+            cScreenPopup_getStringSize(self, self->mpTitleText, info, item);
             cScreenPopup_increaseBoxSize(self, (float*)((char*)self + 0x260), item);
             self->mvCurSize[1] += 5.0f;
             if (self->mbCenterText != 0) {
@@ -2074,11 +2074,11 @@ extern "C" void cScreenPopup_restoreElements(cScreenPopup* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C8EF0);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxSize);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float* size);
-extern "C" void func_001C9210_s(void* self, void* text, const char* str, float* size) __asm__("func_001C9210");
+extern "C" void cScreenPopup_getTextBoxSize1(void* self, void* text, unsigned short* str, float* size);
+extern "C" void cScreenPopup_getTextBoxSize2_s(void* self, void* text, const char* str, float* size) __asm__("cScreenPopup_getTextBoxSize2");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_String_pct_08x[];
 
@@ -2092,8 +2092,8 @@ struct sVEntry_8EF0 {
  * Grows a text-box size to fit a popup string element, plus a gap.
  *
  * Picks mpMessageText when @p flag is nonzero, else mpPostText, and returns when it is null. By @p item's eType: 1
- * measures the unicode string with func_001C9038(), 2 the ascii string with func_001C9210(), 3 the localised string
- * (SSXApp->FELocale virtual slot 4) with func_001C9038(), or the text "String %08x" with func_001C9210() when the id
+ * measures the unicode string with cScreenPopup_getTextBoxSize1(), 2 the ascii string with cScreenPopup_getTextBoxSize2(), 3 the localised string
+ * (SSXApp->FELocale virtual slot 4) with cScreenPopup_getTextBoxSize1(), or the text "String %08x" with cScreenPopup_getTextBoxSize2() when the id
  * has no string. Afterwards adds @p extra to @p size[1], except for type 0 and a missing id.
  *
  * @param vself  the popup (cScreenPopup)
@@ -2102,7 +2102,7 @@ struct sVEntry_8EF0 {
  * @param flag   nonzero to measure with the message text, 0 with the post text
  * @param extra  gap added to the height
  */
-extern "C" void func_001C8EF0(void* vself, int* item, float* size, int flag, float extra)
+extern "C" void cScreenPopup_getTextBoxSize(void* vself, int* item, float* size, int flag, float extra)
 {
     char* self = (char*)vself;
     void* text;
@@ -2116,22 +2116,22 @@ extern "C" void func_001C8EF0(void* vself, int* item, float* size, int flag, flo
     case 0:
         break;
     case 2:
-        func_001C9210_s(self, text, (const char*)item[1], size);
+        cScreenPopup_getTextBoxSize2_s(self, text, (const char*)item[1], size);
         goto add;
     case 1:
-        func_001C9038(self, text, (unsigned short*)item[1], size);
+        cScreenPopup_getTextBoxSize1(self, text, (unsigned short*)item[1], size);
         goto add;
     case 3: {
         char* locale = (char*)SSXApp->FELocale;
         sVEntry_8EF0* vt = *(sVEntry_8EF0**)(locale + 4);
         unsigned short* str = vt[4].fn(locale + vt[4].delta, item[1]);
         if (str) {
-            func_001C9038(self, text, str, size);
+            cScreenPopup_getTextBoxSize1(self, text, str, size);
             goto add;
         } else {
             char buf[0x40];
             sprintf(buf, str_String_pct_08x, item[1]);
-            func_001C9210_s(self, text, buf, size);
+            cScreenPopup_getTextBoxSize2_s(self, text, buf, size);
         }
         break;
     }
@@ -2144,13 +2144,13 @@ extern "C" void func_001C8EF0(void* vself, int* item, float* size, int flag, flo
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C9038);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxSize1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int USTR_length(unsigned short* s);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_001C8568(void* self, void* text, const char* str, void* out);
+extern "C" void cScreenPopup_getStringSize2(void* self, void* text, const char* str, void* out);
 extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item);
 extern char str_getTextBoxSize[];
 extern char D_004A1C38;
@@ -2159,14 +2159,14 @@ extern char D_004A1C38;
  * Grows a text-box size to fit a unicode string, line by line.
  *
  * Splits a copy of @p str (allocated "getTextBoxSize") at each pair of backslashes (D_004A1C38 is a backslash) and each
- * '\r'; each line is measured with func_001C8568(), added to @p size with cScreenPopup_increaseBoxSize() and followed
+ * '\r'; each line is measured with cScreenPopup_getStringSize2(), added to @p size with cScreenPopup_increaseBoxSize() and followed
  * by 3 units of height. The copy is freed at the end.
  *
  * @param text  the text widget whose font is used
  * @param str   the unicode string
  * @param size  the box size (t3Vector) to grow
  */
-extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float* size)
+extern "C" void cScreenPopup_getTextBoxSize1(void* self, void* text, unsigned short* str, float* size)
 {
     int j = 0;
     int i = 0;
@@ -2179,14 +2179,14 @@ extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float
         unsigned short next = str[i + 1];
         if (curChar == D_004A1C38 && next == D_004A1C38) {
             buf[j] = 0;
-            func_001C8568(self, text, (const char*)buf, item);
+            cScreenPopup_getStringSize2(self, text, (const char*)buf, item);
             i += 2;
             j = 0;
             cScreenPopup_increaseBoxSize(self, size, item);
             size[1] += 3.0f;
         } else if (curChar == '\r') {
             buf[j] = 0;
-            func_001C8568(self, text, (const char*)buf, item);
+            cScreenPopup_getStringSize2(self, text, (const char*)buf, item);
             i += 1;
             j = 0;
             cScreenPopup_increaseBoxSize(self, size, item);
@@ -2199,7 +2199,7 @@ extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float
     }
     if (j != 0) {
         buf[j] = 0;
-        func_001C8568(self, text, (const char*)buf, item);
+        cScreenPopup_getStringSize2(self, text, (const char*)buf, item);
         cScreenPopup_increaseBoxSize(self, size, item);
         size[1] += 3.0f;
     }
@@ -2209,13 +2209,13 @@ extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C9210);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxSize2);
 #ifdef SKIP_ASM
 struct cUIText;
 extern "C" int strlen(const char* s);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_001C84A8(void* self, void* text, const char* str, void* out);
+extern "C" void cScreenPopup_getStringSize1(void* self, void* text, const char* str, void* out);
 extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item);
 extern char str_getTextBoxSize[];
 
@@ -2223,15 +2223,15 @@ extern char str_getTextBoxSize[];
  * Grows a text-box size to fit an ascii string, line by line.
  *
  * Splits a copy of @p str (allocated "getTextBoxSize") at each pair of backslashes and each '\r'; each line is measured
- * with func_001C84A8() and added to the size with cScreenPopup_increaseBoxSize(). Lines ended by a separator add 3
- * units of height; unlike func_001C9038() the last line does not. The copy is freed at the end.
+ * with cScreenPopup_getStringSize1() and added to the size with cScreenPopup_increaseBoxSize(). Lines ended by a separator add 3
+ * units of height; unlike cScreenPopup_getTextBoxSize1() the last line does not. The copy is freed at the end.
  *
  * @param text     the text widget whose font is used
  * @param str      the ascii string
  * @param sizePtr  the box size (a float* to a t3Vector, declared int)
  */
 // PORT: a3 is the float* size out pointer (the unit declares it int)
-extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int sizePtr)
+extern "C" void cScreenPopup_getTextBoxSize2(void* self, cUIText* text, const char* str, int sizePtr)
 {
     float* size = (float*)sizePtr;
     int j = 0;
@@ -2245,14 +2245,14 @@ extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int si
         char next = str[i + 1];
         if (chr == '\\' && next == '\\') {
             buf[j] = 0;
-            func_001C84A8(self, text, buf, item);
+            cScreenPopup_getStringSize1(self, text, buf, item);
             i += 2;
             cScreenPopup_increaseBoxSize(self, size, item);
             j = 0;
             size[1] += 3.0f;
         } else if (chr == '\r') {
             buf[j] = 0;
-            func_001C84A8(self, text, buf, item);
+            cScreenPopup_getStringSize1(self, text, buf, item);
             i += 1;
             cScreenPopup_increaseBoxSize(self, size, item);
             j = 0;
@@ -2265,7 +2265,7 @@ extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int si
     }
     if (j != 0) {
         buf[j] = 0;
-        func_001C84A8(self, text, buf, item);
+        cScreenPopup_getStringSize1(self, text, buf, item);
         cScreenPopup_increaseBoxSize(self, size, item);
     }
     if (buf != 0)
@@ -2278,7 +2278,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getMessageLineWrapSize1);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* text, const char* str, void* out);
-extern "C" void func_001C94B0(void* self, void* text, void* str, void* out);
+extern "C" void cScreenPopup_getMessageLineWrapSize2(void* self, void* text, void* str, void* out);
 extern char str_String_pct_08x[];
 
 struct sVEntryK93B0 {
@@ -2291,7 +2291,7 @@ struct sVEntryK93B0 {
  * Measures the first wrapped line of a popup message with the popup's message text object.
  *
  * Does nothing without mpMessageText. ASCII text goes to cScreenPopup_getMessageLineWrapSize(), unicode to
- * func_001C94B0; a text id is looked up in the front-end locale first, or measured as "String %08x" when it
+ * cScreenPopup_getMessageLineWrapSize2; a text id is looked up in the front-end locale first, or measured as "String %08x" when it
  * has no text. An empty element leaves the size alone.
  *
  * @param msg  the message element (On Tour: tPopupElement *ptElement)
@@ -2308,14 +2308,14 @@ extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* ms
         cScreenPopup_getMessageLineWrapSize(self, self->mpMessageText, (const char*)msg[1], out);
         break;
     case 1:
-        func_001C94B0(self, self->mpMessageText, (void*)msg[1], out);
+        cScreenPopup_getMessageLineWrapSize2(self, self->mpMessageText, (void*)msg[1], out);
         break;
     case 3: {
         char* locale = (char*)SSXApp->FELocale;
         sVEntryK93B0* vt = *(sVEntryK93B0**)(locale + 4);
         void* str = vt[4].fn(locale + vt[4].delta, msg[1]);
         if (str) {
-            func_001C94B0(self, self->mpMessageText, str, out);
+            cScreenPopup_getMessageLineWrapSize2(self, self->mpMessageText, str, out);
         } else {
             char buf[0x40];
             sprintf(buf, str_String_pct_08x, msg[1]);
@@ -2328,7 +2328,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* ms
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C94B0);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_getMessageLineWrapSize2);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sVec3_94B0 { float x, y, z; };
@@ -2359,7 +2359,7 @@ extern char D_004A1C38;
  * @param strp  the unicode string
  * @param outp  receives the width (float)
  */
-extern "C" void func_001C94B0(void* self, void* text, void* strp, void* outp)
+extern "C" void cScreenPopup_getMessageLineWrapSize2(void* self, void* text, void* strp, void* outp)
 {
     unsigned short* str = (unsigned short*)strp;
     float* out = (float*)outp;
@@ -2480,10 +2480,10 @@ extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* pT
 INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxWrapSize);
 #ifdef SKIP_ASM
 struct cUIText;
-extern "C" void func_001C8050(void* self, cUIText* text, int* info);
-extern "C" void func_001C9938(void* self, cUIText* text, void* str, float* out);
-// PORT: func_001C9B28's 4th parameter is the out pointer (declared int in the unit)
-extern "C" void func_001C9B28(void* self, cUIText* text, const char* str, int a3);
+extern "C" void cScreenPopup_setTextString2(void* self, cUIText* text, int* info);
+extern "C" void cScreenPopup_getTextBoxWrapSize1(void* self, cUIText* text, void* str, float* out);
+// PORT: cScreenPopup_getTextBoxWrapSize2's 4th parameter is the out pointer (declared int in the unit)
+extern "C" void cScreenPopup_getTextBoxWrapSize2(void* self, cUIText* text, const char* str, int a3);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_String_pct_08x[];
 
@@ -2497,9 +2497,9 @@ struct sVEntry_97E0 {
  * Sets the popup's message or post text from a popup string and grows a size by the wrapped text plus a gap.
  *
  * Picks mpMessageText when @p which is nonzero, else mpPostText (nothing without one). By the string's type: 2
- * ascii (func_001C9B28) and 1 unicode (func_001C9938) wrap the text into @p vSize; 3 looks the id up in the FE locale
+ * ascii (cScreenPopup_getTextBoxWrapSize2) and 1 unicode (cScreenPopup_getTextBoxWrapSize1) wrap the text into @p vSize; 3 looks the id up in the FE locale
  * (slot 4) and wraps that string, or, when missing, the ascii text "String %08x" and returns without the gap; 0
- * only sets the text (func_001C8050) and returns. Otherwise adds @p bMessage to the size's y.
+ * only sets the text (cScreenPopup_setTextString2) and returns. Otherwise adds @p bMessage to the size's y.
  *
  * @param ptElement  the popup string (On Tour tPopupElement* ptElement): type word, then the value
  * @param vSize  the size to grow (On Tour t3Vector& vSize)
@@ -2519,27 +2519,27 @@ extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* ptElem
         return;
     switch (info[0]) {
     case 2:
-        func_001C9B28(self, text, (const char*)info[1], (int)out);
+        cScreenPopup_getTextBoxWrapSize2(self, text, (const char*)info[1], (int)out);
         break;
     case 1:
-        func_001C9938(self, text, (void*)info[1], out);
+        cScreenPopup_getTextBoxWrapSize1(self, text, (void*)info[1], out);
         break;
     case 3: {
         char* locale = (char*)SSXApp->FELocale;
         sVEntry_97E0* vt = *(sVEntry_97E0**)(locale + 4);
         void* str = vt[4].fn(locale + vt[4].delta, info[1]);
         if (str) {
-            func_001C9938(self, text, str, out);
+            cScreenPopup_getTextBoxWrapSize1(self, text, str, out);
         } else {
             char buf[0x40];
             sprintf(buf, str_String_pct_08x, info[1]);
-            func_001C9B28(self, text, buf, (int)out);
+            cScreenPopup_getTextBoxWrapSize2(self, text, buf, (int)out);
             return;
         }
         break;
     }
     case 0:
-        func_001C8050(self, text, info);
+        cScreenPopup_setTextString2(self, text, info);
         return;
     }
     out[1] += bMessage;
@@ -2547,7 +2547,7 @@ extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* ptElem
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001C9938);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxWrapSize1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIText;
@@ -2563,7 +2563,7 @@ extern "C" float func_00392C60(void* font, int c);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 extern "C" void cUIText_setUnicodeString(cUIText* text, void* p);
-extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float* size);
+extern "C" void cScreenPopup_getTextBoxSize1(void* self, void* text, unsigned short* str, float* size);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_UITEXTTEMP[];
@@ -2575,13 +2575,13 @@ extern char D_004A1C38;
  * Sets bit 7 of the widget's mAttr; returns when the widget has no font. On a copy of @p strp (allocated "UITEXTTEMP")
  * it adds character widths (func_00392C60 times mScale.x), restarting at backslash pairs and '\r'; when the width
  * passes the widget's width (getSize) after a space was seen, that space becomes '\r' and scanning resumes after it.
- * The wrapped copy is measured into @p out with func_001C9038() and set with cUIText_setUnicodeString(), then freed.
+ * The wrapped copy is measured into @p out with cScreenPopup_getTextBoxSize1() and set with cUIText_setUnicodeString(), then freed.
  *
  * @param text  the text widget
  * @param strp  the unicode string
  * @param out   the box size (t3Vector) to grow
  */
-extern "C" void func_001C9938(void* self, cUIText* text, void* strp, float* out)
+extern "C" void cScreenPopup_getTextBoxWrapSize1(void* self, cUIText* text, void* strp, float* out)
 {
     unsigned short* str = (unsigned short*)strp;
     *(int*)((char*)text + 0x14) |= 0x80;
@@ -2623,7 +2623,7 @@ extern "C" void func_001C9938(void* self, cUIText* text, void* strp, float* out)
             i++;
         }
     }
-    func_001C9038(self, text, buf, out);
+    cScreenPopup_getTextBoxSize1(self, text, buf, out);
     cUIText_setUnicodeString(text, buf);
     if (buf != 0)
         cMemMan_free(buf);
@@ -2631,24 +2631,24 @@ extern "C" void func_001C9938(void* self, cUIText* text, void* strp, float* out)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/fepopup", func_001C9B28);
+INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxWrapSize2);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" void func_001C9210(void* self, cUIText* text, const char* str, int a3);
+extern "C" void cScreenPopup_getTextBoxSize2(void* self, cUIText* text, const char* str, int a3);
 
 /**
  * Grows a box size to fit an ascii string and puts the string in the text widget.
  *
- * Runs func_001C9210() and then cUIText_setAsciiString(); the ascii string is not wrapped.
+ * Runs cScreenPopup_getTextBoxSize2() and then cUIText_setAsciiString(); the ascii string is not wrapped.
  *
  * @param text     the text widget
  * @param str      the ascii string
  * @param sizePtr  the box size (a float* to a t3Vector, declared int)
  */
-extern "C" void func_001C9B28(void* self, cUIText* text, const char* str, int sizePtr)
+extern "C" void cScreenPopup_getTextBoxWrapSize2(void* self, cUIText* text, const char* str, int sizePtr)
 {
-    func_001C9210(self, text, str, sizePtr);
+    cScreenPopup_getTextBoxSize2(self, text, str, sizePtr);
     cUIText_setAsciiString(text, str);
 }
 #endif
@@ -3143,7 +3143,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_onPopupEvent);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cKeyboardPopup_setInputText(cKeyboardPopup* popup, const char* a1);
-extern "C" void func_001CCF00(cKeyboardPopup* popup, const char* a1);
+extern "C" void cKeyboardPopup_setStatic2(cKeyboardPopup* popup, const char* a1);
 // PORT: the unit declares func_0039F190 as void; it returns a value this caller ignores.
 extern "C" int func_0039F190_i(void* self, int a1) __asm__("func_0039F190");
 
@@ -3171,7 +3171,7 @@ extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, void* child, int m
     case 21:
         if (child == (void*)self->mpKeyboard) {
             cKeyboardPopup_setInputText((cKeyboardPopup*)child, (const char*)self->mszInputText);
-            func_001CCF00(self->mpKeyboard, (const char*)self->mszStaticText);
+            cKeyboardPopup_setStatic2(self->mpKeyboard, (const char*)self->mszStaticText);
         }
         break;
     case 0xF:
@@ -3364,7 +3364,7 @@ extern "C" void cBuyPopupInfo_initBuySong(int* self, int songName, int cost, int
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CAA18);
+INCLUDE_ASM("fe/fepopup", cBuyPopupInfo_initBuyReward);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int GetHashValue32(char* str);
@@ -3390,7 +3390,7 @@ extern char str_kT_OVRCMNCheatCharColon[];
  * @param cost    the price
  * @param money    the player's cash
  */
-extern "C" void func_001CAA18(int* desc, int kind, int rewardName, int cost, int money)
+extern "C" void cBuyPopupInfo_initBuyReward(int* desc, int kind, int rewardName, int cost, int money)
 {
     desc[4] = rewardName;
     desc[3] = 2;
@@ -3467,7 +3467,7 @@ INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_cUIStateBuyPopup);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cBuyPopupInfo_clear(cBuyPopupInfo* self);
-extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern void* cUIStateBuyPopup_vtbl[];
 
 /**
@@ -3475,7 +3475,7 @@ extern void* cUIStateBuyPopup_vtbl[];
  *
  * Runs the cUIState constructor (func_0039E318), stores cUIStateBuyPopup_vtbl, clears the embedded cBuyPopupInfo
  * (+0x48, cBuyPopupInfo_clear) twice (before and after the other stores), stores @p idx as mUserNum and mHashName 7, and
- * when the engine's first word is set takes mCtrlBits from func_001A1CD0(that word, idx).
+ * when the engine's first word is set takes mCtrlBits from cFECustom_getPlayerCtrlMask(that word, idx).
  *
  * @param engine  the UI engine (On Tour pEngine)
  * @param owner  the parent state (On Tour pParentState)
@@ -3491,7 +3491,7 @@ extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, void*
     self->mHashName = 7;
     void* custom = *(void**)self->mpEngine;
     if (custom != 0) {
-        *(char*)&self->mCtrlBits = func_001A1CD0(custom, idx);
+        *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(custom, idx);
     }
     cBuyPopupInfo_clear((cBuyPopupInfo*)((char*)self + 0x48));
     return ((void*)self);
@@ -5323,7 +5323,7 @@ extern "C" void cKeyboardPopup_setPasswordText(sPwd_CCE98* self, char* str)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CCF00);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setStatic2);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_StaticValue[];
@@ -5340,7 +5340,7 @@ extern "C" void* cBXString_cBXString4(void* self, const char* str);
  *
  * @param str  the label text
  */
-extern "C" void func_001CCF00(cKeyboardPopup* self, const char* str)
+extern "C" void cKeyboardPopup_setStatic2(cKeyboardPopup* self, const char* str)
 {
     if (self->mpScreen == 0) {
         cBXString_cBXString4((char*)self + 0x424, str);
@@ -5579,7 +5579,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self);
 extern "C" void cKeyboardPopup_setStatic(cKeyboardPopup* self, unsigned short* str);
 extern "C" void cKeyboardPopup_setInputText(cKeyboardPopup* self, const char* str);
-extern "C" void func_001CCF00(cKeyboardPopup* self, const char* str);
+extern "C" void cKeyboardPopup_setStatic2(cKeyboardPopup* self, const char* str);
 extern "C" void cKeyboardPopup_setStatic1(cKeyboardPopup* self, int a1);
 extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self);
 extern "C" void cBXString_Reset(void* self);
@@ -5723,10 +5723,10 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
         } else {
             char** str = (char**)(((char*)self) + 0x424);
             if (*(int*)(*str - 8) != 0) {
-                func_001CCF00((cKeyboardPopup*)(((char*)self)), *str);
+                cKeyboardPopup_setStatic2((cKeyboardPopup*)(((char*)self)), *str);
                 cBXString_Reset(str);
             } else {
-                func_001CCF00((cKeyboardPopup*)(((char*)self)), D_004A1408);
+                cKeyboardPopup_setStatic2((cKeyboardPopup*)(((char*)self)), D_004A1408);
             }
         }
         cKeyboardPopup_updateCursor(self);
@@ -5962,7 +5962,7 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self, int a1);
 extern "C" void cKeyboardPopup_AddAsciiEdit(cKeyboardPopup* self, int value);
 extern "C" bool cKeyboardPopup_updateToAscii_b(void* self, int value) __asm__("cKeyboardPopup_updateToAscii");
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup*, int, int);
-extern "C" void* func_001D9D48(void* mem, void* engine, void* owner);
+extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup(void* mem, void* engine, void* owner);
 void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
 void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
 void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
@@ -6066,7 +6066,7 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
             if (isOnK1CDB98()) {
                 if ((int)SSXApp->Game == 0) {
                     changed = 1;
-                    void* popup = func_001D9D48(cMemMan_alloc(320, str_cFEStateNetHelpPopup, 0x100, 0), self->mpEngine, self);
+                    void* popup = cFEStateNetHelpPopup_cFEStateNetHelpPopup(cMemMan_alloc(320, str_cFEStateNetHelpPopup, 0x100, 0), self->mpEngine, self);
                     cFEStateNetHelpPopup_setNumHelpOptions(popup, 6);
                     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELPKeyboard);
                     cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELPKeyboardMessage));
@@ -6189,7 +6189,7 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_fillSelectableKeys);
 #ifdef SKIP_ASM
 extern "C" void cKeyboardPopup_setIncludeKey(cKeyboardPopup* self, int i, int v, int mode);
-extern "C" void func_001CE468(void* self, int a1);
+extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(void* self, int a1);
 extern "C" int strlen(const char* s);
 extern signed char D_00441390[];
 
@@ -6198,7 +6198,7 @@ extern signed char D_00441390[];
  *
  * Excludes the blank keys ('*' in D_00441390) and keys 0x1C, 0x29, 0x45 and 0x4F; key 0x4B (space) is included only
  * when the edit string is not empty and mbDisableForFirst is set; every other key is included
- * (cKeyboardPopup_setIncludeKey(key, on, 2)). Ends with func_001CE468(self, 0).
+ * (cKeyboardPopup_setIncludeKey(key, on, 2)). Ends with cKeyboardPopup_setIncludeQuickKeyRow(self, 0).
  */
 extern "C" void cKeyboardPopup_fillSelectableKeys(cKeyboardPopup* self)
 {
@@ -6217,7 +6217,7 @@ extern "C" void cKeyboardPopup_fillSelectableKeys(cKeyboardPopup* self)
             cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, i, 1, 2);
         }
     }
-    func_001CE468(self, 0);
+    cKeyboardPopup_setIncludeQuickKeyRow(self, 0);
 }
 #endif
 
@@ -6243,7 +6243,7 @@ extern "C" void cKeyboardPopup_setIncludeKey(cKeyboardPopup* self, int i, int bI
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CE408);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setDisableShiftNumbers);
 #ifdef SKIP_ASM
 /**
  * Enables or disables the shifted number keys of the keyboard popup.
@@ -6253,7 +6253,7 @@ INCLUDE_ASM("fe/fepopup", func_001CE408);
  *
  * @param on  nonzero to disable the keys in the alternate set, 0 to enable them
  */
-extern "C" void func_001CE408(void* self, bool on)
+extern "C" void cKeyboardPopup_setDisableShiftNumbers(void* self, bool on)
 {
     int i;
     for (i = 0xF; i < 25; i++) {
@@ -6263,7 +6263,7 @@ extern "C" void func_001CE408(void* self, bool on)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", func_001CE468);
+INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setIncludeQuickKeyRow);
 #ifdef SKIP_ASM
 /**
  * Includes or excludes the keyboard popup's quick-key row.
@@ -6273,7 +6273,7 @@ INCLUDE_ASM("fe/fepopup", func_001CE468);
  *
  * @param included  nonzero to make the keys selectable
  */
-extern "C" void func_001CE468(void* self, int included)
+extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(void* self, int included)
 {
     int i;
     for (i = 0; i < 0xE; i++) {

@@ -7,7 +7,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_cFEStateCharEquip);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E2A0(void* self);
-extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
@@ -15,7 +15,7 @@ int cBELibrary_getRiderIndex(int index);
 int GetHashValue32(char* str);
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
 extern "C" int cUITextureBank_getElementByHashname(void* list, int hash);
-extern "C" void func_001A0508(void* mgr, int idx, int ch, int a3);
+extern "C" void cFERiderManager_setHumanCharacter(void* mgr, int idx, int ch, int a3);
 extern "C" int cBEEconInterface_getMoney(void* iface, int idx, int ch);
 extern "C" void func_0014AEA8(void* self, int a1, int a2);
 extern "C" int func_0014B478(void* self, int a1, int a2);
@@ -114,7 +114,7 @@ static inline int Find_8DB8(char* mgr, int hash)
  * Sets state id 0xE, the two preview positions (0xAC0, 0xAD0), the user's controller bits, the character
  * (0xBC), the mode (0xC8: 1 in the store), money (0xC0) and equip points (0xC4, func_0014B478); clears the
  * widget pointers and the category stack (root -1), finds the dollar and checkbox texture elements and sets
- * the user's FE rider to the character (func_001A0508).
+ * the user's FE rider to the character (cFERiderManager_setHumanCharacter).
  *
  * With a store or a mode switch, 0xCC (On Tour mStoreNum) is the last hub's peak (2 for hubs 19-20, 3 for 21,
  * else 1), otherwise -1. Builds the root item list (func_0019B180) and loads the character's icon file into
@@ -142,7 +142,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* mem, void* owner, sig
     self->camTarget.w = 1.0f;
     self->fC = 0xE;
     self->team = team;
-    self->f15 = func_001A1CD0(*self->mgr, team);
+    self->f15 = cFECustom_getPlayerCtrlMask(*self->mgr, team);
     void* player = cBE_getInterface(cBE_getBE(), 1);
     self->slot = cBENewPlayerInterface_getPlayerCharID(player, self->team);
     if (inStore != 0) {
@@ -201,7 +201,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* mem, void* owner, sig
         self->fA9C = Find_8DB8(mgr, GetHashValue32(str_empty_box));
     }
     self->fAA0 = 0;
-    func_001A0508((char*)SSXApp->RealFE + 0xB0, self->team, self->slot, 1);
+    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->team, self->slot, 1);
     self->fC0 = cBEEconInterface_getMoney(cBE_getInterface(cBE_getBE(), 11), self->team, self->slot);
     void* shop = cBE_getInterface(cBE_getBE(), 9);
     func_0014AEA8(shop, self->team, self->slot);
@@ -243,7 +243,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip__cFEStateCharEquip);
 #ifdef SKIP_ASM
 struct sEquipTable_DC20;
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
-extern "C" void func_0019A498(void* self);
+extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(void* self);
 extern "C" void func_0039E390(void* self, int flags);
 extern void* cFEStateCharEquip_vtbl[];
 extern void* D_0046D0D0[];
@@ -267,7 +267,7 @@ static inline void releaseK199148(int id)
  * Destroys the equip-gear state: frees its icon file and preview textures, then runs the base destructor.
  *
  * Releases the icon file (0xA64) from the FE file cache and the texture ids at 0xA68, 0xA70 and 0xA74 through
- * the graphics manager (vtable slot 50), cancels a pending large-preview load (func_0019A498), restores the
+ * the graphics manager (vtable slot 50), cancels a pending large-preview load (cFEStateCharEquip_cancelLargePreviewLoad), restores the
  * base vtable D_0046D0D0 and calls the cUIState destructor func_0039E390().
  *
  * @param flags  g++ destructor flags, passed on to func_0039E390(); bit 0 frees the object
@@ -282,7 +282,7 @@ extern "C" void cFEStateCharEquip__cFEStateCharEquip(void* self, int flags)
     }
     releaseK199148(*(int*)((char*)self + 0xA68));
     *(int*)((char*)self + 0xA68) = -1;
-    func_0019A498(self);
+    cFEStateCharEquip_cancelLargePreviewLoad(self);
     releaseK199148(*(int*)((char*)self + 0xA70));
     releaseK199148(*(int*)((char*)self + 0xA74));
     *(int*)((char*)self + 0xA70) = -1;
@@ -298,10 +298,10 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cRiderAnimBase_reset(void* self);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
-extern "C" void func_0019BFE8(void* self);
+extern "C" void cFEStateCharEquip_update3DPositions(void* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern char str_12equ_char[];
@@ -311,7 +311,7 @@ extern char str_12equ_char[];
  *
  * Puts the rider's draw layer (+0xC2C) at 0x11 and clears its +0xCCC; when its character id is below 10 and
  * its model is ready (+0xCB4, +0xCB8), restarts its animation with animation 0x1B2. Resets the zoom (0xAA4)
- * and turn (0xAAC) to 0 and the pan (0xAA8) to -1, places the camera and models (func_0019BFE8) and switches
+ * and turn (0xAAC) to 0 and the pan (0xAA8) to -1, places the camera and models (cFEStateCharEquip_update3DPositions) and switches
  * the front-end sound-bank mode to 2.
  */
 extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
@@ -321,7 +321,7 @@ extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
+    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
     *(int*)(feRider + 0xC2C) = 17;
     *(int*)(feRider + 0xCCC) = 0;
     int ok = *(unsigned int*)feRider < 10 && *(int*)(feRider + 0xCB8) != 0 && *(int*)(feRider + 0xCB4) != 0;
@@ -335,7 +335,7 @@ extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
     *(int*)((char*)self + 0xAA4) = 0;
     *(int*)((char*)self + 0xAAC) = 0;
     *(float*)((char*)self + 0xAA8) = -1.0f;
-    func_0019BFE8(self);
+    cFEStateCharEquip_update3DPositions(self);
     func_0028F140(cAudioInterface_bxAudio(), 2);
 }
 #endif
@@ -343,7 +343,7 @@ extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onDestroyScreen);
 #ifdef SKIP_ASM
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
 /**
@@ -355,7 +355,7 @@ extern "C" void cFEStateCharEquip_onDestroyScreen(void* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
-        char* feRider = (char*)func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
+        char* feRider = (char*)cFERiderManager_getHuman1(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
         *(unsigned int*)(feRider + 0xC2C) = 0xFFFFFFFF;
     }
     cUIState_onDestroyScreen(self);
@@ -365,19 +365,19 @@ extern "C" void cFEStateCharEquip_onDestroyScreen(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onGainFocus);
 #ifdef SKIP_ASM
-extern "C" void func_0019A308(void* self);
-extern "C" void func_0019A238(void* self);
-extern "C" void func_0019BC90(void* self);
-extern "C" void func_0019BD48(void* self, int a1);
+extern "C" void cFEStateCharEquip_initStorePreview(void* self);
+extern "C" void cFEStateCharEquip_initInventoryPreview(void* self);
+extern "C" void cFEStateCharEquip_updatePolyBar(void* self);
+extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(void* self, int a1);
 extern "C" void func_0019B618(void* self, int a1, int a2);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 
 /**
  * Gives the equip-gear state focus: sets up its mode's widgets, the points bars and the item rows.
  *
- * Runs func_0019A308() in store mode (0xC8 set; probably On Tour initStorePreview) or func_0019A238()
- * otherwise (initInventoryPreview), then the points bar (func_0019BC90) and the equip preview bar with no
- * extra cost (func_0019BD48), redraws the rows with a scroll reset (func_0019B618) and runs
+ * Runs cFEStateCharEquip_initStorePreview() in store mode (0xC8 set; probably On Tour initStorePreview) or cFEStateCharEquip_initInventoryPreview()
+ * otherwise (initInventoryPreview), then the points bar (cFEStateCharEquip_updatePolyBar) and the equip preview bar with no
+ * extra cost (cFEStateCharEquip_updatePolyEquipPreviewBar), redraws the rows with a scroll reset (func_0019B618) and runs
  * cFEState_onGainFocus().
  *
  * @param pPrevState  the state that had focus before, passed on to cFEState_onGainFocus()
@@ -386,12 +386,12 @@ extern "C" void cFEStateCharEquip_onGainFocus(void* self, int pPrevState)
 {
     bool off = !*(bool*)((char*)self + 0xC8);
     if (!off) {
-        func_0019A308(self);
+        cFEStateCharEquip_initStorePreview(self);
     } else {
-        func_0019A238(self);
+        cFEStateCharEquip_initInventoryPreview(self);
     }
-    func_0019BC90(self);
-    func_0019BD48(self, 0);
+    cFEStateCharEquip_updatePolyBar(self);
+    cFEStateCharEquip_updatePolyEquipPreviewBar(self, 0);
     func_0019B618(self, 1, 1);
     cFEState_onGainFocus(self, pPrevState);
 }
@@ -400,18 +400,18 @@ extern "C" void cFEStateCharEquip_onGainFocus(void* self, int pPrevState)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onLoseFocus);
 #ifdef SKIP_ASM
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* rider, int a1);
 
 /**
  * Clears two flags of the front-end rider record this equip screen works on when the screen loses focus.
  *
  * The record is entry @p self+0x44 (a signed char rider index) of the 0xCE0-byte records at SSXApp->RealFE +
- * 0xB0 (func_001A0548); cFERider_setVisible(record, 0) zeroes its words at +0xCC4 and +0xCC8.
+ * 0xB0 (cFERiderManager_getHuman1); cFERider_setVisible(record, 0) zeroes its words at +0xCC4 and +0xCC8.
  */
 extern "C" void cFEStateCharEquip_onLoseFocus(void* self)
 {
-    cFERider_setVisible(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    cFERider_setVisible(cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
 }
 #endif
 
@@ -432,7 +432,7 @@ extern "C" void func_0019B7E0_eate(void* self, int idx) __asm__("func_0019B7E0")
 
 extern "C" void func_0019BA60_eate(void* self, int idx) __asm__("func_0019BA60");
 
-extern "C" void func_0019BBA0_eate(void* self) __asm__("func_0019BBA0");
+extern "C" void cFEStateCharEquip_updateBankWidget_eate(void* self) __asm__("cFEStateCharEquip_updateBankWidget");
 
 extern char str_kT_CMNBuyGear[];
 
@@ -558,7 +558,7 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, void* w)
         }
     } else if (id == GetHashValue32(str_1right)) {
         self->f64 = w;
-        func_0019BBA0_eate(self);
+        cFEStateCharEquip_updateBankWidget_eate(self);
     } else if (id == GetHashValue32(str_2right)) {
         self->f68 = w;
         cUIText_setAsciiString_eate(self->f68, D_004A1408);
@@ -622,7 +622,7 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, void* w)
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" void func_0019BE80(void* self);
-extern "C" void func_0019BBA0(void* self);
+extern "C" void cFEStateCharEquip_updateBankWidget(void* self);
 struct sEquipDetail;
 extern "C" int func_0019B458(sEquipDetail* self, int idx);
 extern "C" void func_0019B618(void* self, int a1, int a2);
@@ -652,7 +652,7 @@ extern "C" void cFEStateCharEquip_onPopupEvent(void* self, void* widget, int msg
         }
         if (*(int*)((char*)widget + 0xC) == 7 && *(int*)((char*)widget + 0x6C) != 0) {
             func_0019BE80(self);
-            func_0019BBA0(self);
+            cFEStateCharEquip_updateBankWidget(self);
             if (func_0019B458((sEquipDetail*)self, *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95))) {
                 func_0019B618(self, 0, 1);
             }
@@ -673,9 +673,9 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_onUpdate(void* self);
 extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
 extern "C" void func_0019A9B8(void* self);
-extern "C" void func_0019A638(void* self);
-extern "C" void func_0019BFE8(void* self);
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void cFEStateCharEquip_updatePreviewLoad(void* self);
+extern "C" void cFEStateCharEquip_update3DPositions(void* self);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern char str_loading_text[];
 
 struct sVEntryK199938 {
@@ -690,7 +690,7 @@ struct sVEntryK199938 {
  * Runs the base update cUIState_onUpdate(); once the icon file (0xA64) is ready in the FE file cache, marks it
  * (0xA60) and refreshes the selected item's preview (func_0019A9B8). "loading text" shows in store mode while
  * a large preview is pending (0xA6C, 0x95C), otherwise until the FE rider's model is shown (+0xCC8). Then
- * func_0019A638() advances the preview load and func_0019BFE8() places the camera and models.
+ * cFEStateCharEquip_updatePreviewLoad() advances the preview load and cFEStateCharEquip_update3DPositions() places the camera and models.
  */
 extern "C" void cFEStateCharEquip_onUpdate(void* self)
 {
@@ -704,7 +704,7 @@ extern "C" void cFEStateCharEquip_onUpdate(void* self)
     void* screen = cList_first((cList*)((char*)self + 0x24));
     char* obj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_loading_text));
     if (obj != 0) {
-        char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
+        char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
         int on = 0;
         int mode1 = *(int*)((char*)self + 0xC8) == 1;
         if (mode1) {
@@ -717,8 +717,8 @@ extern "C" void cFEStateCharEquip_onUpdate(void* self)
         sVEntryK199938* vt = *(sVEntryK199938**)(obj + 8);
         vt[9].fn(obj + vt[9].delta, on);
     }
-    func_0019A638(self);
-    func_0019BFE8(self);
+    cFEStateCharEquip_updatePreviewLoad(self);
+    cFEStateCharEquip_update3DPositions(self);
 }
 #endif
 
@@ -826,18 +826,18 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetEvent);
 extern "C" void cFEStateCharEquip_updateHeading(void* self, int id);
 extern "C" void func_0019B180(void* self, int id);
 extern "C" void func_0019B618(void* self, int a1, int a2);
-extern "C" void func_0019A4E8(void* self, int a1);
+extern "C" void cFEStateCharEquip_startLargePreviewLoad(void* self, int a1);
 extern "C" void func_0019A9B8(void* self);
 extern "C" void func_0019ACA0(void* self);
 extern "C" int func_0019BEE8(void* self);
 extern "C" void func_0019C7E8(void* self, void* item);
-extern "C" void func_0019BC90(void* self);
-extern "C" void func_0019BD48(void* self, int a1);
+extern "C" void cFEStateCharEquip_updatePolyBar(void* self);
+extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(void* self, int a1);
 extern "C" int func_0014B478(void* self, int a1, int a2);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern int D_004A11E0;
 extern int D_004A18D8;
 
@@ -948,8 +948,8 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, char* w, unsigned i
             return;
         self->spent = func_0014B478(iface, self->team, self->slot);
         func_0019B618(self, 0, 1);
-        func_0019BC90(self);
-        func_0019BD48(self, *(int*)((char*)vals + (*(int*)(w + 0x18) << 2)));
+        cFEStateCharEquip_updatePolyBar(self);
+        cFEStateCharEquip_updatePolyEquipPreviewBar(self, *(int*)((char*)vals + (*(int*)(w + 0x18) << 2)));
         func_0019ACA0(self);
         return;
     }
@@ -962,7 +962,7 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, char* w, unsigned i
             func_0019B180(self, *(int*)((char*)stack + ((self->depth - 1) << 2)));
             func_0019B618(self, 1, 1);
         } else {
-            char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, self->team);
+            char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->team);
             *(int*)(feRider + 0xC20) = 0;
             *(int*)(feRider + 0xC1C) = 1;
             char* obj = *(char**)self->menu;
@@ -975,7 +975,7 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, char* w, unsigned i
     }
     case 1:
         if (isMode1_9C28(self))
-            func_0019A4E8(self, 1);
+            cFEStateCharEquip_startLargePreviewLoad(self, 1);
         func_0019A9B8(self);
         break;
     }
@@ -986,7 +986,7 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, char* w, unsigned i
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetMenu);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_0019A3D0(void* self);
+extern "C" void cFEStateCharEquip_switchEquipMode(void* self);
 extern int D_004A18D8;
 
 struct sEquipItem_9F20 {
@@ -1029,7 +1029,7 @@ static inline bool hasFlag_9F20(sEquipItem_9F20* item, int f)
  * and give 1. Event 6 (next) gives 0x101 for a category, any store item (its price test gives 0x101 either
  * way) or an inventory item whose points fit (row cost at 0xA78 plus 0xC4 at most 3392), else 0x110 (the
  * item's mSound[0]). Event 7 (back) steps the category depth (0x120) down and gives 1; 8 switches the mode
- * (func_0019A3D0) when allowed (0xAE4) and gives 0x101, else 0x100; 9 gives 0x100.
+ * (cFEStateCharEquip_switchEquipMode) when allowed (0xAE4) and gives 0x101, else 0x100; 9 gives 0x100.
  *
  * @param pMenu  the menu that sent the event (unused)
  * @param kind  the menu event
@@ -1077,7 +1077,7 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu
         break;
     case 8:
         if (self->fAE4 != 0) {
-            func_0019A3D0(self);
+            cFEStateCharEquip_switchEquipMode(self);
             return 257;
         }
         return 0x100;
@@ -1089,7 +1089,7 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A098);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_getIconID);
 #ifdef SKIP_ASM
 struct sEquipTable;
 // PORT: func_0019E2B0 returns a pointer through int (the unit defines it as int).
@@ -1132,7 +1132,7 @@ struct sVEK19A098b {
  * @param name  the icon name
  * @return the texture id (+0xA68), or -1 when the package is not loaded or has no such image
  */
-extern "C" int func_0019A098(void* self, const char* name)
+extern "C" int cFEStateCharEquip_getIconID(void* self, const char* name)
 {
     if (*(int*)((char*)self + 0xA60) == 0)
         return -1;
@@ -1167,7 +1167,7 @@ extern "C" int func_0019A098(void* self, const char* name)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A1E0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateIconTexturesLoad);
 #ifdef SKIP_ASM
 struct sEquipTable;
 extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
@@ -1179,7 +1179,7 @@ extern "C" void func_0019A9B8(void* self);
  * When +0xA60 is clear and the file manager reports the icon file ready (func_0019E238 on +0xBC, +0xA64), sets +0xA60
  * and calls func_0019A9B8. No call site was found in the asm.
  */
-extern "C" void func_0019A1E0(void* self)
+extern "C" void cFEStateCharEquip_updateIconTexturesLoad(void* self)
 {
     if (*(int*)((char*)self + 0xA60) == 0
         && func_0019E238((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70), *(int*)((char*)self + 0xBC),
@@ -1191,7 +1191,7 @@ extern "C" void func_0019A1E0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A238);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_initInventoryPreview);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
@@ -1211,7 +1211,7 @@ struct sVEntry0019A238 {
  * preview group (+0x80), shows the user's front-end rider (cFERider_setVisible with 1) and sets the camera state (+0xAE0) to
  * 1.
  */
-extern "C" void func_0019A238(void* self)
+extern "C" void cFEStateCharEquip_initInventoryPreview(void* self)
 {
     if (*(cUIText**)((char*)self + 0x48) != 0) {
         cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x48), GetHashValue32(str_kT_CMNEquipGear));
@@ -1231,13 +1231,13 @@ extern "C" void func_0019A238(void* self)
         sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 1);
     }
-    cFERider_setVisible(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 1);
+    cFERider_setVisible(cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 1);
     *(int*)((char*)self + 0xAE0) = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A308);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_initStorePreview);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
@@ -1256,7 +1256,7 @@ struct sVEntry0019A308 {
  * Titles it kT_CMNBuyGear (+0x48), hides the small icon preview group (+0x80) and the points group (+0x6C), hides the
  * user's front-end rider and shows the money group (+0x60).
  */
-extern "C" void func_0019A308(void* self)
+extern "C" void cFEStateCharEquip_initStorePreview(void* self)
 {
     if (*(cUIText**)((char*)self + 0x48) != 0) {
         cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x48), GetHashValue32(str_kT_CMNBuyGear));
@@ -1271,7 +1271,7 @@ extern "C" void func_0019A308(void* self)
         sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
-    cFERider_setVisible(func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    cFERider_setVisible(cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     widget = *(char**)((char*)self + 0x60);
     if (widget != 0) {
         sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
@@ -1281,7 +1281,7 @@ extern "C" void func_0019A308(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A3D0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_switchEquipMode);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
@@ -1306,22 +1306,22 @@ static inline int isDetailK19A3D0(void* self)
 /**
  * Switches the equip screen between the inventory (mode 0) and the store (mode 1) and lists the root category again.
  *
- * Flips +0xC8, sets the screen up for the new mode (func_0019A238 or func_0019A308) and labels the button help (+0x50)
+ * Flips +0xC8, sets the screen up for the new mode (cFEStateCharEquip_initInventoryPreview or cFEStateCharEquip_initStorePreview) and labels the button help (+0x50)
  * with the other mode (kT_CMNBuyGear in the inventory, kT_CMNEquipGear in the store). Then empties the category stack
  * (depth +0x120 = 0, the 80 bytes at +0xD0 filled with D_004A11D0), updates the heading and rebuilds and redraws the
  * list (func_0019B180, func_0019B618 with 1, 1).
  */
-extern "C" void func_0019A3D0(void* self)
+extern "C" void cFEStateCharEquip_switchEquipMode(void* self)
 {
     if (isDetailK19A3D0(self)) {
         *(int*)((char*)self + 0xC8) = 0;
-        func_0019A238(self);
+        cFEStateCharEquip_initInventoryPreview(self);
         if (*(cUIText**)((char*)self + 0x50) != 0) {
             cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x50), GetHashValue32(str_kT_CMNBuyGear));
         }
     } else {
         *(int*)((char*)self + 0xC8) = 1;
-        func_0019A308(self);
+        cFEStateCharEquip_initStorePreview(self);
         if (*(cUIText**)((char*)self + 0x50) != 0) {
             cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x50), GetHashValue32(str_kT_CMNEquipGear));
         }
@@ -1335,7 +1335,7 @@ extern "C" void func_0019A3D0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A498);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_cancelLargePreviewLoad);
 #ifdef SKIP_ASM
 struct sEquipTable_DC20;
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
@@ -1346,7 +1346,7 @@ extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
  * Releases the queued preview file (+0xA6C, func_0019DC20) if any, clears the file name (+0x960) and sets +0xA6C and
  * the delay (+0x95C) to -1.
  */
-extern "C" void func_0019A498(void* self)
+extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(void* self)
 {
     int idx = *(int*)((char*)self + 0xA6C);
     if (idx >= 0) {
@@ -1359,7 +1359,7 @@ extern "C" void func_0019A498(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A4E8);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_startLargePreviewLoad);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1368,7 +1368,7 @@ extern "C" char* func_0014B700(void* iface, int rider);
 extern "C" char* func_0041ACC0(const char* s, int c);
 extern "C" char* strncpy(char* dst, const char* src, int n);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_0019A498(void* self);
+extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(void* self);
 extern char str_pct_s_pct_spct_s[];
 
 static inline int isDigitK19A4E8(unsigned char c)
@@ -1379,7 +1379,7 @@ static inline int isDigitK19A4E8(unsigned char c)
 /**
  * Starts loading the large preview of the selected item after a delay.
  *
- * Cancels the previous load (func_0019A498), releases the old preview texture (+0xA74) and moves the current one
+ * Cancels the previous load (cFEStateCharEquip_cancelLargePreviewLoad), releases the old preview texture (+0xA74) and moves the current one
  * (+0xA70) there. For a selected row with a name (+0x30) sets the delay (+0x95C: 20 frames when @p flag is set, else 1)
  * and builds the file name at +0x960 as "%s_%s%s": the character's file name (func_0014B700) without the character
  * before its '.', the item name from its first digit, and the extension. The name buffer is both the destination and
@@ -1387,11 +1387,11 @@ static inline int isDigitK19A4E8(unsigned char c)
  *
  * @param flag  nonzero for the longer delay
  */
-extern "C" void func_0019A4E8(void* self, int flag)
+extern "C" void cFEStateCharEquip_startLargePreviewLoad(void* self, int flag)
 {
     if (*(void**)((char*)self + 0x5C) == 0)
         return;
-    func_0019A498(self);
+    cFEStateCharEquip_cancelLargePreviewLoad(self);
     releaseK199148(*(int*)((char*)self + 0xA74));
     *(int*)((char*)self + 0xA74) = *(int*)((char*)self + 0xA70);
     *(int*)((char*)self + 0xA70) = -1;
@@ -1423,7 +1423,7 @@ extern "C" void func_0019A4E8(void* self, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A638);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updatePreviewLoad);
 #ifdef SKIP_ASM
 struct sEquipTable;
 struct sEquipTable_DC20;
@@ -1448,7 +1448,7 @@ struct sVEntryK19A638 {
  * Once the queued file is ready, makes its texture (graphics manager vtable entry 46, kind "preview") into +0xA70, or
  * -1 when the file is empty, releases the file and refreshes the item preview (func_0019A9B8).
  */
-extern "C" void func_0019A638(void* self)
+extern "C" void cFEStateCharEquip_updatePreviewLoad(void* self)
 {
     int mode1 = *(int*)((char*)self + 0xC8) == 1;
     if (!mode1)
@@ -1479,7 +1479,7 @@ extern "C" void func_0019A638(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A758);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_cancelPreviewLoad);
 #ifdef SKIP_ASM
 extern "C" void func_0019FA78(void* a0, int a1);
 
@@ -1488,17 +1488,17 @@ extern "C" void func_0019FA78(void* a0, int a1);
  *
  * No call site was found in the asm.
  */
-extern "C" void func_0019A758(void* self)
+extern "C" void cFEStateCharEquip_cancelPreviewLoad(void* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
-        func_0019FA78(func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+        func_0019FA78(cFERiderManager_getHuman1(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019A798);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateHelpText);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIText;
@@ -1585,7 +1585,7 @@ static inline void setText_A798(void* self, char* s)
  * kT_FEHELPRemoveItems when the row's points would pass the limit D_004A18D8, else kT_FEYourCurrentOutfit. Shows the
  * help text again. Likely bug: both outcomes of the item's equipped test (entry flag 4) choose kT_FEYourCurrentOutfit.
  */
-extern "C" void func_0019A798(void* self)
+extern "C" void cFEStateCharEquip_updateHelpText(void* self)
 {
     if (*(cUIObj_A798**)((char*)self + 0x4C) == 0)
         return;
@@ -1636,11 +1636,11 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019A9B8);
 #ifdef SKIP_ASM
 extern "C" void func_0019AB78(void* self);
 extern "C" void func_0019AA08(void* self);
-extern "C" void func_0019A798(void* self);
+extern "C" void cFEStateCharEquip_updateHelpText(void* self);
 
 /**
  * Refreshes the equip screen's item preview for the current mode (func_0019AB78 in the store, func_0019AA08 in the
- * inventory) and then its help text (func_0019A798).
+ * inventory) and then its help text (cFEStateCharEquip_updateHelpText).
  */
 extern "C" void func_0019A9B8(void* self)
 {
@@ -1650,15 +1650,15 @@ extern "C" void func_0019A9B8(void* self)
     } else {
         func_0019AA08(self);
     }
-    func_0019A798(self);
+    cFEStateCharEquip_updateHelpText(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AA08);
 #ifdef SKIP_ASM
-extern "C" int func_0019A098(void* self, const char* name);
-extern "C" void func_0019BD48(void* self, int a1);
+extern "C" int cFEStateCharEquip_getIconID(void* self, const char* name);
+extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(void* self, int a1);
 
 struct sVEK19AA08 {
     short delta;
@@ -1677,7 +1677,7 @@ static inline void showK19AA08(char* o, int on)
  *
  * Hides the points group (+0x6C), the small bolt icon (+0x84) and the points cost (+0x7C). For an item (flag 4, not a
  * category) shows the points group, takes the row's points (+0xA78) and, when the icons are loaded and the item has a
- * name, shows the icon with its texture (func_0019A098). Finally updates the points preview bar (func_0019BD48) with
+ * name, shows the icon with its texture (cFEStateCharEquip_getIconID). Finally updates the points preview bar (cFEStateCharEquip_updatePolyEquipPreviewBar) with
  * the row's points, or 0.
  */
 extern "C" void func_0019AA08(void* self)
@@ -1706,7 +1706,7 @@ extern "C" void func_0019AA08(void* self)
                 rowValue = *(int*)((char*)self + ((idx - topIndex) << 2) + 0xA78);
                 if (iconWidget != 0 && *(char**)(item + 0x30) != 0 && *(int*)((char*)self + 0xA60) != 0) {
                     showK19AA08(iconWidget, 1);
-                    int iconId = func_0019A098(self, *(char**)(item + 0x30));
+                    int iconId = cFEStateCharEquip_getIconID(self, *(char**)(item + 0x30));
                     char* iconWidget2 = *(char**)((char*)self + 0x84);
                     *(int*)(iconWidget2 + 0x78) = iconId;
                     *(int*)(iconWidget2 + 0x7C) = 0;
@@ -1714,7 +1714,7 @@ extern "C" void func_0019AA08(void* self)
             }
         }
     }
-    func_0019BD48(self, rowValue);
+    cFEStateCharEquip_updatePolyEquipPreviewBar(self, rowValue);
 }
 #endif
 
@@ -1779,7 +1779,7 @@ extern "C" void func_0019AB78(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019ACA0);
 #ifdef SKIP_ASM
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1793,7 +1793,7 @@ extern "C" void func_0019FBE0(void* rider, void* item, int a2, int a3);
  */
 extern "C" void func_0019ACA0(void* self)
 {
-    void* rider = func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
+    void* rider = cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
     func_0019FBE0(rider, func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC)), 0, 1);
 }
 #endif
@@ -2563,7 +2563,7 @@ extern "C" void func_0019BA60(void* equipState, int i)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019BBA0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateBankWidget);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
@@ -2572,7 +2572,7 @@ extern "C" const char* getDollarString(void* a0);
 /**
  * Shows the money (+0xC0) in the bank text (+0x64) through getDollarString.
  */
-extern "C" void func_0019BBA0(void* self)
+extern "C" void cFEStateCharEquip_updateBankWidget(void* self)
 {
     if (*(cUIText**)((char*)self + 0x64) != 0) {
         cUIText_setAsciiString(*(cUIText**)((char*)self + 0x64), getDollarString(*(void**)((char*)self + 0xC0)));
@@ -2633,7 +2633,7 @@ extern "C" void cFEStateCharEquip_updateHeading(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019BC90);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updatePolyBar);
 #ifdef SKIP_ASM
 extern int D_004A18D8;
 
@@ -2654,7 +2654,7 @@ struct sVec3K19BC90 {
  * The bar's scale (+0x50) becomes (1, -t, 1) with t = (points - 1500) / (D_004A18D8 - 1500), not below 0 (there is no
  * upper clamp).
  */
-extern "C" void func_0019BC90(void* self)
+extern "C" void cFEStateCharEquip_updatePolyBar(void* self)
 {
     char* pointsBar = *(char**)((char*)self + 0x70);
     if (pointsBar != 0) {
@@ -2670,7 +2670,7 @@ extern "C" void func_0019BC90(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019BD48);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updatePolyEquipPreviewBar);
 #ifdef SKIP_ASM
 extern int D_004A18D8;
 extern char D_004C66E8[];
@@ -2701,7 +2701,7 @@ struct sVEntryIK19BD48 {
  *
  * @param delta  the selected item's points
  */
-extern "C" void func_0019BD48(void* self, int delta)
+extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(void* self, int delta)
 {
     if (*(void**)((char*)self + 0x74) == 0)
         return;
@@ -2821,13 +2821,13 @@ extern "C" void func_0019BFE0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE8);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_update3DPositions);
 #ifdef SKIP_ASM
 // FAKEMATCH: identical arms `if (self) { state = 2; } else { state = 2; }` in the state-3 arrival test (cross-jumping merges them after
 // reload; before that they lengthen yaw's live range from 166 to 169 insns, so global-alloc ranks the 0.0174533 constant above yaw and
 // they take retail's fs3/fs4); plain form 99.95%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void func_0031BE50(float angle, float* s, float* c);
 
 struct sQuat_BFE8
@@ -2846,8 +2846,8 @@ struct sXform_BFE8
 extern sQuat_BFE8 t4vect_XAxis;
 extern sQuat_BFE8 t4vect_YAxis;
 extern sQuat_BFE8 t4vect_ZAxis;
-extern "C" void func_0019F3E8(void* rider, sXform_BFE8* xf);
-extern "C" void func_0019F548(void* rider, sXform_BFE8* xf);
+extern "C" void cFERider_setPose(void* rider, sXform_BFE8* xf);
+extern "C" void cFERider_setBoardPose(void* rider, sXform_BFE8* xf);
 extern "C" void func_0015E050(void* cam, sQuat_BFE8* a, sQuat_BFE8* b);
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
@@ -2948,16 +2948,16 @@ static inline float VecDot_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
  * (-105, -100 + zoom x 320, -80 + pan x zoom x 65) (zoom +0xAA4, pan +0xAA8) and the board at (265.75, -1073.5, -232);
  * state 2 puts the rider at (-250, -650, -215) and the board at (-100, 45, 15); states 3 and 4 ease (0.2 of the gap per
  * call) toward the state-2 and state-1 positions and switch to that state when close. The rider (+0xAC0) is turned
- * +0xAAC + 80 degrees about Z (func_0019F3E8); the board (+0xAD0) is turned 245 degrees about Z, 320 about Y and its
- * spin angle (+0xAB0, one degree more per call) + 90 about X (func_0019F548). Always places the camera (RealFE + 0x10,
+ * +0xAAC + 80 degrees about Z (cFERider_setPose); the board (+0xAD0) is turned 245 degrees about Z, 320 about Y and its
+ * spin angle (+0xAB0, one degree more per call) + 90 about X (cFERider_setBoardPose). Always places the camera (RealFE + 0x10,
  * func_0015E050) at (-110, 394, 0) looking at (-35, 0, 0) and stores 0.43633 (25 degrees) in its first word.
  *
  * @param vself  the equip state
  */
-extern "C" void func_0019BFE8(void* vself)
+extern "C" void cFEStateCharEquip_update3DPositions(void* vself)
 {
     char* self = (char*)vself;
-    char* rider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
+    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;
@@ -3043,7 +3043,7 @@ extern "C" void func_0019BFE8(void* vself)
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_XAxis, zero));
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_YAxis, zero));
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_ZAxis, (yaw + 80.0f) * 0.01745329424738884f));
-        func_0019F3E8(rider, &xf);
+        cFERider_setPose(rider, &xf);
         xf.pos = *(sQuat_BFE8*)(self + 0xAD0);
         xf.rot.w = 1.0f;
         xf.rot.x = zero;
@@ -3056,7 +3056,7 @@ extern "C" void func_0019BFE8(void* vself)
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_ZAxis, 245.0f * 0.01745329424738884f));
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_YAxis, 320.0f * 0.01745329424738884f));
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_XAxis, (*(float*)(self + 0xAB0) + 90.0f) * 0.01745329424738884f));
-        func_0019F548(rider, &xf);
+        cFERider_setBoardPose(rider, &xf);
     }
     char* cam = (char*)SSXApp->RealFE;
     sQuat_BFE8 pos;
@@ -4850,13 +4850,13 @@ struct sSlot0019E498 {
     char pad[7];
 };
 
-extern "C" void func_0019EBA0(void* self);
+extern "C" void cFERider_purge(void* self);
 void operator_delete(int* p);
 
 /**
  * Destroys a front-end rider: unloads it and releases its textures.
  *
- * Calls func_0019EBA0 (deletes the animation model at +0x8 and the objects at +0xC, +0xC70 and +0xC74), then for each
+ * Calls cFERider_purge (deletes the animation model at +0x8 and the objects at +0xC, +0xC70 and +0xC74), then for each
  * of the 256 texture entries at +0x1C with an id >= 0 calls GrMan's virtual slot 50 with the id; every entry's id
  * becomes -1 and its flag 0. Frees the rider when bit 0 of @p flags is set.
  *
@@ -4865,7 +4865,7 @@ void operator_delete(int* p);
 extern "C" void cFERider__cFERider(void* self, int flags)
 {
     sSlot0019E498* slot = (sSlot0019E498*)((char*)self + 0x1C);
-    func_0019EBA0(self);
+    cFERider_purge(self);
     int i;
     int none = -1;
     for (i = 0xFF; i >= 0; i--, slot++) {

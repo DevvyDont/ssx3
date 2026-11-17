@@ -8,7 +8,7 @@ INCLUDE_ASM("fe/festatecharequip", cFE_cFE);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* cFadeScreen_cFadeScreen(void* self);
 extern "C" void* cSimpleCamera_cSimpleCamera(void* self);
-extern "C" void* func_001A03C0(void* self);
+extern "C" void* cFERiderManager_cFERiderManager(void* self);
 extern "C" void* func_0019CDF0(void* self);
 // PORT: called with an extra int in $a1 here; func_0015D700's body is (self, x, y, z). Bound by asm label.
 void func_0015D700_i(void* self, int a1, float x, float y, float z) __asm__("func_0015D700");
@@ -44,7 +44,7 @@ extern "C" void* cFE_cFE(void* self)
     *(void***)((char*)self + 0x0) = D_0046D878;
     cSimpleCamera_cSimpleCamera((char*)self + 0x10);
     *(void***)((char*)self + 0xA0) = D_0046D8D8;
-    func_001A03C0((char*)self + 0xB0);
+    cFERiderManager_cFERiderManager((char*)self + 0xB0);
     func_0019CDF0((char*)self + 0x1A70);
     *(cFEObjK1956F8_70**)((char*)self + 0xC) = new (str_UIEngine, 0, 0) cFEObjK1956F8_70;
     func_0015D700_i((char*)self + 0x10, 0, 0.7853981852531433f, 5.0f, 5000.0f);
@@ -54,14 +54,14 @@ extern "C" void* cFE_cFE(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequip", func_001957D0);
+INCLUDE_ASM("fe/festatecharequip", cFE__cFE);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 extern "C" void func_00397B70(void* p, int flags);
 extern "C" void cGraphicsMan_PurgeTextures(void* p);
 extern "C" void cFXLoader__cFXLoader(void* p, int flags);
 extern "C" void func_0019CE20(void* p, int flags);
-extern "C" void func_001A0420(void* p, int flags);
+extern "C" void cFERiderManager__cFERiderManager(void* p, int flags);
 extern void* D_0046D878[];
 extern void* D_0046D970[];
 extern void* cSimpleCamera_vtbl[];
@@ -71,13 +71,13 @@ extern void* cSimpleCamera_vtbl[];
  *
  * Stores the vtable D_0046D878, destroys the UI engine (+0xC, func_00397B70 with 3), purges the graphics manager's
  * textures, destroys the FX loader (+0xB5AA0) when present, then the file manager (+0x1A70, func_0019CE20) and the
- * rider manager (+0xB0, func_001A0420), resets the camera's (+0x10) vtable word (+0xA0) to cSimpleCamera_vtbl and
+ * rider manager (+0xB0, cFERiderManager__cFERiderManager), resets the camera's (+0x10) vtable word (+0xA0) to cSimpleCamera_vtbl and
  * stores the base vtable D_0046D970. Calls operator_delete when bit 0 of @p flags is set. cRealFE__cRealFE calls it as
  * its base destructor.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001957D0(void* self, int flags)
+extern "C" void cFE__cFE(void* self, int flags)
 {
     *(void***)((char*)self + 0x0) = D_0046D878;
     if (*(void**)((char*)self + 0xC) != 0) {
@@ -88,7 +88,7 @@ extern "C" void func_001957D0(void* self, int flags)
         cFXLoader__cFXLoader(*(void**)((char*)self + 0xB5AA0), 3);
     }
     func_0019CE20((char*)self + 0x1A70, 2);
-    func_001A0420((char*)self + 0xB0, 2);
+    cFERiderManager__cFERiderManager((char*)self + 0xB0, 2);
     *(void***)((char*)self + 0xA0) = cSimpleCamera_vtbl;
     *(void***)((char*)self + 0x0) = D_0046D970;
     if (flags & 1) {
@@ -130,25 +130,25 @@ extern "C" void* cFELocale_cFELocale(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequip", func_001958F0);
+INCLUDE_ASM("fe/festatecharequip", cFELocale__cFELocale);
 #ifdef SKIP_ASM
 extern void* D_0046BF98[];
 extern void* D_0046D848[];
-extern "C" void func_00195948(void* self);
+extern "C" void cFELocale_deleteAllFiles(void* self);
 void operator_delete(int* p);
 
 /**
  * Destroys the front-end locale, freeing it when asked.
  *
- * Stores the cFELocale vtable D_0046BF98 at +0x4, deletes all its string files (func_00195948), stores the base vtable
+ * Stores the cFELocale vtable D_0046BF98 at +0x4, deletes all its string files (cFELocale_deleteAllFiles), stores the base vtable
  * D_0046D848 and calls operator_delete when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001958F0(void* self, int flags)
+extern "C" void cFELocale__cFELocale(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = D_0046BF98;
-    func_00195948(self);
+    cFELocale_deleteAllFiles(self);
     *(void***)((char*)self + 0x4) = D_0046D848;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -157,14 +157,14 @@ extern "C" void func_001958F0(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequip", func_00195948);
+INCLUDE_ASM("fe/festatecharequip", cFELocale_deleteAllFiles);
 #ifdef SKIP_ASM
 extern "C" void func_00195A50(void* self, int i);
 
 /**
  * Deletes all 20 string files of the front-end locale (func_00195A50 for each index).
  */
-extern "C" void func_00195948(void* self)
+extern "C" void cFELocale_deleteAllFiles(void* self)
 {
     signed char i;
     for (i = 0; i < 20; i++) {

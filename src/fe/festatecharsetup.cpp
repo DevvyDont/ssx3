@@ -15,8 +15,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void cFEStateCharSetup_updateWidget(void* self);
-extern "C" void func_001A0570(void* self, int i, int v);
-extern "C" void func_001A0508(void* self, int idx, int a2, int a3);
+extern "C" void cFERiderManager_setHumanVisible(void* self, int i, int v);
+extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* snd, int a);
 extern signed char D_00535C11[];
@@ -91,8 +91,8 @@ extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
     int charId = cBENewPlayerInterface_getPlayerCharID(iface, self->player);
     sVEntry_182928* vt = *(sVEntry_182928**)(iface + 0xC);
     vt[2].fn(iface + vt[2].delta);
-    func_001A0570((char*)SSXApp->RealFE + 0xB0, self->player, 0);
-    func_001A0508((char*)SSXApp->RealFE + 0xB0, self->player, charId, 0);
+    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, self->player, 0);
+    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->player, charId, 0);
     func_0028F140(cAudioInterface_bxAudio(), 1);
     cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_title));
     if (txt != 0) {
@@ -300,10 +300,10 @@ extern "C" void cFEStateCharSetup_updateWidget(void* self)
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_updateCharacter3DPos);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern "C" void* func_001A0548(void* self, int idx);
+extern "C" void* cFERiderManager_getHuman1(void* self, int idx);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
-extern "C" void func_001A0358(void* rider);
+extern "C" void cFERider_speak(void* rider);
 extern "C" void cFERider_setVisible(void* self, int a1);
 
 struct sQuat_182EC0
@@ -322,8 +322,8 @@ struct sXform_182EC0
 extern sQuat_182EC0 t4vect_XAxis;
 extern sQuat_182EC0 t4vect_YAxis;
 extern sQuat_182EC0 t4vect_ZAxis;
-extern "C" void func_0019F3E8(void* rider, sXform_182EC0* xf);
-extern "C" void func_0019F548(void* rider, sXform_182EC0* xf);
+extern "C" void cFERider_setPose(void* rider, sXform_182EC0* xf);
+extern "C" void cFERider_setBoardPose(void* rider, sXform_182EC0* xf);
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sQuat_182EC0 QuatMul_182EC0(const sQuat_182EC0& a, const sQuat_182EC0& b)
@@ -358,10 +358,10 @@ static inline sQuat_182EC0 AxisAngle_182EC0(const sQuat_182EC0& axis, float angl
 /**
  * Places the user's front-end rider on the character-setup screen and restarts its animation when asked.
  *
- * Gets the user's rider (func_001A0548). When it has a valid character loaded (id below 10, +0xCB8 and +0xCB4 set) and
- * the show-rider flag (+0x4C) is set: sets the rider pose (func_0019F3E8) to position (136, -250, -82) turned 100
- * degrees about Z, moves the board out of view to (0, 10000, 0) (func_0019F548), and when +0x48 is set resets the rider
- * animation and plays animation 435, clears the rider's +0xCCC and +0x48 and calls func_001A0358 on the rider; finally
+ * Gets the user's rider (cFERiderManager_getHuman1). When it has a valid character loaded (id below 10, +0xCB8 and +0xCB4 set) and
+ * the show-rider flag (+0x4C) is set: sets the rider pose (cFERider_setPose) to position (136, -250, -82) turned 100
+ * degrees about Z, moves the board out of view to (0, 10000, 0) (cFERider_setBoardPose), and when +0x48 is set resets the rider
+ * animation and plays animation 435, clears the rider's +0xCCC and +0x48 and calls cFERider_speak on the rider; finally
  * makes the rider visible (cFERider_setVisible).
  *
  * @param self_  the character-setup (or rider-detail) state
@@ -369,7 +369,7 @@ static inline sQuat_182EC0 AxisAngle_182EC0(const sQuat_182EC0& axis, float angl
 extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self_)
 {
     char* self = (char*)self_;
-    char* rider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
+    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;
@@ -393,7 +393,7 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self_)
         }
         xf.rot = QuatMul_182EC0(xf.rot, AxisAngle_182EC0(t4vect_YAxis, 0.0f));
         xf.rot = QuatMul_182EC0(xf.rot, AxisAngle_182EC0(t4vect_ZAxis, 1.7453293800354004f));
-        func_0019F3E8(rider, &xf);
+        cFERider_setPose(rider, &xf);
         {
             sQuat_182EC0 position;
             position.x = 0.0f;
@@ -402,7 +402,7 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self_)
             position.w = 1.0f;
             xf.pos = position;
         }
-        func_0019F548(rider, &xf);
+        cFERider_setBoardPose(rider, &xf);
         if (*(int*)(self + 0x48) != 0) {
             void* anim = *(void**)(rider + 0xC);
             if (anim != 0) {
@@ -411,7 +411,7 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self_)
             }
             *(int*)(rider + 0xCCC) = 0;
             *(int*)(self + 0x48) = 0;
-            func_001A0358(rider);
+            cFERider_speak(rider);
         }
         cFERider_setVisible(rider, 1);
     }
@@ -421,7 +421,7 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self_)
 //100%
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_show3DCharacter);
 #ifdef SKIP_ASM
-extern "C" void* func_001A0548(void* self, int a1);
+extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
 
 /**
@@ -437,7 +437,7 @@ extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int on)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
-        void* rider = func_001A0548(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
+        void* rider = cFERiderManager_getHuman1(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
         if (on == 0) {
             cFERider_setVisible(rider, 0);
         }
@@ -453,14 +453,14 @@ extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int on)
 INCLUDE_ASM("fe/festatecharsetup", cFEStateRiderDetail_cFEStateRiderDetail);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateCharSetup_cFEStateCharSetup(void* self, void* engine, signed char idx);
-extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern void* cFEStateRiderDetail_vtbl[];
 
 /**
  * Constructs the rider-detail state for a user on top of the character-setup state.
  *
  * Runs the character-setup constructor (cFEStateCharSetup_cFEStateCharSetup), then sets state id 13, the cFEStateRiderDetail_vtbl vtable, the
- * user (+0x44), func_001A1CD0's value for the user at +0x15 and clears the show-rider flag (+0x4C).
+ * user (+0x44), cFECustom_getPlayerCtrlMask's value for the user at +0x15 and clears the show-rider flag (+0x4C).
  *
  * @param engine  the UI engine
  * @param idx  the user (controller) index
@@ -472,7 +472,7 @@ extern "C" void* cFEStateRiderDetail_cFEStateRiderDetail(void* self, void* engin
     *(int*)((char*)self + 0xC) = 13;
     *(void***)((char*)self + 0x8) = cFEStateRiderDetail_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
-    *(unsigned char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    *(unsigned char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
     *(int*)((char*)self + 0x4C) = 0;
     return self;
 }

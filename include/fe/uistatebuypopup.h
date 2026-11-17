@@ -44,7 +44,7 @@ struct cUIStateBuyPopup {
                                     //       (onCreateScreen); cUIStateBuyPopup_cUIStateBuyPopup reads *mpEngine for the controller bits
     signed char mCurrentCtrl;       // 0x014 [O]; [R] cUIState ctor stores -1
     unsigned char mCtrlBits;        // 0x015 [O]; [R] cUIState ctor 0xF, then cUIStateBuyPopup_cUIStateBuyPopup stores
-                                    //       func_001A1CD0(*mpEngine, userNum) when there is an input object
+                                    //       cFECustom_getPlayerCtrlMask(*mpEngine, userNum) when there is an input object
     char unk_016[0x2];              // 0x016 padding
     int miMiscData;                 // 0x018 [O]; [P] cUIState::getMiscData
     int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes); [P] lw/sw the word; [R] ctor sh 0x218

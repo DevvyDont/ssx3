@@ -994,7 +994,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_startFELoad);
 #ifdef SKIP_ASM
 extern int cFEPopupConfirm_mUsePreFE;
 extern char str_FEModule[];
-extern "C" void* func_001A1CE8(void* p);
+extern "C" void* cRealFE_cRealFE(void* p);
 extern "C" void* cDebugFE_cDebugFE(void* p);
 
 /**
@@ -1007,7 +1007,7 @@ extern "C" void cSSXApp_startFELoad(cSSXApp* self)
 {
     cFEPopupConfirm_mUsePreFE = 0;
     if (self->unk_60 != 0) {
-        void* frontEnd = func_001A1CE8(cMemMan_alloc(0xB5AE0, str_FEModule, 0, 0));
+        void* frontEnd = cRealFE_cRealFE(cMemMan_alloc(0xB5AE0, str_FEModule, 0, 0));
         *(void**)&self->RealFE = frontEnd;
         cAppMan_setNextModule((cAppMan*)self, (unsigned int)frontEnd);
     } else {

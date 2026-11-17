@@ -6,7 +6,7 @@
 // mask, orientation offset). Its methods live in animation/rideranimbase.cpp (EA's cRiderAnimBase::play, reset,
 // changeHeadingOffset, changeOrientationOffset, getAIAnimFrame ...).
 //
-// Derived class: cRiderAnim (`cMemMan_alloc(0x70, "RiderAnim")` in func_0019ED80; its ctor cRiderAnim_cRiderAnim calls
+// Derived class: cRiderAnim (`cMemMan_alloc(0x70, "RiderAnim")` in cFERider_compileModel; its ctor cRiderAnim_cRiderAnim calls
 // cRiderAnimBase_cRiderAnimBase, then stores its own vtable cRiderAnim_vtbl at 0x58 and its fields at 0x60 and 0x64).
 // cRider holds one at mRiderAnim (0x784).
 //

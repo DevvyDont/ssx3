@@ -74,31 +74,31 @@ INCLUDE_ASM("fe/fememcard2", cFEMemCard_setMenuHighlight);
 
 INCLUDE_ASM("fe/fememcard2", cFEMemCard_SetLoadPressed);
 
-INCLUDE_ASM("fe/fememcard2", func_001D9368);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_updateStart);
 
-INCLUDE_ASM("fe/fememcard2", func_001D93A8);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_updateChecking);
 
-INCLUDE_ASM("fe/fememcard2", func_001D93B0);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_updateSkip);
 
-INCLUDE_ASM("fe/fememcard2", func_001D93C0);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_updateSaving);
 
-INCLUDE_ASM("fe/fememcard2", func_001D93C8);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_updateDeleting);
 
-INCLUDE_ASM("fe/fememcard2", func_001D93D0);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_updateLoading);
 
-INCLUDE_ASM("fe/fememcard2", func_001D93D8);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_onLoseTransition);
 
-INCLUDE_ASM("fe/fememcard2", func_001D93E8);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_triggerArrowPulse);
 
 INCLUDE_ASM("fe/fememcard2", cFEMemCard_triggerDisplayState);
 
 INCLUDE_ASM("fe/fememcard2", cFEMemCard_checkNextAvailableDevice);
 
-INCLUDE_ASM("fe/fememcard2", func_001D9818);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_onGainFocus);
 
-INCLUDE_ASM("fe/fememcard2", func_001D9878);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_onLoseFocus);
 
-INCLUDE_ASM("fe/fememcard2", func_001D9880);
+INCLUDE_ASM("fe/fememcard2", cFEMemCard_displayFileOK);
 
 INCLUDE_ASM("fe/fememcard2", cFEMemCard_createReadBuffer);
 
@@ -112,5 +112,5 @@ INCLUDE_ASM("fe/fememcard2", cFEPopupConfirm_setMessage);
 
 INCLUDE_ASM("fe/fememcard2", cFEPopupConfirm_setDefaultButton);
 
-INCLUDE_ASM("fe/fememcard2", func_001D9D48);
+INCLUDE_ASM("fe/fememcard2", cFEStateNetHelpPopup_cFEStateNetHelpPopup);
 

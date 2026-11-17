@@ -47,7 +47,7 @@ struct cOVState_MESSAGECENTER {
     // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] cUIEngine_addScreenByHashName
-                                    //       (func_001E3D58), cUITextureBank_getElementByHashname(mpEngine + 0x58, hash) in the ctor
+                                    //       (cOVState_MESSAGECENTER_onCreateScreen), cUITextureBank_getElementByHashname(mpEngine + 0x58, hash) in the ctor
     signed char mCurrentCtrl;       // 0x014 [O]; [R] ctor stores -1
     unsigned char mCtrlBits;        // 0x015 [O]; [R] ctor stores 0xF
     char unk_016[0x2];              // 0x016 padding
@@ -68,7 +68,7 @@ struct cOVState_MESSAGECENTER {
     char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (D_004A2088, sh)
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] cOVState_MESSAGECENTER_cOVState_MESSAGECENTER stores its third argument (0x22)
     // --- cOVState_MESSAGECENTER
-    cUIThing* mpUnreadMail[8];      // 0x09C [R] ctor zeroes 8; [U] onWidgetCreate (func_001E3EC0): widgets "UnreadMail%d";
+    cUIThing* mpUnreadMail[8];      // 0x09C [R] ctor zeroes 8; [U] onWidgetCreate (cOVState_MESSAGECENTER_onWidgetCreate): widgets "UnreadMail%d";
                                     //       func_001E48B0/func_001E4C78 show/hide row i's
     cUIThing* mpFAQIcon[8];         // 0x0BC [R] zeroed; [U] widgets "FAQIcon%d"; func_001E4C78 sets them to the folder /
                                     //       minus-folder / question-mark texture (miFolderTex ...)
@@ -80,9 +80,9 @@ struct cOVState_MESSAGECENTER {
     cUIText* mpTotalMessagesLabel;  // 0x13C [R] zeroed; [U] widget "TotalMessagesLabel"; func_001E4758 prints the count
                                     //       (kT_OVRCMNTotalMsg)
     cUIText* mpUnreadMessagesLabel; // 0x140 [R] zeroed; [U] widget "UnreadMessagesLabel"; func_001E4758 (kT_OVRCMNUnread)
-    cUIMenu* mpMenu;                // 0x144 [R] zeroed; [U] widget "MenuFroms"; cUIMenu_setScrollableMenu (func_001E3D58,
-                                    //       func_001E48B0), cUIMenu_setSelectedByIndex (func_001E4168); its byte 0x95 is
-                                    //       read/written as the selected row (func_001E4458, func_001E5148, func_001E4200)
+    cUIMenu* mpMenu;                // 0x144 [R] zeroed; [U] widget "MenuFroms"; cUIMenu_setScrollableMenu (cOVState_MESSAGECENTER_onCreateScreen,
+                                    //       func_001E48B0), cUIMenu_setSelectedByIndex (cOVState_MESSAGECENTER_onGainFocus); its byte 0x95 is
+                                    //       read/written as the selected row (func_001E4458, func_001E5148, cOVState_MESSAGECENTER_onWidgetEvent)
     cUIThing* mpNoMessage;          // 0x148 [U] widget "NoMessage" (hidden on creation, vt slot 9); not zeroed by the ctor
     cUIThing* mpButtonSquare;       // 0x14C [R] zeroed; [U] widget named by D_004A20A8 ("ps2sq"); func_001E4458 /
                                     //       func_001E48B0 show or hide it
@@ -95,14 +95,14 @@ struct cOVState_MESSAGECENTER {
     int miFolderTex;                // 0x164 [R] = cUITextureBank_getElementByHashname(mpEngine + 0x58, hash("folder")); [U] func_001E4C78
     int miMinusFolderTex;           // 0x168 [R] = cUITextureBank_getElementByHashname(mpEngine + 0x58, hash("minus folder")); [U] func_001E4C78
     int miQuestionMarkTex;          // 0x16C [R] = cUITextureBank_getElementByHashname(mpEngine + 0x58, hash("questmark")); [U] func_001E4C78
-    int mbMessageDeleted;           // 0x170 [U] onWidgetEvent (func_001E4200) event 7 stores 0, then 1 once func_001E5148
-                                    //       has removed the selected message (func_001E31B8); onWidgetMenu (func_001E4578)
+    int mbMessageDeleted;           // 0x170 [U] onWidgetEvent (cOVState_MESSAGECENTER_onWidgetEvent) event 7 stores 0, then 1 once func_001E5148
+                                    //       has removed the selected message (func_001E31B8); onWidgetMenu (cOVState_MESSAGECENTER_onWidgetMenu)
                                     //       event 8 returns it != 0; not set by the ctor (name is a guess from that use)
     int mScrollOffset;              // 0x174 [U] onCreateScreen zeroes it; onWidgetMenu event 4 stores the menu's value;
                                     //       func_001E48B0 / func_001E4658 / func_001E4C78 offset the rows by it (lw;
                                     //       func_001E48B0 also reads its low byte with lbu for the menu's byte 0x98)
     int unk_178;                    // 0x178 no access seen (placed by the 0x180 size)
-    cUIScreen* mpMessageScreen;     // 0x17C [U] onCreateScreen (func_001E3D58) stores the "112messagecenter" screen
+    cUIScreen* mpMessageScreen;     // 0x17C [U] onCreateScreen (cOVState_MESSAGECENTER_onCreateScreen) stores the "112messagecenter" screen
                                     //       (cUIEngine_addScreenByHashName, then cUIScreen_playFrame); func_001E50C8 reads
                                     //       its word at 0xD0 (the screen's engine path to the state stack); onWidgetEvent
                                     //       plays its "TransitionOut" frame

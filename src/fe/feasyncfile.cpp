@@ -3267,7 +3267,7 @@ extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" void func_00262690(void* self, int a1, void* a2);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
-extern "C" void func_001CE468(void* self, int v);
+extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(void* self, int v);
 extern "C" void func_001A81F0(cFEStateReadMessagePopup* self);
 extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A7ED8(cFEStateReadMessagePopup* self, const char* name);
@@ -3319,7 +3319,7 @@ extern "C" void cFEStateReadMessagePopup_onWidgetEvent(cFEStateReadMessagePopup*
         func_001A9090((cFEStateNet*)self, 0, (int)self->mszSender, (int)D_004A1408, 0, 0, 0x3F);
         *(int*)((char*)self->mpKeyboard + 0x43C) = 0;
         cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
-        func_001CE468(self->mpKeyboard, 1);
+        cKeyboardPopup_setIncludeQuickKeyRow(self->mpKeyboard, 1);
         *(int*)((char*)self->mpKeyboard + 0x438) = 1;
         break;
     case 7:
@@ -4195,7 +4195,7 @@ public:
 };
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_001D9D48(void* mem, void* a1, void* owner);
+extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup(void* mem, void* a1, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char str_cFEStateNetHelpPopup[];
 
@@ -4203,7 +4203,7 @@ extern char str_cFEStateNetHelpPopup[];
  * Default widget-event handling for the online front-end states: event 7 opens the help popup.
  *
  * When @p pWidget is set and @p msg is 7, allocates a cFEStateNetHelpPopup (cMemMan_alloc(320, "cFEStateNetHelpPopup"),
- * constructed by func_001D9D48 with mpEngine and this state as parent), sets its word +0x50 to 1 (On Tour has
+ * constructed by cFEStateNetHelpPopup_cFEStateNetHelpPopup with mpEngine and this state as parent), sets its word +0x50 to 1 (On Tour has
  * mbReferEventsToParent there), lets the state fill it through its own virtual at vtable entry 25 (the messenger's is
  * func_001A4040) and pushes it on the engine's state stack (cUIStateStack_pushPopup on mpEngine + 0x18). Other events
  * are ignored.
@@ -4214,7 +4214,7 @@ extern char str_cFEStateNetHelpPopup[];
 extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int pWidget, int msg)
 {
     if (pWidget != 0 && msg == 7) {
-        void* helpPopup = func_001D9D48(cMemMan_alloc(320, str_cFEStateNetHelpPopup, 0x100, 0), self->mpEngine, self);
+        void* helpPopup = cFEStateNetHelpPopup_cFEStateNetHelpPopup(cMemMan_alloc(320, str_cFEStateNetHelpPopup, 0x100, 0), self->mpEngine, self);
         *(int*)((char*)helpPopup + 0x50) = 1;
         ((cFEVObj_001A8918*)self)->v25(helpPopup);
         cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, helpPopup);
@@ -4701,13 +4701,13 @@ extern "C" void func_001A8F98(cFEStateNet* self)
 INCLUDE_ASM("fe/feasyncfile", func_001A9090);
 #ifdef SKIP_ASM
 extern "C" void func_001A91B0(cFEStateNet* self, int a1, int a2, int a3, int a4);
-extern "C" void func_001CCF00(void* p, int a);
+extern "C" void cKeyboardPopup_setStatic2(void* p, int a);
 extern "C" void cKeyboardPopup_setInputText(void* p, int a);
 
 /**
  * Opens the keyboard popup with an ASCII static label and an initial text.
  *
- * func_001A91B0 creates and pushes it; func_001CCF00 sets the static label from @p staticLabel, cKeyboardPopup_setInputText the
+ * func_001A91B0 creates and pushes it; cKeyboardPopup_setStatic2 sets the static label from @p staticLabel, cKeyboardPopup_setInputText the
  * edit text.
  *
  * @param textObj  the text widget the keyboard edits (stored in mpKeyboardText), or 0
@@ -4720,7 +4720,7 @@ extern "C" void cKeyboardPopup_setInputText(void* p, int a);
 extern "C" void func_001A9090(cFEStateNet* self, int textObj, int staticLabel, int inputText, int password, int popupId, int maxChars)
 {
     func_001A91B0(self, textObj, password, popupId, maxChars);
-    func_001CCF00(self->mpKeyboard, staticLabel);
+    cKeyboardPopup_setStatic2(self->mpKeyboard, staticLabel);
     cKeyboardPopup_setInputText(self->mpKeyboard, inputText);
 }
 #endif
@@ -6793,7 +6793,7 @@ extern "C" int func_00262A38(void* self, int a1);
 extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup(void* mem, int a1, void* owner, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
-extern "C" void func_001CE468(void* self, int v);
+extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(void* self, int v);
 extern char D_004A1408[];
 extern char str_cFEStateReadMessagePopup[];
 
@@ -6803,7 +6803,7 @@ extern char str_cFEStateReadMessagePopup[];
  *
  * Clears unk_6C4. When BuddyMan has messages from @p playerName (func_00262A38) it pushes a new cFEStateReadMessagePopup (1788
  * bytes) for that sender; otherwise it opens the keyboard (func_001A9090, labelled with the name, id 2, up to 63
- * characters), enables key 75, sets keys 0..13 (func_001CE468) and mbReferEventsToParent; func_001A4750 sends the typed
+ * characters), enables key 75, sets keys 0..13 (cKeyboardPopup_setIncludeQuickKeyRow) and mbReferEventsToParent; func_001A4750 sends the typed
  * text.
  *
  * @param feStateNet  the online state (this)
@@ -6832,7 +6832,7 @@ extern "C" void func_001ABB30(cFEStateNet* feStateNet, int playerName, void* pop
         func_001A9090((cFEStateNet*)self, 0, playerName, (int)D_004A1408, 0, 2, 0x3F);
         *(int*)(((char*)self->mpKeyboard) + 0x43C) = 0;
         cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 75, 1, 2);
-        func_001CE468(((char*)self->mpKeyboard), 1);
+        cKeyboardPopup_setIncludeQuickKeyRow(((char*)self->mpKeyboard), 1);
         *(int*)(((char*)self->mpKeyboard) + 0x438) = 1;
     }
 }
@@ -13121,7 +13121,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom_onInputBegin);
 int GetHashValue32(char* str);
 extern "C" void func_001A9150(cFEStateNet* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
-extern "C" void func_001CE468(void* self, int v);
+extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(void* self, int v);
 extern char str_kT_POPUP235Chat[];
 extern char D_004A1408[];
 
@@ -13141,7 +13141,7 @@ extern "C" int cFEStateChatRoom_onInputBegin(cFEStateChatRoom* self, void* obj)
         // PORT: string pointer passed through an int parameter (func_001A9150's a3)
         func_001A9150(((cFEStateNet*)self), 0, GetHashValue32(str_kT_POPUP235Chat), (int)D_004A1408, 0, 4, 0x3F);
         *(int*)((char*)self->mpKeyboard + 0x43C) = 0;
-        func_001CE468(self->mpKeyboard, 1);
+        cKeyboardPopup_setIncludeQuickKeyRow(self->mpKeyboard, 1);
         cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
         *(int*)((char*)self->mpKeyboard + 0x438) = 1;
         return 1;

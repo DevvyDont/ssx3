@@ -413,7 +413,7 @@ extern void* D_0046D0D0[];
 extern "C" void* func_0039E390(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF380);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRiderBio_cFEStateRiderBio1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateRiderBio_vtbl[];
@@ -426,7 +426,7 @@ extern void* cFEStateRiderBio_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DF380(void* self)
+extern "C" void* cFEStateRiderBio_cFEStateRiderBio1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateRiderBio_vtbl;
@@ -456,7 +456,7 @@ void* cFEStateRiderBio__cFEStateRiderBio(void* self)
 extern "C" void* func_0039E390(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF3E0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRuleSelect_cFEStateRuleSelect1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateRuleSelect_vtbl[];
@@ -469,7 +469,7 @@ extern void* cFEStateRuleSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DF3E0(void* self)
+extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateRuleSelect_vtbl;
@@ -520,7 +520,7 @@ extern "C" void func_001DF440(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF470);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateBraggingRights_cFEStateBraggingRights1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -543,7 +543,7 @@ struct sElem_F470 {
  *
  * @return @p self
  */
-extern "C" void* func_001DF470(void* self)
+extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights1(void* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     *(void***)((char*)self + 0x8) = cFEStateBraggingRights_vtbl;
@@ -602,7 +602,7 @@ void cFEStateBraggingRights_onMenuGainFocus(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF580);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateChatRoom_cFEStateChatRoom1);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateChatRoom_vtbl[];
@@ -614,7 +614,7 @@ extern void* cFEStateChatRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DF580(void* self)
+extern "C" void* cFEStateChatRoom_cFEStateChatRoom1(void* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     *(int*)((char*)self + 0x6F8) = 0;
@@ -938,7 +938,7 @@ extern "C" int cFEStateNetCreateRoomPopup_getPassword(void *roomPopup) {
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF900);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_cFEStateNetHelpPopup1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0039E2A0(void* self, void* engine);
@@ -954,11 +954,11 @@ struct sSlot_F900 {
  * Constructs a network help popup with no engine or parent (the default-constructor copy).
  *
  * Runs the cUIState constructor func_0039E2A0(self, 0), stores cFEStateNetHelpPopup_vtbl and runs the empty constructor
- * of a 7-element array at +0x20 (only the loop is left). The full constructor is func_001D9D48.
+ * of a 7-element array at +0x20 (only the loop is left). The full constructor is cFEStateNetHelpPopup_cFEStateNetHelpPopup.
  *
  * @return @p self
  */
-extern "C" void* func_001DF900(void* self)
+extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateNetHelpPopup_vtbl;
@@ -1065,7 +1065,7 @@ extern "C" int func_001DF9A8(void *helpPopup) {
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9B0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_isInStore);
 #ifdef SKIP_ASM
 /**
  * Reports whether the equip-gear state is in store (buying) mode: its mode at +0xC8 is 1.
@@ -1075,7 +1075,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9B0);
  * @param charEquip  the equip-gear state
  * @return 1 in store mode, else 0
  */
-extern "C" int func_001DF9B0(void *charEquip) {
+extern "C" int cFEStateCharEquip_isInStore(void *charEquip) {
     return (*(int *)((char*)(charEquip) + (0xC8))) == 1;
 }
 #endif
@@ -1112,7 +1112,7 @@ extern "C" void func_001DF9C8(void *charEquip, int value) {
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9D0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_canSwitchEquipMode);
 #ifdef SKIP_ASM
 /**
  * Returns whether the equip-gear state may switch between store and inventory mode (+0xAE4).
@@ -1122,12 +1122,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9D0);
  * @param charEquip  the equip-gear state
  * @return the stored flag
  */
-extern "C" int func_001DF9D0(void *charEquip) {
+extern "C" int cFEStateCharEquip_canSwitchEquipMode(void *charEquip) {
     return (*(int *)((char*)(charEquip) + (0xAE4)));
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9D8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_cFEStateRewardGalleryBase1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_0046A3C8[];
@@ -1139,7 +1139,7 @@ extern void* D_0046A3C8[];
  *
  * @return @p self
  */
-extern "C" void* func_001DF9D8(void* self)
+extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = D_0046A3C8;
@@ -1148,11 +1148,11 @@ extern "C" void* func_001DF9D8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFA10);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase__cFEStateRewardGalleryBase);
 #ifdef SKIP_ASM
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
-void func_001DFAC8(void* self);
+void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
@@ -1160,16 +1160,16 @@ extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390
 /**
  * Destroys a reward-gallery state through the base classes.
  *
- * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
  * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
  * with @p flags.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001DFA10(void* self, int flags)
+extern "C" void cFEStateRewardGalleryBase__cFEStateRewardGalleryBase(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
-    func_001DFAC8(self);
+    cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
@@ -1177,7 +1177,7 @@ extern "C" void func_001DFA10(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFA70);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getStoreNum);
 #ifdef SKIP_ASM
 /**
  * Returns a reward gallery's store number (+0x8F0); negative when the gallery is not a store.
@@ -1187,12 +1187,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFA70);
  * @param gallery  the gallery state
  * @return the store number, or a negative value outside a store
  */
-extern "C" int func_001DFA70(void *gallery) {
+extern "C" int cFEStateRewardGalleryBase_getStoreNum(void *gallery) {
     return (*(int *)((char*)(gallery) + (0x8F0)));
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFA78);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_isInStore);
 #ifdef SKIP_ASM
 /**
  * Reports whether a reward gallery is a store: its store number (+0x8F0) is not negative.
@@ -1202,13 +1202,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFA78);
  * @param gallery  the gallery state
  * @return 1 when the store number is 0 or more, else 0
  */
-extern "C" unsigned int func_001DFA78(void *gallery) {
+extern "C" unsigned int cFEStateRewardGalleryBase_isInStore(void *gallery) {
     return (unsigned int) ~(*(int *)((char*)(gallery) + (0x8F0))) >> 0x1F;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFA88__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getIconsFileName__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the reward-gallery base has no icon file name (vtable entry 25, +0xCC).
@@ -1218,14 +1218,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFA88__FPv);
  *
  * @return 0
  */
-int func_001DFA88(void* self)
+int cFEStateRewardGalleryBase_getIconsFileName(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFA90);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_isIconsLoaded);
 #ifdef SKIP_ASM
 /**
  * Reports whether a reward gallery's icon file has finished loading (bit 3 of the flags at +0x48).
@@ -1236,13 +1236,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFA90);
  * @param gallery  the gallery state
  * @return 1 when the icons are loaded, else 0
  */
-extern "C" int func_001DFA90(void *gallery) {
+extern "C" int cFEStateRewardGalleryBase_isIconsLoaded(void *gallery) {
     return ((int) (*(int *)((char*)(gallery) + (0x48))) >> 3) & 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFAA0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getIconID1__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns -1: the reward-gallery base finds no icon for a reward (vtable entry 26, +0xD4).
@@ -1251,14 +1251,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFAA0__FPv);
  *
  * @return -1
  */
-int func_001DFAA0(void* self)
+int cFEStateRewardGalleryBase_getIconID1(void* self)
 {
     return -0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFAA8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getTextureElement__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the reward-gallery base has no texture element for a reward (vtable entry 27, +0xDC).
@@ -1267,14 +1267,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFAA8__FPv);
  *
  * @return 0 (no texture element)
  */
-int func_001DFAA8(void* self)
+int cFEStateRewardGalleryBase_getTextureElement(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFAB0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_isRewardsLoaded);
 #ifdef SKIP_ASM
 /**
  * Reports whether a reward gallery's reward list has been built (bit 1 of the flags at +0x48).
@@ -1285,26 +1285,26 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFAB0);
  * @param gallery  the gallery state
  * @return 1 when the rewards are loaded, else 0
  */
-extern "C" int func_001DFAB0(void *gallery) {
+extern "C" int cFEStateRewardGalleryBase_isRewardsLoaded(void *gallery) {
     return ((int) (*(int *)((char*)(gallery) + (0x48))) >> 1) & 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFAC0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_allocRewards__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the reward-gallery base builds no reward list (vtable entry 28, +0xE4).
  *
  * Each gallery class overrides it with the code that fills its reward array at +0xA28 (posters: cFEStateRewardGalleryPosters_allocRewards).
  */
-void func_001DFAC0(void* self)
+void cFEStateRewardGalleryBase_allocRewards(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFAC8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_purgeRewards__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the reward-gallery base has no reward list to free (vtable entry 29, +0xEC).
@@ -1312,69 +1312,69 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFAC8__FPv);
  * The gallery classes override it (posters: cFEStateRewardGalleryPosters_purgeRewards clears the list); the destructors call this base version
  * directly.
  */
-void func_001DFAC8(void* self)
+void cFEStateRewardGalleryBase_purgeRewards(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFAD0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getReward__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the reward-gallery base has no reward to return (vtable entry 34, +0x114).
  *
  * @return 0
  */
-int func_001DFAD0(void* self)
+int cFEStateRewardGalleryBase_getReward(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFAD8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getRewardCost__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the reward-gallery base gives no reward a price (vtable entry 35, +0x11C).
  *
  * @return 0
  */
-int func_001DFAD8(void* self)
+int cFEStateRewardGalleryBase_getRewardCost(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFAE0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getRewardStoreNum__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the reward-gallery base puts every reward in store 0 (vtable entry 36, +0x124).
  *
  * @return 0
  */
-int func_001DFAE0(void* self)
+int cFEStateRewardGalleryBase_getRewardStoreNum(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFAE8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getRewardName__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the reward-gallery base has no reward names (vtable entry 37, +0x12C).
  *
  * @return 0 (no name)
  */
-int func_001DFAE8(void* self)
+int cFEStateRewardGalleryBase_getRewardName(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFAF0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_0046A248[];
@@ -1387,7 +1387,7 @@ extern void* D_0046A248[];
  *
  * @return @p self
  */
-extern "C" void* func_001DFAF0(void* self)
+extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = D_0046A248;
@@ -1396,11 +1396,11 @@ extern "C" void* func_001DFAF0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFB28);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters);
 #ifdef SKIP_ASM
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
-void func_001DFAC8(void* self);
+void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
@@ -1408,16 +1408,16 @@ extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390
 /**
  * Destroys the posters gallery state through the gallery base and its bases.
  *
- * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
  * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
- * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001DFB28(void* self, int flags)
+extern "C" void cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
-    func_001DFAC8(self);
+    cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
@@ -1425,7 +1425,7 @@ extern "C" void func_001DFB28(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFB88__FPvi);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getReward__FPvi);
 #ifdef SKIP_ASM
 /**
  * Returns the posters gallery's reward @p i: entry @p i of its reward array at +0xA28.
@@ -1435,14 +1435,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFB88__FPvi);
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int func_001DFB88(void* self, int i)
+int cFEStateRewardGalleryPosters_getReward(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFB98);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardCost);
 #ifdef SKIP_ASM
 /**
  * Returns the price of a posters gallery reward: its short at +0xC, times 10 when positive.
@@ -1452,7 +1452,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFB98);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFB98(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryPosters_getRewardCost(void* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -1461,7 +1461,7 @@ extern "C" int func_001DFB98(void* self, void* reward)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFBB0__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the store number of a posters gallery reward: its signed byte at +0xE.
@@ -1471,14 +1471,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFBB0__FPvT0);
  * @param other  the reward record
  * @return the store the reward is sold in
  */
-signed char func_001DFBB0(void* self, void* other)
+signed char cFEStateRewardGalleryPosters_getRewardStoreNum(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFBB8__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the name of a posters gallery reward: the record's first word (a string pointer).
@@ -1488,14 +1488,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFBB8__FPvT0);
  * @param other  the reward record
  * @return the reward's name
  */
-int func_001DFBB8(void* self, void* other)
+int cFEStateRewardGalleryPosters_getRewardName(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFBC0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_0046A0C8[];
@@ -1508,7 +1508,7 @@ extern void* D_0046A0C8[];
  *
  * @return @p self
  */
-extern "C" void* func_001DFBC0(void* self)
+extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = D_0046A0C8;
@@ -1517,11 +1517,11 @@ extern "C" void* func_001DFBC0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFBF8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingCards);
 #ifdef SKIP_ASM
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
-void func_001DFAC8(void* self);
+void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
@@ -1529,16 +1529,16 @@ extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390
 /**
  * Destroys the trading-card gallery state through the gallery base and its bases.
  *
- * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
  * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
- * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001DFBF8(void* self, int flags)
+extern "C" void cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingCards(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
-    func_001DFAC8(self);
+    cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
@@ -1546,7 +1546,7 @@ extern "C" void func_001DFBF8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFC58__FPvi);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getReward__FPvi);
 #ifdef SKIP_ASM
 /**
  * Returns the trading-card gallery's reward @p i: entry @p i of its reward array at +0xA28.
@@ -1556,14 +1556,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFC58__FPvi);
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int func_001DFC58(void* self, int i)
+int cFEStateRewardGalleryTradingCards_getReward(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFC68);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardCost);
 #ifdef SKIP_ASM
 /**
  * Returns the price of a trading-card gallery reward: its short at +0xC, times 10 when positive.
@@ -1573,7 +1573,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFC68);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFC68(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryTradingCards_getRewardCost(void* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -1582,7 +1582,7 @@ extern "C" int func_001DFC68(void* self, void* reward)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFC80__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the store number of a trading-card gallery reward: its signed byte at +0xE.
@@ -1592,14 +1592,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFC80__FPvT0);
  * @param other  the reward record
  * @return the store the reward is sold in
  */
-signed char func_001DFC80(void* self, void* other)
+signed char cFEStateRewardGalleryTradingCards_getRewardStoreNum(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFC88__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the name of a trading-card gallery reward: the record's first word (a string pointer).
@@ -1609,14 +1609,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFC88__FPvT0);
  * @param other  the reward record
  * @return the reward's name
  */
-int func_001DFC88(void* self, void* other)
+int cFEStateRewardGalleryTradingCards_getRewardName(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFC90);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_00469F48[];
@@ -1629,7 +1629,7 @@ extern void* D_00469F48[];
  *
  * @return @p self
  */
-extern "C" void* func_001DFC90(void* self)
+extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = D_00469F48;
@@ -1638,11 +1638,11 @@ extern "C" void* func_001DFC90(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFCC8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts);
 #ifdef SKIP_ASM
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
-void func_001DFAC8(void* self);
+void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
@@ -1650,16 +1650,16 @@ extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390
 /**
  * Destroys the concept-art gallery state through the gallery base and its bases.
  *
- * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
  * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
- * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001DFCC8(void* self, int flags)
+extern "C" void cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
-    func_001DFAC8(self);
+    cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
@@ -1667,7 +1667,7 @@ extern "C" void func_001DFCC8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFD28__FPvi);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getReward__FPvi);
 #ifdef SKIP_ASM
 /**
  * Returns the concept-art gallery's reward @p i: entry @p i of its reward array at +0xA28.
@@ -1677,14 +1677,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFD28__FPvi);
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int func_001DFD28(void* self, int i)
+int cFEStateRewardGalleryConceptArts_getReward(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFD38);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardCost);
 #ifdef SKIP_ASM
 /**
  * Returns the price of a concept-art gallery reward: its short at +0xC, times 10 when positive.
@@ -1694,7 +1694,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFD38);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFD38(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryConceptArts_getRewardCost(void* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -1703,7 +1703,7 @@ extern "C" int func_001DFD38(void* self, void* reward)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFD50__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the store number of a concept-art gallery reward: its signed byte at +0xE.
@@ -1713,14 +1713,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFD50__FPvT0);
  * @param other  the reward record
  * @return the store the reward is sold in
  */
-signed char func_001DFD50(void* self, void* other)
+signed char cFEStateRewardGalleryConceptArts_getRewardStoreNum(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFD58__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the name of a concept-art gallery reward: the record's first word (a string pointer).
@@ -1730,14 +1730,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFD58__FPvT0);
  * @param other  the reward record
  * @return the reward's name
  */
-int func_001DFD58(void* self, void* other)
+int cFEStateRewardGalleryConceptArts_getRewardName(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFD60);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_00469DC8[];
@@ -1750,7 +1750,7 @@ extern void* D_00469DC8[];
  *
  * @return @p self
  */
-extern "C" void* func_001DFD60(void* self)
+extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = D_00469DC8;
@@ -1759,11 +1759,11 @@ extern "C" void* func_001DFD60(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFD98);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos);
 #ifdef SKIP_ASM
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
-void func_001DFAC8(void* self);
+void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
@@ -1771,16 +1771,16 @@ extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390
 /**
  * Destroys the video gallery state through the gallery base and its bases.
  *
- * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
  * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
- * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001DFD98(void* self, int flags)
+extern "C" void cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
-    func_001DFAC8(self);
+    cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
@@ -1788,7 +1788,7 @@ extern "C" void func_001DFD98(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFDF8__FPvi);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getReward__FPvi);
 #ifdef SKIP_ASM
 /**
  * Returns the video gallery's reward @p i: entry @p i of its reward array at +0xA28.
@@ -1798,14 +1798,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFDF8__FPvi);
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int func_001DFDF8(void* self, int i)
+int cFEStateRewardGalleryVideos_getReward(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFE08);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardCost);
 #ifdef SKIP_ASM
 /**
  * Returns the price of a video gallery reward: its short at +0xC, times 10 when positive.
@@ -1815,7 +1815,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFE08);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFE08(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryVideos_getRewardCost(void* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -1824,7 +1824,7 @@ extern "C" int func_001DFE08(void* self, void* reward)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFE20__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the store number of a video gallery reward: its signed byte at +0xE.
@@ -1834,14 +1834,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFE20__FPvT0);
  * @param other  the reward record
  * @return the store the reward is sold in
  */
-signed char func_001DFE20(void* self, void* other)
+signed char cFEStateRewardGalleryVideos_getRewardStoreNum(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFE28__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the name of a video gallery reward: the record's first word (a string pointer).
@@ -1851,14 +1851,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFE28__FPvT0);
  * @param other  the reward record
  * @return the reward's name
  */
-int func_001DFE28(void* self, void* other)
+int cFEStateRewardGalleryVideos_getRewardName(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFE30);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_cFEStateRewardGalleryToys1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_00469C48[];
@@ -1871,7 +1871,7 @@ extern void* D_00469C48[];
  *
  * @return @p self
  */
-extern "C" void* func_001DFE30(void* self)
+extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = D_00469C48;
@@ -1880,11 +1880,11 @@ extern "C" void* func_001DFE30(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFE68);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys__cFEStateRewardGalleryToys);
 #ifdef SKIP_ASM
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
-void func_001DFAC8(void* self);
+void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
@@ -1892,16 +1892,16 @@ extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390
 /**
  * Destroys the toy gallery state through the gallery base and its bases.
  *
- * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
  * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
- * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001DFE68(void* self, int flags)
+extern "C" void cFEStateRewardGalleryToys__cFEStateRewardGalleryToys(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
-    func_001DFAC8(self);
+    cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
@@ -1909,7 +1909,7 @@ extern "C" void func_001DFE68(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFEC8__FPvi);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getReward__FPvi);
 #ifdef SKIP_ASM
 /**
  * Returns the toy gallery's reward @p i: entry @p i of its reward array at +0xA28.
@@ -1919,14 +1919,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFEC8__FPvi);
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int func_001DFEC8(void* self, int i)
+int cFEStateRewardGalleryToys_getReward(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFED8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardCost);
 #ifdef SKIP_ASM
 /**
  * Returns the price of a toy gallery reward: its short at +0xC, times 10 when positive.
@@ -1936,7 +1936,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFED8);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFED8(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryToys_getRewardCost(void* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -1945,7 +1945,7 @@ extern "C" int func_001DFED8(void* self, void* reward)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFEF0__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the store number of a toy gallery reward: its signed byte at +0xE.
@@ -1955,14 +1955,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFEF0__FPvT0);
  * @param other  the reward record
  * @return the store the reward is sold in
  */
-signed char func_001DFEF0(void* self, void* other)
+signed char cFEStateRewardGalleryToys_getRewardStoreNum(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFEF8__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the name of a toy gallery reward: the record's first word (a string pointer).
@@ -1972,14 +1972,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFEF8__FPvT0);
  * @param other  the reward record
  * @return the reward's name
  */
-int func_001DFEF8(void* self, void* other)
+int cFEStateRewardGalleryToys_getRewardName(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFF00);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* D_00469AC8[];
@@ -1992,7 +1992,7 @@ extern void* D_00469AC8[];
  *
  * @return @p self
  */
-extern "C" void* func_001DFF00(void* self)
+extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = D_00469AC8;
@@ -2001,11 +2001,11 @@ extern "C" void* func_001DFF00(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFF38);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars);
 #ifdef SKIP_ASM
 extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
-void func_001DFAC8(void* self);
+void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
 extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
@@ -2013,16 +2013,16 @@ extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390
 /**
  * Destroys the cheat-character gallery state through the gallery base and its bases.
  *
- * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (func_001DFAC8, empty) and releases the icon
+ * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
  * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
- * with @p flags. The same code as func_001DFA10 (the base destructor inlined).
+ * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001DFF38(void* self, int flags)
+extern "C" void cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_0046A3C8;
-    func_001DFAC8(self);
+    cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
     func_0039E390_dtor(self, flags);
@@ -2030,7 +2030,7 @@ extern "C" void func_001DFF38(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFF98__FPvi);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getReward__FPvi);
 #ifdef SKIP_ASM
 /**
  * Returns the cheat-character gallery's reward @p i: entry @p i of its reward array at +0xA28.
@@ -2040,14 +2040,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFF98__FPvi);
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int func_001DFF98(void* self, int i)
+int cFEStateRewardGalleryCheatChars_getReward(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFFA8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardCost);
 #ifdef SKIP_ASM
 /**
  * Returns the price of a cheat-character gallery reward: its short at +0xC, times 10 when positive.
@@ -2057,7 +2057,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFFA8);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFFA8(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryCheatChars_getRewardCost(void* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -2066,7 +2066,7 @@ extern "C" int func_001DFFA8(void* self, void* reward)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFFC0__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardStoreNum__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the store number of a cheat-character gallery reward: its signed byte at +0xE.
@@ -2076,14 +2076,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFFC0__FPvT0);
  * @param other  the reward record
  * @return the store the reward is sold in
  */
-signed char func_001DFFC0(void* self, void* other)
+signed char cFEStateRewardGalleryCheatChars_getRewardStoreNum(void* self, void* other)
 {
     return *(signed char*)((char*)other + 0xE);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFFC8__FPvT0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardName__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns the name of a cheat-character gallery reward: the record's first word (a string pointer).
@@ -2093,14 +2093,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFFC8__FPvT0);
  * @param other  the reward record
  * @return the reward's name
  */
-int func_001DFFC8(void* self, void* other)
+int cFEStateRewardGalleryCheatChars_getRewardName(void* self, void* other)
 {
     return *(int*)((char*)other + 0x0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DFFD0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStatePreviewReward_cFEStatePreviewReward1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStatePreviewReward_vtbl[];
@@ -2113,7 +2113,7 @@ extern void* cFEStatePreviewReward_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DFFD0(void* self)
+extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStatePreviewReward_vtbl;
@@ -2164,7 +2164,7 @@ extern "C" int func_001E0018(void) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0020__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_onGainTransition__FPv);
 #ifdef SKIP_ASM
 /**
  * Lets the video-player state's gaining transition finish at once (vtable entry 7, onGainTransition).
@@ -2174,14 +2174,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0020__FPv);
  *
  * @return 1 (transition done)
  */
-int func_001E0020(void* self)
+int cFEStateVideoPlayer_onGainTransition(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0028__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_onLoseTransition__FPv);
 #ifdef SKIP_ASM
 /**
  * Lets the video-player state's leaving transition finish at once (vtable entry 10, onLoseTransition).
@@ -2190,14 +2190,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0028__FPv);
  *
  * @return 1 (transition done)
  */
-int func_001E0028(void* self)
+int cFEStateVideoPlayer_onLoseTransition(void* self)
 {
     return 0x1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0030);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setInterruptible);
 #ifdef SKIP_ASM
 /**
  * Stores whether the video-player state's movie may be interrupted (+0x270).
@@ -2208,12 +2208,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0030);
  * @param videoPlayer   the video-player state
  * @param value  nonzero to let input stop the movie
  */
-extern "C" void func_001E0030(void *videoPlayer, int value) {
+extern "C" void cFEStateVideoPlayer_setInterruptible(void *videoPlayer, int value) {
     (*(int *)((char*)(videoPlayer) + (0x270))) = value;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0038);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setFullScreen);
 #ifdef SKIP_ASM
 /**
  * Stores the full-screen option of the video-player state's movie (+0x258, in the play options at +0x24C).
@@ -2223,12 +2223,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0038);
  * @param videoPlayer   the video-player state
  * @param value  nonzero for full screen
  */
-extern "C" void func_001E0038(void *videoPlayer, int value) {
+extern "C" void cFEStateVideoPlayer_setFullScreen(void *videoPlayer, int value) {
     (*(int *)((char*)(videoPlayer) + (0x258))) = value;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0040);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setSound);
 #ifdef SKIP_ASM
 /**
  * Stores the sound option of the video-player state's movie (+0x254, in the play options at +0x24C).
@@ -2238,12 +2238,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0040);
  * @param videoPlayer   the video-player state
  * @param value  nonzero to play the movie's sound
  */
-extern "C" void func_001E0040(void *videoPlayer, int value) {
+extern "C" void cFEStateVideoPlayer_setSound(void *videoPlayer, int value) {
     (*(int *)((char*)(videoPlayer) + (0x254))) = value;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0048);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setOptions);
 #ifdef SKIP_ASM
 struct sBlock24 {
     int w[9];
@@ -2257,13 +2257,13 @@ struct sBlock24 {
  *
  * @param src  the options to copy (nine words)
  */
-extern "C" void func_001E0048(void* self, void* src)
+extern "C" void cFEStateVideoPlayer_setOptions(void* self, void* src)
 {
     *(sBlock24*)((char*)self + 0x24C) = *(sBlock24*)src;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0098);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_cFEStateMountainRoom1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateMountainRoom_vtbl[];
@@ -2276,7 +2276,7 @@ extern void* cFEStateMountainRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001E0098(void* self)
+extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateMountainRoom_vtbl;
@@ -2300,7 +2300,7 @@ extern "C" int func_001E00D0(void *mountainRoom) {
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E00E0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_hidePass);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // A UI widget as cUIScreen_getObjectByHashName returns it: vptr at 0x8. Slot names from the prototype's
@@ -2324,13 +2324,13 @@ public:
  *
  * Calls its setVisible with 0, as cFEStateMountainRoom_onInputBegin does to close the pass view. No null check.
  */
-extern "C" void func_001E00E0(void* self)
+extern "C" void cFEStateMountainRoom_hidePass(void* self)
 {
     (*(cUIThing**)((char*)self + 0x48))->setVisible(0);
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0110);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPassVisible);
 #ifdef SKIP_ASM
 /**
  * Reports whether the mountain room's peak-pass group (the widget at +0x48) is visible.
@@ -2341,7 +2341,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0110);
  * @param mountainRoom  the mountain-room state
  * @return 1 when the pass is shown, else 0
  */
-extern "C" int func_001E0110(void *mountainRoom) {
+extern "C" int cFEStateMountainRoom_isPassVisible(void *mountainRoom) {
     int var_2;
     void *temp_3;
 
@@ -2387,7 +2387,7 @@ extern "C" int func_001E0130(void *mountainRoom) {
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0178);
+INCLUDE_ASM("fe/fepopupmisc", cFEStatePeakRoom_cFEStatePeakRoom1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStatePeakRoom_vtbl[];
@@ -2399,7 +2399,7 @@ extern void* cFEStatePeakRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001E0178(void* self)
+extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStatePeakRoom_vtbl;
@@ -2427,7 +2427,7 @@ void* cFEStatePeakRoom__cFEStatePeakRoom(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E01D8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateTrophyRoom_cFEStateTrophyRoom1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateTrophyRoom_vtbl[];
@@ -2439,7 +2439,7 @@ extern void* cFEStateTrophyRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001E01D8(void* self)
+extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
@@ -2472,7 +2472,7 @@ extern "C" void cFEStateTrophyRoom__cFEStateTrophyRoom(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0268);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom_cFEStateRewardsRoom1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateRewardsRoom_vtbl[];
@@ -2485,7 +2485,7 @@ extern void* cFEStateRewardsRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001E0268(void* self)
+extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateRewardsRoom_vtbl;
@@ -2516,7 +2516,7 @@ extern void* cFEPopupSelectMultiplayerMode_vtbl[];
 extern "C" void* func_0039E390(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E02C8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom_isInStore);
 #ifdef SKIP_ASM
 /**
  * Reports whether the rewards room was opened as a store: its flag at +0x4C.
@@ -2526,7 +2526,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E02C8);
  * @param rewardsRoom  the rewards-room state
  * @return the in-store flag
  */
-extern "C" int func_001E02C8(void *rewardsRoom) {
+extern "C" int cFEStateRewardsRoom_isInStore(void *rewardsRoom) {
     return (*(int *)((char*)(rewardsRoom) + (0x4C)));
 }
 #endif
@@ -2729,7 +2729,7 @@ int cFEPopupSelectMultiplayerMode_onLoseTransition(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0510);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions_cFEStateAudioOptions1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateAudioOptions_vtbl[];
@@ -2742,7 +2742,7 @@ extern void* cFEStateAudioOptions_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001E0510(void* self)
+extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateAudioOptions_vtbl;
@@ -2770,7 +2770,7 @@ void* cFEStateAudioOptions__cFEStateAudioOptions(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0570);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions_isInStore);
 #ifdef SKIP_ASM
 /**
  * Reports whether the audio options were opened from a store: the flag at +0x74.
@@ -2780,12 +2780,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0570);
  * @param audioOptions  the audio-options state
  * @return the in-store flag
  */
-extern "C" int func_001E0570(void *audioOptions) {
+extern "C" int cFEStateAudioOptions_isInStore(void *audioOptions) {
     return (*(int *)((char*)(audioOptions) + (0x74)));
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0578);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_cFEStateRequestLine1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateRequestLine_vtbl[];
@@ -2797,7 +2797,7 @@ extern void* cFEStateRequestLine_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001E0578(void* self)
+extern "C" void* cFEStateRequestLine_cFEStateRequestLine1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateRequestLine_vtbl;
@@ -2825,7 +2825,7 @@ void* cFEStateRequestLine__cFEStateRequestLine(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E05D8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isInStore);
 #ifdef SKIP_ASM
 /**
  * Reports whether the request line was opened as a store: the flag at +0x16C.
@@ -2835,12 +2835,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E05D8);
  * @param requestLine  the request-line state
  * @return the in-store flag
  */
-extern "C" int func_001E05D8(void *requestLine) {
+extern "C" int cFEStateRequestLine_isInStore(void *requestLine) {
     return (*(int *)((char*)(requestLine) + (0x16C)));
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E05E0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_countBits);
 #ifdef SKIP_ASM
 /**
  * Counts the set bits of a 64-bit mask.
@@ -2850,7 +2850,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E05E0);
  * @return the number of bits set (0..64)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_001E05E0(void* requestLine, unsigned long bits) {
+extern "C" int cFEStateRequestLine_countBits(void* requestLine, unsigned long bits) {
     int count;
     int i;
     int bit;
@@ -2866,7 +2866,7 @@ extern "C" int func_001E05E0(void* requestLine, unsigned long bits) {
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0610);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_selectSong);
 #ifdef SKIP_ASM
 /**
  * Adds song @p bit to the request line's playlist: sets that bit of the 64-bit mask at +0x158.
@@ -2874,13 +2874,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0610);
  * @param bit  the song index (0..63)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_001E0610(void* self, int bit)
+extern "C" void cFEStateRequestLine_selectSong(void* self, int bit)
 {
     *(long*)((char*)self + 0x158) |= 1L << bit;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0628);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_unselectSong);
 #ifdef SKIP_ASM
 /**
  * Removes song @p bit from the request line's playlist: clears that bit of the 64-bit mask at +0x158.
@@ -2888,13 +2888,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0628);
  * @param bit  the song index (0..63)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_001E0628(void* self, int bit)
+extern "C" void cFEStateRequestLine_unselectSong(void* self, int bit)
 {
     *(long*)((char*)self + 0x158) &= ~(1L << bit);
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0648);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isEmptyPlaylist);
 #ifdef SKIP_ASM
 /**
  * Reports whether the request line's playlist (the 64-bit mask at +0x158) is empty.
@@ -2903,12 +2903,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0648);
  * @return 1 when no song is selected, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_001E0648(void *requestLine) {
+extern "C" int cFEStateRequestLine_isEmptyPlaylist(void *requestLine) {
     return (*(long *)((char*)(requestLine) + (0x158))) == 0;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0658);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isOnlySongInPlaylist);
 #ifdef SKIP_ASM
 /**
  * Reports whether song @p bit is the only song the playlist could hold: no other bit of the mask at +0x158 is set.
@@ -2919,13 +2919,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0658);
  * @return 1 when no other song is selected, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_001E0658(void* self, int bit)
+extern "C" int cFEStateRequestLine_isOnlySongInPlaylist(void* self, int bit)
 {
     return (*(long*)((char*)self + 0x158) & ~(1L << bit)) == 0;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0678);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isSongSelected);
 #ifdef SKIP_ASM
 /**
  * Reports whether song @p bit is in the request line's playlist (bit @p bit of the mask at +0x158).
@@ -2934,13 +2934,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0678);
  * @return 1 when selected, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_001E0678(void* self, int bit)
+extern "C" int cFEStateRequestLine_isSongSelected(void* self, int bit)
 {
     return (*(unsigned long*)((char*)self + 0x158) >> bit) & 1;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0698);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_getNumSongsInPlaylist);
 #ifdef SKIP_ASM
 /**
  * Counts the songs in the request line's playlist (the set bits of the 64-bit mask at +0x158).
@@ -2949,7 +2949,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0698);
  * @return the number of selected songs
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_001E0698(void *requestLine) {
+extern "C" int cFEStateRequestLine_getNumSongsInPlaylist(void *requestLine) {
     int temp_2;
     int var_4;
     int var_5;
@@ -2965,7 +2965,7 @@ extern "C" int func_001E0698(void *requestLine) {
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E06D0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isSongOwned);
 #ifdef SKIP_ASM
 /**
  * Reports whether song @p bit is owned (bit @p bit of the 64-bit mask at +0x160).
@@ -2974,13 +2974,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E06D0);
  * @return 1 when owned, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_001E06D0(void* self, int bit)
+extern "C" int cFEStateRequestLine_isSongOwned(void* self, int bit)
 {
     return (*(unsigned long*)((char*)self + 0x160) >> bit) & 1;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E06F0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_ownSong);
 #ifdef SKIP_ASM
 /**
  * Marks song @p bit as owned: sets that bit of the 64-bit mask at +0x160.
@@ -2988,13 +2988,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E06F0);
  * @param bit  the song index (0..63)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_001E06F0(void* self, int bit)
+extern "C" void cFEStateRequestLine_ownSong(void* self, int bit)
 {
     *(long*)((char*)self + 0x160) |= 1L << bit;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0708);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_getNumOwnedSongs);
 #ifdef SKIP_ASM
 /**
  * Counts the owned songs (the set bits of the 64-bit mask at +0x160).
@@ -3003,7 +3003,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0708);
  * @return the number of owned songs
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_001E0708(void *requestLine) {
+extern "C" int cFEStateRequestLine_getNumOwnedSongs(void *requestLine) {
     int temp_2;
     int var_4;
     int var_5;
@@ -3020,7 +3020,7 @@ extern "C" int func_001E0708(void *requestLine) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0740);
+INCLUDE_ASM("fe/fepopupmisc", cFESound__cFESound);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* D_0046DD60[];
@@ -3029,11 +3029,11 @@ extern void* D_0046DD60[];
  * Destroys the front end's sound interface (vtable D_00469348), freeing it when asked.
  *
  * Puts back the base sound-interface vtable D_0046DD60 and calls operator_delete when bit 0 of @p flags is set. The
- * object is built by func_001A2E20 (fe/fereal); its play routine is func_001A2E58.
+ * object is built by cFESound_cFESound (fe/fereal); its play routine is cFESound_playSound.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001E0740(void* self, int flags)
+extern "C" void cFESound__cFESound(void* self, int flags)
 {
     *(void***)self = D_0046DD60;
     if (flags & 1) {
@@ -3043,23 +3043,23 @@ extern "C" void func_001E0740(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0770__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFESound_soundInitialize__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the front end's sound interface needs no set-up (entry 3 of D_00469348).
  */
-void func_001E0770(void* self)
+void cFESound_soundInitialize(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0778__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cFESound_soundShutdown__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the front end's sound interface has nothing to shut down (entry 4 of D_00469348).
  */
-void func_001E0778(void* self)
+void cFESound_soundShutdown(void* self)
 {
 }
 #endif
@@ -3073,7 +3073,7 @@ extern void* D_0046DD60[];
 /**
  * Destroys the overlay sound interface, freeing it when asked.
  *
- * Puts back D_0046DD60, the base sound-interface vtable (On Tour cUISoundInterface; its own destructor func_001E1048
+ * Puts back D_0046DD60, the base sound-interface vtable (On Tour cUISoundInterface; its own destructor cUISoundInterface__cUISoundInterface
  * stores the same table), and calls operator_delete when bit 0 of flags is set. cOVSound owns nothing to release
  * (On Tour: only mDummyVar at +0x4).
  *
@@ -3116,7 +3116,7 @@ void cOVSound_soundShutdown(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E07C0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateSelectMultiplayerMode_vtbl[];
@@ -3128,7 +3128,7 @@ extern void* cFEStateSelectMultiplayerMode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001E07C0(void* self)
+extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateSelectMultiplayerMode_vtbl;
@@ -3156,7 +3156,7 @@ void* cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0820);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateMPCircuit_cFEStateMPCircuit1);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern void* cFEStateMPCircuit_vtbl[];
@@ -3168,7 +3168,7 @@ extern void* cFEStateMPCircuit_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001E0820(void* self)
+extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit1(void* self)
 {
     func_0039E2A0(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateMPCircuit_vtbl;
@@ -3680,7 +3680,7 @@ int cFEStateNetAccountMem_onLoseTransition(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0CA0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep1_cFEStateCreateStep11);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateCreateStep1_vtbl[];
@@ -3694,7 +3694,7 @@ extern int cBXString_EmptyString;
  *
  * @return @p self
  */
-extern "C" void* func_001E0CA0(cFEStateCreateStep1* self)
+extern "C" void* cFEStateCreateStep1_cFEStateCreateStep11(cFEStateCreateStep1* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
@@ -3755,7 +3755,7 @@ extern void* cFEStateCreateStep2_vtbl[];
 extern "C" void* cFEStateNet__cFEStateNet(void*);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0D68);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep2_cFEStateCreateStep21);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
@@ -3766,7 +3766,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  *
  * @return @p self
  */
-extern "C" void *func_001E0D68(cFEStateCreateStep2* self) {
+extern "C" void *cFEStateCreateStep2_cFEStateCreateStep21(cFEStateCreateStep2* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateCreateStep2_vtbl;
     return ((void*)self);
@@ -4098,7 +4098,7 @@ extern "C" int cFEStateNetMessenger_onGainTransition(cFEStateNetMessenger* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0FF0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateReadMessagePopup_cFEStateReadMessagePopup1);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void* cFEStateNet_cFEStateNet(void* self, int a1, int a2);
@@ -4127,7 +4127,7 @@ static inline void InitVec_E0FF0(void* self, const sAlloc_E0FF0& a = sAlloc_E0FF
  *
  * @return @p self
  */
-extern "C" void* func_001E0FF0(void* self)
+extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup1(void* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     int emptyStr = cBXString_EmptyString;
@@ -4153,7 +4153,7 @@ int cFEStateReadMessagePopup_onLoseTransition(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1048);
+INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface__cUISoundInterface);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* D_0046DD60[];
@@ -4166,7 +4166,7 @@ extern void* D_0046DD60[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001E1048(void* self, int flags)
+extern "C" void cUISoundInterface__cUISoundInterface(void* self, int flags)
 {
     *(void***)self = D_0046DD60;
     if (flags & 1) {
@@ -4176,40 +4176,40 @@ extern "C" void func_001E1048(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1078__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_playSound__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base UI sound interface plays no sound (entry 2 of D_0046DD60).
  */
-void func_001E1078(void* self)
+void cUISoundInterface_playSound(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1080__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_soundInitialize__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base UI sound interface needs no set-up (entry 3 of D_0046DD60).
  */
-void func_001E1080(void* self)
+void cUISoundInterface_soundInitialize(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1088__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_soundShutdown__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base UI sound interface has nothing to shut down (entry 4 of D_0046DD60).
  */
-void func_001E1088(void* self)
+void cUISoundInterface_soundShutdown(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1090);
+INCLUDE_ASM("fe/fepopupmisc", cUILocaleInterface_setTextNumCharFlag);
 #ifdef SKIP_ASM
 struct sFlags_001E1090 {
     unsigned int pad : 27;
@@ -4224,14 +4224,14 @@ struct sFlags_001E1090 {
  *
  * @param enabled  nonzero to set the flag
  */
-extern "C" void func_001E1090(void* self, int enabled)
+extern "C" void cUILocaleInterface_setTextNumCharFlag(void* self, int enabled)
 {
     ((sFlags_001E1090*)self)->flag = (enabled != 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E10B8);
+INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface__cUICustomInterface);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* D_0046DD28[];
@@ -4244,7 +4244,7 @@ extern void* D_0046DD28[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001E10B8(void* self, int flags)
+extern "C" void cUICustomInterface__cUICustomInterface(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = D_0046DD28;
     if (flags & 1) {
@@ -4254,53 +4254,53 @@ extern "C" void func_001E10B8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E10E8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base UI custom interface has no per-frame work (entry 2 of D_0046DD28).
  */
-void func_001E10E8(void* self)
+void cUICustomInterface_onUpdate(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E10F0__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_onScreenEvent__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the base UI custom interface handles no screen event (entry 3 of D_0046DD28).
  *
  * @return 0 (not handled)
  */
-int func_001E10F0(void* self)
+int cUICustomInterface_onScreenEvent(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E10F8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_getNextState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the base UI custom interface has no next state (entry 4 of D_0046DD28).
  *
  * @return 0 (no state)
  */
-int func_001E10F8(void* self)
+int cUICustomInterface_getNextState(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E1100__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cUICustomInterface_getPrevState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the base UI custom interface has no previous state (entry 5 of D_0046DD28).
  *
  * @return 0 (no state)
  */
-int func_001E1100(void* self)
+int cUICustomInterface_getPrevState(void* self)
 {
     return 0;
 }
@@ -7260,7 +7260,7 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3D58);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: func_001E33E8 is declared (void*) but never reads its argument; called here with none
 unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
@@ -7281,7 +7281,7 @@ extern char str_112messagecenter[];
  * rows, labels, buttons and arrows (func_001E48B0, func_001E4758, func_001E4458, func_001E4658) and sets D_004A20C0
  * (message center open).
  */
-extern "C" void func_001E3D58(cOVState_MESSAGECENTER* self)
+extern "C" void cOVState_MESSAGECENTER_onCreateScreen(cOVState_MESSAGECENTER* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_112messagecenter), 0);
@@ -7311,7 +7311,7 @@ extern "C" void func_001E3D58(cOVState_MESSAGECENTER* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3E30);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void cOVStateManager_removePDATemplate(void);
@@ -7328,7 +7328,7 @@ extern int D_004428F0[];
  * and restores cPauseState_Flags from the saved pause-state stack (D_005366E8, D_004A2A54, D_004428F0); then runs
  * cOVState_onDestroyScreen.
  */
-extern "C" void func_001E3E30(cOVState_MESSAGECENTER* self)
+extern "C" void cOVState_MESSAGECENTER_onDestroyScreen(cOVState_MESSAGECENTER* self)
 {
     int openMode = self->miMiscData;
     if (openMode == 1) {
@@ -7345,7 +7345,7 @@ extern "C" void func_001E3E30(cOVState_MESSAGECENTER* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E3EC0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onWidgetCreate);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* D_004A20A8;
@@ -7400,7 +7400,7 @@ struct sPopup_1E3EC0 {
  *
  * @param w  the widget being created (its name hash at +0x38)
  */
-extern "C" void func_001E3EC0(sPopup_1E3EC0* self, void* w)
+extern "C" void cOVState_MESSAGECENTER_onWidgetCreate(sPopup_1E3EC0* self, void* w)
 {
     char buf[32];
     int widgetHash = *(int*)((char*)w + 0x38);
@@ -7480,7 +7480,7 @@ extern "C" void func_001E3EC0(sPopup_1E3EC0* self, void* w)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/fepopupmisc", func_001E4168);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" unsigned char func_001E3680(int id);
@@ -7498,7 +7498,7 @@ struct sVEntry001E4168 {
  * In opening modes 0 and 1 (miMiscData) selects the row of message 37 (func_001E3680), focuses the menu (vtable entry 7
  * with 1) and opens the view popup for message 37 with number -1 (func_001E50C8); otherwise only focuses the menu.
  */
-extern "C" void func_001E4168(cOVState_MESSAGECENTER* self)
+extern "C" void cOVState_MESSAGECENTER_onGainFocus(cOVState_MESSAGECENTER* self)
 {
     int state = self->miMiscData;
     if (state == 0) {
@@ -7520,7 +7520,7 @@ extern "C" void func_001E4168(cOVState_MESSAGECENTER* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E4200);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onWidgetEvent);
 #ifdef SKIP_ASM
 struct sPopupEntry18_4200 {
     int field_0x0;
@@ -7574,7 +7574,7 @@ extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx);
  * @param widget  the widget (a row's From text holds its message index at +0x18)
  * @param event   the widget event
  */
-extern "C" void func_001E4200(cOVState_MESSAGECENTER* self, void* widget, unsigned int event)
+extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* self, void* widget, unsigned int event)
 {
     if (widget == 0) {
         return;
@@ -7706,7 +7706,7 @@ extern "C" void func_001E4458(cOVState_MESSAGECENTER* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E4578);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onWidgetMenu);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void func_001E4658(cOVState_MESSAGECENTER* self);
@@ -7724,7 +7724,7 @@ extern "C" void func_001E4458(cOVState_MESSAGECENTER* self);
  * @param value   the event's value (the new scroll offset for event 4)
  * @return 257 for events 4, 5 and others, the answers above otherwise
  */
-extern "C" int func_001E4578(cOVState_MESSAGECENTER* self, void* widget, int event, int value)
+extern "C" int cOVState_MESSAGECENTER_onWidgetMenu(cOVState_MESSAGECENTER* self, void* widget, int event, int value)
 {
     switch (event) {
     case 4:
@@ -7748,7 +7748,7 @@ extern "C" int func_001E4578(cOVState_MESSAGECENTER* self, void* widget, int eve
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E4610);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
 extern "C" void func_001E4758(cOVState_MESSAGECENTER*);
@@ -7763,7 +7763,7 @@ extern "C" void func_0039F190(void* self, int a1);
  * @param popup  the popup
  * @param event  the popup event
  */
-extern "C" void func_001E4610(cOVState_MESSAGECENTER* self, int popup, int event)
+extern "C" void cOVState_MESSAGECENTER_onPopupEvent(cOVState_MESSAGECENTER* self, int popup, int event)
 {
     if (event == 20) {
         func_001E48B0(self);

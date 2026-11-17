@@ -45,7 +45,7 @@ extern "C" void cFERider_initBoneMap(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019E7F0);
+INCLUDE_ASM("fe/feridermanager", cFERider_queueLoadExtraTextures);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -95,7 +95,7 @@ static inline sItemE7F0* getItemK19E7F0(sItemListE7F0* list, int i)
  * (func_0014B988) and, when there is one, queues it in the front end's file manager (func_0019DA10 at RealFE + 0x1A70,
  * kind 11) and records the file slot (func_0019CD38).
  */
-extern "C" void func_0019E7F0(int* self)
+extern "C" void cFERider_queueLoadExtraTextures(int* self)
 {
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
@@ -128,8 +128,8 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0014AD28(void* self, int a1, int a2);
-extern "C" void func_0019EBA0(void* self);
-extern "C" void func_0019E7F0(int* self);
+extern "C" void cFERider_purge(void* self);
+extern "C" void cFERider_queueLoadExtraTextures(int* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002F1890(void* mem, void* owner);
 extern "C" void* func_002ECA68(void* mem, void* owner, void* a2);
@@ -139,7 +139,7 @@ extern "C" void func_002F19F0(void* a, void* b);
 // PORT: these are defined later in the unit with struct-typed params; bind void* views by asm label
 extern "C" void func_0019FF00_E980(int* self, void* list, void* prev, int force, int a4) __asm__("func_0019FF00");
 extern "C" void func_0019FBE0_E980(int* self, void* list, int a2, int a3) __asm__("func_0019FBE0");
-extern "C" void func_0019F138_E980(void* self) __asm__("func_0019F138");
+extern "C" void cFERider_update_E980(void* self) __asm__("cFERider_update");
 extern char str_AttachedEmitterFX_b[];
 extern char str_cBoltOnFXInterface_b[];
 extern char str_AnimModel[];
@@ -156,7 +156,7 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
  *
  * @param profile  profile index (On Tour profileIndex)
  * @param character  character ID (On Tour charID)
- * @param slot  nonzero to load everything (On Tour loadAll), which adds func_0019E7F0()
+ * @param slot  nonzero to load everything (On Tour loadAll), which adds cFERider_queueLoadExtraTextures()
  * @return 1
  */
 extern "C" int cFERider_init_impl(int* self, int profile, int character, int slot)
@@ -166,7 +166,7 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
         return 1;
     }
     if (self[0] >= 0) {
-        func_0019EBA0(self);
+        cFERider_purge(self);
     }
     int dirty = (self[3268 / 4] != 0) | (self[3272 / 4] != 0);
     self[4] = slot;
@@ -189,10 +189,10 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
     void* list = func_0014AD28(iface, profile, character);
     func_0019FF00_E980(self, list, 0, self[4], 1);
     if (self[4] != 0) {
-        func_0019E7F0(self);
+        cFERider_queueLoadExtraTextures(self);
     }
     func_0019FBE0_E980(self, list, 0, 1);
-    func_0019F138_E980(self);
+    cFERider_update_E980(self);
     switch (self[0]) {
     case 0: self[3288 / 4] = 1; break;
     case 1: self[3288 / 4] = 4; break;
@@ -210,7 +210,7 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019EBA0);
+INCLUDE_ASM("fe/feridermanager", cFERider_purge);
 #ifdef SKIP_ASM
 struct sVE_EBA0 {
     short delta;
@@ -218,17 +218,17 @@ struct sVE_EBA0 {
     void (*fn)(void*, int);
 };
 extern "C" void cAnimModel__cAnimModel(void* p, int flags);
-extern "C" void func_0019EC68(void* self);
+extern "C" void cFERider_cancelAllFiles(void* self);
 
 /**
  * Releases everything the front-end rider holds and marks it empty.
  *
  * Destroys the anim model (+0x8, cAnimModel__cAnimModel with 3), the animation (+0xC), the bolt-on FX interface
  * (+0xC74) and the attached-emitter FX (+0xC70) through their destructors, clears those pointers, cancels the rider's
- * files (func_0019EC68), sets the character and profile (+0x0, +0x4) and +0xCD4 to -1 and zeroes +0xCC8 (shown) and
+ * files (cFERider_cancelAllFiles), sets the character and profile (+0x0, +0x4) and +0xCD4 to -1 and zeroes +0xCC8 (shown) and
  * +0xC78.
  */
-extern "C" void func_0019EBA0(void* self)
+extern "C" void cFERider_purge(void* self)
 {
     void* animModel = *(void**)((char*)self + 0x8);
     if (animModel != 0) {
@@ -253,7 +253,7 @@ extern "C" void func_0019EBA0(void* self)
     *(void**)((char*)self + 0xC) = 0;
     *(void**)((char*)self + 0xC70) = 0;
     *(void**)((char*)self + 0xC74) = 0;
-    func_0019EC68(self);
+    cFERider_cancelAllFiles(self);
     *(int*)((char*)self + 0x0) = -1;
     *(int*)((char*)self + 0x4) = -1;
     *(int*)((char*)self + 0xCC8) = 0;
@@ -263,7 +263,7 @@ extern "C" void func_0019EBA0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019EC68);
+INCLUDE_ASM("fe/feridermanager", cFERider_cancelAllFiles);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -295,7 +295,7 @@ struct sItemListEC68 {
  *
  * @param rider  the front-end rider
  */
-extern "C" void func_0019EC68(void* rider)
+extern "C" void cFERider_cancelAllFiles(void* rider)
 {
     int* self = (int*)rider;
     if (self[1] < 0)
@@ -323,7 +323,7 @@ extern "C" void func_0019EC68(void* rider)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019ED80);
+INCLUDE_ASM("fe/feridermanager", cFERider_compileModel);
 #ifdef SKIP_ASM
 void func_00369890(void* self, int a1, int a2);
 extern "C" void func_00369690(void* self, int count, void* src);
@@ -365,7 +365,7 @@ struct sFERiderED80 {
  * "RiderAnim"), binds it to the rider (func_00104D50), plays animation 434, applies the identity pose
  * (cAnimModel_transform with tPose_Identity) and builds the bone map (cFERider_initBoneMap).
  */
-extern "C" void func_0019ED80(sFERiderED80* self)
+extern "C" void cFERider_compileModel(sFERiderED80* self)
 {
     self->fCB4 = 1;
     func_00369890(GrMan, 0, 0);
@@ -389,7 +389,7 @@ extern "C" void func_0019ED80(sFERiderED80* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019EE88);
+INCLUDE_ASM("fe/feridermanager", cFERider_render);
 #ifdef SKIP_ASM
 extern char D_005047F8[];
 extern char D_00504810[];
@@ -458,7 +458,7 @@ struct sVE_EE88 {
  *
  * @param selfp  the front-end rider
  */
-extern "C" void func_0019EE88(void* selfp)
+extern "C" void cFERider_render(void* selfp)
 {
     sFERider_EE88* self = (sFERider_EE88*)selfp;
     sMtx_EE88 worldMatrix;
@@ -541,13 +541,13 @@ extern "C" void func_0019EE88(void* selfp)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feridermanager", func_0019F138);
+INCLUDE_ASM("fe/feridermanager", cFERider_update);
 #ifdef SKIP_ASM
 extern "C" void cFERider_init(void* self, int a1, int a2, int a3);
 extern "C" int func_001A0100(int* self);
 extern "C" int func_0019FD58(int* self);
-extern "C" void func_0019F780(int* self);
-extern "C" void func_0019F2D0(void* self);
+extern "C" void cFERider_updateAnimModelParts(int* self);
+extern "C" void cFERider_updateModelPose(void* self);
 extern "C" void cRiderAnimBase_updateAnimation(void* anim, int a1, float blend);
 extern "C" void cRiderAnimBase_expireAnimation(void* anim);
 extern "C" void func_002F1A08(void* p);
@@ -587,13 +587,13 @@ struct sVEF138 {
  * While an init is deferred (its frame word not negative) waits until the graphics manager's vtable entry 114 passes it
  * and then runs cFERider_init with the stored arguments. Otherwise, for a loaded character (id below 10): marks the
  * model parts loaded once func_001A0100 succeeds (+0xCBC), the textures once func_0019FD58 does (+0xCB8) and then
- * compiles the model (func_0019ED80) if needed; once all three are done applies the part variants once (func_0019F780,
+ * compiles the model (cFERider_compileModel) if needed; once all three are done applies the part variants once (cFERider_updateAnimModelParts,
  * +0xCC0) and folds the pending show request (+0xCC4) into the shown flag (+0xCC8). While shown, advances the animation
- * (cRiderAnimBase_updateAnimation, expireAnimation), rebuilds the pose (func_0019F2D0) and updates both FX objects.
+ * (cRiderAnimBase_updateAnimation, expireAnimation), rebuilds the pose (cFERider_updateModelPose) and updates both FX objects.
  *
  * @param selfp  the front-end rider
  */
-extern "C" void func_0019F138(void* selfp)
+extern "C" void cFERider_update(void* selfp)
 {
     sFERiderF138* self = (sFERiderF138*)selfp;
     if (self->pending >= 0) {
@@ -613,10 +613,10 @@ extern "C" void func_0019F138(void* selfp)
             if (self->fCB8 == 0 && func_0019FD58((int*)self)) {
                 self->fCB8 = 1;
                 if (self->fCB4 == 0) {
-                    func_0019ED80((sFERiderED80*)self);
+                    cFERider_compileModel((sFERiderED80*)self);
                 }
             } else if (self->fCBC != 0 && self->fCB8 != 0 && self->fCB4 != 0 && self->fCC0 == 0) {
-                func_0019F780((int*)self);
+                cFERider_updateAnimModelParts((int*)self);
                 self->fCC0 = 1;
                 int* pv = &self->fCC8;
                 *pv = self->fCC4 != 0 || *pv != 0;
@@ -629,7 +629,7 @@ extern "C" void func_0019F138(void* selfp)
             cRiderAnimBase_updateAnimation(self->anim, 0, 1.0f);
             cRiderAnimBase_expireAnimation(self->anim);
         }
-        func_0019F2D0(self);
+        cFERider_updateModelPose(self);
         func_002F1A08(self->fC70);
         func_002ECF78(self->fC74);
     }
@@ -637,7 +637,7 @@ extern "C" void func_0019F138(void* selfp)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F2D0);
+INCLUDE_ASM("fe/feridermanager", cFERider_updateModelPose);
 #ifdef SKIP_ASM
 struct sQuadF2D0 { int x[4]; } __attribute__((aligned(16)));
 struct sHalfF2D0 { sQuadF2D0 a, b; };
@@ -653,7 +653,7 @@ extern "C" void cAnimModel_buildSkelMatrices(void* model);
  * transforms, first resetting the two board bones (+0xCAC, +0xCB0) to the origin and D_004FF220. Then
  * cAnimModel_transform and cAnimModel_buildSkelMatrices.
  */
-extern "C" void func_0019F2D0(void* self)
+extern "C" void cFERider_updateModelPose(void* self)
 {
     sHalfF2D0 poses[2];
     if (*(int*)((char*)self + 0xCCC) != 0) {
@@ -676,28 +676,28 @@ extern "C" void func_0019F2D0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F3E8);
+INCLUDE_ASM("fe/feridermanager", cFERider_setPose);
 #ifdef SKIP_ASM
 struct sQuadRM { int x[4]; } __attribute__((aligned(16)));
-extern "C" void func_0019F2D0(void* self);
+extern "C" void cFERider_updateModelPose(void* self);
 
 /**
- * Sets the front-end rider's transform (position +0xC30, rotation +0xC40) and rebuilds the pose (func_0019F2D0).
+ * Sets the front-end rider's transform (position +0xC30, rotation +0xC40) and rebuilds the pose (cFERider_updateModelPose).
  *
  * @param src  the new transform (two quadwords)
  */
-extern "C" void func_0019F3E8(void* self, sQuadRM* src)
+extern "C" void cFERider_setPose(void* self, sQuadRM* src)
 {
     *(sQuadRM*)((char*)self + 0xC30) = src[0];
     *(sQuadRM*)((char*)self + 0xC40) = src[1];
-    func_0019F2D0(self);
+    cFERider_updateModelPose(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F418);
+INCLUDE_ASM("fe/feridermanager", cFERider_translate);
 #ifdef SKIP_ASM
-extern "C" void func_0019F2D0(void* self);
+extern "C" void cFERider_updateModelPose(void* self);
 
 struct sVec_F418 {
     float x, y, z, w;
@@ -749,18 +749,18 @@ static inline void AddTo_F418(sVec_F418& dst, const sVec_F418& b)
  *
  * @param delta  the move, in the rider's frame
  */
-extern "C" void func_0019F418(void* self, sVec_F418* delta)
+extern "C" void cFERider_translate(void* self, sVec_F418* delta)
 {
     sVec_F418* pos = (sVec_F418*)((char*)self + 0xC30);
     sVec_F418* rot = (sVec_F418*)((char*)self + 0xC40);
     AddTo_F418(*pos, Rot_F418(*rot, *delta));
-    func_0019F2D0(self);
+    cFERider_updateModelPose(self);
 }
 #endif
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F488);
+INCLUDE_ASM("fe/feridermanager", cFERider_rotate);
 #ifdef SKIP_ASM
-extern "C" void func_0019F2D0(void* self);
+extern "C" void cFERider_updateModelPose(void* self);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 struct sQuat_F488 {
@@ -799,7 +799,7 @@ static inline sQuat_F488 QuatMul_F488(const sQuat_F488& a, const sQuat_F488& b)
  * @param axis   the axis (x, y, z used)
  * @param angle  the angle in radians
  */
-extern "C" void func_0019F488(void* self, sQuat_F488* axis, float angle)
+extern "C" void cFERider_rotate(void* self, sQuat_F488* axis, float angle)
 {
     sQuat_F488* rot = (sQuat_F488*)((char*)self + 0xC40);
     sQuat_F488 turn;
@@ -812,32 +812,32 @@ extern "C" void func_0019F488(void* self, sQuat_F488* axis, float angle)
     rotQuat.z = sinHalf * axis->z;
     turn = rotQuat;
     *rot = QuatMul_F488(*rot, turn);
-    func_0019F2D0(self);
+    cFERider_updateModelPose(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F548);
+INCLUDE_ASM("fe/feridermanager", cFERider_setBoardPose);
 #ifdef SKIP_ASM
-extern "C" void func_0019F2D0(void* self);
+extern "C" void cFERider_updateModelPose(void* self);
 
 /**
  * Sets the front-end rider's board transform (position +0xC50, rotation +0xC60) and rebuilds the pose.
  *
  * @param src  the new transform (two quadwords)
  */
-extern "C" void func_0019F548(void* self, sQuadRM* src)
+extern "C" void cFERider_setBoardPose(void* self, sQuadRM* src)
 {
     *(sQuadRM*)((char*)self + 0xC50) = src[0];
     *(sQuadRM*)((char*)self + 0xC60) = src[1];
-    func_0019F2D0(self);
+    cFERider_updateModelPose(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F578);
+INCLUDE_ASM("fe/feridermanager", cFERider_translateBoard);
 #ifdef SKIP_ASM
-extern "C" void func_0019F2D0(void* self);
+extern "C" void cFERider_updateModelPose(void* self);
 
 struct sVec_F578 {
     float x, y, z, w;
@@ -889,18 +889,18 @@ static inline void AddTo_F578(sVec_F578& dst, const sVec_F578& b)
  *
  * @param delta  the move, in the board's frame
  */
-extern "C" void func_0019F578(void* self, sVec_F578* delta)
+extern "C" void cFERider_translateBoard(void* self, sVec_F578* delta)
 {
     sVec_F578* pos = (sVec_F578*)((char*)self + 0xC50);
     sVec_F578* rot = (sVec_F578*)((char*)self + 0xC60);
     AddTo_F578(*pos, Rot_F578(*rot, *delta));
-    func_0019F2D0(self);
+    cFERider_updateModelPose(self);
 }
 #endif
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F5E8);
+INCLUDE_ASM("fe/feridermanager", cFERider_rotateBoard);
 #ifdef SKIP_ASM
-extern "C" void func_0019F2D0(void* self);
+extern "C" void cFERider_updateModelPose(void* self);
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
 struct sQuat_F5E8 {
@@ -938,7 +938,7 @@ static inline sQuat_F5E8 QuatMul_F5E8(const sQuat_F5E8& a, const sQuat_F5E8& b)
  * @param axis   the axis (x, y, z used)
  * @param angle  the angle in radians
  */
-extern "C" void func_0019F5E8(void* self, sQuat_F5E8* axis, float angle)
+extern "C" void cFERider_rotateBoard(void* self, sQuat_F5E8* axis, float angle)
 {
     sQuat_F5E8* rot = (sQuat_F5E8*)((char*)self + 0xC60);
     sQuat_F5E8 turn;
@@ -951,11 +951,11 @@ extern "C" void func_0019F5E8(void* self, sQuat_F5E8* axis, float angle)
     rotQuat.z = sinHalf * axis->z;
     turn = rotQuat;
     *rot = QuatMul_F5E8(*rot, turn);
-    func_0019F2D0(self);
+    cFERider_updateModelPose(self);
 }
 #endif
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F6A8);
+INCLUDE_ASM("fe/feridermanager", cFERider_getBonePosition);
 #ifdef SKIP_ASM
 /**
  * Returns the address of a bone's position in the front-end rider's model.
@@ -966,12 +966,12 @@ INCLUDE_ASM("fe/feridermanager", func_0019F6A8);
  * @param index      the bone id
  * @return the address of the bone's position (first quadword)
  */
-extern "C" int func_0019F6A8(void *riderSlot, int index) {
+extern "C" int cFERider_getBonePosition(void *riderSlot, int index) {
     return (*(int *)((char*)((*(void **)((char*)(riderSlot) + (8)))) + (0x2C))) + ((*(int *)(((char*)(riderSlot) + (index << 2)) + (0xC7C))) << 5);
 }
 #endif
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F6C8);
+INCLUDE_ASM("fe/feridermanager", cFERider_setBonePosition);
 #ifdef SKIP_ASM
 // R5900 128-bit GPR quadword (single lq/sq pair); same typedef as ai/rider.cpp.
 typedef int cQuad128 __attribute__((mode(TI)));
@@ -988,7 +988,7 @@ struct sFeBone_19F6C8 {
  * @param slot  the bone id (through the bone map at +0xC7C)
  * @param src   the new position
  */
-extern "C" void func_0019F6C8(void* self, int slot, cQuad128* src)
+extern "C" void cFERider_setBonePosition(void* self, int slot, cQuad128* src)
 {
     char* model = *(char**)((char*)self + 0x8);
     int bone = *(int*)((char*)self + (slot << 2) + 0xC7C);
@@ -997,7 +997,7 @@ extern "C" void func_0019F6C8(void* self, int slot, cQuad128* src)
 }
 #endif
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F6F0);
+INCLUDE_ASM("fe/feridermanager", cFERider_getBoneQuaternion);
 #ifdef SKIP_ASM
 /**
  * Returns the address of a bone's rotation in the front-end rider's model (the mapped bone's second quadword).
@@ -1006,12 +1006,12 @@ INCLUDE_ASM("fe/feridermanager", func_0019F6F0);
  * @param index      the bone id (through the bone map at +0xC7C)
  * @return the address of the bone's quaternion
  */
-extern "C" int func_0019F6F0(void *riderSlot, int index) {
+extern "C" int cFERider_getBoneQuaternion(void *riderSlot, int index) {
     return (*(int *)((char*)((*(void **)((char*)(riderSlot) + (8)))) + (0x2C))) + ((*(int *)(((char*)(riderSlot) + (index << 2)) + (0xC7C))) << 5) + 0x10;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F718);
+INCLUDE_ASM("fe/feridermanager", cFERider_setBoneQuaternion);
 #ifdef SKIP_ASM
 typedef int cQuad128 __attribute__((mode(TI)));
 
@@ -1026,7 +1026,7 @@ struct sFeBone_19F718 {
  * @param slot  the bone id (through the bone map at +0xC7C)
  * @param src   the new quaternion
  */
-extern "C" void func_0019F718(void* self, int slot, cQuad128* src)
+extern "C" void cFERider_setBoneQuaternion(void* self, int slot, cQuad128* src)
 {
     char* model = *(char**)((char*)self + 0x8);
     int bone = *(int*)((char*)self + (slot << 2) + 0xC7C);
@@ -1035,7 +1035,7 @@ extern "C" void func_0019F718(void* self, int slot, cQuad128* src)
 }
 #endif
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F740);
+INCLUDE_ASM("fe/feridermanager", cFERider_getAnimID);
 #ifdef SKIP_ASM
 extern "C" void cRiderAnimBase_getCurrentAnimID__FPvi(int, int);
 
@@ -1044,12 +1044,12 @@ extern "C" void cRiderAnimBase_getCurrentAnimID__FPvi(int, int);
  *
  * @param riderSlot  the front-end rider
  */
-extern "C" void func_0019F740(void *riderSlot) {
+extern "C" void cFERider_getAnimID(void *riderSlot) {
     cRiderAnimBase_getCurrentAnimID__FPvi((*(int *)((char*)(riderSlot) + (0xC))), 2);
 }
 #endif
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F760);
+INCLUDE_ASM("fe/feridermanager", cFERider_getAnimPercent);
 #ifdef SKIP_ASM
 extern "C" void func_00312AB0(int, int);
 
@@ -1062,13 +1062,13 @@ extern "C" void func_00312AB0(int, int);
  *
  * @param riderSlot  the front-end rider
  */
-extern "C" void func_0019F760(void *riderSlot) {
+extern "C" void cFERider_getAnimPercent(void *riderSlot) {
     func_00312AB0((*(int *)((char*)(riderSlot) + (0xC))), 2);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F780);
+INCLUDE_ASM("fe/feridermanager", cFERider_updateAnimModelParts);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -1115,7 +1115,7 @@ static inline sBoneEntF780* getEntK19F780(sBoneDbF780* db, int i)
  * entry (func_0014D448 on the item database) and, when its part index (+0x10) is not negative, sets that model part's
  * variant (cAnimModel_setModelPartVariant). Finally sets the first word of the bolt-on FX interface (+0xC74) to 1.
  */
-extern "C" void func_0019F780(int* self)
+extern "C" void cFERider_updateAnimModelParts(int* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     sBoneDbF780* db = (sBoneDbF780*)func_0014BDB8_noarg();
@@ -1706,7 +1706,7 @@ extern "C" int func_001A0100(int* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0358);
+INCLUDE_ASM("fe/feridermanager", cFERider_speak);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002A16B0(void* mgr, int id);
@@ -1718,7 +1718,7 @@ extern "C" void func_002A1778(void* mgr, int id);
  * The customize request (+0xC1C, set by the equip screen) plays through func_002A1778 (sound 8381); otherwise the
  * character-select request (+0xC20) through func_002A16B0 (sound 8380); both on cAudioInterface_bxAudio() with the character id.
  */
-extern "C" void func_001A0358(void* self)
+extern "C" void cFERider_speak(void* self)
 {
     if (*(int*)((char*)self + 0xC1C) != 0) {
         func_002A1778(cAudioInterface_bxAudio(), *(int*)self);
@@ -1731,7 +1731,7 @@ extern "C" void func_001A0358(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A03C0);
+INCLUDE_ASM("fe/feridermanager", cFERiderManager_cFERiderManager);
 #ifdef SKIP_ASM
 extern "C" void* cFERider_cFERider(void* self);
 
@@ -1740,7 +1740,7 @@ extern "C" void* cFERider_cFERider(void* self);
  *
  * @return @p self
  */
-extern "C" void* func_001A03C0(void* self)
+extern "C" void* cFERiderManager_cFERiderManager(void* self)
 {
     char* slot = (char*)self;
     int i;
@@ -1752,23 +1752,23 @@ extern "C" void* func_001A03C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0420);
+INCLUDE_ASM("fe/feridermanager", cFERiderManager__cFERiderManager);
 #ifdef SKIP_ASM
-extern "C" void func_001A04C8(void* self);
+extern "C" void cFERiderManager_purge(void* self);
 extern "C" void cFERider__cFERider(void* self, int flags);
 void operator_delete(int* p);
 
 /**
  * Destroys the front end's rider manager, freeing it when asked.
  *
- * Purges both riders (func_001A04C8), destroys them (cFERider__cFERider) and calls operator_delete when bit 0 of @p flags is
- * set. cFE's destructor func_001957D0 calls it on +0xB0 with 2.
+ * Purges both riders (cFERiderManager_purge), destroys them (cFERider__cFERider) and calls operator_delete when bit 0 of @p flags is
+ * set. cFE's destructor cFE__cFE calls it on +0xB0 with 2.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001A0420(void* self, int flags)
+extern "C" void cFERiderManager__cFERiderManager(void* self, int flags)
 {
-    func_001A04C8(self);
+    cFERiderManager_purge(self);
     char* base = (char*)self;
     if (base != 0) {
         char* slot = base + 0x19C0;
@@ -1784,7 +1784,7 @@ extern "C" void func_001A0420(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0498);
+INCLUDE_ASM("fe/feridermanager", cFERiderManager_init);
 #ifdef SKIP_ASM
 struct sRiderSlot_001A0498 {
     int field_0x0;
@@ -1797,7 +1797,7 @@ struct sRiderSlot_001A0498 {
  *
  * cRealFE_load calls it on the rider manager.
  */
-extern "C" void func_001A0498(sRiderSlot_001A0498* self)
+extern "C" void cFERiderManager_init(sRiderSlot_001A0498* self)
 {
     int i;
     sRiderSlot_001A0498* slot = self;
@@ -1809,26 +1809,26 @@ extern "C" void func_001A0498(sRiderSlot_001A0498* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A04C8);
+INCLUDE_ASM("fe/feridermanager", cFERiderManager_purge);
 #ifdef SKIP_ASM
-extern "C" void func_0019EBA0(void* slot);
+extern "C" void cFERider_purge(void* slot);
 
 /**
- * Purges both of the front end's riders (cFERider purge, func_0019EBA0).
+ * Purges both of the front end's riders (cFERider purge, cFERider_purge).
  *
  * cRealFE_purge calls it on the rider manager.
  */
-extern "C" void func_001A04C8(void* self)
+extern "C" void cFERiderManager_purge(void* self)
 {
     int i;
     for (i = 0; i < 2; i++) {
-        func_0019EBA0((char*)self + i * 0xce0);
+        cFERider_purge((char*)self + i * 0xce0);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0508);
+INCLUDE_ASM("fe/feridermanager", cFERiderManager_setHumanCharacter);
 #ifdef SKIP_ASM
 extern "C" void cFERider_setCharID(void* slot, int a1, int a2);
 
@@ -1839,14 +1839,14 @@ extern "C" void cFERider_setCharID(void* slot, int a1, int a2);
  * @param charId   the character id
  * @param loadAll   nonzero to load everything
  */
-extern "C" void func_001A0508(void* self, int idx, int charId, int loadAll)
+extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int charId, int loadAll)
 {
     cFERider_setCharID((char*)self + idx * 0xce0, charId, loadAll);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0538);
+INCLUDE_ASM("fe/feridermanager", cFERiderManager_getHuman);
 #ifdef SKIP_ASM
 /**
  * Returns front-end rider @p index (the manager plus 0xCE0 x index).
@@ -1854,14 +1854,14 @@ INCLUDE_ASM("fe/feridermanager", func_001A0538);
  * @param index  the rider
  * @return the rider
  */
-extern "C" void* func_001A0538(void* self, int index)
+extern "C" void* cFERiderManager_getHuman(void* self, int index)
 {
     return (char*)self + index * 0xce0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0548);
+INCLUDE_ASM("fe/feridermanager", cFERiderManager_getHuman1);
 #ifdef SKIP_ASM
 /**
  * Returns front-end rider @p index (the manager plus 0xCE0 x index).
@@ -1869,14 +1869,14 @@ INCLUDE_ASM("fe/feridermanager", func_001A0548);
  * @param index  the rider
  * @return the rider
  */
-extern "C" void* func_001A0548(void* self, int index)
+extern "C" void* cFERiderManager_getHuman1(void* self, int index)
 {
     return (char*)self + index * 0xce0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0558);
+INCLUDE_ASM("fe/feridermanager", cFERiderManager_isHumanVisible);
 #ifdef SKIP_ASM
 /**
  * Reports whether front-end rider @p index is shown (its +0xCC8).
@@ -1885,13 +1885,13 @@ INCLUDE_ASM("fe/feridermanager", func_001A0558);
  * @param index  the rider
  * @return the shown flag
  */
-extern "C" int func_001A0558(int slots, int index) {
+extern "C" int cFERiderManager_isHumanVisible(int slots, int index) {
     return (*(int *)((char*)(((index * 0xCE0) + slots)) + (0xCC8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0570);
+INCLUDE_ASM("fe/feridermanager", cFERiderManager_setHumanVisible);
 #ifdef SKIP_ASM
 extern "C" void cFERider_setVisible(void* slot, int v);
 
@@ -1901,24 +1901,24 @@ extern "C" void cFERider_setVisible(void* slot, int v);
  * @param i  the rider
  * @param visible  nonzero to show it
  */
-extern "C" void func_001A0570(void* self, int i, int visible)
+extern "C" void cFERiderManager_setHumanVisible(void* self, int i, int visible)
 {
     cFERider_setVisible((char*)self + i * 0xce0, visible);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/feridermanager", func_001A0598);
+INCLUDE_ASM("fe/feridermanager", cFERiderManager_render);
 #ifdef SKIP_ASM
-extern "C" void func_0019EE88(void* rider);
+extern "C" void cFERider_render(void* rider);
 
 /**
  * Renders the front end's shown riders.
  *
  * Sets the graphics manager's words +0x24 to 46, +0x84 to 47 and +0x10A8 to its +0x1008, then renders each rider whose
- * shown flag (+0xCC8) is set (func_0019EE88).
+ * shown flag (+0xCC8) is set (cFERider_render).
  */
-extern "C" void func_001A0598(char* self)
+extern "C" void cFERiderManager_render(char* self)
 {
     char* riderBase = (char*)GrMan;
     *(int*)(riderBase + 0x24) = 46;
@@ -1927,24 +1927,24 @@ extern "C" void func_001A0598(char* self)
     for (int i = 0; i < 2; i++) {
         riderBase = self + i * 3296;
         if (*(int*)(riderBase + 0xCC8) != 0)
-            func_0019EE88(riderBase);
+            cFERider_render(riderBase);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0608);
+INCLUDE_ASM("fe/feridermanager", cFERiderManager_update);
 #ifdef SKIP_ASM
-extern "C" void func_0019F138(void* slot);
+extern "C" void cFERider_update(void* slot);
 
 /**
- * Updates both front-end riders (func_0019F138).
+ * Updates both front-end riders (cFERider_update).
  */
-extern "C" void func_001A0608(void* self)
+extern "C" void cFERiderManager_update(void* self)
 {
     int i;
     for (i = 0; i < 2; i++) {
-        func_0019F138((char*)self + i * 0xce0);
+        cFERider_update((char*)self + i * 0xce0);
     }
 }
 #endif

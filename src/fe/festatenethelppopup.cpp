@@ -390,7 +390,7 @@ struct sNetHelpPopup_DA4A8 {
  *
  * Sets the option count (+0x48, see cFEStateNetHelpPopup_setNumHelpOptions()), +0x54, the three description ids (+0x58)
  * and +0x64 to 0, and the seven option text ids (+0x68) to 0 and icons (+0x84) to -1 (see
- * cFEStateNetHelpPopup_setOption()). The help popup's constructor func_001D9D48() calls it.
+ * cFEStateNetHelpPopup_setOption()). The help popup's constructor cFEStateNetHelpPopup_cFEStateNetHelpPopup() calls it.
  */
 extern "C" void cFEStateNetHelpPopup_clear(void* self)
 {

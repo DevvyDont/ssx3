@@ -11,7 +11,7 @@
 // Size 0x73C: cMemMan_alloc(0x73C, "cFEStateChatRoom") + cFEStateChatRoom_cFEStateChatRoom(mem, pEngine) at all 4 sites (func_001A9578,
 // func_001B15D8, func_001BD738; fe/festatebigradio func_001941B0); the constructor's last store is the 16-byte
 // mChatColour at 0x72C. Constructors cFEStateChatRoom_cFEStateChatRoom (cFEStateNet(pEngine, 0), vtable cFEStateChatRoom_vtbl, mHashName 0x3D) and
-// the default func_001DF580 (fe/fepopupmisc); destructor cFEStateChatRoom__cFEStateChatRoom (slot 1; the preview's _$_16cFEStateChatRoom).
+// the default cFEStateChatRoom_cFEStateChatRoom1 (fe/fepopupmisc); destructor cFEStateChatRoom__cFEStateChatRoom (slot 1; the preview's _$_16cFEStateChatRoom).
 // Retail vtable cFEStateChatRoom_vtbl (32 slots: 4 onCreateScreen cFEStateChatRoom_onCreateScreen, 6 onGainFocus cFEStateChatRoom_onGainFocus, 7 cFEStateChatRoom_onGainTransition,
 // 8 cFEStateChatRoom_onInputBegin, 12 onUpdate cFEStateChatRoom_onUpdate, 13 cFEStateChatRoom_onMenuGainFocus, 17 onPopupEvent cFEStateChatRoom_onPopupEvent, 18 onWidgetCreate
 // cFEStateChatRoom_onWidgetCreate, 19 onWidgetEvent cFEStateChatRoom_onWidgetEvent, 20 onWidgetMenu cFEStateChatRoom_onWidgetMenu, 25 func_001B2DA0 (help), 31
@@ -41,7 +41,7 @@ struct cFEStateChatRoom {
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
     void** mVtbl;                   // 0x008 [R] cFEStateChatRoom_vtbl (vtables.tsv; 32 slots), stored by cFEStateChatRoom_cFEStateChatRoom /
-                                    //       func_001DF580 after the cFEStateNet ctor and by the destructor
+                                    //       cFEStateChatRoom_cFEStateChatRoom1 after the cFEStateNet ctor and by the destructor
                                     //       cFEStateChatRoom__cFEStateChatRoom
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateChatRoom_cFEStateChatRoom stores

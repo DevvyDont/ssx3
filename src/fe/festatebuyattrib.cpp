@@ -166,12 +166,12 @@ extern "C" int cFEStateBuyAttrib_onWidgetMenu(void* self, int pMenu, unsigned in
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onPopupEvent);
 #ifdef SKIP_ASM
-extern "C" void func_001F5300(void* self);
+extern "C" void cFEStateBuyAttrib_buyExperience(void* self);
 
 /**
  * Buys the chosen attribute points when the buy popup closes with a yes.
  *
- * On event 0x16 (a popup was popped) with the popup's result word (+0x6C) set, calls func_001F5300() (On Tour
+ * On event 0x16 (a popup was popped) with the popup's result word (+0x6C) set, calls cFEStateBuyAttrib_buyExperience() (On Tour
  * buyExperience), which pays the total cost and records the points with the economy interface.
  *
  * @param sender  the popup that closed (the cUIStateBuyPopup)
@@ -181,7 +181,7 @@ extern "C" void cFEStateBuyAttrib_onPopupEvent(void* self, void* sender, int msg
 {
     if (msg == 22) {
         if (*(int*)((char*)sender + 0x6C) != 0) {
-            func_001F5300(self);
+            cFEStateBuyAttrib_buyExperience(self);
         }
     }
 }
@@ -590,7 +590,7 @@ extern "C" void cFEStateBuyAttrib_updateBank(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F5300);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_buyExperience);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
@@ -651,7 +651,7 @@ struct sBuyAttrib_5300 {
  *
  * @param buyState  the buy-attributes state
  */
-extern "C" void func_001F5300(void* buyState)
+extern "C" void cFEStateBuyAttrib_buyExperience(void* buyState)
 {
     sBuyAttrib_5300* self = (sBuyAttrib_5300*)buyState;
     self->bank -= self->cost;
@@ -694,28 +694,28 @@ extern "C" void func_001F54A8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F54B0);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_cFEStateCareerStats);
 #ifdef SKIP_ASM
 extern void* cFEStateCareerStats_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
-extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 
 /**
  * Constructs a career-stats state.
  *
  * Runs the cUIState constructor func_0039E2A0 (the engine reaches it in the second argument register), stores
  * cFEStateCareerStats_vtbl, sets the state id (+0xC) to 42 and the user (+0x44) to 0, and copies player 0's control
- * mask from the custom interface (func_001A1CD0) into +0x15, without checking that the interface exists.
+ * mask from the custom interface (cFECustom_getPlayerCtrlMask) into +0x15, without checking that the interface exists.
  *
  * @return @p self
  */
-extern "C" void* func_001F54B0(void* self)
+extern "C" void* cFEStateCareerStats_cFEStateCareerStats(void* self)
 {
     func_0039E2A0(self);
     *(void***)((char*)self + 0x8) = cFEStateCareerStats_vtbl;
     *(int*)((char*)self + 0xC) = 42;
     *(char*)((char*)self + 0x44) = 0;
-    *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), 0);
+    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), 0);
     return self;
 }
 #endif
@@ -727,8 +727,8 @@ int GetHashValue32(char* str);
 extern char str_35car_stat[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_001F6F30(void* self);
-extern "C" void func_001F5A38(void* self);
+extern "C" void cFEStateCareerStats_initTotalEventMedal(void* self);
+extern "C" void cFEStateCareerStats_setupLayout(void* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 
@@ -736,7 +736,7 @@ extern "C" void func_0028F140(void* self, int a1);
  * Opens the career-stats screen ("35car_stat") on its highlights page and counts the event medals.
  *
  * Keeps the screen at 0x40, clears the scroll positions, event totals and medal bit masks (0x4C to 0x74) and
- * the page (0x48), then runs func_001F6F30() (probably On Tour initTotalEventMedal), func_001F5A38() (shows
+ * the page (0x48), then runs cFEStateCareerStats_initTotalEventMedal() (probably On Tour initTotalEventMedal), cFEStateCareerStats_setupLayout() (shows
  * the page's group, probably setupLayout) and switches the front-end sound-bank mode to 8.
  */
 extern "C" void cFEStateCareerStats_onCreateScreen(void* self)
@@ -759,8 +759,8 @@ extern "C" void cFEStateCareerStats_onCreateScreen(void* self)
     *(int*)((char*)self + 0x6C) = 0;
     *(int*)((char*)self + 0x74) = 0;
     *(int*)((char*)self + 0x48) = 0;
-    func_001F6F30(self);
-    func_001F5A38(self);
+    cFEStateCareerStats_initTotalEventMedal(self);
+    cFEStateCareerStats_setupLayout(self);
     func_0028F140(cAudioInterface_bxAudio(), 8);
 }
 #endif
@@ -878,9 +878,9 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onInputBegin);
 #ifdef SKIP_ASM
 extern "C" void cFEStateCareerStats_setupHighlightsList(void* self);
 extern "C" void cFEStateCareerStats_setupMenuFocus(void* self, int focus);
-extern "C" void func_001F5A38(void* self);
-extern "C" void func_001F60E0(void* self);
-extern "C" void func_001F6490(void* self);
+extern "C" void cFEStateCareerStats_setupLayout(void* self);
+extern "C" void cFEStateCareerStats_setupRacePlatinumMedalsList(void* self);
+extern "C" void cFEStateCareerStats_setupFSPlatinumMedalsList(void* self);
 extern char str_hll[];
 extern char str_hlr[];
 extern char str_high_up[];
@@ -957,7 +957,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(sCareer_56C8* self, char* w)
     }
     if (handled) {
         cFEStateCareerStats_setupMenuFocus(self, self->menu);
-        func_001F5A38(self);
+        cFEStateCareerStats_setupLayout(self);
     }
     if (self->menu == 0) {
         if (wantCall_56C8(w, 17)) {
@@ -985,7 +985,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(sCareer_56C8* self, char* w)
         if (wantCall_56C8(w, 17)) {
             if (self->scrollB > 0) {
                 self->scrollB--;
-                func_001F60E0(self);
+                cFEStateCareerStats_setupRacePlatinumMedalsList(self);
                 handled = 1;
                 playFrame_56C8(self, str_race_up);
                 msg = 2;
@@ -996,7 +996,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(sCareer_56C8* self, char* w)
             if (self->scrollB + 5 < self->countB) {
                 handled = 1;
                 self->scrollB++;
-                func_001F60E0(self);
+                cFEStateCareerStats_setupRacePlatinumMedalsList(self);
                 playFrame_56C8(self, str_race_down);
                 msg = 2;
             } else {
@@ -1007,7 +1007,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(sCareer_56C8* self, char* w)
         if (wantCall_56C8(w, 17)) {
             if (self->scrollC > 0) {
                 self->scrollC--;
-                func_001F6490(self);
+                cFEStateCareerStats_setupFSPlatinumMedalsList(self);
                 handled = 1;
                 playFrame_56C8(self, str_free_up);
                 msg = 2;
@@ -1018,7 +1018,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(sCareer_56C8* self, char* w)
             if (self->scrollC + 5 < self->countC) {
                 handled = 1;
                 self->scrollC++;
-                func_001F6490(self);
+                cFEStateCareerStats_setupFSPlatinumMedalsList(self);
                 playFrame_56C8(self, str_free_down);
                 msg = 2;
             } else {
@@ -1036,7 +1036,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(sCareer_56C8* self, char* w)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F5A38);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupLayout);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1061,7 +1061,7 @@ struct sVEK1F5A38 {
  * Hides "highlights", "race_platinum", "freestyle_platinum" and "ridersbest", then shows page 0, 1, 2 or 3 of those.
  * The "horizontal_dash_b" and "vertical_dash_b" lines are shown (vtable entry 9) except on pages 0 and 3.
  */
-extern "C" void func_001F5A38(void* self)
+extern "C" void cFEStateCareerStats_setupLayout(void* self)
 {
     cUIState_hideObjSafe(self, str_highlights);
     cUIState_hideObjSafe(self, str_race_platinum);
@@ -1103,8 +1103,8 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupMenuFocus);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cFEStateCareerStats_setupHighlightsList(void* self);
 extern "C" void cFEStateCareerStats_setupRidersBest(void* self);
-extern "C" void func_001F60E0(void* self);
-extern "C" void func_001F6490(void* self);
+extern "C" void cFEStateCareerStats_setupRacePlatinumMedalsList(void* self);
+extern "C" void cFEStateCareerStats_setupFSPlatinumMedalsList(void* self);
 extern char str_highlightsMenu[];
 extern char str_race_platinumdummyMenu[];
 extern char str_fs_platinumdummyMenu[];
@@ -1127,7 +1127,7 @@ static inline void setFocus_5BA8(char* o, int on)
  *
  * Stores @p menu at 0x48 (On Tour mStatsState), unfocuses "highlightsMenu", "race_platinumdummyMenu",
  * "fs_platinumdummyMenu" and "ridersbestDummyMenu" (setFocus, vtable slot 7), then focuses the page's one
- * without a null check and runs setupHighlightsList(), func_001F60E0() or func_001F6490() (probably the race
+ * without a null check and runs setupHighlightsList(), cFEStateCareerStats_setupRacePlatinumMedalsList() or cFEStateCareerStats_setupFSPlatinumMedalsList() (probably the race
  * and freestyle platinum-medal lists) or setupRidersBest().
  *
  * @param self_  the career-stats state (this)
@@ -1156,11 +1156,11 @@ extern "C" void cFEStateCareerStats_setupMenuFocus(void* self_, int menu)
         break;
     case 1:
         setFocus_5BA8(menuTab1, 1);
-        func_001F60E0(self);
+        cFEStateCareerStats_setupRacePlatinumMedalsList(self);
         break;
     case 2:
         setFocus_5BA8(menuTab2, 1);
-        func_001F6490(self);
+        cFEStateCareerStats_setupFSPlatinumMedalsList(self);
         break;
     case 3:
         setFocus_5BA8(menuTab3, 1);
@@ -1295,7 +1295,7 @@ extern "C" void cFEStateCareerStats_setupHighlightsList(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F60E0);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupRacePlatinumMedalsList);
 #ifdef SKIP_ASM
 struct cUIText;
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
@@ -1345,7 +1345,7 @@ struct sCareer_60E0 {
  *
  * @param vself  the career-stats state
  */
-extern "C" void func_001F60E0(void* vself)
+extern "C" void cFEStateCareerStats_setupRacePlatinumMedalsList(void* vself)
 {
     sCareer_60E0* self = (sCareer_60E0*)vself;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1414,7 +1414,7 @@ extern "C" void func_001F60E0(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F6490);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setupFSPlatinumMedalsList);
 #ifdef SKIP_ASM
 struct cUIText;
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
@@ -1461,7 +1461,7 @@ struct sCareer_6490 {
  *
  * @param vself  the career-stats state
  */
-extern "C" void func_001F6490(void* vself)
+extern "C" void cFEStateCareerStats_setupFSPlatinumMedalsList(void* vself)
 {
     sCareer_6490* self = (sCareer_6490*)vself;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1534,7 +1534,7 @@ extern "C" void func_001F6490(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F6840);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_setTextSafe);
 #ifdef SKIP_ASM
 struct cUIText;
 int GetHashValue32(char* str);
@@ -1547,7 +1547,7 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
  * @param name  the object's name
  * @param str   the ASCII text
  */
-extern "C" void func_001F6840(void* self, char* name, const char* str)
+extern "C" void cFEStateCareerStats_setTextSafe(void* self, char* name, const char* str)
 {
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
     if (text != 0) {
@@ -1619,7 +1619,7 @@ struct sCareerStats_6890 {
  * ubers and uber grinds show as "%d", handplants and airtime as "%d sec.", the longest rail as "%0.1f m."
  * (value / 100), each with "[location]" from the race interface; a record of 0 or less shows "-" and "- - -".
  * "favoriteEvent" shows the best combo (record 4) under the label kT_ovrcmnBestCombo, whose text widget is
- * not null-checked. Texts are set through func_001F6840() (On Tour setTextSafe).
+ * not null-checked. Texts are set through cFEStateCareerStats_setTextSafe() (On Tour setTextSafe).
  *
  * @param vself  the career-stats state (this)
  */
@@ -1638,12 +1638,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
         track = best.entry[0].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
-            func_001F6840(self, str_ko, buf);
+            cFEStateCareerStats_setTextSafe(self, str_ko, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            func_001F6840(self, str_ko_event, buf);
+            cFEStateCareerStats_setTextSafe(self, str_ko_event, buf);
         } else {
-            func_001F6840(self, str_ko, D_004A2108);
-            func_001F6840(self, str_ko_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe(self, str_ko, D_004A2108);
+            cFEStateCareerStats_setTextSafe(self, str_ko_event, D_004A2168);
         }
     }
     {
@@ -1651,12 +1651,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
         track = best.entry[5].track;
         if (value > 0) {
             sprintf(buf, str_pct_d_sec, value);
-            func_001F6840(self, str_handplants, buf);
+            cFEStateCareerStats_setTextSafe(self, str_handplants, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            func_001F6840(self, str_handplants_event, buf);
+            cFEStateCareerStats_setTextSafe(self, str_handplants_event, buf);
         } else {
-            func_001F6840(self, str_handplants, D_004A2108);
-            func_001F6840(self, str_handplants_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe(self, str_handplants, D_004A2108);
+            cFEStateCareerStats_setTextSafe(self, str_handplants_event, D_004A2168);
         }
     }
     {
@@ -1664,12 +1664,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
         track = best.entry[1].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
-            func_001F6840(self, str_ubers, buf);
+            cFEStateCareerStats_setTextSafe(self, str_ubers, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            func_001F6840(self, str_ubers_event, buf);
+            cFEStateCareerStats_setTextSafe(self, str_ubers_event, buf);
         } else {
-            func_001F6840(self, str_ubers, D_004A2108);
-            func_001F6840(self, str_ubers_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe(self, str_ubers, D_004A2108);
+            cFEStateCareerStats_setTextSafe(self, str_ubers_event, D_004A2168);
         }
     }
     {
@@ -1677,12 +1677,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
         track = best.entry[2].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
-            func_001F6840(self, str_superubers, buf);
+            cFEStateCareerStats_setTextSafe(self, str_superubers, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            func_001F6840(self, str_superubers_event, buf);
+            cFEStateCareerStats_setTextSafe(self, str_superubers_event, buf);
         } else {
-            func_001F6840(self, str_superubers, D_004A2108);
-            func_001F6840(self, str_superubers_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe(self, str_superubers, D_004A2108);
+            cFEStateCareerStats_setTextSafe(self, str_superubers_event, D_004A2168);
         }
     }
     {
@@ -1690,12 +1690,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
         track = best.entry[3].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
-            func_001F6840(self, str_ubergrinds, buf);
+            cFEStateCareerStats_setTextSafe(self, str_ubergrinds, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            func_001F6840(self, str_ubergrinds_event, buf);
+            cFEStateCareerStats_setTextSafe(self, str_ubergrinds_event, buf);
         } else {
-            func_001F6840(self, str_ubergrinds, D_004A2108);
-            func_001F6840(self, str_ubergrinds_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe(self, str_ubergrinds, D_004A2108);
+            cFEStateCareerStats_setTextSafe(self, str_ubergrinds_event, D_004A2168);
         }
     }
     {
@@ -1703,12 +1703,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
         track = best.entry[6].track;
         if (value > 0) {
             sprintf(buf, str_pct_0_1f_m, fptodp((float)value * 0.009999999776482582f));
-            func_001F6840(self, str_longrail, buf);
+            cFEStateCareerStats_setTextSafe(self, str_longrail, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            func_001F6840(self, str_longrail_event, buf);
+            cFEStateCareerStats_setTextSafe(self, str_longrail_event, buf);
         } else {
-            func_001F6840(self, str_longrail, D_004A2108);
-            func_001F6840(self, str_longrail_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe(self, str_longrail, D_004A2108);
+            cFEStateCareerStats_setTextSafe(self, str_longrail_event, D_004A2168);
         }
     }
     {
@@ -1716,12 +1716,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
         track = best.entry[7].track;
         if (value > 0) {
             sprintf(buf, str_pct_d_sec, value);
-            func_001F6840(self, str_airtime, buf);
+            cFEStateCareerStats_setTextSafe(self, str_airtime, buf);
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
-            func_001F6840(self, str_airtime_event, buf);
+            cFEStateCareerStats_setTextSafe(self, str_airtime_event, buf);
         } else {
-            func_001F6840(self, str_airtime, D_004A2108);
-            func_001F6840(self, str_airtime_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe(self, str_airtime, D_004A2108);
+            cFEStateCareerStats_setTextSafe(self, str_airtime_event, D_004A2168);
         }
     }
     cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_favoriteEvent_label));
@@ -1732,12 +1732,12 @@ extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
         // strcpy(buf, "-"): gcc's inline strcpy of a literal is a 2-byte aligned copy
         __builtin_memcpy(buf, D_004A2108, 2);
     }
-    func_001F6840(self, str_favoriteEvent, buf);
+    cFEStateCareerStats_setTextSafe(self, str_favoriteEvent, buf);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F6EE0);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_getOwnedMedalByith);
 #ifdef SKIP_ASM
 /**
  * Returns the bit number of the @p n-th set bit (counting from 0) among the low @p count bits of @p mask.
@@ -1747,7 +1747,7 @@ INCLUDE_ASM("fe/festatebuyattrib", func_001F6EE0);
  * @param count  how many bits to look at
  * @return the bit number, or -1 when there are not that many
  */
-extern "C" int func_001F6EE0(void* self, unsigned int mask, int n, int count)
+extern "C" int cFEStateCareerStats_getOwnedMedalByith(void* self, unsigned int mask, int n, int count)
 {
     int seen = -1;
     for (int i = 0; i < count; i++) {
@@ -1762,7 +1762,7 @@ extern "C" int func_001F6EE0(void* self, unsigned int mask, int n, int count)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebuyattrib", func_001F6F30);
+INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_initTotalEventMedal);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 extern "C" int cBENewPlayerInterface_getHumanRider(void* player, int idx);
@@ -1784,7 +1784,7 @@ extern int D_00478110[];
  *
  * @param vself  the career-stats state
  */
-extern "C" void func_001F6F30(void* vself)
+extern "C" void cFEStateCareerStats_initTotalEventMedal(void* vself)
 {
     char* self = (char*)vself;
     void* reward = cBE_getInterface_Fv(cBE_getBE(), 13);

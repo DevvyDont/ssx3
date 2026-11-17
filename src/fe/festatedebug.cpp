@@ -223,7 +223,7 @@ extern "C" int cScreenKeyboard_onInput(sDbgState_180EF0* self, sDbgInput_180EF0*
 INCLUDE_ASM("fe/festatedebug", cFEStateCharSelect_cFEStateCharSelect);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self, void* owner);
-extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern void* cFEStateCharSelect_vtbl[];
 
 /**
@@ -231,8 +231,8 @@ extern void* cFEStateCharSelect_vtbl[];
  *
  * Runs the cUIState constructor func_0039E2A0(), stores cFEStateCharSelect_vtbl and mHashName 9, sets +0x54 to 1,
  * mUserNum (+0x44) to @p count and clears +0x48 and +0x4C. mCtrlBits (+0x15) starts at 0xFF with the controller mask of
- * every earlier rider slot (0 .. @p count - 1, func_001A1CD0() on the engine's FE custom object) removed, so a
- * controller that already picked a character cannot drive this one. cFECustom_getNextState() and func_001A16C0()
+ * every earlier rider slot (0 .. @p count - 1, cFECustom_getPlayerCtrlMask() on the engine's FE custom object) removed, so a
+ * controller that already picked a character cannot drive this one. cFECustom_getNextState() and cFECustom_getPrevState()
  * allocate it (144 bytes, "cFEStateCharSelect").
  *
  * @param owner  the UI engine (mpEngine)
@@ -253,7 +253,7 @@ extern "C" void* cFEStateCharSelect_cFEStateCharSelect(void* self, void* owner, 
     *(int*)((char*)self + 0x4C) = 0;
     void* mgr = **(void***)((char*)self + 0x10);
     for (; i < n; i++) {
-        mask &= ~func_001A1CD0(mgr, i);
+        mask &= ~cFECustom_getPlayerCtrlMask(mgr, i);
     }
     *(unsigned char*)((char*)self + 0x15) = mask;
     return self;

@@ -363,7 +363,7 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(void* self, void* item, int msg)
 INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRuleSelect_cFEStateRuleSelect);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern "C" char func_001A1CD0(void* p, int a);
+extern "C" char cFECustom_getPlayerCtrlMask(void* p, int a);
 extern void* cFEStateRuleSelect_vtbl[];
 
 /**
@@ -371,7 +371,7 @@ extern void* cFEStateRuleSelect_vtbl[];
  *
  * Runs cUIState's constructor (func_0039E2A0; the engine argument reaches it untouched in the second argument
  * register), stores cFEStateRuleSelect_vtbl, clears +0x48 (On Tour mpGameEventMapping), sets mUserNum to 0 and
- * mCtrlBits to user 0's controller bits (func_001A1CD0 on the engine's front end) and mHashName to 20. It lives in the
+ * mCtrlBits to user 0's controller bits (cFECustom_getPlayerCtrlMask on the engine's front end) and mHashName to 20. It lives in the
  * rider-bio unit.
  *
  * @return @p self
@@ -382,7 +382,7 @@ extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect(void* self)
     *(void***)((char*)self + 0x8) = cFEStateRuleSelect_vtbl;
     *(int*)((char*)self + 0x48) = 0;
     *(char*)((char*)self + 0x44) = 0;
-    *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), 0);
+    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), 0);
     *(int*)((char*)self + 0xC) = 20;
     return self;
 }

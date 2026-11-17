@@ -8660,7 +8660,7 @@ INCLUDE_ASM("dirtysock/tagsunk", cConnMan_cConnMan__FPv);
 /**
  * Constructs the front end's connection manager: clears its state word and stores vtable cConnMan_vtbl at +0x8.
  *
- * cRealFE's constructor (func_001A1CE8) builds it at +0xB5AB0; func_002636A8() starts a connection and func_00263828()
+ * cRealFE's constructor (cRealFE_cRealFE) builds it at +0xB5AB0; func_002636A8() starts a connection and func_00263828()
  * updates it.
  *
  * @return the object
@@ -8908,7 +8908,7 @@ INCLUDE_ASM("dirtysock/tagsunk", cGameConnMan_cGameConnMan__FPv);
 /**
  * Constructs the front end's game-connection manager: clears its state word and stores vtable cGameConnMan_vtbl at +0x14.
  *
- * cRealFE's constructor (func_001A1CE8) builds it at +0xB5ABC; func_002639E0() starts it, func_00263CF0() updates it
+ * cRealFE's constructor (cRealFE_cRealFE) builds it at +0xB5ABC; func_002639E0() starts it, func_00263CF0() updates it
  * and func_00263BA8() shuts it down.
  *
  * @return the object

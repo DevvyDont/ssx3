@@ -196,7 +196,7 @@ struct sGallery_F270 {
  * engine's sound object (the word at mpEngine + 0x14), or of gUISoundNull when there is none; "test n" is vtable slot n
  * of @p in.
  * - Back (test 6): sound 3, hides all 32 grid cells (+0x924, setVisible 0), plays the screen's "TransitionOut" frame,
- *   asks the engine's cFECustom (*mpEngine, its vtable slot 5: func_001A16C0) for the state to return to, passing 1
+ *   asks the engine's cFECustom (*mpEngine, its vtable slot 5: cFECustom_getPrevState) for the state to return to, passing 1
  *   when a store number is set (+0x8F0 >= 0), and pushes that with cUIStateStack_push().
  * - Accept (test 5): the reward index is first visible row (+0x64) * columns (+0x5C) + the current cell's mMiscData. An
  *   empty gallery (reward count +0x68 = 0) gets sound 4. An owned reward (slot 38, cFEStateRewardGalleryBase_isRewardOwned) opens with sound 6
@@ -924,7 +924,7 @@ struct sSelf001D00C0 {
  * Each entry with a handle >= 0 is released through GrMan's virtual v50 (as the view declares it); every entry's handle
  * becomes -1 and its name empty. A file slot in +0x8EC that is >= 0 is released in the FE file table (func_0019DC20,
  * bank +0x50) and set to -1. Clears bit 3 (icons loaded) of flags +0x48. The callers are in fe/fepopupmisc.cpp, among
- * them the gallery vtables' slot-1 destructors (func_001DFCC8, func_001DFD98, func_001DFE68, func_001DFF38).
+ * them the gallery vtables' slot-1 destructors (cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts, cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos, cFEStateRewardGalleryToys__cFEStateRewardGalleryToys, cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars).
  */
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(sSelf001D00C0* self)
 {
@@ -1140,7 +1140,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_showBuyPopup);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, void* owner, signed char idx);
-extern "C" void func_001CAA18(void* self, int a1, int a2, int a3, int a4);
+extern "C" void cBuyPopupInfo_initBuyReward(void* self, int a1, int a2, int a3, int a4);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern char str_cUIStateBuyPopup[];
 struct sVE_0510a {
@@ -1161,7 +1161,7 @@ struct sVE_0510b {
  * Vtable slot 32 of the gallery vtables; cFEStateRewardGalleryBase_onInputBegin calls it with the reward index, which this C view does not
  * declare: the index stays in the second argument register and reaches vtable slot 34 (the per-gallery reward getter)
  * unchanged. The popup is built by cUIStateBuyPopup_cUIStateBuyPopup() (the engine, this gallery as parent, mUserNum);
- * func_001CAA18() fills its mInfo (+0x48) with the reward type (+0x4C), the reward's name (slot 37), its cost (slot 35)
+ * cBuyPopupInfo_initBuyReward() fills its mInfo (+0x48) with the reward type (+0x4C), the reward's name (slot 37), its cost (slot 35)
  * and the cash (+0x54); cUIStateStack_pushPopup() pushes it on the engine's state stack (mpEngine + 0x18).
  */
 extern "C" void cFEStateRewardGalleryBase_showBuyPopup(void* self)
@@ -1174,7 +1174,7 @@ extern "C" void cFEStateRewardGalleryBase_showBuyPopup(void* self)
     int rewardName = vt2[37].fn((char*)self + vt2[37].delta, sel);
     sVE_0510b* vt3 = *(sVE_0510b**)((char*)self + 8);
     int cost = vt3[35].fn((char*)self + vt3[35].delta, sel);
-    func_001CAA18(popup + 0x48, *(int*)((char*)self + 0x4C), rewardName, cost, *(int*)((char*)self + 0x54));
+    cBuyPopupInfo_initBuyReward(popup + 0x48, *(int*)((char*)self + 0x4C), rewardName, cost, *(int*)((char*)self + 0x54));
     cUIStateStack_pushPopup((char*)*(void**)((char*)self + 0x10) + 0x18, popup);
 }
 #endif
@@ -2535,7 +2535,7 @@ extern "C" void cFEStateRewardGalleryCheatChars_getTextureElement(void* self, in
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_cFEStatePreviewReward);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
-extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2551,7 +2551,7 @@ struct sRewardState_1AA0 {
  * Constructs the reward preview state (vtable cFEStatePreviewReward_vtbl, state id 0x30) for a user.
  *
  * Runs the cUIState constructor func_0039E318(), sets mHashName to 0x30, the vtable, mUserNum and mCtrlBits
- * (func_001A1CD0 on *mpEngine); clears the three bitmap pointers (+0x48) and the three shape-frame pointers (+0x54) and
+ * (cFECustom_getPlayerCtrlMask on *mpEngine); clears the three bitmap pointers (+0x48) and the three shape-frame pointers (+0x54) and
  * the reward (+0x60); stores the player's character id (cBENewPlayerInterface_getPlayerCharID, interface kind 1) in
  * +0x64; and sets the reward type (+0x68), the file slot (+0x6C), the texture handle (+0x70) and the shape index
  * (+0x74) to -1. Called by cFEStateRewardGalleryBase_showReward.
@@ -2569,7 +2569,7 @@ extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(void* self, void* e
     *(int*)((char*)self + 0xC) = 0x30;
     *(void***)((char*)self + 0x8) = cFEStatePreviewReward_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
-    *(unsigned char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    *(unsigned char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
     for (i = 0; i < 3; i++) {
         ((sRewardState_1AA0*)self)->a[i] = 0;
         ((sRewardState_1AA0*)self)->b[i] = 0;

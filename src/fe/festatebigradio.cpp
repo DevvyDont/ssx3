@@ -17,7 +17,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cBraggingRightsMenu_setConfirmed_2DB0(void* panel, int on) __asm__("cBraggingRightsMenu_setConfirmed");
 void cBraggingRightsMenu_setEnableFlag(void* panel, int mask);
 extern "C" void cBraggingRightsMenu_setEnableItem_2DB0(void* panel, void* screen) __asm__("cBraggingRightsMenu_setEnableItem");
-extern "C" int func_00193F38(void* self, int player, int which);
+extern "C" int cFEStateBraggingRights_getBEData(void* self, int player, int which);
 extern "C" unsigned char cUIListBox_addEntryByStringID_2DB0(void* box, int id, int idx) __asm__("cUIListBox_addEntryByStringID");
 extern "C" unsigned char cUIListBox_addEntryByAsciiString_2DB0(void* box, const char* str, int data) __asm__("cUIListBox_addEntryByAsciiString");
 extern "C" int cUIListBox_getEntryByData_2DB0(void* item, int key, unsigned char* out) __asm__("cUIListBox_getEntryByData");
@@ -100,7 +100,7 @@ static inline bool isNet_2DB0()
  * Creates "65bragrights", unlocks both panels when bit 4 of +0x1C is set, and picks the rule table and row
  * count (5-7) from the game event. Each row's label gets the rule's text id (D_00441108), and each panel's
  * list gets No/Yes for rules 1-6, Off/5s-20s for rule 0 and Off/3000-15000 for rule 7, with the current value
- * (func_00193F38) selected. Online (D_004A1A70 == 1) shows "ongroup" and hides the second player's widgets.
+ * (cFEStateBraggingRights_getBEData) selected. Online (D_004A1A70 == 1) shows "ongroup" and hides the second player's widgets.
  */
 // Bragging rights screen: builds the rule rows of both player panels for the current mode.
 extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
@@ -169,7 +169,7 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
             case 6:
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNNo), 0);
                 cUIListBox_addEntryByStringID_2DB0(lb, GetHashValue32(str_kT_CMNYes), 1);
-                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, playerIndex, self->rules[row]), &out);
+                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(self, playerIndex, self->rules[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             case 0:
@@ -178,7 +178,7 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_10s, 10);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_15s, 15);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_20s, 20);
-                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, playerIndex, self->rules[row]), &out);
+                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(self, playerIndex, self->rules[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             case 7:
@@ -187,7 +187,7 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_5000, 5000);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_10000, 10000);
                 cUIListBox_addEntryByAsciiString_2DB0(lb, str_15000, 15000);
-                cUIListBox_getEntryByData_2DB0(lb, func_00193F38(self, playerIndex, self->rules[row]), &out);
+                cUIListBox_getEntryByData_2DB0(lb, cFEStateBraggingRights_getBEData(self, playerIndex, self->rules[row]), &out);
                 cUIListBox_setCurrentEntryByIndex_2DB0(lb, out);
                 break;
             }
@@ -516,8 +516,8 @@ int GetHashValue32(char* str);
 extern int D_004A1A70;
 extern void* D_004A33CC;
 extern "C" void cBraggingRightsMenu_setMenuItemColor(void* p);
-extern "C" void func_00194080(void* self);
-extern "C" void func_00193DE0(void* self, int player, int which, int value);
+extern "C" void cFEStateBraggingRights_updateConfirmedState(void* self);
+extern "C" void cFEStateBraggingRights_updateBE(void* self, int player, int which, int value);
 extern "C" int cBraggingRightsMenu_findListBoxP_38F8(void* panel, void* item) __asm__("cBraggingRightsMenu_findListBoxP");
 extern "C" int cUIListBox_getCurrentEntryData_38F8(void* item) __asm__("cUIListBox_getCurrentEntryData");
 extern "C" void cBraggingRightsMenu_setConfirmed_38F8(void* panel, int on) __asm__("cBraggingRightsMenu_setConfirmed");
@@ -567,7 +567,7 @@ static inline void* vcall_38F8(char* self, int slot, sWidget_38F8* w)
  * Event 5 on a row locks its panel (cBraggingRightsMenu_setConfirmed) and plays the wait labels; offline, once both panels are
  * locked, the custom interface's next state is pushed. Event 6 online asks "kT_POPUPCMNCancelChallenge"
  * (popup id 0x838), offline pushes the previous state and clears the rule records D_005308B8. Events 1 and 2
- * recolour the panel; event 9 stores the new value with func_00193DE0 (online it is sent to the peer
+ * recolour the panel; event 9 stores the new value with cFEStateBraggingRights_updateBE (online it is sent to the peer
  * instead).
  *
  * @param w  the widget
@@ -585,7 +585,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
                 if (isOn_38F8() && i == 0)
                     func_00265688(D_004A33CC);
                 cBraggingRightsMenu_setConfirmed_38F8(self + 0x6D0 + i * 52, 1);
-                func_00194080(self);
+                cFEStateBraggingRights_updateConfirmedState(self);
                 break;
             }
             i++;
@@ -639,7 +639,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
             int slot = cBraggingRightsMenu_findListBoxP_38F8(self + 0x6D0 + panel * 52, w);
             int which = (*(signed char**)(self + 0x738))[slot];
             if (which != -1)
-                func_00193DE0(self, panel, which, cUIListBox_getCurrentEntryData_38F8(w));
+                cFEStateBraggingRights_updateBE(self, panel, which, cUIListBox_getCurrentEntryData_38F8(w));
         }
         break;
     }
@@ -739,7 +739,7 @@ extern "C" int cFEStateBraggingRights_onWidgetMenu(void* self, void* ctrl, int m
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00193DE0);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_updateBE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -772,7 +772,7 @@ static inline int other_193DE0(int p)
  * @param which   the rule (0-7)
  * @param value   the chosen value
  */
-extern "C" void func_00193DE0(void* self, int player, int which, int value)
+extern "C" void cFEStateBraggingRights_updateBE(void* self, int player, int which, int value)
 {
     switch (which) {
     case 0: D_005308B8_193DE0[other_193DE0(player)].f8 = value; break;
@@ -788,7 +788,7 @@ extern "C" void func_00193DE0(void* self, int player, int which, int value)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00193F38);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_getBEData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 static inline int other_3F38(int c) { return c == 0; }
@@ -808,14 +808,14 @@ extern sRadioChan_3F38 D_005308B8_a[] __asm__("D_005308B8");
 /**
  * Returns the value of one bragging-rights rule for a player from the rule records D_005308B8.
  *
- * Reads the same fields func_00193DE0 writes: rules 0, 1, 2 and 7 from the other player's record, 3-6 from the player's
+ * Reads the same fields cFEStateBraggingRights_updateBE writes: rules 0, 1, 2 and 7 from the other player's record, 3-6 from the player's
  * own.
  *
  * @param chan  the player (0 or 1)
  * @param kind  the rule (0-7)
  * @return the rule's value, or -1 for other rules
  */
-extern "C" int func_00193F38(void *self, int chan, int kind) {
+extern "C" int cFEStateBraggingRights_getBEData(void *self, int chan, int kind) {
     switch (kind) {
     case 0:
         return D_005308B8_a[other_3F38(chan)].f8;
@@ -840,7 +840,7 @@ extern "C" int func_00193F38(void *self, int chan, int kind) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatebigradio", func_00194080);
+INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_updateConfirmedState);
 #ifdef SKIP_ASM
 struct cUIScreen;
 int GetHashValue32(char* str);
@@ -856,7 +856,7 @@ static inline int get6F8_4080(void* p) { return *(int*)((char*)p + 0x6F8); }
  * "wait 1" when the first panel's flag (+0x6F8) is set and the second's (+0x72C) clear, "wait 2" the other way round;
  * nothing when both or neither are locked.
  */
-extern "C" void func_00194080(void* self)
+extern "C" void cFEStateBraggingRights_updateConfirmedState(void* self)
 {
     if (*(int*)((char*)self + 0x6F8) != 0 && *(int*)((char*)self + 0x72C) == 0) {
         int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_wait_1));
@@ -975,8 +975,8 @@ struct sRadioMsg_41B0 {
  * Handles the online messages of the bragging-rights screen (vtable word 63, cFEStateNet entry 31).
  *
  * 251 selects row @p data's idx in the given panel's menu. 252 finds the list entry whose data is the message's key in
- * the given panel's list idx, selects it and stores the value for the row's rule (+0x738 table; func_00193DE0) unless
- * the rule is -1. 253 locks the panel (cBraggingRightsMenu_setConfirmed with 1) and refreshes the wait labels (func_00194080). 254 unlocks
+ * the given panel's list idx, selects it and stores the value for the row's rule (+0x738 table; cFEStateBraggingRights_updateBE) unless
+ * the rule is -1. 253 locks the panel (cBraggingRightsMenu_setConfirmed with 1) and refreshes the wait labels (cFEStateBraggingRights_updateConfirmedState). 254 unlocks
  * it, recolours it (cBraggingRightsMenu_setEnableItem), selects its row 0 and plays label "11" (panel 0) or "21". 238, 241, 248, 250, 274
  * and 275 call func_001AB288. 268 hands func_001A8A40 a new chat room (cFEStateChatRoom, 1852 bytes) when
  * func_0025DA90(LobbyMan_mLobbyMan) is true, else a new online main menu (1744 bytes). Others go to func_001A8E40.
@@ -1004,12 +1004,12 @@ extern "C" int func_001941B0(char* self, int msg, sRadioMsg_41B0* data)
             break;
         }
         int panel = data->panel;
-        func_00193DE0(self, panel, which, cUIListBox_getCurrentEntryData_41B0(item));
+        cFEStateBraggingRights_updateBE(self, panel, which, cUIListBox_getCurrentEntryData_41B0(item));
         break;
     }
     case 253:
         cBraggingRightsMenu_setConfirmed_41B0(&((sRadioPanel_41B0*)(self + 0x6D0))[data->panel], 1);
-        func_00194080(self);
+        cFEStateBraggingRights_updateConfirmedState(self);
         break;
     case 238: case 241: case 248: case 250: case 274: case 275:
         func_001AB288_41B0(self);

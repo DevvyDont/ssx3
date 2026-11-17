@@ -51,7 +51,7 @@ extern "C" void* cFECustom_cFECustom(void* self, void* owner)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A07C8);
+INCLUDE_ASM("fe/fereal", cFECustom_onScreenEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_whitefade[];
@@ -71,7 +71,7 @@ struct sVEntry001A07C8 {
  * @param hash  the event (a name hash)
  * @return 1 for "whitefade", else 0
  */
-extern "C" int func_001A07C8(void* self, int screen, int hash)
+extern "C" int cFECustom_onScreenEvent(void* self, int screen, int hash)
 {
     if (hash == GetHashValue32(str_whitefade)) {
         void* obj = *(void**)((char*)self + 0x10);
@@ -119,7 +119,7 @@ extern "C" int func_00145C38(void* self, int index);
 extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index);
 extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit(void* self, void* owner);
 extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* self, void* owner, int a, int b, int c);
-extern "C" void* func_00196B90(void* self, void* owner, int a, int b);
+extern "C" void* cFEStateRequestLine_cFEStateRequestLine(void* self, void* owner, int a, int b);
 extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights(void* self, void* owner);
 extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect(void* self, void* owner);
 extern "C" void* func_00188EE8(void* self, void* owner);
@@ -131,7 +131,7 @@ extern "C" void* cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(void* 
 extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* self, void* owner, int a, int b);
 extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(void* self, void* owner);
 extern "C" void* cFEStateUberTrick_cFEStateUberTrick(void* self, void* owner, int a);
-extern "C" void* func_001F54B0(void* self, void* owner);
+extern "C" void* cFEStateCareerStats_cFEStateCareerStats(void* self, void* owner);
 extern "C" void* cFEStateRiderBio_cFEStateRiderBio(void* self, void* owner, int a);
 extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(void* self, void* owner, int a, int b, int c);
 extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters(void* self, void* owner, int a, int b);
@@ -362,7 +362,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             return cFEStateRiderBio_cFEStateRiderBio(cMemMan_alloc(80, str_cFEStateRiderBio, 0, 0), *self, st->x44);
         }
     case 16:
-        return func_00196B90(cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), *self, st->x44, D_004A19D8);
+        return cFEStateRequestLine_cFEStateRequestLine(cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), *self, st->x44, D_004A19D8);
     case 19:
         cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (D_00535C11[0]) {
@@ -465,7 +465,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
         case 12:
             return cFEStateUberTrick_cFEStateUberTrick(cMemMan_alloc(0x60, str_cFEStateUberTrick, 0, 0), *self, st->x44);
         case 13:
-            return func_001F54B0(cMemMan_alloc(0x78, str_cFEStateCareerStats, 0, 0), *self);
+            return cFEStateCareerStats_cFEStateCareerStats(cMemMan_alloc(0x78, str_cFEStateCareerStats, 0, 0), *self);
         case 15:
             return cFEStateRiderBio_cFEStateRiderBio(cMemMan_alloc(80, str_cFEStateRiderBio, 0, 0), *self, st->x44);
         }
@@ -496,7 +496,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A16C0);
+INCLUDE_ASM("fe/fereal", cFECustom_getPrevState);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBE_getBE();
@@ -563,7 +563,7 @@ static inline bool IsMode1_1A16C0()
  * @param stateData   the state data passed along (picks the branch for state 33; the peak and rewards rooms get it)
  * @return the new state, or 0 when there is none
  */
-extern "C" void* func_001A16C0(void** self, char* desc, int stateData)
+extern "C" void* cFECustom_getPrevState(void** self, char* desc, int stateData)
 {
     switch (*(int*)(desc + 0xC)) {
     case 9:
@@ -705,7 +705,7 @@ extern "C" void* func_001A16C0(void** self, char* desc, int stateData)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A1CB8);
+INCLUDE_ASM("fe/fereal", cFECustom_setPlayerCtrlMask);
 #ifdef SKIP_ASM
 /**
  * Stores the control mask byte of player @p index (+0x8 + index of the front end's custom interface).
@@ -713,7 +713,7 @@ INCLUDE_ASM("fe/fereal", func_001A1CB8);
  * @param index  the player (a signed char)
  * @param val    the mask
  */
-extern "C" void func_001A1CB8(void* self, int index, int val)
+extern "C" void cFECustom_setPlayerCtrlMask(void* self, int index, int val)
 {
     char* entry = (char*)self + (signed char)index;
     *(char*)(entry + 0x8) = val;
@@ -721,7 +721,7 @@ extern "C" void func_001A1CB8(void* self, int index, int val)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A1CD0);
+INCLUDE_ASM("fe/fereal", cFECustom_getPlayerCtrlMask);
 #ifdef SKIP_ASM
 /**
  * Returns the control mask byte of player @p index (+0x8 + index of the front end's custom interface).
@@ -731,7 +731,7 @@ INCLUDE_ASM("fe/fereal", func_001A1CD0);
  * @param index  the player (a signed char)
  * @return the mask
  */
-extern "C" unsigned char func_001A1CD0(void* self, int index)
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int index)
 {
     char* entry = (char*)self + (signed char)index;
     return *(unsigned char*)(entry + 0x8);
@@ -739,7 +739,7 @@ extern "C" unsigned char func_001A1CD0(void* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A1CE8);
+INCLUDE_ASM("fe/fereal", cRealFE_cRealFE);
 #ifdef SKIP_ASM
 extern "C" void* cFE_cFE(void* self);
 void cConnMan_cConnMan(void* p);
@@ -754,7 +754,7 @@ extern void* cRealFE_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001A1CE8(void* self)
+extern "C" void* cRealFE_cRealFE(void* self)
 {
     cFE_cFE(self);
     *(void***)self = cRealFE_vtbl;
@@ -773,13 +773,13 @@ INCLUDE_ASM("fe/fereal", cRealFE__cRealFE);
 extern void* cRealFE_vtbl[];
 extern "C" void cGameConnMan__cGameConnMan(void* self, int flags);
 extern "C" void cConnMan__cConnMan(void* self, int flags);
-extern "C" void func_001957D0(void* self, int flags);
+extern "C" void cFE__cFE(void* self, int flags);
 
 /**
  * Destroys the front-end module.
  *
  * Restores cRealFE_vtbl, destroys the members at +0xB5ABC and +0xB5AB0 (cGameConnMan__cGameConnMan and cConnMan__cConnMan, each with
- * flags 2: destroy without freeing), then runs the base-class destructor func_001957D0 with @p flags, which frees
+ * flags 2: destroy without freeing), then runs the base-class destructor cFE__cFE with @p flags, which frees
  * the object when bit 0 is set.
  *
  * @param flags  the destructor flags (bit 0: free the memory)
@@ -789,7 +789,7 @@ extern "C" void cRealFE__cRealFE(void* self, int flags)
     *(void***)self = cRealFE_vtbl;
     cGameConnMan__cGameConnMan((char*)self + 0xB5ABC, 2);
     cConnMan__cConnMan((char*)self + 0xB5AB0, 2);
-    func_001957D0(self, flags);
+    cFE__cFE(self, flags);
 }
 #endif
 
@@ -868,10 +868,10 @@ extern "C" void cUIEngine_loadFile(void* engine, const char* path);
 // PORT: the unit declares cRealFE_loadCharAnimations without parameters; this caller passes self.
 extern "C" void cRealFE_loadCharAnimations_1(void* self) __asm__("cRealFE_loadCharAnimations");
 extern "C" void func_0019CE68(void* self);
-extern "C" void func_001A0498(void* self);
+extern "C" void cFERiderManager_init(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFECustom_cFECustom(void* self, void* owner);
-extern "C" void* func_001A2E20(void* self);
+extern "C" void* cFESound_cFESound(void* self);
 extern "C" void cIrradianceDataBase_Load(void* db);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00285FB0(void* snd);
@@ -929,7 +929,7 @@ static inline void progress_1E80(float t)
  * Advances the loading bar (20, 50, 75, 99) as it goes. It calls func_0014BD78 and func_0014AF10 on BE
  * interface 9 and func_00195BE0 on the front-end locale, calls the graphics manager's slot 44 with 0, loads
  * "data/ui/fe" into the UI engine and the character animations, and calls func_0019CE68 on +0x1A70 and
- * func_001A0498 on the rider manager (+0xB0). The camera gets (0, 0, -195) and (0, 1, 0) and is updated. The
+ * cFERiderManager_init on the rider manager (+0xB0). The camera gets (0, 0, -195) and (0, 1, 0) and is updated. The
  * engine gets a cFEInput ("FEUIInput"), a cFECustom ("FEUICustom"), a sound object ("FEUISound"), the app's
  * fonts and locale; finally it loads the irradiance database and calls func_00285FB0(cAudioInterface_bxAudio()).
  */
@@ -957,7 +957,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     progress_1E80(75.0f);
     cRealFE_loadCharAnimations_1(self);
     func_0019CE68((char*)self + 0x1A70);
-    func_001A0498((char*)self + 0xB0);
+    cFERiderManager_init((char*)self + 0xB0);
     cFE* cam = SSXApp->RealFE;
     sV4_1E80 pos;
     sV4_1E80 up;
@@ -986,7 +986,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     *(int*)(in + 0x14) = 0;
     ui2->input = in;
     self->ui->custom = cFECustom_cFECustom(cMemMan_alloc(20, str_FEUICustom, 0, 0), self->ui);
-    self->ui->sound = func_001A2E20(cMemMan_alloc(8, str_FEUISound, 0, 0));
+    self->ui->sound = cFESound_cFESound(cMemMan_alloc(8, str_FEUISound, 0, 0));
     char* g = (char*)SSXApp;
     void* feLocale = *(void**)(g + 0x8C);
     self->ui->f10 = feLocale;
@@ -1043,8 +1043,8 @@ struct sVEntry001A2190 {
 };
 
 extern char D_005047F8[];
-extern "C" void func_001A2BC0(void* self);
-extern "C" void func_001A04C8(void* p);
+extern "C" void cRealFE_purgeCharAnimations(void* self);
+extern "C" void cFERiderManager_purge(void* p);
 extern "C" void func_0019CF40(void* p);
 extern "C" void func_0038ADB0(void* p);
 extern "C" void* cAudioInterface_bxAudio();
@@ -1053,8 +1053,8 @@ extern "C" void cSSXAudio_FrontEndPurge(void* p);
 /**
  * Unloads the front end: flushes the renderer, then frees the character animations, front-end data and audio.
  *
- * Calls the graphics manager's slot 19 (cGraphicsMan_FlushRenderer) first, then func_001A2BC0 (releases the animation
- * data sources that cRealFE_loadCharAnimations() registered), func_001A04C8 on the rider manager (+0xB0),
+ * Calls the graphics manager's slot 19 (cGraphicsMan_FlushRenderer) first, then cRealFE_purgeCharAnimations (releases the animation
+ * data sources that cRealFE_loadCharAnimations() registered), cFERiderManager_purge on the rider manager (+0xB0),
  * func_0019CF40 on +0x1A70 and func_0038ADB0 on D_005047F8, clears the app's words at +0x7C and +0x80 and finally
  * calls cSSXAudio_FrontEndPurge() on the audio object.
  */
@@ -1063,8 +1063,8 @@ extern "C" void cRealFE_purge(void* self)
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEntry001A2190* vt = (sVEntry001A2190*)ps2GraphicsMan->mVtbl;
     vt[19].fn((char*)ps2GraphicsMan + vt[19].delta);
-    func_001A2BC0(self);
-    func_001A04C8((char*)self + 0xB0);
+    cRealFE_purgeCharAnimations(self);
+    cFERiderManager_purge((char*)self + 0xB0);
     func_0019CF40((char*)self + 0x1A70);
     func_0038ADB0(D_005047F8);
     char* st = (char*)SSXApp;
@@ -1080,7 +1080,7 @@ INCLUDE_ASM("fe/fereal", cRealFE_render);
 extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void func_00253890(void* h, int a1);
 extern "C" void func_00398018(void* ui);
-extern "C" void func_001A0598(void* p);
+extern "C" void cFERiderManager_render(void* p);
 extern "C" void func_00397DF8(void* ui);
 extern "C" void func_00285BF8(void* snd, int a1, float t);
 extern "C" void* cAudioInterface_bxAudio();
@@ -1162,7 +1162,7 @@ static inline unsigned int feCallU(int slot)
  * 20) and returns 1. While cRealFE_mMovieList is non-zero it draws a full-screen black quad in an orthographic viewport
  * (slot 26) as a 4-vertex tri strip (slot 71). Otherwise it sets the perspective from the camera (+0x10, +0x14, +0x18
  * to slot 25) and the view matrix (+0x50 to slot 34), draws the scene with a fixed draw state (func_00398018 on the UI
- * engine at +0xC, func_001A0598 on the rider manager at +0xB0), then the UI (func_00397DF8), flips the frame and calls
+ * engine at +0xC, cFERiderManager_render on the rider manager at +0xB0), then the UI (func_00397DF8), flips the frame and calls
  * func_00285BF8 on the audio object with 0.02.
  *
  * @return 1 when a frame was drawn, 0 when the renderer was not ready
@@ -1274,7 +1274,7 @@ extern "C" int cRealFE_render(void* self)
     feW()->top->setAlpha(21);
     feW()->top->setG2(5);
     func_00398018(*(void**)((char*)self + 0xC));
-    func_001A0598((char*)self + 0xB0);
+    cFERiderManager_render((char*)self + 0xB0);
     feW()->top--;
     feCall(32);
     feCall(22);
@@ -1306,7 +1306,7 @@ int func_00289DE0(void* self);
 void* cInput_getState(void* self, int a1);
 extern "C" void func_00398038(void* self);
 extern "C" void func_0019D250(void* p);
-extern "C" void func_001A0608(void* p);
+extern "C" void cFERiderManager_update(void* p);
 extern "C" void cFEAsyncManager_Update(void* p);
 extern "C" void func_00263828(void* p);
 extern "C" void func_00263CF0(void* p);
@@ -1346,7 +1346,7 @@ struct sVE_27A0 {
  * press of input 0x70 or 122 on either pad; when it ends the player is destroyed, +0xB5ADC is set to 1 and, if no
  * movie is left, func_002B3A98 is called on the audio object (+0x118). Without a movie it updates the UI engine (+0xC,
  * func_00398038; or sets +0x8 when SSXApp +0x4 is set), the camera at +0x10 (its virtual slot 3), func_0019D250 on
- * +0x1A70, the rider manager (+0xB0, func_001A0608) and the async file manager, and, when D_004A29EC is set, the
+ * +0x1A70, the rider manager (+0xB0, cFERiderManager_update) and the async file manager, and, when D_004A29EC is set, the
  * online members at +0xB5AB0 and +0xB5ABC and the lobby manager.
  */
 extern "C" void cRealFE_update(char* self)
@@ -1429,7 +1429,7 @@ noh:
         char* obj = self + 0x10;
         vt[3].fn(obj + vt[3].delta);
         func_0019D250(self + 0x1A70);
-        func_001A0608(self + 0xB0);
+        cFERiderManager_update(self + 0xB0);
         if ((void*)SSXApp->mFEAsyncManager != 0) {
             cFEAsyncManager_Update(SSXApp->mFEAsyncManager);
         }
@@ -1484,7 +1484,7 @@ extern "C" void cRealFE_loadCharAnimations(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2BC0);
+INCLUDE_ASM("fe/fereal", cRealFE_purgeCharAnimations);
 #ifdef SKIP_ASM
 extern void** cAnimDataBase_TheAnimDataBase;
 extern void* cGameAnimMap_TheGameAnimMap;
@@ -1499,7 +1499,7 @@ extern "C" void func_003112C8(void* a, int b);
  * cGameAnimMap_TheGameAnimMap (func_00314FE8), clears the slot, calls func_00311110 on the table and destroys the data
  * (func_003112C8 with 3).
  */
-extern "C" void func_001A2BC0(void* self)
+extern "C" void cRealFE_purgeCharAnimations(void* self)
 {
     int i;
     for (i = 0; i < 1; i++) {
@@ -1610,7 +1610,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2E20);
+INCLUDE_ASM("fe/fereal", cFESound_cFESound);
 #ifdef SKIP_ASM
 void* func_0039E288(void* self);
 extern void* D_00469348[];
@@ -1622,7 +1622,7 @@ extern void* D_00469348[];
  *
  * @return @p self
  */
-extern "C" void* func_001A2E20(void* self)
+extern "C" void* cFESound_cFESound(void* self)
 {
     func_0039E288(self);
     *(void***)self = D_00469348;
@@ -1632,7 +1632,7 @@ extern "C" void* func_001A2E20(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A2E58);
+INCLUDE_ASM("fe/fereal", cFESound_playSound);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cAudioInterface_bxAudio();
@@ -1645,7 +1645,7 @@ extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
  *
  * @param sel  the UI sound event
  */
-extern "C" void func_001A2E58(void* self, int sel)
+extern "C" void cFESound_playSound(void* self, int sel)
 {
     switch (sel) {
     case 1:
@@ -1733,7 +1733,7 @@ extern "C" void cOVSound_playSound(void* self, int sel)
 
 
 //100%
-INCLUDE_ASM("fe/fereal", func_001A3050);
+INCLUDE_ASM("fe/fereal", cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode);
 #ifdef SKIP_ASM
 extern void* cFEStateSelectMultiplayerMode_vtbl[];
 
@@ -1746,7 +1746,7 @@ extern void* cFEStateSelectMultiplayerMode_vtbl[];
  * @param owner  the UI engine
  * @return @p self
  */
-extern "C" void* func_001A3050(void* self, void* owner)
+extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode(void* self, void* owner)
 {
     func_0039E2A0(self, owner);
     *(int*)((char*)self + 0xC) = 22;

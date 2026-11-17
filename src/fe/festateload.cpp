@@ -189,7 +189,7 @@ static inline void Opened1867A8(void* self, void* item)
  * Every event first goes to the embedded map template's handler, cUITemplate_MAP_onWidgetEvent() on +0x48. For event 5
  * (accept) or 6 (back) that the template answers with 1: online (D_004A1A70 == 1) it plays the screen's "TransitionOut"
  * frame and pops this state (func_0039F190() with count 1 on the engine's state stack, mpEngine +0x18); otherwise it
- * asks the engine's FE custom object for a state (cFECustom_getNextState(), slot 4, for 5; func_001A16C0(), slot 5, for
+ * asks the engine's FE custom object for a state (cFECustom_getNextState(), slot 4, for 5; cFECustom_getPrevState(), slot 5, for
  * 6) with the widget's id (+0x18) and, when one comes back, calls handleEvent (slot 24) with (1, 0) on the state at the
  * custom object's +0x10, plays "TransitionOut" and pushes the new state.
  *

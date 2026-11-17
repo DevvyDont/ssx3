@@ -1546,36 +1546,36 @@ extern "C" int cFE_getCamera1(int realFe) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFE_getHuman);
 #ifdef SKIP_ASM
-extern "C" void func_001A0538(int);
+extern "C" void cFERiderManager_getHuman(int);
 
 /**
  * Returns one human rider of the front end's rider manager.
  *
- * Calls func_001A0538 on the rider manager at +0xB0; the rider index arrives in the second argument register and is
- * passed through untouched (func_001A0538 returns manager + index * 0xCE0).
+ * Calls cFERiderManager_getHuman on the rider manager at +0xB0; the rider index arrives in the second argument register and is
+ * passed through untouched (cFERiderManager_getHuman returns manager + index * 0xCE0).
  *
  * @param realFe  the front end (cRealFE / cFE)
  */
 extern "C" void cFE_getHuman(int realFe) {
-    func_001A0538(realFe + 176);
+    cFERiderManager_getHuman(realFe + 176);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFE_getHuman1);
 #ifdef SKIP_ASM
-extern "C" void func_001A0548(int);
+extern "C" void cFERiderManager_getHuman1(int);
 
 /**
  * Returns one human rider of the front end's rider manager (the second of an identical pair of out-of-line copies).
  *
- * Calls func_001A0548 on the rider manager at +0xB0 with the rider index passed through in the second argument
+ * Calls cFERiderManager_getHuman1 on the rider manager at +0xB0 with the rider index passed through in the second argument
  * register.
  *
  * @param realFe  the front end (cRealFE / cFE)
  */
 extern "C" void cFE_getHuman1(int realFe) {
-    func_001A0548(realFe + 176);
+    cFERiderManager_getHuman1(realFe + 176);
 }
 #endif
 
@@ -1672,12 +1672,12 @@ extern "C" void cUILocaleInterface__cUILocaleInterface(void *self, int flags) {
 INCLUDE_ASM("main/all_in_one_main", cUILocaleInterface_setDisplayMode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_001E1090_CC08(void*, int) __asm__("func_001E1090");
+extern "C" void cUILocaleInterface_setTextNumCharFlag_CC08(void*, int) __asm__("cUILocaleInterface_setTextNumCharFlag");
 
 /**
  * Sets the locale's display mode (the byte at +0x0) and turns the text-num-char flag on for mode 2.
  *
- * Stores @p v at +0x0, then calls func_001E1090, which sets bit 3 of the attribute byte at +0x3 (tAttrLocale's fourth
+ * Stores @p v at +0x0, then calls cUILocaleInterface_setTextNumCharFlag, which sets bit 3 of the attribute byte at +0x3 (tAttrLocale's fourth
  * flag, On Tour's mTextNumChar) when @p v is 2 and clears it otherwise. It is slot 0x14 of both the base locale vtable
  * D_0046D848 and the front-end locale's D_0046BF98.
  *
@@ -1687,7 +1687,7 @@ extern "C" void func_001E1090_CC08(void*, int) __asm__("func_001E1090");
  */
 extern "C" void cUILocaleInterface_setDisplayMode(signed char *self, signed char v) {
     *self = v;
-    func_001E1090_CC08(self, v == 2);
+    cUILocaleInterface_setTextNumCharFlag_CC08(self, v == 2);
 }
 #endif
 
@@ -1850,7 +1850,7 @@ extern "C" void cRealFE_playAttractMovie(void) {
 INCLUDE_ASM("main/all_in_one_main", cRealFE_getConnMan);
 #ifdef SKIP_ASM
 /**
- * Returns the front end's connection manager at +0xB5AB0 (the one func_001A1CE8 builds with cConnMan_cConnMan__FPv).
+ * Returns the front end's connection manager at +0xB5AB0 (the one cRealFE_cRealFE builds with cConnMan_cConnMan__FPv).
  *
  * @param realFe  the front end (cRealFE)
  * @return @p realFe + 0xB5AB0
@@ -1864,7 +1864,7 @@ extern "C" int cRealFE_getConnMan(int realFe) {
 INCLUDE_ASM("main/all_in_one_main", cRealFE_getGameConnMan);
 #ifdef SKIP_ASM
 /**
- * Returns the front end's game connection manager at +0xB5ABC (the one func_001A1CE8 builds with
+ * Returns the front end's game connection manager at +0xB5ABC (the one cRealFE_cRealFE builds with
  * cGameConnMan_cGameConnMan__FPv).
  *
  * @param realFe  the front end (cRealFE)
@@ -2690,13 +2690,13 @@ extern "C" void cFEState__cFEState(void *self) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEState_setControllerFilter);
 #ifdef SKIP_ASM
-extern "C" int func_001A1CD0(int, signed char);
+extern "C" int cFECustom_getPlayerCtrlMask(int, signed char);
 
 /**
  * Narrows a front-end state's controller filter to the controllers no user claims.
  *
  * Starts from 0xFF and, for each user 0 .. @p n - 1, clears the bits of that user's controller mask, read with
- * func_001A1CD0 from the front-end handler (the first word of the UI engine at +0x10); stores the result in mCtrlBits
+ * cFECustom_getPlayerCtrlMask from the front-end handler (the first word of the UI engine at +0x10); stores the result in mCtrlBits
  * (+0x15).
  *
  * @param n  number of users whose masks to remove
@@ -2707,7 +2707,7 @@ extern "C" void cFEState_setControllerFilter(char *self, signed char n) {
     int realFe = **(int **)(self + 0x10);
     if (n > 0) {
         do {
-            mask &= ~func_001A1CD0(realFe, i);
+            mask &= ~cFECustom_getPlayerCtrlMask(realFe, i);
             i++;
         } while (i < n);
     }
@@ -2718,12 +2718,12 @@ extern "C" void cFEState_setControllerFilter(char *self, signed char n) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEState_setControllerMask);
 #ifdef SKIP_ASM
-extern "C" void func_001A1CB8(int, signed char, int);
+extern "C" void cFECustom_setPlayerCtrlMask(int, signed char, int);
 
 /**
  * Gives one user one controller: sets the user's controller mask to the single bit for @p controllerNum.
  *
- * Calls func_001A1CB8 on the front-end handler (the first word of the UI engine at +0x10) with @p userNum and 1
+ * Calls cFECustom_setPlayerCtrlMask on the front-end handler (the first word of the UI engine at +0x10) with @p userNum and 1
  * << @p controllerNum.
  *
  * @param feState  the front-end state
@@ -2731,7 +2731,7 @@ extern "C" void func_001A1CB8(int, signed char, int);
  * @param controllerNum  the controller port
  */
 extern "C" void cFEState_setControllerMask(void *feState, signed char userNum, signed char controllerNum) {
-    func_001A1CB8(*(*(int **)((char*)(feState) + (0x10))), userNum, (1 << controllerNum) & 0xFF);
+    cFECustom_setPlayerCtrlMask(*(*(int **)((char*)(feState) + (0x10))), userNum, (1 << controllerNum) & 0xFF);
 }
 #endif
 
@@ -3830,18 +3830,18 @@ extern "C" void cUIStateBuyPopup_initBuySong(int buyPopup) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup_initBuyReward);
 #ifdef SKIP_ASM
-extern "C" void func_001CAA18(int);
+extern "C" void cBuyPopupInfo_initBuyReward(int);
 
 /**
- * Sets the buy popup up to buy a reward item: calls func_001CAA18 on the description at +0x48.
+ * Sets the buy popup up to buy a reward item: calls cBuyPopupInfo_initBuyReward on the description at +0x48.
  *
- * The item arguments pass through untouched in the remaining argument registers (func_001CAA18 fills the description
+ * The item arguments pass through untouched in the remaining argument registers (cBuyPopupInfo_initBuyReward fills the description
  * with the item name and the "kT_CMNItemColon" / "kT_OVRCMNBuyItem" texts).
  *
  * @param buyPopup  the popup (cUIStateBuyPopup)
  */
 extern "C" void cUIStateBuyPopup_initBuyReward(int buyPopup) {
-    func_001CAA18(buyPopup + 72);
+    cBuyPopupInfo_initBuyReward(buyPopup + 72);
 }
 #endif
 

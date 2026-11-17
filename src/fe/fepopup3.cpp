@@ -48,89 +48,89 @@ INCLUDE_ASM("fe/fepopup3", cFEStateNetHelpPopup__cFEStateNetHelpPopup);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetHelpPopup_onLoseTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFA10);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase__cFEStateRewardGalleryBase);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFA88);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase_getIconsFileName);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFAA0);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase_getIconID1);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFAA8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase_getTextureElement);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFAC0);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase_allocRewards);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFAC8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase_purgeRewards);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFAD0);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase_getReward);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFAD8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase_getRewardCost);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFAE0);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase_getRewardStoreNum);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFAE8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFB28);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFB88);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryPosters_getReward);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFB98);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryPosters_getRewardCost);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFBB0);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryPosters_getRewardStoreNum);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFBB8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryPosters_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFBF8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingCards);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFC58);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryTradingCards_getReward);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFC68);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryTradingCards_getRewardCost);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFC80);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryTradingCards_getRewardStoreNum);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFC88);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryTradingCards_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFCC8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFD28);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryConceptArts_getReward);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFD38);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryConceptArts_getRewardCost);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFD50);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryConceptArts_getRewardStoreNum);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFD58);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryConceptArts_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFD98);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFDF8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryVideos_getReward);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFE08);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryVideos_getRewardCost);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFE20);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryVideos_getRewardStoreNum);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFE28);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryVideos_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFE68);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryToys__cFEStateRewardGalleryToys);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFEC8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryToys_getReward);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFED8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryToys_getRewardCost);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFEF0);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryToys_getRewardStoreNum);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFEF8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryToys_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFF38);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFF98);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryCheatChars_getReward);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFFA8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryCheatChars_getRewardCost);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFFC0);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryCheatChars_getRewardStoreNum);
 
-INCLUDE_ASM("fe/fepopup3", func_001DFFC8);
+INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryCheatChars_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0020);
+INCLUDE_ASM("fe/fepopup3", cFEStateVideoPlayer_onGainTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0028);
+INCLUDE_ASM("fe/fepopup3", cFEStateVideoPlayer_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStatePeakRoom__cFEStatePeakRoom);
 
@@ -158,11 +158,11 @@ INCLUDE_ASM("fe/fepopup3", cFEStateAudioOptions__cFEStateAudioOptions);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRequestLine__cFEStateRequestLine);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0740);
+INCLUDE_ASM("fe/fepopup3", cFESound__cFESound);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0770);
+INCLUDE_ASM("fe/fepopup3", cFESound_soundInitialize);
 
-INCLUDE_ASM("fe/fepopup3", func_001E0778);
+INCLUDE_ASM("fe/fepopup3", cFESound_soundShutdown);
 
 INCLUDE_ASM("fe/fepopup3", cOVSound__cOVSound);
 
@@ -248,25 +248,25 @@ INCLUDE_ASM("fe/fepopup3", cFEStateNetMessenger_onGainTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateReadMessagePopup_onLoseTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1048);
+INCLUDE_ASM("fe/fepopup3", cUISoundInterface__cUISoundInterface);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1078);
+INCLUDE_ASM("fe/fepopup3", cUISoundInterface_playSound);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1080);
+INCLUDE_ASM("fe/fepopup3", cUISoundInterface_soundInitialize);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1088);
+INCLUDE_ASM("fe/fepopup3", cUISoundInterface_soundShutdown);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1090);
+INCLUDE_ASM("fe/fepopup3", cUILocaleInterface_setTextNumCharFlag);
 
-INCLUDE_ASM("fe/fepopup3", func_001E10B8);
+INCLUDE_ASM("fe/fepopup3", cUICustomInterface__cUICustomInterface);
 
-INCLUDE_ASM("fe/fepopup3", func_001E10E8);
+INCLUDE_ASM("fe/fepopup3", cUICustomInterface_onUpdate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E10F0);
+INCLUDE_ASM("fe/fepopup3", cUICustomInterface_onScreenEvent);
 
-INCLUDE_ASM("fe/fepopup3", func_001E10F8);
+INCLUDE_ASM("fe/fepopup3", cUICustomInterface_getNextState);
 
-INCLUDE_ASM("fe/fepopup3", func_001E1100);
+INCLUDE_ASM("fe/fepopup3", cUICustomInterface_getPrevState);
 
 INCLUDE_ASM("fe/fepopup3", cUIInput__cUIInput);
 
@@ -452,21 +452,21 @@ INCLUDE_ASM("fe/fepopup3", func_001E3A78);
 
 INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_cOVState_MESSAGECENTER);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3D58);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_onCreateScreen);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3E30);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_onDestroyScreen);
 
-INCLUDE_ASM("fe/fepopup3", func_001E3EC0);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_onWidgetCreate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4168);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_onGainFocus);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4200);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_onWidgetEvent);
 
 INCLUDE_ASM("fe/fepopup3", func_001E4458);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4578);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_onWidgetMenu);
 
-INCLUDE_ASM("fe/fepopup3", func_001E4610);
+INCLUDE_ASM("fe/fepopup3", cOVState_MESSAGECENTER_onPopupEvent);
 
 INCLUDE_ASM("fe/fepopup3", func_001E4658);
 

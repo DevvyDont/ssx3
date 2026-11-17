@@ -369,14 +369,14 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail
 #ifdef SKIP_ASM
 extern void* cFEStateLodgeRiderDetail_vtbl[];
 extern "C" void* func_0039E2A0(void* self);
-extern "C" unsigned char func_001A1CD0(void* self, int a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 
 /**
  * Constructs the lodge rider-detail state: base cUIState, cFEStateLodgeRiderDetail_vtbl, state id 40, user 0.
  *
  * Runs the cUIState constructor func_0039E2A0() (the engine passes through in the second argument register), stores the
  * vtable and mHashName 40, sets mUserNum (+0x44) to 0 and mCtrlBits (+0x15) to rider slot 0's controller mask
- * (func_001A1CD0() on the engine's FE custom object). cFECustom_getNextState() and func_001A16C0() create it.
+ * (cFECustom_getPlayerCtrlMask() on the engine's FE custom object). cFECustom_getNextState() and cFECustom_getPrevState() create it.
  *
  * @return @p self
  */
@@ -386,7 +386,7 @@ extern "C" void* cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(void* self)
     *(void***)((char*)self + 0x8) = cFEStateLodgeRiderDetail_vtbl;
     *(int*)((char*)self + 0xC) = 40;
     *(char*)((char*)self + 0x44) = 0;
-    *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), 0);
+    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), 0);
     return self;
 }
 #endif
@@ -608,7 +608,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* self, void* engine, void* owner, int a3, unsigned char a4);
 extern "C" void cKeyboardPopup_setMaxCharacters(void* self, int a1);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int key, int a2, int a3);
-extern "C" void func_001CE408(void* self, int a1);
+extern "C" void cKeyboardPopup_setDisableShiftNumbers(void* self, int a1);
 extern "C" void cKeyboardPopup_setInputText(void* self, const char* str);
 extern "C" const char* cBENewPlayerInterface_getPlayerName(void* iface, int player);
 extern "C" void* cFEStateCheatCharSelect_cFEStateCheatCharSelect(void* self, void* engine, void* owner, int player, int charID);
@@ -661,7 +661,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(char* self, char* w, int 
             cKeyboardPopup_setMaxCharacters(popup, 8);
             cKeyboardPopup_setIncludeKey(popup, 75, 1, 2);
             *(int*)(popup + 0x58) = 1;
-            func_001CE408(popup, 1);
+            cKeyboardPopup_setDisableShiftNumbers(popup, 1);
             cKeyboardPopup_setIncludeKey(popup, 0xE, 0, 2);
             cKeyboardPopup_setIncludeKey(popup, 39, 0, 2);
             cKeyboardPopup_setIncludeKey(popup, 40, 0, 2);
@@ -714,7 +714,7 @@ INCLUDE_ASM("fe/festatelodge", cFEStateBuyAttrib_cFEStateBuyAttrib);
 extern "C" void* func_0039E2A0_4728(void* self, int a1) __asm__("func_0039E2A0");
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" unsigned char func_001A1CD0_4728(void* p, int a1) __asm__("func_001A1CD0");
+extern "C" unsigned char cFECustom_getPlayerCtrlMask_4728(void* p, int a1) __asm__("cFECustom_getPlayerCtrlMask");
 extern "C" int func_00148158_4728(void* iface, int a1, int stat) __asm__("func_00148158");
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern void* cFEStateBuyAttrib_vtbl[];
@@ -732,7 +732,7 @@ struct sLodgeStats_4728 {
  * rider's seven attribute values.
  *
  * Runs the cUIState constructor func_0039E2A0() on @p engine, stores mHashName 41 and the vtable, sets mUserNum (+0x44) to
- * 0 and mCtrlBits (+0x15) to rider slot 0's controller mask (func_001A1CD0()), and clears the 0x1C bytes at +0x84. For
+ * 0 and mCtrlBits (+0x15) to rider slot 0's controller mask (cFECustom_getPlayerCtrlMask()), and clears the 0x1C bytes at +0x84. For
  * each of the seven attributes listed in D_004780B0 it stores func_00148158() (player interface, rider 0) at +0x4C[i]
  * and that value / 5 (the level) at +0x68[i]. cFECustom_getNextState() creates it.
  *
@@ -748,7 +748,7 @@ extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(void* stateMemory, int engi
     *(int*)(stateBytes + 0xC) = 41;
     *(void***)(stateBytes + 0x8) = cFEStateBuyAttrib_vtbl;
     *(signed char*)(stateBytes + 0x44) = 0;
-    *(unsigned char*)(stateBytes + 0x15) = func_001A1CD0_4728(**(void***)(stateBytes + 0x10), 0);
+    *(unsigned char*)(stateBytes + 0x15) = cFECustom_getPlayerCtrlMask_4728(**(void***)(stateBytes + 0x10), 0);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     MEM_fill(stateBytes + 0x84, 0, 0x1C);
     for (int i = 0; i < 7; i++) {

@@ -202,7 +202,7 @@ struct cUIObj_11270 {
 /**
  * Shows the profile overlay's empty layout, or switches to the file list as soon as a card is in.
  *
- * When func_001D9880 (virtual slot 42) allows the file display and the memory card (mpMemCard of cSSXApp_getMCManager,
+ * When cFEMemCard_displayFileOK (virtual slot 42) allows the file display and the memory card (mpMemCard of cSSXApp_getMCManager,
  * its slot 53) is present, moves to display state 3 through cFEMemCard_triggerDisplayState (virtual slot 35) and runs
  * cOVState_PROFILE_displayOn. Otherwise resets the six profile buttons "player1" ... "player6" of mpScreen: setSelected(0) (slot 25)
  * and setEnabled(1) (slot 8).
@@ -428,7 +428,7 @@ static inline cUIObj_1380* getObj_1380(cState_1380* self, char* name)
  * Shows the profile overlay's file list for the selected memory card: the card's name, the six profile slots and the
  * device arrows.
  *
- * With the memory-card manager (cSSXApp_getMCManager) mp: when func_001D9880 (virtual slot 42) allows the file display
+ * With the memory-card manager (cSSXApp_getMCManager) mp: when cFEMemCard_displayFileOK (virtual slot 42) allows the file display
  * but the card (mpMemCard slot 53) is missing, it shows the no-card message (cFEMemCard_callbackDisplayNoCards, the front end's
  * callbackDisplayNoCards) and falls back to cOVState_PROFILE_displayOff; otherwise it switches to display state 3
  * (cFEMemCard_triggerDisplayState, virtual slot 35) if not there yet. Then, still allowed: writes the device name of
@@ -799,7 +799,7 @@ extern "C" void cKeyboardPopup_setInputText(void* kb, void* name);
 extern "C" void cKeyboardPopup_setMaxCharacters(void* kb, int a1);
 extern "C" void cKeyboardPopup_setMinCharacters(void* kb, int a1);
 extern "C" void cKeyboardPopup_setIncludeKey(void* kb, int key, int a2, int a3);
-extern "C" void func_001CE408(void* kb, int a1);
+extern "C" void cKeyboardPopup_setDisableShiftNumbers(void* kb, int a1);
 extern "C" void cKeyboardPopup_setStatic(void* kb, void* text);
 extern "C" void cMCOverlayManager_SetAction(void* mp, int a1);
 extern "C" void func_002C2540(void* dst, char* src);
@@ -935,7 +935,7 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(void* vself, char* item, int even
                 cKeyboardPopup_setMaxCharacters(self->keyboard, 8);
                 cKeyboardPopup_setIncludeKey(self->keyboard, 75, 1, 2);
                 *(int*)(self->keyboard + 0x58) = 1;
-                func_001CE408(self->keyboard, 1);
+                cKeyboardPopup_setDisableShiftNumbers(self->keyboard, 1);
                 cKeyboardPopup_setIncludeKey(self->keyboard, 0xE, 0, 2);
                 cKeyboardPopup_setIncludeKey(self->keyboard, 39, 0, 2);
                 cKeyboardPopup_setIncludeKey(self->keyboard, 40, 0, 2);

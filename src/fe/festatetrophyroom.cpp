@@ -617,7 +617,7 @@ extern "C" void cFEStateTrophyRoom_purgeTextures(sSelf001D4B20* self)
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_cFEStateRewardsRoom);
 #ifdef SKIP_ASM
 extern "C" void* func_0039E2A0(void* self);
-extern "C" unsigned char func_001A1CD0(void* self, signed char a1);
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -629,7 +629,7 @@ extern void* cFEStateRewardsRoom_vtbl[];
  *
  * Runs cUIState's constructor (func_0039E2A0; @p engine reaches it untouched in the second argument register), stores
  * mHashName 46 and cFEStateRewardsRoom_vtbl, sets mUserNum to @p idx and mCtrlBits to that user's controller bits
- * (func_001A1CD0 on the engine's front end), +0x4C to @p inStore (On Tour mInStore) and +0x48 to the user's character
+ * (cFECustom_getPlayerCtrlMask on the engine's front end), +0x4C to @p inStore (On Tour mInStore) and +0x48 to the user's character
  * (cBENewPlayerInterface_getPlayerCharID; On Tour mCharID).
  *
  * @param engine  the UI engine (only passed on to cUIState's constructor)
@@ -643,7 +643,7 @@ extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom(void* self, int engine,
     *(int*)((char*)self + 0xC) = 46;
     *(void***)((char*)self + 0x8) = cFEStateRewardsRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;
-    *(char*)((char*)self + 0x15) = func_001A1CD0(**(void***)((char*)self + 0x10), idx);
+    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
     *(int*)((char*)self + 0x4C) = inStore;
     *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
     return self;

@@ -166,8 +166,8 @@ int GetHashValue32(char* str);
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_001A0508(void* self, int a1, int a2, int a3);
-extern "C" void func_001A0570(void* self, int a1, int a2);
+extern "C" void cFERiderManager_setHumanCharacter(void* self, int a1, int a2, int a3);
+extern "C" void cFERiderManager_setHumanVisible(void* self, int a1, int a2);
 extern "C" void func_0015E050(void* cam, void* a, void* b);
 extern "C" void* cUITextureBank_getElementByHashname(void* list, int hash);
 extern "C" void* cAudioInterface_bxAudio();
@@ -194,7 +194,7 @@ struct sVE_1849B0 {
  *
  * Adds the screen through mpEngine into mpScreen (+0x40) and plays frame 0. Calls the player interface's (cBE interface
  * 1) vtable slot 2, has the FE rider manager (RealFE + 0xB0) set the user's rider to the user's character
- * (func_001A0508) and hides that rider (func_001A0570 with 0). Points the FE camera (RealFE + 0x10, func_0015E050) from
+ * (cFERiderManager_setHumanCharacter) and hides that rider (cFERiderManager_setHumanVisible with 0). Points the FE camera (RealFE + 0x10, func_0015E050) from
  * (0, 660, 80) at (0, 0, 80) and sets its first float to 0.4363 (25 degrees). Looks up the "empty_box", "checkbox" and
  * "yell_dollar_sign" texture elements (mpEngine + 0x58) into +0x58, +0x54 and +0x5C (On Tour mpCheckbox, mpCheckmark,
  * mpDollarSign), sets the sound bank manager's mode 5 (func_0028F140 on cAudioInterface_bxAudio()) and hides the cost display
@@ -213,8 +213,8 @@ extern "C" void cFEStateUberTrick_onCreateScreen(void* self)
         sVE_1849B0* vt = *(sVE_1849B0**)(player + 0xC);
         vt[2].fn(player + vt[2].delta);
     }
-    func_001A0508((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
-    func_001A0570((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), 0);
+    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
+    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), 0);
     char* realFe = (char*)SSXApp->RealFE;
     sVec4_1849B0 camPos;
     sVec4_1849B0 lookAt;
@@ -255,20 +255,20 @@ extern "C" void cFEStateUberTrick_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onDestroyScreen);
 #ifdef SKIP_ASM
-extern "C" void func_001A0570(void* self, int a1, int a2);
+extern "C" void cFERiderManager_setHumanVisible(void* self, int a1, int a2);
 void* cUIState_onDestroyScreen(void* self);
 
 /**
  * Hides the user's FE rider when the uber-trick screen goes away, then runs cUIState_onDestroyScreen.
  *
- * The rider is hidden with func_001A0570 (user mUserNum, 0) on RealFE + 0xB0, skipped when there is no front end.
+ * The rider is hidden with cFERiderManager_setHumanVisible (user mUserNum, 0) on RealFE + 0xB0, skipped when there is no front end.
  * onDestroyScreen slot (+0x2C) of the vtable D_0046CCC0.
  */
 extern "C" void cFEStateUberTrick_onDestroyScreen(void* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
-        func_001A0570(mgr + 0xB0, *(signed char*)((char*)self + 0x44), 0);
+        cFERiderManager_setHumanVisible(mgr + 0xB0, *(signed char*)((char*)self + 0x44), 0);
     }
     cUIState_onDestroyScreen(self);
 }
@@ -341,7 +341,7 @@ extern "C" void cFEStateUberTrick_onGainFocus(void* self, int prevState)
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern "C" void* func_001A0548(void* self, int idx);
+extern "C" void* cFERiderManager_getHuman1(void* self, int idx);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void cUIState_onUpdate(void* self);
@@ -362,7 +362,7 @@ struct sXform_184C60
 extern sQuat_184C60 t4vect_XAxis;
 extern sQuat_184C60 t4vect_YAxis;
 extern sQuat_184C60 t4vect_ZAxis;
-extern "C" void func_0019F3E8(void* rider, sXform_184C60* xf);
+extern "C" void cFERider_setPose(void* rider, sXform_184C60* xf);
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sQuat_184C60 QuatMul_184C60(const sQuat_184C60& a, const sQuat_184C60& b)
@@ -397,16 +397,16 @@ static inline sQuat_184C60 AxisAngle_184C60(const sQuat_184C60& axis, float angl
 /**
  * Poses the user's FE rider on the uber-trick screen once it has loaded, then runs cUIState_onUpdate.
  *
- * Until +0x48 (On Tour mbModelVisible) is set it takes the user's FE rider (func_001A0548 on RealFE + 0xB0). When the
+ * Until +0x48 (On Tour mbModelVisible) is set it takes the user's FE rider (cFERiderManager_getHuman1 on RealFE + 0xB0). When the
  * rider's character (+0x0) is below 10 and +0xCB8 and +0xCB4 are both set, it sets the rider's +0xCCC, resets its
  * animation (+0xC, cRiderAnimBase_reset) and plays animation 436 (cRiderAnimBase_play, blend -1), places it at (-228,
  * -205, 63) turned 1.0821 rad (62 degrees) about Z (the X and Y turns are 0; func_0031BE50 gives the sines) with
- * func_0019F3E8, shows it (func_001A0570 with 1) and sets +0x48. onUpdate slot (+0x64) of the vtable D_0046CCC0.
+ * cFERider_setPose, shows it (cFERiderManager_setHumanVisible with 1) and sets +0x48. onUpdate slot (+0x64) of the vtable D_0046CCC0.
  */
 extern "C" void cFEStateUberTrick_onUpdate(char* self)
 {
     if (*(int*)(self + 0x48) == 0) {
-        char* rider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
+        char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
         int ok = 0;
         if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
             ok = *(int*)(rider + 0xCB4) != 0;
@@ -437,8 +437,8 @@ extern "C" void cFEStateUberTrick_onUpdate(char* self)
             }
             xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_YAxis, 0.0f));
             xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_ZAxis, 1.082104206085205f));
-            func_0019F3E8(rider, &xf);
-            func_001A0570((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44), 1);
+            cFERider_setPose(rider, &xf);
+            cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44), 1);
         }
     }
     cUIState_onUpdate(self);
@@ -621,7 +621,7 @@ extern "C" void cFEStateUberTrick_activateMainMenu(void* self);
 extern "C" void cFEStateUberTrick_activateTrickMenu(void* self);
 extern "C" void func_00184520(void* self);
 extern "C" void cFEStateUberTrick_previewVisible(void* self, int on);
-extern "C" void* func_001A0548(void* self, int idx);
+extern "C" void* cFERiderManager_getHuman1(void* self, int idx);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* mem, void* owner, void* state, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
@@ -710,7 +710,7 @@ static inline void Back_185268(char* self)
  * A widget's menu is its mpParent (+0x40): the category menu +0x4C or the trick menu +0x50 (On Tour mpMainMenu,
  * mpTrickMenu). The category and trick are the menus' selected items' (mpSelected, +0xA0) mMiscData (+0x18); the trick
  * table comes from func_0014FF90 on cBE interface 6. "Back" pushes the state that the custom front end (*mpEngine)
- * returns from its vtable slot 5 (func_001A16C0). onWidgetEvent slot (+0x9C) of the vtable D_0046CCC0.
+ * returns from its vtable slot 5 (cFECustom_getPrevState). onWidgetEvent slot (+0x9C) of the vtable D_0046CCC0.
  * - 5 (accept) on the category menu: "done" goes back; another item gives the trick menu focus at row 0 (setFocus,
  *   vtable slot 7), runs cFEStateUberTrick_activateTrickMenu and shows the cost display (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's
  *   objects. On the trick menu: an unlocked trick (func_00150048) that is not for sale (func_0014FFB8) becomes the
@@ -814,14 +814,14 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(char* self, char* item, int msg)
                 int n = 0;
                 sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
                 if (*(int*)(self + 0x48) != 0) {
-                    char* feRider = (char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
+                    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
                     cRiderAnimBase_play(*(void**)(feRider + 0xC), tbl[bi].anim, 0, -1.0f);
                 }
             }
         }
         break;
     case 1:
-        *(int*)((char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44)) + 0xCD0) = 1;
+        *(int*)((char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44)) + 0xCD0) = 1;
         if (*(char**)(item + 0x40) == *(char**)(self + 0x4C)) {
             if (*(void**)(self + 0x50) != 0 && *(int*)(item + 0x18) != -1) {
                 cFEStateUberTrick_trickVisible(self, 1);
@@ -870,7 +870,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(char* self, char* item, int msg)
         }
         break;
     case 2:
-        *(int*)((char*)func_001A0548((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44)) + 0xCD0) = 0;
+        *(int*)((char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44)) + 0xCD0) = 0;
         break;
     }
 }

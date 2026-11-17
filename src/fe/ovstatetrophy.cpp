@@ -1911,13 +1911,13 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
 INCLUDE_ASM("fe/ovstatetrophy", func_00210F40);
 #ifdef SKIP_ASM
 extern "C" void func_00210FA0(void* self, int a1, int a2, int a3, int a4);
-extern "C" void func_001CCF00(void* p, int a);
+extern "C" void cKeyboardPopup_setStatic2(void* p, int a);
 extern "C" void cKeyboardPopup_setInputText(void* p, int a);
 
 /**
  * Opens the chat overlay's keyboard with a prompt and a starting text.
  *
- * func_00210FA0 creates and pushes the keyboard popup, func_001CCF00 sets its static (prompt) text to @p staticText and
+ * func_00210FA0 creates and pushes the keyboard popup, cKeyboardPopup_setStatic2 sets its static (prompt) text to @p staticText and
  * cKeyboardPopup_setInputText its edit text to @p inputText.
  *
  * @param a1  stored at +0xDC by func_00210FA0 (the callers pass 0)
@@ -1930,7 +1930,7 @@ extern "C" void cKeyboardPopup_setInputText(void* p, int a);
 extern "C" void func_00210F40(void* self, int a1, int staticText, int inputText, int password, int miscData, int maxChars)
 {
     func_00210FA0(self, a1, password, miscData, maxChars);
-    func_001CCF00(*(void**)((char*)self + 0xE0), staticText);
+    cKeyboardPopup_setStatic2(*(void**)((char*)self + 0xE0), staticText);
     cKeyboardPopup_setInputText(*(void**)((char*)self + 0xE0), inputText);
 }
 #endif
@@ -1943,7 +1943,7 @@ extern "C" void* cKeyboardPopup_cKeyboardPopup(void* mem, void* engine, void* ow
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cKeyboardPopup_setMaxCharacters(void* self, int v);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
-extern "C" void func_001CE468(void* self, int v);
+extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(void* self, int v);
 extern char str_cKeyboardPopup_b[];
 
 /**
@@ -1953,7 +1953,7 @@ extern char str_cKeyboardPopup_b[];
  * state as owner, @p password and controller bits 0xF, stores it at +0xE0 and pushes it with cUIStateStack_pushPopup on
  * the stack reached through the screen (mpScreen + 0xD0, then + 0x10, + 0x18). Then it sets the popup's miMiscData
  * to @p miscData, cKeyboardPopup_setMaxCharacters(@p maxChars), meType 0, includes key 75 and keys 0..13
- * (cKeyboardPopup_setIncludeKey, func_001CE468), sets mbCallParentsUpdate and stores @p a1 at +0xDC.
+ * (cKeyboardPopup_setIncludeKey, cKeyboardPopup_setIncludeQuickKeyRow), sets mbCallParentsUpdate and stores @p a1 at +0xDC.
  *
  * @param a1  stored at +0xDC (the callers pass 0)
  * @param password  nonzero for a password keyboard
@@ -1969,7 +1969,7 @@ extern "C" void func_00210FA0(void* self, int a1, int password, int miscData, in
     cKeyboardPopup_setMaxCharacters(*(void**)((char*)self + 0xE0), maxChars);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x43C) = 0;
     cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 75, 1, 2);
-    func_001CE468(*(void**)((char*)self + 0xE0), 1);
+    cKeyboardPopup_setIncludeQuickKeyRow(*(void**)((char*)self + 0xE0), 1);
     *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x440) = 1;
     *(int*)((char*)self + 0xDC) = a1;
 }
